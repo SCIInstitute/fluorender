@@ -86,6 +86,14 @@ json_t const* json_create( char* str, json_t mem[], unsigned int qty ) {
     spool.qty = qty;
     spool.pool.init = poolInit;
     spool.pool.alloc = poolAlloc;
+
+    // Initialize indices for all json_t elements
+    for (unsigned int i = 0; i < qty; ++i) {
+        mem[i].u.c.child_index = SIZE_MAX;
+        mem[i].u.c.last_child_index = SIZE_MAX;
+        mem[i].sibling_index = SIZE_MAX;
+    }
+
     return json_createWithPool( str, &spool.pool );
 }
 

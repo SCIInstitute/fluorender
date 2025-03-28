@@ -38,21 +38,31 @@ class JsonFile : public BaseTreeFile {
 public:
 	JsonFile() :
 		json_(0),
-		cur_obj_(0)
+		cur_obj_(0),
+		cur_obj_index_(0),
+		mem_size_(32),
+		mem_used_(0)
 	{
 		path_sep_ = "/";
 		cd_sep_ = ".";
 		pd_sep_ = "..";
 
 		//root
-		json_t mem[32];
+		mem_ = new json_t[mem_size_];
 		char empty_json[] = R"({})";
-		json_ = const_cast<json_t*>(json_create(empty_json, mem, sizeof mem / sizeof * mem));
+		json_ = const_cast<json_t*>(json_create(empty_json, mem_, static_cast<unsigned int>(mem_size_)));
+		mem_used_ = 1; // Update mem_used_ to account for the root node
 		cur_obj_ = json_;
+		cur_obj_index_ = 0; // Root node index
 	}
 
 	~JsonFile()
 	{
+		if (mem_)
+		{
+			delete[] mem_;
+			mem_ = nullptr;
+		}
 	}
 
 	int LoadFile(const std::wstring& filename) override
@@ -66,19 +76,43 @@ public:
 		std::stringstream buffer;
 		buffer << file.rdbuf();
 		std::string str = buffer.str();
-		json_t mem[32];
-		json_ = const_cast<json_t*>(json_create(str.data(), mem, sizeof mem / sizeof * mem));
-		cur_obj_ = json_;
 
-		return json_ == 0;
+		int result = LoadString(str);
+
+		file.close();
+
+		return result;
 	}
 
 	int LoadString(const std::string& ini_string) override
 	{
-		json_t mem[32];
-		std::string str = ini_string;
-		json_ = const_cast<json_t*>(json_create(str.data(), mem, sizeof mem / sizeof * mem));
-		cur_obj_ = json_;
+		if (mem_)
+		{
+			delete[] mem_;
+			mem_ = nullptr;
+		}
+		mem_size_ = 32; // Start with an initial size
+		mem_used_ = 0;
+		bool success = false;
+		char* non_const_ini_string = const_cast<char*>(ini_string.data());
+
+		while (!success) {
+			mem_ = new json_t[mem_size_];
+			json_ = const_cast<json_t*>(json_create(non_const_ini_string, mem_, static_cast<unsigned int>(mem_size_)));
+
+			if (json_ != nullptr) {
+				success = true;
+				cur_obj_ = json_;
+				cur_obj_index_ = 0; // Root node index
+				mem_used_ = 1; // Update mem_used_ to account for the root node
+			}
+			else {
+				delete[] mem_;
+				if (!ReallocateMem()) {
+					return -1; // Indicate failure to allocate memory
+				}
+			}
+		}
 
 		return json_ == 0;
 	}
@@ -217,12 +251,22 @@ public:
 				json_t* child = const_cast<json_t*>(json_getProperty(element, component.c_str()));
 				if (!child) {
 					// Create a new child element if it doesn't exist
-					child = (json_t*)malloc(sizeof(json_t));
+					if (mem_used_ >= mem_size_) {
+						size_t eid = element - mem_;
+						if (!ReallocateMem()) {
+							return false; // Failed to allocate memory
+						}
+						element = &mem_[eid];
+					}
+					child = &mem_[mem_used_++];
 					child->name = strdup(component.c_str());
 					child->type = JSON_OBJ;
 					child->u.c.child = nullptr;
 					child->u.c.last_child = nullptr;
 					child->sibling = nullptr;
+					child->u.c.child_index = SIZE_MAX;
+					child->u.c.last_child_index = SIZE_MAX;
+					child->sibling_index = SIZE_MAX;
 					addProperty(element, component, child);
 				}
 				element = child;
@@ -234,6 +278,9 @@ public:
 		cur_obj_ = element;
 		cur_path_ = new_path;
 		element_stack_ = new_stack;
+
+		// Update cur_obj_index_
+		cur_obj_index_ = element - mem_;
 
 		return true; // Path exists or was created, and cur_obj_, cur_path_, and element_stack_ are updated
 	}
@@ -616,10 +663,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_TEXT;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -640,10 +694,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_BOOLEAN;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -659,10 +720,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_INTEGER;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -678,10 +746,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_INTEGER;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -707,10 +782,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_INTEGER;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -736,10 +818,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_REAL;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -755,10 +844,17 @@ protected:
 		json_t* parent = const_cast<json_t*>(cur_obj_);
 		json_t* item = const_cast<json_t*>(json_getProperty(parent, key.c_str()));
 		if (!item) {
-			item = (json_t*)malloc(sizeof(json_t));
+			if (mem_used_ >= mem_size_) {
+				size_t pid = parent - mem_;
+				if (!ReallocateMem()) {
+					return false;
+				}
+				parent = &mem_[pid];
+			}
+			item = &mem_[mem_used_++];
 			item->type = JSON_REAL;
 			if (!addProperty(parent, key, item)) {
-				free(item);
+				mem_used_--;
 				return false;
 			}
 		}
@@ -798,10 +894,87 @@ protected:
 
 private:
 	json_t* json_;
+	json_t* mem_;
+	size_t mem_size_;
+	size_t mem_used_;
 	json_t* cur_obj_;
+	size_t cur_obj_index_;
 	std::vector<json_t*> element_stack_;
 
 private:
+	bool ReallocateMem() {
+		size_t new_size = mem_size_ * 2;
+		json_t* new_mem = new json_t[new_size];
+		if (!new_mem) {
+			return false;
+		}
+		std::copy(mem_, mem_ + mem_size_, new_mem);
+		delete[] mem_;
+		mem_ = new_mem;
+		mem_size_ = new_size;
+
+		// Update json_ and cur_obj_ to point to the new memory block
+		json_ = &mem_[0];
+		cur_obj_ = &mem_[cur_obj_index_]; // Update cur_obj_ to the correct index
+
+		// Update all indices in the new memory block
+		UpdateIndices();
+
+		return true;
+	}
+
+	void UpdateIndices() {
+		for (size_t i = 0; i < mem_used_; ++i) {
+			json_t* item = &mem_[i];
+			if (item->type == JSON_OBJ) {
+				if (item->u.c.child_index != SIZE_MAX) {
+					item->u.c.child = &mem_[item->u.c.child_index];
+				}
+				if (item->u.c.last_child_index != SIZE_MAX) {
+					item->u.c.last_child = &mem_[item->u.c.last_child_index];
+				}
+			}
+			if (item->sibling_index != SIZE_MAX) {
+				item->sibling = &mem_[item->sibling_index];
+			}
+		}
+	}
+
+	bool addProperty(json_t* parent, const std::string& key, json_t* item) {
+		if (!parent || !item) {
+			return false;
+		}
+
+		// Ensure parent is of type JSON_OBJ
+		if (parent->type != JSON_OBJ) {
+			return false;
+		}
+
+		// Allocate memory for the name and check for success
+		item->name = strdup(key.c_str());
+		if (!item->name) {
+			return false;
+		}
+
+		item->sibling = nullptr;
+		item->sibling_index = SIZE_MAX;
+
+		if (!parent->u.c.child) {
+			parent->u.c.child = item;
+			parent->u.c.child_index = item - mem_;
+			parent->u.c.last_child = item;
+			parent->u.c.last_child_index = item - mem_;
+		}
+		else {
+			parent->u.c.last_child->sibling = item;
+			parent->u.c.last_child->sibling_index = item - mem_;
+			parent->u.c.last_child = item;
+			parent->u.c.last_child_index = item - mem_;
+		}
+
+		return true;
+	}
+
 	std::string json_stringify(const json_t* json) {
 		if (json == nullptr) {
 			return "{}";
@@ -851,24 +1024,6 @@ private:
 		return oss.str();
 	}
 
-	bool addProperty(json_t* parent, const std::string& key, json_t* item)
-	{
-		if (!parent || !item) {
-			return false;
-		}
-		item->name = strdup(key.c_str());
-		item->sibling = nullptr;
-
-		if (!parent->u.c.child) {
-			parent->u.c.child = item;
-			parent->u.c.last_child = item;
-		}
-		else {
-			parent->u.c.last_child->sibling = item;
-			parent->u.c.last_child = item;
-		}
-		return true;
-	}
 };
 
 #endif//_JSONFILE_H_

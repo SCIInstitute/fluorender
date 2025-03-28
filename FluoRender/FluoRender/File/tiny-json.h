@@ -54,12 +54,15 @@ typedef enum {
 /** Structure to handle JSON properties. */
 typedef struct json_s {
     struct json_s* sibling;
+    size_t sibling_index;
     char const* name;
     union {
         char const* value;
         struct {
             struct json_s* child;
             struct json_s* last_child;
+            size_t child_index;
+            size_t last_child_index;
         } c;
     } u;
     jsonType_t type;
