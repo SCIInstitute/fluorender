@@ -107,7 +107,7 @@ public:
 				mem_used_ = 1; // Update mem_used_ to account for the root node
 			}
 			else {
-				delete[] mem_;
+				//delete[] mem_;
 				if (!ReallocateMem()) {
 					return -1; // Indicate failure to allocate memory
 				}
