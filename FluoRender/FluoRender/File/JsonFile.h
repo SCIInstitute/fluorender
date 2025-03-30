@@ -91,27 +91,20 @@ public:
 			delete[] mem_;
 			mem_ = nullptr;
 		}
-		mem_size_ = 32; // Start with an initial size
-		mem_used_ = 0;
+		int node_count = count_nodes(ini_string.c_str());
+		mem_size_ = node_count * 2; // Start with an initial size
+		mem_used_ = node_count;
 		bool success = false;
 		char* non_const_ini_string = const_cast<char*>(ini_string.data());
 
-		while (!success) {
-			mem_ = new json_t[mem_size_];
-			json_ = const_cast<json_t*>(json_create(non_const_ini_string, mem_, static_cast<unsigned int>(mem_size_)));
+		mem_ = new json_t[mem_size_];
+		json_ = const_cast<json_t*>(json_create(non_const_ini_string, mem_, static_cast<unsigned int>(mem_size_)));
 
-			if (json_ != nullptr) {
-				success = true;
-				cur_obj_ = json_;
-				cur_obj_index_ = 0; // Root node index
-				mem_used_ = 1; // Update mem_used_ to account for the root node
-			}
-			else {
-				//delete[] mem_;
-				if (!ReallocateMem()) {
-					return -1; // Indicate failure to allocate memory
-				}
-			}
+		if (json_ != nullptr) {
+			success = true;
+			cur_obj_ = json_;
+			cur_obj_index_ = 0; // Root node index
+			//mem_used_ = 1; // Update mem_used_ to account for the root node
 		}
 
 		return json_ == 0;
@@ -1024,6 +1017,17 @@ private:
 		return oss.str();
 	}
 
+	int count_nodes(const char* json_data) {
+		int count = 0;
+		const char* p = json_data;
+		while (*p) {
+			if (*p == '{' || *p == '[' || *p == '}' || *p == ']') {
+				count++;
+			}
+			p++;
+		}
+		return count;
+	}
 };
 
 #endif//_JSONFILE_H_
