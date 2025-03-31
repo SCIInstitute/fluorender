@@ -77,14 +77,14 @@ public:
 		buffer << file.rdbuf();
 		std::string str = buffer.str();
 
-		int result = LoadString(str);
+		int result = LoadStringConf(str);
 
 		file.close();
 
 		return result;
 	}
 
-	int LoadString(const std::string& ini_string) override
+	int LoadStringConf(const std::string& ini_string) override
 	{
 		if (mem_)
 		{
@@ -92,7 +92,7 @@ public:
 			mem_ = nullptr;
 		}
 		int node_count = count_nodes(ini_string.c_str());
-		mem_size_ = node_count * 2; // Start with an initial size
+		mem_size_ = node_count; // Start with an initial size
 		mem_used_ = node_count;
 		bool success = false;
 		char* non_const_ini_string = const_cast<char*>(ini_string.data());
@@ -968,31 +968,47 @@ private:
 		return true;
 	}
 
-	std::string json_stringify(const json_t* json) {
+	std::string json_stringify(const json_t* json, bool formatted = true, int indent = 0) {
 		if (json == nullptr) {
 			return "{}";
 		}
 
 		std::ostringstream oss;
+		std::string indent_str = formatted ? std::string(indent, '\t') : "";
+
 		switch (json_getType(json)) {
 		case JSON_OBJ:
 			oss << "{";
+			if (formatted) oss << "\n";
 			for (const json_t* child = json_getChild(json); child != nullptr; child = json_getSibling(child)) {
-				oss << "\"" << json_getName(child) << "\": " << json_stringify(child);
+				if (formatted) oss << indent_str << "\t";
+				oss << "\"" << json_getName(child) << "\": " << json_stringify(child, formatted, indent + 1);
 				if (json_getSibling(child) != nullptr) {
-					oss << ", ";
+					oss << ",";
+					if (formatted) oss << "\n";
+				}
+				else if (formatted) {
+					oss << "\n";
 				}
 			}
+			if (formatted) oss << indent_str;
 			oss << "}";
 			break;
 		case JSON_ARRAY:
 			oss << "[";
+			if (formatted) oss << "\n";
 			for (const json_t* child = json_getChild(json); child != nullptr; child = json_getSibling(child)) {
-				oss << json_stringify(child);
+				if (formatted) oss << indent_str << "\t";
+				oss << json_stringify(child, formatted, indent + 1);
 				if (json_getSibling(child) != nullptr) {
-					oss << ", ";
+					oss << ",";
+					if (formatted) oss << "\n";
+				}
+				else if (formatted) {
+					oss << "\n";
 				}
 			}
+			if (formatted) oss << indent_str;
 			oss << "]";
 			break;
 		case JSON_TEXT:

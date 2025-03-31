@@ -65,7 +65,7 @@ public:
 		return 0;
 	}
 
-	int LoadString(const std::string& ini_string) override
+	int LoadStringConf(const std::string& ini_string) override
 	{
 		doc_.Parse(ini_string.c_str());
 		cur_element_ = doc_.RootElement();

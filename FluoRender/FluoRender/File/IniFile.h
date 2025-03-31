@@ -80,7 +80,7 @@ public:
 		return load_ini_path(str.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary_);
 	}
 
-	int LoadString(const std::string& ini_string) override
+	int LoadStringConf(const std::string& ini_string) override
 	{
 		dictionary_.clear();
 		cur_path_ = "";

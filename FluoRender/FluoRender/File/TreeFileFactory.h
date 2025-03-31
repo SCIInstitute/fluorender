@@ -108,8 +108,8 @@ private:
 			return 1;
 		}
 
-		std::regex jsonRegex(R"(\{.*:.*\})");
-		if (std::regex_search(content, jsonRegex)) {
+		// Check if the content starts with '{' or '[' for JSON
+		if (!content.empty() && (content[0] == '{' || content[0] == '[')) {
 			return 2;
 		}
 

@@ -70,7 +70,7 @@ public:
 		return 1;
 	}
 
-	int LoadString(const std::string& ini_string) override
+	int LoadStringConf(const std::string& ini_string) override
 	{
 		return 1;
 	}
