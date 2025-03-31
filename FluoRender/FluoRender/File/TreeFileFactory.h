@@ -98,24 +98,34 @@ private:
 	//0: ini, 1: xml, 2: json, 3: pole
 	int determineFileType(const std::string& content)
 	{
+		std::string processed_content = content;
+
+		// Remove BOM if present
+		if (processed_content.size() >= 3 &&
+			processed_content[0] == '\xEF' &&
+			processed_content[1] == '\xBB' &&
+			processed_content[2] == '\xBF') {
+			processed_content = processed_content.substr(3);
+		}
+
 		std::regex iniRegex(R"(\[.*\]\s*.*=.*)");
-		if (std::regex_search(content, iniRegex)) {
+		if (std::regex_search(processed_content, iniRegex)) {
 			return 0;
 		}
 
 		std::regex xmlRegex(R"(<\?xml.*\?>|<.*>.*<\/.*>)");
-		if (std::regex_search(content, xmlRegex)) {
+		if (std::regex_search(processed_content, xmlRegex)) {
 			return 1;
 		}
 
 		// Check if the content starts with '{' or '[' for JSON
-		if (!content.empty() && (content[0] == '{' || content[0] == '[')) {
+		if (!processed_content.empty() && (processed_content[0] == '{' || processed_content[0] == '[')) {
 			return 2;
 		}
 
 		// Add regex for POLE file structure
 		std::regex poleRegex(R"(POLE\s+Structure\s+Start)");
-		if (std::regex_search(content, poleRegex)) {
+		if (std::regex_search(processed_content, poleRegex)) {
 			return 3;
 		}
 

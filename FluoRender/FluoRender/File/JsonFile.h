@@ -48,7 +48,7 @@ public:
 		pd_sep_ = "..";
 
 		//root
-		mem_ = new json_t[mem_size_];
+		mem_ = new json_t[mem_size_]();
 		char empty_json[] = R"({})";
 		json_ = const_cast<json_t*>(json_create(empty_json, mem_, static_cast<unsigned int>(mem_size_)));
 		mem_used_ = 1; // Update mem_used_ to account for the root node
@@ -58,6 +58,7 @@ public:
 
 	~JsonFile()
 	{
+		FreeJson(json_);
 		if (mem_)
 		{
 			delete[] mem_;
@@ -86,18 +87,28 @@ public:
 
 	int LoadStringConf(const std::string& ini_string) override
 	{
+		static std::string processed_string = ini_string;
+
+		// Remove BOM if present
+		if (processed_string.size() >= 3 &&
+			processed_string[0] == '\xEF' &&
+			processed_string[1] == '\xBB' &&
+			processed_string[2] == '\xBF') {
+			processed_string = processed_string.substr(3);
+		}
+
 		if (mem_)
 		{
 			delete[] mem_;
 			mem_ = nullptr;
 		}
-		int node_count = count_nodes(ini_string.c_str());
+		int node_count = count_nodes(processed_string.c_str());
 		mem_size_ = node_count; // Start with an initial size
 		mem_used_ = node_count;
 		bool success = false;
-		char* non_const_ini_string = const_cast<char*>(ini_string.data());
+		char* non_const_ini_string = processed_string.data();
 
-		mem_ = new json_t[mem_size_];
+		mem_ = new json_t[mem_size_]();
 		json_ = const_cast<json_t*>(json_create(non_const_ini_string, mem_, static_cast<unsigned int>(mem_size_)));
 
 		if (json_ != nullptr) {
@@ -252,7 +263,7 @@ public:
 						element = &mem_[eid];
 					}
 					child = &mem_[mem_used_++];
-					child->name = strdup(component.c_str());
+					AssignName(child, component.c_str());
 					child->type = JSON_OBJ;
 					child->u.c.child = nullptr;
 					child->u.c.last_child = nullptr;
@@ -371,8 +382,7 @@ public:
 	}
 
 	// Implement deletion methods
-	bool DeleteEntry(const std::string& key) override
-	{
+	bool DeleteEntry(const std::string& key) override {
 		if (!cur_obj_) {
 			return false;
 		}
@@ -390,9 +400,11 @@ public:
 				if (item == parent->u.c.last_child) {
 					parent->u.c.last_child = prev;
 				}
-				// Free the memory associated with the item
-				free((void*)item->name);
-				if (item->type == JSON_TEXT) {
+				// Free the memory associated with the item if dynamically allocated
+				if (item->name_dynamically_allocated) {
+					free((void*)item->name);
+				}
+				if (item->type == JSON_TEXT && item->value_dynamically_allocated) {
 					free((void*)item->u.value);
 				}
 				free(item);
@@ -670,7 +682,7 @@ protected:
 				return false;
 			}
 		}
-		item->u.value = strdup(value.c_str());
+		AssignValue(item, value.c_str());
 		return true;
 	}
 
@@ -727,7 +739,7 @@ protected:
 				return false;
 			}
 		}
-		item->u.value = strdup(std::to_string(value).c_str());
+		AssignValue(item, std::to_string(value).c_str());
 		return true;
 	}
 
@@ -753,7 +765,7 @@ protected:
 				return false;
 			}
 		}
-		item->u.value = strdup(std::to_string(value).c_str());
+		AssignValue(item, std::to_string(value).c_str());
 		return true;
 	}
 
@@ -789,7 +801,7 @@ protected:
 				return false;
 			}
 		}
-		item->u.value = strdup(std::to_string(value).c_str());
+		AssignValue(item, std::to_string(value).c_str());
 		return true;
 	}
 
@@ -825,7 +837,7 @@ protected:
 				return false;
 			}
 		}
-		item->u.value = strdup(std::to_string(value).c_str());
+		AssignValue(item, std::to_string(value).c_str());
 		return true;
 	}
 
@@ -851,7 +863,7 @@ protected:
 				return false;
 			}
 		}
-		item->u.value = strdup(std::to_string(value).c_str());
+		AssignValue(item, std::to_string(value).c_str());
 		return true;
 	}
 
@@ -897,7 +909,7 @@ private:
 private:
 	bool ReallocateMem() {
 		size_t new_size = mem_size_ * 2;
-		json_t* new_mem = new json_t[new_size];
+		json_t* new_mem = new json_t[new_size]();
 		if (!new_mem) {
 			return false;
 		}
@@ -944,7 +956,7 @@ private:
 		}
 
 		// Allocate memory for the name and check for success
-		item->name = strdup(key.c_str());
+		AssignName(item, key.c_str());
 		if (!item->name) {
 			return false;
 		}
@@ -1036,14 +1048,68 @@ private:
 	int count_nodes(const char* json_data) {
 		int count = 0;
 		const char* p = json_data;
+		bool in_string = false;
+		char prev_char = '\0';
+
 		while (*p) {
-			if (*p == '{' || *p == '[' || *p == '}' || *p == ']') {
-				count++;
+			if (*p == '\"') {
+				in_string = !in_string;
+			}
+			if (!in_string) {
+				if (*p == '{' || *p == '[') {
+					if (prev_char != ':') {
+						count++; // Count opening braces/brackets only if not preceded by ':'
+					}
+				}
+				else if (*p == ':') {
+					count++; // Count key-value pairs
+				}
+				if (!isspace(*p) && *p != '\n' && *p != '\r' && *p != '\t') {
+					prev_char = *p; // Update previous valid character
+				}
 			}
 			p++;
 		}
 		return count;
 	}
+
+	void AssignName(json_t* item, const char* name) {
+		if (item->name_dynamically_allocated) {
+			free((void*)item->name);
+		}
+		item->name = strdup(name);
+		item->name_dynamically_allocated = true;
+	}
+
+	void AssignValue(json_t* item, const char* value) {
+		if (item->value_dynamically_allocated) {
+			free((void*)item->u.value);
+		}
+		item->u.value = strdup(value);
+		item->value_dynamically_allocated = true;
+	}
+
+	void FreeJson(json_t* obj) {
+		if (!obj) return;
+
+		// Free the name if dynamically allocated
+		if (obj->name_dynamically_allocated) {
+			free((void*)obj->name);
+		}
+
+		// Free the value if dynamically allocated and the type is JSON_TEXT
+		if (obj->type == JSON_TEXT && obj->value_dynamically_allocated) {
+			free((void*)obj->u.value);
+		}
+
+		// Recursively free children if the node is a JSON object
+		if (obj->type == JSON_OBJ) {
+			for (json_t* item = obj->u.c.child; item; item = item->sibling) {
+				FreeJson(item);
+			}
+		}
+	}
+
 };
 
 #endif//_JSONFILE_H_

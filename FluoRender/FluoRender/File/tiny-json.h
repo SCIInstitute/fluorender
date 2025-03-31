@@ -66,6 +66,8 @@ typedef struct json_s {
         } c;
     } u;
     jsonType_t type;
+    bool name_dynamically_allocated; // Flag for name
+    bool value_dynamically_allocated; // Flag for value
 } json_t;
 
 /** Parse a string to get a json.

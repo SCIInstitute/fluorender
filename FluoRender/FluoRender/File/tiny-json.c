@@ -74,6 +74,8 @@ json_t const* json_createWithPool( char *str, jsonPool_t *pool ) {
     obj->name    = 0;
     obj->sibling = 0;
     obj->u.c.child = 0;
+	obj->name_dynamically_allocated = false;
+    obj->value_dynamically_allocated = false;
     ptr = objValue( ptr, obj, pool );
     if ( !ptr ) return 0;
     return obj;
@@ -361,9 +363,14 @@ static char* objValue( char* ptr, json_t* obj, jsonPool_t* pool ) {
             ptr = propertyName( ptr, property );
             if ( !ptr ) return 0;
         }
-        else property->name = 0;
+        else
+        {
+            property->name = 0;
+			property->name_dynamically_allocated = false;
+        }
         add( obj, property );
         property->u.value = ptr;
+		property->value_dynamically_allocated = false;
         switch( *ptr ) {
             case '{':
                 property->type    = JSON_OBJ;
