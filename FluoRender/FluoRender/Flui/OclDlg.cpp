@@ -210,7 +210,7 @@ void OclDlg::UpdateKernelList()
 	{
 		if (entry.is_regular_file() && entry.path().extension() == ".cl")
 		{
-			list.push_back(entry.path().string());
+			list.push_back(entry.path().stem().string());
 		}
 	}
 	// Sort the list of files

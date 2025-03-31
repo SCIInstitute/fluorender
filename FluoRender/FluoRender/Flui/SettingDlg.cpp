@@ -993,7 +993,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			if (entry.is_regular_file() && entry.path().extension() == ".ttf")
 			{
-				list.push_back(entry.path().string());
+				list.push_back(entry.path().stem().string());
 			}
 		}
 		std::sort(list.begin(), list.end());
