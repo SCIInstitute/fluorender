@@ -586,8 +586,6 @@ RenderCanvas::~RenderCanvas()
 #endif
 #endif
 
-	m_loader.StopAll();
-
 	std::string str = GetName().ToStdString() + ":";
 
 	int i;

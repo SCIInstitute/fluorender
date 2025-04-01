@@ -592,83 +592,8 @@ namespace flvr
 
 			if (!found_cache)
 			{
-/*				CURLcode ret;
-
-				if (s_curl_ == NULL) {
-					cerr << "curl_easy_init() failed" << endl;
-					return false;
-				}
-				curl_easy_reset(s_curl_);
-				curl_easy_setopt(s_curl_, CURLOPT_URL, wxString::wxString(finfo->filename).ToStdString().c_str());
-				curl_easy_setopt(s_curl_, CURLOPT_TIMEOUT, 10L);
-				curl_easy_setopt(s_curl_, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-				curl_easy_setopt(s_curl_, CURLOPT_WRITEFUNCTION, WriteFileCallback);
-				curl_easy_setopt(s_curl_, CURLOPT_SSL_VERIFYPEER, 0);
-				curl_easy_setopt(s_curl_, CURLOPT_NOSIGNAL, 1);
-				curl_easy_setopt(s_curl_, CURLOPT_FAILONERROR, 1);
-				curl_easy_setopt(s_curl_, CURLOPT_FILETIME, 1);
-				curl_easy_setopt(s_curl_, CURLOPT_XFERINFOFUNCTION, xferinfo);
-				curl_easy_setopt(s_curl_, CURLOPT_XFERINFODATA, th);
-				curl_easy_setopt(s_curl_, CURLOPT_NOPROGRESS, 0L);
-
-				wxString expath = wxStandardPaths::Get().GetExecutablePath();
-				expath = expath.BeforeLast(GETSLASH(), NULL);
-#ifdef _WIN32
-				wxString dft = expath + "\\vvd_cache";
-				wxString dft2 = wxStandardPaths::Get().GetUserDataDir() + "\\vvd_cache";
-				if (!wxDirExists(dft) && wxDirExists(dft2))
-					dft = dft2;
-				else if (!wxDirExists(dft))
-					wxMkdir(dft);
-				dft += L"\\";
-#else
-				wxString dft = expath + "/../Resources/vvd_cache";
-				if (!wxDirExists(dft))
-					wxMkdir(dft);
-				dft += L"/";
-#endif
-				wstring randname;
-				int len = 16;
-				char s[17];
-				wxString test;
-				do {
-					const char alphanum[] =
-						"0123456789"
-						"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-						"abcdefghijklmnopqrstuvwxyz";
-
-					for (int i = 0; i < len; ++i) {
-						s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
-					}
-					s[len] = 0;
-					test = dft;
-					test += s;
-				} while (wxFileExists(test));
-				dft += s;
-
-				wstring cfname = dft.ToStdWstring();
-				ofstream ofs(ws2s(cfname), ios::binary);
-				if (!ofs) return false;
-				curl_easy_setopt(s_curl_, CURLOPT_WRITEDATA, &ofs);
-				ret = curl_easy_perform(s_curl_);
-				bool succeeded = false;
-				if (ret == CURLE_OK)
-					succeeded = true;
-
-				ofs.close();
-
-				if (succeeded)
-				{
-					finfo->cached = true;
-					finfo->cache_filename = cfname;
-					cache_table_[finfo->filename] = cfname;
-				}
-				else
-				{
-					if (wxFileExists(cfname)) wxRemoveFile(cfname);
-					return false;
-				}
-*/			}
+				//network
+			}
 		}
 
 		std::ifstream ifs;

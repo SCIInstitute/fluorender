@@ -31,7 +31,6 @@
 
 #include <DataManager.h>
 #include <TextureBrick.h>
-#include <wx/thread.h>
 
 class VolumeLoader;
 
@@ -44,37 +43,6 @@ struct VolumeLoaderData
 	int mode;
 };
 
-struct VolumeDecompressorData
-{
-	char *in_data;
-	size_t in_size;
-	flvr::TextureBrick *b;
-	flvr::FileLocInfo *finfo;
-	VolumeData *vd;
-	unsigned long long datasize;
-	int mode;
-};
-
-class VolumeDecompressorThread : public wxThread
-{
-public:
-	VolumeDecompressorThread(VolumeLoader *vl);
-	~VolumeDecompressorThread();
-protected:
-	virtual ExitCode Entry();
-	VolumeLoader* m_vl;
-};
-
-class VolumeLoaderThread : public wxThread
-{
-public:
-	VolumeLoaderThread(VolumeLoader *vl);
-	~VolumeLoaderThread();
-protected:
-	virtual ExitCode Entry();
-	VolumeLoader* m_vl;
-};
-
 class VolumeLoader
 {
 public:
@@ -83,15 +51,11 @@ public:
 	void Queue(VolumeLoaderData brick);
 	void ClearQueues();
 	void Set(std::vector<VolumeLoaderData> vld);
-	void Abort();
-	void StopAll();
 	bool Run();
-	void SetMaxThreadNum(int num) { m_max_decomp_th = num; }
 	void SetMemoryLimitByte(long long limit) { m_memory_limit = limit; }
 	void CleanupLoadedBrick();
 	void RemoveAllLoadedBrick();
 	void RemoveBrickVD(VolumeData *vd);
-	void GetPalams(long long &used_mem, int &running_decomp_th, int &queue_num, int &decomp_queue_num);
 
 	static bool sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2)
 	{
@@ -103,15 +67,9 @@ public:
 	}
 
 protected:
-	VolumeLoaderThread *m_thread;
-	wxCriticalSection m_pThreadCS;
 	std::vector<VolumeLoaderData> m_queues;
 	std::vector<VolumeLoaderData> m_queued;
-	std::vector<VolumeDecompressorData> m_decomp_queues;
-	std::vector<VolumeDecompressorThread *> m_decomp_threads;
 	std::unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
-	int m_running_decomp_th;
-	int m_max_decomp_th;
 	bool m_valid;
 
 	long long m_memory_limit;
@@ -122,9 +80,6 @@ protected:
 		m_loaded[lbd.brick] = lbd;
 		m_used_memory += lbd.datasize;
 	}
-
-	friend class VolumeLoaderThread;
-	friend class VolumeDecompressorThread;
 };
 
 #endif//_VOLUMELOADER_H_
