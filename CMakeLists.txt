@@ -796,10 +796,6 @@ add_library(VIDEO_LIB STATIC
 target_link_libraries(VIDEO_LIB
   ${FFMPEG_LIBRARIES})
 
-# other sources
-file(GLOB src FluoRender/FluoRender/*.cpp)
-file(GLOB hdr FluoRender/FluoRender/*.h)
-
 # boost interface
 add_library(BOOST_ILIB INTERFACE)
 target_link_libraries(BOOST_ILIB INTERFACE
@@ -808,20 +804,13 @@ target_link_libraries(BOOST_ILIB INTERFACE
   FILTER_LIB
   ${Boost_LIBRARIES})
 
-# SynthBB
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/SynthBB)
-file(GLOB synthbb_hdr FluoRender/SynthBB/*.h)
-file(GLOB synthbb_src FluoRender/SynthBB/*.cpp)
-
-# MaskInt
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/MaskInt)
-file(GLOB maskint_hdr FluoRender/MaskInt/*.h)
-file(GLOB maskint_src FluoRender/MaskInt/*.cpp)
-
-# ReadGMM
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/ReadGMM)
-file(GLOB readgmm_hdr FluoRender/ReadGMM/*.h)
-file(GLOB readgmm_src FluoRender/ReadGMM/*.cpp)
+# Entry of the program
+file(GLOB src FluoRender/FluoRender/*.cpp)
+file(GLOB hdr FluoRender/FluoRender/*.h)
+add_library(MAIN_LIB STATIC
+  ${src} ${hdr})
+target_link_libraries(MAIN_LIB
+  ${wxWidgets_LIBRARIES})
 
 # Tester
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Tester)
@@ -951,7 +940,7 @@ else()
 endif()
 
 target_link_libraries(FluoRender
-    ${wxWidgets_LIBRARIES}
+    MAIN_LIB
     ANIMATORS_LIB
     BOOST_ILIB
     CALCULATE_LIB
