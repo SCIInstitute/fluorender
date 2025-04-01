@@ -61,7 +61,6 @@ namespace flrd
 		}
 
 		fluo::Color GetColor();
-		//wxColor GetWxColor();
 		std::string GetOutput();
 
 		void Clean(int mode);

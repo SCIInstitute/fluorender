@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 namespace fluo
 {
@@ -101,6 +102,7 @@ namespace fluo
 
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			os << '[' << c.hue_ << ',' << c.sat_ << ',' << c.val_ << ']';
 			return os;
 		}
@@ -215,6 +217,7 @@ namespace fluo
 
 		friend std::ostream& operator<<(std::ostream& os, const Color& c)
 		{
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			os << '[' << c.r_ << ',' << c.g_ << ',' << c.b_ << ']';
 			return os;
 		}

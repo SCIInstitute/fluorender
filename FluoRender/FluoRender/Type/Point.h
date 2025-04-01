@@ -34,6 +34,7 @@
 #include <iostream>
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
 
 namespace fluo {
 	using std::string;
@@ -137,6 +138,7 @@ namespace fluo {
 
 		friend std::ostream& operator<<(std::ostream& os, const Point& p)
 		{
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			os << '[' << p.x() << ',' << p.y() << ',' << p.z() << ']';
 			return os;
 		}

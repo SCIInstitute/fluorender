@@ -311,6 +311,7 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 	{
+		os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 		os << '[' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ']';
 		return os;
 	}

@@ -28,6 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef LookingGlassRenderer_h
 #define LookingGlassRenderer_h
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#endif
+
 class LookingGlassRenderer
 {
 public:
@@ -80,6 +84,23 @@ private:
 
 private:
 	void advance_views();
+#if defined(_WIN32) || defined(_WIN64)
+	struct MonitorEnumData {
+		HMONITOR targetMonitor;
+		int index;
+		int currentIndex;
+	};
+
+	static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+		MonitorEnumData* data = reinterpret_cast<MonitorEnumData*>(dwData);
+		if (hMonitor == data->targetMonitor) {
+			data->index = data->currentIndex;
+			return FALSE; // Stop enumeration
+		}
+		data->currentIndex++;
+		return TRUE; // Continue enumeration
+	}
+#endif
 };
 
 #endif//LookingGlassRenderer_h

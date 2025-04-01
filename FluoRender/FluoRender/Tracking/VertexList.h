@@ -234,6 +234,7 @@ namespace flrd
 	//output
 	inline std::ostream& operator<<(std::ostream& os, Path& p)
 	{
+		os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 		InterGraph graph = p.get_graph();
 		Verp vertex;
 		for (auto iter = p.begin();
@@ -270,6 +271,7 @@ namespace flrd
 
 	inline std::wostream& operator<<(std::wostream& os, Path& p)
 	{
+		os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 		InterGraph graph = p.get_graph();
 		Verp vertex;
 		for (auto iter = p.begin();

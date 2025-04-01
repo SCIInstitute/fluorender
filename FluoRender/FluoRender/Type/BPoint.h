@@ -177,6 +177,7 @@ namespace fluo
 
 		friend std::ostream& operator<<(std::ostream& os, const BPoint& b)
 		{
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			//os << '[' << b.xmin_ << ',' << b.xmax_ << ',' << b.ymin_ << ',' << b.ymax_ << ',' << b.zmin_ << ',' << b.zmax_ << ']';
 			return os;
 		}

@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <assert.h>
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
 
 namespace fluo
 {
@@ -203,6 +204,7 @@ namespace fluo
 		friend std::ostream& operator<<(std::ostream& os, const Vector& v)
 		{
 			//avoid using spaces so that it can be read correctly using >>
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			os << '[' << v.x() << ',' << v.y() << ',' << v.z() << ']';
 			return os;
 		}

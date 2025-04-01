@@ -646,6 +646,7 @@ namespace fluo
 
 	inline std::ostream& operator<<(std::ostream& os, const Value& v)
 	{
+		os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 		switch (v._etype)
 		{
 		case Value::vt_pReferenced:

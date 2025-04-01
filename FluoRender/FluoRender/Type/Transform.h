@@ -31,6 +31,7 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 namespace fluo
 {
@@ -139,6 +140,7 @@ namespace fluo
 
 		friend std::ostream& operator<<(std::ostream& os, const Transform& t)
 		{
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			os << "[[" << t.mat[0][0] << ',' << t.mat[0][1] << ',' << t.mat[0][2] << ',' << t.mat[0][3] << "],";
 			os <<  "[" << t.mat[1][0] << ',' << t.mat[1][1] << ',' << t.mat[1][2] << ',' << t.mat[1][3] << "],";
 			os <<  "[" << t.mat[2][0] << ',' << t.mat[2][1] << ',' << t.mat[2][2] << ',' << t.mat[2][3] << "],";

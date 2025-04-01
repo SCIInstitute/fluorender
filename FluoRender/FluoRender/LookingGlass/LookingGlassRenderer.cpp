@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <HoloPlayCore.h>
 #include <compatibility.h>
-#include <wx/display.h>
 #include <string>
 #include <Debug.h>
 
@@ -112,23 +111,106 @@ void LookingGlassRenderer::Close()
 	}
 }
 
-int LookingGlassRenderer::GetDisplayId()
-{
-	if (!m_initialized)
-		return 0;
+#if defined(_WIN32) || defined(_WIN64)
 
-	//get screen rect
-	int w, h, x, y;
-	w = hpc_GetDevicePropertyScreenW(m_dev_index);
-	h = hpc_GetDevicePropertyScreenH(m_dev_index);
-	x = hpc_GetDevicePropertyWinX(m_dev_index);
-	y = hpc_GetDevicePropertyWinY(m_dev_index);
+int LookingGlassRenderer::GetDisplayId() {
+    if (!m_initialized)
+        return 0;
 
-	int id = wxDisplay::GetFromPoint(wxPoint(x + w / 2, y + h / 2));
-	if (id != wxNOT_FOUND)
-		return id;
-	return 0;
+    // get screen rect
+    int w, h, x, y;
+    w = hpc_GetDevicePropertyScreenW(m_dev_index);
+    h = hpc_GetDevicePropertyScreenH(m_dev_index);
+    x = hpc_GetDevicePropertyWinX(m_dev_index);
+    y = hpc_GetDevicePropertyWinY(m_dev_index);
+
+    POINT pt = { x + w / 2, y + h / 2 };
+    HMONITOR hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONULL);
+    if (hMonitor) {
+        MonitorEnumData data = { hMonitor, -1, 0 };
+        EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, reinterpret_cast<LPARAM>(&data));
+        return data.index;
+    }
+
+    return -1; // Not found
 }
+
+#elif defined(__APPLE__)
+#include <ApplicationServices/ApplicationServices.h>
+
+int LookingGlassRenderer::GetDisplayId() {
+    if (!m_initialized)
+        return 0;
+
+    // get screen rect
+    int w, h, x, y;
+    w = hpc_GetDevicePropertyScreenW(m_dev_index);
+    h = hpc_GetDevicePropertyScreenH(m_dev_index);
+    x = hpc_GetDevicePropertyWinX(m_dev_index);
+    y = hpc_GetDevicePropertyWinY(m_dev_index);
+
+    CGPoint pt = CGPointMake(x + w / 2, y + h / 2);
+    uint32_t displayCount;
+    CGGetActiveDisplayList(0, nullptr, &displayCount);
+    CGDirectDisplayID displays[displayCount];
+    CGGetActiveDisplayList(displayCount, displays, &displayCount);
+    for (uint32_t i = 0; i < displayCount; ++i) {
+        CGRect displayBounds = CGDisplayBounds(displays[i]);
+        if (CGRectContainsPoint(displayBounds, pt)) {
+            return i;
+        }
+    }
+    return -1; // Not found
+}
+
+#elif defined(__linux__)
+#include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
+
+int LookingGlassRenderer::GetDisplayId() {
+    if (!m_initialized)
+        return 0;
+
+    // get screen rect
+    int w, h, x, y;
+    w = hpc_GetDevicePropertyScreenW(m_dev_index);
+    h = hpc_GetDevicePropertyScreenH(m_dev_index);
+    x = hpc_GetDevicePropertyWinX(m_dev_index);
+    y = hpc_GetDevicePropertyWinY(m_dev_index);
+
+    Display* display = XOpenDisplay(nullptr);
+    if (!display) return -1;
+
+    Window root = DefaultRootWindow(display);
+    XRRScreenResources* screenResources = XRRGetScreenResources(display, root);
+    if (!screenResources) {
+        XCloseDisplay(display);
+        return -1;
+    }
+
+    int centerX = x + w / 2;
+    int centerY = y + h / 2;
+    for (int i = 0; i < screenResources->ncrtc; ++i) {
+        XRRCrtcInfo* crtcInfo = XRRGetCrtcInfo(display, screenResources, screenResources->crtcs[i]);
+        if (crtcInfo) {
+            if (centerX >= crtcInfo->x && centerX < crtcInfo->x + crtcInfo->width &&
+                centerY >= crtcInfo->y && centerY < crtcInfo->y + crtcInfo->height) {
+                int id = i;
+                XRRFreeCrtcInfo(crtcInfo);
+                XRRFreeScreenResources(screenResources);
+                XCloseDisplay(display);
+                return id;
+            }
+            XRRFreeCrtcInfo(crtcInfo);
+        }
+    }
+
+    XRRFreeScreenResources(screenResources);
+    XCloseDisplay(display);
+    return -1; // Not found
+}
+
+#endif
 
 void LookingGlassRenderer::SetPreset(int val)
 {
@@ -265,7 +347,7 @@ void LookingGlassRenderer::Draw()
 	//glDisable(GL_DEPTH_TEST);
 	shader = glbin_light_field_shader_factory.shader(0);
 	shader->bind();
-	shader->setLocalParamUInt(0, glbin_settings.m_hologram_debug?1:0);//show quilt
+	shader->setLocalParamUInt(0, glbin_settings.m_hologram_debug ? 1 : 0);//show quilt
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	quad_va->draw();
 	shader->release();

@@ -68,13 +68,6 @@ fluo::Color ComponentEditor::GetColor()
 	return c;
 }
 
-//wxColor ComponentEditor::GetWxColor()
-//{
-//	fluo::Color c = GetColor();
-//	wxColor wxc = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-//	return wxc;
-//}
-
 void ComponentEditor::Clean(int mode)
 {
 	VolumeData* vd = glbin_current.vol_data;

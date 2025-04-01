@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Vector.h>
 #include <vector>
+#include <iomanip>
 
 namespace fluo
 {
@@ -98,6 +99,7 @@ namespace fluo
 
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
+			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
 			os << "[[" << p.n_.x() << ',' << p.n_.y() << ',' << p.n_.z() << "]," << p.d_ << ']';
 			return os;
 		}

@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <JVMInitializer.h>
 #include <SettingDlg.h>
 #include <Debug.h>
-#include <wx/dir.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <filesystem>
@@ -52,16 +51,12 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 		bioformats_path = args[2]; //inp_settingDlg->getBioformatsPath();
 		// For Mac: ij_path is going to be ij.app or fiji.app.
 
-		std::string name;
-		p = ij_path;
 #ifdef _WIN32
-		p /= "ij.jar";
+		p = std::filesystem::path(ij_path) / "jars";
 #else
-		p /= "Contents";
-		p /= "Java";
-		p /= "ij.jar";
+		p = std::filesystem::path(ij_path) / "Contents" / "Java" / "ij.jar";
 #endif
-		name = p.string();
+		std::string name = p.string();
 		if (FILE* file = fopen(name.c_str(), "r"))
 		{
 			DBGPRINT(L"Inside here.\n");
@@ -72,12 +67,10 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 		}
 		else
 		{
-			p = ij_path;
-			p /= "jars";
-			p /= "bio-formats";
+			p = std::filesystem::path(ij_path) / "jars" / "bio-formats";
 			name = p.string();
-			wxDir dir(name);
-			if (!dir.IsOpened())
+			if (!std::filesystem::exists(name) ||
+				!std::filesystem::is_directory(name))
 			{
 				m_with_fiji = false;
 				return false;
@@ -85,88 +78,78 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 			else
 			{
 				m_with_fiji = true;
-				wxString filename;
-				bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
-				while (cont)
+				std::string filename;
+				for (const auto& entry : std::filesystem::directory_iterator(name))
 				{
-					if (filename.Matches("formats-*.jar") || filename.Matches("turbojpeg-*.jar") ||
-						filename.Matches("ome-xml*.jar") || filename.Matches("ome-codecs*.jar") ||
-						filename.Matches("ome-common*.jar"))
-					{
-						if (jvm_bioformats_path == "")
-							jvm_bioformats_path = dir.GetNameWithSep() + filename;
+					std::string filename = entry.path().filename().string();
+					if (filename.find("formats-") != std::string::npos || filename.find("turbojpeg-") != std::string::npos ||
+						filename.find("ome-xml") != std::string::npos || filename.find("ome-codecs") != std::string::npos ||
+						filename.find("ome-common") != std::string::npos) {
+						if (jvm_bioformats_path.empty())
+							jvm_bioformats_path = name + std::filesystem::path::preferred_separator + filename;
 						else
-							jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
+							jvm_bioformats_path += getPathSeparator() + name + std::filesystem::path::preferred_separator + filename;
 					}
-					cont = dir.GetNext(&filename);
 				}
 
-				p = ij_path;
-				p /= "jars";
-				dir.Open(p.string());
-				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
-				while (cont)
-				{
-					if (filename.Matches("commons-collections-*.jar") || filename.Matches("commons-lang-*.jar") ||
-						filename.Matches("commons-logging-*.jar") || filename.Matches("guava-*.jar") ||
-						filename.Matches("jcommander-*.jar") || filename.Matches("jgoodies-common-*.jar") ||
-						filename.Matches("jgoodies-forms-*.jar") || filename.Matches("jhdf5-*.jar") ||
-						filename.Matches("joda-time-*.jar") || filename.Matches("kryo-*.jar") ||
-						filename.Matches("log4j-*.jar") || filename.Matches("logback-classic*.jar") ||
-						filename.Matches("logback-core*.jar") || filename.Matches("metadata-extractor-*.jar") ||
-						filename.Matches("minlog-*.jar") || filename.Matches("native-lib-loader-*.jar") ||
-						filename.Matches("netcdf-*.jar") || filename.Matches("objenesis-*.jar") ||
-						filename.Matches("perf4j-*.jar") || filename.Matches("slf4j-api-*.jar") ||
-						filename.Matches("snakeyaml-*.jar") || filename.Matches("xercesImpl-*.jar") ||
-						filename.Matches("xml-apis-ext-*.jar") || filename.Matches("xmpcore-*.jar")) {
-						if (jvm_bioformats_path == "")
-							jvm_bioformats_path = dir.GetNameWithSep() + filename;
+				p = std::filesystem::path(ij_path) / "jars";
+				name = p.string();
+				for (const auto& entry : std::filesystem::directory_iterator(name)) {
+					std::string filename = entry.path().filename().string();
+					if (filename.find("commons-collections-") != std::string::npos || filename.find("commons-lang-") != std::string::npos ||
+						filename.find("commons-logging-") != std::string::npos || filename.find("guava-") != std::string::npos ||
+						filename.find("jcommander-") != std::string::npos || filename.find("jgoodies-common-") != std::string::npos ||
+						filename.find("jgoodies-forms-") != std::string::npos || filename.find("jhdf5-") != std::string::npos ||
+						filename.find("joda-time-") != std::string::npos || filename.find("kryo-") != std::string::npos ||
+						filename.find("log4j-") != std::string::npos || filename.find("logback-classic") != std::string::npos ||
+						filename.find("logback-core") != std::string::npos || filename.find("metadata-extractor-") != std::string::npos ||
+						filename.find("minlog-") != std::string::npos || filename.find("native-lib-loader-") != std::string::npos ||
+						filename.find("netcdf-") != std::string::npos || filename.find("objenesis-") != std::string::npos ||
+						filename.find("perf4j-") != std::string::npos || filename.find("slf4j-api-") != std::string::npos ||
+						filename.find("snakeyaml-") != std::string::npos || filename.find("xercesImpl-") != std::string::npos ||
+						filename.find("xml-apis-ext-") != std::string::npos || filename.find("xmpcore-") != std::string::npos) {
+						if (jvm_bioformats_path.empty())
+							jvm_bioformats_path = name + std::filesystem::path::preferred_separator + filename;
 						else
-							jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
+							jvm_bioformats_path += getPathSeparator() + name + std::filesystem::path::preferred_separator + filename;
 					}
-					else if (filename.Matches("ij-*.jar"))
-						jvm_ij_path = dir.GetNameWithSep() + filename;
-					cont = dir.GetNext(&filename);
+					else if (filename.find("ij-") != std::string::npos) {
+						jvm_ij_path = name + std::filesystem::path::preferred_separator + filename;
+					}
 				}
 
-				p = ij_path;
-				p /= "plugins";
-				dir.Open(p.string());
-				cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
-				while (cont)
-				{
-					if (filename.Matches("bio-formats_plugins-*.jar"))
-						jvm_bioformats_path += getPathSeparator() + dir.GetNameWithSep() + filename;
-					cont = dir.GetNext(&filename);
+				p = std::filesystem::path(ij_path) / "plugins";
+				name = p.string();
+				for (const auto& entry : std::filesystem::directory_iterator(name)) {
+					std::string filename = entry.path().filename().string();
+					if (filename.find("bio-formats_plugins-") != std::string::npos) {
+						jvm_bioformats_path += getPathSeparator() + name + std::filesystem::path::preferred_separator + filename;
+					}
 				}
+
 				//Checking for jvm path.
 				if (jvm_path.empty())
 				{
-					p = ij_path;
-					p /= "java";
+					p = std::filesystem::path(ij_path) / "java";
 #ifdef _DARWIN
 					p /= "macosx";
 #else
 					p /= "win64";
 #endif
 					jvm_path = p.string();
-					dir.Open(jvm_path);
-					cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
-					while (cont)
-					{
-						if (filename.Matches("*jdk*"))
-						{
-							p = dir.GetNameWithSep().ToStdString() + filename.ToStdString();
-							p /= "";
+					for (const auto& entry : std::filesystem::directory_iterator(jvm_path)) {
+						std::string filename = entry.path().filename().string();
+						if (filename.find("jdk") != std::string::npos) {
+							p = entry.path();
 							jvm_path = p.string();
 						}
-						cont = dir.GetNext(&filename);
 					}
+
 #ifdef _DARWIN
-					p = jvm_path; p /= "jre"; p /= "Contents"; p /= "Home"; p /= "lib"; p /= "server"; p /= "libjvm.dylib";
+					p = std::filesystem::path(jvm_path) / "jre" / "Contents" / "Home" / "lib" / "server" / "libjvm.dylib";
 					jvm_path = p.string();
 #else
-					p = jvm_path; p /= "jre"; p /= "bin"; p /= "server"; p /= "jvm.dll";
+					p = std::filesystem::path(jvm_path) / "jre" / "bin" / "server" / "jvm.dll";
 					jvm_path = p.string();
 #endif
 				}

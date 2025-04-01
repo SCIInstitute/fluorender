@@ -204,7 +204,7 @@ void MovieMaker::PlaySave()
 		glbin.get_video_encoder().open(m_filename, m_crop_w, m_crop_h,
 			m_clip_frame_num + 1, m_fps, glbin_settings.m_mov_bitrate * 1e6);
 	}
-	m_filename = file_path.stem().wstring();
+	m_filename = (file_path.parent_path() / file_path.stem()).wstring();
 	m_record = true;
 	if (glbin_settings.m_prj_save)
 	{
@@ -285,11 +285,6 @@ void MovieMaker::WriteFrameToFile()
 	if (!m_view)
 		return;
 
-	//wxString s_length = wxString::Format("%d", m_clip_frame_num);
-	//int length = s_length.Length();
-	//wxString format = wxString::Format("_%%0%dd", length);
-	//wxString outputfilename = wxString::Format("%s" + format + "%s", m_filename,
-	//	m_last_frame, ".tif");
 	std::wostringstream oss;
 	oss << m_clip_frame_num;
 	std::wstring s_length = oss.str();
