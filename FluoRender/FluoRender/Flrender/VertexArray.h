@@ -28,12 +28,21 @@
 #ifndef VertexArray_h
 #define VertexArray_h
 
-#include <GL/glew.h>
+#include <BBox.h>
+#include <Point.h>
 #include <string>
 #include <vector>
 #include <map>
-#include <BBox.h>
-#include <Point.h>
+
+#ifndef __glew_h__
+typedef ptrdiff_t GLsizeiptr;
+typedef void GLvoid;
+typedef unsigned int GLenum;
+typedef int GLint;
+typedef unsigned int GLuint;
+typedef unsigned char GLboolean;
+typedef int GLsizei; 
+#endif
 
 namespace flvr
 {
@@ -198,58 +207,6 @@ namespace flvr
 		std::vector<VertexBuffer*> vb_list_;
 	};
 
-	inline bool VertexBuffer::bind()
-	{
-		if (valid_)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, id_);
-			return true;
-		}
-		else
-			return false;
-	}
-
-	inline void VertexBuffer::unbind()
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	inline bool VertexBuffer::valid()
-	{
-		return valid_;
-	}
-
-	inline void VertexBuffer::data(GLsizeiptr size, const GLvoid* data, GLenum usage)
-	{
-		if (valid_)
-		{
-			switch (type_)
-			{
-			case VABuf_Coord:
-				glBindBuffer(GL_ARRAY_BUFFER, id_);
-				glBufferData(GL_ARRAY_BUFFER,
-					size, data, usage);
-				break;
-			case VABuf_Index:
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-					size, data, usage);
-				break;
-			}
-		}
-	}
-
-	inline void VertexArray::bind()
-	{
-		if (valid_)
-			glBindVertexArray(id_);
-	}
-
-	inline void VertexArray::unbind()
-	{
-		glBindVertexArray(0);
-	}
-
 	inline void VertexArray::protect()
 	{
 		protected_ = true;
@@ -268,249 +225,6 @@ namespace flvr
 	inline unsigned int VertexArray::id()
 	{
 		return id_;
-	}
-
-	inline bool VertexArray::attach_buffer(VertexBuffer* buf)
-	{
-		if (!valid_)
-			return false;
-		//doesn't do anything here, just remembers the relationship
-		buffer_list_.push_back(buf);
-		return true;
-	}
-
-	inline void VertexArray::attrib_pointer(GLuint index,
-		GLint size, GLenum type, GLboolean normalized,
-		GLsizei stride, const GLvoid* pointer)
-	{
-		//glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, size, type, normalized, stride, pointer);
-		attrib_pointer_list_.push_back(index);
-	}
-
-	inline bool VertexArray::get_dirty()
-	{
-		return dirty_;
-	}
-
-	inline void VertexArray::draw_begin()
-	{
-		if (!valid_)
-			return;
-		glBindVertexArray(id_);
-		//enable attrib array
-		for (auto it = attrib_pointer_list_.begin();
-			it != attrib_pointer_list_.end(); ++it)
-			glEnableVertexAttribArray(*it);
-	}
-
-	inline void VertexArray::draw_arrays(GLenum mode, GLint first, GLsizei count)
-	{
-		if (!valid_)
-			return;
-		glDrawArrays(mode, first, count);
-	}
-
-	inline void VertexArray::draw_elements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
-	{
-		if (!valid_)
-			return;
-		glDrawElements(mode, count, type, indices);
-	}
-
-	inline void VertexArray::draw_end()
-	{
-		if (!valid_)
-			return;
-		//disable attrib array
-		for (auto it = attrib_pointer_list_.begin();
-			it != attrib_pointer_list_.end(); ++it)
-			glDisableVertexAttribArray(*it);
-		glBindVertexArray(0);
-	}
-
-	inline void VertexArray::draw()
-	{
-		if (!valid_)
-			return;
-		glBindVertexArray(id_);
-		//enable attrib array
-		for (auto it = attrib_pointer_list_.begin();
-			it != attrib_pointer_list_.end(); ++it)
-			glEnableVertexAttribArray(*it);
-		switch (type_)
-		{
-		case VA_Norm_Square:
-		case VA_Norm_Square_d:
-		case VA_Text:
-		case VA_Left_Square:
-		case VA_Right_Square:
-			draw_norm_square();
-			break;
-		case VA_Brush_Circles:
-			draw_circles();
-			break;
-		case VA_Bound_Cube:
-			draw_bound_cube();
-			break;
-		case VA_Grid:
-			draw_grid();
-			break;
-		case VA_Crop_Frame:
-			draw_crop_frame();
-			break;
-		case VA_Scale_Bar:
-			draw_scale_bar();
-			break;
-		case VA_Grad_Bkg:
-			draw_grad_bkg();
-			break;
-		case VA_Color_Map:
-			draw_color_map();
-			break;
-		case VA_Traces:
-			draw_traces();
-			break;
-		case VA_Rulers:
-			draw_rulers();
-			break;
-		}
-		//disable attrib array
-		for (auto it = attrib_pointer_list_.begin();
-			it != attrib_pointer_list_.end(); ++it)
-			glDisableVertexAttribArray(*it);
-		glBindVertexArray(0);
-	}
-
-	inline void VertexArray::draw_norm_square()
-	{
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	}
-
-	inline void VertexArray::draw_circles()
-	{
-		int count = 0;
-		//first, determine how many circles to draw
-		auto param = param_list_.find(0);
-		if (param != param_list_.end() &&
-			param->second >= 0.0)
-			count++;
-		param = param_list_.find(1);
-		if (param != param_list_.end() &&
-			param->second >= 0.0)
-			count++;
-		//determine secs
-		int secs = 0;
-		param = param_list_.find(2);
-		if (param != param_list_.end())
-			secs = int(param->second + 0.5);
-
-		//draw
-		for (int i=0; i<count; ++i)
-			glDrawArrays(GL_LINE_LOOP, i*secs, secs);
-	}
-
-	inline void VertexArray::draw_bound_cube()
-	{
-		glDrawArrays(GL_LINES, 0, 24);
-	}
-
-	inline void VertexArray::draw_clip_plane(int plane, bool border)
-	{
-		if (border)
-			glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT,
-				reinterpret_cast<const GLvoid*>((long long)(plane)));
-		else
-			glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
-				reinterpret_cast<const GLvoid*>((long long)(plane)));
-	}
-
-	inline void VertexArray::draw_grid()
-	{
-		//get line number
-		int line_num = 0;
-		auto param = param_list_.find(0);
-		if (param != param_list_.end())
-			line_num = int(param->second+0.5) * 2 + 1;
-
-		//draw
-		glDrawArrays(GL_LINES, 0, line_num * 4);
-	}
-
-	inline void VertexArray::draw_cam_jack(int axis)
-	{
-		switch (axis)
-		{
-		case 0:
-			glDrawArrays(GL_LINES, 0, 2);
-			break;
-		case 1:
-			glDrawArrays(GL_LINES, 2, 2);
-			break;
-		case 2:
-			glDrawArrays(GL_LINES, 4, 2);
-			break;
-		}
-	}
-
-	inline void VertexArray::draw_cam_center()
-	{
-		glDrawArrays(GL_LINES, 0, 2);
-		glDrawArrays(GL_LINES, 2, 2);
-		glDrawArrays(GL_LINES, 4, 2);
-		glDrawArrays(GL_LINES, 6, 2);
-	}
-
-	inline void VertexArray::draw_crop_frame()
-	{
-		glDrawArrays(GL_LINE_LOOP, 0, 4);
-	}
-
-	inline void VertexArray::draw_scale_bar()
-	{
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	}
-
-	inline void VertexArray::draw_legend_square(int index)
-	{
-		if (index == 0)
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		else if (index == 1)
-			glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
-	}
-
-	inline void VertexArray::draw_grad_bkg()
-	{
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
-	}
-
-	inline void VertexArray::draw_color_map()
-	{
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
-	}
-
-	inline void VertexArray::draw_traces()
-	{
-		//get array number
-		int num = 0;
-		auto param = param_list_.find(0);
-		if (param != param_list_.end())
-			num = int(param->second + 0.5);
-
-		//draw
-		glDrawArrays(GL_LINES, 0, num);
-	}
-
-	inline void VertexArray::draw_rulers()
-	{
-		//get array number
-		int num = 0;
-		auto param = param_list_.find(0);
-		if (param != param_list_.end())
-			num = int(param->second + 0.5);
-
-		//draw
-		glDrawArrays(GL_LINES, 0, num);
 	}
 
 	inline bool VertexArray::match(VAType type)

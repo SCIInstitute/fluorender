@@ -26,6 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
+#include <GL/glew.h>
 #include <ShaderProgram.h>
 #include <Utils.h>
 #include <compatibility.h>

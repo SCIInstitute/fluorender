@@ -28,7 +28,6 @@
 #ifndef Framebuffer_h
 #define Framebuffer_h
 
-#include <GL/glew.h>
 #include <string>
 #include <vector>
 #ifdef __linux__
@@ -147,91 +146,6 @@ namespace flvr
 		std::vector<FramebufferTexture*> tex_list_;
 	};
 
-	inline bool FramebufferTexture::bind()
-	{
-		if (valid_)
-		{
-			switch (type_)
-			{
-			case FBTex_Render_RGBA:
-			case FBTex_UChar_RGBA:
-			case FBTex_Render_Int32:
-			case FBTex_Depth_Float:
-			default:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				break;
-			}
-			return true;
-		}
-		else
-			return false;
-	}
-
-	inline void FramebufferTexture::unbind()
-	{
-		if (valid_)
-		{
-			switch (type_)
-			{
-			case FBTex_Render_RGBA:
-			case FBTex_UChar_RGBA:
-			case FBTex_Render_Int32:
-			case FBTex_Depth_Float:
-			default:
-				glBindTexture(GL_TEXTURE_2D, 0);
-				break;
-			}
-		}
-	}
-
-	inline bool FramebufferTexture::valid()
-	{
-		return valid_;
-	}
-
-	inline void FramebufferTexture::resize(int nx, int ny)
-	{
-		if (valid_)
-		{
-			nx_ = nx; ny_ = ny;
-			switch (type_)
-			{
-			case FBTex_Render_RGBA:
-			default:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, nx_, ny_, 0,
-					GL_RGBA, GL_FLOAT, NULL);//GL_RGBA16F
-				break;
-			case FBTex_UChar_RGBA:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nx_, ny_, 0,
-					GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-				break;
-			case FBTex_Render_Int32:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx_, ny_, 0,
-					GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
-				break;
-			case FBTex_Depth_Float:
-				glBindTexture(GL_TEXTURE_2D, id_);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx_, ny_, 0,
-					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-				break;
-			}
-		}
-	}
-
-	inline void Framebuffer::bind()
-	{
-		if (valid_)
-			glBindFramebuffer(GL_FRAMEBUFFER, id_);
-	}
-
-	inline void Framebuffer::unbind()
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
 	inline void Framebuffer::protect()
 	{
 		protected_ = true;
@@ -250,29 +164,6 @@ namespace flvr
 	inline unsigned int Framebuffer::id()
 	{
 		return id_;
-	}
-
-	inline bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
-	{
-		if (!valid_)
-			return false;
-		switch (type_)
-		{
-		case FB_Render_RGBA:
-		case FB_UChar_RGBA:
-		case FB_Pick_Int32_Float:
-		case FB_Depth_Float:
-		default:
-			glFramebufferTexture(GL_FRAMEBUFFER,
-				ap, tex_id, 0);
-			break;
-		case FB_3D_Int:
-			glFramebufferTexture3D(GL_FRAMEBUFFER,
-				ap, GL_TEXTURE_3D,
-				tex_id, 0, layer);
-			break;
-		}
-		return true;
 	}
 
 	inline bool Framebuffer::match_size(int nx, int ny)
@@ -299,14 +190,5 @@ namespace flvr
 		name_ = "";
 	}
 
-	inline unsigned int Framebuffer::read_value(int px, int py)
-	{
-		if (type_ != FB_Pick_Int32_Float)
-			return 0;
-		unsigned int value = 0;
-		glReadPixels(px, py, 1, 1, GL_RED_INTEGER,
-			GL_UNSIGNED_INT, (GLvoid*)&value);
-		return value;
-	}
 }
 #endif//Framebuffer_h

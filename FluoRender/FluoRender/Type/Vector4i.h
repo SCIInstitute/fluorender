@@ -29,10 +29,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef VECTOR4I_HPP
 #define VECTOR4I_HPP
 
-#include <GL/glew.h>
 #include <string>
 #include <iosfwd>
 #include <iostream>
+
+#ifndef __glew_h__
+typedef float GLfloat;
+typedef int GLint;
+#endif
 
 namespace fluo
 {

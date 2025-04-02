@@ -152,11 +152,9 @@ endif()
 add_definitions(-DGLEW_STATIC)
 set(GLEW_USE_STATIC_LIBS TRUE)
 find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIR})
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
 
 # wxWidgets
 file(GLOB WXWIDGETS_DIRS "${PARENT_DIR}/wxWidgets*")
@@ -504,6 +502,11 @@ add_definitions(-DTEEM_QNANHIBIT=1)
 add_definitions(-DTEEM_ZLIB=1)
 add_definitions(-DTEEM_32BIT=0)
 
+# Tester
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Tester)
+file(GLOB tester_hdr FluoRender/Tester/*.h)
+file(GLOB tester_src FluoRender/Tester/*.cpp)
+
 # Wacom
 if(WIN32)
     include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils/Include)
@@ -573,8 +576,6 @@ file(GLOB cvt_src FluoRender/FluoRender/Converter/*.cpp)
 file(GLOB cvt_hdr FluoRender/FluoRender/Converter/*.h)
 add_library(CONVERTER_LIB STATIC
   ${cvt_src} ${cvt_hdr})
-target_link_libraries(CONVERTER_LIB
-  teem)
 
 # Database
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Database)
@@ -589,10 +590,6 @@ file(GLOB dist_src FluoRender/FluoRender/Distance/*.cpp)
 file(GLOB dist_hdr FluoRender/FluoRender/Distance/*.h)
 add_library(DISTANCE_LIB STATIC
   ${dist_src} ${dist_hdr})
-target_link_libraries(DISTANCE_LIB
-  teem
-  ${OpenCV_LIBS}
-)
 
 # File
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/File)
@@ -623,13 +620,6 @@ file(GLOB flrd_src FluoRender/FluoRender/Flrender/*.cpp)
 file(GLOB flrd_hdr FluoRender/FluoRender/Flrender/*.h)
 add_library(FLRENDER_LIB STATIC
   ${flrd_src} ${flrd_hdr})
-target_link_libraries(FLRENDER_LIB
-  teem
-  ${FREETYPE_LIBRARIES}
-  ${GLEW_STATIC_LIBRARIES}
-  ${OpenCL_LIBRARIES}
-  ${OPENGL_LIBRARIES}
-)
 
 # Flui
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flui)
@@ -637,14 +627,6 @@ file(GLOB flui_src FluoRender/FluoRender/Flui/*.cpp)
 file(GLOB flui_hdr FluoRender/FluoRender/Flui/*.h)
 add_library(FLUI_LIB STATIC
   ${flui_src} ${flui_hdr})
-if(WIN32)
-    target_link_libraries(FLUI_LIB
-      WACOMUTILS_LIB)
-endif()
-if (WIN32 AND USE_XINPUT)
-    target_link_libraries(FLUI_LIB
-      XINPUT_LIB)
-endif()
 
 # Format
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Format)
@@ -652,13 +634,6 @@ file(GLOB fmt_src FluoRender/FluoRender/Format/*.cpp)
 file(GLOB fmt_hdr FluoRender/FluoRender/Format/*.h)
 add_library(FORMAT_LIB STATIC
   ${fmt_src} ${fmt_hdr} ${fmt_rsc})
-target_link_libraries(FORMAT_LIB
-  teem
-  ${Boost_LIBRARIES}
-  ${FFMPEG_LIBRARIES}
-  ${ND2_LIBRARIES}
-  ${TIFF_LIBRARIES}
-)
 
 # Global
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Global)
@@ -681,8 +656,12 @@ file(GLOB lgr_src FluoRender/FluoRender/LookingGlass/*.cpp)
 file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
 add_library(LOOKINGGLASS_LIB STATIC
   ${lgr_src} ${lgr_hdr})
-target_link_libraries(LOOKINGGLASS_LIB
-  ${HoloPlay_LIBRARIES})
+
+# Main
+file(GLOB src FluoRender/FluoRender/*.cpp)
+file(GLOB hdr FluoRender/FluoRender/*.h)
+add_library(MAIN_LIB STATIC
+  ${src} ${hdr})
 
 # OpenXR
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/OpenXR)
@@ -690,10 +669,6 @@ file(GLOB oxr_src FluoRender/FluoRender/OpenXR/*.cpp)
 file(GLOB oxr_hdr FluoRender/FluoRender/OpenXR/*.h)
 add_library(OPENXR_LIB STATIC
   ${oxr_src} ${oxr_hdr})
-target_link_libraries(OPENXR_LIB
-  ${GLEW_STATIC_LIBRARIES}
-  ${OpenVR_LIBRARIES}
-  ${OpenXR_LIBRARIES})
 
 # Progress
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Progress)
@@ -715,9 +690,6 @@ file(GLOB pyth_hdr FluoRender/FluoRender/Python/*.h)
 file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
 add_library(PYTHON_LIB STATIC
   ${pyth_hdr} ${pyth_src})
-target_link_libraries(PYTHON_LIB
-  ${HDF5_LIBRARIES}
-  ${Boost_LIBRARIES})
 
 # Scene
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
@@ -732,8 +704,6 @@ file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
 file(GLOB scr_hdr FluoRender/FluoRender/Script/*.h)
 add_library(SCRIPT_LIB STATIC
   ${scr_src} ${scr_hdr})
-target_link_libraries(SCRIPT_LIB
-  ${TIFF_LIBRARIES})
 
 # Selection
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Selection)
@@ -755,8 +725,6 @@ file(GLOB trk_src FluoRender/FluoRender/Tracking/*.cpp)
 file(GLOB trk_hdr FluoRender/FluoRender/Tracking/*.h)
 add_library(TRACKING_LIB STATIC
   ${trk_src} ${trk_hdr})
-target_link_libraries(TRACKING_LIB
-  ${Boost_LIBRARIES})
 
 # Trainer
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Trainer)
@@ -764,9 +732,6 @@ file(GLOB trainer_src FluoRender/FluoRender/Trainer/*.cpp)
 file(GLOB trainer_hdr FluoRender/FluoRender/Trainer/*.h)
 add_library(TRAINER_LIB STATIC
   ${trainer_src} ${trainer_hdr})
-target_link_libraries(TRAINER_LIB
-  ${Python3_LIBRARIES}
-  dlib::dlib)
 
 # Type
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Type)
@@ -774,8 +739,6 @@ file(GLOB typ_src FluoRender/FluoRender/Type/*.cpp)
 file(GLOB typ_hdr FluoRender/FluoRender/Type/*.h)
 add_library(TYPE_LIB STATIC
   ${typ_src} ${typ_hdr})
-target_link_libraries(TYPE_LIB
-  ${GLEW_STATIC_LIBRARIES})
 
 # Utility
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Utility)
@@ -784,8 +747,6 @@ file(GLOB utl_hdr FluoRender/FluoRender/Utility/*.h)
 file(GLOB utl_rsc FluoRender/FluoRender/Utility/*.natvis)
 add_library(UTILITY_LIB STATIC
   ${utl_src} ${utl_hdr} ${utl_rsc})
-target_link_libraries(UTILITY_LIB
-  ${Boost_LIBRARIES})
 
 # Video
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
@@ -793,29 +754,157 @@ file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
 file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
 add_library(VIDEO_LIB STATIC
   ${vid_src} ${vid_hdr})
-target_link_libraries(VIDEO_LIB
-  ${FFMPEG_LIBRARIES})
 
-# boost interface
-add_library(BOOST_ILIB INTERFACE)
-target_link_libraries(BOOST_ILIB INTERFACE
-  CLUSTER_LIB
-  COMPONENT_LIB
-  FILTER_LIB
+# include and link
+# Animator
+target_link_libraries(ANIMATORS_LIB PRIVATE
+  TYPE_LIB
+  FLRENDER_LIB)
+
+# Calculate
+target_link_libraries(CALCULATE_LIB PRIVATE
+  FLRENDER_LIB)
+
+# Cluster
+target_include_directories(CLUSTER_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
+target_link_libraries(CLUSTER_LIB PRIVATE
   ${Boost_LIBRARIES})
 
-# Entry of the program
-file(GLOB src FluoRender/FluoRender/*.cpp)
-file(GLOB hdr FluoRender/FluoRender/*.h)
-add_library(MAIN_LIB STATIC
-  ${src} ${hdr})
+# Component
+target_include_directories(COMPONENT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
+target_link_libraries(COMPONENT_LIB PRIVATE
+  ${Boost_LIBRARIES}
+  FLRENDER_LIB)
+
+# Config
+target_include_directories(CONFIG_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(CONFIG_LIB PRIVATE
+  ${GLEW_STATIC_LIBRARIES})
+
+# Control
+
+# Converter
+target_link_libraries(CONVERTER_LIB
+  teem)
+
+# Database
+
+# Distance
+target_link_libraries(DISTANCE_LIB PRIVATE
+  teem
+  ${OpenCV_LIBS}
+  FLRENDER_LIB)
+
+# File
+
+# Filter
+target_include_directories(FILTER_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
+target_link_libraries(FILTER_LIB PRIVATE
+  ${Boost_LIBRARIES}
+  FLRENDER_LIB)
+
+# Flobject
+
+# Flrender
+target_include_directories(FLRENDER_LIB PUBLIC
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(FLRENDER_LIB PRIVATE
+  teem
+  ${FREETYPE_LIBRARIES}
+  ${GLEW_STATIC_LIBRARIES}
+  ${OpenCL_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+)
+
+# Flui
+target_link_libraries(FLUI_LIB PRIVATE
+  FLRENDER_LIB)
+if(WIN32)
+    target_link_libraries(FLUI_LIB PRIVATE
+      WACOMUTILS_LIB)
+endif()
+if (WIN32 AND USE_XINPUT)
+    target_link_libraries(FLUI_LIB PRIVATE
+      XINPUT_LIB)
+endif()
+
+# Format
+target_link_libraries(FORMAT_LIB
+  teem
+  ${Boost_LIBRARIES}
+  ${FFMPEG_LIBRARIES}
+  ${ND2_LIBRARIES}
+  ${TIFF_LIBRARIES}
+)
+
+# Global
+
+# Image
+
+# LookingGlass
+target_link_libraries(LOOKINGGLASS_LIB
+  ${HoloPlay_LIBRARIES})
+
+# Main
 target_link_libraries(MAIN_LIB
   ${wxWidgets_LIBRARIES})
 
-# Tester
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Tester)
-file(GLOB tester_hdr FluoRender/Tester/*.h)
-file(GLOB tester_src FluoRender/Tester/*.cpp)
+# OpenXR
+target_include_directories(OPENXR_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(OPENXR_LIB PRIVATE
+  ${GLEW_STATIC_LIBRARIES}
+  ${OpenVR_LIBRARIES}
+  ${OpenXR_LIBRARIES})
+
+# Progress
+
+# Project
+
+# Python
+target_link_libraries(PYTHON_LIB
+  ${HDF5_LIBRARIES}
+  ${Boost_LIBRARIES})
+
+# Scene
+
+# Script
+target_link_libraries(SCRIPT_LIB
+  ${TIFF_LIBRARIES})
+
+# Selection
+target_link_libraries(SELECTION_LIB
+  FLRENDER_LIB)
+
+# Timer
+
+# Tracking
+target_link_libraries(TRACKING_LIB
+  ${Boost_LIBRARIES}
+  FLRENDER_LIB)
+
+# Trainer
+target_link_libraries(TRAINER_LIB
+  ${Python3_LIBRARIES}
+  dlib::dlib)
+
+# Type
+target_include_directories(TYPE_LIB PUBLIC
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(TYPE_LIB PRIVATE
+  ${GLEW_STATIC_LIBRARIES})
+
+# Utility
+target_link_libraries(UTILITY_LIB
+  ${Boost_LIBRARIES})
+
+# Video
+target_link_libraries(VIDEO_LIB
+  ${FFMPEG_LIBRARIES})
 
 # For Apple set the icns file containing icons
 IF(APPLE)
@@ -942,14 +1031,16 @@ endif()
 target_link_libraries(FluoRender
     MAIN_LIB
     ANIMATORS_LIB
-    BOOST_ILIB
     CALCULATE_LIB
+    CLUSTER_LIB
+    COMPONENT_LIB
     CONFIG_LIB
     CONTROL_LIB
     CONVERTER_LIB
     DATABASE_LIB
     DISTANCE_LIB
     FILE_LIB
+    FILTER_LIB
     FLOBJECT_LIB
     FLRENDER_LIB
     FLUI_LIB

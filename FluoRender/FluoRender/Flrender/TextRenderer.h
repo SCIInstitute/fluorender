@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #define _TEXTRENDERER_H_
 
 #include <Color.h>
-#include <GL/glew.h>
 #include <string>
 #include <map>
 #include <ft2build.h>
@@ -68,18 +67,6 @@ namespace flvr
 
 		friend class TextTextureManager;
 	};
-
-	inline void TextTexture::bind()
-	{
-		if (valid_)
-			glBindTexture(GL_TEXTURE_2D, id_);
-	}
-
-	inline void TextTexture::unbind()
-	{
-		if (valid_)
-			glBindTexture(GL_TEXTURE_2D, 0);
-	}
 
 	inline bool TextTexture::valid()
 	{

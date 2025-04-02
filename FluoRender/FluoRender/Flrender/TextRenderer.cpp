@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <GL/glew.h>
 #include <TextRenderer.h>
 #include <Global.h>
 #include <ShaderProgram.h>
@@ -82,6 +83,18 @@ namespace flvr
 		glDeleteTextures(1, &id_);
 		id_ = 0;
 		valid_ = false;
+	}
+
+	inline void TextTexture::bind()
+	{
+		if (valid_)
+			glBindTexture(GL_TEXTURE_2D, id_);
+	}
+
+	inline void TextTexture::unbind()
+	{
+		if (valid_)
+			glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	TextTextureManager::TextTextureManager():

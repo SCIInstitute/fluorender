@@ -26,7 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-//#include <ShaderProgram.h>
+#include <GL/glew.h>
+#ifdef _WIN32
+#include <GL/wglew.h>
+#endif
 #include <RenderViewPanel.h>
 #include <Global.h>
 #include <MainFrame.h>

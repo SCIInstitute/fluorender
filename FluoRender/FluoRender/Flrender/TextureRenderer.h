@@ -34,11 +34,20 @@
 #include <Texture.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
-#ifdef _DARWIN
-#include <OpenCL/cl.h>
-#include <OpenCL/cl_gl.h>
-#include <OpenCL/cl_gl_ext.h>
-#include <OpenGL/CGLCurrent.h>
+
+#ifndef __glew_h_
+typedef unsigned int GLenum;
+typedef unsigned int GLuint;
+typedef int GLint;
+#endif // !__glew_h_
+#ifndef GL_UNSIGNED_BYTE
+#define GL_UNSIGNED_BYTE 0x1401 // The actual value of GL_UNSIGNED_BYTE
+#endif
+#ifndef GL_LINEAR
+#define GL_LINEAR 0x2601
+#endif
+#ifndef GL_NEAREST
+#define GL_NEAREST 0x2600
 #endif
 
 namespace flvr

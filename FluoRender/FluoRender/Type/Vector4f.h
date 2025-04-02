@@ -33,7 +33,10 @@ DEALINGS IN THE SOFTWARE.
 #include <iosfwd>
 #include <iostream>
 
-#include <GL/glew.h>
+#ifndef __glew_h__
+typedef float GLfloat;
+typedef int GLint;
+#endif
 
 namespace fluo
 {
