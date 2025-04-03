@@ -28,53 +28,75 @@ DEALINGS IN THE SOFTWARE.
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <Names.h>
-#include <Group.hpp>
-#include <MainSettings.h>
-#include <States.h>
-#include <VolCache.h>
-#include <Params.h>
-#include <EntryParams.h>
-#include <TableHistParams.h>
-#include <Undoable.h>
-#include <QVideoEncoder.h>
-#include <PyBase.h>
-#include <PyDlc.h>
-#include <CompGenerator.h>
-#include <CompSelector.h>
-#include <CompEditor.h>
-#include <VolumeSelector.h>
-#include <CompAnalyzer.h>
-#include <VolumeCalculator.h>
-#include <KernelExecutor.h>
-#include <ScriptProc.h>
-#include <RulerAlign.h>
-#include <TrackMap.h>
-#include <RulerHandler.h>
-#include <RulerRenderer.h>
-#include <VolumePoint.h>
-#include <SegGrow.h>
-#include <DistCalculator.h>
-#include <Colocalize.h>
-#include <Interpolator.h>
-#include <MovieMaker.h>
-#include <DataManager.h>
-#include <VolKernel.h>
-#include <Framebuffer.h>
-#include <VertexArray.h>
-#include <VolShader.h>
-#include <SegShader.h>
-#include <VolCalShader.h>
-#include <ImgShader.h>
-#include <LightFieldShader.h>
-#include <TextRenderer.h>
-#include <LookingGlassRenderer.h>
-#include <Clusterizer.h>
-#include <VolumeMeshConv.h>
-#include <Project.h>
-#include <BaseXrRenderer.h>
-#include <JVMInitializer.h>
-#include <TreeFileFactory.h>
+#include <string>
+#include <memory>
+#include <unordered_map>
+
+class TreeFileFactory;
+class QVideoEncoder;
+class Undoable;
+class MainSettings;
+class BrushDefault;
+class ComponentDefault;
+class OutAdjDefault;
+class ViewDefault;
+class VolumeDataDefault;
+class MovieDefault;
+class ColocalDefault;
+class States;
+class KernelExecutor;
+class Interpolator;
+class MovieMaker;
+class DataManager;
+class LookingGlassRenderer;
+class BaseXrRenderer;
+class JVMInitializer;
+struct CurrentObjects;
+class Project;
+namespace fluo
+{
+	class AsyncTimer;
+	class StopWatch;
+	class AsyncTimerFactory;
+	class StopWatchFactory;
+}
+namespace flrd
+{
+	class CacheQueue;
+	class EntryParams;
+	class TableHistParams;
+	class PyBase;
+	class PyDlc;
+	class ComponentGenerator;
+	class ComponentAnalyzer;
+	class ComponentSelector;
+	class ComponentEditor;
+	class VolumeSelector;
+	class VolumeCalculator;
+	class ScriptProc;
+	class RulerAlign;
+	class TrackMapProcessor;
+	class RulerHandler;
+	class RulerRenderer;
+	class VolumePoint;
+	class SegGrow;
+	class DistCalculator;
+	class Colocalize;
+	class Clusterizer;
+	class VolumeMeshConv;
+}
+namespace flvr
+{
+	class VolKernelFactory;
+	class FramebufferManager;
+	class VertexArrayManager;
+	class VolShaderFactory;
+	class SegShaderFactory;
+	class VolCalShaderFactory;
+	class ImgShaderFactory;
+	class LightFieldShaderFactory;
+	class TextTextureManager;
+}
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
@@ -151,67 +173,43 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class AsyncTimer;
-	class StopWatch;
-	class AsyncTimerFactory;
-	class StopWatchFactory;
 	class Global
 	{
 	public:
 		static Global& instance() { return instance_; }
 
-		flrd::CacheQueue& get_cache_queue() { return cache_queue_; }
-
 		//config file handlers
-		TreeFileFactory& get_tree_file_factory() { return tree_file_factory_; }
+		TreeFileFactory& get_tree_file_factory();
+
+		flrd::CacheQueue& get_cache_queue();
 
 		//video encoder
-		QVideoEncoder& get_video_encoder() { return encoder_; }
+		QVideoEncoder& get_video_encoder();
 
 		//comp gen
 		void set_cg_table_enable(bool value) { comp_gen_table_enable_ = value; }
 		bool get_cg_table_enable() { return comp_gen_table_enable_; }
-		flrd::EntryParams& get_cg_entry() { return comp_gen_entry_; }
-		flrd::TableHistParams& get_cg_table() { return comp_gen_table_; }
+		flrd::EntryParams& get_cg_entry();
+		flrd::TableHistParams& get_cg_table();
 		//vol prop
 		void set_vp_table_enable(bool value) { vol_prop_table_enable_ = value; }
 		bool get_vp_table_enable() { return vol_prop_table_enable_; }
-		flrd::TableHistParams& get_vp_table() { return vol_prop_table_; }
+		flrd::TableHistParams& get_vp_table();
 
 		//python
 		template <class T>
-		T* get_add_python(const std::string& name)
-		{
-			auto it = python_list_.find(name);
-			if (it == python_list_.end())
-			{
-				T* py = new T;
-				size_t n = python_list_.size();
-				python_list_.insert(std::pair<std::string, flrd::PyBase*>(name, py));
-				if (python_list_.size() > n)
-					return py;
-				else
-					return nullptr;
-			}
-			else
-				return dynamic_cast<T*>(it->second);
-		}
+		T* get_add_python(const std::string& name);
 		flrd::PyBase* get_add_pybase(const std::string& name);
 		flrd::PyDlc* get_add_pydlc(const std::string& name);
 		void clear_python();
 
 		//undo sliders
-		void add_undo_control(Undoable* control) { undo_ctrls_.push_back(control); }
-		void del_undo_control(Undoable* control)
-		{
-			auto it = std::find(undo_ctrls_.begin(), undo_ctrls_.end(), control);
-			if (it != undo_ctrls_.end())
-				undo_ctrls_.erase(it);
-		}
+		void add_undo_control(Undoable* control);
+		void del_undo_control(Undoable* control);
 		void undo();
 		void redo();
 
-		//default volume data settings
+		//settings
 		MainSettings& get_settings();
 		BrushDefault& get_brush_def();
 		ComponentDefault& get_comp_def();
@@ -226,58 +224,57 @@ namespace fluo
 
 		//data processors
 		void apply_processor_settings();
-		flrd::ComponentGenerator& get_comp_generator() { return m_comp_generator; }
-		flrd::ComponentAnalyzer& get_comp_analyzer() { return m_comp_analyzer; }
-		flrd::ComponentSelector& get_comp_selector() { return m_comp_selector; }
-		flrd::ComponentEditor& get_comp_editor() { return m_comp_editor; }
-		flrd::VolumeSelector& get_vol_selector() { return m_vol_selector; }
-		flrd::VolumeCalculator& get_vol_calculator() { return m_vol_calculator; }
-		KernelExecutor& get_kernel_executor() { return m_kernel_executor; }
-		flrd::ScriptProc& get_script_proc() { return m_script_proc; }
-		flrd::RulerAlign& get_aligner() { return m_aligner; }
-		flrd::TrackMapProcessor& get_trackmap_proc() { return m_trackmap_proc; }
-		flrd::RulerHandler& get_ruler_handler() { return m_ruler_handler; }
-		flrd::RulerRenderer& get_ruler_renderer() { return m_ruler_renderer; }
-		flrd::VolumePoint& get_volume_point() { return m_volume_point; }
-		flrd::SegGrow& get_seg_grow() { return m_seg_grow; }
-		flrd::DistCalculator& get_dist_calculator() { return m_dist_calculator; }
-		Interpolator& get_interpolator() { return m_interpolator; }
-		MovieMaker& get_movie_maker() { return m_movie_maker; }
-		DataManager& get_data_manager() { return m_data_manager; }
-		LookingGlassRenderer& get_looking_glass_renderer() { return m_lg_renderer; }
-		flrd::Colocalize& get_colocalizer() { return m_colocalizer; }
-		flrd::Clusterizer& get_clusterizer() { return m_clusterizer; }
-		flrd::VolumeMeshConv& get_vol_converter() { return m_vol_converter; }
+		flrd::ComponentGenerator& get_comp_generator();
+		flrd::ComponentAnalyzer& get_comp_analyzer();
+		flrd::ComponentSelector& get_comp_selector();
+		flrd::ComponentEditor& get_comp_editor();
+		flrd::VolumeSelector& get_vol_selector();
+		flrd::VolumeCalculator& get_vol_calculator();
+		KernelExecutor& get_kernel_executor();
+		flrd::ScriptProc& get_script_proc();
+		flrd::RulerAlign& get_aligner();
+		flrd::TrackMapProcessor& get_trackmap_proc();
+		flrd::RulerHandler& get_ruler_handler();
+		flrd::RulerRenderer& get_ruler_renderer();
+		flrd::VolumePoint& get_volume_point();
+		flrd::SegGrow& get_seg_grow();
+		flrd::DistCalculator& get_dist_calculator();
+		Interpolator& get_interpolator();
+		MovieMaker& get_movie_maker();
+		DataManager& get_data_manager();
+		flrd::Colocalize& get_colocalizer();
+		flrd::Clusterizer& get_clusterizer();
+		flrd::VolumeMeshConv& get_vol_converter();
 
 		//xr renderer
+		LookingGlassRenderer& get_looking_glass_renderer();
 		BaseXrRenderer* get_xr_renderer();
+
+		//time
+		AsyncTimer* getAsyncTimer(const std::string& name);
+		StopWatch* getStopWatch(const std::string& name);
+		AsyncTimerFactory& getAsyncTimerFactory();
+		StopWatchFactory& getStopWatchFactory();
 
 		//jvm
 		JVMInitializer* get_jvm_instance();
 
 		//graphics resources
-		flvr::VolKernelFactory& get_vol_kernel_factory() { return vol_kernel_factory_; }
-		flvr::FramebufferManager& get_framebuffer_manager() { return framebuffer_manager_; }
-		flvr::VertexArrayManager& get_vertex_array_manager() { return vertex_array_manager_; }
-		flvr::VolShaderFactory& get_vol_shader_factory() { return vol_shader_factory_; }
-		flvr::SegShaderFactory& get_seg_shader_factory() { return seg_shader_factory_; }
-		flvr::VolCalShaderFactory& get_vol_cal_shader_factory() { return cal_shader_factory_; }
-		flvr::ImgShaderFactory& get_img_shader_factory() { return img_shader_factory_; }
-		flvr::LightFieldShaderFactory& get_light_field_shader_factory() { return ligh_field_shader_factory_; }
-		flvr::TextTextureManager& get_text_tex_manager() { return text_texture_manager_; }
-
-		//time
-		Object* get(const std::string& name, Group* start = nullptr);
-		AsyncTimer* getAsyncTimer(const std::string& name);
-		StopWatch* getStopWatch(const std::string& name);
-		AsyncTimerFactory* getAsyncTimerFactory();
-		StopWatchFactory* getStopWatchFactory();
+		flvr::VolKernelFactory& get_vol_kernel_factory();
+		flvr::FramebufferManager& get_framebuffer_manager();
+		flvr::VertexArrayManager& get_vertex_array_manager();
+		flvr::VolShaderFactory& get_vol_shader_factory();
+		flvr::SegShaderFactory& get_seg_shader_factory();
+		flvr::VolCalShaderFactory& get_vol_cal_shader_factory();
+		flvr::ImgShaderFactory& get_img_shader_factory();
+		flvr::LightFieldShaderFactory& get_light_field_shader_factory();
+		flvr::TextTextureManager& get_text_tex_manager();
 
 		//current selection
-		CurrentObjects& get_current_objects() { return current_objects_; }
+		CurrentObjects& get_current_objects();
 
 		//project
-		Project& get_project() { return project_; }
+		Project& get_project();
 
 		std::string& get_help_url() { return help_url_; }
 
@@ -285,99 +282,109 @@ namespace fluo
 		static Global instance_;
 
 		//config file handlers
-		TreeFileFactory tree_file_factory_;
+		std::unique_ptr<TreeFileFactory> tree_file_factory_;
 
-		flrd::CacheQueue cache_queue_;
+		//cache for volumes
+		std::unique_ptr<flrd::CacheQueue> cache_queue_;
 
 		//video encoder
-		QVideoEncoder encoder_;
+		std::unique_ptr<QVideoEncoder> encoder_;
 
 		//comp gen
 		bool comp_gen_table_enable_;//add records from ui
-		flrd::EntryParams comp_gen_entry_;//temporary entry to save cg params
-		flrd::TableHistParams comp_gen_table_;//records for learning comp generation settings
+		std::unique_ptr<flrd::EntryParams> comp_gen_entry_;//temporary entry to save cg params
+		std::unique_ptr<flrd::TableHistParams> comp_gen_table_;//records for learning comp generation settings
 		//vol prop
 		bool vol_prop_table_enable_;//add records for vol prop
-		flrd::TableHistParams vol_prop_table_;//records for learning vol props
+		std::unique_ptr<flrd::TableHistParams> vol_prop_table_;//records for learning vol props
 
 		//python
-		std::unordered_map<std::string, flrd::PyBase*> python_list_;
+		using PyList = std::unordered_map<std::string, flrd::PyBase*>;//python list
+		PyList python_list_;
 
 		//controls for undo and redo
 		std::vector<Undoable*> undo_ctrls_;
 
 		//settings
-		MainSettings main_settings_;
+		std::unique_ptr<MainSettings> main_settings_;
 
 		//states
-		States states_;
+		std::unique_ptr<States> states_;
 
 		//the data processors
-		flrd::ComponentGenerator m_comp_generator;
-		flrd::ComponentAnalyzer m_comp_analyzer;
-		flrd::ComponentSelector m_comp_selector;
-		flrd::ComponentEditor m_comp_editor;
-		flrd::VolumeSelector m_vol_selector;
-		flrd::VolumeCalculator m_vol_calculator;
-		KernelExecutor m_kernel_executor;
-		flrd::ScriptProc m_script_proc;
-		flrd::RulerAlign m_aligner;
-		flrd::TrackMapProcessor m_trackmap_proc;
-		flrd::RulerHandler m_ruler_handler;
-		flrd::RulerRenderer m_ruler_renderer;
-		flrd::VolumePoint m_volume_point;
-		flrd::SegGrow m_seg_grow;
-		flrd::DistCalculator m_dist_calculator;
-		Interpolator m_interpolator;
-		MovieMaker m_movie_maker;
-		DataManager m_data_manager;
-		LookingGlassRenderer m_lg_renderer;
-		flrd::Colocalize m_colocalizer;
-		flrd::Clusterizer m_clusterizer;
-		flrd::VolumeMeshConv m_vol_converter;
+		std::unique_ptr<flrd::ComponentGenerator> m_comp_generator;
+		std::unique_ptr<flrd::ComponentAnalyzer> m_comp_analyzer;
+		std::unique_ptr<flrd::ComponentSelector> m_comp_selector;
+		std::unique_ptr<flrd::ComponentEditor> m_comp_editor;
+		std::unique_ptr<flrd::VolumeSelector> m_vol_selector;
+		std::unique_ptr<flrd::VolumeCalculator> m_vol_calculator;
+		std::unique_ptr<KernelExecutor> m_kernel_executor;
+		std::unique_ptr<flrd::ScriptProc> m_script_proc;
+		std::unique_ptr<flrd::RulerAlign> m_aligner;
+		std::unique_ptr<flrd::TrackMapProcessor> m_trackmap_proc;
+		std::unique_ptr<flrd::RulerHandler> m_ruler_handler;
+		std::unique_ptr<flrd::RulerRenderer> m_ruler_renderer;
+		std::unique_ptr<flrd::VolumePoint> m_volume_point;
+		std::unique_ptr<flrd::SegGrow> m_seg_grow;
+		std::unique_ptr<flrd::DistCalculator> m_dist_calculator;
+		std::unique_ptr<Interpolator> m_interpolator;
+		std::unique_ptr<MovieMaker> m_movie_maker;
+		std::unique_ptr<DataManager> m_data_manager;
+		std::unique_ptr<flrd::Colocalize> m_colocalizer;
+		std::unique_ptr<flrd::Clusterizer> m_clusterizer;
+		std::unique_ptr<flrd::VolumeMeshConv> m_vol_converter;
 
 		//xr renderer
+		std::unique_ptr<LookingGlassRenderer> m_lg_renderer;
 		std::unique_ptr<BaseXrRenderer> m_xr_renderer = nullptr;
+
+		//time
+		std::unique_ptr<fluo::AsyncTimerFactory> m_atmf = nullptr;
+		std::unique_ptr<fluo::StopWatchFactory> m_swhf = nullptr;
 
 		//jvm
 		std::unique_ptr<JVMInitializer> m_pJVMInstance = nullptr;
 
 		//graphics resources
 		//kernel for calculation
-		flvr::VolKernelFactory vol_kernel_factory_;
+		std::unique_ptr<flvr::VolKernelFactory> vol_kernel_factory_;
 		//framebuffers for everything
-		flvr::FramebufferManager framebuffer_manager_;
+		std::unique_ptr<flvr::FramebufferManager> framebuffer_manager_;
 		//vertex arrays
-		flvr::VertexArrayManager vertex_array_manager_;
+		std::unique_ptr<flvr::VertexArrayManager> vertex_array_manager_;
 		//sahder for volume rendering
-		flvr::VolShaderFactory vol_shader_factory_;
+		std::unique_ptr<flvr::VolShaderFactory> vol_shader_factory_;
 		//shader for segmentation
-		flvr::SegShaderFactory seg_shader_factory_;
+		std::unique_ptr<flvr::SegShaderFactory> seg_shader_factory_;
 		//shader for calculation
-		flvr::VolCalShaderFactory cal_shader_factory_;
+		std::unique_ptr<flvr::VolCalShaderFactory> cal_shader_factory_;
 		//smooth filter
-		flvr::ImgShaderFactory img_shader_factory_;
+		std::unique_ptr<flvr::ImgShaderFactory> img_shader_factory_;
 		//for looking glass
-		flvr::LightFieldShaderFactory ligh_field_shader_factory_;
+		std::unique_ptr<flvr::LightFieldShaderFactory> light_field_shader_factory_;
 		//text texture
-		flvr::TextTextureManager text_texture_manager_;
-
-		//time
-		ref_ptr<Group> origin_;//the root of everything else
+		std::unique_ptr<flvr::TextTextureManager> text_texture_manager_;
 
 		//current selection
-		CurrentObjects current_objects_;
+		std::unique_ptr<CurrentObjects> current_objects_;
 
 		//project management
-		Project project_;
+		std::unique_ptr<Project> project_;
 
 		//help url
 		std::string help_url_;
 
 	private:
 		Global();
-		void BuildFactories();
+		~Global();
+		Global(const Global&) = delete;
+		Global& operator=(const Global&) = delete;
+		Global(Global&&) = delete;
+		Global& operator=(Global&&) = delete;
 
+		void Init();
+		void InitDatabase();
+		void BuildFactories();
 		void InitLocale();
 	};
 

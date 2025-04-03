@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COLOCALIZE_H_
 #define _COLOCALIZE_H_
 
-#include <Compare.h>
 #include <vector>
 #include <string>
 #include <chrono>

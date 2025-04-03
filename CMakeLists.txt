@@ -842,6 +842,8 @@ target_link_libraries(FORMAT_LIB
 )
 
 # Global
+target_include_directories(GLOBAL_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR})
 
 # Image
 

@@ -31,7 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <TextureBrick.h>
 #include <Texture.h>
+#include <VolKernel.h>
+#include <DataManager.h>
 #include <algorithm>
+
 using namespace flrd;
 
 //8-bit data

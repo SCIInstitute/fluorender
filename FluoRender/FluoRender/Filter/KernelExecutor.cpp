@@ -29,8 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
+#include <DataManager.h>
+#include <VolumeDefault.h>
 #include <boost/chrono.hpp>
 #include <filesystem>
+#include <fstream>
 
 using namespace boost::chrono;
 

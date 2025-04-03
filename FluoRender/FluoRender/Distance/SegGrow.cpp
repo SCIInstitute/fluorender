@@ -27,6 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <SegGrow.h>
 #include <Global.h>
+#include <DataManager.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <RulerHandler.h>
 #include <algorithm>
 #include <unordered_map>
 #include <Debug.h>
@@ -589,6 +593,11 @@ SegGrow::SegGrow():
 SegGrow::~SegGrow()
 {
 
+}
+
+void SegGrow::SetVolumeData(VolumeData* vd)
+{
+	m_vd = vd;
 }
 
 void SegGrow::SetRulerHandler(RulerHandler* handler)

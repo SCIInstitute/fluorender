@@ -25,6 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <MovieMaker.h>
 #include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
@@ -32,6 +33,11 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
+#include <QVideoEncoder.h>
+#include <MainSettings.h>
+#include <Project.h>
+#include <Interpolator.h>
+#include <Names.h>
 #include <iostream>
 #include <filesystem>
 #include <tiffio.h>
@@ -896,10 +902,10 @@ bool MovieMaker::Action()
 
 fluo::StopWatch* MovieMaker::get_stopwatch()
 {
-	fluo::StopWatch* result = glbin_swhf->findFirst(gstMovStopWatch);
+	fluo::StopWatch* result = glbin_swhf.findFirst(gstMovStopWatch);
 	if (!result)
 	{
-		result = glbin_swhf->build();
+		result = glbin_swhf.build();
 		result->setName(gstMovStopWatch);
 		result->interval(1000.0 / m_fps);
 	}

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <States.h>
 #include <Global.h>
+#include <MainSettings.h>
 
 States::States()
 {

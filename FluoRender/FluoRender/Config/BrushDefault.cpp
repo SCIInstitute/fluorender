@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <BrushDefault.h>
 #include <Names.h>
 #include <VolumeSelector.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 BrushDefault::BrushDefault()
 {

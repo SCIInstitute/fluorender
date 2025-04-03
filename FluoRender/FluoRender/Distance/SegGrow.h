@@ -28,11 +28,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_SegGrow_h
 #define FL_SegGrow_h
 
-#include <DataManager.h>
-#include <KernelProgram.h>
 #include <Point.h>
 #include <set>
+#include <unordered_map>
 
+class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+	class KernelProgram;
+	class Argument;
+}
 namespace flrd
 {
 	class RulerHandler;
@@ -51,7 +57,7 @@ namespace flrd
 		SegGrow();
 		~SegGrow();
 
-		void SetVolumeData(VolumeData* vd) { m_vd = vd; }
+		void SetVolumeData(VolumeData* vd);
 		void SetBranches(int val) { m_branches = val; }
 		void SetIter(int val) { m_iter = val; }
 		void SetSizeThresh(int size) { m_sz_thresh = size; }

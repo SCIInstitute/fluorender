@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <Ray.h>
 #include <Plane.h>
+#include <DataManager.h>
 
 using namespace flrd;
 

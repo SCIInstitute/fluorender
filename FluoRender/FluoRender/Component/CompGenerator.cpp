@@ -32,6 +32,14 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryHist.h>
 #include <EntryParams.h>
 #include <Reshape.h>
+#include <DataManager.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <TableHistParams.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>
@@ -52,6 +60,11 @@ ComponentGenerator::ComponentGenerator()
 
 ComponentGenerator::~ComponentGenerator()
 {
+}
+
+void ComponentGenerator::SetVolumeData(VolumeData* vd)
+{
+	m_vd = vd;
 }
 
 bool ComponentGenerator::CheckBricks()

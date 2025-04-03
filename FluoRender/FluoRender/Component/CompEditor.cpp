@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompEditor.h>
 #include <Global.h>
 #include <RenderCanvas.h>
+#include <MovieMaker.h>
 
 using namespace flrd;
 

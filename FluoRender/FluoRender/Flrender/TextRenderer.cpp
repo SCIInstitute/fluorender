@@ -30,6 +30,12 @@ DEALINGS IN THE SOFTWARE.
 #include <TextRenderer.h>
 #include <Global.h>
 #include <ShaderProgram.h>
+#include <Color.h>
+#include <ImgShader.h>
+#include <VertexArray.h>
+#include <compatibility.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 namespace flvr
 {

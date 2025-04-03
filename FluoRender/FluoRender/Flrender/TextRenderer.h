@@ -29,12 +29,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TEXTRENDERER_H_
 #define _TEXTRENDERER_H_
 
-#include <Color.h>
 #include <string>
 #include <map>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
+// Forward declarations for FreeType2 types
+struct FT_FaceRec_;
+typedef struct FT_FaceRec_* FT_Face;
+
+struct FT_LibraryRec_;
+typedef struct FT_LibraryRec_* FT_Library;
+
+namespace fluo
+{
+	class Color;
+}
 namespace flvr
 {
 	class TextTextureManager;

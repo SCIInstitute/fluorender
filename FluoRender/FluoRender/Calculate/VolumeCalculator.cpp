@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <VolumePropPanel.h>
+#include <VolumeDefault.h>
+#include <Names.h>
 
 using namespace flrd;
 

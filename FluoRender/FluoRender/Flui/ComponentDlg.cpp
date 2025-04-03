@@ -2631,7 +2631,8 @@ void ComponentDlg::OutputDistance()
 
 void ComponentDlg::AlignPca(int axis_type)
 {
-	flrd::RulerList list = glbin_comp_analyzer.GetRulerListFromCelp();
+	flrd::RulerList list;
+	glbin_comp_analyzer.GetRulerListFromCelp(list);
 	glbin_aligner.SetRulerList(&list);
 	glbin_aligner.SetAxisType(axis_type);
 	glbin_aligner.SetView(glbin_current.canvas);

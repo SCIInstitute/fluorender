@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <Names.h>
 #include <Global.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 #include <compatibility.h>
 #include <filesystem>
 

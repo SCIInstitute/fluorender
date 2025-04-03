@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <RenderCanvas.h>
 #include <DataManager.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 OutAdjDefault::OutAdjDefault()
 {

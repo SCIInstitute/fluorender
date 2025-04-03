@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <type_traits>
 #include <unordered_map>
+#include <map>
 
 class BaseTreeFile
 {

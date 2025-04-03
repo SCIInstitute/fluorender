@@ -28,15 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Relax_h
 #define FL_Relax_h
 
-#include <Ruler.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
-#include <Point.h>
 #include <vector>
+#include <Vector.h>
 
 class VolumeData;
 namespace flrd
 {
+	class Ruler;
 	class Relax
 	{
 	public:
@@ -51,21 +49,9 @@ namespace flrd
 		{
 			return m_use_mask;
 		}
-		void SetVolume(VolumeData* vd)
-		{
-			m_vd = vd;
-		}
-		void SetRuler(Ruler* ruler)
-		{
-			if (ruler != m_ruler)
-			{
-				m_ruler = ruler;
-			}
-		}
-		Ruler* GetRuler()
-		{
-			return m_ruler;
-		}
+		void SetVolume(VolumeData* vd);
+		void SetRuler(Ruler* ruler);
+		Ruler* GetRuler();
 		void SetRestDist(float d)
 		{
 			m_rest = d;

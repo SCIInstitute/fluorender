@@ -27,9 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Clusterizer.h>
 #include <Global.h>
+#include <ClusterMethod.h>
 #include <dbscan.h>
 #include <kmeans.h>
 #include <exmax.h>
+#include <DataManager.h>
+#include <ComponentDefault.h>
 
 using namespace flrd;
 

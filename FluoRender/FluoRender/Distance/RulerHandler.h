@@ -29,15 +29,20 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerHandler_H_
 #define _RulerHandler_H_
 
-#include <Ruler.h>
+#include <Point.h>
 #include <string>
 #include <algorithm>
+#include <set>
+#include <memory>
 
 class RenderCanvas;
 class VolumeData;
 
 namespace flrd
 {
+	class Ruler;
+	class RulerPoint;
+	class RulerList;
 	class WalkCycle;
 	class RulerHandler
 	{
@@ -98,7 +103,7 @@ namespace flrd
 		bool FindClosestRulerBranch(double mx, double my);
 		bool FindClosestRulerBranchPoint(double mx, double my);
 
-		void SetPoint(pRulerPoint point)
+		void SetPoint(const std::shared_ptr<RulerPoint>& point)
 		{
 			m_point = point;
 		}
@@ -230,7 +235,7 @@ namespace flrd
 		//find moving distance
 		fluo::Point m_mouse;//mouse position
 		//get point
-		pRulerPoint m_point;
+		std::shared_ptr<RulerPoint> m_point;
 		int m_pindex;//index of point in ruler
 
 		//stroke for the magnet tool

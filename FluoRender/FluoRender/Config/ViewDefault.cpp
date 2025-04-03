@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <Global.h>
 #include <RenderCanvas.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 ViewDefault::ViewDefault()
 {

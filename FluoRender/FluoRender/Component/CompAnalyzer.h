@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompAnalyzer_h
 #define FL_CompAnalyzer_h
 
-#include <DataManager.h>
 #include <Progress.h>
 #include <Cell.h>
 #include <functional>
@@ -36,8 +35,14 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <set>
 
+class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
+	class RulerList;
 	struct CompGroup
 	{
 		VolumeData* vd;//associated volume
@@ -87,60 +92,17 @@ namespace flrd
 		void SetUseDistAllchan(bool val) { m_use_dist_allchan = val; }
 		bool GetUseDistAllchan() { return m_use_dist_allchan; }
 
-		void SetVolume(VolumeData* vd)
-		{
-			if (!vd)
-				return;
-			CompGroup* compgroup = FindCompGroup(vd);
-			if (!compgroup)
-				compgroup = AddCompGroup(vd);
-			m_compgroup = compgroup;
-		}
-		VolumeData* GetVolume()
-		{
-			if (m_compgroup)
-				return m_compgroup->vd;
-			return 0;
-		}
+		void SetVolume(VolumeData* vd);
+		VolumeData* GetVolume();
 
-		void SetCoVolumes(std::vector<VolumeData*> &list)
-		{
-			m_vd_list = list;
-		}
-		void AddCoVolume(VolumeData* vd)
-		{
-			m_vd_list.push_back(vd);
-		}
-		void ClearCoVolumes()
-		{
-			m_vd_list.clear();
-		}
-		CelpList* GetCelpList()
-		{
-			if (m_compgroup)
-				return &(m_compgroup->celps);
-			return 0;
-		}
-		CellGraph* GetCellGraph()
-		{
-			if (m_compgroup)
-				return &(m_compgroup->graph);
-			return 0;
-		}
-		int GetCompGroupSize()
-		{
-			return static_cast<int>(m_comp_groups.size());
-		}
-		CompGroup* GetCompGroup(int i)
-		{
-			if (i >= 0 && i < m_comp_groups.size())
-				return &(m_comp_groups[i]);
-			return 0;
-		}
-		int GetBrickNum()
-		{
-			return m_bn;
-		}
+		void SetCoVolumes(std::vector<VolumeData*>& list);
+		void AddCoVolume(VolumeData* vd);
+		void ClearCoVolumes();
+		CelpList* GetCelpList();
+		CellGraph* GetCellGraph();
+		int GetCompGroupSize();
+		CompGroup* GetCompGroup(int i);
+		int GetBrickNum();
 		//count
 		void SetUseMin(bool val) { m_use_min = val; }
 		void SetUseMax(bool val) { m_use_max = val; }
@@ -182,7 +144,7 @@ namespace flrd
 		size_t GetDistMatSize();
 
 		//align
-		RulerList GetRulerListFromCelp();
+		bool GetRulerListFromCelp(RulerList& list);
 
 		//list
 		void SetSelectedIds(const std::vector<unsigned int>& ids,
@@ -255,24 +217,8 @@ namespace flrd
 			unsigned int* data);
 
 		//comp groups
-		CompGroup* FindCompGroup(VolumeData* vd)
-		{
-			for (size_t i = 0; i < m_comp_groups.size(); ++i)
-			{
-				if (m_comp_groups[i].vd == vd)
-					return &(m_comp_groups[i]);
-			}
-			return 0;
-		}
-		CompGroup* AddCompGroup(VolumeData* vd)
-		{
-			if (!vd)
-				return 0;
-			m_comp_groups.push_back(CompGroup());
-			CompGroup *compgroup = &(m_comp_groups.back());
-			compgroup->vd = vd;
-			return compgroup;
-		}
+		CompGroup* FindCompGroup(VolumeData* vd);
+		CompGroup* AddCompGroup(VolumeData* vd);
 
 		//get list
 		void FindCelps(CelpList& list,

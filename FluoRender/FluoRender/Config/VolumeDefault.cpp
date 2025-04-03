@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <Color.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 VolumeDataDefault::VolumeDataDefault()
 {

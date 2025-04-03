@@ -32,7 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <TextureBrick.h>
 #include <Texture.h>
+#include <VolKernel.h>
 #include <EntryHist.h>
+#include <DataManager.h>
 
 using namespace flrd;
 

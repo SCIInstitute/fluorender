@@ -37,6 +37,7 @@ namespace fluo
 	{
 	public:
 		AsyncTimerFactory();
+		~AsyncTimerFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
@@ -92,8 +93,6 @@ namespace fluo
 			}
 		}
 
-	protected:
-		virtual ~AsyncTimerFactory();
 	};
 }
 

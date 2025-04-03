@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <Global.h>
 #include <MovieMaker.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 MovieDefault::MovieDefault()
 {

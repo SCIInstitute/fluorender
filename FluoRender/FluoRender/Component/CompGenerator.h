@@ -28,14 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompGenerator_h
 #define FL_CompGenerator_h
 
-#include <DataManager.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
 #include <Progress.h>
 #include <vector>
 #include <functional>
 #include <chrono>
 
+class VolumeData;
 namespace flrd
 {
 	typedef std::vector<std::string> CompCmdParams;
@@ -48,10 +46,7 @@ namespace flrd
 		ComponentGenerator();
 		~ComponentGenerator();
 
-		void SetVolumeData(VolumeData* vd)
-		{
-			m_vd = vd;
-		}
+		void SetVolumeData(VolumeData* vd);
 
 		void SetUseSel(bool val) { m_use_sel = val; }
 		bool GetUseSel() { return m_use_sel; }

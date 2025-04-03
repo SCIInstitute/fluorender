@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CombineList.h>
 #include <Global.h>
 #include <DataManager.h>
+#include <VolumeDefault.h>
 
 using namespace flrd;
 

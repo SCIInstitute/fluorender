@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <ColocalDefault.h>
 #include <Names.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 ColocalDefault::ColocalDefault()
 {

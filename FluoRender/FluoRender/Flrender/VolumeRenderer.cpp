@@ -26,10 +26,19 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <Global.h>
 #include <VolumeRenderer.h>
+#include <Global.h>
+#include <MainSettings.h>
+#include <Plane.h>
+#include <Texture.h>
+#include <Framebuffer.h>
+#include <VolShader.h>
+#include <ImgShader.h>
+#include <SegShader.h>
 #include <ShaderProgram.h>
 #include <TextureBrick.h>
+#include <VolKernel.h>
+#include <VolCalShader.h>
 #include <KernelProgram.h>
 #include <compatibility.h>
 #include <fstream>

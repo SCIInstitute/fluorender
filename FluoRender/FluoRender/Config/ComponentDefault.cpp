@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <Clusterizer.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
 
 ComponentDefault::ComponentDefault()
 {

@@ -25,8 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <KernelProgram.h>
 #include <Relax.h>
 #include <Global.h>
+#include <Ruler.h>
+#include <VolKernel.h>
+#include <DataManager.h>
 
 using namespace flrd;
 
@@ -104,6 +108,24 @@ Relax::Relax() :
 
 Relax::~Relax()
 {
+}
+
+void Relax::SetVolume(VolumeData* vd)
+{
+	m_vd = vd;
+}
+
+void Relax::SetRuler(Ruler* ruler)
+{
+	if (ruler != m_ruler)
+	{
+		m_ruler = ruler;
+	}
+}
+
+Ruler* Relax::GetRuler()
+{
+	return m_ruler;
 }
 
 void Relax::BuildSpring()

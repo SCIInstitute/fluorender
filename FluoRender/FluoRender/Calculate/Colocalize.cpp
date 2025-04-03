@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Colocalize.h>
 #include <Global.h>
 #include <RenderCanvas.h>
+#include <ColocalDefault.h>
+#include <Compare.h>
 #include <string>
 
 using namespace flrd;

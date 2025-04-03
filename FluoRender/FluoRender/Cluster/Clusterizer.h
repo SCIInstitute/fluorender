@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CLUSTERIZER_H_
 #define _CLUSTERIZER_H_
 
-#include <ClusterMethod.h>
 #include <Progress.h>
+#include <Cell.h>
 
 namespace flrd
 {

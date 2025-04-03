@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RulerHandler.h>
+#include <Ruler.h>
 #include <RenderCanvas.h>
 #include <Global.h>
 #include <Texture.h>
@@ -37,6 +38,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRoi.h>
 #include <VolumePoint.h>
 #include <DistCalculator.h>
+#include <MainSettings.h>
+#include <CompAnalyzer.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <nrrd.h>
 #include <Debug.h>

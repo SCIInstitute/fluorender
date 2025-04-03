@@ -27,14 +27,56 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Global.h>
+#include <Names.h>
+#include <TreeFileFactory.h>
+#include <VolCache.h>
+#include <QVideoEncoder.h>
+#include <Reshape.h>
+#include <EntryParams.h>
+#include <TableHistParams.h>
+#include <PyDlc.h>
+#include <Undoable.h>
+#include <MainSettings.h>
+#include <States.h>
+//processors
+#include <CompGenerator.h>
+#include <CompAnalyzer.h>
+#include <CompSelector.h>
+#include <CompEditor.h>
+#include <VolumeSelector.h>
+#include <VolumeCalculator.h>
+#include <KernelExecutor.h>
+#include <ScriptProc.h>
+#include <RulerAlign.h>
+#include <TrackMap.h>
+#include <RulerHandler.h>
+#include <RulerRenderer.h>
+#include <VolumePoint.h>
+#include <SegGrow.h>
+#include <DistCalculator.h>
+#include <Interpolator.h>
+#include <MovieMaker.h>
+#include <DataManager.h>
+#include <Colocalize.h>
+#include <Clusterizer.h>
+#include <VolumeMeshConv.h>
+#include <LookingGlassRenderer.h>
+#include <HololensRenderer.h>
 #include <OpenXrRenderer.h>
 #include <OpenVrRenderer.h>
-#include <HololensRenderer.h>
 #include <AsyncTimerFactory.hpp>
 #include <StopWatchFactory.hpp>
-#include <SearchVisitor.hpp>
-#include <Reshape.h>
-#include <memory>
+#include <JVMInitializer.h>
+#include <VolKernel.h>
+#include <Framebuffer.h>
+#include <VertexArray.h>
+#include <VolShader.h>
+#include <SegShader.h>
+#include <VolCalShader.h>
+#include <ImgShader.h>
+#include <LightFieldShader.h>
+#include <TextRenderer.h>
+#include <Project.h>
 
 using namespace fluo;
 
@@ -214,24 +256,136 @@ std::string IniFile::path_sep_s_ = "";
 Global Global::instance_;
 
 Global::Global() :
-	comp_gen_table_enable_(false)
+	tree_file_factory_(std::make_unique<TreeFileFactory>()),
+	cache_queue_(std::make_unique<flrd::CacheQueue>()),
+	encoder_(std::make_unique<QVideoEncoder>()),
+	main_settings_(std::make_unique<MainSettings>()),
+	states_(std::make_unique<States>()),
+	//processors
+	m_comp_generator(std::make_unique<flrd::ComponentGenerator>()),
+	m_comp_analyzer(std::make_unique<flrd::ComponentAnalyzer>()),
+	m_comp_selector(std::make_unique<flrd::ComponentSelector>()),
+	m_comp_editor(std::make_unique<flrd::ComponentEditor>()),
+	m_vol_selector(std::make_unique<flrd::VolumeSelector>()),
+	m_vol_calculator(std::make_unique<flrd::VolumeCalculator>()),
+	m_kernel_executor(std::make_unique<KernelExecutor>()),
+	m_script_proc(std::make_unique<flrd::ScriptProc>()),
+	m_aligner(std::make_unique<flrd::RulerAlign>()),
+	m_trackmap_proc(std::make_unique<flrd::TrackMapProcessor>()),
+	m_ruler_handler(std::make_unique<flrd::RulerHandler>()),
+	m_ruler_renderer(std::make_unique<flrd::RulerRenderer>()),
+	m_volume_point(std::make_unique<flrd::VolumePoint>()),
+	m_seg_grow(std::make_unique<flrd::SegGrow>()),
+	m_dist_calculator(std::make_unique<flrd::DistCalculator>()),
+	m_interpolator(std::make_unique<Interpolator>()),
+	m_movie_maker(std::make_unique<MovieMaker>()),
+	m_data_manager(std::make_unique<DataManager>()),
+	m_colocalizer(std::make_unique<flrd::Colocalize>()),
+	m_clusterizer(std::make_unique<flrd::Clusterizer>()),
+	m_vol_converter(std::make_unique<flrd::VolumeMeshConv>()),
+	m_lg_renderer(std::make_unique<LookingGlassRenderer>()),
+	m_atmf(std::make_unique<fluo::AsyncTimerFactory>()),
+	m_swhf(std::make_unique<fluo::StopWatchFactory>()),
+	vol_kernel_factory_(std::make_unique<flvr::VolKernelFactory>()),
+	framebuffer_manager_(std::make_unique<flvr::FramebufferManager>()),
+	vertex_array_manager_(std::make_unique<flvr::VertexArrayManager>()),
+	vol_shader_factory_(std::make_unique<flvr::VolShaderFactory>()),
+	seg_shader_factory_(std::make_unique<flvr::SegShaderFactory>()),
+	cal_shader_factory_(std::make_unique<flvr::VolCalShaderFactory>()),
+	img_shader_factory_(std::make_unique<flvr::ImgShaderFactory>()),
+	light_field_shader_factory_(std::make_unique<flvr::LightFieldShaderFactory>()),
+	text_texture_manager_(std::make_unique<flvr::TextTextureManager>()),
+	current_objects_(std::make_unique<CurrentObjects>()),
+	project_(std::make_unique<Project>())
 {
-	//comp gen
-	comp_gen_entry_.setParams(flrd::Reshape::get_params("comp_gen"));
-	comp_gen_table_.setParams(flrd::Reshape::get_params("comp_gen"));
-	//vol prop
-	vol_prop_table_.setParams(flrd::Reshape::get_params("vol_prop"));
+	Init();
+}
 
-	origin_ = ref_ptr<Group>(new Group());
-	origin_->setName(gstOrigin);
+Global::~Global() = default;
+
+void Global::Init()
+{
+	InitDatabase();
 	BuildFactories();
-
 	help_url_ = "https://github.com/SCIInstitute/fluorender";
-
 	InitLocale();
 }
 
+void Global::InitDatabase()
+{
+	//comp gen
+	comp_gen_table_enable_ = false;
+	comp_gen_entry_ = std::make_unique<flrd::EntryParams>();
+	comp_gen_table_ = std::make_unique<flrd::TableHistParams>();
+	comp_gen_entry_->setParams(flrd::Reshape::get_params("comp_gen"));
+	comp_gen_table_->setParams(flrd::Reshape::get_params("comp_gen"));
+	//vol prop
+	vol_prop_table_enable_ = false;
+	vol_prop_table_ = std::make_unique<flrd::TableHistParams>();
+	vol_prop_table_->setParams(flrd::Reshape::get_params("vol_prop"));
+}
+
+void Global::BuildFactories()
+{
+	m_atmf->createDefault();
+	m_swhf->createDefault();
+}
+
+//locale
+void Global::InitLocale()
+{
+	std::setlocale(LC_ALL, "en_US.UTF-8");
+}
+
+TreeFileFactory& Global::get_tree_file_factory()
+{
+	return *tree_file_factory_;
+}
+
+flrd::CacheQueue& Global::get_cache_queue()
+{
+	return *cache_queue_;
+}
+
+QVideoEncoder& Global::get_video_encoder()
+{
+	return *encoder_;
+}
+
+flrd::EntryParams& Global::get_cg_entry()
+{
+	return *comp_gen_entry_;
+}
+
+flrd::TableHistParams& Global::get_cg_table()
+{
+	return *comp_gen_table_;
+}
+
+flrd::TableHistParams& Global::get_vp_table()
+{
+	return *vol_prop_table_;
+}
+
 //python
+template <class T>
+T* Global::get_add_python(const std::string& name)
+{
+	auto it = python_list_.find(name);
+	if (it == python_list_.end())
+	{
+		T* py = new T;
+		size_t n = python_list_.size();
+		python_list_.insert(std::pair<std::string, flrd::PyBase*>(name, py));
+		if (python_list_.size() > n)
+			return py;
+		else
+			return nullptr;
+	}
+	else
+		return dynamic_cast<T*>(it->second);
+}
+
 flrd::PyBase* Global::get_add_pybase(const std::string& name)
 {
 	auto it = python_list_.find(name);
@@ -270,6 +424,19 @@ void Global::clear_python()
 	flrd::PyBase::Free();
 }
 
+//undo
+void Global::add_undo_control(Undoable* control)
+{
+	undo_ctrls_.push_back(control);
+}
+
+void Global::del_undo_control(Undoable* control)
+{
+	auto it = std::find(undo_ctrls_.begin(), undo_ctrls_.end(), control);
+	if (it != undo_ctrls_.end())
+		undo_ctrls_.erase(it);
+}
+
 void Global::undo()
 {
 	//find lastest slider
@@ -288,7 +455,7 @@ void Global::undo()
 	if (!c)
 		return;
 
-	double time_span = main_settings_.m_time_span;
+	double time_span = main_settings_->m_time_span;
 	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeUndo();
@@ -315,7 +482,7 @@ void Global::redo()
 	if (!c)
 		return;
 
-	double time_span = main_settings_.m_time_span;
+	double time_span = main_settings_->m_time_span;
 	for (auto i : undo_ctrls_)
 	{
 		double time = i->GetTimeRedo();
@@ -324,115 +491,175 @@ void Global::redo()
 	}
 }
 
-void Global::apply_processor_settings()
-{
-	m_ruler_handler.SetBgParams(
-		glbin_settings.m_bg_type,
-		glbin_settings.m_kx,
-		glbin_settings.m_ky,
-		glbin_settings.m_varth,
-		glbin_settings.m_gauth);
-	glbin_script_proc.SetBreak(glbin_settings.m_script_break);
-	//glbin_brush_def.Apply(&m_vol_selector);
-	glbin_seg_grow.SetRulerHandler(&m_ruler_handler);
-}
-
+//settings
 MainSettings& Global::get_settings()
 {
-	return main_settings_;
+	return *main_settings_;
 }
 
 BrushDefault& Global::get_brush_def()
 {
-	return main_settings_.m_brush_def;
+	return main_settings_->m_brush_def;
 }
 
 ComponentDefault& Global::get_comp_def()
 {
-	return main_settings_.m_comp_def;
+	return main_settings_->m_comp_def;
 }
 
 OutAdjDefault& Global::get_outadj_def()
 {
-	return main_settings_.m_outadj_def;
+	return main_settings_->m_outadj_def;
 }
 
 ViewDefault& Global::get_view_def()
 {
-	return main_settings_.m_view_def;
+	return main_settings_->m_view_def;
 }
 
 VolumeDataDefault& Global::get_vol_def()
 {
-	return main_settings_.m_vol_def;
+	return main_settings_->m_vol_def;
 }
 
 MovieDefault& Global::get_movie_def()
 {
-	return main_settings_.m_movie_def;
+	return main_settings_->m_movie_def;
 }
 
 ColocalDefault& Global::get_colocal_def()
 {
-	return main_settings_.m_colocal_def;
+	return main_settings_->m_colocal_def;
 }
 
 //states
 States& Global::get_states()
 {
-	return states_;
+	return *states_;
 }
 
-AsyncTimer* Global::getAsyncTimer(const std::string& name)
+//processors
+void Global::apply_processor_settings()
 {
-	return glbin_atmf->findFirst(name);
+	m_ruler_handler->SetBgParams(
+		glbin_settings.m_bg_type,
+		glbin_settings.m_kx,
+		glbin_settings.m_ky,
+		glbin_settings.m_varth,
+		glbin_settings.m_gauth);
+	m_script_proc->SetBreak(glbin_settings.m_script_break);
+	//glbin_brush_def.Apply(&m_vol_selector);
+	m_seg_grow->SetRulerHandler(m_ruler_handler.get());
 }
 
-StopWatch* Global::getStopWatch(const std::string& name)
+flrd::ComponentGenerator& Global::get_comp_generator()
 {
-	return glbin_swhf->findFirst(name);
+	return *m_comp_generator;
 }
 
-Object* Global::get(const std::string& name, Group* start)
+flrd::ComponentAnalyzer& Global::get_comp_analyzer()
 {
-	SearchVisitor visitor;
-	visitor.matchName(name);
-	if (start)
-		start->accept(visitor);
-	else
-		origin_->accept(visitor);
-	ObjectList* list = visitor.getResult();
-	if (list->empty())
-		return 0;
-	else
-		return (*list)[0];
+	return *m_comp_analyzer;
 }
 
-AsyncTimerFactory* Global::getAsyncTimerFactory()
+flrd::ComponentSelector& Global::get_comp_selector()
 {
-	Object* obj = get(gstAsyncTimerFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<AsyncTimerFactory*>(obj);
+	return *m_comp_selector;
 }
 
-StopWatchFactory* Global::getStopWatchFactory()
+flrd::ComponentEditor& Global::get_comp_editor()
 {
-	Object* obj = get(gstStopWatchFactory);
-	if (!obj)
-		return 0;
-	return dynamic_cast<StopWatchFactory*>(obj);
+	return *m_comp_editor;
 }
 
-void Global::BuildFactories()
+flrd::VolumeSelector& Global::get_vol_selector()
 {
-	AsyncTimerFactory* f1 = new AsyncTimerFactory();
-	f1->createDefault();
-	origin_->addChild(f1);
-	StopWatchFactory* f2 = new StopWatchFactory();
-	f2->createDefault();
-	origin_->addChild(f2);
+	return *m_vol_selector;
+}
 
+flrd::VolumeCalculator& Global::get_vol_calculator()
+{
+	return *m_vol_calculator;
+}
+
+KernelExecutor& Global::get_kernel_executor()
+{
+	return *m_kernel_executor;
+}
+
+flrd::ScriptProc& Global::get_script_proc()
+{
+	return *m_script_proc;
+}
+
+flrd::RulerAlign& Global::get_aligner()
+{
+	return *m_aligner;
+}
+
+flrd::TrackMapProcessor& Global::get_trackmap_proc()
+{
+	return *m_trackmap_proc;
+}
+
+flrd::RulerHandler& Global::get_ruler_handler()
+{
+	return *m_ruler_handler;
+}
+
+flrd::RulerRenderer& Global::get_ruler_renderer()
+{
+	return *m_ruler_renderer;
+}
+
+flrd::VolumePoint& Global::get_volume_point()
+{
+	return *m_volume_point;
+}
+
+flrd::SegGrow& Global::get_seg_grow()
+{
+	return *m_seg_grow;
+}
+
+flrd::DistCalculator& Global::get_dist_calculator()
+{
+	return *m_dist_calculator;
+}
+
+Interpolator& Global::get_interpolator()
+{
+	return *m_interpolator;
+}
+
+MovieMaker& Global::get_movie_maker()
+{
+	return *m_movie_maker;
+}
+
+DataManager& Global::get_data_manager()
+{
+	return *m_data_manager;
+}
+
+flrd::Colocalize& Global::get_colocalizer()
+{
+	return *m_colocalizer;
+}
+
+flrd::Clusterizer& Global::get_clusterizer()
+{
+	return *m_clusterizer;
+}
+
+flrd::VolumeMeshConv& Global::get_vol_converter()
+{
+	return *m_vol_converter;
+}
+
+LookingGlassRenderer& Global::get_looking_glass_renderer()
+{
+	return *m_lg_renderer;
 }
 
 BaseXrRenderer* Global::get_xr_renderer()
@@ -465,6 +692,26 @@ BaseXrRenderer* Global::get_xr_renderer()
 	return 0;
 }
 
+AsyncTimer* Global::getAsyncTimer(const std::string& name)
+{
+	return m_atmf->findFirst(name);
+}
+
+StopWatch* Global::getStopWatch(const std::string& name)
+{
+	return m_swhf->findFirst(name);
+}
+
+AsyncTimerFactory& Global::getAsyncTimerFactory()
+{
+	return *m_atmf;
+}
+
+StopWatchFactory& Global::getStopWatchFactory()
+{
+	return *m_swhf;
+}
+
 //jvm
 JVMInitializer* Global::get_jvm_instance()
 {
@@ -475,8 +722,60 @@ JVMInitializer* Global::get_jvm_instance()
 	return m_pJVMInstance.get();
 }
 
-//locale
-void Global::InitLocale()
+//graphics resources
+flvr::VolKernelFactory& Global::get_vol_kernel_factory()
 {
-	std::setlocale(LC_ALL, "en_US.UTF-8");
+	return *vol_kernel_factory_;
+}
+
+flvr::FramebufferManager& Global::get_framebuffer_manager()
+{
+	return *framebuffer_manager_;
+}
+
+flvr::VertexArrayManager& Global::get_vertex_array_manager()
+{
+	return *vertex_array_manager_;
+}
+
+flvr::VolShaderFactory& Global::get_vol_shader_factory()
+{
+	return *vol_shader_factory_;
+}
+
+flvr::SegShaderFactory& Global::get_seg_shader_factory()
+{
+	return *seg_shader_factory_;
+}
+
+flvr::VolCalShaderFactory& Global::get_vol_cal_shader_factory()
+{
+	return *cal_shader_factory_;
+}
+
+flvr::ImgShaderFactory& Global::get_img_shader_factory()
+{
+	return *img_shader_factory_;
+}
+
+flvr::LightFieldShaderFactory& Global::get_light_field_shader_factory()
+{
+	return *light_field_shader_factory_;
+}
+
+flvr::TextTextureManager& Global::get_text_tex_manager()
+{
+	return *text_texture_manager_;
+}
+
+//current selection
+CurrentObjects& Global::get_current_objects()
+{
+	return *current_objects_;
+}
+
+//project
+Project& Global::get_project()
+{
+	return *project_;
 }

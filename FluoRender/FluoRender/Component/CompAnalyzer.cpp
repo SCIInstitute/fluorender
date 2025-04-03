@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <Global.h>
 #include <RenderCanvas.h>
+#include <DataManager.h>
+#include <VolumeDefault.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -50,6 +52,69 @@ ComponentAnalyzer::ComponentAnalyzer()
 
 ComponentAnalyzer::~ComponentAnalyzer()
 {
+}
+
+void ComponentAnalyzer::SetVolume(VolumeData* vd)
+{
+	if (!vd)
+		return;
+	CompGroup* compgroup = FindCompGroup(vd);
+	if (!compgroup)
+		compgroup = AddCompGroup(vd);
+	m_compgroup = compgroup;
+}
+
+VolumeData* ComponentAnalyzer::GetVolume()
+{
+	if (m_compgroup)
+		return m_compgroup->vd;
+	return 0;
+}
+
+void ComponentAnalyzer::SetCoVolumes(std::vector<VolumeData*> &list)
+{
+	m_vd_list = list;
+}
+
+void ComponentAnalyzer::AddCoVolume(VolumeData* vd)
+{
+	m_vd_list.push_back(vd);
+}
+
+void ComponentAnalyzer::ClearCoVolumes()
+{
+	m_vd_list.clear();
+}
+
+CelpList* ComponentAnalyzer::GetCelpList()
+{
+	if (m_compgroup)
+		return &(m_compgroup->celps);
+	return 0;
+}
+
+CellGraph* ComponentAnalyzer::GetCellGraph()
+{
+	if (m_compgroup)
+		return &(m_compgroup->graph);
+	return 0;
+}
+
+int ComponentAnalyzer::GetCompGroupSize()
+{
+	return static_cast<int>(m_comp_groups.size());
+}
+
+CompGroup* ComponentAnalyzer::GetCompGroup(int i)
+{
+	if (i >= 0 && i < m_comp_groups.size())
+		return &(m_comp_groups[i]);
+	return 0;
+}
+
+int ComponentAnalyzer::GetBrickNum()
+{
+	return m_bn;
 }
 
 int ComponentAnalyzer::GetColocalization(
@@ -1759,16 +1824,14 @@ size_t ComponentAnalyzer::GetDistMatSize()
 	}
 }
 
-RulerList ComponentAnalyzer::GetRulerListFromCelp()
+bool ComponentAnalyzer::GetRulerListFromCelp(RulerList& rulerlist)
 {
-	RulerList rulerlist;
-
 	if (!m_compgroup)
-		return rulerlist;
+		return false;
 
 	CelpList* list = &(m_compgroup->celps);
 	if (!list || list->size() < 3)
-		return rulerlist;
+		return false;
 
 	double sx = list->sx;
 	double sy = list->sy;
@@ -1786,7 +1849,7 @@ RulerList ComponentAnalyzer::GetRulerListFromCelp()
 
 	rulerlist.push_back(&ruler);
 
-	return rulerlist;
+	return true;
 }
 
 void ComponentAnalyzer::SetSelectedIds(const std::vector<unsigned int>& ids,
@@ -2031,6 +2094,26 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 	} while (id != iid);
 
 	return result;
+}
+
+CompGroup* ComponentAnalyzer::FindCompGroup(VolumeData* vd)
+{
+	for (size_t i = 0; i < m_comp_groups.size(); ++i)
+	{
+		if (m_comp_groups[i].vd == vd)
+			return &(m_comp_groups[i]);
+	}
+	return 0;
+}
+
+CompGroup* ComponentAnalyzer::AddCompGroup(VolumeData* vd)
+{
+	if (!vd)
+		return 0;
+	m_comp_groups.push_back(CompGroup());
+	CompGroup *compgroup = &(m_comp_groups.back());
+	compgroup->vd = vd;
+	return compgroup;
 }
 
 void ComponentAnalyzer::FindCelps(CelpList& list,

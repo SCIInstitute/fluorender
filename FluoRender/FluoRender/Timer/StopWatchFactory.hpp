@@ -37,6 +37,7 @@ namespace fluo
 	{
 	public:
 		StopWatchFactory();
+		~StopWatchFactory();
 
 		virtual bool isSameKindAs(const Object* obj) const
 		{
@@ -82,9 +83,6 @@ namespace fluo
 		{
 			return dynamic_cast<StopWatch*>(ObjectFactory::findLast(name));
 		}
-
-	protected:
-		virtual ~StopWatchFactory();
 	};
 }
 

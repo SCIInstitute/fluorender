@@ -29,16 +29,23 @@
 #ifndef VolumeRenderer_h
 #define VolumeRenderer_h
 
-#include <Color.h>
-#include <Plane.h>
-#include <Texture.h>
 #include <TextureRenderer.h>
-#include <ImgShader.h>
-#include <LightFieldShader.h>
+#include <Color.h>
 
+#ifndef __glew_h__
+typedef int GLint;
+typedef unsigned int GLuint;
+typedef float GLfloat;
+#endif
+
+namespace fluo
+{
+	class Plane;
+}
 namespace flvr
 {
 	class MultiVolumeRenderer;
+	class Texture;
 
 	class VolumeRenderer : public TextureRenderer
 	{
