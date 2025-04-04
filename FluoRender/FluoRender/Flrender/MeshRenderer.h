@@ -29,17 +29,15 @@
 #ifndef MeshRenderer_h
 #define MeshRenderer_h
 
-#include <ShaderProgram.h>
-#include <MshShader.h>
-#include <glm.h>
 #include <Plane.h>
 #include <vector>
 #include <cstring>
 #include <glm/glm.hpp>
 
+typedef struct _GLMmodel GLMmodel;
+
 namespace flvr
 {
-	class MshShaderFactory;
 	class VertexArray;
 
 	class MeshRenderer
@@ -118,8 +116,6 @@ namespace flvr
 		VertexArray* va_model_;
 		//bool update
 		bool update_;
-
-		static MshShaderFactory msh_shader_factory_;
 	};
 
 } // End namespace flvr

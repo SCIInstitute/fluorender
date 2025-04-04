@@ -76,6 +76,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ImgShader.h>
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
+#include <MshShader.h>
 #include <Project.h>
 
 using namespace fluo;
@@ -295,6 +296,7 @@ Global::Global() :
 	img_shader_factory_(std::make_unique<flvr::ImgShaderFactory>()),
 	light_field_shader_factory_(std::make_unique<flvr::LightFieldShaderFactory>()),
 	text_texture_manager_(std::make_unique<flvr::TextTextureManager>()),
+	msh_shader_factory_(std::make_unique<flvr::MshShaderFactory>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
 	project_(std::make_unique<Project>())
 {
@@ -766,6 +768,11 @@ flvr::LightFieldShaderFactory& Global::get_light_field_shader_factory()
 flvr::TextTextureManager& Global::get_text_tex_manager()
 {
 	return *text_texture_manager_;
+}
+
+flvr::MshShaderFactory& Global::get_msh_shader_factory()
+{
+	return *msh_shader_factory_;
 }
 
 //current selection

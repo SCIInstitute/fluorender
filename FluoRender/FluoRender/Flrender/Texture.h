@@ -29,14 +29,25 @@
 #ifndef Texture_h
 #define Texture_h
 
-#include <vector>
+#include <nrrd.h>
+#include <BBox.h>
 #include <Transform.h>
-#include <TextureBrick.h>
-#include <Utils.h>
 #include <glm/glm.hpp>
+#include <vector>
 
+#ifndef TextureBrick_h
+#define TEXTURE_MAX_COMPONENTS	4
+#endif
+
+namespace fluo
+{
+	class Ray;
+}
 namespace flvr
 {
+	class TextureBrick;
+	struct Pyramid_Level;
+	class FileLocInfo;
 	class Texture 
 	{
 	public:
@@ -102,30 +113,13 @@ namespace flvr
 		}
 
 		//! Interface that does not expose flvr::BBox.
-		inline 
-			void get_bounds(double &xmin, double &ymin, double &zmin,
-			double &xmax, double &ymax, double &zmax) const 
-		{
-			fluo::BBox b;
-			get_bounds(b);
-			xmin = b.Min().x();
-			ymin = b.Min().y();
-			zmin = b.Min().z();
+		inline void get_bounds(double& xmin, double& ymin, double& zmin,
+			double& xmax, double& ymax, double& zmax) const;
 
-			xmax = b.Max().x();
-			ymax = b.Max().y();
-			zmax = b.Max().z();
-		}
-
-		inline 
-			void get_bounds(fluo::BBox &b) const
-		{
-			b.extend(transform_.project(bbox_.Min()));
-			b.extend(transform_.project(bbox_.Max()));
-		}
+		inline void get_bounds(fluo::BBox& b) const;
 
 		inline fluo::BBox *bbox() { return &bbox_; }
-		inline void set_bbox(fluo::BBox bbox) { bbox_ = bbox; }
+		inline void set_bbox(const fluo::BBox& bbox) { bbox_ = bbox; }
 		inline fluo::Transform *transform() { return &transform_; }
 		inline void set_transform(fluo::Transform tform) { transform_ = tform; }
 
@@ -164,56 +158,8 @@ namespace flvr
 		{vmin_ = vmin; vmax_ = vmax; gmin_ = gmin; gmax_ = gmax;}
 
 		void set_spacings(double x, double y, double z);
-		void get_spacings(double &x, double &y, double &z, int lv = -1)
-		{
-			if (!brkxml_)
-			{
-				x = spcx_;
-				y = spcy_;
-				z = spcz_;
-			}
-			else if (lv < 0 || lv >= pyramid_lv_num_ || pyramid_.empty())
-			{
-				x = spcx_ * s_spcx_;
-				y = spcy_ * s_spcy_;
-				z = spcz_ * s_spcz_;
-			}
-			else if (pyramid_[lv].data)
-			{
-				int offset = 0;
-				if (pyramid_[lv].data->dim > 3) offset = 1;
-				x = pyramid_[lv].data->axis[offset + 0].spacing * s_spcx_;
-				y = pyramid_[lv].data->axis[offset + 1].spacing * s_spcy_;
-				z = pyramid_[lv].data->axis[offset + 2].spacing * s_spcz_;
-			}
-		}
-		void set_base_spacings(double x, double y, double z)
-		{
-			spcx_ = x;
-			spcy_ = y;
-			spcz_ = z;
-			b_spcx_ = x;
-			b_spcy_ = y;
-			b_spcz_ = z;
-			fluo::Transform tform;
-			tform.load_identity();
-			size_t nx, ny, nz;
-			if (brkxml_)
-			{
-				nx = pyramid_[0].data->axis[0].size;
-				ny = pyramid_[0].data->axis[1].size;
-				nz = pyramid_[0].data->axis[2].size;
-			}
-			else
-			{
-				nx = nx_;
-				ny = ny_;
-				nz = nz_;
-			}
-			fluo::Point nmax(nx*x, ny*y, nz*z);
-			tform.pre_scale(fluo::Vector(nmax));
-			set_transform(tform);
-		}
+		void get_spacings(double& x, double& y, double& z, int lv = -1);
+		void set_base_spacings(double x, double y, double z);
 
 		void get_base_spacings(double &x, double &y, double &z)
 		{
@@ -237,8 +183,7 @@ namespace flvr
 
 		// Creator of the brick owns the nrrd memory.
 		void set_nrrd(Nrrd* data, int index);
-		Nrrd* get_nrrd(int index)
-		{if (index>=0&&index<TEXTURE_MAX_COMPONENTS) return data_[index]; else return 0;}
+		Nrrd* get_nrrd(int index);
 		int get_max_tex_comp()
 		{return TEXTURE_MAX_COMPONENTS;}
 		bool trim_mask_undos_head();
@@ -258,29 +203,13 @@ namespace flvr
 		bool add_empty_label();
 
 		//enable mask paint for all
-		void deact_all_mask()
-		{
-			for (size_t i = 0; i < bricks_->size(); ++i)
-				(*bricks_)[i]->deact_mask();
-		}
+		void deact_all_mask();
 		//activate all masks
-		void act_all_mask()
-		{
-			for (size_t i = 0; i < bricks_->size(); ++i)
-				(*bricks_)[i]->act_mask();
-		}
+		void act_all_mask();
 		//invalidate all masks
-		void invalid_all_mask()
-		{
-			for (size_t i = 0; i < bricks_->size(); ++i)
-				(*bricks_)[i]->invalid_mask();
-		}
+		void invalid_all_mask();
 		//validate all masks
-		void valid_all_mask()
-		{
-			for (size_t i = 0; i < bricks_->size(); ++i)
-				(*bricks_)[i]->valid_mask();
-		}
+		void valid_all_mask();
 
 		//get priority brick number
 		inline void set_use_priority(bool value) {use_priority_ = value;}
@@ -493,15 +422,6 @@ namespace flvr
 		return static_cast<unsigned int>(z * bnx_ * bny_ + y * bnx_ + x);
 	}
 
-	inline TextureBrick* Texture::get_brick(unsigned int bid)
-	{
-		for (size_t i=0; i<(*bricks_).size(); ++i)
-		{
-			if ((*bricks_)[i]->get_id() == bid)
-				return (*bricks_)[i];
-		}
-		return 0;
-	}
 
 } // namespace flvr
 

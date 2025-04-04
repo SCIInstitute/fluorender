@@ -27,15 +27,19 @@
 //  
 
 #include <GL/glew.h>
-#include <Global.h>
-#include <TextureBrick.h>
 #include <TextureRenderer.h>
+#include <TextureBrick.h>
+#include <Texture.h>
 #include <ShaderProgram.h>
+#include <VertexArray.h>
 #include <Color.h>
 #include <Utils.h>
+#include <Global.h>
+#include <MainSettings.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include <compatibility.h>
+#include <thread>
 
 namespace flvr
 {
@@ -485,7 +489,7 @@ namespace flvr
 		return fluo::Ray(p, v);
 	}
 
-	double TextureRenderer::compute_rate_scale(fluo::Vector v)
+	double TextureRenderer::compute_rate_scale(const fluo::Vector& v)
 	{
 		double basen = std::min(tex_->nx(), std::min(tex_->ny(), tex_->nz()));
 		fluo::Vector n(double(tex_->nx() / basen),

@@ -26,9 +26,14 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
+#include <GL/glew.h>
 #include <MeshRenderer.h>
-#include <Global.h>
 #include <TextureRenderer.h>
+#include <VertexArray.h>
+#include <MshShader.h>
+#include <ShaderProgram.h>
+#include <Global.h>
+#include <glm.h>
 #include <iostream>
 #include <vector>
 #include <glm/gtc/type_ptr.hpp>
@@ -36,8 +41,6 @@
 
 namespace flvr
 {
-	MshShaderFactory MeshRenderer::msh_shader_factory_;
-
 	MeshRenderer::MeshRenderer(GLMmodel* data)
 		: data_(data),
 		depth_peel_(0),
@@ -183,7 +186,7 @@ namespace flvr
 			}
 
 			//set up shader
-			shader = msh_shader_factory_.shader(0,
+			shader = glbin_msh_shader_factory.shader(0,
 				depth_peel_, tex, fog_, light_);
 			if (shader)
 			{
@@ -271,7 +274,7 @@ namespace flvr
 		
 		//set up shader
 		ShaderProgram* shader = 0;
-		shader = msh_shader_factory_.shader(0,
+		shader = glbin_msh_shader_factory.shader(0,
 			peel, tex, fog_, light);
 		if (shader)
 		{
@@ -332,7 +335,7 @@ namespace flvr
 
 		//set up shader
 		ShaderProgram* shader = 0;
-		shader = msh_shader_factory_.shader(1,
+		shader = glbin_msh_shader_factory.shader(1,
 			0, false, false, false);
 		if (shader)
 		{

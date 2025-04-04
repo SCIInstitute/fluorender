@@ -96,6 +96,7 @@ namespace flvr
 	class ImgShaderFactory;
 	class LightFieldShaderFactory;
 	class TextTextureManager;
+	class MshShaderFactory;
 }
 
 #define glbin fluo::Global::instance()
@@ -152,6 +153,7 @@ namespace flvr
 #define glbin_img_shader_factory fluo::Global::instance().get_img_shader_factory()
 #define glbin_light_field_shader_factory fluo::Global::instance().get_light_field_shader_factory()
 #define glbin_text_tex_manager fluo::Global::instance().get_text_tex_manager()
+#define glbin_msh_shader_factory fluo::Global::instance().get_msh_shader_factory()
 
 //time
 #define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
@@ -269,6 +271,7 @@ namespace fluo
 		flvr::ImgShaderFactory& get_img_shader_factory();
 		flvr::LightFieldShaderFactory& get_light_field_shader_factory();
 		flvr::TextTextureManager& get_text_tex_manager();
+		flvr::MshShaderFactory& get_msh_shader_factory();
 
 		//current selection
 		CurrentObjects& get_current_objects();
@@ -364,6 +367,8 @@ namespace fluo
 		std::unique_ptr<flvr::LightFieldShaderFactory> light_field_shader_factory_;
 		//text texture
 		std::unique_ptr<flvr::TextTextureManager> text_texture_manager_;
+		//mesh shader
+		std::unique_ptr<flvr::MshShaderFactory> msh_shader_factory_;
 
 		//current selection
 		std::unique_ptr<CurrentObjects> current_objects_;

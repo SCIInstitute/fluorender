@@ -29,9 +29,7 @@
 #ifndef TextureRenderer_h
 #define TextureRenderer_h
 
-#include <nrrd.h>
-#include <TextureBrick.h>
-#include <Texture.h>
+#include <Ray.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
 
@@ -50,8 +48,14 @@ typedef int GLint;
 #define GL_NEAREST 0x2600
 #endif
 
+namespace fluo
+{
+	class BBox;
+}
 namespace flvr
 {
+	class Texture;
+	class TextureBrick;
 	//a simple fixed-length fifo sequence
 	class BrickQueue
 	{
@@ -329,7 +333,7 @@ namespace flvr
 		//compute view
 		fluo::Ray compute_view();
 		fluo::Ray compute_snapview(double snap);
-		double compute_rate_scale(fluo::Vector v);
+		double compute_rate_scale(const fluo::Vector& v);
 
 		//brick distance sort
 		static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);

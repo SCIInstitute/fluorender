@@ -26,13 +26,15 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <Global.h>
-#include <compatibility.h>
-#include <Texture.h>
-#include <math.h>
+#include <GL/glew.h>
 #include <TextureBrick.h>
+#include <Texture.h>
 #include <TextureRenderer.h>
+#include <Global.h>
+#include <MainSettings.h>
 #include <Utils.h>
+#include <compatibility.h>
+#include <math.h>
 #include <utility>
 #include <iostream>
 #include <fstream>

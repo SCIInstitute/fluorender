@@ -26,10 +26,13 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <Global.h>
-#include <ShaderProgram.h>
 #include <Texture.h>
+#include <TextureBrick.h>
+#include <ShaderProgram.h>
 #include <TextureRenderer.h>
+#include <Global.h>
+#include <MainSettings.h>
+#include <Ray.h>
 #include <Utils.h>
 #include <algorithm>
 #include <inttypes.h>
@@ -347,7 +350,59 @@ namespace flvr
 		}
 	}
 
-	bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
+	void Texture::get_spacings(double &x, double &y, double &z, int lv)
+	{
+		if (!brkxml_)
+		{
+			x = spcx_;
+			y = spcy_;
+			z = spcz_;
+		}
+		else if (lv < 0 || lv >= pyramid_lv_num_ || pyramid_.empty())
+		{
+			x = spcx_ * s_spcx_;
+			y = spcy_ * s_spcy_;
+			z = spcz_ * s_spcz_;
+		}
+		else if (pyramid_[lv].data)
+		{
+			int offset = 0;
+			if (pyramid_[lv].data->dim > 3) offset = 1;
+			x = pyramid_[lv].data->axis[offset + 0].spacing * s_spcx_;
+			y = pyramid_[lv].data->axis[offset + 1].spacing * s_spcy_;
+			z = pyramid_[lv].data->axis[offset + 2].spacing * s_spcz_;
+		}
+	}
+
+	void Texture::set_base_spacings(double x, double y, double z)
+	{
+		spcx_ = x;
+		spcy_ = y;
+		spcz_ = z;
+		b_spcx_ = x;
+		b_spcy_ = y;
+		b_spcz_ = z;
+		fluo::Transform tform;
+		tform.load_identity();
+		size_t nx, ny, nz;
+		if (brkxml_)
+		{
+			nx = pyramid_[0].data->axis[0].size;
+			ny = pyramid_[0].data->axis[1].size;
+			nz = pyramid_[0].data->axis[2].size;
+		}
+		else
+		{
+			nx = nx_;
+			ny = ny_;
+			nz = nz_;
+		}
+		fluo::Point nmax(nx*x, ny*y, nz*z);
+		tform.pre_scale(fluo::Vector(nmax));
+		set_transform(tform);
+	}
+
+	inline bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
 		double vmn, double vmx,
 		double gmn, double gmx,
 		vector<flvr::TextureBrick*>* brks)
@@ -584,6 +639,27 @@ namespace flvr
 		}
 	}
 
+	//! Interface that does not expose flvr::BBox.
+	inline void Texture::get_bounds(double &xmin, double &ymin, double &zmin,
+		double &xmax, double &ymax, double &zmax) const 
+	{
+		fluo::BBox b;
+		get_bounds(b);
+		xmin = b.Min().x();
+		ymin = b.Min().y();
+		zmin = b.Min().z();
+
+		xmax = b.Max().x();
+		ymax = b.Max().y();
+		zmax = b.Max().z();
+	}
+
+	inline void Texture::get_bounds(fluo::BBox &b) const
+	{
+		b.extend(transform_.project(bbox_.Min()));
+		b.extend(transform_.project(bbox_.Max()));
+	}
+
 	//add one more texture component as the volume mask
 	bool Texture::add_empty_mask()
 	{
@@ -629,6 +705,40 @@ namespace flvr
 		}
 		else
 			return false;
+	}
+
+	void Texture::deact_all_mask()
+	{
+		for (size_t i = 0; i < bricks_->size(); ++i)
+			(*bricks_)[i]->deact_mask();
+	}
+
+	void Texture::act_all_mask()
+	{
+		for (size_t i = 0; i < bricks_->size(); ++i)
+			(*bricks_)[i]->act_mask();
+	}
+
+	void Texture::invalid_all_mask()
+	{
+		for (size_t i = 0; i < bricks_->size(); ++i)
+			(*bricks_)[i]->invalid_mask();
+	}
+
+	void Texture::valid_all_mask()
+	{
+		for (size_t i = 0; i < bricks_->size(); ++i)
+			(*bricks_)[i]->valid_mask();
+	}
+
+	inline TextureBrick* Texture::get_brick(unsigned int bid)
+	{
+		for (size_t i=0; i<(*bricks_).size(); ++i)
+		{
+			if ((*bricks_)[i]->get_id() == bid)
+				return (*bricks_)[i];
+		}
+		return 0;
 	}
 
 	bool Texture::buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL)
@@ -781,6 +891,13 @@ namespace flvr
 					set_mask(data->data);
 			}
 		}
+	}
+
+	Nrrd* Texture::get_nrrd(int index)
+	{
+		if (index>=0&&index<TEXTURE_MAX_COMPONENTS)
+			return data_[index];
+		else return 0;
 	}
 
 	//mask undo management
