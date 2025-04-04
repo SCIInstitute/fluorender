@@ -48,6 +48,7 @@ class KernelExecutor;
 class Interpolator;
 class MovieMaker;
 class DataManager;
+class VolumeLoader;
 class LookingGlassRenderer;
 class BaseXrRenderer;
 class JVMInitializer;
@@ -138,6 +139,7 @@ namespace flvr
 #define glbin_interpolator fluo::Global::instance().get_interpolator()
 #define glbin_moviemaker fluo::Global::instance().get_movie_maker()
 #define glbin_data_manager fluo::Global::instance().get_data_manager()
+#define glbin_vol_loader fluo::Global::instance().get_vol_loader()
 #define glbin_lg_renderer fluo::Global::instance().get_looking_glass_renderer()
 #define glbin_xr_renderer fluo::Global::instance().get_xr_renderer()
 #define glbin_colocalizer fluo::Global::instance().get_colocalizer()
@@ -244,6 +246,7 @@ namespace fluo
 		Interpolator& get_interpolator();
 		MovieMaker& get_movie_maker();
 		DataManager& get_data_manager();
+		VolumeLoader& get_vol_loader();
 		flrd::Colocalize& get_colocalizer();
 		flrd::Clusterizer& get_clusterizer();
 		flrd::VolumeMeshConv& get_vol_converter();
@@ -333,6 +336,7 @@ namespace fluo
 		std::unique_ptr<Interpolator> m_interpolator;
 		std::unique_ptr<MovieMaker> m_movie_maker;
 		std::unique_ptr<DataManager> m_data_manager;
+		std::unique_ptr<VolumeLoader> m_vol_loader;
 		std::unique_ptr<flrd::Colocalize> m_colocalizer;
 		std::unique_ptr<flrd::Clusterizer> m_clusterizer;
 		std::unique_ptr<flrd::VolumeMeshConv> m_vol_converter;

@@ -57,6 +57,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <MovieMaker.h>
 #include <DataManager.h>
+#include <VolumeLoader.h>
 #include <Colocalize.h>
 #include <Clusterizer.h>
 #include <VolumeMeshConv.h>
@@ -281,6 +282,7 @@ Global::Global() :
 	m_interpolator(std::make_unique<Interpolator>()),
 	m_movie_maker(std::make_unique<MovieMaker>()),
 	m_data_manager(std::make_unique<DataManager>()),
+	m_vol_loader(std::make_unique<VolumeLoader>()),
 	m_colocalizer(std::make_unique<flrd::Colocalize>()),
 	m_clusterizer(std::make_unique<flrd::Clusterizer>()),
 	m_vol_converter(std::make_unique<flrd::VolumeMeshConv>()),
@@ -642,6 +644,11 @@ MovieMaker& Global::get_movie_maker()
 DataManager& Global::get_data_manager()
 {
 	return *m_data_manager;
+}
+
+VolumeLoader& Global::get_vol_loader()
+{
+	return *m_vol_loader;
 }
 
 flrd::Colocalize& Global::get_colocalizer()

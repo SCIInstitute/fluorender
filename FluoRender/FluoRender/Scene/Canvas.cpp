@@ -27,10 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Canvas.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Canvas::Canvas() :
 	//public
-	m_size(size.x, size.y),
+	m_size(100, 100),
 	//set gl
 	m_set_gl(false),
 	//ruler
@@ -87,8 +89,8 @@ Canvas::Canvas() :
 	//scale mode
 	m_scale_mode(0),
 	//private
-	m_frame(frame),
-	m_renderview_panel(parent),
+	//m_frame(frame),
+	//m_renderview_panel(parent),
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
@@ -109,7 +111,7 @@ Canvas::Canvas() :
 	//interpolation
 	m_intp(true),
 	//previous focus
-	m_prev_focus(0),
+	//m_prev_focus(0),
 	//interactive modes
 	m_int_mode(1),
 	m_crop_type(0),
@@ -233,7 +235,7 @@ Canvas::Canvas() :
 	//comp exclude
 	m_comp_exclude(false),
 	//timer for fullscreen
-	m_fullscreen_trigger(this, ID_ftrigger),
+	//m_fullscreen_trigger(this, ID_ftrigger),
 	//nodraw count
 	m_nodraw_count(0),
 	//pin rotation center
@@ -241,13 +243,13 @@ Canvas::Canvas() :
 	m_update_rot_ctr(false),
 	m_pin_pick_thresh(0.6),
 	m_res_mode(1),
-	m_enable_touch(false),
-	m_ptr_id1(-1),
-	m_ptr_id2(-1),
-	m_full_screen(false),
+	//m_enable_touch(false),
+	//m_ptr_id1(-1),
+	//m_ptr_id2(-1),
+	//m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	m_focused_slider(0),
+	//m_focused_slider(0),
 	m_keep_enlarge(false),
 	m_enlarge(false),
 	m_enlarge_scale(1.0),
@@ -2290,6 +2292,22 @@ void Canvas::HandleCamera(bool vr)
 	}
 }
 
+//camera operations
+fluo::Vector Canvas::GetTranslations()
+{
+	return fluo::Vector(m_transx, m_transy, m_transz);
+}
+void Canvas::SetTranslations(const fluo::Vector& val)
+{
+	m_transx = val.x(); m_transy = val.y(); m_transz = val.z();
+	m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
+}
+
+fluo::Vector Canvas::GetRotations()
+{
+	return fluo::Vector(m_rotx, m_roty, m_rotz);
+}
+
 void Canvas::SetRotations(const fluo::Vector& val, bool notify)
 {
 	m_rotx = val.x();
@@ -2367,6 +2385,16 @@ fluo::Vector Canvas::ResetZeroRotations()
 	if (rotz < 0.0)
 		rotz += 360.0;
 	return fluo::Vector(rotx, roty, rotz);
+}
+
+fluo::Point Canvas::GetCenters()
+{
+	return fluo::Point(m_ctrx, m_ctry, m_ctrz);
+}
+
+void Canvas::SetCenters(const fluo::Point& val)
+{
+	m_ctrx = val.x(); m_ctry = val.y(); m_ctrz = val.z();
 }
 
 void Canvas::SetRadius(double r)
@@ -2480,6 +2508,97 @@ void Canvas::SetPinRotCenter(bool pin)
 	m_pin_rot_ctr = pin;
 	if (pin)
 		m_update_rot_ctr = true;
+}
+
+//object operations
+fluo::Point Canvas::GetObjCenters()
+{
+	return fluo::Point(m_obj_ctrx, m_obj_ctry, m_obj_ctrz);
+}
+
+void Canvas::SetObjCenters(const fluo::Point& val)
+{
+	m_obj_ctrx = val.x();
+	m_obj_ctry = val.y();
+	m_obj_ctrz = val.z();
+}
+
+fluo::Vector Canvas::GetObjRot()
+{
+	return fluo::Vector(m_obj_rotx, m_obj_roty, m_obj_rotz);
+}
+
+void Canvas::SetObjRot(const fluo::Vector& val)
+{
+	m_obj_rotx = val.x();
+	m_obj_roty = val.y();
+	m_obj_rotz = val.z();
+}
+
+void Canvas::SetOffset()
+{
+	if (m_obj_ctr_offx != 0.0 || m_obj_ctr_offy != 0.0 || m_obj_ctr_offz != 0.0 ||
+		m_obj_rot_ctr_offx != 0.0 || m_obj_rot_ctr_offy != 0.0 || m_obj_rot_ctr_offz != 0.0 ||
+		m_obj_rot_offx != 0.0 || m_obj_rot_offy != 0.0 || m_obj_rot_offz != 0.0)
+		m_offset = true;
+	else
+		m_offset = false;
+}
+
+fluo::Vector Canvas::GetObjCtrOff()
+{
+	return fluo::Vector(m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz);
+}
+
+void Canvas::SetObjCtrOff(const fluo::Vector& val)
+{
+	m_obj_ctr_offx = val.x();
+	m_obj_ctr_offy = val.y();
+	m_obj_ctr_offz = val.z();
+	SetOffset();
+}
+
+fluo::Vector Canvas::GetObjRotCtrOff()
+{
+	return fluo::Vector(m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz);
+}
+
+void Canvas::SetObjRotCtrOff(const fluo::Vector& val)
+{
+	m_obj_rot_ctr_offx = val.x() == 0.0 ? m_obj_ctrx : val.x();
+	m_obj_rot_ctr_offy = val.y() == 0.0 ? m_obj_ctry : val.y();
+	m_obj_rot_ctr_offz = val.z() == 0.0 ? m_obj_ctrz : val.z();
+	SetOffset();
+}
+
+fluo::Vector Canvas::GetObjRotOff()
+{
+	return fluo::Vector(m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz);
+}
+
+void Canvas::SetObjRotOff(const fluo::Vector& val)
+{
+	m_obj_rot_offx = val.x();
+	m_obj_rot_offy = val.y();
+	m_obj_rot_offz = val.z();
+	SetOffset();
+}
+
+void Canvas::SetOffsetTransform(const fluo::Transform &tf)
+{
+	m_offset_tf = tf;
+}
+
+fluo::Vector Canvas::GetObjTrans()
+{
+	return fluo::Vector(m_obj_transx, m_obj_transy, m_obj_transz);
+}
+
+void Canvas::SetObjTrans(const fluo::Vector& val)
+{
+	m_obj_transx = val.x();
+	m_obj_transy = val.y();
+	m_obj_transz = val.z();
 }
 
 void Canvas::SetLockCenter()
@@ -3013,6 +3132,57 @@ void Canvas::Get4DSeqRange(int &start_frame, int &end_frame)
 	m_end_all_frame = end_frame;
 }
 
+void Canvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
+{
+	m_frame_num_type = 0;
+
+	//skip update if frame num unchanged
+	bool update = m_tseq_cur_num == frame ? false : true;
+	//compute frame number
+	m_begin_frame = start_frame;
+	m_end_frame = end_frame;
+	m_total_frames = std::abs(end_frame - start_frame + 1);
+
+	//save currently selected volume
+	m_cur_vol_save = m_cur_vol;
+
+	//run pre-change script
+	if (update && glbin_settings.m_run_script)
+	{
+		int r = glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_PRE, rewind);
+		if (r == 2)
+		{
+			glbin_moviemaker.Reset();
+			return;
+		}
+	}
+
+	//change time frame
+	m_tseq_prv_num = m_tseq_cur_num;
+	m_tseq_cur_num = frame;
+
+	if (update)
+	for (auto i : m_vd_pop_list)
+		UpdateVolumeData(frame, i);
+
+	//run post-change script
+	if (update && glbin_settings.m_run_script)
+		glbin_script_proc.Run4DScript(flrd::ScriptProc::TM_ALL_POST_REWIND, rewind);
+
+	//restore currently selected volume
+	m_cur_vol = m_cur_vol_save;
+	glbin_vol_calculator.SetVolumeA(m_cur_vol);
+
+	//update ruler intensity values
+	glbin_ruler_handler.ProfileAll();
+
+	//clear results if rewind
+	if (rewind)
+		glbin_script_proc.ClearResults();
+
+	m_frame->UpdateProps({ gstRulerList });
+}
+
 void Canvas::UpdateVolumeData(int frame, VolumeData* vd)
 {
 	if (!vd)
@@ -3351,12 +3521,12 @@ void Canvas::CalcFrame()
 }
 
 //interactive modes
-int RenderCanvas::GetIntMode()
+int Canvas::GetIntMode()
 {
 	return m_int_mode;
 }
 
-void RenderCanvas::SetIntMode(int mode)
+void Canvas::SetIntMode(int mode)
 {
 	m_int_mode = mode;
 	if (m_int_mode == 1)
@@ -3370,35 +3540,35 @@ void RenderCanvas::SetIntMode(int mode)
 }
 
 //set use 2d rendering results
-void RenderCanvas::SetPaintUse2d(bool use2d)
+void Canvas::SetPaintUse2d(bool use2d)
 {
 	glbin_vol_selector.SetPaintUse2d(use2d);
 }
 
-bool RenderCanvas::GetPaintUse2d()
+bool Canvas::GetPaintUse2d()
 {
 	return glbin_vol_selector.GetPaintUse2d();
 }
 
 //calculations
-void RenderCanvas::SetVolumeA(VolumeData* vd)
+void Canvas::SetVolumeA(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeA(vd);
 }
 
-void RenderCanvas::SetVolumeB(VolumeData* vd)
+void Canvas::SetVolumeB(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeB(vd);
 }
 
 //change brush display
-void RenderCanvas::ChangeBrushSize(int value)
+void Canvas::ChangeBrushSize(int value)
 {
 	glbin_vol_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
 	m_renderview_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
-void RenderCanvas::SetClipMode(int mode)
+void Canvas::SetClipMode(int mode)
 {
 	switch (mode)
 	{
@@ -3430,7 +3600,7 @@ void RenderCanvas::SetClipMode(int mode)
 	}
 }
 
-void RenderCanvas::RestorePlanes()
+void Canvas::RestorePlanes()
 {
 	std::vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -3453,7 +3623,7 @@ void RenderCanvas::RestorePlanes()
 	}
 }
 
-void RenderCanvas::ClipRotate()
+void Canvas::ClipRotate()
 {
 	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
 	m_q_cl.Normalize();
@@ -3462,7 +3632,7 @@ void RenderCanvas::ClipRotate()
 
 }
 
-void RenderCanvas::SetClippingPlaneRotations(const fluo::Vector& val)
+void Canvas::SetClippingPlaneRotations(const fluo::Vector& val)
 {
 	m_rotx_cl = -val.x();
 	m_roty_cl = val.y();
@@ -3470,7 +3640,7 @@ void RenderCanvas::SetClippingPlaneRotations(const fluo::Vector& val)
 	ClipRotate();
 }
 
-fluo::Vector RenderCanvas::GetClippingPlaneRotations()
+fluo::Vector Canvas::GetClippingPlaneRotations()
 {
 	return fluo::Vector(
 		m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl,
@@ -3478,25 +3648,25 @@ fluo::Vector RenderCanvas::GetClippingPlaneRotations()
 		m_rotz_cl);
 }
 
-void RenderCanvas::SetClipRotX(double val)
+void Canvas::SetClipRotX(double val)
 {
 	m_rotx_cl = -val;
 	ClipRotate();
 }
 
-void RenderCanvas::SetClipRotY(double val)
+void Canvas::SetClipRotY(double val)
 {
 	m_roty_cl = val;
 	ClipRotate();
 }
 
-void RenderCanvas::SetClipRotZ(double val)
+void Canvas::SetClipRotZ(double val)
 {
 	m_rotz_cl = val;
 	ClipRotate();
 }
 
-void RenderCanvas::SetClipValue(int mask, int val)
+void Canvas::SetClipValue(int mask, int val)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3507,7 +3677,7 @@ void RenderCanvas::SetClipValue(int mask, int val)
 	}
 }
 
-void RenderCanvas::SetClipValues(int mask, int val1, int val2)
+void Canvas::SetClipValues(int mask, int val1, int val2)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3518,7 +3688,7 @@ void RenderCanvas::SetClipValues(int mask, int val1, int val2)
 	}
 }
 
-void RenderCanvas::SetClipValues(const int val[6])
+void Canvas::SetClipValues(const int val[6])
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3529,7 +3699,7 @@ void RenderCanvas::SetClipValues(const int val[6])
 	}
 }
 
-void RenderCanvas::ResetClipValues()
+void Canvas::ResetClipValues()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3540,7 +3710,7 @@ void RenderCanvas::ResetClipValues()
 	}
 }
 
-void RenderCanvas::ResetClipValuesX()
+void Canvas::ResetClipValuesX()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3551,7 +3721,7 @@ void RenderCanvas::ResetClipValuesX()
 	}
 }
 
-void RenderCanvas::ResetClipValuesY()
+void Canvas::ResetClipValuesY()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3562,7 +3732,7 @@ void RenderCanvas::ResetClipValuesY()
 	}
 }
 
-void RenderCanvas::ResetClipValuesZ()
+void Canvas::ResetClipValuesZ()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3574,17 +3744,17 @@ void RenderCanvas::ResetClipValuesZ()
 }
 
 //interpolation
-void RenderCanvas::SetIntp(bool mode)
+void Canvas::SetIntp(bool mode)
 {
 	m_intp = mode;
 }
 
-bool RenderCanvas::GetIntp()
+bool Canvas::GetIntp()
 {
 	return m_intp;
 }
 
-void RenderCanvas::ForceDraw()
+void Canvas::ForceDraw()
 {
 #ifdef _WIN32
 	if (!m_set_gl)
@@ -3595,7 +3765,7 @@ void RenderCanvas::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
 			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
+				Canvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
 					view->m_set_gl = false;
@@ -3765,7 +3935,7 @@ void RenderCanvas::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
 			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
+				Canvas* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
 					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
@@ -3780,7 +3950,7 @@ void RenderCanvas::ForceDraw()
 }
 
 //start loop update
-void RenderCanvas::StartLoopUpdate()
+void Canvas::StartLoopUpdate()
 {
 	////this is for debug_ds, comment when done
 	//if (TextureRenderer::get_mem_swap() &&
@@ -4215,7 +4385,7 @@ void RenderCanvas::StartLoopUpdate()
 }
 
 //halt loop update
-void RenderCanvas::HaltLoopUpdate()
+void Canvas::HaltLoopUpdate()
 {
 	if (glbin_settings.m_mem_swap)
 	{
@@ -4224,7 +4394,7 @@ void RenderCanvas::HaltLoopUpdate()
 }
 
 //new function to refresh
-void RenderCanvas::RefreshGL(int debug_code,
+void Canvas::RefreshGL(int debug_code,
 	bool erase,
 	bool start_loop,
 	bool lg_changed)
@@ -4247,7 +4417,7 @@ void RenderCanvas::RefreshGL(int debug_code,
 	//Update();
 }
 
-void RenderCanvas::DrawRulers()
+void Canvas::DrawRulers()
 {
 	if (m_ruler_list.empty())
 		return;
@@ -4258,22 +4428,22 @@ void RenderCanvas::DrawRulers()
 	glbin_ruler_renderer.Draw();
 }
 
-flrd::RulerList* RenderCanvas::GetRulerList()
+flrd::RulerList* Canvas::GetRulerList()
 {
 	return &m_ruler_list;
 }
 
-void RenderCanvas::SetCurRuler(flrd::Ruler* ruler)
+void Canvas::SetCurRuler(flrd::Ruler* ruler)
 {
 	m_cur_ruler = ruler;
 }
 
-flrd::Ruler* RenderCanvas::GetCurRuler()
+flrd::Ruler* Canvas::GetCurRuler()
 {
 	return m_cur_ruler;
 }
 
-flrd::Ruler* RenderCanvas::GetRuler(unsigned int id)
+flrd::Ruler* Canvas::GetRuler(unsigned int id)
 {
 	m_cur_ruler = 0;
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
@@ -4288,7 +4458,7 @@ flrd::Ruler* RenderCanvas::GetRuler(unsigned int id)
 }
 
 //draw highlighted comps
-void RenderCanvas::DrawCells()
+void Canvas::DrawCells()
 {
 	if (m_cell_list.empty())
 		return;
@@ -4330,7 +4500,7 @@ void RenderCanvas::DrawCells()
 		shader->release();
 }
 
-unsigned int RenderCanvas::DrawCellVerts(std::vector<float>& verts)
+unsigned int Canvas::DrawCellVerts(std::vector<float>& verts)
 {
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px = 0, py = 0;
@@ -4379,7 +4549,7 @@ unsigned int RenderCanvas::DrawCellVerts(std::vector<float>& verts)
 	return num;
 }
 
-void RenderCanvas::GetCellPoints(fluo::BBox& box,
+void Canvas::GetCellPoints(fluo::BBox& box,
 	fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
 	fluo::Transform& mv, fluo::Transform& p)
 {
@@ -4418,7 +4588,7 @@ void RenderCanvas::GetCellPoints(fluo::BBox& box,
 }
 
 //traces
-int RenderCanvas::GetTrackFileExist(bool save)
+int Canvas::GetTrackFileExist(bool save)
 {
 	if (!m_track_group)
 		return 0;
@@ -4437,12 +4607,12 @@ int RenderCanvas::GetTrackFileExist(bool save)
 		return 1;
 }
 
-TrackGroup* RenderCanvas::GetTrackGroup()
+TrackGroup* Canvas::GetTrackGroup()
 {
 	return m_track_group;
 }
 
-std::wstring RenderCanvas::GetTrackGroupFile()
+std::wstring Canvas::GetTrackGroupFile()
 {
 	std::wstring str;
 	if (m_track_group)
@@ -4450,7 +4620,7 @@ std::wstring RenderCanvas::GetTrackGroupFile()
 	return str;
 }
 
-void RenderCanvas::CreateTrackGroup()
+void Canvas::CreateTrackGroup()
 {
 	if (m_track_group)
 		delete m_track_group;
@@ -4458,7 +4628,7 @@ void RenderCanvas::CreateTrackGroup()
 	m_track_group = new TrackGroup;
 }
 
-int RenderCanvas::LoadTrackGroup(const std::wstring& filename)
+int Canvas::LoadTrackGroup(const std::wstring& filename)
 {
 	if (m_track_group)
 		delete m_track_group;
@@ -4467,7 +4637,7 @@ int RenderCanvas::LoadTrackGroup(const std::wstring& filename)
 	return m_track_group->Load(filename);
 }
 
-int RenderCanvas::SaveTrackGroup(const std::wstring& filename)
+int Canvas::SaveTrackGroup(const std::wstring& filename)
 {
 	if (m_track_group)
 		return m_track_group->Save(filename);
@@ -4475,13 +4645,13 @@ int RenderCanvas::SaveTrackGroup(const std::wstring& filename)
 		return 0;
 }
 
-void RenderCanvas::ExportTrackGroup(const std::wstring& filename, unsigned int id)
+void Canvas::ExportTrackGroup(const std::wstring& filename, unsigned int id)
 {
 	if (!m_track_group)
 		return;
 }
 
-void RenderCanvas::DrawTraces()
+void Canvas::DrawTraces()
 {
 	if (m_cur_vol &&
 		m_track_group)
@@ -4537,7 +4707,7 @@ void RenderCanvas::DrawTraces()
 	}
 }
 
-void RenderCanvas::GetTraces(bool update)
+void Canvas::GetTraces(bool update)
 {
 	if (!m_track_group)
 		return;
@@ -4596,14 +4766,14 @@ void RenderCanvas::GetTraces(bool update)
 	//}
 }
 
-void RenderCanvas::SetEnlarge(bool value)
+void Canvas::SetEnlarge(bool value)
 {
 	if (m_enlarge && !value)
 		glbin_text_tex_manager.SetEnlargeScale(1);
 	m_enlarge = value;
 }
 
-void RenderCanvas::SetEnlargeScale(double value)
+void Canvas::SetEnlargeScale(double value)
 {
 	m_enlarge_scale = value;
 	if (m_enlarge)
@@ -4611,7 +4781,7 @@ void RenderCanvas::SetEnlargeScale(double value)
 }
 
 //read pixels
-void RenderCanvas::ReadPixels(
+void Canvas::ReadPixels(
 	int chann, bool fp32,
 	int &x, int &y, int &w, int &h,
 	void** image)
@@ -4695,7 +4865,7 @@ void RenderCanvas::ReadPixels(
 		BindRenderBuffer();
 }
 
-inline Size2D RenderCanvas::GetGLSize()
+inline Size2D Canvas::GetGLSize()
 {
 	double dval = 1;
 #ifdef _DARWIN
@@ -4708,7 +4878,165 @@ inline Size2D RenderCanvas::GetGLSize()
 	return Size2D(size.x, size.y);
 }
 
-void RenderCanvas::UpdateClips()
+glm::mat4 Canvas::GetObjectMat()
+{
+	glm::mat4 obj_mat = m_mv_mat;
+	//translate object
+	obj_mat = glm::translate(obj_mat, glm::vec3(
+		m_obj_transx,
+		m_obj_transy,
+		m_obj_transz));
+
+	if (m_offset)
+	{
+		obj_mat = glm::translate(obj_mat, glm::vec3(
+			m_obj_rot_ctr_offx - m_obj_ctrx,
+			m_obj_ctry - m_obj_rot_ctr_offy,
+			m_obj_rot_ctr_offz - m_obj_ctrz));
+		//rotate object
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		obj_mat = glm::translate(obj_mat, glm::vec3(
+			-m_obj_rot_ctr_offx - m_obj_ctr_offx,
+			-m_obj_rot_ctr_offy - m_obj_ctr_offy,
+			-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+	}
+	else
+	{
+		//rotate object
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		obj_mat = glm::translate(obj_mat, glm::vec3(
+			-m_obj_ctrx,
+			-m_obj_ctry,
+			-m_obj_ctrz));
+	}
+
+	return obj_mat;
+}
+
+glm::mat4 Canvas::GetDrawMat()
+{
+	glm::mat4 drw_mat = m_mv_mat;
+	//translate object
+	drw_mat = glm::translate(drw_mat, glm::vec3(
+		m_obj_transx,
+		m_obj_transy,
+		m_obj_transz));
+
+	if (m_offset)
+	{
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			m_obj_rot_ctr_offx - m_obj_ctrx,
+			m_obj_ctry - m_obj_rot_ctr_offy,
+			m_obj_rot_ctr_offz - m_obj_ctrz));
+		//rotate object
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			-m_obj_rot_ctr_offx - m_obj_ctr_offx,
+			-m_obj_rot_ctr_offy - m_obj_ctr_offy,
+			-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+	}
+	else
+	{
+		//rotate object
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+		//center object
+		drw_mat = glm::translate(drw_mat, glm::vec3(
+			-m_obj_ctrx,
+			-m_obj_ctry,
+			-m_obj_ctrz));
+	}
+
+	return drw_mat;
+}
+
+glm::mat4 Canvas::GetInvtMat()
+{
+	glm::mat4 inv_mat = m_mv_mat;
+	//translate object
+	inv_mat = glm::translate(inv_mat, glm::vec3(
+		m_obj_transx,
+		m_obj_transy,
+		m_obj_transz));
+
+	if (m_offset)
+	{
+		inv_mat = glm::translate(inv_mat, glm::vec3(
+			m_obj_rot_ctr_offx - m_obj_ctrx,
+			m_obj_ctry - m_obj_rot_ctr_offy,
+			m_obj_rot_ctr_offz - m_obj_ctrz));
+		//rotate object
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		inv_mat = glm::translate(inv_mat, glm::vec3(
+			-m_obj_rot_ctr_offx - m_obj_ctr_offx,
+			-m_obj_rot_ctr_offy - m_obj_ctr_offy,
+			-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+	}
+	else
+	{
+		//rotate object
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		//center object
+		inv_mat = glm::translate(inv_mat, glm::vec3(
+			-m_obj_ctrx,
+			-m_obj_ctry,
+			-m_obj_ctrz));
+	}
+
+	return inv_mat;
+}
+
+glm::mat4 Canvas::GetDrawWorldMat()
+{
+	glm::mat4 drw_mat = m_mv_mat;
+	//translate object
+	drw_mat = glm::translate(drw_mat, glm::vec3(
+		m_obj_transx,
+		m_obj_transy,
+		m_obj_transz));
+
+	//rotate object
+	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
+	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+	//center object
+	drw_mat = glm::translate(drw_mat, glm::vec3(
+		-m_obj_ctrx,
+		-m_obj_ctry,
+		-m_obj_ctrz));
+
+	return drw_mat;
+}
+
+fluo::Transform Canvas::GetInvOffsetMat()
+{
+	return m_offset_tf;
+}
+
+fluo::Vector Canvas::GetSide()
+{
+	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+	m_head.normalize();
+	fluo::Vector side = Cross(m_up, m_head);
+	return side;
+}
+
+void Canvas::UpdateClips()
 {
 	if (m_clip_mode == 1)
 		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
@@ -4795,7 +5123,7 @@ void RenderCanvas::UpdateClips()
 }
 
 //vr buffers
-void RenderCanvas::GetRenderSize(int &nx, int &ny)
+void Canvas::GetRenderSize(int &nx, int &ny)
 {
 	if (m_use_openxr)
 	{
@@ -4812,7 +5140,7 @@ void RenderCanvas::GetRenderSize(int &nx, int &ny)
 	}
 }
 
-void RenderCanvas::DrawBounds()
+void Canvas::DrawBounds()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -4844,7 +5172,7 @@ void RenderCanvas::DrawBounds()
 	glEnable(GL_BLEND);
 }
 
-void RenderCanvas::DrawGrid()
+void Canvas::DrawGrid()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -4881,7 +5209,7 @@ void RenderCanvas::DrawGrid()
 	glEnable(GL_BLEND);
 }
 
-void RenderCanvas::DrawCamCtr()
+void Canvas::DrawCamCtr()
 {
 	flvr::VertexArray* va_jack = 0;
 	if (m_pin_rot_ctr)
@@ -4948,7 +5276,7 @@ void RenderCanvas::DrawCamCtr()
 	glEnable(GL_BLEND);
 }
 
-void RenderCanvas::DrawScaleBar()
+void Canvas::DrawScaleBar()
 {
 	flvr::VertexArray* va_scale_bar =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Scale_Bar);
@@ -5052,7 +5380,7 @@ void RenderCanvas::DrawScaleBar()
 	glEnable(GL_BLEND);
 }
 
-void RenderCanvas::DrawLegend()
+void Canvas::DrawLegend()
 {
 	if (!m_frame)
 		return;
@@ -5191,7 +5519,7 @@ void RenderCanvas::DrawLegend()
 	m_sb_height = (lines + 1)*font_height;
 }
 
-void RenderCanvas::DrawName(
+void Canvas::DrawName(
 	double x, double y, int nx, int ny,
 	const std::wstring& name, fluo::Color color,
 	double font_height,
@@ -5255,7 +5583,7 @@ void RenderCanvas::DrawName(
 	glEnable(GL_BLEND);
 }
 
-void RenderCanvas::DrawFrame()
+void Canvas::DrawFrame()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -5292,7 +5620,7 @@ void RenderCanvas::DrawFrame()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void RenderCanvas::DrawClippingPlanes(int face_winding)
+void Canvas::DrawClippingPlanes(int face_winding)
 {
 	int i;
 	bool link = glbin_settings.m_clip_link;
@@ -5683,7 +6011,7 @@ void RenderCanvas::DrawClippingPlanes(int face_winding)
 	glCullFace(GL_BACK);
 }
 
-void RenderCanvas::SetColormapColors(int colormap, fluo::Color &c, double inv)
+void Canvas::SetColormapColors(int colormap, fluo::Color &c, double inv)
 {
 	switch (colormap)
 	{
@@ -5866,7 +6194,7 @@ void RenderCanvas::SetColormapColors(int colormap, fluo::Color &c, double inv)
 	}
 }
 
-void RenderCanvas::DrawColormap()
+void Canvas::DrawColormap()
 {
 	double max_val = 255.0;
 	bool enable_alpha = false;
@@ -6054,7 +6382,7 @@ void RenderCanvas::DrawColormap()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void RenderCanvas::DrawGradBg()
+void Canvas::DrawGradBg()
 {
 	//define colors
 	fluo::Color color1, color2;
@@ -6155,7 +6483,7 @@ void RenderCanvas::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
-void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
+void Canvas::DrawInfo(int nx, int ny, bool intactive)
 {
 	float sx, sy;
 	sx = 2.0 / nx;
@@ -6300,7 +6628,7 @@ void RenderCanvas::DrawInfo(int nx, int ny, bool intactive)
 }
 
 //depth buffer calculation
-double RenderCanvas::CalcZ(double z)
+double Canvas::CalcZ(double z)
 {
 	double result = 0.0;
 	if (m_persp)
@@ -6316,7 +6644,7 @@ double RenderCanvas::CalcZ(double z)
 	return result;
 }
 
-void RenderCanvas::CalcFogRange()
+void Canvas::CalcFogRange()
 {
 	fluo::BBox bbox;
 	bool use_box = false;
@@ -6384,7 +6712,7 @@ void RenderCanvas::CalcFogRange()
 }
 
 //draw the volume data only
-void RenderCanvas::Draw()
+void Canvas::Draw()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6453,7 +6781,7 @@ void RenderCanvas::Draw()
 }
 
 //draw with depth peeling
-void RenderCanvas::DrawDP()
+void Canvas::DrawDP()
 {
 	int i;
 	int nx, ny;
@@ -6731,7 +7059,7 @@ void RenderCanvas::DrawDP()
 
 //draw meshes
 //peel==true -- depth peeling
-void RenderCanvas::DrawMeshes(int peel)
+void Canvas::DrawMeshes(int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6775,7 +7103,7 @@ void RenderCanvas::DrawMeshes(int peel)
 
 //draw volumes
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumes(int peel)
+void Canvas::DrawVolumes(int peel)
 {
 	int finished_bricks = 0;
 	if (glbin_settings.m_mem_swap)
@@ -7069,7 +7397,7 @@ void RenderCanvas::DrawVolumes(int peel)
 	//}
 }
 
-void RenderCanvas::DrawAnnotations()
+void Canvas::DrawAnnotations()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7125,7 +7453,7 @@ void RenderCanvas::DrawAnnotations()
 	}
 }
 
-void RenderCanvas::BindRenderBuffer()
+void Canvas::BindRenderBuffer()
 {
 	if (glbin_settings.m_hologram_mode == 1)
 	{
@@ -7154,7 +7482,7 @@ void RenderCanvas::BindRenderBuffer()
 }
 
 //draw out the framebuffer after composition
-void RenderCanvas::PrepFinalBuffer()
+void Canvas::PrepFinalBuffer()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7170,7 +7498,7 @@ void RenderCanvas::PrepFinalBuffer()
 		final_buffer->protect();
 }
 
-void RenderCanvas::ClearFinalBuffer()
+void Canvas::ClearFinalBuffer()
 {
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer(
@@ -7182,7 +7510,7 @@ void RenderCanvas::ClearFinalBuffer()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void RenderCanvas::ClearFinalBuffer()
+void Canvas::ClearFinalBuffer()
 {
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer(
@@ -7194,7 +7522,7 @@ void RenderCanvas::ClearFinalBuffer()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void RenderCanvas::DrawFinalBuffer()
+void Canvas::DrawFinalBuffer()
 {
 	if (m_enlarge)
 		return;
@@ -7245,7 +7573,7 @@ void RenderCanvas::DrawFinalBuffer()
 	}
 }
 
-void RenderCanvas::PrepVRBuffer()
+void Canvas::PrepVRBuffer()
 {
 	if (m_use_openxr)
 	{
@@ -7273,7 +7601,7 @@ void RenderCanvas::PrepVRBuffer()
 		vr_buffer->protect();
 }
 
-void RenderCanvas::ClearVRBuffer()
+void Canvas::ClearVRBuffer()
 {
 	BindRenderBuffer();
 	//clear color buffer to black for compositing
@@ -7282,7 +7610,7 @@ void RenderCanvas::ClearVRBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void RenderCanvas::DrawVRBuffer()
+void Canvas::DrawVRBuffer()
 {
 	int vr_x, vr_y, gl_x, gl_y;
 	GetRenderSize(vr_x, vr_y);
@@ -7350,7 +7678,7 @@ void RenderCanvas::DrawVRBuffer()
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
+void Canvas::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -7491,7 +7819,7 @@ void RenderCanvas::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void RenderCanvas::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, int peel)
+void Canvas::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, int peel)
 {
 	if (list.size() <= 0)
 		return;
@@ -7569,7 +7897,7 @@ void RenderCanvas::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, in
 	}
 }
 
-void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
+void Canvas::DrawMIP(VolumeData* vd, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7883,7 +8211,7 @@ void RenderCanvas::DrawMIP(VolumeData* vd, int peel)
 	//}
 }
 
-void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
+void Canvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8082,7 +8410,7 @@ void RenderCanvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 	//}
 }
 
-void RenderCanvas::DrawOLShading(VolumeData* vd)
+void Canvas::DrawOLShading(VolumeData* vd)
 {
 	if (glbin_settings.m_mem_swap &&
 		!flvr::TextureRenderer::get_done_current_chan())
@@ -8160,7 +8488,7 @@ void RenderCanvas::DrawOLShading(VolumeData* vd)
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void RenderCanvas::DrawOLShadows(std::vector<VolumeData*> &vlist)
+void Canvas::DrawOLShadows(std::vector<VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -8390,7 +8718,7 @@ void RenderCanvas::DrawOLShadows(std::vector<VolumeData*> &vlist)
 	glBlendEquation(GL_FUNC_ADD);
 }
 
-void RenderCanvas::DrawOLShadowsMesh(double darkness)
+void Canvas::DrawOLShadowsMesh(double darkness)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8489,7 +8817,7 @@ void RenderCanvas::DrawOLShadowsMesh(double darkness)
 }
 
 //get mesh shadow
-bool RenderCanvas::GetMeshShadow(double &val)
+bool Canvas::GetMeshShadow(double &val)
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -8525,7 +8853,7 @@ bool RenderCanvas::GetMeshShadow(double &val)
 	return false;
 }
 
-void RenderCanvas::DrawCircles(double cx, double cy,
+void Canvas::DrawCircles(double cx, double cy,
 	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
 	flvr::ShaderProgram* shader =
@@ -8561,7 +8889,7 @@ void RenderCanvas::DrawCircles(double cx, double cy,
 }
 
 //draw the brush shape
-void RenderCanvas::DrawBrush()
+void Canvas::DrawBrush()
 {
 	double pressure = glbin_vol_selector.GetNormPress();
 
@@ -8643,7 +8971,7 @@ void RenderCanvas::DrawBrush()
 }
 
 //paint strokes on the paint fbo
-void RenderCanvas::PaintStroke()
+void Canvas::PaintStroke()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8756,7 +9084,7 @@ void RenderCanvas::PaintStroke()
 }
 
 //show the stroke buffer
-void RenderCanvas::DisplayStroke()
+void Canvas::DisplayStroke()
 {
 	//painting texture
 	flvr::Framebuffer* paint_buffer =
@@ -8787,7 +9115,7 @@ void RenderCanvas::DisplayStroke()
 	glEnable(GL_DEPTH_TEST);
 }
 
-fluo::Quaternion RenderCanvas::Trackball(double dx, double dy)
+fluo::Quaternion Canvas::Trackball(double dx, double dy)
 {
 	fluo::Quaternion q;
 	fluo::Vector a; /* Axis of rotation */
@@ -8847,7 +9175,7 @@ fluo::Quaternion RenderCanvas::Trackball(double dx, double dy)
 	return q;
 }
 
-fluo::Quaternion RenderCanvas::TrackballClip(int p1x, int p1y, int p2x, int p2y)
+fluo::Quaternion Canvas::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 {
 	fluo::Quaternion q;
 	fluo::Vector a; /* Axis of rotation */
@@ -8877,7 +9205,7 @@ fluo::Quaternion RenderCanvas::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 	return q;
 }
 
-void RenderCanvas::Q2A()
+void Canvas::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
@@ -8901,7 +9229,7 @@ void RenderCanvas::Q2A()
 		UpdateClips();
 }
 
-void RenderCanvas::A2Q()
+void Canvas::A2Q()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
@@ -8914,7 +9242,7 @@ void RenderCanvas::A2Q()
 }
 
 //sort bricks after view changes
-void RenderCanvas::SetSortBricks()
+void Canvas::SetSortBricks()
 {
 	PopVolumeList();
 
@@ -8927,7 +9255,7 @@ void RenderCanvas::SetSortBricks()
 }
 
 //pre-draw processings
-void RenderCanvas::PreDraw()
+void Canvas::PreDraw()
 {
 	//skip if not done with loop
 	if (glbin_settings.m_mem_swap)
@@ -8939,7 +9267,7 @@ void RenderCanvas::PreDraw()
 	}
 }
 
-void RenderCanvas::PostDraw()
+void Canvas::PostDraw()
 {
 	//skip if not done with loop
 	if (glbin_settings.m_mem_swap &&
@@ -9013,7 +9341,7 @@ void RenderCanvas::PostDraw()
 	}
 }
 
-void RenderCanvas::ResetEnlarge()
+void Canvas::ResetEnlarge()
 {
 	//skip if not done with loop
 	if (glbin_settings.m_mem_swap &&
@@ -9027,7 +9355,7 @@ void RenderCanvas::ResetEnlarge()
 	RefreshGL(19);
 }
 
-void RenderCanvas::SetBrush(int mode)
+void Canvas::SetBrush(int mode)
 {
 	m_prev_focus = FindFocus();
 	SetFocus();
@@ -9061,7 +9389,7 @@ void RenderCanvas::SetBrush(int mode)
 	}
 }
 
-bool RenderCanvas::UpdateBrushState()
+bool Canvas::UpdateBrushState()
 {
 	bool refresh = false;
 
@@ -9134,7 +9462,7 @@ bool RenderCanvas::UpdateBrushState()
 }
 
 //selection
-void RenderCanvas::Pick()
+void Canvas::Pick()
 {
 	if (!m_draw_all)
 		return;
@@ -9149,7 +9477,7 @@ void RenderCanvas::Pick()
 	m_frame->UpdateProps(vc);
 }
 
-bool RenderCanvas::PickMesh()
+bool Canvas::PickMesh()
 {
 	int i;
 	int nx = GetGLSize().w();
@@ -9222,7 +9550,7 @@ bool RenderCanvas::PickMesh()
 	return selected;
 }
 
-bool RenderCanvas::PickVolume()
+bool Canvas::PickVolume()
 {
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
@@ -9285,7 +9613,7 @@ bool RenderCanvas::PickVolume()
 	return picked_vd != 0;
 }
 
-void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
+void Canvas::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
 	std::set<unsigned long long> ids;
@@ -9294,7 +9622,7 @@ void RenderCanvas::SetCompSelection(fluo::Point& p, int mode)
 	//m_frame->UpdateProps({ gstCompListSelection });
 }
 
-void RenderCanvas::DrawViewQuad()
+void Canvas::DrawViewQuad()
 {
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
@@ -9303,7 +9631,7 @@ void RenderCanvas::DrawViewQuad()
 }
 
 //find crop frame
-int RenderCanvas::HitCropFrame(fluo::Point& mp)
+int Canvas::HitCropFrame(fluo::Point& mp)
 {
 	int ny = GetGLSize().h();
 	fluo::Point p(mp);
@@ -9378,7 +9706,7 @@ int RenderCanvas::HitCropFrame(fluo::Point& mp)
 	return 0;
 }
 
-void RenderCanvas::ChangeCropFrame(fluo::Point& mp)
+void Canvas::ChangeCropFrame(fluo::Point& mp)
 {
 	if (!m_crop_type)
 		return;
@@ -9456,7 +9784,7 @@ void RenderCanvas::ChangeCropFrame(fluo::Point& mp)
 	glbin_moviemaker.SetCropH(std::round(h));
 }
 
-void RenderCanvas::switchLevel(VolumeData *vd)
+void Canvas::switchLevel(VolumeData *vd)
 {
 	if (!vd) return;
 
@@ -9546,7 +9874,7 @@ void RenderCanvas::switchLevel(VolumeData *vd)
 }
 
 //controller interactions
-void RenderCanvas::ControllerMoveHorizontal(double dval, int nx, int ny)
+void Canvas::ControllerMoveHorizontal(double dval, int nx, int ny)
 {
 	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 	m_head.normalize();
@@ -9557,7 +9885,7 @@ void RenderCanvas::ControllerMoveHorizontal(double dval, int nx, int ny)
 	m_obj_transz += trans.z();
 }
 
-void RenderCanvas::ControllerZoomDolly(double dval, int nx, int ny)
+void Canvas::ControllerZoomDolly(double dval, int nx, int ny)
 {
 	double delta = dval / (double)ny;
 	if (m_scale_factor < 1e5 && m_scale_factor > 1e-3)
@@ -9574,7 +9902,7 @@ void RenderCanvas::ControllerZoomDolly(double dval, int nx, int ny)
 	}
 }
 
-void RenderCanvas::ControllerRotate(double dx, double dy, int nx, int ny)
+void Canvas::ControllerRotate(double dx, double dy, int nx, int ny)
 {
 	fluo::Quaternion q_delta = Trackball(dx, dy);
 	m_q *= q_delta;
@@ -9602,7 +9930,7 @@ void RenderCanvas::ControllerRotate(double dx, double dy, int nx, int ny)
 		m_rotz += 360.0;
 }
 
-void RenderCanvas::ControllerPan(double dx, double dy, int nx, int ny)
+void Canvas::ControllerPan(double dx, double dy, int nx, int ny)
 {
 	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 	m_head.normalize();
@@ -9615,7 +9943,7 @@ void RenderCanvas::ControllerPan(double dx, double dy, int nx, int ny)
 	m_obj_transz += trans.z() * m_scale_factor;
 }
 
-void RenderCanvas::GrabRotate(const glm::mat4& pose)
+void Canvas::GrabRotate(const glm::mat4& pose)
 {
 	// Extract the rotation matrix (upper-left 3x3 part of the 4x4 matrix)
 	glm::mat3 rotationMatrix = glm::mat3(pose);

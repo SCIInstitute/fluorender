@@ -80,16 +80,6 @@ DEALINGS IN THE SOFTWARE.
 #endif
 #endif
 
-#define VOL_METHOD_SEQ    1
-#define VOL_METHOD_MULTI  2
-#define VOL_METHOD_COMP    3
-
-#define INIT_BOUNDS  1
-#define INIT_CENTER  2
-#define INIT_TRANSL  4
-#define INIT_ROTATE  8
-#define INIT_OBJ_TRANSL  16
-
 //clipping plane mask
 #define CLIP_X1  1
 #define CLIP_X2  2

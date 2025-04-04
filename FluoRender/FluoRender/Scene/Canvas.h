@@ -30,12 +30,26 @@ DEALINGS IN THE SOFTWARE.
 #define _CANVAS_H_
 
 #include <DataManager.h>
+#include <Quaternion.h>
+#include <TextRenderer.h>
+#include <Size.h>
 #include <string>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
+
+#define INIT_BOUNDS  1
+#define INIT_CENTER  2
+#define INIT_TRANSL  4
+#define INIT_ROTATE  8
+#define INIT_OBJ_TRANSL  16
+
+#define VOL_METHOD_SEQ    1
+#define VOL_METHOD_MULTI  2
+#define VOL_METHOD_COMP    3
+
 
 class Canvas : public TreeLayer
 {
@@ -130,63 +144,23 @@ public:
 	void HandleProjection(int nx, int ny, bool vr = false);
 	void HandleCamera(bool vr = false);
 	//camera operations
-	fluo::Vector GetTranslations()
-	{
-		return fluo::Vector(m_transx, m_transy, m_transz);
-	}
-	void SetTranslations(const fluo::Vector& val)
-	{
-		m_transx = val.x(); m_transy = val.y(); m_transz = val.z();
-		m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
-	}
-	fluo::Quaternion GetZeroQuat()
-	{
-		return m_zq;
-	}
-	void SetZeroQuat(const fluo::Quaternion& val)
-	{
-		m_zq = val;
-	}
-	fluo::Quaternion GetRotQuat()
-	{
-		return m_q;
-	}
-	fluo::Vector GetRotations()
-	{
-		return fluo::Vector(m_rotx, m_roty, m_rotz);
-	}
+	fluo::Vector GetTranslations();
+	void SetTranslations(const fluo::Vector& val);
+	fluo::Quaternion GetZeroQuat() { return m_zq; }
+	void SetZeroQuat(const fluo::Quaternion& val) { m_zq = val; }
+	fluo::Quaternion GetRotQuat() { return m_q; }
+	fluo::Vector GetRotations();
 	void SetRotations(const fluo::Vector& val, bool notify);
 	int GetOrientation();//same as the indices in the view panel
 	void SetZeroRotations();
 	fluo::Vector ResetZeroRotations();
-	fluo::Point GetCenters()
-	{
-		return fluo::Point(m_ctrx, m_ctry, m_ctrz);
-	}
-	void SetCenters(const fluo::Point& val)
-	{
-		m_ctrx = val.x(); m_ctry = val.y(); m_ctrz = val.z();
-	}
-	double GetCenterEyeDist()
-	{
-		return m_distance;
-	}
-	void SetCenterEyeDist(double dist)
-	{
-		m_distance = dist;
-	}
-	double GetInitDist()
-	{
-		return m_init_dist;
-	}
-	void SetInitDist(double dist)
-	{
-		m_init_dist = dist;
-	}
-	double GetRadius()
-	{
-		return m_radius;
-	}
+	fluo::Point GetCenters();
+	void SetCenters(const fluo::Point& val);
+	double GetCenterEyeDist() { return m_distance; }
+	void SetCenterEyeDist(double dist) { m_distance = dist; }
+	double GetInitDist() { return m_init_dist; }
+	void SetInitDist(double dist) { m_init_dist = dist; }
+	double GetRadius() { return m_radius; }
 	void SetRadius(double r);
 	void SetCenter();
 	double Get121ScaleFactor();
@@ -194,90 +168,22 @@ public:
 	void SetPinRotCenter(bool);
 
 	//object operations
-	fluo::Point GetObjCenters()
-	{
-		return fluo::Point(m_obj_ctrx, m_obj_ctry, m_obj_ctrz);
-	}
-	void SetObjCenters(const fluo::Point& val)
-	{
-		m_obj_ctrx = val.x();
-		m_obj_ctry = val.y();
-		m_obj_ctrz = val.z();
-	}
-	fluo::Vector GetObjRot()
-	{
-		return fluo::Vector(m_obj_rotx, m_obj_roty, m_obj_rotz);
-	}
-	void SetObjRot(const fluo::Vector& val)
-	{
-		m_obj_rotx = val.x();
-		m_obj_roty = val.y();
-		m_obj_rotz = val.z();
-	}
-	void SetOffset()
-	{
-		if (m_obj_ctr_offx != 0.0 || m_obj_ctr_offy != 0.0 || m_obj_ctr_offz != 0.0 ||
-			m_obj_rot_ctr_offx != 0.0 || m_obj_rot_ctr_offy != 0.0 || m_obj_rot_ctr_offz != 0.0 ||
-			m_obj_rot_offx != 0.0 || m_obj_rot_offy != 0.0 || m_obj_rot_offz != 0.0)
-			m_offset = true;
-		else
-			m_offset = false;
-	}
-	fluo::Vector GetObjCtrOff()
-	{
-		return fluo::Vector(m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz);
-	}
-	void SetObjCtrOff(const fluo::Vector& val)
-	{
-		m_obj_ctr_offx = val.x();
-		m_obj_ctr_offy = val.y();
-		m_obj_ctr_offz = val.z();
-		SetOffset();
-	}
-	fluo::Vector GetObjRotCtrOff()
-	{
-		return fluo::Vector(m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz);
-	}
-	void SetObjRotCtrOff(const fluo::Vector& val)
-	{
-		m_obj_rot_ctr_offx = val.x() == 0.0 ? m_obj_ctrx : val.x();
-		m_obj_rot_ctr_offy = val.y() == 0.0 ? m_obj_ctry : val.y();
-		m_obj_rot_ctr_offz = val.z() == 0.0 ? m_obj_ctrz : val.z();
-		SetOffset();
-	}
-	fluo::Vector GetObjRotOff()
-	{
-		return fluo::Vector(m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz);
-	}
-	void SetObjRotOff(const fluo::Vector& val)
-	{
-		m_obj_rot_offx = val.x();
-		m_obj_rot_offy = val.y();
-		m_obj_rot_offz = val.z();
-		SetOffset();
-	}
-	void SetOffsetTransform(const fluo::Transform &tf)
-	{
-		m_offset_tf = tf;
-	}
-	fluo::Vector GetObjTrans()
-	{
-		return fluo::Vector(m_obj_transx, m_obj_transy, m_obj_transz);
-	}
-	void SetObjTrans(const fluo::Vector& val)
-	{
-		m_obj_transx = val.x();
-		m_obj_transy = val.y();
-		m_obj_transz = val.z();
-	}
-	void SetRotLock(bool mode)
-	{
-		m_rot_lock = mode;
-	}
-	bool GetRotLock()
-	{
-		return m_rot_lock;
-	}
+	fluo::Point GetObjCenters();
+	void SetObjCenters(const fluo::Point& val);
+	fluo::Vector GetObjRot();
+	void SetObjRot(const fluo::Vector& val);
+	void SetOffset();
+	fluo::Vector GetObjCtrOff();
+	void SetObjCtrOff(const fluo::Vector& val);
+	fluo::Vector GetObjRotCtrOff();
+	void SetObjRotCtrOff(const fluo::Vector& val);
+	fluo::Vector GetObjRotOff();
+	void SetObjRotOff(const fluo::Vector& val);
+	void SetOffsetTransform(const fluo::Transform& tf);
+	fluo::Vector GetObjTrans();
+	void SetObjTrans(const fluo::Vector& val);
+	void SetRotLock(bool mode) { m_rot_lock = mode; }
+	bool GetRotLock() { return m_rot_lock; }
 	//lock cam center
 	void SetLockCamObject(bool bval) { m_lock_cam_object = bval; }
 	bool GetLockCamObject() { return m_lock_cam_object; }
@@ -459,20 +365,11 @@ public:
 	void GetTraces(bool update = false);
 
 	//enlarge output image
-	void SetKeepEnlarge(bool value)
-	{
-		m_keep_enlarge = value;
-	}
+	void SetKeepEnlarge(bool value) { m_keep_enlarge = value; }
 	void SetEnlarge(bool value);
 	void SetEnlargeScale(double value);
-	bool GetEnlarge()
-	{
-		return m_enlarge;
-	}
-	double GetEnlargeScale()
-	{
-		return m_enlarge_scale;
-	}
+	bool GetEnlarge() { return m_enlarge; }
+	double GetEnlargeScale() { return m_enlarge_scale; }
 
 	//read pixels
 	void ReadPixels(
@@ -481,190 +378,30 @@ public:
 		void** image);
 
 	//set cell list
-	void SetCellList(flrd::CelpList &list)
-	{
-		m_cell_list = list;
-	}
+	void SetCellList(flrd::CelpList &list) { m_cell_list = list; }
 
 	//get view info for external ops
 	//get size, considering enlargement
 	inline Size2D GetGLSize();
 	//fluo::Point GetMousePos(wxMouseEvent& e);
 	//bool GetMouseIn(wxPoint& p);
-	glm::mat4 GetModelView()
-	{
-		return m_mv_mat;
-	}
-	glm::mat4 GetProjection()
-	{
-		return m_proj_mat;
-	}
-	glm::mat4 GetObjectMat()
-	{
-		glm::mat4 obj_mat = m_mv_mat;
-		//translate object
-		obj_mat = glm::translate(obj_mat, glm::vec3(
-			m_obj_transx,
-			m_obj_transy,
-			m_obj_transz));
-
-		if (m_offset)
-		{
-			obj_mat = glm::translate(obj_mat, glm::vec3(
-				m_obj_rot_ctr_offx - m_obj_ctrx,
-				m_obj_ctry - m_obj_rot_ctr_offy,
-				m_obj_rot_ctr_offz - m_obj_ctrz));
-			//rotate object
-			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-			//center object
-			obj_mat = glm::translate(obj_mat, glm::vec3(
-				-m_obj_rot_ctr_offx - m_obj_ctr_offx,
-				-m_obj_rot_ctr_offy - m_obj_ctr_offy,
-				-m_obj_rot_ctr_offz - m_obj_ctr_offz));
-		}
-		else
-		{
-			//rotate object
-			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-			obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-			//center object
-			obj_mat = glm::translate(obj_mat, glm::vec3(
-				-m_obj_ctrx,
-				-m_obj_ctry,
-				-m_obj_ctrz));
-		}
-
-		return obj_mat;
-	}
-	glm::mat4 GetDrawMat()
-	{
-		glm::mat4 drw_mat = m_mv_mat;
-		//translate object
-		drw_mat = glm::translate(drw_mat, glm::vec3(
-			m_obj_transx,
-			m_obj_transy,
-			m_obj_transz));
-
-		if (m_offset)
-		{
-			drw_mat = glm::translate(drw_mat, glm::vec3(
-				m_obj_rot_ctr_offx - m_obj_ctrx,
-				m_obj_ctry - m_obj_rot_ctr_offy,
-				m_obj_rot_ctr_offz - m_obj_ctrz));
-			//rotate object
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-			//center object
-			drw_mat = glm::translate(drw_mat, glm::vec3(
-				-m_obj_rot_ctr_offx - m_obj_ctr_offx,
-				-m_obj_rot_ctr_offy - m_obj_ctr_offy,
-				-m_obj_rot_ctr_offz - m_obj_ctr_offz));
-		}
-		else
-		{
-			//rotate object
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-			drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-			//center object
-			drw_mat = glm::translate(drw_mat, glm::vec3(
-				-m_obj_ctrx,
-				-m_obj_ctry,
-				-m_obj_ctrz));
-		}
-
-		return drw_mat;
-	}
-	glm::mat4 GetInvtMat()
-	{
-		glm::mat4 inv_mat = m_mv_mat;
-		//translate object
-		inv_mat = glm::translate(inv_mat, glm::vec3(
-			m_obj_transx,
-			m_obj_transy,
-			m_obj_transz));
-
-		if (m_offset)
-		{
-			inv_mat = glm::translate(inv_mat, glm::vec3(
-				m_obj_rot_ctr_offx - m_obj_ctrx,
-				m_obj_ctry - m_obj_rot_ctr_offy,
-				m_obj_rot_ctr_offz - m_obj_ctrz));
-			//rotate object
-			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-			//center object
-			inv_mat = glm::translate(inv_mat, glm::vec3(
-				-m_obj_rot_ctr_offx - m_obj_ctr_offx,
-				-m_obj_rot_ctr_offy - m_obj_ctr_offy,
-				-m_obj_rot_ctr_offz - m_obj_ctr_offz));
-		}
-		else
-		{
-			//rotate object
-			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-			inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-			//center object
-			inv_mat = glm::translate(inv_mat, glm::vec3(
-				-m_obj_ctrx,
-				-m_obj_ctry,
-				-m_obj_ctrz));
-		}
-
-		return inv_mat;
-	}
-	glm::mat4 GetDrawWorldMat()
-	{
-		glm::mat4 drw_mat = m_mv_mat;
-		//translate object
-		drw_mat = glm::translate(drw_mat, glm::vec3(
-			m_obj_transx,
-			m_obj_transy,
-			m_obj_transz));
-
-		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		//center object
-		drw_mat = glm::translate(drw_mat, glm::vec3(
-			-m_obj_ctrx,
-			-m_obj_ctry,
-			-m_obj_ctrz));
-
-		return drw_mat;
-	}
-	fluo::Transform GetInvOffsetMat()
-	{
-		return m_offset_tf;
-	}
-	fluo::Vector GetSide()
-	{
-		m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-		m_head.normalize();
-		fluo::Vector side = Cross(m_up, m_head);
-		return side;
-	}
+	glm::mat4 GetModelView() { return m_mv_mat; }
+	glm::mat4 GetProjection() { return m_proj_mat; }
+	glm::mat4 GetObjectMat();
+	glm::mat4 GetDrawMat();
+	glm::mat4 GetInvtMat();
+	glm::mat4 GetDrawWorldMat();
+	fluo::Transform GetInvOffsetMat();
+	fluo::Vector GetSide();
 
 	void UpdateClips();
 
 	void GetRenderSize(int& nx, int& ny);
 
-	//void SetScriptBreak(bool val)
+	//void SetFocusedSlider(wxBasisSlider* slider)
 	//{
-	//	m_scriptor.SetBreak(val);
+	//	m_focused_slider = slider;
 	//}
-
-	void SetFocusedSlider(wxBasisSlider* slider)
-	{
-		m_focused_slider = slider;
-	}
 
 public:
 	//set gl context
@@ -772,7 +509,7 @@ private:
 	//interpolation
 	bool m_intp;
 	//previous focus before brush
-	wxWindow* m_prev_focus;
+	//wxWindow* m_prev_focus;
 
 	//interactive modes
 	int m_int_mode;  //interactive mode
@@ -971,7 +708,7 @@ private:
 	//nodraw count
 	int m_nodraw_count;
 
-	VolumeLoader m_loader;
+	//VolumeLoader m_loader;
 	bool m_load_in_main_thread;
 
 	int m_res_mode;
