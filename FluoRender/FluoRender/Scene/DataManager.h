@@ -141,7 +141,7 @@ public:
 	{m_associated = layer;}
 
 protected:
-	int type;//-1:invalid, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
+	int type;//-1:invalid, 1: canvas, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	std::wstring m_name;
 	unsigned int m_id;
 

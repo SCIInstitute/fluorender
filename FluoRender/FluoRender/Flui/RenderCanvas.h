@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerRenderer.h>
 #include <VolumePoint.h>
 #include <ShaderProgram.h>
-#include <KernelProgram.h>
+//#include <KernelProgram.h>
 #include <MultiVolumeRenderer.h>
 #include <ImgShader.h>
 #include <VolKernel.h>
