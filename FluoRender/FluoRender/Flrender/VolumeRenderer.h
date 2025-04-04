@@ -38,6 +38,10 @@ typedef unsigned int GLuint;
 typedef float GLfloat;
 #endif
 
+#ifndef TextureBrick_h
+#define TEXTURE_RENDER_MODES	5
+#endif
+
 namespace fluo
 {
 	class Plane;
@@ -51,7 +55,7 @@ namespace flvr
 	{
 	public:
 		VolumeRenderer(Texture* tex,
-			const vector<fluo::Plane*> &planes);
+			const std::vector<fluo::Plane*> &planes);
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
@@ -159,8 +163,8 @@ namespace flvr
 		void set_adaptive(bool b);
 
 		//clipping planes
-		void set_planes(vector<fluo::Plane*> *p);
-		vector<fluo::Plane*> *get_planes();
+		void set_planes(std::vector<fluo::Plane*> *p);
+		std::vector<fluo::Plane*> *get_planes();
 
 		//interpolation
 		bool get_interpolate();
@@ -286,7 +290,7 @@ namespace flvr
 		//adaptive
 		bool adaptive_;
 		//planes
-		vector<fluo::Plane *> planes_;
+		std::vector<fluo::Plane *> planes_;
 		//depth peel
 		int depth_peel_;
 		//segmentation

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryParams.h>
 #include <Reshape.h>
 #include <DataManager.h>
+#include <Texture.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <TableHistParams.h>

@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompSelector_h
 #define FL_CompSelector_h
 
-#include <vector>
 #include <Cell.h>
+#include <vector>
 
 namespace flvr
 {

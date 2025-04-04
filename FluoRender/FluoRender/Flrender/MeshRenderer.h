@@ -36,6 +36,10 @@
 
 typedef struct _GLMmodel GLMmodel;
 
+#ifndef __glew_h__
+typedef int GLint;
+#endif
+
 namespace flvr
 {
 	class VertexArray;

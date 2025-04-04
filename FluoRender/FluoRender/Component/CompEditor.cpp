@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <RenderCanvas.h>
 #include <MovieMaker.h>
+#include <Texture.h>
 
 using namespace flrd;
 

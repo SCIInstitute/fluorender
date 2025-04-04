@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeBaker.h>
+#include <DataManager.h>
+#include <Texture.h>
 #include <stdexcept>
 
 using namespace flrd;

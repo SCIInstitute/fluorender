@@ -28,8 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEBAKER_H_
 #define _VOLUMEBAKER_H_
 
-#include <DataManager.h>
+#include <nrrd.h>
 
+class VolumeData;
 namespace flrd
 {
 	class VolumeBaker

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <kmeans.h>
 #include <exmax.h>
 #include <DataManager.h>
+#include <Texture.h>
 #include <ComponentDefault.h>
 
 using namespace flrd;

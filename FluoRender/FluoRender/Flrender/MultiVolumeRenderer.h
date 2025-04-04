@@ -29,17 +29,16 @@
 #ifndef MultiVolumeRenderer_h
 #define MultiVolumeRenderer_h
 
-#include <GL/glew.h>
+#include <TextureRenderer.h>
 #include <BBox.h>
-#include <Plane.h>
-#include <Texture.h>
-#include <VolumeRenderer.h>
 #include <vector>
 
 namespace flvr
 {
 	class Framebuffer;
 	class VertexArray;
+	class VolumeRenderer;
+	class TextureBrick;
 	class MultiVolumeRenderer
 	{
 	public:
@@ -65,7 +64,7 @@ namespace flvr
 		}
 
 		//mode and sampling rate
-		void set_mode(TextureRenderer::RenderMode mode);
+		void set_mode(const TextureRenderer::RenderMode& mode);
 		void set_sampling_rate(double rate);
 		void set_interactive_rate(double irate);
 		void set_interactive_mode(bool mode);
@@ -110,7 +109,7 @@ namespace flvr
 		GLfloat clear_color_[4];
 
 		//volume renderer list
-		vector<VolumeRenderer*> vr_list_;
+		std::vector<VolumeRenderer*> vr_list_;
 
 		//unified matrices
 		glm::mat4 mv_mat2_;
@@ -152,9 +151,9 @@ namespace flvr
 		VertexArray* va_slices_;
 		void draw_polygons_vol(
 			TextureBrick* b, double rate,
-			vector<float>& vertex,
-			vector<uint32_t>& index,
-			vector<uint32_t>& size,
+			std::vector<float>& vertex,
+			std::vector<uint32_t>& index,
+			std::vector<uint32_t>& size,
 			fluo::Ray &view_ray,
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
@@ -162,7 +161,7 @@ namespace flvr
 			Framebuffer* blend_buffer);
 
 		//find out combined bricks in interactive mode
-		vector<TextureBrick*> *get_combined_bricks(
+		std::vector<TextureBrick*> *get_combined_bricks(
 			fluo::Point& center, fluo::Ray& view, bool is_orthographic = false);
 	};
 

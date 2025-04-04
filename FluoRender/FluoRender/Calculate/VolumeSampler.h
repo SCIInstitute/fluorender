@@ -28,10 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESAMPLER_H_
 #define _VOLUMESAMPLER_H_
 
-#include <DataManager.h>
-#include <Vector.h>
 #include <Quaternion.h>
+#include <nrrd.h>
 
+class VolumeData;
+namespace fluo
+{
+	class Vector;
+}
 namespace flrd
 {
 	enum SampDataType

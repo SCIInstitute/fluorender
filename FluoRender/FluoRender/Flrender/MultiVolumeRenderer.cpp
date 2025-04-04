@@ -26,9 +26,18 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
+#include <GL/glew.h>
 #include <MultiVolumeRenderer.h>
-#include <Global.h>
+#include <VolumeRenderer.h>
 #include <ShaderProgram.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <Framebuffer.h>
+#include <VertexArray.h>
+#include <ImgShader.h>
+#include <VolShader.h>
+#include <Global.h>
+#include <MainSettings.h>
 #include <compatibility.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
@@ -81,7 +90,7 @@ MultiVolumeRenderer::~MultiVolumeRenderer()
 }
 
 //mode and sampling rate
-void MultiVolumeRenderer::set_mode(TextureRenderer::RenderMode mode)
+void MultiVolumeRenderer::set_mode(const TextureRenderer::RenderMode& mode)
 {
 	mode_ = mode;
 }
@@ -192,9 +201,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		num_slices_ = 0;
 	}
 
-	vector<float> vertex;
-	vector<uint32_t> index;
-	vector<uint32_t> size;
+	std::vector<float> vertex;
+	std::vector<uint32_t> index;
+	std::vector<uint32_t> size;
 	vertex.reserve(num_slices_*12);
 	index.reserve(num_slices_*6);
 	size.reserve(num_slices_*6);
@@ -271,7 +280,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		vr_list_[i]->eval_ml_mode();
 
 	int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
-	vector<TextureBrick*> *bs = 0;
+	std::vector<TextureBrick*> *bs = 0;
 	fluo::Point pt = TextureRenderer::quota_center_;
 	if (glbin_settings.m_mem_swap &&
 		TextureRenderer::interactive_)

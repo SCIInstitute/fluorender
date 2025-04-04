@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <Global.h>
 #include <RenderCanvas.h>
+#include <Texture.h>
 #include <set>
 
 using namespace flrd;

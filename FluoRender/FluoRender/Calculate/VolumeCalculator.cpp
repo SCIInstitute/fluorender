@@ -26,12 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeCalculator.h>
-#include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <VolumePropPanel.h>
 #include <VolumeDefault.h>
+#include <Global.h>
 #include <Names.h>
+#include <Texture.h>
 
 using namespace flrd;
 

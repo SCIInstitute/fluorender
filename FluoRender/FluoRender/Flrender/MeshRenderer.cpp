@@ -74,7 +74,7 @@ namespace flvr
 	}
 
 	//clipping planes
-	void MeshRenderer::set_planes(vector<fluo::Plane*> *p)
+	void MeshRenderer::set_planes(std::vector<fluo::Plane*> *p)
 	{
 		int i;
 		if (!planes_.empty())
@@ -94,7 +94,7 @@ namespace flvr
 		}
 	}
 
-	vector<fluo::Plane*>* MeshRenderer::get_planes()
+	std::vector<fluo::Plane*>* MeshRenderer::get_planes()
 	{
 		return &planes_;
 	}
@@ -103,7 +103,7 @@ namespace flvr
 	{
 		bool bnormal = data_->normals;
 		bool btexcoord = data_->texcoords;
-		vector<float> verts;
+		std::vector<float> verts;
 
 		GLMgroup* group = data_->groups;
 		GLMtriangle* triangle = 0;

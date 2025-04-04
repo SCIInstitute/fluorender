@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <DataManager.h>
 #include <VolumeDefault.h>
+#include <Texture.h>
 
 using namespace flrd;
 

@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <DataManager.h>
 #include <VolumeDefault.h>
+#include <Texture.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
