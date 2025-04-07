@@ -26,12 +26,24 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Canvas.h>
+#include <GL/glew.h>
+#include <RenderView.h>
+#include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
+#include <MainFrame.h>
+#include <BaseXrRenderer.h>
+#include <LookingGlassRenderer.h>
+#include <ShaderProgram.h>
+#include <KernelProgram.h>
+#include <Texture.h>
+#include <StopWatch.hpp>
+#include <VolumeLoader.h>
+#include <VolumePropPanel.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Canvas::Canvas() :
-	//public
+RenderView::RenderView() :
 	m_size(100, 100),
 	//set gl
 	m_set_gl(false),
@@ -88,9 +100,6 @@ Canvas::Canvas() :
 	m_scale_factor_saved(1.0),
 	//scale mode
 	m_scale_mode(0),
-	//private
-	//m_frame(frame),
-	//m_renderview_panel(parent),
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
@@ -110,8 +119,6 @@ Canvas::Canvas() :
 	m_far_clip(1000.0),
 	//interpolation
 	m_intp(true),
-	//previous focus
-	//m_prev_focus(0),
 	//interactive modes
 	m_int_mode(1),
 	m_crop_type(0),
@@ -234,8 +241,6 @@ Canvas::Canvas() :
 	m_comp_include(false),
 	//comp exclude
 	m_comp_exclude(false),
-	//timer for fullscreen
-	//m_fullscreen_trigger(this, ID_ftrigger),
 	//nodraw count
 	m_nodraw_count(0),
 	//pin rotation center
@@ -243,13 +248,8 @@ Canvas::Canvas() :
 	m_update_rot_ctr(false),
 	m_pin_pick_thresh(0.6),
 	m_res_mode(1),
-	//m_enable_touch(false),
-	//m_ptr_id1(-1),
-	//m_ptr_id2(-1),
-	//m_full_screen(false),
 	m_drawing(false),
 	m_refresh(false),
-	//m_focused_slider(0),
 	m_keep_enlarge(false),
 	m_enlarge(false),
 	m_enlarge_scale(1.0),
@@ -261,8 +261,9 @@ Canvas::Canvas() :
 
 }
 
-Canvas::Canvas(Canvas& copy):
+RenderView::RenderView(RenderView& copy):
 	m_size(copy.m_size),
+	//set gl
 	m_set_gl(copy.m_set_gl),
 	//ruler
 	m_cur_ruler(copy.m_cur_ruler),
@@ -306,20 +307,180 @@ Canvas::Canvas(Canvas& copy):
 	m_disp_scale_bar_text(false), //copy m_disp_scale_bar_text,
 	m_sb_length(50), //copy m_sb_length,
 	m_sb_unit(1), //copy m_sb_unit,
+	m_sb_height(0.0),
 	//ortho size
 	m_ortho_left(0.0), //copy m_ortho_left,
 	m_ortho_right(1.0), //copy m_ortho_right,
 	m_ortho_bottom(0.0), //copy m_ortho_bottom,
 	m_ortho_top(1.0), //copy m_ortho_top,
 	//scale factor
-	m_scale_factor(1.0) //copy m_scale_factor,
-	//
+	m_scale_factor(1.0), //copy m_scale_factor,
+	m_scale_factor_saved(1.0),
+	//scale mode
+	m_scale_mode(0),
+	//populated lists of data
+	m_vd_pop_dirty(true),
+	m_md_pop_dirty(true),
+	//traces
+	m_track_group(0),
+	//multivolume
+	m_mvr(0),
+	//initializaion
+	m_initialized(false),
+	m_init_view(false),
+	//bg color
+	m_bg_color(copy.m_bg_color),
+	m_bg_color_inv(copy.m_bg_color_inv),
+	//frustrum
+	m_aov(copy.m_aov),
+	m_near_clip(copy.m_near_clip),
+	m_far_clip(copy.m_far_clip),
+	//interpolation
+	m_intp(copy.m_intp),
+	//interacrive modes
+	m_int_mode(copy.m_int_mode),
+	m_crop_type(copy.m_crop_type),
+	m_force_clear(false),
+	m_interactive(false),
+	m_clear_buffer(false),
+	m_grow_on(false),
+	//resizing
+	m_resize(false),
+	//brush tools
+	m_draw_brush(false),
+	m_paint_enable(false),
+	m_paint_display(false),
+	//paint buffer
+	m_clear_paint(true),
+	//camera controls
+	m_persp(false),
+	m_free(false),
+	//camera distance
+	m_distance(copy.m_distance),
+	m_init_dist(copy.m_init_dist),
+	//camera translation
+	m_transx(0.0), m_transy(0.0), m_transz(0.0),
+	m_transx_saved(0.0), m_transy_saved(0.0), m_transz_saved(0.0),
+	//camera rotation
+	m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
+	m_rotx_saved(0.0), m_roty_saved(0.0), m_rotz_saved(0.0),
+	//camera center
+	m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
+	m_ctrx_saved(0.0), m_ctry_saved(0.0), m_ctrz_saved(0.0),
+	//camera direction
+	m_up(0.0, 1.0, 0.0),
+	m_head(0.0, 0.0, -1.0),
+	//object center
+	m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
+	//object rotation
+	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
+	//flag for using offset values
+	m_offset(false),
+	//object center offset
+	m_obj_ctr_offx(0), m_obj_ctr_offy(0), m_obj_ctr_offz(0),
+	//object rotation center offset
+	m_obj_rot_ctr_offx(0), m_obj_rot_ctr_offy(0), m_obj_rot_ctr_offz(0),
+	//object rotation offset
+	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
+	//object translation
+	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
+	m_obj_transx_saved(0.0), m_obj_transy_saved(0.0), m_obj_transz_saved(0.0),
+	m_rot_lock(false),
+	//lock cam center
+	m_lock_cam_object(false),
+	m_pick_lock_center(false),
+	//object bounding box
+	m_radius(348.0),
+	//mouse position
+	old_mouse_X(-1), old_mouse_Y(-1),
+	prv_mouse_X(-1), prv_mouse_Y(-1),
+	//draw controls
+	m_draw_all(copy.m_draw_all),
+	m_draw_type(copy.m_draw_type),
+	m_vol_method(copy.m_vol_method),
+	//fog
+	m_use_fog(true),
+	m_fog_intensity(0.0),
+	m_fog_start(0.0),
+	m_fog_end(0.0),
+	//movie properties
+	m_init_angle(0.0),
+	m_start_angle(0.0),
+	m_end_angle(0.0),
+	m_cur_angle(0.0),
+	m_step(0.0),
+	m_movie_seq(0),
+	m_rewind(false),
+	m_stages(0),
+	m_4d_rewind(false),
+	//post image processing
+	m_gamma(copy.m_gamma),
+	m_brightness(copy.m_brightness),
+	m_hdr(copy.m_hdr),
+	m_sync(copy.m_sync),
+	//volume color map
+	m_color_1(fluo::Color(0.0, 0.0, 1.0)),
+	m_value_2(0.0),
+	m_color_2(fluo::Color(0.0, 0.0, 1.0)),
+	m_value_3(0.25),
+	m_color_3(fluo::Color(0.0, 1.0, 1.0)),
+	m_value_4(0.5),
+	m_color_4(fluo::Color(0.0, 1.0, 0.0)),
+	m_value_5(0.75),
+	m_color_5(fluo::Color(1.0, 1.0, 0.0)),
+	m_value_6(1.0),
+	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
+	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
+	//clipping plane rotations
+	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
+	//selection
+	m_pick(false),
+	m_draw_mask(true),
+	m_clear_mask(false),
+	m_save_mask(false),
+	//move view
+	m_move_left(false),
+	m_move_right(false),
+	m_move_up(false),
+	m_move_down(false),
+	//move time
+	m_tseq_forward(false),
+	m_tseq_backward(false),
+	//move clip
+	m_clip_up(false),
+	m_clip_down(false),
+	//full cell
+	m_cell_full(false),
+	//link cells
+	m_cell_link(false),
+	//new cell id
+	m_cell_new_id(false),
+	//comp include
+	m_comp_include(false),
+	//comp exclude
+	m_comp_exclude(false),
+	//nodraw count
+	m_nodraw_count(0),
+	//pin rotation center
+	m_pin_rot_ctr(false),
+	m_update_rot_ctr(false),
+	m_pin_pick_thresh(0.6),
+	m_res_mode(1),
+	m_drawing(false),
+	m_refresh(false),
+	//m_focused_slider(0),
+	m_keep_enlarge(false),
+	m_enlarge(false),
+	m_enlarge_scale(1.0),
+	//vr settings
+	m_lg_initiated(false),
+	m_use_openxr(false),
+	m_vr_eye_idx(0)
 {
 }
 
-Canvas::~Canvas()
+RenderView::~RenderView()
 {
-#ifdef _WIN32
 	if (glbin_settings.m_hologram_mode)
 	{
 		if (glbin_settings.m_hologram_mode == 1 && m_use_openxr)
@@ -332,27 +493,75 @@ Canvas::~Canvas()
 			glbin_lg_renderer.Close();
 		}
 	}
-#endif
+
+	int i;
+	//delete groups
+	for (i = 0; i<(int)m_layer_list.size(); i++)
+	{
+		if (!m_layer_list[i])
+			continue;
+		if (m_layer_list[i]->IsA() == 2)
+		{
+			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			if (vd)
+				glbin_current.mainframe->DeleteProps(2, vd->GetName());
+		}
+		if (m_layer_list[i]->IsA() == 3)
+		{
+			MeshData* md = (MeshData*)m_layer_list[i];
+			if (md)
+			{
+				glbin_current.mainframe->DeleteProps(3, md->GetName());
+				glbin_current.mainframe->DeleteProps(6, md->GetName());
+			}
+		}
+		if (m_layer_list[i]->IsA() == 4)
+		{
+			Annotations* ad = (Annotations*)m_layer_list[i];
+			if (ad)
+				glbin_current.mainframe->DeleteProps(4, ad->GetName());
+		}
+		if (m_layer_list[i]->IsA() == 5)//group
+		{
+			DataGroup* group = (DataGroup*)m_layer_list[i];
+			for (size_t j = 0; j < group->GetVolumeNum(); ++j)
+			{
+				VolumeData* vd = group->GetVolumeData(j);
+				if (vd)
+					glbin_current.mainframe->DeleteProps(2, vd->GetName());
+			}
+			delete group;
+		}
+		else if (m_layer_list[i]->IsA() == 6)//mesh group
+		{
+			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			for (size_t j = 0; j < group->GetMeshNum(); ++j)
+			{
+				MeshData* md = group->GetMeshData(j);
+				if (md)
+					glbin_current.mainframe->DeleteProps(3, md->GetName());
+			}
+			delete group;
+		}
+	}
+
+	//delete rulers
+	m_ruler_list.DeleteRulers();
+
+	if (m_track_group)
+		delete m_track_group;
+
+	if (m_mvr)
+		delete m_mvr;
 
 }
 
-#ifdef _WIN32
-int Canvas::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd)
-{
-	int pixelFormat = ::GetPixelFormat(m_hDC);
-	if (pixelFormat == 0) return GetLastError();
-	pixelFormat = DescribePixelFormat(m_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), pfd);
-	if (pixelFormat == 0) return GetLastError();
-	return pixelFormat;
-}
-#endif
-
-std::string Canvas::GetOGLVersion()
+std::string RenderView::GetOGLVersion()
 {
 	return m_GLversion;
 }
 
-void Canvas::Init()
+void RenderView::Init()
 {
 	if (!m_initialized)
 	{
@@ -371,14 +580,13 @@ void Canvas::Init()
 		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 		glEnable(GL_MULTISAMPLE);
 
-		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
 		m_initialized = true;
 
 		glbin.getStopWatch(gstStopWatch)->start();
 	}
 }
 
-void Canvas::InitOpenXR()
+void RenderView::InitOpenXR()
 {
 	if (m_use_openxr)
 		return;
@@ -440,7 +648,7 @@ void Canvas::InitOpenXR()
 	}
 }
 
-void Canvas::InitLookingGlass()
+void RenderView::InitLookingGlass()
 {
 	if (m_lg_initiated)
 		return;
@@ -448,7 +656,7 @@ void Canvas::InitLookingGlass()
 	if (!bval)
 	{
 		glbin_settings.m_hologram_mode = 0;
-		m_renderview_panel->FluoRefresh(0, { gstHologramMode }, { -1 });
+		glbin_current.mainframe->UpdateProps({ gstHologramMode });
 		return;
 	}
 	glbin_lg_renderer.SetDevIndex(glbin_settings.m_lg_dev_id);
@@ -457,13 +665,13 @@ void Canvas::InitLookingGlass()
 	if (glbin_settings.m_lg_offset == 0)
 		glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
 	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
-	m_renderview_panel->FluoRefresh(0, { gstHologramMode, gstFullscreenDisplay }, { -1 });
+	glbin_current.mainframe->UpdateProps({ gstHologramMode, gstFullscreenDisplay });
 	m_renderview_panel->SetFullScreen();
 	m_lg_initiated = true;
 }
 
 //init
-void Canvas::InitView(unsigned int type)
+void RenderView::InitView(unsigned int type)
 {
 	int i;
 
@@ -527,7 +735,7 @@ void Canvas::InitView(unsigned int type)
 
 }
 
-void Canvas::ClearAll()
+void RenderView::ClearAll()
 {
 	Clear();
 	ClearVolList();
@@ -543,9 +751,9 @@ void Canvas::ClearAll()
 	SetClippingPlaneRotations(fluo::Vector(0.0));
 }
 
-void Canvas::Clear()
+void RenderView::Clear()
 {
-	m_loader.RemoveAllLoadedBrick();
+	glbin_vol_loader.RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
 
 	//delete groups
@@ -569,26 +777,26 @@ void Canvas::Clear()
 	m_cur_vol = 0;
 }
 
-void Canvas::ClearVolList()
+void RenderView::ClearVolList()
 {
-	m_loader.RemoveAllLoadedBrick();
+	glbin_vol_loader.RemoveAllLoadedBrick();
 	flvr::TextureRenderer::clear_tex_pool();
 	m_vd_pop_list.clear();
 }
 
-void Canvas::ClearMeshList()
+void RenderView::ClearMeshList()
 {
 	m_md_pop_list.clear();
 }
 
-int Canvas::GetAny()
+int RenderView::GetAny()
 {
 	PopVolumeList();
 	PopMeshList();
 	return m_vd_pop_list.size() + m_md_pop_list.size();
 }
 
-int Canvas::GetDispVolumeNum()
+int RenderView::GetDispVolumeNum()
 {
 	//get the volume list m_vd_pop_list
 	PopVolumeList();
@@ -596,7 +804,7 @@ int Canvas::GetDispVolumeNum()
 	return m_vd_pop_list.size();
 }
 
-int Canvas::GetAllVolumeNum()
+int RenderView::GetAllVolumeNum()
 {
 	int num = 0;
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
@@ -619,13 +827,13 @@ int Canvas::GetAllVolumeNum()
 	return num;
 }
 
-int Canvas::GetMeshNum()
+int RenderView::GetMeshNum()
 {
 	PopMeshList();
 	return m_md_pop_list.size();
 }
 
-int Canvas::GetGroupNum()
+int RenderView::GetGroupNum()
 {
 	int group_num = 0;
 
@@ -638,12 +846,12 @@ int Canvas::GetGroupNum()
 	return group_num;
 }
 
-int Canvas::GetLayerNum()
+int RenderView::GetLayerNum()
 {
 	return m_layer_list.size();
 }
 
-VolumeData* Canvas::GetAllVolumeData(int index)
+VolumeData* RenderView::GetAllVolumeData(int index)
 {
 	int cnt = 0;
 	int i, j;
@@ -676,7 +884,7 @@ VolumeData* Canvas::GetAllVolumeData(int index)
 	return 0;
 }
 
-VolumeData* Canvas::GetDispVolumeData(int index)
+VolumeData* RenderView::GetDispVolumeData(int index)
 {
 	if (GetDispVolumeNum() <= 0)
 		return 0;
@@ -690,7 +898,7 @@ VolumeData* Canvas::GetDispVolumeData(int index)
 		return 0;
 }
 
-MeshData* Canvas::GetMeshData(int index)
+MeshData* RenderView::GetMeshData(int index)
 {
 	if (GetMeshNum() <= 0)
 		return 0;
@@ -703,7 +911,7 @@ MeshData* Canvas::GetMeshData(int index)
 		return 0;
 }
 
-TreeLayer* Canvas::GetLayer(int index)
+TreeLayer* RenderView::GetLayer(int index)
 {
 	if (index >= 0 && index<(int)m_layer_list.size())
 		return m_layer_list[index];
@@ -711,7 +919,7 @@ TreeLayer* Canvas::GetLayer(int index)
 		return 0;
 }
 
-VolumeData* Canvas::GetVolumeData(const std::wstring &name)
+VolumeData* RenderView::GetVolumeData(const std::wstring &name)
 {
 	int i, j;
 
@@ -747,7 +955,7 @@ VolumeData* Canvas::GetVolumeData(const std::wstring &name)
 	return 0;
 }
 
-MeshData* Canvas::GetMeshData(const std::wstring &name)
+MeshData* RenderView::GetMeshData(const std::wstring &name)
 {
 	int i, j;
 
@@ -781,7 +989,7 @@ MeshData* Canvas::GetMeshData(const std::wstring &name)
 	return 0;
 }
 
-Annotations* Canvas::GetAnnotations(const std::wstring &name)
+Annotations* RenderView::GetAnnotations(const std::wstring &name)
 {
 	int i;
 
@@ -802,7 +1010,7 @@ Annotations* Canvas::GetAnnotations(const std::wstring &name)
 	return 0;
 }
 
-DataGroup* Canvas::GetGroup(const std::wstring &name)
+DataGroup* RenderView::GetGroup(const std::wstring &name)
 {
 	int i;
 
@@ -823,7 +1031,7 @@ DataGroup* Canvas::GetGroup(const std::wstring &name)
 	return 0;
 }
 
-DataGroup* Canvas::GetGroup(int index)
+DataGroup* RenderView::GetGroup(int index)
 {
 	int i;
 	int count = 0;
@@ -845,7 +1053,7 @@ DataGroup* Canvas::GetGroup(int index)
 	return 0;
 }
 
-DataGroup* Canvas::GetGroup(VolumeData* vd)
+DataGroup* RenderView::GetGroup(VolumeData* vd)
 {
 	for (int i = 0; i < GetLayerNum(); i++)
 	{
@@ -864,7 +1072,7 @@ DataGroup* Canvas::GetGroup(VolumeData* vd)
 	return 0;
 }
 
-MeshGroup* Canvas::GetMGroup(const std::wstring& str)
+MeshGroup* RenderView::GetMGroup(const std::wstring& str)
 {
 	int i;
 
@@ -885,7 +1093,7 @@ MeshGroup* Canvas::GetMGroup(const std::wstring& str)
 	return 0;
 }
 
-DataGroup* Canvas::AddVolumeData(VolumeData* vd, const std::wstring& group_name)
+DataGroup* RenderView::AddVolumeData(VolumeData* vd, const std::wstring& group_name)
 {
 	//m_layer_list.push_back(vd);
 	int i;
@@ -950,18 +1158,18 @@ DataGroup* Canvas::AddVolumeData(VolumeData* vd, const std::wstring& group_name)
 	return group;
 }
 
-void Canvas::AddMeshData(MeshData* md)
+void RenderView::AddMeshData(MeshData* md)
 {
 	m_layer_list.push_back(md);
 	m_md_pop_dirty = true;
 }
 
-void Canvas::AddAnnotations(Annotations* ann)
+void RenderView::AddAnnotations(Annotations* ann)
 {
 	m_layer_list.push_back(ann);
 }
 
-std::wstring Canvas::AddGroup(const std::wstring& str, const std::wstring& prev_group)
+std::wstring RenderView::AddGroup(const std::wstring& str, const std::wstring& prev_group)
 {
 	DataGroup* group = new DataGroup();
 	if (group && str != L"")
@@ -990,24 +1198,20 @@ std::wstring Canvas::AddGroup(const std::wstring& str, const std::wstring& prev_
 		m_layer_list.push_back(group);
 
 	//set default settings
-	if (m_frame)
+	if (group)
 	{
-		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-		if (adjust_view && group)
-		{
-			//fluo::Color gamma, brightness, hdr;
-			//bool sync_r, sync_g, sync_b;
-			//adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-			group->SetGammaColor(
-				fluo::Color(glbin_outadj_def.m_gamma_r, glbin_outadj_def.m_gamma_g, glbin_outadj_def.m_gamma_b));
-			group->SetBrightness(
-				fluo::Color(glbin_outadj_def.m_brightness_r, glbin_outadj_def.m_brightness_g, glbin_outadj_def.m_brightness_b));
-			group->SetHdr(
-				fluo::Color(glbin_outadj_def.m_hdr_r, glbin_outadj_def.m_hdr_g, glbin_outadj_def.m_hdr_b));
-			group->SetSync(0, glbin_outadj_def.m_sync_r);
-			group->SetSync(1, glbin_outadj_def.m_sync_g);
-			group->SetSync(2, glbin_outadj_def.m_sync_b);
-		}
+		//fluo::Color gamma, brightness, hdr;
+		//bool sync_r, sync_g, sync_b;
+		//adjust_view->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
+		group->SetGammaColor(
+			fluo::Color(glbin_outadj_def.m_gamma_r, glbin_outadj_def.m_gamma_g, glbin_outadj_def.m_gamma_b));
+		group->SetBrightness(
+			fluo::Color(glbin_outadj_def.m_brightness_r, glbin_outadj_def.m_brightness_g, glbin_outadj_def.m_brightness_b));
+		group->SetHdr(
+			fluo::Color(glbin_outadj_def.m_hdr_r, glbin_outadj_def.m_hdr_g, glbin_outadj_def.m_hdr_b));
+		group->SetSync(0, glbin_outadj_def.m_sync_r);
+		group->SetSync(1, glbin_outadj_def.m_sync_g);
+		group->SetSync(2, glbin_outadj_def.m_sync_b);
 	}
 
 	if (group)
@@ -1016,7 +1220,7 @@ std::wstring Canvas::AddGroup(const std::wstring& str, const std::wstring& prev_
 		return L"";
 }
 
-DataGroup* Canvas::AddOrGetGroup()
+DataGroup* RenderView::AddOrGetGroup()
 {
 	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
@@ -1038,27 +1242,20 @@ DataGroup* Canvas::AddOrGetGroup()
 	if (!group)
 		return 0;
 	//set default settings
-	if (m_frame)
-	{
-		OutputAdjPanel* adjust_view = m_frame->GetOutAdjPanel();
-		if (adjust_view)
-		{
-			group->SetGammaColor(
-				fluo::Color(glbin_outadj_def.m_gamma_r, glbin_outadj_def.m_gamma_g, glbin_outadj_def.m_gamma_b));
-			group->SetBrightness(
-				fluo::Color(glbin_outadj_def.m_brightness_r, glbin_outadj_def.m_brightness_g, glbin_outadj_def.m_brightness_b));
-			group->SetHdr(
-				fluo::Color(glbin_outadj_def.m_hdr_r, glbin_outadj_def.m_hdr_g, glbin_outadj_def.m_hdr_b));
-			group->SetSync(0, glbin_outadj_def.m_sync_r);
-			group->SetSync(1, glbin_outadj_def.m_sync_g);
-			group->SetSync(2, glbin_outadj_def.m_sync_b);
-		}
-	}
+	group->SetGammaColor(
+		fluo::Color(glbin_outadj_def.m_gamma_r, glbin_outadj_def.m_gamma_g, glbin_outadj_def.m_gamma_b));
+	group->SetBrightness(
+		fluo::Color(glbin_outadj_def.m_brightness_r, glbin_outadj_def.m_brightness_g, glbin_outadj_def.m_brightness_b));
+	group->SetHdr(
+		fluo::Color(glbin_outadj_def.m_hdr_r, glbin_outadj_def.m_hdr_g, glbin_outadj_def.m_hdr_b));
+	group->SetSync(0, glbin_outadj_def.m_sync_r);
+	group->SetSync(1, glbin_outadj_def.m_sync_g);
+	group->SetSync(2, glbin_outadj_def.m_sync_b);
 	m_layer_list.push_back(group);
 	return group;
 }
 
-std::wstring Canvas::AddMGroup(const std::wstring& str)
+std::wstring RenderView::AddMGroup(const std::wstring& str)
 {
 	MeshGroup* group = new MeshGroup();
 	if (group && str != L"")
@@ -1071,7 +1268,7 @@ std::wstring Canvas::AddMGroup(const std::wstring& str)
 		return L"";
 }
 
-MeshGroup* Canvas::AddOrGetMGroup()
+MeshGroup* RenderView::AddOrGetMGroup()
 {
 	for (int i = 0; i < (int)m_layer_list.size(); i++)
 	{
@@ -1096,10 +1293,10 @@ MeshGroup* Canvas::AddOrGetMGroup()
 	return group;
 }
 
-void Canvas::RemoveVolumeData(const std::wstring &name)
+void RenderView::RemoveVolumeData(const std::wstring &name)
 {
 	//std::wstring str = GetName().ToStdWstring() + L":";
-	m_frame->DeleteProps(2, name);
+	glbin_current.mainframe->DeleteProps(2, name);
 
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end(); ++iter)
@@ -1141,10 +1338,10 @@ void Canvas::RemoveVolumeData(const std::wstring &name)
 	}
 }
 
-void Canvas::RemoveVolumeDataDup(const std::wstring &name)
+void RenderView::RemoveVolumeDataDup(const std::wstring &name)
 {
 	//std::wstring str = GetName().ToStdWstring() + L":";
-	m_frame->DeleteProps(2, name);
+	glbin_current.mainframe->DeleteProps(2, name);
 	VolumeData* vd_main = 0;
 	for (auto iter = m_layer_list.begin();
 		iter != m_layer_list.end() && !vd_main;
@@ -1257,7 +1454,7 @@ void Canvas::RemoveVolumeDataDup(const std::wstring &name)
 	}
 }
 
-void Canvas::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
+void RenderView::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
 {
 	int i, j;
 
@@ -1276,7 +1473,7 @@ void Canvas::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
 			if (vd && vd->GetName() == name)
 			{
 				if (m_cur_vol == vd) m_cur_vol = dst;
-				m_loader.RemoveBrickVD(vd);
+				glbin_vol_loader.RemoveBrickVD(vd);
 				vd->GetVR()->clear_tex_current();
 				m_layer_list[i] = dst;
 				m_vd_pop_dirty = true;
@@ -1295,7 +1492,7 @@ void Canvas::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
 				if (vd && vd->GetName() == name)
 				{
 					if (m_cur_vol == vd) m_cur_vol = dst;
-					m_loader.RemoveBrickVD(vd);
+					glbin_vol_loader.RemoveBrickVD(vd);
 					vd->GetVR()->clear_tex_current();
 					tmpgroup->ReplaceVolumeData(j, dst);
 					m_vd_pop_dirty = true;
@@ -1313,16 +1510,16 @@ void Canvas::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
 	if (found)
 	{
 		glbin_current.vol_data = dst;
-		VolumePropPanel* vprop_view = m_frame->FindVolumeProps(name);
+		VolumePropPanel* vprop_view = glbin_current.mainframe->FindVolumeProps(name);
 		if (vprop_view)
 			vprop_view->SetVolumeData(dst);
 	}
 }
 
-void Canvas::RemoveMeshData(const std::wstring &name)
+void RenderView::RemoveMeshData(const std::wstring &name)
 {
 	//std::wstring str = GetName().ToStdWstring() + L":";
-	m_frame->DeleteProps(3, name);
+	glbin_current.mainframe->DeleteProps(3, name);
 
 	int i, j;
 
@@ -1363,9 +1560,9 @@ void Canvas::RemoveMeshData(const std::wstring &name)
 	}
 }
 
-void Canvas::RemoveAnnotations(const std::wstring &name)
+void RenderView::RemoveAnnotations(const std::wstring &name)
 {
-	m_frame->DeleteProps(4, name);
+	glbin_current.mainframe->DeleteProps(4, name);
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
 		if (!m_layer_list[i])
@@ -1381,7 +1578,7 @@ void Canvas::RemoveAnnotations(const std::wstring &name)
 	}
 }
 
-void Canvas::RemoveGroup(const std::wstring &name)
+void RenderView::RemoveGroup(const std::wstring &name)
 {
 	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
@@ -1401,7 +1598,7 @@ void Canvas::RemoveGroup(const std::wstring &name)
 					{
 						group->RemoveVolumeData(j);
 						//if add back to view
-						m_frame->DeleteProps(2, vd->GetName());
+						glbin_current.mainframe->DeleteProps(2, vd->GetName());
 					}
 				}
 				m_layer_list.erase(m_layer_list.begin() + i);
@@ -1421,7 +1618,7 @@ void Canvas::RemoveGroup(const std::wstring &name)
 					if (md)
 					{
 						group->RemoveMeshData(j);
-						m_frame->DeleteProps(3, md->GetName());
+						glbin_current.mainframe->DeleteProps(3, md->GetName());
 					}
 				}
 				m_layer_list.erase(m_layer_list.begin() + i);
@@ -1435,7 +1632,7 @@ void Canvas::RemoveGroup(const std::wstring &name)
 }
 
 //isolate
-void Canvas::Isolate(int type, const std::wstring& name)
+void RenderView::Isolate(int type, const std::wstring& name)
 {
 	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
@@ -1552,7 +1749,7 @@ void Canvas::Isolate(int type, const std::wstring& name)
 	m_md_pop_dirty = true;
 }
 
-void Canvas::ShowAll()
+void RenderView::ShowAll()
 {
 	for (size_t i = 0; i<m_layer_list.size(); ++i)
 	{
@@ -1619,7 +1816,7 @@ void Canvas::ShowAll()
 
 //move layer of the same level within this view
 //source is after the destination
-void Canvas::MoveLayerinView(const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveLayerinView(const std::wstring &src_name, const std::wstring &dst_name)
 {
 	size_t src_index;
 	TreeLayer* src = 0;
@@ -1652,7 +1849,7 @@ void Canvas::MoveLayerinView(const std::wstring &src_name, const std::wstring &d
 
 //move layer (volume) of the same level within the given group
 //source is after the destination
-void Canvas::MoveLayerinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveLayerinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	DataGroup* group = GetGroup(group_name);
 	if (!group)
@@ -1691,7 +1888,7 @@ void Canvas::MoveLayerinGroup(const std::wstring &group_name, const std::wstring
 
 //move layer (volume) from the given group up one level to this view
 //source is after the destination
-void Canvas::MoveLayertoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveLayertoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	DataGroup* group = GetGroup(group_name);
 	if (!group)
@@ -1732,7 +1929,7 @@ void Canvas::MoveLayertoView(const std::wstring &group_name, const std::wstring 
 
 //move layer (volume) one level down to the given group
 //source is after the destination
-void Canvas::MoveLayertoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveLayertoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	VolumeData* src_vd = 0;
 
@@ -1782,7 +1979,7 @@ void Canvas::MoveLayertoGroup(const std::wstring &group_name, const std::wstring
 
 //move layer (volume from one group to another different group
 //sourece is after the destination
-void Canvas::MoveLayerfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveLayerfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	DataGroup* src_group = GetGroup(src_group_name);
 	if (!src_group)
@@ -1839,7 +2036,7 @@ void Canvas::MoveLayerfromtoGroup(const std::wstring &src_group_name, const std:
 }
 
 //move mesh within a group
-void Canvas::MoveMeshinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveMeshinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	MeshGroup* group = GetMGroup(group_name);
 	if (!group)
@@ -1878,7 +2075,7 @@ void Canvas::MoveMeshinGroup(const std::wstring &group_name, const std::wstring 
 }
 
 //move mesh out of a group
-void Canvas::MoveMeshtoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveMeshtoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	MeshGroup* group = GetMGroup(group_name);
 	if (!group)
@@ -1917,7 +2114,7 @@ void Canvas::MoveMeshtoView(const std::wstring &group_name, const std::wstring &
 }
 
 //move mesh into a group
-void Canvas::MoveMeshtoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveMeshtoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	MeshData* src_md = 0;
 
@@ -1953,7 +2150,7 @@ void Canvas::MoveMeshtoGroup(const std::wstring &group_name, const std::wstring 
 }
 
 //move mesh out of then into a group
-void Canvas::MoveMeshfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name)
+void RenderView::MoveMeshfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
 	MeshGroup* src_group = GetMGroup(src_group_name);
 	if (!src_group)
@@ -1993,7 +2190,7 @@ void Canvas::MoveMeshfromtoGroup(const std::wstring &src_group_name, const std::
 
 //get populated volume list
 //stored in m_vd_pop_list
-void Canvas::PopVolumeList()
+void RenderView::PopVolumeList()
 {
 	if (!m_vd_pop_dirty)
 		return;
@@ -2033,7 +2230,7 @@ void Canvas::PopVolumeList()
 
 //get populated mesh list
 //stored in m_md_pop_list
-void Canvas::PopMeshList()
+void RenderView::PopMeshList()
 {
 	if (!m_md_pop_dirty)
 		return;
@@ -2075,7 +2272,7 @@ void Canvas::PopMeshList()
 //organize layers in view
 //put all volume data under view into last group of the view
 //if no group in view
-void Canvas::OrganizeLayers()
+void RenderView::OrganizeLayers()
 {
 	DataGroup* le_group = 0;
 	int i;
@@ -2123,7 +2320,7 @@ void Canvas::OrganizeLayers()
 	}
 }
 
-void Canvas::RandomizeColor()
+void RenderView::RandomizeColor()
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -2132,22 +2329,22 @@ void Canvas::RandomizeColor()
 	}
 }
 
-void Canvas::SetDraw(bool draw)
+void RenderView::SetDraw(bool draw)
 {
 	m_draw_all = draw;
 }
 
-void Canvas::ToggleDraw()
+void RenderView::ToggleDraw()
 {
 	m_draw_all = !m_draw_all;
 }
 
-bool Canvas::GetDraw()
+bool RenderView::GetDraw()
 {
 	return m_draw_all;
 }
 
-void Canvas::HandleProjection(int nx, int ny, bool vr)
+void RenderView::HandleProjection(int nx, int ny, bool vr)
 {
 	if (ny == 0 || m_aov == 0 || m_scale_factor == 0)
 		return;
@@ -2179,7 +2376,7 @@ void Canvas::HandleProjection(int nx, int ny, bool vr)
 	}
 }
 
-void Canvas::HandleCamera(bool vr)
+void RenderView::HandleCamera(bool vr)
 {
 	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
@@ -2293,22 +2490,22 @@ void Canvas::HandleCamera(bool vr)
 }
 
 //camera operations
-fluo::Vector Canvas::GetTranslations()
+fluo::Vector RenderView::GetTranslations()
 {
 	return fluo::Vector(m_transx, m_transy, m_transz);
 }
-void Canvas::SetTranslations(const fluo::Vector& val)
+void RenderView::SetTranslations(const fluo::Vector& val)
 {
 	m_transx = val.x(); m_transy = val.y(); m_transz = val.z();
 	m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
 }
 
-fluo::Vector Canvas::GetRotations()
+fluo::Vector RenderView::GetRotations()
 {
 	return fluo::Vector(m_rotx, m_roty, m_rotz);
 }
 
-void Canvas::SetRotations(const fluo::Vector& val, bool notify)
+void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 {
 	m_rotx = val.x();
 	m_roty = val.y();
@@ -2343,7 +2540,7 @@ void Canvas::SetRotations(const fluo::Vector& val, bool notify)
 		m_renderview_panel->FluoUpdate({ gstCamRotation });
 }
 
-int Canvas::GetOrientation()
+int RenderView::GetOrientation()
 {
 	//update ortho rotation
 	if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
@@ -2362,12 +2559,12 @@ int Canvas::GetOrientation()
 		return 6;
 }
 
-void Canvas::SetZeroRotations()
+void RenderView::SetZeroRotations()
 {
 	m_zq = m_q;
 }
 
-fluo::Vector Canvas::ResetZeroRotations()
+fluo::Vector RenderView::ResetZeroRotations()
 {
 	double rotx, roty, rotz;
 	m_zq = fluo::Quaternion();
@@ -2387,22 +2584,22 @@ fluo::Vector Canvas::ResetZeroRotations()
 	return fluo::Vector(rotx, roty, rotz);
 }
 
-fluo::Point Canvas::GetCenters()
+fluo::Point RenderView::GetCenters()
 {
 	return fluo::Point(m_ctrx, m_ctry, m_ctrz);
 }
 
-void Canvas::SetCenters(const fluo::Point& val)
+void RenderView::SetCenters(const fluo::Point& val)
 {
 	m_ctrx = val.x(); m_ctry = val.y(); m_ctrz = val.z();
 }
 
-void Canvas::SetRadius(double r)
+void RenderView::SetRadius(double r)
 {
 	m_radius = r;
 }
 
-void Canvas::SetCenter()
+void RenderView::SetCenter()
 {
 	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
 
@@ -2444,7 +2641,7 @@ void Canvas::SetCenter()
 	}
 }
 
-double Canvas::Get121ScaleFactor()
+double RenderView::Get121ScaleFactor()
 {
 	double result = 1.0;
 
@@ -2468,7 +2665,7 @@ double Canvas::Get121ScaleFactor()
 	return result;
 }
 
-void Canvas::SetScale121()
+void RenderView::SetScale121()
 {
 	m_scale_factor = Get121ScaleFactor();
 	double value = 1.0;
@@ -2503,7 +2700,7 @@ void Canvas::SetScale121()
 	m_renderview_panel->FluoUpdate({ gstScaleFactor });
 }
 
-void Canvas::SetPinRotCenter(bool pin)
+void RenderView::SetPinRotCenter(bool pin)
 {
 	m_pin_rot_ctr = pin;
 	if (pin)
@@ -2511,31 +2708,31 @@ void Canvas::SetPinRotCenter(bool pin)
 }
 
 //object operations
-fluo::Point Canvas::GetObjCenters()
+fluo::Point RenderView::GetObjCenters()
 {
 	return fluo::Point(m_obj_ctrx, m_obj_ctry, m_obj_ctrz);
 }
 
-void Canvas::SetObjCenters(const fluo::Point& val)
+void RenderView::SetObjCenters(const fluo::Point& val)
 {
 	m_obj_ctrx = val.x();
 	m_obj_ctry = val.y();
 	m_obj_ctrz = val.z();
 }
 
-fluo::Vector Canvas::GetObjRot()
+fluo::Vector RenderView::GetObjRot()
 {
 	return fluo::Vector(m_obj_rotx, m_obj_roty, m_obj_rotz);
 }
 
-void Canvas::SetObjRot(const fluo::Vector& val)
+void RenderView::SetObjRot(const fluo::Vector& val)
 {
 	m_obj_rotx = val.x();
 	m_obj_roty = val.y();
 	m_obj_rotz = val.z();
 }
 
-void Canvas::SetOffset()
+void RenderView::SetOffset()
 {
 	if (m_obj_ctr_offx != 0.0 || m_obj_ctr_offy != 0.0 || m_obj_ctr_offz != 0.0 ||
 		m_obj_rot_ctr_offx != 0.0 || m_obj_rot_ctr_offy != 0.0 || m_obj_rot_ctr_offz != 0.0 ||
@@ -2545,12 +2742,12 @@ void Canvas::SetOffset()
 		m_offset = false;
 }
 
-fluo::Vector Canvas::GetObjCtrOff()
+fluo::Vector RenderView::GetObjCtrOff()
 {
 	return fluo::Vector(m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz);
 }
 
-void Canvas::SetObjCtrOff(const fluo::Vector& val)
+void RenderView::SetObjCtrOff(const fluo::Vector& val)
 {
 	m_obj_ctr_offx = val.x();
 	m_obj_ctr_offy = val.y();
@@ -2558,12 +2755,12 @@ void Canvas::SetObjCtrOff(const fluo::Vector& val)
 	SetOffset();
 }
 
-fluo::Vector Canvas::GetObjRotCtrOff()
+fluo::Vector RenderView::GetObjRotCtrOff()
 {
 	return fluo::Vector(m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz);
 }
 
-void Canvas::SetObjRotCtrOff(const fluo::Vector& val)
+void RenderView::SetObjRotCtrOff(const fluo::Vector& val)
 {
 	m_obj_rot_ctr_offx = val.x() == 0.0 ? m_obj_ctrx : val.x();
 	m_obj_rot_ctr_offy = val.y() == 0.0 ? m_obj_ctry : val.y();
@@ -2571,12 +2768,12 @@ void Canvas::SetObjRotCtrOff(const fluo::Vector& val)
 	SetOffset();
 }
 
-fluo::Vector Canvas::GetObjRotOff()
+fluo::Vector RenderView::GetObjRotOff()
 {
 	return fluo::Vector(m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz);
 }
 
-void Canvas::SetObjRotOff(const fluo::Vector& val)
+void RenderView::SetObjRotOff(const fluo::Vector& val)
 {
 	m_obj_rot_offx = val.x();
 	m_obj_rot_offy = val.y();
@@ -2584,24 +2781,24 @@ void Canvas::SetObjRotOff(const fluo::Vector& val)
 	SetOffset();
 }
 
-void Canvas::SetOffsetTransform(const fluo::Transform &tf)
+void RenderView::SetOffsetTransform(const fluo::Transform &tf)
 {
 	m_offset_tf = tf;
 }
 
-fluo::Vector Canvas::GetObjTrans()
+fluo::Vector RenderView::GetObjTrans()
 {
 	return fluo::Vector(m_obj_transx, m_obj_transy, m_obj_transz);
 }
 
-void Canvas::SetObjTrans(const fluo::Vector& val)
+void RenderView::SetObjTrans(const fluo::Vector& val)
 {
 	m_obj_transx = val.x();
 	m_obj_transy = val.y();
 	m_obj_transz = val.z();
 }
 
-void Canvas::SetLockCenter()
+void RenderView::SetLockCenter()
 {
 	int type = glbin_moviemaker.GetCamLockType();
 	switch (type)
@@ -2622,7 +2819,7 @@ void Canvas::SetLockCenter()
 	}
 }
 
-void Canvas::SetLockCenterVol()
+void RenderView::SetLockCenterVol()
 {
 	if (!m_cur_vol)
 		return;
@@ -2630,14 +2827,14 @@ void Canvas::SetLockCenterVol()
 	m_lock_center = box.center();
 }
 
-void Canvas::SetLockCenterRuler()
+void RenderView::SetLockCenterRuler()
 {
 	if (!m_cur_ruler)
 		return;
 	m_lock_center = m_cur_ruler->GetCenter();
 }
 
-void Canvas::SetLockCenterSel()
+void RenderView::SetLockCenterSel()
 {
 	if (!m_cur_vol)
 		return;
@@ -2646,7 +2843,7 @@ void Canvas::SetLockCenterSel()
 	m_lock_center = cover.GetCenter();
 }
 
-void Canvas::SetPersp(bool persp)
+void RenderView::SetPersp(bool persp)
 {
 	m_persp = persp;
 	if (m_free && !m_persp)
@@ -2678,7 +2875,7 @@ void Canvas::SetPersp(bool persp)
 	//SetSortBricks();
 }
 
-void Canvas::SetFree(bool free)
+void RenderView::SetFree(bool free)
 {
 	m_free = free;
 	if (free)
@@ -2739,7 +2936,7 @@ void Canvas::SetFree(bool free)
 	//SetSortBricks();
 }
 
-void Canvas::SetAov(double aov)
+void RenderView::SetAov(double aov)
 {
 	//view has been changed, sort bricks
 	//SetSortBricks();
@@ -2747,12 +2944,12 @@ void Canvas::SetAov(double aov)
 	m_aov = aov;
 }
 
-fluo::Color Canvas::GetBackgroundColor()
+fluo::Color RenderView::GetBackgroundColor()
 {
 	return m_bg_color;
 }
 
-fluo::Color Canvas::GetTextColor()
+fluo::Color RenderView::GetTextColor()
 {
 	switch (glbin_settings.m_text_color)
 	{
@@ -2769,7 +2966,7 @@ fluo::Color Canvas::GetTextColor()
 	return m_bg_color_inv;
 }
 
-void Canvas::SetBackgroundColor(fluo::Color &color)
+void RenderView::SetBackgroundColor(fluo::Color &color)
 {
 	m_bg_color = color;
 	fluo::HSVColor bg_color(m_bg_color);
@@ -2791,7 +2988,7 @@ void Canvas::SetBackgroundColor(fluo::Color &color)
 	}
 }
 
-void Canvas::SetVolMethod(int method)
+void RenderView::SetVolMethod(int method)
 {
 	//get the volume list m_vd_pop_list
 	PopVolumeList();
@@ -2799,14 +2996,14 @@ void Canvas::SetVolMethod(int method)
 	m_vol_method = method;
 }
 
-void Canvas::SetFog(bool b)
+void RenderView::SetFog(bool b)
 {
 	m_use_fog = b;
 	//if (m_renderview_panel)
 	//	m_renderview_panel->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
-void Canvas::Set3DRotCapture(double start_angle,
+void RenderView::Set3DRotCapture(double start_angle,
 	double end_angle,
 	double step,
 	int frames,
@@ -2849,7 +3046,7 @@ void Canvas::Set3DRotCapture(double start_angle,
 	m_stages = 0;
 }
 
-void Canvas::Set4DSeqCapture(const std::wstring &cap_file, int begin_frame, int end_frame, bool rewind)
+void RenderView::Set4DSeqCapture(const std::wstring &cap_file, int begin_frame, int end_frame, bool rewind)
 {
 	m_cap_file = cap_file;
 	m_tseq_cur_num = begin_frame;
@@ -2862,7 +3059,7 @@ void Canvas::Set4DSeqCapture(const std::wstring &cap_file, int begin_frame, int 
 	m_4d_rewind = rewind;
 }
 
-void Canvas::Set3DBatCapture(const std::wstring &cap_file, int begin_frame, int end_frame)
+void RenderView::Set3DBatCapture(const std::wstring &cap_file, int begin_frame, int end_frame)
 {
 	m_cap_file = cap_file;
 	m_begin_frame = begin_frame;
@@ -2880,7 +3077,7 @@ void Canvas::Set3DBatCapture(const std::wstring &cap_file, int begin_frame, int 
 	}
 }
 
-void Canvas::SetParamCapture(const std::wstring &cap_file, int begin_frame, int end_frame, bool rewind)
+void RenderView::SetParamCapture(const std::wstring &cap_file, int begin_frame, int end_frame, bool rewind)
 {
 	m_cap_file = cap_file;
 	m_param_cur_num = begin_frame;
@@ -2892,7 +3089,7 @@ void Canvas::SetParamCapture(const std::wstring &cap_file, int begin_frame, int 
 	m_4d_rewind = rewind;
 }
 
-void Canvas::SetParams(double t)
+void RenderView::SetParams(double t)
 {
 	fluo::ValueCollection vc;
 	if (!m_renderview_panel)
@@ -3082,7 +3279,7 @@ void Canvas::SetParams(double t)
 	m_frame->UpdateProps(vc);
 }
 
-void Canvas::ResetMovieAngle()
+void RenderView::ResetMovieAngle()
 {
 	fluo::Vector rv = GetRotations();
 	rv[m_rot_axis] = m_init_angle;
@@ -3094,7 +3291,7 @@ void Canvas::ResetMovieAngle()
 	RefreshGL(16);
 }
 
-void Canvas::StopMovie()
+void RenderView::StopMovie()
 {
 	m_capture = false;
 	m_capture_rotat = false;
@@ -3102,7 +3299,7 @@ void Canvas::StopMovie()
 	m_capture_param = false;
 }
 
-void Canvas::Get4DSeqRange(int &start_frame, int &end_frame)
+void RenderView::Get4DSeqRange(int &start_frame, int &end_frame)
 {
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
 	{
@@ -3132,7 +3329,7 @@ void Canvas::Get4DSeqRange(int &start_frame, int &end_frame)
 	m_end_all_frame = end_frame;
 }
 
-void Canvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
+void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
 	m_frame_num_type = 0;
 
@@ -3183,7 +3380,7 @@ void Canvas::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewin
 	m_frame->UpdateProps({ gstRulerList });
 }
 
-void Canvas::UpdateVolumeData(int frame, VolumeData* vd)
+void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
 {
 	if (!vd)
 		return;
@@ -3233,7 +3430,7 @@ void Canvas::UpdateVolumeData(int frame, VolumeData* vd)
 		vd->GetVR()->clear_tex_pool();
 }
 
-void Canvas::ReloadVolumeData(int frame)
+void RenderView::ReloadVolumeData(int frame)
 {
 	int i, j;
 	std::vector<BaseReader*> reader_list;
@@ -3350,7 +3547,7 @@ void Canvas::ReloadVolumeData(int frame)
 	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
 }
 
-void Canvas::Get3DBatRange(int &start_frame, int &end_frame)
+void RenderView::Get3DBatRange(int &start_frame, int &end_frame)
 {
 	m_bat_folder = L"";
 	int cur_t = -1;
@@ -3396,7 +3593,7 @@ void Canvas::Get3DBatRange(int &start_frame, int &end_frame)
 		m_tseq_cur_num = cur_t;
 }
 
-void Canvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
+void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)
 {
 	m_frame_num_type = 0;
 
@@ -3443,7 +3640,7 @@ void Canvas::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewin
 	//RefreshGL(18);
 }
 
-void Canvas::CalcFrame()
+void RenderView::CalcFrame()
 {
 	int w, h;
 	w = GetGLSize().w();
@@ -3521,12 +3718,12 @@ void Canvas::CalcFrame()
 }
 
 //interactive modes
-int Canvas::GetIntMode()
+int RenderView::GetIntMode()
 {
 	return m_int_mode;
 }
 
-void Canvas::SetIntMode(int mode)
+void RenderView::SetIntMode(int mode)
 {
 	m_int_mode = mode;
 	if (m_int_mode == 1)
@@ -3540,35 +3737,35 @@ void Canvas::SetIntMode(int mode)
 }
 
 //set use 2d rendering results
-void Canvas::SetPaintUse2d(bool use2d)
+void RenderView::SetPaintUse2d(bool use2d)
 {
 	glbin_vol_selector.SetPaintUse2d(use2d);
 }
 
-bool Canvas::GetPaintUse2d()
+bool RenderView::GetPaintUse2d()
 {
 	return glbin_vol_selector.GetPaintUse2d();
 }
 
 //calculations
-void Canvas::SetVolumeA(VolumeData* vd)
+void RenderView::SetVolumeA(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeA(vd);
 }
 
-void Canvas::SetVolumeB(VolumeData* vd)
+void RenderView::SetVolumeB(VolumeData* vd)
 {
 	glbin_vol_calculator.SetVolumeB(vd);
 }
 
 //change brush display
-void Canvas::ChangeBrushSize(int value)
+void RenderView::ChangeBrushSize(int value)
 {
 	glbin_vol_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
 	m_renderview_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
-void Canvas::SetClipMode(int mode)
+void RenderView::SetClipMode(int mode)
 {
 	switch (mode)
 	{
@@ -3600,7 +3797,7 @@ void Canvas::SetClipMode(int mode)
 	}
 }
 
-void Canvas::RestorePlanes()
+void RenderView::RestorePlanes()
 {
 	std::vector<fluo::Plane*> *planes = 0;
 	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
@@ -3623,7 +3820,7 @@ void Canvas::RestorePlanes()
 	}
 }
 
-void Canvas::ClipRotate()
+void RenderView::ClipRotate()
 {
 	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
 	m_q_cl.Normalize();
@@ -3632,7 +3829,7 @@ void Canvas::ClipRotate()
 
 }
 
-void Canvas::SetClippingPlaneRotations(const fluo::Vector& val)
+void RenderView::SetClippingPlaneRotations(const fluo::Vector& val)
 {
 	m_rotx_cl = -val.x();
 	m_roty_cl = val.y();
@@ -3640,7 +3837,7 @@ void Canvas::SetClippingPlaneRotations(const fluo::Vector& val)
 	ClipRotate();
 }
 
-fluo::Vector Canvas::GetClippingPlaneRotations()
+fluo::Vector RenderView::GetClippingPlaneRotations()
 {
 	return fluo::Vector(
 		m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl,
@@ -3648,25 +3845,25 @@ fluo::Vector Canvas::GetClippingPlaneRotations()
 		m_rotz_cl);
 }
 
-void Canvas::SetClipRotX(double val)
+void RenderView::SetClipRotX(double val)
 {
 	m_rotx_cl = -val;
 	ClipRotate();
 }
 
-void Canvas::SetClipRotY(double val)
+void RenderView::SetClipRotY(double val)
 {
 	m_roty_cl = val;
 	ClipRotate();
 }
 
-void Canvas::SetClipRotZ(double val)
+void RenderView::SetClipRotZ(double val)
 {
 	m_rotz_cl = val;
 	ClipRotate();
 }
 
-void Canvas::SetClipValue(int mask, int val)
+void RenderView::SetClipValue(int mask, int val)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3677,7 +3874,7 @@ void Canvas::SetClipValue(int mask, int val)
 	}
 }
 
-void Canvas::SetClipValues(int mask, int val1, int val2)
+void RenderView::SetClipValues(int mask, int val1, int val2)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3688,7 +3885,7 @@ void Canvas::SetClipValues(int mask, int val1, int val2)
 	}
 }
 
-void Canvas::SetClipValues(const int val[6])
+void RenderView::SetClipValues(const int val[6])
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3699,7 +3896,7 @@ void Canvas::SetClipValues(const int val[6])
 	}
 }
 
-void Canvas::ResetClipValues()
+void RenderView::ResetClipValues()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3710,7 +3907,7 @@ void Canvas::ResetClipValues()
 	}
 }
 
-void Canvas::ResetClipValuesX()
+void RenderView::ResetClipValuesX()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3721,7 +3918,7 @@ void Canvas::ResetClipValuesX()
 	}
 }
 
-void Canvas::ResetClipValuesY()
+void RenderView::ResetClipValuesY()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3732,7 +3929,7 @@ void Canvas::ResetClipValuesY()
 	}
 }
 
-void Canvas::ResetClipValuesZ()
+void RenderView::ResetClipValuesZ()
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -3744,17 +3941,17 @@ void Canvas::ResetClipValuesZ()
 }
 
 //interpolation
-void Canvas::SetIntp(bool mode)
+void RenderView::SetIntp(bool mode)
 {
 	m_intp = mode;
 }
 
-bool Canvas::GetIntp()
+bool RenderView::GetIntp()
 {
 	return m_intp;
 }
 
-void Canvas::ForceDraw()
+void RenderView::ForceDraw()
 {
 #ifdef _WIN32
 	if (!m_set_gl)
@@ -3765,7 +3962,7 @@ void Canvas::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
 			{
-				Canvas* view = m_frame->GetRenderCanvas(i);
+				RenderView* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
 					view->m_set_gl = false;
@@ -3935,7 +4132,7 @@ void Canvas::ForceDraw()
 		{
 			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
 			{
-				Canvas* view = m_frame->GetRenderCanvas(i);
+				RenderView* view = m_frame->GetRenderCanvas(i);
 				if (view && view != this)
 				{
 					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
@@ -3950,7 +4147,7 @@ void Canvas::ForceDraw()
 }
 
 //start loop update
-void Canvas::StartLoopUpdate()
+void RenderView::StartLoopUpdate()
 {
 	////this is for debug_ds, comment when done
 	//if (TextureRenderer::get_mem_swap() &&
@@ -4385,7 +4582,7 @@ void Canvas::StartLoopUpdate()
 }
 
 //halt loop update
-void Canvas::HaltLoopUpdate()
+void RenderView::HaltLoopUpdate()
 {
 	if (glbin_settings.m_mem_swap)
 	{
@@ -4394,7 +4591,7 @@ void Canvas::HaltLoopUpdate()
 }
 
 //new function to refresh
-void Canvas::RefreshGL(int debug_code,
+void RenderView::RefreshGL(int debug_code,
 	bool erase,
 	bool start_loop,
 	bool lg_changed)
@@ -4417,7 +4614,7 @@ void Canvas::RefreshGL(int debug_code,
 	//Update();
 }
 
-void Canvas::DrawRulers()
+void RenderView::DrawRulers()
 {
 	if (m_ruler_list.empty())
 		return;
@@ -4428,22 +4625,22 @@ void Canvas::DrawRulers()
 	glbin_ruler_renderer.Draw();
 }
 
-flrd::RulerList* Canvas::GetRulerList()
+flrd::RulerList* RenderView::GetRulerList()
 {
 	return &m_ruler_list;
 }
 
-void Canvas::SetCurRuler(flrd::Ruler* ruler)
+void RenderView::SetCurRuler(flrd::Ruler* ruler)
 {
 	m_cur_ruler = ruler;
 }
 
-flrd::Ruler* Canvas::GetCurRuler()
+flrd::Ruler* RenderView::GetCurRuler()
 {
 	return m_cur_ruler;
 }
 
-flrd::Ruler* Canvas::GetRuler(unsigned int id)
+flrd::Ruler* RenderView::GetRuler(unsigned int id)
 {
 	m_cur_ruler = 0;
 	for (size_t i = 0; i < m_ruler_list.size(); ++i)
@@ -4458,7 +4655,7 @@ flrd::Ruler* Canvas::GetRuler(unsigned int id)
 }
 
 //draw highlighted comps
-void Canvas::DrawCells()
+void RenderView::DrawCells()
 {
 	if (m_cell_list.empty())
 		return;
@@ -4500,7 +4697,7 @@ void Canvas::DrawCells()
 		shader->release();
 }
 
-unsigned int Canvas::DrawCellVerts(std::vector<float>& verts)
+unsigned int RenderView::DrawCellVerts(std::vector<float>& verts)
 {
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px = 0, py = 0;
@@ -4549,7 +4746,7 @@ unsigned int Canvas::DrawCellVerts(std::vector<float>& verts)
 	return num;
 }
 
-void Canvas::GetCellPoints(fluo::BBox& box,
+void RenderView::GetCellPoints(fluo::BBox& box,
 	fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
 	fluo::Transform& mv, fluo::Transform& p)
 {
@@ -4588,7 +4785,7 @@ void Canvas::GetCellPoints(fluo::BBox& box,
 }
 
 //traces
-int Canvas::GetTrackFileExist(bool save)
+int RenderView::GetTrackFileExist(bool save)
 {
 	if (!m_track_group)
 		return 0;
@@ -4607,12 +4804,12 @@ int Canvas::GetTrackFileExist(bool save)
 		return 1;
 }
 
-TrackGroup* Canvas::GetTrackGroup()
+TrackGroup* RenderView::GetTrackGroup()
 {
 	return m_track_group;
 }
 
-std::wstring Canvas::GetTrackGroupFile()
+std::wstring RenderView::GetTrackGroupFile()
 {
 	std::wstring str;
 	if (m_track_group)
@@ -4620,7 +4817,7 @@ std::wstring Canvas::GetTrackGroupFile()
 	return str;
 }
 
-void Canvas::CreateTrackGroup()
+void RenderView::CreateTrackGroup()
 {
 	if (m_track_group)
 		delete m_track_group;
@@ -4628,7 +4825,7 @@ void Canvas::CreateTrackGroup()
 	m_track_group = new TrackGroup;
 }
 
-int Canvas::LoadTrackGroup(const std::wstring& filename)
+int RenderView::LoadTrackGroup(const std::wstring& filename)
 {
 	if (m_track_group)
 		delete m_track_group;
@@ -4637,7 +4834,7 @@ int Canvas::LoadTrackGroup(const std::wstring& filename)
 	return m_track_group->Load(filename);
 }
 
-int Canvas::SaveTrackGroup(const std::wstring& filename)
+int RenderView::SaveTrackGroup(const std::wstring& filename)
 {
 	if (m_track_group)
 		return m_track_group->Save(filename);
@@ -4645,13 +4842,13 @@ int Canvas::SaveTrackGroup(const std::wstring& filename)
 		return 0;
 }
 
-void Canvas::ExportTrackGroup(const std::wstring& filename, unsigned int id)
+void RenderView::ExportTrackGroup(const std::wstring& filename, unsigned int id)
 {
 	if (!m_track_group)
 		return;
 }
 
-void Canvas::DrawTraces()
+void RenderView::DrawTraces()
 {
 	if (m_cur_vol &&
 		m_track_group)
@@ -4707,7 +4904,7 @@ void Canvas::DrawTraces()
 	}
 }
 
-void Canvas::GetTraces(bool update)
+void RenderView::GetTraces(bool update)
 {
 	if (!m_track_group)
 		return;
@@ -4766,14 +4963,14 @@ void Canvas::GetTraces(bool update)
 	//}
 }
 
-void Canvas::SetEnlarge(bool value)
+void RenderView::SetEnlarge(bool value)
 {
 	if (m_enlarge && !value)
 		glbin_text_tex_manager.SetEnlargeScale(1);
 	m_enlarge = value;
 }
 
-void Canvas::SetEnlargeScale(double value)
+void RenderView::SetEnlargeScale(double value)
 {
 	m_enlarge_scale = value;
 	if (m_enlarge)
@@ -4781,7 +4978,7 @@ void Canvas::SetEnlargeScale(double value)
 }
 
 //read pixels
-void Canvas::ReadPixels(
+void RenderView::ReadPixels(
 	int chann, bool fp32,
 	int &x, int &y, int &w, int &h,
 	void** image)
@@ -4865,20 +5062,7 @@ void Canvas::ReadPixels(
 		BindRenderBuffer();
 }
 
-inline Size2D Canvas::GetGLSize()
-{
-	double dval = 1;
-#ifdef _DARWIN
-	dval = GetDPIScaleFactor();
-#endif
-	wxSize size = GetSize() * dval;
-	if (m_enlarge)
-		size.Set(size.x * m_enlarge_scale,
-			size.y * m_enlarge_scale);
-	return Size2D(size.x, size.y);
-}
-
-glm::mat4 Canvas::GetObjectMat()
+glm::mat4 RenderView::GetObjectMat()
 {
 	glm::mat4 obj_mat = m_mv_mat;
 	//translate object
@@ -4919,7 +5103,7 @@ glm::mat4 Canvas::GetObjectMat()
 	return obj_mat;
 }
 
-glm::mat4 Canvas::GetDrawMat()
+glm::mat4 RenderView::GetDrawMat()
 {
 	glm::mat4 drw_mat = m_mv_mat;
 	//translate object
@@ -4960,7 +5144,7 @@ glm::mat4 Canvas::GetDrawMat()
 	return drw_mat;
 }
 
-glm::mat4 Canvas::GetInvtMat()
+glm::mat4 RenderView::GetInvtMat()
 {
 	glm::mat4 inv_mat = m_mv_mat;
 	//translate object
@@ -5001,7 +5185,7 @@ glm::mat4 Canvas::GetInvtMat()
 	return inv_mat;
 }
 
-glm::mat4 Canvas::GetDrawWorldMat()
+glm::mat4 RenderView::GetDrawWorldMat()
 {
 	glm::mat4 drw_mat = m_mv_mat;
 	//translate object
@@ -5023,12 +5207,12 @@ glm::mat4 Canvas::GetDrawWorldMat()
 	return drw_mat;
 }
 
-fluo::Transform Canvas::GetInvOffsetMat()
+fluo::Transform RenderView::GetInvOffsetMat()
 {
 	return m_offset_tf;
 }
 
-fluo::Vector Canvas::GetSide()
+fluo::Vector RenderView::GetSide()
 {
 	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 	m_head.normalize();
@@ -5036,7 +5220,7 @@ fluo::Vector Canvas::GetSide()
 	return side;
 }
 
-void Canvas::UpdateClips()
+void RenderView::UpdateClips()
 {
 	if (m_clip_mode == 1)
 		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
@@ -5123,7 +5307,7 @@ void Canvas::UpdateClips()
 }
 
 //vr buffers
-void Canvas::GetRenderSize(int &nx, int &ny)
+void RenderView::GetRenderSize(int &nx, int &ny)
 {
 	if (m_use_openxr)
 	{
@@ -5140,7 +5324,7 @@ void Canvas::GetRenderSize(int &nx, int &ny)
 	}
 }
 
-void Canvas::DrawBounds()
+void RenderView::DrawBounds()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -5172,7 +5356,7 @@ void Canvas::DrawBounds()
 	glEnable(GL_BLEND);
 }
 
-void Canvas::DrawGrid()
+void RenderView::DrawGrid()
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -5209,7 +5393,7 @@ void Canvas::DrawGrid()
 	glEnable(GL_BLEND);
 }
 
-void Canvas::DrawCamCtr()
+void RenderView::DrawCamCtr()
 {
 	flvr::VertexArray* va_jack = 0;
 	if (m_pin_rot_ctr)
@@ -5276,7 +5460,7 @@ void Canvas::DrawCamCtr()
 	glEnable(GL_BLEND);
 }
 
-void Canvas::DrawScaleBar()
+void RenderView::DrawScaleBar()
 {
 	flvr::VertexArray* va_scale_bar =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Scale_Bar);
@@ -5380,7 +5564,7 @@ void Canvas::DrawScaleBar()
 	glEnable(GL_BLEND);
 }
 
-void Canvas::DrawLegend()
+void RenderView::DrawLegend()
 {
 	if (!m_frame)
 		return;
@@ -5519,7 +5703,7 @@ void Canvas::DrawLegend()
 	m_sb_height = (lines + 1)*font_height;
 }
 
-void Canvas::DrawName(
+void RenderView::DrawName(
 	double x, double y, int nx, int ny,
 	const std::wstring& name, fluo::Color color,
 	double font_height,
@@ -5583,7 +5767,7 @@ void Canvas::DrawName(
 	glEnable(GL_BLEND);
 }
 
-void Canvas::DrawFrame()
+void RenderView::DrawFrame()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -5620,7 +5804,7 @@ void Canvas::DrawFrame()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void Canvas::DrawClippingPlanes(int face_winding)
+void RenderView::DrawClippingPlanes(int face_winding)
 {
 	int i;
 	bool link = glbin_settings.m_clip_link;
@@ -6011,7 +6195,7 @@ void Canvas::DrawClippingPlanes(int face_winding)
 	glCullFace(GL_BACK);
 }
 
-void Canvas::SetColormapColors(int colormap, fluo::Color &c, double inv)
+void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 {
 	switch (colormap)
 	{
@@ -6194,7 +6378,7 @@ void Canvas::SetColormapColors(int colormap, fluo::Color &c, double inv)
 	}
 }
 
-void Canvas::DrawColormap()
+void RenderView::DrawColormap()
 {
 	double max_val = 255.0;
 	bool enable_alpha = false;
@@ -6382,7 +6566,7 @@ void Canvas::DrawColormap()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void Canvas::DrawGradBg()
+void RenderView::DrawGradBg()
 {
 	//define colors
 	fluo::Color color1, color2;
@@ -6483,7 +6667,7 @@ void Canvas::DrawGradBg()
 	glEnable(GL_BLEND);
 }
 
-void Canvas::DrawInfo(int nx, int ny, bool intactive)
+void RenderView::DrawInfo(int nx, int ny, bool intactive)
 {
 	float sx, sy;
 	sx = 2.0 / nx;
@@ -6628,7 +6812,7 @@ void Canvas::DrawInfo(int nx, int ny, bool intactive)
 }
 
 //depth buffer calculation
-double Canvas::CalcZ(double z)
+double RenderView::CalcZ(double z)
 {
 	double result = 0.0;
 	if (m_persp)
@@ -6644,7 +6828,7 @@ double Canvas::CalcZ(double z)
 	return result;
 }
 
-void Canvas::CalcFogRange()
+void RenderView::CalcFogRange()
 {
 	fluo::BBox bbox;
 	bool use_box = false;
@@ -6712,7 +6896,7 @@ void Canvas::CalcFogRange()
 }
 
 //draw the volume data only
-void Canvas::Draw()
+void RenderView::Draw()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6781,7 +6965,7 @@ void Canvas::Draw()
 }
 
 //draw with depth peeling
-void Canvas::DrawDP()
+void RenderView::DrawDP()
 {
 	int i;
 	int nx, ny;
@@ -7059,7 +7243,7 @@ void Canvas::DrawDP()
 
 //draw meshes
 //peel==true -- depth peeling
-void Canvas::DrawMeshes(int peel)
+void RenderView::DrawMeshes(int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7103,7 +7287,7 @@ void Canvas::DrawMeshes(int peel)
 
 //draw volumes
 //peel==true -- depth peeling
-void Canvas::DrawVolumes(int peel)
+void RenderView::DrawVolumes(int peel)
 {
 	int finished_bricks = 0;
 	if (glbin_settings.m_mem_swap)
@@ -7397,7 +7581,7 @@ void Canvas::DrawVolumes(int peel)
 	//}
 }
 
-void Canvas::DrawAnnotations()
+void RenderView::DrawAnnotations()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7453,7 +7637,7 @@ void Canvas::DrawAnnotations()
 	}
 }
 
-void Canvas::BindRenderBuffer()
+void RenderView::BindRenderBuffer()
 {
 	if (glbin_settings.m_hologram_mode == 1)
 	{
@@ -7482,7 +7666,7 @@ void Canvas::BindRenderBuffer()
 }
 
 //draw out the framebuffer after composition
-void Canvas::PrepFinalBuffer()
+void RenderView::PrepFinalBuffer()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7498,7 +7682,7 @@ void Canvas::PrepFinalBuffer()
 		final_buffer->protect();
 }
 
-void Canvas::ClearFinalBuffer()
+void RenderView::ClearFinalBuffer()
 {
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer(
@@ -7510,7 +7694,7 @@ void Canvas::ClearFinalBuffer()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Canvas::ClearFinalBuffer()
+void RenderView::ClearFinalBuffer()
 {
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer(
@@ -7522,7 +7706,7 @@ void Canvas::ClearFinalBuffer()
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Canvas::DrawFinalBuffer()
+void RenderView::DrawFinalBuffer()
 {
 	if (m_enlarge)
 		return;
@@ -7573,7 +7757,7 @@ void Canvas::DrawFinalBuffer()
 	}
 }
 
-void Canvas::PrepVRBuffer()
+void RenderView::PrepVRBuffer()
 {
 	if (m_use_openxr)
 	{
@@ -7601,7 +7785,7 @@ void Canvas::PrepVRBuffer()
 		vr_buffer->protect();
 }
 
-void Canvas::ClearVRBuffer()
+void RenderView::ClearVRBuffer()
 {
 	BindRenderBuffer();
 	//clear color buffer to black for compositing
@@ -7610,7 +7794,7 @@ void Canvas::ClearVRBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Canvas::DrawVRBuffer()
+void RenderView::DrawVRBuffer()
 {
 	int vr_x, vr_y, gl_x, gl_y;
 	GetRenderSize(vr_x, vr_y);
@@ -7678,7 +7862,7 @@ void Canvas::DrawVRBuffer()
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void Canvas::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
+void RenderView::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -7819,7 +8003,7 @@ void Canvas::DrawVolumesMulti(std::vector<VolumeData*> &list, int peel)
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void Canvas::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, int peel)
+void RenderView::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, int peel)
 {
 	if (list.size() <= 0)
 		return;
@@ -7897,7 +8081,7 @@ void Canvas::DrawVolumesComp(std::vector<VolumeData*> &list, bool mask, int peel
 	}
 }
 
-void Canvas::DrawMIP(VolumeData* vd, int peel)
+void RenderView::DrawMIP(VolumeData* vd, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8211,7 +8395,7 @@ void Canvas::DrawMIP(VolumeData* vd, int peel)
 	//}
 }
 
-void Canvas::DrawOVER(VolumeData* vd, bool mask, int peel)
+void RenderView::DrawOVER(VolumeData* vd, bool mask, int peel)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8410,7 +8594,7 @@ void Canvas::DrawOVER(VolumeData* vd, bool mask, int peel)
 	//}
 }
 
-void Canvas::DrawOLShading(VolumeData* vd)
+void RenderView::DrawOLShading(VolumeData* vd)
 {
 	if (glbin_settings.m_mem_swap &&
 		!flvr::TextureRenderer::get_done_current_chan())
@@ -8488,7 +8672,7 @@ void Canvas::DrawOLShading(VolumeData* vd)
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Canvas::DrawOLShadows(std::vector<VolumeData*> &vlist)
+void RenderView::DrawOLShadows(std::vector<VolumeData*> &vlist)
 {
 	if (vlist.empty())
 		return;
@@ -8718,7 +8902,7 @@ void Canvas::DrawOLShadows(std::vector<VolumeData*> &vlist)
 	glBlendEquation(GL_FUNC_ADD);
 }
 
-void Canvas::DrawOLShadowsMesh(double darkness)
+void RenderView::DrawOLShadowsMesh(double darkness)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8817,7 +9001,7 @@ void Canvas::DrawOLShadowsMesh(double darkness)
 }
 
 //get mesh shadow
-bool Canvas::GetMeshShadow(double &val)
+bool RenderView::GetMeshShadow(double &val)
 {
 	for (int i = 0; i<(int)m_layer_list.size(); i++)
 	{
@@ -8853,7 +9037,7 @@ bool Canvas::GetMeshShadow(double &val)
 	return false;
 }
 
-void Canvas::DrawCircles(double cx, double cy,
+void RenderView::DrawCircles(double cx, double cy,
 	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
 	flvr::ShaderProgram* shader =
@@ -8889,7 +9073,7 @@ void Canvas::DrawCircles(double cx, double cy,
 }
 
 //draw the brush shape
-void Canvas::DrawBrush()
+void RenderView::DrawBrush()
 {
 	double pressure = glbin_vol_selector.GetNormPress();
 
@@ -8971,7 +9155,7 @@ void Canvas::DrawBrush()
 }
 
 //paint strokes on the paint fbo
-void Canvas::PaintStroke()
+void RenderView::PaintStroke()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -9084,7 +9268,7 @@ void Canvas::PaintStroke()
 }
 
 //show the stroke buffer
-void Canvas::DisplayStroke()
+void RenderView::DisplayStroke()
 {
 	//painting texture
 	flvr::Framebuffer* paint_buffer =
@@ -9115,7 +9299,7 @@ void Canvas::DisplayStroke()
 	glEnable(GL_DEPTH_TEST);
 }
 
-fluo::Quaternion Canvas::Trackball(double dx, double dy)
+fluo::Quaternion RenderView::Trackball(double dx, double dy)
 {
 	fluo::Quaternion q;
 	fluo::Vector a; /* Axis of rotation */
@@ -9175,7 +9359,7 @@ fluo::Quaternion Canvas::Trackball(double dx, double dy)
 	return q;
 }
 
-fluo::Quaternion Canvas::TrackballClip(int p1x, int p1y, int p2x, int p2y)
+fluo::Quaternion RenderView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 {
 	fluo::Quaternion q;
 	fluo::Vector a; /* Axis of rotation */
@@ -9205,7 +9389,7 @@ fluo::Quaternion Canvas::TrackballClip(int p1x, int p1y, int p2x, int p2y)
 	return q;
 }
 
-void Canvas::Q2A()
+void RenderView::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
@@ -9229,7 +9413,7 @@ void Canvas::Q2A()
 		UpdateClips();
 }
 
-void Canvas::A2Q()
+void RenderView::A2Q()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
@@ -9242,7 +9426,7 @@ void Canvas::A2Q()
 }
 
 //sort bricks after view changes
-void Canvas::SetSortBricks()
+void RenderView::SetSortBricks()
 {
 	PopVolumeList();
 
@@ -9255,7 +9439,7 @@ void Canvas::SetSortBricks()
 }
 
 //pre-draw processings
-void Canvas::PreDraw()
+void RenderView::PreDraw()
 {
 	//skip if not done with loop
 	if (glbin_settings.m_mem_swap)
@@ -9267,7 +9451,7 @@ void Canvas::PreDraw()
 	}
 }
 
-void Canvas::PostDraw()
+void RenderView::PostDraw()
 {
 	//skip if not done with loop
 	if (glbin_settings.m_mem_swap &&
@@ -9341,7 +9525,7 @@ void Canvas::PostDraw()
 	}
 }
 
-void Canvas::ResetEnlarge()
+void RenderView::ResetEnlarge()
 {
 	//skip if not done with loop
 	if (glbin_settings.m_mem_swap &&
@@ -9355,7 +9539,7 @@ void Canvas::ResetEnlarge()
 	RefreshGL(19);
 }
 
-void Canvas::SetBrush(int mode)
+void RenderView::SetBrush(int mode)
 {
 	m_prev_focus = FindFocus();
 	SetFocus();
@@ -9389,7 +9573,7 @@ void Canvas::SetBrush(int mode)
 	}
 }
 
-bool Canvas::UpdateBrushState()
+bool RenderView::UpdateBrushState()
 {
 	bool refresh = false;
 
@@ -9462,7 +9646,7 @@ bool Canvas::UpdateBrushState()
 }
 
 //selection
-void Canvas::Pick()
+void RenderView::Pick()
 {
 	if (!m_draw_all)
 		return;
@@ -9477,7 +9661,7 @@ void Canvas::Pick()
 	m_frame->UpdateProps(vc);
 }
 
-bool Canvas::PickMesh()
+bool RenderView::PickMesh()
 {
 	int i;
 	int nx = GetGLSize().w();
@@ -9550,7 +9734,7 @@ bool Canvas::PickMesh()
 	return selected;
 }
 
-bool Canvas::PickVolume()
+bool RenderView::PickVolume()
 {
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
@@ -9613,7 +9797,7 @@ bool Canvas::PickVolume()
 	return picked_vd != 0;
 }
 
-void Canvas::SetCompSelection(fluo::Point& p, int mode)
+void RenderView::SetCompSelection(fluo::Point& p, int mode)
 {
 	//update selection
 	std::set<unsigned long long> ids;
@@ -9622,7 +9806,7 @@ void Canvas::SetCompSelection(fluo::Point& p, int mode)
 	//m_frame->UpdateProps({ gstCompListSelection });
 }
 
-void Canvas::DrawViewQuad()
+void RenderView::DrawViewQuad()
 {
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
@@ -9631,7 +9815,7 @@ void Canvas::DrawViewQuad()
 }
 
 //find crop frame
-int Canvas::HitCropFrame(fluo::Point& mp)
+int RenderView::HitCropFrame(fluo::Point& mp)
 {
 	int ny = GetGLSize().h();
 	fluo::Point p(mp);
@@ -9706,7 +9890,7 @@ int Canvas::HitCropFrame(fluo::Point& mp)
 	return 0;
 }
 
-void Canvas::ChangeCropFrame(fluo::Point& mp)
+void RenderView::ChangeCropFrame(fluo::Point& mp)
 {
 	if (!m_crop_type)
 		return;
@@ -9784,7 +9968,7 @@ void Canvas::ChangeCropFrame(fluo::Point& mp)
 	glbin_moviemaker.SetCropH(std::round(h));
 }
 
-void Canvas::switchLevel(VolumeData *vd)
+void RenderView::switchLevel(VolumeData *vd)
 {
 	if (!vd) return;
 
@@ -9874,7 +10058,7 @@ void Canvas::switchLevel(VolumeData *vd)
 }
 
 //controller interactions
-void Canvas::ControllerMoveHorizontal(double dval, int nx, int ny)
+void RenderView::ControllerMoveHorizontal(double dval, int nx, int ny)
 {
 	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 	m_head.normalize();
@@ -9885,7 +10069,7 @@ void Canvas::ControllerMoveHorizontal(double dval, int nx, int ny)
 	m_obj_transz += trans.z();
 }
 
-void Canvas::ControllerZoomDolly(double dval, int nx, int ny)
+void RenderView::ControllerZoomDolly(double dval, int nx, int ny)
 {
 	double delta = dval / (double)ny;
 	if (m_scale_factor < 1e5 && m_scale_factor > 1e-3)
@@ -9902,7 +10086,7 @@ void Canvas::ControllerZoomDolly(double dval, int nx, int ny)
 	}
 }
 
-void Canvas::ControllerRotate(double dx, double dy, int nx, int ny)
+void RenderView::ControllerRotate(double dx, double dy, int nx, int ny)
 {
 	fluo::Quaternion q_delta = Trackball(dx, dy);
 	m_q *= q_delta;
@@ -9930,7 +10114,7 @@ void Canvas::ControllerRotate(double dx, double dy, int nx, int ny)
 		m_rotz += 360.0;
 }
 
-void Canvas::ControllerPan(double dx, double dy, int nx, int ny)
+void RenderView::ControllerPan(double dx, double dy, int nx, int ny)
 {
 	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 	m_head.normalize();
@@ -9943,7 +10127,7 @@ void Canvas::ControllerPan(double dx, double dy, int nx, int ny)
 	m_obj_transz += trans.z() * m_scale_factor;
 }
 
-void Canvas::GrabRotate(const glm::mat4& pose)
+void RenderView::GrabRotate(const glm::mat4& pose)
 {
 	// Extract the rotation matrix (upper-left 3x3 part of the 4x4 matrix)
 	glm::mat3 rotationMatrix = glm::mat3(pose);

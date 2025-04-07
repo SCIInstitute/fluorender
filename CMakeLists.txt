@@ -873,6 +873,10 @@ target_link_libraries(PYTHON_LIB
   ${Boost_LIBRARIES})
 
 # Scene
+target_include_directories(SCENE_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(SCENE_LIB PRIVATE
+  ${GLEW_STATIC_LIBRARIES})
 
 # Script
 target_link_libraries(SCRIPT_LIB

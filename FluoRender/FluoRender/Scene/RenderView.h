@@ -26,19 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _CANVAS_H_
-#define _CANVAS_H_
+#ifndef _RENDERVIEW_H_
+#define _RENDERVIEW_H_
 
 #include <DataManager.h>
 #include <Quaternion.h>
 #include <TextRenderer.h>
 #include <Size.h>
 #include <string>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
@@ -50,18 +45,39 @@ DEALINGS IN THE SOFTWARE.
 #define VOL_METHOD_MULTI  2
 #define VOL_METHOD_COMP    3
 
+//clipping plane mask
+#define CLIP_X1  1
+#define CLIP_X2  2
+#define CLIP_Y1  4
+#define CLIP_Y2  8
+#define CLIP_Z1  16
+#define CLIP_Z2  32
+//clipping plane winding
+#define CULL_OFF  0
+#define FRONT_FACE  1
+#define BACK_FACE  2
 
-class Canvas : public TreeLayer
+//information bits
+#define INFO_DISP	1
+#define INFO_POS	2
+#define INFO_FRAME	4
+#define INFO_FPS	8
+#define INFO_T		16
+#define INFO_X		32
+#define INFO_Y		64
+#define INFO_Z		128
+
+
+class RenderView : public TreeLayer
 {
 public:
-	Canvas();
-	Canvas(Canvas& copy);
-	virtual ~Canvas();
+	RenderView();
+	RenderView(RenderView& copy);
+	virtual ~RenderView();
 
-	//for degugging, this allows inspection of the pixel format actually given.
-#ifdef _WIN32
-	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
-#endif
+	//size
+	void SetSize(int nx, int ny) { m_size = Size2D(nx, ny); }
+	Size2D GetSize() { return m_size; }
 	std::string GetOGLVersion();
 
 	//initialization
@@ -380,11 +396,6 @@ public:
 	//set cell list
 	void SetCellList(flrd::CelpList &list) { m_cell_list = list; }
 
-	//get view info for external ops
-	//get size, considering enlargement
-	inline Size2D GetGLSize();
-	//fluo::Point GetMousePos(wxMouseEvent& e);
-	//bool GetMouseIn(wxPoint& p);
 	glm::mat4 GetModelView() { return m_mv_mat; }
 	glm::mat4 GetProjection() { return m_proj_mat; }
 	glm::mat4 GetObjectMat();
@@ -398,10 +409,9 @@ public:
 
 	void GetRenderSize(int& nx, int& ny);
 
-	//void SetFocusedSlider(wxBasisSlider* slider)
-	//{
-	//	m_focused_slider = slider;
-	//}
+	//benchmark
+	void SetBenchmark(bool val) { m_benchmark = val; }
+	bool GetBenchmark() { return m_benchmark; }
 
 public:
 	//set gl context
@@ -494,8 +504,6 @@ private:
 	flvr::MultiVolumeRenderer* m_mvr;
 	//highlighted comps
 	flrd::CelpList m_cell_list;
-	//fisrt volume data in the depth groups
-	//VolumeData* m_first_depth_vd;
 	//initializaion
 	bool m_initialized;
 	bool m_init_view;
@@ -508,8 +516,6 @@ private:
 	double m_far_clip;
 	//interpolation
 	bool m_intp;
-	//previous focus before brush
-	//wxWindow* m_prev_focus;
 
 	//interactive modes
 	int m_int_mode;  //interactive mode
@@ -827,4 +833,4 @@ private:
 	void GrabRotate(const glm::mat4& pose);
 };
 
-#endif//_CANVAS_H_
+#endif//_RENDERVIEW_H_
