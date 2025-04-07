@@ -57,6 +57,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <MovieMaker.h>
 #include <DataManager.h>
+#include <RenderView.h>
 #include <VolumeLoader.h>
 #include <Colocalize.h>
 #include <Clusterizer.h>
@@ -300,7 +301,9 @@ Global::Global() :
 	text_texture_manager_(std::make_unique<flvr::TextTextureManager>()),
 	msh_shader_factory_(std::make_unique<flvr::MshShaderFactory>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
-	project_(std::make_unique<Project>())
+	project_(std::make_unique<Project>()),
+	m_linked_rot(false),
+	m_master_linked_view(nullptr)
 {
 	Init();
 }

@@ -79,19 +79,18 @@ public:
 
 	//get view info for external ops
 	//get size, considering enlargement
-	inline Size2D GetGLSize();
 	inline fluo::Point GetMousePos(wxMouseEvent& e);
-	inline bool GetMouseIn(wxPoint& p);
 
 	void SetFocusedSlider(wxBasisSlider* slider) { m_focused_slider = slider; }
 
+	void Draw();
+
 public:
 	RenderViewPanel* m_renderview_panel;
-	//linked rotation
-	static bool m_linked_rot;
-	static RenderCanvas* m_master_linked_view;
 
 private:
+	//set gl context
+	bool m_set_gl;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	MainFrame* m_frame;
@@ -149,6 +148,7 @@ private:
 	void OnMouse(wxMouseEvent& event);
 	void OnDraw(wxPaintEvent& event);
 	void OnResize(wxSizeEvent& event);
+	void OnMove(wxMoveEvent& event);
 	void OnIdle(wxIdleEvent& event);
 	void OnQuitFscreen(wxTimerEvent& event);
 	void OnClose(wxCloseEvent& event);

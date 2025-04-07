@@ -37,16 +37,31 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
 #include <Texture.h>
+#include <MultiVolumeRenderer.h>
 #include <StopWatch.hpp>
 #include <VolumeLoader.h>
 #include <VolumePropPanel.h>
+#include <MovieMaker.h>
+#include <Cov.h>
+#include <FlKey.h>
+#include <Interpolator.h>
+#include <RulerHandler.h>
+#include <ScriptProc.h>
+#include <VolumeCalculator.h>
+#include <VolumeSelector.h>
+#include <RulerRenderer.h>
+#include <CompAnalyzer.h>
+#include <CompSelector.h>
+#include <ImgShader.h>
+#include <Framebuffer.h>
+#include <VolumePoint.h>
+#include <States.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <tiffio.h>
 
 RenderView::RenderView() :
-	m_size(100, 100),
-	//set gl
-	m_set_gl(false),
 	//ruler
 	m_cur_ruler(0),
 	//capture modes
@@ -258,13 +273,10 @@ RenderView::RenderView() :
 	m_use_openxr(false),
 	m_vr_eye_idx(0)
 {
-
 }
 
 RenderView::RenderView(RenderView& copy):
 	m_size(copy.m_size),
-	//set gl
-	m_set_gl(copy.m_set_gl),
 	//ruler
 	m_cur_ruler(copy.m_cur_ruler),
 	//capture modes
@@ -554,6 +566,16 @@ RenderView::~RenderView()
 	if (m_mvr)
 		delete m_mvr;
 
+}
+
+void RenderView::SetSize(int x, int y)
+{
+	m_size = Size2D(x, y);
+	if (m_enlarge)
+		m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
+			static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));
+	else
+		m_gl_size = m_size;
 }
 
 std::string RenderView::GetOGLVersion()
@@ -2329,21 +2351,6 @@ void RenderView::RandomizeColor()
 	}
 }
 
-void RenderView::SetDraw(bool draw)
-{
-	m_draw_all = draw;
-}
-
-void RenderView::ToggleDraw()
-{
-	m_draw_all = !m_draw_all;
-}
-
-bool RenderView::GetDraw()
-{
-	return m_draw_all;
-}
-
 void RenderView::HandleProjection(int nx, int ny, bool vr)
 {
 	if (ny == 0 || m_aov == 0 || m_scale_factor == 0)
@@ -2559,11 +2566,6 @@ int RenderView::GetOrientation()
 		return 6;
 }
 
-void RenderView::SetZeroRotations()
-{
-	m_zq = m_q;
-}
-
 fluo::Vector RenderView::ResetZeroRotations()
 {
 	double rotx, roty, rotz;
@@ -2592,11 +2594,6 @@ fluo::Point RenderView::GetCenters()
 void RenderView::SetCenters(const fluo::Point& val)
 {
 	m_ctrx = val.x(); m_ctry = val.y(); m_ctrz = val.z();
-}
-
-void RenderView::SetRadius(double r)
-{
-	m_radius = r;
 }
 
 void RenderView::SetCenter()
@@ -2936,19 +2933,6 @@ void RenderView::SetFree(bool free)
 	//SetSortBricks();
 }
 
-void RenderView::SetAov(double aov)
-{
-	//view has been changed, sort bricks
-	//SetSortBricks();
-
-	m_aov = aov;
-}
-
-fluo::Color RenderView::GetBackgroundColor()
-{
-	return m_bg_color;
-}
-
 fluo::Color RenderView::GetTextColor()
 {
 	switch (glbin_settings.m_text_color)
@@ -2994,13 +2978,6 @@ void RenderView::SetVolMethod(int method)
 	PopVolumeList();
 
 	m_vol_method = method;
-}
-
-void RenderView::SetFog(bool b)
-{
-	m_use_fog = b;
-	//if (m_renderview_panel)
-	//	m_renderview_panel->m_left_toolbar->ToggleTool(RenderViewPanel::ID_DepthAttenChk, b);
 }
 
 void RenderView::Set3DRotCapture(double start_angle,
@@ -3092,11 +3069,6 @@ void RenderView::SetParamCapture(const std::wstring &cap_file, int begin_frame, 
 void RenderView::SetParams(double t)
 {
 	fluo::ValueCollection vc;
-	if (!m_renderview_panel)
-		return;
-	if (!m_frame)
-		return;
-	ClipPlanePanel* clip_view = m_frame->GetClipPlanPanel();
 	m_frame_num_type = 1;
 	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
@@ -3276,7 +3248,7 @@ void RenderView::SetParams(double t)
 	vc.insert(gstClipPlaneRangeColor);
 	vc.insert(gstRulerList);
 
-	m_frame->UpdateProps(vc);
+	glbin_current.mainframe->UpdateProps(vc);
 }
 
 void RenderView::ResetMovieAngle()
@@ -3377,7 +3349,7 @@ void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool r
 	if (rewind)
 		glbin_script_proc.ClearResults();
 
-	m_frame->UpdateProps({ gstRulerList });
+	glbin_current.mainframe->UpdateProps({ gstRulerList });
 }
 
 void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
@@ -3424,7 +3396,7 @@ void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
 		clear_pool = true;
 	}
 
-	m_frame->UpdateProps({ gstRulerList });
+	glbin_current.mainframe->UpdateProps({ gstRulerList });
 
 	if (clear_pool && vd->GetVR())
 		vd->GetVR()->clear_tex_pool();
@@ -3440,7 +3412,7 @@ void RenderView::ReloadVolumeData(int frame)
 	{
 		VolumeData* vd = m_vd_pop_list[i];
 		if (vd)
-			m_frame->DeleteProps(2, vd->GetName());
+			glbin_current.mainframe->DeleteProps(2, vd->GetName());
 		if (vd && vd->GetReader())
 		{
 			flvr::Texture *tex = vd->GetTexture();
@@ -3544,7 +3516,7 @@ void RenderView::ReloadVolumeData(int frame)
 	//		glbin.set_tree_selection(vd->GetName().ToStdString());
 	//	else
 	//glbin.set_tree_selection("");
-	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+	glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl });
 }
 
 void RenderView::Get3DBatRange(int &start_frame, int &end_frame)
@@ -3635,21 +3607,19 @@ void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool r
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
-	m_frame->UpdateProps({ gstRulerList });
-
-	//RefreshGL(18);
+	glbin_current.mainframe->UpdateProps({ gstRulerList });
 }
 
 void RenderView::CalcFrame()
 {
-	int w, h;
-	w = GetGLSize().w();
-	h = GetGLSize().h();
+	//int w, h;
+	//w = GetGLSize().w();
+	//h = GetGLSize().h();
 
 	if (m_cur_vol)
 	{
 		//projection
-		HandleProjection(w, h);
+		HandleProjection(m_gl_size.w(), m_gl_size.h());
 		//Transformation
 		HandleCamera();
 
@@ -3691,26 +3661,26 @@ void RenderView::CalcFrame()
 		miny = fluo::Clamp(miny, -1.0, 1.0);
 		maxy = fluo::Clamp(maxy, -1.0, 1.0);
 
-		glbin_moviemaker.SetCropX(std::round((minx + 1.0)*w / 2.0 + 1.0));
-		glbin_moviemaker.SetCropY(std::round((miny + 1.0)*h / 2.0 + 1.0));
-		glbin_moviemaker.SetCropW(std::round((maxx - minx)*w / 2.0 - 1.5));
-		glbin_moviemaker.SetCropH(std::round((maxy - miny)*h / 2.0 - 1.5));
+		glbin_moviemaker.SetCropX(std::round((minx + 1.0)*m_size.w() / 2.0 + 1.0));
+		glbin_moviemaker.SetCropY(std::round((miny + 1.0)*m_size.h() / 2.0 + 1.0));
+		glbin_moviemaker.SetCropW(std::round((maxx - minx)*m_size.w() / 2.0 - 1.5));
+		glbin_moviemaker.SetCropH(std::round((maxy - miny)*m_size.h() / 2.0 - 1.5));
 
 	}
 	else
 	{
 		int size;
-		if (w > h)
+		if (m_size.w() > m_size.h())
 		{
-			size = h;
-			glbin_moviemaker.SetCropX(std::round((w - h) / 2.0));
+			size = m_size.h();
+			glbin_moviemaker.SetCropX(std::round((m_size.w() - m_size.h()) / 2.0));
 			glbin_moviemaker.SetCropY(0);
 		}
 		else
 		{
-			size = w;
+			size = m_size.w();
 			glbin_moviemaker.SetCropX(0);
-			glbin_moviemaker.SetCropY(std::round((h - w) / 2.0));
+			glbin_moviemaker.SetCropY(std::round((m_size.h() - m_size.w()) / 2.0));
 		}
 		glbin_moviemaker.SetCropW(size);
 		glbin_moviemaker.SetCropH(size);
@@ -3718,11 +3688,6 @@ void RenderView::CalcFrame()
 }
 
 //interactive modes
-int RenderView::GetIntMode()
-{
-	return m_int_mode;
-}
-
 void RenderView::SetIntMode(int mode)
 {
 	m_int_mode = mode;
@@ -3826,7 +3791,6 @@ void RenderView::ClipRotate()
 	m_q_cl.Normalize();
 
 	SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-
 }
 
 void RenderView::SetClippingPlaneRotations(const fluo::Vector& val)
@@ -3940,42 +3904,16 @@ void RenderView::ResetClipValuesZ()
 	}
 }
 
-//interpolation
-void RenderView::SetIntp(bool mode)
+bool RenderView::ForceDraw()
 {
-	m_intp = mode;
-}
+	if (!m_refresh)
+		m_retain_finalbuffer = true;
+	else
+		m_refresh = false;
 
-bool RenderView::GetIntp()
-{
-	return m_intp;
-}
+	bool swap = false;
 
-void RenderView::ForceDraw()
-{
-#ifdef _WIN32
-	if (!m_set_gl)
-	{
-		SetCurrent(*m_glRC);
-		m_set_gl = true;
-		if (m_frame)
-		{
-			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
-			{
-				RenderView* view = m_frame->GetRenderCanvas(i);
-				if (view && view != this)
-				{
-					view->m_set_gl = false;
-				}
-			}
-		}
-	}
-#endif
-#if defined(_DARWIN) || defined(__linux__)
-	SetCurrent(*m_glRC);
-#endif
 	Init();
-	wxPaintDC dc(this);
 
 	switch (glbin_settings.m_hologram_mode)
 	{
@@ -4095,7 +4033,7 @@ void RenderView::ForceDraw()
 		{
 			DrawVRBuffer();
 			m_vr_eye_idx = 0;
-			SwapBuffers();
+			swap = true;
 		}
 		else
 		{
@@ -4106,10 +4044,10 @@ void RenderView::ForceDraw()
 	else if (glbin_settings.m_hologram_mode == 2)
 	{
 		glbin_lg_renderer.Draw();
-		SwapBuffers();
+			swap = true;
 	}
 	else
-		SwapBuffers();
+			swap = true;
 
 	glbin.getStopWatch(gstStopWatch)->sample();
 	m_drawing = false;
@@ -4122,28 +4060,33 @@ void RenderView::ForceDraw()
 	if (m_enlarge)
 		ResetEnlarge();
 
-	if (m_linked_rot)
-	{
-		if (!m_master_linked_view ||
-			this != m_master_linked_view)
-			return;
+	//need to add a root node to global to access the entire scene structure
+	// this will be done later
+	//if (glbin_linked_rot)
+	//{
+	//	RenderView* master_view = glbin_master_linked_view;
+	//	if (!master_view ||
+	//		this != master_view)
+	//		return;
 
-		if (m_frame)
-		{
-			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
-			{
-				RenderView* view = m_frame->GetRenderCanvas(i);
-				if (view && view != this)
-				{
-					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-					view->RefreshGL(39);
-					view->Update();
-				}
-			}
-		}
+	//	if (m_frame)
+	//	{
+	//		for (int i = 0; i< m_frame->GetCanvasNum(); i++)
+	//		{
+	//			RenderView* view = m_frame->GetRenderCanvas(i);
+	//			if (view && view != this)
+	//			{
+	//				view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+	//				view->RefreshGL(39);
+	//				view->Update();
+	//			}
+	//		}
+	//	}
 
-		m_master_linked_view = 0;
-	}
+	//	m_master_linked_view = 0;
+	//}
+
+	return swap;
 }
 
 //start loop update
@@ -4563,10 +4506,10 @@ void RenderView::StartLoopUpdate()
 
 		if (queues.size() > 0 /*&& !m_interactive*/)
 		{
-			m_loader.Set(queues);
-			m_loader.SetMemoryLimitByte((long long)flvr::TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
+			glbin_vol_loader.Set(queues);
+			glbin_vol_loader.SetMemoryLimitByte((long long)flvr::TextureRenderer::mainmem_buf_size_ * 1024LL * 1024LL);
 			flvr::TextureRenderer::set_load_on_main_thread(false);
-			m_loader.Run();
+			glbin_vol_loader.Run();
 		}
 
 		if (total_num > 0)
@@ -4673,9 +4616,9 @@ void RenderView::DrawCells()
 		shader->bind();
 	}
 	glm::mat4 matrix = glm::ortho(float(0),
-		float(GetGLSize().w()), float(0), float(GetGLSize().h()));
+		float(m_gl_size.w()), float(0), float(m_gl_size.h()));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-	shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
+	shader->setLocalParam(0, m_size.w(), m_size.h(), width, 0.0);
 
 	flvr::VertexArray* va_rulers =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
@@ -4775,8 +4718,8 @@ void RenderView::GetCellPoints(fluo::BBox& box,
 		maxy = std::max(maxy, pp[i].y());
 	}
 
-	int nx = GetGLSize().w();
-	int ny = GetGLSize().h();
+	int nx = m_gl_size.w();
+	int ny = m_gl_size.h();
 
 	p1 = fluo::Point((minx+1)*nx/2, (miny+1)*ny/2, 0.0);
 	p2 = fluo::Point((maxx+1)*nx/2, (miny+1)*ny/2, 0.0);
@@ -4875,7 +4818,7 @@ void RenderView::DrawTraces()
 			shader->bind();
 		}
 		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-		shader->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
+		shader->setLocalParam(0, m_size.w(), m_size.h(), width, 0.0);
 
 		flvr::VertexArray* va_traces =
 			glbin_vertex_array_manager.vertex_array(flvr::VA_Traces);
@@ -5004,8 +4947,8 @@ void RenderView::ReadPixels(
 	{
 		x = 0;
 		y = 0;
-		w = GetGLSize().w();
-		h = GetGLSize().h();
+		w = m_gl_size.w();
+		h = m_gl_size.h();
 	}
 
 	if (m_enlarge || fp32)
@@ -5316,8 +5259,8 @@ void RenderView::GetRenderSize(int &nx, int &ny)
 	}
 	else
 	{
-		nx = GetGLSize().w();
-		ny = GetGLSize().h();
+		nx = m_gl_size.w();
+		ny = m_gl_size.h();
 		if (glbin_settings.m_hologram_mode == 1 &&
 			!glbin_settings.m_sbs)
 			nx /= 2;
@@ -5566,9 +5509,6 @@ void RenderView::DrawScaleBar()
 
 void RenderView::DrawLegend()
 {
-	if (!m_frame)
-		return;
-
 	float font_height =
 		glbin_text_tex_manager.GetSize() + 3.0;
 
@@ -6005,7 +5945,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 		{
 			shader2->bind();
 			shader2->setLocalParamMatrix(0, glm::value_ptr(matrix));
-			shader2->setLocalParam(0, GetSize().x, GetSize().y, width, 0.0);
+			shader2->setLocalParam(0, m_size.w(), m_size.h(), width, 0.0);
 			shader1->bind();
 		}
 
@@ -6732,10 +6672,9 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 		(m_draw_info & INFO_Z))
 	{
 		fluo::Point p;
-		wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
 		glbin_volume_point.SetVolumeData(m_cur_vol);
-		if ((glbin_volume_point.GetPointVolumeBox(mouse_pos.x, mouse_pos.y, true, p )>0.0) ||
-			glbin_volume_point.GetPointPlane(mouse_pos.x, mouse_pos.y, 0, true, p)>0.0)
+		if ((glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p )>0.0) ||
+			glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p)>0.0)
 		{
 			tos << L"T: " << m_tseq_cur_num
 				<< L", X: " << std::fixed << std::setprecision(2) << p.x()
@@ -7798,8 +7737,8 @@ void RenderView::DrawVRBuffer()
 {
 	int vr_x, vr_y, gl_x, gl_y;
 	GetRenderSize(vr_x, vr_y);
-	gl_x = GetGLSize().w();
-	gl_y = GetGLSize().h();
+	gl_x = m_gl_size.w();
+	gl_y = m_gl_size.h();
 	if (glbin_settings.m_sbs)
 		vr_x /= 2;
 	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
@@ -9077,8 +9016,7 @@ void RenderView::DrawBrush()
 {
 	double pressure = glbin_vol_selector.GetNormPress();
 
-	wxPoint pos1(old_mouse_X, old_mouse_Y);
-	if (GetMouseIn(pos1))
+	if (PointInView(old_mouse_X, old_mouse_Y))
 	{
 		int nx, ny;
 		GetRenderSize(nx, ny);
@@ -9094,14 +9032,14 @@ void RenderView::DrawBrush()
 		{
 			proj_mat = glm::ortho(float(m_ortho_left), float(m_ortho_right),
 				float(m_ortho_top), float(m_ortho_bottom));
-			cx = m_ortho_left + pos1.x * (m_ortho_right - m_ortho_left) / nx;
-			cy = m_ortho_bottom + pos1.y * (m_ortho_top - m_ortho_bottom) / ny;
+			cx = m_ortho_left + old_mouse_X * (m_ortho_right - m_ortho_left) / nx;
+			cy = m_ortho_bottom + old_mouse_Y * (m_ortho_top - m_ortho_bottom) / ny;
 		}
 		else
 		{
 			proj_mat = glm::ortho(float(0), float(nx), float(0), float(ny));
-			cx = pos1.x;
-			cy = ny - pos1.y;
+			cx = old_mouse_X;
+			cy = ny - old_mouse_Y;
 		}
 
 		//attributes
@@ -9126,8 +9064,8 @@ void RenderView::DrawBrush()
 			DrawCircles(cx, cy, -1.0,
 				br2*pressure, text_color, proj_mat);
 
-		float cx2 = pos1.x;
-		float cy2 = ny - pos1.y;
+		float cx2 = old_mouse_X;
+		float cy2 = ny - old_mouse_Y;
 		float px, py;
 		px = cx2 - 7 - nx / 2.0;
 		py = cy2 - 3 - ny / 2.0;
@@ -9541,8 +9479,9 @@ void RenderView::ResetEnlarge()
 
 void RenderView::SetBrush(int mode)
 {
-	m_prev_focus = FindFocus();
-	SetFocus();
+	//need to add somewhere else
+	//m_prev_focus = FindFocus();
+	//SetFocus();
 
 	int ruler_type = glbin_ruler_handler.GetType();
 
@@ -9575,6 +9514,7 @@ void RenderView::SetBrush(int mode)
 
 bool RenderView::UpdateBrushState()
 {
+	//need to move key and mouse states somewhere independent of wxwidgets
 	bool refresh = false;
 
 	if (wxGetKeyState(WXK_SHIFT))
@@ -9618,8 +9558,8 @@ bool RenderView::UpdateBrushState()
 		{
 			if (wxGetMouseState().LeftIsDown())
 			{
-				wxPoint mps = ScreenToClient(wxGetMousePosition());
-				glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+				//wxPoint mps = ScreenToClient(wxGetMousePosition());
+				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			}
 
 			if (m_int_mode == 7)
@@ -9634,11 +9574,12 @@ bool RenderView::UpdateBrushState()
 			SetBrush(0);
 			refresh = true;
 
-			if (m_prev_focus)
-			{
-				m_prev_focus->SetFocus();
-				m_prev_focus = 0;
-			}
+			//need to move somewhere else
+			//if (m_prev_focus)
+			//{
+			//	m_prev_focus->SetFocus();
+			//	m_prev_focus = 0;
+			//}
 		}
 	}
 
@@ -9658,19 +9599,18 @@ void RenderView::Pick()
 		vc.insert(gstCompListSelection);
 	else if (!mesh_sel)
 		glbin_current.SetMeshData(0);
-	m_frame->UpdateProps(vc);
+	glbin_current.mainframe->UpdateProps(vc);
 }
 
 bool RenderView::PickMesh()
 {
 	int i;
-	int nx = GetGLSize().w();
-	int ny = GetGLSize().h();
+	int nx = m_gl_size.w();
+	int ny = m_gl_size.h();
 	if (nx <= 0 || ny <= 0)
 		return false;
-	wxPoint mouse_pos = ScreenToClient(wxGetMousePosition());
-	if (mouse_pos.x<0 || mouse_pos.x >= nx ||
-		mouse_pos.y <= 0 || mouse_pos.y>ny)
+	if (m_mouse_x<0 || m_mouse_x >= nx ||
+		m_mouse_y <= 0 || m_mouse_y>ny)
 		return false;
 
 	//projection
@@ -9694,7 +9634,7 @@ bool RenderView::PickMesh()
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glScissor(mouse_pos.x, ny - mouse_pos.y, 1, 1);
+	glScissor(m_mouse_x, ny - m_mouse_y, 1, 1);
 	glEnable(GL_SCISSOR_TEST);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -9711,7 +9651,7 @@ bool RenderView::PickMesh()
 
 	size_t choose = 0;
 	if (pick_buffer)
-		choose = pick_buffer->read_value(mouse_pos.x, ny - mouse_pos.y);
+		choose = pick_buffer->read_value(m_mouse_x, ny - m_mouse_y);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_cur_framebuffer);
 
 	bool selected = false;
@@ -9736,6 +9676,7 @@ bool RenderView::PickMesh()
 
 bool RenderView::PickVolume()
 {
+	//need to update keyboard state
 	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
 	double dist = 0.0;
 	double min_dist = -1.0;
@@ -9817,7 +9758,7 @@ void RenderView::DrawViewQuad()
 //find crop frame
 int RenderView::HitCropFrame(fluo::Point& mp)
 {
-	int ny = GetGLSize().h();
+	int ny = m_gl_size.h();
 	fluo::Point p(mp);
 	p.y(ny - p.y());
 
@@ -9895,7 +9836,7 @@ void RenderView::ChangeCropFrame(fluo::Point& mp)
 	if (!m_crop_type)
 		return;
 
-	int ny = GetGLSize().h();
+	int ny = m_gl_size.h();
 	fluo::Point p(mp);
 	p.y(ny - p.y());
 
@@ -10161,3 +10102,550 @@ void RenderView::GrabRotate(const glm::mat4& pose)
 		m_rotz += 360.0;
 }
 
+void RenderView::ProcessIdle(const fluo::ValueCollection& vc)
+{
+
+}
+
+void RenderView::ProcessMouse()
+{
+	if (m_interactive && !m_rot_lock)
+		return;
+
+	m_interactive = false;
+	m_paint_enable = false;
+	m_retain_finalbuffer = false;
+	int nx = m_gl_size.w();
+	int ny = m_gl_size.h();
+	fluo::Point mp(m_mouse_x, m_mouse_y, 0);
+	mp *= m_dpi_factor;
+	if (m_enlarge)
+		mp *= m_enlarge_scale;
+
+	//mouse button down operations
+	//glbin_ruler_handler.SetVolumeData(m_cur_vol);
+	if (event.LeftDown())
+	{
+		if (m_draw_frame)
+		{
+			m_crop_type = HitCropFrame(mp);
+			if (m_crop_type)
+			{
+				m_int_mode = 16;
+				return;
+			}
+		}
+
+		m_focused_slider = 0;
+
+		bool found_rp = false;
+		if (m_int_mode == 6 ||
+			m_int_mode == 9 ||
+			m_int_mode == 11 ||
+			m_int_mode == 14)
+		{
+			found_rp = glbin_ruler_handler.FindEditingRuler(
+				mp.x(), mp.y());
+		}
+		if (found_rp)
+		{
+			if (m_int_mode == 11)
+			{
+				flrd::RulerPoint *p = glbin_ruler_handler.GetPoint();
+				if (p) p->ToggleLocked();
+			}
+			if (m_int_mode == 14)
+				glbin_ruler_handler.DeletePoint();
+			RefreshGL(41);
+			m_frame->UpdateProps({ gstRulerList });
+		}
+
+		if (m_int_mode == 1 ||
+			((m_int_mode == 5 ||
+			//m_int_mode == 13 ||
+			m_int_mode == 15) &&
+			event.AltDown()) ||
+			((m_int_mode == 6 ||
+			m_int_mode == 9 ||
+			m_int_mode == 11 ||
+			m_int_mode == 14) &&
+			!found_rp))
+		{
+			old_mouse_X = mp.x();
+			old_mouse_Y = mp.y();
+			m_pick = true;
+		}
+		else if (m_int_mode == 2 || m_int_mode == 7)
+		{
+			old_mouse_X = mp.x();
+			old_mouse_Y = mp.y();
+			prv_mouse_X = old_mouse_X;
+			prv_mouse_Y = old_mouse_Y;
+			m_paint_enable = true;
+			m_clear_paint = true;
+			glbin_vol_selector.SetBrushPressPeak(0.0);
+			RefreshGL(26);
+		}
+
+		if (m_int_mode == 10 ||
+			m_int_mode == 12)
+		{
+			glbin_vol_selector.ResetMousePos();
+			glbin_vol_selector.SetInitMask(1);
+			wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+			glbin_vol_selector.SetInitMask(3);
+			if (m_int_mode == 12)
+				m_cur_vol->AddEmptyLabel(0, false);
+			m_force_clear = true;
+			m_grow_on = true;
+		}
+
+		if (m_int_mode == 13 &&
+			!event.AltDown())
+		{
+			//add one point to a ruler
+			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 2);
+			RefreshGL(26);
+			m_frame->UpdateProps({ gstRulerList });
+		}
+
+		return;
+	}
+	if (event.RightDown())
+	{
+		m_focused_slider = 0;
+		old_mouse_X = mp.x();
+		old_mouse_Y = mp.y();
+		return;
+	}
+	if (event.MiddleDown())
+	{
+		m_focused_slider = 0;
+		old_mouse_X = mp.x();
+		old_mouse_Y = mp.y();
+		return;
+	}
+
+	//mouse button up operations
+	if (event.LeftUp())
+	{
+		if (m_int_mode == 1)
+		{
+			//pick stuff
+			if (m_pick)
+			{
+				Pick();
+				m_pick_lock_center = false;
+				return;
+			}
+			else
+			{
+				//RefreshGL(27);
+				return;
+			}
+		}
+		else if (m_int_mode == 2)
+		{
+			//segment volumes
+			m_paint_enable = true;
+			wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+			m_int_mode = 4;
+			m_force_clear = true;
+			RefreshGL(27);
+			fluo::ValueCollection vc;
+			vc.insert({ gstSelUndo, gstBrushThreshold });
+			if (glbin_brush_def.m_update_size)
+				vc.insert(gstBrushCountResult);
+			if (glbin_brush_def.m_update_colocal)
+				vc.insert(gstColocalResult);
+			m_frame->UpdateProps(vc);
+			return;
+		}
+		else if (m_int_mode == 5 &&
+			!event.AltDown())
+		{
+			//add one point to a ruler
+			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
+			RefreshGL(27);
+			m_frame->UpdateProps({ gstRulerList });
+			return;
+		}
+		else if (m_int_mode == 9 ||
+			m_int_mode == 11)
+		{
+			glbin_ruler_handler.SetPoint(0);
+		}
+		else if (m_int_mode == 7)
+		{
+			//segment volume, calculate center, add ruler point
+			m_paint_enable = true;
+			wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+			if (glbin_ruler_handler.GetType() == 3)
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
+			else
+				glbin_ruler_handler.AddPaintRulerPoint();
+			m_int_mode = 8;
+			m_force_clear = true;
+			RefreshGL(27);
+			fluo::ValueCollection vc;
+			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
+			if (glbin_brush_def.m_update_size)
+				vc.insert(gstBrushCountResult);
+			if (glbin_brush_def.m_update_colocal)
+				vc.insert(gstColocalResult);
+			m_frame->UpdateProps(vc);
+			return;
+		}
+		else if (m_int_mode == 10 ||
+			m_int_mode == 12)
+		{
+			//glbin_vol_selector.PushMask();
+			m_grow_on = false;
+			return;
+		}
+		else if (m_int_mode == 13 &&
+			!event.AltDown())
+		{
+			if (glbin_settings.m_ruler_auto_relax)
+			{
+				glbin_ruler_handler.SetEdited(true);
+				glbin_ruler_handler.Relax();
+			}
+			RefreshGL(29);
+			m_frame->UpdateProps({ gstRulerList });
+			return;
+		}
+		else if ((m_int_mode == 6 ||
+			m_int_mode == 15) &&
+			!event.AltDown())
+		{
+			if (m_int_mode == 6)
+			{
+				glbin_ruler_handler.ClearMagStroke();
+				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			}
+			else if (glbin_ruler_handler.MagStrokeEmpty())
+				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			glbin_ruler_handler.ApplyMagPoint();
+			glbin_ruler_handler.ClearMagStroke();
+			RefreshGL(29);
+			m_frame->UpdateProps({ gstRulerList });
+			return;
+		}
+		else if (m_int_mode == 16)
+		{
+			m_int_mode = 1;
+			m_crop_type = 0;
+		}
+	}
+	if (event.MiddleUp())
+	{
+		//SetSortBricks();
+		//RefreshGL(28);
+		return;
+	}
+	if (event.RightUp())
+	{
+		if (m_int_mode == 1)
+		{
+			//RefreshGL(27);
+			//return;
+		}
+		if (m_int_mode == 5 &&
+			!event.AltDown())
+		{
+			if (glbin_ruler_handler.GetRulerFinished())
+			{
+				m_int_mode = 1;
+				//SetIntMode(1);
+				//glbin_ruler_handler.SetMode(0);
+			}
+			else
+			{
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
+				glbin_ruler_handler.FinishRuler();
+			}
+			if (glbin_settings.m_ruler_auto_relax)
+			{
+				glbin_ruler_handler.SetEdited(true);
+				glbin_ruler_handler.Relax();
+			}
+			RefreshGL(29);
+			m_frame->UpdateProps({ gstRulerList });
+			return;
+		}
+		//SetSortBricks();
+	}
+
+	//mouse dragging
+	if (event.Dragging())
+	{
+		//crop
+		if (m_int_mode == 16)
+		{
+			ChangeCropFrame(mp);
+			RefreshGL(29);
+			m_frame->UpdateProps({ gstCropValues });
+			return;
+		}
+
+		flvr::TextureRenderer::set_cor_up_time(
+			std::round(sqrt(double(old_mouse_X - mp.x())*
+				double(old_mouse_X - mp.x()) +
+				double(old_mouse_Y - mp.y())*
+				double(old_mouse_Y - mp.y()))));
+
+		flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
+		bool hold_old = false;
+		if (m_int_mode == 1 ||
+			((m_int_mode == 5  ||
+			m_int_mode == 13 ||
+			m_int_mode == 15) &&
+			event.AltDown()) ||
+			((m_int_mode == 9 ||
+			m_int_mode == 10 ||
+			m_int_mode == 11 ||
+			m_int_mode == 12 ||
+			m_int_mode == 14) &&
+			!p0) ||
+			((m_int_mode == 6 ||
+			m_int_mode == 15 ||
+			m_int_mode == 13) &&
+			(event.ControlDown() ||
+			event.MiddleIsDown() ||
+			event.RightIsDown())))
+		{
+			//disable picking
+			m_pick = false;
+
+			if (old_mouse_X != -1 &&
+				old_mouse_Y != -1 &&
+				abs(old_mouse_X - mp.x()) +
+				abs(old_mouse_Y - mp.y())<200)
+			{
+				if (event.LeftIsDown() &&
+					!event.ControlDown() &&
+					m_int_mode != 10 &&
+					m_int_mode != 12)
+				{
+					fluo::Quaternion q_delta = Trackball(
+						mp.x() - old_mouse_X, old_mouse_Y - mp.y());
+					if (m_rot_lock && q_delta.IsIdentity())
+						hold_old = true;
+					m_q *= q_delta;
+					m_q.Normalize();
+					fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+					fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+					m_transx = cam_pos2.x;
+					m_transy = cam_pos2.y;
+					m_transz = cam_pos2.z;
+
+					fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+					fluo::Quaternion up2 = (-m_q) * up * m_q;
+					m_up = fluo::Vector(up2.x, up2.y, up2.z);
+
+					Q2A();
+
+					m_interactive = true;
+
+					if (m_linked_rot)
+						m_master_linked_view = this;
+
+					if (!hold_old)
+						RefreshGL(30);
+					//DBGPRINT(L"refresh requested\n");
+					m_renderview_panel->FluoUpdate({ gstCamRotation });
+				}
+				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
+				{
+					long dx = mp.x() - old_mouse_X;
+					long dy = mp.y() - old_mouse_Y;
+
+					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+					m_head.normalize();
+					fluo::Vector side = Cross(m_up, m_head);
+					fluo::Vector trans = -(
+						side*(double(dx)*(m_ortho_right - m_ortho_left) / double(nx)) +
+						m_up*(double(dy)*(m_ortho_top - m_ortho_bottom) / double(ny)));
+					m_obj_transx += trans.x();
+					m_obj_transy += trans.y();
+					m_obj_transz += trans.z();
+
+					m_interactive = true;
+
+					if (m_pin_rot_ctr)
+						m_update_rot_ctr = true;
+
+					//SetSortBricks();
+					RefreshGL(31);
+				}
+				if (event.RightIsDown())
+				{
+					long dx = mp.x() - old_mouse_X;
+					long dy = mp.y() - old_mouse_Y;
+
+					double delta = abs(dx)>abs(dy) ?
+						(double)dx / (double)nx :
+						(double)-dy / (double)ny;
+					m_scale_factor += m_scale_factor*delta;
+
+					if (m_free)
+					{
+						fluo::Vector pos(m_transx, m_transy, m_transz);
+						pos.normalize();
+						fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+						ctr -= delta*pos * 1000;
+						m_ctrx = ctr.x();
+						m_ctry = ctr.y();
+						m_ctrz = ctr.z();
+					}
+
+					m_interactive = true;
+
+					//SetSortBricks();
+					RefreshGL(32);
+
+					m_renderview_panel->FluoUpdate({ gstScaleFactor });
+				}
+			}
+		}
+		else if (m_int_mode == 2 || m_int_mode == 7)
+		{
+			m_paint_enable = true;
+			RefreshGL(33);
+		}
+		else if (m_int_mode == 3)
+		{
+			if (old_mouse_X != -1 &&
+				old_mouse_Y != -1 &&
+				abs(old_mouse_X - mp.x()) +
+				abs(old_mouse_Y - mp.y())<200)
+			{
+				if (event.LeftIsDown())
+				{
+					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
+					m_q_cl = q_delta * m_q_cl;
+					m_q_cl.Normalize();
+					SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+					RefreshGL(34);
+				}
+			}
+		}
+		else if (m_int_mode == 6 || m_int_mode == 9)
+		{
+			bool rval = false;
+			if (m_int_mode == 6)
+				rval = glbin_ruler_handler.EditPoint(
+					mp.x(), mp.y(), event.AltDown());
+			else if (m_int_mode == 9)
+				rval = glbin_ruler_handler.MoveRuler(
+					mp.x(), mp.y());
+			if (rval)
+			{
+				RefreshGL(35);
+				m_frame->UpdateProps({ gstRulerList });
+				glbin_ruler_handler.SetEdited(true);
+			}
+		}
+		else if (m_int_mode == 13 && !event.AltDown())
+		{
+			double dist = glbin_settings.m_pencil_dist;
+			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
+			{
+				//add one point to a ruler
+				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
+				RefreshGL(27);
+				m_frame->UpdateProps({ gstRulerList });
+			}
+		}
+		else if (m_int_mode == 15 && !event.AltDown())
+		{
+			double dist = glbin_settings.m_pencil_dist;
+			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
+				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			glbin_ruler_handler.ApplyMagStroke();
+			RefreshGL(27);
+		}
+
+		//update mouse position
+		if (old_mouse_X >= 0 && old_mouse_Y >= 0)
+		{
+			prv_mouse_X = old_mouse_X;
+			prv_mouse_Y = old_mouse_Y;
+			if (!hold_old)
+			{
+				old_mouse_X = mp.x();
+				old_mouse_Y = mp.y();
+			}
+		}
+		else
+		{
+			old_mouse_X = mp.x();
+			old_mouse_Y = mp.y();
+			prv_mouse_X = old_mouse_X;
+			prv_mouse_Y = old_mouse_Y;
+		}
+
+		return;
+	}
+
+	//wheel operations
+	int wheel = event.GetWheelRotation();
+	if (wheel)  //if rotation
+	{
+		if (m_focused_slider)
+		{
+			int value = wheel / event.GetWheelDelta();
+			m_focused_slider->Scroll(value);
+		}
+		else
+		{
+			if (m_int_mode == 2 || m_int_mode == 7)
+			{
+				ChangeBrushSize(wheel);
+			}
+			else
+			{
+				m_interactive = true;
+				if (m_pin_rot_ctr)
+					m_update_rot_ctr = true;
+				double value = wheel * m_scale_factor / 1000.0;
+				if (m_scale_factor + value > 0.01)
+					m_scale_factor += value;
+				m_renderview_panel->FluoUpdate({ gstScaleFactor });
+			}
+		}
+
+		RefreshGL(36);
+		return;
+	}
+
+	// draw the strokes into a framebuffer texture
+	//not actually for displaying it
+	if (m_draw_brush)
+	{
+		old_mouse_X = mp.x();
+		old_mouse_Y = mp.y();
+		RefreshGL(37);
+		return;
+	}
+
+	if (m_draw_info & INFO_DISP)
+	{
+		if (glbin_moviemaker.IsRunning())
+			return;
+		if (glbin_settings.m_hologram_mode)
+			return;
+
+		m_retain_finalbuffer = true;
+#ifdef _WIN32
+		RefreshGL(38, false, false);
+#else
+		RefreshGL(38, false, true);
+#endif
+		return;
+	}
+}

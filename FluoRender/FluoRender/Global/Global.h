@@ -54,6 +54,7 @@ class BaseXrRenderer;
 class JVMInitializer;
 struct CurrentObjects;
 class Project;
+class RenderView;
 namespace fluo
 {
 	class AsyncTimer;
@@ -168,6 +169,10 @@ namespace flvr
 
 //help url
 #define glbin_help_url fluo::Global::instance().get_help_url()
+
+//linked rotation
+#define glbin_linked_rot fluo::Global::instance().get_linked_rot()
+#define glbin_master_linked_view fluo::Global::instance().get_master_linked_view()
 
 //jvm
 #define glbin_jvm_instance fluo::Global::instance().get_jvm_instance()
@@ -284,6 +289,10 @@ namespace fluo
 
 		std::string& get_help_url() { return help_url_; }
 
+		//linked rotation
+		bool get_linked_rot() { return m_linked_rot; }
+		RenderView* get_master_linked_view() { return m_master_linked_view; }
+
 	private:
 		static Global instance_;
 
@@ -382,6 +391,10 @@ namespace fluo
 
 		//help url
 		std::string help_url_;
+
+		//linked rotation
+		bool m_linked_rot;
+		RenderView* m_master_linked_view;
 
 	private:
 		Global();

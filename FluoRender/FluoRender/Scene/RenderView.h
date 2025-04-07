@@ -76,8 +76,9 @@ public:
 	virtual ~RenderView();
 
 	//size
-	void SetSize(int nx, int ny) { m_size = Size2D(nx, ny); }
-	Size2D GetSize() { return m_size; }
+	void SetSize(int x, int y);
+	void SetClient(int x, int y, int w, int h) { m_client_x = x; m_client_y = y; m_client_w = w; m_client_h = h; }
+	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
 	std::string GetOGLVersion();
 
 	//initialization
@@ -152,9 +153,9 @@ public:
 	void RandomizeColor();
 
 	//toggle hiding/displaying
-	void SetDraw(bool draw);
-	void ToggleDraw();
-	bool GetDraw();
+	void SetDraw(bool draw) { m_draw_all = draw; }
+	void ToggleDraw() { m_draw_all = !m_draw_all; }
+	bool GetDraw() { return m_draw_all; }
 
 	//handle camera
 	void HandleProjection(int nx, int ny, bool vr = false);
@@ -168,7 +169,7 @@ public:
 	fluo::Vector GetRotations();
 	void SetRotations(const fluo::Vector& val, bool notify);
 	int GetOrientation();//same as the indices in the view panel
-	void SetZeroRotations();
+	void SetZeroRotations() { m_zq = m_q; }
 	fluo::Vector ResetZeroRotations();
 	fluo::Point GetCenters();
 	void SetCenters(const fluo::Point& val);
@@ -177,7 +178,7 @@ public:
 	double GetInitDist() { return m_init_dist; }
 	void SetInitDist(double dist) { m_init_dist = dist; }
 	double GetRadius() { return m_radius; }
-	void SetRadius(double r);
+	void SetRadius(double r) { m_radius = r; }
 	void SetCenter();
 	double Get121ScaleFactor();
 	void SetScale121();
@@ -214,7 +215,7 @@ public:
 	bool GetFree() { return m_free; }
 	void SetFree(bool free = true);
 	double GetAov() { return m_aov; }
-	void SetAov(double aov);
+	void SetAov(double aov) { m_aov = aov; }
 	double GetNearClip() { return m_near_clip; }
 	void SetNearClip(double nc) { m_near_clip = nc; }
 	double GetFarClip() { return m_far_clip; }
@@ -225,7 +226,7 @@ public:
 	bool GetInteractive() { return m_interactive; }
 
 	//background color
-	fluo::Color GetBackgroundColor();
+	fluo::Color GetBackgroundColor() { return m_bg_color; }
 	fluo::Color GetTextColor();
 	void SetBackgroundColor(fluo::Color &color);
 
@@ -233,7 +234,7 @@ public:
 	int GetDrawType() { return m_draw_type; }
 	void SetVolMethod(int method);
 	int GetVolMethod() { return m_vol_method; }
-	void SetFog(bool b = true);
+	void SetFog(bool b = true) { m_use_fog = b; }
 	bool GetFog() { return m_use_fog; }
 	void SetFogIntensity(double i) { m_fog_intensity = i; }
 	double GetFogIntensity() { return m_fog_intensity; }
@@ -299,7 +300,7 @@ public:
 	void SetMeshPopDirty() { m_md_pop_dirty = true; }
 
 	//inteactive mode selection
-	int GetIntMode();
+	int GetIntMode() { return m_int_mode; }
 	void SetIntMode(int mode);
 
 	//set use 2d rendering results
@@ -337,14 +338,14 @@ public:
 	void ResetClipValuesZ();
 
 	//interpolation
-	void SetIntp(bool mode);
-	bool GetIntp();
+	void SetIntp(bool mode) { m_intp = mode; }
+	bool GetIntp() { return m_intp; }
 
 	//text renderer
 	flvr::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
 
 	//force draw
-	void ForceDraw();
+	bool ForceDraw();//return if swap buffers
 
 	//start loop update
 	void StartLoopUpdate();
@@ -413,9 +414,15 @@ public:
 	void SetBenchmark(bool val) { m_benchmark = val; }
 	bool GetBenchmark() { return m_benchmark; }
 
+	//mouse position
+	void SetMousePos(int x, int y) { m_mouse_x = x; m_mouse_y = y; }
+
+	//process idle
+	void ProcessIdle(const fluo::ValueCollection& vc);
+	//process mouse
+	void ProcessMouse();
+
 public:
-	//set gl context
-	bool m_set_gl;
 	//capture modes
 	bool m_capture;
 	bool m_capture_rotat;
@@ -486,6 +493,8 @@ private:
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	Size2D m_size;
+	Size2D m_gl_size;
+	double m_dpi_factor;
 	std::string m_GLversion;
 
 	//populated lists of data
@@ -724,6 +733,15 @@ private:
 	bool m_lg_initiated;
 	int m_vr_eye_idx;//0: left; 1: right
 
+	//mouse position (client)
+	int m_mouse_x;
+	int m_mouse_y;
+	//client
+	int m_client_x;
+	int m_client_y;
+	int m_client_w;
+	int m_client_h;
+
 private:
 	void DrawBounds();
 	void DrawGrid();
@@ -831,6 +849,16 @@ private:
 	void ControllerRotate(double dx, double dy, int nx, int ny);
 	void ControllerPan(double dx, double dy, int nx, int ny);
 	void GrabRotate(const glm::mat4& pose);
+
+	//determine if point in current view
+	bool PointInView(int x, int y)
+	{
+		if (x < m_client_x || x > m_client_x + m_client_w * m_dpi_factor ||
+			y < m_client_y || y > m_client_y + m_client_h * m_dpi_factor)
+			return false;
+		else
+			return true;
+	}
 };
 
 #endif//_RENDERVIEW_H_
