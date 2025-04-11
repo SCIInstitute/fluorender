@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <PyDlc.h>
 #include <Undoable.h>
 #include <MainSettings.h>
-#include <States.h>
+#include <GlobalStates.h>
 //processors
 #include <CompGenerator.h>
 #include <CompAnalyzer.h>
@@ -263,7 +263,7 @@ Global::Global() :
 	cache_queue_(std::make_unique<flrd::CacheQueue>()),
 	encoder_(std::make_unique<QVideoEncoder>()),
 	main_settings_(std::make_unique<MainSettings>()),
-	states_(std::make_unique<States>()),
+	states_(std::make_unique<GlobalStates>()),
 	//processors
 	m_comp_generator(std::make_unique<flrd::ComponentGenerator>()),
 	m_comp_analyzer(std::make_unique<flrd::ComponentAnalyzer>()),
@@ -540,7 +540,7 @@ ColocalDefault& Global::get_colocal_def()
 }
 
 //states
-States& Global::get_states()
+GlobalStates& Global::get_states()
 {
 	return *states_;
 }

@@ -26,14 +26,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <GL/glew.h>
 #include <RulerRenderer.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <Vector.h>
 #include <Quaternion.h>
 #include <TextRenderer.h>
 #include <ShaderProgram.h>
 #include <TextureRenderer.h>
+#include <ImgShader.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;

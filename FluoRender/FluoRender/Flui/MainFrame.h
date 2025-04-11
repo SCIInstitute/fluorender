@@ -223,7 +223,6 @@ public:
 	void LoadPerspective(const wxString& str);
 	wxString SavePerspective();
 
-	bool GetBenchmark();
 	//volume
 	void OpenVolume();
 	void ImportVolume();
@@ -398,8 +397,6 @@ private:
 	wxString m_title;
 	//mac address
 	wxString m_address;
-	//benchmark mode
-	bool m_benchmark;
 	wxTimer m_waker;
 
 private:

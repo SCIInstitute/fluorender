@@ -50,9 +50,6 @@ DEALINGS IN THE SOFTWARE.
 #define PACKETMODE	PK_BUTTONS
 #include <PKTDEF.h>
 #include <WacomUtils.h>
-#ifdef USE_XINPUT
-#include <XInput/XboxController.h>
-#endif
 #endif
 
 #define ID_ftrigger	0
@@ -126,13 +123,6 @@ private:
 
 	//is full screen
 	bool m_full_screen;
-
-#ifdef _WIN32
-#ifdef USE_XINPUT
-	XboxController* m_controller;
-	bool m_control_connected;
-#endif
-#endif
 
 	//focused slider
 	wxBasisSlider* m_focused_slider;

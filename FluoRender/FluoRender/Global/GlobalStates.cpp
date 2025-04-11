@@ -26,66 +26,35 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _RulerRenderer_H_
-#define _RulerRenderer_H_
+#include <GlobalStates.h>
+#include <Global.h>
+#include <MainSettings.h>
 
-#include <Ruler.h>
-#include <Color.h>
-#include <Point.h>
-#include <Transform.h>
-#include <vector>
-
-class RenderView;
-
-namespace flrd
+GlobalStates::GlobalStates()
 {
-	class RulerRenderer
-	{
-	public:
-		RulerRenderer();
-		~RulerRenderer();
+	m_mouse_in_clip_plane_panel = false;
+	m_mouse_in_aov_slider = false;
+	m_clip_display = false;
+	m_modal_shown = false;
+}
 
-		void SetView(RenderView* view)
-		{
-			m_view = view;
-		}
-
-		void SetRulerList(flrd::RulerList* ruler_list)
-		{
-			m_ruler_list = ruler_list;
-		}
-
-		flrd::RulerList* GetRulerList()
-		{
-			return m_ruler_list;
-		}
-
-		void SetLineSize(double val)
-		{
-			m_line_size = val;
-		}
-
-		void SetDrawText(bool val)
-		{
-			m_draw_text = val;
-		}
-
-		void Draw();
-
-	private:
-		RenderView *m_view;
-		RulerList *m_ruler_list;
-		double m_line_size;
-		bool m_draw_text;
-
-	private:
-		unsigned int DrawVerts(std::vector<float> &verts);
-		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c);
-		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
-			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
-			std::vector<float> &verts, unsigned int& num);
-		void DrawText(int, int);
-	};
+GlobalStates::~GlobalStates()
+{
 
 }
-#endif//_RulerRenderer_H_
+
+bool GlobalStates::ClipDisplayChanged()
+{
+	bool bval = m_clip_display;
+	m_clip_display =
+		glbin_settings.m_clip_hold ||
+		m_mouse_in_clip_plane_panel ||
+		m_mouse_in_aov_slider;
+	bval = bval != m_clip_display;
+	return 	bval;
+}
+
+void GlobalStates::SetModal(bool bval)
+{
+	m_modal_shown = bval;
+}

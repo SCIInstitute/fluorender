@@ -33,7 +33,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Quaternion.h>
 #include <TextRenderer.h>
 #include <Size.h>
+#include <Value.hpp>
 #include <string>
+
+#if defined(_WIN32) && defined(USE_XINPUT)
+#include <XInput/XboxController.h>
+#endif
 
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
@@ -67,7 +72,10 @@ DEALINGS IN THE SOFTWARE.
 #define INFO_Y		64
 #define INFO_Z		128
 
-
+class RenderViewPanel;
+class RenderCanvas;
+class IdleState;
+class MouseState;
 class RenderView : public TreeLayer
 {
 public:
@@ -75,8 +83,17 @@ public:
 	RenderView(RenderView& copy);
 	virtual ~RenderView();
 
+	//handle
+	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
+	//set render view panel
+	void SetRenderViewPanel(RenderViewPanel* panel) { m_render_view_panel = panel; m_id = panel->m_id; }
+	//set render canvas
+	void SetRenderCanvas(RenderCanvas* canvas) { m_render_canvas = canvas; }
+
 	//size
 	void SetSize(int x, int y);
+	Size2D GetSize() { return m_size; }
+	Size2D GetGLSize() { return m_gl_size; }
 	void SetClient(int x, int y, int w, int h) { m_client_x = x; m_client_y = y; m_client_w = w; m_client_h = h; }
 	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
 	std::string GetOGLVersion();
@@ -410,17 +427,13 @@ public:
 
 	void GetRenderSize(int& nx, int& ny);
 
-	//benchmark
-	void SetBenchmark(bool val) { m_benchmark = val; }
-	bool GetBenchmark() { return m_benchmark; }
-
 	//mouse position
 	void SetMousePos(int x, int y) { m_mouse_x = x; m_mouse_y = y; }
 
 	//process idle
-	void ProcessIdle(const fluo::ValueCollection& vc);
+	void ProcessIdle(IdleState& state);
 	//process mouse
-	void ProcessMouse();
+	void ProcessMouse(MouseState& state);
 
 public:
 	//capture modes
@@ -490,6 +503,9 @@ public:
 	fluo::Point m_pin_ctr;//the center point for view rotation
 
 private:
+	void* m_hWnd;
+	RenderViewPanel* m_render_view_panel;
+	RenderCanvas* m_render_canvas;
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	Size2D m_size;
@@ -717,9 +733,6 @@ private:
 	bool m_enlarge;
 	double m_enlarge_scale;
 
-	//for benchmark
-	bool m_benchmark;
-
 	//nodraw count
 	int m_nodraw_count;
 
@@ -741,6 +754,11 @@ private:
 	int m_client_y;
 	int m_client_w;
 	int m_client_h;
+
+#if defined(_WIN32) && defined(USE_XINPUT)
+	XboxController* m_controller;
+	bool m_control_connected;
+#endif
 
 private:
 	void DrawBounds();

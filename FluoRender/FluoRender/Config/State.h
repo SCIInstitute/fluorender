@@ -25,36 +25,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef _STATE_H_
+#define _STATE_H_
 
-#include <States.h>
-#include <Global.h>
-#include <MainSettings.h>
+#include <Value.hpp>
 
-States::States()
+class BaseState
 {
-	m_mouse_in_clip_plane_panel = false;
-	m_mouse_in_aov_slider = false;
-	m_clip_display = false;
-	m_modal_shown = false;
-}
+public:
+	virtual ~BaseState() = default;
+};
 
-States::~States()
+class MouseState : public BaseState
 {
+public:
+	MouseState()
+	{ }
+};
 
-}
-
-bool States::ClipDisplayChanged()
+class IdleState : public BaseState
 {
-	bool bval = m_clip_display;
-	m_clip_display =
-		glbin_settings.m_clip_hold ||
-		m_mouse_in_clip_plane_panel ||
-		m_mouse_in_aov_slider;
-	bval = bval != m_clip_display;
-	return 	bval;
-}
+public:
+	IdleState()
+	{
+	}
 
-void States::SetModal(bool bval)
-{
-	m_modal_shown = bval;
-}
+	bool m_request_more = false;
+	bool m_movie_maker_render_canvas = false;
+	bool m_refresh = false;
+	bool m_erase_background = false;
+	bool m_start_loop = false;
+	bool m_set_focus = false;
+	double m_benchmark_fps = 0;
+	bool m_looking_glass_changed = false;
+	bool m_mouse_over = false;
+	fluo::ValueCollection m_value_collection = {};
+};
+
+#endif//_STATE_H_

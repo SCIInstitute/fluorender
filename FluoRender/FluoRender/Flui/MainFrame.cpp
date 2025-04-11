@@ -110,7 +110,6 @@ MainFrame::MainFrame(
 	m_machine_learning_dlg(0),
 	m_script_break_dlg(0),
 	m_fp_range_dlg(0),
-	m_benchmark(benchmark),
 	//m_vd_copy(0),
 	//m_copy_data(false),
 	m_waker(this)
@@ -146,6 +145,8 @@ MainFrame::MainFrame(
 	glbin_clusterizer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_trackmap_proc.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	glbin_kernel_executor.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+
+	glbin_states.m_benchmark = benchmark;
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
@@ -1017,11 +1018,6 @@ void MainFrame::LoadPerspective(const wxString& str)
 wxString MainFrame::SavePerspective()
 {
 	return m_aui_mgr.SavePerspective();
-}
-
-bool MainFrame::GetBenchmark()
-{
-	return m_benchmark;
 }
 
 TreePanel *MainFrame::GetTreePanel()

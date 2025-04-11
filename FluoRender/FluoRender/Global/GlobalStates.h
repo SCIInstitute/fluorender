@@ -25,16 +25,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _STATES_H_
-#define _STATES_H_
+#ifndef _GLOBALSTATES_H_
+#define _GLOBALSTATES_H_
 
 #include <string>
 
-class States
+class GlobalStates
 {
 public:
-	States();
-	~States();
+	GlobalStates();
+	~GlobalStates();
 
 	bool ClipDisplayChanged();
 
@@ -51,5 +51,7 @@ public:
 	bool m_modal_shown;	//a modal dialog is currently shown, disable keyboard shortcuts
 
 	std::string m_status_str;		//string to show on main statusbar
+
+	bool m_benchmark;	//benchmark mode
 };
-#endif
+#endif//_GLOBALSTATES_H_

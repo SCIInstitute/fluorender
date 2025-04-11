@@ -34,6 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <RenderView.h>
 #include <StopWatch.hpp>
+#include <State.h>
+#include <MovieMaker.h>
+#include <GlobalStates.h>
+#include <MainSettings.h>
 
 #ifdef _WIN32
 HCTX RenderCanvas::m_hTab = 0;
@@ -61,15 +65,16 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_ptr_id2(-1),
 	m_full_screen(false),
 	m_focused_slider(0)
-#if defined(_WIN32) && defined(USE_XINPUT)
-	,
-	m_controller(0)
-#endif
 {
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 
 	m_render_view = new RenderView();
+	m_render_view->SetRenderViewPanel(m_renderview_panel);
+	m_render_view->SetRenderCanvas(this);
+#ifdef _WIN32
+	m_render_view->SetHandle((void*)GetHWND());
+#endif
 	m_render_view->SetSize(size.x, size.y);
 
 #ifdef _WIN32
@@ -94,20 +99,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	else
 		m_enable_touch = false;
 
-	//xbox controller
-#ifdef USE_XINPUT
-	m_controller = new XboxController(1);
-	if (m_controller)
-	{
-		m_control_connected = m_controller->IsConnected();
-	}
 #endif
-#endif
-
-	if (m_frame && m_frame->GetBenchmark())
-		m_render_view->SetBenchmark(true);
-	else
-		m_render_view->SetBenchmark(false);
 
 	//events
 	Bind(wxEVT_PAINT, &RenderCanvas::OnDraw, this);
@@ -128,7 +120,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 
 RenderCanvas::~RenderCanvas()
 {
-	if (m_render_view->GetBenchmark())
+	if (glbin_states.m_benchmark)
 	{
 		unsigned long long msec =
 			(unsigned long long)(glbin.getStopWatch(gstStopWatch)->total_time() * 1000.0);
@@ -158,10 +150,6 @@ RenderCanvas::~RenderCanvas()
 		UnloadWintab();
 	}
 
-#ifdef USE_XINPUT
-	if (m_controller)
-		delete m_controller;
-#endif
 #endif
 
 	std::string str = GetName().ToStdString() + ":";
@@ -364,664 +352,30 @@ void RenderCanvas::OnMove(wxMoveEvent& event)
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
-	fluo::ValueCollection vc;
+	IdleState state;
 
-	bool refresh = false;
-	bool ref_stat = false;
-	bool start_loop = true;
-	bool set_focus = false;
-	bool lg_changed = false;
-	m_retain_finalbuffer = false;
+	state.m_movie_maker_render_canvas = glbin_moviemaker.GetRenderCanvas() == this;
+	wxPoint mps = wxGetMousePosition();
+	state.m_mouse_over = wxFindWindowAtPoint(mps) == this &&
+		!glbin_states.m_modal_shown;
 
-	if (glbin_settings.m_hologram_mode == 2)
-	{
-		//make sure all views are drawn for the quilt
-		if (glbin_lg_renderer.GetFinished())
-			event.RequestMore(false);
-		else
-		{
-			event.RequestMore(true);
-			refresh = true;
-			lg_changed = false;
-		}
-	}
+	m_render_view->ProcessIdle(state);
 
-	//check memory swap status
-	if (glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-	{
-		if (flvr::TextureRenderer::active_view_ == m_renderview_panel->m_id)
-		{
-			refresh = true;
-			start_loop = false;
-			lg_changed = true;
-		}
-	}
-	else
-	{
-		if (glbin_moviemaker.GetRenderCanvas() == this)
-		{
-			//DBGPRINT(L"lg finished: %d, cur view: %d\n",
-			//	glbin_lg_renderer.GetFinished(),
-			//	glbin_lg_renderer.GetCurView());
-			if (glbin_lg_renderer.GetFinished())
-			{
-				refresh = glbin_moviemaker.Action();
-				event.RequestMore(glbin_moviemaker.IsRunning());
-				if (refresh)
-				{
-					lg_changed = true;
-					vc.insert(gstCamRotation);
-					if (!glbin_moviemaker.IsRunning())
-						vc.insert(gstMovPlay);
-				}
-			}
-		}
-	}
+	event.RequestMore(state.m_request_more);
 
-	if (m_capture_rotat ||
-		m_capture_tsequ ||
-		m_capture_param ||
-		glbin_settings.m_test_speed)
+	if (state.m_refresh)
+		m_renderview_panel->FluoRefresh(0, state.m_value_collection, {-1});
+	if (state.m_set_focus)
+		SetFocus();
+	if (glbin_states.m_benchmark)
 	{
-		refresh = true;
-		lg_changed = true;
-		if (glbin_settings.m_mem_swap &&
-			flvr::TextureRenderer::get_done_update_loop())
-			m_pre_draw = true;
-	}
-
-	if (m_use_openxr)
-	{
-		event.RequestMore(true);
-		refresh = true;
-		lg_changed = true;
-		//m_retain_finalbuffer = true;
-	}
-
-	if (m_frame && m_frame->GetBenchmark())
-	{
-		double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 		wxString title = wxString(FLUORENDER_TITLE) +
 			" " + wxString(VERSION_MAJOR_TAG) +
 			"." + wxString(VERSION_MINOR_TAG) +
 			" Benchmarking... FPS = " +
-			wxString::Format("%.2f", fps);
+			wxString::Format("%.2f", state.m_benchmark_fps);
 		m_frame->SetTitle(title);
-
-		refresh = true;
-		lg_changed = true;
-		if (glbin_settings.m_mem_swap &&
-			flvr::TextureRenderer::get_done_update_loop())
-			m_pre_draw = true;
 	}
-
-	//update pin rotation center
-	if (m_update_rot_ctr && m_cur_vol && !m_free)
-	{
-		fluo::Point p, ip;
-		int nx = GetGLSize().w();
-		int ny = GetGLSize().h();
-		int mode = 2;
-		if (m_cur_vol->GetMode() == 1) mode = 1;
-		glbin_volume_point.SetVolumeData(m_cur_vol);
-		double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
-			mode, true, m_pin_pick_thresh, p, ip);
-		if (dist <= 0.0)
-			dist = glbin_volume_point.GetPointVolumeBox(
-				nx / 2.0, ny / 2.0,
-				true, p);
-		if (dist > 0.0)
-		{
-			m_pin_ctr = p;
-			double obj_transx, obj_transy, obj_transz;
-			p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
-				p.y() - m_obj_ctry - m_obj_ctr_offy,
-				p.z() - m_obj_ctrz - m_obj_ctr_offz);
-			obj_transx = p.x();
-			obj_transy = p.y();
-			obj_transz = p.z();
-			double thresh = 10.0;
-			double spcx, spcy, spcz;
-			m_cur_vol->GetSpacings(spcx, spcy, spcz);
-			thresh *= spcx;
-			if (sqrt((m_obj_transx - obj_transx)*(m_obj_transx - obj_transx) +
-				(m_obj_transy - obj_transy)*(m_obj_transy - obj_transy) +
-				(m_obj_transz - obj_transz)*(m_obj_transz - obj_transz)) > thresh)
-			{
-				m_obj_transx = obj_transx;
-				m_obj_transy = obj_transy;
-				m_obj_transz = obj_transz;
-			}
-		}
-		m_update_rot_ctr = false;
-		refresh = true;
-		lg_changed = true;
-	}
-
-	wxPoint mps = wxGetMousePosition();
-	bool mouse_over = wxFindWindowAtPoint(mps) == this &&
-		!glbin_states.m_modal_shown;
-
-	if (mouse_over)
-	{
-		//forced refresh
-		if (wxGetKeyState(WXK_F5))
-		{
-			SetFocus();
-			m_clear_buffer = true;
-			m_updating = true;
-			glbin_states.m_status_str = "Forced Refresh";
-			m_frame->FluoUpdate({ gstMainStatusbarPush });
-			wxSizeEvent e;
-			OnResize(e);
-			RefreshGL(14, false, true, true);
-			m_frame->FluoUpdate({ gstMainStatusbarPop });
-			return;
-		}
-
-		if (UpdateBrushState())
-		{
-			set_focus = true;
-			refresh = true;
-			vc.insert({ gstSelUndo, gstBrushState, gstBrushThreshold, gstBrushSize1, gstBrushSize2 });
-			if (glbin_brush_def.m_update_size)
-				vc.insert(gstBrushCountResult);
-			if (glbin_brush_def.m_update_colocal)
-				vc.insert(gstColocalResult);
-		}
-
-		//draw_mask
-		if (wxGetKeyState(wxKeyCode('V')) &&
-			m_draw_mask)
-		{
-			m_draw_mask = false;
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('V')) &&
-			!m_draw_mask)
-		{
-			m_draw_mask = true;
-			refresh = true;
-			lg_changed = true;
-		}
-
-		//move view
-		//left
-		if (!m_move_left &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_LEFT))
-		{
-			m_move_left = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = -(side * (std::round(0.8 * (m_ortho_right - m_ortho_left))));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (m_move_left &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_LEFT)))
-			m_move_left = false;
-		//right
-		if (!m_move_right &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_RIGHT))
-		{
-			m_move_right = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = side * (std::round(0.8 * (m_ortho_right - m_ortho_left)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (m_move_right &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_RIGHT)))
-			m_move_right = false;
-		//up
-		if (!m_move_up &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_UP))
-		{
-			m_move_up = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector trans = -m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (m_move_up &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_UP)))
-			m_move_up = false;
-		//down
-		if (!m_move_down &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_DOWN))
-		{
-			m_move_down = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector trans = m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (m_move_down &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_DOWN)))
-			m_move_down = false;
-
-		//move time sequence
-		//forward
-		if ((!m_tseq_forward &&
-			wxGetKeyState(wxKeyCode('d'))) ||
-			(!wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_SPACE)))
-		{
-			m_tseq_forward = true;
-			int frame = glbin_moviemaker.GetCurrentFrame();
-			frame++;
-			glbin_moviemaker.SetCurrentFrame(frame);
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
-		}
-		if (m_tseq_forward &&
-			!wxGetKeyState(wxKeyCode('d')))
-			m_tseq_forward = false;
-		//backforward
-		if ((!m_tseq_backward &&
-			wxGetKeyState(wxKeyCode('a'))) ||
-			(wxGetKeyState(WXK_SPACE) &&
-			wxGetKeyState(WXK_CONTROL)))
-		{
-			m_tseq_backward = true;
-			int frame = glbin_moviemaker.GetCurrentFrame();
-			frame--;
-			glbin_moviemaker.SetCurrentFrame(frame);
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
-		}
-		if (m_tseq_backward &&
-			!wxGetKeyState(wxKeyCode('a')))
-			m_tseq_backward = false;
-
-		//move clip
-		//up
-		if (!m_clip_up &&
-			wxGetKeyState(wxKeyCode('s')))
-		{
-			m_clip_up = true;
-			if (m_frame && m_frame->GetClipPlanPanel())
-				m_frame->GetClipPlanPanel()->MoveLinkedClippingPlanes(-1);
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
-		}
-		if (m_clip_up &&
-			!wxGetKeyState(wxKeyCode('s')))
-			m_clip_up = false;
-		//down
-		if (!m_clip_down &&
-			wxGetKeyState(wxKeyCode('w')))
-		{
-			m_clip_down = true;
-			if (m_frame && m_frame->GetClipPlanPanel())
-				m_frame->GetClipPlanPanel()->MoveLinkedClippingPlanes(1);
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
-		}
-		if (m_clip_down &&
-			!wxGetKeyState(wxKeyCode('w')))
-			m_clip_down = false;
-
-		//cell full
-		if (!m_cell_full &&
-			wxGetKeyState(wxKeyCode('f')))
-		{
-			m_cell_full = true;
-			glbin_comp_selector.SelectFullComp();
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_cell_full &&
-			!wxGetKeyState(wxKeyCode('f')))
-			m_cell_full = false;
-		//cell link
-		if (!m_cell_link &&
-			wxGetKeyState(wxKeyCode('l')))
-		{
-			m_cell_link = true;
-			glbin_trackmap_proc.LinkCells(false);
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_cell_link &&
-			!wxGetKeyState(wxKeyCode('l')))
-			m_cell_link = false;
-		//new cell id
-		if (!m_cell_new_id &&
-			wxGetKeyState(wxKeyCode('n')))
-		{
-			m_cell_new_id = true;
-			glbin_comp_editor.NewId(false, true);
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_cell_new_id &&
-			!wxGetKeyState(wxKeyCode('n')))
-			m_cell_new_id = false;
-		//clear
-		if (wxGetKeyState(wxKeyCode('c')) &&
-			!m_clear_mask)
-		{
-			glbin_vol_selector.Clear();
-			glbin_comp_selector.Clear();
-			GetTraces(false);
-			m_clear_mask = true;
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-			vc.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (!wxGetKeyState(wxKeyCode('c')) &&
-			m_clear_mask)
-			m_clear_mask = false;
-		//save all masks
-		if (wxGetKeyState(wxKeyCode('m')) &&
-			!m_save_mask)
-		{
-			//if (m_frame && m_frame->GetListPanel())
-			//	m_frame->GetListPanel()->SaveAllMasks();
-			VolumeData* vd = glbin_current.vol_data;
-			if (vd)
-			{
-				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-			}
-			m_save_mask = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('m')) &&
-			m_save_mask)
-			m_save_mask = false;
-		//full screen
-		if (wxGetKeyState(WXK_ESCAPE))
-		{
-			m_fullscreen_trigger.Start(10);
-		}
-		//brush size
-		if (wxGetKeyState(wxKeyCode('[')))
-		{
-			ChangeBrushSize(-10);
-			set_focus = true;
-		}
-		if (wxGetKeyState(wxKeyCode(']')))
-		{
-			ChangeBrushSize(10);
-			set_focus = true;
-		}
-		//comp include
-		if (wxGetKeyState(WXK_RETURN) &&
-			!m_comp_include)
-		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->IncludeComps();
-			m_comp_include = true;
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(WXK_RETURN) &&
-			m_comp_include)
-			m_comp_include = false;
-		//comp exclude
-		if (wxGetKeyState(wxKeyCode('\\')) &&
-			!m_comp_exclude)
-		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->ExcludeComps();
-			m_comp_exclude = true;
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('\\')) &&
-			m_comp_exclude)
-			m_comp_exclude = false;
-		//ruler relax
-		if (wxGetKeyState(wxKeyCode('r')) &&
-			!m_ruler_relax)
-		{
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->Relax();
-			m_ruler_relax = true;
-			refresh = true;
-			lg_changed = true;
-			set_focus = true;
-		}
-		if (!wxGetKeyState(wxKeyCode('r')) &&
-			m_ruler_relax)
-			m_ruler_relax = false;
-
-		//grow
-		if ((m_int_mode == 10 ||
-			m_int_mode == 12) &&
-			wxGetMouseState().LeftIsDown() &&
-			m_grow_on)
-		{
-			int sz = glbin_settings.m_ruler_size_thresh;
-			//event.RequestMore();
-			glbin_vol_selector.SetInitMask(2);
-			mps = ScreenToClient(mps);
-			glbin_vol_selector.Segment(false, true, mps.x, mps.y);
-			glbin_vol_selector.SetInitMask(3);
-			if (m_int_mode == 12)
-			{
-				glbin_seg_grow.SetVolumeData(m_cur_vol);
-				glbin_seg_grow.SetIter(glbin_vol_selector.GetIter() * 3);
-				glbin_seg_grow.SetSizeThresh(sz);
-				glbin_seg_grow.Compute();
-			}
-			refresh = true;
-			lg_changed = true;
-			start_loop = true;
-			//update
-			if (glbin_brush_def.m_update_size)
-				vc.insert(gstBrushCountResult);
-			if (glbin_brush_def.m_update_colocal)
-				vc.insert(gstColocalResult);
-			if (m_int_mode == 12)
-				vc.insert(gstRulerList);
-		}
-	}
-
-#if defined(_WIN32)
-	//vr controller, similar to xinput
-	if (m_use_openxr)
-	{
-		glbin_xr_renderer->GetControllerStates();
-		float leftx, lefty, rightx, righty;
-		leftx = glbin_xr_renderer->GetControllerLeftThumbstickX();
-		lefty = glbin_xr_renderer->GetControllerLeftThumbstickY();
-
-		int nx = GetGLSize().w();
-		int ny = GetGLSize().h();
-		//horizontal move
-		if (leftx != 0.0)
-		{
-			event.RequestMore(true);
-			ControllerMoveHorizontal(leftx, nx, ny);
-			m_interactive = true;
-			m_update_rot_ctr = true;
-			refresh = true;
-		}
-		//zoom/dolly
-		if (lefty != 0.0)
-		{
-			event.RequestMore(true);
-			ControllerZoomDolly(lefty, nx, ny);
-			m_interactive = true;
-			refresh = true;
-			vc.insert(gstScaleFactor);
-		}
-
-		if (glbin_xr_renderer->GetGrab())
-		{
-			event.RequestMore(true);
-			glm::mat4 rot_mat = glbin_xr_renderer->GetGrabMatrix();
-			GrabRotate(rot_mat);
-			m_interactive = true;
-			refresh = true;
-			vc.insert(gstCamRotation);
-		}
-		else
-		{
-			rightx = glbin_xr_renderer->GetControllerRightThumbstickX();
-			righty = glbin_xr_renderer->GetControllerRightThumbstickY();
-
-			//rotate
-			if (rightx != 0.0 || righty != 0.0)
-			{
-				event.RequestMore(true);
-				ControllerRotate(rightx, righty, nx, ny);
-				m_interactive = true;
-				refresh = true;
-				vc.insert(gstCamRotation);
-			}
-		}
-	}
-#endif
-
-#if defined(_WIN32) && defined(USE_XINPUT)
-	//xinput controller
-	if (m_control_connected)
-	{
-		//DBGPRINT(L"Idle controller\n");
-		XINPUT_STATE xstate = m_controller->GetState();
-		double dzone = 0.2;
-		double sclr = 20;
-		double leftx = double(xstate.Gamepad.sThumbLX) / 32767.0;
-		if (leftx > -dzone && leftx < dzone) leftx = 0.0;
-		double lefty = double(xstate.Gamepad.sThumbLY) / 32767.0;
-		if (lefty > -dzone && lefty < dzone) lefty = 0.0;
-		double rghtx = double(xstate.Gamepad.sThumbRX) / 32767.0;
-		if (rghtx > -dzone && rghtx < dzone) rghtx = 0.0;
-		double rghty = double(xstate.Gamepad.sThumbRY) / 32767.0;
-		if (rghty > -dzone && rghty < dzone) rghty = 0.0;
-		int px = 0;
-		int py = 0;
-		int inc = 5;
-		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) py = -inc;
-		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) py = inc;
-		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
-		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
-
-		int nx = GetGLSize().w();
-		int ny = GetGLSize().h();
-		//horizontal move
-		if (leftx != 0.0)
-		{
-			event.RequestMore(true);
-			ControllerMoveHorizontal(leftx * sclr, nx, ny);
-			m_interactive = true;
-			m_update_rot_ctr = true;
-			refresh = true;
-			lg_changed = true;
-		}
-		//zoom/dolly
-		if (lefty != 0.0)
-		{
-			event.RequestMore(true);
-			ControllerZoomDolly(lefty * sclr, nx, ny);
-			m_interactive = true;
-			refresh = true;
-			lg_changed = true;
-			vc.insert(gstScaleFactor);
-		}
-		//rotate
-		if (rghtx != 0.0 || rghty != 0.0)
-		{
-			event.RequestMore(true);
-			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
-			m_interactive = true;
-			refresh = true;
-			lg_changed = true;
-			vc.insert(gstCamRotation);
-		}
-		//pan
-		if (px != 0 || py != 0)
-		{
-			event.RequestMore(true);
-			ControllerPan(px, py, nx, ny);
-			m_interactive = true;
-			m_update_rot_ctr = true;
-			refresh = true;
-			lg_changed = true;
-		}
-	}
-#endif
-
-
-	if (refresh)
-	{
-		m_clear_buffer = true;
-		m_updating = true;
-		RefreshGL(15, ref_stat, start_loop, lg_changed);
-		if (vc.empty())
-			vc.insert(gstNull);
-		m_renderview_panel->FluoRefresh(0, vc, {-1});
-	}
-	else if (glbin_settings.m_inf_loop)
-	{
-		RefreshGL(0, false, true, true);
-		event.RequestMore(true);
-		return;
-	}
-	if (set_focus)
-		SetFocus();
 }
 
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
@@ -1031,7 +385,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 		return;
 
 	m_full_screen = false;
-	if (m_benchmark)
+	if (glbin_states.m_benchmark)
 	{
 		if (m_renderview_panel->m_full_frame)
 			m_renderview_panel->m_full_frame->Hide();
@@ -1056,7 +410,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Raise();
 			m_frame->Show();
 		}
-		RefreshGL(40);
+		m_render_view->RefreshGL(40);
 	}
 }
 
@@ -1225,6 +579,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		event.GetWheelRotation()))
 		SetFocus();
 
-	m_render_view->ProcessMouse();
+	MouseState state;
+	m_render_view->ProcessMouse(state);
 }
 

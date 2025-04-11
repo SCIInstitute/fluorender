@@ -43,7 +43,7 @@ class ViewDefault;
 class VolumeDataDefault;
 class MovieDefault;
 class ColocalDefault;
-class States;
+class GlobalStates;
 class KernelExecutor;
 class Interpolator;
 class MovieMaker;
@@ -229,7 +229,7 @@ namespace fluo
 		ColocalDefault& get_colocal_def();
 
 		//states
-		States& get_states();
+		GlobalStates& get_states();
 
 		//data processors
 		void apply_processor_settings();
@@ -324,7 +324,7 @@ namespace fluo
 		std::unique_ptr<MainSettings> main_settings_;
 
 		//states
-		std::unique_ptr<States> states_;
+		std::unique_ptr<GlobalStates> states_;
 
 		//the data processors
 		std::unique_ptr<flrd::ComponentGenerator> m_comp_generator;
