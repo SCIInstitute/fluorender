@@ -355,13 +355,51 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	IdleState state;
 
 	state.m_movie_maker_render_canvas = glbin_moviemaker.GetRenderCanvas() == this;
+	//mouse state
 	wxPoint mps = wxGetMousePosition();
 	state.m_mouse_over = wxFindWindowAtPoint(mps) == this &&
 		!glbin_states.m_modal_shown;
+	state.m_mouse_left = wxGetMouseState().LeftIsDown();
+	//key state
+	state.m_key_paint = wxGetKeyState(WXK_SHIFT);
+	state.m_key_erase = wxGetKeyState(wxKeyCode('x'));
+	state.m_key_diff = wxGetKeyState(wxKeyCode('z'));
+	state.m_key_ctrl = wxGetKeyState(WXK_CONTROL);
+	state.m_key_refresh = wxGetKeyState(WXK_F5);
+	state.m_key_mask = wxGetKeyState(wxKeyCode('v'));
+	state.m_key_left = wxGetKeyState(WXK_LEFT);
+	state.m_key_right = wxGetKeyState(WXK_RIGHT);
+	state.m_key_up = wxGetKeyState(WXK_UP);
+	state.m_key_down = wxGetKeyState(WXK_DOWN);
+	state.m_key_mov_forward = wxGetKeyState(wxKeyCode('d'));
+	state.m_key_mov_backward = wxGetKeyState(wxKeyCode('a'));
+	state.m_key_mov_play = wxGetKeyState(WXK_SPACE);
+	state.m_key_clip_up = wxGetKeyState(wxKeyCode('s'));
+	state.m_key_clip_down = wxGetKeyState(wxKeyCode('w'));
+	state.m_key_cell_full = wxGetKeyState(wxKeyCode('f'));
+	state.m_key_cell_link = wxGetKeyState(wxKeyCode('l'));
+	state.m_key_cell_new_id = wxGetKeyState(wxKeyCode('n'));
+	state.m_key_cell_clear = wxGetKeyState(wxKeyCode('c'));
+	state.m_key_cell_include = wxGetKeyState(WXK_RETURN);
+	state.m_key_cell_exclude = wxGetKeyState(wxKeyCode('\\'));
+	state.m_key_save_mask = wxGetKeyState(wxKeyCode('m'));
+	state.m_key_exit_fullscreen = wxGetKeyState(WXK_ESCAPE);
+	state.m_key_fullscreen = wxGetKeyState(WXK_F11);
+	state.m_key_brush_size_down = wxGetKeyState(wxKeyCode('['));
+	state.m_key_brush_size_up = wxGetKeyState(wxKeyCode(']'));
+	state.m_key_ruler_relax = wxGetKeyState(wxKeyCode('r'));
+
+	m_prev_focus = FindFocus();
 
 	m_render_view->ProcessIdle(state);
 
 	event.RequestMore(state.m_request_more);
+
+	//full screen
+	if (state.m_fullscreen)
+		m_renderview_panel->SetFullScreen();
+	else if (state.m_exit_fullscreen)
+		m_fullscreen_trigger.Start(10);
 
 	if (state.m_refresh)
 		m_renderview_panel->FluoRefresh(0, state.m_value_collection, {-1});
@@ -376,6 +414,12 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 			wxString::Format("%.2f", state.m_benchmark_fps);
 		m_frame->SetTitle(title);
 	}
+
+	if (state.m_set_cur_focus)
+		SetFocus();
+
+	if (state.m_set_previous_focus && m_prev_focus)
+		m_prev_focus->SetFocus();
 }
 
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
@@ -551,35 +595,45 @@ WXLRESULT RenderCanvas::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM 
 
 void RenderCanvas::OnMouse(wxMouseEvent& event)
 {
-	m_render_view->SetMousePos(event.GetPosition().x, event.GetPosition().y);
+	MouseState state;
 
-	//if (m_drawing) return;
+	state.m_valid_focus_slider = m_focused_slider != nullptr;
+	//mouse
+	state.m_mouse_left = event.LeftDown();
+	state.m_mouse_right = event.RightDown();
+	state.m_mouse_middle = event.MiddleDown();
+	state.m_mouse_left_up = event.LeftUp();
+	state.m_mouse_right_up = event.RightUp();
+	state.m_mouse_middle_up = event.MiddleUp();
+	state.m_mouse_drag = event.Dragging();
+	state.m_mouse_wheel_rotate = event.GetWheelRotation();
+	state.m_mouse_wheel_delta = event.GetWheelDelta();
+	//key
+	state.m_key_alt = event.AltDown();
+	state.m_key_ctrl = event.ControlDown();
+
 	wxWindow *window = wxWindow::FindFocus();
-	//if (window &&
-	//	(window->GetClassInfo()->
-	//		IsKindOf(CLASSINFO(wxTextCtrl)) ||
-	//		window->GetClassInfo()->
-	//		IsKindOf(CLASSINFO(wxComboBox))) &&
-	//		(event.LeftDown() ||
-	//			event.RightDown() ||
-	//			event.MiddleDown() ||
-	//			event.LeftUp() ||
-	//			event.MiddleUp() ||
-	//			event.RightUp() ||
-	//			event.Dragging() ||
-	//			event.GetWheelRotation()))
 	if (window &&
-		(event.LeftDown() ||
-		event.RightDown() ||
-		event.MiddleDown() ||
-		event.LeftUp() ||
-		event.MiddleUp() ||
-		event.RightUp() ||
-		event.Dragging() ||
-		event.GetWheelRotation()))
+		(state.m_mouse_left ||
+		state.m_mouse_right ||
+		state.m_mouse_middle ||
+		state.m_mouse_left_up ||
+		state.m_mouse_right_up ||
+		state.m_mouse_middle_up ||
+		state.m_mouse_drag ||
+		state.m_mouse_wheel_rotate != 0))
 		SetFocus();
 
-	MouseState state;
+	m_render_view->SetMousePos(event.GetPosition().x, event.GetPosition().y);
+
 	m_render_view->ProcessMouse(state);
+
+	if (state.m_reset_focus_slider)
+		m_focused_slider = nullptr;
+	if (state.m_scroll_focus_slider && m_focused_slider)
+	{
+		int value = state.m_mouse_wheel_rotate / state.m_mouse_wheel_delta;
+		m_focused_slider->Scroll(value);
+	}
 }
 

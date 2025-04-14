@@ -74,6 +74,8 @@ public:
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
 
+	RenderView* GetRenderView() { return m_render_view; }
+
 	//get view info for external ops
 	//get size, considering enlargement
 	inline fluo::Point GetMousePos(wxMouseEvent& e);

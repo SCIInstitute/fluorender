@@ -33,7 +33,11 @@ DEALINGS IN THE SOFTWARE.
 class BaseState
 {
 public:
-	virtual ~BaseState() = default;
+	BaseState()
+	{ }
+
+	bool m_key_ctrl = false;//ctrl
+
 };
 
 class MouseState : public BaseState
@@ -41,6 +45,22 @@ class MouseState : public BaseState
 public:
 	MouseState()
 	{ }
+
+	bool m_valid_focus_slider = false;
+	bool m_reset_focus_slider = false;
+	bool m_scroll_focus_slider = false;
+	//mouse state
+	bool m_mouse_left = false;
+	bool m_mouse_right = false;
+	bool m_mouse_middle = false;
+	bool m_mouse_left_up = false;
+	bool m_mouse_right_up = false;
+	bool m_mouse_middle_up = false;
+	bool m_mouse_drag = false;
+	int m_mouse_wheel_rotate = 0;
+	int m_mouse_wheel_delta = 0;
+	//key state
+	bool m_key_alt = false;//alt
 };
 
 class IdleState : public BaseState
@@ -59,6 +79,43 @@ public:
 	double m_benchmark_fps = 0;
 	bool m_looking_glass_changed = false;
 	bool m_mouse_over = false;
+	bool m_exit_fullscreen = false;
+	bool m_fullscreen = false;
+
+	//focus update
+	bool m_set_cur_focus = false;
+	bool m_set_previous_focus = false;
+
+	//mouse state
+	bool m_mouse_left = false;
+	//key state
+	bool m_key_paint = false;//shift
+	bool m_key_erase = false;//x
+	bool m_key_diff = false;//z
+	bool m_key_refresh = false;//f5
+	bool m_key_mask = false;//v
+	bool m_key_left = false;//left
+	bool m_key_right = false;//right
+	bool m_key_up = false;//up
+	bool m_key_down = false;//down
+	bool m_key_mov_forward = false;//d
+	bool m_key_mov_backward = false;//a
+	bool m_key_mov_play = false;//space
+	bool m_key_clip_up = false;//s
+	bool m_key_clip_down = false;//w
+	bool m_key_cell_full = false;//f
+	bool m_key_cell_link = false;//l
+	bool m_key_cell_new_id = false;//n
+	bool m_key_cell_clear = false;//c
+	bool m_key_cell_include = false;//enter
+	bool m_key_cell_exclude = false;//back slash
+	bool m_key_save_mask = false;//m
+	bool m_key_exit_fullscreen = false;//esc
+	bool m_key_fullscreen = false;//f11
+	bool m_key_brush_size_down = false;//[
+	bool m_key_brush_size_up = false;//]
+	bool m_key_ruler_relax = false;//r
+
 	fluo::ValueCollection m_value_collection = {};
 };
 

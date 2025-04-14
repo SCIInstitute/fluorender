@@ -74,6 +74,7 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderViewPanel;
 class RenderCanvas;
+class BaseState;
 class IdleState;
 class MouseState;
 class RenderView : public TreeLayer
@@ -86,9 +87,9 @@ public:
 	//handle
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
 	//set render view panel
-	void SetRenderViewPanel(RenderViewPanel* panel) { m_render_view_panel = panel; m_id = panel->m_id; }
+	void SetRenderViewPanel(RenderViewPanel* panel);
 	//set render canvas
-	void SetRenderCanvas(RenderCanvas* canvas) { m_render_canvas = canvas; }
+	void SetRenderCanvas(RenderCanvas* canvas);
 
 	//size
 	void SetSize(int x, int y);
@@ -330,7 +331,7 @@ public:
 
 	//brush properties
 	//change display
-	void ChangeBrushSize(int value);
+	void ChangeBrushSize(int value, bool ctrl);
 
 	//set clip mode
 	void SetClipMode(int mode);
@@ -843,13 +844,13 @@ private:
 	void ResetEnlarge();
 
 	//brush states update
-	void SetBrush(int mode);
-	bool UpdateBrushState();
+	void SetBrush(int mode, IdleState& state);
+	bool UpdateBrushState(IdleState& state);
 
 	//selection
-	void Pick();
-	bool PickMesh();
-	bool PickVolume();
+	void Pick(BaseState& state);
+	bool PickMesh(BaseState& state);
+	bool PickVolume(BaseState& state);
 	void SetCompSelection(fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
 
 	//draw quad

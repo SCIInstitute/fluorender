@@ -291,7 +291,9 @@ namespace fluo
 
 		//linked rotation
 		bool get_linked_rot() { return m_linked_rot; }
+		void set_linked_rot(bool value) { m_linked_rot = value; }
 		RenderView* get_master_linked_view() { return m_master_linked_view; }
+		void set_master_linked_view(RenderView* view) { m_master_linked_view = view; }
 
 	private:
 		static Global instance_;

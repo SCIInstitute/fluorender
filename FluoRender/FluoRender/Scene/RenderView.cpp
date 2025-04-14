@@ -33,6 +33,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderViewPanel.h>
+#include <ClipPlanePanel.h>
+#include <ComponentDlg.h>
+#include <MeasureDlg.h>
 #include <RenderCanvas.h>
 #include <BaseXrRenderer.h>
 #include <LookingGlassRenderer.h>
@@ -54,9 +57,11 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerRenderer.h>
 #include <CompAnalyzer.h>
 #include <CompSelector.h>
+#include <CompEditor.h>
 #include <ImgShader.h>
 #include <Framebuffer.h>
 #include <VolumePoint.h>
+#include <SegGrow.h>
 #include <GlobalStates.h>
 #include <State.h>
 #include <glm/glm.hpp>
@@ -610,6 +615,19 @@ RenderView::~RenderView()
 	if (m_controller)
 		delete m_controller;
 #endif
+}
+
+//set render view panel
+void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
+{
+	m_render_view_panel = panel;
+	m_id = panel->m_id;
+}
+
+//set render canvas
+void RenderView::SetRenderCanvas(RenderCanvas* canvas)
+{
+	m_render_canvas = canvas;
 }
 
 void RenderView::SetSize(int x, int y)
@@ -3768,9 +3786,9 @@ void RenderView::SetVolumeB(VolumeData* vd)
 }
 
 //change brush display
-void RenderView::ChangeBrushSize(int value)
+void RenderView::ChangeBrushSize(int value, bool ctrl)
 {
-	glbin_vol_selector.ChangeBrushSize(value, wxGetKeyState(WXK_CONTROL));
+	glbin_vol_selector.ChangeBrushSize(value, ctrl);
 	m_render_view_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -4106,29 +4124,24 @@ bool RenderView::ForceDraw()
 
 	//need to add a root node to global to access the entire scene structure
 	// this will be done later
-	//if (glbin_linked_rot)
-	//{
-	//	RenderView* master_view = glbin_master_linked_view;
-	//	if (!master_view ||
-	//		this != master_view)
-	//		return;
+	if (glbin_linked_rot)
+	{
+		RenderView* master_view = glbin_master_linked_view;
+		if (!master_view ||
+			this != master_view)
+			return swap;
 
-	//	if (m_frame)
-	//	{
-	//		for (int i = 0; i< m_frame->GetCanvasNum(); i++)
-	//		{
-	//			RenderView* view = m_frame->GetRenderCanvas(i);
-	//			if (view && view != this)
-	//			{
-	//				view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-	//				view->RefreshGL(39);
-	//				view->Update();
-	//			}
-	//		}
-	//	}
-
-	//	m_master_linked_view = 0;
-	//}
+		for (int i = 0; i< glbin_current.mainframe->GetCanvasNum(); i++)
+		{
+			RenderView* view = glbin_current.mainframe->GetRenderCanvas(i)->GetRenderView();
+			if (view && view != this)
+			{
+				view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+				view->RefreshGL(39);
+				view->m_render_canvas->Update();
+			}
+		}
+	}
 
 	return swap;
 }
@@ -7539,11 +7552,6 @@ void RenderView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
-		//wxMouseState ms = wxGetMouseState();
-		//if (ms.LeftIsDown() ||
-		//	ms.MiddleIsDown() ||
-		//	ms.RightIsDown())
-		//	return;
 		m_interactive = false;
 		m_clear_buffer = true;
 		RefreshGL(2);
@@ -7663,18 +7671,6 @@ void RenderView::PrepFinalBuffer()
 			flvr::FB_Render_RGBA, nx, ny, "final");
 	if (final_buffer)
 		final_buffer->protect();
-}
-
-void RenderView::ClearFinalBuffer()
-{
-	flvr::Framebuffer* final_buffer =
-		glbin_framebuffer_manager.framebuffer(
-		"final");
-	if (final_buffer)
-		final_buffer->bind();
-	//clear color buffer to black for compositing
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void RenderView::ClearFinalBuffer()
@@ -9521,11 +9517,12 @@ void RenderView::ResetEnlarge()
 	RefreshGL(19);
 }
 
-void RenderView::SetBrush(int mode)
+void RenderView::SetBrush(int mode, IdleState& state)
 {
 	//need to add somewhere else
 	//m_prev_focus = FindFocus();
 	//SetFocus();
+	state.m_set_cur_focus = true;
 
 	int ruler_type = glbin_ruler_handler.GetType();
 
@@ -9556,36 +9553,35 @@ void RenderView::SetBrush(int mode)
 	}
 }
 
-bool RenderView::UpdateBrushState()
+bool RenderView::UpdateBrushState(IdleState& state)
 {
-	//need to move key and mouse states somewhere independent of wxwidgets
 	bool refresh = false;
 
-	if (wxGetKeyState(WXK_SHIFT))
+	if (state.m_key_paint)
 	{
 		glbin_states.m_brush_mode_toolbar = 0;
 		glbin_states.m_brush_mode_shortcut = 2;
 		m_paint_display = true;
 		m_draw_brush = true;
-		SetBrush(2);
+		SetBrush(2, state);
 		refresh = true;
 	}
-	else if (wxGetKeyState(wxKeyCode('X')))
+	else if (state.m_key_erase)
 	{
 		glbin_states.m_brush_mode_toolbar = 0;
 		glbin_states.m_brush_mode_shortcut = 3;
 		m_paint_display = true;
 		m_draw_brush = true;
-		SetBrush(3);
+		SetBrush(3, state);
 		refresh = true;
 	}
-	else if (wxGetKeyState(wxKeyCode('Z')))
+	else if (state.m_key_diff)
 	{
 		glbin_states.m_brush_mode_toolbar = 0;
 		glbin_states.m_brush_mode_shortcut = 4;
 		m_paint_display = true;
 		m_draw_brush = true;
-		SetBrush(4);
+		SetBrush(4, state);
 		refresh = true;
 	}
 	else
@@ -9595,12 +9591,12 @@ bool RenderView::UpdateBrushState()
 			m_paint_display = true;
 			m_draw_brush = true;
 		}
-		else if (!wxGetKeyState(WXK_SHIFT) &&
-			!wxGetKeyState(wxKeyCode('X')) &&
-			!wxGetKeyState(wxKeyCode('Z')) &&
+		else if (!state.m_key_paint &&
+			!state.m_key_erase &&
+			!state.m_key_diff &&
 			glbin_states.m_brush_mode_shortcut)
 		{
-			if (wxGetMouseState().LeftIsDown())
+			if (state.m_mouse_left)
 			{
 				//wxPoint mps = ScreenToClient(wxGetMousePosition());
 				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
@@ -9615,7 +9611,7 @@ bool RenderView::UpdateBrushState()
 			glbin_states.m_brush_mode_shortcut = 0;
 			m_paint_display = false;
 			m_draw_brush = false;
-			SetBrush(0);
+			SetBrush(0, state);
 			refresh = true;
 
 			//need to move somewhere else
@@ -9624,6 +9620,7 @@ bool RenderView::UpdateBrushState()
 			//	m_prev_focus->SetFocus();
 			//	m_prev_focus = 0;
 			//}
+			state.m_set_previous_focus = true;
 		}
 	}
 
@@ -9631,13 +9628,13 @@ bool RenderView::UpdateBrushState()
 }
 
 //selection
-void RenderView::Pick()
+void RenderView::Pick(BaseState& state)
 {
 	if (!m_draw_all)
 		return;
 
-	bool vol_sel = PickVolume();
-	bool mesh_sel = PickMesh();
+	bool vol_sel = PickVolume(state);
+	bool mesh_sel = PickMesh(state);
 	fluo::ValueCollection vc = { gstCurrentSelect };
 	if (vol_sel)
 		vc.insert(gstCompListSelection);
@@ -9646,7 +9643,7 @@ void RenderView::Pick()
 	glbin_current.mainframe->UpdateProps(vc);
 }
 
-bool RenderView::PickMesh()
+bool RenderView::PickMesh(BaseState& state)
 {
 	int i;
 	int nx = m_gl_size.w();
@@ -9718,10 +9715,9 @@ bool RenderView::PickMesh()
 	return selected;
 }
 
-bool RenderView::PickVolume()
+bool RenderView::PickVolume(BaseState& state)
 {
-	//need to update keyboard state
-	int kmode = wxGetKeyState(WXK_CONTROL) ? 1 : 0;
+	int kmode = state.m_key_ctrl ? 1 : 0;
 	double dist = 0.0;
 	double min_dist = -1.0;
 	fluo::Point p, ip, pp;
@@ -10274,21 +10270,21 @@ void RenderView::ProcessIdle(IdleState& state)
 	if (state.m_mouse_over)
 	{
 		//forced refresh
-		if (wxGetKeyState(WXK_F5))
+		if (state.m_key_refresh)
 		{
 			state.m_set_focus = true;
 			m_clear_buffer = true;
 			m_updating = true;
 			glbin_states.m_status_str = "Forced Refresh";
-			m_frame->FluoUpdate({ gstMainStatusbarPush });
-			wxSizeEvent e;
-			OnResize(e);
+			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPush });
+			//wxSizeEvent e;
+			//OnResize(e);
 			RefreshGL(14, false, true, true);
-			m_frame->FluoUpdate({ gstMainStatusbarPop });
+			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPop });
 			return;
 		}
 
-		if (UpdateBrushState())
+		if (UpdateBrushState(state))
 		{
 			state.m_set_focus = true;
 			state.m_refresh = true;
@@ -10300,16 +10296,14 @@ void RenderView::ProcessIdle(IdleState& state)
 		}
 
 		//draw_mask
-		if (wxGetKeyState(wxKeyCode('V')) &&
-			m_draw_mask)
+		if (state.m_key_mask && m_draw_mask)
 		{
 			m_draw_mask = false;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('V')) &&
-			!m_draw_mask)
+		if (!state.m_key_mask && !m_draw_mask)
 		{
 			m_draw_mask = true;
 			state.m_refresh = true;
@@ -10319,8 +10313,8 @@ void RenderView::ProcessIdle(IdleState& state)
 		//move view
 		//left
 		if (!m_move_left &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_LEFT))
+			state.m_key_ctrl &&
+			state.m_key_left)
 		{
 			m_move_left = true;
 
@@ -10337,13 +10331,13 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 		}
 		if (m_move_left &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_LEFT)))
+			(!state.m_key_ctrl ||
+				!state.m_key_left))
 			m_move_left = false;
 		//right
 		if (!m_move_right &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_RIGHT))
+			state.m_key_ctrl &&
+			state.m_key_right)
 		{
 			m_move_right = true;
 
@@ -10360,13 +10354,13 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 		}
 		if (m_move_right &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_RIGHT)))
+			(!state.m_key_ctrl ||
+				!state.m_key_right))
 			m_move_right = false;
 		//up
 		if (!m_move_up &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_UP))
+			state.m_key_ctrl &&
+			state.m_key_up)
 		{
 			m_move_up = true;
 
@@ -10382,13 +10376,13 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 		}
 		if (m_move_up &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_UP)))
+			(!state.m_key_ctrl ||
+				!state.m_key_up))
 			m_move_up = false;
 		//down
 		if (!m_move_down &&
-			wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_DOWN))
+			state.m_key_ctrl &&
+			state.m_key_down)
 		{
 			m_move_down = true;
 
@@ -10404,16 +10398,14 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 		}
 		if (m_move_down &&
-			(!wxGetKeyState(WXK_CONTROL) ||
-				!wxGetKeyState(WXK_DOWN)))
+			(!state.m_key_ctrl ||
+				!state.m_key_down))
 			m_move_down = false;
 
 		//move time sequence
 		//forward
-		if ((!m_tseq_forward &&
-			wxGetKeyState(wxKeyCode('d'))) ||
-			(!wxGetKeyState(WXK_CONTROL) &&
-			wxGetKeyState(WXK_SPACE)))
+		if ((!m_tseq_forward && state.m_key_mov_forward) ||
+			(!state.m_key_ctrl && state.m_key_mov_play))
 		{
 			m_tseq_forward = true;
 			int frame = glbin_moviemaker.GetCurrentFrame();
@@ -10424,14 +10416,11 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 		}
-		if (m_tseq_forward &&
-			!wxGetKeyState(wxKeyCode('d')))
+		if (m_tseq_forward && !state.m_key_mov_forward)
 			m_tseq_forward = false;
 		//backforward
-		if ((!m_tseq_backward &&
-			wxGetKeyState(wxKeyCode('a'))) ||
-			(wxGetKeyState(WXK_SPACE) &&
-			wxGetKeyState(WXK_CONTROL)))
+		if ((!m_tseq_backward && state.m_key_mov_backward) ||
+			(state.m_key_ctrl && state.m_key_mov_play))
 		{
 			m_tseq_backward = true;
 			int frame = glbin_moviemaker.GetCurrentFrame();
@@ -10442,45 +10431,39 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 		}
-		if (m_tseq_backward &&
-			!wxGetKeyState(wxKeyCode('a')))
+		if (m_tseq_backward && state.m_key_mov_backward)
 			m_tseq_backward = false;
 
 		//move clip
 		//up
-		if (!m_clip_up &&
-			wxGetKeyState(wxKeyCode('s')))
+		if (!m_clip_up && state.m_key_clip_up)
 		{
 			m_clip_up = true;
-			if (m_frame && m_frame->GetClipPlanPanel())
-				m_frame->GetClipPlanPanel()->MoveLinkedClippingPlanes(-1);
+			if (glbin_current.mainframe->GetClipPlanPanel())
+				glbin_current.mainframe->GetClipPlanPanel()->MoveLinkedClippingPlanes(-1);
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 		}
-		if (m_clip_up &&
-			!wxGetKeyState(wxKeyCode('s')))
+		if (m_clip_up && !state.m_key_clip_up)
 			m_clip_up = false;
 		//down
-		if (!m_clip_down &&
-			wxGetKeyState(wxKeyCode('w')))
+		if (!m_clip_down && state.m_key_clip_down)
 		{
 			m_clip_down = true;
-			if (m_frame && m_frame->GetClipPlanPanel())
-				m_frame->GetClipPlanPanel()->MoveLinkedClippingPlanes(1);
+			if (glbin_current.mainframe->GetClipPlanPanel())
+				glbin_current.mainframe->GetClipPlanPanel()->MoveLinkedClippingPlanes(1);
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 		}
-		if (m_clip_down &&
-			!wxGetKeyState(wxKeyCode('w')))
+		if (m_clip_down && !state.m_key_clip_down)
 			m_clip_down = false;
 
 		//cell full
-		if (!m_cell_full &&
-			wxGetKeyState(wxKeyCode('f')))
+		if (!m_cell_full && state.m_key_cell_full)
 		{
 			m_cell_full = true;
 			glbin_comp_selector.SelectFullComp();
@@ -10489,12 +10472,10 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
 		}
-		if (m_cell_full &&
-			!wxGetKeyState(wxKeyCode('f')))
+		if (m_cell_full && !state.m_key_cell_full)
 			m_cell_full = false;
 		//cell link
-		if (!m_cell_link &&
-			wxGetKeyState(wxKeyCode('l')))
+		if (!m_cell_link && state.m_key_cell_link)
 		{
 			m_cell_link = true;
 			glbin_trackmap_proc.LinkCells(false);
@@ -10503,12 +10484,10 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
 		}
-		if (m_cell_link &&
-			!wxGetKeyState(wxKeyCode('l')))
+		if (m_cell_link && !state.m_key_cell_link)
 			m_cell_link = false;
 		//new cell id
-		if (!m_cell_new_id &&
-			wxGetKeyState(wxKeyCode('n')))
+		if (!m_cell_new_id && state.m_key_cell_new_id)
 		{
 			m_cell_new_id = true;
 			glbin_comp_editor.NewId(false, true);
@@ -10517,12 +10496,10 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
 		}
-		if (m_cell_new_id &&
-			!wxGetKeyState(wxKeyCode('n')))
+		if (m_cell_new_id && !state.m_key_cell_new_id)
 			m_cell_new_id = false;
 		//clear
-		if (wxGetKeyState(wxKeyCode('c')) &&
-			!m_clear_mask)
+		if (!m_clear_mask && state.m_key_cell_clear)
 		{
 			glbin_vol_selector.Clear();
 			glbin_comp_selector.Clear();
@@ -10533,15 +10510,11 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
 		}
-		if (!wxGetKeyState(wxKeyCode('c')) &&
-			m_clear_mask)
+		if (m_clear_mask && !state.m_key_cell_clear)
 			m_clear_mask = false;
 		//save all masks
-		if (wxGetKeyState(wxKeyCode('m')) &&
-			!m_save_mask)
+		if (!m_save_mask && state.m_key_save_mask)
 		{
-			//if (m_frame && m_frame->GetListPanel())
-			//	m_frame->GetListPanel()->SaveAllMasks();
 			VolumeData* vd = glbin_current.vol_data;
 			if (vd)
 			{
@@ -10551,79 +10524,78 @@ void RenderView::ProcessIdle(IdleState& state)
 			m_save_mask = true;
 			state.m_set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('m')) &&
-			m_save_mask)
+		if (m_save_mask && !state.m_key_save_mask)
 			m_save_mask = false;
 		//full screen
-		if (wxGetKeyState(WXK_ESCAPE))
+		if (state.m_key_exit_fullscreen)
 		{
-			m_fullscreen_trigger.Start(10);
+			state.m_key_exit_fullscreen = true;
+			state.m_fullscreen = false;
+		}
+		if (state.m_key_fullscreen)
+		{
+			state.m_key_exit_fullscreen = false;
+			state.m_fullscreen = true;
 		}
 		//brush size
-		if (wxGetKeyState(wxKeyCode('[')))
+		if (state.m_key_brush_size_down)
 		{
-			ChangeBrushSize(-10);
+			ChangeBrushSize(-10, state.m_key_ctrl);
 			state.m_set_focus = true;
 		}
-		if (wxGetKeyState(wxKeyCode(']')))
+		if (state.m_key_brush_size_up)
 		{
-			ChangeBrushSize(10);
+			ChangeBrushSize(10, state.m_key_ctrl);
 			state.m_set_focus = true;
 		}
 		//comp include
-		if (wxGetKeyState(WXK_RETURN) &&
-			!m_comp_include)
+		if (!m_comp_include && state.m_key_cell_include)
 		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->IncludeComps();
+			if (glbin_current.mainframe->GetComponentDlg())
+				glbin_current.mainframe->GetComponentDlg()->IncludeComps();
 			m_comp_include = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
 		}
-		if (!wxGetKeyState(WXK_RETURN) &&
-			m_comp_include)
+		if (m_comp_include && !state.m_key_cell_include)
 			m_comp_include = false;
 		//comp exclude
-		if (wxGetKeyState(wxKeyCode('\\')) &&
-			!m_comp_exclude)
+		if (!m_comp_exclude && state.m_key_cell_exclude)
 		{
-			if (m_frame && m_frame->GetComponentDlg())
-				m_frame->GetComponentDlg()->ExcludeComps();
+			if (glbin_current.mainframe->GetComponentDlg())
+				glbin_current.mainframe->GetComponentDlg()->ExcludeComps();
 			m_comp_exclude = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('\\')) &&
-			m_comp_exclude)
+		if (m_comp_exclude && !state.m_key_cell_exclude)
 			m_comp_exclude = false;
 		//ruler relax
-		if (wxGetKeyState(wxKeyCode('r')) &&
-			!m_ruler_relax)
+		if (!m_ruler_relax && state.m_key_ruler_relax)
 		{
-			if (m_frame && m_frame->GetMeasureDlg())
-				m_frame->GetMeasureDlg()->Relax();
+			if (glbin_current.mainframe->GetMeasureDlg())
+				glbin_current.mainframe->GetMeasureDlg()->Relax();
 			m_ruler_relax = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
 		}
-		if (!wxGetKeyState(wxKeyCode('r')) &&
-			m_ruler_relax)
+		if (m_ruler_relax && !state.m_key_ruler_relax)
 			m_ruler_relax = false;
 
 		//grow
 		if ((m_int_mode == 10 ||
 			m_int_mode == 12) &&
-			wxGetMouseState().LeftIsDown() &&
+			state.m_mouse_left &&
 			m_grow_on)
 		{
 			int sz = glbin_settings.m_ruler_size_thresh;
 			//event.RequestMore();
 			glbin_vol_selector.SetInitMask(2);
-			mps = ScreenToClient(mps);
-			glbin_vol_selector.Segment(false, true, mps.x, mps.y);
+			//mps = ScreenToClient(mps);
+			glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 			{
@@ -10659,7 +10631,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		//horizontal move
 		if (leftx != 0.0)
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			ControllerMoveHorizontal(leftx, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
@@ -10668,7 +10640,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		//zoom/dolly
 		if (lefty != 0.0)
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			ControllerZoomDolly(lefty, nx, ny);
 			m_interactive = true;
 			state.m_refresh = true;
@@ -10677,7 +10649,7 @@ void RenderView::ProcessIdle(IdleState& state)
 
 		if (glbin_xr_renderer->GetGrab())
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			glm::mat4 rot_mat = glbin_xr_renderer->GetGrabMatrix();
 			GrabRotate(rot_mat);
 			m_interactive = true;
@@ -10692,7 +10664,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			//rotate
 			if (rightx != 0.0 || righty != 0.0)
 			{
-				event.RequestMore(true);
+				state.m_request_more = true;
 				ControllerRotate(rightx, righty, nx, ny);
 				m_interactive = true;
 				state.m_refresh = true;
@@ -10731,7 +10703,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		//horizontal move
 		if (leftx != 0.0)
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			ControllerMoveHorizontal(leftx * sclr, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
@@ -10741,7 +10713,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		//zoom/dolly
 		if (lefty != 0.0)
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			ControllerZoomDolly(lefty * sclr, nx, ny);
 			m_interactive = true;
 			state.m_refresh = true;
@@ -10751,7 +10723,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		//rotate
 		if (rghtx != 0.0 || rghty != 0.0)
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
 			m_interactive = true;
 			state.m_refresh = true;
@@ -10761,7 +10733,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		//pan
 		if (px != 0 || py != 0)
 		{
-			event.RequestMore(true);
+			state.m_request_more = true;
 			ControllerPan(px, py, nx, ny);
 			m_interactive = true;
 			m_update_rot_ctr = true;
@@ -10783,7 +10755,7 @@ void RenderView::ProcessIdle(IdleState& state)
 	else if (glbin_settings.m_inf_loop)
 	{
 		RefreshGL(0, false, true, true);
-		event.RequestMore(true);
+		state.m_request_more = true;
 		return;
 	}
 }
@@ -10805,7 +10777,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 	//mouse button down operations
 	//glbin_ruler_handler.SetVolumeData(m_cur_vol);
-	if (event.LeftDown())
+	if (state.m_mouse_left)
 	{
 		if (m_draw_frame)
 		{
@@ -10817,7 +10789,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 		}
 
-		m_focused_slider = 0;
+		state.m_reset_focus_slider = true;
 
 		bool found_rp = false;
 		if (m_int_mode == 6 ||
@@ -10838,14 +10810,14 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (m_int_mode == 14)
 				glbin_ruler_handler.DeletePoint();
 			RefreshGL(41);
-			m_frame->UpdateProps({ gstRulerList });
+			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
 
 		if (m_int_mode == 1 ||
 			((m_int_mode == 5 ||
 			//m_int_mode == 13 ||
 			m_int_mode == 15) &&
-			event.AltDown()) ||
+			state.m_key_alt) ||
 			((m_int_mode == 6 ||
 			m_int_mode == 9 ||
 			m_int_mode == 11 ||
@@ -10873,8 +10845,8 @@ void RenderView::ProcessMouse(MouseState& state)
 		{
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
-			wxPoint mps = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+			//wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
 				m_cur_vol->AddEmptyLabel(0, false);
@@ -10883,40 +10855,40 @@ void RenderView::ProcessMouse(MouseState& state)
 		}
 
 		if (m_int_mode == 13 &&
-			!event.AltDown())
+			!state.m_key_alt)
 		{
 			//add one point to a ruler
 			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 2);
 			RefreshGL(26);
-			m_frame->UpdateProps({ gstRulerList });
+			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
 
 		return;
 	}
-	if (event.RightDown())
+	if (state.m_mouse_right)
 	{
-		m_focused_slider = 0;
+		state.m_reset_focus_slider = true;
 		old_mouse_X = mp.x();
 		old_mouse_Y = mp.y();
 		return;
 	}
-	if (event.MiddleDown())
+	if (state.m_mouse_middle)
 	{
-		m_focused_slider = 0;
+		state.m_reset_focus_slider = true;
 		old_mouse_X = mp.x();
 		old_mouse_Y = mp.y();
 		return;
 	}
 
 	//mouse button up operations
-	if (event.LeftUp())
+	if (state.m_mouse_left_up)
 	{
 		if (m_int_mode == 1)
 		{
 			//pick stuff
 			if (m_pick)
 			{
-				Pick();
+				Pick(state);
 				m_pick_lock_center = false;
 				return;
 			}
@@ -10930,8 +10902,8 @@ void RenderView::ProcessMouse(MouseState& state)
 		{
 			//segment volumes
 			m_paint_enable = true;
-			wxPoint mps = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+			//wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(27);
@@ -10941,16 +10913,16 @@ void RenderView::ProcessMouse(MouseState& state)
 				vc.insert(gstBrushCountResult);
 			if (glbin_brush_def.m_update_colocal)
 				vc.insert(gstColocalResult);
-			m_frame->UpdateProps(vc);
+			glbin_current.mainframe->UpdateProps(vc);
 			return;
 		}
 		else if (m_int_mode == 5 &&
-			!event.AltDown())
+			!state.m_key_alt)
 		{
 			//add one point to a ruler
 			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
 			RefreshGL(27);
-			m_frame->UpdateProps({ gstRulerList });
+			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if (m_int_mode == 9 ||
@@ -10962,8 +10934,8 @@ void RenderView::ProcessMouse(MouseState& state)
 		{
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
-			wxPoint mps = ScreenToClient(wxGetMousePosition());
-			glbin_vol_selector.Segment(true, true, mps.x, mps.y);
+			//wxPoint mps = ScreenToClient(wxGetMousePosition());
+			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			if (glbin_ruler_handler.GetType() == 3)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
 			else
@@ -10977,7 +10949,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				vc.insert(gstBrushCountResult);
 			if (glbin_brush_def.m_update_colocal)
 				vc.insert(gstColocalResult);
-			m_frame->UpdateProps(vc);
+			glbin_current.mainframe->UpdateProps(vc);
 			return;
 		}
 		else if (m_int_mode == 10 ||
@@ -10988,7 +10960,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			return;
 		}
 		else if (m_int_mode == 13 &&
-			!event.AltDown())
+			!state.m_key_alt)
 		{
 			if (glbin_settings.m_ruler_auto_relax)
 			{
@@ -10996,12 +10968,12 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.Relax();
 			}
 			RefreshGL(29);
-			m_frame->UpdateProps({ gstRulerList });
+			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if ((m_int_mode == 6 ||
 			m_int_mode == 15) &&
-			!event.AltDown())
+			!state.m_key_alt)
 		{
 			if (m_int_mode == 6)
 			{
@@ -11013,7 +10985,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_ruler_handler.ApplyMagPoint();
 			glbin_ruler_handler.ClearMagStroke();
 			RefreshGL(29);
-			m_frame->UpdateProps({ gstRulerList });
+			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
 		else if (m_int_mode == 16)
@@ -11022,13 +10994,13 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_crop_type = 0;
 		}
 	}
-	if (event.MiddleUp())
+	if (state.m_mouse_middle_up)
 	{
 		//SetSortBricks();
 		//RefreshGL(28);
 		return;
 	}
-	if (event.RightUp())
+	if (state.m_mouse_right_up)
 	{
 		if (m_int_mode == 1)
 		{
@@ -11036,7 +11008,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			//return;
 		}
 		if (m_int_mode == 5 &&
-			!event.AltDown())
+			!state.m_key_alt)
 		{
 			if (glbin_ruler_handler.GetRulerFinished())
 			{
@@ -11055,21 +11027,21 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.Relax();
 			}
 			RefreshGL(29);
-			m_frame->UpdateProps({ gstRulerList });
+			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
 		//SetSortBricks();
 	}
 
 	//mouse dragging
-	if (event.Dragging())
+	if (state.m_mouse_drag)
 	{
 		//crop
 		if (m_int_mode == 16)
 		{
 			ChangeCropFrame(mp);
 			RefreshGL(29);
-			m_frame->UpdateProps({ gstCropValues });
+			glbin_current.mainframe->UpdateProps({ gstCropValues });
 			return;
 		}
 
@@ -11085,7 +11057,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			((m_int_mode == 5  ||
 			m_int_mode == 13 ||
 			m_int_mode == 15) &&
-			event.AltDown()) ||
+			state.m_key_alt) ||
 			((m_int_mode == 9 ||
 			m_int_mode == 10 ||
 			m_int_mode == 11 ||
@@ -11095,9 +11067,9 @@ void RenderView::ProcessMouse(MouseState& state)
 			((m_int_mode == 6 ||
 			m_int_mode == 15 ||
 			m_int_mode == 13) &&
-			(event.ControlDown() ||
-			event.MiddleIsDown() ||
-			event.RightIsDown())))
+			(state.m_key_ctrl ||
+			state.m_mouse_middle ||
+			state.m_mouse_right)))
 		{
 			//disable picking
 			m_pick = false;
@@ -11107,8 +11079,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				abs(old_mouse_X - mp.x()) +
 				abs(old_mouse_Y - mp.y())<200)
 			{
-				if (event.LeftIsDown() &&
-					!event.ControlDown() &&
+				if (state.m_mouse_left &&
+					!state.m_key_ctrl &&
 					m_int_mode != 10 &&
 					m_int_mode != 12)
 				{
@@ -11132,15 +11104,15 @@ void RenderView::ProcessMouse(MouseState& state)
 
 					m_interactive = true;
 
-					if (m_linked_rot)
-						m_master_linked_view = this;
+					if (glbin.get_linked_rot())
+						glbin.set_master_linked_view(this);
 
 					if (!hold_old)
 						RefreshGL(30);
 					//DBGPRINT(L"refresh requested\n");
 					m_render_view_panel->FluoUpdate({ gstCamRotation });
 				}
-				if (event.MiddleIsDown() || (event.ControlDown() && event.LeftIsDown()))
+				if (state.m_mouse_middle || (state.m_key_ctrl && state.m_mouse_left))
 				{
 					long dx = mp.x() - old_mouse_X;
 					long dy = mp.y() - old_mouse_Y;
@@ -11163,7 +11135,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					//SetSortBricks();
 					RefreshGL(31);
 				}
-				if (event.RightIsDown())
+				if (state.m_mouse_right)
 				{
 					long dx = mp.x() - old_mouse_X;
 					long dy = mp.y() - old_mouse_Y;
@@ -11205,7 +11177,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				abs(old_mouse_X - mp.x()) +
 				abs(old_mouse_Y - mp.y())<200)
 			{
-				if (event.LeftIsDown())
+				if (state.m_mouse_left)
 				{
 					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
@@ -11220,18 +11192,18 @@ void RenderView::ProcessMouse(MouseState& state)
 			bool rval = false;
 			if (m_int_mode == 6)
 				rval = glbin_ruler_handler.EditPoint(
-					mp.x(), mp.y(), event.AltDown());
+					mp.x(), mp.y(), state.m_key_alt);
 			else if (m_int_mode == 9)
 				rval = glbin_ruler_handler.MoveRuler(
 					mp.x(), mp.y());
 			if (rval)
 			{
 				RefreshGL(35);
-				m_frame->UpdateProps({ gstRulerList });
+				glbin_current.mainframe->UpdateProps({ gstRulerList });
 				glbin_ruler_handler.SetEdited(true);
 			}
 		}
-		else if (m_int_mode == 13 && !event.AltDown())
+		else if (m_int_mode == 13 && !state.m_key_alt)
 		{
 			double dist = glbin_settings.m_pencil_dist;
 			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
@@ -11239,10 +11211,10 @@ void RenderView::ProcessMouse(MouseState& state)
 				//add one point to a ruler
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
 				RefreshGL(27);
-				m_frame->UpdateProps({ gstRulerList });
+				glbin_current.mainframe->UpdateProps({ gstRulerList });
 			}
 		}
-		else if (m_int_mode == 15 && !event.AltDown())
+		else if (m_int_mode == 15 && !state.m_key_alt)
 		{
 			double dist = glbin_settings.m_pencil_dist;
 			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
@@ -11274,19 +11246,18 @@ void RenderView::ProcessMouse(MouseState& state)
 	}
 
 	//wheel operations
-	int wheel = event.GetWheelRotation();
+	int wheel = state.m_mouse_wheel_rotate;
 	if (wheel)  //if rotation
 	{
-		if (m_focused_slider)
+		if (state.m_valid_focus_slider)
 		{
-			int value = wheel / event.GetWheelDelta();
-			m_focused_slider->Scroll(value);
+			state.m_scroll_focus_slider = true;
 		}
 		else
 		{
 			if (m_int_mode == 2 || m_int_mode == 7)
 			{
-				ChangeBrushSize(wheel);
+				ChangeBrushSize(wheel, state.m_key_ctrl);
 			}
 			else
 			{
