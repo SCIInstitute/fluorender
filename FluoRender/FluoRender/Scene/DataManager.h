@@ -28,36 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
 
-#include <compatibility.h>
+//#include <compatibility.h>
 #include <BBox.h>
 #include <Color.h>
 #include <Point.h>
-#include <Transform.h>
-#include <MeshRenderer.h>
-#include <VolumeRenderer.h>
-#include <VertexArray.h>
-#include <EntryParams.h>
-#include <base_reader.h>
-#include <oib_reader.h>
-#include <oif_reader.h>
-#include <nrrd_reader.h>
-#include <tif_reader.h>
-#include <nrrd_writer.h>
-#include <tif_writer.h>
-#include <msk_reader.h>
-#include <msk_writer.h>
-#include <lsm_reader.h>
-#include <lbl_reader.h>
-#include <pvxml_reader.h>
-#include <brkxml_reader.h>
-#include <imageJ_reader.h>
-#include <czi_reader.h>
-#include <nd2_reader.h>
-#include <lif_reader.h>
-#include <lof_reader.h>
-#include <mpg_reader.h>
-#include <TrackMap.h>
-#include <Ruler.h>
 #include <Progress.h>
 #include <vector>
 #include <string>
@@ -80,9 +54,20 @@ DEALINGS IN THE SOFTWARE.
 #define LOAD_TYPE_LOF		11
 #define LOAD_TYPE_MPG		12
 
+class BaseReader;
+namespace flvr
+{
+	class MeshRenderer;
+	class VolumeRenderer;
+}
 namespace flrd
 {
+	class Ruler;
 	class EntryParams;
+}
+namespace fluo
+{
+	class Transform;
 }
 class TreeLayer
 {
@@ -141,7 +126,7 @@ public:
 	{m_associated = layer;}
 
 protected:
-	int type;//-1:invalid, 1: canvas, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
+	int type;//-1:invalid, 0:root 1: canvas, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	std::wstring m_name;
 	unsigned int m_id;
 
@@ -164,6 +149,17 @@ struct VD_Landmark
 	double spcx = 0;
 	double spcy = 0;
 	double spcz = 0;
+};
+
+class RenderView;
+class Root : public TreeLayer
+{
+public:
+	Root();
+	~Root();
+
+private:
+	std::vector<RenderView*> m_views;
 };
 
 class VolumeData : public TreeLayer
@@ -571,7 +567,7 @@ private:
 	int m_dup_counter;
 	VolumeData* m_dup_data;//duplicated from
 
-	flrd::EntryParams m_ep;
+	std::unique_ptr<flrd::EntryParams> m_ep;
 
 	std::wstring m_tex_path;
 	fluo::BBox m_bounds;
@@ -1300,12 +1296,12 @@ private:
 };
 
 class MainFrame;
-class RenderCanvas;
+class RenderView;
 struct CurrentObjects
 {
 	CurrentObjects() :
 		mainframe(0),
-		canvas(0),
+		render_view(0),
 		vol_group(0),
 		mesh_group(0),
 		vol_data(0),
@@ -1326,20 +1322,20 @@ struct CurrentObjects
 			return 5;
 		if (mesh_group)
 			return 6;
-		if (canvas)
+		if (render_view)
 			return 1;
 		return 0;
 	}
 	void SetRoot()
 	{
-		canvas = 0;
+		render_view = 0;
 		vol_group = 0;
 		mesh_group = 0;
 		vol_data = 0;
 		mesh_data = 0;
 		ann_data = 0;
 	}
-	void SetCanvas(RenderCanvas* cnvs);
+	void SetRenderView(RenderView* v);
 	void SetVolumeGroup(DataGroup* g);
 	void SetMeshGroup(MeshGroup* g);
 	void SetVolumeData(VolumeData* vd);
@@ -1352,7 +1348,7 @@ struct CurrentObjects
 	TrackGroup* GetTrackGroup();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
-	RenderCanvas* canvas;
+	RenderView* render_view;
 	DataGroup* vol_group;
 	MeshGroup* mesh_group;
 	VolumeData* vol_data;

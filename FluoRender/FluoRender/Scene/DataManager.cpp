@@ -26,16 +26,43 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <DataManager.h>
+#include <RenderView.h>
 #include <Global.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
 #include <VolumeSampler.h>
 #include <VolumeBaker.h>
+#include <MeshRenderer.h>
+#include <VolumeRenderer.h>
+#include <VertexArray.h>
 #include <Histogram.h>
 #include <EntryHist.h>
+#include <EntryParams.h>
+#include <TableHistParams.h>
 #include <Reshape.h>
 #include <FpRangeDlg.h>
 #include <Quaternion.h>
+#include <Transform.h>
+#include <Ruler.h>
+#include <TrackMap.h>
+#include <base_reader.h>
+#include <oib_reader.h>
+#include <oif_reader.h>
+#include <nrrd_reader.h>
+#include <tif_reader.h>
+#include <nrrd_writer.h>
+#include <tif_writer.h>
+#include <msk_reader.h>
+#include <msk_writer.h>
+#include <lsm_reader.h>
+#include <lbl_reader.h>
+#include <pvxml_reader.h>
+#include <brkxml_reader.h>
+#include <imageJ_reader.h>
+#include <czi_reader.h>
+#include <nd2_reader.h>
+#include <lif_reader.h>
+#include <lof_reader.h>
+#include <mpg_reader.h>
 #include <compatibility.h>
 #include <nrrd.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -59,6 +86,24 @@ TreeLayer::TreeLayer()
 
 TreeLayer::~TreeLayer()
 {
+}
+
+Root::Root()
+{
+	type = 0;
+}
+
+Root::~Root()
+{
+	for (auto& view : m_views)
+	{
+		if (view)
+		{
+			view->ClearAll();
+			delete view;
+		}
+	}
+	m_views.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3048,7 +3093,7 @@ void VolumeData::GetMlParams()
 			return;
 		//get entry from table
 		flrd::TableHistParams& table = glbin.get_vp_table();
-		m_ep = *table.infer(eh);
+		m_ep = std::make_unique<flrd::EntryParams>(*table.infer(eh));
 		delete eh;
 		flrd::Reshape::clear();
 	}
@@ -5160,17 +5205,17 @@ void MeshGroup::RandomizeColor()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void CurrentObjects::SetCanvas(RenderCanvas* cnvs)
+void CurrentObjects::SetRenderView(RenderView* view)
 {
-	canvas = cnvs;
+	render_view = view;
 	vol_group = 0;
 	mesh_group = 0;
 	vol_data = 0;
 	mesh_data = 0;
 	ann_data = 0;
-	if (canvas)
+	if (render_view)
 	{
-		canvas->m_cur_vol = 0;
+		render_view->m_cur_vol = 0;
 	}
 }
 

@@ -292,6 +292,7 @@ RenderView::RenderView() :
 	m_render_view_panel(0),
 	m_render_canvas(0)
 {
+	type = 1;
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = new XboxController(1);
@@ -526,6 +527,7 @@ RenderView::RenderView(RenderView& copy):
 	m_render_view_panel(0),
 	m_render_canvas(0)
 {
+	type = 1;
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = new XboxController(1);
