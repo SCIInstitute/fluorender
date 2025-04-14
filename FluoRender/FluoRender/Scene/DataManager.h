@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _DATAMANAGER_H_
 #define _DATAMANAGER_H_
 
-//#include <compatibility.h>
 #include <BBox.h>
 #include <Color.h>
 #include <Point.h>

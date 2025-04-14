@@ -25,6 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <GL/glew.h>
 #include <DataManager.h>
 #include <RenderView.h>
 #include <Global.h>
@@ -34,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshRenderer.h>
 #include <VolumeRenderer.h>
 #include <VertexArray.h>
+#include <Texture.h>
 #include <Histogram.h>
 #include <EntryHist.h>
 #include <EntryParams.h>
@@ -65,6 +67,7 @@ DEALINGS IN THE SOFTWARE.
 #include <mpg_reader.h>
 #include <compatibility.h>
 #include <nrrd.h>
+#include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <sstream>
 #include <fstream>
@@ -1802,8 +1805,8 @@ double VolumeData::GetGamma()
 
 double VolumeData::GetMlGamma()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("gamma3d");
+	if (m_ep->getValid())
+		return m_ep->getParam("gamma3d");
 	else
 		return m_gamma;
 }
@@ -1837,8 +1840,8 @@ double VolumeData::GetBoundary()
 
 double VolumeData::GetMlBoundary()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("extract_boundary");
+	if (m_ep->getValid())
+		return m_ep->getParam("extract_boundary");
 	else
 		return m_boundary;
 }
@@ -1872,8 +1875,8 @@ double VolumeData::GetSaturation()
 
 double VolumeData::GetMlSaturation()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("low_offset");
+	if (m_ep->getValid())
+		return m_ep->getParam("low_offset");
 	else
 		return m_saturation;
 }
@@ -1913,8 +1916,8 @@ double VolumeData::GetLeftThresh()
 
 double VolumeData::GetMlLeftThresh()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("low_threshold");
+	if (m_ep->getValid())
+		return m_ep->getParam("low_threshold");
 	else
 		return m_lo_thresh;
 }
@@ -1946,8 +1949,8 @@ double VolumeData::GetSoftThreshold()
 
 double VolumeData::GetMlRightThresh()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("high_threshold");
+	if (m_ep->getValid())
+		return m_ep->getParam("high_threshold");
 	else
 		return m_hi_thresh;
 }
@@ -1986,8 +1989,8 @@ double VolumeData::GetLuminance()
 
 double VolumeData::GetMlLuminance()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("luminance");
+	if (m_ep->getValid())
+		return m_ep->getParam("luminance");
 	else
 		return m_luminance;
 }
@@ -2025,8 +2028,8 @@ double VolumeData::GetAlpha()
 
 double VolumeData::GetMlAlpha()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("alpha");
+	if (m_ep->getValid())
+		return m_ep->getParam("alpha");
 	else
 		return m_alpha;
 }
@@ -2085,8 +2088,8 @@ double VolumeData::GetLowShading()
 
 double VolumeData::GetMlLowShading()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("low_shading");
+	if (m_ep->getValid())
+		return m_ep->getParam("low_shading");
 	else
 		return GetLowShading();
 }
@@ -2100,8 +2103,8 @@ double VolumeData::GetHiShading()
 
 double VolumeData::GetMlHiShading()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("high_shading");
+	if (m_ep->getValid())
+		return m_ep->getParam("high_shading");
 	else
 		return GetHiShading();
 }
@@ -2129,8 +2132,8 @@ double VolumeData::GetShadowIntensity()
 
 double VolumeData::GetMlShadowIntensity()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("shadow_intensity");
+	if (m_ep->getValid())
+		return m_ep->getParam("shadow_intensity");
 	else
 		return m_shadow_intensity;
 }
@@ -2165,8 +2168,8 @@ double VolumeData::GetSampleRate()
 
 double VolumeData::GetMlSampleRate()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("sample_rate");
+	if (m_ep->getValid())
+		return m_ep->getParam("sample_rate");
 	else
 		return m_sample_rate;
 }
@@ -2332,8 +2335,8 @@ double VolumeData::GetColormapLow()
 
 double VolumeData::GetMlColormapLow()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("colormap_low");
+	if (m_ep->getValid())
+		return m_ep->getParam("colormap_low");
 	else
 		return m_colormap_low_value;
 }
@@ -2345,8 +2348,8 @@ double VolumeData::GetColormapHigh()
 
 double VolumeData::GetMlColormapHigh()
 {
-	if (m_ep.getValid())
-		return m_ep.getParam("colormap_hi");
+	if (m_ep->getValid())
+		return m_ep->getParam("colormap_hi");
 	else
 		return m_colormap_hi_value;
 }
@@ -3084,7 +3087,7 @@ void VolumeData::LoadLabel2()
 
 void VolumeData::GetMlParams()
 {
-	if (!m_ep.getValid())
+	if (!m_ep->getValid())
 	{
 		flrd::Histogram histogram(this);
 		histogram.SetUseMask(false);
@@ -3103,42 +3106,42 @@ void VolumeData::ApplyMlVolProp()
 {
 	GetMlParams();
 	//get histogram
-	if (m_ep.getValid())
+	if (m_ep->getValid())
 	{
 		//set parameters
 		double dval, dval2;
 		//extract boundary
-		dval = std::max(0.0f, m_ep.getParam("extract_boundary"));
+		dval = std::max(0.0f, m_ep->getParam("extract_boundary"));
 		SetBoundary(dval);
 		//gamma
-		dval = std::max(0.0f, m_ep.getParam("gamma3d"));
+		dval = std::max(0.0f, m_ep->getParam("gamma3d"));
 		SetGamma(dval);
 		//low offset
-		dval = std::max(0.0f, m_ep.getParam("low_offset"));
+		dval = std::max(0.0f, m_ep->getParam("low_offset"));
 		SetSaturation(dval);
 		//high offset
-		dval = std::max(0.0f, m_ep.getParam("high_offset"));
+		dval = std::max(0.0f, m_ep->getParam("high_offset"));
 		//low thresholding
-		dval = std::max(0.0f, m_ep.getParam("low_threshold"));
+		dval = std::max(0.0f, m_ep->getParam("low_threshold"));
 		SetLeftThresh(dval);
 		//high thresholding
-		dval = std::max(0.0f, m_ep.getParam("high_threshold"));
+		dval = std::max(0.0f, m_ep->getParam("high_threshold"));
 		SetRightThresh(dval);
 		//low shading
-		dval = std::max(0.0f, m_ep.getParam("low_shading"));
+		dval = std::max(0.0f, m_ep->getParam("low_shading"));
 		//high shading
-		dval2 = std::max(0.0f, m_ep.getParam("high_shading"));
+		dval2 = std::max(0.0f, m_ep->getParam("high_shading"));
 		double amb, diff, spec, shine;
 		GetMaterial(amb, diff, spec, shine);
 		SetMaterial(dval, diff, spec, dval2);
 		//alpha
-		dval = std::max(0.0f, m_ep.getParam("alpha"));
+		dval = std::max(0.0f, m_ep->getParam("alpha"));
 		SetAlpha(dval);
 		//sample rate
-		dval = std::max(0.1f, m_ep.getParam("sample_rate"));
+		dval = std::max(0.1f, m_ep->getParam("sample_rate"));
 		SetSampleRate(dval);
 		//luminance
-		dval = std::max(0.0f, m_ep.getParam("luminance"));
+		dval = std::max(0.0f, m_ep->getParam("luminance"));
 		double h, s, v;
 		GetHSV(h, s, v);
 		fluo::HSVColor hsv(h, s, dval);
@@ -3146,48 +3149,48 @@ void VolumeData::ApplyMlVolProp()
 		ResetMaskColorSet();
 		SetColor(color);
 		//colormap enable
-		dval = m_ep.getParam("colormap_enable");
+		dval = m_ep->getParam("colormap_enable");
 		SetColormapMode(dval>0.5);
 		//colormap inv
-		dval = m_ep.getParam("colormap_inv");
+		dval = m_ep->getParam("colormap_inv");
 		SetColormapInv(dval > 0.5 ? -1.0 : 1.0);
 		//colormap type
-		dval = m_ep.getParam("colormap_type");
+		dval = m_ep->getParam("colormap_type");
 		SetColormap(std::round(dval));
 		//colormap projection
-		dval = m_ep.getParam("colormap_proj");
+		dval = m_ep->getParam("colormap_proj");
 		SetColormapProj(std::round(dval));
 		//colormap low value
-		dval = std::max(0.0f, m_ep.getParam("colormap_low"));
+		dval = std::max(0.0f, m_ep->getParam("colormap_low"));
 		//colormap high value
-		dval2 = std::max(0.0f, m_ep.getParam("colormap_hi"));
+		dval2 = std::max(0.0f, m_ep->getParam("colormap_hi"));
 		SetColormapValues(dval, dval2);
 		//alpha
-		dval = m_ep.getParam("alpha_enable");
+		dval = m_ep->getParam("alpha_enable");
 		SetAlphaEnable(dval > 0.5);
 		//enable shading
-		dval = m_ep.getParam("shading_enable");
+		dval = m_ep->getParam("shading_enable");
 		SetShadingEnable(dval > 0.5);
 		//interpolation
-		dval = m_ep.getParam("interp_enable");
+		dval = m_ep->getParam("interp_enable");
 		SetInterpolate(dval > 0.5);
 		//inversion
-		dval = m_ep.getParam("invert_enable");
+		dval = m_ep->getParam("invert_enable");
 		SetInvert(dval > 0.5);
 		//enable mip
-		dval = m_ep.getParam("mip_enable");
+		dval = m_ep->getParam("mip_enable");
 		SetMode(std::round(dval));
 		//enable hi transp
-		dval = m_ep.getParam("transparent_enable");
+		dval = m_ep->getParam("transparent_enable");
 		SetAlphaPower(dval > 0.5 ? 2.0 : 1.0);
 		//noise reduction
-		dval = m_ep.getParam("denoise_enable");
+		dval = m_ep->getParam("denoise_enable");
 		SetNR(dval > 0.5);
 		//shadow
-		dval = m_ep.getParam("shadow_enable");
+		dval = m_ep->getParam("shadow_enable");
 		SetShadowEnable(dval > 0.5);
 		//shadow intensity
-		dval = std::max(0.0f, m_ep.getParam("shadow_intensity"));
+		dval = std::max(0.0f, m_ep->getParam("shadow_intensity"));
 		SetShadowIntensity(dval);
 	}
 }
