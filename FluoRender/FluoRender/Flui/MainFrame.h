@@ -299,14 +299,14 @@ public:
 
 	//views
 	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update
-	int GetCanvasNum();
-	RenderCanvas* GetRenderCanvas(int index);
-	RenderCanvas* GetRenderCanvas(const std::wstring& name);
-	int GetRenderCanvas(RenderCanvas* view);
-	RenderCanvas* GetLastRenderCanvas();
-	wxString CreateRenderView(int row = 1);
-	void DeleteRenderView(int i);
-	void DeleteRenderView(const wxString& name);
+	//int GetCanvasNum();
+	//RenderCanvas* GetRenderCanvas(int index);
+	//RenderCanvas* GetRenderCanvas(const std::wstring& name);
+	//int GetRenderCanvas(RenderCanvas* view);
+	//RenderCanvas* GetLastRenderCanvas();
+	wxString CreateRenderViewPanel(int row = 1);
+	void DeleteRenderViewPanel(int i);
+	void DeleteRenderViewPanel(const wxString& name);
 
 	//hide/show tools
 	void ToggleAllPanels(bool cur_state);

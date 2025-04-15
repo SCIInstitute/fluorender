@@ -70,6 +70,8 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_sharedRC = m_glRC ? true : false;
 
 	m_render_view = new RenderView();
+	Root* root = glbin_data_manager.GetRoot();
+	root->AddView(m_render_view);
 	m_render_view->SetRenderViewPanel(m_renderview_panel);
 	m_render_view->SetRenderCanvas(this);
 #ifdef _WIN32

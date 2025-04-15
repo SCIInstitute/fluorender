@@ -27,7 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeMeshConv.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
 #include <MCTable.h>
 #include <Utils.h>
 #include <compatibility.h>
@@ -138,7 +140,7 @@ void VolumeMeshConv::Compute()
 	if (m_weld)
 	{
 		SetProgress(80, "FluoRender is welding vertices. Please wait.");
-		glmWeld(m_mesh, 0.001 * fluo::Min(m_spcx, m_spcy, m_spcz));
+		glmWeld(m_mesh, static_cast<GLfloat>(0.001 * fluo::Min(m_spcx, m_spcy, m_spcz)));
 	}
 	float scale[3] = { 1.0f, 1.0f, 1.0f };
 	glmArea(m_mesh, scale, &m_area);
@@ -149,9 +151,9 @@ void VolumeMeshConv::Compute()
 	MeshData* md = glbin_data_manager.GetLastMeshData();
 	if (!md)
 		return;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		canvas->AddMeshData(md);
+	RenderView* view = glbin_current.render_view;
+	if (view)
+		view->AddMeshData(md);
 	glbin_current.SetMeshData(md);
 }
 
@@ -276,7 +278,7 @@ void VolumeMeshConv::Convert()
 	size_t tri_list_size = tri_list.size();
 	for (size_t n = 0; n < tri_list_size; ++n)
 	{
-		SetProgress(100 * n / tri_list_size,
+		SetProgress(static_cast<int>(100 * n / tri_list_size),
 			"FluoRender is converting volume to mesh. Please wait.");
 
 		MCTriangle tri = tri_list[n];

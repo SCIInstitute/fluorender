@@ -27,12 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <BrushToolDlg.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <NoiseCancellingDlg.h>
 #include <CountingDlg.h>
 #include <TreePanel.h>
 #include <Count.h>
+#include <Texture.h>
+#include <VolumeSelector.h>
+#include <RulerAlign.h>
+#include <BrushDefault.h>
+#include <GlobalStates.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 //resources
@@ -630,10 +636,10 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		data.size = data.voxel_sum * vvol;
 		data.wsize = data.voxel_wsum * vvol;
 		wxString unit;
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (canvas)
+		RenderView* view = glbin_current.render_view;
+		if (view)
 		{
-			switch (canvas->m_sb_unit)
+			switch (view->m_sb_unit)
 			{
 			case 0:
 				unit = L"nm\u00B3";
@@ -842,8 +848,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 		vc.insert(gstColocalResult);
 		sx = 0;
 	}
-	FluoRefresh(sx, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
 }
 
 //gm falloff
@@ -881,8 +886,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 		vc.insert(gstColocalResult);
 		sx = 0;
 	}
-	FluoRefresh(sx, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
 }
 
 //2d influence
@@ -920,8 +924,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 		vc.insert(gstColocalResult);
 		sx = 0;
 	}
-	FluoRefresh(sx, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
 }
 
 //edge detect
@@ -950,8 +953,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 		vc.insert(gstColocalResult);
 		sx = 0;
 	}
-	FluoRefresh(sx, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
 }
 
 //hidden removal
@@ -986,8 +988,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 		vc.insert(gstColocalResult);
 		sx = 0;
 	}
-	FluoRefresh(sx, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
 }
 
 //estimate threshold
@@ -1110,10 +1111,9 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 		return;
 	glbin_aligner.SetVolumeData(vd);
 	glbin_aligner.SetAxisType(event.GetId());
-	glbin_aligner.SetView(glbin_current.canvas);
+	glbin_aligner.SetView(glbin_current.render_view);
 	glbin_aligner.AlignPca(false);
-	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId()});
 }
 
 //output

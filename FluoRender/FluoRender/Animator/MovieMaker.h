@@ -36,7 +36,7 @@ namespace fluo
 	class StopWatch;
 }
 class MainFrame;
-class RenderCanvas;
+class RenderView;
 class MovieMaker
 {
 public:
@@ -79,8 +79,8 @@ public:
 
 	//settings
 	void SetMainFrame(MainFrame* frame);
-	void SetView(RenderCanvas* view);
-	RenderCanvas* GetRenderCanvas();
+	void SetView(RenderView* view);
+	RenderView* GetView();
 	int GetViewIndex();
 	void SetFileName(const std::wstring& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }
@@ -195,7 +195,7 @@ public:
 
 private:
 	MainFrame* m_frame;
-	RenderCanvas* m_view;
+	RenderView* m_view;
 	bool m_running;
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation

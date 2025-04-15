@@ -625,8 +625,11 @@ RenderView::~RenderView()
 //set render view panel
 void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
 {
+	if (!panel)
+		return;
 	m_render_view_panel = panel;
 	m_id = panel->m_id;
+	m_name = panel->GetName();
 }
 
 //set render canvas

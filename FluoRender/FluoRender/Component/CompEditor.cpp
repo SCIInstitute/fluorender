@@ -27,9 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CompEditor.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <MovieMaker.h>
 #include <Texture.h>
+#include <VolumeRenderer.h>
+#include <TrackMap.h>
+#include <lbl_reader.h>
+#include <msk_writer.h>
 
 using namespace flrd;
 
@@ -115,7 +119,7 @@ void ComponentEditor::Clean(int mode)
 
 void ComponentEditor::NewId(bool append, bool track)
 {
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!view)
 		return;
 
@@ -319,7 +323,7 @@ void ComponentEditor::ReplaceList()
 		return;
 	if (!m_id)
 		return;
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!view)
 		return;
 	VolumeData* vd = glbin_current.vol_data;
@@ -446,7 +450,7 @@ void ComponentEditor::CombineId()
 
 void ComponentEditor::CombineList()
 {
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!view)
 		return;
 	VolumeData* vd = glbin_current.vol_data;
@@ -536,7 +540,7 @@ void ComponentEditor::ReadVolCache(VolCache& vol_cache)
 
 	int cur_time = glbin_moviemaker.GetSeqCurNum();
 	int chan = vd->GetCurChannel();
-	int frame = vol_cache.frame;
+	int frame = static_cast<int>(vol_cache.frame);
 
 	if (frame == cur_time)
 	{
@@ -581,7 +585,7 @@ void ComponentEditor::DelVolCache(VolCache& vol_cache)
 	if (!reader)
 		return;
 	int chan = vd->GetCurChannel();
-	int frame = vol_cache.frame;
+	int frame = static_cast<int>(vol_cache.frame);
 	int cur_time = glbin_moviemaker.GetSeqCurNum();
 
 	if (vol_cache.valid && vol_cache.modified)

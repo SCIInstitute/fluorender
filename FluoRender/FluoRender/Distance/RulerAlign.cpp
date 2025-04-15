@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Quaternion.h>
 #include <Utils.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <Pca.h>
 #include <Cov.h>
 
@@ -38,7 +38,7 @@ using namespace flrd;
 
 void RulerAlign::AddRuler(Ruler* ruler)
 {
-	m_view = glbin_current.canvas;
+	m_view = glbin_current.render_view;
 	if (!m_view)
 		return;
 	fluo::Point p;
@@ -46,14 +46,14 @@ void RulerAlign::AddRuler(Ruler* ruler)
 	ruler->SetWorkTime(t);
 	for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
 	{
-		if (ruler->GetPoint(i, p))
+		if (ruler->GetPoint(static_cast<int>(i), p))
 			m_point_list.push_back(p);
 	}
 }
 
 void RulerAlign::AlignRuler()
 {
-	m_view = glbin_current.canvas;
+	m_view = glbin_current.render_view;
 	if (!m_view)
 		return;
 	if (m_point_list.size() < 2)
@@ -118,7 +118,7 @@ void RulerAlign::AlignRuler()
 
 void RulerAlign::AlignPca(bool rulers)
 {
-	m_view = glbin_current.canvas;
+	m_view = glbin_current.render_view;
 	if (!m_view)
 		return;
 	Pca solver;

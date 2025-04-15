@@ -27,16 +27,21 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ClipPlanePanel.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
+#include <GlobalStates.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
+#include <VolumeRenderer.h>
+#include <MeshRenderer.h>
 #include <compatibility.h>
+#include <png_resource.h>
+#include <icons.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
 #include <wx/gbsizer.h>
-#include <png_resource.h>
-#include <icons.h>
 #include <Debug.h>
 
 ClipPlanePanel::ClipPlanePanel(
@@ -433,7 +438,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	VolumeData* vd = glbin_current.vol_data;
 	MeshData* md = glbin_current.mesh_data;
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 
 	//mf button tips
 	if (update_all || FOUND_VALUE(gstMultiFuncTips))
@@ -739,9 +744,9 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//rotations
-	if (canvas)
+	if (view)
 	{
-		fluo::Vector rot = canvas->GetClippingPlaneRotations();
+		fluo::Vector rot = view->GetClippingPlaneRotations();
 		//x
 		if (update_all || FOUND_VALUE(gstClipRotX))
 		{
@@ -829,10 +834,10 @@ void ClipPlanePanel::HoldPlanes()
 {
 	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 	glbin_states.ClipDisplayChanged();
-	if (glbin_current.canvas)
-		glbin_current.canvas->m_clip_mask = -1;
+	if (glbin_current.render_view)
+		glbin_current.render_view->m_clip_mask = -1;
 	FluoRefresh(2, { gstClipHold },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::SetPlaneMode()
@@ -842,7 +847,7 @@ void ClipPlanePanel::SetPlaneMode()
 	ival = ival > cm_None ? cm_Normal : ival;
 	glbin_settings.m_clip_mode = ival;
 	FluoRefresh(2, { gstClipPlaneMode },
-		{m_frame->GetRenderCanvas(glbin_current.canvas)});
+		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent& event)
@@ -1048,11 +1053,11 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 {
 	if (!IsShown())
 		return;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
-	if (canvas->m_capture)
+	if (view->m_capture)
 		return;
 
 	wxPoint pos = wxGetMousePosition();
@@ -1062,9 +1067,9 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	glbin_states.m_mouse_in_clip_plane_panel = bval;
 	if (glbin_states.ClipDisplayChanged())
 	{
-		canvas->m_clip_mask = -1;
+		view->m_clip_mask = -1;
 		FluoRefresh(3, { gstNull },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+			{ glbin_current.GetViewId() });
 	}
 }
 
@@ -1120,11 +1125,11 @@ void ClipPlanePanel::SetZLink(bool val)
 void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->SetClipValue(i, val);
+		view->SetClipValue(i, val);
 	else
 		vd->SetClipValue(i, val);
 
@@ -1133,60 +1138,60 @@ void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 	switch (i)
 	{
 	case 0:
-		canvas->m_clip_mask = link ? 3 : 1;
+		view->m_clip_mask = link ? 3 : 1;
 		vc.insert(gstClipX1);
 		if (link)
 			vc.insert(gstClipX2);
 		break;
 	case 1:
-		canvas->m_clip_mask = link ? 3 : 2;
+		view->m_clip_mask = link ? 3 : 2;
 		vc.insert(gstClipX2);
 		if (link)
 			vc.insert(gstClipX1);
 		break;
 	case 2:
-		canvas->m_clip_mask = link ? 12 : 4;
+		view->m_clip_mask = link ? 12 : 4;
 		vc.insert(gstClipY1);
 		if (link)
 			vc.insert(gstClipY2);
 		break;
 	case 3:
-		canvas->m_clip_mask = link ? 12 : 8;
+		view->m_clip_mask = link ? 12 : 8;
 		vc.insert(gstClipY2);
 		if (link)
 			vc.insert(gstClipY1);
 		break;
 	case 4:
-		canvas->m_clip_mask = link ? 48 : 16;
+		view->m_clip_mask = link ? 48 : 16;
 		vc.insert(gstClipZ1);
 		if (link)
 			vc.insert(gstClipZ2);
 		break;
 	case 5:
-		canvas->m_clip_mask = link ? 48 : 32;
+		view->m_clip_mask = link ? 48 : 32;
 		vc.insert(gstClipZ2);
 		if (link)
 			vc.insert(gstClipZ1);
 		break;
 	}
-	canvas->UpdateClips();
+	view->UpdateClips();
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->SetClipValues(i, val1, val2);
+		view->SetClipValues(i, val1, val2);
 	else
 		vd->SetClipValues(i, val1, val2);
 
-	canvas->m_clip_mask = i;
-	canvas->UpdateClips();
+	view->m_clip_mask = i;
+	view->UpdateClips();
 
 	fluo::ValueCollection vc;
 	if (i & 1)
@@ -1202,39 +1207,39 @@ void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 	if (i & 32)
 		vc.insert(gstClipZ2);
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::SetClipValues(const int val[6])
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->SetClipValues(val);
+		view->SetClipValues(val);
 	else
 		vd->SetClipValues(val);
-	canvas->m_clip_mask = 63;
-	canvas->UpdateClips();
+	view->m_clip_mask = 63;
+	view->UpdateClips();
 
 	FluoRefresh(2,
 		{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::ResetClipValues()
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->ResetClipValues();
+		view->ResetClipValues();
 	else
 		vd->ResetClipValues();
-	canvas->m_clip_mask = -1;
-	canvas->UpdateClips();
+	view->m_clip_mask = -1;
+	view->UpdateClips();
 
 	//links
 	SetXLink(false);
@@ -1242,64 +1247,64 @@ void ClipPlanePanel::ResetClipValues()
 	SetZLink(false);
 
 	FluoRefresh(2, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::ResetClipValuesX()
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->ResetClipValuesX();
+		view->ResetClipValuesX();
 	else
 		vd->ResetClipValuesX();
-	canvas->m_clip_mask = -1;
-	canvas->UpdateClips();
+	view->m_clip_mask = -1;
+	view->UpdateClips();
 
 	//links
 	SetXLink(false);
 
-	FluoRefresh(2, { gstClipX1, gstClipX2 }, { m_frame->GetRenderCanvas(canvas) });
+	FluoRefresh(2, { gstClipX1, gstClipX2 }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::ResetClipValuesY()
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->ResetClipValuesY();
+		view->ResetClipValuesY();
 	else
 		vd->ResetClipValuesY();
-	canvas->m_clip_mask = -1;
-	canvas->UpdateClips();
+	view->m_clip_mask = -1;
+	view->UpdateClips();
 
 	//links
 	SetYLink(false);
 
-	FluoRefresh(2, { gstClipY1, gstClipY2 }, { m_frame->GetRenderCanvas(canvas) });
+	FluoRefresh(2, { gstClipY1, gstClipY2 }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::ResetClipValuesZ()
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		canvas->ResetClipValuesZ();
+		view->ResetClipValuesZ();
 	else
 		vd->ResetClipValuesZ();
-	canvas->m_clip_mask = -1;
-	canvas->UpdateClips();
+	view->m_clip_mask = -1;
+	view->UpdateClips();
 
 	//links
 	SetZLink(false);
 
-	FluoRefresh(2, { gstClipZ1, gstClipZ2 }, { m_frame->GetRenderCanvas(canvas) });
+	FluoRefresh(2, { gstClipZ1, gstClipZ2 }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent& event)
@@ -1358,25 +1363,25 @@ void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
-	canvas->SetClipMode(2);
+	view->SetClipMode(2);
 	FluoRefresh(2, { gstClipRotX, gstClipRotY, gstClipRotZ },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnRotResetBtn(wxCommandEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	//reset rotations
-	canvas->SetClippingPlaneRotations(fluo::Vector(0));
+	view->SetClippingPlaneRotations(fluo::Vector(0));
 	FluoRefresh(2, { gstClipRotX, gstClipRotY, gstClipRotZ },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
@@ -1390,11 +1395,11 @@ void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
 		break;
 	case 2:
 	{
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (!canvas)
+		RenderView* view = glbin_current.render_view;
+		if (!view)
 			break;
-		if (canvas) canvas->SetClipRotX(0.0);
-		FluoRefresh(2, { gstClipRotX }, { m_frame->GetRenderCanvas(canvas) });
+		view->SetClipRotX(0.0);
+		FluoRefresh(2, { gstClipRotX }, { glbin_current.GetViewId() });
 	}
 		break;
 	case 3:
@@ -1418,11 +1423,11 @@ void ClipPlanePanel::OnRotYMF(wxCommandEvent& event)
 		break;
 	case 2:
 	{
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (!canvas)
+		RenderView* view = glbin_current.render_view;
+		if (!view)
 			break;
-		if (canvas) canvas->SetClipRotY(0.0);
-		FluoRefresh(2, { gstClipRotY }, { m_frame->GetRenderCanvas(canvas) });
+		view->SetClipRotY(0.0);
+		FluoRefresh(2, { gstClipRotY }, { glbin_current.GetViewId() });
 	}
 		break;
 	case 3:
@@ -1446,11 +1451,11 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 		break;
 	case 2:
 	{
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (!canvas)
+		RenderView* view = glbin_current.render_view;
+		if (!view)
 			break;
-		if (canvas) canvas->SetClipRotZ(0.0);
-		FluoRefresh(2, { gstClipRotZ }, { m_frame->GetRenderCanvas(canvas) });
+		view->SetClipRotZ(0.0);
+		FluoRefresh(2, { gstClipRotZ }, { glbin_current.GetViewId() });
 	}
 		break;
 	case 3:
@@ -1465,83 +1470,83 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnXRotChange(wxScrollEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	int val = m_x_rot_sldr->GetValue();
-	canvas->SetClipRotX(val);
-	FluoRefresh(2, { gstClipRotX }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotX(val);
+	FluoRefresh(2, { gstClipRotX }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnXRotEdit(wxCommandEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str = m_x_rot_text->GetValue();
 	double val = 0.0;
 	if (str.ToDouble(&val))
 		m_x_rot_sldr->ChangeValue(std::round(val));
-	canvas->SetClipRotX(val);
-	FluoRefresh(2, { gstNull }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotX(val);
+	FluoRefresh(2, { gstNull }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	int val = m_y_rot_sldr->GetValue();
-	canvas->SetClipRotY(val);
-	FluoRefresh(2, { gstClipRotY }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotY(val);
+	FluoRefresh(2, { gstClipRotY }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnYRotEdit(wxCommandEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str = m_y_rot_text->GetValue();
 	double val = 0.0;
 	if (str.ToDouble(&val))
 		m_y_rot_sldr->ChangeValue(std::round(val));
-	canvas->SetClipRotY(val);
-	FluoRefresh(2, { gstNull }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotY(val);
+	FluoRefresh(2, { gstNull }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	int val = m_z_rot_sldr->GetValue();
-	canvas->SetClipRotZ(val);
-	FluoRefresh(2, { gstClipRotZ }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotZ(val);
+	FluoRefresh(2, { gstClipRotZ }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnZRotEdit(wxCommandEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str = m_z_rot_text->GetValue();
 	double val = 0.0;
 	if (str.ToDouble(&val))
 		m_z_rot_sldr->ChangeValue(std::round(val));
-	canvas->SetClipRotZ(val);
-	FluoRefresh(2, { gstNull }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotZ(val);
+	FluoRefresh(2, { gstNull }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str_val = m_x_rot_text->GetValue();
@@ -1550,14 +1555,14 @@ void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	canvas->SetClipRotX(val);
-	FluoRefresh(2, { gstClipRotX }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotX(val);
+	FluoRefresh(2, { gstClipRotX }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str_val = m_x_rot_text->GetValue();
@@ -1566,14 +1571,14 @@ void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	canvas->SetClipRotX(val);
-	FluoRefresh(2, { gstClipRotX }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotX(val);
+	FluoRefresh(2, { gstClipRotX }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str_val = m_y_rot_text->GetValue();
@@ -1582,14 +1587,14 @@ void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	canvas->SetClipRotY(val);
-	FluoRefresh(2, { gstClipRotY }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotY(val);
+	FluoRefresh(2, { gstClipRotY }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str_val = m_y_rot_text->GetValue();
@@ -1598,14 +1603,14 @@ void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	canvas->SetClipRotY(val);
-	FluoRefresh(2, { gstClipRotY }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotY(val);
+	FluoRefresh(2, { gstClipRotY }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str_val = m_z_rot_text->GetValue();
@@ -1614,14 +1619,14 @@ void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	canvas->SetClipRotZ(val);
-	FluoRefresh(2, { gstClipRotZ }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotZ(val);
+	FluoRefresh(2, { gstClipRotZ }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	wxString str_val = m_z_rot_text->GetValue();
@@ -1630,8 +1635,8 @@ void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	canvas->SetClipRotZ(val);
-	FluoRefresh(2, { gstClipRotZ }, { m_frame->GetRenderCanvas(canvas) });
+	view->SetClipRotZ(val);
+	FluoRefresh(2, { gstClipRotZ }, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::UpdateSampleRate()

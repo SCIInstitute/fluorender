@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
-class RenderCanvas;
 class VolumeData;
 namespace flrd
 {

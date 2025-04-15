@@ -731,6 +731,11 @@ namespace flvr
 			(*bricks_)[i]->valid_mask();
 	}
 
+	int Texture::GetLevelNum()
+	{
+		return static_cast<int>(pyramid_.size());
+	}
+
 	inline TextureBrick* Texture::get_brick(unsigned int bid)
 	{
 		for (size_t i=0; i<(*bricks_).size(); ++i)

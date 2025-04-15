@@ -5628,6 +5628,14 @@ void CurrentObjects::SetSel(const std::wstring& str)
 	}
 }
 
+int CurrentObjects::GetViewId()
+{
+	if (render_view)
+		return static_cast<int>(render_view->Id());
+	else
+		return -1;
+}
+
 flrd::RulerList* CurrentObjects::GetRulerList()
 {
 	if (!render_view)

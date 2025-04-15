@@ -33,11 +33,11 @@
 #include <stdint.h>
 #include <glm/glm.hpp>
 
-#ifndef __glew_h_
+#ifndef __glew_h__
 typedef unsigned int GLenum;
 typedef unsigned int GLuint;
 typedef int GLint;
-#endif // !__glew_h_
+#endif // !__glew_h__
 #ifndef GL_UNSIGNED_BYTE
 #define GL_UNSIGNED_BYTE 0x1401 // The actual value of GL_UNSIGNED_BYTE
 #endif

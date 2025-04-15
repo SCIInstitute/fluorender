@@ -27,14 +27,21 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ComponentDlg.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
-#include <BrushToolDlg.h>
-#include <ColocalizationDlg.h>
+#include <ComponentDefault.h>
+#include <BrushDefault.h>
 #include <CompEditor.h>
 #include <RecordHistParams.h>
-#include <wxSingleSlider.h>
+#include <CompGenerator.h>
+#include <Clusterizer.h>
+#include <CompSelector.h>
+#include <CompAnalyzer.h>
+#include <VolumeSelector.h>
+#include <RulerAlign.h>
+#include <DataManager.h>
 #include <ModalDlg.h>
+#include <wxSingleSlider.h>
 #include <Progress.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>
@@ -2179,8 +2186,7 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent& event)
 		vc.insert(gstBrushCountResult);
 	if (glbin_brush_def.m_update_colocal)
 		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent& event)
@@ -2193,8 +2199,7 @@ void ComponentDlg::OnCompAppend(wxCommandEvent& event)
 		vc.insert(gstBrushCountResult);
 	if (glbin_brush_def.m_update_colocal)
 		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent& event)
@@ -2206,8 +2211,7 @@ void ComponentDlg::OnCompAll(wxCommandEvent& event)
 		vc.insert(gstBrushCountResult);
 	if (glbin_brush_def.m_update_colocal)
 		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent& event)
@@ -2374,8 +2378,7 @@ void ComponentDlg::OnAlignCenterChk(wxCommandEvent& event)
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
 	AlignPca(event.GetId());
-	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId()});
 }
 
 void ComponentDlg::OnSize(wxSizeEvent& event)
@@ -2635,10 +2638,9 @@ void ComponentDlg::AlignPca(int axis_type)
 	glbin_comp_analyzer.GetRulerListFromCelp(list);
 	glbin_aligner.SetRulerList(&list);
 	glbin_aligner.SetAxisType(axis_type);
-	glbin_aligner.SetView(glbin_current.canvas);
+	glbin_aligner.SetView(glbin_current.render_view);
 	glbin_aligner.AlignPca(true);
-	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::IncludeComps()

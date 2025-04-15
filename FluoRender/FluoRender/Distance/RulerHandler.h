@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <memory>
 
-class RenderCanvas;
+class RenderView;
 class VolumeData;
 
 namespace flrd

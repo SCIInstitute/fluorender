@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RulerHandler.h>
 #include <Ruler.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <Global.h>
 #include <Texture.h>
 #include <Cov.h>
@@ -40,6 +40,8 @@ DEALINGS IN THE SOFTWARE.
 #include <DistCalculator.h>
 #include <MainSettings.h>
 #include <CompAnalyzer.h>
+#include <VolumeSelector.h>
+#include <VolumeRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <nrrd.h>
 #include <Debug.h>
@@ -95,7 +97,7 @@ void RulerHandler::GroupRulers(const std::set<int>& rulers)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 			i->Group(m_group);
 		c++;
 	}
@@ -155,7 +157,7 @@ void RulerHandler::GetRulerList(const std::set<int>& rulers, flrd::RulerList& ou
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 			out_list.push_back(i);
 		c++;
 	}
@@ -171,7 +173,7 @@ void RulerHandler::ToggleDisplay(const std::set<int> rulers)
 	{
 		Ruler* ruler = (*list)[i];
 		if (!ruler) continue;
-		if (rulers.find(i) != rulers.end())
+		if (rulers.find(static_cast<int>(i)) != rulers.end())
 			ruler->ToggleDisp();
 	}
 }
@@ -202,14 +204,14 @@ void RulerHandler::ToggleGroupDisp()
 
 bool RulerHandler::FindEditingRuler(double mx, double my)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return false;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = canvas->GetGLSize();
+	Size2D view_size = view->GetGLSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -222,11 +224,11 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	double aspect = (double)nx / (double)ny;
 
 	//get persp
-	bool persp = canvas->GetPersp();
+	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = canvas->GetObjectMat();
-	glm::mat4 prj_temp = canvas->GetProjection();
+	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
 	mv.set(glm::value_ptr(mv_temp));
@@ -258,7 +260,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 				y<ptemp.y() + 0.02 &&
 				y>ptemp.y() - 0.02)
 			{
-				canvas->SetCurRuler(ruler);
+				view->SetCurRuler(ruler);
 				m_point = point;
 				m_pindex = k;
 				return true;
@@ -271,14 +273,14 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 
 bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return false;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = canvas->GetGLSize();
+	Size2D view_size = view->GetGLSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -291,11 +293,11 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 	double aspect = (double)nx / (double)ny;
 
 	//get persp
-	bool persp = canvas->GetPersp();
+	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = canvas->GetObjectMat();
-	glm::mat4 prj_temp = canvas->GetProjection();
+	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
 	mv.set(glm::value_ptr(mv_temp));
@@ -330,7 +332,7 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 			{
 				ppmin = point;
 				dmin = dist;
-				canvas->SetCurRuler(ruler);
+				view->SetCurRuler(ruler);
 				m_pindex = k;
 			}
 		}
@@ -346,14 +348,14 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 
 bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return false;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = canvas->GetGLSize();
+	Size2D view_size = view->GetGLSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -366,11 +368,11 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 	double aspect = (double)nx / (double)ny;
 
 	//get persp
-	bool persp = canvas->GetPersp();
+	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = canvas->GetObjectMat();
-	glm::mat4 prj_temp = canvas->GetProjection();
+	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
 	mv.set(glm::value_ptr(mv_temp));
@@ -393,7 +395,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 		{
 			//if (ruler->GetNumBranchPoint(j) < 2)
 			//	continue;
-			point = ruler->GetPRulerPoint(j, 0);
+			point = ruler->GetPRulerPoint(static_cast<int>(j), 0);
 			if (!point) continue;
 			ptemp = point->GetPoint(rwt, interp);
 			ptemp = mv.transform(ptemp);
@@ -417,7 +419,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 	if (ppmin && rulermin)
 	{
 		m_point = ppmin;
-		canvas->SetCurRuler(rulermin);
+		view->SetCurRuler(rulermin);
 		m_mag_ruler = rulermin;
 		m_mag_branch = rj;
 		m_mag_branch_point = 0;
@@ -428,14 +430,14 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 
 bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return false;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = canvas->GetGLSize();
+	Size2D view_size = view->GetGLSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -448,11 +450,11 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 	double aspect = (double)nx / (double)ny;
 
 	//get persp
-	bool persp = canvas->GetPersp();
+	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = canvas->GetObjectMat();
-	glm::mat4 prj_temp = canvas->GetProjection();
+	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
 	mv.set(glm::value_ptr(mv_temp));
@@ -473,12 +475,12 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 
 		for (j = 0; j < ruler->GetNumBranch(); j++)
 		{
-			int nbp = ruler->GetNumBranchPoint(j);
+			int nbp = ruler->GetNumBranchPoint(static_cast<int>(j));
 			//if (nbp < 2)
 			//	continue;
 			for (k = 0; k < nbp; ++k)
 			{
-				point = ruler->GetPRulerPoint(j, k);
+				point = ruler->GetPRulerPoint(static_cast<int>(j), static_cast<int>(k));
 				if (!point) continue;
 				ptemp = point->GetPoint(rwt, interp);
 				ptemp = mv.transform(ptemp);
@@ -674,9 +676,9 @@ void RulerHandler::AddRulerPoint(fluo::Point &p)
 		ruler->SetRulerType(m_type);
 		ruler->AddPoint(p);
 		list->push_back(ruler);
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (canvas)
-			canvas->SetCurRuler(ruler);
+		RenderView* view = glbin_current.render_view;
+		if (view)
+			view->SetCurRuler(ruler);
 	}
 
 	Profile(ruler);
@@ -704,9 +706,9 @@ void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 		//ruler->SetTransient(m_view->m_ruler_time_dep);
 		//ruler->SetTransTime(m_view->m_tseq_cur_num);
 		list->push_back(ruler);
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (canvas)
-			canvas->SetCurRuler(ruler);
+		RenderView* view = glbin_current.render_view;
+		if (view)
+			view->SetCurRuler(ruler);
 	}
 
 	Profile(ruler);
@@ -722,13 +724,13 @@ bool RulerHandler::GetMouseDist(int mx, int my, double dist)
 
 void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return;
 
 	int point_volume_mode = glbin_settings.m_point_volume_mode;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 	Ruler* ruler = glbin_current.GetRuler();
 	if (ruler) ruler->SetWorkTime(rwt);
 	//DBGPRINT(L"Ruler:%d\n", m_ruler);
@@ -770,7 +772,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 			ruler->SetBrushSize(glbin_vol_selector.GetBrushSize1());
 		else
 			ruler->SetBrushSize(glbin_vol_selector.GetBrushSize1()
-				/ canvas->Get121ScaleFactor());
+				/ view->Get121ScaleFactor());
 	}
 	else
 	{
@@ -823,7 +825,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 			if (m_type == 5)
 			{
 				//finish
-				glm::mat4 mv_temp = canvas->GetDrawMat();
+				glm::mat4 mv_temp = view->GetDrawMat();
 				glm::vec4 axis(0, 0, -1, 0);
 				axis = glm::transpose(mv_temp) * axis;
 				ruler->FinishEllipse(fluo::Vector(axis[0], axis[1], axis[2]));
@@ -837,7 +839,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 			ruler->SetRulerType(m_type);
 			ruler->AddPoint(p);
 			list->push_back(ruler);
-			canvas->SetCurRuler(ruler);
+			view->SetCurRuler(ruler);
 		}
 	}
 
@@ -888,9 +890,9 @@ void RulerHandler::AddPaintRulerPoint()
 		str = std::to_string(static_cast<int>(size));
 		ruler->AddInfoValues(str);
 		list->push_back(ruler);
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (canvas)
-			canvas->SetCurRuler(ruler);
+		RenderView* view = glbin_current.render_view;
+		if (view)
+			view->SetCurRuler(ruler);
 	}
 
 	Profile(ruler);
@@ -898,9 +900,9 @@ void RulerHandler::AddPaintRulerPoint()
 
 bool RulerHandler::MoveRuler(int mx, int my)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	Ruler* ruler = glbin_current.GetRuler();
-	if (!m_point || !canvas || !ruler)
+	if (!m_point || !view || !ruler)
 		return false;
 	size_t rwt = ruler->GetWorkTime();
 	int interp = ruler->GetInterp();
@@ -943,9 +945,9 @@ bool RulerHandler::MoveRuler(int mx, int my)
 
 bool RulerHandler::EditPoint(int mx, int my, bool alt)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	Ruler* ruler = glbin_current.GetRuler();
-	if (!m_point || !canvas || !ruler)
+	if (!m_point || !view || !ruler)
 		return false;
 	size_t rwt = ruler->GetWorkTime();
 	int interp = ruler->GetInterp();
@@ -1009,7 +1011,7 @@ void RulerHandler::Flip(const std::set<int>& rulers)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 			i->Reverse();
 		c++;
 	}
@@ -1028,7 +1030,7 @@ void RulerHandler::AddAverage(const std::set<int>& rulers)
 	size_t c = 0, count = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			avg += i->GetCenter();
 			count++;
@@ -1094,7 +1096,7 @@ void RulerHandler::Relax(const std::set<int>& rulers)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			glbin_dist_calculator.SetRuler(i);
 			glbin_dist_calculator.CenterRuler(type, m_edited, iter);
@@ -1115,8 +1117,8 @@ void RulerHandler::Prune(const std::set<int>& rulers)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
-			Prune(c, 1);
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
+			Prune(static_cast<int>(c), 1);
 		c++;
 	}
 }
@@ -1126,10 +1128,10 @@ void RulerHandler::ApplyMagPoint()
 {
 	if (m_mag_stroke.size() > 1)
 		return;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 	fluo::Point p = m_mag_stroke.front();
 	if (!FindClosestRulerPoint(m_magx, m_magy))
 		return;
@@ -1143,10 +1145,10 @@ void RulerHandler::ApplyMagPoint()
 
 void RulerHandler::ApplyMagStroke()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 	if (m_mag_stroke.size() < 2)
 		return;
 	if (!m_mag_ruler)
@@ -1161,11 +1163,11 @@ void RulerHandler::ApplyMagStroke()
 	}
 	if (!m_mag_ruler || m_mag_branch >= m_mag_ruler->GetNumBranch())
 		return;
-	int num = m_mag_ruler->GetNumBranchPoint(m_mag_branch);
+	int num = m_mag_ruler->GetNumBranchPoint(static_cast<int>(m_mag_branch));
 	if (num == 1)
 	{
 		//move point
-		pRulerPoint temp = m_mag_ruler->GetPRulerPoint(m_mag_branch, 0);
+		pRulerPoint temp = m_mag_ruler->GetPRulerPoint(static_cast<int>(m_mag_branch), 0);
 		if (!temp)
 			return;
 		fluo::Point p = m_mag_stroke.back();
@@ -1180,7 +1182,7 @@ void RulerHandler::ApplyMagStroke()
 
 	for (size_t i = m_mag_branch_point; i < num; ++i)
 	{
-		pRulerPoint temp = m_mag_ruler->GetPRulerPoint(m_mag_branch, i);
+		pRulerPoint temp = m_mag_ruler->GetPRulerPoint(static_cast<int>(m_mag_branch), static_cast<int>(i));
 		if (!temp)
 			continue;
 		if (m_redist_len)
@@ -1232,7 +1234,7 @@ void RulerHandler::InitMagRulerLength()
 		return;
 	if (m_mag_branch >= m_mag_ruler->GetNumBranch())
 		return;
-	size_t bp_num = m_mag_ruler->GetNumBranchPoint(m_mag_branch);
+	size_t bp_num = m_mag_ruler->GetNumBranchPoint(static_cast<int>(m_mag_branch));
 	if (m_mag_branch_point >= bp_num)
 		return;
 
@@ -1242,8 +1244,8 @@ void RulerHandler::InitMagRulerLength()
 	//compute total length
 	for (size_t i = m_mag_branch_point; i < bp_num - 1; ++i)
 	{
-		fluo::Point p1 = m_mag_ruler->GetPoint(m_mag_branch, i);
-		fluo::Point p2 = m_mag_ruler->GetPoint(m_mag_branch, i + 1);
+		fluo::Point p1 = m_mag_ruler->GetPoint(static_cast<int>(m_mag_branch), static_cast<int>(i));
+		fluo::Point p2 = m_mag_ruler->GetPoint(static_cast<int>(m_mag_branch), static_cast<int>(i + 1));
 		size_t si = i - m_mag_branch_point;
 		m_mag_ruler_len[si + 1] = m_mag_ruler_len[si] + (p2 - p1).length();
 	}
@@ -1356,7 +1358,7 @@ void RulerHandler::DeleteSelection(const std::set<int> &sel)
 		it != list->rend();)
 	{
 		auto it2 = std::next(it).base();
-		int idx = it2 - list->begin();
+		int idx = static_cast<int>(it2 - list->begin());
 		if (sel.find(idx) != sel.end())
 		{
 			if (*it2)
@@ -1368,9 +1370,9 @@ void RulerHandler::DeleteSelection(const std::set<int> &sel)
 			++it;
 	}
 
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		canvas->SetCurRuler(0);
+	RenderView* view = glbin_current.render_view;
+	if (view)
+		view->SetCurRuler(0);
 	m_point = nullptr;
 	m_pindex = -1;
 }
@@ -1378,38 +1380,38 @@ void RulerHandler::DeleteSelection(const std::set<int> &sel)
 void RulerHandler::DeleteAll(bool cur_time)
 {
 	RulerList* list = glbin_current.GetRulerList();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!list || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!list || !view)
 		return;
 
 	if (cur_time)
 	{
-		int tseq = canvas->m_tseq_cur_num;
-		for (int i = list->size() - 1; i >= 0; i--)
+		int tseq = view->m_tseq_cur_num;
+		for (size_t i = list->size(); i > 0; i--)
 		{
-			flrd::Ruler* ruler = (*list)[i];
+			flrd::Ruler* ruler = (*list)[i-1];
 			if (ruler &&
 				((ruler->GetTransient() &&
 					ruler->GetTransTime() == tseq) ||
 					!ruler->GetTransient()))
 			{
-				list->erase(list->begin() + i);
+				list->erase(list->begin() + i - 1);
 				delete ruler;
 			}
 		}
 	}
 	else
 	{
-		for (int i = list->size() - 1; i >= 0; i--)
+		for (size_t i = list->size(); i > 0; i--)
 		{
-			flrd::Ruler* ruler = (*list)[i];
+			flrd::Ruler* ruler = (*list)[i-1];
 			if (ruler)
 				delete ruler;
 		}
 		list->clear();
 	}
 
-	canvas->SetCurRuler(0);
+	view->SetCurRuler(0);
 	m_point = nullptr;
 	m_pindex = -1;
 }
@@ -1460,7 +1462,7 @@ void RulerHandler::Profile(const std::set<int>& rulers)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 			Profile(i);
 		c++;
 	}
@@ -1468,16 +1470,16 @@ void RulerHandler::Profile(const std::set<int>& rulers)
 
 int RulerHandler::Profile(Ruler* ruler)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	VolumeData* vd = glbin_current.vol_data;
-	if (!canvas || !vd || !ruler)
+	if (!view || !vd || !ruler)
 		return 0;
 	if (ruler->GetNumPoint() < 1)
 		return 0;
 	size_t rwt = ruler->GetWorkTime();
 
 	//set ruler transform
-	fluo::Transform tf = canvas->GetInvOffsetMat();
+	fluo::Transform tf = view->GetInvOffsetMat();
 	ruler->SetTransform(tf);
 
 	double spcx, spcy, spcz;
@@ -1637,7 +1639,7 @@ int RulerHandler::Profile(Ruler* ruler)
 		}
 	}
 	std::string str = "Profile of volume ";
-	str = str + vd->GetName();
+	str = str + ws2s(vd->GetName());
 	ruler->SetInfoProfile(str);
 
 	//get background intensity
@@ -1648,7 +1650,7 @@ int RulerHandler::Profile(Ruler* ruler)
 			flrd::BackgStat bgs(vd);
 			bgs.SetType(m_bg_type);
 			bgs.SetFeatureSize2D(m_kx, m_ky);
-			bgs.SetThreshold(m_varth, m_gauth);
+			bgs.SetThreshold(static_cast<float>(m_varth), static_cast<float>(m_gauth));
 			bgs.Run();
 			double result = bgs.GetResultf();
 			vd->SetBackgroundInt(result);
@@ -1677,15 +1679,15 @@ int RulerHandler::ProfileAll()
 		return 0;
 	int c = 0;
 	for (size_t i = 0; i < list->size(); ++i)
-		c += Profile(i);
+		c += Profile(static_cast<int>(i));
 	return c;
 }
 
 int RulerHandler::Roi(Ruler* ruler)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	VolumeData* vd = glbin_current.vol_data;
-	if (!canvas || !vd || !ruler)
+	if (!view || !vd || !ruler)
 		return 0;
 	if (ruler->GetRulerType() != 5 ||
 		ruler->GetNumPoint() != 4)
@@ -1727,8 +1729,8 @@ int RulerHandler::Roi(Ruler* ruler)
 	if (!valid()) return 0;
 
 	//get transform
-	glm::mat4 mv = canvas->GetObjectMat();
-	glm::mat4 prj = canvas->GetProjection();
+	glm::mat4 mv = view->GetObjectMat();
+	glm::mat4 prj = view->GetProjection();
 	glm::mat4 mvprj = prj * mv;
 	tf.set(glm::value_ptr(mvprj));
 	//get volume roi
@@ -1736,7 +1738,7 @@ int RulerHandler::Roi(Ruler* ruler)
 	vr.SetTransform(tf);
 	vr.SetRoi(ruler);
 	int vx, vy;
-	canvas->GetRenderSize(vx, vy);
+	view->GetRenderSize(vx, vy);
 	vr.SetAspect(vx, vy);
 	vr.Run();
 	ruler->SetMeanInt(vr.GetResult());
@@ -1763,7 +1765,7 @@ int RulerHandler::RoiAll()
 		return 0;
 	int c = 0;
 	for (size_t i = 0; i < list->size(); ++i)
-		c += Roi(i);
+		c += Roi(static_cast<int>(i));
 	return c;
 }
 
@@ -1793,7 +1795,7 @@ void RulerHandler::Distance(const std::set<int>& rulers, const std::wstring& fil
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			flrd::Ruler* ruler = i;
 			if (!ruler)
@@ -1839,7 +1841,7 @@ void RulerHandler::Project(const std::set<int>& rulers, const std::wstring& file
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			glbin_dist_calculator.SetRuler(i);
 			glbin_dist_calculator.Project();
@@ -1882,13 +1884,13 @@ void RulerHandler::SetTransient(bool bval, const std::set<int>& rulers)
 	bool update_all = rulers.empty();
 
 	size_t t = 0;
-	if (glbin_current.canvas)
-		t = glbin_current.canvas->m_tseq_cur_num;
+	if (glbin_current.render_view)
+		t = glbin_current.render_view->m_tseq_cur_num;
 
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			if (!i)
 				continue;
@@ -1911,7 +1913,7 @@ void RulerHandler::SetDisplay(bool bval, const std::set<int>& rulers, int type)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			if (!i)
 				continue;
@@ -1932,7 +1934,7 @@ void RulerHandler::SetInterp(int ival, const std::set<int>& rulers)
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			if (!i)
 				continue;
@@ -1951,13 +1953,13 @@ void RulerHandler::DeleteKey(const std::set<int>& rulers)
 	bool update_all = rulers.empty();
 
 	size_t t = 0;
-	if (glbin_current.canvas)
-		t = glbin_current.canvas->m_tseq_cur_num;
+	if (glbin_current.render_view)
+		t = glbin_current.render_view->m_tseq_cur_num;
 
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			if (!i)
 				continue;
@@ -1977,13 +1979,13 @@ void RulerHandler::DeleteAllKeys(const std::set<int>& rulers)
 	bool update_all = rulers.empty();
 
 	size_t t = 0;
-	if (glbin_current.canvas)
-		t = glbin_current.canvas->m_tseq_cur_num;
+	if (glbin_current.render_view)
+		t = glbin_current.render_view->m_tseq_cur_num;
 
 	size_t c = 0;
 	for (auto i : *list)
 	{
-		if (update_all || rulers.find(c) != rulers.end())
+		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
 		{
 			if (!i)
 				continue;
@@ -1997,13 +1999,13 @@ void RulerHandler::DeleteAllKeys(const std::set<int>& rulers)
 //get time points where keys exist
 bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return false;
 	size_t startf, endf;
-	startf = canvas->m_begin_frame;
-	endf = canvas->m_end_frame;
+	startf = view->m_begin_frame;
+	endf = view->m_end_frame;
 
 	if (!list)
 		return false;
@@ -2017,7 +2019,7 @@ bool RulerHandler::GetKeyFrames(std::set<size_t>& kf)
 			continue;
 		for (size_t j = 0; j < i->GetNumPoint(); ++j)
 		{
-			RulerPoint* p = i->GetRulerPoint(j);
+			RulerPoint* p = i->GetRulerPoint(static_cast<int>(j));
 			if (!p)
 				continue;
 			size_t tn = p->GetTimeNum();
@@ -2142,12 +2144,12 @@ bool RulerHandler::GetRulerPointCoords(std::vector<double>& coords)
 
 RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list)
+	if (!view || !list)
 		return nullptr;
 
-	size_t rwt = canvas->m_tseq_cur_num;
+	size_t rwt = view->m_tseq_cur_num;
 	double dmin = std::numeric_limits<double>::max();
 	RulerPoint* result = 0;
 
@@ -2178,9 +2180,9 @@ RulerPoint* RulerHandler::get_closest_point(fluo::Point& p)
 
 void RulerHandler::GenerateWalk(size_t nl, double dir, WalkCycle& cycle)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	RulerList* list = glbin_current.GetRulerList();
-	if (!canvas || !list || list->empty())
+	if (!view || !list || list->empty())
 		return;
 
 	std::vector<WcName> names;
@@ -2201,12 +2203,12 @@ void RulerHandler::GenerateWalk(size_t nl, double dir, WalkCycle& cycle)
 			Ruler* r = list->GetRuler(name.s);
 			if (!r)
 				continue;
-			int dim = name.d;
+			int dim = static_cast<int>(name.d);
 			//compute integral for each point
 			for (size_t j = 0; j < r->GetNumPoint(); ++j)
 			{
 				r->SetWorkTime(i);
-				fluo::Point p = r->GetPoint(j);
+				fluo::Point p = r->GetPoint(static_cast<int>(j));
 				double x, y, z;
 				x = dim > 0 ? data.get(cnt++, f) : 0;
 				y = dim > 1 ? data.get(cnt++, f) : 0;
@@ -2214,7 +2216,7 @@ void RulerHandler::GenerateWalk(size_t nl, double dir, WalkCycle& cycle)
 				fluo::Vector v(x, y, z);
 				p += v * dir;
 				r->SetWorkTime(t);
-				r->SetPoint(j, p);
+				r->SetPoint(static_cast<int>(j), p);
 			}
 		}
 	}

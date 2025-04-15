@@ -27,10 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CompAnalyzer.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <DataManager.h>
 #include <VolumeDefault.h>
 #include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
+#include <Ruler.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -143,7 +146,7 @@ int ComponentAnalyzer::GetColocalization(
 			sumd.push_back(0.0);
 			continue;
 		}
-		flvr::TextureBrick* b = tex->get_brick(bid);
+		flvr::TextureBrick* b = tex->get_brick(static_cast<unsigned int>(bid));
 		if (!b)
 		{
 			sumi.push_back(0);
@@ -166,7 +169,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		return;
 
 	double prog = 0;
-	SetProgress(prog, "Analyzing components.");
+	SetProgress(static_cast<int>(prog), "Analyzing components.");
 
 	if (!FindCompGroup(vd))
 		m_compgroup = AddCompGroup(vd);
@@ -176,7 +179,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (m_colocal)
 	{
 		ClearCoVolumes();
-		RenderCanvas* view = glbin_current.canvas;
+		RenderView* view = glbin_current.render_view;
 		if (view)
 		{
 			for (int i = 0; i < view->GetDispVolumeNum(); ++i)
@@ -189,7 +192,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 	}
 
 	prog += 10;
-	SetProgress(prog, "Analyzing components.");
+	SetProgress(static_cast<int>(prog), "Analyzing components.");
 
 	double sx, sy, sz;
 	vd->GetSpacings(sx, sy, sz);
@@ -338,7 +341,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		}
 
 		prog += 80 * (0.2 + double(bi) / bn);
-		SetProgress(prog, "Analyzing components.");
+		SetProgress(static_cast<int>(prog), "Analyzing components.");
 
 		unsigned int id = 0;
 		unsigned int brick_id = b->get_id();
@@ -358,7 +361,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			if (index % 10000 == 0)
 			{
 				prog += 320000.0 * (bi + 1) / for_size / bn;
-				SetProgress(prog,
+				SetProgress(static_cast<int>(prog),
 					"Analyzing components.");
 			}
 
@@ -388,8 +391,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 			if (value <= 0.0)
 				continue;
 
-			k = index / (nx*ny);
-			j = index % (nx*ny);
+			k = static_cast<int>(index / (nx*ny));
+			j = static_cast<int>(index % (nx*ny));
 			i = j % nx;
 			j = j / nx;
 			ext = GetExt(data_label, index, id, nx?nx:1, ny?ny:1, nz?nz:1, i, j, k);
@@ -408,13 +411,13 @@ void ComponentAnalyzer::Analyze(bool sel)
 				Cell* info = 0;
 				if (m_colocal)
 					info = new Cell(id, brick_id,
-						1, value, ext,
+						1, value, static_cast<unsigned int>(std::round(ext)),
 						i + b->ox(), j + b->oy(), k + b->oz(),
 						sx, sy, sz,
 						sumi, sumd);
 				else
 					info = new Cell(id, brick_id,
-						1, value, ext,
+						1, value, static_cast<unsigned int>(std::round(ext)),
 						i+b->ox(), j+b->oy(), k+b->oz(),
 						sx, sy, sz);
 				comp_list_brick.insert(std::pair<unsigned int, Celp>
@@ -423,12 +426,12 @@ void ComponentAnalyzer::Analyze(bool sel)
 			else
 			{
 				if (m_colocal)
-					iter->second->Inc(1, value, ext,
+					iter->second->Inc(1, value, static_cast<unsigned int>(std::round(ext)),
 						i + b->ox(), j + b->oy(), k + b->oz(),
 						sx, sy, sz,
 						sumi, sumd);
 				else
-					iter->second->Inc(1, value, ext,
+					iter->second->Inc(1, value, static_cast<unsigned int>(std::round(ext)),
 						i + b->ox(), j + b->oy(), k + b->oz(),
 						sx, sy, sz);
 			}
@@ -442,7 +445,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			if (count % 10000 == 0)
 			{
 				prog += 320000.0 * (bi + 1) / ticks / bn;
-				SetProgress(prog,
+				SetProgress(static_cast<int>(prog),
 					"Analyzing components.");
 			}
 			count++;
@@ -454,11 +457,11 @@ void ComponentAnalyzer::Analyze(bool sel)
 			//iter->second->min *= scale;
 			//iter->second->max *= scale;
 			//iter->second->Calc();
-			comps.min = iter->second->GetSizeD() <
-				comps.min ? iter->second->GetSizeD() :
+			comps.min = static_cast<unsigned int>(std::round(iter->second->GetSizeD())) <
+				comps.min ? static_cast<unsigned int>(std::round(iter->second->GetSizeD())) :
 				comps.min;
-			comps.max = iter->second->GetSizeD() >
-				comps.max ? iter->second->GetSizeD() :
+			comps.max = static_cast<unsigned int>(std::round(iter->second->GetSizeD())) >
+				comps.max ? static_cast<unsigned int>(std::round(iter->second->GetSizeD())) :
 				comps.max;
 			comps.insert(std::pair<unsigned long long, Celp>
 				(iter->second->GetEId(), iter->second));
@@ -473,7 +476,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 	}
 
 	prog = 90;
-	SetProgress(prog, "Analyzing components.");
+	SetProgress(static_cast<int>(prog), "Analyzing components.");
 
 	MatchBricks(sel);
 	UpdateMaxCompSize(m_colocal);
@@ -825,9 +828,9 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 		return;
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
-	int ix = std::round(p.x());
-	int iy = std::round(p.y());
-	int iz = std::round(p.z());
+	int ix = static_cast<int>(std::round(p.x()));
+	int iy = static_cast<int>(std::round(p.y()));
+	int iz = static_cast<int>(std::round(p.z()));
 	if (ix < 0 || ix >= nx ||
 		iy < 0 || iy >= ny ||
 		iz < 0 || iz >= nz)
@@ -892,7 +895,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 	if (m_colocal)
 	{
 		for (size_t i = 0; i < m_vd_list.size(); ++i)
-			str += "\t" + m_vd_list[i]->GetName() + "\t";
+			str += "\t" + ws2s(m_vd_list[i]->GetName()) + "\t";
 	}
 	str += "\n";
 }
@@ -1215,7 +1218,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 	ann->SetVolume(vd);
 	ann->SetTransform(vd->GetTexture()->transform());
 	glbin_data_manager.AddAnnotations(ann);
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (view)
 		view->AddAnnotations(ann);
 
@@ -1238,7 +1241,7 @@ bool ComponentAnalyzer::OutputChannels()
 
 	std::wstring group_name = L"";
 	DataGroup* group = 0;
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!view)
 		return false;
 	
@@ -1652,7 +1655,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 				str += ":";
 				str += std::to_string(it->second->Id());
 				nl.push_back(str);
-				gn.push_back(i);
+				gn.push_back(static_cast<int>(i));
 				num2++;
 			}
 		}
@@ -1715,7 +1718,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 			im.push_back(std::vector<int>());
 			im[i].reserve(num2);
 			for (size_t j = 0; j < num2; ++j)
-				im[i].push_back(j);
+				im[i].push_back(static_cast<int>(j));
 		}
 		//copy rm
 		std::vector<std::vector<double>> rm2 = rm;

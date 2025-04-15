@@ -28,7 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvertDlg.h>
 #include <Global.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <VolumeMeshConv.h>
+#include <DataManager.h>
+#include <Names.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
@@ -313,6 +315,6 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 {
 	glbin_vol_converter.Compute();
 	FluoRefresh(0, { gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 
 }

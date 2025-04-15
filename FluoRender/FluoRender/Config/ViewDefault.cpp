@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ViewDefault.h>
 #include <Names.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 
@@ -144,7 +144,7 @@ void ViewDefault::Save()
 	f->Write("rot slider", m_rot_slider);
 }
 
-void ViewDefault::Set(RenderCanvas* canvas)
+void ViewDefault::Set(RenderView* canvas)
 {
 	if (!canvas)
 		return;
@@ -175,7 +175,7 @@ void ViewDefault::Set(RenderCanvas* canvas)
 	m_fog_intensity = canvas->GetFogIntensity();
 }
 
-void ViewDefault::Apply(RenderCanvas* canvas)
+void ViewDefault::Apply(RenderView* canvas)
 {
 	if (!canvas)
 		return;

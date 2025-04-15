@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <OutAdjDefault.h>
 #include <Names.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <DataManager.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
@@ -113,7 +113,7 @@ void OutAdjDefault::Save()
 	f->Write("hdr_b", m_hdr_b);
 }
 
-void OutAdjDefault::Set(RenderCanvas* view)
+void OutAdjDefault::Set(RenderView* view)
 {
 	if (!view)
 		return;
@@ -140,7 +140,7 @@ void OutAdjDefault::Set(RenderCanvas* view)
 	m_hdr_b = c.b();
 }
 
-void OutAdjDefault::Apply(RenderCanvas* view)
+void OutAdjDefault::Apply(RenderView* view)
 {
 	if (!view)
 		return;

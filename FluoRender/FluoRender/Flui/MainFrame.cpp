@@ -869,7 +869,7 @@ MainFrame::~MainFrame()
 	m_waker.Stop();
 }
 
-wxString MainFrame::CreateRenderView(int row)
+wxString MainFrame::CreateRenderViewPanel(int row)
 {
 	RenderViewPanel* vrv = 0;
 	if (m_render_view_panels.size()>0)
@@ -957,56 +957,6 @@ wxString MainFrame::CreateRenderView(int row)
 	UpdateProps({ gstMovViewList, gstMovViewIndex, gstTreeCtrl, gstUpdateSync });
 
 	return vrv->GetName();
-}
-
-RenderCanvas* MainFrame::GetLastRenderCanvas()
-{
-	return m_render_view_panels[m_render_view_panels.size() - 1]->m_canvas;
-}
-
-//views
-int MainFrame::GetCanvasNum()
-{
-	return m_render_view_panels.size();
-}
-
-RenderCanvas* MainFrame::GetRenderCanvas(int index)
-{
-	if (index >= 0 && index < (int)m_render_view_panels.size())
-	{
-		RenderViewPanel* v = m_render_view_panels[index];
-		if (v)
-			return v->m_canvas;
-	}
-	return 0;
-}
-
-RenderCanvas* MainFrame::GetRenderCanvas(const std::wstring& name)
-{
-	for (size_t i=0; i < m_render_view_panels.size(); ++i)
-	{
-		RenderViewPanel* v = m_render_view_panels[i];
-		if (v && v->GetName() == name)
-			return v->m_canvas;
-	}
-	return 0;
-}
-
-int MainFrame::GetRenderCanvas(RenderCanvas* canvas)
-{
-	if (!canvas)
-		return 0;
-	if (m_render_view_panels.size() == 1)
-		return 0;
-
-	for (size_t i = 0; i < m_render_view_panels.size(); ++i)
-	{
-		RenderViewPanel* v = m_render_view_panels[i];
-		if (v && v->m_canvas == canvas)
-			return i;
-	}
-
-	return 0;
 }
 
 void MainFrame::LoadPerspective(const wxString& str)

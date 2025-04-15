@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OUTADJDEFAULT_H_
 #define _OUTADJDEFAULT_H_
 
-class RenderCanvas;
+class RenderView;
 class TreeLayer;
 class OutAdjDefault
 {
@@ -38,8 +38,8 @@ public:
 
 	void Read();
 	void Save();
-	void Set(RenderCanvas* view);
-	void Apply(RenderCanvas* view);
+	void Set(RenderView* view);
+	void Apply(RenderView* view);
 	void Set(TreeLayer* layer);
 	void Apply(TreeLayer* layer);
 

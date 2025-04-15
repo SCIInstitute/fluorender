@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Vector.h>
 #include <Point.h>
 
-class RenderCanvas;
+class RenderView;
 class ViewDefault
 {
 public:
@@ -41,8 +41,8 @@ public:
 
 	void Read();
 	void Save();
-	void Set(RenderCanvas* view);
-	void Apply(RenderCanvas* view);
+	void Set(RenderView* view);
+	void Apply(RenderView* view);
 
 public:
 	//default values

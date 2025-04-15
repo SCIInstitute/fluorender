@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Colocalize.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <ColocalDefault.h>
 #include <Compare.h>
 #include <string>
@@ -45,7 +45,7 @@ Colocalize::~Colocalize()
 
 void Colocalize::Compute()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	DataGroup* group = glbin_current.vol_group;
 	if (!group)
 		return;
@@ -68,9 +68,9 @@ void Colocalize::Compute()
 		vd->GetSpacings(spcx, spcy, spcz);
 		spc = spcx * spcy * spcz;
 	}
-	if (canvas)
+	if (view)
 	{
-		switch (canvas->m_sb_unit)
+		switch (view->m_sb_unit)
 		{
 		case 0:
 			unit = L"nm\u00B3";
@@ -197,7 +197,7 @@ void Colocalize::Compute()
 				m_titles += std::to_wstring(i+1) + L" (%%)";
 			else
 				m_titles += std::to_wstring(i+1);
-			VolumeData* vd = group->GetVolumeData(i);
+			VolumeData* vd = group->GetVolumeData(static_cast<int>(i));
 			if (vd)
 				name = vd->GetName();
 			else

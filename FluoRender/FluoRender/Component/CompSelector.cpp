@@ -28,8 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
 #include <set>
 
 using namespace flrd;
@@ -99,7 +101,7 @@ void ComponentSelector::SelectFullComp()
 
 void ComponentSelector::SelectCompsCanvas(const std::vector<unsigned long long>& ids, bool sel_all)
 {
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!view)
 		return;
 
@@ -275,7 +277,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	}
 	else
 	{
-		idsel = m_id;
+		idsel = static_cast<unsigned int>(m_id);
 		bidsel = 0;
 	}
 

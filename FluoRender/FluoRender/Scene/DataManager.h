@@ -39,6 +39,11 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <unordered_map>
 
+#ifndef __glew_h__
+typedef unsigned int GLuint;
+typedef int GLint;
+typedef float GLfloat;
+#endif // !__glew_h__
 #define DATA_VOLUME			1
 #define DATA_MESH			2
 #define DATA_ANNOTATIONS	3
@@ -1369,6 +1374,8 @@ struct CurrentObjects
 	void SetMeshData(MeshData* md);
 	void SetAnnotation(Annotations* ann);
 	void SetSel(const std::wstring& str);
+
+	int GetViewId();
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();

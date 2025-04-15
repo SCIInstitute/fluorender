@@ -27,12 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeCalculator.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <VolumePropPanel.h>
 #include <VolumeDefault.h>
 #include <Global.h>
 #include <Names.h>
 #include <Texture.h>
+#include <VolumeRenderer.h>
+#include <VolumeSelector.h>
 
 using namespace flrd;
 
@@ -111,8 +113,8 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 			{
 				glbin_data_manager.AddVolumeData(vd);
 				//vr_frame->GetDataManager()->SetVolumeDefault(vd);
-				if (glbin_current.canvas)
-					glbin_current.canvas->AddVolumeData(vd, prev_group);
+				if (glbin_current.render_view)
+					glbin_current.render_view->AddVolumeData(vd, prev_group);
 
 				if (type == 5 ||
 					type == 6 ||
@@ -162,12 +164,12 @@ void VolumeCalculator::CalculateGroup(int type, const std::wstring& prev_group, 
 		{
 			VolumeData* vd = GetVolumeA();
 			DataGroup* group = 0;
-			RenderCanvas* canvas = glbin_current.canvas;
-			if (vd && canvas)
+			RenderView* view = glbin_current.render_view;
+			if (vd && view)
 			{
-				for (int i = 0; i < canvas->GetLayerNum(); i++)
+				for (int i = 0; i < view->GetLayerNum(); i++)
 				{
-					TreeLayer* layer = canvas->GetLayer(i);
+					TreeLayer* layer = view->GetLayer(i);
 					if (layer && layer->IsA() == 5)
 					{
 						DataGroup* tmp_group = (DataGroup*)layer;

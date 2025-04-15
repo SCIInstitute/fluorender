@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class VolumeData;
-class MainFrame;
-class RenderCanvas;
 namespace flrd
 {
 	class VolumeSelector;

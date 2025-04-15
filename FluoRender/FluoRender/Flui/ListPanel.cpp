@@ -27,11 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ListPanel.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
-#include <RenderViewPanel.h>
-#include <OutputAdjPanel.h>
+#include <RenderView.h>
 #include <ModalDlg.h>
+#include <DataManager.h>
 #include <png_resource.h>
 #include <wx/valnum.h>
 //resources
@@ -343,10 +344,13 @@ void ListPanel::UpdateSelection()
 	}
 }
 
-void ListPanel::AddSelectionToView(int view)
+void ListPanel::AddSelectionToView(int vid)
 {
-	RenderCanvas* canvas = m_frame->GetRenderCanvas(view);
-	if (!canvas)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
+	RenderView* view = root->GetView(vid);
+	if (!view)
 		return;
 
 	fluo::ValueCollection vc;
@@ -364,9 +368,9 @@ void ListPanel::AddSelectionToView(int view)
 		std::wstring name = vd->GetName();
 		VolumeData* vd_add = vd;
 
-		for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
+		for (int i = 0; i < root->GetViewNum(); ++i)
 		{
-			RenderCanvas* v = m_frame->GetRenderCanvas(i);
+			RenderView* v = root->GetView(i);
 			if (v && v->GetVolumeData(name))
 			{
 				vd_add = glbin_data_manager.DuplicateVolumeData(vd);
@@ -374,7 +378,7 @@ void ListPanel::AddSelectionToView(int view)
 			}
 		}
 
-		int chan_num = canvas->GetAny();
+		int chan_num = view->GetAny();
 		view_empty = chan_num > 0 ? false : view_empty;
 		fluo::Color color(1.0, 1.0, 1.0);
 		if (chan_num == 0)
@@ -387,9 +391,9 @@ void ListPanel::AddSelectionToView(int view)
 		if (chan_num >= 0 && chan_num < 3)
 			vd_add->SetColor(color);
 
-		DataGroup* group = canvas->AddVolumeData(vd_add);
+		DataGroup* group = view->AddVolumeData(vd_add);
 		glbin_current.SetVolumeData(vd_add);
-		if (canvas->GetVolMethod() == VOL_METHOD_MULTI)
+		if (view->GetVolMethod() == VOL_METHOD_MULTI)
 			vc.insert(gstUpdateSync);
 	}
 		break;
@@ -398,9 +402,9 @@ void ListPanel::AddSelectionToView(int view)
 		MeshData* md = glbin_current.mesh_data;
 		if (!md)
 			break;
-		int chan_num = canvas->GetAny();
+		int chan_num = view->GetAny();
 		view_empty = chan_num > 0 ? false : view_empty;
-		canvas->AddMeshData(md);
+		view->AddMeshData(md);
 	}
 		break;
 	case 4://annotations
@@ -408,32 +412,28 @@ void ListPanel::AddSelectionToView(int view)
 		Annotations* ann = glbin_current.ann_data;
 		if (!ann)
 			break;
-		int chan_num = canvas->GetAny();
+		int chan_num = view->GetAny();
 		view_empty = chan_num > 0 ? false : view_empty;
-		canvas->AddAnnotations(ann);
+		view->AddAnnotations(ann);
 	}
 		break;
 	}
 
 	//update
-	if (view)
+	if (vid)
 	{
 		if (view_empty)
-			canvas->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+			view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
 		else
-			canvas->InitView(INIT_BOUNDS | INIT_CENTER);
+			view->InitView(INIT_BOUNDS | INIT_CENTER);
 	}
 	vc.insert(gstTreeCtrl);
-	FluoRefresh(0, vc, { view });
+	FluoRefresh(0, vc, { vid });
 }
 
 void ListPanel::AddSelToCurView()
 {
-	int view = 0;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		view = m_frame->GetRenderCanvas(canvas);
-	AddSelectionToView(view);
+	AddSelectionToView(glbin_current.GetViewId());
 }
 
 void ListPanel::RenameSelection(const std::wstring& name)
@@ -484,7 +484,10 @@ void ListPanel::SaveSelection()
 		VolumeData* vd = glbin_current.vol_data;
 		if (!vd)
 			break;
-		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
+		RenderView* view = glbin_current.render_view;
+		if (!view)
+			break;
+		fluo::Quaternion q = view->GetClipRotation();
 		vd->SetResize(0, 0, 0, 0);
 
 		ModalDlg* fopendlg = new ModalDlg(
@@ -584,13 +587,17 @@ void ListPanel::BakeSelection()
 	{
 		std::wstring filename = fopendlg->GetPath().ToStdWstring();
 
-		fluo::Quaternion q = m_frame->GetRenderCanvas(0)->GetClipRotation();
-		vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
-			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-			true, glbin_settings.m_save_compress,
-			fluo::Point(), q, fluo::Point(), false);
-		std::wstring str = vd->GetPath();
-		m_datalist->SetText(item, 2, str);
+		RenderView* view = glbin_current.render_view;
+		if (view)
+		{
+			fluo::Quaternion q = view->GetClipRotation();
+			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+				true, glbin_settings.m_save_compress,
+				fluo::Point(), q, fluo::Point(), false);
+			std::wstring str = vd->GetPath();
+			m_datalist->SetText(item, 2, str);
+		}
 	}
 
 	delete fopendlg;
@@ -608,6 +615,9 @@ void ListPanel::SaveSelMask()
 
 void ListPanel::DeleteSelection()
 {
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
 	int type = glbin_current.GetType();
 
 	switch (type)
@@ -619,9 +629,9 @@ void ListPanel::DeleteSelection()
 			break;
 		std::wstring name = vd->GetName();
 		//from view
-		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
+		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+			RenderView* view = root->GetView(i);
 			if (view)
 			{
 				view->RemoveVolumeDataDup(name);
@@ -642,9 +652,9 @@ void ListPanel::DeleteSelection()
 			break;
 		std::wstring name = md->GetName();
 		//from view
-		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
+		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+			RenderView* view = root->GetView(i);
 			if (view)
 			{
 				view->RemoveMeshData(name);
@@ -665,9 +675,9 @@ void ListPanel::DeleteSelection()
 			break;
 		std::wstring name = ann->GetName();
 		//from view
-		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
+		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
+			RenderView* view = root->GetView(i);
 			if (view)
 				view->RemoveAnnotations(name);
 		}
@@ -685,9 +695,12 @@ void ListPanel::DeleteSelection()
 
 void ListPanel::DeleteAll()
 {
-	for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderCanvas* canvas = m_frame->GetRenderCanvas(i);
+		RenderView* canvas = root->GetView(i);
 		if (canvas)
 			canvas->ClearAll();
 	}
@@ -698,6 +711,10 @@ void ListPanel::DeleteAll()
 
 void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 {
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
+
 	int seln = m_datalist->GetSelectedItemCount();
 	if (seln == 0)
 		return;
@@ -717,11 +734,11 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 
 	wxMenu menu;
 	wxMenu* add_to_menu = new wxMenu;
-	for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderCanvas* view = m_frame->GetRenderCanvas(i);
+		RenderView* view = root->GetView(i);
 		add_to_menu->Append(ID_ViewID + i,
-			view->m_renderview_panel->GetName());
+			view->GetName());
 	}
 
 	menu.Append(ID_AddToView, "Add to", add_to_menu);

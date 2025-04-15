@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Ruler.h>
 #include <Vector.h>
 
-class RenderCanvas;
+class RenderView;
 class VolumeData;
 namespace flrd
 {
@@ -45,7 +45,7 @@ namespace flrd
 			m_align_center(false) {};
 		~RulerAlign() {};
 
-		void SetView(RenderCanvas* view)
+		void SetView(RenderView* view)
 		{
 			m_view = view;
 		}
@@ -103,7 +103,7 @@ namespace flrd
 		void AlignPca(bool);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
 
 	private:
-		RenderCanvas *m_view;
+		RenderView *m_view;
 		VolumeData* m_vd;
 		std::vector<fluo::Point> m_point_list;
 		int m_axis_type;

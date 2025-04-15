@@ -219,7 +219,7 @@ namespace flvr
 
 		//for brkxml file
 		int GetCurLevel() { return pyramid_cur_lv_; }
-		int GetLevelNum() { return static_cast<int>(pyramid_.size()); }
+		int GetLevelNum();
 		void SetCopyableLevel(int lv) { pyramid_copy_lv_ = lv; }
 		int GetCopyableLevel() { return pyramid_copy_lv_; }
 		bool buildPyramid(std::vector<Pyramid_Level> &pyramid, std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>> &filenames, bool useURL = false);

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieMaker.h>
 #include <Global.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <MoviePanel.h>
 #include <RenderViewPanel.h>
 #include <StopWatch.hpp>
@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <Project.h>
 #include <Interpolator.h>
+#include <TextureRenderer.h>
+#include <VolumeRenderer.h>
 #include <Names.h>
 #include <iostream>
 #include <filesystem>
@@ -381,26 +383,21 @@ void MovieMaker::SetMainFrame(MainFrame* frame)
 	m_frame = frame;
 }
 
-void MovieMaker::SetView(RenderCanvas* view)
+void MovieMaker::SetView(RenderView* view)
 {
 	m_view = view;
 }
 
-RenderCanvas* MovieMaker::GetRenderCanvas()
+RenderView* MovieMaker::GetView()
 {
 	return m_view;
 }
 
 int MovieMaker::GetViewIndex()
 {
-	if (!m_view || !m_frame)
-		return -1;
-
-	for (int i = 0; i < m_frame->GetCanvasNum(); ++i)
-	{
-		if (m_view == m_frame->GetRenderCanvas(i))
-			return i;
-	}
+	Root* root = glbin_data_manager.GetRoot();
+	if (root)
+		return root->GetView(m_view);
 
 	return -1;
 }
@@ -657,15 +654,13 @@ void MovieMaker::SetCropH(int val)
 
 void MovieMaker::InsertKey(int index)
 {
-	if (!m_frame)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	if (!m_view)
-	{
-		if (m_frame->GetRenderCanvas(0))
-			m_view = m_frame->GetRenderCanvas(0);
-		else
-			return;
-	}
+		m_view = root->GetView(0);
+	if (!m_view)
+		return;
 
 	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
@@ -685,7 +680,7 @@ void MovieMaker::InsertKey(int index)
 	{
 		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
 		keycode.l0 = 1;
-		keycode.l0_name = m_view->m_renderview_panel->GetName();
+		keycode.l0_name = ws2s(m_view->GetName());
 		keycode.l1 = 2;
 		keycode.l1_name = ws2s(vd->GetName());
 		//display
@@ -758,9 +753,9 @@ void MovieMaker::InsertKey(int index)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_renderview_panel->GetName();
+	keycode.l1_name = ws2s(m_view->GetName());
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
@@ -997,9 +992,9 @@ void MovieMaker::MakeKeysCameraTumble()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_renderview_panel->GetName();
+	keycode.l1_name = ws2s(m_view->GetName());
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
@@ -1068,9 +1063,9 @@ void MovieMaker::MakeKeysCameraZoom()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_renderview_panel->GetName();
+	keycode.l1_name = ws2s(m_view->GetName());
 	//scale
 	keycode.l2 = 0;
 	keycode.l2_name = "scale";
@@ -1120,7 +1115,7 @@ void MovieMaker::MakeKeysTimeSequence()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	//time point
 	keycode.l2 = 0;
 	keycode.l2_name = "frame";
@@ -1218,7 +1213,7 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	////for the view
 	//keycode.l0 = 1;
-	//keycode.l0_name = m_view->m_renderview_panel->GetName();
+	//keycode.l0_name = ws2s(m_view->GetName());
 	////time point
 	//keycode.l2 = 0;
 	//keycode.l2_name = "frame";
@@ -1239,7 +1234,7 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	//color
 	keycode.l2 = 0;
 
@@ -1304,9 +1299,9 @@ void MovieMaker::MakeKeysClipZ(int type)
 
 	//for the view
 	keycode1.l0 = 1;
-	keycode1.l0_name = m_view->m_renderview_panel->GetName();
+	keycode1.l0_name = ws2s(m_view->GetName());
 	keycode2.l0 = 1;
-	keycode2.l0_name = m_view->m_renderview_panel->GetName();
+	keycode2.l0_name = ws2s(m_view->GetName());
 	//time point
 	keycode1.l2 = 0;
 	keycode1.l2_name = "z1_val";
@@ -1393,7 +1388,7 @@ void MovieMaker::AddChannToView()
 
 	//for view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	//display only
 	keycode.l2 = 0;
 	keycode.l2_name = "display";
@@ -1437,15 +1432,13 @@ void MovieMaker::AddChannToView()
 
 void MovieMaker::MakeKeysChannComb(int comb)
 {
-	if (!m_frame)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	if (!m_view)
-	{
-		if (m_frame->GetRenderCanvas(0))
-			m_view = m_frame->GetRenderCanvas(0);
-		else
-			return;
-	}
+		m_view = root->GetView(0);
+	if (!m_view)
+		return;
 
 	FlKeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
@@ -1475,7 +1468,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 		{
 			VolumeData* vd = m_view->GetAllVolumeData(i);
 			keycode.l0 = 1;
-			keycode.l0_name = m_view->m_renderview_panel->GetName();
+			keycode.l0_name = ws2s(m_view->GetName());
 			keycode.l1 = 2;
 			keycode.l1_name = ws2s(vd->GetName());
 			//display only
@@ -1563,9 +1556,9 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = m_view->m_renderview_panel->GetName();
+	keycode.l0_name = ws2s(m_view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = m_view->m_renderview_panel->GetName();
+	keycode.l1_name = ws2s(m_view->GetName());
 	//scale
 	keycode.l2 = 0;
 

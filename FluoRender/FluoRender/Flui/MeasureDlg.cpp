@@ -27,9 +27,19 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MeasureDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
+#include <Project.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <ModalDlg.h>
+#include <VertexArray.h>
+#include <VolumeRenderer.h>
+#include <Ruler.h>
+#include <RulerHandler.h>
+#include <RulerAlign.h>
+#include <RulerRenderer.h>
+#include <DistCalculator.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -798,10 +808,10 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstRulerTools))
 	{
-		RenderCanvas* canvas = glbin_current.canvas;
-		bval = canvas && canvas->GetIntMode() == 5;
+		RenderView* view = glbin_current.render_view;
+		bval = view && view->GetIntMode() == 5;
 		ival = glbin_ruler_handler.GetType();
-		int mode = canvas ? canvas->GetIntMode() : 0;
+		int mode = view ? view->GetIntMode() : 0;
 		//toolbar1
 		m_toolbar1->ToggleTool(ID_LocatorBtn, bval && ival == 2);
 		m_toolbar1->ToggleTool(ID_ProbeBtn, bval && ival == 3);
@@ -938,7 +948,7 @@ void MeasureDlg::UpdateRulerList()
 	m_ruler_list->m_center_text->Hide();
 	m_ruler_list->m_color_picker->Hide();
 
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
 	if (!ruler_list)
 		return;
@@ -956,10 +966,10 @@ void MeasureDlg::UpdateRulerList()
 	fluo::Point p;
 	int num_points;
 	size_t t;
-	if (canvas->m_frame_num_type == 1)
-		t = canvas->m_param_cur_num;
+	if (view->m_frame_num_type == 1)
+		t = view->m_param_cur_num;
 	else
-		t = canvas->m_tseq_cur_num;
+		t = view->m_tseq_cur_num;
 	for (int i = 0; i < (int)ruler_list->size(); i++)
 	{
 		flrd::Ruler* ruler = (*ruler_list)[i];
@@ -970,7 +980,7 @@ void MeasureDlg::UpdateRulerList()
 			continue;
 
 		wxString unit;
-		switch (canvas->m_sb_unit)
+		switch (view->m_sb_unit)
 		{
 		case 0:
 			unit = "nm";
@@ -1100,25 +1110,25 @@ void MeasureDlg::ToggleDisplay()
 	if (!m_ruler_list->GetCurrSelection(sel))
 		return;
 	glbin_ruler_handler.ToggleDisplay(sel);
-	FluoRefresh(2, { gstRulerListDisp }, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(2, { gstRulerListDisp }, { glbin_current.GetViewId() });
 }
 
 void MeasureDlg::SetCurrentRuler()
 {
 	flrd::Ruler* ruler = glbin_current.GetRuler();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!ruler || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!ruler || !view)
 		return;
 	ruler->SetName(m_ruler_list->m_name.ToStdWstring());
 	if (ruler->GetRulerType() == 2)
 	{
-		ruler->SetWorkTime(canvas->m_tseq_cur_num);
+		ruler->SetWorkTime(view->m_tseq_cur_num);
 		ruler->SetPoint(0, m_ruler_list->m_center);
 	}
 	if (m_ruler_list->m_color_set)
 		ruler->SetColor(m_ruler_list->m_color);
 	FluoRefresh(2, { gstRulerListCur },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::UpdateProfile()
@@ -1146,10 +1156,10 @@ void MeasureDlg::UpdateProfile()
 
 void MeasureDlg::Locator()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1158,11 +1168,11 @@ void MeasureDlg::Locator()
 
 	if (bval && ival == 2)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	}
 	else
 	{
-		canvas->SetIntMode(5);
+		view->SetIntMode(5);
 		glbin_ruler_handler.SetType(2);
 	}
 
@@ -1171,10 +1181,10 @@ void MeasureDlg::Locator()
 
 void MeasureDlg::Probe()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1183,11 +1193,11 @@ void MeasureDlg::Probe()
 
 	if (bval && ival == 3)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	}
 	else
 	{
-		canvas->SetIntMode(5);
+		view->SetIntMode(5);
 		glbin_ruler_handler.SetType(3);
 	}
 
@@ -1196,10 +1206,10 @@ void MeasureDlg::Probe()
 
 void MeasureDlg::Ruler()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1208,11 +1218,11 @@ void MeasureDlg::Ruler()
 
 	if (bval && ival == 0)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	}
 	else
 	{
-		canvas->SetIntMode(5);
+		view->SetIntMode(5);
 		glbin_ruler_handler.SetType(0);
 	}
 
@@ -1221,10 +1231,10 @@ void MeasureDlg::Ruler()
 
 void MeasureDlg::Protractor()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1233,11 +1243,11 @@ void MeasureDlg::Protractor()
 
 	if (bval && ival == 4)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	}
 	else
 	{
-		canvas->SetIntMode(5);
+		view->SetIntMode(5);
 		glbin_ruler_handler.SetType(4);
 	}
 
@@ -1246,10 +1256,10 @@ void MeasureDlg::Protractor()
 
 void MeasureDlg::Ellipse()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1258,11 +1268,11 @@ void MeasureDlg::Ellipse()
 
 	if (bval && ival == 5)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	}
 	else
 	{
-		canvas->SetIntMode(5);
+		view->SetIntMode(5);
 		glbin_ruler_handler.SetType(5);
 	}
 
@@ -1271,23 +1281,23 @@ void MeasureDlg::Ellipse()
 
 void MeasureDlg::RulerMP()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5;
 	int ival = glbin_ruler_handler.GetType();
 
 	if (bval && ival == 1)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 		glbin_ruler_handler.FinishRuler();
 	}
 	else
 	{
 		if (mode == 13)
 			glbin_ruler_handler.FinishRuler();
-		canvas->SetIntMode(5);
+		view->SetIntMode(5);
 		glbin_ruler_handler.SetType(1);
 	}
 
@@ -1296,22 +1306,22 @@ void MeasureDlg::RulerMP()
 
 void MeasureDlg::Pencil()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int ival = canvas->GetIntMode();
+	int ival = view->GetIntMode();
 
 	glbin_ruler_handler.FinishRuler();
 
 	if (ival == 13)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 		//if (m_view->m_canvas->GetRulerRenderer())
 		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(true);
 	}
 	else
 	{
-		canvas->SetIntMode(13);
+		view->SetIntMode(13);
 		glbin_ruler_handler.SetType(1);
 		//if (m_view->m_canvas->GetRulerRenderer())
 		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(false);
@@ -1322,21 +1332,21 @@ void MeasureDlg::Pencil()
 
 void MeasureDlg::Grow()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int ival = canvas->GetIntMode();
+	int ival = view->GetIntMode();
 
 	glbin_ruler_handler.FinishRuler();
 
 	if (ival == 12)
 	{
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 		glbin_ruler_renderer.SetDrawText(true);
 	}
 	else
 	{
-		canvas->SetIntMode(12);
+		view->SetIntMode(12);
 		glbin_ruler_handler.SetType(1);
 		glbin_ruler_renderer.SetDrawText(false);
 		//reset label volume
@@ -1355,10 +1365,10 @@ void MeasureDlg::Grow()
 
 void MeasureDlg::RulerMove()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1366,19 +1376,19 @@ void MeasureDlg::RulerMove()
 		glbin_ruler_handler.FinishRuler();
 
 	if (mode == 9)
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	else
-		canvas->SetIntMode(9);
+		view->SetIntMode(9);
 
 	FluoUpdate({ gstRulerTools });
 }
 
 void MeasureDlg::RulerMovePoint()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1386,19 +1396,19 @@ void MeasureDlg::RulerMovePoint()
 		glbin_ruler_handler.FinishRuler();
 
 	if (mode == 6)
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	else
-		canvas->SetIntMode(6);
+		view->SetIntMode(6);
 
 	FluoUpdate({ gstRulerTools });
 }
 
 void MeasureDlg::Magnet()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1407,10 +1417,10 @@ void MeasureDlg::Magnet()
 
 	bool bval2 = glbin_ruler_handler.GetRedistLength();
 	if (mode == 15 && !bval2)
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	else
 	{
-		canvas->SetIntMode(15);
+		view->SetIntMode(15);
 		glbin_ruler_handler.SetRedistLength(false);
 	}
 
@@ -1419,10 +1429,10 @@ void MeasureDlg::Magnet()
 
 void MeasureDlg::RulerMovePencil()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1431,10 +1441,10 @@ void MeasureDlg::RulerMovePencil()
 
 	bool bval2 = glbin_ruler_handler.GetRedistLength();
 	if (mode == 15 && bval2)
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	else
 	{
-		canvas->SetIntMode(15);
+		view->SetIntMode(15);
 		glbin_ruler_handler.SetRedistLength(true);
 	}
 
@@ -1448,7 +1458,7 @@ void MeasureDlg::RulerFlip()
 	glbin_ruler_handler.Flip(sel);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::RulerAvg()
@@ -1458,15 +1468,15 @@ void MeasureDlg::RulerAvg()
 	glbin_ruler_handler.AddAverage(sel);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::Lock()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1474,9 +1484,9 @@ void MeasureDlg::Lock()
 		glbin_ruler_handler.FinishRuler();
 
 	if (mode == 11)
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	else
-		canvas->SetIntMode(11);
+		view->SetIntMode(11);
 
 	FluoUpdate({ gstRulerTools });
 }
@@ -1488,7 +1498,7 @@ void MeasureDlg::Relax()
 	glbin_ruler_handler.Relax(sel);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::DeleteSelection()
@@ -1497,22 +1507,22 @@ void MeasureDlg::DeleteSelection()
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.DeleteSelection(sel);
 	FluoRefresh(2, { gstRulerList, gstRulerListSel },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::DeleteAll()
 {
 	glbin_ruler_handler.DeleteAll(false);
 	FluoRefresh(2, { gstRulerList, gstRulerListSel },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::DeletePoint()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	int mode = canvas->GetIntMode();
+	int mode = view->GetIntMode();
 	bool bval = mode == 5 || mode == 13;
 	int ival = glbin_ruler_handler.GetType();
 
@@ -1520,9 +1530,9 @@ void MeasureDlg::DeletePoint()
 		glbin_ruler_handler.FinishRuler();
 
 	if (mode == 14)
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 	else
-		canvas->SetIntMode(14);
+		view->SetIntMode(14);
 
 	FluoUpdate({ gstRulerTools });
 }
@@ -1534,7 +1544,7 @@ void MeasureDlg::Prune()
 	glbin_ruler_handler.Prune(sel);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::Profile()
@@ -1716,7 +1726,7 @@ void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 	glbin_ruler_handler.SetTransient(bval, sel);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
@@ -1733,7 +1743,7 @@ void MeasureDlg::OnDispPointCheck(wxCommandEvent& event)
 	glbin_ruler_handler.SetDisplay(bval, sel, 0);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnDispLineCheck(wxCommandEvent& event)
@@ -1745,7 +1755,7 @@ void MeasureDlg::OnDispLineCheck(wxCommandEvent& event)
 	glbin_ruler_handler.SetDisplay(bval, sel, 1);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnDispNameCheck(wxCommandEvent& event)
@@ -1757,7 +1767,7 @@ void MeasureDlg::OnDispNameCheck(wxCommandEvent& event)
 	glbin_ruler_handler.SetDisplay(bval, sel, 2);
 
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
@@ -1816,7 +1826,7 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 {
 	glbin_ruler_handler.ToggleGroupDisp();
 	FluoRefresh(2, { gstRulerListDisp },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 //interpolation/key
@@ -1827,7 +1837,7 @@ void MeasureDlg::OnInterpCmb(wxCommandEvent& event)
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.SetInterp(ival, sel);
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
@@ -1836,7 +1846,7 @@ void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.DeleteKey(sel);
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnDeleteAllKeyBtn(wxCommandEvent& event)
@@ -1845,7 +1855,7 @@ void MeasureDlg::OnDeleteAllKeyBtn(wxCommandEvent& event)
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.DeleteAllKeys(sel);
 	FluoRefresh(2, { gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnAlignCenterChk(wxCommandEvent& event)
@@ -1865,7 +1875,7 @@ void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 	glbin_aligner.SetAxisType(event.GetId());
 	glbin_aligner.AlignRuler();
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
@@ -1878,7 +1888,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 	glbin_aligner.SetAxisType(event.GetId());
 	glbin_aligner.AlignPca(true);
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnKeyDown(wxKeyEvent& event)
@@ -1955,13 +1965,13 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 
 void MeasureDlg::OnSelection(wxListEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	long ival = event.GetIndex();
 
-	flrd::Ruler* ruler = canvas->GetRuler(
+	flrd::Ruler* ruler = view->GetRuler(
 		m_ruler_list->GetItemData(ival));
 	if (!ruler || !ruler->GetDisp())
 		return;

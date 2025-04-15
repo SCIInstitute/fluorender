@@ -27,9 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CalculationDlg.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <CombineList.h>
+#include <VolumeCalculator.h>
 
 CalculationDlg::CalculationDlg(MainFrame *frame)
 	: PropPanel(frame, frame,
@@ -207,8 +209,8 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 	DataGroup* group = glbin_current.vol_group;
 	if (!group)
 		return;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	flrd::CombineList Op;
@@ -246,10 +248,10 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 			glbin_data_manager.AddVolumeData(vd);
 			if (i == results.begin())
 			{
-				group_name = canvas->AddGroup(L"");
-				group = canvas->GetGroup(group_name);
+				group_name = view->AddGroup(L"");
+				group = view->GetGroup(group_name);
 			}
-			canvas->AddVolumeData(vd, group_name);
+			view->AddVolumeData(vd, group_name);
 		}
 	}
 	if (group && volume)
@@ -264,5 +266,5 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 	glbin_current.SetVolumeGroup(group);
 
 	FluoRefresh(1, { gstVolumePropPanel, gstListCtrl, gstTreeCtrl, gstCurrentSelect, gstUpdateSync },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId()});
 }

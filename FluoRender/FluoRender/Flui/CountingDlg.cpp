@@ -27,8 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CountingDlg.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
+#include <CompGenerator.h>
+#include <CompAnalyzer.h>
 #include <wx/valnum.h>
 
 CountingDlg::CountingDlg(MainFrame *frame)
@@ -186,7 +189,7 @@ void CountingDlg::OutputSize()
 	wxString vol_unit_text;
 	vol_unit_text = wxString::Format("%.0f", size);
 	vol_unit_text += " ";
-	RenderCanvas* view = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!view)
 		return;
 	switch (view->m_sb_unit)
