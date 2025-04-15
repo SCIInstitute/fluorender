@@ -64,7 +64,6 @@ DEALINGS IN THE SOFTWARE.
 #include <SegGrow.h>
 #include <GlobalStates.h>
 #include <State.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <tiffio.h>
@@ -293,6 +292,8 @@ RenderView::RenderView() :
 	m_render_canvas(0)
 {
 	type = 1;
+
+	m_ruler_list = std::make_unique<flrd::RulerList>();
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = new XboxController(1);
@@ -528,6 +529,8 @@ RenderView::RenderView(RenderView& copy):
 	m_render_canvas(0)
 {
 	type = 1;
+
+	m_ruler_list = std::make_unique<flrd::RulerList>();
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = new XboxController(1);
@@ -605,7 +608,7 @@ RenderView::~RenderView()
 	}
 
 	//delete rulers
-	m_ruler_list.DeleteRulers();
+	m_ruler_list->DeleteRulers();
 
 	if (m_track_group)
 		delete m_track_group;
@@ -828,7 +831,7 @@ void RenderView::ClearAll()
 	ClearMeshList();
 	m_cur_vol = 0;
 	m_cur_vol_save = 0;
-	m_ruler_list.clear();
+	m_ruler_list->clear();
 	m_cur_ruler = 0;
 	if (m_track_group)
 		m_track_group->Clear();
@@ -4618,18 +4621,18 @@ void RenderView::RefreshGL(int debug_code,
 
 void RenderView::DrawRulers()
 {
-	if (m_ruler_list.empty())
+	if (m_ruler_list->empty())
 		return;
 	double width = glbin_settings.m_line_width;
 	glbin_ruler_renderer.SetLineSize(width);
 	glbin_ruler_renderer.SetView(this);
-	glbin_ruler_renderer.SetRulerList(&m_ruler_list);
+	glbin_ruler_renderer.SetRulerList(m_ruler_list.get());
 	glbin_ruler_renderer.Draw();
 }
 
 flrd::RulerList* RenderView::GetRulerList()
 {
-	return &m_ruler_list;
+	return m_ruler_list.get();
 }
 
 void RenderView::SetCurRuler(flrd::Ruler* ruler)
@@ -4645,11 +4648,11 @@ flrd::Ruler* RenderView::GetCurRuler()
 flrd::Ruler* RenderView::GetRuler(unsigned int id)
 {
 	m_cur_ruler = 0;
-	for (size_t i = 0; i < m_ruler_list.size(); ++i)
+	for (size_t i = 0; i < m_ruler_list->size(); ++i)
 	{
-		if (m_ruler_list[i] && m_ruler_list[i]->Id() == id)
+		if ((*m_ruler_list)[i] && (*m_ruler_list)[i]->Id() == id)
 		{
-			m_cur_ruler = m_ruler_list[i];
+			m_cur_ruler = (*m_ruler_list)[i];
 			break;
 		}
 	}
@@ -5062,6 +5065,12 @@ void RenderView::ReadPixels(
 
 	if (m_enlarge || fp32)
 		BindRenderBuffer();
+}
+
+//set cell list
+void RenderView::SetCellList(flrd::CelpList& list)
+{
+	*m_cell_list = list;
 }
 
 glm::mat4 RenderView::GetObjectMat()

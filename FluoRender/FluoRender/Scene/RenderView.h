@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextRenderer.h>
 #include <Size.h>
 #include <Value.hpp>
+#include <glm/glm.hpp>
 #include <string>
 
 #if defined(_WIN32) && defined(USE_XINPUT)
@@ -77,6 +78,14 @@ class RenderCanvas;
 class BaseState;
 class IdleState;
 class MouseState;
+namespace flvr
+{
+	class MultiVolumeRenderer;
+}
+namespace flrd
+{
+	class CelpList;
+}
 class RenderView : public TreeLayer
 {
 public:
@@ -413,7 +422,7 @@ public:
 		void** image);
 
 	//set cell list
-	void SetCellList(flrd::CelpList &list) { m_cell_list = list; }
+	void SetCellList(flrd::CelpList& list);
 
 	glm::mat4 GetModelView() { return m_mv_mat; }
 	glm::mat4 GetProjection() { return m_proj_mat; }
@@ -522,14 +531,14 @@ private:
 	//real data list
 	std::vector <TreeLayer*> m_layer_list;
 	//ruler list
-	flrd::RulerList m_ruler_list;
+	std::unique_ptr<flrd::RulerList> m_ruler_list;
 	flrd::Ruler *m_cur_ruler;
 	//traces
 	TrackGroup* m_track_group;
 	//multivolume
 	flvr::MultiVolumeRenderer* m_mvr;
 	//highlighted comps
-	flrd::CelpList m_cell_list;
+	std::unique_ptr<flrd::CelpList> m_cell_list;
 	//initializaion
 	bool m_initialized;
 	bool m_init_view;

@@ -32,8 +32,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <Point.h>
 #include <Progress.h>
+#include <nrrd.h>
+#include <glm/glm.hpp>
 #include <vector>
 #include <string>
+#include <memory>
+#include <unordered_map>
 
 #define DATA_VOLUME			1
 #define DATA_MESH			2
@@ -54,19 +58,32 @@ DEALINGS IN THE SOFTWARE.
 #define LOAD_TYPE_MPG		12
 
 class BaseReader;
+struct _GLMmodel;
+typedef struct _GLMmodel GLMmodel;
 namespace flvr
 {
 	class MeshRenderer;
 	class VolumeRenderer;
+	class TextureBrick;
+	class Texture;
 }
 namespace flrd
 {
+	class Vertex;
+	typedef std::shared_ptr<Vertex> Verp;
+	typedef std::unordered_map<unsigned int, Verp> VertexList;
 	class Ruler;
+	class RulerList;
+	typedef std::vector<Ruler*>::iterator RulerListIter;
 	class EntryParams;
+	class TrackMap;
+	typedef std::shared_ptr<TrackMap> pTrackMap;
+	class CelpList;
 }
 namespace fluo
 {
 	class Transform;
+	class Quaternion;
 }
 class TreeLayer
 {
@@ -156,6 +173,17 @@ class Root : public TreeLayer
 public:
 	Root();
 	~Root();
+
+	//view functions
+	int GetViewNum();
+	RenderView* GetView(int i);
+	RenderView* GetView(const std::wstring& name);
+	int GetView(RenderView* view);
+	RenderView* GetLastView();
+	void AddView(RenderView* view);
+	void DeleteView(int i);
+	void DeleteView(RenderView* view);
+	void DeleteView(const std::wstring& name);
 
 private:
 	std::vector<RenderView*> m_views;
@@ -481,9 +509,9 @@ public:
 		}
 	}
 	double GetScalarScale() {return m_scalar_scale;}
-	void SetScalarScale(double val) {m_scalar_scale = val; if (m_vr) m_vr->set_scalar_scale(val);}
+	void SetScalarScale(double val);
 	double GetGMScale() {return m_gm_scale;}
-	void SetGMScale(double val) {m_gm_scale = val; if (m_vr) m_vr->set_gm_scale(val);}
+	void SetGMScale(double val);
 	double GetMaxValue() {return m_max_value;}
 	void SetMaxValue(double val) {m_max_value = val;}
 
@@ -1041,7 +1069,7 @@ private:
 	int m_uncertain_low;
 
 	flrd::pTrackMap m_track_map;
-	flrd::CelpList m_cell_list;
+	std::unique_ptr<flrd::CelpList> m_cell_list;
 
 	//edges (in a vector of drawable)
 	unsigned int GetMappedEdges(
@@ -1373,6 +1401,12 @@ public:
 	std::wstring SearchProjectPath(const std::wstring &filename);
 	std::wstring GetProjectFile();
 
+	//root
+	Root* GetRoot()
+	{
+		return m_root.get();
+	}
+
 	//load volume
 	void LoadVolumes(const std::vector<std::wstring>& files, bool withImageJ);
 	void StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej);
@@ -1440,6 +1474,7 @@ public:
 
 private:
 	MainFrame* m_frame;
+	std::unique_ptr<Root> m_root;// root of the scene graph
 	std::vector <VolumeData*> m_vd_list;
 	std::vector <MeshData*> m_md_list;
 	std::vector <BaseReader*> m_reader_list;

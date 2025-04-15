@@ -29,11 +29,17 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <RenderView.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
 #include <VolumeSampler.h>
 #include <VolumeBaker.h>
 #include <MeshRenderer.h>
 #include <VolumeRenderer.h>
+#include <VolumeSelector.h>
+#include <CompGenerator.h>
+#include <MovieMaker.h>
+#include <Project.h>
 #include <VertexArray.h>
 #include <Texture.h>
 #include <Histogram.h>
@@ -66,7 +72,6 @@ DEALINGS IN THE SOFTWARE.
 #include <lof_reader.h>
 #include <mpg_reader.h>
 #include <compatibility.h>
-#include <nrrd.h>
 #include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <sstream>
@@ -107,6 +112,97 @@ Root::~Root()
 		}
 	}
 	m_views.clear();
+}
+
+int Root::GetViewNum()
+{
+	return static_cast<int>(m_views.size());
+}
+
+RenderView* Root::GetView(int i)
+{
+	if (i >= 0 && i < (int)m_views.size())
+		return m_views[i];
+	else return 0;
+}
+
+RenderView* Root::GetView(const std::wstring& name)
+{
+	for (auto& view : m_views)
+	{
+		if (view && view->GetName() == name)
+			return view;
+	}
+	return 0;
+}
+
+int Root::GetView(RenderView* view)
+{
+	if (view)
+	{
+		for (size_t i = 0; i < m_views.size(); i++)
+		{
+			if (m_views[i] == view)
+				return static_cast<int>(i);
+		}
+	}
+	return -1;
+}
+
+RenderView* Root::GetLastView()
+{
+	if (m_views.size())
+		return m_views.back();
+	else return 0;
+}
+
+void Root::AddView(RenderView* view)
+{
+	if (view)
+	{
+		m_views.push_back(view);
+	}
+}
+
+void Root::DeleteView(int i)
+{
+	if (i >= 0 && i < (int)m_views.size())
+	{
+		m_views[i]->ClearAll();
+		delete m_views[i];
+		m_views.erase(m_views.begin() + i);
+	}
+}
+
+void Root::DeleteView(RenderView* view)
+{
+	if (view)
+	{
+		for (size_t i = 0; i < m_views.size(); i++)
+		{
+			if (m_views[i] == view)
+			{
+				m_views[i]->ClearAll();
+				delete m_views[i];
+				m_views.erase(m_views.begin() + i);
+				break;
+			}
+		}
+	}
+}
+
+void Root::DeleteView(const std::wstring& name)
+{
+	for (size_t i = 0; i < m_views.size(); i++)
+	{
+		if (m_views[i] && m_views[i]->GetName() == name)
+		{
+			m_views[i]->ClearAll();
+			delete m_views[i];
+			m_views.erase(m_views.begin() + i);
+			break;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2700,6 +2796,20 @@ bool VolumeData::GetTransparent()
 	return m_transparent;
 }
 
+void VolumeData::SetScalarScale(double val)
+{
+	m_scalar_scale = val;
+	if (m_vr)
+		m_vr->set_scalar_scale(val);
+}
+
+void VolumeData::SetGMScale(double val)
+{
+	m_gm_scale = val;
+	if (m_vr)
+		m_vr->set_gm_scale(val);
+}
+
 //clip size
 void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
 	int &nx, int &ny, int &nz)
@@ -4242,6 +4352,7 @@ TrackGroup::TrackGroup()
 	m_cell_size = 20;
 	m_uncertain_low = 0;
 	m_track_map = flrd::pTrackMap(new flrd::TrackMap());
+	m_cell_list = std::make_unique<flrd::CelpList>();
 }
 
 TrackGroup::~TrackGroup()
@@ -4312,7 +4423,7 @@ void TrackGroup::GetLinkLists(size_t frame,
 
 void TrackGroup::ClearCellList()
 {
-	m_cell_list.clear();
+	m_cell_list->clear();
 	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 }
 
@@ -4337,7 +4448,7 @@ void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 		{
 			if (cell_iter->second->GetSizeUi() >
 				(unsigned int)m_cell_size)
-				m_cell_list.insert(std::pair<unsigned int, flrd::Celp>
+				m_cell_list->insert(std::pair<unsigned int, flrd::Celp>
 					(cell_iter->second->Id(), cell_iter->second));
 		}
 		return;
@@ -4347,7 +4458,7 @@ void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 	//cur_sel_list -> m_cell_list
 	glbin_trackmap_proc.SetTrackMap(m_track_map);
 	glbin_trackmap_proc.GetMappedCells(
-		cur_sel_list, m_cell_list,
+		cur_sel_list, *m_cell_list,
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
 
@@ -4356,12 +4467,12 @@ void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 
 flrd::CelpList &TrackGroup::GetCellList()
 {
-	return m_cell_list;
+	return *m_cell_list;
 }
 
 bool TrackGroup::FindCell(unsigned int id)
 {
-	return m_cell_list.find(id) != m_cell_list.end();
+	return m_cell_list->find(id) != m_cell_list->end();
 }
 
 bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers)
@@ -4386,7 +4497,7 @@ bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers)
 
 	if (m_draw_lead)
 	{
-		temp_sel_list1 = m_cell_list;
+		temp_sel_list1 = *m_cell_list;
 		for (size_t i = m_cur_time;
 		i < m_cur_time + ghost_lead; ++i)
 		{
@@ -4406,7 +4517,7 @@ bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers)
 
 	if (m_draw_tail)
 	{
-		temp_sel_list1 = m_cell_list;
+		temp_sel_list1 = *m_cell_list;
 		for (size_t i = m_cur_time;
 		i > m_cur_time - ghost_tail; --i)
 		{
@@ -4637,7 +4748,7 @@ unsigned int TrackGroup::Draw(std::vector<float> &verts, int shuffle)
 	if (m_ghost_num <= 0 ||
 		m_cur_time < 0 ||
 		m_cur_time >= frame_num ||
-		m_cell_list.empty())
+		m_cell_list->empty())
 		return result;
 
 	//estimate verts size
@@ -4650,13 +4761,13 @@ unsigned int TrackGroup::Draw(std::vector<float> &verts, int shuffle)
 		(m_cur_time>=m_ghost_num ?
 		m_ghost_num : m_cur_time) : 0;
 	verts.reserve((ghost_lead + ghost_tail) *
-		m_cell_list.size() * 3 * 6 * 3);//1.5 branches each
+		m_cell_list->size() * 3 * 6 * 3);//1.5 branches each
 
 	flrd::CelpList temp_sel_list1, temp_sel_list2;
 
 	if (m_draw_lead)
 	{
-		temp_sel_list1 = m_cell_list;
+		temp_sel_list1 = *m_cell_list;
 		for (size_t i = m_cur_time;
 			i < m_cur_time + ghost_lead; ++i)
 		{
@@ -4671,7 +4782,7 @@ unsigned int TrackGroup::Draw(std::vector<float> &verts, int shuffle)
 
 	if (m_draw_tail)
 	{
-		temp_sel_list1 = m_cell_list;
+		temp_sel_list1 = *m_cell_list;
 		for (size_t i = m_cur_time;
 			i > m_cur_time - ghost_tail; --i)
 		{
@@ -5224,12 +5335,13 @@ void CurrentObjects::SetRenderView(RenderView* view)
 
 void CurrentObjects::SetVolumeGroup(DataGroup* g)
 {
-	if (!mainframe)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	bool found = false;
-	for (int i = 0; i < mainframe->GetCanvasNum(); ++i)
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		RenderView* v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum(); ++j)
@@ -5242,7 +5354,7 @@ void CurrentObjects::SetVolumeGroup(DataGroup* g)
 				DataGroup* group = (DataGroup*)l;
 				if (group == g)
 				{
-					canvas = v;
+					render_view = v;
 					found = true;
 					break;
 				}
@@ -5254,18 +5366,19 @@ void CurrentObjects::SetVolumeGroup(DataGroup* g)
 	vol_data = 0;
 	mesh_data = 0;
 	ann_data = 0;
-	if (canvas)
-		canvas->m_cur_vol = 0;
+	if (render_view)
+		render_view->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetMeshGroup(MeshGroup* g)
 {
-	if (!mainframe)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	bool found = false;
-	for (int i = 0; i < mainframe->GetCanvasNum(); ++i)
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		RenderView* v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum(); ++j)
@@ -5278,7 +5391,7 @@ void CurrentObjects::SetMeshGroup(MeshGroup* g)
 				MeshGroup* group = (MeshGroup*)l;
 				if (group == g)
 				{
-					canvas = v;
+					render_view = v;
 					found = true;
 					break;
 				}
@@ -5290,18 +5403,19 @@ void CurrentObjects::SetMeshGroup(MeshGroup* g)
 	vol_data = 0;
 	mesh_data = 0;
 	ann_data = 0;
-	if (canvas)
-		canvas->m_cur_vol = 0;
+	if (render_view)
+		render_view->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetVolumeData(VolumeData* vd)
 {
-	if (!mainframe)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	bool found = false;
-	for (int i = 0; i < mainframe->GetCanvasNum() && !found; ++i)
+	for (int i = 0; i < root->GetViewNum() && !found; ++i)
 	{
-		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		RenderView* v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum() && !found; ++j)
@@ -5315,7 +5429,7 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 				if (vd == vd0)
 				{
 					found = true;
-					canvas = v;
+					render_view = v;
 					break;
 				}
 			}
@@ -5328,7 +5442,7 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 					if (vd == vd0)
 					{
 						found = true;
-						canvas = v;
+						render_view = v;
 						vol_group = g;
 						break;
 					}
@@ -5340,20 +5454,21 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 	mesh_data = 0;
 	mesh_group = 0;
 	ann_data = 0;
-	if (canvas)
-		canvas->m_cur_vol = vd;
+	if (render_view)
+		render_view->m_cur_vol = vd;
 	glbin_vol_selector.SetVolume(vd);
 	glbin_comp_generator.SetVolumeData(vd);
 }
 
 void CurrentObjects::SetMeshData(MeshData* md)
 {
-	if (!mainframe)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	bool found = false;
-	for (int i = 0; i < mainframe->GetCanvasNum() && !found; ++i)
+	for (int i = 0; i < root->GetViewNum() && !found; ++i)
 	{
-		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		RenderView* v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum() && !found; ++j)
@@ -5367,7 +5482,7 @@ void CurrentObjects::SetMeshData(MeshData* md)
 				if (md == md0)
 				{
 					found = true;
-					canvas = v;
+					render_view = v;
 					break;
 				}
 			}
@@ -5380,7 +5495,7 @@ void CurrentObjects::SetMeshData(MeshData* md)
 					if (md == md0)
 					{
 						found = true;
-						canvas = v;
+						render_view = v;
 						mesh_group = g;
 						break;
 					}
@@ -5392,18 +5507,19 @@ void CurrentObjects::SetMeshData(MeshData* md)
 	vol_group = 0;
 	vol_data = 0;
 	ann_data = 0;
-	if (canvas)
-		canvas->m_cur_vol = 0;
+	if (render_view)
+		render_view->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetAnnotation(Annotations* ann)
 {
-	if (!mainframe)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	bool found = false;
-	for (int i = 0; i < mainframe->GetCanvasNum(); ++i)
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		RenderView* v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum(); ++j)
@@ -5416,7 +5532,7 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 				Annotations* a0 = (Annotations*)l;
 				if (a0 == ann)
 				{
-					canvas = v;
+					render_view = v;
 					found = true;
 					break;
 				}
@@ -5428,23 +5544,24 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 	mesh_group = 0;
 	vol_data = 0;
 	mesh_data = 0;
-	if (canvas)
-		canvas->m_cur_vol = 0;
+	if (render_view)
+		render_view->m_cur_vol = 0;
 }
 
 void CurrentObjects::SetSel(const std::wstring& str)
 {
-	if (!mainframe)
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
 		return;
 	bool found = false;
-	for (int i = 0; i < mainframe->GetCanvasNum(); ++i)
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderCanvas* v = mainframe->GetRenderCanvas(i);
+		RenderView* v = root->GetView(i);
 		if (!v)
 			continue;
 		if (v->GetName() == str)
 		{
-			SetCanvas(v);
+			SetRenderView(v);
 			return;
 		}
 		for (int j = 0; j < v->GetLayerNum(); ++j)
@@ -5513,23 +5630,23 @@ void CurrentObjects::SetSel(const std::wstring& str)
 
 flrd::RulerList* CurrentObjects::GetRulerList()
 {
-	if (!canvas)
+	if (!render_view)
 		return 0;
-	return canvas->GetRulerList();
+	return render_view->GetRulerList();
 }
 
 flrd::Ruler* CurrentObjects::GetRuler()
 {
-	if (!canvas)
+	if (!render_view)
 		return 0;
-	return canvas->GetCurRuler();
+	return render_view->GetCurRuler();
 }
 
 TrackGroup* CurrentObjects::GetTrackGroup()
 {
-	if (!canvas)
+	if (!render_view)
 		return 0;
-	return canvas->GetTrackGroup();
+	return render_view->GetTrackGroup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5539,6 +5656,7 @@ DataManager::DataManager() :
 	m_cur_file(0),
 	m_file_num(0)
 {
+	m_root = std::make_unique<Root>();
 }
 
 DataManager::~DataManager()
@@ -5647,11 +5765,14 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	fluo::ValueCollection vc;
 	VolumeData* vd_sel = 0;
 	DataGroup* group_sel = 0;
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
+	Root* root = glbin_data_manager.GetRoot();
 
-	if (!canvas)
-		canvas = m_frame->GetRenderCanvas(0);
-	if (!canvas)
+	if (!root)
+		return;
+	if (!view)
+		view = root->GetView(0);
+	if (!view)
 		return;
 
 	bool streaming = glbin_settings.m_mem_swap;
@@ -5710,7 +5831,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 		if (ch_num > 1)
 		{
-			DataGroup* group = canvas->AddOrGetGroup();
+			DataGroup* group = view->AddOrGetGroup();
 			if (group)
 			{
 				for (int i = ch_num; i > 0; i--)
@@ -5718,7 +5839,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 					VolumeData* vd = GetVolumeData(GetVolumeNum() - i);
 					if (vd)
 					{
-						canvas->AddVolumeData(vd, group->GetName());
+						view->AddVolumeData(vd, group->GetName());
 						std::wstring vol_name = vd->GetName();
 						if (vol_name.find(L"_1ch") != std::wstring::npos &&
 							(i == 1 || i == 2))
@@ -5748,7 +5869,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 			{
 				if (!vd->GetWlColor())
 				{
-					int chan_num = canvas->GetDispVolumeNum();
+					int chan_num = view->GetDispVolumeNum();
 					fluo::Color color(1.0, 1.0, 1.0);
 					if (chan_num == 0)
 						color = fluo::Color(1.0, 0.0, 0.0);
@@ -5763,19 +5884,19 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 						vd->RandomizeColor();
 				}
 
-				canvas->AddVolumeData(vd);
+				view->AddVolumeData(vd);
 				vd_sel = vd;
 
 				if (vd->GetReader() && vd->GetReader()->GetTimeNum() > 1)
 				{
-					canvas->m_tseq_cur_num = vd->GetReader()->GetCurTime();
+					view->m_tseq_cur_num = vd->GetReader()->GetCurTime();
 					enable_4d = true;
 				}
 			}
 		}
 
-		canvas->InitView(INIT_BOUNDS | INIT_CENTER);
-		m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(canvas) });
+		view->InitView(INIT_BOUNDS | INIT_CENTER);
+		m_frame->RefreshCanvases({ root->GetView(view) });
 	}
 
 	vc.insert(gstListCtrl);
@@ -5798,9 +5919,9 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		canvas->Init();
+	RenderView* view = glbin_current.render_view;
+	if (view)
+		view->Init();
 
 	if (!files.empty())
 	{
@@ -5976,7 +6097,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	{
 		std::string err_str = BaseReader::GetError(reader_return);
 		SetProgress(0, err_str);
-		int i = (int)m_reader_list.size() - 1;		
+		int i = (int)m_reader_list.size() - 1;
 		if (m_reader_list[i]) {
 			delete m_reader_list[i];
 			m_reader_list.erase(m_reader_list.begin() + (int)m_reader_list.size() - 1);
@@ -6140,18 +6261,21 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 
 void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
+	RenderView* view = glbin_current.render_view;
 
-	if (!canvas)
-		canvas = m_frame->GetRenderCanvas(0);
-	if (!canvas)
+	if (!view)
+		view = root->GetView(0);
+	if (!view)
 		return;
 
 	MeshData* md_sel = 0;
 	MeshGroup* group = 0;
 	size_t fn = files.size();
 	if (fn > 1)
-		group = canvas->AddOrGetMGroup();
+		group = view->AddOrGetMGroup();
 
 	for (size_t i = 0; i < fn; i++)
 	{
@@ -6162,15 +6286,15 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 		LoadMeshData(filename);
 
 		MeshData* md = GetLastMeshData();
-		if (canvas && md)
+		if (view && md)
 		{
 			if (group)
 			{
 				group->InsertMeshData(group->GetMeshNum() - 1, md);
-				canvas->SetMeshPopDirty();
+				view->SetMeshPopDirty();
 			}
 			else
-				canvas->AddMeshData(md);
+				view->AddMeshData(md);
 
 			if (i == int(fn - 1))
 				md_sel = md;
@@ -6179,10 +6303,10 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 
 	glbin_current.SetMeshData(md_sel);
 
-	if (canvas)
-		canvas->InitView(INIT_BOUNDS | INIT_CENTER);
+	if (view)
+		view->InitView(INIT_BOUNDS | INIT_CENTER);
 
-	m_frame->RefreshCanvases({ m_frame->GetRenderCanvas(canvas) });
+	m_frame->RefreshCanvases({ root->GetView(view) });
 	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
 
 	SetProgress(0, "");
