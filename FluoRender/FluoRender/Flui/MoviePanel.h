@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #define UITEXT_NBPG4_0 "Scripts"
 #define UITEXT_NBPG4_1 "Scripts (Enabled)"
 
-class RenderCanvas;
+class RenderView;
 class wxUndoableScrollBar;
 
 class KeyListCtrl : public wxListCtrl
@@ -153,7 +153,7 @@ public:
 
 private:
 	bool m_running;
-	RenderCanvas* m_view;
+	RenderView* m_view;
 	wxAuiNotebook* m_notebook;
 
 	//common controls

@@ -27,8 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MeshPropPanel.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
@@ -230,7 +231,7 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 	m_size_text->ChangeValue(wxString::Format("%d", limit));
 }
 
-void MeshPropPanel::SetView(RenderCanvas* view)
+void MeshPropPanel::SetView(RenderView* view)
 {
 	m_view = view;
 }

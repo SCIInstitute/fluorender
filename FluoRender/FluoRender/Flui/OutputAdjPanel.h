@@ -29,12 +29,15 @@ DEALINGS IN THE SOFTWARE.
 #define _ADJUSTVIEW_H_
 
 #include <PropPanel.h>
-#include <Color.h>
 #include <wx/aui/auibook.h>
 
 class DataGroup;
 class wxSingleSlider;
 class wxUndoableToolbar;
+namespace fluo
+{
+	class Color;
+}
 class OutputAdjPanel: public PropPanel
 {
 public:

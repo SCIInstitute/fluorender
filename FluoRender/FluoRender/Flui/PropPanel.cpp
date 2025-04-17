@@ -26,9 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <PropPanel.h>
+#include <Global.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
+#include <RenderView.h>
+#include <DataManager.h>
 
 PropBase::PropBase(MainFrame* frame):
 	m_frame(frame)
@@ -50,14 +53,16 @@ void PropBase::FluoRefresh(int excl_self,
 
 void PropBase::SetFocusVRenderViews(wxBasisSlider* slider)
 {
-	if (m_frame)
+	Root* root = glbin_data_manager.GetRoot();
+	if (root)
 	{
-		for (int i = 0; i < m_frame->GetCanvasNum(); i++)
+		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view)
+			RenderView* view = root->GetView(i);
+			RenderCanvas* canvas = view->GetRenderCanvas();
+			if (canvas)
 			{
-				view->SetFocusedSlider(slider);
+				canvas->SetFocusedSlider(slider);
 			}
 		}
 	}

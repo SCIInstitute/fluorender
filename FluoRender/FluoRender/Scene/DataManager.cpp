@@ -5630,8 +5630,16 @@ void CurrentObjects::SetSel(const std::wstring& str)
 
 int CurrentObjects::GetViewId()
 {
+	Root* root = glbin_data_manager.GetRoot();
 	if (render_view)
-		return static_cast<int>(render_view->Id());
+	{
+		for (int i = 0; i < root->GetViewNum(); ++i)
+		{
+			RenderView* v = root->GetView(i);
+			if (v == render_view)
+				return i;
+		}
+	}
 	else
 		return -1;
 }

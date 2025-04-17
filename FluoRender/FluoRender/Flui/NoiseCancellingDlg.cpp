@@ -27,9 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <NoiseCancellingDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <ComponentDefault.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
 #include <TreePanel.h>
+#include <DataManager.h>
+#include <CompGenerator.h>
+#include <CompAnalyzer.h>
+#include <CompSelector.h>
+#include <VolumeSelector.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 

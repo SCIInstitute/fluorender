@@ -39,6 +39,7 @@ class wxSingleSlider;
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
 class wxUndoableColorPicker;
+class RenderView;
 class RenderViewPanel: public PropPanel
 {
 public:
@@ -97,6 +98,7 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
+	int GetId() const { return m_id; }
 	//reset counter
 	static void ResetID();
 
@@ -141,7 +143,7 @@ public:
 	void SaveDefault(unsigned int mask = 0xffffffff);
 	void LoadSettings();
 
-public:
+private:
 	static int m_max_id;
 	int m_id;
 	int m_draw_scalebar;
@@ -153,6 +155,7 @@ public:
 	bool m_pin_by_scale;
 
 	//render view///////////////////////////////////////////////
+	RenderView* m_render_view;
 	RenderCanvas *m_canvas;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;
@@ -196,6 +199,8 @@ public:
 	wxToolBar* m_reset_btn;
 
 private:
+	int GetViewId();
+
 	//called when updated from bars
 	void CreateBar();
 

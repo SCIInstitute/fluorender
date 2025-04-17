@@ -27,9 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MoviePanel.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
+#include <MovieDefault.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <RenderViewPanel.h>
+#include <Interpolator.h>
+#include <MovieMaker.h>
 #include <wxUndoableScrollBar.h>
 #include <ModalDlg.h>
 #include <wx/aboutdlg.h>
@@ -978,8 +983,9 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	//SetDoubleBuffered(true);
 	wxIntegerValidator<unsigned int> vald_int;
 
-	if (m_frame)
-		m_view = m_frame->GetRenderCanvas(glbin_mov_def.m_view_idx);
+	Root* root = glbin_data_manager.GetRoot();
+	if (root)
+		m_view = root->GetView(glbin_mov_def.m_view_idx);
 
 	//notebook
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
@@ -1212,13 +1218,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstMovViewList))
 	{
-		int i = 0;
 		m_views_cmb->Clear();
-		for (i = 0; i < m_frame->GetCanvasNum(); i++)
+		Root* root = glbin_data_manager.GetRoot();
+		if (root)
 		{
-			RenderCanvas* view = m_frame->GetRenderCanvas(i);
-			if (view && m_views_cmb)
-				m_views_cmb->Append(view->m_renderview_panel->GetName());
+			for (int i = 0; i < root->GetViewNum(); i++)
+			{
+				RenderView* view = root->GetView(i);
+				if (view && m_views_cmb)
+					m_views_cmb->Append(view->GetName());
+			}
 		}
 	}
 	if (update_all || FOUND_VALUE(gstMovViewIndex))
@@ -1969,7 +1978,7 @@ void MoviePanel::OnAct(wxListEvent& event)
 	double time = glbin_interpolator.GetKeyTime(index);
 	glbin_moviemaker.SetCurrentFrame(time);
 
-	RenderCanvas* view = glbin_moviemaker.GetRenderCanvas();
+	RenderView* view = glbin_moviemaker.GetView();
 	if (view)
 		view->SetParams(time);
 	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect},

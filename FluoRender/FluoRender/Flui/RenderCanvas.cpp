@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieMaker.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
+#include <DataManager.h>
 
 #ifdef _WIN32
 HCTX RenderCanvas::m_hTab = 0;
@@ -203,14 +204,17 @@ void RenderCanvas::Draw()
 	{
 		SetCurrent(*m_glRC);
 		m_set_gl = true;
-		if (m_frame)
+
+		Root* root = glbin_data_manager.GetRoot();
+		if (root)
 		{
-			for (int i = 0; i< m_frame->GetCanvasNum(); i++)
+			for (int i = 0; i< root->GetViewNum(); i++)
 			{
-				RenderCanvas* view = m_frame->GetRenderCanvas(i);
-				if (view && view != this)
+				RenderView* view = root->GetView(i);
+				RenderCanvas* canvas = view->GetRenderCanvas();
+				if (canvas && canvas != this)
 				{
-					view->m_set_gl = false;
+					canvas->m_set_gl = false;
 				}
 			}
 		}
@@ -356,7 +360,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
 	IdleState state;
 
-	state.m_movie_maker_render_canvas = glbin_moviemaker.GetRenderCanvas() == this;
+	state.m_movie_maker_render_canvas = m_render_view && (glbin_moviemaker.GetView() == m_render_view);
 	//mouse state
 	wxPoint mps = wxGetMousePosition();
 	state.m_mouse_over = wxFindWindowAtPoint(mps) == this &&

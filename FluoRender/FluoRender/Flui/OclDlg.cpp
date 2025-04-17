@@ -27,10 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <OclDlg.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
-#include <wxSingleSlider.h>
+#include <RenderView.h>
 #include <ModalDlg.h>
+#include <KernelExecutor.h>
+#include <wxSingleSlider.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/valnum.h>
@@ -225,8 +227,8 @@ void OclDlg::UpdateKernelList()
 void OclDlg::Execute()
 {
 	VolumeData* vd = glbin_current.vol_data;
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!vd || ! canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!vd || ! view)
 		return;
 
 	m_output_txt->ChangeValue("");
@@ -273,7 +275,7 @@ void OclDlg::Execute()
 		if (m_frame)
 		{
 			glbin_data_manager.AddVolumeData(vd_r);
-			canvas->AddVolumeData(vd_r);
+			view->AddVolumeData(vd_r);
 			vd->SetDisp(false);
 			glbin_current.SetVolumeData(vd_r);
 		}
@@ -285,7 +287,7 @@ void OclDlg::Execute()
 	else
 		vc.insert({ gstNull });
 
-	FluoRefresh(1, vc, { m_frame->GetRenderCanvas(canvas) });
+	FluoRefresh(1, vc, { glbin_current.GetViewId() });
 }
 
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)

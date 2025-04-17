@@ -60,8 +60,13 @@ DEALINGS IN THE SOFTWARE.
 #include <CompEditor.h>
 #include <ImgShader.h>
 #include <Framebuffer.h>
+#include <VertexArray.h>
 #include <VolumePoint.h>
 #include <SegGrow.h>
+#include <VolumeRenderer.h>
+#include <TrackMap.h>
+#include <base_reader.h>
+#include <brkxml_reader.h>
 #include <GlobalStates.h>
 #include <State.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -628,7 +633,7 @@ void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
 	if (!panel)
 		return;
 	m_render_view_panel = panel;
-	m_id = panel->m_id;
+	m_id = panel->GetId();
 	m_name = panel->GetName();
 }
 
@@ -838,7 +843,7 @@ void RenderView::ClearAll()
 	m_cur_ruler = 0;
 	if (m_track_group)
 		m_track_group->Clear();
-	m_cell_list.clear();
+	m_cell_list->clear();
 	InitView();
 	SetClippingPlaneRotations(fluo::Vector(0.0));
 }
@@ -4139,14 +4144,18 @@ bool RenderView::ForceDraw()
 			this != master_view)
 			return swap;
 
-		for (int i = 0; i< glbin_current.mainframe->GetCanvasNum(); i++)
+		Root* root = glbin_data_manager.GetRoot();
+		if (root)
 		{
-			RenderView* view = glbin_current.mainframe->GetRenderCanvas(i)->GetRenderView();
-			if (view && view != this)
+			for (int i = 0; i < root->GetViewNum(); i++)
 			{
-				view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-				view->RefreshGL(39);
-				view->m_render_canvas->Update();
+				RenderView* view = root->GetView(i);
+				if (view && view != this)
+				{
+					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+					view->RefreshGL(39);
+					view->m_render_canvas->Update();
+				}
 			}
 		}
 	}
@@ -4166,10 +4175,10 @@ void RenderView::StartLoopUpdate()
 	if (glbin_settings.m_mem_swap)
 	{
 		if (flvr::TextureRenderer::active_view_ > 0 &&
-			flvr::TextureRenderer::active_view_ != m_render_view_panel->m_id)
+			flvr::TextureRenderer::active_view_ != m_render_view_panel->GetId())
 			return;
 		else
-			flvr::TextureRenderer::active_view_ = m_render_view_panel->m_id;
+			flvr::TextureRenderer::active_view_ = m_render_view_panel->GetId();
 
 		int nx, ny;
 		GetRenderSize(nx, ny);
@@ -4665,7 +4674,7 @@ flrd::Ruler* RenderView::GetRuler(unsigned int id)
 //draw highlighted comps
 void RenderView::DrawCells()
 {
-	if (m_cell_list.empty())
+	if (m_cell_list->empty())
 		return;
 	double width = glbin_settings.m_line_width;
 
@@ -4716,18 +4725,18 @@ unsigned int RenderView::DrawCellVerts(std::vector<float>& verts)
 	p.set(glm::value_ptr(m_proj_mat));
 
 	//estimate
-	size_t vert_num = m_cell_list.size();
+	size_t vert_num = m_cell_list->size();
 	verts.reserve(vert_num * 48);
 
 	unsigned int num = 0;
 	fluo::Point p1, p2, p3, p4;
 	fluo::Color c = GetTextColor();
 	double sx, sy, sz;
-	sx = m_cell_list.sx;
-	sy = m_cell_list.sy;
-	sz = m_cell_list.sz;
-	for (auto it = m_cell_list.begin();
-		it != m_cell_list.end(); ++it)
+	sx = m_cell_list->sx;
+	sy = m_cell_list->sy;
+	sz = m_cell_list->sz;
+	for (auto it = m_cell_list->begin();
+		it != m_cell_list->end(); ++it)
 	{
 		fluo::BBox box = it->second->GetBox(sx, sy, sz);
 		GetCellPoints(box, p1, p2, p3, p4, mv, p);

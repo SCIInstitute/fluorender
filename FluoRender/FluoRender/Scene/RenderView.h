@@ -99,6 +99,7 @@ public:
 	void SetRenderViewPanel(RenderViewPanel* panel);
 	//set render canvas
 	void SetRenderCanvas(RenderCanvas* canvas);
+	RenderCanvas* GetRenderCanvas() { return m_render_canvas; }
 
 	//size
 	void SetSize(int x, int y);
@@ -248,6 +249,9 @@ public:
 	double GetFarClip() { return m_far_clip; }
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
+	//force clear
+	void SetForceClear(bool val) { m_force_clear = val; }
+	bool GetForceClear() { return m_force_clear; }
 	//intearctive
 	void SetInteractive(bool val) { m_interactive = val; }
 	bool GetInteractive() { return m_interactive; }
@@ -444,6 +448,12 @@ public:
 	void ProcessIdle(IdleState& state);
 	//process mouse
 	void ProcessMouse(MouseState& state);
+
+	//pop list
+	bool GetVolPopListEmpty() { return m_vd_pop_list.empty(); }
+	VolumeData* GetVolPopList(int index) { return m_vd_pop_list[index]; }
+	bool GetMeshPopListEmpty() { return m_md_pop_list.empty(); }
+	MeshData* GetMeshPopList(int index) { return m_md_pop_list[index]; }
 
 public:
 	//capture modes

@@ -27,9 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <OutputAdjPanel.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <DataManager.h>
+#include <Color.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
@@ -506,14 +509,14 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 	case 1://view
 	{
-		RenderCanvas* canvas = glbin_current.canvas;
-		if (canvas)
+		RenderView* view = glbin_current.render_view;
+		if (view)
 		{
 			for (int i : {0, 1, 2})
-				m_sync[i] = canvas->GetSync(i);
-			gamma = canvas->GetGammaColor();
-			brightness = canvas->GetBrightness();
-			hdr = canvas->GetHdr();
+				m_sync[i] = view->GetSync(i);
+			gamma = view->GetGammaColor();
+			brightness = view->GetBrightness();
+			hdr = view->GetHdr();
 		}
 	}
 	break;
@@ -1057,7 +1060,7 @@ void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 	switch (type)
 	{
 	case 1://view
-		glbin_outadj_def.Set(glbin_current.canvas);
+		glbin_outadj_def.Set(glbin_current.render_view);
 		break;
 	case 2://volume data
 		glbin_outadj_def.Set(glbin_current.vol_data);
@@ -1193,16 +1196,16 @@ void OutputAdjPanel::SyncGamma(int i)
 {
 	fluo::Color gamma;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = 0;
+	RenderView* view = 0;
 	VolumeData* vd = 0;
 	DataGroup* group = glbin_current.vol_group;
 	switch (type)
 	{
 	case 1:
 	{
-		canvas = glbin_current.canvas;
-		if (canvas)
-			gamma = canvas->GetGammaColor();
+		view = glbin_current.render_view;
+		if (view)
+			gamma = view->GetGammaColor();
 	}
 		break;
 	case 2:
@@ -1224,8 +1227,8 @@ void OutputAdjPanel::SyncGamma(int i)
 	switch (type)
 	{
 	case 1:
-		if (canvas)
-			canvas->SetGammaColor(gamma);
+		if (view)
+			view->SetGammaColor(gamma);
 		break;
 	case 2:
 		if (vd)
@@ -1246,23 +1249,23 @@ void OutputAdjPanel::SyncGamma(int i)
 		vc.insert(gstGammaG);
 	if (i != 2)
 		vc.insert(gstGammaB);
-	FluoRefresh(2, vc, {m_frame->GetRenderCanvas(glbin_current.canvas)});
+	FluoRefresh(2, vc, { glbin_current.GetViewId() });
 }
 
 void OutputAdjPanel::SyncBrightness(int i)
 {
 	fluo::Color brightness;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = 0;
+	RenderView* view = 0;
 	VolumeData* vd = 0;
 	DataGroup* group = glbin_current.vol_group;
 	switch (type)
 	{
 	case 1:
 	{
-		canvas = glbin_current.canvas;
-		if (canvas)
-			brightness = canvas->GetBrightness();
+		view = glbin_current.render_view;
+		if (view)
+			brightness = view->GetBrightness();
 	}
 		break;
 	case 2:
@@ -1284,8 +1287,8 @@ void OutputAdjPanel::SyncBrightness(int i)
 	switch (type)
 	{
 	case 1:
-		if (canvas)
-			canvas->SetBrightness(brightness);
+		if (view)
+			view->SetBrightness(brightness);
 		break;
 	case 2:
 		if (vd)
@@ -1306,23 +1309,23 @@ void OutputAdjPanel::SyncBrightness(int i)
 		vc.insert(gstBrightnessG);
 	if (i != 2)
 		vc.insert(gstBrightnessB);
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId() });
 }
 
 void OutputAdjPanel::SyncHdr(int i)
 {
 	fluo::Color hdr;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = 0;
+	RenderView* view = 0;
 	VolumeData* vd = 0;
 	DataGroup* group = glbin_current.vol_group;
 	switch (type)
 	{
 	case 1:
 	{
-		canvas = glbin_current.canvas;
-		if (canvas)
-			hdr = canvas->GetHdr();
+		view = glbin_current.render_view;
+		if (view)
+			hdr = view->GetHdr();
 	}
 		break;
 	case 2:
@@ -1345,8 +1348,8 @@ void OutputAdjPanel::SyncHdr(int i)
 	switch (type)
 	{
 	case 1:
-		if (canvas)
-			canvas->SetHdr(hdr);
+		if (view)
+			view->SetHdr(hdr);
 		break;
 	case 2:
 		if (vd)
@@ -1367,7 +1370,7 @@ void OutputAdjPanel::SyncHdr(int i)
 		vc.insert(gstEqualizeG);
 	if (i != 2)
 		vc.insert(gstEqualizeB);
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId()});
 }
 
 void OutputAdjPanel::SetSync(int i, bool val, bool update)
@@ -1375,28 +1378,28 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 	m_sync[i] = val;
 	fluo::Color gamma, brightness, hdr;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	VolumeData* vd = glbin_current.vol_data;
 	DataGroup* group = glbin_current.vol_group;
 
 	switch (type)
 	{
 	case 1://view
-		if (canvas)
+		if (view)
 		{
-			canvas->SetSync(i, val);
+			view->SetSync(i, val);
 
 			if (val)
 			{
-				gamma = canvas->GetGammaColor();
-				brightness = canvas->GetBrightness();
-				hdr = canvas->GetHdr();
+				gamma = view->GetGammaColor();
+				brightness = view->GetBrightness();
+				hdr = view->GetHdr();
 				SyncColor(gamma, gamma[i]);
 				SyncColor(brightness, brightness[i]);
 				SyncColor(hdr, hdr[i]);
-				canvas->SetGammaColor(gamma);
-				canvas->SetBrightness(brightness);
-				canvas->SetHdr(hdr);
+				view->SetGammaColor(gamma);
+				view->SetBrightness(brightness);
+				view->SetHdr(hdr);
 			}
 		}
 		break;
@@ -1457,7 +1460,7 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 		if (i != 2 && m_sync[2])
 			vc.insert(gstSyncB);
 
-		FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+		FluoRefresh(2, vc, { glbin_current.GetViewId() });
 	}
 }
 
@@ -1465,15 +1468,15 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 {
 	fluo::Color gamma;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	VolumeData* vd = glbin_current.vol_data;
 	DataGroup* group = glbin_current.vol_group;
 
 	switch (type)
 	{
 	case 1://view
-		if (canvas)
-			gamma = canvas->GetGammaColor();
+		if (view)
+			gamma = view->GetGammaColor();
 		break;
 	case 2://volume
 		if (vd)
@@ -1489,8 +1492,8 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1:
-		if (canvas)
-			canvas->SetGammaColor(gamma);
+		if (view)
+			view->SetGammaColor(gamma);
 		break;
 	case 2:
 		if (vd)
@@ -1504,22 +1507,22 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 		break;
 	}
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId()});
 }
 
 void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 {
 	fluo::Color brightness;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	VolumeData* vd = glbin_current.vol_data;
 	DataGroup* group = glbin_current.vol_group;
 
 	switch (type)
 	{
 	case 1://view
-		if (canvas)
-			brightness = canvas->GetBrightness();
+		if (view)
+			brightness = view->GetBrightness();
 		break;
 	case 2://volume
 		if (vd)
@@ -1535,8 +1538,8 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1:
-		if (canvas)
-			canvas->SetBrightness(brightness);
+		if (view)
+			view->SetBrightness(brightness);
 		break;
 	case 2:
 		if (vd)
@@ -1550,22 +1553,22 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 		break;
 	}
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId() });
 }
 
 void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 {
 	fluo::Color hdr;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	VolumeData* vd = glbin_current.vol_data;
 	DataGroup* group = glbin_current.vol_group;
 
 	switch (type)
 	{
 	case 1://view
-		if (canvas)
-			hdr = canvas->GetHdr();
+		if (view)
+			hdr = view->GetHdr();
 		break;
 	case 2://volume
 		if (vd)
@@ -1581,8 +1584,8 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1:
-		if (canvas)
-			canvas->SetHdr(hdr);
+		if (view)
+			view->SetHdr(hdr);
 		break;
 	case 2:
 		if (vd)
@@ -1596,7 +1599,7 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 		break;
 	}
 
-	FluoRefresh(2, vc, { m_frame->GetRenderCanvas(glbin_current.canvas) });
+	FluoRefresh(2, vc, { glbin_current.GetViewId() });
 }
 
 void OutputAdjPanel::UpdateSync()
@@ -1607,7 +1610,7 @@ void OutputAdjPanel::UpdateSync()
 	bool g_v = false;
 	bool b_v = false;
 	int type = glbin_current.GetType();
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	DataGroup* group = glbin_current.vol_group;
 
 	if ((type == 2 && group) ||
@@ -1681,15 +1684,15 @@ void OutputAdjPanel::UpdateSync()
 			}
 		}
 	}
-	else if (type == 1 && canvas)
+	else if (type == 1 && view)
 	{
 		//means this is depth mode
-		if (canvas->GetVolMethod() != VOL_METHOD_MULTI)
+		if (view->GetVolMethod() != VOL_METHOD_MULTI)
 			return;
 		
-		for (i=0; i<canvas->GetDispVolumeNum(); i++)
+		for (i=0; i<view->GetDispVolumeNum(); i++)
 		{
-			VolumeData* vd = canvas->GetDispVolumeData(i);
+			VolumeData* vd = view->GetDispVolumeData(i);
 			if (vd)
 			{
 				if (vd->GetColormapMode())
@@ -1731,15 +1734,15 @@ void OutputAdjPanel::UpdateSync()
 			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
 			if (r_v)
 			{
-				gamma = canvas->GetGammaColor().r();
-				brightness = canvas->GetBrightness().r();
-				hdr = canvas->GetHdr().r();
+				gamma = view->GetGammaColor().r();
+				brightness = view->GetBrightness().r();
+				hdr = view->GetHdr().r();
 			}
 			else if (g_v)
 			{
-				gamma = canvas->GetGammaColor().g();
-				brightness = canvas->GetBrightness().g();
-				hdr = canvas->GetHdr().g();
+				gamma = view->GetGammaColor().g();
+				brightness = view->GetBrightness().g();
+				hdr = view->GetHdr().g();
 			}
 
 			if (g_v)

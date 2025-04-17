@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/slider.h>
 
-class RenderCanvas;
+class RenderView;
 class MeshData;
 class wxSingleSlider;
 class MeshPropPanel: public PropPanel
@@ -47,14 +47,14 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void SetView(RenderCanvas* view);
+	void SetView(RenderView* view);
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	RenderCanvas* m_view;
+	RenderView* m_view;
 	MeshData* m_md;
 
 	wxCheckBox *m_light_chk;
