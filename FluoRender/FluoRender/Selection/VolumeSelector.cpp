@@ -25,9 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
+#include <VolumeSelector.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <VolumeDefault.h>
+#include <RenderView.h>
 #include <MainFrame.h>
 #include <compatibility.h>
 #include <TextureRenderer.h>
@@ -35,6 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <MaskBorder.h>
 #include <Histogram.h>
 #include <RecordHistParams.h>
+#include <TableHistParams.h>
+#include <VolumeRenderer.h>
+#include <Framebuffer.h>
+#include <Texture.h>
+#include <VolumeCalculator.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <Debug.h>
 
@@ -97,14 +103,14 @@ void VolumeSelector::SetMode(int mode)
 	if (m_mode_ext)
 		m_mode = m_mode_ext;
 	ChangeBrushSetsIndex();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	switch (m_mode_ext)
 	{
 	case 0://not used
-		canvas->SetIntMode(1);
+		view->SetIntMode(1);
 		break;
 	case 1://select
 	case 2://append
@@ -114,10 +120,10 @@ void VolumeSelector::SetMode(int mode)
 	case 6://clear
 	case 7://select all
 	case 8://select solid
-		canvas->SetIntMode(2);
+		view->SetIntMode(2);
 		break;
 	case 9://grow from point
-		canvas->SetIntMode(10);
+		view->SetIntMode(10);
 		break;
 	}
 }
@@ -153,11 +159,11 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		}
 	}
 
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
-	canvas->HandleCamera();
+	view->HandleCamera();
 	if (m_mode == 9)
 		segment(push_mask, est_th, mx, my);
 	else
@@ -166,10 +172,10 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 
 void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
-	if (!canvas || !m_vd)
+	if (!view || !m_vd)
 		return;
 
 	if (m_test_speed)
@@ -180,8 +186,8 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 		m_vd->SetMaskClear();
 
 	//save view
-	m_mv_mat = canvas->GetDrawMat();
-	m_prj_mat = canvas->GetProjection();
+	m_mv_mat = view->GetDrawMat();
+	m_prj_mat = view->GetProjection();
 
 	//mouse position
 	fluo::Vector mvec;//mouse vector in data space
@@ -209,7 +215,7 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 			final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
 			chann_buffer->tex_id(GL_COLOR_ATTACHMENT0));
 	//orthographic
-	SetOrthographic(!canvas->GetPersp());
+	SetOrthographic(!view->GetPersp());
 
 	//modulate threshold with pressure
 	double gm_falloff_save, scl_translate_save;
@@ -268,10 +274,10 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 
 void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
-	if (!canvas || !m_vd)
+	if (!view || !m_vd)
 		return;
 
 	//insert the mask volume into m_vd
@@ -333,7 +339,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		{
 			flrd::PaintBoxes pb;
 			pb.SetBricks(bricks);
-			pb.SetPersp(!canvas->GetPersp());
+			pb.SetPersp(!view->GetPersp());
 			fluo::Transform *tform = m_vd->GetTexture()->transform();
 			double mvmat[16];
 			tform->get_trans(mvmat);
@@ -349,7 +355,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			pr.set(glm::value_ptr(m_prj_mat));
 			mat.set(glm::value_ptr(cmat));
 			pb.SetMats(mv, pr, mat);
-			pb.SetPaintTex(m_2d_mask, canvas->GetGLSize().w(), canvas->GetGLSize().h());
+			pb.SetPaintTex(m_2d_mask, view->GetGLSize().w(), view->GetGLSize().h());
 			if (m_mode == 9)
 				pb.SetMousePos(m_mx, m_my);
 			pb.Compute();
@@ -691,12 +697,12 @@ void VolumeSelector::ChangeBrushSetsIndex()
 //th udpate
 bool VolumeSelector::GetThUpdate()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas || (m_mode != 1 &&
+	RenderView* view = glbin_current.render_view;
+	if (!view || (m_mode != 1 &&
 		m_mode != 2 && m_mode != 4))
 		return false;
-	glm::mat4 mv_mat = canvas->GetDrawMat();
-	glm::mat4 prj_mat = canvas->GetProjection();
+	glm::mat4 mv_mat = view->GetDrawMat();
+	glm::mat4 prj_mat = view->GetProjection();
 	//compare view
 	if (mv_mat == m_mv_mat && prj_mat == m_prj_mat)
 		return true;
@@ -798,10 +804,10 @@ void VolumeSelector::PasteMask(int op)
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 {
 	DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
-	RenderCanvas* canvas = glbin_current.canvas;
+	RenderView* view = glbin_current.render_view;
 	if (!m_vd)
 		m_vd = glbin_current.vol_data;
-	if (!canvas || !m_vd)
+	if (!view || !m_vd)
 		return false;
 	if (mx >= 0 && my >= 0 &&
 		m_mx0 >=0 && m_my0 >=0)
@@ -822,8 +828,8 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		m_mx0 < 0 || m_my0 < 0)
 		return false;
 	
-	int nx = canvas->GetGLSize().w();
-	int ny = canvas->GetGLSize().h();
+	int nx = view->GetGLSize().w();
+	int ny = view->GetGLSize().h();
 	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
@@ -832,7 +838,7 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	glm::mat4 mv_mat = canvas->GetDrawMat();
+	glm::mat4 mv_mat = view->GetDrawMat();
 	mv_mat = mv_mat * mv_mat2;
 	fluo::Transform mv, pr;
 	mv.set(glm::value_ptr(mv_mat));

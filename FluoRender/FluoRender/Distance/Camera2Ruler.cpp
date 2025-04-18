@@ -26,11 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <opencv2/opencv.hpp>
 #include <Camera2Ruler.h>
 #include <Global.h>
+#include <Ruler.h>
 #include <RulerHandler.h>
 #include <Ray.h>
 #include <Plane.h>
+#include <Point.h>
 #include <DataManager.h>
 
 using namespace flrd;
@@ -52,7 +55,7 @@ Camera2Ruler::Camera2Ruler() :
 	m_affine(false),
 	m_metric(true)
 {
-	m_h = cv::Mat::eye(4, 4, CV_64F);
+	m_h = std::make_unique<cv::Mat>(cv::Mat::eye(4, 4, CV_64F));
 }
 
 Camera2Ruler::~Camera2Ruler()
@@ -405,21 +408,21 @@ bool Camera2Ruler::get_affine(const cv::Mat& p1, const cv::Mat& p2)
 	cv::Vec4d plane = get_plane(
 		intp4[0], intp4[1], intp4[2]);
 	//get homogeneous matrix
-	m_h = cv::Mat::eye(4, 4, CV_64F);
-	m_h.at<double>(3, 0) = plane(0);
-	m_h.at<double>(3, 1) = plane(1);
-	m_h.at<double>(3, 2) = plane(2);
-	m_h.at<double>(3, 3) = plane(3);
+	m_h = std::make_unique<cv::Mat>(cv::Mat::eye(4, 4, CV_64F));
+	m_h->at<double>(3, 0) = plane(0);
+	m_h->at<double>(3, 1) = plane(1);
+	m_h->at<double>(3, 2) = plane(2);
+	m_h->at<double>(3, 3) = plane(3);
 	return true;
 }
 
 cv::Vec3d Camera2Ruler::calib_affine(const cv::Vec3d& pp)
 {
 	cv::Vec4d rhp(
-		m_h.at<double>(0, 0) * pp(0) + m_h.at<double>(0, 1) * pp(1) + m_h.at<double>(0, 2) * pp(2) + m_h.at<double>(0, 3),
-		m_h.at<double>(1, 0) * pp(0) + m_h.at<double>(1, 1) * pp(1) + m_h.at<double>(1, 2) * pp(2) + m_h.at<double>(1, 3),
-		m_h.at<double>(2, 0) * pp(0) + m_h.at<double>(2, 1) * pp(1) + m_h.at<double>(2, 2) * pp(2) + m_h.at<double>(2, 3),
-		m_h.at<double>(3, 0) * pp(0) + m_h.at<double>(3, 1) * pp(1) + m_h.at<double>(3, 2) * pp(2) + m_h.at<double>(3, 3)
+		m_h->at<double>(0, 0) * pp(0) + m_h->at<double>(0, 1) * pp(1) + m_h->at<double>(0, 2) * pp(2) + m_h->at<double>(0, 3),
+		m_h->at<double>(1, 0) * pp(0) + m_h->at<double>(1, 1) * pp(1) + m_h->at<double>(1, 2) * pp(2) + m_h->at<double>(1, 3),
+		m_h->at<double>(2, 0) * pp(0) + m_h->at<double>(2, 1) * pp(1) + m_h->at<double>(2, 2) * pp(2) + m_h->at<double>(2, 3),
+		m_h->at<double>(3, 0) * pp(0) + m_h->at<double>(3, 1) * pp(1) + m_h->at<double>(3, 2) * pp(2) + m_h->at<double>(3, 3)
 		);
 	return cv::Vec3d(rhp(0) / rhp(3), rhp(1) / rhp(3), rhp(2) / rhp(3));
 }
@@ -577,6 +580,27 @@ bool Camera2Ruler::calib_metric()
 		}
 	}
 	return true;
+}
+
+cv::Point2f Camera2Ruler::normalize(fluo::Point& p)
+{
+	cv::Point2f cvp =
+	{
+		float(p.x() / m_nx - 0.5),
+		float(p.y() / m_nx - 0.5 * double(m_ny) / double(m_nx))
+	};
+	return cvp;
+}
+
+cv::Point3f Camera2Ruler::normalize_homo(fluo::Point& p)
+{
+	cv::Point3f cvp =
+	{
+		float(p.x() / m_nx - 0.5),
+		float(p.y() / m_nx - 0.5 * double(m_ny) / double(m_nx)),
+		1
+	};
+	return cvp;
 }
 
 cv::Vec3d Camera2Ruler::triangulate(

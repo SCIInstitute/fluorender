@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 class MainFrame;
-class RenderCanvas;
+class RenderView;
 class VolumeData;
 class BaseTreeFile;
 namespace flrd
@@ -66,7 +66,7 @@ namespace flrd
 		~ScriptProc();
 
 		void SetFrame(MainFrame* frame) { m_frame = frame; }
-		void SetView(RenderCanvas* view) { m_view = view; }
+		void SetView(RenderView* view) { m_view = view; }
 		void SetBreak(bool bval) { m_break = bval; }
 		bool GetBreak() { return m_break; }
 		void SetBreakCount(int val = 0) { m_break_count = val; }
@@ -82,7 +82,7 @@ namespace flrd
 
 	private:
 		MainFrame* m_frame;
-		RenderCanvas *m_view;
+		RenderView *m_view;
 
 		std::string m_type;
 		TimeMask m_time_mask;

@@ -28,13 +28,28 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CAMERA2RULER_H_
 #define _CAMERA2RULER_H_
 
-#include <Ruler.h>
-#include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
+#include <memory.h>
 
+namespace cv
+{
+	class Mat;
+	template<typename _Tp> class Point_;
+	typedef Point_<float> Point2f;
+	template<typename _Tp> class Point3_;
+	typedef Point3_<float> Point3f;
+	template<typename _Tp, int cn> class Vec;
+	typedef Vec<double, 3> Vec3d;
+	typedef Vec<double, 4> Vec4d;
+}
+namespace fluo
+{
+	class Point;
+}
 namespace flrd
 {
+	class RulerList;
 	class Camera2Ruler
 	{
 	public:
@@ -108,32 +123,15 @@ namespace flrd
 		bool m_persp;
 		bool m_affine;
 		bool m_metric;
-		cv::Mat m_h;//homogeneours matrix from affine correction
+		std::unique_ptr<cv::Mat> m_h;//homogeneours matrix from affine correction
 
 	private:
 		bool get_affine(const cv::Mat& p1, const cv::Mat& p2);
 		cv::Vec3d calib_affine(const cv::Vec3d& pp);
 		bool calib_persp();
 		bool calib_metric();
-		cv::Point2f normalize(fluo::Point& p)
-		{
-			cv::Point2f cvp =
-			{
-				float(p.x() / m_nx - 0.5),
-				float(p.y() / m_nx - 0.5 * double(m_ny) / double(m_nx))
-			};
-			return cvp;
-		}
-		cv::Point3f normalize_homo(fluo::Point& p)
-		{
-			cv::Point3f cvp =
-			{
-				float(p.x() / m_nx - 0.5),
-				float(p.y() / m_nx - 0.5 * double(m_ny) / double(m_nx)),
-				1
-			};
-			return cvp;
-		}
+		cv::Point2f normalize(fluo::Point& p);
+		cv::Point3f normalize_homo(fluo::Point& p);
 		cv::Vec3d triangulate(
 			const cv::Point2f& pp1, const cv::Point2f& pp2,
 			const cv::Mat& p1, const cv::Mat& p2);

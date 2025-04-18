@@ -102,6 +102,9 @@ public:
 	//reset counter
 	static void ResetID();
 
+	void SetGL(bool bval);
+	RenderView* GetRenderView() { return m_render_view; }
+
 	//update
 	void SetVolumeMethod(int val);
 	void Capture();

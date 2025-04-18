@@ -25,9 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <KernelProgram.h>
 #include <Main.h>
 #include <MainFrame.h>
 #include <Global.h>
+#include <GlobalStates.h>
+#include <MainSettings.h>
 #include <compatibility.h>
 #include <DragDrop.h>
 #include <TreePanel.h>
@@ -59,10 +62,31 @@ DEALINGS IN THE SOFTWARE.
 #include <FpRangeDlg.h>
 #include <AsyncTimerFactory.hpp>
 #include <Tester.h>
-#include <png_resource.h>
+#include <TextureRenderer.h>
 #include <msk_writer.h>
 #include <msk_reader.h>
 #include <VolumeMeshConv.h>
+#include <DataManager.h>
+#include <RenderView.h>
+#include <ScriptProc.h>
+#include <Project.h>
+#include <VolumeCalculator.h>
+#include <CompGenerator.h>
+#include <CompAnalyzer.h>
+#include <Clusterizer.h>
+#include <TrackMap.h>
+#include <KernelExecutor.h>
+#include <JVMInitializer.h>
+#include <PyBase.h>
+#include <MovieMaker.h>
+#include <VolKernel.h>
+#include <Framebuffer.h>
+#include <VertexArray.h>
+#include <VolShader.h>
+#include <SegShader.h>
+#include <VolCalShader.h>
+#include <ImgShader.h>
+#include <LightFieldShader.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <ModalDlg.h>
@@ -78,6 +102,7 @@ DEALINGS IN THE SOFTWARE.
 #include <cctype>
 //resources
 #include <icons.h>
+#include <png_resource.h>
 
 MainFrame::MainFrame(
 	wxFrame* frame,
@@ -369,7 +394,14 @@ MainFrame::MainFrame(
 
 	//create render view
 	RenderViewPanel *vrv = new RenderViewPanel(this);
-	vrv->m_canvas->InitView();
+	Root* root = glbin_data_manager.GetRoot();
+	RenderView* view = 0;
+	if (root)
+	{
+		view = root->GetLastView();
+		if (view)
+			view->InitView();
+	}
 	m_render_view_panels.push_back(vrv);
 
 	wxSize panel_size(FromDIP(wxSize(350, 450)));
@@ -817,7 +849,7 @@ MainFrame::MainFrame(
 	m_output_adj_panel->LoadPerspective();
 	m_clip_plane_panel->LoadPerspective();
 	glbin_moviemaker.SetMainFrame(this);
-	glbin_moviemaker.SetView(vrv->m_canvas);
+	glbin_moviemaker.SetView(view);
 	glbin_mov_def.Apply(&glbin_moviemaker);
 
 	m_waker.Start(100);
@@ -840,12 +872,13 @@ MainFrame::~MainFrame()
 	glbin_light_field_shader_factory.clear();
 	glbin_text_tex_manager.clear();
 
-	for (int i=0; i<GetCanvasNum(); i++)
+	Root* root = glbin_data_manager.GetRoot();
+	for (int i=0; i<root->GetViewNum(); i++)
 	{
-		RenderCanvas* canvas = GetRenderCanvas(i);
-		if (canvas)
+		RenderView* view = root->GetView(i);
+		if (view)
 		{
-			canvas->ClearAll();
+			view->ClearAll();
 			if (i == 0)
 				glbin_brush_def.Set(&glbin_vol_selector);
 		}
@@ -884,23 +917,23 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 
 	if (!vrv)
 		return "NO_NAME";
-	RenderCanvas* canvas = vrv->m_canvas;
-	if (!canvas)
-		return "NO_NAME";
 
+	RenderView* this_view = vrv->GetRenderView();;
 	m_render_view_panels.push_back(vrv);
 	if (m_movie_panel)
 		m_movie_panel->FluoUpdate({ gstMovViewList });
 
 	//reset gl
-	for (int i = 0; i < GetCanvasNum(); ++i)
+	for (auto& it : m_render_view_panels)
 	{
-		if (GetRenderCanvas(i))
-			GetRenderCanvas(i)->m_set_gl = false;
+		if (it)
+		{
+			it->SetGL(false);
+		}
 	}
 
 	//m_aui_mgr.Update();
-	OrganizeVRenderViews(1);
+	LayoutRenderViewPanels(1);
 
 	//set view default settings
 	//if (m_output_adj_panel)
@@ -917,9 +950,10 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 	//}
 
 	//add volumes
-	if (GetCanvasNum() > 0)
+	Root* root = glbin_data_manager.GetRoot();
+	if (root && root->GetViewNum() > 0)
 	{
-		RenderCanvas* view0 = GetRenderCanvas(0);
+		RenderView* view0 = root->GetView(0);
 		if (view0)
 		{
 			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
@@ -931,7 +965,7 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 
 					if (vd_add)
 					{
-						int chan_num = canvas->GetAny();
+						int chan_num = this_view->GetAny();
 						fluo::Color color(1.0, 1.0, 1.0);
 						if (chan_num == 0)
 							color = fluo::Color(1.0, 0.0, 0.0);
@@ -943,13 +977,13 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 						if (chan_num >= 0 && chan_num < 3)
 							vd_add->SetColor(color);
 
-						canvas->AddVolumeData(vd_add);
+						this_view->AddVolumeData(vd_add);
 					}
 				}
 			}
 		}
 		//update
-		canvas->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+		this_view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
 	}
 
 	vrv->LoadSettings();
@@ -993,7 +1027,7 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 	else if (FOUND_VALUE(gstAnnotatPropPanel))
 		type = 4;
 	ShowPropPage(type,
-		glbin_current.canvas,
+		glbin_current.render_view,
 		glbin_current.vol_group,
 		glbin_current.vol_data,
 		glbin_current.mesh_data,
@@ -1075,7 +1109,7 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 }
 
 wxWindow* MainFrame::AddProps(int type,
-	RenderCanvas* canvas,
+	RenderView* view,
 	DataGroup* group,
 	VolumeData* vd,
 	MeshData* md,
@@ -1093,7 +1127,7 @@ wxWindow* MainFrame::AddProps(int type,
 			VolumePropPanel* pane = new VolumePropPanel(this, m_prop_panel);
 			pane->SetVolumeData(vd);
 			pane->SetGroup(group);
-			pane->SetView(canvas);
+			pane->SetView(view);
 			pane->SetName(vd->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
@@ -1106,7 +1140,7 @@ wxWindow* MainFrame::AddProps(int type,
 			MeshPropPanel* pane = new MeshPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
 			//pane->SetMGroup(group);
-			pane->SetView(canvas);
+			pane->SetView(view);
 			pane->SetName(md->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
@@ -1176,7 +1210,7 @@ void MainFrame::DeleteProps(int type, const wxString& name)
 }
 
 void MainFrame::ShowPropPage(int type,
-	RenderCanvas* canvas,
+	RenderView* view,
 	DataGroup* group,
 	VolumeData* vd,
 	MeshData* md,
@@ -1232,7 +1266,7 @@ void MainFrame::ShowPropPage(int type,
 	}
 	if (!page)
 	{
-		page = AddProps(type, canvas, group, vd, md, ann);
+		page = AddProps(type, view, group, vd, md, ann);
 		if (!page)
 			return;
 	}
@@ -1531,18 +1565,17 @@ void MainFrame::RefreshCanvases(const std::set<int>& canvases)
 	}
 }
 
-void MainFrame::DeleteRenderView(int i)
+void MainFrame::DeleteRenderViewPanel(int i)
 {
 	if (m_render_view_panels[i])
 	{
-		int j;
-		wxString str = m_render_view_panels[i]->GetName();
-
-		for (j=0 ; j<GetRenderCanvas(i)->GetAllVolumeNum() ; j++)
-			GetRenderCanvas(i)->GetAllVolumeData(j)->SetDisp(true);
-		for (j=0 ; j< GetRenderCanvas(i)->GetMeshNum() ; j++)
-			GetRenderCanvas(i)->GetMeshData(j)->SetDisp(true);
 		RenderViewPanel* vrv = m_render_view_panels[i];
+		RenderView* view = vrv->GetRenderView();
+		for (int j=0 ; j<view->GetAllVolumeNum() ; j++)
+			view->GetAllVolumeData(j)->SetDisp(true);
+		for (int j=0 ; j< view->GetMeshNum() ; j++)
+			view->GetMeshData(j)->SetDisp(true);
+
 		m_render_view_panels.erase(m_render_view_panels.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
@@ -1555,14 +1588,14 @@ void MainFrame::DeleteRenderView(int i)
 	}
 }
 
-void MainFrame::DeleteRenderView(const wxString &name)
+void MainFrame::DeleteRenderViewPanel(const std::wstring &name)
 {
-	for (int i=0; i<GetCanvasNum(); i++)
+	for (size_t i=0; i<m_render_view_panels.size(); i++)
 	{
-		RenderCanvas* canvas = GetRenderCanvas(i);
-		if (canvas && name == canvas->m_renderview_panel->GetName() && canvas->m_renderview_panel->m_id > 1)
+		RenderView* view = m_render_view_panels[i]->GetRenderView();
+		if (view && name == view->GetName() && view->Id() > 1)
 		{
-			DeleteRenderView(i);
+			DeleteRenderViewPanel(i);
 			return;
 		}
 	}
@@ -1906,7 +1939,7 @@ void MainFrame::ShowToolbar()
 }
 
 //organize render views
-void MainFrame::OrganizeVRenderViews(int mode)
+void MainFrame::LayoutRenderViewPanels(int mode)
 {
 	int width = 0;
 	int height = 0;
@@ -2047,7 +2080,7 @@ void MainFrame::ResetLayout()
 		BestSize(FromDIP(wxSize(150, 800))).
 		FloatingSize(FromDIP(wxSize(150, 800))).
 		Right().Show().Dock().Layer(1);
-	OrganizeVRenderViews(1);
+	LayoutRenderViewPanels(1);
 	glbin_settings.m_layout.clear();
 	FluoUpdate({ gstMainToolbar, gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
@@ -2288,7 +2321,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		SaveProject();
 		break;
 	case ID_ViewNew:
-		CreateRenderView();
+		CreateRenderViewPanel();
 		break;
 	case ID_Panels:
 		ToggleAllPanels(true);
@@ -2459,13 +2492,13 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		ShowPropPanel();
 		break;
 	case ID_LayoutMenu:
-		OrganizeVRenderViews(1);
+		LayoutRenderViewPanels(1);
 		break;
 	case ID_ResetMenu:
 		ResetLayout();
 		break;
 	case ID_ViewNewMenu:
-		CreateRenderView();
+		CreateRenderViewPanel();
 		break;
 	case ID_FullscreenMenu:
 		FullScreen();

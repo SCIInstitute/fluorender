@@ -80,7 +80,7 @@ DEALINGS IN THE SOFTWARE.
 class TreePanel;
 class ListPanel;
 class RenderViewPanel;
-class RenderCanvas;
+class RenderView;
 class DataGroup;
 class VolumeData;
 class MeshData;
@@ -236,14 +236,14 @@ public:
 
 	//prop panels
 	wxWindow* AddProps(int type,//follow above
-		RenderCanvas* view = 0,
+		RenderView* view = 0,
 		DataGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
 		Annotations* ann = 0);
 	void DeleteProps(int type, const wxString& name);
 	void ShowPropPage(int type,
-		RenderCanvas* view = 0,
+		RenderView* view = 0,
 		DataGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
@@ -299,14 +299,9 @@ public:
 
 	//views
 	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update
-	//int GetCanvasNum();
-	//RenderCanvas* GetRenderCanvas(int index);
-	//RenderCanvas* GetRenderCanvas(const std::wstring& name);
-	//int GetRenderCanvas(RenderCanvas* view);
-	//RenderCanvas* GetLastRenderCanvas();
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
-	void DeleteRenderViewPanel(const wxString& name);
+	void DeleteRenderViewPanel(const std::wstring& name);
 
 	//hide/show tools
 	void ToggleAllPanels(bool cur_state);
@@ -338,7 +333,7 @@ public:
 	std::wstring ScriptDialog(const std::wstring& title,
 		const std::wstring& wildcard, long style);
 	//organize render views
-	void OrganizeVRenderViews(int mode);
+	void LayoutRenderViewPanels(int mode);
 	//reset layout
 	void ResetLayout();
 	//fullscreen

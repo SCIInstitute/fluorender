@@ -27,13 +27,26 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Project.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderViewPanel.h>
-#include <RenderCanvas.h>
 #include <ClipPlanePanel.h>
 #include <MoviePanel.h>
-#include <TrackDlg.h>
+#include <RenderView.h>
 #include <compatibility.h>
+#include <BaseTreeFile.h>
+#include <TreeFileFactory.h>
+#include <base_reader.h>
+#include <msk_reader.h>
+#include <VolumeRenderer.h>
+#include <BaseXrRenderer.h>
+#include <VolumeSelector.h>
+#include <MovieMaker.h>
+#include <Interpolator.h>
+#include <VolumePoint.h>
+#include <CompAnalyzer.h>
+#include <Ruler.h>
 #include <format>
 
 Project::Project() :
@@ -50,6 +63,9 @@ void Project::Open(const std::wstring& filename)
 	MainFrame* frame = glbin_current.mainframe;
 	if (!frame)
 		return;
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
 
 	glbin_data_manager.SetProjectPath(filename);
 
@@ -57,9 +73,9 @@ void Project::Open(const std::wstring& filename)
 	glbin_data_manager.ClearAll();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
-	frame->GetRenderCanvas(0)->ClearAll();
-	for (int i = frame->GetCanvasNum() - 1; i > 0; i--)
-		frame->DeleteRenderView(i);
+	root->GetView(0)->ClearAll();
+	for (int i = root->GetViewNum() - 1; i > 0; i--)
+		frame->DeleteRenderViewPanel(i);
 
 	std::shared_ptr<BaseTreeFile> fconfig =
 		glbin_tree_file_factory.createTreeFile(filename, gstProjectFile);
@@ -566,12 +582,12 @@ void Project::Open(const std::wstring& filename)
 		for (size_t i = 0; i < num; i++)
 		{
 			if (i > 0)
-				frame->CreateRenderView();
-			RenderCanvas* canvas = frame->GetLastRenderCanvas();
-			if (!canvas)
+				frame->CreateRenderViewPanel();
+			RenderView* view = root->GetLastView();
+			if (!view)
 				continue;
 
-			canvas->ClearAll();
+			view->ClearAll();
 
 			//old
 			//volumes
@@ -587,10 +603,10 @@ void Project::Open(const std::wstring& filename)
 					{
 						VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
 						if (vd)
-							canvas->AddVolumeData(vd);
+							view->AddVolumeData(vd);
 					}
 				}
-				canvas->SetVolPopDirty();
+				view->SetVolPopDirty();
 			}
 			//meshes
 			path = "/views/" + std::to_string(i) + "/meshes";
@@ -605,7 +621,7 @@ void Project::Open(const std::wstring& filename)
 					{
 						MeshData* md = glbin_data_manager.GetMeshData(wsval);
 						if (md)
-							canvas->AddMeshData(md);
+							view->AddMeshData(md);
 					}
 				}
 			}
@@ -636,7 +652,7 @@ void Project::Open(const std::wstring& filename)
 								{
 									VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
 									if (vd)
-										canvas->AddVolumeData(vd);
+										view->AddVolumeData(vd);
 								}
 							}
 							break;
@@ -646,7 +662,7 @@ void Project::Open(const std::wstring& filename)
 								{
 									MeshData* md = glbin_data_manager.GetMeshData(wsval);
 									if (md)
-										canvas->AddMeshData(md);
+										view->AddMeshData(md);
 								}
 							}
 							break;
@@ -656,7 +672,7 @@ void Project::Open(const std::wstring& filename)
 								{
 									Annotations* ann = glbin_data_manager.GetAnnotations(wsval);
 									if (ann)
-										canvas->AddAnnotations(ann);
+										view->AddAnnotations(ann);
 								}
 							}
 							break;
@@ -666,8 +682,8 @@ void Project::Open(const std::wstring& filename)
 								{
 									if (fconfig->Read("id", &ival))
 										DataGroup::SetID(ival);
-									wsval = canvas->AddGroup(wsval);
-									DataGroup* group = canvas->GetGroup(wsval);
+									wsval = view->AddGroup(wsval);
+									DataGroup* group = view->GetGroup(wsval);
 									if (group)
 									{
 										//display
@@ -712,7 +728,7 @@ void Project::Open(const std::wstring& filename)
 										if (group->GetName() == cur_vol_group)
 											glbin_current.vol_group = group;
 									}
-									canvas->SetVolPopDirty();
+									view->SetVolPopDirty();
 								}
 							}
 							break;
@@ -722,8 +738,8 @@ void Project::Open(const std::wstring& filename)
 								{
 									if (fconfig->Read("id", &ival))
 										MeshGroup::SetID(ival);
-									wsval = canvas->AddMGroup(wsval);
-									MeshGroup* group = canvas->GetMGroup(wsval);
+									wsval = view->AddMGroup(wsval);
+									MeshGroup* group = view->GetMGroup(wsval);
 									if (group)
 									{
 										//display
@@ -756,7 +772,7 @@ void Project::Open(const std::wstring& filename)
 										if (group->GetName() == cur_mesh_group)
 											glbin_current.mesh_group = group;
 									}
-									canvas->SetMeshPopDirty();
+									view->SetMeshPopDirty();
 								}
 							}
 							break;
@@ -772,7 +788,7 @@ void Project::Open(const std::wstring& filename)
 			{
 				if (fconfig->Read("track_file", &wsval))
 				{
-					canvas->LoadTrackGroup(wsval);
+					view->LoadTrackGroup(wsval);
 				}
 			}
 
@@ -782,113 +798,113 @@ void Project::Open(const std::wstring& filename)
 			{
 				fconfig->SetPath(path);
 				if (fconfig->Read("drawall", &bval))
-					canvas->SetDraw(bval);
+					view->SetDraw(bval);
 				//properties
 				if (fconfig->Read("persp", &bval))
-					canvas->SetPersp(bval);
+					view->SetPersp(bval);
 				if (fconfig->Read("free", &bval))
-					canvas->SetFree(bval);
+					view->SetFree(bval);
 				if (fconfig->Read("aov", &dval))
-					canvas->SetAov(dval);
+					view->SetAov(dval);
 				double nearclip;
 				double farclip;
 				if (fconfig->Read("nearclip", &nearclip) &&
 					fconfig->Read("farclip", &farclip))
 				{
-					canvas->SetNearClip(nearclip);
-					canvas->SetFarClip(farclip);
+					view->SetNearClip(nearclip);
+					view->SetFarClip(farclip);
 					if (glbin_xr_renderer)
 						glbin_xr_renderer->SetClips(nearclip, farclip);
 				}
 				if (fconfig->Read("backgroundcolor", &cval))
-					canvas->SetBackgroundColor(cval);
+					view->SetBackgroundColor(cval);
 				if (fconfig->Read("volmethod", &ival))
-					canvas->SetVolMethod(ival);
+					view->SetVolMethod(ival);
 				if (fconfig->Read("fog", &bval))
-					canvas->SetFog(bval);
+					view->SetFog(bval);
 				if (fconfig->Read("fogintensity", &dval))
-					canvas->SetFogIntensity(dval);
+					view->SetFogIntensity(dval);
 				if (fconfig->Read("draw_camctr", &bval))
-					canvas->m_draw_camctr = bval;
+					view->m_draw_camctr = bval;
 				if (fconfig->Read("draw_info", &ival))
-					canvas->m_draw_info = ival;
+					view->m_draw_info = ival;
 				if (fconfig->Read("draw_legend", &bval))
-					canvas->m_draw_legend = bval;
+					view->m_draw_legend = bval;
 
 				//camera
 				if (fconfig->Read("translation", &vval))
-					canvas->SetTranslations(vval);
+					view->SetTranslations(vval);
 				if (fconfig->Read("rotation", &vval))
-						canvas->SetRotations(vval, false);
+						view->SetRotations(vval, false);
 				if (fconfig->Read("zero_quat", &qval))
-						canvas->SetZeroQuat(qval);
+						view->SetZeroQuat(qval);
 				if (fconfig->Read("center", &pval))
-					canvas->SetCenters(pval);
+					view->SetCenters(pval);
 				if (fconfig->Read("centereyedist", &dval))
-					canvas->SetCenterEyeDist(dval);
+					view->SetCenterEyeDist(dval);
 				if (fconfig->Read("radius", &dval, 5.0))
-					canvas->SetRadius(dval);
+					view->SetRadius(dval);
 				if (fconfig->Read("initdist", &dval))
-					canvas->SetInitDist(dval);
+					view->SetInitDist(dval);
 				else
-					canvas->SetInitDist(canvas->GetRadius() / tan(d2r(canvas->GetAov() / 2.0)));
+					view->SetInitDist(view->GetRadius() / tan(d2r(view->GetAov() / 2.0)));
 				if (fconfig->Read("scale_mode", &ival))
-					canvas->m_scale_mode = ival;
+					view->m_scale_mode = ival;
 				if (fconfig->Read("scale", &dval))
-					canvas->m_scale_factor = dval;
+					view->m_scale_factor = dval;
 				else
-					canvas->m_scale_factor = canvas->GetRadius() / tan(d2r(canvas->GetAov() / 2.0)) / canvas->GetInitDist();
+					view->m_scale_factor = view->GetRadius() / tan(d2r(view->GetAov() / 2.0)) / view->GetInitDist();
 				if (fconfig->Read("pin_rot_center", &bval))
-					canvas->SetPinRotCenter(bval);
+					view->SetPinRotCenter(bval);
 				//object
 				if (fconfig->Read("obj_center", &pval))
-					canvas->SetObjCenters(pval);
+					view->SetObjCenters(pval);
 				if (fconfig->Read("obj_trans", &vval))
-					canvas->SetObjTrans(vval);
+					view->SetObjTrans(vval);
 				if (fconfig->Read("obj_rot", &vval))
 				{
 					if (l_major <= 2 && d_minor < 24.3)
 						vval += fluo::Vector(0, 180, 180);
-					canvas->SetObjRot(vval);
+					view->SetObjRot(vval);
 				}
 				//scale bar
 				if (fconfig->Read("disp_scale_bar", &bval))
-					canvas->m_disp_scale_bar = bval;
+					view->m_disp_scale_bar = bval;
 				if (fconfig->Read("disp_scale_bar_text", &bval))
-					canvas->m_disp_scale_bar_text = bval;
+					view->m_disp_scale_bar_text = bval;
 				if (fconfig->Read("sb_length", &dval))
-					canvas->m_sb_length = dval;
+					view->m_sb_length = dval;
 				if (fconfig->Read("sb_text", &wsval))
-					canvas->m_sb_text = wsval;
+					view->m_sb_text = wsval;
 				if (fconfig->Read("sb_num", &wsval))
-					canvas->m_sb_num = wsval;
+					view->m_sb_num = wsval;
 				if (fconfig->Read("sb_unit", &ival))
-					canvas->m_sb_unit = ival;
+					view->m_sb_unit = ival;
 
 				//2d sdjustment settings
 				if (fconfig->Read("gamma", &cval))
-					canvas->SetGammaColor(cval);
+					view->SetGammaColor(cval);
 				if (fconfig->Read("brightness", &cval))
-					canvas->SetBrightness(cval);
+					view->SetBrightness(cval);
 				if (fconfig->Read("hdr", &cval))
-					canvas->SetHdr(cval);
+					view->SetHdr(cval);
 				if (fconfig->Read("sync_r", &bval))
-					canvas->SetSync(0, bval);
+					view->SetSync(0, bval);
 				if (fconfig->Read("sync_g", &bval))
-					canvas->SetSync(1, bval);
+					view->SetSync(1, bval);
 				if (fconfig->Read("sync_b", &bval))
-					canvas->SetSync(2, bval);
+					view->SetSync(2, bval);
 
 				//clipping plane rotations
 				if (fconfig->Read("clip_mode", &ival))
-					canvas->SetClipMode(ival);
+					view->SetClipMode(ival);
 				double rotx_cl, roty_cl, rotz_cl;
 				if (fconfig->Read("rot_cl", &vval))
-					canvas->SetClippingPlaneRotations(vval);
+					view->SetClippingPlaneRotations(vval);
 				else if (fconfig->Read("rotx_cl", &rotx_cl) &&
 					fconfig->Read("roty_cl", &roty_cl) &&
 					fconfig->Read("rotz_cl", &rotz_cl))
-					canvas->SetClippingPlaneRotations(fluo::Vector(rotx_cl, roty_cl, rotz_cl));
+					view->SetClippingPlaneRotations(fluo::Vector(rotx_cl, roty_cl, rotz_cl));
 
 				//painting parameters
 				if (fconfig->Read("brush_use_pres", &dval))
@@ -911,13 +927,13 @@ void Project::Open(const std::wstring& filename)
 
 			//rulers
 			path = "/views/" + std::to_string(i) + "/rulers";
-			if (canvas->GetRulerList() && fconfig->Exists(path))
+			if (view->GetRulerList() && fconfig->Exists(path))
 			{
 				fconfig->SetPath(path);
 				ReadRulerList(gstProjectFile, i);
 			}
 		}
-		glbin_current.canvas = frame->GetRenderCanvas(cur_canvas);
+		glbin_current.render_view = root->GetView(cur_canvas);
 	}
 
 	//clipping planes
@@ -946,13 +962,13 @@ void Project::Open(const std::wstring& filename)
 		fconfig->SetPath(path);
 
 		//set settings for frame
-		RenderCanvas* canvas = 0;
+		RenderView* view = 0;
 		if (fconfig->Read("key frame enable", &bval))
 			glbin_moviemaker.SetKeyframeEnable(bval);
 		if (fconfig->Read("views_cmb", &ival))
 		{
-			canvas = frame->GetRenderCanvas(ival);
-			glbin_moviemaker.SetView(canvas);
+			view = root->GetView(ival);
+			glbin_moviemaker.SetView(view);
 		}
 		if (fconfig->Read("rot_check", &bval))
 			glbin_moviemaker.SetRotateEnable(bval);
@@ -1002,10 +1018,10 @@ void Project::Open(const std::wstring& filename)
 			if (curf && curf >= startf && curf <= endf)
 			{
 				glbin_moviemaker.SetCurrentTime(curf);
-				RenderCanvas* canvas = frame->GetLastRenderCanvas();
-				if (canvas)
+				RenderView* view = root->GetLastView();
+				if (view)
 				{
-					canvas->Set4DSeqFrame(curf, startf, endf, false);
+					view->Set4DSeqFrame(curf, startf, endf, false);
 				}
 			}
 		}
@@ -1159,6 +1175,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 	MainFrame* frame = glbin_current.mainframe;
 	if (!frame)
 		return;
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
 
 	std::wstring filename2 = filename;
 	if (inc)
@@ -1197,7 +1216,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 	path = "/current";
 	fconfig->SetPath(path);
-	wsval = glbin_current.canvas ? glbin_current.canvas->GetName().ToStdWstring() : L"";
+	wsval = glbin_current.render_view ? glbin_current.render_view->GetName() : L"";
 	fconfig->Write("canvas", wsval);
 	wsval = glbin_current.vol_group ? glbin_current.vol_group->GetName() : L"";
 	fconfig->Write("vol group", wsval);
@@ -1469,21 +1488,21 @@ void Project::Save(const std::wstring& filename, bool inc)
 	//views
 	path = "/views";
 	fconfig->SetPath(path);
-	num = frame->GetCanvasNum();
+	num = static_cast<size_t>(root->GetViewNum());
 	fconfig->Write("num", num);
-	for (size_t i = 0; i < static_cast<size_t>(frame->GetCanvasNum()); i++)
+	for (size_t i = 0; i < num; i++)
 	{
-		RenderCanvas* canvas = frame->GetRenderCanvas(i);
-		if (canvas)
+		RenderView* view = root->GetView(static_cast<int>(i));
+		if (view)
 		{
 			//view layers
 			path = "/views/" + std::to_string(i) + "/layers";
 			fconfig->SetPath(path);
-			int layer_num = canvas->GetLayerNum();
+			int layer_num = view->GetLayerNum();
 			fconfig->Write("num", layer_num);
 			for (int j = 0; j < layer_num; j++)
 			{
-				TreeLayer* layer = canvas->GetLayer(j);
+				TreeLayer* layer = view->GetLayer(j);
 				if (!layer)
 					continue;
 				path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j);
@@ -1556,7 +1575,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			//tracking group
 			path = "/views/" + std::to_string(i) + "/track_group";
 			fconfig->SetPath(path);
-			int ival = canvas->GetTrackFileExist(true);
+			int ival = view->GetTrackFileExist(true);
 			if (ival == 1)
 			{
 				std::wstring new_folder;
@@ -1564,62 +1583,62 @@ void Project::Save(const std::wstring& filename, bool inc)
 				MkDirW(new_folder);
 				std::filesystem::path p(new_folder);
 				p /= GET_NAME(filename2) + L".track";
-				canvas->SaveTrackGroup(p.wstring());
+				view->SaveTrackGroup(p.wstring());
 			}
-			fconfig->Write("track_file",canvas->GetTrackGroupFile());
+			fconfig->Write("track_file",view->GetTrackGroupFile());
 
 			//properties
 			path = "/views/" + std::to_string(i) + "/properties";
 			fconfig->SetPath(path);
-			fconfig->Write("drawall", canvas->GetDraw());
-			fconfig->Write("persp", canvas->GetPersp());
-			fconfig->Write("free", canvas->GetFree());
-			fconfig->Write("aov", canvas->GetAov());
-			fconfig->Write("nearclip", canvas->GetNearClip());
-			fconfig->Write("farclip", canvas->GetFarClip());
-			fconfig->Write("backgroundcolor", canvas->GetBackgroundColor());
-			fconfig->Write("drawtype", canvas->GetDrawType());
-			fconfig->Write("volmethod", canvas->GetVolMethod());
-			fconfig->Write("fog", canvas->GetFog());
-			fconfig->Write("fogintensity", canvas->GetFogIntensity());
-			fconfig->Write("draw_camctr", canvas->m_draw_camctr);
-			fconfig->Write("draw_info", canvas->m_draw_info);
-			fconfig->Write("draw_legend", canvas->m_draw_legend);
+			fconfig->Write("drawall", view->GetDraw());
+			fconfig->Write("persp", view->GetPersp());
+			fconfig->Write("free", view->GetFree());
+			fconfig->Write("aov", view->GetAov());
+			fconfig->Write("nearclip", view->GetNearClip());
+			fconfig->Write("farclip", view->GetFarClip());
+			fconfig->Write("backgroundcolor", view->GetBackgroundColor());
+			fconfig->Write("drawtype", view->GetDrawType());
+			fconfig->Write("volmethod", view->GetVolMethod());
+			fconfig->Write("fog", view->GetFog());
+			fconfig->Write("fogintensity", view->GetFogIntensity());
+			fconfig->Write("draw_camctr", view->m_draw_camctr);
+			fconfig->Write("draw_info", view->m_draw_info);
+			fconfig->Write("draw_legend", view->m_draw_legend);
 
 			//camera
-			fconfig->Write("translation", canvas->GetTranslations());
-			fconfig->Write("rotation", canvas->GetRotations());
-			fconfig->Write("zero_quat", canvas->GetZeroQuat());
-			fconfig->Write("center", canvas->GetCenters());
-			fconfig->Write("centereyedist", canvas->GetCenterEyeDist());
-			fconfig->Write("radius", canvas->GetRadius());
-			fconfig->Write("initdist", canvas->GetInitDist());
-			fconfig->Write("scale_mode", canvas->m_scale_mode);
-			fconfig->Write("scale", canvas->m_scale_factor);
-			fconfig->Write("pin_rot_center", canvas->m_pin_rot_ctr);
+			fconfig->Write("translation", view->GetTranslations());
+			fconfig->Write("rotation", view->GetRotations());
+			fconfig->Write("zero_quat", view->GetZeroQuat());
+			fconfig->Write("center", view->GetCenters());
+			fconfig->Write("centereyedist", view->GetCenterEyeDist());
+			fconfig->Write("radius", view->GetRadius());
+			fconfig->Write("initdist", view->GetInitDist());
+			fconfig->Write("scale_mode", view->m_scale_mode);
+			fconfig->Write("scale", view->m_scale_factor);
+			fconfig->Write("pin_rot_center", view->m_pin_rot_ctr);
 			//object
-			fconfig->Write("obj_center", canvas->GetObjCenters());
-			fconfig->Write("obj_trans", canvas->GetObjTrans());
-			fconfig->Write("obj_rot", canvas->GetObjRot());
+			fconfig->Write("obj_center", view->GetObjCenters());
+			fconfig->Write("obj_trans", view->GetObjTrans());
+			fconfig->Write("obj_rot", view->GetObjRot());
 			//scale bar
-			fconfig->Write("disp_scale_bar", canvas->m_disp_scale_bar);
-			fconfig->Write("disp_scale_bar_text", canvas->m_disp_scale_bar_text);
-			fconfig->Write("sb_length", canvas->m_sb_length);
-			fconfig->Write("sb_text", canvas->m_sb_text);
-			fconfig->Write("sb_num", canvas->m_sb_num);
-			fconfig->Write("sb_unit", canvas->m_sb_unit);
+			fconfig->Write("disp_scale_bar", view->m_disp_scale_bar);
+			fconfig->Write("disp_scale_bar_text", view->m_disp_scale_bar_text);
+			fconfig->Write("sb_length", view->m_sb_length);
+			fconfig->Write("sb_text", view->m_sb_text);
+			fconfig->Write("sb_num", view->m_sb_num);
+			fconfig->Write("sb_unit", view->m_sb_unit);
 
 			//2d adjustment
-			fconfig->Write("gamma", canvas->GetGammaColor());
-			fconfig->Write("brightness", canvas->GetBrightness());
-			fconfig->Write("hdr", canvas->GetHdr());
-			fconfig->Write("sync_r", canvas->GetSync(0));
-			fconfig->Write("sync_g", canvas->GetSync(1));
-			fconfig->Write("sync_b", canvas->GetSync(2));
+			fconfig->Write("gamma", view->GetGammaColor());
+			fconfig->Write("brightness", view->GetBrightness());
+			fconfig->Write("hdr", view->GetHdr());
+			fconfig->Write("sync_r", view->GetSync(0));
+			fconfig->Write("sync_g", view->GetSync(1));
+			fconfig->Write("sync_b", view->GetSync(2));
 
 			//clipping plane rotations
-			fconfig->Write("clip_mode", canvas->GetClipMode());
-			fconfig->Write("rot_cl", canvas->GetClippingPlaneRotations());
+			fconfig->Write("clip_mode", view->GetClipMode());
+			fconfig->Write("rot_cl", view->GetClippingPlaneRotations());
 
 			//painting parameters
 			fconfig->Write("brush_use_pres", glbin_vol_selector.GetBrushUsePres());
@@ -1745,6 +1764,9 @@ void Project::Reset()
 	MainFrame* frame = glbin_current.mainframe;
 	if (!frame)
 		return;
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
 
 	glbin_data_manager.SetProjectPath(L"");
 	//SetTitle(m_title);
@@ -1752,13 +1774,13 @@ void Project::Reset()
 	glbin_data_manager.ClearAll();
 	DataGroup::ResetID();
 	MeshGroup::ResetID();
-	frame->GetRenderCanvas(0)->ClearAll();
-	for (int i = frame->GetCanvasNum() - 1; i > 0; i--)
-		frame->DeleteRenderView(i);
+	root->GetView(0)->ClearAll();
+	for (int i = root->GetViewNum() - 1; i > 0; i--)
+		frame->DeleteRenderViewPanel(i);
 	RenderViewPanel::ResetID();
 	glbin_current.SetRoot();
 	glbin_moviemaker.Stop();
-	glbin_moviemaker.SetView(frame->GetRenderCanvas(0));
+	glbin_moviemaker.SetView(root->GetView(0));
 	glbin_mov_def.Apply(&glbin_moviemaker);
 	glbin_interpolator.Clear();
 	glbin_volume_point.SetVolumeData(0);
@@ -1768,8 +1790,8 @@ void Project::Reset()
 void Project::ExportRulerList(const std::wstring& filename)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!list || !canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!list || !view)
 	{
 		return;
 	}
@@ -1782,7 +1804,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 	int num_points;
 	fluo::Point p;
 	flrd::Ruler* ruler;
-	switch (canvas->m_sb_unit)
+	switch (view->m_sb_unit)
 	{
 	case 0:
 		unit = L"nm";
@@ -1836,7 +1858,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 		ruler = (*list)[i];
 		if (!ruler)
 			continue;
-		ruler->SetWorkTime(canvas->m_tseq_cur_num);
+		ruler->SetWorkTime(view->m_tseq_cur_num);
 
 		os << ruler->GetName() << "\t";
 

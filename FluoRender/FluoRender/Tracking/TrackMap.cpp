@@ -28,12 +28,21 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TrackMap.h>
 #include <Global.h>
-#include <RenderCanvas.h>
+#include <MainSettings.h>
+#include <RenderView.h>
 #include <Stencil.h>
 #include <dbscan.h>
 #include <kmeans.h>
 #include <exmax.h>
 #include <StencilCompare.h>
+#include <Clusterizer.h>
+#include <base_reader.h>
+#include <lbl_reader.h>
+#include <msk_writer.h>
+#include <Texture.h>
+#include <VolumeRenderer.h>
+#include <VertexArray.h>
+#include <Ruler.h>
 #include <functional>
 #include <algorithm>
 #include <limits>
@@ -62,12 +71,12 @@ TrackMap::~TrackMap()
 //auto tracking
 void TrackMapProcessor::GenMap()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 	//get trace group
-	canvas->CreateTrackGroup();
-	TrackGroup* trkg = canvas->GetTrackGroup();
+	view->CreateTrackGroup();
+	TrackGroup* trkg = view->GetTrackGroup();
 	if (!trkg)
 		return;
 	VolumeData* vd = glbin_current.vol_data;
@@ -114,7 +123,7 @@ void TrackMapProcessor::GenMap()
 	{
 		InitializeFrame(i);
 		WriteInfo(L"Time point " + std::to_wstring(i) + L" initialized.\n");
-		SetProgress(100.0 * count / ticks, info_str);
+		SetProgress(static_cast<int>(100.0 * count / ticks), info_str);
 		count++;
 
 		if (i < 1)
@@ -141,7 +150,7 @@ void TrackMapProcessor::GenMap()
 	ProcessFrames(frames - 2, frames - 1);
 	ProcessFrames(frames - 1, frames - 2);
 	WriteInfo(L"Time point " + std::to_wstring(frames - 1) + L" processed.\n");
-	SetProgress(100.0 * count / ticks, info_str);
+	SetProgress(static_cast<int>(100.0 * count / ticks), info_str);
 
 	//iterations
 	for (size_t iteri = 0; iteri < glbin_settings.m_track_iter; ++iteri)
@@ -152,7 +161,7 @@ void TrackMapProcessor::GenMap()
 			ProcessFrames(i - 2, i - 1);
 			ProcessFrames(i - 1, i - 2);
 			WriteInfo(L"Time point " + std::to_wstring(i - 1) + L" processed.\n");
-			SetProgress(100.0 * count / ticks, info_str);
+			SetProgress(static_cast<int>(100.0 * count / ticks), info_str);
 			count++;
 		}
 	}
@@ -166,7 +175,7 @@ void TrackMapProcessor::GenMap()
 		for (size_t fi = 1; fi < track_map->GetFrameNum(); ++fi)
 		{
 			WriteInfo(L"Set colors for frame " + std::to_wstring(fi) + L"\n");
-			SetProgress(100.0 * count / ticks, info_str);
+			SetProgress(static_cast<int>(100.0 * count / ticks), info_str);
 			count++;
 
 			MakeConsistent(fi - 1, fi);
@@ -179,20 +188,20 @@ void TrackMapProcessor::GenMap()
 	SetProgress(0, "");
 	SetRange(0, 100);
 
-	canvas->GetTraces(false);
+	view->GetTraces(false);
 }
 
 void TrackMapProcessor::RefineMap(int t, bool erase_v)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
 	//get trace group
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
-	TrackGroup* trkg = canvas->GetTrackGroup();
+	TrackGroup* trkg = view->GetTrackGroup();
 	if (!trkg)
 		return;
 	if (t < 0)
@@ -207,7 +216,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	if (t < 0)
 	{
 		start_frame = 0;
-		end_frame = track_map->GetFrameNum() - 1;
+		end_frame = static_cast<int>(track_map->GetFrameNum()) - 1;
 		clear_counters = true;
 	}
 	else
@@ -274,7 +283,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	std::chrono::duration<double> time_span = duration_cast<std::chrono::duration<double>>(t2 - t1);
 	WriteInfo(L"Wall clock time: " + std::to_wstring(time_span.count()) + L"s.\n");
 
-	canvas->GetTraces(false);
+	view->GetTraces(false);
 }
 
 void TrackMapProcessor::SetUncertainLow(unsigned int value)
@@ -302,16 +311,16 @@ void TrackMapProcessor::SetBits(size_t bits)
 	m_map->m_data_bits = bits;
 }
 
-void TrackMapProcessor::SetScale(float scale)
+void TrackMapProcessor::SetScale(double scale)
 {
-	m_map->m_scale = scale;
+	m_map->m_scale = static_cast<float>(scale);
 }
 
-void TrackMapProcessor::SetSpacings(float spcx, float spcy, float spcz)
+void TrackMapProcessor::SetSpacings(double spcx, double spcy, double spcz)
 {
-	m_map->m_spc_x = spcx;
-	m_map->m_spc_y = spcy;
-	m_map->m_spc_z = spcz;
+	m_map->m_spc_x = static_cast<float>(spcx);
+	m_map->m_spc_y = static_cast<float>(spcy);
+	m_map->m_spc_z = static_cast<float>(spcz);
 }
 
 void TrackMapProcessor::SetClusterNum(int val)
@@ -464,8 +473,8 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 //read/delete volume cache
 void TrackMapProcessor::ReadVolCache(flrd::VolCache& vol_cache)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 	//get volume, readers
 	VolumeData* vd = glbin_current.vol_data;
@@ -477,9 +486,9 @@ void TrackMapProcessor::ReadVolCache(flrd::VolCache& vol_cache)
 	LBLReader lbl_reader;
 
 	int chan = vd->GetCurChannel();
-	int frame = vol_cache.frame;
+	int frame = static_cast<int>(vol_cache.frame);
 
-	if (frame == canvas->m_tseq_cur_num)
+	if (frame == view->m_tseq_cur_num)
 	{
 		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
@@ -515,8 +524,8 @@ void TrackMapProcessor::ReadVolCache(flrd::VolCache& vol_cache)
 
 void TrackMapProcessor::DelVolCache(flrd::VolCache& vol_cache)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
@@ -525,7 +534,7 @@ void TrackMapProcessor::DelVolCache(flrd::VolCache& vol_cache)
 	if (!reader)
 		return;
 	int chan = vd->GetCurChannel();
-	int frame = vol_cache.frame;
+	int frame = static_cast<int>(vol_cache.frame);
 
 	if (vol_cache.valid && vol_cache.modified)
 	{
@@ -541,7 +550,7 @@ void TrackMapProcessor::DelVolCache(flrd::VolCache& vol_cache)
 	}
 
 	vol_cache.valid = false;
-	if (frame != canvas->m_tseq_cur_num)
+	if (frame != view->m_tseq_cur_num)
 	{
 		if (vol_cache.data)
 			nrrdNuke((Nrrd*)vol_cache.nrrd_data);
@@ -670,7 +679,7 @@ bool TrackMapProcessor::CheckCellDist(
 		iter = cell_list.find(idn);
 		if (iter != cell_list.end())
 		{
-			dist_v = sqrt(i*i + j*j + k*k);
+			dist_v = static_cast<float>(sqrt(i*i + j*j + k*k));
 			dist_s = sqrt(i*i*spcx*spcx + j*j*spcy*spcy + k*k*spcz*spcz);
 			AddNeighbor(intra_graph, celp, iter->second, dist_v, dist_s);
 		}
@@ -851,7 +860,7 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
-		graph[v1].frame = f1;
+		graph[v1].frame = static_cast<unsigned int>(f1);
 		graph[v1].count = 1;
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
@@ -860,7 +869,7 @@ bool TrackMapProcessor::LinkVertices(InterGraph& graph,
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
-		graph[v2].frame = f2;
+		graph[v2].frame = static_cast<unsigned int>(f2);
 		graph[v2].count = 1;
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
@@ -950,7 +959,7 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, Verp &vertex)
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex->Id();
-		graph[v1].frame = m_frame1;
+		graph[v1].frame = static_cast<unsigned int>(m_frame1);
 		graph[v1].count = 1;
 		graph[v1].vertex = vertex;
 		vertex->SetInterVert(graph, v1);
@@ -961,7 +970,7 @@ bool TrackMapProcessor::LinkOrphans(InterGraph& graph, Verp &vertex)
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = v1_min->Id();
-		graph[v2].frame = m_frame2;
+		graph[v2].frame = static_cast<unsigned int>(m_frame2);
 		graph[v2].count = 1;
 		graph[v2].vertex = v1_min;
 		v1_min->SetInterVert(graph, v2);
@@ -1028,7 +1037,7 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
-		graph[v1].frame = f1;
+		graph[v1].frame = static_cast<unsigned int>(f1);
 		//reset
 		graph[v1].count = 0;
 		graph[v1].vertex = vertex1;
@@ -1038,7 +1047,7 @@ bool TrackMapProcessor::ForceVertices(InterGraph& graph,
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
-		graph[v2].frame = f2;
+		graph[v2].frame = static_cast<unsigned int>(f2);
 		//reset
 		graph[v2].count = 0;
 		graph[v2].vertex = vertex2;
@@ -2105,7 +2114,7 @@ bool TrackMapProcessor::similar_path_count(Path &path1, Path &path2)
 	//p1 compares to p2
 	if (p1 > 0 || p2 > 0)
 	{
-		d = fabs((double)p1 - (double)p2) / std::max(p1, p2);
+		d = static_cast<float>(fabs((double)p1 - (double)p2) / std::max(p1, p2));
 		if (d < m_similar_thresh)
 			return true;
 	}
@@ -2196,7 +2205,7 @@ bool TrackMapProcessor::get_alter_path(InterGraph &graph, Verp &vertex,
 			{
 				//set back
 				alt_path.back().edge_valid = true;
-				alt_path.back().edge_value = graph[edge.first].size_d;
+				alt_path.back().edge_value = static_cast<float>(graph[edge.first].size_d);
 				alt_path.back().link = graph[edge.first].link;
 
 				return get_alter_path(graph, vertex1,
@@ -2717,7 +2726,7 @@ bool TrackMapProcessor::RelinkInterGraph(Verp &vertex, Verp &vertex0, size_t fra
 			{
 				inter_vert0 = boost::add_vertex(graph);
 				graph[inter_vert0].id = vertex0->Id();
-				graph[inter_vert0].frame = frame;
+				graph[inter_vert0].frame = static_cast<unsigned int>(frame);
 				graph[inter_vert0].count = 0;
 				graph[inter_vert0].vertex = vertex0;
 				vertex0->SetInterVert(graph, inter_vert0);
@@ -2821,7 +2830,7 @@ bool TrackMapProcessor::Export(const std::wstring &filename)
 	//number of frames
 	WriteTag(ofs, TAG_NUM);
 	size_t num = m_map->m_frame_num;
-	WriteUint(ofs, num);
+	WriteUint(ofs, static_cast<unsigned int>(num));
 
 	VertexListIter iter;
 	Verp vertex;
@@ -2837,12 +2846,12 @@ bool TrackMapProcessor::Export(const std::wstring &filename)
 	{
 		WriteTag(ofs, TAG_FRAM);
 		//frame id
-		WriteUint(ofs, i);
+		WriteUint(ofs, static_cast<unsigned int>(i));
 
 		//vertex list
 		VertexList &vertex_list = m_map->m_vertices_list.at(i);
 		//vertex number
-		WriteUint(ofs, vertex_list.size());
+		WriteUint(ofs, static_cast<unsigned int>(vertex_list.size()));
 		//write each vertex
 		for (iter = vertex_list.begin();
 		iter != vertex_list.end(); ++iter)
@@ -2859,7 +2868,7 @@ bool TrackMapProcessor::Export(const std::wstring &filename)
 			++intra_iter)
 			edge_num++;
 		//intra edge num
-		WriteUint(ofs, edge_num);
+		WriteUint(ofs, static_cast<unsigned int>(edge_num));
 		//write each intra edge
 		for (intra_iter = intra_pair.first;
 		intra_iter != intra_pair.second;
@@ -2887,9 +2896,9 @@ bool TrackMapProcessor::Export(const std::wstring &filename)
 		//write index and counter
 		WriteTag(ofs, TAG_VER220);
 		//index
-		WriteUint(ofs, inter_graph.index);
+		WriteUint(ofs, static_cast<unsigned int>(inter_graph.index));
 		//counter
-		WriteUint(ofs, inter_graph.counter);
+		WriteUint(ofs, static_cast<unsigned int>(inter_graph.counter));
 		//get edge number
 		inter_pair = boost::edges(inter_graph);
 		edge_num = 0;
@@ -2898,7 +2907,7 @@ bool TrackMapProcessor::Export(const std::wstring &filename)
 			++inter_iter)
 			edge_num++;
 		//inter edge number
-		WriteUint(ofs, edge_num);
+		WriteUint(ofs, static_cast<unsigned int>(edge_num));
 		//write each inter edge
 		for (inter_iter = inter_pair.first;
 		inter_iter != inter_pair.second;
@@ -3149,7 +3158,7 @@ bool TrackMapProcessor::ResetVertexIDs()
 				{
 					if (celp->GetSize() > max_size)
 					{
-						max_size = celp->GetSize();
+						max_size = static_cast<float>(celp->GetSize());
 						max_id = celp->Id();
 					}
 				}
@@ -3186,7 +3195,7 @@ void TrackMapProcessor::WriteVertex(std::ofstream& ofs, const Verp &vertex)
 	WriteDouble(ofs, vertex->GetSizeD());
 	WritePoint(ofs, vertex->GetCenter());
 	//cell number
-	WriteUint(ofs, vertex->GetCellNum());
+	WriteUint(ofs, static_cast<unsigned int>(vertex->GetCellNum()));
 
 	//cells
 	Celp celp;
@@ -3284,7 +3293,7 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	{
 		v1 = boost::add_vertex(graph);
 		graph[v1].id = vertex1->Id();
-		graph[v1].frame = f1;
+		graph[v1].frame = static_cast<unsigned int>(f1);
 		graph[v1].vertex = vertex1;
 		vertex1->SetInterVert(graph, v1);
 	}
@@ -3293,7 +3302,7 @@ bool TrackMapProcessor::AddInterEdge(InterGraph& graph,
 	{
 		v2 = boost::add_vertex(graph);
 		graph[v2].id = vertex2->Id();
-		graph[v2].frame = f2;
+		graph[v2].frame = static_cast<unsigned int>(f2);
 		graph[v2].vertex = vertex2;
 		vertex2->SetInterVert(graph, v2);
 	}
@@ -3443,11 +3452,11 @@ bool TrackMapProcessor::GetMappedCells(
 //modifications
 bool TrackMapProcessor::LinkCells(bool exclusive)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
-	size_t frame1 = canvas->m_tseq_cur_num;
-	size_t frame2 = canvas->m_tseq_prv_num;
+	size_t frame1 = view->m_tseq_cur_num;
+	size_t frame2 = view->m_tseq_prv_num;
 
 	//check validity
 	if ((frame2 != frame1 + 1 &&
@@ -3531,8 +3540,8 @@ bool TrackMapProcessor::LinkCells(bool exclusive)
 
 bool TrackMapProcessor::LinkAllCells()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
@@ -3543,8 +3552,8 @@ bool TrackMapProcessor::LinkAllCells()
 	glbin_cache_queue.set_max_size(3);
 	flrd::CelpList in = glbin_clusterizer.GetInCells();
 	flrd::CelpList out = glbin_clusterizer.GetOutCells();
-	RelinkCells(in, out, canvas->m_tseq_cur_num);
-	canvas->GetTraces(false);
+	RelinkCells(in, out, view->m_tseq_cur_num);
+	view->GetTraces(false);
 
 	return true;
 }
@@ -3599,10 +3608,10 @@ bool TrackMapProcessor::LinkCells(Celp &celp1, Celp &celp2,
 
 bool TrackMapProcessor::IsolateCells()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
-	size_t frame = canvas->m_tseq_cur_num;
+	size_t frame = view->m_tseq_cur_num;
 
 	//check validity
 	size_t frame_num = m_map->m_frame_num;
@@ -3647,18 +3656,18 @@ bool TrackMapProcessor::IsolateCells()
 			IsolateVertex(inter_graph, viter->second);
 	}
 
-	canvas->GetTraces(false);
+	view->GetTraces(false);
 
 	return true;
 }
 
 bool TrackMapProcessor::UnlinkCells()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
-	size_t frame1 = canvas->m_tseq_cur_num;
-	size_t frame2 = canvas->m_tseq_prv_num;
+	size_t frame1 = view->m_tseq_cur_num;
+	size_t frame2 = view->m_tseq_prv_num;
 
 	//check validity
 	size_t frame_num = m_map->m_frame_num;
@@ -3991,10 +4000,10 @@ bool TrackMapProcessor::DivideCells()
 	if (!trkg)
 		return false;
 	SetTrackMap(trkg->GetTrackMap());
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
-	size_t frame = canvas->m_tseq_cur_num;
+	size_t frame = view->m_tseq_cur_num;
 
 	//check validity
 	if (!m_map->ExtendFrameNum(frame))
@@ -4235,10 +4244,10 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	//		break;
 	//	}
 	//}
-	cs_proc_km.SetClnum(clnum);
+	cs_proc_km.SetClnum(static_cast<unsigned int>(clnum));
 	cs_proc_km.Execute();
 	cs_proc_km.AddIDsToData();
-	cs_proc_em.SetClnum(clnum);
+	cs_proc_em.SetClnum(static_cast<unsigned int>(clnum));
 	cs_proc_em.SetProbTol(0.9f);
 	cs_proc_em.SetData(cs_proc_km.GetData());
 	cs_proc_em.SetUseInitCluster(true);
@@ -4293,10 +4302,10 @@ bool TrackMapProcessor::SegmentCells()
 	if (!trkg)
 		return false;
 	SetTrackMap(trkg->GetTrackMap());
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
-	size_t frame = canvas->m_tseq_cur_num;
+	size_t frame = view->m_tseq_cur_num;
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
@@ -4389,7 +4398,7 @@ bool TrackMapProcessor::SegmentCells()
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();
 
-	RefineMap(frame);
+	RefineMap(static_cast<int>(frame));
 
 	return true;
 }
@@ -4612,8 +4621,8 @@ void TrackMapProcessor::AnalyzeUncertainty()
 
 void TrackMapProcessor::GetCellsByUncertainty(bool filter_in_list)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
@@ -4621,7 +4630,7 @@ void TrackMapProcessor::GetCellsByUncertainty(bool filter_in_list)
 	if (!trkg->GetTrackMap()->GetFrameNum())
 		return;
 	SetTrackMap(trkg->GetTrackMap());
-	size_t frame = canvas->m_tseq_cur_num;
+	size_t frame = view->m_tseq_cur_num;
 	if (frame >= m_map->m_frame_num)
 		return;
 
@@ -4754,15 +4763,15 @@ void TrackMapProcessor::GetCellsByUncertainty(bool filter_in_list)
 		}
 	}
 
-	canvas->GetTraces(false);
+	view->GetTraces(false);
 }
 
 void TrackMapProcessor::GetCellUncertainty()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	size_t frame = canvas->m_tseq_cur_num;
+	size_t frame = view->m_tseq_cur_num;
 	if (frame >= m_map->m_frame_num)
 		return;
 
@@ -4866,10 +4875,10 @@ void TrackMapProcessor::GetCellUncertainty()
 
 void TrackMapProcessor::GetUncertainHist()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
-	size_t frame = canvas->m_tseq_cur_num;
+	size_t frame = view->m_tseq_cur_num;
 	if (frame >= m_map->m_frame_num)
 		return;
 
@@ -4966,8 +4975,8 @@ void TrackMapProcessor::GetUncertainHist(UncertainHist& hist,
 
 void TrackMapProcessor::AnalyzePath()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	size_t frame = canvas->m_tseq_cur_num;
+	RenderView* view = glbin_current.render_view;
+	size_t frame = view->m_tseq_cur_num;
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
@@ -5098,7 +5107,10 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 		iter = stencil_list.find(label_value);
 		if (iter != stencil_list.end())
 		{
-			iter->second.extend(fluo::Point(i, j, k));
+			iter->second.extend(fluo::Point(
+				static_cast<double>(i),
+				static_cast<double>(j),
+				static_cast<double>(k)));
 		}
 		else
 		{
@@ -5112,7 +5124,10 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 			stencil.bits = m_map->m_data_bits;
 			stencil.scale = m_map->m_scale;
 			stencil.fsize = m_filter;
-			stencil.box.extend(fluo::Point(i, j, k));
+			stencil.box.extend(fluo::Point(
+				static_cast<double>(i),
+				static_cast<double>(j),
+				static_cast<double>(k)));
 			stencil_list.insert(std::pair<unsigned int, Stencil>
 				(label_value, stencil));
 		}

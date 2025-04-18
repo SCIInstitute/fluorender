@@ -79,22 +79,22 @@ namespace flrd
 		void RefineMap(int t = -1, bool erase_v = true);
 
 		void SetTrackMap(const pTrackMap& map);
-		void SetContactThresh(float value);
-		void SetSizeThresh(float value);
-		void SetSimilarThresh(float value);
+		void SetContactThresh(double value);
+		void SetSizeThresh(double value);
+		void SetSimilarThresh(double value);
 		void SetLevelThresh(int level);
 		void SetUncertainLow(unsigned int value);
 		void SetMerge(bool value);
 		void SetSplit(bool value);
 		void SetMaxIter(int value);
-		void SetEps(float value);
+		void SetEps(double value);
 		void SetFilterSize(size_t value);
 		void SetStencilThresh(const fluo::Point &value);
 
 		void SetSizes(size_t nx, size_t ny, size_t nz);
 		void SetBits(size_t bits);
-		void SetScale(float scale);
-		void SetSpacings(float spcx, float spcy, float spcz);
+		void SetScale(double scale);
+		void SetSpacings(double spcx, double spcy, double spcz);
 
 		void SetClusterNum(int val);
 		int GetClusterNum();
@@ -394,19 +394,19 @@ namespace flrd
 	{
 	}
 
-	inline void TrackMapProcessor::SetContactThresh(float value)
+	inline void TrackMapProcessor::SetContactThresh(double value)
 	{
-		m_contact_thresh = value;
+		m_contact_thresh = static_cast<float>(value);
 	}
 
-	inline void TrackMapProcessor::SetSizeThresh(float value)
+	inline void TrackMapProcessor::SetSizeThresh(double value)
 	{
-		m_size_thresh = value;
+		m_size_thresh = static_cast<float>(value);
 	}
 
-	inline void TrackMapProcessor::SetSimilarThresh(float value)
+	inline void TrackMapProcessor::SetSimilarThresh(double value)
 	{
-		m_similar_thresh = value;
+		m_similar_thresh = static_cast<float>(value);
 	}
 
 	inline void TrackMapProcessor::SetLevelThresh(int level)
@@ -429,9 +429,9 @@ namespace flrd
 		m_max_iter = value;
 	}
 
-	inline void TrackMapProcessor::SetEps(float value)
+	inline void TrackMapProcessor::SetEps(double value)
 	{
-		m_eps = value;
+		m_eps = static_cast<float>(value);
 	}
 
 	inline void TrackMapProcessor::SetFilterSize(size_t value)

@@ -25,11 +25,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
-#include <Camera2Ruler.h>
+#include <ScriptProc.h>
 #include <Global.h>
-#include <ScriptVisitors.h>
-#include <RenderCanvas.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
 #include <TrackDlg.h>
 #include <NoiseCancellingDlg.h>
@@ -37,11 +36,34 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <OutputAdjPanel.h>
 #include <ScriptBreakDlg.h>
+#include <RenderView.h>
 #include <BackgStat.h>
 #include <CompEditor.h>
 #include <WalkCycle.h>
 #include <Registrator.h>
 #include <PyBase.h>
+#include <Camera2Ruler.h>
+#include <ScriptVisitors.h>
+#include <TreeFileFactory.h>
+#include <VolumeCalculator.h>
+#include <CompAnalyzer.h>
+#include <CompSelector.h>
+#include <CompGenerator.h>
+#include <VolumeSelector.h>
+#include <VertexArray.h>
+#include <VolumeRenderer.h>
+#include <Texture.h>
+#include <KernelExecutor.h>
+#include <TrackMap.h>
+#include <Ruler.h>
+#include <RulerHandler.h>
+#include <MovieMaker.h>
+#include <msk_reader.h>
+#include <msk_writer.h>
+#include <lbl_reader.h>
+#include <TableHistParams.h>
+#include <Project.h>
+#include <PyDlc.h>
 #include <compatibility.h>
 #include <iostream>
 #include <string> 
@@ -95,7 +117,7 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 		return 0;
 
 	m_frame = glbin_current.mainframe;
-	m_view = glbin_current.canvas;
+	m_view = glbin_current.render_view;
 
 	m_time_mask = tm;
 	m_rewind = rewind;
@@ -2531,7 +2553,9 @@ void ScriptProc::ChangeData()
 	{
 		glbin_ruler_handler.DeleteAll(false);
 		glbin_data_manager.ClearAll();
-		m_frame->GetRenderCanvas(0)->ClearAll();
+		Root* root = glbin_data_manager.GetRoot();
+		if (root)
+			root->GetView(0)->ClearAll();
 		DataGroup::ResetID();
 		MeshGroup::ResetID();
 	}

@@ -1666,6 +1666,12 @@ void RenderViewPanel::ResetID()
 	m_max_id = 1;
 }
 
+void RenderViewPanel::SetGL(bool bval)
+{
+	if (m_canvas)
+		m_canvas->m_set_gl = bval;
+}
+
 //get rendering context
 wxGLContext* RenderViewPanel::GetContext()
 {
