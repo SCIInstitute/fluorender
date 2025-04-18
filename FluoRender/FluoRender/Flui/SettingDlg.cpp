@@ -27,9 +27,14 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <SettingDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
+#include <RenderView.h>
 #include <RenderViewPanel.h>
+#include <ShaderProgram.h>
+#include <KernelProgram.h>
+#include <Texture.h>
 #include <wxSingleSlider.h>
 #include <ModalDlg.h>
 #include <wx/valnum.h>
@@ -1456,8 +1461,8 @@ void SettingDlg::OnPinThresholdEdit(wxCommandEvent& event)
 void SettingDlg::OnRotLink(wxCommandEvent& event)
 {
 	bool linked_rot = m_rot_link_chk->GetValue();
-	RenderCanvas::m_linked_rot = linked_rot;
-	RenderCanvas::m_master_linked_view = 0;
+	glbin.set_linked_rot(linked_rot);
+	glbin.set_master_linked_view(0);
 	FluoRefresh(3, { gstNull });
 }
 

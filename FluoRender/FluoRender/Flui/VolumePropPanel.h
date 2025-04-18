@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class RenderCanvas;
+class RenderView;
 class VolumeData;
 class DataGroup;
 class wxBasisSlider;
@@ -81,8 +81,8 @@ public:
 	DataGroup* GetGroup();
 
 	//sync view in depth mode
-	void SetView(RenderCanvas* view);
-	RenderCanvas* GetRenderCanvas();
+	void SetView(RenderView* view);
+	RenderView* GetView();
 
 	void ApplyMl();
 	void SaveMl();
@@ -95,7 +95,7 @@ private:
 	bool m_lumi_change;
 	bool m_sync_group;
 	DataGroup* m_group;
-	RenderCanvas* m_view;
+	RenderView* m_view;
 	double m_max_val;
 
 	//1

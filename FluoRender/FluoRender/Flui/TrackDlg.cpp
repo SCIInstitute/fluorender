@@ -27,16 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <TrackDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
-#include <RenderCanvas.h>
-#include <BrushToolDlg.h>
-#include <MeasureDlg.h>
-#include <ComponentDlg.h>
-#include <MoviePanel.h>
+#include <RenderView.h>
 #include <CompEditor.h>
+#include <CompSelector.h>
+#include <CompAnalyzer.h>
+#include <TrackMap.h>
+#include <MovieMaker.h>
+#include <Color.h>
 #include <wxSingleSlider.h>
 #include <ModalDlg.h>
-#include <Color.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -1020,29 +1022,29 @@ void TrackDlg::UpdateTracks()
 
 void TrackDlg::LoadTrackFile(const std::wstring& file)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	canvas->LoadTrackGroup(file);
+	RenderView* view = glbin_current.render_view;
+	view->LoadTrackGroup(file);
 	FluoUpdate({ gstTrackFile });
 }
 
 bool TrackDlg::SaveTrackFile()
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return false;
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
 	std::wstring str = trkg->GetPath();
 	if (std::filesystem::exists(str))
-		return canvas->SaveTrackGroup(str);
+		return view->SaveTrackGroup(str);
 	return false;
 }
 
 void TrackDlg::SaveTrackFile(const std::wstring& file)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	canvas->SaveTrackGroup(file);
+	RenderView* view = glbin_current.render_view;
+	view->SaveTrackGroup(file);
 }
 
 void TrackDlg::SaveasTrackFile()
@@ -1068,7 +1070,7 @@ void TrackDlg::DeleteSelection(int type)
 	{
 		glbin_comp_selector.DeleteList();
 		FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-			{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+			{ glbin_current.GetViewId() });
 	}
 	else
 		m_active_list->DeleteSelection();
@@ -1129,11 +1131,11 @@ void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
 
 void TrackDlg::OnRefineTBtn(wxCommandEvent& event)
 {
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (!canvas)
+	RenderView* view = glbin_current.render_view;
+	if (!view)
 		return;
 
-	glbin_trackmap_proc.RefineMap(canvas->m_tseq_cur_num);
+	glbin_trackmap_proc.RefineMap(view->m_tseq_cur_num);
 }
 
 void TrackDlg::OnRefineAllBtn(wxCommandEvent& event)
@@ -1231,32 +1233,32 @@ void TrackDlg::OnCompFull(wxCommandEvent& event)
 void TrackDlg::OnCompExclusive(wxCommandEvent& event)
 {
 	glbin_comp_selector.Exclusive();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		canvas->GetTraces(false);
+	RenderView* view = glbin_current.render_view;
+	if (view)
+		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId(view) });
 }
 
 void TrackDlg::OnCompAppend(wxCommandEvent& event)
 {
 	bool get_all = m_comp_id.Lower() == "all" ? true : false;
 	glbin_comp_selector.Select(get_all);
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		canvas->GetTraces(false);
+	RenderView* view = glbin_current.render_view;
+	if (view)
+		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId(view) });
 }
 
 void TrackDlg::OnCompClear(wxCommandEvent& event)
 {
 	glbin_comp_selector.Clear();
-	RenderCanvas* canvas = glbin_current.canvas;
-	if (canvas)
-		canvas->GetTraces(false);
+	RenderView* view = glbin_current.render_view;
+	if (view)
+		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(canvas) });
+		{ glbin_current.GetViewId(view) });
 }
 
 void TrackDlg::OnShuffle(wxCommandEvent& event)
@@ -1268,7 +1270,7 @@ void TrackDlg::OnShuffle(wxCommandEvent& event)
 
 	vd->IncShuffle();
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 //cell size filter
@@ -1303,7 +1305,7 @@ void TrackDlg::OnCompUncertainBtn(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.GetCellsByUncertainty(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCompUncertainLowChange(wxScrollEvent& event)
@@ -1324,7 +1326,7 @@ void TrackDlg::OnCompUncertainLowText(wxCommandEvent& event)
 	glbin_trackmap_proc.SetUncertainLow(ival);
 	glbin_trackmap_proc.GetCellsByUncertainty(true);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 //link page
@@ -1351,35 +1353,35 @@ void TrackDlg::OnCellExclusiveLink(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.LinkCells(true);
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellLink(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.LinkCells(false);
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellLinkAll(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.LinkAllCells();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellIsolate(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.IsolateCells();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellUnlink(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.UnlinkCells();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 //modify page
@@ -1407,42 +1409,42 @@ void TrackDlg::OnCellNewID(wxCommandEvent& event)
 {
 	glbin_comp_editor.NewId(false, true);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellAppendID(wxCommandEvent& event)
 {
 	glbin_comp_editor.NewId(true, true);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellReplaceID(wxCommandEvent& event)
 {
 	glbin_comp_editor.ReplaceList();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellCombineID(wxCommandEvent& event)
 {
 	glbin_comp_editor.CombineList();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellSeparateID(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.DivideCells();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellSegment(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.SegmentCells();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCellSegSpin(wxSpinEvent& event)
@@ -1460,14 +1462,14 @@ void TrackDlg::OnConvertToRulers(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.ConvertRulers();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo, gstRulerList },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
 {
 	glbin_trackmap_proc.ConvertConsistent();
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
@@ -1538,7 +1540,7 @@ void TrackDlg::OnCellPrev(wxCommandEvent& event)
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum, gstTrackList };
 	FluoRefresh(0, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas)});
+		{ glbin_current.GetViewId()});
 }
 
 void TrackDlg::OnCellNext(wxCommandEvent& event)
@@ -1550,7 +1552,7 @@ void TrackDlg::OnCellNext(wxCommandEvent& event)
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum, gstTrackList };
 	FluoRefresh(0, vc,
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnGhostNumChange(wxScrollEvent& event)
@@ -1574,7 +1576,7 @@ void TrackDlg::OnGhostNumText(wxCommandEvent& event)
 
 	trkg->SetGhostNum(ival);
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnGhostShowTail(wxCommandEvent& event)
@@ -1587,7 +1589,7 @@ void TrackDlg::OnGhostShowTail(wxCommandEvent& event)
 
 	trkg->SetDrawTail(bval);
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnGhostShowLead(wxCommandEvent& event)
@@ -1600,7 +1602,7 @@ void TrackDlg::OnGhostShowLead(wxCommandEvent& event)
 
 	trkg->SetDrawLead(bval);
 	FluoRefresh(3, { gstNull },
-		{ m_frame->GetRenderCanvas(glbin_current.canvas) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::AddLabel(long item, TrackListCtrl* trace_list_ctrl, flrd::CelpList& list)

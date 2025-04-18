@@ -5628,20 +5628,24 @@ void CurrentObjects::SetSel(const std::wstring& str)
 	}
 }
 
-int CurrentObjects::GetViewId()
+int CurrentObjects::GetViewId(RenderView* view)
 {
 	Root* root = glbin_data_manager.GetRoot();
-	if (render_view)
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		for (int i = 0; i < root->GetViewNum(); ++i)
+		RenderView* v = root->GetView(i);
+		if (view)
 		{
-			RenderView* v = root->GetView(i);
+			if (v == view)
+				return i;
+		}
+		else
+		{
 			if (v == render_view)
 				return i;
 		}
 	}
-	else
-		return -1;
+	return -1;
 }
 
 flrd::RulerList* CurrentObjects::GetRulerList()

@@ -395,11 +395,7 @@ RenderView* MovieMaker::GetView()
 
 int MovieMaker::GetViewIndex()
 {
-	Root* root = glbin_data_manager.GetRoot();
-	if (root)
-		return root->GetView(m_view);
-
-	return -1;
+	return glbin_current.GetViewId(m_view);
 }
 
 void MovieMaker::SetKeyframeEnable(bool val)

@@ -287,11 +287,7 @@ RenderViewPanel::~RenderViewPanel()
 
 int RenderViewPanel::GetViewId()
 {
-	int view_id = -1;
-	Root* root = glbin_data_manager.GetRoot();
-	if (root)
-		view_id = root->GetView(m_render_view);
-	return view_id;
+	return glbin_current.GetViewId(m_render_view);
 }
 
 void RenderViewPanel::CreateBar()

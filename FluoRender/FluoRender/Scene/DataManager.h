@@ -1375,7 +1375,7 @@ struct CurrentObjects
 	void SetAnnotation(Annotations* ann);
 	void SetSel(const std::wstring& str);
 
-	int GetViewId();
+	int GetViewId(RenderView* v = 0);
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();
