@@ -26,16 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <KernelExecutor.h>
-#include <Global.h>
 #include <KernelProgram.h>
+#include <Global.h>
+#include <VolumeDefault.h>
 #include <VolKernel.h>
 #include <DataManager.h>
-#include <VolumeDefault.h>
-#include <boost/chrono.hpp>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
+#include <Ray.h>
+#include <compatibility.h>
 #include <filesystem>
 #include <fstream>
-
-using namespace boost::chrono;
+#include <chrono>
 
 KernelExecutor::KernelExecutor()
 	: Progress(),
@@ -292,10 +295,10 @@ bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
 	//execute
 	size_t global_size[3] = { brick_x, brick_y, brick_z };
 	size_t local_size[3] = { 1, 1, 1 };
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	kernel->executeKernel(kernel_index, 3, global_size, local_size);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	std::wstring stime = std::to_wstring(time_span.count());
 	m_message += L"OpenCL time on ";
 	m_message += s2ws(kernel->get_device_name());

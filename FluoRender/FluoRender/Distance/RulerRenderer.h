@@ -29,16 +29,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerRenderer_H_
 #define _RulerRenderer_H_
 
-#include <Ruler.h>
-#include <Color.h>
-#include <Point.h>
-#include <Transform.h>
 #include <vector>
 
 class RenderView;
-
+namespace fluo
+{
+	class Color;
+	class Point;
+	class Transform;
+}
 namespace flrd
 {
+	class RulerList;
 	class RulerRenderer
 	{
 	public:
@@ -84,7 +86,7 @@ namespace flrd
 		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
 			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
 			std::vector<float> &verts, unsigned int& num);
-		void DrawText(int, int);
+		void DrawTextAt(int, int);
 	};
 
 }

@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <JsonFile.h>
 #include <PoleFile.h>
 #include <XmlFile.h>
-#include <PoleFile.h>
 #include <iostream>
 #include <fstream>
 #include <string>

@@ -28,7 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSampler.h>
 #include <DataManager.h>
 #include <Vector.h>
+#include <Plane.h>
 #include <Texture.h>
+#include <VolumeRenderer.h>
 #include <stdexcept>
 
 using namespace flrd;
@@ -357,20 +359,20 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	//write to nrrd
 	Nrrd* nrrd_result = nrrdNew();
 	if (m_bits == 8)
-		nrrdWrap(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
+		nrrdWrap_va(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
 			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 	else if (m_bits == 16)
-		nrrdWrap(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
+		nrrdWrap_va(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
 			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 	else if (m_bits == 32)
-		nrrdWrap(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
+		nrrdWrap_va(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
 			3, (size_t)m_lx, (size_t)m_ly, (size_t)m_lz);
 
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spc.x()*m_lx,
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, spc.x()*m_lx,
 		spc.y()*m_ly, spc.z()*m_lz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_lx,
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSize, (size_t)m_lx,
 		(size_t)m_ly, (size_t)m_lz);
 
 	if (replace)

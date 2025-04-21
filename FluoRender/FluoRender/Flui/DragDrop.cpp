@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <DragDrop.h>
 #include <Global.h>
 #include <MainFrame.h>
+#include <Project.h>
+#include <DataManager.h>
 
 DnDFile::DnDFile(wxWindow *frame, wxWindow *view)
 : m_frame(frame),

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Tester.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
 #include <wxSingleSlider.h>
 

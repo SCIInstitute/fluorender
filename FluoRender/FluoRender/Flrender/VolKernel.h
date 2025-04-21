@@ -32,7 +32,6 @@
 #include <string>
 #include <vector>
 
-
 namespace flvr
 {
 #define KERNEL_STRING	0

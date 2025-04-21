@@ -27,6 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <FpRangeDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
 #include <wx/valnum.h>
 

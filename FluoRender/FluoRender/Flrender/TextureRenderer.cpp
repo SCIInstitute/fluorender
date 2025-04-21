@@ -28,14 +28,15 @@
 
 #include <GL/glew.h>
 #include <TextureRenderer.h>
+#include <Global.h>
+#include <MainSettings.h>
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <ShaderProgram.h>
 #include <VertexArray.h>
 #include <Color.h>
 #include <Utils.h>
-#include <Global.h>
-#include <MainSettings.h>
+#include <Ray.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 #include <compatibility.h>
@@ -78,7 +79,7 @@ namespace flvr
 	TextureRenderer::TextureRenderer(Texture* tex)
 		:
 		tex_(tex),
-		mode_(MODE_NONE),
+		mode_(RENDER_MODE_NONE),
 		sampling_rate_(1.0),
 		num_slices_(0),
 		irate_(0.5),

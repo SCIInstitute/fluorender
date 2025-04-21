@@ -31,8 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <RulerHandler.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
 #include <algorithm>
-#include <unordered_map>
+#include <fstream>
 #include <Debug.h>
 
 using namespace flrd;

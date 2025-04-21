@@ -29,15 +29,15 @@ DEALINGS IN THE SOFTWARE.
 #define FL_CompEditor_h
 
 #include <Color.h>
-#include <Cell.h>
 #include <string>
 #include <vector>
+#include <memory>
 
 class VolumeData;
 namespace flrd
 {
 	struct VolCache;
-	//class ComponentAnalyzer;
+	class CelpList;
 	class ComponentEditor
 	{
 	public:
@@ -50,14 +50,8 @@ namespace flrd
 			m_id_empty = id_empty;
 		}
 
-		void SetList(const CelpList& list)
-		{
-			m_list = list;
-		}
-		CelpList& GetList()
-		{
-			return m_list;
-		}
+		void SetList(const CelpList& list);
+		CelpList& GetList();
 
 		fluo::Color GetColor();
 		std::string GetOutput();
@@ -73,7 +67,7 @@ namespace flrd
 		std::string m_output;
 		unsigned int m_id;
 		bool m_id_empty;
-		CelpList m_list;
+		std::unique_ptr<CelpList> m_list;
 
 	private:
 		//read/delete volume cache from file

@@ -27,9 +27,15 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MachineLearningDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
 #include <ComponentDlg.h>
 #include <EntryHist.h>
+#include <Table.h>
+#include <TableHistParams.h>
+#include <CompGenerator.h>
+#include <DataManager.h>
 #include <format>
 #include <filesystem>
 

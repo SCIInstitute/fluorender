@@ -36,6 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <TextureRenderer.h>
 #include <ImgShader.h>
+#include <VertexArray.h>
+#include <Ruler.h>
+#include <Color.h>
+#include <Point.h>
+#include <Transform.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;
@@ -100,7 +105,7 @@ void RulerRenderer::Draw()
 
 	//draw text
 	if (m_draw_text)
-		DrawText(nx, ny);
+		DrawTextAt(nx, ny);
 }
 
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
@@ -170,8 +175,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 						(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 						continue;
-					px = (p1.x() + 1.0)*nx / 2.0;
-					py = (p1.y() + 1.0)*ny / 2.0;
+					px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+					py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 					if (rp1->GetLocked())
 						DrawPoint(verts, 1, px, py, w, c);
 					else
@@ -204,8 +209,8 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 							if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 								(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 								continue;
-							px = (p1.x() + 1.0) * nx / 2.0;
-							py = (p1.y() + 1.0) * ny / 2.0;
+							px = static_cast<float>((p1.x() + 1.0) * nx / 2.0);
+							py = static_cast<float>((p1.y() + 1.0) * ny / 2.0);
 							if (rps[j]->GetLocked())
 								DrawPoint(verts, 1, px, py, w, c);
 							else
@@ -218,16 +223,16 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 						if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 							(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 							continue;
-						px = (p1.x() + 1.0)*nx / 2.0;
-						py = (p1.y() + 1.0)*ny / 2.0;
+						px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+						py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 						verts.push_back(px - w); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						verts.push_back(px + w); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						verts.push_back(px); verts.push_back(py - w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						verts.push_back(px); verts.push_back(py + w); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						num += 4;
 					}
 					if (draw_line)
@@ -247,15 +252,15 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				for (int bi = 0; bi < ruler->GetNumBranch(); ++bi)
 					for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
 					{
-						rp2 = ruler->GetRulerPoint(bi, j);
+						rp2 = ruler->GetRulerPoint(bi, static_cast<int>(j));
 						p2 = rp2->GetPoint(rwt, interp);
 						p2 = mv.transform(p2);
 						p2 = p.transform(p2);
 						if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
 							(!persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
 							continue;
-						px = (p2.x() + 1.0)*nx / 2.0;
-						py = (p2.y() + 1.0)*ny / 2.0;
+						px = static_cast<float>((p2.x() + 1.0)*nx / 2.0);
+						py = static_cast<float>((p2.y() + 1.0)*ny / 2.0);
 						if (draw_square)
 						{
 							if (bi == 0 && j == 0)
@@ -277,18 +282,18 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 						if (j > 0 && draw_line)
 						{
 							//draw line
-							p1 = ruler->GetPoint(bi, j - 1);
+							p1 = ruler->GetPoint(bi, static_cast<int>(j) - 1);
 							p1 = mv.transform(p1);
 							p1 = p.transform(p1);
 							if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 								(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 								continue;
 							verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-							verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-							px = (p1.x() + 1.0)*nx / 2.0;
-							py = (p1.y() + 1.0)*ny / 2.0;
+							verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
+							px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+							py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 							verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-							verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+							verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 							num += 2;
 						}
 					}
@@ -297,15 +302,15 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 			{
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
-					rp2 = ruler->GetRulerPoint(j);
+					rp2 = ruler->GetRulerPoint(static_cast<int>(j));
 					p2 = rp2->GetPoint(rwt, interp);
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
 					if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
 						(!persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
 						continue;
-					px = (p2.x() + 1.0)*nx / 2.0;
-					py = (p2.y() + 1.0)*ny / 2.0;
+					px = static_cast<float>((p2.x() + 1.0)*nx / 2.0);
+					py = static_cast<float>((p2.y() + 1.0)*ny / 2.0);
 					if (draw_square)
 					{
 						if (ruler->GetNumPoint() > 1 && j == 0)
@@ -326,18 +331,18 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					}
 					if (j > 0 && draw_line)
 					{
-						p1 = ruler->GetPoint(j - 1);
+						p1 = ruler->GetPoint(static_cast<int>(j) - 1);
 						p1 = mv.transform(p1);
 						p1 = p.transform(p1);
 						if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 							(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 							continue;
 						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-						px = (p1.x() + 1.0)*nx / 2.0;
-						py = (p1.y() + 1.0)*ny / 2.0;
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
+						px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+						py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						num += 2;
 					}
 				}
@@ -356,17 +361,17 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 						p1 = center + v1 * w;
 						p1 = mv.transform(p1);
 						p1 = p.transform(p1);
-						px = (p1.x() + 1.0)*nx / 2.0;
-						py = (p1.y() + 1.0)*ny / 2.0;
+						px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+						py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						p1 = center + v2 * w;
 						p1 = mv.transform(p1);
 						p1 = p.transform(p1);
-						px = (p1.x() + 1.0)*nx / 2.0;
-						py = (p1.y() + 1.0)*ny / 2.0;
+						px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+						py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 						verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-						verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+						verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 						num += 2;
 					}
 				}
@@ -379,80 +384,80 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 
 void RulerRenderer::DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c)
 {
-	float w2 = 1.41421356 * w;
+	float w2 = static_cast<float>(1.41421356 * w);
 	switch (type)
 	{
 	case 0://square
 		verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w); verts.push_back(py - w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w); verts.push_back(py + w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w); verts.push_back(py + w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w); verts.push_back(py - w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		break;
 	case 1://hash
 		verts.push_back(px - w); verts.push_back(py - w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w); verts.push_back(py - w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w / 2); verts.push_back(py - w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w / 2); verts.push_back(py + w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w); verts.push_back(py + w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w); verts.push_back(py + w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w / 2); verts.push_back(py + w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w / 2); verts.push_back(py - w); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		break;
 	case 2://diamond
 		verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px); verts.push_back(py + w2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w2); verts.push_back(py); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px); verts.push_back(py - w2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w2); verts.push_back(py); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		break;
 	case 3://diamond hash
 		verts.push_back(px + w2 - w / 2); verts.push_back(py - w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w / 2); verts.push_back(py + w2 - w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w / 2); verts.push_back(py + w2 - w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w2 + w / 2); verts.push_back(py - w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w2 + w / 2); verts.push_back(py + w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w / 2); verts.push_back(py - w2 + w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px - w / 2); verts.push_back(py - w2 + w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		verts.push_back(px + w2 - w / 2); verts.push_back(py + w / 2); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		break;
 	}
 }
@@ -504,20 +509,20 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 		if ((persp && (p2.z() <= 0.0 || p2.z() >= 1.0)) ||
 			(!persp && (p2.z() >= 0.0 || p2.z() <= -1.0)))
 			continue;
-		px = (p1.x() + 1.0)*nx / 2.0;
-		py = (p1.y() + 1.0)*ny / 2.0;
+		px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
+		py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
 		verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		px = (p2.x() + 1.0)*nx / 2.0;
-		py = (p2.y() + 1.0)*ny / 2.0;
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
+		px = static_cast<float>((p2.x() + 1.0)*nx / 2.0);
+		py = static_cast<float>((p2.y() + 1.0)*ny / 2.0);
 		verts.push_back(px); verts.push_back(py); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(c.r())); verts.push_back(static_cast<float>(c.g())); verts.push_back(static_cast<float>(c.b()));
 		num += 2;
 		p1 = p2;
 	}
 }
 
-void RulerRenderer::DrawText(int nx, int ny)
+void RulerRenderer::DrawTextAt(int nx, int ny)
 {
 	size_t tseq_cur_num;
 	if (m_view->m_frame_num_type == 1)
@@ -526,8 +531,8 @@ void RulerRenderer::DrawText(int nx, int ny)
 		tseq_cur_num = m_view->m_tseq_cur_num;
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
+	sx = static_cast<float>(2.0 / nx);
+	sy = static_cast<float>(2.0 / ny);
 	fluo::Color c;
 	fluo::Color text_color = m_view->GetTextColor();
 	fluo::Point p2;
@@ -557,11 +562,11 @@ void RulerRenderer::DrawText(int nx, int ny)
 			else
 				c = text_color;
 			size_t j = ruler->GetNumPoint() - 1;
-			p2 = ruler->GetPoint(j);
+			p2 = ruler->GetPoint(static_cast<int>(j));
 			p2 = mv.transform(p2);
 			p2 = p.transform(p2);
-			p2x = p2.x()*nx / 2.0;
-			p2y = p2.y()*ny / 2.0;
+			p2x = static_cast<float>(p2.x()*nx / 2.0);
+			p2y = static_cast<float>(p2.y()*ny / 2.0);
 			text_renderer->RenderText(
 				ruler->GetName(),
 				c,

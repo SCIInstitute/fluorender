@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompEditor.h>
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
+#include <Cell.h>
 #include <TrackMap.h>
 #include <MovieMaker.h>
 #include <Color.h>

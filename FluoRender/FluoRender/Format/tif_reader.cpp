@@ -2108,16 +2108,16 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 
 	//write to nrrd
 	if (eight_bit)
-		nrrdWrap(nrrdout, (uint8_t*)val, nrrdTypeUChar,
+		nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
 			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
 	else
-		nrrdWrap(nrrdout, (uint16_t*)val, nrrdTypeUShort,
+		nrrdWrap_va(nrrdout, (uint16_t*)val, nrrdTypeUShort,
 			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
 		m_yspc*m_y_size, m_zspc*numPages);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
 		(size_t)m_y_size, (size_t)numPages);
 
 	if (!eight_bit) {

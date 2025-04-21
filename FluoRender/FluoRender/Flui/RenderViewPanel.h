@@ -104,6 +104,9 @@ public:
 
 	void SetGL(bool bval);
 	RenderView* GetRenderView() { return m_render_view; }
+	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }
+	wxFrame* GetFullFrame() { return m_full_frame; }
+	wxBoxSizer* GetViewSizer() { return m_view_sizer; }
 
 	//update
 	void SetVolumeMethod(int val);

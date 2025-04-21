@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ManipPropPanel.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
 #include <DataManager.h>
 #include <compatibility.h>

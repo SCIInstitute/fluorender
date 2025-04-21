@@ -26,6 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
+#include <GL/glew.h>
 #include <VolumeRenderer.h>
 #include <Global.h>
 #include <MainSettings.h>
@@ -108,7 +109,7 @@ namespace flvr
 		zoom_data_(1.0)
 	{
 		//mode
-		mode_ = MODE_OVER;
+		mode_ = RENDER_MODE_OVER;
 		//done loop
 		for (int i=0; i<TEXTURE_RENDER_MODES; i++)
 			done_loop_[i] = false;
@@ -632,14 +633,14 @@ namespace flvr
 		glEnable(GL_BLEND);
 		switch(mode_)
 		{
-		case MODE_OVER:
+		case RENDER_MODE_OVER:
 			glBlendEquation(GL_FUNC_ADD);
 			if (glbin_settings.m_update_order == 0)
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 			else if (glbin_settings.m_update_order == 1)
 				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 			break;
-		case MODE_MIP:
+		case RENDER_MODE_MIP:
 			glBlendEquation(GL_MAX);
 			glBlendFunc(GL_ONE, GL_ONE);
 			break;
@@ -707,7 +708,7 @@ namespace flvr
 			false, tex_->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
-			grad, ml_mode_, mode_ == TextureRenderer::MODE_MIP,
+			grad, ml_mode_, mode_ == RENDER_MODE_MIP,
 			cm_mode, colormap_, colormap_proj_,
 			solid_, 1);
 		if (shader)
@@ -739,7 +740,7 @@ namespace flvr
 		//transfer function
 		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
-		if (mode_==TextureRenderer::MODE_MIP &&
+		if (mode_==RENDER_MODE_MIP &&
 			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 				colormap_hi_value_ - colormap_low_value_, colormap_inv_);
@@ -850,7 +851,7 @@ namespace flvr
 			}
 
 			if ((cm_mode ==1 ||
-				mode_==TextureRenderer::MODE_MIP) &&
+				mode_==RENDER_MODE_MIP) &&
 				colormap_proj_)
 			{
 				fluo::BBox bbox = b->dbox();
@@ -896,7 +897,7 @@ namespace flvr
 				if (label_)
 					load_brick_label(b);
 				shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
-					mode_ == MODE_OVER ? 1.0 / rate : 1.0);
+					mode_ == RENDER_MODE_OVER ? 1.0 / rate : 1.0);
 
 				//for brick transformation
 				float matrix[16];
@@ -1338,7 +1339,7 @@ namespace flvr
 
 			//size and sample rate
 			seg_shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(),
-				mode_==MODE_OVER?1.0/sampling_rate_:1.0);
+				mode_==RENDER_MODE_OVER?1.0/sampling_rate_:1.0);
 
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)

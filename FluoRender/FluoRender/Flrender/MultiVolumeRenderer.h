@@ -29,16 +29,21 @@
 #ifndef MultiVolumeRenderer_h
 #define MultiVolumeRenderer_h
 
-#include <TextureRenderer.h>
 #include <BBox.h>
+#include <glm/mat4x4.hpp>
 #include <vector>
 
+namespace fluo
+{
+	class Ray;
+}
 namespace flvr
 {
 	class Framebuffer;
 	class VertexArray;
 	class VolumeRenderer;
 	class TextureBrick;
+	enum RenderMode;
 	class MultiVolumeRenderer
 	{
 	public:
@@ -64,7 +69,7 @@ namespace flvr
 		}
 
 		//mode and sampling rate
-		void set_mode(const TextureRenderer::RenderMode& mode);
+		void set_mode(const RenderMode& mode);
 		void set_sampling_rate(double rate);
 		void set_interactive_rate(double irate);
 		void set_interactive_mode(bool mode);
@@ -117,7 +122,7 @@ namespace flvr
 		glm::mat4 tex_mat_;
 
 		//mode and quality control
-		TextureRenderer::RenderMode mode_;
+		RenderMode mode_;
 		int depth_peel_;
 		int blend_num_bits_;
 		bool blend_slices_;

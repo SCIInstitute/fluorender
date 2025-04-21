@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <VolumeSelector.h>
+#include <Ruler.h>
 #include <RulerAlign.h>
 #include <DataManager.h>
 #include <ModalDlg.h>

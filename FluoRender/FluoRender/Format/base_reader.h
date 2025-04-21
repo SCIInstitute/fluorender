@@ -34,11 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <sstream>
 
-#ifdef STATIC_COMPILE
-	#define nrrdWrap nrrdWrap_va
-	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
-#endif
-
 //error codes
 //return to notify caller if fail
 #define READER_OK	0

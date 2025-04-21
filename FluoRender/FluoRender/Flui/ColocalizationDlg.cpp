@@ -27,8 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ColocalizationDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <ColocalDefault.h>
 #include <MainFrame.h>
 #include <StringConvert.h>
+#include <Colocalize.h>
+#include <DataManager.h>
 
 ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	PropPanel(frame, frame,

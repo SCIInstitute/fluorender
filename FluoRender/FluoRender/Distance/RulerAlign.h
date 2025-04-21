@@ -28,13 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_RulerAlign_h
 #define FL_RulerAlign_h
 
-#include <Ruler.h>
 #include <Vector.h>
 
 class RenderView;
 class VolumeData;
 namespace flrd
 {
+	class Ruler;
+	class RulerList;
 	class RulerAlign
 	{
 	public:
@@ -57,17 +58,7 @@ namespace flrd
 
 		void AddRuler(Ruler* ruler);
 
-		void SetRulerList(RulerList* list)
-		{
-			Clear();
-			for (size_t i = 0; i < list->size(); ++i)
-			{
-				Ruler* ruler = (*list)[i];
-				if (!ruler)
-					continue;
-				AddRuler(ruler);
-			}
-		}
+		void SetRulerList(RulerList* list);
 
 		void Clear()
 		{

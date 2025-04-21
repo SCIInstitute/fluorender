@@ -29,7 +29,7 @@
 #ifndef TextureRenderer_h
 #define TextureRenderer_h
 
-#include <Ray.h>
+#include <Point.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
 
@@ -51,6 +51,7 @@ typedef int GLint;
 namespace fluo
 {
 	class BBox;
+	class Ray;
 }
 namespace flvr
 {
@@ -151,17 +152,17 @@ namespace flvr
 #define PALETTE_SIZE (PALETTE_W*PALETTE_H)
 #define PALETTE_ELEM_COMP 4
 
+	enum RenderMode
+	{
+		RENDER_MODE_NONE,
+		RENDER_MODE_OVER,
+		RENDER_MODE_MIP,
+		RENDER_MODE_SLICE
+	};
+
 	class TextureRenderer
 	{
 	public:
-		enum RenderMode
-		{
-			MODE_NONE,
-			MODE_OVER,
-			MODE_MIP,
-			MODE_SLICE
-		};
-
 		TextureRenderer(Texture* tex);
 		TextureRenderer(const TextureRenderer&);
 		virtual ~TextureRenderer();

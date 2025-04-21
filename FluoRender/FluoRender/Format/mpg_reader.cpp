@@ -406,12 +406,12 @@ Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 
 	//create nrrd
 	Nrrd* data = nrrdNew();
-	nrrdWrap(data, (uint8_t*)val, nrrdTypeUChar,
+	nrrdWrap_va(data, (uint8_t*)val, nrrdTypeUChar,
 		3, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
-	nrrdAxisInfoSet(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc);
-	nrrdAxisInfoSet(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc);
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
 
 	return data;
 }

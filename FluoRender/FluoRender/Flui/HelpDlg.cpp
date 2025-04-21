@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <HelpDlg.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
 
 HelpDlg::HelpDlg(MainFrame *frame) :

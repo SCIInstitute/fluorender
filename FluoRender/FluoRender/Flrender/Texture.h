@@ -32,7 +32,7 @@
 #include <nrrd.h>
 #include <BBox.h>
 #include <Transform.h>
-#include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
 #include <vector>
 
 #ifndef TextureBrick_h

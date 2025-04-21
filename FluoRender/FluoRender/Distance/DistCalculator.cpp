@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <DistCalculator.h>
 #include <DataManager.h>
+#include <Cell.h>
+#include <Ruler.h>
+#include <Relax.h>
 #include <limits>
 #include <algorithm>
 
@@ -43,10 +46,47 @@ DistCalculator::DistCalculator() :
 	m_f2 = 2;
 	m_f3 = 3;
 	m_infr = 2.5;
+
+	m_relax = std::make_unique<Relax>();
 }
 
 DistCalculator::~DistCalculator()
 {
+}
+
+void DistCalculator::SetRuler(Ruler* ruler)
+{
+	if (ruler != m_ruler)
+	{
+		m_ruler = ruler;
+		m_init = false;
+	}
+	m_relax->SetRuler(ruler);
+}
+
+Ruler* DistCalculator::GetRuler()
+{
+	return m_ruler;
+}
+
+void DistCalculator::SetCelpList(CelpList* list)
+{
+	if (list != m_celps)
+	{
+		m_celps = list;
+		m_init = false;
+	}
+}
+
+CelpList* DistCalculator::GetCelpList()
+{
+	return m_celps;
+}
+
+void DistCalculator::SetVolume(VolumeData* vd)
+{
+	m_vd = vd;
+	m_relax->SetVolume(vd);
 }
 
 void DistCalculator::CenterRuler(int type, bool init, int iter)
@@ -54,9 +94,9 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 	m_type = type;
 	
 	if (m_type == 1)
-		m_relax.SetUseMask(false);
+		m_relax->SetUseMask(false);
 	else if (m_type == 2)
-		m_relax.SetUseMask(true);
+		m_relax->SetUseMask(true);
 	if (m_type != 3)
 		iter = std::max(1, iter / 10);
 
@@ -66,15 +106,15 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 		if (m_type == 3)
 			BuildCloud();
 		m_rest = GetRestDist();
-		m_relax.SetRestDist(static_cast<float>(m_rest));
-		m_relax.SetInflRange(static_cast<float>(m_rest*m_infr*5));
+		m_relax->SetRestDist(static_cast<float>(m_rest));
+		m_relax->SetInflRange(static_cast<float>(m_rest*m_infr*5));
 		m_init = true;
 	}
 
 	for (int it = 0; it < iter; ++it)
 	{
 		if (m_type == 1 || m_type == 2)
-			m_relax.Compute();
+			m_relax->Compute();
 		for (int i = 0; i < m_spring.size(); ++i)
 			UpdateSpringNode(i);
 	}
@@ -223,7 +263,7 @@ void DistCalculator::UpdateSpringNode(int idx)
 	if (m_type == 1 || m_type == 2)
 	{
 		//from relax
-		f1 = m_relax.GetDisplacement(idx);
+		f1 = m_relax->GetDisplacement(idx);
 	}
 	else if (m_type == 3)
 	{

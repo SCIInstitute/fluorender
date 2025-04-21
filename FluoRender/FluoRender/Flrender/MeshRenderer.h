@@ -29,7 +29,6 @@
 #ifndef MeshRenderer_h
 #define MeshRenderer_h
 
-#include <Plane.h>
 #include <vector>
 #include <cstring>
 #include <glm/glm.hpp>
@@ -40,6 +39,10 @@ typedef struct _GLMmodel GLMmodel;
 typedef int GLint;
 #endif
 
+namespace fluo
+{
+	class Plane;
+}
 namespace flvr
 {
 	class VertexArray;

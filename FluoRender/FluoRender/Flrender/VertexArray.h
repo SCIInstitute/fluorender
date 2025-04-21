@@ -29,7 +29,6 @@
 #define VertexArray_h
 
 #include <BBox.h>
-#include <Point.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -44,6 +43,10 @@ typedef unsigned char GLboolean;
 typedef int GLsizei; 
 #endif
 
+namespace fluo
+{
+	class Point;
+}
 namespace flvr
 {
 	enum VABufferType

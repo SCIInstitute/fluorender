@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MCTable.h>
 #include <Utils.h>
 #include <compatibility.h>
+#include <glm.h>
 
 using namespace flrd;
 

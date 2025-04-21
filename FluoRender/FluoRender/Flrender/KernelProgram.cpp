@@ -26,6 +26,10 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
+#include <GL/glew.h>
+#ifdef _WIN32
+#include <GL/wglew.h>
+#endif
 #include <KernelProgram.h>
 #include <Debug.h>
 #ifdef _WIN32

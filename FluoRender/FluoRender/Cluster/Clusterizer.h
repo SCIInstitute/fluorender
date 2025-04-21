@@ -29,10 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _CLUSTERIZER_H_
 
 #include <Progress.h>
-#include <Cell.h>
+#include <memory>
 
 namespace flrd
 {
+	class CelpList;
 	class Clusterizer : public Progress
 	{
 	public:
@@ -54,14 +55,8 @@ namespace flrd
 		void SetEps(double val) { m_eps = val; }
 		double GetEps() { return m_eps; }
 		//in and out cell lists
-		flrd::CelpList& GetInCells()
-		{
-			return m_in_cells;
-		}
-		flrd::CelpList& GetOutCells()
-		{
-			return m_out_cells;
-		}
+		CelpList& GetInCells();
+		CelpList& GetOutCells();
 
 	protected:
 		//settings
@@ -73,8 +68,8 @@ namespace flrd
 		int m_size;
 		double m_eps;
 		//in and out cell lists for tracking
-		flrd::CelpList m_in_cells;
-		flrd::CelpList m_out_cells;
+		std::unique_ptr<flrd::CelpList> m_in_cells;
+		std::unique_ptr<flrd::CelpList> m_out_cells;
 	};
 }
 #endif//_CLUSTERIZER_H_

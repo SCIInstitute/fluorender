@@ -26,11 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Compare.h>
+#include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeRenderer.h>
-#include <KernelProgram.h>
 #include <TextureBrick.h>
 #include <Texture.h>
+#include <VolKernel.h>
+#include <DataManager.h>
 #include <algorithm>
 
 using namespace flrd;

@@ -28,8 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_CompSelector_h
 #define FL_CompSelector_h
 
-#include <Cell.h>
 #include <vector>
+#include <set>
+#include <string>
+#include <memory>
 
 namespace flvr
 {
@@ -37,6 +39,7 @@ namespace flvr
 }
 namespace flrd
 {
+	class CelpList;
 	class ComponentSelector
 	{
 	public:
@@ -53,8 +56,8 @@ namespace flrd
 		}
 		void SetId(const std::string& str);
 		unsigned long long GetId() { return m_id; }
-		void SetList(const CelpList& list) { m_list = list; }
-		CelpList& GetList() { return m_list; }
+		void SetList(const CelpList& list);
+		CelpList& GetList();
 		bool GetIdEmpty() { return m_id_empty; }
 		void SetUseMin(bool val) { m_use_min = val; }
 		void SetUseMax(bool val) { m_use_max = val; }
@@ -93,7 +96,7 @@ namespace flrd
 		unsigned int m_max_num;
 		std::set<unsigned long long> m_sel_ids;
 		int m_sel_mode;//0:single; 1:multiple
-		CelpList m_list;
+		std::unique_ptr<CelpList> m_list;
 
 	private:
 		bool CompareSize(unsigned int size);

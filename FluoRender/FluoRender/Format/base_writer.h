@@ -31,11 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <nrrd.h>
 
-#ifdef STATIC_COMPILE
-	#define nrrdWrap nrrdWrap_va
-	#define nrrdAxisInfoSet nrrdAxisInfoSet_va
-#endif
-
 class BaseWriter
 {
 public:

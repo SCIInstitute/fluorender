@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
+#include <Cell.h>
 #include <set>
 
 using namespace flrd;
@@ -45,7 +46,7 @@ ComponentSelector::ComponentSelector():
 	m_min_num(0),
 	m_max_num(0)
 {
-	//glbin_comp_def.Apply(this);
+	m_list = std::make_unique<CelpList>();
 }
 
 ComponentSelector::~ComponentSelector()
@@ -89,6 +90,16 @@ void ComponentSelector::SetId(const std::string& str)
 	}
 
 	SetId(flrd::Cell::GetKey(id, brick_id), id_empty);
+}
+
+void ComponentSelector::SetList(const CelpList& list)
+{
+	m_list = std::make_unique<CelpList>(list);
+}
+
+CelpList& ComponentSelector::GetList()
+{
+	return *m_list;
 }
 
 void ComponentSelector::SelectFullComp()
@@ -551,7 +562,7 @@ void ComponentSelector::Delete()
 void ComponentSelector::DeleteList()
 {
 	std::set<unsigned long long> ids;
-	for (auto it : m_list)
+	for (auto it : *m_list)
 		ids.insert(it.first);
 
 	bool clear_all = ids.empty();
@@ -662,7 +673,7 @@ void ComponentSelector::SelectList()
 				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
 			key = brick_id;
 			key = (key << 32) | data_label[index];
-			if (m_list.find(key) != m_list.end())
+			if (m_list->find(key) != m_list->end())
 				SelectMask(data_mask, index, 255, tex);
 			else
 				data_mask[index] = 0;
@@ -735,7 +746,7 @@ void ComponentSelector::EraseList()
 				(unsigned long long)nx * (unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
 			key = brick_id;
 			key = (key << 32) | data_label[index];
-			if (m_list.find(key) != m_list.end())
+			if (m_list->find(key) != m_list->end())
 				SelectMask(data_mask, index, 0, tex);
 			else
 				data_mask[index] = 0;

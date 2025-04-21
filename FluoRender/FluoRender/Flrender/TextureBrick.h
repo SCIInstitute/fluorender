@@ -31,7 +31,6 @@
 
 #include <Ray.h>
 #include <BBox.h>
-#include <Plane.h>
 #include <vector>
 #include <nrrd.h>
 #include <stdint.h>

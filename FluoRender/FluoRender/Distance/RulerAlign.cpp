@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Quaternion.h>
 #include <Utils.h>
 #include <RenderView.h>
+#include <Ruler.h>
 #include <Pca.h>
 #include <Cov.h>
 
@@ -48,6 +49,18 @@ void RulerAlign::AddRuler(Ruler* ruler)
 	{
 		if (ruler->GetPoint(static_cast<int>(i), p))
 			m_point_list.push_back(p);
+	}
+}
+
+void RulerAlign::SetRulerList(RulerList* list)
+{
+	Clear();
+	for (size_t i = 0; i < list->size(); ++i)
+	{
+		Ruler* ruler = (*list)[i];
+		if (!ruler)
+			continue;
+		AddRuler(ruler);
 	}
 }
 

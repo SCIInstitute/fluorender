@@ -28,12 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_BasicStat_h
 #define FL_BasicStat_h
 
-#include <DataManager.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
+#include <vector>
 #include <map>
 
 class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class BasicStat

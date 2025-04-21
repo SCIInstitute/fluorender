@@ -27,8 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ScriptBreakDlg.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <MainFrame.h>
 #include <MoviePanel.h>
+#include <ScriptProc.h>
+#include <MovieMaker.h>
 
 ScriptBreakDlg::ScriptBreakDlg(MainFrame* frame) :
 	PropPanel(frame, frame,

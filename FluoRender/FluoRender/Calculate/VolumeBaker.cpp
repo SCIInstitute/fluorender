@@ -124,20 +124,20 @@ void VolumeBaker::Bake(bool replace)
 	//write to nrrd
 	Nrrd* nrrd_result = nrrdNew();
 	if (m_bits == 8)
-		nrrdWrap(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
+		nrrdWrap_va(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 	else if (m_bits == 16)
-		nrrdWrap(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
+		nrrdWrap_va(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
 			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
 
 	//spacing
 	double spcx, spcy, spcz;
 	m_input->GetSpacings(spcx, spcy, spcz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
 		spcy*m_ny, spcz*m_nz);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
 		(size_t)m_ny, (size_t)m_nz);
 
 	if (replace)

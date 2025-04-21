@@ -26,7 +26,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <CompGenerator.h>
+#include <KernelProgram.h>
 #include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 #include <cl_code.h>
 #include <cl_code_db.h>
 #include <EntryHist.h>
@@ -34,13 +37,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Reshape.h>
 #include <DataManager.h>
 #include <Texture.h>
-#include <KernelProgram.h>
+#include <TextureBrick.h>
 #include <VolKernel.h>
+#include <VolumeRenderer.h>
 #include <TableHistParams.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
-#include <Names.h>
-#include <MainSettings.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>

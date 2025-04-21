@@ -34,11 +34,13 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/shared_ptr.hpp>
 #include <list>
 #include <vector>
-#include <Cell.h>
 #include <Progress.h>
+#include <memory>
 
 namespace flrd
 {
+	class CelpList;
+
 	typedef boost::qvm::vec<double, 3> EmVec;
 	typedef boost::qvm::mat<double, 3, 3> EmMat;
 
@@ -136,11 +138,7 @@ namespace flrd
 	class ClusterMethod : public Progress
 	{
 	public:
-		ClusterMethod() :
-			m_id_counter(1),
-			m_use_init_cluster(false),
-			m_spc({1, 1, 1}),
-			Progress() {};
+		ClusterMethod();
 		virtual ~ClusterMethod() {};
 
 		void SetData(Cluster &data)
@@ -169,8 +167,7 @@ namespace flrd
 		virtual bool Execute() = 0;
 		virtual float GetProb() = 0;
 
-		CelpList& GetCellList()
-		{ return m_out_cells; }
+		CelpList& GetCellList();
 
 	protected:
 		Cluster m_data;
@@ -180,7 +177,7 @@ namespace flrd
 		bool m_use_init_cluster;
 		EmVec m_spc;//spacings
 		//output cells
-		CelpList m_out_cells;
+		std::unique_ptr<CelpList> m_out_cells;
 	};
 }
 #endif//FL_ClusterMethod_h

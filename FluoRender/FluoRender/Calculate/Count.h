@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Count_h
 #define FL_Count_h
 
-#include <DataManager.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
-
 class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class CountVoxels

@@ -28,58 +28,30 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_DistCalculator_h
 #define FL_DistCalculator_h
 
-#include <Cell.h>
-#include <Ruler.h>
-#include <Relax.h>
+#include <Point.h>
+#include <memory>
 
 class VolumeData;
 namespace flrd
 {
+	class Ruler;
+	class RulerPoint;
+	class CelpList;
+	class Relax;
 	class DistCalculator
 	{
 	public:
 		DistCalculator();
 		~DistCalculator();
 
-		void SetRuler(Ruler* ruler)
-		{
-			if (ruler != m_ruler)
-			{
-				m_ruler = ruler;
-				m_init = false;
-			}
-			m_relax.SetRuler(ruler);
-		}
-		Ruler* GetRuler()
-		{
-			return m_ruler;
-		}
-		void SetCelpList(CelpList* list)
-		{
-			if (list != m_celps)
-			{
-				m_celps = list;
-				m_init = false;
-			}
-		}
-		CelpList* GetCelpList()
-		{
-			return m_celps;
-		}
-		void SetVolume(VolumeData* vd)
-		{
-			m_vd = vd;
-			m_relax.SetVolume(vd);
-		}
+		void SetRuler(Ruler* ruler);
+		Ruler* GetRuler();
+		void SetCelpList(CelpList* list);
+		CelpList* GetCelpList();
+		void SetVolume(VolumeData* vd);
 
-		void SetF1(double val)
-		{
-			m_f1 = val;
-		}
-		void SetInfr(double val)
-		{
-			m_infr = val;
-		}
+		void SetF1(double val) { m_f1 = val; }
+		void SetInfr(double val) { m_infr = val; }
 
 		void CenterRuler(int type, bool init, int iter=1);
 		void Project();
@@ -111,7 +83,7 @@ namespace flrd
 		std::vector<fluo::Point> m_cloud;
 
 		//volume relax
-		Relax m_relax;
+		std::unique_ptr<Relax> m_relax;
 
 	private:
 		void BuildSpring();

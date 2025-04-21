@@ -26,9 +26,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ClusterMethod.h>
+#include <Cell.h>
 #include <boost/qvm/vec_access.hpp>
 
 using namespace flrd;
+
+ClusterMethod::ClusterMethod() :
+	m_id_counter(1),
+	m_use_init_cluster(false),
+	m_spc({1, 1, 1}),
+	Progress()
+{
+	m_out_cells = std::make_unique<CelpList>();
+}
 
 void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 {
@@ -52,7 +62,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 {
 	m_id_list.clear();
 	if (out_cells)
-		m_out_cells.clear();
+		m_out_cells->clear();
 
 	unsigned int id2 = id;
 	unsigned long long index;
@@ -106,7 +116,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 		m_id_list.push_back(id2);
 
 		if (out_cells)
-			m_out_cells.insert(std::pair<unsigned int, Celp>
+			m_out_cells->insert(std::pair<unsigned int, Celp>
 				(id2, Celp(cell)));
 
 	}
@@ -137,4 +147,9 @@ void ClusterMethod::AddIDsToData()
 			(*iter)->cid = static_cast<int>(ii);
 		}
 	}
+}
+
+CelpList& ClusterMethod::GetCellList()
+{
+	return *m_out_cells;
 }

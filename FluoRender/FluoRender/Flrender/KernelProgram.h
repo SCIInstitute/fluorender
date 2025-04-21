@@ -29,7 +29,6 @@
 #ifndef KernelProgram_h
 #define KernelProgram_h
 
-#include <GL/glew.h>
 #if defined(__linux__)
 #include <GL/glx.h>
 #endif
@@ -45,6 +44,10 @@
 #include <string>
 #include <vector>
 #include <set>
+
+#ifndef __glew_h__
+typedef unsigned int GLuint;
+#endif
 
 namespace flvr
 {

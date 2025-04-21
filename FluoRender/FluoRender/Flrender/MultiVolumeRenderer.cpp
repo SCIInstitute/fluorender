@@ -28,6 +28,8 @@
 
 #include <GL/glew.h>
 #include <MultiVolumeRenderer.h>
+#include <Global.h>
+#include <MainSettings.h>
 #include <VolumeRenderer.h>
 #include <ShaderProgram.h>
 #include <Texture.h>
@@ -36,8 +38,8 @@
 #include <VertexArray.h>
 #include <ImgShader.h>
 #include <VolShader.h>
-#include <Global.h>
-#include <MainSettings.h>
+#include <Ray.h>
+#include <Plane.h>
 #include <compatibility.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
@@ -45,7 +47,7 @@
 using namespace flvr;
 
 MultiVolumeRenderer::MultiVolumeRenderer()
-	: mode_(TextureRenderer::MODE_OVER),
+	: mode_(RENDER_MODE_OVER),
 	depth_peel_(0),
 	blend_num_bits_(32),
 	blend_slices_(false),
@@ -90,7 +92,7 @@ MultiVolumeRenderer::~MultiVolumeRenderer()
 }
 
 //mode and sampling rate
-void MultiVolumeRenderer::set_mode(const TextureRenderer::RenderMode& mode)
+void MultiVolumeRenderer::set_mode(const RenderMode& mode)
 {
 	mode_ = mode;
 }
@@ -212,14 +214,14 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	glEnable(GL_BLEND);
 	switch(mode_)
 	{
-	case TextureRenderer::MODE_OVER:
+	case RENDER_MODE_OVER:
 		glBlendEquation(GL_FUNC_ADD);
 		if (glbin_settings.m_update_order == 0)
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		else if (glbin_settings.m_update_order == 1)
 			glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 		break;
-	case TextureRenderer::MODE_MIP:
+	case RENDER_MODE_MIP:
 		glBlendEquation(GL_MAX);
 		glBlendFunc(GL_ONE, GL_ONE);
 		break;
@@ -583,7 +585,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->depth_peel_, true,
 				grad,
 				vr_list_[tn]->ml_mode_,
-				vr_list_[tn]->mode_ == TextureRenderer::MODE_MIP,
+				vr_list_[tn]->mode_ == RENDER_MODE_MIP,
 				vr_list_[tn]->colormap_mode_,
 				vr_list_[tn]->colormap_,
 				vr_list_[tn]->colormap_proj_,

@@ -33,6 +33,7 @@
 #include <MshShader.h>
 #include <ShaderProgram.h>
 #include <Global.h>
+#include <Plane.h>
 #include <glm.h>
 #include <iostream>
 #include <vector>

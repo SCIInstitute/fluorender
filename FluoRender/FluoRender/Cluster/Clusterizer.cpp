@@ -27,19 +27,29 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Clusterizer.h>
 #include <Global.h>
+#include <ComponentDefault.h>
 #include <ClusterMethod.h>
 #include <dbscan.h>
 #include <kmeans.h>
 #include <exmax.h>
 #include <DataManager.h>
 #include <Texture.h>
-#include <ComponentDefault.h>
+#include <VolumeRenderer.h>
+#include <Cell.h>
 
 using namespace flrd;
 
-Clusterizer::Clusterizer()
+Clusterizer::Clusterizer():
+	Progress(),
+	m_method(0),
+	m_num(0),
+	m_maxiter(0),
+	m_tol(0.0f),
+	m_size(0),
+	m_eps(0.0)
 {
-	//glbin_comp_def.Apply(this);
+	m_in_cells = std::make_unique<CelpList>();
+	m_out_cells = std::make_unique<CelpList>();
 }
 
 Clusterizer::~Clusterizer()
@@ -50,8 +60,8 @@ void Clusterizer::Compute()
 {
 	SetProgress(0, "Computing clusters.");
 
-	m_in_cells.clear();
-	m_out_cells.clear();
+	m_in_cells->clear();
+	m_out_cells->clear();
 
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
@@ -223,8 +233,8 @@ void Clusterizer::Compute()
 				pnt, data_value, cid);
 
 			//add to list
-			auto iter = m_in_cells.find(label_value);
-			if (iter != m_in_cells.end())
+			auto iter = m_in_cells->find(label_value);
+			if (iter != m_in_cells->end())
 			{
 				iter->second->Inc(i, j, k, data_value);
 			}
@@ -232,7 +242,7 @@ void Clusterizer::Compute()
 			{
 				flrd::Cell* cell = new flrd::Cell(label_value);
 				cell->Inc(i, j, k, data_value);
-				m_in_cells.insert(std::pair<unsigned int, flrd::Celp>
+				m_in_cells->insert(std::pair<unsigned int, flrd::Celp>
 					(label_value, flrd::Celp(cell)));
 			}
 		}
@@ -251,7 +261,7 @@ void Clusterizer::Compute()
 	{
 		method->SetRange(90, 100);
 		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
-		m_out_cells = method->GetCellList();
+		m_out_cells = std::make_unique<CelpList>(method->GetCellList());
 		vd->GetVR()->clear_tex_label();
 		//m_view->RefreshGL(39);//refresh needs to be performed by caller
 	}
@@ -260,4 +270,14 @@ void Clusterizer::Compute()
 
 	SetRange(0, 100);
 	SetProgress(0, "");
+}
+
+//in and out cell lists
+CelpList& Clusterizer::GetInCells()
+{
+	return *m_in_cells;
+}
+CelpList& Clusterizer::GetOutCells()
+{
+	return *m_out_cells;
 }

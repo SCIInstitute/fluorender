@@ -26,11 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Cov.h>
+#include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeRenderer.h>
-#include <KernelProgram.h>
 #include <TextureBrick.h>
 #include <Texture.h>
+#include <VolKernel.h>
+#include <DataManager.h>
 #include <algorithm>
 
 using namespace flrd;
@@ -317,3 +319,42 @@ bool Cov::Compute(int type)
 	return result;
 }
 
+std::vector<double> Cov::GetCov()
+{
+	if (m_vd)
+	{
+		//set to correct spacings
+		double spcx, spcy, spcz;
+		m_vd->GetSpacings(spcx, spcy, spcz);
+		m_cov[0] *= static_cast<float>(spcx * spcx);
+		m_cov[1] *= static_cast<float>(spcx * spcy);
+		m_cov[2] *= static_cast<float>(spcx * spcz);
+		m_cov[3] *= static_cast<float>(spcy * spcy);
+		m_cov[4] *= static_cast<float>(spcy * spcz);
+		m_cov[5] *= static_cast<float>(spcz * spcz);
+	}
+
+	std::vector<double> cov;
+	for (int i = 0; i < 6; ++i)
+		cov.push_back(m_cov[i]);
+	return cov;
+}
+
+fluo::Point Cov::GetCenter()
+{
+	if (m_vd)
+	{
+		//set to correct spacings
+		double spcx, spcy, spcz;
+		m_vd->GetSpacings(spcx, spcy, spcz);
+		m_center[0] *= static_cast<float>(spcx);
+		m_center[1] *= static_cast<float>(spcy);
+		m_center[2] *= static_cast<float>(spcz);
+	}
+
+	fluo::Point center;
+	center.x(m_center[0]);
+	center.y(m_center[1]);
+	center.z(m_center[2]);
+	return center;
+}

@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ModalDlg.h>
 #include <Global.h>
+#include <GlobalStates.h>
 
 ModalDlg::ModalDlg(wxWindow* parent,
 	const wxString& message,

@@ -2703,11 +2703,11 @@ void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 		unsigned long long mem_size = (unsigned long long)resx *
 			(unsigned long long)resy * (unsigned long long)resz;
 		unsigned int* val32 = new (std::nothrow) unsigned int[mem_size]();
-		nrrdWrap(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
-		nrrdAxisInfoSet(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-		nrrdAxisInfoSet(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet(label, nrrdAxisInfoMax, spcx * resx, spcy * resy, spcz * resz);
-		nrrdAxisInfoSet(label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdWrap_va(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoMax, spcx * resx, spcy * resy, spcz * resz);
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
 	}
 	vol_cache.nrrd_label = label;
 	vol_cache.label = label->data;

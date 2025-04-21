@@ -31,6 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Ruler.h>
 #include <VolKernel.h>
 #include <DataManager.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
 
 using namespace flrd;
 

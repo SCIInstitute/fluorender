@@ -28,6 +28,7 @@
 
 #include <GL/glew.h>
 #include <VertexArray.h>
+#include <Point.h>
 #include <compatibility.h>
 
 namespace flvr

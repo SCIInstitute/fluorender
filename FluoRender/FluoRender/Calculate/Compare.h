@@ -28,12 +28,15 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Compare_h
 #define FL_Compare_h
 
-#include <DataManager.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
+#include <string>
 #include <functional>
 
 class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+	class Argument;
+}
 namespace flrd
 {
 	typedef std::function<void(const std::string&)> ChannelCompareFunc;

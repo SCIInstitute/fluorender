@@ -142,7 +142,12 @@ RenderCanvas::~RenderCanvas()
 	}
 
 	if (m_render_view)
+	{
+		Root* root = glbin_data_manager.GetRoot();
+		if (root)
+			root->DeleteView(m_render_view);
 		delete m_render_view;
+	}
 
 #ifdef _WIN32
 	//tablet
@@ -160,8 +165,7 @@ RenderCanvas::~RenderCanvas()
 	if (m_full_screen)
 	{
 		m_full_screen = false;
-		m_renderview_panel->m_canvas = 0;
-		m_renderview_panel->m_full_frame = 0;
+		m_renderview_panel->SetFullFrame(0);
 		if (m_frame)
 		{
 			//m_frame->EraseAllCanvases();
@@ -435,20 +439,25 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 		return;
 
 	m_full_screen = false;
+	wxFrame* full_frame = m_renderview_panel->GetFullFrame();
 	if (glbin_states.m_benchmark)
 	{
-		if (m_renderview_panel->m_full_frame)
-			m_renderview_panel->m_full_frame->Hide();
+		if (full_frame)
+			full_frame->Hide();
 		if (m_frame)
 			m_frame->Close();
 	}
-	else if (GetParent() == m_renderview_panel->m_full_frame)
+	else if (GetParent() == full_frame)
 	{
 		Reparent(m_renderview_panel);
-		m_renderview_panel->m_view_sizer->Clear();
-		m_renderview_panel->m_view_sizer->Add(this, 1, wxEXPAND);
+		wxBoxSizer* view_sizer = m_renderview_panel->GetViewSizer();
+		if (view_sizer)
+		{
+			view_sizer->Clear();
+			view_sizer->Add(this, 1, wxEXPAND);
+		}
 		m_renderview_panel->Layout();
-		m_renderview_panel->m_full_frame->Hide();
+		full_frame->Hide();
 		if (m_frame)
 		{
 #ifdef _WIN32

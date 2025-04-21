@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <VolumeRenderer.h>
 #include <TrackMap.h>
+#include <Cell.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
 
@@ -41,12 +42,22 @@ ComponentEditor::ComponentEditor() :
 	m_id(0),
 	m_id_empty(true)
 {
-
+	m_list = std::make_unique<CelpList>();
 }
 
 ComponentEditor::~ComponentEditor()
 {
 
+}
+
+void ComponentEditor::SetList(const CelpList& list)
+{
+	m_list = std::make_unique<CelpList>(list);
+}
+
+CelpList& ComponentEditor::GetList()
+{
+	return *m_list;
 }
 
 std::string ComponentEditor::GetOutput()
@@ -381,8 +392,8 @@ void ComponentEditor::ReplaceList()
 			continue;
 		}
 
-		cell_iter = m_list.find(old_id);
-		if (cell_iter != m_list.end())
+		cell_iter = m_list->find(old_id);
+		if (cell_iter != m_list->end())
 		{
 			new_id = m_id;
 			while (vd->SearchLabel(new_id))
@@ -457,7 +468,7 @@ void ComponentEditor::CombineList()
 	if (!vd)
 		return;
 
-	if (m_list.size() <= 1)
+	if (m_list->size() <= 1)
 		return;//nothing to combine
 	//trace group
 	TrackGroup *trkg = glbin_current.GetTrackGroup();
@@ -469,8 +480,8 @@ void ComponentEditor::CombineList()
 	//find the largest cell in the list
 	flrd::Celp cell;
 	flrd::CelpListIter cell_iter;
-	for (cell_iter = m_list.begin();
-		cell_iter != m_list.end(); ++cell_iter)
+	for (cell_iter = m_list->begin();
+		cell_iter != m_list->end(); ++cell_iter)
 	{
 		if (cell)
 		{
@@ -512,8 +523,8 @@ void ComponentEditor::CombineList()
 		if (!data_mask[index] ||
 			!data_label[index])
 			continue;
-		cell_iter = m_list.find(data_label[index]);
-		if (cell_iter != m_list.end())
+		cell_iter = m_list->find(data_label[index]);
+		if (cell_iter != m_list->end())
 			data_label[index] = cell->Id();
 	}
 	//invalidate label mask in gpu
@@ -522,7 +533,7 @@ void ComponentEditor::CombineList()
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 
 	//modify graphs
-	glbin_trackmap_proc.CombineCells(cell, m_list,
+	glbin_trackmap_proc.CombineCells(cell, *m_list,
 		cur_time);
 }
 

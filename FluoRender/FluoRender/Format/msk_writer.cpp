@@ -80,8 +80,8 @@ void MSKWriter::Save(const std::wstring& filename, int mode)
 	if (m_use_spacings &&
 		m_data->dim == 3)
 	{
-		nrrdAxisInfoSet(m_data, nrrdAxisInfoSpacing, m_spcx, m_spcy, m_spcz);
-		nrrdAxisInfoSet(m_data, nrrdAxisInfoMax,
+		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoSpacing, m_spcx, m_spcy, m_spcz);
+		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoMax,
 			m_spcx*m_data->axis[0].size,
 			m_spcy*m_data->axis[1].size,
 			m_spcz*m_data->axis[2].size);

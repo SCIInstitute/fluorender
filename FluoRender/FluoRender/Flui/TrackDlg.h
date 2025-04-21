@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _TRACEDLG_H_
 
 #include <PropPanel.h>
-#include <Cell.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
@@ -37,6 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <vector>
 
+namespace flrd
+{
+	class CelpList;
+}
 class TrackDlg;
 class wxSingleSlider;
 class TrackListCtrl : public wxListCtrl

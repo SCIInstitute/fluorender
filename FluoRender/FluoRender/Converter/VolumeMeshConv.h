@@ -31,8 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Vector.h>
 #include <Progress.h>
 #include <vector>
-#include <glm.h>
 #include <nrrd.h>
+
+typedef struct _GLMmodel GLMmodel;
 
 namespace flrd
 {

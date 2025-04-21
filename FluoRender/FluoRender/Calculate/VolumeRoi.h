@@ -28,13 +28,16 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Volume_Roi_h
 #define FL_Volume_Roi_h
 
-#include <DataManager.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
+#include <Transform.h>
 
 class VolumeData;
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
+	class Ruler;
 	class VolumeRoi
 	{
 	public:
