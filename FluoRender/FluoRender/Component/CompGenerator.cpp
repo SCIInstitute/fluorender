@@ -43,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
+#include <Plane.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>

@@ -26,8 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <GL/glew.h>
 #include <LookingGlassRenderer.h>
 #include <Global.h>
+#include <MainSettings.h>
+#include <Framebuffer.h>
+#include <ShaderProgram.h>
+#include <ImgShader.h>
+#include <LightFieldShader.h>
+#include <VertexArray.h>
 #include <HoloPlayCore.h>
 #include <compatibility.h>
 #include <string>

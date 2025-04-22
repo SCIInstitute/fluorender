@@ -27,6 +27,8 @@
 //  
 
 #include <VolumeLoader.h>
+#include <TextureBrick.h>
+#include <DataManager.h>
 
 VolumeLoader::VolumeLoader()
 {
@@ -236,4 +238,14 @@ void VolumeLoader::RemoveBrickVD(VolumeData *vd)
 		else
 			ite++;
 	}
+}
+
+bool VolumeLoader::sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2)
+{
+	return b2.brick->get_d() > b1.brick->get_d();
+}
+
+bool VolumeLoader::sort_data_asc(const VolumeLoaderData b1, const VolumeLoaderData b2)
+{
+	return b2.brick->get_d() < b1.brick->get_d();
 }

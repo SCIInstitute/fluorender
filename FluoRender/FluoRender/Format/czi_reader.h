@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 #include <limits>
-#include <algorithm>
 
 #define HDRSIZE	32//header size
 #define FIXSIZE	256//fixed part size

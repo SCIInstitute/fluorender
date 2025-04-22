@@ -26,14 +26,32 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 #include <JVMInitializer.h>
-#include <SettingDlg.h>
+#include <compatibility.h>
 #include <Debug.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <filesystem>
+#ifdef __linux__
+#include <dlfcn.h>
+#endif
 
 decltype(&JNIEnv::FindClass) m_FindClass_Ptr = nullptr;
+
+JVMInitializer::JVMInitializer(const std::vector<std::string>& args)
+{
+	m_VMargs = std::make_unique<JavaVMInitArgs>();
+	m_valid = create_JVM(args);
+}
+
+JVMInitializer::~JVMInitializer()
+{
+	destroyJVM();
+}
 
 bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 {
@@ -86,9 +104,9 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 						filename.find("ome-xml") != std::string::npos || filename.find("ome-codecs") != std::string::npos ||
 						filename.find("ome-common") != std::string::npos) {
 						if (jvm_bioformats_path.empty())
-							jvm_bioformats_path = name + std::filesystem::path::preferred_separator + filename;
+							jvm_bioformats_path = (p / filename).string();
 						else
-							jvm_bioformats_path += getPathSeparator() + name + std::filesystem::path::preferred_separator + filename;
+							jvm_bioformats_path += getPathSeparator() + (p / filename).string();
 					}
 				}
 
@@ -109,12 +127,12 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 						filename.find("snakeyaml-") != std::string::npos || filename.find("xercesImpl-") != std::string::npos ||
 						filename.find("xml-apis-ext-") != std::string::npos || filename.find("xmpcore-") != std::string::npos) {
 						if (jvm_bioformats_path.empty())
-							jvm_bioformats_path = name + std::filesystem::path::preferred_separator + filename;
+							jvm_bioformats_path = (p / filename).string();
 						else
-							jvm_bioformats_path += getPathSeparator() + name + std::filesystem::path::preferred_separator + filename;
+							jvm_bioformats_path += getPathSeparator() + (p / filename).string();
 					}
 					else if (filename.find("ij-") != std::string::npos) {
-						jvm_ij_path = name + std::filesystem::path::preferred_separator + filename;
+						jvm_ij_path = (p / filename).string();
 					}
 				}
 
@@ -123,7 +141,7 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 				for (const auto& entry : std::filesystem::directory_iterator(name)) {
 					std::string filename = entry.path().filename().string();
 					if (filename.find("bio-formats_plugins-") != std::string::npos) {
-						jvm_bioformats_path += getPathSeparator() + name + std::filesystem::path::preferred_separator + filename;
+						jvm_bioformats_path += getPathSeparator() + (p / filename).string();
 					}
 				}
 
@@ -183,7 +201,7 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 #endif
 
 #ifdef _WIN32
-	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(m_jvm_dll, "JNI_CreateJavaVM");
+	m_createJVM_Ptr = (decltype(&JNI_CreateJavaVM))GetProcAddress(HMODULE(m_jvm_dll), "JNI_CreateJavaVM");
 #else
 	m_createJVM_Ptr = (CreateJavaVM_t*)dlsym(m_jvm_dll, "JNI_CreateJavaVM");
 #endif
@@ -219,14 +237,14 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 
 	options[0].optionString = const_cast<char*>(imageJPath.c_str());
 
-	m_VMargs.version = JNI_VERSION_1_6;             // minimum Java version
-	m_VMargs.nOptions = 1;                          // number of options
-	m_VMargs.options = options;
-	m_VMargs.ignoreUnrecognized = false;     // invalid options make the JVM init fail
+	m_VMargs->version = JNI_VERSION_1_6;             // minimum Java version
+	m_VMargs->nOptions = 1;                          // number of options
+	m_VMargs->options = options;
+	m_VMargs->ignoreUnrecognized = false;     // invalid options make the JVM init fail
 
 	try
 	{
-		jint rc = m_createJVM_Ptr(&m_pJvm, (void**)&m_pEnv, &m_VMargs);
+		jint rc = m_createJVM_Ptr(&m_pJvm, (void**)&m_pEnv, m_VMargs.get());
 		delete[] options;
 		if (rc != JNI_OK)
 		{
@@ -250,7 +268,7 @@ void JVMInitializer::destroyJVM()
 		m_pJvm->DestroyJavaVM();
 #ifdef _WIN32
 	if (m_jvm_dll)
-		FreeLibrary(m_jvm_dll);
+		FreeLibrary(HMODULE(m_jvm_dll));
 #else
 	if (m_jvm_dll)
 		dlclose(m_jvm_dll);

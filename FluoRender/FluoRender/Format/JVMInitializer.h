@@ -29,35 +29,23 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _JVMINITIALIZER_H_
 #define _JVMINITIALIZER_H_
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 #include <jni.h>
 #include <vector>
-#include <iostream>
-#include <compatibility.h>
-
-#ifdef __linux__
-#include <dlfcn.h>
-#endif
+#include <string>
+#include <memory>
 
 class JVMInitializer
 {
 public:
-	JVMInitializer(const std::vector<std::string>& args) { m_valid = create_JVM(args); };
-	~JVMInitializer() {destroyJVM();};
+	JVMInitializer(const std::vector<std::string>& args);
+	~JVMInitializer();
 
 	bool IsValid() { return m_valid; }
 
-#ifdef _WIN32
-	HMODULE m_jvm_dll = nullptr;
-#else
 	void* m_jvm_dll = nullptr;
-#endif
 	JavaVM* m_pJvm = nullptr;                      // Pointer to the JVM (Java Virtual Machine)
 	JNIEnv* m_pEnv = nullptr;                      // Pointer to native interface
-	JavaVMInitArgs m_VMargs;
+	std::unique_ptr<JavaVMInitArgs> m_VMargs;
 
 #ifdef _WIN32
 	decltype(&JNI_CreateJavaVM) m_createJVM_Ptr = nullptr;

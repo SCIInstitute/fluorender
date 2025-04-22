@@ -28,9 +28,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Directory.h>
 #include <Main.h>
-#include <MainFrame.h>
-#include <compatibility.h>
 #include <Global.h>
+#include <MainSettings.h>
+#include <MainFrame.h>
+#include <DataManager.h>
+#include <compatibility.h>
 #include <cstdio>
 #include <iostream>
 #include <wx/cmdline.h>

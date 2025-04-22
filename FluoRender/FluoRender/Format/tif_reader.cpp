@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <tif_reader.h>
 #include <Global.h>
+#include <MainSettings.h>
 #include <compatibility.h>
 #include <sstream>
 #include <iomanip>

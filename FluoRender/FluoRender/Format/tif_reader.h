@@ -29,13 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _TIF_READER_H_
 
 #include <base_reader.h>
-#include <cstdio>
-#include <vector>
 #include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <algorithm>
-#include <stdint.h>
 #include <string>
 #include <deque>
 #include <set>

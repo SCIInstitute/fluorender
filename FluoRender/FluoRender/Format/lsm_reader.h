@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _LSM_READER_H_
 
 #include <base_reader.h>
+#include <string>
 #include <vector>
 
 class LSMReader : public BaseReader

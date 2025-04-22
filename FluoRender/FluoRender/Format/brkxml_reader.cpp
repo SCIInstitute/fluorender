@@ -1,6 +1,7 @@
 ﻿#include <brkxml_reader.h>
 #include <TextureRenderer.h>
 #include <ShaderProgram.h>
+#include <TextureBrick.h>
 #include <Utils.h>
 #include <compatibility.h>
 #include <fstream>

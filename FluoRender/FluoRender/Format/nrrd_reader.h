@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NRRD_READER_H_
 
 #include <base_reader.h>
-#include <stdio.h>
+#include <string>
 #include <vector>
 
 class NRRDReader : public BaseReader

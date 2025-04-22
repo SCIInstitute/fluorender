@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <OpenXrRenderer.h>
 
+typedef unsigned int GLenum;
+typedef unsigned int GLuint;
 struct GLFormat
 {
 	GLenum internalFormat;

@@ -29,13 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _MPG_READER_H_
 
 #include <base_reader.h>
-extern "C"
-{
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
-}
+
+struct AVFormatContext;
+struct AVCodecContext;
+struct SwsContext;
+struct AVFrame;
 
 class MPGReader : public BaseReader
 {

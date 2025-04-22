@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Project.h>
 #include <VertexArray.h>
 #include <Texture.h>
+#include <TextureBrick.h>
 #include <Histogram.h>
 #include <EntryHist.h>
 #include <EntryParams.h>

@@ -27,6 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <mpg_reader.h>
 #include <compatibility.h>
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libavutil/imgutils.h>
+}
 
 MPGReader::MPGReader():
 	BaseReader()

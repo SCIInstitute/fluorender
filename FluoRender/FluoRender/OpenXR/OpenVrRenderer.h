@@ -30,9 +30,16 @@ DEALINGS IN THE SOFTWARE.
 #define OpenVrRenderer_h
 
 #include <BaseXrRenderer.h>
-#include <openvr.h>
 #include <glm/gtc/type_ptr.hpp>
 
+namespace flvr
+{
+	class Framebuffer;
+}
+namespace vr
+{
+	class IVRSystem;
+}
 class OpenVrRenderer : public BaseXrRenderer
 {
 public:

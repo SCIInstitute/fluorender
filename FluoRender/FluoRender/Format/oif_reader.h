@@ -29,10 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _OIF_READER_H_
 
 #include <base_reader.h>
-#include <stdio.h>
+#include <string>
 #include <vector>
 #include <fstream>
-#include <iostream>
 
 class OIFReader : public BaseReader
 {

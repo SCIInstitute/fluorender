@@ -36,20 +36,12 @@
 #include <stdint.h>
 #include <map>
 
-#ifndef __glew_h__
-typedef unsigned int GLenum;
-#endif
-
-namespace flvr {
-
-	using std::vector;
-
-	// We use no more than 2 texture units.
-	// GL_MAX_TEXTURE_UNITS is the actual maximum.
-	//we now added maximum to 4
-	//which can include mask volumes
+// We use no more than 2 texture units.
+// GL_MAX_TEXTURE_UNITS is the actual maximum.
+//we now added maximum to 4
+//which can include mask volumes
 #define TEXTURE_MAX_COMPONENTS	4
-	//these are the render modes used to determine if each mode is drawn
+//these are the render modes used to determine if each mode is drawn
 #define TEXTURE_RENDER_MODES	5
 
 #define BRICK_FILE_TYPE_NONE	0
@@ -57,7 +49,14 @@ namespace flvr {
 #define BRICK_FILE_TYPE_JPEG	2
 #define BRICK_FILE_TYPE_ZLIB	3
 
-	class FileLocInfo {
+#ifndef __glew_h__
+typedef unsigned int GLenum;
+#endif
+
+namespace flvr
+{
+	class FileLocInfo
+	{
 	public:
 		FileLocInfo()
 		{
@@ -181,10 +180,10 @@ namespace flvr {
 		virtual void* tex_data_brk(int c, const FileLocInfo* finfo);
 
 		void compute_polygons(fluo::Ray& view, double tmin, double tmax, double dt,
-			vector<float>& vertex, vector<uint32_t>& index, vector<uint32_t>& size);
+			std::vector<float>& vertex, std::vector<uint32_t>& index, std::vector<uint32_t>& size);
 		void compute_polygons(fluo::Ray& view, double dt,
-			vector<float>& vertex, vector<uint32_t>& index,
-			vector<uint32_t>& size, bool bricks=false);
+			std::vector<float>& vertex, std::vector<uint32_t>& index,
+			std::vector<uint32_t>& size, bool bricks=false);
 		
 		//set d
 		void set_d(double d) { d_ = d; }

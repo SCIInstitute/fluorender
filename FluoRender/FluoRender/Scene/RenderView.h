@@ -31,16 +31,19 @@ DEALINGS IN THE SOFTWARE.
 
 #include <DataManager.h>
 #include <Quaternion.h>
-#include <TextRenderer.h>
 #include <Size.h>
 #include <Value.hpp>
 #include <glm/glm.hpp>
 #include <string>
-
+#include <memory>
 #if defined(_WIN32) && defined(USE_XINPUT)
 #include <XInput/XboxController.h>
 #endif
 
+namespace flvr
+{
+	class TextRenderer;
+}
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
 #define INIT_TRANSL  4
@@ -373,7 +376,7 @@ public:
 	bool GetIntp() { return m_intp; }
 
 	//text renderer
-	flvr::TextRenderer* GetTextRenderer() { return &m_text_renderer; }
+	flvr::TextRenderer* GetTextRenderer();
 
 	//force draw
 	bool ForceDraw();//return if swap buffers
@@ -746,7 +749,7 @@ private:
 	glm::mat4 m_tex_mat = glm::mat4(1.0);
 
 	//text renderer
-	flvr::TextRenderer m_text_renderer;
+	std::unique_ptr<flvr::TextRenderer> m_text_renderer;
 
 	//enlargement
 	bool m_keep_enlarge;

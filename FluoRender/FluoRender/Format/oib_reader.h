@@ -28,12 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OIB_READER_H_
 #define _OIB_READER_H_
 
-#include <pole.h>
-#include <stdio.h>
-#include <compatibility.h>
-#include <vector>
 #include <base_reader.h>
+#include <string>
+#include <vector>
 
+namespace POLE
+{
+	class Storage;
+}
 class OIBReader : public BaseReader
 {
 public:

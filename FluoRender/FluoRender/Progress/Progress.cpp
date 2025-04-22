@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <Global.h>
 #include <MainFrame.h>
+#include <DataManager.h>
+#include <MovieMaker.h>
 
 Progress::Progress() :
 	m_progress_func(0),

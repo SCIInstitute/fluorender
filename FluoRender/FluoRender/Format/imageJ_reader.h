@@ -29,15 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _IMAGEJ_READER_H_
 
 #include <base_reader.h>
-#include <cstdio>
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <algorithm>
-#include <stdint.h>
 #include <jni.h>
-#include <cmath>
+#include <vector>
 #include <string>
 
 class ImageJReader : public BaseReader

@@ -3,9 +3,14 @@
 
 #include <vector>
 #include <base_reader.h>
-#include <TextureBrick.h>
 #include <XmlUtils.h>
 
+namespace flvr
+{
+	class FileLocInfo;
+	class TextureBrick;
+	struct Pyramid_Level;
+}
 class BRKXMLReader : public BaseReader
 {
 public:

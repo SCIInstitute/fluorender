@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <PyDlc.h>
+#include <Ruler.h>
 #include <RulerHandler.h>
 #include <filesystem>
 #include <iostream>

@@ -26,10 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <nd2_reader.h>
-#include <compatibility.h>
 #include <Global.h>
-#include <stdio.h>
+#include <MainSettings.h>
+#include <compatibility.h>
 #include <json.hpp>
+
 #if defined(_DEBUG) || defined(__linux__)
 typedef char                     LIMCHAR;
 typedef LIMCHAR*                 LIMSTR;

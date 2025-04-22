@@ -848,7 +848,10 @@ target_include_directories(GLOBAL_LIB PRIVATE
 # Image
 
 # LookingGlass
-target_link_libraries(LOOKINGGLASS_LIB
+target_include_directories(LOOKINGGLASS_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(LOOKINGGLASS_LIB PRIVATE
+  ${GLEW_STATIC_LIBRARIES}
   ${HoloPlay_LIBRARIES})
 
 # Main

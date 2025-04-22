@@ -29,10 +29,16 @@
 #ifndef _VOLUMELOADER_H_
 #define _VOLUMELOADER_H_
 
-#include <DataManager.h>
-#include <TextureBrick.h>
+#include <vector>
+#include <unordered_map>
 
 class VolumeLoader;
+class VolumeData;
+namespace flvr
+{
+	class FileLocInfo;
+	class TextureBrick;
+}
 
 struct VolumeLoaderData
 {
@@ -57,14 +63,8 @@ public:
 	void RemoveAllLoadedBrick();
 	void RemoveBrickVD(VolumeData *vd);
 
-	static bool sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2)
-	{
-		return b2.brick->get_d() > b1.brick->get_d();
-	}
-	static bool sort_data_asc(const VolumeLoaderData b1, const VolumeLoaderData b2)
-	{
-		return b2.brick->get_d() < b1.brick->get_d();
-	}
+	static bool sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2);
+	static bool sort_data_asc(const VolumeLoaderData b1, const VolumeLoaderData b2);
 
 protected:
 	std::vector<VolumeLoaderData> m_queues;
