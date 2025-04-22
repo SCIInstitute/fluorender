@@ -64,6 +64,8 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <Project.h>
 #include <PyDlc.h>
+#include <VolCache.h>
+#include <Cell.h>
 #include <compatibility.h>
 #include <iostream>
 #include <string> 
@@ -86,6 +88,7 @@ ScriptProc::ScriptProc() :
 	m_break_count(0)
 {
 	m_output = fluo::ref_ptr<fluo::Group>(new fluo::Group());
+	m_sel_labels = std::make_unique<CelpList>();
 }
 
 ScriptProc::~ScriptProc()
@@ -641,7 +644,7 @@ void ScriptProc::RunPreTracking()
 	glbin_comp_analyzer.SetVolume(cur_vol);
 	glbin_comp_analyzer.Analyze(true);
 	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
-	m_sel_labels.clear();
+	m_sel_labels->clear();
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
@@ -653,7 +656,7 @@ void ScriptProc::RunPreTracking()
 			//celp->SetSizeD(it->second->sumd);
 			//celp->SetCenter(it->second->pos);
 			//celp->SetBox(it->second->box);
-			m_sel_labels.insert(std::pair<unsigned int, flrd::Celp>
+			m_sel_labels->insert(std::pair<unsigned int, flrd::Celp>
 				(it->second->Id(), celp));
 		}
 	}
@@ -677,7 +680,7 @@ void ScriptProc::RunPostTracking()
 		//create new id list
 		tg->SetCurTime(m_view->m_tseq_cur_num);
 		tg->SetPrvTime(m_view->m_tseq_prv_num);
-		tg->UpdateCellList(m_sel_labels);
+		tg->UpdateCellList(*m_sel_labels);
 		glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
 	}
 
@@ -711,7 +714,7 @@ void ScriptProc::RunPostTracking()
 		}
 		else
 		{
-			if (m_sel_labels.find(label_value) != m_sel_labels.end())
+			if (m_sel_labels->find(label_value) != m_sel_labels->end())
 				mask_data[idx] = 255;
 		}
 	}
@@ -1585,7 +1588,7 @@ void ScriptProc::RunAddCells()
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
 	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	glbin_trackmap_proc.AddCells(m_sel_labels,
+	glbin_trackmap_proc.AddCells(*m_sel_labels,
 		m_view->m_tseq_cur_num);
 }
 
@@ -1609,8 +1612,8 @@ void ScriptProc::RunLinkCells()
 	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
 	glbin_trackmap_proc.SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
-	glbin_trackmap_proc.LinkAddedCells(m_sel_labels, m_view->m_tseq_cur_num, m_view->m_tseq_cur_num - 1);
-	glbin_trackmap_proc.LinkAddedCells(m_sel_labels, m_view->m_tseq_cur_num, m_view->m_tseq_cur_num + 1);
+	glbin_trackmap_proc.LinkAddedCells(*m_sel_labels, m_view->m_tseq_cur_num, m_view->m_tseq_cur_num - 1);
+	glbin_trackmap_proc.LinkAddedCells(*m_sel_labels, m_view->m_tseq_cur_num, m_view->m_tseq_cur_num + 1);
 	glbin_trackmap_proc.RefineMap(m_view->m_tseq_cur_num, false);
 }
 
@@ -1631,7 +1634,7 @@ void ScriptProc::RunUnlinkCells()
 	int resx, resy, resz;
 	cur_vol->GetResolution(resx, resy, resz);
 	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	glbin_trackmap_proc.RemoveCells(m_sel_labels,
+	glbin_trackmap_proc.RemoveCells(*m_sel_labels,
 		m_view->m_tseq_cur_num);
 }
 

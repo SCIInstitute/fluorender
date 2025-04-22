@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMESELECTOR_H_
 #define _VOLUMESELECTOR_H_
 
-#include <Point.h>
+#include <Vector.h>
+#include <glm/glm.hpp>
 #include <vector>
 #include <algorithm>
-#include <glm/glm.hpp>
 #include <chrono>
 #include <cstring>
 

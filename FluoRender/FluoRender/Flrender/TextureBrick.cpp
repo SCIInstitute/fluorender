@@ -201,8 +201,8 @@ namespace flvr
 
 	// compute polygon of edge plane intersections
 	void TextureBrick::compute_polygons(fluo::Ray& view, double dt,
-		vector<float>& vertex, vector<uint32_t>& index,
-		vector<uint32_t>& size, bool bricks)
+		std::vector<float>& vertex, std::vector<uint32_t>& index,
+		std::vector<uint32_t>& size, bool bricks)
 	{
 		if (dt <= 0.0)
 			return;
@@ -250,8 +250,8 @@ namespace flvr
 	// typical rendering only contains about 1k triangles.
 	void TextureBrick::compute_polygons(fluo::Ray& view,
 		double tmin, double tmax, double dt,
-		vector<float>& vertex, vector<uint32_t>& index,
-		vector<uint32_t>& size)
+		std::vector<float>& vertex, std::vector<uint32_t>& index,
+		std::vector<uint32_t>& size)
 	{
 		if (dt <= 0.0)
 			return;

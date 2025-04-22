@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <Stencil.h>
+#include <Neighbor.h>
 
 namespace flrd
 {

@@ -27,6 +27,12 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MaskBorder.h>
 #include <Global.h>
+#include <DataManager.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolumeRenderer.h>
 
 using namespace flrd;
 

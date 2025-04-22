@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Exmax1_h
 
 #include <ClusterMethod.h>
+#include <Point.h>
 #include <boost/qvm/vec.hpp>
 #include <boost/qvm/mat.hpp>
 #include <boost/qvm/vec_operations.hpp>

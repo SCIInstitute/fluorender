@@ -25,10 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifdef _DEBUG
-#include <Debug.h>
-#endif
 #include <exmax1.h>
+#include <Cell.h>
 #include <algorithm>
 #include <fstream>
 #include <boost/qvm/mat_operations.hpp>
@@ -36,6 +34,9 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/qvm/vec_mat_operations.hpp>
 #include <boost/qvm/mat_access.hpp>
 #include <boost/qvm/vec_access.hpp>
+#ifdef _DEBUG
+#include <Debug.h>
+#endif
 
 using namespace flrd;
 

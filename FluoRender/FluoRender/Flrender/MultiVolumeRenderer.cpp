@@ -326,7 +326,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				{
 					for (unsigned int j=0; j<vr_list_.size(); j++)
 					{
-						vector<TextureBrick*>* bs_tmp = 0;
+						std::vector<TextureBrick*>* bs_tmp = 0;
 						if (TextureRenderer::interactive_)
 							//bs_tmp = vr_list_[j]->tex_->get_closest_bricks(
 							//TextureRenderer::quota_center_,
@@ -499,9 +499,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 void MultiVolumeRenderer::draw_polygons_vol(
 	TextureBrick* b, double rate,
-	vector<float>& vertex,
-	vector<uint32_t>& index,
-	vector<uint32_t>& size,
+	std::vector<float>& vertex,
+	std::vector<uint32_t>& index,
+	std::vector<uint32_t>& size,
 	fluo::Ray &view_ray,
 	int bi, bool orthographic_p,
 	int w, int h, bool intp,
@@ -695,7 +695,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
-			vector<TextureBrick*> *bs = 0;
+			std::vector<TextureBrick*> *bs = 0;
 			if (glbin_settings.m_mem_swap &&
 				TextureRenderer::interactive_)
 				//bs = vr_list_[tn]->tex_->get_closest_bricks(
@@ -796,9 +796,9 @@ std::vector<TextureBrick*> *MultiVolumeRenderer::get_combined_bricks(
 		return vr_list_[0]->tex_->get_quota_bricks();
 
 	size_t i, j, k;
-	vector<TextureBrick*>* bs;
-	vector<TextureBrick*>* bs0;
-	vector<TextureBrick*>* result;
+	std::vector<TextureBrick*>* bs;
+	std::vector<TextureBrick*>* bs0;
+	std::vector<TextureBrick*>* result;
 	fluo::Point brick_center;
 	double d;
 
@@ -945,9 +945,9 @@ void MultiVolumeRenderer::draw_wireframe(bool orthographic_p)
 		num_slices_ = 0;
 	}
 
-	vector<float> vertex;
-	vector<uint32_t> index;
-	vector<uint32_t> size;
+	std::vector<float> vertex;
+	std::vector<uint32_t> index;
+	std::vector<uint32_t> size;
 	vertex.reserve(num_slices_*12);
 	index.reserve(num_slices_*6);
 	size.reserve(num_slices_*6);
@@ -978,7 +978,7 @@ void MultiVolumeRenderer::draw_wireframe(bool orthographic_p)
 
 	glEnable(GL_DEPTH_TEST);
 
-	vector<TextureBrick*> *bs = vr_list_[0]->tex_->get_sorted_bricks(view_ray, orthographic_p);
+	std::vector<TextureBrick*> *bs = vr_list_[0]->tex_->get_sorted_bricks(view_ray, orthographic_p);
 
 	if (bs)
 	{

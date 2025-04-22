@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ASYNC_TIMER_H_
 #define _ASYNC_TIMER_H_
 
-#include <Names.h>
 #include <Node.hpp>
 #include <chrono>
 #include <functional>

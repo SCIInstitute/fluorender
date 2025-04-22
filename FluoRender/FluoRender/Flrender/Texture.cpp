@@ -92,7 +92,7 @@ namespace flvr
 				if ((*bricks_)[i])
 					delete (*bricks_)[i];
 			}
-			vector<TextureBrick *>().swap(*bricks_);
+			std::vector<TextureBrick *>().swap(*bricks_);
 		}
 
 		clear_undos();
@@ -131,7 +131,7 @@ namespace flvr
 		mask_undo_pointer_ = -1;
 	}
 
-	vector<TextureBrick*>* Texture::get_sorted_bricks(
+	std::vector<TextureBrick*>* Texture::get_sorted_bricks(
 		fluo::Ray& view, bool is_orthographic)
 	{
 		if (sort_bricks_)
@@ -180,7 +180,7 @@ namespace flvr
 		return bricks_;
 	}
 
-	vector<TextureBrick*>* Texture::get_closest_bricks(
+	std::vector<TextureBrick*>* Texture::get_closest_bricks(
 		fluo::Point& center, int quota, bool skip,
 		fluo::Ray& view, bool is_orthographic)
 	{
@@ -307,19 +307,19 @@ namespace flvr
 		return !(overx || overy || overz || underx || undery || underz);
 	}
 
-	vector<TextureBrick*>* Texture::get_bricks()
+	std::vector<TextureBrick*>* Texture::get_bricks()
 	{
 		return bricks_;
 	}
 
 	//get bricks sorted by id
-	vector<TextureBrick*>* Texture::get_bricks_id()
+	std::vector<TextureBrick*>* Texture::get_bricks_id()
 	{
 		std::sort((*bricks_).begin(), (*bricks_).end(), TextureBrick::sort_id);
 		return bricks_;
 	}
 
-	vector<TextureBrick*>* Texture::get_quota_bricks()
+	std::vector<TextureBrick*>* Texture::get_quota_bricks()
 	{
 		return &quota_bricks_;
 	}
@@ -405,7 +405,7 @@ namespace flvr
 	inline bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
 		double vmn, double vmx,
 		double gmn, double gmx,
-		vector<flvr::TextureBrick*>* brks)
+		std::vector<flvr::TextureBrick*>* brks)
 	{
 		size_t axis_size[4];
 		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoSize, axis_size);
@@ -500,7 +500,7 @@ namespace flvr
 		return true;
 	}
 
-	void Texture::build_bricks(vector<TextureBrick*> &bricks, 
+	void Texture::build_bricks(std::vector<TextureBrick*> &bricks, 
 		int sz_x, int sz_y, int sz_z,
 		int numc, int* numb)
 	{
@@ -746,7 +746,7 @@ namespace flvr
 		return 0;
 	}
 
-	bool Texture::buildPyramid(vector<Pyramid_Level> &pyramid, vector<vector<vector<vector<FileLocInfo *>>>> &filenames, bool useURL)
+	bool Texture::buildPyramid(std::vector<Pyramid_Level> &pyramid, std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>> &filenames, bool useURL)
 	{
 		if (pyramid.empty()) return false;
 		if (pyramid.size() != filenames.size()) return false;
@@ -791,10 +791,10 @@ namespace flvr
 			{
 				if (pyramid_[i].bricks[j]) delete pyramid_[i].bricks[j];
 			}
-			vector<TextureBrick *>().swap(pyramid_[i].bricks);
+			std::vector<TextureBrick *>().swap(pyramid_[i].bricks);
 			nrrdNix(pyramid_[i].data);
 		}
-		vector<Pyramid_Level>().swap(pyramid_);
+		std::vector<Pyramid_Level>().swap(pyramid_);
 
 		for (int i = 0; i<(int)filenames_.size(); i++)
 			for (int j = 0; j<(int)filenames_[i].size(); j++)
@@ -802,7 +802,7 @@ namespace flvr
 					for (int n = 0; n<(int)filenames_[i][j][k].size(); n++)
 						if (filenames_[i][j][k][n]) delete filenames_[i][j][k][n];
 
-		vector<vector<vector<vector<FileLocInfo *>>>>().swap(filenames_);
+		std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>>().swap(filenames_);
 
 		pyramid_lv_num_ = 0;
 		pyramid_cur_lv_ = -1;
@@ -837,7 +837,7 @@ namespace flvr
 		bnz_ = pyramid_[lv].bnz;
 	}
 
-	void Texture::set_data_file(vector<FileLocInfo *> *fname, int type)
+	void Texture::set_data_file(std::vector<FileLocInfo *> *fname, int type)
 	{
 		filename_ = fname;
 		filetype_ = type;

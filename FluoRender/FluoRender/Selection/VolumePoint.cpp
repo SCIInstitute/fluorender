@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
+#include <Point.h>
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace flrd;

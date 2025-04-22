@@ -31,12 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
-#include <ExGauss.h>
 #include <BBox.h>
 #include <Point.h>
 #include <Vector.h>
 #include <Transform.h>
-#include <Neighbor.h>
 #include <unordered_map>
 
 namespace flrd

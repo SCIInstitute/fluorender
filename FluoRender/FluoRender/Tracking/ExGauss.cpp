@@ -25,11 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <ExGauss.h>
+#include <exmax1.h>
+#include <Cell.h>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
-#include <ExGauss.h>
-#include <exmax1.h>
 
 using namespace flrd;
 

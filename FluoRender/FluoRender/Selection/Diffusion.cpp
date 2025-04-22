@@ -28,6 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Diffusion.h>
 #include <Global.h>
 #include <KernelProgram.h>
+#include <DataManager.h>
+#include <Texture.h>
+#include <TextureBrick.h>
+#include <VolKernel.h>
+#include <VolumeRenderer.h>
+#include <Plane.h>
 #include <vector>
 
 using namespace flrd;

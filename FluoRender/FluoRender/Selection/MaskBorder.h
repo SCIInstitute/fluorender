@@ -29,10 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define FL_MaskBorder_h
 
 #include <vector>
-#include <DataManager.h>
-#include <KernelProgram.h>
-#include <VolKernel.h>
 
+class VolumeData;
 namespace flrd
 {
 	class MaskBorder

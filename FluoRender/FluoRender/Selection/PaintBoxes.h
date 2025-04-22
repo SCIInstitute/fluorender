@@ -28,13 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_PaintBoxes_h
 #define FL_PaintBoxes_h
 
-#include <KernelProgram.h>
-#include <VolKernel.h>
 #include <BBox.h>
-#include <Vector.h>
 #include <Transform.h>
-#include <TextureBrick.h>
+#include <vector>
 
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	class PaintBoxes

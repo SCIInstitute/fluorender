@@ -50,7 +50,7 @@
 namespace flvr
 {
 	VolumeRenderer::VolumeRenderer(Texture* tex,
-		const vector<fluo::Plane*> &planes)
+		const std::vector<fluo::Plane*> &planes)
 		:TextureRenderer(tex),
 		//scalar scaling factor
 		scalar_scale_(1.0),
@@ -381,7 +381,7 @@ namespace flvr
 	}
 
 	//clipping planes
-	void VolumeRenderer::set_planes(vector<fluo::Plane*> *p)
+	void VolumeRenderer::set_planes(std::vector<fluo::Plane*> *p)
 	{
 		int i;
 		if (!planes_.empty())
@@ -401,7 +401,7 @@ namespace flvr
 		}
 	}
 
-	vector<fluo::Plane*>* VolumeRenderer::get_planes()
+	std::vector<fluo::Plane*>* VolumeRenderer::get_planes()
 	{
 		return &planes_;
 	}
@@ -584,7 +584,7 @@ namespace flvr
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
 
-		vector<TextureBrick*> *bricks = 0;
+		std::vector<TextureBrick*> *bricks = 0;
 		tex_->set_matrices(m_mv_mat2, m_proj_mat);
 		if (glbin_settings.m_mem_swap && interactive_)
 			bricks = tex_->get_closest_bricks(
@@ -617,9 +617,9 @@ namespace flvr
 			num_slices_ = 0;
 		}
 
-		vector<float> vertex;
-		vector<uint32_t> index;
-		vector<uint32_t> size;
+		std::vector<float> vertex;
+		std::vector<uint32_t> index;
+		std::vector<uint32_t> size;
 		vertex.reserve(num_slices_*12);
 		index.reserve(num_slices_*6);
 		size.reserve(num_slices_*6);
@@ -1073,7 +1073,7 @@ namespace flvr
 		fluo::Ray snapview = compute_snapview(0.4);
 
 		glEnable(GL_DEPTH_TEST);
-		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
+		std::vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
 
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
 		fluo::Vector diag = tex_->bbox()->diagonal();
@@ -1093,9 +1093,9 @@ namespace flvr
 			num_slices = 0;
 		}
 
-		vector<float> vertex;
-		vector<uint32_t> index;
-		vector<uint32_t> size;
+		std::vector<float> vertex;
+		std::vector<uint32_t> index;
+		std::vector<uint32_t> size;
 		vertex.reserve(num_slices * 12);
 		index.reserve(num_slices * 6);
 		size.reserve(num_slices * 6);
@@ -1170,7 +1170,7 @@ namespace flvr
 		bool use_2d = tex_2d_weight1_&&
 			tex_2d_weight2_;
 
-		vector<TextureBrick*> *bricks = tex_->get_bricks();
+		std::vector<TextureBrick*> *bricks = tex_->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -1569,11 +1569,11 @@ namespace flvr
 		//sync sorting
 		fluo::Ray view_ray(fluo::Point(0.802,0.267,0.534), fluo::Vector(0.802,0.267,0.534));
 		tex_->set_sort_bricks();
-		vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray);
+		std::vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray);
 		if (!bricks || bricks->size() == 0)
 			return;
-		vector<TextureBrick*> *bricks_a = 0;
-		vector<TextureBrick*> *bricks_b = 0;
+		std::vector<TextureBrick*> *bricks_a = 0;
+		std::vector<TextureBrick*> *bricks_b = 0;
 
 		bricks_a = vr_a->tex_->get_bricks();
 		if (vr_a)
@@ -1687,7 +1687,7 @@ namespace flvr
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*> *bricks = tex_->get_bricks();
+		std::vector<TextureBrick*> *bricks = tex_->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -1730,7 +1730,7 @@ namespace flvr
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*> *bricks = tex_->get_bricks();
+		std::vector<TextureBrick*> *bricks = tex_->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -1777,7 +1777,7 @@ namespace flvr
 	{
 		if (!tex_)
 			return;
-		vector<TextureBrick*> *bricks = tex_->get_bricks_id();
+		std::vector<TextureBrick*> *bricks = tex_->get_bricks_id();
 		if (!bricks || bricks->size() == 0)
 			return;
 

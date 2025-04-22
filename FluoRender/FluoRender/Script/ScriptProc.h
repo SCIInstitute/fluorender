@@ -29,9 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _SCRIPTPROC_H_
 
 #include <Group.hpp>
-#include <VolCache.h>
-#include <Cell.h>
 #include <vector>
+#include <memory>
 
 class MainFrame;
 class RenderView;
@@ -39,6 +38,8 @@ class VolumeData;
 class BaseTreeFile;
 namespace flrd
 {
+	struct VolCache;
+	class CelpList;
 	class ScriptProc
 	{
 	public:
@@ -94,7 +95,7 @@ namespace flrd
 		int m_break_count;
 
 		//selected labels
-		CelpList m_sel_labels;
+		std::unique_ptr<CelpList> m_sel_labels;
 
 		//output
 		//structure: output(group)--time(group)--channel(group)--script_command(group)

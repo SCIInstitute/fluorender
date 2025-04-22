@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <PaintBoxes.h>
 #include <Global.h>
 #include <Point.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <TextureBrick.h>
 
 using namespace flrd;
 
