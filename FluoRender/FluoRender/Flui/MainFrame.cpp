@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Main.h>
 #include <MainFrame.h>
 #include <Global.h>
+#include <Names.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
 #include <compatibility.h>
@@ -87,6 +88,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolCalShader.h>
 #include <ImgShader.h>
 #include <LightFieldShader.h>
+#include <TextRenderer.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <ModalDlg.h>

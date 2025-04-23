@@ -206,8 +206,6 @@ namespace fluo
 		flrd::TableHistParams& get_vp_table();
 
 		//python
-		template <class T>
-		T* get_add_python(const std::string& name);
 		flrd::PyBase* get_add_pybase(const std::string& name);
 		flrd::PyDlc* get_add_pydlc(const std::string& name);
 		void clear_python();

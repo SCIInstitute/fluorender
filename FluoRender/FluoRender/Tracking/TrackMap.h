@@ -30,15 +30,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Cell.h>
 #include <VertexList.h>
-#include <VolCache.h>
 #include <Progress.h>
 #include <fstream>
 #include <memory>
 #include <deque>
 #include <map>
 
-namespace flrd
-{
 //tags
 #define TAG_CELL		1
 #define TAG_VERT		2
@@ -52,6 +49,9 @@ namespace flrd
 #define TAG_VER220		9	//new values added in v2.20
 #define TAG_VER221		10	//new values added in v2.21
 
+namespace flrd
+{
+	struct VolCache;
 	class TrackMap;
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	typedef std::weak_ptr<TrackMap> pwTrackMap;

@@ -402,7 +402,7 @@ namespace flvr
 		set_transform(tform);
 	}
 
-	inline bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
+	bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
 		double vmn, double vmx,
 		double gmn, double gmx,
 		std::vector<flvr::TextureBrick*>* brks)
@@ -640,7 +640,7 @@ namespace flvr
 	}
 
 	//! Interface that does not expose flvr::BBox.
-	inline void Texture::get_bounds(double &xmin, double &ymin, double &zmin,
+	void Texture::get_bounds(double &xmin, double &ymin, double &zmin,
 		double &xmax, double &ymax, double &zmax) const 
 	{
 		fluo::BBox b;
@@ -654,7 +654,7 @@ namespace flvr
 		zmax = b.Max().z();
 	}
 
-	inline void Texture::get_bounds(fluo::BBox &b) const
+	void Texture::get_bounds(fluo::BBox &b) const
 	{
 		b.extend(transform_.project(bbox_.Min()));
 		b.extend(transform_.project(bbox_.Max()));
@@ -736,7 +736,7 @@ namespace flvr
 		return static_cast<int>(pyramid_.size());
 	}
 
-	inline TextureBrick* Texture::get_brick(unsigned int bid)
+	TextureBrick* Texture::get_brick(unsigned int bid)
 	{
 		for (size_t i=0; i<(*bricks_).size(); ++i)
 		{
@@ -1083,4 +1083,101 @@ namespace flvr
 			(size_t)ny_, (size_t)nz_);
 	}
 
+	unsigned int Texture::negxid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		if (x == 0)
+			return id;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	unsigned int Texture::negyid(unsigned int id)
+	{
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		if (y == 0)
+			return id;
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + (y - 1) * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	unsigned int Texture::negzid(unsigned int id)
+	{
+		int z = id / (bnx_ * bny_);
+		if (z == 0)
+			return id;
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int r = (z - 1) * bnx_ * bny_ + y * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	unsigned int Texture::posxid(unsigned int id)
+	{
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		if (x == bnx_ - 1)
+			return id;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + y * bnx_ + x + 1;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	unsigned int Texture::posyid(unsigned int id)
+	{
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		if (y == bny_ - 1)
+			return id;
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int z = id / (bnx_ * bny_);
+		int r = z * bnx_ * bny_ + (y + 1) * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	unsigned int Texture::poszid(unsigned int id)
+	{
+		int z = id / (bnx_ * bny_);
+		if (z == bnz_ - 1)
+			return id;
+		int x = (id % (bnx_ * bny_)) % bnx_;
+		int y = (id % (bnx_ * bny_)) / bnx_;
+		int r = (z + 1) * bnx_ * bny_ + y * bnx_ + x;
+		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+			return id;
+		else
+			return r;
+	}
+
+	unsigned int Texture::get_brick_id(unsigned long long index)
+	{
+		unsigned long long x, y, z;
+		z = index / (nx_ * ny_);
+		y = index % (nx_ * ny_);
+		x = y % nx_;
+		y = y / nx_;
+		//get brick indices
+		x = bszx_ <= 1 ? 0 : x / (bszx_-1);
+		y = bszy_ <= 1 ? 0 : y / (bszy_-1);
+		z = bszz_ <= 1 ? 0 : z / (bszz_-1);
+		return static_cast<unsigned int>(z * bnx_ * bny_ + y * bnx_ + x);
+	}
 } // namespace flvr

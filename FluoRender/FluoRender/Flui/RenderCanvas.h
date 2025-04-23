@@ -32,25 +32,15 @@ DEALINGS IN THE SOFTWARE.
 #include <Size.h>
 #include <Point.h>
 #include <wxBasisSlider.h>
-
+#ifdef _WIN32
+#include <wintab.h>
+#endif
 #include <wx/wx.h>
 #include <wx/clrpicker.h>
 #include <wx/spinbutt.h>
 #include <wx/glcanvas.h>
 #include <wx/event.h>
 #include <wx/timer.h>
-
-#ifdef _WIN32
-//wacom support
-#include <wx/msw/private.h>
-#include <MSGPACK.h>
-#include <wintab.h>
-#define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS |\
-		PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE)
-#define PACKETMODE	PK_BUTTONS
-#include <PKTDEF.h>
-#include <WacomUtils.h>
-#endif
 
 #define ID_ftrigger	0
 

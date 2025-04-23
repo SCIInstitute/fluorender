@@ -75,6 +75,9 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <tiffio.h>
+#if defined(_WIN32) && defined(USE_XINPUT)
+#include <XInput/XboxController.h>
+#endif
 
 RenderView::RenderView() :
 #if defined(_WIN32) && defined(USE_XINPUT)

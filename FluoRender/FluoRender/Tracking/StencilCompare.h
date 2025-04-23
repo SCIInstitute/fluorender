@@ -28,13 +28,18 @@ DEALINGS IN THE SOFTWARE.
 #ifndef StencilCompare_h
 #define StencilCompare_h
 
-#include <KernelProgram.h>
-#include <VolKernel.h>
-#include <Stencil.h>
-#include <Neighbor.h>
+#include <Vector.h>
+#include <Point.h>
+#include <memory>
 
+namespace flvr
+{
+	class KernelProgram;
+	struct Argument;
+}
 namespace flrd
 {
+	class Stencil;
 	class StencilCompare
 	{
 	public:
@@ -48,83 +53,9 @@ namespace flrd
 		void Prepare(const std::string& cmp_name);
 		void Clean();
 		bool Compare();
-
-		//inline float Similar()
-		//{
-		//	float result = 0.0f;
-
-		//	float v1, v2, d1, d2, w;
-		//	fluo::Range nb(m_s1->box);
-		//	if (m_method == 0)
-		//	{
-		//		//dot product
-		//		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
-		//		{
-		//			//get v1
-		//			v1 = m_s1->getfilter(i);
-		//			//get v2
-		//			v2 = m_s2->getfilter(i);
-		//			//get d weighted
-		//			//d1 = v1 - v2;
-		//			//d2 = 1.0 - std::min(v1, v2);
-		//			w = v1 * v2;
-		//			result += w;
-		//		}
-		//	}
-		//	else if (m_method == 1)
-		//	{
-		//		//diff squared
-		//		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
-		//		{
-		//			//get v1
-		//			v1 = m_s1->getfilter(i);
-		//			//get v2
-		//			v2 = m_s2->getfilter(i);
-		//			//get d weighted
-		//			d1 = v1 - v2;
-		//			//d2 = 1.0 - std::min(v1, v2);
-		//			w = 1.0 - d1 * d1;
-		//			result += w;
-		//		}
-		//	}
-		//	return result;
-		//}
-
-		inline void Label()
-		{
-			fluo::Range nb(m_s1->box);
-
-			unsigned int l;
-			fluo::Point tfp1, tfp2;
-			for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
-			{
-				if (!m_s1->valid(i, tfp1) || !m_s2->valid(i, tfp2))
-					continue;
-				//get v1
-				l = m_s1->getlabel(i);
-				//set s2
-				if (l == m_s1->id)
-					m_s2->setlabel(i, l);
-			}
-		}
-
-		inline void Lookup()
-		{
-			fluo::Range all2(fluo::Point(),
-				fluo::Vector(static_cast<double>(m_s2->nx - 1), static_cast<double>(m_s2->ny - 1), static_cast<double>(m_s2->nz - 1)));
-			for (fluo::Point i = all2.begin(); i != all2.end(); i = ++all2)
-			{
-				unsigned int l = m_s1->lookuplabel(i, *m_s2);
-				if (l == m_s1->id)
-				{
-					unsigned long long index =
-						(unsigned long long)m_s2->nx*m_s2->ny*i.intz() +
-						(unsigned long long)m_s2->nx*i.inty() +
-						(unsigned long long)i.intx();
-					((unsigned int*)m_s2->label)[index] = l;
-				}
-			}
-		}
+		//float Similar();
+		void Label();
+		void Lookup();
 
 		fluo::Point GetTranslate()
 		{
@@ -160,9 +91,9 @@ namespace flrd
 		fluo::Point m_euler;//rotation
 
 		flvr::KernelProgram* m_prog;
-		flvr::Argument m_img1;//filtered img
-		flvr::Argument m_img2;
-		flvr::Argument m_mask1;//mask buffer for img1
+		std::unique_ptr<flvr::Argument> m_img1;//filtered img
+		std::unique_ptr<flvr::Argument> m_img2;
+		std::unique_ptr<flvr::Argument> m_mask1;//mask buffer for img1
 
 		float Similar(const std::string& name);
 	};

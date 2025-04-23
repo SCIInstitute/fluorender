@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Cell.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
+#include <VolCache.h>
 
 using namespace flrd;
 

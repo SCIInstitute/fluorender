@@ -27,6 +27,18 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <QVideoEncoder.h>
 #include <compatibility.h>
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavutil/opt.h>
+#include <libavutil/mathematics.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
+}
+
+#define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
+#define SCALE_FLAGS SWS_BICUBIC
 
 QVideoEncoder::QVideoEncoder()
 {

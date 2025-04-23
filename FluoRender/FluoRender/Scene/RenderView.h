@@ -36,10 +36,8 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
-#if defined(_WIN32) && defined(USE_XINPUT)
-#include <XInput/XboxController.h>
-#endif
 
+class XboxController;
 namespace flvr
 {
 	class TextRenderer;

@@ -56,7 +56,7 @@ namespace flvr
 		valid_ = false;
 	}
 
-	inline bool VertexBuffer::bind()
+	bool VertexBuffer::bind()
 	{
 		if (valid_)
 		{
@@ -67,17 +67,17 @@ namespace flvr
 			return false;
 	}
 
-	inline void VertexBuffer::unbind()
+	void VertexBuffer::unbind()
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	inline bool VertexBuffer::valid()
+	bool VertexBuffer::valid()
 	{
 		return valid_;
 	}
 
-	inline void VertexBuffer::data(GLsizeiptr size, const GLvoid* data, GLenum usage)
+	void VertexBuffer::data(GLsizeiptr size, const GLvoid* data, GLenum usage)
 	{
 		if (valid_)
 		{
@@ -131,13 +131,13 @@ namespace flvr
 		protected_ = false;
 	}
 
-	inline void VertexArray::bind()
+	void VertexArray::bind()
 	{
 		if (valid_)
 			glBindVertexArray(id_);
 	}
 
-	inline void VertexArray::unbind()
+	void VertexArray::unbind()
 	{
 		glBindVertexArray(0);
 	}
@@ -677,7 +677,7 @@ namespace flvr
 			&float_list_[0], GL_STREAM_DRAW);
 	}
 
-	inline bool VertexArray::attach_buffer(VertexBuffer* buf)
+	bool VertexArray::attach_buffer(VertexBuffer* buf)
 	{
 		if (!valid_)
 			return false;
@@ -686,7 +686,7 @@ namespace flvr
 		return true;
 	}
 
-	inline void VertexArray::attrib_pointer(GLuint index,
+	void VertexArray::attrib_pointer(GLuint index,
 		GLint size, GLenum type, GLboolean normalized,
 		GLsizei stride, const GLvoid* pointer)
 	{
@@ -695,12 +695,12 @@ namespace flvr
 		attrib_pointer_list_.push_back(index);
 	}
 
-	inline bool VertexArray::get_dirty()
+	bool VertexArray::get_dirty()
 	{
 		return dirty_;
 	}
 
-	inline void VertexArray::draw_begin()
+	void VertexArray::draw_begin()
 	{
 		if (!valid_)
 			return;
@@ -711,21 +711,21 @@ namespace flvr
 			glEnableVertexAttribArray(*it);
 	}
 
-	inline void VertexArray::draw_arrays(GLenum mode, GLint first, GLsizei count)
+	void VertexArray::draw_arrays(GLenum mode, GLint first, GLsizei count)
 	{
 		if (!valid_)
 			return;
 		glDrawArrays(mode, first, count);
 	}
 
-	inline void VertexArray::draw_elements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
+	void VertexArray::draw_elements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
 	{
 		if (!valid_)
 			return;
 		glDrawElements(mode, count, type, indices);
 	}
 
-	inline void VertexArray::draw_end()
+	void VertexArray::draw_end()
 	{
 		if (!valid_)
 			return;
@@ -736,7 +736,7 @@ namespace flvr
 		glBindVertexArray(0);
 	}
 
-	inline void VertexArray::draw()
+	void VertexArray::draw()
 	{
 		if (!valid_)
 			return;
@@ -789,12 +789,12 @@ namespace flvr
 		glBindVertexArray(0);
 	}
 
-	inline void VertexArray::draw_norm_square()
+	void VertexArray::draw_norm_square()
 	{
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
-	inline void VertexArray::draw_circles()
+	void VertexArray::draw_circles()
 	{
 		int count = 0;
 		//first, determine how many circles to draw
@@ -817,12 +817,12 @@ namespace flvr
 			glDrawArrays(GL_LINE_LOOP, i*secs, secs);
 	}
 
-	inline void VertexArray::draw_bound_cube()
+	void VertexArray::draw_bound_cube()
 	{
 		glDrawArrays(GL_LINES, 0, 24);
 	}
 
-	inline void VertexArray::draw_clip_plane(int plane, bool border)
+	void VertexArray::draw_clip_plane(int plane, bool border)
 	{
 		if (border)
 			glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT,
@@ -832,7 +832,7 @@ namespace flvr
 				reinterpret_cast<const GLvoid*>((long long)(plane)));
 	}
 
-	inline void VertexArray::draw_grid()
+	void VertexArray::draw_grid()
 	{
 		//get line number
 		int line_num = 0;
@@ -844,7 +844,7 @@ namespace flvr
 		glDrawArrays(GL_LINES, 0, line_num * 4);
 	}
 
-	inline void VertexArray::draw_cam_jack(int axis)
+	void VertexArray::draw_cam_jack(int axis)
 	{
 		switch (axis)
 		{
@@ -860,7 +860,7 @@ namespace flvr
 		}
 	}
 
-	inline void VertexArray::draw_cam_center()
+	void VertexArray::draw_cam_center()
 	{
 		glDrawArrays(GL_LINES, 0, 2);
 		glDrawArrays(GL_LINES, 2, 2);
@@ -868,17 +868,17 @@ namespace flvr
 		glDrawArrays(GL_LINES, 6, 2);
 	}
 
-	inline void VertexArray::draw_crop_frame()
+	void VertexArray::draw_crop_frame()
 	{
 		glDrawArrays(GL_LINE_LOOP, 0, 4);
 	}
 
-	inline void VertexArray::draw_scale_bar()
+	void VertexArray::draw_scale_bar()
 	{
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
-	inline void VertexArray::draw_legend_square(int index)
+	void VertexArray::draw_legend_square(int index)
 	{
 		if (index == 0)
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -886,17 +886,17 @@ namespace flvr
 			glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 	}
 
-	inline void VertexArray::draw_grad_bkg()
+	void VertexArray::draw_grad_bkg()
 	{
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
 	}
 
-	inline void VertexArray::draw_color_map()
+	void VertexArray::draw_color_map()
 	{
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 	}
 
-	inline void VertexArray::draw_traces()
+	void VertexArray::draw_traces()
 	{
 		//get array number
 		int num = 0;
@@ -908,7 +908,7 @@ namespace flvr
 		glDrawArrays(GL_LINES, 0, num);
 	}
 
-	inline void VertexArray::draw_rulers()
+	void VertexArray::draw_rulers()
 	{
 		//get array number
 		int num = 0;
@@ -1164,5 +1164,51 @@ namespace flvr
 		//va->unbind();
 
 		return va;
+	}
+
+	void VertexArray::protect()
+	{
+		protected_ = true;
+	}
+
+	void VertexArray::unprotect()
+	{
+		protected_ = false;
+	}
+
+	bool VertexArray::valid()
+	{
+		return valid_;
+	}
+
+	unsigned int VertexArray::id()
+	{
+		return id_;
+	}
+
+	bool VertexArray::match(VAType type)
+	{
+		if (protected_)
+			return false;
+		if (type_ == type)
+			return true;
+		return false;
+	}
+
+	void VertexArrayManager::set_dirty(VAType type)
+	{
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+		{
+			if ((*it)->type_ == type)
+				(*it)->dirty_ = true;
+		}
+	}
+
+	void VertexArrayManager::set_all_dirty()
+	{
+		for (auto it = va_list_.begin();
+			it != va_list_.end(); ++it)
+			(*it)->dirty_ = true;
 	}
 }

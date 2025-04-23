@@ -51,10 +51,10 @@ namespace flvr
 
 		void create();
 		void destroy();
-		inline bool bind();
-		inline void unbind();
-		inline bool valid();
-		inline void resize(int nx, int ny);
+		bool bind();
+		void unbind();
+		bool valid();
+		void resize(int nx, int ny);
 
 	private:
 		unsigned int id_;
@@ -82,21 +82,21 @@ namespace flvr
 
 		void create();
 		void destroy();
-		inline void bind();
-		inline void unbind();
-		inline void protect();
-		inline void unprotect();
-		inline bool valid();
-		inline unsigned int id();
+		void bind();
+		void unbind();
+		void protect();
+		void unprotect();
+		bool valid();
+		unsigned int id();
 
 		bool attach_texture(int ap, FramebufferTexture* tex);
-		inline bool attach_texture(int ap, unsigned int tex_id, int layer=0);
+		bool attach_texture(int ap, unsigned int tex_id, int layer=0);
 		void detach_texture(int ap);
 		void detach_texture(FramebufferTexture* tex);
 		void bind_texture(int ap);
 		unsigned int tex_id(int ap);
 
-		inline bool match_size(int nx, int ny);
+		bool match_size(int nx, int ny);
 		void resize(int nx, int ny);
 
 		//match without size
@@ -104,15 +104,15 @@ namespace flvr
 		//match with size
 		bool match(FBType, int, int);
 		//match by name
-		inline bool match(const std::string &name);
+		bool match(const std::string &name);
 
 		//name represents its use
-		inline void set_name(const std::string &name);
-		inline void clear_name();
+		void set_name(const std::string &name);
+		void clear_name();
 		std::string &get_name() { return name_; }
 
 		//read pick value
-		inline unsigned int read_value(int, int);
+		unsigned int read_value(int, int);
 
 	private:
 		unsigned int id_;
@@ -142,50 +142,6 @@ namespace flvr
 		std::vector<Framebuffer*> fb_list_;
 		std::vector<FramebufferTexture*> tex_list_;
 	};
-
-	inline void Framebuffer::protect()
-	{
-		protected_ = true;
-	}
-
-	inline void Framebuffer::unprotect()
-	{
-		protected_ = false;
-	}
-
-	inline bool Framebuffer::valid()
-	{
-		return valid_;
-	}
-
-	inline unsigned int Framebuffer::id()
-	{
-		return id_;
-	}
-
-	inline bool Framebuffer::match_size(int nx, int ny)
-	{
-		return (nx == nx_) && (ny == ny_);
-	}
-
-	inline bool Framebuffer::match(const std::string &name)
-	{
-		if (name == "")
-			return false;
-		if (name_ == name)
-			return true;
-		return false;
-	}
-
-	inline void Framebuffer::set_name(const std::string &name)
-	{
-		name_ = name;
-	}
-
-	inline void Framebuffer::clear_name()
-	{
-		name_ = "";
-	}
 
 }
 #endif//Framebuffer_h

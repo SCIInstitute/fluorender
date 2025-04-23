@@ -852,7 +852,8 @@ target_include_directories(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_INCLUDE_DIR})
 target_link_libraries(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
-  ${HoloPlay_LIBRARIES})
+  ${HoloPlay_LIBRARIES}
+  FLRENDER_LIB)
 
 # Main
 target_link_libraries(MAIN_LIB
@@ -883,7 +884,10 @@ target_link_libraries(SCENE_LIB PRIVATE
 
 # Script
 target_link_libraries(SCRIPT_LIB
-  ${TIFF_LIBRARIES})
+  ${TIFF_LIBRARIES}
+  ${Python3_LIBRARIES}
+  GLOBAL_LIB
+  PYTHON_LIB)
 
 # Selection
 target_link_libraries(SELECTION_LIB

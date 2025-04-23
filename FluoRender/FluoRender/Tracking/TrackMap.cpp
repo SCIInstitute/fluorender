@@ -43,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <VertexArray.h>
 #include <Ruler.h>
+#include <VolCache.h>
 #include <functional>
 #include <algorithm>
 #include <limits>

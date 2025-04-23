@@ -64,10 +64,10 @@ namespace flvr
 
 		void create();
 		void destroy();
-		inline bool bind();
-		inline void unbind();
-		inline bool valid();
-		inline void data(GLsizeiptr size, const GLvoid* data, GLenum usage);
+		bool bind();
+		void unbind();
+		bool valid();
+		void data(GLsizeiptr size, const GLvoid* data, GLenum usage);
 
 	private:
 		unsigned int id_;
@@ -107,17 +107,17 @@ namespace flvr
 
 		void create();
 		void destroy();
-		inline void bind();
-		inline void unbind();
-		inline void protect();
-		inline void unprotect();
-		inline bool valid();
-		inline unsigned int id();
+		void bind();
+		void unbind();
+		void protect();
+		void unprotect();
+		bool valid();
+		unsigned int id();
 
-		inline bool attach_buffer(VertexBuffer* buf);
+		bool attach_buffer(VertexBuffer* buf);
 		void buffer_data(VABufferType type,
 			GLsizeiptr size, const GLvoid* data, GLenum usage);
-		inline void attrib_pointer(GLuint index,
+		void attrib_pointer(GLuint index,
 			GLint size, GLenum type, GLboolean normalized,
 			GLsizei stride, const GLvoid* pointer);
 
@@ -127,30 +127,30 @@ namespace flvr
 		void set_param(fluo::BBox &box);//for bounding box
 		void set_param(std::vector<fluo::Point> &pp);//for clipping planes
 		void set_param(std::vector<float> &vts);//for floats
-		inline bool get_dirty();//dirty array needs new data and update
+		bool get_dirty();//dirty array needs new data and update
 
-		inline void draw_begin();
-		inline void draw_end();
-		inline void draw_arrays(GLenum, GLint, GLsizei);
-		inline void draw_elements(GLenum, GLsizei, GLenum, const GLvoid*);
-		inline void draw();
-		inline void draw_norm_square();
-		inline void draw_circles();
-		inline void draw_bound_cube();
-		inline void draw_grid();
-		inline void draw_crop_frame();
-		inline void draw_scale_bar();
-		inline void draw_grad_bkg();
-		inline void draw_color_map();
-		inline void draw_traces();
-		inline void draw_rulers();
+		void draw_begin();
+		void draw_end();
+		void draw_arrays(GLenum, GLint, GLsizei);
+		void draw_elements(GLenum, GLsizei, GLenum, const GLvoid*);
+		void draw();
+		void draw_norm_square();
+		void draw_circles();
+		void draw_bound_cube();
+		void draw_grid();
+		void draw_crop_frame();
+		void draw_scale_bar();
+		void draw_grad_bkg();
+		void draw_color_map();
+		void draw_traces();
+		void draw_rulers();
 		//clipping planes are drawn differently
-		inline void draw_clip_plane(int plane, bool border);
-		inline void draw_cam_jack(int axis);//0-x; 1-y; 2-z
-		inline void draw_cam_center();
-		inline void draw_legend_square(int index);//0-outside; 1-inside
+		void draw_clip_plane(int plane, bool border);
+		void draw_cam_jack(int axis);//0-x; 1-y; 2-z
+		void draw_cam_center();
+		void draw_legend_square(int index);//0-outside; 1-inside
 
-		inline bool match(VAType);
+		bool match(VAType);
 
 	private:
 		void update_buffer();
@@ -210,51 +210,6 @@ namespace flvr
 		std::vector<VertexBuffer*> vb_list_;
 	};
 
-	inline void VertexArray::protect()
-	{
-		protected_ = true;
-	}
-
-	inline void VertexArray::unprotect()
-	{
-		protected_ = false;
-	}
-
-	inline bool VertexArray::valid()
-	{
-		return valid_;
-	}
-
-	inline unsigned int VertexArray::id()
-	{
-		return id_;
-	}
-
-	inline bool VertexArray::match(VAType type)
-	{
-		if (protected_)
-			return false;
-		if (type_ == type)
-			return true;
-		return false;
-	}
-
-	inline void VertexArrayManager::set_dirty(VAType type)
-	{
-		for (auto it = va_list_.begin();
-			it != va_list_.end(); ++it)
-		{
-			if ((*it)->type_ == type)
-				(*it)->dirty_ = true;
-		}
-	}
-
-	inline void VertexArrayManager::set_all_dirty()
-	{
-		for (auto it = va_list_.begin();
-			it != va_list_.end(); ++it)
-			(*it)->dirty_ = true;
-	}
 }
 
 #endif//VertexArray_h

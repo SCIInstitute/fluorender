@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Stencil.h>
 #include <StencilCompare.h>
+#include <VolCache.h>
+#include <DataManager.h>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif

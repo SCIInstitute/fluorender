@@ -375,24 +375,6 @@ flrd::TableHistParams& Global::get_vp_table()
 }
 
 //python
-template <class T>
-T* Global::get_add_python(const std::string& name)
-{
-	auto it = python_list_.find(name);
-	if (it == python_list_.end())
-	{
-		T* py = new T;
-		size_t n = python_list_.size();
-		python_list_.insert(std::pair<std::string, flrd::PyBase*>(name, py));
-		if (python_list_.size() > n)
-			return py;
-		else
-			return nullptr;
-	}
-	else
-		return dynamic_cast<T*>(it->second);
-}
-
 flrd::PyBase* Global::get_add_pybase(const std::string& name)
 {
 	auto it = python_list_.find(name);

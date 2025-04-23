@@ -119,7 +119,7 @@ namespace flvr
 		name_ = "";
 	}
 
-	inline bool FramebufferTexture::bind()
+	bool FramebufferTexture::bind()
 	{
 		if (valid_)
 		{
@@ -139,7 +139,7 @@ namespace flvr
 			return false;
 	}
 
-	inline void FramebufferTexture::unbind()
+	void FramebufferTexture::unbind()
 	{
 		if (valid_)
 		{
@@ -156,12 +156,12 @@ namespace flvr
 		}
 	}
 
-	inline bool FramebufferTexture::valid()
+	bool FramebufferTexture::valid()
 	{
 		return valid_;
 	}
 
-	inline void FramebufferTexture::resize(int nx, int ny)
+	void FramebufferTexture::resize(int nx, int ny)
 	{
 		if (valid_)
 		{
@@ -193,18 +193,18 @@ namespace flvr
 		}
 	}
 
-	inline void Framebuffer::bind()
+	void Framebuffer::bind()
 	{
 		if (valid_)
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 	}
 
-	inline void Framebuffer::unbind()
+	void Framebuffer::unbind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	inline bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
+	bool Framebuffer::attach_texture(int ap, unsigned int tex_id, int layer)
 	{
 		if (!valid_)
 			return false;
@@ -227,7 +227,7 @@ namespace flvr
 		return true;
 	}
 
-	inline unsigned int Framebuffer::read_value(int px, int py)
+	unsigned int Framebuffer::read_value(int px, int py)
 	{
 		if (type_ != FB_Pick_Int32_Float)
 			return 0;
@@ -488,6 +488,50 @@ namespace flvr
 			ny_ == ny)
 			return true;
 		return false;
+	}
+
+	void Framebuffer::protect()
+	{
+		protected_ = true;
+	}
+
+	void Framebuffer::unprotect()
+	{
+		protected_ = false;
+	}
+
+	bool Framebuffer::valid()
+	{
+		return valid_;
+	}
+
+	unsigned int Framebuffer::id()
+	{
+		return id_;
+	}
+
+	bool Framebuffer::match_size(int nx, int ny)
+	{
+		return (nx == nx_) && (ny == ny_);
+	}
+
+	bool Framebuffer::match(const std::string &name)
+	{
+		if (name == "")
+			return false;
+		if (name_ == name)
+			return true;
+		return false;
+	}
+
+	void Framebuffer::set_name(const std::string &name)
+	{
+		name_ = name;
+	}
+
+	void Framebuffer::clear_name()
+	{
+		name_ = "";
 	}
 
 }

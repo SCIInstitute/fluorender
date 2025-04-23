@@ -62,39 +62,39 @@ namespace flvr
 			double gmn, double gmx,
 			std::vector<flvr::TextureBrick*>* brks = NULL);
 
-		inline fluo::Vector res() { return fluo::Vector(nx_, ny_, nz_); }
-		inline int nx() { return nx_; }
-		inline int ny() { return ny_; }
-		inline int nz() { return nz_; }
+		fluo::Vector res() { return fluo::Vector(nx_, ny_, nz_); }
+		int nx() { return nx_; }
+		int ny() { return ny_; }
+		int nz() { return nz_; }
 
 		//bricks
-		inline int bszx() { return bszx_; }
-		inline int bszy() { return bszy_; }
-		inline int bszz() { return bszz_; }
-		inline int bnx() { return bnx_; }
-		inline int bny() { return bny_; }
-		inline int bnz() { return bnz_; }
+		int bszx() { return bszx_; }
+		int bszy() { return bszy_; }
+		int bszz() { return bszz_; }
+		int bnx() { return bnx_; }
+		int bny() { return bny_; }
+		int bnz() { return bnz_; }
 		//get neighbor id
-		inline unsigned int negxid(unsigned int id);
-		inline unsigned int negyid(unsigned int id);
-		inline unsigned int negzid(unsigned int id);
-		inline unsigned int posxid(unsigned int id);
-		inline unsigned int posyid(unsigned int id);
-		inline unsigned int poszid(unsigned int id);
+		unsigned int negxid(unsigned int id);
+		unsigned int negyid(unsigned int id);
+		unsigned int negzid(unsigned int id);
+		unsigned int posxid(unsigned int id);
+		unsigned int posyid(unsigned int id);
+		unsigned int poszid(unsigned int id);
 		//get brick id by voxel index
-		inline unsigned int get_brick_id(unsigned long long index);
+		unsigned int get_brick_id(unsigned long long index);
 		TextureBrick* get_brick(unsigned int bid);
 
-		inline int nc() { return nc_; }
-		inline int nb(int i)
+		int nc() { return nc_; }
+		int nb(int i)
 		{
 			assert(i >= 0 && i < TEXTURE_MAX_COMPONENTS);
 			return nb_[i];
 		}
-		inline int nmask() { return nmask_; }
-		inline int nlabel() { return nlabel_; }
+		int nmask() { return nmask_; }
+		int nlabel() { return nlabel_; }
 
-		inline void set_size(int nx, int ny, int nz, int nc, int* nb) 
+		void set_size(int nx, int ny, int nz, int nc, int* nb) 
 		{
 			nx_ = nx; ny_ = ny; nz_ = nz; nc_ = nc;
 			for(int c = 0; c < nc_; c++)
@@ -113,15 +113,15 @@ namespace flvr
 		}
 
 		//! Interface that does not expose flvr::BBox.
-		inline void get_bounds(double& xmin, double& ymin, double& zmin,
+		void get_bounds(double& xmin, double& ymin, double& zmin,
 			double& xmax, double& ymax, double& zmax) const;
 
-		inline void get_bounds(fluo::BBox& b) const;
+		void get_bounds(fluo::BBox& b) const;
 
-		inline fluo::BBox *bbox() { return &bbox_; }
-		inline void set_bbox(const fluo::BBox& bbox) { bbox_ = bbox; }
-		inline fluo::Transform *transform() { return &transform_; }
-		inline void set_transform(fluo::Transform tform) { transform_ = tform; }
+		fluo::BBox *bbox() { return &bbox_; }
+		void set_bbox(const fluo::BBox& bbox) { bbox_ = bbox; }
+		fluo::Transform *transform() { return &transform_; }
+		void set_transform(fluo::Transform tform) { transform_ = tform; }
 
 		// get sorted bricks
 		std::vector<TextureBrick*>* get_sorted_bricks(
@@ -148,13 +148,13 @@ namespace flvr
 		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat);
 		bool test_against_view(const fluo::BBox &bbox, bool persp = false);
 
-		inline int nlevels(){ return int((*bricks_).size()); }
+		int nlevels(){ return int((*bricks_).size()); }
 
-		inline double vmin() const { return vmin_; }
-		inline double vmax() const { return vmax_; }
-		inline double gmin() const { return gmin_; }
-		inline double gmax() const { return gmax_; }
-		inline void set_minmax(double vmin, double vmax, double gmin, double gmax)
+		double vmin() const { return vmin_; }
+		double vmax() const { return vmax_; }
+		double gmin() const { return gmin_; }
+		double gmax() const { return gmax_; }
+		void set_minmax(double vmin, double vmax, double gmin, double gmax)
 		{vmin_ = vmin; vmax_ = vmax; gmin_ = gmin; gmax_ = gmax;}
 
 		void set_spacings(double x, double y, double z);
@@ -212,9 +212,9 @@ namespace flvr
 		void valid_all_mask();
 
 		//get priority brick number
-		inline void set_use_priority(bool value) {use_priority_ = value;}
-		inline bool get_use_priority() {return use_priority_;}
-		inline int get_n_p0()
+		void set_use_priority(bool value) {use_priority_ = value;}
+		bool get_use_priority() {return use_priority_;}
+		int get_n_p0()
 		{if (use_priority_) return n_p0_; else return int((*bricks_).size());}
 
 		//for brkxml file
@@ -323,105 +323,6 @@ namespace flvr
 		fluo::Transform mv_;
 		fluo::Transform pr_;
 	};
-
-	inline unsigned int Texture::negxid(unsigned int id)
-	{
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		if (x == 0)
-			return id;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
-			return id;
-		else
-			return r;
-	}
-
-	inline unsigned int Texture::negyid(unsigned int id)
-	{
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		if (y == 0)
-			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + (y - 1) * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
-			return id;
-		else
-			return r;
-	}
-
-	inline unsigned int Texture::negzid(unsigned int id)
-	{
-		int z = id / (bnx_ * bny_);
-		if (z == 0)
-			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int r = (z - 1) * bnx_ * bny_ + y * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
-			return id;
-		else
-			return r;
-	}
-
-	inline unsigned int Texture::posxid(unsigned int id)
-	{
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		if (x == bnx_ - 1)
-			return id;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + y * bnx_ + x + 1;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
-			return id;
-		else
-			return r;
-	}
-
-	inline unsigned int Texture::posyid(unsigned int id)
-	{
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		if (y == bny_ - 1)
-			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + (y + 1) * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
-			return id;
-		else
-			return r;
-	}
-
-	inline unsigned int Texture::poszid(unsigned int id)
-	{
-		int z = id / (bnx_ * bny_);
-		if (z == bnz_ - 1)
-			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int r = (z + 1) * bnx_ * bny_ + y * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
-			return id;
-		else
-			return r;
-	}
-
-	inline unsigned int Texture::get_brick_id(unsigned long long index)
-	{
-		unsigned long long x, y, z;
-		z = index / (nx_ * ny_);
-		y = index % (nx_ * ny_);
-		x = y % nx_;
-		y = y / nx_;
-		//get brick indices
-		x = bszx_ <= 1 ? 0 : x / (bszx_-1);
-		y = bszy_ <= 1 ? 0 : y / (bszy_-1);
-		z = bszz_ <= 1 ? 0 : z / (bszz_-1);
-		return static_cast<unsigned int>(z * bnx_ * bny_ + y * bnx_ + x);
-	}
-
 
 } // namespace flvr
 

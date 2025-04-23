@@ -2162,7 +2162,7 @@ void ScriptProc::RunDlcVideoAnalyze()
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 
-	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
 	if (!dlc)
 		return;
 	if (dlc->GetState() == 2)
@@ -2206,7 +2206,7 @@ void ScriptProc::RunDlcGetRulers()
 	if (analyzed)
 		return;
 
-	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
 	if (!dlc)
 		return;
 	if (!dlc->GetResultFile())
@@ -2237,7 +2237,7 @@ void ScriptProc::RunDlcCreateProj()
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
 
-	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
 	if (!dlc)
 		return;
 
@@ -2266,7 +2266,7 @@ void ScriptProc::RunDlcLabel()
 		return;
 	if (!TimeCondition())
 		return;
-	flrd::PyDlc* dlc = glbin.get_add_python<flrd::PyDlc>("dlc");
+	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
 	if (!dlc)
 		return;
 

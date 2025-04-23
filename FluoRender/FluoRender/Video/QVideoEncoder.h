@@ -29,30 +29,20 @@ DEALINGS IN THE SOFTWARE.
 #define __QVideoEncoder_H
 
 #include <string>
-#include <cstring>
-#include <stdint.h>
-#include <cstdio>
-#include <iostream>
-#include <cmath>
-extern "C"
-{
-#include <libavcodec/avcodec.h>
-#include <libavutil/opt.h>
-#include <libavutil/mathematics.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libswresample/swresample.h>
-}
-
 // MC hack to add two missing defines from older FFMPEG versions
 //#ifdef __linux__
 //  #define CODEC_FLAG_GLOBAL_HEADER   0x00400000
 //  #define AVFMT_RAWPICTURE   0x0020
 //#endif
 
-#define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
-#define SCALE_FLAGS SWS_BICUBIC
-
+struct AVStream;
+struct AVFrame;
+struct SwsContext;
+struct SwrContext;
+struct AVFormatContext;
+struct AVCodecContext;
+struct AVRational;
+struct AVPacket;
 class QVideoEncoder
 {
 protected:
@@ -73,8 +63,8 @@ protected:
 		AVFrame *frame;
 		AVFrame *tmp_frame;
 		float t, tincr, tincr2;
-		struct SwsContext *sws_ctx;
-		struct SwrContext *swr_ctx;
+		SwsContext *sws_ctx;
+		SwrContext *swr_ctx;
 	} OutputStream;
 
 	//codec and format details.

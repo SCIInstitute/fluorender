@@ -39,6 +39,16 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <MainSettings.h>
 #include <DataManager.h>
+#ifdef _WIN32
+//wacom support
+#include <wx/msw/private.h>
+#include <MSGPACK.h>
+#define PACKETDATA	(/*PK_X | PK_Y | */PK_BUTTONS |\
+		PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE)
+#define PACKETMODE	PK_BUTTONS
+#include <PKTDEF.h>
+#include <WacomUtils.h>
+#endif
 
 #ifdef _WIN32
 HCTX RenderCanvas::m_hTab = 0;

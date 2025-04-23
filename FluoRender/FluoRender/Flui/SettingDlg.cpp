@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
 #include <Texture.h>
+#include <TextRenderer.h>
 #include <wxSingleSlider.h>
 #include <ModalDlg.h>
 #include <wx/valnum.h>

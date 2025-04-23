@@ -26,8 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Global.h>
 #include <StencilCompare.h>
+#include <Global.h>
+#include <KernelProgram.h>
+#include <VolKernel.h>
+#include <Stencil.h>
+#include <Neighbor.h>
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
@@ -787,6 +791,9 @@ m_use_mask(use_mask)
 	//create program
 	m_prog = glbin_vol_kernel_factory.kernel(
 		m_use_mask ? str_cl_stencil_mask : str_cl_stencil);
+	m_img1 = std::make_unique<flvr::Argument>();
+	m_img2 = std::make_unique<flvr::Argument>();
+	m_mask1 = std::make_unique<flvr::Argument>();
 }
 
 StencilCompare::~StencilCompare()
@@ -822,7 +829,7 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
 	if (m_s1->fsize < 1)
-		m_img1 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s1->data));
+		m_img1 = std::make_unique<flvr::Argument>(m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s1->data)));
 	else
 	{
 		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s1->data));
@@ -842,14 +849,14 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 			}
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		}
-		m_img1 = img[m_s1->fsize % 2];
+		m_img1 = std::make_unique<flvr::Argument>(img[m_s1->fsize % 2]);
 		m_prog->releaseMemObject(img[(m_s1->fsize+1)%2]);
 	}
 
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
 	if (m_s2->fsize < 1)
-		m_img2 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data));
+		m_img2 = std::make_unique<flvr::Argument>(m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data)));
 	else
 	{
 		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data));
@@ -869,7 +876,7 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 			}
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		}
-		m_img2 = img[m_s2->fsize % 2];
+		m_img2 = std::make_unique<flvr::Argument>(img[m_s2->fsize % 2]);
 		m_prog->releaseMemObject(img[(m_s2->fsize + 1) % 2]);
 	}
 	//m_prog->readBuffer(m_img1, (void*)(mi.data));
@@ -888,9 +895,10 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 			kernel_index = m_prog->createKernel(cmp_name);
 		buf_size = sizeof(unsigned char) * nx * ny * nz;
 		m_prog->setKernelArgBegin(kernel_index, 1);
-		m_mask1 = m_prog->setKernelArgBuf(
+		m_mask1 = std::make_unique<flvr::Argument>(
+			m_prog->setKernelArgBuf(
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-			buf_size, m_s1->mask);
+			buf_size, m_s1->mask));
 	}
 }
 
@@ -1059,6 +1067,83 @@ bool StencilCompare::Compare()
 	return true;
 }
 
+//float StencilCompare::Similar()
+//{
+//	float result = 0.0f;
+
+//	float v1, v2, d1, d2, w;
+//	fluo::Range nb(m_s1->box);
+//	if (m_method == 0)
+//	{
+//		//dot product
+//		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+//		{
+//			//get v1
+//			v1 = m_s1->getfilter(i);
+//			//get v2
+//			v2 = m_s2->getfilter(i);
+//			//get d weighted
+//			//d1 = v1 - v2;
+//			//d2 = 1.0 - std::min(v1, v2);
+//			w = v1 * v2;
+//			result += w;
+//		}
+//	}
+//	else if (m_method == 1)
+//	{
+//		//diff squared
+//		for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+//		{
+//			//get v1
+//			v1 = m_s1->getfilter(i);
+//			//get v2
+//			v2 = m_s2->getfilter(i);
+//			//get d weighted
+//			d1 = v1 - v2;
+//			//d2 = 1.0 - std::min(v1, v2);
+//			w = 1.0 - d1 * d1;
+//			result += w;
+//		}
+//	}
+//	return result;
+//}
+
+void StencilCompare::Label()
+{
+	fluo::Range nb(m_s1->box);
+
+	unsigned int l;
+	fluo::Point tfp1, tfp2;
+	for (fluo::Point i = nb.begin(); i != nb.end(); i = ++nb)
+	{
+		if (!m_s1->valid(i, tfp1) || !m_s2->valid(i, tfp2))
+			continue;
+		//get v1
+		l = m_s1->getlabel(i);
+		//set s2
+		if (l == m_s1->id)
+			m_s2->setlabel(i, l);
+	}
+}
+
+void StencilCompare::Lookup()
+{
+	fluo::Range all2(fluo::Point(),
+		fluo::Vector(static_cast<double>(m_s2->nx - 1), static_cast<double>(m_s2->ny - 1), static_cast<double>(m_s2->nz - 1)));
+	for (fluo::Point i = all2.begin(); i != all2.end(); i = ++all2)
+	{
+		unsigned int l = m_s1->lookuplabel(i, *m_s2);
+		if (l == m_s1->id)
+		{
+			unsigned long long index =
+				(unsigned long long)m_s2->nx*m_s2->ny*i.intz() +
+				(unsigned long long)m_s2->nx*i.inty() +
+				(unsigned long long)i.intx();
+			((unsigned int*)m_s2->label)[index] = l;
+		}
+	}
+}
+
 float StencilCompare::Similar(const std::string& name)
 {
 	float result = 0.0f;
@@ -1114,10 +1199,10 @@ float StencilCompare::Similar(const std::string& name)
 	cl_uint* sumi = new cl_uint[gsize.gsxyz];
 	//
 	m_prog->setKernelArgBegin(kernel_index);
-	m_prog->setKernelArgument(m_img1);
+	m_prog->setKernelArgument(*m_img1);
 	if (m_use_mask)
-		m_prog->setKernelArgument(m_mask1);
-	m_prog->setKernelArgument(m_img2);
+		m_prog->setKernelArgument(*m_mask1);
+	m_prog->setKernelArgument(*m_img2);
 	flvr::Argument arg_sumf = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_float)*(gsize.gsxyz), (void*)(sumf));
 	flvr::Argument arg_sumi = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * (gsize.gsxyz), (void*)(sumi));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
