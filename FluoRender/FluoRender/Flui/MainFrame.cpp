@@ -864,20 +864,9 @@ MainFrame::~MainFrame()
 	glbin_img_shader_factory.clear();
 	glbin_light_field_shader_factory.clear();
 	glbin_text_tex_manager.clear();
-
-	Root* root = glbin_data_manager.GetRoot();
-	for (int i=0; i<root->GetViewNum(); i++)
-	{
-		RenderView* view = root->GetView(i);
-		if (view)
-		{
-			view->ClearAll();
-			if (i == 0)
-				glbin_brush_def.Set(&glbin_vol_selector);
-		}
-	}
 	flvr::KernelProgram::release();
 
+	glbin_brush_def.Set(&glbin_vol_selector);
 	glbin_comp_def.Set(&glbin_comp_generator);
 	glbin_comp_def.Set(&glbin_clusterizer);
 	glbin_comp_def.Set(&glbin_comp_selector);

@@ -153,10 +153,11 @@ RenderCanvas::~RenderCanvas()
 
 	if (m_render_view)
 	{
+		m_render_view->SetRenderCanvas(0);
+		m_render_view->SetRenderViewPanel(0);
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->DeleteView(m_render_view);
-		delete m_render_view;
 	}
 
 #ifdef _WIN32

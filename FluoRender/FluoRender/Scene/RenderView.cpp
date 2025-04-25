@@ -643,9 +643,9 @@ RenderView::~RenderView()
 //set render view panel
 void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
 {
+	m_render_view_panel = panel;
 	if (!panel)
 		return;
-	m_render_view_panel = panel;
 	m_id = panel->GetId();
 	m_name = panel->GetName();
 }
@@ -776,7 +776,8 @@ void RenderView::InitLookingGlass()
 		glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
 	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
 	glbin_current.mainframe->UpdateProps({ gstHologramMode, gstFullscreenDisplay });
-	m_render_view_panel->SetFullScreen();
+	if (m_render_view_panel)
+		m_render_view_panel->SetFullScreen();
 	m_lg_initiated = true;
 }
 
@@ -2631,7 +2632,7 @@ void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 	fluo::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
 
-	if (notify)
+	if (notify && m_render_view_panel)
 		m_render_view_panel->FluoUpdate({ gstCamRotation });
 }
 
@@ -2782,7 +2783,8 @@ void RenderView::SetScale121()
 
 	RefreshGL(21);
 
-	m_render_view_panel->FluoUpdate({ gstScaleFactor });
+	if (m_render_view_panel)
+		m_render_view_panel->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderView::SetPinRotCenter(bool pin)
@@ -2953,7 +2955,8 @@ void RenderView::SetPersp(bool persp)
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
 
-		m_render_view_panel->FluoUpdate({ gstScaleFactor, gstFree });
+		if (m_render_view_panel)
+			m_render_view_panel->FluoUpdate({ gstScaleFactor, gstFree });
 		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 	}
 
@@ -3014,7 +3017,8 @@ void RenderView::SetFree(bool free)
 		m_obj_transz = m_obj_transz_saved;
 		//restore scale factor
 		m_scale_factor = m_scale_factor_saved;
-		m_render_view_panel->FluoUpdate({ gstScaleFactor });
+		if (m_render_view_panel)
+			m_render_view_panel->FluoUpdate({ gstScaleFactor });
 
 		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 	}
@@ -3161,7 +3165,7 @@ void RenderView::SetParams(double t)
 	m_param_cur_num = std::round(t);
 	FlKeyCode keycode;
 	keycode.l0 = 1;
-	keycode.l0_name = m_render_view_panel->GetName();
+	keycode.l0_name = ws2s(GetName());
 
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
@@ -3253,7 +3257,7 @@ void RenderView::SetParams(double t)
 	bool bx, by, bz;
 	//for the view
 	keycode.l1 = 1;
-	keycode.l1_name = m_render_view_panel->GetName();
+	keycode.l1_name = ws2s(GetName());
 	//translation
 	double tx, ty, tz;
 	keycode.l2 = 0;
@@ -3815,7 +3819,8 @@ void RenderView::SetVolumeB(VolumeData* vd)
 void RenderView::ChangeBrushSize(int value, bool ctrl)
 {
 	glbin_vol_selector.ChangeBrushSize(value, ctrl);
-	m_render_view_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
+	if (m_render_view_panel)
+		m_render_view_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
 void RenderView::SetClipMode(int mode)
@@ -4172,7 +4177,8 @@ bool RenderView::ForceDraw()
 				{
 					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 					view->RefreshGL(39);
-					view->m_render_canvas->Update();
+					if (view->m_render_canvas)
+						view->m_render_canvas->Update();
 				}
 			}
 		}
@@ -4193,10 +4199,10 @@ void RenderView::StartLoopUpdate()
 	if (glbin_settings.m_mem_swap)
 	{
 		if (flvr::TextureRenderer::active_view_ > 0 &&
-			flvr::TextureRenderer::active_view_ != m_render_view_panel->GetId())
+			flvr::TextureRenderer::active_view_ != Id())
 			return;
 		else
-			flvr::TextureRenderer::active_view_ = m_render_view_panel->GetId();
+			flvr::TextureRenderer::active_view_ = Id();
 
 		int nx, ny;
 		GetRenderSize(nx, ny);
@@ -4645,7 +4651,8 @@ void RenderView::RefreshGL(int debug_code,
 	SetSortBricks();
 	m_refresh = true;
 	glbin_lg_renderer.SetUpdating(lg_changed);
-	m_render_canvas->Refresh(erase);
+	if (m_render_canvas)
+		m_render_canvas->Refresh(erase);
 	//Update();
 }
 
@@ -11151,7 +11158,8 @@ void RenderView::ProcessMouse(MouseState& state)
 					if (!hold_old)
 						RefreshGL(30);
 					//DBGPRINT(L"refresh requested\n");
-					m_render_view_panel->FluoUpdate({ gstCamRotation });
+					if (m_render_view_panel)
+						m_render_view_panel->FluoUpdate({ gstCamRotation });
 				}
 				if (state.m_mouse_middle || (state.m_key_ctrl && state.m_mouse_left))
 				{
@@ -11202,7 +11210,8 @@ void RenderView::ProcessMouse(MouseState& state)
 					//SetSortBricks();
 					RefreshGL(32);
 
-					m_render_view_panel->FluoUpdate({ gstScaleFactor });
+					if (m_render_view_panel)
+						m_render_view_panel->FluoUpdate({ gstScaleFactor });
 				}
 			}
 		}
@@ -11308,7 +11317,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				double value = wheel * m_scale_factor / 1000.0;
 				if (m_scale_factor + value > 0.01)
 					m_scale_factor += value;
-				m_render_view_panel->FluoUpdate({ gstScaleFactor });
+				if (m_render_view_panel)
+					m_render_view_panel->FluoUpdate({ gstScaleFactor });
 			}
 		}
 
