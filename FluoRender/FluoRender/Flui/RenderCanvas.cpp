@@ -625,12 +625,15 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 	state.m_valid_focus_slider = m_focused_slider != nullptr;
 	//mouse
-	state.m_mouse_left = event.LeftDown();
-	state.m_mouse_right = event.RightDown();
-	state.m_mouse_middle = event.MiddleDown();
+	state.m_mouse_left_down = event.LeftDown();
+	state.m_mouse_right_down = event.RightDown();
+	state.m_mouse_middle_down = event.MiddleDown();
 	state.m_mouse_left_up = event.LeftUp();
 	state.m_mouse_right_up = event.RightUp();
 	state.m_mouse_middle_up = event.MiddleUp();
+	state.m_mouse_left_is_down = event.LeftIsDown();
+	state.m_mouse_right_is_down = event.RightIsDown();
+	state.m_mouse_middle_is_down = event.MiddleIsDown();
 	state.m_mouse_drag = event.Dragging();
 	state.m_mouse_wheel_rotate = event.GetWheelRotation();
 	state.m_mouse_wheel_delta = event.GetWheelDelta();
@@ -640,9 +643,9 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 
 	wxWindow *window = wxWindow::FindFocus();
 	if (window &&
-		(state.m_mouse_left ||
-		state.m_mouse_right ||
-		state.m_mouse_middle ||
+		(state.m_mouse_left_down ||
+		state.m_mouse_right_down ||
+		state.m_mouse_middle_down ||
 		state.m_mouse_left_up ||
 		state.m_mouse_right_up ||
 		state.m_mouse_middle_up ||

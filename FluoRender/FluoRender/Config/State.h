@@ -50,12 +50,15 @@ public:
 	bool m_reset_focus_slider = false;
 	bool m_scroll_focus_slider = false;
 	//mouse state
-	bool m_mouse_left = false;
-	bool m_mouse_right = false;
-	bool m_mouse_middle = false;
+	bool m_mouse_left_down = false;
 	bool m_mouse_left_up = false;
+	bool m_mouse_left_is_down = false;
+	bool m_mouse_right_down = false;
 	bool m_mouse_right_up = false;
+	bool m_mouse_right_is_down = false;
+	bool m_mouse_middle_down = false;
 	bool m_mouse_middle_up = false;
+	bool m_mouse_middle_is_down = false;
 	bool m_mouse_drag = false;
 	int m_mouse_wheel_rotate = 0;
 	int m_mouse_wheel_delta = 0;

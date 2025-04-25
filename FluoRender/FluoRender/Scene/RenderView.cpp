@@ -10825,7 +10825,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 	//mouse button down operations
 	//glbin_ruler_handler.SetVolumeData(m_cur_vol);
-	if (state.m_mouse_left)
+	if (state.m_mouse_left_down)
 	{
 		if (m_draw_frame)
 		{
@@ -10913,14 +10913,14 @@ void RenderView::ProcessMouse(MouseState& state)
 
 		return;
 	}
-	if (state.m_mouse_right)
+	if (state.m_mouse_right_down)
 	{
 		state.m_reset_focus_slider = true;
 		old_mouse_X = mp.x();
 		old_mouse_Y = mp.y();
 		return;
 	}
-	if (state.m_mouse_middle)
+	if (state.m_mouse_middle_down)
 	{
 		state.m_reset_focus_slider = true;
 		old_mouse_X = mp.x();
@@ -11116,8 +11116,8 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_int_mode == 15 ||
 			m_int_mode == 13) &&
 			(state.m_key_ctrl ||
-			state.m_mouse_middle ||
-			state.m_mouse_right)))
+			state.m_mouse_middle_is_down ||
+			state.m_mouse_right_is_down)))
 		{
 			//disable picking
 			m_pick = false;
@@ -11127,7 +11127,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				abs(old_mouse_X - mp.x()) +
 				abs(old_mouse_Y - mp.y())<200)
 			{
-				if (state.m_mouse_left &&
+				if (state.m_mouse_left_is_down &&
 					!state.m_key_ctrl &&
 					m_int_mode != 10 &&
 					m_int_mode != 12)
@@ -11161,7 +11161,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					if (m_render_view_panel)
 						m_render_view_panel->FluoUpdate({ gstCamRotation });
 				}
-				if (state.m_mouse_middle || (state.m_key_ctrl && state.m_mouse_left))
+				if (state.m_mouse_middle_is_down || (state.m_key_ctrl && state.m_mouse_left_is_down))
 				{
 					long dx = mp.x() - old_mouse_X;
 					long dy = mp.y() - old_mouse_Y;
@@ -11184,7 +11184,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					//SetSortBricks();
 					RefreshGL(31);
 				}
-				if (state.m_mouse_right)
+				if (state.m_mouse_right_is_down)
 				{
 					long dx = mp.x() - old_mouse_X;
 					long dy = mp.y() - old_mouse_Y;
@@ -11227,7 +11227,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				abs(old_mouse_X - mp.x()) +
 				abs(old_mouse_Y - mp.y())<200)
 			{
-				if (state.m_mouse_left)
+				if (state.m_mouse_left_is_down)
 				{
 					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
