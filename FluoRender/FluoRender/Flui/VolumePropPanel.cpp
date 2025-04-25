@@ -1307,6 +1307,7 @@ void VolumePropPanel::SaveMl()
 
 	//histogram
 	flrd::Histogram histogram(m_vd);
+	histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	histogram.SetUseMask(false);
 	flrd::EntryHist* eh = histogram.GetEntryHist();
 

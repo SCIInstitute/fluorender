@@ -310,6 +310,20 @@ Global::Global() :
 
 Global::~Global() = default;
 
+void Global::InitProgress(const std::function<void(int, const std::string&)>& f)
+{
+	//set progress functions for all processors
+	m_comp_generator->SetProgressFunc(f);
+	m_comp_analyzer->SetProgressFunc(f);
+	m_vol_calculator->SetProgressFunc(f);
+	m_kernel_executor->SetProgressFunc(f);
+	m_trackmap_proc->SetProgressFunc(f);
+	m_data_manager->SetProgressFunc(f);
+	m_clusterizer->SetProgressFunc(f);
+	m_vol_converter->SetProgressFunc(f);
+	project_->SetProgressFunc(f);
+}
+
 void Global::Init()
 {
 	InitDatabase();

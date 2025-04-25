@@ -38,9 +38,9 @@ Progress::Progress() :
 	m_range(100),
 	m_busy(false)
 {
-	SetProgressFunc(
-		std::bind(&MainFrame::SetProgress, glbin_current.mainframe,
-			std::placeholders::_1, std::placeholders::_2));
+	//SetProgressFunc(
+	//	std::bind(&MainFrame::SetProgress, glbin_current.mainframe,
+	//		std::placeholders::_1, std::placeholders::_2));
 }
 
 void Progress::SetProgress(int val, const std::string& str)

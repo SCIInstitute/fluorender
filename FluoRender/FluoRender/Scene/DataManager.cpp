@@ -3201,6 +3201,7 @@ void VolumeData::GetMlParams()
 	if (!m_ep->getValid())
 	{
 		flrd::Histogram histogram(this);
+		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(false);
 		flrd::EntryHist* eh = histogram.GetEntryHist();
 		if (!eh)
@@ -6025,6 +6026,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	int reader_return = -1;
 	if (reader)
 	{
+		reader->SetProgressFunc(GetProgressFunc());
 		bool preprocess = false;
 		if (reader->GetSliceSeq() != glbin_settings.m_slice_sequence)
 		{
@@ -6088,7 +6090,8 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				reader = new MPGReader();
 		}
 		
-		
+		reader->SetProgressFunc(GetProgressFunc());
+
 		m_reader_list.push_back(reader);
 		reader->SetFile(pathname);
 		reader->SetSliceSeq(glbin_settings.m_slice_sequence);

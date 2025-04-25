@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <functional>
 
 class TreeFileFactory;
 class QVideoEncoder;
@@ -186,6 +187,9 @@ namespace fluo
 	{
 	public:
 		static Global& instance() { return instance_; }
+
+		//initialize processors by setting progress func
+		void InitProgress(const std::function<void(int, const std::string&)>& f);
 
 		//config file handlers
 		TreeFileFactory& get_tree_file_factory();

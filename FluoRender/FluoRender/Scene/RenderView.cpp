@@ -305,6 +305,9 @@ RenderView::RenderView() :
 	type = 1;
 
 	m_ruler_list = std::make_unique<flrd::RulerList>();
+	m_cell_list = std::make_unique<flrd::CelpList>();
+	m_text_renderer = std::make_unique<flvr::TextRenderer>();
+
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = new XboxController(1);
@@ -313,8 +316,6 @@ RenderView::RenderView() :
 		m_control_connected = m_controller->IsConnected();
 	}
 #endif
-
-	m_text_renderer = std::make_unique<flvr::TextRenderer>();
 }
 
 RenderView::RenderView(RenderView& copy):
@@ -544,6 +545,9 @@ RenderView::RenderView(RenderView& copy):
 	type = 1;
 
 	m_ruler_list = std::make_unique<flrd::RulerList>();
+	m_cell_list = std::make_unique<flrd::CelpList>();
+	m_text_renderer = std::make_unique<flvr::TextRenderer>();
+
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = new XboxController(1);
@@ -553,7 +557,6 @@ RenderView::RenderView(RenderView& copy):
 	}
 #endif
 
-	m_text_renderer = std::make_unique<flvr::TextRenderer>();
 }
 
 RenderView::~RenderView()

@@ -161,17 +161,8 @@ MainFrame::MainFrame(
 	glbin_current.mainframe = this;
 	//progress
 	//these global objects are constructed before mainframe. therefore need to set progress functions again
-	glbin_data_manager.SetProgressFunc(
-		std::bind(&MainFrame::SetProgress, this,
+	glbin.InitProgress(std::bind(&MainFrame::SetProgress, this,
 			std::placeholders::_1, std::placeholders::_2));
-	glbin_project.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_vol_converter.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_vol_calculator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_comp_generator.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_comp_analyzer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_clusterizer.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_trackmap_proc.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	glbin_kernel_executor.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 
 	glbin_states.m_benchmark = benchmark;
 

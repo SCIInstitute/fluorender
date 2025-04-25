@@ -1431,6 +1431,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	wxColor color;
 
 	Progress prg;
+	prg.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	prg.SetProgress(0, "Updating component list.");
 
 	i = 0;

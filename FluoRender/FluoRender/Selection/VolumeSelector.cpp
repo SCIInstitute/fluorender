@@ -144,6 +144,7 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 	{
 		//histogram
 		flrd::Histogram histogram(m_vd);
+		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(true);
 		flrd::EntryHist* eh = histogram.GetEntryHist();
 
