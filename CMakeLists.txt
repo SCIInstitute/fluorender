@@ -231,15 +231,12 @@ if(WIN32)
     set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
     set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 endif()
-include_directories(${TIFF_INCLUDE_DIR})
 if (TIFF_FOUND)
     message (STATUS "TIFF_INCLUDE_DIR=${TIFF_INCLUDE_DIR}")
 endif()
-include_directories(${PNG_PNG_INCLUDE_DIR})
 if (PNG_FOUND)
     message (STATUS "PNG_PNG_INCLUDE_DIR=${PNG_PNG_INCLUDE_DIR}")
 endif()
-include_directories(${ZLIB_INCLUDE_DIRS})
 
 # Boost
 file(GLOB BOOST_DIRS "${PARENT_DIR}/boost*")
@@ -250,7 +247,6 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem locale REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
 
 # dlib
 if(WIN32)
@@ -269,7 +265,7 @@ endif()
 file(GLOB DLIB_DIRS "${PARENT_DIR}/dlib*")
 list(GET DLIB_DIRS 0 DLIB_DIRS)  # Get the first match
 add_subdirectory(${DLIB_DIRS} dlib_build)
-include_directories(${DLIB_DIRS})
+#include_directories(${DLIB_DIRS})
 set(DLIB_USE_BLAS ON)
 set(DLIB_USE_CUDA ON)
 
@@ -757,13 +753,15 @@ add_library(VIDEO_LIB STATIC
 
 # include and link
 # Animator
+target_include_directories(ANIMATORS_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
+  ${TIFF_INCLUDE_DIR})
 target_link_libraries(ANIMATORS_LIB PRIVATE
-  TYPE_LIB
-  FLRENDER_LIB)
+  ${TIFF_LIBRARIES})
 
 # Calculate
-target_link_libraries(CALCULATE_LIB PRIVATE
-  FLRENDER_LIB)
+#target_link_libraries(CALCULATE_LIB PRIVATE
+#  FLRENDER_LIB)
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
@@ -775,11 +773,11 @@ target_link_libraries(CLUSTER_LIB PRIVATE
 target_include_directories(COMPONENT_LIB PRIVATE
   ${Boost_INCLUDE_DIR})
 target_link_libraries(COMPONENT_LIB PRIVATE
-  ${Boost_LIBRARIES}
-  FLRENDER_LIB)
+  ${Boost_LIBRARIES})
 
 # Config
 target_include_directories(CONFIG_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR})
 target_link_libraries(CONFIG_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
@@ -787,30 +785,38 @@ target_link_libraries(CONFIG_LIB PRIVATE
 # Control
 
 # Converter
-target_link_libraries(CONVERTER_LIB
+target_link_libraries(CONVERTER_LIB PRIVATE
   teem)
 
 # Database
+target_include_directories(DATABASE_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
 
 # Distance
+target_include_directories(DISTANCE_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
+  ${GLEW_INCLUDE_DIR})
 target_link_libraries(DISTANCE_LIB PRIVATE
   teem
-  ${OpenCV_LIBS}
-  FLRENDER_LIB)
+  ${GLEW_STATIC_LIBRARIES}
+  ${OpenCV_LIBS})
 
 # File
+target_include_directories(FILE_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
 
 # Filter
 target_include_directories(FILTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR})
 target_link_libraries(FILTER_LIB PRIVATE
-  ${Boost_LIBRARIES}
-  FLRENDER_LIB)
+  ${Boost_LIBRARIES})
 
 # Flobject
+target_include_directories(FLOBJECT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
 
 # Flrender
-target_include_directories(FLRENDER_LIB PUBLIC
+target_include_directories(FLRENDER_LIB PRIVATE
   ${GLEW_INCLUDE_DIR})
 target_link_libraries(FLRENDER_LIB PRIVATE
   teem
@@ -821,8 +827,11 @@ target_link_libraries(FLRENDER_LIB PRIVATE
 )
 
 # Flui
+target_include_directories(FLUI_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
+  ${GLEW_INCLUDE_DIR})
 target_link_libraries(FLUI_LIB PRIVATE
-  FLRENDER_LIB)
+  ${GLEW_STATIC_LIBRARIES})
 if(WIN32)
     target_link_libraries(FLUI_LIB PRIVATE
       WACOMUTILS_LIB)
@@ -833,7 +842,10 @@ if (WIN32 AND USE_XINPUT)
 endif()
 
 # Format
-target_link_libraries(FORMAT_LIB
+target_include_directories(FORMAT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
+  ${TIFF_INCLUDE_DIR})
+target_link_libraries(FORMAT_LIB PRIVATE
   teem
   ${Boost_LIBRARIES}
   ${FFMPEG_LIBRARIES}
@@ -843,6 +855,7 @@ target_link_libraries(FORMAT_LIB
 
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR})
 
 # Image
@@ -852,11 +865,10 @@ target_include_directories(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_INCLUDE_DIR})
 target_link_libraries(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
-  ${HoloPlay_LIBRARIES}
-  FLRENDER_LIB)
+  ${HoloPlay_LIBRARIES})
 
 # Main
-target_link_libraries(MAIN_LIB
+target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
 
 # OpenXR
@@ -870,53 +882,66 @@ target_link_libraries(OPENXR_LIB PRIVATE
 # Progress
 
 # Project
+target_include_directories(PROJECT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
 
 # Python
-target_link_libraries(PYTHON_LIB
+target_include_directories(PYTHON_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
+target_link_libraries(PYTHON_LIB PRIVATE
   ${HDF5_LIBRARIES}
   ${Boost_LIBRARIES})
 
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${GLEW_INCLUDE_DIR}
+  ${TIFF_INCLUDE_DIR})
 target_link_libraries(SCENE_LIB PRIVATE
+  ${TIFF_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES})
 
 # Script
-target_link_libraries(SCRIPT_LIB
+target_include_directories(SCRIPT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
+  ${TIFF_INCLUDE_DIR})
+target_link_libraries(SCRIPT_LIB PRIVATE
   ${TIFF_LIBRARIES}
-  ${Python3_LIBRARIES}
-  GLOBAL_LIB
-  PYTHON_LIB)
+  ${Python3_LIBRARIES})
 
 # Selection
-target_link_libraries(SELECTION_LIB
-  FLRENDER_LIB)
+target_include_directories(SELECTION_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR})
+target_link_libraries(SELECTION_LIB PRIVATE
+  ${GLEW_STATIC_LIBRARIES})
 
 # Timer
+target_include_directories(TIMER_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
 
 # Tracking
-target_link_libraries(TRACKING_LIB
-  ${Boost_LIBRARIES}
-  FLRENDER_LIB)
+target_include_directories(TRACKING_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
+target_link_libraries(TRACKING_LIB PRIVATE
+  ${Boost_LIBRARIES})
 
 # Trainer
-target_link_libraries(TRAINER_LIB
+target_link_libraries(TRAINER_LIB PRIVATE
   ${Python3_LIBRARIES}
   dlib::dlib)
 
 # Type
-target_include_directories(TYPE_LIB PUBLIC
+target_include_directories(TYPE_LIB PRIVATE
   ${GLEW_INCLUDE_DIR})
 target_link_libraries(TYPE_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 
 # Utility
-target_link_libraries(UTILITY_LIB
+target_link_libraries(UTILITY_LIB PRIVATE
   ${Boost_LIBRARIES})
 
 # Video
-target_link_libraries(VIDEO_LIB
+target_link_libraries(VIDEO_LIB PRIVATE
   ${FFMPEG_LIBRARIES})
 
 # For Apple set the icns file containing icons
@@ -1031,17 +1056,17 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 # link the libraries
 if(WIN32)
-  target_link_libraries(FluoRender
+  target_link_libraries(FluoRender PRIVATE
     secur32.lib
   )
 elseif(APPLE)
 else()
-  target_link_libraries(FluoRender
+  target_link_libraries(FluoRender PRIVATE
     stdc++fs
   )
 endif()
 
-target_link_libraries(FluoRender
+target_link_libraries(FluoRender PRIVATE
     MAIN_LIB
     ANIMATORS_LIB
     CALCULATE_LIB
