@@ -9575,6 +9575,12 @@ void RenderView::ResetEnlarge()
 		return;
 	m_enlarge = false;
 	glbin_text_tex_manager.SetEnlargeScale(1);
+	if (m_enlarge)
+		m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
+			static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));
+	else
+		m_gl_size = m_size;
+
 	RefreshGL(19);
 }
 

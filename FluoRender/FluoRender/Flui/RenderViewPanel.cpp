@@ -1725,12 +1725,15 @@ void RenderViewPanel::OnDpiText(wxCommandEvent& event)
 	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
 	bool enlarge = lval > 72;
-	RenderView* view = glbin_current.render_view;
-	if (view)
-		view->SetEnlarge(enlarge);
 	if (ch_enlarge)
 		ch_enlarge->SetValue(enlarge);
 	double enlarge_scale = (double)lval / 72.0;
+	RenderView* view = glbin_current.render_view;
+	if (view)
+	{
+		view->SetEnlarge(enlarge);
+		view->SetEnlargeScale(enlarge_scale);
+	}
 	if (sl_enlarge)
 	{
 		sl_enlarge->Enable(enlarge);
@@ -1885,6 +1888,12 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(RenderViewPanel::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
+	RenderView* view = glbin_current.render_view;
+	if (view)
+	{
+		view->SetEnlarge(enlarge);
+		view->SetEnlargeScale(enlarge_scale);
+	}
 	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
 	wxFloatingPointValidator<double> vald_fp(1);
 	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
