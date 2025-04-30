@@ -265,7 +265,6 @@ endif()
 file(GLOB DLIB_DIRS "${PARENT_DIR}/dlib*")
 list(GET DLIB_DIRS 0 DLIB_DIRS)  # Get the first match
 add_subdirectory(${DLIB_DIRS} dlib_build)
-#include_directories(${DLIB_DIRS})
 set(DLIB_USE_BLAS ON)
 set(DLIB_USE_CUDA ON)
 
@@ -274,7 +273,6 @@ file(GLOB OPENCV_DIRS "${PARENT_DIR}/opencv*")
 list(GET OPENCV_DIRS 0 OPENCV_DIRS)  # Get the first match
 set(OpenCV_DIR "${OPENCV_DIRS}/build")
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 if (OPENCV_FOUND)
   message (STATUS "OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
 endif()
@@ -282,7 +280,6 @@ endif()
 #python
 #set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-include_directories(${Python3_INCLUDE_DIRS})
 if (PYTHON3_FOUND)
   message (STATUS "Python3_INCLUDE_DIRS=${Python3_INCLUDE_DIRS}")
 endif()
@@ -306,17 +303,17 @@ if (WIN32 OR APPLE)
     message(STATUS "HDF5 include directories: ${HDF5_INCLUDE_DIRS}")
     message(STATUS "HDF5 libraries: ${HDF5_LIBRARIES}")
   endif()
-include_directories(${HDF5_INCLUDE_DIRS}
-  "${HDF5_DIRS}/src/H5FDsubfiling"
-  ${HDF5_C_INCLUDE_DIR}
-  )
+  set(HDF5_INCLUDE_PATHS
+    ${HDF5_INCLUDE_DIRS}
+    "${HDF5_DIRS}/src/H5FDsubfiling"
+    ${HDF5_C_INCLUDE_DIR}
+)
 endif()
 
 # JNI includes
 if (WIN32 OR APPLE)
   find_package(Java REQUIRED)
   find_package(JNI REQUIRED)
-  include_directories(${JNI_INCLUDE_DIRS})
 else()
   set(JAVA_HOME /usr/lib/jvm/jdk-19)
   set(JAVA_AWT_LIBRARY ${JAVA_HOME}/lib/libjawt.so)
@@ -326,14 +323,7 @@ else()
   set(JAVA_AWT_INCLUDE_PATH ${JAVA_HOME}/include)
   find_package(Java REQUIRED)
   find_package(JNI REQUIRED)
-  include_directories(${JNI_INCLUDE_DIRS})
-  include_directories(${JAVA_INCLUDE_PATH})
-  include_directories(${JAVA_INCLUDE_PATH2})
 endif()
-
-# FluoRender
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender)
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 
 # ffmpeg
 file(GLOB FFMPEG_DIRS "${PARENT_DIR}/FFmpeg*")
@@ -344,7 +334,6 @@ find_library(AVFORMAT_LIBRARY avformat HINTS "${FFMPEG_DIRS}/libavformat")
 find_library(AVUTIL_LIBRARY avutil HINTS "${FFMPEG_DIRS}/libavutil")
 find_library(SWSCALE_LIBRARY swscale HINTS "${FFMPEG_DIRS}/libswscale")
 find_library(SWRESAMPLE_LIBRARY swresample HINTS "${FFMPEG_DIRS}/libswresample")
-include_directories(${FFMPEG_INCLUDE_DIR})
 set(FFMPEG_LIBRARIES
     ${AVCODEC_LIBRARY}
     ${AVFORMAT_LIBRARY}
@@ -377,16 +366,13 @@ if(WIN32)
     set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/Debug/freetyped.lib")
 endif()
 find_package(Freetype REQUIRED)
-include_directories(${FREETYPE_INCLUDE_DIRS})
 
 # glm
 file(GLOB GLM_DIRS "${PARENT_DIR}/glm*")
 list(GET GLM_DIRS 0 GLM_DIRS)  # Get the first match
-include_directories(${GLM_DIRS})
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
 # HoloPlay
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include)
 if(WIN32)
 	if(${ARCHITECTURE} MATCHES 32)
 		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win32/*.lib)
@@ -398,25 +384,24 @@ elseif(APPLE)
 else()
 	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
 endif()
+set(HOLOPLAY_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include")
 
 #nikon
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/nd2/include)
 if(WIN32)
   add_compile_options(/wd4099)
   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
 else()
   file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
 endif()
+set(ND2_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/nd2/include")
 
 # OpenCL
 find_package(OpenCL REQUIRED)
-include_directories(${OpenCL_INCLUDE_DIRS})
 add_definitions(-DCL_TARGET_OPENCL_VERSION=300)
 
 # OpenVR
 file(GLOB OPENVR_DIRS "${PARENT_DIR}/openvr*")
 list(GET OPENVR_DIRS 0 OPENVR_DIRS)  # Get the first match
-include_directories(${OPENVR_DIRS}/headers)
 if(WIN32)
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/win64/openvr_api.lib)
 elseif(APPLE)
@@ -424,14 +409,15 @@ elseif(APPLE)
 else()
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/linux64/libopenvr_api.so)
 endif()
+set(OPENVR_PATHS "${OPENVR_DIRS}/headers")
 
 # OpenXR
 file(GLOB OPENXR_DIRS "${PARENT_DIR}/OpenXR-SDK*")
 list(GET OPENXR_DIRS 0 OPENXR_DIRS)  # Get the first match
-include_directories(${OPENXR_DIRS}/include)
+set(OPENXR_PATHS "${OPENXR_DIRS}/include")
 if(WIN32)
     #d3d11 dependencies
-    include_directories(${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include)
+    set(OPENXR_PATHS "${OPENXR_PATHS};${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include")
     file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.lib)
     file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.lib)
     set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>)
@@ -463,15 +449,6 @@ if(WIN32)
         COMMAND ${NUGET_COMMAND} install ${NUGET_PACKAGE} -Version ${NUGET_VERSION} -OutputDirectory ${CMAKE_BINARY_DIR}/packages
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-
-    # Set the path to the installed package
-    set(NUGET_PACKAGE_DIR ${CMAKE_BINARY_DIR}/packages/${NUGET_PACKAGE}.${NUGET_VERSION})
-
-    # Include directories
-    include_directories(${NUGET_PACKAGE_DIR}/build/native/include)
-
-    # Link libraries
-    link_directories(${NUGET_PACKAGE_DIR}/build/native/lib)
 elseif(APPLE)
     set(OpenXR_LIBRARIES ${OPENXR_DIRS}/build/src/loader/libopenxr_loader.dylib)
     add_definitions(-DXR_USE_PLATFORM_MACOS)
@@ -488,9 +465,8 @@ list(GET TEEM_DIRS 0 TEEM_DIRS)  # Get the first match
 set(Teem_DIR "${TEEM_DIRS}/build")
 find_package(Teem REQUIRED)
 include(${Teem_USE_FILE})
-include_directories(${Teem_INCLUDE_DIRS})
-set(Nrrd_DIR "${TEEM_DIRS}/src/nrrd")
-include_directories(${Nrrd_DIR})
+set(TEEM_PATHS ${Teem_INCLUDE_DIRS}
+  "${TEEM_DIRS}/src/nrrd")
 # teem required definitions
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
@@ -499,28 +475,33 @@ add_definitions(-DTEEM_ZLIB=1)
 add_definitions(-DTEEM_32BIT=0)
 
 # Tester
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Tester)
-file(GLOB tester_hdr FluoRender/Tester/*.h)
-file(GLOB tester_src FluoRender/Tester/*.cpp)
+if(BUILD_TESTER)
+  file(GLOB tester_hdr FluoRender/Tester/*.h)
+  file(GLOB tester_src FluoRender/Tester/*.cpp)
+endif()
 
 # Wacom
 if(WIN32)
-    include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils/Include)
-    include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils)
     file(GLOB wac_src FluoRender/FluoRender/WacomUtils/*.cpp)
     file(GLOB wac_hdr FluoRender/FluoRender/WacomUtils/*.h)
     add_library(WACOMUTILS_LIB STATIC
       ${wac_src} ${wac_hdr})
+    set(WACOM_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils/Include"
+      "${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/WacomUtils")
+    target_include_directories(WACOMUTILS_LIB PRIVATE
+      ${WACOM_PATHS})
 endif()
 
 # XInput
 if(WIN32 AND USE_XINPUT)
-	include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/XInput)
 	file(GLOB xip_src FluoRender/FluoRender/XInput/*.cpp)
 	file(GLOB xip_hdr FluoRender/FluoRender/XInput/*.h)
 	add_library(XINPUT_LIB STATIC
 		${xip_src} ${xip_hdr})
-    target_link_libraries(XINPUT_LIB
+	set(XINPUT_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/XInput")
+    target_include_directories(XINPUT_LIB PRIVATE
+      ${XINPUT_PATHS})
+    target_link_libraries(XINPUT_LIB PRIVATE
         XInput.lib)
 endif()
 
@@ -654,6 +635,7 @@ add_library(LOOKINGGLASS_LIB STATIC
   ${lgr_src} ${lgr_hdr})
 
 # Main
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 file(GLOB src FluoRender/FluoRender/*.cpp)
 file(GLOB hdr FluoRender/FluoRender/*.h)
 add_library(MAIN_LIB STATIC
@@ -755,47 +737,66 @@ add_library(VIDEO_LIB STATIC
 # Animator
 target_include_directories(ANIMATORS_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
 target_link_libraries(ANIMATORS_LIB PRIVATE
   ${TIFF_LIBRARIES})
 
 # Calculate
-#target_link_libraries(CALCULATE_LIB PRIVATE
-#  FLRENDER_LIB)
+target_include_directories(CALCULATE_LIB PRIVATE
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(CLUSTER_LIB PRIVATE
   ${Boost_LIBRARIES})
 
 # Component
 target_include_directories(COMPONENT_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(COMPONENT_LIB PRIVATE
   ${Boost_LIBRARIES})
 
 # Config
 target_include_directories(CONFIG_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(CONFIG_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 
 # Control
 
 # Converter
+target_include_directories(CONVERTER_LIB PRIVATE
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(CONVERTER_LIB PRIVATE
   teem)
 
 # Database
 target_include_directories(DATABASE_LIB PRIVATE
+  ${DLIB_DIRS}
   ${Boost_INCLUDE_DIR})
 
 # Distance
 target_include_directories(DISTANCE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(DISTANCE_LIB PRIVATE
   teem
   ${GLEW_STATIC_LIBRARIES}
@@ -807,7 +808,10 @@ target_include_directories(FILE_LIB PRIVATE
 
 # Filter
 target_include_directories(FILTER_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(FILTER_LIB PRIVATE
   ${Boost_LIBRARIES})
 
@@ -817,7 +821,11 @@ target_include_directories(FLOBJECT_LIB PRIVATE
 
 # Flrender
 target_include_directories(FLRENDER_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR})
+  ${FREETYPE_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(FLRENDER_LIB PRIVATE
   teem
   ${FREETYPE_LIBRARIES}
@@ -829,7 +837,24 @@ target_link_libraries(FLRENDER_LIB PRIVATE
 # Flui
 target_include_directories(FLUI_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${Python3_INCLUDE_DIRS}
+  ${TEEM_PATHS})
+if (WIN32)
+  target_include_directories(FLUI_LIB PRIVATE
+    ${WACOM_PATHS})
+endif()
+if (WIN32 OR APPLE)
+  target_include_directories(FLUI_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS})
+else()
+  target_include_directories(FLUI_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS}
+    ${JAVA_INCLUDE_PATH}
+    ${JAVA_INCLUDE_PATH2})
+endif()
 target_link_libraries(FLUI_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 if(WIN32)
@@ -844,7 +869,20 @@ endif()
 # Format
 target_include_directories(FORMAT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
+  ${FFMPEG_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${ND2_PATHS}
+  ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
+if (WIN32 OR APPLE)
+  target_include_directories(FORMAT_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS})
+else()
+  target_include_directories(FORMAT_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS}
+    ${JAVA_INCLUDE_PATH}
+    ${JAVA_INCLUDE_PATH2})
+endif()
 target_link_libraries(FORMAT_LIB PRIVATE
   teem
   ${Boost_LIBRARIES}
@@ -856,38 +894,68 @@ target_link_libraries(FORMAT_LIB PRIVATE
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OPENXR_PATHS}
+  ${Python3_INCLUDE_DIRS}
+  ${TEEM_PATHS})
+if (WIN32 OR APPLE)
+  target_include_directories(GLOBAL_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS})
+else()
+  target_include_directories(GLOBAL_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS}
+    ${JAVA_INCLUDE_PATH}
+    ${JAVA_INCLUDE_PATH2})
+endif()
 
 # Image
 
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${HOLOPLAY_PATHS})
 target_link_libraries(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
   ${HoloPlay_LIBRARIES})
 
 # Main
+target_include_directories(MAIN_LIB PRIVATE
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
 
 # OpenXR
 target_include_directories(OPENXR_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OPENVR_PATHS}
+  ${OPENXR_PATHS})
 target_link_libraries(OPENXR_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
   ${OpenVR_LIBRARIES}
   ${OpenXR_LIBRARIES})
 
 # Progress
+target_include_directories(PROGRESS_LIB PRIVATE
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 
 # Project
 target_include_directories(PROJECT_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 
 # Python
 target_include_directories(PYTHON_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${Python3_INCLUDE_DIRS})
+if (WIN32 OR APPLE)
+  target_include_directories(PYTHON_LIB PRIVATE
+    ${HDF5_INCLUDE_PATHS})
+endif()
 target_link_libraries(PYTHON_LIB PRIVATE
   ${HDF5_LIBRARIES}
   ${Boost_LIBRARIES})
@@ -896,7 +964,23 @@ target_link_libraries(PYTHON_LIB PRIVATE
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
+if (WIN32)
+  target_include_directories(SCENE_LIB PRIVATE
+    ${WACOM_PATHS})
+endif()
+if (WIN32 OR APPLE)
+  target_include_directories(SCENE_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS})
+else()
+  target_include_directories(SCENE_LIB PRIVATE
+    ${JNI_INCLUDE_DIRS}
+    ${JAVA_INCLUDE_PATH}
+    ${JAVA_INCLUDE_PATH2})
+endif()
 target_link_libraries(SCENE_LIB PRIVATE
   ${TIFF_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES})
@@ -904,6 +988,9 @@ target_link_libraries(SCENE_LIB PRIVATE
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${Python3_INCLUDE_DIRS}
+  ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
 target_link_libraries(SCRIPT_LIB PRIVATE
   ${TIFF_LIBRARIES}
@@ -911,7 +998,10 @@ target_link_libraries(SCRIPT_LIB PRIVATE
 
 # Selection
 target_include_directories(SELECTION_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR})
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(SELECTION_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 
@@ -921,7 +1011,10 @@ target_include_directories(TIMER_LIB PRIVATE
 
 # Tracking
 target_include_directories(TRACKING_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_PATHS})
 target_link_libraries(TRACKING_LIB PRIVATE
   ${Boost_LIBRARIES})
 
@@ -941,6 +1034,8 @@ target_link_libraries(UTILITY_LIB PRIVATE
   ${Boost_LIBRARIES})
 
 # Video
+target_include_directories(VIDEO_LIB PRIVATE
+  ${FFMPEG_INCLUDE_DIR})
 target_link_libraries(VIDEO_LIB PRIVATE
   ${FFMPEG_LIBRARIES})
 
@@ -1030,6 +1125,7 @@ elseif(WIN32)
         add_executable(Tester
           ${tester_src} ${tester_hdr}
         )
+        target_include_directories(Tester PRIVATE ${FluoRender_SOURCE_DIR}/FluoRender/Tester)
     endif()
   endif()
 endif()
@@ -1054,6 +1150,9 @@ endif()
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
+target_include_directories(FluoRender PRIVATE
+  ${GLM_DIRS}
+  ${TEEM_PATHS})
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender PRIVATE
@@ -1101,7 +1200,7 @@ target_link_libraries(FluoRender PRIVATE
     VIDEO_LIB
 )
 if(BUILD_TESTER)
-    target_link_libraries(Tester
+    target_link_libraries(Tester PRIVATE
       ${Boost_LIBRARIES}
       dlib::dlib
       FLOBJECT_LIB
