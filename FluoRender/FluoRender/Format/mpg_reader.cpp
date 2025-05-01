@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <mpg_reader.h>
+#include <Global.h>
+#include <MainSettings.h>
 #include <compatibility.h>
 extern "C"
 {
@@ -67,6 +69,8 @@ MPGReader::MPGReader():
 	m_frame_yuv = NULL;
 	m_frame_rgb = NULL;
 	m_frame_buffer = NULL;
+
+	m_cache_size_limit = glbin_settings.m_mpg_cache_size;
 }
 
 MPGReader::~MPGReader()
@@ -285,8 +289,6 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	t = std::clamp(t, 0, m_time_num - 1);
 	c = std::clamp(c, 0, 2);
 
-	m_cur_time = t;
-
 	// Check if the frame is already in the cache
 	auto it = m_frame_cache.find(t);
 	if (it != m_frame_cache.end())
@@ -297,8 +299,16 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 
 		AVFrame* cached_frame = it->second;
 		data = get_nrrd(cached_frame, c);
+		m_cur_time = t;
+
 		return data;
 	}
+
+	if (t == m_cur_time && m_frame_rgb)
+	{
+		return get_nrrd(m_frame_rgb, c);
+	}
+	m_cur_time = t;
 
 	// Allocate video frame
 	if (!m_frame_yuv)
@@ -426,8 +436,13 @@ Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 void MPGReader::add_cache(int t, AVFrame* frame)
 {
 	// Check if the cache size limit is exceeded
-	if (m_frame_cache.size() >= m_cache_size_limit) {
-		invalidate_cache();
+	if (m_cache_size_limit == 0)
+		return;
+	else if (m_cache_size_limit > 0)
+	{
+		while (m_frame_cache.size() >= m_cache_size_limit) {
+			invalidate_cache();
+		}
 	}
 
 	// Allocate the frame

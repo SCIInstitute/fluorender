@@ -111,6 +111,7 @@ public:
 	bool m_realtime_compress;//real time compress
 	double m_mov_bitrate;	//bitrate for mov export (Mbits)
 	std::wstring m_mov_filename;//file name for mov export
+	int m_mpg_cache_size;	//mpeg cache size
 	bool m_fp_convert;		//convert floating point to int
 	double m_fp_min;		//min value of the floating point number
 	double m_fp_max;		//max value of the floating point number

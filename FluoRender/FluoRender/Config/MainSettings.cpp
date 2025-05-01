@@ -64,6 +64,7 @@ MainSettings::MainSettings()
 	m_realtime_compress = false;
 	m_mov_bitrate = 20.0;
 	m_mov_filename = L"output.mov";
+	m_mpg_cache_size = -1;
 	m_fp_convert = false;
 	m_fp_min = 0;
 	m_fp_max = 1;
@@ -255,6 +256,7 @@ void MainSettings::Read()
 		fconfig->Read("rt compress", &m_realtime_compress, false);
 		fconfig->Read("mov bitrate", &m_mov_bitrate, 20.0);
 		fconfig->Read("mov filename", &m_mov_filename, std::wstring(L"output.mov"));
+		fconfig->Read("mpg cache size", &m_mpg_cache_size, -1);
 		fconfig->Read("fp convert", &m_fp_convert, false);
 		fconfig->Read("fp min", &m_fp_min, 0.0);
 		fconfig->Read("fp max", &m_fp_max, 1.0);
@@ -502,6 +504,7 @@ void MainSettings::Save()
 	fconfig->Write("rt compress", m_realtime_compress);
 	fconfig->Write("mov bitrate", m_mov_bitrate);
 	fconfig->Write("mov filename", m_mov_filename);
+	fconfig->Write("mpg cache size", m_mpg_cache_size);
 	fconfig->Write("fp convert", m_fp_convert);
 	fconfig->Write("fp min", m_fp_min);
 	fconfig->Write("fp max", m_fp_max);

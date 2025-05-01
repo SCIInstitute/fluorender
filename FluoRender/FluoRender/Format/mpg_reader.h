@@ -115,7 +115,7 @@ private:
 	AVFrame* m_frame_rgb;//frame cache
 	std::unordered_map<int, AVFrame*> m_frame_cache; // Frame cache
 	std::list<int> m_cache_order; // Order of access for LRU eviction
-	size_t m_cache_size_limit = 10; // Example cache size limit
+	int m_cache_size_limit = -1; // -1: infinity; 0: disable; >0: size
 	uint8_t* m_frame_buffer;
 
 private:
