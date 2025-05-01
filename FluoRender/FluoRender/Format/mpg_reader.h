@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _MPG_READER_H_
 
 #include <base_reader.h>
+#include <unordered_map>
+#include <list>
 
 struct AVFormatContext;
 struct AVCodecContext;
@@ -111,11 +113,17 @@ private:
 	//frame cache
 	AVFrame* m_frame_yuv;//frame cache, should all be the same size
 	AVFrame* m_frame_rgb;//frame cache
+	std::unordered_map<int, AVFrame*> m_frame_cache; // Frame cache
+	std::list<int> m_cache_order; // Order of access for LRU eviction
+	size_t m_cache_size_limit = 10; // Example cache size limit
 	uint8_t* m_frame_buffer;
 
 private:
 	FrameInfo get_frame_info(int64_t dts, int64_t pts);
 	Nrrd* get_nrrd(AVFrame* frame, int c);
+	void add_cache(int t, AVFrame* frame);
+	void invalidate_cache();
+	void release_cache();
 };
 
 #endif//_MPG_READER_H_

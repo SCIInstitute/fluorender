@@ -71,6 +71,7 @@ MPGReader::MPGReader():
 
 MPGReader::~MPGReader()
 {
+	release_cache();
 	//release frame cache
 	if (m_frame_yuv)
 		av_frame_free(&m_frame_yuv);
@@ -85,18 +86,6 @@ MPGReader::~MPGReader()
 	if (m_av_format_context)
 		avformat_close_input(&m_av_format_context);
 }
-
-//void MPGReader::SetFile(const std::string &file)
-//{
-//	if (!file.empty())
-//	{
-//		if (!m_path_name.empty())
-//			m_path_name.clear();
-//		m_path_name.assign(file.length(), L' ');
-//		copy(file.begin(), file.end(), m_path_name.begin());
-//	}
-//	m_id_string = m_path_name;
-//}
 
 void MPGReader::SetFile(const std::wstring &file)
 {
@@ -293,18 +282,23 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 		!m_sws_context)
 		return data;
 
-	if (t < 0) t = 0;
-	if (t >= m_time_num) t = m_time_num - 1;
-	if (c < 0) c = 0;
-	if (c > 2) c = 2;
+	t = std::clamp(t, 0, m_time_num - 1);
+	c = std::clamp(c, 0, 2);
 
-	if (t == m_cur_time && m_frame_rgb)
-	{
-		return get_nrrd(m_frame_rgb, c);
-	}
 	m_cur_time = t;
 
-	AVPacket packet;
+	// Check if the frame is already in the cache
+	auto it = m_frame_cache.find(t);
+	if (it != m_frame_cache.end())
+	{
+		// Move accessed frame to the front of the cache order list
+		m_cache_order.remove(t);
+		m_cache_order.push_front(t);
+
+		AVFrame* cached_frame = it->second;
+		data = get_nrrd(cached_frame, c);
+		return data;
+	}
 
 	// Allocate video frame
 	if (!m_frame_yuv)
@@ -314,12 +308,12 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	if (!m_frame_rgb)
 	{
 		m_frame_rgb = av_frame_alloc();
-		if (m_frame_rgb == NULL)
+		if (!m_frame_rgb)
 			return data;
 
 		// Determine required buffer size and allocate buffer
 		int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
-		m_frame_buffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
+		m_frame_buffer = static_cast<uint8_t*>(av_malloc(numBytes));
 
 		// Assign appropriate parts of buffer to image planes in pFrameRGB
 		// Note that pFrameRGB is an AVFrame, but AVFrame is a superset
@@ -328,11 +322,14 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 	}
 
 	//seek frame
+	//int prev_t = std::max(t - 1, 0);
 	int64_t target = m_mpg_info[t].dts;
 	if (av_seek_frame(m_av_format_context, m_stream_index, target, AVSEEK_FLAG_BACKWARD) < 0)
 		return data;
 
 	// Read frame
+	AVPacket packet;
+
 	while (av_read_frame(m_av_format_context, &packet) >= 0)
 	{
 		if (packet.stream_index == m_stream_index)
@@ -350,14 +347,17 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 				if (packet.pts == m_mpg_info[t].pts)
 				{
 					// Convert the image from its native format to RGB
-					sws_scale(m_sws_context, (uint8_t const* const*)m_frame_yuv->data,
+					sws_scale(m_sws_context, m_frame_yuv->data,
 						m_frame_yuv->linesize, 0, m_av_codec_context->height,
 						m_frame_rgb->data, m_frame_rgb->linesize);
 
 					data = get_nrrd(m_frame_rgb, c);
 
+					// Add the decoded frame to the cache
+					add_cache(t, m_frame_rgb);
+
 					av_packet_unref(&packet);
-					break;
+					return data;
 				}
 			}
 		}
@@ -421,4 +421,62 @@ Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 	nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
 
 	return data;
+}
+
+void MPGReader::add_cache(int t, AVFrame* frame)
+{
+	// Check if the cache size limit is exceeded
+	if (m_frame_cache.size() >= m_cache_size_limit) {
+		invalidate_cache();
+	}
+
+	// Allocate the frame
+	AVFrame* cached_frame = av_frame_alloc();
+	if (!cached_frame) {
+		return; // Handle allocation failure
+	}
+
+	// Allocate the image buffer
+	int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+	uint8_t* buffer = static_cast<uint8_t*>(av_malloc(numBytes));
+	if (!buffer) {
+		av_frame_free(&cached_frame);
+		return; // Handle allocation failure
+	}
+
+	// Fill the frame data arrays
+	av_image_fill_arrays(cached_frame->data, cached_frame->linesize, buffer, AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+
+	// Copy the frame data from the source frame
+	av_frame_copy_props(cached_frame, frame); // Copy frame properties
+	for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i)
+	{
+		if (frame->data[i]) {
+			memcpy(cached_frame->data[i], frame->data[i], frame->linesize[i] * m_y_size);
+		}
+	}
+
+	// Add the frame to the cache and update the order list
+	m_frame_cache[t] = cached_frame;
+	m_cache_order.push_front(t);
+}
+
+void MPGReader::invalidate_cache()
+{
+	// Remove the least recently used frame from the cache
+	int lru_frame = m_cache_order.back();
+	m_cache_order.pop_back();
+	av_frame_free(&m_frame_cache[lru_frame]);
+	m_frame_cache.erase(lru_frame);
+}
+
+void MPGReader::release_cache()
+{
+	for (auto& entry : m_frame_cache)
+	{
+		av_freep(&entry.second->data[0]); // Free the buffer
+		av_frame_free(&entry.second);
+	}
+	m_frame_cache.clear();
+	m_cache_order.clear();
 }
