@@ -6784,6 +6784,9 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 		str, text_color,
 		px*sx, py*sy, sx, sy);
 
+	tos.str(L"");
+	tos.clear();
+
 	if ((m_draw_info & INFO_T) &&
 		(m_draw_info & INFO_X) &&
 		(m_draw_info & INFO_Y) &&
