@@ -36,6 +36,7 @@ extern "C"
 #include <libswscale/swscale.h>
 #include <libswresample/swresample.h>
 }
+#include <Debug.h>
 
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
@@ -65,11 +66,22 @@ QVideoEncoder::QVideoEncoder()
 	valid_ = false;
 }
 
+
+void ffmpeg_log_callback(void* ptr, int level, const char* fmt, va_list vl)
+{
+	char log_message[1024];
+	vsnprintf(log_message, sizeof(log_message), fmt, vl);
+	OutputDebugStringA(log_message);
+}
+
 bool QVideoEncoder::open(
 	const std::wstring& f,
 	size_t w, size_t h, size_t len,
 	size_t fps, size_t bitrate)
 {
+	av_log_set_level(AV_LOG_DEBUG);
+	av_log_set_callback(ffmpeg_log_callback);
+
 	output_stream_.frame = 0;
 	output_stream_.next_pts = 0;
 	output_stream_.samples_count = 0;
@@ -155,7 +167,7 @@ bool QVideoEncoder::open_video()
 		fprintf(stderr, "Could not allocate stream\n");
 		return false;
 	}
-	output_stream_.st->id = format_context_->nb_streams - 1;
+	//output_stream_.st->id = format_context_->nb_streams - 1;
 
 	av_codec_context_ = avcodec_alloc_context3(video_codec);
 	if (!av_codec_context_) {
@@ -207,6 +219,14 @@ bool QVideoEncoder::open_video()
 			return false;
 		}
 	}
+
+	// Set the codec parameters for the stream
+	int ret = avcodec_parameters_from_context(output_stream_.st->codecpar, av_codec_context_);
+	if (ret < 0) {
+		fprintf(stderr, "Could not copy codec parameters\n");
+		return false;
+	}
+
 	return true;
 }
 
@@ -322,73 +342,64 @@ void QVideoEncoder::log_packet(const AVFormatContext *fmt_ctx,
 bool QVideoEncoder::write_video_frame(size_t frame_num)
 {
 	if (!valid_) return false;
-	int ret;
+
+	// Set the presentation timestamp (pts) for the frame
 	output_stream_.frame->pts = frame_num;
 	output_stream_.next_pts = frame_num + 1;
-	AVFrame * frame = output_stream_.frame;
+	AVFrame* frame = av_frame_clone(output_stream_.frame); // Clone the frame to store in the queue
+	frame_queue_.push(frame);
 
-	AVPacket pkt;
-	pkt.data = NULL; // packet data will be allocated by the encoder
-	pkt.size = 0;
-
-	/* send the frame to the encoder */
-	ret = avcodec_send_frame(av_codec_context_, frame);
-	if (ret < 0) {
-		fprintf(stderr, "Error sending a frame for encoding: %d\n", ret);
+	// Allocate a new packet
+	AVPacket* pkt = av_packet_alloc();
+	if (!pkt) {
+		fprintf(stderr, "Could not allocate packet\n");
 		return false;
 	}
 
-	/* receive the encoded packet from the encoder */
-	ret = avcodec_receive_packet(av_codec_context_, &pkt);
-	if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-		return false;
-	}
-	else if (ret < 0) {
-		fprintf(stderr, "Error encoding video frame: %d\n", ret);
-		return false;
-	}
+	// Process frames from the queue
+	while (!frame_queue_.empty()) {
+		AVFrame* queued_frame = frame_queue_.front();
+		frame_queue_.pop();
 
-	ret = write_frame(&av_codec_context_->time_base, &pkt);
-	av_packet_unref(&pkt);
-
-	if (ret < 0) {
-		fprintf(stderr, "Error while writing video frame: %d\n", ret);
-		return false;
-	}
-	return true;
-}
-
-AVFrame * QVideoEncoder::get_video_frame()
-{
-	/* check if we want to generate more frames */
-	if (av_compare_ts(output_stream_.next_pts, av_codec_context_->time_base,
-		10, av_make_q(1, 1)) >= 0)
-		return NULL;
-	if (av_codec_context_->pix_fmt != AV_PIX_FMT_YUV420P) {
-		/* as we only generate a YUV420P picture, we must convert it
-		 * to the codec pixel format if needed */
-		if (!output_stream_.sws_ctx) {
-			output_stream_.sws_ctx = sws_getContext(av_codec_context_->width, av_codec_context_->height,
-				AV_PIX_FMT_YUV420P,
-				av_codec_context_->width, av_codec_context_->height,
-				av_codec_context_->pix_fmt,
-				SCALE_FLAGS, NULL, NULL, NULL);
-			if (!output_stream_.sws_ctx) {
-				fprintf(stderr,
-					"Could not initialize the conversion context\n");
-				return NULL;
-			}
+		// Send the frame to the encoder
+		int ret = avcodec_send_frame(av_codec_context_, queued_frame);
+		av_frame_free(&queued_frame); // Free the frame after sending it
+		if (ret < 0) {
+			fprintf(stderr, "Error sending a frame for encoding: %d\n", ret);
+			av_packet_free(&pkt);
+			return false;
 		}
-		fill_yuv_image(output_stream_.next_pts);
-		sws_scale(output_stream_.sws_ctx,
-			(const uint8_t * const *)output_stream_.tmp_frame->data, output_stream_.tmp_frame->linesize,
-			0, av_codec_context_->height, output_stream_.frame->data, output_stream_.frame->linesize);
+
+		// Receive the encoded packet from the encoder
+		ret = avcodec_receive_packet(av_codec_context_, pkt);
+		if (ret == AVERROR(EAGAIN)) {
+			// Encoder needs more frames, break the loop and continue feeding frames
+			break;
+		}
+		else if (ret == AVERROR_EOF) {
+			// Encoder has been fully flushed, no more packets
+			av_packet_free(&pkt);
+			return false;
+		}
+		else if (ret < 0) {
+			fprintf(stderr, "Error encoding video frame: %d\n", ret);
+			av_packet_free(&pkt);
+			return false;
+		}
+
+		// Write the encoded packet to the output file
+		ret = write_frame(&av_codec_context_->time_base, pkt);
+		av_packet_unref(pkt);
+
+		if (ret < 0) {
+			fprintf(stderr, "Error while writing video frame: %d\n", ret);
+			av_packet_free(&pkt);
+			return false;
+		}
 	}
-	else {
-		fill_yuv_image(output_stream_.next_pts);
-	}
-	output_stream_.frame->pts = output_stream_.next_pts++;
-	return output_stream_.frame;
+
+	av_packet_free(&pkt);
+	return true;
 }
 
 int QVideoEncoder::write_frame(const AVRational *time_base,
@@ -401,31 +412,7 @@ int QVideoEncoder::write_frame(const AVRational *time_base,
 	//log_packet(format_context_, pkt);
 	return av_interleaved_write_frame(format_context_, pkt);
 }
-/* Prepare a dummy image. */
-void QVideoEncoder::fill_yuv_image(int64_t frame_index) {
-	AVFrame *pict = output_stream_.frame;
-	size_t x, y, i;
-	int ret;
-	/* when we pass a frame to the encoder, it may keep a reference to it
-	 * internally;
-	 * make sure we do not overwrite it here
-	 */
-	ret = av_frame_make_writable(pict);
-	if (ret < 0)
-		return;
-	i = frame_index & 0xFFFF;
-	/* Y */
-	for (y = 0; y < height_; y++)
-		for (x = 0; x < width_; x++)
-			pict->data[0][y * pict->linesize[0] + x] = static_cast<uint8_t>(x + y + i * 3);
-	/* Cb and Cr */
-	for (y = 0; y < height_ / 2; y++) {
-		for (x = 0; x < width_ / 2; x++) {
-			pict->data[1][y * pict->linesize[1] + x] = static_cast<uint8_t>(128 + y + i * 2);
-			pict->data[2][y * pict->linesize[2] + x] = static_cast<uint8_t>(64 + x + i * 5);
-		}
-	}
-}
+
 //main method to set the RGB data.
 bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
 	/* as we only generate a YUV420P picture, we must convert it

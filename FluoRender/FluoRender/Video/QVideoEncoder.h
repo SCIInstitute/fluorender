@@ -29,11 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define __QVideoEncoder_H
 
 #include <string>
-// MC hack to add two missing defines from older FFMPEG versions
-//#ifdef __linux__
-//  #define CODEC_FLAG_GLOBAL_HEADER   0x00400000
-//  #define AVFMT_RAWPICTURE   0x0020
-//#endif
+#include <queue>
 
 struct AVStream;
 struct AVFrame;
@@ -72,10 +68,11 @@ protected:
 	AVFormatContext *format_context_;
 	AVCodecContext* av_codec_context_;
 
+	std::queue<AVFrame*> frame_queue_;
+
 	//interior functions
 	bool open_video();
 	AVFrame * alloc_picture();
-	AVFrame * get_video_frame();
 	int write_frame(const AVRational *time_base, AVPacket *pkt);
 	void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt);
 public:
@@ -83,7 +80,6 @@ public:
 	virtual ~QVideoEncoder();
 	bool open(const std::wstring& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
 	void close();
-	void fill_yuv_image(int64_t frame_index);
 	bool write_video_frame(size_t frame_num);
 	bool set_frame_rgb_data(unsigned char * data);
 };
