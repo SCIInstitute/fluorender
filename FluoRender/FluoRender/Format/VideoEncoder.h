@@ -39,7 +39,7 @@ struct AVFormatContext;
 struct AVCodecContext;
 struct AVRational;
 struct AVPacket;
-class QVideoEncoder
+class VideoEncoder
 {
 protected:
 	//video basics
@@ -76,8 +76,8 @@ protected:
 	int write_frame(const AVRational *time_base, AVPacket *pkt);
 	void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt);
 public:
-	QVideoEncoder();
-	virtual ~QVideoEncoder();
+	VideoEncoder();
+	virtual ~VideoEncoder();
 	bool open(const std::wstring& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
 	void close();
 	bool write_video_frame(size_t frame_num);

@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <StopWatch.hpp>
 #include <StopWatchFactory.hpp>
-#include <QVideoEncoder.h>
+#include <VideoEncoder.h>
 #include <MainSettings.h>
 #include <Project.h>
 #include <Interpolator.h>

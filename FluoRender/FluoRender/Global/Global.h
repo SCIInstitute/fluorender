@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 
 class TreeFileFactory;
-class QVideoEncoder;
+class VideoEncoder;
 class Undoable;
 class MainSettings;
 class BrushDefault;
@@ -197,7 +197,7 @@ namespace fluo
 		flrd::CacheQueue& get_cache_queue();
 
 		//video encoder
-		QVideoEncoder& get_video_encoder();
+		VideoEncoder& get_video_encoder();
 
 		//comp gen
 		void set_cg_table_enable(bool value) { comp_gen_table_enable_ = value; }
@@ -307,7 +307,7 @@ namespace fluo
 		std::unique_ptr<flrd::CacheQueue> cache_queue_;
 
 		//video encoder
-		std::unique_ptr<QVideoEncoder> encoder_;
+		std::unique_ptr<VideoEncoder> encoder_;
 
 		//comp gen
 		bool comp_gen_table_enable_;//add records from ui

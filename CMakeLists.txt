@@ -726,13 +726,6 @@ file(GLOB utl_rsc FluoRender/FluoRender/Utility/*.natvis)
 add_library(UTILITY_LIB STATIC
   ${utl_src} ${utl_hdr} ${utl_rsc})
 
-# Video
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Video)
-file(GLOB vid_src FluoRender/FluoRender/Video/*.cpp)
-file(GLOB vid_hdr FluoRender/FluoRender/Video/*.h)
-add_library(VIDEO_LIB STATIC
-  ${vid_src} ${vid_hdr})
-
 # include and link
 # Animator
 target_include_directories(ANIMATORS_LIB PRIVATE
@@ -1033,12 +1026,6 @@ target_link_libraries(TYPE_LIB PRIVATE
 target_link_libraries(UTILITY_LIB PRIVATE
   ${Boost_LIBRARIES})
 
-# Video
-target_include_directories(VIDEO_LIB PRIVATE
-  ${FFMPEG_INCLUDE_DIR})
-target_link_libraries(VIDEO_LIB PRIVATE
-  ${FFMPEG_LIBRARIES})
-
 # For Apple set the icns file containing icons
 IF(APPLE)
   # set how it shows up in the Info.plist file
@@ -1197,7 +1184,6 @@ target_link_libraries(FluoRender PRIVATE
     TRAINER_LIB
     TYPE_LIB
     UTILITY_LIB
-    VIDEO_LIB
 )
 if(BUILD_TESTER)
     target_link_libraries(Tester PRIVATE

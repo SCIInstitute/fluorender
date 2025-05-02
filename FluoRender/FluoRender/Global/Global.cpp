@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <TreeFileFactory.h>
 #include <VolCache.h>
-#include <QVideoEncoder.h>
+#include <VideoEncoder.h>
 #include <Reshape.h>
 #include <EntryParams.h>
 #include <TableHistParams.h>
@@ -261,7 +261,7 @@ Global Global::instance_;
 Global::Global() :
 	tree_file_factory_(std::make_unique<TreeFileFactory>()),
 	cache_queue_(std::make_unique<flrd::CacheQueue>()),
-	encoder_(std::make_unique<QVideoEncoder>()),
+	encoder_(std::make_unique<VideoEncoder>()),
 	main_settings_(std::make_unique<MainSettings>()),
 	states_(std::make_unique<GlobalStates>()),
 	//processors
@@ -368,7 +368,7 @@ flrd::CacheQueue& Global::get_cache_queue()
 	return *cache_queue_;
 }
 
-QVideoEncoder& Global::get_video_encoder()
+VideoEncoder& Global::get_video_encoder()
 {
 	return *encoder_;
 }

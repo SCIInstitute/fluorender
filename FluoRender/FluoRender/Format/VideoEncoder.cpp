@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <QVideoEncoder.h>
+#include <VideoEncoder.h>
 #include <compatibility.h>
 extern "C"
 {
@@ -41,7 +41,7 @@ extern "C"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
 
-QVideoEncoder::QVideoEncoder()
+VideoEncoder::VideoEncoder()
 {
 	output_stream_.frame = 0;
 	output_stream_.next_pts = 0;
@@ -74,7 +74,7 @@ void ffmpeg_log_callback(void* ptr, int level, const char* fmt, va_list vl)
 	OutputDebugStringA(log_message);
 }
 
-bool QVideoEncoder::open(
+bool VideoEncoder::open(
 	const std::wstring& f,
 	size_t w, size_t h, size_t len,
 	size_t fps, size_t bitrate)
@@ -147,11 +147,11 @@ bool QVideoEncoder::open(
 	return true;
 }
 
-QVideoEncoder::~QVideoEncoder() {
+VideoEncoder::~VideoEncoder() {
 
 }
 
-bool QVideoEncoder::open_video()
+bool VideoEncoder::open_video()
 {
 	const AVOutputFormat* format = format_context_->oformat;
 	const AVCodec* video_codec = avcodec_find_encoder(format->video_codec);
@@ -230,7 +230,7 @@ bool QVideoEncoder::open_video()
 	return true;
 }
 
-AVFrame * QVideoEncoder::alloc_picture() {
+AVFrame * VideoEncoder::alloc_picture() {
 	AVFrame *picture;
 	int ret;
 	picture = av_frame_alloc();
@@ -248,7 +248,7 @@ AVFrame * QVideoEncoder::alloc_picture() {
 	return picture;
 }
 
-void QVideoEncoder::close()
+void VideoEncoder::close()
 {
 	if (!valid_) return;
 	//flush the remaining (delayed) frames.
@@ -323,7 +323,7 @@ void QVideoEncoder::close()
 	valid_ = false;
 }
 
-void QVideoEncoder::log_packet(const AVFormatContext *fmt_ctx,
+void VideoEncoder::log_packet(const AVFormatContext *fmt_ctx,
 	const AVPacket *pkt) {
 	AVRational *time_base =
 		&fmt_ctx->streams[pkt->stream_index]->time_base;
@@ -339,7 +339,7 @@ void QVideoEncoder::log_packet(const AVFormatContext *fmt_ctx,
 		"\nstream_index: " << pkt->stream_index << std::endl;
 }
 
-bool QVideoEncoder::write_video_frame(size_t frame_num)
+bool VideoEncoder::write_video_frame(size_t frame_num)
 {
 	if (!valid_) return false;
 
@@ -402,7 +402,7 @@ bool QVideoEncoder::write_video_frame(size_t frame_num)
 	return true;
 }
 
-int QVideoEncoder::write_frame(const AVRational *time_base,
+int VideoEncoder::write_frame(const AVRational *time_base,
 	AVPacket *pkt)
 {
 	/* rescale output packet timestamp values from codec to stream timebase */
@@ -414,7 +414,7 @@ int QVideoEncoder::write_frame(const AVRational *time_base,
 }
 
 //main method to set the RGB data.
-bool QVideoEncoder::set_frame_rgb_data(unsigned char * data) {
+bool VideoEncoder::set_frame_rgb_data(unsigned char * data) {
 	/* as we only generate a YUV420P picture, we must convert it
 		* to the codec pixel format if needed */
 	if (!output_stream_.sws_ctx) {
