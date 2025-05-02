@@ -340,6 +340,8 @@ VolumeData::VolumeData()
 	//m_clip
 	for (int i : { 0, 1, 2 })
 		m_clip_dist[i] = 1;
+
+	m_ep = std::make_unique<flrd::EntryParams>();
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -478,6 +480,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	for (int i : { 0, 1, 2 })
 		m_clip_dist[i] = copy.m_clip_dist[i];
 
+	m_ep = std::make_unique<flrd::EntryParams>();
 }
 
 VolumeData::~VolumeData()
