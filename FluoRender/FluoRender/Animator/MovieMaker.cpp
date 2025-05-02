@@ -127,7 +127,7 @@ void MovieMaker::Start()
 void MovieMaker::Stop()
 {
 	get_stopwatch()->stop();
-	glbin.get_video_encoder().close();
+	glbin_video_encoder.close();
 	m_record = false;
 	flvr::TextureRenderer::maximize_uptime_ = false;
 	m_reverse = false;
@@ -209,7 +209,7 @@ void MovieMaker::PlaySave()
 			m_crop_h *= scale;
 		}
 
-		glbin.get_video_encoder().open(m_filename, m_crop_w, m_crop_h,
+		glbin_video_encoder.open(m_filename, m_crop_w, m_crop_h,
 			m_clip_frame_num + 1, m_fps, glbin_settings.m_mov_bitrate * 1e6);
 	}
 	m_filename = (file_path.parent_path() / file_path.stem()).wstring();
@@ -317,8 +317,8 @@ void MovieMaker::WriteFrameToFile()
 		for (size_t yy = 0; yy < (size_t)h; yy++)
 			for (size_t xx = 0; xx < (size_t)w; xx++)
 				memcpy(flip + 3 * (w * yy + xx), (unsigned char*)image + chann * (w * (h - yy - 1) + xx), 3);
-		bool worked = glbin.get_video_encoder().set_frame_rgb_data(flip);
-		worked = glbin.get_video_encoder().write_video_frame(m_last_frame);
+		glbin_video_encoder.set_frame_rgb_data(flip);
+		glbin_video_encoder.write_video_frame(m_last_frame);
 		if (flip)
 			delete[]flip;
 		if (image)

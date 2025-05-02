@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define __QVideoEncoder_H
 
 #include <string>
-#include <queue>
 
 struct AVStream;
 struct AVFrame;
@@ -41,6 +40,14 @@ struct AVRational;
 struct AVPacket;
 class VideoEncoder
 {
+public:
+	VideoEncoder();
+	virtual ~VideoEncoder();
+	bool open(const std::wstring& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
+	void close();
+	bool set_frame_rgb_data(unsigned char * data);
+	bool write_video_frame(size_t frame_num);//main method to set the RGB data.
+
 protected:
 	//video basics
 	size_t width_, height_, bitrate_, gop_, fps_;
@@ -68,20 +75,11 @@ protected:
 	AVFormatContext *format_context_;
 	AVCodecContext* av_codec_context_;
 
-	std::queue<AVFrame*> frame_queue_;
-
 	//interior functions
 	bool open_video();
 	AVFrame * alloc_picture();
 	int write_frame(const AVRational *time_base, AVPacket *pkt);
 	void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt);
-public:
-	VideoEncoder();
-	virtual ~VideoEncoder();
-	bool open(const std::wstring& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
-	void close();
-	bool write_video_frame(size_t frame_num);
-	bool set_frame_rgb_data(unsigned char * data);
 };
 
 #endif // QVideoEncoder_H

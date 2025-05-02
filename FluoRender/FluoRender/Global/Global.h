@@ -178,6 +178,9 @@ namespace flvr
 //jvm
 #define glbin_jvm_instance fluo::Global::instance().get_jvm_instance()
 
+//video encoder
+#define glbin_video_encoder fluo::Global::instance().get_video_encoder()
+
 //ml output size
 #define glbin_vp_size 26
 
