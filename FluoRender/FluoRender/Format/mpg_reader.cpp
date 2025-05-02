@@ -160,12 +160,14 @@ int MPGReader::Preprocess()
 		return READER_OPEN_FAIL;
 
 	m_mpg_info.clear();
-	m_mpg_info.reserve(m_av_format_context->streams[m_stream_index]->nb_frames);
+	size_t num = m_av_format_context->streams[m_stream_index]->nb_frames;
+	m_mpg_info.reserve(num);
 
 	// Allocate video frame
 	if (!m_frame_yuv)
 		m_frame_yuv = av_frame_alloc();
 	//read frame
+	int i = 0;
 	while (av_read_frame(m_av_format_context, &packet) >= 0)
 	{
 		if (packet.stream_index == m_stream_index)
@@ -182,6 +184,8 @@ int MPGReader::Preprocess()
 				// Process the decoded frame (m_frame_yuv)
 				FrameInfo info = get_frame_info(packet.dts, packet.pts);
 				m_mpg_info.push_back(info);
+				i++;
+				SetProgress(static_cast<int>(std::round(100.0 * i / num)), "NOT_SET");
 			}
 		}
 		// Free the packet that was allocated by av_read_frame

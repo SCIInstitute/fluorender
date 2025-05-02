@@ -5814,6 +5814,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		str_streaming = "Large data streaming is currently OFF.";
 
 	bool enable_4d = false;
+	bool enable_rot_lock = false;
 	m_file_num = files.size();
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; ++m_cur_file)
@@ -5856,6 +5857,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 			DataGroup* group = view->AddOrGetGroup();
 			if (group)
 			{
+				int nz_count = 0;
 				for (int i = ch_num; i > 0; i--)
 				{
 					VolumeData* vd = GetVolumeData(GetVolumeNum() - i);
@@ -5878,10 +5880,17 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 						if (vd->GetReader() && vd->GetReader()->GetTimeNum() > 1)
 							enable_4d = true;
+
+						int nx, ny, nz;
+						vd->GetResolution(nx, ny, nz);
+						if (nz == 1)
+							nz_count++;
 					}
 				}
 				if (m_cur_file > 0)
 					group->SetDisp(false);
+				if (nz_count == ch_num)
+					enable_rot_lock = true;
 			}
 		}
 		else if (ch_num == 1)
@@ -5914,6 +5923,11 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 					view->m_tseq_cur_num = vd->GetReader()->GetCurTime();
 					enable_4d = true;
 				}
+
+				int nx, ny, nz;
+				vd->GetResolution(nx, ny, nz);
+				if (nz == 1)
+					enable_rot_lock = true;
 			}
 		}
 
@@ -5932,6 +5946,9 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		glbin_moviemaker.SetSeqMode(1);
 		vc.insert(gstMovieAgent);
 	}
+	view->SetRotLock(enable_rot_lock);
+	vc.insert(gstGearedEnable);
+
 	m_frame->UpdateProps(vc);
 
 	SetProgress(0, "");

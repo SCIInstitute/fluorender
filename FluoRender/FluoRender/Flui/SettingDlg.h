@@ -63,10 +63,6 @@ private:
 	wxTextCtrl *m_peeling_layers_text;
 	//micro blending
 	wxCheckBox *m_micro_blend_chk;
-	//shaodw direction
-	wxCheckBox *m_shadow_dir_chk;
-	wxSingleSlider *m_shadow_dir_sldr;
-	wxTextCtrl *m_shadow_dir_text;
 	//gradient background
 	wxCheckBox *m_grad_bg_chk;
 	//rot center anchor
@@ -157,8 +153,8 @@ private:
 	void EnableStreaming(bool enable);
 
 	//shadow direction
-	void SetShadowDir(double deg);
-	double GetShadowDir();
+	//void SetShadowDir(double deg);
+	//double GetShadowDir();
 
 	//event handling
 	void OnSave(wxCommandEvent& event);
@@ -179,10 +175,6 @@ private:
 	void OnPeelingLayersEdit(wxCommandEvent& event);
 	//blending
 	void OnMicroBlendCheck(wxCommandEvent& event);
-	//shadow
-	void OnShadowDirCheck(wxCommandEvent& event);
-	void OnShadowDirChange(wxScrollEvent& event);
-	void OnShadowDirEdit(wxCommandEvent& event);
 	//gradient background
 	void OnGradBgCheck(wxCommandEvent& event);
 	//rot center anchor threshold

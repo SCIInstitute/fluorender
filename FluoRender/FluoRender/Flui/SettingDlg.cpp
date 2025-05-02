@@ -275,33 +275,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group2->Add(st);
 	group2->Add(10, 5);
 
-	//shadow direction
-	wxBoxSizer *group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Shadow Direction"), wxVERTICAL);
-	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_shadow_dir_chk = new wxCheckBox(page, wxID_ANY,
-		"Enable Directional Shadow");
-	m_shadow_dir_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnShadowDirCheck, this);
-	m_shadow_dir_sldr = new wxSingleSlider(page, wxID_ANY, -45, -180, 180,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shadow_dir_sldr->SetRangeStyle(2);
-	m_shadow_dir_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnShadowDirChange, this);
-	m_shadow_dir_text = new wxTextCtrl(page, wxID_ANY, "-45",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
-	m_shadow_dir_text->Bind(wxEVT_TEXT, &SettingDlg::OnShadowDirEdit, this);
-	st = new wxStaticText(page, 0,
-		"The direction of the shadows, when shadow is enabled for volume data.");
-	sizer3_1->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
-	sizer3_1->Add(m_shadow_dir_sldr, 1, wxEXPAND);
-	sizer3_1->Add(m_shadow_dir_text, 0, wxALIGN_CENTER);
-	group3->Add(10, 5);
-	group3->Add(sizer3_1, 0, wxEXPAND);
-	group3->Add(10, 5);
-	group3->Add(st);
-	group3->Add(10, 5);
-
 	//rotations
-	wxBoxSizer* group4 = new wxStaticBoxSizer(
+	wxBoxSizer* group3 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "RC Anchor Start");
@@ -319,23 +294,23 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		"Link All Rendering Views' Rotations.");
 	m_rot_link_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnRotLink, this);
 	sizer4_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
-	group4->Add(10, 5);
-	group4->Add(sizer4_1, 0, wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(sizer4_2, 0, wxEXPAND);
-	group4->Add(10, 5);
+	group3->Add(10, 5);
+	group3->Add(sizer4_1, 0, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer4_2, 0, wxEXPAND);
+	group3->Add(10, 5);
 
 	//gradient background
-	wxBoxSizer *group5 = new wxStaticBoxSizer(
+	wxBoxSizer *group4 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Gradient Background"), wxVERTICAL);
 	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Gradient Background");
 	m_grad_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnGradBgCheck, this);
 	sizer5_1->Add(m_grad_bg_chk, 0, wxALIGN_CENTER);
-	group5->Add(10, 5);
-	group5->Add(sizer5_1, 0, wxEXPAND);
-	group5->Add(10, 5);
+	group4->Add(10, 5);
+	group4->Add(sizer5_1, 0, wxEXPAND);
+	group4->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 
@@ -348,7 +323,6 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(group4, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(group5, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	return page;
@@ -1050,18 +1024,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_peeling_layers_text->ChangeValue(wxString::Format("%d", glbin_settings.m_peeling_layers));
 	}
 
-	//shadow direction
-	if (update_all || FOUND_VALUE(gstShadowDir))
-	{
-		bool bval = glbin_settings.m_shadow_dir;
-		m_shadow_dir_chk->SetValue(bval);
-		m_shadow_dir_sldr->Enable(bval);
-		m_shadow_dir_text->Enable(bval);
-		double deg = GetShadowDir();
-		m_shadow_dir_sldr->ChangeValue(std::round(deg));
-		m_shadow_dir_text->ChangeValue(wxString::Format("%.2f", deg));
-	}
-
 	//rotations
 	if (update_all || FOUND_VALUE(gstSettingsRot))
 	{
@@ -1343,50 +1305,6 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent& event)
 	FluoRefresh(3, { gstNull });
 }
 
-//shadow direction
-void SettingDlg::OnShadowDirCheck(wxCommandEvent& event)
-{
-	if (m_shadow_dir_chk->GetValue())
-	{
-		m_shadow_dir_sldr->Enable();
-		m_shadow_dir_text->Enable();
-
-		wxString str;
-		str = m_shadow_dir_text->GetValue();
-		double deg;
-		str.ToDouble(&deg);
-		SetShadowDir(deg);
-		glbin_settings.m_shadow_dir = true;
-	}
-	else
-	{
-		m_shadow_dir_sldr->Disable();
-		m_shadow_dir_text->Disable();
-		glbin_settings.m_shadow_dir_x = 0.0;
-		glbin_settings.m_shadow_dir_y = 0.0;
-		glbin_settings.m_shadow_dir = false;
-	}
-	FluoRefresh(3, { gstNull });
-}
-
-void SettingDlg::OnShadowDirChange(wxScrollEvent& event)
-{
-	double deg = m_shadow_dir_sldr->GetValue();
-	wxString str = wxString::Format("%.2f", deg);
-	if (str != m_shadow_dir_text->GetValue())
-		m_shadow_dir_text->SetValue(str);
-}
-
-void SettingDlg::OnShadowDirEdit(wxCommandEvent& event)
-{
-	wxString str = m_shadow_dir_text->GetValue();
-	double deg;
-	str.ToDouble(&deg);
-	m_shadow_dir_sldr->ChangeValue(std::round(deg));
-	SetShadowDir(deg);
-	FluoRefresh(3, { gstNull });
-}
-
 void SettingDlg::EnableStreaming(bool enable)
 {
 	if (enable)
@@ -1419,18 +1337,6 @@ void SettingDlg::EnableStreaming(bool enable)
 		m_detail_level_offset_sldr->Disable();
 		m_detail_level_offset_text->Disable();
 	}
-}
-
-void SettingDlg::SetShadowDir(double deg)
-{
-	glbin_settings.m_shadow_dir_x = cos(d2r(deg));
-	glbin_settings.m_shadow_dir_y = sin(d2r(deg));
-}
-
-double SettingDlg::GetShadowDir()
-{
-	double deg = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x));
-	return deg;
 }
 
 //gradient background

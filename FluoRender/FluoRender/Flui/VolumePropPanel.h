@@ -145,6 +145,9 @@ private:
 	wxSingleSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
 	wxUndoableCheckBox* m_shadow_chk;
+	wxSingleSlider* m_shadow_dir_sldr;
+	wxTextCtrl* m_shadow_dir_text;
+	wxUndoableCheckBox* m_shadow_dir_chk;
 	//sample rate
 	wxButton* m_sample_st;
 	wxSingleSlider *m_sample_sldr;
@@ -192,6 +195,7 @@ private:
 	void EnableBoundary(bool);
 	void EnableThresh(bool);
 	void EnableShadow(bool);
+	void EnableShadowDir(bool);
 	void EnableSample(bool);
 	void EnableColormap(bool);
 	//3
@@ -208,6 +212,7 @@ private:
 	void SetBoundary(double, bool);
 	void SetThresh(double, double, bool);
 	void SetShadowInt(double, bool);
+	void SetShadowDir(double, bool);
 	void SetSampleRate(double, bool);
 	void SetColormapVal(double, double, bool);
 
@@ -282,6 +287,9 @@ private:
 	void OnShadowChange(wxScrollEvent& event);
 	void OnShadowText(wxCommandEvent& event);
 	void OnShadowChk(wxCommandEvent& event);
+	void OnShadowDirCheck(wxCommandEvent& event);
+	void OnShadowDirChange(wxScrollEvent& event);
+	void OnShadowDirEdit(wxCommandEvent& event);
 	//
 	void OnSampleMF(wxCommandEvent& event);
 	void OnSampleChange(wxScrollEvent& event);

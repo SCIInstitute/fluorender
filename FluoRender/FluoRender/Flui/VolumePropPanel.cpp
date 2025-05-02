@@ -111,27 +111,9 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxSize bts(FromDIP(wxSize(80, 23)));
 	wxSize tts1(FromDIP(wxSize(40, 23)));
 	wxSize tts2(FromDIP(wxSize(50, 23)));
+	wxSize tts3(FromDIP(wxSize(60, 23)));
+	wxSize tts4(FromDIP(wxSize(30, 23)));
 	//left///////////////////////////////////////////////////
-	//gamma
-	m_gamma_st = new wxButton(this, wxID_ANY, ": Gamma",
-		wxDefaultPosition, bts, wxBU_LEFT);
-	m_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_INVERSE);
-	m_gamma_sldr->SetRangeStyle(1);
-	m_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
-		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
-	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	//bind events
-	m_gamma_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnGammaMF, this);
-	m_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnGammaChange, this);
-	m_gamma_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnGammaText, this);
-	m_gamma_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnGammaChk, this);
-	//add to sizer
-	sizer_l1->Add(m_gamma_sldr, 1, wxEXPAND);
-	sizer_l1->Add(m_gamma_text, 0, wxALIGN_CENTER);
-	sizer_l1->Add(5, 5);
-	sizer_l1->Add(m_gamma_chk, 0, wxALIGN_CENTER);
-	sizer_l1->Add(m_gamma_st, 0, wxALIGN_CENTER);
 	//saturation point
 	m_saturation_st = new wxButton(this, wxID_ANY, ": Saturation",
 		wxDefaultPosition, bts, wxBU_LEFT);
@@ -146,30 +128,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_saturation_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSaturationText, this);
 	m_saturation_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnSaturationChk, this);
 	//add to sizer
-	sizer_l2->Add(m_saturation_sldr, 1, wxEXPAND);
-	sizer_l2->Add(m_saturation_text, 0, wxALIGN_CENTER);
-	sizer_l2->Add(5, 5);
-	sizer_l2->Add(m_saturation_chk, 0, wxALIGN_CENTER);
-	sizer_l2->Add(m_saturation_st, 0, wxALIGN_CENTER);
-	//luminance
-	m_luminance_st = new wxButton(this, wxID_ANY, ": Luminance",
-		wxDefaultPosition, bts, wxBU_LEFT);
-	m_luminance_sldr = new wxSingleSlider(this, wxID_ANY, 128, 0, 255,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_luminance_text = new wxTextCtrl(this, wxID_ANY, "128",
-		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
-	m_luminance_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	//bind events
-	m_luminance_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnLuminanceMF, this);
-	m_luminance_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLuminanceChange, this);
-	m_luminance_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLuminanceText, this);
-	m_luminance_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnLuminanceChk, this);
-	//add to sizer
-	sizer_l3->Add(m_luminance_sldr, 1, wxEXPAND, 0);
-	sizer_l3->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
-	sizer_l3->Add(5, 5);
-	sizer_l3->Add(m_luminance_chk, 0, wxALIGN_CENTER);
-	sizer_l3->Add(m_luminance_st, 0, wxALIGN_CENTER, 0);
+	sizer_l1->Add(m_saturation_sldr, 1, wxEXPAND);
+	sizer_l1->Add(m_saturation_text, 0, wxALIGN_CENTER);
+	sizer_l1->Add(5, 5);
+	sizer_l1->Add(m_saturation_chk, 0, wxALIGN_CENTER);
+	sizer_l1->Add(m_saturation_st, 0, wxALIGN_CENTER);
 	//alpha
 	m_alpha_st = new wxButton(this, wxID_ANY, ": Alpha",
 		wxDefaultPosition, bts, wxBU_LEFT);
@@ -184,60 +147,71 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_alpha_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnAlphaText, this);
 	m_alpha_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnAlphaCheck, this);
 	//add to sizer
-	sizer_l4->Add(m_alpha_sldr, 1, wxEXPAND);
-	sizer_l4->Add(m_alpha_text, 0, wxALIGN_CENTER);
-	sizer_l4->Add(5, 5);
-	sizer_l4->Add(m_alpha_chk, 0, wxALIGN_CENTER);
-	sizer_l4->Add(m_alpha_st, 0, wxALIGN_CENTER);
-	//highlight
-	m_shade_st = new wxButton(this, wxID_ANY, ": Shading",
+	sizer_l2->Add(m_alpha_sldr, 1, wxEXPAND);
+	sizer_l2->Add(m_alpha_text, 0, wxALIGN_CENTER);
+	sizer_l2->Add(5, 5);
+	sizer_l2->Add(m_alpha_chk, 0, wxALIGN_CENTER);
+	sizer_l2->Add(m_alpha_st, 0, wxALIGN_CENTER);
+	//gamma
+	m_gamma_st = new wxButton(this, wxID_ANY, ": Gamma",
 		wxDefaultPosition, bts, wxBU_LEFT);
-	m_hi_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
+	m_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_hi_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	//m_gamma_sldr->SetRangeStyle(1);
+	m_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
-	//shading
-	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
-	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	//bind events
-	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
-	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
-	m_hi_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnHiShadingText, this);
-	m_low_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLowShadingChange, this);
-	m_low_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLowShadingText, this);
-	m_shade_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadingChk, this);
+	m_gamma_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnGammaMF, this);
+	m_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnGammaChange, this);
+	m_gamma_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnGammaText, this);
+	m_gamma_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnGammaChk, this);
 	//add to sizer
-	sizer_l5->Add(m_hi_shading_sldr, 1, wxEXPAND);
-	sizer_l5->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
-	sizer_l5->Add(m_low_shading_sldr, 1, wxEXPAND);
-	sizer_l5->Add(m_low_shading_text, 0, wxALIGN_CENTER);
+	sizer_l3->Add(m_gamma_sldr, 1, wxEXPAND);
+	sizer_l3->Add(m_gamma_text, 0, wxALIGN_CENTER);
+	sizer_l3->Add(5, 5);
+	sizer_l3->Add(m_gamma_chk, 0, wxALIGN_CENTER);
+	sizer_l3->Add(m_gamma_st, 0, wxALIGN_CENTER);
+	//luminance
+	m_luminance_st = new wxButton(this, wxID_ANY, ": Luminance",
+		wxDefaultPosition, bts, wxBU_LEFT);
+	m_luminance_sldr = new wxSingleSlider(this, wxID_ANY, 128, 0, 255,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_luminance_text = new wxTextCtrl(this, wxID_ANY, "128",
+		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
+	m_luminance_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_luminance_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnLuminanceMF, this);
+	m_luminance_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLuminanceChange, this);
+	m_luminance_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLuminanceText, this);
+	m_luminance_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnLuminanceChk, this);
+	//add to sizer
+	sizer_l4->Add(m_luminance_sldr, 1, wxEXPAND, 0);
+	sizer_l4->Add(m_luminance_text, 0, wxALIGN_CENTER, 0);
+	sizer_l4->Add(5, 5);
+	sizer_l4->Add(m_luminance_chk, 0, wxALIGN_CENTER);
+	sizer_l4->Add(m_luminance_st, 0, wxALIGN_CENTER, 0);
+	//sample rate
+	m_sample_st = new wxButton(this, wxID_ANY, ": Samp. Rate",
+		wxDefaultPosition, bts, wxBU_LEFT);
+	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 50,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_sample_text = new wxTextCtrl(this, wxID_ANY, "1.0",
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
+	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_sample_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSampleMF, this);
+	m_sample_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnSampleChange, this);
+	m_sample_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSampleText, this);
+	m_sample_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnSampleChk, this);
+	//add to sizer
+	sizer_l5->Add(m_sample_sldr, 1, wxEXPAND);
+	sizer_l5->Add(m_sample_text, 0, wxALIGN_CENTER);
 	sizer_l5->Add(5, 5);
-	sizer_l5->Add(m_shade_chk, 0, wxALIGN_CENTER);
-	sizer_l5->Add(m_shade_st, 0, wxALIGN_CENTER);
+	sizer_l5->Add(m_sample_chk, 0, wxALIGN_CENTER);
+	sizer_l5->Add(m_sample_st, 0, wxALIGN_CENTER);
 
 	//middle///////////////////////////////////////////////////
-	//extract boundary
-	m_boundary_st = new wxButton(this, wxID_ANY, "Boundary :",
-		wxDefaultPosition, bts, wxBU_RIGHT);
-	m_boundary_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 1000,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_boundary_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
-		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
-	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	//bind events
-	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
-	m_boundary_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnBoundaryChange, this);
-	m_boundary_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnBoundaryText, this);
-	m_boundary_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnBoundaryChk, this);
-	//add to sizer
-	sizer_m1->Add(m_boundary_st, 0, wxALIGN_CENTER);
-	sizer_m1->Add(5, 5);
-	sizer_m1->Add(m_boundary_chk, 0, wxALIGN_CENTER);
-	sizer_m1->Add(m_boundary_text, 0, wxALIGN_CENTER);
-	sizer_m1->Add(m_boundary_sldr, 1, wxEXPAND);
 	//thresholds
 	m_thresh_st = new wxButton(this, wxID_ANY, "Threshold :",
 		wxDefaultPosition, bts, wxBU_RIGHT);
@@ -263,14 +237,61 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_thresh_link_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnThreshLink, this);
 	m_thresh_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnThreshChk, this);
 	//add to sizer
-	sizer_m2->Add(m_thresh_st, 0, wxALIGN_CENTER);
-	sizer_m2->Add(5, 5);
-	sizer_m2->Add(m_thresh_chk, 0, wxALIGN_CENTER);
-	sizer_m2->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
-	sizer_m2->Add(m_thresh_sldr, 1, wxEXPAND);
-	sizer_m2->Add(m_right_thresh_text, 0, wxALIGN_CENTER);
-	sizer_m2->Add(m_thresh_link_tb, 0, wxALIGN_CENTER, 0);
+	sizer_m1->Add(m_thresh_st, 0, wxALIGN_CENTER);
+	sizer_m1->Add(5, 5);
+	sizer_m1->Add(m_thresh_chk, 0, wxALIGN_CENTER);
+	sizer_m1->Add(m_left_thresh_text, 0, wxALIGN_CENTER);
+	sizer_m1->Add(m_thresh_sldr, 1, wxEXPAND);
+	sizer_m1->Add(m_right_thresh_text, 0, wxALIGN_CENTER);
+	sizer_m1->Add(m_thresh_link_tb, 0, wxALIGN_CENTER, 0);
 	m_thresh_link_tb->Realize();
+	//extract boundary
+	m_boundary_st = new wxButton(this, wxID_ANY, "Boundary :",
+		wxDefaultPosition, bts, wxBU_RIGHT);
+	m_boundary_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_boundary_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
+	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
+	m_boundary_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnBoundaryChange, this);
+	m_boundary_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnBoundaryText, this);
+	m_boundary_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnBoundaryChk, this);
+	//add to sizer
+	sizer_m2->Add(m_boundary_st, 0, wxALIGN_CENTER);
+	sizer_m2->Add(5, 5);
+	sizer_m2->Add(m_boundary_chk, 0, wxALIGN_CENTER);
+	sizer_m2->Add(m_boundary_text, 0, wxALIGN_CENTER);
+	sizer_m2->Add(m_boundary_sldr, 1, wxEXPAND);
+	//highlight
+	m_shade_st = new wxButton(this, wxID_ANY, "Shading :",
+		wxDefaultPosition, bts, wxBU_RIGHT);
+	m_hi_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_hi_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
+	//shading
+	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+		wxDefaultPosition, tts3, wxTE_RIGHT, vald_fp2);
+	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	//bind events
+	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
+	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
+	m_hi_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnHiShadingText, this);
+	m_low_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLowShadingChange, this);
+	m_low_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLowShadingText, this);
+	m_shade_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadingChk, this);
+	//add to sizer
+	sizer_m3->Add(m_shade_st, 0, wxALIGN_CENTER);
+	sizer_m3->Add(5, 5);
+	sizer_m3->Add(m_shade_chk, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND);
+	sizer_m3->Add(m_low_shading_text, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_low_shading_sldr, 1, wxEXPAND);
 	//shadow
 	m_shadow_st = new wxButton(this, wxID_ANY, "Shadow :",
 		wxDefaultPosition, bts, wxBU_RIGHT);
@@ -279,36 +300,30 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	m_shadow_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	m_shadow_dir_chk = new wxUndoableCheckBox(this, wxID_ANY, "D:",
+		wxDefaultPosition, tts4);
+	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, -45, -180, 180,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_shadow_dir_sldr->SetRangeStyle(2);
+	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "-45",
+		wxDefaultPosition, tts4, wxTE_RIGHT, vald_int);
 	//bind events
 	m_shadow_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadowMF, this);
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadowChange, this);
 	m_shadow_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadowText, this);
 	m_shadow_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadowChk, this);
+	m_shadow_dir_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadowDirCheck, this);
+	m_shadow_dir_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadowDirChange, this);
+	m_shadow_dir_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadowDirEdit, this);
 	//add to sizer
-	sizer_m3->Add(m_shadow_st, 0, wxALIGN_CENTER);
-	sizer_m3->Add(5, 5);
-	sizer_m3->Add(m_shadow_chk, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_shadow_text, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_shadow_sldr, 1, wxEXPAND);
-	//sample rate
-	m_sample_st = new wxButton(this, wxID_ANY, "Samp. Rate :",
-		wxDefaultPosition, bts, wxBU_RIGHT);
-	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 50,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_sample_text = new wxTextCtrl(this, wxID_ANY, "1.0",
-		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
-	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	//bind events
-	m_sample_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSampleMF, this);
-	m_sample_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnSampleChange, this);
-	m_sample_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSampleText, this);
-	m_sample_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnSampleChk, this);
-	//add to sizer
-	sizer_m4->Add(m_sample_st, 0, wxALIGN_CENTER);
+	sizer_m4->Add(m_shadow_st, 0, wxALIGN_CENTER);
 	sizer_m4->Add(5, 5);
-	sizer_m4->Add(m_sample_chk, 0, wxALIGN_CENTER);
-	sizer_m4->Add(m_sample_text, 0, wxALIGN_CENTER);
-	sizer_m4->Add(m_sample_sldr, 1, wxEXPAND);
+	sizer_m4->Add(m_shadow_chk, 0, wxALIGN_CENTER);
+	sizer_m4->Add(m_shadow_text, 0, wxALIGN_CENTER);
+	sizer_m4->Add(m_shadow_sldr, 1, wxEXPAND);
+	sizer_m4->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
+	sizer_m4->Add(m_shadow_dir_text, 0, wxALIGN_CENTER);
+	sizer_m4->Add(m_shadow_dir_sldr, 1, wxEXPAND);
 	//colormap
 	m_colormap_st = new wxButton(this, wxID_ANY, "Colormap :",
 		wxDefaultPosition, bts, wxBU_RIGHT);
@@ -548,6 +563,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	glbin.add_undo_control(m_boundary_sldr);
 	glbin.add_undo_control(m_thresh_sldr);
 	glbin.add_undo_control(m_shadow_sldr);
+	glbin.add_undo_control(m_shadow_dir_sldr);
 	glbin.add_undo_control(m_sample_sldr);
 	glbin.add_undo_control(m_colormap_sldr);
 	//add checkboxes
@@ -559,6 +575,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	glbin.add_undo_control(m_boundary_chk);
 	glbin.add_undo_control(m_thresh_chk);
 	glbin.add_undo_control(m_shadow_chk);
+	glbin.add_undo_control(m_shadow_dir_chk);
 	glbin.add_undo_control(m_sample_chk);
 	glbin.add_undo_control(m_colormap_chk);
 	//add others
@@ -587,6 +604,7 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_boundary_sldr);
 	glbin.del_undo_control(m_thresh_sldr);
 	glbin.del_undo_control(m_shadow_sldr);
+	glbin.del_undo_control(m_shadow_dir_sldr);
 	glbin.del_undo_control(m_sample_sldr);
 	glbin.del_undo_control(m_colormap_sldr);
 	//delete checkboxes
@@ -598,6 +616,7 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_boundary_chk);
 	glbin.del_undo_control(m_thresh_chk);
 	glbin.del_undo_control(m_shadow_chk);
+	glbin.del_undo_control(m_shadow_dir_chk);
 	glbin.del_undo_control(m_sample_chk);
 	glbin.del_undo_control(m_colormap_chk);
 	//delete others
@@ -947,7 +966,29 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			m_shadow_sldr->Enable(bval);
 			m_shadow_text->Enable(bval);
+			m_shadow_dir_chk->Enable(bval);
+			if (!bval)
+			{
+				m_shadow_dir_sldr->Enable(bval);
+				m_shadow_dir_text->Enable(bval);
+			}
+			else
+			{
+				bval = glbin_settings.m_shadow_dir;
+				m_shadow_dir_sldr->Enable(bval);
+				m_shadow_dir_text->Enable(bval);
+			}
 		}
+	}
+	if (update_all || FOUND_VALUE(gstShadowDir))
+	{
+		bool bval = glbin_settings.m_shadow_dir;
+		m_shadow_dir_chk->SetValue(bval);
+		m_shadow_dir_sldr->Enable(bval);
+		m_shadow_dir_text->Enable(bval);
+		double deg = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x));
+		m_shadow_dir_sldr->ChangeValue(std::round(deg));
+		m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", deg));
 	}
 	if (update_shadow || update_tips)
 	{
@@ -1333,6 +1374,7 @@ void VolumePropPanel::ClearUndo()
 	m_boundary_sldr->Clear();
 	m_thresh_sldr->Clear();
 	m_shadow_sldr->Clear();
+	m_shadow_dir_sldr->Clear();
 	m_sample_sldr->Clear();
 	m_colormap_sldr->Clear();
 }
@@ -1436,6 +1478,26 @@ void VolumePropPanel::EnableShadow(bool bval)
 	//	m_right_thresh_text->Enable();
 	//}
 	FluoRefresh(0, { gstShadow }, { glbin_current.GetViewId(m_view) });
+}
+
+void VolumePropPanel::EnableShadowDir(bool bval)
+{
+	glbin_settings.m_shadow_dir = bval;
+	if (bval)
+	{
+		wxString str;
+		str = m_shadow_dir_text->GetValue();
+		double deg;
+		str.ToDouble(&deg);
+		glbin_settings.m_shadow_dir_x = cos(d2r(deg));
+		glbin_settings.m_shadow_dir_y = sin(d2r(deg));
+	}
+	else
+	{
+		glbin_settings.m_shadow_dir_x = 0.0;
+		glbin_settings.m_shadow_dir_y = 0.0;
+	}
+	FluoRefresh(0, { gstShadowDir }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::EnableSample(bool bval)
@@ -1611,6 +1673,16 @@ void VolumePropPanel::SetShadowInt(double val, bool notify)
 	m_vd->SetShadowIntensity(val);
 	if (notify)
 		FluoRefresh(1, { gstShadow }, { glbin_current.GetViewId(m_view) });
+	else
+		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+}
+
+void VolumePropPanel::SetShadowDir(double dval, bool notify)
+{
+	glbin_settings.m_shadow_dir_x = cos(d2r(dval));
+	glbin_settings.m_shadow_dir_y = sin(d2r(dval));
+	if (notify)
+		FluoRefresh(1, { gstShadowDir }, { glbin_current.GetViewId(m_view) });
 	else
 		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
@@ -2336,6 +2408,31 @@ void VolumePropPanel::OnShadowText(wxCommandEvent& event)
 		SyncShadowInt(val);
 	else
 		SetShadowInt(val, false);
+}
+
+//shadow direction
+void VolumePropPanel::OnShadowDirCheck(wxCommandEvent& event)
+{
+	bool bval = m_shadow_dir_chk->GetValue();
+	EnableShadowDir(bval);
+}
+
+void VolumePropPanel::OnShadowDirChange(wxScrollEvent& event)
+{
+	double deg = m_shadow_dir_sldr->GetValue();
+	wxString str = wxString::Format("%.0f", deg);
+	if (str != m_shadow_dir_text->GetValue())
+		m_shadow_dir_text->SetValue(str);
+	SetShadowDir(deg, false);
+}
+
+void VolumePropPanel::OnShadowDirEdit(wxCommandEvent& event)
+{
+	wxString str = m_shadow_dir_text->GetValue();
+	double deg;
+	str.ToDouble(&deg);
+	m_shadow_dir_sldr->ChangeValue(std::round(deg));
+	SetShadowDir(deg, false);
 }
 
 void VolumePropPanel::OnSampleMF(wxCommandEvent& event)
