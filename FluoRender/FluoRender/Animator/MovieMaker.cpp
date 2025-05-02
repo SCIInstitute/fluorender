@@ -193,7 +193,7 @@ void MovieMaker::PlaySave()
 
 	std::filesystem::path file_path(m_filename);
 	filetype_ = file_path.extension().string();
-	if (filetype_ == ".mov")
+	if (filetype_ == ".mp4")
 	{
 		if (!m_crop)
 		{
@@ -302,7 +302,7 @@ void MovieMaker::WriteFrameToFile()
 	std::wstring outputfilename = oss.str();
 
 	//capture
-	bool bmov = filetype_ == ".mov";
+	bool bmov = filetype_ == ".mp4";
 	int chann = glbin_settings.m_save_alpha ? 4 : 3;
 	bool fp32 = bmov ? false : glbin_settings.m_save_float;
 	float dpi = glbin_settings.m_dpi;

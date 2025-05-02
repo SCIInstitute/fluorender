@@ -1867,7 +1867,7 @@ void MoviePanel::OnSave(wxCommandEvent& event)
 {
 	ModalDlg* fopendlg = new ModalDlg(
 		m_frame, "Save Movie Sequence",
-		"", "output", "MOV file (*.mov)|*.mov|TIF files (*.tif)|*.tif",
+		"", "output", "MP4 file (*.mp4)|*.mp4|TIF files (*.tif)|*.tif",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
 	fopendlg->CenterOnParent();

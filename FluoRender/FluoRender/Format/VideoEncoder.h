@@ -79,7 +79,6 @@ protected:
 	bool open_video();
 	AVFrame * alloc_picture();
 	int write_frame(const AVRational *time_base, AVPacket *pkt);
-	void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt);
 };
 
 #endif // QVideoEncoder_H

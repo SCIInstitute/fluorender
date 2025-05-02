@@ -37,6 +37,7 @@ extern "C"
 #include <libswresample/swresample.h>
 }
 #include <Debug.h>
+#include <memory>
 
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
@@ -66,8 +67,26 @@ VideoEncoder::VideoEncoder()
 	valid_ = false;
 }
 
-VideoEncoder::~VideoEncoder() {
-
+VideoEncoder::~VideoEncoder()
+{
+	if (output_stream_.frame) {
+		av_frame_free(&output_stream_.frame);
+	}
+	if (output_stream_.tmp_frame) {
+		av_frame_free(&output_stream_.tmp_frame);
+	}
+	if (output_stream_.sws_ctx) {
+		sws_freeContext(output_stream_.sws_ctx);
+	}
+	if (output_stream_.swr_ctx) {
+		swr_free(&output_stream_.swr_ctx);
+	}
+	if (av_codec_context_) {
+		avcodec_free_context(&av_codec_context_);
+	}
+	if (format_context_) {
+		avformat_free_context(format_context_);
+	}
 }
 
 void ffmpeg_log_callback(void* ptr, int level, const char* fmt, va_list vl)
@@ -76,7 +95,6 @@ void ffmpeg_log_callback(void* ptr, int level, const char* fmt, va_list vl)
 	vsnprintf(log_message, sizeof(log_message), fmt, vl);
 	std::wstring str = s2ws(log_message);
 	DBGPRINT(str.c_str());
-	//OutputDebugStringA(log_message);
 }
 
 bool VideoEncoder::open(
@@ -84,8 +102,8 @@ bool VideoEncoder::open(
 	size_t w, size_t h, size_t len,
 	size_t fps, size_t bitrate)
 {
-	av_log_set_level(AV_LOG_DEBUG);
-	av_log_set_callback(ffmpeg_log_callback);
+	//av_log_set_level(AV_LOG_DEBUG);
+	//av_log_set_callback(ffmpeg_log_callback);
 
 	output_stream_.frame = 0;
 	output_stream_.next_pts = 0;
@@ -155,81 +173,91 @@ bool VideoEncoder::open(
 void VideoEncoder::close()
 {
 	if (!valid_) return;
-	//flush the remaining (delayed) frames.
-	int64_t last_dts = 0;
+
+	// Allocate a new packet
 	AVPacket *pkt = av_packet_alloc();
 	if (!pkt)
-		return;
-	while (true)
 	{
-		int ret;
-		AVFrame* frame = output_stream_.frame;
+		DBGPRINT(L"Could not allocate packet\n");
+		return;
+	}
 
-		// Send the frame to the encoder
-		ret = avcodec_send_frame(av_codec_context_, frame);
-		if (ret == AVERROR(EAGAIN)) {
-			// The encoder is not ready to accept a new frame, try again
-			continue;
+	// Flush the encoder by sending a NULL frame
+	int ret = avcodec_send_frame(av_codec_context_, NULL);
+	if (ret < 0) {
+		DBGPRINT(L"Error sending flush frame: %d\n", ret);
+		av_packet_free(&pkt);
+		return;
+	}
+
+	// Receive and process all remaining packets
+	while (ret >= 0) {
+		ret = avcodec_receive_packet(av_codec_context_, pkt);
+		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+			break;
 		}
 		else if (ret < 0) {
-			DBGPRINT(L"Error sending a frame for encoding: %d\n", ret);
+			DBGPRINT(L"Error encoding video frame: %d\n", ret);
 			break;
 		}
 
-		// Receive the encoded packet from the encoder
-		while (ret >= 0) {
-			ret = avcodec_receive_packet(av_codec_context_, pkt);
-			if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-				break;
-			}
-			else if (ret < 0) {
-				DBGPRINT(L"Error encoding video frame: %d\n", ret);
-				break;
-			}
-
-			if (last_dts == pkt->pts)
-				break;
-			last_dts = pkt->dts;
-
-			// Process the encoded packet (e.g., write it to a file)
-			ret = write_frame(&av_codec_context_->time_base, pkt);
-			av_packet_unref(pkt);
-		}
-
-		if (ret == AVERROR_EOF)
-			break;
-	}
-
-	// Flush the encoder
-	avcodec_send_frame(av_codec_context_, NULL);
-	while (avcodec_receive_packet(av_codec_context_, pkt) == 0) {
 		// Process the encoded packet (e.g., write it to a file)
-		write_frame(&av_codec_context_->time_base, pkt);
+		ret = write_frame(&av_codec_context_->time_base, pkt);
 		av_packet_unref(pkt);
+
+		if (ret < 0) {
+			DBGPRINT(L"Error while writing video frame: %d\n", ret);
+			break;
+		}
 	}
+
 	av_packet_free(&pkt);
 
 	// Write the trailer to the output media file
 	av_write_trailer(format_context_);
-	/* Close each codec. */
-	avcodec_free_context(&av_codec_context_);
-	av_frame_free(&output_stream_.frame);
-	av_frame_free(&output_stream_.tmp_frame);
-	sws_freeContext(output_stream_.sws_ctx);
-	swr_free(&output_stream_.swr_ctx);
-	const AVOutputFormat* format = format_context_->oformat;
-	if (!(format->flags & AVFMT_NOFILE))
-		/* Close the output file. */
-		avio_closep(&format_context_->pb);
-	/* free the stream */
-	avformat_free_context(format_context_);
+
+	// Free resources in the correct order
+	if (output_stream_.frame) {
+		av_frame_free(&output_stream_.frame);
+		output_stream_.frame = 0;
+	}
+	if (output_stream_.tmp_frame) {
+		av_frame_free(&output_stream_.tmp_frame);
+		output_stream_.tmp_frame = 0;
+	}
+	if (output_stream_.sws_ctx) {
+		sws_freeContext(output_stream_.sws_ctx);
+		output_stream_.sws_ctx = 0;
+	}
+	if (output_stream_.swr_ctx) {
+		swr_free(&output_stream_.swr_ctx);
+		output_stream_.swr_ctx = 0;
+	}
+	if (av_codec_context_) {
+		avcodec_free_context(&av_codec_context_);
+		av_codec_context_ = 0;
+	}
+
+	if (format_context_)
+	{
+		const AVOutputFormat* format = format_context_->oformat;
+		if (!(format->flags & AVFMT_NOFILE)) {
+			// Close the output file
+			avio_closep(&format_context_->pb);
+		}
+
+		// Free the format context
+		avformat_free_context(format_context_);
+		format_context_ = 0;
+	}
 
 	valid_ = false;
 }
 
-bool VideoEncoder::set_frame_rgb_data(unsigned char * data) {
+bool VideoEncoder::set_frame_rgb_data(unsigned char* data)
+{
 	/* as we only generate a YUV420P picture, we must convert it
-		* to the codec pixel format if needed */
+	 * to the codec pixel format if needed */
 	if (!output_stream_.sws_ctx) {
 		output_stream_.sws_ctx = sws_getContext(
 			static_cast<int>(width_), static_cast<int>(height_), AV_PIX_FMT_RGB24,
@@ -240,33 +268,36 @@ bool VideoEncoder::set_frame_rgb_data(unsigned char * data) {
 			return false;
 		}
 	}
-	unsigned char * temp_array = new unsigned char[width_ * height_ * 3 + 16];
-	unsigned char * aligned_data = &temp_array[0];
-	//align the data
-	if ((uintptr_t)data & 15) {
-		while ((uintptr_t)aligned_data & 15)
-			aligned_data++;
-	}
-	//this is where data gets cropped if width/height are not divisible by 16
-	for (size_t i = 0; i < height_; i++)
+
+	// Allocate aligned memory
+	std::unique_ptr<unsigned char[]> temp_array(new unsigned char[width_ * height_ * 3 + 16]);
+	void* aligned_data_void = temp_array.get();
+	size_t space = width_ * height_ * 3 + 16;
+	std::align(16, width_ * height_ * 3, aligned_data_void, space);
+	unsigned char* aligned_data = static_cast<unsigned char*>(aligned_data_void);
+
+	// Crop the data if width/height are not divisible by 16
+	for (size_t i = 0; i < height_; i++) {
 		std::memcpy(
 			aligned_data + (3 * i * width_),
 			data + (3 * i * actual_width_),
 			3 * width_);
-	//now convert the pixel format
-	uint8_t * inData[] = { aligned_data }; // RGB24 have one plane
-	int inLinesize[] = { (int)(3 * width_) }; // RGB stride
+	}
+
+	// Convert the pixel format
+	uint8_t* inData[] = { aligned_data }; // RGB24 has one plane
+	int inLinesize[] = { static_cast<int>(3 * width_) }; // RGB stride
 	int ret = av_frame_make_writable(output_stream_.frame);
-	if (ret < 0)
-	{
-		delete[]temp_array;
+	if (ret < 0) {
+		DBGPRINT(L"Error making frame writable: %d\n", ret);
 		return false;
 	}
+
 	sws_scale(output_stream_.sws_ctx,
 		inData, inLinesize,
 		0, static_cast<int>(height_), output_stream_.frame->data,
 		output_stream_.frame->linesize);
-	delete[]temp_array;
+
 	return true;
 }
 
@@ -328,8 +359,7 @@ bool VideoEncoder::open_video()
 
 	/* find the encoder */
 	if (!video_codec) {
-		DBGPRINT(L"Could not find encoder for '%s'\n",
-			avcodec_get_name(format->video_codec));
+		DBGPRINT(L"Could not find encoder for '%s'\n", avcodec_get_name(format->video_codec));
 		return false;
 	}
 	output_stream_.st = avformat_new_stream(format_context_, video_codec);
@@ -337,7 +367,6 @@ bool VideoEncoder::open_video()
 		DBGPRINT(L"Could not allocate stream\n");
 		return false;
 	}
-	//output_stream_.st->id = format_context_->nb_streams - 1;
 
 	av_codec_context_ = avcodec_alloc_context3(video_codec);
 	if (!av_codec_context_) {
@@ -359,8 +388,8 @@ bool VideoEncoder::open_video()
 	}
 	if (av_codec_context_->codec_id == AV_CODEC_ID_MPEG1VIDEO) {
 		/* Needed to avoid using macroblocks in which some coeffs overflow.
-			* This does not happen with normal video, it just happens here as
-			* the motion of the chroma plane does not match the luma plane. */
+		 * This does not happen with normal video, it just happens here as
+		 * the motion of the chroma plane does not match the luma plane. */
 		av_codec_context_->mb_decision = 2;
 	}
 	/* Some formats want stream headers to be separate. */
@@ -370,12 +399,14 @@ bool VideoEncoder::open_video()
 	/* open the codec */
 	if (avcodec_open2(av_codec_context_, video_codec, NULL) < 0) {
 		DBGPRINT(L"Could not open video codec\n");
+		avcodec_free_context(&av_codec_context_);
 		return false;
 	}
 	/* allocate and init a re-usable frame */
 	output_stream_.frame = alloc_picture();
 	if (!output_stream_.frame) {
 		DBGPRINT(L"Could not allocate video frame\n");
+		avcodec_free_context(&av_codec_context_);
 		return false;
 	}
 	/* If the output format is not YUV420P, then a temporary YUV420P
@@ -386,6 +417,8 @@ bool VideoEncoder::open_video()
 		output_stream_.tmp_frame = alloc_picture();
 		if (!output_stream_.tmp_frame) {
 			DBGPRINT(L"Could not allocate temporary picture\n");
+			av_frame_free(&output_stream_.frame);
+			avcodec_free_context(&av_codec_context_);
 			return false;
 		}
 	}
@@ -394,55 +427,42 @@ bool VideoEncoder::open_video()
 	int ret = avcodec_parameters_from_context(output_stream_.st->codecpar, av_codec_context_);
 	if (ret < 0) {
 		DBGPRINT(L"Could not copy codec parameters\n");
+		av_frame_free(&output_stream_.frame);
+		if (output_stream_.tmp_frame) {
+			av_frame_free(&output_stream_.tmp_frame);
+		}
+		avcodec_free_context(&av_codec_context_);
 		return false;
 	}
 
 	return true;
 }
 
-AVFrame * VideoEncoder::alloc_picture() {
-	AVFrame *picture;
+AVFrame* VideoEncoder::alloc_picture() {
+	AVFrame* picture;
 	int ret;
 	picture = av_frame_alloc();
-	if (!picture)
+	if (!picture) {
+		DBGPRINT(L"Could not allocate frame.\n");
 		return NULL;
+	}
 	picture->format = AV_PIX_FMT_YUV420P;
 	picture->width = static_cast<int>(width_);
 	picture->height = static_cast<int>(height_);
 	/* allocate the buffers for the frame data */
 	ret = av_frame_get_buffer(picture, 32);
 	if (ret < 0) {
-		DBGPRINT(L"Could not allocate frame data.\n");
+		DBGPRINT(L"Could not allocate frame data: %d\n", ret);
+		av_frame_free(&picture);
 		return NULL;
 	}
 	return picture;
 }
 
-int VideoEncoder::write_frame(const AVRational *time_base,
-	AVPacket *pkt)
-{
+int VideoEncoder::write_frame(const AVRational* time_base, AVPacket* pkt) {
 	/* rescale output packet timestamp values from codec to stream timebase */
 	av_packet_rescale_ts(pkt, *time_base, output_stream_.st->time_base);
 	pkt->stream_index = output_stream_.st->index;
 	/* Write the compressed frame to the media file. */
-	//log_packet(format_context_, pkt);
 	return av_interleaved_write_frame(format_context_, pkt);
 }
-
-void VideoEncoder::log_packet(const AVFormatContext *fmt_ctx,
-	const AVPacket *pkt) {
-	AVRational *time_base =
-		&fmt_ctx->streams[pkt->stream_index]->time_base;
-	std::cout << "pts: " << pkt->pts <<
-		"\npts_time: " << (pkt->pts *
-		(double)time_base->num / time_base->den) <<
-		"\ndts: " << pkt->dts <<
-		"\ndts_time: " << (pkt->dts *
-		(double)time_base->num / time_base->den) <<
-		"\nduration: " << pkt->duration <<
-		"\nduration_time: " << (pkt->duration *
-		(double)time_base->num / time_base->den) <<
-		"\nstream_index: " << pkt->stream_index << std::endl;
-}
-
-

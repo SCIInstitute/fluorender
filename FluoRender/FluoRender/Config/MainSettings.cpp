@@ -63,7 +63,7 @@ MainSettings::MainSettings()
 	m_dpi = 72.0;
 	m_realtime_compress = false;
 	m_mov_bitrate = 20.0;
-	m_mov_filename = L"output.mov";
+	m_mov_filename = L"output.mp4";
 	m_mpg_cache_size = -1;
 	m_fp_convert = false;
 	m_fp_min = 0;
@@ -255,7 +255,7 @@ void MainSettings::Read()
 		fconfig->Read("dpi", &m_dpi, 72.0);
 		fconfig->Read("rt compress", &m_realtime_compress, false);
 		fconfig->Read("mov bitrate", &m_mov_bitrate, 20.0);
-		fconfig->Read("mov filename", &m_mov_filename, std::wstring(L"output.mov"));
+		fconfig->Read("mov filename", &m_mov_filename, std::wstring(L"output.mp4"));
 		fconfig->Read("mpg cache size", &m_mpg_cache_size, -1);
 		fconfig->Read("fp convert", &m_fp_convert, false);
 		fconfig->Read("fp min", &m_fp_min, 0.0);
