@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <HistoryIndicator.h>
 #include <wx/wx.h>
-#include <wx/button.h>
+#include <wx/control.h>
 
-class wxFadeButton : public wxButton, public HistoryIndicator
+class wxFadeButton : public wxControl, public HistoryIndicator
 {
 public:
 	wxFadeButton(wxWindow* parent, wxWindowID id, const wxString& label,
@@ -41,7 +41,7 @@ public:
 		const wxString& name = wxButtonNameStr);
 
 	void SetMode(int mode) { m_mode = mode; }
-	void SetTintColor(const wxColour& c) { m_tint = c; }
+	void SetTintColor(const wxColour& c) { m_tint = c; m_mode = 1; }
 	void SetFadeLimit(int val) { m_fade_limit = val; }
 	void SetFontBold(bool val = true);
 
@@ -49,14 +49,24 @@ public:
 
 protected:
 	virtual void OnPaint(wxPaintEvent& event);
+	virtual void OnLeftDown(wxMouseEvent& event);
+	virtual void OnLeftUp(wxMouseEvent& event);
+	virtual void OnLeave(wxMouseEvent& event);
+	virtual void OnEnter(wxMouseEvent& event);
 
 private:
 	int m_mode;//0: normal; 1: color gradient; 2: rainbow gradient
 	int m_fade_limit;
 	wxColour m_tint;
+	wxString m_label;
+	bool m_pressed;
+	bool m_hovered;
 
 private:
-	void UpdateButtonColor();
+	void DrawNormal(wxPaintDC& dc);
+	void DrawTint(wxPaintDC& dc, double f);
+	void DrawRainbow(wxPaintDC& dc, double f);
+	void DrawHover(wxPaintDC& dc, const wxRect& rect);
 };
 
 #endif//_FADEBUTTON_H_

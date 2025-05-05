@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 class RenderView;
 class VolumeData;
 class DataGroup;
+class wxFadeButton;
 class wxBasisSlider;
 class wxDoubleSlider;
 class wxSingleSlider;
@@ -100,27 +101,27 @@ private:
 
 	//1
 	//gamma
-	wxButton *m_gamma_st;
+	wxFadeButton *m_gamma_st;
 	wxSingleSlider *m_gamma_sldr;
 	wxTextCtrl *m_gamma_text;
 	wxUndoableCheckBox* m_gamma_chk;
 	//saturation point
-	wxButton *m_saturation_st;
+	wxFadeButton *m_saturation_st;
 	wxSingleSlider *m_saturation_sldr;
 	wxTextCtrl *m_saturation_text;
 	wxUndoableCheckBox* m_saturation_chk;
 	//luminance
-	wxButton *m_luminance_st;
+	wxFadeButton *m_luminance_st;
 	wxSingleSlider *m_luminance_sldr;
 	wxTextCtrl* m_luminance_text;
 	wxUndoableCheckBox* m_luminance_chk;
 	//alpha
-	wxButton *m_alpha_st;
+	wxFadeButton *m_alpha_st;
 	wxSingleSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
 	wxUndoableCheckBox* m_alpha_chk;
 	//shading
-	wxButton* m_shade_st;
+	wxFadeButton* m_shade_st;
 	wxSingleSlider *m_hi_shading_sldr;
 	wxTextCtrl *m_hi_shading_text;
 	wxSingleSlider *m_low_shading_sldr;
@@ -129,19 +130,19 @@ private:
 
 	//2
 	//boundary
-	wxButton* m_boundary_st;
+	wxFadeButton* m_boundary_st;
 	wxSingleSlider *m_boundary_sldr;
 	wxTextCtrl *m_boundary_text;
 	wxUndoableCheckBox* m_boundary_chk;
 	//thresholds
-	wxButton* m_thresh_st;
+	wxFadeButton* m_thresh_st;
 	wxDoubleSlider *m_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
 	wxTextCtrl *m_right_thresh_text;
 	wxToolBar* m_thresh_link_tb;
 	wxUndoableCheckBox* m_thresh_chk;
 	//shadow
-	wxButton* m_shadow_st;
+	wxFadeButton* m_shadow_st;
 	wxSingleSlider *m_shadow_sldr;
 	wxTextCtrl *m_shadow_text;
 	wxUndoableCheckBox* m_shadow_chk;
@@ -149,12 +150,12 @@ private:
 	wxTextCtrl* m_shadow_dir_text;
 	wxUndoableCheckBox* m_shadow_dir_chk;
 	//sample rate
-	wxButton* m_sample_st;
+	wxFadeButton* m_sample_st;
 	wxSingleSlider *m_sample_sldr;
 	wxTextCtrl *m_sample_text;
 	wxUndoableCheckBox* m_sample_chk;
 	//colormap
-	wxButton* m_colormap_st;
+	wxFadeButton* m_colormap_st;
 	wxDoubleSlider *m_colormap_sldr;
 	wxTextCtrl *m_colormap_low_text;
 	wxTextCtrl *m_colormap_hi_text;

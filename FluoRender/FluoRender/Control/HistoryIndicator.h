@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 class HistoryIndicator
 {
 public:
-	HistoryIndicator();
+	HistoryIndicator() {}
 
 	virtual void UpdateHistory() = 0;
 	virtual void SetLength(size_t val) { m_length = val; }
