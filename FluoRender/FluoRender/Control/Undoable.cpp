@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Undoable.h>
+#include <HistoryIndicator.h>
 #include <cmath>
 #include <Debug.h>
 
@@ -42,6 +43,14 @@ void Undoable::Clear()
 	{
 		stack_pointer_ = 0;
 		stack_.erase(stack_.begin() + 1, stack_.end());
+
+		//history
+		if (indicator_)
+		{
+			indicator_->SetLength(0);
+			indicator_->SetPosition(0);
+			indicator_->UpdateHistory();
+		}
 	}
 }
 
@@ -76,6 +85,12 @@ void Undoable::Undo()
 
 	//update
 	update();
+
+	if (indicator_)
+	{
+		indicator_->SetPosition(stack_pointer_);
+		indicator_->UpdateHistory();
+	}
 }
 
 void Undoable::Redo()
@@ -93,6 +108,12 @@ void Undoable::Redo()
 
 	//update
 	update();
+
+	if (indicator_)
+	{
+		indicator_->SetPosition(stack_pointer_);
+		indicator_->UpdateHistory();
+	}
 }
 
 void Undoable::pop()
@@ -103,6 +124,13 @@ void Undoable::pop()
 		if (stack_pointer_ == size - 1)
 			stack_pointer_--;
 		stack_.pop_back();
+
+		if (indicator_)
+		{
+			indicator_->SetLength(size);
+			indicator_->SetPosition(stack_pointer_);
+			indicator_->UpdateHistory();
+		}
 	}
 }
 

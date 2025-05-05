@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <wxSingleSlider.h>
+#include <HistoryIndicator.h>
 #include <Debug.h>
 
 wxSingleSlider::wxSingleSlider(
@@ -513,6 +514,13 @@ void wxSingleSlider::push(double t)
 		//DBGPRINT(L"\tsize:%d,pointer:%d,last:(%f, %d)\n",
 		//	stack_.size(), stack_pointer_, stack_.back().first,
 		//	std::any_cast<int>(stack_.back().second));
+
+		if (indicator_)
+		{
+			indicator_->SetLength(stack_.size());
+			indicator_->SetPosition(stack_pointer_);
+			indicator_->UpdateHistory();
+		}
 	}
 }
 

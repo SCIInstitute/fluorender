@@ -25,43 +25,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _UNDOABLE_H_
-#define _UNDOABLE_H_
+#ifndef _FADEBUTTON_H_
+#define _FADEBUTTON_H_
 
-#include <chrono>
-#include <vector>
-#include <any>
+#include <HistoryIndicator.h>
+#include <wx/wx.h>
+#include <wx/button.h>
 
-class HistoryIndicator;
-class Undoable
+class wxFadeButton : public wxButton, public HistoryIndicator
 {
 public:
-	Undoable();
+	wxFadeButton(wxWindow* parent, wxWindowID id, const wxString& label,
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		long style = 0, const wxValidator& validator = wxDefaultValidator,
+		const wxString& name = wxButtonNameStr);
 
-	virtual void Clear();
-	virtual void Undo();
-	virtual void Redo();
-	virtual double GetTimeUndo();
-	virtual double GetTimeRedo();
+	void SetMode(int mode) { m_mode = mode; }
+	void SetTintColor(const wxColour& c) { m_tint = c; }
+	void SetFadeLimit(int val) { m_fade_limit = val; }
+	void SetFontBold(bool val = true);
 
-	virtual void SetHistoryIndicator(HistoryIndicator* ind) { indicator_ = ind; }
-
-protected:
-	//timer
-	static double time_span_;
-	//value stack
-	size_t stack_pointer_;
-	std::vector <std::pair<double, std::any>> stack_;
-	HistoryIndicator* indicator_ = 0;
+	virtual void UpdateHistory() override;
 
 protected:
-	virtual void replace(double t) = 0;
-	virtual void push(double t) = 0;
-	virtual void pop();
-	virtual void update() = 0;
+	virtual void OnPaint(wxPaintEvent& event);
 
-	virtual double get_time_span();
-	virtual bool time_sample(double& t);
+private:
+	int m_mode;//0: normal; 1: color gradient; 2: rainbow gradient
+	int m_fade_limit;
+	wxColour m_tint;
+
+private:
+	void UpdateButtonColor();
 };
 
-#endif//_UNDOABLE_H_
+#endif//_FADEBUTTON_H_

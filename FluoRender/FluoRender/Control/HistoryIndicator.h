@@ -25,43 +25,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _UNDOABLE_H_
-#define _UNDOABLE_H_
+#ifndef _HISTORYINDICATOR_H_
+#define _HISTORYINDICATOR_H_
 
-#include <chrono>
-#include <vector>
-#include <any>
-
-class HistoryIndicator;
-class Undoable
+class HistoryIndicator
 {
 public:
-	Undoable();
+	HistoryIndicator();
 
-	virtual void Clear();
-	virtual void Undo();
-	virtual void Redo();
-	virtual double GetTimeUndo();
-	virtual double GetTimeRedo();
-
-	virtual void SetHistoryIndicator(HistoryIndicator* ind) { indicator_ = ind; }
+	virtual void UpdateHistory() = 0;
+	virtual void SetLength(size_t val) { m_length = val; }
+	virtual void SetPosition(size_t val) { m_position = val; }
 
 protected:
-	//timer
-	static double time_span_;
-	//value stack
-	size_t stack_pointer_;
-	std::vector <std::pair<double, std::any>> stack_;
-	HistoryIndicator* indicator_ = 0;
-
-protected:
-	virtual void replace(double t) = 0;
-	virtual void push(double t) = 0;
-	virtual void pop();
-	virtual void update() = 0;
-
-	virtual double get_time_span();
-	virtual bool time_sample(double& t);
+	size_t m_length = 0;
+	size_t m_position = 0;
 };
 
-#endif//_UNDOABLE_H_
+#endif//_HISTORYINDICATOR_H_
