@@ -1730,15 +1730,15 @@ void MoviePanel::SetScalebarValues(int x, int y)
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 {
-	int sel = event.GetSelection();
-	wxString str = m_notebook->GetPageText(sel);
-	if (str == UITEXT_NBPG1)
-	{
-		glbin_moviemaker.SetKeyframeEnable(true);
-		//DBGPRINT(L"SetKeyframeEnable: true\n");
-	}
+	//int sel = event.GetSelection();
+	//wxString str = m_notebook->GetPageText(sel);
+	//if (str == UITEXT_NBPG1)
+	//{
+	//	glbin_moviemaker.SetKeyframeEnable(true);
+	//	//DBGPRINT(L"SetKeyframeEnable: true\n");
+	//}
 
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum });
+	//FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -2022,7 +2022,10 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 	}
 	glbin_moviemaker.InsertKey(index);
 
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+	if (!glbin_moviemaker.GetKeyframeEnable())
+		glbin_moviemaker.SetKeyframeEnable(true);
+
+	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
 	m_keylist->Update();
 	m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
@@ -2066,8 +2069,11 @@ void MoviePanel::OnGenKey(wxCommandEvent& event)
 	if (item != -1)
 	{
 		glbin_moviemaker.MakeKeys(item);
+		if (!glbin_moviemaker.GetKeyframeEnable())
+			glbin_moviemaker.SetKeyframeEnable(true);
+
 		m_notebook->SetSelection(1);
-		FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+		FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
 	}
 }
 
