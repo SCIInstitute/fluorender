@@ -102,6 +102,11 @@ void wxFadeButton::OnPaint(wxPaintEvent& event)
 
 void wxFadeButton::OnLeftDown(wxMouseEvent& event) {
 	m_pressed = true;
+
+	wxCommandEvent buttonEvent(wxEVT_BUTTON, GetId());
+	buttonEvent.SetEventObject(this);
+	ProcessWindowEvent(buttonEvent);
+
 	Refresh();
 	event.Skip();
 }
@@ -149,19 +154,26 @@ void wxFadeButton::DrawTint(wxPaintDC& dc, double f)
 		static_cast<unsigned char>(m_tint.Green() + f * (defaultBgColor.Green() - m_tint.Green())),
 		static_cast<unsigned char>(m_tint.Blue() + f * (defaultBgColor.Blue() - m_tint.Blue()))
 	);
+	double g = (f + 1) / 2;
+	wxColour color2(
+		static_cast<unsigned char>(m_tint.Red() + g * (defaultBgColor.Red() - m_tint.Red())),
+		static_cast<unsigned char>(m_tint.Green() + g * (defaultBgColor.Green() - m_tint.Green())),
+		static_cast<unsigned char>(m_tint.Blue() + g * (defaultBgColor.Blue() - m_tint.Blue()))
+	);
 
 	// Create a gradient brush
 	wxGraphicsContext* gc = wxGraphicsContext::Create(dc);
 	if (gc) {
 		wxGraphicsGradientStops stops(color1, defaultBgColor);
 		stops.Add(color1, 0.0f);
+		stops.Add(color1, 0.1f);
+		stops.Add(defaultBgColor, 0.35f);
 		stops.Add(defaultBgColor, 0.45f);
-		stops.Add(defaultBgColor, 0.55f);
-		stops.Add(color1, 1.0f);
+		stops.Add(color2, 1.0f);
 
 		wxGraphicsPath path = gc->CreatePath();
 		path.AddRectangle(0, 0, width, height);
-		gc->SetBrush(gc->CreateLinearGradientBrush(0, 0, width, 0, stops));
+		gc->SetBrush(gc->CreateLinearGradientBrush(0, 0, 0, height, stops));
 		gc->FillPath(path);
 
 		delete gc;

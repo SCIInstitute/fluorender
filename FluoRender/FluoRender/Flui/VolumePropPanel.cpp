@@ -124,7 +124,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
 	m_saturation_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_saturation_st->SetFontBold();
-	m_saturation_st->SetTintColor(wxColor(255, 128, 128));
+	m_saturation_st->SetTintColor(wxColor(255, 150, 150));
 	m_saturation_sldr->SetHistoryIndicator(m_saturation_st);
 	//bind events
 	m_saturation_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSaturationMF, this);
@@ -207,6 +207,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_sample_st->SetFontBold();
+	m_sample_st->SetTintColor(wxColor(150, 150, 150));
+	m_sample_sldr->SetHistoryIndicator(m_sample_st);
 	//bind events
 	m_sample_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSampleMF, this);
 	m_sample_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnSampleChange, this);
@@ -357,6 +359,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Link low and high colormap values");
 	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_colormap_st->SetFontBold();
+	m_colormap_st->SetMode(2);
 	//bind events
 	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);
 	m_colormap_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnColormapChange, this);
