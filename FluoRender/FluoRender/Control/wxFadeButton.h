@@ -47,6 +47,9 @@ public:
 
 	virtual void UpdateHistory() override;
 
+	virtual bool Disable();
+	virtual bool Enable(bool enable = true);
+
 protected:
 	virtual void OnPaint(wxPaintEvent& event);
 	virtual void OnLeftDown(wxMouseEvent& event);
@@ -61,12 +64,23 @@ private:
 	wxString m_label;
 	bool m_pressed;
 	bool m_hovered;
+	bool m_enabled;
 
 private:
 	void DrawNormal(wxPaintDC& dc);
 	void DrawTint(wxPaintDC& dc, double f);
 	void DrawRainbow(wxPaintDC& dc, double f);
 	void DrawHover(wxPaintDC& dc, const wxRect& rect);
+
+	wxColour ToGrayscale(const wxColour& color) {
+		// Calculate the luminance using the weighted sum of the RGB components
+		unsigned char gray = static_cast<unsigned char>(0.299 * color.Red() +
+			0.587 * color.Green() +
+			0.114 * color.Blue());
+		// Create and return the grayscale color
+		return wxColour(gray, gray, gray);
+	}
+
 };
 
 #endif//_FADEBUTTON_H_

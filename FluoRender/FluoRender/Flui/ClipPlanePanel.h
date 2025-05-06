@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/spinbutt.h>
 #include <wx/aui/auibook.h>
 
+class wxFadeButton;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableToolbar;
@@ -90,9 +91,9 @@ private:
 	wxButton *m_rot_reset_btn;
 
 	//buttons
-	wxButton* m_clip_x_st;
-	wxButton* m_clip_y_st;
-	wxButton* m_clip_z_st;
+	wxFadeButton* m_clip_x_st;
+	wxFadeButton* m_clip_y_st;
+	wxFadeButton* m_clip_z_st;
 	//sliders for clipping planes
 	//x
 	wxDoubleSlider *m_clipx_sldr;
@@ -121,9 +122,9 @@ private:
 	wxTextCtrl *m_xy_dist_text;
 
 	//buttons
-	wxButton* m_rot_x_st;
-	wxButton* m_rot_y_st;
-	wxButton* m_rot_z_st;
+	wxFadeButton* m_rot_x_st;
+	wxFadeButton* m_rot_y_st;
+	wxFadeButton* m_rot_z_st;
 	//sliders for rotating clipping planes
 	wxSingleSlider *m_x_rot_sldr;
 	wxSingleSlider *m_y_rot_sldr;

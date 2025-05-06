@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibook.h>
 
 class DataGroup;
+class wxFadeButton;
 class wxSingleSlider;
 class wxUndoableToolbar;
 namespace fluo
@@ -73,9 +74,9 @@ private:
 	//sync red
 	wxUndoableToolbar* m_sync_r_chk;
 	//buttons
-	wxButton* m_r_gamma_st;
-	wxButton* m_r_brightness_st;
-	wxButton* m_r_hdr_st;
+	wxFadeButton* m_r_gamma_st;
+	wxFadeButton* m_r_brightness_st;
+	wxFadeButton* m_r_hdr_st;
 	//red sliders
 	wxSingleSlider *m_r_gamma_sldr;
 	wxSingleSlider *m_r_brightness_sldr;
@@ -90,9 +91,9 @@ private:
 	//sync green
 	wxUndoableToolbar* m_sync_g_chk;
 	//buttons
-	wxButton* m_g_gamma_st;
-	wxButton* m_g_brightness_st;
-	wxButton* m_g_hdr_st;
+	wxFadeButton* m_g_gamma_st;
+	wxFadeButton* m_g_brightness_st;
+	wxFadeButton* m_g_hdr_st;
 	//green sliders
 	wxSingleSlider *m_g_gamma_sldr;
 	wxSingleSlider *m_g_brightness_sldr;
@@ -107,9 +108,9 @@ private:
 	//sync blue
 	wxUndoableToolbar* m_sync_b_chk;
 	//buttons
-	wxButton* m_b_gamma_st;
-	wxButton* m_b_brightness_st;
-	wxButton* m_b_hdr_st;
+	wxFadeButton* m_b_gamma_st;
+	wxFadeButton* m_b_brightness_st;
+	wxFadeButton* m_b_hdr_st;
 	//blue sliders
 	wxSingleSlider *m_b_gamma_sldr;
 	wxSingleSlider *m_b_brightness_sldr;

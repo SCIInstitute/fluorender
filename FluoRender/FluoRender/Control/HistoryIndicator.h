@@ -36,10 +36,12 @@ public:
 	virtual void UpdateHistory() = 0;
 	virtual void SetLength(size_t val) { m_length = val; }
 	virtual void SetPosition(size_t val) { m_position = val; }
+	virtual void SetFocused(bool val) { m_focused = val; }
 
 protected:
 	size_t m_length = 0;
 	size_t m_position = 0;
+	bool m_focused = false;
 };
 
 #endif//_HISTORYINDICATOR_H_

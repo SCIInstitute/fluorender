@@ -45,6 +45,7 @@ public:
 	virtual double GetTimeRedo();
 
 	virtual void SetHistoryIndicator(HistoryIndicator* ind) { indicator_ = ind; }
+	virtual void SetIndicatorFocused(bool val);
 
 protected:
 	//timer

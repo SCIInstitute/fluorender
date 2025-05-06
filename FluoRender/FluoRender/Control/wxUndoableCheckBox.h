@@ -47,9 +47,11 @@ public:
 	virtual void SetValue(bool value);
 
 private:
-	void OnChange(wxCommandEvent& event);
+	bool val_ = false;
 
 private:
+	void OnChange(wxCommandEvent& event);
+
 	virtual void replace(double t);
 	virtual void push(double t);
 	virtual void update();

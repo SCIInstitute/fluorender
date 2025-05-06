@@ -70,6 +70,15 @@ double Undoable::GetTimeRedo()
 	return stack_[stack_pointer_ + 1].first;
 }
 
+void Undoable::SetIndicatorFocused(bool val)
+{
+	if (indicator_)
+	{
+		indicator_->SetFocused(val);
+		indicator_->UpdateHistory();
+	}
+}
+
 void Undoable::Undo()
 {
 	if (stack_.empty())

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <DataManager.h>
 #include <Color.h>
+#include <wxFadeButton.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
 #include <wx/valnum.h>
@@ -133,13 +134,13 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//multifunc buttons
-	m_r_gamma_st = new wxButton(page, wxID_ANY, "Gam.R.",
+	m_r_gamma_st = new wxFadeButton(page, wxID_ANY, "Gam.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_r_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRGammaMF, this);
-	m_r_brightness_st = new wxButton(page, wxID_ANY, "Lum.R.",
+	m_r_brightness_st = new wxFadeButton(page, wxID_ANY, "Lum.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_r_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRBrightnessMF, this);
-	m_r_hdr_st = new wxButton(page, wxID_ANY, "Eql.R.",
+	m_r_hdr_st = new wxFadeButton(page, wxID_ANY, "Eql.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_r_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRHdrMF, this);
 	sizer_v->Add(m_r_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
@@ -151,15 +152,18 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRGammaChange, this);
 	m_r_gamma_sldr->SetRangeColor(*wxRED);
+	m_r_gamma_sldr->SetHistoryIndicator(m_r_gamma_st);
 	m_r_brightness_sldr = new wxSingleSlider(page, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_brightness_sldr->SetRangeStyle(2);
 	m_r_brightness_sldr->SetRangeColor(*wxRED);
 	m_r_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRBrightnessChange, this);
+	m_r_brightness_sldr->SetHistoryIndicator(m_r_brightness_st);
 	m_r_hdr_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_r_hdr_sldr->SetRangeColor(*wxRED);
 	m_r_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnRHdrChange, this);
+	m_r_hdr_sldr->SetHistoryIndicator(m_r_hdr_st);
 	sizer_v->Add(m_r_gamma_sldr, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_r_brightness_sldr, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_r_hdr_sldr, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND);
@@ -222,13 +226,13 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//buttons
-	m_g_gamma_st = new wxButton(page, wxID_ANY, "Gam.G.",
+	m_g_gamma_st = new wxFadeButton(page, wxID_ANY, "Gam.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGGammaMF, this);
-	m_g_brightness_st = new wxButton(page, wxID_ANY, "Lum.G.",
+	m_g_brightness_st = new wxFadeButton(page, wxID_ANY, "Lum.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGBrightnessMF, this);
-	m_g_hdr_st = new wxButton(page, wxID_ANY, "Eql.G.",
+	m_g_hdr_st = new wxFadeButton(page, wxID_ANY, "Eql.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGHdrMF, this);
 	sizer_v->Add(m_g_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
@@ -240,15 +244,18 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGGammaChange, this);
 	m_g_gamma_sldr->SetRangeColor(*wxGREEN);
+	m_g_gamma_sldr->SetHistoryIndicator(m_g_gamma_st);
 	m_g_brightness_sldr = new wxSingleSlider(page, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_brightness_sldr->SetRangeStyle(2);
 	m_g_brightness_sldr->SetRangeColor(*wxGREEN);
 	m_g_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGBrightnessChange, this);
+	m_g_brightness_sldr->SetHistoryIndicator(m_g_brightness_st);
 	m_g_hdr_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_g_hdr_sldr->SetRangeColor(*wxGREEN);
 	m_g_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnGHdrChange, this);
+	m_g_hdr_sldr->SetHistoryIndicator(m_g_hdr_st);
 	sizer_v->Add(m_g_gamma_sldr, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_g_brightness_sldr, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_g_hdr_sldr, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND);
@@ -311,13 +318,13 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//multifunc buttons
-	m_b_gamma_st = new wxButton(page, wxID_ANY, "Gam.B.",
+	m_b_gamma_st = new wxFadeButton(page, wxID_ANY, "Gam.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_gamma_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBGammaMF, this);
-	m_b_brightness_st = new wxButton(page, wxID_ANY, "Lum.B.",
+	m_b_brightness_st = new wxFadeButton(page, wxID_ANY, "Lum.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBBrightnessMF, this);
-	m_b_hdr_st = new wxButton(page, wxID_ANY, "Eql.B.",
+	m_b_hdr_st = new wxFadeButton(page, wxID_ANY, "Eql.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBHdrMF, this);
 	sizer_v->Add(m_b_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
@@ -329,15 +336,18 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_gamma_sldr->SetRangeColor(*wxBLUE);
 	m_b_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBGammaChange, this);
+	m_b_gamma_sldr->SetHistoryIndicator(m_b_gamma_st);
 	m_b_brightness_sldr = new wxSingleSlider(page, wxID_ANY, 0, -256, 256,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_brightness_sldr->SetRangeStyle(2);
 	m_b_brightness_sldr->SetRangeColor(*wxBLUE);
 	m_b_brightness_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBBrightnessChange, this);
+	m_b_brightness_sldr->SetHistoryIndicator(m_b_brightness_st);
 	m_b_hdr_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_b_hdr_sldr->SetRangeColor(*wxBLUE);
 	m_b_hdr_sldr->Bind(wxEVT_SCROLL_CHANGED, &OutputAdjPanel::OnBHdrChange, this);
+	m_b_hdr_sldr->SetHistoryIndicator(m_b_hdr_st);
 	sizer_v->Add(m_b_gamma_sldr, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_b_brightness_sldr, wxGBPosition(1, 1), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_b_hdr_sldr, wxGBPosition(1, 2), wxGBSpan(1, 1), wxEXPAND);

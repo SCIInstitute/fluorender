@@ -212,6 +212,15 @@ inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
 	return pnt;
 }
 
+void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
+{
+	if (m_focused_slider)
+		m_focused_slider->SetIndicatorFocused(false);
+	m_focused_slider = slider;
+	if (m_focused_slider)
+		m_focused_slider->SetIndicatorFocused(true);
+}
+
 void RenderCanvas::Draw()
 {
 #ifdef _WIN32
@@ -658,8 +667,10 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	m_render_view->ProcessMouse(state);
 
 	if (state.m_reset_focus_slider)
-		m_focused_slider = nullptr;
-	if (state.m_scroll_focus_slider && m_focused_slider)
+		SetFocusedSlider(nullptr);
+	if (state.m_scroll_focus_slider &&
+		m_focused_slider &&
+		m_focused_slider->IsEnabled())
 	{
 		int value = state.m_mouse_wheel_rotate / state.m_mouse_wheel_delta;
 		m_focused_slider->Scroll(value);

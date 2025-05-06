@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <png_resource.h>
 #include <icons.h>
+#include <wxFadeButton.h>
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
@@ -142,7 +143,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//x
-	m_clip_x_st = new wxButton(page, wxID_ANY, "X",
+	m_clip_x_st = new wxFadeButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_clipx_sldr = new wxDoubleSlider(page, wxID_ANY, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -161,6 +162,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		"Link two X clipping planes");
 	m_clip_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipXMF, this);
 	m_clipx_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipXChange, this);
+	m_clipx_sldr->SetHistoryIndicator(m_clip_x_st);
 	m_x1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnX1ClipEdit, this);
 	m_x2_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnX2ClipEdit, this);
 	m_linkx_tb->Bind(wxEVT_TOOL, &ClipPlanePanel::OnLinkXCheck, this);
@@ -182,7 +184,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	sizer_v->Add(m_linkx_tb, wxGBPosition(4, 0), wxGBSpan(1, 1), wxEXPAND | wxALIGN_CENTER);
 
 	//y
-	m_clip_y_st = new wxButton(page, wxID_ANY, "Y",
+	m_clip_y_st = new wxFadeButton(page, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_clipy_sldr = new wxDoubleSlider(page, wxID_ANY, 0, 512, 0, 512,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -200,6 +202,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		"Link two Y clipping planes");
 	m_clip_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipYMF, this);
 	m_clipy_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipYChange, this);
+	m_clipy_sldr->SetHistoryIndicator(m_clip_y_st);
 	m_y1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnY1ClipEdit, this);
 	m_y2_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnY2ClipEdit, this);
 	m_linky_tb->Bind(wxEVT_TOOL, &ClipPlanePanel::OnLinkYCheck, this);
@@ -222,7 +225,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 
 	//z
 	//wxPanel * zpanel = new wxPanel(page);
-	m_clip_z_st = new wxButton(page, wxID_ANY, "Z",
+	m_clip_z_st = new wxFadeButton(page, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_clipz_sldr = new wxDoubleSlider(page, wxID_ANY, 0, 512, 0, 512,
 		wxPoint(0, 0), wxDefaultSize, ls);
@@ -240,6 +243,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		"Link two Z clipping planes");
 	m_clip_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipZMF, this);
 	m_clipz_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipZChange, this);
+	m_clipz_sldr->SetHistoryIndicator(m_clip_z_st);
 	m_z1_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnZ1ClipEdit, this);
 	m_z2_clip_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnZ2ClipEdit, this);
 	m_linkz_tb->Bind(wxEVT_TOOL, &ClipPlanePanel::OnLinkZCheck, this);
@@ -328,7 +332,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	//sliders for rotating clipping planes 
 	//x
-	m_rot_x_st = new wxButton(page, wxID_ANY, "X",
+	m_rot_x_st = new wxFadeButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_x_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -340,6 +344,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_rot_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotXMF, this);
 	m_x_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnXRotChange, this);
+	m_x_rot_sldr->SetHistoryIndicator(m_rot_x_st);
 	m_x_rot_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnXRotEdit, this);
 	m_x_rot_spin->Bind(wxEVT_SPIN_UP, &ClipPlanePanel::OnXRotSpinUp, this);
 	m_x_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClipPlanePanel::OnXRotSpinDown, this);
@@ -348,7 +353,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	sizer_v->Add(m_x_rot_spin, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_x_rot_text, wxGBPosition(3, 0), wxGBSpan(1, 1), wxEXPAND);
 	//y
-	m_rot_y_st = new wxButton(page, wxID_ANY, "Y",
+	m_rot_y_st = new wxFadeButton(page, wxID_ANY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_y_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -360,6 +365,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_rot_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotXMF, this);
 	m_y_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnYRotChange, this);
+	m_y_rot_sldr->SetHistoryIndicator(m_rot_y_st);
 	m_y_rot_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnYRotEdit, this);
 	m_y_rot_spin->Bind(wxEVT_SPIN_UP, &ClipPlanePanel::OnYRotSpinUp, this);
 	m_y_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClipPlanePanel::OnYRotSpinDown, this);
@@ -368,7 +374,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	sizer_v->Add(m_y_rot_spin, wxGBPosition(2, 1), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_y_rot_text, wxGBPosition(3, 1), wxGBSpan(1, 1), wxEXPAND);
 	//z
-	m_rot_z_st = new wxButton(page, wxID_ANY, "Z",
+	m_rot_z_st = new wxFadeButton(page, wxID_ANY, "Z",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
 	m_z_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
@@ -380,6 +386,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
 	m_rot_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotZMF, this);
 	m_z_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnZRotChange, this);
+	m_z_rot_sldr->SetHistoryIndicator(m_rot_z_st);
 	m_z_rot_text->Bind(wxEVT_TEXT, &ClipPlanePanel::OnZRotEdit, this);
 	m_z_rot_spin->Bind(wxEVT_SPIN_UP, &ClipPlanePanel::OnZRotSpinUp, this);
 	m_z_rot_spin->Bind(wxEVT_SPIN_DOWN, &ClipPlanePanel::OnZRotSpinDown, this);

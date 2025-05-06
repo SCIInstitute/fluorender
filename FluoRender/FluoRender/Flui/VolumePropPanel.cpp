@@ -137,26 +137,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_l1->Add(5, 5);
 	sizer_l1->Add(m_saturation_chk, 0, wxALIGN_CENTER);
 	sizer_l1->Add(m_saturation_st, 0, wxALIGN_CENTER);
-	//alpha
-	m_alpha_st = new wxFadeButton(this, wxID_ANY, "Alpha",
-		wxDefaultPosition, bts);
-	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "127",
-		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
-	m_alpha_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	m_alpha_st->SetFontBold();
-	//bind events
-	m_alpha_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnAlphaMF, this);
-	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnAlphaChange, this);
-	m_alpha_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnAlphaText, this);
-	m_alpha_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnAlphaCheck, this);
-	//add to sizer
-	sizer_l2->Add(m_alpha_sldr, 1, wxEXPAND);
-	sizer_l2->Add(m_alpha_text, 0, wxALIGN_CENTER);
-	sizer_l2->Add(5, 5);
-	sizer_l2->Add(m_alpha_chk, 0, wxALIGN_CENTER);
-	sizer_l2->Add(m_alpha_st, 0, wxALIGN_CENTER);
 	//gamma
 	m_gamma_st = new wxFadeButton(this, wxID_ANY, "Gamma",
 		wxDefaultPosition, bts);
@@ -167,17 +147,41 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_gamma_st->SetFontBold();
+	m_gamma_st->SetTintColor(wxColor(255, 150, 180));
+	m_gamma_sldr->SetHistoryIndicator(m_gamma_st);
 	//bind events
 	m_gamma_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnGammaMF, this);
 	m_gamma_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnGammaChange, this);
 	m_gamma_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnGammaText, this);
 	m_gamma_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnGammaChk, this);
 	//add to sizer
-	sizer_l3->Add(m_gamma_sldr, 1, wxEXPAND);
-	sizer_l3->Add(m_gamma_text, 0, wxALIGN_CENTER);
+	sizer_l2->Add(m_gamma_sldr, 1, wxEXPAND);
+	sizer_l2->Add(m_gamma_text, 0, wxALIGN_CENTER);
+	sizer_l2->Add(5, 5);
+	sizer_l2->Add(m_gamma_chk, 0, wxALIGN_CENTER);
+	sizer_l2->Add(m_gamma_st, 0, wxALIGN_CENTER);
+	//alpha
+	m_alpha_st = new wxFadeButton(this, wxID_ANY, "Alpha",
+		wxDefaultPosition, bts);
+	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "127",
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
+	m_alpha_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	m_alpha_st->SetFontBold();
+	m_alpha_st->SetTintColor(wxColor(255, 180, 150));
+	m_alpha_sldr->SetHistoryIndicator(m_alpha_st);
+	//bind events
+	m_alpha_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnAlphaMF, this);
+	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnAlphaChange, this);
+	m_alpha_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnAlphaText, this);
+	m_alpha_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnAlphaCheck, this);
+	//add to sizer
+	sizer_l3->Add(m_alpha_sldr, 1, wxEXPAND);
+	sizer_l3->Add(m_alpha_text, 0, wxALIGN_CENTER);
 	sizer_l3->Add(5, 5);
-	sizer_l3->Add(m_gamma_chk, 0, wxALIGN_CENTER);
-	sizer_l3->Add(m_gamma_st, 0, wxALIGN_CENTER);
+	sizer_l3->Add(m_alpha_chk, 0, wxALIGN_CENTER);
+	sizer_l3->Add(m_alpha_st, 0, wxALIGN_CENTER);
 	//luminance
 	m_luminance_st = new wxFadeButton(this, wxID_ANY, "Luminance",
 		wxDefaultPosition, bts);
@@ -187,6 +191,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
 	m_luminance_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_luminance_st->SetFontBold();
+	m_luminance_st->SetTintColor(wxColor(255, 255, 150));
+	m_luminance_sldr->SetHistoryIndicator(m_luminance_st);
 	//bind events
 	m_luminance_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnLuminanceMF, this);
 	m_luminance_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLuminanceChange, this);
@@ -207,7 +213,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_sample_st->SetFontBold();
-	m_sample_st->SetTintColor(wxColor(150, 150, 150));
+	m_sample_st->SetTintColor(wxColor(180, 120, 180));
 	m_sample_sldr->SetHistoryIndicator(m_sample_st);
 	//bind events
 	m_sample_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSampleMF, this);
@@ -240,6 +246,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Link low and high threshold values");
 	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_thresh_st->SetFontBold();
+	m_thresh_st->SetTintColor(wxColor(150, 255, 150));
+	m_thresh_sldr->SetHistoryIndicator(m_thresh_st);
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
 	m_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnThreshChange, this);
@@ -265,6 +273,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
 	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_boundary_st->SetFontBold();
+	m_boundary_st->SetTintColor(wxColor(150, 255, 220));
+	m_boundary_sldr->SetHistoryIndicator(m_boundary_st);
 	//bind events
 	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
 	m_boundary_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnBoundaryChange, this);
@@ -290,6 +300,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts3, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shade_st->SetFontBold();
+	m_shade_st->SetTintColor(wxColor(150, 240, 255));
+	m_low_shading_sldr->SetHistoryIndicator(m_shade_st);
 	//bind events
 	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
 	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
@@ -321,6 +333,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "-45",
 		wxDefaultPosition, tts4, wxTE_RIGHT, vald_int);
 	m_shadow_st->SetFontBold();
+	m_shadow_st->SetTintColor(wxColor(150, 150, 255));
+	m_shadow_sldr->SetHistoryIndicator(m_shadow_st);
 	//bind events
 	m_shadow_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadowMF, this);
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadowChange, this);
@@ -360,6 +374,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_colormap_st->SetFontBold();
 	m_colormap_st->SetMode(2);
+	m_colormap_sldr->SetHistoryIndicator(m_colormap_st);
 	//bind events
 	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);
 	m_colormap_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnColormapChange, this);

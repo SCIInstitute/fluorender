@@ -525,7 +525,6 @@ RenderView::RenderView(RenderView& copy):
 	m_res_mode(1),
 	m_drawing(false),
 	m_refresh(false),
-	//m_focused_slider(0),
 	m_keep_enlarge(false),
 	m_enlarge(false),
 	m_enlarge_scale(1.0),

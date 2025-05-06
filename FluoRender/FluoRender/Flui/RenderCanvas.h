@@ -70,7 +70,7 @@ public:
 	//get size, considering enlargement
 	inline fluo::Point GetMousePos(wxMouseEvent& e);
 
-	void SetFocusedSlider(wxBasisSlider* slider) { m_focused_slider = slider; }
+	void SetFocusedSlider(wxBasisSlider* slider);
 
 	void Draw();
 

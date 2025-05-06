@@ -45,7 +45,6 @@ wxUndoableCheckBox::wxUndoableCheckBox(
 
 void wxUndoableCheckBox::SetValue(bool val)
 {
-	bool val_ = GetValue();
 	if (val_ != val || stack_.empty())
 	{
 		wxCheckBox::SetValue(val);
@@ -55,10 +54,12 @@ void wxUndoableCheckBox::SetValue(bool val)
 		else
 			replace(t);
 	}
+	val_ = val;
 }
 
 void wxUndoableCheckBox::OnChange(wxCommandEvent& event)
 {
+	val_ = wxCheckBox::GetValue();
 	if (event.GetString() != "update")
 	{
 		double t;
@@ -74,14 +75,13 @@ void wxUndoableCheckBox::replace(double t)
 {
 	if (stack_.empty())
 		return;
-	bool val_ = wxCheckBox::GetValue();
 	stack_[stack_pointer_] = std::pair<double, bool>(t, val_);
 }
 
 void wxUndoableCheckBox::push(double t)
 {
 	size_t size = stack_.size();
-	bool val_ = wxCheckBox::GetValue();
+	val_ = wxCheckBox::GetValue();
 	bool val = size ? std::any_cast<bool>(stack_[stack_pointer_].second) : false;
 	if (!size || val_ != val)
 	{
