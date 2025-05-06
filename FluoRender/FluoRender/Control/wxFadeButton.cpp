@@ -155,8 +155,8 @@ void wxFadeButton::DrawTint(wxPaintDC& dc, double f)
 	if (gc) {
 		wxGraphicsGradientStops stops(color1, defaultBgColor);
 		stops.Add(color1, 0.0f);
-		stops.Add(defaultBgColor, 0.33f);
-		stops.Add(defaultBgColor, 0.66f);
+		stops.Add(defaultBgColor, 0.45f);
+		stops.Add(defaultBgColor, 0.55f);
 		stops.Add(color1, 1.0f);
 
 		wxGraphicsPath path = gc->CreatePath();
