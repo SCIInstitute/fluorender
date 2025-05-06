@@ -234,6 +234,8 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 					ChangeScript();
 				else if (str == "load_project")
 					LoadProject();
+				else if (str == "disable_script")
+					DisableScript();
 			}
 		}
 	}
@@ -2588,8 +2590,7 @@ void ScriptProc::ChangeScript()
 		glbin_settings.m_run_script = run_script;
 	if (!filename.empty())
 		glbin_settings.m_script_file = filename;
-	m_frame->GetMoviePanel()->FluoUpdate({ gstScriptList });
-	//m_fconfig_name = filename;
+	m_frame->GetMoviePanel()->FluoUpdate({ gstRunScript, gstScriptList, gstScriptFile });
 }
 
 void ScriptProc::LoadProject()
@@ -2604,6 +2605,17 @@ void ScriptProc::LoadProject()
 	filename = GetInputFile(filename, L"Data");
 
 	glbin_project.Open(filename);
+}
+
+void ScriptProc::DisableScript()
+{
+	if (!m_frame)
+		return;
+	if (!TimeCondition())
+		return;
+
+	glbin_settings.m_run_script = false;
+	m_frame->GetMoviePanel()->FluoUpdate({ gstRunScript });
 }
 
 bool ScriptProc::RunBreak()

@@ -162,6 +162,7 @@ namespace flrd
 		void ChangeData();
 		void ChangeScript();
 		void LoadProject();
+		void DisableScript();
 
 		//read/delete volume cache
 		void ReadVolCacheData(VolCache& vol_cache);

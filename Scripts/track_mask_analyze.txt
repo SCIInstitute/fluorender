@@ -1,5 +1,5 @@
 [tasks]
-tasknum=5
+tasknum=6
 [tasks/task0]
 type=mask_tracking
 time_mode=TM_ALL_POST
@@ -37,3 +37,6 @@ output=
 value_num=1
 value_name0=comp_mean
 js_value=+d.comp_mean
+[tasks/task5]
+type=disable_script
+time_mode=TM_LAST_POST

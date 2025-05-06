@@ -1,5 +1,5 @@
 [tasks]
-tasknum=3
+tasknum=4
 [tasks/task0]
 type=registration
 time_mode=TM_ALL_POST_REWIND
@@ -31,3 +31,6 @@ output=
 value_num=1
 value_name0=max_int
 js_value=(+d.max_int)
+[tasks/task3]
+type=disable_script
+time_mode=TM_LAST_POST

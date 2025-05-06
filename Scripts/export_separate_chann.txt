@@ -1,5 +1,5 @@
 [tasks]
-tasknum=1
+tasknum=2
 [tasks/task0]
 type=save_volume
 time_mode=TM_ALL_PRE_LAST_BOTH
@@ -10,3 +10,6 @@ mask=0
 compress=0
 delete=0
 savepath=
+[tasks/task1]
+type=disable_script
+time_mode=TM_LAST_POST

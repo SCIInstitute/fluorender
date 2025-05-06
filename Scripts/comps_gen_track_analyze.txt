@@ -1,5 +1,5 @@
 [tasks]
-tasknum=10
+tasknum=11
 [tasks/task0]
 type=generate_comp
 time_mode=TM_FIRST_PRE
@@ -73,3 +73,6 @@ value_num=2
 value_name0=comp_mean
 value_name1=bkg_median
 js_value=(+d.comp_mean - +d.bkg_median) / (+d.bkg_median)
+[tasks/task10]
+type=disable_script
+time_mode=TM_LAST_POST

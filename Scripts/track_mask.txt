@@ -1,5 +1,5 @@
 [tasks]
-tasknum=3
+tasknum=4
 [tasks/task0]
 type=mask_tracking
 time_mode=TM_ALL_POST
@@ -25,3 +25,6 @@ type=comp_select
 time_mode=TM_ALL_POST_REWIND
 chan_mode=0
 mode=0
+[tasks/task3]
+type=disable_script
+time_mode=TM_LAST_POST

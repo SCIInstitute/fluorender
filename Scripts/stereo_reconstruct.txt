@@ -1,5 +1,5 @@
 [tasks]
-tasknum=1
+tasknum=2
 [tasks/task0]
 type=camera_points
 time_mode=TM_FIRST_PRE
@@ -9,3 +9,6 @@ slope=5.336
 affine=0
 persp=1
 metric=1
+[tasks/task1]
+type=disable_script
+time_mode=TM_LAST_POST

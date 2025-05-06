@@ -1,5 +1,5 @@
 [tasks]
-tasknum=3
+tasknum=4
 [tasks/task0]
 type=comp_analysis
 time_mode=TM_ALL_PRE_LAST_BOTH
@@ -33,3 +33,6 @@ value_name10=comp_max
 value_name11=comp_distp
 value_name12=comp_pca_lens
 js_value=
+[tasks/task3]
+type=disable_script
+time_mode=TM_LAST_POST

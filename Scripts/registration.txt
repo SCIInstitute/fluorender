@@ -1,5 +1,5 @@
 [tasks]
-tasknum=2
+tasknum=3
 [tasks/task0]
 type=registration
 time_mode=TM_ALL_POST_REWIND
@@ -28,3 +28,6 @@ compress=0
 delete=0
 smooth=5
 savepath=
+[tasks/task2]
+type=disable_script
+time_mode=TM_LAST_POST

@@ -1,5 +1,5 @@
 [tasks]
-tasknum=2
+tasknum=3
 [tasks/task0]
 type=ruler_profile
 time_mode=TM_ALL_PRE_LAST_BOTH
@@ -15,3 +15,6 @@ output=
 value_num=1
 value_name0=max_int
 js_value=(+d.max_int)
+[tasks/task2]
+type=disable_script
+time_mode=TM_LAST_POST

@@ -1,5 +1,5 @@
 [tasks]
-tasknum=2
+tasknum=3
 [tasks/task0]
 type=noise_reduction
 time_mode=TM_ALL_PRE_LAST_BOTH
@@ -16,3 +16,6 @@ mask=0
 compress=0
 delete=1
 savepath=
+[tasks/task2]
+type=disable_script
+time_mode=TM_LAST_POST

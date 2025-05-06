@@ -92,9 +92,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <ModalDlg.h>
-#include <wx/artprov.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
 #include <wx/aboutdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/accel.h>

@@ -1,6 +1,9 @@
 [tasks]
-tasknum=1
+tasknum=2
 [tasks/task0]
 type=python
 time_mode=TM_FIRST_PRE
 command="print(\"This is Python\")"
+[tasks/task1]
+type=disable_script
+time_mode=TM_LAST_POST

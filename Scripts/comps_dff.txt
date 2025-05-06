@@ -1,5 +1,5 @@
 [tasks]
-tasknum=5
+tasknum=6
 [tasks/task0]
 type=backg_stat
 time_mode=TM_ALL_PRE_LAST_BOTH
@@ -36,3 +36,6 @@ time_mode=TM_LAST_POST
 output=
 value_num=1
 value_name0=roi_dff
+[tasks/task5]
+type=disable_script
+time_mode=TM_LAST_POST

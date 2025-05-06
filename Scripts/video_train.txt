@@ -1,5 +1,5 @@
 [tasks]
-tasknum=2
+tasknum=3
 [tasks/task0]
 type=create_va_config
 time_mode=TM_FIRST_PRE
@@ -8,3 +8,6 @@ conifg=""
 type=create_va_label
 time_mode=TM_ALL_POST
 maxiters=300
+[tasks/task2]
+type=disable_script
+time_mode=TM_LAST_POST

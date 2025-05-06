@@ -1,5 +1,5 @@
 [tasks]
-tasknum=3
+tasknum=4
 [tasks/task0]
 type=ruler_transform
 time_mode=TM_ALL_PRE
@@ -17,3 +17,6 @@ time_mode=TM_LAST_POST
 output=
 type_num=1
 type_name0=ruler_speed
+[tasks/task3]
+type=disable_script
+time_mode=TM_LAST_POST

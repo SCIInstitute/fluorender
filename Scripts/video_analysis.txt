@@ -1,5 +1,5 @@
 [tasks]
-tasknum=3
+tasknum=4
 [tasks/task0]
 type=break
 time_mode=TM_FIRST_PRE
@@ -13,3 +13,6 @@ config=""
 type=get_rulers
 time_mode=TM_ALL_POST
 time_offset=0
+[tasks/task3]
+type=disable_script
+time_mode=TM_LAST_POST

@@ -49,12 +49,8 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableToolbar.h>
 #include <wxUndoableTextCtrl.h>
 #include <png_resource.h>
-#include <wx/wfstream.h>
-#include <wx/fileconf.h>
-#include <wx/aboutdlg.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
-#include <wx/hyperlink.h>
 #include <icons.h>
 #include <limits>
 #include <Debug.h>

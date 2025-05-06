@@ -1,5 +1,5 @@
 [tasks]
-tasknum=3
+tasknum=4
 [tasks/task0]
 type=fetch_mask
 time_mode=TM_ALL_POST_REWIND
@@ -20,3 +20,6 @@ mask=0
 compress=0
 delete=1
 savepath=
+[tasks/task3]
+type=disable_script
+time_mode=TM_LAST_POST
