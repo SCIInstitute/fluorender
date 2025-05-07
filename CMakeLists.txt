@@ -1060,6 +1060,10 @@ if(APPLE)
     ${src} ${hdr} ${rsc} ${icns}
     )
   set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "11.5")
+  # Set the rpath to the executable path
+  set(CMAKE_INSTALL_RPATH "@executable_path")
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set_target_properties(FluoRender PROPERTIES INSTALL_RPATH "@executable_path")
 elseif(UNIX OR MINGW)
   set(CFLAGS "-fPIC")
   set(CXXFLAGS "-fPIC ")
@@ -1312,9 +1316,6 @@ elseif(APPLE)
         "${HoloPlay_LIBRARIES}"
         "$<TARGET_FILE_DIR:FluoRender>"
         )
-    add_custom_command(TARGET FluoRender POST_BUILD COMMAND
-        ${CMAKE_INSTALL_NAME_TOOL} -add_rpath "@executable_path/"
-        $<TARGET_FILE:FluoRender>)
 else()
     add_custom_command(TARGET FluoRender POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy

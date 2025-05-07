@@ -120,7 +120,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
 	m_saturation_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_saturation_st->SetFontBold();
-	m_saturation_st->SetTintColor(wxColor(255, 150, 150));
+	m_saturation_st->SetTintColor(wxColor(255, 150, 200));
 	m_saturation_sldr->SetHistoryIndicator(m_saturation_st);
 	//bind events
 	m_saturation_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSaturationMF, this);
@@ -143,7 +143,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_gamma_st->SetFontBold();
-	m_gamma_st->SetTintColor(wxColor(255, 150, 180));
+	m_gamma_st->SetTintColor(wxColor(255, 150, 150));
 	m_gamma_sldr->SetHistoryIndicator(m_gamma_st);
 	//bind events
 	m_gamma_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnGammaMF, this);
@@ -165,7 +165,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_alpha_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_alpha_st->SetFontBold();
-	m_alpha_st->SetTintColor(wxColor(255, 180, 150));
+	m_alpha_st->SetTintColor(wxColor(255, 200, 150));
 	m_alpha_sldr->SetHistoryIndicator(m_alpha_st);
 	//bind events
 	m_alpha_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnAlphaMF, this);
@@ -242,7 +242,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Link low and high threshold values");
 	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_thresh_st->SetFontBold();
-	m_thresh_st->SetTintColor(wxColor(150, 255, 150));
+	m_thresh_st->SetTintColor(wxColor(180, 255, 150));
 	m_thresh_sldr->SetHistoryIndicator(m_thresh_st);
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
@@ -269,7 +269,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
 	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_boundary_st->SetFontBold();
-	m_boundary_st->SetTintColor(wxColor(150, 255, 220));
+	m_boundary_st->SetTintColor(wxColor(150, 255, 180));
 	m_boundary_sldr->SetHistoryIndicator(m_boundary_st);
 	//bind events
 	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
@@ -296,7 +296,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts3, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shade_st->SetFontBold();
-	m_shade_st->SetTintColor(wxColor(150, 240, 255));
+	m_shade_st->SetTintColor(wxColor(150, 180, 255));
 	m_low_shading_sldr->SetHistoryIndicator(m_shade_st);
 	//bind events
 	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
@@ -329,7 +329,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "-45",
 		wxDefaultPosition, tts4, wxTE_RIGHT, vald_int);
 	m_shadow_st->SetFontBold();
-	m_shadow_st->SetTintColor(wxColor(150, 150, 255));
+	m_shadow_st->SetTintColor(wxColor(160, 150, 255));
 	m_shadow_sldr->SetHistoryIndicator(m_shadow_st);
 	//bind events
 	m_shadow_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadowMF, this);
