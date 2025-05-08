@@ -47,6 +47,7 @@ LOFReader::LOFReader():
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -541,6 +542,7 @@ void LOFReader::FillLofInfo()
 	}
 	if (m_datatype > 1)
 	{
+		m_min_value = m_lof_info.minv;
 		m_max_value = m_lof_info.maxv;
 		m_scalar_scale = 65535.0 / m_max_value;
 	}

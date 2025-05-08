@@ -112,27 +112,41 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxSize tts4(FromDIP(wxSize(30, 23)));
 	//left///////////////////////////////////////////////////
 	//saturation point
-	m_saturation_st = new wxFadeButton(this, wxID_ANY, "Saturation",
+	m_minmax_st = new wxFadeButton(this, wxID_ANY, "Min-Max",
 		wxDefaultPosition, bts);
-	m_saturation_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255,
+	m_minmax_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_saturation_text = new wxTextCtrl(this, wxID_ANY, "50",
-		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
-	m_saturation_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	m_saturation_st->SetFontBold();
-	m_saturation_st->SetTintColor(wxColor(255, 150, 200));
-	m_saturation_sldr->SetHistoryIndicator(m_saturation_st);
+	m_low_offset_text = new wxTextCtrl(this, wxID_ANY, "0",
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
+	m_high_offset_text = new wxTextCtrl(this, wxID_ANY, "255",
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
+	m_minmax_link_tb = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(unlink, dpi_sf);
+	m_minmax_link_tb->AddCheckTool(0, "",
+		bitmap, wxNullBitmap,
+		"Link min and max values",
+		"Link min and max values");
+	m_minmax_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
+	m_minmax_st->SetFontBold();
+	m_minmax_st->SetTintColor(wxColor(255, 150, 200));
+	m_minmax_sldr->SetHistoryIndicator(m_minmax_st);
 	//bind events
-	m_saturation_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnSaturationMF, this);
-	m_saturation_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnSaturationChange, this);
-	m_saturation_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSaturationText, this);
-	m_saturation_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnSaturationChk, this);
+	m_minmax_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnMinMaxMF, this);
+	m_minmax_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnMinMaxChange, this);
+	m_low_offset_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnMinMaxText, this);
+	m_high_offset_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnMinMaxText, this);
+	m_minmax_link_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnMinMaxLink, this);
+	m_minmax_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnMinMaxChk, this);
 	//add to sizer
-	sizer_l1->Add(m_saturation_sldr, 1, wxEXPAND);
-	sizer_l1->Add(m_saturation_text, 0, wxALIGN_CENTER);
+	sizer_l1->Add(m_minmax_link_tb, 0, wxALIGN_CENTER, 0);
+	sizer_l1->Add(m_low_offset_text, 0, wxALIGN_CENTER);
+	sizer_l1->Add(m_minmax_sldr, 1, wxEXPAND);
+	sizer_l1->Add(m_high_offset_text, 0, wxALIGN_CENTER);
 	sizer_l1->Add(5, 5);
-	sizer_l1->Add(m_saturation_chk, 0, wxALIGN_CENTER);
-	sizer_l1->Add(m_saturation_st, 0, wxALIGN_CENTER);
+	sizer_l1->Add(m_minmax_chk, 0, wxALIGN_CENTER);
+	sizer_l1->Add(m_minmax_st, 0, wxALIGN_CENTER);
+	m_minmax_link_tb->Realize();
 	//gamma
 	m_gamma_st = new wxFadeButton(this, wxID_ANY, "Gamma",
 		wxDefaultPosition, bts);
@@ -581,29 +595,29 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	SetScrollRate(10, 10);
 
 	//add sliders for undo and redo
+	glbin.add_undo_control(m_minmax_sldr);
 	glbin.add_undo_control(m_gamma_sldr);
-	glbin.add_undo_control(m_saturation_sldr);
-	glbin.add_undo_control(m_luminance_sldr);
 	glbin.add_undo_control(m_alpha_sldr);
+	glbin.add_undo_control(m_luminance_sldr);
+	glbin.add_undo_control(m_sample_sldr);
+	glbin.add_undo_control(m_thresh_sldr);
+	glbin.add_undo_control(m_boundary_sldr);
 	glbin.add_undo_control(m_hi_shading_sldr);
 	glbin.add_undo_control(m_low_shading_sldr);
-	glbin.add_undo_control(m_boundary_sldr);
-	glbin.add_undo_control(m_thresh_sldr);
 	glbin.add_undo_control(m_shadow_sldr);
 	glbin.add_undo_control(m_shadow_dir_sldr);
-	glbin.add_undo_control(m_sample_sldr);
 	glbin.add_undo_control(m_colormap_sldr);
 	//add checkboxes
+	glbin.add_undo_control(m_minmax_chk);
 	glbin.add_undo_control(m_gamma_chk);
-	glbin.add_undo_control(m_saturation_chk);
-	glbin.add_undo_control(m_luminance_chk);
 	glbin.add_undo_control(m_alpha_chk);
-	glbin.add_undo_control(m_shade_chk);
-	glbin.add_undo_control(m_boundary_chk);
+	glbin.add_undo_control(m_luminance_chk);
+	glbin.add_undo_control(m_sample_chk);
 	glbin.add_undo_control(m_thresh_chk);
+	glbin.add_undo_control(m_boundary_chk);
+	glbin.add_undo_control(m_shade_chk);
 	glbin.add_undo_control(m_shadow_chk);
 	glbin.add_undo_control(m_shadow_dir_chk);
-	glbin.add_undo_control(m_sample_chk);
 	glbin.add_undo_control(m_colormap_chk);
 	//add others
 	glbin.add_undo_control(m_color_btn);
@@ -622,29 +636,29 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 VolumePropPanel::~VolumePropPanel()
 {
 	//delete sliders for undo and redo
+	glbin.del_undo_control(m_minmax_sldr);
 	glbin.del_undo_control(m_gamma_sldr);
-	glbin.del_undo_control(m_saturation_sldr);
-	glbin.del_undo_control(m_luminance_sldr);
 	glbin.del_undo_control(m_alpha_sldr);
+	glbin.del_undo_control(m_luminance_sldr);
+	glbin.del_undo_control(m_sample_sldr);
+	glbin.del_undo_control(m_thresh_sldr);
+	glbin.del_undo_control(m_boundary_sldr);
 	glbin.del_undo_control(m_hi_shading_sldr);
 	glbin.del_undo_control(m_low_shading_sldr);
-	glbin.del_undo_control(m_boundary_sldr);
-	glbin.del_undo_control(m_thresh_sldr);
 	glbin.del_undo_control(m_shadow_sldr);
 	glbin.del_undo_control(m_shadow_dir_sldr);
-	glbin.del_undo_control(m_sample_sldr);
 	glbin.del_undo_control(m_colormap_sldr);
 	//delete checkboxes
+	glbin.del_undo_control(m_minmax_chk);
 	glbin.del_undo_control(m_gamma_chk);
-	glbin.del_undo_control(m_saturation_chk);
-	glbin.del_undo_control(m_luminance_chk);
 	glbin.del_undo_control(m_alpha_chk);
-	glbin.del_undo_control(m_shade_chk);
-	glbin.del_undo_control(m_boundary_chk);
+	glbin.del_undo_control(m_luminance_chk);
+	glbin.del_undo_control(m_sample_chk);
 	glbin.del_undo_control(m_thresh_chk);
+	glbin.del_undo_control(m_boundary_chk);
+	glbin.del_undo_control(m_shade_chk);
 	glbin.del_undo_control(m_shadow_chk);
 	glbin.del_undo_control(m_shadow_dir_chk);
-	glbin.del_undo_control(m_sample_chk);
 	glbin.del_undo_control(m_colormap_chk);
 	//delete others
 	glbin.del_undo_control(m_color_btn);
@@ -686,7 +700,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_tips = update_all || FOUND_VALUE(gstMultiFuncTips);
 	bool update_gamma = update_all || FOUND_VALUE(gstGamma3d);
 	bool update_boundary = update_all || FOUND_VALUE(gstBoundary);
-	bool update_saturation = update_all || FOUND_VALUE(gstSaturation);
+	bool update_minmax = update_all || FOUND_VALUE(gstMinMax);
 	bool update_threshold = update_all || FOUND_VALUE(gstThreshold);
 	bool update_color = update_all || FOUND_VALUE(gstColor);
 	bool update_alpha = update_all || FOUND_VALUE(gstAlpha);
@@ -704,7 +718,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 		case 0:
 			m_gamma_st->SetToolTip("Synchronize the gamma values of all channels in the group");
-			m_saturation_st->SetToolTip("Synchronize the saturation values of all channels in the group");
+			m_minmax_st->SetToolTip("Synchronize the saturation values of all channels in the group");
 			m_luminance_st->SetToolTip("Synchronize the luminance values of all channels in the group");
 			m_alpha_st->SetToolTip("Synchronize the alpha values of all channels in the group");
 			m_shade_st->SetToolTip("Synchronize the shading values of all channels in the group");
@@ -716,7 +730,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 1:
 			m_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
-			m_saturation_st->SetToolTip("Move the mouse cursor in render view and change the saturation value using the mouse wheel");
+			m_minmax_st->SetToolTip("Move the mouse cursor in render view and change the saturation value using the mouse wheel");
 			m_luminance_st->SetToolTip("Move the mouse cursor in render view and change the luminance value using the mouse wheel");
 			m_alpha_st->SetToolTip("Move the mouse cursor in render view and change the alpha value using the mouse wheel");
 			m_shade_st->SetToolTip("Move the mouse cursor in render view and change the shading value using the mouse wheel");
@@ -728,7 +742,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 2:
 			m_gamma_st->SetToolTip("Reset the gamma value");
-			m_saturation_st->SetToolTip("Reset the saturation value");
+			m_minmax_st->SetToolTip("Reset the saturation value");
 			m_luminance_st->SetToolTip("Reset the luminance value");
 			m_alpha_st->SetToolTip("Reset the alpha value");
 			m_shade_st->SetToolTip("Reset the shading value");
@@ -740,7 +754,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 3:
 			m_gamma_st->SetToolTip("Set the gamma value from machine learning");
-			m_saturation_st->SetToolTip("Set the saturation value from machine learning");
+			m_minmax_st->SetToolTip("Set the saturation value from machine learning");
 			m_luminance_st->SetToolTip("Set the luminance value from machine learning");
 			m_alpha_st->SetToolTip("Set the alpha value from machine learning");
 			m_shade_st->SetToolTip("Set the shading value from machine learning");
@@ -752,7 +766,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 4:
 			m_gamma_st->SetToolTip("Undo the gamma value changes");
-			m_saturation_st->SetToolTip("Undo the saturation value changes");
+			m_minmax_st->SetToolTip("Undo the saturation value changes");
 			m_luminance_st->SetToolTip("Undo the luminance value changes");
 			m_alpha_st->SetToolTip("Undo the alpha value changes");
 			m_shade_st->SetToolTip("Undo the shading value changes");
@@ -764,7 +778,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 5:
 			m_gamma_st->SetToolTip("Enable/Disable the gamma value");
-			m_saturation_st->SetToolTip("Enable/Disable the saturation value");
+			m_minmax_st->SetToolTip("Enable/Disable the saturation value");
 			m_luminance_st->SetToolTip("Enable/Disable the luminance value");
 			m_alpha_st->SetToolTip("Enable/Disable the alpha value");
 			m_shade_st->SetToolTip("Enable/Disable the shading value");
@@ -825,30 +839,52 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (m_boundary_st->IsEnabled() != bval)
 			m_boundary_st->Enable(bval);
 	}
-	//saturation
-	if (update_saturation)
+	//minmax
+	if (update_minmax)
 	{
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_saturation_text->GetValidator()))
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_low_offset_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetSaturation();
-		bval = m_vd->GetSaturationEnable();
+		dval = m_vd->GetLowOffset();
+		ival = std::round(dval * m_max_val);
+		m_minmax_sldr->SetRange(0, std::round(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_minmax_sldr->ChangeLowValue(ival);
+		m_low_offset_text->ChangeValue(str);
+		//high offset
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_high_offset_text->GetValidator()))
+			vald_i->SetMin(0);
+		dval = m_vd->GetHighOffset();
 		ival = std::round(dval * m_max_val);
 		str = wxString::Format("%d", ival);
-		m_saturation_sldr->SetRange(0, std::round(m_max_val));
-		m_saturation_sldr->ChangeValue(ival);
-		m_saturation_text->ChangeValue(str);
-		m_saturation_chk->SetValue(bval);
-		if (m_saturation_sldr->IsEnabled() != bval)
+		m_minmax_sldr->ChangeHighValue(ival);
+		m_high_offset_text->ChangeValue(str);
+		bval = m_minmax_sldr->GetLink();
+		if (bval != m_minmax_link_tb->GetToolState(0))
 		{
-			m_saturation_sldr->Enable(bval);
-			m_saturation_text->Enable(bval);
+			m_minmax_link_tb->ToggleTool(0, bval);
+			wxBitmap bitmap;
+			double dpi_sf = getDpiScaleFactor();
+			if (bval)
+				bitmap = wxGetBitmap(link, dpi_sf);
+			else
+				bitmap = wxGetBitmap(unlink, dpi_sf);
+			m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
+		}
+		bval = m_vd->GetMinMaxEnable();
+		m_minmax_chk->SetValue(bval);
+		if (m_minmax_sldr->IsEnabled() != bval)
+		{
+			m_minmax_sldr->Enable(bval);
+			m_low_offset_text->Enable(bval);
+			m_high_offset_text->Enable(bval);
+			m_minmax_link_tb->Enable(bval);
 		}
 	}
-	if (update_saturation || update_tips)
+	if (update_minmax || update_tips)
 	{
-		bval = m_vd->GetSaturationEnable() || mf_enable;
-		if (m_saturation_st->IsEnabled() != bval)
-			m_saturation_st->Enable(bval);
+		bval = m_vd->GetMinMaxEnable() || mf_enable;
+		if (m_minmax_st->IsEnabled() != bval)
+			m_minmax_st->Enable(bval);
 	}
 	//threshold
 	if (update_threshold)
@@ -1347,8 +1383,8 @@ void VolumePropPanel::SaveMl()
 	std::vector<float> val;
 	val.push_back(float(m_vd->GetBoundary()));
 	val.push_back(float(m_vd->GetGamma()));
-	val.push_back(float(m_vd->GetSaturation()));
-	val.push_back(float(1));
+	val.push_back(float(m_vd->GetLowOffset()));
+	val.push_back(float(m_vd->GetHighOffset()));
 	val.push_back(float(m_vd->GetLeftThresh()));
 	val.push_back(float(m_vd->GetRightThresh()));
 	val.push_back(float(m_vd->GetLowShading()));
@@ -1393,7 +1429,7 @@ void VolumePropPanel::SaveMl()
 void VolumePropPanel::ClearUndo()
 {
 	m_gamma_sldr->Clear();
-	m_saturation_sldr->Clear();
+	m_minmax_sldr->Clear();
 	m_luminance_sldr->Clear();
 	m_alpha_sldr->Clear();
 	m_hi_shading_sldr->Clear();
@@ -1417,21 +1453,14 @@ void VolumePropPanel::EnableGamma(bool bval)
 	FluoRefresh(0, { gstGamma3d }, { glbin_current.GetViewId(m_view) });
 }
 
-void VolumePropPanel::EnableSaturation(bool bval)
+void VolumePropPanel::EnableMinMax(bool bval)
 {
-	//double val = 0.0;
-	//if (bval)
-	//{
-	//	wxString str = m_saturation_text->GetValue();
-	//	str.ToDouble(&val);
-	//	val = val / m_max_val;
-	//}
 	if (m_sync_group && m_group)
-		m_group->SetSaturationEnable(bval);
+		m_group->SetMinMaxEnable(bval);
 	else if (m_vd)
-		m_vd->SetSaturationEnable(bval);
+		m_vd->SetMinMaxEnable(bval);
 
-	FluoRefresh(0, { gstSaturation }, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(0, { gstMinMax }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::EnableLuminance(bool bval)
@@ -1586,14 +1615,16 @@ void VolumePropPanel::SetGamma(double val, bool notify)
 		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
-void VolumePropPanel::SetSaturation(double val, bool notify)
+void VolumePropPanel::SetMinMax(double val1, double val2, bool notify)
 {
 	if (!m_vd)
 		return;
 
-	m_vd->SetSaturation(val);
+	m_vd->SetLowOffset(val1);
+	m_vd->SetHighOffset(val2);
+
 	if (notify)
-		FluoRefresh(1, { gstSaturation }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(1, { gstMinMax }, { glbin_current.GetViewId(m_view) });
 	else
 		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
@@ -1749,13 +1780,15 @@ void VolumePropPanel::SyncGamma(double val)
 	FluoRefresh(1, { gstGamma3d }, { glbin_current.GetViewId(m_view) });
 }
 
-void VolumePropPanel::SyncSaturation(double val)
+void VolumePropPanel::SyncMinMax(double val1, double val2)
 {
 	if (!m_group)
 		return;
 
-	m_group->SetSaturation(val);
-	FluoRefresh(1, { gstSaturation }, { glbin_current.GetViewId(m_view) });
+	m_group->SetLowOffset(val1);
+	m_group->SetHighOffset(val2);
+
+	FluoRefresh(1, { gstMinMax }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SyncLuminance(double val)
@@ -1919,7 +1952,7 @@ void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
 	EnableGamma(val);
 }
 
-void VolumePropPanel::OnSaturationMF(wxCommandEvent& event)
+void VolumePropPanel::OnMinMaxMF(wxCommandEvent& event)
 {
 	if (!m_vd)
 		return;
@@ -1927,63 +1960,89 @@ void VolumePropPanel::OnSaturationMF(wxCommandEvent& event)
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncSaturation(m_vd->GetSaturation());
+		SyncMinMax(m_vd->GetLowOffset(), m_vd->GetHighOffset());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_saturation_sldr);
+		SetFocusVRenderViews(m_minmax_sldr);
 		break;
 	case 2:
-		SetSaturation(glbin_vol_def.m_saturation, true);
+		SetMinMax(glbin_vol_def.m_lo_offset, glbin_vol_def.m_hi_offset, true);
 		break;
 	case 3:
-		SetSaturation(m_vd->GetMlSaturation(), true);
+		SetMinMax(m_vd->GetMlLowOffset(), m_vd->GetMlHighOffset(), true);
 		break;
 	case 4:
-		m_saturation_sldr->Undo();
+		m_minmax_sldr->Undo();
 		break;
 	case 5:
-		EnableSaturation(!m_vd->GetSaturationEnable());
+		EnableMinMax(!m_vd->GetMinMaxEnable());
 		break;
 	}
 }
 
-void VolumePropPanel::OnSaturationChange(wxScrollEvent & event)
+void VolumePropPanel::OnMinMaxChange(wxScrollEvent & event)
 {
-	int ival = m_saturation_sldr->GetValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_saturation_text->GetValue())
-		m_saturation_text->ChangeValue(str);
-	double val = ival / m_max_val;
+	int ival1 = m_minmax_sldr->GetLowValue();
+	int ival2 = m_minmax_sldr->GetHighValue();
+	double val1 = ival1 / m_max_val;
+	double val2 = ival2 / m_max_val;
+	m_low_offset_text->ChangeValue(wxString::Format("%d", ival1));
+	m_high_offset_text->ChangeValue(wxString::Format("%d", ival2));
 
 	//set saturation value
 	if (m_sync_group)
-		SyncSaturation(val);
+		SyncMinMax(val1, val2);
 	else
-		SetSaturation(val, false);
+		SetMinMax(val1, val2, false);
 }
 
-void VolumePropPanel::OnSaturationText(wxCommandEvent& event)
+void VolumePropPanel::OnMinMaxText(wxCommandEvent& event)
 {
-	wxString str = m_saturation_text->GetValue();
-	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
-		UpdateMaxVal(ival);
-	m_saturation_sldr->ChangeValue(ival);
-	double val = ival / m_max_val;
+	wxObject* t = event.GetEventObject();
+	long ival1 = 0, ival2 = 0;
+	wxString str = m_low_offset_text->GetValue();
+	str.ToLong(&ival1);
+	str = m_high_offset_text->GetValue();
+	str.ToLong(&ival2);
+	int low = ival1;
+	int hi = ival2;
+	m_minmax_sldr->ChangeValues(low, hi);
+	if (low != ival1 && t != m_low_offset_text)
+		m_low_offset_text->ChangeValue(std::to_string(low));
+	if (hi != ival2 && t != m_high_offset_text)
+		m_high_offset_text->ChangeValue(std::to_string(hi));
+	if (double(hi) > m_max_val)
+		UpdateMaxVal(hi);
+	double val1 = double(low) / m_max_val;
+	double val2 = double(hi) / m_max_val;
 
-	//set saturation value
+	//set minmax value
 	if (m_sync_group)
-		SyncSaturation(val);
+		SyncMinMax(val1, val2);
 	else
-		SetSaturation(val, false);
+		SetMinMax(val1, val2, false);
 
 }
 
-void VolumePropPanel::OnSaturationChk(wxCommandEvent& event)
+void VolumePropPanel::OnMinMaxLink(wxCommandEvent& event)
 {
-	bool val = m_saturation_chk->GetValue();
-	EnableSaturation(val);
+	bool val = m_minmax_sldr->GetLink();
+	val = !val;
+	m_minmax_sldr->SetLink(val);
+	m_minmax_link_tb->ToggleTool(0, val);
+	wxBitmap bitmap;
+	double dpi_sf = getDpiScaleFactor();
+	if (val)
+		bitmap = wxGetBitmap(link, dpi_sf);
+	else
+		bitmap = wxGetBitmap(unlink, dpi_sf);
+	m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
+}
+
+void VolumePropPanel::OnMinMaxChk(wxCommandEvent& event)
+{
+	bool val = m_minmax_chk->GetValue();
+	EnableMinMax(val);
 }
 
 void VolumePropPanel::OnLuminanceMF(wxCommandEvent& event)
@@ -3069,9 +3128,10 @@ void VolumePropPanel::SetSyncGroup()
 		//gamma
 		m_group->SetGammaEnable(m_vd->GetGammaEnable());
 		m_group->SetGamma(m_vd->GetGamma());
-		//saturation
-		m_group->SetSaturationEnable(m_vd->GetSaturationEnable());
-		m_group->SetSaturation(m_vd->GetSaturation());
+		//minmax
+		m_group->SetMinMaxEnable(m_vd->GetMinMaxEnable());
+		m_group->SetLowOffset(m_vd->GetLowOffset());
+		m_group->SetHighOffset(m_vd->GetHighOffset());
 		//alpha
 		m_group->SetAlphaEnable(m_vd->GetAlphaEnable());
 		m_group->SetAlpha(m_vd->GetAlpha());
@@ -3241,10 +3301,10 @@ void VolumePropPanel::UpdateMaxVal(double value)
 			value = 65535.0;
 	}
 	m_max_val = value;
-	m_vd->SetMaxValue(m_max_val);
+	m_vd->SetMinMaxValue(m_vd->GetMinValue(), m_max_val);
 	m_vd->SetScalarScale(65535.0 / m_max_val);
 
-	m_saturation_sldr->SetRange(0, std::round(m_max_val));
+	m_minmax_sldr->SetRange(0, std::round(m_max_val));
 	m_thresh_sldr->SetRange(0, std::round(m_max_val));
 	m_luminance_sldr->SetRange(0, std::round(m_max_val));
 	m_alpha_sldr->SetRange(0, std::round(m_max_val));

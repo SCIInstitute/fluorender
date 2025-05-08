@@ -54,6 +54,7 @@ PVXMLReader::PVXMLReader() :
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -102,6 +103,7 @@ int PVXMLReader::Preprocess()
 	m_slice_num = 0;
 	m_chan_num = 0;
 	m_group_num = 0;
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_seq_boxes.clear();
 	m_force_stack = false;
@@ -933,6 +935,7 @@ Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
 				for (unsigned long long i = 0; i < totali; ++i)
 				{
 					value = val[i];
+					m_min_value = i == 0 ? value : (value < m_min_value ? value : m_min_value);
 					m_max_value = value > m_max_value ? value : m_max_value;
 				}
 			}
@@ -1103,6 +1106,7 @@ void PVXMLReader::ReadTiff(char* pbyData, unsigned short* val)
 			unsigned short value;
 			value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
 			//if ((double)value > m_max_value)
+			m_min_value = m_min_value == 0.0 ? value : (value < m_min_value ? value : m_min_value);
 			m_max_value = (double)value;
 		}
 		break;

@@ -649,12 +649,12 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->inv_?
 				-vr_list_[tn]->scalar_scale_:
 				vr_list_[tn]->scalar_scale_,
-				vr_list_[tn]->gm_scale_,
+				vr_list_[tn]->gm_thresh_,
 				vr_list_[tn]->lo_thresh_,
 				vr_list_[tn]->hi_thresh_);
 			shader->setLocalParam(3, 1.0/vr_list_[tn]->gamma3d_,
-				vr_list_[tn]->gm_thresh_,
-				vr_list_[tn]->offset_,
+				vr_list_[tn]->lo_offset_,
+				vr_list_[tn]->hi_offset_,
 				vr_list_[tn]->sw_);
 			double spcx, spcy, spcz;
 			vr_list_[tn]->tex_->get_spacings(spcx, spcy, spcz);

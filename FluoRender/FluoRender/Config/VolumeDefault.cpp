@@ -43,8 +43,9 @@ VolumeDataDefault::VolumeDataDefault()
 	m_boundary_enable = true;
 	m_boundary = 0.0;
 
-	m_saturation_enable = true;
-	m_saturation = 1.0;
+	m_minmax_enable = true;
+	m_lo_offset = 0.0;
+	m_hi_offset = 1.0;
 
 	m_thresh_enable = true;
 	m_lo_thresh = 0.0;
@@ -117,8 +118,9 @@ void VolumeDataDefault::Read()
 	f->Read(gstBoundaryEnable, &m_boundary_enable, true);
 	f->Read(gstBoundary, &m_boundary, 0.0);
 
-	f->Read(gstSaturationEnable, &m_saturation_enable, true);
-	f->Read(gstSaturation, &m_saturation, 1.0);
+	f->Read(gstMinMaxEnable, &m_minmax_enable, true);
+	f->Read(gstLowOffset, &m_lo_offset, 0.0);
+	f->Read(gstHighOffset, &m_hi_offset, 1.0);
 
 	f->Read(gstThresholdEnable, &m_thresh_enable, true);
 	f->Read(gstLowThreshold, &m_lo_thresh, 0.0);
@@ -179,8 +181,9 @@ void VolumeDataDefault::Save()
 	f->Write(gstBoundaryEnable, m_boundary_enable);
 	f->Write(gstBoundary, m_boundary);
 
-	f->Write(gstSaturationEnable, m_saturation_enable);
-	f->Write(gstSaturation, m_saturation);
+	f->Write(gstMinMaxEnable, m_minmax_enable);
+	f->Write(gstLowOffset, m_lo_offset);
+	f->Write(gstHighOffset, m_hi_offset);
 
 	f->Write(gstThresholdEnable, m_thresh_enable);
 	f->Write(gstLowThreshold, m_lo_thresh);
@@ -237,8 +240,9 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_boundary_enable = vd->GetBoundaryEnable();
 	m_boundary = vd->GetBoundary();
 
-	m_saturation_enable = vd->GetSaturationEnable();
-	m_saturation = vd->GetSaturation();
+	m_minmax_enable = vd->GetMinMaxEnable();
+	m_lo_offset = vd->GetLowOffset();
+	m_hi_offset = vd->GetHighOffset();
 
 	m_thresh_enable = vd->GetThreshEnable();
 	m_lo_thresh = vd->GetLeftThresh();
@@ -296,8 +300,9 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetBoundaryEnable(m_boundary_enable);
 	vd->SetBoundary(m_boundary);
 
-	vd->SetSaturationEnable(m_saturation_enable);
-	vd->SetSaturation(m_saturation);
+	vd->SetMinMaxEnable(m_minmax_enable);
+	vd->SetLowOffset(m_lo_offset);
+	vd->SetHighOffset(m_hi_offset);
 
 	vd->SetThreshEnable(m_thresh_enable);
 	vd->SetLeftThresh(m_lo_thresh);
@@ -358,8 +363,9 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetBoundaryEnable(v2->GetBoundaryEnable());
 	v1->SetBoundary(v2->GetBoundary());
 
-	v1->SetSaturationEnable(v2->GetSaturationEnable());
-	v1->SetSaturation(v2->GetSaturation());
+	v1->SetMinMaxEnable(v2->GetMinMaxEnable());
+	v1->SetLowOffset(v2->GetLowOffset());
+	v1->SetHighOffset(v2->GetHighOffset());
 
 	v1->SetThreshEnable(v2->GetThreshEnable());
 	v1->SetLeftThresh(v2->GetLeftThresh());
@@ -413,7 +419,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 
 	v1->SetScalarScale(v2->GetScalarScale());
 	v1->SetGMScale(v2->GetGMScale());
-	v1->SetMaxValue(v2->GetMaxValue());
+	v1->SetMinMaxValue(v2->GetMinValue(), v2->GetMaxValue());
 }
 
 void VolumeDataDefault::Apply(DataGroup* g)
@@ -430,8 +436,9 @@ void VolumeDataDefault::Apply(DataGroup* g)
 	g->SetBoundaryEnable(m_boundary_enable);
 	g->SetBoundary(m_boundary);
 
-	g->SetSaturationEnable(m_saturation_enable);
-	g->SetSaturation(m_saturation);
+	g->SetMinMaxEnable(m_minmax_enable);
+	g->SetLowOffset(m_lo_offset);
+	g->SetHighOffset(m_hi_offset);
 
 	g->SetThreshEnable(m_thresh_enable);
 	g->SetLeftThresh(m_lo_thresh);

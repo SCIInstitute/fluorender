@@ -329,11 +329,14 @@ public:
 	double GetBoundary();
 	double GetMlBoundary();
 
-	void SetSaturationEnable(bool);
-	bool GetSaturationEnable();
-	void SetSaturation(double val, bool set_this = true);
-	double GetSaturation();
-	double GetMlSaturation();
+	void SetMinMaxEnable(bool);
+	bool GetMinMaxEnable();
+	void SetLowOffset(double val, bool set_this = true);
+	double GetLowOffset();
+	double GetMlLowOffset();
+	void SetHighOffset(double val, bool set_this = true);
+	double GetHighOffset();
+	double GetMlHighOffset();
 
 	void SetThreshEnable(bool);
 	bool GetThreshEnable();
@@ -517,8 +520,9 @@ public:
 	void SetScalarScale(double val);
 	double GetGMScale() {return m_gm_scale;}
 	void SetGMScale(double val);
+	double GetMinValue() {return m_min_value;}
 	double GetMaxValue() {return m_max_value;}
-	void SetMaxValue(double val) {m_max_value = val;}
+	void SetMinMaxValue(double val1, double val2) { m_min_value = val1; m_max_value = val2; }
 
 	//clip size
 	void GetClipValues(int &ox, int &oy, int &oz,
@@ -628,6 +632,7 @@ private:
 	//volume properties
 	double m_scalar_scale;
 	double m_gm_scale;
+	double m_min_value;
 	double m_max_value;
 
 	//transfer function settings
@@ -637,8 +642,9 @@ private:
 	bool m_boundary_enable;
 	double m_boundary;
 
-	bool m_saturation_enable;
-	double m_saturation;
+	bool m_minmax_enable;
+	double m_lo_offset;
+	double m_hi_offset;
 
 	bool m_thresh_enable;
 	double m_lo_thresh;
@@ -1181,8 +1187,9 @@ public:
 	void SetGamma(double val, bool set_this = true);
 	void SetBoundaryEnable(bool);
 	void SetBoundary(double, bool set_this = true);
-	void SetSaturationEnable(bool);
-	void SetSaturation(double, bool set_this = true);
+	void SetMinMaxEnable(bool);
+	void SetLowOffset(double, bool set_this = true);
+	void SetHighOffset(double, bool set_this = true);
 	void SetThreshEnable(bool);
 	void SetLeftThresh(double, bool set_this = true);
 	void SetRightThresh(double, bool set_this = true);

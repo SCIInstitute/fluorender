@@ -50,6 +50,7 @@ BRKXMLReader::BRKXMLReader() :
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -188,6 +189,7 @@ int BRKXMLReader::Preprocess()
 	Clear();
 	m_slice_num = 0;
 	m_chan_num = 0;
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 
 #ifdef _WIN32

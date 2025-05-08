@@ -63,6 +63,7 @@ CZIReader::CZIReader() :
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -757,6 +758,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				sbi->x_size, sbi->y_size, sbi->z_size,
 				m_x_size, m_y_size,
 				minv, maxv);
+			m_min_value = m_min_value == 0.0 ? minv : std::min(m_min_value, static_cast<double>(minv));
 			m_max_value = maxv > m_max_value ? maxv : m_max_value;
 		}
 		break;
@@ -775,6 +777,7 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 			if (result)
 			{
 				GetMinMax16((unsigned short*)val + pos, pxcount, minv, maxv);
+				m_min_value = m_min_value == 0.0 ? minv : std::min(m_min_value, static_cast<double>(minv));
 				m_max_value = maxv > m_max_value ? maxv : m_max_value;
 			}
 			break;

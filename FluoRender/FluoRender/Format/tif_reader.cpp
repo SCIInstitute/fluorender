@@ -55,6 +55,7 @@ TIFReader::TIFReader():
 	m_yspc = 1;
 	m_zspc = 1;
 
+	m_min_value = 0;
 	m_max_value = 0;
 	m_scalar_scale = 1;
 
@@ -146,6 +147,12 @@ int TIFReader::Preprocess()
 		if (bits == 16)
 		{
 			double dval = 0;
+			search_str = "min=";
+			str_pos = img_desc.find(search_str);
+			if (str_pos != -1)
+				dval = get_double(img_desc, str_pos + search_str.length());
+			if (dval)
+				m_min_value = dval;
 			search_str = "max=";
 			str_pos = img_desc.find(search_str);
 			if (str_pos != -1)
@@ -1827,6 +1834,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 
 	bool show_progress = total_size > glbin_settings.m_prg_size;
 
+	int min_value = 0;
 	int max_value = 0;
 
 	void* buf = 0;
@@ -2067,9 +2075,13 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 							else
 								memcpy((uint16_t*)val + valindex,
 									(uint16_t*)buf + samples*i + c, sizeof(uint16_t));
-							if (!eight_bit && get_max &&
-								*((uint16_t*)val + valindex) > max_value)
-								max_value = *((uint16_t*)val + valindex);
+							if (!eight_bit && get_max)
+							{
+								if (min_value == 0 || *((uint16_t*)val + valindex) < min_value)
+									min_value = *((uint16_t*)val + valindex);
+								if (*((uint16_t*)val + valindex) > max_value)
+									max_value = *((uint16_t*)val + valindex);
+							}
 							valindex++;
 						}
 					}
@@ -2124,7 +2136,10 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	if (!eight_bit) {
 		if (get_max) {
 			if (samples > 1)
+			{
+				m_min_value = min_value;
 				m_max_value = max_value;
+			}
 			else {
 				double value;
 				unsigned long long totali = (unsigned long long)m_slice_num*
@@ -2132,6 +2147,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				for (unsigned long long i = 0; i < totali; ++i)
 				{
 					value = ((unsigned short*)nrrdout->data)[i];
+					m_min_value = m_min_value == 0.0 ? value : (value < m_min_value ? value : m_min_value);
 					m_max_value = value > m_max_value ? value : m_max_value;
 				}
 			}

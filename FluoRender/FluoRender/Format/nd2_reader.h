@@ -75,6 +75,7 @@ public:
 	double GetXSpc() {return m_xspc;}
 	double GetYSpc() {return m_yspc;}
 	double GetZSpc() {return m_zspc;}
+	double GetMinValue() { return m_min_value; }
 	double GetMaxValue() {return m_max_value;}
 	double GetScalarScale() {return m_scalar_scale;}
 	bool GetBatch() {return m_batch;}
@@ -139,6 +140,7 @@ private:
 	double m_xspc;
 	double m_yspc;
 	double m_zspc;
+	double m_min_value;
 	double m_max_value;
 	double m_scalar_scale;
 

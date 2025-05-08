@@ -51,7 +51,8 @@ VolumeMeshConv::VolumeMeshConv() :
 	m_lo_thresh(0.0),
 	m_hi_thresh(1.0),
 	m_sw(0),
-	m_saturation(1.0),
+	m_lo_offset(0.0),
+	m_hi_offset(1.0),
 	m_boundary(0.0),
 	m_use_mask(false),
 	m_weld(false),
@@ -102,7 +103,8 @@ void VolumeMeshConv::Compute()
 		m_gamma = vd->GetGamma();
 		m_lo_thresh = vd->GetLeftThresh();
 		m_hi_thresh = vd->GetRightThresh();
-		m_saturation = vd->GetSaturation();
+		m_lo_offset = vd->GetLowOffset();
+		m_hi_offset = vd->GetHighOffset();
 		m_boundary = vd->GetBoundary();
 		m_sw = vd->GetSoftThreshold();
 	}
@@ -111,7 +113,8 @@ void VolumeMeshConv::Compute()
 		m_gamma = 1.0;
 		m_lo_thresh = 0.0;
 		m_hi_thresh = 1.0;
-		m_saturation = 1.0;
+		m_lo_offset = 0.0;
+		m_hi_offset = 1.0;
 		m_boundary = 0.0;
 	}
 	//get use selection
@@ -362,9 +365,8 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 				value *= (m_boundary > 0.0 ?
 					fluo::Clamp(gm / m_boundary, 0.0,
 					1.0 + m_boundary*10.0) : 1.0);
-				value = pow(fluo::Clamp(value/m_saturation,
-					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
-					gamma>1.0?0.9999:1.0), gamma);
+				value = pow(fluo::Clamp((value - m_lo_offset) / (m_hi_offset - m_lo_offset),
+					gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			}
 		}
 	}
@@ -404,9 +406,8 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 				value *= (m_boundary > 0.0 ?
 					fluo::Clamp(gm / m_boundary, 0.0,
 						1.0 + m_boundary*10.0) : 1.0);
-				value = pow(fluo::Clamp(value/m_saturation,
-					gamma<1.0?-(gamma-1.0)*0.00001:0.0,
-					gamma>1.0?0.9999:1.0), gamma);
+				value = pow(fluo::Clamp((value - m_lo_offset) / (m_hi_offset - m_lo_offset),
+					gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			}
 		}
 	}

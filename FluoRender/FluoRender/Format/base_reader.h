@@ -162,6 +162,7 @@ public:
 	//get the max intensity value
 	//for 8-bit data, the max value is usually 255
 	//for 16-bit data, the microscope sensor may not generate full range, a smaller number is usually used
+	virtual double GetMinValue() = 0;
 	virtual double GetMaxValue() = 0;
 	//intensity values (0-255 for 8-bit, 0-max value for 16-bit) are normalized to (0.0-1.0) for OpenGL
 	//the scalar-value scaling factor is usually the inverse of the max value (1/max) for 16-bit data

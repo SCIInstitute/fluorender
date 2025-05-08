@@ -99,8 +99,10 @@ namespace flvr
 		double get_gamma3d();
 		void set_gm_thresh(double thresh);
 		double get_gm_thresh();
-		void set_offset(double offset);
-		double get_offset();
+		void set_lo_offset(double val);
+		double get_lo_offset();
+		void set_hi_offset(double val);
+		double get_hi_offset();
 		void set_lo_thresh(double thresh);
 		double get_lo_thresh();
 		void set_hi_thresh(double thresh);
@@ -263,7 +265,8 @@ namespace flvr
 		//transfer function properties
 		double gamma3d_;
 		double gm_thresh_;
-		double offset_;
+		double lo_offset_;
+		double hi_offset_;
 		double lo_thresh_;
 		double hi_thresh_;
 		double sw_;//soft threshold

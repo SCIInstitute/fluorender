@@ -69,6 +69,7 @@ public:
 	double GetXSpc() {return 0.0;}
 	double GetYSpc() {return 0.0;}
 	double GetZSpc() {return 0.0;}
+	double GetMinValue() { return 0.0; }
 	double GetMaxValue() {return 0.0;}
 	double GetScalarScale() {return 0.0;}
 	bool GetBatch() {return false;}

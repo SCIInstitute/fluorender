@@ -46,6 +46,7 @@ OIFReader::OIFReader():
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -811,6 +812,7 @@ void OIFReader::ReadTiff(char *pbyData, unsigned short *val, int z)
 		{
 			unsigned short value;
 			value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
+			m_min_value = m_min_value == 0.0 ? value : (value < m_min_value ? value : m_min_value);
 			if ((double)value > m_max_value)
 				m_max_value = (double)value;
 		}

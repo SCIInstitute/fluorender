@@ -51,8 +51,9 @@ public:
 	bool m_boundary_enable;
 	double m_boundary;
 
-	bool m_saturation_enable;
-	double m_saturation;
+	bool m_minmax_enable;
+	double m_lo_offset;
+	double m_hi_offset;
 
 	bool m_thresh_enable;
 	double m_lo_thresh;

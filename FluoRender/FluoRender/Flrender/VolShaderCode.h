@@ -48,8 +48,8 @@
 	"// VOL_UNIFORMS_COMMON\n" \
 	"uniform vec4 loc0;//(lx, ly, lz, alpha)\n" \
 	"uniform vec4 loc1;//(ka, kd, ks, ns)\n" \
-	"uniform vec4 loc2;//(scalar_scale, gm_scale, left_thresh, right_thresh)\n" \
-	"uniform vec4 loc3;//(gamma, gm_thresh, offset, sw)\n" \
+	"uniform vec4 loc2;//(scalar_scale, gm_thresh, left_thresh, right_thresh)\n" \
+	"uniform vec4 loc3;//(gamma, left_offset, right_offset, sw)\n" \
 	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"uniform vec4 loc5;//(spcx, spcy, spcz, shuffle)\n" \
 	"uniform vec4 loc9;//(red, green, blue, alpha_power)\n" \
@@ -337,7 +337,7 @@
 
 #define VOL_COMPUTED_GM_INVALIDATE \
 	"	//VOL_COMPUTED_GM_INVALIDATE\n" \
-	"	v.y = loc3.y;\n" \
+	"	v.y = loc2.y;\n" \
 	"\n"
 
 #define VOL_TEXTURE_GM_LOOKUP \
@@ -356,10 +356,9 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 	"		alpha = 1.0 - pow(1.0-pow(tf_alp, loc9.w), loc4.w);\n" \
 	"		c = vec4(loc6.rgb*alpha*(loc9.w>1.1?1.0:tf_alp), alpha);\n" \
 	"	}\n" \
@@ -376,10 +375,9 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 	"		c = vec4(loc6.rgb*tf_alp, 1.0);\n" \
 	"	}\n" \
 	"\n"
@@ -395,10 +393,9 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 	"		c = vec4(tf_alp);\n" \
 	"	}\n" \
 	"\n"
@@ -415,10 +412,9 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 	"		c = vec4(tf_alp);\n" \
 	"	}\n" \
 	"	return c;\n" \
@@ -427,9 +423,8 @@
 
 #define VOL_COMMON_TRANSFER_FUNCTION_CALC \
 	"		//VOL_COMMON_TRANSFER_FUNCTION_CALC\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n"
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 
 //rainbow
 #define VOL_COLORMAP_CALC0 \
@@ -494,7 +489,7 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
 	"		vec4 rb = vec4(0.0);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU0 \
@@ -545,7 +540,7 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
 	"		vec4 rb = vec4(0.0);\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT \
@@ -564,10 +559,9 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n"
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 
 #define VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT \
 	"		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ\n" \
@@ -586,10 +580,9 @@
 	"	else\n" \
 	"	{\n" \
 	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc3.y>0.0?clamp(v.y/loc3.y, 0.0, 1.0+loc3.y*10.0):1.0)*v.x;\n" \
-	"		tf_alp = pow(clamp(v.x/loc3.z,\n" \
-	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0,\n" \
-	"			loc3.x>1.0?0.9999:1.0), loc3.x);\n" \
+	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
+	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 	"		float alpha = tf_alp;\n" \
 	"		c = vec4(vec3(alpha*tf_alp), alpha);\n" \
 	"	}\n" \

@@ -44,6 +44,7 @@ NRRDReader::NRRDReader():
 	m_yspc = 0.0;
 	m_zspc = 0.0;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -314,7 +315,10 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 			((unsigned short*)output->data)[idx] = n;
 			min_value = (n < min_value) ? n : min_value;
 			if (get_max)
+			{
+				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
 				m_max_value = (n > m_max_value) ? n : m_max_value;
+			}
 		}
 		output->type = nrrdTypeUShort;
 	}
@@ -325,7 +329,10 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		{
 			n =  ((unsigned short*)output->data)[idx];
 			if (get_max)
-				m_max_value = (n > m_max_value)?n:m_max_value;
+			{
+				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
+				m_max_value = (n > m_max_value) ? n : m_max_value;
+			}
 		}
 	}
 	//compress int
@@ -340,7 +347,10 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 			((unsigned short*)output->data)[idx] = n;
 			min_value = (n < min_value) ? n : min_value;
 			if (get_max)
+			{
+				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
 				m_max_value = (n > m_max_value) ? n : m_max_value;
+			}
 		}
 		output->type = nrrdTypeUShort;
 	}
@@ -353,7 +363,10 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 			n = (unsigned short)(val >> 8);
 			((unsigned short*)output->data)[idx] = n;
 			if (get_max)
+			{
+				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
 				m_max_value = (n > m_max_value) ? n : m_max_value;
+			}
 		}
 		output->type = nrrdTypeUShort;
 	}

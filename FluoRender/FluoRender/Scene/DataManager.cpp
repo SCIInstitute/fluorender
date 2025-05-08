@@ -234,11 +234,13 @@ VolumeData::VolumeData()
 	m_label_mode = 0;
 	m_mask_mode = 0;
 	m_use_mask_threshold = false;
+	m_mask_clear = false;
 
 	//volume properties
 	m_scalar_scale = 1.0;
 	m_gm_scale = 1.0;
 	m_max_value = 255.0;
+	m_min_value = 0.0;
 
 	//transfer function settings
 	m_gamma_enable = true;
@@ -247,8 +249,9 @@ VolumeData::VolumeData()
 	m_boundary_enable = true;
 	m_boundary = 0.0;
 
-	m_saturation_enable = true;
-	m_saturation = 1.0;
+	m_minmax_enable = true;
+	m_lo_offset = 0.0;
+	m_hi_offset = 1.0;
 
 	m_thresh_enable = true;
 	m_lo_thresh = 0.0;
@@ -334,8 +337,15 @@ VolumeData::VolumeData()
 	//save label
 	m_label_save = 0;
 
+	//background intensity
+	m_bg_valid = false;
+	m_bg_int = 0;
+
 	//machine learning applied
 	m_ml_comp_gen_applied = false;
+
+	//transparent
+	m_transparent = false;
 
 	//m_clip
 	for (int i : { 0, 1, 2 })
@@ -391,40 +401,50 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_scalar_scale = copy.m_scalar_scale;
 	m_gm_scale = copy.m_gm_scale;
 	m_max_value = copy.m_max_value;
-	//gamma
+	m_min_value = copy.m_min_value;
+
+	//transfer function settings
+	m_gamma_enable = copy.m_gamma_enable;
 	m_gamma = copy.m_gamma;
+
+	m_boundary_enable = copy.m_boundary_enable;
 	m_boundary = copy.m_boundary;
-	m_saturation = copy.m_saturation;
+
+	m_minmax_enable = copy.m_minmax_enable;
+	m_lo_offset = copy.m_lo_offset;
+	m_hi_offset = copy.m_hi_offset;
+
+	m_thresh_enable = copy.m_thresh_enable;
 	m_lo_thresh = copy.m_lo_thresh;
 	m_hi_thresh = copy.m_hi_thresh;
 	m_sw = copy.m_sw;
-	m_color = copy.m_color;
-	m_wl_color = copy.m_wl_color;
-	SetHSV();
+
+	m_luminance_enable = copy.m_luminance_enable;
+	m_luminance = copy.m_luminance;
+
+	m_alpha_enable = copy.m_alpha_enable;
 	m_alpha = copy.m_alpha;
-	m_sample_rate = copy.m_sample_rate;
+
+	//shading
+	m_shading_enable = copy.m_shading_enable;
 	m_mat_amb = copy.m_mat_amb;
 	m_mat_diff = copy.m_mat_diff;
 	m_mat_spec = copy.m_mat_spec;
 	m_mat_shine = copy.m_mat_shine;
-	//noise reduction
-	m_noise_rd = copy.m_noise_rd;
-	//shading
-	m_shading_enable = copy.m_shading_enable;
+
 	//shadow
 	m_shadow_enable = copy.m_shadow_enable;
 	m_shadow_intensity = copy.m_shadow_intensity;
 
-	//resolution, scaling, spacing
-	m_res_x = copy.m_res_x;	m_res_y = copy.m_res_y;	m_res_z = copy.m_res_z;
-	m_sclx = copy.m_sclx;	m_scly = copy.m_scly;	m_sclz = copy.m_sclz;
-	m_spcx = copy.m_spcx;	m_spcy = copy.m_spcy;	m_spcz = copy.m_spcz;
-	m_spc_from_file = copy.m_spc_from_file;
+	m_sample_rate_enable = copy.m_sample_rate_enable;
+	m_sample_rate = copy.m_sample_rate;
 
-	//display control
-	m_disp = copy.m_disp;
-	m_draw_bounds = copy.m_draw_bounds;
-	m_test_wiref = copy.m_test_wiref;
+	m_color = copy.m_color;
+	m_wl_color = copy.m_wl_color;
+	SetHSV();
+
+	//noise reduction
+	m_noise_rd = copy.m_noise_rd;
 
 	//colormap mode
 	m_colormap_inv = copy.m_colormap_inv;
@@ -440,11 +460,24 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	m_saved_mode = copy.m_saved_mode;
 
+	//resolution, scaling, spacing
+	m_res_x = copy.m_res_x;	m_res_y = copy.m_res_y;	m_res_z = copy.m_res_z;
+	m_sclx = copy.m_sclx;	m_scly = copy.m_scly;	m_sclz = copy.m_sclz;
+	m_spcx = copy.m_spcx;	m_spcy = copy.m_spcy;	m_spcz = copy.m_spcz;
+	m_spc_from_file = copy.m_spc_from_file;
+
+	//display control
+	m_disp = copy.m_disp;
+	m_draw_bounds = copy.m_draw_bounds;
+	m_test_wiref = copy.m_test_wiref;
+
 	m_2d_mask = 0;
 	m_2d_weight1 = 0;
 	m_2d_weight2 = 0;
 	m_2d_dmap = 0;
 
+	//compression
+	m_compression = copy.m_compression;
 	//resize
 	m_resize = false;
 	m_rnx = 0;
@@ -672,7 +705,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		tex = m_tex;
 		m_tex = new flvr::Texture();
 		m_tex->set_use_priority(m_skip_brick);
-		m_tex->build(nv, gm, 0, m_max_value, 0, 0);
+		m_tex->build(nv, gm, m_min_value, m_max_value, 0, 0);
 	}
 	else
 	{
@@ -716,7 +749,7 @@ int VolumeData::Replace(VolumeData* data)
 	data->SetTexture();
 	SetScalarScale(data->GetScalarScale());
 	SetGMScale(data->GetGMScale());
-	SetMaxValue(data->GetMaxValue());
+	SetMinMaxValue(data->GetMinValue(), data->GetMaxValue());
 	if (m_vr)
 		m_vr->set_texture(m_tex);
 	else
@@ -1381,9 +1414,8 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			new_value *= (m_boundary > 0.0 ?
 				fluo::Clamp(gm / m_boundary, 0.0,
 					1.0 + m_boundary*10.0) : 1.0);
-			new_value = pow(fluo::Clamp(new_value/m_saturation,
-				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
-				gamma>1.0?0.9999:1.0), gamma);
+			new_value = pow(fluo::Clamp((new_value-m_lo_offset)/(m_hi_offset-m_lo_offset),
+				gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			new_value *= m_alpha;
 		}
 		return new_value;
@@ -1426,9 +1458,8 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			new_value *= (m_boundary > 0.0 ?
 				fluo::Clamp(gm / m_boundary, 0.0,
 					1.0 + m_boundary*10.0) : 1.0);
-			new_value = pow(fluo::Clamp(new_value/m_saturation,
-				gamma<1.0?-(gamma-1.0)*0.00001:0.0,
-				gamma>1.0?0.9999:1.0), gamma);
+			new_value = pow(fluo::Clamp((new_value-m_lo_offset)/(m_hi_offset-m_lo_offset),
+				gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			new_value *= m_alpha;
 		}
 		return new_value;
@@ -1946,39 +1977,66 @@ double VolumeData::GetMlBoundary()
 		return m_boundary;
 }
 
-void VolumeData::SetSaturationEnable(bool bval)
+void VolumeData::SetMinMaxEnable(bool bval)
 {
-	m_saturation_enable = bval;
+	m_minmax_enable = bval;
 	if (bval)
-		SetSaturation(m_saturation, false);
+	{
+		SetLowOffset(m_lo_offset, false);
+		SetHighOffset(m_hi_offset, false);
+	}
 	else
-		SetSaturation(0.0, false);
+	{
+		SetLowOffset(m_min_value, false);
+		SetHighOffset(m_max_value, false);
+	}
 }
 
-bool VolumeData::GetSaturationEnable()
+bool VolumeData::GetMinMaxEnable()
 {
-	return m_saturation_enable;
+	return m_minmax_enable;
 }
 
-void VolumeData::SetSaturation(double val, bool set_this)
+void VolumeData::SetLowOffset(double val, bool set_this)
 {
 	if (set_this)
-		m_saturation = val;
+		m_lo_offset = val;
 	if (m_vr)
-		m_vr->set_offset(val);
+		m_vr->set_lo_offset(val);
 }
 
-double VolumeData::GetSaturation()
+double VolumeData::GetLowOffset()
 {
-	return m_saturation;
+	return m_lo_offset;
 }
 
-double VolumeData::GetMlSaturation()
+double VolumeData::GetMlLowOffset()
 {
 	if (m_ep->getValid())
 		return m_ep->getParam("low_offset");
 	else
-		return m_saturation;
+		return m_lo_offset;
+}
+
+void VolumeData::SetHighOffset(double val, bool set_this)
+{
+	if (set_this)
+		m_hi_offset = val;
+	if (m_vr)
+		m_vr->set_hi_offset(val);
+}
+
+double VolumeData::GetHighOffset()
+{
+	return m_hi_offset;
+}
+
+double VolumeData::GetMlHighOffset()
+{
+	if (m_ep->getValid())
+		return m_ep->getParam("high_offset");
+	else
+		return m_hi_offset;
 }
 
 void VolumeData::SetThreshEnable(bool bval)
@@ -3233,9 +3291,10 @@ void VolumeData::ApplyMlVolProp()
 		SetGamma(dval);
 		//low offset
 		dval = std::max(0.0f, m_ep->getParam("low_offset"));
-		SetSaturation(dval);
+		SetLowOffset(dval);
 		//high offset
 		dval = std::max(0.0f, m_ep->getParam("high_offset"));
+		SetHighOffset(dval);
 		//low thresholding
 		dval = std::max(0.0f, m_ep->getParam("low_threshold"));
 		SetLeftThresh(dval);
@@ -4950,23 +5009,33 @@ void DataGroup::SetBoundary(double val, bool set_this)
 	}
 }
 
-void DataGroup::SetSaturationEnable(bool bval)
+void DataGroup::SetMinMaxEnable(bool bval)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetSaturationEnable(bval);
+			vd->SetMinMaxEnable(bval);
 	}
 }
 
-void DataGroup::SetSaturation(double val, bool set_this)
+void DataGroup::SetLowOffset(double val, bool set_this)
 {
 	for (int i = 0; i < GetVolumeNum(); i++)
 	{
 		VolumeData* vd = GetVolumeData(i);
 		if (vd)
-			vd->SetSaturation(val, set_this);
+			vd->SetLowOffset(val, set_this);
+	}
+}
+
+void DataGroup::SetHighOffset(double val, bool set_this)
+{
+	for (int i = 0; i < GetVolumeNum(); i++)
+	{
+		VolumeData* vd = GetVolumeData(i);
+		if (vd)
+			vd->SetHighOffset(val, set_this);
 	}
 }
 
@@ -5745,6 +5814,8 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	{
 		glbin_vol_def.Apply(vd);
 	}
+	//low offset set to min value
+	vd->SetLowOffset(vd->GetMinValue() / vd->GetMaxValue());
 }
 
 //set project path
@@ -6242,7 +6313,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 			else vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
 			vd->SetSpcFromFile(valid_spc);
 			vd->SetScalarScale(reader->GetScalarScale());
-			vd->SetMaxValue(reader->GetMaxValue());
+			vd->SetMinMaxValue(reader->GetMinValue(), reader->GetMaxValue());
 			vd->SetCurTime(reader->GetCurTime());
 			vd->SetCurChannel(i);
 			//++

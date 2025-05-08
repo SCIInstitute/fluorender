@@ -268,7 +268,8 @@ void Project::Open(const std::wstring& filename)
 								height >> offset1 >> offset2 >> gamma;
 							vd->SetGamma(gamma);
 							vd->SetBoundary(left_y);
-							vd->SetSaturation(offset1);
+							vd->SetLowOffset(offset1);
+							vd->SetHighOffset(offset2);
 							vd->SetLeftThresh(left_x);
 							vd->SetRightThresh(left_x + width);
 							if (fconfig->Read("widgetcolor", &cval))
@@ -278,16 +279,28 @@ void Project::Open(const std::wstring& filename)
 						}
 
 						//transfer function
+						if (fconfig->Read("3dgamma enable", &bval))
+							vd->SetGammaEnable(bval);
 						if (fconfig->Read("3dgamma", &dval))
 							vd->SetGamma(dval);
+						if (fconfig->Read("boundary enable", &bval))
+							vd->SetBoundaryEnable(bval);
 						if (fconfig->Read("boundary", &dval))
 							vd->SetBoundary(dval);
-						if (fconfig->Read("contrast", &dval))
-							vd->SetSaturation(dval);
+						if (fconfig->Read("minmax enable", &bval))
+							vd->SetMinMaxEnable(bval);
+						if (fconfig->Read("low offset", &dval))
+							vd->SetLowOffset(dval);
+						if (fconfig->Read("high offset", &dval))
+							vd->SetHighOffset(dval);
+						if (fconfig->Read("threshold enable", &bval))
+							vd->SetThreshEnable(bval);
 						if (fconfig->Read("left_thresh", &dval))
 							vd->SetLeftThresh(dval);
 						if (fconfig->Read("right_thresh", &dval))
 							vd->SetRightThresh(dval);
+						if (fconfig->Read("luminance enable", &bval))
+							vd->SetLuminanceEnable(bval);
 						if (fconfig->Read("color", &cval))
 							vd->SetColor(cval);
 						if (fconfig->Read("hsv", &hval))
@@ -1298,11 +1311,17 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("display", vd->GetDisp());
 
 			//properties
+			fconfig->Write("3dgamma enable", vd->GetGammaEnable());
 			fconfig->Write("3dgamma", vd->GetGamma());
+			fconfig->Write("boundary enable", vd->GetBoundaryEnable());
 			fconfig->Write("boundary", vd->GetBoundary());
-			fconfig->Write("contrast", vd->GetSaturation());
+			fconfig->Write("minmax enable", vd->GetMinMaxEnable());
+			fconfig->Write("low offset", vd->GetLowOffset());
+			fconfig->Write("high offset", vd->GetHighOffset());
+			fconfig->Write("threshold enable", vd->GetThreshEnable());
 			fconfig->Write("left_thresh", vd->GetLeftThresh());
 			fconfig->Write("right_thresh", vd->GetRightThresh());
+			fconfig->Write("luminance enable", vd->GetLuminanceEnable());
 			fconfig->Write("color", vd->GetColor());
 			fconfig->Write("hsv", vd->GetHSVColor());
 			fconfig->Write("mask_color", vd->GetMaskColor());

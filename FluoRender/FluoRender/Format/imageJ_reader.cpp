@@ -54,6 +54,7 @@ ImageJReader::ImageJReader():
 	m_zspc = 1.0;
 	m_excitation_wavelength = nullptr;
 
+	m_min_value = 0.0;
 	m_max_value = 0.0;
 	m_scalar_scale = 1.0;
 
@@ -477,6 +478,7 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 			for (unsigned long long i = 0; i < totali; ++i)
 			{
 				value = ((unsigned short*)nrrdout->data)[i];
+				m_min_value = i == 0 ? value : (value < m_min_value ? value : m_min_value);
 				m_max_value = value > m_max_value ? value : m_max_value;
 			}			
 		}

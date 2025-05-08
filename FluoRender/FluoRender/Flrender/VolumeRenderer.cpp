@@ -59,7 +59,8 @@ namespace flvr
 		//transfer function
 		gamma3d_(1.0),
 		gm_thresh_(0.0),
-		offset_(1.0),
+		lo_offset_(0.0),
+		hi_offset_(1.0),
 		lo_thresh_(0.0),
 		hi_thresh_(1.0),
 		color_(fluo::Color(1.0, 1.0, 1.0)),
@@ -124,7 +125,8 @@ namespace flvr
 		//transfer function
 		gamma3d_(copy.gamma3d_),
 		gm_thresh_(copy.gm_thresh_),
-		offset_(copy.offset_),
+		lo_offset_(copy.lo_offset_),
+		hi_offset_(copy.hi_offset_),
 		lo_thresh_(copy.lo_thresh_),
 		hi_thresh_(copy.hi_thresh_),
 		color_(copy.color_),
@@ -237,14 +239,24 @@ namespace flvr
 		return gm_thresh_;
 	}
 
-	void VolumeRenderer::set_offset(double offset)
+	void VolumeRenderer::set_lo_offset(double val)
 	{
-		offset_ = offset;
+		lo_offset_ = val;
 	}
 
-	double VolumeRenderer::get_offset()
+	double VolumeRenderer::get_lo_offset()
 	{
-		return offset_;
+		return lo_offset_;
+	}
+
+	void VolumeRenderer::set_hi_offset(double val)
+	{
+		hi_offset_ = val;
+	}
+
+	double VolumeRenderer::get_hi_offset()
+	{
+		return hi_offset_;
 	}
 
 	void VolumeRenderer::set_lo_thresh(double thresh)
@@ -738,8 +750,8 @@ namespace flvr
 			spcz==0.0?1.0:spcz, shuffle_);
 
 		//transfer function
-		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-		shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
+		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_thresh_, lo_thresh_, hi_thresh_);
+		shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
 		if (mode_==RENDER_MODE_MIP &&
 			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
@@ -1225,8 +1237,8 @@ namespace flvr
 		seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
-		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-		seg_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
+		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_thresh_, lo_thresh_, hi_thresh_);
+		seg_shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
 		seg_shader->setLocalParam(6, mp_[0], vp_[3]-mp_[1], vp_[2], vp_[3]);
 		seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
 
@@ -1627,8 +1639,8 @@ namespace flvr
 				(vr_b&&vr_b->get_inversion())?-1.0:0.0);
 		if (vr_a && (type==6 || type==7))
 		{
-			cal_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-			cal_shader->setLocalParam(3, 1.0/gamma3d_, gm_thresh_, offset_, sw_);
+			cal_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_thresh_, lo_thresh_, hi_thresh_);
+			cal_shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
 		}
 
 		for (unsigned int i=0; i < bricks->size(); i++)

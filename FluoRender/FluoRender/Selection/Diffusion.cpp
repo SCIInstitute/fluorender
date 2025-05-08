@@ -132,8 +132,8 @@ const char* str_cl_diffusion = \
 "	else\n" \
 "	{\n" \
 "		v.x = (v.x < loc2.z ? (loc3.w - loc2.z + v.x) / loc3.w : (loc2.w<1.0f && v.x>loc2.w ? (loc3.w - v.x + loc2.w) / loc3.w : 1.0f))*v.x;\n" \
-"		v.x = (loc3.y > 0.0f ? clamp(v.y / loc3.y, 0.0f, 1.0f + loc3.y*10.0f) : 1.0f)*v.x;\n" \
-"		c = pow(clamp(v.x / loc3.z, loc3.x<1.0f ? -(loc3.x - 1.0f)*0.00001f : 0.0f, loc3.x>1.0f ? 0.9999f : 1.0f), loc3.x);\n" \
+"		v.x = (loc2.y > 0.0f ? clamp(v.y / loc2.y, 0.0f, 1.0f + loc2.y*10.0f) : 1.0f)*v.x;\n" \
+"		c = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y), loc3.x<1.0f ? -(loc3.x - 1.0f)*0.00001f : 0.0f, 1.0f), loc3.x);\n" \
 "	}\n" \
 "	//SEG_BODY_DB_GROW_STOP_FUNC\n" \
 "	if (c <= 0.0001f)\n" \
@@ -374,7 +374,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	cl_float4 p[6];
 	bool inv;
 	float scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
-		offset, sw;
+		lo_offset, hi_offset, sw;
 	if (m_vd && m_vd->GetVR())
 	{
 		flvr::VolumeRenderer* vr = m_vd->GetVR();
@@ -395,7 +395,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		hi_thresh = static_cast<float>(m_vd->GetRightThresh());
 		gamma3d = static_cast<float>(m_vd->GetGamma());
 		gm_thresh = static_cast<float>(m_vd->GetBoundary());
-		offset = static_cast<float>(m_vd->GetSaturation());
+		lo_offset = static_cast<float>(m_vd->GetLowOffset());
+		hi_offset = static_cast<float>(m_vd->GetHighOffset());
 		sw = static_cast<float>(m_vd->GetSoftThreshold());
 	}
 
@@ -426,8 +427,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z()) };
-		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, 1.0, lo_thresh, hi_thresh };
-		cl_float4 loc3 = { 1.0f / gamma3d, gm_thresh, offset, sw };
+		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_thresh, lo_thresh, hi_thresh };
+		cl_float4 loc3 = { 1.0f / gamma3d, lo_offset, hi_offset, sw };
 		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
