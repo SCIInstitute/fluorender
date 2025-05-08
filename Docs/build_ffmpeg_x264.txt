@@ -21,3 +21,4 @@ Use x265's script to generate vc projects
 Copy built results to FFmpeg/depends/
 Configure FFMpeg
 	./configure --toolchain=msvc --prefix=/mingw64 --enable-static --disable-shared --enable-gpl --enable-libx264 --enable-libx265 --extra-cflags="-I./depends/include" --extra-ldflags="/LIBPATH:./depends/lib libx264.lib libx265.lib" --pkg-config-flags="--static" --logfile=ffmpeg_configure.log
+configure file of ffmpeg may need some changes to disable testing (because it's on Windows)
