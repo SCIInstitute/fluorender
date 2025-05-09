@@ -3169,6 +3169,7 @@ void RenderView::SetParams(double t)
 	bool bval;
 	double dval;
 	int ival;
+	fluo::Color cval;
 
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
@@ -3332,6 +3333,17 @@ void RenderView::SetParams(double t)
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
 			vd->SetColormapHigh(dval);
 		vc.insert(gstColormap);
+
+		//output adj
+		keycode.l2_name = "gamma";
+		if (glbin_interpolator.GetColor(keycode, t, cval))
+			vd->SetGammaColor(cval);
+		keycode.l2_name = "brightness";
+		if (glbin_interpolator.GetColor(keycode, t, cval))
+			vd->SetBrightness(cval);
+		keycode.l2_name = "hdr";
+		if (glbin_interpolator.GetColor(keycode, t, cval))
+			vd->SetHdr(cval);
 	}
 
 	bool bx, by, bz;
@@ -3419,6 +3431,17 @@ void RenderView::SetParams(double t)
 	if (glbin_interpolator.GetDouble(keycode, t, dval))
 		glbin_settings.m_shadow_dir_y = dval;
 	vc.insert(gstShadowDir);
+	//output adj
+	keycode.l2_name = "gamma";
+	if (glbin_interpolator.GetColor(keycode, t, cval))
+		SetGammaColor(cval);
+	keycode.l2_name = "brightness";
+	if (glbin_interpolator.GetColor(keycode, t, cval))
+		SetBrightness(cval);
+	keycode.l2_name = "hdr";
+	if (glbin_interpolator.GetColor(keycode, t, cval))
+		SetHdr(cval);
+	vc.insert({ gstGammaR, gstGammaG, gstGammaB, gstBrightnessR, gstBrightnessG, gstBrightnessB, gstEqualizeR, gstEqualizeG, gstEqualizeB });
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();

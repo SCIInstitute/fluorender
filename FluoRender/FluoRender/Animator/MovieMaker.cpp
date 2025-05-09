@@ -816,6 +816,17 @@ void MovieMaker::InsertKey(int index)
 		keycode.l2_name = "colormap high";
 		flkey = new FlKeyDouble(keycode, vd->GetColormapHigh());
 		glbin_interpolator.AddKey(flkey);
+
+		//output adj
+		keycode.l2_name = "gamma";
+		flkeyC = new FlKeyColor(keycode, vd->GetGammaColor());
+		glbin_interpolator.AddKey(flkeyC);
+		keycode.l2_name = "brightness";
+		flkeyC = new FlKeyColor(keycode, vd->GetBrightness());
+		glbin_interpolator.AddKey(flkeyC);
+		keycode.l2_name = "hdr";
+		flkeyC = new FlKeyColor(keycode, vd->GetHdr());
+		glbin_interpolator.AddKey(flkeyC);
 	}
 	//for the view
 	keycode.l0 = 1;
@@ -898,6 +909,16 @@ void MovieMaker::InsertKey(int index)
 	keycode.l2_name = "shadow dir y";
 	flkey = new FlKeyDouble(keycode, glbin_settings.m_shadow_dir_y);
 	glbin_interpolator.AddKey(flkey);
+	//output adj
+	keycode.l2_name = "gamma";
+	flkeyC = new FlKeyColor(keycode, m_view->GetGammaColor());
+	glbin_interpolator.AddKey(flkeyC);
+	keycode.l2_name = "brightness";
+	flkeyC = new FlKeyColor(keycode, m_view->GetBrightness());
+	glbin_interpolator.AddKey(flkeyC);
+	keycode.l2_name = "hdr";
+	flkeyC = new FlKeyColor(keycode, m_view->GetHdr());
+	glbin_interpolator.AddKey(flkeyC);
 
 	glbin_interpolator.End();
 
@@ -905,8 +926,8 @@ void MovieMaker::InsertKey(int index)
 	if (group)
 		group->type = m_interpolation;
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	glbin_moviemaker.SetCurrentFrame(glbin_moviemaker.GetClipEndFrame());
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetCurrentFrame(GetClipEndFrame());
 }
 
 bool MovieMaker::Action()
@@ -1006,22 +1027,26 @@ void MovieMaker::MakeKeys(int type)
 		MakeKeysClipZ(1);
 		break;
 	case 6:
-		AddChannToView();
+		MakeIntSweep();
 		break;
 	case 7:
-		KeyChannComb();
+		AddChannToView();
 		break;
 	case 8:
-		MakeKeysChannComb(1);
+		KeyChannComb();
 		break;
 	case 9:
-		MakeKeysChannComb(2);
+		MakeKeysChannComb(1);
 		break;
 	case 10:
-		MakeKeysChannComb(3);
+		MakeKeysChannComb(2);
 		break;
 	case 11:
+		MakeKeysChannComb(3);
+		break;
+	case 12:
 		MakeKeysLookingGlass(44);
+		break;
 	}
 }
 
@@ -1041,16 +1066,18 @@ std::vector<std::string> MovieMaker::GetAutoKeyTypes()
 	//5
 	result.push_back("Single Z section move down and back");
 	//6
-	result.push_back("Add channels one by one to view");
+	result.push_back("Sweep the intensity values from low to high");
 	//7
-	result.push_back("Channel combinations");
+	result.push_back("Add channels one by one to view");
 	//8
-	result.push_back("Channel combination nC1");
+	result.push_back("Channel combinations");
 	//9
-	result.push_back("Channel combination nC2");
+	result.push_back("Channel combination nC1");
 	//10
-	result.push_back("Channel combination nC3");
+	result.push_back("Channel combination nC2");
 	//11
+	result.push_back("Channel combination nC3");
+	//12
 	result.push_back("Looking Glass light field");
 	return result;
 }
@@ -1124,7 +1151,7 @@ void MovieMaker::MakeKeysCameraTumble()
 	kg = glbin_interpolator.GetKeyGroupFromTime(t);
 	if (kg) kg->desc = L"Rotate back to the initial angle";
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
 void MovieMaker::MakeKeysCameraZoom()
@@ -1173,7 +1200,7 @@ void MovieMaker::MakeKeysCameraZoom()
 	kg = glbin_interpolator.GetKeyGroupFromTime(t);
 	if (kg) kg->desc = L"Zoom out to the initial view";
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
 void MovieMaker::MakeKeysTimeSequence()
@@ -1244,7 +1271,7 @@ void MovieMaker::MakeKeysTimeSequence()
 	kg = glbin_interpolator.GetKeyGroupFromTime(t);
 	if (kg) kg->desc = L"Back to the initial time point";
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
 void MovieMaker::MakeKeysTimeColormap()
@@ -1343,7 +1370,7 @@ void MovieMaker::MakeKeysTimeColormap()
 			t += dt[i + 1];
 	}
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
 void MovieMaker::MakeKeysClipZ(int type)
@@ -1448,7 +1475,73 @@ void MovieMaker::MakeKeysClipZ(int type)
 	kg = glbin_interpolator.GetKeyGroupFromTime(t);
 	if (kg) kg->desc = type ? L"Back to the first Z section"  : L"Slice back up to the intial clipping plane position";
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+}
+
+void MovieMaker::MakeIntSweep()
+{
+	int n = m_view->GetAllVolumeNum();
+	if (n <= 0)
+		return;
+
+	FlKeyCode keycode1, keycode2;
+	FlKeyDouble* flkey = 0;
+	FlKeyGroup* kg = 0;
+
+	double t = glbin_interpolator.GetLastT();
+	if (t > 0.0) t += m_key_duration;
+
+	//for the view
+	keycode1.l0 = 1;
+	keycode1.l0_name = ws2s(m_view->GetName());
+	keycode2.l0 = 1;
+	keycode2.l0_name = ws2s(m_view->GetName());
+	//time point
+	keycode1.l2 = 0;
+	keycode1.l2_name = "low threshold";
+	keycode2.l2 = 0;
+	keycode2.l2_name = "high threshold";
+
+	glbin_interpolator.Begin(t, m_key_duration);
+	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		keycode1.l1 = 2;
+		keycode1.l1_name = ws2s(vd->GetName());
+		flkey = new FlKeyDouble(keycode1, 0.0);
+		glbin_interpolator.AddKey(flkey);
+		keycode2.l1 = 2;
+		keycode2.l1_name = ws2s(vd->GetName());
+		flkey = new FlKeyDouble(keycode2, 0.05);
+		glbin_interpolator.AddKey(flkey);
+	}
+	glbin_interpolator.End();
+	kg = glbin_interpolator.GetKeyGroupFromTime(t);
+	if (kg) kg->desc = L"Low intensity section";
+	t += m_key_duration;
+
+	glbin_interpolator.Begin(t, m_key_duration);
+	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	{
+		VolumeData* vd = m_view->GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		keycode1.l1 = 2;
+		keycode1.l1_name = ws2s(vd->GetName());
+		flkey = new FlKeyDouble(keycode1, 0.95);
+		glbin_interpolator.AddKey(flkey);
+		keycode2.l1 = 2;
+		keycode2.l1_name = ws2s(vd->GetName());
+		flkey = new FlKeyDouble(keycode2, 1.0);
+		glbin_interpolator.AddKey(flkey);
+	}
+	glbin_interpolator.End();
+	kg = glbin_interpolator.GetKeyGroupFromTime(t);
+	if (kg) kg->desc = L"High intensity section";
+
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }
 
 void MovieMaker::AddChannToView()
@@ -1503,7 +1596,7 @@ void MovieMaker::AddChannToView()
 		t += m_key_duration;
 	}
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
 }
 
 void MovieMaker::MakeKeysChannComb(int comb)
@@ -1560,7 +1653,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 		t += m_key_duration;
 	} while (GetMask(chan_mask));
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
 }
 
 bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)
@@ -1674,5 +1767,5 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	kg = glbin_interpolator.GetKeyGroupFromTime(t);
 	if (kg) kg->desc = L"Camera track horizontally";
 
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 }

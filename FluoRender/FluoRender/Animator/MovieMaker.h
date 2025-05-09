@@ -186,6 +186,7 @@ public:
 	void MakeKeysTimeSequence();
 	void MakeKeysTimeColormap();
 	void MakeKeysClipZ(int type);//type: 0-one-sided; 1-single slice
+	void MakeIntSweep();
 	void AddChannToView();
 	void KeyChannComb();
 	void MakeKeysChannComb(int comb);
