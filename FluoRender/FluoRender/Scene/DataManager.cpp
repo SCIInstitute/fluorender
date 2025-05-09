@@ -1987,8 +1987,8 @@ void VolumeData::SetMinMaxEnable(bool bval)
 	}
 	else
 	{
-		SetLowOffset(m_min_value, false);
-		SetHighOffset(m_max_value, false);
+		SetLowOffset(m_min_value / m_max_value, false);
+		SetHighOffset(1.0, false);
 	}
 }
 
@@ -2050,7 +2050,7 @@ void VolumeData::SetThreshEnable(bool bval)
 	else
 	{
 		SetLeftThresh(0, false);
-		SetRightThresh(m_max_value, false);
+		SetRightThresh(1, false);
 	}
 }
 

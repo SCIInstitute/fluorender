@@ -232,8 +232,8 @@ private:
 	//wavelength info
 	struct WavelengthInfo
 	{
-		int chan_num;
-		double wavelength;
+		int chan_num = 0;
+		double wavelength = 0.0;
 	};
 	std::vector<WavelengthInfo> m_excitation_wavelength_list;
 
