@@ -490,16 +490,7 @@ void WalkCycle::LoadCycle(const std::wstring& name)
 				if (entry[0] == "correlation")
 				{
 					//correlation
-					double v;
-					try
-					{
-						v = std::stod(entry[1]);
-					}
-					catch (...)
-					{
-						v = 0;
-					}
-					in_corr_ = v;
+					in_corr_ = STOD(entry[1]);
 				}
 			}
 			continue;

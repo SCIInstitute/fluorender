@@ -365,7 +365,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stol(str);
+		*value = STOL(str);
 		return true;
 	}
 
@@ -377,7 +377,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stoul(str);
+		*value = STOUL(str);
 		return true;
 	}
 
@@ -389,7 +389,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stoi(str);
+		*value = STOI(str);
 		return true;
 	}
 
@@ -401,7 +401,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stoul(str);
+		*value = STOUL(str);
 		return true;
 	}
 
@@ -413,7 +413,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stoull(str);
+		*value = STOULL(str);
 		return true;
 	}
 
@@ -425,7 +425,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = static_cast<short>(std::stoi(str));
+		*value = static_cast<short>(STOI(str));
 		return true;
 	}
 
@@ -437,7 +437,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = static_cast<unsigned short>(std::stoul(str));
+		*value = static_cast<unsigned short>(STOUL(str));
 		return true;
 	}
 
@@ -449,7 +449,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stod(str);
+		*value = STOD(str);
 		return true;
 	}
 
@@ -461,7 +461,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = std::stof(str);
+		*value = STOF(str);
 		return true;
 	}
 

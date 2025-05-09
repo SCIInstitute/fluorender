@@ -357,16 +357,7 @@ int ScriptProc::TimeMode(std::string& str)
 		return TM_ALL_POST_REWIND;
 	if (str == "TM_ALL")
 		return TM_ALL;
-	int result = 0;
-	try
-	{
-		result = std::stoi(str, nullptr, 0);
-	}
-	catch (...)
-	{
-		return result;
-	}
-	return result;
+	return STOI(str);
 }
 
 int ScriptProc::GetTimeNum()

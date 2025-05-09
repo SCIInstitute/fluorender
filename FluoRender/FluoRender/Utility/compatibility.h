@@ -619,6 +619,17 @@ extern "C" {
 inline char GETSLASHA() { return std::filesystem::path::preferred_separator; }
 inline wchar_t GETSLASH() { return static_cast<wchar_t>(GETSLASHA()); }
 
+inline int STOI(const char* s) { return (s ? atoi(s) : 0); }
+inline int STOI(const std::string& s, int def = 0) { try { return std::stoi(s); } catch (...) { return def; } }
+inline double STOD(const char* s) { return (s ? atof(s) : 0.0); }
+inline double STOD(const std::string& s, double def = 0.0) { try { return std::stod(s); } catch (...) { return def; } }
+inline long STOL(const std::string& s, long def = 0) { try { return std::stol(s); } catch (...) { return def; } }
+inline unsigned long STOUL(const std::string& s, unsigned long def = 0) { try { return std::stoul(s); } catch (...) { return def; } }
+inline unsigned long long STOULL(const std::string& s, unsigned long long def = 0) { try { return std::stoull(s); } catch (...) { return def; } }
+inline float STOF(const std::string& s, float def = 0.0f) { try { return std::stof(s); } catch (...) { return def; } }
+inline int WSTOI(const std::wstring& s, int def = 0) { try { return std::stoi(s); } catch (...) { return def; } }
+inline double WSTOD(const std::wstring& s, double def = 0.0) { try { return std::stod(s); } catch (...) { return def; } }
+
 #ifdef _WIN32 //WINDOWS ONLY
 
 #include <cstdlib>
@@ -697,14 +708,6 @@ inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 	return r;
 }
 
-inline int WSTOI(std::wstring s) { return _wtoi(s.c_str()); }
-
-inline double WSTOD(std::wstring s) { return _wtof(s.c_str()); }
-
-inline int STOI(const char* s) { return (s ? atoi(s) : 0); }
-
-inline double STOD(const char* s) { return (s ? atof(s) : 0.0); }
-
 #else // MAC OSX or LINUX
 
 #include <unistd.h>
@@ -780,14 +783,6 @@ inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 	va_end(args);
 	return r;
 }
-
-inline int WSTOI(std::wstring s) { return atoi(ws2s(s).c_str()); }
-
-inline double WSTOD(std::wstring s) { return atof(ws2s(s).c_str()); }
-
-inline int STOI(const char* s) { return (s ? atoi(s) : 0); }
-
-inline double STOD(const char* s) { return (s ? atof(s) : 0.0); }
 
 typedef union _LARGE_INTEGER {
 	struct {

@@ -3281,70 +3281,107 @@ void VolumeData::ApplyMlVolProp()
 	//get histogram
 	if (m_ep->getValid())
 	{
-		//set parameters
 		double dval, dval2;
+
 		//extract boundary
-		dval = std::max(0.0f, m_ep->getParam("extract_boundary"));
-		SetBoundary(dval);
+		if (m_boundary_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("extract_boundary"));
+			SetBoundary(dval);
+		}
 		//gamma
-		dval = std::max(0.0f, m_ep->getParam("gamma3d"));
-		SetGamma(dval);
-		//low offset
-		dval = std::max(0.0f, m_ep->getParam("low_offset"));
-		SetLowOffset(dval);
-		//high offset
-		dval = std::max(0.0f, m_ep->getParam("high_offset"));
-		SetHighOffset(dval);
-		//low thresholding
-		dval = std::max(0.0f, m_ep->getParam("low_threshold"));
-		SetLeftThresh(dval);
-		//high thresholding
-		dval = std::max(0.0f, m_ep->getParam("high_threshold"));
-		SetRightThresh(dval);
-		//low shading
-		dval = std::max(0.0f, m_ep->getParam("low_shading"));
-		//high shading
-		dval2 = std::max(0.0f, m_ep->getParam("high_shading"));
-		double amb, diff, spec, shine;
-		GetMaterial(amb, diff, spec, shine);
-		SetMaterial(dval, diff, spec, dval2);
-		//alpha
-		dval = std::max(0.0f, m_ep->getParam("alpha"));
-		SetAlpha(dval);
-		//sample rate
-		dval = std::max(0.1f, m_ep->getParam("sample_rate"));
-		SetSampleRate(dval);
-		//luminance
-		dval = std::max(0.0f, m_ep->getParam("luminance"));
-		double h, s, v;
-		GetHSV(h, s, v);
-		fluo::HSVColor hsv(h, s, dval);
-		fluo::Color color(hsv);
-		ResetMaskColorSet();
-		SetColor(color);
-		//colormap enable
-		dval = m_ep->getParam("colormap_enable");
-		SetColormapMode(dval>0.5);
-		//colormap inv
-		dval = m_ep->getParam("colormap_inv");
-		SetColormapInv(dval > 0.5 ? -1.0 : 1.0);
-		//colormap type
-		dval = m_ep->getParam("colormap_type");
-		SetColormap(std::round(dval));
-		//colormap projection
-		dval = m_ep->getParam("colormap_proj");
-		SetColormapProj(std::round(dval));
-		//colormap low value
-		dval = std::max(0.0f, m_ep->getParam("colormap_low"));
-		//colormap high value
-		dval2 = std::max(0.0f, m_ep->getParam("colormap_hi"));
-		SetColormapValues(dval, dval2);
-		//alpha
-		dval = m_ep->getParam("alpha_enable");
-		SetAlphaEnable(dval > 0.5);
+		if (m_gamma_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("gamma3d"));
+			SetGamma(dval);
+		}
+		//offset
+		if (m_minmax_enable)
+		{
+			//low
+			dval = std::max(0.0f, m_ep->getParam("low_offset"));
+			SetLowOffset(dval);
+			//high offset
+			dval = std::max(0.0f, m_ep->getParam("high_offset"));
+			SetHighOffset(dval);
+		}
+		//threshold
+		if (m_thresh_enable)
+		{
+			//low thresholding
+			dval = std::max(0.0f, m_ep->getParam("low_threshold"));
+			SetLeftThresh(dval);
+			//high thresholding
+			dval = std::max(0.0f, m_ep->getParam("high_threshold"));
+			SetRightThresh(dval);
+		}
 		//enable shading
 		dval = m_ep->getParam("shading_enable");
 		SetShadingEnable(dval > 0.5);
+		if (m_shading_enable)
+		{
+			//low shading
+			dval = std::max(0.0f, m_ep->getParam("low_shading"));
+			//high shading
+			dval2 = std::max(0.0f, m_ep->getParam("high_shading"));
+			double amb, diff, spec, shine;
+			GetMaterial(amb, diff, spec, shine);
+			SetMaterial(dval, diff, spec, dval2);
+		}
+		//shadow
+		dval = m_ep->getParam("shadow_enable");
+		SetShadowEnable(dval > 0.5);
+		if (m_shadow_enable)
+		{
+			//shadow intensity
+			dval = std::max(0.0f, m_ep->getParam("shadow_intensity"));
+			SetShadowIntensity(dval);
+		}
+		//alpha
+		dval = m_ep->getParam("alpha_enable");
+		SetAlphaEnable(dval > 0.5);
+		if (m_alpha_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("alpha"));
+			SetAlpha(dval);
+		}
+		//sample rate
+		if (m_sample_rate_enable)
+		{
+			dval = std::max(0.1f, m_ep->getParam("sample_rate"));
+			SetSampleRate(dval);
+		}
+		//luminance
+		if (m_luminance_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("luminance"));
+			double h, s, v;
+			GetHSV(h, s, v);
+			fluo::HSVColor hsv(h, s, dval);
+			fluo::Color color(hsv);
+			ResetMaskColorSet();
+			SetColor(color);
+		}
+		//colormap enable
+		dval = m_ep->getParam("colormap_enable");
+		SetColormapMode(dval>0.5);
+		if (m_colormap_mode > 0)
+		{
+			//colormap inv
+			dval = m_ep->getParam("colormap_inv");
+			SetColormapInv(dval > 0.5 ? -1.0 : 1.0);
+			//colormap type
+			dval = m_ep->getParam("colormap_type");
+			SetColormap(std::round(dval));
+			//colormap projection
+			dval = m_ep->getParam("colormap_proj");
+			SetColormapProj(std::round(dval));
+			//colormap low value
+			dval = std::max(0.0f, m_ep->getParam("colormap_low"));
+			//colormap high value
+			dval2 = std::max(0.0f, m_ep->getParam("colormap_hi"));
+			SetColormapValues(dval, dval2);
+		}
 		//interpolation
 		dval = m_ep->getParam("interp_enable");
 		SetInterpolate(dval > 0.5);
@@ -3360,12 +3397,6 @@ void VolumeData::ApplyMlVolProp()
 		//noise reduction
 		dval = m_ep->getParam("denoise_enable");
 		SetNR(dval > 0.5);
-		//shadow
-		dval = m_ep->getParam("shadow_enable");
-		SetShadowEnable(dval > 0.5);
-		//shadow intensity
-		dval = std::max(0.0f, m_ep->getParam("shadow_intensity"));
-		SetShadowIntensity(dval);
 	}
 }
 
@@ -4381,9 +4412,9 @@ AText* Annotations::GetAText(const std::wstring& str)
 	}
 	if (tab_counter == 4)
 	{
-		double x = std::stod(sX);
-		double y = std::stod(sY);
-		double z = std::stod(sZ);
+		double x = WSTOD(sX);
+		double y = WSTOD(sY);
+		double z = WSTOD(sZ);
 		int resx = 1;
 		int resy = 1;
 		int resz = 1;

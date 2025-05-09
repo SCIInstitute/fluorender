@@ -149,10 +149,10 @@ namespace flrd
 			for (size_t i = 0; i < entry.size(); ++i)
 			{
 				if (props[i] == "x")
-					p.x(std::stof(entry[i]));
+					p.x(STOF(entry[i]));
 				if (props[i] == "y")
 				{
-					p.y(std::stof(entry[i]));
+					p.y(STOF(entry[i]));
 					points.push_back(p);
 				}
 			}

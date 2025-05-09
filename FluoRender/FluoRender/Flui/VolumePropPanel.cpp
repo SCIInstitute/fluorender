@@ -296,17 +296,17 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m2->Add(m_boundary_chk, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_boundary_text, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_boundary_sldr, 1, wxEXPAND);
+	//shading
+	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	//highlight
 	m_shade_st = new wxFadeButton(this, wxID_ANY, "Shading",
 		wxDefaultPosition, bts);
 	m_hi_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_hi_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
-	//shading
-	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts3, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shade_st->SetFontBold();
@@ -314,19 +314,19 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_low_shading_sldr->SetHistoryIndicator(m_shade_st);
 	//bind events
 	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
-	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
-	m_hi_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnHiShadingText, this);
 	m_low_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLowShadingChange, this);
 	m_low_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLowShadingText, this);
+	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
+	m_hi_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnHiShadingText, this);
 	m_shade_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadingChk, this);
 	//add to sizer
 	sizer_m3->Add(m_shade_st, 0, wxALIGN_CENTER);
 	sizer_m3->Add(5, 5);
 	sizer_m3->Add(m_shade_chk, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND);
 	sizer_m3->Add(m_low_shading_text, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_low_shading_sldr, 1, wxEXPAND);
+	sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND);
 	//shadow
 	m_shadow_st = new wxFadeButton(this, wxID_ANY, "Shadow",
 		wxDefaultPosition, bts);
@@ -504,7 +504,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
-	st = new wxStaticText(this, 0, "Prime Color: ",
+	st = new wxStaticText(this, 0, "Primary Color",
 		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
@@ -518,7 +518,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r3->Add(m_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
-	st = new wxStaticText(this, 0, "Secnd Color: ",
+	st = new wxStaticText(this, 0, "Secondary",
 		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_color2_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);

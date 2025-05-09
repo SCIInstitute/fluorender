@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <base_reader.h>
+#include <compatibility.h>
 
 BaseReader::BaseReader() :
 	Progress()
@@ -299,7 +300,7 @@ double BaseReader::get_double(const std::string& str, int64_t pos)
 			break;
 	}
 	if (num_str != "")
-		return std::stod(num_str.c_str());
+		return STOD(num_str.c_str());
 	else
 		return 0;
 }

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <DataManager.h>
 #include <png_resource.h>
+#include <compatibility.h>
 #include <wx/valnum.h>
 //resources
 #include <icons.h>
@@ -991,7 +992,7 @@ void ListPanel::OnSizeXText(wxCommandEvent& event)
 	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_x_txt && glbin_current.vol_data)
 		glbin_current.vol_data->SetResize(-1,
-			std::stoi(size_x_txt->GetValue().ToStdString()), -1, -1);
+			STOI(size_x_txt->GetValue().ToStdString()), -1, -1);
 }
 
 void ListPanel::OnSizeYText(wxCommandEvent& event)
@@ -999,7 +1000,7 @@ void ListPanel::OnSizeYText(wxCommandEvent& event)
 	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_y_txt && glbin_current.vol_data)
 		glbin_current.vol_data->SetResize(-1, -1,
-			std::stoi(size_y_txt->GetValue().ToStdString()), -1);
+			STOI(size_y_txt->GetValue().ToStdString()), -1);
 }
 
 void ListPanel::OnSizeZText(wxCommandEvent& event)
@@ -1007,7 +1008,7 @@ void ListPanel::OnSizeZText(wxCommandEvent& event)
 	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
 	if (size_z_txt && glbin_current.vol_data)
 		glbin_current.vol_data->SetResize(-1, -1, -1,
-			std::stoi(size_z_txt->GetValue().ToStdString()));
+			STOI(size_z_txt->GetValue().ToStdString()));
 }
 
 void ListPanel::OnFilterChange(wxCommandEvent& event)

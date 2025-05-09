@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <PyDlc.h>
 #include <Ruler.h>
 #include <RulerHandler.h>
+#include <compatibility.h>
 #include <filesystem>
 #include <iostream>
 #include <vector>
@@ -144,7 +145,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 		if (entry[0] == "time_offset")
 		{
 			has_toff = true;
-			toff = std::stoi(entry[1]);
+			toff = STOI(entry[1]);
 			continue;
 		}
 
@@ -159,7 +160,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 				start = true;
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-				size_t t = std::stoi(entry[0]) + toff;
+				size_t t = STOI(entry[0]) + toff;
 				size_t c = 0;
 				Ruler* r = 0;
 				int rst;
@@ -198,7 +199,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 			{
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-				size_t t = std::stoi(entry[0]) + toff;
+				size_t t = STOI(entry[0]) + toff;
 				size_t c = 0, ri = 0, rpi = 0;
 				Ruler* r = 0;
 				int rst;

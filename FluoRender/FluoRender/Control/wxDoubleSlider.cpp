@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <wxDoubleSlider.h>
+#include <HistoryIndicator.h>
 #include <Debug.h>
 
 wxDoubleSlider::wxDoubleSlider(
@@ -838,6 +839,13 @@ void wxDoubleSlider::push(double t)
 		//	stack_size_, stack_pointer_,
 		//	stack1_.back().first, stack1_.back().second,
 		//	stack2_.back().first, stack2_.back().second);
+
+		if (indicator_)
+		{
+			indicator_->SetLength(stack_.size());
+			indicator_->SetPosition(stack_pointer_);
+			indicator_->UpdateHistory();
+		}
 	}
 }
 

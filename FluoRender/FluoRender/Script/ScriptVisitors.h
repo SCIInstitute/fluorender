@@ -145,8 +145,8 @@ protected:
 	{
 		if (!object)
 			return;
-		int time = std::stoi(t_);
-		int chann = std::stoi(ch_);
+		int time = STOI(t_);
+		int chann = STOI(ch_);
 		std::string str;
 		object->getValue("type", str);
 		if (str == "backg_stat")
@@ -158,7 +158,7 @@ protected:
 				//expand bg values
 				if (bg_values_.size() <= time)
 					bg_values_.resize(time + 1);
-				double dval = std::stod(std::get<2>(vt));
+				double dval = STOD(std::get<2>(vt));
 				bg_values_[time] = dval;
 			}
 		}
@@ -184,7 +184,7 @@ protected:
 				BaseValues& bv = rit->second;
 				if (time >= bv.size())
 					bv.resize(time + 1);
-				double dval = std::stod(std::get<2>(vt));
+				double dval = STOD(std::get<2>(vt));
 				bv[time] = dval;
 			}
 		}

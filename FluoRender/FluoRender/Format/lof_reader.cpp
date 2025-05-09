@@ -420,13 +420,13 @@ void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 			ChannelInfo cinfo;
 			cinfo.chan = static_cast<int>(m_lof_info.channels.size());
 			str = GetAttributeValue(child, "Resolution");
-			cinfo.res = std::stoul(str);
+			cinfo.res = STOUL(str);
 			str = GetAttributeValue(child, "Min");
-			cinfo.minv = std::stod(str);
+			cinfo.minv = STOD(str);
 			str = GetAttributeValue(child, "Max");
-			cinfo.maxv = std::stod(str);
+			cinfo.maxv = STOD(str);
 			str = GetAttributeValue(child, "BytesInc");
-			cinfo.inc = std::stoull(str);
+			cinfo.inc = STOULL(str);
 			cinfo.lut = GetAttributeValue(child, "LUTName");
 			m_lof_info.channels.push_back(cinfo);
 			m_lof_info.minv = std::min(m_lof_info.minv, cinfo.minv);
@@ -455,13 +455,13 @@ void LOFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node)
 				else if (str == "mm")
 					sfactor = 1e3;
 				str = GetAttributeValue(child, "NumberOfElements");
-				size = std::stoul(str);
+				size = STOUL(str);
 				str = GetAttributeValue(child, "Origin");
-				orig = std::stod(str) * sfactor;
+				orig = STOD(str) * sfactor;
 				str = GetAttributeValue(child, "Length");
-				len = std::stod(str) * sfactor;
+				len = STOD(str) * sfactor;
 				str = GetAttributeValue(child, "BytesInc");
-				inc = std::stoull(str);
+				inc = STOULL(str);
 				AddSubBlockInfo(did, size, orig, len, inc);
 			}
 		}

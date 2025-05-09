@@ -317,27 +317,27 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 
 	if (strKey == "xYStageGridIndex")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.grid_index = ival;
 	}
 	else if (strKey == "xYStageGridXIndex")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.grid_index_x = ival;
 	}
 	else if (strKey == "xYStageGridYIndex")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.grid_index_y = ival;
 	}
 	else if (strKey == "positionCurrent_XAxis")
 	{
-		try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+		dval = STOD(strValue);
 		m_current_state.pos_x = dval;
 	}
 	else if (strKey == "positionCurrent_YAxis")
 	{
-		try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+		dval = STOD(strValue);
 		m_current_state.pos_y = dval;
 	}
 	else if (strKey == "positionCurrent_ZAxis")
@@ -345,7 +345,7 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 		size_t pos = strValue.find(',');
 		if (pos == std::string::npos)
 		{
-			try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+			dval = STOD(strValue);
 			m_current_state.pos_z = dval;
 		}
 		else
@@ -353,12 +353,12 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 			m_current_state.pos_z = 0.0;
 			do
 			{
-				try { dval = std::stod(strValue.substr(0, pos)); } catch (...) { dval = 0.0; }
+				dval = STOD(strValue.substr(0, pos));
 				m_current_state.pos_z += dval;
 				strValue = strValue.substr(pos + 1);
 				pos = strValue.find(',');
 			} while (pos != std::string::npos);
-			try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+			dval = STOD(strValue);
 			if (!strValue.empty() && dval)
 				m_current_state.pos_z += dval;
 		}
@@ -369,27 +369,27 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 	}
 	else if (strKey == "zDevice")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.z_device = ival;
 	}
 	else if (strKey == "pixelsPerLine")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.ppl = ival;
 	}
 	else if (strKey == "linesPerFrame")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.lpf = ival;
 	}
 	else if (strKey == "micronsPerPixel_XAxis")
 	{
-		try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+		dval = STOD(strValue);
 		m_current_state.mpp_x = dval;
 	}
 	else if (strKey == "micronsPerPixel_YAxis")
 	{
-		try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+		dval = STOD(strValue);
 		m_current_state.mpp_y = dval;
 	}
 	else if (strKey == "micronsPerPixel")
@@ -398,12 +398,12 @@ void PVXMLReader::ReadKey(tinyxml2::XMLElement* keyNode)
 	}
 	else if (strKey == "bitDepth")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_current_state.bit_depth = ival;
 	}
 	else if (strKey == "seqType")
 	{
-		try { ival = std::stoi(strValue); } catch (...) { ival = 0; }
+		ival = STOI(strValue);
 		m_seq_type = ival;
 	}
 	else if (strKey == "laserPower")
@@ -434,17 +434,17 @@ void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, const std::strin
 					{
 						if (strIndex == "XAxis")
 						{
-							try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+							dval = STOD(strValue);
 							m_current_state.pos_x = dval;
 						}
 						else if (strIndex == "YAxis")
 						{
-							try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+							dval = STOD(strValue);
 							m_current_state.pos_y = dval;
 						}
 						else if (strIndex == "ZAxis")
 						{
-							try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+							dval = STOD(strValue);
 							m_current_state.pos_z = dval;
 						}
 					}
@@ -466,12 +466,12 @@ void PVXMLReader::ReadIndexedKey(tinyxml2::XMLElement* keyNode, const std::strin
 				std::string strValue = GetAttributeValue(child, "value");
 				if (strIndex == "XAxis")
 				{
-					try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+					dval = STOD(strValue);
 					m_current_state.mpp_x = dval;
 				}
 				else if (strIndex == "YAxis")
 				{
-					try { dval = std::stod(strValue); } catch (...) { dval = 0.0; }
+					dval = STOD(strValue);
 					m_current_state.mpp_y = dval;
 				}
 			}
@@ -567,8 +567,7 @@ void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 		if (strName == "File")
 		{
 			std::string channel = GetAttributeValue(child, "channel");
-			int chn = 0;
-			try { chn = std::stoi(channel); } catch (...) {}
+			int chn = STOI(channel);
 			std::string filename = GetAttributeValue(child, "filename");
 
 			ChannelInfo channel_info;
@@ -1146,8 +1145,7 @@ void PVXMLReader::ReadLaser(tinyxml2::XMLElement* node)
 			std::string strIndex = GetAttributeValue(child, "index");
 			std::string strValue = GetAttributeValue(child, "value");
 			std::string strDesc = GetAttributeValue(child, "description");
-			int ch = 0;
-			try { ch = std::stoi(strIndex); } catch (...) {}
+			int ch = STOI(strIndex);
 			int wl = 0;
 			std::string strWl;
 			if (strDesc.find("LED") != std::string::npos ||
@@ -1162,7 +1160,7 @@ void PVXMLReader::ReadLaser(tinyxml2::XMLElement* node)
 					else
 						break;
 				}
-				try { wl = std::stoi(strWl); } catch (...) {}
+				wl = STOI(strWl);
 			}
 			WavelengthInfo winfo;
 			winfo.chan_num = ch;

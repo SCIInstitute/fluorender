@@ -329,7 +329,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stol(str);
+			*value = STOL(str);
 			return true;
 		}
 		*value = def;
@@ -341,7 +341,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stoul(str);
+			*value = STOUL(str);
 			return true;
 		}
 		*value = def;
@@ -353,7 +353,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stoi(str);
+			*value = STOI(str);
 			return true;
 		}
 		*value = def;
@@ -365,7 +365,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stoul(str);
+			*value = STOUL(str);
 			return true;
 		}
 		*value = def;
@@ -377,7 +377,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stoull(str);
+			*value = STOULL(str);
 			return true;
 		}
 		*value = def;
@@ -389,7 +389,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = static_cast<short>(std::stoi(str));
+			*value = static_cast<short>(STOI(str));
 			return true;
 		}
 		*value = def;
@@ -401,7 +401,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = static_cast<unsigned short>(std::stoul(str));
+			*value = static_cast<unsigned short>(STOUL(str));
 			return true;
 		}
 		*value = def;
@@ -413,7 +413,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stod(str);
+			*value = STOD(str);
 			return true;
 		}
 		*value = def;
@@ -425,7 +425,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = std::stof(str);
+			*value = STOF(str);
 			return true;
 		}
 		*value = def;

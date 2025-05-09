@@ -491,7 +491,7 @@ void ND2Reader::ReadTextInfo(LIMFILEHANDLE h)
 					exw = str.substr(pos + 20, pt - pos - 20);
 					WavelengthInfo winfo;
 					winfo.chan_num = c;
-					winfo.wavelength = std::stod(exw);
+					winfo.wavelength = STOD(exw);
 					m_excitation_wavelength_list.push_back(winfo);
 					c++;
 					pos = pt;

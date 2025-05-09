@@ -826,25 +826,25 @@ void CZIReader::FindNodeRecursive(tinyxml2::XMLElement* node)
 		if (name == "ScalingX")
 		{
 			str = child->GetText();
-			dval = std::stod(str);
+			dval = STOD(str);
 			m_xspc = dval * 1e6;
 		}
 		else if (name == "ScalingY")
 		{
 			str = child->GetText();
-			dval = std::stod(str);
+			dval = STOD(str);
 			m_yspc = dval * 1e6;
 		}
 		else if (name == "ScalingZ")
 		{
 			str = child->GetText();
-			dval = std::stod(str);
+			dval = STOD(str);
 				m_zspc = dval * 1e6;
 		}
 		else if (name == "ExcitationWavelength")
 		{
 			str = child->GetText();
-			dval = std::stod(str);
+			dval = STOD(str);
 			WavelengthInfo winfo;
 			winfo.chan_num = static_cast<int>(m_excitation_wavelength_list.size());
 			winfo.wavelength = dval;

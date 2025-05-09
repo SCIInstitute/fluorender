@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 #include <Plane.h>
+#include <compatibility.h>
 #include <algorithm>
 #ifdef _DEBUG
 #include <Debug.h>
@@ -2144,7 +2145,7 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 				str = (*it2);
 				++it2;
 				str2 = (*it2);
-				fconfig->Write(str, std::stoi(str2));
+				fconfig->Write(str, STOI(str2));
 			}
 			else if (*it2 == "thresh" ||
 				*it2 == "dist_strength" ||
@@ -2156,7 +2157,7 @@ void ComponentGenerator::SaveCmd(const std::wstring& filename)
 				str = (*it2);
 				++it2;
 				str2 = (*it2);
-				fconfig->Write(str, std::stod(str2));
+				fconfig->Write(str, STOD(str2));
 			}
 		}
 	}
@@ -2261,41 +2262,41 @@ void ComponentGenerator::PlayCmd(double tfactor)
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "iter")
-					m_iter = std::stoi(*(++it2));
+					m_iter = STOI(*(++it2));
 				else if (*it2 == "thresh")
-					m_thresh = std::stod(*(++it2));
+					m_thresh = STOD(*(++it2));
 				else if (*it2 == "use_dist_field")
-					m_use_dist_field = std::stoi(*(++it2));
+					m_use_dist_field = STOI(*(++it2));
 				else if (*it2 == "dist_strength")
-					m_dist_strength = std::stod(*(++it2));
+					m_dist_strength = STOD(*(++it2));
 				else if (*it2 == "dist_filter_size")
-					m_dist_filter_size = std::stoi(*(++it2));
+					m_dist_filter_size = STOI(*(++it2));
 				else if (*it2 == "max_dist")
-					m_max_dist = std::stoi(*(++it2));
+					m_max_dist = STOI(*(++it2));
 				else if (*it2 == "dist_thresh")
-					m_dist_thresh = std::stod(*(++it2));
+					m_dist_thresh = STOD(*(++it2));
 				else if (*it2 == "diff")
-					m_diff = std::stoi(*(++it2));
+					m_diff = STOI(*(++it2));
 				else if (*it2 == "falloff")
-					m_falloff = std::stod(*(++it2));
+					m_falloff = STOD(*(++it2));
 				else if (*it2 == "density")
-					m_density = std::stoi(*(++it2));
+					m_density = STOI(*(++it2));
 				else if (*it2 == "density_thresh")
-					m_density_thresh = std::stod(*(++it2));
+					m_density_thresh = STOD(*(++it2));
 				else if (*it2 == "varth")
-					m_varth = std::stod(*(++it2));
+					m_varth = STOD(*(++it2));
 				else if (*it2 == "density_window_size")
-					m_density_window_size = std::stoi(*(++it2));
+					m_density_window_size = STOI(*(++it2));
 				else if (*it2 == "density_stats_size")
-					m_density_stats_size = std::stoi(*(++it2));
+					m_density_stats_size = STOI(*(++it2));
 				else if (*it2 == "cleanb")
-					m_clean = std::stoi(*(++it2));
+					m_clean = STOI(*(++it2));
 				else if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
+					m_clean_iter = STOI(*(++it2));
 				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
+					m_clean_size_vl = STOI(*(++it2));
 				else if (*it2 == "grow_fixed")
-					m_grow_fixed = std::stoi(*(++it2));
+					m_grow_fixed = STOI(*(++it2));
 			}
 			GenerateComp(false);
 		}
@@ -2306,9 +2307,9 @@ void ComponentGenerator::PlayCmd(double tfactor)
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "clean_iter")
-					m_clean_iter = std::stoi(*(++it2));
+					m_clean_iter = STOI(*(++it2));
 				else if (*it2 == "clean_size_vl")
-					m_clean_size_vl = std::stoi(*(++it2));
+					m_clean_size_vl = STOI(*(++it2));
 			}
 			Clean(false);
 		}
@@ -2319,7 +2320,7 @@ void ComponentGenerator::PlayCmd(double tfactor)
 				it2 != it->end(); ++it2)
 			{
 				if (*it2 == "fix_size")
-					m_fix_size = std::stoi(*(++it2));
+					m_fix_size = STOI(*(++it2));
 			}
 			//GenerateComp();
 			Fixate(false);
