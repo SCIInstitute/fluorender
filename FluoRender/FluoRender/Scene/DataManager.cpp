@@ -5816,6 +5816,11 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	}
 	//low offset set to min value
 	vd->SetLowOffset(vd->GetMinValue() / vd->GetMaxValue());
+	//disable alpha for z = 1
+	int nx, ny, nz;
+	vd->GetResolution(nx, ny, nz);
+	if (nz == 1)
+		vd->SetAlphaEnable(false);
 }
 
 //set project path
@@ -5890,6 +5895,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	bool enable_4d = false;
 	bool enable_rot_lock = false;
 	m_file_num = files.size();
+	int all_ch_num = 0;
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; ++m_cur_file)
 	{
@@ -5926,6 +5932,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		else if (suffix == L".mp4" || suffix == L".m4v" || suffix == L".mov" || suffix == L".avi" || suffix == L".wmv")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_MPG, false);
 
+		all_ch_num += ch_num;
 		if (ch_num > 1)
 		{
 			DataGroup* group = view->AddOrGetGroup();
@@ -6022,6 +6029,11 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	}
 	view->SetRotLock(enable_rot_lock);
 	vc.insert(gstGearedEnable);
+	if (enable_rot_lock && all_ch_num > 1)
+	{
+		glbin_settings.m_micro_blend = true;
+		vc.insert(gstMicroBlendEnable);
+	}
 
 	m_frame->UpdateProps(vc);
 

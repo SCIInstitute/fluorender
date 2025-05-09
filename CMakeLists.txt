@@ -49,10 +49,9 @@ if (WIN32)
 endif()
 
 # option to build with multithreading
-SET(USE_MP_COMPILE "4" CACHE STRING "Number of parallel jobs for building")
-if (NOT USE_MP_COMPILE STREQUAL "")
-    set(CMAKE_BUILD_PARALLEL_LEVEL ${USE_MP_COMPILE})
-endif()
+SET(USE_MP_COMPILE "0" CACHE STRING "Number of parallel jobs for building")
+# Convert the string to a number
+math(EXPR MP_THREADS "${USE_MP_COMPILE}")
 
 cmake_minimum_required(VERSION 3.10)
 
@@ -1083,7 +1082,7 @@ elseif(WIN32)
     add_definitions(-DWIN32)
     add_definitions(-D_WIN32)
     if(MSVC)
-      if (USE_MP_COMPILE)
+      if (MP_THREADS GREATER 1)
         add_definitions(/MP)
       endif()
       add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
