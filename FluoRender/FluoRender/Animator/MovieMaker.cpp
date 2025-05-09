@@ -695,57 +695,127 @@ void MovieMaker::InsertKey(int index)
 		//x1
 		plane = (*planes)[0];
 		plane->get_copy(abcd);
-		keycode.l2 = 0;
 		keycode.l2_name = "x1_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		glbin_interpolator.AddKey(flkey);
 		//x2
 		plane = (*planes)[1];
 		plane->get_copy(abcd);
-		keycode.l2 = 0;
 		keycode.l2_name = "x2_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		glbin_interpolator.AddKey(flkey);
 		//y1
 		plane = (*planes)[2];
 		plane->get_copy(abcd);
-		keycode.l2 = 0;
 		keycode.l2_name = "y1_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		glbin_interpolator.AddKey(flkey);
 		//y2
 		plane = (*planes)[3];
 		plane->get_copy(abcd);
-		keycode.l2 = 0;
 		keycode.l2_name = "y2_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		glbin_interpolator.AddKey(flkey);
 		//z1
 		plane = (*planes)[4];
 		plane->get_copy(abcd);
-		keycode.l2 = 0;
 		keycode.l2_name = "z1_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		glbin_interpolator.AddKey(flkey);
 		//z2
 		plane = (*planes)[5];
 		plane->get_copy(abcd);
-		keycode.l2 = 0;
 		keycode.l2_name = "z2_val";
 		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
 		glbin_interpolator.AddKey(flkey);
 		//t
 		int frame = vd->GetCurTime();
-		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		flkey = new FlKeyDouble(keycode, frame);
 		glbin_interpolator.AddKey(flkey);
 		//primary color
 		fluo::Color pc = vd->GetColor();
-		keycode.l2 = 0;
 		keycode.l2_name = "color";
 		flkeyC = new FlKeyColor(keycode, pc);
 		glbin_interpolator.AddKey(flkeyC);
+
+		//volume properties
+		//minmax
+		keycode.l2_name = "minmax enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetMinMaxEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "low_offset";
+		flkey = new FlKeyDouble(keycode, vd->GetLowOffset());
+		glbin_interpolator.AddKey(flkey);
+		keycode.l2_name = "high_offset";
+		flkey = new FlKeyDouble(keycode, vd->GetHighOffset());
+		glbin_interpolator.AddKey(flkey);
+		//gamma
+		keycode.l2_name = "gamma3d enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetGammaEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "gamma3d";
+		flkey = new FlKeyDouble(keycode, vd->GetGamma());
+		glbin_interpolator.AddKey(flkey);
+		//alpha
+		keycode.l2_name = "alpha enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetAlphaEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "alpha";
+		flkey = new FlKeyDouble(keycode, vd->GetAlpha());
+		glbin_interpolator.AddKey(flkey);
+		//luminance is color
+		//sample rate
+		keycode.l2_name = "sample rate enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetSampleRateEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "sample rate";
+		flkey = new FlKeyDouble(keycode, vd->GetSampleRate());
+		glbin_interpolator.AddKey(flkey);
+		//threshold
+		keycode.l2_name = "threshold enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetThreshEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "low threshold";
+		flkey = new FlKeyDouble(keycode, vd->GetLeftThresh());
+		glbin_interpolator.AddKey(flkey);
+		keycode.l2_name = "high threshold";
+		flkey = new FlKeyDouble(keycode, vd->GetRightThresh());
+		glbin_interpolator.AddKey(flkey);
+		//boundary
+		keycode.l2_name = "boundary enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetBoundaryEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "boundary";
+		flkey = new FlKeyDouble(keycode, vd->GetBoundary());
+		glbin_interpolator.AddKey(flkey);
+		//shading
+		keycode.l2_name = "shading enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetShadingEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "low shading";
+		flkey = new FlKeyDouble(keycode, vd->GetLowShading());
+		glbin_interpolator.AddKey(flkey);
+		keycode.l2_name = "high shading";
+		flkey = new FlKeyDouble(keycode, vd->GetHiShading());
+		glbin_interpolator.AddKey(flkey);
+		//shadow
+		keycode.l2_name = "shadow enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetShadowEnable());
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "shadow intensity";
+		flkey = new FlKeyDouble(keycode, vd->GetShadowIntensity());
+		glbin_interpolator.AddKey(flkey);
+		//colormap
+		keycode.l2_name = "colormap enable";
+		flkeyB = new FlKeyBoolean(keycode, vd->GetColormapMode() > 0);
+		glbin_interpolator.AddKey(flkeyB);
+		keycode.l2_name = "colormap low";
+		flkey = new FlKeyDouble(keycode, vd->GetColormapLow());
+		glbin_interpolator.AddKey(flkey);
+		keycode.l2_name = "colormap high";
+		flkey = new FlKeyDouble(keycode, vd->GetColormapHigh());
+		glbin_interpolator.AddKey(flkey);
 	}
 	//for the view
 	keycode.l0 = 1;
@@ -817,6 +887,16 @@ void MovieMaker::InsertKey(int index)
 		aov = 9.9;
 	keycode.l2_name = "aov";
 	flkey = new FlKeyDouble(keycode, aov);
+	glbin_interpolator.AddKey(flkey);
+	//shadow dir
+	keycode.l2_name = "shadow dir enable";
+	flkeyB = new FlKeyBoolean(keycode, glbin_settings.m_shadow_dir);
+	glbin_interpolator.AddKey(flkeyB);
+	keycode.l2_name = "shadow dir x";
+	flkey = new FlKeyDouble(keycode, glbin_settings.m_shadow_dir_x);
+	glbin_interpolator.AddKey(flkey);
+	keycode.l2_name = "shadow dir y";
+	flkey = new FlKeyDouble(keycode, glbin_settings.m_shadow_dir_y);
 	glbin_interpolator.AddKey(flkey);
 
 	glbin_interpolator.End();

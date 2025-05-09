@@ -1045,10 +1045,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_all || FOUND_VALUE(gstShadowDir))
 	{
-		bool bval = glbin_settings.m_shadow_dir;
-		m_shadow_dir_chk->SetValue(bval);
-		m_shadow_dir_sldr->Enable(bval);
-		m_shadow_dir_text->Enable(bval);
+		bool bval1 = m_vd->GetShadowEnable();
+		bool bval2 = glbin_settings.m_shadow_dir;
+		m_shadow_dir_chk->SetValue(bval2);
+		m_shadow_dir_sldr->Enable(bval1);
+		m_shadow_dir_text->Enable(bval1);
 		double deg = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x));
 		m_shadow_dir_sldr->ChangeValue(std::round(deg));
 		m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", deg));

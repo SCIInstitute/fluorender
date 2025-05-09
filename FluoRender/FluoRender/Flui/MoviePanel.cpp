@@ -2008,6 +2008,9 @@ void MoviePanel::OnInterpolation(wxCommandEvent& event)
 
 void MoviePanel::OnInsKey(wxCommandEvent& event)
 {
+	if (!glbin_moviemaker.GetKeyframeEnable())
+		glbin_moviemaker.SetKeyframeEnable(true);
+
 	wxString str;
 	long item = m_keylist->GetNextItem(-1,
 		wxLIST_NEXT_ALL,
@@ -2021,9 +2024,6 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 		index = glbin_interpolator.GetKeyIndex(id);
 	}
 	glbin_moviemaker.InsertKey(index);
-
-	if (!glbin_moviemaker.GetKeyframeEnable())
-		glbin_moviemaker.SetKeyframeEnable(true);
 
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
 	m_keylist->Update();

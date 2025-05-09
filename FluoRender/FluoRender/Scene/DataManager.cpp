@@ -3283,19 +3283,7 @@ void VolumeData::ApplyMlVolProp()
 	{
 		double dval, dval2;
 
-		//extract boundary
-		if (m_boundary_enable)
-		{
-			dval = std::max(0.0f, m_ep->getParam("extract_boundary"));
-			SetBoundary(dval);
-		}
-		//gamma
-		if (m_gamma_enable)
-		{
-			dval = std::max(0.0f, m_ep->getParam("gamma3d"));
-			SetGamma(dval);
-		}
-		//offset
+		//minmax
 		if (m_minmax_enable)
 		{
 			//low
@@ -3304,6 +3292,37 @@ void VolumeData::ApplyMlVolProp()
 			//high offset
 			dval = std::max(0.0f, m_ep->getParam("high_offset"));
 			SetHighOffset(dval);
+		}
+		//gamma
+		if (m_gamma_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("gamma3d"));
+			SetGamma(dval);
+		}
+		//alpha
+		dval = m_ep->getParam("alpha_enable");
+		SetAlphaEnable(dval > 0.5);
+		if (m_alpha_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("alpha"));
+			SetAlpha(dval);
+		}
+		//luminance
+		if (m_luminance_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("luminance"));
+			double h, s, v;
+			GetHSV(h, s, v);
+			fluo::HSVColor hsv(h, s, dval);
+			fluo::Color color(hsv);
+			ResetMaskColorSet();
+			SetColor(color);
+		}
+		//sample rate
+		if (m_sample_rate_enable)
+		{
+			dval = std::max(0.1f, m_ep->getParam("sample_rate"));
+			SetSampleRate(dval);
 		}
 		//threshold
 		if (m_thresh_enable)
@@ -3314,6 +3333,12 @@ void VolumeData::ApplyMlVolProp()
 			//high thresholding
 			dval = std::max(0.0f, m_ep->getParam("high_threshold"));
 			SetRightThresh(dval);
+		}
+		//extract boundary
+		if (m_boundary_enable)
+		{
+			dval = std::max(0.0f, m_ep->getParam("extract_boundary"));
+			SetBoundary(dval);
 		}
 		//enable shading
 		dval = m_ep->getParam("shading_enable");
@@ -3336,31 +3361,6 @@ void VolumeData::ApplyMlVolProp()
 			//shadow intensity
 			dval = std::max(0.0f, m_ep->getParam("shadow_intensity"));
 			SetShadowIntensity(dval);
-		}
-		//alpha
-		dval = m_ep->getParam("alpha_enable");
-		SetAlphaEnable(dval > 0.5);
-		if (m_alpha_enable)
-		{
-			dval = std::max(0.0f, m_ep->getParam("alpha"));
-			SetAlpha(dval);
-		}
-		//sample rate
-		if (m_sample_rate_enable)
-		{
-			dval = std::max(0.1f, m_ep->getParam("sample_rate"));
-			SetSampleRate(dval);
-		}
-		//luminance
-		if (m_luminance_enable)
-		{
-			dval = std::max(0.0f, m_ep->getParam("luminance"));
-			double h, s, v;
-			GetHSV(h, s, v);
-			fluo::HSVColor hsv(h, s, dval);
-			fluo::Color color(hsv);
-			ResetMaskColorSet();
-			SetColor(color);
 		}
 		//colormap enable
 		dval = m_ep->getParam("colormap_enable");

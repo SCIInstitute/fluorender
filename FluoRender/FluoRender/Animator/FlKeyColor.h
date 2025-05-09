@@ -43,7 +43,7 @@ public:
 		m_code.l2 = 0;
 		m_code.l2_name = "";
 	}
-	FlKeyColor(FlKeyCode keycode, fluo::Color &cval)
+	FlKeyColor(FlKeyCode keycode, const fluo::Color &cval)
 	{
 		m_code = keycode;
 		m_cval = cval;
@@ -51,7 +51,7 @@ public:
 	~FlKeyColor() {}
 
 	int GetType() { return FLKEY_TYPE_COLOR; }
-	void SetValue(fluo::Color &cval) { m_cval = cval; }
+	void SetValue(const fluo::Color &cval) { m_cval = cval; }
 	fluo::Color GetValue() { return m_cval; }
 
 private:

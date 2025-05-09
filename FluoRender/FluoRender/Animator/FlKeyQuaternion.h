@@ -43,7 +43,7 @@ public:
 		m_code.l2 = 0;
 		m_code.l2_name = "";
 	}
-	FlKeyQuaternion(FlKeyCode keycode, fluo::Quaternion &qval)
+	FlKeyQuaternion(FlKeyCode keycode, const fluo::Quaternion &qval)
 	{
 		m_code = keycode;
 		m_qval = qval;
@@ -51,7 +51,7 @@ public:
 	~FlKeyQuaternion() {}
 
 	int GetType() {return FLKEY_TYPE_QUATER;}
-	void SetValue(fluo::Quaternion &qval) {m_qval = qval;}
+	void SetValue(const fluo::Quaternion &qval) {m_qval = qval;}
 	fluo::Quaternion GetValue() {return m_qval;}
 
 private:

@@ -39,6 +39,12 @@ DEALINGS IN THE SOFTWARE.
 class FlKeyCode
 {
 public:
+	FlKeyCode():
+		l0(0), l1(0), l2(0)
+	{ }
+	FlKeyCode(int val0, const std::string& str0, int val1, const std::string& str1, int val2, const std::string& str2):
+		l0(val0), l0_name(str0), l1(val1), l1_name(str1), l2(val2), l2_name(str2)
+	{ }
 	int l0;//view: 1
 	std::string l0_name;//view name
 	int l1;//volume: 2

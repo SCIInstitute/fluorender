@@ -3166,6 +3166,10 @@ void RenderView::SetParams(double t)
 	keycode.l0 = 1;
 	keycode.l0_name = ws2s(GetName());
 
+	bool bval;
+	double dval;
+	int ival;
+
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
 		VolumeData* vd = GetAllVolumeData(i);
@@ -3177,7 +3181,6 @@ void RenderView::SetParams(double t)
 		//display
 		keycode.l2 = 0;
 		keycode.l2_name = "display";
-		bool bval;
 		if (glbin_interpolator.GetBoolean(keycode, t, bval))
 			vd->SetDisp(bval);
 
@@ -3189,7 +3192,6 @@ void RenderView::SetParams(double t)
 		double val = 0;
 		//x1
 		plane = (*planes)[0];
-		keycode.l2 = 0;
 		keycode.l2_name = "x1_val";
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
@@ -3197,7 +3199,6 @@ void RenderView::SetParams(double t)
 		vc.insert(gstClipX1);
 		//x2
 		plane = (*planes)[1];
-		keycode.l2 = 0;
 		keycode.l2_name = "x2_val";
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
@@ -3205,7 +3206,6 @@ void RenderView::SetParams(double t)
 		vc.insert(gstClipX2);
 		//y1
 		plane = (*planes)[2];
-		keycode.l2 = 0;
 		keycode.l2_name = "y1_val";
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
@@ -3213,7 +3213,6 @@ void RenderView::SetParams(double t)
 		vc.insert(gstClipY1);
 		//y2
 		plane = (*planes)[3];
-		keycode.l2 = 0;
 		keycode.l2_name = "y2_val";
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
@@ -3221,7 +3220,6 @@ void RenderView::SetParams(double t)
 		vc.insert(gstClipY2);
 		//z1
 		plane = (*planes)[4];
-		keycode.l2 = 0;
 		keycode.l2_name = "z1_val";
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
@@ -3229,7 +3227,6 @@ void RenderView::SetParams(double t)
 		vc.insert(gstClipZ1);
 		//z2
 		plane = (*planes)[5];
-		keycode.l2 = 0;
 		keycode.l2_name = "z2_val";
 		if (glbin_interpolator.GetDouble(keycode, t, val))
 			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
@@ -3237,7 +3234,6 @@ void RenderView::SetParams(double t)
 		vc.insert(gstClipZ2);
 		//t
 		double frame;
-		keycode.l2 = 0;
 		keycode.l2_name = "frame";
 		if (glbin_interpolator.GetDouble(keycode, t, frame))
 		{
@@ -3246,11 +3242,96 @@ void RenderView::SetParams(double t)
 		}
 		//primary color
 		fluo::Color pc;
-		keycode.l2 = 0;
 		keycode.l2_name = "color";
 		if (glbin_interpolator.GetColor(keycode, t, pc))
 			vd->SetColor(pc);
 		vc.insert(gstColor);
+
+		//volume properties
+		//minmax
+		keycode.l2_name = "minmax enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetMinMaxEnable(bval);
+		keycode.l2_name = "low_offset";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetLowOffset(dval);
+		keycode.l2_name = "high_offset";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetHighOffset(dval);
+		vc.insert(gstMinMax);
+		//gamma
+		keycode.l2_name = "gamma3d enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetGammaEnable(bval);
+		keycode.l2_name = "gamma3d";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetGamma(dval);
+		vc.insert(gstGamma3d);
+		//alpha
+		keycode.l2_name = "alpha enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetAlphaEnable(bval);
+		keycode.l2_name = "alpha";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetAlpha(dval);
+		vc.insert(gstAlpha);
+		//sample rate
+		keycode.l2_name = "sample rate enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetSampleRateEnable(bval);
+		keycode.l2_name = "sample rate";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetSampleRate(dval);
+		vc.insert(gstSampleRate);
+		//threshold
+		keycode.l2_name = "threshold enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetThreshEnable(bval);
+		keycode.l2_name = "low threshold";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetLeftThresh(dval);
+		keycode.l2_name = "high threshold";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetRightThresh(dval);
+		vc.insert(gstThreshold);
+		//boundary
+		keycode.l2_name = "boundary enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetBoundaryEnable(bval);
+		keycode.l2_name = "boundary";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetBoundary(dval);
+		vc.insert(gstBoundary);
+		//shading
+		keycode.l2_name = "shading enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetShadingEnable(bval);
+		keycode.l2_name = "low shading";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetLowShading(dval);
+		keycode.l2_name = "high shading";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetHiShading(dval);
+		vc.insert(gstShading);
+		//shadow
+		keycode.l2_name = "shadow enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetShadowEnable(bval);
+		keycode.l2_name = "shadow intensity";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetShadowIntensity(dval);
+		vc.insert(gstShadow);
+		//colormap
+		keycode.l2_name = "colormap enable";
+		if (glbin_interpolator.GetBoolean(keycode, t, bval))
+			vd->SetColormapMode(bval ? 1 : 0);
+		keycode.l2_name = "colormap low";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetColormapLow(dval);
+		keycode.l2_name = "colormap high";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetColormapHigh(dval);
+		vc.insert(gstColormap);
 	}
 
 	bool bx, by, bz;
@@ -3309,7 +3390,6 @@ void RenderView::SetParams(double t)
 	}
 	//intermixing mode
 	keycode.l2_name = "volmethod";
-	int ival;
 	if (glbin_interpolator.GetInt(keycode, t, ival))
 		SetVolMethod(ival);
 	//perspective angle
@@ -3328,6 +3408,17 @@ void RenderView::SetParams(double t)
 		}
 		vc.insert(gstAov);
 	}
+	//shadow dir
+	keycode.l2_name = "shadow dir enable";
+	if (glbin_interpolator.GetBoolean(keycode, t, bval))
+		glbin_settings.m_shadow_dir = bval;
+	keycode.l2_name = "shadow dir x";
+	if (glbin_interpolator.GetDouble(keycode, t, dval))
+		glbin_settings.m_shadow_dir_x = dval;
+	keycode.l2_name = "shadow dir y";
+	if (glbin_interpolator.GetDouble(keycode, t, dval))
+		glbin_settings.m_shadow_dir_y = dval;
+	vc.insert(gstShadowDir);
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
