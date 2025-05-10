@@ -3,12 +3,12 @@ FFmpeg: https://github.com/FFmpeg/FFmpeg.git
 x264: https://code.videolan.org/videolan/x264.git
 x265: https://bitbucket.org/multicoreware/x265_git.git
 Install MSYS2
-Install dependencies on mingw. May need to check if there is anything missing when running config or building.
-	pacman -S mingw-w64-x86_64-toolchain base-devel git yasm pkg-config mingw-w64-x86_64-x264 libiconv
-	pacman -S yasm libiconv nasm make pkgconf
 Lauch MSYS2 from msvc cmd
 	cd /msys64
 	msys2_shell.cmd -mingw64 -full-path
+Install dependencies on mingw. May need to check if there is anything missing when running config or building.
+	(not needed for using visual studio)//pacman -S mingw-w64-x86_64-toolchain base-devel git yasm pkg-config mingw-w64-x86_64-x264 libiconv
+	pacman -S yasm libiconv nasm make pkgconf
 Configure path. Change paths for future msvc versions
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.43.34808/bin/Hostx64/x64:$PATH"
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin:$PATH"
@@ -19,6 +19,9 @@ Configure x264
 	CC=cl ./configure --prefix=/mingw64 --disable-cli --enable-static
 Use x265's script to generate vc projects
 Copy built results to FFmpeg/depends/
+	In include/ x264.h x264_config.h x265.h x265_config.h
+	In lib/ libx264l.lib libx265.lib libx265d.h
+configure file of ffmpeg may need some changes to disable testing (because it's on Windows)
+	line starting with enabled libx265
 Configure FFMpeg
 	./configure --toolchain=msvc --prefix=/mingw64 --enable-static --disable-shared --enable-gpl --enable-libx264 --enable-libx265 --extra-cflags="-I./depends/include" --extra-ldflags="/LIBPATH:./depends/lib libx264.lib libx265.lib" --pkg-config-flags="--static" --logfile=ffmpeg_configure.log
-configure file of ffmpeg may need some changes to disable testing (because it's on Windows)
