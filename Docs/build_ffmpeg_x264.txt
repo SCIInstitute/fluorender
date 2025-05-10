@@ -10,7 +10,7 @@ Lauch MSYS2 from msvc cmd
 	cd /msys64
 	msys2_shell.cmd -mingw64 -full-path
 Configure path. Change paths for future msvc versions
-	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64:$PATH"
+	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.43.34808/bin/Hostx64/x64:$PATH"
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin:$PATH"
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/Common7/IDE:$PATH"
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Auxiliary/Build:$PATH"
