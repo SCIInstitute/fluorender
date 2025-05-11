@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BBox.h>
 #include <Point.h>
 #include <wxFadeButton.h>
-#include <wxDoubleSlider.h>
+#include <wxMapDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableCheckBox.h>
 #include <wxUndoableColorPicker.h>
@@ -114,7 +114,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//saturation point
 	m_minmax_st = new wxFadeButton(this, wxID_ANY, "Min-Max",
 		wxDefaultPosition, bts);
-	m_minmax_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
+	m_minmax_sldr = new wxMapDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_low_offset_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
@@ -241,7 +241,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//thresholds
 	m_thresh_st = new wxFadeButton(this, wxID_ANY, "Threshold",
 		wxDefaultPosition, bts);
-	m_thresh_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
+	m_thresh_sldr = new wxMapDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_left_thresh_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_int);
@@ -365,7 +365,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//colormap
 	m_colormap_st = new wxFadeButton(this, wxID_ANY, "Colormap",
 		wxDefaultPosition, bts);
-	m_colormap_sldr = new wxDoubleSlider(this,
+	m_colormap_sldr = new wxMapDoubleSlider(this,
 		wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_colormap_low_text = new wxTextCtrl(this,

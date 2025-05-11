@@ -35,7 +35,7 @@ class VolumeData;
 class DataGroup;
 class wxFadeButton;
 class wxBasisSlider;
-class wxDoubleSlider;
+class wxMapDoubleSlider;
 class wxSingleSlider;
 class wxUndoableCheckBox;
 class wxUndoableToolbar;
@@ -102,7 +102,7 @@ private:
 	//1
 	//minmax
 	wxFadeButton *m_minmax_st;
-	wxDoubleSlider *m_minmax_sldr;
+	wxMapDoubleSlider *m_minmax_sldr;
 	wxTextCtrl *m_low_offset_text;
 	wxTextCtrl* m_high_offset_text;
 	wxToolBar* m_minmax_link_tb;
@@ -131,7 +131,7 @@ private:
 	//2
 	//thresholds
 	wxFadeButton* m_thresh_st;
-	wxDoubleSlider *m_thresh_sldr;
+	wxMapDoubleSlider *m_thresh_sldr;
 	wxTextCtrl *m_left_thresh_text;
 	wxTextCtrl *m_right_thresh_text;
 	wxToolBar* m_thresh_link_tb;
@@ -158,7 +158,7 @@ private:
 	wxUndoableCheckBox* m_shadow_dir_chk;
 	//colormap
 	wxFadeButton* m_colormap_st;
-	wxDoubleSlider *m_colormap_sldr;
+	wxMapDoubleSlider *m_colormap_sldr;
 	wxTextCtrl *m_colormap_low_text;
 	wxTextCtrl *m_colormap_hi_text;
 	wxUndoableCheckBox* m_colormap_chk;
