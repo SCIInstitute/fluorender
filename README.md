@@ -59,6 +59,7 @@ Wan, Y., et al. (2017). FluoRender: joint free-hand segmentation and visualizati
 <h2>Common Dependencies</h2>
 
 Some third-party dependencies are included in the FluoRender source code. Other dependencies need to be prepared before building FluoRender.
+This is especially true after recent reoganization of FluoRender source code, as many dependencies are moved out of the project. They need to be built or installed before building.
  - Windows 10 and later : Visual Studio 2017 and later<br/>
    - Or Mac OS 11 (Big Sur) and later : Updated Xcode and command line tools<br/>
    - Or Ubuntu Linux 22.04 (tested to work)
@@ -87,6 +88,13 @@ Some third-party dependencies are included in the FluoRender source code. Other 
    - https://github.com/HDFGroup/hdf5/releases/tag/hdf5_1.14.5
    - Needs building before FluoRender
  - JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
+   - Needs installation
+ - OpenBLAS for linear algebra computations
+ - - https://github.com/OpenMathLib/OpenBLAS.git
+   - Needs building before FluoRender
+ - OpenCL SDK for cross-platform GPU computing
+   - There are multiple providers. On Windows, I use NVIDIA CUDA Toolkit:
+   - https://developer.nvidia.com/cuda-toolkit
    - Needs installation
  - OpenCV (https://opencv.org/) for computer vision calculations
    - https://github.com/opencv/opencv.git
