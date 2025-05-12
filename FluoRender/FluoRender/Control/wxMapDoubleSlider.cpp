@@ -50,11 +50,11 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 	if (horizontal_)
 	{
 		int a, b, c, d, e, f;
-		a = std::round(h - scale_);
+		a = std::round(h / 2.0 - scale_);
 		b = std::round(w - margin_ + 1.0 + 1.5 * scale_);
-		c = std::round(h - 0.2 * scale_);
-		d = std::round(h + scale_ + 0.5 * scale_);
-		e = std::round(h + 2.0 * scale_);
+		c = std::round(h / 2.0 - 0.2 * scale_);
+		d = std::round(h / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(h / 2.0 + 2.0 * scale_);
 		f = std::round(margin_ - 1.5 * scale_);
 		wxPoint p1h[] = {
 			wxPoint(margin_, a),
@@ -71,11 +71,11 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 	else
 	{
 		int a, b, c, d, e, f;
-		a = std::round(w - scale_);
+		a = std::round(w / 2.0 - scale_);
 		b = std::round(h - margin_ + 1.0 + 1.5 * scale_);
-		c = std::round(w - 0.2 * scale_);
-		d = std::round(w + scale_ + 0.5 * scale_);
-		e = std::round(w + 2.0 * scale_);
+		c = std::round(w / 2.0 - 0.2 * scale_);
+		d = std::round(w / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(w / 2.0 + 2.0 * scale_);
 		f = std::round(margin_ - 1.5 * scale_);
 		wxPoint p1v[] = {
 			wxPoint(a, margin_),
@@ -107,8 +107,8 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 		if (horizontal_)
 		{
 			int a, b;
-			a = std::round(h - scale_);
-			b = std::round(h + 2.0 * scale_);
+			a = std::round(0.25 * h);
+			b = std::round(0.75 * h);
 			wxPoint p2h[] = {
 				wxPoint(margin_ + posl, a),
 				wxPoint(margin_ + posr, a),
@@ -120,8 +120,8 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 		else
 		{
 			int a, b;
-			a = std::round(w - scale_);
-			b = std::round(w + 2.0 * scale_);
+			a = std::round(0.25 * w);
+			b = std::round(0.75 * w);
 			wxPoint p2v[] = {
 				wxPoint(a, margin_ + posl),
 				wxPoint(a, margin_ + posr),
@@ -197,11 +197,11 @@ void wxMapDoubleSlider::renderInverse(wxDC& dc)
 	if (horizontal_)
 	{
 		int a, b, c, d, e, f;
-		a = std::round(h - scale_);
+		a = std::round(h / 2.0 - scale_);
 		b = std::round(w - margin_ + 1.0 + 1.5 * scale_);
-		c = std::round(h - 0.2 * scale_);
-		d = std::round(h + scale_ + 0.5 * scale_);
-		e = std::round(h + 2.0 * scale_);
+		c = std::round(h / 2.0 - 0.2 * scale_);
+		d = std::round(h / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(h / 2.0 + 2.0 * scale_);
 		f = std::round(margin_ - 1.5 * scale_);
 		wxPoint p1h[] = {
 			wxPoint(margin_, a),
@@ -218,11 +218,11 @@ void wxMapDoubleSlider::renderInverse(wxDC& dc)
 	else
 	{
 		int a, b, c, d, e, f;
-		a = std::round(w - scale_);
+		a = std::round(w / 2.0 - scale_);
 		b = std::round(h - margin_ + 1.0 + 1.5 * scale_);
-		c = std::round(w - 0.2 * scale_);
-		d = std::round(w + scale_ + 0.5 * scale_);
-		e = std::round(w + 2.0 * scale_);
+		c = std::round(w / 2.0 - 0.2 * scale_);
+		d = std::round(w / 2.0 + scale_ + 0.5 * scale_);
+		e = std::round(w / 2.0 + 2.0 * scale_);
 		f = std::round(margin_ - 1.5 * scale_);
 		wxPoint p1v[] = {
 			wxPoint(a, margin_),
@@ -254,8 +254,8 @@ void wxMapDoubleSlider::renderInverse(wxDC& dc)
 		if (horizontal_)
 		{
 			int a, b;
-			a = std::round(h - scale_);
-			b = std::round(h + 2.0 * scale_);
+			a = std::round(h / 2.0 - scale_);
+			b = std::round(h / 2.0 + 2.0 * scale_);
 			wxPoint p2h[] = {
 			wxPoint(w - margin_ - posl, a),
 			wxPoint(w - margin_ - posr, a),
@@ -267,8 +267,8 @@ void wxMapDoubleSlider::renderInverse(wxDC& dc)
 		else
 		{
 			int a, b;
-			a = std::round(w - scale_);
-			b = std::round(w + 2.0 * scale_);
+			a = std::round(w / 2.0 - scale_);
+			b = std::round(w / 2.0 + 2.0 * scale_);
 			wxPoint p2v[] = {
 			wxPoint(a, h - margin_ - posl),
 			wxPoint(a, h - margin_ - posr),
