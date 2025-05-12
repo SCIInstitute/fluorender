@@ -43,11 +43,24 @@ public:
 		const wxValidator& val = wxDefaultValidator,
 		const wxString& name = "wxDoubleSlider");
 
+	void SetMapData(const std::vector<unsigned char>& rgbData);
+	void SetColors(const wxColour& lc, const wxColour& hc) { m_low_color = lc; m_high_color = hc; }
+	void SetMode(int ival) { m_mode = ival; }
+
 protected:
+	int m_mode;	//0:range only; 1:threshold with gray low and high
+				//2:minmax with low and high solid colors
+	wxColour m_low_color;
+	wxColour m_high_color;
+	std::vector<unsigned char> m_rgbData;
+	wxBitmap m_colorBitmap;
+	wxBitmap m_grayBitmap;
 
 protected:
 	virtual void renderNormal(wxDC& dc);
 	virtual void renderInverse(wxDC& dc);
+
+	void GenerateBaseImage();
 };
 
 #endif//_WXMAPDOUBLESLIDER_H_

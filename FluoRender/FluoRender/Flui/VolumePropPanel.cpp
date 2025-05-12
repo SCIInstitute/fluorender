@@ -687,6 +687,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	double dval = 0.0;
 	int ival = 0;
 	bool bval;
+	fluo::Color cval;
 
 	//maximum value
 	m_max_val = m_vd->GetMaxValue();
@@ -1197,6 +1198,22 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		m_colormap_combo->SetSelection(m_vd->GetColormap());
 		m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
+		//show colormap on slider
+		std::vector<unsigned char> colormap_data;
+		if (m_vd->GetColormapData(colormap_data))
+		{
+			wxColor lc, hc;
+			cval = m_vd->GetColorFromColormap(0, true);
+			lc = wxColor((unsigned char)(cval.r() *255 + 0.5),
+				(unsigned char)(cval.g() * 255 + 0.5),
+				(unsigned char)(cval.b() * 255 + 0.5));
+			cval = m_vd->GetColorFromColormap(1, true);
+			hc = wxColor((unsigned char)(cval.r() *255 + 0.5),
+				(unsigned char)(cval.g() * 255 + 0.5),
+				(unsigned char)(cval.b() * 255 + 0.5));
+			m_colormap_sldr->SetColors(lc, hc);
+			m_colormap_sldr->SetMapData(colormap_data);
+		}
 	}
 	if (update_colormap || update_tips)
 	{
@@ -1208,17 +1225,17 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//color
 	if (update_color)
 	{
-		fluo::Color c = m_vd->GetColor();
-		wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
-			(unsigned char)(c.g() * 255 + 0.5),
-			(unsigned char)(c.b() * 255 + 0.5));
+		cval = m_vd->GetColor();
+		wxColor wxc((unsigned char)(cval.r() * 255 + 0.5),
+			(unsigned char)(cval.g() * 255 + 0.5),
+			(unsigned char)(cval.b() * 255 + 0.5));
 		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
 		m_color_btn->SetValue(wxc);
-		c = m_vd->GetMaskColor();
-		wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
-			(unsigned char)(c.g() * 255 + 0.5),
-			(unsigned char)(c.b() * 255 + 0.5));
+		cval = m_vd->GetMaskColor();
+		wxc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
+			(unsigned char)(cval.g() * 255 + 0.5),
+			(unsigned char)(cval.b() * 255 + 0.5));
 		m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
 		m_color2_btn->SetValue(wxc);

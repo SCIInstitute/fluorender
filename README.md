@@ -110,7 +110,7 @@ This is especially true after recent reoganization of FluoRender source code, as
  - Teem (https://teem.sourceforge.net/) for reading and writing Nrrd format files
    - Needs building before FluoRender
  - wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
-   - I made some changes to the wxWidgets code. Use my branch: https://github.com/basisunus/wxWidgets.git
+   - I made some changes to the wxWidgets code. Use my branch: https://github.com/basisunus/wxWidgets/tree/wxWidgets-v3.2.8
    - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, and Zlib
    - Needs building before FluoRender
 

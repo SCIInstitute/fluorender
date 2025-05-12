@@ -425,7 +425,8 @@ public:
 	void SetColormapProj(int value);
 	int GetColormap();
 	int GetColormapProj();
-	fluo::Color GetColorFromColormap(double value);
+	fluo::Color GetColorFromColormap(double value, bool raw = false);
+	bool GetColormapData(std::vector<unsigned char>& data);
 
 	//shuffle
 	void SetShuffle(int val);

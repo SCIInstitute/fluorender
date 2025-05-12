@@ -2548,11 +2548,13 @@ int VolumeData::GetColormapProj()
 	return m_colormap_proj;
 }
 
-fluo::Color VolumeData::GetColorFromColormap(double value)
+fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
 {
 	fluo::Color rb;
-	double v = (value - m_colormap_low_value) /
-		(m_colormap_hi_value - m_colormap_low_value);
+	double v = value;
+	if (!raw)
+		v = (v - m_colormap_low_value) /
+			(m_colormap_hi_value - m_colormap_low_value);
 	double valu = fluo::Clamp(v, 0.0, 1.0);
 	double inv = GetColormapInv();
 	switch (m_colormap)
@@ -2606,6 +2608,19 @@ fluo::Color VolumeData::GetColorFromColormap(double value)
 		break;
 	}
 	return rb;
+}
+
+bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
+{
+	data.resize(32 * 3, 0);
+	for (int i = 0; i < 32; ++i)
+	{
+		fluo::Color c = GetColorFromColormap(double(i) / 31, true);
+		data[i * 3] = static_cast<unsigned char>(std::round(c.r() * 255.0));
+		data[i * 3 + 1] = static_cast<unsigned char>(std::round(c.g() * 255.0));
+		data[i * 3 + 2] = static_cast<unsigned char>(std::round(c.b() * 255.0));
+	}
+	return true;
 }
 
 void VolumeData::SetShuffle(int val)
