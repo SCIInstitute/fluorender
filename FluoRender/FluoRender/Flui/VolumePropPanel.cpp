@@ -130,6 +130,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_minmax_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_minmax_st->SetFontBold();
 	m_minmax_st->SetTintColor(wxColor(255, 150, 200));
+	m_minmax_sldr->SetMode(2);
 	m_minmax_sldr->SetHistoryIndicator(m_minmax_st);
 	//bind events
 	m_minmax_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnMinMaxMF, this);
@@ -257,6 +258,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_thresh_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_thresh_st->SetFontBold();
 	m_thresh_st->SetTintColor(wxColor(180, 255, 150));
+	m_thresh_sldr->SetMode(1);
 	m_thresh_sldr->SetHistoryIndicator(m_thresh_st);
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
@@ -384,6 +386,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_colormap_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_colormap_st->SetFontBold();
 	m_colormap_st->SetMode(2);
+	m_colormap_sldr->SetMode(3);
 	m_colormap_sldr->SetHistoryIndicator(m_colormap_st);
 	//bind events
 	m_colormap_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnColormapMF, this);
@@ -709,6 +712,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_shadow = update_all || FOUND_VALUE(gstShadow);
 	bool update_sample = update_all || FOUND_VALUE(gstSampleRate);
 	bool update_colormap = update_all || FOUND_VALUE(gstColormap);
+	bool update_histogram = update_all || FOUND_VALUE(gstUpdateHistogram) || m_vd->GetHistogramDirty();
 	bool mf_enable = glbin_settings.m_mulfunc == 5;
 
 	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
@@ -793,6 +797,22 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//volume properties
+	//histogram
+	if (update_histogram)
+	{
+		std::vector<unsigned char> hist_data;
+		if (m_vd->GetHistogram(hist_data))
+		{
+			wxColour lc = wxColour(0, 0, 0);
+			cval = m_vd->GetColor();
+			wxColour hc = wxColor((unsigned char)(cval.r() *255 + 0.5),
+				(unsigned char)(cval.g() * 255 + 0.5),
+				(unsigned char)(cval.b() * 255 + 0.5));
+			m_minmax_sldr->SetColors(lc, hc);
+			m_minmax_sldr->SetMapData(hist_data);
+			m_thresh_sldr->SetMapData(hist_data);
+		}
+	}
 	//transfer function
 	//gamma
 	if (update_gamma)
@@ -2794,7 +2814,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 			m_color2_btn->SetValue(wxc);
 		}
 
-		FluoRefresh(1, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync, gstColormap, gstUpdateHistogram }, { glbin_current.GetViewId(m_view) });
 	}
 }
 

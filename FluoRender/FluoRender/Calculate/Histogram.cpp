@@ -122,12 +122,10 @@ bool Histogram::GetInfo(
 	return true;
 }
 
-EntryHist* Histogram::GetEntryHist()
+void Histogram::Compute()
 {
-	EntryHist* hist = 0;
-
 	if (!CheckBricks())
-		return hist;
+		return;
 	long bits = m_vd->GetBits();
 	float minv = 0;
 	float maxv = 1;
@@ -136,7 +134,7 @@ EntryHist* Histogram::GetEntryHist()
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_histogram, bits);
 	if (!kernel_prog)
-		return hist;
+		return;
 	int kernel_index;
 	if (!m_use_mask)
 		kernel_index = kernel_prog->createKernel("kernel_0");
@@ -148,7 +146,7 @@ EntryHist* Histogram::GetEntryHist()
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//sum histogram
-	unsigned int* sh = new unsigned int[m_bins + 1]();
+	m_histogram.resize(m_bins + 1, 0);
 	flvr::Argument arg_sh;
 
 	for (size_t i = 0; i < brick_num; ++i)
@@ -176,7 +174,7 @@ EntryHist* Histogram::GetEntryHist()
 		if (i == 0)
 			arg_sh = kernel_prog->setKernelArgBuf(
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-				sizeof(unsigned int)*(bin + 1), (void*)(sh));
+				sizeof(unsigned int)*(bin + 1), (void*)(m_histogram.data()));
 		else
 			kernel_prog->setKernelArgument(arg_sh);
 		if (m_use_mask)
@@ -185,24 +183,30 @@ EntryHist* Histogram::GetEntryHist()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*(bin+1), sh, sh);
+		kernel_prog->readBuffer(sizeof(unsigned int)*(bin+1), (void*)(m_histogram.data()), (void*)(m_histogram.data()));
 
 		SetProgress(100 * count / brick_num,
 			"Computing histogram.");
 		count++;
 	}
 
-	if (sh[m_bins])
+	kernel_prog->releaseAll();
+	SetProgress(0, "");
+}
+
+EntryHist* Histogram::GetEntryHist()
+{
+	EntryHist* hist = 0;
+	Compute();
+	if (m_histogram.size() != m_bins + 1)
+		return hist;
+	if (m_histogram[m_bins])
 	{
 		hist = new flrd::EntryHist();
-		hist->setRange(minv, maxv);
-		hist->setPopulation(sh[m_bins]);
-		hist->setData(sh);
+		hist->setRange(0, 1);
+		hist->setPopulation(m_histogram[m_bins]);
+		hist->setData(m_histogram.data());
 	}
-	
-	kernel_prog->releaseAll();
-	delete[] sh;
-	SetProgress(0, "");
 
 	return hist;
 }

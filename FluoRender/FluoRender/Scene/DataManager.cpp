@@ -352,6 +352,8 @@ VolumeData::VolumeData()
 		m_clip_dist[i] = 1;
 
 	m_ep = std::make_unique<flrd::EntryParams>();
+
+	m_hist_dirty = true;
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -514,6 +516,8 @@ VolumeData::VolumeData(VolumeData &copy)
 		m_clip_dist[i] = copy.m_clip_dist[i];
 
 	m_ep = std::make_unique<flrd::EntryParams>();
+
+	m_hist_dirty = true;
 }
 
 VolumeData::~VolumeData()
@@ -686,6 +690,8 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	m_clip_dist[1] = std::max(1, m_res_y / 20);
 	m_clip_dist[2] = std::max(1, m_res_z / 20);
 
+	m_hist_dirty = true;
+
 	return 1;
 }
 
@@ -725,6 +731,8 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	m_clip_dist[1] = std::max(1, m_res_y / 20);
 	m_clip_dist[2] = std::max(1, m_res_z / 20);
 
+	m_hist_dirty = true;
+
 	return 1;
 }
 
@@ -755,6 +763,8 @@ int VolumeData::Replace(VolumeData* data)
 	else
 		return 0;
 	m_bg_valid = false;
+	m_hist_dirty = true;
+
 	return 1;
 }
 
@@ -856,6 +866,8 @@ void VolumeData::AddEmptyData(int bits,
 	m_clip_dist[0] = std::max(1, m_res_x / 20);
 	m_clip_dist[1] = std::max(1, m_res_y / 20);
 	m_clip_dist[2] = std::max(1, m_res_z / 20);
+
+	m_hist_dirty = true;
 
 }
 
@@ -2620,6 +2632,43 @@ bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
 		data[i * 3 + 1] = static_cast<unsigned char>(std::round(c.g() * 255.0));
 		data[i * 3 + 2] = static_cast<unsigned char>(std::round(c.b() * 255.0));
 	}
+	return true;
+}
+
+bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
+{
+	int bins = 128;
+	if (m_hist_dirty)
+	{
+		flrd::Histogram histogram(this);
+		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+		histogram.SetUseMask(false);
+		histogram.SetBins(bins);
+		histogram.Compute();
+		m_hist = histogram.GetHistogram();
+		m_hist_dirty = false;
+	}
+
+	data.resize(bins * 3, 0);
+	fluo::HSVColor hsv(m_color);
+	fluo::Color bg;
+	if (hsv.val() > 0.5)
+		bg = fluo::Color(0.25);
+	else
+		bg = fluo::Color(0.75);
+	fluo::Color c;
+	double sum = m_hist[bins] - m_hist[0];
+	if (sum == 0.0)
+		sum = 1.0;
+	for (int i = 0; i < bins; ++i)
+	{
+		double p = std::clamp(std::pow(m_hist[i] / sum, 0.2), 0.0, 1.0);
+		c = m_color * p + bg * (1 - p);
+		data[i * 3] = static_cast<unsigned char>(c.r() * 255.0);
+		data[i * 3 + 1] = static_cast<unsigned char>(c.g() * 255.0);
+		data[i * 3 + 2] = static_cast<unsigned char>(c.b() * 255.0);
+	}
+
 	return true;
 }
 
@@ -6080,6 +6129,8 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		glbin_settings.m_micro_blend = true;
 		vc.insert(gstMicroBlendEnable);
 	}
+	//update histogram
+	vc.insert(gstUpdateHistogram);
 
 	m_frame->UpdateProps(vc);
 

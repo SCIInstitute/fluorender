@@ -190,6 +190,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstTransparent "transparent"
 //trasnfer function
 #define gstVolumeProps "volume props"
+#define gstUpdateHistogram "update histogram"
 #define gstIntScale "int scale"
 #define gstGmScale "gm scale"
 #define gstMaxInt "max int"

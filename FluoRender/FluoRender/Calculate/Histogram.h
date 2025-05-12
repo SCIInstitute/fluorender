@@ -51,15 +51,21 @@ namespace flrd
 
 		void SetBins(unsigned int bins)
 		{
-			//m_bins = bins;
+			m_bins = bins;
 		}
 
+		void Compute();
+		std::vector<unsigned int> GetHistogram()
+		{
+			return m_histogram;
+		}
 		EntryHist* GetEntryHist();
 
 	private:
 		VolumeData* m_vd;
 		bool m_use_mask;//compute histogram on selected area
 		unsigned int m_bins;
+		std::vector<unsigned int> m_histogram;
 
 		bool CheckBricks();
 		bool GetInfo(flvr::TextureBrick* b,

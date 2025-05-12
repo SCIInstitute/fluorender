@@ -427,6 +427,7 @@ public:
 	int GetColormapProj();
 	fluo::Color GetColorFromColormap(double value, bool raw = false);
 	bool GetColormapData(std::vector<unsigned char>& data);
+	bool GetHistogram(std::vector<unsigned char>& data);
 
 	//shuffle
 	void SetShuffle(int val);
@@ -598,6 +599,9 @@ public:
 	void GetMlParams();
 	void ApplyMlVolProp();
 
+	//see if need update histogram
+	bool GetHistogramDirty() { return m_hist_dirty; }
+
 private:
 	//duplication indicator and counter
 	bool m_dup;
@@ -755,6 +759,10 @@ private:
 
 	//clip distance
 	int m_clip_dist[3];
+
+	//colormap of histogram
+	bool m_hist_dirty;
+	std::vector<unsigned int> m_hist;
 
 private:
 	//label functions

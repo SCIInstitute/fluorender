@@ -50,6 +50,7 @@ public:
 protected:
 	int m_mode;	//0:range only; 1:threshold with gray low and high
 				//2:minmax with low and high solid colors
+				//3:colormap rescale within range, solid colors outside
 	wxColour m_low_color;
 	wxColour m_high_color;
 	std::vector<unsigned char> m_rgbData;
