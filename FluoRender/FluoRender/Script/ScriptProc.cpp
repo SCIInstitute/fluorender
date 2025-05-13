@@ -2634,7 +2634,6 @@ bool ScriptProc::RunBreak()
 //read/delete volume cache
 void ScriptProc::ReadVolCacheData(flrd::VolCache& vol_cache)
 {
-	if (!m_view) return;
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
@@ -2654,7 +2653,6 @@ void ScriptProc::ReadVolCacheData(flrd::VolCache& vol_cache)
 
 void ScriptProc::ReadVolCacheDataMask(flrd::VolCache& vol_cache)
 {
-	if (!m_view) return;
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
@@ -2681,7 +2679,6 @@ void ScriptProc::ReadVolCacheDataMask(flrd::VolCache& vol_cache)
 
 void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 {
-	if (!m_view) return;
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
@@ -2723,7 +2720,6 @@ void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
 
 void ScriptProc::DelVolCacheData(flrd::VolCache& vol_cache)
 {
-	if (!m_view) return;
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
@@ -2738,7 +2734,6 @@ void ScriptProc::DelVolCacheData(flrd::VolCache& vol_cache)
 
 void ScriptProc::DelVolCacheDataLabel(flrd::VolCache& vol_cache)
 {
-	if (!m_view) return;
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol) return;
