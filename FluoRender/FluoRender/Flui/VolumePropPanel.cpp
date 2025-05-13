@@ -553,7 +553,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_colormap_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo, this);
 	m_colormap_combo2 = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> colormap_list2 = { "Intensity", "Z Value", "Y Value", "X Value", "Gradient", "Differential" };
+	std::vector<wxString> colormap_list2 = { "Intensity", "Z Value", "Y Value", "X Value", "Gradient", "Differential", "4D Intensity Diff" };
 	m_colormap_combo2->Append(colormap_list2);
 	m_colormap_combo2->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo2, this);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);

@@ -60,6 +60,11 @@
 	"uniform mat4 matrix5;//texture\n" \
 	"\n"
 
+#define VOL_UNIFORMS_4D_CACHE \
+	"// VOL_UNIFORMS_4D_CACHE\n" \
+	"uniform sampler3D tex10;//data from t-1\n" \
+	"\n"
+
 #define VOL_UNIFORMS_MATRICES \
 	"// VOL_UNIFORMS_MATRICES\n" \
 	"uniform mat4 matrix2;//tex transform for bricking\n" \
@@ -215,6 +220,12 @@
 #define VOL_DATA_VOLUME_LOOKUP_130 \
 	"	//VOL_DATA_VOLUME_LOOKUP_130\n" \
 	"	vec4 v = texture(tex0, t.stp);\n" \
+	"\n"
+
+#define VOL_DATA_4D_LOOKUP \
+	"	//VOL_DATA_4D_LOOKUP\n" \
+	"	vec v0 = v;\n" \
+	"	vec v_1 = texture(tex10, t.stp);\n" \
 	"\n"
 
 #define VOL_GRAD_COMPUTE_LO \
@@ -520,6 +531,12 @@
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU5\n" \
 	"		float valu = dot(clamp(n.xyz, -1.0, 1.0), l.xyz/*vec3(1.0, 1.0, 0.0)*/);\n" \
 	"		valu = valu + 1.0;\n" \
+	"		valu = (valu-loc6.x)/loc6.z;\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU6 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU6\n" \
+	"		float valu = v0.x - v_1.x;\n" \
+	"		valu = (valu + 1.0) / 2.0;\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \

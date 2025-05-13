@@ -42,6 +42,7 @@ namespace flrd
 			data(0),
 			mask(0),
 			label(0),
+			tex(0),
 			frame(0),
 			valid(false),
 			modified(false),
@@ -57,6 +58,8 @@ namespace flrd
 		void* data;
 		void* mask;
 		void* label;
+		//texture for 4d colormap
+		void* tex;
 
 		size_t frame;
 		bool valid;

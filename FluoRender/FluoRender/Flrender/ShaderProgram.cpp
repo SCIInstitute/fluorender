@@ -334,6 +334,23 @@ namespace flvr
 			glDeleteShader(f_shader);
 			glDeleteShader(g_shader);
 
+			//general use of the units
+			//tex0: data volume, render buffer
+			//tex1: gm (unused), operand A, shadow intermediate
+			//tex2: mask, operand B, shadow intermediate
+			//tex3: label, operand A mask
+			//tex4: depth map, operand B mask, segmentation weight
+			//tex5: segmentation weight
+			//tex6: sementation mask
+			//tex7: unused
+			//tex8: unused
+			//tex9: unused
+			//tex10: unused
+			//tex11: unused
+			//tex12: unused
+			//tex13: depth peeling layer
+			//tex14: depth peeling layer
+			//tex15: depth peeling layer
 			const char *loc_strings[] = {
 				"tex0", "tex1", "tex2", "tex3",
 				"tex4", "tex5", "tex6", "tex7",

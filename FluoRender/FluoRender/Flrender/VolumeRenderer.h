@@ -60,33 +60,17 @@ namespace flvr
 		virtual ~VolumeRenderer();
 
 		//set viewport
-		void set_viewport(GLint vp[4])
-		{
-			memcpy(vp_, vp, sizeof(GLint) * 4);
-		}
+		void set_viewport(GLint vp[4]) { memcpy(vp_, vp, sizeof(GLint) * 4); }
 
 		//mouse position in viewport
-		void set_mouse_position(GLint mp[2])
-		{
-			memcpy(mp_, mp, sizeof(GLint) * 2);
-		}
+		void set_mouse_position(GLint mp[2]) { memcpy(mp_, mp, sizeof(GLint) * 2); }
 		//mouse direction
-		void set_mouse_vec(fluo::Vector &mvec)
-		{
-			mvec_ = mvec;
-		}
+		void set_mouse_vec(fluo::Vector &mvec) { mvec_ = mvec; }
 		//set scale/zoom factor for 2d
-		void set_zoom(GLfloat sf, GLfloat sf121)
-		{
-			zoom_ = sf;
-			zoom_data_ = sf / sf121;
-		}
+		void set_zoom(GLfloat sf, GLfloat sf121) { zoom_ = sf; zoom_data_ = sf / sf121; }
 
 		//set clear color
-		void set_clear_color(GLfloat clear_color[4])
-		{
-			memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4);
-		}
+		void set_clear_color(GLfloat clear_color[4]) { memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4); }
 
 		//render mode
 		void set_mode(RenderMode mode);
@@ -123,34 +107,22 @@ namespace flvr
 		//shading
 		void set_shading(bool shading) { shading_ = shading; }
 		bool get_shading() { return shading_; }
-		void set_material(double amb, double diff, double spec, double shine)
-		{ ambient_ = amb; diffuse_ = amb+0.7;
-		diffuse_ = diffuse_>1.0?1.0:diffuse_;
-		specular_ = spec; shine_ = shine; }
+		void set_material(double amb, double diff, double spec, double shine) { ambient_ = amb; diffuse_ = amb+0.7; diffuse_ = diffuse_>1.0?1.0:diffuse_; specular_ = spec; shine_ = shine; }
 
 		//colormap mode
-		void set_colormap_inv(double val)
-		{colormap_inv_ = val;}
-		void set_colormap_mode(int mode)
-		{colormap_mode_ = mode;}
-		void set_colormap_values(double low, double hi)
-		{colormap_low_value_ = low; colormap_hi_value_ = hi;}
-		void set_colormap(int value)
-		{colormap_ = value;}
-		void set_colormap_proj(int value)
-		{colormap_proj_ = value;}
+		void set_colormap_inv(double val) { colormap_inv_ = val; }
+		void set_colormap_mode(int mode) { colormap_mode_ = mode; }
+		void set_colormap_values(double low, double hi) { colormap_low_value_ = low; colormap_hi_value_ = hi; }
+		void set_colormap(int value) { colormap_ = value; }
+		void set_colormap_proj(int value) { colormap_proj_ = value; }
 
 		//label color shuffling
-		void set_shuffle(int val)
-		{ shuffle_ = val; }
-		int get_shuffle()
-		{ return shuffle_; }
+		void set_shuffle(int val) { shuffle_ = val; }
+		int get_shuffle() { return shuffle_; }
 
 		//solid
-		void set_solid(bool mode)
-		{solid_ = mode;}
-		bool get_solid()
-		{return solid_;}
+		void set_solid(bool mode) { solid_ = mode; }
+		bool get_solid() { return solid_; }
 
 		//sampling rate
 		void set_sampling_rate(double rate);
@@ -212,41 +184,37 @@ namespace flvr
 		void return_label(); //return the label volume
 
 		//mask and label
-		int get_ml_mode() {return ml_mode_;}
-		void set_ml_mode(int mode) {ml_mode_ = mode;}
+		int get_ml_mode() { return ml_mode_; }
+		void set_ml_mode(int mode) { ml_mode_ = mode; }
 
 		//set noise reduction
-		void SetNoiseRed(bool nd) {noise_red_ = nd;}
-		bool GetNoiseRed() {return noise_red_;}
+		void SetNoiseRed(bool nd) { noise_red_ = nd; }
+		bool GetNoiseRed() { return noise_red_; }
 
 		//inversion
-		void set_inversion(bool mode) {inv_ = mode;}
-		bool get_inversion() {return inv_;}
+		void set_inversion(bool mode) { inv_ = mode; }
+		bool get_inversion() { return inv_; }
 
 		//alpha power
 		void set_alpha_power(double val) { alpha_power_ = val; }
 		double get_alpha_power() { return alpha_power_; }
 
 		//compression
-		void set_compression(bool compression) {compression_ = compression;}
+		void set_compression(bool compression) { compression_ = compression; }
 
 		//done loop
-		bool get_done_loop(int mode)
-		{if (mode>=0 && mode<TEXTURE_RENDER_MODES) return done_loop_[mode]; else return false;}
-		void set_done_loop(bool done)
-		{for (int i=0; i<TEXTURE_RENDER_MODES; i++) done_loop_[i] = done;}
+		bool get_done_loop(int mode) { if (mode>=0 && mode<TEXTURE_RENDER_MODES) return done_loop_[mode]; else return false; }
+		void set_done_loop(bool done) { for (int i=0; i<TEXTURE_RENDER_MODES; i++) done_loop_[i] = done; }
 
 		//estimated threshold
 		double get_estimated_thresh()
 		{ return est_thresh_; }
 
 		//set matrices
-		void set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
-		{ m_mv_mat = mv_mat; m_proj_mat = proj_mat; m_tex_mat = tex_mat; }
+		void set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat) { m_mv_mat = mv_mat; m_proj_mat = proj_mat; m_tex_mat = tex_mat; }
 
 		//fog
-		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end)
-		{ m_use_fog = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
+		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end) { m_use_fog = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
 
 		friend class MultiVolumeRenderer;
 
