@@ -416,10 +416,15 @@ namespace flvr
 	{
 		if (shaders_supported())
 		{
-			const char *loc_strings[] = {"loc0", "loc1", "loc2", "loc3",
+			const char *loc_strings[] = {
+				"loc0", "loc1", "loc2", "loc3",
 				"loc4", "loc5", "loc6", "loc7",
 				"loc8", "loc9", "loc10", "loc11",
-				"loc12", "loc13", "loc14", "loc15"};
+				"loc12", "loc13", "loc14", "loc15",
+				"loc16", "loc17", "loc18", "loc19",
+				"loc20", "loc21", "loc22", "loc23",
+				"loc24", "loc25", "loc26", "loc27",
+				"loc28", "loc29", "loc30", "loc31"};
 
 			if (loc_vec4[i] == -1)
 			{

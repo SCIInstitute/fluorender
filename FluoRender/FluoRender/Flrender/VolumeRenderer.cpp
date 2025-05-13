@@ -41,6 +41,7 @@
 #include <VolKernel.h>
 #include <VolCalShader.h>
 #include <KernelProgram.h>
+#include <MovieMaker.h>
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>
@@ -777,6 +778,12 @@ namespace flvr
 		}
 		//color
 		shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), alpha_power_);
+
+		if (colormap_proj_ == 4)
+		{
+			shader->setLocalParamUInt(0, static_cast<unsigned int>(glbin_moviemaker.GetSeqCurNum()));
+			shader->setLocalParamUInt(1, static_cast<unsigned int>(glbin_moviemaker.GetSeqAllNum()));
+		}
 
 		//setup depth peeling
 		if (depth_peel_ || cm_mode == 2)

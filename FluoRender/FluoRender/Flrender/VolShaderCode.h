@@ -80,6 +80,12 @@
 	"uniform vec4 loc6;//(low, hi, hi-lo, inv)\n" \
 	"\n"
 
+#define VOL_UNIFROMS_4D_COLORMAP \
+	"//VOL_UNIFROMS_4D_COLORMAP\n" \
+	"uniform uint loci0;//time\n" \
+	"uniform uint loci1;//time length\n" \
+	"\n"
+
 #define VOL_UNIFORMS_2DMAP_LOC \
 	"//VOL_UNIFORMS_2DMAP_LOC\n" \
 	"uniform vec4 loc7;//(1/vx, 1/vy, 0, 0)\n" \
@@ -523,18 +529,23 @@
 	"		float valu = (1.0-tt.x-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU4 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_T\n" \
+	"		float valu = (loci1 != 0u) ? float(loci0) / float(loci1) : 0.0;\n" \
+	"		valu = (valu-loc6.x)/loc6.z;\n"
+
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU5 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_GM\n" \
 	"		vec4 tt = matrix5 * t;\n" \
 	"		float valu = (v.y-loc6.x)/loc6.z;\n"
 
-#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU5 \
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU6 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU5\n" \
 	"		float valu = dot(clamp(n.xyz, -1.0, 1.0), l.xyz/*vec3(1.0, 1.0, 0.0)*/);\n" \
 	"		valu = valu + 1.0;\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"
 
-#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU6 \
-	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU6\n" \
+#define VOL_TRANSFER_FUNCTION_COLORMAP_VALU7 \
+	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU7\n" \
 	"		float valu = v0.x - v_1.x;\n" \
 	"		valu = (valu + 1.0) / 2.0;\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"

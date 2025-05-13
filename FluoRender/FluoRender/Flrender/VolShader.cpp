@@ -145,7 +145,7 @@ VolShader::VolShader(
 		switch (colormap_)
 		{
 		case 0:
-			if (colormap_proj_ == 5)
+			if (colormap_proj_ == 6)
 				return string(VOL_COLORMAP_DIFF_CALC0);
 			else
 				return string(VOL_COLORMAP_CALC0);
@@ -185,6 +185,8 @@ VolShader::VolShader(
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU5);
 		case 6:
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU6);
+		case 7:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU7);
 		}
 		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
 	}
@@ -214,8 +216,12 @@ VolShader::VolShader(
 		//the common uniforms
 		z << VOL_UNIFORMS_COMMON;
 
+		//time for 4d colormap
+		if (colormap_proj_ == 4)
+			z << VOL_UNIFROMS_4D_COLORMAP;
+
 		//neighbors for 4d colormap
-		if (colormap_proj_ >= 6)
+		if (colormap_proj_ >= 7)
 			z << VOL_UNIFORMS_4D_CACHE;
 
 		//2d map location

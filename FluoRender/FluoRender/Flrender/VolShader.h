@@ -106,7 +106,7 @@ namespace flvr
 		int color_mode_;//0-normal; 1-rainbow; 2-depth
 		int colormap_;//index
 		int colormap_proj_;	//projection direction
-							//4D colormap: >=6
+							//4D colormap: >=7
 		bool solid_;//no transparency
 		int vertex_type_;
 
