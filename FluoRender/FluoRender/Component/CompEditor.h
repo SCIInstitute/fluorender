@@ -68,12 +68,6 @@ namespace flrd
 		unsigned int m_id;
 		bool m_id_empty;
 		std::unique_ptr<CelpList> m_list;
-
-	private:
-		//read/delete volume cache from file
-		void ReadVolCache(VolCache& vol_cache);
-		void DelVolCache(VolCache& vol_cache);
-
 	};
 }
 #endif//FL_CompEditor_h

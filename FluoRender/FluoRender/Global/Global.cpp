@@ -330,6 +330,7 @@ void Global::Init()
 	BuildFactories();
 	help_url_ = "https://github.com/SCIInstitute/fluorender";
 	InitLocale();
+	InitCacheQueue();
 }
 
 void Global::InitDatabase()
@@ -356,6 +357,11 @@ void Global::BuildFactories()
 void Global::InitLocale()
 {
 	std::setlocale(LC_ALL, "en_US.UTF-8");
+}
+
+void Global::InitCacheQueue()
+{
+	cache_queue_->RegisterCacheQueueFuncs(flrd::CQCallback::ReadVolCache, flrd::CQCallback::FreeVolCache);
 }
 
 TreeFileFactory& Global::get_tree_file_factory()

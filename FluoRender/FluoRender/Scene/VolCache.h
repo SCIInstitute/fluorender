@@ -28,46 +28,109 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_VolCache_h
 #define FL_VolCache_h
 
+#include <nrrd.h>
 #include <deque>
 #include <functional>
 
+namespace flvr
+{
+	class Texture;
+}
 namespace flrd
 {
-	struct VolCache
+	class CacheQueue;
+	class CQCallback;
+	class VolCache
 	{
+	public:
 		VolCache() :
-			nrrd_data(0),
-			nrrd_mask(0),
-			nrrd_label(0),
-			data(0),
-			mask(0),
-			label(0),
-			tex(0),
-			frame(0),
-			valid(false),
-			modified(false),
-			protect(false) {}
+			m_data(0),
+			m_mask(0),
+			m_label(0),
+			m_tex(0),
+			m_tnum(0),
+			m_valid(false),
+			m_modified(false),
+			m_protect(false) {}
 
-		//manage memory externally
-		//don't care releasing here
-		//handles to release
-		void* nrrd_data;
-		void* nrrd_mask;
-		void* nrrd_label;
-		//actual data
-		void* data;
-		void* mask;
-		void* label;
+		flvr::Texture* GetTexture() { return m_tex; }
+		Nrrd* GetNrrdData() { return m_data; }
+		Nrrd* GetNrrdMask() { return m_mask; }
+		Nrrd* GetNrrdLabel() { return m_label; }
+		void* GetRawData() { if (m_data) return m_data->data; return 0; }
+		void* GetRawMask() { if (m_mask) return m_mask->data; return 0; }
+		void* GetRawLabel() { if (m_label) return m_label->data; return 0; }
+
+	private:
+		Nrrd* m_data;
+		Nrrd* m_mask;
+		Nrrd* m_label;
 		//texture for 4d colormap
-		void* tex;
+		flvr::Texture* m_tex;
+		size_t m_tnum;//current time point number
+		bool m_valid;
+		bool m_modified;
+		bool m_protect;
 
-		size_t frame;
-		bool valid;
-		bool modified;
-		bool protect;
+		friend class CacheQueue;
+		friend class CQCallback;
 	};
 
 	typedef std::function<void(VolCache&)> VolCacheFunc;
+
+	//callback manager
+	class CQCallback
+	{
+	public:
+		static void ReadVolCache(VolCache& vol_cache);
+		static void FreeVolCache(VolCache& vol_cache);
+
+		static bool handle_data;//read data from file and then free
+		static bool handle_mask;//read mask from file and then free
+		static bool handle_label;//read label from file and then free
+		static bool access_data;//read data from memory and don't free
+		static bool access_mask;//read mask from memory and don't free
+		static bool access_label;//read label from mempry and don't free
+		static bool return_data;//read data from gpu and dont free
+		static bool return_mask;//read mask from gpu and don't free
+		static bool return_label;//read label from gpu and don't free
+		static bool save_data;//save data to disk if modified
+		static bool save_mask;//save mask to disk if modified
+		static bool save_label;//save label to disk if modified
+		static bool build_tex;//build texture
+		static bool time_cond0;//time conditional0: cur_time==cache_time, access; otherwise, handle
+
+		static void SetHandleFlags(int flags);
+
+		static constexpr int HDL_DATA		= 1 << 0;
+		static constexpr int HDL_MASK		= 1 << 1;
+		static constexpr int HDL_LABEL		= 1 << 2;
+		static constexpr int ACS_DATA		= 1 << 3;
+		static constexpr int ACS_MASK		= 1 << 4;
+		static constexpr int ACS_LABEL		= 1 << 5;
+		static constexpr int RET_DATA		= 1 << 6;
+		static constexpr int RET_MASK		= 1 << 7;
+		static constexpr int RET_LABEL		= 1 << 8;
+		static constexpr int SAV_DATA		= 1 << 9;
+		static constexpr int SAV_MASK		= 1 << 10;
+		static constexpr int SAV_LABEL		= 1 << 11;
+		static constexpr int BLD_TEX		= 1 << 12;
+		static constexpr int TIME_COND0		= 1 << 13;//time conditional0
+
+	private:
+		static bool HandleData(VolCache& vol_cache);
+		static bool HandleMask(VolCache& vol_cache);
+		static bool HandleLabel(VolCache& vol_cache);
+		static bool AccessData(VolCache& vol_cache, bool ret);
+		static bool AccessMask(VolCache& vol_cache, bool ret);
+		static bool AccessLabel(VolCache& vol_cache, bool ret);
+		static bool SaveData(VolCache& vol_cache);
+		static bool SaveMask(VolCache& vol_cache);
+		static bool SaveLabel(VolCache& vol_cache);
+		static bool BuildTex(VolCache& vol_cache);
+
+		static bool cond0;//actual time condition
+	};
 
 	//queue with a max size
 	class CacheQueue
@@ -114,9 +177,9 @@ namespace flrd
 		for (auto iter = m_queue.begin();
 			iter != m_queue.end(); ++iter)
 		{
-			if (iter->frame == frame)
+			if (iter->m_tnum == frame)
 			{
-				iter->protect = true;
+				iter->m_protect = true;
 				break;
 			}
 		}
@@ -127,9 +190,9 @@ namespace flrd
 		for (auto iter = m_queue.begin();
 			iter != m_queue.end(); ++iter)
 		{
-			if (iter->frame == frame)
+			if (iter->m_tnum == frame)
 			{
-				iter->protect = false;
+				iter->m_protect = false;
 				break;
 			}
 		}
@@ -166,12 +229,12 @@ namespace flrd
 
 	inline void CacheQueue::pop_cache()
 	{
-		if (m_queue.front().protect)
+		if (m_queue.front().m_protect)
 		{
 			for (auto iter = m_queue.begin();
 				iter != m_queue.end(); ++iter)
 			{
-				if (!iter->protect)
+				if (!iter->m_protect)
 				{
 					if (m_del_cache)
 						m_del_cache(*iter);
@@ -202,7 +265,7 @@ namespace flrd
 		int index = -1;
 		for (size_t i = 0; i < m_queue.size(); ++i)
 		{
-			if (m_queue[i].frame == frame)
+			if (m_queue[i].m_tnum == frame)
 			{
 				index = (int)i;
 				found = true;
@@ -211,7 +274,7 @@ namespace flrd
 		}
 		if (found)
 		{
-			if (!m_queue[index].valid && m_new_cache)
+			if (!m_queue[index].m_valid && m_new_cache)
 			{
 				m_new_cache(m_queue[index]);
 			}
@@ -219,7 +282,7 @@ namespace flrd
 		}
 		else
 		{
-			vol_cache.frame = frame;
+			vol_cache.m_tnum = frame;
 			if (m_new_cache)
 			{
 				m_new_cache(vol_cache);
@@ -233,10 +296,10 @@ namespace flrd
 	{
 		for (size_t i = 0; i < m_queue.size(); ++i)
 		{
-			if (m_queue[i].frame == frame)
+			if (m_queue[i].m_tnum == frame)
 			{
-				if (m_queue[i].valid)
-					m_queue[i].modified = value;
+				if (m_queue[i].m_valid)
+					m_queue[i].m_modified = value;
 				return;
 			}
 		}
@@ -246,7 +309,7 @@ namespace flrd
 	{
 		for (size_t i = 0; i < m_queue.size(); ++i)
 		{
-			if (m_queue[i].frame == frame)
+			if (m_queue[i].m_tnum == frame)
 			{
 				if (m_del_cache)
 				{

@@ -59,19 +59,19 @@ bool Registrator::Run(size_t f1, size_t f2,
 	//get data
 	size_t f0 = mode == 1 ? start : f1;
 	//size_t f0 = start;
+	void *data1 = 0, *data2 = 0, *mask1 = 0;
 	glbin_cache_queue.set_max_size(2);
 	VolCache cache = glbin_cache_queue.get(f0);
-	if (!cache.data)
+	data1 = cache.GetRawData();
+	if (!data1)
 		return false;
 	glbin_cache_queue.protect(f0);
-	void *data1 = 0, *data2 = 0, *mask1 = 0;
-	data1 = cache.data;
-	if (m_use_mask && cache.mask)
-		mask1 = cache.mask;
+	if (m_use_mask && cache.GetRawMask())
+		mask1 = cache.GetRawMask();
 	cache = glbin_cache_queue.get(f2);
-	if (!cache.data)
+	data2 = cache.GetRawData();
+	if (!data2)
 		return false;
-	data2 = cache.data;
 
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);

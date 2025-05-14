@@ -216,10 +216,6 @@ namespace flrd
 		CelpList m_list_out;
 
 	private:
-		//read/delete volume cache from file
-		void ReadVolCache(flrd::VolCache& vol_cache);
-		void DelVolCache(flrd::VolCache& vol_cache);
-
 		//modification
 		bool CheckCellContact(Celp &celp, void *data, void *label,
 			size_t ci, size_t cj, size_t ck);

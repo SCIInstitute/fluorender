@@ -773,9 +773,10 @@ void ScriptProc::RunMaskTracking()
 	glbin_trackmap_proc.SetFilterSize(fsize);
 	glbin_trackmap_proc.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
-	glbin_reg_cache_queue_func(this,
-		ScriptProc::ReadVolCacheDataLabel,
-		ScriptProc::DelVolCacheDataLabel);
+	CQCallback::SetHandleFlags(
+		CQCallback::HDL_DATA |
+		CQCallback::HDL_LABEL |
+		CQCallback::SAV_LABEL);
 
 	glbin_trackmap_proc.TrackStencils(
 		m_view->m_tseq_prv_num,
@@ -1773,13 +1774,14 @@ void ScriptProc::RunRegistration()
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);
 	if (use_mask)
-		glbin_reg_cache_queue_func(this,
-			ScriptProc::ReadVolCacheDataMask,
-			ScriptProc::DelVolCacheData);
+		CQCallback::SetHandleFlags(
+			CQCallback::HDL_DATA |
+			CQCallback::ACS_MASK |
+			CQCallback::RET_MASK |
+			CQCallback::SAV_LABEL);
 	else
-		glbin_reg_cache_queue_func(this,
-			ScriptProc::ReadVolCacheData,
-			ScriptProc::DelVolCacheData);
+		CQCallback::SetHandleFlags(
+			CQCallback::HDL_DATA);
 	fluo::Point transl, transl2, center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;
@@ -2629,142 +2631,6 @@ bool ScriptProc::RunBreak()
 		return false;
 	dlg->Hold();
 	return reset;
-}
-
-//read/delete volume cache
-void ScriptProc::ReadVolCacheData(flrd::VolCache& vol_cache)
-{
-	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol) return;
-	BaseReader* reader = cur_vol->GetReader();
-	if (!reader)
-		return;
-
-	int chan = cur_vol->GetCurChannel();
-	int frame = vol_cache.frame;
-
-	Nrrd* data = reader->Convert(frame, chan, true);
-	vol_cache.nrrd_data = data;
-	vol_cache.data = data->data;
-	if (data)
-		vol_cache.valid = true;
-}
-
-void ScriptProc::ReadVolCacheDataMask(flrd::VolCache& vol_cache)
-{
-	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol) return;
-	BaseReader* reader = cur_vol->GetReader();
-	if (!reader)
-		return;
-
-	int chan = cur_vol->GetCurChannel();
-	int frame = vol_cache.frame;
-
-	Nrrd* data = reader->Convert(frame, chan, true);
-	vol_cache.nrrd_data = data;
-	if (data)
-		vol_cache.data = data->data;
-
-	Nrrd* mask = cur_vol->GetMask(true);
-	vol_cache.nrrd_mask = mask;
-	if (mask)
-		vol_cache.mask = mask->data;
-
-	if (data)
-		vol_cache.valid = true;
-}
-
-void ScriptProc::ReadVolCacheDataLabel(flrd::VolCache& vol_cache)
-{
-	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol) return;
-	BaseReader* reader = cur_vol->GetReader();
-	if (!reader)
-		return;
-	LBLReader lbl_reader;
-
-	int chan = cur_vol->GetCurChannel();
-	int frame = vol_cache.frame;
-
-	Nrrd* data = reader->Convert(frame, chan, true);
-	vol_cache.nrrd_data = data;
-	vol_cache.data = data->data;
-	std::wstring lblname = reader->GetCurLabelName(frame, chan);
-	lbl_reader.SetFile(lblname);
-	Nrrd* label = lbl_reader.Convert(frame, chan, true);
-	if (!label)
-	{
-		int resx, resy, resz;
-		cur_vol->GetResolution(resx, resy, resz);
-		double spcx, spcy, spcz;
-		cur_vol->GetSpacings(spcx, spcy, spcz);
-		label = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)resx *
-			(unsigned long long)resy * (unsigned long long)resz;
-		unsigned int* val32 = new (std::nothrow) unsigned int[mem_size]();
-		nrrdWrap_va(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoMax, spcx * resx, spcy * resy, spcz * resz);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
-	}
-	vol_cache.nrrd_label = label;
-	vol_cache.label = label->data;
-	if (data && label)
-		vol_cache.valid = true;
-}
-
-void ScriptProc::DelVolCacheData(flrd::VolCache& vol_cache)
-{
-	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol) return;
-	vol_cache.valid = false;
-	if (vol_cache.data)
-	{
-		nrrdNuke((Nrrd*)vol_cache.nrrd_data);
-		vol_cache.data = 0;
-		vol_cache.nrrd_data = 0;
-	}
-}
-
-void ScriptProc::DelVolCacheDataLabel(flrd::VolCache& vol_cache)
-{
-	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol) return;
-	vol_cache.valid = false;
-	if (vol_cache.data)
-	{
-		nrrdNuke((Nrrd*)vol_cache.nrrd_data);
-		vol_cache.data = 0;
-		vol_cache.nrrd_data = 0;
-	}
-	if (vol_cache.label)
-	{
-		int chan = cur_vol->GetCurChannel();
-		int frame = vol_cache.frame;
-		double spcx, spcy, spcz;
-		cur_vol->GetSpacings(spcx, spcy, spcz);
-
-		MSKWriter msk_writer;
-		msk_writer.SetData((Nrrd*)(vol_cache.nrrd_label));
-		msk_writer.SetSpacings(spcx, spcy, spcz);
-		BaseReader* reader = cur_vol->GetReader();
-		if (reader)
-		{
-			std::wstring filename = reader->GetCurLabelName(frame, chan);
-			msk_writer.Save(filename, 1);
-		}
-
-		nrrdNuke((Nrrd*)vol_cache.nrrd_label);
-		vol_cache.label = 0;
-		vol_cache.nrrd_label = 0;
-	}
 }
 
 void ScriptProc::OpenFileWithDefaultProgram(const std::wstring& filename)

@@ -104,11 +104,6 @@ namespace flvr
 
 #define glbin fluo::Global::instance()
 #define glbin_cache_queue fluo::Global::instance().get_cache_queue()
-#define glbin_reg_cache_queue_func(obj, read_func, del_func) \
-	fluo::Global::instance().get_cache_queue().\
-	RegisterCacheQueueFuncs(\
-	std::bind(&read_func, obj, std::placeholders::_1),\
-	std::bind(&del_func, obj, std::placeholders::_1))
 //config file handlers
 #define glbin_tree_file_factory fluo::Global::instance().get_tree_file_factory()
 //settings
@@ -415,6 +410,7 @@ namespace fluo
 		void InitDatabase();
 		void BuildFactories();
 		void InitLocale();
+		void InitCacheQueue();
 	};
 
 }

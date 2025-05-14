@@ -269,8 +269,6 @@ void ComponentEditor::NewId(bool append, bool track)
 		//trkg->AddCell(cell, m_cur_time);
 		pTrackMap track_map = trkg->GetTrackMap();
 		glbin_trackmap_proc.SetTrackMap(track_map);
-		//register file reading and deleteing functions
-		glbin_reg_cache_queue_func(this, ComponentEditor::ReadVolCache, ComponentEditor::DelVolCache);
 		glbin_cache_queue.set_max_size(4);
 		//add
 		cell->Calc();
@@ -537,93 +535,3 @@ void ComponentEditor::CombineList()
 	glbin_trackmap_proc.CombineCells(cell, *m_list,
 		cur_time);
 }
-
-//read/delete volume cache
-void ComponentEditor::ReadVolCache(VolCache& vol_cache)
-{
-	//get volume, readers
-	VolumeData* vd = glbin_current.vol_data;
-	if (!vd)
-		return;
-	BaseReader* reader = vd->GetReader();
-	if (!reader)
-		return;
-	LBLReader lbl_reader;
-
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
-	int chan = vd->GetCurChannel();
-	int frame = static_cast<int>(vol_cache.frame);
-
-	if (frame == cur_time)
-	{
-		flvr::Texture* tex = vd->GetTexture();
-		if (!tex)
-			return;
-
-		Nrrd* data = tex->get_nrrd(0);
-		vol_cache.nrrd_data = data;
-		vol_cache.data = data->data;
-		Nrrd* label = tex->get_nrrd(tex->nlabel());
-		vol_cache.nrrd_label = label;
-		vol_cache.label = label->data;
-		if (data && label)
-			vol_cache.valid = true;
-	}
-	else
-	{
-		Nrrd* data = reader->Convert(frame, chan, true);
-		if (!data)
-			return;
-		vol_cache.nrrd_data = data;
-		vol_cache.data = data->data;
-		std::wstring lblname = reader->GetCurLabelName(frame, chan);
-		lbl_reader.SetFile(lblname);
-		Nrrd* label = lbl_reader.Convert(frame, chan, true);
-		if (!label)
-			return;
-		vol_cache.nrrd_label = label;
-		vol_cache.label = label->data;
-		if (data && label)
-			vol_cache.valid = true;
-	}
-}
-
-void ComponentEditor::DelVolCache(VolCache& vol_cache)
-{
-	VolumeData* vd = glbin_current.vol_data;
-	if (!vd)
-		return;
-	BaseReader* reader = vd->GetReader();
-	if (!reader)
-		return;
-	int chan = vd->GetCurChannel();
-	int frame = static_cast<int>(vol_cache.frame);
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
-
-	if (vol_cache.valid && vol_cache.modified)
-	{
-		//save it first if modified
-		//assume that only label is modified
-		MSKWriter msk_writer;
-		msk_writer.SetData((Nrrd*)vol_cache.nrrd_label);
-		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
-		msk_writer.SetSpacings(spcx, spcy, spcz);
-		std::wstring filename = reader->GetCurLabelName(frame, chan);
-		msk_writer.Save(filename, 1);
-	}
-
-	vol_cache.valid = false;
-	if (frame != cur_time)
-	{
-		if (vol_cache.data)
-			nrrdNuke((Nrrd*)vol_cache.nrrd_data);
-		if (vol_cache.label)
-			nrrdNuke((Nrrd*)vol_cache.nrrd_label);
-	}
-	vol_cache.data = 0;
-	vol_cache.nrrd_data = 0;
-	vol_cache.label = 0;
-	vol_cache.nrrd_label = 0;
-}
-
