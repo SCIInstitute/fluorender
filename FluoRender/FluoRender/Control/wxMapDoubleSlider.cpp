@@ -246,10 +246,13 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 				img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
 			}
 			bitmap = wxBitmap(img_scaled);
-			if (horizontal_)
-				dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(posl, 0, posr - posl, height)), margin_ + posl, h / 2.0 - 4 * scale_, false);
-			else
-				dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(0, posl, width, posr - posl)), w / 2.0 - 4 * scale_, margin_ + posl, false);
+			if (posr - posl > 0)
+			{
+				if (horizontal_)
+					dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(posl, 0, posr - posl, height)), margin_ + posl, h / 2.0 - 4 * scale_, false);
+				else
+					dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(0, posl, width, posr - posl)), w / 2.0 - 4 * scale_, margin_ + posl, false);
+			}
 		}
 	}
 	else
