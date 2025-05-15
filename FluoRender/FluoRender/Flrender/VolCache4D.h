@@ -76,6 +76,32 @@ namespace flvr
 		size_t GetTime() { return m_tnum; }
 
 		void SetHandleFlags(int flags);
+		void Reset()
+		{
+			handle_data = false;
+			handle_mask = false;
+			handle_label = false;
+			access_data = false;
+			access_mask = false;
+			access_label = false;
+			return_data = false;
+			return_mask = false;
+			return_label = false;
+			save_data = false;
+			save_mask = false;
+			save_label = false;
+			build_tex = false;
+			time_cond0 = false;
+			m_vd = 0;
+			m_data = 0;
+			m_mask = 0;
+			m_label = 0;
+			m_tex = 0;
+			m_tnum = 0;
+			m_valid = false;
+			m_modified = false;
+			m_protect = false;
+		}
 
 		bool handle_data;//read data from file and then free
 		bool handle_mask;//read mask from file and then free
@@ -170,6 +196,7 @@ namespace flvr
 		VolCache4D* get_offset(int toffset);
 		inline void set_modified(size_t frame, bool value = true);
 		inline void clear(size_t frame);
+		inline void reset(size_t frame);
 
 		void RegisterCacheQueueFuncs(const VolCacheFunc &fnew, const VolCacheFunc &fdel);
 		void UnregisterCacheQueueFuncs();
@@ -355,6 +382,17 @@ namespace flvr
 				}
 				m_queue.erase(m_queue.begin() + i);
 				return;
+			}
+		}
+	}
+
+	inline void CacheQueue::reset(size_t frame)
+	{
+		for (size_t i = 0; i < m_queue.size(); ++i)
+		{
+			if (m_queue[i].m_tnum == frame)
+			{
+				m_queue[i].Reset();
 			}
 		}
 	}

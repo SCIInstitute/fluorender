@@ -141,8 +141,7 @@ void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 	{
 		if (vol_cache.m_data)
 		{
-			//test
-			//nrrdNuke((Nrrd*)vol_cache.m_data);
+			nrrdNuke((Nrrd*)vol_cache.m_data);
 			vol_cache.m_data = 0;
 		}
 	}
