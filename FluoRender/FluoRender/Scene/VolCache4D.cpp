@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <VolCache.h>
+#include <VolCache4D.h>
 #include <Texture.h>
 #include <Global.h>
 #include <DataManager.h>
@@ -38,31 +38,36 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-bool CQCallback::handle_data = false;
-bool CQCallback::handle_mask = false;
-bool CQCallback::handle_label = false;
-bool CQCallback::access_data = false;
-bool CQCallback::access_mask = false;
-bool CQCallback::access_label = false;
-bool CQCallback::return_data = false;
-bool CQCallback::return_mask = false;
-bool CQCallback::return_label = false;
-bool CQCallback::save_data = false;
-bool CQCallback::save_mask = false;
-bool CQCallback::save_label = false;
-bool CQCallback::build_tex = false;
-bool CQCallback::time_cond0 = false;
+void VolCache4D::SetHandleFlags(int flags)
+{
+	handle_data = flags & CQCallback::HDL_DATA;
+	handle_mask = flags & CQCallback::HDL_MASK;
+	handle_label = flags & CQCallback::HDL_LABEL;
+	access_data = flags & CQCallback::ACS_DATA;
+	access_mask = flags & CQCallback::ACS_MASK;
+	access_label = flags & CQCallback::ACS_LABEL;
+	return_data = flags & CQCallback::RET_DATA;
+	return_mask = flags & CQCallback::RET_MASK;
+	return_label = flags & CQCallback::RET_LABEL;
+	build_tex = flags & CQCallback::BLD_TEX;
+	time_cond0 = flags & CQCallback::TIME_COND0;
+}
+
 bool CQCallback::cond0 = false;
 
-void CQCallback::ReadVolCache(VolCache& vol_cache)
+void CQCallback::ReadVolCache(VolCache4D& vol_cache)
 {
-	if (!handle_data && !handle_label && !handle_mask &&
-		!access_data && !access_mask && !access_label &&
-		!build_tex)
+	if (!vol_cache.handle_data &&
+		!vol_cache.handle_label &&
+		!vol_cache.handle_mask &&
+		!vol_cache.access_data &&
+		!vol_cache.access_mask &&
+		!vol_cache.access_label &&
+		!vol_cache.build_tex)
 		return;
 
 	cond0 = false;
-	if (time_cond0)
+	if (vol_cache.time_cond0)
 	{
 		int cur_time = glbin_moviemaker.GetSeqCurNum();
 		int frame = static_cast<int>(vol_cache.m_tnum);
@@ -70,65 +75,69 @@ void CQCallback::ReadVolCache(VolCache& vol_cache)
 	}
 
 	vol_cache.m_valid = true;
-	if (handle_data)
+	if (vol_cache.handle_data)
 	{
 		if (cond0)
-			AccessData(vol_cache, return_data);
+			AccessData(vol_cache);
 		else
 			HandleData(vol_cache);
 	}
-	if (handle_mask)
+	if (vol_cache.handle_mask)
 	{
 		if (cond0)
-			AccessMask(vol_cache, return_mask);
+			AccessMask(vol_cache);
 		else
 			HandleMask(vol_cache);
 	}
-	if (handle_label)
+	if (vol_cache.handle_label)
 	{
 		if (cond0)
-			AccessLabel(vol_cache, return_label);
+			AccessLabel(vol_cache);
 		else
 			HandleLabel(vol_cache);
 	}
-	if (access_data)
+	if (vol_cache.access_data)
 	{
-		AccessData(vol_cache, return_data);
+		AccessData(vol_cache);
 	}
-	if (access_mask)
+	if (vol_cache.access_mask)
 	{
-		AccessMask(vol_cache, return_mask);
+		AccessMask(vol_cache);
 	}
-	if (access_label)
+	if (vol_cache.access_label)
 	{
-		AccessLabel(vol_cache, return_label);
+		AccessLabel(vol_cache);
 	}
-	if (build_tex)
+	if (vol_cache.build_tex)
 	{
 		BuildTex(vol_cache);
 	}
 }
 
-void CQCallback::FreeVolCache(VolCache& vol_cache)
+void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 {
-	if (!handle_data && !handle_label && !handle_mask &&
-		!save_data && !save_mask && !save_label &&
-		!build_tex)
+	if (!vol_cache.handle_data &&
+		!vol_cache.handle_label &&
+		!vol_cache.handle_mask &&
+		!vol_cache.access_data &&
+		!vol_cache.access_mask &&
+		!vol_cache.access_label &&
+		!vol_cache.build_tex)
 		return;
 
-	if (save_data)
+	if (vol_cache.save_data)
 	{
 		SaveData(vol_cache);
 	}
-	if (save_mask)
+	if (vol_cache.save_mask)
 	{
 		SaveMask(vol_cache);
 	}
-	if (save_label)
+	if (vol_cache.save_label)
 	{
 		SaveLabel(vol_cache);
 	}
-	if (handle_data && !cond0)
+	if (vol_cache.handle_data && !cond0)
 	{
 		if (vol_cache.m_data)
 		{
@@ -136,7 +145,7 @@ void CQCallback::FreeVolCache(VolCache& vol_cache)
 			vol_cache.m_data = 0;
 		}
 	}
-	if (handle_mask && !cond0)
+	if (vol_cache.handle_mask && !cond0)
 	{
 		if (vol_cache.m_mask)
 		{
@@ -144,7 +153,7 @@ void CQCallback::FreeVolCache(VolCache& vol_cache)
 			vol_cache.m_mask = 0;
 		}
 	}
-	if (handle_label && !cond0)
+	if (vol_cache.handle_label && !cond0)
 	{
 		if (vol_cache.m_label)
 		{
@@ -155,22 +164,7 @@ void CQCallback::FreeVolCache(VolCache& vol_cache)
 	vol_cache.m_valid = false;
 }
 
-void CQCallback::SetHandleFlags(int flags)
-{
-	handle_data = flags & HDL_DATA;
-	handle_mask = flags & HDL_MASK;
-	handle_label = flags & HDL_LABEL;
-	access_data = flags & ACS_DATA;
-	access_mask = flags & ACS_MASK;
-	access_label = flags & ACS_LABEL;
-	return_data = flags & RET_DATA;
-	return_mask = flags & RET_MASK;
-	return_label = flags & RET_LABEL;
-	build_tex = flags & BLD_TEX;
-	time_cond0 = flags & TIME_COND0;
-}
-
-bool CQCallback::HandleData(VolCache& vol_cache)
+bool CQCallback::HandleData(VolCache4D& vol_cache)
 {
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
@@ -190,7 +184,7 @@ bool CQCallback::HandleData(VolCache& vol_cache)
 	return data != 0;
 }
 
-bool CQCallback::HandleMask(VolCache& vol_cache)
+bool CQCallback::HandleMask(VolCache4D& vol_cache)
 {
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
@@ -228,7 +222,7 @@ bool CQCallback::HandleMask(VolCache& vol_cache)
 	return mask != 0;
 }
 
-bool CQCallback::HandleLabel(VolCache& vol_cache)
+bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 {
 	//get volume, readers
 	VolumeData* cur_vol = glbin_current.vol_data;
@@ -266,48 +260,48 @@ bool CQCallback::HandleLabel(VolCache& vol_cache)
 	return label != 0;
 }
 
-bool CQCallback::AccessData(VolCache& vol_cache, bool ret)
+bool CQCallback::AccessData(VolCache4D& vol_cache)
 {
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol)
 		return false;
 
-	Nrrd* data = cur_vol->GetVolume(ret);
+	Nrrd* data = cur_vol->GetVolume(vol_cache.return_data);
 	vol_cache.m_data = data;
 	vol_cache.m_valid &= (data != 0);
 	return data != 0;
 }
 
-bool CQCallback::AccessMask(VolCache& vol_cache, bool ret)
+bool CQCallback::AccessMask(VolCache4D& vol_cache)
 {
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol)
 		return false;
 
-	Nrrd* mask = cur_vol->GetMask(ret);
+	Nrrd* mask = cur_vol->GetMask(vol_cache.return_mask);
 	vol_cache.m_mask = mask;
 	vol_cache.m_valid &= (mask != 0);
 	return mask != 0;
 }
 
-bool CQCallback::AccessLabel(VolCache& vol_cache, bool ret)
+bool CQCallback::AccessLabel(VolCache4D& vol_cache)
 {
 	VolumeData* cur_vol = glbin_current.vol_data;
 	if (!cur_vol)
 		return false;
 
-	Nrrd* label = cur_vol->GetLabel(ret);
+	Nrrd* label = cur_vol->GetLabel(vol_cache.return_label);
 	vol_cache.m_label = label;
 	vol_cache.m_valid &= (label != 0);
 	return label != 0;
 }
 
-bool CQCallback::SaveData(VolCache& vol_cache)
+bool CQCallback::SaveData(VolCache4D& vol_cache)
 {
 	return true;
 }
 
-bool CQCallback::SaveMask(VolCache& vol_cache)
+bool CQCallback::SaveMask(VolCache4D& vol_cache)
 {
 	if (!vol_cache.m_valid || !vol_cache.m_modified)
 		return false;
@@ -331,7 +325,7 @@ bool CQCallback::SaveMask(VolCache& vol_cache)
 	return true;
 }
 
-bool CQCallback::SaveLabel(VolCache& vol_cache)
+bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 {
 	if (!vol_cache.m_valid || !vol_cache.m_modified)
 		return false;
@@ -355,7 +349,7 @@ bool CQCallback::SaveLabel(VolCache& vol_cache)
 	return true;
 }
 
-bool CQCallback::BuildTex(VolCache& vol_cache)
+bool CQCallback::BuildTex(VolCache4D& vol_cache)
 {
 	return true;
 }

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Stencil.h>
 #include <StencilCompare.h>
-#include <VolCache.h>
+#include <VolCache4D.h>
 #include <DataManager.h>
 #ifdef _DEBUG
 #include <Debug.h>
@@ -56,22 +56,30 @@ Registrator::~Registrator()
 bool Registrator::Run(size_t f1, size_t f2,
 	int mode, size_t start)
 {
+	if (!m_vd)
+		return false;
+	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(m_vd);
+	if (!cache_queue)
+		return false;
+
 	//get data
 	size_t f0 = mode == 1 ? start : f1;
 	//size_t f0 = start;
 	void *data1 = 0, *data2 = 0, *mask1 = 0;
-	glbin_cache_queue.set_max_size(2);
-	VolCache cache = glbin_cache_queue.get(f0);
-	data1 = cache.GetRawData();
+	cache_queue->set_max_size(2);
+	VolCache4D* cache = cache_queue->get(f0);
+	if (!cache)
+		return false;
+	data1 = cache->GetRawData();
 	if (!data1)
 		return false;
-	glbin_cache_queue.protect(f0);
-	if (m_use_mask && cache.GetRawMask())
-		mask1 = cache.GetRawMask();
-	cache = glbin_cache_queue.get(f2);
-	data2 = cache.GetRawData();
+	if (m_use_mask && cache->GetRawMask())
+		mask1 = cache->GetRawMask();
+	cache = cache_queue->get(f2);
+	data2 = cache->GetRawData();
 	if (!data2)
 		return false;
+	cache_queue->protect(f0);
 
 	int nx, ny, nz;
 	m_vd->GetResolution(nx, ny, nz);
@@ -133,7 +141,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 		//}
 	}
 
-	glbin_cache_queue.unprotect(f0);
+	cache_queue->unprotect(f0);
 	return true;
 }
 

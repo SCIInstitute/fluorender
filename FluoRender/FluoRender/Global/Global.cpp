@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <TreeFileFactory.h>
-#include <VolCache.h>
 #include <VideoEncoder.h>
 #include <Reshape.h>
 #include <EntryParams.h>
@@ -260,7 +259,6 @@ Global Global::instance_;
 
 Global::Global() :
 	tree_file_factory_(std::make_unique<TreeFileFactory>()),
-	cache_queue_(std::make_unique<flrd::CacheQueue>()),
 	encoder_(std::make_unique<VideoEncoder>()),
 	main_settings_(std::make_unique<MainSettings>()),
 	states_(std::make_unique<GlobalStates>()),
@@ -330,7 +328,6 @@ void Global::Init()
 	BuildFactories();
 	help_url_ = "https://github.com/SCIInstitute/fluorender";
 	InitLocale();
-	InitCacheQueue();
 }
 
 void Global::InitDatabase()
@@ -359,19 +356,9 @@ void Global::InitLocale()
 	std::setlocale(LC_ALL, "en_US.UTF-8");
 }
 
-void Global::InitCacheQueue()
-{
-	cache_queue_->RegisterCacheQueueFuncs(flrd::CQCallback::ReadVolCache, flrd::CQCallback::FreeVolCache);
-}
-
 TreeFileFactory& Global::get_tree_file_factory()
 {
 	return *tree_file_factory_;
-}
-
-flrd::CacheQueue& Global::get_cache_queue()
-{
-	return *cache_queue_;
 }
 
 VideoEncoder& Global::get_video_encoder()

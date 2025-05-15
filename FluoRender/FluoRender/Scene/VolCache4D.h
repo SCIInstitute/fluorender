@@ -40,10 +40,10 @@ namespace flrd
 {
 	class CacheQueue;
 	class CQCallback;
-	class VolCache
+	class VolCache4D
 	{
 	public:
-		VolCache() :
+		VolCache4D() :
 			m_data(0),
 			m_mask(0),
 			m_label(0),
@@ -51,7 +51,21 @@ namespace flrd
 			m_tnum(0),
 			m_valid(false),
 			m_modified(false),
-			m_protect(false) {}
+			m_protect(false),
+			handle_data(false),
+			handle_mask(false),
+			handle_label(false),
+			access_data(false),
+			access_mask(false),
+			access_label(false),
+			return_data(false),
+			return_mask(false),
+			return_label(false),
+			save_data(false),
+			save_mask(false),
+			save_label(false),
+			build_tex(false),
+			time_cond0(false) {}
 
 		flvr::Texture* GetTexture() { return m_tex; }
 		Nrrd* GetNrrdData() { return m_data; }
@@ -61,12 +75,30 @@ namespace flrd
 		void* GetRawMask() { if (m_mask) return m_mask->data; return 0; }
 		void* GetRawLabel() { if (m_label) return m_label->data; return 0; }
 
+		void SetHandleFlags(int flags);
+
+		bool handle_data;//read data from file and then free
+		bool handle_mask;//read mask from file and then free
+		bool handle_label;//read label from file and then free
+		bool access_data;//read data from memory and don't free
+		bool access_mask;//read mask from memory and don't free
+		bool access_label;//read label from mempry and don't free
+		bool return_data;//read data from gpu and dont free
+		bool return_mask;//read mask from gpu and don't free
+		bool return_label;//read label from gpu and don't free
+		bool save_data;//save data to disk if modified
+		bool save_mask;//save mask to disk if modified
+		bool save_label;//save label to disk if modified
+		bool build_tex;//build texture
+		bool time_cond0;//time conditional0: cur_time==cache_time, access; otherwise, handle
+
 	private:
 		Nrrd* m_data;
 		Nrrd* m_mask;
 		Nrrd* m_label;
 		//texture for 4d colormap
 		flvr::Texture* m_tex;
+
 		size_t m_tnum;//current time point number
 		bool m_valid;
 		bool m_modified;
@@ -76,31 +108,14 @@ namespace flrd
 		friend class CQCallback;
 	};
 
-	typedef std::function<void(VolCache&)> VolCacheFunc;
+	typedef std::function<void(VolCache4D&)> VolCacheFunc;
 
 	//callback manager
 	class CQCallback
 	{
 	public:
-		static void ReadVolCache(VolCache& vol_cache);
-		static void FreeVolCache(VolCache& vol_cache);
-
-		static bool handle_data;//read data from file and then free
-		static bool handle_mask;//read mask from file and then free
-		static bool handle_label;//read label from file and then free
-		static bool access_data;//read data from memory and don't free
-		static bool access_mask;//read mask from memory and don't free
-		static bool access_label;//read label from mempry and don't free
-		static bool return_data;//read data from gpu and dont free
-		static bool return_mask;//read mask from gpu and don't free
-		static bool return_label;//read label from gpu and don't free
-		static bool save_data;//save data to disk if modified
-		static bool save_mask;//save mask to disk if modified
-		static bool save_label;//save label to disk if modified
-		static bool build_tex;//build texture
-		static bool time_cond0;//time conditional0: cur_time==cache_time, access; otherwise, handle
-
-		static void SetHandleFlags(int flags);
+		static void ReadVolCache(VolCache4D& vol_cache);
+		static void FreeVolCache(VolCache4D& vol_cache);
 
 		static constexpr int HDL_DATA		= 1 << 0;
 		static constexpr int HDL_MASK		= 1 << 1;
@@ -118,16 +133,16 @@ namespace flrd
 		static constexpr int TIME_COND0		= 1 << 13;//time conditional0
 
 	private:
-		static bool HandleData(VolCache& vol_cache);
-		static bool HandleMask(VolCache& vol_cache);
-		static bool HandleLabel(VolCache& vol_cache);
-		static bool AccessData(VolCache& vol_cache, bool ret);
-		static bool AccessMask(VolCache& vol_cache, bool ret);
-		static bool AccessLabel(VolCache& vol_cache, bool ret);
-		static bool SaveData(VolCache& vol_cache);
-		static bool SaveMask(VolCache& vol_cache);
-		static bool SaveLabel(VolCache& vol_cache);
-		static bool BuildTex(VolCache& vol_cache);
+		static bool HandleData(VolCache4D& vol_cache);
+		static bool HandleMask(VolCache4D& vol_cache);
+		static bool HandleLabel(VolCache4D& vol_cache);
+		static bool AccessData(VolCache4D& vol_cache);
+		static bool AccessMask(VolCache4D& vol_cache);
+		static bool AccessLabel(VolCache4D& vol_cache);
+		static bool SaveData(VolCache4D& vol_cache);
+		static bool SaveMask(VolCache4D& vol_cache);
+		static bool SaveLabel(VolCache4D& vol_cache);
+		static bool BuildTex(VolCache4D& vol_cache);
 
 		static bool cond0;//actual time condition
 	};
@@ -139,7 +154,8 @@ namespace flrd
 		CacheQueue():
 		m_max_size(1),
 		m_new_cache(nullptr),
-		m_del_cache(nullptr) {};
+		m_del_cache(nullptr),
+		m_flags(0) {};
 		~CacheQueue();
 
 		inline void protect(size_t frame);
@@ -148,12 +164,14 @@ namespace flrd
 		inline void set_max_size(size_t size);
 		inline size_t get_max_size();
 		inline size_t size();
-		inline VolCache get(size_t frame);
+		inline VolCache4D* get(size_t frame);
 		inline void set_modified(size_t frame, bool value = true);
 		inline void clear(size_t frame);
 
 		void RegisterCacheQueueFuncs(const VolCacheFunc &fnew, const VolCacheFunc &fdel);
 		void UnregisterCacheQueueFuncs();
+
+		void SetHandleFlags(int flags) { m_flags = flags; }
 
 		//external calls
 		VolCacheFunc m_new_cache;
@@ -161,10 +179,12 @@ namespace flrd
 
 	private:
 		size_t m_max_size;
-		std::deque<VolCache> m_queue;
+		std::deque<VolCache4D> m_queue;
+		int m_flags;
 
 		inline void pop_cache();
-		inline void push_cache(const VolCache& val);
+		inline void push_cache(const VolCache4D& val);
+
 	};
 
 	inline CacheQueue::~CacheQueue()
@@ -203,7 +223,10 @@ namespace flrd
 		if (m_del_cache)
 		{
 			for (size_t i = 0; i < m_queue.size(); ++i)
+			{
+				m_queue[i].SetHandleFlags(m_flags);
 				m_del_cache(m_queue[i]);
+			}
 		}
 		m_queue.clear();
 	}
@@ -237,7 +260,10 @@ namespace flrd
 				if (!iter->m_protect)
 				{
 					if (m_del_cache)
+					{
+						iter->SetHandleFlags(m_flags);
 						m_del_cache(*iter);
+					}
 					m_queue.erase(iter);
 					break;
 				}
@@ -246,21 +272,23 @@ namespace flrd
 		else
 		{
 			if (m_del_cache)
+			{
+				m_queue.front().SetHandleFlags(m_flags);
 				m_del_cache(m_queue.front());
+			}
 			m_queue.pop_front();
 		}
 	}
 
-	inline void CacheQueue::push_cache(const VolCache& val)
+	inline void CacheQueue::push_cache(const VolCache4D& val)
 	{
 		while (m_queue.size() > m_max_size - 1)
 			pop_cache();
 		m_queue.push_back(val);
 	}
 
-	inline VolCache CacheQueue::get(size_t frame)
+	inline VolCache4D* CacheQueue::get(size_t frame)
 	{
-		VolCache vol_cache;
 		bool found = false;
 		int index = -1;
 		for (size_t i = 0; i < m_queue.size(); ++i)
@@ -276,20 +304,25 @@ namespace flrd
 		{
 			if (!m_queue[index].m_valid && m_new_cache)
 			{
+				m_queue[index].SetHandleFlags(m_flags);
 				m_new_cache(m_queue[index]);
 			}
-			return m_queue[index];
+			return &(m_queue[index]);
 		}
 		else
 		{
+			VolCache4D vol_cache;
 			vol_cache.m_tnum = frame;
 			if (m_new_cache)
 			{
+				vol_cache.SetHandleFlags(m_flags);
 				m_new_cache(vol_cache);
-				push_cache(vol_cache);
 			}
+			push_cache(vol_cache);
+			if (!m_queue.empty())
+				return &m_queue.back();
 		}
-		return vol_cache;
+		return 0;
 	}
 
 	inline void CacheQueue::set_modified(size_t frame, bool value)
@@ -313,6 +346,7 @@ namespace flrd
 			{
 				if (m_del_cache)
 				{
+					m_queue[i].SetHandleFlags(m_flags);
 					m_del_cache(m_queue[i]);
 				}
 				m_queue.erase(m_queue.begin() + i);

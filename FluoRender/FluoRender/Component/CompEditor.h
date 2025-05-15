@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flrd
 {
-	struct VolCache;
 	class CelpList;
 	class ComponentEditor
 	{

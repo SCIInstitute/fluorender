@@ -51,7 +51,6 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
-	struct VolCache;
 	class TrackMap;
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	typedef std::weak_ptr<TrackMap> pwTrackMap;

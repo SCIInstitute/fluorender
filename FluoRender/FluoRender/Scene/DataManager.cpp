@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <GL/glew.h>
 #include <DataManager.h>
+#include <VolCache4D.h>
 #include <RenderView.h>
 #include <Global.h>
 #include <Names.h>
@@ -5887,6 +5888,7 @@ void DataManager::ClearAll()
 	m_md_list.clear();
 	m_reader_list.clear();
 	m_annotation_list.clear();
+	m_vd_cache_queue.clear();
 }
 
 void DataManager::SetVolumeDefault(VolumeData* vd)
@@ -6674,7 +6676,8 @@ void DataManager::RemoveVolumeData(size_t index)
 		}
 		else
 			++iter;
-	}	
+	}
+	m_vd_cache_queue.erase(data);
 }
 
 void DataManager::RemoveVolumeData(const std::wstring &name)
@@ -6745,6 +6748,9 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		}
 	}
 	m_vd_list.push_back(vd);
+	auto vol_cache_queue = std::make_unique<flrd::CacheQueue>();
+	vol_cache_queue->RegisterCacheQueueFuncs(flrd::CQCallback::ReadVolCache, flrd::CQCallback::FreeVolCache);
+	m_vd_cache_queue.emplace(vd, std::move(vol_cache_queue));
 }
 
 VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
@@ -6936,3 +6942,12 @@ fluo::Color DataManager::GetWavelengthColor(double wavelength)
 		return fluo::Color(1.0, 1.0, 1.0);
 }
 
+flrd::CacheQueue* DataManager::GetCacheQueue(VolumeData* vd)
+{
+	if (!vd)
+		return 0;
+	auto it = m_vd_cache_queue.find(vd);
+	if (it != m_vd_cache_queue.end() && it->second)
+		return it->second.get();
+	return 0;
+}

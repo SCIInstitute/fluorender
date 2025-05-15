@@ -64,7 +64,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <Project.h>
 #include <PyDlc.h>
-#include <VolCache.h>
+#include <VolCache4D.h>
 #include <Cell.h>
 #include <compatibility.h>
 #include <iostream>
@@ -773,10 +773,12 @@ void ScriptProc::RunMaskTracking()
 	glbin_trackmap_proc.SetFilterSize(fsize);
 	glbin_trackmap_proc.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
-	CQCallback::SetHandleFlags(
-		CQCallback::HDL_DATA |
-		CQCallback::HDL_LABEL |
-		CQCallback::SAV_LABEL);
+	flrd::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(cur_vol);
+	if (cache_queue)
+		cache_queue->SetHandleFlags(
+			CQCallback::HDL_DATA |
+			CQCallback::HDL_LABEL |
+			CQCallback::SAV_LABEL);
 
 	glbin_trackmap_proc.TrackStencils(
 		m_view->m_tseq_prv_num,
@@ -1773,15 +1775,19 @@ void ScriptProc::RunRegistration()
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
 	registrator.SetVolumeData(cur_vol);
-	if (use_mask)
-		CQCallback::SetHandleFlags(
-			CQCallback::HDL_DATA |
-			CQCallback::ACS_MASK |
-			CQCallback::RET_MASK |
-			CQCallback::SAV_LABEL);
-	else
-		CQCallback::SetHandleFlags(
-			CQCallback::HDL_DATA);
+	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(cur_vol);
+	if (cache_queue)
+	{
+		if (use_mask)
+			cache_queue->SetHandleFlags(
+				CQCallback::HDL_DATA |
+				CQCallback::ACS_MASK |
+				CQCallback::RET_MASK |
+				CQCallback::SAV_LABEL);
+		else
+			cache_queue->SetHandleFlags(
+				CQCallback::HDL_DATA);
+	}
 	fluo::Point transl, transl2, center, center2, euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;

@@ -84,6 +84,7 @@ namespace flrd
 	class TrackMap;
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	class CelpList;
+	class CacheQueue;
 }
 namespace fluo
 {
@@ -1495,6 +1496,9 @@ public:
 	fluo::Color GetWavelengthColor(double wavelength);
 	fluo::Color GetColor(int);
 
+	//get vol cache queue
+	flrd::CacheQueue* GetCacheQueue(VolumeData* vd);
+
 private:
 	MainFrame* m_frame;
 	std::unique_ptr<Root> m_root;// root of the scene graph
@@ -1503,6 +1507,8 @@ private:
 	std::vector <BaseReader*> m_reader_list;
 	std::vector <Annotations*> m_annotation_list;
 
+	//4d cache for volume data
+	std::unordered_map<VolumeData*, std::unique_ptr<flrd::CacheQueue>> m_vd_cache_queue;
 	//project path
 	std::wstring m_prj_path;
 	std::wstring m_prj_file;

@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Cell.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
-#include <VolCache.h>
+#include <VolCache4D.h>
 
 using namespace flrd;
 
@@ -269,7 +269,9 @@ void ComponentEditor::NewId(bool append, bool track)
 		//trkg->AddCell(cell, m_cur_time);
 		pTrackMap track_map = trkg->GetTrackMap();
 		glbin_trackmap_proc.SetTrackMap(track_map);
-		glbin_cache_queue.set_max_size(4);
+		CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+		if (cache_queue)
+			cache_queue->set_max_size(4);
 		//add
 		cell->Calc();
 		glbin_trackmap_proc.AddCellDup(cell, cur_time);

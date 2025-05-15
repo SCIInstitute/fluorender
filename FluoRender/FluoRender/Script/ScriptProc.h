@@ -38,7 +38,6 @@ class VolumeData;
 class BaseTreeFile;
 namespace flrd
 {
-	struct VolCache;
 	class CelpList;
 	class ScriptProc
 	{

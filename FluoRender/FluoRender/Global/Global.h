@@ -65,7 +65,6 @@ namespace fluo
 }
 namespace flrd
 {
-	class CacheQueue;
 	class EntryParams;
 	class TableHistParams;
 	class PyBase;
@@ -192,8 +191,6 @@ namespace fluo
 		//config file handlers
 		TreeFileFactory& get_tree_file_factory();
 
-		flrd::CacheQueue& get_cache_queue();
-
 		//video encoder
 		VideoEncoder& get_video_encoder();
 
@@ -301,9 +298,6 @@ namespace fluo
 		//config file handlers
 		std::unique_ptr<TreeFileFactory> tree_file_factory_;
 
-		//cache for volumes
-		std::unique_ptr<flrd::CacheQueue> cache_queue_;
-
 		//video encoder
 		std::unique_ptr<VideoEncoder> encoder_;
 
@@ -410,7 +404,6 @@ namespace fluo
 		void InitDatabase();
 		void BuildFactories();
 		void InitLocale();
-		void InitCacheQueue();
 	};
 
 }
