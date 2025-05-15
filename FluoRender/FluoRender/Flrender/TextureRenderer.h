@@ -55,6 +55,7 @@ namespace fluo
 }
 namespace flvr
 {
+	class CacheQueue;
 	class Texture;
 	class TextureBrick;
 	//a simple fixed-length fifo sequence
@@ -128,23 +129,38 @@ namespace flvr
 		unsigned int id;
 		TextureBrick *brick;
 		int comp;
+		int time;
 		GLenum textype;
 		bool delayed_del;
 		TexParam() :
-		nx(0), ny(0), nz(0), nb(0),
-			id(0), brick(0), comp(0),
+			nx(0), ny(0), nz(0), nb(0),
+			id(0), brick(0), comp(0), time(0),
 			textype(GL_UNSIGNED_BYTE),
 			delayed_del(false)
 		{}
-		TexParam(int c, int x,
-			int y, int z,
-			int b, GLenum f,
+		TexParam(int c, int t,
+			int x, int y, int z, int b,
+			GLenum f,
 			unsigned int i) :
-		nx(x), ny(y),
-			nz(z), nb(b), id(i),
-			brick(0), comp(c), textype(f),
+			nx(x), ny(y), nz(z), nb(b),
+			id(i), brick(0), comp(c), time(t),
+			textype(f),
 			delayed_del(false)
 		{}
+
+		bool Match(TextureBrick* bk,
+			int c, int t, int x, int y, int z, int b, GLenum f)
+		{
+			return id != 0 &&
+				brick == bk &&
+				comp == c &&
+				time == t &&
+				nx == x &&
+				ny == y &&
+				nz == z &&
+				nb == b &&
+				textype == f;
+		}
 	};
 
 #define PALETTE_W 256
@@ -195,6 +211,9 @@ namespace flvr
 		// PROJECTION matrices to determine if it is within the viewport.
 		// Returns true if it is visible.
 		bool test_against_view(const fluo::BBox &bbox, bool persp=false);
+
+		//set cache queue
+		void set_cache_queue(CacheQueue* cache_queue) { cache_queue_ = cache_queue; }
 
 		//main(cpu) memory limit
 		static void set_mainmem_buf_size(double val) { mainmem_buf_size_ = val; }
@@ -331,6 +350,9 @@ namespace flvr
 		VertexArray* va_slices_;
 		VertexArray* va_wirefm_;
 
+		//cache queue for getting neighbors of time
+		CacheQueue* cache_queue_;
+
 		//compute view
 		fluo::Ray compute_view();
 		fluo::Ray compute_snapview(double snap);
@@ -342,11 +364,12 @@ namespace flvr
 		void check_swap_memory(TextureBrick* brick, int c);
 		//load texture bricks for drawing
 		//unit:assigned unit, c:channel
-		GLint load_brick(TextureBrick* brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0);
+		GLint load_brick(TextureBrick* brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0);
 		//load the texture for volume mask into texture pool
 		GLint load_brick_mask(TextureBrick* brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
 		//load the texture for volume labeling into texture pool
 		GLint load_brick_label(TextureBrick* brick);
+		void load_texture(void* tex_data, unsigned int nx, unsigned int ny, unsigned int nz, unsigned int nb, unsigned int sx, unsigned int sy, GLenum tex_type, GLenum format);
 		void release_texture(int unit, GLenum target);
 
 		//draw slices of the volume

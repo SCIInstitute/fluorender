@@ -71,6 +71,7 @@ namespace flvr
 	class VolumeRenderer;
 	class TextureBrick;
 	class Texture;
+	class CacheQueue;
 }
 namespace flrd
 {
@@ -84,7 +85,6 @@ namespace flrd
 	class TrackMap;
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	class CelpList;
-	class CacheQueue;
 }
 namespace fluo
 {
@@ -1497,7 +1497,7 @@ public:
 	fluo::Color GetColor(int);
 
 	//get vol cache queue
-	flrd::CacheQueue* GetCacheQueue(VolumeData* vd);
+	flvr::CacheQueue* GetCacheQueue(VolumeData* vd);
 
 private:
 	MainFrame* m_frame;
@@ -1508,7 +1508,7 @@ private:
 	std::vector <Annotations*> m_annotation_list;
 
 	//4d cache for volume data
-	std::unordered_map<VolumeData*, std::unique_ptr<flrd::CacheQueue>> m_vd_cache_queue;
+	std::unordered_map<VolumeData*, std::unique_ptr<flvr::CacheQueue>> m_vd_cache_queue;
 	//project path
 	std::wstring m_prj_path;
 	std::wstring m_prj_file;

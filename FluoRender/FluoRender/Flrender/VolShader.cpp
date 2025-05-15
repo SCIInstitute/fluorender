@@ -307,6 +307,8 @@ VolShader::VolShader(
 		{
 			//no gradient volume, need to calculate in real-time
 			z << VOL_DATA_VOLUME_LOOKUP;
+			if (colormap_proj_ >= 7)
+				z << VOL_DATA_4D_LOOKUP;
 			z << VOL_GRAD_COMPUTE;
 			z << VOL_BODY_SHADING;
 
@@ -348,6 +350,8 @@ VolShader::VolShader(
 		else // No shading
 		{
 			z << VOL_DATA_VOLUME_LOOKUP;
+			if (colormap_proj_ >= 7)
+				z << VOL_DATA_4D_LOOKUP;
 
 			if (channels_ == 1)
 			{

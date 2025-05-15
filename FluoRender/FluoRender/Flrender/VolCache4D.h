@@ -32,18 +32,17 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <functional>
 
+class VolumeData;
 namespace flvr
 {
 	class Texture;
-}
-namespace flrd
-{
 	class CacheQueue;
 	class CQCallback;
 	class VolCache4D
 	{
 	public:
-		VolCache4D() :
+		VolCache4D(VolumeData* vd) :
+			m_vd(vd),
 			m_data(0),
 			m_mask(0),
 			m_label(0),
@@ -74,6 +73,7 @@ namespace flrd
 		void* GetRawData() { if (m_data) return m_data->data; return 0; }
 		void* GetRawMask() { if (m_mask) return m_mask->data; return 0; }
 		void* GetRawLabel() { if (m_label) return m_label->data; return 0; }
+		size_t GetTime() { return m_tnum; }
 
 		void SetHandleFlags(int flags);
 
@@ -93,6 +93,7 @@ namespace flrd
 		bool time_cond0;//time conditional0: cur_time==cache_time, access; otherwise, handle
 
 	private:
+		VolumeData* m_vd;
 		Nrrd* m_data;
 		Nrrd* m_mask;
 		Nrrd* m_label;
@@ -151,11 +152,12 @@ namespace flrd
 	class CacheQueue
 	{
 	public:
-		CacheQueue():
-		m_max_size(1),
-		m_new_cache(nullptr),
-		m_del_cache(nullptr),
-		m_flags(0) {};
+		CacheQueue(VolumeData* vd):
+			m_vd(vd),
+			m_max_size(1),
+			m_new_cache(nullptr),
+			m_del_cache(nullptr),
+			m_flags(0) {};
 		~CacheQueue();
 
 		inline void protect(size_t frame);
@@ -165,6 +167,7 @@ namespace flrd
 		inline size_t get_max_size();
 		inline size_t size();
 		inline VolCache4D* get(size_t frame);
+		VolCache4D* get_offset(int toffset);
 		inline void set_modified(size_t frame, bool value = true);
 		inline void clear(size_t frame);
 
@@ -178,6 +181,7 @@ namespace flrd
 		VolCacheFunc m_del_cache;
 
 	private:
+		VolumeData* m_vd;//each volume data has a queue
 		size_t m_max_size;
 		std::deque<VolCache4D> m_queue;
 		int m_flags;
@@ -311,7 +315,7 @@ namespace flrd
 		}
 		else
 		{
-			VolCache4D vol_cache;
+			VolCache4D vol_cache(m_vd);
 			vol_cache.m_tnum = frame;
 			if (m_new_cache)
 			{
@@ -368,6 +372,6 @@ namespace flrd
 		m_del_cache = nullptr;
 	}
 
-}//namespace flrd
+}//namespace flvr
 
 #endif//FL_VolCache_h

@@ -230,8 +230,8 @@
 
 #define VOL_DATA_4D_LOOKUP \
 	"	//VOL_DATA_4D_LOOKUP\n" \
-	"	vec v0 = v;\n" \
-	"	vec v_1 = texture(tex10, t.stp);\n" \
+	"	vec4 v0 = v;\n" \
+	"	vec4 v_1 = texture(tex10, t.stp);\n" \
 	"\n"
 
 #define VOL_GRAD_COMPUTE_LO \

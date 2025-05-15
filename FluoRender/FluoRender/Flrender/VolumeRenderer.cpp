@@ -42,6 +42,7 @@
 #include <VolCalShader.h>
 #include <KernelProgram.h>
 #include <MovieMaker.h>
+#include <VolCache4D.h>
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>
@@ -710,6 +711,15 @@ namespace flvr
 
 		eval_ml_mode();
 
+		//set up vol cache mode
+		if (colormap_proj_ >= 7)
+		{
+			if (cache_queue_)
+				cache_queue_->SetHandleFlags(
+					flvr::CQCallback::HDL_DATA |
+					flvr::CQCallback::TIME_COND0);
+		}
+
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		ShaderProgram* shader = 0;
@@ -911,6 +921,8 @@ namespace flvr
 
 				if (!load_brick(b, filter, compression_, 0, mode))
 					continue;
+				if (colormap_proj_ >= 7)
+					load_brick(b, filter, compression_, 10, mode, -1);
 				if (mask_)
 					load_brick_mask(b, filter);
 				if (label_)
@@ -987,6 +999,8 @@ namespace flvr
 
 		//Release 3d texture
 		release_texture(0, GL_TEXTURE_3D);
+		if (colormap_proj_ >= 7)
+			release_texture(10, GL_TEXTURE_3D);
 		if (mask_)
 			release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
 		if (label_)

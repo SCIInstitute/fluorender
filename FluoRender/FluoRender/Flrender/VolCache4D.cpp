@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <msk_writer.h>
 #include <string>
 
-using namespace flrd;
+using namespace flvr;
 
 void VolCache4D::SetHandleFlags(int flags)
 {
@@ -141,7 +141,8 @@ void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 	{
 		if (vol_cache.m_data)
 		{
-			nrrdNuke((Nrrd*)vol_cache.m_data);
+			//test
+			//nrrdNuke((Nrrd*)vol_cache.m_data);
 			vol_cache.m_data = 0;
 		}
 	}
@@ -167,15 +168,15 @@ void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 bool CQCallback::HandleData(VolCache4D& vol_cache)
 {
 	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
-	BaseReader* reader = cur_vol->GetReader();
+	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return false;
 
 	int frame = static_cast<int>(vol_cache.m_tnum);
-	int chan = cur_vol->GetCurChannel();
+	int chan = vd->GetCurChannel();
 
 	Nrrd* data = 0;
 	data = reader->Convert(frame, chan, true);
@@ -187,15 +188,15 @@ bool CQCallback::HandleData(VolCache4D& vol_cache)
 bool CQCallback::HandleMask(VolCache4D& vol_cache)
 {
 	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
-	BaseReader* reader = cur_vol->GetReader();
+	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return false;
 
 	int frame = static_cast<int>(vol_cache.m_tnum);
-	int chan = cur_vol->GetCurChannel();
+	int chan = vd->GetCurChannel();
 
 	MSKReader msk_reader;
 	std::wstring mskname = reader->GetCurMaskName(frame, chan);
@@ -204,9 +205,9 @@ bool CQCallback::HandleMask(VolCache4D& vol_cache)
 	if (!mask)
 	{
 		int resx, resy, resz;
-		cur_vol->GetResolution(resx, resy, resz);
+		vd->GetResolution(resx, resy, resz);
 		double spcx, spcy, spcz;
-		cur_vol->GetSpacings(spcx, spcy, spcz);
+		vd->GetSpacings(spcx, spcy, spcz);
 		mask = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)resx *
 			(unsigned long long)resy * (unsigned long long)resz;
@@ -225,15 +226,15 @@ bool CQCallback::HandleMask(VolCache4D& vol_cache)
 bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 {
 	//get volume, readers
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
-	BaseReader* reader = cur_vol->GetReader();
+	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return false;
 
 	int frame = static_cast<int>(vol_cache.m_tnum);
-	int chan = cur_vol->GetCurChannel();
+	int chan = vd->GetCurChannel();
 
 	LBLReader lbl_reader;
 	std::wstring lblname = reader->GetCurLabelName(frame, chan);
@@ -242,9 +243,9 @@ bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 	if (!label)
 	{
 		int resx, resy, resz;
-		cur_vol->GetResolution(resx, resy, resz);
+		vd->GetResolution(resx, resy, resz);
 		double spcx, spcy, spcz;
-		cur_vol->GetSpacings(spcx, spcy, spcz);
+		vd->GetSpacings(spcx, spcy, spcz);
 		label = nrrdNew();
 		unsigned long long mem_size = (unsigned long long)resx *
 			(unsigned long long)resy * (unsigned long long)resz;
@@ -262,11 +263,11 @@ bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 
 bool CQCallback::AccessData(VolCache4D& vol_cache)
 {
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
 
-	Nrrd* data = cur_vol->GetVolume(vol_cache.return_data);
+	Nrrd* data = vd->GetVolume(vol_cache.return_data);
 	vol_cache.m_data = data;
 	vol_cache.m_valid &= (data != 0);
 	return data != 0;
@@ -274,11 +275,11 @@ bool CQCallback::AccessData(VolCache4D& vol_cache)
 
 bool CQCallback::AccessMask(VolCache4D& vol_cache)
 {
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
 
-	Nrrd* mask = cur_vol->GetMask(vol_cache.return_mask);
+	Nrrd* mask = vd->GetMask(vol_cache.return_mask);
 	vol_cache.m_mask = mask;
 	vol_cache.m_valid &= (mask != 0);
 	return mask != 0;
@@ -286,11 +287,11 @@ bool CQCallback::AccessMask(VolCache4D& vol_cache)
 
 bool CQCallback::AccessLabel(VolCache4D& vol_cache)
 {
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
 
-	Nrrd* label = cur_vol->GetLabel(vol_cache.return_label);
+	Nrrd* label = vd->GetLabel(vol_cache.return_label);
 	vol_cache.m_label = label;
 	vol_cache.m_valid &= (label != 0);
 	return label != 0;
@@ -306,19 +307,19 @@ bool CQCallback::SaveMask(VolCache4D& vol_cache)
 	if (!vol_cache.m_valid || !vol_cache.m_modified)
 		return false;
 
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
-	BaseReader* reader = cur_vol->GetReader();
+	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return false;
 
-	int chan = cur_vol->GetCurChannel();
+	int chan = vd->GetCurChannel();
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
 	msk_writer.SetData((Nrrd*)vol_cache.GetNrrdMask());
 	double spcx, spcy, spcz;
-	cur_vol->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacings(spcx, spcy, spcz);
 	msk_writer.SetSpacings(spcx, spcy, spcz);
 	std::wstring filename = reader->GetCurMaskName(frame, chan);
 	msk_writer.Save(filename, 0);
@@ -330,19 +331,19 @@ bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 	if (!vol_cache.m_valid || !vol_cache.m_modified)
 		return false;
 
-	VolumeData* cur_vol = glbin_current.vol_data;
-	if (!cur_vol)
+	VolumeData* vd = vol_cache.m_vd;
+	if (!vd)
 		return false;
-	BaseReader* reader = cur_vol->GetReader();
+	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return false;
 
-	int chan = cur_vol->GetCurChannel();
+	int chan = vd->GetCurChannel();
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
 	msk_writer.SetData((Nrrd*)vol_cache.GetNrrdLabel());
 	double spcx, spcy, spcz;
-	cur_vol->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacings(spcx, spcy, spcz);
 	msk_writer.SetSpacings(spcx, spcy, spcz);
 	std::wstring filename = reader->GetCurLabelName(frame, chan);
 	msk_writer.Save(filename, 1);
@@ -352,5 +353,12 @@ bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 bool CQCallback::BuildTex(VolCache4D& vol_cache)
 {
 	return true;
+}
+
+VolCache4D* CacheQueue::get_offset(int toffset)
+{
+	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	int t = std::max(0, cur_time + toffset);
+	return get(static_cast<size_t>(t));
 }
 

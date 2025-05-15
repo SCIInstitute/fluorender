@@ -6748,8 +6748,9 @@ void DataManager::AddVolumeData(VolumeData* vd)
 		}
 	}
 	m_vd_list.push_back(vd);
-	auto vol_cache_queue = std::make_unique<flrd::CacheQueue>();
-	vol_cache_queue->RegisterCacheQueueFuncs(flrd::CQCallback::ReadVolCache, flrd::CQCallback::FreeVolCache);
+	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd);
+	vol_cache_queue->RegisterCacheQueueFuncs(flvr::CQCallback::ReadVolCache, flvr::CQCallback::FreeVolCache);
+	vd->GetVR()->set_cache_queue(vol_cache_queue.get());
 	m_vd_cache_queue.emplace(vd, std::move(vol_cache_queue));
 }
 
@@ -6942,7 +6943,7 @@ fluo::Color DataManager::GetWavelengthColor(double wavelength)
 		return fluo::Color(1.0, 1.0, 1.0);
 }
 
-flrd::CacheQueue* DataManager::GetCacheQueue(VolumeData* vd)
+flvr::CacheQueue* DataManager::GetCacheQueue(VolumeData* vd)
 {
 	if (!vd)
 		return 0;

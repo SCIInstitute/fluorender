@@ -269,7 +269,7 @@ void ComponentEditor::NewId(bool append, bool track)
 		//trkg->AddCell(cell, m_cur_time);
 		pTrackMap track_map = trkg->GetTrackMap();
 		glbin_trackmap_proc.SetTrackMap(track_map);
-		CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+		flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 		if (cache_queue)
 			cache_queue->set_max_size(4);
 		//add

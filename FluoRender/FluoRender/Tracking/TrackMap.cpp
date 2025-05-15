@@ -86,7 +86,7 @@ void TrackMapProcessor::GenMap()
 	BaseReader* reader = vd->GetReader();
 	if (!reader)
 		return;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return;
 
@@ -115,10 +115,10 @@ void TrackMapProcessor::GenMap()
 	SetSimilarThresh(glbin_settings.m_similarity);
 	//register file reading and deleteing functions
 	cache_queue->SetHandleFlags(
-		CQCallback::HDL_DATA |
-		CQCallback::HDL_LABEL |
-		CQCallback::SAV_LABEL |
-		CQCallback::TIME_COND0);
+		flvr::CQCallback::HDL_DATA |
+		flvr::CQCallback::HDL_LABEL |
+		flvr::CQCallback::SAV_LABEL |
+		flvr::CQCallback::TIME_COND0);
 	cache_queue->set_max_size(4);
 	//merge/split
 	SetMerge(glbin_settings.m_try_merge);
@@ -209,7 +209,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return;
 	TrackGroup* trkg = view->GetTrackGroup();
@@ -248,10 +248,10 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	SetSimilarThresh(glbin_settings.m_similarity);
 	//register file reading and deleteing functions
 	cache_queue->SetHandleFlags(
-		CQCallback::HDL_DATA |
-		CQCallback::HDL_LABEL |
-		CQCallback::SAV_LABEL |
-		CQCallback::TIME_COND0);
+		flvr::CQCallback::HDL_DATA |
+		flvr::CQCallback::HDL_LABEL |
+		flvr::CQCallback::SAV_LABEL |
+		flvr::CQCallback::TIME_COND0);
 	cache_queue->set_max_size(4);
 	//merge/split
 	SetMerge(glbin_settings.m_try_merge);
@@ -354,10 +354,10 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
-	VolCache4D* cache = cache_queue->get(frame);
+	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
 	void* data = cache->GetRawData();
@@ -712,11 +712,11 @@ bool TrackMapProcessor::LinkFrames(
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
-	VolCache4D* cache = cache_queue->get(f1);
+	flvr::VolCache4D* cache = cache_queue->get(f1);
 	if (!cache)
 		return false;
 	void* data1 = cache->GetRawData();
@@ -1160,11 +1160,11 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get label
-	VolCache4D* cache = cache_queue->get(f);
+	flvr::VolCache4D* cache = cache_queue->get(f);
 	if (!cache)
 		return false;
 	unsigned int* label = (unsigned int*)(cache->GetRawLabel());
@@ -1223,11 +1223,11 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get label
-	VolCache4D* cache = cache_queue->get(f2);
+	flvr::VolCache4D* cache = cache_queue->get(f2);
 	if (!cache)
 		return false;
 	unsigned int* label = (unsigned int*)(cache->GetRawLabel());
@@ -3505,16 +3505,16 @@ bool TrackMapProcessor::LinkAllCells()
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 
 	SetTrackMap(trkg->GetTrackMap());
 	cache_queue->SetHandleFlags(
-		CQCallback::HDL_DATA |
-		CQCallback::HDL_LABEL |
-		CQCallback::SAV_LABEL |
-		CQCallback::TIME_COND0);
+		flvr::CQCallback::HDL_DATA |
+		flvr::CQCallback::HDL_LABEL |
+		flvr::CQCallback::SAV_LABEL |
+		flvr::CQCallback::TIME_COND0);
 	cache_queue->set_max_size(3);
 	flrd::CelpList in = glbin_clusterizer.GetInCells();
 	flrd::CelpList out = glbin_clusterizer.GetOutCells();
@@ -3809,18 +3809,18 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	cache_queue->SetHandleFlags(
-		CQCallback::HDL_DATA |
-		CQCallback::HDL_LABEL |
-		CQCallback::SAV_LABEL |
-		CQCallback::TIME_COND0);
+		flvr::CQCallback::HDL_DATA |
+		flvr::CQCallback::HDL_LABEL |
+		flvr::CQCallback::SAV_LABEL |
+		flvr::CQCallback::TIME_COND0);
 	cache_queue->set_max_size(3);
 
 	//get data and label
-	VolCache4D* cache = cache_queue->get(f1);
+	flvr::VolCache4D* cache = cache_queue->get(f1);
 	if (!cache)
 		return false;
 	void* data1 = cache->GetRawData();
@@ -4087,11 +4087,11 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
-	VolCache4D* cache = cache_queue->get(frame);
+	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
 	void* data = cache->GetRawData();
@@ -4166,11 +4166,11 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
-	VolCache4D* cache = cache_queue->get(frame);
+	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
 	void* data = cache->GetRawData();
@@ -4303,7 +4303,7 @@ bool TrackMapProcessor::SegmentCells()
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	flvr::Texture* tex = vd->GetTexture();
@@ -4316,17 +4316,17 @@ bool TrackMapProcessor::SegmentCells()
 	SetSizes(resx, resy, resz);
 	//register file reading and deleteing functions
 	cache_queue->SetHandleFlags(
-		CQCallback::HDL_DATA |
-		CQCallback::HDL_LABEL |
-		CQCallback::SAV_LABEL |
-		CQCallback::TIME_COND0);
+		flvr::CQCallback::HDL_DATA |
+		flvr::CQCallback::HDL_LABEL |
+		flvr::CQCallback::SAV_LABEL |
+		flvr::CQCallback::TIME_COND0);
 	cache_queue->set_max_size(3);
 
 	if (m_cluster_num < 2)
 		return false;
 
 	//get label and data from cache
-	VolCache4D* cache = cache_queue->get(frame);
+	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (cache)
 		return false;
 	void* data = cache->GetRawData();
@@ -4411,10 +4411,10 @@ void TrackMapProcessor::RelinkCells(CelpList &in, CelpList& out, size_t frame)
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return;
-	VolCache4D* cache = cache_queue->get(frame);
+	flvr::VolCache4D* cache = cache_queue->get(frame);
 	bool result = false;
 	result |= RemoveCells(in, frame);
 	result |= AddCells(out, frame);
@@ -5073,13 +5073,13 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return false;
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
 	size_t f0 = mode == 1?start:f1;
 	cache_queue->set_max_size(2);
-	VolCache4D* cache = cache_queue->get(f0);
+	flvr::VolCache4D* cache = cache_queue->get(f0);
 	if (!cache)
 		return false;
 	void* data1 = cache->GetRawData();
@@ -5270,14 +5270,14 @@ void TrackMapProcessor::ConvertConsistent()
 	SetScale(vd->GetScalarScale());
 	SetSizes(resx, resy, resz);
 	SetSpacings(spcx, spcy, spcz);
-	CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (cache_queue)
 	{
 		cache_queue->SetHandleFlags(
-			CQCallback::HDL_DATA |
-			CQCallback::HDL_LABEL |
-			CQCallback::SAV_LABEL |
-			CQCallback::TIME_COND0);
+			flvr::CQCallback::HDL_DATA |
+			flvr::CQCallback::HDL_LABEL |
+			flvr::CQCallback::SAV_LABEL |
+			flvr::CQCallback::TIME_COND0);
 		cache_queue->set_max_size(2);
 	}
 
