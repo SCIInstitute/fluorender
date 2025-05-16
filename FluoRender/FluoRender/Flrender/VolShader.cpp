@@ -186,8 +186,9 @@ VolShader::VolShader(
 		case 6:
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU6);
 		case 7:
-		case 8:
 			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU7);
+		case 8:
+			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU8);
 		}
 		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
 	}
@@ -308,10 +309,6 @@ VolShader::VolShader(
 		{
 			//no gradient volume, need to calculate in real-time
 			z << VOL_DATA_VOLUME_LOOKUP;
-			if (colormap_proj_ == 7)
-				z << VOL_DATA_4D_INTENSITY_DELTA;
-			else if (colormap_proj_ == 8)
-				z << VOL_DATA_4D_SPEED;
 			z << VOL_GRAD_COMPUTE;
 			z << VOL_BODY_SHADING;
 
@@ -319,6 +316,11 @@ VolShader::VolShader(
 				z << VOL_COMPUTED_GM_LOOKUP;
 			else
 				z << VOL_TEXTURE_GM_LOOKUP;
+
+			if (colormap_proj_ == 7)
+				z << VOL_DATA_4D_INTENSITY_DELTA;
+			else if (colormap_proj_ == 8)
+				z << VOL_DATA_4D_SPEED;
 
 			switch (color_mode_)
 			{
@@ -353,10 +355,6 @@ VolShader::VolShader(
 		else // No shading
 		{
 			z << VOL_DATA_VOLUME_LOOKUP;
-			if (colormap_proj_ == 7)
-				z << VOL_DATA_4D_INTENSITY_DELTA;
-			else if (colormap_proj_ == 8)
-				z << VOL_DATA_4D_SPEED;
 
 			if (channels_ == 1)
 			{
@@ -373,6 +371,11 @@ VolShader::VolShader(
 			{
 				z << VOL_TEXTURE_GM_LOOKUP;
 			}
+
+			if (colormap_proj_ == 7)
+				z << VOL_DATA_4D_INTENSITY_DELTA;
+			else if (colormap_proj_ == 8)
+				z << VOL_DATA_4D_SPEED;
 
 			if (mip_ && colormap_proj_)
 			{
