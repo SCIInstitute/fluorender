@@ -547,6 +547,7 @@
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU7 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU7\n" \
 	"		float valu = v0.x - v_1.x;\n" \
+	"		valu = valu < 0.0 ? -pow(-valu, 0.1) : pow(valu, 0.1);\n" \
 	"		valu = (valu + 1.0) / 2.0;\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"
 
