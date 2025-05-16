@@ -228,10 +228,21 @@
 	"	vec4 v = texture(tex0, t.stp);\n" \
 	"\n"
 
-#define VOL_DATA_4D_LOOKUP \
-	"	//VOL_DATA_4D_LOOKUP\n" \
-	"	vec4 v0 = v;\n" \
-	"	vec4 v_1 = texture(tex10, t.stp);\n" \
+#define VOL_DATA_4D_INTENSITY_DELTA \
+	"	//VOL_DATA_4D_INTENSITY_DELTA\n" \
+	"	float v4d = v.x - texture(tex10, t.stp).x;\n" \
+	"\n"
+
+#define VOL_DATA_4D_SPEED \
+	"	//VOL_DATA_4D_SPEED\n" \
+	"	float grad_t = v.x - texture(tex10, t.stp).x;\n" \
+	"	vec3 grad_s;\n" \
+	"	grad_s.x = (texture(tex1, t.stp + vec3(loc4.x, 0.0, 0.0)).x - texture(tex1, t.stp - vec2(loc4.x, 0.0, 0.0)).x) * 0.5;\n" \
+	"	grad_s.y = (texture(tex1, t.stp + vec3(0.0, loc4.y, 0.0)).x - texture(tex1, t.stp - vec2(0.0, loc4.y, 0.0)).x) * 0.5;\n" \
+	"	grad_s.z = (texture(tex1, t.stp + vec3(0.0, 0.0, loc4.z)).x - texture(tex1, t.stp - vec2(0.0, 0.0, loc4.z)).x) * 0.5;\n" \
+	"	float denom = dot(grad_s, grad_s) + 1e-4;\n" \
+	"	vec3 velocity = -grad_s * grad_t / denom;\n" \
+	"	float v4d = length(velocity);\n" \
 	"\n"
 
 #define VOL_GRAD_COMPUTE_LO \
@@ -546,8 +557,9 @@
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU7 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU7\n" \
-	"		float valu = v0.x - v_1.x;\n" \
-	"		valu = valu < 0.0 ? -pow(-valu, 0.1) : pow(valu, 0.1);\n" \
+	"		float valu = v4d;\n" \
+	"		float exponent = max(loc6.z / 10.0, 0.01);\n" \
+	"		valu = valu < 0.0 ? -pow(-valu, exponent) : pow(valu, exponent);\n" \
 	"		valu = (valu + 1.0) / 2.0;\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"
 
