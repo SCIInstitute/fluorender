@@ -365,9 +365,6 @@
 	"	//VOL_DATA_4D_SPEED\n" \
 	"	float grad_t = v.x - texture(tex10, t.stp).x;\n" \
 	"	vec3 grad_s = n.xyz;\n" \
-	"	//grad_s.x = (texture(tex1, t.stp + vec3(loc4.x, 0.0, 0.0)).x - texture(tex1, t.stp - vec3(loc4.x, 0.0, 0.0)).x) * 0.5;\n" \
-	"	//grad_s.y = (texture(tex1, t.stp + vec3(0.0, loc4.y, 0.0)).x - texture(tex1, t.stp - vec3(0.0, loc4.y, 0.0)).x) * 0.5;\n" \
-	"	//grad_s.z = (texture(tex1, t.stp + vec3(0.0, 0.0, loc4.z)).x - texture(tex1, t.stp - vec3(0.0, 0.0, loc4.z)).x) * 0.5;\n" \
 	"	float denom = dot(grad_s, grad_s) + 1e-4;\n" \
 	"	grad_s = -grad_s * grad_t / denom;\n" \
 	"	float v4d = length(grad_s);\n" \
@@ -566,6 +563,8 @@
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU8 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU8\n" \
 	"		float valu = v4d;\n" \
+	"		float exponent = max(loc6.z, 0.01);\n" \
+	"		valu = pow(valu, exponent);\n" \
 	"		valu = (valu-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_RESULT \

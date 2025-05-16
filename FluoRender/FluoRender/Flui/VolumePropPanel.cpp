@@ -714,7 +714,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_shadow = update_all || FOUND_VALUE(gstShadow);
 	bool update_sample = update_all || FOUND_VALUE(gstSampleRate);
 	bool update_colormap = update_all || FOUND_VALUE(gstColormap);
-	bool update_histogram = update_all || FOUND_VALUE(gstUpdateHistogram) || m_vd->GetHistogramDirty();
+	bool update_histogram = update_all || FOUND_VALUE(gstUpdateHistogram);
 	bool mf_enable = glbin_settings.m_mulfunc == 5;
 
 	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());

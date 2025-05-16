@@ -359,7 +359,8 @@ VolShader::VolShader(
 			if (channels_ == 1)
 			{
 				// Compute Gradient magnitude and use it.
-				if (grad_)
+				if (grad_ ||
+					colormap_proj_  >= 8)
 				{
 					z << VOL_GRAD_COMPUTE;
 					z << VOL_COMPUTED_GM_LOOKUP;

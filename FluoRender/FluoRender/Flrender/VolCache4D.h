@@ -180,7 +180,7 @@ namespace flvr
 	public:
 		CacheQueue(VolumeData* vd):
 			m_vd(vd),
-			m_max_size(1),
+			m_max_size(2),
 			m_new_cache(nullptr),
 			m_del_cache(nullptr),
 			m_flags(0) {};
@@ -324,7 +324,7 @@ namespace flvr
 		int index = -1;
 		for (size_t i = 0; i < m_queue.size(); ++i)
 		{
-			if (m_queue[i].m_tnum == frame)
+			if (m_queue[i].m_tnum == frame && m_queue[i].m_valid)
 			{
 				index = (int)i;
 				found = true;

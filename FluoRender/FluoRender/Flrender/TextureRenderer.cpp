@@ -604,19 +604,14 @@ namespace flvr
 		int c = 0;
 		int tn = 0;
 		void* tex_data = 0;
-		if (toffset == 0)
-			tex_data = brick->tex_data(c);
-		else
+		//get raw data from cache
+		if (cache_queue_)
 		{
-			//get raw data from cache
-			if (cache_queue_)
+			VolCache4D* vol_cache = cache_queue_->get_offset(toffset);
+			if (vol_cache)
 			{
-				VolCache4D* vol_cache = cache_queue_->get_offset(toffset);
-				if (vol_cache)
-				{
-					tex_data = vol_cache->GetRawData();
-					tn = static_cast<int>(vol_cache->GetTime());
-				}
+				tex_data = vol_cache->GetRawData();
+				tn = static_cast<int>(vol_cache->GetTime());
 			}
 		}
 

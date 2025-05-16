@@ -712,12 +712,11 @@ namespace flvr
 		eval_ml_mode();
 
 		//set up vol cache mode
-		if (colormap_proj_ >= 7)
+		if (cache_queue_)
 		{
-			if (cache_queue_)
-				cache_queue_->SetHandleFlags(
-					flvr::CQCallback::HDL_DATA |
-					flvr::CQCallback::TIME_COND0);
+			cache_queue_->SetHandleFlags(
+				flvr::CQCallback::HDL_DATA |
+				flvr::CQCallback::TIME_COND0);
 		}
 
 		//--------------------------------------------------------------------------
@@ -919,7 +918,7 @@ namespace flvr
 				else
 					filter = GL_NEAREST;
 
-				if (!load_brick(b, filter, compression_, 0, mode))
+				if (!load_brick(b, filter, compression_, 0, mode, 0))
 					continue;
 				if (colormap_proj_ >= 7)
 					load_brick(b, filter, compression_, 10, mode, -1);
