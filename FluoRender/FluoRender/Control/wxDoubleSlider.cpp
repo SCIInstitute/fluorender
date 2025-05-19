@@ -794,6 +794,15 @@ void wxDoubleSlider::OnLeave(wxMouseEvent& event)
 	wxBasisSlider::OnLeave(event);
 }
 
+void wxDoubleSlider::SetRange(int min_val, int max_val)
+{
+	double old_range = max_val_ - min_val_;
+	double new_range = max_val - min_val;
+	low_val_ = static_cast<int>(std::round((double(low_val_) - min_val_)*new_range/old_range + min_val));
+	hi_val_ = static_cast<int>(std::round((double(hi_val_) - min_val_)*new_range/old_range + min_val));
+	wxBasisSlider::SetRange(min_val, max_val);
+}
+
 void wxDoubleSlider::SetThumbColor(const wxColor& c1, const wxColor& c2)
 {
 	thumb_color1_ = c1;

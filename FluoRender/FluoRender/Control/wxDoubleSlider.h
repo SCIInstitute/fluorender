@@ -61,6 +61,7 @@ public:
 	virtual void OnLeftUp(wxMouseEvent& event);
 	virtual void OnLeave(wxMouseEvent& event);
 
+	virtual void SetRange(int min_val, int max_val);
 	virtual void SetThumbColor(const wxColor& c1, const wxColor& c2);
 
 	virtual void Scroll(int val);

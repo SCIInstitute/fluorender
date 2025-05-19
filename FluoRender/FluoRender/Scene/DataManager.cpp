@@ -2639,11 +2639,11 @@ bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
 	return true;
 }
 
-bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
+void VolumeData::ComputeHistogram()
 {
-	int bins = 128;
 	if (m_hist_dirty)
 	{
+		int bins = 128;
 		flrd::Histogram histogram(this);
 		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(false);
@@ -2652,7 +2652,12 @@ bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
 		m_hist = histogram.GetHistogram();
 		m_hist_dirty = false;
 	}
+}
 
+bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
+{
+	ComputeHistogram();
+	int bins = static_cast<int>(m_hist.size() - 1);
 	data.resize(bins * 3, 0);
 	fluo::HSVColor hsv(m_color);
 	fluo::Color bg;
@@ -2938,6 +2943,22 @@ void VolumeData::SetGMScale(double val)
 	m_gm_scale = val;
 	if (m_vr)
 		m_vr->set_gm_scale(val);
+}
+
+double VolumeData::GetMinValueScale()
+{
+	if (m_min_value > 0.0 && m_max_value > m_min_value)
+		return m_min_value / m_max_value;
+	ComputeHistogram();
+	int bins = static_cast<int>(m_hist.size() - 1);
+	if (bins <= 0)
+		return 0.0;
+	for (int i = 0; i < bins; ++i)
+	{
+		if (m_hist[i])
+			return double(i) / bins;
+	}
+	return 0.0;
 }
 
 //clip size
@@ -5914,8 +5935,6 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	{
 		glbin_vol_def.Apply(vd);
 	}
-	//low offset set to min value
-	vd->SetLowOffset(vd->GetMinValue() / vd->GetMaxValue());
 	//disable alpha for z = 1
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
@@ -6439,8 +6458,8 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 			continue;
 		}
 
-		SetVolumeDefault(vd);
 		AddVolumeData(vd);
+		SetVolumeDefault(vd);
 
 		//get excitation wavelength
 		double wavelength = reader->GetExcitationWavelength(i);

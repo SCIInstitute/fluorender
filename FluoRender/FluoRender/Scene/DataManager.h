@@ -428,6 +428,9 @@ public:
 	int GetColormapProj();
 	fluo::Color GetColorFromColormap(double value, bool raw = false);
 	bool GetColormapData(std::vector<unsigned char>& data);
+	//see if need update histogram
+	bool GetHistogramDirty() { return m_hist_dirty; }
+	void ComputeHistogram();
 	bool GetHistogram(std::vector<unsigned char>& data);
 
 	//shuffle
@@ -525,6 +528,7 @@ public:
 	void SetGMScale(double val);
 	double GetMinValue() {return m_min_value;}
 	double GetMaxValue() {return m_max_value;}
+	double GetMinValueScale();
 	void SetMinMaxValue(double val1, double val2) { m_min_value = val1; m_max_value = val2; }
 
 	//clip size
@@ -599,9 +603,6 @@ public:
 	//apply volume properties form machine learning
 	void GetMlParams();
 	void ApplyMlVolProp();
-
-	//see if need update histogram
-	bool GetHistogramDirty() { return m_hist_dirty; }
 
 private:
 	//duplication indicator and counter

@@ -966,7 +966,6 @@ void OIBReader::ReadTiff(unsigned char *pbyData, unsigned short *val, int z)
 		{
 			unsigned short value;
 			value = *((unsigned short*)(pbyData + offset + 2 + 12 * i + 8));
-			m_min_value = m_min_value == 0.0 ? value : (value < m_min_value ? value : m_min_value);
 			if ((double)value > m_max_value)
 				m_max_value = (double)value;
 		}

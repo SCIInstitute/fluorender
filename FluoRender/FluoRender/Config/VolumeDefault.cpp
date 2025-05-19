@@ -301,7 +301,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetBoundary(m_boundary);
 
 	vd->SetMinMaxEnable(m_minmax_enable);
-	vd->SetLowOffset(m_lo_offset);
+	vd->SetLowOffset(vd->GetMinValueScale());
 	vd->SetHighOffset(m_hi_offset);
 
 	vd->SetThreshEnable(m_thresh_enable);
