@@ -32,7 +32,35 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/mstream.h>
 #include <compatibility.h>
 
-#define wxGetBitmapFromMemory(name) _wxGetBitmapFromMemory(icons::name ## _png, sizeof(icons::name ## _png))
+#define wxGetBitmap(name) _wxGetBitmapBundleFromMemory(icons::name ## _png, sizeof(icons::name ## _png))
+
+inline wxBitmapBundle _wxGetBitmapBundleFromMemory(const unsigned char* data, int length)
+{
+	wxLogNull logNo;
+	wxMemoryInputStream is(data, length);
+	wxImage baseImage(is, wxBITMAP_TYPE_ANY, -1);
+
+	if (!baseImage.IsOk())
+		return wxBitmapBundle(); // Return empty bundle if image loading fails
+
+	const wxSize baseSize = baseImage.GetSize();
+	wxVector<wxBitmap> bitmaps;
+
+	// Always include the original
+	bitmaps.push_back(wxBitmap(baseImage));
+
+	// Common Windows DPI scale factors
+	const double scales[] = { 1.51, 1.76, 2.01, 2.51, 3.01 };
+
+	for (double scale : scales)
+	{
+		wxImage scaled = baseImage.Copy();
+		scaled.Rescale(baseSize.GetWidth() * scale, baseSize.GetHeight() * scale, wxIMAGE_QUALITY_HIGH);
+		bitmaps.push_back(wxBitmap(scaled));
+	}
+
+	return wxBitmapBundle::FromBitmaps(bitmaps);
+}
 
 inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
 {
@@ -40,8 +68,6 @@ inline wxBitmap _wxGetBitmapFromMemory(const unsigned char *data, int length)
 	wxMemoryInputStream is(data, length);
 	return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
 }
-
-#define wxGetBitmap(name, f) _wxGetBitmap(icons::name ## _png, sizeof(icons::name ## _png), f)
 
 inline wxBitmap _wxGetBitmap(const unsigned char* data, int length, double f)
 {
@@ -51,6 +77,17 @@ inline wxBitmap _wxGetBitmap(const unsigned char* data, int length, double f)
 	if (f < 0.9 || f > 1.1)
 		image.Rescale(image.GetWidth() * f, image.GetHeight() * f, wxIMAGE_QUALITY_BICUBIC);
 	return wxBitmap(image, -1);
+}
+
+inline wxBitmapBundle _wxGetBitmapBundle(const unsigned char* data, int length, double f)
+{
+	wxLogNull logNo;
+	wxMemoryInputStream is(data, length);
+	wxImage image(is, wxBITMAP_TYPE_ANY, -1);
+	if (f < 0.9 || f > 1.1)
+		image.Rescale(image.GetWidth() * f, image.GetHeight() * f, wxIMAGE_QUALITY_BICUBIC);
+	wxBitmap bitmap(image, -1);
+	return wxBitmapBundle::FromBitmap(bitmap);
 }
 
 #endif//PNG_RESOURCE_H

@@ -71,7 +71,7 @@ m_enable_all(true)
 
 	m_dft_btn = new wxButton(this, wxID_ANY, "Set Default",
 							 wxDefaultPosition, FromDIP(wxSize(95, 22)));
-	m_dft_btn->SetBitmap(wxGetBitmapFromMemory(save_settings));
+	m_dft_btn->SetBitmap(wxGetBitmap(save_settings));
 	m_dft_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnSaveDefault, this);
 
 	sizer->Add(m_notebook, 1, wxEXPAND);
@@ -130,7 +130,7 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	//validator: integer
 	wxIntegerValidator<int> vald_int;
 	vald_int.SetRange(-256, 256);
-	wxBitmap bitmap;
+	wxBitmapBundle bitmap;
 
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//multifunc buttons
@@ -190,11 +190,11 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	//reset buttons
 	m_r_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-	m_r_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_r_reset_btn->SetBitmap(wxGetBitmap(reset));
 	m_r_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRReset, this);
 	m_sync_r_chk = new wxUndoableToolbar(page, 0,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(unlink);
+	bitmap = wxGetBitmap(unlink);
 	m_sync_r_chk->AddCheckTool(0, "Link",
 		bitmap, wxNullBitmap,
 		"Link Red Properties with Linked Green or Blue",
@@ -225,7 +225,7 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 	//validator: integer
 	wxIntegerValidator<int> vald_int;
 	vald_int.SetRange(-256, 256);
-	wxBitmap bitmap;
+	wxBitmapBundle bitmap;
 
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//buttons
@@ -285,11 +285,11 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 	//reset buttons
 	m_g_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-	m_g_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_g_reset_btn->SetBitmap(wxGetBitmap(reset));
 	m_g_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGReset, this);
 	m_sync_g_chk = new wxUndoableToolbar(page, 0,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(unlink);
+	bitmap = wxGetBitmap(unlink);
 	m_sync_g_chk->AddCheckTool(0, "Link",
 		bitmap, wxNullBitmap,
 		"Link Green Properties with Linked Red or Blue",
@@ -320,7 +320,7 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	//validator: integer
 	wxIntegerValidator<int> vald_int;
 	vald_int.SetRange(-256, 256);
-	wxBitmap bitmap;
+	wxBitmapBundle bitmap;
 
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//multifunc buttons
@@ -380,11 +380,11 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	//reset buttons
 	m_b_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, FromDIP(wxSize(30, 22)));
-	m_b_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_b_reset_btn->SetBitmap(wxGetBitmap(reset));
 	m_b_reset_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBReset, this);
 	m_sync_b_chk = new wxUndoableToolbar(page, 0,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(unlink);
+	bitmap = wxGetBitmap(unlink);
 	m_sync_b_chk->AddCheckTool(0, "Link",
 		bitmap, wxNullBitmap,
 		"Link Blue Properties with Linked Red or Green",
@@ -565,7 +565,7 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		m_sync_r_chk->ToggleTool(0, m_sync[0]);
 		m_sync_r_chk->SetToolNormalBitmap(0,
-			m_sync[0] ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+			m_sync[0] ? wxGetBitmap(link) : wxGetBitmap(unlink));
 	}
 	if (update_all || bGammaR || bSyncR)
 	{
@@ -587,7 +587,7 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		m_sync_g_chk->ToggleTool(0, m_sync[1]);
 		m_sync_g_chk->SetToolNormalBitmap(0,
-			m_sync[1] ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+			m_sync[1] ? wxGetBitmap(link) : wxGetBitmap(unlink));
 	}
 	if (update_all || bGammaG || bSyncG)
 	{
@@ -609,7 +609,7 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		m_sync_b_chk->ToggleTool(0, m_sync[2]);
 		m_sync_b_chk->SetToolNormalBitmap(0,
-			m_sync[2] ? wxGetBitmapFromMemory(link) : wxGetBitmapFromMemory(unlink));
+			m_sync[2] ? wxGetBitmap(link) : wxGetBitmap(unlink));
 	}
 	if (update_all || bGammaB || bSyncB)
 	{

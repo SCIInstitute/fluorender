@@ -81,9 +81,9 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	m_full_frame = new wxFrame((wxFrame*)NULL, wxID_ANY, "FluoRender");
 	m_view_sizer = new wxBoxSizer(wxVERTICAL);
 
-	m_dpi_sf = GetDPIScaleFactor();
-	m_dpi_sf2 = std::round(m_dpi_sf - 0.1);
-	m_dpi_sf2 = m_dpi_sf2 < m_dpi_sf ? m_dpi_sf : 1;
+	//m_dpi_sf = GetDPIScaleFactor();
+	//m_dpi_sf2 = std::round(m_dpi_sf - 0.1);
+	//m_dpi_sf2 = m_dpi_sf2 < m_dpi_sf ? m_dpi_sf : 1;
 
 	m_id = m_max_id;
 	SetName(wxString::Format("Render View:%d", m_max_id++));
@@ -305,7 +305,7 @@ void RenderViewPanel::CreateBar()
 	wxStaticText *st1, *st2, *st3;
 
 	bool inverse_slider = glbin_settings.m_inverse_slider;
-	wxBitmap bitmap;
+	wxBitmapBundle bitmap;
 	wxImage image;
 	//bar top///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -314,23 +314,21 @@ void RenderViewPanel::CreateBar()
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar->SetDoubleBuffered(true);
 	wxSize tbs = m_options_toolbar->GetSize();
-	wxSize toolsize = FromDIP(wxSize(tbs.y, tbs.y));
-	m_options_toolbar->SetToolBitmapSize(toolsize);
 
 	//blend mode
-	bitmap = wxGetBitmap(layers, m_dpi_sf2);
+	bitmap = wxGetBitmap(layers);
 	m_options_toolbar->AddCheckTool(
 		ID_VolumeSeqRd, "Layer",
 		bitmap, wxNullBitmap,
 		"Render View as Layers",
 		"Render View as Layers");
-	bitmap = wxGetBitmap(depth, m_dpi_sf2);
+	bitmap = wxGetBitmap(depth);
 	m_options_toolbar->AddCheckTool(
 		ID_VolumeMultiRd, "Depth",
 		bitmap, wxNullBitmap,
 		"Render View by Depth",
 		"Render View by Depth");
-	bitmap = wxGetBitmap(composite, m_dpi_sf2);
+	bitmap = wxGetBitmap(composite);
 	m_options_toolbar->AddCheckTool(
 		ID_VolumeCompRd, "Compo",
 		bitmap, wxNullBitmap,
@@ -338,14 +336,14 @@ void RenderViewPanel::CreateBar()
 		"Render View as a Composite of Colors");
 
 	//capture
-	bitmap = wxGetBitmap(camera, m_dpi_sf2);
+	bitmap = wxGetBitmap(camera);
 	m_options_toolbar->AddToolWithHelp(
 		ID_CaptureBtn, "Snap",
 		bitmap,
 		"Capture Render View as an image");
 
 	//info
-	bitmap = wxGetBitmap(info, m_dpi_sf2);
+	bitmap = wxGetBitmap(info);
 	m_options_toolbar->AddCheckTool(
 		ID_InfoChk, "Info",
 		bitmap, wxNullBitmap,
@@ -353,7 +351,7 @@ void RenderViewPanel::CreateBar()
 		"Toggle View of FPS and Mouse Position");
 
 	//cam center
-	bitmap = wxGetBitmap(axis, m_dpi_sf2);
+	bitmap = wxGetBitmap(axis);
 	m_options_toolbar->AddCheckTool(
 		ID_CamCtrChk, "Axis",
 		bitmap, wxNullBitmap,
@@ -361,7 +359,7 @@ void RenderViewPanel::CreateBar()
 		"Toggle View of the Center Axis");
 
 	//legend
-	bitmap = wxGetBitmap(legend, m_dpi_sf2);
+	bitmap = wxGetBitmap(legend);
 	m_options_toolbar->AddCheckTool(
 		ID_LegendChk, "Legend",
 		bitmap, wxNullBitmap,
@@ -369,7 +367,7 @@ void RenderViewPanel::CreateBar()
 		"Toggle View of the Legend");
 
 	//colormap
-	bitmap = wxGetBitmap(colormap, m_dpi_sf2);
+	bitmap = wxGetBitmap(colormap);
 	m_options_toolbar->AddCheckTool(
 		ID_ColormapChk, "Colormap",
 		bitmap, wxNullBitmap,
@@ -377,7 +375,7 @@ void RenderViewPanel::CreateBar()
 		"Toggle View of the Colormap Sample");
 
 	//scale bar
-	bitmap = wxGetBitmap(scalebar, m_dpi_sf2);
+	bitmap = wxGetBitmap(scalebar);
 	m_options_toolbar->AddToolWithHelp(
 		ID_ScaleBar, "Scale", bitmap,
 		"Toggle Scalebar Options (Off, On, On with text)");
@@ -407,8 +405,7 @@ void RenderViewPanel::CreateBar()
 	m_bg_inv_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_bg_inv_btn->SetDoubleBuffered(true);
-	m_bg_inv_btn->SetToolBitmapSize(toolsize);
-	bitmap = wxGetBitmap(invert, m_dpi_sf2);
+	bitmap = wxGetBitmap(invert);
 	m_bg_inv_btn->AddCheckTool(
 		0, "Invert",
 		bitmap, wxNullBitmap,
@@ -437,9 +434,8 @@ void RenderViewPanel::CreateBar()
 	//free fly
 	m_options_toolbar2 = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_options_toolbar2->SetToolBitmapSize(toolsize);
 	m_options_toolbar2->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(freefly, m_dpi_sf2);
+	bitmap = wxGetBitmap(freefly);
 	m_options_toolbar2->AddCheckTool(
 		ID_FreeChk, "Free Fly",
 		bitmap, wxNullBitmap,
@@ -447,7 +443,7 @@ void RenderViewPanel::CreateBar()
 		"Change the camera to a 'Free-Fly' Mode");
 
 	//save default
-	bitmap = wxGetBitmap(save_settings, m_dpi_sf2);
+	bitmap = wxGetBitmap(save_settings);
 	m_options_toolbar2->AddToolWithHelp(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
@@ -458,9 +454,8 @@ void RenderViewPanel::CreateBar()
 	//full screen
 	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
-	m_full_screen_btn->SetToolBitmapSize(toolsize);
 	m_full_screen_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(full_view, m_dpi_sf2);
+	bitmap = wxGetBitmap(full_view);
 	m_full_screen_btn->AddTool(
 		0, "Full Screen",
 		bitmap, "Show full screen");
@@ -474,9 +469,8 @@ void RenderViewPanel::CreateBar()
 	//depth attenuation
 	m_depth_atten_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_depth_atten_btn->SetToolBitmapSize(toolsize);
 	m_depth_atten_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(no_depth_atten, m_dpi_sf2);
+	bitmap = wxGetBitmap(no_depth_atten);
 	m_depth_atten_btn->AddCheckTool(0, "Depth Interval",
 		bitmap, wxNullBitmap,
 		"Enable adjustment of the Depth Attenuation Interval",
@@ -495,9 +489,8 @@ void RenderViewPanel::CreateBar()
 	//reset
 	m_depth_atten_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_depth_atten_reset_btn->SetToolBitmapSize(toolsize);
 	m_depth_atten_reset_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(reset, m_dpi_sf2);
+	bitmap = wxGetBitmap(reset);
 	m_depth_atten_reset_btn->AddTool(
 		0, "Reset",
 		bitmap, "Reset Depth Attenuation Interval");
@@ -516,9 +509,8 @@ void RenderViewPanel::CreateBar()
 	//pin rotation
 	m_pin_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_pin_btn->SetToolBitmapSize(toolsize);
 	m_pin_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(anchor_dark, m_dpi_sf2);
+	bitmap = wxGetBitmap(anchor_dark);
 	m_pin_btn->AddCheckTool(0, "Pin",
 		bitmap, wxNullBitmap,
 		"Anchor the rotation center on data",
@@ -529,9 +521,8 @@ void RenderViewPanel::CreateBar()
 	//centerize
 	m_center_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_center_btn->SetToolBitmapSize(toolsize);
 	m_center_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(center, m_dpi_sf2);
+	bitmap = wxGetBitmap(center);
 	m_center_btn->AddTool(0, "Center",
 		bitmap, "Center the Data on the Render View");
 	m_center_btn->SetToolLongHelp(0, "Center the Data on the Render View");
@@ -541,9 +532,8 @@ void RenderViewPanel::CreateBar()
 	//one to one scale
 	m_scale_121_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_121_btn->SetToolBitmapSize(toolsize);
 	m_scale_121_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(ratio, m_dpi_sf2);
+	bitmap = wxGetBitmap(ratio);
 	m_scale_121_btn->AddTool(0, "1 to 1",
 		bitmap, "Auto-size the data to a 1:1 ratio");
 	m_scale_121_btn->SetToolLongHelp(0, "Auto-size the data to a 1:1 ratio");
@@ -565,9 +555,8 @@ void RenderViewPanel::CreateBar()
 	m_scale_factor_spin->Bind(wxEVT_SPIN_DOWN, &RenderViewPanel::OnScaleFactorSpinUp, this);
 	m_scale_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_reset_btn->SetToolBitmapSize(toolsize);
 	m_scale_reset_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(reset, m_dpi_sf2);
+	bitmap = wxGetBitmap(reset);
 	m_scale_reset_btn->AddTool(0, "Reset",
 		bitmap, "Reset the Zoom");
 	m_scale_reset_btn->SetToolLongHelp(0, "Reset the Zoom");
@@ -575,9 +564,8 @@ void RenderViewPanel::CreateBar()
 	m_scale_reset_btn->Realize();
 	m_scale_mode_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_scale_mode_btn->SetToolBitmapSize(toolsize);
 	m_scale_mode_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(zoom_view, m_dpi_sf2);
+	bitmap = wxGetBitmap(zoom_view);
 	m_scale_mode_btn->AddTool(
 		0, "Switch zoom ratio mode",
 		bitmap, "View-based zoom ratio");
@@ -605,14 +593,13 @@ void RenderViewPanel::CreateBar()
 	//45 lock
 	m_rot_lock_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_rot_lock_btn->SetToolBitmapSize(toolsize);
 	m_rot_lock_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(gear_dark, m_dpi_sf2);
+	bitmap = wxGetBitmap(gear_dark);
 	m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
 		bitmap, wxNullBitmap,
 		"Confine all angles to 45 Degrees",
 		"Confine all angles to 45 Degrees");
-	bitmap = wxGetBitmap(slider_type_rot, m_dpi_sf2);
+	bitmap = wxGetBitmap(slider_type_rot);
 	m_rot_lock_btn->AddCheckTool(ID_RotSliderType, "Slider Style",
 		bitmap, wxNullBitmap,
 		"Choose slider style between jog and normal",
@@ -652,13 +639,12 @@ void RenderViewPanel::CreateBar()
 	//set reset
 	m_reset_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_reset_btn->SetToolBitmapSize(toolsize);
 	m_reset_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(zrot, m_dpi_sf2);
+	bitmap = wxGetBitmap(zrot);
 	m_reset_btn->AddTool(ID_ZeroRotBtn, "Set Zeros",
 		bitmap, "Set current angles as zeros");
 	m_reset_btn->SetToolLongHelp(ID_ZeroRotBtn, "Set current angles as zeros");
-	bitmap = wxGetBitmap(reset, m_dpi_sf2);
+	bitmap = wxGetBitmap(reset);
 	m_reset_btn->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
 	m_reset_btn->SetToolLongHelp(ID_RotResetBtn, "Reset Rotations");
@@ -715,18 +701,18 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_VolumeSeqRd, ival == VOL_METHOD_SEQ);
 		m_options_toolbar->SetToolNormalBitmap(ID_VolumeSeqRd,
 			ival == VOL_METHOD_SEQ ?
-			wxGetBitmap(layers, m_dpi_sf2) :
-			wxGetBitmap(layers_off, m_dpi_sf2));
+			wxGetBitmap(layers) :
+			wxGetBitmap(layers_off));
 		m_options_toolbar->ToggleTool(ID_VolumeMultiRd, ival == VOL_METHOD_MULTI);
 		m_options_toolbar->SetToolNormalBitmap(ID_VolumeMultiRd,
 			ival == VOL_METHOD_MULTI ?
-			wxGetBitmap(depth, m_dpi_sf2) :
-			wxGetBitmap(depth_off, m_dpi_sf2));
+			wxGetBitmap(depth) :
+			wxGetBitmap(depth_off));
 		m_options_toolbar->ToggleTool(ID_VolumeCompRd, ival == VOL_METHOD_COMP);
 		m_options_toolbar->SetToolNormalBitmap(ID_VolumeCompRd,
 			ival == VOL_METHOD_COMP ?
-			wxGetBitmap(composite, m_dpi_sf2) :
-			wxGetBitmap(composite_off, m_dpi_sf2));
+			wxGetBitmap(composite) :
+			wxGetBitmap(composite_off));
 	}
 
 	//info
@@ -764,19 +750,19 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 		case 0:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scalebar, m_dpi_sf2));
+				wxGetBitmap(scalebar));
 			m_scale_text->Disable();
 			m_scale_cmb->Disable();
 			break;
 		case 1:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scale_text_off, m_dpi_sf2));
+				wxGetBitmap(scale_text_off));
 			m_scale_text->Enable();
 			m_scale_cmb->Disable();
 			break;
 		case 2:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scale_text, m_dpi_sf2));
+				wxGetBitmap(scale_text));
 			m_scale_text->Enable();
 			m_scale_cmb->Enable();
 			break;
@@ -799,10 +785,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_bg_inv_btn->ToggleTool(0, m_bg_color_inv);
 		if (m_bg_color_inv)
 			m_bg_inv_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(invert, m_dpi_sf2));
+				wxGetBitmap(invert));
 		else
 			m_bg_inv_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(invert_off, m_dpi_sf2));
+				wxGetBitmap(invert_off));
 	}
 
 	//angle of view
@@ -826,10 +812,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_depth_atten_btn->ToggleTool(0, bval);
 		if (bval)
 			m_depth_atten_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(depth_atten, m_dpi_sf2));
+				wxGetBitmap(depth_atten));
 		else
 			m_depth_atten_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(no_depth_atten, m_dpi_sf2));
+				wxGetBitmap(no_depth_atten));
 		m_depth_atten_factor_sldr->Enable(bval);
 		m_depth_atten_factor_text->Enable(bval);
 	}
@@ -887,7 +873,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 		case 0:
 			m_scale_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(zoom_view, m_dpi_sf2));
+				wxGetBitmap(zoom_view));
 			m_scale_mode_btn->SetToolShortHelp(0,
 				"View-based zoom ratio");
 			m_scale_mode_btn->SetToolLongHelp(0,
@@ -895,7 +881,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 1:
 			m_scale_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(zoom_pixel, m_dpi_sf2));
+				wxGetBitmap(zoom_pixel));
 			m_scale_mode_btn->SetToolShortHelp(0,
 				"Pixel-based zoom ratio");
 			m_scale_mode_btn->SetToolLongHelp(0,
@@ -903,7 +889,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 2:
 			m_scale_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(zoom_data, m_dpi_sf2));
+				wxGetBitmap(zoom_data));
 			m_scale_mode_btn->SetToolShortHelp(0,
 				"Data-based zoom ratio");
 			m_scale_mode_btn->SetToolLongHelp(0,
@@ -918,10 +904,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_pin_btn->ToggleTool(0, bval);
 		if (bval)
 			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(pin, m_dpi_sf2));
+				wxGetBitmap(pin));
 		else
 			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(anchor_dark, m_dpi_sf2));
+				wxGetBitmap(anchor_dark));
 	}
 
 	//lock rot
@@ -930,10 +916,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_rot_lock_btn->ToggleTool(ID_RotLockChk, m_render_view->GetRotLock());
 		if (m_render_view->GetRotLock())
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
-				wxGetBitmap(gear_45, m_dpi_sf2));
+				wxGetBitmap(gear_45));
 		else
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
-				wxGetBitmap(gear_dark, m_dpi_sf2));
+				wxGetBitmap(gear_dark));
 	}
 
 	//slider type
@@ -943,7 +929,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (m_rot_slider)
 		{
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
-				wxGetBitmap(slider_type_rot, m_dpi_sf2));
+				wxGetBitmap(slider_type_rot));
 			if (m_x_rot_sldr->GetMode() != 1)
 			{
 				m_x_rot_sldr->SetMode(1);
@@ -954,7 +940,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		else
 		{
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
-				wxGetBitmap(slider_type_pos, m_dpi_sf2));
+				wxGetBitmap(slider_type_pos));
 			if (m_x_rot_sldr->GetMode() != 0)
 			{
 				m_x_rot_sldr->SetMode(0);

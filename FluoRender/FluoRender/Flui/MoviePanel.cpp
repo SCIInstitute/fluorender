@@ -518,7 +518,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	st = new wxStaticText(page, wxID_ANY, "T: ");
 	m_seq_dec_btn = new wxButton(page, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_seq_dec_btn->SetBitmap(wxGetBitmapFromMemory(minus));
+	m_seq_dec_btn->SetBitmap(wxGetBitmap(minus));
 	m_seq_dec_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqDecBtn, this);
 	m_seq_dec_btn->SetToolTip("Decrease the time point number by 1");
 	m_seq_num_text = new wxTextCtrl(page, wxID_ANY, "0",
@@ -526,7 +526,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_seq_num_text->Bind(wxEVT_TEXT, &MoviePanel::OnSeqNumText, this);
 	m_seq_inc_btn = new wxButton(page, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_seq_inc_btn->SetBitmap(wxGetBitmapFromMemory(plus));
+	m_seq_inc_btn->SetBitmap(wxGetBitmap(plus));
 	m_seq_inc_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqIncBtn, this);
 	m_seq_inc_btn->SetToolTip("Increase the time point number by 1");
 	st2 = new wxStaticText(page, wxID_ANY, "of: ");
@@ -875,7 +875,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 	m_reset_btn = new wxButton(page, wxID_ANY, "Reset",
 		wxDefaultPosition, wxDefaultSize);
 	m_reset_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnResetCrop, this);
-	m_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_reset_btn->SetBitmap(wxGetBitmap(reset));
 	m_reset_btn->SetToolTip("Also drag the yellow frame in render view");
 	sizer8->Add(20, 20, 0);
 	sizer8->Add(m_reset_btn, 0, wxALIGN_CENTER);
@@ -1038,7 +1038,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_slider_btn->SetDoubleBuffered(true);
 	m_slider_btn->AddCheckTool(0, "Slider style",
-		wxGetBitmapFromMemory(slider_type_pos), wxNullBitmap,
+		wxGetBitmap(slider_type_pos), wxNullBitmap,
 		"Choose slider style between jog and normal",
 		"Choose slider style between jog and normal");
 	m_slider_btn->Bind(wxEVT_TOOL, &MoviePanel::OnSliderStyle, this);
@@ -1064,7 +1064,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	m_start_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_start_btn->SetBitmap(wxGetBitmapFromMemory(start));
+	m_start_btn->SetBitmap(wxGetBitmap(start));
 	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
 	m_start_btn->SetToolTip("Set the start frame number of a clip to current frame");
 	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
@@ -1081,12 +1081,12 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_end_frame_text->SetToolTip("Set the end frame number of a clip");
 	m_end_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_end_btn->SetBitmap(wxGetBitmapFromMemory(end));
+	m_end_btn->SetBitmap(wxGetBitmap(end));
 	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
 	m_end_btn->SetToolTip("Set the end frame number of a clip to current frame");
 	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_dec_time_btn->SetBitmap(wxGetBitmapFromMemory(step_back));
+	m_dec_time_btn->SetBitmap(wxGetBitmap(step_back));
 	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
 	m_dec_time_btn->SetToolTip("Step back one frame");
 	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
@@ -1096,7 +1096,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_cur_frame_text->SetToolTip("Set current frame number");
 	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_inc_time_btn->SetBitmap(wxGetBitmapFromMemory(step_forward));
+	m_inc_time_btn->SetBitmap(wxGetBitmap(step_forward));
 	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
 	m_inc_time_btn->SetToolTip("Step forward one frame");
 	m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
@@ -1120,27 +1120,27 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_rewind_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_rewind_btn->SetBitmap(wxGetBitmapFromMemory(rewind));
+	m_rewind_btn->SetBitmap(wxGetBitmap(rewind));
 	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
 	m_rewind_btn->SetToolTip("Rewind to the start frame of a clip");
 	m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+	m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
 	m_play_inv_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlayInv, this);
 	m_play_inv_btn->SetToolTip("Play a clip backward");
 	m_play_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+	m_play_btn->SetBitmap(wxGetBitmap(play));
 	m_play_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlay, this);
 	m_play_btn->SetToolTip("Play a clip");
 	m_forward_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_forward_btn->SetBitmap(wxGetBitmapFromMemory(forward));
+	m_forward_btn->SetBitmap(wxGetBitmap(forward));
 	m_forward_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnForward, this);
 	m_forward_btn->SetToolTip("Proceed forward to the end of a clip");
 	m_loop_btn = new wxToggleButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_loop_btn->SetBitmap(wxGetBitmapFromMemory(loop));
+	m_loop_btn->SetBitmap(wxGetBitmap(loop));
 	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
 	m_loop_btn->SetToolTip("Enable clip playback in a loop");
 	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
@@ -1152,7 +1152,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(26, -1)));
 	m_save_btn = new wxButton(this, wxID_ANY, "",
 		wxDefaultPosition, bs);
-	m_save_btn->SetBitmap(wxGetBitmapFromMemory(save));
+	m_save_btn->SetBitmap(wxGetBitmap(save));
 	m_save_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSave, this);
 	m_save_btn->SetToolTip("Export a movie clip");
 	sizer4->AddStretchSpacer(2);
@@ -1239,9 +1239,9 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_progress_sldr->SetMode(bval ? 1 : 0);
 		m_slider_btn->ToggleTool(0, bval);
 		if (bval)
-			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_rot));
+			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider_type_rot));
 		else
-			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmapFromMemory(slider_type_pos));
+			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider_type_pos));
 	}
 
 	if (update_all || FOUND_VALUE(gstMovProgSlider))
@@ -1288,16 +1288,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			{
 				if (glbin_moviemaker.IsReverse())
 				{
-					m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+					m_play_btn->SetBitmap(wxGetBitmap(play));
 					m_play_btn->SetValue(false);
-					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+					m_play_inv_btn->SetBitmap(wxGetBitmap(pause));
 					m_play_inv_btn->SetValue(true);
 				}
 				else
 				{
-					m_play_btn->SetBitmap(wxGetBitmapFromMemory(pause));
+					m_play_btn->SetBitmap(wxGetBitmap(pause));
 					m_play_btn->SetValue(true);
-					m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+					m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
 					m_play_inv_btn->SetValue(false);
 				}
 				m_running = true;
@@ -1307,16 +1307,16 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			if (glbin_settings.m_run_script)
 			{
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play_script));
+				m_play_btn->SetBitmap(wxGetBitmap(play_script));
 				m_play_btn->SetValue(false);
-				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv_script));
+				m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv_script));
 				m_play_inv_btn->SetValue(false);
 			}
 			else
 			{
-				m_play_btn->SetBitmap(wxGetBitmapFromMemory(play));
+				m_play_btn->SetBitmap(wxGetBitmap(play));
 				m_play_btn->SetValue(false);
-				m_play_inv_btn->SetBitmap(wxGetBitmapFromMemory(play_inv));
+				m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
 				m_play_inv_btn->SetValue(false);
 			}
 			m_running = false;

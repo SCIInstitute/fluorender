@@ -63,18 +63,18 @@ m_enable_all(true)
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_toolbar = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	wxBitmap bitmap;
-	bitmap = wxGetBitmapFromMemory(sync_chan);
+	wxBitmapBundle bitmap;
+	bitmap = wxGetBitmap(sync_chan);
 	m_toolbar->AddCheckTool(ID_LinkChannelsBtn, "Sync All Channels",
 		bitmap, wxNullBitmap,
 		"Link all data channels to this cropping",
 		"Link all data channels to this cropping");
-	bitmap = wxGetBitmapFromMemory(hold_clip);
+	bitmap = wxGetBitmap(hold_clip);
 	m_toolbar->AddCheckTool(ID_HoldPlanesBtn, "Hold Plane Display",
 		bitmap, wxNullBitmap,
 		"Clipping planes are always shown",
 		"Clipping planes are always shown");
-	bitmap = wxGetBitmapFromMemory(clip_normal);
+	bitmap = wxGetBitmap(clip_normal);
 	m_toolbar->AddTool(ID_PlaneModesBtn, "Display Modes",
 		bitmap, "Toggle clipping plane display modes");
 	m_toolbar->SetToolLongHelp(ID_PlaneModesBtn, "Toggle clipping plane display modes");
@@ -135,7 +135,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 
 	//validator: integer
 	wxIntegerValidator<int> vald_int;
-	wxBitmap bitmap;
+	wxBitmapBundle bitmap;
 
 	//sliders for clipping planes
 	bool inverse_slider = glbin_settings.m_inverse_slider;
@@ -155,7 +155,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linkx_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(unlink);
+	bitmap = wxGetBitmap(unlink);
 	m_linkx_tb->AddCheckTool(0, "",
 		bitmap, wxNullBitmap,
 		"Link two X clipping planes",
@@ -307,7 +307,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	//reset clipping
 	m_clip_reset_btn = new wxButton(page, wxID_ANY, "Reset Clips",
 		wxDefaultPosition, wxDefaultSize);
-	m_clip_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_clip_reset_btn->SetBitmap(wxGetBitmap(reset));
 	m_clip_reset_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipResetBtn, this);
 	sizer_v->Add(m_clip_reset_btn, wxGBPosition(8, 0), wxGBSpan(1, 3), wxEXPAND);
 
@@ -404,7 +404,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	//set sero rotation for clipping planes 7
 	m_set_zero_btn = new wxButton(page, wxID_ANY, "Align to View",
 		wxDefaultPosition, wxDefaultSize);
-	m_set_zero_btn->SetBitmap(wxGetBitmapFromMemory(align));
+	m_set_zero_btn->SetBitmap(wxGetBitmap(align));
 	m_set_zero_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnSetZeroBtn, this);
 	sizer_v->Add(m_set_zero_btn, wxGBPosition(4, 0), wxGBSpan(1, 3), wxEXPAND);
 
@@ -412,7 +412,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
 	m_rot_reset_btn = new wxButton(page, wxID_ANY, "Reset to 0",
 		wxDefaultPosition, wxDefaultSize);
-	m_rot_reset_btn->SetBitmap(wxGetBitmapFromMemory(reset));
+	m_rot_reset_btn->SetBitmap(wxGetBitmap(reset));
 	m_rot_reset_btn->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotResetBtn, this);
 	sizer_v->Add(m_rot_reset_btn, wxGBPosition(5, 0), wxGBSpan(1, 3), wxEXPAND);
 
@@ -523,31 +523,31 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 		case cm_Normal:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_normal));
+				wxGetBitmap(clip_normal));
 			break;
 		case cm_Frame6:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_frame6));
+				wxGetBitmap(clip_frame6));
 			break;
 		case cm_Frame3:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_frame3));
+				wxGetBitmap(clip_frame3));
 			break;
 		case cm_LowTrans:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_low));
+				wxGetBitmap(clip_low));
 			break;
 		case cm_LowTransBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_low_back));
+				wxGetBitmap(clip_low_back));
 			break;
 		case cm_NormalBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_normal_back));
+				wxGetBitmap(clip_normal_back));
 			break;
 		case cm_None:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmapFromMemory(clip_none));
+				wxGetBitmap(clip_none));
 			break;
 		}
 	}
@@ -721,10 +721,10 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_linkx_tb->ToggleTool(0, bval);
 			if (bval)
 				m_linkx_tb->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(link));
+					wxGetBitmap(link));
 			else
 				m_linkx_tb->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(unlink));
+					wxGetBitmap(unlink));
 		}
 	}
 	if (update_all || FOUND_VALUE(gstClipLinkY))
@@ -735,10 +735,10 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_linky_tb->ToggleTool(0, bval);
 			if (bval)
 				m_linky_tb->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(link));
+					wxGetBitmap(link));
 			else
 				m_linky_tb->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(unlink));
+					wxGetBitmap(unlink));
 		}
 	}
 	if (update_all || FOUND_VALUE(gstClipLinkZ))
@@ -749,10 +749,10 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_linkz_tb->ToggleTool(0, bval);
 			if (bval)
 				m_linkz_tb->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(link));
+					wxGetBitmap(link));
 			else
 				m_linkz_tb->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(unlink));
+					wxGetBitmap(unlink));
 		}
 	}
 
@@ -1105,10 +1105,10 @@ void ClipPlanePanel::SetXLink(bool val)
 	m_linkx_tb->ToggleTool(0, val);
 	if (val)
 		m_linkx_tb->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(link));
+			wxGetBitmap(link));
 	else
 		m_linkx_tb->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(unlink));
+			wxGetBitmap(unlink));
 }
 
 void ClipPlanePanel::SetYLink(bool val)
@@ -1117,10 +1117,10 @@ void ClipPlanePanel::SetYLink(bool val)
 	m_linky_tb->ToggleTool(0, val);
 	if (val)
 		m_linky_tb->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(link));
+			wxGetBitmap(link));
 	else
 		m_linky_tb->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(unlink));
+			wxGetBitmap(unlink));
 }
 
 void ClipPlanePanel::SetZLink(bool val)
@@ -1129,10 +1129,10 @@ void ClipPlanePanel::SetZLink(bool val)
 	m_linkz_tb->ToggleTool(0, val);
 	if (val)
 		m_linkz_tb->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(link));
+			wxGetBitmap(link));
 	else
 		m_linkz_tb->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(unlink));
+			wxGetBitmap(unlink));
 }
 
 void ClipPlanePanel::SetClipValue(int i, int val, bool link)

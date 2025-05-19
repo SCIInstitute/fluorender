@@ -174,37 +174,37 @@ ListPanel::ListPanel(MainFrame* frame,
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
-	wxBitmap bitmap = wxGetBitmapFromMemory(view);
+	wxBitmapBundle bitmap = wxGetBitmap(view);
 	m_toolbar->AddTool(ID_AddToView, "Add to View",
 		bitmap, "Add selected data set to render view");
 	m_toolbar->SetToolLongHelp(ID_AddToView,
 		"Add selected data set to render view");
-	bitmap = wxGetBitmapFromMemory(rename);
+	bitmap = wxGetBitmap(rename);
 	m_toolbar->AddTool(ID_Rename, "Rename",
 		bitmap, "Rename selected data set");
 	m_toolbar->SetToolLongHelp(ID_Rename,
 		"Rename selected data set");
-	bitmap = wxGetBitmapFromMemory(save);
+	bitmap = wxGetBitmap(save);
 	m_toolbar->AddTool(ID_Save, "Save As",
 		bitmap, "Save selected volume data set");
 	m_toolbar->SetToolLongHelp(ID_Save,
 		"Save selected volume data set");
-	bitmap = wxGetBitmapFromMemory(bake);
+	bitmap = wxGetBitmap(bake);
 	m_toolbar->AddTool(ID_Bake, "Bake",
 		bitmap, "Apply the volume properties and save");
 	m_toolbar->SetToolLongHelp(ID_Bake,
 		"Apply the volume properties and save");
-	bitmap = wxGetBitmapFromMemory(save_mask);
+	bitmap = wxGetBitmap(save_mask);
 	m_toolbar->AddTool(ID_SaveMask, "Save Mask",
 		bitmap, "Save its mask to a file");
 	m_toolbar->SetToolLongHelp(ID_SaveMask,
 		"Save its mask to a file");
-	bitmap = wxGetBitmapFromMemory(delet);
+	bitmap = wxGetBitmap(delet);
 	m_toolbar->AddTool(ID_Delete, "Delete",
 		bitmap, "Delete selected data set");
 	m_toolbar->SetToolLongHelp(ID_Delete,
 		"Delete selected data set");
-	bitmap = wxGetBitmapFromMemory(del_all);
+	bitmap = wxGetBitmap(del_all);
 	m_toolbar->AddTool(ID_DeleteAll, "Delete All",
 		bitmap, "Delete all data sets");
 	m_toolbar->SetToolLongHelp(ID_DeleteAll,

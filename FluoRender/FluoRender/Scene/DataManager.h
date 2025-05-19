@@ -430,7 +430,7 @@ public:
 	bool GetColormapData(std::vector<unsigned char>& data);
 	//see if need update histogram
 	bool GetHistogramDirty() { return m_hist_dirty; }
-	void ComputeHistogram();
+	void ComputeHistogram(bool set_prog_func);
 	bool GetHistogram(std::vector<unsigned char>& data);
 
 	//shuffle

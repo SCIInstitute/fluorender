@@ -388,42 +388,42 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	//toolbar
 	m_toolbar1 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
-	wxBitmap bitmap = wxGetBitmapFromMemory(locator);
+	wxBitmapBundle bitmap = wxGetBitmap(locator);
 	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
 		bitmap, wxNullBitmap,
 		"Add locators to the render view by clicking",
 		"Add locators to the render view by clicking");
-	bitmap = wxGetBitmapFromMemory(drill);
+	bitmap = wxGetBitmap(drill);
 	m_toolbar1->AddCheckTool(ID_ProbeBtn, "Probe",
 		bitmap, wxNullBitmap,
 		"Add probes to the render view by clicking once",
 		"Add probes to the render view by clicking once");
-	bitmap = wxGetBitmapFromMemory(two_point);
+	bitmap = wxGetBitmap(two_point);
 	m_toolbar1->AddCheckTool(ID_RulerBtn, "Line",
 		bitmap, wxNullBitmap,
 		"Add rulers to the render view by clicking at two end points",
 		"Add rulers to the render view by clicking at two end points");
-	bitmap = wxGetBitmapFromMemory(protractor);
+	bitmap = wxGetBitmap(protractor);
 	m_toolbar1->AddCheckTool(ID_ProtractorBtn, "Angle",
 		bitmap, wxNullBitmap,
 		"Add protractors to measure angles by clicking at three points",
 		"Add protractors to measure angles by clicking at three points");
-	bitmap = wxGetBitmapFromMemory(ellipse);
+	bitmap = wxGetBitmap(ellipse);
 	m_toolbar1->AddCheckTool(ID_EllipseBtn, "Ellipse",
 		bitmap, wxNullBitmap,
 		"Add an ellipse to the render view by clicking at its points",
 		"Add an ellipse to the render view by clicking at its points");
-	bitmap = wxGetBitmapFromMemory(multi_point);
+	bitmap = wxGetBitmap(multi_point);
 	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "Polyline",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler to the render view by clicking at its points",
 		"Add a polyline ruler to the render view by clicking at its points");
-	bitmap = wxGetBitmapFromMemory(pencil);
+	bitmap = wxGetBitmap(pencil);
 	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencil",
 		bitmap, wxNullBitmap,
 		"Draw ruler without clicking each point",
 		"Draw ruler without clicking each point");
-	bitmap = wxGetBitmapFromMemory(grow);
+	bitmap = wxGetBitmap(grow);
 	m_toolbar1->AddCheckTool(ID_GrowBtn, "Grow",
 		bitmap, wxNullBitmap,
 		"Click and hold to create ruler automatically based on data",
@@ -433,42 +433,42 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	//toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
-	bitmap = wxGetBitmapFromMemory(move);
+	bitmap = wxGetBitmap(move);
 	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
 		bitmap, wxNullBitmap,
 		"Select and move ruler",
 		"Select and move ruler");
-	bitmap = wxGetBitmapFromMemory(ruler_edit);
+	bitmap = wxGetBitmap(ruler_edit);
 	m_toolbar2->AddCheckTool(ID_RulerMovePointBtn, "Edit",
 		bitmap, wxNullBitmap,
 		"Select and move a ruler point",
 		"Select and move a ruler point");
-	bitmap = wxGetBitmapFromMemory(magnet);
+	bitmap = wxGetBitmap(magnet);
 	m_toolbar2->AddCheckTool(ID_MagnetBtn, "Magnet",
 		bitmap, wxNullBitmap,
 		"Move ruler points by magnet",
 		"Move ruler points by magnet");
-	bitmap = wxGetBitmapFromMemory(pencil);
+	bitmap = wxGetBitmap(pencil);
 	m_toolbar2->AddCheckTool(ID_RulerMovePencilBtn, "Redraw",
 		bitmap, wxNullBitmap,
 		"Move ruler points by redraw",
 		"Move ruler points by redraw");
-	bitmap = wxGetBitmapFromMemory(flip_ruler);
+	bitmap = wxGetBitmap(flip_ruler);
 	m_toolbar2->AddTool(ID_RulerFlipBtn, "Flip", bitmap,
 		"Reverse the order of ruler points");
 	m_toolbar2->SetToolLongHelp(ID_RulerFlipBtn,
 		"Reverse the order of ruler points");
-	bitmap = wxGetBitmapFromMemory(average);
+	bitmap = wxGetBitmap(average);
 	m_toolbar2->AddTool(ID_RulerAvgBtn, "Average", bitmap,
 		"Compute a center for selected rulers");
 	m_toolbar2->SetToolLongHelp(ID_RulerAvgBtn,
 		"Compute a center for selected rulers");
-	bitmap = wxGetBitmapFromMemory(lock);
+	bitmap = wxGetBitmap(lock);
 	m_toolbar2->AddCheckTool(ID_LockBtn, "Lock",
 		bitmap, wxNullBitmap,
 		"Click to lock/unlock a ruler point for relaxing",
 		"Click to lock/unlock a ruler point for relaxing");
-	bitmap = wxGetBitmapFromMemory(relax);
+	bitmap = wxGetBitmap(relax);
 	m_toolbar2->AddTool(ID_RelaxBtn, "Relax", bitmap,
 		"Relax ruler by components");
 	m_toolbar2->SetToolLongHelp(ID_RelaxBtn,
@@ -478,43 +478,43 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	//toolbar3
 	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
-	bitmap = wxGetBitmapFromMemory(delet);
+	bitmap = wxGetBitmap(delet);
 	m_toolbar3->AddTool(ID_DeleteBtn, "Delete", bitmap,
 		"Delete a selected ruler");
 	m_toolbar3->SetToolLongHelp(ID_DeleteBtn,
 		"Delete a selected ruler");
-	bitmap = wxGetBitmapFromMemory(del_all);
+	bitmap = wxGetBitmap(del_all);
 	m_toolbar3->AddTool(ID_DeleteAllBtn,"Delete All", bitmap,
 		"Delete all rulers");
 	m_toolbar3->SetToolLongHelp(ID_DeleteAllBtn,
 		"Delete all rulers");
-	bitmap = wxGetBitmapFromMemory(ruler_del);
+	bitmap = wxGetBitmap(ruler_del);
 	m_toolbar3->AddCheckTool(ID_RulerDelBtn, "Delete",
 		bitmap, wxNullBitmap,
 		"Select and delete a ruler point");
 	m_toolbar3->SetToolLongHelp(ID_RulerDelBtn,
 		"Select and delete a ruler point");
-	bitmap = wxGetBitmapFromMemory(prune);
+	bitmap = wxGetBitmap(prune);
 	m_toolbar3->AddTool(ID_PruneBtn, "Prune", bitmap,
 		"Remove very short branches from ruler");
 	m_toolbar3->SetToolLongHelp(ID_PruneBtn,
 		"Remove very short branches from ruler");
-	bitmap = wxGetBitmapFromMemory(eyedrop);
+	bitmap = wxGetBitmap(eyedrop);
 	m_toolbar3->AddTool(ID_ProfileBtn, "Sample", bitmap,
 		"Sample intensity values along ruler");
 	m_toolbar3->SetToolLongHelp(ID_ProfileBtn,
 		"Sample intensity values along ruler");
-	bitmap = wxGetBitmapFromMemory(tape);
+	bitmap = wxGetBitmap(tape);
 	m_toolbar3->AddTool(ID_DistanceBtn, "Length", bitmap,
 		"Calculate distances");
 	m_toolbar3->SetToolLongHelp(ID_DistanceBtn,
 		"Calculate distances");
-	bitmap = wxGetBitmapFromMemory(profile);
+	bitmap = wxGetBitmap(profile);
 	m_toolbar3->AddTool(ID_ProjectBtn, "Project", bitmap,
 		"Project components onto ruler");
 	m_toolbar3->SetToolLongHelp(ID_ProjectBtn,
 		"Project components onto ruler");
-	bitmap = wxGetBitmapFromMemory(save);
+	bitmap = wxGetBitmap(save);
 	m_toolbar3->AddTool(ID_ExportBtn, "Export", bitmap,
 		"Export rulers to a text file");
 	m_toolbar3->SetToolLongHelp(ID_ExportBtn,

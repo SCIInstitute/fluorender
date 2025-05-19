@@ -2639,13 +2639,14 @@ bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
 	return true;
 }
 
-void VolumeData::ComputeHistogram()
+void VolumeData::ComputeHistogram(bool set_prog_func)
 {
 	if (m_hist_dirty)
 	{
 		int bins = 128;
 		flrd::Histogram histogram(this);
-		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+		if (set_prog_func)
+			histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(false);
 		histogram.SetBins(bins);
 		histogram.Compute();
@@ -2656,7 +2657,7 @@ void VolumeData::ComputeHistogram()
 
 bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
 {
-	ComputeHistogram();
+	ComputeHistogram(true);
 	int bins = static_cast<int>(m_hist.size() - 1);
 	data.resize(bins * 3, 0);
 	fluo::HSVColor hsv(m_color);
@@ -2949,7 +2950,7 @@ double VolumeData::GetMinValueScale()
 {
 	if (m_min_value > 0.0 && m_max_value > m_min_value)
 		return m_min_value / m_max_value;
-	ComputeHistogram();
+	ComputeHistogram(false);
 	int bins = static_cast<int>(m_hist.size() - 1);
 	if (bins <= 0)
 		return 0.0;

@@ -103,8 +103,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
-	double dpi_sf = getDpiScaleFactor();
-	wxBitmap bitmap;
+	wxBitmapBundle bitmap;
 	wxSize bts(FromDIP(wxSize(80, 23)));
 	wxSize tts1(FromDIP(wxSize(40, 23)));
 	wxSize tts2(FromDIP(wxSize(50, 23)));
@@ -122,7 +121,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_minmax_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmap(unlink, dpi_sf);
+	bitmap = wxGetBitmap(unlink);
 	m_minmax_link_tb->AddCheckTool(0, "",
 		bitmap, wxNullBitmap,
 		"Link min and max values",
@@ -250,7 +249,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_thresh_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmap(unlink, dpi_sf);
+	bitmap = wxGetBitmap(unlink);
 	m_thresh_link_tb->AddCheckTool(0, "",
 		bitmap, wxNullBitmap,
 		"Link low and high threshold values",
@@ -378,7 +377,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_colormap_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmap(unlink, dpi_sf);
+	bitmap = wxGetBitmap(unlink);
 	m_colormap_link_tb->AddCheckTool(0, "",
 		bitmap, wxNullBitmap,
 		"Link low and high colormap values",
@@ -409,68 +408,68 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_options_toolbar = new wxUndoableToolbar(this,wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//ml
-	bitmap = wxGetBitmap(starknot, dpi_sf);
+	bitmap = wxGetBitmap(starknot);
 	m_options_toolbar->AddToolWithHelp(ID_UseMlChk, "Use Machine Learning",
 		bitmap, "Generate properties using machine learning");
 	//transparency
-	bitmap = wxGetBitmap(transplo, dpi_sf);
+	bitmap = wxGetBitmap(transplo);
 	m_options_toolbar->AddCheckTool(ID_TranspChk, "Increase Transpancy",
 		bitmap, wxNullBitmap,
 		"Enable High-Tarnsparency mode",
 		"Enable High-Tarnsparency mode");
 	//MIP
-	bitmap = wxGetBitmap(mip, dpi_sf);
+	bitmap = wxGetBitmap(mip);
 	m_options_toolbar->AddCheckTool(ID_MipChk, "MIP",
 		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection (MIP) mode",
 		"Enable Maximum Intensity Projection (MIP) mode");
 	//inversion
-	bitmap = wxGetBitmap(invert_off, dpi_sf);
+	bitmap = wxGetBitmap(invert_off);
 	m_options_toolbar->AddCheckTool(ID_InvChk, "Invert",
 		bitmap, wxNullBitmap,
 		"Invert data intensity values",
 		"Invert data intensity values");
 	//component display
-	bitmap = wxGetBitmap(comp_off, dpi_sf);
+	bitmap = wxGetBitmap(comp_off);
 	m_options_toolbar->AddCheckTool(ID_CompChk, "Components",
 		bitmap, wxNullBitmap,
 		"Show components",
 		"Show components");
 	//interpolation
-	bitmap = wxGetBitmap(interpolate, dpi_sf);
+	bitmap = wxGetBitmap(interpolate);
 	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
 		bitmap, wxNullBitmap,
 		"Enable spatial interpolation of voxel intensity values",
 		"Enable spatial interpolation of voxel intensity values");
 	//noise reduction
-	bitmap = wxGetBitmap(smooth_off, dpi_sf);
+	bitmap = wxGetBitmap(smooth_off);
 	m_options_toolbar->AddCheckTool(ID_NRChk, "Smoothing",
 		bitmap, wxNullBitmap,
 		"Enable rendering result smoothing",
 		"Enable rendering result smoothing");
 	//sync group
-	bitmap = wxGetBitmap(sync_chan, dpi_sf);
+	bitmap = wxGetBitmap(sync_chan);
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
 		bitmap, wxNullBitmap,
 		"Sync current channel with other channels in the group",
 		"Sync current channel with other channels in the group");
 	//depth mode
-	bitmap = wxGetBitmap(depth_off, dpi_sf);
+	bitmap = wxGetBitmap(depth_off);
 	m_options_toolbar->AddCheckTool(ID_DepthChk, "Depth Mode",
 		bitmap, wxNullBitmap,
 		"Enable Depth Mode within the group",
 		"Enable Depth Mode within the group");
 	//legend
-	bitmap = wxGetBitmap(legend, dpi_sf);
+	bitmap = wxGetBitmap(legend);
 	m_options_toolbar->AddCheckTool(ID_LegendChk, "Legend",
 		bitmap, wxNullBitmap,
 		"Enable name legend display for current channel",
 		"Enable name legend display for current channel");
 	//buttons
-	bitmap = wxGetBitmap(reset, dpi_sf);
+	bitmap = wxGetBitmap(reset);
 	m_options_toolbar->AddToolWithHelp(ID_ResetDefault,"Reset",
 		bitmap, "Reset all properties");
-	bitmap = wxGetBitmap(save_settings, dpi_sf);
+	bitmap = wxGetBitmap(save_settings);
 	m_options_toolbar->AddToolWithHelp(ID_SaveDefault,"Save",
 		bitmap, "Set current settings as default");
 	m_options_toolbar->Bind(wxEVT_TOOL, &VolumePropPanel::OnOptions, this);
@@ -539,7 +538,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	bitmap = wxGetBitmapFromMemory(invert_off);
+	bitmap = wxGetBitmap(invert_off);
 	m_colormap_inv_btn->AddCheckTool(0, "Invert",
 		bitmap, wxNullBitmap,
 		"Invert colormap",
@@ -885,12 +884,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (bval != m_minmax_link_tb->GetToolState(0))
 		{
 			m_minmax_link_tb->ToggleTool(0, bval);
-			wxBitmap bitmap;
-			double dpi_sf = getDpiScaleFactor();
+			wxBitmapBundle bitmap;
 			if (bval)
-				bitmap = wxGetBitmap(link, dpi_sf);
+				bitmap = wxGetBitmap(link);
 			else
-				bitmap = wxGetBitmap(unlink, dpi_sf);
+				bitmap = wxGetBitmap(unlink);
 			m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		bval = m_vd->GetMinMaxEnable();
@@ -932,12 +930,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (bval != m_thresh_link_tb->GetToolState(0))
 		{
 			m_thresh_link_tb->ToggleTool(0, bval);
-			wxBitmap bitmap;
-			double dpi_sf = getDpiScaleFactor();
+			wxBitmapBundle bitmap;
 			if (bval)
-				bitmap = wxGetBitmap(link, dpi_sf);
+				bitmap = wxGetBitmap(link);
 			else
-				bitmap = wxGetBitmap(unlink, dpi_sf);
+				bitmap = wxGetBitmap(unlink);
 			m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		bval = m_vd->GetThreshEnable();
@@ -1137,10 +1134,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_CompChk, bval);
 		if (bval)
 			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmapFromMemory(comp));
+				wxGetBitmap(comp));
 		else
 			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmapFromMemory(comp_off));
+				wxGetBitmap(comp_off));
 	}
 
 	//interpolate
@@ -1150,10 +1147,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
 		if (interp)
 			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
-				wxGetBitmapFromMemory(interpolate));
+				wxGetBitmap(interpolate));
 		else
 			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
-				wxGetBitmapFromMemory(interpolate_off));
+				wxGetBitmap(interpolate_off));
 	}
 
 	//sync group
@@ -1188,12 +1185,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (bval != m_colormap_link_tb->GetToolState(0))
 		{
 			m_colormap_link_tb->ToggleTool(0, bval);
-			wxBitmap bitmap;
-			double dpi_sf = getDpiScaleFactor();
+			wxBitmapBundle bitmap;
 			if (bval)
-				bitmap = wxGetBitmap(link, dpi_sf);
+				bitmap = wxGetBitmap(link);
 			else
-				bitmap = wxGetBitmap(unlink, dpi_sf);
+				bitmap = wxGetBitmap(unlink);
 			m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		//mode
@@ -1213,10 +1209,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_colormap_inv_btn->ToggleTool(0, bval);
 			if (bval)
 				m_colormap_inv_btn->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(invert));
+					wxGetBitmap(invert));
 			else
 				m_colormap_inv_btn->SetToolNormalBitmap(0,
-					wxGetBitmapFromMemory(invert_off));
+					wxGetBitmap(invert_off));
 		}
 		m_colormap_combo->SetSelection(m_vd->GetColormap());
 		m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
@@ -1270,10 +1266,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_InvChk, inv);
 		if (inv)
 			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
-				wxGetBitmapFromMemory(invert));
+				wxGetBitmap(invert));
 		else
 			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
-				wxGetBitmapFromMemory(invert_off));
+				wxGetBitmap(invert_off));
 	}
 
 	//MIP
@@ -1291,13 +1287,13 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			m_options_toolbar->ToggleTool(ID_TranspChk, true);
 			m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
-				wxGetBitmapFromMemory(transphi));
+				wxGetBitmap(transphi));
 		}
 		else
 		{
 			m_options_toolbar->ToggleTool(ID_TranspChk, false);
 			m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
-				wxGetBitmapFromMemory(transplo));
+				wxGetBitmap(transplo));
 		}
 	}
 
@@ -1309,13 +1305,13 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			m_options_toolbar->ToggleTool(ID_CompChk, true);
 			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmapFromMemory(comp));
+				wxGetBitmap(comp));
 		}
 		else
 		{
 			m_options_toolbar->ToggleTool(ID_CompChk, false);
 			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmapFromMemory(comp_off));
+				wxGetBitmap(comp_off));
 		}
 	}
 
@@ -1326,10 +1322,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_NRChk, nr);
 		if (nr)
 			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
-				wxGetBitmapFromMemory(smooth));
+				wxGetBitmap(smooth));
 		else
 			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
-				wxGetBitmapFromMemory(smooth_off));
+				wxGetBitmap(smooth_off));
 	}
 
 	//blend mode
@@ -1339,12 +1335,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (blend_mode == 2)
 		{
 			m_options_toolbar->ToggleTool(ID_DepthChk, true);
-			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth));
+			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmap(depth));
 		}
 		else
 		{
 			m_options_toolbar->ToggleTool(ID_DepthChk, false);
-			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmapFromMemory(depth_off));
+			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmap(depth_off));
 		}
 	}
 
@@ -2070,12 +2066,11 @@ void VolumePropPanel::OnMinMaxLink(wxCommandEvent& event)
 	val = !val;
 	m_minmax_sldr->SetLink(val);
 	m_minmax_link_tb->ToggleTool(0, val);
-	wxBitmap bitmap;
-	double dpi_sf = getDpiScaleFactor();
+	wxBitmapBundle bitmap;
 	if (val)
-		bitmap = wxGetBitmap(link, dpi_sf);
+		bitmap = wxGetBitmap(link);
 	else
-		bitmap = wxGetBitmap(unlink, dpi_sf);
+		bitmap = wxGetBitmap(unlink);
 	m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
 }
 
@@ -2458,12 +2453,11 @@ void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
 	val = !val;
 	m_thresh_sldr->SetLink(val);
 	m_thresh_link_tb->ToggleTool(0, val);
-	wxBitmap bitmap;
-	double dpi_sf = getDpiScaleFactor();
+	wxBitmapBundle bitmap;
 	if (val)
-		bitmap = wxGetBitmap(link, dpi_sf);
+		bitmap = wxGetBitmap(link);
 	else
-		bitmap = wxGetBitmap(unlink, dpi_sf);
+		bitmap = wxGetBitmap(unlink);
 	m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
 }
 
@@ -2711,12 +2705,11 @@ void VolumePropPanel::OnColormapLink(wxCommandEvent& event)
 	val = !val;
 	m_colormap_sldr->SetLink(val);
 	m_colormap_link_tb->ToggleTool(0, val);
-	wxBitmap bitmap;
-	double dpi_sf = getDpiScaleFactor();
+	wxBitmapBundle bitmap;
 	if (val)
-		bitmap = wxGetBitmap(link, dpi_sf);
+		bitmap = wxGetBitmap(link);
 	else
-		bitmap = wxGetBitmap(unlink, dpi_sf);
+		bitmap = wxGetBitmap(unlink);
 	m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 }
 
@@ -2725,10 +2718,10 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 	bool val = m_colormap_inv_btn->GetToolState(0);
 	if (val)
 		m_colormap_inv_btn->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(invert));
+			wxGetBitmap(invert));
 	else
 		m_colormap_inv_btn->SetToolNormalBitmap(0,
-			wxGetBitmapFromMemory(invert_off));
+			wxGetBitmap(invert_off));
 
 	if (m_sync_group && m_group)
 		m_group->SetColormapInv(val ? -1.0 : 1.0);

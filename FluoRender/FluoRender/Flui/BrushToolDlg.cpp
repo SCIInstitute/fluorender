@@ -74,53 +74,53 @@ BrushToolDlg::BrushToolDlg(
 	//toolbar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
-	wxBitmap bitmap;
-	bitmap = wxGetBitmapFromMemory(undo);
+	wxBitmapBundle bitmap;
+	bitmap = wxGetBitmap(undo);
 	m_toolbar->AddTool(
 		ID_BrushUndo, "Undo", bitmap,
 		"Rollback previous brush operation");
 	m_toolbar->SetToolLongHelp(ID_BrushUndo, "Rollback previous brush operation");
-	bitmap = wxGetBitmapFromMemory(redo);
+	bitmap = wxGetBitmap(redo);
 	m_toolbar->AddTool(
 		ID_BrushRedo, "Redo", bitmap,
 		"Redo the rollback brush operation");
 	m_toolbar->SetToolLongHelp(ID_BrushRedo, "Redo the rollback brush operation");
 	m_toolbar->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(grow);
+	bitmap = wxGetBitmap(grow);
 	m_toolbar->AddCheckTool(ID_Grow, "Grow",
 		bitmap, wxNullBitmap,
 		"Click and hold mouse button to grow selection mask from a point",
 		"Click and hold mouse button to grow selection mask from a point");
-	bitmap = wxGetBitmapFromMemory(brush_append);
+	bitmap = wxGetBitmap(brush_append);
 	m_toolbar->AddCheckTool(ID_BrushAppend, "Select",
 		bitmap, wxNullBitmap,
 		"Highlight structures by painting on the render view (hold Shift)",
 		"Highlight structures by painting on the render view (hold Shift)");
-	bitmap = wxGetBitmapFromMemory(brush_diffuse);
+	bitmap = wxGetBitmap(brush_diffuse);
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
 		bitmap, wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)",
 		"Diffuse highlighted structures by painting (hold Z)");
-	bitmap = wxGetBitmapFromMemory(brush_solid);
+	bitmap = wxGetBitmap(brush_solid);
 	m_toolbar->AddCheckTool(ID_BrushSolid, "Solid",
 		bitmap, wxNullBitmap,
 		"Highlight structures with solid mask",
 		"Highlight structures with solid mask");
-	bitmap = wxGetBitmapFromMemory(brush_desel);
+	bitmap = wxGetBitmap(brush_desel);
 	m_toolbar->AddCheckTool(ID_BrushDesel, "Unsel",
 		bitmap, wxNullBitmap,
 		"Reset highlighted structures by painting (hold X)",
 		"Reset highlighted structures by painting (hold X)");
 	m_toolbar->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(brush_erase);
+	bitmap = wxGetBitmap(brush_erase);
 	m_toolbar->AddTool(ID_BrushErase, "Erase",
 		bitmap, "Erase highlighted structures");
 	m_toolbar->SetToolLongHelp(ID_BrushErase, "Erase highlighted structures");
-	bitmap = wxGetBitmapFromMemory(brush_create);
+	bitmap = wxGetBitmap(brush_create);
 	m_toolbar->AddTool(ID_BrushExtract, "Extract",
 		bitmap, "Extract highlighted structures out and create a new volume");
 	m_toolbar->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
-	bitmap = wxGetBitmapFromMemory(brush_clear);
+	bitmap = wxGetBitmap(brush_clear);
 	m_toolbar->AddSeparator();
 	m_toolbar->AddTool(ID_BrushClear, "Reset",
 		bitmap, "Reset all highlighted structures");
@@ -131,33 +131,33 @@ BrushToolDlg::BrushToolDlg(
 	//mask tools
 	m_mask_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
-	bitmap = wxGetBitmapFromMemory(mask_copy);
+	bitmap = wxGetBitmap(mask_copy);
 	m_mask_tb->AddTool(
 		ID_MaskCopy, "Copy", bitmap,
 		"Copy current selection mask to clipboard");
 	m_mask_tb->SetToolLongHelp(ID_MaskCopy, "Copy current selection mask to clipboard");
-	bitmap = wxGetBitmapFromMemory(copy_data);
+	bitmap = wxGetBitmap(copy_data);
 	m_mask_tb->AddTool(
 		ID_MaskCopyData, "Data", bitmap,
 		"Copy current channel data as mask to clipboard");
 	m_mask_tb->SetToolLongHelp(ID_MaskCopyData, "Copy current channel data as mask to clipboard");
 	m_mask_tb->AddSeparator();
-	bitmap = wxGetBitmapFromMemory(mask_paste);
+	bitmap = wxGetBitmap(mask_paste);
 	m_mask_tb->AddTool(
 		ID_MaskPaste, "Paste", bitmap,
 		"Paste selection mask from clipboard");
 	m_mask_tb->SetToolLongHelp(ID_MaskPaste, "Paste selection mask from clipboard");
-	bitmap = wxGetBitmapFromMemory(mask_union);
+	bitmap = wxGetBitmap(mask_union);
 	m_mask_tb->AddTool(
 		ID_MaskMerge, "Merge", bitmap,
 		"Merge selection mask from clipboard with current");
 	m_mask_tb->SetToolLongHelp(ID_MaskMerge, "Merge selection mask from clipboard with current");
-	bitmap = wxGetBitmapFromMemory(mask_exclude);
+	bitmap = wxGetBitmap(mask_exclude);
 	m_mask_tb->AddTool(
 		ID_MaskExclude, "Exclude", bitmap,
 		"Exclude clipboard's selection mask from current");
 	m_mask_tb->SetToolLongHelp(ID_MaskExclude, "Exclude clipboard's selection mask from current");
-	bitmap = wxGetBitmapFromMemory(mask_intersect);
+	bitmap = wxGetBitmap(mask_intersect);
 	m_mask_tb->AddTool(
 		ID_MaskIntersect, "Intersect", bitmap,
 		"Intersect selection mask from clipboard with current");
