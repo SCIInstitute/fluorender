@@ -177,6 +177,7 @@ namespace flvr
 
 		virtual GLenum tex_type(int c);
 		virtual void* tex_data(int c);
+		virtual void* tex_data(int c, void* raw_data);//given external raw data, using the same address in brick
 		virtual void* tex_data_brk(int c, const FileLocInfo* finfo);
 
 		void compute_polygons(fluo::Ray& view, double tmin, double tmax, double dt,

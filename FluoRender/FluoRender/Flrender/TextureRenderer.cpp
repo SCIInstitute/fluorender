@@ -603,20 +603,20 @@ namespace flvr
 		GLint result = -1;
 		int c = 0;
 		int tn = 0;
-		void* tex_data = 0;
+		void* raw_data = 0;
 		//get raw data from cache
 		if (cache_queue_)
 		{
 			VolCache4D* vol_cache = cache_queue_->get_offset(toffset);
 			if (vol_cache)
 			{
-				tex_data = vol_cache->GetRawData();
+				raw_data = vol_cache->GetRawData();
 				tn = static_cast<int>(vol_cache->GetTime());
 			}
 		}
 
 		if (!tex_->isBrxml() &&
-			(!brick || !tex_data))
+			(!brick || !raw_data))
 			return 0;
 		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
 			return 0;
@@ -874,7 +874,7 @@ namespace flvr
 						glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 							brick->tex_type(c), 0);
 
-						load_texture(tex_data, nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
+						load_texture(brick->tex_data(c, raw_data), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
 					}
 
 					if (glbin_settings.m_mem_swap)

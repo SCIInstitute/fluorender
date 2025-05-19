@@ -429,6 +429,23 @@ namespace flvr
 			return NULL;
 	}
 
+	void* TextureBrick::tex_data(int c, void* raw_data)
+	{
+		if (c >= 0 && raw_data)
+		{
+			unsigned char *ptr = (unsigned char *)(raw_data);
+			long long offset = (long long)(oz()) *
+				(long long)(sx()) *
+				(long long)(sy()) +
+				(long long)(oy()) *
+				(long long)(sx()) +
+				(long long)(ox());
+			return ptr + offset * tex_type_size(tex_type(c));
+		}
+		else
+			return NULL;
+	}
+
 	void *TextureBrick::tex_data_brk(int c, const FileLocInfo* finfo)
 	{
 		unsigned char *ptr = NULL;
