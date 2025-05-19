@@ -646,46 +646,48 @@ inline double WSTOD(const std::wstring& s, double def = 0.0) { try { return std:
 inline wchar_t GETSLASHALT() { return L'/'; }
 inline char GETSLASHALTA() { return '/'; }
 
-inline TIFF* TIFFOpenW(std::wstring fname, const char* opt)
+inline TIFF* TIFFOpenW(const std::wstring& fname, const char* opt)
 {
-	fname = L"\x5c\x5c\x3f\x5c" + fname;
-	return TIFFOpenW(fname.c_str(), opt);
+	std::wstring path = L"\x5c\x5c\x3f\x5c" + fname;
+	return TIFFOpenW(path.c_str(), opt);
 }
 
-inline FILE* FOPEN(FILE** fp, std::string& fname, const char* mode) {
-	fname = "\x5c\x5c\x3f\x5c" + fname;
-	fopen_s(fp, fname.c_str(), mode);
+inline FILE* FOPEN(FILE** fp, const std::string& fname, const char* mode)
+{
+	std::string path = "\x5c\x5c\x3f\x5c" + fname;
+	fopen_s(fp, path.c_str(), mode);
 	return *fp;
 }
 
-inline FILE* WFOPEN(FILE** fp, std::wstring& fname, const wchar_t* mode) {
-	fname = L"\x5c\x5c\x3f\x5c" + fname;
-	_wfopen_s(fp, fname.c_str(), mode);
+inline FILE* WFOPEN(FILE** fp, const std::wstring& fname, const wchar_t* mode)
+{
+	std::wstring path = L"\x5c\x5c\x3f\x5c" + fname;
+	_wfopen_s(fp, path.c_str(), mode);
 	return *fp;
 }
 
-inline void OutputStreamOpen(std::ofstream& os, std::string fname)
+inline void OutputStreamOpen(std::ofstream& os, const std::string& fname)
 {
-	fname = "\x5c\x5c\x3f\x5c" + fname;
-	os.open(fname);
+	std::string path = "\x5c\x5c\x3f\x5c" + fname;
+	os.open(path);
 }
 
-inline void OutputStreamOpenW(std::wofstream& os, std::wstring fname)
+inline void OutputStreamOpenW(std::wofstream& os, const std::wstring& fname)
 {
-	fname = L"\x5c\x5c\x3f\x5c" + fname;
-	os.open(fname);
+	std::wstring path = L"\x5c\x5c\x3f\x5c" + fname;
+	os.open(path);
 }
 
-inline int MkDir(std::string dirname)
+inline int MkDir(const std::string& dirname)
 {
-	dirname = "\x5c\x5c\x3f\x5c" + dirname;
-	return _mkdir(dirname.c_str());
+	std::string path = "\x5c\x5c\x3f\x5c" + dirname;
+	return _mkdir(path.c_str());
 }
 
-inline int MkDirW(std::wstring dirname)
+inline int MkDirW(const std::wstring& dirname)
 {
-	dirname = L"\x5c\x5c\x3f\x5c" + dirname;
-	return _wmkdir(dirname.c_str());
+	std::wstring path = L"\x5c\x5c\x3f\x5c" + dirname;
+	return _wmkdir(path.c_str());
 }
 
 inline errno_t STRCPY(char* d, size_t n, const char* s) { return strcpy_s(d, n, s); }
