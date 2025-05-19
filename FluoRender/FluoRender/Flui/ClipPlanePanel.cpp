@@ -160,6 +160,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		bitmap, wxNullBitmap,
 		"Link two X clipping planes",
 		"Link two X clipping planes");
+	m_clip_x_st->SetFontBold();
 	m_clip_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipXMF, this);
 	m_clipx_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipXChange, this);
 	m_clipx_sldr->SetHistoryIndicator(m_clip_x_st);
@@ -200,6 +201,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		bitmap, wxNullBitmap,
 		"Link two Y clipping planes",
 		"Link two Y clipping planes");
+	m_clip_y_st->SetFontBold();
 	m_clip_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipYMF, this);
 	m_clipy_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipYChange, this);
 	m_clipy_sldr->SetHistoryIndicator(m_clip_y_st);
@@ -241,6 +243,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		bitmap, wxNullBitmap,
 		"Link two Z clipping planes",
 		"Link two Z clipping planes");
+	m_clip_z_st->SetFontBold();
 	m_clip_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnClipZMF, this);
 	m_clipz_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnClipZChange, this);
 	m_clipz_sldr->SetHistoryIndicator(m_clip_z_st);
@@ -342,6 +345,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_x_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_x_rot_spin->SetRange(-0x8000, 0x7fff);
+	m_rot_x_st->SetFontBold();
 	m_rot_x_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotXMF, this);
 	m_x_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnXRotChange, this);
 	m_x_rot_sldr->SetHistoryIndicator(m_rot_x_st);
@@ -363,6 +367,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_y_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_y_rot_spin->SetRange(-0x8000, 0x7fff);
+	m_rot_y_st->SetFontBold();
 	m_rot_y_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotXMF, this);
 	m_y_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnYRotChange, this);
 	m_y_rot_sldr->SetHistoryIndicator(m_rot_y_st);
@@ -384,6 +389,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_z_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
 	m_z_rot_spin->SetRange(-0x8000, 0x7fff);
+	m_rot_z_st->SetFontBold();
 	m_rot_z_st->Bind(wxEVT_BUTTON, &ClipPlanePanel::OnRotZMF, this);
 	m_z_rot_sldr->Bind(wxEVT_SCROLL_CHANGED, &ClipPlanePanel::OnZRotChange, this);
 	m_z_rot_sldr->SetHistoryIndicator(m_rot_z_st);

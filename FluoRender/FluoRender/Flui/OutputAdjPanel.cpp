@@ -142,6 +142,9 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 	m_r_brightness_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRBrightnessMF, this);
 	m_r_hdr_st = new wxFadeButton(page, wxID_ANY, "Eql.R.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
+	m_r_gamma_st->SetFontBold();
+	m_r_brightness_st->SetFontBold();
+	m_r_hdr_st->SetFontBold();
 	m_r_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnRHdrMF, this);
 	sizer_v->Add(m_r_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_r_brightness_st, wxGBPosition(0, 1), wxGBSpan(1, 1), wxEXPAND);
@@ -235,6 +238,9 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 	m_g_hdr_st = new wxFadeButton(page, wxID_ANY, "Eql.G.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_g_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnGHdrMF, this);
+	m_g_gamma_st->SetFontBold();
+	m_g_brightness_st->SetFontBold();
+	m_g_hdr_st->SetFontBold();
 	sizer_v->Add(m_g_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_g_brightness_st, wxGBPosition(0, 1), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_g_hdr_st, wxGBPosition(0, 2), wxGBSpan(1, 1), wxEXPAND);
@@ -327,6 +333,9 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	m_b_hdr_st = new wxFadeButton(page, wxID_ANY, "Eql.B.",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)));
 	m_b_hdr_st->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnBHdrMF, this);
+	m_b_gamma_st->SetFontBold();
+	m_b_brightness_st->SetFontBold();
+	m_b_hdr_st->SetFontBold();
 	sizer_v->Add(m_b_gamma_st, wxGBPosition(0, 0), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_b_brightness_st, wxGBPosition(0, 1), wxGBSpan(1, 1), wxEXPAND);
 	sizer_v->Add(m_b_hdr_st, wxGBPosition(0, 2), wxGBSpan(1, 1), wxEXPAND);

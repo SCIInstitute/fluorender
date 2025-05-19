@@ -96,13 +96,16 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 	{
 		if (m_mode == 1)
 		{
-			//draw map in grayscale
-			img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
-			bitmap = wxBitmap(img_scaled);
-			if (horizontal_)
-				dc.DrawBitmap(bitmap, margin_, h / 2.0 - 2 * scale_, false);
-			else
-				dc.DrawBitmap(bitmap, w / 2.0 - 2 * scale_, margin_, false);
+			if (width > 0 && height > 0)
+			{
+				//draw map in grayscale
+				img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
+				bitmap = wxBitmap(img_scaled);
+				if (horizontal_)
+					dc.DrawBitmap(bitmap, margin_, h / 2.0 - 2 * scale_, false);
+				else
+					dc.DrawBitmap(bitmap, w / 2.0 - 2 * scale_, margin_, false);
+			}
 		}
 		else if (m_mode == 2 || m_mode == 3)
 		{
@@ -221,37 +224,44 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 				width = posr - posl;
 			else
 				height = posr - posl;
-			if (enabled_)
+
+			if (width > 0 && height > 0)
 			{
-				img_scaled = m_colorBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
+				if (enabled_)
+				{
+					img_scaled = m_colorBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
+				}
+				else
+				{
+					img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
+				}
+				bitmap = wxBitmap(img_scaled);
+				if (horizontal_)
+					dc.DrawBitmap(bitmap, margin_ + posl, h / 2.0 - 4 * scale_, false);
+				else
+					dc.DrawBitmap(bitmap, w / 2.0 - 4 * scale_, margin_ + posl, false);
 			}
-			else
-			{
-				img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
-			}
-			bitmap = wxBitmap(img_scaled);
-			if (horizontal_)
-				dc.DrawBitmap(bitmap, margin_ + posl, h / 2.0 - 4 * scale_, false);
-			else
-				dc.DrawBitmap(bitmap, w / 2.0 - 4 * scale_, margin_ + posl, false);
 		}
 		else
 		{
-			if (enabled_)
+			if (width > 0 && height > 0)
 			{
-				img_scaled = m_colorBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
-			}
-			else
-			{
-				img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
-			}
-			bitmap = wxBitmap(img_scaled);
-			if (posr - posl > 0)
-			{
-				if (horizontal_)
-					dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(posl, 0, posr - posl, height)), margin_ + posl, h / 2.0 - 4 * scale_, false);
+				if (enabled_)
+				{
+					img_scaled = m_colorBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
+				}
 				else
-					dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(0, posl, width, posr - posl)), w / 2.0 - 4 * scale_, margin_ + posl, false);
+				{
+					img_scaled = m_grayBitmap.ConvertToImage().Rescale(width, height, wxIMAGE_QUALITY_BICUBIC);
+				}
+				bitmap = wxBitmap(img_scaled);
+				if (posr - posl > 0)
+				{
+					if (horizontal_)
+						dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(posl, 0, posr - posl, height)), margin_ + posl, h / 2.0 - 4 * scale_, false);
+					else
+						dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(0, posl, width, posr - posl)), w / 2.0 - 4 * scale_, margin_ + posl, false);
+				}
 			}
 		}
 	}
