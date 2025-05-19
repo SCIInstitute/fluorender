@@ -6753,6 +6753,8 @@ void DataManager::AddVolumeData(VolumeData* vd)
 	m_vd_list.push_back(vd);
 	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd);
 	vol_cache_queue->RegisterCacheQueueFuncs(flvr::CQCallback::ReadVolCache, flvr::CQCallback::FreeVolCache);
+	//set up default vol cache mode
+	vol_cache_queue->SetHandleFlags(flvr::CQCallback::HDL_DATA | flvr::CQCallback::TIME_COND0);
 	vd->GetVR()->set_cache_queue(vol_cache_queue.get());
 	m_vd_cache_queue.emplace(vd, std::move(vol_cache_queue));
 }

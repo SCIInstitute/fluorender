@@ -711,14 +711,6 @@ namespace flvr
 
 		eval_ml_mode();
 
-		//set up vol cache mode
-		if (cache_queue_)
-		{
-			cache_queue_->SetHandleFlags(
-				flvr::CQCallback::HDL_DATA |
-				flvr::CQCallback::TIME_COND0);
-		}
-
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		ShaderProgram* shader = 0;
