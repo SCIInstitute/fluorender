@@ -50,7 +50,7 @@ inline wxBitmapBundle _wxGetBitmapBundleFromMemory(const unsigned char* data, in
 	bitmaps.push_back(wxBitmap(baseImage));
 
 	// Common Windows DPI scale factors
-	const double scales[] = { 1.51, 1.76, 2.01, 2.51, 3.01 };
+	const double scales[] = { 1.8, 2.0, 2.5, 3.0 };
 
 	for (double scale : scales)
 	{
