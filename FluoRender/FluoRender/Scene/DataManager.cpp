@@ -2659,6 +2659,7 @@ bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
 {
 	ComputeHistogram(true);
 	int bins = static_cast<int>(m_hist.size() - 1);
+	int win = 4;//half window size
 	data.resize(bins * 3, 0);
 	fluo::HSVColor hsv(m_color);
 	fluo::Color bg;
@@ -2670,9 +2671,19 @@ bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
 	double sum = m_hist[bins] - m_hist[0];
 	if (sum == 0.0)
 		sum = 1.0;
+	std::vector<double> val(bins);
+	for (int i = 0; i < bins; ++i)
+		val[i] = m_hist[i] / sum;
 	for (int i = 0; i < bins; ++i)
 	{
-		double p = std::clamp(std::pow(m_hist[i] / sum, 0.2), 0.0, 1.0);
+		int start = std::max(0, i - win);
+		int end = std::min(bins - 1, i + win);
+		double localSum = 0.0;
+		for (int j = start; j <= end; ++j)
+			localSum += val[j];
+		double p = localSum / (end - start + 1);
+		p = p + 15.0 * (val[i] - p);
+		p = std::clamp(std::pow(p, 0.1), 0.0, 1.0);
 		c = m_color * p + bg * (1 - p);
 		data[i * 3] = static_cast<unsigned char>(c.r() * 255.0);
 		data[i * 3 + 1] = static_cast<unsigned char>(c.g() * 255.0);

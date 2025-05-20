@@ -1150,6 +1150,8 @@ void ScriptProc::RunOpenCL()
 	clname = GetInputFile(clname, L"CL_code");
 	if (clname.empty())
 		return;
+	int repeat = 1;
+	m_fconfig->Read("repeat", &repeat, 1);
 
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
@@ -1157,8 +1159,11 @@ void ScriptProc::RunOpenCL()
 		(*i)->GetVR()->clear_tex_current();
 		glbin_kernel_executor.LoadCode(clname);
 		glbin_kernel_executor.SetVolume(*i);
-		glbin_kernel_executor.SetDuplicate(true);
-		glbin_kernel_executor.Execute();
+		for (int j = 0; j < repeat; ++j)
+		{
+			glbin_kernel_executor.SetDuplicate(j==0 ? true : false);
+			glbin_kernel_executor.Execute();
+		}
 	}
 }
 

@@ -131,7 +131,7 @@ int CZIReader::Preprocess()
 	fclose(pfile);
 
 	m_cur_time = 0;
-	m_data_name = GET_NAME(m_path_name);
+	m_data_name = GET_STEM(m_path_name);
 
 	return READER_OK;
 }

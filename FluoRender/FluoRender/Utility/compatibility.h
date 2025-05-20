@@ -535,16 +535,28 @@ inline std::string ws2s(const std::wstring& ws)
 	return dest;
 }
 
-inline std::wstring GET_NAME(const std::wstring& pathname)
+inline std::wstring GET_STEM(const std::wstring& pathname)
 {
 	std::filesystem::path path(pathname);
 	return path.stem().wstring();
 }
 
-inline std::string GET_NAME(const std::string& pathname)
+inline std::string GET_STEM(const std::string& pathname)
 {
 	std::filesystem::path path(pathname);
 	return path.stem().string();
+}
+
+inline std::wstring GET_NAME(const std::wstring& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.filename().wstring();
+}
+
+inline std::string GET_NAME(const std::string& pathname)
+{
+	std::filesystem::path path(pathname);
+	return path.filename().string();
 }
 
 inline std::wstring GET_PATH(const std::wstring& pathname)

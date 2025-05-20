@@ -1601,7 +1601,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 				new_folder = filename2 + L"_files";
 				MkDirW(new_folder);
 				std::filesystem::path p(new_folder);
-				p /= GET_NAME(filename2) + L".track";
+				p /= GET_STEM(filename2) + L".track";
 				view->SaveTrackGroup(p.wstring());
 			}
 			fconfig->Write("track_file",view->GetTrackGroupFile());

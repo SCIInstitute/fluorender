@@ -1288,7 +1288,7 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 	Nrrd* data = 0;
 	TimeDataInfo chan_info = m_4d_seq[t];
 	if (!isHyperstack_ || isHsTimeSeq_)
-		m_data_name = GET_NAME(chan_info.slices[0].slice);
+		m_data_name = GET_STEM(chan_info.slices[0].slice);
 	data = ReadTiff(chan_info.slices, c, get_max);
 	m_cur_time = t;
 	return data;

@@ -339,7 +339,7 @@ Nrrd* ImageJReader::Convert(int t, int c, bool get_max)
 	//TODO: Fix the m_data_name.
 	//TimeDataInfo chan_info = m_4d_seq[t];
 	//if (!isHyperstack_ || isHsTimeSeq_)
-		//m_data_name = GET_NAME(chan_info.slices[0].slice);
+		//m_data_name = GET_STEM(chan_info.slices[0].slice);
 	
 	data = ReadFromImageJ(t, c, get_max);
 	m_cur_time = t;

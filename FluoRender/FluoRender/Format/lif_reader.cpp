@@ -109,7 +109,7 @@ int LIFReader::Preprocess()
 
 	FillLifInfo();
 	m_cur_time = 0;
-	m_data_name = GET_NAME(m_path_name);
+	m_data_name = GET_STEM(m_path_name);
 	LoadBatch(0);
 
 	return READER_OK;

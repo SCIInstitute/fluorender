@@ -501,7 +501,7 @@ void LOFReader::FillLofInfo()
 	m_lof_info.FillInfo();
 
 	m_cur_time = 0;
-	m_data_name = GET_NAME(m_path_name);
+	m_data_name = GET_STEM(m_path_name);
 	m_chan_num = static_cast<int>(m_lof_info.channels.size());
 	ChannelInfo* cinfo = m_lof_info.GetChannelInfo(0);
 	if (cinfo)

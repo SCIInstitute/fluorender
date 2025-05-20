@@ -75,7 +75,7 @@ OIFReader::~OIFReader()
 //		m_path_name.assign(file.length(), L' ');
 //		copy(file.begin(), file.end(), m_path_name.begin());
 //
-//		m_data_name = GET_NAME(m_path_name);
+//		m_data_name = GET_STEM(m_path_name);
 //	}
 //	m_id_string = m_path_name;
 //}
@@ -83,7 +83,7 @@ OIFReader::~OIFReader()
 void OIFReader::SetFile(const std::wstring &file)
 {
 	m_path_name = file;
-	m_data_name = GET_NAME(m_path_name);
+	m_data_name = GET_STEM(m_path_name);
 	m_id_string = m_path_name;
 }
 
