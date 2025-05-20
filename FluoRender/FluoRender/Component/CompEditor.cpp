@@ -287,8 +287,11 @@ void ComponentEditor::ReplaceId()
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
+	RenderView* view = glbin_current.render_view;
+	if (!view)
+		return;
 
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	int cur_time = view->m_tseq_cur_num;
 	//get current mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
@@ -348,7 +351,7 @@ void ComponentEditor::ReplaceList()
 	//trace group
 	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
 	bool track_map = trkg && trkg->GetTrackMap()->GetFrameNum();
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	int cur_time = view->m_tseq_cur_num;
 
 	//get current mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
@@ -418,7 +421,11 @@ void ComponentEditor::CombineId()
 	VolumeData* vd = glbin_current.vol_data;
 	if (!vd)
 		return;
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	RenderView* view = glbin_current.render_view;
+	if (!view)
+		return;
+
+	int cur_time = view->m_tseq_cur_num;
 	//get current mask
 	Nrrd* nrrd_mask = vd->GetMask(true);
 	if (!nrrd_mask)
@@ -476,7 +483,7 @@ void ComponentEditor::CombineList()
 	if (!trkg)
 		return;
 	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	int cur_time = view->m_tseq_cur_num;
 
 	//find the largest cell in the list
 	flrd::Celp cell;

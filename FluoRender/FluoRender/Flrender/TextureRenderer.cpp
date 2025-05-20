@@ -93,7 +93,8 @@ namespace flvr
 		tex_2d_dmap_(0),
 		blend_num_bits_(32),
 		va_slices_(0),
-		va_wirefm_(0)
+		va_wirefm_(0),
+		cache_queue_(0)
 	{
 		if (!ShaderProgram::init())
 			return;
@@ -116,7 +117,8 @@ namespace flvr
 		tex_2d_dmap_(0),
 		blend_num_bits_(copy.blend_num_bits_),
 		va_slices_(0),
-		va_wirefm_(0)
+		va_wirefm_(0),
+		cache_queue_(0)
 	{
 		if (!ShaderProgram::init())
 			return;
@@ -614,6 +616,8 @@ namespace flvr
 				tn = static_cast<int>(vol_cache->GetTime());
 			}
 		}
+		else
+			raw_data = brick->tex_data(c);
 
 		if (!tex_->isBrxml() &&
 			(!brick || !raw_data))

@@ -1068,6 +1068,7 @@ void ScriptProc::RunSaveVolume()
 	name = REM_NUM(name);
 	if (name.empty())
 		return;
+	DataManager* data_manager = &glbin_data_manager;
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
@@ -1158,10 +1159,19 @@ void ScriptProc::RunOpenCL()
 	{
 		(*i)->GetVR()->clear_tex_current();
 		glbin_kernel_executor.LoadCode(clname);
-		glbin_kernel_executor.SetVolume(*i);
 		for (int j = 0; j < repeat; ++j)
 		{
-			glbin_kernel_executor.SetDuplicate(j==0 ? true : false);
+			if (j == 0)
+			{
+				glbin_kernel_executor.SetVolume(*i);
+				glbin_kernel_executor.SetDuplicate(true);
+			}
+			else
+			{
+				VolumeData* vd = glbin_kernel_executor.GetResult(true);
+				glbin_kernel_executor.SetVolume(vd);
+				glbin_kernel_executor.SetDuplicate(false);
+			}
 			glbin_kernel_executor.Execute();
 		}
 	}

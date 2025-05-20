@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <Global.h>
 #include <DataManager.h>
-#include <MovieMaker.h>
+#include <RenderView.h>
 #include <base_reader.h>
 #include <msk_reader.h>
 #include <lbl_reader.h>
@@ -69,7 +69,9 @@ void CQCallback::ReadVolCache(VolCache4D& vol_cache)
 	cond0 = false;
 	if (vol_cache.time_cond0)
 	{
-		int cur_time = glbin_moviemaker.GetSeqCurNum();
+		int cur_time = 0;
+		if (glbin_current.render_view)
+			cur_time = glbin_current.render_view->m_tseq_cur_num;
 		int frame = static_cast<int>(vol_cache.m_tnum);
 		cond0 = cur_time == frame;
 	}
@@ -137,29 +139,20 @@ void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 	{
 		SaveLabel(vol_cache);
 	}
-	if (vol_cache.handle_data && !cond0)
+	if (vol_cache.own_data && vol_cache.m_data)
 	{
-		if (vol_cache.m_data)
-		{
-			nrrdNuke((Nrrd*)vol_cache.m_data);
-			vol_cache.m_data = 0;
-		}
+		nrrdNuke((Nrrd*)vol_cache.m_data);
+		vol_cache.m_data = 0;
 	}
-	if (vol_cache.handle_mask && !cond0)
+	if (vol_cache.own_mask && vol_cache.m_mask)
 	{
-		if (vol_cache.m_mask)
-		{
-			nrrdNuke((Nrrd*)vol_cache.m_mask);
-			vol_cache.m_mask = 0;
-		}
+		nrrdNuke((Nrrd*)vol_cache.m_mask);
+		vol_cache.m_mask = 0;
 	}
-	if (vol_cache.handle_label && !cond0)
+	if (vol_cache.own_label && vol_cache.m_label)
 	{
-		if (vol_cache.m_label)
-		{
-			nrrdNuke((Nrrd*)vol_cache.m_label);
-			vol_cache.m_label = 0;
-		}
+		nrrdNuke((Nrrd*)vol_cache.m_label);
+		vol_cache.m_label = 0;
 	}
 	vol_cache.m_valid = false;
 }
@@ -181,6 +174,7 @@ bool CQCallback::HandleData(VolCache4D& vol_cache)
 	data = reader->Convert(frame, chan, true);
 	vol_cache.m_data = data;
 	vol_cache.m_valid &= (data != 0);
+	vol_cache.own_data = vol_cache.m_valid;
 	return data != 0;
 }
 
@@ -219,6 +213,7 @@ bool CQCallback::HandleMask(VolCache4D& vol_cache)
 	}
 	vol_cache.m_mask = mask;
 	vol_cache.m_valid &= (mask != 0);
+	vol_cache.own_mask = vol_cache.m_valid;
 	return mask != 0;
 }
 
@@ -257,6 +252,7 @@ bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 	}
 	vol_cache.m_label = label;
 	vol_cache.m_valid &= (label != 0);
+	vol_cache.own_label = vol_cache.m_valid;
 	return label != 0;
 }
 
@@ -356,7 +352,9 @@ bool CQCallback::BuildTex(VolCache4D& vol_cache)
 
 VolCache4D* CacheQueue::get_offset(int toffset)
 {
-	int cur_time = glbin_moviemaker.GetSeqCurNum();
+	int cur_time = 0;
+	if (glbin_current.render_view)
+		cur_time = glbin_current.render_view->m_tseq_cur_num;
 	int t = std::max(0, cur_time + toffset);
 	return get(static_cast<size_t>(t));
 }

@@ -51,6 +51,9 @@ namespace flvr
 			m_valid(false),
 			m_modified(false),
 			m_protect(false),
+			own_data(false),
+			own_mask(false),
+			own_label(false),
 			handle_data(false),
 			handle_mask(false),
 			handle_label(false),
@@ -78,6 +81,9 @@ namespace flvr
 		void SetHandleFlags(int flags);
 		void Reset()
 		{
+			own_data = false;
+			own_mask = false;
+			own_label = false;
 			handle_data = false;
 			handle_mask = false;
 			handle_label = false;
@@ -103,6 +109,9 @@ namespace flvr
 			m_protect = false;
 		}
 
+		bool own_data;//if cache owns data for release
+		bool own_mask;//if cache owns mask for release
+		bool own_label;//if cache owns label for release
 		bool handle_data;//read data from file and then free
 		bool handle_mask;//read mask from file and then free
 		bool handle_label;//read label from file and then free
