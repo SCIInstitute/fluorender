@@ -184,7 +184,7 @@ bool wxDoubleSlider::ChangeValues(int &low, int &hi)
 
 	bool changed = low_val_ != olow || hi_val_ != ohi;
 	low = low_val_;
-	hi = hi_val_;
+	hi = hi <= low ? hi_val_ : hi;
 
 	if (changed || stack_.empty())
 	{

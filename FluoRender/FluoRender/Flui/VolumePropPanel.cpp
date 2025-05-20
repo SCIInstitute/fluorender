@@ -217,7 +217,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//sample rate
 	m_sample_st = new wxFadeButton(this, wxID_ANY, "Samp. Rate",
 		wxDefaultPosition, bts);
-	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 50,
+	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_sample_text = new wxTextCtrl(this, wxID_ANY, "1.0",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
@@ -2042,13 +2042,13 @@ void VolumePropPanel::OnMinMaxText(wxCommandEvent& event)
 	str.ToLong(&ival2);
 	int low = ival1;
 	int hi = ival2;
+	if (double(hi) > m_max_val)
+		UpdateMaxVal(hi);
 	m_minmax_sldr->ChangeValues(low, hi);
 	if (low != ival1 && t != m_low_offset_text)
 		m_low_offset_text->ChangeValue(std::to_string(low));
 	if (hi != ival2 && t != m_high_offset_text)
 		m_high_offset_text->ChangeValue(std::to_string(hi));
-	if (double(hi) > m_max_val)
-		UpdateMaxVal(hi);
 	double val1 = double(low) / m_max_val;
 	double val2 = double(hi) / m_max_val;
 
@@ -2430,13 +2430,13 @@ void VolumePropPanel::OnThreshText(wxCommandEvent& event)
 	str.ToLong(&ival2);
 	int low = ival1;
 	int hi = ival2;
+	if (double(hi) > m_max_val)
+		UpdateMaxVal(hi);
 	m_thresh_sldr->ChangeValues(low, hi);
 	if (low != ival1 && t != m_left_thresh_text)
 		m_left_thresh_text->ChangeValue(std::to_string(low));
 	if (hi != ival2 && t != m_right_thresh_text)
 		m_right_thresh_text->ChangeValue(std::to_string(hi));
-	if (double(hi) > m_max_val)
-		UpdateMaxVal(hi);
 	double val1 = double(low) / m_max_val;
 	double val2 = double(hi) / m_max_val;
 
@@ -2682,13 +2682,13 @@ void VolumePropPanel::OnColormapText(wxCommandEvent& event)
 	str.ToLong(&ival2);
 	int low = ival1;
 	int hi = ival2;
+	if (double(hi) > m_max_val)
+		UpdateMaxVal(hi);
 	m_colormap_sldr->ChangeValues(low, hi);
 	if (low != ival1 && t != m_colormap_low_text)
 		m_colormap_low_text->ChangeValue(std::to_string(low));
 	if (hi != ival2 && t != m_colormap_hi_text)
 		m_colormap_hi_text->ChangeValue(std::to_string(hi));
-	if (double(hi) > m_max_val)
-		UpdateMaxVal(hi);
 	double val1 = double(low) / m_max_val;
 	double val2 = double(hi) / m_max_val;
 
