@@ -43,7 +43,8 @@ DEALINGS IN THE SOFTWARE.
 KernelExecutor::KernelExecutor()
 	: Progress(),
 	m_vd(0),
-	m_duplicate(true)
+	m_duplicate(true),
+	m_repeat(0)
 {
 }
 
@@ -130,12 +131,6 @@ bool KernelExecutor::Execute()
 		m_message = L"No volume selected. Select a volume first.\n";
 		return false;
 	}
-	flvr::VolumeRenderer* vr = m_vd->GetVR();
-	if (!vr)
-	{
-		m_message = L"Volume corrupted.\n";
-		return false;
-	}
 	flvr::Texture* tex =m_vd->GetTexture();
 	if (!tex)
 	{
@@ -144,7 +139,6 @@ bool KernelExecutor::Execute()
 	}
 
 	int bits = m_vd->GetBits();
-	int chars = bits / 8;
 	int res_x, res_y, res_z;
 	m_vd->GetResolution(res_x, res_y, res_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
@@ -161,9 +155,8 @@ bool KernelExecutor::Execute()
 
 	m_message = L"";
 	//execute for each brick
-	flvr::TextureBrick *b, *b_r;
 	std::vector<flvr::TextureBrick*> *bricks_r;
-	void *result;
+	VolumeData* vd_r = 0;
 
 	SetProgress(0, "Running OpenCL kernel.");
 
@@ -172,22 +165,16 @@ bool KernelExecutor::Execute()
 		//result
 		double spc_x, spc_y, spc_z;
 		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		VolumeData* vd = new VolumeData();
-		m_vd_r.push_back(vd);
-		vd->AddEmptyData(bits,
+		vd_r = new VolumeData();
+		m_vd_r.push_back(vd_r);
+		vd_r->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
-		vd->SetSpcFromFile(true);
-		vd->SetName(m_vd->GetName() + L"_CL");
-		flvr::Texture* tex_r = vd->GetTexture();
+		vd_r->SetSpcFromFile(true);
+		vd_r->SetName(m_vd->GetName() + L"_CL");
+		flvr::Texture* tex_r = vd_r->GetTexture();
 		if (!tex_r)
-			return false;
-		Nrrd* nrrd_r = tex_r->get_nrrd(0);
-		if (!nrrd_r)
-			return false;
-		result = nrrd_r->data;
-		if (!result)
 			return false;
 
 		tex_r->set_sort_bricks();
@@ -195,20 +182,77 @@ bool KernelExecutor::Execute()
 		if (!bricks_r || bricks_r->size() == 0)
 			return false;
 
-		glbin_vol_def.Copy(vd, m_vd);
+		glbin_vol_def.Copy(vd_r, m_vd);
 	}
 	else
-		result = tex->get_nrrd(0)->data;
+		vd_r = m_vd;
 
+	bool kernel_exe = ExecuteKernel(m_vd, vd_r);
+	for (int i = 0; i < m_repeat; ++i)
+		kernel_exe &= ExecuteKernel(vd_r, vd_r);
+
+	if (!kernel_exe)
+	{
+		if (m_duplicate && !m_vd_r.empty())
+			delete m_vd_r.back();
+		m_vd_r.pop_back();
+		SetProgress(0, "");
+		return false;
+	}
+
+	if (!m_duplicate)
+	{
+		m_vd->GetVR()->clear_tex_current();
+		m_vd_r.clear();
+		m_vd_r.push_back(m_vd);
+	}
+
+	SetProgress(0, "");
+
+	return true;
+}
+
+bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
+{
 	bool kernel_exe = true;
-	size_t brick_num = bricks->size();
 
+	flvr::VolumeRenderer* vr = m_vd->GetVR();
+	if (!vr)
+	{
+		m_message = L"Volume corrupted.\n";
+		return false;
+	}
+	flvr::Texture* tex =m_vd->GetTexture();
+	if (!tex)
+	{
+		m_message = L"Volume corrupted.\n";
+		return false;
+	}
+	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
+	if (!bricks)
+		return false;
+
+	flvr::Texture* tex_r = vd_r->GetTexture();
+	if (!tex_r)
+		return false;
+	std::vector<flvr::TextureBrick*> *bricks_r = tex_r->get_bricks();
+	if (!bricks_r)
+		return false;
+	void* result = vd_r->GetVolume(false)->data;
+
+	size_t brick_num = bricks->size();
+	int bits = m_vd->GetBits();
+	int chars = bits / 8;
+	int res_x, res_y, res_z;
+	m_vd->GetResolution(res_x, res_y, res_z);
+
+	flvr::TextureBrick *b, *b_r;
 	for (size_t i = 0; i<brick_num; ++i)
 	{
 		SetProgress(static_cast<int>(100.0 * i / brick_num), "Running OpenCL kernel.");
 
 		b = (*bricks)[i];
-		if (m_duplicate) b_r = (*bricks_r)[i];
+		b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel =
 			glbin_vol_kernel_factory.
@@ -217,23 +261,20 @@ bool KernelExecutor::Execute()
 		{
 			m_message += L"OpenCL kernel created.\n";
 			if (brick_num == 1)
-				kernel_exe = ExecuteKernel(kernel, data_id, result, res_x, res_y, res_z, chars);
+				kernel_exe = ExecuteKernelBrick(kernel, data_id, result, res_x, res_y, res_z, chars);
 			else
 			{
 				int brick_x = b->nx();
 				int brick_y = b->ny();
 				int brick_z = b->nz();
 				void* bresult = (void*)(new unsigned char[brick_x*brick_y*brick_z*chars]);
-				kernel_exe = ExecuteKernel(kernel, data_id, bresult, brick_x, brick_y, brick_z, chars);
+				kernel_exe = ExecuteKernelBrick(kernel, data_id, bresult, brick_x, brick_y, brick_z, chars);
 				if (!kernel_exe)
 					break;
 				//copy data back
 				unsigned char* ptr_br = (unsigned char*)bresult;
 				unsigned char* ptr_z;
-				if (m_duplicate)
-					ptr_z = (unsigned char*)(b_r->tex_data(0));
-				else
-					ptr_z = (unsigned char*)(b->tex_data(0));
+				ptr_z = (unsigned char*)(b_r->tex_data(0));
 				unsigned char* ptr_y;
 				for (int bk = 0; bk < brick_z; ++bk)
 				{
@@ -256,25 +297,10 @@ bool KernelExecutor::Execute()
 			break;
 		}
 	}
-
-	if (!kernel_exe)
-	{
-		if (m_duplicate && !m_vd_r.empty())
-			delete m_vd_r.back();
-		m_vd_r.pop_back();
-		SetProgress(0, "");
-		return false;
-	}
-
-	if (!m_duplicate)
-		m_vd->GetVR()->clear_tex_current();
-
-	SetProgress(0, "");
-
-	return true;
+	return kernel_exe;
 }
 
-bool KernelExecutor::ExecuteKernel(flvr::KernelProgram* kernel,
+bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel,
 	unsigned int data_id, void* result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z, int chars)

@@ -35,6 +35,7 @@ class VolumeData;
 namespace flvr
 {
 	class KernelProgram;
+	class TextureBrick;
 }
 class KernelExecutor : public Progress
 {
@@ -46,6 +47,7 @@ public:
 	void LoadCode(const std::wstring &filename);
 	void SetVolume(VolumeData *vd);
 	void SetDuplicate(bool dup);
+	void SetRepeat(int val) { m_repeat = val; }
 	VolumeData* GetVolume();
 	VolumeData* GetResult(bool pop);
 	std::wstring GetInfo();
@@ -56,11 +58,13 @@ private:
 	VolumeData *m_vd;
 	std::vector<VolumeData*> m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
+	int m_repeat;//number of execution on top of the base, no duplication
 
 	std::string m_code;
 	std::wstring m_message;
 
-	bool ExecuteKernel(flvr::KernelProgram* kernel,
+	bool ExecuteKernel(VolumeData* vd, VolumeData* vd_r);
+	bool ExecuteKernelBrick(flvr::KernelProgram* kernel,
 		unsigned int data_id, void* result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z, int chars);
