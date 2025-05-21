@@ -202,9 +202,8 @@ bool KernelExecutor::Execute()
 
 	if (!m_duplicate)
 	{
+		//clear gpu texture because the kernel updates the data in main memory after read back
 		m_vd->GetVR()->clear_tex_current();
-		m_vd_r.clear();
-		m_vd_r.push_back(m_vd);
 	}
 
 	SetProgress(0, "");
@@ -216,13 +215,13 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 {
 	bool kernel_exe = true;
 
-	flvr::VolumeRenderer* vr = m_vd->GetVR();
+	flvr::VolumeRenderer* vr = vd->GetVR();
 	if (!vr)
 	{
 		m_message = L"Volume corrupted.\n";
 		return false;
 	}
-	flvr::Texture* tex =m_vd->GetTexture();
+	flvr::Texture* tex =vd->GetTexture();
 	if (!tex)
 	{
 		m_message = L"Volume corrupted.\n";
@@ -241,10 +240,10 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 	void* result = vd_r->GetVolume(false)->data;
 
 	size_t brick_num = bricks->size();
-	int bits = m_vd->GetBits();
+	int bits = vd->GetBits();
 	int chars = bits / 8;
 	int res_x, res_y, res_z;
-	m_vd->GetResolution(res_x, res_y, res_z);
+	vd->GetResolution(res_x, res_y, res_z);
 
 	flvr::TextureBrick *b, *b_r;
 	for (size_t i = 0; i<brick_num; ++i)
@@ -297,6 +296,11 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 			break;
 		}
 	}
+
+	//clear gpu texture because the kernel updates the data in main memory after read back
+	if (vd == vd_r)
+		vd->GetVR()->clear_tex_current();
+
 	return kernel_exe;
 }
 

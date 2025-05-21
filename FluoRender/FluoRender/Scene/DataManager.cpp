@@ -724,6 +724,9 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		m_vr->set_texture(m_tex);
 	if (tex)
 		delete tex;
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(this);
+	if (cache_queue)
+		cache_queue->reset(m_time);
 
 	m_bg_valid = false;
 
