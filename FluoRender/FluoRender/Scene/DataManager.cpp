@@ -110,7 +110,6 @@ Root::~Root()
 		if (view)
 		{
 			view->ClearAll();
-			delete view;
 		}
 	}
 	m_views.clear();
@@ -124,7 +123,7 @@ int Root::GetViewNum()
 RenderView* Root::GetView(int i)
 {
 	if (i >= 0 && i < (int)m_views.size())
-		return m_views[i];
+		return m_views[i].get();
 	else return 0;
 }
 
@@ -133,7 +132,7 @@ RenderView* Root::GetView(const std::wstring& name)
 	for (auto& view : m_views)
 	{
 		if (view && view->GetName() == name)
-			return view;
+			return view.get();
 	}
 	return 0;
 }
@@ -144,7 +143,7 @@ int Root::GetView(RenderView* view)
 	{
 		for (size_t i = 0; i < m_views.size(); i++)
 		{
-			if (m_views[i] == view)
+			if (m_views[i].get() == view)
 				return static_cast<int>(i);
 		}
 	}
@@ -154,7 +153,7 @@ int Root::GetView(RenderView* view)
 RenderView* Root::GetLastView()
 {
 	if (m_views.size())
-		return m_views.back();
+		return m_views.back().get();
 	else return 0;
 }
 
@@ -162,7 +161,7 @@ void Root::AddView(RenderView* view)
 {
 	if (view)
 	{
-		m_views.push_back(view);
+		m_views.push_back(std::unique_ptr<RenderView>(view));
 	}
 }
 
@@ -171,7 +170,6 @@ void Root::DeleteView(int i)
 	if (i >= 0 && i < (int)m_views.size())
 	{
 		m_views[i]->ClearAll();
-		delete m_views[i];
 		m_views.erase(m_views.begin() + i);
 	}
 }
@@ -182,10 +180,9 @@ void Root::DeleteView(RenderView* view)
 	{
 		for (size_t i = 0; i < m_views.size(); i++)
 		{
-			if (m_views[i] == view)
+			if (m_views[i].get() == view)
 			{
 				m_views[i]->ClearAll();
-				delete m_views[i];
 				m_views.erase(m_views.begin() + i);
 				break;
 			}
@@ -200,7 +197,6 @@ void Root::DeleteView(const std::wstring& name)
 		if (m_views[i] && m_views[i]->GetName() == name)
 		{
 			m_views[i]->ClearAll();
-			delete m_views[i];
 			m_views.erase(m_views.begin() + i);
 			break;
 		}
@@ -212,15 +208,7 @@ VolumeData::VolumeData()
 {
 	m_reader = 0;
 
-	m_dup = false;
-	m_dup_counter = 0;
-	m_dup_data = 0;
-
 	type = 2;//volume
-
-	//volume renderer and texture
-	m_vr = 0;
-	m_tex = 0;
 
 	//current channel index
 	m_chan = -1;
@@ -360,19 +348,12 @@ VolumeData::VolumeData()
 VolumeData::VolumeData(VolumeData &copy)
 {
 	m_reader = 0;
-	//duplication
-	m_dup = true;
-	copy.m_dup_counter++;
-	m_dup_counter = copy.m_dup_counter;
-	if (copy.m_dup_data)
-		m_dup_data = copy.m_dup_data;
-	else
-		m_dup_data = &copy;
 
-	m_vr = new flvr::VolumeRenderer(*copy.m_vr);
+	if (copy.m_vr)
+		m_vr = std::make_unique<flvr::VolumeRenderer>(*copy.m_vr);
 	//layer properties
 	type = 2;//volume
-	SetName(copy.GetName() + L"_" + std::to_wstring(m_dup_counter));
+	SetName(copy.GetName());
 	SetGammaColor(copy.GetGammaColor());
 	SetBrightness(copy.GetBrightness());
 	SetHdr(copy.GetHdr());
@@ -523,10 +504,6 @@ VolumeData::VolumeData(VolumeData &copy)
 
 VolumeData::~VolumeData()
 {
-	if (m_vr)
-		delete m_vr;
-	if (m_tex && !m_dup)
-		delete m_tex;
 	if (m_label_save)
 		delete[] m_label_save;
 }
@@ -550,24 +527,6 @@ void VolumeData::SetCurFramebuffer(GLuint cur_framebuffer)
 {
 	if (m_vr)
 		m_vr->set_cur_framebuffer(cur_framebuffer);
-}
-
-//duplication
-bool VolumeData::GetDup()
-{
-	return m_dup;
-}
-
-//increase duplicate counter
-void VolumeData::IncDupCounter()
-{
-	m_dup_counter++;
-}
-
-//get from
-VolumeData* VolumeData::GetDupData()
-{
-	return m_dup_data;
 }
 
 //data related
@@ -603,12 +562,6 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	m_tex_path = path;
 	m_name = name;
 
-	if (m_tex)
-	{
-		delete m_tex;
-		m_tex = NULL;
-	}
-
 	Nrrd *nv = data;
 	Nrrd *gm = 0;
 	m_res_x = nv->axis[0].size;
@@ -622,7 +575,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	bounds.extend(pmax);
 	m_bounds = bounds;
 
-	m_tex = new flvr::Texture();
+	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(m_skip_brick);
 	if (m_reader && m_reader->GetType()==READER_BRKXML_TYPE)
 	{
@@ -653,9 +606,6 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 
 	if (m_tex)
 	{
-		if (m_vr)
-			delete m_vr;
-
 		std::vector<fluo::Plane*> planelist(0);
 		fluo::Plane* plane = 0;
 		//x
@@ -674,7 +624,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
 		planelist.push_back(plane);
 
-		m_vr = new flvr::VolumeRenderer(m_tex, planelist);
+		m_vr = std::make_unique<flvr::VolumeRenderer>(m_tex.get(), planelist);
 		m_vr->set_sampling_rate(m_sample_rate);
 		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 		m_vr->set_shading(true);
@@ -684,14 +634,15 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		SetMode(m_mode);
 	}
 
-	m_bg_valid = false;
-
 	//clip distance
 	m_clip_dist[0] = std::max(1, m_res_x / 20);
 	m_clip_dist[1] = std::max(1, m_res_y / 20);
 	m_clip_dist[2] = std::max(1, m_res_z / 20);
 
+	m_bg_valid = false;
 	m_hist_dirty = true;
+
+	ResetCacheQueue();
 
 	return 1;
 }
@@ -700,7 +651,6 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 {
 	if (!data || data->dim!=3)
 		return 0;
-	flvr::Texture* tex = 0;
 	if (del_tex)
 	{
 		Nrrd *nv = data;
@@ -709,8 +659,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 		m_res_y = nv->axis[1].size;
 		m_res_z = nv->axis[2].size;
 
-		tex = m_tex;
-		m_tex = new flvr::Texture();
+		m_tex = std::make_shared<flvr::Texture>();
 		m_tex->set_use_priority(m_skip_brick);
 		m_tex->build(nv, gm, m_min_value, m_max_value, 0, 0);
 	}
@@ -721,12 +670,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	}
 
 	if (m_vr)
-		m_vr->set_texture(m_tex);
-	if (tex)
-		delete tex;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(this);
-	if (cache_queue)
-		cache_queue->reset(m_time);
+		m_vr->set_texture(m_tex.get());
 
 	m_bg_valid = false;
 
@@ -736,6 +680,8 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	m_clip_dist[2] = std::max(1, m_res_z / 20);
 
 	m_hist_dirty = true;
+
+	ResetCacheQueue();
 
 	return 1;
 }
@@ -754,20 +700,21 @@ int VolumeData::Replace(VolumeData* data)
 	{
 		m_tex->get_spacings(spcx, spcy, spcz);
 		m_vr->clear_tex_current();
-		delete m_tex;
 		m_vr->reset_texture();
 	}
-	m_tex = data->GetTexture();
-	data->SetTexture();
+	m_tex = data->m_tex;
 	SetScalarScale(data->GetScalarScale());
 	SetGMScale(data->GetGMScale());
 	SetMinMaxValue(data->GetMinValue(), data->GetMaxValue());
 	if (m_vr)
-		m_vr->set_texture(m_tex);
+		m_vr->set_texture(m_tex.get());
 	else
 		return 0;
+
 	m_bg_valid = false;
 	m_hist_dirty = true;
+
+	ResetCacheQueue();
 
 	return 1;
 }
@@ -780,11 +727,6 @@ void VolumeData::AddEmptyData(int bits,
 {
 	if (bits!=8 && bits!=16)
 		return;
-
-	if (m_vr)
-		delete m_vr;
-	if (m_tex)
-		delete m_tex;
 
 	Nrrd *nv = nrrdNew();
 	if (bits == 8)
@@ -830,7 +772,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_bounds = bounds;
 
 	//create texture
-	m_tex = new flvr::Texture();
+	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(false);
 	m_tex->set_brick_size(brick_size);
 	m_tex->build(nv, 0, 0, 256, 0, 0);
@@ -856,7 +798,7 @@ void VolumeData::AddEmptyData(int bits,
 	planelist.push_back(plane);
 
 	//create volume renderer
-	m_vr = new flvr::VolumeRenderer(m_tex, planelist);
+	m_vr = std::make_unique<flvr::VolumeRenderer>(m_tex.get(), planelist);
 	m_vr->set_sampling_rate(m_sample_rate);
 	m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 	m_vr->set_shading(true);
@@ -873,6 +815,7 @@ void VolumeData::AddEmptyData(int bits,
 
 	m_hist_dirty = true;
 
+	ResetCacheQueue();
 }
 
 //volume mask
@@ -1826,20 +1769,20 @@ bool VolumeData::GetNR()
 //volumerenderer
 flvr::VolumeRenderer *VolumeData::GetVR()
 {
-	return m_vr;
+	return m_vr.get();
 }
 
 //texture
 flvr::Texture* VolumeData::GetTexture()
 {
-	return m_tex;
+	return m_tex.get();
 }
 
-void VolumeData::SetTexture()
+void VolumeData::ResetCacheQueue()
 {
-	if (m_vr)
-		m_vr->reset_texture();
-	m_tex = 0;
+	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(this);
+	if (cache_queue)
+		cache_queue->reset(m_time);
 }
 
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,
@@ -3503,8 +3446,6 @@ void VolumeData::ApplyMlVolProp()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
-m_data(0),
-	m_mr(0),
 	m_center(0.0, 0.0, 0.0),
 	m_disp(true),
 	m_draw_bounds(false),
@@ -3543,10 +3484,6 @@ m_data(0),
 
 MeshData::~MeshData()
 {
-	if (m_mr)
-		delete m_mr;
-	if (m_data)
-		glmDelete(m_data);
 }
 
 //set viewport
@@ -3563,15 +3500,13 @@ int MeshData::Load(GLMmodel* mesh)
 	m_data_path = L"";
 	m_name = L"New Mesh";
 
-	if (m_data)
-		delete m_data;
-	m_data = mesh;
+	m_data = std::unique_ptr<GLMmodel>(mesh);
 
 	if (!m_data->normals)
 	{
 		if (!m_data->facetnorms)
-			glmFacetNormals(m_data);
-		glmVertexNormals(m_data, 89.0);
+			glmFacetNormals(m_data.get());
+		glmVertexNormals(m_data.get(), 89.0);
 	}
 
 	if (!m_data->materials)
@@ -3604,7 +3539,7 @@ int MeshData::Load(GLMmodel* mesh)
 
 	//bounds
 	GLfloat fbounds[6];
-	glmBoundingBox(m_data, fbounds);
+	glmBoundingBox(m_data.get(), fbounds);
 	fluo::BBox bounds;
 	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
 	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
@@ -3616,9 +3551,7 @@ int MeshData::Load(GLMmodel* mesh)
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
-	if (m_mr)
-		delete m_mr;
-	m_mr = new flvr::MeshRenderer(m_data);
+	m_mr = std::make_unique<flvr::MeshRenderer>(m_data.get());
 
 	return 1;
 }
@@ -3629,12 +3562,9 @@ int MeshData::Load(const std::wstring &filename)
 	std::filesystem::path p(filename);
 	m_name = p.filename().wstring();
 
-	if (m_data)
-		delete m_data;
-
 	std::string str_fn = ws2s(filename);
 	bool no_fail = true;
-	m_data = glmReadOBJ(str_fn.c_str(), &no_fail);
+	m_data = std::unique_ptr<GLMmodel>(glmReadOBJ(str_fn.c_str(), &no_fail));
 
 	if (!m_data)
 		return 0;
@@ -3642,8 +3572,8 @@ int MeshData::Load(const std::wstring &filename)
 	if (!m_data->normals && m_data->numtriangles)
 	{
 		if (!m_data->facetnorms)
-			glmFacetNormals(m_data);
-		glmVertexNormals(m_data, 89.0);
+			glmFacetNormals(m_data.get());
+		glmVertexNormals(m_data.get(), 89.0);
 	}
 
 	if (!m_data->materials)
@@ -3676,7 +3606,7 @@ int MeshData::Load(const std::wstring &filename)
 
 	//bounds
 	GLfloat fbounds[6];
-	glmBoundingBox(m_data, fbounds);
+	glmBoundingBox(m_data.get(), fbounds);
 	fluo::BBox bounds;
 	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
 	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
@@ -3688,9 +3618,7 @@ int MeshData::Load(const std::wstring &filename)
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
-	if (m_mr)
-		delete m_mr;
-	m_mr = new flvr::MeshRenderer(m_data);
+	m_mr = std::make_unique<flvr::MeshRenderer>(m_data.get());
 
 	return 1;
 }
@@ -3700,7 +3628,7 @@ void MeshData::Save(const std::wstring& filename)
 	if (m_data)
 	{
 		std::string str = ws2s(filename);
-		glmWriteOBJ(m_data, str.c_str(), GLM_SMOOTH);
+		glmWriteOBJ(m_data.get(), str.c_str(), GLM_SMOOTH);
 		m_data_path = filename;
 	}
 }
@@ -3708,7 +3636,7 @@ void MeshData::Save(const std::wstring& filename)
 //MR
 flvr::MeshRenderer* MeshData::GetMR()
 {
-	return m_mr;
+	return m_mr.get();
 }
 
 void MeshData::SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
@@ -3973,7 +3901,7 @@ fluo::BBox MeshData::GetBounds()
 
 GLMmodel* MeshData::GetMesh()
 {
-	return m_data;
+	return m_data.get();
 }
 
 void MeshData::SetDisp(bool disp)
@@ -4184,7 +4112,6 @@ Annotations::Annotations()
 	m_num++;
 	m_name = L"Antn_" + std::to_wstring(m_num);
 	m_tform = 0;
-	m_vd = 0;
 	m_disp = true;
 	m_memo_ro = false;
 }
@@ -4203,7 +4130,7 @@ std::wstring Annotations::GetTextText(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index];
+		AText* atext = m_alist[index].get();
 		if (atext)
 			return atext->m_txt;
 	}
@@ -4214,7 +4141,7 @@ fluo::Point Annotations::GetTextPos(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index];
+		AText* atext = m_alist[index].get();
 		if (atext)
 			return atext->m_pos;
 	}
@@ -4225,7 +4152,7 @@ fluo::Point Annotations::GetTextTransformedPos(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index];
+		AText* atext = m_alist[index].get();
 		if (atext && m_tform)
 			return m_tform->transform(atext->m_pos);
 	}
@@ -4236,7 +4163,7 @@ std::wstring Annotations::GetTextInfo(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index];
+		AText* atext = m_alist[index].get();
 		if(atext)
 			return atext->m_info;
 	}
@@ -4247,7 +4174,7 @@ void Annotations::AddText(const std::wstring& str, fluo::Point pos, const std::w
 {
 	AText* atext = new AText(str, pos);
 	atext->SetInfo(info);
-	m_alist.push_back(atext);
+	m_alist.push_back(std::shared_ptr<AText>(atext));
 }
 
 void Annotations::SetTransform(fluo::Transform *tform)
@@ -4255,26 +4182,22 @@ void Annotations::SetTransform(fluo::Transform *tform)
 	m_tform = tform;
 }
 
-void Annotations::SetVolume(VolumeData *vd)
+void Annotations::SetVolume(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd = vd;
-	if (m_vd)
-		m_name += L"_FROM_" + m_vd->GetName();
+	if (vd)
+		m_name += L"_FROM_" + vd->GetName();
 }
 
 VolumeData* Annotations::GetVolume()
 {
-	return m_vd;
+	if (auto vd_ptr = m_vd.lock())
+		return vd_ptr.get();
+	return 0;
 }
 
 void Annotations::Clear()
 {
-	for (int i=0; i<(int)m_alist.size(); i++)
-	{
-		AText* atext = m_alist[i];
-		if (atext)
-			delete atext;
-	}
 	m_alist.clear();
 }
 
@@ -4305,7 +4228,7 @@ std::wstring Annotations::GetPath()
 	return m_data_path;
 }
 
-int Annotations::Load(const std::wstring &filename, DataManager* mgr)
+int Annotations::Load(const std::wstring &filename)
 {
 	std::wifstream fis(filename);
 	if (!fis.is_open())
@@ -4347,11 +4270,11 @@ int Annotations::Load(const std::wstring &filename, DataManager* mgr)
 		else if (sline.substr(0, 7) == L"Volume: ")
 		{
 			str = sline.substr(8, sline.length()-8);
-			VolumeData* vd = mgr->GetVolumeData(str);
-			if (vd)
+			m_vd = glbin_data_manager.GetVolumeDataWeakPtr(
+				glbin_data_manager.GetVolumeData(str));
+			if (auto vd_ptr = m_vd.lock())
 			{
-				m_vd = vd;
-				m_tform = vd->GetTexture()->transform();
+				m_tform = vd_ptr->GetTexture()->transform();
 			}
 		}
 		else if (sline.substr(0, 9) == L"Transform:")
@@ -4390,7 +4313,7 @@ int Annotations::Load(const std::wstring &filename, DataManager* mgr)
 			while (std::getline(fis, str))
 			{
 				if (AText* atext = GetAText(str))
-					m_alist.push_back(atext);
+					m_alist.push_back(std::shared_ptr<AText>(atext));
 			}
 		}
 	}
@@ -4407,19 +4330,20 @@ void Annotations::Save(const std::wstring &filename)
 	int resx = 1;
 	int resy = 1;
 	int resz = 1;
-	if (m_vd)
-		m_vd->GetResolution(resx, resy, resz);
+	auto vd_ptr = m_vd.lock();
+	if (vd_ptr)
+		vd_ptr->GetResolution(resx, resy, resz);
 
 	os << L"Name: " << m_name << L"\n";
 	os << L"Display: " << m_disp << L"\n";
 	os << L"Memo:\n" << m_memo << L"\n";
 	os << L"Memo Update: " << m_memo_ro << L"\n";
-	if (m_vd)
+	if (vd_ptr)
 	{
-		os << L"Volume: " << m_vd->GetName() << L"\n";
+		os << L"Volume: " << vd_ptr->GetName() << L"\n";
 		os << L"Voxel size (X Y Z):\n";
 		double spcx, spcy, spcz;
-		m_vd->GetSpacings(spcx, spcy, spcz);
+		vd_ptr->GetSpacings(spcx, spcy, spcz);
 		os << spcx << L"\t" << spcy << L"\t" << spcz << L"\n";
 	}
 
@@ -4428,7 +4352,7 @@ void Annotations::Save(const std::wstring &filename)
 	os << L"ID\tX\tY\tZ\t" << m_info_meaning << L"\n\n";
 	for (int i=0; i<(int)m_alist.size(); i++)
 	{
-		AText* atext = m_alist[i];
+		AText* atext = m_alist[i].get();
 		if (atext)
 		{
 			os << atext->m_txt << L"\t";
@@ -4456,10 +4380,11 @@ void Annotations::SetInfoMeaning(const std::wstring &str)
 //test if point is inside the clipping planes
 bool Annotations::InsideClippingPlanes(fluo::Point &pos)
 {
-	if (!m_vd)
+	auto vd_ptr = m_vd.lock();
+	if (!vd_ptr)
 		return true;
 
-	std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	std::vector<fluo::Plane*> *planes = vd_ptr->GetVR()->get_planes();
 	if (!planes)
 		return true;
 	if (planes->size() != 6)
@@ -4519,8 +4444,9 @@ AText* Annotations::GetAText(const std::wstring& str)
 		int resx = 1;
 		int resy = 1;
 		int resz = 1;
-		if (m_vd)
-			m_vd->GetResolution(resx, resy, resz);
+		auto vd_ptr = m_vd.lock();
+		if (vd_ptr)
+			vd_ptr->GetResolution(resx, resy, resz);
 		x /= resx?resx:1;
 		y /= resy?resy:1;
 		z /= resz?resz:1;
@@ -5887,18 +5813,6 @@ DataManager::DataManager() :
 
 DataManager::~DataManager()
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-		if (m_vd_list[i])
-			delete m_vd_list[i];
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-		if (m_md_list[i])
-			delete m_md_list[i];
-	for (int i=0; i<(int)m_reader_list.size(); i++)
-		if (m_reader_list[i])
-			delete m_reader_list[i];
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
-		if (m_annotation_list[i])
-			delete m_annotation_list[i];
 }
 
 void DataManager::SetFrame(MainFrame* frame)
@@ -5908,18 +5822,6 @@ void DataManager::SetFrame(MainFrame* frame)
 
 void DataManager::ClearAll()
 {
-	for (int i=0 ; i<(int)m_vd_list.size() ; i++)
-		if (m_vd_list[i])
-			delete m_vd_list[i];
-	for (int i=0 ; i<(int)m_md_list.size() ; i++)
-		if (m_md_list[i])
-			delete m_md_list[i];
-	for (int i=0; i<(int)m_reader_list.size(); i++)
-		if (m_reader_list[i])
-			delete m_reader_list[i];
-	for (int i=0; i<(int)m_annotation_list.size(); i++)
-		if (m_annotation_list[i])
-			delete m_annotation_list[i];
 	m_vd_list.clear();
 	m_md_list.clear();
 	m_reader_list.clear();
@@ -6254,7 +6156,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		std::wstring wstr = pathname;
 		if (m_reader_list[i]->Match(wstr))
 		{
-			reader = m_reader_list[i];
+			reader = m_reader_list[i].get();
 			break;
 		}
 	}
@@ -6328,7 +6230,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		
 		reader->SetProgressFunc(GetProgressFunc());
 
-		m_reader_list.push_back(reader);
+		m_reader_list.push_back(std::shared_ptr<BaseReader>(reader));
 		reader->SetFile(pathname);
 		reader->SetSliceSeq(glbin_settings.m_slice_sequence);
 		reader->SetChannSeq(glbin_settings.m_chann_sequence);
@@ -6359,7 +6261,6 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		SetProgress(0, err_str);
 		int i = (int)m_reader_list.size() - 1;
 		if (m_reader_list[i]) {
-			delete m_reader_list[i];
 			m_reader_list.erase(m_reader_list.begin() + (int)m_reader_list.size() - 1);
 		}
 		return result;
@@ -6592,7 +6493,7 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		md->SetName(new_name);
-	m_md_list.push_back(md);
+	m_md_list.push_back(std::shared_ptr<MeshData>(md));
 
 	return true;
 }
@@ -6611,7 +6512,7 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		md->SetName(new_name);
-	m_md_list.push_back(md);
+	m_md_list.push_back(std::shared_ptr<MeshData>(md));
 
 	return true;
 }
@@ -6619,7 +6520,7 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 VolumeData* DataManager::GetVolumeData(size_t index)
 {
 	if (index<m_vd_list.size())
-		return m_vd_list[index];
+		return m_vd_list[index].get();
 	else
 		return 0;
 }
@@ -6627,7 +6528,7 @@ VolumeData* DataManager::GetVolumeData(size_t index)
 MeshData* DataManager::GetMeshData(size_t index)
 {
 	if (index<m_md_list.size())
-		return m_md_list[index];
+		return m_md_list[index].get();
 	else
 		return 0;
 }
@@ -6638,10 +6539,22 @@ VolumeData* DataManager::GetVolumeData(const std::wstring &name)
 	{
 		if (name == m_vd_list[i]->GetName())
 		{
-			return m_vd_list[i];
+			return m_vd_list[i].get();
 		}
 	}
 	return 0;
+}
+
+std::weak_ptr<VolumeData> DataManager::GetVolumeDataWeakPtr(VolumeData* vd)
+{
+	for (size_t i=0 ; i<m_vd_list.size() ; i++)
+	{
+		if (vd == m_vd_list[i].get())
+		{
+			return m_vd_list[i];
+		}
+	}
+	return std::weak_ptr<VolumeData>();
 }
 
 MeshData* DataManager::GetMeshData(const std::wstring &name)
@@ -6650,7 +6563,7 @@ MeshData* DataManager::GetMeshData(const std::wstring &name)
 	{
 		if (name == m_md_list[i]->GetName())
 		{
-			return m_md_list[i];
+			return m_md_list[i].get();
 		}
 	}
 	return 0;
@@ -6670,6 +6583,15 @@ size_t DataManager::GetVolumeIndex(const std::wstring &name)
 	return -1;
 }
 
+VolumeData* DataManager::GetLastVolumeData()
+{
+	size_t num = m_vd_list.size();
+	if (num)
+		return m_vd_list[num-1].get();
+	else
+		return 0;
+}
+
 size_t DataManager::GetMeshIndex(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_md_list.size() ; i++)
@@ -6682,36 +6604,24 @@ size_t DataManager::GetMeshIndex(const std::wstring &name)
 	return -1;
 }
 
+MeshData* DataManager::GetLastMeshData()
+{
+	size_t num = m_md_list.size();
+	if (num)
+		return m_md_list[num-1].get();
+	else
+		return 0;
+}
+
 void DataManager::RemoveVolumeData(size_t index)
 {
-	VolumeData* data = m_vd_list[index];
-	if (!data)
-		return;
-	
-	for (auto iter = m_vd_list.begin();
-		iter != m_vd_list.end();)
+	if (index < m_vd_list.size())
 	{
-		VolumeData* vd = *iter;
-		bool del = false;
-		if (vd)
-		{
-			if (vd == data)
-				del = true;
-			if (vd->GetDup())
-			{
-				if (vd->GetDupData() == data)
-					del = true;
-			}
-		}
-		if (del)
-		{
-			iter = m_vd_list.erase(iter);
-			delete vd;
-		}
-		else
-			++iter;
+		VolumeData* data = m_vd_list[index].get();
+		if (data)
+			m_vd_cache_queue.erase(data);
+		m_vd_list.erase(m_vd_list.begin() + index);
 	}
-	m_vd_cache_queue.erase(data);
 }
 
 void DataManager::RemoveVolumeData(const std::wstring &name)
@@ -6727,12 +6637,9 @@ void DataManager::RemoveVolumeData(const std::wstring &name)
 
 void DataManager::RemoveMeshData(size_t index)
 {
-	MeshData* data = m_md_list[index];
-	if (data)
+	if (index < m_md_list.size())
 	{
 		m_md_list.erase(m_md_list.begin()+index);
-		delete data;
-		data = 0;
 	}
 }
 
@@ -6781,7 +6688,7 @@ void DataManager::AddVolumeData(VolumeData* vd)
 			//vd->SetSpcFromFile(true);
 		}
 	}
-	m_vd_list.push_back(vd);
+	m_vd_list.push_back(std::shared_ptr<VolumeData>(vd));
 	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd);
 	vol_cache_queue->RegisterCacheQueueFuncs(flvr::CQCallback::ReadVolCache, flvr::CQCallback::FreeVolCache);
 	//set up default vol cache mode
@@ -6814,7 +6721,7 @@ bool DataManager::LoadAnnotations(const std::wstring &filename)
 	}
 
 	Annotations* ann = new Annotations();
-	ann->Load(pathname, this);
+	ann->Load(pathname);
 
 	std::wstring name = ann->GetName();
 	std::wstring new_name = name;
@@ -6823,7 +6730,7 @@ bool DataManager::LoadAnnotations(const std::wstring &filename)
 		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		ann->SetName(new_name);
-	m_annotation_list.push_back(ann);
+	m_annotation_list.push_back(std::shared_ptr<Annotations>(ann));
 
 	return true;
 }
@@ -6842,17 +6749,15 @@ void DataManager::AddAnnotations(Annotations* ann)
 	if (i>1)
 		ann->SetName(new_name);
 
-	m_annotation_list.push_back(ann);
+	m_annotation_list.push_back(std::shared_ptr<Annotations>(ann));
 }
 
 void DataManager::RemoveAnnotations(size_t index)
 {
-	Annotations* ann = m_annotation_list[index];
+	Annotations* ann = m_annotation_list[index].get();
 	if (ann)
 	{
 		m_annotation_list.erase(m_annotation_list.begin()+index);
-		delete ann;
-		ann = 0;
 	}
 }
 
@@ -6864,7 +6769,7 @@ size_t DataManager::GetAnnotationNum()
 Annotations* DataManager::GetAnnotations(size_t index)
 {
 	if (index<m_annotation_list.size())
-		return m_annotation_list[index];
+		return m_annotation_list[index].get();
 	else
 		return 0;
 }
@@ -6874,7 +6779,7 @@ Annotations* DataManager::GetAnnotations(const std::wstring &name)
 	for (size_t i=0; i<m_annotation_list.size(); i++)
 	{
 		if (name == m_annotation_list[i]->GetName())
-			return m_annotation_list[i];
+			return m_annotation_list[i].get();
 	}
 	return 0;
 }
@@ -6891,12 +6796,21 @@ size_t DataManager::GetAnnotationIndex(const std::wstring &name)
 	return -1;
 }
 
+Annotations* DataManager::GetLastAnnotations()
+{
+	size_t num = m_annotation_list.size();
+	if (num)
+		return m_annotation_list[num-1].get();
+	else
+		return 0;
+}
+
 bool DataManager::CheckNames(const std::wstring &str)
 {
 	bool result = false;
 	for (unsigned int i=0; i<m_vd_list.size(); i++)
 	{
-		VolumeData* vd = m_vd_list[i];
+		VolumeData* vd = m_vd_list[i].get();
 		if (vd && vd->GetName()==str)
 		{
 			result = true;
@@ -6907,7 +6821,7 @@ bool DataManager::CheckNames(const std::wstring &str)
 	{
 		for (unsigned int i=0; i<m_md_list.size(); i++)
 		{
-			MeshData* md = m_md_list[i];
+			MeshData* md = m_md_list[i].get();
 			if (md && md->GetName()==str)
 			{
 				result = true;
@@ -6919,7 +6833,7 @@ bool DataManager::CheckNames(const std::wstring &str)
 	{
 		for (unsigned int i=0; i<m_annotation_list.size(); i++)
 		{
-			Annotations* ann = m_annotation_list[i];
+			Annotations* ann = m_annotation_list[i].get();
 			if (ann && ann->GetName()==str)
 			{
 				result = true;

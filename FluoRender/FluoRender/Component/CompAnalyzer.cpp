@@ -1216,7 +1216,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 		++count;
 	}
 
-	ann->SetVolume(vd);
+	ann->SetVolume(glbin_data_manager.GetVolumeDataWeakPtr(vd).lock());
 	ann->SetTransform(vd->GetTexture()->transform());
 	glbin_data_manager.AddAnnotations(ann);
 	RenderView* view = glbin_current.render_view;

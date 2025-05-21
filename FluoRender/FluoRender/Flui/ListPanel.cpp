@@ -268,7 +268,7 @@ void ListPanel::UpdateList()
 	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
 		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
-		if (vd && !vd->GetDup())
+		if (vd)
 		{
 			std::wstring name = vd->GetName();
 			std::wstring path = vd->GetPath();
@@ -635,7 +635,7 @@ void ListPanel::DeleteSelection()
 			RenderView* view = root->GetView(i);
 			if (view)
 			{
-				view->RemoveVolumeDataDup(name);
+				view->RemoveVolumeData(name);
 			}
 		}
 		//from datamanager

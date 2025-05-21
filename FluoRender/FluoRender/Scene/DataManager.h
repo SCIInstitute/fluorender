@@ -192,7 +192,7 @@ public:
 	void DeleteView(const std::wstring& name);
 
 private:
-	std::vector<RenderView*> m_views;
+	std::vector<std::unique_ptr<RenderView>> m_views;
 };
 
 class VolumeData : public TreeLayer
@@ -210,13 +210,6 @@ public:
 
 	//set current framebuffer
 	void SetCurFramebuffer(GLuint cur_framebuffer);
-
-	//duplication
-	bool GetDup();
-	//increase duplicate counter
-	void IncDupCounter();
-	//get duplicated from
-	VolumeData* GetDupData();
 
 	//data related
 	//reader
@@ -278,7 +271,7 @@ public:
 	flvr::VolumeRenderer *GetVR();
 	//texture
 	flvr::Texture* GetTexture();
-	void SetTexture();
+	void ResetCacheQueue();
 
 	//bounding box
 	fluo::BBox GetBounds();
@@ -605,17 +598,12 @@ public:
 	void ApplyMlVolProp();
 
 private:
-	//duplication indicator and counter
-	bool m_dup;
-	int m_dup_counter;
-	VolumeData* m_dup_data;//duplicated from
-
 	std::unique_ptr<flrd::EntryParams> m_ep;
+	std::unique_ptr<flvr::VolumeRenderer> m_vr;
+	std::shared_ptr<flvr::Texture> m_tex;
 
 	std::wstring m_tex_path;
 	fluo::BBox m_bounds;
-	flvr::VolumeRenderer *m_vr;
-	flvr::Texture *m_tex;
 	//save label
 	void* m_label_save;
 
@@ -860,8 +848,8 @@ public:
 
 private:
 	std::wstring m_data_path;
-	GLMmodel* m_data;
-	flvr::MeshRenderer *m_mr;
+	std::unique_ptr<GLMmodel> m_data;
+	std::unique_ptr<flvr::MeshRenderer> m_mr;
 	fluo::BBox m_bounds;
 	fluo::Point m_center;
 
@@ -914,7 +902,6 @@ private:
 	std::wstring m_info;
 };
 
-class DataManager;
 class Annotations : public TreeLayer
 {
 public:
@@ -942,7 +929,7 @@ public:
 	std::wstring GetTextInfo(int index);
 	void AddText(const std::wstring& str, fluo::Point pos, const std::wstring& info);
 	void SetTransform(fluo::Transform *tform);
-	void SetVolume(VolumeData* vd);
+	void SetVolume(const std::shared_ptr<VolumeData>& vd);
 	VolumeData* GetVolume();
 
 	void Clear();
@@ -969,7 +956,7 @@ public:
 
 	//save/load
 	std::wstring GetPath();
-	int Load(const std::wstring &filename, DataManager* mgr);
+	int Load(const std::wstring &filename);
 	void Save(const std::wstring &filename);
 
 	//info meaning
@@ -980,9 +967,9 @@ public:
 
 private:
 	static int m_num;
-	std::vector<AText*> m_alist;
+	std::vector<std::shared_ptr<AText>> m_alist;
 	fluo::Transform *m_tform;
-	VolumeData* m_vd;
+	std::weak_ptr<VolumeData> m_vd;
 
 	bool m_disp;
 
@@ -1443,17 +1430,11 @@ public:
 	void RemoveVolumeData(size_t index);
 	void RemoveVolumeData(const std::wstring &name);
 	size_t GetVolumeNum();
+	std::weak_ptr<VolumeData> GetVolumeDataWeakPtr(VolumeData* vd);
 	VolumeData* GetVolumeData(size_t index);
 	VolumeData* GetVolumeData(const std::wstring &name);
 	size_t GetVolumeIndex(const std::wstring &name);
-	VolumeData* GetLastVolumeData()
-	{
-		size_t num = m_vd_list.size();
-		if (num)
-			return m_vd_list[num-1];
-		else
-			return 0;
-	};
+	VolumeData* GetLastVolumeData();
 
 	//load mesh
 	void LoadMeshes(const std::vector<std::wstring>& files);
@@ -1463,14 +1444,7 @@ public:
 	MeshData* GetMeshData(size_t index);
 	MeshData* GetMeshData(const std::wstring &name);
 	size_t GetMeshIndex(const std::wstring &name);
-	MeshData* GetLastMeshData()
-	{
-		size_t num = m_md_list.size();
-		if (num)
-			return m_md_list[num-1];
-		else
-			return 0;
-	};
+	MeshData* GetLastMeshData();
 	void RemoveMeshData(size_t index);
 	void ClearMeshSelection();
 
@@ -1482,14 +1456,7 @@ public:
 	Annotations* GetAnnotations(size_t index);
 	Annotations* GetAnnotations(const std::wstring &name);
 	size_t GetAnnotationIndex(const std::wstring &name);
-	Annotations* GetLastAnnotations()
-	{
-		size_t num = m_annotation_list.size();
-		if (num)
-			return m_annotation_list[num-1];
-		else
-			return 0;
-	}
+	Annotations* GetLastAnnotations();
 
 	bool CheckNames(const std::wstring &str);
 
@@ -1503,10 +1470,10 @@ public:
 private:
 	MainFrame* m_frame;
 	std::unique_ptr<Root> m_root;// root of the scene graph
-	std::vector <VolumeData*> m_vd_list;
-	std::vector <MeshData*> m_md_list;
-	std::vector <BaseReader*> m_reader_list;
-	std::vector <Annotations*> m_annotation_list;
+	std::vector<std::shared_ptr<VolumeData>> m_vd_list;
+	std::vector<std::shared_ptr<MeshData>> m_md_list;
+	std::vector<std::shared_ptr<BaseReader>> m_reader_list;
+	std::vector<std::shared_ptr<Annotations>> m_annotation_list;
 
 	//4d cache for volume data
 	std::unordered_map<VolumeData*, std::unique_ptr<flvr::CacheQueue>> m_vd_cache_queue;

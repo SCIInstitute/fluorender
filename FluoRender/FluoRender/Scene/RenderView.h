@@ -153,7 +153,6 @@ public:
 	MeshGroup* AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(const std::wstring &name);
-	void RemoveVolumeDataDup(const std::wstring &name);//remove all duplicated data
 	void ReplaceVolumeData(const std::wstring &name, VolumeData *dst);
 	void RemoveMeshData(const std::wstring &name);
 	void RemoveAnnotations(const std::wstring &name);
