@@ -1050,19 +1050,16 @@ void TrackDlg::SaveTrackFile(const std::wstring& file)
 
 void TrackDlg::SaveasTrackFile()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Save a FluoRender track file",
 		"", "", "*.track", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::wstring filename = fopendlg->GetPath().ToStdWstring();
+		std::wstring filename = fopendlg.GetPath().ToStdWstring();
 		SaveTrackFile(filename);
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void TrackDlg::DeleteSelection(int type)
@@ -1092,19 +1089,16 @@ void TrackDlg::OnClearTrace(wxCommandEvent& event)
 
 void TrackDlg::OnLoadTrace(wxCommandEvent& event)
 {
-	ModalDlg *fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Choose a FluoRender track file",
 		"", "", "*.track", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::wstring filename = fopendlg->GetPath().ToStdWstring();
+		std::wstring filename = fopendlg.GetPath().ToStdWstring();
 		LoadTrackFile(filename);
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void TrackDlg::OnSaveTrace(wxCommandEvent& event)
@@ -1518,18 +1512,16 @@ void TrackDlg::SaveOutputResult(wxString &filename)
 
 void TrackDlg::OnSaveResult(wxCommandEvent& event)
 {
-	ModalDlg *fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Save results", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		wxString filename = fopendlg.GetPath();
 		SaveOutputResult(filename);
 	}
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void TrackDlg::OnCellPrev(wxCommandEvent& event)

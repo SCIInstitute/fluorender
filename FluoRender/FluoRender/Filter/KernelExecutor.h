@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Progress.h>
 #include <vector>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -49,14 +50,14 @@ public:
 	void SetDuplicate(bool dup);
 	void SetRepeat(int val) { m_repeat = val; }
 	VolumeData* GetVolume();
-	VolumeData* GetResult(bool pop);
+	std::shared_ptr<VolumeData> GetResult(bool pop);
 	std::wstring GetInfo();
 
 	bool Execute();
 
 private:
 	VolumeData *m_vd;
-	std::vector<VolumeData*> m_vd_r;//result
+	std::vector<std::shared_ptr<VolumeData>> m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
 	int m_repeat;//number of execution on top of the base, no duplication
 

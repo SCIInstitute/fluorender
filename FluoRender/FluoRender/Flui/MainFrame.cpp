@@ -1184,7 +1184,6 @@ void MainFrame::DeleteProps(int type, const wxString& name)
 		int page_no = m_prop_panel->FindPage(page);
 		if (page_no != wxNOT_FOUND)
 			m_prop_panel->DeletePage(page_no);
-		//delete page;
 	}
 }
 
@@ -1559,7 +1558,6 @@ void MainFrame::DeleteRenderViewPanel(int i)
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
 		vrv->Destroy();
-		//delete vrv;
 		m_aui_mgr.Update();
 
 		if (glbin_mov_def.m_view_idx >= i)
@@ -1852,13 +1850,12 @@ std::wstring MainFrame::ScriptDialog(const std::wstring& title,
 {
 	glbin_moviemaker.Hold();
 	std::wstring result;
-	ModalDlg* dlg = new ModalDlg(
+	ModalDlg dlg(
 		this, title, "", "",
 		wildcard, style);
-	int rval = dlg->ShowModal();
+	int rval = dlg.ShowModal();
 	if (rval == wxID_OK)
-		result = dlg->GetPath().ToStdWstring();
-	delete dlg;
+		result = dlg.GetPath().ToStdWstring();
 	glbin_moviemaker.Resume();
 	return result;
 }
@@ -2094,7 +2091,7 @@ void MainFrame::SetProgress(int val, const std::string& str)
 
 void MainFrame::OpenVolume()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Choose the volume data file", "", "",
 		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
@@ -2110,13 +2107,13 @@ void MainFrame::OpenVolume()
 		"Janelia Brick files (*.vvd)|*.vvd|"\
 		"Video files (*.mp4, *.m4v, *.mov, *.avi, *.wmv)|*.mp4;*.m4v;*.mov;*.avi;*.wmv",
 		wxFD_OPEN | wxFD_MULTIPLE);
-	fopendlg->SetExtraControlCreator(CreateExtraControlVolume);
+	fopendlg.SetExtraControlCreator(CreateExtraControlVolume);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxArrayString paths;
-		fopendlg->GetPaths(paths);
+		fopendlg.GetPaths(paths);
 		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(paths.size());
 		for (const auto& filename : paths) {
@@ -2124,22 +2121,20 @@ void MainFrame::OpenVolume()
 		}
 		glbin_data_manager.LoadVolumes(std_filenames, false);
 	}
-
-	delete fopendlg;
 }
 
 void MainFrame::ImportVolume()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Choose the volume data file", "", "", "All Files|*.*",
 		wxFD_OPEN | wxFD_MULTIPLE);
-	fopendlg->SetExtraControlCreator(CreateExtraControlVolumeForImport);
+	fopendlg.SetExtraControlCreator(CreateExtraControlVolumeForImport);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxArrayString paths;
-		fopendlg->GetPaths(paths);
+		fopendlg.GetPaths(paths);
 		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(paths.size());
 		for (const auto& filename : paths) {
@@ -2147,21 +2142,19 @@ void MainFrame::ImportVolume()
 		}
 		glbin_data_manager.LoadVolumes(std_filenames, true);
 	}
-
-	delete fopendlg;
 }
 
 void MainFrame::OpenMesh()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Choose the mesh data file",
 		"", "", "*.obj", wxFD_OPEN | wxFD_MULTIPLE);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxArrayString files;
-		fopendlg->GetPaths(files);
+		fopendlg.GetPaths(files);
 		std::vector<std::wstring> std_filenames;
 		std_filenames.reserve(files.size());
 		for (const auto& filename : files) {
@@ -2169,9 +2162,6 @@ void MainFrame::OpenMesh()
 		}
 		glbin_data_manager.LoadMeshes(std_filenames);
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void MainFrame::NewProject()
@@ -2183,19 +2173,17 @@ void MainFrame::NewProject()
 
 void MainFrame::OpenProject()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Choose Project File",
 		"", "", "*.vrp", wxFD_OPEN);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::wstring path = fopendlg->GetPath().ToStdWstring();
+		std::wstring path = fopendlg.GetPath().ToStdWstring();
 		glbin_project.Open(path);
 		FluoUpdate({ gstMainFrameTitle });
 	}
-
-	delete fopendlg;
 }
 
 void MainFrame::SaveProject()
@@ -2220,21 +2208,19 @@ void MainFrame::SaveAsProject()
 	std::wstring filename;
 	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
 
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Save Project File",
 		default_valid ? path : L"", default_valid ? filename : L"",
 		"*.vrp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg->SetExtraControlCreator(CreateExtraControlProjectSave);
+	fopendlg.SetExtraControlCreator(CreateExtraControlProjectSave);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		filename = fopendlg->GetPath().ToStdWstring();
+		filename = fopendlg.GetPath().ToStdWstring();
 		glbin_project.Save(filename, false);
 		FluoUpdate({ gstMainFrameTitle });
 	}
-
-	delete fopendlg;
 }
 
 //toolbar menus

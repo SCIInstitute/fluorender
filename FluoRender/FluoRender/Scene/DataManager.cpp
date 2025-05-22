@@ -86,7 +86,6 @@ DEALINGS IN THE SOFTWARE.
 TreeLayer::TreeLayer()
 {
 	m_id = 0;
-	m_associated = 0;
 	type = -1;
 	m_gamma = fluo::Color(1.0, 1.0, 1.0);
 	m_brightness = fluo::Color(1.0, 1.0, 1.0);
@@ -120,21 +119,21 @@ int Root::GetViewNum()
 	return static_cast<int>(m_views.size());
 }
 
-RenderView* Root::GetView(int i)
+std::shared_ptr<RenderView> Root::GetView(int i)
 {
 	if (i >= 0 && i < (int)m_views.size())
-		return m_views[i].get();
-	else return 0;
+		return m_views[i];
+	else return nullptr;
 }
 
-RenderView* Root::GetView(const std::wstring& name)
+std::shared_ptr<RenderView> Root::GetView(const std::wstring& name)
 {
 	for (auto& view : m_views)
 	{
 		if (view && view->GetName() == name)
-			return view.get();
+			return view;
 	}
-	return 0;
+	return nullptr;
 }
 
 int Root::GetView(RenderView* view)
@@ -150,21 +149,11 @@ int Root::GetView(RenderView* view)
 	return -1;
 }
 
-RenderView* Root::GetLastView()
+std::shared_ptr<RenderView> Root::GetLastView()
 {
 	if (m_views.size())
-		return m_views.back().get();
-	else return 0;
-}
-
-std::shared_ptr<RenderView> Root::GetViewSharedPtr(RenderView* view)
-{
-	for (auto it : m_views)
-	{
-		if (it.get() == view)
-			return it;
-	}
-	return nullptr;
+		return m_views.back();
+	else return nullptr;
 }
 
 void Root::AddView(RenderView* view)
@@ -4957,11 +4946,10 @@ int DataGroup::GetBlendMode()
 void DataGroup::SetGammaAll(const fluo::Color &gamma)
 {
 	SetGammaColor(gamma);
-	for (int i=0; i<(int)m_vd_list.size(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd)
-			vd->SetGammaColor(gamma);
+		if (it)
+			it->SetGammaColor(gamma);
 	}
 }
 
@@ -4969,11 +4957,10 @@ void DataGroup::SetGammaAll(const fluo::Color &gamma)
 void DataGroup::SetBrightnessAll(const fluo::Color &brightness)
 {
 	SetBrightness(brightness);
-	for (int i=0; i<(int)m_vd_list.size(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd)
-			vd->SetBrightness(brightness);
+		if (it)
+			it->SetBrightness(brightness);
 	}
 }
 
@@ -4981,11 +4968,10 @@ void DataGroup::SetBrightnessAll(const fluo::Color &brightness)
 void DataGroup::SetHdrAll(const fluo::Color &hdr)
 {
 	SetHdr(hdr);
-	for (int i=0; i<(int)m_vd_list.size(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = m_vd_list[i];
-		if (vd)
-			vd->SetHdr(hdr);
+		if (it)
+			it->SetHdr(hdr);
 	}
 }
 
@@ -4993,11 +4979,10 @@ void DataGroup::SetHdrAll(const fluo::Color &hdr)
 void DataGroup::SetSyncAll(int i, bool val)
 {
 	SetSync(i, val);
-	for (int j=0; j<(int)m_vd_list.size(); j++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = m_vd_list[j];
-		if (vd)
-			vd->SetSync(i, val);
+		if (it)
+			it->SetSync(i, val);
 	}
 }
 
@@ -5009,12 +4994,11 @@ void DataGroup::ResetSync()
 	bool g_v = false;
 	bool b_v = false;
 
-	for (i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
+		if (it)
 		{
-			fluo::Color c = vd->GetColor();
+			fluo::Color c = it->GetColor();
 			bool r, g, b;
 			r = g = b = false;
 			cnt = 0;
@@ -5039,393 +5023,355 @@ void DataGroup::ResetSync()
 //volume properties
 void DataGroup::SetGammaEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetGammaEnable(bval);
+		if (it)
+			it->SetGammaEnable(bval);
 	}
 }
 
 void DataGroup::SetGamma(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetGamma(val, set_this);
+		if (it)
+			it->SetGamma(val, set_this);
 	}
 }
 
 void DataGroup::SetBoundaryEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetBoundaryEnable(bval);
+		if (it)
+			it->SetBoundaryEnable(bval);
 	}
 }
 
 void DataGroup::SetBoundary(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetBoundary(val, set_this);
+		if (it)
+			it->SetBoundary(val, set_this);
 	}
 }
 
 void DataGroup::SetMinMaxEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetMinMaxEnable(bval);
+		if (it)
+			it->SetMinMaxEnable(bval);
 	}
 }
 
 void DataGroup::SetLowOffset(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetLowOffset(val, set_this);
+		if (it)
+			it->SetLowOffset(val, set_this);
 	}
 }
 
 void DataGroup::SetHighOffset(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetHighOffset(val, set_this);
+		if (it)
+			it->SetHighOffset(val, set_this);
 	}
 }
 
 void DataGroup::SetThreshEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetThreshEnable(bval);
+		if (it)
+			it->SetThreshEnable(bval);
 	}
 }
 
 void DataGroup::SetLeftThresh(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetLeftThresh(val, set_this);
+		if (it)
+			it->SetLeftThresh(val, set_this);
 	}
 }
 
 void DataGroup::SetRightThresh(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetRightThresh(val, set_this);
+		if (it)
+			it->SetRightThresh(val, set_this);
 	}
 }
 
 void DataGroup::SetLuminanceEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetLuminanceEnable(bval);
+		if (it)
+			it->SetLuminanceEnable(bval);
 	}
 }
 
 void DataGroup::SetLuminance(double val, bool set_this)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetLuminance(val, set_this);
+		if (it)
+			it->SetLuminance(val, set_this);
 	}
 }
 
 void DataGroup::SetAlphaEnable(bool mode)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetAlphaEnable(mode);
+		if (it)
+			it->SetAlphaEnable(mode);
 	}
 }
 
 void DataGroup::SetAlpha(double val, bool set_this)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetAlpha(val, set_this);
+		if (it)
+			it->SetAlpha(val, set_this);
 	}
 }
 
 void DataGroup::SetShadingEnable(bool shading)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetShadingEnable(shading);
+		if (it)
+			it->SetShadingEnable(shading);
 	}
 }
 
 void DataGroup::SetLowShading(double val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetLowShading(val);
+		if (it)
+			it->SetLowShading(val);
 	}
 }
 
 void DataGroup::SetHiShading(double val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetHiShading(val);
+		if (it)
+			it->SetHiShading(val);
 	}
 }
 
 void DataGroup::SetShadowEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetShadowEnable(bval);
+		if (it)
+			it->SetShadowEnable(bval);
 	}
 }
 
 void DataGroup::SetShadowIntensity(double val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetShadowIntensity(val);
+		if (it)
+			it->SetShadowIntensity(val);
 	}
 }
 
 void DataGroup::SetSampleRateEnable(bool bval)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetSampleRateEnable(bval);
+		if (it)
+			it->SetSampleRateEnable(bval);
 	}
 }
 
 void DataGroup::SetSampleRate(double val, bool set_this)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetSampleRate(val, set_this);
+		if (it)
+			it->SetSampleRate(val, set_this);
 	}
 }
 
 void DataGroup::SetColormapMode(int mode)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetColormapMode(mode);
+		if (it)
+			it->SetColormapMode(mode);
 	}
 }
 
 void DataGroup::SetColormapDisp(bool disp)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetColormapDisp(disp);
+		if (it)
+			it->SetColormapDisp(disp);
 	}
 }
 
 void DataGroup::SetColormapValues(double low, double high)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
+		if (it)
 		{
 			double l, h;
-			vd->GetColormapValues(l, h);
-			vd->SetColormapValues(low<0?l:low, high<0?h:high);
+			it->GetColormapValues(l, h);
+			it->SetColormapValues(low<0?l:low, high<0?h:high);
 		}
 	}
 }
 
 void DataGroup::SetColormapInv(double val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetColormapInv(val);
+		if (it)
+			it->SetColormapInv(val);
 	}
 }
 
 void DataGroup::SetColormap(int value)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetColormap(value);
+		if (it)
+			it->SetColormap(value);
 	}
 }
 
 void DataGroup::SetColormapProj(int value)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetColormapProj(value);
+		if (it)
+			it->SetColormapProj(value);
 	}
 }
 
 void DataGroup::SetMode(int mode)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetMode(mode);
+		if (it)
+			it->SetMode(mode);
 	}
 }
 
 void DataGroup::SetAlphaPower(double val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetAlphaPower(val);
+		if (it)
+			it->SetAlphaPower(val);
 	}
 }
 
 void DataGroup::SetLabelMode(int val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetLabelMode(val);
+		if (it)
+			it->SetLabelMode(val);
 	}
 }
 
 void DataGroup::SetNR(bool val)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetNR(val);
+		if (it)
+			it->SetNR(val);
 	}
 }
 //inversion
 void DataGroup::SetInterpolate(bool mode)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetInterpolate(mode);
+		if (it)
+			it->SetInterpolate(mode);
 	}
 }
 
 //inversion
 void DataGroup::SetInvert(bool mode)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetInvert(mode);
+		if (it)
+			it->SetInvert(mode);
 	}
 }
 
 void DataGroup::SetTransparent(bool val)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetTransparent(val);
+		if (it)
+			it->SetTransparent(val);
 	}
 }
 
 //use ml
 void DataGroup::ApplyMlVolProp()
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->ApplyMlVolProp();
+		if (it)
+			it->ApplyMlVolProp();
 	}
 }
 
 //blend mode
 void DataGroup::SetBlendMode(int mode)
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->SetBlendMode(mode);
+		if (it)
+			it->SetBlendMode(mode);
 	}
 }
 
 //randomize color
 void DataGroup::RandomizeColor()
 {
-	for (int i=0; i<GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
+		if (it)
 		{
 			double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 			fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
-			vd->SetColor(color);
+			it->SetColor(color);
 		}
 	}
 }
 
 void DataGroup::AddMask(Nrrd* mask, int op)
 {
-	for (int i = 0; i < GetVolumeNum(); i++)
+	for (auto& it : m_vd_list)
 	{
-		VolumeData* vd = GetVolumeData(i);
-		if (vd)
-			vd->AddMask(mask, op);
+		if (it)
+			it->AddMask(mask, op);
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5446,36 +5392,35 @@ MeshGroup::~MeshGroup()
 //randomize color
 void MeshGroup::RandomizeColor()
 {
-	for (int i=0; i<GetMeshNum(); i++)
+	for (auto& it : m_md_list)
 	{
-		MeshData* md = GetMeshData(i);
-		if (md)
+		if (it)
 		{
 			double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 			fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
-			md->SetColor(color, MESH_COLOR_DIFF);
+			it->SetColor(color, MESH_COLOR_DIFF);
 			fluo::Color amb = color * 0.3;
-			md->SetColor(amb, MESH_COLOR_AMB);
+			it->SetColor(amb, MESH_COLOR_AMB);
 		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void CurrentObjects::SetRenderView(RenderView* view)
+void CurrentObjects::SetRenderView(const std::shared_ptr<RenderView>& view)
 {
 	render_view = view;
-	vol_group = 0;
-	mesh_group = 0;
-	vol_data = 0;
-	mesh_data = 0;
-	ann_data = 0;
-	if (render_view)
+	vol_group.reset();
+	mesh_group.reset();
+	vol_data.reset();
+	mesh_data.reset();
+	ann_data.reset();
+	if (auto view_ptr = render_view.lock())
 	{
-		render_view->m_cur_vol = 0;
+		view_ptr->m_cur_vol.reset();
 	}
 }
 
-void CurrentObjects::SetVolumeGroup(DataGroup* g)
+void CurrentObjects::SetVolumeGroup(const std::shared_ptr<DataGroup>& g)
 {
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
@@ -5483,17 +5428,17 @@ void CurrentObjects::SetVolumeGroup(DataGroup* g)
 	bool found = false;
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum(); ++j)
 		{
-			TreeLayer* l = v->GetLayer(j);
+			auto l = v->GetLayer(j);
 			if (!l)
 				continue;
 			if (l->IsA() == 5)
 			{
-				DataGroup* group = (DataGroup*)l;
+				auto group = std::dynamic_pointer_cast<DataGroup>(l);
 				if (group == g)
 				{
 					render_view = v;
@@ -5504,15 +5449,15 @@ void CurrentObjects::SetVolumeGroup(DataGroup* g)
 		}
 	}
 	vol_group = g;
-	mesh_group = 0;
-	vol_data = 0;
-	mesh_data = 0;
-	ann_data = 0;
-	if (render_view)
-		render_view->m_cur_vol = 0;
+	mesh_group.reset();
+	vol_data.reset();
+	mesh_data .reset();
+	ann_data.reset();
+	if (auto view_ptr = render_view.lock())
+		view_ptr->m_cur_vol.reset();
 }
 
-void CurrentObjects::SetMeshGroup(MeshGroup* g)
+void CurrentObjects::SetMeshGroup(const std::shared_ptr<MeshGroup>& g)
 {
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
@@ -5520,17 +5465,17 @@ void CurrentObjects::SetMeshGroup(MeshGroup* g)
 	bool found = false;
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum(); ++j)
 		{
-			TreeLayer* l = v->GetLayer(j);
+			auto l = v->GetLayer(j);
 			if (!l)
 				continue;
 			if (l->IsA() == 6)
 			{
-				MeshGroup* group = (MeshGroup*)l;
+				auto group = std::dynamic_pointer_cast<MeshGroup>(l);
 				if (group == g)
 				{
 					render_view = v;
@@ -5540,16 +5485,16 @@ void CurrentObjects::SetMeshGroup(MeshGroup* g)
 			}
 		}
 	}
-	vol_group = 0;
-	mesh_group = g;
-	vol_data = 0;
-	mesh_data = 0;
-	ann_data = 0;
-	if (render_view)
-		render_view->m_cur_vol = 0;
+	vol_group.reset();
+	mesh_group.reset();
+	vol_data.reset();
+	mesh_data.reset();
+	ann_data.reset();
+	if (auto view_ptr = render_view.lock())
+		view_ptr->m_cur_vol.reset();
 }
 
-void CurrentObjects::SetVolumeData(VolumeData* vd)
+void CurrentObjects::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 {
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
@@ -5557,17 +5502,17 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 	bool found = false;
 	for (int i = 0; i < root->GetViewNum() && !found; ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum() && !found; ++j)
 		{
-			TreeLayer* l = v->GetLayer(j);
+			auto l = v->GetLayer(j);
 			if (!l)
 				continue;
 			if (l->IsA() == 2)
 			{
-				VolumeData* vd0 = (VolumeData*)l;
+				auto vd0 = std::dynamic_pointer_cast<VolumeData>(l);
 				if (vd == vd0)
 				{
 					found = true;
@@ -5577,10 +5522,10 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 			}
 			else if (l->IsA() == 5)
 			{
-				DataGroup* g = (DataGroup*)l;
+				auto g = std::dynamic_pointer_cast<DataGroup>(l);
 				for (int k = 0; k < g->GetVolumeNum(); ++k)
 				{
-					VolumeData* vd0 = g->GetVolumeData(k);
+					auto vd0 = g->GetVolumeData(k);
 					if (vd == vd0)
 					{
 						found = true;
@@ -5593,16 +5538,16 @@ void CurrentObjects::SetVolumeData(VolumeData* vd)
 		}
 	}
 	vol_data = vd;
-	mesh_data = 0;
-	mesh_group = 0;
-	ann_data = 0;
-	if (render_view)
-		render_view->m_cur_vol = vd;
-	glbin_vol_selector.SetVolume(vd);
-	glbin_comp_generator.SetVolumeData(vd);
+	mesh_data.reset();
+	mesh_group.reset();
+	ann_data.reset();
+	if (auto view_ptr = render_view.lock())
+		view_ptr->m_cur_vol = vd;
+	glbin_vol_selector.SetVolume(vd.get());
+	glbin_comp_generator.SetVolumeData(vd.get());
 }
 
-void CurrentObjects::SetMeshData(MeshData* md)
+void CurrentObjects::SetMeshData(const std::shared_ptr<MeshData>& md)
 {
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
@@ -5610,17 +5555,17 @@ void CurrentObjects::SetMeshData(MeshData* md)
 	bool found = false;
 	for (int i = 0; i < root->GetViewNum() && !found; ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum() && !found; ++j)
 		{
-			TreeLayer* l = v->GetLayer(j);
+			auto l = v->GetLayer(j);
 			if (!l)
 				continue;
 			if (l->IsA() == 3)
 			{
-				MeshData* md0 = (MeshData*)l;
+				auto md0 = std::dynamic_pointer_cast<MeshData>(l);
 				if (md == md0)
 				{
 					found = true;
@@ -5630,10 +5575,10 @@ void CurrentObjects::SetMeshData(MeshData* md)
 			}
 			else if (l->IsA() == 6)
 			{
-				MeshGroup* g = (MeshGroup*)l;
+				auto g = std::dynamic_pointer_cast<MeshGroup>(l);
 				for (int k = 0; k < g->GetMeshNum(); ++k)
 				{
-					MeshData* md0 = g->GetMeshData(k);
+					auto md0 = g->GetMeshData(k);
 					if (md == md0)
 					{
 						found = true;
@@ -5646,14 +5591,14 @@ void CurrentObjects::SetMeshData(MeshData* md)
 		}
 	}
 	mesh_data = md;
-	vol_group = 0;
-	vol_data = 0;
-	ann_data = 0;
-	if (render_view)
-		render_view->m_cur_vol = 0;
+	vol_group.reset();
+	vol_data.reset();
+	ann_data.reset();
+	if (auto view_ptr = render_view.lock())
+		view_ptr->m_cur_vol.reset();
 }
 
-void CurrentObjects::SetAnnotation(Annotations* ann)
+void CurrentObjects::SetAnnotation(const std::shared_ptr<Annotations>& ann)
 {
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
@@ -5661,17 +5606,17 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 	bool found = false;
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (!v)
 			continue;
 		for (int j = 0; j < v->GetLayerNum(); ++j)
 		{
-			TreeLayer* l = v->GetLayer(j);
+			auto l = v->GetLayer(j);
 			if (!l)
 				continue;
 			if (l->IsA() == 4)
 			{
-				Annotations* a0 = (Annotations*)l;
+				auto a0 = std::dynamic_pointer_cast<Annotations>(l);
 				if (a0 == ann)
 				{
 					render_view = v;
@@ -5682,12 +5627,12 @@ void CurrentObjects::SetAnnotation(Annotations* ann)
 		}
 	}
 	ann_data = ann;
-	vol_group = 0;
-	mesh_group = 0;
-	vol_data = 0;
-	mesh_data = 0;
-	if (render_view)
-		render_view->m_cur_vol = 0;
+	vol_group.reset();
+	mesh_group.reset();
+	vol_data.reset();
+	mesh_data.reset();
+	if (auto view_ptr = render_view.lock())
+		view_ptr->m_cur_vol.reset();
 }
 
 void CurrentObjects::SetSel(const std::wstring& str)
@@ -5698,7 +5643,7 @@ void CurrentObjects::SetSel(const std::wstring& str)
 	bool found = false;
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (!v)
 			continue;
 		if (v->GetName() == str)
@@ -5708,27 +5653,27 @@ void CurrentObjects::SetSel(const std::wstring& str)
 		}
 		for (int j = 0; j < v->GetLayerNum(); ++j)
 		{
-			TreeLayer* l = v->GetLayer(j);
+			auto l = v->GetLayer(j);
 			if (!l)
 				continue;
 			if (l->IsA() == 2)
 			{
-				SetVolumeData(dynamic_cast<VolumeData*>(l));
+				SetVolumeData(std::dynamic_pointer_cast<VolumeData>(l));
 				return;
 			}
 			else if (l->IsA() == 3)
 			{
-				SetMeshData(dynamic_cast<MeshData*>(l));
+				SetMeshData(std::dynamic_pointer_cast<MeshData>(l));
 				return;
 			}
 			else if (l->IsA() == 4)
 			{
-				SetAnnotation(dynamic_cast<Annotations*>(l));
+				SetAnnotation(std::dynamic_pointer_cast<Annotations>(l));
 				return;
 			}
 			else if (l->IsA() == 5)
 			{
-				DataGroup* g = dynamic_cast<DataGroup*>(l);
+				auto g = std::dynamic_pointer_cast<DataGroup>(l);
 				if (!g)
 					continue;
 				if (g->GetName() == str)
@@ -5738,7 +5683,7 @@ void CurrentObjects::SetSel(const std::wstring& str)
 				}
 				for (int k = 0; k < g->GetVolumeNum(); ++k)
 				{
-					VolumeData* vd = g->GetVolumeData(k);
+					auto vd = g->GetVolumeData(k);
 					if (vd && vd->GetName() == str)
 					{
 						SetVolumeData(vd);
@@ -5748,7 +5693,7 @@ void CurrentObjects::SetSel(const std::wstring& str)
 			}
 			else if (l->IsA() == 6)
 			{
-				MeshGroup* g = dynamic_cast<MeshGroup*>(l);
+				auto g = std::dynamic_pointer_cast<MeshGroup>(l);
 				if (!g)
 					continue;
 				if (g->GetName() == str)
@@ -5758,7 +5703,7 @@ void CurrentObjects::SetSel(const std::wstring& str)
 				}
 				for (int k = 0; k < g->GetMeshNum(); ++k)
 				{
-					MeshData* md = g->GetMeshData(k);
+					auto md = g->GetMeshData(k);
 					if (md && md->GetName() == str)
 					{
 						SetMeshData(md);
@@ -5775,15 +5720,15 @@ int CurrentObjects::GetViewId(RenderView* view)
 	Root* root = glbin_data_manager.GetRoot();
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* v = root->GetView(i);
+		auto v = root->GetView(i);
 		if (view)
 		{
-			if (v == view)
+			if (v.get() == view)
 				return i;
 		}
 		else
 		{
-			if (v == render_view)
+			if (v == render_view.lock())
 				return i;
 		}
 	}
@@ -5792,23 +5737,23 @@ int CurrentObjects::GetViewId(RenderView* view)
 
 flrd::RulerList* CurrentObjects::GetRulerList()
 {
-	if (!render_view)
-		return 0;
-	return render_view->GetRulerList();
+	if (auto vptr = render_view.lock())
+		return vptr->GetRulerList();
+	return 0;
 }
 
 flrd::Ruler* CurrentObjects::GetRuler()
 {
-	if (!render_view)
-		return 0;
-	return render_view->GetCurRuler();
+	if (auto vptr = render_view.lock())
+		return vptr->GetCurRuler();
+	return 0;
 }
 
 TrackGroup* CurrentObjects::GetTrackGroup()
 {
-	if (!render_view)
-		return 0;
-	return render_view->GetTrackGroup();
+	if (auto vptr = render_view.lock())
+		return vptr->GetTrackGroup();
+	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5907,9 +5852,9 @@ std::wstring DataManager::GetProjectFile()
 void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withImageJ)
 {
 	fluo::ValueCollection vc;
-	VolumeData* vd_sel = 0;
-	DataGroup* group_sel = 0;
-	RenderView* view = glbin_current.render_view;
+	std::weak_ptr<VolumeData> vd_sel;
+	std::weak_ptr<DataGroup> group_sel;
+	auto view = glbin_current.render_view.lock();
 	Root* root = glbin_data_manager.GetRoot();
 
 	if (!root)
@@ -5978,7 +5923,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		all_ch_num += ch_num;
 		if (ch_num > 1)
 		{
-			DataGroup* group = view->AddOrGetGroup();
+			auto group = view->AddOrGetGroup();
 			if (group)
 			{
 				int nz_count = 0;
@@ -6381,7 +6326,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 			continue;
 		}
 
-		AddVolumeData(vd);
+		AddVolumeData(std::shared_ptr<VolumeData>(vd));
 		SetVolumeDefault(vd);
 
 		//get excitation wavelength
@@ -6672,7 +6617,7 @@ size_t DataManager::GetMeshNum()
 	return m_md_list.size();
 }
 
-void DataManager::AddVolumeData(VolumeData* vd)
+void DataManager::AddVolumeData(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return;
@@ -6698,13 +6643,13 @@ void DataManager::AddVolumeData(VolumeData* vd)
 			//vd->SetSpcFromFile(true);
 		}
 	}
-	m_vd_list.push_back(std::shared_ptr<VolumeData>(vd));
-	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd);
+	m_vd_list.push_back(vd);
+	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd.get());
 	vol_cache_queue->RegisterCacheQueueFuncs(flvr::CQCallback::ReadVolCache, flvr::CQCallback::FreeVolCache);
 	//set up default vol cache mode
 	vol_cache_queue->SetHandleFlags(flvr::CQCallback::HDL_DATA | flvr::CQCallback::TIME_COND0);
 	vd->GetVR()->set_cache_queue(vol_cache_queue.get());
-	m_vd_cache_queue.emplace(vd, std::move(vol_cache_queue));
+	m_vd_cache_queue.emplace(vd.get(), std::move(vol_cache_queue));
 }
 
 VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
@@ -6714,7 +6659,7 @@ VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
 	if (vd)
 	{
 		vd_new = new VolumeData(*vd);
-		AddVolumeData(vd_new);
+		AddVolumeData(std::shared_ptr<VolumeData>(vd_new));
 	}
 
 	return vd_new;

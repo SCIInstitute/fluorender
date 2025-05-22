@@ -94,16 +94,16 @@ VolumeData* KernelExecutor::GetVolume()
 	return m_vd;
 }
 
-VolumeData* KernelExecutor::GetResult(bool pop)
+std::shared_ptr<VolumeData> KernelExecutor::GetResult(bool pop)
 {
-	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 	{
-		vd = m_vd_r.back();
+		auto vd = m_vd_r.back();
 		if (pop)
 			m_vd_r.pop_back();
+		return vd;
 	}
-	return vd;
+	return nullptr;
 }
 
 std::wstring KernelExecutor::GetInfo()
@@ -166,7 +166,7 @@ bool KernelExecutor::Execute()
 		double spc_x, spc_y, spc_z;
 		m_vd->GetSpacings(spc_x, spc_y, spc_z);
 		vd_r = new VolumeData();
-		m_vd_r.push_back(vd_r);
+		m_vd_r.push_back(std::shared_ptr<VolumeData>(vd_r));
 		vd_r->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
@@ -193,8 +193,6 @@ bool KernelExecutor::Execute()
 
 	if (!kernel_exe)
 	{
-		if (m_duplicate && !m_vd_r.empty())
-			delete m_vd_r.back();
 		m_vd_r.pop_back();
 		SetProgress(0, "");
 		return false;

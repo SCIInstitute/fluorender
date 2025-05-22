@@ -71,16 +71,16 @@ VolumeData* VolumeCalculator::GetVolumeB()
 	return m_vd_b;
 }
 
-VolumeData* VolumeCalculator::GetResult(bool pop)
+std::shared_ptr<VolumeData> VolumeCalculator::GetResult(bool pop)
 {
-	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
 	{
-		vd = m_vd_r.back();
+		auto vd = m_vd_r.back();
 		if (pop)
 			m_vd_r.pop_back();
+		return vd;
 	}
-	return vd;
+	return nullptr;
 }
 
 void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group, bool add)
@@ -89,7 +89,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 	bool refresh = false;
 
 	Calculate(type);
-	VolumeData* vd = GetResult(add);
+	auto vd = GetResult(add);
 	VolumeData* vd_a = GetVolumeA();
 	if (vd && vd_a)
 	{
@@ -98,7 +98,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 		if (planes && vd->GetVR())
 			vd->GetVR()->set_planes(planes);
 		//transfer function
-		glbin_vol_def.Copy(vd, vd_a);
+		glbin_vol_def.Copy(vd.get(), vd_a);
 
 		if (type == 1 ||
 			type == 2 ||
@@ -114,7 +114,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 				glbin_data_manager.AddVolumeData(vd);
 				//vr_frame->GetDataManager()->SetVolumeDefault(vd);
 				if (glbin_current.render_view)
-					glbin_current.render_view->AddVolumeData(vd, prev_group);
+					glbin_current.render_view->AddVolumeData(vd.get(), prev_group);
 
 				if (type == 5 ||
 					type == 6 ||
@@ -132,15 +132,14 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 					if (vd_b)
 						vd_b->SetDisp(false);
 				}
-				glbin_current.SetVolumeData(vd);
+				glbin_current.SetVolumeData(vd.get());
 				update = true;
 			}
 		}
 		else if (type == 7)
 		{
-			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd);
-			vd_a->Replace(vd);
-			delete vd;
+			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd.get());
+			vd_a->Replace(vd.get());
 			page->SetVolumeData(vd_a);
 		}
 		refresh = true;
@@ -227,7 +226,7 @@ void VolumeCalculator::Calculate(int type)
 		CreateVolumeResult2();
 		VolumeData* vd = 0;
 		if (!m_vd_r.empty())
-			vd = m_vd_r.back();
+			vd = m_vd_r.back().get();
 		if (!vd)
 			return;
 		vd->Calculate(m_type, m_vd_a, m_vd_b);
@@ -242,7 +241,7 @@ void VolumeCalculator::Calculate(int type)
 		CreateVolumeResult1();
 		VolumeData* vd = 0;
 		if (!m_vd_r.empty())
-			vd = m_vd_r.back();
+			vd = m_vd_r.back().get();
 		if (!vd)
 			return;
 		vd->Calculate(m_type, m_vd_a, 0);
@@ -255,7 +254,7 @@ void VolumeCalculator::Calculate(int type)
 		CreateVolumeResult1();
 		VolumeData* vd = 0;
 		if (!m_vd_r.empty())
-			vd = m_vd_r.back();
+			vd = m_vd_r.back().get();
 		if (!vd)
 			return;
 		FillHoles(m_threshold);
@@ -287,7 +286,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		brick_size);
 	vd->SetSpcFromFile(true);
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
-	m_vd_r.push_back(vd);
+	m_vd_r.push_back(std::shared_ptr<VolumeData>(vd));
 
 	std::wstring name = m_vd_a->GetName();
 	std::wstring str_type;
@@ -341,7 +340,7 @@ void VolumeCalculator::CreateVolumeResult2()
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd->SetSpcFromFile(true);
-	m_vd_r.push_back(vd);
+	m_vd_r.push_back(std::shared_ptr<VolumeData>(vd));
 
 	std::wstring name_a = m_vd_a->GetName();
 	std::wstring name_b = m_vd_b->GetName();
@@ -377,7 +376,7 @@ void VolumeCalculator::FillHoles(double thresh)
 		return;
 	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
-		vd = m_vd_r.back();
+		vd = m_vd_r.back().get();
 	if (!vd)
 		return;
 

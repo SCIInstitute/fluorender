@@ -1558,59 +1558,50 @@ void MeasureDlg::Profile()
 
 void MeasureDlg::Distance()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString wxstr = fopendlg->GetPath();
+		wxString wxstr = fopendlg.GetPath();
 		std::set<int> sel;
 		m_ruler_list->GetCurrSelection(sel);
 		glbin_ruler_handler.Distance(sel, wxstr.ToStdWstring());
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void MeasureDlg::Project()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString wxstr = fopendlg->GetPath();
+		wxString wxstr = fopendlg.GetPath();
 		std::set<int> sel;
 		m_ruler_list->GetCurrSelection(sel);
 		glbin_ruler_handler.Project(sel, wxstr.ToStdWstring());
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void MeasureDlg::Export()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Export rulers", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		wxString filename = fopendlg.GetPath();
 		glbin_project.ExportRulerList(filename.ToStdWstring());
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void MeasureDlg::OnToolbar1(wxCommandEvent& event)

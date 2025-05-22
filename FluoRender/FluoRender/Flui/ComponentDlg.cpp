@@ -1374,20 +1374,18 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		bool saved = false;
 		if (size > m_max_lines)
 		{
-			ModalDlg* fopendlg = new ModalDlg(this,
+			ModalDlg fopendlg(this,
 				wxString::Format("Component count is over %d. Save in a file?", m_max_lines),
 				"", "", "Text file (*.txt)|*.txt",
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-			int rval = fopendlg->ShowModal();
+			int rval = fopendlg.ShowModal();
 			if (rval == wxID_OK)
 			{
-				wxString filename = fopendlg->GetPath();
+				wxString filename = fopendlg.GetPath();
 				std::wstring str = filename.ToStdWstring();
 				glbin_comp_analyzer.OutputCompListFile(str, 1);
 				saved = true;
 			}
-			if (fopendlg)
-				delete fopendlg;
 		}
 		if (!saved)
 		{
@@ -1970,34 +1968,27 @@ void ComponentDlg::OnResetCmd(wxCommandEvent& event)
 
 void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 {
-	ModalDlg *fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Choose a FluoRender component generator macro command",
 		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval != wxID_OK)
-	{
-		delete fopendlg;
 		return;
-	}
-	std::wstring filename = fopendlg->GetPath().ToStdWstring();
-	delete fopendlg;
+	std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
 	glbin_comp_generator.LoadCmd(filename);
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 {
-	ModalDlg *fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Save a FluoRender component generator macro command",
 		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval != wxID_OK)
-	{
-		delete fopendlg;
 		return;
-	}
-	std::wstring filename = fopendlg->GetPath().ToStdWstring();
-	delete fopendlg;
+
+	std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
 	glbin_comp_generator.SaveCmd(filename);
 }
@@ -2615,14 +2606,14 @@ void ComponentDlg::PasteData()
 
 void ComponentDlg::OutputDistance()
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		this, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		wxString filename = fopendlg.GetPath();
 		std::string str = filename.ToStdString();
 		std::ofstream outfile;
 		outfile.open(str, std::ofstream::out);
@@ -2630,8 +2621,6 @@ void ComponentDlg::OutputDistance()
 		glbin_comp_analyzer.OutputDistance(outfile);
 		outfile.close();
 	}
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void ComponentDlg::AlignPca(int axis_type)

@@ -141,12 +141,6 @@ public:
 	//randomize color
 	virtual void RandomizeColor() {}
 
-	//associated layer
-	TreeLayer* GetAssociated()
-	{return m_associated;}
-	void SetAssociated(TreeLayer* layer)
-	{m_associated = layer;}
-
 protected:
 	int type;//-1:invalid, 0:root 1: canvas, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	std::wstring m_name;
@@ -157,9 +151,6 @@ protected:
 	fluo::Color m_brightness;
 	fluo::Color m_hdr;
 	bool m_sync[3];//for rgb
-
-	//associated layer
-	TreeLayer* m_associated;
 };
 
 struct VD_Landmark
@@ -182,11 +173,10 @@ public:
 
 	//view functions
 	int GetViewNum();
-	RenderView* GetView(int i);
-	RenderView* GetView(const std::wstring& name);
+	std::shared_ptr<RenderView> GetView(int i);
+	std::shared_ptr<RenderView> GetView(const std::wstring& name);
 	int GetView(RenderView* view);
-	RenderView* GetLastView();
-	std::shared_ptr<RenderView> GetViewSharedPtr(RenderView* view);
+	std::shared_ptr<RenderView> GetLastView();
 	void AddView(RenderView* view);
 	void DeleteView(int i);
 	void DeleteView(RenderView* view);
@@ -1120,13 +1110,13 @@ public:
 	{
 		return static_cast<int>(m_vd_list.size());
 	}
-	VolumeData* GetVolumeData(int index)
+	std::shared_ptr<VolumeData> GetVolumeData(int index)
 	{
 		if (index>=0 && index<(int)m_vd_list.size())
 			return m_vd_list[index];
-		else return 0;
+		else return nullptr;
 	}
-	void InsertVolumeData(int index, VolumeData* vd)
+	void InsertVolumeData(int index, const std::shared_ptr<VolumeData>& vd)
 	{
 		if (!m_vd_list.empty())
 		{
@@ -1140,7 +1130,7 @@ public:
 			m_vd_list.push_back(vd);
 		}
 	}
-	void ReplaceVolumeData(int index, VolumeData *vd)
+	void ReplaceVolumeData(int index, const std::shared_ptr<VolumeData>& vd)
 	{
 		if (index >= 0 && index<(int)m_vd_list.size())
 			m_vd_list[index] = vd;
@@ -1241,7 +1231,7 @@ public:
 
 private:
 	static int m_num;
-	std::vector <VolumeData*> m_vd_list;
+	std::vector<std::shared_ptr<VolumeData>> m_vd_list;
 	bool m_sync_volume_prop;
 
 	bool m_disp;
@@ -1273,13 +1263,13 @@ public:
 	{
 		return (int)m_md_list.size();
 	}
-	MeshData* GetMeshData(int index)
+	std::shared_ptr<MeshData> GetMeshData(int index)
 	{
 		if (index>=0 && index<(int)m_md_list.size())
 			return m_md_list[index];
 		else return 0;
 	}
-	void InsertMeshData(int index, MeshData* md)
+	void InsertMeshData(int index, const std::shared_ptr<MeshData>& md)
 	{
 		if (m_md_list.size() > 0)
 		{
@@ -1328,7 +1318,7 @@ public:
 
 private:
 	static int m_num;
-	std::vector<MeshData*> m_md_list;
+	std::vector<std::shared_ptr<MeshData>> m_md_list;
 	bool m_sync_mesh_prop;
 	bool m_disp;
 };
@@ -1338,47 +1328,42 @@ class RenderView;
 struct CurrentObjects
 {
 	CurrentObjects() :
-		mainframe(0),
-		render_view(0),
-		vol_group(0),
-		mesh_group(0),
-		vol_data(0),
-		mesh_data(0),
-		ann_data(0)
+		mainframe(0)
 	{}
 
 	//0:root, 1:view, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	int GetType()
 	{
-		if (vol_data)
+		if (vol_data.lock())
 			return 2;
-		if (mesh_data)
+		if (mesh_data.lock())
 			return 3;
-		if (ann_data)
+		if (ann_data.lock())
 			return 4;
-		if (vol_group)
+		if (vol_group.lock())
 			return 5;
-		if (mesh_group)
+		if (mesh_group.lock())
 			return 6;
-		if (render_view)
+		if (render_view.lock())
 			return 1;
 		return 0;
 	}
 	void SetRoot()
 	{
-		render_view = 0;
-		vol_group = 0;
-		mesh_group = 0;
-		vol_data = 0;
-		mesh_data = 0;
-		ann_data = 0;
+		render_view.reset();
+		vol_group.reset();
+		mesh_group.reset();
+		vol_data.reset();
+		mesh_data.reset();
+		ann_data.reset();
 	}
-	void SetRenderView(RenderView* v);
-	void SetVolumeGroup(DataGroup* g);
-	void SetMeshGroup(MeshGroup* g);
-	void SetVolumeData(VolumeData* vd);
-	void SetMeshData(MeshData* md);
-	void SetAnnotation(Annotations* ann);
+	void SetRenderView(const std::shared_ptr<RenderView>& v);
+	void SetVolumeGroup(const std::shared_ptr<DataGroup>& g);
+	void SetMeshGroup(const std::shared_ptr<MeshGroup>& g);
+	void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
+	void SetMeshData(const std::shared_ptr<MeshData>& md);
+	void SetAnnotation(const std::shared_ptr<Annotations>& ann);
+
 	void SetSel(const std::wstring& str);
 
 	int GetViewId(RenderView* v = 0);
@@ -1388,12 +1373,12 @@ struct CurrentObjects
 	TrackGroup* GetTrackGroup();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
-	RenderView* render_view;
-	DataGroup* vol_group;
-	MeshGroup* mesh_group;
-	VolumeData* vol_data;
-	MeshData* mesh_data;
-	Annotations* ann_data;
+	std::weak_ptr<RenderView> render_view;
+	std::weak_ptr<DataGroup> vol_group;
+	std::weak_ptr<MeshGroup> mesh_group;
+	std::weak_ptr<VolumeData> vol_data;
+	std::weak_ptr<MeshData> mesh_data;
+	std::weak_ptr<Annotations> ann_data;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1425,39 +1410,38 @@ public:
 	void StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej);
 	size_t LoadVolumeData(const std::wstring &filename, int type, bool withImageJ, int ch_num=-1, int t_num=-1);
 	//set default
-	void SetVolumeDefault(VolumeData* vd);
-	void AddVolumeData(VolumeData* vd);
-	VolumeData* DuplicateVolumeData(VolumeData* vd);
+	void SetVolumeDefault(const std::shared_ptr<VolumeData>& vd);
+	void AddVolumeData(const std::shared_ptr<VolumeData>& vd);
+	std::shared_ptr<VolumeData> DuplicateVolumeData(const std::shared_ptr<VolumeData>& vd);
 	void RemoveVolumeData(size_t index);
 	void RemoveVolumeData(const std::wstring &name);
 	size_t GetVolumeNum();
-	std::shared_ptr<VolumeData> GetVolumeDataSharedPtr(VolumeData* vd);
-	VolumeData* GetVolumeData(size_t index);
-	VolumeData* GetVolumeData(const std::wstring &name);
+	std::shared_ptr<VolumeData> GetVolumeData(size_t index);
+	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name);
 	size_t GetVolumeIndex(const std::wstring &name);
-	VolumeData* GetLastVolumeData();
+	std::shared_ptr<VolumeData> GetLastVolumeData();
 
 	//load mesh
 	void LoadMeshes(const std::vector<std::wstring>& files);
 	bool LoadMeshData(const std::wstring &filename);
 	bool LoadMeshData(GLMmodel* mesh);
 	size_t GetMeshNum();
-	MeshData* GetMeshData(size_t index);
-	MeshData* GetMeshData(const std::wstring &name);
+	std::shared_ptr<MeshData> GetMeshData(size_t index);
+	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);
 	size_t GetMeshIndex(const std::wstring &name);
-	MeshData* GetLastMeshData();
+	std::shared_ptr<MeshData> GetLastMeshData();
 	void RemoveMeshData(size_t index);
 	void ClearMeshSelection();
 
 	//annotations
 	bool LoadAnnotations(const std::wstring &filename);
-	void AddAnnotations(Annotations* ann);
+	void AddAnnotations(const std::shared_ptr<Annotations>& ann);
 	void RemoveAnnotations(size_t index);
 	size_t GetAnnotationNum();
-	Annotations* GetAnnotations(size_t index);
-	Annotations* GetAnnotations(const std::wstring &name);
+	std::shared_ptr<Annotations> GetAnnotations(size_t index);
+	std::shared_ptr<Annotations> GetAnnotations(const std::wstring &name);
 	size_t GetAnnotationIndex(const std::wstring &name);
-	Annotations* GetLastAnnotations();
+	std::shared_ptr<Annotations> GetLastAnnotations();
 
 	bool CheckNames(const std::wstring &str);
 

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <vector>
 #include <string>
+#include <memory>
 
 class VolumeData;
 namespace flrd
@@ -50,7 +51,7 @@ namespace flrd
 
 		VolumeData* GetVolumeA();
 		VolumeData* GetVolumeB();
-		VolumeData* GetResult(bool pop);
+		std::shared_ptr<VolumeData> GetResult(bool pop);
 
 		//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
 		void CalculateGroup(int type, const std::wstring &prev_group = L"", bool add = true);
@@ -58,7 +59,7 @@ namespace flrd
 		void Calculate(int type);
 
 	private:
-		std::vector<VolumeData*> m_vd_r;//result volume data (stack)
+		std::vector<std::shared_ptr<VolumeData>> m_vd_r;//result volume data (stack)
 
 		VolumeData *m_vd_a;	//volume data A
 		VolumeData *m_vd_b;	//volume data B

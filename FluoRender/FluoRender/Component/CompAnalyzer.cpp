@@ -1251,7 +1251,7 @@ bool ComponentAnalyzer::OutputChannels()
 		VolumeData* vd = *i;
 		if (vd)
 		{
-			glbin_data_manager.AddVolumeData(vd);
+			glbin_data_manager.AddVolumeData(std::shared_ptr<VolumeData>(vd));
 			if (i == channs.begin())
 			{
 				group_name = view->AddGroup(L"");

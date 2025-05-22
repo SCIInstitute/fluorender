@@ -104,7 +104,7 @@ namespace flrd
 
 	private:
 		bool TimeCondition();
-		bool GetVolumes(std::vector<VolumeData*> &list);
+		bool GetVolumes(std::vector<std::shared_ptr<VolumeData>> &list);
 		void UpdateTraceDlg();
 		int TimeMode(std::string &str);
 		int GetTimeNum();

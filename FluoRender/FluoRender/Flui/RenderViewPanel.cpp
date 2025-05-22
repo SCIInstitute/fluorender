@@ -267,7 +267,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 RenderViewPanel::~RenderViewPanel()
 {
 	if (m_full_frame)
-		delete m_full_frame;
+		m_full_frame->Destroy();
 
 	//delete controls
 	glbin.del_undo_control(m_options_toolbar);

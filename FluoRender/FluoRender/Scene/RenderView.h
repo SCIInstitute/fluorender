@@ -131,26 +131,26 @@ public:
 	int GetMeshNum();
 	int GetGroupNum();
 	int GetLayerNum();
-	VolumeData* GetAllVolumeData(int index);
-	VolumeData* GetDispVolumeData(int index);
-	MeshData* GetMeshData(int index);
-	TreeLayer* GetLayer(int index);
-	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr; };
-	VolumeData* GetVolumeData(const std::wstring &name);
-	MeshData* GetMeshData(const std::wstring &name);
-	Annotations* GetAnnotations(const std::wstring &name);
-	DataGroup* GetGroup(const std::wstring &name);
-	DataGroup* GetGroup(int index);
-	DataGroup* GetGroup(VolumeData* vd);
-	MeshGroup* GetMGroup(const std::wstring &str);
+	std::shared_ptr<VolumeData> GetAllVolumeData(int index);
+	std::shared_ptr<VolumeData> GetDispVolumeData(int index);
+	std::shared_ptr<MeshData> GetMeshData(int index);
+	std::shared_ptr<TreeLayer> GetLayer(int index);
+	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr.get(); };
+	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name);
+	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);
+	std::shared_ptr<Annotations> GetAnnotations(const std::wstring &name);
+	std::shared_ptr<DataGroup> GetGroup(const std::wstring &name);
+	std::shared_ptr<DataGroup> GetGroup(int index);
+	std::shared_ptr<DataGroup> GetGroup(VolumeData* vd);
+	std::shared_ptr<MeshGroup> GetMGroup(const std::wstring &str);
 	//add
-	DataGroup* AddVolumeData(VolumeData* vd, const std::wstring &group_name = L"");
+	std::shared_ptr<DataGroup> AddVolumeData(VolumeData* vd, const std::wstring &group_name = L"");
 	void AddMeshData(MeshData* md);
 	void AddAnnotations(Annotations* ann);
 	std::wstring AddGroup(const std::wstring& str, const std::wstring& prev_group = L"");
-	DataGroup* AddOrGetGroup();
+	std::shared_ptr<DataGroup> AddOrGetGroup();
 	std::wstring AddMGroup(const std::wstring& str);
-	MeshGroup* AddOrGetMGroup();
+	std::shared_ptr<MeshGroup> AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(const std::wstring &name);
 	void ReplaceVolumeData(const std::wstring &name, VolumeData *dst);
@@ -451,9 +451,9 @@ public:
 
 	//pop list
 	bool GetVolPopListEmpty() { return m_vd_pop_list.empty(); }
-	VolumeData* GetVolPopList(int index) { return m_vd_pop_list[index]; }
+	std::shared_ptr<VolumeData> GetVolPopList(int index) { return m_vd_pop_list[index].lock(); }
 	bool GetMeshPopListEmpty() { return m_md_pop_list.empty(); }
-	MeshData* GetMeshPopList(int index) { return m_md_pop_list[index]; }
+	std::shared_ptr<MeshData> GetMeshPopList(int index) { return m_md_pop_list[index].lock(); }
 
 public:
 	//capture modes
@@ -493,8 +493,8 @@ public:
 	bool m_mouse_focus;
 	bool m_draw_rulers;
 	//current volume
-	VolumeData *m_cur_vol;
-	VolumeData* m_cur_vol_save;
+	std::weak_ptr<VolumeData> m_cur_vol;
+	std::weak_ptr<VolumeData> m_cur_vol_save;
 	//clipping settings
 	int m_clip_mask;
 	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference
@@ -535,18 +535,18 @@ private:
 
 	//populated lists of data
 	bool m_vd_pop_dirty;
-	std::vector <VolumeData*> m_vd_pop_list;
+	std::vector<std::weak_ptr<VolumeData>> m_vd_pop_list;
 	bool m_md_pop_dirty;
-	std::vector <MeshData*> m_md_pop_list;
+	std::vector<std::weak_ptr<MeshData>> m_md_pop_list;
 	//real data list
-	std::vector <TreeLayer*> m_layer_list;
+	std::vector<std::shared_ptr<TreeLayer>> m_layer_list;
 	//ruler list
 	std::unique_ptr<flrd::RulerList> m_ruler_list;
-	flrd::Ruler *m_cur_ruler;
+	std::weak_ptr<flrd::Ruler> m_cur_ruler;
 	//traces
 	TrackGroup* m_track_group;
 	//multivolume
-	flvr::MultiVolumeRenderer* m_mvr;
+	std::unique_ptr<flvr::MultiVolumeRenderer> m_mvr;
 	//highlighted comps
 	std::unique_ptr<flrd::CelpList> m_cell_list;
 	//initializaion

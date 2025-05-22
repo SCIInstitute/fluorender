@@ -491,27 +491,26 @@ void ListPanel::SaveSelection()
 		fluo::Quaternion q = view->GetClipRotation();
 		vd->SetResize(0, 0, 0, 0);
 
-		ModalDlg* fopendlg = new ModalDlg(
+		ModalDlg fopendlg(
 			m_frame, "Save Volume Data", "", "",
 			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
 			"Utah Nrrd file (*.nrrd)|*.nrrd",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		fopendlg->SetExtraControlCreator(CreateExtraControl);
+		fopendlg.SetExtraControlCreator(CreateExtraControl);
 
-		int rval = fopendlg->ShowModal();
+		int rval = fopendlg.ShowModal();
 
 		if (rval == wxID_OK)
 		{
-			std::wstring filename = fopendlg->GetPath().ToStdWstring();
-			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+			std::wstring filename = fopendlg.GetPath().ToStdWstring();
+			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
 				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 				false, glbin_settings.m_save_compress,
 				fluo::Point(), q, fluo::Point(), false);
 			std::wstring str = vd->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
-		delete fopendlg;
 	}
 	break;
 	case 3://mesh
@@ -519,22 +518,21 @@ void ListPanel::SaveSelection()
 		MeshData* md = glbin_current.mesh_data;
 		if (!md)
 			break;
-		ModalDlg* fopendlg = new ModalDlg(
+		ModalDlg fopendlg(
 			m_frame, "Save Mesh Data", "", "",
 			"OBJ file (*.obj)|*.obj",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-		int rval = fopendlg->ShowModal();
+		int rval = fopendlg.ShowModal();
 
 		if (rval == wxID_OK)
 		{
-			std::wstring filename = fopendlg->GetPath().ToStdWstring();
+			std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
 			md->Save(filename);
 			std::wstring str = md->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
-		delete fopendlg;
 	}
 	break;
 	case 4://annotations
@@ -542,22 +540,21 @@ void ListPanel::SaveSelection()
 		Annotations* ann = glbin_current.ann_data;
 		if (!ann)
 			break;
-		ModalDlg* fopendlg = new ModalDlg(
+		ModalDlg fopendlg(
 			m_frame, "Save Annotations", "", "",
 			"Text file (*.txt)|*.txt",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-		int rval = fopendlg->ShowModal();
+		int rval = fopendlg.ShowModal();
 
 		if (rval == wxID_OK)
 		{
-			std::wstring filename = fopendlg->GetPath().ToStdWstring();
+			std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
 			ann->Save(filename);
 			std::wstring str = ann->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
-		delete fopendlg;
 	}
 	break;
 	}
@@ -574,25 +571,25 @@ void ListPanel::BakeSelection()
 	if (!vd)
 		return;
 
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Bake Volume Data", "", "",
 		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
 		"Utah Nrrd file (*.nrrd)|*.nrrd",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg->SetExtraControlCreator(CreateExtraControl);
+	fopendlg.SetExtraControlCreator(CreateExtraControl);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 
 	if (rval == wxID_OK)
 	{
-		std::wstring filename = fopendlg->GetPath().ToStdWstring();
+		std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
 		RenderView* view = glbin_current.render_view;
 		if (view)
 		{
 			fluo::Quaternion q = view->GetClipRotation();
-			vd->Save(filename, fopendlg->GetFilterIndex(), 3, false,
+			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
 				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 				true, glbin_settings.m_save_compress,
 				fluo::Point(), q, fluo::Point(), false);
@@ -600,8 +597,6 @@ void ListPanel::BakeSelection()
 			m_datalist->SetText(item, 2, str);
 		}
 	}
-
-	delete fopendlg;
 }
 
 void ListPanel::SaveSelMask()

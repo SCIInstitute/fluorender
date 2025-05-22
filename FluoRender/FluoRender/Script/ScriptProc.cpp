@@ -150,7 +150,6 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 						if (m_break_count == 1)
 						{
 							//reset on first break
-							//delete m_fconfig;
 							return 2;
 						}
 				}
@@ -274,7 +273,7 @@ bool ScriptProc::TimeCondition()
 	return false;
 }
 
-bool ScriptProc::GetVolumes(std::vector<VolumeData*>& list)
+bool ScriptProc::GetVolumes(std::vector<std::shared_ptr<VolumeData>>& list)
 {
 	if (!m_fconfig || !m_view)
 		return false;
@@ -285,19 +284,19 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*>& list)
 	{
 		VolumeData* vol = glbin_current.vol_data;
 		if (vol)
-			list.push_back(vol);
+			list.push_back(std::shared_ptr<VolumeData>(vol));
 		else
 			return false;
 	}
 	else if (chan_mode == 1)
 	{
 		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
-			list.push_back(m_view->GetAllVolumeData(i));
+			list.push_back(std::shared_ptr<VolumeData>(m_view->GetAllVolumeData(i)));
 	}
 	else if (chan_mode == 2)
 	{
 		for (int i = 0; i < m_view->GetDispVolumeNum(); ++i)
-			list.push_back(m_view->GetDispVolumeData(i));
+			list.push_back(std::shared_ptr<VolumeData>(m_view->GetDispVolumeData(i)));
 	}
 	else if (chan_mode == 3)
 	{
@@ -305,7 +304,7 @@ bool ScriptProc::GetVolumes(std::vector<VolumeData*>& list)
 		{
 			VolumeData* vol = m_view->GetAllVolumeData(i);
 			if (!vol->GetDisp())
-				list.push_back(vol);
+				list.push_back(std::shared_ptr<VolumeData>(vol));
 		}
 	}
 	return !list.empty();
@@ -593,7 +592,7 @@ void ScriptProc::RunNoiseReduction()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -609,7 +608,7 @@ void ScriptProc::RunNoiseReduction()
 		i != vlist.end(); ++i)
 	{
 		//m_view->m_cur_vol = *i;
-		glbin_vol_calculator.SetVolumeA(*i);
+		glbin_vol_calculator.SetVolumeA(i->get());
 
 		//selection
 		glbin_comp_def.m_nr_thresh = thresh;
@@ -795,7 +794,7 @@ void ScriptProc::RunRandomColors()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -810,7 +809,7 @@ void ScriptProc::RunRandomColors()
 		i != vlist.end(); ++i)
 	{
 		//generate RGB volumes
-		glbin_vol_selector.SetVolume(*i);
+		glbin_vol_selector.SetVolume(i->get());
 		glbin_vol_selector.CompExportRandomColor(hmode, 0, 0, 0, false, false);
 	}
 }
@@ -819,7 +818,7 @@ void ScriptProc::RunCompSelect()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -833,7 +832,7 @@ void ScriptProc::RunCompSelect()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		glbin_current.SetVolumeData(*i);
+		glbin_current.SetVolumeData(i->get());
 
 		switch (mode)
 		{
@@ -864,7 +863,7 @@ void ScriptProc::RunCompEdit()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -876,7 +875,7 @@ void ScriptProc::RunCompEdit()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		glbin_current.SetVolumeData(*i);
+		glbin_current.SetVolumeData(i->get());
 
 		switch (edit_type)
 		{
@@ -891,7 +890,7 @@ void ScriptProc::RunFetchMask()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -937,7 +936,7 @@ void ScriptProc::RunClearMask()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -962,7 +961,7 @@ void ScriptProc::RunSaveMask()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1013,7 +1012,7 @@ void ScriptProc::RunSaveVolume()
 	fluo::Quaternion rot;
 	fluo::Point transl, center;
 	bool fix_size = false;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (source == "channels" ||
 		source == "")
 	{
@@ -1021,26 +1020,18 @@ void ScriptProc::RunSaveVolume()
 	}
 	else if (source == "calculator")
 	{
-		//VolumeCalculator* calculator = m_view->GetVolumeCalculator();
-		//if (!calculator) return;
-		VolumeData* vd = 0;
-		while (vd = glbin_vol_calculator.GetResult(true))
+		while (auto vd = glbin_vol_calculator.GetResult(true))
 			vlist.push_back(vd);
 	}
 	else if (source == "selector")
 	{
-		//VolumeSelector* selector = m_view->GetVolumeSelector();
-		//if (!selector) return;
 		VolumeData* vd = 0;
 		while (vd = glbin_vol_selector.GetResult(true))
-			vlist.push_back(vd);
+			vlist.push_back(std::shared_ptr<VolumeData>(vd));
 	}
 	else if (source == "executor")
 	{
-		//KernelExecutor* executor = m_view->GetKernelExecutor();
-		//if (!executor) return;
-		VolumeData* vd = 0;
-		while (vd = glbin_kernel_executor.GetResult(true))
+		while (auto vd = glbin_kernel_executor.GetResult(true))
 			vlist.push_back(vd);
 	}
 	else if (source == "registrator")
@@ -1091,8 +1082,6 @@ void ScriptProc::RunSaveVolume()
 			bake, compression,
 			center, rot, transl,
 			fix_size);
-		if (del_vol)
-			delete* i;
 	}
 }
 
@@ -1140,7 +1129,7 @@ void ScriptProc::RunOpenCL()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1161,8 +1150,7 @@ void ScriptProc::RunOpenCL()
 	{
 		(*i)->GetVR()->clear_tex_current();
 		glbin_kernel_executor.LoadCode(clname);
-		VolumeData* vd = 0;
-		glbin_kernel_executor.SetVolume(*i);
+		glbin_kernel_executor.SetVolume(i->get());
 		glbin_kernel_executor.Execute();
 	}
 
@@ -1173,7 +1161,7 @@ void ScriptProc::RunCompAnalysis()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1196,7 +1184,7 @@ void ScriptProc::RunCompAnalysis()
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
 		int bn = (*itvol)->GetAllBrickNum();
-		glbin_comp_analyzer.SetVolume(*itvol);
+		glbin_comp_analyzer.SetVolume(itvol->get());
 		glbin_comp_analyzer.SetSizeLimit(slimit);
 		glbin_comp_analyzer.SetConsistent(consistent);
 		glbin_comp_analyzer.Analyze(selected);
@@ -1284,7 +1272,7 @@ void ScriptProc::RunCompRuler()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 	RulerList* ruler_list = m_view->GetRulerList();
@@ -1374,7 +1362,7 @@ void ScriptProc::RunGenerateComp()
 	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1397,7 +1385,7 @@ void ScriptProc::RunGenerateComp()
 	for (auto i = vlist.begin();
 		i != vlist.end(); ++i)
 	{
-		glbin_comp_generator.SetVolumeData(*i);
+		glbin_comp_generator.SetVolumeData(i->get());
 		if (use_ml)
 		{
 			flrd::TableHistParams& table = glbin.get_cg_table();
@@ -1414,7 +1402,7 @@ void ScriptProc::RunRulerProfile()
 	if (!m_frame) return;
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1440,7 +1428,7 @@ void ScriptProc::RunRulerProfile()
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		glbin_current.SetVolumeData(*itvol);
+		glbin_current.SetVolumeData(itvol->get());
 		glbin_ruler_handler.ProfileAll();
 
 		//output
@@ -1500,7 +1488,7 @@ void ScriptProc::RunRoi()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1515,7 +1503,7 @@ void ScriptProc::RunRoi()
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
-		glbin_current.SetVolumeData(*itvol);
+		glbin_current.SetVolumeData(itvol->get());
 
 		//output
 		//time group
@@ -1645,7 +1633,7 @@ void ScriptProc::RunBackgroundStat()
 {
 	if (!TimeCondition())
 		return;
-	std::vector<VolumeData*> vlist;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (!GetVolumes(vlist))
 		return;
 
@@ -1658,7 +1646,7 @@ void ScriptProc::RunBackgroundStat()
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
 
-		flrd::BackgStat bgs(*itvol);
+		flrd::BackgStat bgs(itvol->get());
 		bool bval;
 		m_fconfig->Read("use_mask", &bval, false);
 		bgs.SetUseMask(bval);

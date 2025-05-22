@@ -269,15 +269,15 @@ void OclDlg::Execute()
 	//add result for rendering
 	if (dup)
 	{
-		VolumeData* vd_r = glbin_kernel_executor.GetResult(true);
+		auto vd_r = glbin_kernel_executor.GetResult(true);
 		if (!vd_r)
 			return;
 		if (m_frame)
 		{
 			glbin_data_manager.AddVolumeData(vd_r);
-			view->AddVolumeData(vd_r);
+			view->AddVolumeData(vd_r.get());
 			vd->SetDisp(false);
-			glbin_current.SetVolumeData(vd_r);
+			glbin_current.SetVolumeData(vd_r.get());
 		}
 	}
 
@@ -292,21 +292,18 @@ void OclDlg::Execute()
 
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 {
-	ModalDlg *fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		wxString filename = fopendlg.GetPath();
 		m_kernel_edit_stc->LoadFile(filename);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->ChangeValue(filename);
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void OclDlg::OnSaveBtn(wxCommandEvent& event)
@@ -323,14 +320,14 @@ void OclDlg::OnSaveBtn(wxCommandEvent& event)
 
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
-	ModalDlg *fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Choose an OpenCL kernel file", 
 		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		wxString filename = fopendlg->GetPath();
+		wxString filename = fopendlg.GetPath();
 		rval = m_kernel_edit_stc->SaveFile(filename);
 		if (rval)
 		{
@@ -345,9 +342,6 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 			m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), fn);
 		}
 	}
-
-	if (fopendlg)
-		delete fopendlg;
 }
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)

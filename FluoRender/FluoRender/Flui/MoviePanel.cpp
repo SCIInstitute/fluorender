@@ -1865,18 +1865,17 @@ void MoviePanel::OnFullFrameText(wxCommandEvent& event)
 
 void MoviePanel::OnSave(wxCommandEvent& event)
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Save Movie Sequence",
 		"", "output", "MP4 file (*.mp4)|*.mp4|TIF files (*.tif)|*.tif",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg->SetExtraControlCreator(CreateExtraCaptureControl);
-	fopendlg->CenterOnParent();
-	int rval = fopendlg->ShowModal();
+	fopendlg.SetExtraControlCreator(CreateExtraCaptureControl);
+	fopendlg.CenterOnParent();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		Save(fopendlg->GetPath().ToStdWstring());
+		Save(fopendlg.GetPath().ToStdWstring());
 	}
-	delete fopendlg;
 }
 
 void MoviePanel::OnRotateChecked(wxCommandEvent& event)
@@ -2234,22 +2233,20 @@ void MoviePanel::OnScriptClearBtn(wxCommandEvent& event)
 
 void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 {
-	ModalDlg* fopendlg = new ModalDlg(
+	ModalDlg fopendlg(
 		m_frame, "Choose a 4D script file", "", "",
 		"4D script file (*.txt)|*.txt",
 		wxFD_OPEN);
 
-	int rval = fopendlg->ShowModal();
+	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		std::wstring file = fopendlg->GetPath().ToStdWstring();
+		std::wstring file = fopendlg.GetPath().ToStdWstring();
 		glbin_settings.m_script_file = file;
 		m_script_file_text->ChangeValue(file);
 
 		EnableScript(true, file);
 	}
-
-	delete fopendlg;
 }
 
 void MoviePanel::OnScriptListSelected(wxListEvent& event)
