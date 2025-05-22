@@ -157,6 +157,16 @@ RenderView* Root::GetLastView()
 	else return 0;
 }
 
+std::shared_ptr<RenderView> Root::GetViewSharedPtr(RenderView* view)
+{
+	for (auto it : m_views)
+	{
+		if (it.get() == view)
+			return it;
+	}
+	return nullptr;
+}
+
 void Root::AddView(RenderView* view)
 {
 	if (view)
@@ -4270,7 +4280,7 @@ int Annotations::Load(const std::wstring &filename)
 		else if (sline.substr(0, 7) == L"Volume: ")
 		{
 			str = sline.substr(8, sline.length()-8);
-			m_vd = glbin_data_manager.GetVolumeDataWeakPtr(
+			m_vd = glbin_data_manager.GetVolumeDataSharedPtr(
 				glbin_data_manager.GetVolumeData(str));
 			if (auto vd_ptr = m_vd.lock())
 			{
@@ -6545,7 +6555,7 @@ VolumeData* DataManager::GetVolumeData(const std::wstring &name)
 	return 0;
 }
 
-std::weak_ptr<VolumeData> DataManager::GetVolumeDataWeakPtr(VolumeData* vd)
+std::shared_ptr<VolumeData> DataManager::GetVolumeDataSharedPtr(VolumeData* vd)
 {
 	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
@@ -6554,7 +6564,7 @@ std::weak_ptr<VolumeData> DataManager::GetVolumeDataWeakPtr(VolumeData* vd)
 			return m_vd_list[i];
 		}
 	}
-	return std::weak_ptr<VolumeData>();
+	return nullptr;
 }
 
 MeshData* DataManager::GetMeshData(const std::wstring &name)

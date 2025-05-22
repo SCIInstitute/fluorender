@@ -64,7 +64,12 @@ public:
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
 
-	RenderView* GetRenderView() { return m_render_view; }
+	RenderView* GetRenderView()
+	{
+		if (auto view_ptr = m_render_view.lock())
+			return view_ptr.get();
+		return 0;
+	}
 
 	//get view info for external ops
 	//get size, considering enlargement
@@ -86,7 +91,7 @@ private:
 	//previous focus before brush
 	wxWindow* m_prev_focus;
 	//render view
-	RenderView* m_render_view;
+	std::weak_ptr<RenderView> m_render_view;
 
 	//timer for full screen
 	wxTimer m_fullscreen_trigger;

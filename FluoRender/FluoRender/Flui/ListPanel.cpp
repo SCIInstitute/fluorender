@@ -428,7 +428,7 @@ void ListPanel::AddSelectionToView(int vid)
 		else
 			view->InitView(INIT_BOUNDS | INIT_CENTER);
 	}
-	vc.insert(gstTreeCtrl);
+	vc.insert({ gstListCtrl, gstTreeCtrl });
 	FluoRefresh(0, vc, { vid });
 }
 

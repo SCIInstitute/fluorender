@@ -186,13 +186,14 @@ public:
 	RenderView* GetView(const std::wstring& name);
 	int GetView(RenderView* view);
 	RenderView* GetLastView();
+	std::shared_ptr<RenderView> GetViewSharedPtr(RenderView* view);
 	void AddView(RenderView* view);
 	void DeleteView(int i);
 	void DeleteView(RenderView* view);
 	void DeleteView(const std::wstring& name);
 
 private:
-	std::vector<std::unique_ptr<RenderView>> m_views;
+	std::vector<std::shared_ptr<RenderView>> m_views;
 };
 
 class VolumeData : public TreeLayer
@@ -1430,7 +1431,7 @@ public:
 	void RemoveVolumeData(size_t index);
 	void RemoveVolumeData(const std::wstring &name);
 	size_t GetVolumeNum();
-	std::weak_ptr<VolumeData> GetVolumeDataWeakPtr(VolumeData* vd);
+	std::shared_ptr<VolumeData> GetVolumeDataSharedPtr(VolumeData* vd);
 	VolumeData* GetVolumeData(size_t index);
 	VolumeData* GetVolumeData(const std::wstring &name);
 	size_t GetVolumeIndex(const std::wstring &name);

@@ -80,15 +80,16 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 
-	m_render_view = new RenderView();
+	RenderView* view = new RenderView();
 	Root* root = glbin_data_manager.GetRoot();
-	root->AddView(m_render_view);
-	m_render_view->SetRenderViewPanel(m_renderview_panel);
-	m_render_view->SetRenderCanvas(this);
+	view->SetRenderViewPanel(m_renderview_panel);
+	view->SetRenderCanvas(this);
 #ifdef _WIN32
-	m_render_view->SetHandle((void*)GetHWND());
+	view->SetHandle((void*)GetHWND());
 #endif
-	m_render_view->SetSize(size.x, size.y);
+	view->SetSize(size.x, size.y);
+	root->AddView(view);
+	m_render_view = root->GetViewSharedPtr(view);
 
 #ifdef _WIN32
 	//tablet initialization
@@ -151,13 +152,13 @@ RenderCanvas::~RenderCanvas()
 		diag->ShowModal();
 	}
 
-	if (m_render_view)
+	if (auto view_ptr = m_render_view.lock())
 	{
-		m_render_view->SetRenderCanvas(0);
-		m_render_view->SetRenderViewPanel(0);
+		view_ptr->SetRenderCanvas(0);
+		view_ptr->SetRenderViewPanel(0);
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
-			root->DeleteView(m_render_view);
+			root->DeleteView(view_ptr.get());
 	}
 
 #ifdef _WIN32
@@ -207,8 +208,11 @@ inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
 #endif
 	fluo::Point pnt(e.GetPosition().x, e.GetPosition().y, 0);
 	pnt *= dval;
-	if (m_render_view->GetEnlarge())
-		pnt = pnt * m_render_view->GetEnlargeScale();
+	if (auto view_ptr = m_render_view.lock())
+	{
+		if (view_ptr->GetEnlarge())
+			pnt = pnt * view_ptr->GetEnlargeScale();
+	}
 	return pnt;
 }
 
@@ -249,13 +253,17 @@ void RenderCanvas::Draw()
 #endif
 
 	wxPaintDC dc(this);
-	if (m_render_view->ForceDraw())
-		SwapBuffers();
+	if (auto view_ptr = m_render_view.lock())
+	{
+		if (view_ptr->ForceDraw())
+			SwapBuffers();
+	}
 
 }
 void RenderCanvas::Init()
 {
-	m_render_view->Init();
+	if (auto view_ptr = m_render_view.lock())
+		view_ptr->Init();
 	m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
 }
 
@@ -362,29 +370,36 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 #ifdef _DARWIN
 	dval = GetDPIScaleFactor();
 #endif
-	m_render_view->SetDpiFactor(dval);
 
-	wxSize size = GetSize();
-	m_render_view->SetSize(size.x, size.y);
+	if (auto view_ptr = m_render_view.lock())
+	{
+		view_ptr->SetDpiFactor(dval);
 
-	wxRect rect = GetClientRect();
-	m_render_view->SetClient(rect.x, rect.y, rect.width, rect.height);
+		wxSize size = GetSize();
+		view_ptr->SetSize(size.x, size.y);
 
-	m_render_view->RefreshGL(1);
+		wxRect rect = GetClientRect();
+		view_ptr->SetClient(rect.x, rect.y, rect.width, rect.height);
+
+		view_ptr->RefreshGL(1);
+	}
+
 	m_renderview_panel->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderCanvas::OnMove(wxMoveEvent& event)
 {
 	wxRect rect = GetClientRect();
-	m_render_view->SetClient(rect.x, rect.y, rect.width, rect.height);
+	if (auto view_ptr = m_render_view.lock())
+		view_ptr->SetClient(rect.x, rect.y, rect.width, rect.height);
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
 	IdleState state;
+	auto view_ptr = m_render_view.lock();
 
-	state.m_movie_maker_render_canvas = m_render_view && (glbin_moviemaker.GetView() == m_render_view);
+	state.m_movie_maker_render_canvas = view_ptr && (glbin_moviemaker.GetView() == view_ptr.get());
 	//mouse state
 	wxPoint mps = wxGetMousePosition();
 	state.m_mouse_over = wxFindWindowAtPoint(mps) == this &&
@@ -421,7 +436,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 	m_prev_focus = FindFocus();
 
-	m_render_view->ProcessIdle(state);
+	if (view_ptr)
+		view_ptr->ProcessIdle(state);
 
 	event.RequestMore(state.m_request_more);
 
@@ -489,7 +505,8 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Raise();
 			m_frame->Show();
 		}
-		m_render_view->RefreshGL(40);
+		if (auto view_ptr = m_render_view.lock())
+			view_ptr->RefreshGL(40);
 	}
 }
 
@@ -662,9 +679,12 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 		state.m_mouse_wheel_rotate != 0))
 		SetFocus();
 
-	m_render_view->SetMousePos(event.GetPosition().x, event.GetPosition().y);
+	if (auto view_ptr = m_render_view.lock())
+	{
+		view_ptr->SetMousePos(event.GetPosition().x, event.GetPosition().y);
 
-	m_render_view->ProcessMouse(state);
+		view_ptr->ProcessMouse(state);
+	}
 
 	if (state.m_reset_focus_slider)
 		SetFocusedSlider(nullptr);

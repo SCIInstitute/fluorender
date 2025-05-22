@@ -1558,12 +1558,12 @@ void MainFrame::DeleteRenderViewPanel(int i)
 		m_render_view_panels.erase(m_render_view_panels.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
-		delete vrv;
+		vrv->Destroy();
+		//delete vrv;
 		m_aui_mgr.Update();
 
 		if (glbin_mov_def.m_view_idx >= i)
 			glbin_mov_def.m_view_idx--;
-		UpdateProps({ gstTreeCtrl, gstMovViewList, gstMovViewIndex });
 	}
 }
 
@@ -1575,7 +1575,7 @@ void MainFrame::DeleteRenderViewPanel(const std::wstring &name)
 		if (view && name == view->GetName() && view->Id() > 1)
 		{
 			DeleteRenderViewPanel(i);
-			return;
+			break;
 		}
 	}
 }

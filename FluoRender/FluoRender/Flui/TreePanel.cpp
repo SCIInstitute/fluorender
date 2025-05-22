@@ -978,10 +978,10 @@ void TreePanel::DeleteSelection()
 	case 1://view
 	{
 		std::wstring name = view->GetName();
+		m_frame->DeleteRenderViewPanel(name);
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->DeleteView(name);
-		m_frame->DeleteRenderViewPanel(name);
 	}
 		break;
 	case 2://volume
@@ -1040,7 +1040,7 @@ void TreePanel::DeleteSelection()
 
 	glbin_current.SetRoot();
 
-	FluoRefresh(0, { gstTreeCtrl, gstListCtrl });
+	FluoRefresh(0, { gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex });
 }
 
 //delete
@@ -1052,8 +1052,8 @@ void TreePanel::DeleteAll()
 	{
 		for (int i = root->GetViewNum(); i > 1; --i)
 		{
-			root->DeleteView(i - 1);
 			m_frame->DeleteRenderViewPanel(i - 1);
+			root->DeleteView(i - 1);
 		}
 	}
 
@@ -1061,7 +1061,7 @@ void TreePanel::DeleteAll()
 
 	glbin_current.SetRoot();
 
-	FluoRefresh(0, { gstTreeCtrl });
+	FluoRefresh(0, { gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex });
 }
 
 void TreePanel::Expand()
@@ -1205,14 +1205,14 @@ void TreePanel::CloseView()
 	if (view)
 	{
 		std::wstring name = view->GetName();
+		m_frame->DeleteRenderViewPanel(name);
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->DeleteView(name);
-		m_frame->DeleteRenderViewPanel(name);
 	}
 
 	glbin_current.SetRoot();
-	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect });
+	FluoRefresh(0, { gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex });
 }
 
 void TreePanel::Isolate()
