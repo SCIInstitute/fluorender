@@ -141,19 +141,19 @@ public:
 	std::shared_ptr<Annotations> GetAnnotations(const std::wstring &name);
 	std::shared_ptr<DataGroup> GetGroup(const std::wstring &name);
 	std::shared_ptr<DataGroup> GetGroup(int index);
-	std::shared_ptr<DataGroup> GetGroup(VolumeData* vd);
+	std::shared_ptr<DataGroup> GetGroup(const std::shared_ptr<VolumeData>& vd);
 	std::shared_ptr<MeshGroup> GetMGroup(const std::wstring &str);
 	//add
-	std::shared_ptr<DataGroup> AddVolumeData(VolumeData* vd, const std::wstring &group_name = L"");
-	void AddMeshData(MeshData* md);
-	void AddAnnotations(Annotations* ann);
+	std::shared_ptr<DataGroup> AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring &group_name = L"");
+	void AddMeshData(const std::shared_ptr<MeshData>& md);
+	void AddAnnotations(const std::shared_ptr<Annotations>& ann);
 	std::wstring AddGroup(const std::wstring& str, const std::wstring& prev_group = L"");
 	std::shared_ptr<DataGroup> AddOrGetGroup();
 	std::wstring AddMGroup(const std::wstring& str);
 	std::shared_ptr<MeshGroup> AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(const std::wstring &name);
-	void ReplaceVolumeData(const std::wstring &name, VolumeData *dst);
+	void ReplaceVolumeData(const std::wstring &name, const std::shared_ptr<VolumeData>& dst);
 	void RemoveMeshData(const std::wstring &name);
 	void RemoveAnnotations(const std::wstring &name);
 	void RemoveGroup(const std::wstring &name);
@@ -293,7 +293,7 @@ public:
 	//4d movie frame calculation
 	void Get4DSeqRange(int &start_frame, int &end_frame);
 	void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind);
-	void UpdateVolumeData(int frame, VolumeData* vd);
+	void UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& vd);
 	void ReloadVolumeData(int frame);
 	//3d batch file calculation
 	void Get3DBatRange(int &start_frame, int &end_frame);
@@ -339,8 +339,8 @@ public:
 	bool GetPaintUse2d();
 
 	//calculations
-	void SetVolumeA(VolumeData* vd);
-	void SetVolumeB(VolumeData* vd);
+	void SetVolumeA(const std::shared_ptr<VolumeData>& vd);
+	void SetVolumeB(const std::shared_ptr<VolumeData>& vd);
 
 	//brush properties
 	//change display
@@ -544,7 +544,7 @@ private:
 	std::unique_ptr<flrd::RulerList> m_ruler_list;
 	std::weak_ptr<flrd::Ruler> m_cur_ruler;
 	//traces
-	TrackGroup* m_track_group;
+	std::unique_ptr<TrackGroup> m_track_group;
 	//multivolume
 	std::unique_ptr<flvr::MultiVolumeRenderer> m_mvr;
 	//highlighted comps
@@ -776,7 +776,7 @@ private:
 	int m_client_h;
 
 #if defined(_WIN32) && defined(USE_XINPUT)
-	XboxController* m_controller;
+	std::unique_ptr<XboxController> m_controller;
 	bool m_control_connected;
 #endif
 

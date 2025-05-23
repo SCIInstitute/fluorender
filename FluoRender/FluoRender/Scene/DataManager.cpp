@@ -205,8 +205,6 @@ void Root::DeleteView(const std::wstring& name)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 VolumeData::VolumeData()
 {
-	m_reader = 0;
-
 	type = 2;//volume
 
 	//current channel index
@@ -346,8 +344,6 @@ VolumeData::VolumeData()
 
 VolumeData::VolumeData(VolumeData &copy)
 {
-	m_reader = 0;
-
 	if (copy.m_vr)
 		m_vr = std::make_unique<flvr::VolumeRenderer>(*copy.m_vr);
 	//layer properties
@@ -576,26 +572,29 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 
 	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(m_skip_brick);
-	if (m_reader && m_reader->GetType()==READER_BRKXML_TYPE)
+	if (auto reader = m_reader.lock())
 	{
-		BRKXMLReader *breader = (BRKXMLReader*)m_reader;
-		std::vector<flvr::Pyramid_Level> pyramid;
-		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo *>>>> fnames;
-		int ftype = BRICK_FILE_TYPE_NONE;
-
-		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
-		m_tex->SetCopyableLevel(breader->GetCopyableLevel());
-
-		int lmnum = breader->GetLandmarkNum();
-		for (int j = 0; j < lmnum; j++)
+		if (reader->GetType() == READER_BRKXML_TYPE)
 		{
-			std::wstring name;
-			VD_Landmark vlm;
-			breader->GetLandmark(j, vlm.name, vlm.x, vlm.y, vlm.z, vlm.spcx, vlm.spcy, vlm.spcz);
-			m_landmarks.push_back(vlm);
-			breader->GetMetadataID(m_metadata_id);
+			auto breader = std::dynamic_pointer_cast<BRKXMLReader>(reader);
+			std::vector<flvr::Pyramid_Level> pyramid;
+			std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>> fnames;
+			int ftype = BRICK_FILE_TYPE_NONE;
+
+			breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
+			m_tex->SetCopyableLevel(breader->GetCopyableLevel());
+
+			int lmnum = breader->GetLandmarkNum();
+			for (int j = 0; j < lmnum; j++)
+			{
+				std::wstring name;
+				VD_Landmark vlm;
+				breader->GetLandmark(j, vlm.name, vlm.x, vlm.y, vlm.z, vlm.spcx, vlm.spcy, vlm.spcz);
+				m_landmarks.push_back(vlm);
+				breader->GetMetadataID(m_metadata_id);
+			}
+			if (!m_tex->buildPyramid(pyramid, fnames, breader->isURL())) return 0;
 		}
-		if (!m_tex->buildPyramid(pyramid, fnames, breader->isURL())) return 0;
 	}
 	else
 	{
@@ -1565,8 +1564,11 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	msk_writer.SetData(data);
 	msk_writer.SetSpacings(spcx, spcy, spcz);
 	std::wstring filename;
-	if (use_reader && m_reader)
-		filename = m_reader->GetCurMaskName(t, c);
+	if (use_reader)
+	{
+		if (auto reader = m_reader.lock())
+			filename = reader->GetCurMaskName(t, c);
+	}
 	else
 		filename = m_tex_path.substr(0, m_tex_path.find_last_of(L'.')) + L".msk";
 	msk_writer.Save(filename, 0);
@@ -1590,8 +1592,11 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 	msk_writer.SetData(data);
 	msk_writer.SetSpacings(spcx, spcy, spcz);
 	std::wstring filename;
-	if (use_reader && m_reader)
-		filename = m_reader->GetCurLabelName(t, c);
+	if (use_reader)
+	{
+		if (auto reader = m_reader.lock())
+			filename = reader->GetCurLabelName(t, c);
+	}
 	else
 		filename = m_tex_path.substr(0, m_tex_path.find_last_of(L'.')) + L".lbl";
 	msk_writer.Save(filename, 1);
@@ -4129,7 +4134,7 @@ std::wstring Annotations::GetTextText(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index].get();
+		auto atext = m_alist[index];
 		if (atext)
 			return atext->m_txt;
 	}
@@ -4140,7 +4145,7 @@ fluo::Point Annotations::GetTextPos(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index].get();
+		auto atext = m_alist[index];
 		if (atext)
 			return atext->m_pos;
 	}
@@ -4151,7 +4156,7 @@ fluo::Point Annotations::GetTextTransformedPos(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index].get();
+		auto atext = m_alist[index];
 		if (atext && m_tform)
 			return m_tform->transform(atext->m_pos);
 	}
@@ -4162,7 +4167,7 @@ std::wstring Annotations::GetTextInfo(int index)
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
-		AText* atext = m_alist[index].get();
+		auto atext = m_alist[index];
 		if(atext)
 			return atext->m_info;
 	}
@@ -4171,9 +4176,9 @@ std::wstring Annotations::GetTextInfo(int index)
 
 void Annotations::AddText(const std::wstring& str, fluo::Point pos, const std::wstring& info)
 {
-	AText* atext = new AText(str, pos);
+	auto atext = std::make_shared<AText>(str, pos);
 	atext->SetInfo(info);
-	m_alist.push_back(std::shared_ptr<AText>(atext));
+	m_alist.push_back(atext);
 }
 
 void Annotations::SetTransform(fluo::Transform *tform)
@@ -4269,8 +4274,7 @@ int Annotations::Load(const std::wstring &filename)
 		else if (sline.substr(0, 7) == L"Volume: ")
 		{
 			str = sline.substr(8, sline.length()-8);
-			m_vd = glbin_data_manager.GetVolumeDataSharedPtr(
-				glbin_data_manager.GetVolumeData(str));
+			m_vd = glbin_data_manager.GetVolumeData(str);
 			if (auto vd_ptr = m_vd.lock())
 			{
 				m_tform = vd_ptr->GetTexture()->transform();
@@ -4311,8 +4315,8 @@ int Annotations::Load(const std::wstring &filename)
 
 			while (std::getline(fis, str))
 			{
-				if (AText* atext = GetAText(str))
-					m_alist.push_back(std::shared_ptr<AText>(atext));
+				if (auto atext = GetAText(str))
+					m_alist.push_back(atext);
 			}
 		}
 	}
@@ -4402,9 +4406,8 @@ bool Annotations::InsideClippingPlanes(fluo::Point &pos)
 	return true;
 }
 
-AText* Annotations::GetAText(const std::wstring& str)
+std::shared_ptr<AText> Annotations::GetAText(const std::wstring& str)
 {
-	AText *atext = 0;
 	std::wstring sID;
 	std::wstring sX;
 	std::wstring sY;
@@ -4450,11 +4453,12 @@ AText* Annotations::GetAText(const std::wstring& str)
 		y /= resy?resy:1;
 		z /= resz?resz:1;
 		fluo::Point pos(x, y, z);
-		atext = new AText(sID, pos);
+		auto atext = std::make_shared<AText>(sID, pos);
 		atext->SetInfo(sInfo);
+		return atext;
 	}
 
-	return atext;
+	return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5739,21 +5743,21 @@ flrd::RulerList* CurrentObjects::GetRulerList()
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetRulerList();
-	return 0;
+	return nullptr;
 }
 
 flrd::Ruler* CurrentObjects::GetRuler()
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetCurRuler();
-	return 0;
+	return nullptr;
 }
 
 TrackGroup* CurrentObjects::GetTrackGroup()
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetTrackGroup();
-	return 0;
+	return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5784,7 +5788,7 @@ void DataManager::ClearAll()
 	m_vd_cache_queue.clear();
 }
 
-void DataManager::SetVolumeDefault(VolumeData* vd)
+void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 {
 	bool use_ml = glbin_settings.m_vp_auto_apply;
 	if (use_ml)
@@ -5802,7 +5806,7 @@ void DataManager::SetVolumeDefault(VolumeData* vd)
 	}
 	else
 	{
-		glbin_vol_def.Apply(vd);
+		glbin_vol_def.Apply(vd.get());
 	}
 	//disable alpha for z = 1
 	int nx, ny, nz;
@@ -5929,7 +5933,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 				int nz_count = 0;
 				for (int i = ch_num; i > 0; i--)
 				{
-					VolumeData* vd = GetVolumeData(GetVolumeNum() - i);
+					auto vd = GetVolumeData(GetVolumeNum() - i);
 					if (vd)
 					{
 						view->AddVolumeData(vd, group->GetName());
@@ -5964,7 +5968,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		}
 		else if (ch_num == 1)
 		{
-			VolumeData* vd = GetVolumeData(GetVolumeNum() - 1);
+			auto vd = GetVolumeData(GetVolumeNum() - 1);
 			if (vd)
 			{
 				if (!vd->GetWlColor())
@@ -6001,13 +6005,14 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		}
 
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
-		m_frame->RefreshCanvases({ root->GetView(view) });
+		m_frame->RefreshCanvases({ root->GetView(view.get()) });
 	}
 
 	vc.insert(gstListCtrl);
 	vc.insert(gstTreeCtrl);
 	vc.insert(gstUpdateSync);
-	glbin_current.SetVolumeData(vd_sel);
+	if (auto vd_sel_ptr = vd_sel.lock())
+		glbin_current.SetVolumeData(vd_sel_ptr);
 	vc.insert(gstScaleFactor);
 
 	if (enable_4d)
@@ -6034,7 +6039,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->Init();
 
@@ -6104,14 +6109,14 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	}
 
 	size_t result = 0;
-	BaseReader* reader = 0;
+	std::shared_ptr<BaseReader> reader;
 
 	for (size_t i=0; i<m_reader_list.size(); i++)
 	{
 		std::wstring wstr = pathname;
 		if (m_reader_list[i]->Match(wstr))
 		{
-			reader = m_reader_list[i].get();
+			reader = m_reader_list[i];
 			break;
 		}
 	}
@@ -6150,42 +6155,43 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		//RGB tiff
 		//TODO: Loading with imageJ irrespective of the file type.
 		if (withImageJ == true)
-			reader = new ImageJReader();
+			reader = std::make_shared<ImageJReader>();
 		else {
 			if (type == LOAD_TYPE_TIFF)
-				reader = new TIFReader();
+				reader = std::make_shared<TIFReader>();
 			else if (type == LOAD_TYPE_NRRD)
-				reader = new NRRDReader();
+				reader = std::make_shared<NRRDReader>();
 			else if (type == LOAD_TYPE_OIB)
-				reader = new OIBReader();
+				reader = std::make_shared<OIBReader>();
 			else if (type == LOAD_TYPE_OIF)
-				reader = new OIFReader();
+				reader = std::make_shared<OIFReader>();
 			else if (type == LOAD_TYPE_LSM)
-				reader = new LSMReader();
+				reader = std::make_shared<LSMReader>();
 			else if (type == LOAD_TYPE_PVXML)
 			{
-				reader = new PVXMLReader();
-				((PVXMLReader*)reader)->SetFlipX(glbin_settings.m_pvxml_flip_x);
-				((PVXMLReader*)reader)->SetFlipY(glbin_settings.m_pvxml_flip_y);
-				((PVXMLReader*)reader)->SetSeqType(glbin_settings.m_pvxml_seq_type);
+				auto pvxml_reader = std::make_shared<PVXMLReader>();
+				pvxml_reader->SetFlipX(glbin_settings.m_pvxml_flip_x);
+				pvxml_reader->SetFlipY(glbin_settings.m_pvxml_flip_y);
+				pvxml_reader->SetSeqType(glbin_settings.m_pvxml_seq_type);
+				reader = pvxml_reader;
 			}
 			else if (type == LOAD_TYPE_BRKXML)
-				reader = new BRKXMLReader();
+				reader = std::make_shared<BRKXMLReader>();
 			else if (type == LOAD_TYPE_CZI)
-				reader = new CZIReader();
+				reader = std::make_shared<CZIReader>();
 			else if (type == LOAD_TYPE_ND2)
-				reader = new ND2Reader();
+				reader = std::make_shared<ND2Reader>();
 			else if (type == LOAD_TYPE_LIF)
-				reader = new LIFReader();
+				reader = std::make_shared<LIFReader>();
 			else if (type == LOAD_TYPE_LOF)
-				reader = new LOFReader();
+				reader = std::make_shared<LOFReader>();
 			else if (type == LOAD_TYPE_MPG)
-				reader = new MPGReader();
+				reader = std::make_shared<MPGReader>();
 		}
 		
 		reader->SetProgressFunc(GetProgressFunc());
 
-		m_reader_list.push_back(std::shared_ptr<BaseReader>(reader));
+		m_reader_list.push_back(reader);
 		reader->SetFile(pathname);
 		reader->SetSliceSeq(glbin_settings.m_slice_sequence);
 		reader->SetChannSeq(glbin_settings.m_chann_sequence);
@@ -6252,7 +6258,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		reader->SetRange(v1 + std::round(double(i) * r / chan),
 			v1 + std::round(double(i + 1) * r / chan));
 
-		VolumeData *vd = new VolumeData();
+		auto vd = std::make_shared<VolumeData>();
 		if (!vd)
 			continue;
 
@@ -6270,15 +6276,18 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		}
 		else
 		{
-			BRKXMLReader* breader = (BRKXMLReader*)reader;
 			name = reader->GetDataName();
 			std::filesystem::path p(name);
 			name = p.stem().wstring();
 			if (ch_num > 1)
 				name = L"_Ch" + std::to_wstring(i);
 			pathname = filename;
-			breader->SetCurChan(i);
-			breader->SetCurTime(0);
+			auto breader = std::dynamic_pointer_cast<BRKXMLReader>(reader);
+			if (breader)
+			{
+				breader->SetCurChan(i);
+				breader->SetCurTime(0);
+			}
 		}
 
 		vd->SetReader(reader);
@@ -6304,7 +6313,12 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				if (label)
 					vd->LoadLabel(label);
 			}
-			if (type == LOAD_TYPE_BRKXML) ((BRKXMLReader*)reader)->SetLevel(0);
+			if (type == LOAD_TYPE_BRKXML)
+			{
+				auto breader = std::dynamic_pointer_cast<BRKXMLReader>(reader);
+				if (breader)
+					breader->SetLevel(0);
+			}
 			//for 2D data
 			int xres, yres, zres;
 			vd->GetResolution(xres, yres, zres);
@@ -6322,11 +6336,10 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		}
 		else
 		{
-			delete vd;
 			continue;
 		}
 
-		AddVolumeData(std::shared_ptr<VolumeData>(vd));
+		AddVolumeData(vd);
 		SetVolumeDefault(vd);
 
 		//get excitation wavelength
@@ -6380,15 +6393,15 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 
 	if (!view)
 		view = root->GetView(0);
 	if (!view)
 		return;
 
-	MeshData* md_sel = 0;
-	MeshGroup* group = 0;
+	std::weak_ptr<MeshData> md_sel;
+	std::shared_ptr<MeshGroup> group;
 	size_t fn = files.size();
 	if (fn > 1)
 		group = view->AddOrGetMGroup();
@@ -6401,7 +6414,7 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 		std::wstring filename = files[i];
 		LoadMeshData(filename);
 
-		MeshData* md = GetLastMeshData();
+		auto md = GetLastMeshData();
 		if (view && md)
 		{
 			if (group)
@@ -6417,12 +6430,13 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 		}
 	}
 
-	glbin_current.SetMeshData(md_sel);
+	if (auto md_sel_ptr = md_sel.lock())
+		glbin_current.SetMeshData(md_sel_ptr);
 
 	if (view)
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
 
-	m_frame->RefreshCanvases({ root->GetView(view) });
+	m_frame->RefreshCanvases({ root->GetView(view.get()) });
 	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
 
 	SetProgress(0, "");
@@ -6438,7 +6452,7 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 			return false;
 	}
 
-	MeshData *md = new MeshData();
+	auto md = std::make_shared<MeshData>();
 	md->Load(pathname);
 
 	std::wstring name = md->GetName();
@@ -6448,7 +6462,7 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		md->SetName(new_name);
-	m_md_list.push_back(std::shared_ptr<MeshData>(md));
+	m_md_list.push_back(md);
 
 	return true;
 }
@@ -6457,7 +6471,7 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 {
 	if (!mesh) return false;
 
-	MeshData *md = new MeshData();
+	auto md = std::make_shared<MeshData>();
 	md->Load(mesh);
 
 	std::wstring name = md->GetName();
@@ -6467,44 +6481,32 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		md->SetName(new_name);
-	m_md_list.push_back(std::shared_ptr<MeshData>(md));
+	m_md_list.push_back(md);
 
 	return true;
 }
 
-VolumeData* DataManager::GetVolumeData(size_t index)
+std::shared_ptr<VolumeData> DataManager::GetVolumeData(size_t index)
 {
 	if (index<m_vd_list.size())
-		return m_vd_list[index].get();
+		return m_vd_list[index];
 	else
-		return 0;
+		return nullptr;
 }
 
-MeshData* DataManager::GetMeshData(size_t index)
+std::shared_ptr<MeshData> DataManager::GetMeshData(size_t index)
 {
 	if (index<m_md_list.size())
-		return m_md_list[index].get();
+		return m_md_list[index];
 	else
-		return 0;
+		return nullptr;
 }
 
-VolumeData* DataManager::GetVolumeData(const std::wstring &name)
+std::shared_ptr<VolumeData> DataManager::GetVolumeData(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
 		if (name == m_vd_list[i]->GetName())
-		{
-			return m_vd_list[i].get();
-		}
-	}
-	return 0;
-}
-
-std::shared_ptr<VolumeData> DataManager::GetVolumeDataSharedPtr(VolumeData* vd)
-{
-	for (size_t i=0 ; i<m_vd_list.size() ; i++)
-	{
-		if (vd == m_vd_list[i].get())
 		{
 			return m_vd_list[i];
 		}
@@ -6512,16 +6514,16 @@ std::shared_ptr<VolumeData> DataManager::GetVolumeDataSharedPtr(VolumeData* vd)
 	return nullptr;
 }
 
-MeshData* DataManager::GetMeshData(const std::wstring &name)
+std::shared_ptr<MeshData> DataManager::GetMeshData(const std::wstring &name)
 {
 	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
 		if (name == m_md_list[i]->GetName())
 		{
-			return m_md_list[i].get();
+			return m_md_list[i];
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 size_t DataManager::GetVolumeIndex(const std::wstring &name)
@@ -6538,13 +6540,13 @@ size_t DataManager::GetVolumeIndex(const std::wstring &name)
 	return -1;
 }
 
-VolumeData* DataManager::GetLastVolumeData()
+std::shared_ptr<VolumeData> DataManager::GetLastVolumeData()
 {
 	size_t num = m_vd_list.size();
 	if (num)
-		return m_vd_list[num-1].get();
+		return m_vd_list[num-1];
 	else
-		return 0;
+		return nullptr;
 }
 
 size_t DataManager::GetMeshIndex(const std::wstring &name)
@@ -6559,13 +6561,13 @@ size_t DataManager::GetMeshIndex(const std::wstring &name)
 	return -1;
 }
 
-MeshData* DataManager::GetLastMeshData()
+std::shared_ptr<MeshData> DataManager::GetLastMeshData()
 {
 	size_t num = m_md_list.size();
 	if (num)
-		return m_md_list[num-1].get();
+		return m_md_list[num-1];
 	else
-		return 0;
+		return nullptr;
 }
 
 void DataManager::RemoveVolumeData(size_t index)
@@ -6652,17 +6654,15 @@ void DataManager::AddVolumeData(const std::shared_ptr<VolumeData>& vd)
 	m_vd_cache_queue.emplace(vd.get(), std::move(vol_cache_queue));
 }
 
-VolumeData* DataManager::DuplicateVolumeData(VolumeData* vd)
+std::shared_ptr<VolumeData> DataManager::DuplicateVolumeData(const std::shared_ptr<VolumeData>& vd)
 {
-	VolumeData* vd_new = 0;
-
 	if (vd)
 	{
-		vd_new = new VolumeData(*vd);
-		AddVolumeData(std::shared_ptr<VolumeData>(vd_new));
+		auto vd_new = std::make_shared<VolumeData>(vd);
+		AddVolumeData(vd_new);
+		return vd_new;
 	}
-
-	return vd_new;
+	return nullptr;
 }
 
 bool DataManager::LoadAnnotations(const std::wstring &filename)
@@ -6675,7 +6675,7 @@ bool DataManager::LoadAnnotations(const std::wstring &filename)
 			return false;
 	}
 
-	Annotations* ann = new Annotations();
+	auto ann = std::make_shared<Annotations>();
 	ann->Load(pathname);
 
 	std::wstring name = ann->GetName();
@@ -6685,12 +6685,12 @@ bool DataManager::LoadAnnotations(const std::wstring &filename)
 		new_name = name + L"_" + std::to_string(i);
 	if (i>1)
 		ann->SetName(new_name);
-	m_annotation_list.push_back(std::shared_ptr<Annotations>(ann));
+	m_annotation_list.push_back(ann);
 
 	return true;
 }
 
-void DataManager::AddAnnotations(Annotations* ann)
+void DataManager::AddAnnotations(const std::shared_ptr<Annotations>& ann)
 {
 	if (!ann)
 		return;
@@ -6704,7 +6704,7 @@ void DataManager::AddAnnotations(Annotations* ann)
 	if (i>1)
 		ann->SetName(new_name);
 
-	m_annotation_list.push_back(std::shared_ptr<Annotations>(ann));
+	m_annotation_list.push_back(ann);
 }
 
 void DataManager::RemoveAnnotations(size_t index)
@@ -6721,22 +6721,22 @@ size_t DataManager::GetAnnotationNum()
 	return m_annotation_list.size();
 }
 
-Annotations* DataManager::GetAnnotations(size_t index)
+std::shared_ptr<Annotations> DataManager::GetAnnotations(size_t index)
 {
 	if (index<m_annotation_list.size())
-		return m_annotation_list[index].get();
+		return m_annotation_list[index];
 	else
-		return 0;
+		return nullptr;
 }
 
-Annotations* DataManager::GetAnnotations(const std::wstring &name)
+std::shared_ptr<Annotations> DataManager::GetAnnotations(const std::wstring &name)
 {
 	for (size_t i=0; i<m_annotation_list.size(); i++)
 	{
 		if (name == m_annotation_list[i]->GetName())
-			return m_annotation_list[i].get();
+			return m_annotation_list[i];
 	}
-	return 0;
+	return nullptr;
 }
 
 size_t DataManager::GetAnnotationIndex(const std::wstring &name)
@@ -6751,13 +6751,13 @@ size_t DataManager::GetAnnotationIndex(const std::wstring &name)
 	return -1;
 }
 
-Annotations* DataManager::GetLastAnnotations()
+std::shared_ptr<Annotations> DataManager::GetLastAnnotations()
 {
 	size_t num = m_annotation_list.size();
 	if (num)
-		return m_annotation_list[num-1].get();
+		return m_annotation_list[num - 1];
 	else
-		return 0;
+		return nullptr;
 }
 
 bool DataManager::CheckNames(const std::wstring &str)
@@ -6851,9 +6851,9 @@ fluo::Color DataManager::GetWavelengthColor(double wavelength)
 flvr::CacheQueue* DataManager::GetCacheQueue(VolumeData* vd)
 {
 	if (!vd)
-		return 0;
+		return nullptr;
 	auto it = m_vd_cache_queue.find(vd);
 	if (it != m_vd_cache_queue.end() && it->second)
 		return it->second.get();
-	return 0;
+	return nullptr;
 }

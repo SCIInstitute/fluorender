@@ -204,8 +204,8 @@ public:
 
 	//data related
 	//reader
-	void SetReader(BaseReader* reader) {m_reader = reader;}
-	BaseReader* GetReader() {return m_reader;}
+	void SetReader(const std::shared_ptr<BaseReader>& reader) {m_reader = reader;}
+	std::shared_ptr<BaseReader> GetReader() {return m_reader.lock();}
 	//compression
 	void SetCompression(bool compression);
 	bool GetCompression();
@@ -706,7 +706,7 @@ private:
 	GLuint m_2d_dmap;
 
 	//reader
-	BaseReader *m_reader;
+	std::weak_ptr<BaseReader> m_reader;
 
 	//compression
 	bool m_compression;
@@ -975,7 +975,7 @@ private:
 	std::wstring m_info_meaning;
 
 private:
-	AText* GetAText(const std::wstring& str);
+	std::shared_ptr<AText> GetAText(const std::wstring& str);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

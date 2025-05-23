@@ -80,9 +80,6 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 RenderView::RenderView() :
-#if defined(_WIN32) && defined(USE_XINPUT)
-	m_controller(0),
-#endif
 	//capture modes
 	m_capture(false),
 	m_capture_rotat(false),
@@ -135,8 +132,6 @@ RenderView::RenderView() :
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
-	//traces
-	m_track_group(0),
 	//initializaion
 	m_initialized(false),
 	m_init_view(false),
@@ -304,7 +299,7 @@ RenderView::RenderView() :
 
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
-	m_controller = new XboxController(1);
+	m_controller = std::make_unique<XboxController>(1);
 	if (m_controller)
 	{
 		m_control_connected = m_controller->IsConnected();
@@ -313,9 +308,6 @@ RenderView::RenderView() :
 }
 
 RenderView::RenderView(RenderView& copy):
-#if defined(_WIN32) && defined(USE_XINPUT)
-	m_controller(0),
-#endif
 	//ruler
 	m_cur_ruler(copy.m_cur_ruler),
 	//capture modes
@@ -370,8 +362,6 @@ RenderView::RenderView(RenderView& copy):
 	//populated lists of data
 	m_vd_pop_dirty(true),
 	m_md_pop_dirty(true),
-	//traces
-	m_track_group(0),
 	//initializaion
 	m_initialized(false),
 	m_init_view(false),
@@ -539,7 +529,7 @@ RenderView::RenderView(RenderView& copy):
 
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
-	m_controller = new XboxController(1);
+	m_controller = std::make_unique<XboxController>(1);
 	if (m_controller)
 	{
 		m_control_connected = m_controller->IsConnected();
@@ -615,14 +605,6 @@ RenderView::~RenderView()
 	//delete rulers
 	if (m_ruler_list)
 		m_ruler_list->DeleteRulers();
-
-	if (m_track_group)
-		delete m_track_group;
-
-#if defined(_WIN32) && defined(USE_XINPUT)
-	if (m_controller)
-		delete m_controller;
-#endif
 }
 
 //set render view panel
@@ -976,7 +958,7 @@ std::shared_ptr<VolumeData> RenderView::GetDispVolumeData(int index)
 		return nullptr;
 }
 
-MeshData* RenderView::GetMeshData(int index)
+std::shared_ptr<MeshData> RenderView::GetMeshData(int index)
 {
 	if (GetMeshNum() <= 0)
 		return 0;
@@ -984,44 +966,42 @@ MeshData* RenderView::GetMeshData(int index)
 	PopMeshList();
 
 	if (index >= 0 && index<(int)m_md_pop_list.size())
-		return m_md_pop_list[index];
+		return m_md_pop_list[index].lock();
 	else
-		return 0;
+		return nullptr;
 }
 
-TreeLayer* RenderView::GetLayer(int index)
+std::shared_ptr<TreeLayer> RenderView::GetLayer(int index)
 {
 	if (index >= 0 && index<(int)m_layer_list.size())
 		return m_layer_list[index];
 	else
-		return 0;
+		return nullptr;
 }
 
-VolumeData* RenderView::GetVolumeData(const std::wstring &name)
+std::shared_ptr<VolumeData> RenderView::GetVolumeData(const std::wstring &name)
 {
-	int i, j;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			auto vd = std::dynamic_pointer_cast<VolumeData>(it);
 			if (vd && vd->GetName() == name)
 				return vd;
 		}
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			if (!group)
 				break;
-			for (j = 0; j<group->GetVolumeNum(); j++)
+			for (int j = 0; j<group->GetVolumeNum(); ++j)
 			{
-				VolumeData* vd = group->GetVolumeData(j);
+				auto vd = group->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 					return vd;
 			}
@@ -1030,33 +1010,32 @@ VolumeData* RenderView::GetVolumeData(const std::wstring &name)
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
-MeshData* RenderView::GetMeshData(const std::wstring &name)
+std::shared_ptr<MeshData> RenderView::GetMeshData(const std::wstring &name)
 {
-	int i, j;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 3://mesh data
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			auto md = std::dynamic_pointer_cast<MeshData>(it);
 			if (md && md->GetName() == name)
 				return md;
 		}
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (!group) continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
+			if (!group)
+				break;
+			for (int j = 0; j<group->GetMeshNum(); j++)
 			{
-				MeshData* md = group->GetMeshData(j);
+				auto md = group->GetMeshData(j);
 				if (md && md->GetName() == name)
 					return md;
 			}
@@ -1064,127 +1043,111 @@ MeshData* RenderView::GetMeshData(const std::wstring &name)
 		break;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
-Annotations* RenderView::GetAnnotations(const std::wstring &name)
+std::shared_ptr<Annotations> RenderView::GetAnnotations(const std::wstring &name)
 {
-	int i;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (it->IsA() == 4)
 		{
-		case 4://annotations
-		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			auto ann = std::dynamic_pointer_cast<Annotations>(it);
 			if (ann && ann->GetName() == name)
 				return ann;
 		}
-		}
 	}
-	return 0;
+	return nullptr;
 }
 
-DataGroup* RenderView::GetGroup(const std::wstring &name)
+std::shared_ptr<DataGroup> RenderView::GetGroup(const std::wstring &name)
 {
-	int i;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (it->IsA() == 5)
 		{
-		case 5://group
-		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group && group->GetName() == name)
 				return group;
 		}
-		}
 	}
-	return 0;
+	return nullptr;
 }
 
-DataGroup* RenderView::GetGroup(int index)
+std::shared_ptr<DataGroup> RenderView::GetGroup(int index)
 {
-	int i;
 	int count = 0;
 
-	for (i = 0; i < (int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		if (m_layer_list[i]->IsA() == 5)
+		if (it->IsA() == 5)
 		{
 			if (count == index)
 			{
-				DataGroup* group = (DataGroup*)m_layer_list[i];
+				auto group = std::dynamic_pointer_cast<DataGroup>(it);
 				return group;
 			}
 			count++;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
-DataGroup* RenderView::GetGroup(VolumeData* vd)
+std::shared_ptr<DataGroup> RenderView::GetGroup(const std::shared_ptr<VolumeData>& vd)
 {
-	for (int i = 0; i < GetLayerNum(); i++)
+	for (auto& it : m_layer_list)
 	{
-		TreeLayer* layer = GetLayer(i);
-		if (layer && layer->IsA() == 5)
+		if (!it)
+			continue;
+		if (it->IsA() == 5)
 		{
-			DataGroup* group = (DataGroup*)layer;
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			for (int j = 0; j < group->GetVolumeNum(); j++)
 			{
-				VolumeData* tmp_vd = group->GetVolumeData(j);
+				auto tmp_vd = group->GetVolumeData(j);
 				if (tmp_vd && tmp_vd == vd)
 					return group;
 			}
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
-MeshGroup* RenderView::GetMGroup(const std::wstring& str)
+std::shared_ptr<MeshGroup> RenderView::GetMGroup(const std::wstring& str)
 {
-	int i;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (it->IsA() == 6)
 		{
-		case 6://mesh group
-		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
 			if (group && group->GetName() == str)
 				return group;
 		}
-		}
 	}
-	return 0;
+	return nullptr;
 }
 
-DataGroup* RenderView::AddVolumeData(VolumeData* vd, const std::wstring& group_name)
+std::shared_ptr<DataGroup> RenderView::AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring& group_name)
 {
-	//m_layer_list.push_back(vd);
-	int i;
-	DataGroup* group = 0;
-	DataGroup* group_temp = 0;
+	std::shared_ptr<DataGroup> group;
+	std::shared_ptr<DataGroup> group_temp;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		TreeLayer* layer = m_layer_list[i];
-		if (layer && layer->IsA() == 5)
+		if (!it)
+			continue;
+		if (it->IsA() == 5)
 		{
 			//layer is group
-			group_temp = (DataGroup*)layer;
+			group_temp = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group_temp && group_temp->GetName() == group_name)
 			{
 				group = group_temp;
@@ -1201,7 +1164,7 @@ DataGroup* RenderView::AddVolumeData(VolumeData* vd, const std::wstring& group_n
 		std::wstring group_name = AddGroup(L"");
 		group = GetGroup(group_name);
 		if (!group)
-			return 0;
+			return nullptr;
 	}
 
 	/*for (i=0; i<1; i++)
@@ -1236,40 +1199,41 @@ DataGroup* RenderView::AddVolumeData(VolumeData* vd, const std::wstring& group_n
 	return group;
 }
 
-void RenderView::AddMeshData(MeshData* md)
+void RenderView::AddMeshData(const std::shared_ptr<MeshData>& md)
 {
 	m_layer_list.push_back(md);
 	m_md_pop_dirty = true;
 }
 
-void RenderView::AddAnnotations(Annotations* ann)
+void RenderView::AddAnnotations(const std::shared_ptr<Annotations>& ann)
 {
 	m_layer_list.push_back(ann);
 }
 
 std::wstring RenderView::AddGroup(const std::wstring& str, const std::wstring& prev_group)
 {
-	DataGroup* group = new DataGroup();
+	auto group = std::make_shared<DataGroup>();
 	if (group && str != L"")
 		group->SetName(str);
 
 	bool found_prev = false;
-	for (size_t i = 0; i<m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (it->IsA() == 5)
 		{
-		case 5://group
-		{
-			DataGroup* group_temp = (DataGroup*)m_layer_list[i];
+			auto group_temp = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group_temp && group_temp->GetName() == prev_group)
 			{
-				m_layer_list.insert(m_layer_list.begin() + i + 1, group);
-				found_prev = true;
+				auto pos = std::find(m_layer_list.begin(),
+					m_layer_list.end(), it);
+				if (pos != m_layer_list.end())
+				{
+					m_layer_list.insert(pos + 1, group);
+					found_prev = true;
+				}
 			}
-		}
-		break;
 		}
 	}
 	if (!found_prev)
@@ -1298,27 +1262,23 @@ std::wstring RenderView::AddGroup(const std::wstring& str, const std::wstring& p
 		return L"";
 }
 
-DataGroup* RenderView::AddOrGetGroup()
+std::shared_ptr<DataGroup> RenderView::AddOrGetGroup()
 {
-	for (int i = 0; i < (int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (it->IsA() == 5)
 		{
-		case 5://group
-		{
-			DataGroup* group_temp = (DataGroup*)m_layer_list[i];
+			auto group_temp = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group_temp && !group_temp->GetVolumeNum())
 				return group_temp;
 		}
-		break;
-		}
 	}
 	//group not found
-	DataGroup* group = new DataGroup();
+	auto group = std::make_shared<DataGroup>();
 	if (!group)
-		return 0;
+		return nullptr;
 	//set default settings
 	group->SetGammaColor(
 		fluo::Color(glbin_outadj_def.m_gamma_r, glbin_outadj_def.m_gamma_g, glbin_outadj_def.m_gamma_b));
@@ -1335,7 +1295,7 @@ DataGroup* RenderView::AddOrGetGroup()
 
 std::wstring RenderView::AddMGroup(const std::wstring& str)
 {
-	MeshGroup* group = new MeshGroup();
+	auto group = std::make_shared<MeshGroup>();
 	if (group && str != L"")
 		group->SetName(str);
 	m_layer_list.push_back(group);
@@ -1346,27 +1306,23 @@ std::wstring RenderView::AddMGroup(const std::wstring& str)
 		return L"";
 }
 
-MeshGroup* RenderView::AddOrGetMGroup()
+std::shared_ptr<MeshGroup> RenderView::AddOrGetMGroup()
 {
-	for (int i = 0; i < (int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		if (it->IsA() == 6)
 		{
-		case 6://group
-		{
-			MeshGroup* group_temp = (MeshGroup*)m_layer_list[i];
+			auto group_temp = std::dynamic_pointer_cast<MeshGroup>(it);
 			if (group_temp && !group_temp->GetMeshNum())
 				return group_temp;
 		}
-		break;
-		}
 	}
 	//group not found
-	MeshGroup* group = new MeshGroup();
+	auto group = std::make_shared<MeshGroup>();
 	if (!group)
-		return 0;
+		return nullptr;
 	m_layer_list.push_back(group);
 	return group;
 }
@@ -1376,21 +1332,24 @@ void RenderView::RemoveVolumeData(const std::wstring &name)
 	//std::wstring str = GetName().ToStdWstring() + L":";
 	glbin_current.mainframe->DeleteProps(2, name);
 
-	for (auto iter = m_layer_list.begin();
-		iter != m_layer_list.end(); ++iter)
+	for (auto& it : m_layer_list)
 	{
-		if (!(*iter))
+		if (!it)
 			continue;
-		switch ((*iter)->IsA())
+		switch (it->IsA())
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)(*iter);
+			auto vd = std::dynamic_pointer_cast<VolumeData>(it);
 			if (vd && vd->GetName() == name)
 			{
-				m_layer_list.erase(iter);
-				if (m_cur_vol == vd)
-					m_cur_vol = 0;
+				auto pos = std::find(m_layer_list.begin(),
+					m_layer_list.end(), it);
+				if (pos != m_layer_list.end())
+					m_layer_list.erase(pos);
+				if (auto cur_vd_ptr = m_cur_vol.lock())
+					if (cur_vd_ptr == vd)
+						m_cur_vol.reset();
 				m_vd_pop_dirty = true;
 				return;
 			}
@@ -1398,15 +1357,16 @@ void RenderView::RemoveVolumeData(const std::wstring &name)
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)(*iter);
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			for (int j = 0; j < group->GetVolumeNum(); ++j)
 			{
-				VolumeData* vd = group->GetVolumeData(j);
+				auto vd = group->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 				{
 					group->RemoveVolumeData(j);
-					if (m_cur_vol == vd)
-						m_cur_vol = 0;
+					if (auto cur_vd_ptr = m_cur_vol.lock())
+						if (cur_vd_ptr == vd)
+							m_cur_vol.reset();
 					m_vd_pop_dirty = true;
 					return;
 				}
@@ -1416,28 +1376,28 @@ void RenderView::RemoveVolumeData(const std::wstring &name)
 	}
 }
 
-void RenderView::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
+void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_ptr<VolumeData>& dst)
 {
-	int i, j;
-
 	bool found = false;
-	DataGroup* group = 0;
+	std::shared_ptr<DataGroup> group;
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			auto vd = std::dynamic_pointer_cast<VolumeData>(it);
 			if (vd && vd->GetName() == name)
 			{
-				if (m_cur_vol == vd) m_cur_vol = dst;
-				glbin_vol_loader.RemoveBrickVD(vd);
+				if (auto cur_vd_ptr = m_cur_vol.lock())
+					if (cur_vd_ptr == vd)
+						m_cur_vol = dst;
+				glbin_vol_loader.RemoveBrickVD(vd.get());
 				vd->GetVR()->clear_tex_current();
-				m_layer_list[i] = dst;
+				it = dst;
 				m_vd_pop_dirty = true;
 				found = true;
 				glbin_data_manager.RemoveVolumeData(name);
@@ -1447,14 +1407,16 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
 		break;
 		case 5://group
 		{
-			DataGroup* tmpgroup = (DataGroup*)m_layer_list[i];
-			for (j = 0; j<tmpgroup->GetVolumeNum(); j++)
+			auto tmpgroup = std::dynamic_pointer_cast<DataGroup>(it);
+			for (int j = 0; j<tmpgroup->GetVolumeNum(); ++j)
 			{
-				VolumeData* vd = tmpgroup->GetVolumeData(j);
+				auto vd = tmpgroup->GetVolumeData(j);
 				if (vd && vd->GetName() == name)
 				{
-					if (m_cur_vol == vd) m_cur_vol = dst;
-					glbin_vol_loader.RemoveBrickVD(vd);
+				if (auto cur_vd_ptr = m_cur_vol.lock())
+					if (cur_vd_ptr == vd)
+						m_cur_vol = dst;
+					glbin_vol_loader.RemoveBrickVD(vd.get());
 					vd->GetVR()->clear_tex_current();
 					tmpgroup->ReplaceVolumeData(j, dst);
 					m_vd_pop_dirty = true;
@@ -1474,41 +1436,44 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, VolumeData *dst)
 		glbin_current.vol_data = dst;
 		VolumePropPanel* vprop_view = glbin_current.mainframe->FindVolumeProps(name);
 		if (vprop_view)
-			vprop_view->SetVolumeData(dst);
+			vprop_view->SetVolumeData(dst.get());
 	}
 }
 
 void RenderView::RemoveMeshData(const std::wstring &name)
 {
-	//std::wstring str = GetName().ToStdWstring() + L":";
 	glbin_current.mainframe->DeleteProps(3, name);
 
-	int i, j;
-
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 3://mesh data
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			auto md = std::dynamic_pointer_cast<MeshData>(it);
 			if (md && md->GetName() == name)
 			{
-				m_layer_list.erase(m_layer_list.begin() + i);
-				m_md_pop_dirty = true;
+				auto pos = std::find(m_layer_list.begin(),
+					m_layer_list.end(), it);
+				if (pos != m_layer_list.end())
+				{
+					m_layer_list.erase(pos);
+					m_md_pop_dirty = true;
+				}
 				return;
 			}
 		}
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
-			if (!group) continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
+			if (!group)
+				break;
+			for (int j = 0; j<group->GetMeshNum(); j++)
 			{
-				MeshData* md = group->GetMeshData(j);
+				auto md = group->GetMeshData(j);
 				if (md && md->GetName() == name)
 				{
 					group->RemoveMeshData(j);
@@ -1525,16 +1490,20 @@ void RenderView::RemoveMeshData(const std::wstring &name)
 void RenderView::RemoveAnnotations(const std::wstring &name)
 {
 	glbin_current.mainframe->DeleteProps(4, name);
-	for (int i = 0; i<(int)m_layer_list.size(); i++)
+
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		if (m_layer_list[i]->IsA() == 4)
+		if (it->IsA() == 4)
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			auto ann = std::dynamic_pointer_cast<Annotations>(it);
 			if (ann && ann->GetName() == name)
 			{
-				m_layer_list.erase(m_layer_list.begin() + i);
+				auto pos = std::find(m_layer_list.begin(),
+					m_layer_list.end(), it);
+				if (pos != m_layer_list.end())
+					m_layer_list.erase(pos);
 			}
 		}
 	}
@@ -1542,20 +1511,20 @@ void RenderView::RemoveAnnotations(const std::wstring &name)
 
 void RenderView::RemoveGroup(const std::wstring &name)
 {
-	for (size_t i = 0; i<m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group && group->GetName() == name)
 			{
-				for (int j = group->GetVolumeNum() - 1; j >= 0; j--)
+				for (int j = group->GetVolumeNum(); j > 0; --j)
 				{
-					VolumeData* vd = group->GetVolumeData(j);
+					auto vd = group->GetVolumeData(j - 1);
 					if (vd)
 					{
 						group->RemoveVolumeData(j);
@@ -1563,28 +1532,32 @@ void RenderView::RemoveGroup(const std::wstring &name)
 						glbin_current.mainframe->DeleteProps(2, vd->GetName());
 					}
 				}
-				m_layer_list.erase(m_layer_list.begin() + i);
-				delete group;
+				auto pos = std::find(m_layer_list.begin(),
+					m_layer_list.end(), it);
+				if (pos != m_layer_list.end())
+					m_layer_list.erase(pos);
 				m_vd_pop_dirty = true;
 			}
 		}
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
 			if (group && group->GetName() == name)
 			{
-				for (int j = group->GetMeshNum() - 1; j >= 0; j--)
+				for (int j = group->GetMeshNum(); j > 0; --j)
 				{
-					MeshData* md = group->GetMeshData(j);
+					auto md = group->GetMeshData(j - 1);
 					if (md)
 					{
 						group->RemoveMeshData(j);
 						glbin_current.mainframe->DeleteProps(3, md->GetName());
 					}
 				}
-				m_layer_list.erase(m_layer_list.begin() + i);
-				delete group;
+				auto pos = std::find(m_layer_list.begin(),
+					m_layer_list.end(), it);
+				if (pos != m_layer_list.end())
+					m_layer_list.erase(pos);
 				m_md_pop_dirty = true;
 			}
 		}
@@ -1596,15 +1569,15 @@ void RenderView::RemoveGroup(const std::wstring &name)
 //isolate
 void RenderView::Isolate(int type, const std::wstring& name)
 {
-	for (size_t i = 0; i<m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i]) continue;
-
-		switch (m_layer_list[i]->IsA())
+		if (!it)
+			continue;
+		switch (it->IsA())
 		{
 		case 2://volume
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			auto vd = std::dynamic_pointer_cast<VolumeData>(it);
 			if (vd)
 			{
 				if (type == 2 &&
@@ -1617,7 +1590,7 @@ void RenderView::Isolate(int type, const std::wstring& name)
 		break;
 		case 3://mesh
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			auto md = std::dynamic_pointer_cast<MeshData>(it);
 			if (md)
 			{
 				if (type == 3 &&
@@ -1630,7 +1603,7 @@ void RenderView::Isolate(int type, const std::wstring& name)
 		break;
 		case 4://annotation
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			auto ann = std::dynamic_pointer_cast<Annotations>(it);
 			if (ann)
 			{
 				if (type == 4 &&
@@ -1643,7 +1616,7 @@ void RenderView::Isolate(int type, const std::wstring& name)
 		break;
 		case 5://volume group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group)
 			{
 				if (type == 5)
@@ -1657,9 +1630,9 @@ void RenderView::Isolate(int type, const std::wstring& name)
 					group->SetDisp(false);
 				else
 				{
-					for (int i = 0; i<(int)group->GetVolumeNum(); i++)
+					for (int i = 0; i < group->GetVolumeNum(); i++)
 					{
-						VolumeData* vd = group->GetVolumeData(i);
+						auto vd = group->GetVolumeData(i);
 						if (vd)
 						{
 							if (type == 2 &&
@@ -1675,7 +1648,7 @@ void RenderView::Isolate(int type, const std::wstring& name)
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
 			if (group)
 			{
 				if (type == 6)
@@ -1689,9 +1662,9 @@ void RenderView::Isolate(int type, const std::wstring& name)
 					group->SetDisp(false);
 				else
 				{
-					for (int i = 0; i < (int)group->GetMeshNum(); i++)
+					for (int i = 0; i < group->GetMeshNum(); i++)
 					{
-						MeshData* md = group->GetMeshData(i);
+						auto md = group->GetMeshData(i);
 						if (md)
 						{
 							if (type == 3 &&
@@ -1713,42 +1686,42 @@ void RenderView::Isolate(int type, const std::wstring& name)
 
 void RenderView::ShowAll()
 {
-	for (size_t i = 0; i<m_layer_list.size(); ++i)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i]) continue;
-
-		switch (m_layer_list[i]->IsA())
+		if (!it)
+			continue;
+		switch (it->IsA())
 		{
 		case 2://volume
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			auto vd = std::dynamic_pointer_cast<VolumeData>(it);
 			if (vd)
 				vd->SetDisp(true);
 		}
 		break;
 		case 3://mesh
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			auto md = std::dynamic_pointer_cast<MeshData>(it);
 			if (md)
 				md->SetDisp(true);
 		}
 		break;
 		case 4://annotation
 		{
-			Annotations* ann = (Annotations*)m_layer_list[i];
+			auto ann = std::dynamic_pointer_cast<Annotations>(it);
 			if (ann)
 				ann->SetDisp(true);
 		}
 		break;
 		case 5:
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			if (group)
 			{
 				group->SetDisp(true);
 				for (int j = 0; j<group->GetVolumeNum(); ++j)
 				{
-					VolumeData* vd = group->GetVolumeData(j);
+					auto vd = group->GetVolumeData(j);
 					if (vd)
 						vd->SetDisp(true);
 				}
@@ -1757,13 +1730,13 @@ void RenderView::ShowAll()
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
 			if (group)
 			{
 				group->SetDisp(true);
 				for (int j = 0; j<group->GetMeshNum(); ++j)
 				{
-					MeshData* md = group->GetMeshData(j);
+					auto md = group->GetMeshData(j);
 					if (md)
 						md->SetDisp(true);
 				}
@@ -1781,7 +1754,7 @@ void RenderView::ShowAll()
 void RenderView::MoveLayerinView(const std::wstring &src_name, const std::wstring &dst_name)
 {
 	size_t src_index;
-	TreeLayer* src = 0;
+	std::shared_ptr<TreeLayer> src;
 	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
 		if (m_layer_list[i] && m_layer_list[i]->GetName() == src_name)
@@ -1813,11 +1786,11 @@ void RenderView::MoveLayerinView(const std::wstring &src_name, const std::wstrin
 //source is after the destination
 void RenderView::MoveLayerinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	DataGroup* group = GetGroup(group_name);
+	auto group = GetGroup(group_name);
 	if (!group)
 		return;
 
-	VolumeData* src_vd = 0;
+	std::shared_ptr<VolumeData> src_vd;
 	int i, src_index;
 	for (i = 0; i<group->GetVolumeNum(); i++)
 	{
@@ -1852,11 +1825,11 @@ void RenderView::MoveLayerinGroup(const std::wstring &group_name, const std::wst
 //source is after the destination
 void RenderView::MoveLayertoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	DataGroup* group = GetGroup(group_name);
+	auto group = GetGroup(group_name);
 	if (!group)
 		return;
 
-	VolumeData* src_vd = 0;
+	std::shared_ptr<VolumeData> src_vd;
 	for (int i = 0; i<group->GetVolumeNum(); i++)
 	{
 		std::wstring name = group->GetVolumeData(i)->GetName();
@@ -1893,19 +1866,19 @@ void RenderView::MoveLayertoView(const std::wstring &group_name, const std::wstr
 //source is after the destination
 void RenderView::MoveLayertoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	VolumeData* src_vd = 0;
+	std::shared_ptr<VolumeData> src_vd;
 
 	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
 		std::wstring name = m_layer_list[i]->GetName();
 		if (name == src_name && m_layer_list[i]->IsA() == 2)//is volume data
 		{
-			src_vd = (VolumeData*)m_layer_list[i];
+			src_vd = std::dynamic_pointer_cast<VolumeData>(m_layer_list[i]);
 			m_layer_list.erase(m_layer_list.begin() + i);
 			break;
 		}
 	}
-	DataGroup* group = GetGroup(group_name);
+	auto group = GetGroup(group_name);
 	if (!group || !src_vd)
 		return;
 	if (group->GetVolumeNum() == 0 || dst_name == L"")
@@ -1943,12 +1916,12 @@ void RenderView::MoveLayertoGroup(const std::wstring &group_name, const std::wst
 //sourece is after the destination
 void RenderView::MoveLayerfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	DataGroup* src_group = GetGroup(src_group_name);
+	auto src_group = GetGroup(src_group_name);
 	if (!src_group)
 		return;
-	int i;
-	VolumeData* src_vd = 0;
-	for (i = 0; i<src_group->GetVolumeNum(); i++)
+
+	std::shared_ptr<VolumeData> src_vd;
+	for (int i = 0; i<src_group->GetVolumeNum(); i++)
 	{
 		std::wstring name = src_group->GetVolumeData(i)->GetName();
 		if (name == src_name)
@@ -1958,7 +1931,7 @@ void RenderView::MoveLayerfromtoGroup(const std::wstring &src_group_name, const 
 			break;
 		}
 	}
-	DataGroup* dst_group = GetGroup(dst_group_name);
+	auto dst_group = GetGroup(dst_group_name);
 	if (!dst_group || !src_vd)
 		return;
 	if (dst_group->GetVolumeNum() == 0 || dst_name == L"")
@@ -1967,7 +1940,7 @@ void RenderView::MoveLayerfromtoGroup(const std::wstring &src_group_name, const 
 	}
 	else
 	{
-		for (i = 0; i<dst_group->GetVolumeNum(); i++)
+		for (int i = 0; i<dst_group->GetVolumeNum(); i++)
 		{
 			std::wstring name = dst_group->GetVolumeData(i)->GetName();
 			if (name == dst_name)
@@ -2000,13 +1973,13 @@ void RenderView::MoveLayerfromtoGroup(const std::wstring &src_group_name, const 
 //move mesh within a group
 void RenderView::MoveMeshinGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	MeshGroup* group = GetMGroup(group_name);
+	auto group = GetMGroup(group_name);
 	if (!group)
 		return;
 
-	MeshData* src_md = 0;
-	int i, src_index;
-	for (i = 0; i<group->GetMeshNum(); i++)
+	std::shared_ptr<MeshData> src_md;
+	int src_index;
+	for (int i = 0; i<group->GetMeshNum(); i++)
 	{
 		std::wstring name = group->GetMeshData(i)->GetName();
 		if (name == src_name)
@@ -2019,7 +1992,7 @@ void RenderView::MoveMeshinGroup(const std::wstring &group_name, const std::wstr
 	}
 	if (!src_md)
 		return;
-	for (i = 0; i<group->GetMeshNum(); i++)
+	for (int i = 0; i<group->GetMeshNum(); i++)
 	{
 		std::wstring name = group->GetMeshData(i)->GetName();
 		if (name == dst_name)
@@ -2039,13 +2012,12 @@ void RenderView::MoveMeshinGroup(const std::wstring &group_name, const std::wstr
 //move mesh out of a group
 void RenderView::MoveMeshtoView(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	MeshGroup* group = GetMGroup(group_name);
+	auto group = GetMGroup(group_name);
 	if (!group)
 		return;
 
-	MeshData* src_md = 0;
-	int i;
-	for (i = 0; i<group->GetMeshNum(); i++)
+	std::shared_ptr<MeshData> src_md;
+	for (int i = 0; i<group->GetMeshNum(); i++)
 	{
 		std::wstring name = group->GetMeshData(i)->GetName();
 		if (name == src_name)
@@ -2061,7 +2033,7 @@ void RenderView::MoveMeshtoView(const std::wstring &group_name, const std::wstri
 		m_layer_list.push_back(src_md);
 	else
 	{
-		for (i = 0; i<(int)m_layer_list.size(); i++)
+		for (int i = 0; i<(int)m_layer_list.size(); i++)
 		{
 			std::wstring name = m_layer_list[i]->GetName();
 			if (name == dst_name)
@@ -2078,19 +2050,19 @@ void RenderView::MoveMeshtoView(const std::wstring &group_name, const std::wstri
 //move mesh into a group
 void RenderView::MoveMeshtoGroup(const std::wstring &group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	MeshData* src_md = 0;
+	std::shared_ptr<MeshData> src_md;
 
 	for (size_t i = 0; i<m_layer_list.size(); i++)
 	{
 		std::wstring name = m_layer_list[i]->GetName();
 		if (name == src_name && m_layer_list[i]->IsA() == 3)
 		{
-			src_md = (MeshData*)m_layer_list[i];
+			src_md = std::dynamic_pointer_cast<MeshData>(m_layer_list[i]);
 			m_layer_list.erase(m_layer_list.begin() + i);
 			break;
 		}
 	}
-	MeshGroup* group = GetMGroup(group_name);
+	auto group = GetMGroup(group_name);
 	if (!group || !src_md)
 		return;
 	if (group->GetMeshNum() == 0 || dst_name == "")
@@ -2114,12 +2086,12 @@ void RenderView::MoveMeshtoGroup(const std::wstring &group_name, const std::wstr
 //move mesh out of then into a group
 void RenderView::MoveMeshfromtoGroup(const std::wstring &src_group_name, const std::wstring &dst_group_name, const std::wstring &src_name, const std::wstring &dst_name)
 {
-	MeshGroup* src_group = GetMGroup(src_group_name);
+	auto src_group = GetMGroup(src_group_name);
 	if (!src_group)
 		return;
-	int i;
-	MeshData* src_md = 0;
-	for (i = 0; i<src_group->GetMeshNum(); i++)
+	
+	std::shared_ptr<MeshData> src_md;
+	for (int i = 0; i<src_group->GetMeshNum(); i++)
 	{
 		std::wstring name = src_group->GetMeshData(i)->GetName();
 		if (name == src_name)
@@ -2129,14 +2101,14 @@ void RenderView::MoveMeshfromtoGroup(const std::wstring &src_group_name, const s
 			break;
 		}
 	}
-	MeshGroup* dst_group = GetMGroup(dst_group_name);
+	auto dst_group = GetMGroup(dst_group_name);
 	if (!dst_group || !src_md)
 		return;
 	if (dst_group->GetMeshNum() == 0 || dst_name == "")
 		dst_group->InsertMeshData(0, src_md);
 	else
 	{
-		for (i = 0; i<dst_group->GetMeshNum(); i++)
+		for (int i = 0; i<dst_group->GetMeshNum(); i++)
 		{
 			std::wstring name = dst_group->GetMeshData(i)->GetName();
 			if (name == dst_name)
@@ -2157,28 +2129,27 @@ void RenderView::PopVolumeList()
 	if (!m_vd_pop_dirty)
 		return;
 
-	int i, j;
 	m_vd_pop_list.clear();
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			continue;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 2://volume data
 		{
-			VolumeData* vd = (VolumeData*)m_layer_list[i];
+			auto vd = std::dynamic_pointer_cast<VolumeData>(it);
 			if (vd->GetDisp())
 				m_vd_pop_list.push_back(vd);
 		}
 		break;
 		case 5://group
 		{
-			DataGroup* group = (DataGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<DataGroup>(it);
 			if (!group->GetDisp())
 				continue;
-			for (j = 0; j<group->GetVolumeNum(); j++)
+			for (int j = 0; j<group->GetVolumeNum(); j++)
 			{
 				if (group->GetVolumeData(j) && group->GetVolumeData(j)->GetDisp())
 					m_vd_pop_list.push_back(group->GetVolumeData(j));
@@ -2197,28 +2168,27 @@ void RenderView::PopMeshList()
 	if (!m_md_pop_dirty)
 		return;
 
-	int i, j;
 	m_md_pop_list.clear();
 
-	for (i = 0; i<(int)m_layer_list.size(); i++)
+	for (auto& it : m_layer_list)
 	{
-		if (!m_layer_list[i])
+		if (!it)
 			return;
-		switch (m_layer_list[i]->IsA())
+		switch (it->IsA())
 		{
 		case 3://mesh data
 		{
-			MeshData* md = (MeshData*)m_layer_list[i];
+			auto md = std::dynamic_pointer_cast<MeshData>(it);
 			if (md->GetDisp())
 				m_md_pop_list.push_back(md);
 		}
 		break;
 		case 6://mesh group
 		{
-			MeshGroup* group = (MeshGroup*)m_layer_list[i];
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
 			if (!group->GetDisp())
 				continue;
-			for (j = 0; j<group->GetMeshNum(); j++)
+			for (int j = 0; j<group->GetMeshNum(); j++)
 			{
 				if (group->GetMeshData(j) &&
 					group->GetMeshData(j)->GetDisp())
@@ -2236,17 +2206,16 @@ void RenderView::PopMeshList()
 //if no group in view
 void RenderView::OrganizeLayers()
 {
-	DataGroup* le_group = 0;
-	int i;
+	std::shared_ptr<DataGroup> le_group;
 
 	//find last empty group
-	for (i = GetLayerNum() - 1; i >= 0; i--)
+	for (int i = GetLayerNum(); i > 0; i--)
 	{
-		TreeLayer* layer = GetLayer(i);
+		auto layer = GetLayer(i-1);
 		if (layer && layer->IsA() == 5)
 		{
 			//layer is group
-			DataGroup* group = (DataGroup*)layer;
+			auto group = std::dynamic_pointer_cast<DataGroup>(layer);
 			if (group->GetVolumeNum() == 0)
 			{
 				le_group = group;
@@ -2255,13 +2224,13 @@ void RenderView::OrganizeLayers()
 		}
 	}
 
-	for (i = 0; i<GetLayerNum(); i++)
+	for (int i = 0; i<GetLayerNum(); i++)
 	{
-		TreeLayer* layer = GetLayer(i);
+		auto layer = GetLayer(i);
 		if (layer && layer->IsA() == 2)
 		{
 			//layer is volume
-			VolumeData* vd = (VolumeData*)layer;
+			auto vd = std::dynamic_pointer_cast<VolumeData>(layer);
 			std::wstring name = vd->GetName();
 			if (le_group)
 			{
@@ -2540,42 +2509,42 @@ void RenderView::SetCenter()
 {
 	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
 
-	VolumeData *vd = 0;
-	if (m_cur_vol)
-		vd = m_cur_vol;
+	std::shared_ptr<VolumeData> vd;
+	if (auto cur_vd_ptr = m_cur_vol.lock())
+		vd = cur_vd_ptr;
 	else if (m_vd_pop_list.size())
-		vd = m_vd_pop_list[0];
+		vd = m_vd_pop_list[0].lock();
 
-	if (vd)
-	{
-		fluo::BBox bbox = vd->GetBounds();
-		flvr::VolumeRenderer *vr = vd->GetVR();
-		if (!vr) return;
-		std::vector<fluo::Plane*> *planes = vr->get_planes();
-		if (planes->size() != 6) return;
-		double x1, x2, y1, y2, z1, z2;
-		double abcd[4];
-		(*planes)[0]->get_copy(abcd);
-		x1 = fabs(abcd[3])*bbox.Max().x();
-		(*planes)[1]->get_copy(abcd);
-		x2 = fabs(abcd[3])*bbox.Max().x();
-		(*planes)[2]->get_copy(abcd);
-		y1 = fabs(abcd[3])*bbox.Max().y();
-		(*planes)[3]->get_copy(abcd);
-		y2 = fabs(abcd[3])*bbox.Max().y();
-		(*planes)[4]->get_copy(abcd);
-		z1 = fabs(abcd[3])*bbox.Max().z();
-		(*planes)[5]->get_copy(abcd);
-		z2 = fabs(abcd[3])*bbox.Max().z();
+	if (!vd)
+		return;
 
-		m_obj_ctrx = (x1 + x2) / 2.0;
-		m_obj_ctry = (y1 + y2) / 2.0;
-		m_obj_ctrz = (z1 + z2) / 2.0;
+	fluo::BBox bbox = vd->GetBounds();
+	flvr::VolumeRenderer *vr = vd->GetVR();
+	if (!vr) return;
+	std::vector<fluo::Plane*> *planes = vr->get_planes();
+	if (planes->size() != 6) return;
+	double x1, x2, y1, y2, z1, z2;
+	double abcd[4];
+	(*planes)[0]->get_copy(abcd);
+	x1 = fabs(abcd[3])*bbox.Max().x();
+	(*planes)[1]->get_copy(abcd);
+	x2 = fabs(abcd[3])*bbox.Max().x();
+	(*planes)[2]->get_copy(abcd);
+	y1 = fabs(abcd[3])*bbox.Max().y();
+	(*planes)[3]->get_copy(abcd);
+	y2 = fabs(abcd[3])*bbox.Max().y();
+	(*planes)[4]->get_copy(abcd);
+	z1 = fabs(abcd[3])*bbox.Max().z();
+	(*planes)[5]->get_copy(abcd);
+	z2 = fabs(abcd[3])*bbox.Max().z();
 
-		//SetSortBricks();
+	m_obj_ctrx = (x1 + x2) / 2.0;
+	m_obj_ctry = (y1 + y2) / 2.0;
+	m_obj_ctrz = (z1 + z2) / 2.0;
 
-		RefreshGL(20);
-	}
+	//SetSortBricks();
+
+	RefreshGL(20);
 }
 
 double RenderView::Get121ScaleFactor()
@@ -2588,11 +2557,11 @@ double RenderView::Get121ScaleFactor()
 	double spc_x = 1.0;
 	double spc_y = 1.0;
 	double spc_z = 1.0;
-	VolumeData *vd = 0;
-	if (m_cur_vol)
-		vd = m_cur_vol;
+	std::shared_ptr<VolumeData> vd;
+	if (auto cur_vd_ptr = m_cur_vol.lock())
+		vd = cur_vd_ptr;
 	else if (m_vd_pop_list.size())
-		vd = m_vd_pop_list[0];
+		vd = m_vd_pop_list[0].lock();
 	if (vd)
 		vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
 	spc_y = spc_y<EPS ? 1.0 : spc_y;
@@ -2615,11 +2584,11 @@ void RenderView::SetScale121()
 		break;
 	case 2:
 		{
-		VolumeData *vd = 0;
-		if (m_cur_vol)
-			vd = m_cur_vol;
+		std::shared_ptr<VolumeData> vd;
+		if (auto cur_vd_ptr = m_cur_vol.lock())
+			vd = cur_vd_ptr;
 		else if (m_vd_pop_list.size())
-			vd = m_vd_pop_list[0];
+			vd = m_vd_pop_list[0].lock();
 		if (!vd)
 			break;
 		double spcx = 0, spcy = 0, spcz = 0;
@@ -2759,24 +2728,27 @@ void RenderView::SetLockCenter()
 
 void RenderView::SetLockCenterVol()
 {
-	if (!m_cur_vol)
+	auto cur_vd_ptr = m_cur_vol.lock();
+	if (!cur_vd_ptr)
 		return;
-	fluo::BBox box = m_cur_vol->GetClippedBounds();
+	fluo::BBox box = cur_vd_ptr->GetClippedBounds();
 	m_lock_center = box.center();
 }
 
 void RenderView::SetLockCenterRuler()
 {
-	if (!m_cur_ruler)
+	auto cur_ruler_ptr = m_cur_ruler.lock();
+	if (!cur_ruler_ptr)
 		return;
-	m_lock_center = m_cur_ruler->GetCenter();
+	m_lock_center = cur_ruler_ptr->GetCenter();
 }
 
 void RenderView::SetLockCenterSel()
 {
-	if (!m_cur_vol)
+	auto cur_vd_ptr = m_cur_vol.lock();
+	if (!cur_vd_ptr)
 		return;
-	flrd::Cov cover(m_cur_vol);
+	flrd::Cov cover(cur_vd_ptr.get());
 	cover.Compute(1);
 	m_lock_center = cover.GetCenter();
 }
@@ -2885,8 +2857,8 @@ fluo::Color RenderView::GetTextColor()
 	case 1://background
 		return m_bg_color;
 	case 2://secondary color of current volume
-		if (m_cur_vol)
-			return m_cur_vol->GetMaskColor();
+		if (auto cur_vd_ptr = m_cur_vol.lock())
+			return cur_vd_ptr->GetMaskColor();
 		else
 			return m_bg_color_inv;
 	}
@@ -3025,7 +2997,7 @@ void RenderView::SetParams(double t)
 
 	for (int i = 0; i<GetAllVolumeNum(); i++)
 	{
-		VolumeData* vd = GetAllVolumeData(i);
+		auto vd = GetAllVolumeData(i);
 		if (!vd) continue;
 
 		keycode.l1 = 2;
@@ -3330,18 +3302,18 @@ void RenderView::StopMovie()
 
 void RenderView::Get4DSeqRange(int &start_frame, int &end_frame)
 {
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
+	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		auto vd = it->lock();
 		if (vd && vd->GetReader())
 		{
-			BaseReader* reader = vd->GetReader();
+			auto reader = vd->GetReader();
 
 			int vd_start_frame = 0;
 			int vd_end_frame = reader->GetTimeNum() - 1;
 			int vd_cur_frame = reader->GetCurTime();
 
-			if (i == 0)
+			if (it == m_vd_pop_list.begin())
 			{
 				//first dataset
 				start_frame = vd_start_frame;
@@ -3388,8 +3360,8 @@ void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool r
 	m_tseq_cur_num = frame;
 
 	if (update)
-	for (auto i : m_vd_pop_list)
-		UpdateVolumeData(frame, i);
+	for (auto& i : m_vd_pop_list)
+		UpdateVolumeData(frame, i.lock());
 
 	//run post-change script
 	if (update && glbin_settings.m_run_script)
@@ -3397,7 +3369,8 @@ void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool r
 
 	//restore currently selected volume
 	m_cur_vol = m_cur_vol_save;
-	glbin_vol_calculator.SetVolumeA(m_cur_vol);
+	if (auto cur_vd_ptr = m_cur_vol.lock())
+		glbin_vol_calculator.SetVolumeA(cur_vd_ptr.get());
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
@@ -3409,7 +3382,7 @@ void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool r
 	glbin_current.mainframe->UpdateProps({ gstRulerList });
 }
 
-void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
+void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return;
@@ -3417,7 +3390,7 @@ void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
 	if (vd->GetCurTime() == frame)
 		return;
 
-	BaseReader* reader = vd->GetReader();
+	auto reader = vd->GetReader();
 	if (!reader)
 		return;
 
@@ -3426,17 +3399,20 @@ void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
 	flvr::Texture *tex = vd->GetTexture();
 	if (tex && tex->isBrxml())
 	{
-		BRKXMLReader *br = (BRKXMLReader *)reader;
-		br->SetCurTime(frame);
-		int curlv = tex->GetCurLevel();
-		for (int j = 0; j < br->GetLevelNum(); j++)
+		auto br = std::dynamic_pointer_cast<BRKXMLReader>(reader);
+		if (br)
 		{
-			tex->setLevel(j);
-			if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+			br->SetCurTime(frame);
+			int curlv = tex->GetCurLevel();
+			for (int j = 0; j < br->GetLevelNum(); j++)
+			{
+				tex->setLevel(j);
+				if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+			}
+			tex->setLevel(curlv);
+			tex->set_FrameAndChannel(frame, vd->GetCurChannel());
+			vd->SetCurTime(reader->GetCurTime());
 		}
-		tex->setLevel(curlv);
-		tex->set_FrameAndChannel(frame, vd->GetCurChannel());
-		vd->SetCurTime(reader->GetCurTime());
 	}
 	else
 	{
@@ -3461,33 +3437,35 @@ void RenderView::UpdateVolumeData(int frame, VolumeData* vd)
 
 void RenderView::ReloadVolumeData(int frame)
 {
-	int i, j;
-	std::vector<BaseReader*> reader_list;
+	std::vector<std::shared_ptr<BaseReader>> reader_list;
 	m_bat_folder = L"";
 
-	for (i = 0; i < (int)m_vd_pop_list.size(); i++)
+	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		auto vd = it->lock();
 		if (vd)
 			glbin_current.mainframe->DeleteProps(2, vd->GetName());
 		if (vd && vd->GetReader())
 		{
 			flvr::Texture *tex = vd->GetTexture();
-			BaseReader* reader = vd->GetReader();
+			auto reader = vd->GetReader();
 			if (tex && tex->isBrxml())
 			{
-				BRKXMLReader *br = (BRKXMLReader *)reader;
-				int curlv = tex->GetCurLevel();
-				for (j = 0; j < br->GetLevelNum(); j++)
+				auto br = std::dynamic_pointer_cast<BRKXMLReader>(reader);
+				if (br)
 				{
-					tex->setLevel(j);
-					if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					for (int j = 0; j < br->GetLevelNum(); j++)
+					{
+						tex->setLevel(j);
+						if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+					}
 				}
+				int curlv = tex->GetCurLevel();
 				tex->setLevel(curlv);
 				tex->set_FrameAndChannel(0, vd->GetCurChannel());
 				vd->SetCurTime(reader->GetCurTime());
 				std::wstring data_name = reader->GetDataName();
-				if (i > 0)
+				if (it != m_vd_pop_list.begin())
 					m_bat_folder += L"_";
 				m_bat_folder += data_name;
 
@@ -3508,7 +3486,7 @@ void RenderView::ReloadVolumeData(int frame)
 			else
 			{
 				bool found = false;
-				for (j = 0; j < (int)reader_list.size(); j++)
+				for (size_t j = 0; j < reader_list.size(); j++)
 				{
 					if (reader == reader_list[j])
 					{
@@ -3535,7 +3513,7 @@ void RenderView::ReloadVolumeData(int frame)
 				}
 
 				std::wstring data_name = reader->GetDataName();
-				if (i > 0)
+				if (it != m_vd_pop_list.begin())
 					m_bat_folder += L"_";
 				m_bat_folder += data_name;
 
@@ -3581,12 +3559,12 @@ void RenderView::Get3DBatRange(int &start_frame, int &end_frame)
 	m_bat_folder = L"";
 	int cur_t = -1;
 
-	for (int i = 0; i<(int)m_vd_pop_list.size(); i++)
+	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 	{
-		VolumeData* vd = m_vd_pop_list[i];
+		auto vd = it->lock();
 		if (vd && vd->GetReader())
 		{
-			BaseReader* reader = vd->GetReader();
+			auto reader = vd->GetReader();
 			reader->SetBatch(true);
 
 			int vd_cur_frame = reader->GetCurBatch();
@@ -3595,11 +3573,11 @@ void RenderView::Get3DBatRange(int &start_frame, int &end_frame)
 			if (cur_t < 0)
 				cur_t = vd_cur_frame;
 
-			if (i > 0)
+			if (it != m_vd_pop_list.begin())
 				m_bat_folder += L"_";
 			m_bat_folder += reader->GetDataName();
 
-			if (i == 0)
+			if (it == m_vd_pop_list.begin())
 			{
 				//first dataset
 				start_frame = vd_start_frame;
@@ -3634,7 +3612,7 @@ void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool r
 	m_total_frames = std::abs(end_frame - start_frame + 1);
 
 	//save currently selected volume
-	VolumeData* cur_vd_save = m_cur_vol;
+	auto cur_vd_save = m_cur_vol.lock();
 
 	//run pre-change script
 	if (update && glbin_settings.m_run_script)
@@ -3660,7 +3638,8 @@ void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool r
 
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
-	glbin_vol_calculator.SetVolumeA(m_cur_vol);
+	if (auto cur_vd_ptr = m_cur_vol.lock())
+	glbin_vol_calculator.SetVolumeA(cur_vd_ptr.get());
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
