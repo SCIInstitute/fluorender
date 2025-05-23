@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 #include <set>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -45,13 +46,13 @@ namespace flrd
 	class RulerList;
 	struct CompGroup
 	{
-		VolumeData* vd;//associated volume
+		std::weak_ptr<VolumeData> vd;//associated volume
 		bool dirty;
 		CelpList celps;
 		CellGraph graph;//links comps in multibrick volume
 
 		CompGroup() :
-			vd(0), dirty(true)
+			dirty(true)
 		{}
 
 		void Clear()
@@ -92,11 +93,11 @@ namespace flrd
 		void SetUseDistAllchan(bool val) { m_use_dist_allchan = val; }
 		bool GetUseDistAllchan() { return m_use_dist_allchan; }
 
-		void SetVolume(VolumeData* vd);
-		VolumeData* GetVolume();
+		void SetVolume(const std::shared_ptr<VolumeData>& vd);
+		std::shared_ptr<VolumeData> GetVolume();
 
-		void SetCoVolumes(std::vector<VolumeData*>& list);
-		void AddCoVolume(VolumeData* vd);
+		void SetCoVolumes(const std::vector<std::weak_ptr<VolumeData>>& list);
+		void AddCoVolume(const std::shared_ptr<VolumeData>& vd);
 		void ClearCoVolumes();
 		CelpList* GetCelpList();
 		CellGraph* GetCellGraph();
@@ -135,8 +136,8 @@ namespace flrd
 		void OutputCompListFile(const std::wstring &filename, int verbose, const std::string& comp_header = "");
 
 		bool OutputChannels();
-		bool OutputMultiChannels(std::list<VolumeData*> &channs);
-		bool OutputRgbChannels(std::list<VolumeData*> &channs);
+		bool OutputMultiChannels(std::vector<std::shared_ptr<VolumeData>> &channs);
+		bool OutputRgbChannels(std::vector<std::shared_ptr<VolumeData>> &channs);
 		bool OutputAnnotations();
 
 		//distance
@@ -172,7 +173,7 @@ namespace flrd
 
 		int m_bn;
 
-		std::vector<VolumeData*> m_vd_list;//list of volumes for colocalization analysis
+		std::vector<std::weak_ptr<VolumeData>> m_vd_list;//list of volumes for colocalization analysis
 		std::vector<CompGroup> m_comp_groups;//each analyzed volume can have comp results saved
 		CompGroup* m_compgroup;//current group
 
@@ -217,8 +218,8 @@ namespace flrd
 			unsigned int* data);
 
 		//comp groups
-		CompGroup* FindCompGroup(VolumeData* vd);
-		CompGroup* AddCompGroup(VolumeData* vd);
+		CompGroup* FindCompGroup(const std::shared_ptr<VolumeData>& vd);
+		CompGroup* AddCompGroup(const std::shared_ptr<VolumeData>& vd);
 
 		//get list
 		void FindCelps(CelpList& list,

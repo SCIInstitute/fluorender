@@ -43,14 +43,14 @@ namespace flrd
 		VolumeCalculator();
 		~VolumeCalculator();
 
-		void SetVolumeA(VolumeData *vd);
-		void SetVolumeB(VolumeData *vd);
+		void SetVolumeA(const std::shared_ptr<VolumeData>& vd);
+		void SetVolumeB(const std::shared_ptr<VolumeData>& vd);
 
 		void SetThreshold(double thresh)
 		{ m_threshold = thresh; }
 
-		VolumeData* GetVolumeA();
-		VolumeData* GetVolumeB();
+		std::shared_ptr<VolumeData> GetVolumeA();
+		std::shared_ptr<VolumeData> GetVolumeB();
 		std::shared_ptr<VolumeData> GetResult(bool pop);
 
 		//1-sub;2-add;3-div;4-and;5-new;6-new inv;7-clear
@@ -61,8 +61,8 @@ namespace flrd
 	private:
 		std::vector<std::shared_ptr<VolumeData>> m_vd_r;//result volume data (stack)
 
-		VolumeData *m_vd_a;	//volume data A
-		VolumeData *m_vd_b;	//volume data B
+		std::weak_ptr<VolumeData> m_vd_a;	//volume data A
+		std::weak_ptr<VolumeData> m_vd_b;	//volume data B
 
 		int m_type;	//calculation type
 					//1:substraction;

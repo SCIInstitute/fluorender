@@ -90,7 +90,7 @@ VolumeMeshConv::~VolumeMeshConv()
 
 void VolumeMeshConv::Compute()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -152,10 +152,10 @@ void VolumeMeshConv::Compute()
 	SetProgress(0, "");
 
 	glbin_data_manager.LoadMeshData(m_mesh);
-	MeshData* md = glbin_data_manager.GetLastMeshData();
+	auto md = glbin_data_manager.GetLastMeshData();
 	if (!md)
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->AddMeshData(md);
 	glbin_current.SetMeshData(md);

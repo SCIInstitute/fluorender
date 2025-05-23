@@ -78,8 +78,8 @@ fluo::Color ComponentEditor::GetColor()
 		else
 		{
 			int shuffle = 0;
-			if (glbin_current.vol_data)
-				shuffle = glbin_current.vol_data->GetShuffle();
+			if (auto cur_vd = glbin_current.vol_data.lock())
+				shuffle = cur_vd->GetShuffle();
 			c = fluo::Color(m_id, shuffle);
 		}
 	}
@@ -88,7 +88,7 @@ fluo::Color ComponentEditor::GetColor()
 
 void ComponentEditor::Clean(int mode)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -131,7 +131,7 @@ void ComponentEditor::Clean(int mode)
 
 void ComponentEditor::NewId(bool append, bool track)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -143,7 +143,7 @@ void ComponentEditor::NewId(bool append, bool track)
 		trkg = view->GetTrackGroup();
 	}
 
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	Nrrd* nrrd_mask = 0;
@@ -269,7 +269,7 @@ void ComponentEditor::NewId(bool append, bool track)
 		//trkg->AddCell(cell, m_cur_time);
 		pTrackMap track_map = trkg->GetTrackMap();
 		glbin_trackmap_proc.SetTrackMap(track_map);
-		flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd);
+		flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
 		if (cache_queue)
 			cache_queue->set_max_size(4);
 		//add
@@ -284,10 +284,10 @@ void ComponentEditor::ReplaceId()
 		return;
 	if (!m_id)
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -338,10 +338,10 @@ void ComponentEditor::ReplaceList()
 		return;
 	if (!m_id)
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	TrackGroup *trkg = glbin_current.GetTrackGroup();
@@ -418,10 +418,10 @@ void ComponentEditor::ReplaceList()
 
 void ComponentEditor::CombineId()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -469,10 +469,10 @@ void ComponentEditor::CombineId()
 
 void ComponentEditor::CombineList()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 

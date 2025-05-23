@@ -59,7 +59,7 @@ ComponentAnalyzer::~ComponentAnalyzer()
 {
 }
 
-void ComponentAnalyzer::SetVolume(VolumeData* vd)
+void ComponentAnalyzer::SetVolume(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return;
@@ -69,19 +69,19 @@ void ComponentAnalyzer::SetVolume(VolumeData* vd)
 	m_compgroup = compgroup;
 }
 
-VolumeData* ComponentAnalyzer::GetVolume()
+std::shared_ptr<VolumeData> ComponentAnalyzer::GetVolume()
 {
 	if (m_compgroup)
-		return m_compgroup->vd;
-	return 0;
+		return m_compgroup->vd.lock();
+	return nullptr;
 }
 
-void ComponentAnalyzer::SetCoVolumes(std::vector<VolumeData*> &list)
+void ComponentAnalyzer::SetCoVolumes(const std::vector<std::weak_ptr<VolumeData>>& list)
 {
 	m_vd_list = list;
 }
 
-void ComponentAnalyzer::AddCoVolume(VolumeData* vd)
+void ComponentAnalyzer::AddCoVolume(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd_list.push_back(vd);
 }
@@ -132,15 +132,17 @@ int ComponentAnalyzer::GetColocalization(
 {
 	int num = 0;
 
-	for (size_t i=0; i<m_vd_list.size(); ++i)
+	for (auto it = m_vd_list.begin(); it != m_vd_list.end(); ++it)
 	{
-		if (!m_vd_list[i])
+		auto vd = it->lock();
+
+		if (!vd)
 		{
 			sumi.push_back(0);
 			sumd.push_back(0.0);
 			continue;
 		}
-		flvr::Texture* tex = m_vd_list[i]->GetTexture();
+		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
 		{
 			sumi.push_back(0);
@@ -165,7 +167,7 @@ int ComponentAnalyzer::GetColocalization(
 
 void ComponentAnalyzer::Analyze(bool sel)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd || !vd->GetTexture())
 		return;
 
@@ -180,12 +182,12 @@ void ComponentAnalyzer::Analyze(bool sel)
 	if (m_colocal)
 	{
 		ClearCoVolumes();
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (view)
 		{
 			for (int i = 0; i < view->GetDispVolumeNum(); ++i)
 			{
-				VolumeData* vdi = view->GetDispVolumeData(i);
+				auto vdi = view->GetDispVolumeData(i);
 				if (vdi != vd)
 					AddCoVolume(vdi);
 			}
@@ -500,7 +502,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -676,7 +678,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -758,7 +760,7 @@ void ComponentAnalyzer::Count()
 	}
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd)
 		return;
 	double spcx, spcy, spcz;
@@ -771,7 +773,7 @@ void ComponentAnalyzer::ClearCompGroup()
 	if (!m_compgroup)
 		return;
 	m_compgroup->Clear();
-	m_compgroup->vd = 0;
+	m_compgroup->vd.reset();
 }
 
 size_t ComponentAnalyzer::GetListSize()
@@ -816,7 +818,7 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd || ! vd->GetTexture())
 		return;
 
@@ -883,7 +885,7 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd)
 		return;
 
@@ -895,8 +897,13 @@ void ComponentAnalyzer::OutputFormHeader(std::string &str)
 
 	if (m_colocal)
 	{
-		for (size_t i = 0; i < m_vd_list.size(); ++i)
-			str += "\t" + ws2s(m_vd_list[i]->GetName()) + "\t";
+		for (auto it = m_vd_list.begin(); it != m_vd_list.end(); ++it)
+		{
+			auto vd = it->lock();
+			if (!vd)
+				continue;
+			str += "\t" + ws2s(vd->GetName()) + "\t";
+		}
 	}
 	str += "\n";
 }
@@ -905,7 +912,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd)
 		return;
 	//comp list
@@ -1148,7 +1155,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 {
 	if (!m_compgroup)
 		return false;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd)
 		return false;
 
@@ -1182,7 +1189,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 	std::wstring sinfo;
 	std::wstring str;
 
-	Annotations* ann = new Annotations();
+	auto ann = std::make_shared<Annotations>();
 
 	int bn = vd->GetAllBrickNum();
 	graph.ClearVisited();
@@ -1216,10 +1223,10 @@ bool ComponentAnalyzer::OutputAnnotations()
 		++count;
 	}
 
-	ann->SetVolume(glbin_data_manager.GetVolumeDataSharedPtr(vd));
+	ann->SetVolume(vd);
 	ann->SetTransform(vd->GetTexture()->transform());
 	glbin_data_manager.AddAnnotations(ann);
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->AddAnnotations(ann);
 
@@ -1229,7 +1236,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 bool ComponentAnalyzer::OutputChannels()
 {
 	bool result = false;
-	std::list<VolumeData*> channs;
+	std::vector<std::shared_ptr<VolumeData>> channs;
 	switch (m_channel_type)
 	{
 	case 1:
@@ -1241,23 +1248,22 @@ bool ComponentAnalyzer::OutputChannels()
 	}
 
 	std::wstring group_name = L"";
-	DataGroup* group = 0;
-	RenderView* view = glbin_current.render_view;
+	std::shared_ptr<DataGroup> group;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;
 	
-	for (auto i = channs.begin(); i != channs.end(); ++i)
+	for (auto it = channs.begin(); it != channs.end(); ++it)
 	{
-		VolumeData* vd = *i;
-		if (vd)
+		if (*it)
 		{
-			glbin_data_manager.AddVolumeData(std::shared_ptr<VolumeData>(vd));
-			if (i == channs.begin())
+			glbin_data_manager.AddVolumeData(*it);
+			if (it == channs.begin())
 			{
 				group_name = view->AddGroup(L"");
 				group = view->GetGroup(group_name);
 			}
-			view->AddVolumeData(vd, group_name);
+			view->AddVolumeData(*it, group_name);
 		}
 	}
 	if (group)
@@ -1265,7 +1271,7 @@ bool ComponentAnalyzer::OutputChannels()
 		//group->SetSyncRAll(true);
 		//group->SetSyncGAll(true);
 		//group->SetSyncBAll(true);
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 		{
 			fluo::Color col = vd->GetGammaColor();
@@ -1281,11 +1287,11 @@ bool ComponentAnalyzer::OutputChannels()
 	return result;
 }
 
-bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
+bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeData>> &channs)
 {
 	if (!m_compgroup)
 		return false;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd)
 		return false;
 	//comp list
@@ -1344,7 +1350,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
 				continue;
 		}
 
-		VolumeData* vdn = new VolumeData();
+		auto vdn = std::make_shared<VolumeData>();
 		vdn->AddEmptyData(bits,
 			nx, ny, nz,
 			spcx, spcy, spcz,
@@ -1454,23 +1460,21 @@ bool ComponentAnalyzer::OutputMultiChannels(std::list<VolumeData*>& channs)
 
 		//settings
 		fluo::Color c;
-		if (GetColor(i->second->Id(), i->second->BrickId(), vd, c))
+		if (GetColor(i->second->Id(), i->second->BrickId(), vd.get(), c))
 		{
-			glbin_vol_def.Copy(vdn, vd);
+			glbin_vol_def.Copy(vdn.get(), vd.get());
 			vdn->SetColor(c);
 			channs.push_back(vdn);
 		}
-		else
-			delete vdn;
 	}
 	return true;
 }
 
-bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
+bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData>> &channs)
 {
 	if (!m_compgroup)
 		return false;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd)
 		return false;
 	//comp list
@@ -1510,7 +1514,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume
-	VolumeData* vd_r = new VolumeData();
+	auto vd_r = std::make_shared<VolumeData>();
 	vd_r->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
@@ -1518,7 +1522,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(vd->GetName() + L"_CH_R");
 	//green volume
-	VolumeData* vd_g = new VolumeData();
+	auto vd_g = std::make_shared<VolumeData>();
 	vd_g->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
@@ -1526,7 +1530,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(vd->GetName() + L"_CH_G");
 	//blue volume
-	VolumeData* vd_b = new VolumeData();
+	auto vd_b = std::make_shared<VolumeData>();
 	vd_b->AddEmptyData(8,
 		nx, ny, nz,
 		spcx, spcy, spcz,
@@ -1566,7 +1570,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = data_label[index];
-		if (GetColor(value_label, tex->get_brick_id(index), vd, color))
+		if (GetColor(value_label, tex->get_brick_id(index), vd.get(), color))
 		{
 			//assign colors
 			double value;//0-255
@@ -1580,9 +1584,9 @@ bool ComponentAnalyzer::OutputRgbChannels(std::list<VolumeData*> &channs)
 		}
 	}
 
-	glbin_vol_def.Copy(vd_r, vd);
-	glbin_vol_def.Copy(vd_g, vd);
-	glbin_vol_def.Copy(vd_b, vd);
+	glbin_vol_def.Copy(vd_r.get(), vd.get());
+	glbin_vol_def.Copy(vd_g.get(), vd.get());
+	glbin_vol_def.Copy(vd_b.get(), vd.get());
 
 	fluo::Color red(1.0, 0.0, 0.0);
 	fluo::Color green(0.0, 1.0, 0.0);
@@ -2009,7 +2013,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 {
 	if (!m_compgroup)
 		return;
-	VolumeData* vd = m_compgroup->vd;
+	auto vd = m_compgroup->vd.lock();
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -2101,17 +2105,17 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 	return result;
 }
 
-CompGroup* ComponentAnalyzer::FindCompGroup(VolumeData* vd)
+CompGroup* ComponentAnalyzer::FindCompGroup(const std::shared_ptr<VolumeData>& vd)
 {
 	for (size_t i = 0; i < m_comp_groups.size(); ++i)
 	{
-		if (m_comp_groups[i].vd == vd)
+		if (m_comp_groups[i].vd.lock() == vd)
 			return &(m_comp_groups[i]);
 	}
 	return 0;
 }
 
-CompGroup* ComponentAnalyzer::AddCompGroup(VolumeData* vd)
+CompGroup* ComponentAnalyzer::AddCompGroup(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return 0;

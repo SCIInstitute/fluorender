@@ -45,8 +45,8 @@ Colocalize::~Colocalize()
 
 void Colocalize::Compute()
 {
-	RenderView* view = glbin_current.render_view;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto group = glbin_current.vol_group.lock();
 	if (!group)
 		return;
 
@@ -58,7 +58,7 @@ void Colocalize::Compute()
 	double spcx, spcy, spcz;
 	double spc;
 	std::wstring unit;
-	VolumeData* vd = group->GetVolumeData(0);
+	auto vd = group->GetVolumeData(0);
 	if (!vd)
 	{
 		spc = spcx = spcy = spcz = 1.0;
@@ -110,14 +110,14 @@ void Colocalize::Compute()
 		{
 			for (int it2 = it1; it2 < num; ++it2)
 			{
-				VolumeData* vd1 = group->GetVolumeData(it1);
-				VolumeData* vd2 = group->GetVolumeData(it2);
+				auto vd1 = group->GetVolumeData(it1);
+				auto vd2 = group->GetVolumeData(it2);
 				if (!vd1 || !vd2 ||
 					!vd1->GetDisp() ||
 					!vd2->GetDisp())
 					continue;
 
-				flrd::ChannelCompare compare(vd1, vd2);
+				flrd::ChannelCompare compare(vd1.get(), vd2.get());
 				compare.SetUseMask(glbin_colocal_def.m_use_mask);
 				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
 				compare.prework = std::bind(
@@ -156,14 +156,14 @@ void Colocalize::Compute()
 		for (int it1 = 0; it1 < num; ++it1)
 			for (int it2 = 0; it2 < num; ++it2)
 			{
-				VolumeData* vd1 = group->GetVolumeData(it1);
-				VolumeData* vd2 = group->GetVolumeData(it2);
+				auto vd1 = group->GetVolumeData(it1);
+				auto vd2 = group->GetVolumeData(it2);
 				if (!vd1 || !vd2 ||
 					!vd1->GetDisp() ||
 					!vd2->GetDisp())
 					continue;
 
-				flrd::ChannelCompare compare(vd1, vd2);
+				flrd::ChannelCompare compare(vd1.get(), vd2.get());
 				compare.SetUseMask(glbin_colocal_def.m_use_mask);
 				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
 				compare.prework = std::bind(
@@ -197,7 +197,7 @@ void Colocalize::Compute()
 				m_titles += std::to_wstring(i+1) + L" (%%)";
 			else
 				m_titles += std::to_wstring(i+1);
-			VolumeData* vd = group->GetVolumeData(static_cast<int>(i));
+			auto vd = group->GetVolumeData(static_cast<int>(i));
 			if (vd)
 				name = vd->GetName();
 			else

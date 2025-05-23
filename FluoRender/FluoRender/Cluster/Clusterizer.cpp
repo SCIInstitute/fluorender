@@ -63,7 +63,7 @@ void Clusterizer::Compute()
 	m_in_cells->clear();
 	m_out_cells->clear();
 
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();

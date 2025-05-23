@@ -338,10 +338,6 @@ public:
 	void SetPaintUse2d(bool use2d);
 	bool GetPaintUse2d();
 
-	//calculations
-	void SetVolumeA(const std::shared_ptr<VolumeData>& vd);
-	void SetVolumeB(const std::shared_ptr<VolumeData>& vd);
-
 	//brush properties
 	//change display
 	void ChangeBrushSize(int value, bool ctrl);
@@ -542,7 +538,7 @@ private:
 	std::vector<std::shared_ptr<TreeLayer>> m_layer_list;
 	//ruler list
 	std::unique_ptr<flrd::RulerList> m_ruler_list;
-	std::weak_ptr<flrd::Ruler> m_cur_ruler;
+	flrd::Ruler* m_cur_ruler;
 	//traces
 	std::unique_ptr<TrackGroup> m_track_group;
 	//multivolume
@@ -828,13 +824,13 @@ private:
 	void ClearVRBuffer();
 	void DrawVRBuffer();
 	//different volume drawing modes
-	void DrawVolumesMulti(std::vector<VolumeData*> &list, int peel = 0);
-	void DrawVolumesComp(std::vector<VolumeData*> &list, bool mask = false, int peel = 0);
-	void DrawMIP(VolumeData* vd, int peel = 0);
-	void DrawOVER(VolumeData* vd, bool mask, int peel = 0);
+	void DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
+	void DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>> &list, bool mask = false, int peel = 0);
+	void DrawMIP(const std::weak_ptr<VolumeData>& vd, int peel = 0);
+	void DrawOVER(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
 	//overlay passes
-	void DrawOLShading(VolumeData* vd);
-	void DrawOLShadows(std::vector<VolumeData*> &vlist);
+	void DrawOLShading(const std::weak_ptr<VolumeData>& vd);
+	void DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &list);
 	void DrawOLShadowsMesh(double darkenss);
 
 	//get mesh shadow

@@ -79,7 +79,7 @@ public:
 
 	//settings
 	void SetMainFrame(MainFrame* frame);
-	void SetView(RenderView* view);
+	void SetView(const std::shared_ptr<RenderView>& view);
 	RenderView* GetView();
 	int GetViewIndex();
 	void SetFileName(const std::wstring& filename) { m_filename = filename; }
@@ -196,7 +196,7 @@ public:
 
 private:
 	MainFrame* m_frame;
-	RenderView* m_view;
+	std::weak_ptr<RenderView> m_view;
 	bool m_running;
 	int m_last_frame;//last frame nunmber to save
 	double m_starting_rot;//starting degree of rotation

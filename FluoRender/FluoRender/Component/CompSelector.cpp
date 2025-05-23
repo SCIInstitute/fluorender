@@ -112,7 +112,7 @@ void ComponentSelector::SelectFullComp()
 
 void ComponentSelector::SelectCompsCanvas(const std::vector<unsigned long long>& ids, bool sel_all)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -134,7 +134,7 @@ void ComponentSelector::SetSelectedCompIds(const std::set<unsigned long long>& i
 
 void ComponentSelector::CompFull()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -253,7 +253,7 @@ void ComponentSelector::CompFull()
 void ComponentSelector::Select(bool all, bool rmask)
 {
 	//get current mask
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -461,7 +461,7 @@ void ComponentSelector::Exclusive()
 void ComponentSelector::All()
 {
 	//get current mask
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -493,7 +493,7 @@ void ComponentSelector::All()
 void ComponentSelector::Clear(bool invalidate)
 {
 	//get current mask
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -523,7 +523,7 @@ void ComponentSelector::Clear(bool invalidate)
 void ComponentSelector::Delete()
 {
 	//get current mask
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -568,7 +568,7 @@ void ComponentSelector::DeleteList()
 	bool clear_all = ids.empty();
 
 	//get current mask
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	flvr::Texture* tex = vd->GetTexture();
@@ -623,7 +623,7 @@ void ComponentSelector::DeleteList()
 
 void ComponentSelector::SelectList()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -698,7 +698,7 @@ void ComponentSelector::SelectList()
 
 void ComponentSelector::EraseList()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 

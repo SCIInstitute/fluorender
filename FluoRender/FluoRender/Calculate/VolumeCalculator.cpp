@@ -40,8 +40,6 @@ using namespace flrd;
 
 VolumeCalculator::VolumeCalculator():
 	m_threshold(0),
-	m_vd_a(0),
-	m_vd_b(0),
 	m_type(0),
 	Progress()
 {
@@ -51,24 +49,24 @@ VolumeCalculator::~VolumeCalculator()
 {
 }
 
-void VolumeCalculator::SetVolumeA(VolumeData *vd)
+void VolumeCalculator::SetVolumeA(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd_a = vd;
 }
 
-void VolumeCalculator::SetVolumeB(VolumeData *vd)
+void VolumeCalculator::SetVolumeB(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd_b = vd;
 }
 
-VolumeData* VolumeCalculator::GetVolumeA()
+std::shared_ptr<VolumeData> VolumeCalculator::GetVolumeA()
 {
-	return m_vd_a;
+	return m_vd_a.lock();
 }
 
-VolumeData* VolumeCalculator::GetVolumeB()
+std::shared_ptr<VolumeData> VolumeCalculator::GetVolumeB()
 {
-	return m_vd_b;
+	return m_vd_b.lock();
 }
 
 std::shared_ptr<VolumeData> VolumeCalculator::GetResult(bool pop)
@@ -90,7 +88,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 
 	Calculate(type);
 	auto vd = GetResult(add);
-	VolumeData* vd_a = GetVolumeA();
+	auto vd_a = GetVolumeA();
 	if (vd && vd_a)
 	{
 		//clipping planes
@@ -98,7 +96,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 		if (planes && vd->GetVR())
 			vd->GetVR()->set_planes(planes);
 		//transfer function
-		glbin_vol_def.Copy(vd.get(), vd_a);
+		glbin_vol_def.Copy(vd.get(), vd_a.get());
 
 		if (type == 1 ||
 			type == 2 ||
@@ -113,8 +111,8 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 			{
 				glbin_data_manager.AddVolumeData(vd);
 				//vr_frame->GetDataManager()->SetVolumeDefault(vd);
-				if (glbin_current.render_view)
-					glbin_current.render_view->AddVolumeData(vd.get(), prev_group);
+				if (auto cur_view = glbin_current.render_view.lock())
+					cur_view->AddVolumeData(vd, prev_group);
 
 				if (type == 5 ||
 					type == 6 ||
@@ -128,11 +126,11 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 					type == 4)
 				{
 					vd_a->SetDisp(false);
-					VolumeData* vd_b = GetVolumeB();
+					auto vd_b = GetVolumeB();
 					if (vd_b)
 						vd_b->SetDisp(false);
 				}
-				glbin_current.SetVolumeData(vd.get());
+				glbin_current.SetVolumeData(vd);
 				update = true;
 			}
 		}
@@ -140,7 +138,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 		{
 			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd.get());
 			vd_a->Replace(vd.get());
-			page->SetVolumeData(vd_a);
+			page->SetVolumeData(vd_a.get());
 		}
 		refresh = true;
 	}
@@ -158,23 +156,23 @@ void VolumeCalculator::CalculateGroup(int type, const std::wstring& prev_group, 
 		type == 6 ||
 		type == 7)
 	{
-		std::vector<VolumeData*> vd_list;
+		std::vector<std::weak_ptr<VolumeData>> vd_list;
 		if (glbin_vol_selector.GetSelectGroup())
 		{
-			VolumeData* vd = GetVolumeA();
-			DataGroup* group = 0;
-			RenderView* view = glbin_current.render_view;
+			auto vd = GetVolumeA();
+			auto view = glbin_current.render_view.lock();
+			std::shared_ptr<DataGroup> group;
 			if (vd && view)
 			{
 				for (int i = 0; i < view->GetLayerNum(); i++)
 				{
-					TreeLayer* layer = view->GetLayer(i);
+					auto layer = view->GetLayer(i);
 					if (layer && layer->IsA() == 5)
 					{
-						DataGroup* tmp_group = (DataGroup*)layer;
+						auto tmp_group = std::dynamic_pointer_cast<DataGroup>(layer);
 						for (int j = 0; j < tmp_group->GetVolumeNum(); j++)
 						{
-							VolumeData* tmp_vd = tmp_group->GetVolumeData(j);
+							auto tmp_vd = tmp_group->GetVolumeData(j);
 							if (tmp_vd && tmp_vd == vd)
 							{
 								group = tmp_group;
@@ -190,13 +188,13 @@ void VolumeCalculator::CalculateGroup(int type, const std::wstring& prev_group, 
 			{
 				for (int i = 0; i < group->GetVolumeNum(); i++)
 				{
-					VolumeData* tmp_vd = group->GetVolumeData(i);
+					auto tmp_vd = group->GetVolumeData(i);
 					if (tmp_vd && tmp_vd->GetDisp())
 						vd_list.push_back(tmp_vd);
 				}
 				for (size_t i = 0; i < vd_list.size(); ++i)
 				{
-					SetVolumeA(vd_list[i]);
+					SetVolumeA(vd_list[i].lock());
 					CalculateSingle(type, prev_group, add);
 				}
 				SetVolumeA(vd);
@@ -224,40 +222,36 @@ void VolumeCalculator::Calculate(int type)
 	case 8://intersection with mask
 	{
 		CreateVolumeResult2();
-		VolumeData* vd = 0;
-		if (!m_vd_r.empty())
-			vd = m_vd_r.back().get();
-		if (!vd)
+		if (m_vd_r.empty())
 			return;
-		vd->Calculate(m_type, m_vd_a, m_vd_b);
+		if (auto vd = m_vd_r.back())
+			vd->Calculate(m_type, m_vd_a.lock().get(), m_vd_b.lock().get());
 		return;
 	}
 	case 5:
 	case 6:
 	case 7:
 	{
-		if (!m_vd_a || !m_vd_a->GetMask(false))
+		auto vd_a = m_vd_a.lock();
+		if (!vd_a || !vd_a->GetMask(false))
 			return;
 		CreateVolumeResult1();
-		VolumeData* vd = 0;
-		if (!m_vd_r.empty())
-			vd = m_vd_r.back().get();
-		if (!vd)
+		if (m_vd_r.empty())
 			return;
-		vd->Calculate(m_type, m_vd_a, 0);
+		if (auto vd = m_vd_r.back())
+			vd->Calculate(m_type, vd_a.get(), 0);
 		return;
 	}
 	case 9:
 	{
-		if (!m_vd_a)
+		auto vd_a = m_vd_a.lock();
+		if (!vd_a)
 			return;
 		CreateVolumeResult1();
-		VolumeData* vd = 0;
-		if (!m_vd_r.empty())
-			vd = m_vd_r.back().get();
-		if (!vd)
+		if (m_vd_r.empty())
 			return;
-		FillHoles(m_threshold);
+		if (auto vd = m_vd_r.back())
+			FillHoles(m_threshold);
 		return;
 	}
 	}
@@ -265,21 +259,21 @@ void VolumeCalculator::Calculate(int type)
 
 void VolumeCalculator::CreateVolumeResult1()
 {
-	if (!m_vd_a)
+	auto vd_a = m_vd_a.lock();
+	if (!vd_a)
 		return;
 
 	int res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
 
-	m_vd_a->GetResolution(res_x, res_y, res_z);
-	m_vd_a->GetSpacings(spc_x, spc_y, spc_z);
-	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
+	vd_a->GetResolution(res_x, res_y, res_z);
+	vd_a->GetSpacings(spc_x, spc_y, spc_z);
+	int brick_size = vd_a->GetTexture()->get_build_max_tex_size();
 
-	int bits = (m_vd_a->GetMaxValue()>255.0)?
-	  16:8;
+	int bits = (vd_a->GetMaxValue()>255.0) ? 16:8;
 	//int bits = 8;  //it has an unknown problem with 16 bit data
 
-	VolumeData* vd = new VolumeData();
+	auto vd = std::make_shared<VolumeData>();
 	vd->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
@@ -288,7 +282,7 @@ void VolumeCalculator::CreateVolumeResult1()
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
 	m_vd_r.push_back(std::shared_ptr<VolumeData>(vd));
 
-	std::wstring name = m_vd_a->GetName();
+	std::wstring name = vd_a->GetName();
 	std::wstring str_type;
 	switch (m_type)
 	{
@@ -307,7 +301,9 @@ void VolumeCalculator::CreateVolumeResult1()
 
 void VolumeCalculator::CreateVolumeResult2()
 {
-	if (!m_vd_a || !m_vd_b)
+	auto vd_a = m_vd_a.lock();
+	auto vd_b = m_vd_b.lock();
+	if (!vd_a || !vd_b)
 		return;
 
 	int res_x_a, res_y_a, res_z_a;
@@ -315,14 +311,13 @@ void VolumeCalculator::CreateVolumeResult2()
 	double spc_x_a, spc_y_a, spc_z_a;
 	double spc_x_b, spc_y_b, spc_z_b;
 
-	m_vd_a->GetResolution(res_x_a, res_y_a, res_z_a);
-	m_vd_b->GetResolution(res_x_b, res_y_b, res_z_b);
-	m_vd_a->GetSpacings(spc_x_a, spc_y_a, spc_z_a);
-	m_vd_b->GetSpacings(spc_x_b, spc_y_b, spc_z_b);
-	int brick_size = m_vd_a->GetTexture()->get_build_max_tex_size();
+	vd_a->GetResolution(res_x_a, res_y_a, res_z_a);
+	vd_b->GetResolution(res_x_b, res_y_b, res_z_b);
+	vd_a->GetSpacings(spc_x_a, spc_y_a, spc_z_a);
+	vd_b->GetSpacings(spc_x_b, spc_y_b, spc_z_b);
+	int brick_size = vd_a->GetTexture()->get_build_max_tex_size();
 
-	int bits = (m_vd_a->GetMaxValue()>255.0||m_vd_b->GetMaxValue()>255.0)?
-	  16:8;
+	int bits = (vd_a->GetMaxValue()>255.0||vd_b->GetMaxValue()>255.0) ? 16:8;
 	//int bits = 8;  //it has an unknown problem with 16 bit data
 	int res_x, res_y, res_z;
 	double spc_x, spc_y, spc_z;
@@ -342,8 +337,8 @@ void VolumeCalculator::CreateVolumeResult2()
 	vd->SetSpcFromFile(true);
 	m_vd_r.push_back(std::shared_ptr<VolumeData>(vd));
 
-	std::wstring name_a = m_vd_a->GetName();
-	std::wstring name_b = m_vd_b->GetName();
+	std::wstring name_a = vd_a->GetName();
+	std::wstring name_b = vd_b->GetName();
 	size_t len = 15;
 	if (name_a.length() > len)
 		name_a = name_a.substr(0, len);
@@ -372,7 +367,8 @@ void VolumeCalculator::CreateVolumeResult2()
 //fill holes
 void VolumeCalculator::FillHoles(double thresh)
 {
-	if (!m_vd_a)
+	auto vd_a = m_vd_a.lock();
+	if (!vd_a)
 		return;
 	VolumeData* vd = 0;
 	if (!m_vd_r.empty())
@@ -380,7 +376,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	if (!vd)
 		return;
 
-	flvr::Texture* tex_a = m_vd_a->GetTexture();
+	flvr::Texture* tex_a = vd_a->GetTexture();
 	if (!tex_a)
 		return;
 	Nrrd* nrrd_a = tex_a->get_nrrd(0);
@@ -402,7 +398,7 @@ void VolumeCalculator::FillHoles(double thresh)
 
 	//resolution
 	int nx, ny, nz;
-	m_vd_a->GetResolution(nx, ny, nz);
+	vd_a->GetResolution(nx, ny, nz);
 
 	int progress = 0;
 	int total_prg = nx * 2;
@@ -421,7 +417,7 @@ void VolumeCalculator::FillHoles(double thresh)
 			if (nrrd_a->type == nrrdTypeUChar)
 				value_a = ((unsigned char*)data_a)[index];
 			else if (nrrd_a->type == nrrdTypeUShort)
-				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*m_vd_a->GetScalarScale() / 257.0);
+				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*vd_a->GetScalarScale() / 257.0);
 			if (value_a > thresh * 255)
 			{
 				bbox.extend(fluo::Point(i, j, k));

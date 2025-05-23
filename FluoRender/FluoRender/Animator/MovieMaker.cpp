@@ -46,7 +46,6 @@ DEALINGS IN THE SOFTWARE.
 
 MovieMaker::MovieMaker() :
 	m_frame(0),
-	m_view(0),
 	m_last_frame(-1),
 	m_starting_rot(0),
 	m_running(false),
@@ -112,10 +111,11 @@ void MovieMaker::Play(bool back)
 
 void MovieMaker::Start()
 {
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
 		return;
 
-	m_view->m_begin_play_frame = m_cur_frame;
+	view->m_begin_play_frame = m_cur_frame;
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_last_frame = 0;
 
@@ -157,7 +157,8 @@ void MovieMaker::Hold()
 
 void MovieMaker::Rewind()
 {
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
 		return;
 	Stop();
 	SetCurrentFrame(m_clip_start_frame);
@@ -166,7 +167,8 @@ void MovieMaker::Rewind()
 
 void MovieMaker::Forward()
 {
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
 		return;
 	Stop();
 	SetCurrentFrame(m_clip_end_frame);
@@ -175,10 +177,11 @@ void MovieMaker::Forward()
 
 void MovieMaker::Reset()
 {
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
 		return;
-	m_view->m_tseq_cur_num =
-		m_view->m_tseq_prv_num = 0;
+	view->m_tseq_cur_num =
+		view->m_tseq_prv_num = 0;
 	SetCurrentFrame(m_clip_start_frame);
 	m_last_frame = -1;
 	SetRendering(false);
@@ -186,7 +189,8 @@ void MovieMaker::Reset()
 
 void MovieMaker::PlaySave()
 {
-	if (!m_frame || !m_view)
+	auto view = m_view.lock();
+	if (!m_frame || !view)
 		return;
 
 	Rewind();
@@ -199,12 +203,12 @@ void MovieMaker::PlaySave()
 		{
 			m_crop_x = 0;
 			m_crop_y = 0;
-			m_crop_w = m_view->GetGLSize().w();
-			m_crop_h = m_view->GetGLSize().h();
+			m_crop_w = view->GetGLSize().w();
+			m_crop_h = view->GetGLSize().h();
 		}
-		else if (m_view->GetEnlarge())
+		else if (view->GetEnlarge())
 		{
-			double scale = m_view->GetEnlargeScale();
+			double scale = view->GetEnlargeScale();
 			m_crop_w *= scale;
 			m_crop_h *= scale;
 		}
@@ -229,13 +233,14 @@ void MovieMaker::PlaySave()
 		glbin_project.Save(prop_file, inc);
 	}
 
-	m_view->SetKeepEnlarge(true);
+	view->SetKeepEnlarge(true);
 	Play(false);
 }
 
 void MovieMaker::SetRendering(bool rewind)
 {
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
 		return;
 
 	double t = GetCurProg();
@@ -244,8 +249,8 @@ void MovieMaker::SetRendering(bool rewind)
 	{
 		if (glbin_interpolator.GetLastIndex() > 0)
 		{
-			m_view->SetLockCamObject(m_cam_lock && m_running);
-			m_view->SetParams(t);
+			view->SetLockCamObject(m_cam_lock && m_running);
+			view->SetParams(t);
 		}
 	}
 	else
@@ -253,18 +258,18 @@ void MovieMaker::SetRendering(bool rewind)
 		//basic options
 		if (m_seq_mode == 1)
 		{
-			m_view->Set4DSeqFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, rewind);
+			view->Set4DSeqFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, rewind);
 		}
 		else if (m_seq_mode == 2)
 		{
-			m_view->Set3DBatFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, rewind);
+			view->Set3DBatFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, rewind);
 		}
 
 		//rotate animation
 		if (m_rotate)
 		{
 			double val;
-			fluo::Vector rval = m_view->GetRotations();
+			fluo::Vector rval = view->GetRotations();
 			val = rval[m_rot_axis];
 			if (m_interpolation == 0)
 				val = m_starting_rot + t * m_rot_deg;
@@ -272,12 +277,12 @@ void MovieMaker::SetRendering(bool rewind)
 				val = m_starting_rot +
 				(-2.0 * t * t * t + 3.0 * t * t) * m_rot_deg;
 			rval[m_rot_axis] = val;
-			m_view->SetRotations(rval, true);
+			view->SetRotations(rval, true);
 		}
 	}
 	if (m_running)
 	{
-		m_view->SetInteractive(false);
+		view->SetInteractive(false);
 		m_frame->UpdateProps({
 			gstMovProgSlider,
 			gstCurrentFrame,
@@ -290,7 +295,8 @@ void MovieMaker::SetRendering(bool rewind)
 
 void MovieMaker::WriteFrameToFile()
 {
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
 		return;
 
 	std::wostringstream oss;
@@ -308,7 +314,7 @@ void MovieMaker::WriteFrameToFile()
 	float dpi = glbin_settings.m_dpi;
 	int x, y, w, h;
 	void* image = 0;
-	m_view->ReadPixels(chann, fp32, x, y, w, h, &image);
+	view->ReadPixels(chann, fp32, x, y, w, h, &image);
 
 	if (bmov)
 	{
@@ -383,19 +389,19 @@ void MovieMaker::SetMainFrame(MainFrame* frame)
 	m_frame = frame;
 }
 
-void MovieMaker::SetView(RenderView* view)
+void MovieMaker::SetView(const std::shared_ptr<RenderView>& view)
 {
 	m_view = view;
 }
 
 RenderView* MovieMaker::GetView()
 {
-	return m_view;
+	return m_view.lock().get();
 }
 
 int MovieMaker::GetViewIndex()
 {
-	return glbin_current.GetViewId(m_view);
+	return glbin_current.GetViewId(m_view.lock().get());
 }
 
 void MovieMaker::SetKeyframeEnable(bool val)
@@ -464,6 +470,10 @@ void MovieMaker::SetSeqMode(int val)
 		m_seq_mode = val;
 	m_keyframe_enable = false;
 
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	int sf, ef;
 	switch (m_seq_mode)
 	{
@@ -471,43 +481,37 @@ void MovieMaker::SetSeqMode(int val)
 		SetRotateEnable(true);
 		break;
 	case 1:
-		if (m_view)
+		view->Get4DSeqRange(sf, ef);
+		if (ef > 0)
 		{
-			m_view->Get4DSeqRange(sf, ef);
-			if (ef > 0)
-			{
-				m_rotate = false;
-				m_seq_all_num = ef - sf;
-				SetFullFrameNum(m_seq_all_num);
-				SetSeqCurNum(m_view->m_tseq_cur_num);
-				//SetClipStartEndFrames(0, ef);
-			}
-			else
-			{
-				m_seq_mode = 0;
-				SetRotateEnable(true);
-			}
+			m_rotate = false;
+			m_seq_all_num = ef - sf;
+			SetFullFrameNum(m_seq_all_num);
+			SetSeqCurNum(view->m_tseq_cur_num);
+			//SetClipStartEndFrames(0, ef);
+		}
+		else
+		{
+			m_seq_mode = 0;
+			SetRotateEnable(true);
 		}
 		break;
 	case 2:
-		if (m_view)
+		view->Get3DBatRange(sf, ef);
+		if (ef > 0)
 		{
-			m_view->Get3DBatRange(sf, ef);
-			if (ef > 0)
-			{
-				m_rotate = false;
-				m_seq_all_num = ef - sf;
-				SetFullFrameNum(m_seq_all_num);
-				SetSeqCurNum(m_view->m_tseq_cur_num);
-				//SetClipStartEndFrames(0, ef);
-			}
-			else
-			{
-				m_seq_mode = 0;
-				m_seq_all_num = 0;
-				m_seq_cur_num = 0;
-				SetRotateEnable(true);
-			}
+			m_rotate = false;
+			m_seq_all_num = ef - sf;
+			SetFullFrameNum(m_seq_all_num);
+			SetSeqCurNum(view->m_tseq_cur_num);
+			//SetClipStartEndFrames(0, ef);
+		}
+		else
+		{
+			m_seq_mode = 0;
+			m_seq_all_num = 0;
+			m_seq_cur_num = 0;
+			SetRotateEnable(true);
 		}
 		break;
 	}
@@ -517,16 +521,19 @@ void MovieMaker::SetSeqCurNum(int val)
 {
 	if (m_seq_all_num == 0)
 		return;
+	auto view = m_view.lock();
+	if (!view)
+		return;
 	m_seq_cur_num = fluo::RotateClamp2(val, 0, m_seq_all_num);
 	if (m_keyframe_enable)
 	{
 		if (m_seq_mode == 1)
 		{
-			m_view->Set4DSeqFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, false);
+			view->Set4DSeqFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, false);
 		}
 		else if (m_seq_mode == 2)
 		{
-			m_view->Set3DBatFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, false);
+			view->Set3DBatFrame(m_seq_cur_num, m_clip_start_frame, m_clip_end_frame, false);
 		}
 	}
 	else if (m_seq_mode > 0)
@@ -585,9 +592,12 @@ void MovieMaker::SetCurrentFrame(int val, bool upd_seq)
 {
 	if (m_rotate && !IsPaused())
 	{
-		fluo::Vector rval = m_view->GetRotations();
-		double r = rval[m_rot_axis];
-		m_starting_rot = fluo::RotateClamp(r, 0, 360);
+		if (auto view = m_view.lock())
+		{
+			fluo::Vector rval = view->GetRotations();
+			double r = rval[m_rot_axis];
+			m_starting_rot = fluo::RotateClamp(r, 0, 360);
+		}
 	}
 	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
 	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
@@ -608,16 +618,16 @@ void MovieMaker::SetCurrentTime(double val)
 void MovieMaker::SetCropEnable(bool val)
 {
 	m_crop = val;
-	if (m_view)
+	auto view = m_view.lock();
+	if (!view)
+		return;
+	if (val)
 	{
-		if (val)
-		{
-			m_view->CalcFrame();
-			m_view->EnableFrame();
-		}
-		else
-			m_view->DisableFrame();
+		view->CalcFrame();
+		view->EnableFrame();
 	}
+	else
+		view->DisableFrame();
 }
 
 void MovieMaker::SetCropValues(int x, int y, int w, int h)
@@ -653,9 +663,13 @@ void MovieMaker::InsertKey(int index)
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
 		return;
-	if (!m_view)
-		m_view = root->GetView(0);
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
+	{
+		view = root->GetView(0);
+		m_view = view;
+	}
+	if (!view)
 		return;
 
 	FlKeyCode keycode;
@@ -674,9 +688,9 @@ void MovieMaker::InsertKey(int index)
 	//for all volumes
 	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
-		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+		auto vd = glbin_data_manager.GetVolumeData(i);
 		keycode.l0 = 1;
-		keycode.l0_name = ws2s(m_view->GetName());
+		keycode.l0_name = ws2s(view->GetName());
 		keycode.l1 = 2;
 		keycode.l1_name = ws2s(vd->GetName());
 		//display
@@ -830,17 +844,17 @@ void MovieMaker::InsertKey(int index)
 	}
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = ws2s(m_view->GetName());
+	keycode.l1_name = ws2s(view->GetName());
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
-	fluo::Quaternion q = m_view->GetRotQuat();
+	fluo::Quaternion q = view->GetRotQuat();
 	flkeyQ = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkeyQ);
 	//translation
-	fluo::Vector vval = m_view->GetTranslations();
+	fluo::Vector vval = view->GetTranslations();
 	//x
 	keycode.l2_name = "translation_x";
 	flkey = new FlKeyDouble(keycode, vval.x());
@@ -854,7 +868,7 @@ void MovieMaker::InsertKey(int index)
 	flkey = new FlKeyDouble(keycode, vval.z());
 	glbin_interpolator.AddKey(flkey);
 	//centers
-	fluo::Point pval = m_view->GetCenters();
+	fluo::Point pval = view->GetCenters();
 	//x
 	keycode.l2_name = "center_x";
 	flkey = new FlKeyDouble(keycode, pval.x());
@@ -868,7 +882,7 @@ void MovieMaker::InsertKey(int index)
 	flkey = new FlKeyDouble(keycode, pval.z());
 	glbin_interpolator.AddKey(flkey);
 	//obj traslation
-	vval = m_view->GetObjTrans();
+	vval = view->GetObjTrans();
 	//x
 	keycode.l2_name = "obj_trans_x";
 	flkey = new FlKeyDouble(keycode, vval.x());
@@ -882,18 +896,18 @@ void MovieMaker::InsertKey(int index)
 	flkey = new FlKeyDouble(keycode, vval.z());
 	glbin_interpolator.AddKey(flkey);
 	//scale
-	double scale = m_view->m_scale_factor;
+	double scale = view->m_scale_factor;
 	keycode.l2_name = "scale";
 	flkey = new FlKeyDouble(keycode, scale);
 	glbin_interpolator.AddKey(flkey);
 	//intermixing mode
-	int ival = m_view->GetVolMethod();
+	int ival = view->GetVolMethod();
 	keycode.l2_name = "volmethod";
 	flkeyI = new FlKeyInt(keycode, ival);
 	glbin_interpolator.AddKey(flkeyI);
 	//perspective angle
-	bool persp = m_view->GetPersp();
-	double aov = m_view->GetAov();
+	bool persp = view->GetPersp();
+	double aov = view->GetAov();
 	if (!persp)
 		aov = 9.9;
 	keycode.l2_name = "aov";
@@ -911,13 +925,13 @@ void MovieMaker::InsertKey(int index)
 	glbin_interpolator.AddKey(flkey);
 	//output adj
 	keycode.l2_name = "gamma";
-	flkeyC = new FlKeyColor(keycode, m_view->GetGammaColor());
+	flkeyC = new FlKeyColor(keycode, view->GetGammaColor());
 	glbin_interpolator.AddKey(flkeyC);
 	keycode.l2_name = "brightness";
-	flkeyC = new FlKeyColor(keycode, m_view->GetBrightness());
+	flkeyC = new FlKeyColor(keycode, view->GetBrightness());
 	glbin_interpolator.AddKey(flkeyC);
 	keycode.l2_name = "hdr";
-	flkeyC = new FlKeyColor(keycode, m_view->GetHdr());
+	flkeyC = new FlKeyColor(keycode, view->GetHdr());
 	glbin_interpolator.AddKey(flkeyC);
 
 	glbin_interpolator.End();
@@ -945,7 +959,8 @@ bool MovieMaker::Action()
 			WriteFrameToFile();
 		SetCurrentFrame(m_cur_frame);
 		Stop();
-		m_view->SetKeepEnlarge(false);
+		if (auto view = m_view.lock())
+			view->SetKeepEnlarge(false);
 		return true;
 	}
 
@@ -1084,6 +1099,10 @@ std::vector<std::string> MovieMaker::GetAutoKeyTypes()
 
 void MovieMaker::MakeKeysCameraTumble()
 {
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	FlKeyCode keycode;
 	FlKeyQuaternion* flkey = 0;
 	FlKeyGroup* kg = 0;
@@ -1095,16 +1114,16 @@ void MovieMaker::MakeKeysCameraTumble()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = ws2s(m_view->GetName());
+	keycode.l1_name = ws2s(view->GetName());
 	//rotation
 	keycode.l2 = 0;
 	keycode.l2_name = "rotation";
 
 	//initial
 	glbin_interpolator.Begin(t, m_key_duration);
-	q = m_view->GetRotQuat();
+	q = view->GetRotQuat();
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1124,7 +1143,7 @@ void MovieMaker::MakeKeysCameraTumble()
 	t += m_key_duration;
 	//restore
 	glbin_interpolator.Begin(t, m_key_duration);
-	q = m_view->GetRotQuat();
+	q = view->GetRotQuat();
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1144,7 +1163,7 @@ void MovieMaker::MakeKeysCameraTumble()
 	t += m_key_duration;
 	//restore
 	glbin_interpolator.Begin(t, m_key_duration);
-	q = m_view->GetRotQuat();
+	q = view->GetRotQuat();
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1156,6 +1175,10 @@ void MovieMaker::MakeKeysCameraTumble()
 
 void MovieMaker::MakeKeysCameraZoom()
 {
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyGroup* kg = 0;
@@ -1166,16 +1189,16 @@ void MovieMaker::MakeKeysCameraZoom()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = ws2s(m_view->GetName());
+	keycode.l1_name = ws2s(view->GetName());
 	//scale
 	keycode.l2 = 0;
 	keycode.l2_name = "scale";
 
 	//initial
 	glbin_interpolator.Begin(t, m_key_duration);
-	val = m_view->m_scale_factor;
+	val = view->m_scale_factor;
 	flkey = new FlKeyDouble(keycode, val);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1193,7 +1216,7 @@ void MovieMaker::MakeKeysCameraZoom()
 	t += m_key_duration;
 	//restore
 	glbin_interpolator.Begin(t, m_key_duration);
-	val = m_view->m_scale_factor;
+	val = view->m_scale_factor;
 	flkey = new FlKeyDouble(keycode, val);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1208,6 +1231,10 @@ void MovieMaker::MakeKeysTimeSequence()
 	if (m_seq_all_num <= 0)
 		return;
 
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyGroup* kg = 0;
@@ -1218,16 +1245,16 @@ void MovieMaker::MakeKeysTimeSequence()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	//time point
 	keycode.l2 = 0;
 	keycode.l2_name = "frame";
 
 	//initial
 	glbin_interpolator.Begin(t, m_seq_all_num);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode.l1 = 2;
@@ -1241,9 +1268,9 @@ void MovieMaker::MakeKeysTimeSequence()
 	t += m_seq_all_num;
 	//move to end
 	glbin_interpolator.Begin(t, m_seq_all_num);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode.l1 = 2;
@@ -1257,9 +1284,9 @@ void MovieMaker::MakeKeysTimeSequence()
 	t += m_seq_all_num;
 	//restore
 	glbin_interpolator.Begin(t, m_seq_all_num);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode.l1 = 2;
@@ -1279,13 +1306,17 @@ void MovieMaker::MakeKeysTimeColormap()
 	if (m_seq_all_num <= 0)
 		return;
 
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	fluo::Color c[7];
 	double v[7];
 	int tt[7];
 	int dt[7];
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
-		vd = m_view->GetAllVolumeData(0);
+		vd = view->GetAllVolumeData(0);
 	if (!vd)
 		return;
 	double low, high;
@@ -1337,7 +1368,7 @@ void MovieMaker::MakeKeysTimeColormap()
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	//color
 	keycode.l2 = 0;
 
@@ -1348,9 +1379,9 @@ void MovieMaker::MakeKeysTimeColormap()
 		if (i == 6 && tt[i] == tt[i - 1])
 			continue;
 		glbin_interpolator.Begin(t, dt[i]);
-		for (int j = 0; j < m_view->GetAllVolumeNum(); ++j)
+		for (int j = 0; j < view->GetAllVolumeNum(); ++j)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(j);
+			auto vd = view->GetAllVolumeData(j);
 			if (!vd)
 				continue;
 			keycode.l1 = 2;
@@ -1375,7 +1406,10 @@ void MovieMaker::MakeKeysTimeColormap()
 
 void MovieMaker::MakeKeysClipZ(int type)
 {
-	int n = m_view->GetAllVolumeNum();
+	auto view = m_view.lock();
+	if (!view)
+		return;
+	int n = view->GetAllVolumeNum();
 	if (n <= 0)
 		return;
 
@@ -1383,7 +1417,7 @@ void MovieMaker::MakeKeysClipZ(int type)
 	int x, y, z;
 	for (int i = 0; i < n; ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		vd->GetResolution(x, y, z);
@@ -1402,9 +1436,9 @@ void MovieMaker::MakeKeysClipZ(int type)
 
 	//for the view
 	keycode1.l0 = 1;
-	keycode1.l0_name = ws2s(m_view->GetName());
+	keycode1.l0_name = ws2s(view->GetName());
 	keycode2.l0 = 1;
-	keycode2.l0_name = ws2s(m_view->GetName());
+	keycode2.l0_name = ws2s(view->GetName());
 	//time point
 	keycode1.l2 = 0;
 	keycode1.l2_name = "z1_val";
@@ -1413,9 +1447,9 @@ void MovieMaker::MakeKeysClipZ(int type)
 
 	//initial
 	glbin_interpolator.Begin(t, nz);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
@@ -1434,9 +1468,9 @@ void MovieMaker::MakeKeysClipZ(int type)
 	t += nz;
 	//move down
 	glbin_interpolator.Begin(t, nz);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
@@ -1456,9 +1490,9 @@ void MovieMaker::MakeKeysClipZ(int type)
 	t += nz;
 	//restore
 	glbin_interpolator.Begin(t, nz);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
@@ -1480,7 +1514,10 @@ void MovieMaker::MakeKeysClipZ(int type)
 
 void MovieMaker::MakeIntSweep()
 {
-	int n = m_view->GetAllVolumeNum();
+	auto view = m_view.lock();
+	if (!view)
+		return;
+	int n = view->GetAllVolumeNum();
 	if (n <= 0)
 		return;
 
@@ -1493,9 +1530,9 @@ void MovieMaker::MakeIntSweep()
 
 	//for the view
 	keycode1.l0 = 1;
-	keycode1.l0_name = ws2s(m_view->GetName());
+	keycode1.l0_name = ws2s(view->GetName());
 	keycode2.l0 = 1;
-	keycode2.l0_name = ws2s(m_view->GetName());
+	keycode2.l0_name = ws2s(view->GetName());
 	//time point
 	keycode1.l2 = 0;
 	keycode1.l2_name = "low threshold";
@@ -1503,9 +1540,9 @@ void MovieMaker::MakeIntSweep()
 	keycode2.l2_name = "high threshold";
 
 	glbin_interpolator.Begin(t, m_key_duration);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
@@ -1523,9 +1560,9 @@ void MovieMaker::MakeIntSweep()
 	t += m_key_duration;
 
 	glbin_interpolator.Begin(t, m_key_duration);
-	for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+	for (int i = 0; i < view->GetAllVolumeNum(); ++i)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
 		keycode1.l1 = 2;
@@ -1546,6 +1583,10 @@ void MovieMaker::MakeIntSweep()
 
 void MovieMaker::AddChannToView()
 {
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	FlKeyCode keycode;
 	FlKeyBoolean* flkeyB = 0;
 	FlKeyGroup* kg = 0;
@@ -1553,11 +1594,11 @@ void MovieMaker::AddChannToView()
 	double t = glbin_interpolator.GetLastT();
 	if (t > 0.0) t += m_key_duration;
 
-	int numChan = m_view->GetAllVolumeNum();
+	int numChan = view->GetAllVolumeNum();
 
 	//for view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	//display only
 	keycode.l2 = 0;
 	keycode.l2_name = "display";
@@ -1567,7 +1608,7 @@ void MovieMaker::AddChannToView()
 	//for all volumes
 	for (int i = 0; i < numChan; i++)
 	{
-		VolumeData* vd = m_view->GetAllVolumeData(i);
+		auto vd = view->GetAllVolumeData(i);
 		keycode.l1 = 2;
 		keycode.l1_name = ws2s(vd->GetName());
 		flkeyB = new FlKeyBoolean(keycode, false);
@@ -1584,7 +1625,7 @@ void MovieMaker::AddChannToView()
 		//for all volumes
 		for (int j = 0; j < numChan; j++)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(j);
+			auto vd = view->GetAllVolumeData(j);
 			keycode.l1 = 2;
 			keycode.l1_name = ws2s(vd->GetName());
 			flkeyB = new FlKeyBoolean(keycode, j <= i);
@@ -1604,9 +1645,13 @@ void MovieMaker::MakeKeysChannComb(int comb)
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
 		return;
-	if (!m_view)
-		m_view = root->GetView(0);
-	if (!m_view)
+	auto view = m_view.lock();
+	if (!view)
+	{
+		view = root->GetView(0);
+		m_view = view;
+	}
+	if (!view)
 		return;
 
 	FlKeyCode keycode;
@@ -1617,7 +1662,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 	if (t > 0.0) t += m_key_duration;
 
 	int i;
-	int numChan = m_view->GetAllVolumeNum();
+	int numChan = view->GetAllVolumeNum();
 	std::vector<bool> chan_mask;
 	//initiate mask
 	for (i = 0; i < numChan; i++)
@@ -1633,11 +1678,11 @@ void MovieMaker::MakeKeysChannComb(int comb)
 		glbin_interpolator.Begin(t, m_key_duration);
 
 		//for all volumes
-		for (i = 0; i < m_view->GetAllVolumeNum(); i++)
+		for (i = 0; i < view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(i);
+			auto vd = view->GetAllVolumeData(i);
 			keycode.l0 = 1;
-			keycode.l0_name = ws2s(m_view->GetName());
+			keycode.l0_name = ws2s(view->GetName());
 			keycode.l1 = 2;
 			keycode.l1_name = ws2s(vd->GetName());
 			//display only
@@ -1712,6 +1757,10 @@ void MovieMaker::KeyChannComb()
 
 void MovieMaker::MakeKeysLookingGlass(int frames)
 {
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
 	FlKeyCode keycode;
 	FlKeyDouble* flkey = 0;
 	FlKeyGroup* kg = 0;
@@ -1719,15 +1768,15 @@ void MovieMaker::MakeKeysLookingGlass(int frames)
 	double t = glbin_interpolator.GetLastT();
 	if (t > 0.0) t += frames;
 
-	fluo::Vector side = m_view->GetSide();
-	fluo::Vector trans = side * (m_view->m_ortho_right - m_view->m_ortho_left);
+	fluo::Vector side = view->GetSide();
+	fluo::Vector trans = side * (view->m_ortho_right - view->m_ortho_left);
 	trans /= 4;
 
 	//for the view
 	keycode.l0 = 1;
-	keycode.l0_name = ws2s(m_view->GetName());
+	keycode.l0_name = ws2s(view->GetName());
 	keycode.l1 = 1;
-	keycode.l1_name = ws2s(m_view->GetName());
+	keycode.l1_name = ws2s(view->GetName());
 	//scale
 	keycode.l2 = 0;
 

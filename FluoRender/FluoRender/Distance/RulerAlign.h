@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_RulerAlign_h
 
 #include <Vector.h>
+#include <memory>
 
 class RenderView;
 class VolumeData;
@@ -40,18 +41,16 @@ namespace flrd
 	{
 	public:
 		RulerAlign():
-			m_view(0),
-			m_vd(0),
 			m_axis_type(0),
 			m_align_center(false) {};
 		~RulerAlign() {};
 
-		void SetView(RenderView* view)
+		void SetView(const std::shared_ptr<RenderView>& view)
 		{
 			m_view = view;
 		}
 
-		void SetVolumeData(VolumeData* vd)
+		void SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 		{
 			m_vd = vd;
 		}
@@ -94,8 +93,8 @@ namespace flrd
 		void AlignPca(bool);//0-xyz; 1-yxz; 2-zxy, 3-xzy; 4-yzx; 5-zyx
 
 	private:
-		RenderView *m_view;
-		VolumeData* m_vd;
+		std::weak_ptr<RenderView> m_view;
+		std::weak_ptr<VolumeData> m_vd;
 		std::vector<fluo::Point> m_point_list;
 		int m_axis_type;
 		fluo::Vector m_axis;
