@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <nrrd.h>
 #include <deque>
 #include <functional>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -41,12 +42,11 @@ namespace flvr
 	class VolCache4D
 	{
 	public:
-		VolCache4D(VolumeData* vd) :
+		VolCache4D(const std::shared_ptr<VolumeData>& vd) :
 			m_vd(vd),
 			m_data(0),
 			m_mask(0),
 			m_label(0),
-			m_tex(0),
 			m_tnum(0),
 			m_valid(false),
 			m_modified(false),
@@ -69,7 +69,6 @@ namespace flvr
 			build_tex(false),
 			time_cond0(false) {}
 
-		flvr::Texture* GetTexture() { return m_tex; }
 		Nrrd* GetNrrdData() { return m_data; }
 		Nrrd* GetNrrdMask() { return m_mask; }
 		Nrrd* GetNrrdLabel() { return m_label; }
@@ -98,11 +97,10 @@ namespace flvr
 			save_label = false;
 			build_tex = false;
 			time_cond0 = false;
-			m_vd = 0;
+			m_vd.reset();
 			m_data = 0;
 			m_mask = 0;
 			m_label = 0;
-			m_tex = 0;
 			m_tnum = 0;
 			m_valid = false;
 			m_modified = false;
@@ -128,12 +126,10 @@ namespace flvr
 		bool time_cond0;//time conditional0: cur_time==cache_time, access; otherwise, handle
 
 	private:
-		VolumeData* m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		Nrrd* m_data;
 		Nrrd* m_mask;
 		Nrrd* m_label;
-		//texture for 4d colormap
-		flvr::Texture* m_tex;
 
 		size_t m_tnum;//current time point number
 		bool m_valid;
@@ -187,7 +183,7 @@ namespace flvr
 	class CacheQueue
 	{
 	public:
-		CacheQueue(VolumeData* vd):
+		CacheQueue(const std::shared_ptr<VolumeData>& vd):
 			m_vd(vd),
 			m_max_size(2),
 			m_new_cache(nullptr),
@@ -217,7 +213,7 @@ namespace flvr
 		VolCacheFunc m_del_cache;
 
 	private:
-		VolumeData* m_vd;//each volume data has a queue
+		std::weak_ptr<VolumeData> m_vd;//each volume data has a queue
 		size_t m_max_size;
 		std::deque<VolCache4D> m_queue;
 		int m_flags;
@@ -351,14 +347,18 @@ namespace flvr
 		}
 		else
 		{
-			VolCache4D vol_cache(m_vd);
-			vol_cache.m_tnum = frame;
-			if (m_new_cache)
+			auto vd_ptr = m_vd.lock();
+			if (vd_ptr)
 			{
-				vol_cache.SetHandleFlags(m_flags);
-				m_new_cache(vol_cache);
+				VolCache4D vol_cache(vd_ptr);
+				vol_cache.m_tnum = frame;
+				if (m_new_cache)
+				{
+					vol_cache.SetHandleFlags(m_flags);
+					m_new_cache(vol_cache);
+				}
+				push_cache(vol_cache);
 			}
-			push_cache(vol_cache);
 			if (!m_queue.empty())
 				return &m_queue.back();
 		}

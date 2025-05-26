@@ -460,7 +460,7 @@ BrushToolDlg::~BrushToolDlg()
 
 void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	VolumeData* sel_vol = glbin_current.vol_data;
+	auto sel_vol = glbin_current.vol_data.lock();
 
 	//update user interface
 	if (FOUND_VALUE(gstNull))
@@ -615,7 +615,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (sel_vol && FOUND_VALUE(gstBrushCountResult))
 	{
 		GridData data;
-		flrd::CountVoxels counter(sel_vol);
+		flrd::CountVoxels counter(sel_vol.get());
 		counter.SetUseMask(true);
 		counter.Count();
 		data.voxel_sum = counter.GetSum();
@@ -636,7 +636,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		data.size = data.voxel_sum * vvol;
 		data.wsize = data.voxel_wsum * vvol;
 		wxString unit;
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (view)
 		{
 			switch (view->m_sb_unit)
@@ -1106,12 +1106,12 @@ void BrushToolDlg::OnAlignCenterCheck(wxCommandEvent& event)
 
 void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	glbin_aligner.SetVolumeData(vd);
 	glbin_aligner.SetAxisType(event.GetId());
-	glbin_aligner.SetView(glbin_current.render_view);
+	glbin_aligner.SetView(glbin_current.render_view.lock());
 	glbin_aligner.AlignPca(false);
 	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId()});
 }

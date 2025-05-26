@@ -70,8 +70,9 @@ void CQCallback::ReadVolCache(VolCache4D& vol_cache)
 	if (vol_cache.time_cond0)
 	{
 		int cur_time = 0;
-		if (glbin_current.render_view)
-			cur_time = glbin_current.render_view->m_tseq_cur_num;
+		auto view_ptr = glbin_current.render_view.lock();
+		if (view_ptr)
+			cur_time = view_ptr->m_tseq_cur_num;
 		int frame = static_cast<int>(vol_cache.m_tnum);
 		cond0 = cur_time == frame;
 	}
@@ -160,10 +161,10 @@ void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 bool CQCallback::HandleData(VolCache4D& vol_cache)
 {
 	//get volume, readers
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
-	BaseReader* reader = vd->GetReader();
+	auto reader = vd->GetReader();
 	if (!reader)
 		return false;
 
@@ -181,10 +182,10 @@ bool CQCallback::HandleData(VolCache4D& vol_cache)
 bool CQCallback::HandleMask(VolCache4D& vol_cache)
 {
 	//get volume, readers
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
-	BaseReader* reader = vd->GetReader();
+	auto reader = vd->GetReader();
 	if (!reader)
 		return false;
 
@@ -220,10 +221,10 @@ bool CQCallback::HandleMask(VolCache4D& vol_cache)
 bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 {
 	//get volume, readers
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
-	BaseReader* reader = vd->GetReader();
+	auto reader = vd->GetReader();
 	if (!reader)
 		return false;
 
@@ -258,7 +259,7 @@ bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 
 bool CQCallback::AccessData(VolCache4D& vol_cache)
 {
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
 
@@ -270,7 +271,7 @@ bool CQCallback::AccessData(VolCache4D& vol_cache)
 
 bool CQCallback::AccessMask(VolCache4D& vol_cache)
 {
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
 
@@ -282,7 +283,7 @@ bool CQCallback::AccessMask(VolCache4D& vol_cache)
 
 bool CQCallback::AccessLabel(VolCache4D& vol_cache)
 {
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
 
@@ -302,10 +303,10 @@ bool CQCallback::SaveMask(VolCache4D& vol_cache)
 	if (!vol_cache.m_valid || !vol_cache.m_modified)
 		return false;
 
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
-	BaseReader* reader = vd->GetReader();
+	auto reader = vd->GetReader();
 	if (!reader)
 		return false;
 
@@ -326,10 +327,10 @@ bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 	if (!vol_cache.m_valid || !vol_cache.m_modified)
 		return false;
 
-	VolumeData* vd = vol_cache.m_vd;
+	auto vd = vol_cache.m_vd.lock();
 	if (!vd)
 		return false;
-	BaseReader* reader = vd->GetReader();
+	auto reader = vd->GetReader();
 	if (!reader)
 		return false;
 
@@ -353,8 +354,9 @@ bool CQCallback::BuildTex(VolCache4D& vol_cache)
 VolCache4D* CacheQueue::get_offset(int toffset)
 {
 	int cur_time = 0;
-	if (glbin_current.render_view)
-		cur_time = glbin_current.render_view->m_tseq_cur_num;
+	auto view_ptr = glbin_current.render_view.lock();
+	if (view_ptr)
+		cur_time = view_ptr->m_tseq_cur_num;
 	int t = std::max(0, cur_time + toffset);
 	return get(static_cast<size_t>(t));
 }

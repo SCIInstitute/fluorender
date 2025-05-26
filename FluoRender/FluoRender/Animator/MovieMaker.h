@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace fluo
 {

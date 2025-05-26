@@ -136,7 +136,7 @@ void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	std::wstring str;
 	if (update_all || FOUND_VALUE(gstVolumeA))
 	{
-		VolumeData* vd = glbin_vol_calculator.GetVolumeA();
+		auto vd = glbin_vol_calculator.GetVolumeA();
 		if (vd)
 		{
 			str = vd->GetName();
@@ -146,7 +146,7 @@ void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstVolumeB))
 	{
-		VolumeData* vd = glbin_vol_calculator.GetVolumeB();
+		auto vd = glbin_vol_calculator.GetVolumeB();
 		if (vd)
 		{
 			str = vd->GetName();
@@ -160,8 +160,7 @@ void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 void CalculationDlg::OnLoadA(wxCommandEvent& event)
 {
 	glbin_vol_calculator.SetVolumeA(
-		glbin_current.vol_data
-	);
+		glbin_current.vol_data.lock());
 
 	FluoUpdate({ gstVolumeA });
 }
@@ -169,8 +168,7 @@ void CalculationDlg::OnLoadA(wxCommandEvent& event)
 void CalculationDlg::OnLoadB(wxCommandEvent& event)
 {
 	glbin_vol_calculator.SetVolumeB(
-		glbin_current.vol_data
-	);
+		glbin_current.vol_data.lock());
 
 	FluoUpdate({ gstVolumeB });
 }
@@ -206,20 +204,20 @@ void CalculationDlg::OnCalcFill(wxCommandEvent& event)
 
 void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 {
-	DataGroup* group = glbin_current.vol_group;
+	auto group = glbin_current.vol_group.lock();
 	if (!group)
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
 	flrd::CombineList Op;
 	std::wstring name = group->GetName() + L"_combined";
 	Op.SetName(name);
-	std::list<VolumeData*> channs;
+	std::list<std::weak_ptr<VolumeData>> channs;
 	for (int i = 0; i < group->GetVolumeNum(); ++i)
 	{
-		VolumeData* vd = group->GetVolumeData(i);
+		auto vd = group->GetVolumeData(i);
 		if (!vd)
 			continue;
 		channs.push_back(vd);
@@ -231,22 +229,21 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 	if (!Op.Execute())
 		return;
 
-	std::list<VolumeData*> results;
-	Op.GetResults(results);
+	auto results = Op.GetResults();
 	if (results.empty())
 		return;
 
 	std::wstring group_name = L"";
 	group = 0;
-	VolumeData* volume = 0;
-	for (auto i = results.begin(); i != results.end(); ++i)
+	std::shared_ptr<VolumeData> volume;
+	for (auto it = results.begin(); it != results.end(); ++it)
 	{
-		VolumeData* vd = *i;
+		auto vd = *it;
 		if (vd)
 		{
 			if (!volume) volume = vd;
 			glbin_data_manager.AddVolumeData(std::shared_ptr<VolumeData>(vd));
-			if (i == results.begin())
+			if (it == results.begin())
 			{
 				group_name = view->AddGroup(L"");
 				group = view->GetGroup(group_name);

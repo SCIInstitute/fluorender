@@ -38,14 +38,14 @@ void CombineList::SetName(const std::wstring &name)
 	m_name = name;
 }
 
-void CombineList::SetVolumes(const std::list<VolumeData*> &channs)
+void CombineList::SetVolumes(const std::list<std::weak_ptr<VolumeData>>& channs)
 {
 	m_channs = channs;
 }
 
-void CombineList::GetResults(std::list<VolumeData*> &results)
+std::list<std::shared_ptr<VolumeData>> CombineList::GetResults()
 {
-	results = m_results;
+	return m_results;
 }
 
 int CombineList::Execute()
@@ -54,15 +54,18 @@ int CombineList::Execute()
 	if (m_channs.empty())
 		return 0;
 
-	(*m_channs.begin())->GetResolution(m_resx, m_resy, m_resz);
-	(*m_channs.begin())->GetSpacings(m_spcx, m_spcy, m_spcz);
-	m_bits = (*m_channs.begin())->GetBits();
-	int brick_size = (*m_channs.begin())->GetTexture()->get_build_max_tex_size();
+	auto vd0 = (*m_channs.begin()).lock();
+	if (!vd0)
+		return 0;
+	vd0->GetResolution(m_resx, m_resy, m_resz);
+	vd0->GetSpacings(m_spcx, m_spcy, m_spcz);
+	m_bits = vd0->GetBits();
+	int brick_size = vd0->GetTexture()->get_build_max_tex_size();
 	if (m_name == L"")
 		m_name = L"combined_volume";
 
 	//red volume
-	VolumeData* vd_r = new VolumeData();
+	auto vd_r = std::make_shared<VolumeData>();
 	vd_r->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
@@ -70,7 +73,7 @@ int CombineList::Execute()
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_name + L"_CH_R");
 	//green volume
-	VolumeData* vd_g = new VolumeData();
+	auto vd_g = std::make_shared<VolumeData>();
 	vd_g->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
@@ -78,7 +81,7 @@ int CombineList::Execute()
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_name + L"_CH_G");
 	//blue volume
-	VolumeData* vd_b = new VolumeData();
+	auto vd_b = std::make_shared<VolumeData>();
 	vd_b->AddEmptyData(m_bits,
 		m_resx, m_resy, m_resz,
 		m_spcx, m_spcy, m_spcz,
@@ -112,16 +115,17 @@ int CombineList::Execute()
 	unsigned long long for_size = (unsigned long long)m_resx *
 		(unsigned long long)m_resy * (unsigned long long)m_resz;
 	unsigned long long index;
-	VolumeData* vd = 0;
+	std::shared_ptr<VolumeData> volume;
 	for (auto iter = m_channs.begin();
 		iter != m_channs.end(); ++iter)
 	{
 		int nx, ny, nz;
-		(*iter)->GetResolution(nx, ny, nz);
+		auto vd = iter->lock();
+		vd->GetResolution(nx, ny, nz);
 		if (!(nx == m_resx && ny == m_resy && nz == m_resz))
 			continue;
-		fluo::Color color = (*iter)->GetColor();
-		Nrrd* nrrd_iter = (*iter)->GetVolume(false);
+		fluo::Color color = vd->GetColor();
+		Nrrd* nrrd_iter = vd->GetVolume(false);
 		if (!nrrd_iter)
 			continue;
 		void* data_iter = nrrd_iter->data;
@@ -154,14 +158,14 @@ int CombineList::Execute()
 					(unsigned short)(color.b()*((unsigned short*)data_iter)[index] + 0.5));
 			}
 		}
-		if (!vd) vd = *iter;
+		if (!volume) volume = vd;
 	}
 
-	if (vd)
+	if (volume)
 	{
-		glbin_vol_def.Copy(vd_r, vd);
-		glbin_vol_def.Copy(vd_g, vd);
-		glbin_vol_def.Copy(vd_b, vd);
+		glbin_vol_def.Copy(vd_r.get(), volume.get());
+		glbin_vol_def.Copy(vd_g.get(), volume.get());
+		glbin_vol_def.Copy(vd_b.get(), volume.get());
 	}
 	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
 	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);

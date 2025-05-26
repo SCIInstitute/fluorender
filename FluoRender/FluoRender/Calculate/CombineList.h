@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <list>
 #include <string>
+#include <memory>
 
 class VolumeData;
 
@@ -42,13 +43,13 @@ namespace flrd
 		~CombineList() {};
 
 		void SetName(const std::wstring &name);
-		void SetVolumes(const std::list<VolumeData*> &channs);
-		void GetResults(std::list<VolumeData*> &results);
+		void SetVolumes(const std::list<std::weak_ptr<VolumeData>> &channs);
+		std::list<std::shared_ptr<VolumeData>> GetResults();
 		int Execute();
 
 	private:
-		std::list<VolumeData*> m_channs;
-		std::list<VolumeData*> m_results;
+		std::list<std::weak_ptr<VolumeData>> m_channs;
+		std::list<std::shared_ptr<VolumeData>> m_results;
 		int m_resx, m_resy, m_resz;
 		double m_spcx, m_spcy, m_spcz;
 		int m_bits;
