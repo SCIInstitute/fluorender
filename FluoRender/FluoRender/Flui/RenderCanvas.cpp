@@ -80,7 +80,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_glRC = sharedContext;
 	m_sharedRC = m_glRC ? true : false;
 
-	RenderView* view = new RenderView();
+	auto view = std::make_shared<RenderView>();
 	Root* root = glbin_data_manager.GetRoot();
 	view->SetRenderViewPanel(m_renderview_panel);
 	view->SetRenderCanvas(this);
@@ -89,7 +89,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 #endif
 	view->SetSize(size.x, size.y);
 	root->AddView(view);
-	m_render_view = root->GetViewSharedPtr(view);
+	m_render_view = view;
 
 #ifdef _WIN32
 	//tablet initialization
@@ -238,7 +238,7 @@ void RenderCanvas::Draw()
 		{
 			for (int i = 0; i< root->GetViewNum(); i++)
 			{
-				RenderView* view = root->GetView(i);
+				auto view = root->GetView(i);
 				RenderCanvas* canvas = view->GetRenderCanvas();
 				if (canvas && canvas != this)
 				{

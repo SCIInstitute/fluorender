@@ -528,7 +528,7 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 	case 1://view
 	{
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (view)
 		{
 			for (int i : {0, 1, 2})
@@ -540,21 +540,30 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	break;
 	case 2://volume data
-	case 5://group
 	{
-		TreeLayer* layer = 0;
-		if (type == 2)
-			layer = dynamic_cast<TreeLayer*>(glbin_current.vol_data);
-		else if (type == 5)
-			layer = dynamic_cast<TreeLayer*>(glbin_current.vol_group);
+		auto vd = glbin_current.vol_data.lock();
 
-		if (layer)
+		if (vd)
 		{
 			for (int i : {0, 1, 2})
-				m_sync[i] = layer->GetSync(i);
-			gamma = layer->GetGammaColor();
-			brightness = layer->GetBrightness();
-			hdr = layer->GetHdr();
+				m_sync[i] = vd->GetSync(i);
+			gamma = vd->GetGammaColor();
+			brightness = vd->GetBrightness();
+			hdr = vd->GetHdr();
+		}
+	}
+	break;
+	case 5://group
+	{
+		auto group = glbin_current.vol_group.lock();
+
+		if (group)
+		{
+			for (int i : {0, 1, 2})
+				m_sync[i] = group->GetSync(i);
+			gamma = group->GetGammaColor();
+			brightness = group->GetBrightness();
+			hdr = group->GetHdr();
 		}
 	}
 	break;
@@ -1079,13 +1088,13 @@ void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 	switch (type)
 	{
 	case 1://view
-		glbin_outadj_def.Set(glbin_current.render_view);
+		glbin_outadj_def.Set(glbin_current.render_view.lock().get());
 		break;
 	case 2://volume data
-		glbin_outadj_def.Set(glbin_current.vol_data);
+		glbin_outadj_def.Set(glbin_current.vol_data.lock().get());
 		break;
 	case 5://group
-		glbin_outadj_def.Set(glbin_current.vol_group);
+		glbin_outadj_def.Set(glbin_current.vol_group.lock().get());
 		break;
 	}
 }
@@ -1215,21 +1224,19 @@ void OutputAdjPanel::SyncGamma(int i)
 {
 	fluo::Color gamma;
 	int type = glbin_current.GetType();
-	RenderView* view = 0;
-	VolumeData* vd = 0;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 	switch (type)
 	{
 	case 1:
 	{
-		view = glbin_current.render_view;
 		if (view)
 			gamma = view->GetGammaColor();
 	}
 		break;
 	case 2:
 	{
-		vd = glbin_current.vol_data;
 		if (vd)
 			gamma = vd->GetGammaColor();
 	}
@@ -1275,21 +1282,19 @@ void OutputAdjPanel::SyncBrightness(int i)
 {
 	fluo::Color brightness;
 	int type = glbin_current.GetType();
-	RenderView* view = 0;
-	VolumeData* vd = 0;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 	switch (type)
 	{
 	case 1:
 	{
-		view = glbin_current.render_view;
 		if (view)
 			brightness = view->GetBrightness();
 	}
 		break;
 	case 2:
 	{
-		vd = glbin_current.vol_data;
 		if (vd)
 			brightness = vd->GetBrightness();
 		break;
@@ -1335,28 +1340,25 @@ void OutputAdjPanel::SyncHdr(int i)
 {
 	fluo::Color hdr;
 	int type = glbin_current.GetType();
-	RenderView* view = 0;
-	VolumeData* vd = 0;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 	switch (type)
 	{
 	case 1:
 	{
-		view = glbin_current.render_view;
 		if (view)
 			hdr = view->GetHdr();
 	}
 		break;
 	case 2:
 	{
-		vd = glbin_current.vol_data;
 		if (vd)
 			hdr = vd->GetHdr();
 	}
 		break;
 	case 5:
 	{
-		group = glbin_current.vol_group;
 		if (group)
 			hdr = group->GetHdr();
 	}
@@ -1397,9 +1399,9 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 	m_sync[i] = val;
 	fluo::Color gamma, brightness, hdr;
 	int type = glbin_current.GetType();
-	RenderView* view = glbin_current.render_view;
-	VolumeData* vd = glbin_current.vol_data;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 
 	switch (type)
 	{
@@ -1487,9 +1489,9 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 {
 	fluo::Color gamma;
 	int type = glbin_current.GetType();
-	RenderView* view = glbin_current.render_view;
-	VolumeData* vd = glbin_current.vol_data;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 
 	switch (type)
 	{
@@ -1533,9 +1535,9 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 {
 	fluo::Color brightness;
 	int type = glbin_current.GetType();
-	RenderView* view = glbin_current.render_view;
-	VolumeData* vd = glbin_current.vol_data;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 
 	switch (type)
 	{
@@ -1579,9 +1581,9 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 {
 	fluo::Color hdr;
 	int type = glbin_current.GetType();
-	RenderView* view = glbin_current.render_view;
-	VolumeData* vd = glbin_current.vol_data;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 
 	switch (type)
 	{
@@ -1629,8 +1631,8 @@ void OutputAdjPanel::UpdateSync()
 	bool g_v = false;
 	bool b_v = false;
 	int type = glbin_current.GetType();
-	RenderView* view = glbin_current.render_view;
-	DataGroup* group = glbin_current.vol_group;
+	auto view = glbin_current.render_view.lock();
+	auto group = glbin_current.vol_group.lock();
 
 	if ((type == 2 && group) ||
 		(type == 5 && group))
@@ -1638,7 +1640,7 @@ void OutputAdjPanel::UpdateSync()
 		//use group
 		for (i=0; i<group->GetVolumeNum(); i++)
 		{
-			VolumeData* vd = group->GetVolumeData(i);
+			auto vd = group->GetVolumeData(i);
 			if (vd)
 			{
 				if (vd->GetColormapMode())
@@ -1711,7 +1713,7 @@ void OutputAdjPanel::UpdateSync()
 		
 		for (i=0; i<view->GetDispVolumeNum(); i++)
 		{
-			VolumeData* vd = view->GetDispVolumeData(i);
+			auto vd = view->GetDispVolumeData(i);
 			if (vd)
 			{
 				if (vd->GetColormapMode())

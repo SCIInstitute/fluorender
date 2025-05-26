@@ -143,7 +143,7 @@ void NoiseCancellingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//update user interface
 	if (FOUND_VALUE(gstNull))
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -186,13 +186,13 @@ void NoiseCancellingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 void NoiseCancellingDlg::Preview()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
 	bool bval = glbin_comp_generator.GetUseSel();
 	glbin_comp_generator.SetThresh(glbin_comp_def.m_nr_thresh);
-	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.SetVolumeData(vd.get());
 	vd->AddEmptyMask(1, !bval);
 	vd->AddEmptyLabel(0, !bval);
 	glbin_comp_generator.ShuffleID();
@@ -235,7 +235,7 @@ void NoiseCancellingDlg::Preview()
 
 void NoiseCancellingDlg::Enhance()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -286,7 +286,7 @@ void NoiseCancellingDlg::OnThresholdText(wxCommandEvent& event)
 	glbin_comp_def.m_nr_thresh = val/m_max_value;
 
 	//change mask threshold
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (vd)
 		vd->SetMaskThreshold(glbin_comp_def.m_nr_thresh);
 	FluoRefresh(3, { gstNull });

@@ -808,7 +808,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstRulerTools))
 	{
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		bval = view && view->GetIntMode() == 5;
 		ival = glbin_ruler_handler.GetType();
 		int mode = view ? view->GetIntMode() : 0;
@@ -948,7 +948,7 @@ void MeasureDlg::UpdateRulerList()
 	m_ruler_list->m_center_text->Hide();
 	m_ruler_list->m_color_picker->Hide();
 
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
 	if (!ruler_list)
 		return;
@@ -1116,7 +1116,7 @@ void MeasureDlg::ToggleDisplay()
 void MeasureDlg::SetCurrentRuler()
 {
 	flrd::Ruler* ruler = glbin_current.GetRuler();
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!ruler || !view)
 		return;
 	ruler->SetName(m_ruler_list->m_name.ToStdWstring());
@@ -1156,7 +1156,7 @@ void MeasureDlg::UpdateProfile()
 
 void MeasureDlg::Locator()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1181,7 +1181,7 @@ void MeasureDlg::Locator()
 
 void MeasureDlg::Probe()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1206,7 +1206,7 @@ void MeasureDlg::Probe()
 
 void MeasureDlg::Ruler()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1231,7 +1231,7 @@ void MeasureDlg::Ruler()
 
 void MeasureDlg::Protractor()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1256,7 +1256,7 @@ void MeasureDlg::Protractor()
 
 void MeasureDlg::Ellipse()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1281,7 +1281,7 @@ void MeasureDlg::Ellipse()
 
 void MeasureDlg::RulerMP()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1306,7 +1306,7 @@ void MeasureDlg::RulerMP()
 
 void MeasureDlg::Pencil()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int ival = view->GetIntMode();
@@ -1332,7 +1332,7 @@ void MeasureDlg::Pencil()
 
 void MeasureDlg::Grow()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int ival = view->GetIntMode();
@@ -1350,7 +1350,7 @@ void MeasureDlg::Grow()
 		glbin_ruler_handler.SetType(1);
 		glbin_ruler_renderer.SetDrawText(false);
 		//reset label volume
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 		{
 			vd->GetVR()->clear_tex_mask();
@@ -1365,7 +1365,7 @@ void MeasureDlg::Grow()
 
 void MeasureDlg::RulerMove()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1385,7 +1385,7 @@ void MeasureDlg::RulerMove()
 
 void MeasureDlg::RulerMovePoint()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1405,7 +1405,7 @@ void MeasureDlg::RulerMovePoint()
 
 void MeasureDlg::Magnet()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1429,7 +1429,7 @@ void MeasureDlg::Magnet()
 
 void MeasureDlg::RulerMovePencil()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1473,7 +1473,7 @@ void MeasureDlg::RulerAvg()
 
 void MeasureDlg::Lock()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1519,7 +1519,7 @@ void MeasureDlg::DeleteAll()
 
 void MeasureDlg::DeletePoint()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
@@ -1956,7 +1956,7 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 
 void MeasureDlg::OnSelection(wxListEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 

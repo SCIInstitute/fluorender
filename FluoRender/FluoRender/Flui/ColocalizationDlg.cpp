@@ -235,8 +235,8 @@ void ColocalizationDlg::SetOutput()
 	fluo::Color c;
 	double val;
 	wxColor color;
-	VolumeData* vd = glbin_current.vol_data;
-	DataGroup* group = glbin_current.vol_group;
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 	if (!vd && group)
 		vd = group->GetVolumeData(0);
 	bool colormap = glbin_colocal_def.m_colormap && vd &&

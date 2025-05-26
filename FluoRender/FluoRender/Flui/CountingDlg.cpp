@@ -134,7 +134,7 @@ void CountingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//update user interface
 	if (FOUND_VALUE(gstNull))
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -189,7 +189,7 @@ void CountingDlg::OutputSize()
 	wxString vol_unit_text;
 	vol_unit_text = wxString::Format("%.0f", size);
 	vol_unit_text += " ";
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	switch (view->m_sb_unit)
@@ -247,11 +247,11 @@ void CountingDlg::OnIgnoreMaxChk(wxCommandEvent& event)
 //component analyze
 void CountingDlg::OnAnalyzeBtn(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
-	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.SetVolumeData(vd.get());
 	bool sel = glbin_comp_generator.GetUseSel();
 	vd->AddEmptyMask(1, !sel);
 	vd->AddEmptyLabel(0, !sel);

@@ -214,7 +214,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (FOUND_VALUE(gstVolMeshInfo))
 	{
 		wxString str = "The surface area of mesh object ";
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (md)
 		{
 			str += md->GetName();

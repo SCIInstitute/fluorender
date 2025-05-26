@@ -226,8 +226,8 @@ void OclDlg::UpdateKernelList()
 
 void OclDlg::Execute()
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || ! view)
 		return;
 
@@ -248,7 +248,7 @@ void OclDlg::Execute()
 		dup = false;
 	//bool dup = false;
 
-	glbin_kernel_executor.SetVolume(vd);
+	glbin_kernel_executor.SetVolume(vd.get());
 	glbin_kernel_executor.SetCode(code.ToStdString());
 	glbin_kernel_executor.SetDuplicate(dup);
 	glbin_kernel_executor.Execute();
@@ -275,9 +275,9 @@ void OclDlg::Execute()
 		if (m_frame)
 		{
 			glbin_data_manager.AddVolumeData(vd_r);
-			view->AddVolumeData(vd_r.get());
+			view->AddVolumeData(vd_r);
 			vd->SetDisp(false);
-			glbin_current.SetVolumeData(vd_r.get());
+			glbin_current.SetVolumeData(vd_r);
 		}
 	}
 

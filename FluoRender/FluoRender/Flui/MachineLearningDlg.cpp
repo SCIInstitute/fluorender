@@ -950,8 +950,8 @@ void MLVolPropPanel::OnDelRec(wxCommandEvent& event)
 
 void MLVolPropPanel::OnApplyRec(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
-	DataGroup* group = glbin_current.vol_group;
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
 	if (group && group->GetVolumeSyncProp())
 		group->ApplyMlVolProp();
 	else if (vd)

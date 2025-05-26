@@ -796,7 +796,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 				color = wxColor(24, 167, 181);
 			else
 			{
-				VolumeData* vd = glbin_current.vol_data;
+				auto vd = glbin_current.vol_data.lock();
 				bool shuffle = vd ? vd->GetShuffle() : 0;
 				fluo::Color c(id, shuffle);
 				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
@@ -832,7 +832,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 				color = wxColor(24, 167, 181);
 			else
 			{
-				VolumeData* vd = glbin_current.vol_data;
+				auto vd = glbin_current.vol_data.lock();
 				bool shuffle = vd ? vd->GetShuffle() : 0;
 				fluo::Color c(id, shuffle);
 				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
@@ -875,7 +875,7 @@ void TrackDlg::UpdateTrackList()
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -940,7 +940,7 @@ void TrackDlg::UpdateTracks()
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1023,14 +1023,14 @@ void TrackDlg::UpdateTracks()
 
 void TrackDlg::LoadTrackFile(const std::wstring& file)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	view->LoadTrackGroup(file);
 	FluoUpdate({ gstTrackFile });
 }
 
 bool TrackDlg::SaveTrackFile()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;
 	TrackGroup* trkg = glbin_current.GetTrackGroup();
@@ -1044,7 +1044,7 @@ bool TrackDlg::SaveTrackFile()
 
 void TrackDlg::SaveTrackFile(const std::wstring& file)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	view->SaveTrackGroup(file);
 }
 
@@ -1126,7 +1126,7 @@ void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
 
 void TrackDlg::OnRefineTBtn(wxCommandEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1228,38 +1228,38 @@ void TrackDlg::OnCompFull(wxCommandEvent& event)
 void TrackDlg::OnCompExclusive(wxCommandEvent& event)
 {
 	glbin_comp_selector.Exclusive();
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId(view) });
+		{ glbin_current.GetViewId(view.get()) });
 }
 
 void TrackDlg::OnCompAppend(wxCommandEvent& event)
 {
 	bool get_all = m_comp_id.Lower() == "all" ? true : false;
 	glbin_comp_selector.Select(get_all);
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId(view) });
+		{ glbin_current.GetViewId(view.get()) });
 }
 
 void TrackDlg::OnCompClear(wxCommandEvent& event)
 {
 	glbin_comp_selector.Clear();
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId(view) });
+		{ glbin_current.GetViewId(view.get()) });
 }
 
 void TrackDlg::OnShuffle(wxCommandEvent& event)
 {
 	//get current vd
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1469,7 +1469,7 @@ void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
 
 void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 

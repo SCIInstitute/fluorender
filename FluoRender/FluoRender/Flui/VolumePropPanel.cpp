@@ -1371,7 +1371,7 @@ void VolumePropPanel::InitVRenderViews(unsigned int type)
 	{
 		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderView* view = root->GetView(i);
+			auto view = root->GetView(i);
 			if (view)
 			{
 				view->InitView(type);
@@ -1906,7 +1906,7 @@ void VolumePropPanel::SyncSampleRate(double val)
 	if (m_view->GetVolMethod() == VOL_METHOD_MULTI)
 		for (int i = 0; i < m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(i);
+			auto vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->SetSampleRate(val);
 		}
@@ -3131,7 +3131,7 @@ void VolumePropPanel::SetNoiseReduction()
 	{
 		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
 		{
-			VolumeData* vd = m_view->GetAllVolumeData(i);
+			auto vd = m_view->GetAllVolumeData(i);
 			if (vd)
 				vd->SetNR(val);
 		}

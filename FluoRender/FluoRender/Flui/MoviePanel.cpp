@@ -985,7 +985,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 
 	Root* root = glbin_data_manager.GetRoot();
 	if (root)
-		m_view = root->GetView(glbin_mov_def.m_view_idx);
+		m_view = root->GetView(glbin_mov_def.m_view_idx).get();
 
 	//notebook
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
@@ -1224,7 +1224,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			for (int i = 0; i < root->GetViewNum(); i++)
 			{
-				RenderView* view = root->GetView(i);
+				auto view = root->GetView(i);
 				if (view && m_views_cmb)
 					m_views_cmb->Append(view->GetName());
 			}

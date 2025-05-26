@@ -58,7 +58,7 @@ void PropBase::SetFocusVRenderViews(wxBasisSlider* slider)
 	{
 		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderView* view = root->GetView(i);
+			auto view = root->GetView(i);
 			RenderCanvas* canvas = view->GetRenderCanvas();
 			if (canvas)
 			{

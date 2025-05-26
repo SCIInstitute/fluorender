@@ -156,11 +156,11 @@ std::shared_ptr<RenderView> Root::GetLastView()
 	else return nullptr;
 }
 
-void Root::AddView(RenderView* view)
+void Root::AddView(const std::shared_ptr<RenderView>& view)
 {
 	if (view)
 	{
-		m_views.push_back(std::unique_ptr<RenderView>(view));
+		m_views.push_back(view);
 	}
 }
 

@@ -256,7 +256,7 @@ void MeshPropPanel::OnLightingCheck(wxCommandEvent& event)
 		m_md->SetLighting(val);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_view->GetMeshData(i);
+			auto md = m_view->GetMeshData(i);
 			if (md)
 				md->SetLighting(val);
 		}
@@ -363,7 +363,7 @@ void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 		m_md->SetShadowEnable(val);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_view->GetMeshData(i);
+			auto md = m_view->GetMeshData(i);
 			if (md)
 				md->SetShadowEnable(val);
 		}
@@ -391,7 +391,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 		m_md->SetShadowIntensity(dval);
 		for (int i=0; i< m_view->GetMeshNum(); i++)
 		{
-			MeshData* md = m_view->GetMeshData(i);
+			auto md = m_view->GetMeshData(i);
 			if (md)
 				md->SetShadowIntensity(dval);
 		}

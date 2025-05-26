@@ -839,7 +839,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			break;
 		case 2:
 		{
-			VolumeData* vd = m_render_view->m_cur_vol;
+			auto vd = m_render_view->m_cur_vol.lock();
 			if (!vd && !m_render_view->GetVolPopListEmpty())
 				vd = m_render_view->GetVolPopList(0);
 			if (!vd)
@@ -1254,7 +1254,7 @@ void RenderViewPanel::SetScaleFactor(double val)
 			break;
 		case 2:
 		{
-			VolumeData* vd = m_render_view->m_cur_vol;
+			auto vd = m_render_view->m_cur_vol.lock();
 			if (!vd && !m_render_view->GetVolPopListEmpty())
 				vd = m_render_view->GetVolPopList(0);
 			double spcx, spcy, spcz;
@@ -1714,7 +1714,7 @@ void RenderViewPanel::OnDpiText(wxCommandEvent& event)
 	if (ch_enlarge)
 		ch_enlarge->SetValue(enlarge);
 	double enlarge_scale = (double)lval / 72.0;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 	{
 		view->SetEnlarge(enlarge);
@@ -1746,7 +1746,7 @@ void RenderViewPanel::OnChEnlargeCheck(wxCommandEvent& event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (view)
 			view->SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
@@ -1796,7 +1796,7 @@ void RenderViewPanel::OnTxEnlargeText(wxCommandEvent& event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 		view->SetEnlargeScale(dval);
 	int ival = std::round(dval * 10);
@@ -1874,7 +1874,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
 		wxScrollEventHandler(RenderViewPanel::OnSlEnlargeScroll), NULL, panel);
 	sl_enlarge->Enable(enlarge);
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (view)
 	{
 		view->SetEnlarge(enlarge);

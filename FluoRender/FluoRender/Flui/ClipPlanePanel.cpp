@@ -449,9 +449,9 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		EnableAll(false);
 		return;
 	}
-	VolumeData* vd = glbin_current.vol_data;
-	MeshData* md = glbin_current.mesh_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto md = glbin_current.mesh_data.lock();
+	auto view = glbin_current.render_view.lock();
 
 	//mf button tips
 	if (update_all || FOUND_VALUE(gstMultiFuncTips))
@@ -847,8 +847,8 @@ void ClipPlanePanel::HoldPlanes()
 {
 	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 	glbin_states.ClipDisplayChanged();
-	if (glbin_current.render_view)
-		glbin_current.render_view->m_clip_mask = -1;
+	if (auto view = glbin_current.render_view.lock())
+		view->m_clip_mask = -1;
 	FluoRefresh(2, { gstClipHold },
 		{ glbin_current.GetViewId() });
 }
@@ -1066,7 +1066,7 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 {
 	if (!IsShown())
 		return;
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1137,8 +1137,8 @@ void ClipPlanePanel::SetZLink(bool val)
 
 void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1194,8 +1194,8 @@ void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 
 void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1225,8 +1225,8 @@ void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 
 void ClipPlanePanel::SetClipValues(const int val[6])
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1243,8 +1243,8 @@ void ClipPlanePanel::SetClipValues(const int val[6])
 
 void ClipPlanePanel::ResetClipValues()
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1265,8 +1265,8 @@ void ClipPlanePanel::ResetClipValues()
 
 void ClipPlanePanel::ResetClipValuesX()
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1284,8 +1284,8 @@ void ClipPlanePanel::ResetClipValuesX()
 
 void ClipPlanePanel::ResetClipValuesY()
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1303,8 +1303,8 @@ void ClipPlanePanel::ResetClipValuesY()
 
 void ClipPlanePanel::ResetClipValuesZ()
 {
-	VolumeData* vd = glbin_current.vol_data;
-	RenderView* view = glbin_current.render_view;
+	auto vd = glbin_current.vol_data.lock();
+	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
@@ -1340,7 +1340,7 @@ void ClipPlanePanel::OnLinkZCheck(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipDistXEdit(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1352,7 +1352,7 @@ void ClipPlanePanel::OnClipDistXEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipDistYEdit(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1364,7 +1364,7 @@ void ClipPlanePanel::OnClipDistYEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1376,7 +1376,7 @@ void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1387,7 +1387,7 @@ void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent& event)
 
 void ClipPlanePanel::OnRotResetBtn(wxCommandEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1408,7 +1408,7 @@ void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
 		break;
 	case 2:
 	{
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (!view)
 			break;
 		view->SetClipRotX(0.0);
@@ -1436,7 +1436,7 @@ void ClipPlanePanel::OnRotYMF(wxCommandEvent& event)
 		break;
 	case 2:
 	{
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (!view)
 			break;
 		view->SetClipRotY(0.0);
@@ -1464,7 +1464,7 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 		break;
 	case 2:
 	{
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (!view)
 			break;
 		view->SetClipRotZ(0.0);
@@ -1483,7 +1483,7 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnXRotChange(wxScrollEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1494,7 +1494,7 @@ void ClipPlanePanel::OnXRotChange(wxScrollEvent& event)
 
 void ClipPlanePanel::OnXRotEdit(wxCommandEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1508,7 +1508,7 @@ void ClipPlanePanel::OnXRotEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1519,7 +1519,7 @@ void ClipPlanePanel::OnYRotChange(wxScrollEvent& event)
 
 void ClipPlanePanel::OnYRotEdit(wxCommandEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1533,7 +1533,7 @@ void ClipPlanePanel::OnYRotEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1544,7 +1544,7 @@ void ClipPlanePanel::OnZRotChange(wxScrollEvent& event)
 
 void ClipPlanePanel::OnZRotEdit(wxCommandEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1558,7 +1558,7 @@ void ClipPlanePanel::OnZRotEdit(wxCommandEvent& event)
 
 void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1574,7 +1574,7 @@ void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
 
 void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1590,7 +1590,7 @@ void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
 
 void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1606,7 +1606,7 @@ void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
 
 void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1622,7 +1622,7 @@ void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 
 void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1638,7 +1638,7 @@ void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 
 void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -1654,7 +1654,7 @@ void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 
 void ClipPlanePanel::UpdateSampleRate()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1666,7 +1666,7 @@ void ClipPlanePanel::UpdateSampleRate()
 		int i;
 		for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 		{
-			VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+			auto vd = glbin_data_manager.GetVolumeData(i);
 			if (!vd || vd == vd)
 				continue;
 			if (vd->GetSampleRate() < 2.0)
@@ -1677,7 +1677,7 @@ void ClipPlanePanel::UpdateSampleRate()
 
 void ClipPlanePanel::OnClipXRClick(wxMouseEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1701,7 +1701,7 @@ void ClipPlanePanel::OnClipXRClick(wxMouseEvent& event)
 
 void ClipPlanePanel::OnClipYRClick(wxMouseEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1725,7 +1725,7 @@ void ClipPlanePanel::OnClipYRClick(wxMouseEvent& event)
 
 void ClipPlanePanel::OnClipZRClick(wxMouseEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1749,7 +1749,7 @@ void ClipPlanePanel::OnClipZRClick(wxMouseEvent& event)
 
 void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1773,7 +1773,7 @@ void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
 
 void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1798,7 +1798,7 @@ void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 
 void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -1824,7 +1824,7 @@ void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 //move linked clipping planes
 void ClipPlanePanel::MoveLinkedClippingPlanes(int dir)
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 

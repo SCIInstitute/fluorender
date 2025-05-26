@@ -1424,7 +1424,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	} while (cur_line.IsEmpty() == false);
 
 	fluo::Color c;
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	unsigned long lval;
 	wxColor color;
 
@@ -2217,7 +2217,7 @@ void ComponentDlg::OnCompClear(wxCommandEvent& event)
 void ComponentDlg::OnShuffle(wxCommandEvent& event)
 {
 	//get current vd
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -2629,7 +2629,7 @@ void ComponentDlg::AlignPca(int axis_type)
 	glbin_comp_analyzer.GetRulerListFromCelp(list);
 	glbin_aligner.SetRulerList(&list);
 	glbin_aligner.SetAxisType(axis_type);
-	glbin_aligner.SetView(glbin_current.render_view);
+	glbin_aligner.SetView(glbin_current.render_view.lock());
 	glbin_aligner.AlignPca(true);
 	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId() });
 }

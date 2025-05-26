@@ -177,7 +177,7 @@ public:
 	std::shared_ptr<RenderView> GetView(const std::wstring& name);
 	int GetView(RenderView* view);
 	std::shared_ptr<RenderView> GetLastView();
-	void AddView(RenderView* view);
+	void AddView(const std::shared_ptr<RenderView>& view);
 	void DeleteView(int i);
 	void DeleteView(RenderView* view);
 	void DeleteView(const std::wstring& name);

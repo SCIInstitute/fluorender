@@ -385,7 +385,7 @@ MainFrame::MainFrame(
 	//create render view
 	RenderViewPanel *vrv = new RenderViewPanel(this);
 	Root* root = glbin_data_manager.GetRoot();
-	RenderView* view = 0;
+	std::shared_ptr<RenderView> view;
 	if (root)
 	{
 		view = root->GetLastView();
@@ -932,15 +932,15 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 	Root* root = glbin_data_manager.GetRoot();
 	if (root && root->GetViewNum() > 0)
 	{
-		RenderView* view0 = root->GetView(0);
+		auto view0 = root->GetView(0);
 		if (view0)
 		{
 			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
 			{
-				VolumeData* vd = view0->GetDispVolumeData(i);
+				auto vd = view0->GetDispVolumeData(i);
 				if (vd)
 				{
-					VolumeData* vd_add = glbin_data_manager.DuplicateVolumeData(vd);
+					auto vd_add = glbin_data_manager.DuplicateVolumeData(vd);
 
 					if (vd_add)
 					{
@@ -1006,15 +1006,15 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 	else if (FOUND_VALUE(gstAnnotatPropPanel))
 		type = 4;
 	ShowPropPage(type,
-		glbin_current.render_view,
-		glbin_current.vol_group,
-		glbin_current.vol_data,
-		glbin_current.mesh_data,
-		glbin_current.ann_data);
+		glbin_current.render_view.lock().get(),
+		glbin_current.vol_group.lock().get(),
+		glbin_current.vol_data.lock().get(),
+		glbin_current.mesh_data.lock().get(),
+		glbin_current.ann_data.lock().get());
 
 	//clear mesh bounds
 	glbin_data_manager.ClearMeshSelection();
-	MeshData* md = glbin_current.mesh_data;
+	auto md = glbin_current.mesh_data.lock();
 	if (md)
 		md->SetDrawBounds(true);
 

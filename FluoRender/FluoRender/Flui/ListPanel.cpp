@@ -267,7 +267,7 @@ void ListPanel::UpdateList()
 
 	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
 	{
-		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+		auto vd = glbin_data_manager.GetVolumeData(i);
 		if (vd)
 		{
 			std::wstring name = vd->GetName();
@@ -278,7 +278,7 @@ void ListPanel::UpdateList()
 
 	for (int i = 0; i < glbin_data_manager.GetMeshNum(); i++)
 	{
-		MeshData* md = glbin_data_manager.GetMeshData(i);
+		auto md = glbin_data_manager.GetMeshData(i);
 		if (md)
 		{
 			std::wstring name = md->GetName();
@@ -289,7 +289,7 @@ void ListPanel::UpdateList()
 
 	for (int i = 0; i < glbin_data_manager.GetAnnotationNum(); i++)
 	{
-		Annotations* ann = glbin_data_manager.GetAnnotations(i);
+		auto ann = glbin_data_manager.GetAnnotations(i);
 		if (ann)
 		{
 			std::wstring name = ann->GetName();
@@ -307,7 +307,7 @@ void ListPanel::UpdateSelection()
 	{
 	case 2://volume
 	{
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 			name = vd->GetName();
 		item_type = L"Volume";
@@ -315,7 +315,7 @@ void ListPanel::UpdateSelection()
 	break;
 	case 3://mesh
 	{
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (md)
 			name = md->GetName();
 		item_type = L"Mesh";
@@ -323,7 +323,7 @@ void ListPanel::UpdateSelection()
 	break;
 	case 4://annotations
 	{
-		Annotations* ann = glbin_current.ann_data;
+		auto ann = glbin_current.ann_data.lock();
 		if (ann)
 			name = ann->GetName();
 		item_type = L"Annotations";
@@ -350,7 +350,7 @@ void ListPanel::AddSelectionToView(int vid)
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)
 		return;
-	RenderView* view = root->GetView(vid);
+	auto view = root->GetView(vid);
 	if (!view)
 		return;
 
@@ -362,16 +362,16 @@ void ListPanel::AddSelectionToView(int vid)
 	{
 	case 2://volume
 	{
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (!vd)
 			break;
 
 		std::wstring name = vd->GetName();
-		VolumeData* vd_add = vd;
+		auto vd_add = vd;
 
 		for (int i = 0; i < root->GetViewNum(); ++i)
 		{
-			RenderView* v = root->GetView(i);
+			auto v = root->GetView(i);
 			if (v && v->GetVolumeData(name))
 			{
 				vd_add = glbin_data_manager.DuplicateVolumeData(vd);
@@ -392,7 +392,7 @@ void ListPanel::AddSelectionToView(int vid)
 		if (chan_num >= 0 && chan_num < 3)
 			vd_add->SetColor(color);
 
-		DataGroup* group = view->AddVolumeData(vd_add);
+		auto group = view->AddVolumeData(vd_add);
 		glbin_current.SetVolumeData(vd_add);
 		if (view->GetVolMethod() == VOL_METHOD_MULTI)
 			vc.insert(gstUpdateSync);
@@ -400,7 +400,7 @@ void ListPanel::AddSelectionToView(int vid)
 		break;
 	case 3://mesh
 	{
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (!md)
 			break;
 		int chan_num = view->GetAny();
@@ -410,7 +410,7 @@ void ListPanel::AddSelectionToView(int vid)
 		break;
 	case 4://annotations
 	{
-		Annotations* ann = glbin_current.ann_data;
+		auto ann = glbin_current.ann_data.lock();
 		if (!ann)
 			break;
 		int chan_num = view->GetAny();
@@ -448,21 +448,21 @@ void ListPanel::RenameSelection(const std::wstring& name)
 	{
 	case 2://volume
 	{
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 			vd->SetName(new_name);
 	}
 		break;
 	case 3://mesh
 	{
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (md)
 			md->SetName(new_name);
 	}
 		break;
 	case 4://annotations
 	{
-		Annotations* ann = glbin_current.ann_data;
+		auto ann = glbin_current.ann_data.lock();
 		if (ann)
 			ann->SetName(new_name);
 	}
@@ -482,10 +482,10 @@ void ListPanel::SaveSelection()
 	{
 	case 2://volume
 	{
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (!vd)
 			break;
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (!view)
 			break;
 		fluo::Quaternion q = view->GetClipRotation();
@@ -515,7 +515,7 @@ void ListPanel::SaveSelection()
 	break;
 	case 3://mesh
 	{
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (!md)
 			break;
 		ModalDlg fopendlg(
@@ -537,7 +537,7 @@ void ListPanel::SaveSelection()
 	break;
 	case 4://annotations
 	{
-		Annotations* ann = glbin_current.ann_data;
+		auto ann = glbin_current.ann_data.lock();
 		if (!ann)
 			break;
 		ModalDlg fopendlg(
@@ -567,7 +567,7 @@ void ListPanel::BakeSelection()
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
 
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
@@ -585,7 +585,7 @@ void ListPanel::BakeSelection()
 	{
 		std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
-		RenderView* view = glbin_current.render_view;
+		auto view = glbin_current.render_view.lock();
 		if (view)
 		{
 			fluo::Quaternion q = view->GetClipRotation();
@@ -601,7 +601,7 @@ void ListPanel::BakeSelection()
 
 void ListPanel::SaveSelMask()
 {
-	VolumeData* vd = glbin_current.vol_data;
+	auto vd = glbin_current.vol_data.lock();
 	if (vd)
 	{
 		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
@@ -620,14 +620,14 @@ void ListPanel::DeleteSelection()
 	{
 	case 2://volume
 	{
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (!vd)
 			break;
 		std::wstring name = vd->GetName();
 		//from view
 		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderView* view = root->GetView(i);
+			auto view = root->GetView(i);
 			if (view)
 			{
 				view->RemoveVolumeData(name);
@@ -643,14 +643,14 @@ void ListPanel::DeleteSelection()
 	break;
 	case 3://mesh
 	{
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (!md)
 			break;
 		std::wstring name = md->GetName();
 		//from view
 		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderView* view = root->GetView(i);
+			auto view = root->GetView(i);
 			if (view)
 			{
 				view->RemoveMeshData(name);
@@ -666,14 +666,14 @@ void ListPanel::DeleteSelection()
 	break;
 	case 4://annotations
 	{
-		Annotations* ann = glbin_current.ann_data;
+		auto ann = glbin_current.ann_data.lock();
 		if (!ann)
 			break;
 		std::wstring name = ann->GetName();
 		//from view
 		for (int i = 0; i < root->GetViewNum(); i++)
 		{
-			RenderView* view = root->GetView(i);
+			auto view = root->GetView(i);
 			if (view)
 				view->RemoveAnnotations(name);
 		}
@@ -696,9 +696,9 @@ void ListPanel::DeleteAll()
 		return;
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* canvas = root->GetView(i);
-		if (canvas)
-			canvas->ClearAll();
+		auto view = root->GetView(i);
+		if (view)
+			view->ClearAll();
 	}
 	glbin_data_manager.ClearAll();
 	glbin_current.SetRoot();
@@ -732,7 +732,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 	wxMenu* add_to_menu = new wxMenu;
 	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		RenderView* view = root->GetView(i);
+		auto view = root->GetView(i);
 		add_to_menu->Append(ID_ViewID + i,
 			view->GetName());
 	}
@@ -751,7 +751,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 	{
 	case 2://volume
 	{
-		VolumeData* vd = glbin_current.vol_data;
+		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 		{
 			if (vd->GetPath() == "")
@@ -765,7 +765,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 		break;
 	case 3://mesh
 	{
-		MeshData* md = glbin_current.mesh_data;
+		auto md = glbin_current.mesh_data.lock();
 		if (md)
 		{
 			if (md->GetPath() == "")
@@ -777,7 +777,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 		break;
 	case 4://annotations
 	{
-		Annotations* ann = glbin_current.ann_data;
+		auto ann = glbin_current.ann_data.lock();
 		if (ann)
 		{
 			if (ann->GetPath() == "")
@@ -948,7 +948,8 @@ void ListPanel::OnCompCheck(wxCommandEvent& event)
 
 void ListPanel::OnResizeCheck(wxCommandEvent& event)
 {
-	if (!glbin_current.vol_data)
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
 		return;
 	wxCheckBox* comp_chk = (wxCheckBox*)event.GetEventObject();
 	if (!comp_chk)
@@ -963,10 +964,10 @@ void ListPanel::OnResizeCheck(wxCommandEvent& event)
 	//set size values
 	if (size_x_txt && size_y_txt && size_z_txt)
 	{
-		if (glbin_current.vol_data && resize)
+		if (resize)
 		{
 			int nx, ny, nz;
-			glbin_current.vol_data->GetResolution(nx, ny, nz);
+			vd->GetResolution(nx, ny, nz);
 			size_x_txt->ChangeValue(std::to_string(nx));
 			size_y_txt->ChangeValue(std::to_string(ny));
 			size_z_txt->ChangeValue(std::to_string(nz));
@@ -978,32 +979,31 @@ void ListPanel::OnResizeCheck(wxCommandEvent& event)
 			size_z_txt->ChangeValue("");
 		}
 	}
-	if (glbin_current.vol_data)
-		glbin_current.vol_data->SetResize(resize ? 1 : 0, -1, -1, -1);
+	vd->SetResize(resize ? 1 : 0, -1, -1, -1);
 }
 
 void ListPanel::OnSizeXText(wxCommandEvent& event)
 {
 	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
-	if (size_x_txt && glbin_current.vol_data)
-		glbin_current.vol_data->SetResize(-1,
-			STOI(size_x_txt->GetValue().ToStdString()), -1, -1);
+	auto vd = glbin_current.vol_data.lock();
+	if (size_x_txt && vd)
+		vd->SetResize(-1, STOI(size_x_txt->GetValue().ToStdString()), -1, -1);
 }
 
 void ListPanel::OnSizeYText(wxCommandEvent& event)
 {
 	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
-	if (size_y_txt && glbin_current.vol_data)
-		glbin_current.vol_data->SetResize(-1, -1,
-			STOI(size_y_txt->GetValue().ToStdString()), -1);
+	auto vd = glbin_current.vol_data.lock();
+	if (size_y_txt && vd)
+		vd->SetResize(-1, -1, STOI(size_y_txt->GetValue().ToStdString()), -1);
 }
 
 void ListPanel::OnSizeZText(wxCommandEvent& event)
 {
 	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
-	if (size_z_txt && glbin_current.vol_data)
-		glbin_current.vol_data->SetResize(-1, -1, -1,
-			STOI(size_z_txt->GetValue().ToStdString()));
+	auto vd = glbin_current.vol_data.lock();
+	if (size_z_txt && vd)
+		vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().ToStdString()));
 }
 
 void ListPanel::OnFilterChange(wxCommandEvent& event)
@@ -1075,11 +1075,11 @@ wxWindow* ListPanel::CreateExtraControl(wxWindow* parent)
 		combo->Append(combo_list[i]);
 	combo->SetSelection(glbin_settings.m_save_filter);
 
-	if (glbin_current.vol_data)
+	if (auto vd = glbin_current.vol_data.lock())
 	{
 		bool resize;
 		int nx, ny, nz;
-		glbin_current.vol_data->GetResize(resize, nx, ny, nz);
+		vd->GetResize(resize, nx, ny, nz);
 		resize_chk->SetValue(resize);
 		if (resize)
 		{
