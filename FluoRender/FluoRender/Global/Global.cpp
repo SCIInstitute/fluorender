@@ -300,8 +300,7 @@ Global::Global() :
 	msh_shader_factory_(std::make_unique<flvr::MshShaderFactory>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
 	project_(std::make_unique<Project>()),
-	m_linked_rot(false),
-	m_master_linked_view(nullptr)
+	m_linked_rot(false)
 {
 	Init();
 }

@@ -6646,7 +6646,7 @@ void DataManager::AddVolumeData(const std::shared_ptr<VolumeData>& vd)
 		}
 	}
 	m_vd_list.push_back(vd);
-	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd.get());
+	auto vol_cache_queue = std::make_unique<flvr::CacheQueue>(vd);
 	vol_cache_queue->RegisterCacheQueueFuncs(flvr::CQCallback::ReadVolCache, flvr::CQCallback::FreeVolCache);
 	//set up default vol cache mode
 	vol_cache_queue->SetHandleFlags(flvr::CQCallback::HDL_DATA | flvr::CQCallback::TIME_COND0);
@@ -6658,7 +6658,7 @@ std::shared_ptr<VolumeData> DataManager::DuplicateVolumeData(const std::shared_p
 {
 	if (vd)
 	{
-		auto vd_new = std::make_shared<VolumeData>(vd);
+		auto vd_new = std::make_shared<VolumeData>(*vd);
 		AddVolumeData(vd_new);
 		return vd_new;
 	}

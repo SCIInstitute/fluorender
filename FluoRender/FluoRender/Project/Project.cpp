@@ -237,7 +237,7 @@ void Project::Open(const std::wstring& filename)
 					else if (suffix == L".mp4" || suffix == L".m4v" || suffix == L".mov" || suffix == L".avi" || suffix == L".wmv")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_MPG, false, cur_chan, cur_time);
 				}
-				VolumeData* vd = 0;
+				std::shared_ptr<VolumeData> vd;
 				if (loaded_num)
 					vd = glbin_data_manager.GetLastVolumeData();
 				if (vd)
@@ -500,7 +500,7 @@ void Project::Open(const std::wstring& filename)
 				{
 					glbin_data_manager.LoadMeshData(wsval);
 				}
-				MeshData* md = glbin_data_manager.GetLastMeshData();
+				auto md = glbin_data_manager.GetLastMeshData();
 				if (md)
 				{
 					if (fconfig->Read("name", &wsval))
@@ -596,7 +596,7 @@ void Project::Open(const std::wstring& filename)
 		{
 			if (i > 0)
 				frame->CreateRenderViewPanel();
-			RenderView* view = root->GetLastView();
+			auto view = root->GetLastView();
 			if (!view)
 				continue;
 
@@ -614,7 +614,7 @@ void Project::Open(const std::wstring& filename)
 				{
 					if (fconfig->Read("name" + std::to_string(j), &wsval))
 					{
-						VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
+						auto vd = glbin_data_manager.GetVolumeData(wsval);
 						if (vd)
 							view->AddVolumeData(vd);
 					}
@@ -632,7 +632,7 @@ void Project::Open(const std::wstring& filename)
 				{
 					if (fconfig->Read("name" + std::to_string(j), &wsval))
 					{
-						MeshData* md = glbin_data_manager.GetMeshData(wsval);
+						auto md = glbin_data_manager.GetMeshData(wsval);
 						if (md)
 							view->AddMeshData(md);
 					}
@@ -663,7 +663,7 @@ void Project::Open(const std::wstring& filename)
 							{
 								if (fconfig->Read("name", &wsval))
 								{
-									VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
+									auto vd = glbin_data_manager.GetVolumeData(wsval);
 									if (vd)
 										view->AddVolumeData(vd);
 								}
@@ -673,7 +673,7 @@ void Project::Open(const std::wstring& filename)
 							{
 								if (fconfig->Read("name", &wsval))
 								{
-									MeshData* md = glbin_data_manager.GetMeshData(wsval);
+									auto md = glbin_data_manager.GetMeshData(wsval);
 									if (md)
 										view->AddMeshData(md);
 								}
@@ -683,7 +683,7 @@ void Project::Open(const std::wstring& filename)
 							{
 								if (fconfig->Read("name", &wsval))
 								{
-									Annotations* ann = glbin_data_manager.GetAnnotations(wsval);
+									auto ann = glbin_data_manager.GetAnnotations(wsval);
 									if (ann)
 										view->AddAnnotations(ann);
 								}
@@ -696,7 +696,7 @@ void Project::Open(const std::wstring& filename)
 									if (fconfig->Read("id", &ival))
 										DataGroup::SetID(ival);
 									wsval = view->AddGroup(wsval);
-									DataGroup* group = view->GetGroup(wsval);
+									auto group = view->GetGroup(wsval);
 									if (group)
 									{
 										//display
@@ -729,7 +729,7 @@ void Project::Open(const std::wstring& filename)
 											{
 												if (fconfig->Read("vol_" + std::to_string(k), &wsval))
 												{
-													VolumeData* vd = glbin_data_manager.GetVolumeData(wsval);
+													auto vd = glbin_data_manager.GetVolumeData(wsval);
 													if (vd)
 													{
 														group->InsertVolumeData(k - 1, vd);
@@ -752,7 +752,7 @@ void Project::Open(const std::wstring& filename)
 									if (fconfig->Read("id", &ival))
 										MeshGroup::SetID(ival);
 									wsval = view->AddMGroup(wsval);
-									MeshGroup* group = view->GetMGroup(wsval);
+									auto group = view->GetMGroup(wsval);
 									if (group)
 									{
 										//display
@@ -772,7 +772,7 @@ void Project::Open(const std::wstring& filename)
 											{
 												if (fconfig->Read("mesh_" + std::to_string(k), &wsval))
 												{
-													MeshData* md = glbin_data_manager.GetMeshData(wsval);
+													auto md = glbin_data_manager.GetMeshData(wsval);
 													if (md)
 													{
 														group->InsertMeshData(k - 1, md);
@@ -975,7 +975,7 @@ void Project::Open(const std::wstring& filename)
 		fconfig->SetPath(path);
 
 		//set settings for frame
-		RenderView* view = 0;
+		std::shared_ptr<RenderView> view;
 		if (fconfig->Read("key frame enable", &bval))
 			glbin_moviemaker.SetKeyframeEnable(bval);
 		if (fconfig->Read("views_cmb", &ival))
@@ -1031,7 +1031,7 @@ void Project::Open(const std::wstring& filename)
 			if (curf && curf >= startf && curf <= endf)
 			{
 				glbin_moviemaker.SetCurrentTime(curf);
-				RenderView* view = root->GetLastView();
+				auto view = root->GetLastView();
 				if (view)
 				{
 					view->Set4DSeqFrame(curf, startf, endf, false);
@@ -1229,17 +1229,23 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 	path = "/current";
 	fconfig->SetPath(path);
-	wsval = glbin_current.render_view ? glbin_current.render_view->GetName() : L"";
+	auto view = glbin_current.render_view.lock();
+	wsval = view ? view->GetName() : L"";
 	fconfig->Write("canvas", wsval);
-	wsval = glbin_current.vol_group ? glbin_current.vol_group->GetName() : L"";
+	auto vol_group = glbin_current.vol_group.lock();
+	wsval = vol_group ? vol_group->GetName() : L"";
 	fconfig->Write("vol group", wsval);
-	wsval = glbin_current.mesh_group ? glbin_current.mesh_group->GetName() : L"";
+	auto mesh_group = glbin_current.mesh_group.lock();
+	wsval = mesh_group ? mesh_group->GetName() : L"";
 	fconfig->Write("mesh group", wsval);
-	wsval = glbin_current.vol_data ? glbin_current.vol_data->GetName() : L"";
+	auto vol_data = glbin_current.vol_data.lock();
+	wsval = vol_data ? vol_data->GetName() : L"";
 	fconfig->Write("vol data", wsval);
-	wsval = glbin_current.mesh_data ? glbin_current.mesh_data->GetName() : L"";
+	auto mesh_data = glbin_current.mesh_data.lock();
+	wsval = mesh_data ? mesh_data->GetName() : L"";
 	fconfig->Write("mesh data", wsval);
-	wsval = glbin_current.ann_data ? glbin_current.ann_data->GetName() : L"";
+	auto ann_data = glbin_current.ann_data.lock();
+	wsval = ann_data ? ann_data->GetName() : L"";
 	fconfig->Write("ann data", wsval);
 
 	//save data list
@@ -1254,7 +1260,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			"FluoRender is saving volume data. Please wait.");
 		tick_cnt++;
 
-		VolumeData* vd = glbin_data_manager.GetVolumeData(i);
+		auto vd = glbin_data_manager.GetVolumeData(i);
 		if (vd)
 		{
 			path = "/data/volume/" + std::to_string(i);
@@ -1283,7 +1289,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			}
 			else
 				fconfig->Write("path", filepath);
-			BaseReader* reader = vd->GetReader();
+			auto reader = vd->GetReader();
 			if (reader)
 			{
 				//reader type
@@ -1430,7 +1436,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			"FluoRender is saving mesh data. Please wait.");
 		tick_cnt++;
 
-		MeshData* md = glbin_data_manager.GetMeshData(i);
+		auto md = glbin_data_manager.GetMeshData(i);
 		if (md)
 		{
 			if (md->GetPath() == L"" || glbin_settings.m_vrp_embed)
@@ -1486,7 +1492,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("num", num);
 	for (size_t i = 0; i < num; i++)
 	{
-		Annotations* ann = glbin_data_manager.GetAnnotations(i);
+		auto ann = glbin_data_manager.GetAnnotations(i);
 		if (ann)
 		{
 			if (ann->GetPath() == L"")
@@ -1511,7 +1517,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("num", num);
 	for (size_t i = 0; i < num; i++)
 	{
-		RenderView* view = root->GetView(static_cast<int>(i));
+		auto view = root->GetView(static_cast<int>(i));
 		if (view)
 		{
 			//view layers
@@ -1521,7 +1527,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("num", layer_num);
 			for (int j = 0; j < layer_num; j++)
 			{
-				TreeLayer* layer = view->GetLayer(j);
+				auto layer = view->GetLayer(j);
 				if (!layer)
 					continue;
 				path = "/views/" + std::to_string(i) + "/layers/" + std::to_string(j);
@@ -1542,7 +1548,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 					break;
 				case 5://group
 				{
-					DataGroup* group = (DataGroup*)layer;
+					auto group = std::dynamic_pointer_cast<DataGroup>(layer);
+					if (!group)
+						break;
 
 					fconfig->Write("type", 5);
 					fconfig->Write("name", layer->GetName());
@@ -1570,7 +1578,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 				break;
 				case 6://mesh group
 				{
-					MeshGroup* group = (MeshGroup*)layer;
+					auto group = std::dynamic_pointer_cast<MeshGroup>(layer);
+					if (!group)
+						break;
 
 					fconfig->Write("type", 6);
 					fconfig->Write("name", layer->GetName());
@@ -1809,7 +1819,7 @@ void Project::Reset()
 void Project::ExportRulerList(const std::wstring& filename)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!list || !view)
 	{
 		return;
