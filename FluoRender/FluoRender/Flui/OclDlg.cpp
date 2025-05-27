@@ -248,7 +248,7 @@ void OclDlg::Execute()
 		dup = false;
 	//bool dup = false;
 
-	glbin_kernel_executor.SetVolume(vd.get());
+	glbin_kernel_executor.SetVolume(vd);
 	glbin_kernel_executor.SetCode(code.ToStdString());
 	glbin_kernel_executor.SetDuplicate(dup);
 	glbin_kernel_executor.Execute();

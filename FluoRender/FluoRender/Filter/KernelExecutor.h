@@ -46,17 +46,17 @@ public:
 
 	void SetCode(const std::string &code);
 	void LoadCode(const std::wstring &filename);
-	void SetVolume(VolumeData *vd);
+	void SetVolume(const std::shared_ptr<VolumeData>& vd);
 	void SetDuplicate(bool dup);
 	void SetRepeat(int val) { m_repeat = val; }
-	VolumeData* GetVolume();
+	std::shared_ptr<VolumeData> GetVolume();
 	std::shared_ptr<VolumeData> GetResult(bool pop);
 	std::wstring GetInfo();
 
 	bool Execute();
 
 private:
-	VolumeData *m_vd;
+	std::weak_ptr<VolumeData> m_vd;
 	std::vector<std::shared_ptr<VolumeData>> m_vd_r;//result
 	bool m_duplicate;//whether duplicate the input volume
 	int m_repeat;//number of execution on top of the base, no duplication

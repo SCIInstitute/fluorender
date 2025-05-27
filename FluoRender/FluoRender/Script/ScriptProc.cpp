@@ -1170,7 +1170,7 @@ void ScriptProc::RunOpenCL()
 	{
 		it->GetVR()->clear_tex_current();
 		glbin_kernel_executor.LoadCode(clname);
-		glbin_kernel_executor.SetVolume(it.get());
+		glbin_kernel_executor.SetVolume(it);
 		glbin_kernel_executor.Execute();
 	}
 

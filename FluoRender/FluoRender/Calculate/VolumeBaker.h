@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEBAKER_H_
 
 #include <nrrd.h>
+#include <memory>
 
 class VolumeData;
 namespace flrd
@@ -39,14 +40,14 @@ namespace flrd
 		VolumeBaker();
 		~VolumeBaker();
 
-		void SetInput(VolumeData *data);
-		VolumeData* GetInput();
-		VolumeData* GetResult();
+		void SetInput(const std::shared_ptr<VolumeData>& data);
+		std::shared_ptr<VolumeData> GetInput();
+		std::shared_ptr<VolumeData> GetResult();
 		void Bake(bool replace);
 
 	private:
-		VolumeData *m_input;	//input
-		VolumeData *m_result;	//result
+		std::weak_ptr<VolumeData> m_input;	//input
+		std::shared_ptr<VolumeData> m_result;	//result
 		void* m_raw_input;		//
 		void* m_raw_result;		//
 

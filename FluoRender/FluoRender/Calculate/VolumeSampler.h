@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Quaternion.h>
 #include <nrrd.h>
+#include <memory>
 
 class VolumeData;
 namespace fluo
@@ -51,9 +52,9 @@ namespace flrd
 		VolumeSampler();
 		~VolumeSampler();
 
-		void SetInput(VolumeData *data);
-		VolumeData* GetInput();
-		VolumeData* GetResult();
+		void SetInput(const std::shared_ptr<VolumeData>& data);
+		std::shared_ptr<VolumeData> GetInput();
+		std::shared_ptr<VolumeData> GetResult();
 		void SetFixSize(bool bval);
 		void SetSize(int nx, int ny, int nz);
 		void SetFilter(int type);
@@ -68,8 +69,8 @@ namespace flrd
 		unsigned int SampleInt(double x, double y, double z);
 
 	private:
-		VolumeData *m_input;	//input
-		VolumeData *m_result;	//result
+		std::weak_ptr<VolumeData> m_input;	//input
+		std::shared_ptr<VolumeData> m_result;	//result
 		void* m_raw_input;		//
 		void* m_raw_result;		//
 

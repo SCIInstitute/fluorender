@@ -819,6 +819,9 @@ void VolumeData::LoadMask(Nrrd* mask)
 {
 	if (!mask || !m_tex || !m_vr)
 		return;
+	auto vd = glbin_data_manager.GetVolumeData(m_name);
+	if (!vd)
+		return;
 
 	//prepare the texture bricks for the mask
 	m_tex->add_empty_mask();
@@ -831,7 +834,7 @@ void VolumeData::LoadMask(Nrrd* mask)
 	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
 	{
 		flrd::VolumeSampler sampler;
-		sampler.SetInput(this);
+		sampler.SetInput(vd);
 		sampler.SetSize(m_res_x, m_res_y, m_res_z);
 		sampler.SetFilter(0);
 		//sampler.SetFilterSize(2, 2, 0);
@@ -1062,6 +1065,9 @@ void VolumeData::LoadLabel(Nrrd* label)
 {
 	if (!label || !m_tex || !m_vr)
 		return;
+	auto vd = glbin_data_manager.GetVolumeData(m_name);
+	if (!vd)
+		return;
 
 	m_tex->add_empty_label();
 	m_tex->set_nrrd(label, m_tex->nlabel());
@@ -1073,7 +1079,7 @@ void VolumeData::LoadLabel(Nrrd* label)
 	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
 	{
 		flrd::VolumeSampler sampler;
-		sampler.SetInput(this);
+		sampler.SetInput(vd);
 		sampler.SetSize(m_res_x, m_res_y, m_res_z);
 		sampler.Resize(flrd::SDT_Label, true);
 		//nrrdNuke(label);
@@ -1455,20 +1461,23 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 {
 	if (!m_vr || !m_tex)
 		return;
+	auto vd = glbin_data_manager.GetVolumeData(m_name);
+	if (!vd)
+		return;
 
-	VolumeData* temp = 0;
+	std::shared_ptr<VolumeData> temp;
 	if (bake)
 	{
 		flrd::VolumeBaker baker;
-		baker.SetInput(temp ? temp : this);
-		baker.Bake(temp);
+		baker.SetInput(temp ? temp : vd);
+		baker.Bake(temp ? true : false);
 		temp = baker.GetResult();
 	}
 
 	if (m_resize || crop)
 	{
 		flrd::VolumeSampler sampler;
-		sampler.SetInput(temp ? temp : this);
+		sampler.SetInput(temp ? temp : vd);
 		sampler.SetFixSize(fix_size);
 		sampler.SetSize(m_rnx, m_rny, m_rnz);
 		sampler.SetFilter(filter);
@@ -1537,9 +1546,6 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 		if (mask & 2)
 			SaveLabel(false, 0, 0);
 	}
-
-	if (temp)
-		delete temp;
 
 	m_tex_path = filename;
 }
@@ -4194,11 +4200,9 @@ void Annotations::SetVolume(const std::shared_ptr<VolumeData>& vd)
 		m_name += L"_FROM_" + vd->GetName();
 }
 
-VolumeData* Annotations::GetVolume()
+std::shared_ptr<VolumeData> Annotations::GetVolume()
 {
-	if (auto vd_ptr = m_vd.lock())
-		return vd_ptr.get();
-	return 0;
+	return m_vd.lock();
 }
 
 void Annotations::Clear()
@@ -4354,16 +4358,15 @@ void Annotations::Save(const std::wstring &filename)
 
 	os << L"\nComponents:\n";
 	os << L"ID\tX\tY\tZ\t" << m_info_meaning << L"\n\n";
-	for (int i=0; i<(int)m_alist.size(); i++)
+	for (auto& it : m_alist)
 	{
-		AText* atext = m_alist[i].get();
-		if (atext)
+		if (it)
 		{
-			os << atext->m_txt << L"\t";
-			os << int(atext->m_pos.x()*resx+1.0) << L"\t";
-			os << int(atext->m_pos.y()*resy+1.0) << L"\t";
-			os << int(atext->m_pos.z()*resz+1.0) << L"\t";
-			os << atext->m_info << L"\n";
+			os << it->m_txt << L"\t";
+			os << int(it->m_pos.x()*resx+1.0) << L"\t";
+			os << int(it->m_pos.y()*resy+1.0) << L"\t";
+			os << int(it->m_pos.z()*resz+1.0) << L"\t";
+			os << it->m_info << L"\n";
 		}
 	}
 
@@ -6575,9 +6578,9 @@ void DataManager::RemoveVolumeData(size_t index)
 {
 	if (index < m_vd_list.size())
 	{
-		VolumeData* data = m_vd_list[index].get();
+		auto data = m_vd_list[index];
 		if (data)
-			m_vd_cache_queue.erase(data);
+			m_vd_cache_queue.erase(data.get());
 		m_vd_list.erase(m_vd_list.begin() + index);
 	}
 }
@@ -6710,8 +6713,7 @@ void DataManager::AddAnnotations(const std::shared_ptr<Annotations>& ann)
 
 void DataManager::RemoveAnnotations(size_t index)
 {
-	Annotations* ann = m_annotation_list[index].get();
-	if (ann)
+	if (index < m_annotation_list.size())
 	{
 		m_annotation_list.erase(m_annotation_list.begin()+index);
 	}
@@ -6764,9 +6766,8 @@ std::shared_ptr<Annotations> DataManager::GetLastAnnotations()
 bool DataManager::CheckNames(const std::wstring &str)
 {
 	bool result = false;
-	for (unsigned int i=0; i<m_vd_list.size(); i++)
+	for (auto& vd : m_vd_list)
 	{
-		VolumeData* vd = m_vd_list[i].get();
 		if (vd && vd->GetName()==str)
 		{
 			result = true;
@@ -6775,9 +6776,8 @@ bool DataManager::CheckNames(const std::wstring &str)
 	}
 	if (!result)
 	{
-		for (unsigned int i=0; i<m_md_list.size(); i++)
+		for (auto& md : m_md_list)
 		{
-			MeshData* md = m_md_list[i].get();
 			if (md && md->GetName()==str)
 			{
 				result = true;
@@ -6787,9 +6787,8 @@ bool DataManager::CheckNames(const std::wstring &str)
 	}
 	if (!result)
 	{
-		for (unsigned int i=0; i<m_annotation_list.size(); i++)
+		for (auto& ann : m_annotation_list)
 		{
-			Annotations* ann = m_annotation_list[i].get();
 			if (ann && ann->GetName()==str)
 			{
 				result = true;

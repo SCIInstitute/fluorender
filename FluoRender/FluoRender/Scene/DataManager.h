@@ -921,7 +921,7 @@ public:
 	void AddText(const std::wstring& str, fluo::Point pos, const std::wstring& info);
 	void SetTransform(fluo::Transform *tform);
 	void SetVolume(const std::shared_ptr<VolumeData>& vd);
-	VolumeData* GetVolume();
+	std::shared_ptr<VolumeData> GetVolume();
 
 	void Clear();
 

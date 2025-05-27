@@ -242,7 +242,7 @@ void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 		if (vd)
 		{
 			if (!volume) volume = vd;
-			glbin_data_manager.AddVolumeData(std::shared_ptr<VolumeData>(vd));
+			glbin_data_manager.AddVolumeData(vd);
 			if (it == results.begin())
 			{
 				group_name = view->AddGroup(L"");

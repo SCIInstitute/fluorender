@@ -33,8 +33,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 VolumeBaker::VolumeBaker() :
-	m_result(0),
-	m_input(0),
 	m_raw_input(0),
 	m_raw_result(0),
 	m_nx(0),
@@ -51,27 +49,28 @@ VolumeBaker::~VolumeBaker()
 	//	delete m_result;
 }
 
-void VolumeBaker::SetInput(VolumeData *data)
+void VolumeBaker::SetInput(const std::shared_ptr<VolumeData>& data)
 {
 	m_input = data;
 }
 
-VolumeData* VolumeBaker::GetInput()
+std::shared_ptr<VolumeData> VolumeBaker::GetInput()
 {
-	return m_input;
+	return m_input.lock();
 }
 
-VolumeData* VolumeBaker::GetResult()
+std::shared_ptr<VolumeData> VolumeBaker::GetResult()
 {
 	return m_result;
 }
 
 void VolumeBaker::Bake(bool replace)
 {
-	if (!m_input)
+	auto input = m_input.lock();
+	if (!input)
 		return;
-	m_raw_input = GetRaw(m_input);
-	Nrrd* input_nrrd = GetNrrd(m_input);
+	m_raw_input = GetRaw(input.get());
+	Nrrd* input_nrrd = GetNrrd(input.get());
 	if (!input_nrrd)
 		return;
 
@@ -114,7 +113,7 @@ void VolumeBaker::Bake(bool replace)
 		fluo::Point p(double(i) / double(m_nx),
 			double(j) / double(m_ny),
 			double(k) / double(m_nz));
-		double new_value = m_input->GetTransferedValue(i, j, k);
+		double new_value = input->GetTransferedValue(i, j, k);
 		if (m_bits == 8)
 			((unsigned char*)m_raw_result)[index] = uint8_t(new_value*255.0);
 		else if (m_bits == 16)
@@ -132,7 +131,7 @@ void VolumeBaker::Bake(bool replace)
 
 	//spacing
 	double spcx, spcy, spcz;
-	m_input->GetSpacings(spcx, spcy, spcz);
+	input->GetSpacings(spcx, spcy, spcz);
 	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
 		spcy*m_ny, spcz*m_nz);
@@ -142,13 +141,13 @@ void VolumeBaker::Bake(bool replace)
 
 	if (replace)
 	{
-		m_input->Replace(nrrd_result, true);
+		input->Replace(nrrd_result, true);
 	}
 	else
 	{
 		if (!m_result)
 		{
-			m_result = new VolumeData();
+			m_result = std::make_shared<VolumeData>();
 			std::wstring name, path;
 			m_result->Load(nrrd_result, name, path);
 		}

@@ -36,8 +36,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 VolumeSampler::VolumeSampler() :
-	m_result(0),
-	m_input(0),
 	m_raw_input(0),
 	m_raw_result(0),
 	m_nx_in(0),
@@ -70,17 +68,17 @@ VolumeSampler::~VolumeSampler()
 	//	delete m_result;
 }
 
-void VolumeSampler::SetInput(VolumeData *data)
+void VolumeSampler::SetInput(const std::shared_ptr<VolumeData>& data)
 {
 	m_input = data;
 }
 
-VolumeData* VolumeSampler::GetInput()
+std::shared_ptr<VolumeData> VolumeSampler::GetInput()
 {
-	return m_input;
+	return m_input.lock();
 }
 
-VolumeData* VolumeSampler::GetResult()
+std::shared_ptr<VolumeData> VolumeSampler::GetResult()
 {
 	return m_result;
 }
@@ -144,9 +142,10 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		return;
 	}
 
-	if (!m_input)
+	auto input = m_input.lock();
+	if (!input)
 		return;
-	Nrrd* input_nrrd = GetNrrd(m_input, type);
+	Nrrd* input_nrrd = GetNrrd(input.get(), type);
 	if (!input_nrrd)
 		return;
 	m_raw_input = input_nrrd->data;
@@ -188,7 +187,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
 	//spacing
 	double spcx_in, spcy_in, spcz_in;
-	m_input->GetSpacings(spcx_in, spcy_in, spcz_in);
+	input->GetSpacings(spcx_in, spcy_in, spcz_in);
 	fluo::Vector spc_in(spcx_in, spcy_in, spcz_in);
 	fluo::Vector spc;
 	double x, y, z;
@@ -209,7 +208,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 
 		//recalculate range
 		std::vector<fluo::Plane*> *planes =
-			m_input->GetVR()->get_planes();
+			input->GetVR()->get_planes();
 		fluo::Plane p[6];
 		int np = int(planes->size());
 
@@ -380,13 +379,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		switch (type)
 		{
 		case SDT_Data:
-			m_input->Replace(nrrd_result, true);
+			input->Replace(nrrd_result, true);
 			break;
 		case SDT_Mask:
-			m_input->LoadMask(nrrd_result);
+			input->LoadMask(nrrd_result);
 			break;
 		case SDT_Label:
-			m_input->LoadLabel(nrrd_result);
+			input->LoadLabel(nrrd_result);
 			break;
 		}
 	}
@@ -395,7 +394,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		//create m_result
 		if (!m_result)
 		{
-			m_result = new VolumeData();
+			m_result = std::make_shared<VolumeData>();
 			std::wstring name, path;
 			if (type == SDT_Data)
 				m_result->Load(nrrd_result, name, path);
@@ -425,7 +424,7 @@ Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)
 	if (!vd || !vd->GetTexture())
 		return 0;
 	flvr::Texture* tex = vd->GetTexture();
-	int index;
+	int index = 0;
 	switch (type)
 	{
 	case SDT_Data:
@@ -467,6 +466,9 @@ double VolumeSampler::Sample(double x, double y, double z)
 
 unsigned int VolumeSampler::SampleInt(double x, double y, double z)
 {
+	auto input = m_input.lock();
+	if (!input)
+		return 0;
 	if (!m_raw_input)
 		return 0;
 	int i, j, k;
@@ -474,7 +476,7 @@ unsigned int VolumeSampler::SampleInt(double x, double y, double z)
 	if (!ijk(i, j, k))
 		return 0;
 	int nx, ny, nz;
-	m_input->GetResolution(nx, ny, nz);
+	input->GetResolution(nx, ny, nz);
 	unsigned long long index = (unsigned long long)nx*(unsigned long long)ny*
 		(unsigned long long)k + (unsigned long long)nx*
 		(unsigned long long)j + (unsigned long long)i;

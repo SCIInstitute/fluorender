@@ -203,14 +203,14 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 
 	if (horizontal_)
 	{
-		a = std::round(h / 2.0 - 4 * scale_);
-		b = std::round(h / 2.0 + 4 * scale_);
+		a = std::round(h / 2.0 - 5 * scale_);
+		b = std::round(h / 2.0 + 5 * scale_);
 		height = 10 * scale_;
 	}
 	else
 	{
-		a = std::round(w / 2.0 - 4 * scale_);
-		b = std::round(w / 2.0 + 4 * scale_);
+		a = std::round(w / 2.0 - 5 * scale_);
+		b = std::round(w / 2.0 + 5 * scale_);
 		width = 10 * scale_;
 	}
 
@@ -237,9 +237,9 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 				}
 				bitmap = wxBitmap(img_scaled);
 				if (horizontal_)
-					dc.DrawBitmap(bitmap, margin_ + posl, h / 2.0 - 4 * scale_, false);
+					dc.DrawBitmap(bitmap, margin_ + posl, a, false);
 				else
-					dc.DrawBitmap(bitmap, w / 2.0 - 4 * scale_, margin_ + posl, false);
+					dc.DrawBitmap(bitmap, a, margin_ + posl, false);
 			}
 		}
 		else
@@ -258,9 +258,9 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 				if (posr - posl > 0)
 				{
 					if (horizontal_)
-						dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(posl, 0, posr - posl, height)), margin_ + posl, h / 2.0 - 4 * scale_, false);
+						dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(posl, 0, posr - posl, height)), margin_ + posl, a, false);
 					else
-						dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(0, posl, width, posr - posl)), w / 2.0 - 4 * scale_, margin_ + posl, false);
+						dc.DrawBitmap(bitmap.GetSubBitmap(wxRect(0, posl, width, posr - posl)), a, margin_ + posl, false);
 				}
 			}
 		}

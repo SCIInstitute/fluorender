@@ -42,7 +42,6 @@ DEALINGS IN THE SOFTWARE.
 
 KernelExecutor::KernelExecutor()
 	: Progress(),
-	m_vd(0),
 	m_duplicate(true),
 	m_repeat(0)
 {
@@ -79,7 +78,7 @@ void KernelExecutor::LoadCode(const std::wstring &filename)
 		filename + L" read.\n";
 }
 
-void KernelExecutor::SetVolume(VolumeData *vd)
+void KernelExecutor::SetVolume(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd = vd;
 }
@@ -89,9 +88,9 @@ void KernelExecutor::SetDuplicate(bool dup)
 	m_duplicate = dup;
 }
 
-VolumeData* KernelExecutor::GetVolume()
+std::shared_ptr<VolumeData> KernelExecutor::GetVolume()
 {
-	return m_vd;
+	return m_vd.lock();
 }
 
 std::shared_ptr<VolumeData> KernelExecutor::GetResult(bool pop)
@@ -126,22 +125,23 @@ bool KernelExecutor::Execute()
 #endif
 
 	//get volume currently selected
-	if (!m_vd)
+	auto vd = m_vd.lock();
+	if (!vd)
 	{
 		m_message = L"No volume selected. Select a volume first.\n";
 		return false;
 	}
-	flvr::Texture* tex =m_vd->GetTexture();
+	flvr::Texture* tex =vd->GetTexture();
 	if (!tex)
 	{
 		m_message = L"Volume corrupted.\n";
 		return false;
 	}
 
-	int bits = m_vd->GetBits();
+	int bits = vd->GetBits();
 	int res_x, res_y, res_z;
-	m_vd->GetResolution(res_x, res_y, res_z);
-	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
+	vd->GetResolution(res_x, res_y, res_z);
+	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
 	fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
@@ -156,7 +156,7 @@ bool KernelExecutor::Execute()
 	m_message = L"";
 	//execute for each brick
 	std::vector<flvr::TextureBrick*> *bricks_r;
-	VolumeData* vd_r = 0;
+	auto vd_r = std::make_shared<VolumeData>();
 
 	SetProgress(0, "Running OpenCL kernel.");
 
@@ -164,15 +164,14 @@ bool KernelExecutor::Execute()
 	{
 		//result
 		double spc_x, spc_y, spc_z;
-		m_vd->GetSpacings(spc_x, spc_y, spc_z);
-		vd_r = new VolumeData();
-		m_vd_r.push_back(std::shared_ptr<VolumeData>(vd_r));
+		vd->GetSpacings(spc_x, spc_y, spc_z);
+		m_vd_r.push_back(vd_r);
 		vd_r->AddEmptyData(bits,
 			res_x, res_y, res_z,
 			spc_x, spc_y, spc_z,
 			brick_size);
 		vd_r->SetSpcFromFile(true);
-		vd_r->SetName(m_vd->GetName() + L"_CL");
+		vd_r->SetName(vd->GetName() + L"_CL");
 		flvr::Texture* tex_r = vd_r->GetTexture();
 		if (!tex_r)
 			return false;
@@ -182,14 +181,14 @@ bool KernelExecutor::Execute()
 		if (!bricks_r || bricks_r->size() == 0)
 			return false;
 
-		glbin_vol_def.Copy(vd_r, m_vd);
+		glbin_vol_def.Copy(vd_r.get(), vd.get());
 	}
 	else
-		vd_r = m_vd;
+		vd_r = vd;
 
-	bool kernel_exe = ExecuteKernel(m_vd, vd_r);
+	bool kernel_exe = ExecuteKernel(vd.get(), vd_r.get());
 	for (int i = 0; i < m_repeat; ++i)
-		kernel_exe &= ExecuteKernel(vd_r, vd_r);
+		kernel_exe &= ExecuteKernel(vd_r.get(), vd_r.get());
 
 	if (!kernel_exe)
 	{
@@ -201,7 +200,7 @@ bool KernelExecutor::Execute()
 	if (!m_duplicate)
 	{
 		//clear gpu texture because the kernel updates the data in main memory after read back
-		m_vd->GetVR()->clear_tex_current();
+		vd->GetVR()->clear_tex_current();
 	}
 
 	SetProgress(0, "");

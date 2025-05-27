@@ -280,7 +280,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		brick_size);
 	vd->SetSpcFromFile(true);
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
-	m_vd_r.push_back(std::shared_ptr<VolumeData>(vd));
+	m_vd_r.push_back(vd);
 
 	std::wstring name = vd_a->GetName();
 	std::wstring str_type;
@@ -329,13 +329,13 @@ void VolumeCalculator::CreateVolumeResult2()
 	spc_y = std::max(spc_y_a, spc_y_b);
 	spc_z = std::max(spc_z_a, spc_z_b);
 
-	VolumeData* vd = new VolumeData();
+	auto vd = std::make_shared<VolumeData>();
 	vd->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
 		brick_size);
 	vd->SetSpcFromFile(true);
-	m_vd_r.push_back(std::shared_ptr<VolumeData>(vd));
+	m_vd_r.push_back(vd);
 
 	std::wstring name_a = vd_a->GetName();
 	std::wstring name_b = vd_b->GetName();
