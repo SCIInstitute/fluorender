@@ -66,7 +66,7 @@ namespace flrd
 		~ScriptProc();
 
 		void SetFrame(MainFrame* frame) { m_frame = frame; }
-		void SetView(RenderView* view) { m_view = view; }
+		void SetView(const std::shared_ptr<RenderView>& view) { m_view = view; }
 		void SetBreak(bool bval) { m_break = bval; }
 		bool GetBreak() { return m_break; }
 		void SetBreakCount(int val = 0) { m_break_count = val; }
@@ -82,7 +82,7 @@ namespace flrd
 
 	private:
 		MainFrame* m_frame;
-		RenderView *m_view;
+		std::weak_ptr<RenderView> m_view;
 
 		std::string m_type;
 		TimeMask m_time_mask;

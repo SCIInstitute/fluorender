@@ -610,7 +610,7 @@ void TreePanel::UpdateTree()
 	m_datatree->SetScrollPos(wxVERTICAL, 0);
 
 	if (sel_item.IsOk())
-		m_datatree->SelectItem(sel_item);
+		m_datatree->SelectItemSilently(sel_item);
 }
 
 void TreePanel::UpdateTreeIcons()
@@ -932,7 +932,7 @@ void TreePanel::traversalSel(wxTreeItemId item)
 
 	if (sel)
 	{
-		m_datatree->SelectItem(item);
+		m_datatree->SelectItemSilently(item);
 		return;
 	}
 
@@ -1283,7 +1283,7 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 	if (!sel_item.IsOk())
 		return;
 
-	m_datatree->SelectItem(sel_item);
+	m_datatree->SelectItemSilently(sel_item);
 
 	wxPoint point = event.GetPosition();
 	// If from keyboard
@@ -1647,6 +1647,9 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 
 void TreePanel::OnSelChanged(wxTreeEvent& event)
 {
+	if (m_datatree && m_datatree->m_silent_select)
+		return;
+
 	wxTreeItemId sel_item = m_datatree->GetSelection();
 
 	if (!sel_item.IsOk())

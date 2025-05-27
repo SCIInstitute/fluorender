@@ -192,7 +192,7 @@ void NoiseCancellingDlg::Preview()
 
 	bool bval = glbin_comp_generator.GetUseSel();
 	glbin_comp_generator.SetThresh(glbin_comp_def.m_nr_thresh);
-	glbin_comp_generator.SetVolumeData(vd.get());
+	glbin_comp_generator.SetVolumeData(vd);
 	vd->AddEmptyMask(1, !bval);
 	vd->AddEmptyLabel(0, !bval);
 	glbin_comp_generator.ShuffleID();

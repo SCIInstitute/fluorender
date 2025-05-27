@@ -205,13 +205,13 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 	{
 		a = std::round(h / 2.0 - 4 * scale_);
 		b = std::round(h / 2.0 + 4 * scale_);
-		height = 8 * scale_;
+		height = 10 * scale_;
 	}
 	else
 	{
 		a = std::round(w / 2.0 - 4 * scale_);
 		b = std::round(w / 2.0 + 4 * scale_);
-		width = 8 * scale_;
+		width = 10 * scale_;
 	}
 
 	//draw map

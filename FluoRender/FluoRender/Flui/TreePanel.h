@@ -64,8 +64,16 @@ public:
 		wxTR_FULL_ROW_HIGHLIGHT);
 	~DataTreeCtrl();
 
+	void SelectItemSilently(const wxTreeItemId& item)
+	{
+		m_silent_select = true;
+		SelectItem(item);
+		m_silent_select = false;
+	}
+
 private:
 	wxTreeItemId m_selected;
+	bool m_silent_select = false;
 
 	//icon operations
 	//change the color of the icon dual

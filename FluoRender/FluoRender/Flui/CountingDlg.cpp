@@ -251,7 +251,7 @@ void CountingDlg::OnAnalyzeBtn(wxCommandEvent& event)
 	if (!vd)
 		return;
 
-	glbin_comp_generator.SetVolumeData(vd.get());
+	glbin_comp_generator.SetVolumeData(vd);
 	bool sel = glbin_comp_generator.GetUseSel();
 	vd->AddEmptyMask(1, !sel);
 	vd->AddEmptyLabel(0, !sel);

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <chrono>
 #include <cstring>
+#include <memory>
 
 class VolumeData;
 namespace flrd
@@ -52,8 +53,7 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
-		void SetVolume(VolumeData *vd) { m_vd = vd; }
-		//VolumeData* GetVolume() { return m_vd; }
+		void SetVolume(const std::shared_ptr<VolumeData>& vd) { m_vd = vd; }
 		//modes
 		void SetMode(int mode);
 		int GetMode() { return m_mode_ext; }
@@ -239,8 +239,12 @@ namespace flrd
 		void Clear();//erase selection
 		void Erase();//extract a new volume excluding the selection
 		void Extract();//extract a new volume of the selection
-		void CompExportRandomColor(int hmode, VolumeData* vd_r, VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide);
-		VolumeData* GetResult(bool pop);
+		void CompExportRandomColor(int hmode,
+			std::shared_ptr<VolumeData>& vd_r,
+			std::shared_ptr<VolumeData>& vd_g,
+			std::shared_ptr<VolumeData>& vd_b,
+			bool select, bool hide);
+		std::shared_ptr<VolumeData> GetResult(bool pop);
 
 		void PushMask();
 		void PopMask();
@@ -248,8 +252,8 @@ namespace flrd
 		void RedoMask();
 		//mask operations
 		void CopyMask(bool copy_data);
-		void SetCopyMaskVolume(VolumeData* vd) { m_vd_copy = vd; }
-		VolumeData* GetCopyMaskVolume() { return m_vd_copy; }
+		void SetCopyMaskVolume(const std::shared_ptr<VolumeData>& vd) { m_vd_copy = vd; }
+		std::shared_ptr<VolumeData> GetCopyMaskVolume() { return m_vd_copy; }
 		void PasteMask(int op);
 
 		//mouse position
@@ -264,8 +268,8 @@ namespace flrd
 		double GetSpanSec() { return m_span_sec; }
 
 	private:
-		VolumeData *m_vd;	//volume data for segmentation
-		VolumeData* m_vd_copy;//for copying mask source
+		std::shared_ptr<VolumeData> m_vd;	//volume data for segmentation
+		std::shared_ptr<VolumeData> m_vd_copy;//for copying mask source
 		bool m_copy_data;//copy data or mask
 
 		unsigned int m_2d_mask;	//2d mask from painting
@@ -323,7 +327,7 @@ namespace flrd
 		bool m_brush_size_data;
 
 		//exported volumes
-		std::vector<VolumeData*> m_result_vols;
+		std::vector<std::shared_ptr<VolumeData>> m_result_vols;
 
 		//a random variable
 		int m_randv;

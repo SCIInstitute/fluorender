@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <functional>
 #include <chrono>
+#include <memory>
 
 class VolumeData;
 namespace flrd
@@ -46,7 +47,7 @@ namespace flrd
 		ComponentGenerator();
 		~ComponentGenerator();
 
-		void SetVolumeData(VolumeData* vd);
+		void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
 
 		void SetUseSel(bool val) { m_use_sel = val; }
 		bool GetUseSel() { return m_use_sel; }
@@ -163,7 +164,7 @@ namespace flrd
 		CompGenFunc postwork;
 
 	private:
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 
 		bool m_use_sel;//use mask instead of data
 		bool m_use_ml;//use machine learning

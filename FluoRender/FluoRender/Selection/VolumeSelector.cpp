@@ -104,7 +104,7 @@ void VolumeSelector::SetMode(int mode)
 	if (m_mode_ext)
 		m_mode = m_mode_ext;
 	ChangeBrushSetsIndex();
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -133,7 +133,7 @@ void VolumeSelector::SetMode(int mode)
 void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd)
 		return;
 
@@ -143,7 +143,7 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		m_vd)
 	{
 		//histogram
-		flrd::Histogram histogram(m_vd);
+		flrd::Histogram histogram(m_vd.get());
 		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(true);
 		flrd::EntryHist* eh = histogram.GetEntryHist();
@@ -161,7 +161,7 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		}
 	}
 
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 
@@ -174,9 +174,9 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 
 void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!view || !m_vd)
 		return;
 
@@ -236,13 +236,13 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	double r = m_brush_radius2 - m_brush_radius1;
 	if (m_select_multi)
 	{
-		DataGroup* group = glbin_current.vol_group;
+		auto group = glbin_current.vol_group.lock();
 		if (group && group->GetVolumeNum() > 1)
 		{
-			VolumeData* save = m_vd;
+			auto save = m_vd;
 			for (int i = 0; i < group->GetVolumeNum(); i++)
 			{
-				VolumeData* vd = group->GetVolumeData(i);
+				auto vd = group->GetVolumeData(i);
 				if (vd && vd->GetDisp())
 				{
 					m_vd = vd;
@@ -276,9 +276,9 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 
 void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!view || !m_vd)
 		return;
 
@@ -409,7 +409,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 				m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			int div = 3;
 			int order;
-			flrd::MaskBorder mb(m_vd);
+			flrd::MaskBorder mb(m_vd.get());
 			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;
@@ -450,7 +450,7 @@ void VolumeSelector::Clear()
 void VolumeSelector::Erase()
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	int mode = 6;
 	std::wstring vd_name;
 	if (m_vd)
@@ -458,7 +458,7 @@ void VolumeSelector::Erase()
 	if (vd_name.find(L"_DELETED") != std::wstring::npos)
 		mode = 7;
 	std::wstring group_name;
-	DataGroup* group = glbin_current.vol_group;
+	auto group = glbin_current.vol_group.lock();
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
@@ -469,9 +469,9 @@ void VolumeSelector::Erase()
 void VolumeSelector::Extract()
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	std::wstring group_name;
-	DataGroup* group = glbin_current.vol_group;
+	auto group = glbin_current.vol_group.lock();
 	if (group)
 		group_name = group->GetName();
 	glbin_vol_calculator.SetVolumeA(m_vd);
@@ -496,11 +496,14 @@ double VolumeSelector::HueCalculation(int mode, unsigned int label)
 	return hue;
 }
 
-void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
-	VolumeData* vd_g, VolumeData* vd_b, bool select, bool hide)
+void VolumeSelector::CompExportRandomColor(int hmode,
+	std::shared_ptr<VolumeData>& vd_r,
+	std::shared_ptr<VolumeData>& vd_g,
+	std::shared_ptr<VolumeData>& vd_b,
+	bool select, bool hide)
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd ||
 		!m_vd->GetTexture() ||
 		(select&&m_vd->GetTexture()->nmask()==-1) ||
@@ -536,7 +539,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	bool push_new = true;
 	//red volume
 	if (!vd_r)
-		vd_r = new VolumeData();
+		vd_r = std::make_shared<VolumeData>();
 	else
 		push_new = false;
 	vd_r->AddEmptyData(bits,
@@ -548,7 +551,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_r->SetCurChannel(0);
 	//green volume
 	if (!vd_g)
-		vd_g = new VolumeData();
+		vd_g = std::make_shared<VolumeData>();
 	vd_g->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
@@ -558,7 +561,7 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 	vd_g->SetCurChannel(1);
 	//blue volume
 	if (!vd_b)
-		vd_b = new VolumeData();
+		vd_b = std::make_shared<VolumeData>();
 	vd_b->AddEmptyData(bits,
 		res_x, res_y, res_z,
 		spc_x, spc_y, spc_z,
@@ -635,9 +638,9 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		}
 	}
 
-	glbin_vol_def.Copy(vd_r, m_vd);
-	glbin_vol_def.Copy(vd_g, m_vd);
-	glbin_vol_def.Copy(vd_b, m_vd);
+	glbin_vol_def.Copy(vd_r.get(), m_vd.get());
+	glbin_vol_def.Copy(vd_g.get(), m_vd.get());
+	glbin_vol_def.Copy(vd_b.get(), m_vd.get());
 
 	fluo::Color red(  1.0,0.0,0.0);
 	fluo::Color green(0.0,1.0,0.0);
@@ -658,9 +661,9 @@ void VolumeSelector::CompExportRandomColor(int hmode, VolumeData* vd_r,
 		m_vd->SetDisp(false);
 }
 
-VolumeData* VolumeSelector::GetResult(bool pop)
+std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop)
 {
-	VolumeData* vd = 0;
+	std::shared_ptr<VolumeData> vd;
 	if (!m_result_vols.empty())
 	{
 		vd = m_result_vols.back();
@@ -699,7 +702,7 @@ void VolumeSelector::ChangeBrushSetsIndex()
 //th udpate
 bool VolumeSelector::GetThUpdate()
 {
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!view || (m_mode != 1 &&
 		m_mode != 2 && m_mode != 4))
 		return false;
@@ -715,7 +718,7 @@ bool VolumeSelector::GetThUpdate()
 void VolumeSelector::PushMask()
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd || !m_vd->GetTexture())
 		return;
 	if (flvr::Texture::mask_undo_num_ > 0)
@@ -725,7 +728,7 @@ void VolumeSelector::PushMask()
 void VolumeSelector::PopMask()
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd || !m_vd->GetTexture())
 		return;
 
@@ -736,7 +739,7 @@ void VolumeSelector::PopMask()
 void VolumeSelector::UndoMask()
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd || !m_vd->GetTexture())
 		return;
 
@@ -747,7 +750,7 @@ void VolumeSelector::UndoMask()
 void VolumeSelector::RedoMask()
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd || !m_vd->GetTexture())
 		return;
 
@@ -759,7 +762,7 @@ void VolumeSelector::RedoMask()
 void VolumeSelector::CopyMask(bool copy_data)
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (m_vd)
 	{
 		m_vd_copy = m_vd;
@@ -770,7 +773,7 @@ void VolumeSelector::CopyMask(bool copy_data)
 void VolumeSelector::PasteMask(int op)
 {
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (m_vd && m_vd_copy)
 	{
 		//prevent self copying
@@ -795,7 +798,7 @@ void VolumeSelector::PasteMask(int op)
 
 		if (m_select_multi)
 		{
-			DataGroup* group = glbin_current.vol_group;
+			auto group = glbin_current.vol_group.lock();
 			Nrrd* data = m_vd->GetMask(false);
 			if (group && data)
 				group->AddMask(data, 0);
@@ -806,9 +809,9 @@ void VolumeSelector::PasteMask(int op)
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 {
 	DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
-	RenderView* view = glbin_current.render_view;
+	auto view = glbin_current.render_view.lock();
 	if (!m_vd)
-		m_vd = glbin_current.vol_data;
+		m_vd = glbin_current.vol_data.lock();
 	if (!view || !m_vd)
 		return false;
 	if (mx >= 0 && my >= 0 &&

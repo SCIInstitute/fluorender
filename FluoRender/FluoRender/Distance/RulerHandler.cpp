@@ -761,7 +761,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 		ruler->SetWorkTime(rwt);
 		ruler->Group(m_group);
 		ruler->SetRulerType(m_type);
-		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock().get());
+		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
 		glbin_volume_point.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
@@ -796,7 +796,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 		}
 		if (point_volume_mode)
 		{
-			glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock().get());
+			glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
 			double t = glbin_volume_point.GetPointVolume(mx, my,
 				point_volume_mode,
 				glbin_settings.m_ruler_use_transf, 0.5,
@@ -910,7 +910,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	fluo::Point point, ip, tmp;
 	if (glbin_settings.m_point_volume_mode)
 	{
-		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock().get());
+		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
 		double t = glbin_volume_point.GetPointVolume(mx, my,
 			glbin_settings.m_point_volume_mode,
 			glbin_settings.m_ruler_use_transf,
@@ -955,7 +955,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	fluo::Point point, ip, tmp;
 	if (glbin_settings.m_point_volume_mode)
 	{
-		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock().get());
+		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
 		double t = glbin_volume_point.GetPointVolume(mx, my,
 			glbin_settings.m_point_volume_mode,
 			glbin_settings.m_ruler_use_transf,
@@ -1320,7 +1320,7 @@ void RulerHandler::AddMagStrokePoint(int mx, int my)
 
 	if (point_volume_mode)
 	{
-		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock().get());
+		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
 		double t = glbin_volume_point.GetPointVolume(mx, my,
 			point_volume_mode,
 			glbin_settings.m_ruler_use_transf,

@@ -72,6 +72,7 @@ DEALINGS IN THE SOFTWARE.
 #include <brkxml_reader.h>
 #include <GlobalStates.h>
 #include <State.h>
+#include <compatibility.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <tiffio.h>
@@ -3371,7 +3372,7 @@ void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool r
 	//restore currently selected volume
 	m_cur_vol = m_cur_vol_save;
 	if (auto cur_vd_ptr = m_cur_vol.lock())
-		glbin_vol_calculator.SetVolumeA(cur_vd_ptr.get());
+		glbin_vol_calculator.SetVolumeA(cur_vd_ptr);
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
@@ -3640,7 +3641,7 @@ void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool r
 	//restore currently selected volume
 	m_cur_vol = cur_vd_save;
 	if (auto cur_vd_ptr = m_cur_vol.lock())
-	glbin_vol_calculator.SetVolumeA(cur_vd_ptr.get());
+	glbin_vol_calculator.SetVolumeA(cur_vd_ptr);
 
 	//update ruler intensity values
 	glbin_ruler_handler.ProfileAll();
@@ -5578,7 +5579,6 @@ void RenderView::DrawLegend()
 	float name_len = 0;
 	float gap_width = font_height * 1.5;
 	float w = glbin_moviemaker.GetCropW();
-	int i;
 	int lines = 0;
 	//first pass
 	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
@@ -6731,7 +6731,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 		(m_draw_info & INFO_Z))
 	{
 		fluo::Point p;
-		glbin_volume_point.SetVolumeData(cur_vd.get());
+		glbin_volume_point.SetVolumeData(cur_vd);
 		if ((glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p )>0.0) ||
 			glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p)>0.0)
 		{
@@ -7383,7 +7383,7 @@ void RenderView::DrawVolumes(int peel)
 				{
 					//priority: 1-selected channel; 2-group contains selected channel; 3-linear distance to above
 					//not considering mask for now
-					auto cur_iter = std::find(m_vd_pop_list.begin(), m_vd_pop_list.end(), m_cur_vol);
+					auto cur_iter = FIND_PTR(m_vd_pop_list, m_cur_vol.lock());
 					size_t cur_index = std::distance(m_vd_pop_list.begin(), cur_iter);
 					unsigned long vd_index;
 					if (cur_iter != m_vd_pop_list.end())
@@ -7480,8 +7480,7 @@ void RenderView::DrawVolumes(int peel)
 							flvr::TextureRenderer::get_interactive() &&
 							quota_vd_list.size() > 0)
 						{
-							if (find(quota_vd_list.begin(),
-								quota_vd_list.end(), vd) !=
+							if (FIND_PTR(quota_vd_list, vd) !=
 								quota_vd_list.end())
 								list.push_back(vd);
 						}
@@ -7512,8 +7511,7 @@ void RenderView::DrawVolumes(int peel)
 								flvr::TextureRenderer::get_interactive() &&
 								quota_vd_list.size() > 0)
 							{
-								if (find(quota_vd_list.begin(),
-									quota_vd_list.end(), vd) !=
+								if (FIND_PTR(quota_vd_list, vd) !=
 									quota_vd_list.end())
 									list.push_back(vd);
 							}
@@ -7863,7 +7861,6 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 
 	m_mvr->set_blend_slices(glbin_settings.m_micro_blend);
 
-	int i;
 	m_mvr->clear_vr();
 	for (auto it = list.begin(); it != list.end(); ++it)
 	{
@@ -8688,7 +8685,6 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 1, 1, 1, 1 };
 
-	size_t i;
 	bool has_shadow = false;
 	std::vector<int> colormodes;
 	std::vector<bool> shadings;
@@ -8811,14 +8807,15 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 			m_mvr->set_cur_framebuffer(m_cur_framebuffer);
 			m_mvr->draw(glbin_settings.m_test_wiref, glbin_settings.m_mouse_int, m_interactive, !m_persp, m_intp);
 
-			for (auto it = local_list.begin(); it != local_list.end(); ++it)
+			int index = 0;
+			for (auto it = local_list.begin(); it != local_list.end(); ++it, ++index)
 			{
 				auto vd = it->lock();
 				if (vd)
 				{
 					vd->RestoreMode();
-					vd->SetColormapMode(colormodes[i]);
-					vd->GetVR()->set_shading(shadings[i]);
+					vd->SetColormapMode(colormodes[index]);
+					vd->GetVR()->set_shading(shadings[index]);
 				}
 			}
 			auto vd = local_list[0].lock();
@@ -9688,7 +9685,6 @@ void RenderView::Pick(BaseState& state)
 
 bool RenderView::PickMesh(BaseState& state)
 {
-	int i;
 	int nx = m_gl_size.w();
 	int ny = m_gl_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -9722,13 +9718,14 @@ bool RenderView::PickMesh(BaseState& state)
 	glEnable(GL_SCISSOR_TEST);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it)
+	int index = 0;
+	for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it, ++index)
 	{
 		auto md = it->lock();
 		if (md)
 		{
 			md->SetMatrices(m_mv_mat, m_proj_mat);
-			md->DrawInt(i + 1);
+			md->DrawInt(index + 1);
 		}
 	}
 	glDisable(GL_SCISSOR_TEST);
@@ -9772,7 +9769,7 @@ bool RenderView::PickVolume(BaseState& state)
 			continue;
 		int mode = 2;
 		if (vd->GetMode() == 1) mode = 1;
-		glbin_volume_point.SetVolumeData(vd.get());
+		glbin_volume_point.SetVolumeData(vd);
 		dist = glbin_volume_point.GetPointVolume(old_mouse_X, old_mouse_Y,
 			mode, true, 0.5, p, ip);
 		if (dist > 0.0)
@@ -10276,7 +10273,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		int ny = GetGLSize().h();
 		int mode = 2;
 		if (cur_vd->GetMode() == 1) mode = 1;
-		glbin_volume_point.SetVolumeData(cur_vd.get());
+		glbin_volume_point.SetVolumeData(cur_vd);
 		double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
 			mode, true, m_pin_pick_thresh, p, ip);
 		if (dist <= 0.0)

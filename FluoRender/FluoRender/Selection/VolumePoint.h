@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_VolumePoint_h_
 #define FL_VolumePoint_h_
 
+#include <memory>
+
 class VolumeData;
 namespace fluo
 {
@@ -39,10 +41,10 @@ namespace flrd
 	class VolumePoint
 	{
 	public:
-		VolumePoint() : m_vd(0) {}
+		VolumePoint() {}
 		~VolumePoint() {}
 
-		void SetVolumeData(VolumeData* vd)
+		void SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 		{
 			m_vd = vd;
 		}
@@ -65,7 +67,7 @@ namespace flrd
 			fluo::Point &mp);
 
 	private:
-		VolumeData* m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 	};
 }
 

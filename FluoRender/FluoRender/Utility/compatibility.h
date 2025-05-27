@@ -642,6 +642,18 @@ inline float STOF(const std::string& s, float def = 0.0f) { try { return std::st
 inline int WSTOI(const std::wstring& s, int def = 0) { try { return std::stoi(s); } catch (...) { return def; } }
 inline double WSTOD(const std::wstring& s, double def = 0.0) { try { return std::stod(s); } catch (...) { return def; } }
 
+
+template<typename T>
+typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
+	std::vector<std::weak_ptr<T>>& vec, const std::shared_ptr<T>& target)
+{
+	return std::find_if(vec.begin(), vec.end(),
+		[&target](const std::weak_ptr<T>& wp) {
+		auto sp = wp.lock();
+		return sp && sp == target;
+	});
+}
+
 #ifdef _WIN32 //WINDOWS ONLY
 
 #include <cstdlib>

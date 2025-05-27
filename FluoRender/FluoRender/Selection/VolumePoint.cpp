@@ -43,22 +43,23 @@ double VolumePoint::GetPointVolume(
 	int mode, bool use_transf, double thresh,//params
 	fluo::Point &mp, fluo::Point &ip)
 {
-	RenderView* view = glbin_current.render_view;
-	if (!m_vd)
-		m_vd = glbin_current.vol_data;
-	if (!view || !m_vd)
+	auto view = glbin_current.render_view.lock();
+	auto vd = m_vd.lock();
+	if (!vd)
+		vd = glbin_current.vol_data.lock();
+	if (!view || !vd)
 		return -1.0;
 	int nx = view->GetGLSize().w();
 	int ny = view->GetGLSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	flvr::Texture* tex = m_vd->GetTexture();
+	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return -1.0;
 	Nrrd* nrrd = tex->get_nrrd(0);
 	if (!nrrd) return -1.0;
 	void* data = nrrd->data;
-	if (!data && m_vd->GetAllBrickNum() < 1) return -1.0;
+	if (!data && vd->GetAllBrickNum() < 1) return -1.0;
 
 	//projection
 	view->HandleProjection(nx, ny);
@@ -91,11 +92,11 @@ double VolumePoint::GetPointVolume(
 	int tmp_xx, tmp_yy, tmp_zz;
 	fluo::Point nmp;
 	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacings(spcx, spcy, spcz);
 	int resx, resy, resz;
-	m_vd->GetResolution(resx, resy, resz, m_vd->GetLevel());
+	vd->GetResolution(resx, resy, resz, vd->GetLevel());
 	//volume bounding box
-	fluo::BBox bbox = m_vd->GetBounds();
+	fluo::BBox bbox = vd->GetBounds();
 	fluo::Vector vv = mp2 - mp1;
 	vv.normalize();
 	fluo::Point hit;
@@ -104,10 +105,10 @@ double VolumePoint::GetPointVolume(
 	double value = 0.0;
 	std::vector<fluo::Plane*> *planes = 0;
 	double mspc = 1.0;
-	if (m_vd->GetSampleRate() > 0.0)
-		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / m_vd->GetSampleRate();
-	if (m_vd->GetVR())
-		planes = m_vd->GetVR()->get_planes();
+	if (vd->GetSampleRate() > 0.0)
+		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / vd->GetSampleRate();
+	if (vd->GetVR())
+		planes = vd->GetVR()->get_planes();
 	int counter = 0;//counter to determine if the ray casting has run
 	if (bbox.intersect(mp1, vv, hit))
 	{
@@ -115,7 +116,7 @@ double VolumePoint::GetPointVolume(
 		flvr::TextureBrick* hit_brick = 0;
 		unsigned long long vindex;
 		int data_nx, data_ny, data_nz;
-		if (m_vd->isBrxml())
+		if (vd->isBrxml())
 		{
 			data_nx = tex->nx();
 			data_ny = tex->ny();
@@ -167,7 +168,7 @@ double VolumePoint::GetPointVolume(
 				zz = zz == resz ? resz - 1 : zz;
 
 				//if it's multiresolution, get brick first
-				if (m_vd->isBrxml())
+				if (vd->isBrxml())
 				{
 					vindex = (unsigned long long)data_nx*(unsigned long long)data_ny*
 						(unsigned long long)zz + (unsigned long long)data_nx*
@@ -187,17 +188,17 @@ double VolumePoint::GetPointVolume(
 						jj = yy - hit_brick->oy();
 						kk = zz - hit_brick->oz();
 						if (use_transf)
-							value = m_vd->GetTransferedValue(ii, jj, kk, hit_brick);
+							value = vd->GetTransferedValue(ii, jj, kk, hit_brick);
 						else
-							value = m_vd->GetOriginalValue(ii, jj, kk, hit_brick);
+							value = vd->GetOriginalValue(ii, jj, kk, hit_brick);
 					}
 				}
 				else
 				{
 					if (use_transf)
-						value = m_vd->GetTransferedValue(xx, yy, zz);
+						value = vd->GetTransferedValue(xx, yy, zz);
 					else
-						value = m_vd->GetOriginalValue(xx, yy, zz);
+						value = vd->GetOriginalValue(xx, yy, zz);
 				}
 
 				if (mode == 1)
@@ -215,7 +216,7 @@ double VolumePoint::GetPointVolume(
 					//accumulate
 					if (value > 0.0)
 					{
-						alpha = 1.0 - pow(fluo::Clamp(1.0 - value, 0.0, 1.0), m_vd->GetSampleRate());
+						alpha = 1.0 - pow(fluo::Clamp(1.0 - value, 0.0, 1.0), vd->GetSampleRate());
 						max_int += alpha * (1.0 - max_int);
 						//mp = Point((xx + 0.5)*spcx, (yy + 0.5)*spcy, (zz + 0.5)*spcz);
 						ip = fluo::Point(xx, yy, zz);
@@ -260,24 +261,25 @@ double VolumePoint::GetPointVolumeBox(
 	bool calc_mats,
 	fluo::Point &mp)
 {
-	RenderView* view = glbin_current.render_view;
-	if (!m_vd)
-		m_vd = glbin_current.vol_data;
-	if (!view || !m_vd)
+	auto view = glbin_current.render_view.lock();
+	auto vd = m_vd.lock();
+	if (!vd)
+		vd = glbin_current.vol_data.lock();
+	if (!view || !vd)
 		return -1.0;
 	int nx = view->GetGLSize().w();
 	int ny = view->GetGLSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	std::vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
 	fluo::Transform mv;
 	fluo::Transform p;
 	glm::mat4 mv_temp;
-	fluo::Transform *tform = m_vd->GetTexture()->transform();
+	fluo::Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 
@@ -366,17 +368,18 @@ double VolumePoint::GetPointVolumeBox2(
 	double mx, double my,//mouse coord on screen
 	fluo::Point &p1, fluo::Point &p2)
 {
-	RenderView* view = glbin_current.render_view;
-	if (!m_vd)
-		m_vd = glbin_current.vol_data;
-	if (!view || !m_vd)
+	auto view = glbin_current.render_view.lock();
+	auto vd = m_vd.lock();
+	if (!vd)
+		vd = glbin_current.vol_data.lock();
+	if (!view || !vd)
 		return -1.0;
 	int nx = view->GetGLSize().w();
 	int ny = view->GetGLSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	std::vector<fluo::Plane*> *planes = m_vd->GetVR()->get_planes();
+	std::vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
 	if (planes->size() != 6)
 		return -1.0;
 
@@ -385,7 +388,7 @@ double VolumePoint::GetPointVolumeBox2(
 	//Transformation
 	//HandleCamera();
 	glm::mat4 mv_temp = view->GetObjectMat();
-	fluo::Transform *tform = m_vd->GetTexture()->transform();
+	fluo::Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 	glm::mat4 mv_mat2 = glm::mat4(
@@ -472,10 +475,11 @@ double VolumePoint::GetPointPlane(
 	fluo::Point* planep, bool calc_mats,
 	fluo::Point &mp)
 {
-	RenderView* view = glbin_current.render_view;
-	if (!m_vd)
-		m_vd = glbin_current.vol_data;
-	if (!view || !m_vd)
+	auto view = glbin_current.render_view.lock();
+	auto vd = m_vd.lock();
+	if (!vd)
+		vd = glbin_current.vol_data.lock();
+	if (!view || !vd)
 		return -1.0;
 	int nx = view->GetGLSize().w();
 	int ny = view->GetGLSize().h();

@@ -572,29 +572,27 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 
 	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(m_skip_brick);
-	if (auto reader = m_reader.lock())
+	auto reader = m_reader.lock();
+	if (reader && reader->GetType() == READER_BRKXML_TYPE)
 	{
-		if (reader->GetType() == READER_BRKXML_TYPE)
+		auto breader = std::dynamic_pointer_cast<BRKXMLReader>(reader);
+		std::vector<flvr::Pyramid_Level> pyramid;
+		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>> fnames;
+		int ftype = BRICK_FILE_TYPE_NONE;
+
+		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
+		m_tex->SetCopyableLevel(breader->GetCopyableLevel());
+
+		int lmnum = breader->GetLandmarkNum();
+		for (int j = 0; j < lmnum; j++)
 		{
-			auto breader = std::dynamic_pointer_cast<BRKXMLReader>(reader);
-			std::vector<flvr::Pyramid_Level> pyramid;
-			std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>> fnames;
-			int ftype = BRICK_FILE_TYPE_NONE;
-
-			breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
-			m_tex->SetCopyableLevel(breader->GetCopyableLevel());
-
-			int lmnum = breader->GetLandmarkNum();
-			for (int j = 0; j < lmnum; j++)
-			{
-				std::wstring name;
-				VD_Landmark vlm;
-				breader->GetLandmark(j, vlm.name, vlm.x, vlm.y, vlm.z, vlm.spcx, vlm.spcy, vlm.spcz);
-				m_landmarks.push_back(vlm);
-				breader->GetMetadataID(m_metadata_id);
-			}
-			if (!m_tex->buildPyramid(pyramid, fnames, breader->isURL())) return 0;
+			std::wstring name;
+			VD_Landmark vlm;
+			breader->GetLandmark(j, vlm.name, vlm.x, vlm.y, vlm.z, vlm.spcx, vlm.spcy, vlm.spcz);
+			m_landmarks.push_back(vlm);
+			breader->GetMetadataID(m_metadata_id);
 		}
+		if (!m_tex->buildPyramid(pyramid, fnames, breader->isURL())) return 0;
 	}
 	else
 	{
@@ -2598,7 +2596,8 @@ void VolumeData::ComputeHistogram(bool set_prog_func)
 		histogram.SetBins(bins);
 		histogram.Compute();
 		m_hist = histogram.GetHistogram();
-		m_hist_dirty = false;
+		if (m_hist.size())
+			m_hist_dirty = false;
 	}
 }
 
@@ -2606,6 +2605,8 @@ bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
 {
 	ComputeHistogram(true);
 	int bins = static_cast<int>(m_hist.size() - 1);
+	if (bins <= 0)
+		return false;
 	int win = 4;//half window size
 	data.resize(bins * 3, 0);
 	fluo::HSVColor hsv(m_color);
@@ -4992,7 +4993,6 @@ void DataGroup::SetSyncAll(int i, bool val)
 
 void DataGroup::ResetSync()
 {
-	int i;
 	int cnt = 0;
 	bool r_v = false;
 	bool g_v = false;
@@ -5547,8 +5547,8 @@ void CurrentObjects::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 	ann_data.reset();
 	if (auto view_ptr = render_view.lock())
 		view_ptr->m_cur_vol = vd;
-	glbin_vol_selector.SetVolume(vd.get());
-	glbin_comp_generator.SetVolumeData(vd.get());
+	glbin_vol_selector.SetVolume(vd);
+	glbin_comp_generator.SetVolumeData(vd);
 }
 
 void CurrentObjects::SetMeshData(const std::shared_ptr<MeshData>& md)
@@ -6027,6 +6027,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		glbin_settings.m_micro_blend = true;
 		vc.insert(gstMicroBlendEnable);
 	}
+	vc.insert(gstVolumePropPanel);
 	//update histogram
 	vc.insert(gstUpdateHistogram);
 
