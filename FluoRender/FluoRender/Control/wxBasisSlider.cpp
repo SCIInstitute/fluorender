@@ -258,3 +258,15 @@ void wxBasisSlider::Scroll(int val)
 	ProcessWindowEvent(e);
 	wxPostEvent(parent_, e);
 }
+
+wxColour wxBasisSlider::toGray(const wxColour& color)
+{
+	unsigned char r = color.Red();
+	unsigned char g = color.Green();
+	unsigned char b = color.Blue();
+
+	// Calculate grayscale using luminance formula
+	unsigned char gray = static_cast<unsigned char>(0.299 * r + 0.587 * g + 0.114 * b);
+
+	return wxColour(gray, gray, gray, color.Alpha()); // Preserve alpha if needed
+}

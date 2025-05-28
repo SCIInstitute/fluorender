@@ -186,7 +186,7 @@ private:
 	std::vector<std::shared_ptr<RenderView>> m_views;
 };
 
-class VolumeData : public TreeLayer
+class VolumeData : public TreeLayer, public std::enable_shared_from_this<VolumeData>
 {
 public:
 	VolumeData();

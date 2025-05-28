@@ -43,7 +43,8 @@ DEALINGS IN THE SOFTWARE.
 KernelExecutor::KernelExecutor()
 	: Progress(),
 	m_duplicate(true),
-	m_repeat(0)
+	m_repeat(0),
+	m_file_index(0)
 {
 }
 

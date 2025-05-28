@@ -77,21 +77,23 @@ OclDlg::OclDlg(MainFrame* frame) :
 
 	//controls
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Controls:",
+	st = new wxStaticText(this, 0, "Execute:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_execute_btn = new wxButton(this, wxID_ANY, "Run",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)));
-	m_iterations_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_iterations_txt = new wxTextCtrl(this, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_execute_btn->Bind(wxEVT_BUTTON, &OclDlg::OnExecuteBtn, this);
-	m_iterations_sldr->Bind(wxEVT_SCROLL_CHANGED, &OclDlg::OnIterationsChange, this);
-	m_iterations_txt->Bind(wxEVT_TEXT, &OclDlg::OnIterationsEdit, this);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_execute_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
+	st = new wxStaticText(this, 0, "Iteration");
+	m_iterations_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_iterations_txt = new wxTextCtrl(this, wxID_ANY, "1",
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_iterations_sldr->Bind(wxEVT_SCROLL_CHANGED, &OclDlg::OnIterationsChange, this);
+	m_iterations_txt->Bind(wxEVT_TEXT, &OclDlg::OnIterationsEdit, this);
+	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_iterations_sldr, 1, wxEXPAND);
 	sizer_2->Add(m_iterations_txt, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
@@ -109,7 +111,8 @@ OclDlg::OclDlg(MainFrame* frame) :
 	m_kernel_list->InsertColumn(0, itemCol);
 	itemCol.SetText("Kernel Files");
 	m_kernel_list->InsertColumn(1, itemCol);
-	m_kernel_list->SetColumnWidth(0, 100);
+	m_kernel_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_kernel_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 	//stc
 	m_kernel_edit_stc = new wxStyledTextCtrl(
 		topSplitter, wxID_ANY,
@@ -199,7 +202,8 @@ void OclDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstKernelList))
 		UpdateKernelList();
 
-		
+	if (update_all || FOUND_VALUE(gstKernelListSelect))
+		UpdateKernelListSelect();
 }
 
 void OclDlg::UpdateKernelList()
@@ -228,6 +232,17 @@ void OclDlg::UpdateKernelList()
 		long tmp = m_kernel_list->InsertItem(i-1, str, 0);
 		m_kernel_list->SetItem(tmp, 1, it);
 	}
+	m_kernel_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_kernel_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
+}
+
+void OclDlg::UpdateKernelListSelect()
+{
+	int idx = glbin_kernel_executor.GetFileIndex();
+	if (idx >= 0)
+		m_kernel_list->SetItemState(idx,
+			wxLIST_STATE_SELECTED,
+			wxLIST_STATE_SELECTED);
 }
 
 void OclDlg::Execute()
@@ -394,6 +409,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 		//get cl code
 		wxString code = m_kernel_edit_stc->GetText();
 		glbin_kernel_executor.SetCode(code.ToStdString());
+		glbin_kernel_executor.SetFileIndex(item);
 	}
 }
 

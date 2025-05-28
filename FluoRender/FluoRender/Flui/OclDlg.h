@@ -42,6 +42,7 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateKernelList();
+	void UpdateKernelListSelect();
 	void Execute();
 
 private:

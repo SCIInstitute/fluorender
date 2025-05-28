@@ -96,6 +96,9 @@ protected:
 	virtual void replace(double t) = 0;
 	virtual void push(double t) = 0;
 	virtual void update() = 0;
+
+	//color conversion
+	wxColour toGray(const wxColour& color);
 };
 
 #endif//_WXBASISSLIDER_H_

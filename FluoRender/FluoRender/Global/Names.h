@@ -779,6 +779,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstNrHdrB "nr hdr b"
 //ocl kernel
 #define gstKernelList "kernel list"
+#define gstKernelListSelect "kernel list select"
 //script break
 #define gstScriptBreakTitle "script break title"
 #define gstScriptBreakInfo "script break info"

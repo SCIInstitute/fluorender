@@ -55,6 +55,9 @@ public:
 
 	std::string GetCode() { return m_code; }
 	int GetRepeat() { return m_repeat; }
+	std::wstring GetFile() { return m_file; }
+	void SetFileIndex(int val) { m_file_index = val; }
+	int GetFileIndex() { return m_file_index; }
 
 	bool Execute();
 
@@ -66,6 +69,9 @@ private:
 
 	std::string m_code;
 	std::wstring m_message;
+
+	std::wstring m_file;//current file
+	int m_file_index;//index of current file in the kernel list
 
 	bool ExecuteKernel(VolumeData* vd, VolumeData* vd_r);
 	bool ExecuteKernelBrick(flvr::KernelProgram* kernel,

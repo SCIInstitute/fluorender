@@ -91,6 +91,18 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 		height = h - 2 * margin_;
 	}
 
+	wxColour low_color, hi_color;
+	if (enabled_)
+	{
+		low_color = m_low_color;
+		hi_color = m_high_color;
+	}
+	else
+	{
+		low_color = toGray(m_low_color);
+		hi_color = toGray(m_high_color);
+	}
+
 	//draw out of range
 	if (draw_map)
 	{
@@ -113,8 +125,8 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 			//left
 			if (low_val_ > min_val_)
 			{
-				dc.SetPen(m_low_color);
-				dc.SetBrush(m_low_color);
+				dc.SetPen(low_color);
+				dc.SetBrush(low_color);
 				if (horizontal_)
 				{
 					wxPoint p2h[] = {
@@ -139,8 +151,8 @@ void wxMapDoubleSlider::renderNormal(wxDC& dc)
 			//right
 			if (hi_val_ < max_val_)
 			{
-				dc.SetPen(m_high_color);
-				dc.SetBrush(m_high_color);
+				dc.SetPen(hi_color);
+				dc.SetBrush(hi_color);
 				if (horizontal_)
 				{
 					wxPoint p2h[] = {

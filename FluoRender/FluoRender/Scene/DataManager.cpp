@@ -821,9 +821,6 @@ void VolumeData::LoadMask(Nrrd* mask)
 {
 	if (!mask || !m_tex || !m_vr)
 		return;
-	auto vd = glbin_data_manager.GetVolumeData(m_name);
-	if (!vd)
-		return;
 
 	//prepare the texture bricks for the mask
 	m_tex->add_empty_mask();
@@ -836,7 +833,7 @@ void VolumeData::LoadMask(Nrrd* mask)
 	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
 	{
 		flrd::VolumeSampler sampler;
-		sampler.SetInput(vd);
+		sampler.SetInput(shared_from_this());
 		sampler.SetSize(m_res_x, m_res_y, m_res_z);
 		sampler.SetFilter(0);
 		//sampler.SetFilterSize(2, 2, 0);
@@ -1067,9 +1064,6 @@ void VolumeData::LoadLabel(Nrrd* label)
 {
 	if (!label || !m_tex || !m_vr)
 		return;
-	auto vd = glbin_data_manager.GetVolumeData(m_name);
-	if (!vd)
-		return;
 
 	m_tex->add_empty_label();
 	m_tex->set_nrrd(label, m_tex->nlabel());
@@ -1081,7 +1075,7 @@ void VolumeData::LoadLabel(Nrrd* label)
 	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
 	{
 		flrd::VolumeSampler sampler;
-		sampler.SetInput(vd);
+		sampler.SetInput(shared_from_this());
 		sampler.SetSize(m_res_x, m_res_y, m_res_z);
 		sampler.Resize(flrd::SDT_Label, true);
 		//nrrdNuke(label);
@@ -1463,15 +1457,12 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 {
 	if (!m_vr || !m_tex)
 		return;
-	auto vd = glbin_data_manager.GetVolumeData(m_name);
-	if (!vd)
-		return;
 
 	std::shared_ptr<VolumeData> temp;
 	if (bake)
 	{
 		flrd::VolumeBaker baker;
-		baker.SetInput(temp ? temp : vd);
+		baker.SetInput(temp ? temp : shared_from_this());
 		baker.Bake(temp ? true : false);
 		temp = baker.GetResult();
 	}
@@ -1479,7 +1470,7 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 	if (m_resize || crop)
 	{
 		flrd::VolumeSampler sampler;
-		sampler.SetInput(temp ? temp : vd);
+		sampler.SetInput(temp ? temp : shared_from_this());
 		sampler.SetFixSize(fix_size);
 		sampler.SetSize(m_rnx, m_rny, m_rnz);
 		sampler.SetFilter(filter);
