@@ -1283,7 +1283,7 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 	if (!sel_item.IsOk())
 		return;
 
-	m_datatree->SelectItemSilently(sel_item);
+	m_datatree->SelectItem(sel_item);
 
 	wxPoint point = event.GetPosition();
 	// If from keyboard
