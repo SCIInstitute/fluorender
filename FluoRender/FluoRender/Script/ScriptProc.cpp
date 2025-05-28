@@ -1159,22 +1159,34 @@ void ScriptProc::RunOpenCL()
 	std::wstring clname;
 	m_fconfig->Read("clpath", &clname, std::wstring(L""));
 	clname = GetInputFile(clname, L"CL_code");
-	if (clname.empty())
-		return;
 	int repeat = 0;
 	m_fconfig->Read("repeat", &repeat, 0);
-	glbin_kernel_executor.SetRepeat(repeat);
+	std::string code_save;
+	if (!clname.empty())
+	{
+		code_save = glbin_kernel_executor.GetCode();
+		glbin_kernel_executor.LoadCode(clname);
+	}
+	int repeat_save = -1;
+	if (repeat)
+	{
+		repeat_save = glbin_kernel_executor.GetRepeat();
+		glbin_kernel_executor.SetRepeat(repeat);
+	}
 	glbin_kernel_executor.SetDuplicate(true);
 
 	for (auto& it : vlist)
 	{
 		it->GetVR()->clear_tex_current();
-		glbin_kernel_executor.LoadCode(clname);
 		glbin_kernel_executor.SetVolume(it);
 		glbin_kernel_executor.Execute();
 	}
 
-	glbin_kernel_executor.SetRepeat(0);
+	//restore saved settings
+	if (!code_save.empty())
+		glbin_kernel_executor.SetCode(code_save);
+	if (repeat_save > -1)
+		glbin_kernel_executor.SetRepeat(repeat_save);
 }
 
 void ScriptProc::RunCompAnalysis()

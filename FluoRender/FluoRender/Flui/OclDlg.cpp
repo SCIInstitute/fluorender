@@ -33,10 +33,11 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <KernelExecutor.h>
 #include <wxSingleSlider.h>
+#include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/valnum.h>
-#include <compatibility.h>
+#include <wx/splitter.h>
 
 OclDlg::OclDlg(MainFrame* frame) :
 	PropPanel(frame, frame,
@@ -80,40 +81,38 @@ OclDlg::OclDlg(MainFrame* frame) :
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_execute_btn = new wxButton(this, wxID_ANY, "Run",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)));
-	m_execute_n_btn = new wxButton(this, wxID_ANY, "Run N Times",
-		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_iterations_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_iterations_txt = new wxTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_execute_btn->Bind(wxEVT_BUTTON, &OclDlg::OnExecuteBtn, this);
-	m_execute_n_btn->Bind(wxEVT_BUTTON, &OclDlg::OnExecuteNBtn, this);
 	m_iterations_sldr->Bind(wxEVT_SCROLL_CHANGED, &OclDlg::OnIterationsChange, this);
 	m_iterations_txt->Bind(wxEVT_TEXT, &OclDlg::OnIterationsEdit, this);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
 	sizer_2->Add(m_execute_btn, 0, wxALIGN_CENTER);
-	sizer_2->Add(m_execute_n_btn, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_iterations_sldr, 1, wxEXPAND);
 	sizer_2->Add(m_iterations_txt, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 
-	//output
-	m_output_txt = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_READONLY|wxTE_MULTILINE);
+	//splitters
+	wxSplitterWindow* mainSplitter = new wxSplitterWindow(this, wxID_ANY);
+	wxSplitterWindow* topSplitter = new wxSplitterWindow(mainSplitter, wxID_ANY);
 
 	//list
-	m_kernel_list = new wxListCtrl(this, wxID_ANY,
+	m_kernel_list = new wxListCtrl(topSplitter, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(-1, -1)), wxLC_REPORT | wxLC_SINGLE_SEL);
 	m_kernel_list->Bind(wxEVT_LIST_ITEM_SELECTED, &OclDlg::OnKernelListSelected, this);
 	wxListItem itemCol;
-	itemCol.SetText("Kernel Files");
+	itemCol.SetText("No.");
 	m_kernel_list->InsertColumn(0, itemCol);
+	itemCol.SetText("Kernel Files");
+	m_kernel_list->InsertColumn(1, itemCol);
 	m_kernel_list->SetColumnWidth(0, 100);
 	//stc
 	m_kernel_edit_stc = new wxStyledTextCtrl(
-		this, wxID_ANY,
+		topSplitter, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize);
 	wxFont font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	m_kernel_edit_stc->StyleSetFont(wxSTC_STYLE_DEFAULT, font);
@@ -162,12 +161,16 @@ OclDlg::OclDlg(MainFrame* frame) :
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
 
-	//sizer
-	wxBoxSizer *sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_3->Add(m_kernel_list, 0, wxEXPAND);
-	wxStaticText * separator = new wxStaticText(this, 0, "", wxDefaultPosition, FromDIP(wxSize(5, -1)));
-	sizer_3->Add(separator, 0, wxEXPAND);
-	sizer_3->Add(m_kernel_edit_stc, 1, wxEXPAND);
+	//output
+	m_output_txt = new wxTextCtrl(mainSplitter, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_READONLY|wxTE_MULTILINE);
+
+	//top: list and code
+	topSplitter->SplitVertically(m_kernel_list, m_kernel_edit_stc);
+	topSplitter->SetSashGravity(0.2);
+	//vertical split
+	mainSplitter->SplitHorizontally(topSplitter, m_output_txt);
+	mainSplitter->SetSashGravity(0.9); // Optional: top gets more space
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -176,9 +179,7 @@ OclDlg::OclDlg(MainFrame* frame) :
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_3, 4, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(m_output_txt, 1, wxEXPAND);
+	sizerV->Add(mainSplitter, 1, wxEXPAND);
 
 	SetSizer(sizerV);
 	Layout();
@@ -218,10 +219,15 @@ void OclDlg::UpdateKernelList()
 	// Sort the list of files
 	std::sort(list.begin(), list.end());
 
-	for (size_t i = 0; i < list.size(); ++i)
-		m_kernel_list->InsertItem(
-			m_kernel_list->GetItemCount(),
-			list[i]);
+	int i = 0;
+	wxString str;
+	for (auto& it : list)
+	{
+		i++;
+		str = wxString::Format("%d", i);
+		long tmp = m_kernel_list->InsertItem(i-1, str, 0);
+		m_kernel_list->SetItem(tmp, 1, it);
+	}
 }
 
 void OclDlg::Execute()
@@ -237,9 +243,6 @@ void OclDlg::Execute()
 	//if (!executor)
 	//	return;
 
-	//currently, this is expected to be a convolution/filering kernel
-	//get cl code
-	wxString code = m_kernel_edit_stc->GetText();
 
 	//get volume currently selected
 	bool dup = true;
@@ -249,7 +252,6 @@ void OclDlg::Execute()
 	//bool dup = false;
 
 	glbin_kernel_executor.SetVolume(vd);
-	glbin_kernel_executor.SetCode(code.ToStdString());
 	glbin_kernel_executor.SetDuplicate(dup);
 	glbin_kernel_executor.Execute();
 
@@ -283,7 +285,7 @@ void OclDlg::Execute()
 
 	fluo::ValueCollection vc;
 	if (dup)
-		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync });
+		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
 	else
 		vc.insert({ gstNull });
 
@@ -338,28 +340,18 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 			p = p / "CL_code" / fn;
 			fn = p.string();
 			m_kernel_edit_stc->SaveFile(fn);
-			fn = p.stem().string();
-			m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), fn);
+			//fn = p.stem().string();
+			//m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), fn);
+			FluoUpdate({ gstKernelList });
 		}
 	}
 }
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
-	Execute();
-}
-
-void OclDlg::OnExecuteNBtn(wxCommandEvent& event)
-{
-	wxString str = m_iterations_txt->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
-
 	glbin_kernel_executor.SetProgress(0, "Running OpenCL kernel.");
 
-	glbin_kernel_executor.SetRepeat(ival - 1);
 	Execute();
-	glbin_kernel_executor.SetRepeat(0);
 
 	glbin_kernel_executor.SetRange(0, 100);
 	glbin_kernel_executor.SetProgress(0, "");
@@ -379,6 +371,7 @@ void OclDlg::OnIterationsEdit(wxCommandEvent& event)
 	unsigned long ival;
 	str.ToULong(&ival);
 	m_iterations_sldr->ChangeValue(ival);
+	glbin_kernel_executor.SetRepeat(ival - 1);
 }
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)
@@ -389,13 +382,18 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 
 	if (item != -1)
 	{
-		wxString file = m_kernel_list->GetItemText(item);
+		wxString file = m_kernel_list->GetItemText(item, 1);
 		std::filesystem::path p = std::filesystem::current_path();
 		p = p / "CL_code" / (file.ToStdString() + ".cl");
 		file = p.string();
 		m_kernel_edit_stc->LoadFile(file);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->ChangeValue(file);
+
+		//currently, this is expected to be a convolution/filering kernel
+		//get cl code
+		wxString code = m_kernel_edit_stc->GetText();
+		glbin_kernel_executor.SetCode(code.ToStdString());
 	}
 }
 

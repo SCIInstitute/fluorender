@@ -396,6 +396,7 @@ void ListPanel::AddSelectionToView(int vid)
 		glbin_current.SetVolumeData(vd_add);
 		if (view->GetVolMethod() == VOL_METHOD_MULTI)
 			vc.insert(gstUpdateSync);
+		vc.insert(gstVolumePropPanel);
 	}
 		break;
 	case 3://mesh
@@ -406,6 +407,7 @@ void ListPanel::AddSelectionToView(int vid)
 		int chan_num = view->GetAny();
 		view_empty = chan_num > 0 ? false : view_empty;
 		view->AddMeshData(md);
+		vc.insert(gstMeshPropPanel);
 	}
 		break;
 	case 4://annotations
@@ -416,6 +418,7 @@ void ListPanel::AddSelectionToView(int vid)
 		int chan_num = view->GetAny();
 		view_empty = chan_num > 0 ? false : view_empty;
 		view->AddAnnotations(ann);
+		vc.insert(gstAnnotatPropPanel);
 	}
 		break;
 	}
@@ -428,7 +431,7 @@ void ListPanel::AddSelectionToView(int vid)
 		else
 			view->InitView(INIT_BOUNDS | INIT_CENTER);
 	}
-	vc.insert({ gstListCtrl, gstTreeCtrl });
+	vc.insert({ gstListCtrl, gstTreeCtrl, gstCurrentSelect });
 	FluoRefresh(0, vc, { vid });
 }
 

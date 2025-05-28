@@ -4,8 +4,8 @@ tasknum=3
 type=opencl
 time_mode=TM_ALL_PRE_LAST_BOTH
 chan_mode=0
-clpath=gauss_2d.cl
-repeat=1
+clpath=
+repeat=
 [tasks/task1]
 type=save_volume
 time_mode=TM_ALL_PRE_LAST_BOTH

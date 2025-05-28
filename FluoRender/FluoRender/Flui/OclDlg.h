@@ -51,7 +51,6 @@ private:
 	wxButton* m_save_btn;
 	wxButton* m_saveas_btn;
 	wxButton* m_execute_btn;
-	wxButton* m_execute_n_btn;
 	wxSingleSlider* m_iterations_sldr;
 	wxTextCtrl* m_iterations_txt;
 	wxTextCtrl* m_output_txt;
@@ -67,7 +66,6 @@ private:
 	void OnSaveBtn(wxCommandEvent& event);
 	void OnSaveAsBtn(wxCommandEvent& event);
 	void OnExecuteBtn(wxCommandEvent& event);
-	void OnExecuteNBtn(wxCommandEvent& event);
 	void OnIterationsChange(wxScrollEvent& event);
 	void OnIterationsEdit(wxCommandEvent& event);
 	void OnKernelListSelected(wxListEvent& event);

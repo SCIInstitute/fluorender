@@ -53,6 +53,9 @@ public:
 	std::shared_ptr<VolumeData> GetResult(bool pop);
 	std::wstring GetInfo();
 
+	std::string GetCode() { return m_code; }
+	int GetRepeat() { return m_repeat; }
+
 	bool Execute();
 
 private:
