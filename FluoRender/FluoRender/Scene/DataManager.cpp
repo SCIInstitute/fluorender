@@ -620,7 +620,8 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
 		planelist.push_back(plane);
 
-		m_vr = std::make_unique<flvr::VolumeRenderer>(m_tex.get(), planelist);
+		m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
+		m_vr->set_texture(m_tex);
 		m_vr->set_sampling_rate(m_sample_rate);
 		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 		m_vr->set_shading(true);
@@ -666,7 +667,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	}
 
 	if (m_vr)
-		m_vr->set_texture(m_tex.get());
+		m_vr->set_texture(m_tex);
 
 	m_bg_valid = false;
 
@@ -703,7 +704,7 @@ int VolumeData::Replace(VolumeData* data)
 	SetGMScale(data->GetGMScale());
 	SetMinMaxValue(data->GetMinValue(), data->GetMaxValue());
 	if (m_vr)
-		m_vr->set_texture(m_tex.get());
+		m_vr->set_texture(m_tex);
 	else
 		return 0;
 
@@ -794,7 +795,8 @@ void VolumeData::AddEmptyData(int bits,
 	planelist.push_back(plane);
 
 	//create volume renderer
-	m_vr = std::make_unique<flvr::VolumeRenderer>(m_tex.get(), planelist);
+	m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
+	m_vr->set_texture(m_tex);
 	m_vr->set_sampling_rate(m_sample_rate);
 	m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 	m_vr->set_shading(true);

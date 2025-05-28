@@ -54,8 +54,7 @@ namespace flvr
 	class VolumeRenderer : public TextureRenderer
 	{
 	public:
-		VolumeRenderer(Texture* tex,
-			const std::vector<fluo::Plane*> &planes);
+		VolumeRenderer(const std::vector<fluo::Plane*> &planes);
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 

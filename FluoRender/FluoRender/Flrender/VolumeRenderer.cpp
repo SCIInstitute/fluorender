@@ -51,9 +51,9 @@
 
 namespace flvr
 {
-	VolumeRenderer::VolumeRenderer(Texture* tex,
+	VolumeRenderer::VolumeRenderer(
 		const std::vector<fluo::Plane*> &planes)
-		:TextureRenderer(tex),
+		:TextureRenderer(),
 		//scalar scaling factor
 		scalar_scale_(1.0),
 		//gm range
@@ -363,10 +363,14 @@ namespace flvr
 
 	double VolumeRenderer::num_slices_to_rate(int num_slices)
 	{
-		const fluo::Vector diag = tex_->bbox()->diagonal();
-		const fluo::Vector cell_diag(diag.x()/tex_->nx(),
-			diag.y()/tex_->ny(),
-			diag.z()/tex_->nz());
+		auto tex = tex_.lock();
+		if (!tex)
+			return 1;
+
+		const fluo::Vector diag = tex->bbox()->diagonal();
+		const fluo::Vector cell_diag(diag.x()/tex->nx(),
+			diag.y()/tex->ny(),
+			diag.z()/tex->nz());
 		const double dt = diag.length() / num_slices;
 		const double rate = cell_diag.length() / dt;
 
@@ -519,6 +523,10 @@ namespace flvr
 	//darw
 	void VolumeRenderer::eval_ml_mode()
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return;
+
 		//reassess the mask/label mode
 		//0-normal, 1-render with mask, 2-render with mask excluded
 		//3-random color with label, 4-random color with label+mask
@@ -529,7 +537,7 @@ namespace flvr
 			label_ = false;
 			break;
 		case 1:
-			if (tex_->nmask() == -1)
+			if (tex->nmask() == -1)
 			{
 				mask_ = false;
 				ml_mode_ = 0;
@@ -539,7 +547,7 @@ namespace flvr
 			label_ = false;
 			break;
 		case 2:
-			if (tex_->nmask() == -1)
+			if (tex->nmask() == -1)
 			{
 				mask_ = false;
 				ml_mode_ = 0;
@@ -549,7 +557,7 @@ namespace flvr
 			label_ = false;
 			break;
 		case 3:
-			if (tex_->nlabel() == -1)
+			if (tex->nlabel() == -1)
 			{
 				label_ = false;
 				ml_mode_ = 0;
@@ -559,9 +567,9 @@ namespace flvr
 			mask_ = false;
 			break;
 		case 4:
-			if (tex_->nlabel() == -1)
+			if (tex->nlabel() == -1)
 			{
-				if (tex_->nmask()>-1)
+				if (tex->nmask()>-1)
 				{
 					mask_ = true;
 					label_ = false;
@@ -592,20 +600,21 @@ namespace flvr
 		bool orthographic_p,
 		int mode)
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
 
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
 
 		std::vector<TextureBrick*> *bricks = 0;
-		tex_->set_matrices(m_mv_mat2, m_proj_mat);
+		tex->set_matrices(m_mv_mat2, m_proj_mat);
 		if (glbin_settings.m_mem_swap && interactive_)
-			bricks = tex_->get_closest_bricks(
+			bricks = tex->get_closest_bricks(
 			quota_center_, quota_bricks_chan_, true,
 			view_ray, orthographic_p);
 		else
-			bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
+			bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -614,11 +623,11 @@ namespace flvr
 
 		// Set sampling rate based on interaction
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
-		fluo::Vector diag = tex_->bbox()->diagonal();
+		fluo::Vector diag = tex->bbox()->diagonal();
 		fluo::Vector cell_diag(
-			diag.x() / tex_->nx(),
-			diag.y() / tex_->ny(),
-			diag.z() / tex_->nz());
+			diag.x() / tex->nx(),
+			diag.y() / tex->ny(),
+			diag.z() / tex->nz());
 		double dt;
 		if (rate > 0.0)
 		{
@@ -675,7 +684,7 @@ namespace flvr
 		}
 		else if (noise_red_)
 		{
-			sf = CalcScaleFactor(w, h, tex_->nx(), tex_->ny());
+			sf = CalcScaleFactor(w, h, tex->nx(), tex->ny());
 			bbufname = "blend_nr";
 		}
 		else
@@ -719,7 +728,7 @@ namespace flvr
 			(cm_mode &&
 			colormap_proj_>3);
 		shader = glbin_vol_shader_factory.shader(
-			false, tex_->nc(),
+			false, tex->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			grad, ml_mode_, mode_ == RENDER_MODE_MIP,
@@ -745,7 +754,7 @@ namespace flvr
 
 		//spacings
 		double spcx, spcy, spcz;
-		tex_->get_spacings(spcx, spcy, spcz);
+		tex->get_spacings(spcx, spcy, spcz);
 		shader->setLocalParam(5,
 			spcx==0.0?1.0:spcx,
 			spcy==0.0?1.0:spcy,
@@ -812,7 +821,7 @@ namespace flvr
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		fluo::Transform *tform = tex_->transform();
+		fluo::Transform *tform = tex->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_mat2 = glm::mat4(
@@ -841,7 +850,7 @@ namespace flvr
 			}
 
 			TextureBrick* b = (*bricks)[i];
-			if (tex_->isBrxml() && !b->isLoaded())
+			if (tex->isBrxml() && !b->isLoaded())
 			{
 				if (!test_against_view(b->bbox(), !orthographic_p) ||
 					b->get_priority() > 0)
@@ -1032,7 +1041,7 @@ namespace flvr
 					}
 					img_shader->bind();
 				}
-				filter_size_min_ = CalcFilterSize(4, w, h, tex_->nx(), tex_->ny(), sfactor_);
+				filter_size_min_ = CalcFilterSize(4, w, h, tex->nx(), tex->ny(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
 
 				draw_view_quad();
@@ -1067,7 +1076,7 @@ namespace flvr
 
 			if (noise_red_ && cm_mode !=2)
 			{
-				filter_size_shp_ = CalcFilterSize(3, w, h, tex_->nx(), tex_->ny(), sfactor_);
+				filter_size_shp_ = CalcFilterSize(3, w, h, tex->nx(), tex->ny(), sfactor_);
 				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
 			}
 
@@ -1093,17 +1102,21 @@ namespace flvr
 
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return;
+
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
 
 		glEnable(GL_DEPTH_TEST);
-		std::vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray, orthographic_p);
+		std::vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 
 		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
-		fluo::Vector diag = tex_->bbox()->diagonal();
-		fluo::Vector cell_diag(diag.x()/tex_->nx(),
-			diag.y()/tex_->ny(),
-			diag.z()/tex_->nz());
+		fluo::Vector diag = tex->bbox()->diagonal();
+		fluo::Vector cell_diag(diag.x()/tex->nx(),
+			diag.y()/tex->ny(),
+			diag.z()/tex->nz());
 		double dt;
 		int num_slices;
 		if (rate > 0.0)
@@ -1144,7 +1157,7 @@ namespace flvr
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		fluo::Transform *tform = tex_->transform();
+		fluo::Transform *tform = tex->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_mat2 = glm::mat4(
@@ -1189,12 +1202,16 @@ namespace flvr
 		double scl_translate, double w2d, double bins, int order,
 		bool orthographic_p, bool estimate)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return;
+
 		if (estimate && type==0)
 			est_thresh_ = 0.0;
 		bool use_2d = tex_2d_weight1_&&
 			tex_2d_weight2_;
 
-		std::vector<TextureBrick*> *bricks = tex_->get_bricks();
+		std::vector<TextureBrick*> *bricks = tex->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -1245,7 +1262,7 @@ namespace flvr
 
 		//spacings
 		double spcx, spcy, spcz;
-		tex_->get_spacings(spcx, spcy, spcz);
+		tex->get_spacings(spcx, spcy, spcz);
 		seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
@@ -1281,7 +1298,7 @@ namespace flvr
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		fluo::Transform *tform = tex_->transform();
+		fluo::Transform *tform = tex->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_mat2 = glm::mat4(
@@ -1420,11 +1437,17 @@ namespace flvr
 	//for multibrick, copy border to continue diffusion
 	void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return;
+
 #ifdef _DARWIN
 		return;
 #endif
+
 		if (!b || !btex || !order)
 			return;
+
 		TextureBrick* nb;//neighbor brick
 		unsigned int nid;//neighbor id
 		unsigned int bid = b->get_id();
@@ -1434,10 +1457,10 @@ namespace flvr
 		if (order == 2)
 		{
 			//negx
-			nid = tex_->negxid(bid);
+			nid = tex->negxid(bid);
 			if (nid != bid)
 			{
-				nb = tex_->get_brick(nid);
+				nb = tex->get_brick(nid);
 				if (nb && nb->is_mask_act())
 				{
 					nbnx = nb->nx();
@@ -1451,10 +1474,10 @@ namespace flvr
 				}
 			}
 			//negy
-			nid = tex_->negyid(bid);
+			nid = tex->negyid(bid);
 			if (nid != bid)
 			{
-				nb = tex_->get_brick(nid);
+				nb = tex->get_brick(nid);
 				if (nb && nb->is_mask_act())
 				{
 					nbny = nb->ny();
@@ -1468,10 +1491,10 @@ namespace flvr
 				}
 			}
 			//negz
-			nid = tex_->negzid(bid);
+			nid = tex->negzid(bid);
 			if (nid != bid)
 			{
-				nb = tex_->get_brick(nid);
+				nb = tex->get_brick(nid);
 				if (nb && nb->is_mask_act())
 				{
 					nbnz = nb->nz();
@@ -1488,10 +1511,10 @@ namespace flvr
 		else
 		{
 			//posx
-			nid = tex_->posxid(bid);
+			nid = tex->posxid(bid);
 			if (nid != bid)
 			{
-				nb = tex_->get_brick(nid);
+				nb = tex->get_brick(nid);
 				if (nb && nb->is_mask_act())
 				{
 					nbtex = load_brick_mask(nb);
@@ -1504,10 +1527,10 @@ namespace flvr
 				}
 			}
 			//posy
-			nid = tex_->posyid(bid);
+			nid = tex->posyid(bid);
 			if (nid != bid)
 			{
-				nb = tex_->get_brick(nid);
+				nb = tex->get_brick(nid);
 				if (nb && nb->is_mask_act())
 				{
 					nbtex = load_brick_mask(nb);
@@ -1520,10 +1543,10 @@ namespace flvr
 				}
 			}
 			//posz
-			nid = tex_->poszid(bid);
+			nid = tex->poszid(bid);
 			if (nid != bid)
 			{
-				nb = tex_->get_brick(nid);
+				nb = tex->get_brick(nid);
 				if (nb && nb->is_mask_act())
 				{
 					nbtex = load_brick_mask(nb);
@@ -1541,6 +1564,10 @@ namespace flvr
 	double VolumeRenderer::calc_hist_3d(GLuint data_id, GLuint mask_id,
 		size_t brick_x, size_t brick_y, size_t brick_z)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return 0;
+
 		double result = 0.0;
 		int kernel_index = -1;
 		KernelProgram* kernel = glbin_vol_kernel_factory.kernel(KERNEL_HIST_3D);
@@ -1551,11 +1578,11 @@ namespace flvr
 			kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
 			kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, mask_id);
 			unsigned int hist_size = 64;
-			if (tex_ && tex_->get_nrrd(0))
+			if (tex->get_nrrd(0))
 			{
-				if (tex_->get_nrrd(0)->type == nrrdTypeUChar)
+				if (tex->get_nrrd(0)->type == nrrdTypeUChar)
 					hist_size = 64;
-				else if (tex_->get_nrrd(0)->type == nrrdTypeUShort)
+				else if (tex->get_nrrd(0)->type == nrrdTypeUShort)
 					hist_size = 1024;
 			}
 			float* hist = new float[hist_size]();
@@ -1590,25 +1617,38 @@ namespace flvr
 	//calculation
 	void VolumeRenderer::calculate(int type, VolumeRenderer *vr_a, VolumeRenderer *vr_b)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return;
+
 		//sync sorting
 		fluo::Ray view_ray(fluo::Point(0.802,0.267,0.534), fluo::Vector(0.802,0.267,0.534));
-		tex_->set_sort_bricks();
-		std::vector<TextureBrick*> *bricks = tex_->get_sorted_bricks(view_ray);
+		tex->set_sort_bricks();
+		std::vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
 		if (!bricks || bricks->size() == 0)
 			return;
 		std::vector<TextureBrick*> *bricks_a = 0;
 		std::vector<TextureBrick*> *bricks_b = 0;
 
-		bricks_a = vr_a->tex_->get_bricks();
+		std::shared_ptr<Texture> tex_a, tex_b;
 		if (vr_a)
 		{
-			vr_a->tex_->set_sort_bricks();
-			bricks_a = vr_a->tex_->get_sorted_bricks(view_ray);
+			tex_a = vr_a->tex_.lock();
+			if (tex_a)
+			{
+				bricks_a = tex_a->get_bricks();
+				tex_a->set_sort_bricks();
+				bricks_a = tex_a->get_sorted_bricks(view_ray);
+			}
 		}
 		if (vr_b)
 		{
-			vr_b->tex_->set_sort_bricks();
-			bricks_b = vr_b->tex_->get_sorted_bricks(view_ray);
+			tex_b = vr_b->tex_.lock();
+			if (tex_b)
+			{
+				tex_b->set_sort_bricks();
+				bricks_b = tex_b->get_sorted_bricks(view_ray);
+			}
 		}
 
 		glActiveTexture(GL_TEXTURE0);
@@ -1637,8 +1677,8 @@ namespace flvr
 			type == 8)
 			cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
 				vr_b ? vr_b->get_scalar_scale() : 1.0,
-				(vr_a&&vr_a->tex_&&vr_a->tex_->nmask() != -1) ? 1.0 : 0.0,
-				(vr_b&&vr_b->tex_&&vr_b->tex_->nmask() != -1) ? 1.0 : 0.0);
+				(vr_a&&tex_a&&tex_a->nmask() != -1) ? 1.0 : 0.0,
+				(vr_b&&tex_b&&tex_b->nmask() != -1) ? 1.0 : 0.0);
 		else if (type == 4 ||
 			type == 5 ||
 			type == 6 ||
@@ -1709,9 +1749,11 @@ namespace flvr
 	//return the data volume
 	void VolumeRenderer::return_volume()
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		std::vector<TextureBrick*> *bricks = tex_->get_bricks();
+
+		std::vector<TextureBrick*> *bricks = tex->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -1752,13 +1794,15 @@ namespace flvr
 	//return the mask volume
 	void VolumeRenderer::return_mask(int order)
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		std::vector<TextureBrick*> *bricks = tex_->get_bricks();
+
+		std::vector<TextureBrick*> *bricks = tex->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		int c = tex_->nmask();
+		int c = tex->nmask();
 		if (c<0 || c>=TEXTURE_MAX_COMPONENTS)
 			return;
 
@@ -1799,13 +1843,15 @@ namespace flvr
 	//return the label volume
 	void VolumeRenderer::return_label()
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		std::vector<TextureBrick*> *bricks = tex_->get_bricks_id();
+
+		std::vector<TextureBrick*> *bricks = tex->get_bricks_id();
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		int c = tex_->nlabel();
+		int c = tex->nlabel();
 		if (c<0 || c>=TEXTURE_MAX_COMPONENTS)
 			return;
 

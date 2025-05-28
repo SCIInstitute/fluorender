@@ -32,6 +32,7 @@
 #include <Point.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
+#include <memory>
 
 #ifndef __glew_h__
 typedef unsigned int GLenum;
@@ -179,7 +180,7 @@ namespace flvr
 	class TextureRenderer
 	{
 	public:
-		TextureRenderer(Texture* tex);
+		TextureRenderer();
 		TextureRenderer(const TextureRenderer&);
 		virtual ~TextureRenderer();
 
@@ -187,7 +188,7 @@ namespace flvr
 		{ cur_framebuffer_ = cur_framebuffer; }
 
 		//set the texture for rendering
-		void set_texture(Texture* tex);
+		void set_texture(const std::shared_ptr<Texture>& tex);
 		void reset_texture();
 
 		//set blending bits. b>8 means 32bit blending
@@ -275,7 +276,7 @@ namespace flvr
 			TextureBrick* brick;  //a brick
 			double dist;      //distance to another brick
 		};
-		Texture *tex_;
+		std::weak_ptr<Texture> tex_;
 		RenderMode mode_;
 		double sampling_rate_;
 		int num_slices_;

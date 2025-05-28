@@ -78,9 +78,8 @@ namespace flvr
 	CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
 
-	TextureRenderer::TextureRenderer(Texture* tex)
+	TextureRenderer::TextureRenderer()
 		:
-		tex_(tex),
 		mode_(RENDER_MODE_NONE),
 		sampling_rate_(1.0),
 		num_slices_(0),
@@ -94,7 +93,8 @@ namespace flvr
 		blend_num_bits_(32),
 		va_slices_(0),
 		va_wirefm_(0),
-		cache_queue_(0)
+		cache_queue_(0),
+		quota_bricks_chan_(0)
 	{
 		if (!ShaderProgram::init())
 			return;
@@ -118,7 +118,8 @@ namespace flvr
 		blend_num_bits_(copy.blend_num_bits_),
 		va_slices_(0),
 		va_wirefm_(0),
-		cache_queue_(0)
+		cache_queue_(0),
+		quota_bricks_chan_(0)
 	{
 		if (!ShaderProgram::init())
 			return;
@@ -139,9 +140,10 @@ namespace flvr
 	}
 
 	//set the texture for rendering
-	void TextureRenderer::set_texture(Texture* tex)
+	void TextureRenderer::set_texture(const std::shared_ptr<Texture>& tex)
 	{
-		if (tex_ != tex)
+		auto old_tex = tex_.lock();
+		if (old_tex != tex)
 		{
 			// new texture, flag existing tex id's for deletion.
 			clear_tex_current();
@@ -153,7 +155,7 @@ namespace flvr
 
 	void TextureRenderer::reset_texture()
 	{
-		tex_ = 0;
+		tex_.reset();
 	}
 
 	//set blending bits. b>8 means 32bit blending
@@ -181,9 +183,11 @@ namespace flvr
 
 	void TextureRenderer::clear_tex_current()
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
+
+		std::vector<TextureBrick*>* bricks = tex->get_bricks();
 		TextureBrick* brick = 0;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
@@ -210,9 +214,11 @@ namespace flvr
 
 	void TextureRenderer::clear_tex_mask(bool skip)
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
+
+		std::vector<TextureBrick*>* bricks = tex->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
@@ -244,9 +250,11 @@ namespace flvr
 
 	void TextureRenderer::clear_tex_label()
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		std::vector<TextureBrick*>* bricks = tex_->get_bricks();
+
+		std::vector<TextureBrick*>* bricks = tex->get_bricks();
 		TextureBrick *brick = 0;
 		TextureBrick *locbk = 0;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
@@ -434,7 +442,11 @@ namespace flvr
 
 	fluo::Ray TextureRenderer::compute_view()
 	{
-		fluo::Transform *field_trans = tex_->transform();
+		auto tex = tex_.lock();
+		if (!tex)
+			return fluo::Ray();
+
+		fluo::Transform *field_trans = tex->transform();
 		double mvmat[16] =
 		{ m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
 		 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
@@ -452,7 +464,11 @@ namespace flvr
 
 	fluo::Ray TextureRenderer::compute_snapview(double snap)
 	{
-		fluo::Transform *field_trans = tex_->transform();
+		auto tex = tex_.lock();
+		if (!tex)
+			return fluo::Ray();
+
+		fluo::Transform *field_trans = tex->transform();
 		double mvmat[16] =
 		{ m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
 		 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
@@ -496,10 +512,14 @@ namespace flvr
 
 	double TextureRenderer::compute_rate_scale(const fluo::Vector& v)
 	{
-		double basen = std::min(tex_->nx(), std::min(tex_->ny(), tex_->nz()));
-		fluo::Vector n(double(tex_->nx() / basen),
-			double(tex_->ny() / basen),
-			double(tex_->nz() / basen));
+		auto tex = tex_.lock();
+		if (!tex)
+			return 0;
+
+		double basen = std::min(tex->nx(), std::min(tex->ny(), tex->nz()));
+		fluo::Vector n(double(tex->nx() / basen),
+			double(tex->ny() / basen),
+			double(tex->nz() / basen));
 
 		double e = 0.0001;
 		double a, b, c;
@@ -602,6 +622,10 @@ namespace flvr
 	GLint TextureRenderer::load_brick(TextureBrick* brick,
 		GLint filter, bool compression, int unit, int mode, int toffset)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return 0;
+
 		GLint result = -1;
 		int c = 0;
 		int tn = 0;
@@ -619,7 +643,7 @@ namespace flvr
 		else
 			raw_data = brick->tex_data(c);
 
-		if (!tex_->isBrxml() &&
+		if (!tex->isBrxml() &&
 			(!brick || !raw_data))
 			return 0;
 		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
@@ -689,7 +713,7 @@ namespace flvr
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 			}
-			else if (tex_->isBrxml())
+			else if (tex->isBrxml())
 			{
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
 				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
@@ -731,7 +755,7 @@ namespace flvr
 
 				if (glTexImage3D)
 				{
-					if (tex_->isBrxml())
+					if (tex->isBrxml())
 					{
 						if (load_on_main_thread_)
 						{
@@ -766,7 +790,7 @@ namespace flvr
 								}
 							}
 
-							FileLocInfo *finfo = tex_->GetFileName(brick->getID());
+							FileLocInfo *finfo = tex->GetFileName(brick->getID());
 							void *texdata = brick->tex_data_brk(c, finfo);
 							if (texdata)
 							{
@@ -1343,9 +1367,13 @@ namespace flvr
 		GLenum tex_type,
 		GLenum format)
 	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return;
+
 		if (ShaderProgram::no_tex_unpack_)
 		{
-			if (tex_->get_brick_num() > 1)
+			if (tex->get_brick_num() > 1)
 			{
 				unsigned long long mem_size = (unsigned long long)nx*
 					(unsigned long long)ny*(unsigned long long)nz*nb;
@@ -1410,13 +1438,15 @@ namespace flvr
 	//Texture
 	void TextureRenderer::clear_brick_buf()
 	{
-		if (!tex_)
+		auto tex = tex_.lock();
+		if (!tex)
 			return;
-		int cur_lv = tex_->GetCurLevel();
-		for (size_t lv = 0; static_cast<long long>(lv) < static_cast<long long>(tex_->GetLevelNum()); lv++)
+
+		int cur_lv = tex->GetCurLevel();
+		for (size_t lv = 0; static_cast<long long>(lv) < static_cast<long long>(tex->GetLevelNum()); lv++)
 		{
-			tex_->setLevel(static_cast<int>(lv));
-			std::vector<TextureBrick *> *bs = tex_->get_bricks();
+			tex->setLevel(static_cast<int>(lv));
+			std::vector<TextureBrick *> *bs = tex->get_bricks();
 			for (size_t i = 0; i < bs->size(); i++)
 			{
 				if ((*bs)[i]->isLoaded()) {
@@ -1426,7 +1456,7 @@ namespace flvr
 			}
 			rearrangeLoadedBrkVec();//tex_
 		}
-		tex_->setLevel(cur_lv);
+		tex->setLevel(cur_lv);
 	}
 
 } // namespace flvr
