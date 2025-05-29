@@ -282,7 +282,6 @@ void MovieMaker::SetRendering(bool rewind)
 	}
 	if (m_running)
 	{
-		view->SetInteractive(false);
 		m_frame->UpdateProps({
 			gstMovProgSlider,
 			gstCurrentFrame,
@@ -969,7 +968,6 @@ bool MovieMaker::Action()
 	//	!flvr::TextureRenderer::get_done_update_loop())
 	//{
 	//	if (!m_view) return;
-	//	m_view->SetInteractive(false);
 	//	m_view->RefreshGL(39, false, false);
 	//	return;
 	//}

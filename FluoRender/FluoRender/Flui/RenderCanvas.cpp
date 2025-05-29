@@ -506,7 +506,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Show();
 		}
 		if (auto view_ptr = m_render_view.lock())
-			view_ptr->RefreshGL(40);
+			view_ptr->RefreshGL(2);
 	}
 }
 

@@ -41,17 +41,17 @@ public:
 	void SetModal(bool bval = true);
 
 public:
-	bool m_mouse_in_clip_plane_panel;
-	bool m_mouse_in_aov_slider;
-	bool m_clip_display;	//show clipping planes in view
+	bool m_mouse_in_clip_plane_panel = false;
+	bool m_mouse_in_aov_slider = false;
+	bool m_clip_display = false;	//show clipping planes in view
 
-	int m_brush_mode_toolbar;	//brush state set from ui
-	int m_brush_mode_shortcut;	//brush state set by shortcut
+	int m_brush_mode_toolbar = false;	//brush state set from ui
+	int m_brush_mode_shortcut = false;	//brush state set by shortcut
 
-	bool m_modal_shown;	//a modal dialog is currently shown, disable keyboard shortcuts
+	bool m_modal_shown = false;	//a modal dialog is currently shown, disable keyboard shortcuts
 
 	std::string m_status_str;		//string to show on main statusbar
 
-	bool m_benchmark;	//benchmark mode
+	bool m_benchmark = false;	//benchmark mode
 };
 #endif//_GLOBALSTATES_H_

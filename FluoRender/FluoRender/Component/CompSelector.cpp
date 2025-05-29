@@ -122,7 +122,6 @@ void ComponentSelector::SelectCompsCanvas(const std::vector<unsigned long long>&
 	else
 		glbin_comp_analyzer.GetCelpFromIds(cl, ids);
 	view->SetCellList(cl);
-	view->SetInteractive(false);
 	//view->RefreshGL(39);
 }
 

@@ -142,7 +142,7 @@ public:
 	wxGLContext* GetContext();
 
 	//refresh glview
-	void RefreshGL(bool intactive=true, bool start_loop=true);
+	void RefreshGL(bool start_loop=true);
 
 	//bit mask for items to save
 	bool m_default_saved;

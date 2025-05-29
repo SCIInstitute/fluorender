@@ -1665,13 +1665,12 @@ wxGLContext* RenderViewPanel::GetContext()
 		return 0;
 }
 
-void RenderViewPanel::RefreshGL(bool interactive, bool start_loop)
+void RenderViewPanel::RefreshGL(bool start_loop)
 {
 	if (m_render_view)
 	{
 		m_render_view->SetForceClear(true);
-		m_render_view->SetInteractive(interactive);
-		m_render_view->RefreshGL(39, false, start_loop);
+		m_render_view->RefreshGL(0, false, start_loop);
 	}
 }
 

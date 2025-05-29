@@ -32,10 +32,6 @@ DEALINGS IN THE SOFTWARE.
 
 GlobalStates::GlobalStates()
 {
-	m_mouse_in_clip_plane_panel = false;
-	m_mouse_in_aov_slider = false;
-	m_clip_display = false;
-	m_modal_shown = false;
 }
 
 GlobalStates::~GlobalStates()
