@@ -3965,7 +3965,6 @@ bool RenderView::ForceDraw()
 	if (m_resize)
 		m_retain_finalbuffer = false;
 
-	bool intactive = m_interactive;
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
@@ -4018,7 +4017,7 @@ bool RenderView::ForceDraw()
 
 	//draw info
 	if (m_draw_info & INFO_DISP)
-		DrawInfo(nx, ny, intactive);
+		DrawInfo(nx, ny, m_interactive);
 
 	if (m_int_mode == 2 ||
 		m_int_mode == 7)  //painting mode
@@ -4574,7 +4573,7 @@ void RenderView::RefreshGL(int debug_code,
 	bool start_loop,
 	bool lg_changed)
 {
-	//m_interactive = m_idle_interactive || m_mouse_interactive;
+	m_interactive = m_idle_interactive || m_mouse_interactive;
 	//for debugging refresh events
 	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_id, debug_code, m_interactive);
 
@@ -4587,6 +4586,8 @@ void RenderView::RefreshGL(int debug_code,
 	if (m_render_canvas)
 		m_render_canvas->Refresh(erase);
 	//Update();
+	m_idle_interactive = false;
+	m_mouse_interactive = false;
 }
 
 void RenderView::DrawRulers()
@@ -7552,13 +7553,6 @@ void RenderView::DrawVolumes(int peel)
 			flvr::TextureRenderer::reset_update_loop();
 	}
 
-	if (m_interactive)
-	{
-		m_interactive = false;
-		m_clear_buffer = true;
-		RefreshGL(2);
-	}
-
 	//if (TextureRenderer::get_mem_swap())
 	//{
 	//	if (finished_bricks == 0)
@@ -10185,6 +10179,11 @@ void RenderView::GrabRotate(const glm::mat4& pose)
 
 void RenderView::ProcessIdle(IdleState& state)
 {
+	if ((m_idle_interactive ||
+		m_mouse_interactive) &&
+		!m_rot_lock)
+		return;
+
 	state.m_start_loop = true;
 	m_retain_finalbuffer = false;
 
@@ -10675,7 +10674,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerMoveHorizontal(leftx, nx, ny);
-			m_interactive = true;
+			m_idle_interactive = true;
 			m_update_rot_ctr = true;
 			state.m_refresh = true;
 		}
@@ -10684,7 +10683,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerZoomDolly(lefty, nx, ny);
-			m_interactive = true;
+			m_idle_interactive = true;
 			state.m_refresh = true;
 			state.m_value_collection.insert(gstScaleFactor);
 		}
@@ -10694,7 +10693,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_request_more = true;
 			glm::mat4 rot_mat = glbin_xr_renderer->GetGrabMatrix();
 			GrabRotate(rot_mat);
-			m_interactive = true;
+			m_idle_interactive = true;
 			state.m_refresh = true;
 			state.m_value_collection.insert(gstCamRotation);
 		}
@@ -10708,7 +10707,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				state.m_request_more = true;
 				ControllerRotate(rightx, righty, nx, ny);
-				m_interactive = true;
+				m_idle_interactive = true;
 				state.m_refresh = true;
 				state.m_value_collection.insert(gstCamRotation);
 			}
@@ -10747,7 +10746,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerMoveHorizontal(leftx * sclr, nx, ny);
-			m_interactive = true;
+			m_idle_interactive = true;
 			m_update_rot_ctr = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
@@ -10757,7 +10756,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerZoomDolly(lefty * sclr, nx, ny);
-			m_interactive = true;
+			m_idle_interactive = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_value_collection.insert(gstScaleFactor);
@@ -10767,7 +10766,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
-			m_interactive = true;
+			m_idle_interactive = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_value_collection.insert(gstCamRotation);
@@ -10777,7 +10776,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerPan(px, py, nx, ny);
-			m_interactive = true;
+			m_idle_interactive = true;
 			m_update_rot_ctr = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
@@ -10803,10 +10802,11 @@ void RenderView::ProcessIdle(IdleState& state)
 
 void RenderView::ProcessMouse(MouseState& state)
 {
-	if (m_interactive && !m_rot_lock)
+	if ((m_idle_interactive ||
+		m_mouse_interactive) &&
+		!m_rot_lock)
 		return;
 
-	m_interactive = false;
 	m_paint_enable = false;
 	m_retain_finalbuffer = false;
 	int nx = m_gl_size.w();
@@ -11142,7 +11142,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 					Q2A();
 
-					m_interactive = true;
+					m_mouse_interactive = true;
 
 					if (glbin.get_linked_rot())
 					{
@@ -11181,7 +11181,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					m_obj_transy += trans.y();
 					m_obj_transz += trans.z();
 
-					m_interactive = true;
+					m_mouse_interactive = true;
 
 					if (m_pin_rot_ctr)
 						m_update_rot_ctr = true;
@@ -11210,7 +11210,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						m_ctrz = ctr.z();
 					}
 
-					m_interactive = true;
+					m_mouse_interactive = true;
 
 					//SetSortBricks();
 					RefreshGL(26);
@@ -11316,7 +11316,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			else
 			{
-				m_interactive = true;
+				m_mouse_interactive = true;
 				if (m_pin_rot_ctr)
 					m_update_rot_ctr = true;
 				double value = wheel * m_scale_factor / 1000.0;
