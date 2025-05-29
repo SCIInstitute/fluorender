@@ -73,6 +73,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <State.h>
 #include <compatibility.h>
+#include <Debug.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <tiffio.h>
@@ -151,6 +152,9 @@ RenderView::RenderView() :
 	m_int_mode(1),
 	m_crop_type(0),
 	m_force_clear(false),
+	//interactive state control
+	m_idle_interactive(false),
+	m_mouse_interactive(false),
 	m_interactive(false),
 	m_clear_buffer(false),
 	m_grow_on(false),
@@ -381,6 +385,8 @@ RenderView::RenderView(RenderView& copy):
 	m_int_mode(copy.m_int_mode),
 	m_crop_type(copy.m_crop_type),
 	m_force_clear(false),
+	m_idle_interactive(false),
+	m_mouse_interactive(false),
 	m_interactive(false),
 	m_clear_buffer(false),
 	m_grow_on(false),
@@ -2547,7 +2553,7 @@ void RenderView::SetCenter()
 
 	//SetSortBricks();
 
-	RefreshGL(20);
+	RefreshGL(3);
 }
 
 double RenderView::Get121ScaleFactor()
@@ -2604,7 +2610,7 @@ void RenderView::SetScale121()
 
 	//SetSortBricks();
 
-	RefreshGL(21);
+	RefreshGL(4);
 
 	if (m_render_view_panel)
 		m_render_view_panel->FluoUpdate({ gstScaleFactor });
@@ -3291,7 +3297,7 @@ void RenderView::ResetMovieAngle()
 	m_capture = false;
 	m_capture_rotat = false;
 
-	RefreshGL(16);
+	RefreshGL(5);
 }
 
 void RenderView::StopMovie()
@@ -4069,7 +4075,7 @@ bool RenderView::ForceDraw()
 		else
 		{
 			m_vr_eye_idx = 1;
-			RefreshGL(99);
+			RefreshGL(6);
 		}
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
@@ -4109,7 +4115,7 @@ bool RenderView::ForceDraw()
 				if (view && view.get() != this)
 				{
 					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-					view->RefreshGL(39);
+					view->RefreshGL(7);
 					if (view->m_render_canvas)
 						view->m_render_canvas->Update();
 				}
@@ -4568,13 +4574,9 @@ void RenderView::RefreshGL(int debug_code,
 	bool start_loop,
 	bool lg_changed)
 {
-	//m_force_clear = force_clear;
-	//m_interactive = interactive;
-
+	//m_interactive = m_idle_interactive || m_mouse_interactive;
 	//for debugging refresh events
-	//DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_render_view_panel->m_id, debug_code, m_interactive);
-	//if (!m_interactive)
-	//	m_frame->UpdateProps();
+	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_id, debug_code, m_interactive);
 
 	m_updating = true;
 	if (start_loop)
@@ -9276,7 +9278,6 @@ void RenderView::PaintStroke()
 	//bind back the window frame buffer
 	BindRenderBuffer();
 	glBlendEquation(GL_FUNC_ADD);
-	//RefreshGL(3);
 }
 
 //show the stroke buffer
@@ -9554,7 +9555,7 @@ void RenderView::ResetEnlarge()
 	else
 		m_gl_size = m_size;
 
-	RefreshGL(19);
+	RefreshGL(9);
 }
 
 void RenderView::SetBrush(int mode, IdleState& state)
@@ -9742,7 +9743,7 @@ bool RenderView::PickMesh(BaseState& state)
 		if (md)
 		{
 			glbin_current.SetMeshData(md);
-			RefreshGL(27);
+			RefreshGL(10);
 			selected = true;
 		}
 	}
@@ -10320,7 +10321,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPush });
 			//wxSizeEvent e;
 			//OnResize(e);
-			RefreshGL(14, false, true, true);
+			RefreshGL(11, false, true, true);
 			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPop });
 			return;
 		}
@@ -10784,18 +10785,17 @@ void RenderView::ProcessIdle(IdleState& state)
 	}
 #endif
 
-
 	if (state.m_refresh)
 	{
 		m_clear_buffer = true;
 		m_updating = true;
-		RefreshGL(15, state.m_erase_background, state.m_start_loop, state.m_looking_glass_changed);
+		RefreshGL(12, state.m_erase_background, state.m_start_loop, state.m_looking_glass_changed);
 		if (state.m_value_collection.empty())
 			state.m_value_collection.insert(gstNull);
 	}
 	else if (glbin_settings.m_inf_loop)
 	{
-		RefreshGL(0, false, true, true);
+		RefreshGL(13, false, true, true);
 		state.m_request_more = true;
 		return;
 	}
@@ -10852,7 +10852,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			if (m_int_mode == 14)
 				glbin_ruler_handler.DeletePoint();
-			RefreshGL(41);
+			RefreshGL(14);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
 
@@ -10880,7 +10880,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_paint_enable = true;
 			m_clear_paint = true;
 			glbin_vol_selector.SetBrushPressPeak(0.0);
-			RefreshGL(26);
+			RefreshGL(15);
 		}
 
 		if (m_int_mode == 10 ||
@@ -10902,7 +10902,7 @@ void RenderView::ProcessMouse(MouseState& state)
 		{
 			//add one point to a ruler
 			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 2);
-			RefreshGL(26);
+			RefreshGL(16);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
 
@@ -10937,7 +10937,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			else
 			{
-				//RefreshGL(27);
 				return;
 			}
 		}
@@ -10949,7 +10948,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			m_int_mode = 4;
 			m_force_clear = true;
-			RefreshGL(27);
+			RefreshGL(17);
 			fluo::ValueCollection vc;
 			vc.insert({ gstSelUndo, gstBrushThreshold });
 			if (glbin_brush_def.m_update_size)
@@ -10964,7 +10963,7 @@ void RenderView::ProcessMouse(MouseState& state)
 		{
 			//add one point to a ruler
 			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
-			RefreshGL(27);
+			RefreshGL(18);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
@@ -10985,7 +10984,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = 8;
 			m_force_clear = true;
-			RefreshGL(27);
+			RefreshGL(19);
 			fluo::ValueCollection vc;
 			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
 			if (glbin_brush_def.m_update_size)
@@ -11010,7 +11009,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.SetEdited(true);
 				glbin_ruler_handler.Relax();
 			}
-			RefreshGL(29);
+			RefreshGL(20);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
@@ -11027,7 +11026,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
 			glbin_ruler_handler.ApplyMagPoint();
 			glbin_ruler_handler.ClearMagStroke();
-			RefreshGL(29);
+			RefreshGL(21);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
@@ -11040,14 +11039,12 @@ void RenderView::ProcessMouse(MouseState& state)
 	if (state.m_mouse_middle_up)
 	{
 		//SetSortBricks();
-		//RefreshGL(28);
 		return;
 	}
 	if (state.m_mouse_right_up)
 	{
 		if (m_int_mode == 1)
 		{
-			//RefreshGL(27);
 			//return;
 		}
 		if (m_int_mode == 5 &&
@@ -11069,7 +11066,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.SetEdited(true);
 				glbin_ruler_handler.Relax();
 			}
-			RefreshGL(29);
+			RefreshGL(22);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
@@ -11083,7 +11080,7 @@ void RenderView::ProcessMouse(MouseState& state)
 		if (m_int_mode == 16)
 		{
 			ChangeCropFrame(mp);
-			RefreshGL(29);
+			RefreshGL(23);
 			glbin_current.mainframe->UpdateProps({ gstCropValues });
 			return;
 		}
@@ -11164,7 +11161,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					}
 
 					if (!hold_old)
-						RefreshGL(30);
+						RefreshGL(24);
 					//DBGPRINT(L"refresh requested\n");
 					if (m_render_view_panel)
 						m_render_view_panel->FluoUpdate({ gstCamRotation });
@@ -11190,7 +11187,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						m_update_rot_ctr = true;
 
 					//SetSortBricks();
-					RefreshGL(31);
+					RefreshGL(25);
 				}
 				if (state.m_mouse_right_is_down)
 				{
@@ -11216,7 +11213,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					m_interactive = true;
 
 					//SetSortBricks();
-					RefreshGL(32);
+					RefreshGL(26);
 
 					if (m_render_view_panel)
 						m_render_view_panel->FluoUpdate({ gstScaleFactor });
@@ -11226,7 +11223,7 @@ void RenderView::ProcessMouse(MouseState& state)
 		else if (m_int_mode == 2 || m_int_mode == 7)
 		{
 			m_paint_enable = true;
-			RefreshGL(33);
+			RefreshGL(27);
 		}
 		else if (m_int_mode == 3)
 		{
@@ -11241,7 +11238,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-					RefreshGL(34);
+					RefreshGL(28);
 				}
 			}
 		}
@@ -11256,7 +11253,7 @@ void RenderView::ProcessMouse(MouseState& state)
 					mp.x(), mp.y());
 			if (rval)
 			{
-				RefreshGL(35);
+				RefreshGL(29);
 				glbin_current.mainframe->UpdateProps({ gstRulerList });
 				glbin_ruler_handler.SetEdited(true);
 			}
@@ -11268,7 +11265,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				//add one point to a ruler
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
-				RefreshGL(27);
+				RefreshGL(30);
 				glbin_current.mainframe->UpdateProps({ gstRulerList });
 			}
 		}
@@ -11278,7 +11275,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
 				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
 			glbin_ruler_handler.ApplyMagStroke();
-			RefreshGL(27);
+			RefreshGL(31);
 		}
 
 		//update mouse position
@@ -11330,7 +11327,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 		}
 
-		RefreshGL(36);
+		RefreshGL(32);
 		return;
 	}
 
@@ -11340,7 +11337,7 @@ void RenderView::ProcessMouse(MouseState& state)
 	{
 		old_mouse_X = mp.x();
 		old_mouse_Y = mp.y();
-		RefreshGL(37);
+		RefreshGL(33);
 		return;
 	}
 
@@ -11353,9 +11350,9 @@ void RenderView::ProcessMouse(MouseState& state)
 
 		m_retain_finalbuffer = true;
 #ifdef _WIN32
-		RefreshGL(38, false, false);
+		RefreshGL(34, false, false);
 #else
-		RefreshGL(38, false, true);
+		RefreshGL(34, false, true);
 #endif
 		return;
 	}

@@ -252,9 +252,6 @@ public:
 	//force clear
 	void SetForceClear(bool val) { m_force_clear = val; }
 	bool GetForceClear() { return m_force_clear; }
-	//intearctive
-	void SetInteractive(bool val) { m_interactive = val; }
-	bool GetInteractive() { return m_interactive; }
 
 	//background color
 	fluo::Color GetBackgroundColor() { return m_bg_color; }
@@ -578,7 +575,6 @@ private:
 					 //16-edit crop frame
 	int m_crop_type;
 	bool m_force_clear;
-	bool m_interactive;
 	bool m_clear_buffer;
 	bool m_grow_on;//flag for grow is currently on for idle events
 	//resizing
@@ -591,6 +587,11 @@ private:
 	GLuint m_cur_framebuffer;
 	//paint buffer
 	bool m_clear_paint;
+
+	//interactive state control
+	bool m_idle_interactive;
+	bool m_mouse_interactive;
+	bool m_interactive;//main control
 
 	//camera controls
 	bool m_persp;
