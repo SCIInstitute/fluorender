@@ -402,6 +402,8 @@ namespace flvr
 			if (m_queue[i].m_tnum == frame)
 			{
 				m_queue[i].Reset();
+				m_queue.erase(m_queue.begin() + i);
+				break;
 			}
 		}
 	}

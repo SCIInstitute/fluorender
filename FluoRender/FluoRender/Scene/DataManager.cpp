@@ -6026,6 +6026,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	vc.insert(gstVolumePropPanel);
 	//update histogram
 	vc.insert(gstUpdateHistogram);
+	vc.insert(gstCurrentSelect);
 
 	m_frame->UpdateProps(vc);
 

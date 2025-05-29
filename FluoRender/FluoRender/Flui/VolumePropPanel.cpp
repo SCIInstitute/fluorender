@@ -130,6 +130,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_minmax_st->SetFontBold();
 	m_minmax_st->SetTintColor(wxColor(255, 150, 200));
 	m_minmax_sldr->SetMode(2);
+	m_minmax_sldr->SetToolTip("Contrast-enhanced intensity distribution");
 	m_minmax_sldr->SetHistoryIndicator(m_minmax_st);
 	//bind events
 	m_minmax_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnMinMaxMF, this);
@@ -258,6 +259,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_thresh_st->SetFontBold();
 	m_thresh_st->SetTintColor(wxColor(180, 255, 150));
 	m_thresh_sldr->SetMode(1);
+	m_thresh_sldr->SetToolTip("Contrast-enhanced intensity distribution");
 	m_thresh_sldr->SetHistoryIndicator(m_thresh_st);
 	//bind events
 	m_thresh_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnThreshMF, this);
