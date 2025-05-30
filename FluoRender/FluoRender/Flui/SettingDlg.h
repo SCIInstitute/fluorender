@@ -143,6 +143,7 @@ private:
 
 private:
 	wxWindow* CreateProjectPage(wxWindow *parent);
+	wxWindow* CreateAutomationPage(wxWindow* parent);
 	wxWindow* CreateRenderingPage(wxWindow *parent);
 	wxWindow* CreatePerformancePage(wxWindow *parent);
 	wxWindow* CreateDisplayPage(wxWindow* parent);
@@ -151,10 +152,6 @@ private:
 
 	//streaming disable/enable
 	void EnableStreaming(bool enable);
-
-	//shadow direction
-	//void SetShadowDir(double deg);
-	//double GetShadowDir();
 
 	//event handling
 	void OnSave(wxCommandEvent& event);
@@ -245,6 +242,8 @@ private:
 	void onJavaRadioButtonFiji(wxCommandEvent& event);
 	//device tree
 	void OnSelChanged(wxTreeEvent& event);
+	//automation
+	void OnAutomationCombo(wxCommandEvent& event);
 };
 
 #endif//_SETTINGDLG_H_

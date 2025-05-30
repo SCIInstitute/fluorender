@@ -70,28 +70,25 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_inverse_slider_chk = new wxCheckBox(page, wxID_ANY,
 		"Invert vertical slider orientation.");
 	m_inverse_slider_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnInverseSliderCheck, this);
-	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
+
+	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
+	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
 	st = new wxStaticText(page, 0, "Set multifunction buttons to:");
 	m_mul_func_btn_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items = {"Sync Channels", "Focused Scroll", "Use Default", "Use ML", "Undo", "Enable/Disable"};
 	m_mul_func_btn_comb->Append(items);
 	m_mul_func_btn_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnMulFuncBtnComb, this);
-	sizer1_1->Add(st);
-	sizer1_1->Add(10, 10);
-	sizer1_1->Add(m_mul_func_btn_comb);
-	sizer1_1->Add(10, 10);
-	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	gridSizer->Add(st, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	gridSizer->Add(m_mul_func_btn_comb, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 	st = new wxStaticText(page, 0, "Project and config file type:");
 	m_config_file_type_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items2 = { "INI", "XML", "JSON" };
 	m_config_file_type_comb->Append(items2);
 	m_config_file_type_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnConfigFileTypeComb, this);
-	sizer1_2->Add(st);
-	sizer1_2->Add(10, 10);
-	sizer1_2->Add(m_config_file_type_comb);
-	sizer1_2->Add(10, 10);
+	gridSizer->Add(st, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	gridSizer->Add(m_config_file_type_comb, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
 	group1->Add(10, 5);
@@ -103,9 +100,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group1->Add(10, 5);
 	group1->Add(m_inverse_slider_chk);
 	group1->Add(10, 5);
-	group1->Add(sizer1_1);
-	group1->Add(10, 5);
-	group1->Add(sizer1_2);
+	group1->Add(gridSizer);
 	group1->Add(10, 5);
 
 	//font
@@ -221,6 +216,40 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
+	return page;
+}
+
+wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
+{
+	wxPanel *page = new wxPanel(parent);
+	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
+
+	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
+	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
+
+	std::vector<std::pair<wxString, wxArrayString>> settings = {
+		{ "Automatically compute histograms for volume data",
+			{ "Enable", "Disable", "Disable for large data" } },
+		{ "Automatically compute information on brush selection",
+			{ "Enable", "Disable", "Disable for large data" } },
+		{ "Automatically generate components for volume data",
+			{ "Enable", "Disable", "Disable for large data" } } };
+
+	int cid = 0;
+	for (const auto& setting : settings)
+	{
+		wxStaticText* label = new wxStaticText(page, wxID_ANY, setting.first);
+		wxComboBox* combo = new wxComboBox(page, cid++, "", wxDefaultPosition, wxDefaultSize, setting.second, wxCB_READONLY);
+		combo->Bind(wxEVT_COMBOBOX, &SettingDlg::OnAutomationCombo, this);
+
+		gridSizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+		gridSizer->Add(combo, 1, wxEXPAND);
+	}
+
+	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
+	sizerV->Add(gridSizer, 1, wxALL | wxEXPAND, 15);
+
+	page->SetSizerAndFit(sizerV);
 	return page;
 }
 
@@ -904,6 +933,7 @@ SettingDlg::SettingDlg(MainFrame *frame) :
 	notebook->AddPage(CreateProjectPage(notebook), "Project");
 	notebook->AddPage(CreateRenderingPage(notebook), "Rendering");
 	notebook->AddPage(CreatePerformancePage(notebook), "Performance");
+	notebook->AddPage(CreateAutomationPage(notebook), "Automation");
 	notebook->AddPage(CreateDisplayPage(notebook), "Display");
 	notebook->AddPage(CreateFormatPage(notebook), "File format");
 	notebook->AddPage(CreateJavaPage(notebook), "ImageJ Link");
@@ -1897,5 +1927,21 @@ void SettingDlg::OnSelChanged(wxTreeEvent& event)
 			pfitem = m_device_tree->GetNextChild(root, pfck);
 			i++;
 		}
+	}
+}
+
+void SettingDlg::OnAutomationCombo(wxCommandEvent& event)
+{
+	int id = event.GetId();
+	int index = event.GetSelection();
+
+	switch (id)
+	{
+	case 0://histogram
+		break;
+	case 1://paint size
+		break;
+	case 3://compo gen
+		break;
 	}
 }
