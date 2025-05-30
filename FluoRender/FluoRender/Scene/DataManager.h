@@ -213,6 +213,7 @@ public:
 	void SetSkipBrick(bool skip);
 	bool GetSkipBrick();
 	//load
+	void ResetVolume();
 	int Load(Nrrd* data, const std::wstring &name, const std::wstring &path);
 	int Replace(Nrrd* data, bool del_tex);
 	int Replace(VolumeData* data);
@@ -262,7 +263,6 @@ public:
 	flvr::VolumeRenderer *GetVR();
 	//texture
 	flvr::Texture* GetTexture();
-	void ResetCacheQueue();
 
 	//bounding box
 	fluo::BBox GetBounds();

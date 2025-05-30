@@ -252,6 +252,8 @@ public:
 	//force clear
 	void SetForceClear(bool val) { m_force_clear = val; }
 	bool GetForceClear() { return m_force_clear; }
+	//interactive
+	void SetInteractive(bool val = false) { m_interactive = val; }
 
 	//background color
 	fluo::Color GetBackgroundColor() { return m_bg_color; }

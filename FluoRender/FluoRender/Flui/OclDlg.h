@@ -70,6 +70,7 @@ private:
 	void OnIterationsChange(wxScrollEvent& event);
 	void OnIterationsEdit(wxCommandEvent& event);
 	void OnKernelListSelected(wxListEvent& event);
+	void OnKernelTextChanged(wxStyledTextEvent& event);
 
 #ifdef _DEBUG
 	void copy_filter(void* data, void* result,

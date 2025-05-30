@@ -1154,8 +1154,6 @@ void ScriptProc::RunOpenCL()
 	if (!GetVolumes(vlist))
 		return;
 
-	//KernelExecutor* executor = m_view->GetKernelExecutor();
-	//if (!executor) return;
 	std::wstring clname;
 	m_fconfig->Read("clpath", &clname, std::wstring(L""));
 	clname = GetInputFile(clname, L"CL_code");

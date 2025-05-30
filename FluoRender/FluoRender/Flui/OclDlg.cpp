@@ -163,6 +163,8 @@ OclDlg::OclDlg(MainFrame* frame) :
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_ARROWDOWN, wxT("BLACK"), wxT("WHITE"));
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
 	m_kernel_edit_stc->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_EMPTY, wxT("BLACK"), wxT("BLACK"));
+	//bind
+	m_kernel_edit_stc->Bind(wxEVT_STC_CHANGE, &OclDlg::OnKernelTextChanged, this);
 
 	//output
 	m_output_txt = new wxTextCtrl(mainSplitter, wxID_ANY, "",
@@ -254,11 +256,6 @@ void OclDlg::Execute()
 
 	m_output_txt->ChangeValue("");
 
-	//KernelExecutor* executor = m_view->GetKernelExecutor();
-	//if (!executor)
-	//	return;
-
-
 	//get volume currently selected
 	bool dup = true;
 	wxString vd_name = vd->GetName();
@@ -266,20 +263,12 @@ void OclDlg::Execute()
 		dup = false;
 	//bool dup = false;
 
+	//get cl code
+	wxString code = m_kernel_edit_stc->GetText();
+	glbin_kernel_executor.SetCode(code.ToStdString());
 	glbin_kernel_executor.SetVolume(vd);
 	glbin_kernel_executor.SetDuplicate(dup);
 	glbin_kernel_executor.Execute();
-
-	/*	Texture* tex = vd->GetTexture();
-	void* result = executor->GetResult()->GetTexture()->get_nrrd(0)->data;
-	int res_x, res_y, res_z;
-	vd->GetResolution(res_x, res_y, res_z);
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	min_filter(tex->get_nrrd(0)->data, result,
-	res_x, res_y, res_z);
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(t2-t1);
-	(*m_output_txt) << "CPU time: " << time_span.count() << " sec.\n";*/
 
 	(*m_output_txt) << glbin_kernel_executor.GetInfo();
 
@@ -405,12 +394,18 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->ChangeValue(file);
 
-		//currently, this is expected to be a convolution/filering kernel
 		//get cl code
 		wxString code = m_kernel_edit_stc->GetText();
 		glbin_kernel_executor.SetCode(code.ToStdString());
 		glbin_kernel_executor.SetFileIndex(item);
 	}
+}
+
+void OclDlg::OnKernelTextChanged(wxStyledTextEvent& event)
+{
+	//get cl code
+	wxString code = m_kernel_edit_stc->GetText();
+	glbin_kernel_executor.SetCode(code.ToStdString());
 }
 
 #ifdef _DEBUG

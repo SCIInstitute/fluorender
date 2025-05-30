@@ -1648,9 +1648,9 @@ void VolumePropPanel::SetGamma(double val, bool notify)
 
 	m_vd->SetGamma(val);
 	if (notify)
-		FluoRefresh(1, { gstGamma3d }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstGamma3d }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetMinMax(double val1, double val2, bool notify)
@@ -1662,9 +1662,9 @@ void VolumePropPanel::SetMinMax(double val1, double val2, bool notify)
 	m_vd->SetHighOffset(val2);
 
 	if (notify)
-		FluoRefresh(1, { gstMinMax }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstMinMax }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetLuminance(double val, bool notify)
@@ -1690,9 +1690,9 @@ void VolumePropPanel::SetLuminance(double val, bool notify)
 	m_color2_btn->SetValue(wxc);
 
 	if (notify)
-		FluoRefresh(1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetAlpha(double val, bool notify)
@@ -1702,9 +1702,9 @@ void VolumePropPanel::SetAlpha(double val, bool notify)
 
 	m_vd->SetAlpha(val);
 	if (notify)
-		FluoRefresh(1, { gstAlpha }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstAlpha }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetLowShading(double val, bool notify)
@@ -1714,9 +1714,9 @@ void VolumePropPanel::SetLowShading(double val, bool notify)
 
 	m_vd->SetLowShading(val);
 	if (notify)
-		FluoRefresh(1, { gstShading }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstShading }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetHiShading(double val, bool notify)
@@ -1726,9 +1726,9 @@ void VolumePropPanel::SetHiShading(double val, bool notify)
 
 	m_vd->SetHiShading(val);
 	if (notify)
-		FluoRefresh(1, { gstShading }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstShading }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetBoundary(double val, bool notify)
@@ -1738,9 +1738,9 @@ void VolumePropPanel::SetBoundary(double val, bool notify)
 
 	m_vd->SetBoundary(val);
 	if (notify)
-		FluoRefresh(1, { gstBoundary }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstBoundary }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
@@ -1758,7 +1758,7 @@ void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
 	if (glbin_brush_def.m_update_colocal)
 		vc.insert(gstColocalResult);
 
-	FluoRefresh(1, vc, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(0, vc, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetShadowInt(double val, bool notify)
@@ -1768,9 +1768,9 @@ void VolumePropPanel::SetShadowInt(double val, bool notify)
 
 	m_vd->SetShadowIntensity(val);
 	if (notify)
-		FluoRefresh(1, { gstShadow }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstShadow }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetShadowDir(double dval, bool notify)
@@ -1778,9 +1778,9 @@ void VolumePropPanel::SetShadowDir(double dval, bool notify)
 	glbin_settings.m_shadow_dir_x = cos(d2r(dval));
 	glbin_settings.m_shadow_dir_y = sin(d2r(dval));
 	if (notify)
-		FluoRefresh(1, { gstShadowDir }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstShadowDir }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetSampleRate(double val, bool notify)
@@ -1790,9 +1790,9 @@ void VolumePropPanel::SetSampleRate(double val, bool notify)
 
 	m_vd->SetSampleRate(val);
 	if (notify)
-		FluoRefresh(1, { gstSampleRate }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstSampleRate }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetColormapVal(double val1, double val2, bool notify)
@@ -1802,9 +1802,9 @@ void VolumePropPanel::SetColormapVal(double val1, double val2, bool notify)
 
 	m_vd->SetColormapValues(val1, val2);
 	if (notify)
-		FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstColormap }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(1, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
 

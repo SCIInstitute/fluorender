@@ -10429,8 +10429,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		if (m_tseq_forward && !state.m_key_mov_forward)
 			m_tseq_forward = false;
 		//backforward
-		if ((!m_tseq_backward && state.m_key_mov_backward) ||
-			(state.m_key_ctrl && state.m_key_mov_play))
+		if ((!m_tseq_backward && state.m_key_mov_backward))
 		{
 			m_tseq_backward = true;
 			int frame = glbin_moviemaker.GetCurrentFrame();
@@ -10441,7 +10440,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 		}
-		if (m_tseq_backward && state.m_key_mov_backward)
+		if (m_tseq_backward && !state.m_key_mov_backward)
 			m_tseq_backward = false;
 
 		//move clip
