@@ -575,7 +575,6 @@ private:
 					 //16-edit crop frame
 	int m_crop_type;
 	bool m_force_clear;
-	bool m_clear_buffer;
 	bool m_grow_on;//flag for grow is currently on for idle events
 	//resizing
 	bool m_resize;

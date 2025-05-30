@@ -154,7 +154,6 @@ RenderView::RenderView() :
 	m_force_clear(false),
 	//interactive state control
 	m_interactive(false),
-	m_clear_buffer(false),
 	m_grow_on(false),
 	//resizing
 	m_resize(false),
@@ -384,7 +383,6 @@ RenderView::RenderView(RenderView& copy):
 	m_crop_type(copy.m_crop_type),
 	m_force_clear(false),
 	m_interactive(false),
-	m_clear_buffer(false),
 	m_grow_on(false),
 	//resizing
 	m_resize(false),
@@ -4569,7 +4567,7 @@ void RenderView::RefreshGL(int debug_code,
 	bool start_loop,
 	bool lg_changed)
 {
-	DBGPRINT(L"View: %d\tRefresh: (%d)\tInteractive: %d\tClear: %d\n", m_id, debug_code, m_interactive, m_clear_buffer);
+	DBGPRINT(L"View: %d\tRefresh: (%d)\tInteractive: %d\n", m_id, debug_code, m_interactive);
 
 	m_updating = true;
 	if (start_loop)
@@ -7321,18 +7319,7 @@ void RenderView::DrawVolumes(int peel)
 		m_force_clear = false;
 		m_load_update = false;
 
-		if (glbin_settings.m_update_order == 1)
-		{
-			if (m_interactive)
-				ClearFinalBuffer();
-			else/* if (m_clear_buffer)*/
-			{
-				ClearFinalBuffer();
-				m_clear_buffer = false;
-			}
-		}
-		else
-			ClearFinalBuffer();
+		ClearFinalBuffer();
 
 		GLboolean bCull = glIsEnabled(GL_CULL_FACE);
 		glDisable(GL_CULL_FACE);
@@ -7547,7 +7534,6 @@ void RenderView::DrawVolumes(int peel)
 	if (m_interactive)
 	{
 		m_interactive = false;
-		m_clear_buffer = true;
 		RefreshGL(2);
 	}
 }
@@ -10298,7 +10284,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		if (state.m_key_refresh)
 		{
 			state.m_set_focus = true;
-			m_clear_buffer = true;
 			m_updating = true;
 			glbin_states.m_status_str = "Forced Refresh";
 			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPush });
@@ -10770,7 +10755,6 @@ void RenderView::ProcessIdle(IdleState& state)
 
 	if (state.m_refresh)
 	{
-		m_clear_buffer = true;
 		m_updating = true;
 		RefreshGL(12, state.m_erase_background, state.m_start_loop, state.m_looking_glass_changed);
 		if (state.m_value_collection.empty())
