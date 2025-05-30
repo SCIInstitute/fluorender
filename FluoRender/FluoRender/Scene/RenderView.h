@@ -589,8 +589,6 @@ private:
 	bool m_clear_paint;
 
 	//interactive state control
-	bool m_idle_interactive;
-	bool m_mouse_interactive;
 	bool m_interactive;//main control
 
 	//camera controls

@@ -153,8 +153,6 @@ RenderView::RenderView() :
 	m_crop_type(0),
 	m_force_clear(false),
 	//interactive state control
-	m_idle_interactive(false),
-	m_mouse_interactive(false),
 	m_interactive(false),
 	m_clear_buffer(false),
 	m_grow_on(false),
@@ -385,8 +383,6 @@ RenderView::RenderView(RenderView& copy):
 	m_int_mode(copy.m_int_mode),
 	m_crop_type(copy.m_crop_type),
 	m_force_clear(false),
-	m_idle_interactive(false),
-	m_mouse_interactive(false),
 	m_interactive(false),
 	m_clear_buffer(false),
 	m_grow_on(false),
@@ -4573,9 +4569,7 @@ void RenderView::RefreshGL(int debug_code,
 	bool start_loop,
 	bool lg_changed)
 {
-	m_interactive = m_idle_interactive || m_mouse_interactive;
-	//for debugging refresh events
-	DBGPRINT(L"%d\trefresh\t%d\t%d\n", m_id, debug_code, m_interactive);
+	DBGPRINT(L"View: %d\tRefresh: (%d)\tInteractive: %d\tClear: %d\n", m_id, debug_code, m_interactive, m_clear_buffer);
 
 	m_updating = true;
 	if (start_loop)
@@ -4585,9 +4579,6 @@ void RenderView::RefreshGL(int debug_code,
 	glbin_lg_renderer.SetUpdating(lg_changed);
 	if (m_render_canvas)
 		m_render_canvas->Refresh(erase);
-	//Update();
-	m_idle_interactive = false;
-	m_mouse_interactive = false;
 }
 
 void RenderView::DrawRulers()
@@ -7553,19 +7544,12 @@ void RenderView::DrawVolumes(int peel)
 			flvr::TextureRenderer::reset_update_loop();
 	}
 
-	//if (TextureRenderer::get_mem_swap())
-	//{
-	//	if (finished_bricks == 0)
-	//	{
-	//		if (m_nodraw_count == 100)
-	//		{
-	//			TextureRenderer::set_done_update_loop();
-	//			m_nodraw_count = 0;
-	//		}
-	//		else
-	//			m_nodraw_count++;
-	//	}
-	//}
+	if (m_interactive)
+	{
+		m_interactive = false;
+		m_clear_buffer = true;
+		RefreshGL(2);
+	}
 }
 
 void RenderView::DrawAnnotations()
@@ -10179,11 +10163,11 @@ void RenderView::GrabRotate(const glm::mat4& pose)
 
 void RenderView::ProcessIdle(IdleState& state)
 {
-	if ((m_idle_interactive ||
-		m_mouse_interactive) &&
+	if (m_interactive &&
 		!m_rot_lock)
 		return;
 
+	m_interactive = false;
 	state.m_start_loop = true;
 	m_retain_finalbuffer = false;
 
@@ -10674,7 +10658,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerMoveHorizontal(leftx, nx, ny);
-			m_idle_interactive = true;
+			m_interactive = true;
 			m_update_rot_ctr = true;
 			state.m_refresh = true;
 		}
@@ -10683,7 +10667,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerZoomDolly(lefty, nx, ny);
-			m_idle_interactive = true;
+			m_interactive = true;
 			state.m_refresh = true;
 			state.m_value_collection.insert(gstScaleFactor);
 		}
@@ -10693,7 +10677,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_request_more = true;
 			glm::mat4 rot_mat = glbin_xr_renderer->GetGrabMatrix();
 			GrabRotate(rot_mat);
-			m_idle_interactive = true;
+			m_interactive = true;
 			state.m_refresh = true;
 			state.m_value_collection.insert(gstCamRotation);
 		}
@@ -10707,7 +10691,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				state.m_request_more = true;
 				ControllerRotate(rightx, righty, nx, ny);
-				m_idle_interactive = true;
+				m_interactive = true;
 				state.m_refresh = true;
 				state.m_value_collection.insert(gstCamRotation);
 			}
@@ -10746,7 +10730,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerMoveHorizontal(leftx * sclr, nx, ny);
-			m_idle_interactive = true;
+			m_interactive = true;
 			m_update_rot_ctr = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
@@ -10756,7 +10740,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerZoomDolly(lefty * sclr, nx, ny);
-			m_idle_interactive = true;
+			m_interactive = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_value_collection.insert(gstScaleFactor);
@@ -10766,7 +10750,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerRotate(rghtx * sclr, rghty * sclr, nx, ny);
-			m_idle_interactive = true;
+			m_interactive = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_value_collection.insert(gstCamRotation);
@@ -10776,7 +10760,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_request_more = true;
 			ControllerPan(px, py, nx, ny);
-			m_idle_interactive = true;
+			m_interactive = true;
 			m_update_rot_ctr = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
@@ -10802,11 +10786,11 @@ void RenderView::ProcessIdle(IdleState& state)
 
 void RenderView::ProcessMouse(MouseState& state)
 {
-	if ((m_idle_interactive ||
-		m_mouse_interactive) &&
+	if (m_interactive &&
 		!m_rot_lock)
 		return;
 
+	m_interactive = false;
 	m_paint_enable = false;
 	m_retain_finalbuffer = false;
 	int nx = m_gl_size.w();
@@ -11142,7 +11126,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 					Q2A();
 
-					m_mouse_interactive = true;
+					m_interactive = true;
 
 					if (glbin.get_linked_rot())
 					{
@@ -11162,7 +11146,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 					if (!hold_old)
 						RefreshGL(24);
-					//DBGPRINT(L"refresh requested\n");
+
 					if (m_render_view_panel)
 						m_render_view_panel->FluoUpdate({ gstCamRotation });
 				}
@@ -11181,12 +11165,11 @@ void RenderView::ProcessMouse(MouseState& state)
 					m_obj_transy += trans.y();
 					m_obj_transz += trans.z();
 
-					m_mouse_interactive = true;
+					m_interactive = true;
 
 					if (m_pin_rot_ctr)
 						m_update_rot_ctr = true;
 
-					//SetSortBricks();
 					RefreshGL(25);
 				}
 				if (state.m_mouse_right_is_down)
@@ -11210,9 +11193,8 @@ void RenderView::ProcessMouse(MouseState& state)
 						m_ctrz = ctr.z();
 					}
 
-					m_mouse_interactive = true;
+					m_interactive = true;
 
-					//SetSortBricks();
 					RefreshGL(26);
 
 					if (m_render_view_panel)
@@ -11316,7 +11298,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			else
 			{
-				m_mouse_interactive = true;
+				m_interactive = true;
 				if (m_pin_rot_ctr)
 					m_update_rot_ctr = true;
 				double value = wheel * m_scale_factor / 1000.0;
