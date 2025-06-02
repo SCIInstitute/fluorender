@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #define TOOL_CALCULATIONS	10
 #define TOOL_MACHINE_LEARNING	11
 
+#include <AutomateDefault.h>
 #include <BrushDefault.h>
 #include <ComponentDefault.h>
 #include <OutAdjDefault.h>
@@ -73,6 +74,7 @@ public:
 	std::vector<std::string> GetJvmArgs();
 	void GetMemorySettings();
 
+	AutomateDefault m_automate_def;
 	BrushDefault m_brush_def;
 	ComponentDefault m_comp_def;
 	OutAdjDefault m_outadj_def;

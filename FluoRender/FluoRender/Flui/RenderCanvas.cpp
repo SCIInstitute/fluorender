@@ -444,7 +444,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	//full screen
 	if (state.m_fullscreen)
 		m_renderview_panel->SetFullScreen();
-	else if (state.m_exit_fullscreen)
+	if (state.m_exit_fullscreen)
 		m_fullscreen_trigger.Start(10);
 
 	if (state.m_refresh)

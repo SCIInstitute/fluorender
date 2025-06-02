@@ -492,6 +492,11 @@ MainSettings& Global::get_settings()
 	return *main_settings_;
 }
 
+AutomateDefault& Global::get_automate_def()
+{
+	return main_settings_->m_automate_def;
+}
+
 BrushDefault& Global::get_brush_def()
 {
 	return main_settings_->m_brush_def;

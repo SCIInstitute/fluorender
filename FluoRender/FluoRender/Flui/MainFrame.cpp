@@ -390,7 +390,10 @@ MainFrame::MainFrame(
 	{
 		view = root->GetLastView();
 		if (view)
+		{
+			view->Init();
 			view->InitView();
+		}
 	}
 	m_render_view_panels.push_back(vrv);
 

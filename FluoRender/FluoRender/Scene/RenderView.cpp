@@ -10538,12 +10538,12 @@ void RenderView::ProcessIdle(IdleState& state)
 		//full screen
 		if (state.m_key_exit_fullscreen)
 		{
-			state.m_key_exit_fullscreen = true;
+			state.m_exit_fullscreen = true;
 			state.m_fullscreen = false;
 		}
 		if (state.m_key_fullscreen)
 		{
-			state.m_key_exit_fullscreen = false;
+			state.m_exit_fullscreen = false;
 			state.m_fullscreen = true;
 		}
 		//brush size

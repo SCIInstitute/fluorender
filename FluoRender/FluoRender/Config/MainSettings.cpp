@@ -458,6 +458,7 @@ void MainSettings::Read()
 		fconfig->Read("version", &m_python_ver, 10);
 	}
 
+	m_automate_def.Read();
 	m_brush_def.Read();
 	m_comp_def.Read(gstConfigFile);
 	m_outadj_def.Read();
@@ -671,6 +672,7 @@ void MainSettings::Save()
 	fconfig->SetPath("/python");
 	fconfig->Write("version", m_python_ver);
 
+	m_automate_def.Save();
 	m_brush_def.Save();
 	m_comp_def.Save(gstConfigFile);
 	m_outadj_def.Save();

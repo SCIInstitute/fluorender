@@ -227,23 +227,36 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
 	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
 
-	std::vector<std::pair<wxString, wxArrayString>> settings = {
-		{ "Automatically compute histograms for volume data",
-			{ "Enable", "Disable", "Disable for large data" } },
-		{ "Automatically compute information on brush selection",
-			{ "Enable", "Disable", "Disable for large data" } },
-		{ "Automatically generate components for volume data",
-			{ "Enable", "Disable", "Disable for large data" } } };
+	m_automate_combo.insert({
+		"histogram",
+		ComboEntry{ 0, "histogram",
+		"Automatically compute histograms for volume data",
+		{ "Enable", "Disable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		"paint size",
+		ComboEntry{ 1, "paint size",
+		"Automatically compute information on brush selection",
+		{ "Enable", "Disable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		"comp gen",
+		ComboEntry{ 2, "comp gen",
+		"Automatically generate components for volume data",
+		{ "Enable", "Disable", "Disable for large data" }, nullptr } });
 
-	int cid = 0;
-	for (const auto& setting : settings)
+	for (const auto& key : m_combo_keys)
 	{
-		wxStaticText* label = new wxStaticText(page, wxID_ANY, setting.first);
-		wxComboBox* combo = new wxComboBox(page, cid++, "", wxDefaultPosition, wxDefaultSize, setting.second, wxCB_READONLY);
-		combo->Bind(wxEVT_COMBOBOX, &SettingDlg::OnAutomationCombo, this);
+		auto it = m_automate_combo.find(key);
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
 
-		gridSizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
-		gridSizer->Add(combo, 1, wxEXPAND);
+			wxStaticText* label = new wxStaticText(page, wxID_ANY, entry.label);
+			entry.combo = new wxComboBox(page, entry.id, "", wxDefaultPosition, wxDefaultSize, entry.options, wxCB_READONLY);
+			entry.combo->Bind(wxEVT_COMBOBOX, &SettingDlg::OnAutomationCombo, this);
+
+			gridSizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+			gridSizer->Add(entry.combo, 1, wxEXPAND);
+		}
 	}
 
 	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
@@ -1086,6 +1099,29 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_response_time_sldr->ChangeValue(std::round(glbin_settings.m_up_time / 10.0));
 		m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -glbin_settings.m_detail_level_offset));
 		m_detail_level_offset_sldr->ChangeValue(-glbin_settings.m_detail_level_offset);
+	}
+
+	//automate page
+	if (update_all || FOUND_VALUE(gstAutomate))
+	{
+		auto it = m_automate_combo.find("histogram");
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
+			entry.combo->SetSelection(glbin_automate_def.m_histogram);
+		}
+		it = m_automate_combo.find("paint size");
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
+			entry.combo->SetSelection(glbin_automate_def.m_paint_size);
+		}
+		it = m_automate_combo.find("comp gen");
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
+			entry.combo->SetSelection(glbin_automate_def.m_comp_gen);
+		}
 	}
 
 	//display page

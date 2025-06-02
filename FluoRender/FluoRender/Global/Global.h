@@ -37,6 +37,7 @@ class TreeFileFactory;
 class VideoEncoder;
 class Undoable;
 class MainSettings;
+class AutomateDefault;
 class BrushDefault;
 class ComponentDefault;
 class OutAdjDefault;
@@ -107,6 +108,7 @@ namespace flvr
 #define glbin_tree_file_factory fluo::Global::instance().get_tree_file_factory()
 //settings
 #define glbin_settings fluo::Global::instance().get_settings()
+#define glbin_automate_def fluo::Global::instance().get_automate_def()
 #define glbin_brush_def fluo::Global::instance().get_brush_def()
 #define glbin_comp_def fluo::Global::instance().get_comp_def()
 #define glbin_outadj_def fluo::Global::instance().get_outadj_def()
@@ -217,6 +219,7 @@ namespace fluo
 
 		//settings
 		MainSettings& get_settings();
+		AutomateDefault& get_automate_def();
 		BrushDefault& get_brush_def();
 		ComponentDefault& get_comp_def();
 		OutAdjDefault& get_outadj_def();

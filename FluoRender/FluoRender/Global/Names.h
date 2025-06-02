@@ -837,6 +837,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstBioformatsPath "bioformats path"
 #define gstDeviceTree "device tree"
 #define gstMaxTextureSize "max texture size"
+#define gstAutomate "automate"
 //from render frame
 #define gstOpenSlices "open slices"
 #define gstOpenChanns "open channs"

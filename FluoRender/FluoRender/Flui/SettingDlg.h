@@ -136,6 +136,20 @@ private:
 	//device tree
 	wxTreeCtrl* m_device_tree;
 
+	//automate
+	std::vector<std::string> m_combo_keys =
+	{ "histogram", "paint size", "comp gen" };
+
+	struct ComboEntry
+	{
+		int id;
+		wxString sid;
+		wxString label;
+		wxArrayString options;
+		wxComboBox* combo;
+	};
+	std::unordered_map<std::string, ComboEntry> m_automate_combo;
+
 	//save
 	wxButton *m_save_btn;
 	//close
