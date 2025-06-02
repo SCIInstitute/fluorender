@@ -697,6 +697,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParam(9, vr_list_[tn]->color_.r(),
 				vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(),
 				vr_list_[tn]->alpha_power_);
+			shader->setLocalParam(16, vr_list_[tn]->mask_color_.r(),
+				vr_list_[tn]->mask_color_.g(), vr_list_[tn]->mask_color_.b(),
+				0.0);
 
 			double abcd[4];
 			vr_list_[tn]->planes_[0]->get(abcd);

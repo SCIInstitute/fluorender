@@ -52,7 +52,8 @@
 	"uniform vec4 loc3;//(gamma, left_offset, right_offset, sw)\n" \
 	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"uniform vec4 loc5;//(spcx, spcy, spcz, shuffle)\n" \
-	"uniform vec4 loc9;//(red, green, blue, alpha_power)\n" \
+	"uniform vec4 loc9;//(primary red, green, blue, alpha_power)\n" \
+	"uniform vec4 loc16;//(secondary red, green, blue, 0)\n" \
 	"\n" \
 	"uniform sampler3D tex0;//data volume\n" \
 	"uniform sampler3D tex1;//gm volume\n" \
@@ -462,45 +463,50 @@
 	"		//VOL_COLORMAP_DIFF_CALC0\n" \
 	"		rb.rgb = clamp(n.xyz*loc6.w, -1.0, 1.0) + vec3(1.0);\n" \
 
-//hot
+//primary-secondary
 #define VOL_COLORMAP_CALC1 \
 	"		//VOL_COLORMAP_CALC1\n" \
+	"		rb.rgb = mix(loc6.w>0.0?loc16.rgb:loc9.rgb, loc6.w>0.0?loc9.rgb:loc16.rgb, clamp(valu, 0.0, 1.0));\n"
+
+//hot
+#define VOL_COLORMAP_CALC2 \
+	"		//VOL_COLORMAP_CALC2\n" \
 	"		rb.r = clamp(loc6.w*2.0*valu+(loc6.w>0.0?0.0:2.0), 0.0, 1.0);\n" \
 	"		rb.g = clamp(loc6.w*(4.0*valu - 2.0), 0.0, 1.0);\n" \
 	"		rb.b = clamp(loc6.w*4.0*valu+(loc6.w>0.0?-3.0:1.0), 0.0, 1.0);\n"
 
 //cool
-#define VOL_COLORMAP_CALC2 \
-	"		//VOL_COLORMAP_CALC2\n" \
+#define VOL_COLORMAP_CALC3 \
+	"		//VOL_COLORMAP_CALC3\n" \
 	"		rb.r = clamp(loc6.w>0.0?valu:(1.0-valu), 0.0, 1.0);\n" \
 	"		rb.g = clamp(loc6.w>0.0?(1.0-valu):valu, 0.0, 1.0);\n" \
 	"		rb.b = 1.0;\n"
 
 //diverging
-#define VOL_COLORMAP_CALC3 \
-	"		//VOL_COLORMAP_CALC3\n" \
+#define VOL_COLORMAP_CALC4 \
+	"		//VOL_COLORMAP_CALC4\n" \
 	"		rb.r = clamp(loc6.w>0.0?(valu<0.5?valu*0.9+0.25:0.7):(valu<0.5?0.7:-0.9*valu+1.15), 0.0, 1.0);\n" \
 	"		rb.g = clamp(loc6.w>0.0?(valu<0.5?valu*0.8+0.3:1.4-1.4*valu):(valu<0.5?1.4*valu:-0.8*valu+1.1), 0.0, 1.0);\n" \
 	"		rb.b = clamp(loc6.w>0.0?(valu<0.5?-0.1*valu+0.75:-1.1*valu+1.25):(valu<0.5?1.1*valu+0.15:0.1*valu+0.65), 0.0, 1.0);\n"
 
 //monochrome
-#define VOL_COLORMAP_CALC4 \
-	"		//VOL_COLORMAP_CALC4\n" \
+#define VOL_COLORMAP_CALC5 \
+	"		//VOL_COLORMAP_CALC5\n" \
 	"		rb.rgb = vec3((loc6.w>0.0?0.0:1.0) + loc6.w*clamp(valu, 0.0, 1.0));\n"
 
 //high-key
-#define VOL_COLORMAP_CALC5 \
-	"		//VOL_COLORMAP_CALC5\n" \
+#define VOL_COLORMAP_CALC6 \
+	"		//VOL_COLORMAP_CALC6\n" \
 	"		rb.rgb = mix(loc6.w>0.0?vec3(1.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(1.0), clamp(valu, 0.0, 1.0));\n"
 
 //low-key
-#define VOL_COLORMAP_CALC6 \
-	"		//VOL_COLORMAP_CALC6\n" \
+#define VOL_COLORMAP_CALC7 \
+	"		//VOL_COLORMAP_CALC7\n" \
 	"		rb.rgb = mix(loc6.w>0.0?loc9.rgb:loc9.rgb*0.1, loc6.w>0.0?loc9.rgb*0.1:loc9.rgb, clamp(valu, 0.0, 1.0));\n"
 
 //increased transp
-#define VOL_COLORMAP_CALC7 \
-	"		//VOL_COLORMAP_CALC7\n" \
+#define VOL_COLORMAP_CALC8 \
+	"		//VOL_COLORMAP_CALC8\n" \
 	"		rb.rgb = mix(loc6.w>0.0?vec3(0.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(0.0), clamp(valu, 0.0, 1.0));\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP \

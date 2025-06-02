@@ -743,26 +743,22 @@ namespace flvr
 
 	string ImgShader::get_colormap_code()
 	{
-		switch (colormap_)
-		{
-		case 0:
-			return string(VOL_COLORMAP_CALC0);
-		case 1:
-			return string(VOL_COLORMAP_CALC1);
-		case 2:
-			return string(VOL_COLORMAP_CALC2);
-		case 3:
-			return string(VOL_COLORMAP_CALC3);
-		case 4:
-			return string(VOL_COLORMAP_CALC4);
-		case 5:
-			return string(VOL_COLORMAP_CALC5);
-		case 6:
-			return string(VOL_COLORMAP_CALC6);
-		case 7:
-			return string(VOL_COLORMAP_CALC7);
-		}
-		return string(VOL_COLORMAP_CALC0);
+		static const char* colormap_codes[] = {
+			VOL_COLORMAP_CALC0,
+			VOL_COLORMAP_CALC1,
+			VOL_COLORMAP_CALC2,
+			VOL_COLORMAP_CALC3,
+			VOL_COLORMAP_CALC4,
+			VOL_COLORMAP_CALC5,
+			VOL_COLORMAP_CALC6,
+			VOL_COLORMAP_CALC7,
+			VOL_COLORMAP_CALC8
+		};
+
+		if (colormap_ >= 0 && colormap_ < 9)
+			return std::string(colormap_codes[colormap_]);
+		else
+			return std::string(VOL_COLORMAP_CALC0); // default fallback
 	}
 
 	bool ImgShader::emit_f(string& s)

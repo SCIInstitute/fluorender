@@ -355,7 +355,12 @@ namespace flvr
 				"tex0", "tex1", "tex2", "tex3",
 				"tex4", "tex5", "tex6", "tex7",
 				"tex8", "tex9", "tex10", "tex11",
-				"tex12", "tex13", "tex14", "tex15"};
+				"tex12", "tex13", "tex14", "tex15",
+				"tex16", "tex17", "tex18", "tex19",
+				"tex20", "tex21", "tex22", "tex23",
+				"tex24", "tex25", "tex26", "tex27",
+				"tex28", "tex29", "tex30", "tex31"
+			};
 
 			int location;
 			for (size_t i=0; i<MAX_SHADER_UNIFORMS; ++i)
@@ -441,10 +446,16 @@ namespace flvr
 	{
 		if (shaders_supported())
 		{
-			const char *loc_strings[] = {"matrix0", "matrix1", "matrix2", "matrix3",
+			const char *loc_strings[] = {
+				"matrix0", "matrix1", "matrix2", "matrix3",
 				"matrix4", "matrix5", "matrix6", "matrix7",
 				"matrix8", "matrix9", "matrix10", "matrix11",
-				"matrix12", "matrix13", "matrix14", "matrix15"};
+				"matrix12", "matrix13", "matrix14", "matrix15",
+				"matrix16", "matrix17", "matrix18", "matrix19",
+				"matrix20", "matrix21", "matrix22", "matrix23",
+				"matrix24", "matrix25", "matrix26", "matrix27",
+				"matrix28", "matrix29", "matrix30", "matrix31"
+			};
 
 			if (loc_mat4[i] == -1)
 			{
@@ -461,10 +472,16 @@ namespace flvr
 	{
 		if (shaders_supported())
 		{
-			const char *loc_strings[] = {"loci0", "loci1", "loci2", "loci3",
+			const char *loc_strings[] = {
+				"loci0", "loci1", "loci2", "loci3",
 				"loci4", "loci5", "loci6", "loci7",
 				"loci8", "loci9", "loci10", "loci11",
-				"loci12", "loci13", "loci14", "loci15"};
+				"loci12", "loci13", "loci14", "loci15",
+				"loci16", "loci17", "loci18", "loci19",
+				"loci20", "loci21", "loci22", "loci23",
+				"loci24", "loci25", "loci26", "loci27",
+				"loci28", "loci29", "loci30", "loci31"
+			};
 
 			if (loc_ui[i] == -1)
 			{
@@ -481,10 +498,16 @@ namespace flvr
 	{
 		if (shaders_supported())
 		{
-			const char* loc_strings[] = { "lci0", "lci1", "lci2", "lci3",
+			const char* loc_strings[] = {
+				"lci0", "lci1", "lci2", "lci3",
 				"lci4", "lci5", "lci6", "lci7",
 				"lci8", "lci9", "lci10", "lci11",
-				"lci12", "lci13", "lci14", "lci15" };
+				"lci12", "lci13", "lci14", "lci15",
+				"lci16", "lci17", "lci18", "lci19",
+				"lci20", "lci21", "lci22", "lci23",
+				"lci24", "lci25", "lci26", "lci27",
+				"lci28", "lci29", "lci30", "lci31"
+			};
 
 			if (loc_int4[i] == -1)
 			{

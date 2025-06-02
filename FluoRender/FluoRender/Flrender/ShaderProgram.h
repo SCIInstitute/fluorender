@@ -71,7 +71,7 @@ namespace flvr
 		static void reset_max_texture_size();
 		static bool texture_non_power_of_two();
 		static void set_no_tex_upack(bool val);
-		static const int MAX_SHADER_UNIFORMS = 16;
+		static const int MAX_SHADER_UNIFORMS = 32;
 		static std::string glsl_version_;
 		static std::string glsl_unroll_;
 		static bool no_tex_unpack_;

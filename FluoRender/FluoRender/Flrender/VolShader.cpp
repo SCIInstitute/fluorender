@@ -142,55 +142,45 @@ VolShader::VolShader(
 
 	string VolShader::get_colormap_code()
 	{
-		switch (colormap_)
-		{
-		case 0:
-			if (colormap_proj_ == 6)
-				return string(VOL_COLORMAP_DIFF_CALC0);
-			else
-				return string(VOL_COLORMAP_CALC0);
-		case 1:
-			return string(VOL_COLORMAP_CALC1);
-		case 2:
-			return string(VOL_COLORMAP_CALC2);
-		case 3:
-			return string(VOL_COLORMAP_CALC3);
-		case 4:
-			return string(VOL_COLORMAP_CALC4);
-		case 5:
-			return string(VOL_COLORMAP_CALC5);
-		case 6:
-			return string(VOL_COLORMAP_CALC6);
-		case 7:
-			return string(VOL_COLORMAP_CALC7);
-		}
-		return string(VOL_COLORMAP_CALC0);
+		if (colormap_ == 0 && colormap_proj_ == 6)
+			return string(VOL_COLORMAP_DIFF_CALC0);
+
+		static const string colormap_codes[] = {
+			VOL_COLORMAP_CALC0,
+			VOL_COLORMAP_CALC1,
+			VOL_COLORMAP_CALC2,
+			VOL_COLORMAP_CALC3,
+			VOL_COLORMAP_CALC4,
+			VOL_COLORMAP_CALC5,
+			VOL_COLORMAP_CALC6,
+			VOL_COLORMAP_CALC7,
+			VOL_COLORMAP_CALC8
+		};
+
+		if (colormap_ >= 0 && colormap_ < 9)
+			return string(colormap_codes[colormap_]);
+
+		return string(VOL_COLORMAP_CALC0); // default fallback
 	}
 
 	string VolShader::get_colormap_proj()
 	{
-		switch (colormap_proj_)
-		{
-		case 0:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
-		case 1:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU1);
-		case 2:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU2);
-		case 3:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU3);
-		case 4:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU4);
-		case 5:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU5);
-		case 6:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU6);
-		case 7:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU7);
-		case 8:
-			return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU8);
-		}
-		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0);
+		static const string colormap_proj_codes[] = {
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU0,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU1,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU2,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU3,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU4,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU5,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU6,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU7,
+			VOL_TRANSFER_FUNCTION_COLORMAP_VALU8
+		};
+
+		if (colormap_proj_ >= 0 && colormap_proj_ < 9)
+			return string(colormap_proj_codes[colormap_proj_]);
+
+		return string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0); // default fallback
 	}
 
 	bool VolShader::emit_f(string& s)

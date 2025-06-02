@@ -788,6 +788,7 @@ namespace flvr
 		}
 		//color
 		shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), alpha_power_);
+		shader->setLocalParam(16, mask_color_.r(), mask_color_.g(), mask_color_.b(), 0.0);
 
 		if (colormap_proj_ == 4)
 		{

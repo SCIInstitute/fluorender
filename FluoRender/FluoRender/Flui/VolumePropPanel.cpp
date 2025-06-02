@@ -549,7 +549,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_colormap_inv_btn->Realize();
 	m_colormap_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> colormap_list = { "Rainbow", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
+	std::vector<wxString> colormap_list = { "Rainbow", "Two Colors", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
 	m_colormap_combo->Append(colormap_list);
 	m_colormap_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo, this);
 	m_colormap_combo2 = new wxUndoableComboBox(this, wxID_ANY, "",
@@ -2821,7 +2821,7 @@ void VolumePropPanel::OnColor2Change(wxColor c)
 	if (m_vd)
 	{
 		m_vd->SetMaskColor(color);
-		FluoRefresh(1, { gstSecColor }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstSecColor, gstColormap }, { glbin_current.GetViewId(m_view) });
 	}
 }
 

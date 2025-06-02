@@ -337,8 +337,6 @@ VolumeData::VolumeData()
 	for (int i : { 0, 1, 2 })
 		m_clip_dist[i] = 1;
 
-	m_ep = std::make_unique<flrd::EntryParams>();
-
 	m_hist_dirty = true;
 }
 
@@ -491,8 +489,6 @@ VolumeData::VolumeData(VolumeData &copy)
 	//m_clip
 	for (int i : { 0, 1, 2 })
 		m_clip_dist[i] = copy.m_clip_dist[i];
-
-	m_ep = std::make_unique<flrd::EntryParams>();
 
 	m_hist_dirty = true;
 }
@@ -1785,6 +1781,7 @@ void VolumeData::ResetVolume()
 	if (cache_queue)
 		cache_queue->reset(m_time);
 	m_ep.reset();
+	m_hist_dirty = true;
 }
 
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,
@@ -1899,7 +1896,7 @@ double VolumeData::GetMlGamma()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("gamma3d");
 	else
 		return glbin_vol_def.m_gamma;
@@ -1936,7 +1933,7 @@ double VolumeData::GetMlBoundary()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("extract_boundary");
 	else
 		return glbin_vol_def.m_boundary;
@@ -1979,7 +1976,7 @@ double VolumeData::GetMlLowOffset()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("low_offset");
 	else
 		return glbin_vol_def.m_lo_offset;
@@ -2002,7 +1999,7 @@ double VolumeData::GetMlHighOffset()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("high_offset");
 	else
 		return glbin_vol_def.m_hi_offset;
@@ -2045,7 +2042,7 @@ double VolumeData::GetMlLeftThresh()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("low_threshold");
 	else
 		return glbin_vol_def.m_lo_thresh;
@@ -2080,7 +2077,7 @@ double VolumeData::GetMlRightThresh()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("high_threshold");
 	else
 		return glbin_vol_def.m_hi_thresh;
@@ -2122,7 +2119,7 @@ double VolumeData::GetMlLuminance()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("luminance");
 	else
 		return glbin_vol_def.m_luminance;
@@ -2163,7 +2160,7 @@ double VolumeData::GetMlAlpha()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("alpha");
 	else
 		return glbin_vol_def.m_alpha;
@@ -2225,7 +2222,7 @@ double VolumeData::GetMlLowShading()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("low_shading");
 	else
 		return glbin_vol_def.m_low_shading;
@@ -2242,7 +2239,7 @@ double VolumeData::GetMlHiShading()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("high_shading");
 	else
 		return glbin_vol_def.m_high_shading;
@@ -2273,7 +2270,7 @@ double VolumeData::GetMlShadowIntensity()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("shadow_intensity");
 	else
 		return glbin_vol_def.m_shadow_intensity;
@@ -2311,7 +2308,7 @@ double VolumeData::GetMlSampleRate()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("sample_rate");
 	else
 		return glbin_vol_def.m_sample_rate;
@@ -2480,7 +2477,7 @@ double VolumeData::GetMlColormapLow()
 {
 	GetMlParams();
 
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("colormap_low");
 	else
 		return glbin_vol_def.m_colormap_low_value;
@@ -2554,22 +2551,28 @@ fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
 		rb.g(fluo::Clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0));
 		rb.b(fluo::Clamp((2.0 - 4.0*valu)*inv, 0.0, 1.0));
 		break;
-	case 1://hot
+	case 1://primary-secondary
+	{
+		fluo::Color mask_color = m_vr->get_mask_color();
+		rb = (inv > 0.0 ? mask_color : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : mask_color) * valu;
+	}
+		break;
+	case 2://hot
 		rb.r(fluo::Clamp(inv*2.0*valu+(inv>0.0?0.0:2.0), 0.0, 1.0));
 		rb.g(fluo::Clamp(inv*(4.0*valu - 2.0), 0.0, 1.0));
 		rb.b(fluo::Clamp(inv*4.0*valu+(inv>0.0?-3.0:1.0), 0.0, 1.0));
 		break;
-	case 2://cool
+	case 3://cool
 		rb.r(fluo::Clamp(inv>0.0?valu:(1.0-valu), 0.0, 1.0));
 		rb.g(fluo::Clamp(inv>0.0?(1.0-valu):valu, 0.0, 1.0));
 		rb.b(1.0);
 		break;
-	case 3://diverging
+	case 4://diverging
 		rb.r(fluo::Clamp(inv>0.0?(valu<0.5?valu*0.9+0.25:0.7):(valu<0.5?0.7:-0.9*valu+1.15), 0.0, 1.0));
 		rb.g(fluo::Clamp(inv>0.0?(valu<0.5?valu*0.8+0.3:1.4-1.4*valu):(valu<0.5?1.4*valu:-0.8*valu+1.1), 0.0, 1.0));
 		rb.b(fluo::Clamp(inv>0.0?(valu<0.5?-0.1*valu+0.75:-1.1*valu+1.25):(valu<0.5?1.1*valu+0.15:0.1*valu+0.65), 0.0, 1.0));
 		break;
-	case 4://monochrome
+	case 5://monochrome
 	{
 		double cv = (inv > 0.0 ? 0.0 : 1.0) + inv * fluo::Clamp(valu, 0.0, 1.0);
 		rb.r(cv);
@@ -2577,19 +2580,19 @@ fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
 		rb.b(cv);
 	}
 		break;
-	case 5://high-key
+	case 6://high-key
 	{
 		fluo::Color w(1.0, 1.0, 1.0);
 		rb = (inv > 0.0 ? w : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : w) * valu;
 	}
 		break;
-	case 6://low-key
+	case 7://low-key
 	{
 		fluo::Color l = m_color * 0.1;
 		rb = (inv > 0.0 ? m_color : l) * (1.0 - valu) + (inv > 0.0 ? l : m_color) * valu;
 	}
 		break;
-	case 7://increased transp
+	case 8://increased transp
 	{
 		fluo::Color l(0.0, 0.0, 0.0);
 		rb = (inv > 0.0 ? l : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : l) * valu;
@@ -3336,7 +3339,7 @@ void VolumeData::LoadLabel2()
 
 void VolumeData::GetMlParams()
 {
-	if (!m_ep->getValid())
+	if (!m_ep || !m_ep->getValid())
 	{
 		flrd::Histogram histogram(this);
 		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
@@ -3356,7 +3359,7 @@ void VolumeData::ApplyMlVolProp()
 {
 	GetMlParams();
 	//get histogram
-	if (m_ep->getValid())
+	if (m_ep && m_ep->getValid())
 	{
 		double dval, dval2;
 
