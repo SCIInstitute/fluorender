@@ -143,7 +143,6 @@ private:
 
 	//output
 	wxButton* m_update_btn;
-	wxToggleButton* m_auto_update_btn;
 	wxCheckBox* m_history_chk;
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
@@ -198,7 +197,6 @@ private:
 	void OnAlignPca(wxCommandEvent& event);
 	//output
 	void OnUpdateBtn(wxCommandEvent& event);
-	void OnAutoUpdateBtn(wxCommandEvent& event);
 	void OnHistoryChk(wxCommandEvent& event);
 	void OnClearHistBtn(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent& event);

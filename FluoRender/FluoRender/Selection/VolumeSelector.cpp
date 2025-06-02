@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <Global.h>
 #include <VolumeDefault.h>
+#include <AutomateDefault.h>
 #include <RenderView.h>
 #include <MainFrame.h>
 #include <compatibility.h>
@@ -96,6 +97,23 @@ VolumeSelector::VolumeSelector() :
 
 VolumeSelector::~VolumeSelector()
 {
+}
+
+bool VolumeSelector::GetAutoPaintSize()
+{
+	if (!m_vd)
+		return false;
+	int get_paint_size = glbin_automate_def.m_paint_size;
+	if (get_paint_size == 0)
+		return false;
+	else if (get_paint_size == 1)
+		return true;
+	else if (get_paint_size == 2)
+	{
+		if (m_vd->GetAllBrickNum() > 1)
+			return false;
+	}
+	return true;
 }
 
 void VolumeSelector::SetMode(int mode)

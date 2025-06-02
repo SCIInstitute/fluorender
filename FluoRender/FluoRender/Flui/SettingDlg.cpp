@@ -228,22 +228,27 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
 
 	std::vector<std::string> keys =
-	{ "histogram", "paint size", "comp gen" };
+	{ "histogram", "paint size", "comp gen", "colocalize" };
 
 	m_automate_combo.insert({
 		keys[0],
 		ComboEntry{ 0, keys[0],
-		"Automatically compute histograms for volume data",
+		"Compute histograms for volume data",
 		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
 	m_automate_combo.insert({
 		keys[1],
 		ComboEntry{ 1, keys[1],
-		"Automatically compute information on brush selection",
+		"Compute information on brush selection",
 		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
 	m_automate_combo.insert({
 		keys[2],
 		ComboEntry{ 2, keys[2],
-		"Automatically generate components for volume data",
+		"Generate volume components when settings change",
+		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		keys[3],
+		ComboEntry{ 3, keys[3],
+		"Update colocalization result when settings change",
 		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
 
 	for (const auto& key : keys)
@@ -262,7 +267,14 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 		}
 	}
 
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText* st = new wxStaticText(page, wxID_ANY, "Automatically perform these functions:");
+	sizer1->Add(10, 10);
+	sizer1->Add(st, wxALIGN_CENTER);
+
 	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
+	sizerV->Add(10, 10);
+	sizerV->Add(sizer1, 0, wxEXPAND);
 	sizerV->Add(gridSizer, 1, wxALL | wxEXPAND, 15);
 
 	page->SetSizerAndFit(sizerV);
@@ -1124,6 +1136,12 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			ComboEntry& entry = it->second;
 			entry.combo->SetSelection(glbin_automate_def.m_comp_gen);
+		}
+		it = m_automate_combo.find("colocalize");
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
+			entry.combo->SetSelection(glbin_automate_def.m_colocalize);
 		}
 	}
 

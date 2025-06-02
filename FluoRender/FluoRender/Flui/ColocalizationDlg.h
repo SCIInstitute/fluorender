@@ -54,7 +54,6 @@ private:
 	//colocalization
 	wxButton *m_colocalize_btn;
 	wxCheckBox* m_use_sel_chk;
-	wxToggleButton* m_auto_update_btn;
 	//settings
 	wxRadioButton* m_product_rdb;
 	wxRadioButton* m_min_value_rdb;
@@ -74,7 +73,6 @@ private:
 	//calculate
 	void OnColocalizenBtn(wxCommandEvent& event);
 	void OnUseSelChk(wxCommandEvent& event);
-	void OnAutoUpdate(wxCommandEvent& event);
 	//settings
 	void OnMethodRdb(wxCommandEvent& event);
 	//format

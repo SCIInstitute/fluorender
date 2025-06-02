@@ -60,9 +60,6 @@ BrushDefault::BrushDefault()
 
 	m_brush_spacing = 0.1;
 	m_brush_size_data = true;
-
-	m_update_size = false;
-	m_update_colocal = false;
 }
 
 BrushDefault::~BrushDefault()
@@ -163,10 +160,6 @@ void BrushDefault::Read()
 	f->Read("spacing", &m_brush_spacing, 0.1);
 	//brush size relation
 	f->Read("size_data", &m_brush_size_data, true);
-
-	//auto update
-	f->Read("update size", &m_update_size, false);
-	f->Read("update colocal", &m_update_colocal, false);
 }
 
 void BrushDefault::Save()
@@ -232,10 +225,6 @@ void BrushDefault::Save()
 	f->Write("spacing", m_brush_spacing);
 	//brush size relation
 	f->Write("size_data", m_brush_size_data);
-
-	//auto update
-	f->Write("update size", m_update_size);
-	f->Write("update colocal", m_update_colocal);
 }
 
 void BrushDefault::Set(flrd::VolumeSelector* vs)

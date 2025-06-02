@@ -100,15 +100,11 @@ ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 		wxDefaultPosition, wxDefaultSize);
 	m_colocalize_btn = new wxButton(this, wxID_ANY, "Colocalize",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_auto_update_btn = new wxToggleButton(this, wxID_ANY, "Auto Update",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_use_sel_chk->Bind(wxEVT_CHECKBOX, &ColocalizationDlg::OnUseSelChk, this);
 	m_colocalize_btn->Bind(wxEVT_BUTTON, &ColocalizationDlg::OnColocalizenBtn, this);
-	m_auto_update_btn->Bind(wxEVT_TOGGLEBUTTON, &ColocalizationDlg::OnAutoUpdate, this);
 	sizer1_3->AddStretchSpacer(1);
 	sizer1_3->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1_3->Add(m_colocalize_btn, 0, wxALIGN_CENTER);
-	sizer1_3->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(10, 10);
 	sizer1->Add(sizer1_1, 0, wxEXPAND);
 	sizer1->Add(10, 10);
@@ -200,11 +196,6 @@ void ColocalizationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstUseSelection))
 	{
 		m_use_sel_chk->SetValue(glbin_colocal_def.m_use_mask);
-	}
-
-	if (update_all || FOUND_VALUE(gstAutoUpdate))
-	{
-		m_auto_update_btn->SetValue(glbin_colocal_def.m_auto_update);
 	}
 
 	if (FOUND_VALUE(gstColocalResult))
@@ -349,16 +340,11 @@ void ColocalizationDlg::OnUseSelChk(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_use_mask = m_use_sel_chk->GetValue();
 
-	if (glbin_colocal_def.m_auto_update)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		glbin_colocalizer.Compute();
 		FluoUpdate({ gstColocalResult });
 	}
-}
-
-void ColocalizationDlg::OnAutoUpdate(wxCommandEvent& event)
-{
-	glbin_colocal_def.m_auto_update = m_auto_update_btn->GetValue();
 }
 
 void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
@@ -370,7 +356,7 @@ void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
 	else if (m_logical_and_rdb->GetValue())
 		glbin_colocal_def.m_method = 2;
 
-	if (glbin_colocal_def.m_auto_update)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		glbin_colocalizer.Compute();
 		FluoUpdate({ gstColocalResult });
@@ -382,7 +368,7 @@ void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_int_weighted = m_int_weight_btn->GetValue();
 
-	if (glbin_colocal_def.m_auto_update)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		glbin_colocalizer.Compute();
 		FluoUpdate({ gstColocalResult });
@@ -393,7 +379,7 @@ void ColocalizationDlg::OnRatioBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_get_ratio = m_ratio_btn->GetValue();
 
-	if (glbin_colocal_def.m_auto_update)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		glbin_colocalizer.Compute();
 		FluoUpdate({ gstColocalResult });
@@ -404,7 +390,7 @@ void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_physical_size = m_physical_btn->GetValue();
 
-	if (glbin_colocal_def.m_auto_update)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		glbin_colocalizer.Compute();
 		FluoUpdate({ gstColocalResult });
@@ -415,7 +401,7 @@ void ColocalizationDlg::OnColorMapBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_colormap = m_colormap_btn->GetValue();
 
-	if (glbin_colocal_def.m_auto_update)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		glbin_colocalizer.Compute();
 		FluoUpdate({ gstColocalResult });

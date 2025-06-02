@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 ColocalDefault::ColocalDefault()
 {
 	m_use_mask = false;
-	m_auto_update = false;
 	m_method = 2;
 	m_int_weighted = false;
 	m_get_ratio = false;
@@ -60,7 +59,6 @@ void ColocalDefault::Read()
 		f->SetPath("/colocal default");
 
 	f->Read("use mask", &m_use_mask, false);
-	f->Read("auto update", &m_auto_update, false);
 	f->Read("method", &m_method, 2);
 	f->Read("int weighted", &m_int_weighted, false);
 	f->Read("get ratio", &m_get_ratio, false);
@@ -80,7 +78,6 @@ void ColocalDefault::Save()
 	f->SetPath("/colocal default");
 
 	f->Write("use mask", m_use_mask);
-	f->Write("auto update", m_auto_update);
 	f->Write("method", m_method);
 	f->Write("int weighted", m_int_weighted);
 	f->Write("get ratio", m_get_ratio);

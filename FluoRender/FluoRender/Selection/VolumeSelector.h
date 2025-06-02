@@ -53,6 +53,8 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
+		bool GetAutoPaintSize();
+
 		void SetVolume(const std::shared_ptr<VolumeData>& vd) { m_vd = vd; }
 		//modes
 		void SetMode(int mode);

@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <CompAnalyzer.h>
 #include <VolumeSelector.h>
+#include <Colocalize.h>
 #include <Ruler.h>
 #include <RulerAlign.h>
 #include <DataManager.h>
@@ -1055,8 +1056,8 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstUseMachineLearning))
 		m_use_ml_chk->SetValue(glbin_comp_generator.GetUseMl());
 
-	if (update_all || FOUND_VALUE(gstAutoUpdate))
-		m_auto_update_btn->SetValue(glbin_comp_def.m_auto_update);
+	//if (update_all || FOUND_VALUE(gstAutoUpdate))
+	//	m_auto_update_btn->SetValue(glbin_comp_def.m_auto_update);
 
 	//comp generate page
 	if (update_all || FOUND_VALUE(gstIteration))
@@ -2175,9 +2176,9 @@ void ComponentDlg::OnCompExclusive(wxCommandEvent& event)
 	glbin_comp_selector.Exclusive();
 	fluo::ValueCollection vc;
 	vc.insert({ gstCompAnalysisResult, gstSelUndo });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
@@ -2188,9 +2189,9 @@ void ComponentDlg::OnCompAppend(wxCommandEvent& event)
 	glbin_comp_selector.Select(get_all);
 	fluo::ValueCollection vc;
 	vc.insert({ gstCompAnalysisResult, gstSelUndo });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
@@ -2200,9 +2201,9 @@ void ComponentDlg::OnCompAll(wxCommandEvent& event)
 	glbin_comp_selector.All();
 	fluo::ValueCollection vc;
 	vc.insert({ gstCompAnalysisResult, gstSelUndo });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }

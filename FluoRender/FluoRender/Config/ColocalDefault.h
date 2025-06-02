@@ -39,14 +39,6 @@ public:
 	void Read();
 	void Save();
 
-	bool GetThreshUpdate()
-	{
-		return m_auto_update && (m_method == 2);
-	}
-	bool GetColormapUpdate()
-	{
-		return m_auto_update && m_colormap;
-	}
 	//reset min max
 	void ResetMinMax()
 	{
@@ -62,7 +54,6 @@ public:
 public:
 	//default values
 	bool m_use_mask;
-	bool m_auto_update;
 	//method
 	int m_method;//0:dot product; 1:min value; 2:threshold
 	//format

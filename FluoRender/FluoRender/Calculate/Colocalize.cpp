@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <RenderView.h>
 #include <ColocalDefault.h>
+#include <AutomateDefault.h>
 #include <Compare.h>
 #include <string>
 
@@ -41,6 +42,27 @@ Colocalize::Colocalize() :
 
 Colocalize::~Colocalize()
 {
+}
+
+bool Colocalize::GetAutoColocalize()
+{
+	int get_colocalize = glbin_automate_def.m_colocalize;
+	if (get_colocalize == 0)
+		return false;
+	else if (get_colocalize == 1)
+		return true;
+	else if (get_colocalize == 2)
+	{
+		auto group = glbin_current.vol_group.lock();
+		if (!group)
+			return false;
+		auto vd = group->GetVolumeData(0);
+		if (!vd)
+			return false;
+		if (vd->GetAllBrickNum() == 1)
+			return true;
+	}
+	return false;
 }
 
 void Colocalize::Compute()

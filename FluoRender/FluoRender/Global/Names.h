@@ -635,7 +635,6 @@ DEALINGS IN THE SOFTWARE.
 
 //dialog agent common
 #define gstUseSelection "use selection"//use mask selection
-#define gstAutoUpdate "auto update"
 #define gstHoldHistory "hold history"
 #define gstTestSpeed "test speed"
 #define gstUseTransferFunc "use transfer func"

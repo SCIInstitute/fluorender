@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Count.h>
 #include <Texture.h>
 #include <VolumeSelector.h>
+#include <Colocalize.h>
 #include <RulerAlign.h>
 #include <BrushDefault.h>
 #include <GlobalStates.h>
@@ -398,9 +399,6 @@ BrushToolDlg::BrushToolDlg(
 	m_update_btn = new wxButton(this, wxID_ANY, "Paint Size",
 		wxDefaultPosition, wxDefaultSize);
 	m_update_btn->Bind(wxEVT_BUTTON, &BrushToolDlg::OnUpdateBtn, this);
-	m_auto_update_btn = new wxToggleButton(this, wxID_ANY,
-		"Auto Update", wxDefaultPosition, wxDefaultSize);
-	m_auto_update_btn->Bind(wxEVT_TOGGLEBUTTON, &BrushToolDlg::OnAutoUpdateBtn, this);
 	m_history_chk = new wxCheckBox(this, wxID_ANY,
 		"Hold History", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_history_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnHistoryChk, this);
@@ -408,7 +406,6 @@ BrushToolDlg::BrushToolDlg(
 		"Clear History", wxDefaultPosition, wxDefaultSize);
 	m_clear_hist_btn->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnClearHistBtn, this);
 	sizer4_1->Add(m_update_btn, 0, wxALIGN_CENTER);
-	sizer4_1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->AddStretchSpacer(1);
 	sizer4_1->Add(m_history_chk, 0, wxALIGN_CENTER);
 	sizer4_1->Add(5, 5);
@@ -606,12 +603,6 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstBrushHistoryEnable))
 		m_history_chk->SetValue(m_hold_history);
 
-	//auto update
-	if (update_all || FOUND_VALUE(gstAutoUpdate))
-	{
-		m_auto_update_btn->SetValue(glbin_brush_def.m_update_size);
-	}
-
 	if (sel_vol && FOUND_VALUE(gstBrushCountResult))
 	{
 		GridData data;
@@ -775,36 +766,36 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 		glbin_vol_selector.PasteMask(0);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
-		if (glbin_brush_def.m_update_size)
+		if (glbin_vol_selector.GetAutoPaintSize())
 			vc.insert(gstBrushCountResult);
-		if (glbin_brush_def.m_update_colocal)
+		if (glbin_colocalizer.GetAutoColocalize())
 			vc.insert(gstColocalResult);
 		break;
 	case ID_MaskMerge:
 		glbin_vol_selector.PasteMask(1);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
-		if (glbin_brush_def.m_update_size)
+		if (glbin_vol_selector.GetAutoPaintSize())
 			vc.insert(gstBrushCountResult);
-		if (glbin_brush_def.m_update_colocal)
+		if (glbin_colocalizer.GetAutoColocalize())
 			vc.insert(gstColocalResult);
 		break;
 	case ID_MaskExclude:
 		glbin_vol_selector.PasteMask(2);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
-		if (glbin_brush_def.m_update_size)
+		if (glbin_vol_selector.GetAutoPaintSize())
 			vc.insert(gstBrushCountResult);
-		if (glbin_brush_def.m_update_colocal)
+		if (glbin_colocalizer.GetAutoColocalize())
 			vc.insert(gstColocalResult);
 		break;
 	case ID_MaskIntersect:
 		glbin_vol_selector.PasteMask(3);
 		excl_self = 0;
 		vc.insert(gstSelUndo);
-		if (glbin_brush_def.m_update_size)
+		if (glbin_vol_selector.GetAutoPaintSize())
 			vc.insert(gstBrushCountResult);
-		if (glbin_brush_def.m_update_colocal)
+		if (glbin_colocalizer.GetAutoColocalize())
 			vc.insert(gstColocalResult);
 		break;
 	}
@@ -841,9 +832,9 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 	fluo::ValueCollection vc;
 	int sx = 2;
 	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		vc.insert(gstColocalResult);
 		sx = 0;
@@ -879,9 +870,9 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 	fluo::ValueCollection vc;
 	int sx = 2;
 	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		vc.insert(gstColocalResult);
 		sx = 0;
@@ -917,9 +908,9 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 	fluo::ValueCollection vc;
 	int sx = 2;
 	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		vc.insert(gstColocalResult);
 		sx = 0;
@@ -946,9 +937,9 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 	fluo::ValueCollection vc;
 	int sx = 2;
 	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		vc.insert(gstColocalResult);
 		sx = 0;
@@ -981,9 +972,9 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 	fluo::ValueCollection vc;
 	int sx = 2;
 	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
 		vc.insert(gstColocalResult);
 		sx = 0;
@@ -1142,11 +1133,6 @@ void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 {
 	FluoUpdate({ gstBrushCountResult });
-}
-
-void BrushToolDlg::OnAutoUpdateBtn(wxCommandEvent& event)
-{
-	glbin_brush_def.m_update_size = m_auto_update_btn->GetValue();
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)

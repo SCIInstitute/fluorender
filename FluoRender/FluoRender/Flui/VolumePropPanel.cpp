@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Reshape.h>
 #include <MultiVolumeRenderer.h>
 #include <VolumeRenderer.h>
+#include <VolumeSelector.h>
+#include <Colocalize.h>
 #include <Color.h>
 #include <BBox.h>
 #include <Point.h>
@@ -1753,9 +1755,9 @@ void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
 
 	fluo::ValueCollection vc;
 	vc.insert(notify?gstThreshold: gstNull);
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 
 	FluoRefresh(0, vc, { glbin_current.GetViewId(m_view) });
@@ -1884,9 +1886,9 @@ void VolumePropPanel::SyncThresh(double val1, double val2)
 
 	fluo::ValueCollection vc;
 	vc.insert(gstThreshold);
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 	FluoRefresh(1, vc, { glbin_current.GetViewId(m_view) });
 }
@@ -2734,9 +2736,9 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 
 	fluo::ValueCollection vc;
 	vc.insert(gstColormap);
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId(m_view) });
 }
@@ -2759,9 +2761,9 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 
 	fluo::ValueCollection vc;
 	vc.insert(gstColormap);
-	if (glbin_brush_def.m_update_size)
+	if (glbin_vol_selector.GetAutoPaintSize())
 		vc.insert(gstBrushCountResult);
-	if (glbin_brush_def.m_update_colocal)
+	if (glbin_colocalizer.GetAutoColocalize())
 		vc.insert(gstColocalResult);
 	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId(m_view) });
 }

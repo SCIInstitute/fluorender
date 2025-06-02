@@ -60,6 +60,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerRenderer.h>
 #include <CompAnalyzer.h>
 #include <CompSelector.h>
+#include <Colocalize.h>
 #include <CompEditor.h>
 #include <ImgShader.h>
 #include <Framebuffer.h>
@@ -10299,9 +10300,9 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_set_focus = true;
 			state.m_refresh = true;
 			state.m_value_collection.insert({ gstSelUndo, gstBrushState, gstBrushThreshold, gstBrushSize1, gstBrushSize2 });
-			if (glbin_brush_def.m_update_size)
+			if (glbin_vol_selector.GetAutoPaintSize())
 				state.m_value_collection.insert(gstBrushCountResult);
-			if (glbin_brush_def.m_update_colocal)
+			if (glbin_colocalizer.GetAutoColocalize())
 				state.m_value_collection.insert(gstColocalResult);
 		}
 
@@ -10617,9 +10618,9 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_looking_glass_changed = true;
 			state.m_start_loop = true;
 			//update
-			if (glbin_brush_def.m_update_size)
+			if (glbin_vol_selector.GetAutoPaintSize())
 				state.m_value_collection.insert(gstBrushCountResult);
-			if (glbin_brush_def.m_update_colocal)
+			if (glbin_colocalizer.GetAutoColocalize())
 				state.m_value_collection.insert(gstColocalResult);
 			if (m_int_mode == 12)
 				state.m_value_collection.insert(gstRulerList);
@@ -10918,9 +10919,9 @@ void RenderView::ProcessMouse(MouseState& state)
 			RefreshGL(17);
 			fluo::ValueCollection vc;
 			vc.insert({ gstSelUndo, gstBrushThreshold });
-			if (glbin_brush_def.m_update_size)
+			if (glbin_vol_selector.GetAutoPaintSize())
 				vc.insert(gstBrushCountResult);
-			if (glbin_brush_def.m_update_colocal)
+			if (glbin_colocalizer.GetAutoColocalize())
 				vc.insert(gstColocalResult);
 			glbin_current.mainframe->UpdateProps(vc);
 			return;
@@ -10954,9 +10955,9 @@ void RenderView::ProcessMouse(MouseState& state)
 			RefreshGL(19);
 			fluo::ValueCollection vc;
 			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
-			if (glbin_brush_def.m_update_size)
+			if (glbin_vol_selector.GetAutoPaintSize())
 				vc.insert(gstBrushCountResult);
-			if (glbin_brush_def.m_update_colocal)
+			if (glbin_colocalizer.GetAutoColocalize())
 				vc.insert(gstColocalResult);
 			glbin_current.mainframe->UpdateProps(vc);
 			return;

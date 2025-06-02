@@ -40,6 +40,8 @@ namespace flrd
 		Colocalize();
 		~Colocalize();
 
+		bool GetAutoColocalize();
+
 		void Compute();
 		std::wstring GetTitles() { return m_titles; }
 		std::wstring GetValues() { return m_values; }

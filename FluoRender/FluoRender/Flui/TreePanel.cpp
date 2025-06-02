@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <DataManager.h>
 #include <VolumeSelector.h>
+#include <Colocalize.h>
 //resources
 #include <png_resource.h>
 #include <tick.xpm>
@@ -1579,9 +1580,9 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 			break;
 		}
 		glbin_vol_selector.PasteMask(ival);
-		if (glbin_brush_def.m_update_size)
+		if (glbin_vol_selector.GetAutoPaintSize())
 			vc.insert(gstBrushCountResult);
-		if (glbin_brush_def.m_update_colocal)
+		if (glbin_colocalizer.GetAutoColocalize())
 			vc.insert(gstColocalResult);
 	}
 		break;

@@ -36,6 +36,7 @@ AutomateDefault::AutomateDefault()
 	m_histogram = 2;
 	m_paint_size = 2;
 	m_comp_gen = 2;
+	m_colocalize = 2;
 }
 
 AutomateDefault::~AutomateDefault()
@@ -59,6 +60,8 @@ void AutomateDefault::Read()
 	f->Read("paint size", &m_paint_size, 2);
 	//component generation
 	f->Read("comp gen", &m_comp_gen, 2);
+	//colocalization
+	f->Read("colocalize", &m_colocalize, 2);
 }
 
 void AutomateDefault::Save()
@@ -76,4 +79,6 @@ void AutomateDefault::Save()
 	f->Write("paint size", m_paint_size);
 	//component generation
 	f->Write("comp gen", m_comp_gen);
+	//colocalization
+	f->Write("colocalize", m_colocalize);
 }

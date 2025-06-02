@@ -45,5 +45,6 @@ public:
 	int m_histogram;
 	int m_paint_size;
 	int m_comp_gen;
+	int m_colocalize;
 };
 #endif//_AUTOMATEDEFAULT_H_
