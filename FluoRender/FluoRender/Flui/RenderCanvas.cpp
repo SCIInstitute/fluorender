@@ -70,7 +70,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	//previous focus
 	m_prev_focus(0),
 	//timer for fullscreen
-	m_fullscreen_trigger(this, ID_ftrigger),
+	m_exit_fscreen_trigger(this, 0),
 	m_enable_touch(false),
 	m_ptr_id1(-1),
 	m_ptr_id2(-1),
@@ -445,7 +445,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	if (state.m_fullscreen)
 		m_renderview_panel->SetFullScreen();
 	if (state.m_exit_fullscreen)
-		m_fullscreen_trigger.Start(10);
+		m_exit_fscreen_trigger.Start(10);
 
 	if (state.m_refresh)
 		m_renderview_panel->FluoRefresh(0, state.m_value_collection, {-1});
@@ -470,7 +470,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 {
-	m_fullscreen_trigger.Stop();
+	m_exit_fscreen_trigger.Stop();
 	if (!m_frame || !m_renderview_panel)
 		return;
 
@@ -514,7 +514,7 @@ void RenderCanvas::OnClose(wxCloseEvent &event)
 {
 	if (m_full_screen)
 	{
-		m_fullscreen_trigger.Start(10);
+		m_exit_fscreen_trigger.Start(10);
 		event.Veto();
 	}
 }

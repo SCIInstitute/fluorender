@@ -160,6 +160,9 @@ private:
 	int m_pin_by_user;//override pin by scale: 0:by scale; 1:always pin; 2:always not pin
 	bool m_pin_by_scale;
 
+	//trigger for entering full screen
+	wxTimer m_enter_fscreen_trigger;
+
 	//render view///////////////////////////////////////////////
 	RenderView* m_render_view;
 	RenderCanvas *m_canvas;
@@ -221,6 +224,7 @@ private:
 	void OnAovText(wxCommandEvent& event);
 	void OnToolBar2(wxCommandEvent& event);
 	void OnFullScreen(wxCommandEvent& event);
+	void OnSetFullScreen(wxTimerEvent& event);
 
 	//bar left
 	void OnDepthAttenCheck(wxCommandEvent& event);

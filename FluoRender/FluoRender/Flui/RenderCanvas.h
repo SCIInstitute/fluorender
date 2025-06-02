@@ -42,8 +42,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/event.h>
 #include <wx/timer.h>
 
-#define ID_ftrigger	0
-
 class MainFrame;
 class RenderViewPanel;
 class RenderView;
@@ -93,8 +91,8 @@ private:
 	//render view
 	std::weak_ptr<RenderView> m_render_view;
 
-	//timer for full screen
-	wxTimer m_fullscreen_trigger;
+	//timer for exit full screen
+	wxTimer m_exit_fscreen_trigger;
 
 	//wacom support
 #ifdef _WIN32

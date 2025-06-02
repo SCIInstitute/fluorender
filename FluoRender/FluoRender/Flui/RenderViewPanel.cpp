@@ -70,7 +70,8 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	m_bg_color_inv(false),
 	m_rot_slider(true),
 	m_pin_by_user(0),
-	m_pin_by_scale(false)
+	m_pin_by_scale(false),
+	m_enter_fscreen_trigger(this, 0)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -260,6 +261,8 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	glbin.add_undo_control(m_x_rot_sldr);
 	glbin.add_undo_control(m_y_rot_sldr);
 	glbin.add_undo_control(m_z_rot_sldr);
+
+	Bind(wxEVT_TIMER, &RenderViewPanel::OnSetFullScreen, this);
 
 	Thaw();
 }
@@ -1164,47 +1167,7 @@ void RenderViewPanel::SetFree(bool val)
 
 void RenderViewPanel::SetFullScreen()
 {
-	if (m_canvas->GetParent() != m_full_frame)
-	{
-		m_view_sizer->Detach(m_canvas);
-		m_view_sizer->AddStretchSpacer();
-		m_canvas->Reparent(m_full_frame);
-		//get display id
-		unsigned int disp_id = glbin_settings.m_disp_id;
-		if (disp_id >= wxDisplay::GetCount())
-			disp_id = 0;
-		wxDisplay display(disp_id);
-		wxRect rect = display.GetGeometry();
-		m_full_frame->SetSize(rect.GetSize());
-		wxPoint pos = rect.GetPosition();
-#ifdef _DARWIN
-		pos -= wxPoint(0, 10);
-#endif
-		m_full_frame->SetPosition(pos);
-#ifdef _WIN32
-		m_full_frame->ShowFullScreen(true);
-#endif
-		m_canvas->SetPosition(wxPoint(0, 0));
-		m_canvas->SetSize(m_full_frame->GetSize());
-		if (glbin_settings.m_stay_top)
-			m_full_frame->SetWindowStyle(wxBORDER_NONE | wxSTAY_ON_TOP);
-		else
-			m_full_frame->SetWindowStyle(wxBORDER_NONE);
-#ifdef _WIN32
-		if (!glbin_settings.m_show_cursor)
-			ShowCursor(false);
-#endif
-		m_full_frame->Iconize(false);
-		m_full_frame->Raise();
-		m_full_frame->Show();
-		m_canvas->m_full_screen = true;
-		m_canvas->SetFocus();
-		RefreshGL();
-	}
-	else
-	{
-		m_canvas->Close();
-	}
+	m_enter_fscreen_trigger.Start(10);
 }
 
 void RenderViewPanel::CloseFullScreen()
@@ -1441,6 +1404,52 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
 {
 	SetFullScreen();
+}
+
+void RenderViewPanel::OnSetFullScreen(wxTimerEvent& event)
+{
+	m_enter_fscreen_trigger.Stop();
+	if (m_canvas->GetParent() != m_full_frame)
+	{
+		m_view_sizer->Detach(m_canvas);
+		m_view_sizer->AddStretchSpacer();
+		m_canvas->Reparent(m_full_frame);
+		//get display id
+		unsigned int disp_id = glbin_settings.m_disp_id;
+		if (disp_id >= wxDisplay::GetCount())
+			disp_id = 0;
+		wxDisplay display(disp_id);
+		wxRect rect = display.GetGeometry();
+		m_full_frame->SetSize(rect.GetSize());
+		wxPoint pos = rect.GetPosition();
+#ifdef _DARWIN
+		pos -= wxPoint(0, 10);
+#endif
+		m_full_frame->SetPosition(pos);
+#ifdef _WIN32
+		m_full_frame->ShowFullScreen(true);
+#endif
+		m_canvas->SetPosition(wxPoint(0, 0));
+		m_canvas->SetSize(m_full_frame->GetSize());
+		if (glbin_settings.m_stay_top)
+			m_full_frame->SetWindowStyle(wxBORDER_NONE | wxSTAY_ON_TOP);
+		else
+			m_full_frame->SetWindowStyle(wxBORDER_NONE);
+#ifdef _WIN32
+		if (!glbin_settings.m_show_cursor)
+			ShowCursor(false);
+#endif
+		m_full_frame->Iconize(false);
+		m_full_frame->Raise();
+		m_full_frame->Show();
+		m_canvas->m_full_screen = true;
+		m_canvas->SetFocus();
+		RefreshGL();
+	}
+	else
+	{
+		m_canvas->Close();
+	}
 }
 
 void RenderViewPanel::OnDepthAttenCheck(wxCommandEvent& event)
