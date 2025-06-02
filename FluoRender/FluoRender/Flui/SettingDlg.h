@@ -137,9 +137,6 @@ private:
 	wxTreeCtrl* m_device_tree;
 
 	//automate
-	std::vector<std::string> m_combo_keys =
-	{ "histogram", "paint size", "comp gen" };
-
 	struct ComboEntry
 	{
 		int id;

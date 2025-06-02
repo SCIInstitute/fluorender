@@ -2617,6 +2617,17 @@ bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
 
 void VolumeData::ComputeHistogram(bool set_prog_func)
 {
+	int get_histogram = glbin_automate_def.m_histogram;
+	if (get_histogram == 0)
+		return;
+	else if (get_histogram == 1)
+		;
+	else if (get_histogram == 2)
+	{
+		if (GetAllBrickNum() > 1)
+			return;
+	}
+
 	if (m_hist_dirty)
 	{
 		int bins = 128;

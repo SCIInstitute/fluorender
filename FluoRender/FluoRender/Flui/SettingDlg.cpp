@@ -227,23 +227,26 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
 	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
 
-	m_automate_combo.insert({
-		"histogram",
-		ComboEntry{ 0, "histogram",
-		"Automatically compute histograms for volume data",
-		{ "Enable", "Disable", "Disable for large data" }, nullptr } });
-	m_automate_combo.insert({
-		"paint size",
-		ComboEntry{ 1, "paint size",
-		"Automatically compute information on brush selection",
-		{ "Enable", "Disable", "Disable for large data" }, nullptr } });
-	m_automate_combo.insert({
-		"comp gen",
-		ComboEntry{ 2, "comp gen",
-		"Automatically generate components for volume data",
-		{ "Enable", "Disable", "Disable for large data" }, nullptr } });
+	std::vector<std::string> keys =
+	{ "histogram", "paint size", "comp gen" };
 
-	for (const auto& key : m_combo_keys)
+	m_automate_combo.insert({
+		keys[0],
+		ComboEntry{ 0, keys[0],
+		"Automatically compute histograms for volume data",
+		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		keys[1],
+		ComboEntry{ 1, keys[1],
+		"Automatically compute information on brush selection",
+		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		keys[2],
+		ComboEntry{ 2, keys[2],
+		"Automatically generate components for volume data",
+		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
+
+	for (const auto& key : keys)
 	{
 		auto it = m_automate_combo.find(key);
 		if (it != m_automate_combo.end())
@@ -1974,10 +1977,13 @@ void SettingDlg::OnAutomationCombo(wxCommandEvent& event)
 	switch (id)
 	{
 	case 0://histogram
+		glbin_automate_def.m_histogram = index;
 		break;
 	case 1://paint size
+		glbin_automate_def.m_paint_size = index;
 		break;
 	case 3://compo gen
+		glbin_automate_def.m_comp_gen = index;
 		break;
 	}
 }

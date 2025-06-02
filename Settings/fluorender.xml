@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <FluoRender>
     <ver_major>2</ver_major>
-    <ver_minor>32</ver_minor>
+    <ver_minor>33</ver_minor>
     <project>
         <save_project>1</save_project>
         <inc_save>1</inc_save>
@@ -27,6 +27,7 @@
         <rt_compress>0</rt_compress>
         <mov_bitrate>20</mov_bitrate>
         <mov_filename></mov_filename>
+        <mpg_cache_size>-1</mpg_cache_size>
         <fp_convert>0</fp_convert>
         <fp_min>0</fp_min>
         <fp_max>1</fp_max>
@@ -170,6 +171,11 @@
     <python>
         <version>10</version>
     </python>
+    <automate_default>
+        <histogram>2</histogram>
+        <paint_size>2</paint_size>
+        <comp_gen>2</comp_gen>
+    </automate_default>
     <brush_default>
         <hist_depth>1</hist_depth>
         <iter_weak>10</iter_weak>
@@ -322,8 +328,9 @@
         <gamma_3d>0.69999999999999996</gamma_3d>
         <boundary_enable>1</boundary_enable>
         <boundary>0</boundary>
-        <saturation_enable>1</saturation_enable>
-        <saturation>1</saturation>
+        <minmax_enable>1</minmax_enable>
+        <low_offset>0</low_offset>
+        <high_offset>1</high_offset>
         <threshold_enable>1</threshold_enable>
         <low_threshold>0</low_threshold>
         <high_threshold>1</high_threshold>

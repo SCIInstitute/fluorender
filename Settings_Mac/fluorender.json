@@ -105,7 +105,7 @@
 		"point volume": 0
 	},
 	"memory": {
-		"mem swap": true,
+		"mem swap": false,
 		"graphics mem": 8000,
 		"large data size": 1000,
 		"force brick size": 256,
