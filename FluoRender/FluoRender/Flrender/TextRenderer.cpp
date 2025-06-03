@@ -201,7 +201,7 @@ namespace flvr
 	{
 	}
 
-	void TextRenderer::RenderText(const std::wstring& text, fluo::Color &color,
+	void TextRenderer::RenderText(const std::wstring& text, const fluo::Color &color,
 		float x, float y, float sx, float sy)
 	{
 		glDisable(GL_DEPTH_TEST);

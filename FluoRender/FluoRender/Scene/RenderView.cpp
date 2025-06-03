@@ -5691,7 +5691,7 @@ void RenderView::DrawLegend()
 
 void RenderView::DrawName(
 	double x, double y, int nx, int ny,
-	const std::wstring& name, fluo::Color color,
+	const std::wstring& name, const fluo::Color color,
 	double font_height,
 	bool highlighted)
 {
@@ -6181,7 +6181,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 	glCullFace(GL_BACK);
 }
 
-void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
+void RenderView::SetColormapColors(int colormap, const fluo::Color &c1, const fluo::Color& c2, double inv)
 {
 	switch (colormap)
 	{
@@ -6207,7 +6207,29 @@ void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 			m_color_7 = fluo::Color(0.0, 0.0, 1.0);
 		}
 		break;
-	case 1://hot
+	case 1://primary secondary
+		if (inv > 0.0)
+		{
+			m_color_1 = c2;
+			m_color_2 = c2;
+			m_color_3 = c2 * 0.75 + c1 * 0.25;
+			m_color_4 = (c1 + c2) * 0.5;
+			m_color_5 = c1 * 0.75 + c2 * 0.25;
+			m_color_6 = c1;
+			m_color_7 = c1;
+		}
+		else
+		{
+			m_color_1 = c1;
+			m_color_2 = c1;
+			m_color_3 = c1 * 0.75 + c2 * 0.25;
+			m_color_4 = (c1 + c2) * 0.5;
+			m_color_5 = c2 * 0.75 + c1 * 0.25;
+			m_color_6 = c2;
+			m_color_7 = c2;
+		}
+		break;
+	case 2://hot
 		if (inv > 0.0)
 		{
 			m_color_1 = fluo::Color(0.0, 0.0, 0.0);
@@ -6229,7 +6251,7 @@ void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 			m_color_7 = fluo::Color(0.0, 0.0, 0.0);
 		}
 		break;
-	case 2://cool
+	case 3://cool
 		if (inv > 0.0)
 		{
 			m_color_1 = fluo::Color(0.0, 1.0, 1.0);
@@ -6251,7 +6273,7 @@ void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 			m_color_7 = fluo::Color(0.0, 1.0, 1.0);
 		}
 		break;
-	case 3://diverging
+	case 4://diverging
 		if (inv > 0.0)
 		{
 			m_color_1 = fluo::Color(0.25, 0.3, 0.75);
@@ -6273,7 +6295,7 @@ void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 			m_color_7 = fluo::Color(0.25, 0.3, 0.75);
 		}
 		break;
-	case 4://monochrome
+	case 5://monochrome
 		if (inv > 0.0)
 		{
 			m_color_1 = fluo::Color(0.0, 0.0, 0.0);
@@ -6295,68 +6317,68 @@ void RenderView::SetColormapColors(int colormap, fluo::Color &c, double inv)
 			m_color_7 = fluo::Color(0.0, 0.0, 0.0);
 		}
 		break;
-	case 5://high-key
+	case 6://high-key
 		if (inv > 0.0)
 		{
 			m_color_1 = fluo::Color(1.0, 1.0, 1.0);
 			m_color_2 = fluo::Color(1.0, 1.0, 1.0);
-			m_color_3 = c * 0.25 + fluo::Color(1.0, 1.0, 1.0)*0.75;
-			m_color_4 = (c + fluo::Color(1.0, 1.0, 1.0))*0.5;
-			m_color_5 = c * 0.75 + fluo::Color(1.0, 1.0, 1.0)*0.25;
-			m_color_6 = c;
-			m_color_7 = c;
+			m_color_3 = c1 * 0.25 + fluo::Color(1.0, 1.0, 1.0)*0.75;
+			m_color_4 = (c1 + fluo::Color(1.0, 1.0, 1.0))*0.5;
+			m_color_5 = c1 * 0.75 + fluo::Color(1.0, 1.0, 1.0)*0.25;
+			m_color_6 = c1;
+			m_color_7 = c1;
 		}
 		else
 		{
-			m_color_1 = c;
-			m_color_2 = c;
-			m_color_3 = c * 0.75 + fluo::Color(1.0, 1.0, 1.0)*0.25;
-			m_color_4 = (c + fluo::Color(1.0, 1.0, 1.0))*0.5;
-			m_color_5 = c * 0.25 + fluo::Color(1.0, 1.0, 1.0)*0.75;
+			m_color_1 = c1;
+			m_color_2 = c1;
+			m_color_3 = c1 * 0.75 + fluo::Color(1.0, 1.0, 1.0)*0.25;
+			m_color_4 = (c1 + fluo::Color(1.0, 1.0, 1.0))*0.5;
+			m_color_5 = c1 * 0.25 + fluo::Color(1.0, 1.0, 1.0)*0.75;
 			m_color_6 = fluo::Color(1.0, 1.0, 1.0);
 			m_color_7 = fluo::Color(1.0, 1.0, 1.0);
 		}
 		break;
-	case 6://low-key
+	case 7://low-key
 		if (inv > 0.0)
 		{
-			m_color_1 = c;
-			m_color_2 = c;
-			m_color_3 = c * (0.025 + 0.75);
-			m_color_4 = c * 0.55;
-			m_color_5 = c * (0.075 + 0.25);
-			m_color_6 = c * 0.1;
-			m_color_7 = c * 0.1;
+			m_color_1 = c1;
+			m_color_2 = c1;
+			m_color_3 = c1 * (0.025 + 0.75);
+			m_color_4 = c1 * 0.55;
+			m_color_5 = c1 * (0.075 + 0.25);
+			m_color_6 = c1 * 0.1;
+			m_color_7 = c1 * 0.1;
 		}
 		else
 		{
-			m_color_1 = c * 0.1;
-			m_color_2 = c * 0.1;
-			m_color_3 = c * (0.075 + 0.25);
-			m_color_4 = c * 0.55;
-			m_color_5 = c * (0.025 + 0.75);
-			m_color_6 = c;
-			m_color_7 = c;
+			m_color_1 = c1 * 0.1;
+			m_color_2 = c1 * 0.1;
+			m_color_3 = c1 * (0.075 + 0.25);
+			m_color_4 = c1 * 0.55;
+			m_color_5 = c1 * (0.025 + 0.75);
+			m_color_6 = c1;
+			m_color_7 = c1;
 		}
 		break;
-	case 7://high transparency
+	case 8://high transparency
 		if (inv > 0.0)
 		{
 			m_color_1 = fluo::Color(0.0, 0.0, 0.0);
 			m_color_2 = fluo::Color(0.0, 0.0, 0.0);
-			m_color_3 = c * 0.25 + fluo::Color(0.0, 0.0, 0.0) * 0.75;
-			m_color_4 = c * 0.5 + fluo::Color(0.0, 0.0, 0.0) * 0.5;
-			m_color_5 = c * 0.75 + fluo::Color(0.0, 0.0, 0.0) * 0.25;
-			m_color_6 = c;
-			m_color_7 = c;
+			m_color_3 = c1 * 0.25 + fluo::Color(0.0, 0.0, 0.0) * 0.75;
+			m_color_4 = c1 * 0.5 + fluo::Color(0.0, 0.0, 0.0) * 0.5;
+			m_color_5 = c1 * 0.75 + fluo::Color(0.0, 0.0, 0.0) * 0.25;
+			m_color_6 = c1;
+			m_color_7 = c1;
 		}
 		else
 		{
-			m_color_1 = c;
-			m_color_2 = c;
-			m_color_3 = c * 0.75 + fluo::Color(0.0, 0.0, 0.0) * 0.25;
-			m_color_4 = c * 0.5 + fluo::Color(0.0, 0.0, 0.0) * 0.5;
-			m_color_5 = c * 0.25 + fluo::Color(0.0, 0.0, 0.0) * 0.75;
+			m_color_1 = c1;
+			m_color_2 = c1;
+			m_color_3 = c1 * 0.75 + fluo::Color(0.0, 0.0, 0.0) * 0.25;
+			m_color_4 = c1 * 0.5 + fluo::Color(0.0, 0.0, 0.0) * 0.5;
+			m_color_5 = c1 * 0.25 + fluo::Color(0.0, 0.0, 0.0) * 0.75;
 			m_color_6 = fluo::Color(0.0, 0.0, 0.0);
 			m_color_7 = fluo::Color(0.0, 0.0, 0.0);
 		}
@@ -6384,9 +6406,11 @@ void RenderView::DrawColormap()
 	m_value_5 = (m_value_4 + high) / 2.0;
 	max_val = cur_vd->GetMaxValue();
 	enable_alpha = cur_vd->GetAlphaEnable();
-	fluo::Color vd_color = cur_vd->GetColor();
-	SetColormapColors(cur_vd->GetColormap(),
-		vd_color, cur_vd->GetColormapInv());
+	SetColormapColors(
+		cur_vd->GetColormap(),
+		cur_vd->GetColor(),
+		cur_vd->GetMaskColor(),
+		cur_vd->GetColormapInv());
 
 	float offset = 0;
 	if (m_draw_legend)

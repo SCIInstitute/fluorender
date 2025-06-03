@@ -783,11 +783,11 @@ private:
 	void DrawScaleBar();
 	void DrawLegend();
 	void DrawName(double x, double y, int nx, int ny,
-		const std::wstring& name, fluo::Color color,
+		const std::wstring& name, const fluo::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
 	void DrawClippingPlanes(int face_winding);
-	void SetColormapColors(int colormap, fluo::Color &c, double inv);
+	void SetColormapColors(int colormap, const fluo::Color &c1, const fluo::Color& c2, double inv);
 	void DrawColormap();
 	void DrawGradBg();
 	void DrawInfo(int nx, int ny, bool intactive);
