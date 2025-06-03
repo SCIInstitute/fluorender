@@ -256,7 +256,7 @@ struct DBMIFLOAT64
 
 #else//_DEBUG
 #define DBG_NEW new
-#define DBGPRINT( kwszDebugFormatString, ... )
+#define DBGPRINT( kwszDebugFormatString, ... ) ((void)0)
 #endif//_DEBUG
 
 #else//_WIN32

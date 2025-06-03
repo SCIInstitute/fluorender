@@ -4568,7 +4568,8 @@ void RenderView::RefreshGL(int debug_code,
 	bool start_loop,
 	bool lg_changed)
 {
-	DBGPRINT(L"View: %d\tRefresh: (%d)\tInteractive: %d\n", m_id, debug_code, m_interactive);
+	DBGPRINT(L"View: %d\tCode: (%d)\tErase: %d\tStart Loop: %d\tLG Changed: %d\tInteractive: %d\n",
+		m_id, debug_code, erase, start_loop, lg_changed, m_interactive);
 
 	m_updating = true;
 	if (start_loop)

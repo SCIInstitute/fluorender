@@ -1542,7 +1542,7 @@ void MainFrame::RefreshCanvases(const std::set<int>& canvases)
 			continue;
 
 		if (update_all || canvases.find(i) != canvases.end())
-			m_render_view_panels[i]->RefreshGL(false);
+			m_render_view_panels[i]->RefreshGL();
 	}
 }
 
