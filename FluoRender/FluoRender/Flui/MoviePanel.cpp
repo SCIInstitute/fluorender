@@ -1591,8 +1591,8 @@ void MoviePanel::SetEndFrame(int val)
 
 void MoviePanel::SetScrollFrame(int val, bool notify)
 {
-	//if (glbin_moviemaker.IsRunning())
-	//	return;
+	if (glbin_moviemaker.GetCurrentFrame() == val)
+		return;
 	glbin_moviemaker.SetCurrentFrame(val);
 
 	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame, gstMovSeqNum };
