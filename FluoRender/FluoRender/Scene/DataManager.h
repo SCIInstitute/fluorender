@@ -1174,29 +1174,44 @@ public:
 	//volume properties
 	void SetGammaEnable(bool);
 	void SetGamma(double val, bool set_this = true);
+	double GetGamma();
 	void SetBoundaryEnable(bool);
 	void SetBoundary(double, bool set_this = true);
+	double GetBoundary();
 	void SetMinMaxEnable(bool);
 	void SetLowOffset(double, bool set_this = true);
+	double GetLowOffset();
 	void SetHighOffset(double, bool set_this = true);
+	double GetHighOffset();
 	void SetThreshEnable(bool);
 	void SetLeftThresh(double, bool set_this = true);
+	double GetLeftThresh();
 	void SetRightThresh(double, bool set_this = true);
+	double GetRightThresh();
+	double GetSoftThreshold();
 	void SetLuminanceEnable(bool);
 	void SetLuminance(double, bool set_this = true);
+	double GetLuminance();
 	void SetAlphaEnable(bool);
 	void SetAlpha(double, bool set_this = true);
+	double GetAlpha();
 	void SetShadingEnable(bool);
 	void SetLowShading(double);
 	void SetHiShading(double);
+	double GetLowShading();
+	double GetHiShading();
 	void SetShadowEnable(bool);
 	void SetShadowIntensity(double);
+	double GetShadowIntensity();
 	void SetSampleRateEnable(bool);
 	void SetSampleRate(double, bool set_this = true);
+	double GetSampleRate();
 
 	void SetColormapMode(int mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
+	double GetColormapLow();
+	double GetColormapHigh();
 	void SetColormapInv(double val);
 	void SetColormap(int value);
 	void SetColormapProj(int value);
@@ -1235,6 +1250,25 @@ private:
 	bool m_sync_volume_prop;
 
 	bool m_disp;
+
+	//synced values
+	double m_gamma;
+	double m_boundary;
+	double m_lo_offset;
+	double m_hi_offset;
+	double m_lo_thresh;
+	double m_hi_thresh;
+	double m_sw;
+	double m_luminance;
+	double m_alpha;
+	double m_mat_amb;
+	double m_mat_diff;
+	double m_mat_spec;
+	double m_mat_shine;
+	double m_shadow_intensity;
+	double m_sample_rate;
+	double m_colormap_low;
+	double m_colormap_high;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

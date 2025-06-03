@@ -75,7 +75,7 @@ public:
 
 	void SetVolumeData(VolumeData* vd);
 	VolumeData* GetVolumeData();
-	void InitVRenderViews(unsigned int type);
+	void InitViews(unsigned int type);
 
 	//sync group
 	void SetGroup(DataGroup* group);

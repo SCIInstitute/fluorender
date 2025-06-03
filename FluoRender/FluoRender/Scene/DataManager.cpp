@@ -4972,6 +4972,24 @@ DataGroup::DataGroup()
 	m_name = L"Group " + std::to_wstring(m_num);
 	m_disp = true;
 	m_sync_volume_prop = false;
+
+	m_gamma = 1.0;
+	m_boundary = 0.0;
+	m_lo_offset = 0.0;
+	m_hi_offset = 1.0;
+	m_lo_thresh = 0.0;
+	m_hi_thresh = 1.0;
+	m_sw = 0.0;
+	m_luminance = 1.0;
+	m_alpha = 1.0;
+	m_mat_amb = 1.0;
+	m_mat_diff = 1.0;
+	m_mat_spec = 1.0;
+	m_mat_shine = 10;
+	m_shadow_intensity = 0.0;
+	m_sample_rate = 2.0;
+	m_colormap_low = 0.0;
+	m_colormap_high = 1.0;
 }
 
 DataGroup::~DataGroup()
@@ -5075,11 +5093,17 @@ void DataGroup::SetGammaEnable(bool bval)
 
 void DataGroup::SetGamma(double val, bool set_this)
 {
+	m_gamma = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetGamma(val, set_this);
 	}
+}
+
+double DataGroup::GetGamma()
+{
+	return m_gamma;
 }
 
 void DataGroup::SetBoundaryEnable(bool bval)
@@ -5093,11 +5117,17 @@ void DataGroup::SetBoundaryEnable(bool bval)
 
 void DataGroup::SetBoundary(double val, bool set_this)
 {
+	m_boundary = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetBoundary(val, set_this);
 	}
+}
+
+double DataGroup::GetBoundary()
+{
+	return m_boundary;
 }
 
 void DataGroup::SetMinMaxEnable(bool bval)
@@ -5111,6 +5141,7 @@ void DataGroup::SetMinMaxEnable(bool bval)
 
 void DataGroup::SetLowOffset(double val, bool set_this)
 {
+	m_lo_offset = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
@@ -5118,13 +5149,24 @@ void DataGroup::SetLowOffset(double val, bool set_this)
 	}
 }
 
+double DataGroup::GetLowOffset()
+{
+	return m_lo_offset;
+}
+
 void DataGroup::SetHighOffset(double val, bool set_this)
 {
+	m_hi_offset = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetHighOffset(val, set_this);
 	}
+}
+
+double DataGroup::GetHighOffset()
+{
+	return m_hi_offset;
 }
 
 void DataGroup::SetThreshEnable(bool bval)
@@ -5138,6 +5180,7 @@ void DataGroup::SetThreshEnable(bool bval)
 
 void DataGroup::SetLeftThresh(double val, bool set_this)
 {
+	m_lo_thresh = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
@@ -5145,13 +5188,29 @@ void DataGroup::SetLeftThresh(double val, bool set_this)
 	}
 }
 
+double DataGroup::GetLeftThresh()
+{
+	return m_lo_thresh;
+}
+
 void DataGroup::SetRightThresh(double val, bool set_this)
 {
+	m_hi_thresh = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetRightThresh(val, set_this);
 	}
+}
+
+double DataGroup::GetRightThresh()
+{
+	return m_hi_thresh;
+}
+
+double DataGroup::GetSoftThreshold()
+{
+	return m_sw;
 }
 
 void DataGroup::SetLuminanceEnable(bool bval)
@@ -5165,11 +5224,17 @@ void DataGroup::SetLuminanceEnable(bool bval)
 
 void DataGroup::SetLuminance(double val, bool set_this)
 {
+	m_luminance = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetLuminance(val, set_this);
 	}
+}
+
+double DataGroup::GetLuminance()
+{
+	return m_luminance;
 }
 
 void DataGroup::SetAlphaEnable(bool mode)
@@ -5183,11 +5248,17 @@ void DataGroup::SetAlphaEnable(bool mode)
 
 void DataGroup::SetAlpha(double val, bool set_this)
 {
+	m_alpha = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetAlpha(val, set_this);
 	}
+}
+
+double DataGroup::GetAlpha()
+{
+	return m_alpha;
 }
 
 void DataGroup::SetShadingEnable(bool shading)
@@ -5201,6 +5272,7 @@ void DataGroup::SetShadingEnable(bool shading)
 
 void DataGroup::SetLowShading(double val)
 {
+	m_mat_amb = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
@@ -5208,13 +5280,24 @@ void DataGroup::SetLowShading(double val)
 	}
 }
 
+double DataGroup::GetLowShading()
+{
+	return m_mat_amb;
+}
+
 void DataGroup::SetHiShading(double val)
 {
+	m_mat_shine = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetHiShading(val);
 	}
+}
+
+double DataGroup::GetHiShading()
+{
+	return m_mat_shine;
 }
 
 void DataGroup::SetShadowEnable(bool bval)
@@ -5228,11 +5311,17 @@ void DataGroup::SetShadowEnable(bool bval)
 
 void DataGroup::SetShadowIntensity(double val)
 {
+	m_shadow_intensity = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetShadowIntensity(val);
 	}
+}
+
+double DataGroup::GetShadowIntensity()
+{
+	return m_shadow_intensity;
 }
 
 void DataGroup::SetSampleRateEnable(bool bval)
@@ -5246,11 +5335,17 @@ void DataGroup::SetSampleRateEnable(bool bval)
 
 void DataGroup::SetSampleRate(double val, bool set_this)
 {
+	m_sample_rate = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetSampleRate(val, set_this);
 	}
+}
+
+double DataGroup::GetSampleRate()
+{
+	return m_sample_rate;
 }
 
 void DataGroup::SetColormapMode(int mode)
@@ -5273,6 +5368,8 @@ void DataGroup::SetColormapDisp(bool disp)
 
 void DataGroup::SetColormapValues(double low, double high)
 {
+	m_colormap_low = low;
+	m_colormap_high = high;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
@@ -5282,6 +5379,16 @@ void DataGroup::SetColormapValues(double low, double high)
 			it->SetColormapValues(low<0?l:low, high<0?h:high);
 		}
 	}
+}
+
+double DataGroup::GetColormapLow()
+{
+	return m_colormap_low;
+}
+
+double DataGroup::GetColormapHigh()
+{
+	return m_colormap_high;
 }
 
 void DataGroup::SetColormapInv(double val)

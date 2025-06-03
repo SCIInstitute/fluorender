@@ -1254,17 +1254,29 @@ void OutputAdjPanel::SyncGamma(int i)
 	{
 	case 1:
 		if (view)
+		{
+			if (view->GetGammaColor() == gamma)
+				return;
 			view->SetGammaColor(gamma);
+		}
 		break;
 	case 2:
 		if (vd)
+		{
+			if (vd->GetGammaColor() == gamma)
+				return;
 			vd->SetGammaColor(gamma);
+		}
 		if (group)
 			group->SetGammaAll(gamma);
 		break;
 	case 5:
 		if (group)
+		{
+			if (group->GetGammaColor() == gamma)
+				return;
 			group->SetGammaAll(gamma);
+		}
 		break;
 	}
 
@@ -1312,17 +1324,29 @@ void OutputAdjPanel::SyncBrightness(int i)
 	{
 	case 1:
 		if (view)
+		{
+			if (view->GetBrightness() == brightness)
+				return;
 			view->SetBrightness(brightness);
+		}
 		break;
 	case 2:
 		if (vd)
+		{
+			if (vd->GetBrightness() == brightness)
+				return;
 			vd->SetBrightness(brightness);
+		}
 		if (group)
 			group->SetBrightnessAll(brightness);
 		break;
 	case 5:
 		if (group)
+		{
+			if (group->GetBrightness() == brightness)
+				return;
 			group->SetBrightnessAll(brightness);
+		}
 		break;
 	}
 
@@ -1370,17 +1394,29 @@ void OutputAdjPanel::SyncHdr(int i)
 	{
 	case 1:
 		if (view)
+		{
+			if (view->GetHdr() == hdr)
+				return;
 			view->SetHdr(hdr);
+		}
 		break;
 	case 2:
 		if (vd)
+		{
+			if (vd->GetHdr() == hdr)
+				return;
 			vd->SetHdr(hdr);
+		}
 		if (group)
 			group->SetHdrAll(hdr);
 		break;
 	case 5:
 		if (group)
+		{
+			if (group->GetHdr() == hdr)
+				return;
 			group->SetHdrAll(hdr);
+		}
 		break;
 	}
 
