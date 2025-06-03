@@ -1679,7 +1679,7 @@ void RenderViewPanel::RefreshGL(bool start_loop)
 	if (m_render_view)
 	{
 		m_render_view->SetForceClear(true);
-		m_render_view->SetInteractive(true);
+		m_render_view->SetInteractive(false);
 		m_render_view->RefreshGL(0, false, start_loop);
 	}
 }
