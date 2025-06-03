@@ -1132,16 +1132,22 @@ void RenderViewPanel::SetAov(double val, bool notify)
 	if (val < 11)
 	{
 		m_render_view->SetPersp(false);
+		if (m_render_view->GetAov() == 10)
+			return;
 		m_render_view->SetAov(10);
 	}
 	else if (val > 100)
 	{
 		m_render_view->SetPersp(true);
+		if (m_render_view->GetAov() == 100)
+			return;
 		m_render_view->SetAov(100);
 	}
 	else
 	{
 		m_render_view->SetPersp(true);
+		if (m_render_view->GetAov() == val)
+			return;
 		m_render_view->SetAov(val);
 	}
 
@@ -1184,6 +1190,8 @@ void RenderViewPanel::SetDepthAttenEnable(bool val)
 
 void RenderViewPanel::SetDepthAtten(double val, bool notify)
 {
+	if (m_render_view->GetFogIntensity() == val)
+		return;
 	m_render_view->SetFogIntensity(val);
 	if (notify)
 		FluoRefresh(2, { gstDaInt }, { GetViewId() });
@@ -1207,13 +1215,13 @@ void RenderViewPanel::SetScale121()
 
 void RenderViewPanel::SetScaleFactor(double val)
 {
+	double factor = val;
 	switch (m_render_view->m_scale_mode)
 	{
 		case 0:
-			m_render_view->m_scale_factor = val;
 			break;
 		case 1:
-			m_render_view->m_scale_factor = val * m_render_view->Get121ScaleFactor();
+			factor = val * m_render_view->Get121ScaleFactor();
 			break;
 		case 2:
 		{
@@ -1225,11 +1233,14 @@ void RenderViewPanel::SetScaleFactor(double val)
 			{
 				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
 				if (spcx > 0.0)
-					m_render_view->m_scale_factor = val * m_render_view->Get121ScaleFactor() * spcx;
+					factor = val * m_render_view->Get121ScaleFactor() * spcx;
 			}
 		}
 		break;
 	}
+	if (m_render_view->m_scale_factor == factor)
+		return;
+	m_render_view->m_scale_factor = factor;
 	FluoRefresh(2, { gstScaleFactor, gstPinRotCtr }, { GetViewId() });
 }
 
@@ -1261,6 +1272,8 @@ void RenderViewPanel::SetSliderType(bool val)
 
 void RenderViewPanel::SetRotations(const fluo::Vector& val, bool notify)
 {
+	if (m_render_view->GetRotations() == val)
+		return;
 	m_render_view->SetRotations(val, false);
 	if (notify)
 		FluoRefresh(2, { gstCamRotation }, { GetViewId() });
