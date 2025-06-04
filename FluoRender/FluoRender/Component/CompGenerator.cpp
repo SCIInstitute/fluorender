@@ -66,6 +66,24 @@ ComponentGenerator::~ComponentGenerator()
 {
 }
 
+bool ComponentGenerator::GetAutoCompGen()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return false;
+	int get_comp_gen = glbin_automate_def.m_comp_gen;
+	if (get_comp_gen == 0)
+		return false;
+	else if (get_comp_gen == 1)
+		return true;
+	else if (get_comp_gen == 2)
+	{
+		if (vd->GetAllBrickNum() > 1)
+			return false;
+	}
+	return true;
+}
+
 void ComponentGenerator::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd = vd;
@@ -567,7 +585,7 @@ void ComponentGenerator::Grow()
 	if (!CheckBricks())
 		return;
 	auto vd = m_vd.lock();
-	if (vd)
+	if (!vd)
 		return;
 
 	float scale = static_cast<float>(vd->GetScalarScale());
@@ -2274,7 +2292,7 @@ void ComponentGenerator::PlayCmd(double tfactor)
 {
 	//disable first
 	m_fixate = false;
-	glbin_comp_def.m_auto_update = false;
+	//glbin_comp_def.m_auto_update = false;
 	//m_auto_update_btn->SetValue(false);
 
 	if (m_command.empty())

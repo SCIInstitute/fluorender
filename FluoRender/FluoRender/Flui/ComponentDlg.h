@@ -254,7 +254,6 @@ private:
 	wxCheckBox* m_use_ml_chk;
 	wxCheckBox* m_use_sel_chk;
 	wxButton* m_generate_btn;
-	wxToggleButton* m_auto_update_btn;
 	wxButton* m_cluster_btn;
 	wxButton* m_analyze_btn;
 	wxButton* m_analyze_sel_btn;
@@ -278,7 +277,6 @@ private:
 	void OnUseSelChk(wxCommandEvent& event);
 	void OnUseMlChk(wxCommandEvent& event);
 	void OnGenerate(wxCommandEvent& event);
-	void OnAutoUpdate(wxCommandEvent& event);
 	void OnCluster(wxCommandEvent& event);
 	void OnAnalyze(wxCommandEvent& event);
 	void OnAnalyzeSel(wxCommandEvent& event);

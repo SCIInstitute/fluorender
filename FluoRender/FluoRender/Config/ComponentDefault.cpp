@@ -102,9 +102,6 @@ ComponentDefault::ComponentDefault()
 	m_dist_neighbor_num = 1;
 	m_use_dist_allchan = false;
 
-	//update
-	m_auto_update = false;
-
 	//record
 	m_record_cmd = false;
 }
@@ -207,12 +204,6 @@ void ComponentDefault::Read(const std::string& gst_file)
 	f->Read("use_dist_neighbor", &m_use_dist_neighbor);
 	f->Read("dist_neighbor", &m_dist_neighbor_num);
 	f->Read("use_dist_allchan", &m_use_dist_allchan);
-
-	////auto update
-	//f->Read("auto_update", &m_auto_update);
-
-	////record
-	//f->Read("record_cmd", &m_record_cmd);
 }
 
 void ComponentDefault::Save(const std::string& gst_file)
@@ -283,9 +274,6 @@ void ComponentDefault::Save(const std::string& gst_file)
 	f->Write("use_dist_neighbor", m_use_dist_neighbor);
 	f->Write("dist_neighbor", m_dist_neighbor_num);
 	f->Write("use_dist_allchan", m_use_dist_allchan);
-
-	//auto update
-	f->Write("auto_update", m_auto_update);
 
 	//record
 	f->Write("record_cmd", m_record_cmd);

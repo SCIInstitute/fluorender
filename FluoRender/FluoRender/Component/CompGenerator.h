@@ -47,6 +47,8 @@ namespace flrd
 		ComponentGenerator();
 		~ComponentGenerator();
 
+		bool GetAutoCompGen();
+
 		void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
 
 		void SetUseSel(bool val) { m_use_sel = val; }

@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainFrame.h>
 #include <ComponentDefault.h>
+#include <AutomateDefault.h>
 #include <BrushDefault.h>
 #include <CompEditor.h>
 #include <RecordHistParams.h>
@@ -94,8 +95,6 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 		wxDefaultPosition, wxDefaultSize);
 	m_generate_btn = new wxButton(panel_bot, wxID_ANY, "Generate",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_auto_update_btn = new wxToggleButton(panel_bot, wxID_ANY, "Auto Update",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_cluster_btn = new wxButton(panel_bot, wxID_ANY, "Cluster",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_analyze_btn = new wxButton(panel_bot, wxID_ANY, "Analyze",
@@ -106,7 +105,6 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	m_use_sel_chk->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseSelChk, this);
 	m_use_ml_chk->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseMlChk, this);
 	m_generate_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnGenerate, this);
-	m_auto_update_btn->Bind(wxEVT_TOGGLEBUTTON, &ComponentDlg::OnAutoUpdate, this);
 	m_cluster_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnCluster, this);
 	m_analyze_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnAnalyze, this);
 	m_analyze_sel_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnAnalyzeSel, this);
@@ -115,7 +113,6 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 	sizer1->Add(m_use_ml_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_use_sel_chk, 0, wxALIGN_CENTER);
 	sizer1->Add(m_generate_btn, 0, wxALIGN_CENTER);
-	sizer1->Add(m_auto_update_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_cluster_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_analyze_sel_btn, 0, wxALIGN_CENTER);
@@ -1056,8 +1053,11 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstUseMachineLearning))
 		m_use_ml_chk->SetValue(glbin_comp_generator.GetUseMl());
 
-	//if (update_all || FOUND_VALUE(gstAutoUpdate))
-	//	m_auto_update_btn->SetValue(glbin_comp_def.m_auto_update);
+	if (update_all || FOUND_VALUE(gstCompAutoUpdate))
+	{
+		if (glbin_comp_generator.GetAutoCompGen())
+			LaunchAutoUpdateTimer();
+	}
 
 	//comp generate page
 	if (update_all || FOUND_VALUE(gstIteration))
@@ -1349,7 +1349,6 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_use_sel_chk->Show(ival == 0);
 		m_use_ml_chk->Show(ival == 0);
 		m_generate_btn->Show(ival == 0);
-		m_auto_update_btn->Show(ival == 0);
 		m_cluster_btn->Show(ival == 1);
 		m_analyze_btn->Show(ival == 2);
 		m_analyze_sel_btn->Show(ival == 2);
@@ -1490,87 +1489,75 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 void ComponentDlg::SetIter(int val)
 {
 	glbin_comp_generator.SetIter(val);
-	FluoUpdate({ gstIteration });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstIteration, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetThresh(double val)
 {
 	glbin_comp_generator.SetThresh(val);
-	FluoUpdate({ gstCompThreshold });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstCompThreshold, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetDistStrength(double val)
 {
 	glbin_comp_generator.SetDistStrength(val);
-	FluoUpdate({ gstDistFieldStrength });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDistFieldStrength, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetDistFilterSize(int val)
 {
 	glbin_comp_generator.SetDistFilterSize(val);
-	FluoUpdate({ gstDistFieldFilterSize });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDistFieldFilterSize, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetMaxDist(int val)
 {
 	glbin_comp_generator.SetMaxDist(val);
-	FluoUpdate({ gstMaxDist });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstMaxDist, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetDistThresh(double val)
 {
 	glbin_comp_generator.SetDistThresh(val);
-	FluoUpdate({ gstDistFieldThresh });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDistFieldThresh, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetFalloff(double val)
 {
 	glbin_comp_generator.SetFalloff(val);
-	FluoUpdate({ gstDiffusionFalloff });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDiffusionFalloff, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetDensity(double val)
 {
 	glbin_comp_generator.SetDensityThresh(val);
-	FluoUpdate({ gstDensityFieldThresh });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDensityFieldThresh, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetVarth(double val)
 {
 	glbin_comp_generator.SetVarThresh(val);
-	FluoUpdate({ gstDensityVarThresh });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDensityVarThresh, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetDensityWindowSize(int val)
 {
 	glbin_comp_generator.SetDensityWinSize(val);
-	FluoUpdate({ gstDensityWindowSize });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDensityWindowSize, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetDensityStatsSize(int val)
 {
 	glbin_comp_generator.SetDensityStatSize(val);
-	FluoUpdate({ gstDensityStatsSize });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstDensityStatsSize, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetFixSize(int val)
 {
 	glbin_comp_generator.SetFixSize(val);
-	FluoUpdate({ gstFixateSize });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstFixateSize, gstCompAutoUpdate });
 
-	//if (glbin_comp_def.m_auto_update &&
+	//if (glbin_comp_generator.GetAutoCompGen() &&
 	//	!glbin_comp_generator.IsBusy())
 	//{
 	//	glbin_comp_generator.GenerateComp(false);
@@ -1583,15 +1570,13 @@ void ComponentDlg::SetFixSize(int val)
 void ComponentDlg::SetCleanIter(int val)
 {
 	glbin_comp_generator.SetCleanIter(val);
-	FluoUpdate({ gstCleanIteration });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstCleanIteration, gstCompAutoUpdate });
 }
 
 void ComponentDlg::SetCleanLimit(int val)
 {
 	glbin_comp_generator.SetCleanSize(val);
-	FluoUpdate({ gstCleanSize });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstCleanSize, gstCompAutoUpdate });
 }
 
 //comp generate page
@@ -1656,8 +1641,7 @@ void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
 {
 	bool bval = m_use_dist_field_check->GetValue();
 	glbin_comp_generator.SetUseDistField(bval);
-	FluoUpdate({ gstUseDistField });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstUseDistField, gstCompAutoUpdate });
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
@@ -1723,8 +1707,7 @@ void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
 {
 	bool bval = m_diff_check->GetValue();
 	glbin_comp_generator.SetDiffusion(bval);
-	FluoUpdate({ gstUseDiffusion });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstUseDiffusion, gstCompAutoUpdate });
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
@@ -1750,8 +1733,7 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
 {
 	bool bval = m_density_check->GetValue();
 	glbin_comp_generator.SetDensity(bval);
-	FluoUpdate({ gstUseDensityField });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstUseDensityField, gstCompAutoUpdate });
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
@@ -1838,7 +1820,7 @@ void ComponentDlg::OnFixateCheck(wxCommandEvent& event)
 	if (bval)
 		glbin_comp_generator.Fixate();
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_generator.GetAutoCompGen())
 	{
 		bval = glbin_comp_generator.GetClean();
 		glbin_comp_generator.SetClean(false);
@@ -1855,7 +1837,7 @@ void ComponentDlg::OnGrowFixedCheck(wxCommandEvent& event)
 	bool bval = m_grow_fixed_check->GetValue();
 	glbin_comp_generator.SetGrowFixed(bval);
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_generator.GetAutoCompGen())
 	{
 		bval = glbin_comp_generator.GetClean();
 		glbin_comp_generator.SetClean(false);
@@ -1869,7 +1851,7 @@ void ComponentDlg::OnFixUpdateBtn(wxCommandEvent& event)
 {
 	glbin_comp_generator.Fixate();
 
-	if (glbin_comp_def.m_auto_update)
+	if (glbin_comp_generator.GetAutoCompGen())
 	{
 		bool bval = glbin_comp_generator.GetClean();
 		glbin_comp_generator.SetClean(false);
@@ -1902,8 +1884,7 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
 {
 	bool bval = m_clean_check->GetValue();
 	glbin_comp_generator.SetClean(bval);
-	FluoUpdate({ gstCleanEnable });
-	LaunchAutoUpdateTimer();
+	FluoUpdate({ gstCleanEnable, gstCompAutoUpdate });
 }
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent& event)
@@ -1997,7 +1978,7 @@ void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 //auto update
 void ComponentDlg::LaunchAutoUpdateTimer()
 {
-	if (!glbin_comp_def.m_auto_update)
+	if (!glbin_comp_generator.GetAutoCompGen())
 		return;
 	m_auto_update_timer.Start(100);
 }
@@ -2418,13 +2399,6 @@ void ComponentDlg::OnGenerate(wxCommandEvent& event)
 {
 	glbin_comp_generator.Compute();
 	FluoRefresh(2, { gstCompGenOutput });
-}
-
-void ComponentDlg::OnAutoUpdate(wxCommandEvent& event)
-{
-	bool bval = m_auto_update_btn->GetValue();
-	glbin_comp_def.m_auto_update = bval;
-	LaunchAutoUpdateTimer();
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent& event)

@@ -127,9 +127,6 @@ public:
 	int m_dist_neighbor_num;
 	bool m_use_dist_allchan;
 
-	//auto udate
-	bool m_auto_update;
-
 	//record
 	bool m_record_cmd;
 };
