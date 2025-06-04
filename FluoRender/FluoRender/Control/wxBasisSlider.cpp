@@ -158,11 +158,11 @@ void wxBasisSlider::OnLeftUp(wxMouseEvent& event)
 		//thumb_state_ = 0;
 		Refresh();
 		Update();
-		wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
-		e.SetEventObject(this);
-		e.SetString("update");
-		ProcessWindowEvent(e);
-		wxPostEvent(parent_, e);
+		//wxCommandEvent e(wxEVT_SCROLL_CHANGED, id_);
+		//e.SetEventObject(this);
+		//e.SetString("update");
+		//ProcessWindowEvent(e);
+		//wxPostEvent(parent_, e);
 
 	}
 }
