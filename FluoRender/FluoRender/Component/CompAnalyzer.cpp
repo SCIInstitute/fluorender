@@ -45,6 +45,7 @@ using namespace flrd;
 
 ComponentAnalyzer::ComponentAnalyzer()
 	: Progress(),
+	m_use_sel(false),
 	m_analyzed(false),
 	m_colocal(false),
 	m_bn(0),
@@ -165,7 +166,7 @@ int ComponentAnalyzer::GetColocalization(
 	return num;
 }
 
-void ComponentAnalyzer::Analyze(bool sel)
+void ComponentAnalyzer::Analyze()
 {
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd || !vd->GetTexture())
@@ -219,7 +220,8 @@ void ComponentAnalyzer::Analyze(bool sel)
 	m_analyzed = false;
 
 	vd->GetVR()->return_label();
-	if (sel)
+	bool use_sel = m_use_sel;//need to check if mask is valid
+	if (use_sel)
 		vd->GetVR()->return_mask();
 
 	unsigned int size_limit;
@@ -243,7 +245,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 		int nb = 1;
 		if (bn > 1)
 		{
-			if (sel && !b->is_mask_valid())
+			if (use_sel && !b->is_mask_valid())
 				continue;
 			// get brick if ther are more than one brick
 			nb = b->nb(0);
@@ -278,7 +280,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			}
 			data_data = (void*)temp;
 			//mask
-			if (sel)
+			if (use_sel)
 			{
 				c = b->nmask();
 				nb = b->nb(c);
@@ -339,7 +341,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			Nrrd* nrrd_label = vd->GetLabel(false);
 			if (nrrd_label)
 				data_label = (unsigned int*)(nrrd_label->data);
-			if (!data_data || (sel && !data_mask) || !data_label)
+			if (!data_data || (use_sel && !data_mask) || !data_label)
 				return;
 		}
 
@@ -369,7 +371,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 			}
 
 			value = 0.0;
-			if (sel)
+			if (use_sel)
 			{
 				if (data_mask && !data_mask[index])
 					continue;
@@ -481,7 +483,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 	prog = 90;
 	SetProgress(static_cast<int>(prog), "Analyzing components.");
 
-	MatchBricks(sel);
+	MatchBricks(use_sel);
 	UpdateMaxCompSize(m_colocal);
 	if (m_consistent)
 	{
@@ -491,7 +493,7 @@ void ComponentAnalyzer::Analyze(bool sel)
 
 	m_compgroup->dirty = false;
 	m_colocal = m_colocal && m_vd_list.size();
-	if (!sel)
+	if (!use_sel)
 		m_analyzed = true;
 
 	SetRange(0, 100);
@@ -1183,7 +1185,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
-		Analyze(true);
+		Analyze();
 
 	std::wostringstream oss;
 	std::wstring sinfo;
@@ -1299,7 +1301,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
-		Analyze(true);
+		Analyze();
 
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
@@ -1482,7 +1484,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 
 	if (comps.empty() ||
 		m_compgroup->dirty)
-		Analyze(true);
+		Analyze();
 
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)

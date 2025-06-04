@@ -256,7 +256,6 @@ private:
 	wxButton* m_generate_btn;
 	wxButton* m_cluster_btn;
 	wxButton* m_analyze_btn;
-	wxButton* m_analyze_sel_btn;
 
 	//output
 	wxButton* m_include_btn;
@@ -279,7 +278,6 @@ private:
 	void OnGenerate(wxCommandEvent& event);
 	void OnCluster(wxCommandEvent& event);
 	void OnAnalyze(wxCommandEvent& event);
-	void OnAnalyzeSel(wxCommandEvent& event);
 
 	//stats text
 	void OnIncludeBtn(wxCommandEvent& event);

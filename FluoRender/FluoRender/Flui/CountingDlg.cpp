@@ -258,7 +258,7 @@ void CountingDlg::OnAnalyzeBtn(wxCommandEvent& event)
 	glbin_comp_generator.ShuffleID();
 	glbin_comp_generator.Grow();
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(sel);
+	glbin_comp_analyzer.Analyze();
 	glbin_comp_analyzer.Count();
 
 	FluoRefresh(2, { gstCountResult });

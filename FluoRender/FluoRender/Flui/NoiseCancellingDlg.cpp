@@ -209,7 +209,7 @@ void NoiseCancellingDlg::Preview()
 	glbin_comp_analyzer.SetMinNum(0);
 	glbin_comp_analyzer.SetMaxNum(glbin_comp_def.m_nr_size);
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(bval);
+	glbin_comp_analyzer.Analyze();
 
 	//cell size filter
 	glbin_comp_selector.SetUseMin(false);

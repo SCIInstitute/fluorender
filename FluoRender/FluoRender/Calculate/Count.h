@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Count_h
 #define FL_Count_h
 
+#include <memory>
+
 class VolumeData;
 namespace flvr
 {
@@ -38,13 +40,11 @@ namespace flrd
 	class CountVoxels
 	{
 	public:
-		CountVoxels(VolumeData* vd);
+		CountVoxels();
 		~CountVoxels();
 
-		void SetUseMask(bool use_mask)
-		{ m_use_mask = use_mask; }
-		bool GetUseMask()
-		{ return m_use_mask; }
+		void SetVolumeData(const std::shared_ptr<VolumeData>& vd) { m_vd = vd; }
+		std::shared_ptr<VolumeData> GetVolumeData() { return m_vd.lock(); }
 
 		void Count();
 		unsigned int GetSum()
@@ -53,8 +53,7 @@ namespace flrd
 		{ return m_wsum; }
 
 	private:
-		VolumeData *m_vd;
-		bool m_use_mask;//use mask instead of data
+		std::weak_ptr<VolumeData> m_vd;
 		//result
 		unsigned int m_sum;
 		float m_wsum;
@@ -62,8 +61,6 @@ namespace flrd
 		bool CheckBricks();
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz);
-		void* GetVolDataBrick(flvr::TextureBrick* b);
-		void* GetVolData(VolumeData* vd);
 	};
 
 }

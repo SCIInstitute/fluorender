@@ -606,8 +606,8 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (sel_vol && FOUND_VALUE(gstBrushCountResult))
 	{
 		GridData data;
-		flrd::CountVoxels counter(sel_vol.get());
-		counter.SetUseMask(true);
+		flrd::CountVoxels counter;
+		counter.SetVolumeData(sel_vol);
 		counter.Count();
 		data.voxel_sum = counter.GetSum();
 		double scale = sel_vol->GetScalarScale();

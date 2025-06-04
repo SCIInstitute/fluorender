@@ -226,6 +226,7 @@ public:
 	//load mask
 	void LoadMask(Nrrd* mask);
 	Nrrd* GetMask(bool ret);
+	bool IsValidMask();//check if mask doesn't exist or it's empty
 	//empty mask
 	//mode: 0-zeros; 1-255; 2-leave as is
 	void AddEmptyMask(int mode, bool change=true);
@@ -588,6 +589,9 @@ public:
 	void GetMlParams();
 	void ApplyMlVolProp();
 
+	void SetMaskCount(unsigned int sum, float wsum);
+	void ResetMaskCount() { m_mask_count_dirty = true; }
+
 private:
 	std::unique_ptr<flrd::EntryParams> m_ep;
 	std::unique_ptr<flvr::VolumeRenderer> m_vr;
@@ -744,6 +748,11 @@ private:
 	//colormap of histogram
 	bool m_hist_dirty;
 	std::vector<unsigned int> m_hist;
+
+	//mask count
+	bool m_mask_count_dirty;
+	unsigned int m_mask_sum;
+	float m_mask_wsum;
 
 private:
 	//label functions

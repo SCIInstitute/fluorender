@@ -188,6 +188,8 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		segment(push_mask, est_th, mx, my);
 	else
 		segment(push_mask, est_th, 0, 0);
+
+	m_vd->ResetMaskCount();
 }
 
 void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
@@ -752,6 +754,7 @@ void VolumeSelector::PopMask()
 
 	m_vd->GetTexture()->pop_mask();
 	m_vd->GetVR()->clear_tex_mask();
+	m_vd->ResetMaskCount();
 }
 
 void VolumeSelector::UndoMask()
@@ -763,6 +766,7 @@ void VolumeSelector::UndoMask()
 
 	m_vd->GetTexture()->mask_undos_backward();
 	m_vd->GetVR()->clear_tex_mask();
+	m_vd->ResetMaskCount();
 }
 
 void VolumeSelector::RedoMask()
@@ -774,6 +778,7 @@ void VolumeSelector::RedoMask()
 
 	m_vd->GetTexture()->mask_undos_forward();
 	m_vd->GetVR()->clear_tex_mask();
+	m_vd->ResetMaskCount();
 }
 
 //mask operations
@@ -822,6 +827,7 @@ void VolumeSelector::PasteMask(int op)
 				group->AddMask(data, 0);
 		}
 	}
+	m_vd->ResetMaskCount();
 }
 
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)

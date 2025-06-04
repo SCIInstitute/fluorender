@@ -175,6 +175,7 @@
         <histogram>2</histogram>
         <paint_size>2</paint_size>
         <comp_gen>2</comp_gen>
+        <colocalize>2</colocalize>
     </automate_default>
     <brush_default>
         <hist_depth>1</hist_depth>
@@ -225,11 +226,10 @@
         </radius_settings>
         <spacing>0.10000000000000001</spacing>
         <size_data>1</size_data>
-        <update_size>0</update_size>
-        <update_colocal>0</update_colocal>
     </brush_default>
     <comp_default>
-        <use_sel>0</use_sel>
+        <use_sel_cg>1</use_sel_cg>
+        <use_sel_ca>1</use_sel_ca>
         <use_ml>0</use_ml>
         <iter>50</iter>
         <thresh>0.5</thresh>
@@ -277,7 +277,6 @@
         <use_dist_neighbor>0</use_dist_neighbor>
         <dist_neighbor>1</dist_neighbor>
         <use_dist_allchan>0</use_dist_allchan>
-        <auto_update>0</auto_update>
         <record_cmd>0</record_cmd>
     </comp_default>
     <outadj_default>
@@ -395,7 +394,6 @@
     </movie_default>
     <colocal_default>
         <use_mask>0</use_mask>
-        <auto_update>0</auto_update>
         <method>2</method>
         <int_weighted>0</int_weighted>
         <get_ratio>0</get_ratio>

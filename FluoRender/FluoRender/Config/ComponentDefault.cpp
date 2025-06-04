@@ -41,7 +41,8 @@ ComponentDefault::ComponentDefault()
 {
 	//defaults
 	//comp generate page
-	m_use_sel = false;
+	m_use_sel_cg = true;
+	m_use_sel_ca = true;
 	m_use_ml = false;
 	m_iter = 50;
 	m_thresh = 0.5;
@@ -146,7 +147,8 @@ void ComponentDefault::Read(const std::string& gst_file)
 		f->SetPath("/comp default");
 
 	//basic settings
-	f->Read("use_sel", &m_use_sel);
+	f->Read("use_sel_cg", &m_use_sel_cg);
+	f->Read("use_sel_ca", &m_use_sel_ca);
 	f->Read("use_ml", &m_use_ml);
 	f->Read("iter", &m_iter);
 	f->Read("thresh", &m_thresh);
@@ -216,7 +218,8 @@ void ComponentDefault::Save(const std::string& gst_file)
 	f->SetPath("/comp default");
 
 	//comp generate settings
-	f->Write("use_sel", m_use_sel);
+	f->Write("use_sel_cg", m_use_sel_cg);
+	f->Write("use_sel_ca", m_use_sel_ca);
 	f->Write("use_ml", m_use_ml);
 	f->Write("iter", m_iter);
 	f->Write("thresh", m_thresh);
@@ -284,7 +287,7 @@ void ComponentDefault::Set(flrd::ComponentGenerator* cg)
 	if (!cg)
 		return;
 
-	m_use_sel = cg->GetUseSel();
+	m_use_sel_cg = cg->GetUseSel();
 	m_use_ml = cg->GetUseMl();
 	m_iter = cg->GetIter();
 	m_thresh = cg->GetThresh();
@@ -304,6 +307,7 @@ void ComponentDefault::Set(flrd::ComponentGenerator* cg)
 	m_density_window_size = cg->GetDensityWinSize();
 	m_density_stats_size = cg->GetDensityStatSize();
 	m_fixate = cg->GetFixate();
+	m_fix_size = cg->GetFixSize();
 	m_grow_fixed = cg->GetGrowFixed();
 	m_clean = cg->GetClean();
 	m_clean_iter = cg->GetCleanIter();
@@ -316,7 +320,7 @@ void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
 	if (!cg)
 		return;
 
-	cg->SetUseSel(m_use_sel);
+	cg->SetUseSel(m_use_sel_cg);
 	cg->SetUseMl(m_use_ml);
 	cg->SetIter(m_iter);
 	cg->SetThresh(m_thresh);
@@ -336,6 +340,7 @@ void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
 	cg->SetDensityWinSize(m_density_window_size);
 	cg->SetDensityStatSize(m_density_stats_size);
 	cg->SetFixate(m_fixate);
+	cg->SetFixSize(m_fix_size);
 	cg->SetGrowFixed(m_grow_fixed);
 	cg->SetClean(m_clean);
 	cg->SetCleanIter(m_clean_iter);
@@ -396,6 +401,7 @@ void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
 	if (!ca)
 		return;
 
+	m_use_sel_ca = ca->GetUseSel();
 	m_slimit = ca->GetSizeLimit();
 	m_colocal = ca->GetColocal();
 	m_consistent = ca->GetConsistent();
@@ -412,6 +418,7 @@ void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
 	if (!ca)
 		return;
 
+	ca->SetUseSel(m_use_sel_ca);
 	ca->SetSizeLimit(static_cast<unsigned int>(m_slimit));
 	ca->SetColocal(m_colocal);
 	ca->SetConsistent(m_consistent);

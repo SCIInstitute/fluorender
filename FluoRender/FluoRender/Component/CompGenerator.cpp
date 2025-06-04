@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 #include <Plane.h>
+#include <Count.h>
 #include <compatibility.h>
 #include <algorithm>
 #ifdef _DEBUG
@@ -135,6 +136,8 @@ void ComponentGenerator::GenerateComp(bool command)
 	m_tps.push_back(std::chrono::high_resolution_clock::now());
 
 	SetProgress(0, "Initializing component generation.");
+
+	m_use_sel &= vd->IsValidMask();
 
 	vd->AddEmptyMask(1, !m_use_sel);//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
@@ -237,7 +240,7 @@ void ComponentGenerator::Clean(bool command)
 
 	//glbin_comp_generator.SetVolumeData(vd);
 	//glbin_comp_def.Apply(&glbin_comp_generator);
-	//glbin_comp_generator.SetUseMask(use_sel);
+	//glbin_comp_generator.SetUseMask(m_use_sel);
 
 	SetProgress(0, "Initializing component generation.");
 

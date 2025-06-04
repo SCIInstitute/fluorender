@@ -58,7 +58,8 @@ public:
 
 public:
 	//generate settings
-	bool m_use_sel;
+	bool m_use_sel_cg;//for component generator
+	bool m_use_sel_ca;//for component analyzer, should be the same as cg
 	bool m_use_ml;
 	int m_iter;
 	double m_thresh;

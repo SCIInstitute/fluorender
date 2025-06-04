@@ -1474,7 +1474,7 @@ void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
 		return;
 
 	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze(true);
+	glbin_comp_analyzer.Analyze();
 	std::string str;
 	glbin_comp_analyzer.OutputCompListStr(str, 1);
 	m_stat_text->ChangeValue(str);

@@ -78,9 +78,7 @@ const char* str_cl_count_voxels = \
 "	atomic_xchg(wcount+index, lwsum);\n" \
 "}\n";
 
-CountVoxels::CountVoxels(VolumeData* vd)
-	: m_vd(vd),
-	m_use_mask(false),
+CountVoxels::CountVoxels() :
 	m_sum(0),
 	m_wsum(0.0)
 {
@@ -92,11 +90,12 @@ CountVoxels::~CountVoxels()
 
 bool CountVoxels::CheckBricks()
 {
-	if (!m_vd)
+	auto vd = m_vd.lock();
+	if (!vd)
 		return false;
-	if (!m_vd->GetTexture())
+	if (!vd->GetTexture())
 		return false;
-	int brick_num = m_vd->GetTexture()->get_brick_num();
+	int brick_num = vd->GetTexture()->get_brick_num();
 	if (!brick_num)
 		return false;
 	return true;
@@ -113,61 +112,18 @@ bool CountVoxels::GetInfo(
 	return true;
 }
 
-void* CountVoxels::GetVolDataBrick(flvr::TextureBrick* b)
-{
-	if (!b)
-		return 0;
-
-	size_t nx, ny, nz;
-	int bits = 8;
-	int c = 0;
-	int nb = 1;
-
-	c = m_use_mask ? b->nmask() : 0;
-	nb = b->nb(c);
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
-	bits = nb * 8;
-	unsigned long long mem_size = (unsigned long long)nx*
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
-	unsigned char* temp = new unsigned char[mem_size];
-	unsigned char* tempp = temp;
-	unsigned char* tp = (unsigned char*)(b->tex_data(c));
-	unsigned char* tp2;
-	for (size_t k = 0; k < nz; ++k)
-	{
-		tp2 = tp;
-		for (size_t j = 0; j < ny; ++j)
-		{
-			memcpy(tempp, tp2, nx*nb);
-			tempp += nx * nb;
-			tp2 += b->sx()*nb;
-		}
-		tp += b->sx()*b->sy()*nb;
-	}
-	return (void*)temp;
-}
-
-void* CountVoxels::GetVolData(VolumeData* vd)
-{
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	Nrrd* nrrd_data = 0;
-	if (m_use_mask)
-		nrrd_data = vd->GetMask(false);
-	if (!nrrd_data)
-		nrrd_data = vd->GetVolume(false);
-	if (!nrrd_data)
-		return 0;
-	return nrrd_data->data;
-}
-
 void CountVoxels::Count()
 {
+	m_sum = 0;
+	m_wsum = 0;
+
 	if (!CheckBricks())
 		return;
-	if (!m_vd->GetMask(false))
+
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	if (!vd->GetMask(false))
 		return;
 
 	//create program and kernels
@@ -181,8 +137,8 @@ void CountVoxels::Count()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	size_t brick_num = vd->GetTexture()->get_brick_num();
+	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 
 	m_sum = 0; m_wsum = 0.0;
 	for (size_t i = 0; i < brick_num; ++i)
@@ -192,8 +148,8 @@ void CountVoxels::Count()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint tid = vd->GetVR()->load_brick(b);
+		GLint mid = vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -238,5 +194,8 @@ void CountVoxels::Count()
 		delete[] sum;
 		delete[] wsum;
 	}
+
+	//update volume
+	vd->SetMaskCount(m_sum, m_wsum);
 }
 

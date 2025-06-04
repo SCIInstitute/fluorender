@@ -860,7 +860,8 @@ void RulerHandler::AddPaintRulerPoint()
 
 	flrd::Cov cover(vd.get());
 	cover.Compute(1);
-	flrd::CountVoxels counter(vd.get());
+	flrd::CountVoxels counter;
+	counter.SetVolumeData(vd);
 	counter.Count();
 
 	fluo::Point center = cover.GetCenter();

@@ -74,6 +74,8 @@ namespace flrd
 		bool GetAnalyzed()
 		{ return m_analyzed; }
 
+		void SetUseSel(bool val) { m_use_sel = val; }
+		bool GetUseSel() { return m_use_sel; }
 		unsigned int GetSizeLimit() { return m_slimit; }
 		void SetSizeLimit(unsigned int size) { m_slimit = size; }
 		void SetColocal(bool val) { m_colocal = val; }
@@ -117,7 +119,7 @@ namespace flrd
 		size_t GetVox() { return m_vox; }
 		double GetSize() { return m_size; }
 
-		void Analyze(bool sel);
+		void Analyze();
 		void MatchBricks(bool sel);
 		void UpdateMaxCompSize(bool);
 		void MakeColorConsistent();
@@ -158,6 +160,7 @@ namespace flrd
 		CompAnalyzerFunc m_sig_progress;
 
 	private:
+		bool m_use_sel;//use mask instead of data
 		bool m_analyzed;//if used
 		unsigned int m_slimit;//size limit for connecting components
 		bool m_colocal;

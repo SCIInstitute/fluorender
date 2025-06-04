@@ -54,6 +54,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Transform.h>
 #include <Ruler.h>
 #include <TrackMap.h>
+#include <Count.h>
 #include <base_reader.h>
 #include <oib_reader.h>
 #include <oif_reader.h>
@@ -338,6 +339,10 @@ VolumeData::VolumeData()
 		m_clip_dist[i] = 1;
 
 	m_hist_dirty = true;
+
+	m_mask_count_dirty = true;
+	m_mask_sum = 0;
+	m_mask_wsum = 0;
 }
 
 VolumeData::VolumeData(VolumeData &copy)
@@ -491,6 +496,10 @@ VolumeData::VolumeData(VolumeData &copy)
 		m_clip_dist[i] = copy.m_clip_dist[i];
 
 	m_hist_dirty = true;
+
+	m_mask_count_dirty = true;
+	m_mask_sum = 0;
+	m_mask_wsum = 0;
 }
 
 VolumeData::~VolumeData()
@@ -1228,6 +1237,24 @@ Nrrd* VolumeData::GetMask(bool ret)
 	}
 
 	return 0;
+}
+
+bool VolumeData::IsValidMask()
+{
+	if (!m_tex)
+		return false;
+	if (m_tex->nmask() == -1)
+		return false;
+	if (m_mask_count_dirty)
+	{
+		flrd::CountVoxels counter;
+		counter.SetVolumeData(shared_from_this());
+		counter.Count();
+		m_mask_sum = counter.GetSum();
+		m_mask_wsum = counter.GetWeightedSum();
+		m_mask_count_dirty = false;
+	}
+	return m_mask_sum;
 }
 
 Nrrd* VolumeData::GetLabel(bool ret)
@@ -3489,6 +3516,13 @@ void VolumeData::ApplyMlVolProp()
 		dval = m_ep->getParam("denoise_enable");
 		SetNR(dval > 0.5);
 	}
+}
+
+void VolumeData::SetMaskCount(unsigned int sum, float wsum)
+{
+	m_mask_sum = sum;
+	m_mask_wsum = wsum;
+	m_mask_count_dirty = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -639,7 +639,7 @@ void ScriptProc::RunPreTracking()
 	m_fconfig->Read("size_limit", &slimit, 0);
 	//before updating volume
 	glbin_comp_analyzer.SetVolume(cur_vol);
-	glbin_comp_analyzer.Analyze(true);
+	glbin_comp_analyzer.Analyze();
 	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
 	m_sel_labels->clear();
 	for (auto it = list->begin();
@@ -1214,14 +1214,16 @@ void ScriptProc::RunCompAnalysis()
 	std::string fn = std::to_string(curf);
 	fluo::Vector lens;
 
+	glbin_comp_analyzer.SetSizeLimit(slimit);
+	glbin_comp_analyzer.SetConsistent(consistent);
+	bool old_selected = glbin_comp_analyzer.GetUseSel();
+	glbin_comp_analyzer.SetUseSel(selected);
 	for (auto itvol = vlist.begin();
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
 		int bn = (*itvol)->GetAllBrickNum();
 		glbin_comp_analyzer.SetVolume(*itvol);
-		glbin_comp_analyzer.SetSizeLimit(slimit);
-		glbin_comp_analyzer.SetConsistent(consistent);
-		glbin_comp_analyzer.Analyze(selected);
+		glbin_comp_analyzer.Analyze();
 
 		//output
 		//time group
@@ -1300,6 +1302,9 @@ void ScriptProc::RunCompAnalysis()
 			node->addSetValue("comp_pca_lens", lens.x());
 		}
 	}
+
+	//restore
+	glbin_comp_analyzer.SetUseSel(old_selected);
 }
 
 void ScriptProc::RunCompRuler()
