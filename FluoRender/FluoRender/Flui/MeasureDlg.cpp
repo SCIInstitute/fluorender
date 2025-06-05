@@ -1017,15 +1017,7 @@ void MeasureDlg::UpdateRulerList()
 		}
 		double dval = ruler->GetProfileMaxValue();
 		dval *= ruler->GetScalarScale();
-		wxString intensity;
-		if (glbin_ruler_handler.GetBackground())
-		{
-			double bg_int = glbin_ruler_handler.GetVolumeBgInt();
-			dval = (dval - bg_int) / bg_int;
-			intensity = wxString::Format("%.4f", dval);
-		}
-		else
-			intensity = wxString::Format("%.0f", dval);
+		wxString intensity = wxString::Format("%.0f", dval);
 		wxString color;
 		if (ruler->GetUseColor())
 			color = wxString::Format("RGB(%d, %d, %d)",
@@ -1142,14 +1134,7 @@ void MeasureDlg::UpdateProfile()
 
 		double dval = ruler->GetProfileMaxValue();
 		dval *= ruler->GetScalarScale();
-		if (glbin_ruler_handler.GetBackground())
-		{
-			double bg_int = glbin_ruler_handler.GetVolumeBgInt();
-			dval = (dval - bg_int) / bg_int;
-			str = wxString::Format("%.4f", dval);
-		}
-		else
-			str = wxString::Format("%.0f", dval);
+		str = wxString::Format("%.0f", dval);
 		m_ruler_list->SetText(i, IntCol, str);
 	}
 }

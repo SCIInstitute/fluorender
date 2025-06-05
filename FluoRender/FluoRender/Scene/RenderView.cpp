@@ -10812,7 +10812,6 @@ void RenderView::ProcessMouse(MouseState& state)
 	auto cur_vd = m_cur_vol.lock();
 
 	//mouse button down operations
-	//glbin_ruler_handler.SetVolumeData(m_cur_vol);
 	if (state.m_mouse_left_down)
 	{
 		if (m_draw_frame)

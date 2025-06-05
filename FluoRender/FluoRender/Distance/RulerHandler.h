@@ -184,24 +184,6 @@ namespace flrd
 			m_step_length = dval;
 		}
 
-		//background
-		void SetBackground(bool bval)
-		{
-			m_background = bval;
-		}
-		bool GetBackground()
-		{
-			return m_background;
-		}
-		void SetBgParams(int type, int kx, int ky, double varth, double gauth)
-		{
-			m_bg_type = type;
-			m_kx = kx;
-			m_ky = ky;
-			m_varth = varth;
-			m_gauth = gauth;
-		}
-
 		//magnet mode
 		bool GetRedistLength() { return m_redist_len; }
 		void SetRedistLength(bool val) { m_redist_len = val; }
@@ -225,12 +207,6 @@ namespace flrd
 		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
 					//4: protractor; 5: ellipse
 		bool m_edited;
-
-		//get background intensity
-		bool m_background;
-		int m_bg_type;//0-mean; 1-minmax; 2-median
-		int m_kx, m_ky;//window size
-		double m_varth, m_gauth;//threshold
 
 		//find moving distance
 		fluo::Point m_mouse;//mouse position

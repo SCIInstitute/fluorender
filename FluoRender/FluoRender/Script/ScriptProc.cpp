@@ -1461,8 +1461,6 @@ void ScriptProc::RunRulerProfile()
 	glbin_ruler_handler.SetSampleType(ival);
 	m_fconfig->Read("step_len", &dval, 1.0);
 	glbin_ruler_handler.SetStepLength(dval);
-	bool bg_int = glbin_ruler_handler.GetBackground();
-	glbin_ruler_handler.SetBackground(false);
 
 	int curf = view->m_tseq_cur_num;
 	int chan_num = vlist.size();
@@ -1525,7 +1523,6 @@ void ScriptProc::RunRulerProfile()
 			}
 		}
 	}
-	glbin_ruler_handler.SetBackground(bg_int);
 }
 
 void ScriptProc::RunRoi()

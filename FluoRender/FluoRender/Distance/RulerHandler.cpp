@@ -1643,21 +1643,6 @@ int RulerHandler::Profile(Ruler* ruler)
 	str = str + ws2s(vd->GetName());
 	ruler->SetInfoProfile(str);
 
-	//get background intensity
-	if (m_background)
-	{
-		if (!vd->GetBackgroundValid())
-		{
-			flrd::BackgStat bgs(vd.get());
-			bgs.SetType(m_bg_type);
-			bgs.SetFeatureSize2D(m_kx, m_ky);
-			bgs.SetThreshold(static_cast<float>(m_varth), static_cast<float>(m_gauth));
-			bgs.Run();
-			double result = bgs.GetResultf();
-			vd->SetBackgroundInt(result);
-		}
-	}
-
 	return 1;
 }
 
