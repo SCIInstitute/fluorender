@@ -55,7 +55,7 @@ DEALINGS IN THE SOFTWARE.
 #include <icons.h>
 
 RulerListCtrl::RulerListCtrl(
-	MeasureDlg* parent,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
@@ -377,16 +377,55 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	frame->FromDIP(wxSize(500, 600)),
 	0, "MeasureDlg")
 {
+	wxSize size = frame->FromDIP(wxSize(500, 600));
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
 	//SetDoubleBuffered(true);
 
-	wxIntegerValidator<unsigned int> vald_int;
+	//notebook
+	m_notebook = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+	wxSize s = wxSize(size.x, size.y / 2);
+	m_notebook->AddPage(CreateToolPage(m_notebook, s), "Tools", true);
+	m_notebook->AddPage(CreateListPage(m_notebook, s), "Rulers");
+	m_notebook->AddPage(CreateAlignPage(m_notebook, s), "Align");
+	m_notebook->Split(1, wxBOTTOM);
+
+	Bind(wxEVT_MENU, &MeasureDlg::OnMenuItem, this);
+	Bind(wxEVT_SCROLLWIN_TOP, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_BOTTOM, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_LINEUP, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_LINEDOWN, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_PAGEUP, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_PAGEDOWN, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_SCROLLWIN_THUMBTRACK, &MeasureDlg::OnScrollWin, this);
+	Bind(wxEVT_MOUSEWHEEL, &MeasureDlg::OnScrollMouse, this);
+
+	wxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(m_notebook, 1, wxEXPAND | wxALL);
+	SetSizer(sizer_v);
+	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
+	Thaw();
+}
+
+MeasureDlg::~MeasureDlg()
+{
+}
+
+wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent, wxSize& size)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+	SetSize(size);
 
 	wxStaticText* st;
+
 	//toolbar
-	m_toolbar1 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	m_toolbar1 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
 	wxBitmapBundle bitmap = wxGetBitmap(locator);
 	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
@@ -431,7 +470,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar1->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar1, this);
 	m_toolbar1->Realize();
 	//toolbar2
-	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	m_toolbar2 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmap(move);
 	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
@@ -476,7 +515,7 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_toolbar2->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar2, this);
 	m_toolbar2->Realize();
 	//toolbar3
-	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	m_toolbar3 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT | wxTB_HORIZONTAL);
 	bitmap = wxGetBitmap(delet);
 	m_toolbar3->AddTool(ID_DeleteBtn, "Delete", bitmap,
@@ -524,15 +563,15 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 
 	//options
 	wxBoxSizer *sizer_1 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Settings"), wxVERTICAL);
+		new wxStaticBox(page, wxID_ANY, "Settings"), wxVERTICAL);
 	wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Z-Depth Comp.:",
+	st = new wxStaticText(page, 0, "Z-Depth Comp.:",
 		wxDefaultPosition, FromDIP(wxSize(90, -1)));
-	m_view_plane_rd = new wxRadioButton(this, ID_ViewPlaneRd, "View Plane",
+	m_view_plane_rd = new wxRadioButton(page, ID_ViewPlaneRd, "View Plane",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-	m_max_intensity_rd = new wxRadioButton(this, ID_MaxIntensityRd, "Maximum Intensity",
+	m_max_intensity_rd = new wxRadioButton(page, ID_MaxIntensityRd, "Maximum Intensity",
 		wxDefaultPosition, wxDefaultSize);
-	m_acc_intensity_rd = new wxRadioButton(this, ID_AccIntensityRd, "Accumulated Intensity",
+	m_acc_intensity_rd = new wxRadioButton(page, ID_AccIntensityRd, "Accumulated Intensity",
 		wxDefaultPosition, wxDefaultSize);
 	m_view_plane_rd->Bind(wxEVT_RADIOBUTTON, &MeasureDlg::OnIntensityMethodCheck, this);
 	m_max_intensity_rd->Bind(wxEVT_RADIOBUTTON, &MeasureDlg::OnIntensityMethodCheck, this);
@@ -547,11 +586,11 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizer_11->Add(m_acc_intensity_rd, 0, wxALIGN_CENTER);
 	//more options
 	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Properties:",
+	st = new wxStaticText(page, 0, "Properties:",
 		wxDefaultPosition, FromDIP(wxSize(90, -1)));
-	m_transient_chk = new wxCheckBox(this, wxID_ANY, "Transient",
+	m_transient_chk = new wxCheckBox(page, wxID_ANY, "Transient",
 		wxDefaultPosition, wxDefaultSize);
-	m_use_transfer_chk = new wxCheckBox(this, wxID_ANY, "Use Volume Properties",
+	m_use_transfer_chk = new wxCheckBox(page, wxID_ANY, "Use Volume Properties",
 		wxDefaultPosition, wxDefaultSize);
 	m_transient_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnTransientCheck, this);
 	m_use_transfer_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnUseTransferCheck, this);
@@ -563,13 +602,13 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizer_12->Add(m_use_transfer_chk, 0, wxALIGN_CENTER);
 	//display settings
 	wxBoxSizer* sizer_13 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Display:",
+	st = new wxStaticText(page, 0, "Display:",
 		wxDefaultPosition, FromDIP(wxSize(90, -1)));
-	m_disp_point_chk = new wxCheckBox(this, wxID_ANY, "Point",
+	m_disp_point_chk = new wxCheckBox(page, wxID_ANY, "Point",
 		wxDefaultPosition, wxDefaultSize);
-	m_disp_line_chk = new wxCheckBox(this, wxID_ANY, "Line",
+	m_disp_line_chk = new wxCheckBox(page, wxID_ANY, "Line",
 		wxDefaultPosition, wxDefaultSize);
-	m_disp_name_chk = new wxCheckBox(this, wxID_ANY, "Name",
+	m_disp_name_chk = new wxCheckBox(page, wxID_ANY, "Name",
 		wxDefaultPosition, wxDefaultSize);
 	m_disp_point_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnDispPointCheck, this);
 	m_disp_line_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnDispLineCheck, this);
@@ -584,29 +623,29 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizer_13->Add(m_disp_name_chk, 0, wxALIGN_CENTER);
 	//relax settings
 	wxBoxSizer* sizer_14 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Relax:",
+	st = new wxStaticText(page, 0, "Relax:",
 		wxDefaultPosition, FromDIP(wxSize(90, -1)));
 	sizer_14->Add(10, 10);
 	sizer_14->Add(st, 0, wxALIGN_CENTER);
-	m_auto_relax_btn = new wxToggleButton(this, wxID_ANY,
+	m_auto_relax_btn = new wxToggleButton(page, wxID_ANY,
 		"Auto Relax", wxDefaultPosition, FromDIP(wxSize(75, -1)));
 	m_auto_relax_btn->Bind(wxEVT_TOGGLEBUTTON, &MeasureDlg::OnAutoRelax, this);
 	sizer_14->Add(10, 10);
 	sizer_14->Add(m_auto_relax_btn, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "Constraint ");
+	st = new wxStaticText(page, 0, "Constraint ");
 	sizer_14->Add(10, 10);
 	sizer_14->Add(st, 0, wxALIGN_CENTER);
-	m_relax_data_cmb = new wxComboBox(this, wxID_ANY, "",
+	m_relax_data_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items = { "Free", "Volume", "Selection", "Analyzed Comp." };
 	m_relax_data_cmb->Append(items);
 	m_relax_data_cmb->Bind(wxEVT_COMBOBOX, &MeasureDlg::OnRelaxData, this);
 	sizer_14->Add(m_relax_data_cmb, 0, wxALIGN_CENTER);
-	st = new wxStaticText(this, 0, "Ex/In Ratio ");
+	st = new wxStaticText(page, 0, "Ex/In Ratio ");
 	sizer_14->Add(10, 10);
 	sizer_14->Add(st, 0, wxALIGN_CENTER);
 	m_relax_value_spin = new wxSpinCtrlDouble(
-		this, wxID_ANY, "2",
+		page, wxID_ANY, "2",
 		wxDefaultPosition, FromDIP(wxSize(50, 23)),
 		wxSP_ARROW_KEYS | wxSP_WRAP,
 		0, 100, 2, 0.1);
@@ -622,91 +661,129 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	sizer_1->Add(10, 10);
 	sizer_1->Add(sizer_14, 0, wxEXPAND);
 
+	//sizer
+	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_toolbar1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_toolbar2, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(m_toolbar3, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(10, 10);
+
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
+}
+
+wxWindow* MeasureDlg::CreateListPage(wxWindow* parent, wxSize& size)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+	SetSize(size);
+
+	wxIntegerValidator<unsigned int> vald_int;
+	wxStaticText* st;
+
 	//list
-	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Ruler List"), wxVERTICAL);
+	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
 	//group
-	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
-	m_new_group = new wxButton(this, wxID_ANY, "New Group",
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_new_group = new wxButton(page, wxID_ANY, "New Group",
 		wxDefaultPosition, wxDefaultSize);
-	st = new wxStaticText(this, 0, "Group ID:",
+	st = new wxStaticText(page, 0, "Group ID:",
 		wxDefaultPosition, FromDIP(wxSize(65, -1)));
-	m_group_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_group_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, 22)), wxTE_RIGHT, vald_int);
-	m_chg_group = new wxButton(this, wxID_ANY, "Change",
+	m_chg_group = new wxButton(page, wxID_ANY, "Change",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_sel_group = new wxButton(this, wxID_ANY, "Select",
+	m_sel_group = new wxButton(page, wxID_ANY, "Select",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_disptgl_group = new wxButton(this, wxID_ANY, "Display",
+	m_disptgl_group = new wxButton(page, wxID_ANY, "Display",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_group_text->Bind(wxEVT_TEXT, &MeasureDlg::OnGroupText, this);
 	m_new_group->Bind(wxEVT_BUTTON, &MeasureDlg::OnNewGroup, this);
 	m_chg_group->Bind(wxEVT_BUTTON, &MeasureDlg::OnChgGroup, this);
 	m_sel_group->Bind(wxEVT_BUTTON, &MeasureDlg::OnSelGroup, this);
 	m_disptgl_group->Bind(wxEVT_BUTTON, &MeasureDlg::OnDispTglGroup, this);
-	sizer21->Add(m_new_group, 0, wxALIGN_CENTER);
-	sizer21->AddStretchSpacer();
-	sizer21->Add(st, 0, wxALIGN_CENTER);
-	sizer21->Add(m_group_text, 0, wxALIGN_CENTER);
-	sizer21->Add(m_chg_group, 0, wxALIGN_CENTER);
-	sizer21->Add(m_sel_group, 0, wxALIGN_CENTER);
-	sizer21->Add(m_disptgl_group, 0, wxALIGN_CENTER);
+	sizer1->Add(m_new_group, 0, wxALIGN_CENTER);
+	sizer1->AddStretchSpacer();
+	sizer1->Add(st, 0, wxALIGN_CENTER);
+	sizer1->Add(m_group_text, 0, wxALIGN_CENTER);
+	sizer1->Add(m_chg_group, 0, wxALIGN_CENTER);
+	sizer1->Add(m_sel_group, 0, wxALIGN_CENTER);
+	sizer1->Add(m_disptgl_group, 0, wxALIGN_CENTER);
 	//interpolate/key
-	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Time Interpolation: ",
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Time Interpolation: ",
 		wxDefaultPosition, wxDefaultSize);
-	m_interp_cmb = new wxComboBox(this, wxID_ANY, "",
+	m_interp_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items2 = { "Step", "Linear", "Smooth" };
 	m_interp_cmb->Append(items2);
 	m_interp_cmb->Bind(wxEVT_COMBOBOX, &MeasureDlg::OnInterpCmb, this);
-	m_delete_key_btn = new wxButton(this, wxID_ANY, "Del. Key",
+	m_delete_key_btn = new wxButton(page, wxID_ANY, "Del. Key",
 		wxDefaultPosition, wxDefaultSize);
-	m_delete_all_key_btn = new wxButton(this, wxID_ANY, "Del. All Keys",
+	m_delete_all_key_btn = new wxButton(page, wxID_ANY, "Del. All Keys",
 		wxDefaultPosition, wxDefaultSize);
 	m_delete_key_btn->Bind(wxEVT_BUTTON, &MeasureDlg::OnDeleteKeyBtn, this);
 	m_delete_all_key_btn->Bind(wxEVT_BUTTON, &MeasureDlg::OnDeleteAllKeyBtn, this);
-	sizer22->AddStretchSpacer();
-	sizer22->Add(st, 0, wxALIGN_CENTER);
-	sizer22->Add(m_interp_cmb, 0, wxALIGN_CENTER);
-	sizer22->Add(m_delete_key_btn, 0, wxALIGN_CENTER);
-	sizer22->Add(m_delete_all_key_btn, 0, wxALIGN_CENTER);
+	sizer2->AddStretchSpacer();
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_interp_cmb, 0, wxALIGN_CENTER);
+	sizer2->Add(m_delete_key_btn, 0, wxALIGN_CENTER);
+	sizer2->Add(m_delete_all_key_btn, 0, wxALIGN_CENTER);
 	//list
-	m_ruler_list = new RulerListCtrl(this,
+	m_ruler_list = new RulerListCtrl(page,
 		wxDefaultPosition, FromDIP(wxSize(200, 200)), wxLC_REPORT);
 	m_ruler_list->Bind(wxEVT_KEY_DOWN, &MeasureDlg::OnKeyDown, this);
 	m_ruler_list->Bind(wxEVT_CONTEXT_MENU, &MeasureDlg::OnContextMenu, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MeasureDlg::OnSelection, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_DESELECTED, &MeasureDlg::OnEndSelection, this);
-	sizer_2->Add(sizer21, 0, wxEXPAND);
-	sizer_2->Add(5, 5);
-	sizer_2->Add(sizer22, 0, wxEXPAND);
-	sizer_2->Add(5, 5);
-	sizer_2->Add(m_ruler_list, 1, wxEXPAND);
+	
+	sizer_v->Add(sizer1, 0, wxEXPAND);
+	sizer_v->Add(5, 5);
+	sizer_v->Add(sizer2, 0, wxEXPAND);
+	sizer_v->Add(5, 5);
+	sizer_v->Add(m_ruler_list, 1, wxEXPAND);
+
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
+}
+
+wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent, wxSize& size)
+{
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+	SetSize(size);
+
+	wxStaticText* st;
 
 	//alignment
-	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Align Render View to Ruler(s)"), wxVERTICAL);
-	wxBoxSizer* sizer31 = new wxBoxSizer(wxHORIZONTAL);
-	m_align_center = new wxCheckBox(this, wxID_ANY,
+	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	m_align_center = new wxCheckBox(page, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_align_center->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnAlignCenterChk, this);
-	sizer31->Add(5, 5);
-	sizer31->Add(m_align_center, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer32 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Mono Axis:",
+	sizer1->Add(5, 5);
+	sizer1->Add(m_align_center, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Mono Axis:",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_x = new wxButton(this, ID_AlignX, "X",
+	m_align_x = new wxButton(page, ID_AlignX, "X",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_y = new wxButton(this, ID_AlignY, "Y",
+	m_align_y = new wxButton(page, ID_AlignY, "Y",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_z = new wxButton(this, ID_AlignZ, "Z",
+	m_align_z = new wxButton(page, ID_AlignZ, "Z",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_nx = new wxButton(this, ID_AlignNX, "-X",
+	m_align_nx = new wxButton(page, ID_AlignNX, "-X",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_ny = new wxButton(this, ID_AlignNY, "-Y",
+	m_align_ny = new wxButton(page, ID_AlignNY, "-Y",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_nz = new wxButton(this, ID_AlignNZ, "-Z",
+	m_align_nz = new wxButton(page, ID_AlignNZ, "-Z",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_x->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignRuler, this);
 	m_align_y->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignRuler, this);
@@ -714,28 +791,28 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_align_nx->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignRuler, this);
 	m_align_ny->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignRuler, this);
 	m_align_nz->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignRuler, this);
-	sizer32->Add(5, 5);
-	sizer32->Add(st, 0, wxALIGN_CENTER);
-	sizer32->Add(m_align_x, 0, wxALIGN_CENTER);
-	sizer32->Add(m_align_y, 0, wxALIGN_CENTER);
-	sizer32->Add(m_align_z, 0, wxALIGN_CENTER);
-	sizer32->Add(m_align_nx, 0, wxALIGN_CENTER);
-	sizer32->Add(m_align_ny, 0, wxALIGN_CENTER);
-	sizer32->Add(m_align_nz, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer33 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Tri Axes:",
+	sizer2->Add(5, 5);
+	sizer2->Add(st, 0, wxALIGN_CENTER);
+	sizer2->Add(m_align_x, 0, wxALIGN_CENTER);
+	sizer2->Add(m_align_y, 0, wxALIGN_CENTER);
+	sizer2->Add(m_align_z, 0, wxALIGN_CENTER);
+	sizer2->Add(m_align_nx, 0, wxALIGN_CENTER);
+	sizer2->Add(m_align_ny, 0, wxALIGN_CENTER);
+	sizer2->Add(m_align_nz, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Tri Axes:",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_xyz = new wxButton(this, ID_AlignXYZ, "XYZ",
+	m_align_xyz = new wxButton(page, ID_AlignXYZ, "XYZ",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_yxz = new wxButton(this, ID_AlignYXZ, "YXZ",
+	m_align_yxz = new wxButton(page, ID_AlignYXZ, "YXZ",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_zxy = new wxButton(this, ID_AlignZXY, "ZXY",
+	m_align_zxy = new wxButton(page, ID_AlignZXY, "ZXY",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_xzy = new wxButton(this, ID_AlignXZY, "XZY",
+	m_align_xzy = new wxButton(page, ID_AlignXZY, "XZY",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_yzx = new wxButton(this, ID_AlignYZX, "YZX",
+	m_align_yzx = new wxButton(page, ID_AlignYZX, "YZX",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
-	m_align_zyx = new wxButton(this, ID_AlignZYX, "ZYX",
+	m_align_zyx = new wxButton(page, ID_AlignZYX, "ZYX",
 		wxDefaultPosition, FromDIP(wxSize(65, 22)));
 	m_align_xyz->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignPca, this);
 	m_align_yxz->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignPca, this);
@@ -743,57 +820,27 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_align_xzy->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignPca, this);
 	m_align_yzx->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignPca, this);
 	m_align_zyx->Bind(wxEVT_BUTTON, &MeasureDlg::OnAlignPca, this);
-	sizer33->Add(5, 5);
-	sizer33->Add(st, 0, wxALIGN_CENTER);
-	sizer33->Add(m_align_xyz, 0, wxALIGN_CENTER);
-	sizer33->Add(m_align_yxz, 0, wxALIGN_CENTER);
-	sizer33->Add(m_align_zxy, 0, wxALIGN_CENTER);
-	sizer33->Add(m_align_xzy, 0, wxALIGN_CENTER);
-	sizer33->Add(m_align_yzx, 0, wxALIGN_CENTER);
-	sizer33->Add(m_align_zyx, 0, wxALIGN_CENTER);
+	sizer3->Add(5, 5);
+	sizer3->Add(st, 0, wxALIGN_CENTER);
+	sizer3->Add(m_align_xyz, 0, wxALIGN_CENTER);
+	sizer3->Add(m_align_yxz, 0, wxALIGN_CENTER);
+	sizer3->Add(m_align_zxy, 0, wxALIGN_CENTER);
+	sizer3->Add(m_align_xzy, 0, wxALIGN_CENTER);
+	sizer3->Add(m_align_yzx, 0, wxALIGN_CENTER);
+	sizer3->Add(m_align_zyx, 0, wxALIGN_CENTER);
 	//
-	sizer_3->Add(5, 5);
-	sizer_3->Add(sizer31, 0, wxEXPAND);
-	sizer_3->Add(5, 5);
-	sizer_3->Add(sizer32, 0, wxEXPAND);
-	sizer_3->Add(5, 5);
-	sizer_3->Add(sizer33, 0, wxEXPAND);
-	sizer_3->Add(5, 5);
+	sizer_v->Add(5, 5);
+	sizer_v->Add(sizer1, 0, wxEXPAND);
+	sizer_v->Add(5, 5);
+	sizer_v->Add(sizer2, 0, wxEXPAND);
+	sizer_v->Add(5, 5);
+	sizer_v->Add(sizer3, 0, wxEXPAND);
+	sizer_v->Add(5, 5);
 
-	//sizer
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(10, 10);
-	sizerV->Add(m_toolbar1, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(m_toolbar2, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(m_toolbar3, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_1, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_2, 1, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer_3, 0, wxEXPAND);
-
-	Bind(wxEVT_MENU, &MeasureDlg::OnMenuItem, this);
-	Bind(wxEVT_SCROLLWIN_TOP, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_SCROLLWIN_BOTTOM, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_SCROLLWIN_LINEUP, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_SCROLLWIN_LINEDOWN, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_SCROLLWIN_PAGEUP, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_SCROLLWIN_PAGEDOWN, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_SCROLLWIN_THUMBTRACK, &MeasureDlg::OnScrollWin, this);
-	Bind(wxEVT_MOUSEWHEEL, &MeasureDlg::OnScrollMouse, this);
-
-	SetSizer(sizerV);
-	Layout();
-	SetAutoLayout(true);
-	SetScrollRate(10, 10);
-	Thaw();
-}
-
-MeasureDlg::~MeasureDlg()
-{
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
 }
 
 void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)

@@ -29,12 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #define _MEASUREDLG_H_
 
 #include <PropPanel.h>
+#include <Color.h>
+#include <Point.h>
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
-#include <Color.h>
-#include <Point.h>
+#include <wx/aui/auibook.h>
 
 #define IntCol 3
 #define ColorCol 4
@@ -51,7 +52,7 @@ class RulerListCtrl : public wxListCtrl
 {
 public:
 	RulerListCtrl(
-		MeasureDlg* parent,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style=wxLC_REPORT);
@@ -80,11 +81,11 @@ private:
 	wxTextCtrl *m_center_text;
 	wxColourPickerCtrl *m_color_picker;
 
-	long m_editing_item;
+	long m_editing_item = -1;
 	wxString m_name;
 	fluo::Point m_center;
 	fluo::Color m_color;
-	bool m_color_set;
+	bool m_color_set = false;
 
 private:
 	void OnTextFocus(wxMouseEvent& event);
@@ -210,6 +211,7 @@ public:
 	void Export();
 
 private:
+	wxAuiNotebook* m_notebook;
 	//list ctrl
 	wxButton* m_new_group;
 	wxTextCtrl* m_group_text;
@@ -256,6 +258,10 @@ private:
 	wxButton* m_align_zyx;
 
 private:
+	wxWindow* CreateToolPage(wxWindow* parent, wxSize& size);
+	wxWindow* CreateListPage(wxWindow* parent, wxSize& size);
+	wxWindow* CreateAlignPage(wxWindow* parent, wxSize& size);
+
 	void OnToolbar1(wxCommandEvent& event);
 	void OnToolbar2(wxCommandEvent& event);
 	void OnToolbar3(wxCommandEvent& event);
