@@ -377,7 +377,6 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	frame->FromDIP(wxSize(500, 600)),
 	0, "MeasureDlg")
 {
-	wxSize size = frame->FromDIP(wxSize(500, 600));
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -388,11 +387,10 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-	wxSize s = wxSize(size.x, size.y / 2);
-	m_notebook->AddPage(CreateToolPage(m_notebook, s), "Tools", true);
-	m_notebook->AddPage(CreateListPage(m_notebook, s), "Rulers");
-	m_notebook->AddPage(CreateAlignPage(m_notebook, s), "Align");
-	m_notebook->Split(1, wxBOTTOM);
+	m_notebook->AddPage(CreateToolPage(m_notebook), "Tools", true);
+	m_notebook->AddPage(CreateListPage(m_notebook), "Rulers");
+	m_notebook->AddPage(CreateAlignPage(m_notebook), "Align");
+	//CallAfter([this] { m_notebook->Split(1, wxBOTTOM); });
 
 	Bind(wxEVT_MENU, &MeasureDlg::OnMenuItem, this);
 	Bind(wxEVT_SCROLLWIN_TOP, &MeasureDlg::OnScrollWin, this);
@@ -417,10 +415,9 @@ MeasureDlg::~MeasureDlg()
 {
 }
 
-wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent, wxSize& size)
+wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
-	SetSize(size);
 
 	wxStaticText* st;
 
@@ -679,10 +676,9 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent, wxSize& size)
 	return page;
 }
 
-wxWindow* MeasureDlg::CreateListPage(wxWindow* parent, wxSize& size)
+wxWindow* MeasureDlg::CreateListPage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
-	SetSize(size);
 
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
@@ -755,10 +751,9 @@ wxWindow* MeasureDlg::CreateListPage(wxWindow* parent, wxSize& size)
 	return page;
 }
 
-wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent, wxSize& size)
+wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
-	SetSize(size);
 
 	wxStaticText* st;
 

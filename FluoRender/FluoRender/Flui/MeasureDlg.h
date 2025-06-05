@@ -258,9 +258,9 @@ private:
 	wxButton* m_align_zyx;
 
 private:
-	wxWindow* CreateToolPage(wxWindow* parent, wxSize& size);
-	wxWindow* CreateListPage(wxWindow* parent, wxSize& size);
-	wxWindow* CreateAlignPage(wxWindow* parent, wxSize& size);
+	wxWindow* CreateToolPage(wxWindow* parent);
+	wxWindow* CreateListPage(wxWindow* parent);
+	wxWindow* CreateAlignPage(wxWindow* parent);
 
 	void OnToolbar1(wxCommandEvent& event);
 	void OnToolbar2(wxCommandEvent& event);
