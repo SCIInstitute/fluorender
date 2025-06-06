@@ -91,6 +91,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextRenderer.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
+#include <wxToolbarArt.h>
 #include <ModalDlg.h>
 #include <wx/aboutdlg.h>
 #include <wx/hyperlink.h>
@@ -178,7 +179,10 @@ MainFrame::MainFrame(
 	wxAuiToolBarItemArray append_items;
 	m_main_tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
+	m_main_tb->SetExtraStyle(m_main_tb->GetExtraStyle() | wxWS_EX_PROCESS_UI_UPDATES);
 	m_main_tb->SetName("Toolbar");
+	m_main_tb->SetArtProvider(new wxToolbarArt());
+
 	//add tools
 	bitmap = wxGetBitmap(icon_open_volume);
 	m_main_tb->AddTool(ID_OpenVolume, "Open Volume", bitmap,
