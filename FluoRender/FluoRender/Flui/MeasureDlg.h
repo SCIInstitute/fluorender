@@ -172,6 +172,8 @@ public:
 	MeasureDlg(MainFrame* frame);
 	~MeasureDlg();
 
+	virtual void LoadPerspective();
+	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateRulerList();
 	void UpdateRulerListCur();

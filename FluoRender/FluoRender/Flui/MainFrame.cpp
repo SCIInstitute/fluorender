@@ -841,8 +841,9 @@ MainFrame::MainFrame(
 	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
 		GetDPIScaleFactor()))
 		m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
-	if (glbin_settings.m_prj_panel_split)
-		m_proj_panel->Split(1, wxBOTTOM);
+	//if (glbin_settings.m_prj_panel_split)
+	//	m_proj_panel->Split(1, wxBOTTOM);
+	m_measure_dlg->LoadPerspective();
 	m_output_adj_panel->LoadPerspective();
 	m_clip_plane_panel->LoadPerspective();
 	glbin_moviemaker.SetMainFrame(this);

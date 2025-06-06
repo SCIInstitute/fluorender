@@ -86,9 +86,10 @@ public:
 public:
 	//default values
 	double m_dpi_scale_factor;//dpi scale factor
-	std::string m_layout;
-	bool m_prj_panel_split;	//split the project panel
-	bool m_clip_panel_split;//split the clip plane panel
+	std::string m_layout;	//layout of the main frame
+	std::string m_layout_measure;	//layout of the measurement panel
+	std::string m_layout_project;	//layout of the project panel
+	std::string m_layout_clip;		//layout of the clip plane panel
 
 	bool m_prj_save;		//save project automatically
 	bool m_prj_save_inc;	//save project incrementally

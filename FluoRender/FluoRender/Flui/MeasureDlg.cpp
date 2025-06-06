@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerAlign.h>
 #include <RulerRenderer.h>
 #include <DistCalculator.h>
+#include <wxNotebookSerializer.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -836,6 +837,20 @@ wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent)
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
+}
+
+void MeasureDlg::LoadPerspective()
+{
+	//auto mgr = m_notebook->GetAuiManager();
+	//wxNotebookDeserializer deser(mgr);
+	//deser.SetConfig(glbin_settings.m_layout_measure);
+}
+
+void MeasureDlg::SavePerspective()
+{
+	wxNotebookSerializer ser;
+	m_notebook->SaveLayout(GetName(), ser);
+	glbin_settings.m_layout_measure = ser.GetConfig();
 }
 
 void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
