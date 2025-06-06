@@ -1846,7 +1846,7 @@ void RenderView::MoveLayertoView(const std::wstring &group_name, const std::wstr
 	}
 	if (!src_vd)
 		return;
-	if (dst_name == "")
+	if (dst_name == L"")
 	{
 		m_layer_list.push_back(src_vd);
 	}
@@ -2069,7 +2069,7 @@ void RenderView::MoveMeshtoGroup(const std::wstring &group_name, const std::wstr
 	auto group = GetMGroup(group_name);
 	if (!group || !src_md)
 		return;
-	if (group->GetMeshNum() == 0 || dst_name == "")
+	if (group->GetMeshNum() == 0 || dst_name == L"")
 		group->InsertMeshData(0, src_md);
 	else
 	{
@@ -2108,7 +2108,7 @@ void RenderView::MoveMeshfromtoGroup(const std::wstring &src_group_name, const s
 	auto dst_group = GetMGroup(dst_group_name);
 	if (!dst_group || !src_md)
 		return;
-	if (dst_group->GetMeshNum() == 0 || dst_name == "")
+	if (dst_group->GetMeshNum() == 0 || dst_name == L"")
 		dst_group->InsertMeshData(0, src_md);
 	else
 	{
@@ -9503,7 +9503,7 @@ void RenderView::PostDraw()
 		void *buf = NULL;
 		buf = _TIFFmalloc(linebytes);
 		//TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
-		for (uint32 row = 0; row < (uint32)h; row++)
+		for (uint32_t row = 0; row < (uint32_t)h; row++)
 		{
 			if (fp32)
 			{

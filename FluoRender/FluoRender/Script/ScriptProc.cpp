@@ -703,7 +703,7 @@ void ScriptProc::RunPostTracking()
 	cur_vol->GetResolution(nx, ny, nz);
 	//update the mask according to the new label
 	unsigned long long for_size = nx * ny * nz;
-	std::memset((void*)mask_data, 0, sizeof(uint8) * for_size);
+	std::memset((void*)mask_data, 0, sizeof(uint8_t) * for_size);
 	for (unsigned long long idx = 0;
 		idx < for_size; ++idx)
 	{
@@ -2406,7 +2406,7 @@ void ScriptProc::RunDlcLabel()
 		tsize_t linebytes = 3 * nx;
 		void* buf = NULL;
 		buf = _TIFFmalloc(linebytes);
-		for (uint32 row = 0; row < (uint32)ny; row++)
+		for (uint32_t row = 0; row < (uint32_t)ny; row++)
 		{
 			unsigned char* line = ((unsigned char*)image) + row * 3 * nx;
 			memcpy(buf, line, linebytes);

@@ -214,7 +214,7 @@ void Project::Open(const std::wstring& filename)
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_IMAGEJ, true, cur_chan, cur_time);
 					else if (suffix == L".nrrd" || suffix == L".msk" || suffix == L".lbl")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
-					else if (suffix == L".tif" || suffix == ".tiff")
+					else if (suffix == L".tif" || suffix == L".tiff")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
 					else if (suffix == L".oib")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_OIB, false, cur_chan, cur_time);
@@ -1828,7 +1828,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 	std::wofstream os;
 	OutputStreamOpenW(os, filename);
 
-	std::string str;
+	std::wstring str;
 	std::wstring unit;
 	int num_points;
 	fluo::Point p;
@@ -1907,57 +1907,57 @@ void Project::ExportRulerList(const std::wstring& filename)
 		if (ruler->GetUseColor())
 		{
 			color = ruler->GetColor();
-			str = "RGB(" +
-				std::to_string(int(std::round(color.r() * 255))) + ", " +
-				std::to_string(int(std::round(color.g() * 255))) + ", " +
-				std::to_string(int(std::round(color.b() * 255))) + ")";
+			str = L"RGB(" +
+				std::to_wstring(int(std::round(color.r() * 255))) + L", " +
+				std::to_wstring(int(std::round(color.g() * 255))) + L", " +
+				std::to_wstring(int(std::round(color.b() * 255))) + L")";
 		}
 		else
-			str = "N/A";
+			str = L"N/A";
 		os << str << "\t";
 
 		//branch count
-		str = std::to_string(ruler->GetNumBranch());
+		str = std::to_wstring(ruler->GetNumBranch());
 		os << str << "\t";
 		//length
-		str = std::to_string(ruler->GetLength());
+		str = std::to_wstring(ruler->GetLength());
 		os << str << "\t";
 		//angle
-		str = std::to_string(ruler->GetAngle());
+		str = std::to_wstring(ruler->GetAngle());
 		os << str << "\t";
 
-		str = "";
+		str = L"";
 		//start and end points
 		num_points = ruler->GetNumPoint();
 		if (num_points > 0)
 		{
 			p = ruler->GetPoint(0);
-			str += p.to_string();
+			str += s2ws(p.to_string());
 		}
 		if (num_points > 1)
 		{
 			p = ruler->GetPoint(num_points - 1);
-			str += p.to_string();
+			str += s2ws(p.to_string());
 		}
 		else
-			str += "\t\t\t";
+			str += L"\t\t\t";
 		os << str;
 
 		//time
 		if (ruler->GetTransient())
-			str = std::to_string(ruler->GetTransTime());
+			str = std::to_wstring(ruler->GetTransTime());
 		else
-			str = "N/A";
+			str = L"N/A";
 		os << str << "\t";
 
 		//info values v1 v2
-		os << ruler->GetInfoValues() << "\n";
+		os << s2ws(ruler->GetInfoValues()) << "\n";
 
 		//export points
 		if (ruler->GetNumPoint() > 2)
 		{
-			os << ruler->GetPosNames();
-			os << ruler->GetPosValues();
+			os << s2ws(ruler->GetPosNames());
+			os << s2ws(ruler->GetPosValues());
 		}
 
 		//export profile
@@ -1966,7 +1966,7 @@ void Project::ExportRulerList(const std::wstring& filename)
 		{
 			double sumd = 0.0;
 			unsigned long long sumull = 0;
-			os << ruler->GetInfoProfile() << "\n";
+			os << s2ws(ruler->GetInfoProfile()) << "\n";
 			for (size_t j = 0; j < profile->size(); ++j)
 			{
 				//for each profile

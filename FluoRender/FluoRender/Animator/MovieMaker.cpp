@@ -360,7 +360,7 @@ void MovieMaker::WriteFrameToFile()
 		void* buf = NULL;
 		buf = _TIFFmalloc(linebytes);
 		//TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
-		for (uint32 row = 0; row < (uint32)h; row++)
+		for (uint32_t row = 0; row < (uint32_t)h; row++)
 		{
 			if (fp32)
 			{

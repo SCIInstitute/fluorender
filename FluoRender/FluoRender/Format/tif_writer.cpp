@@ -102,15 +102,15 @@ void TIFWriter::SaveSingleFile(const std::wstring& filename)
 	}
 
 	//buffers
-	uint16 *buf16 = 0;
-	uint8 *buf8 = 0;
+	uint16_t *buf16 = 0;
+	uint8_t *buf8 = 0;
 	if (bits == 16)
 	{
-		buf16 = (uint16*)_TIFFmalloc(width*sizeof(uint16)*samples);
+		buf16 = (uint16_t*)_TIFFmalloc(width*sizeof(uint16_t)*samples);
 	}
 	else
 	{
-		buf8 = (uint8*)_TIFFmalloc(width*sizeof(uint8)*samples);
+		buf8 = (uint8_t*)_TIFFmalloc(width*sizeof(uint8_t)*samples);
 	}
 
 	TIFF* outfile = TIFFOpenW(filename, "wb");
@@ -144,12 +144,12 @@ void TIFWriter::SaveSingleFile(const std::wstring& filename)
 			int lineindex = (width*height*i + width*j)*samples;
 			if (bits == 16)
 			{
-				memcpy(buf16, ((uint16*)m_data->data)+lineindex, width*sizeof(uint16)*samples);
+				memcpy(buf16, ((uint16_t*)m_data->data)+lineindex, width*sizeof(uint16_t)*samples);
 				TIFFWriteScanline(outfile, buf16, j, 0);
 			}
 			else
 			{
-				memcpy(buf8, ((uint8*)m_data->data)+lineindex, width*sizeof(uint8)*samples);
+				memcpy(buf8, ((uint8_t*)m_data->data)+lineindex, width*sizeof(uint8_t)*samples);
 				TIFFWriteScanline(outfile, buf8, j, 0);
 			}
 		}
@@ -195,15 +195,15 @@ void TIFWriter::SaveSequence(const std::wstring& filename)
 	}
 
 	//buffers
-	uint16 *buf16 = 0;
-	uint8 *buf8 = 0;
+	uint16_t *buf16 = 0;
+	uint8_t *buf8 = 0;
 	if (bits == 16)
 	{
-		buf16 = (uint16*)_TIFFmalloc(width*sizeof(uint16)*samples);
+		buf16 = (uint16_t*)_TIFFmalloc(width*sizeof(uint16_t)*samples);
 	}
 	else
 	{
-		buf8 = (uint8*)_TIFFmalloc(width*sizeof(uint8)*samples);
+		buf8 = (uint8_t*)_TIFFmalloc(width*sizeof(uint8_t)*samples);
 	}
 
 	for (int i=0; i<numPages; i++)
@@ -244,12 +244,12 @@ void TIFWriter::SaveSequence(const std::wstring& filename)
 			int lineindex = (width*height*i + width*j)*samples;
 			if (bits == 16)
 			{
-				memcpy(buf16, ((uint16*)m_data->data)+lineindex, width*sizeof(uint16)*samples);
+				memcpy(buf16, ((uint16_t*)m_data->data)+lineindex, width*sizeof(uint16_t)*samples);
 				TIFFWriteScanline(outfile, buf16, j, 0);
 			}
 			else
 			{
-				memcpy(buf8, ((uint8*)m_data->data)+lineindex, width*sizeof(uint8)*samples);
+				memcpy(buf8, ((uint8_t*)m_data->data)+lineindex, width*sizeof(uint8_t)*samples);
 				TIFFWriteScanline(outfile, buf8, j, 0);
 			}
 		}

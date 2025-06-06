@@ -5564,7 +5564,7 @@ MeshGroup::MeshGroup()
 {
 	type = 6;//mesh group
 	m_num++;
-	m_name = L"MGroup " + std::to_string(m_num);
+	m_name = L"MGroup " + std::to_wstring(m_num);
 	m_disp = true;
 	m_sync_mesh_prop = false;
 }
@@ -6660,7 +6660,7 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 	std::wstring new_name = name;
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + L"_" + std::to_string(i);
+		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		md->SetName(new_name);
 	m_md_list.push_back(md);
@@ -6864,7 +6864,7 @@ bool DataManager::LoadAnnotations(const std::wstring &filename)
 	std::wstring new_name = name;
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + L"_" + std::to_string(i);
+		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		ann->SetName(new_name);
 	m_annotation_list.push_back(ann);
@@ -6882,7 +6882,7 @@ void DataManager::AddAnnotations(const std::shared_ptr<Annotations>& ann)
 
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
-		new_name = name + L"_" + std::to_string(i);
+		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		ann->SetName(new_name);
 

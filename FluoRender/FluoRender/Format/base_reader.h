@@ -250,13 +250,11 @@ protected:
 	#define	CODE_EOI	257		/* end-of-information code */
 	#define CODE_FIRST	258		/* first free code entry */
 	#define	CSIZE		(MAXCODE(BITS_MAX)+1024L)
-	typedef	unsigned short uint16;	/* sizeof (uint16) must == 2 */
-	typedef	int int32;
-	typedef	int32 tsize_t;		/* i/o size in bytes */
+	typedef	int tsize_t;		/* i/o size in bytes */
 	typedef	unsigned char tidataval_t;	/* internal image data value type */
 	typedef	tidataval_t* tidata_t;		/* reference to internal image data */
-	typedef	uint16 tsample_t;			/* sample number */
-	typedef uint16 hcode_t;			/* codes fit in 16 bits */
+	typedef	uint16_t tsample_t;			/* sample number */
+	typedef uint16_t hcode_t;			/* codes fit in 16 bits */
 	typedef struct code_ent
 	{
 		struct code_ent *next;

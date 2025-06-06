@@ -810,7 +810,7 @@ MainFrame::MainFrame(
 	std::wstring font_file = glbin_settings.m_font_file;
 	std::filesystem::path p = std::filesystem::current_path();
 	p /= "Fonts";
-	if (font_file != "")
+	if (font_file != L"")
 		p /= font_file;
 	else
 		p /= "FreeSans.ttf";
@@ -874,7 +874,7 @@ MainFrame::~MainFrame()
 	glbin_mov_def.Set(&glbin_moviemaker);
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
-	glbin_settings.m_prj_panel_split = m_proj_panel->IsSplit();
+	//glbin_settings.m_prj_panel_split = m_proj_panel->IsSplit();
 	m_output_adj_panel->SavePerspective();
 	m_clip_plane_panel->SavePerspective();
 	glbin_settings.Save();
@@ -1145,7 +1145,7 @@ wxWindow* MainFrame::AddProps(int type,
 		{
 			ManipPropPanel* pane = new ManipPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
-			pane->SetName(md->GetName() + " M");
+			pane->SetName(md->GetName() + L" M");
 			pane->Hide();
 			m_prop_pages.push_back(pane);
 			result = pane;

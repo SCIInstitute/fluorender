@@ -724,7 +724,7 @@ void TIFReader::SetPageInfoVector(uint16_t tag, uint16_t type, uint64_t cnt, voi
 	{
 		if (type == kShort)
 		{
-			uint16_t *data2 = (uint16*)data;
+			uint16_t *data2 = (uint16_t*)data;
 			m_page_info.b_bits_per_sample = true;
 			m_page_info.us_bits_per_sample =
 				swap_ ? SwapShort(data2[0]) : data2[0];

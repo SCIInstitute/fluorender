@@ -1102,7 +1102,7 @@ void RenderViewPanel::SetScaleUnit(int val)
 		unit_text = L"mm";
 		break;
 	}
-	str = num_text + " " + unit_text;
+	str = num_text + L" " + unit_text;
 	m_render_view->SetSBText(str);
 	m_render_view->SetScaleBarLen(dval);
 	m_render_view->m_sb_num = num_text;

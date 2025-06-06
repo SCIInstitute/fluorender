@@ -757,7 +757,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 		{
-			if (vd->GetPath() == "")
+			if (vd->GetPath() == L"")
 				menu.Append(ID_Save, "Save...");
 			else
 				menu.Append(ID_Save, "Save As...");
@@ -771,7 +771,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 		auto md = glbin_current.mesh_data.lock();
 		if (md)
 		{
-			if (md->GetPath() == "")
+			if (md->GetPath() == L"")
 				menu.Append(ID_Save, "Save...");
 			else
 				menu.Append(ID_Save, "Save As...");
@@ -783,7 +783,7 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 		auto ann = glbin_current.ann_data.lock();
 		if (ann)
 		{
-			if (ann->GetPath() == "")
+			if (ann->GetPath() == L"")
 				menu.Append(ID_Save, "Save...");
 			else
 				menu.Append(ID_Save, "Save As...");

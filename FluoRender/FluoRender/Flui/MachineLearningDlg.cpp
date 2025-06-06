@@ -488,21 +488,21 @@ void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
 		return;
 
 	flrd::TableHistParams& table = glbin.get_cg_table();
-	std::string name;
+	std::wstring name;
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= "";
-	std::string filename = p.string();
+	std::wstring filename = p.wstring();
 	for (size_t i = 0; i < count; ++i)
 	{
-		name = m_top_grid->GetCellValue(seli[i], 0).ToStdString();
+		name = m_top_grid->GetCellValue(seli[i], 0).ToStdWstring();
 		if (name == table.getName())
 		{
 			table.clear();
 			UpdateBotList();
 		}
 		name = filename + name + m_ext;
-		std::remove(name.c_str());
+		std::remove(ws2s(name).c_str());
 	}
 	PopTopList();
 }
@@ -659,7 +659,7 @@ void MLCompGenPanel::UpdateBotList()
 	}
 	else
 	{
-		m_bot_table_name->SetLabelText("Table loaded:" + name);
+		m_bot_table_name->SetLabelText(L"Table loaded:" + name);
 		m_start_prompt_text->Show();
 	}
 	std::string str_in, str_out;
@@ -859,21 +859,21 @@ void MLVolPropPanel::OnDelTable(wxCommandEvent& event)
 		return;
 
 	flrd::TableHistParams& table = glbin.get_vp_table();
-	std::string name;
+	std::wstring name;
 	std::filesystem::path p(m_exepath);
 	p /= m_dir;
 	p /= "";
-	std::string filename = p.string();
+	std::wstring filename = p.wstring();
 	for (size_t i = 0; i < count; ++i)
 	{
-		name = m_top_grid->GetCellValue(seli[i], 0).ToStdString();
+		name = m_top_grid->GetCellValue(seli[i], 0).ToStdWstring();
 		if (name == table.getName())
 		{
 			table.clear();
 			UpdateBotList();
 		}
 		name = filename + name + m_ext;
-		std::remove(name.c_str());
+		std::remove(ws2s(name).c_str());
 	}
 	PopTopList();
 }
@@ -1030,7 +1030,7 @@ void MLVolPropPanel::UpdateBotList()
 	}
 	else
 	{
-		m_bot_table_name->SetLabelText("Table loaded:" + name);
+		m_bot_table_name->SetLabelText(L"Table loaded:" + name);
 		m_start_prompt_text->Show();
 	}
 	std::string str_in, str_out;

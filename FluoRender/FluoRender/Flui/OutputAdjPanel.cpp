@@ -406,16 +406,16 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 
 void OutputAdjPanel::LoadPerspective()
 {
-	if (glbin_outadj_def.m_split)
-	{
-		m_notebook->Split(1, wxBOTTOM);
-		m_notebook->Split(2, wxBOTTOM);
-	}
+	//if (glbin_outadj_def.m_split)
+	//{
+	//	m_notebook->Split(1, wxBOTTOM);
+	//	m_notebook->Split(2, wxBOTTOM);
+	//}
 }
 
 void OutputAdjPanel::SavePerspective()
 {
-	glbin_outadj_def.m_split = m_notebook->IsSplit();
+	//glbin_outadj_def.m_split = m_notebook->IsSplit();
 }
 
 void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)

@@ -238,7 +238,7 @@ void BaseReader::DecodeAcc8(tidata_t cp0, tsize_t cc, tsize_t stride)
 
 void BaseReader::DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride)
 {
-	uint16* wp = (uint16*)cp0;
+	uint16_t* wp = (uint16_t*)cp0;
 	tsize_t wc = cc / 2;
 
 	if ((cc % (2 * stride)) != 0) return;
