@@ -52,7 +52,7 @@ public:
 		int b = color1.Blue();
 		int brightness = (r * 299 + g * 587 + b * 114) / 1000;
 		wxColour color2;
-		int offset = 20; // Adjust this value to change the brightness difference
+		int offset = 35; // Adjust this value to change the brightness difference
 		if (brightness > 128)
 			color2 = wxColour(std::max(0, r - offset), std::max(0, g - offset), std::max(0, b - offset));
 		else
