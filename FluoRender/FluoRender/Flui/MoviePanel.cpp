@@ -974,7 +974,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, frame, pos, size, style, name)
+	TabbedPanel(frame, frame, pos, size, style, name)
 {
 	m_running = true;
 	// temporarily block events during constructor:
@@ -1188,16 +1188,6 @@ MoviePanel::MoviePanel(MainFrame* frame,
 
 MoviePanel::~MoviePanel()
 {
-}
-
-void MoviePanel::LoadPerspective()
-{
-
-}
-
-void MoviePanel::SavePerspective()
-{
-
 }
 
 void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)

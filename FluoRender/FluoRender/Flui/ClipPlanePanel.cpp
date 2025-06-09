@@ -51,7 +51,7 @@ ClipPlanePanel::ClipPlanePanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, frame, pos, size, style, name),
+	TabbedPanel(frame, frame, pos, size, style, name),
 m_enable_all(true)
 {
 	// temporarily block events during constructor:
@@ -424,17 +424,6 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
-}
-
-void ClipPlanePanel::LoadPerspective()
-{
-	//if (glbin_settings.m_clip_panel_split)
-	//	m_notebook->Split(1, wxBOTTOM);
-}
-
-void ClipPlanePanel::SavePerspective()
-{
-	//glbin_settings.m_clip_panel_split = m_notebook->IsSplit();
 }
 
 void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)

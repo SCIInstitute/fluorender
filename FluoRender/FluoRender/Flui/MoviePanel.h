@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _MOVIEPANEL_H_
 
 #include <PropPanel.h>
-#include <wx/aui/auibook.h>
 #include <wx/listctrl.h>
 #include <wx/spinbutt.h>
 #include <wx/tglbtn.h>
@@ -95,7 +94,7 @@ private:
 	void OnMouseScroll(wxMouseEvent& event);
 };
 
-class MoviePanel : public PropPanel
+class MoviePanel : public TabbedPanel
 {
 	enum
 	{
@@ -113,8 +112,6 @@ public:
 		const wxString& name = "MoviePanel");
 	~MoviePanel();
 
-	virtual void LoadPerspective();
-	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//common
@@ -154,7 +151,6 @@ public:
 private:
 	bool m_running;
 	RenderView* m_view;
-	wxAuiNotebook* m_notebook;
 
 	//common controls
 	wxTextCtrl *m_fps_text;

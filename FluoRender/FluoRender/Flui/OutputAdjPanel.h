@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _ADJUSTVIEW_H_
 
 #include <PropPanel.h>
-#include <wx/aui/auibook.h>
 
 class DataGroup;
 class wxFadeButton;
@@ -39,7 +38,7 @@ namespace fluo
 {
 	class Color;
 }
-class OutputAdjPanel: public PropPanel
+class OutputAdjPanel: public TabbedPanel
 {
 public:
 	OutputAdjPanel(MainFrame* frame,
@@ -49,8 +48,6 @@ public:
 		const wxString& name="OutputAdjPanel");
 	~OutputAdjPanel();
 
-	virtual void LoadPerspective();
-	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateSync();
 
@@ -66,7 +63,6 @@ public:
 	void ClearUndo();
 
 private:
-	wxAuiNotebook* m_notebook;
 	bool m_enable_all;
 	//sync flags
 	bool m_sync[3];//for rgb

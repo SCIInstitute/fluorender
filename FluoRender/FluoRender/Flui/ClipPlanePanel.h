@@ -30,13 +30,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <wx/spinbutt.h>
-#include <wx/aui/auibook.h>
 
 class wxFadeButton;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableToolbar;
-class ClipPlanePanel: public PropPanel
+class ClipPlanePanel: public TabbedPanel
 {
 	enum
 	{
@@ -53,8 +52,6 @@ public:
 		const wxString& name="ClipPlanePanel");
 	~ClipPlanePanel();
 
-	virtual void LoadPerspective();
-	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	bool GetXLink();
@@ -80,7 +77,6 @@ public:
 	void ClearUndo();
 
 private:
-	wxAuiNotebook* m_notebook;
 	bool m_enable_all;
 
 	//1st line

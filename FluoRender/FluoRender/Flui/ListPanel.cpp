@@ -159,11 +159,12 @@ void DataListCtrl::OnSelectionChanged(wxListEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 ListPanel::ListPanel(MainFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, frame, pos, size, style, name)
+	PropPanel(frame, parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -235,16 +236,6 @@ ListPanel::ListPanel(MainFrame* frame,
 
 ListPanel::~ListPanel()
 {
-}
-
-void ListPanel::LoadPerspective()
-{
-
-}
-
-void ListPanel::SavePerspective()
-{
-
 }
 
 void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)

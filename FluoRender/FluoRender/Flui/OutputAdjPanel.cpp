@@ -46,7 +46,7 @@ OutputAdjPanel::OutputAdjPanel(MainFrame* frame,
 					   const wxSize& size,
 					   long style,
 					   const wxString& name) :
-	PropPanel(frame, frame, pos, size, style, name),
+	TabbedPanel(frame, frame, pos, size, style, name),
 m_enable_all(true)
 {
 	m_sync[0] = true;
@@ -402,20 +402,6 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
-}
-
-void OutputAdjPanel::LoadPerspective()
-{
-	//if (glbin_outadj_def.m_split)
-	//{
-	//	m_notebook->Split(1, wxBOTTOM);
-	//	m_notebook->Split(2, wxBOTTOM);
-	//}
-}
-
-void OutputAdjPanel::SavePerspective()
-{
-	//glbin_outadj_def.m_split = m_notebook->IsSplit();
 }
 
 void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)

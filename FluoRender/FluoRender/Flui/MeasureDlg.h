@@ -35,7 +35,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clrpicker.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
-#include <wx/aui/auibook.h>
 
 #define IntCol 3
 #define ColorCol 4
@@ -99,7 +98,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MeasureDlg : public PropPanel
+class MeasureDlg : public TabbedPanel
 {
 public:
 	enum
@@ -172,8 +171,6 @@ public:
 	MeasureDlg(MainFrame* frame);
 	~MeasureDlg();
 
-	virtual void LoadPerspective();
-	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateRulerList();
 	void UpdateRulerListCur();
@@ -213,7 +210,6 @@ public:
 	void Export();
 
 private:
-	wxAuiNotebook* m_notebook;
 	//list ctrl
 	wxButton* m_new_group;
 	wxTextCtrl* m_group_text;

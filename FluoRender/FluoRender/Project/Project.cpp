@@ -33,6 +33,9 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <ClipPlanePanel.h>
 #include <MoviePanel.h>
+#include <OutputAdjPanel.h>
+#include <ProjectPanel.h>
+#include <MeasureDlg.h>
 #include <RenderView.h>
 #include <compatibility.h>
 #include <BaseTreeFile.h>
@@ -961,11 +964,11 @@ void Project::Open(const std::wstring& filename)
 		if (fconfig->Read("plane mode", &ival))
 			glbin_settings.m_clip_mode = ival;
 		if (fconfig->Read("x_link", &bval))
-			frame->GetClipPlanPanel()->SetXLink(bval);
+			frame->GetClipPlanePanel()->SetXLink(bval);
 		if (fconfig->Read("y_link", &bval))
-			frame->GetClipPlanPanel()->SetYLink(bval);
+			frame->GetClipPlanePanel()->SetYLink(bval);
 		if (fconfig->Read("z_link", &bval))
-			frame->GetClipPlanPanel()->SetZLink(bval);
+			frame->GetClipPlanePanel()->SetZLink(bval);
 	}
 
 	//movie panel
@@ -1055,6 +1058,16 @@ void Project::Open(const std::wstring& filename)
 			update = fluo::InEpsilon(dval, frame->GetDPIScaleFactor());
 		if (update && fconfig->Read("layout", &sval))
 			frame->LoadPerspective(sval);
+		if (fconfig->Read("layout clip", &sval))
+			frame->GetClipPlanePanel()->LoadPerspective(sval);
+		if (fconfig->Read("layout movie", &sval))
+			frame->GetMoviePanel()->LoadPerspective(sval);
+		if (fconfig->Read("layout outadj", &sval))
+			frame->GetOutAdjPanel()->LoadPerspective(sval);
+		if (fconfig->Read("layout project", &sval))
+			frame->GetProjectPanel()->LoadPerspective(sval);
+		if (fconfig->Read("layout measure", &sval))
+			frame->GetMeasureDlg()->LoadPerspective(sval);
 	}
 
 	//interpolator
@@ -1690,9 +1703,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("clip link", glbin_settings.m_clip_link);
 	fconfig->Write("clip hold", glbin_settings.m_clip_hold);
 	fconfig->Write("clip mode", glbin_settings.m_clip_mode);
-	fconfig->Write("x_link", frame->GetClipPlanPanel()->GetXLink());
-	fconfig->Write("y_link", frame->GetClipPlanPanel()->GetYLink());
-	fconfig->Write("z_link", frame->GetClipPlanPanel()->GetZLink());
+	fconfig->Write("x_link", frame->GetClipPlanePanel()->GetXLink());
+	fconfig->Write("y_link", frame->GetClipPlanePanel()->GetYLink());
+	fconfig->Write("z_link", frame->GetClipPlanePanel()->GetZLink());
 	//movie view
 	path = "/movie_panel";
 	fconfig->SetPath(path);
@@ -1720,6 +1733,11 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->SetPath(path);
 	fconfig->Write("dpi scale factor", frame->GetDPIScaleFactor());
 	fconfig->Write("layout", frame->SavePerspective().ToStdString());
+	fconfig->Write("layout clip", frame->GetClipPlanePanel()->SavePerspective());
+	fconfig->Write("layout movie", frame->GetMoviePanel()->SavePerspective());
+	fconfig->Write("layout outadj", frame->GetOutAdjPanel()->SavePerspective());
+	fconfig->Write("layout project", frame->GetProjectPanel()->SavePerspective());
+	fconfig->Write("layout measure", frame->GetMeasureDlg()->SavePerspective());
 	//interpolator
 	path = "/interpolator";
 	fconfig->SetPath(path);

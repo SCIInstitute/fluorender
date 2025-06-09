@@ -28,8 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _PROPPANEL_H_
 #define _PROPPANEL_H_
 
-#include <wx/wx.h>
 #include <Value.hpp>
+#include <wx/wx.h>
+#include <wx/aui/auibook.h>
+#include <string>
 
 #define FOUND_VALUE(v) vc.find(v) != vc.end()
 
@@ -41,8 +43,6 @@ public:
 	PropBase(MainFrame* frame);
 	~PropBase() {};
 
-	virtual void LoadPerspective() {};
-	virtual void SavePerspective() {};
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
 	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
 	virtual void FluoRefresh(int excl_self = 1,
@@ -84,5 +84,26 @@ public:
 protected:
 };
 
+class TabbedPanel : public PropPanel
+{
+public:
+	TabbedPanel(MainFrame* frame,
+		wxWindow* parent,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0,
+		const wxString& name = "TabbedPanel");
+	~TabbedPanel() {};
+	virtual void LoadPerspective(const std::string& str);
+	virtual std::string SavePerspective();
 
+	void AddPage(wxWindow* page, const wxString& caption, bool select = false);
+	int FindPage(const wxWindow* page) const;
+	bool DeletePage(size_t page);
+	bool DeleteAllPages();
+	int SetSelection(size_t page);
+
+protected:
+	wxAuiNotebook* m_notebook = nullptr;
+};
 #endif//_PROPPANEL_H_

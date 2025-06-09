@@ -160,14 +160,13 @@ public:
 	};
 
 	TreePanel(MainFrame* frame,
+		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "TreePanel");
 	~TreePanel();
 
-	virtual void LoadPerspective();
-	virtual void SavePerspective();
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//double click

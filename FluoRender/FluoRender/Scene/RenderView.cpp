@@ -10474,8 +10474,8 @@ void RenderView::ProcessIdle(IdleState& state)
 		if (!m_clip_up && state.m_key_clip_up)
 		{
 			m_clip_up = true;
-			if (glbin_current.mainframe->GetClipPlanPanel())
-				glbin_current.mainframe->GetClipPlanPanel()->MoveLinkedClippingPlanes(-1);
+			if (glbin_current.mainframe->GetClipPlanePanel())
+				glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(-1);
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
@@ -10487,8 +10487,8 @@ void RenderView::ProcessIdle(IdleState& state)
 		if (!m_clip_down && state.m_key_clip_down)
 		{
 			m_clip_down = true;
-			if (glbin_current.mainframe->GetClipPlanPanel())
-				glbin_current.mainframe->GetClipPlanPanel()->MoveLinkedClippingPlanes(1);
+			if (glbin_current.mainframe->GetClipPlanePanel())
+				glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(1);
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;

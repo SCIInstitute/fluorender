@@ -34,11 +34,13 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <compatibility.h>
 #include <DragDrop.h>
+#include <PropPanel.h>
+#include <ProjectPanel.h>
 #include <TreePanel.h>
 #include <ListPanel.h>
 #include <RenderViewPanel.h>
 #include <RenderCanvas.h>
-#include <PropPanel.h>
+#include <PropertyPanel.h>
 #include <VolumePropPanel.h>
 #include <MeshPropPanel.h>
 #include <AnnotatPropPanel.h>
@@ -403,18 +405,12 @@ MainFrame::MainFrame(
 
 	wxSize panel_size(FromDIP(wxSize(350, 450)));
 	//use the project panel for both tree and list
-	m_proj_panel = new wxAuiNotebook(this, wxID_ANY,
-		wxDefaultPosition, panel_size,
-		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
-		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
-		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
-	m_proj_panel->SetName("ProjectPanel");
+	m_proj_panel = new ProjectPanel(this);
+	//m_proj_panel->SetName("ProjectPanel");
 	//create list view
-	m_list_panel = new ListPanel(this,
-		wxDefaultPosition, panel_size);
+	m_list_panel = new ListPanel(this, m_proj_panel);
 	//create tree view
-	m_tree_panel = new TreePanel(this,
-		wxDefaultPosition, panel_size);
+	m_tree_panel = new TreePanel(this, m_proj_panel);
 	m_proj_panel->AddPage(m_list_panel, UITEXT_DATAVIEW, false);
 	m_proj_panel->AddPage(m_tree_panel, UITEXT_TREEVIEW, true);
 
@@ -423,12 +419,8 @@ MainFrame::MainFrame(
 		wxDefaultPosition, panel_size);
 
 	//create prop panel
-	m_prop_panel = new wxAuiNotebook(this, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize,
-		wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE |
-		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
-	m_prop_panel->SetName("PropPanel");
-	m_prop_panel->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MainFrame::OnPropPageClose, this);
+	m_prop_panel = new PropertyPanel(this);
+	//m_prop_panel->SetName("PropPanel");
 
 	//clipping view
 	m_clip_plane_panel = new ClipPlanePanel(this,
@@ -841,11 +833,11 @@ MainFrame::MainFrame(
 	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
 		GetDPIScaleFactor()))
 		m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
-	//if (glbin_settings.m_prj_panel_split)
-	//	m_proj_panel->Split(1, wxBOTTOM);
-	m_measure_dlg->LoadPerspective();
-	m_output_adj_panel->LoadPerspective();
-	m_clip_plane_panel->LoadPerspective();
+	m_clip_plane_panel->LoadPerspective(glbin_settings.m_layout_clip);
+	m_movie_panel->LoadPerspective(glbin_settings.m_layout_movie);
+	m_output_adj_panel->LoadPerspective(glbin_settings.m_layout_outadj);
+	m_proj_panel->LoadPerspective(glbin_settings.m_layout_project);
+	m_measure_dlg->LoadPerspective(glbin_settings.m_layout_measure);
 	glbin_moviemaker.SetMainFrame(this);
 	glbin_moviemaker.SetView(view);
 	glbin_mov_def.Apply(&glbin_moviemaker);
@@ -879,10 +871,11 @@ MainFrame::~MainFrame()
 	glbin_mov_def.Set(&glbin_moviemaker);
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
-	//glbin_settings.m_prj_panel_split = m_proj_panel->IsSplit();
-	m_measure_dlg->SavePerspective();
-	m_output_adj_panel->SavePerspective();
-	m_clip_plane_panel->SavePerspective();
+	glbin_settings.m_layout_clip = m_clip_plane_panel->SavePerspective();
+	glbin_settings.m_layout_movie = m_movie_panel->SavePerspective();
+	glbin_settings.m_layout_outadj = m_output_adj_panel->SavePerspective();
+	glbin_settings.m_layout_project = m_proj_panel->SavePerspective();
+	glbin_settings.m_layout_measure = m_measure_dlg->SavePerspective();
 	glbin_settings.Save();
 
 	m_aui_mgr.UnInit();
@@ -990,6 +983,11 @@ void MainFrame::LoadPerspective(const wxString& str)
 wxString MainFrame::SavePerspective()
 {
 	return m_aui_mgr.SavePerspective();
+}
+
+ProjectPanel* MainFrame::GetProjectPanel()
+{
+	return m_proj_panel;
 }
 
 TreePanel *MainFrame::GetTreePanel()
@@ -1270,7 +1268,7 @@ void MainFrame::ShowPropPage(int type,
 	if (added && !show)
 	{
 		page->Hide();
-		m_prop_panel->RemovePage(page_no);
+		m_prop_panel->DeletePage(page_no);
 	}
 }
 
@@ -1460,7 +1458,7 @@ HelpDlg* MainFrame::GetHelpDlg()
 }
 
 //clipping view
-ClipPlanePanel* MainFrame::GetClipPlanPanel()
+ClipPlanePanel* MainFrame::GetClipPlanePanel()
 {
 	return m_clip_plane_panel;
 }
@@ -2508,20 +2506,6 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 {
 	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
-}
-
-//prop pages
-void MainFrame::OnPropPageClose(wxAuiNotebookEvent& event)
-{
-	wxAuiNotebook* panel = (wxAuiNotebook*)event.GetEventObject();
-	wxWindow* page = panel->GetPage(event.GetSelection());
-	if (page)
-	{
-		int page_no = m_prop_panel->FindPage(page);
-		page->Hide();
-		m_prop_panel->RemovePage(page_no);
-	}
-	event.Veto();
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)

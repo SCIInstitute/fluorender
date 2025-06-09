@@ -78,6 +78,7 @@ DEALINGS IN THE SOFTWARE.
 #define UITEXT_CLIPPING		"Clipping Planes"
 #define UITEXT_PROPERTIES	"Properties"
 
+class ProjectPanel;
 class TreePanel;
 class ListPanel;
 class RenderViewPanel;
@@ -87,6 +88,7 @@ class VolumeData;
 class MeshData;
 class Annotations;
 class PropPanel;
+class PropertyPanel;
 class VolumePropPanel;
 class MeshPropPanel;
 class AnnotatPropPanel;
@@ -262,6 +264,7 @@ public:
 	ManipPropPanel* FindMeshManip(const wxString& str);
 
 	//project panels
+	ProjectPanel* GetProjectPanel();
 	TreePanel* GetTreePanel();
 	ListPanel* GetListPanel();
 	//outadj view
@@ -269,7 +272,7 @@ public:
 	//movie view
 	MoviePanel* GetMoviePanel();
 	//clipping view
-	ClipPlanePanel* GetClipPlanPanel();
+	ClipPlanePanel* GetClipPlanePanel();
 	//system settings
 	SettingDlg* GetSettingDlg();
 	//help dialog
@@ -359,11 +362,11 @@ private:
 	wxMenu* m_top_window;
 	wxMenu* m_top_help;
 
-	wxAuiNotebook* m_proj_panel;
+	ProjectPanel* m_proj_panel;
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
 	std::vector<RenderViewPanel*> m_render_view_panels;
-	wxAuiNotebook *m_prop_panel;
+	PropertyPanel *m_prop_panel;
 	//prop panel children
 	std::vector<PropPanel*> m_prop_pages;
 	ClipPlanePanel *m_clip_plane_panel;
@@ -402,8 +405,6 @@ private:
 	void OnMainMenu(wxCommandEvent& event);
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
-	//prop pages
-	void OnPropPageClose(wxAuiNotebookEvent& event);
 	//close
 	void OnClose(wxCloseEvent &event);
 

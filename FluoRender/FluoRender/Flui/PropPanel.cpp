@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <RenderView.h>
 #include <DataManager.h>
+#include <wxNotebookSerializer.h>
 
 PropBase::PropBase(MainFrame* frame):
 	m_frame(frame)
@@ -104,3 +105,72 @@ PropDialog::PropDialog(MainFrame* frame,
 
 }
 
+TabbedPanel::TabbedPanel(MainFrame* frame,
+	wxWindow* parent,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style,
+	const wxString& name) :
+	PropPanel(frame, parent, pos, size, style, name)
+{
+}
+
+void TabbedPanel::LoadPerspective(const std::string& str)
+{
+	if (!m_notebook)
+		return;
+
+	wxAuiManager mgr;
+	wxNotebookDeserializer deser(mgr);
+	deser.SetXML(str);
+	m_notebook->LoadLayout(GetName(), deser);
+}
+
+std::string TabbedPanel::SavePerspective()
+{
+	if (!m_notebook)
+		return "";
+
+	wxNotebookSerializer ser;
+	ser.BeforeSave();
+	ser.BeforeSaveNotebooks();
+	m_notebook->SaveLayout(GetName(), ser);
+	ser.AfterSaveNotebooks();
+	ser.AfterSave();
+	return ser.GetXML().ToStdString();
+}
+
+void TabbedPanel::AddPage(wxWindow* page, const wxString& caption, bool select)
+{
+	if (!m_notebook || !page)
+		return;
+	m_notebook->AddPage(page, caption, select);
+}
+
+int TabbedPanel::FindPage(const wxWindow* page) const
+{
+	if (!m_notebook || !page)
+		return -1;
+	return m_notebook->FindPage(page);
+}
+
+bool TabbedPanel::DeletePage(size_t page)
+{
+	if (!m_notebook || page >= m_notebook->GetPageCount())
+		return false;
+	return m_notebook->DeletePage(page);
+}
+
+bool TabbedPanel::DeleteAllPages()
+{
+	if (!m_notebook)
+		return false;
+	return m_notebook->DeleteAllPages();
+}
+
+int TabbedPanel::SetSelection(size_t page)
+{
+	if (!m_notebook || page >= m_notebook->GetPageCount())
+		return -1;
+	return m_notebook->SetSelection(page);
+}

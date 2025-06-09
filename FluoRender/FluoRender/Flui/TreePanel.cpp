@@ -289,11 +289,12 @@ void DataTreeCtrl::OnSelectionChanged(wxTreeEvent& event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TreePanel::TreePanel(MainFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, frame, pos, size, style, name),
+	PropPanel(frame, parent, pos, size, style, name),
 	m_scroll_pos(-1)
 {
 	wxEventBlocker blocker(this);
@@ -375,16 +376,6 @@ TreePanel::TreePanel(MainFrame* frame,
 
 TreePanel::~TreePanel()
 {
-}
-
-void TreePanel::LoadPerspective()
-{
-
-}
-
-void TreePanel::SavePerspective()
-{
-
 }
 
 void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)

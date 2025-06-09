@@ -273,9 +273,11 @@ void MainSettings::Read()
 		fconfig->SetPath("/ui");
 		fconfig->Read("dpi scale factor", &m_dpi_scale_factor, 0.0);
 		fconfig->Read("layout", &m_layout);
-		fconfig->Read("layout measure", &m_layout_measure);
-		fconfig->Read("layout project", &m_layout_project);
 		fconfig->Read("layout clip", &m_layout_clip);
+		fconfig->Read("layout movie", &m_layout_movie);
+		fconfig->Read("layout outadj", &m_layout_outadj);
+		fconfig->Read("layout project", &m_layout_project);
+		fconfig->Read("layout measure", &m_layout_measure);
 		fconfig->Read("invert slider", &m_inverse_slider, false);
 		fconfig->Read("mulfunc", &m_mulfunc, 0);
 		fconfig->Read("time span", &m_time_span, 1.0);
@@ -519,9 +521,11 @@ void MainSettings::Save()
 	fconfig->SetPath("/ui");
 	fconfig->Write("dpi scale factor", m_dpi_scale_factor);
 	fconfig->Write("layout", m_layout);
-	fconfig->Write("layout measure", m_layout_measure);
-	fconfig->Write("layout project", m_layout_project);
 	fconfig->Write("layout clip", m_layout_clip);
+	fconfig->Write("layout movie", m_layout_movie);
+	fconfig->Write("layout outadj", m_layout_outadj);
+	fconfig->Write("layout project", m_layout_project);
+	fconfig->Write("layout measure", m_layout_measure);
 	fconfig->Write("invert slider", m_inverse_slider);
 	fconfig->Write("mulfunc", m_mulfunc);
 	fconfig->Write("time span", m_time_span);

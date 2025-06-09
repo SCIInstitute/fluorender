@@ -40,7 +40,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerAlign.h>
 #include <RulerRenderer.h>
 #include <DistCalculator.h>
-#include <wxNotebookSerializer.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
 #include <wx/wfstream.h>
@@ -373,7 +372,7 @@ fluo::Color RulerListCtrl::GetColorFromWxColor(const wxColor& c)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeasureDlg::MeasureDlg(MainFrame* frame)
-	: PropPanel(frame, frame,
+	: TabbedPanel(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 600)),
 	0, "MeasureDlg")
@@ -837,25 +836,6 @@ wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent)
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
-}
-
-void MeasureDlg::LoadPerspective()
-{
-	wxAuiManager mgr;
-	wxNotebookDeserializer deser(mgr);
-	deser.SetXML(glbin_settings.m_layout_measure);
-	m_notebook->LoadLayout(GetName(), deser);
-}
-
-void MeasureDlg::SavePerspective()
-{
-	wxNotebookSerializer ser;
-	ser.BeforeSave();
-	ser.BeforeSaveNotebooks();
-	m_notebook->SaveLayout(GetName(), ser);
-	ser.AfterSaveNotebooks();
-	ser.AfterSave();
-	glbin_settings.m_layout_measure = ser.GetXML().ToStdString();
 }
 
 void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
