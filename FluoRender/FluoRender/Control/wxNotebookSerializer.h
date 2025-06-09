@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef WXNOTEBOOKSERIALIZER_H
 #define WXNOTEBOOKSERIALIZER_H
 
-#include <BaseTreeFile.h>
+#include "wx/aui/aui.h"
 #include <wx/aui/serializer.h>
-#include <string>
+#include <wx/xml/xml.h>
 #include <memory>
 
 // Sample serializer and deserializer implementations for saving and loading layouts.
@@ -39,10 +39,7 @@ class wxNotebookSerializer : public wxAuiSerializer
 public:
 	wxNotebookSerializer() = default;
 
-	std::string GetConfig()
-	{
-		return m_config_str;
-	}
+	wxString GetXML() const;
 
 	// Implement wxAuiSerializer methods.
 	virtual void BeforeSave() override;
@@ -66,46 +63,43 @@ public:
 	virtual void AfterSave() override;
 
 private:
-	void AddChild(const wxString& name, const wxString& value);
+	void AddChild(wxXmlNode* parent, const wxString& name, const wxString& value);
 
-	void AddChild(const wxString& name, int value);
+	void AddChild(wxXmlNode* parent, const wxString& name, int value);
 
-	void AddChild(const wxString& name, const wxRect& rect);
+	void AddChild(wxXmlNode* parent, const wxString& name, const wxRect& rect);
 
 	// Common helper of SavePane() and SaveNotebookTabControl() which both need
 	// to save the same layout information.
-	void AddDockLayout(const wxAuiDockLayoutInfo& layout);
+	void AddDockLayout(wxXmlNode* node, const wxAuiDockLayoutInfo& layout);
 
 	// Helper of SaveNotebookTabControl(): add a node with the given name
 	// containing the comma-separated list of page indices if there are any.
-	void AddPagesList(
+	void AddPagesList(wxXmlNode* node,
 		const wxString& name,
 		const std::vector<int>& pages);
 
-	std::string m_config_str;
-	std::unique_ptr<BaseTreeFile> m_config;
-	//wxXmlDocument m_doc;
+	wxXmlDocument m_doc;
 
 	// Non-owning pointer to the root node of m_doc.
-	//wxXmlNode* m_root = nullptr;
+	wxXmlNode* m_root = nullptr;
 
 	// The other pointers are only set temporarily, until they are added to the
 	// document -- this ensures that we don't leak memory if an exception is
 	// thrown before this happens.
-	//std::unique_ptr<wxXmlNode> m_panes;
-	//std::unique_ptr<wxXmlNode> m_books;
-	//std::unique_ptr<wxXmlNode> m_book;
+	std::unique_ptr<wxXmlNode> m_panes;
+	std::unique_ptr<wxXmlNode> m_books;
+	std::unique_ptr<wxXmlNode> m_book;
 };
 
 class wxNotebookDeserializer : public wxAuiDeserializer
 {
 public:
-	explicit wxNotebookDeserializer(wxAuiManager& manager);
+	explicit wxNotebookDeserializer(wxAuiManager& manager) :
+		wxAuiDeserializer(manager) {
+	};
 
-	void SetConfig(const std::string& str)
-	{
-		m_config_str = str;
-	}
+	void SetXML(const wxString& xml);
 
 	// Implement wxAuiDeserializer methods.
 	virtual std::vector<wxAuiPaneLayoutInfo> LoadPanes() override;
@@ -116,8 +110,7 @@ public:
 	// Overriding this function is optional and normally it is not going to be
 	// called at all. We only do it here to show the different possibilities,
 	// but the serialized pages need to be manually edited to see them.
-	virtual bool
-		HandleOrphanedPage(wxAuiNotebook& book,
+	virtual bool HandleOrphanedPage(wxAuiNotebook& book,
 			int page,
 			wxAuiTabCtrl** tabCtrl,
 			int* tabIndex) override;
@@ -135,17 +128,15 @@ private:
 	// load the dock layout information.
 	//
 	// Returns true if we processed this node.
-	bool LoadDockLayout(wxAuiDockLayoutInfo& info);
+	bool LoadDockLayout(wxXmlNode* node, wxAuiDockLayoutInfo& info);
 
-	std::vector<wxAuiTabLayoutInfo> LoadNotebookTabs();
+	std::vector<wxAuiTabLayoutInfo> LoadNotebookTabs(wxXmlNode* book);
 
-	std::string m_config_str;
-	std::unique_ptr<BaseTreeFile> m_config;
-	//wxXmlDocument m_doc;
+	wxXmlDocument m_doc;
 
 	// Non-owning pointers to the nodes in m_doc.
-	//wxXmlNode* m_panes = nullptr;
-	//wxXmlNode* m_books = nullptr;
+	wxXmlNode* m_panes = nullptr;
+	wxXmlNode* m_books = nullptr;
 };
 
 #endif// WXNOTEBOOKSERIALIZER_H

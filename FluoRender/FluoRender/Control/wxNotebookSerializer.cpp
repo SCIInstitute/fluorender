@@ -27,127 +27,130 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <wxNotebookSerializer.h>
-#include <XmlFile.h>
 #include <wx/aui/auibook.h>
+#include <wx/sstream.h>
+
+wxString wxNotebookSerializer::GetXML() const
+{
+	wxStringOutputStream oss;
+	m_doc.Save(oss);
+
+	return oss.GetString();
+}
 
 void wxNotebookSerializer::BeforeSave()
 {
-	m_config = std::make_unique<XmlFile>();
+	m_root = new wxXmlNode(wxXML_ELEMENT_NODE, "aui-layout");
+	m_root->AddAttribute("version", "3.3.0");
 
-	//m_root = new wxXmlNode(wxXML_ELEMENT_NODE, "aui-layout");
-	//m_root->AddAttribute("version", "3.3.0");
-
-	//m_doc.SetRoot(m_root);
+	m_doc.SetRoot(m_root);
 }
 
 void wxNotebookSerializer::BeforeSavePanes()
 {
-	//m_panes.reset(new wxXmlNode(wxXML_ELEMENT_NODE, "panes"));
+	m_panes.reset(new wxXmlNode(wxXML_ELEMENT_NODE, "panes"));
 }
 
 void wxNotebookSerializer::SavePane(const wxAuiPaneLayoutInfo& pane)
 {
-	m_config->SetPath("./pane");
-	//auto node = new wxXmlNode(wxXML_ELEMENT_NODE, "pane");
-	m_config->Write("name", pane.name.ToStdString());
-	//node->AddAttribute("name", pane.name);
+	auto node = new wxXmlNode(wxXML_ELEMENT_NODE, "pane");
+	node->AddAttribute("name", pane.name);
 
-	AddDockLayout(pane);
+	AddDockLayout(node, pane);
 
-	AddChild("floating-rect",
+	AddChild(node, "floating-rect",
 		wxRect(pane.floating_pos, pane.floating_size));
 
 	// Don't bother creating many "maximized" nodes with value 0 when we
 	// can have at most one of them with value 1.
 	if (pane.is_maximized)
-		AddChild("maximized", 1);
+		AddChild(node, "maximized", 1);
 
 	// Also don't mark visible pages (as most of them are) as being so.
 	if (pane.is_hidden)
-		AddChild("hidden", 1);
+		AddChild(node, "hidden", 1);
 
-	//m_panes->AddChild(node);
+	m_panes->AddChild(node);
 }
 
 void wxNotebookSerializer::AfterSavePanes()
 {
-	//m_root->AddChild(m_panes.release());
+	m_root->AddChild(m_panes.release());
 }
 
 void wxNotebookSerializer::BeforeSaveNotebooks()
 {
-	//m_books.reset(new wxXmlNode(wxXML_ELEMENT_NODE, "notebooks"));
+	m_books.reset(new wxXmlNode(wxXML_ELEMENT_NODE, "notebooks"));
 }
 
 void wxNotebookSerializer::BeforeSaveNotebook(const wxString& name)
 {
-	//m_book.reset(new wxXmlNode(wxXML_ELEMENT_NODE, "notebook"));
-	//m_book->AddAttribute("name", name);
+	m_book.reset(new wxXmlNode(wxXML_ELEMENT_NODE, "notebook"));
+	m_book->AddAttribute("name", name);
 }
 
 void wxNotebookSerializer::SaveNotebookTabControl(const wxAuiTabLayoutInfo& tab)
 {
-	//auto node = new wxXmlNode(wxXML_ELEMENT_NODE, "tab");
+	auto node = new wxXmlNode(wxXML_ELEMENT_NODE, "tab");
 
-	AddDockLayout(tab);
+	AddDockLayout(node, tab);
 
-	AddPagesList("pages", tab.pages);
-	AddPagesList("pinned", tab.pinned);
-	AddChild("active", tab.active);
+	AddPagesList(node, "pages", tab.pages);
+	AddPagesList(node, "pinned", tab.pinned);
+	AddChild(node, "active", tab.active);
 
-	//m_book->AddChild(node);
+	m_book->AddChild(node);
 }
 
 void wxNotebookSerializer::AfterSaveNotebook()
 {
-	//m_books->AddChild(m_book.release());
+	m_books->AddChild(m_book.release());
 }
 
 void wxNotebookSerializer::AfterSaveNotebooks()
 {
-	//m_root->AddChild(m_books.release());
+	m_root->AddChild(m_books.release());
 }
 
 void wxNotebookSerializer::AfterSave()
 {
 }
 
-void wxNotebookSerializer::AddChild(const wxString& name, const wxString& value)
+void wxNotebookSerializer::AddChild(wxXmlNode* parent, const wxString& name, const wxString& value)
 {
-	m_config->Write(name.ToStdString(), value.ToStdString());
-	//auto node = new wxXmlNode(parent, wxXML_ELEMENT_NODE, name);
-	//node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, {}, value));
+	auto node = new wxXmlNode(parent, wxXML_ELEMENT_NODE, name);
+	node->AddChild(new wxXmlNode(wxXML_TEXT_NODE, {}, value));
 }
 
-void wxNotebookSerializer::AddChild(const wxString& name, int value)
+void wxNotebookSerializer::AddChild(wxXmlNode* parent, const wxString& name, int value)
 {
 	// Don't save 0 values, they're the default.
 	if (value)
-		AddChild(name, wxString::Format("%u", value));
+		AddChild(parent, name, wxString::Format("%u", value));
 }
 
-void wxNotebookSerializer::AddChild(const wxString& name, const wxRect& rect)
+void wxNotebookSerializer::AddChild(wxXmlNode* parent, const wxString& name, const wxRect& rect)
 {
 	if (rect.GetPosition() != wxDefaultPosition ||
 		rect.GetSize() != wxDefaultSize)
 	{
-		AddChild(name,
+		AddChild(parent, name,
 			wxString::Format("%d,%d %dx%d",
 				rect.x, rect.y, rect.width, rect.height));
 	}
 }
 
-void wxNotebookSerializer::AddDockLayout(const wxAuiDockLayoutInfo& layout)
+void wxNotebookSerializer::AddDockLayout(wxXmlNode* node, const wxAuiDockLayoutInfo& layout)
 {
-	AddChild("direction", layout.dock_direction);
-	AddChild("layer", layout.dock_layer);
-	AddChild("row", layout.dock_row);
-	AddChild("position", layout.dock_pos);
-	AddChild("proportion", layout.dock_proportion);
-	AddChild("size", layout.dock_size);
+	AddChild(node, "direction", layout.dock_direction);
+	AddChild(node, "layer", layout.dock_layer);
+	AddChild(node, "row", layout.dock_row);
+	AddChild(node, "position", layout.dock_pos);
+	AddChild(node, "proportion", layout.dock_proportion);
+	AddChild(node, "size", layout.dock_size);
 }
 
-void wxNotebookSerializer::AddPagesList(
+void wxNotebookSerializer::AddPagesList(wxXmlNode* node,
 	const wxString& name,
 	const std::vector<int>& pages)
 {
@@ -162,27 +165,29 @@ void wxNotebookSerializer::AddPagesList(
 			pagesList << page;
 		}
 
-		AddChild(name, pagesList);
+		AddChild(node, name, pagesList);
 	}
 }
 
-wxNotebookDeserializer::wxNotebookDeserializer(wxAuiManager& manager)
-	: wxAuiDeserializer(manager)
+void wxNotebookDeserializer::SetXML(const wxString& xml)
 {
-	//wxStringInputStream iss(xml);
-	//if (!m_doc.Load(iss))
-	//	throw std::runtime_error("Failed to load XML document.");
+	if (xml.IsEmpty())
+		return;
 
-	//const auto root = m_doc.GetDocumentNode();
-	//const auto layout = root->GetChildren();
-	//if (!layout)
-	//	throw std::runtime_error("Missing layout node");
-	//if (layout->GetName() != "aui-layout")
-	//	throw std::runtime_error("Unexpected XML node name");
-	//if (layout->GetAttribute("version") != "3.3.0")
-	//	throw std::runtime_error("Unexpected XML version");
-	//if (layout->GetNext())
-	//	throw std::runtime_error("Unexpected multiple layout nodes");
+	wxStringInputStream iss(xml);
+	if (!m_doc.Load(iss))
+		return;
+
+	const auto root = m_doc.GetDocumentNode();
+	const auto layout = root->GetChildren();
+	if (!layout)
+		return;
+	if (layout->GetName() != "aui-layout")
+		return;
+	if (layout->GetAttribute("version") != "3.3.0")
+		return;
+	if (layout->GetNext())
+		return;
 
 	// Check that we only have the top level nodes that we expect.
 	//
@@ -191,98 +196,92 @@ wxNotebookDeserializer::wxNotebookDeserializer(wxAuiManager& manager)
 	// decide to to gracefully ignore unknown nodes instead of failing, or
 	// at least save the format version in the XML file to be able to give
 	// a better error message.
-	//for (wxXmlNode* node = layout->GetChildren(); node; node = node->GetNext())
-	//{
-	//	if (node->GetName() == "panes")
-	//	{
-	//		if (m_panes)
-	//			throw std::runtime_error("Unexpected multiple panes nodes");
+	for (wxXmlNode* node = layout->GetChildren(); node; node = node->GetNext())
+	{
+		if (node->GetName() == "panes")
+		{
+			if (m_panes)
+				return;
 
-	//		m_panes = node;
-	//	}
-	//	else if (node->GetName() == "notebooks")
-	//	{
-	//		if (m_books)
-	//			throw std::runtime_error("Unexpected multiple notebooks nodes");
+			m_panes = node;
+		}
+		else if (node->GetName() == "notebooks")
+		{
+			if (m_books)
+				return;
 
-	//		m_books = node;
-	//	}
-	//	else
-	//	{
-	//		throw std::runtime_error("Unexpected node name");
-	//	}
-	//}
+			m_books = node;
+		}
+	}
 }
 
 std::vector<wxAuiPaneLayoutInfo> wxNotebookDeserializer::LoadPanes()
 {
 	std::vector<wxAuiPaneLayoutInfo> panes;
 
-	//for (wxXmlNode* node = m_panes->GetChildren(); node; node = node->GetNext())
-	//{
-	//	if (node->GetName() != "pane")
-	//		throw std::runtime_error("Unexpected pane node name");
+	if (!m_panes)
+		return panes;
 
-	//	{
-	//		wxAuiPaneLayoutInfo pane{ node->GetAttribute("name") };
+	for (wxXmlNode* node = m_panes->GetChildren(); node; node = node->GetNext())
+	{
+		if (node->GetName() != "pane")
+			continue;
 
-	//		for (wxXmlNode* child = node->GetChildren(); child; child = child->GetNext())
-	//		{
-	//			if (LoadDockLayout(child, pane))
-	//				continue;
+		{
+			wxAuiPaneLayoutInfo pane{ node->GetAttribute("name") };
 
-	//			const wxString& name = child->GetName();
-	//			const wxString& content = child->GetNodeContent();
+			for (wxXmlNode* child = node->GetChildren(); child; child = child->GetNext())
+			{
+				if (LoadDockLayout(child, pane))
+					continue;
 
-	//			if (name == "floating-rect")
-	//			{
-	//				auto rect = GetRect(content);
+				const wxString& name = child->GetName();
+				const wxString& content = child->GetNodeContent();
 
-	//				pane.floating_pos = rect.GetPosition();
-	//				pane.floating_size = rect.GetSize();
-	//			}
-	//			else if (name == "maximized")
-	//			{
-	//				pane.is_maximized = GetInt(content) != 0;
-	//			}
-	//			else if (name == "hidden")
-	//			{
-	//				pane.is_hidden = GetInt(content) != 0;
-	//			}
-	//			else
-	//			{
-	//				throw std::runtime_error("Unexpected pane child node name");
-	//			}
-	//		}
+				if (name == "floating-rect")
+				{
+					auto rect = GetRect(content);
 
-	//		panes.push_back(pane);
-	//	}
-	//}
+					pane.floating_pos = rect.GetPosition();
+					pane.floating_size = rect.GetSize();
+				}
+				else if (name == "maximized")
+				{
+					pane.is_maximized = GetInt(content) != 0;
+				}
+				else if (name == "hidden")
+				{
+					pane.is_hidden = GetInt(content) != 0;
+				}
+			}
+
+			panes.push_back(pane);
+		}
+	}
 
 	return panes;
 }
 
 std::vector<wxAuiTabLayoutInfo> wxNotebookDeserializer::LoadNotebookTabs(const wxString& name)
 {
+	if (!m_books)
+		return std::vector<wxAuiTabLayoutInfo>();
+
 	// Find the notebook with the given name.
-	//for (wxXmlNode* node = m_books->GetChildren(); node; node = node->GetNext())
-	//{
-	//	if (node->GetName() != "notebook")
-	//		throw std::runtime_error("Unexpected notebook node name");
+	for (wxXmlNode* node = m_books->GetChildren(); node; node = node->GetNext())
+	{
+		if (node->GetName() != "notebook")
+			continue;
 
-	//	if (node->GetAttribute("name") == name)
-	//		return LoadNotebookTabs(node);
-	//}
+		if (node->GetAttribute("name") == name)
+			return LoadNotebookTabs(node);
+	}
 
-	// As above, this might not be the best thing to do in a real
-	// application, where, perhaps, the XML file was saved by a newer
-	// version of the problem, but here we do this for simplicity and to
-	// make sure we detect any errors.
-	//throw std::runtime_error("Notebook with the given name not found");
-	return LoadNotebookTabs("");
+	return std::vector<wxAuiTabLayoutInfo>();
 }
 
-bool wxNotebookDeserializer::HandleOrphanedPage(wxAuiNotebook& book,
+bool wxNotebookDeserializer::HandleOrphanedPage(
+	wxAuiNotebook& book,
 	int page,
 	wxAuiTabCtrl** tabCtrl,
 	int* tabIndex)
@@ -317,10 +316,8 @@ wxWindow* wxNotebookDeserializer::CreatePaneWindow(wxAuiPaneInfo& pane)
 
 int wxNotebookDeserializer::GetInt(const wxString& str)
 {
-	int value;
-	if (!str.ToInt(&value))
-		throw std::runtime_error("Failed to parse integer");
-
+	int value = 0;
+	str.ToInt(&value);
 	return value;
 }
 
@@ -333,9 +330,9 @@ wxSize wxNotebookDeserializer::GetSize(const wxString& str)
 	if (strW == "-1" && strH == strW)
 		return wxDefaultSize;
 
-	unsigned int w, h;
-	if (!strW.ToUInt(&w) || !strH.ToUInt(&h))
-		throw std::runtime_error("Failed to parse size");
+	unsigned int w = 0, h = 0;
+	strW.ToUInt(&w);
+	strH.ToUInt(&h);
 
 	return wxSize(w, h);
 }
@@ -348,17 +345,17 @@ wxRect wxNotebookDeserializer::GetRect(const wxString& str)
 	wxString strY;
 	const wxString strX = strXY.BeforeFirst(',', &strY);
 
-	int x, y;
-	if (!strX.ToInt(&x) || !strY.ToInt(&y))
-		throw std::runtime_error("Failed to parse position");
+	int x = 0, y = 0;
+	strX.ToInt(&x);
+	strY.ToInt(&y);
 
 	return wxRect(wxPoint(x, y), GetSize(strWH));
 }
 
-bool wxNotebookDeserializer::LoadDockLayout(wxAuiDockLayoutInfo& info)
+bool wxNotebookDeserializer::LoadDockLayout(wxXmlNode* node, wxAuiDockLayoutInfo& info)
 {
-	const wxString& name = "";// node->GetName();
-	const wxString& content = "";// node->GetNodeContent();
+	const wxString& name = node->GetName();
+	const wxString& content = node->GetNodeContent();
 
 	if (name == "direction")
 	{
@@ -392,44 +389,40 @@ bool wxNotebookDeserializer::LoadDockLayout(wxAuiDockLayoutInfo& info)
 	return true;
 }
 
-std::vector<wxAuiTabLayoutInfo> wxNotebookDeserializer::LoadNotebookTabs()
+std::vector<wxAuiTabLayoutInfo> wxNotebookDeserializer::LoadNotebookTabs(wxXmlNode* book)
 {
 	std::vector<wxAuiTabLayoutInfo> tabs;
 
-	//for (wxXmlNode* node = book->GetChildren(); node; node = node->GetNext())
-	//{
-	//	if (node->GetName() != "tab")
-	//		throw std::runtime_error("Unexpected tab node name");
+	for (wxXmlNode* node = book->GetChildren(); node; node = node->GetNext())
+	{
+		if (node->GetName() != "tab")
+			continue;
 
-	//	wxAuiTabLayoutInfo tab;
-	//	for (wxXmlNode* child = node->GetChildren(); child; child = child->GetNext())
-	//	{
-	//		if (LoadDockLayout(child, tab))
-	//			continue;
+		wxAuiTabLayoutInfo tab;
+		for (wxXmlNode* child = node->GetChildren(); child; child = child->GetNext())
+		{
+			if (LoadDockLayout(child, tab))
+				continue;
 
-	//		const auto& pageIndices = wxSplit(child->GetNodeContent(), ',');
-	//		if (child->GetName() == "pages")
-	//		{
-	//			for (const auto& s : pageIndices)
-	//				tab.pages.push_back(GetInt(s));
-	//		}
-	//		else if (child->GetName() == "pinned")
-	//		{
-	//			for (const auto& s : pageIndices)
-	//				tab.pinned.push_back(GetInt(s));
-	//		}
-	//		else if (child->GetName() == "active")
-	//		{
-	//			tab.active = GetInt(child->GetNodeContent());
-	//		}
-	//		else
-	//		{
-	//			throw std::runtime_error("Unexpected tab child node name");
-	//		}
-	//	}
+			const auto& pageIndices = wxSplit(child->GetNodeContent(), ',');
+			if (child->GetName() == "pages")
+			{
+				for (const auto& s : pageIndices)
+					tab.pages.push_back(GetInt(s));
+			}
+			else if (child->GetName() == "pinned")
+			{
+				for (const auto& s : pageIndices)
+					tab.pinned.push_back(GetInt(s));
+			}
+			else if (child->GetName() == "active")
+			{
+				tab.active = GetInt(child->GetNodeContent());
+			}
+		}
 
-	//	tabs.push_back(tab);
-	//}
+		tabs.push_back(tab);
+	}
 
 	return tabs;
 }

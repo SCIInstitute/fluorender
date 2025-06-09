@@ -841,16 +841,21 @@ wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent)
 
 void MeasureDlg::LoadPerspective()
 {
-	//auto mgr = m_notebook->GetAuiManager();
-	//wxNotebookDeserializer deser(mgr);
-	//deser.SetConfig(glbin_settings.m_layout_measure);
+	wxAuiManager mgr;
+	wxNotebookDeserializer deser(mgr);
+	deser.SetXML(glbin_settings.m_layout_measure);
+	m_notebook->LoadLayout(GetName(), deser);
 }
 
 void MeasureDlg::SavePerspective()
 {
 	wxNotebookSerializer ser;
+	ser.BeforeSave();
+	ser.BeforeSaveNotebooks();
 	m_notebook->SaveLayout(GetName(), ser);
-	glbin_settings.m_layout_measure = ser.GetConfig();
+	ser.AfterSaveNotebooks();
+	ser.AfterSave();
+	glbin_settings.m_layout_measure = ser.GetXML().ToStdString();
 }
 
 void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)

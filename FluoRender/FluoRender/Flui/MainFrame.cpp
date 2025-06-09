@@ -880,6 +880,7 @@ MainFrame::~MainFrame()
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
 	//glbin_settings.m_prj_panel_split = m_proj_panel->IsSplit();
+	m_measure_dlg->SavePerspective();
 	m_output_adj_panel->SavePerspective();
 	m_clip_plane_panel->SavePerspective();
 	glbin_settings.Save();
