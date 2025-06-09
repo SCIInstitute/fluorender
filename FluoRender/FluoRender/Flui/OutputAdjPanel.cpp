@@ -625,6 +625,17 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	EnableAll(true);
 }
 
+void OutputAdjPanel::LoadPerspective(const std::string& str)
+{
+	if (str.empty())
+	{
+		m_notebook->Split(1, wxBOTTOM);
+		m_notebook->Split(2, wxBOTTOM);
+		return;
+	}
+	TabbedPanel::LoadPerspective(str);
+}
+
 void OutputAdjPanel::EnableAll(bool val)
 {
 	if (m_enable_all == val)

@@ -49,6 +49,8 @@ public:
 	~OutputAdjPanel();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	virtual void LoadPerspective(const std::string& str) override;
+
 	void UpdateSync();
 
 	//disable/enable

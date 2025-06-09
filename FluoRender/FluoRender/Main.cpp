@@ -80,6 +80,8 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetBreakAlloc(331430);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
+	SetAppearance(Appearance::System);
+
 	std::wstring path = getExecutablePath();
 	std::filesystem::current_path(path);
 	// call default behaviour (mandatory)
