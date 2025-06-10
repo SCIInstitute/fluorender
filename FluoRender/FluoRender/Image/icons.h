@@ -161,10 +161,10 @@ public:
 	const static unsigned char info_png[1262];
 	/* axis.png - 557 bytes */
 	const static unsigned char axis_png[577];
-	/* camera.png - 1011 bytes */
-	const static unsigned char camera_png[1011];
-	/* center.png - 1571 bytes */
-	const static unsigned char center_png[1571];
+	/* camera.png - 1126 bytes */
+	const static unsigned char camera_png[1126];
+	/* center.png - 1370 bytes */
+	const static unsigned char center_png[1370];
 	//view modes
 	/* composite.png - 998 bytes */
 	const static unsigned char composite_png[998];
@@ -196,28 +196,28 @@ public:
 	const static unsigned char pin_png[881];
 	/* anchor_dark.png - 828 bytes */
 	const static unsigned char anchor_dark_png[828];
-	/* ratio.png - 361 bytes */
-	const static unsigned char ratio_png[361];
+	/* ratio.png - 111 bytes */
+	const static unsigned char ratio_png[111];
 	/* scalebar.png - 803 bytes */
 	const static unsigned char scalebar_png[803];
 	/* scale_text.png - 797 bytes */
 	const static unsigned char scale_text_png[797];
 	/* scale_text_off.png - 712 bytes */
 	const static unsigned char scale_text_off_png[712];
-	/* full_screen.png - 472 bytes */
-	const static unsigned char full_view_png[472];
+	/* full_screen.png - 452 bytes */
+	const static unsigned char full_view_png[452];
 	/* slider_type_pos.png - 665 bytes */
 	const static unsigned char slider_type_pos_png[665];
 	/* slider_type_rot.png - 1085 bytes */
 	const static unsigned char slider_type_rot_png[1085];
 	/* zrot.png - 763 bytes */
 	const static unsigned char zrot_png[763];
-	/* zoom_view.png - 303 bytes */
-	const static unsigned char zoom_view_png[303];
-	/* pixel.png - 134 bytes */
-	const static unsigned char zoom_pixel_png[134];
-	/* zoom_data.png - 719 bytes */
-	const static unsigned char zoom_data_png[719];
+	/* zoom_view.png - 312 bytes */
+	const static unsigned char zoom_view_png[312];
+	/* pixel.png - 132 bytes */
+	const static unsigned char zoom_pixel_png[132];
+	/* zoom_data.png - 752 bytes */
+	const static unsigned char zoom_data_png[752];
 
 
 	//clipping view icons
@@ -370,20 +370,20 @@ public:
 	const static unsigned char step_forward_png[981];
 
 	//volume property icons
-	/* mip.png - 436 bytes */
-	const static unsigned char mip_png[436];
+	/* mip.png - 460 bytes */
+	const static unsigned char mip_png[460];
 	/* interpolate.png - 496 bytes */
 	const static unsigned char interpolate_png[496];
 	/* interpolate_off.png - 501 bytes */
 	const static unsigned char interpolate_off_png[501];
-	/* invert.png - 697 bytes */
-	const static unsigned char invert_png[697];
-	/* invert_off.png - 687 bytes */
-	const static unsigned char invert_off_png[687];
-	/* smooth.png - 876 bytes */
-	const static unsigned char smooth_png[876];
-	/* smooth_off.png - 326 bytes */
-	const static unsigned char smooth_off_png[326];
+	/* invert.png - 696 bytes */
+	const static unsigned char invert_png[696];
+	/* invert_off.png - 688 bytes */
+	const static unsigned char invert_off_png[688];
+	/* smooth.png - 867 bytes */
+	const static unsigned char smooth_png[867];
+	/* smooth_off.png - 322 bytes */
+	const static unsigned char smooth_off_png[322];
 	/* alpha.png - 300 bytes */
 	const static unsigned char alpha_png[300];
 	/* palette.png - 375 bytes */
@@ -422,10 +422,10 @@ public:
 	/* logo_snow.png - 49645 bytes */
 	const static unsigned char logo_snow_png[49645];
 	//link/unlink
-	/* link.png - 1227 bytes */
-	const static unsigned char link_png[1227];
-	/* unlink.png - 1503 bytes */
-	const static unsigned char unlink_png[1503];
+	/* link.png - 1118 bytes */
+	const static unsigned char link_png[1118];
+	/* unlink.png - 1185 bytes */
+	const static unsigned char unlink_png[1185];
 	/* save_settings.png - 1314 bytes */
 	const static unsigned char save_settings_png[1314];
 	/* reset.png - 885 bytes */

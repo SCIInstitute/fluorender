@@ -47,10 +47,22 @@ public:
 			return;
 
 		wxColour color1 = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
+		//increase brightness for better contrast
 		int r = color1.Red();
 		int g = color1.Green();
 		int b = color1.Blue();
 		int brightness = (r * 299 + g * 587 + b * 114) / 1000;
+		if (brightness < 128)
+		{
+			wxImage::RGBValue rgb(r, g, b);
+			wxImage::HSVValue hsv = wxImage::RGBtoHSV(rgb);
+			hsv.value = std::min(1.0, hsv.value * 1.3); // Increase brightness by 30%
+			rgb = wxImage::HSVtoRGB(hsv);
+			color1 = wxColour(rgb.red, rgb.green, rgb.blue);
+			r = color1.Red();
+			g = color1.Green();
+			b = color1.Blue();
+		}
 		wxColour color2;
 		int offset = 35; // Adjust this value to change the brightness difference
 		if (brightness > 128)
