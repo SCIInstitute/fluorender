@@ -631,6 +631,7 @@ void OutputAdjPanel::LoadPerspective(const std::string& str)
 	{
 		m_notebook->Split(1, wxBOTTOM);
 		m_notebook->Split(2, wxBOTTOM);
+		m_notebook->SetCalculateMoveSplitSize(true);
 		return;
 	}
 	TabbedPanel::LoadPerspective(str);
