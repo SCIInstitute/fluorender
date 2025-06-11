@@ -50,7 +50,7 @@ inline wxBitmapBundle _wxGetBitmapBundleFromMemory(const unsigned char* data, in
 	bitmaps.push_back(wxBitmap(baseImage));
 
 	// basically trying to fool the mechanism to prefer original res for most scale factors
-	const double scales[] = { 3.0 };
+	const double scales[] = { 1.6, 3.0 };
 
 	for (double scale : scales)
 	{

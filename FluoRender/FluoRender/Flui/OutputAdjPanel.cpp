@@ -627,7 +627,8 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 void OutputAdjPanel::LoadPerspective(const std::string& str)
 {
-	if (str.empty())
+	if (!fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
+		GetDPIScaleFactor()) || str.empty())
 	{
 		m_notebook->Split(1, wxBOTTOM);
 		m_notebook->Split(2, wxBOTTOM);
