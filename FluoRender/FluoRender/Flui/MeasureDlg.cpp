@@ -427,43 +427,43 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	wxBitmapBundle bitmap = wxGetBitmap(locator);
 	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
 		bitmap, wxNullBitmap,
-		"Add locators to the render view by clicking",
-		"Add locators to the render view by clicking");
+		"Add locators by clicking on data",
+		"Add locators by clicking on data");
 	bitmap = wxGetBitmap(drill);
 	m_toolbar1->AddCheckTool(ID_ProbeBtn, "Probe",
 		bitmap, wxNullBitmap,
-		"Add probes to the render view by clicking once",
-		"Add probes to the render view by clicking once");
+		"Add probes of depth by clicking on data",
+		"Add probes of depth by clicking on data");
 	bitmap = wxGetBitmap(two_point);
 	m_toolbar1->AddCheckTool(ID_RulerBtn, "Line",
 		bitmap, wxNullBitmap,
-		"Add rulers to the render view by clicking at two end points",
-		"Add rulers to the render view by clicking at two end points");
+		"Add rulers by clicking twice at each end point",
+		"Add rulers by clicking twice at each end point");
 	bitmap = wxGetBitmap(protractor);
 	m_toolbar1->AddCheckTool(ID_ProtractorBtn, "Angle",
 		bitmap, wxNullBitmap,
-		"Add protractors to measure angles by clicking at three points",
-		"Add protractors to measure angles by clicking at three points");
+		"Add protractors for angles by clicking three times",
+		"Add protractors for angles by clicking three times");
 	bitmap = wxGetBitmap(ellipse);
 	m_toolbar1->AddCheckTool(ID_EllipseBtn, "Ellipse",
 		bitmap, wxNullBitmap,
-		"Add an ellipse to the render view by clicking at its points",
-		"Add an ellipse to the render view by clicking at its points");
+		"Add an ellipse for a region by clicking on data",
+		"Add an ellipse for a region by clicking on data");
 	bitmap = wxGetBitmap(multi_point);
 	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "Polyline",
 		bitmap, wxNullBitmap,
-		"Add a polyline ruler to the render view by clicking at its points",
-		"Add a polyline ruler to the render view by clicking at its points");
+		"Add a polyline ruler by clicking at each point",
+		"Add a polyline ruler by clicking at each point");
 	bitmap = wxGetBitmap(pencil);
 	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencil",
 		bitmap, wxNullBitmap,
-		"Draw ruler without clicking each point",
-		"Draw ruler without clicking each point");
+		"Draw ruler with multiple points continuously",
+		"Draw ruler with multiple points continuously");
 	bitmap = wxGetBitmap(grow);
 	m_toolbar1->AddCheckTool(ID_GrowBtn, "Grow",
 		bitmap, wxNullBitmap,
-		"Click and hold to create ruler automatically based on data",
-		"Click and hold to create ruler automatically based on data");
+		"Click and hold to create ruler automatically by growth",
+		"Click and hold to create ruler automatically by growth");
 	m_toolbar1->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar1, this);
 	m_toolbar1->Realize();
 	//toolbar2
@@ -472,8 +472,8 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	bitmap = wxGetBitmap(move);
 	m_toolbar2->AddCheckTool(ID_RulerMoveBtn, "Move",
 		bitmap, wxNullBitmap,
-		"Select and move ruler",
-		"Select and move ruler");
+		"Select and move an entire ruler",
+		"Select and move an entire ruler");
 	bitmap = wxGetBitmap(ruler_edit);
 	m_toolbar2->AddCheckTool(ID_RulerMovePointBtn, "Edit",
 		bitmap, wxNullBitmap,
@@ -482,13 +482,13 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	bitmap = wxGetBitmap(magnet);
 	m_toolbar2->AddCheckTool(ID_MagnetBtn, "Magnet",
 		bitmap, wxNullBitmap,
-		"Move ruler points by magnet",
-		"Move ruler points by magnet");
+		"Move ruler points by attracting neighbor points",
+		"Move ruler points by attracting neighbor points");
 	bitmap = wxGetBitmap(pencil);
 	m_toolbar2->AddCheckTool(ID_RulerMovePencilBtn, "Redraw",
 		bitmap, wxNullBitmap,
-		"Move ruler points by redraw",
-		"Move ruler points by redraw");
+		"Move ruler points by redrawing continuously",
+		"Move ruler points by redrawing continuously");
 	bitmap = wxGetBitmap(flip_ruler);
 	m_toolbar2->AddTool(ID_RulerFlipBtn, "Flip", bitmap,
 		"Reverse the order of ruler points");
@@ -506,9 +506,9 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 		"Click to lock/unlock a ruler point for relaxing");
 	bitmap = wxGetBitmap(relax);
 	m_toolbar2->AddTool(ID_RelaxBtn, "Relax", bitmap,
-		"Relax ruler by components");
+		"Smooth the curve of a multipoint ruler by data");
 	m_toolbar2->SetToolLongHelp(ID_RelaxBtn,
-		"Relax ruler by components");
+		"Smooth the curve of a multipoint ruler by data");
 	m_toolbar2->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar2, this);
 	m_toolbar2->Realize();
 	//toolbar3
@@ -848,7 +848,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	bool bval;
 	int ival;
 
-	if (update_all || FOUND_VALUE(gstRulerTools))
+	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
 		bval = view && view->GetIntMode() == 5;
@@ -1203,7 +1203,7 @@ void MeasureDlg::Locator()
 		glbin_ruler_handler.SetType(2);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Probe()
@@ -1228,7 +1228,7 @@ void MeasureDlg::Probe()
 		glbin_ruler_handler.SetType(3);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Ruler()
@@ -1253,7 +1253,7 @@ void MeasureDlg::Ruler()
 		glbin_ruler_handler.SetType(0);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Protractor()
@@ -1278,7 +1278,7 @@ void MeasureDlg::Protractor()
 		glbin_ruler_handler.SetType(4);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Ellipse()
@@ -1303,7 +1303,7 @@ void MeasureDlg::Ellipse()
 		glbin_ruler_handler.SetType(5);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerMP()
@@ -1328,7 +1328,7 @@ void MeasureDlg::RulerMP()
 		glbin_ruler_handler.SetType(1);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Pencil()
@@ -1354,7 +1354,7 @@ void MeasureDlg::Pencil()
 		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(false);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Grow()
@@ -1387,7 +1387,7 @@ void MeasureDlg::Grow()
 		}
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerMove()
@@ -1407,7 +1407,7 @@ void MeasureDlg::RulerMove()
 	else
 		view->SetIntMode(9);
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerMovePoint()
@@ -1427,7 +1427,7 @@ void MeasureDlg::RulerMovePoint()
 	else
 		view->SetIntMode(6);
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Magnet()
@@ -1451,7 +1451,7 @@ void MeasureDlg::Magnet()
 		glbin_ruler_handler.SetRedistLength(false);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerMovePencil()
@@ -1475,7 +1475,7 @@ void MeasureDlg::RulerMovePencil()
 		glbin_ruler_handler.SetRedistLength(true);
 	}
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerFlip()
@@ -1515,7 +1515,7 @@ void MeasureDlg::Lock()
 	else
 		view->SetIntMode(11);
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Relax()
@@ -1561,7 +1561,7 @@ void MeasureDlg::DeletePoint()
 	else
 		view->SetIntMode(14);
 
-	FluoUpdate({ gstRulerTools });
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Prune()

@@ -128,12 +128,24 @@ public:
 		ID_AddVolGroup,
 		ID_AddMeshGroup,
 		ID_RemoveData,
+		//rulers
+		ID_RulerLocator,
+		ID_RulerLine,
+		ID_RulerPolyline,
+		ID_RulerPencil,
+		//separator
+		ID_RulerEdit,
+		ID_RulerDeletePoint,
+		//brush
+		ID_BrushGrow,
 		ID_BrushAppend,
-		ID_BrushUnselect,
+		ID_BrushComp,
 		ID_BrushDiffuse,
-		ID_BrushErase,
+		ID_BrushUnselect,
+		//separator
 		ID_BrushClear,
 		ID_BrushExtract,
+		ID_BrushErase,
 		//menu
 		ID_Expand,
 		ID_RandomizeColor,
@@ -199,6 +211,7 @@ private:
 private:
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
+	wxToolBar* m_toolbar2;
 	//save the pos
 	int m_scroll_pos;
 	//drag

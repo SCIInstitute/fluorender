@@ -492,15 +492,18 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
-	if (update_all || FOUND_VALUE(gstBrushState))
+	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
+		auto view = glbin_current.render_view.lock();
+		int mode = view ? view->GetIntMode() : 0;
+		bval = mode == 2 || mode == 10;
 		ival = glbin_vol_selector.GetMode();
-		m_toolbar->ToggleTool(ID_Grow, ival == 9);
-		m_toolbar->ToggleTool(ID_BrushAppend, ival == 2);
-		m_toolbar->ToggleTool(ID_BrushComp, ival == 10);
-		m_toolbar->ToggleTool(ID_BrushDiffuse, ival == 4);
-		m_toolbar->ToggleTool(ID_BrushSolid, ival == 8);
-		m_toolbar->ToggleTool(ID_BrushDesel, ival == 3);
+		m_toolbar->ToggleTool(ID_Grow, bval && ival == 9);
+		m_toolbar->ToggleTool(ID_BrushAppend, bval && ival == 2);
+		m_toolbar->ToggleTool(ID_BrushComp, bval && ival == 10);
+		m_toolbar->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
+		m_toolbar->ToggleTool(ID_BrushSolid, bval && ival == 8);
+		m_toolbar->ToggleTool(ID_BrushDesel, bval && ival == 3);
 	}
 
 	if (update_all || FOUND_VALUE(gstSelMask) || FOUND_VALUE(gstCurrentSelect))
@@ -692,42 +695,42 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		mode = mode == 9 ? 0 : 9;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert(gstBrushState);
+		vc.insert(gstFreehandToolState);
 		views.insert(-1);
 		break;
 	case ID_BrushAppend:
 		mode = mode == 2 ? 0 : 2;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
+		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushComp:
 		mode = mode == 10 ? 0 : 10;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
+		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushDiffuse:
 		mode = mode == 4 ? 0 : 4;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
+		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushSolid:
 		mode = mode == 8 ? 0 : 8;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
+		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	case ID_BrushDesel:
 		mode = mode == 3 ? 0 : 3;
 		set_mode = true;
 		excl_self = 0;
-		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
+		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
 	}

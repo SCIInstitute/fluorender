@@ -476,16 +476,11 @@ DEALINGS IN THE SOFTWARE.
 					 //12-grow with ruler
 					 //13-pencil with multipoint ruler
 					 //14-delete ruler point
+#define gstFreehandToolState "freehand tool state"//combined state for brushes and rulers
 #define gstForceClear "force clear"//forced update
 #define gstInteractive "interactive"//currently user is interacting with view
 #define gstAdaptive "adaptive"//drawing quality is adaptive to speed
 #define gstClearBuffer "clear buffer"
-#define gstBrushState "brush state"  //sets the button state of the tree panel
-						//0-not set
-						//2-append
-						//3-erase
-						//4-diffuse
-						//8-solid
 #define gstGrowEnable "grow enable"//flag for grow is currently on for idle events
 #define gstResize "resize"//request to resize
 #define gstDrawBrush "draw brush"//brush settings
@@ -736,7 +731,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerListSel "ruler list sel"
 #define gstRulerGroupSel "ruler group sel"
 #define gstRulerInterpolation "ruler interpolation"
-#define gstRulerTools "ruler tools"
 #define gstRulerProfile "ruler profile"
 #define gstRulerMethod "ruler method"
 #define gstRulerFile "ruler file"
