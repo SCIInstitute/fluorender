@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextureBrick.h>
 #include <VolKernel.h>
 #include <VolumeRenderer.h>
+#include <VolumeSelector.h>
 #include <TableHistParams.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
@@ -2399,6 +2400,23 @@ bool ComponentGenerator::GetRecordCmd()
 size_t ComponentGenerator::GetCmdNum()
 {
 	return m_command.size();
+}
+
+bool ComponentGenerator::GetAutoThreshold()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return false;
+	if (vd->IsAutoThresholdValid())
+		return false;
+	double threshold = vd->GetAutoThreshold();
+	if (threshold != m_thresh)
+	{
+		m_thresh = threshold;
+		glbin_vol_selector.SetBrushSclTranslate(m_thresh);
+		return true;
+	}
+	return false;
 }
 
 void ComponentGenerator::StartTimer(const std::string& str)

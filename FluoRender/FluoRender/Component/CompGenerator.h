@@ -146,6 +146,9 @@ namespace flrd
 		bool GetRecordCmd();
 		size_t GetCmdNum();
 
+		//if auto threshold is calculated
+		bool GetAutoThreshold();
+
 		//unused
 		//void OrderID_2D();
 		//void OrderID_3D();

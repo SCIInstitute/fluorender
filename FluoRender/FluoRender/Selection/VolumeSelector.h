@@ -234,6 +234,8 @@ namespace flrd
 		bool GetEstimateThreshold() { return m_estimate_threshold; }
 		//th udpate
 		bool GetThUpdate();
+		//if auto threshold is calculated
+		bool GetAutoThreshold();
 
 		//segment volumes in current view
 		void Segment(bool push_mask, bool est_th = true, int mx = 0, int my = 0);

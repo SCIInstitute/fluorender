@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <compatibility.h>
 #include <TextureRenderer.h>
+#include <CompGenerator.h>
 #include <PaintBoxes.h>
 #include <MaskBorder.h>
 #include <Histogram.h>
@@ -733,6 +734,24 @@ bool VolumeSelector::GetThUpdate()
 		return true;
 	else
 		return false;
+}
+
+bool VolumeSelector::GetAutoThreshold()
+{
+	if (!m_vd)
+		m_vd = glbin_current.vol_data.lock();
+	if (!m_vd)
+		return false;
+	if (m_vd->IsAutoThresholdValid())
+		return false;
+	double threshold = m_vd->GetAutoThreshold();
+	if (threshold != m_scl_translate)
+	{
+		m_scl_translate = threshold;
+		glbin_comp_generator.SetThresh(m_scl_translate);
+		return true;
+	}
+	return false;
 }
 
 void VolumeSelector::PushMask()

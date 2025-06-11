@@ -230,7 +230,7 @@
 	"comp default": {
 		"use_sel": false,
 		"use_ml": false,
-		"iter": 50,
+		"iter": 30,
 		"thresh": 0.5,
 		"use_dist_field": false,
 		"dist_strength": 0.5,

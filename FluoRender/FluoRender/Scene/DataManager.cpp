@@ -1809,6 +1809,7 @@ void VolumeData::ResetVolume()
 		cache_queue->reset(m_time);
 	m_ep.reset();
 	m_hist_dirty = true;
+	m_auto_threshold = -1;
 }
 
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,
@@ -2708,6 +2709,44 @@ bool VolumeData::GetHistogram(std::vector<unsigned char>& data)
 	}
 
 	return true;
+}
+
+double VolumeData::GetAutoThreshold()
+{
+	if (m_auto_threshold < 0.0)
+	{
+		ComputeHistogram(true);
+		size_t bins = m_hist.size() - 1;
+		if (bins > 1)
+		{
+			// Compute mean and variance
+			double sum = 0.0, sum_sq = 0.0, total = 0.0;
+			for (size_t i = 0; i < bins; ++i)
+			{
+				double val = static_cast<double>(i) / (bins - 1);
+				double freq = m_hist[i];
+				sum += val * freq;
+				sum_sq += val * val * freq;
+				total += freq;
+			}
+			if (total == 0.0)
+				total = 1.0;
+
+			double mean = sum / total;
+			double var = sqrt((sum_sq - 2.0 * mean * sum + total * mean * mean) / total);
+
+			// Determine threshold
+			if (var < glbin_settings.m_varth)
+				m_auto_threshold = mean; // Low variance: use mean
+			else
+				m_auto_threshold = mean + var * glbin_settings.m_gauth; // Otherwise, offset from mean
+		}
+		else
+		{
+			m_auto_threshold = 0.0;
+		}
+	}
+	return m_auto_threshold;
 }
 
 void VolumeData::SetShuffle(int val)

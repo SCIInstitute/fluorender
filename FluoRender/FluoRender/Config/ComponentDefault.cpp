@@ -44,7 +44,7 @@ ComponentDefault::ComponentDefault()
 	m_use_sel_cg = true;
 	m_use_sel_ca = true;
 	m_use_ml = false;
-	m_iter = 50;
+	m_iter = 30;
 	m_thresh = 0.5;
 	m_tfactor = 1.0;
 	m_use_dist_field = false;

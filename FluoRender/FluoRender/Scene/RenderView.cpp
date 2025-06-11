@@ -9629,7 +9629,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 		{
 			if (state.m_mouse_left)
 			{
-				//wxPoint mps = ScreenToClient(wxGetMousePosition());
+				if (glbin_vol_selector.GetAutoThreshold())
+					glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold });
 				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			}
 
@@ -10629,7 +10630,8 @@ void RenderView::ProcessIdle(IdleState& state)
 			int sz = glbin_settings.m_ruler_size_thresh;
 			//event.RequestMore();
 			glbin_vol_selector.SetInitMask(2);
-			//mps = ScreenToClient(mps);
+			if (glbin_vol_selector.GetAutoThreshold())
+				state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12)
@@ -10880,7 +10882,8 @@ void RenderView::ProcessMouse(MouseState& state)
 		{
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
-			//wxPoint mps = ScreenToClient(wxGetMousePosition());
+			if (glbin_vol_selector.GetAutoThreshold())
+				glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == 12 && cur_vd)
@@ -10934,14 +10937,15 @@ void RenderView::ProcessMouse(MouseState& state)
 		}
 		else if (m_int_mode == 2)
 		{
+			fluo::ValueCollection vc;
 			//segment volumes
 			m_paint_enable = true;
-			//wxPoint mps = ScreenToClient(wxGetMousePosition());
+			if (glbin_vol_selector.GetAutoThreshold())
+				vc.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			m_int_mode = 4;
 			m_force_clear = true;
 			RefreshGL(17);
-			fluo::ValueCollection vc;
 			vc.insert({ gstSelUndo, gstBrushThreshold });
 			if (glbin_vol_selector.GetAutoPaintSize())
 				vc.insert(gstBrushCountResult);
@@ -10966,9 +10970,11 @@ void RenderView::ProcessMouse(MouseState& state)
 		}
 		else if (m_int_mode == 7)
 		{
+			fluo::ValueCollection vc;
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
-			//wxPoint mps = ScreenToClient(wxGetMousePosition());
+			if (glbin_vol_selector.GetAutoThreshold())
+				vc.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			if (glbin_ruler_handler.GetType() == 3)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
@@ -10977,7 +10983,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_int_mode = 8;
 			m_force_clear = true;
 			RefreshGL(19);
-			fluo::ValueCollection vc;
 			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
 			if (glbin_vol_selector.GetAutoPaintSize())
 				vc.insert(gstBrushCountResult);

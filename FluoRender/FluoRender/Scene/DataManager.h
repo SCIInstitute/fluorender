@@ -417,6 +417,9 @@ public:
 	bool GetHistogramDirty() { return m_hist_dirty; }
 	void ComputeHistogram(bool set_prog_func);
 	bool GetHistogram(std::vector<unsigned char>& data);
+	//get auto threshold from histogram
+	double GetAutoThreshold();
+	bool IsAutoThresholdValid() { return m_auto_threshold >= 0; }
 
 	//shuffle
 	void SetShuffle(int val);
@@ -748,6 +751,7 @@ private:
 	//colormap of histogram
 	bool m_hist_dirty;
 	std::vector<unsigned int> m_hist;
+	double m_auto_threshold = -1;//automatically calculated threshold. //-1 if not calculated
 
 	//mask count
 	bool m_mask_count_dirty;

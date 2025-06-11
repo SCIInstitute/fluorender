@@ -231,7 +231,7 @@
         <use_sel_cg>1</use_sel_cg>
         <use_sel_ca>1</use_sel_ca>
         <use_ml>0</use_ml>
-        <iter>50</iter>
+        <iter>30</iter>
         <thresh>0.5</thresh>
         <use_dist_field>0</use_dist_field>
         <dist_strength>0.5</dist_strength>

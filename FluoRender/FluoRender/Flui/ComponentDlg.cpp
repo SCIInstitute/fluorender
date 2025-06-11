@@ -1998,10 +1998,14 @@ void ComponentDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 	if (glbin_comp_generator.IsBusy())
 		return;
 	m_auto_update_timer.Stop();
+	fluo::ValueCollection vc;
 	bool bval = m_use_sel_chk->GetValue();
 	glbin_comp_generator.SetUseSel(bval);
+	if (glbin_comp_generator.GetAutoThreshold())
+		vc.insert({ gstBrushThreshold, gstCompThreshold });
 	glbin_comp_generator.GenerateComp();
-	FluoRefresh(2, { gstCompGenOutput });
+	vc.insert(gstCompGenOutput);
+	FluoRefresh(2, vc);
 }
 
 //clustering page
@@ -2410,10 +2414,14 @@ void ComponentDlg::OnUseMlChk(wxCommandEvent& event)
 
 void ComponentDlg::OnGenerate(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	bool bval = m_use_sel_chk->GetValue();
 	glbin_comp_generator.SetUseSel(bval);
+	if (glbin_comp_generator.GetAutoThreshold())
+		vc.insert({ gstBrushThreshold, gstCompThreshold });
 	glbin_comp_generator.Compute();
-	FluoRefresh(2, { gstCompGenOutput });
+	vc.insert(gstCompGenOutput);
+	FluoRefresh(2, vc);
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent& event)
