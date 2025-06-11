@@ -286,7 +286,7 @@ namespace flrd
 							//0-no selection
 							//1-select; 2-append; 3-unselect; 4-diffuse;
 							//5-flood; 6-unselect all; 7-select all; 8-solid;
-							//9-grow from point
+							//9-grow from point; 10-select and gen comps
 		int m_mode;			//last mode if m_mode_ext is set to 0
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;

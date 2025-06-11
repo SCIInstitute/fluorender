@@ -9119,7 +9119,8 @@ void RenderView::DrawBrush()
 		double br2 = glbin_vol_selector.GetBrushSize2();
 
 		if (mode == 1 ||
-			mode == 2)
+			mode == 2 ||
+			mode == 10)
 			DrawCircles(cx, cy, br1*pressure,
 				br2*pressure, text_color, proj_mat);
 		else if (mode == 8)
@@ -9142,6 +9143,7 @@ void RenderView::DrawBrush()
 			wstr = L"S";
 			break;
 		case 2:
+		case 10:
 			wstr = L"+";
 			break;
 		case 3:

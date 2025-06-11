@@ -330,27 +330,27 @@ TreePanel::TreePanel(MainFrame* frame,
 	bitmap = wxGetBitmap(brush_diffuse);
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
 		bitmap, wxNullBitmap,
-		"Diffuse highlighted structures by painting (hold Z)",
-		"Diffuse highlighted structures by painting (hold Z)");
-	bitmap = wxGetBitmap(brush_desel);
-	m_toolbar->AddCheckTool(ID_BrushUnselect, "Unselect",
-		bitmap, wxNullBitmap,
-		"Unselect highlighted structures by painting (hold X)",
-		"Unselect highlighted structures by painting (hold X)");
-	m_toolbar->AddSeparator();
+		"Diffuse the highlights by painting (hold Z)",
+		"Diffuse the highlights by painting (hold Z)");
 	bitmap = wxGetBitmap(brush_erase);
-	m_toolbar->AddTool(ID_BrushErase, "Erase",
-		bitmap, "Erase highlighted structures");
-	m_toolbar->SetToolLongHelp(ID_BrushErase, "Erase highlighted structures");
-	bitmap = wxGetBitmap(brush_create);
+	m_toolbar->AddCheckTool(ID_BrushUnselect, "Eraser",
+		bitmap, wxNullBitmap,
+		"Remove the highlights by painting (hold X)",
+		"Remove the highlights by painting (hold X)");
+	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmap(brush_delete);
+	m_toolbar->AddTool(ID_BrushErase, "Delete",
+		bitmap, "Delete highlighted structures");
+	m_toolbar->SetToolLongHelp(ID_BrushErase, "Delete highlighted structures");
+	bitmap = wxGetBitmap(brush_extract);
 	m_toolbar->AddTool(ID_BrushExtract, "Extract", bitmap,
 		"Extract highlighted structures out and create a new volume");
 	m_toolbar->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmap(brush_clear);
-	m_toolbar->AddTool(ID_BrushClear, "Reset All",
-		bitmap, "Reset all highlighted structures");
-	m_toolbar->SetToolLongHelp(ID_BrushClear, "Reset all highlighted structures");
+	m_toolbar->AddTool(ID_BrushClear, "Clear",
+		bitmap, "Clear the highlights");
+	m_toolbar->SetToolLongHelp(ID_BrushClear, "Clear the highlights");
 	m_toolbar->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	m_toolbar->Realize();
 

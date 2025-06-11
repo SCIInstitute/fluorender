@@ -1845,11 +1845,13 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 	double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate,
 	double w2d, double bins, int order, bool ortho, bool estimate)
 {
+	int pmode2 = paint_mode;
+	pmode2 = pmode2 == 10 ? 2 : pmode2; //convert to append mode
 	if (m_vr)
 	{
 		m_vr->set_2d_mask(m_2d_mask);
 		m_vr->set_2d_weight(m_2d_weight1, m_2d_weight2);
-		m_vr->draw_mask(type, paint_mode, hr_mode,
+		m_vr->draw_mask(type, pmode2, hr_mode,
 			ini_thresh, gm_falloff,
 			scl_falloff, scl_translate,
 			w2d, bins, order,

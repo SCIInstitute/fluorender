@@ -53,17 +53,18 @@ public:
 		ID_BrushRedo,
 		ID_Grow,
 		ID_BrushAppend,
+		ID_BrushComp,
 		ID_BrushDiffuse,
 		ID_BrushSolid,
-		ID_BrushDesel,
-		ID_BrushErase,
-		ID_BrushExtract,
-		ID_BrushClear
+		ID_BrushDesel
 	};
 	enum
 	{
+		ID_BrushClear = 0,
+		ID_BrushExtract,
+		ID_BrushErase,
 		//mask
-		ID_MaskCopy = 0,
+		ID_MaskCopy,
 		ID_MaskCopyData,
 		ID_MaskPaste,
 		ID_MaskMerge,
@@ -95,7 +96,7 @@ private:
 	//paint tools
 	//toolbar
 	wxToolBar *m_toolbar;
-	wxToolBar *m_mask_tb;
+	wxToolBar *m_toolbar2;
 
 	//stop at boundary
 	wxCheckBox* m_edge_detect_chk;
@@ -159,7 +160,7 @@ private:
 	//brush commands
 	void OnToolBar(wxCommandEvent& event);
 	//mask toolbar
-	void OnMaskToolBar(wxCommandEvent& event);
+	void OnToolBar2(wxCommandEvent& event);
 	//selection adjustment
 	//2d influence
 	void OnBrush2dinflChange(wxScrollEvent& event);

@@ -265,12 +265,16 @@ public:
 
 
 	//brush tool icons
-	/* brush_append.png - 766 bytes */
-	const static unsigned char brush_append_png[766];
+	/* brush_append.png - 786 bytes */
+	const static unsigned char brush_append_png[786];
+	/* brush_comp.png - 1184 bytes */
+	const static unsigned char brush_comp_png[1184];
 	/* brush_clear.png - 909 bytes */
 	const static unsigned char brush_clear_png[909];
-	/* brush_create.png - 802 bytes */
-	const static unsigned char brush_create_png[802];
+	/* brush_delete.png - 843 bytes */
+	const static unsigned char brush_delete_png[843];
+	/* brush_extract.png - 782 bytes */
+	const static unsigned char brush_extract_png[782];
 	/* brush_desel.png - 746 bytes */
 	const static unsigned char brush_desel_png[746];
 	/* brush_diffuse.png - 873 bytes */

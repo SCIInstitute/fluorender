@@ -97,6 +97,11 @@ BrushToolDlg::BrushToolDlg(
 		bitmap, wxNullBitmap,
 		"Highlight structures by painting on the render view (hold Shift)",
 		"Highlight structures by painting on the render view (hold Shift)");
+	bitmap = wxGetBitmap(brush_comp);
+	m_toolbar->AddCheckTool(ID_BrushComp, "Segment",
+		bitmap, wxNullBitmap,
+		"Select structures and then segment them into components",
+		"Select structures and then segment them into components");
 	bitmap = wxGetBitmap(brush_diffuse);
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
 		bitmap, wxNullBitmap,
@@ -107,64 +112,64 @@ BrushToolDlg::BrushToolDlg(
 		bitmap, wxNullBitmap,
 		"Highlight structures with solid mask",
 		"Highlight structures with solid mask");
-	bitmap = wxGetBitmap(brush_desel);
-	m_toolbar->AddCheckTool(ID_BrushDesel, "Unsel",
-		bitmap, wxNullBitmap,
-		"Reset highlighted structures by painting (hold X)",
-		"Reset highlighted structures by painting (hold X)");
-	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmap(brush_erase);
-	m_toolbar->AddTool(ID_BrushErase, "Erase",
-		bitmap, "Erase highlighted structures");
-	m_toolbar->SetToolLongHelp(ID_BrushErase, "Erase highlighted structures");
-	bitmap = wxGetBitmap(brush_create);
-	m_toolbar->AddTool(ID_BrushExtract, "Extract",
-		bitmap, "Extract highlighted structures out and create a new volume");
-	m_toolbar->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
-	bitmap = wxGetBitmap(brush_clear);
-	m_toolbar->AddSeparator();
-	m_toolbar->AddTool(ID_BrushClear, "Reset",
-		bitmap, "Reset all highlighted structures");
-	m_toolbar->SetToolLongHelp(ID_BrushClear, "Reset all highlighted structures");
+	m_toolbar->AddCheckTool(ID_BrushDesel, "Eraser",
+		bitmap, wxNullBitmap,
+		"Remove the highlights by painting (hold X)",
+		"Remove the highlights by painting (hold X)");
 	m_toolbar->Bind(wxEVT_TOOL, &BrushToolDlg::OnToolBar, this);
 	m_toolbar->Realize();
 
-	//mask tools
-	m_mask_tb = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	//clear tools
+	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
+	bitmap = wxGetBitmap(brush_clear);
+	m_toolbar2->AddTool(ID_BrushClear, "Clear",
+		bitmap, "Clear the highlights");
+	m_toolbar2->SetToolLongHelp(ID_BrushClear, "Clear the highlights");
+	bitmap = wxGetBitmap(brush_extract);
+	m_toolbar2->AddTool(ID_BrushExtract, "Extract",
+		bitmap, "Extract highlighted structures out and create a new volume");
+	m_toolbar2->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
+	bitmap = wxGetBitmap(brush_delete);
+	m_toolbar2->AddTool(ID_BrushErase, "Delete",
+		bitmap, "Delete highlighted structures");
+	m_toolbar2->SetToolLongHelp(ID_BrushErase, "Delete highlighted structures");
+	m_toolbar2->AddSeparator();
+	//mask tools
 	bitmap = wxGetBitmap(mask_copy);
-	m_mask_tb->AddTool(
+	m_toolbar2->AddTool(
 		ID_MaskCopy, "Copy", bitmap,
 		"Copy current selection mask to clipboard");
-	m_mask_tb->SetToolLongHelp(ID_MaskCopy, "Copy current selection mask to clipboard");
+	m_toolbar2->SetToolLongHelp(ID_MaskCopy, "Copy current selection mask to clipboard");
 	bitmap = wxGetBitmap(copy_data);
-	m_mask_tb->AddTool(
+	m_toolbar2->AddTool(
 		ID_MaskCopyData, "Data", bitmap,
 		"Copy current channel data as mask to clipboard");
-	m_mask_tb->SetToolLongHelp(ID_MaskCopyData, "Copy current channel data as mask to clipboard");
-	m_mask_tb->AddSeparator();
+	m_toolbar2->SetToolLongHelp(ID_MaskCopyData, "Copy current channel data as mask to clipboard");
+	m_toolbar2->AddSeparator();
 	bitmap = wxGetBitmap(mask_paste);
-	m_mask_tb->AddTool(
+	m_toolbar2->AddTool(
 		ID_MaskPaste, "Paste", bitmap,
 		"Paste selection mask from clipboard");
-	m_mask_tb->SetToolLongHelp(ID_MaskPaste, "Paste selection mask from clipboard");
+	m_toolbar2->SetToolLongHelp(ID_MaskPaste, "Paste selection mask from clipboard");
 	bitmap = wxGetBitmap(mask_union);
-	m_mask_tb->AddTool(
+	m_toolbar2->AddTool(
 		ID_MaskMerge, "Merge", bitmap,
 		"Merge selection mask from clipboard with current");
-	m_mask_tb->SetToolLongHelp(ID_MaskMerge, "Merge selection mask from clipboard with current");
+	m_toolbar2->SetToolLongHelp(ID_MaskMerge, "Merge selection mask from clipboard with current");
 	bitmap = wxGetBitmap(mask_exclude);
-	m_mask_tb->AddTool(
+	m_toolbar2->AddTool(
 		ID_MaskExclude, "Exclude", bitmap,
 		"Exclude clipboard's selection mask from current");
-	m_mask_tb->SetToolLongHelp(ID_MaskExclude, "Exclude clipboard's selection mask from current");
+	m_toolbar2->SetToolLongHelp(ID_MaskExclude, "Exclude clipboard's selection mask from current");
 	bitmap = wxGetBitmap(mask_intersect);
-	m_mask_tb->AddTool(
+	m_toolbar2->AddTool(
 		ID_MaskIntersect, "Intersect", bitmap,
 		"Intersect selection mask from clipboard with current");
-	m_mask_tb->SetToolLongHelp(ID_MaskIntersect, "Intersect selection mask from clipboard with current");
-	m_mask_tb->Bind(wxEVT_TOOL, &BrushToolDlg::OnMaskToolBar, this);
-	m_mask_tb->Realize();
+	m_toolbar2->SetToolLongHelp(ID_MaskIntersect, "Intersect selection mask from clipboard with current");
+	m_toolbar2->Bind(wxEVT_TOOL, &BrushToolDlg::OnToolBar2, this);
+	m_toolbar2->Realize();
 
 	//Selection adjustment
 	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
@@ -431,7 +436,7 @@ BrushToolDlg::BrushToolDlg(
 	sizer_v->Add(10, 10);
 	sizer_v->Add(m_toolbar, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
-	sizer_v->Add(m_mask_tb, 0, wxEXPAND);
+	sizer_v->Add(m_toolbar2, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
@@ -492,6 +497,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		ival = glbin_vol_selector.GetMode();
 		m_toolbar->ToggleTool(ID_Grow, ival == 9);
 		m_toolbar->ToggleTool(ID_BrushAppend, ival == 2);
+		m_toolbar->ToggleTool(ID_BrushComp, ival == 10);
 		m_toolbar->ToggleTool(ID_BrushDiffuse, ival == 4);
 		m_toolbar->ToggleTool(ID_BrushSolid, ival == 8);
 		m_toolbar->ToggleTool(ID_BrushDesel, ival == 3);
@@ -500,10 +506,10 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstSelMask) || FOUND_VALUE(gstCurrentSelect))
 	{
 		bval = glbin_vol_selector.GetCopyMaskVolume() != 0;
-		m_mask_tb->EnableTool(ID_MaskPaste, bval);
-		m_mask_tb->EnableTool(ID_MaskMerge, bval);
-		m_mask_tb->EnableTool(ID_MaskExclude, bval);
-		m_mask_tb->EnableTool(ID_MaskIntersect, bval);
+		m_toolbar2->EnableTool(ID_MaskPaste, bval);
+		m_toolbar2->EnableTool(ID_MaskMerge, bval);
+		m_toolbar2->EnableTool(ID_MaskExclude, bval);
+		m_toolbar2->EnableTool(ID_MaskIntersect, bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstSelOptions))
@@ -696,6 +702,13 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
+	case ID_BrushComp:
+		mode = mode == 10 ? 0 : 10;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
+		views.insert(-1);
+		break;
 	case ID_BrushDiffuse:
 		mode = mode == 4 ? 0 : 4;
 		set_mode = true;
@@ -717,21 +730,6 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		vc.insert({ gstBrushState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
-	case ID_BrushErase:
-		glbin_vol_selector.Erase();
-		excl_self = 3;
-		vc.insert(gstNull);
-		break;
-	case ID_BrushExtract:
-		glbin_vol_selector.Extract();
-		excl_self = 3;
-		vc.insert(gstNull);
-		break;
-	case ID_BrushClear:
-		glbin_vol_selector.Clear();
-		excl_self = 3;
-		vc.insert(gstNull);
-		break;
 	}
 
 	if (set_mode)
@@ -744,7 +742,7 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 }
 
 //mask tools
-void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
+void BrushToolDlg::OnToolBar2(wxCommandEvent& event)
 {
 	int id = event.GetId();
 	int excl_self = 0;
@@ -752,6 +750,21 @@ void BrushToolDlg::OnMaskToolBar(wxCommandEvent& event)
 
 	switch (id)
 	{
+	case ID_BrushClear:
+		glbin_vol_selector.Clear();
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
+	case ID_BrushExtract:
+		glbin_vol_selector.Extract();
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
+	case ID_BrushErase:
+		glbin_vol_selector.Erase();
+		excl_self = 3;
+		vc.insert(gstNull);
+		break;
 	case ID_MaskCopy:
 		glbin_vol_selector.CopyMask(false);
 		excl_self = 2;

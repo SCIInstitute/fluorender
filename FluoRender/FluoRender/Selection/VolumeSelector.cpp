@@ -140,6 +140,7 @@ void VolumeSelector::SetMode(int mode)
 	case 6://clear
 	case 7://select all
 	case 8://select solid
+	case 10://select and gen comps
 		view->SetIntMode(2);
 		break;
 	case 9://grow from point
@@ -191,6 +192,15 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		segment(push_mask, est_th, 0, 0);
 
 	m_vd->ResetMaskCount();
+
+	if (m_mode == 10)
+	{
+		//generate components
+		bool bval = glbin_comp_generator.GetUseSel();
+		glbin_comp_generator.SetUseSel(true);
+		glbin_comp_generator.GenerateComp();
+		glbin_comp_generator.SetUseSel(bval);
+	}
 }
 
 void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
@@ -356,7 +366,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	if (m_mode == 1 || m_mode == 2 ||
 		m_mode == 3 || m_mode == 4 ||
-		m_mode == 8 || m_mode == 9)
+		m_mode == 8 || m_mode == 9 ||
+		m_mode == 10)
 	{
 		if (bricks->size() > 1)
 		{
@@ -394,7 +405,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 	if (m_init_mask & 1)
 	{
 		int hr_mode = m_hidden_removal ? (m_ortho ? 1 : 2) : 0;
-		if ((m_mode == 1 || m_mode == 2) &&
+		if ((m_mode == 1 || m_mode == 2 || m_mode == 10) &&
 			m_estimate_threshold && est_th)
 		{
 			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
@@ -414,7 +425,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			m_mode == 2 ||
 			m_mode == 3 ||
 			m_mode == 4 ||
-			m_mode == 9)
+			m_mode == 9 ||
+			m_mode == 10)
 		{
 			//loop for growing
 			if (m_mode == 9)
@@ -437,7 +449,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 				if (m_mode == 1 ||
 					m_mode == 2 ||
 					m_mode == 4 ||
-					m_mode == 9)
+					m_mode == 9 ||
+					m_mode == 10)
 					mb.Compute(order);
 				m_vd->DrawMask(1, m_mode, 0, ini_thresh,
 					gm_falloff, scl_falloff,
@@ -698,7 +711,7 @@ std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop)
 void VolumeSelector::ChangeBrushSetsIndex()
 {
 	int mode = m_mode;
-	if (mode == 1)
+	if (mode == 1 || mode == 10)
 		mode = 2;
 	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
 	{
@@ -725,7 +738,8 @@ bool VolumeSelector::GetThUpdate()
 {
 	auto view = glbin_current.render_view.lock();
 	if (!view || (m_mode != 1 &&
-		m_mode != 2 && m_mode != 4))
+		m_mode != 2 && m_mode != 4 &&
+		m_mode != 10))
 		return false;
 	glm::mat4 mv_mat = view->GetDrawMat();
 	glm::mat4 prj_mat = view->GetProjection();
