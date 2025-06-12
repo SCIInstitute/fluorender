@@ -254,6 +254,8 @@ void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 void ListPanel::UpdateList()
 {
+	m_suppress_event = true;
+
 	m_datalist->DeleteAllItems();
 
 	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
@@ -288,6 +290,8 @@ void ListPanel::UpdateList()
 			m_datalist->Append(DATA_ANNOTATIONS, name, path);
 		}
 	}
+
+	m_suppress_event = false;
 }
 
 void ListPanel::UpdateSelection()
@@ -330,7 +334,7 @@ void ListPanel::UpdateSelection()
 		if (stype == item_type &&
 			sname == name)
 		{
-			m_datalist->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			m_datalist->SelectItemSilently(i);
 			break;
 		}
 	}

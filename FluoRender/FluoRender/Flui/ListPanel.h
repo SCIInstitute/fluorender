@@ -40,6 +40,13 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 
+	void SelectItemSilently(int i)
+	{
+		m_silent_select = true;
+		SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		m_silent_select = false;
+	}
+
 	void Append(int type, const wxString& name, const wxString& path);
 	void SetText(long item, int col, const wxString &str);
 	wxString GetText(long item, int col);
@@ -51,6 +58,7 @@ public:
 private:
 	wxTextCtrl *m_rename_text;
 	long m_selected;
+	bool m_silent_select = false;
 
 private:
 	void OnSelectionChanged(wxListEvent& event);
@@ -109,6 +117,7 @@ public:
 private:
 	wxToolBar *m_toolbar;
 	DataListCtrl *m_datalist;
+	bool m_suppress_event = false;
 
 private:
 	void OnContextMenu(wxContextMenuEvent& event);

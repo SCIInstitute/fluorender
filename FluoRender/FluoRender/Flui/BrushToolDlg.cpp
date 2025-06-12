@@ -409,7 +409,7 @@ BrushToolDlg::BrushToolDlg(
 	m_history_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnHistoryChk, this);
 	m_clear_hist_btn = new wxButton(this, wxID_ANY,
 		"Clear History", wxDefaultPosition, wxDefaultSize);
-	m_clear_hist_btn->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnClearHistBtn, this);
+	m_clear_hist_btn->Bind(wxEVT_BUTTON, &BrushToolDlg::OnClearHistBtn, this);
 	sizer4_1->Add(m_update_btn, 0, wxALIGN_CENTER);
 	sizer4_1->AddStretchSpacer(1);
 	sizer4_1->Add(m_history_chk, 0, wxALIGN_CENTER);
@@ -501,6 +501,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_toolbar->ToggleTool(ID_Grow, bval && ival == 9);
 		m_toolbar->ToggleTool(ID_BrushAppend, bval && ival == 2);
 		m_toolbar->ToggleTool(ID_BrushComp, bval && ival == 10);
+		m_toolbar->ToggleTool(ID_BrushSingle, bval && ival == 1);
 		m_toolbar->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
 		m_toolbar->ToggleTool(ID_BrushSolid, bval && ival == 8);
 		m_toolbar->ToggleTool(ID_BrushUnsel, bval && ival == 3);
@@ -709,6 +710,13 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
+	case ID_BrushSingle:
+		mode = mode == 1 ? 0 : 1;
+		set_mode = true;
+		excl_self = 0;
+		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
+		views.insert(-1);
+		break;
 	case ID_BrushDiffuse:
 		mode = mode == 4 ? 0 : 4;
 		set_mode = true;
@@ -737,6 +745,7 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		glbin_vol_selector.SetMode(mode);
 		glbin_states.m_brush_mode_toolbar = mode;
 		glbin_states.m_brush_mode_shortcut = 0;
+		glbin_vol_selector.SetEstimateThreshold(mode == 1);
 	}
 	FluoRefresh(excl_self, vc, views);
 }
@@ -757,13 +766,13 @@ void BrushToolDlg::OnToolBar2(wxCommandEvent& event)
 		break;
 	case ID_BrushExtract:
 		glbin_vol_selector.Extract();
-		excl_self = 3;
-		vc.insert(gstNull);
+		excl_self = 0;
+		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
 		break;
 	case ID_BrushDelete:
 		glbin_vol_selector.Erase();
-		excl_self = 3;
-		vc.insert(gstNull);
+		excl_self = 0;
+		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
 		break;
 	case ID_MaskCopy:
 		glbin_vol_selector.CopyMask(false);

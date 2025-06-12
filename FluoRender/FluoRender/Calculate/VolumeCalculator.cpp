@@ -152,61 +152,69 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 
 void VolumeCalculator::CalculateGroup(int type, const std::wstring& prev_group, bool add)
 {
-	if (type == 5 ||
-		type == 6 ||
-		type == 7)
+	// If not type 5, 6, or 7, just calculate single
+	if (type != 5 && type != 6 && type != 7)
+	{
+		CalculateSingle(type, prev_group, add);
+		return;
+	}
+
+	// If group selection is not enabled, fallback to single
+	if (!glbin_vol_selector.GetSelectGroup())
+	{
+		CalculateSingle(type, prev_group, add);
+		return;
+	}
+
+	auto vd = GetVolumeA();
+	auto view = glbin_current.render_view.lock();
+	if (!vd || !view)
+	{
+		CalculateSingle(type, prev_group, add);
+		return;
+	}
+
+	std::shared_ptr<DataGroup> group;
+	for (int i = 0; i < view->GetLayerNum(); ++i)
+	{
+		auto layer = view->GetLayer(i);
+		if (layer && layer->IsA() == 5)
+		{
+			auto tmp_group = std::dynamic_pointer_cast<DataGroup>(layer);
+			for (int j = 0; j < tmp_group->GetVolumeNum(); ++j)
+			{
+				if (tmp_group->GetVolumeData(j) == vd)
+				{
+					group = tmp_group;
+					break;
+				}
+			}
+		}
+		if (group) break;
+	}
+
+	if (group && group->GetVolumeNum() > 1)
 	{
 		std::vector<std::weak_ptr<VolumeData>> vd_list;
-		if (glbin_vol_selector.GetSelectGroup())
+		for (int i = 0; i < group->GetVolumeNum(); ++i)
 		{
-			auto vd = GetVolumeA();
-			auto view = glbin_current.render_view.lock();
-			std::shared_ptr<DataGroup> group;
-			if (vd && view)
-			{
-				for (int i = 0; i < view->GetLayerNum(); i++)
-				{
-					auto layer = view->GetLayer(i);
-					if (layer && layer->IsA() == 5)
-					{
-						auto tmp_group = std::dynamic_pointer_cast<DataGroup>(layer);
-						for (int j = 0; j < tmp_group->GetVolumeNum(); j++)
-						{
-							auto tmp_vd = tmp_group->GetVolumeData(j);
-							if (tmp_vd && tmp_vd == vd)
-							{
-								group = tmp_group;
-								break;
-							}
-						}
-					}
-					if (group)
-						break;
-				}
-			}
-			if (group && group->GetVolumeNum() > 1)
-			{
-				for (int i = 0; i < group->GetVolumeNum(); i++)
-				{
-					auto tmp_vd = group->GetVolumeData(i);
-					if (tmp_vd && tmp_vd->GetDisp())
-						vd_list.push_back(tmp_vd);
-				}
-				for (size_t i = 0; i < vd_list.size(); ++i)
-				{
-					SetVolumeA(vd_list[i].lock());
-					CalculateSingle(type, prev_group, add);
-				}
-				SetVolumeA(vd);
-			}
-			else
-				CalculateSingle(type, prev_group, add);
+			auto tmp_vd = group->GetVolumeData(i);
+			if (tmp_vd && tmp_vd->GetDisp())
+				vd_list.push_back(tmp_vd);
 		}
-		else
+
+		for (auto& weak_vd : vd_list)
+		{
+			SetVolumeA(weak_vd.lock());
 			CalculateSingle(type, prev_group, add);
+		}
+
+		SetVolumeA(vd); // Restore original
 	}
 	else
+	{
 		CalculateSingle(type, prev_group, add);
+	}
 }
 
 void VolumeCalculator::Calculate(int type)

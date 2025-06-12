@@ -215,6 +215,7 @@ private:
 	wxToolBar* m_toolbar2;
 	//save the pos
 	int m_scroll_pos;
+	bool m_suppress_event = false;
 	//drag
 	wxTreeItemId m_drag_item;
 

@@ -475,8 +475,10 @@ void TreePanel::UpdateTree()
 {
 	if (!m_datatree)
 		return;
+	m_suppress_event = true;
 
 	glbin_vol_selector.SetCopyMaskVolume(0);
+	
 	m_datatree->DeleteAllItems();
 	m_datatree->ClearIcons();
 
@@ -653,6 +655,8 @@ void TreePanel::UpdateTree()
 
 	if (sel_item.IsOk())
 		m_datatree->SelectItemSilently(sel_item);
+
+	m_suppress_event = false;
 }
 
 void TreePanel::UpdateTreeIcons()
@@ -1689,6 +1693,8 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 
 void TreePanel::OnSelChanged(wxTreeEvent& event)
 {
+	if (m_suppress_event)
+		return;
 	if (m_datatree && m_datatree->m_silent_select)
 		return;
 
@@ -1780,6 +1786,8 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 
 void TreePanel::OnDeleting(wxTreeEvent& event)
 {
+	if (m_suppress_event)
+		return;
 	FluoUpdate({ gstCurrentSelect });
 }
 

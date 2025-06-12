@@ -9140,7 +9140,7 @@ void RenderView::DrawBrush()
 		switch (mode)
 		{
 		case 1:
-			wstr = L"S";
+			wstr = L"1";
 			break;
 		case 2:
 		case 10:
