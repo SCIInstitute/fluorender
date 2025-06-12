@@ -182,17 +182,32 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	//double click
-	void Action();
 	//update
 	void UpdateTree();
 	void UpdateTreeIcons();
 	void UpdateTreeColors();
 	void UpdateTreeSel();
 
-	//toolbar operations
-	void AddVolumeGroup();
+	//double click
+	void Action();
+	void AddVolGroup();
 	void AddMeshGroup();
+	void RemoveData();
+	void RulerLine();
+	void RulerPolyline();
+	void RulerPencil();
+	void RulerEdit();
+	void RulerDeletePoint();
+	void RulerLocator();
+	void BrushGrow();
+	void BrushAppend();
+	void BrushComp();
+	void BrushDiffuse();
+	void BrushUnselect();
+	void BrushClear();
+	void BrushExtract();
+	void BrushDelete();
+
 	//delete all
 	void DeleteSelection();
 	void DeleteAll();

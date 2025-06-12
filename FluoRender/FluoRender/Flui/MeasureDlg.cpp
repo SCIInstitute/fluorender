@@ -426,46 +426,46 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	m_toolbar1 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
 	bitmap = wxGetBitmap(locator);
-	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
+	m_toolbar1->AddCheckTool(ID_RulerLocator, "Locator",
 		bitmap, wxNullBitmap,
 		"Add locators by clicking on data",
 		"Add locators by clicking on data");
 	bitmap = wxGetBitmap(drill);
-	m_toolbar1->AddCheckTool(ID_ProbeBtn, "Probe",
+	m_toolbar1->AddCheckTool(ID_RulerProbe, "Probe",
 		bitmap, wxNullBitmap,
 		"Add probes of depth by clicking on data",
 		"Add probes of depth by clicking on data");
 	bitmap = wxGetBitmap(two_point);
-	m_toolbar1->AddCheckTool(ID_RulerBtn, "Line",
+	m_toolbar1->AddCheckTool(ID_RulerLine, "Line",
 		bitmap, wxNullBitmap,
 		"Add rulers by clicking twice at each end point",
 		"Add rulers by clicking twice at each end point");
 	bitmap = wxGetBitmap(protractor);
-	m_toolbar1->AddCheckTool(ID_ProtractorBtn, "Angle",
+	m_toolbar1->AddCheckTool(ID_RulerAngle, "Angle",
 		bitmap, wxNullBitmap,
 		"Add protractors for angles by clicking three times",
 		"Add protractors for angles by clicking three times");
 	bitmap = wxGetBitmap(ellipse);
-	m_toolbar1->AddCheckTool(ID_EllipseBtn, "Ellipse",
+	m_toolbar1->AddCheckTool(ID_RulerEllipse, "Ellipse",
 		bitmap, wxNullBitmap,
 		"Add an ellipse for a region by clicking on data",
 		"Add an ellipse for a region by clicking on data");
 	bitmap = wxGetBitmap(multi_point);
-	m_toolbar1->AddCheckTool(ID_RulerMPBtn, "Polyline",
+	m_toolbar1->AddCheckTool(ID_RulerPolyline, "Polyline",
 		bitmap, wxNullBitmap,
 		"Add a polyline ruler by clicking at each point",
 		"Add a polyline ruler by clicking at each point");
 	bitmap = wxGetBitmap(pencil);
-	m_toolbar1->AddCheckTool(ID_PencilBtn, "Pencil",
+	m_toolbar1->AddCheckTool(ID_RulerPencil, "Pencil",
 		bitmap, wxNullBitmap,
 		"Draw ruler with multiple points continuously",
 		"Draw ruler with multiple points continuously");
 	bitmap = wxGetBitmap(grow);
-	m_toolbar1->AddCheckTool(ID_GrowBtn, "Grow",
+	m_toolbar1->AddCheckTool(ID_RulerGrow, "Grow",
 		bitmap, wxNullBitmap,
 		"Click and hold to create ruler automatically by growth",
 		"Click and hold to create ruler automatically by growth");
-	m_toolbar1->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar1, this);
+	m_toolbar1->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar, this);
 	m_toolbar1->Realize();
 	//toolbar2
 	m_toolbar2 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -510,7 +510,7 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 		"Smooth the curve of a multipoint ruler by data");
 	m_toolbar2->SetToolLongHelp(ID_RelaxBtn,
 		"Smooth the curve of a multipoint ruler by data");
-	m_toolbar2->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar2, this);
+	m_toolbar2->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar, this);
 	m_toolbar2->Realize();
 	//toolbar3
 	m_toolbar3 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -556,7 +556,7 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 		"Export rulers to a text file");
 	m_toolbar3->SetToolLongHelp(ID_ExportBtn,
 		"Export rulers to a text file");
-	m_toolbar3->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar3, this);
+	m_toolbar3->Bind(wxEVT_TOOL, &MeasureDlg::OnToolbar, this);
 	m_toolbar3->Realize();
 
 	//options
@@ -852,18 +852,18 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
-		bval = view && view->GetIntMode() == 5;
-		ival = glbin_ruler_handler.GetType();
 		int mode = view ? view->GetIntMode() : 0;
+		bval = mode == 5;
+		ival = glbin_ruler_handler.GetType();
 		//toolbar1
-		m_toolbar1->ToggleTool(ID_LocatorBtn, bval && ival == 2);
-		m_toolbar1->ToggleTool(ID_ProbeBtn, bval && ival == 3);
-		m_toolbar1->ToggleTool(ID_RulerBtn, bval && ival == 0);
-		m_toolbar1->ToggleTool(ID_ProtractorBtn, bval && ival == 4);
-		m_toolbar1->ToggleTool(ID_EllipseBtn, bval && ival == 5);
-		m_toolbar1->ToggleTool(ID_RulerMPBtn, bval && ival == 1);
-		m_toolbar1->ToggleTool(ID_PencilBtn,mode == 13);
-		m_toolbar1->ToggleTool(ID_GrowBtn, mode == 12);
+		m_toolbar1->ToggleTool(ID_RulerLocator, bval && ival == 2);
+		m_toolbar1->ToggleTool(ID_RulerProbe, bval && ival == 3);
+		m_toolbar1->ToggleTool(ID_RulerLine, bval && ival == 0);
+		m_toolbar1->ToggleTool(ID_RulerAngle, bval && ival == 4);
+		m_toolbar1->ToggleTool(ID_RulerEllipse, bval && ival == 5);
+		m_toolbar1->ToggleTool(ID_RulerPolyline, bval && ival == 1);
+		m_toolbar1->ToggleTool(ID_RulerPencil,mode == 13);
+		m_toolbar1->ToggleTool(ID_RulerGrow, mode == 12);
 		//toolbar2
 		m_toolbar2->ToggleTool(ID_RulerMoveBtn, mode == 9);
 		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, mode == 6);
@@ -1344,15 +1344,11 @@ void MeasureDlg::Pencil()
 	if (ival == 13)
 	{
 		view->SetIntMode(1);
-		//if (m_view->m_canvas->GetRulerRenderer())
-		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(true);
 	}
 	else
 	{
 		view->SetIntMode(13);
 		glbin_ruler_handler.SetType(1);
-		//if (m_view->m_canvas->GetRulerRenderer())
-		//	m_view->m_canvas->GetRulerRenderer()->SetDrawText(false);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1632,45 +1628,36 @@ void MeasureDlg::Export()
 	}
 }
 
-void MeasureDlg::OnToolbar1(wxCommandEvent& event)
+void MeasureDlg::OnToolbar(wxCommandEvent& event)
 {
 	int id = event.GetId();
 
 	switch (id)
 	{
-	case ID_LocatorBtn:
+	case ID_RulerLocator:
 		Locator();
 		break;
-	case ID_ProbeBtn:
+	case ID_RulerProbe:
 		Probe();
 		break;
-	case ID_RulerBtn:
+	case ID_RulerLine:
 		Ruler();
 		break;
-	case ID_ProtractorBtn:
+	case ID_RulerAngle:
 		Protractor();
 		break;
-	case ID_EllipseBtn:
+	case ID_RulerEllipse:
 		Ellipse();
 		break;
-	case ID_RulerMPBtn:
+	case ID_RulerPolyline:
 		RulerMP();
 		break;
-	case ID_PencilBtn:
+	case ID_RulerPencil:
 		Pencil();
 		break;
-	case ID_GrowBtn:
+	case ID_RulerGrow:
 		Grow();
 		break;
-	}
-}
-
-void MeasureDlg::OnToolbar2(wxCommandEvent& event)
-{
-	int id = event.GetId();
-
-	switch (id)
-	{
 	case ID_RulerMoveBtn:
 		RulerMove();
 		break;
@@ -1695,15 +1682,6 @@ void MeasureDlg::OnToolbar2(wxCommandEvent& event)
 	case ID_RelaxBtn:
 		Relax();
 		break;
-	}
-}
-
-void MeasureDlg::OnToolbar3(wxCommandEvent& event)
-{
-	int id = event.GetId();
-
-	switch (id)
-	{
 	case ID_DeleteBtn:
 		DeleteSelection();
 		break;

@@ -88,7 +88,7 @@ BrushToolDlg::BrushToolDlg(
 	m_toolbar->SetToolLongHelp(ID_BrushRedo, "Redo the rollback brush operation");
 	m_toolbar->AddSeparator();
 	bitmap = wxGetBitmap(grow);
-	m_toolbar->AddCheckTool(ID_Grow, "Grow",
+	m_toolbar->AddCheckTool(ID_BrushGrow, "Grow",
 		bitmap, wxNullBitmap,
 		"Click and hold mouse button to grow selection mask from a point",
 		"Click and hold mouse button to grow selection mask from a point");
@@ -173,7 +173,7 @@ BrushToolDlg::BrushToolDlg(
 		ID_MaskIntersect, "Intersect", bitmap,
 		"Intersect selection mask from clipboard with current");
 	m_toolbar2->SetToolLongHelp(ID_MaskIntersect, "Intersect selection mask from clipboard with current");
-	m_toolbar2->Bind(wxEVT_TOOL, &BrushToolDlg::OnToolBar2, this);
+	m_toolbar2->Bind(wxEVT_TOOL, &BrushToolDlg::OnToolBar, this);
 	m_toolbar2->Realize();
 
 	//Selection adjustment
@@ -498,7 +498,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		int mode = view ? view->GetIntMode() : 0;
 		bval = mode == 2 || mode == 10;
 		ival = glbin_vol_selector.GetMode();
-		m_toolbar->ToggleTool(ID_Grow, bval && ival == 9);
+		m_toolbar->ToggleTool(ID_BrushGrow, bval && ival == 9);
 		m_toolbar->ToggleTool(ID_BrushAppend, bval && ival == 2);
 		m_toolbar->ToggleTool(ID_BrushComp, bval && ival == 10);
 		m_toolbar->ToggleTool(ID_BrushSingle, bval && ival == 1);
@@ -667,162 +667,286 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 }
 
+void BrushToolDlg::BrushUndo()
+{
+	glbin_vol_selector.UndoMask();
+	FluoRefresh(2, { gstSelUndo });
+}
+
+void BrushToolDlg::BrushRedo()
+{
+	glbin_vol_selector.RedoMask();
+	FluoRefresh(2, { gstSelUndo });
+}
+
+void BrushToolDlg::BrushGrow()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 10 || mode == 12;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 9)
+		mode = 0;
+	else
+		mode = 9;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void BrushToolDlg::BrushAppend()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 2)
+		mode = 0;
+	else
+		mode = 2;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void BrushToolDlg::BrushComp()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 10)
+		mode = 0;
+	else
+		mode = 10;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void BrushToolDlg::BrushSingle()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 1)
+		mode = 0;
+	else
+		mode = 1;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(mode == 1);
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void BrushToolDlg::BrushDiffuse()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 4)
+		mode = 0;
+	else
+		mode = 4;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void BrushToolDlg::BrushSolid()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 8)
+		mode = 0;
+	else
+		mode = 8;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void BrushToolDlg::BrushUnsel()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 3)
+		mode = 0;
+	else
+		mode = 3;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+//toolbar2
+void BrushToolDlg::BrushClear()
+{
+	glbin_vol_selector.Clear();
+	FluoRefresh(3, { gstNull });
+}
+
+void BrushToolDlg::BrushExtract()
+{
+	glbin_vol_selector.Extract();
+	FluoRefresh(0, { gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
+}
+
+void BrushToolDlg::BrushDelete()
+{
+	glbin_vol_selector.Erase();
+	FluoRefresh(0, { gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
+}
+
+void BrushToolDlg::MaskCopy()
+{
+	glbin_vol_selector.CopyMask(false);
+	FluoRefresh(2, { gstSelMask });
+}
+
+void BrushToolDlg::MaskCopyData()
+{
+	glbin_vol_selector.CopyMask(true);
+	FluoRefresh(2, { gstSelMask });
+}
+
+void BrushToolDlg::MaskPaste()
+{
+	fluo::ValueCollection vc;
+	glbin_vol_selector.PasteMask(0);
+	vc.insert(gstSelUndo);
+	if (glbin_vol_selector.GetAutoPaintSize())
+		vc.insert(gstBrushCountResult);
+	if (glbin_colocalizer.GetAutoColocalize())
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc);
+}
+
+void BrushToolDlg::MaskMerge()
+{
+	fluo::ValueCollection vc;
+	glbin_vol_selector.PasteMask(1);
+	vc.insert(gstSelUndo);
+	if (glbin_vol_selector.GetAutoPaintSize())
+		vc.insert(gstBrushCountResult);
+	if (glbin_colocalizer.GetAutoColocalize())
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc);
+}
+
+void BrushToolDlg::MaskExclude()
+{
+	fluo::ValueCollection vc;
+	glbin_vol_selector.PasteMask(2);
+	vc.insert(gstSelUndo);
+	if (glbin_vol_selector.GetAutoPaintSize())
+		vc.insert(gstBrushCountResult);
+	if (glbin_colocalizer.GetAutoColocalize())
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc);
+}
+
+void BrushToolDlg::MaskIntersect()
+{
+	fluo::ValueCollection vc;
+	glbin_vol_selector.PasteMask(3);
+	vc.insert(gstSelUndo);
+	if (glbin_vol_selector.GetAutoPaintSize())
+		vc.insert(gstBrushCountResult);
+	if (glbin_colocalizer.GetAutoColocalize())
+		vc.insert(gstColocalResult);
+	FluoRefresh(0, vc);
+}
+
 //brush commands
 void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int mode = glbin_vol_selector.GetMode();
-	bool set_mode = false;
-	int excl_self = 0;
-	fluo::ValueCollection vc;
-	std::set<int> views;
 
 	switch (id)
 	{
 	case ID_BrushUndo:
-		glbin_vol_selector.UndoMask();
-		excl_self = 2;
-		vc.insert(gstSelUndo);
+		BrushUndo();
 		break;
 	case ID_BrushRedo:
-		glbin_vol_selector.RedoMask();
-		excl_self = 2;
-		vc.insert(gstSelUndo);
+		BrushRedo();
 		break;
-	case ID_Grow:
-		mode = mode == 9 ? 0 : 9;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert(gstFreehandToolState);
-		views.insert(-1);
+	case ID_BrushGrow:
+		BrushGrow();
 		break;
 	case ID_BrushAppend:
-		mode = mode == 2 ? 0 : 2;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
-		views.insert(-1);
+		BrushAppend();
 		break;
 	case ID_BrushComp:
-		mode = mode == 10 ? 0 : 10;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
-		views.insert(-1);
+		BrushComp();
 		break;
 	case ID_BrushSingle:
-		mode = mode == 1 ? 0 : 1;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
-		views.insert(-1);
+		BrushSingle();
 		break;
 	case ID_BrushDiffuse:
-		mode = mode == 4 ? 0 : 4;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
-		views.insert(-1);
+		BrushDiffuse();
 		break;
 	case ID_BrushSolid:
-		mode = mode == 8 ? 0 : 8;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
-		views.insert(-1);
+		BrushSolid();
 		break;
 	case ID_BrushUnsel:
-		mode = mode == 3 ? 0 : 3;
-		set_mode = true;
-		excl_self = 0;
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
-		views.insert(-1);
+		BrushUnsel();
 		break;
-	}
-
-	if (set_mode)
-	{
-		glbin_vol_selector.SetMode(mode);
-		glbin_states.m_brush_mode_toolbar = mode;
-		glbin_states.m_brush_mode_shortcut = 0;
-		glbin_vol_selector.SetEstimateThreshold(mode == 1);
-	}
-	FluoRefresh(excl_self, vc, views);
-}
-
-//mask tools
-void BrushToolDlg::OnToolBar2(wxCommandEvent& event)
-{
-	int id = event.GetId();
-	int excl_self = 0;
-	fluo::ValueCollection vc;
-
-	switch (id)
-	{
 	case ID_BrushClear:
-		glbin_vol_selector.Clear();
-		excl_self = 3;
-		vc.insert(gstNull);
+		BrushClear();
 		break;
 	case ID_BrushExtract:
-		glbin_vol_selector.Extract();
-		excl_self = 0;
-		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
+		BrushExtract();
 		break;
 	case ID_BrushDelete:
-		glbin_vol_selector.Erase();
-		excl_self = 0;
-		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
+		BrushDelete();
 		break;
 	case ID_MaskCopy:
-		glbin_vol_selector.CopyMask(false);
-		excl_self = 2;
-		vc.insert(gstSelMask);
+		MaskCopy();
 		break;
 	case ID_MaskCopyData:
-		glbin_vol_selector.CopyMask(true);
-		excl_self = 2;
-		vc.insert(gstSelMask);
+		MaskCopyData();
 		break;
 	case ID_MaskPaste:
-		glbin_vol_selector.PasteMask(0);
-		excl_self = 0;
-		vc.insert(gstSelUndo);
-		if (glbin_vol_selector.GetAutoPaintSize())
-			vc.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			vc.insert(gstColocalResult);
+		MaskPaste();
 		break;
 	case ID_MaskMerge:
-		glbin_vol_selector.PasteMask(1);
-		excl_self = 0;
-		vc.insert(gstSelUndo);
-		if (glbin_vol_selector.GetAutoPaintSize())
-			vc.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			vc.insert(gstColocalResult);
+		MaskMerge();
 		break;
 	case ID_MaskExclude:
-		glbin_vol_selector.PasteMask(2);
-		excl_self = 0;
-		vc.insert(gstSelUndo);
-		if (glbin_vol_selector.GetAutoPaintSize())
-			vc.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			vc.insert(gstColocalResult);
+		MaskExclude();
 		break;
 	case ID_MaskIntersect:
-		glbin_vol_selector.PasteMask(3);
-		excl_self = 0;
-		vc.insert(gstSelUndo);
-		if (glbin_vol_selector.GetAutoPaintSize())
-			vc.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			vc.insert(gstColocalResult);
+		MaskIntersect();
 		break;
 	}
-
-	FluoRefresh(excl_self, vc);
 }
 
 //selection adjustment

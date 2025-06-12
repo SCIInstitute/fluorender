@@ -109,31 +109,25 @@ public:
 	enum
 	{
 		//toolbar1
-		ID_LocatorBtn = 0,
-		ID_ProbeBtn,
-		ID_RulerBtn,
-		ID_ProtractorBtn,
-		ID_EllipseBtn,
-		ID_RulerMPBtn,
-		ID_PencilBtn,
-		ID_GrowBtn
-	};
-	enum
-	{
+		ID_RulerLocator = 0,
+		ID_RulerProbe,
+		ID_RulerLine,
+		ID_RulerAngle,
+		ID_RulerEllipse,
+		ID_RulerPolyline,
+		ID_RulerPencil,
+		ID_RulerGrow,
 		//toolbar2
-		ID_RulerMoveBtn = 0,
+		ID_RulerMoveBtn,
 		ID_RulerMovePointBtn,
 		ID_MagnetBtn,
 		ID_RulerMovePencilBtn,
 		ID_RulerFlipBtn,
 		ID_RulerAvgBtn,
 		ID_LockBtn,
-		ID_RelaxBtn
-	};
-	enum
-	{
+		ID_RelaxBtn,
 		//toolbar3
-		ID_DeleteBtn = 0,
+		ID_DeleteBtn,
 		ID_DeleteAllBtn,
 		ID_RulerDelBtn,
 		ID_PruneBtn,
@@ -260,9 +254,7 @@ private:
 	wxWindow* CreateListPage(wxWindow* parent);
 	wxWindow* CreateAlignPage(wxWindow* parent);
 
-	void OnToolbar1(wxCommandEvent& event);
-	void OnToolbar2(wxCommandEvent& event);
-	void OnToolbar3(wxCommandEvent& event);
+	void OnToolbar(wxCommandEvent& event);
 
 	void OnIntensityMethodCheck(wxCommandEvent& event);
 	void OnTransientCheck(wxCommandEvent& event);

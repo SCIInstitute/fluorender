@@ -138,6 +138,9 @@ wxString DataListCtrl::EndEdit()
 
 void DataListCtrl::OnSelectionChanged(wxListEvent& event)
 {
+	if (m_silent_select)
+		return;
+
 	wxFont font;
 	if (m_selected != -1)
 	{

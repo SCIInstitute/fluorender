@@ -51,17 +51,15 @@ public:
 		//brushes
 		ID_BrushUndo = 0,
 		ID_BrushRedo,
-		ID_Grow,
+		ID_BrushGrow,
 		ID_BrushAppend,
 		ID_BrushComp,
 		ID_BrushSingle,
 		ID_BrushDiffuse,
 		ID_BrushSolid,
-		ID_BrushUnsel
-	};
-	enum
-	{
-		ID_BrushClear = 0,
+		ID_BrushUnsel,
+		//second row
+		ID_BrushClear,
 		ID_BrushExtract,
 		ID_BrushDelete,
 		//mask
@@ -87,6 +85,27 @@ public:
 	~BrushToolDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+
+	//toolbar1
+	void BrushUndo();
+	void BrushRedo();
+	void BrushGrow();
+	void BrushAppend();
+	void BrushComp();
+	void BrushSingle();
+	void BrushDiffuse();
+	void BrushSolid();
+	void BrushUnsel();
+	//toolbar2
+	void BrushClear();
+	void BrushExtract();
+	void BrushDelete();
+	void MaskCopy();
+	void MaskCopyData();
+	void MaskPaste();
+	void MaskMerge();
+	void MaskExclude();
+	void MaskIntersect();
 
 private:
 	//max volume value
@@ -158,8 +177,6 @@ private:
 	//paint tools
 	//brush commands
 	void OnToolBar(wxCommandEvent& event);
-	//mask toolbar
-	void OnToolBar2(wxCommandEvent& event);
 	//selection adjustment
 	//2d influence
 	void OnBrush2dinflChange(wxScrollEvent& event);

@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <DataManager.h>
 #include <VolumeSelector.h>
+#include <RulerHandler.h>
 #include <Colocalize.h>
 //resources
 #include <png_resource.h>
@@ -435,6 +436,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	bool update_all = vc.empty();
 	int ival;
+	bool bval;
 
 	//update icons only
 	if (update_all || FOUND_VALUE(gstTreeCtrl))
@@ -454,21 +456,323 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
+		auto view = glbin_current.render_view.lock();
+		int mode = view ? view->GetIntMode() : 0;
+
+		bval = mode == 5;
+		ival = glbin_ruler_handler.GetType();
+		m_toolbar->ToggleTool(ID_RulerLine, bval && ival == 0);
+		m_toolbar->ToggleTool(ID_RulerPolyline, bval && ival == 1);
+		m_toolbar->ToggleTool(ID_RulerPencil, mode == 13);
+		m_toolbar->ToggleTool(ID_RulerEdit, mode == 6);
+		m_toolbar->ToggleTool(ID_RulerDeletePoint, mode == 14);
+		m_toolbar->ToggleTool(ID_RulerLocator, bval && ival == 2);
+
+		bval = mode == 2 || mode == 10;
 		ival = glbin_vol_selector.GetMode();
-		m_toolbar->ToggleTool(ID_BrushAppend, ival == 2);
-		m_toolbar->ToggleTool(ID_BrushDiffuse, ival == 4);
-		m_toolbar->ToggleTool(ID_BrushUnselect, ival == 3);
+		m_toolbar->ToggleTool(ID_BrushGrow, bval && ival == 9);
+		m_toolbar->ToggleTool(ID_BrushAppend, bval && ival == 2);
+		m_toolbar->ToggleTool(ID_BrushComp, bval && ival == 10);
+		m_toolbar->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
+		m_toolbar->ToggleTool(ID_BrushUnselect, bval && ival == 3);
 	}
 }
 
 void TreePanel::Action()
 {
 	bool bval = wxGetKeyState(WXK_CONTROL);
+	fluo::ValueCollection vc;
 
 	if (bval)
+	{
 		RandomizeColor();
+		vc.insert(gstTreeColors);
+	}
 	else
+	{
 		ToggleDisplay();
+		vc.insert(gstTreeIcons);
+	}
+	FluoRefresh(2, vc);
+}
+
+void TreePanel::AddVolGroup()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+
+	std::wstring name = view->AddGroup(L"");
+	auto group = view->GetGroup(name);
+	glbin_current.SetVolumeGroup(group);
+
+	FluoRefresh(0, { gstNull }, {-1});
+}
+
+void TreePanel::AddMeshGroup()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+
+	std::wstring name = view->AddMGroup(L"");
+	auto group = view->GetMGroup(name);
+	glbin_current.SetMeshGroup(group);
+
+	FluoRefresh(0, { gstNull }, {-1});
+}
+
+void TreePanel::RemoveData()
+{
+	DeleteSelection();
+	glbin_current.SetRoot();
+
+	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect });
+}
+
+void TreePanel::RulerLine()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
+	int ival = glbin_ruler_handler.GetType();
+
+	if (bval && ival == 1)
+		glbin_ruler_handler.FinishRuler();
+
+	if (bval && ival == 0)
+	{
+		view->SetIntMode(1);
+	}
+	else
+	{
+		view->SetIntMode(5);
+		glbin_ruler_handler.SetType(0);
+	}
+
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::RulerPolyline()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 5;
+	int ival = glbin_ruler_handler.GetType();
+
+	if (bval && ival == 1)
+	{
+		view->SetIntMode(1);
+		glbin_ruler_handler.FinishRuler();
+	}
+	else
+	{
+		if (mode == 13)
+			glbin_ruler_handler.FinishRuler();
+		view->SetIntMode(5);
+		glbin_ruler_handler.SetType(1);
+	}
+
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::RulerPencil()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int ival = view->GetIntMode();
+
+	glbin_ruler_handler.FinishRuler();
+
+	if (ival == 13)
+	{
+		view->SetIntMode(1);
+	}
+	else
+	{
+		view->SetIntMode(13);
+		glbin_ruler_handler.SetType(1);
+	}
+
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::RulerEdit()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
+	int ival = glbin_ruler_handler.GetType();
+
+	if (bval && ival == 1)
+		glbin_ruler_handler.FinishRuler();
+
+	if (mode == 6)
+		view->SetIntMode(1);
+	else
+		view->SetIntMode(6);
+
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::RulerDeletePoint()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
+	int ival = glbin_ruler_handler.GetType();
+
+	if (bval && ival == 1)
+		glbin_ruler_handler.FinishRuler();
+
+	if (mode == 14)
+		view->SetIntMode(1);
+	else
+		view->SetIntMode(14);
+
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::RulerLocator()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 5 || mode == 13;
+	int ival = glbin_ruler_handler.GetType();
+
+	if (bval && ival == 1)
+		glbin_ruler_handler.FinishRuler();
+
+	if (bval && ival == 2)
+	{
+		view->SetIntMode(1);
+	}
+	else
+	{
+		view->SetIntMode(5);
+		glbin_ruler_handler.SetType(2);
+	}
+
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::BrushGrow()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 10 || mode == 12;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 9)
+		mode = 0;
+	else
+		mode = 9;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
+void TreePanel::BrushAppend()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 2)
+		mode = 0;
+	else
+		mode = 2;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void TreePanel::BrushComp()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 10)
+		mode = 0;
+	else
+		mode = 10;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void TreePanel::BrushDiffuse()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 4)
+		mode = 0;
+	else
+		mode = 4;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void TreePanel::BrushUnselect()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	int mode = view->GetIntMode();
+	bool bval = mode == 2;
+	int ival = glbin_vol_selector.GetMode();
+	if (bval && ival == 3)
+		mode = 0;
+	else
+		mode = 3;
+	glbin_vol_selector.SetMode(mode);
+	glbin_states.m_brush_mode_toolbar = mode;
+	glbin_states.m_brush_mode_shortcut = 0;
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+}
+
+void TreePanel::BrushClear()
+{
+	glbin_vol_selector.Clear();
+	FluoRefresh(3, { gstNull });
+}
+
+void TreePanel::BrushExtract()
+{
+	glbin_vol_selector.Extract();
+	FluoRefresh(3, { gstNull });
+}
+
+void TreePanel::BrushDelete()
+{
+	glbin_vol_selector.Erase();
+	FluoRefresh(3, { gstNull });
 }
 
 void TreePanel::UpdateTree()
@@ -991,33 +1295,6 @@ void TreePanel::traversalSel(wxTreeItemId item)
 	}
 }
 
-void TreePanel::AddVolumeGroup()
-{
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-
-	std::wstring name = view->AddGroup(L"");
-	auto group = view->GetGroup(name);
-	glbin_current.SetVolumeGroup(group);
-
-	FluoUpdate({ gstTreeCtrl });
-}
-
-void TreePanel::AddMeshGroup()
-{
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-
-	std::wstring name = view->AddMGroup(L"");
-	auto group = view->GetMGroup(name);
-	glbin_current.SetMeshGroup(group);
-
-
-	FluoUpdate({ gstTreeCtrl });
-}
-
 void TreePanel::DeleteSelection()
 {
 	int type = glbin_current.GetType();
@@ -1449,91 +1726,49 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 void TreePanel::OnToolbar(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int excl_self = 0;
-	fluo::ValueCollection vc;
-	std::set<int> views;
 
 	switch (id)
 	{
 	case ID_ToggleDisp:
 		Action();
-		excl_self = 2;
-		if (wxGetKeyState(WXK_CONTROL))
-			vc.insert(gstTreeColors);
-		else
-			vc.insert(gstTreeIcons);
 		break;
 	case ID_AddVolGroup:
+		AddVolGroup();
+		break;
 	case ID_AddMeshGroup:
-		switch (id)
-		{
-			case ID_AddVolGroup:
-				AddVolumeGroup();
-				break;
-			case ID_AddMeshGroup:
-				AddMeshGroup();
-				break;
-		}
-		vc.insert(gstNull);
-		views.insert(-1);
+		AddMeshGroup();
 		break;
 	case ID_RemoveData:
-		DeleteSelection();
-		glbin_current.SetRoot();
-		vc.insert(gstTreeCtrl);
+		RemoveData();
+		break;
+	case ID_RulerLine:
+		RulerLine();
+		break;
+	case ID_RulerPolyline:
+		RulerPolyline();
+		break;
+	case ID_RulerPencil:
+		RulerPencil();
 		break;
 	case ID_BrushAppend:
+		BrushAppend();
+		break;
 	case ID_BrushUnselect:
+		BrushUnselect();
+		break;
 	case ID_BrushDiffuse:
-	{
-		int mode = glbin_vol_selector.GetMode();
-		bool set_mode = false;
-		switch (id)
-		{
-		case ID_BrushAppend:
-			mode = mode == 2 ? 0 : 2;
-			set_mode = true;
-			break;
-		case ID_BrushUnselect:
-			mode = mode == 3 ? 0 : 3;
-			set_mode = true;
-			break;
-		case ID_BrushDiffuse:
-			mode = mode == 4 ? 0 : 4;
-			set_mode = true;
-			break;
-		}
-		if (set_mode)
-		{
-			glbin_vol_selector.SetMode(mode);
-			glbin_states.m_brush_mode_toolbar = mode;
-			glbin_states.m_brush_mode_shortcut = 0;
-		}
-		vc.insert(gstFreehandToolState);
-		views.insert(-1);
-	}
+		BrushDiffuse();
 		break;
 	case ID_BrushDelete:
+		BrushDelete();
+		break;
 	case ID_BrushClear:
+		BrushClear();
+		break;
 	case ID_BrushExtract:
-		switch (id)
-		{
-		case ID_BrushDelete:
-			glbin_vol_selector.Erase();
-			break;
-		case ID_BrushClear:
-			glbin_vol_selector.Clear();
-			break;
-		case ID_BrushExtract:
-			glbin_vol_selector.Extract();
-			break;
-		}
-		excl_self = 3;
-		vc.insert(gstNull);
+		BrushExtract();
 		break;
 	}
-
-	FluoRefresh(excl_self, vc, views);
 }
 
 void TreePanel::OnMenu(wxCommandEvent& event)
@@ -1547,26 +1782,13 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 	{
 	case ID_ToggleDisp:
 		Action();
-		excl_self = 2;
-		if (wxGetKeyState(WXK_CONTROL))
-			vc.insert(gstTreeColors);
-		else
-			vc.insert(gstTreeIcons);
-		break;
+		return;
 	case ID_AddVolGroup:
+		AddVolGroup();
+		return;
 	case ID_AddMeshGroup:
-		switch (id)
-		{
-		case ID_AddVolGroup:
-			AddVolumeGroup();
-			break;
-		case ID_AddMeshGroup:
-			AddMeshGroup();
-			break;
-		}
-		vc.insert(gstNull);
-		views.insert(-1);
-		break;
+		AddMeshGroup();
+		return;
 	case ID_RemoveData:
 		DeleteSelection();
 		glbin_current.SetRoot();
