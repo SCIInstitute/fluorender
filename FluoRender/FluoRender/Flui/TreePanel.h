@@ -129,7 +129,6 @@ public:
 		ID_AddMeshGroup,
 		ID_RemoveData,
 		//rulers
-		ID_RulerLocator,
 		ID_RulerLine,
 		ID_RulerPolyline,
 		ID_RulerPencil,
@@ -137,6 +136,8 @@ public:
 		ID_RulerEdit,
 		ID_RulerDeletePoint,
 		//brush
+		ID_RulerLocator,
+		//separator
 		ID_BrushGrow,
 		ID_BrushAppend,
 		ID_BrushComp,

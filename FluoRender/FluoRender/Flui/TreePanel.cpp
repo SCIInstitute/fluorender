@@ -322,11 +322,6 @@ TreePanel::TreePanel(MainFrame* frame,
 		"Delete current selection");
 	m_toolbar->SetToolLongHelp(ID_RemoveData, "Delete current selection");
 	m_toolbar->AddSeparator();
-	bitmap = wxGetBitmap(locator);
-	m_toolbar->AddCheckTool(ID_RulerLocator, "Locator",
-		bitmap, wxNullBitmap,
-		"Add locators by clicking on data",
-		"Add locators by clicking on data");
 	bitmap = wxGetBitmap(two_point);
 	m_toolbar->AddCheckTool(ID_RulerLine, "Line",
 		bitmap, wxNullBitmap,
@@ -360,6 +355,12 @@ TreePanel::TreePanel(MainFrame* frame,
 	//create toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(locator);
+	m_toolbar2->AddCheckTool(ID_RulerLocator, "Locator",
+		bitmap, wxNullBitmap,
+		"Add locators by clicking on data",
+		"Add locators by clicking on data");
+	m_toolbar2->AddSeparator();
 	bitmap = wxGetBitmap(grow);
 	m_toolbar2->AddCheckTool(ID_BrushGrow, "Grow",
 		bitmap, wxNullBitmap,
