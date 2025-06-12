@@ -146,7 +146,7 @@ public:
 		//separator
 		ID_BrushClear,
 		ID_BrushExtract,
-		ID_BrushErase,
+		ID_BrushDelete,
 		//menu
 		ID_Expand,
 		ID_RandomizeColor,

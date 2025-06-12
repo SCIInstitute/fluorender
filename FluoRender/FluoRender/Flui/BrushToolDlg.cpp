@@ -102,6 +102,11 @@ BrushToolDlg::BrushToolDlg(
 		bitmap, wxNullBitmap,
 		"Select structures and then segment them into components",
 		"Select structures and then segment them into components");
+	bitmap = wxGetBitmap(brush_single);
+	m_toolbar->AddCheckTool(ID_BrushSingle, "Isolate",
+		bitmap, wxNullBitmap,
+		"Select and isolate a structure by painting",
+		"Select and isolate a structure by painting");
 	bitmap = wxGetBitmap(brush_diffuse);
 	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
 		bitmap, wxNullBitmap,
@@ -112,8 +117,8 @@ BrushToolDlg::BrushToolDlg(
 		bitmap, wxNullBitmap,
 		"Highlight structures with solid mask",
 		"Highlight structures with solid mask");
-	bitmap = wxGetBitmap(brush_erase);
-	m_toolbar->AddCheckTool(ID_BrushDesel, "Eraser",
+	bitmap = wxGetBitmap(brush_unsel);
+	m_toolbar->AddCheckTool(ID_BrushUnsel, "Unsel.",
 		bitmap, wxNullBitmap,
 		"Remove the highlights by painting (hold X)",
 		"Remove the highlights by painting (hold X)");
@@ -125,16 +130,16 @@ BrushToolDlg::BrushToolDlg(
 		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
 	bitmap = wxGetBitmap(brush_clear);
 	m_toolbar2->AddTool(ID_BrushClear, "Clear",
-		bitmap, "Clear the highlights");
-	m_toolbar2->SetToolLongHelp(ID_BrushClear, "Clear the highlights");
+		bitmap, "Clear all highlights");
+	m_toolbar2->SetToolLongHelp(ID_BrushClear, "Clear all highlights");
 	bitmap = wxGetBitmap(brush_extract);
 	m_toolbar2->AddTool(ID_BrushExtract, "Extract",
-		bitmap, "Extract highlighted structures out and create a new volume");
-	m_toolbar2->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
+		bitmap, "Extract highlighted structures and create a new volume");
+	m_toolbar2->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures and create a new volume");
 	bitmap = wxGetBitmap(brush_delete);
-	m_toolbar2->AddTool(ID_BrushErase, "Delete",
+	m_toolbar2->AddTool(ID_BrushDelete, "Delete",
 		bitmap, "Delete highlighted structures");
-	m_toolbar2->SetToolLongHelp(ID_BrushErase, "Delete highlighted structures");
+	m_toolbar2->SetToolLongHelp(ID_BrushDelete, "Delete highlighted structures");
 	m_toolbar2->AddSeparator();
 	//mask tools
 	bitmap = wxGetBitmap(mask_copy);
@@ -177,9 +182,6 @@ BrushToolDlg::BrushToolDlg(
 		wxVERTICAL);
 	//stop at boundary
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_estimate_thresh_chk = new wxCheckBox(this, wxID_ANY, "Auto Clear:",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_estimate_thresh_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnEstimateThreshChk, this);
 	m_edge_detect_chk = new wxCheckBox(this, wxID_ANY, "Edge Detect:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_edge_detect_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushEdgeDetectChk, this);
@@ -192,8 +194,6 @@ BrushToolDlg::BrushToolDlg(
 	m_accurate_bricks_chk = new wxCheckBox(this, wxID_ANY, "Cross Bricks:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_accurate_bricks_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnAccurateBricksCheck, this);
-	sizer1_1->Add(m_estimate_thresh_chk, 0, wxALIGN_CENTER);
-	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_hidden_removal_chk, 0, wxALIGN_CENTER);
@@ -503,7 +503,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_toolbar->ToggleTool(ID_BrushComp, bval && ival == 10);
 		m_toolbar->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
 		m_toolbar->ToggleTool(ID_BrushSolid, bval && ival == 8);
-		m_toolbar->ToggleTool(ID_BrushDesel, bval && ival == 3);
+		m_toolbar->ToggleTool(ID_BrushUnsel, bval && ival == 3);
 	}
 
 	if (update_all || FOUND_VALUE(gstSelMask) || FOUND_VALUE(gstCurrentSelect))
@@ -517,9 +517,6 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstSelOptions))
 	{
-		//estimate threshold
-		bval = glbin_vol_selector.GetEstimateThreshold();
-		m_estimate_thresh_chk->SetValue(bval);
 		//edge detect
 		bval = glbin_vol_selector.GetEdgeDetect();
 		m_edge_detect_chk->SetValue(bval);
@@ -726,7 +723,7 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2 });
 		views.insert(-1);
 		break;
-	case ID_BrushDesel:
+	case ID_BrushUnsel:
 		mode = mode == 3 ? 0 : 3;
 		set_mode = true;
 		excl_self = 0;
@@ -763,7 +760,7 @@ void BrushToolDlg::OnToolBar2(wxCommandEvent& event)
 		excl_self = 3;
 		vc.insert(gstNull);
 		break;
-	case ID_BrushErase:
+	case ID_BrushDelete:
 		glbin_vol_selector.Erase();
 		excl_self = 3;
 		vc.insert(gstNull);
@@ -999,12 +996,12 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 }
 
 //estimate threshold
-void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent& event)
-{
-	bool value = m_estimate_thresh_chk->GetValue();
-
-	glbin_vol_selector.SetEstimateThreshold(value);
-}
+//void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent& event)
+//{
+//	bool value = m_estimate_thresh_chk->GetValue();
+//
+//	glbin_vol_selector.SetEstimateThreshold(value);
+//}
 
 //brick accuracy
 void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent& event)

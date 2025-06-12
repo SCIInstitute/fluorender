@@ -102,7 +102,7 @@
 		"relax type": 1,
 		"size thresh": 2,
 		"pencil dist": 30,
-		"point volume": 0
+		"point volume": 2
 	},
 	"memory": {
 		"mem swap": true,

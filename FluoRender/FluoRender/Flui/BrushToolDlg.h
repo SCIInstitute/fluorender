@@ -54,15 +54,16 @@ public:
 		ID_Grow,
 		ID_BrushAppend,
 		ID_BrushComp,
+		ID_BrushSingle,
 		ID_BrushDiffuse,
 		ID_BrushSolid,
-		ID_BrushDesel
+		ID_BrushUnsel
 	};
 	enum
 	{
 		ID_BrushClear = 0,
 		ID_BrushExtract,
-		ID_BrushErase,
+		ID_BrushDelete,
 		//mask
 		ID_MaskCopy,
 		ID_MaskCopyData,
@@ -104,8 +105,6 @@ private:
 	wxCheckBox* m_hidden_removal_chk;
 	//group selection
 	wxCheckBox* m_select_group_chk;
-	//estimate threshold
-	wxCheckBox* m_estimate_thresh_chk;
 	//brick acuracy
 	wxCheckBox* m_accurate_bricks_chk;
 	//selection strength
@@ -169,8 +168,6 @@ private:
 	void OnBrushEdgeDetectChk(wxCommandEvent& event);
 	//hidden removal
 	void OnBrushHiddenRemovalChk(wxCommandEvent& event);
-	//estimate thresh
-	void OnEstimateThreshChk(wxCommandEvent& event);
 	//select group
 	void OnBrushSelectGroupChk(wxCommandEvent& event);
 	//brick accuracy

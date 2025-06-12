@@ -269,8 +269,10 @@ public:
 	const static unsigned char brush_append_png[786];
 	/* brush_comp.png - 1184 bytes */
 	const static unsigned char brush_comp_png[1184];
-	/* brush_clear.png - 909 bytes */
-	const static unsigned char brush_clear_png[909];
+	/* brush_locator.png - 1001 bytes */
+	const static unsigned char brush_locator_png[1001];
+	/* brush_clear.png - 979 bytes */
+	const static unsigned char brush_clear_png[979];
 	/* brush_delete.png - 843 bytes */
 	const static unsigned char brush_delete_png[843];
 	/* brush_extract.png - 782 bytes */
@@ -279,10 +281,12 @@ public:
 	const static unsigned char brush_desel_png[746];
 	/* brush_diffuse.png - 873 bytes */
 	const static unsigned char brush_diffuse_png[873];
-	/* brush_erase.png - 993 bytes */
-	static const unsigned char brush_erase_png[993];
+	/* brush_unsel.png - 830 bytes */
+	static const unsigned char brush_unsel_png[830];
 	/* brush_solid.png - 788 bytes */
 	const static unsigned char brush_solid_png[788];
+	/* brush_single.png - 859 bytes */
+	const static unsigned char brush_single_png[859];
 	/* grow.png - 1038 bytes */
 	const static unsigned char grow_png[1038];
 	/* redo.png - 873 bytes */

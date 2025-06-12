@@ -420,11 +420,12 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	wxStaticText* st;
+	wxBitmapBundle bitmap;
 
 	//toolbar
 	m_toolbar1 = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER|wxTB_TEXT| wxTB_HORIZONTAL);
-	wxBitmapBundle bitmap = wxGetBitmap(locator);
+	bitmap = wxGetBitmap(locator);
 	m_toolbar1->AddCheckTool(ID_LocatorBtn, "Locator",
 		bitmap, wxNullBitmap,
 		"Add locators by clicking on data",
@@ -495,7 +496,7 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	m_toolbar2->SetToolLongHelp(ID_RulerFlipBtn,
 		"Reverse the order of ruler points");
 	bitmap = wxGetBitmap(average);
-	m_toolbar2->AddTool(ID_RulerAvgBtn, "Average", bitmap,
+	m_toolbar2->AddTool(ID_RulerAvgBtn, "Center", bitmap,
 		"Compute a center for selected rulers");
 	m_toolbar2->SetToolLongHelp(ID_RulerAvgBtn,
 		"Compute a center for selected rulers");
@@ -520,12 +521,12 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	m_toolbar3->SetToolLongHelp(ID_DeleteBtn,
 		"Delete a selected ruler");
 	bitmap = wxGetBitmap(del_all);
-	m_toolbar3->AddTool(ID_DeleteAllBtn,"Delete All", bitmap,
+	m_toolbar3->AddTool(ID_DeleteAllBtn,"Del. All", bitmap,
 		"Delete all rulers");
 	m_toolbar3->SetToolLongHelp(ID_DeleteAllBtn,
 		"Delete all rulers");
 	bitmap = wxGetBitmap(ruler_del);
-	m_toolbar3->AddCheckTool(ID_RulerDelBtn, "Delete",
+	m_toolbar3->AddCheckTool(ID_RulerDelBtn, "Del. Pt.",
 		bitmap, wxNullBitmap,
 		"Select and delete a ruler point");
 	m_toolbar3->SetToolLongHelp(ID_RulerDelBtn,
@@ -576,11 +577,11 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	sizer_11->Add(10, 10);
 	sizer_11->Add(st, 0, wxALIGN_CENTER);
 	sizer_11->Add(10, 10);
-	sizer_11->Add(m_view_plane_rd, 0, wxALIGN_CENTER);
+	sizer_11->Add(m_acc_intensity_rd, 0, wxALIGN_CENTER);
 	sizer_11->Add(10, 10);
 	sizer_11->Add(m_max_intensity_rd, 0, wxALIGN_CENTER);
 	sizer_11->Add(10, 10);
-	sizer_11->Add(m_acc_intensity_rd, 0, wxALIGN_CENTER);
+	sizer_11->Add(m_view_plane_rd, 0, wxALIGN_CENTER);
 	//more options
 	wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Properties:",
@@ -890,7 +891,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		for (int i = 0; i < m_ruler_list->GetItemCount(); ++i)
 		{
 			flrd::Ruler* ruler = glbin_ruler_handler.GetRuler(i);
-			if (ruler)
+			if (!ruler)
 				continue;
 			bval = ruler->GetDisp();
 			c = bval ? wxColour(255, 255, 255) : wxColour(200, 200, 200);

@@ -355,12 +355,6 @@ TreePanel::TreePanel(MainFrame* frame,
 	//create toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
-	bitmap = wxGetBitmap(locator);
-	m_toolbar2->AddCheckTool(ID_RulerLocator, "Locator",
-		bitmap, wxNullBitmap,
-		"Add locators by clicking on data",
-		"Add locators by clicking on data");
-	m_toolbar2->AddSeparator();
 	bitmap = wxGetBitmap(grow);
 	m_toolbar2->AddCheckTool(ID_BrushGrow, "Grow",
 		bitmap, wxNullBitmap,
@@ -371,34 +365,40 @@ TreePanel::TreePanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Highlight structures by painting (hold Shift)",
 		"Highlight structures by painting (hold Shift)");
-	bitmap = wxGetBitmap(brush_comp);
-	m_toolbar2->AddCheckTool(ID_BrushComp, "Segment",
-		bitmap, wxNullBitmap,
-		"Select structures and then segment them into components",
-		"Select structures and then segment them into components");
 	bitmap = wxGetBitmap(brush_diffuse);
 	m_toolbar2->AddCheckTool(ID_BrushDiffuse, "Diffuse",
 		bitmap, wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)",
 		"Diffuse highlighted structures by painting (hold Z)");
-	bitmap = wxGetBitmap(brush_erase);
-	m_toolbar2->AddCheckTool(ID_BrushUnselect, "Eraser",
+	bitmap = wxGetBitmap(brush_unsel);
+	m_toolbar2->AddCheckTool(ID_BrushUnselect, "Unselect",
 		bitmap, wxNullBitmap,
 		"Remove the highlights by painting (hold X)",
 		"Remove the highlights by painting (hold X)");
 	m_toolbar2->AddSeparator();
+	bitmap = wxGetBitmap(brush_locator);
+	m_toolbar2->AddCheckTool(ID_RulerLocator, "Centroid",
+		bitmap, wxNullBitmap,
+		"Select structures and create a locator at center",
+		"Select structures and create a locator at center");
+	bitmap = wxGetBitmap(brush_comp);
+	m_toolbar2->AddCheckTool(ID_BrushComp, "Segment",
+		bitmap, wxNullBitmap,
+		"Select structures and then segment them into components",
+		"Select structures and then segment them into components");
+	m_toolbar2->AddSeparator();
 	bitmap = wxGetBitmap(brush_clear);
 	m_toolbar2->AddTool(ID_BrushClear, "Clear",
-		bitmap, "Clear the highlights");
-	m_toolbar2->SetToolLongHelp(ID_BrushClear, "Clear the highlights");
+		bitmap, "Clear all highlights");
+	m_toolbar2->SetToolLongHelp(ID_BrushClear, "Clear all highlights");
 	bitmap = wxGetBitmap(brush_extract);
 	m_toolbar2->AddTool(ID_BrushExtract, "Extract", bitmap,
-		"Extract highlighted structures out and create a new volume");
-	m_toolbar2->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures out and create a new volume");
+		"Extract highlighted structures and create a new volume");
+	m_toolbar2->SetToolLongHelp(ID_BrushExtract, "Extract highlighted structures and create a new volume");
 	bitmap = wxGetBitmap(brush_delete);
-	m_toolbar2->AddTool(ID_BrushErase, "Delete",
+	m_toolbar2->AddTool(ID_BrushDelete, "Delete",
 		bitmap, "Delete highlighted structures");
-	m_toolbar2->SetToolLongHelp(ID_BrushErase, "Delete highlighted structures");
+	m_toolbar2->SetToolLongHelp(ID_BrushDelete, "Delete highlighted structures");
 
 	m_toolbar2->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	m_toolbar2->Realize();
@@ -1509,12 +1509,12 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 		views.insert(-1);
 	}
 		break;
-	case ID_BrushErase:
+	case ID_BrushDelete:
 	case ID_BrushClear:
 	case ID_BrushExtract:
 		switch (id)
 		{
-		case ID_BrushErase:
+		case ID_BrushDelete:
 			glbin_vol_selector.Erase();
 			break;
 		case ID_BrushClear:

@@ -126,7 +126,7 @@ MainSettings::MainSettings()
 	m_ruler_relax_type = 1;
 	m_ruler_size_thresh = 5;
 	m_pencil_dist = 30;
-	m_point_volume_mode = 0;
+	m_point_volume_mode = 2;
 
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
@@ -360,7 +360,7 @@ void MainSettings::Read()
 		fconfig->Read("relax type", &m_ruler_relax_type, 1);
 		fconfig->Read("size thresh", &m_ruler_size_thresh, 5);
 		fconfig->Read("pencil dist", &m_pencil_dist, 30.0);
-		fconfig->Read("point volume", &m_point_volume_mode, 0);
+		fconfig->Read("point volume", &m_point_volume_mode, 2);
 	}
 	//memory settings
 	if (fconfig->Exists("/memory"))

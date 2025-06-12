@@ -103,7 +103,7 @@
         <relax_type>1</relax_type>
         <size_thresh>2</size_thresh>
         <pencil_dist>30</pencil_dist>
-        <point_volume>0</point_volume>
+        <point_volume>2</point_volume>
     </ruler>
     <memory>
         <mem_swap>1</mem_swap>
