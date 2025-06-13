@@ -43,7 +43,7 @@ struct GridData
 	double wsize;
 };
 
-class BrushToolDlg : public PropPanel
+class BrushToolDlg : public TabbedPanel
 {
 public:
 	enum
@@ -171,6 +171,10 @@ private:
 	void SetOutput(const GridData& data, const wxString& unit);
 	void CopyData();
 	void PasteData();
+
+	wxWindow* CreateToolPage(wxWindow* parent);
+	wxWindow* CreateListPage(wxWindow* parent);
+	wxWindow* CreateAlignPage(wxWindow* parent);
 
 private:
 	//event handling

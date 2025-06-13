@@ -158,7 +158,6 @@ wxString TrackListCtrl::GetText(long item, int col)
 wxWindow* TrackDlg::CreateMapPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
@@ -287,7 +286,6 @@ wxWindow* TrackDlg::CreateMapPage(wxWindow *parent)
 wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -378,7 +376,6 @@ wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 wxWindow* TrackDlg::CreateLinkPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
@@ -456,7 +453,6 @@ wxWindow* TrackDlg::CreateLinkPage(wxWindow *parent)
 wxWindow* TrackDlg::CreateModifyPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 
@@ -543,7 +539,6 @@ wxWindow* TrackDlg::CreateModifyPage(wxWindow *parent)
 wxWindow* TrackDlg::CreateAnalysisPage(wxWindow *parent)
 {
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxStaticText *st = 0;
 

@@ -29,12 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #define _SETTINGDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 #include <wx/treectrl.h>
 #include <vector>
 
 class wxSingleSlider;
-class SettingDlg : public PropPanel
+class SettingDlg : public TabbedPanel
 {
 public:
 	SettingDlg(MainFrame* frame);
@@ -147,11 +146,6 @@ private:
 	};
 	std::unordered_map<std::string, ComboEntry> m_automate_combo;
 
-	//save
-	wxButton *m_save_btn;
-	//close
-	wxButton *m_close_btn;
-
 private:
 	wxWindow* CreateProjectPage(wxWindow *parent);
 	wxWindow* CreateAutomationPage(wxWindow* parent);
@@ -163,10 +157,6 @@ private:
 
 	//streaming disable/enable
 	void EnableStreaming(bool enable);
-
-	//event handling
-	void OnSave(wxCommandEvent& event);
-	void OnClose(wxCommandEvent& event);
 
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent& event);

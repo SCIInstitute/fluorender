@@ -29,16 +29,13 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include <PropPanel.h>
-#include <wx/collpane.h>
-#include <wx/notebook.h>
-#include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
+#include <wx/spinctrl.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
-#include <wx/splitter.h>
 
 class wxSingleSlider;
-class ComponentDlg : public PropPanel
+class ComponentDlg : public TabbedPanel
 {
 public:
 	enum
@@ -116,13 +113,6 @@ private:
 
 	//output
 	bool m_hold_history;
-
-	//split window
-	wxPanel *panel_top;
-	wxPanel *panel_bot;
-
-	//tab control
-	wxNotebook *m_notebook;
 
 	//load/save settings
 	wxTextCtrl* m_load_settings_text;
@@ -211,7 +201,6 @@ private:
 	wxButton* m_comp_append_btn;
 	wxButton* m_comp_all_btn;
 	wxButton* m_comp_clear_btn;
-	wxButton* m_shuffle_btn;
 	//modify
 	wxButton* m_comp_new_btn;
 	wxButton* m_comp_add_btn;
@@ -251,8 +240,12 @@ private:
 	wxButton* m_align_zyx;
 
 	//execute
+	wxButton* m_shf_gen_btn;
+	wxButton* m_shf_cls_btn;
+	wxButton* m_shf_anl_btn;
 	wxCheckBox* m_use_ml_chk;
-	wxCheckBox* m_use_sel_chk;
+	wxCheckBox* m_use_sel_gen_chk;
+	wxCheckBox* m_use_sel_anl_chk;
 	wxButton* m_generate_btn;
 	wxButton* m_cluster_btn;
 	wxButton* m_analyze_btn;
@@ -271,6 +264,12 @@ private:
 		std::vector<unsigned int>& bids, wxGridCellCoordsArray& sel, bool bricks);
 
 private:
+	//pages
+	wxWindow* CreateCompGenPage(wxWindow *parent);
+	wxWindow* CreateClusteringPage(wxWindow *parent);
+	wxWindow* CreateAnalysisPage(wxWindow *parent);
+	wxWindow* CreateOutputPage(wxWindow* parent);
+
 	//common ops
 	void OnShuffle(wxCommandEvent& event);
 	void OnUseSelChk(wxCommandEvent& event);
@@ -290,15 +289,6 @@ private:
 	void OnSelectCell(wxGridEvent& event);
 	void OnRangeSelect(wxGridRangeSelectEvent& event);
 	void OnGridLabelClick(wxGridEvent& event);
-
-	//splitter
-	void OnSplitterDclick(wxSplitterEvent& event);
-	void OnNotebook(wxBookCtrlEvent& event);
-
-	//pages
-	wxWindow* CreateCompGenPage(wxWindow *parent);
-	wxWindow* CreateClusteringPage(wxWindow *parent);
-	wxWindow* CreateAnalysisPage(wxWindow *parent);
 
 	//comp gen page
 	void OnIterSldr(wxScrollEvent& event);

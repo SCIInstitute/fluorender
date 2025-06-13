@@ -254,6 +254,7 @@ private:
 	wxWindow* CreateListPage(wxWindow* parent);
 	wxWindow* CreateAlignPage(wxWindow* parent);
 
+private:
 	void OnToolbar(wxCommandEvent& event);
 
 	void OnIntensityMethodCheck(wxCommandEvent& event);

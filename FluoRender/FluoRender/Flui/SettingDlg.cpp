@@ -44,13 +44,53 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valtext.h>
 #include <wx/regex.h>
 
+SettingDlg::SettingDlg(MainFrame *frame) :
+	TabbedPanel(frame, frame,
+		wxDefaultPosition,
+		frame->FromDIP(wxSize(450, 750)),
+		0, "SettingDlg")
+{
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+	Freeze();
+	SetDoubleBuffered(true);
+
+	//notebook
+	m_notebook = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
+		wxAUI_NB_MULTILINE | wxNO_BORDER);
+	m_notebook->AddPage(CreateProjectPage(m_notebook), "Project", true);
+	m_notebook->AddPage(CreateRenderingPage(m_notebook), "Rendering");
+	m_notebook->AddPage(CreatePerformancePage(m_notebook), "Performance");
+	m_notebook->AddPage(CreateAutomationPage(m_notebook), "Automation");
+	m_notebook->AddPage(CreateDisplayPage(m_notebook), "Display");
+	m_notebook->AddPage(CreateFormatPage(m_notebook), "File format");
+	m_notebook->AddPage(CreateJavaPage(m_notebook), "ImageJ Link");
+
+	//interface
+	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(m_notebook, 1, wxEXPAND);
+	sizer_v->Add(10, 10);
+	SetSizerAndFit(sizer_v);
+	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
+
+	Thaw();
+}
+
+SettingDlg::~SettingDlg()
+{
+}
+
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 {
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//project save
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -222,7 +262,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 {
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
 	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
@@ -292,7 +331,6 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxStaticText* st;
 
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//micro blending
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -392,7 +430,6 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//mouse interactions
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -532,7 +569,6 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	std::vector<wxString> cmb_str;
 
 	wxPanel* page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//stereo
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
@@ -717,7 +753,6 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//override vox
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -856,7 +891,6 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 {
 	wxStaticText* st;
 	wxPanel *page = new wxPanel(parent);
-	page->SetBackgroundColour(((wxNotebook*)parent)->GetThemeBackgroundColour());
 
 	//JVM settings.
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
@@ -943,55 +977,6 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 	page->SetSizer(sizerV);
 	return page;
-}
-
-SettingDlg::SettingDlg(MainFrame *frame) :
-	PropPanel(frame, frame,
-		wxDefaultPosition,
-		frame->FromDIP(wxSize(450, 750)),
-		0, "SettingDlg")
-{
-	// temporarily block events during constructor:
-	wxEventBlocker blocker(this);
-	Freeze();
-	SetDoubleBuffered(true);
-
-	//notebook
-	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
-	notebook->AddPage(CreateProjectPage(notebook), "Project");
-	notebook->AddPage(CreateRenderingPage(notebook), "Rendering");
-	notebook->AddPage(CreatePerformancePage(notebook), "Performance");
-	notebook->AddPage(CreateAutomationPage(notebook), "Automation");
-	notebook->AddPage(CreateDisplayPage(notebook), "Display");
-	notebook->AddPage(CreateFormatPage(notebook), "File format");
-	notebook->AddPage(CreateJavaPage(notebook), "ImageJ Link");
-
-	//buttons
-	wxBoxSizer *group_b = new wxBoxSizer(wxHORIZONTAL);
-	m_save_btn = new wxButton(this, wxID_ANY, "Done");
-	m_save_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnSave, this);
-	m_close_btn = new wxButton(this, wxID_ANY, "Cancel");
-	m_close_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnClose, this);
-	group_b->Add(m_close_btn, 0, wxALIGN_CENTER);
-	group_b->AddStretchSpacer(1);
-	group_b->Add(m_save_btn, 0, wxALIGN_CENTER);
-	group_b->Add(10, 10);
-
-	//interface
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(notebook, 1, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(group_b, 0, wxEXPAND);
-	SetSizerAndFit(sizerV);
-	Layout();
-	SetAutoLayout(true);
-	SetScrollRate(10, 10);
-
-	Thaw();
-}
-
-SettingDlg::~SettingDlg()
-{
 }
 
 void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
@@ -1280,7 +1265,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			}
 		}
 		m_device_tree->ExpandAll();
-		m_device_tree->SetFocus();
+		//m_device_tree->SetFocus();
 	}
 
 	//java
@@ -1310,19 +1295,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 }
 
 //events
-void SettingDlg::OnSave(wxCommandEvent& event)
-{
-	glbin_settings.Save();
-	if (m_frame)
-		m_frame->ShowPanel(this, false);
-}
-
-void SettingDlg::OnClose(wxCommandEvent& event)
-{
-	if (m_frame)
-		m_frame->ShowPanel(this, false);
-}
-
 void SettingDlg::OnProjectSaveCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_prj_save = m_prj_save_chk->GetValue();

@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 #define UITEXT_NBPG0 "Basic"
 #define UITEXT_NBPG1 "Keyframes"
-#define UITEXT_NBPG2 "Templates"
+#define UITEXT_NBPG2 "Presets"
 #define UITEXT_NBPG3 "Crop"
 #define UITEXT_NBPG4_0 "Scripts"
 #define UITEXT_NBPG4_1 "Scripts (Enabled)"

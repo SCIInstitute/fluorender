@@ -374,13 +374,13 @@ fluo::Color RulerListCtrl::GetColorFromWxColor(const wxColor& c)
 MeasureDlg::MeasureDlg(MainFrame* frame)
 	: TabbedPanel(frame, frame,
 	wxDefaultPosition,
-	frame->FromDIP(wxSize(500, 600)),
+	frame->FromDIP(wxSize(500, 620)),
 	0, "MeasureDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
-	//SetDoubleBuffered(true);
+	SetDoubleBuffered(true);
 
 	//notebook
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
@@ -390,7 +390,6 @@ MeasureDlg::MeasureDlg(MainFrame* frame)
 	m_notebook->AddPage(CreateToolPage(m_notebook), "Tools", true);
 	m_notebook->AddPage(CreateListPage(m_notebook), "Rulers");
 	m_notebook->AddPage(CreateAlignPage(m_notebook), "Align");
-	//CallAfter([this] { m_notebook->Split(1, wxBOTTOM); });
 
 	Bind(wxEVT_MENU, &MeasureDlg::OnMenuItem, this);
 	Bind(wxEVT_SCROLLWIN_TOP, &MeasureDlg::OnScrollWin, this);
