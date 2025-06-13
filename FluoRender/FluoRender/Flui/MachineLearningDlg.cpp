@@ -40,42 +40,37 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 
 MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
-	PropPanel(frame, frame,
+	TabbedPanel(frame, frame,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(450, 750)),
+		frame->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
+	Freeze();
 	SetDoubleBuffered(true);
 
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	//auto start
-	m_auto_start_all = new wxCheckBox(this, wxID_ANY, "Auto Start Learning",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_auto_start_all->Bind(wxEVT_CHECKBOX, &MachineLearningDlg::OnAutoStartAll, this);
-	sizer1->AddStretchSpacer(1);
-	sizer1->Add(m_auto_start_all, 0, wxALIGN_CENTER);
-
 	//notebook
-	wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
-	MLCompGenPanel* panel1 = new MLCompGenPanel(frame, notebook);
-	MLVolPropPanel* panel2 = new MLVolPropPanel(frame, notebook);
-	notebook->AddPage(panel1, "Component Generator");
-	notebook->AddPage(panel2, "Volume Properties");
+	m_notebook = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+	MLVolPropPanel* panel1 = new MLVolPropPanel(frame, m_notebook);
+	MLCompGenPanel* panel2 = new MLCompGenPanel(frame, m_notebook);
+	m_notebook->AddPage(panel1, "Volume Properties", true);
+	m_notebook->AddPage(panel2, "Component Generator");
 	m_panels.push_back(panel1);
 	m_panels.push_back(panel2);
 
 	//interface
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
-	sizerV->Add(10, 10);
-	sizerV->Add(sizer1, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(notebook, 1, wxEXPAND);
-	SetSizerAndFit(sizerV);
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(m_notebook, 1, wxEXPAND | wxALL);
+
+	SetSizer(sizer_v);
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
+	Thaw();
 }
 
 MachineLearningDlg::~MachineLearningDlg()
@@ -89,14 +84,6 @@ void MachineLearningDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 	bool update_all = vc.empty();
 
-	bool bval;
-
-	if (update_all || FOUND_VALUE(gstMlAutoStart))
-	{
-		bval = glbin_settings.m_ml_auto_start_all;
-		m_auto_start_all->SetValue(bval);
-	}
-
 	for (auto it : m_panels)
 	{
 		if (it)
@@ -104,19 +91,12 @@ void MachineLearningDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 }
 
-void MachineLearningDlg::OnAutoStartAll(wxCommandEvent& event)
-{
-	bool bval = m_auto_start_all->GetValue();
-	glbin_settings.m_ml_auto_start_all = bval;
-	FluoUpdate({ gstMlAutoStart });
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanel::MachineLearningPanel(
 	MainFrame* frame, wxWindow* parent) :
 	PropPanel(frame, parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(450, 750)),
+		frame->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningPanel"),
 	m_record(false)
 {
@@ -157,15 +137,15 @@ void MachineLearningPanel::Create()
 	//m_top_grid->Fit();
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	m_new_table_btn = new wxButton(m_panel_top, wxID_ANY, "New",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_load_table_btn = new wxButton(m_panel_top, wxID_ANY, "Load",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_del_table_btn = new wxButton(m_panel_top, wxID_ANY, "Delete",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_dup_table_btn = new wxButton(m_panel_top, wxID_ANY, "Duplicate",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_auto_load_btn = new wxButton(m_panel_top, wxID_ANY, "Auto Load",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_new_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnNewTable, this);
 	m_load_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnLoadTable, this);
 	m_del_table_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDelTable, this);
@@ -206,7 +186,7 @@ void MachineLearningPanel::Create()
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_auto_start_check->Bind(wxEVT_CHECKBOX, &MachineLearningPanel::OnAutoStartRec, this);
 	m_start_rec_btn = new wxToggleButton(m_panel_bot, wxID_ANY, "Start",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_start_rec_btn->Bind(wxEVT_TOGGLEBUTTON, &MachineLearningPanel::OnStartRec, this);
 	if (m_record)
 	{
@@ -219,10 +199,10 @@ void MachineLearningPanel::Create()
 		m_start_rec_btn->SetValue(false);
 	}
 	m_del_rec_btn = new wxButton(m_panel_bot, wxID_ANY, "Delete",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_del_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDelRec, this);
 	m_apply_rec_btn = new wxButton(m_panel_bot, wxID_ANY, "Apply",
-		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
+		wxDefaultPosition,wxDefaultSize, wxALIGN_LEFT);
 	m_apply_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnApplyRec, this);
 	m_sizer2->Add(5, 5);
 	m_sizer2->Add(m_bot_table_name, 0, wxALIGN_CENTER);

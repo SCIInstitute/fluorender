@@ -47,7 +47,7 @@ DEALINGS IN THE SOFTWARE.
 SettingDlg::SettingDlg(MainFrame *frame) :
 	TabbedPanel(frame, frame,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(450, 750)),
+		frame->FromDIP(wxSize(500, 620)),
 		0, "SettingDlg")
 {
 	// temporarily block events during constructor:
@@ -60,7 +60,7 @@ SettingDlg::SettingDlg(MainFrame *frame) :
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
-		wxAUI_NB_MULTILINE | wxNO_BORDER);
+		wxAUI_NB_MULTILINE | wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 	m_notebook->AddPage(CreateProjectPage(m_notebook), "Project", true);
 	m_notebook->AddPage(CreateRenderingPage(m_notebook), "Rendering");
 	m_notebook->AddPage(CreatePerformancePage(m_notebook), "Performance");
@@ -71,9 +71,9 @@ SettingDlg::SettingDlg(MainFrame *frame) :
 
 	//interface
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
-	sizer_v->Add(m_notebook, 1, wxEXPAND);
-	sizer_v->Add(10, 10);
-	SetSizerAndFit(sizer_v);
+	sizer_v->Add(m_notebook, 1, wxEXPAND | wxALL);
+
+	SetSizer(sizer_v);
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
@@ -87,11 +87,11 @@ SettingDlg::~SettingDlg()
 
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 {
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
-	wxPanel *page = new wxPanel(parent);
-
 	//project save
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run/UI"), wxVERTICAL);
@@ -256,12 +256,14 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
 	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
@@ -317,11 +319,15 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 	sizerV->Add(gridSizer, 1, wxALL | wxEXPAND, 15);
 
 	page->SetSizerAndFit(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 {
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
+
 	wxFloatingPointValidator<double> vald_fp1(1);
 	//validator: floating point 2
 	wxFloatingPointValidator<double> vald_fp2(2);
@@ -329,8 +335,6 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
-
-	wxPanel *page = new wxPanel(parent);
 
 	//micro blending
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
@@ -420,17 +424,19 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 {
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
-	wxPanel *page = new wxPanel(parent);
-
 	//mouse interactions
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Variable Sample Rate"), wxVERTICAL);
@@ -558,17 +564,19 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 {
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
+
 	wxIntegerValidator<unsigned int> vald_int;
 	wxFloatingPointValidator<double> vald_fp1(1);
 	wxStaticText* st;
 	std::vector<wxString> cmb_str;
-
-	wxPanel* page = new wxPanel(parent);
 
 	//stereo
 	wxBoxSizer* group1 = new wxStaticBoxSizer(
@@ -742,18 +750,20 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizerV->Add(group3, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 {
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
+
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 	//float 2
 	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
-	wxPanel *page = new wxPanel(parent);
-
 	//override vox
 	wxBoxSizer *group1 = new wxStaticBoxSizer(
 		new wxStaticBox(page, wxID_ANY, "Override Voxel Size"), wxVERTICAL);
@@ -884,14 +894,16 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	sizerV->Add(group4, 1, wxEXPAND);
 
 	page->SetSizer(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 {
-	wxStaticText* st;
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
+	wxStaticText* st;
 	//JVM settings.
 	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
 	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
@@ -976,6 +988,8 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 

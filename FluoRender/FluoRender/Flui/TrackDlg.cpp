@@ -52,7 +52,6 @@ DEALINGS IN THE SOFTWARE.
 #include <chrono>
 
 TrackListCtrl::TrackListCtrl(
-	MainFrame* frame,
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -155,9 +154,52 @@ wxString TrackListCtrl::GetText(long item, int col)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+TrackDlg::TrackDlg(MainFrame* frame)
+	: TabbedPanel(frame, frame,
+		wxDefaultPosition,
+		frame->FromDIP(wxSize(500, 620)),
+		0, "TrackDlg")
+{
+	// temporarily block events during constructor:
+	wxEventBlocker blocker(this);
+	Freeze();
+	SetDoubleBuffered(true);
+
+	//notebook
+	m_notebook = new wxAuiNotebook(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
+		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
+	m_notebook->AddPage(CreateMapPage(m_notebook), L"Track Map", true);
+	m_notebook->AddPage(CreateSelectPage(m_notebook), L"Selection");
+	m_notebook->AddPage(CreateModifyPage(m_notebook), L"Modify");
+	m_notebook->AddPage(CreateLinkPage(m_notebook), L"Linkage");
+	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
+	m_notebook->AddPage(CreateListPage(m_notebook), "Tracks");
+	m_notebook->AddPage(CreateOutputPage(m_notebook), "Information");
+
+	Bind(wxEVT_MENU, &TrackDlg::OnMenuItem, this);
+	glbin_trackmap_proc.RegisterInfoOutFunc(
+		std::bind(&TrackDlg::WriteInfo, this, std::placeholders::_1));
+
+	//vertical sizer
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(m_notebook, 1, wxEXPAND | wxALL);
+
+	SetSizer(sizer_v);
+	Layout();
+	SetAutoLayout(true);
+	SetScrollRate(10, 10);
+	Thaw();
+}
+
+TrackDlg::~TrackDlg()
+{
+}
+
 wxWindow* TrackDlg::CreateMapPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	wxStaticText *st = 0;
 
@@ -280,12 +322,14 @@ wxWindow* TrackDlg::CreateMapPage(wxWindow *parent)
 
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
@@ -370,12 +414,14 @@ wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* TrackDlg::CreateLinkPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	wxStaticText *st = 0;
 
@@ -447,12 +493,14 @@ wxWindow* TrackDlg::CreateLinkPage(wxWindow *parent)
 
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* TrackDlg::CreateModifyPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	wxStaticText *st = 0;
 
@@ -533,12 +581,14 @@ wxWindow* TrackDlg::CreateModifyPage(wxWindow *parent)
 
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
 wxWindow* TrackDlg::CreateAnalysisPage(wxWindow *parent)
 {
-	wxPanel *page = new wxPanel(parent);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	wxStaticText *st = 0;
 
@@ -603,42 +653,30 @@ wxWindow* TrackDlg::CreateAnalysisPage(wxWindow *parent)
 
 	//set the page
 	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
 	return page;
 }
 
-TrackDlg::TrackDlg(MainFrame* frame)
-	: PropPanel(frame, frame,
-		wxDefaultPosition,
-		frame->FromDIP(wxSize(550, 650)),
-		0, "TrackDlg")
+wxWindow* TrackDlg::CreateListPage(wxWindow* parent)
 {
-	// temporarily block events during constructor:
-	wxEventBlocker blocker(this);
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
+	wxStaticText *st = 0;
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
-	//notebook
-	m_notebook = new wxNotebook(this, wxID_ANY);
-	m_notebook->AddPage(CreateMapPage(m_notebook), L"Track Map");
-	m_notebook->AddPage(CreateSelectPage(m_notebook), L"Selection");
-	m_notebook->AddPage(CreateModifyPage(m_notebook), L"Modify");
-	m_notebook->AddPage(CreateLinkPage(m_notebook), L"Linkage");
-	m_notebook->AddPage(CreateAnalysisPage(m_notebook), "Analysis");
-
-	wxStaticText *st = 0;
-
 	//ghost num
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Tracks:",
+	st = new wxStaticText(page, 0, "Tracks:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_ghost_show_tail_chk = new wxCheckBox(this, wxID_ANY, "Tail",
+	m_ghost_show_tail_chk = new wxCheckBox(page, wxID_ANY, "Tail",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
-	m_ghost_num_sldr = new wxSingleSlider(this, wxID_ANY, 10, 0, 20,
+	m_ghost_num_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_ghost_num_text = new wxTextCtrl(this, wxID_ANY, "10",
+	m_ghost_num_text = new wxTextCtrl(page, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
-	m_ghost_show_lead_chk = new wxCheckBox(this, wxID_ANY, "Lead",
+	m_ghost_show_lead_chk = new wxCheckBox(page, wxID_ANY, "Lead",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_ghost_show_tail_chk->Bind(wxEVT_CHECKBOX, &TrackDlg::OnGhostShowTail, this);
 	m_ghost_num_sldr->Bind(wxEVT_SCROLL_CHANGED, &TrackDlg::OnGhostNumChange, this);
@@ -655,17 +693,17 @@ TrackDlg::TrackDlg(MainFrame* frame)
 
 	//lists
 	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "ID Lists"),
+		new wxStaticBox(page, wxID_ANY, "ID Lists"),
 		wxVERTICAL);
 	//titles
 	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
-	m_cell_time_curr_st = new wxStaticText(this, 0, "\tCurrent T",
+	m_cell_time_curr_st = new wxStaticText(page, 0, "\tCurrent T",
 		wxDefaultPosition, wxDefaultSize);
-	m_cell_time_prev_st = new wxStaticText(this, 0, "\tPrevious T",
+	m_cell_time_prev_st = new wxStaticText(page, 0, "\tPrevious T",
 		wxDefaultPosition, wxDefaultSize);
-	m_cell_prev_btn = new wxButton(this, wxID_ANY, L"\u21e6 Backward (A)",
+	m_cell_prev_btn = new wxButton(page, wxID_ANY, L"\u21e6 Backward (A)",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cell_next_btn = new wxButton(this, wxID_ANY, L"Forward (D) \u21e8",
+	m_cell_next_btn = new wxButton(page, wxID_ANY, L"Forward (D) \u21e8",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cell_prev_btn->Bind(wxEVT_BUTTON, &TrackDlg::OnCellPrev, this);
 	m_cell_next_btn->Bind(wxEVT_BUTTON, &TrackDlg::OnCellNext, this);
@@ -675,9 +713,9 @@ TrackDlg::TrackDlg(MainFrame* frame)
 	sizer_21->Add(m_cell_time_prev_st, 1, wxEXPAND);
 	//controls
 	wxBoxSizer* sizer_22 = new wxBoxSizer(wxHORIZONTAL);
-	m_trace_list_curr = new TrackListCtrl(frame, this);
+	m_trace_list_curr = new TrackListCtrl(page);
 	m_trace_list_curr->m_type = 0;
-	m_trace_list_prev = new TrackListCtrl(frame, this);
+	m_trace_list_prev = new TrackListCtrl(page);
 	m_trace_list_prev->m_type = 1;
 	m_active_list = 0;
 	m_trace_list_curr->Bind(wxEVT_KEY_DOWN, &TrackDlg::OnKeyDown, this);
@@ -692,43 +730,35 @@ TrackDlg::TrackDlg(MainFrame* frame)
 	sizer_2->Add(sizer_21, 0, wxEXPAND);
 	sizer_2->Add(sizer_22, 1, wxEXPAND);
 
-	//stats text
-	wxBoxSizer *sizer_3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Output"),
-		wxVERTICAL);
-	m_stat_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_MULTILINE);
-	m_stat_text->SetEditable(false);
-	sizer_3->Add(m_stat_text, 1, wxEXPAND);
-
-	//all controls
 	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
-	sizer_v->Add(10, 10);
-	sizer_v->Add(m_notebook, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer_2, 1, wxEXPAND);
 	sizer_v->Add(10, 10);
-	sizer_v->Add(sizer_3, 0, wxEXPAND);
-	sizer_v->Add(10, 10);
 
-	Bind(wxEVT_MENU, &TrackDlg::OnMenuItem, this);
-
-	glbin_trackmap_proc.RegisterInfoOutFunc(
-		std::bind(&TrackDlg::WriteInfo, this, std::placeholders::_1));
-
-	SetSizer(sizer_v);
-	Layout();
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
 }
 
-TrackDlg::~TrackDlg()
+wxWindow* TrackDlg::CreateOutputPage(wxWindow* parent)
 {
-	//if (m_mask)
-	//{
-	//	delete[] reinterpret_cast<char*>(m_mask->data);
-	//	nrrdNix(m_mask);
-	//}
+	wxScrolledWindow *page = new wxScrolledWindow(parent);
+
+	//stats text
+	m_stat_text = new wxTextCtrl(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_MULTILINE);
+	m_stat_text->SetEditable(false);
+
+	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	sizer_v->Add(m_stat_text, 1, wxEXPAND);
+
+	page->SetSizer(sizer_v);
+	page->SetAutoLayout(true);
+	page->SetScrollRate(10, 10);
+	return page;
 }
 
 void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)

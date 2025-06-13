@@ -678,7 +678,7 @@ wxWindow* MoviePanel::CreateTemplatePage(wxWindow *parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
-	wxStaticText * st = new wxStaticText(page, 0, "Double-click a template to generate keyframes");
+	wxStaticText * st = new wxStaticText(page, 0, "Double-click a preset to generate keyframes");
 
 	//list of options
 	m_auto_key_list = new wxListCtrl(page, wxID_ANY,
@@ -686,7 +686,7 @@ wxWindow* MoviePanel::CreateTemplatePage(wxWindow *parent)
 	wxListItem itemCol;
 	itemCol.SetText("No.");
 	m_auto_key_list->InsertColumn(0, itemCol);
-	itemCol.SetText("Template");
+	itemCol.SetText("Keyframe Preset");
 	m_auto_key_list->InsertColumn(1, itemCol);
 	//options
 	//channel comb 1

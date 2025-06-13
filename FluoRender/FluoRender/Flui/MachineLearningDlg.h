@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define _MACHINELEARNINGDLG_H_
 
 #include <PropPanel.h>
-#include <wx/notebook.h>
 #include <wx/grid.h>
 #include <wx/splitter.h>
 #include <wx/tglbtn.h>
@@ -38,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 class MachineLearningPanel;
-class MachineLearningDlg : public PropPanel
+class MachineLearningDlg : public TabbedPanel
 {
 public:
 	MachineLearningDlg(MainFrame* frame);
@@ -47,13 +46,8 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	wxCheckBox* m_auto_start_all;
+	//wxCheckBox* m_auto_start_all;
 	std::vector<MachineLearningPanel*> m_panels;
-	//MLCompGenPanel* m_panel1;
-	//MLVolPropPanel* m_panel2;
-
-private:
-	void OnAutoStartAll(wxCommandEvent& event);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

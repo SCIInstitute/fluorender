@@ -29,10 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _TRACEDLG_H_
 
 #include <PropPanel.h>
-#include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
-#include <wx/notebook.h>
 #include <wx/tglbtn.h>
 #include <vector>
 
@@ -45,7 +43,7 @@ class wxSingleSlider;
 class TrackListCtrl : public wxListCtrl
 {
 public:
-	TrackListCtrl(MainFrame *frame,
+	TrackListCtrl(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxSize(100, 100),
@@ -65,7 +63,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class TrackDlg : public PropPanel
+class TrackDlg : public TabbedPanel
 {
 public:
 	enum
@@ -103,8 +101,6 @@ private:
 	wxString m_comp_id;//select
 	wxString m_comp_id3;//modify / new id
 
-	//tab control
-	wxNotebook *m_notebook;
 	//map page
 	//load/save trace
 	wxTextCtrl* m_load_trace_text;
@@ -206,7 +202,10 @@ private:
 	wxWindow* CreateLinkPage(wxWindow *parent);
 	wxWindow* CreateModifyPage(wxWindow *parent);
 	wxWindow* CreateAnalysisPage(wxWindow *parent);
+	wxWindow* CreateListPage(wxWindow* parent);
+	wxWindow* CreateOutputPage(wxWindow* parent);
 
+private:
 	//map page
 	//load/save trace
 	void OnClearTrace(wxCommandEvent& event);
