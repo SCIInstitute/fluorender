@@ -694,6 +694,7 @@ void BrushToolDlg::BrushGrow()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
@@ -712,6 +713,7 @@ void BrushToolDlg::BrushAppend()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -730,6 +732,7 @@ void BrushToolDlg::BrushComp()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -767,6 +770,7 @@ void BrushToolDlg::BrushDiffuse()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -785,6 +789,7 @@ void BrushToolDlg::BrushSolid()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -803,6 +808,7 @@ void BrushToolDlg::BrushUnsel()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 

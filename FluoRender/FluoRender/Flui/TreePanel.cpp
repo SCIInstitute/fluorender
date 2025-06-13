@@ -682,6 +682,7 @@ void TreePanel::BrushGrow()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
@@ -700,6 +701,7 @@ void TreePanel::BrushAppend()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -718,6 +720,7 @@ void TreePanel::BrushComp()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -736,6 +739,7 @@ void TreePanel::BrushDiffuse()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -754,6 +758,7 @@ void TreePanel::BrushUnselect()
 	glbin_vol_selector.SetMode(mode);
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(false);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
@@ -1750,23 +1755,38 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	case ID_RulerPencil:
 		RulerPencil();
 		break;
+	case ID_RulerEdit:
+		RulerEdit();
+		break;
+	case ID_RulerDeletePoint:
+		RulerDeletePoint();
+		break;
+	case ID_RulerLocator:
+		RulerLocator();
+		break;
+	case ID_BrushGrow:
+		BrushGrow();
+		break;
 	case ID_BrushAppend:
 		BrushAppend();
 		break;
-	case ID_BrushUnselect:
-		BrushUnselect();
+	case ID_BrushComp:
+		BrushComp();
 		break;
 	case ID_BrushDiffuse:
 		BrushDiffuse();
 		break;
-	case ID_BrushDelete:
-		BrushDelete();
+	case ID_BrushUnselect:
+		BrushUnselect();
 		break;
 	case ID_BrushClear:
 		BrushClear();
 		break;
 	case ID_BrushExtract:
 		BrushExtract();
+		break;
+	case ID_BrushDelete:
+		BrushDelete();
 		break;
 	}
 }

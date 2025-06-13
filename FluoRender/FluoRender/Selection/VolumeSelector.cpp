@@ -738,8 +738,7 @@ bool VolumeSelector::GetThUpdate()
 {
 	auto view = glbin_current.render_view.lock();
 	if (!view || (m_mode != 1 &&
-		m_mode != 2 && m_mode != 4 &&
-		m_mode != 10))
+		m_mode != 2 && m_mode != 4))
 		return false;
 	glm::mat4 mv_mat = view->GetDrawMat();
 	glm::mat4 prj_mat = view->GetProjection();
