@@ -692,9 +692,8 @@ wxWindow* TrackDlg::CreateListPage(wxWindow* parent)
 	sizer_1->Add(m_ghost_show_lead_chk, 0, wxALIGN_CENTER);
 
 	//lists
-	wxBoxSizer *sizer_2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "ID Lists"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer_2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "ID Lists");
 	//titles
 	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
 	m_cell_time_curr_st = new wxStaticText(page, 0, "\tCurrent T",

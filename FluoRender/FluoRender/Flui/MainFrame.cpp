@@ -322,7 +322,7 @@ MainFrame::MainFrame(
 	m_main_tb->Realize();
 
 	//create the menu for UI management
-	m_tb_menu_ui = new wxMenu;
+	m_tb_menu_ui = std::make_unique<wxMenu>();
 	m = m_tb_menu_ui->Append(ID_ProjPanel, UITEXT_PROJECT,
 		"Show/hide the project panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmap(disp_project));
@@ -339,7 +339,7 @@ MainFrame::MainFrame(
 		"Show/hide the property panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmap(disp_properties));
 	//create the menu for edit/convert
-	m_tb_menu_edit = new wxMenu;
+	m_tb_menu_edit = std::make_unique<wxMenu>();
 	m = m_tb_menu_edit->Append(ID_BrushDlg, "Paint Brush...",
 		"Use the paint brush to select regions of interest in 3D");
 	m->SetBitmap(wxGetBitmap(icon_paint_brush_mini));
@@ -374,7 +374,7 @@ MainFrame::MainFrame(
 		"Manage machine-learning libraries for various functions");
 	m->SetBitmap(wxGetBitmap(icon_machine_learning_mini));
 	//right-side items
-	m_tb_menu_update = new wxMenu;
+	m_tb_menu_update = std::make_unique<wxMenu>();
 	m = m_tb_menu_update->Append(ID_CheckUpdates, "Check Updates...",
 		"Check if a new version of FluoRender is available");
 	m->SetBitmap(wxGetBitmap(icon_check_updates_mini));
@@ -2249,16 +2249,16 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 		switch (id)
 		{
 		case ID_Panels:
-			menu = m_tb_menu_ui;
+			menu = m_tb_menu_ui.get();
 			break;
 		case ID_LastTool:
-			menu = m_tb_menu_edit;
+			menu = m_tb_menu_edit.get();
 			break;
 		case ID_CheckUpdates:
 		case ID_Youtube:
 		case ID_Twitter:
 		case ID_Info:
-			menu = m_tb_menu_update;
+			menu = m_tb_menu_update.get();
 			break;
 		}
 		if (menu)
@@ -2538,8 +2538,8 @@ wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
 #endif
 	wxStaticText* st1, * st2;
 
-	wxBoxSizer* group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
+		wxVERTICAL, panel, "Additional Options");
 
 	//slice sequence check box
 	wxCheckBox* ch11 = new wxCheckBox(panel, ID_READ_ZSLICE,
@@ -2641,8 +2641,8 @@ wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
 #elifdef __linux__
 	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
-	wxBoxSizer* group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
+		wxVERTICAL, panel, "Additional Options");
 
 	//compression
 	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
@@ -2678,8 +2678,8 @@ wxWindow* MainFrame::CreateExtraControlProjectSave(wxWindow* parent)
 #elifdef __linux__
 	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
-	wxBoxSizer* group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
+		wxVERTICAL, panel, "Additional Options");
 
 	//copy all files check box
 	wxCheckBox* ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,

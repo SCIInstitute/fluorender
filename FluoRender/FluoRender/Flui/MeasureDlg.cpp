@@ -559,8 +559,8 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	m_toolbar3->Realize();
 
 	//options
-	wxBoxSizer *sizer_1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Settings"), wxVERTICAL);
+	wxStaticBoxSizer *sizer_1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Settings");
 	wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Z-Depth Comp.:",
 		wxDefaultPosition, FromDIP(wxSize(90, -1)));

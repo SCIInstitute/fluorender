@@ -37,6 +37,10 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include <wx/cmdline.h>
 #include <wx/filefn.h>
+#if defined(_WIN32) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 
 IMPLEMENT_APP(FluoRenderApp)
 
@@ -77,8 +81,10 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 
 bool FluoRenderApp::OnInit()
 {
-	//_CrtSetBreakAlloc(331430);
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#if defined(_WIN32) && defined(_DEBUG)
+	//_CrtSetBreakAlloc(1107);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 
 	SetAppearance(Appearance::System);
 
@@ -125,7 +131,8 @@ bool FluoRenderApp::OnInit()
 
 int FluoRenderApp::OnExit()
 {
-	return 0;
+	//_CrtDumpMemoryLeaks();
+	return wxApp::OnExit();
 }
 
 void FluoRenderApp::OnInitCmdLine(wxCmdLineParser& parser)

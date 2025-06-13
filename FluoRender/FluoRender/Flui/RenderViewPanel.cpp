@@ -1842,8 +1842,8 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 #elifdef __linux__
     panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, panel, "Additional Options");
 
 	//compressed
 	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,

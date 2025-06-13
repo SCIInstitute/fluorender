@@ -2439,8 +2439,8 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 #elifdef __linux__
     panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(panel, wxID_ANY, "Additional Options"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, panel, "Additional Options");
 
 	wxStaticText* mov_note = new wxStaticText(panel, wxID_ANY,
 		"TIFF sequence is preferrable for very short movies.\n",

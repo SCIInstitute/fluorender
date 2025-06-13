@@ -42,7 +42,7 @@ VolPropDnnTrainer::VolPropDnnTrainer() :
 
 VolPropDnnTrainer::~VolPropDnnTrainer()
 {
-
+	m_trainer.get_net().clean();
 }
 
 void VolPropDnnTrainer::add(float* in, float* out)

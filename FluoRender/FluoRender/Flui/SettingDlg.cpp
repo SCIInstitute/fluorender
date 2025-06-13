@@ -93,8 +93,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxIntegerValidator<unsigned int> vald_int;
 	wxStaticText* st;
 	//project save
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Open/Save/Script Run/UI"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Open/Save/Script Run/UI");
 	m_prj_save_chk = new wxCheckBox(page, wxID_ANY,
 		"Save project when capture viewport or export movie.");
 	m_prj_save_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnProjectSaveCheck, this);
@@ -144,8 +144,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group1->Add(10, 5);
 
 	//font
-	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Render View Text"), wxVERTICAL);
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Render View Text");
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Font:");
 	m_font_cmb = new wxComboBox(page, wxID_ANY, "",
@@ -185,8 +185,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group2->Add(10, 5);
 
 	//line width
-	wxBoxSizer *group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Line Width"), wxVERTICAL);
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Line Width");
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_line_width_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -201,8 +201,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group3->Add(10, 5);
 
 	//paint history depth
-	wxBoxSizer *group4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Paint History"), wxVERTICAL);
+	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Paint History");
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_paint_hist_depth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -223,8 +223,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group4->Add(10, 5);
 
 	//pencil distance
-	wxBoxSizer* group5 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Ruler Point Distance"), wxVERTICAL);
+	wxStaticBoxSizer* group5 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Ruler Point Distance");
 	wxBoxSizer* sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_pencil_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -337,8 +337,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	wxStaticText* st;
 
 	//micro blending
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Micro Blending"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Micro Blending");
 	m_micro_blend_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Micro Blending");
 	m_micro_blend_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMicroBlendCheck, this);
@@ -353,8 +353,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group1->Add(10, 5);
 
 	//depth peeling
-	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Mesh Transparency Quality"), wxVERTICAL);
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Mesh Transparency Quality");
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_peeling_layers_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -375,8 +375,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group2->Add(10, 5);
 
 	//rotations
-	wxBoxSizer* group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Rotations"), wxVERTICAL);
+	wxStaticBoxSizer* group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Rotations");
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "RC Anchor Start");
 	m_pin_threshold_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 500,
@@ -400,8 +400,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group3->Add(10, 5);
 
 	//gradient background
-	wxBoxSizer *group4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Gradient Background"), wxVERTICAL);
+	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Gradient Background");
 	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Gradient Background");
@@ -438,8 +438,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
 	//mouse interactions
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Variable Sample Rate"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Variable Sample Rate");
 	m_mouse_int_chk = new wxCheckBox(page, wxID_ANY,
 		"Reduce volume sample rate for mouse interactions.\n"\
 		"Enable this option if mouse interaction speed is slow.");
@@ -449,8 +449,8 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	group1->Add(10, 5);
 
 	//memory settings
-	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Large Data Streaming"), wxVERTICAL);
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Large Data Streaming");
 	m_streaming_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Streaming for Large Data.");
 	m_streaming_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStreamingChk, this);
@@ -579,8 +579,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	std::vector<wxString> cmb_str;
 
 	//stereo
-	wxBoxSizer* group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Stereography / Virtual Reality / Holography"), wxVERTICAL);
+	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Stereography / Virtual Reality / Holography");
 	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_stereo_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Stereography");
@@ -694,8 +694,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group1->Add(10, 5);
 
 	//full screen display
-	wxBoxSizer* group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Fullscreen on Display"), wxVERTICAL);
+	wxStaticBoxSizer* group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Fullscreen on Display");
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Display:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
@@ -724,8 +724,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group2->Add(10, 5);
 
 	//color depth
-	wxBoxSizer* group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Color Depth of Render View"), wxVERTICAL);
+	wxStaticBoxSizer* group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Color Depth of Render View");
 	wxBoxSizer* sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Color Depth:",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)));
@@ -765,8 +765,8 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
 	//override vox
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Override Voxel Size"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Override Voxel Size");
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_override_vox_chk = new wxCheckBox(page, wxID_ANY,
 		"Get voxel size info from the first opened data set.");
@@ -777,8 +777,8 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	group1->Add(10, 5);
 
 	//wavelength to color
-	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Default Colors for Excitation Wavelengths (nm) (for raw microscopy formats)"), wxVERTICAL);
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Default Colors for Excitation Wavelengths (nm) (for raw microscopy formats)");
 	//combo box line
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_wav_color1_cmb = new wxComboBox(page, wxID_ANY, "",
@@ -843,8 +843,8 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	group2->Add(10, 5);
 
 	//max texture size
-	wxBoxSizer *group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Max Texture Size"), wxVERTICAL);
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Max Texture Size");
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_max_texture_size_chk = new wxCheckBox(page, wxID_ANY,
 		"Set Max Texture Size");
@@ -868,8 +868,8 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	group3->Add(10, 5);
 
 	//cl devices
-	wxBoxSizer *group4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "OpenCL Devices"), wxVERTICAL);
+	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "OpenCL Devices");
 	m_device_tree = new wxTreeCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxTR_FULL_ROW_HIGHLIGHT);
@@ -905,7 +905,8 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 
 	wxStaticText* st;
 	//JVM settings.
-	wxBoxSizer *group1 = new wxStaticBoxSizer(new wxStaticBox(page, wxID_ANY, "Java Settings"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Java Settings");
 	wxBoxSizer *sizer1_0 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);

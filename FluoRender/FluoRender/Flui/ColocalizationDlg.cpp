@@ -48,8 +48,8 @@ ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	wxStaticText* st = 0;
 
 	//controls
-	wxBoxSizer* sizer1 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Colocalization Settings"), wxVERTICAL);
+	wxStaticBoxSizer* sizer1 = new wxStaticBoxSizer(
+		wxVERTICAL, this, "Colocalization Settings");
 	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Overlapping Calculation:",
 		wxDefaultPosition, wxDefaultSize);
@@ -114,9 +114,8 @@ ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	sizer1->Add(10, 10);
 
 	//output
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Output"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
+		wxVERTICAL, this, "Output");
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_history_chk = new wxCheckBox(this, wxID_ANY,
 		"Hold History", wxDefaultPosition, FromDIP(wxSize(85, 20)), wxALIGN_LEFT);

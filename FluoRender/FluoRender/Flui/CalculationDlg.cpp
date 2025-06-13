@@ -70,9 +70,8 @@ CalculationDlg::CalculationDlg(MainFrame *frame)
 	sizer2->Add(m_calc_load_b_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(m_calc_b_text, 1, wxEXPAND);
 	//single operators
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY,
-			"Single-valued Operators (Require only A)"), wxHORIZONTAL);
+	wxStaticBoxSizer *sizer3 = new wxStaticBoxSizer(
+		wxHORIZONTAL, this, "Single-valued Operators (Require only A)");
 	//sizer3
 	m_calc_fill_btn = new wxButton(this, wxID_ANY, "Consolidate Voxels",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
@@ -83,9 +82,8 @@ CalculationDlg::CalculationDlg(MainFrame *frame)
 	sizer3->Add(m_calc_fill_btn, 1, wxEXPAND);
 	sizer3->Add(m_calc_combine_btn, 1, wxEXPAND);
 	//two operators
-	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY,
-			"Two-valued Operators (Require both A and B)"), wxHORIZONTAL);
+	wxStaticBoxSizer *sizer4 = new wxStaticBoxSizer(
+		wxHORIZONTAL, this, "Two-valued Operators (Require both A and B)");
 	m_calc_sub_btn = new wxButton(this, wxID_ANY, "Subtract",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_calc_add_btn = new wxButton(this, wxID_ANY, "Add",

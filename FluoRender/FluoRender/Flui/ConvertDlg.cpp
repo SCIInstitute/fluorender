@@ -53,9 +53,8 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 
 	//group1
 	//convert from volume to mesh
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Volume to Polygon Mesh"),
-		wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, this, "Volume to Polygon Mesh");
 	//threshold slider and text
 	wxBoxSizer *sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
@@ -137,9 +136,8 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 	group1->Add(5, 5);
 
 	//stats text
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Output"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
+		wxVERTICAL, this, "Output");
 	m_stat_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_MULTILINE);
 	m_stat_text->SetEditable(false);

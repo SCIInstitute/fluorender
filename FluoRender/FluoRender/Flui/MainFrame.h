@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibook.h>
 #include <wx/aui/auibar.h>
 #include <vector>
+#include <memory>
 
 #define VERSION_CONTACT "https://sciinstitute.github.io/fluorender/"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
@@ -351,9 +352,9 @@ private:
 	wxAuiManager m_aui_mgr;
 	//main toolbar
 	wxAuiToolBar* m_main_tb;
-	wxMenu* m_tb_menu_ui;
-	wxMenu* m_tb_menu_edit;
-	wxMenu* m_tb_menu_update;
+	std::unique_ptr<wxMenu> m_tb_menu_ui;
+	std::unique_ptr<wxMenu> m_tb_menu_edit;
+	std::unique_ptr<wxMenu> m_tb_menu_update;
 	//main menu
 	wxMenuBar* m_top_menu;
 	wxMenu* m_top_file;

@@ -208,9 +208,8 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_toolbar2->Realize();
 
 	//Selection adjustment
-	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Selection Settings"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Selection Settings");
 	//stop at boundary
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_edge_detect_chk = new wxCheckBox(page, wxID_ANY, "Edge Detect:",
@@ -288,9 +287,8 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	sizer1->Add(5, 5);
 
 	//Brush properties
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Brush Properties"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Brush Properties");
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
 	sizer2_1->Add(5, 5);
@@ -446,8 +444,8 @@ wxWindow* BrushToolDlg::CreateAlignPage(wxWindow* parent)
 	wxStaticText *st = 0;
 
 	//alignment
-	wxBoxSizer *sizer1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Align Render View to Selection"), wxVERTICAL);
+	wxStaticBoxSizer *sizer1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Align Render View to Selection");
 	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center_chk = new wxCheckBox(page, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);

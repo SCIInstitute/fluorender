@@ -119,18 +119,6 @@ namespace flvr
 		clearPyramid();
 	}
 
-	void Texture::clear_undos()
-	{
-		//mask data now managed by the undos
-		for (size_t i=0; i<mask_undos_.size(); ++i)
-		{
-			if (mask_undos_[i])
-				delete[] (unsigned char*)(mask_undos_[i]);
-		}
-		mask_undos_.clear();
-		mask_undo_pointer_ = -1;
-	}
-
 	std::vector<TextureBrick*>* Texture::get_sorted_bricks(
 		fluo::Ray& view, bool is_orthographic)
 	{
@@ -1081,6 +1069,18 @@ namespace flvr
 			mask_undos_[mask_undo_pointer_],
 			nrrdTypeUChar, 3, (size_t)nx_,
 			(size_t)ny_, (size_t)nz_);
+	}
+
+	void Texture::clear_undos()
+	{
+		//mask data now managed by the undos
+		for (size_t i=0; i<mask_undos_.size(); ++i)
+		{
+			if (mask_undos_[i])
+				delete[] (unsigned char*)(mask_undos_[i]);
+		}
+		mask_undos_.clear();
+		mask_undo_pointer_ = -1;
 	}
 
 	unsigned int Texture::negxid(unsigned int id)

@@ -95,9 +95,8 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	sizer_3->Add(20, 5, 0);
 	sizer_3->Add(m_light_chk, 0, wxALIGN_CENTER, 0);
 
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, "Material"),
-		wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, this, "Material");
 
 	st = new wxStaticText(this, 0, " Diffuse Color: ",
 		wxDefaultPosition, FromDIP(wxSize(110, 20)));

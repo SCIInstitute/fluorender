@@ -439,8 +439,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer22->Add(m_save_cmd_btn, 0, wxALIGN_CENTER);
 	sizer22->Add(2, 2);
 
-	wxBoxSizer *group1 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Basic Growth && Merge"), wxVERTICAL);
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Basic Growth && Merge");
 	group1->Add(5, 5);
 	group1->Add(sizer2, 0, wxEXPAND);
 	group1->Add(5, 5);
@@ -451,8 +451,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group1->Add(sizer5, 0, wxEXPAND);
 	group1->Add(5, 5);
 
-	wxBoxSizer *group2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Noise Reduction"), wxVERTICAL);
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Noise Reduction");
 	group2->Add(sizer6, 0, wxEXPAND);
 	group2->Add(5, 5);
 	group2->Add(sizer7, 0, wxEXPAND);
@@ -460,8 +460,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group2->Add(sizer8, 0, wxEXPAND);
 	group2->Add(5, 5);
 
-	wxBoxSizer *group3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Advanced Growth && Merge"), wxVERTICAL);
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Advanced Growth && Merge");
 	group3->Add(sizer9, 0, wxEXPAND);
 	group3->Add(5, 5);
 	group3->Add(sizer10, 0, wxEXPAND);
@@ -487,8 +487,8 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group3->Add(sizer20, 0, wxEXPAND);
 	group3->Add(5, 5);
 
-	wxBoxSizer *group4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Recorder and Playback"), wxVERTICAL);
+	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Recorder and Playback");
 	group4->Add(sizer21, 0, wxEXPAND);
 	group4->Add(5, 5);
 	group4->Add(sizer22, 0, wxEXPAND);
@@ -538,9 +538,8 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	sizer1->Add(m_cluster_btn, 0, wxALIGN_CENTER);
 
 	//clustering methods
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Clustering Method"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Clustering Method");
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Choose Method:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
@@ -566,9 +565,8 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 	sizer2->Add(10, 10);
 
 	//parameters
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Settings"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Settings");
 	//clnum
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Cluster Number:",
@@ -699,9 +697,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer1->Add(m_analyze_btn, 0, wxALIGN_CENTER);
 
 	//id tools
-	wxBoxSizer *sizer2 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Selection and Modification by IDs"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Selection and Modification by IDs");
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "ID:",
 		wxDefaultPosition, wxDefaultSize);
@@ -799,9 +796,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer2->Add(10, 10);
 
 	//Options
-	wxBoxSizer *sizer3 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Options"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Options");
 	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Contact Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
@@ -840,9 +836,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer3->Add(10, 10);
 
 	//output
-	wxBoxSizer *sizer4 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Output as New Channels"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer4 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Output as New Channels");
 	//radios
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Channel Type:",
@@ -889,9 +884,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer4->Add(sizer4_2, 1, wxEXPAND);
 	sizer4->Add(10, 10);
 
-	wxBoxSizer *sizer5 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Distances"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer5 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Distances");
 	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_check = new wxCheckBox(page, wxID_ANY, "Filter Nearest Neighbors",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
@@ -929,9 +923,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	sizer5->Add(10, 10);
 
 	//alignment
-	wxBoxSizer *sizer6 = new wxStaticBoxSizer(
-		new wxStaticBox(page, wxID_ANY, "Align Render View to Analyzed Components"),
-		wxVERTICAL);
+	wxStaticBoxSizer *sizer6 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Align Render View to Analyzed Components");
 	wxBoxSizer* sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_align_center_chk = new wxCheckBox(page, wxID_ANY,
 		"Move to Center", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
