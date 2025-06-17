@@ -276,10 +276,11 @@ VolumeData::VolumeData()
 	m_colormap_inv = 1.0;
 	m_colormap_mode = 0;
 	m_colormap_disp = false;
-	m_colormap_low_value = 0.0;
-	m_colormap_hi_value = 1.0;
 	m_colormap = 0;
 	m_colormap_proj = 0;
+	m_colormap_low_value = 0.0;
+	m_colormap_hi_value = 1.0;
+	UpdateColormapRange();
 
 	//blend mode
 	m_blend_mode = 0;
@@ -432,10 +433,11 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_colormap_inv = copy.m_colormap_inv;
 	m_colormap_mode = copy.m_colormap_mode;
 	m_colormap_disp = copy.m_colormap_disp;
-	m_colormap_low_value = copy.m_colormap_low_value;
-	m_colormap_hi_value = copy.m_colormap_hi_value;
 	m_colormap = copy.m_colormap;
 	m_colormap_proj = copy.m_colormap_proj;
+	m_colormap_low_value = copy.m_colormap_low_value;
+	m_colormap_hi_value = copy.m_colormap_hi_value;
+	UpdateColormapRange();
 
 	//blend mode
 	m_blend_mode = copy.m_blend_mode;
@@ -1138,6 +1140,48 @@ void VolumeData::SetShuffledID(unsigned int* val)
 				unsigned int index = m_res_x*m_res_y*k + m_res_x*j + i;
 				val[index] = m_res_x*m_res_y*m_res_z - res;
 			}
+}
+
+void VolumeData::UpdateColormapRange()
+{
+	switch (m_colormap_proj)
+	{
+	case 0://intensity
+	default:
+		m_colormap_min_value = m_min_value;
+		m_colormap_max_value = m_max_value;
+		break;
+	case 1://z-value
+		m_colormap_min_value = 0;
+		m_colormap_max_value = m_res_z * m_spcz;
+		break;
+	case 2://y-value
+		m_colormap_min_value = 0;
+		m_colormap_max_value = m_res_y * m_spcy;
+		break;
+	case 3://x-value
+		m_colormap_min_value = 0;
+		m_colormap_max_value = m_res_x * m_spcx;
+		break;
+	case 4://t-value
+		m_colormap_min_value = 0;
+		if (auto reader = m_reader.lock())
+			m_colormap_max_value = reader->GetTimeNum();
+		break;
+	case 5://gradient magnitude
+	case 6://gradient dir
+		m_colormap_min_value = 0;
+		m_colormap_max_value = 1;
+		break;
+	case 7://intensity delta
+		m_colormap_min_value = -m_max_value;
+		m_colormap_max_value = m_max_value;
+		break;
+	case 8://speed
+		m_colormap_min_value = 0;
+		m_colormap_max_value = 1;
+		break;
+	}
 }
 
 void VolumeData::AddEmptyLabel(int mode, bool change)
@@ -2492,10 +2536,32 @@ void VolumeData::SetColormapHigh(double val)
 			m_colormap_low_value, m_colormap_hi_value);
 }
 
+void VolumeData::GetColormapRange(double& v1, double& v2)
+{
+	v1 = m_colormap_min_value;
+	v2 = m_colormap_max_value;
+}
+
+double VolumeData::GetColormapMin()
+{
+	return m_colormap_min_value;
+}
+
+double VolumeData::GetColormapMax()
+{
+	return m_colormap_max_value;
+}
+
 void VolumeData::GetColormapValues(double &low, double &high)
 {
 	low = m_colormap_low_value;
 	high = m_colormap_hi_value;
+}
+
+void VolumeData::GetColormapDispValues(double& low, double& high)
+{
+	low = m_colormap_low_value * (m_colormap_max_value - m_colormap_min_value) + m_colormap_min_value;
+	high = m_colormap_hi_value * (m_colormap_max_value - m_colormap_min_value) + m_colormap_min_value;
 }
 
 double VolumeData::GetColormapLow()
@@ -2552,6 +2618,7 @@ void VolumeData::SetColormapProj(int value)
 	m_colormap_proj = value;
 	if (m_vr)
 		m_vr->set_colormap_proj(m_colormap_proj);
+	UpdateColormapRange();
 }
 
 int VolumeData::GetColormap()

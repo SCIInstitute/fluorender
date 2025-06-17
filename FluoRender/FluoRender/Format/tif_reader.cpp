@@ -1459,7 +1459,8 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		if (bits == 32)
 		{
 			uint64_t index = 0;
-			for (index = 0; index < strip_size / 4; ++index)
+			uint64_t temp_size = std::min(strip_size, byte_count);
+			for (index = 0; index < temp_size / 4; ++index)
 			{
 				uint16_t vs;
 				uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
@@ -1531,7 +1532,8 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 		if (bits == 32)
 		{
 			uint64_t index = 0;
-			for (index = 0; index < tile_size / 4; ++index)
+			uint64_t temp_size = std::min(tile_size, byte_count);
+			for (index = 0; index < temp_size / 4; ++index)
 			{
 				uint16_t vs;
 				uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
@@ -1628,7 +1630,8 @@ void TIFReader::GetTiffStripMinMax(uint64_t page, uint64_t strip, uint64_t strip
 	if (!isCompressed && bits == 32 && m_fp_convert)
 	{
 		uint64_t index = 0;
-		for (index = 0; index < strip_size / 4; ++index)
+		uint64_t temp_size = std::min(strip_size, byte_count);
+		for (index = 0; index < temp_size / 4; ++index)
 		{
 			uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
 			if (swap_)
@@ -1662,7 +1665,8 @@ void TIFReader::GetTiffTileMinMax(uint64_t page, uint64_t tile, uint64_t tile_si
 	if (!isCompressed && bits == 32 && m_fp_convert)
 	{
 		uint64_t index = 0;
-		for (index = 0; index < tile_size / 4; ++index)
+		uint64_t temp_size = std::min(tile_size, byte_count);
+		for (index = 0; index < temp_size / 4; ++index)
 		{
 			uint32_t vi = *reinterpret_cast<uint32_t*>(temp + index * 4);
 			if (swap_)

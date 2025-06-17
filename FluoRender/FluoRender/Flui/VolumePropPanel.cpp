@@ -510,7 +510,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
-	st = new wxStaticText(this, 0, "Primary Color",
+	st = new wxStaticText(this, 0, "Main Color",
 		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
@@ -524,7 +524,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r3->Add(m_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
-	st = new wxStaticText(this, 0, "Secondary",
+	st = new wxStaticText(this, 0, "Alt. Color",
 		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_color2_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
@@ -551,7 +551,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_colormap_inv_btn->Realize();
 	m_colormap_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> colormap_list = { "Rainbow", "Two Colors", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
+	std::vector<wxString> colormap_list = { "Rainbow", "Main-Alt", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
 	m_colormap_combo->Append(colormap_list);
 	m_colormap_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo, this);
 	m_colormap_combo2 = new wxUndoableComboBox(this, wxID_ANY, "",
@@ -1168,23 +1168,41 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//colormap
 	if (update_colormap)
 	{
+		//slider
+		m_colormap_sldr->SetRange(0, std::round(m_max_val));
 		double low, high;
 		m_vd->GetColormapValues(low, high);
 		//low
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_low_text->GetValidator()))
-			vald_i->SetMin(0);
 		ival = std::round(low * m_max_val);
-		m_colormap_sldr->SetRange(0, std::round(m_max_val));
-		str = wxString::Format("%d", ival);
 		m_colormap_sldr->ChangeLowValue(ival);
-		m_colormap_low_text->ChangeValue(str);
 		//high
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_colormap_hi_text->GetValidator()))
-			vald_i->SetMin(0);
 		ival = std::round(high * m_max_val);
-		str = wxString::Format("%d", ival);
 		m_colormap_sldr->ChangeHighValue(ival);
-		m_colormap_hi_text->ChangeValue(str);
+
+		//text
+		m_vd->GetColormapDispValues(low, high);
+		double minv, maxv;
+		m_vd->GetColormapRange(minv, maxv);
+		bool int_validator = (maxv - minv) > 10.0;
+		if (int_validator)
+		{
+			m_colormap_low_text->SetValidator(wxIntegerValidator<int>());
+			str = wxString::Format("%.0f", low);
+			m_colormap_low_text->ChangeValue(str);
+			m_colormap_hi_text->SetValidator(wxIntegerValidator<int>());
+			str = wxString::Format("%.0f", high);
+			m_colormap_hi_text->ChangeValue(str);
+		}
+		else
+		{
+			m_colormap_low_text->SetValidator(wxFloatingPointValidator<double>());
+			str = wxString::Format("%.3f", low);
+			m_colormap_low_text->ChangeValue(str);
+			m_colormap_hi_text->SetValidator(wxFloatingPointValidator<double>());
+			str = wxString::Format("%.3f", high);
+			m_colormap_hi_text->ChangeValue(str);
+		}
+
 		bval = m_colormap_sldr->GetLink();
 		if (bval != m_colormap_link_tb->GetToolState(0))
 		{
@@ -2726,41 +2744,36 @@ void VolumePropPanel::OnColormapChange(wxScrollEvent& event)
 	int ival2 = m_colormap_sldr->GetHighValue();
 	double val1 = double(ival1) / m_max_val;
 	double val2 = double(ival2) / m_max_val;
-	m_colormap_low_text->ChangeValue(wxString::Format("%d", ival1));
-	m_colormap_hi_text->ChangeValue(wxString::Format("%d", ival2));
 
 	//set left threshold value
 	if (m_sync_group)
 		SyncColormapVal(val1, val2);
 	else
-		SetColormapVal(val1, val2, false);
+		SetColormapVal(val1, val2, true);
 }
 
 void VolumePropPanel::OnColormapText(wxCommandEvent& event)
 {
 	wxObject* t = event.GetEventObject();
 	wxString str = m_colormap_low_text->GetValue();
-	long ival1 = 0, ival2 = 0;
-	str.ToLong(&ival1);
+	double dval1 = 0, dval2 = 0;
+	str.ToDouble(&dval1);
 	str = m_colormap_hi_text->GetValue();
-	str.ToLong(&ival2);
-	int low = ival1;
-	int hi = ival2;
-	if (double(hi) > m_max_val)
-		UpdateMaxVal(hi);
-	m_colormap_sldr->ChangeValues(low, hi);
-	if (low != ival1 && t != m_colormap_low_text)
-		m_colormap_low_text->ChangeValue(std::to_string(low));
-	if (hi != ival2 && t != m_colormap_hi_text)
-		m_colormap_hi_text->ChangeValue(std::to_string(hi));
-	double val1 = double(low) / m_max_val;
-	double val2 = double(hi) / m_max_val;
+	str.ToDouble(&dval2);
+
+	if (m_vd)
+	{
+		double minv, maxv;
+		m_vd->GetColormapRange(minv, maxv);
+		dval1 = (dval1 - minv) / (maxv - minv);
+		dval2 = (dval2 - minv) / (maxv - minv);
+	}
 
 	//set left threshold value
 	if (m_sync_group)
-		SyncColormapVal(val1, val2);
+		SyncColormapVal(dval1, dval2);
 	else
-		SetColormapVal(val1, val2, false);
+		SetColormapVal(dval1, dval2, true);
 }
 
 void VolumePropPanel::OnColormapLink(wxCommandEvent& event)

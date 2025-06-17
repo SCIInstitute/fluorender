@@ -365,7 +365,7 @@
 #define VOL_DATA_4D_SPEED \
 	"	//VOL_DATA_4D_SPEED\n" \
 	"	float grad_t = v.x - texture(tex10, t.stp).x;\n" \
-	"	vec3 grad_s = n.xyz;\n" \
+	"	vec3 grad_s = n.xyz * loc5.xyz;\n" \
 	"	float denom = dot(grad_s, grad_s) + 1e-4;\n" \
 	"	grad_s = -grad_s * grad_t / denom;\n" \
 	"	float v4d = length(grad_s);\n" \
@@ -530,17 +530,17 @@
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU1 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z\n" \
 	"		vec4 tt = matrix5 * t;\n" \
-	"		float valu = (1.0-tt.z-loc6.x)/loc6.z;\n"
+	"		float valu = (tt.z-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU2 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Y\n" \
 	"		vec4 tt = matrix5 * t;\n" \
-	"		float valu = (1.0-tt.y-loc6.x)/loc6.z;\n"
+	"		float valu = (tt.y-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU3 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_X\n" \
 	"		vec4 tt = matrix5 * t;\n" \
-	"		float valu = (1.0-tt.x-loc6.x)/loc6.z;\n"
+	"		float valu = (tt.x-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU4 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_T\n" \
@@ -549,7 +549,6 @@
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU5 \
 	"		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_GM\n" \
-	"		vec4 tt = matrix5 * t;\n" \
 	"		float valu = (v.y-loc6.x)/loc6.z;\n"
 
 #define VOL_TRANSFER_FUNCTION_COLORMAP_VALU6 \

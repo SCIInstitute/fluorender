@@ -400,7 +400,11 @@ public:
 	void SetColormapValues(double low, double high);
 	void SetColormapLow(double val);
 	void SetColormapHigh(double val);
+	void GetColormapRange(double& v1, double& v2);
+	double GetColormapMin();
+	double GetColormapMax();
 	void GetColormapValues(double &low, double &high);
+	void GetColormapDispValues(double& low, double& high);
 	double GetColormapLow();
 	double GetMlColormapLow();
 	double GetColormapHigh();
@@ -686,10 +690,15 @@ private:
 	double m_colormap_inv;
 	int m_colormap_mode;	//0-normal; 1-rainbow
 	bool m_colormap_disp;	//true/false
+	int m_colormap;//index to a colormap
+	int m_colormap_proj;//index to method of mapping
+						//0-intensity; 1-z-value; 2-y-value; 3-x-value; 4-t-value;
+						//5 - gradient magnitude; 6 - gradient dir; 7 - intensity delta; 8 - speed	
 	double m_colormap_low_value;
 	double m_colormap_hi_value;
-	int m_colormap;//index to a colormap
-	int m_colormap_proj;//index to a way of projection
+	//the min/max values are needed because it can be mapped to values other than intensity
+	double m_colormap_min_value;
+	double m_colormap_max_value;
 
 	//transparent
 	bool m_transparent;
@@ -763,6 +772,9 @@ private:
 	void SetOrderedID(unsigned int* val);
 	void SetReverseID(unsigned int* val);
 	void SetShuffledID(unsigned int* val);
+
+	//update colormap range
+	void UpdateColormapRange();
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

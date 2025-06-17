@@ -6483,35 +6483,45 @@ void RenderView::DrawColormap()
 	if (m_colormap_disp > 1)
 	{
 		fluo::Color text_color = GetTextColor();
+		double minv, maxv;
+		cur_vd->GetColormapRange(minv, maxv);
+		int pres = (maxv - minv) < 10 ? 3 : 0;
+
+		auto to_wstring = [](double value, int precision = 0) {
+			std::wostringstream oss;
+			oss.precision(precision);
+			oss << std::fixed << (precision ? value : std::round(value));
+			return oss.str();
+			};
 
 		px = txx - nx / 2.0;
 		//value 1
 		py = txy - ny / 2.0;
-		wstr = L"0";
+		wstr = to_wstring(minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 2
 		py = txy + cmh * m_value_2 - ny / 2.0;
-		wstr = std::to_wstring(int(std::round(m_value_2 * max_val)));
+		wstr = to_wstring(m_value_2 * (maxv - minv) + minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 4
 		py = txy + cmh * m_value_4 - ny / 2.0;
-		wstr = std::to_wstring(int(std::round(m_value_4 * max_val)));
+		wstr = to_wstring(m_value_4 * (maxv - minv) + minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 6
 		py = txy + cmh * m_value_6 - ny / 2.0;
-		wstr = std::to_wstring(int(std::round(m_value_6 * max_val)));
+		wstr = to_wstring(m_value_6 * (maxv - minv) + minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 7
 		py = txy + cmh - ny / 2.0;
-		wstr = std::to_wstring(int(std::round(max_val)));
+		wstr = to_wstring(maxv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
