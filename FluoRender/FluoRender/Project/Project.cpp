@@ -883,11 +883,12 @@ void Project::Open(const std::wstring& filename)
 						vval += fluo::Vector(0, 180, 180);
 					view->SetObjRot(vval);
 				}
+				//colormap
+				if (fconfig->Read("colormap_disp", &ival))
+					view->m_colormap_disp = ival;
 				//scale bar
-				if (fconfig->Read("disp_scale_bar", &bval))
-					view->m_disp_scale_bar = bval;
-				if (fconfig->Read("disp_scale_bar_text", &bval))
-					view->m_disp_scale_bar_text = bval;
+				if (fconfig->Read("scalebar_disp", &ival))
+					view->m_scalebar_disp = ival;
 				if (fconfig->Read("sb_length", &dval))
 					view->m_sb_length = dval;
 				if (fconfig->Read("sb_text", &wsval))
@@ -1662,9 +1663,10 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("obj_center", view->GetObjCenters());
 			fconfig->Write("obj_trans", view->GetObjTrans());
 			fconfig->Write("obj_rot", view->GetObjRot());
-			//scale bar
-			fconfig->Write("disp_scale_bar", view->m_disp_scale_bar);
-			fconfig->Write("disp_scale_bar_text", view->m_disp_scale_bar_text);
+			//colormap
+			fconfig->Write("colormap_disp", view->m_colormap_disp);
+			//scalebar
+			fconfig->Write("scalebar_disp", view->m_scalebar_disp);
 			fconfig->Write("sb_length", view->m_sb_length);
 			fconfig->Write("sb_text", view->m_sb_text);
 			fconfig->Write("sb_num", view->m_sb_num);

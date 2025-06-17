@@ -52,7 +52,7 @@ public:
 		ID_InfoChk,
 		ID_CamCtrChk,
 		ID_LegendChk,
-		ID_ColormapChk,
+		ID_Colormap,
 		ID_ScaleBar
 	};
 	enum
@@ -114,8 +114,8 @@ public:
 	void SetInfo(bool val);
 	void SetDrawCamCtr(bool val);
 	void SetLegend(bool val);
-	void SetDrawColormap(bool val);
-	void SetDrawScalebar(int val);
+	void SetDrawColormap();
+	void SetDrawScalebar();
 	void SetScaleText(double val);
 	void SetScaleUnit(int val);
 	void SetBgColor(fluo::Color val);
@@ -152,7 +152,6 @@ public:
 private:
 	static int m_max_id;
 	int m_id;
-	int m_draw_scalebar;
 	bool m_bg_color_inv;
 	//rot slider style
 	bool m_rot_slider;

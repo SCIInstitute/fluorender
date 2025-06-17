@@ -66,7 +66,6 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	const wxString& name) :
 	PropPanel(frame, frame, pos, size, style, name),
 	m_default_saved(false),
-	m_draw_scalebar(0),
 	m_bg_color_inv(false),
 	m_rot_slider(true),
 	m_pin_by_user(0),
@@ -370,12 +369,10 @@ void RenderViewPanel::CreateBar()
 		"Toggle View of the Legend");
 
 	//colormap
-	bitmap = wxGetBitmap(colormap);
-	m_options_toolbar->AddCheckTool(
-		ID_ColormapChk, "Colormap",
-		bitmap, wxNullBitmap,
-		"Toggle View of the Colormap Sample",
-		"Toggle View of the Colormap Sample");
+	bitmap = wxGetBitmap(colormap_off);
+	m_options_toolbar->AddToolWithHelp(
+		ID_Colormap, "Colormap", bitmap,
+		"Toggle Colormap Legend Options (Off, On, On with text)");
 
 	//scale bar
 	bitmap = wxGetBitmap(scalebar);
@@ -742,16 +739,32 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//colormap
 	if (update_all || FOUND_VALUE(gstDrawColormap))
 	{
-		bval = m_render_view->m_draw_colormap;
-		m_options_toolbar->ToggleTool(ID_ColormapChk, bval);
+		ival = m_render_view->m_colormap_disp;
+		wxBitmapBundle colormap_bmp;
+		switch (ival)
+		{
+		case 0:
+		default:
+			colormap_bmp = wxGetBitmap(colormap_off);
+			break;
+		case 1:
+			colormap_bmp = wxGetBitmap(colormap);
+			break;
+		case 2:
+			colormap_bmp = wxGetBitmap(colormap_text);
+			break;
+		}
+		m_options_toolbar->SetToolNormalBitmap(ID_Colormap, colormap_bmp);
 	}
 
 	//scale bar
 	if (update_all || FOUND_VALUE(gstDrawScaleBar))
 	{
-		switch (m_draw_scalebar)
+		ival = m_render_view->m_scalebar_disp;
+		switch (ival)
 		{
 		case 0:
+		default:
 			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scalebar));
 			m_scale_text->Disable();
@@ -1030,30 +1043,22 @@ void RenderViewPanel::SetLegend(bool val)
 	FluoRefresh(2, { gstDrawLegend }, { GetViewId() });
 }
 
-void RenderViewPanel::SetDrawColormap(bool val)
+void RenderViewPanel::SetDrawColormap()
 {
-	m_render_view->m_draw_colormap = val;
+	int val = m_render_view->m_colormap_disp;
+	val++;
+	val = val % 3; // cycle through 0, 1, 2
+	m_render_view->m_colormap_disp = val;
 
 	FluoRefresh(2, { gstDrawColormap }, { GetViewId() });
 }
 
-void RenderViewPanel::SetDrawScalebar(int val)
+void RenderViewPanel::SetDrawScalebar()
 {
-	switch (val)
-	{
-	case 0:
-		m_render_view->m_disp_scale_bar = false;
-		m_render_view->m_disp_scale_bar_text = false;
-		break;
-	case 1:
-		m_render_view->m_disp_scale_bar = true;
-		m_render_view->m_disp_scale_bar_text = false;
-		break;
-	case 2:
-		m_render_view->m_disp_scale_bar = true;
-		m_render_view->m_disp_scale_bar_text = true;
-		break;
-	}
+	int val = m_render_view->m_scalebar_disp;
+	val++;
+	val = val % 3; // cycle through 0, 1, 2
+	m_render_view->m_scalebar_disp = val;
 
 	FluoRefresh(2, { gstDrawScaleBar }, { GetViewId() });
 }
@@ -1327,13 +1332,11 @@ void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 	case ID_LegendChk:
 		SetLegend(m_options_toolbar->GetToolState(ID_LegendChk));
 		break;
-	case ID_ColormapChk:
-		SetDrawColormap(m_options_toolbar->GetToolState(ID_ColormapChk));
+	case ID_Colormap:
+		SetDrawColormap();
 		break;
 	case ID_ScaleBar:
-		m_draw_scalebar += 1;
-		m_draw_scalebar = m_draw_scalebar > 2 ? 0 : m_draw_scalebar;
-		SetDrawScalebar(m_draw_scalebar);
+		SetDrawScalebar();
 		break;
 	}
 }
@@ -2009,7 +2012,7 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 		glbin_view_def.m_center = m_render_view->GetCenters();
 	//colormap
 	if (mask & 0x1000)
-		glbin_view_def.m_draw_colormap = m_render_view->m_draw_colormap;
+		glbin_view_def.m_colormap_disp = m_render_view->m_colormap_disp;
 }
 
 void RenderViewPanel::LoadSettings()

@@ -52,9 +52,8 @@ public:
 	double m_camctr_size;
 	int m_draw_info;
 	bool m_draw_legend;
-	bool m_draw_colormap;
-	bool m_draw_scalebar;
-	bool m_draw_scalebar_text;
+	int m_colormap_disp;
+	int m_scalebar_disp;
 	double m_scalebar_len;
 	std::wstring m_scalebar_text;
 	std::wstring m_scalebar_num;

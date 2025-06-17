@@ -304,10 +304,7 @@ public:
 	void CalcFrame();
 
 	//scale bar
-	void EnableScaleBar() { m_disp_scale_bar = true; }
-	void DisableScaleBar() { m_disp_scale_bar = false; }
-	void EnableSBText() { m_disp_scale_bar_text = true; }
-	void DisableSBText() { m_disp_scale_bar_text = false; }
+	void SetScalebarDisp(int disp) { m_scalebar_disp = disp; }
 	void SetScaleBarLen(double len) { m_sb_length = len; }
 	void SetSBText(const std::wstring text) { m_sb_text = text; }
 
@@ -484,7 +481,7 @@ public:
 	bool m_load_update;
 	bool m_draw_frame;
 	bool m_draw_legend;
-	bool m_draw_colormap;
+	int m_colormap_disp;//0-no display; 1-color map; 2-with text
 	bool m_mouse_focus;
 	bool m_draw_rulers;
 	//current volume
@@ -493,9 +490,8 @@ public:
 	//clipping settings
 	int m_clip_mask;
 	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference
-					//scale bar
-	bool m_disp_scale_bar;
-	bool m_disp_scale_bar_text;
+	//scale bar
+	int m_scalebar_disp;//0-no display; 1-length; 2-with text
 	double m_sb_length;
 	int m_sb_unit;
 	std::wstring m_sb_text;

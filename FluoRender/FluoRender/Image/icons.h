@@ -192,6 +192,10 @@ public:
 	const static unsigned char legend_png[998];
 	/* colormap.png - 790 bytes */
 	const static unsigned char colormap_png[790];
+	/* colormap_off.png - 753 bytes */
+	const static unsigned char colormap_off_png[753];
+	/* colormap_text.png - 969 bytes */
+	const static unsigned char colormap_text_png[969];
 	/* pin.png - 881 bytes */
 	const static unsigned char pin_png[881];
 	/* anchor_dark.png - 828 bytes */

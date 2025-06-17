@@ -112,15 +112,14 @@ RenderView::RenderView() :
 	m_retain_finalbuffer(false),
 	m_draw_frame(false),
 	m_draw_legend(false),
-	m_draw_colormap(false),
+	m_colormap_disp(0),
 	m_mouse_focus(false),
 	m_draw_rulers(true),
 	//clipping settings
 	m_clip_mask(-1),
 	m_clip_mode(2),
 	//scale bar
-	m_disp_scale_bar(false),
-	m_disp_scale_bar_text(false),
+	m_scalebar_disp(0),
 	m_sb_length(50),
 	m_sb_unit(1),
 	m_sb_height(0.0),
@@ -342,15 +341,14 @@ RenderView::RenderView(RenderView& copy):
 	m_retain_finalbuffer(copy.m_retain_finalbuffer),
 	m_draw_frame(copy.m_draw_frame),
 	m_draw_legend(copy.m_draw_legend),
-	m_draw_colormap(copy.m_draw_colormap),
+	m_colormap_disp(copy.m_colormap_disp),
 	m_mouse_focus(copy.m_mouse_focus),
 	m_draw_rulers(true), //copy m_draw_rulers,
 	//clipping settings
 	m_clip_mask(-1), //copy m_clip_mask,
 	m_clip_mode(2), //copy m_clip_mode,
 	//scale bar
-	m_disp_scale_bar(false), //copy m_disp_scale_bar,
-	m_disp_scale_bar_text(false), //copy m_disp_scale_bar_text,
+	m_scalebar_disp(copy.m_scalebar_disp), //copy m_scalebar_disp,
 	m_sb_length(50), //copy m_sb_length,
 	m_sb_unit(1), //copy m_sb_unit,
 	m_sb_height(0.0),
@@ -3998,11 +3996,9 @@ bool RenderView::ForceDraw()
 	if (m_draw_legend)
 		DrawLegend();
 
-	if (m_disp_scale_bar)
-		DrawScaleBar();
+	DrawScaleBar();
 
-	if (m_draw_colormap)
-		DrawColormap();
+	DrawColormap();
 
 	PostDraw();
 
@@ -5447,6 +5443,10 @@ void RenderView::DrawCamCtr()
 
 void RenderView::DrawScaleBar()
 {
+	if (!m_scalebar_disp)
+		return;
+	bool draw_text = m_scalebar_disp > 1;
+
 	flvr::VertexArray* va_scale_bar =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Scale_Bar);
 	if (!va_scale_bar)
@@ -5466,7 +5466,7 @@ void RenderView::DrawScaleBar()
 	float textlen = m_text_renderer->RenderTextLen(m_sb_text);
 	fluo::Color text_color = GetTextColor();
 	float font_height = 0;
-	if (m_disp_scale_bar_text)
+	if (draw_text)
 		font_height = glbin_text_tex_manager.GetSize() + 3.0;
 
 	std::vector<std::pair<unsigned int, double>> params;
@@ -5519,7 +5519,7 @@ void RenderView::DrawScaleBar()
 	params.push_back(std::pair<unsigned int, double>(2, len));
 	params.push_back(std::pair<unsigned int, double>(3, ph));
 
-	if (m_disp_scale_bar_text)
+	if (draw_text)
 	{
 		px = sb_x - 0.5 * (sb_w + textlen + nx);
 		py = sb_y + 0.5 * font_height - ny / 2.0;
@@ -5563,7 +5563,7 @@ void RenderView::DrawLegend()
 	{
 		xoffset += glbin_moviemaker.GetCropX();
 		yoffset += glbin_moviemaker.GetCropY();
-		if (m_disp_scale_bar)
+		if (m_scalebar_disp)
 		if (glbin_moviemaker.GetScalebarPos() == 2 ||
 			glbin_moviemaker.GetScalebarPos() == 3)
 			yoffset += font_height * 1.5;
@@ -6389,6 +6389,9 @@ void RenderView::SetColormapColors(int colormap, const fluo::Color &c1, const fl
 
 void RenderView::DrawColormap()
 {
+	if (!m_colormap_disp)
+		return;
+
 	auto cur_vd = m_cur_vol.lock();
 	if (!cur_vd)
 		return;
@@ -6477,39 +6480,42 @@ void RenderView::DrawColormap()
 		txy = cmy;
 	}
 
-	fluo::Color text_color = GetTextColor();
+	if (m_colormap_disp > 1)
+	{
+		fluo::Color text_color = GetTextColor();
 
-	px = txx - nx / 2.0;
-	//value 1
-	py = txy - ny / 2.0;
-	wstr = L"0";
-	m_text_renderer->RenderText(
-		wstr, text_color,
-		px * sx, py * sy, sx, sy);
-	//value 2
-	py = txy + cmh * m_value_2 - ny / 2.0;
-	wstr = std::to_wstring(int(std::round(m_value_2 * max_val)));
-	m_text_renderer->RenderText(
-		wstr, text_color,
-		px * sx, py * sy, sx, sy);
-	//value 4
-	py = txy + cmh * m_value_4 - ny / 2.0;
-	wstr = std::to_wstring(int(std::round(m_value_4 * max_val)));
-	m_text_renderer->RenderText(
-		wstr, text_color,
-		px * sx, py * sy, sx, sy);
-	//value 6
-	py = txy + cmh * m_value_6 - ny / 2.0;
-	wstr = std::to_wstring(int(std::round(m_value_6 * max_val)));
-	m_text_renderer->RenderText(
-		wstr, text_color,
-		px * sx, py * sy, sx, sy);
-	//value 7
-	py = txy + cmh - ny / 2.0;
-	wstr = std::to_wstring(int(std::round(max_val)));
-	m_text_renderer->RenderText(
-		wstr, text_color,
-		px * sx, py * sy, sx, sy);
+		px = txx - nx / 2.0;
+		//value 1
+		py = txy - ny / 2.0;
+		wstr = L"0";
+		m_text_renderer->RenderText(
+			wstr, text_color,
+			px * sx, py * sy, sx, sy);
+		//value 2
+		py = txy + cmh * m_value_2 - ny / 2.0;
+		wstr = std::to_wstring(int(std::round(m_value_2 * max_val)));
+		m_text_renderer->RenderText(
+			wstr, text_color,
+			px * sx, py * sy, sx, sy);
+		//value 4
+		py = txy + cmh * m_value_4 - ny / 2.0;
+		wstr = std::to_wstring(int(std::round(m_value_4 * max_val)));
+		m_text_renderer->RenderText(
+			wstr, text_color,
+			px * sx, py * sy, sx, sy);
+		//value 6
+		py = txy + cmh * m_value_6 - ny / 2.0;
+		wstr = std::to_wstring(int(std::round(m_value_6 * max_val)));
+		m_text_renderer->RenderText(
+			wstr, text_color,
+			px * sx, py * sy, sx, sy);
+		//value 7
+		py = txy + cmh - ny / 2.0;
+		wstr = std::to_wstring(int(std::round(max_val)));
+		m_text_renderer->RenderText(
+			wstr, text_color,
+			px * sx, py * sy, sx, sy);
+	}
 
 	px = cmx / nx;
 	py = cmy / ny;
