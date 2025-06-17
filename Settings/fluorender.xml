@@ -344,7 +344,7 @@
         <shadow_enable>0</shadow_enable>
         <shadow_int>0.5</shadow_int>
         <sample_rate_enable>1</sample_rate_enable>
-        <sample_rate>2</sample_rate>
+        <sample_rate>3.5</sample_rate>
         <spc_x>1</spc_x>
         <spc_y>1</spc_y>
         <spc_z>3</spc_z>

@@ -344,7 +344,7 @@
 		"shadow enable": false,
 		"shadow int": 0.5,
 		"sample rate enable": true,
-		"sample rate": 2,
+		"sample rate": 3.5,
 		"spc x": 1,
 		"spc y": 1,
 		"spc z": 3,

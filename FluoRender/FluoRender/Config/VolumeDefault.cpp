@@ -68,7 +68,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_shadow_intensity = 0.0;
 
 	m_sample_rate_enable = true;
-	m_sample_rate = 2.0;
+	m_sample_rate = 3.5;
 
 	m_spcx = 1.0;
 	m_spcy = 1.0;
@@ -141,7 +141,7 @@ void VolumeDataDefault::Read()
 	f->Read(gstShadowInt, &m_shadow_intensity, 0.0);
 
 	f->Read(gstSampleRateEnable, &m_sample_rate_enable, true);
-	f->Read(gstSampleRate, &m_sample_rate, 2.0);
+	f->Read(gstSampleRate, &m_sample_rate, 3.5);
 
 	f->Read(gstSpcX, &m_spcx, 1.0);
 	f->Read(gstSpcY, &m_spcy, 1.0);

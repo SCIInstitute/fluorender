@@ -6409,7 +6409,7 @@ void RenderView::DrawColormap()
 	m_value_3 = (low + m_value_4) / 2.0;
 	m_value_5 = (m_value_4 + high) / 2.0;
 	max_val = cur_vd->GetMaxValue();
-	enable_alpha = cur_vd->GetAlphaEnable();
+	enable_alpha = cur_vd->GetAlphaEnable() && cur_vd->GetColormapProj();
 	SetColormapColors(
 		cur_vd->GetColormap(),
 		cur_vd->GetColor(),
