@@ -1511,6 +1511,9 @@ public:
 	//get vol cache queue
 	flvr::CacheQueue* GetCacheQueue(VolumeData* vd);
 
+	//update stream rendering mode
+	void UpdateStreamMode(double data_size);//input is a newly loaded data size in mb
+
 private:
 	MainFrame* m_frame;
 	std::unique_ptr<Root> m_root;// root of the scene graph

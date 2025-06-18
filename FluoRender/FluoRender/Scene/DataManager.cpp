@@ -6156,21 +6156,10 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	if (!view)
 		return;
 
-	bool streaming = glbin_settings.m_mem_swap;
 	double gpu_size = glbin_settings.m_graphics_mem;
 	double data_size = glbin_settings.m_large_data_size;
 	int brick_size = glbin_settings.m_force_brick_size;
 	int resp_time = glbin_settings.m_up_time;
-	std::string str_streaming;
-	if (streaming)
-	{
-		str_streaming = "Large data streaming is currently ON. ";
-		str_streaming += "FluoRender uses up to " + std::to_string(int(std::round(gpu_size))) + "MB GPU memory. ";
-		str_streaming += "Data >" + std::to_string(int(data_size)) + "MB are divided into " + std::to_string(brick_size) + "voxel bricks. ";
-		str_streaming += "System response time: " + std::to_string(resp_time) + "ms.";
-	}
-	else
-		str_streaming = "Large data streaming is currently OFF.";
 
 	bool enable_4d = false;
 	bool enable_rot_lock = false;
@@ -6179,6 +6168,17 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; ++m_cur_file)
 	{
+		bool streaming = glbin_settings.m_mem_swap;
+		std::string str_streaming;
+		if (streaming)
+		{
+			str_streaming = "Large data streaming is currently ON. ";
+			str_streaming += "FluoRender uses up to " + std::to_string(int(std::round(gpu_size))) + "MB GPU memory. ";
+			str_streaming += "Data >" + std::to_string(int(data_size)) + "MB are divided into " + std::to_string(brick_size) + "voxel bricks. ";
+			str_streaming += "System response time: " + std::to_string(resp_time) + "ms.";
+		}
+		else
+			str_streaming = "Large data streaming is currently OFF.";
 		SetProgress(std::round(100.0 * (m_cur_file + 1) / m_file_num), str_streaming);
 
 		int ch_num = 0;
@@ -7142,4 +7142,32 @@ flvr::CacheQueue* DataManager::GetCacheQueue(VolumeData* vd)
 	if (it != m_vd_cache_queue.end() && it->second)
 		return it->second.get();
 	return nullptr;
+}
+
+void DataManager::UpdateStreamMode(double data_size)
+{
+	int stream_rendering = glbin_settings.m_stream_rendering;
+
+	switch (stream_rendering)
+	{
+	case 0://disable
+		glbin_settings.m_mem_swap = false;
+		break;
+	case 1://enable
+		glbin_settings.m_mem_swap = true;
+		break;
+	case 2://enable for large data
+		if (data_size < 0.0)
+			return;
+		if (data_size > glbin_settings.m_large_data_size ||
+			data_size > glbin_settings.m_mem_limit)
+		{
+			glbin_settings.m_mem_swap = true;
+		}
+		else
+		{
+			glbin_settings.m_mem_swap = false;
+		}
+		break;
+	}
 }

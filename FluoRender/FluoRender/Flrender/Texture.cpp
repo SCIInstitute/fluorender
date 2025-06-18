@@ -32,6 +32,7 @@
 #include <TextureRenderer.h>
 #include <Global.h>
 #include <MainSettings.h>
+#include <DataManager.h>
 #include <Ray.h>
 #include <Utils.h>
 #include <algorithm>
@@ -506,13 +507,10 @@ namespace flvr
 				max_texture_size = ShaderProgram::max_texture_size();
 
 			//further determine the max texture size
+			double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
+			glbin_data_manager.UpdateStreamMode(data_size);
 			if (glbin_settings.m_mem_swap)
-			{
-				double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
-				if (data_size > glbin_settings.m_mem_limit ||
-					data_size > glbin_settings.m_large_data_size)
-					max_texture_size = glbin_settings.m_force_brick_size;
-			}
+				max_texture_size = glbin_settings.m_force_brick_size;
 		}
 
 		if (max_texture_size > 1)

@@ -1626,6 +1626,7 @@ void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent& event)
 void SettingDlg::OnStreamingComb(wxCommandEvent& event)
 {
 	glbin_settings.m_stream_rendering = m_streaming_comb->GetSelection();
+	glbin_data_manager.UpdateStreamMode(-1.0);
 	FluoRefresh(3, { gstNull });
 }
 

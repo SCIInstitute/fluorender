@@ -156,6 +156,7 @@ void Project::Open(const std::wstring& filename)
 		fconfig->Read("peeling layers", &ival, 1);
 		glbin_settings.m_peeling_layers = ival;
 		//UpdateProps({ gstMouseInt, gstStreamEnable, gstPeelNum });
+		glbin_data_manager.UpdateStreamMode(-1.0);
 	}
 
 	//current
