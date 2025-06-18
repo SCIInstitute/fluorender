@@ -1622,12 +1622,16 @@ void VolumePropPanel::EnableColormap(bool bval)
 	{
 		m_group->SetColormapMode(bval ? 1 : 0);
 		m_group->SetColormapDisp(bval);
+		m_group->SetLabelMode(bval ? 0 : 1);
 	}
 	else if (m_vd)
+	{
 		m_vd->SetColormapMode(bval ? 1 : 0);
 		m_vd->SetColormapDisp(bval);
+		m_vd->SetLabelMode(bval ? 0 : 1);
+	}
 
-	FluoRefresh(0, { gstColormap, gstUpdateSync }, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(0, { gstColormap, gstLabelMode, gstUpdateSync }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::EnableMip(bool bval)

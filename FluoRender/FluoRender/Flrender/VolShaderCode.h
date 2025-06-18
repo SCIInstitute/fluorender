@@ -53,7 +53,7 @@
 	"uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)\n" \
 	"uniform vec4 loc5;//(spcx, spcy, spcz, shuffle)\n" \
 	"uniform vec4 loc9;//(primary red, green, blue, alpha_power)\n" \
-	"uniform vec4 loc16;//(secondary red, green, blue, 0)\n" \
+	"uniform vec4 loc16;//(secondary red, green, blue, mask_threshold)\n" \
 	"\n" \
 	"uniform sampler3D tex0;//data volume\n" \
 	"uniform sampler3D tex1;//gm volume\n" \
@@ -73,7 +73,7 @@
 
 #define VOL_UNIFORMS_SIN_COLOR \
 	"//VOL_UNIFORMS_SIN_COLOR\n" \
-	"uniform vec4 loc6;//(red, green, blue, mask_threshold)\n" \
+	"uniform vec4 loc6;//(red, green, blue, 0)\n" \
 	"\n"
 
 #define VOL_UNIFORMS_COLORMAP \
@@ -721,14 +721,14 @@
 #define VOL_RASTER_BLEND_MASK \
 	"	//VOL_RASTER_BLEND_MASK\n" \
 	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
-	"	FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c*l.w;\n" \
+	"	FragColor = tf_alp*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c*l.w;\n" \
 	"	//FragColor = cmask;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_MASK_SOLID \
 	"	//VOL_RASTER_BLEND_MASK_SOLID\n" \
 	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
-	"	FragColor = tf_alp*cmask.x<loc6.w?vec4(0.0):vec4(cmask.x)*c;\n" \
+	"	FragColor = tf_alp*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c;\n" \
 	"\n"
 
 #define VOL_RASTER_BLEND_MASK_DMAP \
@@ -774,7 +774,7 @@
 #define VOL_RASTER_BLEND_LABEL_MASK \
 	"	//VOL_RASTER_BLEND_LABEL_MASK\n" \
 	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
-	"	if (cmask.x <= loc6.w)\n" \
+	"	if (cmask.x <= loc16.w)\n" \
 	"	{\n" \
 	"		FragColor = c*l.w;\n" \
 	"		return;\n" \
@@ -840,7 +840,7 @@
 #define VOL_RASTER_BLEND_LABEL_MASK \
 	"	//VOL_RASTER_BLEND_LABEL_MASK\n" \
 	"	vec4 cmask = texture(tex2, t.stp); //get mask value\n" \
-	"	if (cmask.x <= loc6.w)\n" \
+	"	if (cmask.x <= loc16.w)\n" \
 	"	{\n" \
 	"		FragColor = c*l.w;\n" \
 	"		return;\n" \
