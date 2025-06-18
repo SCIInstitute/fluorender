@@ -44,96 +44,92 @@
         <layout_movie></layout_movie>
         <layout_outadj></layout_outadj>
         <layout_project></layout_project>
-        <layout_brush>
-            &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-            &lt;aui-layout version="3.3.0"&gt;
-            &lt;notebooks&gt;
-            &lt;notebook name="BrushToolDlg"&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;0,2&lt;/pages&gt;
-            &lt;size&gt;13&lt;/size&gt;
-            &lt;direction&gt;5&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;1&lt;/pages&gt;
-            &lt;size&gt;300&lt;/size&gt;
-            &lt;row&gt;1&lt;/row&gt;
-            &lt;direction&gt;3&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;/notebook&gt;
-            &lt;/notebooks&gt;
-            &lt;/aui-layout&gt;
-        </layout_brush>
-        <layout_component>
-            &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-            &lt;aui-layout version="3.3.0"&gt;
-            &lt;notebooks&gt;
-            &lt;notebook name="ComponentDlg"&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;0,1,2&lt;/pages&gt;
-            &lt;size&gt;13&lt;/size&gt;
-            &lt;direction&gt;5&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;3&lt;/pages&gt;
-            &lt;size&gt;400&lt;/size&gt;
-            &lt;row&gt;1&lt;/row&gt;
-            &lt;direction&gt;3&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;/notebook&gt;
-            &lt;/notebooks&gt;
-            &lt;/aui-layout&gt;
-        </layout_component>
+        <layout_brush>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;aui-layout version="3.3.0"&gt;
+  &lt;notebooks&gt;
+    &lt;notebook name="BrushToolDlg"&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;0,2&lt;/pages&gt;
+        &lt;size&gt;13&lt;/size&gt;
+        &lt;direction&gt;5&lt;/direction&gt;
+      &lt;/tab&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;1&lt;/pages&gt;
+        &lt;size&gt;281&lt;/size&gt;
+        &lt;row&gt;1&lt;/row&gt;
+        &lt;direction&gt;3&lt;/direction&gt;
+      &lt;/tab&gt;
+    &lt;/notebook&gt;
+  &lt;/notebooks&gt;
+&lt;/aui-layout&gt;
+</layout_brush>
+        <layout_component>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;aui-layout version="3.3.0"&gt;
+  &lt;notebooks&gt;
+    &lt;notebook name="ComponentDlg"&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;0,1,2&lt;/pages&gt;
+        &lt;size&gt;13&lt;/size&gt;
+        &lt;direction&gt;5&lt;/direction&gt;
+      &lt;/tab&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;3&lt;/pages&gt;
+        &lt;size&gt;396&lt;/size&gt;
+        &lt;row&gt;1&lt;/row&gt;
+        &lt;direction&gt;3&lt;/direction&gt;
+      &lt;/tab&gt;
+    &lt;/notebook&gt;
+  &lt;/notebooks&gt;
+&lt;/aui-layout&gt;
+</layout_component>
         <layout_machine_learning>
         </layout_machine_learning>
-        <layout_measure>
-            &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-            &lt;aui-layout version="3.3.0"&gt;
-            &lt;notebooks&gt;
-            &lt;notebook name="MeasureDlg"&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;0,2&lt;/pages&gt;
-            &lt;size&gt;13&lt;/size&gt;
-            &lt;direction&gt;5&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;1&lt;/pages&gt;
-            &lt;size&gt;391&lt;/size&gt;
-            &lt;row&gt;1&lt;/row&gt;
-            &lt;direction&gt;3&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;/notebook&gt;
-            &lt;/notebooks&gt;
-            &lt;/aui-layout&gt;
-        </layout_measure>
+        <layout_measure>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;aui-layout version="3.3.0"&gt;
+  &lt;notebooks&gt;
+    &lt;notebook name="MeasureDlg"&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;0,2&lt;/pages&gt;
+        &lt;size&gt;13&lt;/size&gt;
+        &lt;direction&gt;5&lt;/direction&gt;
+      &lt;/tab&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;1&lt;/pages&gt;
+        &lt;size&gt;400&lt;/size&gt;
+        &lt;row&gt;1&lt;/row&gt;
+        &lt;direction&gt;3&lt;/direction&gt;
+      &lt;/tab&gt;
+    &lt;/notebook&gt;
+  &lt;/notebooks&gt;
+&lt;/aui-layout&gt;
+</layout_measure>
         <layout_settings>
         </layout_settings>
-        <layout_track>
-            &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-            &lt;aui-layout version="3.3.0"&gt;
-            &lt;notebooks&gt;
-            &lt;notebook name="TrackDlg"&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;0,1,2,3,6&lt;/pages&gt;
-            &lt;size&gt;13&lt;/size&gt;
-            &lt;direction&gt;5&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;5&lt;/pages&gt;
-            &lt;size&gt;422&lt;/size&gt;
-            &lt;row&gt;1&lt;/row&gt;
-            &lt;direction&gt;3&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;tab&gt;
-            &lt;pages&gt;4&lt;/pages&gt;
-            &lt;size&gt;178&lt;/size&gt;
-            &lt;row&gt;2&lt;/row&gt;
-            &lt;direction&gt;3&lt;/direction&gt;
-            &lt;/tab&gt;
-            &lt;/notebook&gt;
-            &lt;/notebooks&gt;
-            &lt;/aui-layout&gt;
-        </layout_track>
+        <layout_track>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;aui-layout version="3.3.0"&gt;
+  &lt;notebooks&gt;
+    &lt;notebook name="TrackDlg"&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;0,1,2,3,6&lt;/pages&gt;
+        &lt;size&gt;13&lt;/size&gt;
+        &lt;direction&gt;5&lt;/direction&gt;
+      &lt;/tab&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;5&lt;/pages&gt;
+        &lt;size&gt;400&lt;/size&gt;
+        &lt;row&gt;1&lt;/row&gt;
+        &lt;direction&gt;3&lt;/direction&gt;
+      &lt;/tab&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;4&lt;/pages&gt;
+        &lt;size&gt;186&lt;/size&gt;
+        &lt;row&gt;2&lt;/row&gt;
+        &lt;direction&gt;3&lt;/direction&gt;
+      &lt;/tab&gt;
+    &lt;/notebook&gt;
+  &lt;/notebooks&gt;
+&lt;/aui-layout&gt;
+</layout_track>
         <invert_slider>0</invert_slider>
         <mulfunc>1</mulfunc>
         <time_span>1</time_span>
