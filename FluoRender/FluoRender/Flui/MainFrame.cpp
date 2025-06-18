@@ -837,7 +837,12 @@ MainFrame::MainFrame(
 	m_movie_panel->LoadPerspective(glbin_settings.m_layout_movie);
 	m_output_adj_panel->LoadPerspective(glbin_settings.m_layout_outadj);
 	m_proj_panel->LoadPerspective(glbin_settings.m_layout_project);
+	m_brush_tool_dlg->LoadPerspective(glbin_settings.m_layout_brush);
+	m_component_dlg->LoadPerspective(glbin_settings.m_layout_component);
+	m_machine_learning_dlg->LoadPerspective(glbin_settings.m_layout_machine_learning);
 	m_measure_dlg->LoadPerspective(glbin_settings.m_layout_measure);
+	m_setting_dlg->LoadPerspective(glbin_settings.m_layout_settings);
+	m_track_dlg->LoadPerspective(glbin_settings.m_layout_track);
 	glbin_moviemaker.SetMainFrame(this);
 	glbin_moviemaker.SetView(view);
 	glbin_mov_def.Apply(&glbin_moviemaker);
@@ -870,12 +875,20 @@ MainFrame::~MainFrame()
 	glbin_comp_def.Set(&glbin_comp_analyzer);
 	glbin_mov_def.Set(&glbin_moviemaker);
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
+	//frame layout
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
+	//panels
 	glbin_settings.m_layout_clip = m_clip_plane_panel->SavePerspective();
 	glbin_settings.m_layout_movie = m_movie_panel->SavePerspective();
 	glbin_settings.m_layout_outadj = m_output_adj_panel->SavePerspective();
 	glbin_settings.m_layout_project = m_proj_panel->SavePerspective();
+	//dialogs
+	glbin_settings.m_layout_brush = m_brush_tool_dlg->SavePerspective();
+	glbin_settings.m_layout_component = m_component_dlg->SavePerspective();
+	glbin_settings.m_layout_machine_learning = m_machine_learning_dlg->SavePerspective();
 	glbin_settings.m_layout_measure = m_measure_dlg->SavePerspective();
+	glbin_settings.m_layout_settings = m_setting_dlg->SavePerspective();
+	glbin_settings.m_layout_track = m_track_dlg->SavePerspective();
 	glbin_settings.Save();
 
 	m_aui_mgr.UnInit();
@@ -1532,6 +1545,11 @@ ScriptBreakDlg* MainFrame::GetScriptBreakDlg()
 FpRangeDlg* MainFrame::GetFpRangeDlg()
 {
 	return m_fp_range_dlg;
+}
+
+MachineLearningDlg* MainFrame::GetMachineLearningDlg()
+{
+	return m_machine_learning_dlg;
 }
 
 void MainFrame::RefreshCanvases(const std::set<int>& canvases)

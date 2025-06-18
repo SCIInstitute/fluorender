@@ -277,7 +277,12 @@ void MainSettings::Read()
 		fconfig->Read("layout movie", &m_layout_movie);
 		fconfig->Read("layout outadj", &m_layout_outadj);
 		fconfig->Read("layout project", &m_layout_project);
+		fconfig->Read("layout brush", &m_layout_brush);
+		fconfig->Read("layout component", &m_layout_component);
+		fconfig->Read("layout machine learning", &m_layout_machine_learning);
 		fconfig->Read("layout measure", &m_layout_measure);
+		fconfig->Read("layout settings", &m_layout_settings);
+		fconfig->Read("layout track", &m_layout_track);
 		fconfig->Read("invert slider", &m_inverse_slider, false);
 		fconfig->Read("mulfunc", &m_mulfunc, 0);
 		fconfig->Read("time span", &m_time_span, 1.0);
@@ -525,7 +530,12 @@ void MainSettings::Save()
 	fconfig->Write("layout movie", m_layout_movie);
 	fconfig->Write("layout outadj", m_layout_outadj);
 	fconfig->Write("layout project", m_layout_project);
+	fconfig->Write("layout brush", m_layout_brush);
+	fconfig->Write("layout component", m_layout_component);
+	fconfig->Write("layout machine learning", m_layout_machine_learning);
 	fconfig->Write("layout measure", m_layout_measure);
+	fconfig->Write("layout settings", m_layout_settings);
+	fconfig->Write("layout track", m_layout_track);
 	fconfig->Write("invert slider", m_inverse_slider);
 	fconfig->Write("mulfunc", m_mulfunc);
 	fconfig->Write("time span", m_time_span);

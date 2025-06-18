@@ -35,7 +35,12 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <OutputAdjPanel.h>
 #include <ProjectPanel.h>
+#include <BrushToolDlg.h>
+#include <ComponentDlg.h>
+#include <MachineLearningDlg.h>
 #include <MeasureDlg.h>
+#include <SettingDlg.h>
+#include <TrackDlg.h>
 #include <RenderView.h>
 #include <compatibility.h>
 #include <BaseTreeFile.h>
@@ -1067,8 +1072,18 @@ void Project::Open(const std::wstring& filename)
 			frame->GetOutAdjPanel()->LoadPerspective(sval);
 		if (fconfig->Read("layout project", &sval))
 			frame->GetProjectPanel()->LoadPerspective(sval);
+		if (fconfig->Read("layout brush", &sval))
+			frame->GetBrushToolDlg()->LoadPerspective(sval);
+		if (fconfig->Read("layout component", &sval))
+			frame->GetComponentDlg()->LoadPerspective(sval);
+		if (fconfig->Read("layout machine learning", &sval))
+			frame->GetMachineLearningDlg()->LoadPerspective(sval);
 		if (fconfig->Read("layout measure", &sval))
 			frame->GetMeasureDlg()->LoadPerspective(sval);
+		if (fconfig->Read("layout track", &sval))
+			frame->GetTrackDlg()->LoadPerspective(sval);
+		if (fconfig->Read("layout measure", &sval))
+			frame->GetSettingDlg()->LoadPerspective(sval);
 	}
 
 	//interpolator
@@ -1739,7 +1754,12 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->Write("layout movie", frame->GetMoviePanel()->SavePerspective());
 	fconfig->Write("layout outadj", frame->GetOutAdjPanel()->SavePerspective());
 	fconfig->Write("layout project", frame->GetProjectPanel()->SavePerspective());
+	fconfig->Write("layout brush", frame->GetBrushToolDlg()->SavePerspective());
+	fconfig->Write("layout component", frame->GetComponentDlg()->SavePerspective());
+	fconfig->Write("layout machine learning", frame->GetMachineLearningDlg()->SavePerspective());
 	fconfig->Write("layout measure", frame->GetMeasureDlg()->SavePerspective());
+	fconfig->Write("layout settings", frame->GetSettingDlg()->SavePerspective());
+	fconfig->Write("layout track", frame->GetTrackDlg()->SavePerspective());
 	//interpolator
 	path = "/interpolator";
 	fconfig->SetPath(path);

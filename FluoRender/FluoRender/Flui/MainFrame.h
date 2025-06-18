@@ -301,6 +301,8 @@ public:
 	ScriptBreakDlg* GetScriptBreakDlg();
 	//floating point voluem range
 	FpRangeDlg* GetFpRangeDlg();
+	//machine learning dialog
+	MachineLearningDlg* GetMachineLearningDlg();
 
 	//views
 	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update

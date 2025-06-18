@@ -89,9 +89,14 @@ public:
 	std::string m_layout;	//layout of the main frame
 	std::string m_layout_clip;		//layout of the clip plane panel
 	std::string m_layout_movie;		//layout of the movie panel
-	std::string m_layout_outadj;		//layout of the output adjustment panel
+	std::string m_layout_outadj;	//layout of the output adjustment panel
 	std::string m_layout_project;	//layout of the project panel
-	std::string m_layout_measure;	//layout of the measurement panel
+	std::string m_layout_brush;		//layout of the brush tool dialog
+	std::string m_layout_component;	//layout of the component dialog
+	std::string m_layout_machine_learning;	//layout of the machine learning dialog
+	std::string m_layout_measure;	//layout of the measurement dialog
+	std::string m_layout_settings;	//layout of the settings dialog
+	std::string m_layout_track;		//layout of the tracking dialog
 
 	bool m_prj_save;		//save project automatically
 	bool m_prj_save_inc;	//save project incrementally
