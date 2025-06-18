@@ -280,7 +280,7 @@ public:
 
 	//draw volume
 	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
-	void Draw(bool otho = false, bool adaptive = false, bool intactive = false, double zoom = 1.0, double sf121 = 1.0);
+	void Draw(bool otho = false, bool intactive = false, double zoom = 1.0, double sf121 = 1.0);
 	void DrawBounds();
 	//draw mask (create the mask)
 	//type: 0-initial; 1-diffusion-based growing

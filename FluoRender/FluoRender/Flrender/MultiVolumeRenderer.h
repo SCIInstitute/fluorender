@@ -73,7 +73,6 @@ namespace flvr
 		void set_sampling_rate(double rate);
 		void set_interactive_rate(double irate);
 		void set_interactive_mode(bool mode);
-		void set_adaptive(bool b);
 		int get_slice_num();
 
 		//manages volume renderers for rendering
@@ -82,12 +81,11 @@ namespace flvr
 		int get_vr_num();
 
 		void draw(bool draw_wireframe_p,
-			bool adaptive,
 			bool interactive_mode_p, 
 			bool orthographic_p,
 			bool intp);
 
-		void draw_wireframe(bool orthographic_p);
+		void draw_wireframe(bool adaptive, bool orthographic_p);
 		void draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, bool intp);
 
 		double num_slices_to_rate(int slices);
@@ -144,7 +142,6 @@ namespace flvr
 
 		//sample rate etc
 		bool imode_;
-		bool adaptive_;
 		double irate_;
 		double sampling_rate_;
 		int num_slices_;

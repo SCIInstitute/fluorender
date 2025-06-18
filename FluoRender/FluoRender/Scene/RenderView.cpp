@@ -7943,7 +7943,7 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 	m_mvr->set_viewport(vp);
 	m_mvr->set_clear_color(clear_color);
 	m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-	m_mvr->draw(glbin_settings.m_test_wiref, glbin_settings.m_mouse_int, m_interactive, !m_persp, m_intp);
+	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
 
 	//draw shadows
 	DrawOLShadows(list);
@@ -8198,7 +8198,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
+		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
 		//restore
 		if (color_mode == 0)
 			vd->SetColormapProj(saved_colormap_proj);
@@ -8501,7 +8501,7 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->SetCurFramebuffer(m_cur_framebuffer);
-		vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
+		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
 	}
 
 	if (vd->GetShadowEnable())
@@ -8642,7 +8642,7 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
+	vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
 	vd->RestoreMode();
 	vd->SetColormapMode(colormode);
 	vd->SetAlphaEnable(alpha);
@@ -8774,7 +8774,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 			vd->SetViewport(vp);
 			vd->SetClearColor(clear_color);
 			vd->SetCurFramebuffer(m_cur_framebuffer);
-			vd->Draw(!m_persp, glbin_settings.m_mouse_int, m_interactive, m_scale_factor, Get121ScaleFactor());
+			vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
 			//restore
 			vd->RestoreMode();
 			vd->SetMaskMode(msk_mode);
@@ -8813,7 +8813,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 			m_mvr->set_viewport(vp);
 			m_mvr->set_clear_color(clear_color);
 			m_mvr->set_cur_framebuffer(m_cur_framebuffer);
-			m_mvr->draw(glbin_settings.m_test_wiref, glbin_settings.m_mouse_int, m_interactive, !m_persp, m_intp);
+			m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
 
 			int index = 0;
 			for (auto it = local_list.begin(); it != local_list.end(); ++it, ++index)

@@ -56,7 +56,7 @@ private:
 	//project format
 	wxComboBox* m_config_file_type_comb;
 	//mouse interations
-	wxCheckBox *m_mouse_int_chk;
+	wxComboBox *m_mouse_int_comb;
 	//depth peeling
 	wxSingleSlider *m_peeling_layers_sldr;
 	wxTextCtrl *m_peeling_layers_text;
@@ -96,8 +96,8 @@ private:
 	wxCheckBox *m_max_texture_size_chk;
 	wxTextCtrl *m_max_texture_size_text;
 	//memory settings
-	wxCheckBox *m_streaming_chk;
-	wxRadioBox *m_update_order_rbox;
+	wxComboBox *m_streaming_comb;
+	wxComboBox *m_update_order_comb;
 	wxSingleSlider *m_graphics_mem_sldr;
 	wxTextCtrl *m_graphics_mem_text;
 	wxSingleSlider *m_large_data_sldr;
@@ -155,9 +155,6 @@ private:
 	wxWindow* CreateFormatPage(wxWindow *parent);
 	wxWindow* CreateJavaPage(wxWindow *parent);
 
-	//streaming disable/enable
-	void EnableStreaming(bool enable);
-
 	//projec save
 	void OnProjectSaveCheck(wxCommandEvent& event);
 	void OnProjectSaveIncCheck(wxCommandEvent& event);
@@ -167,7 +164,7 @@ private:
 	void OnMulFuncBtnComb(wxCommandEvent& event);
 	void OnConfigFileTypeComb(wxCommandEvent& event);
 	//mouse interaction
-	void OnMouseIntCheck(wxCommandEvent& event);
+	void OnMouseIntComb(wxCommandEvent& event);
 	//peeling
 	void OnPeelingLayersChange(wxScrollEvent& event);
 	void OnPeelingLayersEdit(wxCommandEvent& event);
@@ -207,7 +204,7 @@ private:
 	void OnMaxTextureSizeChk(wxCommandEvent& event);
 	void OnMaxTextureSizeEdit(wxCommandEvent& event);
 	//memory settings
-	void OnStreamingChk(wxCommandEvent& event);
+	void OnStreamingComb(wxCommandEvent& event);
 	void OnUpdateOrderChange(wxCommandEvent & event);
 	void OnGraphicsMemChange(wxScrollEvent& event);
 	void OnGraphicsMemEdit(wxCommandEvent& event);

@@ -529,7 +529,8 @@ protected:
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
 		std::string full_key = getFullKey(key);
-		dictionary_.insert(std::pair<std::string, std::string>(full_key, value));
+		std::string normalized_value = NormalizeValue(value);
+		dictionary_.insert(std::pair<std::string, std::string>(full_key, normalized_value));
 		return true;
 	}
 
@@ -645,6 +646,21 @@ private:
 		result = std::string(tmp, len);
 		delete[] tmp;
 		return true;
+	}
+
+	std::string NormalizeValue(const std::string& value) const
+	{
+		std::string result = value;
+
+		// Remove line breaks
+		result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
+		result.erase(std::remove(result.begin(), result.end(), '\r'), result.end());
+
+		// Optionally trim leading/trailing whitespace
+		result.erase(0, result.find_first_not_of(" \t"));
+		result.erase(result.find_last_not_of(" \t") + 1);
+
+		return result;
 	}
 
 	static int _push_dispatch_(IniDispatch* const disp, void* const v_dictionary)

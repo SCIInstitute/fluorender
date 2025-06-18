@@ -142,7 +142,7 @@ public:
 	int m_peeling_layers;	//peeling layer number
 	bool m_micro_blend;		//blending slice in depth mode
 	bool m_grad_bg;
-	bool m_mouse_int;		//enable lower sample rate for mouse interactions
+	int m_interactive_quality;//enable lower sample rate for mouse interactions
 	double m_pin_threshold;	//rot center anchor thresh
 	double m_line_width;	//line width
 	int m_clip_mode;		//clipping plane display mode
@@ -188,6 +188,8 @@ public:
 	int m_point_volume_mode;//point volume mode
 							//0: use view plane; 1: use max value; 2: use accumulated value
 	
+	int m_stream_rendering;	//streaming rendering mode
+							//0: off; 1: on; 2: enable for large data
 	bool m_mem_swap;		//enable memory swap
 	double m_graphics_mem;	//in MB
 							//it's the user setting

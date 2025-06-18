@@ -134,10 +134,10 @@ void Project::Open(const std::wstring& filename)
 	if (fconfig->Exists(path))
 	{
 		fconfig->SetPath(path);
-		fconfig->Read("mouse int", &bval, true);
-		glbin_settings.m_mouse_int = bval;
-		fconfig->Read("mem swap", &bval, false);
-		glbin_settings.m_mem_swap = bval;
+		fconfig->Read("interactive quality", &ival, 2);
+		glbin_settings.m_interactive_quality = ival;
+		fconfig->Read("stream rendering", &ival, 2);
+		glbin_settings.m_stream_rendering = ival;
 		fconfig->Read("graphics mem", &dval, 1000.0);
 		glbin_settings.m_graphics_mem = dval;
 		fconfig->Read("large data size", &dval, 1000.0);
@@ -1245,8 +1245,8 @@ void Project::Save(const std::wstring& filename, bool inc)
 	path = "/settings";
 	fconfig->SetPath(path);
 	//save streaming mode
-	fconfig->Write("mouse int", glbin_settings.m_mouse_int);
-	fconfig->Write("mem swap", glbin_settings.m_mem_swap);
+	fconfig->Write("interactive quality", glbin_settings.m_interactive_quality);
+	fconfig->Write("stream rendering", glbin_settings.m_stream_rendering);
 	fconfig->Write("graphics mem", glbin_settings.m_graphics_mem);
 	fconfig->Write("large data size", glbin_settings.m_large_data_size);
 	fconfig->Write("force brick size", glbin_settings.m_force_brick_size);

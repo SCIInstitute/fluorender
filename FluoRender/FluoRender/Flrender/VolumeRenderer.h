@@ -133,7 +133,7 @@ namespace flvr
 		//interactive modes
 		void set_interactive_rate(double irate);
 		void set_interactive_mode(bool mode);
-		void set_adaptive(bool b);
+		bool get_adaptive();
 
 		//clipping planes
 		void set_planes(std::vector<fluo::Plane*> *p);
@@ -151,13 +151,12 @@ namespace flvr
 		void eval_ml_mode();
 		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		virtual void draw(bool draw_wireframe_p,
-			bool adaptive,
 			bool interactive_mode_p,
 			bool orthographic_p = false,
 			int mode = 0);
 		void draw_wireframe(bool orthographic_p = false);
 		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
-		void draw_volume(bool adaptive,
+		void draw_volume(
 			bool interactive_mode_p,
 			bool orthographic_p = false,
 			int mode = 0);
@@ -257,8 +256,6 @@ namespace flvr
 		bool solid_;
 		//interpolation
 		bool interpolate_;
-		//adaptive
-		bool adaptive_;
 		//planes
 		std::vector<fluo::Plane *> planes_;
 		//depth peel

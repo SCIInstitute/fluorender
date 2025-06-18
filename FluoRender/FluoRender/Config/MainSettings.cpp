@@ -83,7 +83,7 @@ MainSettings::MainSettings()
 	m_peeling_layers = 1;
 	m_micro_blend = false;
 	m_grad_bg = false;
-	m_mouse_int = true;
+	m_interactive_quality = 2;//enable for large data
 	m_pin_threshold = 10.0;
 	m_line_width = 3.0;
 	m_clip_mode = cm_Normal;
@@ -128,6 +128,7 @@ MainSettings::MainSettings()
 	m_pencil_dist = 30;
 	m_point_volume_mode = 2;
 
+	m_stream_rendering = 2;//enable for large data
 	m_mem_swap = false;
 	m_graphics_mem = 1000.0;
 	m_use_mem_limit = false;
@@ -302,7 +303,7 @@ void MainSettings::Read()
 		fconfig->Read("peeling layers", &m_peeling_layers, 1);
 		fconfig->Read("micro blend", &m_micro_blend, false);
 		fconfig->Read("grad bg", &m_grad_bg, false);
-		fconfig->Read("mouse int", &m_mouse_int, true);
+		fconfig->Read("interactive quality", &m_interactive_quality, 2);
 		fconfig->Read("pin thresh", &m_pin_threshold, 10.0);
 		fconfig->Read("line width", &m_line_width, 3.0);
 		fconfig->Read("clip mode", &m_clip_mode, static_cast<int>(cm_Normal));
@@ -371,6 +372,7 @@ void MainSettings::Read()
 	if (fconfig->Exists("/memory"))
 	{
 		fconfig->SetPath("/memory");
+		fconfig->Read("stream rendering", &m_stream_rendering, 2);
 		//enable mem swap
 		fconfig->Read("mem swap", &m_mem_swap, false);
 		//graphics memory limit
@@ -551,7 +553,7 @@ void MainSettings::Save()
 	fconfig->Write("peeling layers", m_peeling_layers);
 	fconfig->Write("micro blend", m_micro_blend);
 	fconfig->Write("grad bg", m_grad_bg);
-	fconfig->Write("mouse int", m_mouse_int);
+	fconfig->Write("interactive quality", m_interactive_quality);
 	fconfig->Write("pin thresh", m_pin_threshold);
 	fconfig->Write("line width", m_line_width);
 	fconfig->Write("clip mode", m_clip_mode);
@@ -608,6 +610,7 @@ void MainSettings::Save()
 
 	//memory settings
 	fconfig->SetPath("/memory");
+	fconfig->Write("stream rendering", m_stream_rendering);
 	//enable mem swap
 	fconfig->Write("mem swap", m_mem_swap);
 	//graphics memory limit

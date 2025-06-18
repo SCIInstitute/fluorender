@@ -266,7 +266,7 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
 	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
-	gridSizer->AddGrowableCol(1, 1); // Make the right column growable
+	gridSizer->AddGrowableCol(0, 1); // Make the text column growable
 
 	std::vector<std::string> keys =
 	{ "histogram", "paint size", "comp gen", "colocalize" };
@@ -437,131 +437,143 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	wxIntegerValidator<unsigned int> vald_int;
 	wxIntegerValidator<int> vald_int2;
 	wxStaticText* st;
-	//mouse interactions
-	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Variable Sample Rate");
-	m_mouse_int_chk = new wxCheckBox(page, wxID_ANY,
-		"Reduce volume sample rate for mouse interactions.\n"\
-		"Enable this option if mouse interaction speed is slow.");
-	m_mouse_int_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMouseIntCheck, this);
-	group1->Add(10, 5);
-	group1->Add(m_mouse_int_chk);
-	group1->Add(10, 5);
+	std::vector<wxString> items = { "Disable", "Enable", "Enable for large data" };
 
-	//memory settings
-	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Large Data Streaming");
-	m_streaming_chk = new wxCheckBox(page, wxID_ANY,
-		"Enable Streaming for Large Data.");
-	m_streaming_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStreamingChk, this);
-	wxString choices[2] = {"Back to Front", "Front to Back"};
-	m_update_order_rbox = new wxRadioBox(page, wxID_ANY,
-		"Update Order", wxDefaultPosition, wxDefaultSize,
-		2, choices, 0, wxRA_SPECIFY_COLS);
-	m_update_order_rbox->Bind(wxEVT_RADIOBOX, &SettingDlg::OnUpdateOrderChange, this);
-	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Graphics Memory:",
-		wxDefaultPosition, FromDIP(wxSize(110, -1)));
-	sizer2_1->Add(st);
-	m_graphics_mem_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_graphics_mem_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnGraphicsMemChange, this);
-	m_graphics_mem_text = new wxTextCtrl(page, wxID_ANY, "1000",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
-	m_graphics_mem_text->Bind(wxEVT_TEXT, &SettingDlg::OnGraphicsMemEdit, this);
-	st = new wxStaticText(page, 0, "MB",
-		wxDefaultPosition, FromDIP(wxSize(20, -1)));
-	sizer2_1->Add(m_graphics_mem_sldr, 1, wxEXPAND);
-	sizer2_1->Add(m_graphics_mem_text, 0, wxALIGN_CENTER);
-	sizer2_1->Add(st);
-	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Large Data Size:",
-		wxDefaultPosition, FromDIP(wxSize(110, -1)));
-	sizer2_2->Add(st);
+	//large data definition
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Large Data Definition");
+	wxFlexGridSizer* sizer1_1 = new wxFlexGridSizer(4, 5, 10); // 4 columns, 5px hgap, 10px vgap
+	sizer1_1->AddGrowableCol(1, 1); // Make the slider column growable
 	m_large_data_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_large_data_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLargeDataChange, this);
 	m_large_data_text = new wxTextCtrl(page, wxID_ANY, "200",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_large_data_text->Bind(wxEVT_TEXT, &SettingDlg::OnLargeDataEdit, this);
-	st = new wxStaticText(page, 0, "MB",
-		wxDefaultPosition, FromDIP(wxSize(20, -1)));
-	sizer2_2->Add(m_large_data_sldr, 1, wxEXPAND);
-	sizer2_2->Add(m_large_data_text, 0, wxALIGN_CENTER);
-	sizer2_2->Add(st);
-	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Brick Size:",
-		wxDefaultPosition, FromDIP(wxSize(110, -1)));
-	sizer2_3->Add(st);
+	sizer1_1->Add(new wxStaticText(page, 0, "Large Data Size:"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_1->Add(m_large_data_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer1_1->Add(m_large_data_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_1->Add(new wxStaticText(page, 0, "MB"),
+		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+	st = new wxStaticText(page, 0,
+		"Large data is defined as the volume data size in graphics memory.\n"\
+		"Other options can be enabled based on large data to improve performance.");
+	group1->Add(10, 5);
+	group1->Add(sizer1_1, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(st);
+	group1->Add(10, 5);
+
+	//mouse interaction
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Variable Sample Rate");
+	wxFlexGridSizer* sizer2_1 = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
+	sizer2_1->AddGrowableCol(0, 1); // Make the right column growable
+	st = new wxStaticText(page, 0, "Reduce volume rendering quality during interactions");
+	m_mouse_int_comb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_mouse_int_comb->Append(items);
+	m_mouse_int_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnMouseIntComb, this);
+	sizer2_1->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer2_1->Add(m_mouse_int_comb, 1, wxEXPAND | wxRIGHT, 5);
+	group2->Add(10, 5);
+	group2->Add(sizer2_1, 0, wxEXPAND);
+	group2->Add(10, 5);
+
+	//streaming settings
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Streamed Rendering");
+	//slider group
+	wxFlexGridSizer* sizer3_1 = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
+	sizer3_1->AddGrowableCol(0, 1); // Make the right column growable
+	//enable streaming
+	m_streaming_comb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_streaming_comb->Append(items);
+	m_streaming_comb->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStreamingComb, this);
+	sizer3_1->Add(new wxStaticText(page, 0, "Enable streamed rendering"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_1->Add(m_streaming_comb, 1, wxEXPAND | wxRIGHT, 5);
+	//update order
+	std::vector<wxString> update_options = {"Back to Front", "Front to Back"};
+	m_update_order_comb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	m_update_order_comb->Append(update_options);
+	m_update_order_comb->Bind(wxEVT_RADIOBOX, &SettingDlg::OnUpdateOrderChange, this);
+	sizer3_1->Add(new wxStaticText(page, 0, "Update order"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_1->Add(m_update_order_comb, 1, wxEXPAND | wxRIGHT, 5);
+
+	//slider group
+	wxFlexGridSizer* sizer3_2 = new wxFlexGridSizer(4, 5, 10); // 4 columns, 5px hgap, 10px vgap
+	sizer3_2->AddGrowableCol(1, 1); // Make the slider column growable
+	//graphics memory
+	m_graphics_mem_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_graphics_mem_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnGraphicsMemChange, this);
+	m_graphics_mem_text = new wxTextCtrl(page, wxID_ANY, "1000",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_graphics_mem_text->Bind(wxEVT_TEXT, &SettingDlg::OnGraphicsMemEdit, this);
+	sizer3_2->Add(new wxStaticText(page, 0, "Graphics Memory:"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(m_graphics_mem_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer3_2->Add(m_graphics_mem_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(new wxStaticText(page, 0, "MB"),
+		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+	//brick size
 	m_block_size_sldr = new wxSingleSlider(page, wxID_ANY, 7, 6, 12,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_block_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnBlockSizeChange, this);
 	m_block_size_text = new wxTextCtrl(page, wxID_ANY, "128",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_block_size_text->Bind(wxEVT_TEXT, &SettingDlg::OnBlockSizeEdit, this);
-	st = new wxStaticText(page, 0, "vx",
-		wxDefaultPosition, FromDIP(wxSize(20, -1)));
-	sizer2_3->Add(m_block_size_sldr, 1, wxEXPAND);
-	sizer2_3->Add(m_block_size_text, 0, wxALIGN_CENTER);
-	sizer2_3->Add(st);
-	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Response Time:",
-		wxDefaultPosition, FromDIP(wxSize(110, -1)));
-	sizer2_4->Add(st);
+	sizer3_2->Add(new wxStaticText(page, 0, "Brick Size:"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(m_block_size_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer3_2->Add(m_block_size_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(new wxStaticText(page, 0, "voxel"),
+		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+	//response time
 	m_response_time_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_response_time_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnResponseTimeChange, this);
 	m_response_time_text = new wxTextCtrl(page, wxID_ANY, "100",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_response_time_text->Bind(wxEVT_TEXT, &SettingDlg::OnResponseTimeEdit, this);
-	st = new wxStaticText(page, 0, "ms",
-		wxDefaultPosition, FromDIP(wxSize(20, -1)));
-	sizer2_4->Add(m_response_time_sldr, 1, wxEXPAND);
-	sizer2_4->Add(m_response_time_text, 0, wxALIGN_CENTER);
-	sizer2_4->Add(st);
-	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Detail Level Offset:",
-		wxDefaultPosition, FromDIP(wxSize(110, -1)));
-	sizer2_5->Add(st);
+	sizer3_2->Add(new wxStaticText(page, 0, "Response Time:"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(m_response_time_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer3_2->Add(m_response_time_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(new wxStaticText(page, 0, "ms"),
+		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+	//detail level offset
 	m_detail_level_offset_sldr = new wxSingleSlider(page, wxID_ANY, 0, -5, 5,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_detail_level_offset_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnDetailLevelOffsetChange, this);
 	m_detail_level_offset_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int2);
 	m_detail_level_offset_text->Bind(wxEVT_TEXT, &SettingDlg::OnDetailLevelOffsetEdit, this);
-	sizer2_5->Add(m_detail_level_offset_sldr, 1, wxEXPAND);
-	sizer2_5->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER);
-	sizer2_5->Add(20, 5);
-	group2->Add(10, 5);
-	group2->Add(m_streaming_chk);
-	group2->Add(10, 10);
-	group2->Add(m_update_order_rbox);
-	group2->Add(10, 10);
-	group2->Add(sizer2_1, 0, wxEXPAND);
-	group2->Add(10, 5);
-	group2->Add(sizer2_2, 0, wxEXPAND);
-	group2->Add(10, 5);
-	group2->Add(sizer2_3, 0, wxEXPAND);
-	group2->Add(10, 5);
-	group2->Add(sizer2_4, 0, wxEXPAND);
-	group2->Add(10, 5);
-	group2->Add(sizer2_5, 0, wxEXPAND);
-	group2->Add(10, 5);
-	st = new wxStaticText(page, 0,
-		"Note: Configure these settings before loading data.\n"\
-		"Data streaming allows rendering and processing data of larger size than\n"\
-		"available graphics memory. Data are divided into bricks. The bricks are\n"\
-		"sequentially loaded into graphics memory for rendering and processing.\n"\
-		"Different computer hardware may need different settings. You may need to\n"\
-		"experiment in order to find the best settings for your computer.");
-	group2->Add(st);
-	group2->Add(10, 5);
+	sizer3_2->Add(new wxStaticText(page, 0, "Detail Level Offset:"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(m_detail_level_offset_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer3_2->Add(m_detail_level_offset_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer3_2->Add(new wxStaticText(page, 0, ""),
+		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer3_2, 0, wxEXPAND);
+	group3->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group2, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group3, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	page->SetAutoLayout(true);
@@ -1096,14 +1108,13 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//performance page
 	//mouse interactions
 	if (update_all || FOUND_VALUE(gstMouseInt))
-		m_mouse_int_chk->SetValue(glbin_settings.m_mouse_int);
+		m_mouse_int_comb->SetSelection(glbin_settings.m_interactive_quality);
 
 	//memory settings
 	if (update_all || FOUND_VALUE(gstStreamEnable))
 	{
-		m_streaming_chk->SetValue(glbin_settings.m_mem_swap);
-		EnableStreaming(glbin_settings.m_mem_swap);
-		m_update_order_rbox->SetSelection(glbin_settings.m_update_order);
+		m_streaming_comb->SetSelection(glbin_settings.m_stream_rendering);
+		m_update_order_comb->SetSelection(glbin_settings.m_update_order);
 		m_graphics_mem_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_graphics_mem));
 		m_graphics_mem_sldr->ChangeValue(std::round(glbin_settings.m_graphics_mem / 100.0));
 		m_large_data_text->ChangeValue(wxString::Format("%d", (int)glbin_settings.m_large_data_size));
@@ -1346,10 +1357,10 @@ void SettingDlg::OnConfigFileTypeComb(wxCommandEvent& event)
 	glbin_settings.m_config_file_type = m_config_file_type_comb->GetCurrentSelection();
 }
 
-void SettingDlg::OnMouseIntCheck(wxCommandEvent& event)
+void SettingDlg::OnMouseIntComb(wxCommandEvent& event)
 {
-	glbin_settings.m_mouse_int = m_mouse_int_chk->GetValue();
-	FluoRefresh(3, { gstNull });
+	glbin_settings.m_interactive_quality = m_mouse_int_comb->GetCurrentSelection();
+	//FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnPeelingLayersChange(wxScrollEvent& event)
@@ -1376,40 +1387,6 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_micro_blend = m_micro_blend_chk->GetValue();
 	FluoRefresh(3, { gstNull });
-}
-
-void SettingDlg::EnableStreaming(bool enable)
-{
-	if (enable)
-	{
-		m_update_order_rbox->Enable(0, true);
-		m_update_order_rbox->Enable(1, true);
-		m_graphics_mem_sldr->Enable();
-		m_graphics_mem_text->Enable();
-		m_large_data_sldr->Enable();
-		m_large_data_text->Enable();
-		m_block_size_sldr->Enable();
-		m_block_size_text->Enable();
-		m_response_time_sldr->Enable();
-		m_response_time_text->Enable();
-		m_detail_level_offset_sldr->Enable();
-		m_detail_level_offset_text->Enable();
-	}
-	else
-	{
-		m_update_order_rbox->Enable(0, false);
-		m_update_order_rbox->Enable(1, false);
-		m_graphics_mem_sldr->Disable();
-		m_graphics_mem_text->Disable();
-		m_large_data_sldr->Disable();
-		m_large_data_text->Disable();
-		m_block_size_sldr->Disable();
-		m_block_size_text->Disable();
-		m_response_time_sldr->Disable();
-		m_response_time_text->Disable();
-		m_detail_level_offset_sldr->Disable();
-		m_detail_level_offset_text->Disable();
-	}
 }
 
 //gradient background
@@ -1646,19 +1623,15 @@ void SettingDlg::OnMaxTextureSizeEdit(wxCommandEvent& event)
 }
 
 //memory settings
-void SettingDlg::OnStreamingChk(wxCommandEvent& event)
+void SettingDlg::OnStreamingComb(wxCommandEvent& event)
 {
-	if (m_streaming_chk->GetValue())
-		glbin_settings.m_mem_swap = true;
-	else
-		glbin_settings.m_mem_swap = false;
-	EnableStreaming(glbin_settings.m_mem_swap);
+	glbin_settings.m_stream_rendering = m_streaming_comb->GetSelection();
 	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent& event)
 {
-	glbin_settings.m_update_order = m_update_order_rbox->GetSelection();
+	glbin_settings.m_update_order = m_update_order_comb->GetSelection();
 }
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent& event)

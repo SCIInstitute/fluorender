@@ -89,8 +89,6 @@ namespace flvr
 		solid_(false),
 		//interpolate
 		interpolate_(true),
-		//adaptive
-		adaptive_(true),
 		//clipping planes
 		planes_(planes),
 		//depth peel
@@ -155,8 +153,6 @@ namespace flvr
 		solid_(copy.solid_),
 		//interpolate
 		interpolate_(copy.interpolate_),
-		//adaptive
-		adaptive_(copy.adaptive_),
 		//depth peel
 		depth_peel_(copy.depth_peel_),
 		//segmentation
@@ -393,9 +389,24 @@ namespace flvr
 		imode_ = mode;
 	}
 
-	void VolumeRenderer::set_adaptive(bool b)
+	bool VolumeRenderer::get_adaptive()
 	{
-		adaptive_ = b;
+		int interactive_quality = glbin_settings.m_interactive_quality;
+		switch (interactive_quality)
+		{
+		case 0://disable
+			return false;
+		case 1://enaable
+			return true;
+		case 2://enable for large data
+		{
+			auto tex = tex_.lock();
+			if (!tex)
+				return false;
+			return tex->get_brick_num() > 1;
+		}
+		}
+		return false;
 	}
 
 	//clipping planes
@@ -587,15 +598,15 @@ namespace flvr
 		}
 	}
 
-	void VolumeRenderer::draw(bool draw_wireframe_p, bool adaptive,
+	void VolumeRenderer::draw(bool draw_wireframe_p,
 		bool interactive_mode_p, bool orthographic_p, int mode)
 	{
-		draw_volume(adaptive, interactive_mode_p, orthographic_p, mode);
+		draw_volume(interactive_mode_p, orthographic_p, mode);
 		if(draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
 
-	void VolumeRenderer::draw_volume(bool adaptive,
+	void VolumeRenderer::draw_volume(
 		bool interactive_mode_p,
 		bool orthographic_p,
 		int mode)
@@ -618,11 +629,11 @@ namespace flvr
 		if (!bricks || bricks->size() == 0)
 			return;
 
-		set_adaptive(adaptive);
 		set_interactive_mode(interactive_mode_p);
 
+		bool adaptive = get_adaptive();
 		// Set sampling rate based on interaction
-		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
+		double rate = imode_ && adaptive ? irate_ : sampling_rate_;
 		fluo::Vector diag = tex->bbox()->diagonal();
 		fluo::Vector cell_diag(
 			diag.x() / tex->nx(),
@@ -677,7 +688,7 @@ namespace flvr
 		int h2 = h;
 		double sf;
 		std::string bbufname;
-		if (imode_ && adaptive_)
+		if (imode_ && adaptive)
 		{
 			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
 			bbufname = "blend_int";
@@ -1113,7 +1124,8 @@ namespace flvr
 		glEnable(GL_DEPTH_TEST);
 		std::vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 
-		double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
+		bool adaptive = get_adaptive();
+		double rate = imode_ && adaptive ? irate_ : sampling_rate_;
 		fluo::Vector diag = tex->bbox()->diagonal();
 		fluo::Vector cell_diag(diag.x()/tex->nx(),
 			diag.y()/tex->ny(),

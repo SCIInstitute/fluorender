@@ -143,7 +143,7 @@
         <peeling_layers>2</peeling_layers>
         <micro_blend>0</micro_blend>
         <grad_bg>0</grad_bg>
-        <mouse_int>1</mouse_int>
+        <interactive_quality>2</interactive_quality>
         <pin_thresh>10</pin_thresh>
         <line_width>3</line_width>
         <clip_mode>0</clip_mode>
@@ -194,6 +194,7 @@
         <point_volume>2</point_volume>
     </ruler>
     <memory>
+    	<stream_rendering>2</stream_rendering>
         <mem_swap>1</mem_swap>
         <graphics_mem>8000</graphics_mem>
         <large_data_size>1000</large_data_size>

@@ -58,7 +58,6 @@ MultiVolumeRenderer::MultiVolumeRenderer()
 	//filter_size_max_(0.0),
 	filter_size_shp_(0.0),
 	imode_(false),
-	adaptive_(true),
 	irate_(1.0),
 	sampling_rate_(1.0),
 	num_slices_(0),
@@ -77,7 +76,6 @@ MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
 	//filter_size_max_(0.0),
 	filter_size_shp_(0.0),
 	imode_(copy.imode_),
-	adaptive_(copy.adaptive_),
 	irate_(copy.irate_),
 	sampling_rate_(copy.sampling_rate_),
 	num_slices_(0),
@@ -111,11 +109,6 @@ void MultiVolumeRenderer::set_interactive_rate(double rate)
 void MultiVolumeRenderer::set_interactive_mode(bool mode)
 {
 	imode_ = mode;
-}
-
-void MultiVolumeRenderer::set_adaptive(bool b)
-{
-	adaptive_ = b;
 }
 
 int MultiVolumeRenderer::get_slice_num()
@@ -167,14 +160,23 @@ int MultiVolumeRenderer::get_vr_num()
 
 //draw
 void MultiVolumeRenderer::draw(bool draw_wireframe_p,
-	bool adaptive,
 	bool interactive_mode_p,
 	bool orthographic_p,
 	bool intp)
 {
+	bool adaptive = false;
+	int interactive_quality = glbin_settings.m_interactive_quality;
+	for (size_t i = 0; i < vr_list_.size(); ++i)
+	{
+		if (vr_list_[i]->get_adaptive())
+		{
+			adaptive = true;
+			break;
+		}
+	}
 	draw_volume(adaptive, interactive_mode_p, orthographic_p, intp);
 	if(draw_wireframe_p)
-		draw_wireframe(orthographic_p);
+		draw_wireframe(adaptive, orthographic_p);
 }
 
 void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, bool intp)
@@ -185,11 +187,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	fluo::Ray view_ray = vr_list_[0]->compute_view();
 	fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
-	set_adaptive(adaptive);
 	set_interactive_mode(interactive_mode_p);
 
 	// Set sampling rate based on interaction.
-	double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
+	double rate = imode_ && adaptive ? irate_ : sampling_rate_;
 	fluo::Vector diag = bbox_.diagonal();
 	fluo::Vector cell_diag(diag.x()/res_.x(),
 		diag.y()/res_.y(),
@@ -240,7 +241,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	double sf;
 	std::string bbufname;
-	if (imode_ && adaptive_)
+	if (imode_ && adaptive)
 	{
 		sf = fluo::Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.1, 1.0);
 		bbufname = "blend_int";
@@ -957,7 +958,7 @@ std::vector<TextureBrick*> *MultiVolumeRenderer::get_combined_bricks(
 	return result;
 }
 
-void MultiVolumeRenderer::draw_wireframe(bool orthographic_p)
+void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 {
 	if (get_vr_num()<=0)
 		return;
@@ -966,7 +967,7 @@ void MultiVolumeRenderer::draw_wireframe(bool orthographic_p)
 	fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
 	// Set sampling rate based on interaction.
-	double rate = imode_ && adaptive_ ? irate_ : sampling_rate_;
+	double rate = imode_ && adaptive ? irate_ : sampling_rate_;
 	fluo::Vector diag = bbox_.diagonal();
 	fluo::Vector cell_diag(diag.x()/res_.x(),
 		diag.y()/res_.y(),

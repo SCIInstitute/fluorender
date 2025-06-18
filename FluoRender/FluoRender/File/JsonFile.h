@@ -682,7 +682,8 @@ protected:
 				return false;
 			}
 		}
-		AssignValue(item, value.c_str());
+		std::string normalized_value = NormalizeValue(value);
+		AssignValue(item, normalized_value.c_str());
 		return true;
 	}
 
@@ -1110,6 +1111,35 @@ private:
 		}
 	}
 
+	std::string NormalizeValue(const std::string& value) const
+	{
+		std::string result;
+		result.reserve(value.size());
+
+		for (char c : value) {
+			switch (c) {
+			case '\"': result += "\\\""; break;
+			case '\\': result += "\\\\"; break;
+			case '\b': result += "\\b"; break;
+			case '\f': result += "\\f"; break;
+			case '\n': result += "\\n"; break;
+			case '\r': result += "\\r"; break;
+			case '\t': result += "\\t"; break;
+			default:
+				// Escape control characters (ASCII < 0x20)
+				if (static_cast<unsigned char>(c) < 0x20) {
+					char buf[7];
+					std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+					result += buf;
+				}
+				else {
+					result += c;
+				}
+			}
+		}
+
+		return result;
+	}
 };
 
 #endif//_JSONFILE_H_
