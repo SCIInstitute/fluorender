@@ -105,6 +105,10 @@ public:
 	bool m_override_vox;
 	int m_last_tool;		//last tool
 	int m_config_file_type;	//0:ini, 1:xml, 2:json, 3: pole
+	double m_capture_scale;	//capture scale factor to improve quality
+	double m_int_scale;		//interactive scale factor to reduce quality
+	double m_large_scale;	//large data scale factor
+	double m_small_scale;	//small data scale factor
 
 	bool m_slice_sequence;	//if slices are sequence
 	bool m_chann_sequence;	//read channels
@@ -198,6 +202,7 @@ public:
 	double m_mem_limit;		//limit
 	double m_available_mem; //available memory
 	double m_large_data_size;//data size considered as large and needs forced bricking
+	double m_small_data_size;//data size considered as small and can increase quality
 	int m_force_brick_size;	//in pixels
 							//it's the user setting
 							//final value is determined by both reading from the card and this value

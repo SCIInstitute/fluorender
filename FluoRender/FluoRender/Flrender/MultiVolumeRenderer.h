@@ -70,8 +70,6 @@ namespace flvr
 
 		//mode and sampling rate
 		void set_mode(const RenderMode& mode);
-		void set_sampling_rate(double rate);
-		void set_interactive_rate(double irate);
 		void set_interactive_mode(bool mode);
 		int get_slice_num();
 
@@ -142,8 +140,6 @@ namespace flvr
 
 		//sample rate etc
 		bool imode_;
-		double irate_;
-		double sampling_rate_;
 		int num_slices_;
 
 		//light position

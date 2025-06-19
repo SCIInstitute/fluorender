@@ -345,18 +345,6 @@ namespace flvr
 		return alpha_;
 	}
 
-	//sampling rate
-	void VolumeRenderer::set_sampling_rate(double rate)
-	{
-		sampling_rate_ = rate;
-		irate_ = rate / 2.0;
-	}
-
-	double VolumeRenderer::get_sampling_rate()
-	{
-		return sampling_rate_;
-	}
-
 	double VolumeRenderer::num_slices_to_rate(int num_slices)
 	{
 		auto tex = tex_.lock();
@@ -376,47 +364,6 @@ namespace flvr
 	int VolumeRenderer::get_slice_num()
 	{
 		return num_slices_;
-	}
-
-	//interactive modes
-	void VolumeRenderer::set_interactive_rate(double rate)
-	{
-		irate_ = rate;
-	}
-
-	void VolumeRenderer::set_interactive_mode(bool mode)
-	{
-		imode_ = mode;
-	}
-
-	bool VolumeRenderer::get_adaptive()
-	{
-		int interactive_quality = glbin_settings.m_interactive_quality;
-		switch (interactive_quality)
-		{
-		case 0://disable
-			return false;
-		case 1://enaable
-			return true;
-		case 2://enable for large data
-		{
-			double data_size = get_data_size();
-			if (data_size > glbin_settings.m_large_data_size ||
-				data_size > glbin_settings.m_mem_limit)
-				return true;
-			else
-				return false;
-		}
-		}
-		return false;
-	}
-
-	double VolumeRenderer::get_data_size()
-	{
-		auto tex = tex_.lock();
-		if (!tex)
-			return 0.0;
-		return tex->nx() * tex->ny() * tex->nz() / 1.04e6;
 	}
 
 	//clipping planes
@@ -642,8 +589,7 @@ namespace flvr
 		set_interactive_mode(interactive_mode_p);
 
 		bool adaptive = get_adaptive();
-		// Set sampling rate based on interaction
-		double rate = imode_ && adaptive ? irate_ : sampling_rate_;
+		double rate = get_sample_rate();
 		fluo::Vector diag = tex->bbox()->diagonal();
 		fluo::Vector cell_diag(
 			diag.x() / tex->nx(),
@@ -1135,7 +1081,7 @@ namespace flvr
 		std::vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 
 		bool adaptive = get_adaptive();
-		double rate = imode_ && adaptive ? irate_ : sampling_rate_;
+		double rate = get_sample_rate();
 		fluo::Vector diag = tex->bbox()->diagonal();
 		fluo::Vector cell_diag(diag.x()/tex->nx(),
 			diag.y()/tex->ny(),
@@ -1243,6 +1189,8 @@ namespace flvr
 			glbin_framebuffer_manager.framebuffer(FB_3D_Int, 0, 0);
 		if (fbo_mask)
 			fbo_mask->bind();
+
+		double rate = get_sample_rate();
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -1402,8 +1350,8 @@ namespace flvr
 			}
 
 			//size and sample rate
-			seg_shader->setLocalParam(4, 1.0/b->nx(), 1.0/b->ny(), 1.0/b->nz(),
-				mode_==RENDER_MODE_OVER?1.0/sampling_rate_:1.0);
+			seg_shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
+				mode_ == RENDER_MODE_OVER ? 1.0 / rate : 1.0);
 
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)

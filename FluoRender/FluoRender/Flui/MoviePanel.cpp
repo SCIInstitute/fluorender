@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MoviePanel.h>
 #include <Global.h>
+#include <GlobalStates.h>
 #include <Names.h>
 #include <MainSettings.h>
 #include <MovieDefault.h>
@@ -1680,6 +1681,7 @@ void MoviePanel::Save(const std::wstring& filename)
 	if (glbin_moviemaker.IsRunning())
 		return;
 
+	glbin_states.m_capture = true;
 	glbin_moviemaker.SetFileName(filename);
 	glbin_moviemaker.PlaySave();
 

@@ -216,6 +216,16 @@ namespace flvr
 		//set cache queue
 		void set_cache_queue(CacheQueue* cache_queue) { cache_queue_ = cache_queue; }
 
+		//interactive modes
+		void set_interactive_mode(bool mode) { imode_ = mode; }
+		bool get_adaptive();
+		double get_data_size();//size in mb
+		int get_size_type();//0:normal; 1:small; 2:large
+
+		//sample rate
+		void set_sample_rate(double rate) { sample_rate_ = rate; }
+		double get_sample_rate();
+
 		//main(cpu) memory limit
 		static void set_mainmem_buf_size(double val) { mainmem_buf_size_ = val; }
 		static double get_mainmem_buf_size() { return mainmem_buf_size_; }
@@ -278,9 +288,8 @@ namespace flvr
 		};
 		std::weak_ptr<Texture> tex_;
 		RenderMode mode_;
-		double sampling_rate_;
+		double sample_rate_;
 		int num_slices_;
-		double irate_;
 		bool imode_;
 
 		//saved framebuffer

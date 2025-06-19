@@ -53,5 +53,7 @@ public:
 	std::string m_status_str;		//string to show on main statusbar
 
 	bool m_benchmark = false;	//benchmark mode
+
+	bool m_capture = false;	//capture mode, used for movie making
 };
 #endif//_GLOBALSTATES_H_

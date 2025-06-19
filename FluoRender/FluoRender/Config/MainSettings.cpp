@@ -46,6 +46,10 @@ MainSettings::MainSettings()
 	m_override_vox = true;
 	m_last_tool = 0;
 	m_config_file_type = 0;
+	m_capture_scale = 2.0;
+	m_int_scale = 0.5;
+	m_large_scale = 0.5;
+	m_small_scale = 2.0;
 
 	m_slice_sequence = false;
 	m_chann_sequence = false;
@@ -135,6 +139,7 @@ MainSettings::MainSettings()
 	m_mem_limit = 1000.0;
 	m_available_mem = 1000.0;
 	m_large_data_size = 1000.0;
+	m_small_data_size = 100.0;
 	m_force_brick_size = 128;
 	m_up_time = 100;
 	m_update_order = 0;
@@ -235,6 +240,10 @@ void MainSettings::Read()
 		fconfig->Read("override vox", &m_override_vox, true);
 		fconfig->Read("last tool", &m_last_tool, 0);
 		fconfig->Read("config file type", &m_config_file_type, 0);
+		fconfig->Read("capture scale", &m_capture_scale, 2.0);
+		fconfig->Read("int scale", &m_int_scale, 0.5);
+		fconfig->Read("large scale", &m_large_scale, 0.5);
+		fconfig->Read("small scale", &m_small_scale, 2.0);
 	}
 	//image
 	if (fconfig->Exists("/image"))
@@ -381,6 +390,8 @@ void MainSettings::Read()
 		fconfig->Read("graphics mem", &m_graphics_mem, 1000.0);
 		//large data size
 		fconfig->Read("large data size", &m_large_data_size, 1000.0);
+		//small data size
+		fconfig->Read("small data size", &m_small_data_size, 100.0);
 		//force brick size
 		fconfig->Read("force brick size", &m_force_brick_size, 128);
 		//response time
@@ -497,6 +508,10 @@ void MainSettings::Save()
 	fconfig->Write("override vox", m_override_vox);
 	fconfig->Write("last tool", m_last_tool);
 	fconfig->Write("config file type", m_config_file_type);
+	fconfig->Write("capture scale", m_capture_scale);
+	fconfig->Write("int scale", m_int_scale);
+	fconfig->Write("large scale", m_large_scale);
+	fconfig->Write("small scale", m_small_scale);
 
 	//image
 	fconfig->SetPath("/image");
@@ -621,6 +636,8 @@ void MainSettings::Save()
 	fconfig->Write("graphics mem", m_graphics_mem);
 	//large data size
 	fconfig->Write("large data size", m_large_data_size);
+	//small data size
+	fconfig->Write("small data size", m_small_data_size);
 	//force brick size
 	fconfig->Write("force brick size", m_force_brick_size);
 	//response time

@@ -58,8 +58,6 @@ MultiVolumeRenderer::MultiVolumeRenderer()
 	//filter_size_max_(0.0),
 	filter_size_shp_(0.0),
 	imode_(false),
-	irate_(1.0),
-	sampling_rate_(1.0),
 	num_slices_(0),
 	va_slices_(0)
 {
@@ -76,8 +74,6 @@ MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
 	//filter_size_max_(0.0),
 	filter_size_shp_(0.0),
 	imode_(copy.imode_),
-	irate_(copy.irate_),
-	sampling_rate_(copy.sampling_rate_),
 	num_slices_(0),
 	va_slices_(0)
 {
@@ -93,17 +89,6 @@ MultiVolumeRenderer::~MultiVolumeRenderer()
 void MultiVolumeRenderer::set_mode(const RenderMode& mode)
 {
 	mode_ = mode;
-}
-
-void MultiVolumeRenderer::set_sampling_rate(double rate)
-{
-	sampling_rate_ = rate;
-	irate_ = rate / 2.0;
-}
-
-void MultiVolumeRenderer::set_interactive_rate(double rate)
-{
-	irate_ = rate;
 }
 
 void MultiVolumeRenderer::set_interactive_mode(bool mode)
@@ -190,7 +175,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	set_interactive_mode(interactive_mode_p);
 
 	// Set sampling rate based on interaction.
-	double rate = imode_ && adaptive ? irate_ : sampling_rate_;
+	double rate = vr_list_[0]->get_sample_rate();
 	fluo::Vector diag = bbox_.diagonal();
 	fluo::Vector cell_diag(diag.x()/res_.x(),
 		diag.y()/res_.y(),
@@ -967,7 +952,7 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
 
 	// Set sampling rate based on interaction.
-	double rate = imode_ && adaptive ? irate_ : sampling_rate_;
+	double rate = vr_list_[0]->get_sample_rate();
 	fluo::Vector diag = bbox_.diagonal();
 	fluo::Vector cell_diag(diag.x()/res_.x(),
 		diag.y()/res_.y(),

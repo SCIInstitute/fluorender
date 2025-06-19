@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MovieMaker.h>
 #include <Global.h>
+#include <GlobalStates.h>
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <MoviePanel.h>
@@ -129,6 +130,7 @@ void MovieMaker::Stop()
 	get_stopwatch()->stop();
 	glbin_video_encoder.close();
 	m_record = false;
+	glbin_states.m_capture = false;
 	flvr::TextureRenderer::maximize_uptime_ = false;
 	m_reverse = false;
 	m_running = false;

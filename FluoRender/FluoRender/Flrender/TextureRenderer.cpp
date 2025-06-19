@@ -29,6 +29,7 @@
 #include <GL/glew.h>
 #include <TextureRenderer.h>
 #include <Global.h>
+#include <GlobalStates.h>
 #include <MainSettings.h>
 #include <TextureBrick.h>
 #include <Texture.h>
@@ -81,9 +82,8 @@ namespace flvr
 	TextureRenderer::TextureRenderer()
 		:
 		mode_(RENDER_MODE_NONE),
-		sampling_rate_(1.0),
+		sample_rate_(1.0),
 		num_slices_(0),
-		irate_(0.5),
 		imode_(false),
 		cur_framebuffer_(0),
 		tex_2d_mask_(0),
@@ -107,9 +107,8 @@ namespace flvr
 		:
 		tex_(copy.tex_),
 		mode_(copy.mode_),
-		sampling_rate_(copy.sampling_rate_),
+		sample_rate_(copy.sample_rate_),
 		num_slices_(0),
-		irate_(copy.irate_),
 		imode_(copy.imode_),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
@@ -617,6 +616,64 @@ namespace flvr
 		}
 
 		return !(overx || overy || overz || underx || undery || underz);
+	}
+
+	bool TextureRenderer::get_adaptive()
+	{
+		int interactive_quality = glbin_settings.m_interactive_quality;
+		switch (interactive_quality)
+		{
+		case 0://disable
+			return false;
+		case 1://enaable
+			return true;
+		case 2://enable for large data
+		{
+			double data_size = get_data_size();
+			if (data_size > glbin_settings.m_large_data_size ||
+				data_size > glbin_settings.m_mem_limit)
+				return true;
+			else
+				return false;
+		}
+		}
+		return false;
+	}
+
+	double TextureRenderer::get_data_size()
+	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return 0.0;
+		return tex->nx() * tex->ny() * tex->nz() / 1.04e6;
+	}
+
+	int TextureRenderer::get_size_type()
+	{
+		double data_size = get_data_size();
+		if (data_size < glbin_settings.m_small_data_size)
+			return 1; //small
+		else if (data_size < glbin_settings.m_large_data_size)
+			return 0; //normal
+		else
+			return 2; //large
+	}
+
+	double TextureRenderer::get_sample_rate()
+	{
+		bool interactive = imode_ && get_adaptive();
+		bool capture = glbin_states.m_capture;
+		int size_type = get_size_type();
+		double rate = sample_rate_;
+		if (interactive)
+			rate *= glbin_settings.m_int_scale;
+		if (capture)
+			rate *= glbin_settings.m_capture_scale;
+		if (size_type == 1) //small
+			rate *= glbin_settings.m_small_scale;
+		else if (size_type == 2) //large
+			rate *= glbin_settings.m_large_scale;
+		return rate;
 	}
 
 	GLint TextureRenderer::load_brick(TextureBrick* brick,

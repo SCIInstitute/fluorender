@@ -1003,6 +1003,7 @@ void RenderViewPanel::Capture()
 	{
 		m_render_view->m_cap_file = file_dlg.GetPath();
 		m_render_view->m_capture = true;
+		glbin_states.m_capture = true;
 		RefreshGL();
 
 		if (glbin_settings.m_prj_save)

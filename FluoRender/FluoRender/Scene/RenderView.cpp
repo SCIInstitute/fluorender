@@ -7887,7 +7887,6 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				vr->set_zoom(zoom, sf121);
 				m_mvr->add_vr(vr);
-				m_mvr->set_sampling_rate(vr->get_sampling_rate());
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
 			}
 		}
@@ -8804,7 +8803,6 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 						vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 						vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 						m_mvr->add_vr(vr);
-						m_mvr->set_sampling_rate(vr->get_sampling_rate());
 						m_mvr->SetNoiseRed(vr->GetNoiseRed());
 					}
 				}
@@ -9543,6 +9541,7 @@ void RenderView::PostDraw()
 			delete[]image;
 
 		m_capture = false;
+		glbin_states.m_capture = false;
 	}
 }
 

@@ -629,7 +629,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 
 		m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
 		m_vr->set_texture(m_tex);
-		m_vr->set_sampling_rate(m_sample_rate);
+		m_vr->set_sample_rate(m_sample_rate);
 		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 		m_vr->set_shading(true);
 		m_vr->set_scalar_scale(m_scalar_scale);
@@ -804,7 +804,7 @@ void VolumeData::AddEmptyData(int bits,
 	//create volume renderer
 	m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
 	m_vr->set_texture(m_tex);
-	m_vr->set_sampling_rate(m_sample_rate);
+	m_vr->set_sample_rate(m_sample_rate);
 	m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 	m_vr->set_shading(true);
 	m_vr->set_scalar_scale(m_scalar_scale);
@@ -2370,7 +2370,7 @@ void VolumeData::SetSampleRate(double val, bool set_this)
 	if (set_this)
 		m_sample_rate = val;
 	if (m_vr)
-		m_vr->set_sampling_rate(val);
+		m_vr->set_sample_rate(val);
 }
 
 double VolumeData::GetSampleRate()

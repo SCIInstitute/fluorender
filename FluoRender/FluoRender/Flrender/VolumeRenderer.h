@@ -123,18 +123,9 @@ namespace flvr
 		void set_solid(bool mode) { solid_ = mode; }
 		bool get_solid() { return solid_; }
 
-		//sampling rate
-		void set_sampling_rate(double rate);
-		double get_sampling_rate();
 		double num_slices_to_rate(int slices);
 		//slice number
 		int get_slice_num();
-
-		//interactive modes
-		void set_interactive_rate(double irate);
-		void set_interactive_mode(bool mode);
-		bool get_adaptive();
-		double get_data_size();//size in mb
 
 		//clipping planes
 		void set_planes(std::vector<fluo::Plane*> *p);
