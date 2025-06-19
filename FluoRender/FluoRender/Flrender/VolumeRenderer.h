@@ -31,6 +31,7 @@
 
 #include <TextureRenderer.h>
 #include <Color.h>
+#include <Size.h>
 
 #ifndef __glew_h__
 typedef int GLint;
@@ -285,8 +286,7 @@ namespace flvr
 		double m_fog_start;
 		double m_fog_end;
 
-		//calculating scaling factor, etc
-		double CalcScaleFactor(double w, double h, double tex_w, double tex_h);
+		Size2D resize();
 		//calculate the filter sizes
 		double CalcFilterSize(int type, 
 			double w, double h, double tex_w, double tex_h, 

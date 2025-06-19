@@ -397,28 +397,54 @@ namespace flvr
 
 	void VolumeRenderer::set_interpolate(bool b) { interpolate_ = b;}
 
-	//calculating scaling factor, etc
-	//calculate scaling factor according to viewport and texture size
-	double VolumeRenderer::CalcScaleFactor(double w, double h, double tex_w, double tex_h)
+	Size2D VolumeRenderer::resize()
 	{
-		double cs;
-		double vs;
-		double sf = 1.0;
-		if (w > h)
+		Size2D out_size(0, 0);
+		double sf;
+		bool adaptive = get_adaptive();
+		int w = vp_[2];
+		int h = vp_[3];
+		if (imode_ && adaptive)
 		{
-			cs = fluo::Clamp(tex_h, 500.0, 2000.0);
-			vs = h;
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
+		}
+		else if (noise_red_)
+		{
+			auto tex = tex_.lock();
+			if (!tex)
+				return out_size;
+			double tex_w = tex->nx();
+			double tex_h = tex->ny();
+
+			double cs;
+			double vs;
+			double sf = 1.0;
+			if (w > h)
+			{
+				cs = fluo::Clamp(tex_h, 500.0, 2000.0);
+				vs = h;
+			}
+			else
+			{
+				cs = fluo::Clamp(tex_w, 500.0, 2000.0);
+				vs = w;
+			}
+			double p1 = 1.282e9/(cs*cs*cs)+1.522;
+			double p2 = -8.494e7/(cs*cs*cs)+0.496;
+			sf = cs*p1/(vs*zoom_)+p2;
+			sf = fluo::Clamp(sf, 0.6, 2.0);
 		}
 		else
 		{
-			cs = fluo::Clamp(tex_w, 500.0, 2000.0);
-			vs = w;
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 2.0);
 		}
-		double p1 = 1.282e9/(cs*cs*cs)+1.522;
-		double p2 = -8.494e7/(cs*cs*cs)+0.496;
-		sf = cs*p1/(vs*zoom_)+p2;
-		sf = fluo::Clamp(sf, 0.6, 2.0);
-		return sf;
+		if (fabs(sf - sfactor_) > 0.05)
+			sfactor_ = sf;
+		else if (sf == 1.0 && sfactor_ != 1.0)
+			sfactor_ = sf;
+		
+		out_size = Size2D(int(w*sfactor_ + 0.5), int(h*sfactor_ + 0.5));
+		return out_size;
 	}
 
 	//calculate the filter sizes
@@ -588,7 +614,6 @@ namespace flvr
 
 		set_interactive_mode(interactive_mode_p);
 
-		bool adaptive = get_adaptive();
 		double rate = get_sample_rate();
 		fluo::Vector diag = tex->bbox()->diagonal();
 		fluo::Vector cell_diag(
@@ -640,31 +665,23 @@ namespace flvr
 
 		int w = vp_[2];
 		int h = vp_[3];
-		int w2 = w;
-		int h2 = h;
-		double sf;
+		Size2D new_size = resize();
+		int w2 = new_size.w();
+		int h2 = new_size.h();
 		std::string bbufname;
+		bool adaptive = get_adaptive();
 		if (imode_ && adaptive)
 		{
-			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
 			bbufname = "blend_int";
 		}
 		else if (noise_red_)
 		{
-			sf = CalcScaleFactor(w, h, tex->nx(), tex->ny());
 			bbufname = "blend_nr";
 		}
 		else
 		{
-			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 2.0);
 			bbufname = "blend_hi";
 		}
-		if (fabs(sf - sfactor_) > 0.05)
-			sfactor_ = sf;
-		else if (sf == 1.0 && sfactor_ != 1.0)
-			sfactor_ = sf;
-		w2 = int(w*sfactor_ + 0.5);
-		h2 = int(h*sfactor_ + 0.5);
 
 		Framebuffer* blend_buffer = 0;
 		if(blend_num_bits_ > 8)

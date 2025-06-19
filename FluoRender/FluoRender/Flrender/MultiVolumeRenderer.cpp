@@ -221,32 +221,23 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	int w = vp_[2];
 	int h = vp_[3];
-	int w2 = w;
-	int h2 = h;
+	Size2D new_size = vr_list_[0]->resize();
+	int w2 = new_size.w();
+	int h2 = new_size.h();
 
-	double sf;
 	std::string bbufname;
 	if (imode_ && adaptive)
 	{
-		sf = fluo::Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.1, 1.0);
 		bbufname = "blend_int";
 	}
 	else if (noise_red_)
 	{
-		sf = vr_list_[0]->CalcScaleFactor(w, h, res_.x(), res_.y());
 		bbufname = "blend_nr";
 	}
 	else
 	{
-		sf = fluo::Clamp(double(1.0 / vr_list_[0]->zoom_data_), 0.5, 2.0);
 		bbufname = "blend_hi";
 	}
-	if (fabs(sf - sfactor_) > 0.05)
-		sfactor_ = sf;
-	else if (sf == 1.0 && sfactor_ != 1.0)
-		sfactor_ = sf;
-	w2 = int(w*sfactor_ + 0.5);
-	h2 = int(h*sfactor_ + 0.5);
 
 	Framebuffer* blend_buffer = 0;
 	if(blend_num_bits_ > 8)
