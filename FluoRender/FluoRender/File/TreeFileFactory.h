@@ -94,6 +94,20 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<BaseTreeFile>> handlers;
 
 private:
+	std::string getFirstNonEmptyLine(const std::string& content) {
+		std::istringstream stream(content);
+		std::string line;
+		while (std::getline(stream, line)) {
+			// Trim whitespace
+			line.erase(0, line.find_first_not_of(" \t\r\n"));
+			line.erase(line.find_last_not_of(" \t\r\n") + 1);
+			if (!line.empty() && line[0] != '#') {
+				return line;
+			}
+		}
+		return "";
+	}
+
 	//0: ini, 1: xml, 2: json, 3: pole
 	int determineFileType(const std::string& content)
 	{
@@ -107,25 +121,28 @@ private:
 			processed_content = processed_content.substr(3);
 		}
 
+		std::string firstLine = getFirstNonEmptyLine(processed_content);
+
+		// Check for INI
 		std::regex iniRegex(R"(\[.*\]\s*.*=.*)");
-		if (std::regex_search(processed_content, iniRegex)) {
+		if (std::regex_search(firstLine, iniRegex)) {
 			return 0;
 		}
 
-		std::regex xmlRegex(R"(<\?xml.*\?>|<.*>.*<\/.*>)");
-		if (std::regex_search(processed_content, xmlRegex)) {
-			return 1;
-		}
-
-		// Check if the content starts with '{' or '[' for JSON
-		if (!processed_content.empty() && (processed_content[0] == '{' || processed_content[0] == '[')) {
+		// Check for JSON
+		if (!firstLine.empty() && (firstLine[0] == '{' || firstLine[0] == '[')) {
 			return 2;
 		}
 
-		// Add regex for POLE file structure
+		// Check for POLE
 		std::regex poleRegex(R"(POLE\s+Structure\s+Start)");
-		if (std::regex_search(processed_content, poleRegex)) {
+		if (std::regex_search(firstLine, poleRegex)) {
 			return 3;
+		}
+
+		// Check for XML
+		if (firstLine.find("<?xml") == 0 || firstLine.find('<') == 0) {
+			return 1;
 		}
 
 		return -1;

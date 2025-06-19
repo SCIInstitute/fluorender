@@ -243,6 +243,10 @@ public:
 	virtual bool DeleteEntry(const std::string& key) = 0;
 	virtual bool DeleteGroup(const std::string& group) = 0;
 
+	//encoder-decoder for xml embedding
+	virtual std::string EncodeXml(const std::string& xml) = 0;
+	virtual std::string DecodeXml(const std::string& encoded) = 0;
+
 protected:
 	std::string cur_path_;
 	std::string path_sep_;//separator for path

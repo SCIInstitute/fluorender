@@ -134,31 +134,62 @@ static unsigned char getCharFromUnicode( unsigned char const* str ) {
   * @param str Pointer to first character.
   * @retval Pointer to first non white space after the string. If success.
   * @retval Null pointer if any error occur. */
-static char* parseString( char* str ) {
+static char* parseString(char* str) {
     unsigned char* head = (unsigned char*)str;
     unsigned char* tail = (unsigned char*)str;
-    for( ; *head; ++head, ++tail ) {
-        if ( *head == '\"' ) {
+    bool escaped = false;
+
+    while (*head) {
+        if (!escaped && *head == '\"') {
             *tail = '\0';
-            return (char*)++head;
+            return (char*)(head + 1);
         }
-        if ( *head == '\\' ) {
-            if ( *++head == 'u' ) {
-                char const ch = getCharFromUnicode( ++head );
-                if ( ch == '\0' ) return 0;
-                *tail = ch;
-                head += 3;
-            }
-            else {
-                char const esc = getEscape( *head );
-                if ( esc == '\0' ) return 0;
-                *tail = esc;
-            }
+
+        if (*head == '\\' && !escaped) {
+            escaped = true;
+            ++head;
+            continue;
         }
-        else *tail = *head;
+
+        if (escaped) {
+            char const esc = getEscape(*head);
+            if (esc == '\0') return 0;
+            *tail++ = esc;
+            escaped = false;
+        } else {
+            *tail++ = *head;
+        }
+
+        ++head;
     }
-    return 0;
+
+    return 0; // Unterminated string
 }
+//static char* parseString( char* str ) {
+//    unsigned char* head = (unsigned char*)str;
+//    unsigned char* tail = (unsigned char*)str;
+//    for( ; *head; ++head, ++tail ) {
+//        if ( *head == '\"' ) {
+//            *tail = '\0';
+//            return (char*)++head;
+//        }
+//        if ( *head == '\\' ) {
+//            if ( *++head == 'u' ) {
+//                char const ch = getCharFromUnicode( ++head );
+//                if ( ch == '\0' ) return 0;
+//                *tail = ch;
+//                head += 3;
+//            }
+//            else {
+//                char const esc = getEscape( *head );
+//                if ( esc == '\0' ) return 0;
+//                *tail = esc;
+//            }
+//        }
+//        else *tail = *head;
+//    }
+//    return 0;
+//}
 
 /** Parse a string to get the name of a property.
   * @param ptr Pointer to first character.

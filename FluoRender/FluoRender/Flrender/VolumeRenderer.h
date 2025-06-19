@@ -134,6 +134,7 @@ namespace flvr
 		void set_interactive_rate(double irate);
 		void set_interactive_mode(bool mode);
 		bool get_adaptive();
+		double get_data_size();//size in mb
 
 		//clipping planes
 		void set_planes(std::vector<fluo::Plane*> *p);

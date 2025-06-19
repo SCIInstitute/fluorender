@@ -175,13 +175,16 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
 	sizer2_1->Add(m_text_color_cmb);
+	wxBoxSizer* sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0,
+		"Put TrueType font files into the \"Fonts\" folder. "\
+		"Restart FluoRender to load new font files.");
+	st->Wrap(FromDIP(450));
+	sizer2_2->Add(st, 1, wxEXPAND);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
 	group2->Add(10, 5);
-	st = new wxStaticText(page, 0,
-		"Put TrueType font files into the \"Fonts\" folder.\n"\
-		"Restart FluoRender to load new font files.");
-	group2->Add(st);
+	group2->Add(sizer2_2, 0, wxEXPAND);
 	group2->Add(10, 5);
 
 	//line width
@@ -210,16 +213,19 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_paint_hist_depth_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_paint_hist_depth_text->Bind(wxEVT_TEXT, &SettingDlg::OnPaintHistDepthEdit, this);
-	st = new wxStaticText(page, 0,
-		"The number of undo steps for paint brush selection.\n" \
-		"Set the value to 0 to disable history.\n" \
-		"A value greater than 0 slows down speed and increases memory usage.");
 	sizer4_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
 	sizer4_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0,
+		"The number of undo steps for paint brush selection. " \
+		"Set the value to 0 to disable history. " \
+		"A value greater than 0 slows down speed and increases memory usage.");
+	st->Wrap(FromDIP(450));
+	sizer4_2->Add(st, 1, wxEXPAND);
 	group4->Add(10, 5);
 	group4->Add(sizer4_1, 0, wxEXPAND);
 	group4->Add(10, 5);
-	group4->Add(st);
+	group4->Add(sizer4_2, 0, wxEXPAND);
 	group4->Add(10, 5);
 
 	//pencil distance
@@ -232,14 +238,17 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_pencil_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_pencil_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnPencilDistEdit, this);
-	st = new wxStaticText(page, 0,
-		"The pixel distance between two ruler points for pencil and magnet.\n");
 	sizer5_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
 	sizer5_1->Add(m_pencil_dist_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer5_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0,
+		"The pixel distance between two ruler points for pencil and magnet.");
+	st->Wrap(FromDIP(450));
+	sizer5_2->Add(st, 1, wxEXPAND);
 	group5->Add(10, 5);
 	group5->Add(sizer5_1, 0, wxEXPAND);
 	group5->Add(10, 5);
-	group5->Add(st);
+	group5->Add(sizer5_2, 0, wxEXPAND);
 	group5->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -342,14 +351,17 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_micro_blend_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Micro Blending");
 	m_micro_blend_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMicroBlendCheck, this);
+	wxBoxSizer* sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
-		"Micro Blending works only on multiple channels in the depth mode.\n"\
-		"Enable Micro Blending to render the colors of the colocalized voxels correctly.\n"\
+		"Micro Blending works only on multiple channels in the depth mode. "\
+		"Enable Micro Blending to render the colors of the colocalized voxels correctly. "\
 		"On certain systems, it may slow down the rendering speed significantly.");
+	st->Wrap(FromDIP(450));
+	sizer1_1->Add(st, 1, wxEXPAND);
 	group1->Add(10, 5);
-	group1->Add(m_micro_blend_chk);
+	group1->Add(m_micro_blend_chk, 0, wxEXPAND);
 	group1->Add(10, 5);
-	group1->Add(st);
+	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//depth peeling
@@ -362,16 +374,19 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_peeling_layers_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_peeling_layers_text->Bind(wxEVT_TEXT, &SettingDlg::OnPeelingLayersEdit, this);
-	st = new wxStaticText(page, 0,
-		"The number of depth peeling layers for rendering transparent mesh objects.\n"\
-		"Set higher numbers only for complex geometries.\n"\
-		"It slows down the rendering speed.");
 	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
 	sizer2_1->Add(m_peeling_layers_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0,
+		"The number of depth peeling layers for rendering transparent mesh objects. "\
+		"Set higher numbers only for complex geometries. "\
+		"It slows down the rendering speed.");
+	st->Wrap(FromDIP(450));
+	sizer2_2->Add(st, 1, wxEXPAND);
 	group2->Add(10, 5);
 	group2->Add(sizer2_1, 0, wxEXPAND);
 	group2->Add(10, 5);
-	group2->Add(st);
+	group2->Add(sizer2_2, 0, wxEXPAND);
 	group2->Add(10, 5);
 
 	//rotations
@@ -450,19 +465,23 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_large_data_text = new wxTextCtrl(page, wxID_ANY, "200",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_large_data_text->Bind(wxEVT_TEXT, &SettingDlg::OnLargeDataEdit, this);
-	sizer1_1->Add(new wxStaticText(page, 0, "Large Data Size:"),
+	sizer1_1->Add(new wxStaticText(page, 0, "Size Threshold:"),
 		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	sizer1_1->Add(m_large_data_sldr, 1, wxEXPAND | wxRIGHT, 5);
 	sizer1_1->Add(m_large_data_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	sizer1_1->Add(new wxStaticText(page, 0, "MB"),
 		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+	wxBoxSizer* sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
-		"Large data is defined as the volume data size in graphics memory.\n"\
-		"Other options can be enabled based on large data to improve performance.");
+		"Large data refers to volumes that use more graphics memory than the specified threshold. "\
+		"When data exceeds this size, certain performance-enhancing options may become available "\
+		"to help maintain smooth interaction and rendering.");
+	st->Wrap(FromDIP(450));
+	sizer1_2->Add(st, 1, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
-	group1->Add(st);
+	group1->Add(sizer1_2, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//mouse interaction
@@ -663,9 +682,9 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_6->Add(5, 5);
 	sizer1_6->Add(m_looking_glass_chk, 0, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_7 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Install Looking Glass Bridge and connect a Looking Glass display.\nThen send the full-screen render view to the display.");
-	sizer1_7->Add(20, 5);
-	sizer1_7->Add(st, 0, wxALIGN_CENTER);
+	st = new wxStaticText(page, 0, "Install Looking Glass Bridge and connect a Looking Glass display. Then send the full-screen render view to the display.");
+	st->Wrap(FromDIP(450));
+	sizer1_7->Add(st, 1, wxALIGN_CENTER);
 	wxBoxSizer* sizer1_8 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "View Offset:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
@@ -867,16 +886,18 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	sizer3_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
 	sizer3_1->Add(10, 10);
 	sizer3_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer3_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
-		"Note:\n"\
-		"Set a texture size smaller than 1024 to correctly perform component analysis.\n"\
-		"When both the max texture size and data streaming are set, the smaller number\n"\
-		"is used to divide a large data set into bricks.\n"\
+		"Set a texture size smaller than 1024 to correctly perform component analysis. "\
+		"When both the max texture size and data streaming are set, the smaller number "\
+		"is used to divide a large data set into bricks. "\
 		"Restart FluoRender after setting this value.");
+	st->Wrap(FromDIP(450));
+	sizer3_2->Add(st, 1, wxEXPAND);
 	group3->Add(10, 5);
 	group3->Add(sizer3_1, 0);
 	group3->Add(10, 5);
-	group3->Add(st, 0);
+	group3->Add(sizer3_2, 0);
 	group3->Add(10, 5);
 
 	//cl devices
@@ -886,13 +907,16 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize,
 		wxTR_FULL_ROW_HIGHLIGHT);
 	m_device_tree->Bind(wxEVT_TREE_SEL_CHANGED, &SettingDlg::OnSelChanged, this);
+	wxBoxSizer* sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
-		"Select an OpenCL device that is also the rendering GPU.\n"\
+		"Select an OpenCL device that is also the rendering GPU. "\
 		"Restart FluoRender after changing OpenCL devices.");
+	st->Wrap(FromDIP(450));
+	sizer4_1->Add(st, 1, wxEXPAND);
 	group4->Add(10, 5);
 	group4->Add(m_device_tree, 1, wxEXPAND);
 	group4->Add(10, 5);
-	group4->Add(st, 0);
+	group4->Add(sizer4_1, 0, wxEXPAND);
 	group4->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -988,11 +1012,13 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	group1->Add(sizer1_3, 0, wxEXPAND);
 	group1->Add(10, 10);
 
+	wxBoxSizer* sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
-		"Note:\n" \
-		"Restart FluoRender for Java settings to take effect.\n" \
+		"Restart FluoRender for Java settings to take effect. " \
 		"Bioformats and JVM are required when ImageJ is selected.");
-	group1->Add(st);
+	st->Wrap(FromDIP(450));
+	sizer1_4->Add(st, 1, wxEXPAND);
+	group1->Add(sizer1_4, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);

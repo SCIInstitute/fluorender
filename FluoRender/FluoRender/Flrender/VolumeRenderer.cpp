@@ -400,13 +400,23 @@ namespace flvr
 			return true;
 		case 2://enable for large data
 		{
-			auto tex = tex_.lock();
-			if (!tex)
+			double data_size = get_data_size();
+			if (data_size > glbin_settings.m_large_data_size ||
+				data_size > glbin_settings.m_mem_limit)
+				return true;
+			else
 				return false;
-			return tex->get_brick_num() > 1;
 		}
 		}
 		return false;
+	}
+
+	double VolumeRenderer::get_data_size()
+	{
+		auto tex = tex_.lock();
+		if (!tex)
+			return 0.0;
+		return tex->nx() * tex->ny() * tex->nz() / 1.04e6;
 	}
 
 	//clipping planes

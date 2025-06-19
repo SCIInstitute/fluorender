@@ -302,6 +302,44 @@ public:
 		return found;
 	}
 
+	std::string EncodeXml(const std::string& xml) override
+	{
+		std::string encoded;
+		for (char c : xml) {
+			switch (c) {
+			case '\\': encoded += "\\\\"; break;
+			case '\"': encoded += "\\\""; break;
+			case '\n': encoded += "\\n"; break;
+			case '\r': encoded += "\\r"; break;
+			case '\t': encoded += "\\t"; break;
+			default:   encoded += c; break;
+			}
+		}
+		return encoded;
+	}
+
+	std::string DecodeXml(const std::string& encoded) override
+	{
+		std::string decoded;
+		for (size_t i = 0; i < encoded.length(); ++i) {
+			if (encoded[i] == '\\' && i + 1 < encoded.length()) {
+				char next = encoded[i + 1];
+				switch (next) {
+				case 'n': decoded += '\n'; ++i; break;
+				case 'r': decoded += '\r'; ++i; break;
+				case 't': decoded += '\t'; ++i; break;
+				case '\\': decoded += '\\'; ++i; break;
+				case '\"': decoded += '\"'; ++i; break;
+				default: decoded += encoded[i]; break;
+				}
+			}
+			else {
+				decoded += encoded[i];
+			}
+		}
+		return decoded;
+	}
+
 protected:
 	// Implement type-specific read methods
 	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override
@@ -529,8 +567,7 @@ protected:
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
 		std::string full_key = getFullKey(key);
-		std::string normalized_value = NormalizeValue(value);
-		dictionary_.insert(std::pair<std::string, std::string>(full_key, normalized_value));
+		dictionary_.insert(std::pair<std::string, std::string>(full_key, value));
 		return true;
 	}
 
@@ -646,21 +683,6 @@ private:
 		result = std::string(tmp, len);
 		delete[] tmp;
 		return true;
-	}
-
-	std::string NormalizeValue(const std::string& value) const
-	{
-		std::string result = value;
-
-		// Remove line breaks
-		result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
-		result.erase(std::remove(result.begin(), result.end(), '\r'), result.end());
-
-		// Optionally trim leading/trailing whitespace
-		result.erase(0, result.find_first_not_of(" \t"));
-		result.erase(result.find_last_not_of(" \t") + 1);
-
-		return result;
 	}
 
 	static int _push_dispatch_(IniDispatch* const disp, void* const v_dictionary)

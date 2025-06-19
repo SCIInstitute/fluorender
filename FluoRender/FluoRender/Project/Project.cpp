@@ -1066,25 +1066,25 @@ void Project::Open(const std::wstring& filename)
 		if (update && fconfig->Read("layout", &sval))
 			frame->LoadPerspective(sval);
 		if (fconfig->Read("layout clip", &sval))
-			frame->GetClipPlanePanel()->LoadPerspective(sval);
+			frame->GetClipPlanePanel()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout movie", &sval))
-			frame->GetMoviePanel()->LoadPerspective(sval);
+			frame->GetMoviePanel()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout outadj", &sval))
-			frame->GetOutAdjPanel()->LoadPerspective(sval);
+			frame->GetOutAdjPanel()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout project", &sval))
-			frame->GetProjectPanel()->LoadPerspective(sval);
+			frame->GetProjectPanel()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout brush", &sval))
-			frame->GetBrushToolDlg()->LoadPerspective(sval);
+			frame->GetBrushToolDlg()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout component", &sval))
-			frame->GetComponentDlg()->LoadPerspective(sval);
+			frame->GetComponentDlg()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout machine learning", &sval))
-			frame->GetMachineLearningDlg()->LoadPerspective(sval);
+			frame->GetMachineLearningDlg()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout measure", &sval))
-			frame->GetMeasureDlg()->LoadPerspective(sval);
+			frame->GetMeasureDlg()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout track", &sval))
-			frame->GetTrackDlg()->LoadPerspective(sval);
+			frame->GetTrackDlg()->LoadPerspective(fconfig->DecodeXml(sval));
 		if (fconfig->Read("layout measure", &sval))
-			frame->GetSettingDlg()->LoadPerspective(sval);
+			frame->GetSettingDlg()->LoadPerspective(fconfig->DecodeXml(sval));
 	}
 
 	//interpolator
@@ -1751,16 +1751,16 @@ void Project::Save(const std::wstring& filename, bool inc)
 	fconfig->SetPath(path);
 	fconfig->Write("dpi scale factor", frame->GetDPIScaleFactor());
 	fconfig->Write("layout", frame->SavePerspective().ToStdString());
-	fconfig->Write("layout clip", frame->GetClipPlanePanel()->SavePerspective());
-	fconfig->Write("layout movie", frame->GetMoviePanel()->SavePerspective());
-	fconfig->Write("layout outadj", frame->GetOutAdjPanel()->SavePerspective());
-	fconfig->Write("layout project", frame->GetProjectPanel()->SavePerspective());
-	fconfig->Write("layout brush", frame->GetBrushToolDlg()->SavePerspective());
-	fconfig->Write("layout component", frame->GetComponentDlg()->SavePerspective());
-	fconfig->Write("layout machine learning", frame->GetMachineLearningDlg()->SavePerspective());
-	fconfig->Write("layout measure", frame->GetMeasureDlg()->SavePerspective());
-	fconfig->Write("layout settings", frame->GetSettingDlg()->SavePerspective());
-	fconfig->Write("layout track", frame->GetTrackDlg()->SavePerspective());
+	fconfig->Write("layout clip", fconfig->EncodeXml(frame->GetClipPlanePanel()->SavePerspective()));
+	fconfig->Write("layout movie", fconfig->EncodeXml(frame->GetMoviePanel()->SavePerspective()));
+	fconfig->Write("layout outadj", fconfig->EncodeXml(frame->GetOutAdjPanel()->SavePerspective()));
+	fconfig->Write("layout project", fconfig->EncodeXml(frame->GetProjectPanel()->SavePerspective()));
+	fconfig->Write("layout brush", fconfig->EncodeXml(frame->GetBrushToolDlg()->SavePerspective()));
+	fconfig->Write("layout component", fconfig->EncodeXml(frame->GetComponentDlg()->SavePerspective()));
+	fconfig->Write("layout machine learning", fconfig->EncodeXml(frame->GetMachineLearningDlg()->SavePerspective()));
+	fconfig->Write("layout measure", fconfig->EncodeXml(frame->GetMeasureDlg()->SavePerspective()));
+	fconfig->Write("layout settings", fconfig->EncodeXml(frame->GetSettingDlg()->SavePerspective()));
+	fconfig->Write("layout track", fconfig->EncodeXml(frame->GetTrackDlg()->SavePerspective()));
 	//interpolator
 	path = "/interpolator";
 	fconfig->SetPath(path);

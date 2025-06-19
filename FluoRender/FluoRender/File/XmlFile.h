@@ -367,6 +367,16 @@ public:
 		return false;
 	}
 
+	std::string EncodeXml(const std::string& xml) override
+	{
+		return xml;
+	}
+
+	std::string DecodeXml(const std::string& encoded) override
+	{
+		return encoded;
+	}
+
 protected:
 	// Implement type-specific read methods
 	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override

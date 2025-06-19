@@ -34,7 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <sstream>
 
-class JsonFile : public BaseTreeFile {
+class JsonFile : public BaseTreeFile
+{
 public:
 	JsonFile() :
 		json_(0),
@@ -421,6 +422,44 @@ public:
 		return DeleteEntry(group); // Groups and entries are handled similarly
 	}
 
+	std::string EncodeXml(const std::string& xml) override
+	{
+		std::string encoded;
+		for (char c : xml) {
+			switch (c) {
+			case '\\': encoded += "\\\\"; break;
+			case '\"': encoded += "\\\""; break;
+			case '\n': encoded += "\\n"; break;
+			case '\r': encoded += "\\r"; break;
+			case '\t': encoded += "\\t"; break;
+			default:   encoded += c; break;
+			}
+		}
+		return encoded;
+	}
+
+	std::string DecodeXml(const std::string& encoded) override
+	{
+		std::string decoded;
+		for (size_t i = 0; i < encoded.length(); ++i) {
+			if (encoded[i] == '\\' && i + 1 < encoded.length()) {
+				char next = encoded[i + 1];
+				switch (next) {
+				case 'n': decoded += '\n'; ++i; break;
+				case 'r': decoded += '\r'; ++i; break;
+				case 't': decoded += '\t'; ++i; break;
+				case '\\': decoded += '\\'; ++i; break;
+				case '\"': decoded += '\"'; ++i; break;
+				default: decoded += encoded[i]; break;
+				}
+			}
+			else {
+				decoded += encoded[i];
+			}
+		}
+		return decoded;
+	}
+
 protected:
 	// Implement type-specific read methods
 	bool ReadString(const std::string& key, std::string* value, const std::string& def = "") const override
@@ -682,8 +721,7 @@ protected:
 				return false;
 			}
 		}
-		std::string normalized_value = NormalizeValue(value);
-		AssignValue(item, normalized_value.c_str());
+		AssignValue(item, value.c_str());
 		return true;
 	}
 
@@ -1109,36 +1147,6 @@ private:
 				FreeJson(item);
 			}
 		}
-	}
-
-	std::string NormalizeValue(const std::string& value) const
-	{
-		std::string result;
-		result.reserve(value.size());
-
-		for (char c : value) {
-			switch (c) {
-			case '\"': result += "\\\""; break;
-			case '\\': result += "\\\\"; break;
-			case '\b': result += "\\b"; break;
-			case '\f': result += "\\f"; break;
-			case '\n': result += "\\n"; break;
-			case '\r': result += "\\r"; break;
-			case '\t': result += "\\t"; break;
-			default:
-				// Escape control characters (ASCII < 0x20)
-				if (static_cast<unsigned char>(c) < 0x20) {
-					char buf[7];
-					std::snprintf(buf, sizeof(buf), "\\u%04x", c);
-					result += buf;
-				}
-				else {
-					result += c;
-				}
-			}
-		}
-
-		return result;
 	}
 };
 
