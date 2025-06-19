@@ -257,6 +257,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			return;
 		blend_buffer->bind();
 		blend_buffer->protect();
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -425,6 +427,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glGenerateMipmap(GL_TEXTURE_2D);
 
 			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
 			if (img_shader)
@@ -453,7 +457,11 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		if (noise_red_ /*&& colormap_mode_!=2*/)
 			filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 		else
+		{
 			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
 
 		glEnable(GL_BLEND);
 		if (glbin_settings.m_update_order == 0)
