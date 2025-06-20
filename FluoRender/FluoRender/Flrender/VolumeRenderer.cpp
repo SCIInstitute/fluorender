@@ -418,7 +418,6 @@ namespace flvr
 
 			double cs;
 			double vs;
-			double sf = 1.0;
 			if (w > h)
 			{
 				cs = fluo::Clamp(tex_h, 500.0, 2000.0);
@@ -692,8 +691,6 @@ namespace flvr
 				return;
 			blend_buffer->bind();
 			blend_buffer->protect();
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glGenerateMipmap(GL_TEXTURE_2D);
 
 			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -1018,8 +1015,6 @@ namespace flvr
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				glGenerateMipmap(GL_TEXTURE_2D);
 
 				img_shader = 
 					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
@@ -1048,11 +1043,7 @@ namespace flvr
 			if (noise_red_ && cm_mode != 2)
 				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 			else
-			{
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				glGenerateMipmap(GL_TEXTURE_2D);
-			}
 
 			if (noise_red_ && cm_mode !=2)
 				img_shader = 
