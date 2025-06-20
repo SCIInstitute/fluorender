@@ -52,7 +52,7 @@
 namespace flvr
 {
 	VolumeRenderer::VolumeRenderer(
-		const std::vector<fluo::Plane*> &planes)
+		const std::vector<fluo::Plane*>& planes)
 		:TextureRenderer(),
 		//scalar scaling factor
 		scalar_scale_(1.0),
@@ -99,6 +99,7 @@ namespace flvr
 		label_(false),
 		//scale factor
 		noise_red_(false),
+		sfactor_(1.0),
 		inv_(false),
 		compression_(false),
 		alpha_power_(1.0),
@@ -391,10 +392,10 @@ namespace flvr
 		{
 			return "blend_int";
 		}
-		//else if (noise_red_)
-		//{
-		//	return "blend_nr";
-		//}
+		else if (noise_red_)
+		{
+			return "blend_nr";
+		}
 		else
 		{
 			return "blend_hi";
@@ -406,23 +407,25 @@ namespace flvr
 		Size2D out_size(0, 0);
 		int w = vp_[2];
 		int h = vp_[3];
-		double sfactor = 1.0;
+		double sf = 1.0;
 		if (buf_name == "blend_int")
 		{
-			sfactor = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
+		}
+		else if (buf_name == "blend_nr")
+		{
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 3.0);
 		}
 		else
 		{
-			sfactor = fluo::Clamp(double(1.0 / zoom_data_), 0.00001, 10.0);
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 2.0);
 		}
 		//if (std::fabs(sf - sfactor_) > 0.05)
-		//	sfactor_ = sf;
-		//else if (sf == 1.0 && sfactor_ != 1.0)
-		//	sfactor_ = sf;
+		sfactor_ = sf;
 		
 		out_size = Size2D(
-			int(std::round(w * sfactor)),
-			int(std::round(h * sfactor)));
+			int(std::round(w * sfactor_)),
+			int(std::round(h * sfactor_)));
 		return out_size;
 	}
 
@@ -927,7 +930,7 @@ namespace flvr
 					}
 					img_shader->bind();
 				}
-				img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, zoom_data_, 0.0);
+				img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, 1.0 / sfactor_, 0.0);
 
 				draw_view_quad();
 

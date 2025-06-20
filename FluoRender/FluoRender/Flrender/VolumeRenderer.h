@@ -261,6 +261,7 @@ namespace flvr
 
 		//noise reduction
 		bool noise_red_;
+		double sfactor_;
 
 		//inversion
 		bool inv_;

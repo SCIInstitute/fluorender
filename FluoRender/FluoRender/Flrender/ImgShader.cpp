@@ -665,13 +665,13 @@ using std::ostringstream;
 	"\n" \
 	"uniform sampler2D tex0;\n" \
 	"uniform vec4 loc0; //(1/nx, 1/ny, zoom, 0)\n" \
-	"const int a = 3; //Lanczos window size\n" \
+	"const int a = 6; //Lanczos window size\n" \
 	"\n" \
 	"float sinc(float x)\n" \
 	"{\n" \
-	"	if (x == 0.0)\n" \
+	"	if (abs(x) < 1e-5)\n" \
 	"		return 1.0;\n" \
-	"	x *= 3.14159265;\n" \
+	"	//x *= 3.14159265;\n" \
 	"	return sin(x) / x;\n" \
 	"}\n" \
 	"\n" \
@@ -686,16 +686,18 @@ using std::ostringstream;
 	"	vec4 color = vec4(0.0);\n" \
 	"	float totalWeight = 0.0;\n" \
 	"\n" \
-	"	for (int i = -a + 1; i <= a; ++i)\n" \
+	"	vec2 scaledTexelSize = loc0.xy;\n" \
+	"\n" \
+	"for (int i = -a + 1; i <= a; ++i)\n" \
+	"{\n" \
+	"	for (int j = -a + 1; j <= a; ++j)\n" \
 	"	{\n" \
-	"		for (int j = -a + 1; j <= a; ++j)\n" \
-	"		{\n" \
-	"			vec2 offset = vec2(i, j) * loc0.xy;\n" \
-	"			float weight = lanczos(float(i)) * lanczos(float(j));\n" \
-	"			color += texture(tex0, uv + offset) * weight;\n" \
-	"			totalWeight += weight;\n" \
-	"		}\n" \
+	"		vec2 offset = vec2(i, j) * scaledTexelSize;\n" \
+	"		float weight = lanczos(float(i)) * lanczos(float(j));\n" \
+	"		color += texture(tex0, uv + offset) * weight;\n" \
+	"		totalWeight += weight;\n" \
 	"	}\n" \
+	"}\n" \
 	"\n" \
 	"	return color / totalWeight;\n" \
 	"}\n" \
@@ -713,10 +715,10 @@ using std::ostringstream;
 	"\n" \
 	"vec4 bicubicFilter(vec2 uv)\n" \
 	"{\n" \
-	"	vec2 texSize = 1.0 / loc0.xy;\n" \
-	"	vec2 pixelCoord = uv * texSize;\n" \
+	"	vec2 texSize = loc0.xy;\n" \
+	"	vec2 pixelCoord = uv / texSize;\n" \
 	"	vec2 base = floor(pixelCoord - 0.5);\n" \
-	"	vec2 f = pixelCoord - base - 0.5;\n" \
+	"	vec2 f = fract(pixelCoord - 0.5);\n" \
 	"\n" \
 	"	vec4 color = vec4(0.0);\n" \
 	"	float totalWeight = 0.0;\n" \
@@ -739,14 +741,15 @@ using std::ostringstream;
 	"vec4 boxFilter(vec2 uv)\n" \
 	"{\n" \
 	"	vec4 color = vec4(0.0);\n" \
-	"	int a = 3; // same as Lanczos window\n" \
 	"	float totalWeight = 0.0;\n" \
+	"\n" \
+	"	vec2 scaledTexelSize = loc0.xy;\n" \
 	"\n" \
 	"	for (int i = -a + 1; i <= a; ++i)\n" \
 	"	{\n" \
 	"		for (int j = -a + 1; j <= a; ++j)\n" \
 	"		{\n" \
-	"			vec2 offset = vec2(i, j) * loc0.xy;\n" \
+	"			vec2 offset = vec2(i, j) * scaledTexelSize;\n" \
 	"			color += texture(tex0, uv + offset);\n" \
 	"			totalWeight += 1.0;\n" \
 	"		}\n" \
@@ -757,9 +760,9 @@ using std::ostringstream;
 	"\n" \
 	"void main()\n" \
 	"{\n" \
-	"	float blend = clamp((loc0.z - 1.0) * 0.5 + 0.5, 0.0, 1.0);\n" \
-	"	//vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
-	"	vec4 lanczosColor = boxFilter(OutTexCoord.xy);\n" \
+	"	float blend = pow(smoothstep(0.8, 1.5, loc0.z), 0.8);\n" \
+	"	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
+	"	//vec4 lanczosColor = boxFilter(OutTexCoord.xy);\n" \
 	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
 	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
 	"}\n"
