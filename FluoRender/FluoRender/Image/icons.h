@@ -414,6 +414,10 @@ public:
 	const static unsigned char comp_off_png[1151];
 	/* starknot.png - 1174 bytes */
 	const static unsigned char starknot_png[1174];
+	/* filter.png - 1003 bytes */
+	const static unsigned char filter_png[1003];
+	/* filter_off.png - 945 bytes */
+	const static unsigned char filter_off_png[945];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */
@@ -434,10 +438,10 @@ public:
 	/* logo_snow.png - 49645 bytes */
 	const static unsigned char logo_snow_png[49645];
 	//link/unlink
-	/* link.png - 1118 bytes */
-	const static unsigned char link_png[1118];
-	/* unlink.png - 1185 bytes */
-	const static unsigned char unlink_png[1185];
+	/* link.png - 1003 bytes */
+	const static unsigned char link_png[1003];
+	/* unlink.png - 1307 bytes */
+	const static unsigned char unlink_png[1307];
 	/* save_settings.png - 1314 bytes */
 	const static unsigned char save_settings_png[1314];
 	/* reset.png - 885 bytes */

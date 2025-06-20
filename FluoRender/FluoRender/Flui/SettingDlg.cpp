@@ -510,7 +510,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_streaming_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_streaming_comb->Append(items);
-	m_streaming_comb->Bind(wxEVT_CHECKBOX, &SettingDlg::OnStreamingComb, this);
+	m_streaming_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnStreamingComb, this);
 	sizer3_1->Add(new wxStaticText(page, 0, "Enable streamed rendering"),
 		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	sizer3_1->Add(m_streaming_comb, 1, wxEXPAND | wxRIGHT, 5);
@@ -519,7 +519,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_update_order_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_update_order_comb->Append(update_options);
-	m_update_order_comb->Bind(wxEVT_RADIOBOX, &SettingDlg::OnUpdateOrderChange, this);
+	m_update_order_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnUpdateOrderChange, this);
 	sizer3_1->Add(new wxStaticText(page, 0, "Update order"),
 		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	sizer3_1->Add(m_update_order_comb, 1, wxEXPAND | wxRIGHT, 5);
@@ -1659,6 +1659,7 @@ void SettingDlg::OnStreamingComb(wxCommandEvent& event)
 void SettingDlg::OnUpdateOrderChange(wxCommandEvent& event)
 {
 	glbin_settings.m_update_order = m_update_order_comb->GetSelection();
+	FluoRefresh(3, { gstNull });
 }
 
 void SettingDlg::OnGraphicsMemChange(wxScrollEvent& event)

@@ -221,29 +221,16 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	int w = vp_[2];
 	int h = vp_[3];
-	Size2D new_size = vr_list_[0]->resize();
+	std::string buf_name = vr_list_[0]->get_buffer_name();
+	Size2D new_size = vr_list_[0]->resize(buf_name);
 	int w2 = new_size.w();
 	int h2 = new_size.h();
-
-	std::string bbufname;
-	if (imode_ && adaptive)
-	{
-		bbufname = "blend_int";
-	}
-	else if (noise_red_)
-	{
-		bbufname = "blend_nr";
-	}
-	else
-	{
-		bbufname = "blend_hi";
-	}
 
 	Framebuffer* blend_buffer = 0;
 	if(blend_num_bits_ > 8)
 	{
 		blend_buffer = glbin_framebuffer_manager.framebuffer(
-			FB_Render_RGBA, w2, h2, bbufname);
+			FB_Render_RGBA, w2, h2, buf_name);
 		if (!blend_buffer)
 			return;
 		blend_buffer->bind();

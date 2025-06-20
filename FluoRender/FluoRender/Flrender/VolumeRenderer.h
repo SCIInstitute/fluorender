@@ -133,8 +133,8 @@ namespace flvr
 		std::vector<fluo::Plane*> *get_planes();
 
 		//interpolation
-		bool get_interpolate();
-		void set_interpolate(bool b);
+		bool get_interpolate() {return interpolate_; }
+		void set_interpolate(bool b) { interpolate_ = b;}
 
 		//depth peel
 		void set_depth_peel(int dp) {depth_peel_ = dp;}
@@ -198,8 +198,7 @@ namespace flvr
 		void set_done_loop(bool done) { for (int i=0; i<TEXTURE_RENDER_MODES; i++) done_loop_[i] = done; }
 
 		//estimated threshold
-		double get_estimated_thresh()
-		{ return est_thresh_; }
+		double get_estimated_thresh() { return est_thresh_; }
 
 		//set matrices
 		void set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat) { m_mv_mat = mv_mat; m_proj_mat = proj_mat; m_tex_mat = tex_mat; }
@@ -286,7 +285,8 @@ namespace flvr
 		double m_fog_start;
 		double m_fog_end;
 
-		Size2D resize();
+		std::string get_buffer_name();
+		Size2D resize(const std::string& buf_name);
 		//calculate the filter sizes
 		double CalcFilterSize(int type, 
 			double w, double h, double tex_w, double tex_h, 

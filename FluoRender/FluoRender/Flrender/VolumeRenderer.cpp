@@ -392,23 +392,34 @@ namespace flvr
 		return &planes_;
 	}
 	
-	//interpolation
-	bool VolumeRenderer::get_interpolate() {return interpolate_; }
+	std::string VolumeRenderer::get_buffer_name()
+	{
+		bool adaptive = get_adaptive();
+		if (imode_ && adaptive)
+		{
+			return "blend_int";
+		}
+		else if (noise_red_)
+		{
+			return "blend_nr";
+		}
+		else
+		{
+			return "blend_hi";
+		}
+	}
 
-	void VolumeRenderer::set_interpolate(bool b) { interpolate_ = b;}
-
-	Size2D VolumeRenderer::resize()
+	Size2D VolumeRenderer::resize(const std::string& buf_name)
 	{
 		Size2D out_size(0, 0);
 		double sf;
-		bool adaptive = get_adaptive();
 		int w = vp_[2];
 		int h = vp_[3];
-		if (imode_ && adaptive)
+		if (buf_name == "blend_int")
 		{
 			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
 		}
-		else if (noise_red_)
+		else if (buf_name == "blend_nr")
 		{
 			auto tex = tex_.lock();
 			if (!tex)
@@ -664,29 +675,16 @@ namespace flvr
 
 		int w = vp_[2];
 		int h = vp_[3];
-		Size2D new_size = resize();
+		std::string buf_name = get_buffer_name();
+		Size2D new_size = resize(buf_name);
 		int w2 = new_size.w();
 		int h2 = new_size.h();
-		std::string bbufname;
-		bool adaptive = get_adaptive();
-		if (imode_ && adaptive)
-		{
-			bbufname = "blend_int";
-		}
-		else if (noise_red_)
-		{
-			bbufname = "blend_nr";
-		}
-		else
-		{
-			bbufname = "blend_hi";
-		}
 
 		Framebuffer* blend_buffer = 0;
 		if(blend_num_bits_ > 8)
 		{
 			blend_buffer = glbin_framebuffer_manager.framebuffer(
-				FB_Render_RGBA, w2, h2, bbufname);
+				FB_Render_RGBA, w2, h2, buf_name);
 			if (!blend_buffer)
 				return;
 			blend_buffer->bind();

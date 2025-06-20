@@ -446,11 +446,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Enable spatial interpolation of voxel intensity values",
 		"Enable spatial interpolation of voxel intensity values");
 	//noise reduction
-	bitmap = wxGetBitmap(smooth_off);
-	m_options_toolbar->AddCheckTool(ID_NRChk, "Smoothing",
+	bitmap = wxGetBitmap(filter);
+	m_options_toolbar->AddCheckTool(ID_NRChk, "Filter",
 		bitmap, wxNullBitmap,
-		"Enable rendering result smoothing",
-		"Enable rendering result smoothing");
+		"Enable filtering to reduce artifacts",
+		"Enable filtering to reduce artifacts");
 	//sync group
 	bitmap = wxGetBitmap(sync_chan);
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
@@ -1344,10 +1344,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_NRChk, nr);
 		if (nr)
 			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
-				wxGetBitmap(smooth));
+				wxGetBitmap(filter));
 		else
 			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
-				wxGetBitmap(smooth_off));
+				wxGetBitmap(filter_off));
 	}
 
 	//blend mode
