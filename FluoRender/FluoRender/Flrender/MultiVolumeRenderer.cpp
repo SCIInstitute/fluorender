@@ -53,10 +53,6 @@ MultiVolumeRenderer::MultiVolumeRenderer()
 	blend_slices_(false),
 	cur_framebuffer_(0),
 	noise_red_(false),
-	sfactor_(1.0),
-	filter_size_min_(0.0),
-	//filter_size_max_(0.0),
-	filter_size_shp_(0.0),
 	imode_(false),
 	num_slices_(0),
 	va_slices_(0)
@@ -69,10 +65,6 @@ MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
 	blend_num_bits_(copy.blend_num_bits_),
 	blend_slices_(copy.blend_slices_),
 	noise_red_(false),
-	sfactor_(1.0),
-	filter_size_min_(0.0),
-	//filter_size_max_(0.0),
-	filter_size_shp_(0.0),
 	imode_(copy.imode_),
 	num_slices_(0),
 	va_slices_(0)
@@ -396,7 +388,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		Framebuffer* filter_buffer = 0;
 		if (noise_red_ /*&& colormap_mode_!=2*/)
 		{
-			//FILTERING/////////////////////////////////////////////////////////////////
+			//FILTERING
 			filter_buffer = glbin_framebuffer_manager.framebuffer(
 				FB_Render_RGBA, w2, h2);
 			filter_buffer->bind();
@@ -404,7 +396,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
-			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
+			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_SHARPER);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
@@ -413,14 +405,12 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				}
 				img_shader->bind();
 			}
-			filter_size_min_ = vr_list_[0]->
-				CalcFilterSize(4, w, h, res_.x(), res_.y(), sfactor_);
-			img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
+			img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, vr_list_[0]->zoom_data_, 0.0);
+			
 			vr_list_[0]->draw_view_quad();
 
 			if (img_shader && img_shader->valid())
 				img_shader->release();
-			///////////////////////////////////////////////////////////////////////////
 		}
 
 		//go back to normal
@@ -439,23 +429,13 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		else if (glbin_settings.m_update_order == 1)
 			glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 
-		if (noise_red_ /*&& colormap_mode_!=2*/)
-			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
-		else
-			img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
 		if (img_shader)
 		{
 			if (!img_shader->valid())
 				img_shader->create();
 			img_shader->bind();
-		}
-
-		if (noise_red_ /*&& colormap_mode_!=2*/)
-		{
-			filter_size_shp_ = vr_list_[0]->
-				CalcFilterSize(3, w, h, res_.x(), res_.y(), sfactor_);
-			img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
 		}
 
 		vr_list_[0]->draw_view_quad();

@@ -38,8 +38,6 @@ using std::string;
 using std::vector;
 using std::ostringstream;
 
-namespace flvr
-{
 #define IMG_VERTEX_CODE \
 	"//IMG_VERTEX_CODE\n" \
 	"layout(location = 0) in vec3 InVertex;\n" \
@@ -659,6 +657,115 @@ namespace flvr
 	"	FragColor = vec4(color.rgb, 1.0);\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_FILTER_LANCZOS_SHARPER \
+	"//IMG_SHADER_CODE_FILTER_LANCZOS_SHARPER\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexCoord;\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"uniform sampler2D tex0;\n" \
+	"uniform vec4 loc0; //(1/nx, 1/ny, zoom, 0)\n" \
+	"const int a = 3; //Lanczos window size\n" \
+	"\n" \
+	"float sinc(float x)\n" \
+	"{\n" \
+	"	if (x == 0.0)\n" \
+	"		return 1.0;\n" \
+	"	x *= 3.14159265;\n" \
+	"	return sin(x) / x;\n" \
+	"}\n" \
+	"\n" \
+	"float lanczos(float x)\n" \
+	"{\n" \
+	"	if (abs(x) >= float(a)) return 0.0;\n" \
+	"	return sinc(x) * sinc(x / float(a));\n" \
+	"}\n" \
+	"\n" \
+	"vec4 lanczosFilter(vec2 uv)\n" \
+	"{\n" \
+	"	vec4 color = vec4(0.0);\n" \
+	"	float totalWeight = 0.0;\n" \
+	"\n" \
+	"	for (int i = -a + 1; i <= a; ++i)\n" \
+	"	{\n" \
+	"		for (int j = -a + 1; j <= a; ++j)\n" \
+	"		{\n" \
+	"			vec2 offset = vec2(i, j) * loc0.xy;\n" \
+	"			float weight = lanczos(float(i)) * lanczos(float(j));\n" \
+	"			color += texture(tex0, uv + offset) * weight;\n" \
+	"			totalWeight += weight;\n" \
+	"		}\n" \
+	"	}\n" \
+	"\n" \
+	"	return color / totalWeight;\n" \
+	"}\n" \
+	"\n" \
+	"float cubic(float v)\n" \
+	"{\n" \
+	"	v = abs(v);\n" \
+	"	if (v <= 1.0)\n" \
+	"		return 1.0 - 2.0 * v * v + v * v * v;\n" \
+	"	else if (v < 2.0)\n" \
+	"		return 4.0 - 8.0 * v + 5.0 * v * v - v * v * v;\n" \
+	"	else\n" \
+	"		return 0.0;\n" \
+	"}\n" \
+	"\n" \
+	"vec4 bicubicFilter(vec2 uv)\n" \
+	"{\n" \
+	"	vec2 texSize = 1.0 / loc0.xy;\n" \
+	"	vec2 pixelCoord = uv * texSize;\n" \
+	"	vec2 base = floor(pixelCoord - 0.5);\n" \
+	"	vec2 f = pixelCoord - base - 0.5;\n" \
+	"\n" \
+	"	vec4 color = vec4(0.0);\n" \
+	"	float totalWeight = 0.0;\n" \
+	"\n" \
+	"	for (int j = -1; j <= 2; ++j)\n" \
+	"	{\n" \
+	"		for (int i = -1; i <= 2; ++i)\n" \
+	"		{\n" \
+	"			vec2 offset = vec2(i, j);\n" \
+	"			float w = cubic(offset.x - f.x) * cubic(offset.y - f.y);\n" \
+	"			vec2 sampleUV = (base + offset + 0.5) * loc0.xy;\n" \
+	"			color += texture(tex0, sampleUV) * w;\n" \
+	"			totalWeight += w;\n" \
+	"		}\n" \
+	"	}\n" \
+	"\n" \
+	"	return color / totalWeight;\n" \
+	"}\n" \
+	"\n" \
+	"vec4 boxFilter(vec2 uv)\n" \
+	"{\n" \
+	"	vec4 color = vec4(0.0);\n" \
+	"	int a = 3; // same as Lanczos window\n" \
+	"	float totalWeight = 0.0;\n" \
+	"\n" \
+	"	for (int i = -a + 1; i <= a; ++i)\n" \
+	"	{\n" \
+	"		for (int j = -a + 1; j <= a; ++j)\n" \
+	"		{\n" \
+	"			vec2 offset = vec2(i, j) * loc0.xy;\n" \
+	"			color += texture(tex0, uv + offset);\n" \
+	"			totalWeight += 1.0;\n" \
+	"		}\n" \
+	"	}\n" \
+	"\n" \
+	"	return color / totalWeight;\n" \
+	"}\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	float blend = clamp((loc0.z - 1.0) * 0.5 + 0.5, 0.0, 1.0);\n" \
+	"	//vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
+	"	vec4 lanczosColor = boxFilter(OutTexCoord.xy);\n" \
+	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
+	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
+	"}\n"
+
+namespace flvr
+{
 	ImgShader::ImgShader(int type, int colormap) : 
 		type_(type),
 		colormap_(colormap),
@@ -732,6 +839,7 @@ namespace flvr
 		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR:
 		case IMG_SHDR_PAINT:
 		case IMG_SHDR_GRADIENT_BACKGROUND:
+		case IMG_SHDR_FILTER_LANCZOS_SHARPER:
 		default:
 			z << IMG_VERTEX_CODE;
 			break;
@@ -836,6 +944,9 @@ namespace flvr
 			break;
 		case IMG_SHDR_GRADIENT_BACKGROUND:
 			z << IMG_SHADER_CODE_GRADIENT_BACKGROUND;
+			break;
+		case IMG_SHDR_FILTER_LANCZOS_SHARPER:
+			z << IMG_SHADER_CODE_FILTER_LANCZOS_SHARPER;
 			break;
 		default:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;

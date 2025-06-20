@@ -128,10 +128,6 @@ namespace flvr
 
 		//scale factor
 		bool noise_red_;
-		double sfactor_;
-		double filter_size_min_;
-		//double filter_size_max_;
-		double filter_size_shp_;
 
 		//bounding box of all volumes
 		fluo::BBox bbox_;

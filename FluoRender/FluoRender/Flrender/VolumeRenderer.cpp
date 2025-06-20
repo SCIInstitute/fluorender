@@ -99,10 +99,6 @@ namespace flvr
 		label_(false),
 		//scale factor
 		noise_red_(false),
-		sfactor_(1.0),
-		filter_size_min_(0.0),
-		filter_size_max_(0.0),
-		filter_size_shp_(0.0),
 		inv_(false),
 		compression_(false),
 		alpha_power_(1.0),
@@ -161,10 +157,6 @@ namespace flvr
 		label_(copy.label_),
 		//scale factor
 		noise_red_(copy.noise_red_),
-		sfactor_(1.0),
-		filter_size_min_(0.0),
-		filter_size_max_(0.0),
-		filter_size_shp_(0.0),
 		inv_(copy.inv_),
 		compression_(copy.compression_),
 		alpha_power_(copy.alpha_power_),
@@ -399,10 +391,10 @@ namespace flvr
 		{
 			return "blend_int";
 		}
-		else if (noise_red_)
-		{
-			return "blend_nr";
-		}
+		//else if (noise_red_)
+		//{
+		//	return "blend_nr";
+		//}
 		else
 		{
 			return "blend_hi";
@@ -412,116 +404,26 @@ namespace flvr
 	Size2D VolumeRenderer::resize(const std::string& buf_name)
 	{
 		Size2D out_size(0, 0);
-		double sf;
 		int w = vp_[2];
 		int h = vp_[3];
+		double sfactor = 1.0;
 		if (buf_name == "blend_int")
 		{
-			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
-		}
-		else if (buf_name == "blend_nr")
-		{
-			auto tex = tex_.lock();
-			if (!tex)
-				return out_size;
-			double tex_w = tex->nx();
-			double tex_h = tex->ny();
-
-			double cs;
-			double vs;
-			if (w > h)
-			{
-				cs = fluo::Clamp(tex_h, 500.0, 2000.0);
-				vs = h;
-			}
-			else
-			{
-				cs = fluo::Clamp(tex_w, 500.0, 2000.0);
-				vs = w;
-			}
-			double p1 = 1.282e9/(cs*cs*cs)+1.522;
-			double p2 = -8.494e7/(cs*cs*cs)+0.496;
-			sf = cs*p1/(vs*zoom_)+p2;
-			sf = fluo::Clamp(sf, 0.6, 2.0);
+			sfactor = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
 		}
 		else
 		{
-			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 2.0);
+			sfactor = fluo::Clamp(double(1.0 / zoom_data_), 0.00001, 10.0);
 		}
-		if (fabs(sf - sfactor_) > 0.05)
-			sfactor_ = sf;
-		else if (sf == 1.0 && sfactor_ != 1.0)
-			sfactor_ = sf;
+		//if (std::fabs(sf - sfactor_) > 0.05)
+		//	sfactor_ = sf;
+		//else if (sf == 1.0 && sfactor_ != 1.0)
+		//	sfactor_ = sf;
 		
-		out_size = Size2D(int(w*sfactor_ + 0.5), int(h*sfactor_ + 0.5));
+		out_size = Size2D(
+			int(std::round(w * sfactor)),
+			int(std::round(h * sfactor)));
 		return out_size;
-	}
-
-	//calculate the filter sizes
-	//calculate filter sizes according to viewport and texture size
-	double VolumeRenderer::CalcFilterSize(int type,
-		double w, double h, double tex_w, double tex_h,
-		double sf)
-	{
-		//clamped texture size
-		double cs;
-		//viewport size
-		double vs;
-		//filter size
-		double size = 0.0;
-		if (w > h)
-		{
-			cs = fluo::Clamp(tex_h, 500.0, 1200.0);
-			vs = h;
-		}
-		else
-		{
-			cs = fluo::Clamp(tex_w, 500.0, 1200.0);
-			vs = w;
-		}
-
-		switch (type)
-		{
-		case 1:	//min filter
-			{
-				double p = 0.29633+(-2.18448e-4)*cs;
-				size = (p*zoom_+0.24512)*sf;
-				size = fluo::Clamp(size, 0.0, 2.0);
-			}
-			break;
-		case 2:	//max filter
-			{
-				double p1 = 0.26051+(-1.90542e-4)*cs;
-				double p2 = -0.29188+(2.45276e-4)*cs;
-				p2 = std::min(p2, 0.0);
-				size = (p1*zoom_+p2)*sf;
-				size = fluo::Clamp(size, 0.0, 2.0);
-			}
-			break;
-		case 3:	//sharpening filter
-			{
-				//double p = 0.012221;
-				//size = p*zoom_;
-				//size = Clamp(size, 0.0, 0.25);
-				double sf11 = std::sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
-				size = zoom_ / sf11 / 10.0;
-				size = size<1.0?0.0:size;
-				size = fluo::Clamp(size, 0.0, 0.3);
-			}
-			break;
-		case 4:	//blur filter
-			{
-				double sf11 = std::sqrt(tex_w*tex_w + tex_h*tex_h)/vs;
-				size = zoom_ / sf11 / 2.0;
-				size = size<1.0?0.5:size;
-				size = fluo::Clamp(size, 0.1, 1.0);
-			}
-		}
-
-		//adjusting for screen size
-		//double af = vs/800.0;
-
-		return size;
 	}
 
 	//darw
@@ -1007,15 +909,16 @@ namespace flvr
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = glbin_framebuffer_manager.framebuffer(
-					FB_Render_RGBA, w2, h2);
+					FB_Render_RGBA, w, h);
 				filter_buffer->bind();
 
+				glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 				img_shader = 
-					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_BLUR);
+					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_SHARPER);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -1024,8 +927,7 @@ namespace flvr
 					}
 					img_shader->bind();
 				}
-				filter_size_min_ = CalcFilterSize(4, w, h, tex->nx(), tex->ny(), sfactor_);
-				img_shader->setLocalParam(0, filter_size_min_/w2, filter_size_min_/h2, 1.0/w2, 1.0/h2);
+				img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, zoom_data_, 0.0);
 
 				draw_view_quad();
 
@@ -1043,24 +945,13 @@ namespace flvr
 			else
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
-			if (noise_red_ && cm_mode !=2)
-				img_shader = 
-					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_SHARPEN);
-			else
-				img_shader = 
-				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
 			if (img_shader)
 			{
 				if (!img_shader->valid())
 					img_shader->create();
 				img_shader->bind();
-			}
-
-			if (noise_red_ && cm_mode !=2)
-			{
-				filter_size_shp_ = CalcFilterSize(3, w, h, tex->nx(), tex->ny(), sfactor_);
-				img_shader->setLocalParam(0, filter_size_shp_/w, filter_size_shp_/h, 0.0, 0.0);
 			}
 
 			draw_view_quad();

@@ -261,11 +261,6 @@ namespace flvr
 
 		//noise reduction
 		bool noise_red_;
-		//scale factor and filter sizes
-		double sfactor_;
-		double filter_size_min_;
-		double filter_size_max_;
-		double filter_size_shp_;
 
 		//inversion
 		bool inv_;
@@ -287,13 +282,6 @@ namespace flvr
 
 		std::string get_buffer_name();
 		Size2D resize(const std::string& buf_name);
-		//calculate the filter sizes
-		double CalcFilterSize(int type, 
-			double w, double h, double tex_w, double tex_h, 
-			double sf);	//type - 1:min filter
-						//		 2:max filter
-						//		 3:sharpening
-
 	};
 
 } // End namespace flvr
