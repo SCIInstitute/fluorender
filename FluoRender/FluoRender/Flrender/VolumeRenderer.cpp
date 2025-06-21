@@ -414,7 +414,8 @@ namespace flvr
 		}
 		else if (buf_name == "blend_nr")
 		{
-			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 3.0);
+			//sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 3.0);
+			sf = std::min(double(1.0 / zoom_data_), 3.0);
 		}
 		else
 		{
@@ -920,8 +921,7 @@ namespace flvr
 
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
-				img_shader = 
-					glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_SHARPER);
+				img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_SHARPER);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
