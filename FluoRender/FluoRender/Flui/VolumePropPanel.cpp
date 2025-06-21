@@ -441,16 +441,16 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Show components");
 	//interpolation
 	bitmap = wxGetBitmap(interpolate);
-	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Interpolate",
+	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Trilinear",
 		bitmap, wxNullBitmap,
-		"Enable spatial interpolation of voxel intensity values",
-		"Enable spatial interpolation of voxel intensity values");
+		"Enable trilinear interpolation of voxel intensity values",
+		"Enable trilinear interpolation of voxel intensity values");
 	//noise reduction
 	bitmap = wxGetBitmap(filter);
-	m_options_toolbar->AddCheckTool(ID_NRChk, "Filter",
+	m_options_toolbar->AddCheckTool(ID_NRChk, "Lanczos-Bicubic",
 		bitmap, wxNullBitmap,
-		"Enable filtering to reduce artifacts",
-		"Enable filtering to reduce artifacts");
+		"Enable Lanczos-Bicubic filtering to reduce artifacts",
+		"Enable Lanczos-Bicubic filtering to reduce artifacts");
 	//sync group
 	bitmap = wxGetBitmap(sync_chan);
 	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
@@ -461,8 +461,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	bitmap = wxGetBitmap(depth_off);
 	m_options_toolbar->AddCheckTool(ID_DepthChk, "Depth Mode",
 		bitmap, wxNullBitmap,
-		"Enable Depth Mode within the group",
-		"Enable Depth Mode within the group");
+		"Enable Depth Mode within a group",
+		"Enable Depth Mode within a group");
 	//legend
 	bitmap = wxGetBitmap(legend);
 	m_options_toolbar->AddCheckTool(ID_LegendChk, "Legend",

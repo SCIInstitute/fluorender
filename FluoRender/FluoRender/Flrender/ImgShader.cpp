@@ -657,8 +657,8 @@ using std::ostringstream;
 	"	FragColor = vec4(color.rgb, 1.0);\n" \
 	"}\n"
 
-#define IMG_SHADER_CODE_FILTER_LANCZOS_SHARPER \
-	"//IMG_SHADER_CODE_FILTER_LANCZOS_SHARPER\n" \
+#define IMG_SHADER_CODE_FILTER_LANCZOS_BICUBIC \
+	"//IMG_SHADER_CODE_FILTER_LANCZOS_BICUBIC\n" \
 	"in vec3 OutVertex;\n" \
 	"in vec3 OutTexCoord;\n" \
 	"out vec4 FragColor;\n" \
@@ -842,7 +842,7 @@ namespace flvr
 		case IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR:
 		case IMG_SHDR_PAINT:
 		case IMG_SHDR_GRADIENT_BACKGROUND:
-		case IMG_SHDR_FILTER_LANCZOS_SHARPER:
+		case IMG_SHDR_FILTER_LANCZOS_BICUBIC:
 		default:
 			z << IMG_VERTEX_CODE;
 			break;
@@ -948,8 +948,8 @@ namespace flvr
 		case IMG_SHDR_GRADIENT_BACKGROUND:
 			z << IMG_SHADER_CODE_GRADIENT_BACKGROUND;
 			break;
-		case IMG_SHDR_FILTER_LANCZOS_SHARPER:
-			z << IMG_SHADER_CODE_FILTER_LANCZOS_SHARPER;
+		case IMG_SHDR_FILTER_LANCZOS_BICUBIC:
+			z << IMG_SHADER_CODE_FILTER_LANCZOS_BICUBIC;
 			break;
 		default:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;

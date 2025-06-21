@@ -396,7 +396,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
-			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_SHARPER);
+			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
 			if (img_shader)
 			{
 				if (!img_shader->valid())
