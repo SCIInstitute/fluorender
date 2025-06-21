@@ -414,8 +414,8 @@ namespace flvr
 		}
 		else if (buf_name == "blend_nr")
 		{
-			//sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 3.5);
-			sf = std::min(double(1.0 / zoom_data_), 3.5);
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 3.5);
+			//sf = std::min(double(1.0 / zoom_data_), 3.5);
 		}
 		else
 		{
@@ -922,6 +922,7 @@ namespace flvr
 				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 
 				img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
+				//img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 				if (img_shader)
 				{
 					if (!img_shader->valid())
@@ -931,7 +932,7 @@ namespace flvr
 					img_shader->bind();
 				}
 				img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, zoom_data_, 0.0);
-				//img_shader->setLocalParam(0, zoom_data_ / w, zoom_data_ / h, zoom_data_, 0.0);
+				img_shader->setLocalParam(1, 1.0 / w, 1.0 / h, zoom_data_, 0.0);
 
 				draw_view_quad();
 
