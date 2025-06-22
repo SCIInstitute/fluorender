@@ -390,8 +390,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		{
 			//FILTERING
 			filter_buffer = glbin_framebuffer_manager.framebuffer(
-				FB_Render_RGBA, w2, h2);
+				FB_Render_RGBA, w, h);
 			filter_buffer->bind();
+
+			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
@@ -406,7 +408,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				img_shader->bind();
 			}
 			img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, vr_list_[0]->zoom_data_, 0.0);
-			
+			img_shader->setLocalParam(1, 1.0 / w, 1.0 / h, vr_list_[0]->zoom_data_, 0.0);
+
 			vr_list_[0]->draw_view_quad();
 
 			if (img_shader && img_shader->valid())

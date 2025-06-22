@@ -740,7 +740,7 @@ using std::ostringstream;
 	"\n" \
 	"void main()\n" \
 	"{\n" \
-	"	float blend = pow(smoothstep(0.8, 1.5, loc0.z), 0.8);\n" \
+	"	float blend = pow(smoothstep(0.8, 2.5, loc0.z), 0.8);\n" \
 	"	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
 	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
 	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
