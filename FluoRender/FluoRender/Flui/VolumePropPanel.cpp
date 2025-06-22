@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <wxFadeButton.h>
 #include <wxMapDoubleSlider.h>
+#include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableCheckBox.h>
 #include <wxUndoableColorPicker.h>
@@ -282,10 +283,19 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//extract boundary
 	m_boundary_st = new wxFadeButton(this, wxID_ANY, "Boundary",
 		wxDefaultPosition, bts);
-	m_boundary_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 1000,
+	m_boundary_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 1000, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_boundary_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
+	m_boundary_low_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
+	m_boundary_high_text = new wxTextCtrl(this, wxID_ANY, "1.0000",
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp4);
+	m_boundary_link_tb = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(unlink);
+	m_boundary_link_tb->AddCheckTool(0, "",
+		bitmap, wxNullBitmap,
+		"Link low and high boundary values",
+		"Link low and high boundary values");
 	m_boundary_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_boundary_st->SetFontBold();
 	m_boundary_st->SetTintColor(wxColor(150, 255, 180));
@@ -293,14 +303,19 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//bind events
 	m_boundary_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnBoundaryMF, this);
 	m_boundary_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnBoundaryChange, this);
-	m_boundary_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnBoundaryText, this);
+	m_boundary_low_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnBoundaryText, this);
+	m_boundary_high_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnBoundaryText, this);
+	m_boundary_link_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnBoundaryLink, this);
 	m_boundary_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnBoundaryChk, this);
 	//add to sizer
 	sizer_m2->Add(m_boundary_st, 0, wxALIGN_CENTER);
 	sizer_m2->Add(5, 5);
 	sizer_m2->Add(m_boundary_chk, 0, wxALIGN_CENTER);
-	sizer_m2->Add(m_boundary_text, 0, wxALIGN_CENTER);
+	sizer_m2->Add(m_boundary_low_text, 0, wxALIGN_CENTER);
 	sizer_m2->Add(m_boundary_sldr, 1, wxEXPAND);
+	sizer_m2->Add(m_boundary_high_text, 0, wxALIGN_CENTER);
+	sizer_m2->Add(m_boundary_link_tb, 0, wxALIGN_CENTER, 0);
+	m_boundary_link_tb->Realize();
 	//shading
 	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -845,18 +860,18 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//boundary
 	if (update_boundary)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_text->GetValidator()))
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_low_text->GetValidator()))
 			vald_fp->SetRange(0.0, 1.0);
 		dval = m_vd->GetBoundary();
 		bval = m_vd->GetBoundaryEnable();
 		str = wxString::Format("%.4f", dval);
-		m_boundary_sldr->ChangeValue(std::round(dval * 2000.0));
-		m_boundary_text->ChangeValue(str);
+		m_boundary_sldr->ChangeLowValue(std::round(dval * 2000.0));
+		m_boundary_low_text->ChangeValue(str);
 		m_boundary_chk->SetValue(bval);
 		if (m_boundary_sldr->IsEnabled() != bval)
 		{
 			m_boundary_sldr->Enable(bval);
-			m_boundary_text->Enable(bval);
+			m_boundary_low_text->Enable(bval);
 		}
 	}
 	if (update_boundary || update_tips)
@@ -2430,10 +2445,10 @@ void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
 
 void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
 {
-	double val = m_boundary_sldr->GetValue() / 2000.0;
+	double val = m_boundary_sldr->GetLowValue() / 2000.0;
 	wxString str = wxString::Format("%.4f", val);
-	if (str != m_boundary_text->GetValue())
-		m_boundary_text->ChangeValue(str);
+	if (str != m_boundary_low_text->GetValue())
+		m_boundary_low_text->ChangeValue(str);
 
 	//set boundary value
 	if (m_sync_group)
@@ -2444,16 +2459,21 @@ void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
 
 void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 {
-	wxString str = m_boundary_text->GetValue();
+	wxString str = m_boundary_low_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_boundary_sldr->ChangeValue(std::round(val * 2000));
+	m_boundary_sldr->ChangeLowValue(std::round(val * 2000));
 
 	//set boundary value
 	if (m_sync_group)
 		SyncBoundary(val);
 	else
 		SetBoundary(val, false);
+}
+
+void VolumePropPanel::OnBoundaryLink(wxCommandEvent& event)
+{
+
 }
 
 void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)

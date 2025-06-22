@@ -381,8 +381,8 @@
 	"		c = vec4(0.0);\n" \
 	"	else\n" \
 	"	{\n" \
-	"		v.x = (v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0))*v.x;\n" \
-	"		v.x = (loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0+loc2.y*10.0):1.0)*v.x;\n" \
+	"		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);\n" \
+	"		v.x *= loc2.y>0.0?clamp(v.y/loc2.y, 0.0, 1.0):1.0;\n" \
 	"		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),\n" \
 	"			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);\n" \
 	"		alpha = 1.0 - pow(1.0-pow(tf_alp, loc9.w), loc4.w);\n" \

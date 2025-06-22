@@ -36,6 +36,7 @@ class DataGroup;
 class wxFadeButton;
 class wxBasisSlider;
 class wxMapDoubleSlider;
+class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableCheckBox;
 class wxUndoableToolbar;
@@ -138,8 +139,10 @@ private:
 	wxUndoableCheckBox* m_thresh_chk;
 	//boundary
 	wxFadeButton* m_boundary_st;
-	wxSingleSlider *m_boundary_sldr;
-	wxTextCtrl *m_boundary_text;
+	wxDoubleSlider *m_boundary_sldr;
+	wxTextCtrl *m_boundary_low_text;
+	wxTextCtrl* m_boundary_high_text;
+	wxToolBar* m_boundary_link_tb;
 	wxUndoableCheckBox* m_boundary_chk;
 	//shading
 	wxFadeButton* m_shade_st;
@@ -283,6 +286,7 @@ private:
 	void OnBoundaryMF(wxCommandEvent& event);
 	void OnBoundaryChange(wxScrollEvent& event);
 	void OnBoundaryText(wxCommandEvent& event);
+	void OnBoundaryLink(wxCommandEvent& event);
 	void OnBoundaryChk(wxCommandEvent& event);
 	//
 	void OnShadingMF(wxCommandEvent& event);
