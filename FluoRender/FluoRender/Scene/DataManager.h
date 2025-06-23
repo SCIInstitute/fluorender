@@ -311,9 +311,14 @@ public:
 
 	void SetBoundaryEnable(bool);
 	bool GetBoundaryEnable();
-	void SetBoundary(double val, bool set_this = true);
-	double GetBoundary();
-	double GetMlBoundary();
+	void SetBoundaryLow(double val, bool set_this = true);
+	double GetBoundaryLow();
+	double GetMlBoundaryLow();
+	void SetBoundaryHigh(double val, bool set_this = true);
+	double GetBoundaryHigh();
+	double GetMlBoundaryHigh();
+	void SetBoundaryMax(double val);
+	double GetBoundaryMax();
 
 	void SetMinMaxEnable(bool);
 	bool GetMinMaxEnable();
@@ -637,7 +642,9 @@ private:
 	double m_gamma;
 
 	bool m_boundary_enable;
-	double m_boundary;
+	double m_boundary_low;
+	double m_boundary_high;
+	double m_boundary_max;
 
 	bool m_minmax_enable;
 	double m_lo_offset;
@@ -1201,8 +1208,12 @@ public:
 	void SetGamma(double val, bool set_this = true);
 	double GetGamma();
 	void SetBoundaryEnable(bool);
-	void SetBoundary(double, bool set_this = true);
-	double GetBoundary();
+	void SetBoundaryLow(double, bool set_this = true);
+	double GetBoundaryLow();
+	void SetBoundaryHigh(double, bool set_this = true);
+	double GetBoundaryHigh();
+	void SetBoundaryMax(double val);
+	double GetBoundaryMax();
 	void SetMinMaxEnable(bool);
 	void SetLowOffset(double, bool set_this = true);
 	double GetLowOffset();
@@ -1278,7 +1289,9 @@ private:
 
 	//synced values
 	double m_gamma;
-	double m_boundary;
+	double m_boundary_low;
+	double m_boundary_high;
+	double m_boundary_max;
 	double m_lo_offset;
 	double m_hi_offset;
 	double m_lo_thresh;

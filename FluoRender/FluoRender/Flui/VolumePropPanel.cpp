@@ -860,18 +860,42 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//boundary
 	if (update_boundary)
 	{
+		double gmf = 1000 / m_vd->GetBoundaryMax();
+		//low
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_low_text->GetValidator()))
-			vald_fp->SetRange(0.0, 1.0);
-		dval = m_vd->GetBoundary();
-		bval = m_vd->GetBoundaryEnable();
+			vald_fp->SetMin(0.0);
+		dval = m_vd->GetBoundaryLow();
+		m_boundary_sldr->ChangeLowValue(std::round(dval * gmf));
 		str = wxString::Format("%.4f", dval);
-		m_boundary_sldr->ChangeLowValue(std::round(dval * 2000.0));
 		m_boundary_low_text->ChangeValue(str);
+		//high
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_high_text->GetValidator()))
+			vald_fp->SetMin(0.0);
+		dval = m_vd->GetBoundaryHigh();
+		m_boundary_sldr->ChangeHighValue(std::round(dval * gmf));
+		str = wxString::Format("%.4f", dval);
+		m_boundary_high_text->ChangeValue(str);
+		//link
+		bval = m_boundary_sldr->GetLink();
+		if (bval != m_boundary_link_tb->GetToolState(0))
+		{
+			m_boundary_link_tb->ToggleTool(0, bval);
+			wxBitmapBundle bitmap;
+			if (bval)
+				bitmap = wxGetBitmap(link);
+			else
+				bitmap = wxGetBitmap(unlink);
+			m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
+		}
+		//enable
+		bval = m_vd->GetBoundaryEnable();
 		m_boundary_chk->SetValue(bval);
 		if (m_boundary_sldr->IsEnabled() != bval)
 		{
 			m_boundary_sldr->Enable(bval);
 			m_boundary_low_text->Enable(bval);
+			m_boundary_high_text->Enable(bval);
+			m_boundary_link_tb->Enable(bval);
 		}
 	}
 	if (update_boundary || update_tips)
@@ -1454,7 +1478,7 @@ void VolumePropPanel::ApplyMl()
 void VolumePropPanel::SaveMl()
 {
 	std::vector<float> val;
-	val.push_back(float(m_vd->GetBoundary()));
+	val.push_back(float(m_vd->GetBoundaryLow()));
 	val.push_back(float(m_vd->GetGamma()));
 	val.push_back(float(m_vd->GetLowOffset()));
 	val.push_back(float(m_vd->GetHighOffset()));
@@ -1773,14 +1797,17 @@ void VolumePropPanel::SetHiShading(double val, bool notify)
 		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
 }
 
-void VolumePropPanel::SetBoundary(double val, bool notify)
+void VolumePropPanel::SetBoundary(double val1, double val2, bool notify)
 {
 	if (!m_vd)
 		return;
-	if (m_vd->GetBoundary() == val)
+	if (m_vd->GetBoundaryLow() == val1 &&
+		m_vd->GetBoundaryHigh() == val2)
 		return;
 
-	m_vd->SetBoundary(val);
+	m_vd->SetBoundaryLow(val1);
+	m_vd->SetBoundaryHigh(val2);
+
 	if (notify)
 		FluoRefresh(0, { gstBoundary }, { glbin_current.GetViewId(m_view) });
 	else
@@ -1938,14 +1965,17 @@ void VolumePropPanel::SyncHiShading(double val)
 	FluoRefresh(1, { gstShading }, { glbin_current.GetViewId(m_view) });
 }
 
-void VolumePropPanel::SyncBoundary(double val)
+void VolumePropPanel::SyncBoundary(double val1, double val2)
 {
 	if (!m_group)
 		return;
-	if (m_group->GetBoundary() == val)
+	if (m_group->GetBoundaryLow() == val1 &&
+		m_group->GetBoundaryHigh() == val2)
 		return;
 
-	m_group->SetBoundary(val);
+	m_group->SetBoundaryLow(val1);
+	m_group->SetBoundaryHigh(val2);
+
 	FluoRefresh(1, { gstBoundary }, { glbin_current.GetViewId(m_view) });
 }
 
@@ -2423,16 +2453,16 @@ void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncBoundary(m_vd->GetBoundary());
+		SyncBoundary(m_vd->GetBoundaryLow(), m_vd->GetBoundaryHigh());
 		break;
 	case 1:
 		SetFocusVRenderViews(m_boundary_sldr);
 		break;
 	case 2:
-		SetBoundary(glbin_vol_def.m_boundary, true);
+		SetBoundary(glbin_vol_def.m_boundary_low, glbin_vol_def.m_boundary_high, true);
 		break;
 	case 3:
-		SetBoundary(m_vd->GetMlBoundary(), true);
+		SetBoundary(m_vd->GetMlBoundaryLow(), m_vd->GetMlBoundaryHigh(), true);
 		break;
 	case 4:
 		m_boundary_sldr->Undo();
@@ -2445,35 +2475,63 @@ void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
 
 void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
 {
-	double val = m_boundary_sldr->GetLowValue() / 2000.0;
-	wxString str = wxString::Format("%.4f", val);
-	if (str != m_boundary_low_text->GetValue())
-		m_boundary_low_text->ChangeValue(str);
+	double gmf = 1000 / m_vd->GetBoundaryMax();
+	double val1 = m_boundary_sldr->GetLowValue() / gmf;
+	double val2 = m_boundary_sldr->GetHighValue() / gmf;
+	m_boundary_low_text->ChangeValue(wxString::Format("%.4f", val1));
+	m_boundary_high_text->ChangeValue(wxString::Format("%.4f", val2));
 
 	//set boundary value
 	if (m_sync_group)
-		SyncBoundary(val);
+		SyncBoundary(val1, val2);
 	else
-		SetBoundary(val, false);
+		SetBoundary(val1, val2, false);
 }
 
 void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
 {
+	double gmf = 1000 / m_vd->GetBoundaryMax();
+	wxObject* t = event.GetEventObject();
+	double val1 = 0.0, val2 = 0.0;
 	wxString str = m_boundary_low_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_boundary_sldr->ChangeLowValue(std::round(val * 2000));
+	str.ToDouble(&val1);
+	str = m_boundary_high_text->GetValue();
+	str.ToDouble(&val2);
+	int low = std::round(val1 * gmf);
+	int high = std::round(val2 * gmf);
+	int low_save = low;
+	int high_save = high;
+	m_boundary_sldr->ChangeValues(low, high);
+	if (low != low_save && t != m_boundary_low_text)
+	{
+		val1 = low / gmf;
+		m_boundary_low_text->ChangeValue(wxString::Format("%.4f", val1));
+	}
+	if (high != high_save && t != m_boundary_high_text)
+	{
+		val2 = high / gmf;
+		m_boundary_high_text->ChangeValue(wxString::Format("%.4f", val2));
+	}
 
 	//set boundary value
 	if (m_sync_group)
-		SyncBoundary(val);
+		SyncBoundary(val1, val2);
 	else
-		SetBoundary(val, false);
+		SetBoundary(val1, val2, false);
 }
 
 void VolumePropPanel::OnBoundaryLink(wxCommandEvent& event)
 {
-
+	bool val = m_boundary_sldr->GetLink();
+	val = !val;
+	m_boundary_sldr->SetLink(val);
+	m_boundary_link_tb->ToggleTool(0, val);
+	wxBitmapBundle bitmap;
+	if (val)
+		bitmap = wxGetBitmap(link);
+	else
+		bitmap = wxGetBitmap(unlink);
+	m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
 }
 
 void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
@@ -3276,7 +3334,8 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetHiShading(m_vd->GetHiShading());
 		//boundary
 		m_group->SetBoundaryEnable(m_vd->GetBoundaryEnable());
-		m_group->SetBoundary(m_vd->GetBoundary());
+		m_group->SetBoundaryLow(m_vd->GetBoundaryLow());
+		m_group->SetBoundaryHigh(m_vd->GetBoundaryHigh());
 		//left threshold
 		m_group->SetThreshEnable(m_vd->GetThreshEnable());
 		m_group->SetLeftThresh(m_vd->GetLeftThresh());

@@ -373,7 +373,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	//clipping planes
 	cl_float4 p[6];
 	bool inv;
-	float scalar_scale, lo_thresh, hi_thresh, gamma3d, gm_thresh,
+	float scalar_scale, lo_thresh, hi_thresh, gamma3d,
+		gm_scale, gm_low, gm_high, gm_max,
 		lo_offset, hi_offset, sw;
 	if (m_vd && m_vd->GetVR())
 	{
@@ -394,7 +395,10 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		lo_thresh = static_cast<float>(m_vd->GetLeftThresh());
 		hi_thresh = static_cast<float>(m_vd->GetRightThresh());
 		gamma3d = static_cast<float>(m_vd->GetGamma());
-		gm_thresh = static_cast<float>(m_vd->GetBoundary());
+		gm_scale = static_cast<float>(m_vd->GetGMScale());
+		gm_low = static_cast<float>(m_vd->GetBoundaryLow());
+		gm_high = static_cast<float>(m_vd->GetBoundaryHigh());
+		gm_max = static_cast<float>(m_vd->GetBoundaryMax());
 		lo_offset = static_cast<float>(m_vd->GetLowOffset());
 		hi_offset = static_cast<float>(m_vd->GetHighOffset());
 		sw = static_cast<float>(m_vd->GetSoftThreshold());
@@ -427,7 +431,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z()) };
-		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_thresh, lo_thresh, hi_thresh };
+		cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
 		cl_float4 loc3 = { 1.0f / gamma3d, lo_offset, hi_offset, sw };
 		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
 		kernel_prog->setKernelArgBegin(kernel_index);

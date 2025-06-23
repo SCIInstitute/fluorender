@@ -276,7 +276,7 @@ void Project::Open(const std::wstring& filename)
 							ss >> type >> left_x >> left_y >> width >>
 								height >> offset1 >> offset2 >> gamma;
 							vd->SetGamma(gamma);
-							vd->SetBoundary(left_y);
+							vd->SetBoundaryLow(left_y);
 							vd->SetLowOffset(offset1);
 							vd->SetHighOffset(offset2);
 							vd->SetLeftThresh(left_x);
@@ -294,8 +294,12 @@ void Project::Open(const std::wstring& filename)
 							vd->SetGamma(dval);
 						if (fconfig->Read("boundary enable", &bval))
 							vd->SetBoundaryEnable(bval);
-						if (fconfig->Read("boundary", &dval))
-							vd->SetBoundary(dval);
+						if (fconfig->Read("boundary low", &dval))
+							vd->SetBoundaryLow(dval);
+						if (fconfig->Read("boundary high", &dval))
+							vd->SetBoundaryHigh(dval);
+						if (fconfig->Read("boundary max", &dval))
+							vd->SetBoundaryMax(dval);
 						if (fconfig->Read("minmax enable", &bval))
 							vd->SetMinMaxEnable(bval);
 						if (fconfig->Read("low offset", &dval))
@@ -1350,7 +1354,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("3dgamma enable", vd->GetGammaEnable());
 			fconfig->Write("3dgamma", vd->GetGamma());
 			fconfig->Write("boundary enable", vd->GetBoundaryEnable());
-			fconfig->Write("boundary", vd->GetBoundary());
+			fconfig->Write("boundary low", vd->GetBoundaryLow());
+			fconfig->Write("boundary high", vd->GetBoundaryHigh());
+			fconfig->Write("boundary max", vd->GetBoundaryMax());
 			fconfig->Write("minmax enable", vd->GetMinMaxEnable());
 			fconfig->Write("low offset", vd->GetLowOffset());
 			fconfig->Write("high offset", vd->GetHighOffset());

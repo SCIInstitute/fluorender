@@ -73,36 +73,40 @@ namespace flvr
 		void set_clear_color(GLfloat clear_color[4]) { memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4); }
 
 		//render mode
-		void set_mode(RenderMode mode);
+		void set_mode(RenderMode mode) { mode_ = mode; }
 		//range and scale
-		void set_scalar_scale(double scale);
-		double get_scalar_scale();
-		void set_gm_scale(double scale);
+		void set_scalar_scale(double val) { scalar_scale_ = val; }
+		double get_scalar_scale() { return scalar_scale_; }
+		void set_gm_scale(double val) { gm_scale_ = val; }
 		//transfer function properties
-		void set_gamma3d(double gamma);
-		double get_gamma3d();
-		void set_gm_thresh(double thresh);
-		double get_gm_thresh();
-		void set_lo_offset(double val);
-		double get_lo_offset();
-		void set_hi_offset(double val);
-		double get_hi_offset();
-		void set_lo_thresh(double thresh);
-		double get_lo_thresh();
-		void set_hi_thresh(double thresh);
-		double get_hi_thresh();
-		void set_soft_thresh(double val);
-		double get_soft_thresh();
+		void set_gamma3d(double gamma) { gamma3d_ = gamma; }
+		double get_gamma3d() { return gamma3d_; }
+		void set_gm_low(double val) { gm_low_ = val; }
+		double get_gm_low() { return gm_low_; }
+		void set_gm_high(double val) { gm_high_ = val; }
+		double get_gm_high() { return gm_high_; }
+		void set_gm_max(double val) { gm_max_ = val; }
+		double get_gm_max() { return gm_max_; }
+		void set_lo_offset(double val) { lo_offset_ = val; }
+		double get_lo_offset() { return lo_offset_; }
+		void set_hi_offset(double val) { hi_offset_ = val; }
+		double get_hi_offset() { return hi_offset_; }
+		void set_lo_thresh(double thresh) { lo_thresh_ = thresh; }
+		double get_lo_thresh() { return lo_thresh_; }
+		void set_hi_thresh(double thresh) { hi_thresh_ = thresh; }
+		double get_hi_thresh() { return hi_thresh_; }
+		void set_soft_thresh(double val) { sw_ = val; }
+		double get_soft_thresh() { return sw_; }
 		void set_color(const fluo::Color& color);
-		fluo::Color get_color();
+		fluo::Color get_color() { return color_; }
 		void set_mask_color(const fluo::Color& color, bool set=true);
-		fluo::Color get_mask_color();
+		fluo::Color get_mask_color() { return mask_color_; }
 		bool get_mask_color_set() {return mask_color_set_; }
 		void reset_mask_color_set() {mask_color_set_ = false;}
-		void set_mask_thresh(double thresh);
-		double get_mask_thresh();
-		void set_alpha(double alpha);
-		double get_alpha();
+		void set_mask_thresh(double thresh) { mask_thresh_ = thresh; }
+		double get_mask_thresh() { return mask_thresh_; }
+		void set_alpha(double alpha) { alpha_ = alpha; }
+		double get_alpha() { return alpha_; }
 
 		//shading
 		void set_shading(bool shading) { shading_ = shading; }
@@ -126,7 +130,7 @@ namespace flvr
 
 		double num_slices_to_rate(int slices);
 		//slice number
-		int get_slice_num();
+		int get_slice_num() { return num_slices_; }
 
 		//clipping planes
 		void set_planes(std::vector<fluo::Plane*> *p);
@@ -222,7 +226,9 @@ namespace flvr
 		double gm_scale_;
 		//transfer function properties
 		double gamma3d_;
-		double gm_thresh_;
+		double gm_low_;
+		double gm_high_;
+		double gm_max_;
 		double lo_offset_;
 		double hi_offset_;
 		double lo_thresh_;

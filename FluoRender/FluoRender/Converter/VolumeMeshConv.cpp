@@ -53,7 +53,9 @@ VolumeMeshConv::VolumeMeshConv() :
 	m_sw(0),
 	m_lo_offset(0.0),
 	m_hi_offset(1.0),
-	m_boundary(0.0),
+	m_boundary_low(0.0),
+	m_boundary_high(0.5),
+	m_boundary_max(0.5),
 	m_use_mask(false),
 	m_weld(false),
 	m_area(0),
@@ -105,7 +107,9 @@ void VolumeMeshConv::Compute()
 		m_hi_thresh = vd->GetRightThresh();
 		m_lo_offset = vd->GetLowOffset();
 		m_hi_offset = vd->GetHighOffset();
-		m_boundary = vd->GetBoundary();
+		m_boundary_low = vd->GetBoundaryLow();
+		m_boundary_high = vd->GetBoundaryHigh();
+		m_boundary_max = vd->GetBoundaryMax();
 		m_sw = vd->GetSoftThreshold();
 	}
 	else
@@ -115,7 +119,9 @@ void VolumeMeshConv::Compute()
 		m_hi_thresh = 1.0;
 		m_lo_offset = 0.0;
 		m_hi_offset = 1.0;
-		m_boundary = 0.0;
+		m_boundary_low = 0.0;
+		m_boundary_high = 0.5;
+		m_boundary_max = 0.5;
 	}
 	//get use selection
 	if (m_use_mask)
@@ -362,9 +368,8 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 					(m_sw - m_lo_thresh + value) / m_sw :
 					(value > m_hi_thresh ?
 					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
-				value *= (m_boundary > 0.0 ?
-					fluo::Clamp(gm / m_boundary, 0.0,
-					1.0 + m_boundary*10.0) : 1.0);
+				double gmf = 5.0 * (gm - m_boundary_low) * (m_boundary_max - m_boundary_high) / m_boundary_max / (m_boundary_high - m_boundary_low);
+				value *= gm < m_boundary_low ? gm / m_boundary_low : 1.0 + gmf * gmf;
 				value = pow(fluo::Clamp((value - m_lo_offset) / (m_hi_offset - m_lo_offset),
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			}
@@ -403,9 +408,8 @@ double VolumeMeshConv::GetValue(int x, int y, int z)
 					(m_sw - m_lo_thresh + value) / m_sw :
 					(value > m_hi_thresh ?
 					(m_sw - value + m_hi_thresh) / m_sw : 1.0));
-				value *= (m_boundary > 0.0 ?
-					fluo::Clamp(gm / m_boundary, 0.0,
-						1.0 + m_boundary*10.0) : 1.0);
+				double gmf = 5.0 * (gm - m_boundary_low) * (m_boundary_max - m_boundary_high) / m_boundary_max / (m_boundary_high - m_boundary_low);
+				value *= gm < m_boundary_low ? gm / m_boundary_low : 1.0 + gmf * gmf;
 				value = pow(fluo::Clamp((value - m_lo_offset) / (m_hi_offset - m_lo_offset),
 					gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			}

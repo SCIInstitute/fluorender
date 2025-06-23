@@ -60,7 +60,9 @@ namespace flvr
 		gm_scale_(1.0),
 		//transfer function
 		gamma3d_(1.0),
-		gm_thresh_(0.0),
+		gm_low_(0.0),
+		gm_high_(0.5),
+		gm_max_(0.5),
 		lo_offset_(0.0),
 		hi_offset_(1.0),
 		lo_thresh_(0.0),
@@ -121,7 +123,9 @@ namespace flvr
 		gm_scale_(copy.gm_scale_),
 		//transfer function
 		gamma3d_(copy.gamma3d_),
-		gm_thresh_(copy.gm_thresh_),
+		gm_low_(copy.gm_low_),
+		gm_high_(copy.gm_high_),
+		gm_max_(copy.gm_max_),
 		lo_offset_(copy.lo_offset_),
 		hi_offset_(copy.hi_offset_),
 		lo_thresh_(copy.lo_thresh_),
@@ -187,99 +191,6 @@ namespace flvr
 		planes_.clear();
 	}
 
-	//render mode
-	void VolumeRenderer::set_mode(RenderMode mode)
-	{
-		mode_ = mode;
-	}
-
-	//range and scale
-	void VolumeRenderer::set_scalar_scale(double scale)
-	{
-		scalar_scale_ = scale;
-	}
-
-	double VolumeRenderer::get_scalar_scale()
-	{
-		return scalar_scale_;
-	}
-
-	void VolumeRenderer::set_gm_scale(double scale)
-	{
-		gm_scale_ = scale;
-	}
-
-	//transfer function properties
-	void VolumeRenderer::set_gamma3d(double gamma)
-	{
-		gamma3d_ = gamma;
-	}
-
-	double VolumeRenderer::get_gamma3d()
-	{
-		return gamma3d_;
-	}
-
-	void VolumeRenderer::set_gm_thresh(double thresh)
-	{
-		gm_thresh_ = thresh;
-	}
-
-	double VolumeRenderer::get_gm_thresh()
-	{
-		return gm_thresh_;
-	}
-
-	void VolumeRenderer::set_lo_offset(double val)
-	{
-		lo_offset_ = val;
-	}
-
-	double VolumeRenderer::get_lo_offset()
-	{
-		return lo_offset_;
-	}
-
-	void VolumeRenderer::set_hi_offset(double val)
-	{
-		hi_offset_ = val;
-	}
-
-	double VolumeRenderer::get_hi_offset()
-	{
-		return hi_offset_;
-	}
-
-	void VolumeRenderer::set_lo_thresh(double thresh)
-	{
-		lo_thresh_ = thresh;
-	}
-
-	double VolumeRenderer::get_lo_thresh()
-	{
-		return lo_thresh_;
-	}
-
-	void VolumeRenderer::set_hi_thresh(double thresh)
-	{
-		hi_thresh_ = thresh;
-	}
-
-	double VolumeRenderer::get_hi_thresh()
-	{
-		return hi_thresh_;
-	}
-
-	void VolumeRenderer::set_soft_thresh(double val)
-	{
-		sw_ = val;
-	}
-
-	double VolumeRenderer::get_soft_thresh()
-	{
-		return sw_;
-	}
-
 	void VolumeRenderer::set_color(const fluo::Color& color)
 	{
 		color_ = color;
@@ -302,40 +213,10 @@ namespace flvr
 		}
 	}
 
-	fluo::Color VolumeRenderer::get_color()
-	{
-		return color_;
-	}
-
 	void VolumeRenderer::set_mask_color(const fluo::Color& color, bool set)
 	{
 		mask_color_ = color;
 		mask_color_set_ = set;
-	}
-
-	fluo::Color VolumeRenderer::get_mask_color()
-	{
-		return mask_color_;
-	}
-
-	void VolumeRenderer::set_mask_thresh(double thresh)
-	{
-		mask_thresh_ = thresh;
-	}
-
-	double VolumeRenderer::get_mask_thresh()
-	{
-		return mask_thresh_;
-	}
-
-	void VolumeRenderer::set_alpha(double alpha)
-	{
-		alpha_ = alpha;
-	}
-
-	double VolumeRenderer::get_alpha()
-	{
-		return alpha_;
 	}
 
 	double VolumeRenderer::num_slices_to_rate(int num_slices)
@@ -352,11 +233,6 @@ namespace flvr
 		const double rate = cell_diag.length() / dt;
 
 		return rate;
-	}
-
-	int VolumeRenderer::get_slice_num()
-	{
-		return num_slices_;
 	}
 
 	//clipping planes
@@ -611,7 +487,8 @@ namespace flvr
 		// Set up shaders
 		ShaderProgram* shader = 0;
 		//create/bind
-		bool grad = gm_thresh_ > 0.0 ||
+		bool grad = gm_low_ > 0.0 ||
+			gm_high_ < gm_max_ ||
 			(cm_mode &&
 			colormap_proj_>3);
 		shader = glbin_vol_shader_factory.shader(
@@ -648,7 +525,7 @@ namespace flvr
 			spcz==0.0?1.0:spcz, shuffle_);
 
 		//transfer function
-		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_thresh_, lo_thresh_, hi_thresh_);
+		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
 		if (mode_==RENDER_MODE_MIP &&
 			colormap_proj_)
@@ -676,6 +553,8 @@ namespace flvr
 		//color
 		shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), alpha_power_);
 		shader->setLocalParam(16, mask_color_.r(), mask_color_.g(), mask_color_.b(), mask_thresh_);
+		//gm
+		shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
 
 		if (colormap_proj_ == 4)
 		{
@@ -1148,7 +1027,7 @@ namespace flvr
 		seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
-		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_thresh_, lo_thresh_, hi_thresh_);
+		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		seg_shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
 		seg_shader->setLocalParam(6, mp_[0], vp_[3]-mp_[1], vp_[2], vp_[3]);
 		seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
@@ -1161,6 +1040,8 @@ namespace flvr
 		seg_shader->setLocalParam(7, ini_thresh, gm_falloff, scl_falloff, scl_translate);
 		//w2d
 		seg_shader->setLocalParam(8, w2d, bins, zoom_, zoom_data_);
+		//gm
+		seg_shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
 
 		//set clipping planes
 		double abcd[4];
@@ -1573,8 +1454,9 @@ namespace flvr
 				(vr_b&&vr_b->get_inversion())?-1.0:0.0);
 		if (vr_a && (type==6 || type==7))
 		{
-			cal_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_thresh_, lo_thresh_, hi_thresh_);
+			cal_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 			cal_shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
+			cal_shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
 		}
 
 		for (unsigned int i=0; i < bricks->size(); i++)

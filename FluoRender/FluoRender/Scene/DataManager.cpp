@@ -234,7 +234,9 @@ VolumeData::VolumeData()
 	m_gamma = 1.0;
 
 	m_boundary_enable = true;
-	m_boundary = 0.0;
+	m_boundary_low = 0.0;
+	m_boundary_high = 0.5;
+	m_boundary_max = 0.5;
 
 	m_minmax_enable = true;
 	m_lo_offset = 0.0;
@@ -391,7 +393,9 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_gamma = copy.m_gamma;
 
 	m_boundary_enable = copy.m_boundary_enable;
-	m_boundary = copy.m_boundary;
+	m_boundary_low = copy.m_boundary_low;
+	m_boundary_high = copy.m_boundary_high;
+	m_boundary_max = copy.m_boundary_max;
 
 	m_minmax_enable = copy.m_minmax_enable;
 	m_lo_offset = copy.m_lo_offset;
@@ -1435,9 +1439,8 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
-			new_value *= (m_boundary > 0.0 ?
-				fluo::Clamp(gm / m_boundary, 0.0,
-					1.0 + m_boundary*10.0) : 1.0);
+			double gmf = 5.0 * (gm - m_boundary_low) * (m_boundary_max - m_boundary_high) / m_boundary_max / (m_boundary_high - m_boundary_low);
+			new_value *= gm < m_boundary_low ? gm / m_boundary_low : 1.0 + gmf * gmf;
 			new_value = pow(fluo::Clamp((new_value-m_lo_offset)/(m_hi_offset-m_lo_offset),
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			new_value *= m_alpha;
@@ -1479,9 +1482,8 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 			(new_value>m_hi_thresh?
 				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
 				*new_value;
-			new_value *= (m_boundary > 0.0 ?
-				fluo::Clamp(gm / m_boundary, 0.0,
-					1.0 + m_boundary*10.0) : 1.0);
+			double gmf = 5.0 * (gm - m_boundary_low) * (m_boundary_max - m_boundary_high) / m_boundary_max / (m_boundary_high - m_boundary_low);
+			new_value *= gm < m_boundary_low ? gm / m_boundary_low : 1.0 + gmf * gmf;
 			new_value = pow(fluo::Clamp((new_value-m_lo_offset)/(m_hi_offset-m_lo_offset),
 				gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
 			new_value *= m_alpha;
@@ -1980,9 +1982,15 @@ void VolumeData::SetBoundaryEnable(bool bval)
 {
 	m_boundary_enable = bval;
 	if (bval)
-		SetBoundary(m_boundary, false);
+	{
+		SetBoundaryLow(m_boundary_low, false);
+		SetBoundaryHigh(m_boundary_high, false);
+	}
 	else
-		SetBoundary(0.0, false);
+	{
+		SetBoundaryLow(0.0, false);
+		SetBoundaryHigh(m_boundary_max, false);
+	}
 }
 
 bool VolumeData::GetBoundaryEnable()
@@ -1990,27 +1998,55 @@ bool VolumeData::GetBoundaryEnable()
 	return m_boundary_enable;
 }
 
-void VolumeData::SetBoundary(double val, bool set_this)
+void VolumeData::SetBoundaryLow(double val, bool set_this)
 {
 	if (set_this)
-		m_boundary = val;
+		m_boundary_low = val;
 	if (m_vr)
-		m_vr->set_gm_thresh(val);
+		m_vr->set_gm_low(val);
 }
 
-double VolumeData::GetBoundary()
+double VolumeData::GetBoundaryLow()
 {
-	return m_boundary;
+	return m_boundary_low;
 }
 
-double VolumeData::GetMlBoundary()
+double VolumeData::GetMlBoundaryLow()
 {
 	GetMlParams();
 
 	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("extract_boundary");
 	else
-		return glbin_vol_def.m_boundary;
+		return glbin_vol_def.m_boundary_low;
+}
+
+void VolumeData::SetBoundaryHigh(double val, bool set_this)
+{
+	if (set_this)
+		m_boundary_high = val;
+	if (m_vr)
+		m_vr->set_gm_high(val);
+}
+
+double VolumeData::GetBoundaryHigh()
+{
+	return m_boundary_high;
+}
+
+double VolumeData::GetMlBoundaryHigh()
+{
+	return glbin_vol_def.m_boundary_high;
+}
+
+void VolumeData::SetBoundaryMax(double val)
+{
+	m_boundary_max = val;
+}
+
+double VolumeData::GetBoundaryMax()
+{
+	return m_boundary_max;
 }
 
 void VolumeData::SetMinMaxEnable(bool bval)
@@ -3564,7 +3600,8 @@ void VolumeData::ApplyMlVolProp()
 		if (m_boundary_enable)
 		{
 			dval = std::max(0.0f, m_ep->getParam("extract_boundary"));
-			SetBoundary(dval);
+			SetBoundaryLow(dval);
+			SetBoundaryMax(m_boundary_max);
 		}
 		//enable shading
 		dval = m_ep->getParam("shading_enable");
@@ -5116,7 +5153,9 @@ DataGroup::DataGroup()
 	m_sync_volume_prop = false;
 
 	m_gamma = 1.0;
-	m_boundary = 0.0;
+	m_boundary_low = 0.0;
+	m_boundary_high = 0.5;
+	m_boundary_max = 0.5;
 	m_lo_offset = 0.0;
 	m_hi_offset = 1.0;
 	m_lo_thresh = 0.0;
@@ -5257,19 +5296,49 @@ void DataGroup::SetBoundaryEnable(bool bval)
 	}
 }
 
-void DataGroup::SetBoundary(double val, bool set_this)
+void DataGroup::SetBoundaryLow(double val, bool set_this)
 {
-	m_boundary = val;
+	m_boundary_low = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
-			it->SetBoundary(val, set_this);
+			it->SetBoundaryLow(val, set_this);
 	}
 }
 
-double DataGroup::GetBoundary()
+double DataGroup::GetBoundaryLow()
 {
-	return m_boundary;
+	return m_boundary_low;
+}
+
+void DataGroup::SetBoundaryHigh(double val, bool set_this)
+{
+	m_boundary_high = val;
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->SetBoundaryHigh(val, set_this);
+	}
+}
+
+double DataGroup::GetBoundaryHigh()
+{
+	return m_boundary_high;
+}
+
+void DataGroup::SetBoundaryMax(double val)
+{
+	m_boundary_max = val;
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->SetBoundaryMax(val);
+	}
+}
+
+double DataGroup::GetBoundaryMax()
+{
+	return m_boundary_max;
 }
 
 void DataGroup::SetMinMaxEnable(bool bval)

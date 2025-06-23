@@ -49,7 +49,9 @@ public:
 	double m_gamma;
 
 	bool m_boundary_enable;
-	double m_boundary;
+	double m_boundary_low;
+	double m_boundary_high;
+	double m_boundary_max;
 
 	bool m_minmax_enable;
 	double m_lo_offset;

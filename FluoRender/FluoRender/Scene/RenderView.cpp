@@ -3124,9 +3124,12 @@ void RenderView::SetParams(double t)
 		keycode.l2_name = "boundary enable";
 		if (glbin_interpolator.GetBoolean(keycode, t, bval))
 			vd->SetBoundaryEnable(bval);
-		keycode.l2_name = "boundary";
+		keycode.l2_name = "boundary low";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			vd->SetBoundary(dval);
+			vd->SetBoundaryLow(dval);
+		keycode.l2_name = "boundary high";
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			vd->SetBoundaryHigh(dval);
 		vc.insert(gstBoundary);
 		//shading
 		keycode.l2_name = "shading enable";

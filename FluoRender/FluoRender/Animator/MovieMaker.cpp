@@ -801,8 +801,11 @@ void MovieMaker::InsertKey(int index)
 		keycode.l2_name = "boundary enable";
 		flkeyB = new FlKeyBoolean(keycode, vd->GetBoundaryEnable());
 		glbin_interpolator.AddKey(flkeyB);
-		keycode.l2_name = "boundary";
-		flkey = new FlKeyDouble(keycode, vd->GetBoundary());
+		keycode.l2_name = "boundary low";
+		flkey = new FlKeyDouble(keycode, vd->GetBoundaryLow());
+		glbin_interpolator.AddKey(flkey);
+		keycode.l2_name = "boundary high";
+		flkey = new FlKeyDouble(keycode, vd->GetBoundaryHigh());
 		glbin_interpolator.AddKey(flkey);
 		//shading
 		keycode.l2_name = "shading enable";

@@ -41,7 +41,9 @@ VolumeDataDefault::VolumeDataDefault()
 	m_gamma = 1.0;
 
 	m_boundary_enable = true;
-	m_boundary = 0.0;
+	m_boundary_low = 0.0;
+	m_boundary_high = 0.5;
+	m_boundary_max = 0.5;
 
 	m_minmax_enable = true;
 	m_lo_offset = 0.0;
@@ -116,7 +118,9 @@ void VolumeDataDefault::Read()
 	f->Read(gstGamma3d, &m_gamma, 1.0);
 
 	f->Read(gstBoundaryEnable, &m_boundary_enable, true);
-	f->Read(gstBoundary, &m_boundary, 0.0);
+	f->Read(gstBoundaryLow, &m_boundary_low, 0.0);
+	f->Read(gstBoundaryHigh, &m_boundary_high, 0.5);
+	f->Read(gstBoundaryMax, &m_boundary_max, 0.5);
 
 	f->Read(gstMinMaxEnable, &m_minmax_enable, true);
 	f->Read(gstLowOffset, &m_lo_offset, 0.0);
@@ -179,7 +183,9 @@ void VolumeDataDefault::Save()
 	f->Write(gstGamma3d, m_gamma);
 
 	f->Write(gstBoundaryEnable, m_boundary_enable);
-	f->Write(gstBoundary, m_boundary);
+	f->Write(gstBoundaryLow, m_boundary_low);
+	f->Write(gstBoundaryHigh, m_boundary_high);
+	f->Write(gstBoundaryMax, m_boundary_max);
 
 	f->Write(gstMinMaxEnable, m_minmax_enable);
 	f->Write(gstLowOffset, m_lo_offset);
@@ -238,7 +244,9 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_gamma = vd->GetGamma();
 
 	m_boundary_enable = vd->GetBoundaryEnable();
-	m_boundary = vd->GetBoundary();
+	m_boundary_low = vd->GetBoundaryLow();
+	m_boundary_high = vd->GetBoundaryHigh();
+	m_boundary_max = vd->GetBoundaryMax();
 
 	m_minmax_enable = vd->GetMinMaxEnable();
 	m_lo_offset = vd->GetLowOffset();
@@ -298,7 +306,9 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetGamma(m_gamma);
 
 	vd->SetBoundaryEnable(m_boundary_enable);
-	vd->SetBoundary(m_boundary);
+	vd->SetBoundaryLow(m_boundary_low);
+	vd->SetBoundaryHigh(m_boundary_high);
+	vd->SetBoundaryMax(m_boundary_max);
 
 	vd->SetMinMaxEnable(m_minmax_enable);
 	vd->SetLowOffset(vd->GetMinValueScale());
@@ -361,7 +371,9 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetGamma(v2->GetGamma());
 
 	v1->SetBoundaryEnable(v2->GetBoundaryEnable());
-	v1->SetBoundary(v2->GetBoundary());
+	v1->SetBoundaryLow(v2->GetBoundaryLow());
+	v1->SetBoundaryHigh(v2->GetBoundaryHigh());
+	v1->SetBoundaryMax(v2->GetBoundaryMax());
 
 	v1->SetMinMaxEnable(v2->GetMinMaxEnable());
 	v1->SetLowOffset(v2->GetLowOffset());
@@ -434,7 +446,9 @@ void VolumeDataDefault::Apply(DataGroup* g)
 	g->SetGamma(m_gamma);
 
 	g->SetBoundaryEnable(m_boundary_enable);
-	g->SetBoundary(m_boundary);
+	g->SetBoundaryLow(m_boundary_low);
+	g->SetBoundaryHigh(m_boundary_high);
+	g->SetBoundaryMax(m_boundary_max);
 
 	g->SetMinMaxEnable(m_minmax_enable);
 	g->SetLowOffset(m_lo_offset);

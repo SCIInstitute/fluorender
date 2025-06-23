@@ -215,7 +215,7 @@ private:
 	void SetLuminance(double, bool);
 	void SetSampleRate(double, bool);
 	void SetThresh(double, double, bool);
-	void SetBoundary(double, bool);
+	void SetBoundary(double, double, bool);
 	void SetLowShading(double, bool);
 	void SetHiShading(double, bool);
 	void SetShadowInt(double, bool);
@@ -229,7 +229,7 @@ private:
 	void SyncLuminance(double);
 	void SyncSampleRate(double);
 	void SyncThresh(double, double);
-	void SyncBoundary(double);
+	void SyncBoundary(double, double);
 	void SyncLowShading(double);
 	void SyncHiShading(double);
 	void SyncShadowInt(double);

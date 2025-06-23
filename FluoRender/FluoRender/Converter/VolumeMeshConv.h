@@ -85,7 +85,8 @@ namespace flrd
 		double m_spcx, m_spcy, m_spcz;
 		//volume info
 		bool m_use_transfer;
-		double m_gamma, m_lo_thresh, m_hi_thresh, m_sw, m_lo_offset, m_hi_offset, m_boundary;
+		double m_gamma, m_lo_thresh, m_hi_thresh, m_sw, m_lo_offset, m_hi_offset;
+		double m_boundary_low, m_boundary_high, m_boundary_max;
 		bool m_use_mask;
 		bool m_weld;
 

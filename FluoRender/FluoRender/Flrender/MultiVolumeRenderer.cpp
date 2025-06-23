@@ -536,7 +536,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			// Set up shaders
 			ShaderProgram* shader = 0;
-			bool grad = vr_list_[tn]->gm_thresh_ > 0.0 ||
+			bool grad = vr_list_[tn]->gm_low_ > 0.0 ||
+				vr_list_[tn]->gm_high_ < vr_list_[tn]->gm_max_ ||
 				(vr_list_[tn]->colormap_mode_ &&
 					vr_list_[tn]->colormap_proj_);
 			auto tex = vr_list_[tn]->tex_.lock();
@@ -614,7 +615,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->inv_?
 				-vr_list_[tn]->scalar_scale_:
 				vr_list_[tn]->scalar_scale_,
-				vr_list_[tn]->gm_thresh_,
+				vr_list_[tn]->gm_scale_,
 				vr_list_[tn]->lo_thresh_,
 				vr_list_[tn]->hi_thresh_);
 			shader->setLocalParam(3, 1.0/vr_list_[tn]->gamma3d_,
@@ -645,6 +646,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParam(16, vr_list_[tn]->mask_color_.r(),
 				vr_list_[tn]->mask_color_.g(), vr_list_[tn]->mask_color_.b(),
 				vr_list_[tn]->mask_thresh_);
+			shader->setLocalParam(17, vr_list_[tn]->gm_low_,
+				vr_list_[tn]->gm_high_, vr_list_[tn]->gm_max_, 0.0);
 
 			double abcd[4];
 			vr_list_[tn]->planes_[0]->get(abcd);
