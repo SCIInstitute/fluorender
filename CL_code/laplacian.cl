@@ -1,13 +1,12 @@
 #define KX 3
 #define KY 3
 #define KZ 3
-#define MAX 0.03
 #define DWL unsigned char
 #define VSCL 255
-float sharpen(int i, int j, int k)
+float laplacian(int i, int j, int k)
 {
-	if (i == 1 && j == 1 && k == 1) return 2.0f;
-	return -1.0f / 26.0f;
+	if (i == 1 && j == 1 && k == 1) return -26.0f;
+	return 1.0f;
 }
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
@@ -34,7 +33,7 @@ __kernel void kernel_main(
 				coord.y+(j-KY/2),
 				coord.z+(k-KZ/2), 1);
 		dvalue = read_imagef(data, samp, kc);
-		rvalue += sharpen(i, j, k) * dvalue.x;
+		rvalue += laplacian(i, j, k) * dvalue.x;
 	}
 	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
 	result[index] = clamp(rvalue, 0.0f, 1.0f)*VSCL;
