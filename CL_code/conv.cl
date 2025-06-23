@@ -3,20 +3,23 @@
 #define KZ 3
 #define DWL unsigned char
 #define VSCL 255
-__constant float krn[KX*KY*KZ] =
-{-1, 2, -1,
- 2, -4, 2,
- -1, 2, -1,
- 2, -4, 2,
- -4, 8, -4,
- 2, -4, 2,
- -1, 2, -1,
- 2, -4, 2,
- -1, 2, -1};
+__constant float krn[KX * KY * KZ] = {
+	 0.0,  0.5,  0.0,
+	 0.5, -1.0,  0.5,
+	 0.0,  0.5,  0.0,
+
+	 0.5, -1.0,  0.5,
+	-1.0,  4.0, -1.0,
+	 0.5, -1.0,  0.5,
+
+	 0.0,  0.5,  0.0,
+	 0.5, -1.0,  0.5,
+	 0.0,  0.5,  0.0
+};
 const sampler_t samp =
-	CLK_NORMALIZED_COORDS_FALSE|
-	CLK_ADDRESS_CLAMP_TO_EDGE|
-	CLK_FILTER_NEAREST;
+CLK_NORMALIZED_COORDS_FALSE |
+CLK_ADDRESS_CLAMP_TO_EDGE |
+CLK_FILTER_NEAREST;
 __kernel void kernel_main(
 	read_only image3d_t data,
 	__global DWL* result,
@@ -30,16 +33,16 @@ __kernel void kernel_main(
 	float4 dvalue;
 	float rvalue = 0.0;
 	int i, j, k;
-	for (i=0; i<KX; ++i)
-	for (j=0; j<KY; ++j)
-	for (k=0; k<KZ; ++k)
-	{
-		kc = (int4)(coord.x+(i-KX/2),
-				coord.y+(j-KY/2),
-				coord.z+(k-KZ/2), 1);
-		dvalue = read_imagef(data, samp, kc);
-		rvalue += krn[KX*KY*k+KX*j+i] * dvalue.x;
-	}
-	unsigned int index = x*y*coord.z + x*coord.y + coord.x;
-	result[index] = clamp(rvalue, 0.0f, 1.0f)*VSCL;
+	for (i = 0; i < KX; ++i)
+		for (j = 0; j < KY; ++j)
+			for (k = 0; k < KZ; ++k)
+			{
+				kc = (int4)(coord.x + (i - KX / 2),
+					coord.y + (j - KY / 2),
+					coord.z + (k - KZ / 2), 1);
+				dvalue = read_imagef(data, samp, kc);
+				rvalue += krn[KX * KY * k + KX * j + i] * dvalue.x;
+			}
+	unsigned int index = x * y * coord.z + x * coord.y + coord.x;
+	result[index] = clamp(rvalue, 0.0f, 1.0f) * VSCL;
 }
