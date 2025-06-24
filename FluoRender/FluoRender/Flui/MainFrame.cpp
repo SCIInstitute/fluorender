@@ -1152,7 +1152,7 @@ wxWindow* MainFrame::AddProps(int type,
 		{
 			AnnotatPropPanel* pane = new AnnotatPropPanel(this, m_prop_panel);
 			pane->SetAnnotations(ann);
-			pane->SetName(md->GetName());
+			pane->SetName(ann->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
 			result = pane;
@@ -2208,7 +2208,7 @@ void MainFrame::OpenProject()
 	{
 		std::wstring path = fopendlg.GetPath().ToStdWstring();
 		glbin_project.Open(path);
-		FluoUpdate({ gstMainFrameTitle });
+		//FluoUpdate({ gstMainFrameTitle });
 	}
 }
 

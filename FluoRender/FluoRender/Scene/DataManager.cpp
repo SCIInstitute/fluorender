@@ -6374,6 +6374,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 	if (enable_4d)
 	{
+		glbin_moviemaker.SetCurrentFrame(view->m_tseq_cur_num);
 		glbin_moviemaker.SetSeqMode(1);
 		vc.insert(gstMovieAgent);
 	}

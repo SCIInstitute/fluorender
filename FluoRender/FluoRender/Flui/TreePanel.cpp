@@ -478,6 +478,95 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 }
 
+void TreePanel::Select()
+{
+	if (!m_datatree)
+		return;
+
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+
+	if (!sel_item.IsOk())
+		return;
+
+	fluo::ValueCollection vc;
+
+	//select data
+	std::wstring name = m_datatree->GetItemText(sel_item).ToStdWstring();
+	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
+	Root* root = glbin_data_manager.GetRoot();
+
+	if (item_data)
+	{
+		switch (item_data->type)
+		{
+		case 0://root
+			glbin_current.SetRoot();
+			break;
+		case 1://view
+		{
+			if (root)
+			{
+				auto view = root->GetView(name);
+				glbin_current.SetRenderView(view);
+			}
+		}
+			break;
+		case 2://volume data
+		{
+			auto vd = glbin_data_manager.GetVolumeData(name);
+			glbin_current.SetVolumeData(vd);
+			vc.insert(gstVolumePropPanel);
+		}
+			break;
+		case 3://mesh data
+		{
+			auto md = glbin_data_manager.GetMeshData(name);
+			glbin_current.SetMeshData(md);
+			vc.insert(gstMeshPropPanel);
+		}
+			break;
+		case 4://annotations
+		{
+			auto ann = glbin_data_manager.GetAnnotations(name);
+			glbin_current.SetAnnotation(ann);
+			vc.insert(gstAnnotatPropPanel);
+		}
+			break;
+		case 5://volume group
+		{
+			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
+			if (root)
+			{
+				auto view = root->GetView(par_name);
+				if (view)
+				{
+					auto group = view->GetGroup(name);
+					glbin_current.SetVolumeGroup(group);
+				}
+			}
+		}
+			break;
+		case 6://mesh group
+		{
+			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
+			if (root)
+			{
+				auto view = root->GetView(par_name);
+				if (view)
+				{
+					auto group = view->GetMGroup(name);
+					glbin_current.SetMeshGroup(group);
+				}
+			}
+		}
+			break;
+		}
+	}
+
+	vc.insert(gstCurrentSelect);
+	FluoRefresh(1, { vc });
+}
+
 void TreePanel::Action()
 {
 	bool bval = wxGetKeyState(WXK_CONTROL);
@@ -1940,89 +2029,7 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 	if (m_datatree && m_datatree->m_silent_select)
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-
-	if (!sel_item.IsOk())
-		return;
-
-	fluo::ValueCollection vc;
-
-	//select data
-	std::wstring name = m_datatree->GetItemText(sel_item).ToStdWstring();
-	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-	Root* root = glbin_data_manager.GetRoot();
-
-	if (item_data)
-	{
-		switch (item_data->type)
-		{
-		case 0://root
-			glbin_current.SetRoot();
-			break;
-		case 1://view
-		{
-			if (root)
-			{
-				auto view = root->GetView(name);
-				glbin_current.SetRenderView(view);
-			}
-		}
-			break;
-		case 2://volume data
-		{
-			auto vd = glbin_data_manager.GetVolumeData(name);
-			glbin_current.SetVolumeData(vd);
-			vc.insert(gstVolumePropPanel);
-		}
-			break;
-		case 3://mesh data
-		{
-			auto md = glbin_data_manager.GetMeshData(name);
-			glbin_current.SetMeshData(md);
-			vc.insert(gstMeshPropPanel);
-		}
-			break;
-		case 4://annotations
-		{
-			auto ann = glbin_data_manager.GetAnnotations(name);
-			glbin_current.SetAnnotation(ann);
-			vc.insert(gstAnnotatPropPanel);
-		}
-			break;
-		case 5://volume group
-		{
-			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(par_name);
-				if (view)
-				{
-					auto group = view->GetGroup(name);
-					glbin_current.SetVolumeGroup(group);
-				}
-			}
-		}
-			break;
-		case 6://mesh group
-		{
-			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(par_name);
-				if (view)
-				{
-					auto group = view->GetMGroup(name);
-					glbin_current.SetMeshGroup(group);
-				}
-			}
-		}
-			break;
-		}
-	}
-
-	vc.insert(gstCurrentSelect);
-	FluoRefresh(1, { vc });
-
+	Select();
 	event.Skip();
 }
 

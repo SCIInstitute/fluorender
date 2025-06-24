@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
+#include <TreePanel.h>
 #include <RenderViewPanel.h>
 #include <ClipPlanePanel.h>
 #include <MoviePanel.h>
@@ -1215,6 +1216,7 @@ void Project::Open(const std::wstring& filename)
 
 	frame->RefreshCanvases();
 	frame->UpdateProps({}, 0, 0);
+	frame->GetTreePanel()->Select();//simulate selection
 }
 
 void Project::Save(const std::wstring& filename, bool inc)

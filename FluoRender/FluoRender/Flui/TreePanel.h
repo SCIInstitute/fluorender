@@ -182,6 +182,9 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
+	//selection change
+	void Select();
+
 	//update
 	void UpdateTree();
 	void UpdateTreeIcons();
