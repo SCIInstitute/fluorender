@@ -466,15 +466,15 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_toolbar->ToggleTool(ID_RulerPencil, mode == 13);
 		m_toolbar->ToggleTool(ID_RulerEdit, mode == 6);
 		m_toolbar->ToggleTool(ID_RulerDeletePoint, mode == 14);
-		m_toolbar->ToggleTool(ID_RulerLocator, bval && ival == 2);
+		m_toolbar2->ToggleTool(ID_RulerLocator, bval && ival == 2);
 
 		bval = mode == 2 || mode == 10;
 		ival = glbin_vol_selector.GetMode();
-		m_toolbar->ToggleTool(ID_BrushGrow, bval && ival == 9);
-		m_toolbar->ToggleTool(ID_BrushAppend, bval && ival == 2);
-		m_toolbar->ToggleTool(ID_BrushComp, bval && ival == 10);
-		m_toolbar->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
-		m_toolbar->ToggleTool(ID_BrushUnselect, bval && ival == 3);
+		m_toolbar2->ToggleTool(ID_BrushGrow, bval && ival == 9);
+		m_toolbar2->ToggleTool(ID_BrushAppend, bval && ival == 2);
+		m_toolbar2->ToggleTool(ID_BrushComp, bval && ival == 10);
+		m_toolbar2->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
+		m_toolbar2->ToggleTool(ID_BrushUnselect, bval && ival == 3);
 	}
 }
 
