@@ -229,8 +229,11 @@ bool Relax::Compute()
 	m_dsp.assign(m_snum * 3, 0.0);
 	m_wsum.assign(m_snum, 0.0);
 
+	long bits = m_vd->GetBits();
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
+
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_relax);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_relax, bits, max_int);
 	if (!kernel_prog)
 		return false;
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered

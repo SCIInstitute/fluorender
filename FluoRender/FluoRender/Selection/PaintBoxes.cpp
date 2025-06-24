@@ -119,7 +119,7 @@ void PaintBoxes::Compute()
 	}
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_paint_boxes);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_paint_boxes, 8, 255.0f);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");

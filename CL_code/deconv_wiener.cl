@@ -3,7 +3,7 @@
 #define KZ 3
 #define DWL unsigned char
 #define VSCL 255
-#define EPSILON 0.01f  // Regularization term to avoid division by zero
+#define EPSILON (1.0f / VSCL * 5.0f)
 
 // Example 3x3x3 Gaussian PSF (normalized)
 float psf(int i, int j, int k) {

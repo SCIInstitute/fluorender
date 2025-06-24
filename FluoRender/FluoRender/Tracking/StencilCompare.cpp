@@ -790,7 +790,7 @@ m_use_mask(use_mask)
 {
 	//create program
 	m_prog = glbin_vol_kernel_factory.kernel(
-		m_use_mask ? str_cl_stencil_mask : str_cl_stencil);
+		m_use_mask ? str_cl_stencil_mask : str_cl_stencil, 8, 255.0f);
 	m_img1 = std::make_unique<flvr::Argument>();
 	m_img2 = std::make_unique<flvr::Argument>();
 	m_mask1 = std::make_unique<flvr::Argument>();

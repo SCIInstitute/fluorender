@@ -74,8 +74,8 @@ namespace flvr
 		~VolKernelFactory();
 		void clear();
 
-		KernelProgram* kernel(int type = 0);
-		KernelProgram* kernel(std::string s, int bits = 8);
+		KernelProgram* kernel(int type);
+		KernelProgram* kernel(std::string s, int bits, float max_int);
 
 	protected:
 		std::vector<VolKernel*> kernels_;

@@ -242,6 +242,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 	int chars = bits / 8;
 	int res_x, res_y, res_z;
 	vd->GetResolution(res_x, res_y, res_z);
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	flvr::TextureBrick *b, *b_r;
 	for (size_t i = 0; i<brick_num; ++i)
@@ -253,7 +254,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel =
 			glbin_vol_kernel_factory.
-			kernel(m_code, bits);
+			kernel(m_code, bits, max_int);
 		if (kernel)
 		{
 			m_message += L"OpenCL kernel created.\n";

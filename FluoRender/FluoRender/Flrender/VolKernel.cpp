@@ -179,7 +179,7 @@ namespace flvr
 		return k->program();
 	}
 
-	KernelProgram* VolKernelFactory::kernel(std::string s, int bits)
+	KernelProgram* VolKernelFactory::kernel(std::string s, int bits, float max_int)
 	{
 		//change string according to bits
 		if (bits > 8 && bits <= 16)
@@ -188,6 +188,8 @@ namespace flvr
 				"#define DWL unsigned short//");
 			s = replace(s, "#define VSCL ",
 				"#define VSCL 65535//");
+			s = replace(s, "#define MAX_INT ",
+				"#define MAX_INT " + std::to_string(max_int) + "f//");
 		}
 		else if (bits > 16 && bits <= 32)
 		{ }

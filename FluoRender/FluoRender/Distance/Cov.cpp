@@ -162,9 +162,11 @@ bool Cov::ComputeCenter()
 		return false;
 	if (!m_vd->GetMask(false))
 		return false;
+	long bits = m_vd->GetBits();
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cov);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cov, bits, max_int);
 	if (!kernel_prog)
 		return false;
 	std::string name = "kernel_0";
@@ -243,9 +245,11 @@ bool Cov::ComputeCov()
 		return false;
 	if (!m_vd->GetMask(false))
 		return false;
+	long bits = m_vd->GetBits();
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cov);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cov, bits, max_int);
 	if (!kernel_prog)
 		return false;
 	std::string name = "kernel_1";

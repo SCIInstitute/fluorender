@@ -3,8 +3,8 @@
 #define KZ 3
 #define DWL unsigned char
 #define VSCL 255
-#define EPSILON 1e-4f
-#define NOISE_FLOOR 0.01f
+#define MAX_INT 255.0f
+#define EPSILON (1.0f / VSCL * 5.0f)
 
 // Forward PSF (Gaussian)
 float psf(int i, int j, int k) {
@@ -48,8 +48,9 @@ __kernel void kernel_main(
 
 	// Step 2: Compute ratio = observed / blurred
 	float4 obs_val = read_imagef(data, samp, coord);
-	float gain = blurred / (blurred * blurred + NOISE_FLOOR);
-	float ratio = obs_val.x * gain;
+	//float gain = blurred / (blurred * blurred + EPSILON);
+	//float ratio = obs_val.x * gain;
+	float ratio = obs_val.x / (blurred + EPSILON);
 
 	// Step 3: Convolve ratio with flipped PSF
 	float correction = 0.0f;

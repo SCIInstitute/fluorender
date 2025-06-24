@@ -268,9 +268,10 @@ void BasicStat::Run()
 		return;
 	long bits = m_vd->GetBits();
 	int chars = bits / 8;
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_basic_stat, bits);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_basic_stat, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0, kernel_index1;

@@ -125,9 +125,11 @@ void CountVoxels::Count()
 		return;
 	if (!vd->GetMask(false))
 		return;
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_count_voxels);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_count_voxels, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;

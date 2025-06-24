@@ -149,8 +149,10 @@ void VolumeRoi::Run()
 	if (!CheckBricks())
 		return;
 	long bits = m_vd->GetBits();
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
+
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_volume_roi_ellipse, bits);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_volume_roi_ellipse, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;

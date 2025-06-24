@@ -635,9 +635,11 @@ void ChannelCompare::Product()
 
 	if (!CheckBricks())
 		return;
+	long bits = m_vd1->GetBits();
+	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_dotprod);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_dotprod, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -743,9 +745,11 @@ void ChannelCompare::MinValue()
 
 	if (!CheckBricks())
 		return;
+	long bits = m_vd1->GetBits();
+	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_minvalue);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_minvalue, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -851,9 +855,11 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 
 	if (!CheckBricks())
 		return;
+	long bits = m_vd1->GetBits();
+	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_threshold);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_threshold, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -965,9 +971,11 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 
 	if (!CheckBricks())
 		return;
+	long bits = m_vd1->GetBits();
+	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_sum);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_chann_sum, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;

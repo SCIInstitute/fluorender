@@ -278,9 +278,11 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	if (flvr::Texture::mask_undo_num_ > 0 &&
 		m_vd->GetTexture())
 		m_vd->GetTexture()->push_mask();
+	long bits = m_vd->GetBits();
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_diffusion);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_diffusion, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
@@ -364,8 +366,11 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	if (!CheckBricks())
 		return;
 
+	long bits = m_vd->GetBits();
+	float max_int = static_cast<float>(m_vd->GetMaxValue());
+
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_diffusion);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_diffusion, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_1");
