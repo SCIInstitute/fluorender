@@ -189,7 +189,12 @@ bool KernelExecutor::Execute()
 
 	bool kernel_exe = ExecuteKernel(vd.get(), vd_r.get());
 	for (int i = 0; i < m_repeat; ++i)
+	{
+		int prg = static_cast<int>((i + 1) * 100.0 / m_repeat);
+		SetProgress(0, "Running OpenCL kernel.");
+		SetRange(static_cast<int>((i + 1) * 100.0 / m_repeat), static_cast<int>((i + 2) * 100.0 / m_repeat));
 		kernel_exe &= ExecuteKernel(vd_r.get(), vd_r.get());
+	}
 
 	if (!kernel_exe)
 	{
@@ -204,6 +209,7 @@ bool KernelExecutor::Execute()
 		vd->GetVR()->clear_tex_current();
 	}
 
+	SetRange(0, 100);
 	SetProgress(0, "");
 
 	return true;

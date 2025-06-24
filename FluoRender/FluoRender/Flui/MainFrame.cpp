@@ -253,7 +253,7 @@ MainFrame::MainFrame(
 		break;
 	case TOOL_OPENCL:
 		m_main_tb->SetToolBitmap(ID_LastTool,
-			wxGetBitmap(icon_opencl));
+			wxGetBitmap(tb_volume_filter));
 		break;
 	case TOOL_COMPONENT:
 		m_main_tb->SetToolBitmap(ID_LastTool,
@@ -347,6 +347,9 @@ MainFrame::MainFrame(
 	m = m_tb_menu_edit->Append(ID_MeasureDlg, "Measurement...",
 		"Make measurements with the ruler tools");
 	m->SetBitmap(wxGetBitmap(icon_measurement_mini));
+	m = m_tb_menu_edit->Append(ID_OclDlg, "Volume Filter...",
+		"Edit and apply volume filters using OpenCL");
+	m->SetBitmap(wxGetBitmap(icon_filter_mini));
 	m = m_tb_menu_edit->Append(ID_ComponentDlg, "Component Analyzer...",
 		"Segment structures into components and perform analysis");
 	m->SetBitmap(wxGetBitmap(icon_components_mini));
@@ -368,9 +371,6 @@ MainFrame::MainFrame(
 	m = m_tb_menu_edit->Append(ID_ConvertDlg, "Convert...",
 		"Conver a volume channel to a mesh object");
 	m->SetBitmap(wxGetBitmap(icon_convert_mini));
-	m = m_tb_menu_edit->Append(ID_OclDlg, "OpenCL Kernel Editor...",
-		"Edit and apply kernel filters using OpenCL");
-	m->SetBitmap(wxGetBitmap(icon_opencl_mini));
 	m = m_tb_menu_edit->Append(ID_MlDlg, "Machine Learning Manager...",
 		"Manage machine-learning libraries for various functions");
 	m->SetBitmap(wxGetBitmap(icon_machine_learning_mini));
@@ -565,9 +565,9 @@ MainFrame::MainFrame(
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_track_dlg).Float();
 	m_aui_mgr.GetPane(m_track_dlg).Hide();
-	//ocl fialog
+	//ocl dialog
 	m_aui_mgr.AddPane(m_ocl_dlg, wxAuiPaneInfo().
-		Name("m_ocl_dlg").Caption("OpenCL Kernel Editor").
+		Name("m_ocl_dlg").Caption("Volume Filter").
 		Dockable(false).CloseButton(true).
 		MaximizeButton(true));
 	m_aui_mgr.GetPane(m_ocl_dlg).Float();
@@ -693,6 +693,9 @@ MainFrame::MainFrame(
 	m = m_top_tools->Append(ID_MeasureDlgMenu, "&Measurement...",
 		"Use the ruler tools to make measurements and analysis in 3D");
 	m->SetBitmap(wxGetBitmap(icon_measurement_mini));
+	m = m_top_tools->Append(ID_OclDlgMenu, "Volume &Filter...",
+		"Edit and apply volume filters using OpenCL");
+	m->SetBitmap(wxGetBitmap(icon_filter_mini));
 	m = m_top_tools->Append(ID_CompDlgMenu, "Component Anal&yzer...",
 		"Segment structures into components and make analysis");
 	m->SetBitmap(wxGetBitmap(icon_components_mini));
@@ -714,14 +717,11 @@ MainFrame::MainFrame(
 	m = m_top_tools->Append(ID_ConvertDlgMenu, "Co&nvert...",
 		"Conver a volume channel to a mesh object");
 	m->SetBitmap(wxGetBitmap(icon_convert_mini));
-	m = m_top_tools->Append(ID_OclDlgMenu, "&OpenCL Kernel Editor...",
-		"Edit and apply filtering with OpenCL kernels");
-	m->SetBitmap(wxGetBitmap(icon_opencl_mini));
 	m = m_top_tools->Append(ID_MlDlgMenu, "M&achine Learning Manager...",
 		"Manage machine-learning models and training");
 	m->SetBitmap(wxGetBitmap(icon_machine_learning_mini));
 	m_top_tools->Append(wxID_SEPARATOR);
-	m = m_top_tools->Append(ID_Settings, "Con&figurations...",
+	m = m_top_tools->Append(ID_Settings, "Confi&gurations...",
 		"Manage settings of FluoRender");
 	m->SetBitmap(wxGetBitmap(icon_settings_mini));
 	//window option
@@ -1767,7 +1767,7 @@ void MainFrame::ShowOclDlg()
 	m_aui_mgr.GetPane(m_ocl_dlg).Show();
 	glbin_settings.m_last_tool = TOOL_OPENCL;
 	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_opencl));
+		wxGetBitmap(tb_volume_filter));
 	m_aui_mgr.Update();
 }
 

@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolKernel.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
+#include <CompSelector.h>
 #include <TableHistParams.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
@@ -138,7 +139,8 @@ void ComponentGenerator::GenerateComp(bool command)
 
 	SetProgress(0, "Initializing component generation.");
 
-	m_use_sel &= vd->IsValidMask();
+	bool valid_mask = vd->IsValidMask();
+	m_use_sel &= valid_mask;
 
 	vd->AddEmptyMask(1, !m_use_sel);//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
@@ -204,6 +206,9 @@ void ComponentGenerator::GenerateComp(bool command)
 		AddCmd("generate");
 
 	vd->SetMlCompGenApplied(false);
+
+	if (!valid_mask)
+		glbin_comp_selector.All();
 
 	SetRange(0, 100);
 	SetProgress(0, "");

@@ -1673,6 +1673,7 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 		menu.AppendSeparator();
 		menu.Append(TreePanel::ID_Edit, "Paint Brush...");
 		menu.Append(TreePanel::ID_Measurement, "Measurement...");
+		menu.Append(TreePanel::ID_Ocl, "Volume Filter...");
 		menu.Append(TreePanel::ID_Component, "Component Analyzer...");
 		menu.Append(TreePanel::ID_Trace, "Tracking...");
 		menu.Append(TreePanel::ID_Calculations, "Calculations...");
@@ -1680,7 +1681,6 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 		menu.Append(TreePanel::ID_Counting, "Volume Size...");
 		menu.Append(TreePanel::ID_Colocalization, "Colocalization...");
 		menu.Append(TreePanel::ID_Convert, "Convert...");
-		menu.Append(TreePanel::ID_Ocl, "OpenCL Kernel Editor...");
 		menu.Append(TreePanel::ID_MachineLearning, "Machine Learning Manager...");
 		break;
 	case 3:  //mesh data

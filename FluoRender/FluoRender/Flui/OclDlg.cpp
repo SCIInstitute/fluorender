@@ -55,7 +55,7 @@ OclDlg::OclDlg(MainFrame* frame) :
 	wxStaticText *st = 0;
 	//
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Kernel file:",
+	st = new wxStaticText(this, 0, "Filter file:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_kernel_file_txt = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
@@ -109,7 +109,7 @@ OclDlg::OclDlg(MainFrame* frame) :
 	wxListItem itemCol;
 	itemCol.SetText("No.");
 	m_kernel_list->InsertColumn(0, itemCol);
-	itemCol.SetText("Kernel Files");
+	itemCol.SetText("Filter");
 	m_kernel_list->InsertColumn(1, itemCol);
 	m_kernel_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	m_kernel_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
@@ -299,8 +299,8 @@ void OclDlg::Execute()
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 {
 	ModalDlg fopendlg(
-		m_frame, "Choose an OpenCL kernel file", 
-		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+		m_frame, "Choose a filter file", 
+		"", "", "Filter file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
@@ -327,8 +327,8 @@ void OclDlg::OnSaveBtn(wxCommandEvent& event)
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
 	ModalDlg fopendlg(
-		m_frame, "Choose an OpenCL kernel file", 
-		"", "", "OpenCL kernel file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+		m_frame, "Choose an filter file", 
+		"", "", "Filter file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
 	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
@@ -353,7 +353,7 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
-	glbin_kernel_executor.SetProgress(0, "Running OpenCL kernel.");
+	glbin_kernel_executor.SetProgress(0, "Running volume filter.");
 
 	Execute();
 

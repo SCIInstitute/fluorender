@@ -112,10 +112,10 @@ public:
 	const static unsigned char icon_convert_png[3509];
 	/* icon_convert_mini.png - 738 bytes */
 	const static unsigned char icon_convert_mini_png[738];
-	/* icon_opencl.png - 4312 bytes */
-	const static unsigned char icon_opencl_png[4312];
-	/* icon_opencl_mini.png - 715 bytes */
-	const static unsigned char icon_opencl_mini_png[715];
+	/* tb_volume_filter.png - 4528 bytes */
+	const static unsigned char tb_volume_filter_png[4528];
+	/* icon_filter_mini.png - 808 bytes */
+	const static unsigned char icon_filter_mini_png[808];
 	/* icon_components.png - 4122 bytes */
 	const static unsigned char icon_components_png[4122];
 	/* icon_components_mini.png - 839 bytes */
