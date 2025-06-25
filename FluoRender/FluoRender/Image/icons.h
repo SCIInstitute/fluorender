@@ -414,10 +414,10 @@ public:
 	const static unsigned char comp_off_png[1151];
 	/* starknot.png - 1174 bytes */
 	const static unsigned char starknot_png[1174];
-	/* filter.png - 1003 bytes */
-	const static unsigned char filter_png[1003];
-	/* filter_off.png - 945 bytes */
-	const static unsigned char filter_off_png[945];
+	/* filter.png - 905 bytes */
+	const static unsigned char filter_png[905];
+	/* filter_off.png - 880 bytes */
+	const static unsigned char filter_off_png[880];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

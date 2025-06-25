@@ -45,6 +45,7 @@ namespace flrd
 		double radius1;//radius 1
 		double radius2;//radius 2
 		bool use_radius2;//use radius 2
+		int iter_num;//iteration number
 	};
 
 	class VolumeSelector
@@ -222,6 +223,7 @@ namespace flrd
 					it.radius1 = m_brush_radius1;
 					it.radius2 = m_brush_radius2;
 					it.use_radius2 = m_use_brush_radius2;
+					it.iter_num = m_iter_num;
 				}
 			}
 		}

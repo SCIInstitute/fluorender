@@ -791,7 +791,7 @@ void TreePanel::BrushAppend()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushComp()
@@ -810,7 +810,7 @@ void TreePanel::BrushComp()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushDiffuse()
@@ -829,7 +829,7 @@ void TreePanel::BrushDiffuse()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushUnselect()
@@ -848,7 +848,7 @@ void TreePanel::BrushUnselect()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushClear()

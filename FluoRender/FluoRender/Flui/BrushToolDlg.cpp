@@ -761,7 +761,7 @@ void BrushToolDlg::BrushAppend()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushComp()
@@ -780,7 +780,7 @@ void BrushToolDlg::BrushComp()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushSingle()
@@ -799,7 +799,7 @@ void BrushToolDlg::BrushSingle()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(mode == 1);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushDiffuse()
@@ -818,7 +818,7 @@ void BrushToolDlg::BrushDiffuse()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushSolid()
@@ -837,7 +837,7 @@ void BrushToolDlg::BrushSolid()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushUnsel()
@@ -856,7 +856,7 @@ void BrushToolDlg::BrushUnsel()
 	glbin_states.m_brush_mode_toolbar = mode;
 	glbin_states.m_brush_mode_shortcut = 0;
 	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2 }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 //toolbar2

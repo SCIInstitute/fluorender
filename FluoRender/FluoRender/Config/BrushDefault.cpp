@@ -130,6 +130,8 @@ void BrushDefault::Read()
 			f->Read("radius2", &(m_brush_radius_sets[i].radius2));
 			//use radius 2
 			f->Read("use_radius2", &(m_brush_radius_sets[i].use_radius2));
+			//iter num
+			f->Read("iter num", &(m_brush_radius_sets[i].iter_num));
 			//f->SetPath("/brush default/radius_settings");
 			f->SetPath("..");
 		}
@@ -142,6 +144,7 @@ void BrushDefault::Read()
 		radius_set.radius1 = 10;
 		radius_set.radius2 = 30;
 		radius_set.use_radius2 = true;
+		radius_set.iter_num = m_iter_num;
 		m_brush_radius_sets.push_back(radius_set);
 		//erase
 		radius_set.type = 3;
@@ -219,6 +222,8 @@ void BrushDefault::Save()
 		f->Write("radius2", radius_set.radius2);
 		//use radius 2
 		f->Write("use_radius2", radius_set.use_radius2);
+		//iter
+		f->Write("iter_num", radius_set.iter_num);
 	}
 	f->SetPath("/brush default");
 	//spacing

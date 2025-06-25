@@ -723,10 +723,12 @@ void VolumeSelector::ChangeBrushSetsIndex()
 			m_brush_radius_sets[m_brush_sets_index].radius1 = m_brush_radius1;
 			m_brush_radius_sets[m_brush_sets_index].radius2 = m_brush_radius2;
 			m_brush_radius_sets[m_brush_sets_index].use_radius2 = m_use_brush_radius2;
+			m_brush_radius_sets[m_brush_sets_index].iter_num = m_iter_num;
 			//get new
 			m_brush_radius1 = radius_set.radius1;
 			m_brush_radius2 = radius_set.radius2;
 			m_use_brush_radius2 = radius_set.use_radius2;
+			m_iter_num = radius_set.iter_num;
 			m_brush_sets_index = i;
 			break;
 		}

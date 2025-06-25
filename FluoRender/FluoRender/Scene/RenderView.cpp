@@ -10345,7 +10345,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		{
 			state.m_set_focus = true;
 			state.m_refresh = true;
-			state.m_value_collection.insert({ gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2 });
+			state.m_value_collection.insert({ gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter });
 			if (glbin_vol_selector.GetAutoPaintSize())
 				state.m_value_collection.insert(gstBrushCountResult);
 			if (glbin_colocalizer.GetAutoColocalize())
