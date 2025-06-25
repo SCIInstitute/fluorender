@@ -1016,11 +1016,12 @@ wxWindow* ComponentDlg::CreateOutputPage(wxWindow* parent)
 	//grid
 	m_output_grid = new wxGrid(page, wxID_ANY);
 	m_output_grid->CreateGrid(0, 1);
+	m_output_grid->SetSelectionMode(wxGrid::wxGridSelectCells);
 	//m_output_grid->Fit();
 	m_output_grid->Bind(wxEVT_KEY_DOWN, &ComponentDlg::OnKeyDown, this);
 	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &ComponentDlg::OnSelectCell, this);
 	m_output_grid->Bind(wxEVT_GRID_RANGE_SELECT, &ComponentDlg::OnRangeSelect, this);
-	m_output_grid->Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &ComponentDlg::OnGridLabelClick, this);
+	m_output_grid->Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &ComponentDlg::OnSelectCell, this);
 
 	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(10, 10);
@@ -1396,6 +1397,9 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	int i, k;
 	int id_idx = -1;
 
+	m_supress_select = true;
+	m_output_grid->BeginBatch();
+
 	k = 0;
 	cur_line = titles;
 	do
@@ -1468,6 +1472,8 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 
 	//m_output_grid->AutoSizeColumns();
 	m_output_grid->ClearSelection();
+	m_output_grid->EndBatch();
+	m_supress_select = false;
 
 	prg.SetProgress(0, "");
 }
@@ -2442,44 +2448,28 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 
 void ComponentDlg::OnSelectCell(wxGridEvent& event)
 {
-	int row = event.GetRow();
-	if (event.Selecting())
-	{
-		m_sel.insert(row);
-	}
-	else
-	{
-		auto it = m_sel.find(row);
-		if (it != m_sel.end())
-			m_sel.erase(it);
-	}
-	SelectGridCells();
+	if (m_supress_select)
+		return;
+
+	CallAfter([this] {
+		UpdateSelectedRows();
+		SelectGridCells();
+	});
+
+	event.Skip();
 }
 
 void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 {
-	int r1 = event.GetTopRow();
-	int r2 = event.GetBottomRow();
-	if (event.Selecting())
-	{
-		for (int i = r1; i <= r2; ++i)
-			m_sel.insert(i);
-	}
-	else
-	{
-		for (int i = r1; i <= r2; ++i)
-		{
-			auto it = m_sel.find(i);
-			if (it != m_sel.end())
-				m_sel.erase(it);
-		}
-	}
-	SelectGridCells();
-}
+	if (m_supress_select)
+		return;
 
-void ComponentDlg::OnGridLabelClick(wxGridEvent& event)
-{
-	m_output_grid->SetFocus();
+	CallAfter([this] {
+		UpdateSelectedRows();
+		SelectGridCells();
+	});
+
+	event.Skip();
 }
 
 void ComponentDlg::CopyData()
@@ -2792,3 +2782,31 @@ void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
 	}
 }
 
+void ComponentDlg::UpdateSelectedRows()
+{
+	m_sel.clear();
+
+	// 1. Add individually selected cells
+	const auto& cells = m_output_grid->GetSelectedCells();
+	for (const auto& cell : cells)
+		m_sel.insert(cell.GetRow());
+
+	// 2. Add selected blocks
+	const auto& topLeft = m_output_grid->GetSelectionBlockTopLeft();
+	const auto& bottomRight = m_output_grid->GetSelectionBlockBottomRight();
+	for (size_t i = 0; i < topLeft.size(); ++i)
+	{
+		int top = topLeft[i].GetRow();
+		int bottom = bottomRight[i].GetRow();
+		for (int row = top; row <= bottom; ++row)
+			m_sel.insert(row);
+	}
+
+	// 3. Add the current cell if nothing else is selected
+	if (cells.empty() && topLeft.empty())
+	{
+		int row = m_output_grid->GetGridCursorRow();
+		if (row >= 0)
+			m_sel.insert(row);
+	}
+}

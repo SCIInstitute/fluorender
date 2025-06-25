@@ -110,6 +110,7 @@ private:
 
 	//selected rows of output grid
 	std::set<size_t> m_sel;
+	bool m_supress_select = false;
 
 	//output
 	bool m_hold_history;
@@ -262,6 +263,7 @@ private:
 		std::vector<unsigned int>& bids, wxArrayInt& sel, bool bricks);
 	void AddSelCoordArray(std::vector<unsigned int>& ids,
 		std::vector<unsigned int>& bids, wxGridCellCoordsArray& sel, bool bricks);
+	void UpdateSelectedRows();
 
 private:
 	//pages
@@ -288,7 +290,6 @@ private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnSelectCell(wxGridEvent& event);
 	void OnRangeSelect(wxGridRangeSelectEvent& event);
-	void OnGridLabelClick(wxGridEvent& event);
 
 	//comp gen page
 	void OnIterSldr(wxScrollEvent& event);
