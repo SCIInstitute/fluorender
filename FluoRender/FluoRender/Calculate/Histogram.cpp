@@ -130,9 +130,10 @@ void Histogram::Compute()
 	float minv = 0;
 	float maxv = 1;
 	if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
+	float max_int = m_vd->GetMaxValue();
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_histogram, bits);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_histogram, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
