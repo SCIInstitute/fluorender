@@ -227,162 +227,26 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer8->Add(m_clean_limit_text, 0, wxALIGN_CENTER);
 	sizer8->Add(2, 2);
 
-	//density
-	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
-	m_density_check = new wxCheckBox(page, wxID_ANY, "Use Density Field",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_density_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDensityCheck, this);
-	sizer9->Add(2, 2);
-	sizer9->Add(m_density_check, 0, wxALIGN_CENTER);
-
-	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Separation:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_density_sldr = new wxSingleSlider(page, wxID_ANY, 1000, 0, 10000,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_text = new wxTextCtrl(page, wxID_ANY, "1.0",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
-	m_density_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensitySldr, this);
-	m_density_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityText, this);
-	sizer10->Add(2, 2);
-	sizer10->Add(st, 0, wxALIGN_CENTER);
-	sizer10->Add(m_density_sldr, 1, wxEXPAND);
-	sizer10->Add(m_density_text, 0, wxALIGN_CENTER);
-	sizer10->Add(2, 2);
-
-	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Noise Level:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_varth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_varth_text = new wxTextCtrl(page, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
-	m_varth_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnVarthSldr, this);
-	m_varth_text->Bind(wxEVT_TEXT, &ComponentDlg::OnVarthText, this);
-	sizer11->Add(2, 2);
-	sizer11->Add(st, 0, wxALIGN_CENTER);
-	sizer11->Add(m_varth_sldr, 1, wxEXPAND);
-	sizer11->Add(m_varth_text, 0, wxALIGN_CENTER);
-	sizer11->Add(2, 2);
-
-	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Filter Size:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_density_window_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 20,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_window_size_text = new wxTextCtrl(page, wxID_ANY, "5",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_density_window_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityWindowSizeSldr, this);
-	m_density_window_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityWindowSizeText, this);
-	sizer12->Add(2, 2);
-	sizer12->Add(st, 0, wxALIGN_CENTER);
-	sizer12->Add(m_density_window_size_sldr, 1, wxEXPAND);
-	sizer12->Add(m_density_window_size_text, 0, wxALIGN_CENTER);
-	sizer12->Add(2, 2);
-
-	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Feature Size:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_density_stats_size_sldr = new wxSingleSlider(page, wxID_ANY, 15, 1, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_stats_size_text = new wxTextCtrl(page, wxID_ANY, "15",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_density_stats_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityStatsSizeSldr, this);
-	m_density_stats_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityStatsSizeText, this);
-	sizer13->Add(2, 2);
-	sizer13->Add(st, 0, wxALIGN_CENTER);
-	sizer13->Add(m_density_stats_size_sldr, 1, wxEXPAND);
-	sizer13->Add(m_density_stats_size_text, 0, wxALIGN_CENTER);
-	sizer13->Add(2, 2);
-
-	//distance field
-	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
-	m_use_dist_field_check = new wxCheckBox(page, wxID_ANY, "Use Distance Field",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_use_dist_field_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseDistFieldCheck, this);
-	sizer14->Add(2, 2);
-	sizer14->Add(m_use_dist_field_check, 0, wxALIGN_CENTER);
-
-	wxBoxSizer* sizer15 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Strength:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_dist_strength_sldr = new wxSingleSlider(page, wxID_ANY, 500, 0, 1000,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_strength_text = new wxTextCtrl(page, wxID_ANY, "0.5",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
-	m_dist_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistStrengthSldr, this);
-	m_dist_strength_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistStrengthText, this);
-	sizer15->Add(2, 2);
-	sizer15->Add(st, 0, wxALIGN_CENTER);
-	sizer15->Add(m_dist_strength_sldr, 1, wxEXPAND);
-	sizer15->Add(m_dist_strength_text, 0, wxALIGN_CENTER);
-	sizer15->Add(2, 2);
-
-	wxBoxSizer* sizer16 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Perimeter Value:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_dist_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.000",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
-	m_dist_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistThreshSldr, this);
-	m_dist_thresh_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistThreshText, this);
-	sizer16->Add(2, 2);
-	sizer16->Add(st, 0, wxALIGN_CENTER);
-	sizer16->Add(m_dist_thresh_sldr, 1, wxEXPAND);
-	sizer16->Add(m_dist_thresh_text, 0, wxALIGN_CENTER);
-	sizer16->Add(2, 2);
-
-	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Filter Size:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_dist_filter_size_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 20,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_filter_size_text = new wxTextCtrl(page, wxID_ANY, "3",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_dist_filter_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistFilterSizeSldr, this);
-	m_dist_filter_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistFilterSizeText, this);
-	sizer17->Add(2, 2);
-	sizer17->Add(st, 0, wxALIGN_CENTER);
-	sizer17->Add(m_dist_filter_size_sldr, 1, wxEXPAND);
-	sizer17->Add(m_dist_filter_size_text, 0, wxALIGN_CENTER);
-	sizer17->Add(2, 2);
-
-	wxBoxSizer* sizer18 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Feature Size:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_max_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 255,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_max_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
-		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	m_max_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnMaxDistSldr, this);
-	m_max_dist_text->Bind(wxEVT_TEXT, &ComponentDlg::OnMaxDistText, this);
-	sizer18->Add(2, 2);
-	sizer18->Add(st, 0, wxALIGN_CENTER);
-	sizer18->Add(m_max_dist_sldr, 1, wxEXPAND);
-	sizer18->Add(m_max_dist_text, 0, wxALIGN_CENTER);
-	sizer18->Add(2, 2);
-
 	//fixate
-	wxBoxSizer* sizer19 = new wxBoxSizer(wxHORIZONTAL);
-	m_fixate_check = new wxCheckBox(page, wxID_ANY, "Fixate Grown Regions",
+	wxBoxSizer* sizer9 = new wxBoxSizer(wxHORIZONTAL);
+	m_fixate_check = new wxCheckBox(page, wxID_ANY, "Freeze Merged Regions",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_grow_fixed_check = new wxCheckBox(page, wxID_ANY, "Continue on Fixiated Regions",
+	m_grow_fixed_check = new wxCheckBox(page, wxID_ANY, "Growth from Freezed Regions",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-	m_fix_update_btn = new wxButton(page, wxID_ANY, "Refix",
+	m_fix_update_btn = new wxButton(page, wxID_ANY, "Refreeze",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxALIGN_LEFT);
 	m_fixate_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnFixateCheck, this);
 	m_grow_fixed_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnGrowFixedCheck, this);
 	m_fix_update_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnFixUpdateBtn, this);
-	sizer19->Add(2, 2);
-	sizer19->Add(m_fixate_check, 0, wxALIGN_CENTER);
-	sizer19->Add(2, 2);
-	sizer19->Add(m_grow_fixed_check, 0, wxALIGN_CENTER);
-	sizer19->AddStretchSpacer(1);
-	sizer19->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
-	sizer19->Add(2, 2);
+	sizer9->Add(2, 2);
+	sizer9->Add(m_fixate_check, 0, wxALIGN_CENTER);
+	sizer9->Add(2, 2);
+	sizer9->Add(m_grow_fixed_check, 0, wxALIGN_CENTER);
+	sizer9->AddStretchSpacer(1);
+	sizer9->Add(m_fix_update_btn, 0, wxALIGN_CENTER);
+	sizer9->Add(2, 2);
 
-	wxBoxSizer* sizer20 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer10 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Stop Size:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_fix_size_sldr = new wxSingleSlider(page, wxID_ANY, 50, 1, 200,
@@ -391,15 +255,151 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_fix_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnFixSizeSldr, this);
 	m_fix_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnFixSizeText, this);
+	sizer10->Add(2, 2);
+	sizer10->Add(st, 0, wxALIGN_CENTER);
+	sizer10->Add(m_fix_size_sldr, 1, wxEXPAND);
+	sizer10->Add(m_fix_size_text, 0, wxALIGN_CENTER);
+	sizer10->Add(2, 2);
+
+	//density
+	wxBoxSizer* sizer11 = new wxBoxSizer(wxHORIZONTAL);
+	m_density_check = new wxCheckBox(page, wxID_ANY, "Use Density Field",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_density_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnDensityCheck, this);
+	sizer11->Add(2, 2);
+	sizer11->Add(m_density_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer12 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Separation:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_density_sldr = new wxSingleSlider(page, wxID_ANY, 1000, 0, 10000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_density_text = new wxTextCtrl(page, wxID_ANY, "1.0",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_density_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensitySldr, this);
+	m_density_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityText, this);
+	sizer12->Add(2, 2);
+	sizer12->Add(st, 0, wxALIGN_CENTER);
+	sizer12->Add(m_density_sldr, 1, wxEXPAND);
+	sizer12->Add(m_density_text, 0, wxALIGN_CENTER);
+	sizer12->Add(2, 2);
+
+	wxBoxSizer* sizer13 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Noise Level:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_varth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_varth_text = new wxTextCtrl(page, wxID_ANY, "0.0",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_varth_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnVarthSldr, this);
+	m_varth_text->Bind(wxEVT_TEXT, &ComponentDlg::OnVarthText, this);
+	sizer13->Add(2, 2);
+	sizer13->Add(st, 0, wxALIGN_CENTER);
+	sizer13->Add(m_varth_sldr, 1, wxEXPAND);
+	sizer13->Add(m_varth_text, 0, wxALIGN_CENTER);
+	sizer13->Add(2, 2);
+
+	wxBoxSizer* sizer14 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Filter Size:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_density_window_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_density_window_size_text = new wxTextCtrl(page, wxID_ANY, "5",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_density_window_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityWindowSizeSldr, this);
+	m_density_window_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityWindowSizeText, this);
+	sizer14->Add(2, 2);
+	sizer14->Add(st, 0, wxALIGN_CENTER);
+	sizer14->Add(m_density_window_size_sldr, 1, wxEXPAND);
+	sizer14->Add(m_density_window_size_text, 0, wxALIGN_CENTER);
+	sizer14->Add(2, 2);
+
+	wxBoxSizer* sizer15 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Feature Size:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_density_stats_size_sldr = new wxSingleSlider(page, wxID_ANY, 15, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_density_stats_size_text = new wxTextCtrl(page, wxID_ANY, "15",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_density_stats_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityStatsSizeSldr, this);
+	m_density_stats_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityStatsSizeText, this);
+	sizer15->Add(2, 2);
+	sizer15->Add(st, 0, wxALIGN_CENTER);
+	sizer15->Add(m_density_stats_size_sldr, 1, wxEXPAND);
+	sizer15->Add(m_density_stats_size_text, 0, wxALIGN_CENTER);
+	sizer15->Add(2, 2);
+
+	//distance field
+	wxBoxSizer* sizer16 = new wxBoxSizer(wxHORIZONTAL);
+	m_use_dist_field_check = new wxCheckBox(page, wxID_ANY, "Use Distance Field",
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+	m_use_dist_field_check->Bind(wxEVT_CHECKBOX, &ComponentDlg::OnUseDistFieldCheck, this);
+	sizer16->Add(2, 2);
+	sizer16->Add(m_use_dist_field_check, 0, wxALIGN_CENTER);
+
+	wxBoxSizer* sizer17 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Strength:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_dist_strength_sldr = new wxSingleSlider(page, wxID_ANY, 500, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_dist_strength_text = new wxTextCtrl(page, wxID_ANY, "0.5",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_dist_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistStrengthSldr, this);
+	m_dist_strength_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistStrengthText, this);
+	sizer17->Add(2, 2);
+	sizer17->Add(st, 0, wxALIGN_CENTER);
+	sizer17->Add(m_dist_strength_sldr, 1, wxEXPAND);
+	sizer17->Add(m_dist_strength_text, 0, wxALIGN_CENTER);
+	sizer17->Add(2, 2);
+
+	wxBoxSizer* sizer18 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Perimeter Value:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_dist_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_dist_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.000",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
+	m_dist_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistThreshSldr, this);
+	m_dist_thresh_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistThreshText, this);
+	sizer18->Add(2, 2);
+	sizer18->Add(st, 0, wxALIGN_CENTER);
+	sizer18->Add(m_dist_thresh_sldr, 1, wxEXPAND);
+	sizer18->Add(m_dist_thresh_text, 0, wxALIGN_CENTER);
+	sizer18->Add(2, 2);
+
+	wxBoxSizer* sizer19 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Filter Size:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_dist_filter_size_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 20,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_dist_filter_size_text = new wxTextCtrl(page, wxID_ANY, "3",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_dist_filter_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistFilterSizeSldr, this);
+	m_dist_filter_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistFilterSizeText, this);
+	sizer19->Add(2, 2);
+	sizer19->Add(st, 0, wxALIGN_CENTER);
+	sizer19->Add(m_dist_filter_size_sldr, 1, wxEXPAND);
+	sizer19->Add(m_dist_filter_size_text, 0, wxALIGN_CENTER);
+	sizer19->Add(2, 2);
+
+	wxBoxSizer* sizer20 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Feature Size:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_max_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 255,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_max_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
+		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
+	m_max_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnMaxDistSldr, this);
+	m_max_dist_text->Bind(wxEVT_TEXT, &ComponentDlg::OnMaxDistText, this);
 	sizer20->Add(2, 2);
 	sizer20->Add(st, 0, wxALIGN_CENTER);
-	sizer20->Add(m_fix_size_sldr, 1, wxEXPAND);
-	sizer20->Add(m_fix_size_text, 0, wxALIGN_CENTER);
+	sizer20->Add(m_max_dist_sldr, 1, wxEXPAND);
+	sizer20->Add(m_max_dist_text, 0, wxALIGN_CENTER);
 	sizer20->Add(2, 2);
 
 	//command record
 	wxBoxSizer* sizer21 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Recorder:",
+	st = new wxStaticText(page, 0, "Actions:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cmd_count_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, -1)), wxTE_READONLY | wxTE_RIGHT);
@@ -422,7 +422,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer21->Add(2, 2);
 
 	wxBoxSizer* sizer22 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Save File:",
+	st = new wxStaticText(page, 0, "Save Actions:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cmd_file_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
@@ -440,7 +440,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	sizer22->Add(2, 2);
 
 	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Basic Growth && Merge");
+		wxVERTICAL, page, "Simple Segmentation");
 	group1->Add(5, 5);
 	group1->Add(sizer2, 0, wxEXPAND);
 	group1->Add(5, 5);
@@ -459,13 +459,13 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group2->Add(5, 5);
 	group2->Add(sizer8, 0, wxEXPAND);
 	group2->Add(5, 5);
+	group2->Add(sizer9, 0, wxEXPAND);
+	group2->Add(5, 5);
+	group2->Add(sizer10, 0, wxEXPAND);
+	group2->Add(5, 5);
 
 	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Advanced Growth && Merge");
-	group3->Add(sizer9, 0, wxEXPAND);
-	group3->Add(5, 5);
-	group3->Add(sizer10, 0, wxEXPAND);
-	group3->Add(5, 5);
 	group3->Add(sizer11, 0, wxEXPAND);
 	group3->Add(5, 5);
 	group3->Add(sizer12, 0, wxEXPAND);
@@ -488,7 +488,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 	group3->Add(5, 5);
 
 	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Recorder and Playback");
+		wxVERTICAL, page, "Action Recording and Playback");
 	group4->Add(sizer21, 0, wxEXPAND);
 	group4->Add(5, 5);
 	group4->Add(sizer22, 0, wxEXPAND);
@@ -1476,94 +1476,85 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 void ComponentDlg::SetIter(int val)
 {
 	glbin_comp_generator.SetIter(val);
-	FluoUpdate({ gstIteration, gstCompAutoUpdate });
+	FluoUpdate({ gstIteration, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetThresh(double val)
 {
 	glbin_comp_generator.SetThresh(val);
-	FluoUpdate({ gstCompThreshold, gstCompAutoUpdate });
+	FluoUpdate({ gstCompThreshold, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetDistStrength(double val)
 {
 	glbin_comp_generator.SetDistStrength(val);
-	FluoUpdate({ gstDistFieldStrength, gstCompAutoUpdate });
+	FluoUpdate({ gstDistFieldStrength, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetDistFilterSize(int val)
 {
 	glbin_comp_generator.SetDistFilterSize(val);
-	FluoUpdate({ gstDistFieldFilterSize, gstCompAutoUpdate });
+	FluoUpdate({ gstDistFieldFilterSize, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetMaxDist(int val)
 {
 	glbin_comp_generator.SetMaxDist(val);
-	FluoUpdate({ gstMaxDist, gstCompAutoUpdate });
+	FluoUpdate({ gstMaxDist, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetDistThresh(double val)
 {
 	glbin_comp_generator.SetDistThresh(val);
-	FluoUpdate({ gstDistFieldThresh, gstCompAutoUpdate });
+	FluoUpdate({ gstDistFieldThresh, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetFalloff(double val)
 {
 	glbin_comp_generator.SetFalloff(val);
-	FluoUpdate({ gstDiffusionFalloff, gstCompAutoUpdate });
+	FluoUpdate({ gstDiffusionFalloff, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetDensity(double val)
 {
 	glbin_comp_generator.SetDensityThresh(val);
-	FluoUpdate({ gstDensityFieldThresh, gstCompAutoUpdate });
+	FluoUpdate({ gstDensityFieldThresh, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetVarth(double val)
 {
 	glbin_comp_generator.SetVarThresh(val);
-	FluoUpdate({ gstDensityVarThresh, gstCompAutoUpdate });
+	FluoUpdate({ gstDensityVarThresh, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetDensityWindowSize(int val)
 {
 	glbin_comp_generator.SetDensityWinSize(val);
-	FluoUpdate({ gstDensityWindowSize, gstCompAutoUpdate });
+	FluoUpdate({ gstDensityWindowSize, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetDensityStatsSize(int val)
 {
 	glbin_comp_generator.SetDensityStatSize(val);
-	FluoUpdate({ gstDensityStatsSize, gstCompAutoUpdate });
+	FluoUpdate({ gstDensityStatsSize, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetFixSize(int val)
 {
 	glbin_comp_generator.SetFixSize(val);
-	FluoUpdate({ gstFixateSize, gstCompAutoUpdate });
-
-	//if (glbin_comp_generator.GetAutoCompGen() &&
-	//	!glbin_comp_generator.IsBusy())
-	//{
-	//	glbin_comp_generator.GenerateComp(false);
-	//	if (glbin_comp_generator.GetRecordCmd())
-	//		glbin_comp_generator.AddCmd("fixate");
-	//	FluoRefresh(2, { gstRecordCmd, gstFixateSize });
-	//}
+	FluoUpdate({ gstFixateSize, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetCleanIter(int val)
 {
 	glbin_comp_generator.SetCleanIter(val);
-	FluoUpdate({ gstCleanIteration, gstCompAutoUpdate });
+	FluoUpdate({ gstCleanIteration, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::SetCleanLimit(int val)
 {
 	glbin_comp_generator.SetCleanSize(val);
-	FluoUpdate({ gstCleanSize, gstCompAutoUpdate });
+	FluoUpdate({ gstCleanSize, gstCompAutoUpdate, gstRecordCmd });
 }
 
 //comp generate page
@@ -1628,7 +1619,7 @@ void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
 {
 	bool bval = m_use_dist_field_check->GetValue();
 	glbin_comp_generator.SetUseDistField(bval);
-	FluoUpdate({ gstUseDistField, gstCompAutoUpdate });
+	FluoUpdate({ gstUseDistField, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
@@ -1694,7 +1685,7 @@ void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
 {
 	bool bval = m_diff_check->GetValue();
 	glbin_comp_generator.SetDiffusion(bval);
-	FluoUpdate({ gstUseDiffusion, gstCompAutoUpdate });
+	FluoUpdate({ gstUseDiffusion, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
@@ -1720,7 +1711,7 @@ void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
 {
 	bool bval = m_density_check->GetValue();
 	glbin_comp_generator.SetDensity(bval);
-	FluoUpdate({ gstUseDensityField, gstCompAutoUpdate });
+	FluoUpdate({ gstUseDensityField, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
@@ -1874,7 +1865,7 @@ void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
 {
 	bool bval = m_clean_check->GetValue();
 	glbin_comp_generator.SetClean(bval);
-	FluoUpdate({ gstCleanEnable, gstCompAutoUpdate });
+	FluoUpdate({ gstCleanEnable, gstCompAutoUpdate, gstRecordCmd });
 }
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent& event)
@@ -1935,11 +1926,13 @@ void ComponentDlg::OnPlayCmd(wxCommandEvent& event)
 	bool bval = m_use_sel_gen_chk->GetValue();
 	glbin_comp_generator.SetUseSel(bval);
 	glbin_comp_generator.PlayCmd(1.0);
+	FluoRefresh(3, { gstNull });
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent& event)
 {
 	glbin_comp_generator.ResetCmd();
+	FluoUpdate({ gstRecordCmd });
 }
 
 void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
@@ -1953,6 +1946,7 @@ void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 	std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
 	glbin_comp_generator.LoadCmd(filename);
+	FluoUpdate({ gstRecordCmd });
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
@@ -2399,7 +2393,7 @@ void ComponentDlg::OnGenerate(wxCommandEvent& event)
 	if (glbin_comp_generator.GetAutoThreshold())
 		vc.insert({ gstBrushThreshold, gstCompThreshold });
 	glbin_comp_generator.Compute();
-	vc.insert(gstCompGenOutput);
+	vc.insert({ gstCompGenOutput, gstRecordCmd });
 	FluoRefresh(2, vc);
 }
 

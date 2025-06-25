@@ -171,45 +171,45 @@ namespace flrd
 	private:
 		std::weak_ptr<VolumeData> m_vd;
 
-		bool m_use_sel;//use mask instead of data
-		bool m_use_ml;//use machine learning
-		int m_iter;//iteration
-		double m_thresh;
-		double m_tfactor;
+		bool m_use_sel = true;//use mask instead of data
+		bool m_use_ml = false;//use machine learning
+		int m_iter = 30;//iteration
+		double m_thresh = 0.5;
+		double m_tfactor = 1.0;
 		//distance field
-		bool m_use_dist_field;
-		double m_dist_strength;
-		int m_dist_filter_size;
-		int m_max_dist;
-		double m_dist_thresh;
+		bool m_use_dist_field = false;
+		double m_dist_strength = 0.5;
+		int m_dist_filter_size = 3;
+		int m_max_dist = 30;
+		double m_dist_thresh = 0.25;
 		//diffusion
-		bool m_diff;
-		double m_falloff;
-		bool m_size;
-		int m_size_lm;
+		bool m_diff = false;
+		double m_falloff = 0.01;
+		bool m_size = false;
+		int m_size_lm = 100;
 		//density
-		bool m_density;
-		double m_density_thresh;
+		bool m_density = false;
+		double m_density_thresh = 1.0;
 		double m_varth;//variance threshold
-		int m_density_window_size;
-		int m_density_stats_size;
+		int m_density_window_size = 5;
+		int m_density_stats_size = 15;
 		//fixate
-		bool m_fixate;
-		int m_fix_size;
-		int m_grow_fixed;
+		bool m_fixate = false;
+		int m_fix_size = 50;
+		int m_grow_fixed = 1;
 		//clean
-		bool m_clean;
-		int m_clean_iter;
-		int m_clean_size_vl;
+		bool m_clean = false;
+		int m_clean_iter = 5;
+		int m_clean_size_vl = 5;
 		//fill borders
-		double m_fill_border;
+		double m_fill_border = 0.1;
 
 		//record
-		bool m_record_cmd;
+		bool m_record_cmd = false;
 		CompCommand m_command;
 
 		//speed test
-		bool m_test_speed;
+		bool m_test_speed = false;
 		std::vector<std::chrono::high_resolution_clock::time_point> m_tps;
 		std::wstring m_titles, m_values;
 

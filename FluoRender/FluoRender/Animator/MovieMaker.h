@@ -131,6 +131,7 @@ public:
 	void SetClipEndFrame(int val);
 	int GetClipEndFrame() { return m_clip_end_frame; }
 	void SetCurrentFrame(int val, bool upd_seq = true);
+	void SetCurrentFrameSilently(int val, bool upd_seq);
 	int GetCurrentFrame() { return m_cur_frame; }
 	void SetCurrentTime(double val);
 	double GetCurProg()

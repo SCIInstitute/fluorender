@@ -610,6 +610,14 @@ void MovieMaker::SetCurrentFrame(int val, bool upd_seq)
 	SetRendering(false);
 }
 
+void MovieMaker::SetCurrentFrameSilently(int val, bool upd_seq)
+{
+	m_cur_frame = fluo::RotateClamp2(val, m_clip_start_frame, m_clip_end_frame);
+	m_cur_time = (m_cur_frame - m_clip_start_frame) / m_fps;
+	if (upd_seq)
+		m_seq_cur_num = std::round((double)m_cur_frame * m_seq_all_num / m_full_frame_num);
+}
+
 void MovieMaker::SetCurrentTime(double val)
 {
 	int frame = m_clip_start_frame + std::round(val * m_fps);
