@@ -221,6 +221,7 @@ bool RulerListCtrl::GetCurrSelection(std::set<int> &sel)
 
 void RulerListCtrl::ClearSelection()
 {
+	m_silent_select = true;
 	long item = -1;
 	for (;;)
 	{
@@ -231,6 +232,7 @@ void RulerListCtrl::ClearSelection()
 			break;
 		SetItemState(item, 0, wxLIST_STATE_SELECTED);
 	}
+	m_silent_select = false;
 }
 
 void RulerListCtrl::StartEdit(int type, bool use_color, const fluo::Color& color)
@@ -624,13 +626,8 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(90, -1)));
 	sizer_14->Add(10, 10);
 	sizer_14->Add(st, 0, wxALIGN_CENTER);
-	m_auto_relax_btn = new wxToggleButton(page, wxID_ANY,
-		"Auto Relax", wxDefaultPosition, FromDIP(wxSize(75, -1)));
-	m_auto_relax_btn->Bind(wxEVT_TOGGLEBUTTON, &MeasureDlg::OnAutoRelax, this);
 	sizer_14->Add(10, 10);
-	sizer_14->Add(m_auto_relax_btn, 0, wxALIGN_CENTER);
 	st = new wxStaticText(page, 0, "Constraint ");
-	sizer_14->Add(10, 10);
 	sizer_14->Add(st, 0, wxALIGN_CENTER);
 	m_relax_data_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
@@ -901,7 +898,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstRulerListSel))
 	{
 		ival = glbin_ruler_handler.GetRulerIndex();
-		m_ruler_list->SetItemState(ival, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		m_ruler_list->SelectItemSilently(ival);
 	}
 
 	if (FOUND_VALUE(gstRulerGroupSel))
@@ -949,11 +946,6 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			bval = ruler->GetDisplay(2);
 			m_disp_name_chk->SetValue(bval);
 		}
-	}
-
-	if (update_all || FOUND_VALUE(gstRulerAutoRelax))
-	{
-		m_auto_relax_btn->SetValue(glbin_settings.m_ruler_auto_relax);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerRelaxType))
@@ -1090,7 +1082,7 @@ void MeasureDlg::UpdateRulerList()
 	for (auto it : sel)
 	{
 		if (it < size)
-			m_ruler_list->SetItemState(it, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			m_ruler_list->SelectItemSilently(it);
 	}
 }
 
@@ -1134,7 +1126,7 @@ void MeasureDlg::UpdateGroupSel()
 		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (ruler->Group() == gi)
-			m_ruler_list->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+			m_ruler_list->SelectItemSilently(i);
 	}
 }
 
@@ -1766,11 +1758,6 @@ void MeasureDlg::OnDispNameCheck(wxCommandEvent& event)
 		{ glbin_current.GetViewId() });
 }
 
-void MeasureDlg::OnAutoRelax(wxCommandEvent& event)
-{
-	glbin_settings.m_ruler_auto_relax = m_auto_relax_btn->GetValue();
-}
-
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 {
 	glbin_settings.m_ruler_relax_type = m_relax_data_cmb->GetSelection();
@@ -1961,6 +1948,9 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 
 void MeasureDlg::OnSelection(wxListEvent& event)
 {
+	if (m_ruler_list->m_silent_select)
+		return;
+
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;

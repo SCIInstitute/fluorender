@@ -57,6 +57,13 @@ public:
 		long style=wxLC_REPORT);
 	~RulerListCtrl();
 
+	void SelectItemSilently(int i)
+	{
+		m_silent_select = true;
+		SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		m_silent_select = false;
+	}
+
 	void Append(bool enable, unsigned int id,
 		wxString name, unsigned int group, int count,
 		wxString intensity, wxString &color,
@@ -85,6 +92,7 @@ private:
 	fluo::Point m_center;
 	fluo::Color m_color;
 	bool m_color_set = false;
+	bool m_silent_select = false;
 
 private:
 	void OnTextFocus(wxMouseEvent& event);
@@ -231,7 +239,6 @@ private:
 	wxCheckBox* m_disp_line_chk;
 	wxCheckBox* m_disp_name_chk;
 	//relax
-	wxToggleButton *m_auto_relax_btn;
 	wxSpinCtrlDouble* m_relax_value_spin;
 	wxComboBox *m_relax_data_cmb;
 	//align
@@ -263,7 +270,6 @@ private:
 	void OnDispPointCheck(wxCommandEvent& event);
 	void OnDispLineCheck(wxCommandEvent& event);
 	void OnDispNameCheck(wxCommandEvent& event);
-	void OnAutoRelax(wxCommandEvent& event);
 	void OnRelaxData(wxCommandEvent& event);
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
 	void OnRelaxValueText(wxCommandEvent& event);

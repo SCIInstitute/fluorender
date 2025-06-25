@@ -37,6 +37,7 @@ AutomateDefault::AutomateDefault()
 	m_paint_size = 2;
 	m_comp_gen = 2;
 	m_colocalize = 2;
+	m_relax_ruler = 0;
 }
 
 AutomateDefault::~AutomateDefault()
@@ -62,6 +63,8 @@ void AutomateDefault::Read()
 	f->Read("comp gen", &m_comp_gen, 2);
 	//colocalization
 	f->Read("colocalize", &m_colocalize, 2);
+	//relax ruler
+	f->Read("relax ruler", &m_relax_ruler, 0);
 }
 
 void AutomateDefault::Save()
@@ -81,4 +84,6 @@ void AutomateDefault::Save()
 	f->Write("comp gen", m_comp_gen);
 	//colocalization
 	f->Write("colocalize", m_colocalize);
+	//relax ruler
+	f->Write("relax ruler", m_relax_ruler);
 }

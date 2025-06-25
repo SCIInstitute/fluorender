@@ -732,8 +732,11 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 	int point_volume_mode = glbin_settings.m_point_volume_mode;
 	size_t rwt = view->m_tseq_cur_num;
 	Ruler* ruler = glbin_current.GetRuler();
-	if (ruler) ruler->SetWorkTime(rwt);
-	//DBGPRINT(L"Ruler:%d\n", m_ruler);
+	if (ruler)
+	{
+		ruler->SetWorkTime(rwt);
+		//DBGPRINT(L"Ruler:%s\n", ruler->GetName().c_str());
+	}
 
 	if (branch && m_type == 1)
 	{
@@ -1050,6 +1053,22 @@ void RulerHandler::AddAverage(const std::set<int>& rulers)
 	ruler->SetTransient(false);
 	ruler->SetTransTime(0);
 	list->push_back(ruler);
+}
+
+bool RulerHandler::GetAutoRelax()
+{
+	int relax_ruler = glbin_automate_def.m_relax_ruler;
+	if (relax_ruler == 0)
+		return false;
+	else if (relax_ruler == 1)
+		return true;
+	else if (relax_ruler == 2)
+	{
+		auto vd = glbin_current.vol_data.lock();
+		if (vd && vd->GetAllBrickNum() == 1)
+			return true;
+	}
+	return false;
 }
 
 void RulerHandler::Relax()

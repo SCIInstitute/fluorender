@@ -11021,7 +11021,7 @@ void RenderView::ProcessMouse(MouseState& state)
 		else if (m_int_mode == 13 &&
 			!state.m_key_alt)
 		{
-			if (glbin_settings.m_ruler_auto_relax)
+			if (glbin_ruler_handler.GetAutoRelax())
 			{
 				glbin_ruler_handler.SetEdited(true);
 				glbin_ruler_handler.Relax();
@@ -11078,7 +11078,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
 				glbin_ruler_handler.FinishRuler();
 			}
-			if (glbin_settings.m_ruler_auto_relax)
+			if (glbin_ruler_handler.GetAutoRelax())
 			{
 				glbin_ruler_handler.SetEdited(true);
 				glbin_ruler_handler.Relax();

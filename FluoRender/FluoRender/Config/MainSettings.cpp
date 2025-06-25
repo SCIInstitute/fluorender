@@ -126,7 +126,6 @@ MainSettings::MainSettings()
 	m_ruler_infr = 2.0;
 	m_ruler_df_f = false;
 	m_ruler_relax_iter = 10;
-	m_ruler_auto_relax = false;
 	m_ruler_relax_type = 1;
 	m_ruler_size_thresh = 5;
 	m_pencil_dist = 30;
@@ -373,7 +372,6 @@ void MainSettings::Read()
 		fconfig->Read("infr", &m_ruler_infr, 2.0);
 		fconfig->Read("df_f", &m_ruler_df_f, false);
 		fconfig->Read("relax iter", &m_ruler_relax_iter, 10);
-		fconfig->Read("auto relax", &m_ruler_auto_relax, false);
 		fconfig->Read("relax type", &m_ruler_relax_type, 1);
 		fconfig->Read("size thresh", &m_ruler_size_thresh, 5);
 		fconfig->Read("pencil dist", &m_pencil_dist, 30.0);
@@ -621,7 +619,6 @@ void MainSettings::Save()
 	fconfig->Write("infr", m_ruler_infr);
 	fconfig->Write("df_f", m_ruler_df_f);
 	fconfig->Write("relax iter", m_ruler_relax_iter);
-	fconfig->Write("auto relax", m_ruler_auto_relax);
 	fconfig->Write("relax type", m_ruler_relax_type);
 	fconfig->Write("size thresh", m_ruler_size_thresh);
 	fconfig->Write("pencil dist", m_pencil_dist);

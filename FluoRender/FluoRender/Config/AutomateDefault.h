@@ -46,5 +46,6 @@ public:
 	int m_paint_size;
 	int m_comp_gen;
 	int m_colocalize;
+	int m_relax_ruler;
 };
 #endif//_AUTOMATEDEFAULT_H_

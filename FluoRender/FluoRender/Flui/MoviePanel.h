@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <vector>
 #include <string>
+#include <Debug.h>
 
 #define UITEXT_NBPG0 "Basic"
 #define UITEXT_NBPG1 "Keyframes"
@@ -54,6 +55,25 @@ public:
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 	~KeyListCtrl();
 
+	void SelectItemSilently(int i)
+	{
+		DBGPRINT(L"Select Key List Item: %d\n", i);
+		m_silent_select = true;
+		Freeze(); // Optional: prevents flicker during updates
+
+		// Clear all selections
+		long item = -1;
+		while ((item = GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != -1) {
+			SetItemState(item, 0, wxLIST_STATE_SELECTED);
+		}
+
+		SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		EnsureVisible(i); // Optional: scrolls to the item
+
+		Thaw(); // Optional: resumes screen updates
+		m_silent_select = false;
+	}
+
 	void Append(int id, int time, int duration, int interp, const std::wstring& description);
 	void DeleteSel();
 	void DeleteAll();
@@ -73,6 +93,7 @@ private:
 
 	long m_editing_item;
 	long m_dragging_to_item;
+	bool m_silent_select = false;
 
 private:
 	void EndEdit(bool update = true);

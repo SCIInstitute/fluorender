@@ -857,15 +857,15 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	//buttons
 	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Output:",
-		wxDefaultPosition, FromDIP(wxSize(100, 20)));
+		wxDefaultPosition, wxDefaultSize);
 	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+		wxDefaultPosition, wxDefaultSize);
 	m_output_size_btn = new wxButton(page, ID_OutputSizeBtn, "Size-based",
-		wxDefaultPosition, FromDIP(wxSize(85, 23)));
+		wxDefaultPosition, wxDefaultSize);
 	m_output_id_btn = new wxButton(page, ID_OutputIdBtn, "IDs",
-		wxDefaultPosition, FromDIP(wxSize(65, 23)));
+		wxDefaultPosition, wxDefaultSize);
 	m_output_sn_btn = new wxButton(page, ID_OutputSnBtn, "Serial No.",
-		wxDefaultPosition, FromDIP(wxSize(75, 23)));
+		wxDefaultPosition, wxDefaultSize);
 	m_output_random_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
 	m_output_size_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
 	m_output_id_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);

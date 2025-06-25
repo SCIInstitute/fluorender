@@ -129,6 +129,7 @@ namespace flrd
 		bool EditPoint(int mx, int my, bool alt);
 		void Flip(const std::set<int>& rulers);
 		void AddAverage(const std::set<int>& rulers);
+		bool GetAutoRelax();
 		void Relax();
 		void Relax(const std::set<int>& rulers);
 		void Prune(const std::set<int>& rulers);

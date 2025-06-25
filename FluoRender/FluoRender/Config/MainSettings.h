@@ -184,7 +184,6 @@ public:
 	double m_ruler_relax_f1;//ruler relax
 	double m_ruler_infr;	//ruler influence range
 	int m_ruler_relax_iter;
-	bool m_ruler_auto_relax;
 	int m_ruler_relax_type;
 	bool m_ruler_df_f;		//ruler exports df/f
 	int m_ruler_size_thresh;//grow ruler size thresh

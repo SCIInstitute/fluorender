@@ -224,6 +224,9 @@ void KeyListCtrl::SetText(long item, int col, wxString& str)
 
 void KeyListCtrl::OnSelection(wxListEvent& event)
 {
+	if (m_silent_select)
+		return;
+
 	long item = GetNextItem(-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
@@ -411,7 +414,7 @@ void KeyListCtrl::OnDragging(wxMouseEvent& event)
 		UpdateText();
 
 		m_editing_item = m_dragging_to_item;
-		SetItemState(m_editing_item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		SelectItemSilently(m_editing_item);
 	}
 }
 
@@ -1394,9 +1397,8 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		long item = m_keylist->GetNextItem(-1,
 			wxLIST_NEXT_ALL,
 			wxLIST_STATE_SELECTED);
-		if (index != item && item != -1)
-			m_keylist->SetItemState(index,
-				wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+		if (index != item && index != -1)
+			m_keylist->SelectItemSilently(index);
 	}
 
 	if (update_all || FOUND_VALUE(gstCamLockObjEnable))
@@ -2018,7 +2020,7 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
 	m_keylist->Update();
-	m_keylist->SetItemState(item, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+	m_keylist->SelectItemSilently(item);
 }
 
 void MoviePanel::OnDelKey(wxCommandEvent& event)

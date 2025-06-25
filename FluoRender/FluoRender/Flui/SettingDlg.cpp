@@ -278,7 +278,8 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 	gridSizer->AddGrowableCol(0, 1); // Make the text column growable
 
 	std::vector<std::string> keys =
-	{ "histogram", "paint size", "comp gen", "colocalize" };
+	{ "histogram", "paint size", "comp gen",
+		"colocalize", "relax ruler"};
 
 	m_automate_combo.insert({
 		keys[0],
@@ -299,6 +300,11 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 		keys[3],
 		ComboEntry{ 3, keys[3],
 		"Update colocalization result when settings change",
+		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		keys[4],
+		ComboEntry{ 4, keys[4],
+		"Relax a multipoint ruler after creation",
 		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
 
 	for (const auto& key : keys)
@@ -1180,6 +1186,12 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			ComboEntry& entry = it->second;
 			entry.combo->SetSelection(glbin_automate_def.m_colocalize);
 		}
+		it = m_automate_combo.find("relax ruler");
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
+			entry.combo->SetSelection(glbin_automate_def.m_relax_ruler);
+		}
 	}
 
 	//display page
@@ -1988,8 +2000,14 @@ void SettingDlg::OnAutomationCombo(wxCommandEvent& event)
 	case 1://paint size
 		glbin_automate_def.m_paint_size = index;
 		break;
-	case 3://compo gen
+	case 2://compo gen
 		glbin_automate_def.m_comp_gen = index;
+		break;
+	case 3://colocalize
+		glbin_automate_def.m_colocalize = index;
+		break;
+	case 4://relax ruler
+		glbin_automate_def.m_relax_ruler = index;
 		break;
 	}
 }
