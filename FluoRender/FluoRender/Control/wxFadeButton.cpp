@@ -32,7 +32,17 @@ wxFadeButton::wxFadeButton(wxWindow* parent, wxWindowID id, const wxString& labe
 	const wxPoint& pos, const wxSize& size,
 	long style, const wxValidator& validator,
 	const wxString& name) :
-	wxControl(parent, id, pos, size, style, validator, name),
+#ifdef _WIN32
+	wxControl(parent, id, pos,
+		wxSize(std::max(size.GetWidth(), int(std::round(24 * parent->GetDPIScaleFactor()))),
+			std::max(size.GetHeight(), int(std::round(24 * parent->GetDPIScaleFactor())))),
+		style, validator, name),
+#else
+	wxControl(parent, id, pos,
+		wxSize(std::max(size.GetWidth(), 24),
+			std::max(size.GetHeight(), 24)),
+		style, validator, name),
+#endif
 	m_mode(0),
 	m_fade_limit(20),
 	m_label(label),

@@ -435,18 +435,31 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar2 = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar2->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(freefly);
+	bitmap = wxGetBitmap(fly);
 	m_options_toolbar2->AddCheckTool(
 		ID_FreeChk, "Free Fly",
 		bitmap, wxNullBitmap,
 		"Change the camera to a 'Free-Fly' Mode",
 		"Change the camera to a 'Free-Fly' Mode");
-
 	//save default
 	bitmap = wxGetBitmap(save_settings);
 	m_options_toolbar2->AddToolWithHelp(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
+	//vr
+	bitmap = wxGetBitmap(vr);
+	m_options_toolbar2->AddCheckTool(
+		ID_VrChk, "Stereography",
+		bitmap, wxNullBitmap,
+		"Enable stereography",
+		"Enable stereography");
+	//looking glass
+	bitmap = wxGetBitmap(looking_glass);
+	m_options_toolbar2->AddCheckTool(
+		ID_LookingGlassChk, "Holography",
+		bitmap, wxNullBitmap,
+		"Enable holography",
+		"Enable holography");
 	m_options_toolbar2->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
 	m_options_toolbar2->Realize();
 	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
@@ -821,6 +834,14 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFree))
 		m_options_toolbar2->ToggleTool(ID_FreeChk, m_render_view->GetFree());
 
+	//stereo & holography
+	if (update_all || FOUND_VALUE(gstHologramMode))
+	{
+		ival = glbin_settings.m_hologram_mode;
+		m_options_toolbar2->ToggleTool(ID_VrChk, ival == 1);
+		m_options_toolbar2->ToggleTool(ID_LookingGlassChk, ival == 2);
+	}
+
 	//depthe attenuation
 	if (update_all || FOUND_VALUE(gstDepthAtten))
 	{
@@ -1177,6 +1198,18 @@ void RenderViewPanel::SetFree(bool val)
 	FluoRefresh(2, { gstFree, gstAov }, { GetViewId() });
 }
 
+void RenderViewPanel::SetStereography(bool val)
+{
+	glbin_settings.m_hologram_mode = val ? 1 : 0;
+	FluoRefresh(0, { gstHologramMode });
+}
+
+void RenderViewPanel::SetHolography(bool val)
+{
+	glbin_settings.m_hologram_mode = val ? 2 : 0;
+	FluoRefresh(0, { gstHologramMode });
+}
+
 void RenderViewPanel::SetFullScreen()
 {
 	m_enter_fscreen_trigger.Start(10);
@@ -1406,14 +1439,21 @@ void RenderViewPanel::OnAovText(wxCommandEvent& event)
 void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 {
 	int id = event.GetId();
+	bool bval = m_options_toolbar2->GetToolState(id);
 
 	switch (id)
 	{
 	case ID_FreeChk:
-		SetFree(m_options_toolbar2->GetToolState(ID_FreeChk));
+		SetFree(bval);
 		break;
 	case ID_DefaultBtn:
 		SaveDefault();
+		break;
+	case ID_VrChk:
+		SetStereography(bval);
+		break;
+	case ID_LookingGlassChk:
+		SetHolography(bval);
 		break;
 	}
 }

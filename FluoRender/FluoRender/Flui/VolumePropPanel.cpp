@@ -51,6 +51,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableComboBox.h>
 #include <wxUndoableToolbar.h>
 #include <wxUndoableTextCtrl.h>
+#include <wxBoldText.h>
 #include <png_resource.h>
 #include <wx/colordlg.h>
 #include <wx/valnum.h>
@@ -107,11 +108,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxIntegerValidator<unsigned int> vald_int;
 
 	wxBitmapBundle bitmap;
-	wxSize bts(FromDIP(wxSize(80, 23)));
-	wxSize tts1(FromDIP(wxSize(40, 23)));
-	wxSize tts2(FromDIP(wxSize(50, 23)));
-	wxSize tts3(FromDIP(wxSize(60, 23)));
-	wxSize tts4(FromDIP(wxSize(30, 23)));
+	wxSize bts(FromDIP(wxSize(80, -1)));
+	wxSize tts1(FromDIP(wxSize(40, -1)));
+	wxSize tts2(FromDIP(wxSize(50, -1)));
+	wxSize tts3(FromDIP(wxSize(60, -1)));
+	wxSize tts4(FromDIP(wxSize(30, -1)));
 	//left///////////////////////////////////////////////////
 	//saturation point
 	m_minmax_st = new wxFadeButton(this, wxID_ANY, "Min-Max",
@@ -498,8 +499,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_options_toolbar->Realize();
 	//spacings
 	//x
-	st = new wxStaticText(this, 0, "Voxel Size: ",
-		wxDefaultPosition, bts, wxALIGN_RIGHT);
+	st = new wxBoldText(this, 0, "Voxel Size",
+		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_space_x_text = new wxUndoableTextCtrl(this, wxID_ANY, "1.000",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT, vald_fp3);
 	m_space_x_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSpaceText, this);
@@ -525,8 +526,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
-	st = new wxStaticText(this, 0, "Main Color",
-		wxDefaultPosition, bts, wxALIGN_RIGHT);
+	st = new wxBoldText(this, 0, "Main Color",
+		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
 	m_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColorTextChange, this);
@@ -539,8 +540,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r3->Add(m_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
-	st = new wxStaticText(this, 0, "Alt. Color",
-		wxDefaultPosition, bts, wxALIGN_RIGHT);
+	st = new wxBoldText(this, 0, "Alt. Color",
+		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_color2_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
 	m_color2_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColor2TextChange, this);
@@ -553,8 +554,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r4->Add(m_color2_text, 1, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
-	st = new wxStaticText(this, 0, "Effects: ",
-		wxDefaultPosition, bts, wxALIGN_RIGHT);
 	m_colormap_inv_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(invert_off);
@@ -564,6 +563,10 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Invert colormap");
 	m_colormap_inv_btn->Bind(wxEVT_TOOL, &VolumePropPanel::OnColormapInvBtn, this);
 	m_colormap_inv_btn->Realize();
+	wxSize st_size = wxSize(bts.GetWidth() - m_colormap_inv_btn->GetSize().GetWidth(),
+		bts.GetHeight());
+	st = new wxBoldText(this, 0, "Effects",
+		wxDefaultPosition, st_size, wxALIGN_CENTER);
 	m_colormap_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list = { "Rainbow", "Main-Alt", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };

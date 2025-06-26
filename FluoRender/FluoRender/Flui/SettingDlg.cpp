@@ -1465,14 +1465,8 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 void SettingDlg::OnStereoCheck(wxCommandEvent& event)
 {
 	bool bval = m_stereo_chk->GetValue();
-	if (bval)
-	{
-		m_looking_glass_chk->SetValue(false);
-		glbin_settings.m_hologram_mode = 1;
-	}
-	else
-		glbin_settings.m_hologram_mode = 0;
-	FluoRefresh(2, { gstHologramMode });
+	glbin_settings.m_hologram_mode = bval ? 1 : 0;
+	FluoRefresh(0, { gstHologramMode });
 }
 
 void SettingDlg::OnXrApiComb(wxCommandEvent& event)
@@ -1528,14 +1522,8 @@ void SettingDlg::OnHoloIpEdit(wxCommandEvent& event)
 void SettingDlg::OnLookingGlassCheck(wxCommandEvent& event)
 {
 	bool bval = m_looking_glass_chk->GetValue();
-	if (bval)
-	{
-		m_stereo_chk->SetValue(false);
-		glbin_settings.m_hologram_mode = 2;
-	}
-	else
-		glbin_settings.m_hologram_mode = 0;
-	FluoRefresh(2, { gstHologramMode });
+	glbin_settings.m_hologram_mode = bval ? 2 : 0;
+	FluoRefresh(0, { gstHologramMode });
 }
 
 void SettingDlg::OnLgOffsetChange(wxScrollEvent& event)

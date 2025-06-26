@@ -59,6 +59,8 @@ public:
 	{
 		ID_FreeChk = 0,
 		ID_DefaultBtn,
+		ID_VrChk,
+		ID_LookingGlassChk
 	};
 	enum
 	{
@@ -122,6 +124,8 @@ public:
 	void SetBgColorInvert(bool val);
 	void SetAov(double val, bool notify);
 	void SetFree(bool val);
+	void SetStereography(bool val);
+	void SetHolography(bool val);
 	void SetFullScreen();
 	void CloseFullScreen();
 

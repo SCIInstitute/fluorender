@@ -182,8 +182,12 @@ public:
 	const static unsigned char depth_atten_png[1031];
 	/* no_depth_atten.png - 1019 bytes */
 	const static unsigned char no_depth_atten_png[1019];
-	/* freefly.png - 1143 bytes */
-	const static unsigned char freefly_png[1143];
+	/* fly.png - 1142 bytes */
+	const static unsigned char fly_png[1142];
+	/* looking_glass.png - 1017 bytes */
+	const static unsigned char looking_glass_png[1017];
+	/* vr.png - 791 bytes */
+	const static unsigned char vr_png[791];
 	/* gear_45.png - 979 bytes */
 	const static unsigned char gear_45_png[979];
 	/* gear_dark.png - 1018 bytes */
