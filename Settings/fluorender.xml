@@ -276,7 +276,7 @@
         <iter_weak>10</iter_weak>
         <iter_normal>30</iter_normal>
         <iter_strong>60</iter_strong>
-        <iter_num>30</iter_num>
+        <iter_num>10</iter_num>
         <ini_thresh>0</ini_thresh>
         <auto_thresh>0</auto_thresh>
         <gm_falloff>1</gm_falloff>
@@ -295,22 +295,22 @@
             <num>4</num>
             <_0>
                 <type>2</type>
-                <radius1>10</radius1>
-                <radius2>30</radius2>
+                <radius1>5</radius1>
+                <radius2>10</radius2>
                 <use_radius2>1</use_radius2>
-                <iter_num>7</iter_num>
+                <iter_num>10</iter_num>
             </_0>
             <_1>
                 <type>3</type>
-                <radius1>30</radius1>
-                <radius2>30</radius2>
+                <radius1>10</radius1>
+                <radius2>10</radius2>
                 <use_radius2>0</use_radius2>
-                <iter_num>0</iter_num>
+                <iter_num>1</iter_num>
             </_1>
             <_2>
                 <type>4</type>
-                <radius1>20</radius1>
-                <radius2>20</radius2>
+                <radius1>10</radius1>
+                <radius2>10</radius2>
                 <use_radius2>0</use_radius2>
                 <iter_num>30</iter_num>
             </_2>

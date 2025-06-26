@@ -144,13 +144,12 @@ private:
 	wxCheckBox* m_brush_size2_chk;
 	wxSingleSlider* m_brush_size2_sldr;
 	wxTextCtrl* m_brush_size2_text;
-	//growth
-	wxRadioButton* m_brush_iterw_rb;
-	wxRadioButton* m_brush_iters_rb;
-	wxRadioButton* m_brush_iterss_rb;
 	//size relation
 	wxRadioButton* m_brush_size_data_rb;
 	wxRadioButton* m_brush_size_screen_rb;
+	//growth
+	wxSingleSlider* m_brush_iter_sldr;
+	wxTextCtrl* m_brush_iter_text;
 	//align
 	wxCheckBox* m_align_center_chk;
 	wxButton* m_align_xyz;
@@ -208,7 +207,8 @@ private:
 	void OnBrushSize2Change(wxScrollEvent& event);
 	void OnBrushSize2Text(wxCommandEvent& event);
 	//brush iterations
-	void OnBrushIterCheck(wxCommandEvent& event);
+	void OnBrushIterChange(wxScrollEvent& event);
+	void OnBrushIterText(wxCommandEvent& event);
 	//brush size relation
 	void OnBrushSizeRelationCheck(wxCommandEvent& event);
 	//align

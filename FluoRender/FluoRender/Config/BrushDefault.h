@@ -50,10 +50,6 @@ public:
 	//default values
 	int m_paint_hist_depth;		//paint history depth
 
-	int m_iter_weak;			//weak iteration num
-	int m_iter_normal;			//normal
-	int m_iter_strong;			//strong
-
 	int m_iter_num;				//iteration number for growing
 
 	//brush properties

@@ -75,17 +75,12 @@ namespace flrd
 			std::memcpy(m_mvmat, mvmat, 16 * sizeof(double));
 			std::memcpy(m_prjmat, prjmat, 16 * sizeof(double));
 		}
-		void SetBrushIteration(int num) { m_iter_num = num; }
-		int GetBrushIteration() { return m_iter_num; }
-		void SetDefaultIterations(int i1, int i2, int i3)
+		void SetBrushIteration(int num)
 		{
-			m_iter_weak = i1;
-			m_iter_normal = i2;
-			m_iter_strong = i3;
+			m_iter_num = num;
+			UpdateBrushRadiusSet();
 		}
-		int GetIterWeak() { return m_iter_weak; }
-		int GetIterNormal() { return m_iter_normal; }
-		int GetIterStrong() { return m_iter_strong; }
+		int GetBrushIteration() { return m_iter_num; }
 		//set/get brush properties
 		void SetBrushIniThresh(double val) { m_ini_thresh = val; }
 		double GetBrushIniThresh() { return m_ini_thresh; }
@@ -203,7 +198,7 @@ namespace flrd
 				}
 			}
 
-			SetBrushRadiusSet();
+			UpdateBrushRadiusSet();
 		}
 		//brush sets
 		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets)
@@ -213,12 +208,25 @@ namespace flrd
 		void SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
 		{
 			m_brush_radius_sets.assign(sets.begin(), sets.end());
+			if (!m_brush_radius_sets.empty() &&
+				m_brush_sets_index >= 0 &&
+				m_brush_sets_index < m_brush_radius_sets.size())
+			{
+				BrushRadiusSet& radius_set = m_brush_radius_sets.at(m_brush_sets_index);
+				m_brush_radius1 = radius_set.radius1;
+				m_brush_radius2 = radius_set.radius2;
+				m_use_brush_radius2 = radius_set.use_radius2;
+				m_iter_num = radius_set.iter_num;
+			}
 		}
-		void SetBrushRadiusSet()
+		void UpdateBrushRadiusSet()
 		{
+			int mode = m_mode;
+			if (mode == 1 || mode == 10)
+				mode = 2;
 			for (auto& it : m_brush_radius_sets)
 			{
-				if (it.type == m_mode)
+				if (it.type == mode)
 				{
 					it.radius1 = m_brush_radius1;
 					it.radius2 = m_brush_radius2;
@@ -292,10 +300,6 @@ namespace flrd
 		int m_mode;			//last mode if m_mode_ext is set to 0
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
-
-		int m_iter_weak;
-		int m_iter_normal;
-		int m_iter_strong;
 
 		int m_iter;
 		bool m_update_order;

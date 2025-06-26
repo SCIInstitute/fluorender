@@ -36,10 +36,7 @@ BrushDefault::BrushDefault()
 {
 	m_paint_hist_depth = 1;
 
-	m_iter_weak = 10;
-	m_iter_normal = 30;
-	m_iter_strong = 60;
-	m_iter_num = 30;
+	m_iter_num = 10;
 
 	m_ini_thresh = 0.0;
 	m_estimate_threshold = false;
@@ -80,10 +77,7 @@ void BrushDefault::Read()
 	//history
 	f->Read("hist depth", &m_paint_hist_depth, 1);
 	//iterations
-	f->Read("iter weak", &m_iter_weak, 10);
-	f->Read("iter normal", &m_iter_normal, 30);
-	f->Read("iter strong", &m_iter_strong, 60);
-	f->Read("iter num", &m_iter_num, 30);
+	f->Read("iter num", &m_iter_num, 10);
 	//brush properties
 	f->Read("ini thresh", &m_ini_thresh, 0.0);
 	f->Read("auto thresh", &m_estimate_threshold, false);
@@ -177,9 +171,6 @@ void BrushDefault::Save()
 	//history
 	f->Write("hist depth", m_paint_hist_depth);
 	//iterations
-	f->Write("iter weak", m_iter_weak);
-	f->Write("iter normal", m_iter_normal);
-	f->Write("iter strong", m_iter_strong);
 	f->Write("iter num", m_iter_num);
 	//brush properties
 	f->Write("ini thresh", m_ini_thresh);
@@ -237,9 +228,6 @@ void BrushDefault::Set(flrd::VolumeSelector* vs)
 	if (!vs)
 		return;
 
-	m_iter_weak = vs->GetIterWeak();
-	m_iter_normal = vs->GetIterNormal();
-	m_iter_strong = vs->GetIterStrong();
 	m_iter_num = vs->GetBrushIteration();
 
 	m_ini_thresh = vs->GetBrushIniThresh();
@@ -269,7 +257,6 @@ void BrushDefault::Apply(flrd::VolumeSelector* vs)
 	if (!vs)
 		return;
 
-	vs->SetDefaultIterations(m_iter_weak, m_iter_normal, m_iter_strong);
 	vs->SetBrushIteration(m_iter_num);
 
 	vs->SetBrushIniThresh(m_ini_thresh);

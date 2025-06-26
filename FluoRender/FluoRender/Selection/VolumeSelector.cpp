@@ -88,9 +88,6 @@ VolumeSelector::VolumeSelector() :
 	m_press_peak(0.0),
 	m_air_press(0.5),
 	m_iter(0),
-	m_iter_weak(10),
-	m_iter_normal(30),
-	m_iter_strong(60),
 	m_brush_sets_index(0),
 	m_test_speed(false)
 {
@@ -411,7 +408,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 			ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
-			if (m_iter_num > m_iter_weak)
+			if (m_iter_num > 10)
 				ini_thresh /= 2.0;
 			m_scl_translate = ini_thresh;
 		}
@@ -431,9 +428,9 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			//loop for growing
 			if (m_mode == 9)
 			{
-				if (m_iter_num <= m_iter_weak)
+				if (m_iter_num <= 10)
 					m_iter = m_iter_num / 3;
-				else if (m_iter_num <= m_iter_normal)
+				else if (m_iter_num <= 20)
 					m_iter = m_iter_num / 2;
 				else
 					m_iter = m_iter_num;
@@ -715,15 +712,9 @@ void VolumeSelector::ChangeBrushSetsIndex()
 		mode = 2;
 	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
 	{
-		BrushRadiusSet radius_set = m_brush_radius_sets[i];
-		if (radius_set.type == mode &&
-			m_brush_sets_index != i)
+		BrushRadiusSet& radius_set = m_brush_radius_sets.at(i);
+		if (radius_set.type == mode)
 		{
-			//save previous
-			m_brush_radius_sets[m_brush_sets_index].radius1 = m_brush_radius1;
-			m_brush_radius_sets[m_brush_sets_index].radius2 = m_brush_radius2;
-			m_brush_radius_sets[m_brush_sets_index].use_radius2 = m_use_brush_radius2;
-			m_brush_radius_sets[m_brush_sets_index].iter_num = m_iter_num;
 			//get new
 			m_brush_radius1 = radius_set.radius1;
 			m_brush_radius2 = radius_set.radius2;

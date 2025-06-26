@@ -232,122 +232,52 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_select_group_chk, 0, wxALIGN_CENTER);
 	//threshold4
-	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Threshold:",
-		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	wxFlexGridSizer* sizer1_2 = new wxFlexGridSizer(3, 5, 10); // 3 columns, 5px hgap, 10px vgap
+	sizer1_2->AddGrowableCol(1, 1); // Make the slider column growable
+	st = new wxStaticText(page, 0, "Threshold:");
 	m_brush_scl_translate_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_scl_translate_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSclTranslateChange, this);
 	m_brush_scl_translate_text = new wxTextCtrl(page, wxID_ANY, "0.0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp1);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp1);
 	m_brush_scl_translate_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSclTranslateText, this);
-	sizer1_2->Add(5, 5);
-	sizer1_2->Add(st, 0, wxALIGN_CENTER);
-	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND);
-	sizer1_2->Add(m_brush_scl_translate_text, 0, wxALIGN_CENTER);
-	sizer1_2->Add(15, 15);
+	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer1_2->Add(m_brush_scl_translate_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//gm falloff
-	wxBoxSizer *sizer1_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Edge STR:",
-		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	st = new wxStaticText(page, 0, "Edge STR:");
 	m_brush_gm_falloff_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_gm_falloff_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushGmFalloffChange, this);
 	m_brush_gm_falloff_text = new wxTextCtrl(page, wxID_ANY, "0.000",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_fp3);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp3);
 	m_brush_gm_falloff_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushGmFalloffText, this);
-	sizer1_3->Add(5, 5);
-	sizer1_3->Add(st, 0, wxALIGN_CENTER);
-	sizer1_3->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND);
-	sizer1_3->Add(m_brush_gm_falloff_text, 0, wxALIGN_CENTER);
-	sizer1_3->Add(15, 15);
+	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_2->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer1_2->Add(m_brush_gm_falloff_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//2d
-	wxBoxSizer *sizer1_4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "2D Adj. Infl.:",
-		wxDefaultPosition, FromDIP(wxSize(70, 20)));
+	st = new wxStaticText(page, 0, "2D Adj. Infl.:");
 	m_brush_2dinfl_sldr = new wxSingleSlider(page, wxID_ANY, 100, 0, 200,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_INVERSE);
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_2dinfl_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrush2dinflChange, this);
 	m_brush_2dinfl_text = new wxTextCtrl(page, wxID_ANY, "1.00",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp2);
 	m_brush_2dinfl_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrush2dinflText, this);
-	sizer1_4->Add(5, 5);
-	sizer1_4->Add(st, 0, wxALIGN_CENTER);
-	sizer1_4->Add(m_brush_2dinfl_sldr, 1, wxEXPAND);
-	sizer1_4->Add(m_brush_2dinfl_text, 0, wxALIGN_CENTER);
-	sizer1_4->Add(15, 15);
+	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_2->Add(m_brush_2dinfl_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer1_2->Add(m_brush_2dinfl_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//sizer1
 	sizer1->Add(5, 5);
 	sizer1->Add(sizer1_1, 0, wxEXPAND);
 	sizer1->Add(5, 5);
 	sizer1->Add(sizer1_2, 0, wxEXPAND);
-	sizer1->Add(sizer1_3, 0, wxEXPAND);
-	sizer1->Add(sizer1_4, 0, wxEXPAND);
-	sizer1->Hide(sizer1_4, true);
 	sizer1->Add(5, 5);
 
 	//Brush properties
 	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Brush Properties");
-	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
-	sizer2_1->Add(5, 5);
-	sizer2_1->Add(st, 0, wxALIGN_CENTER);
-	//brush size 1
-	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Center Size:",
-		wxDefaultPosition, FromDIP(wxSize(80, 20)), wxALIGN_RIGHT);
-	m_brush_size1_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 300,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_size1_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize1Change, this);
-	m_brush_size1_text = new wxTextCtrl(page, wxID_ANY, "10",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
-	m_brush_size1_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize1Text, this);
-	sizer2_2->Add(5, 5);
-	sizer2_2->Add(st, 0, wxALIGN_CENTER);
-	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND);
-	sizer2_2->Add(m_brush_size1_text, 0, wxALIGN_CENTER);
-	sizer2_2->Add(15, 15);
-	//brush size 2
-	wxBoxSizer *sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
-	m_brush_size2_chk = new wxCheckBox(page, wxID_ANY, "GrowSize",
-		wxDefaultPosition, FromDIP(wxSize(80, 20)), wxALIGN_RIGHT);
-	m_brush_size2_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushSize2Chk, this);
-	st = new wxStaticText(page, 0, ":",
-		wxDefaultPosition, FromDIP(wxSize(5, 20)), wxALIGN_RIGHT);
-	m_brush_size2_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 300,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_brush_size2_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize2Change, this);
-	m_brush_size2_text = new wxTextCtrl(page, wxID_ANY, "30",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
-	m_brush_size2_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize2Text, this);
-	sizer2_3->Add(m_brush_size2_chk, 0, wxALIGN_CENTER);
-	sizer2_3->Add(st, 0, wxALIGN_CENTER);
-	sizer2_3->Add(m_brush_size2_sldr, 1, wxEXPAND);
-	sizer2_3->Add(m_brush_size2_text, 0, wxALIGN_CENTER);
-	sizer2_3->Add(15, 15);
-	//iterations
-	wxBoxSizer *sizer2_4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Growth:",
-		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_iterw_rb = new wxRadioButton(page, wxID_ANY, "Weak",
-		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-	m_brush_iters_rb = new wxRadioButton(page, wxID_ANY, "Normal",
-		wxDefaultPosition, wxDefaultSize);
-	m_brush_iterss_rb = new wxRadioButton(page, wxID_ANY, "Strong",
-		wxDefaultPosition, wxDefaultSize);
-	m_brush_iterw_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushIterCheck, this);
-	m_brush_iters_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushIterCheck, this);
-	m_brush_iterss_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushIterCheck, this);
-	sizer2_4->Add(5, 5);
-	sizer2_4->Add(st, 0, wxALIGN_CENTER);
-	sizer2_4->Add(m_brush_iterw_rb, 0, wxALIGN_CENTER);
-	sizer2_4->Add(15, 15);
-	sizer2_4->Add(m_brush_iters_rb, 0, wxALIGN_CENTER);
-	sizer2_4->Add(15, 15);
-	sizer2_4->Add(m_brush_iterss_rb, 0, wxALIGN_CENTER);
 	//size relation
-	wxBoxSizer *sizer2_5 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Dependent:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
 	m_brush_size_data_rb = new wxRadioButton(page, wxID_ANY, "Data",
@@ -356,21 +286,64 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_brush_size_data_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushSizeRelationCheck, this);
 	m_brush_size_screen_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushSizeRelationCheck, this);
-	sizer2_5->Add(5, 5);
-	sizer2_5->Add(st, 0, wxALIGN_CENTER);
-	sizer2_5->Add(m_brush_size_data_rb, 0, wxALIGN_CENTER);
-	sizer2_5->Add(15, 15);
-	sizer2_5->Add(m_brush_size_screen_rb, 0, wxALIGN_CENTER);
+	sizer2_1->Add(5, 5);
+	sizer2_1->Add(st, 0, wxALIGN_CENTER);
+	sizer2_1->Add(m_brush_size_data_rb, 0, wxALIGN_CENTER);
+	sizer2_1->Add(15, 15);
+	sizer2_1->Add(m_brush_size_screen_rb, 0, wxALIGN_CENTER);
+	//align
+	wxFlexGridSizer* sizer2_2 = new wxFlexGridSizer(4, 5, 10); // 4 columns, 5px hgap, 10px vgap
+	sizer2_2->AddGrowableCol(2, 1); // Make the slider column growable
+	//iterations
+	st = new wxStaticText(page, 0, "Grow Rate:");
+	m_brush_iter_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 50,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_brush_iter_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushIterChange, this);
+	m_brush_iter_text = new wxTextCtrl(page, wxID_ANY, "10",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_brush_iter_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushIterText, this);
+	sizer2_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer2_2->AddSpacer(1);
+	sizer2_2->Add(m_brush_iter_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer2_2->Add(m_brush_iter_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	//brush size 1
+	st = new wxStaticText(page, 0, "Center Size:");
+	m_brush_size1_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 300,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_brush_size1_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize1Change, this);
+	m_brush_size1_text = new wxTextCtrl(page, wxID_ANY, "10",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_brush_size1_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize1Text, this);
+	sizer2_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer2_2->AddSpacer(1);
+	sizer2_2->Add(m_brush_size1_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer2_2->Add(m_brush_size1_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	//brush size 2
+	st = new wxStaticText(page, 0, "Grow Size:");
+	m_brush_size2_chk = new wxCheckBox(page, wxID_ANY, "");
+	m_brush_size2_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushSize2Chk, this);
+	m_brush_size2_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 300,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_brush_size2_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize2Change, this);
+	m_brush_size2_text = new wxTextCtrl(page, wxID_ANY, "30",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_brush_size2_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize2Text, this);
+	sizer2_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer2_2->Add(m_brush_size2_chk, 0, wxALIGN_CENTER);
+	sizer2_2->Add(m_brush_size2_sldr, 1, wxEXPAND | wxRIGHT, 5);
+	sizer2_2->Add(m_brush_size2_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	//note
+	wxBoxSizer* sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
+	st->Wrap(FromDIP(450));
+	sizer2_3->Add(st, 1, wxEXPAND);
 	//sizer2
 	sizer2->Add(5, 5);
-	sizer2->Add(sizer2_4, 0, wxEXPAND);
-	sizer2->Add(5, 5);
-	sizer2->Add(sizer2_5, 0, wxEXPAND);
+	sizer2->Add(sizer2_1, 0, wxEXPAND);
 	sizer2->Add(5, 5);
 	sizer2->Add(sizer2_2, 0, wxEXPAND);
-	sizer2->Add(sizer2_3, 0, wxEXPAND);
 	sizer2->Add(5, 5);
-	sizer2->Add(sizer2_1, 0, wxEXPAND);
+	sizer2->Add(sizer2_3, 0, wxEXPAND);
 	sizer2->Add(5, 5);
 
 	//sizer
@@ -631,11 +604,8 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstBrushIter))
 	{
 		ival = glbin_vol_selector.GetBrushIteration();
-		int i1 = glbin_vol_selector.GetIterWeak();
-		int i2 = glbin_vol_selector.GetIterNormal();
-		m_brush_iterw_rb->SetValue(ival <= i1);
-		m_brush_iters_rb->SetValue(ival > i1 && ival <= i2);
-		m_brush_iterss_rb->SetValue(ival > i2);
+		m_brush_iter_sldr->ChangeValue(ival);
+		m_brush_iter_text->ChangeValue(wxString::Format("%d", ival));
 	}
 
 	//brush size relation
@@ -1257,20 +1227,39 @@ void BrushToolDlg::OnBrushSize2Text(wxCommandEvent& event)
 }
 
 //brush iterations
-void BrushToolDlg::OnBrushIterCheck(wxCommandEvent& event)
+void BrushToolDlg::OnBrushIterChange(wxScrollEvent& event)
 {
-	if (m_brush_iterw_rb->GetValue())
+	int ival = m_brush_iter_sldr->GetValue();
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_brush_iter_text->GetValue())
+		m_brush_iter_text->SetValue(str);
+}
+
+void BrushToolDlg::OnBrushIterText(wxCommandEvent& event)
+{
+	wxString str = m_brush_iter_text->GetValue();
+	long val;
+	str.ToLong(&val);
+	m_brush_iter_sldr->ChangeValue(val);
+
+	glbin_vol_selector.SetBrushIteration(val);
+
+	if (!glbin_vol_selector.GetThUpdate())
+		return;
+
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	fluo::ValueCollection vc;
+	int sx = 2;
+	vc.insert({ gstSelUndo, gstBrushThreshold });
+	if (glbin_vol_selector.GetAutoPaintSize())
+		vc.insert(gstBrushCountResult);
+	if (glbin_colocalizer.GetAutoColocalize())
 	{
-		glbin_vol_selector.SetBrushIteration(glbin_vol_selector.GetIterWeak());
+		vc.insert(gstColocalResult);
+		sx = 0;
 	}
-	else if (m_brush_iters_rb->GetValue())
-	{
-		glbin_vol_selector.SetBrushIteration(glbin_vol_selector.GetIterNormal());
-	}
-	else if (m_brush_iterss_rb->GetValue())
-	{
-		glbin_vol_selector.SetBrushIteration(glbin_vol_selector.GetIterStrong());
-	}
+	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
 }
 
 //brush size relation
