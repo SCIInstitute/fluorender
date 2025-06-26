@@ -85,7 +85,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_colormap_type = 0;
 	m_colormap_proj = 0;
 
-	m_noise_rd = false;
+	m_noise_rd = true;
 	m_interpolate = true;
 	m_inverted = false;
 	m_mip_enable = false;
@@ -159,7 +159,7 @@ void VolumeDataDefault::Read()
 	f->Read(gstColormapType, &m_colormap_type, 0);
 	f->Read(gstColormapProj, &m_colormap_proj, 0);
 
-	f->Read(gstNoiseRedct, &m_noise_rd, false);
+	f->Read(gstNoiseRedct, &m_noise_rd, true);
 	f->Read(gstInterpolate, &m_interpolate, true);
 	f->Read(gstInvert, &m_inverted, false);
 	f->Read(gstMipMode, &m_mip_enable, false);

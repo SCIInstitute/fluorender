@@ -454,7 +454,7 @@
         <colormap_inv>1</colormap_inv>
         <colormap_type>0</colormap_type>
         <colormap_proj>0</colormap_proj>
-        <noise_redct>0</noise_redct>
+        <noise_redct>1</noise_redct>
         <interpolate>1</interpolate>
         <invert>0</invert>
         <mip_mode>0</mip_mode>
