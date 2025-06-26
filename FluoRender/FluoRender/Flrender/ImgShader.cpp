@@ -743,9 +743,8 @@ using std::ostringstream;
 	"	float blend = pow(smoothstep(0.6, 1.6, loc0.z), 0.8);\n" \
 	"	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
 	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
-	"	vec4 texColor = texture(tex0, OutTexCoord.xy);\n" \
 	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
-	"	FragColor.a = texColor.a;\n" \
+	"	FragColor = clamp(FragColor, 0.0, 1.0);\n" \
 	"}\n"
 
 namespace flvr
