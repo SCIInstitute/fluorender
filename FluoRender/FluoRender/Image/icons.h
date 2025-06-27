@@ -433,6 +433,29 @@ public:
 	/* auto_link_on.png - 1081 bytes */
 	const static unsigned char auto_link_on_png[1081];
 
+	//small buttons
+	/* brush_small.png - 992 bytes */
+	const static unsigned char brush_small_png[992];
+	/* calculate_small.png - 1189 bytes */
+	const static unsigned char calculate_small_png[1189];
+	/* colocal_small.png - 1101 bytes */
+	const static unsigned char colocal_small_png[1101];
+	/* component_small.png - 1191 bytes */
+	const static unsigned char component_small_png[1191];
+	/* convert_small.png - 1070 bytes */
+	const static unsigned char convert_small_png[1070];
+	/* filter_small.png - 1049 bytes */
+	const static unsigned char filter_small_png[1049];
+	/* machine_learn_small.png - 1215 bytes */
+	const static unsigned char machine_learn_small_png[1215];
+	/* measure_small.png - 1110 bytes */
+	const static unsigned char measure_small_png[1110];
+	/* noise_red_small.png - 1135 bytes */
+	const static unsigned char noise_red_small_png[1135];
+	/* size_small.png - 1053 bytes */
+	const static unsigned char size_small_png[1053];
+	/* track_small.png - 970 bytes */
+	const static unsigned char track_small_png[970];
 
 	//common icons
 	/* icon_32.png - 2507 bytes */

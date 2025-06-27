@@ -158,13 +158,13 @@ public:
 		ID_MergeMask,
 		ID_ExcludeMask,
 		ID_IntersectMask,
-		ID_Edit,
+		ID_Brush,
 		ID_Measurement,
 		ID_Component,
-		ID_Trace,
-		ID_Calculations,
-		ID_NoiseCancelling,
-		ID_Counting,
+		ID_Track,
+		ID_Calculation,
+		ID_NoiseReduct,
+		ID_VolumeSize,
 		ID_Colocalization,
 		ID_Convert,
 		ID_Ocl,
@@ -231,6 +231,8 @@ private:
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
 	wxToolBar* m_toolbar2;
+	wxToolBar* m_toolbar3;
+
 	//save the pos
 	int m_scroll_pos;
 	bool m_suppress_event = false;

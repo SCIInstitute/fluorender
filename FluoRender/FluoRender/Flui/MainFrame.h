@@ -167,6 +167,7 @@ class MainFrame: public wxFrame
 		ID_UndoMenu,
 		ID_RedoMenu,
 		//tools
+		ID_OclDlgMenu,
 		ID_BrushDlgMenu,
 		ID_MeasureDlgMenu,
 		ID_CompDlgMenu,
@@ -176,7 +177,6 @@ class MainFrame: public wxFrame
 		ID_CountDlgMenu,
 		ID_ColocalDlgMenu,
 		ID_ConvertDlgMenu,
-		ID_OclDlgMenu,
 		ID_MlDlgMenu,
 		//window
 		ID_ToolbarMenu,

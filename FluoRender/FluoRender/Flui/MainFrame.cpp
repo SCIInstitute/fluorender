@@ -341,15 +341,15 @@ MainFrame::MainFrame(
 	m->SetBitmap(wxGetBitmap(disp_properties));
 	//create the menu for edit/convert
 	m_tb_menu_edit = std::make_unique<wxMenu>();
+	m = m_tb_menu_edit->Append(ID_OclDlg, "Volume Filter...",
+		"Edit and apply volume filters using OpenCL");
+	m->SetBitmap(wxGetBitmap(icon_filter_mini));
 	m = m_tb_menu_edit->Append(ID_BrushDlg, "Paint Brush...",
 		"Use the paint brush to select regions of interest in 3D");
 	m->SetBitmap(wxGetBitmap(icon_paint_brush_mini));
 	m = m_tb_menu_edit->Append(ID_MeasureDlg, "Measurement...",
 		"Make measurements with the ruler tools");
 	m->SetBitmap(wxGetBitmap(icon_measurement_mini));
-	m = m_tb_menu_edit->Append(ID_OclDlg, "Volume Filter...",
-		"Edit and apply volume filters using OpenCL");
-	m->SetBitmap(wxGetBitmap(icon_filter_mini));
 	m = m_tb_menu_edit->Append(ID_ComponentDlg, "Component Analyzer...",
 		"Segment structures into components and perform analysis");
 	m->SetBitmap(wxGetBitmap(icon_components_mini));
@@ -687,15 +687,15 @@ MainFrame::MainFrame(
 		"Redo last undone operation");
 	m->SetBitmap(wxGetBitmap(redo_mini));
 	//tool options
+	m = m_top_tools->Append(ID_OclDlgMenu, "Volume &Filter...",
+		"Edit and apply volume filters using OpenCL");
+	m->SetBitmap(wxGetBitmap(icon_filter_mini));
 	m = m_top_tools->Append(ID_BrushDlgMenu, "&Paint Brush...",
 		"Use the paint brush to select structures of interest in 3D");
 	m->SetBitmap(wxGetBitmap(icon_paint_brush_mini));
 	m = m_top_tools->Append(ID_MeasureDlgMenu, "&Measurement...",
 		"Use the ruler tools to make measurements and analysis in 3D");
 	m->SetBitmap(wxGetBitmap(icon_measurement_mini));
-	m = m_top_tools->Append(ID_OclDlgMenu, "Volume &Filter...",
-		"Edit and apply volume filters using OpenCL");
-	m->SetBitmap(wxGetBitmap(icon_filter_mini));
 	m = m_top_tools->Append(ID_CompDlgMenu, "Component Anal&yzer...",
 		"Segment structures into components and make analysis");
 	m->SetBitmap(wxGetBitmap(icon_components_mini));

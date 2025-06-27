@@ -68,7 +68,7 @@ VolumeSelector::VolumeSelector() :
 	m_scl_translate(0.0),
 	m_select_multi(false),
 	m_edge_detect(false),
-	m_hidden_removal(false),
+	m_hidden_removal(true),
 	m_ortho(true),
 	m_w2d(0.0),
 	m_randv(113),

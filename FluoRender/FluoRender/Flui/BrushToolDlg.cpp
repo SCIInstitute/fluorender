@@ -212,9 +212,6 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		wxVERTICAL, page, "Selection Settings");
 	//stop at boundary
 	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_edge_detect_chk = new wxCheckBox(page, wxID_ANY, "Edge Detect:",
-		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
-	m_edge_detect_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushEdgeDetectChk, this);
 	m_hidden_removal_chk = new wxCheckBox(page, wxID_ANY, "Visible Only:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_hidden_removal_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushHiddenRemovalChk, this);
@@ -224,16 +221,14 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_accurate_bricks_chk = new wxCheckBox(page, wxID_ANY, "Cross Bricks:",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_accurate_bricks_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnAccurateBricksCheck, this);
-	sizer1_1->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
-	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_hidden_removal_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_accurate_bricks_chk, 0, wxALIGN_CENTER);
 	sizer1_1->Add(5, 5);
 	sizer1_1->Add(m_select_group_chk, 0, wxALIGN_CENTER);
 	//threshold4
-	wxFlexGridSizer* sizer1_2 = new wxFlexGridSizer(3, 5, 10); // 3 columns, 5px hgap, 10px vgap
-	sizer1_2->AddGrowableCol(1, 1); // Make the slider column growable
+	wxFlexGridSizer* sizer1_2 = new wxFlexGridSizer(4, 5, 10); // 4 columns, 5px hgap, 10px vgap
+	sizer1_2->AddGrowableCol(2, 1); // Make the slider column growable
 	st = new wxStaticText(page, 0, "Threshold:");
 	m_brush_scl_translate_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
@@ -242,10 +237,13 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp1);
 	m_brush_scl_translate_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSclTranslateText, this);
 	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_2->AddSpacer(1);
 	sizer1_2->Add(m_brush_scl_translate_sldr, 1, wxEXPAND | wxRIGHT, 5);
 	sizer1_2->Add(m_brush_scl_translate_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//gm falloff
-	st = new wxStaticText(page, 0, "Edge STR:");
+	st = new wxStaticText(page, 0, "Edge Detect:");
+	m_edge_detect_chk = new wxCheckBox(page, wxID_ANY, "");
+	m_edge_detect_chk->Bind(wxEVT_CHECKBOX, &BrushToolDlg::OnBrushEdgeDetectChk, this);
 	m_brush_gm_falloff_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_gm_falloff_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushGmFalloffChange, this);
@@ -253,10 +251,11 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp3);
 	m_brush_gm_falloff_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushGmFalloffText, this);
 	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_2->Add(m_edge_detect_chk, 0, wxALIGN_CENTER);
 	sizer1_2->Add(m_brush_gm_falloff_sldr, 1, wxEXPAND | wxRIGHT, 5);
 	sizer1_2->Add(m_brush_gm_falloff_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//2d
-	st = new wxStaticText(page, 0, "2D Adj. Infl.:");
+	st = new wxStaticText(page, 0, "Out Weight:");
 	m_brush_2dinfl_sldr = new wxSingleSlider(page, wxID_ANY, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_2dinfl_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrush2dinflChange, this);
@@ -264,6 +263,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp2);
 	m_brush_2dinfl_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrush2dinflText, this);
 	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_2->AddSpacer(1);
 	sizer1_2->Add(m_brush_2dinfl_sldr, 1, wxEXPAND | wxRIGHT, 5);
 	sizer1_2->Add(m_brush_2dinfl_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//sizer1
@@ -278,11 +278,11 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		wxVERTICAL, page, "Brush Properties");
 	//size relation
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Dependent:",
+	st = new wxStaticText(page, 0, "Unit Size:",
 		wxDefaultPosition, FromDIP(wxSize(70, 20)));
-	m_brush_size_data_rb = new wxRadioButton(page, wxID_ANY, "Data",
+	m_brush_size_data_rb = new wxRadioButton(page, wxID_ANY, "Data Voxel",
 		wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-	m_brush_size_screen_rb = new wxRadioButton(page, wxID_ANY, "Screen",
+	m_brush_size_screen_rb = new wxRadioButton(page, wxID_ANY, "Display Pixel",
 		wxDefaultPosition, wxDefaultSize);
 	m_brush_size_data_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushSizeRelationCheck, this);
 	m_brush_size_screen_rb->Bind(wxEVT_RADIOBUTTON, &BrushToolDlg::OnBrushSizeRelationCheck, this);

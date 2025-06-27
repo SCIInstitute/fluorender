@@ -284,7 +284,7 @@
         <scl_translate>0</scl_translate>
         <select_group>0</select_group>
         <edge_detect>0</edge_detect>
-        <hidden_removal>0</hidden_removal>
+        <hidden_removal>1</hidden_removal>
         <ortho>1</ortho>
         <accurate_bricks>1</accurate_bricks>
         <_2d_infl>0</_2d_infl>

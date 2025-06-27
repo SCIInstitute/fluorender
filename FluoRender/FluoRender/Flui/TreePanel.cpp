@@ -404,12 +404,62 @@ TreePanel::TreePanel(MainFrame* frame,
 	m_toolbar2->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	m_toolbar2->Realize();
 
+	//toolbar 3
+	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(filter_small);
+	m_toolbar3->AddTool(ID_Ocl, "Volume Filter", bitmap,
+		"Show Volume Filter Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Ocl, "Show Volume Filter Dialog");
+	m_toolbar3->AddSeparator();
+	bitmap = wxGetBitmap(brush_small);
+	m_toolbar3->AddTool(ID_Brush, "Paint Brush", bitmap,
+		"Show Paint Brush Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Brush, "Show Paint Brush Dialog");
+	bitmap = wxGetBitmap(measure_small);
+	m_toolbar3->AddTool(ID_Measurement, "Measurement", bitmap,
+		"Show Measurement Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Measurement, "Show Measurement Dialog");
+	bitmap = wxGetBitmap(component_small);
+	m_toolbar3->AddTool(ID_Component, "Component Analyzer", bitmap,
+		"Show Component Analyzer Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Component, "Show Component Analyzer Dialog");
+	bitmap = wxGetBitmap(track_small);
+	m_toolbar3->AddTool(ID_Track, "Tracking", bitmap,
+		"Show Tracking Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Track, "Show Tracking Dialog");
+	m_toolbar3->AddSeparator();
+	bitmap = wxGetBitmap(calculate_small);
+	m_toolbar3->AddTool(ID_Calculation, "Calculation", bitmap,
+		"Show Calculation Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Calculation, "Show Calculation Dialog");
+	bitmap = wxGetBitmap(noise_red_small);
+	m_toolbar3->AddTool(ID_NoiseReduct, "Noise Reduction", bitmap,
+		"Show Noise Reduction Dialog");
+	m_toolbar3->SetToolLongHelp(ID_NoiseReduct, "Show Noise Reduction Dialog");
+	bitmap = wxGetBitmap(size_small);
+	m_toolbar3->AddTool(ID_VolumeSize, "Volume Size", bitmap,
+		"Show Volume Size Dialog");
+	m_toolbar3->SetToolLongHelp(ID_VolumeSize, "Show Volume Size Dialog");
+	bitmap = wxGetBitmap(colocal_small);
+	m_toolbar3->AddTool(ID_Colocalization, "Colocalization", bitmap,
+		"Show Colocalization Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Colocalization, "Show Colocalization Dialog");
+	bitmap = wxGetBitmap(convert_small);
+	m_toolbar3->AddTool(ID_Convert, "Convert", bitmap,
+		"Show Convert Dialog");
+	m_toolbar3->SetToolLongHelp(ID_Convert, "Show Convert Dialog");
+
+	m_toolbar3->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
+	m_toolbar3->Realize();
+
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 
 	sizer_v->Add(m_toolbar, 0, wxEXPAND);
 	sizer_v->Add(m_toolbar2, 0, wxEXPAND);
 	sizer_v->Add(m_datatree, 1, wxEXPAND);
+	sizer_v->Add(m_toolbar3, 0, wxEXPAND);
 
 	SetSizer(sizer_v);
 	Layout();
@@ -1760,14 +1810,14 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 			menu.Append(TreePanel::ID_IntersectMask, "Intersect Mask");
 		}
 		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_Edit, "Paint Brush...");
-		menu.Append(TreePanel::ID_Measurement, "Measurement...");
 		menu.Append(TreePanel::ID_Ocl, "Volume Filter...");
+		menu.Append(TreePanel::ID_Brush, "Paint Brush...");
+		menu.Append(TreePanel::ID_Measurement, "Measurement...");
 		menu.Append(TreePanel::ID_Component, "Component Analyzer...");
-		menu.Append(TreePanel::ID_Trace, "Tracking...");
-		menu.Append(TreePanel::ID_Calculations, "Calculations...");
-		menu.Append(TreePanel::ID_NoiseCancelling, "Noise Reduction...");
-		menu.Append(TreePanel::ID_Counting, "Volume Size...");
+		menu.Append(TreePanel::ID_Track, "Tracking...");
+		menu.Append(TreePanel::ID_Calculation, "Calculations...");
+		menu.Append(TreePanel::ID_NoiseReduct, "Noise Reduction...");
+		menu.Append(TreePanel::ID_VolumeSize, "Volume Size...");
 		menu.Append(TreePanel::ID_Colocalization, "Colocalization...");
 		menu.Append(TreePanel::ID_Convert, "Convert...");
 		menu.Append(TreePanel::ID_MachineLearning, "Machine Learning Manager...");
@@ -1877,6 +1927,42 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	case ID_BrushDelete:
 		BrushDelete();
 		break;
+	case ID_Brush:
+		m_frame->ShowBrushDlg();
+		break;
+	case ID_Measurement:
+		m_frame->ShowMeasureDlg();
+		break;
+	case ID_Component:
+		m_frame->ShowComponentDlg();
+		break;
+	case ID_Track:
+		m_frame->ShowTrackDlg();
+		break;
+	case ID_Calculation:
+		m_frame->ShowCalculationDlg();
+		break;
+	case ID_NoiseReduct:
+		m_frame->ShowNoiseCancellingDlg();
+		break;
+	case ID_VolumeSize:
+		m_frame->ShowCountingDlg();
+		break;
+	case ID_Colocalization:
+		m_frame->ShowColocalizationDlg();
+		break;
+	case ID_Convert:
+		m_frame->ShowConvertDlg();
+		break;
+	case ID_Ocl:
+		m_frame->ShowOclDlg();
+		break;
+	case ID_MachineLearning:
+		m_frame->ShowMachineLearningDlg();
+		break;
+	case ID_ManipulateData:
+		ManipulateData();
+		break;
 	}
 }
 
@@ -1962,13 +2048,13 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 			vc.insert(gstColocalResult);
 	}
 		break;
-	case ID_Edit:
+	case ID_Brush:
 	case ID_Measurement:
 	case ID_Component:
-	case ID_Trace:
-	case ID_Calculations:
-	case ID_NoiseCancelling:
-	case ID_Counting:
+	case ID_Track:
+	case ID_Calculation:
+	case ID_NoiseReduct:
+	case ID_VolumeSize:
 	case ID_Colocalization:
 	case ID_Convert:
 	case ID_Ocl:
@@ -1976,7 +2062,7 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 	case ID_ManipulateData:
 		switch (id)
 		{
-			case ID_Edit:
+			case ID_Brush:
 				m_frame->ShowBrushDlg();
 				break;
 			case ID_Measurement:
@@ -1985,16 +2071,16 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 			case ID_Component:
 				m_frame->ShowComponentDlg();
 				break;
-			case ID_Trace:
+			case ID_Track:
 				m_frame->ShowTrackDlg();
 				break;
-			case ID_Calculations:
+			case ID_Calculation:
 				m_frame->ShowCalculationDlg();
 				break;
-			case ID_NoiseCancelling:
+			case ID_NoiseReduct:
 				m_frame->ShowNoiseCancellingDlg();
 				break;
-			case ID_Counting:
+			case ID_VolumeSize:
 				m_frame->ShowCountingDlg();
 				break;
 			case ID_Colocalization:

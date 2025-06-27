@@ -46,7 +46,7 @@ BrushDefault::BrushDefault()
 
 	m_select_multi = false;
 	m_edge_detect = false;
-	m_hidden_removal = false;
+	m_hidden_removal = true;
 	m_ortho = true;
 	m_update_order = true;
 
@@ -89,7 +89,7 @@ void BrushDefault::Read()
 	//edge detect
 	f->Read("edge detect", &m_edge_detect, false);
 	//hidden removal
-	f->Read("hidden removal", &m_hidden_removal, false);
+	f->Read("hidden removal", &m_hidden_removal, true);
 	f->Read("ortho", &m_ortho, true);
 	//brick accuracy
 	f->Read("accurate bricks", &m_update_order, true);
