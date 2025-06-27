@@ -378,7 +378,7 @@ TreePanel::TreePanel(MainFrame* frame,
 		"Remove the highlights by painting (hold X)");
 	m_toolbar2->AddSeparator();
 	bitmap = wxGetBitmap(brush_locator);
-	m_toolbar2->AddCheckTool(ID_RulerLocator, "Centroid",
+	m_toolbar2->AddCheckTool(ID_BrushRuler, "Centroid",
 		bitmap, wxNullBitmap,
 		"Select structures and create a locator at center",
 		"Select structures and create a locator at center");
@@ -516,7 +516,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_toolbar->ToggleTool(ID_RulerPencil, mode == 13);
 		m_toolbar->ToggleTool(ID_RulerEdit, mode == 6);
 		m_toolbar->ToggleTool(ID_RulerDeletePoint, mode == 14);
-		m_toolbar2->ToggleTool(ID_RulerLocator, bval && ival == 2);
+		m_toolbar2->ToggleTool(ID_BrushRuler, mode == 7);
 
 		bval = mode == 2 || mode == 10;
 		ival = glbin_vol_selector.GetMode();
@@ -781,16 +781,16 @@ void TreePanel::RulerDeletePoint()
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
-void TreePanel::RulerLocator()
+void TreePanel::BrushRuler()
 {
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
 	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
+	bool bval = mode == 7;
 	int ival = glbin_ruler_handler.GetType();
 
-	if (bval && ival == 1)
+	if (ival == 1)
 		glbin_ruler_handler.FinishRuler();
 
 	if (bval && ival == 2)
@@ -799,7 +799,8 @@ void TreePanel::RulerLocator()
 	}
 	else
 	{
-		view->SetIntMode(5);
+		view->SetIntMode(7);
+		glbin_vol_selector.SetMode(1);
 		glbin_ruler_handler.SetType(2);
 	}
 
@@ -1900,8 +1901,8 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	case ID_RulerDeletePoint:
 		RulerDeletePoint();
 		break;
-	case ID_RulerLocator:
-		RulerLocator();
+	case ID_BrushRuler:
+		BrushRuler();
 		break;
 	case ID_BrushGrow:
 		BrushGrow();

@@ -136,7 +136,7 @@ public:
 		ID_RulerEdit,
 		ID_RulerDeletePoint,
 		//brush
-		ID_RulerLocator,
+		ID_BrushRuler,
 		//separator
 		ID_BrushGrow,
 		ID_BrushAppend,
@@ -201,7 +201,7 @@ public:
 	void RulerPencil();
 	void RulerEdit();
 	void RulerDeletePoint();
-	void RulerLocator();
+	void BrushRuler();
 	void BrushGrow();
 	void BrushAppend();
 	void BrushComp();

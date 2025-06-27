@@ -307,7 +307,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	sizer2_2->Add(m_brush_iter_sldr, 1, wxEXPAND | wxRIGHT, 5);
 	sizer2_2->Add(m_brush_iter_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//brush size 1
-	st = new wxStaticText(page, 0, "Center Size:");
+	st = new wxStaticText(page, 0, "Seed Size:");
 	m_brush_size1_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size1_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize1Change, this);
@@ -334,7 +334,9 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	sizer2_2->Add(m_brush_size2_text, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	//note
 	wxBoxSizer* sizer2_3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Brush sizes can also be set with mouse wheel in painting mode.");
+	st = new wxStaticText(page, 0,
+		"A selection brush has a center to set seeds and a grow region outside. " \
+		"Brush sizes can also be set with mouse wheel in painting mode.");
 	st->Wrap(FromDIP(450));
 	sizer2_3->Add(st, 1, wxEXPAND);
 	//sizer2
