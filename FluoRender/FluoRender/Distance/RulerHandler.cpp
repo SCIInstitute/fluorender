@@ -60,7 +60,8 @@ RulerHandler::RulerHandler() :
 	m_fsize(1),
 	m_sample_type(1),
 	m_step_length(1),
-	m_edited(false)
+	m_edited(false),
+	m_mode(RulerMode::None)
 {
 
 }
@@ -543,7 +544,7 @@ RulerPoint* RulerHandler::GetEllipsePoint(int index)
 {
 	Ruler* ruler = glbin_current.GetRuler();
 	if (!ruler ||
-		ruler->GetRulerType() != 5 ||
+		ruler->GetRulerMode() != RulerMode::Ellipse ||
 		ruler->GetNumPoint() != 4)
 		return 0;
 
@@ -574,7 +575,8 @@ RulerPoint* RulerHandler::GetEllipsePoint(int index)
 bool RulerHandler::CompleteEllipse(int mode)
 {
 	Ruler* ruler = glbin_current.GetRuler();
-	if (!ruler || ruler->GetRulerType() != 5)
+	if (!ruler ||
+		ruler->GetRulerMode() != RulerMode::Ellipse)
 		return false;
 	size_t rwt = ruler->GetWorkTime();
 	int interp = ruler->GetInterp();
@@ -627,7 +629,7 @@ void RulerHandler::FinishRuler()
 	Ruler* ruler = glbin_current.GetRuler();
 	if (!ruler)
 		return;
-	if (ruler->GetRulerType() == 1)
+	if (ruler->GetRulerMode() == RulerMode::Polyline)
 		ruler->SetFinished();
 	m_mouse = fluo::Point(-1);
 }
@@ -650,7 +652,7 @@ Ruler* RulerHandler::AddRuler(fluo::Point& p, size_t t)
 	Ruler* r = new Ruler();
 	r->SetWorkTime(t);
 	r->Group(m_group);
-	r->SetRulerType(2);
+	r->SetRulerMode(RulerMode::Locator);
 	r->AddPoint(p);
 	list->push_back(r);
 	return r;
@@ -673,7 +675,7 @@ void RulerHandler::AddRulerPoint(fluo::Point &p)
 	{
 		ruler = new Ruler();
 		ruler->Group(m_group);
-		ruler->SetRulerType(m_type);
+		ruler->SetRulerMode(m_mode);
 		ruler->AddPoint(p);
 		list->push_back(ruler);
 		auto view = glbin_current.render_view.lock();
@@ -694,14 +696,14 @@ void RulerHandler::AddRulerPointAfterId(fluo::Point &p, unsigned int id,
 	Ruler* ruler = glbin_current.GetRuler();
 	if (ruler &&
 		ruler->GetDisp() &&
-		ruler->GetRulerType() == 1 &&
+		ruler->GetRulerMode() == RulerMode::Polyline &&
 		!ruler->GetFinished())
 		ruler->AddPointAfterId(p, id, cid, bid);
 	else
 	{
 		ruler = new Ruler();
 		ruler->Group(m_group);
-		ruler->SetRulerType(m_type);
+		ruler->SetRulerMode(m_mode);
 		ruler->AddPointAfterId(p, id, cid, bid);
 		//ruler->SetTransient(m_view->m_ruler_time_dep);
 		//ruler->SetTransTime(m_view->m_tseq_cur_num);
@@ -738,7 +740,8 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 		//DBGPRINT(L"Ruler:%s\n", ruler->GetName().c_str());
 	}
 
-	if (branch && m_type == 1)
+	if (branch &&
+		m_mode == RulerMode::Polyline)
 	{
 		if (FindEditingRuler(mx, my))
 		{
@@ -757,13 +760,13 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 			return;
 		}
 	}
-	if (m_type == 3)
+	if (m_mode == RulerMode::Probe)
 	{
 		fluo::Point p1, p2;
 		Ruler* ruler = new Ruler();
 		ruler->SetWorkTime(rwt);
 		ruler->Group(m_group);
-		ruler->SetRulerType(m_type);
+		ruler->SetRulerMode(m_mode);
 		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
 		glbin_volume_point.GetPointVolumeBox2(mx, my, p1, p2);
 		ruler->AddPoint(p1);
@@ -781,7 +784,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 	{
 		fluo::Point p, ip, planep;
 		fluo::Point* pplanep = 0;
-		if (m_type == 1)
+		if (m_mode == RulerMode::Polyline)
 		{
 			if (ruler)
 			{
@@ -825,7 +828,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 		{
 			ruler->AddPoint(p);
 			new_ruler = false;
-			if (m_type == 5)
+			if (m_mode == RulerMode::Ellipse)
 			{
 				//finish
 				glm::mat4 mv_temp = view->GetDrawMat();
@@ -839,7 +842,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 			ruler = new Ruler();
 			ruler->SetWorkTime(rwt);
 			ruler->Group(m_group);
-			ruler->SetRulerType(m_type);
+			ruler->SetRulerMode(m_mode);
 			ruler->AddPoint(p);
 			list->push_back(ruler);
 			view->SetCurRuler(ruler);
@@ -887,7 +890,7 @@ void RulerHandler::AddPaintRulerPoint()
 	{
 		ruler = new Ruler();
 		ruler->Group(m_group);
-		ruler->SetRulerType(m_type);
+		ruler->SetRulerMode(m_mode);
 		ruler->AddPoint(center);
 		str = "v0";
 		ruler->AddInfoNames(str);
@@ -1047,7 +1050,7 @@ void RulerHandler::AddAverage(const std::set<int>& rulers)
 
 	avg /= double(count);
 	flrd::Ruler* ruler = new flrd::Ruler();
-	ruler->SetRulerType(2);
+	ruler->SetRulerMode(RulerMode::Locator);
 	ruler->SetName(L"Average");
 	ruler->AddPoint(avg);
 	ruler->SetTransient(false);
@@ -1531,7 +1534,8 @@ int RulerHandler::Profile(Ruler* ruler)
 	ruler->SetScalarScale(m_bits == 8 ? 255: 65535);
 	if (!valid()) return 0;
 
-	if (ruler->GetRulerType() == 3 && mask)
+	if (ruler->GetRulerMode() == RulerMode::Probe &&
+		mask)
 	{
 		if (ruler->GetNumPoint() < 1)
 			return 0;
@@ -1694,7 +1698,7 @@ int RulerHandler::Roi(Ruler* ruler)
 	auto vd = glbin_current.vol_data.lock();
 	if (!view || !vd || !ruler)
 		return 0;
-	if (ruler->GetRulerType() != 5 ||
+	if (ruler->GetRulerMode() != RulerMode::Ellipse ||
 		ruler->GetNumPoint() != 4)
 		return 0;
 	//size_t rwt = ruler->GetWorkTime();

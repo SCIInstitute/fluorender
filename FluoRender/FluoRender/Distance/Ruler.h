@@ -39,6 +39,16 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
+	enum class RulerMode
+	{
+		None,
+		Line,		//0: 2 point
+		Polyline,	//1: multi point
+		Locator,	//2: locator
+		Probe,		//3: probe
+		Protractor,	//4: protractor
+		Ellipse		//5: ellipse
+	};
 	class Ruler;
 	class ProfileBin
 	{
@@ -444,8 +454,8 @@ namespace flrd
 			if (p)
 				p->SetPoint(point, m_work_time);
 		}
-		int GetRulerType();
-		void SetRulerType(int type);
+		RulerMode GetRulerMode();
+		void SetRulerMode(RulerMode mode);
 		bool GetFinished();
 		void SetFinished();
 		double GetLength();
@@ -645,8 +655,7 @@ namespace flrd
 		std::wstring m_name;
 		unsigned int m_id;
 		unsigned int m_group;//group number
-		int m_ruler_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
-							//4: protractor; 5: ellipse
+		RulerMode m_mode;
 		bool m_finished;
 		std::vector<RulerBranch> m_ruler;
 		bool m_disp;

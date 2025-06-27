@@ -57,8 +57,7 @@ VolumeSelector::VolumeSelector() :
 	m_2d_weight1(0),
 	m_2d_weight2(0),
 	m_iter_num(20),
-	m_mode_ext(0),
-	m_mode(2),
+	m_mode(SelectMode::None),
 	m_init_mask(3),
 	m_use2d(false),
 	m_update_order(true),
@@ -114,36 +113,10 @@ bool VolumeSelector::GetAutoPaintSize()
 	return true;
 }
 
-void VolumeSelector::SetMode(int mode)
+void VolumeSelector::SetSelectMode(SelectMode mode)
 {
-	m_mode_ext = mode;
-	if (m_mode_ext)
-		m_mode = m_mode_ext;
+	m_mode = mode;
 	ChangeBrushSetsIndex();
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-
-	switch (m_mode_ext)
-	{
-	case 0://not used
-		view->SetIntMode(1);
-		break;
-	case 1://select
-	case 2://append
-	case 3://erase
-	case 4://diffuse
-	case 5://flood
-	case 6://clear
-	case 7://select all
-	case 8://select solid
-	case 10://select and gen comps
-		view->SetIntMode(2);
-		break;
-	case 9://grow from point
-		view->SetIntMode(10);
-		break;
-	}
 }
 
 //segment volumes in current view
@@ -183,14 +156,14 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		return;
 
 	view->HandleCamera();
-	if (m_mode == 9)
+	if (m_mode == SelectMode::Grow)
 		segment(push_mask, est_th, mx, my);
 	else
 		segment(push_mask, est_th, 0, 0);
 
 	m_vd->ResetMaskCount();
 
-	if (m_mode == 10)
+	if (m_mode == SelectMode::Segment)
 	{
 		//generate components
 		bool bval = glbin_comp_generator.GetUseSel();
@@ -212,7 +185,7 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 		m_t1 = std::chrono::high_resolution_clock::now();
 
 	//notify volume that mask is cleared
-	if (m_mode == 6)
+	if (m_mode == SelectMode::Clear)
 		m_vd->SetMaskClear();
 
 	//save view
@@ -222,7 +195,7 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	//mouse position
 	fluo::Vector mvec;//mouse vector in data space
 	bool valid_mvec = false;
-	if (m_mode == 9)
+	if (m_mode == SelectMode::Grow)
 	{
 		GLint mp[2] = { mx, my };
 		m_vd->GetVR()->set_mouse_position(mp);
@@ -350,21 +323,24 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 	m_vd->GetTexture()->deact_all_mask();
 
 	//clear selection
-	if (m_mode == 1)
+	if (m_mode == SelectMode::SingleSelect)
 	{
 		//has to update twice
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 	}
-	else if (m_mode == 6)
+	else if (m_mode == SelectMode::Clear)
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 
 	//set up paint mask flags
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	if (m_mode == 1 || m_mode == 2 ||
-		m_mode == 3 || m_mode == 4 ||
-		m_mode == 8 || m_mode == 9 ||
-		m_mode == 10)
+	if (m_mode == SelectMode::SingleSelect ||
+		m_mode == SelectMode::Append ||
+		m_mode == SelectMode::Eraser ||
+		m_mode == SelectMode::Diffuse ||
+		m_mode == SelectMode::Solid ||
+		m_mode == SelectMode::Grow ||
+		m_mode == SelectMode::Segment)
 	{
 		if (bricks->size() > 1)
 		{
@@ -387,7 +363,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			mat.set(glm::value_ptr(cmat));
 			pb.SetMats(mv, pr, mat);
 			pb.SetPaintTex(m_2d_mask, view->GetGLSize().w(), view->GetGLSize().h());
-			if (m_mode == 9)
+			if (m_mode == SelectMode::Grow)
 				pb.SetMousePos(m_mx, m_my);
 			pb.Compute();
 		}
@@ -402,31 +378,33 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 	if (m_init_mask & 1)
 	{
 		int hr_mode = m_hidden_removal ? (m_ortho ? 1 : 2) : 0;
-		if ((m_mode == 1 || m_mode == 2 || m_mode == 10) &&
+		if ((m_mode == SelectMode::SingleSelect ||
+			m_mode == SelectMode::Append ||
+			m_mode == SelectMode::Segment) &&
 			m_estimate_threshold && est_th)
 		{
-			m_vd->DrawMask(0, m_mode, hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
+			m_vd->DrawMask(0, static_cast<int>(m_mode), hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 			ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
 			if (m_iter_num > 10)
 				ini_thresh /= 2.0;
 			m_scl_translate = ini_thresh;
 		}
-		m_vd->DrawMask(0, m_mode, hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
+		m_vd->DrawMask(0, static_cast<int>(m_mode), hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 	}
 
 	//grow the selection when paint mode is select, append, erase, or invert
 	if (m_init_mask & 2)
 	{
-		if (m_mode == 1 ||
-			m_mode == 2 ||
-			m_mode == 3 ||
-			m_mode == 4 ||
-			m_mode == 9 ||
-			m_mode == 10)
+		if (m_mode == SelectMode::SingleSelect ||
+			m_mode == SelectMode::Append ||
+			m_mode == SelectMode::Eraser ||
+			m_mode == SelectMode::Diffuse ||
+			m_mode == SelectMode::Grow ||
+			m_mode == SelectMode::Segment)
 		{
 			//loop for growing
-			if (m_mode == 9)
+			if (m_mode == SelectMode::Grow)
 			{
 				if (m_iter_num <= 10)
 					m_iter = m_iter_num / 3;
@@ -443,13 +421,13 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i%div) : 0;
-				if (m_mode == 1 ||
-					m_mode == 2 ||
-					m_mode == 4 ||
-					m_mode == 9 ||
-					m_mode == 10)
+				if (m_mode == SelectMode::SingleSelect ||
+					m_mode == SelectMode::Append ||
+					m_mode == SelectMode::Diffuse ||
+					m_mode == SelectMode::Grow ||
+					m_mode == SelectMode::Segment)
 					mb.Compute(order);
-				m_vd->DrawMask(1, m_mode, 0, ini_thresh,
+				m_vd->DrawMask(1, static_cast<int>(m_mode), 0, ini_thresh,
 					gm_falloff, scl_falloff,
 					m_scl_translate, m_w2d, 0.0,
 					order);
@@ -461,7 +439,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		m_vd->GetVR())
 		m_vd->GetVR()->return_mask();
 
-	if (m_mode == 6)
+	if (m_mode == SelectMode::Clear)
 	{
 		m_vd->SetUseMaskThreshold(false);
 		m_vd->GetTexture()->invalid_all_mask();
@@ -471,8 +449,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 //erase selection
 void VolumeSelector::Clear()
 {
-	int mode = m_mode;
-	m_mode = 6;
+	SelectMode mode = m_mode;
+	m_mode = SelectMode::Clear;
 	Segment(true);
 	m_mode = mode;
 }
@@ -707,9 +685,9 @@ std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop)
 //brush sets
 void VolumeSelector::ChangeBrushSetsIndex()
 {
-	int mode = m_mode;
-	if (mode == 1 || mode == 10)
-		mode = 2;
+	SelectMode mode = m_mode;
+	if (mode == SelectMode::SingleSelect || mode == SelectMode::Segment)
+		mode = SelectMode::Append;
 	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
 	{
 		BrushRadiusSet& radius_set = m_brush_radius_sets.at(i);
@@ -730,8 +708,10 @@ void VolumeSelector::ChangeBrushSetsIndex()
 bool VolumeSelector::GetThUpdate()
 {
 	auto view = glbin_current.render_view.lock();
-	if (!view || (m_mode != 1 &&
-		m_mode != 2 && m_mode != 4))
+	if (!view ||
+		(m_mode != SelectMode::SingleSelect &&
+		m_mode != SelectMode::Append &&
+		m_mode != SelectMode::Diffuse))
 		return false;
 	glm::mat4 mv_mat = view->GetDrawMat();
 	glm::mat4 prj_mat = view->GetProjection();

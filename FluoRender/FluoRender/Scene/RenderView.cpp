@@ -149,7 +149,7 @@ RenderView::RenderView() :
 	//interpolation
 	m_intp(true),
 	//interactive modes
-	m_int_mode(1),
+	m_int_mode(InteractiveMode::None),
 	m_crop_type(0),
 	m_force_clear(false),
 	//interactive state control
@@ -3725,10 +3725,10 @@ void RenderView::CalcFrame()
 }
 
 //interactive modes
-void RenderView::SetIntMode(int mode)
+void RenderView::SetIntMode(InteractiveMode mode)
 {
 	m_int_mode = mode;
-	if (m_int_mode == 1)
+	if (m_int_mode == InteractiveMode::Viewport)
 	{
 		//glbin_vol_selector.SetMode(0);
 		m_draw_brush = false;
@@ -4013,8 +4013,8 @@ bool RenderView::ForceDraw()
 	if (m_draw_info & INFO_DISP)
 		DrawInfo(nx, ny, m_interactive);
 
-	if (m_int_mode == 2 ||
-		m_int_mode == 7)  //painting mode
+	if (m_int_mode == InteractiveMode::BrushSelect ||
+		m_int_mode == InteractiveMode::BrushRuler)  //painting mode
 	{
 		if (m_draw_brush)
 		{
@@ -4033,10 +4033,10 @@ bool RenderView::ForceDraw()
 		}
 	}
 
-	if (m_int_mode == 4)
-		m_int_mode = 2;
-	if (m_int_mode == 8)
-		m_int_mode = 7;
+	if (m_int_mode == InteractiveMode::BrushSelectUpdate)
+		m_int_mode = InteractiveMode::BrushSelect;
+	if (m_int_mode == InteractiveMode::BrushRulerUpdate)
+		m_int_mode = InteractiveMode::BrushRuler;
 
 
 	if (glbin_settings.m_invalidate_tex)
@@ -7346,18 +7346,18 @@ void RenderView::DrawVolumes(int peel)
 	if (m_load_update ||
 		glbin_settings.m_hologram_mode == 2 ||
 		(!m_retain_finalbuffer &&
-			m_int_mode != 2 &&
-			m_int_mode != 7 &&
+			m_int_mode != InteractiveMode::BrushSelect &&
+			m_int_mode != InteractiveMode::BrushRuler &&
 			m_updating) ||
 			(!m_retain_finalbuffer &&
-		(m_int_mode == 1 ||
-			m_int_mode == 3 ||
-			m_int_mode == 4 ||
-			m_int_mode == 5 ||
-			((m_int_mode == 6 ||
-			m_int_mode == 9) &&
+		(m_int_mode == InteractiveMode::Viewport ||
+			m_int_mode == InteractiveMode::Clipplane ||
+			m_int_mode == InteractiveMode::BrushSelectUpdate ||
+			m_int_mode == InteractiveMode::Ruler ||
+			((m_int_mode == InteractiveMode::EditRulerPoint ||
+			m_int_mode == InteractiveMode::MoveRuler) &&
 				!p0) ||
-			m_int_mode == 8 ||
+			m_int_mode == InteractiveMode::BrushRulerUpdate ||
 			m_force_clear)))
 	{
 		m_updating = false;
@@ -9128,23 +9128,23 @@ void RenderView::DrawBrush()
 		//attributes
 		glDisable(GL_DEPTH_TEST);
 
-		int mode = glbin_vol_selector.GetMode();
+		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
 
 		fluo::Color text_color = GetTextColor();
 
 		double br1 = glbin_vol_selector.GetBrushSize1();
 		double br2 = glbin_vol_selector.GetBrushSize2();
 
-		if (mode == 1 ||
-			mode == 2 ||
-			mode == 10)
+		if (sel_mode == flrd::SelectMode::SingleSelect ||
+			sel_mode == flrd::SelectMode::Append ||
+			sel_mode == flrd::SelectMode::Segment)
 			DrawCircles(cx, cy, br1*pressure,
 				br2*pressure, text_color, proj_mat);
-		else if (mode == 8)
+		else if (sel_mode == flrd::SelectMode::Solid)
 			DrawCircles(cx, cy, br1*pressure,
 				-1.0, text_color, proj_mat);
-		else if (mode == 3 ||
-			mode == 4)
+		else if (sel_mode == flrd::SelectMode::Eraser ||
+			sel_mode == flrd::SelectMode::Diffuse)
 			DrawCircles(cx, cy, -1.0,
 				br2*pressure, text_color, proj_mat);
 
@@ -9154,19 +9154,19 @@ void RenderView::DrawBrush()
 		px = cx2 - 7 - nx / 2.0;
 		py = cy2 - 3 - ny / 2.0;
 		std::wstring wstr;
-		switch (mode)
+		switch (sel_mode)
 		{
-		case 1:
+		case flrd::SelectMode::SingleSelect:
 			wstr = L"1";
 			break;
-		case 2:
-		case 10:
+		case flrd::SelectMode::Append:
+		case flrd::SelectMode::Segment:
 			wstr = L"+";
 			break;
-		case 3:
+		case flrd::SelectMode::Eraser:
 			wstr = L"-";
 			break;
-		case 4:
+		case flrd::SelectMode::Diffuse:
 			wstr = L"*";
 			break;
 		}
@@ -9257,15 +9257,15 @@ void RenderView::PaintStroke()
 				cx = x;
 				cy = double(ny) - y;
 			}
-			switch (glbin_vol_selector.GetMode())
+			switch (glbin_vol_selector.GetSelectMode())
 			{
-			case 3:
+			case flrd::SelectMode::Eraser:
 				radius1 = radius2;
 				break;
-			case 4:
+			case flrd::SelectMode::Diffuse:
 				radius1 = 0.0;
 				break;
-			case 8:
+			case flrd::SelectMode::Solid:
 				radius2 = radius1;
 				break;
 			default:
@@ -9575,33 +9575,33 @@ void RenderView::SetBrush(int mode, IdleState& state)
 	//SetFocus();
 	state.m_set_cur_focus = true;
 
-	int ruler_type = glbin_ruler_handler.GetType();
+	//int ruler_type = glbin_ruler_handler.GetType();
 
-	if (m_int_mode == 5 ||
-		m_int_mode == 7)
-	{
-		m_int_mode = 7;
-		if (ruler_type == 3)
-			glbin_vol_selector.SetMode(8);
-		else
-			glbin_vol_selector.SetMode(1);
-	}
-	else if (m_int_mode == 8)
-	{
-		if (ruler_type == 3)
-			glbin_vol_selector.SetMode(8);
-		else
-			glbin_vol_selector.SetMode(1);
-	}
-	else if (m_int_mode == 10)
-	{
-		glbin_vol_selector.SetMode(9);
-	}
-	else
-	{
-		m_int_mode = 2;
-		glbin_vol_selector.SetMode(mode);
-	}
+	//if (m_int_mode == 5 ||
+	//	m_int_mode == 7)
+	//{
+	//	m_int_mode = 7;
+	//	if (ruler_type == 3)
+	//		glbin_vol_selector.SetMode(8);
+	//	else
+	//		glbin_vol_selector.SetMode(1);
+	//}
+	//else if (m_int_mode == 8)
+	//{
+	//	if (ruler_type == 3)
+	//		glbin_vol_selector.SetMode(8);
+	//	else
+	//		glbin_vol_selector.SetMode(1);
+	//}
+	//else if (m_int_mode == 10)
+	//{
+	//	glbin_vol_selector.SetMode(9);
+	//}
+	//else
+	//{
+	//	m_int_mode = 2;
+	//	glbin_vol_selector.SetMode(mode);
+	//}
 }
 
 bool RenderView::UpdateBrushState(IdleState& state)
@@ -9654,10 +9654,10 @@ bool RenderView::UpdateBrushState(IdleState& state)
 				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			}
 
-			if (m_int_mode == 7)
-				m_int_mode = 5;
+			if (m_int_mode == InteractiveMode::BrushRuler)
+				m_int_mode = InteractiveMode::Ruler;
 			else
-				m_int_mode = 1;
+				m_int_mode = InteractiveMode::Viewport;
 
 			glbin_states.m_brush_mode_toolbar = 0;
 			glbin_states.m_brush_mode_shortcut = 0;
@@ -10642,8 +10642,8 @@ void RenderView::ProcessIdle(IdleState& state)
 			m_ruler_relax = false;
 
 		//grow
-		if ((m_int_mode == 10 ||
-			m_int_mode == 12) &&
+		if ((m_int_mode == InteractiveMode::Grow ||
+			m_int_mode == InteractiveMode::GrowRuler) &&
 			state.m_mouse_left &&
 			m_grow_on)
 		{
@@ -10654,7 +10654,7 @@ void RenderView::ProcessIdle(IdleState& state)
 				state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
-			if (m_int_mode == 12)
+			if (m_int_mode == InteractiveMode::GrowRuler)
 			{
 				glbin_seg_grow.SetVolumeData(cur_vd.get());
 				glbin_seg_grow.SetIter(glbin_vol_selector.GetIter() * 3);
@@ -10669,7 +10669,7 @@ void RenderView::ProcessIdle(IdleState& state)
 				state.m_value_collection.insert(gstBrushCountResult);
 			if (glbin_colocalizer.GetAutoColocalize())
 				state.m_value_collection.insert(gstColocalResult);
-			if (m_int_mode == 12)
+			if (m_int_mode == InteractiveMode::GrowRuler)
 				state.m_value_collection.insert(gstRulerList);
 		}
 	}
@@ -10841,7 +10841,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_crop_type = HitCropFrame(mp);
 			if (m_crop_type)
 			{
-				m_int_mode = 16;
+				m_int_mode = InteractiveMode::CropFrame;
 				return;
 			}
 		}
@@ -10849,43 +10849,43 @@ void RenderView::ProcessMouse(MouseState& state)
 		state.m_reset_focus_slider = true;
 
 		bool found_rp = false;
-		if (m_int_mode == 6 ||
-			m_int_mode == 9 ||
-			m_int_mode == 11 ||
-			m_int_mode == 14)
+		if (m_int_mode == InteractiveMode::EditRulerPoint ||
+			m_int_mode == InteractiveMode::MoveRuler ||
+			m_int_mode == InteractiveMode::RulerLockPoint ||
+			m_int_mode == InteractiveMode::RulerDelPoint)
 		{
 			found_rp = glbin_ruler_handler.FindEditingRuler(
 				mp.x(), mp.y());
 		}
 		if (found_rp)
 		{
-			if (m_int_mode == 11)
+			if (m_int_mode == InteractiveMode::RulerLockPoint)
 			{
 				flrd::RulerPoint *p = glbin_ruler_handler.GetPoint();
 				if (p) p->ToggleLocked();
 			}
-			if (m_int_mode == 14)
+			if (m_int_mode == InteractiveMode::RulerDelPoint)
 				glbin_ruler_handler.DeletePoint();
 			RefreshGL(14);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
 
-		if (m_int_mode == 1 ||
-			((m_int_mode == 5 ||
-			//m_int_mode == 13 ||
-			m_int_mode == 15) &&
+		if (m_int_mode == InteractiveMode::Viewport ||
+			((m_int_mode == InteractiveMode::Ruler ||
+			m_int_mode == InteractiveMode::Magnet) &&
 			state.m_key_alt) ||
-			((m_int_mode == 6 ||
-			m_int_mode == 9 ||
-			m_int_mode == 11 ||
-			m_int_mode == 14) &&
+			((m_int_mode == InteractiveMode::EditRulerPoint ||
+			m_int_mode == InteractiveMode::MoveRuler ||
+			m_int_mode == InteractiveMode::RulerLockPoint ||
+			m_int_mode == InteractiveMode::RulerDelPoint) &&
 			!found_rp))
 		{
 			old_mouse_X = mp.x();
 			old_mouse_Y = mp.y();
 			m_pick = true;
 		}
-		else if (m_int_mode == 2 || m_int_mode == 7)
+		else if (m_int_mode == InteractiveMode::BrushSelect ||
+			m_int_mode == InteractiveMode::BrushRuler)
 		{
 			old_mouse_X = mp.x();
 			old_mouse_Y = mp.y();
@@ -10897,8 +10897,8 @@ void RenderView::ProcessMouse(MouseState& state)
 			RefreshGL(15);
 		}
 
-		if (m_int_mode == 10 ||
-			m_int_mode == 12)
+		if (m_int_mode == InteractiveMode::Grow ||
+			m_int_mode == InteractiveMode::GrowRuler)
 		{
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
@@ -10906,13 +10906,13 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
-			if (m_int_mode == 12 && cur_vd)
+			if (m_int_mode == InteractiveMode::GrowRuler && cur_vd)
 				cur_vd->AddEmptyLabel(0, false);
 			m_force_clear = true;
 			m_grow_on = true;
 		}
 
-		if (m_int_mode == 13 &&
+		if (m_int_mode == InteractiveMode::Pencil &&
 			!state.m_key_alt)
 		{
 			//add one point to a ruler
@@ -10941,7 +10941,7 @@ void RenderView::ProcessMouse(MouseState& state)
 	//mouse button up operations
 	if (state.m_mouse_left_up)
 	{
-		if (m_int_mode == 1)
+		if (m_int_mode == InteractiveMode::Viewport)
 		{
 			//pick stuff
 			if (m_pick)
@@ -10955,7 +10955,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				return;
 			}
 		}
-		else if (m_int_mode == 2)
+		else if (m_int_mode == InteractiveMode::BrushSelect)
 		{
 			fluo::ValueCollection vc;
 			//segment volumes
@@ -10963,7 +10963,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (glbin_vol_selector.GetAutoThreshold())
 				vc.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
-			m_int_mode = 4;
+			m_int_mode = InteractiveMode::BrushSelectUpdate;
 			m_force_clear = true;
 			RefreshGL(17);
 			vc.insert({ gstSelUndo, gstBrushThreshold });
@@ -10974,7 +10974,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_current.mainframe->UpdateProps(vc);
 			return;
 		}
-		else if (m_int_mode == 5 &&
+		else if (m_int_mode == InteractiveMode::Ruler &&
 			!state.m_key_alt)
 		{
 			//add one point to a ruler
@@ -10983,12 +10983,12 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
-		else if (m_int_mode == 9 ||
-			m_int_mode == 11)
+		else if (m_int_mode == InteractiveMode::MoveRuler ||
+			m_int_mode == InteractiveMode::RulerLockPoint)
 		{
 			glbin_ruler_handler.SetPoint(0);
 		}
-		else if (m_int_mode == 7)
+		else if (m_int_mode == InteractiveMode::BrushRuler)
 		{
 			fluo::ValueCollection vc;
 			//segment volume, calculate center, add ruler point
@@ -10996,11 +10996,11 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (glbin_vol_selector.GetAutoThreshold())
 				vc.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
-			if (glbin_ruler_handler.GetType() == 3)
+			if (glbin_ruler_handler.GetRulerMode() == flrd::RulerMode::Probe)
 				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
 			else
 				glbin_ruler_handler.AddPaintRulerPoint();
-			m_int_mode = 8;
+			m_int_mode = InteractiveMode::BrushRulerUpdate;
 			m_force_clear = true;
 			RefreshGL(19);
 			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
@@ -11011,14 +11011,14 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_current.mainframe->UpdateProps(vc);
 			return;
 		}
-		else if (m_int_mode == 10 ||
-			m_int_mode == 12)
+		else if (m_int_mode == InteractiveMode::Grow ||
+			m_int_mode == InteractiveMode::GrowRuler)
 		{
 			//glbin_vol_selector.PushMask();
 			m_grow_on = false;
 			return;
 		}
-		else if (m_int_mode == 13 &&
+		else if (m_int_mode == InteractiveMode::Pencil &&
 			!state.m_key_alt)
 		{
 			if (glbin_ruler_handler.GetAutoRelax())
@@ -11030,11 +11030,11 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
-		else if ((m_int_mode == 6 ||
-			m_int_mode == 15) &&
+		else if ((m_int_mode == InteractiveMode::EditRulerPoint ||
+			m_int_mode == InteractiveMode::Magnet) &&
 			!state.m_key_alt)
 		{
-			if (m_int_mode == 6)
+			if (m_int_mode == InteractiveMode::EditRulerPoint)
 			{
 				glbin_ruler_handler.ClearMagStroke();
 				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
@@ -11047,9 +11047,9 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
 		}
-		else if (m_int_mode == 16)
+		else if (m_int_mode == InteractiveMode::CropFrame)
 		{
-			m_int_mode = 1;
+			m_int_mode = InteractiveMode::Viewport;
 			m_crop_type = 0;
 		}
 	}
@@ -11060,18 +11060,16 @@ void RenderView::ProcessMouse(MouseState& state)
 	}
 	if (state.m_mouse_right_up)
 	{
-		if (m_int_mode == 1)
+		if (m_int_mode == InteractiveMode::Viewport)
 		{
 			//return;
 		}
-		if (m_int_mode == 5 &&
+		if (m_int_mode == InteractiveMode::Ruler &&
 			!state.m_key_alt)
 		{
 			if (glbin_ruler_handler.GetRulerFinished())
 			{
-				m_int_mode = 1;
-				//SetIntMode(1);
-				//glbin_ruler_handler.SetMode(0);
+				m_int_mode = InteractiveMode::Viewport;
 			}
 			else
 			{
@@ -11094,7 +11092,7 @@ void RenderView::ProcessMouse(MouseState& state)
 	if (state.m_mouse_drag)
 	{
 		//crop
-		if (m_int_mode == 16)
+		if (m_int_mode == InteractiveMode::CropFrame)
 		{
 			ChangeCropFrame(mp);
 			RefreshGL(23);
@@ -11110,20 +11108,20 @@ void RenderView::ProcessMouse(MouseState& state)
 
 		flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
 		bool hold_old = false;
-		if (m_int_mode == 1 ||
-			((m_int_mode == 5  ||
-			m_int_mode == 13 ||
-			m_int_mode == 15) &&
+		if (m_int_mode == InteractiveMode::Viewport ||
+			((m_int_mode == InteractiveMode::Ruler  ||
+			m_int_mode == InteractiveMode::Pencil ||
+			m_int_mode == InteractiveMode::Magnet) &&
 			state.m_key_alt) ||
-			((m_int_mode == 9 ||
-			m_int_mode == 10 ||
-			m_int_mode == 11 ||
-			m_int_mode == 12 ||
-			m_int_mode == 14) &&
+			((m_int_mode == InteractiveMode::MoveRuler ||
+			m_int_mode == InteractiveMode::Grow ||
+			m_int_mode == InteractiveMode::RulerLockPoint ||
+			m_int_mode == InteractiveMode::GrowRuler ||
+			m_int_mode == InteractiveMode::RulerDelPoint) &&
 			!p0) ||
-			((m_int_mode == 6 ||
-			m_int_mode == 15 ||
-			m_int_mode == 13) &&
+			((m_int_mode == InteractiveMode::EditRulerPoint ||
+			m_int_mode == InteractiveMode::Magnet ||
+			m_int_mode == InteractiveMode::Pencil) &&
 			(state.m_key_ctrl ||
 			state.m_mouse_middle_is_down ||
 			state.m_mouse_right_is_down)))
@@ -11138,8 +11136,8 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				if (state.m_mouse_left_is_down &&
 					!state.m_key_ctrl &&
-					m_int_mode != 10 &&
-					m_int_mode != 12)
+					m_int_mode != InteractiveMode::Grow &&
+					m_int_mode != InteractiveMode::GrowRuler)
 				{
 					fluo::Quaternion q_delta = Trackball(
 						mp.x() - old_mouse_X, old_mouse_Y - mp.y());
@@ -11235,12 +11233,13 @@ void RenderView::ProcessMouse(MouseState& state)
 				}
 			}
 		}
-		else if (m_int_mode == 2 || m_int_mode == 7)
+		else if (m_int_mode == InteractiveMode::BrushSelect ||
+			m_int_mode == InteractiveMode::BrushRuler)
 		{
 			m_paint_enable = true;
 			RefreshGL(27);
 		}
-		else if (m_int_mode == 3)
+		else if (m_int_mode == InteractiveMode::Clipplane)
 		{
 			if (old_mouse_X != -1 &&
 				old_mouse_Y != -1 &&
@@ -11257,13 +11256,14 @@ void RenderView::ProcessMouse(MouseState& state)
 				}
 			}
 		}
-		else if (m_int_mode == 6 || m_int_mode == 9)
+		else if (m_int_mode == InteractiveMode::EditRulerPoint ||
+			m_int_mode == InteractiveMode::MoveRuler)
 		{
 			bool rval = false;
-			if (m_int_mode == 6)
+			if (m_int_mode == InteractiveMode::EditRulerPoint)
 				rval = glbin_ruler_handler.EditPoint(
 					mp.x(), mp.y(), state.m_key_alt);
-			else if (m_int_mode == 9)
+			else if (m_int_mode == InteractiveMode::MoveRuler)
 				rval = glbin_ruler_handler.MoveRuler(
 					mp.x(), mp.y());
 			if (rval)
@@ -11273,7 +11273,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.SetEdited(true);
 			}
 		}
-		else if (m_int_mode == 13 && !state.m_key_alt)
+		else if (m_int_mode == InteractiveMode::Pencil &&
+			!state.m_key_alt)
 		{
 			double dist = glbin_settings.m_pencil_dist;
 			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
@@ -11284,7 +11285,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_current.mainframe->UpdateProps({ gstRulerList });
 			}
 		}
-		else if (m_int_mode == 15 && !state.m_key_alt)
+		else if (m_int_mode == InteractiveMode::Magnet &&
+			!state.m_key_alt)
 		{
 			double dist = glbin_settings.m_pencil_dist;
 			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
@@ -11325,7 +11327,8 @@ void RenderView::ProcessMouse(MouseState& state)
 		}
 		else
 		{
-			if (m_int_mode == 2 || m_int_mode == 7)
+			if (m_int_mode == InteractiveMode::BrushSelect ||
+				m_int_mode == InteractiveMode::BrushRuler)
 			{
 				ChangeBrushSize(wheel, state.m_key_ctrl);
 			}

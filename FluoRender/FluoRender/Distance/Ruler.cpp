@@ -43,7 +43,7 @@ Ruler::Ruler()
 	m_name = L"Ruler " + std::to_wstring(m_num);
 	m_disp = true;
 	m_tform.load_identity();
-	m_ruler_type = 0;
+	m_mode = RulerMode::None;
 	m_finished = false;
 	m_use_color = false;
 
@@ -259,14 +259,14 @@ pRulerPoint Ruler::FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t&
 	return nullptr;
 }
 
-int Ruler::GetRulerType()
+RulerMode Ruler::GetRulerMode()
 {
-	return m_ruler_type;
+	return m_mode;
 }
 
-void Ruler::SetRulerType(int type)
+void Ruler::SetRulerMode(RulerMode type)
 {
-	m_ruler_type = type;
+	m_mode = type;
 }
 
 bool Ruler::GetFinished()
@@ -326,8 +326,8 @@ double Ruler::GetAngle()
 	if (m_ruler.empty())
 		return angle;
 
-	if (m_ruler_type == 0 ||
-		m_ruler_type == 3)
+	if (m_mode == RulerMode::Line ||
+		m_mode == RulerMode::Probe)
 	{
 		if (m_ruler[0].size() >= 2)
 		{
@@ -340,7 +340,7 @@ double Ruler::GetAngle()
 			angle = angle < 0.0 ? angle + 180.0 : angle;
 		}
 	}
-	else if (m_ruler_type == 4)
+	else if (m_mode == RulerMode::Protractor)
 	{
 		if (m_ruler[0].size() >= 3)
 		{
@@ -380,28 +380,28 @@ bool Ruler::AddPoint(fluo::Point &point)
 		m_ruler.back().push_back(
 			std::make_shared<RulerPoint>(RulerPoint(point, m_work_time)));
 	}
-	else if (m_ruler_type == 2 &&
+	else if (m_mode == RulerMode::Locator &&
 		m_ruler.back().size() == 1)
 		return false;
-	else if ((m_ruler_type == 0 ||
-		m_ruler_type == 3) &&
+	else if ((m_mode == RulerMode::Line ||
+		m_mode == RulerMode::Probe) &&
 		m_ruler.back().size() == 2)
 		return false;
-	else if (m_ruler_type == 4 &&
+	else if (m_mode == RulerMode::Protractor &&
 		m_ruler.back().size() == 3)
 		return false;
 	else
 		m_ruler.back().push_back(
 			std::make_shared<RulerPoint>(RulerPoint(point, m_work_time)));
 
-	if (m_ruler_type == 2 &&
+	if (m_mode == RulerMode::Locator &&
 		m_ruler.back().size() == 1)
 		m_finished = true;
-	else if ((m_ruler_type == 0 ||
-		m_ruler_type == 3) &&
+	else if ((m_mode == RulerMode::Line ||
+		m_mode == RulerMode::Probe) &&
 		m_ruler.back().size() == 2)
 		m_finished = true;
-	else if (m_ruler_type == 4 &&
+	else if (m_mode == RulerMode::Protractor &&
 		m_ruler.back().size() == 3)
 		m_finished = true;
 	return true;
@@ -412,7 +412,7 @@ bool Ruler::AddPointAfterId(
 	std::set<unsigned int> &cid,
 	std::set<unsigned int> &bid)
 {
-	if (m_ruler_type != 1)
+	if (m_mode != RulerMode::Polyline)
 		return false;
 	if (m_ruler.empty())
 	{
@@ -480,7 +480,7 @@ bool Ruler::AddBranch(pRulerPoint point)
 {
 	if (!point ||
 		m_ruler.empty() ||
-		m_ruler_type != 1)
+		m_mode != RulerMode::Polyline)
 		return false;
 
 	//add branch
@@ -718,7 +718,7 @@ void Ruler::GetProfileMaxValue(double &val, double &dist)
 
 void Ruler::FinishEllipse(fluo::Vector view)
 {
-	if (m_ruler_type != 5 ||
+	if (m_mode != RulerMode::Ellipse ||
 		m_ruler.empty() ||
 		m_ruler.back().size() != 2)
 		return;

@@ -134,20 +134,20 @@ void BrushDefault::Read()
 	{
 		flrd::BrushRadiusSet radius_set;
 		//select brush
-		radius_set.type = 2;
+		radius_set.type = flrd::SelectMode::Append;
 		radius_set.radius1 = 10;
 		radius_set.radius2 = 30;
 		radius_set.use_radius2 = true;
 		radius_set.iter_num = m_iter_num;
 		m_brush_radius_sets.push_back(radius_set);
 		//erase
-		radius_set.type = 3;
+		radius_set.type = flrd::SelectMode::Eraser;
 		m_brush_radius_sets.push_back(radius_set);
 		//diffuse brush
-		radius_set.type = 4;
+		radius_set.type = flrd::SelectMode::Diffuse;
 		m_brush_radius_sets.push_back(radius_set);
 		//solid brush
-		radius_set.type = 8;
+		radius_set.type = flrd::SelectMode::Solid;
 		radius_set.use_radius2 = false;
 		m_brush_radius_sets.push_back(radius_set);
 	}

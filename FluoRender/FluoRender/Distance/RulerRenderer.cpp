@@ -162,7 +162,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				c = ruler->GetColor();
 			else
 				c = text_color;
-			if (ruler->GetRulerType() == 5)
+			if (ruler->GetRulerMode() == RulerMode::Ellipse)
 			{
 				int np = ruler->GetNumPoint();
 				if (np == 1 && draw_square)
@@ -245,7 +245,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 					}
 				}
 			}
-			else if (ruler->GetRulerType() == 1 &&
+			else if (ruler->GetRulerMode() == RulerMode::Polyline &&
 				ruler->GetNumBranch() > 1)
 			{
 				//multiple branches
@@ -346,7 +346,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 						num += 2;
 					}
 				}
-				if (ruler->GetRulerType() == 4 &&
+				if (ruler->GetRulerMode() == RulerMode::Protractor &&
 					ruler->GetNumPoint() >= 3 &&
 					draw_line)
 				{

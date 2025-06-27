@@ -87,6 +87,27 @@ namespace flrd
 {
 	class CelpList;
 }
+
+enum class InteractiveMode
+{
+	None,
+	Viewport,			//1-normal viewing
+	BrushSelect,		//2-painting
+	BrushSelectUpdate,	//4-one-time rendering update in painting mode
+	Clipplane,			//3-rotate clipping planes
+	Ruler,				//5-ruler mode
+	EditRulerPoint,		//6-edit ruler by moving point
+	BrushRuler,			//7-paint with locator
+	BrushRulerUpdate,	//8-same as 4, but for paint ruler mode
+	MoveRuler,			//9-move ruler
+	Grow,				//10-grow, click and hold to activate
+	GrowRuler,			//12-grow with ruler
+	RulerDelPoint,		//14-delete ruler point
+	RulerLockPoint,		//11-lock ruler point for relaxing
+	Pencil,				//13-pencil with multipoint ruler
+	Magnet,				//15-edit ruler by magnet
+	CropFrame,			//16-edit crop frame
+};
 class RenderView : public TreeLayer
 {
 public:
@@ -327,8 +348,8 @@ public:
 	void SetMeshPopDirty() { m_md_pop_dirty = true; }
 
 	//inteactive mode selection
-	int GetIntMode() { return m_int_mode; }
-	void SetIntMode(int mode);
+	InteractiveMode GetIntMode() { return m_int_mode; }
+	void SetIntMode(InteractiveMode val);
 
 	//set use 2d rendering results
 	void SetPaintUse2d(bool use2d);
@@ -554,23 +575,7 @@ private:
 	bool m_intp;
 
 	//interactive modes
-	int m_int_mode;  //interactive mode
-					 //1-normal viewing
-					 //2-painting
-					 //3-rotate clipping planes
-					 //4-one-time rendering update in painting mode
-					 //5-ruler mode
-					 //6-edit ruler by moving point
-					 //7-paint with locator
-					 //8-same as 4, but for paint ruler mode
-					 //9-move ruler
-					 //10-grow, click and hold to activate
-					 //11-lock ruler point for relaxing
-					 //12-grow with ruler
-					 //13-pencil with multipoint ruler
-					 //14-delete ruler point
-					 //15-edit ruler by magnet
-					 //16-edit crop frame
+	InteractiveMode m_int_mode;
 	int m_crop_type;
 	bool m_force_clear;
 	bool m_grow_on;//flag for grow is currently on for idle events

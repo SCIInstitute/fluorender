@@ -1848,7 +1848,7 @@ bool ComponentAnalyzer::GetRulerListFromCelp(RulerList& rulerlist)
 	double sy = list->sy;
 	double sz = list->sz;
 	Ruler ruler;
-	ruler.SetRulerType(1);
+	ruler.SetRulerMode(RulerMode::Polyline);
 	fluo::Point pt;
 	for (auto it = list->begin();
 		it != list->end(); ++it)

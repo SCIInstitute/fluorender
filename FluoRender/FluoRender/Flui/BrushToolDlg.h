@@ -43,6 +43,11 @@ struct GridData
 	double wsize;
 };
 
+namespace flrd
+{
+	enum class SelectMode;
+}
+enum class InteractiveMode;
 class BrushToolDlg : public TabbedPanel
 {
 public:
@@ -170,6 +175,8 @@ private:
 	void SetOutput(const GridData& data, const wxString& unit);
 	void CopyData();
 	void PasteData();
+
+	void SetBrushMode(InteractiveMode int_mode, flrd::SelectMode sel_mode, int shortcut, bool estimate);
 
 	wxWindow* CreateToolPage(wxWindow* parent);
 	wxWindow* CreateListPage(wxWindow* parent);

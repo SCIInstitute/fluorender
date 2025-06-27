@@ -40,6 +40,7 @@ class VolumeData;
 
 namespace flrd
 {
+	enum class RulerMode;
 	class Ruler;
 	class RulerPoint;
 	class RulerList;
@@ -52,15 +53,8 @@ namespace flrd
 
 		//handle group
 		void NewGroup();
-		void SetGroup(unsigned int group)
-		{
-			m_group = group;
-		}
-
-		unsigned int GetGroup()
-		{
-			return m_group;
-		}
+		void SetGroup(unsigned int group) { m_group = group; }
+		unsigned int GetGroup() { return m_group; }
 
 		void GroupRulers(const std::set<int>& rulers);
 
@@ -74,24 +68,12 @@ namespace flrd
 
 		void GetRulerList(const std::set<int>& rulers, flrd::RulerList& list);
 
-		void SetType(int type)
-		{
-			m_type = type;
-		}
+		void SetRulerMode(RulerMode val) { m_mode = val; }
 
-		int GetType()
-		{
-			return m_type;
-		}
+		RulerMode GetRulerMode() { return m_mode; }
 
-		void SetEdited(bool val)
-		{
-			m_edited = val;
-		}
-		bool GetEdited()
-		{
-			return m_edited;
-		}
+		void SetEdited(bool val) { m_edited = val; }
+		bool GetEdited() { return m_edited; }
 
 		//display
 		void ToggleDisplay(const std::set<int> list);
@@ -103,14 +85,8 @@ namespace flrd
 		bool FindClosestRulerBranch(double mx, double my);
 		bool FindClosestRulerBranchPoint(double mx, double my);
 
-		void SetPoint(const std::shared_ptr<RulerPoint>& point)
-		{
-			m_point = point;
-		}
-		RulerPoint* GetPoint()
-		{
-			return m_point.get();
-		}
+		void SetPoint(const std::shared_ptr<RulerPoint>& point) { m_point = point; }
+		RulerPoint* GetPoint() { return m_point.get(); }
 		void DeletePoint();
 
 		RulerPoint* GetEllipsePoint(int index);
@@ -172,18 +148,9 @@ namespace flrd
 
 		std::wstring PrintRulers(bool h);//h-if prints hierarchy
 
-		void SetFsize(int ival)
-		{
-			m_fsize = ival;
-		}
-		void SetSampleType(int type)
-		{
-			m_sample_type = type;
-		}
-		void SetStepLength(double dval)
-		{
-			m_step_length = dval;
-		}
+		void SetFsize(int ival) { m_fsize = ival; }
+		void SetSampleType(int type) { m_sample_type = type; }
+		void SetStepLength(double dval) { m_step_length = dval; }
 
 		//magnet mode
 		bool GetRedistLength() { return m_redist_len; }
@@ -205,8 +172,7 @@ namespace flrd
 		size_t m_mag_branch;
 		size_t m_mag_branch_point;
 		bool m_redist_len;
-		int m_type;	//0: 2 point; 1: multi point; 2:locator; 3: probe;
-					//4: protractor; 5: ellipse
+		RulerMode m_mode;
 		bool m_edited;
 
 		//find moving distance
@@ -376,8 +342,6 @@ namespace flrd
 
 		//snap ruler points to magnet stroke
 		RulerPoint* get_closest_point(fluo::Point& p);
-
-	private:
 	};
 
 }

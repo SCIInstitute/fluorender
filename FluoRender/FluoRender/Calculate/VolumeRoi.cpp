@@ -144,7 +144,8 @@ bool VolumeRoi::GetInfo(
 
 void VolumeRoi::Run()
 {
-	if (!m_ruler || m_ruler->GetRulerType() != 5)//only ellipse ruler is supported
+	if (!m_ruler ||
+		m_ruler->GetRulerMode() != RulerMode::Ellipse)//only ellipse ruler is supported
 		return;
 	if (!CheckBricks())
 		return;

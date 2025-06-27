@@ -256,9 +256,9 @@ void Camera2Ruler::Run()
 		r0->SetColor(ruler->GetColor());
 		int rn = ruler->GetNumPoint();
 		if (rn > 1)
-			r0->SetRulerType(1);
+			r0->SetRulerMode(RulerMode::Polyline);
 		else
-			r0->SetRulerType(2);
+			r0->SetRulerMode(RulerMode::Locator);
 		for (int i = 0; i < rn; ++i)
 		{
 			if (use_t)

@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 
+namespace flrd
+{
+	enum class SelectMode;
+}
 class GlobalStates
 {
 public:
@@ -45,8 +49,8 @@ public:
 	bool m_mouse_in_aov_slider = false;
 	bool m_clip_display = false;	//show clipping planes in view
 
-	int m_brush_mode_toolbar = false;	//brush state set from ui
-	int m_brush_mode_shortcut = false;	//brush state set by shortcut
+	flrd::SelectMode m_brush_mode_toolbar;	//brush state set from ui
+	int m_brush_mode_shortcut = 0;	//brush state set by shortcut
 
 	bool m_modal_shown = false;	//a modal dialog is currently shown, disable keyboard shortcuts
 

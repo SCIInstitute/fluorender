@@ -507,24 +507,22 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
-		int mode = view ? view->GetIntMode() : 0;
+		int int_mode = view ? view->GetIntMode() : 0;
+		int sel_mode = glbin_vol_selector.GetSelectMode();
+		int rul_mode = glbin_ruler_handler.GetRulerMode();
 
-		bval = mode == 5;
-		ival = glbin_ruler_handler.GetType();
-		m_toolbar->ToggleTool(ID_RulerLine, bval && ival == 0);
-		m_toolbar->ToggleTool(ID_RulerPolyline, bval && ival == 1);
-		m_toolbar->ToggleTool(ID_RulerPencil, mode == 13);
-		m_toolbar->ToggleTool(ID_RulerEdit, mode == 6);
-		m_toolbar->ToggleTool(ID_RulerDeletePoint, mode == 14);
-		m_toolbar2->ToggleTool(ID_BrushRuler, mode == 7);
+		m_toolbar->ToggleTool(ID_RulerLine, int_mode == 5 && rul_mode == 0);
+		m_toolbar->ToggleTool(ID_RulerPolyline, int_mode == 5 && rul_mode == 1);
+		m_toolbar->ToggleTool(ID_RulerPencil, int_mode == 13);
+		m_toolbar->ToggleTool(ID_RulerEdit, int_mode == 6);
+		m_toolbar->ToggleTool(ID_RulerDeletePoint, int_mode == 14);
 
-		bval = mode == 2 || mode == 10;
-		ival = glbin_vol_selector.GetMode();
-		m_toolbar2->ToggleTool(ID_BrushGrow, bval && ival == 9);
-		m_toolbar2->ToggleTool(ID_BrushAppend, bval && ival == 2);
-		m_toolbar2->ToggleTool(ID_BrushComp, bval && ival == 10);
-		m_toolbar2->ToggleTool(ID_BrushDiffuse, bval && ival == 4);
-		m_toolbar2->ToggleTool(ID_BrushUnselect, bval && ival == 3);
+		m_toolbar2->ToggleTool(ID_BrushRuler, int_mode == 7);
+		m_toolbar2->ToggleTool(ID_BrushGrow, int_mode == 10);
+		m_toolbar2->ToggleTool(ID_BrushAppend, sel_mode == 2);
+		m_toolbar2->ToggleTool(ID_BrushComp, sel_mode == 10);
+		m_toolbar2->ToggleTool(ID_BrushDiffuse, sel_mode == 4);
+		m_toolbar2->ToggleTool(ID_BrushUnselect, sel_mode == 3);
 	}
 }
 
@@ -674,12 +672,12 @@ void TreePanel::RulerLine()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	int int_mode = view->GetIntMode();
+	int rul_mode = glbin_ruler_handler.GetRulerMode();
+	//bool bval = mode == 5 || mode == 13;
+	//int ival = glbin_ruler_handler.GetType();
 
-	if (bval && ival == 1)
-		glbin_ruler_handler.FinishRuler();
+	glbin_ruler_handler.FinishRuler();
 
 	if (bval && ival == 0)
 	{

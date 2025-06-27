@@ -39,9 +39,24 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flrd
 {
+	enum class SelectMode
+	{
+		None,			//0-no selection
+		SingleSelect,	//1-select;
+		Append,			//2-append;
+		Eraser,			//3-unselect;
+		Diffuse,		//4-diffuse;
+		Flood,			//5-flood;
+		Clear,			//6-unselect all;
+		SelectAll,		//7-select all;
+		Solid,			//8-solid;
+		Grow,			//9-grow from point;
+		Segment,		//10-select and gen comps
+	};
+
 	struct BrushRadiusSet
 	{
-		int type;//brush type
+		SelectMode type;//brush type
 		double radius1;//radius 1
 		double radius2;//radius 2
 		bool use_radius2;//use radius 2
@@ -58,8 +73,8 @@ namespace flrd
 
 		void SetVolume(const std::shared_ptr<VolumeData>& vd) { m_vd = vd; }
 		//modes
-		void SetMode(int mode);
-		int GetMode() { return m_mode_ext; }
+		void SetSelectMode(SelectMode mode);
+		SelectMode GetSelectMode() { return m_mode; }
 		//init mask
 		void SetInitMask(int val) { m_init_mask = val; }
 		int GetInitMask() { return m_init_mask; }
@@ -173,7 +188,7 @@ namespace flrd
 		{
 			if (!value) return;
 
-			if (m_mode == 8 || !m_use_brush_radius2)
+			if (m_mode == SelectMode::Solid || !m_use_brush_radius2)
 			{
 				double delta = value * m_brush_radius1 / 1000.0;
 				m_brush_radius1 += delta;
@@ -221,9 +236,10 @@ namespace flrd
 		}
 		void UpdateBrushRadiusSet()
 		{
-			int mode = m_mode;
-			if (mode == 1 || mode == 10)
-				mode = 2;
+			SelectMode mode = m_mode;
+			if (mode == SelectMode::SingleSelect ||
+				mode == SelectMode::Segment)
+				mode = SelectMode::Append;
 			for (auto& it : m_brush_radius_sets)
 			{
 				if (it.type == mode)
@@ -292,12 +308,7 @@ namespace flrd
 		double m_mvmat[16];	//modelview matrix
 		double m_prjmat[16];//projection matrix
 		int m_iter_num;		//iteration number for growing
-		int m_mode_ext;		//segmentation modes
-							//0-no selection
-							//1-select; 2-append; 3-unselect; 4-diffuse;
-							//5-flood; 6-unselect all; 7-select all; 8-solid;
-							//9-grow from point; 10-select and gen comps
-		int m_mode;			//last mode if m_mode_ext is set to 0
+		SelectMode m_mode;	//selection modes
 		int m_init_mask;	//0; 1-init only; 2-diffuse only; 3-init & diffuse
 		bool m_use2d;
 
