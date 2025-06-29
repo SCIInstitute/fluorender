@@ -174,7 +174,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 						r = rhdl->AddRuler(i, t);
 						if (c < names.size())
 							r->SetName(s2ws(names[c]));
-						r->SetRulerType(rst == -2 ? 2 : 1);
+						r->SetRulerMode(rst == -2 ? flrd::RulerMode::Locator : flrd::RulerMode::Polyline);
 						rlist.push_back(r);
 					}
 					else if (r)

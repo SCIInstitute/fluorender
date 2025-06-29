@@ -254,7 +254,7 @@ void RulerListCtrl::StartEdit(int type, bool use_color, const fluo::Color& color
 	GetSubItemRect(item, ColorCol, rect);
 	m_color_picker->SetPosition(rect.GetTopLeft());
 	m_color_picker->SetSize(rect.GetSize());
-	if (type == 2)
+	if (type == 3)
 	{
 		//locator
 		GetSubItemRect(item, CenterCol, rect);
@@ -848,27 +848,27 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
-		int mode = view ? view->GetIntMode() : 0;
-		bval = mode == 5;
-		ival = glbin_ruler_handler.GetType();
+		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::None;
+		//bval = mode == 5;
+		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 		//toolbar1
-		m_toolbar1->ToggleTool(ID_RulerLocator, bval && ival == 2);
-		m_toolbar1->ToggleTool(ID_RulerProbe, bval && ival == 3);
-		m_toolbar1->ToggleTool(ID_RulerLine, bval && ival == 0);
-		m_toolbar1->ToggleTool(ID_RulerAngle, bval && ival == 4);
-		m_toolbar1->ToggleTool(ID_RulerEllipse, bval && ival == 5);
-		m_toolbar1->ToggleTool(ID_RulerPolyline, bval && ival == 1);
-		m_toolbar1->ToggleTool(ID_RulerPencil,mode == 13);
-		m_toolbar1->ToggleTool(ID_RulerGrow, mode == 12);
+		m_toolbar1->ToggleTool(ID_RulerLocator, rul_mode == flrd::RulerMode::Locator);
+		m_toolbar1->ToggleTool(ID_RulerProbe, rul_mode == flrd::RulerMode::Probe);
+		m_toolbar1->ToggleTool(ID_RulerLine, rul_mode == flrd::RulerMode::Line);
+		m_toolbar1->ToggleTool(ID_RulerAngle, rul_mode == flrd::RulerMode::Protractor);
+		m_toolbar1->ToggleTool(ID_RulerEllipse, rul_mode == flrd::RulerMode::Ellipse);
+		m_toolbar1->ToggleTool(ID_RulerPolyline, rul_mode == flrd::RulerMode::Polyline);
+		m_toolbar1->ToggleTool(ID_RulerPencil,int_mode == InteractiveMode::Pencil);
+		m_toolbar1->ToggleTool(ID_RulerGrow, int_mode == InteractiveMode::GrowRuler);
 		//toolbar2
-		m_toolbar2->ToggleTool(ID_RulerMoveBtn, mode == 9);
-		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, mode == 6);
+		m_toolbar2->ToggleTool(ID_RulerMoveBtn, int_mode == InteractiveMode::MoveRuler);
+		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, int_mode == InteractiveMode::EditRulerPoint);
 		bool bval2 = glbin_ruler_handler.GetRedistLength();
-		m_toolbar2->ToggleTool(ID_MagnetBtn, mode == 15 && !bval2);
-		m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, mode == 15 && bval2);
-		m_toolbar2->ToggleTool(ID_LockBtn, mode == 11);
+		m_toolbar2->ToggleTool(ID_MagnetBtn, int_mode == InteractiveMode::Magnet && !bval2);
+		m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, int_mode == InteractiveMode::Magnet && bval2);
+		m_toolbar2->ToggleTool(ID_LockBtn, int_mode == InteractiveMode::RulerLockPoint);
 		//toolbar3
-		m_toolbar3->ToggleTool(ID_RulerDelBtn, mode == 14);
+		m_toolbar3->ToggleTool(ID_RulerDelBtn, int_mode == InteractiveMode::RulerDelPoint);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerList))
@@ -1146,7 +1146,7 @@ void MeasureDlg::SetCurrentRuler()
 	if (!ruler || !view)
 		return;
 	ruler->SetName(m_ruler_list->m_name.ToStdWstring());
-	if (ruler->GetRulerType() == 2)
+	if (ruler->GetRulerMode() == flrd::RulerMode::Locator)
 	{
 		ruler->SetWorkTime(view->m_tseq_cur_num);
 		ruler->SetPoint(0, m_ruler_list->m_center);
@@ -1178,21 +1178,23 @@ void MeasureDlg::Locator()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (bval && ival == 2)
+	if (bval && rul_mode == flrd::RulerMode::Locator)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		view->SetIntMode(5);
-		glbin_ruler_handler.SetType(2);
+		view->SetIntMode(InteractiveMode::Ruler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Locator);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1203,21 +1205,23 @@ void MeasureDlg::Probe()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (bval && ival == 3)
+	if (bval && rul_mode == flrd::RulerMode::Probe)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		view->SetIntMode(5);
-		glbin_ruler_handler.SetType(3);
+		view->SetIntMode(InteractiveMode::Ruler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Probe);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1228,21 +1232,23 @@ void MeasureDlg::Ruler()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (bval && ival == 0)
+	if (bval && rul_mode == flrd::RulerMode::Line)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		view->SetIntMode(5);
-		glbin_ruler_handler.SetType(0);
+		view->SetIntMode(InteractiveMode::Ruler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Line);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1253,21 +1259,23 @@ void MeasureDlg::Protractor()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (bval && ival == 4)
+	if (bval && rul_mode == flrd::RulerMode::Protractor)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		view->SetIntMode(5);
-		glbin_ruler_handler.SetType(4);
+		view->SetIntMode(InteractiveMode::Ruler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Protractor);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1278,21 +1286,23 @@ void MeasureDlg::Ellipse()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (bval && ival == 5)
+	if (bval && rul_mode == flrd::RulerMode::Ellipse)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		view->SetIntMode(5);
-		glbin_ruler_handler.SetType(5);
+		view->SetIntMode(InteractiveMode::Ruler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Ellipse);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1303,21 +1313,22 @@ void MeasureDlg::RulerMP()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 	{
-		view->SetIntMode(1);
 		glbin_ruler_handler.FinishRuler();
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		if (mode == 13)
+		if (int_mode == InteractiveMode::Pencil)
 			glbin_ruler_handler.FinishRuler();
-		view->SetIntMode(5);
-		glbin_ruler_handler.SetType(1);
+		view->SetIntMode(InteractiveMode::Ruler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Polyline);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1328,18 +1339,19 @@ void MeasureDlg::Pencil()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int ival = view->GetIntMode();
+	InteractiveMode int_mode = view->GetIntMode();
 
 	glbin_ruler_handler.FinishRuler();
 
-	if (ival == 13)
+	if (int_mode == InteractiveMode::Pencil)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	}
 	else
 	{
-		view->SetIntMode(13);
-		glbin_ruler_handler.SetType(1);
+		view->SetIntMode(InteractiveMode::Pencil);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Polyline);
 	}
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
@@ -1350,19 +1362,20 @@ void MeasureDlg::Grow()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int ival = view->GetIntMode();
+	InteractiveMode int_mode = view->GetIntMode();
 
 	glbin_ruler_handler.FinishRuler();
 
-	if (ival == 12)
+	if (int_mode == InteractiveMode::GrowRuler)
 	{
-		view->SetIntMode(1);
+		view->SetIntMode(InteractiveMode::Viewport);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 		glbin_ruler_renderer.SetDrawText(true);
 	}
 	else
 	{
-		view->SetIntMode(12);
-		glbin_ruler_handler.SetType(1);
+		view->SetIntMode(InteractiveMode::GrowRuler);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Polyline);
 		glbin_ruler_renderer.SetDrawText(false);
 		//reset label volume
 		auto vd = glbin_current.vol_data.lock();
@@ -1383,17 +1396,18 @@ void MeasureDlg::RulerMove()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (mode == 9)
-		view->SetIntMode(1);
+	if (int_mode == InteractiveMode::MoveRuler)
+		view->SetIntMode(InteractiveMode::Viewport);
 	else
-		view->SetIntMode(9);
+		view->SetIntMode(InteractiveMode::MoveRuler);
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
@@ -1403,17 +1417,18 @@ void MeasureDlg::RulerMovePoint()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (mode == 6)
-		view->SetIntMode(1);
+	if (int_mode == InteractiveMode::EditRulerPoint)
+		view->SetIntMode(InteractiveMode::Viewport);
 	else
-		view->SetIntMode(6);
+		view->SetIntMode(InteractiveMode::EditRulerPoint);
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
@@ -1423,19 +1438,20 @@ void MeasureDlg::Magnet()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
 	bool bval2 = glbin_ruler_handler.GetRedistLength();
-	if (mode == 15 && !bval2)
-		view->SetIntMode(1);
+	if (int_mode == InteractiveMode::Magnet && !bval2)
+		view->SetIntMode(InteractiveMode::Viewport);
 	else
 	{
-		view->SetIntMode(15);
+		view->SetIntMode(InteractiveMode::Magnet);
 		glbin_ruler_handler.SetRedistLength(false);
 	}
 
@@ -1447,19 +1463,20 @@ void MeasureDlg::RulerMovePencil()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
 	bool bval2 = glbin_ruler_handler.GetRedistLength();
-	if (mode == 15 && bval2)
-		view->SetIntMode(1);
+	if (int_mode == InteractiveMode::Magnet && bval2)
+		view->SetIntMode(InteractiveMode::Viewport);
 	else
 	{
-		view->SetIntMode(15);
+		view->SetIntMode(InteractiveMode::Magnet);
 		glbin_ruler_handler.SetRedistLength(true);
 	}
 
@@ -1491,17 +1508,18 @@ void MeasureDlg::Lock()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (mode == 11)
-		view->SetIntMode(1);
+	if (int_mode == InteractiveMode::RulerLockPoint)
+		view->SetIntMode(InteractiveMode::Viewport);
 	else
-		view->SetIntMode(11);
+		view->SetIntMode(InteractiveMode::RulerLockPoint);
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
@@ -1537,17 +1555,18 @@ void MeasureDlg::DeletePoint()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	int mode = view->GetIntMode();
-	bool bval = mode == 5 || mode == 13;
-	int ival = glbin_ruler_handler.GetType();
+	InteractiveMode int_mode = view->GetIntMode();
+	bool bval = int_mode == InteractiveMode::Ruler ||
+		int_mode == InteractiveMode::Pencil;
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-	if (bval && ival == 1)
+	if (bval && rul_mode == flrd::RulerMode::Polyline)
 		glbin_ruler_handler.FinishRuler();
 
-	if (mode == 14)
-		view->SetIntMode(1);
+	if (int_mode == InteractiveMode::RulerDelPoint)
+		view->SetIntMode(InteractiveMode::Viewport);
 	else
-		view->SetIntMode(14);
+		view->SetIntMode(InteractiveMode::RulerDelPoint);
 
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
@@ -1962,10 +1981,10 @@ void MeasureDlg::OnSelection(wxListEvent& event)
 	if (!ruler || !ruler->GetDisp())
 		return;
 
-	int type = ruler->GetRulerType();
+	flrd::RulerMode rul_mode = ruler->GetRulerMode();
 	bool use_color = ruler->GetUseColor();
 	fluo::Color color = ruler->GetColor();
-	m_ruler_list->StartEdit(type, use_color, color);
+	m_ruler_list->StartEdit(static_cast<int>(rul_mode), use_color, color);
 	
 	FluoUpdate({ gstRulerTransient, gstRulerInterpolation, gstRulerDisp });
 }

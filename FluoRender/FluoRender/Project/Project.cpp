@@ -2076,7 +2076,7 @@ void Project::SaveRulerList(const std::string &gst_name, int view_index)
 		fconfig->SetPath(path);
 		fconfig->Write("name", ruler->GetName());
 		fconfig->Write("group", ruler->Group());
-		fconfig->Write("type", ruler->GetRulerType());
+		fconfig->Write("type", static_cast<int>(ruler->GetRulerMode()));
 		fconfig->Write("display", ruler->GetDisp());
 		fconfig->Write("transient", ruler->GetTransient());
 		fconfig->Write("time", ruler->GetTransTime());
@@ -2155,7 +2155,7 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 			if (fconfig->Read("group", &ival))
 				ruler->Group(ival);
 			if (fconfig->Read("type", &ival))
-				ruler->SetRulerType(ival);
+				ruler->SetRulerMode(static_cast<flrd::RulerMode>(ival));
 			if (fconfig->Read("display", &bval))
 				ruler->SetDisp(bval);
 			if (fconfig->Read("transient", &bval))

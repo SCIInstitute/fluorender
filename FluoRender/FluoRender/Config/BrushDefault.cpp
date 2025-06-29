@@ -71,6 +71,8 @@ void BrushDefault::Read()
 	if (!f)
 		return;
 
+	int ival;
+
 	if (f->Exists("/brush default"))
 		f->SetPath("/brush default");
 
@@ -117,7 +119,8 @@ void BrushDefault::Read()
 				continue;
 			f->SetPath(str);
 			//type
-			f->Read("type", &(m_brush_radius_sets[i].type));
+			if (f->Read("type", &ival))
+				m_brush_radius_sets[i].type = static_cast<flrd::SelectMode>(ival);
 			//radius 1
 			f->Read("radius1", &(m_brush_radius_sets[i].radius1));
 			//radius 2
@@ -206,7 +209,7 @@ void BrushDefault::Save()
 		std::string str = "/brush default/radius_settings/" + std::to_string(i);
 		f->SetPath(str);
 		//type
-		f->Write("type", radius_set.type);
+		f->Write("type", static_cast<int>(radius_set.type));
 		//radius 1
 		f->Write("radius1", radius_set.radius1);
 		//radius 2

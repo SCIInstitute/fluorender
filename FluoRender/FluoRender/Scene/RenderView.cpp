@@ -9610,7 +9610,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 
 	if (state.m_key_paint)
 	{
-		glbin_states.m_brush_mode_toolbar = 0;
+		glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
 		glbin_states.m_brush_mode_shortcut = 2;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9619,7 +9619,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	}
 	else if (state.m_key_erase)
 	{
-		glbin_states.m_brush_mode_toolbar = 0;
+		glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
 		glbin_states.m_brush_mode_shortcut = 3;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9628,7 +9628,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	}
 	else if (state.m_key_diff)
 	{
-		glbin_states.m_brush_mode_toolbar = 0;
+		glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
 		glbin_states.m_brush_mode_shortcut = 4;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9637,7 +9637,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	}
 	else
 	{
-		if (glbin_states.m_brush_mode_toolbar)
+		if (glbin_states.m_brush_mode_toolbar != flrd::SelectMode::None)
 		{
 			m_paint_display = true;
 			m_draw_brush = true;
@@ -9659,7 +9659,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 			else
 				m_int_mode = InteractiveMode::Viewport;
 
-			glbin_states.m_brush_mode_toolbar = 0;
+			glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
 			glbin_states.m_brush_mode_shortcut = 0;
 			m_paint_display = false;
 			m_draw_brush = false;

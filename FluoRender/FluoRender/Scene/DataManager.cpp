@@ -5034,7 +5034,7 @@ bool TrackGroup::GetMappedRulers(
 				if (ruler_iter == rulers.end())
 				{
 					flrd::Ruler* ruler = new flrd::Ruler();
-					ruler->SetRulerType(1);//multi-point
+					ruler->SetRulerMode(flrd::RulerMode::Polyline);//multi-point
 					ruler->AddPoint(vertex1->GetCenter());
 					ruler->AddPoint(vertex2->GetCenter());
 					ruler->SetTransient(false);

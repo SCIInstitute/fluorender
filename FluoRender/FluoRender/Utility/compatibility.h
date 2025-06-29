@@ -561,16 +561,50 @@ inline std::string GET_NAME(const std::string& pathname)
 
 inline std::wstring GET_PATH(const std::wstring& pathname)
 {
-	std::filesystem::path path(pathname);
-	path /= "";
-	return path.parent_path().wstring();
+	namespace fs = std::filesystem;
+	fs::path result;
+	fs::path path(pathname);
+
+	if (fs::exists(path) && fs::is_directory(path)) {
+		// It's a valid directory → use it as-is
+		result = path;
+	}
+	else {
+		// It's likely a file → use its parent path
+		result = path.parent_path();
+	}
+
+	// Ensure trailing separator
+	std::wstring result_str = result.wstring();
+	if (!result_str.empty() && result_str.back() != fs::path::preferred_separator) {
+		result_str += fs::path::preferred_separator;
+	}
+
+	return result_str;
 }
 
 inline std::string GET_PATH(const std::string& pathname)
 {
-	std::filesystem::path path(pathname);
-	path /= "";
-	return path.parent_path().string();
+	namespace fs = std::filesystem;
+	fs::path result;
+	fs::path path(pathname);
+
+	if (fs::exists(path) && fs::is_directory(path)) {
+		// It's a valid directory → use it as-is
+		result = path;
+	}
+	else {
+		// It's likely a file → use its parent path
+		result = path.parent_path();
+	}
+
+	// Ensure trailing separator
+	std::string result_str = result.string();
+	if (!result_str.empty() && result_str.back() != fs::path::preferred_separator) {
+		result_str += fs::path::preferred_separator;
+	}
+
+	return result_str;
 }
 
 inline bool SEP_PATH_NAME(const std::wstring& pathname, std::wstring& path, std::wstring& name)
