@@ -699,43 +699,43 @@ void BrushToolDlg::BrushRedo()
 
 void BrushToolDlg::BrushGrow()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Grow);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushAppend()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Append);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushComp()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Segment);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushSingle()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::SingleSelect);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushDiffuse()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Diffuse);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushSolid()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Solid);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Solid);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void BrushToolDlg::BrushUnsel()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Eraser);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 

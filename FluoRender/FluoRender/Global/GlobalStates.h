@@ -47,10 +47,10 @@ public:
 	void SetModal(bool bval = true);
 
 	//freehand tool states
-	bool SetBrushMode(flrd::SelectMode mode);
-	bool SetRulerMode(flrd::RulerMode mode);
-	bool SetIntMode(InteractiveMode mode);
-	bool SetMagnet(bool redist);
+	bool ToggleBrushMode(flrd::SelectMode mode);
+	bool ToggleRulerMode(flrd::RulerMode mode);
+	bool ToggleIntMode(InteractiveMode mode);
+	bool ToggleMagnet(bool redist);
 	bool QueryShowBrush();
 
 public:

@@ -60,7 +60,7 @@ void GlobalStates::SetModal(bool bval)
 	m_modal_shown = bval;
 }
 
-bool GlobalStates::SetBrushMode(flrd::SelectMode mode)
+bool GlobalStates::ToggleBrushMode(flrd::SelectMode mode)
 {
 	bool result = false;
 	auto view = glbin_current.render_view.lock();
@@ -97,7 +97,7 @@ bool GlobalStates::SetBrushMode(flrd::SelectMode mode)
 	return result;
 }
 
-bool GlobalStates::SetRulerMode(flrd::RulerMode mode)
+bool GlobalStates::ToggleRulerMode(flrd::RulerMode mode)
 {
 	bool result = false;
 	InteractiveMode int_mode = InteractiveMode::None;
@@ -133,7 +133,7 @@ bool GlobalStates::SetRulerMode(flrd::RulerMode mode)
 	return result;
 }
 
-bool GlobalStates::SetIntMode(InteractiveMode mode)
+bool GlobalStates::ToggleIntMode(InteractiveMode mode)
 {
 	bool result = false;
 	auto view = glbin_current.render_view.lock();
@@ -166,7 +166,7 @@ bool GlobalStates::SetIntMode(InteractiveMode mode)
 	return result;
 }
 
-bool GlobalStates::SetMagnet(bool redist)
+bool GlobalStates::ToggleMagnet(bool redist)
 {
 	bool result = false;
 	auto view = glbin_current.render_view.lock();

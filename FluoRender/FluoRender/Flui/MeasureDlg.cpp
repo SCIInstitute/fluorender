@@ -611,9 +611,12 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_disp_name_chk = new wxCheckBox(page, wxID_ANY, "Name",
 		wxDefaultPosition, wxDefaultSize);
+	m_disp_all_chk = new wxCheckBox(page, wxID_ANY, "All",
+		wxDefaultPosition, wxDefaultSize);
 	m_disp_point_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnDispPointCheck, this);
 	m_disp_line_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnDispLineCheck, this);
 	m_disp_name_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnDispNameCheck, this);
+	m_disp_all_chk->Bind(wxEVT_CHECKBOX, &MeasureDlg::OnDispAllCheck, this);
 	sizer_13->Add(10, 10);
 	sizer_13->Add(st, 0, wxALIGN_CENTER);
 	sizer_13->Add(10, 10);
@@ -622,6 +625,8 @@ wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)
 	sizer_13->Add(m_disp_line_chk, 0, wxALIGN_CENTER);
 	sizer_13->Add(10, 10);
 	sizer_13->Add(m_disp_name_chk, 0, wxALIGN_CENTER);
+	sizer_13->Add(10, 10);
+	sizer_13->Add(m_disp_all_chk, 0, wxALIGN_CENTER);
 	//relax settings
 	wxBoxSizer* sizer_14 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Relax:",
@@ -737,7 +742,8 @@ wxWindow* MeasureDlg::CreateListPage(wxWindow* parent)
 	m_ruler_list->Bind(wxEVT_CONTEXT_MENU, &MeasureDlg::OnContextMenu, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MeasureDlg::OnSelection, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_DESELECTED, &MeasureDlg::OnEndSelection, this);
-	
+	m_ruler_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MeasureDlg::OnAct, this);
+
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(5, 5);
 	sizer_v->Add(sizer2, 0, wxEXPAND);
@@ -943,12 +949,23 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		flrd::Ruler* ruler = glbin_current.GetRuler();
 		if (ruler)
 		{
-			bval = ruler->GetDisplay(0);
-			m_disp_point_chk->SetValue(bval);
-			bval = ruler->GetDisplay(1);
-			m_disp_line_chk->SetValue(bval);
-			bval = ruler->GetDisplay(2);
-			m_disp_name_chk->SetValue(bval);
+			if (ruler->GetDisp())
+			{
+				bval = ruler->GetDisplay(0);
+				m_disp_point_chk->SetValue(bval);
+				bval = ruler->GetDisplay(1);
+				m_disp_line_chk->SetValue(bval);
+				bval = ruler->GetDisplay(2);
+				m_disp_name_chk->SetValue(bval);
+				m_disp_all_chk->SetValue(true);
+			}
+			else
+			{
+				m_disp_all_chk->SetValue(false);
+				m_disp_point_chk->SetValue(false);
+				m_disp_line_chk->SetValue(false);
+				m_disp_name_chk->SetValue(false);
+			}
 		}
 	}
 
@@ -1140,7 +1157,7 @@ void MeasureDlg::ToggleDisplay()
 	if (!m_ruler_list->GetCurrSelection(sel))
 		return;
 	glbin_ruler_handler.ToggleDisplay(sel);
-	FluoRefresh(2, { gstRulerListDisp }, { glbin_current.GetViewId() });
+	FluoRefresh(2, { gstRulerListDisp, gstRulerDisp }, { glbin_current.GetViewId() });
 }
 
 void MeasureDlg::SetCurrentRuler()
@@ -1179,49 +1196,49 @@ void MeasureDlg::UpdateProfile()
 
 void MeasureDlg::Locator()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Locator);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Probe()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Probe);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Probe);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerLine()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Line);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Protractor()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Protractor);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Protractor);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Ellipse()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Ellipse);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Ellipse);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerPolyline()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Polyline);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Polyline);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Pencil()
 {
-	glbin_states.SetIntMode(InteractiveMode::Pencil);
+	glbin_states.ToggleIntMode(InteractiveMode::Pencil);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Grow()
 {
-	bool bval = glbin_states.SetIntMode(InteractiveMode::GrowRuler);
+	bool bval = glbin_states.ToggleIntMode(InteractiveMode::GrowRuler);
 	if (bval)
 	{
 		glbin_ruler_renderer.SetDrawText(true);
@@ -1245,25 +1262,25 @@ void MeasureDlg::Grow()
 
 void MeasureDlg::RulerMove()
 {
-	glbin_states.SetIntMode(InteractiveMode::MoveRuler);
+	glbin_states.ToggleIntMode(InteractiveMode::MoveRuler);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerMovePoint()
 {
-	glbin_states.SetIntMode(InteractiveMode::EditRulerPoint);
+	glbin_states.ToggleIntMode(InteractiveMode::EditRulerPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::Magnet()
 {
-	glbin_states.SetMagnet(false);
+	glbin_states.ToggleMagnet(false);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void MeasureDlg::RulerMovePencil()
 {
-	glbin_states.SetMagnet(true);
+	glbin_states.ToggleMagnet(true);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
@@ -1289,7 +1306,7 @@ void MeasureDlg::RulerAvg()
 
 void MeasureDlg::Lock()
 {
-	glbin_states.SetIntMode(InteractiveMode::RulerLockPoint);
+	glbin_states.ToggleIntMode(InteractiveMode::RulerLockPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
@@ -1321,7 +1338,7 @@ void MeasureDlg::DeleteAll()
 
 void MeasureDlg::DeletePoint()
 {
-	glbin_states.SetIntMode(InteractiveMode::RulerDelPoint);
+	glbin_states.ToggleIntMode(InteractiveMode::RulerDelPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
@@ -1503,7 +1520,7 @@ void MeasureDlg::OnDispPointCheck(wxCommandEvent& event)
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.SetDisplay(bval, sel, 0);
 
-	FluoRefresh(2, { gstRulerList },
+	FluoRefresh(2, { gstRulerList, gstRulerDisp },
 		{ glbin_current.GetViewId() });
 }
 
@@ -1515,7 +1532,7 @@ void MeasureDlg::OnDispLineCheck(wxCommandEvent& event)
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.SetDisplay(bval, sel, 1);
 
-	FluoRefresh(2, { gstRulerList },
+	FluoRefresh(2, { gstRulerList, gstRulerDisp },
 		{ glbin_current.GetViewId() });
 }
 
@@ -1527,7 +1544,22 @@ void MeasureDlg::OnDispNameCheck(wxCommandEvent& event)
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.SetDisplay(bval, sel, 2);
 
-	FluoRefresh(2, { gstRulerList },
+	FluoRefresh(2, { gstRulerList, gstRulerDisp },
+		{ glbin_current.GetViewId() });
+}
+
+void MeasureDlg::OnDispAllCheck(wxCommandEvent& event)
+{
+	bool bval = m_disp_all_chk->GetValue();
+
+	std::set<int> sel;
+	m_ruler_list->GetCurrSelection(sel);
+	glbin_ruler_handler.SetDisplay(bval, sel, 0);
+	glbin_ruler_handler.SetDisplay(bval, sel, 1);
+	glbin_ruler_handler.SetDisplay(bval, sel, 2);
+	glbin_ruler_handler.SetDisplay(bval, sel);
+
+	FluoRefresh(2, { gstRulerList, gstRulerDisp },
 		{ glbin_current.GetViewId() });
 }
 

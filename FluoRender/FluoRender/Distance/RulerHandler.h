@@ -76,8 +76,11 @@ namespace flrd
 		bool GetEdited() { return m_edited; }
 
 		//display
-		void ToggleDisplay(const std::set<int> list);
+		void SetDisplay(bool bval, const std::set<int>& list);
+		void ToggleDisplay(const std::set<int>& list);
 		void ToggleGroupDisp();
+		//display part
+		void SetDisplay(bool bval, const std::set<int>& rulers, int type);//0:point; 1:line; 2:name
 
 		//search
 		bool FindEditingRuler(double mx, double my);
@@ -119,9 +122,6 @@ namespace flrd
 
 		//transient over time
 		void SetTransient(bool bval, const std::set<int>& rulers);
-
-		//display part
-		void SetDisplay(bool bval, const std::set<int>& rulers, int type);//0:point; 1:line; 2:name
 
 		//key
 		void SetInterp(int ival, const std::set<int>& rulers);

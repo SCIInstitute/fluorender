@@ -1207,6 +1207,10 @@ void RenderViewPanel::SetStereography(bool val)
 void RenderViewPanel::SetHolography(bool val)
 {
 	glbin_settings.m_hologram_mode = val ? 2 : 0;
+	//close full screen if holography is disabled
+	if (!glbin_settings.m_hologram_mode &&
+		m_canvas->GetParent() == m_full_frame)
+		m_canvas->Close();
 	FluoRefresh(0, { gstHologramMode });
 }
 

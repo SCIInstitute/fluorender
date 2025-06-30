@@ -674,68 +674,68 @@ void TreePanel::RemoveData()
 
 void TreePanel::RulerLine()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Line);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerPolyline()
 {
-	glbin_states.SetRulerMode(flrd::RulerMode::Polyline);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Polyline);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerPencil()
 {
-	glbin_states.SetIntMode(InteractiveMode::Pencil);
+	glbin_states.ToggleIntMode(InteractiveMode::Pencil);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerEdit()
 {
-	glbin_states.SetIntMode(InteractiveMode::EditRulerPoint);
+	glbin_states.ToggleIntMode(InteractiveMode::EditRulerPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerDeletePoint()
 {
-	glbin_states.SetIntMode(InteractiveMode::RulerDelPoint);
+	glbin_states.ToggleIntMode(InteractiveMode::RulerDelPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::BrushRuler()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::SingleSelect);
-	glbin_states.SetRulerMode(flrd::RulerMode::Locator);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushGrow()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Grow);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushAppend()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Append);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushComp()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Segment);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushDiffuse()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Diffuse);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushUnselect()
 {
-	glbin_states.SetBrushMode(flrd::SelectMode::Eraser);
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 

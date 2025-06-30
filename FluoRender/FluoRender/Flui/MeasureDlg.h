@@ -238,6 +238,7 @@ private:
 	wxCheckBox* m_disp_point_chk;
 	wxCheckBox* m_disp_line_chk;
 	wxCheckBox* m_disp_name_chk;
+	wxCheckBox* m_disp_all_chk;
 	//relax
 	wxSpinCtrlDouble* m_relax_value_spin;
 	wxComboBox *m_relax_data_cmb;
@@ -270,6 +271,7 @@ private:
 	void OnDispPointCheck(wxCommandEvent& event);
 	void OnDispLineCheck(wxCommandEvent& event);
 	void OnDispNameCheck(wxCommandEvent& event);
+	void OnDispAllCheck(wxCommandEvent& event);
 	void OnRelaxData(wxCommandEvent& event);
 	void OnRelaxValueSpin(wxSpinDoubleEvent& event);
 	void OnRelaxValueText(wxCommandEvent& event);

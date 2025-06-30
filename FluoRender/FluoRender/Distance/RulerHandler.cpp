@@ -164,7 +164,22 @@ void RulerHandler::GetRulerList(const std::set<int>& rulers, flrd::RulerList& ou
 	}
 }
 
-void RulerHandler::ToggleDisplay(const std::set<int> rulers)
+void RulerHandler::SetDisplay(bool bval, const std::set<int>& rulers)
+{
+	RulerList* list = glbin_current.GetRulerList();
+	if (!list)
+		return;
+
+	for (size_t i = 0; i < list->size(); ++i)
+	{
+		Ruler* ruler = (*list)[i];
+		if (!ruler) continue;
+		if (rulers.find(static_cast<int>(i)) != rulers.end())
+			ruler->SetDisp(bval);
+	}
+}
+
+void RulerHandler::ToggleDisplay(const std::set<int>& rulers)
 {
 	RulerList* list = glbin_current.GetRulerList();
 	if (!list)
