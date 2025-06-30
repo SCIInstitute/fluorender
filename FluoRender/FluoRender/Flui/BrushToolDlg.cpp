@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <VolumeSelector.h>
 #include <Colocalize.h>
+#include <Ruler.h>
+#include <RulerHandler.h>
 #include <RulerAlign.h>
 #include <BrushDefault.h>
 #include <GlobalStates.h>
@@ -516,18 +518,14 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
-		auto view = glbin_current.render_view.lock();
-		InteractiveMode mode = view ? view->GetIntMode() : InteractiveMode::None;
-		bval = mode == InteractiveMode::BrushSelect ||
-			mode == InteractiveMode::Grow;
 		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-		m_toolbar->ToggleTool(ID_BrushGrow, bval && sel_mode == flrd::SelectMode::Grow);
-		m_toolbar->ToggleTool(ID_BrushAppend, bval && sel_mode == flrd::SelectMode::Append);
-		m_toolbar->ToggleTool(ID_BrushComp, bval && sel_mode == flrd::SelectMode::Segment);
-		m_toolbar->ToggleTool(ID_BrushSingle, bval && sel_mode == flrd::SelectMode::SingleSelect);
-		m_toolbar->ToggleTool(ID_BrushDiffuse, bval && sel_mode == flrd::SelectMode::Diffuse);
-		m_toolbar->ToggleTool(ID_BrushSolid, bval && sel_mode == flrd::SelectMode::Solid);
-		m_toolbar->ToggleTool(ID_BrushUnsel, bval && sel_mode == flrd::SelectMode::Eraser);
+		m_toolbar->ToggleTool(ID_BrushGrow, sel_mode == flrd::SelectMode::Grow);
+		m_toolbar->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
+		m_toolbar->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
+		m_toolbar->ToggleTool(ID_BrushSingle, sel_mode == flrd::SelectMode::SingleSelect);
+		m_toolbar->ToggleTool(ID_BrushDiffuse, sel_mode == flrd::SelectMode::Diffuse);
+		m_toolbar->ToggleTool(ID_BrushSolid, sel_mode == flrd::SelectMode::Solid);
+		m_toolbar->ToggleTool(ID_BrushUnsel, sel_mode == flrd::SelectMode::Eraser);
 	}
 
 	if (update_all || FOUND_VALUE(gstSelMask) || FOUND_VALUE(gstCurrentSelect))
@@ -701,149 +699,37 @@ void BrushToolDlg::BrushRedo()
 
 void BrushToolDlg::BrushGrow()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::Grow &&
-		sel_mode == flrd::SelectMode::Grow)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::Grow;
-		sel_mode = flrd::SelectMode::Grow;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, false);
+	SetBrushMode(flrd::SelectMode::Grow);
 }
 
 void BrushToolDlg::BrushAppend()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::BrushSelect &&
-		sel_mode == flrd::SelectMode::Append)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::BrushSelect;
-		sel_mode = flrd::SelectMode::Append;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, false);
+	SetBrushMode(flrd::SelectMode::Append);
 }
 
 void BrushToolDlg::BrushComp()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::BrushSelect &&
-		sel_mode == flrd::SelectMode::Segment)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::BrushSelect;
-		sel_mode = flrd::SelectMode::Segment;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, false);
+	SetBrushMode(flrd::SelectMode::Segment);
 }
 
 void BrushToolDlg::BrushSingle()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::BrushSelect &&
-		sel_mode == flrd::SelectMode::SingleSelect)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::BrushSelect;
-		sel_mode = flrd::SelectMode::SingleSelect;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, sel_mode == flrd::SelectMode::SingleSelect);
+	SetBrushMode(flrd::SelectMode::SingleSelect);
 }
 
 void BrushToolDlg::BrushDiffuse()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::BrushSelect &&
-		sel_mode == flrd::SelectMode::Diffuse)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::BrushSelect;
-		sel_mode = flrd::SelectMode::Diffuse;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, false);
+	SetBrushMode(flrd::SelectMode::Diffuse);
 }
 
 void BrushToolDlg::BrushSolid()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::BrushSelect &&
-		sel_mode == flrd::SelectMode::Solid)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::BrushSelect;
-		sel_mode = flrd::SelectMode::Solid;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, false);
+	SetBrushMode(flrd::SelectMode::Solid);
 }
 
 void BrushToolDlg::BrushUnsel()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (int_mode == InteractiveMode::BrushSelect &&
-		sel_mode == flrd::SelectMode::Eraser)
-	{
-		int_mode = InteractiveMode::Viewport;
-		sel_mode = flrd::SelectMode::None;
-	}
-	else
-	{
-		int_mode = InteractiveMode::BrushSelect;
-		sel_mode = flrd::SelectMode::Eraser;
-	}
-	SetBrushMode(int_mode, sel_mode, 0, false);
+	SetBrushMode(flrd::SelectMode::Eraser);
 }
 
 //toolbar2
@@ -1473,13 +1359,38 @@ void BrushToolDlg::PasteData()
 */
 }
 
-void BrushToolDlg::SetBrushMode(InteractiveMode int_mode, flrd::SelectMode sel_mode, int shortcut, bool estimate)
+void BrushToolDlg::SetBrushMode(flrd::SelectMode mode)
 {
-	if (auto view = glbin_current.render_view.lock())
-		view->SetIntMode(int_mode);
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	bool single_sel = mode == flrd::SelectMode::SingleSelect;
+	InteractiveMode int_mode = InteractiveMode::None;
+	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
+	flrd::RulerMode rul_mode = flrd::RulerMode::None;
+	if (single_sel)
+		rul_mode = glbin_ruler_handler.GetRulerMode();//keep ruler mode unchanged if the brush is in single mode
+	if (sel_mode == mode)
+	{
+		int_mode = InteractiveMode::Viewport;
+		sel_mode = flrd::SelectMode::None;
+	}
+	else
+	{
+		if (single_sel && rul_mode != flrd::RulerMode::None)
+			int_mode = InteractiveMode::BrushRuler;
+		else if (mode == flrd::SelectMode::Grow)
+			int_mode = InteractiveMode::Grow;
+		else
+			int_mode = InteractiveMode::BrushSelect;
+		sel_mode = mode;
+	}
+
+	view->SetIntMode(int_mode);
 	glbin_vol_selector.SetSelectMode(sel_mode);
 	glbin_states.m_brush_mode_toolbar = sel_mode;
-	glbin_states.m_brush_mode_shortcut = shortcut;
-	glbin_vol_selector.SetEstimateThreshold(estimate);
+	glbin_states.m_brush_mode_shortcut = 0;
+	glbin_vol_selector.SetEstimateThreshold(sel_mode == flrd::SelectMode::SingleSelect);
+	glbin_ruler_handler.SetRulerMode(rul_mode);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
