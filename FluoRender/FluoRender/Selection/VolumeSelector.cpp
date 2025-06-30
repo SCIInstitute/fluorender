@@ -163,7 +163,8 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 
 	m_vd->ResetMaskCount();
 
-	if (m_mode == SelectMode::Segment)
+	if (m_mode == SelectMode::Segment &&
+		!glbin_comp_generator.IsBusy())
 	{
 		//generate components
 		bool bval = glbin_comp_generator.GetUseSel();

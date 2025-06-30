@@ -9566,112 +9566,65 @@ void RenderView::ResetEnlarge()
 	RefreshGL(9);
 }
 
-void RenderView::SetBrush(int mode, IdleState& state)
-{
-	//need to add somewhere else
-	//m_prev_focus = FindFocus();
-	//SetFocus();
-	state.m_set_cur_focus = true;
-
-	//int ruler_type = glbin_ruler_handler.GetType();
-
-	//if (m_int_mode == 5 ||
-	//	m_int_mode == 7)
-	//{
-	//	m_int_mode = 7;
-	//	if (ruler_type == 3)
-	//		glbin_vol_selector.SetMode(8);
-	//	else
-	//		glbin_vol_selector.SetMode(1);
-	//}
-	//else if (m_int_mode == 8)
-	//{
-	//	if (ruler_type == 3)
-	//		glbin_vol_selector.SetMode(8);
-	//	else
-	//		glbin_vol_selector.SetMode(1);
-	//}
-	//else if (m_int_mode == 10)
-	//{
-	//	glbin_vol_selector.SetMode(9);
-	//}
-	//else
-	//{
-	//	m_int_mode = 2;
-	//	glbin_vol_selector.SetMode(mode);
-	//}
-}
-
 bool RenderView::UpdateBrushState(IdleState& state)
 {
 	bool refresh = false;
 
 	if (state.m_key_paint)
 	{
-		glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
-		glbin_states.m_brush_mode_shortcut = 2;
+		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Append);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
-		SetBrush(2, state);
+		state.m_set_cur_focus = true;
+		glbin_states.m_freehand_tool_from_kb = true;
 		refresh = true;
 	}
 	else if (state.m_key_erase)
 	{
-		glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
-		glbin_states.m_brush_mode_shortcut = 3;
+		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Eraser);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
-		SetBrush(3, state);
+		state.m_set_cur_focus = true;
+		glbin_states.m_freehand_tool_from_kb = true;
 		refresh = true;
 	}
 	else if (state.m_key_diff)
 	{
-		glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
-		glbin_states.m_brush_mode_shortcut = 4;
+		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Diffuse);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
-		SetBrush(4, state);
+		state.m_set_cur_focus = true;
+		glbin_states.m_freehand_tool_from_kb = true;
 		refresh = true;
 	}
 	else
 	{
-		if (glbin_states.m_brush_mode_toolbar != flrd::SelectMode::None)
+		if (glbin_states.m_freehand_tool_from_kb)
 		{
-			m_paint_display = true;
-			m_draw_brush = true;
-		}
-		else if (!state.m_key_paint &&
-			!state.m_key_erase &&
-			!state.m_key_diff &&
-			glbin_states.m_brush_mode_shortcut)
-		{
-			if (state.m_mouse_left)
-			{
-				if (glbin_vol_selector.GetAutoThreshold())
-					glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold });
-				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
-			}
+			glbin_vol_selector.SetSelectMode(flrd::SelectMode::None);
+			glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+			m_int_mode = InteractiveMode::Viewport;
+			glbin_states.m_freehand_tool_from_kb = false;
 
-			if (m_int_mode == InteractiveMode::BrushRuler)
-				m_int_mode = InteractiveMode::Ruler;
-			else
-				m_int_mode = InteractiveMode::Viewport;
-
-			glbin_states.m_brush_mode_toolbar = flrd::SelectMode::None;
-			glbin_states.m_brush_mode_shortcut = 0;
 			m_paint_display = false;
 			m_draw_brush = false;
-			SetBrush(0, state);
-			refresh = true;
-
-			//need to move somewhere else
-			//if (m_prev_focus)
-			//{
-			//	m_prev_focus->SetFocus();
-			//	m_prev_focus = 0;
-			//}
+			state.m_set_cur_focus = false;
 			state.m_set_previous_focus = true;
+			refresh = true;
 		}
+	}
+
+	if (glbin_states.QueryShowBrush())
+	{
+		m_paint_display = true;
+		m_draw_brush = true;
+		refresh = true;
 	}
 
 	return refresh;

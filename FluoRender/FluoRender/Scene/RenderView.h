@@ -860,7 +860,6 @@ private:
 	void ResetEnlarge();
 
 	//brush states update
-	void SetBrush(int mode, IdleState& state);
 	bool UpdateBrushState(IdleState& state);
 
 	//selection

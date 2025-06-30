@@ -36,19 +36,13 @@ DEALINGS IN THE SOFTWARE.
 class wxSingleSlider;
 struct GridData
 {
-	int voxel_sum;
-	double voxel_wsum;
-	double avg_int;
-	double size;
-	double wsize;
+	int voxel_sum = 0;
+	double voxel_wsum = 0;
+	double avg_int = 0;
+	double size = 0;
+	double wsize = 0;
 };
 
-namespace flrd
-{
-	enum class SelectMode;
-	enum class RulerMode;
-}
-enum class InteractiveMode;
 class BrushToolDlg : public TabbedPanel
 {
 public:
@@ -176,8 +170,6 @@ private:
 	void SetOutput(const GridData& data, const wxString& unit);
 	void CopyData();
 	void PasteData();
-
-	void SetBrushMode(flrd::SelectMode mode);
 
 	wxWindow* CreateToolPage(wxWindow* parent);
 	wxWindow* CreateListPage(wxWindow* parent);

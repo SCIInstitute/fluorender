@@ -42,13 +42,10 @@ DEALINGS IN THE SOFTWARE.
 #define PointCol 10
 
 class MeasureDlg;
-enum class InteractiveMode;
 namespace flrd
 {
 	class Ruler;
 	class RulerList;
-	enum class SelectMode;
-	enum class RulerMode;
 }
 class RulerListCtrl : public wxListCtrl
 {
@@ -263,10 +260,6 @@ private:
 	wxWindow* CreateToolPage(wxWindow* parent);
 	wxWindow* CreateListPage(wxWindow* parent);
 	wxWindow* CreateAlignPage(wxWindow* parent);
-
-	bool SetRulerMode(flrd::RulerMode mode);
-	bool SetIntMode(InteractiveMode mode);
-	bool SetMagnet(bool redist);
 
 private:
 	void OnToolbar(wxCommandEvent& event);

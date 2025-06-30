@@ -486,7 +486,6 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 
 	bool update_all = vc.empty();
-	int ival;
 	bool bval;
 
 	//update icons only
@@ -512,14 +511,19 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
-		m_toolbar->ToggleTool(ID_RulerLine, int_mode == InteractiveMode::Ruler && rul_mode == flrd::RulerMode::Line);
-		m_toolbar->ToggleTool(ID_RulerPolyline, int_mode == InteractiveMode::Ruler && rul_mode == flrd::RulerMode::Polyline);
+		m_toolbar->ToggleTool(ID_RulerLine, rul_mode == flrd::RulerMode::Line);
+		bval = rul_mode == flrd::RulerMode::Polyline &&
+			(int_mode == InteractiveMode::Ruler ||
+				int_mode == InteractiveMode::BrushRuler);
+		m_toolbar->ToggleTool(ID_RulerPolyline, bval);
 		m_toolbar->ToggleTool(ID_RulerPencil, int_mode == InteractiveMode::Pencil);
 		m_toolbar->ToggleTool(ID_RulerEdit, int_mode == InteractiveMode::EditRulerPoint);
 		m_toolbar->ToggleTool(ID_RulerDeletePoint, int_mode == InteractiveMode::RulerDelPoint);
 
-		m_toolbar2->ToggleTool(ID_BrushRuler, int_mode == InteractiveMode::BrushRuler);
-		m_toolbar2->ToggleTool(ID_BrushGrow, int_mode == InteractiveMode::Grow);
+		bval = rul_mode == flrd::RulerMode::Locator &&
+			sel_mode == flrd::SelectMode::SingleSelect;
+		m_toolbar2->ToggleTool(ID_BrushRuler, bval);
+		m_toolbar2->ToggleTool(ID_BrushGrow, sel_mode == flrd::SelectMode::Grow);
 		m_toolbar2->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
 		m_toolbar2->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
 		m_toolbar2->ToggleTool(ID_BrushDiffuse, sel_mode == flrd::SelectMode::Diffuse);
@@ -670,237 +674,68 @@ void TreePanel::RemoveData()
 
 void TreePanel::RulerLine()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-	//bool bval = int_mode == InteractiveMode::Ruler || mode == 13;
-	//flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-
-	glbin_ruler_handler.FinishRuler();
-
-	if (rul_mode == flrd::RulerMode::Line)
-	{
-		view->SetIntMode(InteractiveMode::Viewport);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
-	}
-	else
-	{
-		view->SetIntMode(InteractiveMode::Ruler);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Line);
-	}
-
+	glbin_states.SetRulerMode(flrd::RulerMode::Line);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerPolyline()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::Ruler;
-	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-
-	if (bval && rul_mode == flrd::RulerMode::Polyline)
-	{
-		view->SetIntMode(InteractiveMode::Viewport);
-		glbin_ruler_handler.FinishRuler();
-	}
-	else
-	{
-		if (int_mode == InteractiveMode::Pencil)
-			glbin_ruler_handler.FinishRuler();
-		view->SetIntMode(InteractiveMode::Ruler);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Polyline);
-	}
-
+	glbin_states.SetRulerMode(flrd::RulerMode::Polyline);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerPencil()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-
-	glbin_ruler_handler.FinishRuler();
-
-	if (int_mode == InteractiveMode::Pencil)
-	{
-		view->SetIntMode(InteractiveMode::Viewport);
-	}
-	else
-	{
-		view->SetIntMode(InteractiveMode::Pencil);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Polyline);
-	}
-
+	glbin_states.SetIntMode(InteractiveMode::Pencil);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerEdit()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::Ruler ||
-		int_mode == InteractiveMode::Pencil;
-	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-
-	if (bval && rul_mode == flrd::RulerMode::Polyline)
-		glbin_ruler_handler.FinishRuler();
-
-	if (int_mode == InteractiveMode::EditRulerPoint)
-		view->SetIntMode(InteractiveMode::Viewport);
-	else
-		view->SetIntMode(InteractiveMode::EditRulerPoint);
-
+	glbin_states.SetIntMode(InteractiveMode::EditRulerPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::RulerDeletePoint()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::Ruler ||
-		int_mode == InteractiveMode::Pencil;
-	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-
-	if (bval && rul_mode == flrd::RulerMode::Polyline)
-		glbin_ruler_handler.FinishRuler();
-
-	if (int_mode == InteractiveMode::RulerDelPoint)
-		view->SetIntMode(InteractiveMode::Viewport);
-	else
-		view->SetIntMode(InteractiveMode::RulerDelPoint);
-
+	glbin_states.SetIntMode(InteractiveMode::RulerDelPoint);
 	FluoRefresh(0, { gstFreehandToolState }, {-1});
 }
 
 void TreePanel::BrushRuler()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::BrushRuler;
-	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-
-	if (rul_mode == flrd::RulerMode::Polyline)
-		glbin_ruler_handler.FinishRuler();
-
-	if (bval && rul_mode == flrd::RulerMode::Locator)
-	{
-		view->SetIntMode(InteractiveMode::Viewport);
-	}
-	else
-	{
-		view->SetIntMode(InteractiveMode::BrushRuler);
-		glbin_vol_selector.SetSelectMode(flrd::SelectMode::SingleSelect);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Locator);
-	}
-
-	FluoRefresh(0, { gstFreehandToolState }, {-1});
+	glbin_states.SetBrushMode(flrd::SelectMode::SingleSelect);
+	glbin_states.SetRulerMode(flrd::RulerMode::Locator);
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushGrow()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::Grow || int_mode == InteractiveMode::GrowRuler;
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (bval && sel_mode == flrd::SelectMode::Grow)
-		sel_mode = flrd::SelectMode::None;
-	else
-		sel_mode = flrd::SelectMode::Grow;
-	glbin_vol_selector.SetSelectMode(sel_mode);
-	glbin_states.m_brush_mode_toolbar = sel_mode;
-	glbin_states.m_brush_mode_shortcut = 0;
-	glbin_vol_selector.SetEstimateThreshold(false);
-	FluoRefresh(0, { gstFreehandToolState }, {-1});
+	glbin_states.SetBrushMode(flrd::SelectMode::Grow);
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushAppend()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::BrushSelect;
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (bval && sel_mode == flrd::SelectMode::Append)
-		sel_mode = flrd::SelectMode::None;
-	else
-		sel_mode = flrd::SelectMode::Append;
-	glbin_vol_selector.SetSelectMode(sel_mode);
-	glbin_states.m_brush_mode_toolbar = sel_mode;
-	glbin_states.m_brush_mode_shortcut = 0;
-	glbin_vol_selector.SetEstimateThreshold(false);
+	glbin_states.SetBrushMode(flrd::SelectMode::Append);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushComp()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::BrushSelect;
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (bval && sel_mode == flrd::SelectMode::Segment)
-		sel_mode = flrd::SelectMode::None;
-	else
-		sel_mode = flrd::SelectMode::Segment;
-	glbin_vol_selector.SetSelectMode(sel_mode);
-	glbin_states.m_brush_mode_toolbar = sel_mode;
-	glbin_states.m_brush_mode_shortcut = 0;
-	glbin_vol_selector.SetEstimateThreshold(false);
+	glbin_states.SetBrushMode(flrd::SelectMode::Segment);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushDiffuse()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::BrushSelect;
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (bval && sel_mode == flrd::SelectMode::Diffuse)
-		sel_mode = flrd::SelectMode::None;
-	else
-		sel_mode = flrd::SelectMode::Diffuse;
-	glbin_vol_selector.SetSelectMode(sel_mode);
-	glbin_states.m_brush_mode_toolbar = sel_mode;
-	glbin_states.m_brush_mode_shortcut = 0;
-	glbin_vol_selector.SetEstimateThreshold(false);
+	glbin_states.SetBrushMode(flrd::SelectMode::Diffuse);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void TreePanel::BrushUnselect()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-	InteractiveMode int_mode = view->GetIntMode();
-	bool bval = int_mode == InteractiveMode::BrushSelect;
-	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-	if (bval && sel_mode == flrd::SelectMode::Eraser)
-		sel_mode = flrd::SelectMode::None;
-	else
-		sel_mode = flrd::SelectMode::Eraser;
-	glbin_vol_selector.SetSelectMode(sel_mode);
-	glbin_states.m_brush_mode_toolbar = sel_mode;
-	glbin_states.m_brush_mode_shortcut = 0;
-	glbin_vol_selector.SetEstimateThreshold(false);
+	glbin_states.SetBrushMode(flrd::SelectMode::Eraser);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 

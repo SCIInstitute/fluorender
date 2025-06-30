@@ -33,7 +33,9 @@ DEALINGS IN THE SOFTWARE.
 namespace flrd
 {
 	enum class SelectMode;
+	enum class RulerMode;
 }
+enum class InteractiveMode;
 class GlobalStates
 {
 public:
@@ -44,14 +46,20 @@ public:
 
 	void SetModal(bool bval = true);
 
+	//freehand tool states
+	bool SetBrushMode(flrd::SelectMode mode);
+	bool SetRulerMode(flrd::RulerMode mode);
+	bool SetIntMode(InteractiveMode mode);
+	bool SetMagnet(bool redist);
+	bool QueryShowBrush();
+
 public:
 	bool m_mouse_in_clip_plane_panel = false;
 	bool m_mouse_in_aov_slider = false;
 	bool m_clip_display = false;	//show clipping planes in view
 
-	flrd::SelectMode m_brush_mode_toolbar;	//brush state set from ui
-	int m_brush_mode_shortcut = 0;	//brush state set by shortcut
-
+	bool m_freehand_tool_from_kb = false;	//keyboard shortcuts for freehand tools
+	
 	bool m_modal_shown = false;	//a modal dialog is currently shown, disable keyboard shortcuts
 
 	std::string m_status_str;		//string to show on main statusbar

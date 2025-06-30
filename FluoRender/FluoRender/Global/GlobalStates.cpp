@@ -29,6 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <Global.h>
 #include <MainSettings.h>
+#include <DataManager.h>
+#include <VolumeSelector.h>
+#include <RenderView.h>
+#include <Ruler.h>
+#include <RulerHandler.h>
 
 GlobalStates::GlobalStates()
 {
@@ -53,4 +58,156 @@ bool GlobalStates::ClipDisplayChanged()
 void GlobalStates::SetModal(bool bval)
 {
 	m_modal_shown = bval;
+}
+
+bool GlobalStates::SetBrushMode(flrd::SelectMode mode)
+{
+	bool result = false;
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return result;
+	bool single_sel = mode == flrd::SelectMode::SingleSelect;
+	InteractiveMode int_mode = InteractiveMode::None;
+	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
+	flrd::RulerMode rul_mode = flrd::RulerMode::None;
+	if (single_sel)
+		rul_mode = glbin_ruler_handler.GetRulerMode();//keep ruler mode unchanged if the brush is in single mode
+	if (sel_mode == mode)
+	{
+		int_mode = InteractiveMode::Viewport;
+		sel_mode = flrd::SelectMode::None;
+		result = true;
+	}
+	else
+	{
+		if (single_sel && rul_mode != flrd::RulerMode::None)
+			int_mode = InteractiveMode::BrushRuler;
+		else if (mode == flrd::SelectMode::Grow)
+			int_mode = InteractiveMode::Grow;
+		else
+			int_mode = InteractiveMode::BrushSelect;
+		sel_mode = mode;
+		result = false;
+	}
+
+	view->SetIntMode(int_mode);
+	glbin_vol_selector.SetSelectMode(sel_mode);
+	glbin_vol_selector.SetEstimateThreshold(false);
+	glbin_ruler_handler.SetRulerMode(rul_mode);
+	return result;
+}
+
+bool GlobalStates::SetRulerMode(flrd::RulerMode mode)
+{
+	bool result = false;
+	InteractiveMode int_mode = InteractiveMode::None;
+	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
+	flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
+
+	glbin_ruler_handler.FinishRuler();
+
+	if (rul_mode == mode)
+	{
+		int_mode = InteractiveMode::Viewport;
+		rul_mode = flrd::RulerMode::None;
+		sel_mode = flrd::SelectMode::None;
+		result = true;
+	}
+	else
+	{
+		if (sel_mode == flrd::SelectMode::SingleSelect)
+			int_mode = InteractiveMode::BrushRuler;//keep select mode if it's single
+		else
+		{
+			int_mode = InteractiveMode::Ruler;
+			sel_mode = flrd::SelectMode::None;
+		}
+		rul_mode = mode;
+		result = false;
+	}
+
+	if (auto view = glbin_current.render_view.lock())
+		view->SetIntMode(int_mode);
+	glbin_vol_selector.SetSelectMode(sel_mode);
+	glbin_ruler_handler.SetRulerMode(rul_mode);
+	return result;
+}
+
+bool GlobalStates::SetIntMode(InteractiveMode mode)
+{
+	bool result = false;
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return result;
+	InteractiveMode int_mode = view->GetIntMode();
+	flrd::SelectMode sel_mode = flrd::SelectMode::None;
+	flrd::RulerMode rul_mode = flrd::RulerMode::None;
+
+	glbin_ruler_handler.FinishRuler();
+
+	if (int_mode == mode)
+	{
+		int_mode = InteractiveMode::Viewport;
+		rul_mode = flrd::RulerMode::None;
+		result = true;
+	}
+	else
+	{
+		int_mode = mode;
+		rul_mode = flrd::RulerMode::Polyline;
+		if (int_mode == InteractiveMode::GrowRuler)
+			sel_mode = flrd::SelectMode::Grow;
+		result = false;
+	}
+
+	view->SetIntMode(int_mode);
+	glbin_vol_selector.SetSelectMode(sel_mode);
+	glbin_ruler_handler.SetRulerMode(rul_mode);
+	return result;
+}
+
+bool GlobalStates::SetMagnet(bool redist)
+{
+	bool result = false;
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return result;
+	InteractiveMode int_mode = view->GetIntMode();
+	flrd::SelectMode sel_mode = flrd::SelectMode::None;
+	flrd::RulerMode rul_mode = flrd::RulerMode::None;
+	bool cur_redist = glbin_ruler_handler.GetRedistLength();
+
+	glbin_ruler_handler.FinishRuler();
+
+	if (int_mode == InteractiveMode::Magnet)
+	{
+		if (cur_redist == redist)
+		{
+			int_mode = InteractiveMode::Viewport;
+			rul_mode = flrd::RulerMode::None;
+			result = true;
+		}
+	}
+	else
+	{
+		int_mode = InteractiveMode::Magnet;
+		rul_mode = flrd::RulerMode::Polyline;
+		result = false;
+	}
+
+	view->SetIntMode(int_mode);
+	glbin_vol_selector.SetSelectMode(sel_mode);
+	glbin_ruler_handler.SetRulerMode(rul_mode);
+	glbin_ruler_handler.SetRedistLength(redist);
+	return result;
+}
+
+bool GlobalStates::QueryShowBrush()
+{
+	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
+	return sel_mode == flrd::SelectMode::SingleSelect ||
+		sel_mode == flrd::SelectMode::Append ||
+		sel_mode == flrd::SelectMode::Eraser ||
+		sel_mode == flrd::SelectMode::Diffuse ||
+		sel_mode == flrd::SelectMode::Segment;
 }
