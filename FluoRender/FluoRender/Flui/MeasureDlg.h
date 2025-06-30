@@ -266,6 +266,7 @@ private:
 
 	bool SetRulerMode(flrd::RulerMode mode);
 	bool SetIntMode(InteractiveMode mode);
+	bool SetMagnet(bool redist);
 
 private:
 	void OnToolbar(wxCommandEvent& event);
