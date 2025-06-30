@@ -1390,7 +1390,7 @@ void BrushToolDlg::SetBrushMode(flrd::SelectMode mode)
 	glbin_vol_selector.SetSelectMode(sel_mode);
 	glbin_states.m_brush_mode_toolbar = sel_mode;
 	glbin_states.m_brush_mode_shortcut = 0;
-	glbin_vol_selector.SetEstimateThreshold(sel_mode == flrd::SelectMode::SingleSelect);
+	glbin_vol_selector.SetEstimateThreshold(false);
 	glbin_ruler_handler.SetRulerMode(rul_mode);
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }

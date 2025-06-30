@@ -9201,88 +9201,86 @@ void RenderView::PaintStroke()
 		glClear(GL_COLOR_BUFFER_BIT);
 		m_clear_paint = false;
 	}
-	else
+
+	//paint shader
+	flvr::ShaderProgram* paint_shader =
+		glbin_img_shader_factory.shader(IMG_SHDR_PAINT);
+	if (paint_shader)
 	{
-		//paint shader
-		flvr::ShaderProgram* paint_shader =
-			glbin_img_shader_factory.shader(IMG_SHDR_PAINT);
-		if (paint_shader)
-		{
-			if (!paint_shader->valid())
-				paint_shader->create();
-			paint_shader->bind();
-		}
-
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_MAX);
-
-		double radius1 = glbin_vol_selector.GetBrushSize1();
-		double radius2 = glbin_vol_selector.GetBrushSize2();
-		double bspc = glbin_vol_selector.GetBrushSpacing();
-		bool bs_data = glbin_vol_selector.GetBrushSizeData();
-		double px = double(old_mouse_X - prv_mouse_X);
-		double py = double(old_mouse_Y - prv_mouse_Y);
-		double dist = sqrt(px*px + py*py);
-		double step = radius1 * pressure * bspc;
-		int repeat = std::round(dist / step);
-		double spx = (double)prv_mouse_X;
-		double spy = (double)prv_mouse_Y;
-		if (repeat > 0)
-		{
-			px /= repeat;
-			py /= repeat;
-		}
-
-		//set the width and height
-		if (bs_data)
-			paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
-				m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
-		else
-			paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
-
-		double x, y;
-		double cx, cy;
-		for (int i = 0; i <= repeat; i++)
-		{
-			x = spx + i*px;
-			y = spy + i*py;
-			if (bs_data)
-			{
-				cx = x * (m_ortho_right - m_ortho_left) / nx;
-				cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
-			}
-			else
-			{
-				cx = x;
-				cy = double(ny) - y;
-			}
-			switch (glbin_vol_selector.GetSelectMode())
-			{
-			case flrd::SelectMode::Eraser:
-				radius1 = radius2;
-				break;
-			case flrd::SelectMode::Diffuse:
-				radius1 = 0.0;
-				break;
-			case flrd::SelectMode::Solid:
-				radius2 = radius1;
-				break;
-			default:
-				break;
-			}
-			//send uniforms to paint shader
-			paint_shader->setLocalParam(0, cx, cy,
-				radius1*pressure,
-				radius2*pressure);
-			//draw a square
-			DrawViewQuad();
-		}
-
-		//release paint shader
-		if (paint_shader && paint_shader->valid())
-			paint_shader->release();
+		if (!paint_shader->valid())
+			paint_shader->create();
+		paint_shader->bind();
 	}
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_MAX);
+
+	double radius1 = glbin_vol_selector.GetBrushSize1();
+	double radius2 = glbin_vol_selector.GetBrushSize2();
+	double bspc = glbin_vol_selector.GetBrushSpacing();
+	bool bs_data = glbin_vol_selector.GetBrushSizeData();
+	double px = double(old_mouse_X - prv_mouse_X);
+	double py = double(old_mouse_Y - prv_mouse_Y);
+	double dist = sqrt(px*px + py*py);
+	double step = radius1 * pressure * bspc;
+	int repeat = std::round(dist / step);
+	double spx = (double)prv_mouse_X;
+	double spy = (double)prv_mouse_Y;
+	if (repeat > 0)
+	{
+		px /= repeat;
+		py /= repeat;
+	}
+
+	//set the width and height
+	if (bs_data)
+		paint_shader->setLocalParam(1, m_ortho_right - m_ortho_left,
+			m_ortho_top - m_ortho_bottom, 0.0f, 0.0f);
+	else
+		paint_shader->setLocalParam(1, nx, ny, 0.0f, 0.0f);
+
+	double x, y;
+	double cx, cy;
+	for (int i = 0; i <= repeat; i++)
+	{
+		x = spx + i*px;
+		y = spy + i*py;
+		if (bs_data)
+		{
+			cx = x * (m_ortho_right - m_ortho_left) / nx;
+			cy = (ny - y) * (m_ortho_top - m_ortho_bottom) / ny;
+		}
+		else
+		{
+			cx = x;
+			cy = double(ny) - y;
+		}
+		switch (glbin_vol_selector.GetSelectMode())
+		{
+		case flrd::SelectMode::Eraser:
+			radius1 = radius2;
+			break;
+		case flrd::SelectMode::Diffuse:
+			radius1 = 0.0;
+			break;
+		case flrd::SelectMode::Solid:
+			radius2 = radius1;
+			break;
+		default:
+			break;
+		}
+		//send uniforms to paint shader
+		paint_shader->setLocalParam(0, cx, cy,
+			radius1*pressure,
+			radius2*pressure);
+		//draw a square
+		DrawViewQuad();
+	}
+
+	//release paint shader
+	if (paint_shader && paint_shader->valid())
+		paint_shader->release();
 
 	//bind back the window frame buffer
 	BindRenderBuffer();
