@@ -64,16 +64,26 @@ public:
 		m_silent_select = false;
 	}
 
-	void Append(bool enable, unsigned int id,
-		wxString name, unsigned int group, int count,
-		wxString intensity, wxString &color,
-		int branches, double length, wxString &unit,
-		double angle, wxString &center, bool time_dep,
-		int time, wxString &extra, wxString &points);
+	void Append(bool enable,
+		unsigned int id,
+		bool time_dep,
+		const wxString &unit,
+		const wxString& name,
+		unsigned int group,
+		int count,
+		const wxString& intensity,
+		const wxString& color,
+		int branches,
+		double length,
+		double angle,
+		const wxString &center,
+		int time,
+		const wxString &points,
+		const wxString &voxels);
 	void AdjustSize();
 
 	wxString GetText(long item, int col);
-	void SetText(long item, int col, wxString &str);
+	void SetText(long item, int col, const wxString &str);
 	bool GetCurrSelection(std::set<int> &sel);
 	void ClearSelection();
 	void StartEdit(int type, bool use_color, const fluo::Color& color);

@@ -130,12 +130,23 @@ RulerListCtrl::~RulerListCtrl()
 {
 }
 
-void RulerListCtrl::Append(bool enable, unsigned int id,
-	wxString name, unsigned int group, int count,
-	wxString intensity, wxString &color,
-	int branches, double length, wxString &unit,
-	double angle, wxString &center, bool time_dep,
-	int time, wxString &extra, wxString &points)
+void RulerListCtrl::Append(
+	bool enable,
+	unsigned int id,
+	bool time_dep,
+	const wxString& unit,
+	const wxString& name,
+	unsigned int group,
+	int count,
+	const wxString& intensity,
+	const wxString& color,
+	int branches,
+	double length,
+	double angle,
+	const wxString& center,
+	int time,
+	const wxString& points,
+	const wxString& voxels)
 {
 	int col = 0;
 	wxString str;
@@ -160,7 +171,7 @@ void RulerListCtrl::Append(bool enable, unsigned int id,
 		str = "N/A";
 	SetItem(tmp, col, str); col++;
 	SetItem(tmp, col, points); col++;
-	SetItem(tmp, col, extra); col++;
+	SetItem(tmp, col, voxels); col++;
 
 	if (!enable)
 		SetItemBackgroundColour(tmp, wxColour(200, 200, 200));
@@ -193,7 +204,7 @@ wxString RulerListCtrl::GetText(long item, int col)
 	return info.GetText();
 }
 
-void RulerListCtrl::SetText(long item, int col, wxString& str)
+void RulerListCtrl::SetText(long item, int col, const wxString& str)
 {
 	wxListItem info;
 	info.SetId(item);
@@ -1085,13 +1096,24 @@ void MeasureDlg::UpdateRulerList()
 		fluo::Point cp = ruler->GetCenter();
 		center = wxString::Format("(%.2f, %.2f, %.2f)",
 			cp.x(), cp.y(), cp.z());
-		wxString str = ruler->GetDelInfoValues(", ");
-		m_ruler_list->Append(ruler->GetDisp(), ruler->Id(),
-			ruler->GetName(), group, count,
-			intensity, color,
-			ruler->GetNumBranch(), ruler->GetLength(), unit,
-			ruler->GetAngle(), center, ruler->GetTransient(),
-			ruler->GetTransTime(), str, points);
+		wxString voxels = ruler->GetDelInfoValues(", ");
+		m_ruler_list->Append(
+			ruler->GetDisp(),
+			ruler->Id(),
+			ruler->GetTransient(),
+			unit,
+			ruler->GetName(),
+			group,
+			count,
+			intensity,
+			color,
+			ruler->GetNumBranch(),
+			ruler->GetLength(),
+			ruler->GetAngle(),
+			center,
+			ruler->GetTransTime(),
+			points,
+			voxels);
 	}
 
 	m_ruler_list->AdjustSize();

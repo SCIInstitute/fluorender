@@ -650,6 +650,17 @@ std::string Ruler::GetPosNames()
 	return output;
 }
 
+//profile
+void Ruler::SetPaintIntensity(int ival, double dval)
+{
+	m_profile.clear();
+	ProfileBin bin;
+	bin.m_pixels = ival;
+	bin.m_accum = dval;
+	bin.dist = 0;
+	m_profile.push_back(bin);
+}
+
 void Ruler::SaveProfile(const std::string &filename)
 {
 	if (m_profile.empty())

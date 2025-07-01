@@ -559,6 +559,7 @@ namespace flrd
 		std::string GetPosNames();
 
 		//profile
+		void SetPaintIntensity(int ival, double dval);//use intensity value from paint instead of profile
 		void SetInfoProfile(const std::string &str)
 		{
 			m_info_profile = str;

@@ -887,6 +887,7 @@ void RulerHandler::AddPaintRulerPoint()
 
 	fluo::Point center = cover.GetCenter();
 	double size = counter.GetSum();
+	double intensity = counter.GetWeightedSum();
 
 	std::string str;
 	bool new_ruler = true;
@@ -928,7 +929,8 @@ void RulerHandler::AddPaintRulerPoint()
 			view->SetCurRuler(ruler);
 	}
 
-	Profile(ruler);
+	ruler->SetPaintIntensity(static_cast<int>(size), intensity*vd->GetMaxScale());
+	//Profile(ruler);
 }
 
 bool RulerHandler::MoveRuler(int mx, int my)
