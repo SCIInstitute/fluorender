@@ -10891,6 +10891,25 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
 
+		if (m_int_mode == InteractiveMode::CenterClick)
+		{
+			fluo::Point p, ip;
+			glbin_volume_point.SetVolumeData(cur_vd);
+			if (glbin_volume_point.GetPointVolume(m_mouse_x, m_mouse_y, 2, true, m_pin_pick_thresh, p, ip) > 0.0 ||
+				glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p )>0.0 ||
+				glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p)>0.0)
+			{
+				//double obj_transx, obj_transy, obj_transz;
+				p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
+					p.y() - m_obj_ctry - m_obj_ctr_offy,
+					p.z() - m_obj_ctrz - m_obj_ctr_offz);
+				m_obj_transx = p.x();
+				m_obj_transy = p.y();
+				m_obj_transz = p.z();
+				RefreshGL(17);
+			}
+		}
+
 		return;
 	}
 	if (state.m_mouse_right_down)

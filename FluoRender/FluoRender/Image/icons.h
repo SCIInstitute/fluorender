@@ -163,8 +163,10 @@ public:
 	const static unsigned char axis_png[577];
 	/* camera.png - 1126 bytes */
 	const static unsigned char camera_png[1126];
-	/* center.png - 1370 bytes */
-	const static unsigned char center_png[1370];
+	/* center.png - 1230 bytes */
+	const static unsigned char center_png[1230];
+	/* center_click.png - 1341 bytes */
+	const static unsigned char center_click_png[1341];
 	//view modes
 	/* composite.png - 998 bytes */
 	const static unsigned char composite_png[998];
@@ -200,12 +202,12 @@ public:
 	const static unsigned char colormap_off_png[753];
 	/* colormap_text.png - 969 bytes */
 	const static unsigned char colormap_text_png[969];
-	/* pin.png - 881 bytes */
-	const static unsigned char pin_png[881];
-	/* anchor_dark.png - 828 bytes */
-	const static unsigned char anchor_dark_png[828];
-	/* ratio.png - 111 bytes */
-	const static unsigned char ratio_png[111];
+	/* pin.png - 966 bytes */
+	const static unsigned char pin_png[966];
+	/* anchor_dark.png - 927 bytes */
+	const static unsigned char pin_off_png[927];
+	/* ratio.png - 932 bytes */
+	const static unsigned char ratio_png[932];
 	/* scalebar.png - 803 bytes */
 	const static unsigned char scalebar_png[803];
 	/* scale_text.png - 797 bytes */

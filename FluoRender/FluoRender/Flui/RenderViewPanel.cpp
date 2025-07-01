@@ -523,7 +523,7 @@ void RenderViewPanel::CreateBar()
 	m_pin_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_pin_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(anchor_dark);
+	bitmap = wxGetBitmap(pin_off);
 	m_pin_btn->AddCheckTool(0, "Pin",
 		bitmap, wxNullBitmap,
 		"Anchor the rotation center on data",
@@ -541,6 +541,16 @@ void RenderViewPanel::CreateBar()
 	m_center_btn->SetToolLongHelp(0, "Center the Data on the Render View");
 	m_center_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnCenter, this);
 	m_center_btn->Realize();
+	m_center_click_btn = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_center_click_btn->SetDoubleBuffered(true);
+	bitmap = wxGetBitmap(center_click);
+	m_center_click_btn->AddCheckTool(0, "Click Center",
+		bitmap, wxNullBitmap,
+		"Center the Render View to a clicked point on data",
+		"Center the Render View to a clicked point on data");
+	m_center_click_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnCenterClick, this);
+	m_center_click_btn->Realize();
 
 	//one to one scale
 	m_scale_121_btn = new wxToolBar(this, wxID_ANY,
@@ -588,6 +598,7 @@ void RenderViewPanel::CreateBar()
 	sizer_v_4->AddSpacer(50);
 	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
+	sizer_v_4->Add(m_center_click_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_factor_sldr, 1, wxEXPAND);
 	sizer_v_4->Add(m_scale_factor_spin, 0, wxALIGN_CENTER);
@@ -863,6 +874,12 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", dval));
 	}
 
+	//center click
+	if (update_all || FOUND_VALUE(gstCenterClick))
+	{
+		m_center_click_btn->ToggleTool(0, m_render_view->GetIntMode() == InteractiveMode::CenterClick);
+	}
+
 	//scale factor
 	if (update_all || FOUND_VALUE(gstScaleFactor))
 	{
@@ -944,7 +961,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 				wxGetBitmap(pin));
 		else
 			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(anchor_dark));
+				wxGetBitmap(pin_off));
 	}
 
 	//lock rot
@@ -1207,10 +1224,18 @@ void RenderViewPanel::SetStereography(bool val)
 void RenderViewPanel::SetHolography(bool val)
 {
 	glbin_settings.m_hologram_mode = val ? 2 : 0;
-	//close full screen if holography is disabled
-	if (!glbin_settings.m_hologram_mode &&
-		m_canvas->GetParent() == m_full_frame)
-		m_canvas->Close();
+	if (val)
+	{
+		//go to full screen if not
+		if (m_canvas->GetParent() != m_full_frame)
+			SetFullScreen();
+	}
+	else
+	{
+		//close full screen if holography is disabled
+		if (m_canvas->GetParent() == m_full_frame)
+			m_canvas->Close();
+	}
 	FluoRefresh(0, { gstHologramMode });
 }
 
@@ -1556,6 +1581,11 @@ void RenderViewPanel::OnPin(wxCommandEvent& event)
 void RenderViewPanel::OnCenter(wxCommandEvent& event)
 {
 	SetCenter();
+}
+
+void RenderViewPanel::OnCenterClick(wxCommandEvent& event)
+{
+	glbin_states.ToggleIntMode(InteractiveMode::CenterClick);
 }
 
 void RenderViewPanel::OnScale121(wxCommandEvent& event)

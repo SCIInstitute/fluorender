@@ -425,6 +425,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstOrthoRight "ortho right"
 #define gstOrthoBottom "ortho bottom"
 #define gstOrthoTop "ortho top"
+#define gstCenterClick "center click"
 #define gstScaleFactor "scale factor"//scale factor
 #define gstScaleFactorSaved "scale factor saved"
 #define gstScaleFactor121 "scale factor 121"

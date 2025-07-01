@@ -192,6 +192,7 @@ private:
 	//right bar///////////////////////////////////////////////////
 	wxToolBar *m_pin_btn;
 	wxToolBar *m_center_btn;
+	wxToolBar* m_center_click_btn;
 	wxToolBar *m_scale_121_btn;
 	wxSingleSlider *m_scale_factor_sldr;
 	wxTextCtrl *m_scale_factor_text;
@@ -238,6 +239,7 @@ private:
 	//bar right
 	void OnPin(wxCommandEvent& event);
 	void OnCenter(wxCommandEvent& event);
+	void OnCenterClick(wxCommandEvent& event);
 	void OnScale121(wxCommandEvent& event);
 	void OnScaleFactorChange(wxScrollEvent& event);
 	void OnScaleFactorEdit(wxCommandEvent& event);

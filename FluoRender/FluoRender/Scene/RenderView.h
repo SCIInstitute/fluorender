@@ -107,6 +107,7 @@ enum class InteractiveMode
 	Pencil,				//13-pencil with multipoint ruler
 	Magnet,				//15-edit ruler by magnet
 	CropFrame,			//16-edit crop frame
+	CenterClick			//17-center render view on click
 };
 class RenderView : public TreeLayer
 {
