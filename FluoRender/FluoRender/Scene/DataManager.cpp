@@ -3645,9 +3645,6 @@ void VolumeData::ApplyMlVolProp()
 			dval2 = std::max(0.0f, m_ep->getParam("colormap_hi"));
 			SetColormapValues(dval, dval2);
 		}
-		//interpolation
-		dval = m_ep->getParam("interp_enable");
-		SetInterpolate(dval > 0.5);
 		//inversion
 		dval = m_ep->getParam("invert_enable");
 		SetInvert(dval > 0.5);
@@ -3657,9 +3654,12 @@ void VolumeData::ApplyMlVolProp()
 		//enable hi transp
 		dval = m_ep->getParam("transparent_enable");
 		SetAlphaPower(dval > 0.5 ? 2.0 : 1.0);
+		//interpolation
+		//dval = m_ep->getParam("interp_enable");
+		//SetInterpolate(dval > 0.5);
 		//noise reduction
-		dval = m_ep->getParam("denoise_enable");
-		SetNR(dval > 0.5);
+		//dval = m_ep->getParam("denoise_enable");
+		//SetNR(dval > 0.5);
 	}
 }
 

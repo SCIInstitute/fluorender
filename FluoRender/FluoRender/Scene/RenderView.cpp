@@ -149,7 +149,7 @@ RenderView::RenderView() :
 	//interpolation
 	m_intp(true),
 	//interactive modes
-	m_int_mode(InteractiveMode::None),
+	m_int_mode(InteractiveMode::Viewport),
 	m_crop_type(0),
 	m_force_clear(false),
 	//interactive state control

@@ -518,8 +518,10 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
+		auto view = glbin_current.render_view.lock();
+		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::None;
 		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-		m_toolbar->ToggleTool(ID_BrushGrow, sel_mode == flrd::SelectMode::Grow);
+		m_toolbar->ToggleTool(ID_BrushGrow, int_mode == InteractiveMode::Grow);
 		m_toolbar->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
 		m_toolbar->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
 		m_toolbar->ToggleTool(ID_BrushSingle, sel_mode == flrd::SelectMode::SingleSelect);

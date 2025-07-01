@@ -900,6 +900,17 @@ void RulerHandler::AddPaintRulerPoint()
 		str = "\t" + std::to_string(static_cast<int>(size));
 		ruler->AddInfoValues(str);
 		new_ruler = false;
+		if (m_mode == RulerMode::Ellipse)
+		{
+			//finish
+			if (auto view = glbin_current.render_view.lock())
+			{
+				glm::mat4 mv_temp = view->GetDrawMat();
+				glm::vec4 axis(0, 0, -1, 0);
+				axis = glm::transpose(mv_temp) * axis;
+				ruler->FinishEllipse(fluo::Vector(axis[0], axis[1], axis[2]));
+			}
+		}
 	}
 	if (new_ruler)
 	{
