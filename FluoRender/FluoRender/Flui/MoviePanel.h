@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <vector>
 #include <string>
-#include <Debug.h>
 
 #define UITEXT_NBPG0 "Basic"
 #define UITEXT_NBPG1 "Keyframes"
@@ -57,7 +56,7 @@ public:
 
 	void SelectItemSilently(int i)
 	{
-		DBGPRINT(L"Select Key List Item: %d\n", i);
+		//DBGPRINT(L"Select Key List Item: %d\n", i);
 		m_silent_select = true;
 		Freeze(); // Optional: prevents flicker during updates
 

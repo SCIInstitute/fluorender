@@ -45,7 +45,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <VolumeCalculator.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <Debug.h>
 
 using namespace flrd;
 
@@ -838,7 +837,7 @@ void VolumeSelector::PasteMask(int op)
 
 bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 {
-	DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
+	//DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
 	auto view = glbin_current.render_view.lock();
 	if (!m_vd)
 		m_vd = glbin_current.vol_data.lock();

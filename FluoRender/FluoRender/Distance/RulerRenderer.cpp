@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextRenderer.h>
 #include <ShaderProgram.h>
 #include <TextureRenderer.h>
+#include <RulerHandler.h>
 #include <ImgShader.h>
 #include <VertexArray.h>
 #include <Ruler.h>
@@ -49,6 +50,7 @@ RulerRenderer::RulerRenderer() :
 	m_view(0),
 	m_ruler_list(0),
 	m_line_size(3),
+	m_sel_line_size(5),
 	m_draw_text(true)
 {
 
@@ -82,14 +84,28 @@ void RulerRenderer::Draw()
 	}
 	glm::mat4 matrix = glm::ortho(float(0), float(nx), float(0), float(ny));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-	shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
 
 	flvr::VertexArray* va_rulers =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
 	if (va_rulers)
 	{
 		std::vector<float> verts;
-		unsigned int num = DrawVerts(verts);
+		unsigned int num = 0;
+		
+		//draw unselected first
+		shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
+		num = DrawVerts(verts, 2);
+		if (num)
+		{
+			va_rulers->buffer_data(flvr::VABuf_Coord,
+				sizeof(float)*verts.size(),
+				&verts[0], GL_STREAM_DRAW);
+			va_rulers->set_param(0, num);
+			va_rulers->draw();
+		}
+		//draw selected next
+		shader->setLocalParam(0, nx, ny, m_sel_line_size, 0.0);
+		num = DrawVerts(verts, 1);
 		if (num)
 		{
 			va_rulers->buffer_data(flvr::VABuf_Coord,
@@ -108,10 +124,12 @@ void RulerRenderer::Draw()
 		DrawTextAt(nx, ny);
 }
 
-unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
+unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 {
 	if (!m_view || !m_ruler_list)
 		return 0;
+
+	verts.clear();
 
 	size_t tseq_cur_num;
 	if (m_view->m_frame_num_type == 1)
@@ -130,24 +148,52 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 	glm::mat4 proj_mat = m_view->GetProjection();
 	p.set(glm::value_ptr(proj_mat));
 
+	std::set<int> sel_list = glbin_ruler_handler.GetSelRulers();
 	//estimate
 	int vert_num = 0;
 	for (size_t i = 0; i < m_ruler_list->size(); ++i)
-		if ((*m_ruler_list)[i] &&
-			(*m_ruler_list)[i]->GetDisp())
-			vert_num += (*m_ruler_list)[i]->GetNumPoint();
+	{
+		Ruler* ruler = (*m_ruler_list)[i];
+		if (!ruler || !ruler->GetDisp())
+			continue;
+		//check condition
+		if (sel_mode == 1)
+		{
+			if (sel_list.find(static_cast<int>(i)) == sel_list.end())
+				continue;
+		}
+		else if (sel_mode == 2)
+		{
+			if (sel_list.find(static_cast<int>(i)) != sel_list.end())
+				continue;
+		}
+
+		vert_num += (*m_ruler_list)[i]->GetNumPoint();
+	}
 	verts.reserve(vert_num * 10 * 3 * 2);
 
 	unsigned int num = 0;
 	fluo::Point p1, p2;
-	flrd::RulerPoint *rp1, *rp2;
+	RulerPoint *rp1, *rp2;
 	fluo::Color c;
 	fluo::Color text_color = m_view->GetTextColor();
 	size_t rwt = tseq_cur_num;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
-		flrd::Ruler* ruler = (*m_ruler_list)[i];
+		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
+		//check condition
+		if (sel_mode == 1)
+		{
+			if (sel_list.find(static_cast<int>(i)) == sel_list.end())
+				continue;
+		}
+		else if (sel_mode == 2)
+		{
+			if (sel_list.find(static_cast<int>(i)) != sel_list.end())
+				continue;
+		}
+
 		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;
 		int interp = ruler->GetInterp();
@@ -186,7 +232,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts)
 				else if (np == 4)
 				{
 					//draw ellipse
-					flrd::RulerPoint* rps[4];
+					RulerPoint* rps[4];
 					rps[0] = ruler->GetRulerPoint(0);
 					rps[1] = ruler->GetRulerPoint(1);
 					rps[2] = ruler->GetRulerPoint(2);
@@ -548,7 +594,7 @@ void RulerRenderer::DrawTextAt(int nx, int ny)
 	size_t rwt = tseq_cur_num;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
-		flrd::Ruler* ruler = (*m_ruler_list)[i];
+		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;

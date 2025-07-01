@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerRenderer_H_
 
 #include <vector>
+#include <set>
 
 class RenderView;
 namespace fluo
@@ -67,9 +68,19 @@ namespace flrd
 			m_line_size = val;
 		}
 
+		void SetSelLineSize(double val)
+		{
+			m_sel_line_size = val;
+		}
+
 		void SetDrawText(bool val)
 		{
 			m_draw_text = val;
+		}
+
+		void SetSelection(const std::set<int>& sel_list)
+		{
+			m_sel_list = sel_list;
 		}
 
 		void Draw();
@@ -78,10 +89,12 @@ namespace flrd
 		RenderView *m_view;
 		RulerList *m_ruler_list;
 		double m_line_size;
+		double m_sel_line_size;//line size for selected ruler
 		bool m_draw_text;
+		std::set<int> m_sel_list;//index to selected rulers
 
 	private:
-		unsigned int DrawVerts(std::vector<float> &verts);
+		unsigned int DrawVerts(std::vector<float> &verts, int sel_mode);//sel_mode: 0: all; 1: selected; 2 unselected
 		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c);
 		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
 			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,

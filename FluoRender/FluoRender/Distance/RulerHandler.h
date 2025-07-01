@@ -51,6 +51,9 @@ namespace flrd
 		RulerHandler();
 		~RulerHandler();
 
+		//set selected ruler list
+		void SetSelRulers(const std::set<int>& sel_list) { m_sel_list = sel_list; }
+		std::set<int> GetSelRulers() { return m_sel_list; }
 		//handle group
 		void NewGroup();
 		void SetGroup(unsigned int group) { m_group = group; }
@@ -167,6 +170,7 @@ namespace flrd
 		void GenerateWalk(size_t nl, double dir, WalkCycle& cycle);
 
 	private:
+		std::set<int> m_sel_list;
 		unsigned int m_group;
 		Ruler* m_mag_ruler;
 		size_t m_mag_branch;

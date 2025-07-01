@@ -1794,12 +1794,20 @@ void MeasureDlg::OnSelection(wxListEvent& event)
 	fluo::Color color = ruler->GetColor();
 	m_ruler_list->StartEdit(static_cast<int>(rul_mode), use_color, color);
 	
-	FluoUpdate({ gstRulerTransient, gstRulerInterpolation, gstRulerDisp });
+	std::set<int> sel;
+	m_ruler_list->GetCurrSelection(sel);
+	glbin_ruler_handler.SetSelRulers(sel);
+
+	FluoRefresh(2, { gstRulerTransient, gstRulerInterpolation, gstRulerDisp },
+		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnEndSelection(wxListEvent& event)
 {
 	m_ruler_list->EndEdit();
+	std::set<int> sel;
+	m_ruler_list->GetCurrSelection(sel);
+	glbin_ruler_handler.SetSelRulers(sel);
 	SetCurrentRuler();
 }
 
