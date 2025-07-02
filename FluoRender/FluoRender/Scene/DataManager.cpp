@@ -6185,23 +6185,36 @@ void DataManager::SetProjectPath(const std::wstring& path)
 
 std::wstring DataManager::SearchProjectPath(const std::wstring& filename)
 {
-	int i;
-	std::wstring pathname = filename;
-	if (m_prj_path == L"")
+	if (m_prj_path.empty())
 		return L"";
-	std::wstring search_str;
-	for (i = pathname.length() - 1; i >= 0; i--)
+
+	std::filesystem::path original_path(filename);
+	std::filesystem::path search_str;
+
+	// Normalize the path to handle mixed separators
+	original_path = original_path.lexically_normal();
+
+	// Try partial path reconstruction from the end
+	for (auto it = original_path.end(); it != original_path.begin();)
 	{
-		if (pathname[i] == L'\\' || pathname[i] == L'/')
-		{
-			search_str.insert(search_str.begin(), L'/');
-			std::wstring name_temp = m_prj_path + search_str;
-			if (std::filesystem::exists(name_temp))
-				return name_temp;
-		}
-		else
-			search_str.insert(search_str.begin(), pathname[i]);
+		--it;
+		search_str = std::filesystem::path(*it) / search_str;
+		std::filesystem::path candidate = std::filesystem::path(m_prj_path) / search_str;
+
+		if (std::filesystem::exists(candidate))
+			return candidate.wstring();
 	}
+
+	// If not found, do a recursive search for the filename only
+	std::wstring target_filename = original_path.filename().wstring();
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(m_prj_path))
+	{
+		if (entry.is_regular_file() && entry.path().filename() == target_filename)
+		{
+			return entry.path().wstring();
+		}
+	}
+
 	return L"";
 }
 
