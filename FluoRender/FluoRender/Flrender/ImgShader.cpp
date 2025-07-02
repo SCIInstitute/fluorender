@@ -717,8 +717,8 @@ using std::ostringstream;
 	"{\n" \
 	"	vec2 texSize = loc0.z < 2.5 ? loc0.xy : (loc0.xy + loc1.xy * loc1.z) / 2.0;\n" \
 	"	vec2 pixelCoord = uv / texSize;\n" \
-	"	vec2 base = floor(pixelCoord - 0.5);\n" \
-	"	vec2 f = fract(pixelCoord - 0.5);\n" \
+	"	vec2 base = floor(pixelCoord);\n" \
+	"	vec2 f = fract(pixelCoord);\n" \
 	"\n" \
 	"	vec4 color = vec4(0.0);\n" \
 	"	float totalWeight = 0.0;\n" \
@@ -729,8 +729,12 @@ using std::ostringstream;
 	"		{\n" \
 	"			vec2 offset = vec2(i, j);\n" \
 	"			float w = catmullRom(offset.x - f.x) * catmullRom(offset.y - f.y);\n" \
-	"			vec2 sampleUV = (base + offset + 0.5) * texSize;\n" \
-	"			color += texture(tex0, sampleUV) * w;\n" \
+	"			vec2 sampleUV = (base + offset) * texSize;\n" \
+	"			vec4 old_color = texture(tex0, sampleUV);\n" \
+	"\n" \
+	"			float alpha = clamp(old_color.a, 0.0, 1.0);\n" \
+	"			w *= mix(1.5, 0.5, alpha);\n" \
+	"			color += old_color * w;\n" \
 	"			totalWeight += w;\n" \
 	"		}\n" \
 	"	}\n" \
