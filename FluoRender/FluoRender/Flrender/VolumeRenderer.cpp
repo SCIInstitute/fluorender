@@ -290,7 +290,7 @@ namespace flvr
 		}
 		else if (buf_name == "blend_nr")
 		{
-			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.2, 3.5);
+			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 3.5);
 			//sf = std::min(double(1.0 / zoom_data_), 3.5);
 		}
 		else

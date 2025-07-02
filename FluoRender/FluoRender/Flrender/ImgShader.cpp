@@ -730,24 +730,22 @@ using std::ostringstream;
 	"			vec2 offset = vec2(i, j);\n" \
 	"			float w = catmullRom(offset.x - f.x) * catmullRom(offset.y - f.y);\n" \
 	"			vec2 sampleUV = (base + offset) * texSize;\n" \
-	"			vec4 old_color = texture(tex0, sampleUV);\n" \
-	"\n" \
-	"			float alpha = clamp(old_color.a, 0.0, 1.0);\n" \
-	"			w *= mix(1.5, 0.5, alpha);\n" \
-	"			color += old_color * w;\n" \
+	"			color += texture(tex0, sampleUV) * w;\n" \
 	"			totalWeight += w;\n" \
 	"		}\n" \
 	"	}\n" \
 	"\n" \
-	"	return color / totalWeight;\n" \
+	"	vec4 old_color = texture(tex0, uv);\n" \
+	"	color /= totalWeight;\n" \
+	"	return mix(color, old_color, clamp(old_color.a, 0.0, 1.0));\n" \
 	"}\n" \
 	"\n" \
 	"void main()\n" \
 	"{\n" \
-	"	float blend = pow(smoothstep(0.6, 1.6, loc0.z), 0.8);\n" \
+	"	float blend = smoothstep(0.6, 1.6, loc0.z);\n" \
 	"	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
 	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
-	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
+	"	FragColor = mix(lanczosColor, sharpColor, 1.0);\n" \
 	"	FragColor = clamp(FragColor, 0.0, 1.0);\n" \
 	"}\n"
 
