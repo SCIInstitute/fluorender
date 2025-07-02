@@ -1176,7 +1176,7 @@ void TIFReader::SetBatch(bool batch)
 	{
 		//separate path and name
 		std::wstring suffix = GET_SUFFIX(m_path_name);
-		FIND_FILES_BATCH(m_path_name, suffix, m_batch_list, m_cur_batch);
+		FIND_FILES_BATCH(m_path_name, ESCAPE_REGEX(suffix), m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else
@@ -2318,7 +2318,7 @@ std::wstring TIFReader::GetSearchString(int mode, int t)
 			str += ss.str();
 		}
 		else
-			str += it->str;
+			str += ESCAPE_REGEX(it->str);
 	}
 	return str;
 }

@@ -425,6 +425,7 @@ private:
 	void OnCh3Check(wxCommandEvent& event);
 	void OnChEmbedCheck(wxCommandEvent& event);
 	void OnChSaveCmpCheck(wxCommandEvent& event);
+	void OnSysColorChanged(wxSysColourChangedEvent& event);
 
 private:
 	bool update_props(int excl_self, wxWindow* p1, wxWindow* p2);

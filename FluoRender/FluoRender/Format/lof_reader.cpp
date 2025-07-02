@@ -195,7 +195,7 @@ void LOFReader::SetBatch(bool batch)
 	if (batch)
 	{
 		//read the directory info
-		FIND_FILES_BATCH(m_path_name, L".lof", m_batch_list, m_cur_batch);
+		FIND_FILES_BATCH(m_path_name, ESCAPE_REGEX(L".lof"), m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else

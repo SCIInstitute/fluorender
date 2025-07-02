@@ -231,7 +231,6 @@ private:
 	DataTreeCtrl* m_datatree;
 	wxToolBar *m_toolbar;
 	wxToolBar* m_toolbar2;
-	wxToolBar* m_toolbar3;
 
 	//save the pos
 	int m_scroll_pos;

@@ -358,6 +358,12 @@ inline std::wstring NORM_PATH(const std::wstring& path)
 	return normalizedPath;
 }
 
+inline std::wstring ESCAPE_REGEX(const std::wstring& input)
+{
+	static const std::wregex special_chars(L"([.^$|()\\[\\]{}*+?\\\\])");
+	return std::regex_replace(input, special_chars, L"\\$1");
+}
+
 inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
 {
 	size_t begin = path_name.rfind(id);
@@ -365,7 +371,7 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	if (begin == std::wstring::npos)
 		return false;
 
-	std::wstring searchstr = path_name.substr(0, begin) + L".*";
+	std::wstring searchstr = path_name.substr(0, begin) + L"*";
 	std::wstring t_num;
 	size_t k;
 	bool end_digits = false;
@@ -391,15 +397,15 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	std::filesystem::path p(path_name);
 	p = p.parent_path();
 	std::wstring search_path = p.wstring();
-	std::wregex regex(NORM_PATH(searchstr));
+	std::wregex regex(ESCAPE_REGEX(searchstr));
 	batch_list.clear();
-	cur_batch = -1;
 	int cnt = 0;
 
-	//normalize to linux style always
-	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		std::wstring str = NORM_PATH(entry.path().wstring());
-		if (std::regex_match(str, regex)) {
+	for (const auto& entry : std::filesystem::directory_iterator(search_path))
+	{
+		std::wstring str = entry.path().wstring();
+		if (std::regex_match(str, regex))
+		{
 			std::wstring name = entry.path().wstring();
 			batch_list.push_back(name);
 			if (name == path_name)
@@ -420,16 +426,17 @@ inline void FIND_FILES_BATCH(const std::wstring& path_name,
 	p = p.parent_path();
 	std::wstring search_path = p.wstring();
 	std::wstring full_search_mask =
-		NORM_PATH(search_path + L".*" + search_mask);
+		search_path + L".*" + search_mask;
 
 	std::wregex regex(full_search_mask);
 	batch_list.clear();
-	cur_batch = -1;
 	int cnt = 0;
 
-	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		std::wstring str = NORM_PATH(entry.path().wstring());
-		if (std::regex_match(str, regex)) {
+	for (const auto& entry : std::filesystem::directory_iterator(search_path))
+	{
+		std::wstring str = entry.path().wstring();
+		if (std::regex_match(str, regex))
+		{
 			std::wstring name = entry.path().wstring();
 			batch_list.push_back(name);
 			if (name == path_name)
@@ -448,15 +455,17 @@ inline void FIND_FILES(const std::wstring& path_name,
 	p = p.parent_path();
 	std::wstring search_path = p.wstring();
 
-	std::wregex regex(NORM_PATH(search_mask));
+	std::wregex regex(search_mask);
 	batch_list.clear();
-	cur_batch = -1;
 	int cnt = 0;
 
-	for (const auto& entry : std::filesystem::directory_iterator(search_path)) {
-		std::wstring str = NORM_PATH(entry.path().wstring());
-		if (std::regex_match(str, regex)) {
-			std::wstring name = entry.path().wstring();
+	for (const auto& entry : std::filesystem::directory_iterator(search_path))
+	{
+		std::wstring str = entry.path().filename().wstring();
+		if (std::regex_match(str, regex))
+		{
+			std::filesystem::path full_path = p / entry.path().filename();
+			std::wstring name = full_path.wstring();
 			batch_list.push_back(name);
 			if (name == path_name)
 				cur_batch = cnt;

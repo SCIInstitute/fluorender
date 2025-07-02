@@ -405,72 +405,12 @@ TreePanel::TreePanel(MainFrame* frame,
 	m_toolbar2->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
 	m_toolbar2->Realize();
 
-	//toolbar 3
-	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_LEFT|wxTB_NODIVIDER);
-	bitmap = wxGetBitmap(filter_small);
-	m_toolbar3->AddTool(ID_Ocl, "Volume Filter", bitmap,
-		"Show Volume Filter Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Ocl, "Show Volume Filter Dialog");
-	m_toolbar3->AddSeparator();
-	bitmap = wxGetBitmap(brush_small);
-	m_toolbar3->AddTool(ID_Brush, "Paint Brush", bitmap,
-		"Show Paint Brush Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Brush, "Show Paint Brush Dialog");
-	bitmap = wxGetBitmap(measure_small);
-	m_toolbar3->AddTool(ID_Measurement, "Measurement", bitmap,
-		"Show Measurement Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Measurement, "Show Measurement Dialog");
-	bitmap = wxGetBitmap(component_small);
-	m_toolbar3->AddTool(ID_Component, "Component Analyzer", bitmap,
-		"Show Component Analyzer Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Component, "Show Component Analyzer Dialog");
-	bitmap = wxGetBitmap(track_small);
-	m_toolbar3->AddTool(ID_Track, "Tracking", bitmap,
-		"Show Tracking Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Track, "Show Tracking Dialog");
-	m_toolbar3->AddSeparator();
-	bitmap = wxGetBitmap(calculate_small);
-	m_toolbar3->AddTool(ID_Calculation, "Calculation", bitmap,
-		"Show Calculation Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Calculation, "Show Calculation Dialog");
-	bitmap = wxGetBitmap(noise_red_small);
-	m_toolbar3->AddTool(ID_NoiseReduct, "Noise Reduction", bitmap,
-		"Show Noise Reduction Dialog");
-	m_toolbar3->SetToolLongHelp(ID_NoiseReduct, "Show Noise Reduction Dialog");
-	bitmap = wxGetBitmap(size_small);
-	m_toolbar3->AddTool(ID_VolumeSize, "Volume Size", bitmap,
-		"Show Volume Size Dialog");
-	m_toolbar3->SetToolLongHelp(ID_VolumeSize, "Show Volume Size Dialog");
-	bitmap = wxGetBitmap(colocal_small);
-	m_toolbar3->AddTool(ID_Colocalization, "Colocalization", bitmap,
-		"Show Colocalization Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Colocalization, "Show Colocalization Dialog");
-	bitmap = wxGetBitmap(convert_small);
-	m_toolbar3->AddTool(ID_Convert, "Convert", bitmap,
-		"Show Convert Dialog");
-	m_toolbar3->SetToolLongHelp(ID_Convert, "Show Convert Dialog");
-
-	m_toolbar3->Bind(wxEVT_TOOL, &TreePanel::OnToolbar, this);
-	m_toolbar3->Realize();
-
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 
-	int tool_width = m_toolbar3->GetSize().GetWidth();
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_1->Add(tool_width, tool_width);
-	sizer_1->Add(m_toolbar, 0, wxEXPAND);
-	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_2->Add(tool_width, tool_width);
-	sizer_2->Add(m_toolbar2, 0, wxEXPAND);
-	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-	sizer_3->Add(m_toolbar3, 0, wxEXPAND);
-	sizer_3->Add(m_datatree, 1, wxEXPAND);
-
-	sizer_v->Add(sizer_1, 0, wxEXPAND);
-	sizer_v->Add(sizer_2, 0, wxEXPAND);
-	sizer_v->Add(sizer_3, 1, wxEXPAND);
+	sizer_v->Add(m_toolbar, 0, wxEXPAND | wxLEFT, 20);
+	sizer_v->Add(m_toolbar2, 0, wxEXPAND | wxLEFT, 20);
+	sizer_v->Add(m_datatree, 1, wxEXPAND);
 
 	SetSizer(sizer_v);
 	Layout();
@@ -1459,7 +1399,7 @@ void TreePanel::ToggleDisplay()
 		if (view && group)
 		{
 			group->ToggleDisp();
-			view->SetVolPopDirty();
+			view->SetMeshPopDirty();
 		}
 	}
 	}
@@ -1774,36 +1714,6 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 		break;
 	case ID_BrushDelete:
 		BrushDelete();
-		break;
-	case ID_Brush:
-		m_frame->ShowBrushDlg();
-		break;
-	case ID_Measurement:
-		m_frame->ShowMeasureDlg();
-		break;
-	case ID_Component:
-		m_frame->ShowComponentDlg();
-		break;
-	case ID_Track:
-		m_frame->ShowTrackDlg();
-		break;
-	case ID_Calculation:
-		m_frame->ShowCalculationDlg();
-		break;
-	case ID_NoiseReduct:
-		m_frame->ShowNoiseCancellingDlg();
-		break;
-	case ID_VolumeSize:
-		m_frame->ShowCountingDlg();
-		break;
-	case ID_Colocalization:
-		m_frame->ShowColocalizationDlg();
-		break;
-	case ID_Convert:
-		m_frame->ShowConvertDlg();
-		break;
-	case ID_Ocl:
-		m_frame->ShowOclDlg();
 		break;
 	case ID_MachineLearning:
 		m_frame->ShowMachineLearningDlg();

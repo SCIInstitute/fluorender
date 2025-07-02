@@ -5847,7 +5847,7 @@ void CurrentObjects::SetMeshGroup(const std::shared_ptr<MeshGroup>& g)
 		}
 	}
 	vol_group.reset();
-	mesh_group.reset();
+	mesh_group = g;
 	vol_data.reset();
 	mesh_data.reset();
 	ann_data.reset();

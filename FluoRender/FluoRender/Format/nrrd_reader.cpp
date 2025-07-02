@@ -193,7 +193,7 @@ void NRRDReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		std::wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES_BATCH(search_path,L".nrrd",m_batch_list,m_cur_batch);
+		FIND_FILES_BATCH(search_path,ESCAPE_REGEX(L".nrrd"),m_batch_list,m_cur_batch);
 		m_batch = true;
 	}
 	else

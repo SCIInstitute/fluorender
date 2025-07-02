@@ -304,7 +304,7 @@ void ImageJReader::SetBatch(bool batch)
 	//	//separate path and name
 	//	wstring search_path = GET_PATH(m_path_name);
 	//	wstring suffix = GET_SUFFIX(m_path_name);
-	//	FIND_FILES_BATCH(search_path, suffix, m_batch_list, m_cur_batch);
+	//	FIND_FILES_BATCH(search_path, ESCAPE_REGEX(suffix), m_batch_list, m_cur_batch);
 	//	m_batch = true;
 	//}
 	//else

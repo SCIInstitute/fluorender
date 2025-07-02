@@ -219,7 +219,7 @@ ListPanel::ListPanel(MainFrame* frame,
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 
-	sizer_v->Add(m_toolbar, 0, wxEXPAND);
+	sizer_v->Add(m_toolbar, 0, wxEXPAND | wxLEFT, 20);
 	sizer_v->Add(m_datalist, 1, wxEXPAND);
 
 	SetSizer(sizer_v);

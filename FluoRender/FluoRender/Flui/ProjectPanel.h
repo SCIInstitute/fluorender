@@ -33,6 +33,20 @@ DEALINGS IN THE SOFTWARE.
 class ProjectPanel : public TabbedPanel
 {
 public:
+	enum
+	{
+		ID_Brush = 0,
+		ID_Measurement,
+		ID_Component,
+		ID_Track,
+		ID_Calculation,
+		ID_NoiseReduct,
+		ID_VolumeSize,
+		ID_Colocalization,
+		ID_Convert,
+		ID_Ocl
+	};
+
 	ProjectPanel(MainFrame* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -41,6 +55,11 @@ public:
 	~ProjectPanel() {}
 
 	void FluoUpdate(const fluo::ValueCollection& vc) {}
+
+private:
+	wxToolBar* m_toolbar;
+
+	void OnToolbar(wxCommandEvent& event);
 };
 
 #endif // _PROJECT_PANEL_H_

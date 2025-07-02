@@ -830,6 +830,7 @@ MainFrame::MainFrame(
 	Bind(wxEVT_AUI_PANE_CLOSE, &MainFrame::OnPaneClose, this);
 	Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
 	Bind(wxEVT_TIMER, [](wxTimerEvent& event) { wxWakeUpIdle(); });
+	Bind(wxEVT_SYS_COLOUR_CHANGED, &MainFrame::OnSysColorChanged, this);
 
 	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
 		GetDPIScaleFactor()))
@@ -2795,4 +2796,14 @@ void MainFrame::OnChSaveCmpCheck(wxCommandEvent& event)
 	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
 	if (ch_cmp)
 		glbin_settings.m_save_compress = ch_cmp->GetValue();
+}
+
+void MainFrame::OnSysColorChanged(wxSysColourChangedEvent& event)
+{
+	auto appearance = wxSystemSettings::GetAppearance();
+	wxApp::GetGUIInstance()->SetAppearance(wxApp::Appearance::System);
+
+	// Optionally, refresh UI elements
+	Refresh();
+	event.Skip(); // Allow default processing
 }
