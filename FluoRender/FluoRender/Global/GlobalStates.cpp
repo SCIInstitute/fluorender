@@ -128,13 +128,17 @@ bool GlobalStates::ToggleRulerMode(flrd::RulerMode mode)
 			view->GetIntMode() != InteractiveMode::Ruler)
 		{
 			if (single_sel)
-				int_mode = InteractiveMode::BrushRuler;
+			{
+				int_mode = InteractiveMode::Viewport;
+				rul_mode = flrd::RulerMode::None;
+				sel_mode = flrd::SelectMode::None;
+			}
 			else
 			{
 				int_mode = InteractiveMode::Ruler;
 				sel_mode = flrd::SelectMode::None;
+				rul_mode = mode;
 			}
-			rul_mode = mode;
 		}
 		else
 		{

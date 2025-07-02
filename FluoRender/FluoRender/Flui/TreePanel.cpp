@@ -407,7 +407,7 @@ TreePanel::TreePanel(MainFrame* frame,
 
 	//toolbar 3
 	m_toolbar3 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
+		wxTB_FLAT|wxTB_LEFT|wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(filter_small);
 	m_toolbar3->AddTool(ID_Ocl, "Volume Filter", bitmap,
 		"Show Volume Filter Dialog");
@@ -457,10 +457,20 @@ TreePanel::TreePanel(MainFrame* frame,
 	//organize positions
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 
-	sizer_v->Add(m_toolbar, 0, wxEXPAND);
-	sizer_v->Add(m_toolbar2, 0, wxEXPAND);
-	sizer_v->Add(m_datatree, 1, wxEXPAND);
-	sizer_v->Add(m_toolbar3, 0, wxEXPAND);
+	int tool_width = m_toolbar3->GetSize().GetWidth();
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	sizer_1->Add(tool_width, tool_width);
+	sizer_1->Add(m_toolbar, 0, wxEXPAND);
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer_2->Add(tool_width, tool_width);
+	sizer_2->Add(m_toolbar2, 0, wxEXPAND);
+	wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
+	sizer_3->Add(m_toolbar3, 0, wxEXPAND);
+	sizer_3->Add(m_datatree, 1, wxEXPAND);
+
+	sizer_v->Add(sizer_1, 0, wxEXPAND);
+	sizer_v->Add(sizer_2, 0, wxEXPAND);
+	sizer_v->Add(sizer_3, 1, wxEXPAND);
 
 	SetSizer(sizer_v);
 	Layout();

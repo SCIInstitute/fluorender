@@ -875,7 +875,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//center click
-	if (update_all || FOUND_VALUE(gstCenterClick))
+	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		m_center_click_btn->ToggleTool(0, m_render_view->GetIntMode() == InteractiveMode::CenterClick);
 	}
@@ -1586,6 +1586,7 @@ void RenderViewPanel::OnCenter(wxCommandEvent& event)
 void RenderViewPanel::OnCenterClick(wxCommandEvent& event)
 {
 	glbin_states.ToggleIntMode(InteractiveMode::CenterClick);
+	m_frame->UpdateProps({ gstFreehandToolState });
 }
 
 void RenderViewPanel::OnScale121(wxCommandEvent& event)

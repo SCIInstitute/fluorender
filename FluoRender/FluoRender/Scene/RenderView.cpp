@@ -10906,6 +10906,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				m_obj_transx = p.x();
 				m_obj_transy = p.y();
 				m_obj_transz = p.z();
+				m_interactive = true;
 				RefreshGL(17);
 			}
 		}
