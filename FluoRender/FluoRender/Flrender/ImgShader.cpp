@@ -671,7 +671,7 @@ using std::ostringstream;
 	"{\n" \
 	"	if (abs(x) < 1e-5)\n" \
 	"		return 1.0;\n" \
-	"	//x *= 3.14159265;\n" \
+	"	x *= 3.14159265;\n" \
 	"	return sin(x) / x;\n" \
 	"}\n" \
 	"\n" \
@@ -685,15 +685,13 @@ using std::ostringstream;
 	"{\n" \
 	"	vec4 color = vec4(0.0);\n" \
 	"	float totalWeight = 0.0;\n" \
-	"\n" \
-	"	vec2 scaledTexelSize = loc0.xy;\n" \
-	"\n" \
 	"for (int i = -a + 1; i <= a; ++i)\n" \
 	"{\n" \
 	"	for (int j = -a + 1; j <= a; ++j)\n" \
 	"	{\n" \
-	"		vec2 offset = vec2(i, j) * scaledTexelSize;\n" \
-	"		float weight = lanczos(float(i)) * lanczos(float(j));\n" \
+	"		vec2 offset = vec2(i, j);\n" \
+	"		float weight = lanczos(offset.x * loc0.z) * lanczos(offset.y * loc0.z);\n" \
+	"		offset *= loc0.xy;\n" \
 	"		color += texture(tex0, uv + offset) * weight;\n" \
 	"		totalWeight += weight;\n" \
 	"	}\n" \
@@ -734,17 +732,18 @@ using std::ostringstream;
 	"		}\n" \
 	"	}\n" \
 	"\n" \
-	"	vec4 old_color = texture(tex0, uv);\n" \
 	"	color /= totalWeight;\n" \
-	"	return mix(color, old_color, max(max(old_color.r, old_color.g), old_color.b));\n" \
+	"	vec4 old_color = texture(tex0, uv);\n" \
+	"	float blend = smoothstep(0.0, 1.0, max(max(old_color.r, old_color.g), old_color.b));\n" \
+	"	return mix(color, old_color * color, blend);\n" \
 	"}\n" \
 	"\n" \
 	"void main()\n" \
 	"{\n" \
 	"	float blend = smoothstep(0.6, 1.6, loc0.z);\n" \
 	"	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
-	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
-	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
+	"	vec4 bicubicColor = bicubicFilter(OutTexCoord.xy);\n" \
+	"	FragColor = mix(lanczosColor, bicubicColor, blend);\n" \
 	"	FragColor = clamp(FragColor, 0.0, 1.0);\n" \
 	"}\n"
 
