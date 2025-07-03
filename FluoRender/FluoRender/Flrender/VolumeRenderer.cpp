@@ -392,6 +392,7 @@ namespace flvr
 
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
+		float zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_), 0.2f, 10.0f);
 
 		std::vector<TextureBrick*> *bricks = 0;
 		tex->set_matrices(m_mv_mat2, m_proj_mat);
@@ -810,7 +811,7 @@ namespace flvr
 					}
 					img_shader->bind();
 				}
-				img_shader->setLocalParam(0, zoom_data_ / w, zoom_data_ / h, zoom_data_, 0.0);
+				img_shader->setLocalParam(0, zoom_data_clamp / w, zoom_data_clamp / h, zoom_data_clamp, 0.0);
 
 				draw_view_quad();
 

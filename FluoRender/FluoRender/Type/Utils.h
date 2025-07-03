@@ -32,6 +32,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 namespace fluo
 {
@@ -309,6 +310,33 @@ inline double RotateClamp(double v, int low, int high)
 	if (v >= high)
 		v -= r * ((int)(v - low) / r);
 	return v;
+}
+
+//use with opengl so they are floats
+inline float SmoothStep(float edge0, float edge1, float x)
+{
+	// Scale, bias and saturate x to 0..1 range
+	x = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+	// Evaluate polynomial
+	return x * x * (3 - 2 * x);
+}
+
+inline float SmoothClamp(float x, float edge0, float edge1, float smoothness)
+{
+	float clamped = std::clamp(x, edge0, edge1);
+
+	if (x < edge0 + smoothness) {
+		float t = std::clamp((x - edge0) / smoothness, 0.0f, 1.0f);
+		t = t * t * (3 - 2 * t); // smoothstep
+		return edge0 + t * (x - edge0);
+	}
+	else if (x > edge1 - smoothness) {
+		float t = std::clamp((edge1 - x) / smoothness, 0.0f, 1.0f);
+		t = t * t * (3 - 2 * t); // smoothstep
+		return edge1 - t * (edge1 - x);
+	}
+
+	return x;
 }
 
 } // namespace fluo

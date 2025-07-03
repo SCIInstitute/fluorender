@@ -666,6 +666,7 @@ using std::ostringstream;
 	"uniform sampler2D tex0;\n" \
 	"uniform vec4 loc0; //(zoom/w, zoom/h, zoom, 0)\n" \
 	"const int a = 5; //Lanczos window size\n" \
+	"const int ns = 8; //bicubic jitter samples\n" \
 	"\n" \
 	"float sinc(float x)\n" \
 	"{\n" \
@@ -710,32 +711,53 @@ using std::ostringstream;
 	"	return 0.0;\n" \
 	"}\n" \
 	"\n" \
+	"vec2 jitterOffsets[ns] = vec2[ns](\n" \
+	"	vec2( 0.125,  0.375),\n" \
+	"	vec2(-0.375,  0.125),\n" \
+	"	vec2( 0.375, -0.125),\n" \
+	"	vec2(-0.125, -0.375),\n" \
+	"	vec2( 0.25,   0.25),\n" \
+	"	vec2(-0.25,   0.25),\n" \
+	"	vec2( 0.25,  -0.25),\n" \
+	"	vec2(-0.25,  -0.25)\n" \
+	");\n" \
 	"vec4 bicubicFilter(vec2 uv)\n" \
 	"{\n" \
 	"	vec2 texSize = loc0.xy;\n" \
-	"	vec2 pixelCoord = uv / texSize;\n" \
-	"	vec2 base = floor(pixelCoord);\n" \
-	"	vec2 f = fract(pixelCoord);\n" \
-	"\n" \
 	"	vec4 color = vec4(0.0);\n" \
 	"	float totalWeight = 0.0;\n" \
 	"\n" \
-	"	for (int j = -1; j <= 2; ++j)\n" \
+	"	for (int s = 0; s < ns; ++s)\n" \
 	"	{\n" \
-	"		for (int i = -1; i <= 2; ++i)\n" \
+	"		vec2 jitteredUV = uv + jitterOffsets[s] * texSize;\n" \
+	"\n" \
+	"		vec2 pixelCoord = jitteredUV / texSize;\n" \
+	"		vec2 base = floor(pixelCoord);\n" \
+	"		vec2 f = fract(pixelCoord);\n" \
+	"\n" \
+	"		vec4 sampleColor = vec4(0.0);\n" \
+	"		float sampleWeight = 0.0;\n" \
+	"\n" \
+	"		for (int j = -1; j <= 2; ++j)\n" \
 	"		{\n" \
-	"			vec2 offset = vec2(i, j);\n" \
-	"			float w = catmullRom(offset.x - f.x) * catmullRom(offset.y - f.y);\n" \
-	"			vec2 sampleUV = (base + offset) * texSize;\n" \
-	"			color += texture(tex0, sampleUV) * w;\n" \
-	"			totalWeight += w;\n" \
+	"			for (int i = -1; i <= 2; ++i)\n" \
+	"			{\n" \
+	"				vec2 offset = vec2(i, j);\n" \
+	"				float w = catmullRom(offset.x - f.x) * catmullRom(offset.y - f.y);\n" \
+	"				vec2 sampleUV = (base + offset) * texSize;\n" \
+	"				sampleColor += texture(tex0, sampleUV) * w;\n" \
+	"				sampleWeight += w;\n" \
+	"			}\n" \
 	"		}\n" \
+	"\n" \
+	"		color += sampleColor / sampleWeight;\n" \
+	"		totalWeight += 1.0;\n" \
 	"	}\n" \
 	"\n" \
 	"	color /= totalWeight;\n" \
 	"	vec4 old_color = texture(tex0, uv);\n" \
 	"	float blend = smoothstep(0.0, 1.0, max(max(old_color.r, old_color.g), old_color.b));\n" \
-	"	return mix(color, old_color * color, blend);\n" \
+	"	return mix(color, max(old_color, color), blend);\n" \
 	"}\n" \
 	"\n" \
 	"void main()\n" \
