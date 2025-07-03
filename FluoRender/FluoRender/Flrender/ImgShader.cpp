@@ -664,9 +664,8 @@ using std::ostringstream;
 	"out vec4 FragColor;\n" \
 	"\n" \
 	"uniform sampler2D tex0;\n" \
-	"uniform vec4 loc0; //(1/w2, 1/h2, zoom, 0)\n" \
-	"uniform vec4 loc1; //(1/w, 1/h, zoom, 0)\n" \
-	"const int a = 4; //Lanczos window size\n" \
+	"uniform vec4 loc0; //(zoom/w, zoom/h, zoom, 0)\n" \
+	"const int a = 5; //Lanczos window size\n" \
 	"\n" \
 	"float sinc(float x)\n" \
 	"{\n" \
@@ -715,7 +714,7 @@ using std::ostringstream;
 	"\n" \
 	"vec4 bicubicFilter(vec2 uv)\n" \
 	"{\n" \
-	"	vec2 texSize = loc0.z < 2.5 ? loc0.xy : (loc0.xy + loc1.xy * loc1.z) / 2.0;\n" \
+	"	vec2 texSize = loc0.xy;\n" \
 	"	vec2 pixelCoord = uv / texSize;\n" \
 	"	vec2 base = floor(pixelCoord);\n" \
 	"	vec2 f = fract(pixelCoord);\n" \
@@ -737,7 +736,7 @@ using std::ostringstream;
 	"\n" \
 	"	vec4 old_color = texture(tex0, uv);\n" \
 	"	color /= totalWeight;\n" \
-	"	return mix(color, old_color, clamp(old_color.a, 0.0, 1.0));\n" \
+	"	return mix(color, old_color, max(max(old_color.r, old_color.g), old_color.b));\n" \
 	"}\n" \
 	"\n" \
 	"void main()\n" \
@@ -745,7 +744,7 @@ using std::ostringstream;
 	"	float blend = smoothstep(0.6, 1.6, loc0.z);\n" \
 	"	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);\n" \
 	"	vec4 sharpColor = bicubicFilter(OutTexCoord.xy);\n" \
-	"	FragColor = mix(lanczosColor, sharpColor, 1.0);\n" \
+	"	FragColor = mix(lanczosColor, sharpColor, blend);\n" \
 	"	FragColor = clamp(FragColor, 0.0, 1.0);\n" \
 	"}\n"
 

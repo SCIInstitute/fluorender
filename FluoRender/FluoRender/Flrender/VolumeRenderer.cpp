@@ -810,8 +810,7 @@ namespace flvr
 					}
 					img_shader->bind();
 				}
-				img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, zoom_data_, 0.0);
-				img_shader->setLocalParam(1, 1.0 / w, 1.0 / h, zoom_data_, 0.0);
+				img_shader->setLocalParam(0, zoom_data_ / w, zoom_data_ / h, zoom_data_, 0.0);
 
 				draw_view_quad();
 

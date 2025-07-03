@@ -407,8 +407,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				}
 				img_shader->bind();
 			}
-			img_shader->setLocalParam(0, 1.0 / w2, 1.0 / h2, vr_list_[0]->zoom_data_, 0.0);
-			img_shader->setLocalParam(1, 1.0 / w, 1.0 / h, vr_list_[0]->zoom_data_, 0.0);
+			img_shader->setLocalParam(0, vr_list_[0]->zoom_data_ / w, vr_list_[0]->zoom_data_ / h, vr_list_[0]->zoom_data_, 0.0);
 
 			vr_list_[0]->draw_view_quad();
 
