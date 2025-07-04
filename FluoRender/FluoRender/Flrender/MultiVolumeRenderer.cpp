@@ -163,6 +163,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	fluo::Ray view_ray = vr_list_[0]->compute_view();
 	fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
+	float zoom_data_clamp = std::clamp(static_cast<float>(vr_list_[0]->zoom_data_), 0.2f, 10.0f);
 
 	set_interactive_mode(interactive_mode_p);
 
@@ -407,7 +408,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				}
 				img_shader->bind();
 			}
-			img_shader->setLocalParam(0, vr_list_[0]->zoom_data_ / w, vr_list_[0]->zoom_data_ / h, vr_list_[0]->zoom_data_, 0.0);
+			img_shader->setLocalParam(0, zoom_data_clamp / w, zoom_data_clamp / h, zoom_data_clamp, 0.0);
 
 			vr_list_[0]->draw_view_quad();
 
