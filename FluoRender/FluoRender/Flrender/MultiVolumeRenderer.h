@@ -57,10 +57,7 @@ namespace flvr
 		}
 
 		//set viewport
-		void set_viewport(GLint vp[4])
-		{
-			memcpy(vp_, vp, sizeof(GLint) * 4);
-		}
+		void set_viewport(GLint vp[4]);
 
 		//set clear color
 		void set_clear_color(GLfloat clear_color[4])

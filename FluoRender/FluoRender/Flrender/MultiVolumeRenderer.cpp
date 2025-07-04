@@ -77,6 +77,16 @@ MultiVolumeRenderer::~MultiVolumeRenderer()
 		delete va_slices_;
 }
 
+void MultiVolumeRenderer::set_viewport(GLint vp[4])
+{
+	memcpy(vp_, vp, sizeof(GLint) * 4);
+	for (auto it : vr_list_)
+	{
+		if (it)
+			it->set_viewport(vp);
+	}
+}
+
 //mode and sampling rate
 void MultiVolumeRenderer::set_mode(const RenderMode& mode)
 {
