@@ -358,12 +358,12 @@ private:
 	std::unique_ptr<wxMenu> m_tb_menu_edit;
 	std::unique_ptr<wxMenu> m_tb_menu_update;
 	//main menu
-	wxMenuBar* m_top_menu;
-	wxMenu* m_top_file;
-	wxMenu* m_top_edit;
-	wxMenu* m_top_tools;
-	wxMenu* m_top_window;
-	wxMenu* m_top_help;
+	wxMenuBar* m_top_menu = 0;
+	wxMenu* m_top_file = 0;
+	wxMenu* m_top_edit = 0;
+	wxMenu* m_top_tools = 0;
+	wxMenu* m_top_window = 0;
+	wxMenu* m_top_help = 0;
 
 	ProjectPanel* m_proj_panel;
 	TreePanel *m_tree_panel;

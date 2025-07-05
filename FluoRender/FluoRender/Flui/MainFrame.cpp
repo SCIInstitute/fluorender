@@ -633,9 +633,6 @@ MainFrame::MainFrame(
 	if (!windowed)
 		Maximize();
 
-	if (hidepanels)
-		ToggleAllPanels(false);
-
 	//drop target
 	SetDropTarget(new DnDFile(this));
 
@@ -795,6 +792,9 @@ MainFrame::MainFrame(
 		vrv->SetFullScreen();
 		Iconize();
 	}
+
+	if (hidepanels)
+		ToggleAllPanels(false);
 
 	wxMemorySize free_mem_size = wxGetFreeMemory();
 	double mainmem_buf_size = free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
