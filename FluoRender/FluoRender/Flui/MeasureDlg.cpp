@@ -1279,7 +1279,7 @@ void MeasureDlg::Grow()
 		}
 	}
 
-	FluoRefresh(0, { gstFreehandToolState }, {-1});
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
 void MeasureDlg::RulerMove()

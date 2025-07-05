@@ -292,7 +292,7 @@
         <use_size2>1</use_size2>
         <size2>30</size2>
         <radius_settings>
-            <num>4</num>
+            <num>5</num>
             <_0>
                 <type>2</type>
                 <radius1>5</radius1>
@@ -321,6 +321,13 @@
                 <use_radius2>0</use_radius2>
                 <iter_num>0</iter_num>
             </_3>
+            <_4>
+              <type>9</type>
+              <radius1>10</radius1>
+              <radius2>10</radius2>
+              <use_radius2>0</use_radius2>
+              <iter_num>3</iter_num>
+            </_4>
         </radius_settings>
         <spacing>0.10000000000000001</spacing>
         <size_data>1</size_data>

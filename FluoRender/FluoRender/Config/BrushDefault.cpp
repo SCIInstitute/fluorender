@@ -153,6 +153,13 @@ void BrushDefault::Read()
 		radius_set.type = flrd::SelectMode::Solid;
 		radius_set.use_radius2 = false;
 		m_brush_radius_sets.push_back(radius_set);
+		//grow
+		radius_set.type = flrd::SelectMode::Grow;
+		radius_set.radius1 = 10;
+		radius_set.radius2 = 10;
+		radius_set.use_radius2 = false;
+		radius_set.iter_num = 3;
+		m_brush_radius_sets.push_back(radius_set);
 	}
 	if (f->Exists("/brush default"))
 		f->SetPath("/brush default");
