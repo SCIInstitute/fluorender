@@ -385,10 +385,10 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		{
 			m_vd->DrawMask(0, static_cast<int>(m_mode), hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
 			m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
-			ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
-			if (m_iter_num > 10)
-				ini_thresh /= 2.0;
-			m_scl_translate = ini_thresh;
+			//ini_thresh = m_vd->GetEstThresh() * m_vd->GetScalarScale();
+			//if (m_iter_num > 10)
+			//	ini_thresh /= 2.0;
+			//m_scl_translate = ini_thresh;
 		}
 		m_vd->DrawMask(0, static_cast<int>(m_mode), hr_mode, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 	}
@@ -404,17 +404,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			m_mode == SelectMode::Segment)
 		{
 			//loop for growing
-			if (m_mode == SelectMode::Grow)
-			{
-				if (m_iter_num <= 10)
-					m_iter = m_iter_num / 3;
-				else if (m_iter_num <= 20)
-					m_iter = m_iter_num / 2;
-				else
-					m_iter = m_iter_num;
-			}
-			else
-				m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
+			m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			int div = 3;
 			int order;
 			flrd::MaskBorder mb(m_vd.get());
