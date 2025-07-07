@@ -359,19 +359,8 @@ file(GLOB GLM_DIRS "${PARENT_DIR}/glm*")
 list(GET GLM_DIRS 0 GLM_DIRS)  # Get the first match
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
-# HoloPlay
-if(WIN32)
-	if(${ARCHITECTURE} MATCHES 32)
-		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win32/*.lib)
-    elseif(${ARCHITECTURE} MATCHES 64)
-		file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/*.lib)
-    endif()
-elseif(APPLE)
-	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/macos/libHoloPlayCore.dylib)
-else()
-	file(GLOB HoloPlay_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/*.so)
-endif()
-set(HOLOPLAY_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/include")
+# BridgeRuntime
+set(BRIDGE_RUNTIME_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/BridgeRuntime")
 
 #nikon
 if(WIN32)
@@ -874,6 +863,7 @@ target_link_libraries(FORMAT_LIB PRIVATE
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
+  ${BRIDGE_RUNTIME_PATHS}
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OPENXR_PATHS}
@@ -894,10 +884,9 @@ endif()
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
-  ${HOLOPLAY_PATHS})
+  ${BRIDGE_RUNTIME_PATHS})
 target_link_libraries(LOOKINGGLASS_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
-  ${HoloPlay_LIBRARIES})
+  ${GLEW_STATIC_LIBRARIES})
 
 # Main
 target_include_directories(MAIN_LIB PRIVATE
@@ -943,6 +932,7 @@ target_link_libraries(PYTHON_LIB PRIVATE
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
+  ${BRIDGE_RUNTIME_PATHS}
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
@@ -1281,26 +1271,6 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
 	"${OPENXR_DIRS}/build/src/loader/libopenxr_loader.so"
     "$<TARGET_FILE_DIR:FluoRender>")
-endif()
-
-# holoplay
-if(WIN32)
-    add_custom_command(TARGET FluoRender POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/Win64/HoloPlayCore.dll"
-        "$<TARGET_FILE_DIR:FluoRender>"
-    )
-elseif(APPLE)
-    add_custom_command(TARGET FluoRender POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        "${HoloPlay_LIBRARIES}"
-        "$<TARGET_FILE_DIR:FluoRender>"
-        )
-else()
-    add_custom_command(TARGET FluoRender POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        "${FluoRender_SOURCE_DIR}/FluoRender/HoloPlayCore/dylib/linux/libHoloPlayCore.so"
-        "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
 # hololens

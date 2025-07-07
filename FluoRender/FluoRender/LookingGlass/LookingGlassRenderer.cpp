@@ -35,18 +35,14 @@ DEALINGS IN THE SOFTWARE.
 #include <ImgShader.h>
 #include <LightFieldShader.h>
 #include <VertexArray.h>
-#include <HoloPlayCore.h>
 #include <compatibility.h>
 #include <string>
 #include <Debug.h>
 
-LookingGlassRenderer::LookingGlassRenderer() :
-	m_initialized(false),
-	m_dev_index(0),
-	m_cur_view(0),
-	m_updating(false),
-	m_finished(true)
+LookingGlassRenderer::LookingGlassRenderer()
 {
+	// Create the bridge controller
+	m_lg_controller = std::make_unique<Controller>();
 	SetPreset(1);
 }
 
@@ -59,165 +55,72 @@ bool LookingGlassRenderer::Init()
 {
 	if (m_initialized)
 		return true;
-	hpc_client_error errco = hpc_InitializeApp("FluoRender", hpc_LICENSE_NONCOMMERCIAL);
+
 	std::wstring wstr;
-	if (errco)
+#ifdef _WIN32
+	if (!m_lg_controller->Initialize(L"FluoRender"))
+#else
+	if (!controller->Initialize("FluoRender"))
+#endif
 	{
-		switch (errco)
-		{
-		case hpc_CLIERR_NOSERVICE:
-			wstr = L"HoloPlay Service not running";
-			break;
-		case hpc_CLIERR_SERIALIZEERR:
-			wstr = L"Client message could not be serialized";
-			break;
-		case hpc_CLIERR_VERSIONERR:
-			wstr = L"Incompatible version of HoloPlay Service";
-			break;
-		case hpc_CLIERR_PIPEERROR:
-			wstr = L"Interprocess pipe broken";
-			break;
-		case hpc_CLIERR_SENDTIMEOUT:
-			wstr = L"Interprocess pipe send timeout";
-			break;
-		case hpc_CLIERR_RECVTIMEOUT:
-			wstr = L"Interprocess pipe receive timeout";
-			break;
-		default:
-			wstr = L"Unknown error";
-			break;
-		}
-		DBGPRINT(L"HoloPlay Service access error (code %d): %s.\n", errco, wstr.c_str());
+		m_lg_controller.reset();
+		DBGPRINT(L"Failed to initialize bridge. Bridge may be missing, or the version may be too old\n");
 		return false;
 	}
-	std::string str;
-	char buf[1000];
-	hpc_GetHoloPlayCoreVersion(buf, 1000);
-	str = buf;
-	wstr = s2ws(str);
-	DBGPRINT(L"HoloPlay Core version %s.\n", wstr.c_str());
-	hpc_GetHoloPlayServiceVersion(buf, 1000);
-	str = buf;
-	wstr = s2ws(str);
-	DBGPRINT(L"HoloPlay Service version %s.\n", wstr.c_str());
-	int ival = hpc_GetNumDevices();
-	DBGPRINT(L"%d devices connected.\n", ival);
-	if (ival < 1)
-		return false;
-	m_viewCone = hpc_GetDevicePropertyFloat(m_dev_index, "/calibration/viewCone/value");
-	m_initialized = true;
-	return true;
+	// Create BridgeData
+	WINDOW_HANDLE wnd = 0;
+
+	if (m_lg_controller)
+	{
+		// Get display information list
+		m_lg_displays = m_lg_controller->GetDisplayInfoList();
+		if (m_cur_lg_display < 0 || m_cur_lg_display >= m_lg_displays.size())
+			m_cur_lg_display = 0;
+
+		// Print all display names
+		//for (const auto& displayInfo : displays)
+		//{
+		//	std::wcout << displayInfo.name << std::endl;
+		//}
+
+		// For now we will use the first looking glass display
+		if (!m_lg_displays.empty() && m_lg_controller->InstanceOffscreenWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
+		{
+			DBGPRINT(L"Successfully created the window handle.\n");
+		}
+		else
+		{
+			wnd = 0;
+			DBGPRINT(L"Failed to initialize bridge window. do you have any displays connected?\n");
+			return false;
+		}
+	}
+
+	BridgeWindowData bridgeData = m_lg_controller ? m_lg_controller->GetWindowData(wnd) : BridgeWindowData();
+	m_initialized = (bridgeData.wnd != 0);
+	m_viewCone = m_lg_displays[m_cur_lg_display].viewcone;
+	return m_initialized;
 }
 
 void LookingGlassRenderer::Close()
 {
-	if (m_initialized)
+	if (m_initialized && m_lg_controller)
 	{
-		hpc_CloseApp();
+		m_lg_controller->Uninitialize();
 		m_initialized = false;
 	}
 }
 
-#if defined(_WIN32) || defined(_WIN64)
-
-int LookingGlassRenderer::GetDisplayId() {
-    if (!m_initialized)
-        return 0;
-
-    // get screen rect
-    int w, h, x, y;
-    w = hpc_GetDevicePropertyScreenW(m_dev_index);
-    h = hpc_GetDevicePropertyScreenH(m_dev_index);
-    x = hpc_GetDevicePropertyWinX(m_dev_index);
-    y = hpc_GetDevicePropertyWinY(m_dev_index);
-
-    POINT pt = { x + w / 2, y + h / 2 };
-    HMONITOR hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONULL);
-    if (hMonitor) {
-        MonitorEnumData data = { hMonitor, -1, 0 };
-        EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, reinterpret_cast<LPARAM>(&data));
-        return data.index;
-    }
-
-    return -1; // Not found
+int LookingGlassRenderer::GetDisplayId()
+{
+	if (!m_initialized)
+		return 0;
+	if (m_lg_displays.empty())
+		return 0;
+	if (m_cur_lg_display < 0 || m_cur_lg_display >= m_lg_displays.size())
+		return 0;
+	return m_lg_displays[m_cur_lg_display].display_id;
 }
-
-#elif defined(__APPLE__)
-#include <ApplicationServices/ApplicationServices.h>
-
-int LookingGlassRenderer::GetDisplayId() {
-    if (!m_initialized)
-        return 0;
-
-    // get screen rect
-    int w, h, x, y;
-    w = hpc_GetDevicePropertyScreenW(m_dev_index);
-    h = hpc_GetDevicePropertyScreenH(m_dev_index);
-    x = hpc_GetDevicePropertyWinX(m_dev_index);
-    y = hpc_GetDevicePropertyWinY(m_dev_index);
-
-    CGPoint pt = CGPointMake(x + w / 2, y + h / 2);
-    uint32_t displayCount;
-    CGGetActiveDisplayList(0, nullptr, &displayCount);
-    CGDirectDisplayID displays[displayCount];
-    CGGetActiveDisplayList(displayCount, displays, &displayCount);
-    for (uint32_t i = 0; i < displayCount; ++i) {
-        CGRect displayBounds = CGDisplayBounds(displays[i]);
-        if (CGRectContainsPoint(displayBounds, pt)) {
-            return i;
-        }
-    }
-    return -1; // Not found
-}
-
-#elif defined(__linux__)
-#include <X11/Xlib.h>
-#include <X11/extensions/Xrandr.h>
-
-int LookingGlassRenderer::GetDisplayId() {
-    if (!m_initialized)
-        return 0;
-
-    // get screen rect
-    int w, h, x, y;
-    w = hpc_GetDevicePropertyScreenW(m_dev_index);
-    h = hpc_GetDevicePropertyScreenH(m_dev_index);
-    x = hpc_GetDevicePropertyWinX(m_dev_index);
-    y = hpc_GetDevicePropertyWinY(m_dev_index);
-
-    Display* display = XOpenDisplay(nullptr);
-    if (!display) return -1;
-
-    Window root = DefaultRootWindow(display);
-    XRRScreenResources* screenResources = XRRGetScreenResources(display, root);
-    if (!screenResources) {
-        XCloseDisplay(display);
-        return -1;
-    }
-
-    int centerX = x + w / 2;
-    int centerY = y + h / 2;
-    for (int i = 0; i < screenResources->ncrtc; ++i) {
-        XRRCrtcInfo* crtcInfo = XRRGetCrtcInfo(display, screenResources, screenResources->crtcs[i]);
-        if (crtcInfo) {
-            if (centerX >= crtcInfo->x && centerX < crtcInfo->x + crtcInfo->width &&
-                centerY >= crtcInfo->y && centerY < crtcInfo->y + crtcInfo->height) {
-                int id = i;
-                XRRFreeCrtcInfo(crtcInfo);
-                XRRFreeScreenResources(screenResources);
-                XCloseDisplay(display);
-                return id;
-            }
-            XRRFreeCrtcInfo(crtcInfo);
-        }
-    }
-
-    XRRFreeScreenResources(screenResources);
-    XCloseDisplay(display);
-    return -1; // Not found
-}
-
-#endif
 
 void LookingGlassRenderer::SetPreset(int val)
 {
@@ -278,20 +181,20 @@ void LookingGlassRenderer::Setup()
 		shader->bind();
 	}
 
-	float pitch = hpc_GetDevicePropertyPitch(m_dev_index);
-	float tilt = hpc_GetDevicePropertyTilt(m_dev_index);
-	float center = hpc_GetDevicePropertyCenter(m_dev_index);
-	float subp = hpc_GetDevicePropertySubp(m_dev_index);
+	float pitch = m_lg_displays[m_cur_lg_display].pitch;
+	float tilt = m_lg_displays[m_cur_lg_display].tilt;
+	float center = m_lg_displays[m_cur_lg_display].center;
+	float subp = m_lg_displays[m_cur_lg_display].subp;
 	shader->setLocalParam(0, pitch, tilt, center, subp);
 	float vp0 = float(m_viewWidth * m_columns) / float(m_width);
 	float vp1 = float(m_viewHeight * m_rows) / float(m_height);
-	float displayAspect = hpc_GetDevicePropertyDisplayAspect(m_dev_index);
-	float quiltAspect = hpc_GetDevicePropertyDisplayAspect(m_dev_index);
+	float displayAspect = m_lg_displays[m_cur_lg_display].aspect;
+	float quiltAspect = m_lg_displays[m_cur_lg_display].aspect;
 	shader->setLocalParam(1, vp0, vp1, displayAspect, quiltAspect);
 	shader->setLocalParam(2, m_columns, m_rows, m_totalViews, 0);
-	int invView = hpc_GetDevicePropertyInvView(m_dev_index);
-	int ri = hpc_GetDevicePropertyRi(m_dev_index);
-	int bi = hpc_GetDevicePropertyBi(m_dev_index);
+	int invView = m_lg_displays[m_cur_lg_display].viewinv;
+	int ri = m_lg_displays[m_cur_lg_display].ri;
+	int bi = m_lg_displays[m_cur_lg_display].bi;
 	int quiltInvert = 1;
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 

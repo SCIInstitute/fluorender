@@ -28,9 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef LookingGlassRenderer_h
 #define LookingGlassRenderer_h
 
-#if defined(_WIN32) || defined(_WIN64)
-#include <windows.h>
-#endif
+#include <memory>
+#include <bridge_utils.hpp>
 
 class LookingGlassRenderer
 {
@@ -54,53 +53,39 @@ public:
 	void BindRenderBuffer(int nx, int ny);
 
 private:
-	bool m_initialized;
-	int m_dev_index;
+	bool m_initialized = false;
+	int m_dev_index = 0;
+
+	std::unique_ptr<Controller> m_lg_controller;
+	BridgeWindowData m_lg_data;
+	std::vector<DisplayInfo> m_lg_displays;
+	int m_cur_lg_display = 0;
 
 	// quilt settings
-	// more info at
-	// https://docs.lookingglassfactory.com/HoloPlayCAPI/guides/quilt/
-	int m_preset;		// Set up the quilt settings according to the preset passed
-						// 0: 32 views
-						// 1: 45 views, normally used one
-						// 2: 45 views for 8k display
-						// Feel free to customize if you want
-	int m_width;		// Total width of the quilt texture
-	int m_height;		// Total height of the quilt texture
-	int m_rows;			// Number of columns in the quilt
-	int m_columns;		// Number of rows in the quilt
-	int m_totalViews;	// The total number of views in the quilt.
-						// Note that this number might be lower than rows *
-						// columns
-						// qs_viewWidth & qs_viewHeight could be calculated by given numbers
-	int m_viewWidth;	//quilt view dimensions
-	int m_viewHeight;
-	double m_viewCone;
+	int m_preset = 0;		// Set up the quilt settings according to the preset passed
+							// 0: 32 views
+							// 1: 45 views, normally used one
+							// 2: 45 views for 8k display
+							// Feel free to customize if you want
+	int m_width = 2048;		// Total width of the quilt texture
+	int m_height = 2048;	// Total height of the quilt texture
+	int m_rows = 8;			// Number of columns in the quilt
+	int m_columns = 4;		// Number of rows in the quilt
+	int m_totalViews = 32;	// The total number of views in the quilt.
+							// Note that this number might be lower than rows *
+							// columns
+							// qs_viewWidth & qs_viewHeight could be calculated by given numbers
+	int m_viewWidth = 512;	//quilt view dimensions
+	int m_viewHeight = 256;
 
-	int m_cur_view;		//index to the view
-	bool m_updating;	//still updating
-	int m_upd_view;		//view number when updating starts
-	bool m_finished;	//finished rendering all views with consistent settings
+	double m_viewCone = 45.0;	//view angle
+	int m_cur_view = 0;			//index to the view
+	bool m_updating = false;	//still updating
+	int m_upd_view = 0;			//view number when updating starts
+	bool m_finished = true;		//finished rendering all views with consistent settings
 
 private:
 	void advance_views();
-#if defined(_WIN32) || defined(_WIN64)
-	struct MonitorEnumData {
-		HMONITOR targetMonitor;
-		int index;
-		int currentIndex;
-	};
-
-	static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
-		MonitorEnumData* data = reinterpret_cast<MonitorEnumData*>(dwData);
-		if (hMonitor == data->targetMonitor) {
-			data->index = data->currentIndex;
-			return FALSE; // Stop enumeration
-		}
-		data->currentIndex++;
-		return TRUE; // Continue enumeration
-	}
-#endif
 };
 
 #endif//LookingGlassRenderer_h
