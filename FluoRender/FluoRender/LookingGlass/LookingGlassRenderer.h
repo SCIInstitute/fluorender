@@ -57,7 +57,7 @@ private:
 	int m_dev_index = 0;
 
 	std::unique_ptr<Controller> m_lg_controller;
-	BridgeWindowData m_lg_data;
+	//BridgeWindowData m_lg_data;
 	std::vector<DisplayInfo> m_lg_displays;
 	int m_cur_lg_display = 0;
 

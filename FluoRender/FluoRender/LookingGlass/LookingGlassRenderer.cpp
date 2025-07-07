@@ -54,7 +54,7 @@ LookingGlassRenderer::~LookingGlassRenderer()
 bool LookingGlassRenderer::Init()
 {
 	if (m_initialized)
-		return true;
+		return m_initialized;
 
 	std::wstring wstr;
 #ifdef _WIN32
@@ -84,21 +84,22 @@ bool LookingGlassRenderer::Init()
 		//}
 
 		// For now we will use the first looking glass display
-		if (!m_lg_displays.empty() && m_lg_controller->InstanceOffscreenWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
-		{
-			DBGPRINT(L"Successfully created the window handle.\n");
-		}
-		else
-		{
-			wnd = 0;
-			DBGPRINT(L"Failed to initialize bridge window. do you have any displays connected?\n");
-			return false;
-		}
+		//if (!m_lg_displays.empty() && m_lg_controller->InstanceOffscreenWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
+		//{
+		//	DBGPRINT(L"Successfully created the window handle.\n");
+		//}
+		//else
+		//{
+		//	wnd = 0;
+		//	DBGPRINT(L"Failed to initialize bridge window. do you have any displays connected?\n");
+		//	return false;
+		//}
 	}
 
-	BridgeWindowData bridgeData = m_lg_controller ? m_lg_controller->GetWindowData(wnd) : BridgeWindowData();
-	m_initialized = (bridgeData.wnd != 0);
+	//BridgeWindowData bridgeData = m_lg_controller ? m_lg_controller->GetWindowData(wnd) : BridgeWindowData();
+	//m_initialized = (bridgeData.wnd != 0);
 	m_viewCone = m_lg_displays[m_cur_lg_display].viewcone;
+	m_initialized = true;
 	return m_initialized;
 }
 
@@ -166,12 +167,12 @@ void LookingGlassRenderer::Setup()
 
 	flvr::ShaderProgram* shader = 0;
 	//set up shader to render texture
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
-	}
+	//shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	//if (shader)
+	//{
+	//	if (!shader->valid())
+	//		shader->create();
+	//}
 	//set up shader to render quilt
 	shader = glbin_light_field_shader_factory.shader(0);
 	if (shader)

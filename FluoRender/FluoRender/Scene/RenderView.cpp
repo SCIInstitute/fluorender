@@ -775,7 +775,9 @@ void RenderView::InitView(unsigned int type)
 			m_near_clip = m_radius / 1000.0;
 			m_far_clip = m_radius * 100.0;
 			if (glbin_xr_renderer)
-				glbin_xr_renderer->SetClips(m_near_clip, m_far_clip);
+				glbin_xr_renderer->SetClips(
+					static_cast<float>(m_near_clip),
+					static_cast<float>(m_far_clip));
 		}
 	}
 
@@ -2986,7 +2988,7 @@ void RenderView::SetParams(double t)
 {
 	fluo::ValueCollection vc;
 	m_frame_num_type = 1;
-	m_param_cur_num = std::round(t);
+	m_param_cur_num = static_cast<int>(std::round(t));
 	FlKeyCode keycode;
 	keycode.l0 = 1;
 	keycode.l0_name = ws2s(GetName());
@@ -3063,8 +3065,8 @@ void RenderView::SetParams(double t)
 		keycode.l2_name = "frame";
 		if (glbin_interpolator.GetDouble(keycode, t, frame))
 		{
-			UpdateVolumeData(std::round(frame), vd);
-			glbin_moviemaker.SetSeqCurNum(frame);
+			UpdateVolumeData(static_cast<int>(std::round(frame)), vd);
+			glbin_moviemaker.SetSeqCurNum(static_cast<int>(frame));
 		}
 		//primary color
 		fluo::Color pc;
@@ -3698,10 +3700,10 @@ void RenderView::CalcFrame()
 		miny = fluo::Clamp(miny, -1.0, 1.0);
 		maxy = fluo::Clamp(maxy, -1.0, 1.0);
 
-		glbin_moviemaker.SetCropX(std::round((minx + 1.0)*m_size.w() / 2.0 + 1.0));
-		glbin_moviemaker.SetCropY(std::round((miny + 1.0)*m_size.h() / 2.0 + 1.0));
-		glbin_moviemaker.SetCropW(std::round((maxx - minx)*m_size.w() / 2.0 - 1.5));
-		glbin_moviemaker.SetCropH(std::round((maxy - miny)*m_size.h() / 2.0 - 1.5));
+		glbin_moviemaker.SetCropX(static_cast<int>(std::round((minx + 1.0)*m_size.w() / 2.0 + 1.0)));
+		glbin_moviemaker.SetCropY(static_cast<int>(std::round((miny + 1.0)*m_size.h() / 2.0 + 1.0)));
+		glbin_moviemaker.SetCropW(static_cast<int>(std::round((maxx - minx)*m_size.w() / 2.0 - 1.5)));
+		glbin_moviemaker.SetCropH(static_cast<int>(std::round((maxy - miny)*m_size.h() / 2.0 - 1.5)));
 
 	}
 	else
@@ -3710,14 +3712,14 @@ void RenderView::CalcFrame()
 		if (m_size.w() > m_size.h())
 		{
 			size = m_size.h();
-			glbin_moviemaker.SetCropX(std::round((m_size.w() - m_size.h()) / 2.0));
+			glbin_moviemaker.SetCropX(static_cast<int>(std::round((m_size.w() - m_size.h()) / 2.0)));
 			glbin_moviemaker.SetCropY(0);
 		}
 		else
 		{
 			size = m_size.w();
 			glbin_moviemaker.SetCropX(0);
-			glbin_moviemaker.SetCropY(std::round((m_size.h() - m_size.w()) / 2.0));
+			glbin_moviemaker.SetCropY(static_cast<int>(std::round((m_size.h() - m_size.w()) / 2.0)));
 		}
 		glbin_moviemaker.SetCropW(size);
 		glbin_moviemaker.SetCropH(size);
@@ -4709,22 +4711,22 @@ unsigned int RenderView::DrawCellVerts(std::vector<float>& verts)
 		fluo::BBox box = it->second->GetBox(sx, sy, sz);
 		GetCellPoints(box, p1, p2, p3, p4, mv, p);
 
-		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p2.x()); verts.push_back(p2.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p2.x()); verts.push_back(p2.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p3.x()); verts.push_back(p3.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p3.x()); verts.push_back(p3.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p4.x()); verts.push_back(p4.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p4.x()); verts.push_back(p4.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
-		verts.push_back(p1.x()); verts.push_back(p1.y()); verts.push_back(0.0);
-		verts.push_back(c.r()); verts.push_back(c.g()); verts.push_back(c.b());
+		verts.push_back(static_cast<float>(p1.x())); verts.push_back(static_cast<float>(p1.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p2.x())); verts.push_back(static_cast<float>(p2.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p2.x())); verts.push_back(static_cast<float>(p2.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p3.x())); verts.push_back(static_cast<float>(p3.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p3.x())); verts.push_back(static_cast<float>(p3.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p4.x())); verts.push_back(static_cast<float>(p4.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p4.x())); verts.push_back(static_cast<float>(p4.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
+		verts.push_back(static_cast<float>(p1.x())); verts.push_back(static_cast<float>(p1.y())); verts.push_back(0.0f);
+		verts.push_back(static_cast<float>(c.r()));  verts.push_back(static_cast<float>(c.g()));  verts.push_back(static_cast<float>(c.b()));
 		num += 8;
 	}
 
@@ -4983,10 +4985,10 @@ void RenderView::ReadPixels(
 	{
 		if (m_enlarge)
 		{
-			x = glbin_moviemaker.GetCropX() * m_enlarge_scale;
-			y = glbin_moviemaker.GetCropY() * m_enlarge_scale;
-			w = glbin_moviemaker.GetCropW() * m_enlarge_scale;
-			h = glbin_moviemaker.GetCropH() * m_enlarge_scale;
+			x = static_cast<int>(std::round(glbin_moviemaker.GetCropX() * m_enlarge_scale));
+			y = static_cast<int>(std::round(glbin_moviemaker.GetCropY() * m_enlarge_scale));
+			w = static_cast<int>(std::round(glbin_moviemaker.GetCropW() * m_enlarge_scale));
+			h = static_cast<int>(std::round(glbin_moviemaker.GetCropH() * m_enlarge_scale));
 		}
 		else
 		{
@@ -5409,14 +5411,14 @@ void RenderView::DrawCamCtr()
 	float len;
 	if (m_pin_rot_ctr)
 	{
-		len = m_scale_factor * 5;
+		len = static_cast<float>(m_scale_factor * 5);
 	}
 	else
 	{
 		if (m_camctr_size > 0.0)
-			len = m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0;
+			len = static_cast<float>(m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0);
 		else
-			len = fabs(m_camctr_size);
+			len = static_cast<float>(std::fabs(m_camctr_size));
 	}
 	va_jack->set_param(0, len);
 
@@ -5478,42 +5480,42 @@ void RenderView::DrawScaleBar()
 	GetRenderSize(nx, ny);
 	float sb_x, sb_y, sb_w, sb_h;
 	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
+	sx = static_cast<float>(2.0 / nx);
+	sy = static_cast<float>(2.0 / ny);
 	float px, py, ph;
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
-	float len = m_sb_length / (m_ortho_right - m_ortho_left);
+	float len = static_cast<float>(m_sb_length / (m_ortho_right - m_ortho_left));
 	sb_w = len * nx;
-	sb_h = glbin_settings.m_line_width * 3;
+	sb_h = static_cast<float>(glbin_settings.m_line_width * 3);
 	float textlen = m_text_renderer->RenderTextLen(m_sb_text);
 	fluo::Color text_color = GetTextColor();
 	float font_height = 0;
 	if (draw_text)
-		font_height = glbin_text_tex_manager.GetSize() + 3.0;
+		font_height = static_cast<float>(glbin_text_tex_manager.GetSize() + 3.0);
 
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
 	{
-		float framex = glbin_moviemaker.GetCropX();
-		float framey = glbin_moviemaker.GetCropY();
-		float framew = glbin_moviemaker.GetCropW();
-		float frameh = glbin_moviemaker.GetCropH();
+		float framex = static_cast<float>(glbin_moviemaker.GetCropX());
+		float framey = static_cast<float>(glbin_moviemaker.GetCropY());
+		float framew = static_cast<float>(glbin_moviemaker.GetCropW());
+		float frameh = static_cast<float>(glbin_moviemaker.GetCropH());
 		if (m_enlarge)
 		{
-			framew *= m_enlarge_scale;
-			frameh *= m_enlarge_scale;
-			framex *= m_enlarge_scale;
-			framey *= m_enlarge_scale;
+			framew *= static_cast<float>(m_enlarge_scale);
+			frameh *= static_cast<float>(m_enlarge_scale);
+			framex *= static_cast<float>(m_enlarge_scale);
+			framey *= static_cast<float>(m_enlarge_scale);
 		}
 		switch (glbin_moviemaker.GetScalebarPos())
 		{
 		case 0:
 			sb_x = framex + glbin_moviemaker.GetScalebarX() + sb_w;
-			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1 * font_height;
+			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1f * font_height;
 			break;
 		case 1:
 			sb_x = framex + framew - glbin_moviemaker.GetScalebarX();
-			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1 * font_height;
+			sb_y = framey + frameh - glbin_moviemaker.GetScalebarY() - 1.1f * font_height;
 			break;
 		case 2:
 			sb_x = framex + glbin_moviemaker.GetScalebarX() + sb_w;
@@ -5528,14 +5530,14 @@ void RenderView::DrawScaleBar()
 	}
 	else
 	{
-		sb_x = nx - 20;
+		sb_x = static_cast<float>(nx - 20);
 		sb_y = 20;
 	}
 	px = sb_x / nx;
 	py = sb_y / ny;
 	ph = sb_h / ny;
 	if (m_enlarge)
-		ph *= m_enlarge_scale;
+		ph *= static_cast<float>(m_enlarge_scale);
 	params.push_back(std::pair<unsigned int, double>(0, px));
 	params.push_back(std::pair<unsigned int, double>(1, py));
 	params.push_back(std::pair<unsigned int, double>(2, len));
@@ -5543,8 +5545,8 @@ void RenderView::DrawScaleBar()
 
 	if (draw_text)
 	{
-		px = sb_x - 0.5 * (sb_w + textlen + nx);
-		py = sb_y + 0.5 * font_height - ny / 2.0;
+		px = sb_x - 0.5f * (sb_w + textlen + nx);
+		py = sb_y + 0.5f * font_height - ny / 2.0f;
 		m_text_renderer->RenderText(
 			m_sb_text, text_color,
 			px * sx, py * sy, sx, sy);
@@ -5574,13 +5576,13 @@ void RenderView::DrawScaleBar()
 void RenderView::DrawLegend()
 {
 	float font_height =
-		glbin_text_tex_manager.GetSize() + 3.0;
+		glbin_text_tex_manager.GetSize() + 3.0f;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	float xoffset = glbin_moviemaker.GetScalebarX();
-	float yoffset = glbin_moviemaker.GetScalebarY();
+	float xoffset = static_cast<float>(glbin_moviemaker.GetScalebarX());
+	float yoffset = static_cast<float>(glbin_moviemaker.GetScalebarY());
 	if (m_draw_frame)
 	{
 		xoffset += glbin_moviemaker.GetCropX();
@@ -5588,13 +5590,13 @@ void RenderView::DrawLegend()
 		if (m_scalebar_disp)
 		if (glbin_moviemaker.GetScalebarPos() == 2 ||
 			glbin_moviemaker.GetScalebarPos() == 3)
-			yoffset += font_height * 1.5;
+			yoffset += font_height * 1.5f;
 	}
 
 	float length = 0;
 	float name_len = 0;
-	float gap_width = font_height * 1.5;
-	float w = glbin_moviemaker.GetCropW();
+	float gap_width = font_height * 1.5f;
+	float w = static_cast<float>(glbin_moviemaker.GetCropW());
 	int lines = 0;
 	//first pass
 	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
@@ -5666,7 +5668,7 @@ void RenderView::DrawLegend()
 				cur_vd->GetName() == vd_name)
 				highlighted = true;
 			xpos += xoffset;
-			ypos = ny - (lines - cur_line + 0.1) * font_height - yoffset;
+			ypos = ny - (lines - cur_line + 0.1f) * font_height - yoffset;
 			DrawName(xpos, ypos, nx, ny, vd_name,
 				vd->GetColor(),
 				font_height, highlighted);
@@ -5702,7 +5704,7 @@ void RenderView::DrawLegend()
 				md->GetName() == md_name)
 				highlighted = true;
 			xpos += xoffset;
-			ypos = ny - (lines - cur_line + 0.1) * font_height - yoffset;
+			ypos = ny - (lines - cur_line + 0.1f) * font_height - yoffset;
 			DrawName(xpos, ypos, nx, ny, md_name,
 				md->GetColor(),
 				font_height, highlighted);
@@ -5724,8 +5726,8 @@ void RenderView::DrawName(
 		return;
 
 	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
+	sx = static_cast<float>(2.0 / nx);
+	sy = static_cast<float>(2.0 / ny);
 	glm::mat4 proj_mat = glm::ortho(0.0f, float(nx), 0.0f, float(ny));
 
 	glDisable(GL_DEPTH_TEST);
@@ -5758,8 +5760,8 @@ void RenderView::DrawName(
 	if (shader && shader->valid())
 		shader->release();
 
-	float px1 = x + font_height - nx / 2.0;
-	float py1 = ny / 2.0 - y + 0.25 * font_height;
+	float px1 = static_cast<float>(x + font_height - nx / 2.0);
+	float py1 = static_cast<float>(ny / 2.0 - y + 0.25 * font_height);
 	m_text_renderer->RenderText(
 		name, text_color,
 		px1*sx, py1*sy, sx, sy);
@@ -6440,13 +6442,13 @@ void RenderView::DrawColormap()
 
 	float offset = 0;
 	if (m_draw_legend)
-		offset = glbin_text_tex_manager.GetSize() + 3.0;
+		offset = static_cast<float>(glbin_text_tex_manager.GetSize() + 3.0);
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
 	float sx, sy;//normalized size
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
+	sx = static_cast<float>(2.0 / nx);
+	sy = static_cast<float>(2.0 / ny);
 	float px, py, ph, pw;//normalized pos
 	float cmx, cmy, cmw, cmh;//pixel pos and size
 	cmw = 40;
@@ -6458,16 +6460,16 @@ void RenderView::DrawColormap()
 	//draw colormap
 	if (m_draw_frame)
 	{
-		float framex = glbin_moviemaker.GetCropX();
-		float framey = glbin_moviemaker.GetCropY();
-		float framew = glbin_moviemaker.GetCropW();
-		float frameh = glbin_moviemaker.GetCropH();
+		float framex = static_cast<float>(glbin_moviemaker.GetCropX());
+		float framey = static_cast<float>(glbin_moviemaker.GetCropY());
+		float framew = static_cast<float>(glbin_moviemaker.GetCropW());
+		float frameh = static_cast<float>(glbin_moviemaker.GetCropH());
 		if (m_enlarge)
 		{
-			framew *= m_enlarge_scale;
-			frameh *= m_enlarge_scale;
-			framex *= m_enlarge_scale;
-			framey *= m_enlarge_scale;
+			framew *= static_cast<float>(m_enlarge_scale);
+			frameh *= static_cast<float>(m_enlarge_scale);
+			framex *= static_cast<float>(m_enlarge_scale);
+			framey *= static_cast<float>(m_enlarge_scale);
 		}
 		wstr = std::to_wstring(88);
 		float textlen =
@@ -6497,7 +6499,7 @@ void RenderView::DrawColormap()
 	{
 		cmx = 20;
 		cmy = 20 + offset;
-		cmh = std::min(ny, 300);
+		cmh = static_cast<float>(std::min(ny, 300));
 		txx = cmx + cmw;
 		txy = cmy;
 	}
@@ -6516,33 +6518,33 @@ void RenderView::DrawColormap()
 			return oss.str();
 			};
 
-		px = txx - nx / 2.0;
+		px = static_cast<float>(txx - nx / 2.0);
 		//value 1
-		py = txy - ny / 2.0;
+		py = static_cast<float>(txy - ny / 2.0);
 		wstr = to_wstring(minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 2
-		py = txy + cmh * m_value_2 - ny / 2.0;
+		py = static_cast<float>(txy + cmh * m_value_2 - ny / 2.0);
 		wstr = to_wstring(m_value_2 * (maxv - minv) + minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 4
-		py = txy + cmh * m_value_4 - ny / 2.0;
+		py = static_cast<float>(txy + cmh * m_value_4 - ny / 2.0);
 		wstr = to_wstring(m_value_4 * (maxv - minv) + minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 6
-		py = txy + cmh * m_value_6 - ny / 2.0;
+		py = static_cast<float>(txy + cmh * m_value_6 - ny / 2.0);
 		wstr = to_wstring(m_value_6 * (maxv - minv) + minv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 7
-		py = txy + cmh - ny / 2.0;
+		py = static_cast<float>(txy + cmh - ny / 2.0);
 		wstr = to_wstring(maxv, pres);
 		m_text_renderer->RenderText(
 			wstr, text_color,
@@ -6555,37 +6557,37 @@ void RenderView::DrawColormap()
 	ph = cmh / ny;
 	if (m_enlarge)
 	{
-		pw *= m_enlarge_scale;
-		ph *= m_enlarge_scale;
+		pw *= static_cast<float>(m_enlarge_scale);
+		ph *= static_cast<float>(m_enlarge_scale);
 	}
-	vertex.push_back(px); vertex.push_back(py); vertex.push_back(0.0);
-	vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha ? 0.0 : 1.0);
-	vertex.push_back(px + pw); vertex.push_back(py); vertex.push_back(0.0);
-	vertex.push_back(m_color_1.r()); vertex.push_back(m_color_1.g()); vertex.push_back(m_color_1.b()); vertex.push_back(enable_alpha ? 0.0 : 1.0);
-	vertex.push_back(px); vertex.push_back(py + ph * m_value_2); vertex.push_back(0.0);
-	vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha ? m_value_2 : 1.0);
-	vertex.push_back(px + pw); vertex.push_back(py + ph * m_value_2); vertex.push_back(0.0);
-	vertex.push_back(m_color_2.r()); vertex.push_back(m_color_2.g()); vertex.push_back(m_color_2.b()); vertex.push_back(enable_alpha ? m_value_2 : 1.0);
-	vertex.push_back(px); vertex.push_back(py + ph * m_value_3); vertex.push_back(0.0);
-	vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha ? m_value_3 : 1.0);
-	vertex.push_back(px + pw); vertex.push_back(py + ph * m_value_3); vertex.push_back(0.0);
-	vertex.push_back(m_color_3.r()); vertex.push_back(m_color_3.g()); vertex.push_back(m_color_3.b()); vertex.push_back(enable_alpha ? m_value_3 : 1.0);
-	vertex.push_back(px); vertex.push_back(py + ph * m_value_4); vertex.push_back(0.0);
-	vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha ? m_value_4 : 1.0);
-	vertex.push_back(px + pw); vertex.push_back(py + ph * m_value_4); vertex.push_back(0.0);
-	vertex.push_back(m_color_4.r()); vertex.push_back(m_color_4.g()); vertex.push_back(m_color_4.b()); vertex.push_back(enable_alpha ? m_value_4 : 1.0);
-	vertex.push_back(px); vertex.push_back(py + ph * m_value_5); vertex.push_back(0.0);
-	vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha ? m_value_5 : 1.0);
-	vertex.push_back(px + pw); vertex.push_back(py + ph * m_value_5); vertex.push_back(0.0);
-	vertex.push_back(m_color_5.r()); vertex.push_back(m_color_5.g()); vertex.push_back(m_color_5.b()); vertex.push_back(enable_alpha ? m_value_5 : 1.0);
-	vertex.push_back(px); vertex.push_back(py + ph * m_value_6); vertex.push_back(0.0);
-	vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha ? m_value_6 : 1.0);
-	vertex.push_back(px + pw); vertex.push_back(py + ph * m_value_6); vertex.push_back(0.0);
-	vertex.push_back(m_color_6.r()); vertex.push_back(m_color_6.g()); vertex.push_back(m_color_6.b()); vertex.push_back(enable_alpha ? m_value_6 : 1.0);
-	vertex.push_back(px); vertex.push_back(py + ph); vertex.push_back(0.0);
-	vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
-	vertex.push_back(px + pw); vertex.push_back(py + ph); vertex.push_back(0.0);
-	vertex.push_back(m_color_7.r()); vertex.push_back(m_color_7.g()); vertex.push_back(m_color_7.b()); vertex.push_back(1.0);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py));					vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_1.r()));	vertex.push_back(static_cast<float>(m_color_1.g()));		vertex.push_back(static_cast<float>(m_color_1.b())); vertex.push_back(enable_alpha ? 0.0f : 1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py));					vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_1.r()));	vertex.push_back(static_cast<float>(m_color_1.g()));		vertex.push_back(static_cast<float>(m_color_1.b())); vertex.push_back(enable_alpha ? 0.0f : 1.0f);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py + ph * m_value_2));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_2.r()));	vertex.push_back(static_cast<float>(m_color_2.g()));		vertex.push_back(static_cast<float>(m_color_2.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_2) : 1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py + ph * m_value_2));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_2.r()));	vertex.push_back(static_cast<float>(m_color_2.g()));		vertex.push_back(static_cast<float>(m_color_2.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_2) : 1.0f);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py + ph * m_value_3));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_3.r()));	vertex.push_back(static_cast<float>(m_color_3.g()));		vertex.push_back(static_cast<float>(m_color_3.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_3) : 1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py + ph * m_value_3));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_3.r()));	vertex.push_back(static_cast<float>(m_color_3.g()));		vertex.push_back(static_cast<float>(m_color_3.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_3) : 1.0f);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py + ph * m_value_4));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_4.r()));	vertex.push_back(static_cast<float>(m_color_4.g()));		vertex.push_back(static_cast<float>(m_color_4.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_4) : 1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py + ph * m_value_4));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_4.r()));	vertex.push_back(static_cast<float>(m_color_4.g()));		vertex.push_back(static_cast<float>(m_color_4.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_4) : 1.0f);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py + ph * m_value_5));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_5.r()));	vertex.push_back(static_cast<float>(m_color_5.g()));		vertex.push_back(static_cast<float>(m_color_5.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_5) : 1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py + ph * m_value_5));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_5.r()));	vertex.push_back(static_cast<float>(m_color_5.g()));		vertex.push_back(static_cast<float>(m_color_5.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_5) : 1.0f);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py + ph * m_value_6));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_6.r()));	vertex.push_back(static_cast<float>(m_color_6.g()));		vertex.push_back(static_cast<float>(m_color_6.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_6) : 1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py + ph * m_value_6));	vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_6.r()));	vertex.push_back(static_cast<float>(m_color_6.g()));		vertex.push_back(static_cast<float>(m_color_6.b())); vertex.push_back(enable_alpha ? static_cast<float>(m_value_6) : 1.0f);
+	vertex.push_back(static_cast<float>(px));				vertex.push_back(static_cast<float>(py + ph));				vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_7.r()));	vertex.push_back(static_cast<float>(m_color_7.g()));		vertex.push_back(static_cast<float>(m_color_7.b())); vertex.push_back(1.0f);
+	vertex.push_back(static_cast<float>(px + pw));			vertex.push_back(static_cast<float>(py + ph));				vertex.push_back(0.0f);
+	vertex.push_back(static_cast<float>(m_color_7.r()));	vertex.push_back(static_cast<float>(m_color_7.g()));		vertex.push_back(static_cast<float>(m_color_7.b())); vertex.push_back(1.0f);
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -6720,11 +6722,11 @@ void RenderView::DrawGradBg()
 void RenderView::DrawInfo(int nx, int ny, bool intactive)
 {
 	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
+	sx = static_cast<float>(2.0 / nx);
+	sy = static_cast<float>(2.0 / ny);
 	float px, py;
-	float gapw = glbin_text_tex_manager.GetSize();
-	float gaph = gapw * 2;
+	float gapw = static_cast<float>(glbin_text_tex_manager.GetSize());
+	float gaph = gapw * 2.0f;
 
 	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
 	fps = std::max(fps, 0.0);
@@ -6770,8 +6772,8 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			tos << L"FPS: " << std::fixed << std::setprecision(2) << fps;
 	}
 	str = tos.str();
-	px = gapw - nx / 2.0;
-	py = ny / 2.0 - gaph / 2.0;
+	px = static_cast<float>(gapw - nx / 2.0);
+	py = static_cast<float>(ny / 2.0 - gaph / 2.0);
 	m_text_renderer->RenderText(
 		str, text_color,
 		px*sx, py*sy, sx, sy);
@@ -6796,8 +6798,8 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 				<< L", Y: " << std::fixed << std::setprecision(2) << p.y()
 				<< L", Z: " << std::fixed << std::setprecision(2) << p.z();
 			str = tos.str();
-			px = gapw - nx / 2.0;
-			py = ny / 2.0 - gaph;
+			px = static_cast<float>(gapw - nx / 2.0);
+			py = static_cast<float>(ny / 2.0 - gaph);
 			m_text_renderer->RenderText(
 				str, text_color,
 				px*sx, py*sy, sx, sy);
@@ -6815,19 +6817,19 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			fluo::Plane* plane = (*planes)[4];
 			double abcd[4];
 			plane->get_copy(abcd);
-			int val = fabs(abcd[3] * resz) + 0.499;
+			int val = static_cast<int>(std::round(std::fabs(abcd[3] * resz)));
 
 			tos << L"Z: " << std::fixed << std::setprecision(2) << val * spcz << L"\u03BCm";
 			str = tos.str();
 			if (m_draw_frame)
 			{
-				px = 0.01*glbin_moviemaker.GetCropW() + glbin_moviemaker.GetCropX() - nx / 2.0;
-				py = 0.04*glbin_moviemaker.GetCropH() + glbin_moviemaker.GetCropY() - ny / 2.0;
+				px = static_cast<float>(0.01*glbin_moviemaker.GetCropW() + glbin_moviemaker.GetCropX() - nx / 2.0);
+				py = static_cast<float>(0.04*glbin_moviemaker.GetCropH() + glbin_moviemaker.GetCropY() - ny / 2.0);
 			}
 			else
 			{
-				px = 0.01*nx - nx / 2.0;
-				py = 0.04*ny - ny / 2.0;
+				px = static_cast<float>(0.01*nx - nx / 2.0);
+				py = static_cast<float>(0.04*ny - ny / 2.0);
 			}
 			m_text_renderer->RenderText(
 				str, text_color,
@@ -6840,8 +6842,8 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 		if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
 		{
 			str = L"SLICES: " + std::to_wstring(m_mvr->get_slice_num());
-			px = gapw - nx / 2.0;
-			py = ny / 2.0 - gaph*1.5;
+			px = static_cast<float>(gapw - nx / 2.0);
+			py = static_cast<float>(ny / 2.0 - gaph*1.5);
 			m_text_renderer->RenderText(
 				str, text_color,
 				px*sx, py*sy, sx, sy);
@@ -6855,8 +6857,8 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 				{
 					auto index = std::distance(m_vd_pop_list.begin(), it);
 					str = L"SLICES_" + std::to_wstring(index + 1) + L": " + std::to_wstring(vd->GetVR()->get_slice_num());
-					px = gapw - nx / 2.0;
-					py = ny / 2.0 - gaph*(3 + index) / 2;
+					px = static_cast<float>(gapw - nx / 2.0);
+					py = static_cast<float>(ny / 2.0 - gaph*(3 + index) / 2);
 					m_text_renderer->RenderText(
 						str, text_color,
 						px*sx, py*sy, sx, sy);
@@ -6961,7 +6963,7 @@ void RenderView::Draw()
 
 	// clear color and depth buffers
 	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
+	glClearColor(static_cast<GLfloat>(m_bg_color.r()), static_cast<GLfloat>(m_bg_color.g()), static_cast<GLfloat>(m_bg_color.b()), 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
@@ -7034,7 +7036,7 @@ void RenderView::DrawDP()
 	//clear
 	//	glDrawBuffer(GL_BACK);
 	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
+	glClearColor(static_cast<GLfloat>(m_bg_color.r()), static_cast<GLfloat>(m_bg_color.g()), static_cast<GLfloat>(m_bg_color.b()), 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, (GLint)nx, (GLint)ny);
 
@@ -7394,7 +7396,7 @@ void RenderView::DrawVolumes(int peel)
 		if (glbin_settings.m_mem_swap)
 		{
 			//set start time for the texture renderer
-			flvr::TextureRenderer::set_st_time(GET_TICK_COUNT());
+			flvr::TextureRenderer::set_st_time(static_cast<unsigned long>(GET_TICK_COUNT()));
 
 			flvr::TextureRenderer::set_interactive(m_interactive);
 			//if in interactive mode, do interactive bricking also
@@ -7589,7 +7591,7 @@ void RenderView::DrawVolumes(int peel)
 
 	if (glbin_settings.m_mem_swap)
 	{
-		flvr::TextureRenderer::set_consumed_time(GET_TICK_COUNT() - flvr::TextureRenderer::get_st_time());
+		flvr::TextureRenderer::set_consumed_time(static_cast<unsigned long>(GET_TICK_COUNT() - flvr::TextureRenderer::get_st_time()));
 		if (flvr::TextureRenderer::get_start_update_loop() &&
 			flvr::TextureRenderer::get_done_update_loop())
 			flvr::TextureRenderer::reset_update_loop();
@@ -7607,8 +7609,8 @@ void RenderView::DrawAnnotations()
 	int nx, ny;
 	GetRenderSize(nx, ny);
 	float sx, sy;
-	sx = 2.0 / nx;
-	sy = 2.0 / ny;
+	sx = static_cast<float>(2.0 / nx);
+	sy = static_cast<float>(2.0 / ny);
 	float px, py;
 
 	fluo::Transform mv;
@@ -7647,8 +7649,8 @@ void RenderView::DrawAnnotations()
 							continue;
 						if (!m_persp && (pos.z() >= 0.0 || pos.z() <= -1.0))
 							continue;
-						px = pos.x()*nx / 2.0;
-						py = pos.y()*ny / 2.0;
+						px = static_cast<float>(pos.x()*nx / 2.0);
+						py = static_cast<float>(pos.y()*ny / 2.0);
 						m_text_renderer->RenderText(
 							wstr, text_color,
 							px*sx, py*sy, sx, sy);
@@ -7680,7 +7682,7 @@ void RenderView::BindRenderBuffer()
 		GetRenderSize(nx, ny);
 		glbin_lg_renderer.BindRenderBuffer(nx, ny);
 		glClearDepth(1.0);
-		glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+		glClearColor(static_cast<GLfloat>(m_bg_color.r()), static_cast<GLfloat>(m_bg_color.g()), static_cast<GLfloat>(m_bg_color.b()), 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	else
@@ -7800,7 +7802,7 @@ void RenderView::ClearVRBuffer()
 	BindRenderBuffer();
 	//clear color buffer to black for compositing
 	glClearDepth(1.0);
-	glClearColor(m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 0.0);
+	glClearColor(static_cast<GLfloat>(m_bg_color.r()), static_cast<GLfloat>(m_bg_color.g()), static_cast<GLfloat>(m_bg_color.b()), 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -7812,7 +7814,7 @@ void RenderView::DrawVRBuffer()
 	gl_y = m_gl_size.h();
 	if (glbin_settings.m_sbs)
 		vr_x /= 2;
-	int vp_y = std::round((double)gl_x * vr_y / vr_x / 2.0);
+	int vp_y = static_cast<int>(std::round((double)gl_x * vr_y / vr_x / 2.0));
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, gl_x, vp_y);
 	glDisable(GL_BLEND);
@@ -7886,8 +7888,8 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 	GetRenderSize(nx, ny);
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-	GLfloat zoom = m_scale_factor;
-	GLfloat sf121 = Get121ScaleFactor();
+	GLfloat zoom = static_cast<GLfloat>(m_scale_factor);
+	GLfloat sf121 = static_cast<GLfloat>(Get121ScaleFactor());
 
 	m_mvr->set_blend_slices(glbin_settings.m_micro_blend);
 
@@ -8114,7 +8116,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = GET_TICK_COUNT();
+		unsigned int rn_time = static_cast<unsigned int>(GET_TICK_COUNT());
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -8434,7 +8436,7 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 		flvr::TextureRenderer::get_start_update_loop() &&
 		!flvr::TextureRenderer::get_done_update_loop())
 	{
-		unsigned int rn_time = GET_TICK_COUNT();
+		unsigned int rn_time = static_cast<unsigned int>(GET_TICK_COUNT());
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
@@ -9123,8 +9125,8 @@ void RenderView::DrawBrush()
 		int nx, ny;
 		GetRenderSize(nx, ny);
 		float sx, sy;
-		sx = 2.0 / nx;
-		sy = 2.0 / ny;
+		sx = static_cast<float>(2.0 / nx);
+		sy = static_cast<float>(2.0 / ny);
 
 		//draw the circles
 		//set up the matrices
@@ -9167,11 +9169,11 @@ void RenderView::DrawBrush()
 			DrawCircles(cx, cy, -1.0,
 				br2*pressure, text_color, proj_mat);
 
-		float cx2 = old_mouse_X;
-		float cy2 = ny - old_mouse_Y;
+		float cx2 = static_cast<float>(old_mouse_X);
+		float cy2 = static_cast<float>(ny - old_mouse_Y);
 		float px, py;
-		px = cx2 - 7 - nx / 2.0;
-		py = cy2 - 3 - ny / 2.0;
+		px = static_cast<float>(cx2 - 7 - nx / 2.0);
+		py = static_cast<float>(cy2 - 3 - ny / 2.0);
 		std::wstring wstr;
 		switch (sel_mode)
 		{
@@ -9243,7 +9245,7 @@ void RenderView::PaintStroke()
 	double py = double(old_mouse_Y - prv_mouse_Y);
 	double dist = sqrt(px*px + py*py);
 	double step = radius1 * pressure * bspc;
-	int repeat = std::round(dist / step);
+	int repeat = static_cast<int>(std::round(dist / step));
 	double spx = (double)prv_mouse_X;
 	double spy = (double)prv_mouse_Y;
 	if (repeat > 0)
@@ -9504,7 +9506,7 @@ void RenderView::PostDraw()
 		//capture
 		int chann = glbin_settings.m_save_alpha ? 4 : 3;
 		bool fp32 = glbin_settings.m_save_float;
-		float dpi = glbin_settings.m_dpi;
+		float dpi = static_cast<float>(glbin_settings.m_dpi);
 		int x, y, w, h;
 		void* image = 0;
 		ReadPixels(chann, fp32, x, y, w, h, &image);
@@ -9965,10 +9967,10 @@ void RenderView::ChangeCropFrame(fluo::Point& mp)
 	w = (p2 - p1).x();
 	h = (p3 - p1).y();
 
-	glbin_moviemaker.SetCropX(std::round(x));
-	glbin_moviemaker.SetCropY(std::round(y));
-	glbin_moviemaker.SetCropW(std::round(w));
-	glbin_moviemaker.SetCropH(std::round(h));
+	glbin_moviemaker.SetCropX(static_cast<int>(std::round(x)));
+	glbin_moviemaker.SetCropY(static_cast<int>(std::round(y)));
+	glbin_moviemaker.SetCropW(static_cast<int>(std::round(w)));
+	glbin_moviemaker.SetCropH(static_cast<int>(std::round(h)));
 }
 
 void RenderView::switchLevel(VolumeData *vd)
@@ -9979,8 +9981,8 @@ void RenderView::switchLevel(VolumeData *vd)
 	GetRenderSize(nx, ny);
 	if (m_enlarge)
 	{
-		nx = std::round(nx * m_enlarge_scale);
-		ny = std::round(ny * m_enlarge_scale);
+		nx = static_cast<int>(std::round(nx * m_enlarge_scale));
+		ny = static_cast<int>(std::round(ny * m_enlarge_scale));
 	}
 
 	flvr::Texture *vtex = vd->GetTexture();
@@ -10850,15 +10852,15 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_int_mode == InteractiveMode::RulerDelPoint) &&
 			!found_rp))
 		{
-			old_mouse_X = mp.x();
-			old_mouse_Y = mp.y();
+			old_mouse_X = static_cast<long>(std::round(mp.x()));
+			old_mouse_Y = static_cast<long>(std::round(mp.y()));
 			m_pick = true;
 		}
 		else if (m_int_mode == InteractiveMode::BrushSelect ||
 			m_int_mode == InteractiveMode::BrushRuler)
 		{
-			old_mouse_X = mp.x();
-			old_mouse_Y = mp.y();
+			old_mouse_X = static_cast<long>(std::round(mp.x()));
+			old_mouse_Y = static_cast<long>(std::round(mp.y()));
 			prv_mouse_X = old_mouse_X;
 			prv_mouse_Y = old_mouse_Y;
 			m_paint_enable = true;
@@ -10886,7 +10888,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			!state.m_key_alt)
 		{
 			//add one point to a ruler
-			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 2);
+			glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 2);
 			RefreshGL(16);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 		}
@@ -10916,15 +10918,15 @@ void RenderView::ProcessMouse(MouseState& state)
 	if (state.m_mouse_right_down)
 	{
 		state.m_reset_focus_slider = true;
-		old_mouse_X = mp.x();
-		old_mouse_Y = mp.y();
+		old_mouse_X = static_cast<long>(std::round(mp.x()));
+		old_mouse_Y = static_cast<long>(std::round(mp.y()));
 		return;
 	}
 	if (state.m_mouse_middle_down)
 	{
 		state.m_reset_focus_slider = true;
-		old_mouse_X = mp.x();
-		old_mouse_Y = mp.y();
+		old_mouse_X = static_cast<long>(std::round(mp.x()));
+		old_mouse_Y = static_cast<long>(std::round(mp.y()));
 		return;
 	}
 
@@ -10968,7 +10970,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			!state.m_key_alt)
 		{
 			//add one point to a ruler
-			glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
+			glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 1);
 			RefreshGL(18);
 			glbin_current.mainframe->UpdateProps({ gstRulerList });
 			return;
@@ -10987,7 +10989,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				vc.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			if (glbin_ruler_handler.GetRulerMode() == flrd::RulerMode::Probe)
-				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
+				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);
 			else
 				glbin_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = InteractiveMode::BrushRulerUpdate;
@@ -11027,10 +11029,10 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (m_int_mode == InteractiveMode::EditRulerPoint)
 			{
 				glbin_ruler_handler.ClearMagStroke();
-				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+				glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
 			}
 			else if (glbin_ruler_handler.MagStrokeEmpty())
-				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+				glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
 			glbin_ruler_handler.ApplyMagPoint();
 			glbin_ruler_handler.ClearMagStroke();
 			RefreshGL(21);
@@ -11063,7 +11065,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			else
 			{
-				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 1);
+				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 1);
 				glbin_ruler_handler.FinishRuler();
 			}
 			if (glbin_ruler_handler.GetAutoRelax())
@@ -11091,10 +11093,11 @@ void RenderView::ProcessMouse(MouseState& state)
 		}
 
 		flvr::TextureRenderer::set_cor_up_time(
-			std::round(sqrt(double(old_mouse_X - mp.x())*
+			static_cast<int>(std::round(
+				sqrt(double(old_mouse_X - mp.x())*
 				double(old_mouse_X - mp.x()) +
 				double(old_mouse_Y - mp.y())*
-				double(old_mouse_Y - mp.y()))));
+				double(old_mouse_Y - mp.y())))));
 
 		flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
 		bool hold_old = false;
@@ -11173,8 +11176,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				}
 				if (state.m_mouse_middle_is_down || (state.m_key_ctrl && state.m_mouse_left_is_down))
 				{
-					long dx = mp.x() - old_mouse_X;
-					long dy = mp.y() - old_mouse_Y;
+					long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
+					long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
 
 					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
 					m_head.normalize();
@@ -11195,8 +11198,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				}
 				if (state.m_mouse_right_is_down)
 				{
-					long dx = mp.x() - old_mouse_X;
-					long dy = mp.y() - old_mouse_Y;
+					long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
+					long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
 
 					double delta = abs(dx)>abs(dy) ?
 						(double)dx / (double)nx :
@@ -11238,7 +11241,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				if (state.m_mouse_left_is_down)
 				{
-					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, mp.y(), mp.x(), old_mouse_Y);
+					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, static_cast<int>(std::round(mp.y())), static_cast<int>(std::round(mp.x())), old_mouse_Y);
 					m_q_cl = q_delta * m_q_cl;
 					m_q_cl.Normalize();
 					SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
@@ -11252,10 +11255,10 @@ void RenderView::ProcessMouse(MouseState& state)
 			bool rval = false;
 			if (m_int_mode == InteractiveMode::EditRulerPoint)
 				rval = glbin_ruler_handler.EditPoint(
-					mp.x(), mp.y(), state.m_key_alt);
+					static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), state.m_key_alt);
 			else if (m_int_mode == InteractiveMode::MoveRuler)
 				rval = glbin_ruler_handler.MoveRuler(
-					mp.x(), mp.y());
+					static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
 			if (rval)
 			{
 				RefreshGL(29);
@@ -11267,10 +11270,10 @@ void RenderView::ProcessMouse(MouseState& state)
 			!state.m_key_alt)
 		{
 			double dist = glbin_settings.m_pencil_dist;
-			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
+			if (glbin_ruler_handler.GetMouseDist(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), dist))
 			{
 				//add one point to a ruler
-				glbin_ruler_handler.AddRulerPoint(mp.x(), mp.y(), 0);
+				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);
 				RefreshGL(30);
 				glbin_current.mainframe->UpdateProps({ gstRulerList });
 			}
@@ -11279,8 +11282,8 @@ void RenderView::ProcessMouse(MouseState& state)
 			!state.m_key_alt)
 		{
 			double dist = glbin_settings.m_pencil_dist;
-			if (glbin_ruler_handler.GetMouseDist(mp.x(), mp.y(), dist))
-				glbin_ruler_handler.AddMagStrokePoint(mp.x(), mp.y());
+			if (glbin_ruler_handler.GetMouseDist(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), dist))
+				glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
 			glbin_ruler_handler.ApplyMagStroke();
 			RefreshGL(31);
 		}
@@ -11292,14 +11295,14 @@ void RenderView::ProcessMouse(MouseState& state)
 			prv_mouse_Y = old_mouse_Y;
 			if (!hold_old)
 			{
-				old_mouse_X = mp.x();
-				old_mouse_Y = mp.y();
+				old_mouse_X = static_cast<long>(std::round(mp.x()));
+				old_mouse_Y = static_cast<long>(std::round(mp.y()));
 			}
 		}
 		else
 		{
-			old_mouse_X = mp.x();
-			old_mouse_Y = mp.y();
+			old_mouse_X = static_cast<long>(std::round(mp.x()));
+			old_mouse_Y = static_cast<long>(std::round(mp.y()));
 			prv_mouse_X = old_mouse_X;
 			prv_mouse_Y = old_mouse_Y;
 		}
@@ -11343,8 +11346,8 @@ void RenderView::ProcessMouse(MouseState& state)
 	//not actually for displaying it
 	if (m_draw_brush)
 	{
-		old_mouse_X = mp.x();
-		old_mouse_Y = mp.y();
+		old_mouse_X = static_cast<long>(std::round(mp.x()));
+		old_mouse_Y = static_cast<long>(std::round(mp.y()));
 		RefreshGL(33);
 		return;
 	}

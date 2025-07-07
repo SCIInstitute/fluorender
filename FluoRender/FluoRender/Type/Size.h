@@ -91,6 +91,23 @@ public:
 		return Size2D(width / size, height / size);
 	}
 
+	inline Size2D operator+(double size) const {
+		return Size2D(static_cast<int>(std::round(width + size)),
+			static_cast<int>(std::round(height + size)));
+	}
+	inline Size2D operator-(double size) const {
+		return Size2D(static_cast<int>(std::round(width - size)),
+			static_cast<int>(std::round(height - size)));
+	}
+	inline Size2D operator*(double size) const {
+		return Size2D(static_cast<int>(std::round(width * size)),
+			static_cast<int>(std::round(height * size)));
+	}
+	inline Size2D operator/(double size) const {
+		return Size2D(static_cast<int>(std::round(width / size)),
+			static_cast<int>(std::round(height / size)));
+	}
+
 	inline Size2D& operator+=(const Size2D& size) {
 		width += size.width;
 		height += size.height;
@@ -130,6 +147,29 @@ public:
 	inline Size2D& operator/=(int size) {
 		width /= size;
 		height /= size;
+		return *this;
+	}
+
+	inline Size2D& operator+=(double size) {
+		int rounded = static_cast<int>(std::round(size));
+		width += rounded;
+		height += rounded;
+		return *this;
+	}
+	inline Size2D& operator-=(double size) {
+		int rounded = static_cast<int>(std::round(size));
+		width -= rounded;
+		height -= rounded;
+		return *this;
+	}
+	inline Size2D& operator*=(double size) {
+		width = static_cast<int>(std::round(width * size));
+		height = static_cast<int>(std::round(height * size));
+		return *this;
+	}
+	inline Size2D& operator/=(double size) {
+		width = static_cast<int>(std::round(width / size));
+		height = static_cast<int>(std::round(height / size));
 		return *this;
 	}
 
@@ -214,6 +254,31 @@ public:
 		return Size3D(width / size, height / size, depth / size);
 	}
 
+	inline Size3D operator+(double size) const {
+		return Size3D(
+			static_cast<int>(std::round(width + size)),
+			static_cast<int>(std::round(height + size)),
+			static_cast<int>(std::round(depth + size)));
+	}
+	inline Size3D operator-(double size) const {
+		return Size3D(
+			static_cast<int>(std::round(width - size)),
+			static_cast<int>(std::round(height - size)),
+			static_cast<int>(std::round(depth - size)));
+	}
+	inline Size3D operator*(double size) const {
+		return Size3D(
+			static_cast<int>(std::round(width * size)),
+			static_cast<int>(std::round(height * size)),
+			static_cast<int>(std::round(depth * size)));
+	}
+	inline Size3D operator/(double size) const {
+		return Size3D(
+			static_cast<int>(std::round(width / size)),
+			static_cast<int>(std::round(height / size)),
+			static_cast<int>(std::round(depth / size)));
+	}
+
 	inline Size3D& operator+=(const Size3D& size) {
 		width += size.width;
 		height += size.height;
@@ -261,6 +326,33 @@ public:
 		width /= size;
 		height /= size;
 		depth /= size;
+		return *this;
+	}
+
+	inline Size3D& operator+=(double size) {
+		int rounded = static_cast<int>(size);
+		width += rounded;
+		height += rounded;
+		depth += rounded;
+		return *this;
+	}
+	inline Size3D& operator-=(double size) {
+		int rounded = static_cast<int>(size);
+		width -= rounded;
+		height -= rounded;
+		depth -= rounded;
+		return *this;
+	}
+	inline Size3D& operator*=(double size) {
+		width = static_cast<int>(std::round(width * (size)));
+		height = static_cast<int>(std::round(height * (size)));
+		depth = static_cast<int>(std::round(depth * (size)));
+		return *this;
+	}
+	inline Size3D& operator/=(double size) {
+		width = static_cast<int>(std::round(width / (size)));
+		height = static_cast<int>(std::round(height / (size)));;
+		depth = static_cast<int>(std::round(depth / (size)));;
 		return *this;
 	}
 
