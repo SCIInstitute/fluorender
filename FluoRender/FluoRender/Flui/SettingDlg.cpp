@@ -704,12 +704,6 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_8->Add(st, 0, wxALIGN_CENTER);
 	sizer1_8->Add(m_lg_offset_sldr, 1, wxEXPAND);
 	sizer1_8->Add(m_lg_offset_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer1_9 = new wxBoxSizer(wxHORIZONTAL);
-	m_holo_debug_chk = new wxCheckBox(page, wxID_ANY,
-		"Show Quilt");
-	m_holo_debug_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnHoloDebugCheck, this);
-	sizer1_9->Add(20, 5);
-	sizer1_9->Add(m_holo_debug_chk, 0, wxALIGN_CENTER);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
@@ -726,8 +720,6 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group1->Add(sizer1_7, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_8, 0, wxEXPAND);
-	group1->Add(10, 5);
-	group1->Add(sizer1_9, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//full screen display
@@ -1212,7 +1204,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_looking_glass_chk->SetValue(false);
 			m_lg_offset_sldr->Disable();
 			m_lg_offset_text->Disable();
-			m_holo_debug_chk->Disable();
 		}
 		else if (glbin_settings.m_hologram_mode == 1)
 		{
@@ -1231,7 +1222,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_looking_glass_chk->SetValue(false);
 			m_lg_offset_sldr->Disable();
 			m_lg_offset_text->Disable();
-			m_holo_debug_chk->Disable();
 		}
 		else if (glbin_settings.m_hologram_mode == 2)
 		{
@@ -1247,7 +1237,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_looking_glass_chk->SetValue(true);
 			m_lg_offset_sldr->Enable();
 			m_lg_offset_text->Enable();
-			m_holo_debug_chk->Enable();
 		}
 #ifdef _WIN32
 		m_holo_ip_text->ChangeValue(wxString(glbin_settings.m_holo_ip));
@@ -1259,7 +1248,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
 		m_lg_offset_sldr->ChangeValue(glbin_settings.m_lg_offset);
 		m_lg_offset_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_lg_offset));
-		m_holo_debug_chk->SetValue(glbin_settings.m_hologram_debug);
 	}
 
 	//display id
@@ -1541,12 +1529,6 @@ void SettingDlg::OnLgOffsetEdit(wxCommandEvent& event)
 	str.ToLong(&lval);
 	m_lg_offset_sldr->ChangeValue(lval);
 	glbin_settings.m_lg_offset = lval;
-	FluoRefresh(3, { gstNull });
-}
-
-void SettingDlg::OnHoloDebugCheck(wxCommandEvent& event)
-{
-	glbin_settings.m_hologram_debug = m_holo_debug_chk->GetValue();
 	FluoRefresh(3, { gstNull });
 }
 

@@ -88,7 +88,7 @@ bool LookingGlassRenderer::Init()
 		//}
 
 		// For now we will use the first looking glass display
-		if (!m_lg_displays.empty() && m_lg_controller->InstanceOffscreenWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
+		if (!m_lg_displays.empty() && m_lg_controller->InstanceWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
 		{
 			DBGPRINT(L"Successfully created the window handle.\n");
 		}
@@ -199,14 +199,20 @@ void LookingGlassRenderer::Draw()
 	glDisable(GL_DEPTH_TEST);
 	//texture lookup shader
 	flvr::ShaderProgram* shader = 0;
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	shader->bind();
+	shader = glbin_img_shader_factory.shader(IMG_SHDR_TEXTURE_FLIP);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
 	//set up view port for place texture
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	// get the x and y origin for this view
-	int x = (m_cur_view % m_lg_data.vx) * m_lg_data.view_width;
-	int y = int(float(m_cur_view) / float(m_lg_data.vx)) * m_lg_data.view_height;
+	int corrected_view = m_lg_data.vx * m_lg_data.vy - 1 - m_cur_view;
+	int x = (corrected_view % m_lg_data.vx) * m_lg_data.view_width;
+	int y = (m_lg_data.vy - 1 - (corrected_view / m_lg_data.vx)) * m_lg_data.view_height;
 	glViewport(x, y, m_lg_data.view_width, m_lg_data.view_height);
 	//bind texture
 	flvr::Framebuffer* view_buffer =
@@ -227,19 +233,19 @@ void LookingGlassRenderer::Draw()
 	// reset viewport
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-	//quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	//m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data.wnd,
-	//	quilt_buffer->tex_id(GL_COLOR_ATTACHMENT0), PixelFormats::RGBA,
-	//	m_lg_data.quilt_width, m_lg_data.quilt_height,
-	//	m_lg_data.vx, m_lg_data.vy,
-	//	m_lg_data.displayaspect, 1.0f);
-
-	shader = glbin_light_field_shader_factory.shader(0);
-	shader->bind();
-	shader->setLocalParamUInt(0, glbin_settings.m_hologram_debug ? 1 : 0);//show quilt
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	quad_va->draw();
-	shader->release();
+	m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data.wnd,
+		quilt_buffer->tex_id(GL_COLOR_ATTACHMENT0), PixelFormats::RGBA,
+		m_lg_data.quilt_width, m_lg_data.quilt_height,
+		m_lg_data.vx, m_lg_data.vy,
+		m_lg_data.displayaspect, 1.0f);
+
+	//shader = glbin_light_field_shader_factory.shader(0);
+	//shader->bind();
+	//shader->setLocalParamUInt(0, glbin_settings.m_hologram_debug ? 1 : 0);//show quilt
+	//quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//quad_va->draw();
+	//shader->release();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);

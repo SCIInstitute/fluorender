@@ -57,6 +57,7 @@ namespace flvr
 #define IMG_SHDR_DRAW_THICK_LINES_COLOR		20
 #define IMG_SHDR_GRADIENT_BACKGROUND		21
 #define IMG_SHDR_FILTER_LANCZOS_BICUBIC		22
+#define IMG_SHDR_TEXTURE_FLIP				23
 
 	class ShaderProgram;
 

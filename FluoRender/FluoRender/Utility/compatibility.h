@@ -423,18 +423,17 @@ inline void FIND_FILES_BATCH(const std::wstring& path_name,
 	int& cur_batch)
 {
 	std::filesystem::path p(path_name);
-	p = p.parent_path();
+	p = std::filesystem::absolute(p).parent_path();
 	std::wstring search_path = p.wstring();
-	std::wstring full_search_mask =
-		search_path + L".*" + search_mask;
+	std::wstring full_search_mask = L".*" + search_mask;
 
-	std::wregex regex(full_search_mask);
+	std::wregex regex(full_search_mask, std::regex::icase);
 	batch_list.clear();
 	int cnt = 0;
 
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
-		std::wstring str = entry.path().wstring();
+		std::wstring str = entry.path().filename().wstring();
 		if (std::regex_match(str, regex))
 		{
 			std::wstring name = entry.path().wstring();

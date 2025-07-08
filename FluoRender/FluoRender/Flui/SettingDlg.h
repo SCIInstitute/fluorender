@@ -80,7 +80,6 @@ private:
 	wxCheckBox* m_looking_glass_chk;
 	wxSingleSlider* m_lg_offset_sldr;
 	wxTextCtrl* m_lg_offset_text;
-	wxCheckBox* m_holo_debug_chk;
 	//display
 	wxComboBox* m_disp_id_comb;
 	//color depth
@@ -186,7 +185,6 @@ private:
 	void OnEyeDistEdit(wxCommandEvent& event);
 	void OnHoloIpEdit(wxCommandEvent& event);
 	void OnLookingGlassCheck(wxCommandEvent& event);
-	void OnHoloDebugCheck(wxCommandEvent& event);
 	void OnLgOffsetChange(wxScrollEvent& event);
 	void OnLgOffsetEdit(wxCommandEvent& event);
 	//display id

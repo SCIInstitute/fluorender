@@ -171,6 +171,22 @@ using std::ostringstream;
 	"	FragColor = c;\n" \
 	"}\n"
 
+#define IMG_SHADER_CODE_TEXTURE_FLIP \
+	"//IMG_SHADER_CODE_TEXTURE_FLIP\n" \
+	"in vec3 OutVertex;\n" \
+	"in vec3 OutTexCoord;\n" \
+	"out vec4 FragColor;\n" \
+	"\n" \
+	"// IMG_SHADER_CODE_TEXTURE_FLIP\n" \
+	"uniform sampler2D tex0;\n" \
+	"\n" \
+	"void main()\n" \
+	"{\n" \
+	"	vec2 t = vec2(OutTexCoord.x, 1.0 - OutTexCoord.y);\n" \
+	"	vec4 c = texture(tex0, t);\n" \
+	"	FragColor = c;\n" \
+	"}\n"
+
 #define IMG_SHADER_CODE_BRIGHTNESS_CONTRAST \
 	"//IMG_SHADER_CODE_BRIGHTNESS_CONTRAST\n" \
 	"in vec3 OutVertex;\n" \
@@ -845,6 +861,7 @@ namespace flvr
 		case IMG_SHDR_PAINT:
 		case IMG_SHDR_GRADIENT_BACKGROUND:
 		case IMG_SHDR_FILTER_LANCZOS_BICUBIC:
+		case IMG_SHDR_TEXTURE_FLIP:
 		default:
 			z << IMG_VERTEX_CODE;
 			break;
@@ -952,6 +969,9 @@ namespace flvr
 			break;
 		case IMG_SHDR_FILTER_LANCZOS_BICUBIC:
 			z << IMG_SHADER_CODE_FILTER_LANCZOS_BICUBIC;
+			break;
+		case IMG_SHDR_TEXTURE_FLIP:
+			z << IMG_SHADER_CODE_TEXTURE_FLIP;
 			break;
 		default:
 			z << IMG_SHADER_CODE_TEXTURE_LOOKUP;
