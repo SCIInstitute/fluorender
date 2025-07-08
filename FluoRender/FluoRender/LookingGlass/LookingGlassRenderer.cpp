@@ -226,8 +226,14 @@ void LookingGlassRenderer::Draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// reset viewport
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-	//glDisable(GL_BLEND);
-	//glDisable(GL_DEPTH_TEST);
+
+	//quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	//m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data.wnd,
+	//	quilt_buffer->tex_id(GL_COLOR_ATTACHMENT0), PixelFormats::RGBA,
+	//	m_lg_data.quilt_width, m_lg_data.quilt_height,
+	//	m_lg_data.vx, m_lg_data.vy,
+	//	m_lg_data.displayaspect, 1.0f);
+
 	shader = glbin_light_field_shader_factory.shader(0);
 	shader->bind();
 	shader->setLocalParamUInt(0, glbin_settings.m_hologram_debug ? 1 : 0);//show quilt
