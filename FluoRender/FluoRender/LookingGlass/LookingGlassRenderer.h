@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef LookingGlassRenderer_h
 #define LookingGlassRenderer_h
 
+#include <Size.h>
 #include <memory>
 #include <bridge_utils.hpp>
 
@@ -50,6 +51,12 @@ public:
 	bool GetFinished() { return m_finished; }
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 	void BindRenderBuffer(int nx, int ny);
+	Size2D GetViewSize() const
+	{
+		if (!m_initialized)
+			return Size2D(-1, -1);
+		return Size2D(m_lg_data.view_width, m_lg_data.view_height);
+	}
 
 private:
 	bool m_initialized = false;

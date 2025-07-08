@@ -729,6 +729,12 @@ void RenderView::InitOpenXR()
 
 void RenderView::InitLookingGlass()
 {
+	//set canvas size to the display
+	Size2D lg_size = glbin_lg_renderer.GetViewSize();
+	if (lg_size.isValid())
+	{
+		m_gl_size = m_size = lg_size;
+	}
 	if (m_lg_initiated)
 		return;
 	bool bval = glbin_lg_renderer.Init();
@@ -745,8 +751,8 @@ void RenderView::InitLookingGlass()
 		glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
 	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
 	glbin_current.mainframe->UpdateProps({ gstHologramMode, gstFullscreenDisplay });
-	if (m_render_view_panel)
-		m_render_view_panel->SetFullScreen();
+	//if (m_render_view_panel)
+	//	m_render_view_panel->SetFullScreen();
 	m_lg_initiated = true;
 }
 

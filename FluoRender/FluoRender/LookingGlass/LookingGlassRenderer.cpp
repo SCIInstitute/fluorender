@@ -138,7 +138,7 @@ void LookingGlassRenderer::Setup()
 			flvr::FB_Render_RGBA, m_lg_data.quilt_width, m_lg_data.quilt_height, "quilt");
 	quilt_buffer->protect();
 
-	flvr::ShaderProgram* shader = 0;
+/*	flvr::ShaderProgram* shader = 0;
 	//set up shader to render quilt
 	shader = glbin_light_field_shader_factory.shader(0);
 	if (shader)
@@ -165,7 +165,7 @@ void LookingGlassRenderer::Setup()
 	shader->setLocalParam(2, m_lg_data.vx, m_lg_data.vy, m_lg_data.vx * m_lg_data.vy, 0);
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 
-	shader->release();
+	shader->release();*/
 }
 
 void LookingGlassRenderer::Clear()
@@ -207,8 +207,6 @@ void LookingGlassRenderer::Draw()
 		shader->bind();
 	}
 	//set up view port for place texture
-	GLint viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
 	// get the x and y origin for this view
 	int corrected_view = m_lg_data.vx * m_lg_data.vy - 1 - m_cur_view;
 	int x = (corrected_view % m_lg_data.vx) * m_lg_data.view_width;
@@ -231,6 +229,8 @@ void LookingGlassRenderer::Draw()
 	//draw quilt to view
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// reset viewport
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
@@ -246,6 +246,18 @@ void LookingGlassRenderer::Draw()
 	//quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	//quad_va->draw();
 	//shader->release();
+
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
+	}
+	view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	quad_va->draw();
+	shader->release();
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);

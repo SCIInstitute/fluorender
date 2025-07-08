@@ -178,6 +178,10 @@ public:
 	inline void w(int w) { width = w; }
 	inline void h(int h) { height = h; }
 
+	inline bool isValid() const {
+		return width > 0 && height > 0;
+	}
+
 	friend std::ostream& operator<<(std::ostream& os, const Size2D& size) {
 		os << "[" << size.width << "," << size.height << "]";
 		return os;
@@ -362,6 +366,10 @@ public:
 	inline void w(int w) { width = w; }
 	inline void h(int h) { height = h; }
 	inline void d(int d) { depth = d; }
+
+	inline bool isValid() const {
+		return width > 0 && height > 0 && depth > 0;
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Size3D& size) {
 		os << "[" << size.width << "," << size.height << "," << size.depth << ']';
