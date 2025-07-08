@@ -43,7 +43,6 @@ LookingGlassRenderer::LookingGlassRenderer()
 {
 	// Create the bridge controller
 	m_lg_controller = std::make_unique<Controller>();
-	SetPreset(1);
 }
 
 LookingGlassRenderer::~LookingGlassRenderer()
@@ -89,22 +88,22 @@ bool LookingGlassRenderer::Init()
 		//}
 
 		// For now we will use the first looking glass display
-		//if (!m_lg_displays.empty() && m_lg_controller->InstanceOffscreenWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
-		//{
-		//	DBGPRINT(L"Successfully created the window handle.\n");
-		//}
-		//else
-		//{
-		//	wnd = 0;
-		//	DBGPRINT(L"Failed to initialize bridge window. do you have any displays connected?\n");
-		//	return false;
-		//}
+		if (!m_lg_displays.empty() && m_lg_controller->InstanceOffscreenWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
+		{
+			DBGPRINT(L"Successfully created the window handle.\n");
+		}
+		else
+		{
+			wnd = 0;
+			DBGPRINT(L"Failed to initialize bridge window. do you have any displays connected?\n");
+			return false;
+		}
 	}
 
-	//BridgeWindowData bridgeData = m_lg_controller ? m_lg_controller->GetWindowData(wnd) : BridgeWindowData();
-	//m_initialized = (bridgeData.wnd != 0);
+	m_lg_data = m_lg_controller ? m_lg_controller->GetWindowData(wnd) : BridgeWindowData();
+	m_initialized = (m_lg_data.wnd != 0);
 	m_viewCone = m_lg_displays[m_cur_lg_display].viewcone;
-	m_initialized = true;
+	//m_initialized = true;
 	return m_initialized;
 }
 
@@ -128,56 +127,18 @@ int LookingGlassRenderer::GetDisplayId()
 	return m_lg_displays[m_cur_lg_display].display_id;
 }
 
-void LookingGlassRenderer::SetPreset(int val)
-{
-	switch (val)
-	{
-	case 0: // standard
-		m_width = 2048;
-		m_height = 2048;
-		m_columns = 4;
-		m_rows = 8;
-		m_totalViews = 32;
-		m_preset = 0;
-		break;
-	default:
-	case 1: // hires
-		m_width = 4096;
-		m_height = 4096;
-		m_columns = 5;
-		m_rows = 9;
-		m_totalViews = 45;
-		m_preset = 1;
-		break;
-	case 2: // 8k
-		m_width = 4096 * 2;
-		m_height = 4096 * 2;
-		m_columns = 5;
-		m_rows = 9;
-		m_totalViews = 45;
-		m_preset = 2;
-		break;
-	}
-	m_viewWidth = int(float(m_width) / float(m_columns));
-	m_viewHeight = int(float(m_height) / float(m_rows));
-}
-
 void LookingGlassRenderer::Setup()
 {
+	if (!m_initialized)
+		return;
+
 	//set up framebuffer for quilt
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FB_Render_RGBA, m_width, m_height, "quilt");
+			flvr::FB_Render_RGBA, m_lg_data.quilt_width, m_lg_data.quilt_height, "quilt");
 	quilt_buffer->protect();
 
 	flvr::ShaderProgram* shader = 0;
-	//set up shader to render texture
-	//shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	//if (shader)
-	//{
-	//	if (!shader->valid())
-	//		shader->create();
-	//}
 	//set up shader to render quilt
 	shader = glbin_light_field_shader_factory.shader(0);
 	if (shader)
@@ -191,8 +152,8 @@ void LookingGlassRenderer::Setup()
 	float tilt = m_lg_displays[m_cur_lg_display].tilt;
 	float center = m_lg_displays[m_cur_lg_display].center;
 	float subp = m_lg_displays[m_cur_lg_display].subp;
-	float vp0 = float(m_viewWidth * m_columns) / float(m_width);
-	float vp1 = float(m_viewHeight * m_rows) / float(m_height);
+	float vp0 = float(m_lg_data.view_width * m_lg_data.vx) / float(m_lg_data.quilt_width);
+	float vp1 = float(m_lg_data.view_height * m_lg_data.vy) / float(m_lg_data.quilt_height);
 	float aspect = m_lg_displays[m_cur_lg_display].aspect;
 	int invView = m_lg_displays[m_cur_lg_display].viewinv;
 	int ri = m_lg_displays[m_cur_lg_display].ri;
@@ -201,7 +162,7 @@ void LookingGlassRenderer::Setup()
 
 	shader->setLocalParam(0, pitch, aspect / tilt, center, subp);
 	shader->setLocalParam(1, vp0, vp1, aspect, aspect);
-	shader->setLocalParam(2, m_columns, m_rows, m_totalViews, 0);
+	shader->setLocalParam(2, m_lg_data.vx, m_lg_data.vy, m_lg_data.vx * m_lg_data.vy, 0);
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 
 	shader->release();
@@ -209,6 +170,9 @@ void LookingGlassRenderer::Setup()
 
 void LookingGlassRenderer::Clear()
 {
+	if (!m_initialized)
+		return;
+
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt");
 	quilt_buffer->bind();
@@ -220,6 +184,9 @@ void LookingGlassRenderer::Clear()
 
 void LookingGlassRenderer::Draw()
 {
+	if (!m_initialized)
+		return;
+
 	m_finished = false;
 	//draw view tex to quilt
 	//bind quilt frame buffer
@@ -238,9 +205,9 @@ void LookingGlassRenderer::Draw()
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	// get the x and y origin for this view
-	int x = (m_cur_view % m_columns) * m_viewWidth;
-	int y = int(float(m_cur_view) / float(m_columns)) * m_viewHeight;
-	glViewport(x, y, m_viewWidth, m_viewHeight);
+	int x = (m_cur_view % m_lg_data.vx) * m_lg_data.view_width;
+	int y = int(float(m_cur_view) / float(m_lg_data.vx)) * m_lg_data.view_height;
+	glViewport(x, y, m_lg_data.view_width, m_lg_data.view_height);
 	//bind texture
 	flvr::Framebuffer* view_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt view");
@@ -274,6 +241,9 @@ void LookingGlassRenderer::Draw()
 
 void LookingGlassRenderer::SetUpdating(bool val)
 {
+	if (!m_initialized)
+		return;
+
 	m_updating = val;
 	if (val)
 		m_upd_view = m_cur_view;
@@ -281,12 +251,18 @@ void LookingGlassRenderer::SetUpdating(bool val)
 
 double LookingGlassRenderer::GetOffset()
 {
-	double len = double(m_totalViews - 1) / 2;
+	if (!m_initialized)
+		return 0.0;
+
+	double len = double(m_lg_data.vx * m_lg_data.vy - 1) / 2;
 	return (m_cur_view - len) / len;
 }
 
 void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
 {
+	if (!m_initialized)
+		return;
+
 	flvr::Framebuffer* buffer =
 		glbin_framebuffer_manager.framebuffer(
 			flvr::FB_Render_RGBA, nx, ny, "quilt view");
@@ -296,8 +272,11 @@ void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
 
 void LookingGlassRenderer::advance_views()
 {
+	if (!m_initialized)
+		return;
+
 	m_cur_view++;
-	if (m_cur_view == m_totalViews)
+	if (m_cur_view == m_lg_data.vx * m_lg_data.vy)
 		m_cur_view = 0;
 	if (!m_updating && m_cur_view == m_upd_view)
 		m_finished = true;

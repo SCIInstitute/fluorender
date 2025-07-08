@@ -42,7 +42,6 @@ public:
 	void SetDevIndex(int val) { m_dev_index = val; }
 	int GetDisplayId();
 	double GetHalfCone() { return m_viewCone / 2; }
-	void SetPreset(int val);
 	void Setup();
 	void Clear();
 	void Draw();
@@ -57,26 +56,9 @@ private:
 	int m_dev_index = 0;
 
 	std::unique_ptr<Controller> m_lg_controller;
-	//BridgeWindowData m_lg_data;
 	std::vector<DisplayInfo> m_lg_displays;
 	int m_cur_lg_display = 0;
-
-	// quilt settings
-	int m_preset = 0;		// Set up the quilt settings according to the preset passed
-							// 0: 32 views
-							// 1: 45 views, normally used one
-							// 2: 45 views for 8k display
-							// Feel free to customize if you want
-	int m_width = 2048;		// Total width of the quilt texture
-	int m_height = 2048;	// Total height of the quilt texture
-	int m_rows = 8;			// Number of columns in the quilt
-	int m_columns = 4;		// Number of rows in the quilt
-	int m_totalViews = 32;	// The total number of views in the quilt.
-							// Note that this number might be lower than rows *
-							// columns
-							// qs_viewWidth & qs_viewHeight could be calculated by given numbers
-	int m_viewWidth = 512;	//quilt view dimensions
-	int m_viewHeight = 256;
+	BridgeWindowData m_lg_data;
 
 	double m_viewCone = 45.0;	//view angle
 	int m_cur_view = 0;			//index to the view
