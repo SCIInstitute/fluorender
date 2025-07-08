@@ -74,6 +74,11 @@ bool LookingGlassRenderer::Init()
 	{
 		// Get display information list
 		m_lg_displays = m_lg_controller->GetDisplayInfoList();
+		if (m_lg_displays.empty())
+		{
+			DBGPRINT(L"No Looking Glass displays found. Please connect a display and try again.\n");
+			return false;
+		}
 		if (m_cur_lg_display < 0 || m_cur_lg_display >= m_lg_displays.size())
 			m_cur_lg_display = 0;
 
@@ -186,17 +191,17 @@ void LookingGlassRenderer::Setup()
 	float tilt = m_lg_displays[m_cur_lg_display].tilt;
 	float center = m_lg_displays[m_cur_lg_display].center;
 	float subp = m_lg_displays[m_cur_lg_display].subp;
-	shader->setLocalParam(0, pitch, tilt, center, subp);
 	float vp0 = float(m_viewWidth * m_columns) / float(m_width);
 	float vp1 = float(m_viewHeight * m_rows) / float(m_height);
-	float displayAspect = m_lg_displays[m_cur_lg_display].aspect;
-	float quiltAspect = m_lg_displays[m_cur_lg_display].aspect;
-	shader->setLocalParam(1, vp0, vp1, displayAspect, quiltAspect);
-	shader->setLocalParam(2, m_columns, m_rows, m_totalViews, 0);
+	float aspect = m_lg_displays[m_cur_lg_display].aspect;
 	int invView = m_lg_displays[m_cur_lg_display].viewinv;
 	int ri = m_lg_displays[m_cur_lg_display].ri;
 	int bi = m_lg_displays[m_cur_lg_display].bi;
 	int quiltInvert = 1;
+
+	shader->setLocalParam(0, pitch, aspect / tilt, center, subp);
+	shader->setLocalParam(1, vp0, vp1, aspect, aspect);
+	shader->setLocalParam(2, m_columns, m_rows, m_totalViews, 0);
 	shader->setLocalParamInt4(0, invView, ri, bi, quiltInvert);
 
 	shader->release();
