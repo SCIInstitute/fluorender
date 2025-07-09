@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VertexArray.h>
 #include <compatibility.h>
 #include <bridge_utils.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <string>
 #include <Debug.h>
 
@@ -268,19 +269,31 @@ void LookingGlassRenderer::Draw()
 	}
 	flvr::VertexArray* rect_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
-	rect_va->set_param(0, (float)m_lg_data->view_width / (float)m_lg_data->view_height);
-	rect_va->set_param(1, (float)m_render_view_size.w() / (float)m_render_view_size.h());
-	int center_view = (m_lg_data->vx * m_lg_data->vy) / 2;
-	int cx = center_view % m_lg_data->vx;
-	int cy = m_lg_data->vy - 1 - (center_view / m_lg_data->vx); // Flip Y if origin is bottom-left
-	float u0 = (float)(cx * m_lg_data->view_width) / m_lg_data->quilt_width;
-	float u1 = (float)((cx + 1) * m_lg_data->view_width) / m_lg_data->quilt_width;
-	float v0 = (float)((cy + 1) * m_lg_data->view_height) / m_lg_data->quilt_height;
-	float v1 = (float)(cy * m_lg_data->view_height) / m_lg_data->quilt_height;
-	rect_va->set_param(2, u0);
-	rect_va->set_param(3, u1);
-	rect_va->set_param(4, v0);
-	rect_va->set_param(5, v1);
+	if (glbin_settings.m_hologram_debug)
+	{
+		rect_va->set_param(0, 1);
+		rect_va->set_param(1, 1);
+		rect_va->set_param(2, 0);
+		rect_va->set_param(3, 1);
+		rect_va->set_param(4, 0);
+		rect_va->set_param(5, 1);
+	}
+	else
+	{
+		rect_va->set_param(0, (float)m_lg_data->view_width / (float)m_lg_data->view_height);
+		rect_va->set_param(1, (float)m_render_view_size.w() / (float)m_render_view_size.h());
+		int center_view = (m_lg_data->vx * m_lg_data->vy) / 2;
+		int cx = center_view % m_lg_data->vx;
+		int cy = m_lg_data->vy - 1 - (center_view / m_lg_data->vx); // Flip Y if origin is bottom-left
+		float u0 = (float)(cx * m_lg_data->view_width) / m_lg_data->quilt_width;
+		float u1 = (float)((cx + 1) * m_lg_data->view_width) / m_lg_data->quilt_width;
+		float v0 = (float)((cy + 1) * m_lg_data->view_height) / m_lg_data->quilt_height;
+		float v1 = (float)(cy * m_lg_data->view_height) / m_lg_data->quilt_height;
+		rect_va->set_param(2, u0);
+		rect_va->set_param(3, u1);
+		rect_va->set_param(4, v0);
+		rect_va->set_param(5, v1);
+	}
 	rect_va->draw();
 	shader->release();
 
@@ -337,4 +350,82 @@ void LookingGlassRenderer::advance_views()
 		m_cur_view = 0;
 	if (!m_updating && m_cur_view == m_upd_view)
 		m_finished = true;
+}
+
+void LookingGlassRenderer::HandleCamera()
+{
+	switch (glbin_settings.m_hologram_camera_mode)
+	{
+		case 0: // turntable
+		default:
+			HandleCameraTurntable();
+			break;
+		case 1: // shifting
+			HandleCameraShifting();
+			break;
+	}
+}
+
+void LookingGlassRenderer::HandleProjection(bool persp)
+{
+	if (persp)
+	{
+		m_proj_mat = glm::perspective(m_aov, m_aspect, m_near, m_far);
+	}
+	else
+	{
+		m_proj_mat = glm::ortho(m_left, m_right, m_bottom, m_top,
+			-m_far / 100.0, m_far);
+	}
+
+	if (glbin_settings.m_hologram_camera_mode == 1)
+	{
+		double d = glbin_settings.m_lg_offset;
+		double r = glm::length(m_eye - m_center);
+		d = r * sin(glm::radians(d));
+		double shift = GetOffset() * d;
+		float offset = float(shift / r / 2.0);//reduce this value to improve clarity
+		if (persp)
+		{
+			// Apply horizontal skew
+			m_proj_mat[2][0] += offset; // GLM uses column-major layout
+		}
+		else
+		{
+			glm::mat4 shear = glm::mat4(1.0f);
+			shear[2][0] = offset;
+			m_proj_mat = shear * m_proj_mat;
+		}
+	}
+}
+
+glm::mat4 LookingGlassRenderer::GetProjectionMatrix() const
+{
+	return m_proj_mat;
+}
+
+void LookingGlassRenderer::HandleCameraTurntable()
+{
+	//turntable
+	double ang = GetOffset() * glbin_settings.m_lg_offset;//half angle
+	glm::mat4 rot(1);
+	rot = glm::rotate(rot, float(glm::radians(-ang)), m_up);
+	glm::vec4 vv = glm::vec4(m_eye - m_center, 1);
+	vv = rot * vv;
+	m_eye = m_center + glm::vec3(vv);
+	glm::vec3 new_view = glm::vec3(vv);
+	new_view = glm::normalize(new_view);
+	m_up = glm::cross(new_view, m_up);
+	m_up = glm::cross(m_up, new_view);
+}
+
+void LookingGlassRenderer::HandleCameraShifting()
+{
+	//linear shift
+	double d = glbin_settings.m_lg_offset;
+	double r = glm::length(m_eye - m_center);
+	d = r * sin(glm::radians(d));
+	m_side *= GetOffset() * d;
+	m_eye += m_side;
+	//m_center += m_side;
 }

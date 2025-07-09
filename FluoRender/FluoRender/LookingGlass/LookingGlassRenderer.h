@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define LookingGlassRenderer_h
 
 #include <Size.h>
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
@@ -60,6 +61,39 @@ public:
 		m_render_view_size = size;
 	}
 
+	//camera handling
+	void HandleCamera();
+	void SetCamera(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up)
+	{
+		m_eye = eye;
+		m_center = center;
+		m_up = up;
+	}
+	void SetCameraSide(const glm::vec3& side)
+	{
+		m_side = side;
+	}
+	void GetCamera(glm::vec3& eye, glm::vec3& center, glm::vec3& up) const
+	{
+		eye = m_eye;
+		center = m_center;
+		up = m_up;
+	}
+	void HandleProjection(bool persp);
+	void SetProjection(double aov, double aspect, double near_clip, double far_clip,
+		double left, double right, double top, double bottom)
+	{
+		m_aov = aov;
+		m_aspect = aspect;
+		m_near = near_clip;
+		m_far = far_clip;
+		m_left = left;
+		m_right = right;
+		m_top = top;
+		m_bottom = bottom;
+	}
+	glm::mat4 GetProjectionMatrix() const;
+
 private:
 	bool m_initialized = false;
 	int m_dev_index = 0;
@@ -77,8 +111,27 @@ private:
 
 	Size2D m_render_view_size; //size of the render view, not the quilt view
 
+	//camera handling
+	glm::vec3 m_eye;		//camera eye position
+	glm::vec3 m_center;		//camera center position
+	glm::vec3 m_up;		//camera up vector
+	glm::vec3 m_side;		//camera side vector
+	//projection
+	glm::mat4 m_proj_mat = glm::mat4(1.0); //projection matrix
+	double m_aov = 0.0; //angle of view
+	double m_aspect = 1.0; //aspect ratio
+	double m_near = 0.1; //near plane
+	double m_far = 1000.0; //far plane
+	double m_left = -1.0; //left plane for orthographic projection
+	double m_right = 1.0; //right plane for orthographic projection
+	double m_top = 1.0; //top plane for orthographic projection
+	double m_bottom = -1.0; //bottom plane for orthographic projection
+
 private:
 	void advance_views();
+
+	void HandleCameraTurntable();
+	void HandleCameraShifting();
 };
 
 #endif//LookingGlassRenderer_h

@@ -2321,12 +2321,33 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 	m_ortho_bottom = -m_radius / m_scale_factor;
 	m_ortho_top = -m_ortho_bottom;
 
-	if (vr && m_use_openxr)
+	bool normal_proj = true;
+	if (vr)
 	{
-		//get projection matrix
-		m_proj_mat = glbin_xr_renderer->GetProjectionMatrix(m_vr_eye_idx);
+		if (m_use_openxr)
+		{
+			//get projection matrix
+			m_proj_mat = glbin_xr_renderer->GetProjectionMatrix(m_vr_eye_idx);
+			normal_proj = false;
+		}
+		else if (glbin_settings.m_hologram_mode == 2)
+		{
+			glbin_lg_renderer.SetProjection(
+				glm::radians(m_aov),
+				aspect,
+				m_near_clip,
+				m_far_clip,
+				m_ortho_left,
+				m_ortho_right,
+				m_ortho_top,
+				m_ortho_bottom);
+			glbin_lg_renderer.HandleProjection(m_persp);
+			m_proj_mat = glbin_lg_renderer.GetProjectionMatrix();
+			normal_proj = false;
+		}
 	}
-	else
+
+	if (normal_proj)
 	{
 		if (m_persp)
 		{
@@ -2362,6 +2383,7 @@ void RenderView::HandleCamera(bool vr)
 		eye += center;
 	}
 
+	bool normal_camera = true;
 	if (vr)
 	{
 		if (m_use_openxr)
@@ -2377,6 +2399,7 @@ void RenderView::HandleCamera(bool vr)
 			{
 				m_mv_mat = glm::lookAt(eye, center, up);
 			}
+			normal_camera = false;
 		}
 		else if (glbin_settings.m_hologram_mode)
 		{
@@ -2389,41 +2412,22 @@ void RenderView::HandleCamera(bool vr)
 					eye + offset,
 					center + offset,
 					up);
+				normal_camera = false;
 			}
 			else if (glbin_settings.m_hologram_mode == 2)
 			{
-				double f = glbin_lg_renderer.GetOffset();
-				//linear shift
-				//side *= glbin_settings.m_lg_offset;
-				//side *= f;
-				//glm::vec3 offset(side.x(), side.y(), side.z());
-				//m_mv_mat = glm::lookAt(
-				//	eye + offset,
-				//	center + offset,
-				//	up);
-
-				//turntable
-				double ang = f * glbin_settings.m_lg_offset;//half angle
-				glm::mat4 rot(1);
-				rot = glm::rotate(rot, float(glm::radians(-ang)), up);
-				glm::vec4 vv = glm::vec4(eye - center, 1);
-				vv = rot * vv;
-				glm::vec3 new_eye = center + glm::vec3(vv);
-				glm::vec3 new_view = glm::vec3(vv);
-				new_view = glm::normalize(new_view);
-				glm::vec3 new_up = glm::cross(new_view, up);
-				new_up = glm::cross(new_up, new_view);
-				m_mv_mat = glm::lookAt(new_eye, center, new_up);
-				eye = new_eye;
-				up = new_up;
+				glbin_lg_renderer.SetCamera(eye, center, up);
+				glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
+				glbin_lg_renderer.HandleCamera();
+				glm::vec3 new_eye, new_center, new_up;
+				glbin_lg_renderer.GetCamera(new_eye, new_center, new_up);
+				m_mv_mat = glm::lookAt(new_eye, new_center, new_up);
+				normal_camera = false;
 			}
 		}
-		else
-		{
-			m_mv_mat = glm::lookAt(eye, center, up);
-		}
 	}
-	else
+	
+	if (normal_camera)
 	{
 		m_mv_mat = glm::lookAt(eye, center, up);
 	}

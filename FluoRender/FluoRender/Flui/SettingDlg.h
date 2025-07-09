@@ -80,6 +80,8 @@ private:
 	wxCheckBox* m_looking_glass_chk;
 	wxSingleSlider* m_lg_offset_sldr;
 	wxTextCtrl* m_lg_offset_text;
+	wxComboBox *m_lg_quilt_cmb;
+	wxComboBox *m_lg_camera_mode_cmb;
 	//display
 	wxComboBox* m_disp_id_comb;
 	//color depth
@@ -187,6 +189,8 @@ private:
 	void OnLookingGlassCheck(wxCommandEvent& event);
 	void OnLgOffsetChange(wxScrollEvent& event);
 	void OnLgOffsetEdit(wxCommandEvent& event);
+	void OnLgQuiltComb(wxCommandEvent& event);
+	void OnLgCameraModeComb(wxCommandEvent& event);
 	//display id
 	void OnDispIdComb(wxCommandEvent& event);
 	//color depth

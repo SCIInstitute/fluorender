@@ -883,6 +883,7 @@ endif()
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
   ${BRIDGE_RUNTIME_PATHS})
 target_link_libraries(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})

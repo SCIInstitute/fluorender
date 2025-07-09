@@ -704,6 +704,27 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_8->Add(st, 0, wxALIGN_CENTER);
 	sizer1_8->Add(m_lg_offset_sldr, 1, wxEXPAND);
 	sizer1_8->Add(m_lg_offset_text, 0, wxALIGN_CENTER);
+	//lg settings
+	wxFlexGridSizer* sizer1_9 = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
+	sizer1_9->AddGrowableCol(0, 1); // Make the right column growable
+	//enable streaming
+	m_lg_quilt_cmb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	std::vector<wxString> items1 = { "Disable", "Enable" };
+	m_lg_quilt_cmb->Append(items1);
+	m_lg_quilt_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnLgQuiltComb, this);
+	sizer1_9->Add(new wxStaticText(page, 0, "Enable Quilt Display"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_9->Add(m_lg_quilt_cmb, 1, wxEXPAND | wxRIGHT, 5);
+	//update order
+	m_lg_camera_mode_cmb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	std::vector<wxString> items2 = {"Mode 1", "Mode 2"};
+	m_lg_camera_mode_cmb->Append(items2);
+	m_lg_camera_mode_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnLgCameraModeComb, this);
+	sizer1_9->Add(new wxStaticText(page, 0, "Quilt Mode"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_9->Add(m_update_order_comb, 1, wxEXPAND | wxRIGHT, 5);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
@@ -720,6 +741,8 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	group1->Add(sizer1_7, 0, wxEXPAND);
 	group1->Add(10, 5);
 	group1->Add(sizer1_8, 0, wxEXPAND);
+	group1->Add(10, 5);
+	group1->Add(sizer1_9, 0, wxEXPAND);
 	group1->Add(10, 5);
 
 	//full screen display
@@ -1037,6 +1060,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 	bool update_all = vc.empty();
 
+	int ival;
 	//project page
 	//project save
 	if (update_all || FOUND_VALUE(gstSaveProjectEnable))
@@ -1204,6 +1228,8 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_looking_glass_chk->SetValue(false);
 			m_lg_offset_sldr->Disable();
 			m_lg_offset_text->Disable();
+			m_lg_quilt_cmb->Disable();
+			m_lg_camera_mode_cmb->Disable();
 		}
 		else if (glbin_settings.m_hologram_mode == 1)
 		{
@@ -1222,6 +1248,8 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_looking_glass_chk->SetValue(false);
 			m_lg_offset_sldr->Disable();
 			m_lg_offset_text->Disable();
+			m_lg_quilt_cmb->Disable();
+			m_lg_camera_mode_cmb->Disable();
 		}
 		else if (glbin_settings.m_hologram_mode == 2)
 		{
@@ -1237,6 +1265,8 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			m_looking_glass_chk->SetValue(true);
 			m_lg_offset_sldr->Enable();
 			m_lg_offset_text->Enable();
+			m_lg_quilt_cmb->Enable();
+			m_lg_camera_mode_cmb->Enable();
 		}
 #ifdef _WIN32
 		m_holo_ip_text->ChangeValue(wxString(glbin_settings.m_holo_ip));
@@ -1248,6 +1278,9 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_eye_dist_text->ChangeValue(wxString::Format("%.1f", glbin_settings.m_eye_dist));
 		m_lg_offset_sldr->ChangeValue(glbin_settings.m_lg_offset);
 		m_lg_offset_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_lg_offset));
+		ival = glbin_settings.m_hologram_debug ? 1 : 0;
+		m_lg_quilt_cmb->Select(ival);
+		m_lg_camera_mode_cmb->Select(glbin_settings.m_hologram_camera_mode);
 	}
 
 	//display id
@@ -1529,6 +1562,19 @@ void SettingDlg::OnLgOffsetEdit(wxCommandEvent& event)
 	str.ToLong(&lval);
 	m_lg_offset_sldr->ChangeValue(lval);
 	glbin_settings.m_lg_offset = lval;
+	FluoRefresh(3, { gstNull });
+}
+
+void SettingDlg::OnLgQuiltComb(wxCommandEvent& event)
+{
+	bool bval = m_lg_quilt_cmb->GetCurrentSelection() == 1;
+	glbin_settings.m_hologram_debug = bval;
+	FluoRefresh(3, { gstNull });
+}
+
+void SettingDlg::OnLgCameraModeComb(wxCommandEvent& event)
+{
+	glbin_settings.m_hologram_camera_mode = m_lg_camera_mode_cmb->GetCurrentSelection();
 	FluoRefresh(3, { gstNull });
 }
 
