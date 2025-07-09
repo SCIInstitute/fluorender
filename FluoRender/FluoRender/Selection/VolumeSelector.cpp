@@ -362,7 +362,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			pr.set(glm::value_ptr(m_prj_mat));
 			mat.set(glm::value_ptr(cmat));
 			pb.SetMats(mv, pr, mat);
-			pb.SetPaintTex(m_2d_mask, view->GetGLSize().w(), view->GetGLSize().h());
+			pb.SetPaintTex(m_2d_mask, view->GetCanvasSize().w(), view->GetCanvasSize().h());
 			if (m_mode == SelectMode::Grow)
 				pb.SetMousePos(m_mx, m_my);
 			pb.Compute();
@@ -852,8 +852,8 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 		m_mx0 < 0 || m_my0 < 0)
 		return false;
 	
-	int nx = view->GetGLSize().w();
-	int ny = view->GetGLSize().h();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	fluo::Transform *tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);

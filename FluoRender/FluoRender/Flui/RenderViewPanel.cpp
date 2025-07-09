@@ -851,6 +851,8 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		ival = glbin_settings.m_hologram_mode;
 		m_options_toolbar2->ToggleTool(ID_VrChk, ival == 1);
 		m_options_toolbar2->ToggleTool(ID_LookingGlassChk, ival == 2);
+		if (ival != 2)
+			m_render_view->ResetSize();
 	}
 
 	//depthe attenuation
@@ -1224,18 +1226,6 @@ void RenderViewPanel::SetStereography(bool val)
 void RenderViewPanel::SetHolography(bool val)
 {
 	glbin_settings.m_hologram_mode = val ? 2 : 0;
-	//if (val)
-	//{
-	//	//go to full screen if not
-	//	if (m_canvas->GetParent() != m_full_frame)
-	//		SetFullScreen();
-	//}
-	//else
-	//{
-	//	//close full screen if holography is disabled
-	//	if (m_canvas->GetParent() == m_full_frame)
-	//		m_canvas->Close();
-	//}
 	FluoRefresh(0, { gstHologramMode });
 }
 

@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LightFieldShader.h>
 #include <VertexArray.h>
 #include <compatibility.h>
+#include <bridge_utils.hpp>
 #include <string>
 #include <Debug.h>
 
@@ -72,7 +73,13 @@ bool LookingGlassRenderer::Init()
 	if (m_lg_controller)
 	{
 		// Get display information list
-		m_lg_displays = m_lg_controller->GetDisplayInfoList();
+		std::vector<DisplayInfo> displayList = m_lg_controller->GetDisplayInfoList();
+		m_lg_displays.clear();
+		m_lg_displays.reserve(displayList.size());
+
+		for (const auto& display : displayList) {
+			m_lg_displays.push_back(std::make_shared<DisplayInfo>(display));
+		}
 		if (m_lg_displays.empty())
 		{
 			DBGPRINT(L"No Looking Glass displays found. Please connect a display and try again.\n");
@@ -88,7 +95,7 @@ bool LookingGlassRenderer::Init()
 		//}
 
 		// For now we will use the first looking glass display
-		if (!m_lg_displays.empty() && m_lg_controller->InstanceWindowGL(&wnd, m_lg_displays[m_cur_lg_display].display_id))
+		if (!m_lg_displays.empty() && m_lg_controller->InstanceWindowGL(&wnd, m_lg_displays[m_cur_lg_display]->display_id))
 		{
 			DBGPRINT(L"Successfully created the window handle.\n");
 		}
@@ -100,9 +107,12 @@ bool LookingGlassRenderer::Init()
 		}
 	}
 
-	m_lg_data = m_lg_controller ? m_lg_controller->GetWindowData(wnd) : BridgeWindowData();
-	m_initialized = (m_lg_data.wnd != 0);
-	m_viewCone = m_lg_displays[m_cur_lg_display].viewcone;
+	m_lg_data = m_lg_controller
+		? std::make_unique<BridgeWindowData>(m_lg_controller->GetWindowData(wnd))
+		: std::make_unique<BridgeWindowData>();
+
+	m_initialized = (m_lg_data->wnd != 0);
+	m_viewCone = m_lg_displays[m_cur_lg_display]->viewcone;
 	//m_initialized = true;
 	return m_initialized;
 }
@@ -124,7 +134,7 @@ int LookingGlassRenderer::GetDisplayId()
 		return 0;
 	if (m_cur_lg_display < 0 || m_cur_lg_display >= m_lg_displays.size())
 		return 0;
-	return m_lg_displays[m_cur_lg_display].display_id;
+	return m_lg_displays[m_cur_lg_display]->display_id;
 }
 
 void LookingGlassRenderer::Setup()
@@ -135,7 +145,7 @@ void LookingGlassRenderer::Setup()
 	//set up framebuffer for quilt
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FB_Render_RGBA, m_lg_data.quilt_width, m_lg_data.quilt_height, "quilt");
+			flvr::FB_Render_RGBA, m_lg_data->quilt_width, m_lg_data->quilt_height, "quilt");
 	quilt_buffer->protect();
 
 /*	flvr::ShaderProgram* shader = 0;
@@ -208,10 +218,10 @@ void LookingGlassRenderer::Draw()
 	}
 	//set up view port for place texture
 	// get the x and y origin for this view
-	int corrected_view = m_lg_data.vx * m_lg_data.vy - 1 - m_cur_view;
-	int x = (corrected_view % m_lg_data.vx) * m_lg_data.view_width;
-	int y = (m_lg_data.vy - 1 - (corrected_view / m_lg_data.vx)) * m_lg_data.view_height;
-	glViewport(x, y, m_lg_data.view_width, m_lg_data.view_height);
+	int corrected_view = m_lg_data->vx * m_lg_data->vy - 1 - m_cur_view;
+	int x = (corrected_view % m_lg_data->vx) * m_lg_data->view_width;
+	int y = (m_lg_data->vy - 1 - (corrected_view / m_lg_data->vx)) * m_lg_data->view_height;
+	glViewport(x, y, m_lg_data->view_width, m_lg_data->view_height);
 	//bind texture
 	flvr::Framebuffer* view_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt view");
@@ -227,11 +237,11 @@ void LookingGlassRenderer::Draw()
 	advance_views();
 
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data.wnd,
+	m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data->wnd,
 		quilt_buffer->tex_id(GL_COLOR_ATTACHMENT0), PixelFormats::RGBA,
-		m_lg_data.quilt_width, m_lg_data.quilt_height,
-		m_lg_data.vx, m_lg_data.vy,
-		m_lg_data.displayaspect, 1.0f);
+		m_lg_data->quilt_width, m_lg_data->quilt_height,
+		m_lg_data->vx, m_lg_data->vy,
+		m_lg_data->displayaspect, 1.0f);
 
 	//shader = glbin_light_field_shader_factory.shader(0);
 	//shader->bind();
@@ -242,30 +252,37 @@ void LookingGlassRenderer::Draw()
 
 	//draw quilt to view
 	//only draw the middle view
-	if (m_cur_view == m_lg_data.vx * m_lg_data.vy / 2)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		// reset viewport
-		glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
-		glClearDepth(1);
-		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// reset viewport
+	glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
+	glClearDepth(1);
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-		if (shader)
-		{
-			if (!shader->valid())
-				shader->create();
-			shader->bind();
-		}
-		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-		flvr::VertexArray* rect_va =
-			glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
-		rect_va->set_param(0, (float)m_lg_data.view_width / (float)m_lg_data.view_height);
-		rect_va->set_param(1, (float)m_render_view_size.w() / (float)m_render_view_size.h());
-		rect_va->draw();
-		shader->release();
+	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	if (shader)
+	{
+		if (!shader->valid())
+			shader->create();
+		shader->bind();
 	}
+	flvr::VertexArray* rect_va =
+		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
+	rect_va->set_param(0, (float)m_lg_data->view_width / (float)m_lg_data->view_height);
+	rect_va->set_param(1, (float)m_render_view_size.w() / (float)m_render_view_size.h());
+	int center_view = (m_lg_data->vx * m_lg_data->vy) / 2;
+	int cx = center_view % m_lg_data->vx;
+	int cy = m_lg_data->vy - 1 - (center_view / m_lg_data->vx); // Flip Y if origin is bottom-left
+	float u0 = (float)(cx * m_lg_data->view_width) / m_lg_data->quilt_width;
+	float u1 = (float)((cx + 1) * m_lg_data->view_width) / m_lg_data->quilt_width;
+	float v0 = (float)((cy + 1) * m_lg_data->view_height) / m_lg_data->quilt_height;
+	float v1 = (float)(cy * m_lg_data->view_height) / m_lg_data->quilt_height;
+	rect_va->set_param(2, u0);
+	rect_va->set_param(3, u1);
+	rect_va->set_param(4, v0);
+	rect_va->set_param(5, v1);
+	rect_va->draw();
+	shader->release();
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_BLEND);
@@ -287,7 +304,7 @@ double LookingGlassRenderer::GetOffset()
 	if (!m_initialized)
 		return 0.0;
 
-	double len = double(m_lg_data.vx * m_lg_data.vy - 1) / 2;
+	double len = double(m_lg_data->vx * m_lg_data->vy - 1) / 2;
 	return (m_cur_view - len) / len;
 }
 
@@ -303,13 +320,20 @@ void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
 		buffer->bind();
 }
 
+Size2D LookingGlassRenderer::GetViewSize() const
+{
+	if (!m_initialized)
+		return Size2D(-1, -1);
+	return Size2D(m_lg_data->view_width, m_lg_data->view_height);
+}
+
 void LookingGlassRenderer::advance_views()
 {
 	if (!m_initialized)
 		return;
 
 	m_cur_view++;
-	if (m_cur_view == m_lg_data.vx * m_lg_data.vy)
+	if (m_cur_view == m_lg_data->vx * m_lg_data->vy)
 		m_cur_view = 0;
 	if (!m_updating && m_cur_view == m_upd_view)
 		m_finished = true;

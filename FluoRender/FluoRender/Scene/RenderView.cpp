@@ -627,18 +627,48 @@ void RenderView::SetRenderCanvas(RenderCanvas* canvas)
 
 void RenderView::SetSize(int x, int y)
 {
-	if (!m_lg_initiated)
+	m_canvas_size = Size2D(x, y);
+	if (glbin_settings.m_hologram_mode != 2)
 	{
-		m_size = Size2D(x, y) * m_dpi_factor;
+		m_size = m_canvas_size * m_dpi_factor;
 		if (m_enlarge)
 			m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
 				static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));
 		else
 			m_gl_size = m_size;
 	}
-	//looking glass size
-	glbin_lg_renderer.SetRenderViewSize(Size2D(x, y));
+}
 
+void RenderView::ResetSize()
+{
+	SetSize(m_canvas_size.w(), m_canvas_size.h());
+}
+
+Size2D RenderView::GetCanvasSize()
+{
+	if (glbin_settings.m_hologram_mode == 2)
+	{
+		return m_canvas_size;
+	}
+	return m_gl_size;
+}
+
+//vr buffers
+void RenderView::GetRenderSize(int &nx, int &ny)
+{
+	if (m_use_openxr)
+	{
+		nx = glbin_xr_renderer->GetSize(0);
+		ny = glbin_xr_renderer->GetSize(1);
+	}
+	else
+	{
+		nx = m_gl_size.w();
+		ny = m_gl_size.h();
+		if (glbin_settings.m_hologram_mode == 1 &&
+			!glbin_settings.m_sbs)
+			nx /= 2;
+	}
 }
 
 std::string RenderView::GetOGLVersion()
@@ -736,6 +766,8 @@ void RenderView::InitOpenXR()
 void RenderView::InitLookingGlass()
 {
 	//set canvas size to the display
+	//looking glass size
+	glbin_lg_renderer.SetRenderViewSize(m_canvas_size);
 	Size2D lg_size = glbin_lg_renderer.GetViewSize();
 	if (lg_size.isValid())
 	{
@@ -3964,6 +3996,8 @@ bool RenderView::ForceDraw()
 
 	switch (glbin_settings.m_hologram_mode)
 	{
+	case 0:
+		break;
 	case 1:
 		InitOpenXR();
 		break;
@@ -5320,24 +5354,6 @@ void RenderView::UpdateClips()
 			(*planes)[5]->Scale(scale);
 			(*planes)[5]->Translate(trans2);
 		}
-	}
-}
-
-//vr buffers
-void RenderView::GetRenderSize(int &nx, int &ny)
-{
-	if (m_use_openxr)
-	{
-		nx = glbin_xr_renderer->GetSize(0);
-		ny = glbin_xr_renderer->GetSize(1);
-	}
-	else
-	{
-		nx = m_gl_size.w();
-		ny = m_gl_size.h();
-		if (glbin_settings.m_hologram_mode == 1 &&
-			!glbin_settings.m_sbs)
-			nx /= 2;
 	}
 }
 
@@ -10270,8 +10286,8 @@ void RenderView::ProcessIdle(IdleState& state)
 	if (m_update_rot_ctr && cur_vd && !m_free)
 	{
 		fluo::Point p, ip;
-		int nx = GetGLSize().w();
-		int ny = GetGLSize().h();
+		int nx = GetCanvasSize().w();
+		int ny = GetCanvasSize().h();
 		int mode = 2;
 		if (cur_vd->GetMode() == 1) mode = 1;
 		glbin_volume_point.SetVolumeData(cur_vd);
@@ -10667,8 +10683,8 @@ void RenderView::ProcessIdle(IdleState& state)
 		leftx = glbin_xr_renderer->GetControllerLeftThumbstickX();
 		lefty = glbin_xr_renderer->GetControllerLeftThumbstickY();
 
-		int nx = GetGLSize().w();
-		int ny = GetGLSize().h();
+		int nx = GetCanvasSize().w();
+		int ny = GetCanvasSize().h();
 		//horizontal move
 		if (leftx != 0.0)
 		{
@@ -10739,8 +10755,8 @@ void RenderView::ProcessIdle(IdleState& state)
 		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) px = -inc;
 		if (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) px = inc;
 
-		int nx = GetGLSize().w();
-		int ny = GetGLSize().h();
+		int nx = GetCanvasSize().w();
+		int ny = GetCanvasSize().h();
 		//horizontal move
 		if (leftx != 0.0)
 		{

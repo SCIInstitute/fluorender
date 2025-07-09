@@ -126,8 +126,9 @@ public:
 
 	//size
 	void SetSize(int x, int y);
-	Size2D GetSize() { return m_size; }
-	Size2D GetGLSize() { return m_gl_size; }
+	void ResetSize();
+	Size2D GetCanvasSize();
+	void GetRenderSize(int& nx, int& ny);
 	void SetClient(int x, int y, int w, int h) { m_client_x = x; m_client_y = y; m_client_w = w; m_client_h = h; }
 	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
 	std::string GetOGLVersion();
@@ -453,8 +454,6 @@ public:
 
 	void UpdateClips();
 
-	void GetRenderSize(int& nx, int& ny);
-
 	//mouse position
 	void SetMousePos(int x, int y) { m_mouse_x = x; m_mouse_y = y; }
 
@@ -541,8 +540,9 @@ private:
 	RenderCanvas* m_render_canvas;
 	bool m_drawing;
 	bool m_refresh;//own refresh command
-	Size2D m_size;
-	Size2D m_gl_size;
+	Size2D m_canvas_size;//size from wxwidgets window
+	Size2D m_size;//size with dpi factor
+	Size2D m_gl_size;//actual render size
 	double m_dpi_factor;
 	std::string m_GLversion;
 

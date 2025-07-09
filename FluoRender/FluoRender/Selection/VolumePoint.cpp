@@ -49,8 +49,8 @@ double VolumePoint::GetPointVolume(
 		vd = glbin_current.vol_data.lock();
 	if (!view || !vd)
 		return -1.0;
-	int nx = view->GetGLSize().w();
-	int ny = view->GetGLSize().h();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -267,8 +267,8 @@ double VolumePoint::GetPointVolumeBox(
 		vd = glbin_current.vol_data.lock();
 	if (!view || !vd)
 		return -1.0;
-	int nx = view->GetGLSize().w();
-	int ny = view->GetGLSize().h();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -374,8 +374,8 @@ double VolumePoint::GetPointVolumeBox2(
 		vd = glbin_current.vol_data.lock();
 	if (!view || !vd)
 		return -1.0;
-	int nx = view->GetGLSize().w();
-	int ny = view->GetGLSize().h();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
@@ -481,8 +481,8 @@ double VolumePoint::GetPointPlane(
 		vd = glbin_current.vol_data.lock();
 	if (!view || !vd)
 		return -1.0;
-	int nx = view->GetGLSize().w();
-	int ny = view->GetGLSize().h();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 

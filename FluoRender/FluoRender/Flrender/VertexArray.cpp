@@ -344,12 +344,25 @@ namespace flvr
 		float view_aspect = 1.0f;
 		float scale_x = 1.0f;
 		float scale_y = 1.0f;
+		float u0 = 0.0f, u1 = 1.0f, v0 = 0.0f, v1 = 1.0f;
 		auto param = param_list_.find(0);
 		if (param != param_list_.end())
 			tex_aspect = static_cast<float>(param->second);
 		param = param_list_.find(1);
 		if (param != param_list_.end())
 			view_aspect = static_cast<float>(param->second);
+		param = param_list_.find(2);
+		if (param != param_list_.end())
+			u0 = static_cast<float>(param->second);
+		param = param_list_.find(3);
+		if (param != param_list_.end())
+			u1 = static_cast<float>(param->second);
+		param = param_list_.find(4);
+		if (param != param_list_.end())
+			v0 = static_cast<float>(param->second);
+		param = param_list_.find(5);
+		if (param != param_list_.end())
+			v1 = static_cast<float>(param->second);
 		if (tex_aspect > view_aspect)
 		{
 			scale_y = view_aspect / tex_aspect;
@@ -359,10 +372,10 @@ namespace flvr
 			scale_x = tex_aspect / view_aspect;
 		}
 		float points[] = {
-			-scale_x, -scale_y, 0.0f,  0.0f, 0.0f, 0.0f,
-			 scale_x, -scale_y, 0.0f,  1.0f, 0.0f, 0.0f,
-			-scale_x,  scale_y, 0.0f,  0.0f, 1.0f, 0.0f,
-			 scale_x,  scale_y, 0.0f,  1.0f, 1.0f, 0.0f
+			-scale_x, -scale_y, 0.0f,  u0, v0, 0.0f,
+			 scale_x, -scale_y, 0.0f,  u1, v0, 0.0f,
+			-scale_x,  scale_y, 0.0f,  u0, v1, 0.0f,
+			 scale_x,  scale_y, 0.0f,  u1, v1, 0.0f
 		};
 		buffer_data(VABuf_Coord,
 			sizeof(float) * 24, points, GL_STREAM_DRAW);
@@ -1022,6 +1035,10 @@ namespace flvr
 			//set param
 			va->set_param(0, 1.0);
 			va->set_param(1, 1.0);
+			va->set_param(2, 0.0);
+			va->set_param(3, 1.0);
+			va->set_param(4, 0.0);
+			va->set_param(5, 1.0);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);

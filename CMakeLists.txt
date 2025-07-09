@@ -863,7 +863,6 @@ target_link_libraries(FORMAT_LIB PRIVATE
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${BRIDGE_RUNTIME_PATHS}
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OPENXR_PATHS}
@@ -932,7 +931,6 @@ target_link_libraries(PYTHON_LIB PRIVATE
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${BRIDGE_RUNTIME_PATHS}
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}

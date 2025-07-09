@@ -227,7 +227,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = view->GetGLSize();
+	Size2D view_size = view->GetCanvasSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -296,7 +296,7 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = view->GetGLSize();
+	Size2D view_size = view->GetCanvasSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -371,7 +371,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = view->GetGLSize();
+	Size2D view_size = view->GetCanvasSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)
@@ -453,7 +453,7 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 	size_t rwt = view->m_tseq_cur_num;
 
 	//get view size
-	Size2D view_size = view->GetGLSize();
+	Size2D view_size = view->GetCanvasSize();
 	int nx = view_size.w();
 	int ny = view_size.h();
 	if (nx <= 0 || ny <= 0)

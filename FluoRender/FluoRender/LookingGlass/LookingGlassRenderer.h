@@ -30,8 +30,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Size.h>
 #include <memory>
-#include <bridge_utils.hpp>
+#include <vector>
 
+class Controller;
+struct DisplayInfo;
+struct BridgeWindowData;
 class LookingGlassRenderer
 {
 public:
@@ -51,12 +54,7 @@ public:
 	bool GetFinished() { return m_finished; }
 	double GetOffset();//range of offset [-1, 1]; 0 = center
 	void BindRenderBuffer(int nx, int ny);
-	Size2D GetViewSize() const
-	{
-		if (!m_initialized)
-			return Size2D(-1, -1);
-		return Size2D(m_lg_data.view_width, m_lg_data.view_height);
-	}
+	Size2D GetViewSize() const;
 	void SetRenderViewSize(const Size2D& size)
 	{
 		m_render_view_size = size;
@@ -67,9 +65,9 @@ private:
 	int m_dev_index = 0;
 
 	std::unique_ptr<Controller> m_lg_controller;
-	std::vector<DisplayInfo> m_lg_displays;
+	std::vector<std::shared_ptr<DisplayInfo>> m_lg_displays;
 	int m_cur_lg_display = 0;
-	BridgeWindowData m_lg_data;
+	std::unique_ptr<BridgeWindowData> m_lg_data;
 
 	double m_viewCone = 45.0;	//view angle
 	int m_cur_view = 0;			//index to the view

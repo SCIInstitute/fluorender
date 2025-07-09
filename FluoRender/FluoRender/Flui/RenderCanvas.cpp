@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <MainSettings.h>
 #include <DataManager.h>
+#include <LookingGlassRenderer.h>
 #ifdef _WIN32
 //wacom support
 #include <wx/msw/private.h>
@@ -255,8 +256,11 @@ void RenderCanvas::Draw()
 	wxPaintDC dc(this);
 	if (auto view_ptr = m_render_view.lock())
 	{
-		if (view_ptr->ForceDraw())
+		bool bval = view_ptr->ForceDraw();
+		if (bval)
+		{
 			SwapBuffers();
+		}
 	}
 
 }
