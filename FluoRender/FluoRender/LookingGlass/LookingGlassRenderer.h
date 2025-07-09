@@ -57,6 +57,10 @@ public:
 			return Size2D(-1, -1);
 		return Size2D(m_lg_data.view_width, m_lg_data.view_height);
 	}
+	void SetRenderViewSize(const Size2D& size)
+	{
+		m_render_view_size = size;
+	}
 
 private:
 	bool m_initialized = false;
@@ -72,6 +76,8 @@ private:
 	bool m_updating = false;	//still updating
 	int m_upd_view = 0;			//view number when updating starts
 	bool m_finished = true;		//finished rendering all views with consistent settings
+
+	Size2D m_render_view_size; //size of the render view, not the quilt view
 
 private:
 	void advance_views();

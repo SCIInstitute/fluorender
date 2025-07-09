@@ -627,12 +627,18 @@ void RenderView::SetRenderCanvas(RenderCanvas* canvas)
 
 void RenderView::SetSize(int x, int y)
 {
-	m_size = Size2D(x, y) * m_dpi_factor;
-	if (m_enlarge)
-		m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
-			static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));
-	else
-		m_gl_size = m_size;
+	if (!m_lg_initiated)
+	{
+		m_size = Size2D(x, y) * m_dpi_factor;
+		if (m_enlarge)
+			m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
+				static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));
+		else
+			m_gl_size = m_size;
+	}
+	//looking glass size
+	glbin_lg_renderer.SetRenderViewSize(Size2D(x, y));
+
 }
 
 std::string RenderView::GetOGLVersion()

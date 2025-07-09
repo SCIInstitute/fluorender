@@ -301,6 +301,9 @@ namespace flvr
 		case VA_Text:
 		default:
 			break;
+		case VA_Rectangle:
+			update_buffer_rectangle();
+			break;
 		case VA_Norm_Square_d:
 			update_buffer_norm_square_d();
 			break;
@@ -333,6 +336,36 @@ namespace flvr
 			update_grad_bkg();
 			break;
 		}
+	}
+
+	void VertexArray::update_buffer_rectangle()
+	{
+		float tex_aspect = 1.0f;
+		float view_aspect = 1.0f;
+		float scale_x = 1.0f;
+		float scale_y = 1.0f;
+		auto param = param_list_.find(0);
+		if (param != param_list_.end())
+			tex_aspect = static_cast<float>(param->second);
+		param = param_list_.find(1);
+		if (param != param_list_.end())
+			view_aspect = static_cast<float>(param->second);
+		if (tex_aspect > view_aspect)
+		{
+			scale_y = view_aspect / tex_aspect;
+		}
+		else
+		{
+			scale_x = tex_aspect / view_aspect;
+		}
+		float points[] = {
+			-scale_x, -scale_y, 0.0f,  0.0f, 0.0f, 0.0f,
+			 scale_x, -scale_y, 0.0f,  1.0f, 0.0f, 0.0f,
+			-scale_x,  scale_y, 0.0f,  0.0f, 1.0f, 0.0f,
+			 scale_x,  scale_y, 0.0f,  1.0f, 1.0f, 0.0f
+		};
+		buffer_data(VABuf_Coord,
+			sizeof(float) * 24, points, GL_STREAM_DRAW);
 	}
 
 	void VertexArray::update_buffer_norm_square_d()
@@ -748,6 +781,7 @@ namespace flvr
 		switch (type_)
 		{
 		case VA_Norm_Square:
+		case VA_Rectangle:
 		case VA_Norm_Square_d:
 		case VA_Text:
 		case VA_Left_Square:
@@ -979,6 +1013,15 @@ namespace flvr
 				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 				1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
 			vb->data(sizeof(float) * 24, points, GL_STATIC_DRAW);
+			//set attrib
+			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
+			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);
+		}
+		else if (type == VA_Rectangle)
+		{
+			//set param
+			va->set_param(0, 1.0);
+			va->set_param(1, 1.0);
 			//set attrib
 			va->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)0);
 			va->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const GLvoid*)12);

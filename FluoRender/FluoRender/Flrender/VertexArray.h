@@ -81,6 +81,7 @@ namespace flvr
 	{
 		VA_Unmanaged = 1,
 		VA_Norm_Square,
+		VA_Rectangle,
 		VA_Norm_Square_d,
 		VA_Left_Square,
 		VA_Right_Square,
@@ -154,6 +155,8 @@ namespace flvr
 
 	private:
 		void update_buffer();
+		//parameters: 0-tex_aspect; 1-view aspect
+		void update_buffer_rectangle();
 		//parameters: 0-tex z depth
 		void update_buffer_norm_square_d();
 		//parameters: 0-r1; 1-r2; 2-sections

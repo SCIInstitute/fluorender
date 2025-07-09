@@ -36,7 +36,7 @@ class Size2D {
 public:
 	// Constructor
 	inline Size2D() : width(0), height(0) {}
-	inline Size2D(int width = 0, int height = 0) : width(width), height(height) {}
+	inline Size2D(int width, int height) : width(width), height(height) {}
 	inline Size2D(const Size2D& size) : width(size.width), height(size.height) {}
 	inline Size2D& operator=(const Size2D& size) {
 		width = size.width;
@@ -201,7 +201,7 @@ class Size3D {
 public:
 	// Constructor
 	inline Size3D() : width(0), height(0), depth(0) {}
-	inline Size3D(int width = 0, int height = 0, int depth = 0) : width(width), height(height), depth(depth) {}
+	inline Size3D(int width, int height, int depth) : width(width), height(height), depth(depth) {}
 	inline Size3D(const Size3D& size) : width(size.width), height(size.height), depth(size.depth) {}
 	inline Size3D& operator=(const Size3D& size) {
 		width = size.width;

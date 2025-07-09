@@ -226,13 +226,6 @@ void LookingGlassRenderer::Draw()
 	//move index for next
 	advance_views();
 
-	//draw quilt to view
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	// reset viewport
-	GLint viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
 	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
 	m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data.wnd,
 		quilt_buffer->tex_id(GL_COLOR_ATTACHMENT0), PixelFormats::RGBA,
@@ -247,16 +240,32 @@ void LookingGlassRenderer::Draw()
 	//quad_va->draw();
 	//shader->release();
 
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-	if (shader)
+	//draw quilt to view
+	//only draw the middle view
+	if (m_cur_view == m_lg_data.vx * m_lg_data.vy / 2)
 	{
-		if (!shader->valid())
-			shader->create();
-		shader->bind();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// reset viewport
+		glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
+		glClearDepth(1);
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		if (shader)
+		{
+			if (!shader->valid())
+				shader->create();
+			shader->bind();
+		}
+		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		flvr::VertexArray* rect_va =
+			glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
+		rect_va->set_param(0, (float)m_lg_data.view_width / (float)m_lg_data.view_height);
+		rect_va->set_param(1, (float)m_render_view_size.w() / (float)m_render_view_size.h());
+		rect_va->draw();
+		shader->release();
 	}
-	view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-	quad_va->draw();
-	shader->release();
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_BLEND);
