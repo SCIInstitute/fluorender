@@ -62,7 +62,7 @@ public:
 	}
 
 	//camera handling
-	void HandleCamera();
+	void HandleCamera(bool persp);
 	void SetCamera(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up)
 	{
 		m_eye = eye;
@@ -131,7 +131,7 @@ private:
 	void advance_views();
 
 	void HandleCameraTurntable();
-	void HandleCameraShifting();
+	void HandleCameraShifting(bool persp);
 };
 
 #endif//LookingGlassRenderer_h

@@ -2332,6 +2332,11 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 		}
 		else if (glbin_settings.m_hologram_mode == 2)
 		{
+			fluo::Vector side = GetSide();
+			glm::vec3 eye, center, up;
+			GetCameraSettings(eye, center, up);
+			glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
+			glbin_lg_renderer.SetCamera(eye, center, up);
 			glbin_lg_renderer.SetProjection(
 				glm::radians(m_aov),
 				aspect,
@@ -2361,7 +2366,7 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 	}
 }
 
-void RenderView::HandleCamera(bool vr)
+void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3& up)
 {
 	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
@@ -2373,15 +2378,21 @@ void RenderView::HandleCamera(bool vr)
 	m_transy = pos.y();
 	m_transz = pos.z();
 
-	glm::vec3 eye(m_transx, m_transy, m_transz);
-	glm::vec3 center(0.0);
-	glm::vec3 up(m_up.x(), m_up.y(), m_up.z());
+	eye = glm::vec3(m_transx, m_transy, m_transz);
+	center = glm::vec3(0.0);
+	up = glm::vec3(m_up.x(), m_up.y(), m_up.z());
 
 	if (m_free)
 	{
 		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
 		eye += center;
 	}
+}
+
+void RenderView::HandleCamera(bool vr)
+{
+	glm::vec3 eye, center, up;
+	GetCameraSettings(eye, center, up);
 
 	bool normal_camera = true;
 	if (vr)
@@ -2418,7 +2429,7 @@ void RenderView::HandleCamera(bool vr)
 			{
 				glbin_lg_renderer.SetCamera(eye, center, up);
 				glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
-				glbin_lg_renderer.HandleCamera();
+				glbin_lg_renderer.HandleCamera(m_persp);
 				glm::vec3 new_eye, new_center, new_up;
 				glbin_lg_renderer.GetCamera(new_eye, new_center, new_up);
 				m_mv_mat = glm::lookAt(new_eye, new_center, new_up);

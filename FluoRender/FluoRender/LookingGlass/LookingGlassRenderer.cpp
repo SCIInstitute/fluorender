@@ -352,7 +352,7 @@ void LookingGlassRenderer::advance_views()
 		m_finished = true;
 }
 
-void LookingGlassRenderer::HandleCamera()
+void LookingGlassRenderer::HandleCamera(bool persp)
 {
 	switch (glbin_settings.m_hologram_camera_mode)
 	{
@@ -362,7 +362,7 @@ void LookingGlassRenderer::HandleCamera()
 			break;
 		case 1: // shifting
 		case 2: // shifting skew
-			HandleCameraShifting();
+			HandleCameraShifting(persp);
 			break;
 	}
 }
@@ -376,7 +376,7 @@ void LookingGlassRenderer::HandleProjection(bool persp)
 	else
 	{
 		m_proj_mat = glm::ortho(m_left, m_right, m_bottom, m_top,
-			-m_far / 100.0, m_far);
+			m_near, m_far);
 	}
 
 	if (glbin_settings.m_hologram_camera_mode == 2)
@@ -385,16 +385,17 @@ void LookingGlassRenderer::HandleProjection(bool persp)
 		double r = glm::length(m_eye - m_center);
 		d = r * sin(glm::radians(d));
 		double shift = GetOffset() * d;
-		float offset = float(shift / r / 2.0);//reduce this value to improve clarity
+		// Apply horizontal skew
 		if (persp)
 		{
-			// Apply horizontal skew
+			float offset = float(shift * 2.0 / (m_right - m_left));
 			m_proj_mat[2][0] += offset; // GLM uses column-major layout
 		}
 		else
 		{
+			float offset = float(shift * (m_far - m_near) / ((m_right - m_left) * r));
 			glm::mat4 shear = glm::mat4(1.0f);
-			shear[2][0] = offset;
+			shear[2][0] = -offset;
 			m_proj_mat = shear * m_proj_mat;
 		}
 	}
@@ -420,13 +421,33 @@ void LookingGlassRenderer::HandleCameraTurntable()
 	m_up = glm::cross(m_up, new_view);
 }
 
-void LookingGlassRenderer::HandleCameraShifting()
+void LookingGlassRenderer::HandleCameraShifting(bool persp)
 {
 	//linear shift
 	double d = glbin_settings.m_lg_offset;
 	double r = glm::length(m_eye - m_center);
 	d = r * sin(glm::radians(d));
-	m_side *= GetOffset() * d;
-	m_eye += m_side;
-	//m_center += m_side;
+	double shift = GetOffset() * d;
+	glm::vec3 side = m_side * float(shift);
+
+	if (glbin_settings.m_hologram_camera_mode == 2)
+	{
+		if (persp)
+		{
+			m_eye += side;
+			m_center += side;
+		}
+		else
+		{
+			double shear = shift * (m_far + m_near) / (2.0 * r);
+			shear = shift - shear;
+			side = m_side * float(shear);
+			m_eye += side;
+			m_center += side;
+		}
+	}
+	else
+	{
+		m_eye += side;
+	}
 }

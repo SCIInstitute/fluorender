@@ -834,11 +834,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//angle of view
 	if (update_all || FOUND_VALUE(gstAov))
 	{
-		dval = m_render_view->GetAov();
+		ival = static_cast<int>(std::round(m_render_view->GetAov()));
 		bval = m_render_view->GetPersp();
-		m_aov_sldr->ChangeValue(bval ? std::round(dval) : 10);
-		m_aov_text->ChangeValue(bval ? wxString::Format("%d",
-			(int)(std::round(dval))) : wxString("Ortho"));
+		m_aov_sldr->ChangeValue(bval ? ival : 10);
+		m_aov_text->ChangeValue(bval ? std::to_string(ival) : "Ortho");
 	}
 
 	//free fly
@@ -1436,12 +1435,10 @@ void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 
 void RenderViewPanel::OnAovChange(wxScrollEvent& event)
 {
-	int val = m_aov_sldr->GetValue();
+	int ival = m_aov_sldr->GetValue();
 	bool bval = m_render_view->GetPersp();
-	m_aov_text->ChangeValue(bval ? wxString::Format("%d", val) : wxString("Ortho"));
-	m_aov_text->Update();
 
-	SetAov(val, false);
+	SetAov(ival, true);
 }
 
 void RenderViewPanel::OnAovText(wxCommandEvent& event)
@@ -1451,8 +1448,7 @@ void RenderViewPanel::OnAovText(wxCommandEvent& event)
 	long val;
 	if (str.ToLong(&val))
 		ival = val;
-	m_aov_sldr->ChangeValue(ival);
-	SetAov(ival, false);
+	SetAov(ival, true);
 }
 
 void RenderViewPanel::OnToolBar2(wxCommandEvent& event)

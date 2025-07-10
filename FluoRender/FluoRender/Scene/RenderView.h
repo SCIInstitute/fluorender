@@ -210,6 +210,7 @@ public:
 
 	//handle camera
 	void HandleProjection(int nx, int ny, bool vr = false);
+	void GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3& up);
 	void HandleCamera(bool vr = false);
 	//camera operations
 	fluo::Vector GetTranslations();

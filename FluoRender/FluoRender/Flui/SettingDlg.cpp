@@ -710,7 +710,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	//mode
 	m_lg_camera_mode_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
-	std::vector<wxString> items2 = {"Mode 1: Swing", "Mode 2: Shift", "Mode 3: Shift&Skew"};
+	std::vector<wxString> items2 = {"Mode 1: Rotate", "Mode 2: Shift + Swing", "Mode 3: Shift + Skew"};
 	m_lg_camera_mode_cmb->Append(items2);
 	m_lg_camera_mode_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnLgCameraModeComb, this);
 	sizer1_9->Add(new wxStaticText(page, 0, "Holography Mode"),
