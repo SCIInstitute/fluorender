@@ -707,7 +707,16 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	//lg settings
 	wxFlexGridSizer* sizer1_9 = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
 	sizer1_9->AddGrowableCol(0, 1); // Make the right column growable
-	//enable streaming
+	//mode
+	m_lg_camera_mode_cmb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+	std::vector<wxString> items2 = {"Mode 1: Swing", "Mode 2: Shift", "Mode 3: Shift&Skew"};
+	m_lg_camera_mode_cmb->Append(items2);
+	m_lg_camera_mode_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnLgCameraModeComb, this);
+	sizer1_9->Add(new wxStaticText(page, 0, "Holography Mode"),
+		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+	sizer1_9->Add(m_lg_camera_mode_cmb, 1, wxEXPAND | wxRIGHT, 5);
+	//quilt display
 	m_lg_quilt_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	std::vector<wxString> items1 = { "Disable", "Enable" };
@@ -716,15 +725,6 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	sizer1_9->Add(new wxStaticText(page, 0, "Enable Quilt Display"),
 		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 	sizer1_9->Add(m_lg_quilt_cmb, 1, wxEXPAND | wxRIGHT, 5);
-	//update order
-	m_lg_camera_mode_cmb = new wxComboBox(page, wxID_ANY, "",
-		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
-	std::vector<wxString> items2 = {"Mode 1", "Mode 2"};
-	m_lg_camera_mode_cmb->Append(items2);
-	m_lg_camera_mode_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnLgCameraModeComb, this);
-	sizer1_9->Add(new wxStaticText(page, 0, "Quilt Mode"),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
-	sizer1_9->Add(m_update_order_comb, 1, wxEXPAND | wxRIGHT, 5);
 	group1->Add(10, 5);
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);

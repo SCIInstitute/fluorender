@@ -275,8 +275,8 @@ void LookingGlassRenderer::Draw()
 		rect_va->set_param(1, 1);
 		rect_va->set_param(2, 0);
 		rect_va->set_param(3, 1);
-		rect_va->set_param(4, 0);
-		rect_va->set_param(5, 1);
+		rect_va->set_param(4, 1);
+		rect_va->set_param(5, 0);
 	}
 	else
 	{
@@ -361,6 +361,7 @@ void LookingGlassRenderer::HandleCamera()
 			HandleCameraTurntable();
 			break;
 		case 1: // shifting
+		case 2: // shifting skew
 			HandleCameraShifting();
 			break;
 	}
@@ -378,7 +379,7 @@ void LookingGlassRenderer::HandleProjection(bool persp)
 			-m_far / 100.0, m_far);
 	}
 
-	if (glbin_settings.m_hologram_camera_mode == 1)
+	if (glbin_settings.m_hologram_camera_mode == 2)
 	{
 		double d = glbin_settings.m_lg_offset;
 		double r = glm::length(m_eye - m_center);
