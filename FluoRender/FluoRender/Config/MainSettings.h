@@ -169,8 +169,8 @@ public:
 	bool m_sbs;				//side-by-side aspect ratio
 	double m_eye_dist;		//eye distance, not physical
 	std::string m_holo_ip;	//ip address for hololens
-	bool m_hologram_debug;	//0: normal; 1: show quilt
-	int m_hologram_camera_mode; //0: turntable; 1: shift
+	int m_hologram_debug;	//0: center; 1: first; 2: second; 3: all
+	int m_hologram_camera_mode; //0: shift/shift; 1: shift/swing; 2: rotate
 	double m_lg_offset;		//offset distance from center for lg rendering
 	int m_lg_dev_id;		//in case of multiple lg displays
 	bool m_stay_top;		//full screen

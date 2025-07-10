@@ -110,7 +110,7 @@ MainSettings::MainSettings()
 	m_sbs = false;
 	m_eye_dist = 20.0;
 	m_holo_ip = "192.168.137.78";
-	m_hologram_debug = false;
+	m_hologram_debug = 0;
 	m_hologram_camera_mode = 0;
 	m_lg_offset = 22;
 	m_lg_dev_id = 0;
@@ -349,7 +349,7 @@ void MainSettings::Read()
 		fconfig->Read("sbs enable", &m_sbs, false);
 		fconfig->Read("eye dist", &m_eye_dist, 20.0);
 		fconfig->Read("holo ip", &m_holo_ip, std::string("192.168.137.78"));
-		fconfig->Read("hologram debug", &m_hologram_debug, false);
+		fconfig->Read("hologram debug", &m_hologram_debug, 0);
 		fconfig->Read("hologram camera mode", &m_hologram_camera_mode, 0);
 		fconfig->Read("lg offset", &m_lg_offset, 22.0);
 		fconfig->Read("lg dev id", &m_lg_dev_id, 0);

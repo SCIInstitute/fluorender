@@ -269,7 +269,8 @@ void LookingGlassRenderer::Draw()
 	}
 	flvr::VertexArray* rect_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
-	if (glbin_settings.m_hologram_debug)
+	int mode = glbin_settings.m_hologram_debug;
+	if (mode == 3)
 	{
 		rect_va->set_param(0, 1);
 		rect_va->set_param(1, 1);
@@ -282,9 +283,22 @@ void LookingGlassRenderer::Draw()
 	{
 		rect_va->set_param(0, (float)m_lg_data->view_width / (float)m_lg_data->view_height);
 		rect_va->set_param(1, (float)m_render_view_size.w() / (float)m_render_view_size.h());
-		int center_view = (m_lg_data->vx * m_lg_data->vy) / 2;
-		int cx = center_view % m_lg_data->vx;
-		int cy = m_lg_data->vy - 1 - (center_view / m_lg_data->vx); // Flip Y if origin is bottom-left
+		int view_index = 0;
+		switch (mode)
+		{
+			case 0:
+			default:
+				view_index = (m_lg_data->vx * m_lg_data->vy) / 2;
+				break;
+			case 1:
+				view_index = 0;
+				break;
+			case 2:
+				view_index = m_lg_data->vx * m_lg_data->vy - 1;
+				break;
+		}
+		int cx = view_index % m_lg_data->vx;
+		int cy = m_lg_data->vy - 1 - (view_index / m_lg_data->vx); // Flip Y if origin is bottom-left
 		float u0 = (float)(cx * m_lg_data->view_width) / m_lg_data->quilt_width;
 		float u1 = (float)((cx + 1) * m_lg_data->view_width) / m_lg_data->quilt_width;
 		float v0 = (float)((cy + 1) * m_lg_data->view_height) / m_lg_data->quilt_height;
@@ -357,12 +371,12 @@ void LookingGlassRenderer::HandleCamera(bool persp)
 	switch (glbin_settings.m_hologram_camera_mode)
 	{
 		case 0: // turntable
-		default:
-			HandleCameraTurntable();
-			break;
 		case 1: // shifting
-		case 2: // shifting skew
+		default:
 			HandleCameraShifting(persp);
+			break;
+		case 2: // shifting skew
+			HandleCameraTurntable();
 			break;
 	}
 }
@@ -379,7 +393,7 @@ void LookingGlassRenderer::HandleProjection(bool persp)
 			m_near, m_far);
 	}
 
-	if (glbin_settings.m_hologram_camera_mode == 2)
+	if (glbin_settings.m_hologram_camera_mode == 0)
 	{
 		double d = glbin_settings.m_lg_offset;
 		double r = glm::length(m_eye - m_center);
@@ -430,7 +444,7 @@ void LookingGlassRenderer::HandleCameraShifting(bool persp)
 	double shift = GetOffset() * d;
 	glm::vec3 side = m_side * float(shift);
 
-	if (glbin_settings.m_hologram_camera_mode == 2)
+	if (glbin_settings.m_hologram_camera_mode == 0)
 	{
 		if (persp)
 		{
