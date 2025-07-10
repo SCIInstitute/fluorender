@@ -392,7 +392,7 @@ namespace flvr
 
 		fluo::Ray view_ray = compute_view();
 		fluo::Ray snapview = compute_snapview(0.4);
-		float zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_), 0.2f, 10.0f);
+		float zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_), 0.2f, 35.0f);
 
 		std::vector<TextureBrick*> *bricks = 0;
 		tex->set_matrices(m_mv_mat2, m_proj_mat);
