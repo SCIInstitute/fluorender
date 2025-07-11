@@ -61,6 +61,7 @@ DEALINGS IN THE SOFTWARE.
 #include <msk_reader.h>
 #include <msk_writer.h>
 #include <lbl_reader.h>
+#include <image_capture_factory.h>
 #include <TableHistParams.h>
 #include <Project.h>
 #include <PyDlc.h>
@@ -72,7 +73,6 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <fstream>
 #include <filesystem>
-#include <tiffio.h>
 #if defined(_WIN32) || defined(_WIN64)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -2388,34 +2388,17 @@ void ScriptProc::RunDlcLabel()
 		filename = p.wstring();
 
 		//write tiff
-		TIFF* out = TIFFOpenW(filename.c_str(), "wb");
-		if (!out)
-			return;
-		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, nx);
-		TIFFSetField(out, TIFFTAG_IMAGELENGTH, ny);
-		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, 3);
-		TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
-		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		//dpi
-		TIFFSetField(out, TIFFTAG_XRESOLUTION, 72);
-		TIFFSetField(out, TIFFTAG_YRESOLUTION, 72);
-		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
-
-		tsize_t linebytes = 3 * nx;
-		void* buf = NULL;
-		buf = _TIFFmalloc(linebytes);
-		for (uint32_t row = 0; row < (uint32_t)ny; row++)
+		auto img_capture = CreateImageCapture(filename);
+		if (img_capture)
 		{
-			unsigned char* line = ((unsigned char*)image) + row * 3 * nx;
-			memcpy(buf, line, linebytes);
-			if (TIFFWriteScanline(out, buf, row, 0) < 0)
-				break;
+			img_capture->SetFilename(filename);
+			img_capture->SetData(image, nx, ny, 3);
+			img_capture->SetFlipVertically(false);
+			img_capture->SetIsFloat(false);
+			img_capture->SetUseCompression(false);
+			img_capture->Write();
 		}
-		TIFFClose(out);
-		if (buf)
-			_TIFFfree(buf);
+
 		if (image)
 			delete[]image;
 	}

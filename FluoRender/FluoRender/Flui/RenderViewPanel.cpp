@@ -1035,7 +1035,14 @@ void RenderViewPanel::Capture()
 	m_render_view->SetEnlarge(false);
 	m_render_view->SetEnlargeScale(1.0);
 
-	ModalDlg file_dlg(m_frame, "Save captured image", "", "", "*.tif", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	ModalDlg file_dlg(m_frame,
+		"Save Captured Image", "", "",
+		"Tiff File (*.tif)|*.tif|"\
+		"Tiff File (*.tiff)|*.tiff|"\
+		"Png File (*.png)|*.png|"\
+		"Jpeg File (*.jpg)|*.jpg|"\
+		"Jpeg File (*.jpeg)|*.jpeg",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = file_dlg.ShowModal();
 	if (rval == wxID_OK)

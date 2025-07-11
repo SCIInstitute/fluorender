@@ -202,6 +202,7 @@ if(WIN32)
     set(Tiff_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
     set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
     set(PNG_PNG_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/png)
+    set(JPEG_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/jpeg)
     set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
     set(TIFF_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxtiff.lib)
     set(TIFF_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxtiffd.lib)
@@ -212,6 +213,7 @@ if(WIN32)
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
+#find_package(JPEG REQUIRED)
 #find_package(ZLIB REQUIRED)
 if(WIN32)
     set(Tiff_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
@@ -840,7 +842,9 @@ target_include_directories(FORMAT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${FFMPEG_INCLUDE_DIR}
   ${GLM_DIRS}
+  ${JPEG_INCLUDE_DIR}
   ${ND2_PATHS}
+  ${PNG_PNG_INCLUDE_DIR}
   ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
 if (WIN32 OR APPLE)
@@ -857,6 +861,7 @@ target_link_libraries(FORMAT_LIB PRIVATE
   ${Boost_LIBRARIES}
   ${FFMPEG_LIBRARIES}
   ${ND2_LIBRARIES}
+  ${PNG_LIBRARIES}
   ${TIFF_LIBRARIES}
 )
 

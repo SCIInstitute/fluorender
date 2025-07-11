@@ -41,10 +41,10 @@ DEALINGS IN THE SOFTWARE.
 #include <TextureRenderer.h>
 #include <VolumeRenderer.h>
 #include <LookingGlassRenderer.h>
+#include <image_capture_factory.h>
 #include <Names.h>
 #include <iostream>
 #include <filesystem>
-#include <tiffio.h>
 
 MovieMaker::MovieMaker() :
 	m_frame(0),
@@ -348,53 +348,31 @@ void MovieMaker::WriteFrameToFile()
 	}
 	else
 	{
-		TIFF* out = TIFFOpenW(outputfilename.c_str(), "wb");
-		if (!out) return;
-		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
-		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
-		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
-		if (fp32)
+		auto img_capture = CreateImageCapture(outputfilename);
+		if (img_capture)
 		{
-			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 32);
-			TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-		}
-		else
-		{
-			TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
-			//TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-		}
-		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		if (glbin_settings.m_save_compress)
-			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-		//dpi
-		TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
-		TIFFSetField(out, TIFFTAG_YRESOLUTION, dpi);
-		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
-
-		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
-		void* buf = NULL;
-		buf = _TIFFmalloc(linebytes);
-		//TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, 0));
-		for (uint32_t row = 0; row < (uint32_t)h; row++)
-		{
-			if (fp32)
+			img_capture->SetFilename(outputfilename);
+			img_capture->SetData(image, w, h, chann);
+			if (glbin_settings.m_hologram_mode == 2)
+				img_capture->SetFlipVertically(false);
+			else
+				img_capture->SetFlipVertically(true);
+			img_capture->SetIsFloat(fp32);
+			img_capture->SetDpi(dpi);
+			bool compress = glbin_settings.m_save_compress;
+			if (compress)
 			{
-				float* line = ((float*)image) + (h - row - 1) * chann * w;
-				memcpy(buf, line, linebytes);
+				img_capture->SetUseCompression(true);
+				img_capture->SetQuality(80);
 			}
 			else
-			{// check the index here, and figure out why not using h*linebytes
-				unsigned char* line = ((unsigned char*)image) + (h - row - 1) * chann * w;
-				memcpy(buf, line, linebytes);
+			{
+				img_capture->SetUseCompression(false);
+				img_capture->SetQuality(100);
 			}
-			if (TIFFWriteScanline(out, buf, row, 0) < 0)
-				break;
+			img_capture->Write();
 		}
-		TIFFClose(out);
-		if (buf)
-			_TIFFfree(buf);
+
 		if (image)
 			delete[]image;
 	}

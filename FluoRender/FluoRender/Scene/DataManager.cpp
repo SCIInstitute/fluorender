@@ -6247,6 +6247,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	bool enable_rot_lock = false;
 	m_file_num = files.size();
 	int all_ch_num = 0;
+	bool multi_bricks = false;
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; ++m_cur_file)
 	{
@@ -6328,6 +6329,9 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 						vd->GetResolution(nx, ny, nz);
 						if (nz == 1)
 							nz_count++;
+
+						//check if brick number is larger than 1
+						multi_bricks = multi_bricks || (vd->GetAllBrickNum() > 1);
 					}
 				}
 				if (m_cur_file > 0)
@@ -6396,6 +6400,11 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	if (enable_rot_lock && all_ch_num > 1)
 	{
 		glbin_settings.m_micro_blend = true;
+		vc.insert(gstMicroBlendEnable);
+	}
+	else if (multi_bricks)
+	{
+		glbin_settings.m_micro_blend = false;
 		vc.insert(gstMicroBlendEnable);
 	}
 	vc.insert(gstVolumePropPanel);
