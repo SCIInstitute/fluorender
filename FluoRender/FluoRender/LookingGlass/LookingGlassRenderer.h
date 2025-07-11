@@ -60,6 +60,9 @@ public:
 	{
 		m_render_view_size = size;
 	}
+	Size2D GetQuiltSize();
+	Size2D GetQuiltLayout();
+	float GetAspect();
 
 	//camera handling
 	void HandleCamera(bool persp);

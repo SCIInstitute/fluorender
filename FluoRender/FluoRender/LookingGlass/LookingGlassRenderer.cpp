@@ -354,6 +354,27 @@ Size2D LookingGlassRenderer::GetViewSize() const
 	return Size2D(m_lg_data->view_width, m_lg_data->view_height);
 }
 
+Size2D LookingGlassRenderer::GetQuiltSize()
+{
+	if (!m_initialized)
+		return Size2D(-1, -1);
+	return Size2D(m_lg_data->quilt_width, m_lg_data->quilt_height);
+}
+
+Size2D LookingGlassRenderer::GetQuiltLayout()
+{
+	if (!m_initialized)
+		return Size2D(-1, -1);
+	return Size2D(m_lg_data->vx, m_lg_data->vy);
+}
+
+float LookingGlassRenderer::GetAspect()
+{
+	if (!m_initialized)
+		return 1.0;
+	return m_lg_data->displayaspect;
+}
+
 void LookingGlassRenderer::advance_views()
 {
 	if (!m_initialized)

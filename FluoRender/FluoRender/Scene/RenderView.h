@@ -440,6 +440,10 @@ public:
 		int chann, bool fp32,
 		int &x, int &y, int &w, int &h,
 		void** image);
+	void ReadPixelsQuilt(
+		int chann, bool fp32,
+		int &x, int &y, int &w, int &h,
+		void** image);
 
 	//set cell list
 	void SetCellList(flrd::CelpList& list);

@@ -665,6 +665,20 @@ inline void CHECK_TRAILING_SLASH(std::string& str)
 	str = path.string();
 }
 
+inline std::wstring APPEND_QUILT_INFO(const std::wstring& file, int vx, int vy, double aspect)
+{
+	std::filesystem::path old_path(file);
+	std::filesystem::path base = old_path;
+	base.replace_extension();
+
+	std::wstringstream suffix;
+	suffix << L"_qs" << vx << L"x" << vy
+		<< L"a" << std::fixed << std::setprecision(2) << aspect;
+
+	std::wstring new_path = base.wstring() + suffix.str() + old_path.extension().wstring();
+	return new_path;
+}
+
 extern "C" {
 	typedef struct tiff TIFF;
 	TIFF* TIFFOpenW(const wchar_t* name, const char* mode);

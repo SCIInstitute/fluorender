@@ -5110,6 +5110,38 @@ void RenderView::ReadPixels(
 		BindRenderBuffer();
 }
 
+void RenderView::ReadPixelsQuilt(
+	int chann, bool fp32,
+	int& x, int& y, int& w, int& h,
+	void** image)
+{
+	glActiveTexture(GL_TEXTURE0);
+	flvr::Framebuffer* quilt_buffer =
+		glbin_framebuffer_manager.framebuffer("quilt");
+	if (quilt_buffer)
+	{
+		//draw the final buffer to itself
+		quilt_buffer->bind();
+	}
+	x = 0;
+	y = 0;
+	Size2D size = glbin_lg_renderer.GetQuiltSize();
+	w = size.w();
+	h = size.h();
+	glPixelStorei(GL_PACK_ROW_LENGTH, w);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	if (fp32)
+		*image = new float[w*h*chann];
+	else
+		*image = new unsigned char[w*h*chann];
+	glReadBuffer(GL_BACK);
+	glReadPixels(x, y, w, h,
+		chann == 3 ? GL_RGB : GL_RGBA,
+		fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 //set cell list
 void RenderView::SetCellList(flrd::CelpList& list)
 {
@@ -9541,9 +9573,23 @@ void RenderView::PostDraw()
 		float dpi = static_cast<float>(glbin_settings.m_dpi);
 		int x, y, w, h;
 		void* image = 0;
-		ReadPixels(chann, fp32, x, y, w, h, &image);
+		std::wstring cap_file = m_cap_file;
+		if (glbin_settings.m_hologram_mode == 2)
+		{
+			ReadPixelsQuilt(chann, fp32, x, y, w, h, &image);
+			//change the file name
+			Size2D layout = glbin_lg_renderer.GetQuiltLayout();
+			double aspect = glbin_lg_renderer.GetAspect();
+			cap_file = APPEND_QUILT_INFO(
+				m_cap_file,
+				layout.w(),
+				layout.h(),
+				aspect);
+		}
+		else
+			ReadPixels(chann, fp32, x, y, w, h, &image);
 
-		TIFF *out = TIFFOpenW(m_cap_file.c_str(), "wb");
+		TIFF *out = TIFFOpenW(cap_file.c_str(), "wb");
 		if (!out)
 			return;
 		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);

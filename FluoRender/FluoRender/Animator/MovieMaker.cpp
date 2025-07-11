@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <TextureRenderer.h>
 #include <VolumeRenderer.h>
+#include <LookingGlassRenderer.h>
 #include <Names.h>
 #include <iostream>
 #include <filesystem>
@@ -315,7 +316,21 @@ void MovieMaker::WriteFrameToFile()
 	float dpi = glbin_settings.m_dpi;
 	int x, y, w, h;
 	void* image = 0;
-	view->ReadPixels(chann, fp32, x, y, w, h, &image);
+
+	if (glbin_settings.m_hologram_mode == 2)
+	{
+		view->ReadPixelsQuilt(chann, fp32, x, y, w, h, &image);
+		//change the file name
+		Size2D layout = glbin_lg_renderer.GetQuiltLayout();
+		double aspect = glbin_lg_renderer.GetAspect();
+		outputfilename = APPEND_QUILT_INFO(
+			outputfilename,
+			layout.w(),
+			layout.h(),
+			aspect);
+	}
+	else
+		view->ReadPixels(chann, fp32, x, y, w, h, &image);
 
 	if (bmov)
 	{
