@@ -206,6 +206,8 @@ namespace flvr
 
 		//set matrices
 		void set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat) { m_mv_mat = mv_mat; m_proj_mat = proj_mat; m_tex_mat = tex_mat; }
+		glm::mat4 get_mv_mat2();
+		glm::mat4 get_proj_mat() { return m_proj_mat; }
 
 		//fog
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end) { m_use_fog = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }

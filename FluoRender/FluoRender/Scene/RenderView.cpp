@@ -7964,24 +7964,24 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 	m_mvr->set_depth_peel(peel);
 
 	// Set up transform
-	std::shared_ptr<VolumeData> front_vd;
-	if (!m_vd_pop_list.empty())
-		front_vd = m_vd_pop_list.front().lock();
-	if (front_vd)
-	{
-		fluo::Transform* tform = front_vd->GetTexture()->transform();
-		float mvmat[16];
-		tform->get_trans(mvmat);
-		glm::mat4 mv_mat2 = glm::mat4(
-			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		mv_mat2 = front_vd->GetVR()->m_mv_mat * mv_mat2;
-		m_mvr->set_matrices(mv_mat2,
-			front_vd->GetVR()->m_proj_mat,
-			front_vd->GetVR()->m_tex_mat);
-	}
+	//std::shared_ptr<VolumeData> front_vd;
+	//if (!m_vd_pop_list.empty())
+	//	front_vd = m_vd_pop_list.front().lock();
+	//if (front_vd)
+	//{
+	//	fluo::Transform* tform = front_vd->GetTexture()->transform();
+	//	float mvmat[16];
+	//	tform->get_trans(mvmat);
+	//	glm::mat4 mv_mat2 = glm::mat4(
+	//		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
+	//		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
+	//		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
+	//		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
+	//	mv_mat2 = front_vd->GetVR()->m_mv_mat * mv_mat2;
+	//	m_mvr->set_matrices(mv_mat2,
+	//		front_vd->GetVR()->m_proj_mat,
+	//		front_vd->GetVR()->m_tex_mat);
+	//}
 
 	//generate textures & buffer objects
 	//frame buffer for each volume

@@ -98,7 +98,7 @@ namespace flvr
 		bool GetNoiseRed() {return noise_red_;}
 
 		//set matrices
-		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
+		//void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
 
 	private:
 		//viewport
@@ -110,9 +110,9 @@ namespace flvr
 		std::vector<VolumeRenderer*> vr_list_;
 
 		//unified matrices
-		glm::mat4 mv_mat2_;
-		glm::mat4 proj_mat_;
-		glm::mat4 tex_mat_;
+		//glm::mat4 mv_mat2_;
+		//glm::mat4 proj_mat_;
+		//glm::mat4 tex_mat_;
 
 		//mode and quality control
 		RenderMode mode_;

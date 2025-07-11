@@ -104,12 +104,12 @@ int MultiVolumeRenderer::get_slice_num()
 }
 
 //set matrices
-void MultiVolumeRenderer::set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
-{
-	mv_mat2_ = mv_mat2;
-	proj_mat_ = proj_mat;
-	tex_mat_ = tex_mat;
-}
+//void MultiVolumeRenderer::set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
+//{
+//	mv_mat2_ = mv_mat2;
+//	proj_mat_ = proj_mat;
+//	tex_mat_ = tex_mat;
+//}
 
 //manages volume renderers for rendering
 void MultiVolumeRenderer::add_vr(VolumeRenderer* vr)
@@ -586,9 +586,11 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			//--------------------------------------------------------------------------
 			// render bricks
-			shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat_));
-			shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2_));
-			shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
+			glm::mat4 mv_mat2 = vr_list_[tn]->get_mv_mat2();
+			glm::mat4 proj_mat = vr_list_[tn]->get_proj_mat();
+			shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+			shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2));
+			//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 
 			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), 1.0 / rate);
 
@@ -968,9 +970,11 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 
 	//--------------------------------------------------------------------------
 	// render bricks
-	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat_));
-	shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2_));
-	shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
+	glm::mat4 mv_mat2 = vr_list_[0]->get_mv_mat2();
+	glm::mat4 proj_mat = vr_list_[0]->get_proj_mat();
+	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
+	shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2));
+	//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 	shader->setLocalParam(0, vr_list_[0]->color_.r(), vr_list_[0]->color_.g(), vr_list_[0]->color_.b(), 1.0);
 
 	glEnable(GL_DEPTH_TEST);
