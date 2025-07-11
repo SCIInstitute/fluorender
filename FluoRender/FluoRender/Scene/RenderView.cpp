@@ -10933,10 +10933,22 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p )>0.0 ||
 				glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p)>0.0)
 			{
-				//double obj_transx, obj_transy, obj_transz;
+				//center view on point
 				p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
 					p.y() - m_obj_ctry - m_obj_ctr_offy,
 					p.z() - m_obj_ctrz - m_obj_ctr_offz);
+				if (glbin_settings.m_hologram_mode == 2)
+				{
+					//only change depth to match the point
+					glm::vec3 eye, center, up;
+					GetCameraSettings(eye, center, up);
+					glm::vec3 view_dir = glm::normalize(center - eye);
+					glm::vec3 p3d = glm::vec3(p.x(), p.y(), p.z());
+					float depth = glm::dot(p3d - eye, view_dir);
+					glm::vec3 new_center = eye + depth * view_dir;
+					glm::vec3 offset = new_center - center;
+					p = fluo::Point(offset.x, offset.y, offset.z);
+				}
 				m_obj_transx = p.x();
 				m_obj_transy = p.y();
 				m_obj_transz = p.z();
