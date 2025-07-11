@@ -4225,17 +4225,6 @@ void RenderView::StartLoopUpdate()
 			flvr::Texture* tex = vd->GetTexture();
 			if (tex)
 			{
-				fluo::Transform *tform = tex->transform();
-				double mvmat[16];
-				tform->get_trans(mvmat);
-				vd->GetVR()->m_mv_mat2 = glm::mat4(
-					mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-					mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-					mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-					mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-				vd->GetVR()->m_mv_mat2 = vd->GetVR()->m_mv_mat *
-					vd->GetVR()->m_tex_mat * vd->GetVR()->m_mv_mat2;
-
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
 				std::vector<flvr::TextureBrick*> *bricks = 0;
 				bricks = tex->get_sorted_bricks(view_ray, !m_persp);

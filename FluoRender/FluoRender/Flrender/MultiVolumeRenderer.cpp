@@ -586,10 +586,10 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			//--------------------------------------------------------------------------
 			// render bricks
-			glm::mat4 mv_mat2 = vr_list_[tn]->get_mv_mat2();
+			glm::mat4 mv_tex_scl_mat = vr_list_[tn]->get_mv_tex_scl_mat();
 			glm::mat4 proj_mat = vr_list_[tn]->get_proj_mat();
 			shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
-			shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2));
+			shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
 			//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 
 			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), 1.0 / rate);
@@ -970,10 +970,10 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 
 	//--------------------------------------------------------------------------
 	// render bricks
-	glm::mat4 mv_mat2 = vr_list_[0]->get_mv_mat2();
+	glm::mat4 mv_tex_scl_mat = vr_list_[0]->get_mv_tex_scl_mat();
 	glm::mat4 proj_mat = vr_list_[0]->get_proj_mat();
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
-	shader->setLocalParamMatrix(1, glm::value_ptr(mv_mat2));
+	shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
 	//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 	shader->setLocalParam(0, vr_list_[0]->color_.r(), vr_list_[0]->color_.g(), vr_list_[0]->color_.b(), 1.0);
 

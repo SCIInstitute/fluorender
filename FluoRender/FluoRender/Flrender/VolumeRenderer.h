@@ -205,8 +205,9 @@ namespace flvr
 		double get_estimated_thresh() { return est_thresh_; }
 
 		//set matrices
-		void set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat) { m_mv_mat = mv_mat; m_proj_mat = proj_mat; m_tex_mat = tex_mat; }
-		glm::mat4 get_mv_mat2();
+		void set_matrices(glm::mat4& mv_mat, glm::mat4& proj_mat, glm::mat4& tex_mat);
+		void update_mv_tex_scl_mat();
+		glm::mat4 get_mv_tex_scl_mat() { return m_mv_tex_scl_mat; }
 		glm::mat4 get_proj_mat() { return m_proj_mat; }
 
 		//fog

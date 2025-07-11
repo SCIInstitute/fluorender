@@ -576,7 +576,7 @@ namespace flvr
 
 	bool TextureRenderer::test_against_view(const fluo::BBox &bbox, bool persp)
 	{
-		memcpy(mvmat_, glm::value_ptr(m_mv_mat2), 16 * sizeof(float));
+		memcpy(mvmat_, glm::value_ptr(m_mv_tex_scl_mat), 16 * sizeof(float));
 		memcpy(prmat_, glm::value_ptr(m_proj_mat), 16 * sizeof(float));
 
 		fluo::Transform mv;

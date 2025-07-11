@@ -395,7 +395,7 @@ namespace flvr
 		float zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_), 0.2f, 35.0f);
 
 		std::vector<TextureBrick*> *bricks = 0;
-		tex->set_matrices(m_mv_mat2, m_proj_mat);
+		tex->set_matrices(m_mv_tex_scl_mat, m_proj_mat);
 		if (glbin_settings.m_mem_swap && interactive_)
 			bricks = tex->get_closest_bricks(
 			quota_center_, quota_bricks_chan_, true,
@@ -589,9 +589,8 @@ namespace flvr
 		////////////////////////////////////////////////////////
 		// render bricks
 		// Set up transform
-		get_mv_mat2();
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
-		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
+		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_tex_scl_mat));
 		
 		if (cur_chan_brick_num_ == 0) rearrangeLoadedBrkVec();
 
@@ -907,18 +906,8 @@ namespace flvr
 
 		////////////////////////////////////////////////////////
 		// render bricks
-		// Set up transform
-		fluo::Transform *tform = tex->transform();
-		double mvmat[16];
-		tform->get_trans(mvmat);
-		m_mv_mat2 = glm::mat4(
-			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		m_mv_mat2 = m_mv_mat * m_mv_mat2;
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
-		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat2));
+		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_tex_scl_mat));
 		shader->setLocalParam(0, color_.r(), color_.g(), color_.b(), 1.0);
 
 		if (bricks)
@@ -1052,21 +1041,11 @@ namespace flvr
 
 		////////////////////////////////////////////////////////
 		// render bricks
-		// Set up transform
-		fluo::Transform *tform = tex->transform();
-		double mvmat[16];
-		tform->get_trans(mvmat);
-		m_mv_mat2 = glm::mat4(
-			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		m_mv_mat2 = m_mv_mat * m_mv_mat2;
-		seg_shader->setLocalParamMatrix(0, glm::value_ptr(m_mv_mat2));
+		seg_shader->setLocalParamMatrix(0, glm::value_ptr(m_mv_tex_scl_mat));
 		seg_shader->setLocalParamMatrix(1, glm::value_ptr(m_proj_mat));
 		if (hr_mode > 0)
 		{
-			glm::mat4 mv_inv = glm::inverse(m_mv_mat2);
+			glm::mat4 mv_inv = glm::inverse(m_mv_tex_scl_mat);
 			seg_shader->setLocalParamMatrix(3, glm::value_ptr(mv_inv));
 		}
 
@@ -1634,20 +1613,27 @@ namespace flvr
 		release_texture(c, GL_TEXTURE_3D);
 	}
 
-	glm::mat4 VolumeRenderer::get_mv_mat2()
+	void VolumeRenderer::set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
+	{
+		m_mv_mat = mv_mat;
+		m_proj_mat = proj_mat;
+		m_tex_mat = tex_mat;
+		update_mv_tex_scl_mat();
+	}
+
+	void VolumeRenderer::update_mv_tex_scl_mat()
 	{
 		auto tex = tex_.lock();
 		if (!tex)
-			return glm::mat4(1.0);
+			return;
 		fluo::Transform *tform = tex->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
-		m_mv_mat2 = glm::mat4(
+		m_mv_tex_scl_mat = glm::mat4(
 			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
 			mvmat[2], mvmat[6], mvmat[10], mvmat[14],
 			mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-		m_mv_mat2 = m_mv_mat * m_mv_mat2;
-		return m_mv_mat2;
+		m_mv_tex_scl_mat = m_mv_mat * m_mv_tex_scl_mat;
 	}
 } // namespace flvr

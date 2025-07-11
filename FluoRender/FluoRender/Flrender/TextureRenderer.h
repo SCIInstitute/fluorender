@@ -351,9 +351,9 @@ namespace flvr
 		float prmat_[16];
 
 		//opengl matrices
-		glm::mat4 m_mv_mat;
-		glm::mat4 m_mv_mat2;
-		glm::mat4 m_proj_mat;
+		glm::mat4 m_mv_mat = glm::mat4(1.0);
+		glm::mat4 m_mv_tex_scl_mat = glm::mat4(1.0);//mv matrix with texture scaling
+		glm::mat4 m_proj_mat = glm::mat4(1.0);
 		glm::mat4 m_tex_mat = glm::mat4(1.0);
 
 		//renderer manages vertex array objects
