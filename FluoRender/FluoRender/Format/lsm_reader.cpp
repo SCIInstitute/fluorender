@@ -618,46 +618,6 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 	}
 }
 
-void LSMReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool LSMReader::GetSliceSeq()
-{
-	return false;
-}
-
-void LSMReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool LSMReader::GetChannSeq()
-{
-	return false;
-}
-
-void LSMReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int LSMReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void LSMReader::SetTimeId(const std::wstring &id)
-{
-	//do nothing
-}
-
-std::wstring LSMReader::GetTimeId()
-{
-	return L"";
-}
-
 void LSMReader::SetBatch(bool batch)
 {
 	if (batch)

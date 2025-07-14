@@ -147,46 +147,6 @@ int NRRDReader::Preprocess()
 	return READER_OK;
 }
 
-void NRRDReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool NRRDReader::GetSliceSeq()
-{
-	return false;
-}
-
-void NRRDReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool NRRDReader::GetChannSeq()
-{
-	return false;
-}
-
-void NRRDReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int NRRDReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void NRRDReader::SetTimeId(const std::wstring &id)
-{
-	m_time_id = id;
-}
-
-std::wstring NRRDReader::GetTimeId()
-{
-	return m_time_id;
-}
-
 void NRRDReader::SetBatch(bool batch)
 {
 	if (batch)

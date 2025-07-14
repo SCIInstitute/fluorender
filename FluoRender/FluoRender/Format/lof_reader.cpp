@@ -150,46 +150,6 @@ int LOFReader::Preprocess()
 	return READER_OK;
 }
 
-void LOFReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool LOFReader::GetSliceSeq()
-{
-	return false;
-}
-
-void LOFReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool LOFReader::GetChannSeq()
-{
-	return false;
-}
-
-void LOFReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int LOFReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void LOFReader::SetTimeId(const std::wstring &id)
-{
-	//do nothing
-}
-
-std::wstring LOFReader::GetTimeId()
-{
-	return L"";
-}
-
 void LOFReader::SetBatch(bool batch)
 {
 	if (batch)

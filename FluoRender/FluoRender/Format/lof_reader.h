@@ -53,14 +53,6 @@ public:
 
 	//void SetFile(const std::string &file);
 	void SetFile(const std::wstring &file);
-	void SetSliceSeq(bool ss);
-	bool GetSliceSeq();
-	void SetChannSeq(bool cs);
-	bool GetChannSeq();
-	void SetDigitOrder(int order);
-	int GetDigitOrder();
-	void SetTimeId(const std::wstring &id);
-	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);

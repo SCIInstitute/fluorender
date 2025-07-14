@@ -191,46 +191,6 @@ int ND2Reader::Preprocess()
 	return READER_OK;
 }
 
-void ND2Reader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool ND2Reader::GetSliceSeq()
-{
-	return false;
-}
-
-void ND2Reader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool ND2Reader::GetChannSeq()
-{
-	return false;
-}
-
-void ND2Reader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int ND2Reader::GetDigitOrder()
-{
-	return 0;
-}
-
-void ND2Reader::SetTimeId(const std::wstring &id)
-{
-	//do nothing
-}
-
-std::wstring ND2Reader::GetTimeId()
-{
-	return L"";
-}
-
 void ND2Reader::SetBatch(bool batch)
 {
 	if (batch)

@@ -136,46 +136,6 @@ int CZIReader::Preprocess()
 	return READER_OK;
 }
 
-void CZIReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool CZIReader::GetSliceSeq()
-{
-	return false;
-}
-
-void CZIReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool CZIReader::GetChannSeq()
-{
-	return false;
-}
-
-void CZIReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int CZIReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void CZIReader::SetTimeId(const std::wstring& id)
-{
-	//do nothing
-}
-
-std::wstring CZIReader::GetTimeId()
-{
-	return L"";
-}
-
 void CZIReader::SetBatch(bool batch)
 {
 	if (batch)

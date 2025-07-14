@@ -191,46 +191,6 @@ void OIFReader::ReadSequenceOif()
 	}
 }
 
-void OIFReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool OIFReader::GetSliceSeq()
-{
-	return false;
-}
-
-void OIFReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool OIFReader::GetChannSeq()
-{
-	return false;
-}
-
-void OIFReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int OIFReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void OIFReader::SetTimeId(const std::wstring &id)
-{
-	m_time_id = id;
-}
-
-std::wstring OIFReader::GetTimeId()
-{
-	return m_time_id;
-}
-
 void OIFReader::SetBatch(bool batch)
 {
 	if (batch)

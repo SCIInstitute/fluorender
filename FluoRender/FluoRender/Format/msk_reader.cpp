@@ -65,44 +65,6 @@ int MSKReader::Preprocess()
 	return READER_OK;
 }
 
-void MSKReader::SetSliceSeq(bool ss)
-{
-}
-
-bool MSKReader::GetSliceSeq()
-{
-	return false;
-}
-
-void MSKReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool MSKReader::GetChannSeq()
-{
-	return false;
-}
-
-void MSKReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int MSKReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void MSKReader::SetTimeId(const std::wstring &id)
-{
-}
-
-std::wstring MSKReader::GetTimeId()
-{
-	return L"";
-}
-
 void MSKReader::SetBatch(bool batch)
 {
 }

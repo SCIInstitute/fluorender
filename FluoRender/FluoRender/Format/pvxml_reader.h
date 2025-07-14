@@ -47,14 +47,6 @@ public:
 
 	//void SetFile(const std::string &file);
 	void SetFile(const std::wstring &file);
-	void SetSliceSeq(bool ss);
-	bool GetSliceSeq();
-	void SetChannSeq(bool cs);
-	bool GetChannSeq();
-	void SetDigitOrder(int order);
-	int GetDigitOrder();
-	void SetTimeId(const std::wstring &id);
-	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
@@ -215,9 +207,6 @@ private:
 	double m_min_value;
 	double m_max_value;
 	double m_scalar_scale;
-
-	//time sequence id
-	std::wstring m_time_id;
 
 	//user setting for flipping
 	//0:auto; -1:flip; 1:no flip

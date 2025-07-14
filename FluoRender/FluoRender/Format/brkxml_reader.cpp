@@ -694,36 +694,6 @@ void BRKXMLReader::GetLandmark(int index, std::wstring& name, double& x, double&
 	spcz = m_landmarks[index].spcz;
 }
 
-void BRKXMLReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool BRKXMLReader::GetSliceSeq()
-{
-	return false;
-}
-
-void BRKXMLReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool BRKXMLReader::GetChannSeq()
-{
-	return false;
-}
-
-void BRKXMLReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int BRKXMLReader::GetDigitOrder()
-{
-	return 0;
-}
-
 void BRKXMLReader::SetTimeSeq(bool ts)
 {
 	//do nothing
@@ -732,16 +702,6 @@ void BRKXMLReader::SetTimeSeq(bool ts)
 bool BRKXMLReader::GetTimeSeq()
 {
 	return false;
-}
-
-void BRKXMLReader::SetTimeId(const std::wstring& id)
-{
-	m_time_id = id;
-}
-
-std::wstring BRKXMLReader::GetTimeId()
-{
-	return m_time_id;
 }
 
 void BRKXMLReader::SetCurTime(int t)

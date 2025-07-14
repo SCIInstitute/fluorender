@@ -65,44 +65,6 @@ int LBLReader::Preprocess()
 	return READER_OK;
 }
 
-void LBLReader::SetSliceSeq(bool ss)
-{
-}
-
-bool LBLReader::GetSliceSeq()
-{
-	return false;
-}
-
-void LBLReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool LBLReader::GetChannSeq()
-{
-	return false;
-}
-
-void LBLReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int LBLReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void LBLReader::SetTimeId(const std::wstring &id)
-{
-}
-
-std::wstring LBLReader::GetTimeId()
-{
-	return L"";
-}
-
 void LBLReader::SetBatch(bool batch)
 {
 }

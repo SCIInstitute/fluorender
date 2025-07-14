@@ -31,8 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <base_reader.h>
 #include <fstream>
 #include <string>
-#include <deque>
-#include <set>
 
 class TIFReader : public BaseReader
 {
@@ -44,14 +42,6 @@ public:
 
 	//void SetFile(const std::string &file);
 	void SetFile(const std::wstring &file);
-	void SetSliceSeq(bool ss);
-	bool GetSliceSeq();
-	void SetChannSeq(bool cs);
-	bool GetChannSeq();
-	void SetDigitOrder(int order);
-	int GetDigitOrder();
-	void SetTimeId(const std::wstring &id);
-	std::wstring GetTimeId();
 	int Preprocess();
 	/**
 	 * Finds the tag value given by \@tag of a tiff on the current page.
@@ -208,22 +198,6 @@ private:
 	};
 	std::vector<TimeDataInfo> m_4d_seq;
 
-	struct NamePattern
-	{
-		size_t start;
-		size_t end;
-		size_t len;//0:indefinite
-		int type;//0:string; 1:digits
-		int use;//0:z sections; 1:channels; 2:time
-		std::wstring str;//content
-	};
-	std::deque<NamePattern> m_name_patterns;
-	std::set<int> m_slice_count;
-	std::set<int> m_chann_count;//counting total numbers in preprocessing
-
-	bool m_slice_seq;
-	bool m_chann_seq;
-	int m_digit_order;
 	int m_time_num;
 	int m_cur_time;
 	int m_chan_num;
@@ -323,8 +297,6 @@ private:
 	};
 	PageInfo m_page_info;
 
-	//time sequence id
-	std::wstring m_time_id;
 	/** The input stream for reading the tiff */
 	std::ifstream tiff_stream;
 	/** This keeps track of what page we are on in the tiff */
@@ -420,12 +392,6 @@ private:
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
 	//read tiff
 	Nrrd* ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max);
-
-	//name pattern
-	void AnalyzeNamePattern(const std::wstring &path_name);
-	void AddPatternR(wchar_t c, size_t pos);//add backwards
-	std::wstring GetSearchString(int mode, int t);
-	int GetPatternNumber(std::wstring &path_name, int mode, bool count=false);
 
 	//invalidate page info
 	bool TagInInfo(uint16_t tag);

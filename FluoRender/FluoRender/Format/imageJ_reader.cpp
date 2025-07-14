@@ -229,47 +229,6 @@ int ImageJReader::Preprocess()
 	return return_result;
 }
 
-void ImageJReader::SetSliceSeq(bool ss)
-{
-	//enable searching for slices
-	m_slice_seq = ss;
-}
-
-bool ImageJReader::GetSliceSeq()
-{
-	return m_slice_seq;
-}
-
-void ImageJReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool ImageJReader::GetChannSeq()
-{
-	return false;
-}
-
-void ImageJReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int ImageJReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void ImageJReader::SetTimeId(const std::wstring &id)
-{
-	m_time_id = id;
-}
-
-std::wstring ImageJReader::GetTimeId()
-{
-	return m_time_id;
-}
-
 std::wstring ImageJReader::GetCurDataName(int t, int c)
 {
 	return m_path_name;

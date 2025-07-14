@@ -35,6 +35,206 @@ BaseReader::BaseReader() :
 
 }
 
+void BaseReader::AnalyzeNamePattern(const std::wstring &path_name)
+{
+	m_name_patterns.clear();
+
+	std::filesystem::path p(path_name);
+	p.make_preferred();
+	std::wstring path = p.stem().wstring();
+	std::wstring name = p.filename().wstring();
+	if (name.empty())
+		return;
+
+	size_t end_pos = name.find_last_of(L'.');
+	bool suf = true;
+	if (end_pos == std::wstring::npos)
+	{
+		end_pos = name.length();
+		suf = false;
+	}
+	for (int i = int(end_pos) - 1; i >= 0; --i)
+		AddPatternR(name[i], i);
+	//add suffix
+	if (suf)
+	{
+		NamePattern np;
+		np.start = end_pos;
+		np.end = name.length() - 1;
+		np.len = np.end - np.start + 1;
+		np.type = 0;
+		np.use = -1;
+		np.str = name.substr(np.start);
+		m_name_patterns.push_back(np);
+	}
+	//find time id
+	size_t tid_pos = name.find(m_time_id);
+	if (tid_pos != std::wstring::npos)
+	{
+		size_t tid_start = tid_pos + m_time_id.length();
+		for (auto it = m_name_patterns.begin();
+			it != m_name_patterns.end(); ++it)
+		{
+			if (it->type == 1 &&
+				it->start == tid_start)
+			{
+				it->use = 2;
+				break;
+			}
+		}
+	}
+	//find z and chann
+	int counter = 0;
+	for (auto it = m_name_patterns.rbegin();
+		it != m_name_patterns.rend(); ++it)
+	{
+		if (counter == 2)
+			break;
+		if (it->type == 1 &&
+			it->use != 2)
+		{
+			if (counter == 0)
+			{
+				if (m_digit_order == 0)
+					it->use = 0;
+				else
+					it->use = 1;
+			}
+			else if (counter == 1)
+			{
+				if (m_digit_order == 0)
+					it->use = 1;
+				else
+					it->use = 0;
+			}
+			counter++;
+		}
+	}
+}
+
+void BaseReader::AddPatternR(wchar_t c, size_t pos)
+{
+	int type = iswdigit(c) ? 1 : 0;
+
+	if (m_name_patterns.empty())
+	{
+		NamePattern np;
+		np.start = pos;
+		np.end = pos;
+		np.len = 1;
+		np.type = type;
+		np.use = -1;
+		np.str = c;
+		m_name_patterns.push_front(np);
+	}
+	else
+	{
+		NamePattern &np0 = m_name_patterns.front();
+		if (np0.type == type)
+		{
+			np0.start = pos;
+			np0.len = np0.end - np0.start + 1;
+			np0.str.insert(0, 1, c);
+		}
+		else
+		{
+			NamePattern np;
+			np.start = pos;
+			np.end = pos;
+			np.len = 1;
+			np.type = type;
+			np.use = -1;
+			np.str = c;
+			m_name_patterns.push_front(np);
+		}
+	}
+}
+
+std::wstring BaseReader::GetSearchString(int mode, int t)
+{
+	std::wstring str;
+	for (auto it = m_name_patterns.begin();
+		it != m_name_patterns.end(); ++it)
+	{
+		int add_ast = 0;
+		if (it->type == 1)
+		{
+			if (it->use == 0 || it->use == 1)
+			{
+				switch (mode)
+				{
+				case -1:
+					add_ast = 1;
+					break;
+				case 0:
+					if (it->use == 0)
+						add_ast = 1;
+					break;
+				case 1:
+					if (it->use == 1)
+						add_ast = 1;
+					break;
+				}
+			}
+			else if (it->use == 2)
+				add_ast = 2;
+		}
+
+		if (add_ast == 1)
+			str += L"\\d+";
+		else if (add_ast == 2)
+		{
+			std::wstringstream ss;
+			ss << std::setw(it->len) << std::setfill(L'0') << t;
+			str += ss.str();
+		}
+		else
+			str += ESCAPE_REGEX(it->str);
+	}
+	return str;
+}
+
+int BaseReader::GetPatternNumber(std::wstring &path_name, int mode, bool count)
+{
+	std::filesystem::path p(path_name);
+	std::wstring name = p.filename().wstring();
+
+	int number = 0;
+	std::wstring str;
+	size_t pos = std::wstring::npos;
+	//slice/channel number
+	for (auto it = m_name_patterns.begin();
+		it != m_name_patterns.end(); ++it)
+	{
+		if (it->type == 1 && it->use == mode)
+		{
+			pos = it->start;
+			//auto pit = std::prev(it);
+			//if (pit != m_name_patterns.end())
+			//	str = pit->str;
+			break;
+		}
+	}
+	for (size_t i = pos; i < name.size(); ++i)
+	{
+		if (iswdigit(name[i]))
+			str += name[i];
+		else
+			break;
+	}
+	number = WSTOI(str);
+
+	if (count)
+	{
+		if (mode == 0)
+			m_slice_count.insert(number);
+		else if (mode == 1)
+			m_chann_count.insert(number);
+	}
+
+	return number;
+}
+
 int BaseReader::LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0)
 {
 	//initialize codec state

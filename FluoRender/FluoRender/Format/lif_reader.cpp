@@ -115,46 +115,6 @@ int LIFReader::Preprocess()
 	return READER_OK;
 }
 
-void LIFReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool LIFReader::GetSliceSeq()
-{
-	return false;
-}
-
-void LIFReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool LIFReader::GetChannSeq()
-{
-	return false;
-}
-
-void LIFReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int LIFReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void LIFReader::SetTimeId(const std::wstring &id)
-{
-	//do nothing
-}
-
-std::wstring LIFReader::GetTimeId()
-{
-	return L"";
-}
-
 void LIFReader::SetBatch(bool batch)
 {
 }

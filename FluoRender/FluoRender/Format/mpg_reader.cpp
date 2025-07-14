@@ -216,46 +216,6 @@ int MPGReader::Preprocess()
 	return READER_OK;
 }
 
-void MPGReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool MPGReader::GetSliceSeq()
-{
-	return false;
-}
-
-void MPGReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool MPGReader::GetChannSeq()
-{
-	return false;
-}
-
-void MPGReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int MPGReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void MPGReader::SetTimeId(const std::wstring &id)
-{
-	//do nothing
-}
-
-std::wstring MPGReader::GetTimeId()
-{
-	return L"";
-}
-
 void MPGReader::SetBatch(bool batch)
 {
 }

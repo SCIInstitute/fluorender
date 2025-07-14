@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <nrrd.h>
 #include <vector>
 #include <sstream>
+#include <deque>
+#include <set>
 
 //error codes
 //return to notify caller if fail
@@ -77,22 +79,22 @@ public:
 	//set reader flag to read a 3D stack as a file sequence, each file being a slice
 	//in UI, it is set in the open file dialog as "read a sequence as z slices..."
 	//not all reader types use this flag, basically for a tiff sequence
-	virtual void SetSliceSeq(bool ss) = 0;
+	virtual void SetSliceSeq(bool ss) { m_slice_seq = ss; }
 	//get the reader flag to read z stack sequence
-	virtual bool GetSliceSeq() = 0;
+	virtual bool GetSliceSeq() { return m_slice_seq; }
 	//read channels
-	virtual void SetChannSeq(bool cs) = 0;
-	virtual bool GetChannSeq() = 0;
+	virtual void SetChannSeq(bool cs) { m_chann_seq = cs; }
+	virtual bool GetChannSeq() { return m_chann_seq; }
 	//digit order
-	virtual void SetDigitOrder(int order) = 0;
-	virtual int GetDigitOrder() = 0;
+	virtual void SetDigitOrder(int order) { m_digit_order = order; }
+	virtual int GetDigitOrder() { return m_digit_order; }
 	//set time identifier
 	//time identifier is a string to identify each file in a sequence as a time point
 	//in UI, it is set in the open file dialog as option "time sequence identifier"
 	//default value is "_T", which means any digits after the string in a file name is used as its time value
-	virtual void SetTimeId(const std::wstring &id) = 0;
+	virtual void SetTimeId(const std::wstring& id) { m_time_id = id; }
 	//get current time identifier
-	virtual std::wstring GetTimeId() = 0;
+	virtual std::wstring GetTimeId() { return m_time_id; }
 	//preprocess the file
 	//get the structure of the data without reading actual volume
 	virtual int Preprocess() = 0;
@@ -241,6 +243,33 @@ protected:
 	bool m_fp_convert;
 	double m_fp_min;
 	double m_fp_max;
+
+	//sequence type
+	bool m_slice_seq = false;
+	bool m_chann_seq = false;
+	int m_digit_order = 0;
+	//time sequence id
+	std::wstring m_time_id = L"_T";
+
+	//name pattern stuff
+	struct NamePattern
+	{
+		size_t start;
+		size_t end;
+		size_t len;//0:indefinite
+		int type;//0:string; 1:digits
+		int use;//0:z sections; 1:channels; 2:time
+		std::wstring str;//content
+	};
+	std::deque<NamePattern> m_name_patterns;
+	std::set<int> m_slice_count;
+	std::set<int> m_chann_count;//counting total numbers in preprocessing
+
+	//name pattern
+	void AnalyzeNamePattern(const std::wstring &path_name);
+	void AddPatternR(wchar_t c, size_t pos);//add backwards
+	std::wstring GetSearchString(int mode, int t);
+	int GetPatternNumber(std::wstring &path_name, int mode, bool count=false);
 
 	//all the lzw decoding stuff
 	#define MAXCODE(n)	((1L<<(n))-1)

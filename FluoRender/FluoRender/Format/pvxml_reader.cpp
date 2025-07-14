@@ -663,46 +663,6 @@ void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 	//	m_seq_slice_num++;
 }
 
-void PVXMLReader::SetSliceSeq(bool ss)
-{
-	//do nothing
-}
-
-bool PVXMLReader::GetSliceSeq()
-{
-	return false;
-}
-
-void PVXMLReader::SetChannSeq(bool cs)
-{
-	//do nothing
-}
-
-bool PVXMLReader::GetChannSeq()
-{
-	return false;
-}
-
-void PVXMLReader::SetDigitOrder(int order)
-{
-	//do nothing
-}
-
-int PVXMLReader::GetDigitOrder()
-{
-	return 0;
-}
-
-void PVXMLReader::SetTimeId(const std::wstring& id)
-{
-	m_time_id = id;
-}
-
-std::wstring PVXMLReader::GetTimeId()
-{
-	return m_time_id;
-}
-
 void PVXMLReader::SetBatch(bool batch)
 {
 	if (batch)

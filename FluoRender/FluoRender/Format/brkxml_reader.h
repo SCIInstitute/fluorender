@@ -23,18 +23,10 @@ public:
 	void SetFile(const std::wstring &file);
 	void SetDir(const std::string &dir);
 	void SetDir(const std::wstring &dir);
-	void SetSliceSeq(bool ss);
-	bool GetSliceSeq();
-	void SetChannSeq(bool cs);
-	bool GetChannSeq();
-	void SetDigitOrder(int order);
-	int GetDigitOrder();
 	void SetTimeSeq(bool ss);
 	bool GetTimeSeq();
-	void SetTimeId(const std::wstring &id);
 	void SetCurTime(int t);
 	void SetCurChan(int c);
-	std::wstring GetTimeId();
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
@@ -178,9 +170,6 @@ private:
 	double m_scalar_scale;
 
 	bool m_isURL;
-
-	//time sequence id
-	std::wstring m_time_id;
 
 	tinyxml2::XMLDocument m_doc;
 	tinyxml2::XMLDocument m_md_doc;
