@@ -46,6 +46,42 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include <chrono>
 
+/**
+	* This method swaps the byte order of a short.
+	* @param num The short to swap byte order.
+	* @return The short with bytes swapped.
+	*/
+inline uint16_t SwapShort(uint16_t num) {
+	return ((num & 0x00FF) << 8) | ((num & 0xFF00) >> 8);
+}
+
+/**
+	* This method swaps the byte order of a word.
+	* @param num The word to swap byte order.
+	* @return The word with bytes swapped.
+	*/
+inline uint32_t SwapWord(uint32_t num) {
+	return ((num & 0x000000FF) << 24) | ((num & 0xFF000000) >> 24) |
+		((num & 0x0000FF00) << 8) | ((num & 0x00FF0000) >> 8);
+}
+
+/**
+	* This method swaps the byte order of a 8byte number.
+	* @param num The 8byte to swap byte order.
+	* @return The 8byte with bytes swapped.
+	*/
+inline uint64_t SwapLong(uint64_t num) {
+	return
+		((num & 0x00000000000000FF) << 56) |
+		((num & 0xFF00000000000000) >> 56) |
+		((num & 0x000000000000FF00) << 40) |
+		((num & 0x00FF000000000000) >> 40) |
+		((num & 0x0000000000FF0000) << 24) |
+		((num & 0x0000FF0000000000) >> 24) |
+		((num & 0x00000000FF000000) << 8) |
+		((num & 0x000000FF00000000) >> 8);
+}
+
 inline std::regex REGEX(const std::string& wildcard, bool caseSensitive = true)
 {
 	// Note It is possible to automate checking if filesystem is case sensitive or not (e.g. by performing a test first time this function is ran)

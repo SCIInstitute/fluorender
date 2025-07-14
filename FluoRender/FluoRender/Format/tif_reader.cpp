@@ -1108,27 +1108,6 @@ uint64_t TIFReader::TurnToPage(uint64_t page)
 	return current_page_;
 }
 
-uint16_t TIFReader::SwapShort(uint16_t num) {
-	return ((num & 0x00FF) << 8) | ((num & 0xFF00) >> 8);
-}
-
-uint32_t TIFReader::SwapWord(uint32_t num) {
-	return ((num & 0x000000FF) << 24) | ((num & 0xFF000000) >> 24) |
-		((num & 0x0000FF00) << 8) | ((num & 0x00FF0000) >> 8);
-}
-
-uint64_t TIFReader::SwapLong(uint64_t num) {
-	return
-		((num & 0x00000000000000FF) << 56) |
-		((num & 0xFF00000000000000) >> 56) |
-		((num & 0x000000000000FF00) << 40) |
-		((num & 0x00FF000000000000) >> 40) |
-		((num & 0x0000000000FF0000) << 24) |
-		((num & 0x0000FF0000000000) >> 24) |
-		((num & 0x00000000FF000000) << 8) |
-		((num & 0x000000FF00000000) >> 8);
-}
-
 void TIFReader::SetBatch(bool batch)
 {
 	if (batch)

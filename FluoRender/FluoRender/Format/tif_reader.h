@@ -126,24 +126,7 @@ public:
 	 * Resets the tiff reader to the start of the file.
 	 */
 	void ResetTiff();
-	/**
-	 * This method swaps the byte order of a short.
-	 * @param num The short to swap byte order.
-	 * @return The short with bytes swapped.
-	 */
-	uint16_t SwapShort(uint16_t num);
-	/**
-	 * This method swaps the byte order of a word.
-	 * @param num The word to swap byte order.
-	 * @return The word with bytes swapped.
-	 */
-	uint32_t SwapWord(uint32_t num);
-	/**
-	 * This method swaps the byte order of a 8byte number.
-	 * @param num The 8byte to swap byte order.
-	 * @return The 8byte with bytes swapped.
-	 */
-	uint64_t SwapLong(uint64_t num);
+
 	/**
 	 * Determines the number of pages in a tiff.
 	 * @throws An exception if a tiff is not open.

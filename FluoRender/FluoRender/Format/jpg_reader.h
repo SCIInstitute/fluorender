@@ -39,7 +39,7 @@ public:
 	int GetType() { return READER_JPG_TYPE; }
 
 	// Override base methods
-	virtual void SetFile(const std::string& file);
+	virtual void SetFile(const std::wstring& file);
 	virtual int Preprocess();
 	virtual void SetBatch(bool batch);
 	virtual int LoadBatch(int index);
@@ -100,7 +100,9 @@ private:
 	double m_max_value;
 	double m_scalar_scale;
 
+	void GetFileInfo(const std::wstring& filename);
 	Nrrd* ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get_max);
+	bool ReadSingleJpg(void* val, const std::wstring& filename, int c);
 };
 
 #endif // _JPG_READER_H_
