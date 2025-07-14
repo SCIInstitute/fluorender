@@ -278,6 +278,7 @@ Nrrd* JPGReader::Convert(int t, int c, bool get_max)
 
 	Nrrd* data = nullptr;
 	TimeDataInfo chan_info = m_4d_seq[t];
+	m_data_name = GET_STEM(chan_info.slices[0].slice);
 	data = ReadJpg(chan_info.slices, c, get_max);
 	m_cur_time = t;
 	return data;
@@ -298,21 +299,21 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 
 	bool show_progress = total_size > glbin_settings.m_prg_size;
 
-	void* val_ptr = val;
+	uint8_t* val_ptr = static_cast<uint8_t*>(val);
 	size_t for_size = filelist.size();
 	for (size_t i = 0; i < for_size; i++)
 	{
 		const SliceInfo& slice_info = filelist[i];
 		if (slice_info.slice.empty())
 			continue;
-		if (!ReadSingleJpg(val, slice_info.slice, c))
+		if (!ReadSingleJpg(static_cast<void*>(val_ptr), slice_info.slice, c))
 		{
 			delete[] static_cast<unsigned char*>(val);
 			return nullptr;
 		}
 		if (show_progress)
 			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr = static_cast<unsigned char*>(val) + (i * m_x_size * m_y_size);
+		val_ptr += m_x_size * m_y_size;
 	}
 
 	//write to nrrd
@@ -352,14 +353,26 @@ bool JPGReader::ReadSingleJpg(void* val, const std::wstring& filename, int c)
 	int height = cinfo.output_height;
 	int channels = cinfo.output_components;
 
-	size_t row_stride = width * channels;
-	unsigned char* data = static_cast<unsigned char*>(val);
+	if (c < 0 || c >= channels) {
+		jpeg_finish_decompress(&cinfo);
+		jpeg_destroy_decompress(&cinfo);
+		fclose(infile);
+		return false; // Invalid channel index
+	}
 
-	while (cinfo.output_scanline < cinfo.output_height)
+	size_t row_stride = width * channels;
+	unsigned char* channel_data = static_cast<unsigned char*>(val);
+	std::vector<unsigned char> scanline(row_stride);
+
+	for (size_t row = 0; row < height; ++row)
 	{
-		unsigned char* buffer_array[1];
-		buffer_array[0] = data + (cinfo.output_scanline * row_stride);
+		unsigned char* buffer_array[1] = { scanline.data() };
 		jpeg_read_scanlines(&cinfo, buffer_array, 1);
+
+		for (size_t col = 0; col < width; ++col)
+		{
+			channel_data[row * width + col] = scanline[col * channels + c];
+		}
 	}
 
 	jpeg_finish_decompress(&cinfo);

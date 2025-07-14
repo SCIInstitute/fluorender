@@ -2120,8 +2120,10 @@ void MainFrame::OpenVolume()
 {
 	ModalDlg fopendlg(
 		this, "Choose the volume data file", "", "",
-		"All Supported|*.tif;*.tiff;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
+		"All Supported|*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
 		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Png Files (*.png)|*.png|"\
+		"Jpeg Files (*.jpg, *.jpeg)|*.jpg;*.jpeg|"\
 		"Leica Image File Format (*.lif)|*.lif|"\
 		"Leica Microsystems Object File Format (*.lof)|*.lof|"\
 		"Nikon ND2 File Format (*.nd2)|*.nd2|"\

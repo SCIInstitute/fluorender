@@ -199,8 +199,8 @@ void MovieMaker::PlaySave()
 	Rewind();
 
 	std::filesystem::path file_path(m_filename);
-	filetype_ = file_path.extension().string();
-	if (filetype_ == ".mp4")
+	m_file_ext = file_path.extension().wstring();
+	if (m_file_ext == L".mp4")
 	{
 		if (!m_crop)
 		{
@@ -306,11 +306,11 @@ void MovieMaker::WriteFrameToFile()
 	std::wstring s_length = oss.str();
 	int length = s_length.length();
 	oss.str(L""); oss.clear();
-	oss << m_filename << L"_" << std::setfill(L'0') << std::setw(length) << m_last_frame << L".tif";
+	oss << m_filename << L"_" << std::setfill(L'0') << std::setw(length) << m_last_frame << m_file_ext;
 	std::wstring outputfilename = oss.str();
 
 	//capture
-	bool bmov = filetype_ == ".mp4";
+	bool bmov = m_file_ext == L".mp4";
 	int chann = glbin_settings.m_save_alpha ? 4 : 3;
 	bool fp32 = bmov ? false : glbin_settings.m_save_float;
 	float dpi = glbin_settings.m_dpi;

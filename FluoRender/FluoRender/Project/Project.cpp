@@ -226,6 +226,10 @@ void Project::Open(const std::wstring& filename)
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_NRRD, false, cur_chan, cur_time);
 					else if (suffix == L".tif" || suffix == L".tiff")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_TIFF, false, cur_chan, cur_time);
+					else if (suffix == L".png")
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_PNG, false, cur_chan, cur_time);
+					else if (suffix == L".jpg")
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_JPG, false, cur_chan, cur_time);
 					else if (suffix == L".oib")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_OIB, false, cur_chan, cur_time);
 					else if (suffix == L".oif")

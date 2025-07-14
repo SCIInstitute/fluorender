@@ -1862,12 +1862,12 @@ void MoviePanel::OnSave(wxCommandEvent& event)
 	ModalDlg fopendlg(
 		m_frame, "Save Movie Sequence",
 		"", "output",
-		"MP4 file (*.mp4) | *.mp4 |"\
-		"Tiff files(*.tif) | *.tif |"\
-		"Tiff files(*.tiff) | *.tiff |"\
-		"Png files(*.png) | *.png |"\
-		"Jpeg files(*.jpg) | *.jpg |"\
-		"Jpeg files(*.jpeg) | *.jpeg",
+		"MP4 file (*.mp4)|*.mp4|"\
+		"Tiff files(*.tif)|*.tif|"\
+		"Tiff files(*.tiff)|*.tiff|"\
+		"Png files(*.png)|*.png|"\
+		"Jpeg files(*.jpg)|*.jpg|"\
+		"Jpeg files(*.jpeg)|*.jpeg",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	fopendlg.SetExtraControlCreator(CreateExtraCaptureControl);
 	fopendlg.CenterOnParent();

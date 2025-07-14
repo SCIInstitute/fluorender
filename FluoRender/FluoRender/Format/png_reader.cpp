@@ -317,6 +317,7 @@ Nrrd* PNGReader::Convert(int t, int c, bool get_max)
 
 	Nrrd* data = nullptr;
 	TimeDataInfo chan_info = m_4d_seq[t];
+	m_data_name = GET_STEM(chan_info.slices[0].slice);
 	data = ReadPng(chan_info.slices, c, get_max);
 	m_cur_time = t;
 	return data;
@@ -339,21 +340,21 @@ Nrrd* PNGReader::ReadPng(const std::vector<SliceInfo>& filelist, int c, bool get
 
 	bool show_progress = total_size > glbin_settings.m_prg_size;
 
-	void* val_ptr = val;
+	uint8_t* val_ptr = static_cast<uint8_t*>(val);
 	size_t for_size = filelist.size();
 	for (size_t i = 0; i < for_size; i++)
 	{
 		const SliceInfo& slice_info = filelist[i];
 		if (slice_info.slice.empty())
 			continue;
-		if (!ReadSinglePng(val, slice_info.slice, c))
+		if (!ReadSinglePng(static_cast<void*>(val_ptr), slice_info.slice, c))
 		{
 			delete[] static_cast<unsigned char*>(val);
 			return nullptr;
 		}
 		if (show_progress)
 			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr = static_cast<unsigned char*>(val) + (i * m_x_size * m_y_size * (m_bits / 8));
+		val_ptr += m_x_size * m_y_size * (m_bits / 8);
 	}
 
 	//write to nrrd
@@ -395,8 +396,12 @@ Nrrd* PNGReader::ReadPng(const std::vector<SliceInfo>& filelist, int c, bool get
 bool PNGReader::ReadSinglePng(void* val, const std::wstring& filename, int c)
 {
 	// Open file stream
-	FILE* fp = _wfopen(filename.c_str(), L"rb");
-	if (!fp)
+#ifdef _WIN32
+	FILE* infile = _wfopen(filename.c_str(), L"rb");
+#else
+	FILE* infile = fopen(ws2s(filename).c_str(), "rb");
+#endif
+	if (!infile)
 		return false;
 
 	// Create libpng read structures
@@ -404,18 +409,18 @@ bool PNGReader::ReadSinglePng(void* val, const std::wstring& filename, int c)
 	png_infop info = png_create_info_struct(png);
 	if (!png || !info)
 	{
-		fclose(fp);
+		fclose(infile);
 		return false;
 	}
 
 	if (setjmp(png_jmpbuf(png)))
 	{
 		png_destroy_read_struct(&png, &info, nullptr);
-		fclose(fp);
+		fclose(infile);
 		return false;
 	}
 
-	png_init_io(png, fp);
+	png_init_io(png, infile);
 	png_read_info(png, info);
 
 	int width = png_get_image_width(png, info);
@@ -433,14 +438,14 @@ bool PNGReader::ReadSinglePng(void* val, const std::wstring& filename, int c)
 	case PNG_COLOR_TYPE_RGB_ALPHA:   channels = 4; break;
 	default:
 		png_destroy_read_struct(&png, &info, nullptr);
-		fclose(fp);
+		fclose(infile);
 		return false;
 	}
 
 	if (c < 0 || c >= channels)
 	{
 		png_destroy_read_struct(&png, &info, nullptr);
-		fclose(fp);
+		fclose(infile);
 		return false;
 	}
 
@@ -452,7 +457,7 @@ bool PNGReader::ReadSinglePng(void* val, const std::wstring& filename, int c)
 		row_pointers[y] = new png_byte[png_get_rowbytes(png, info)];
 
 	png_read_image(png, row_pointers);
-	fclose(fp);
+	fclose(infile);
 	png_destroy_read_struct(&png, &info, nullptr);
 
 	// Allocate output buffer based on bit depth

@@ -209,7 +209,7 @@ private:
 	bool m_loop;//rewind after finish and restart play
 	//save
 	std::wstring m_filename;
-	std::string filetype_;
+	std::wstring m_file_ext;
 	int m_scroll_thumb_size;
 
 	//settings

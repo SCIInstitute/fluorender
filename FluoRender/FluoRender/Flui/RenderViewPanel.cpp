@@ -1036,7 +1036,7 @@ void RenderViewPanel::Capture()
 	m_render_view->SetEnlargeScale(1.0);
 
 	ModalDlg file_dlg(m_frame,
-		"Save Captured Image", "", "",
+		"Save Captured Image", "", "output",
 		"Tiff File (*.tif)|*.tif|"\
 		"Tiff File (*.tiff)|*.tiff|"\
 		"Png File (*.png)|*.png|"\

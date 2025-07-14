@@ -74,6 +74,8 @@ DEALINGS IN THE SOFTWARE.
 #include <lif_reader.h>
 #include <lof_reader.h>
 #include <mpg_reader.h>
+#include <png_reader.h>
+#include <jpg_reader.h>
 #include <compatibility.h>
 #include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -6274,6 +6276,10 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_NRRD, false);
 		else if (suffix == L".tif" || suffix == L".tiff")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_TIFF, false);
+		else if (suffix == L".png")
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_PNG, false);
+		else if (suffix == L".jpg" || suffix == L".jpeg")
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_JPG, false);
 		else if (suffix == L".oib")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 		else if (suffix == L".oif")
@@ -6541,6 +6547,10 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		else {
 			if (type == LOAD_TYPE_TIFF)
 				reader = std::make_shared<TIFReader>();
+			else if (type == LOAD_TYPE_PNG)
+				reader = std::make_shared<PNGReader>();
+			else if (type == LOAD_TYPE_JPG)
+				reader = std::make_shared<JPGReader>();
 			else if (type == LOAD_TYPE_NRRD)
 				reader = std::make_shared<NRRDReader>();
 			else if (type == LOAD_TYPE_OIB)
