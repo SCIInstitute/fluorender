@@ -253,13 +253,13 @@ void PNGReader::GetFileInfo(const std::wstring& filename)
 		m_chan_num = 1;
 		break;
 	case PNG_COLOR_TYPE_GRAY_ALPHA:
-		m_chan_num = 2;
+		m_chan_num = 1;
 		break;
 	case PNG_COLOR_TYPE_RGB:
 		m_chan_num = 3;
 		break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
-		m_chan_num = 4;
+		m_chan_num = 3;
 		break;
 	default:
 		m_chan_num = 0; // Unknown or unsupported

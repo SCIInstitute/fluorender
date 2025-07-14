@@ -204,6 +204,28 @@ int JPGReader::Preprocess()
 
 void JPGReader::GetFileInfo(const std::wstring& filename)
 {
+#ifdef _WIN32
+	FILE* infile = _wfopen(filename.c_str(), L"rb");
+#else
+	FILE* infile = fopen(ws2s(filename).c_str(), "rb");
+#endif
+	if (!infile)
+		return;
+
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+	jpeg_stdio_src(&cinfo, infile);
+	jpeg_read_header(&cinfo, TRUE);
+
+	m_x_size = cinfo.image_width;
+	m_y_size = cinfo.image_height;
+	m_chan_num = cinfo.num_components;
+
+	jpeg_destroy_decompress(&cinfo);
+	fclose(infile);
 }
 
 void JPGReader::SetBatch(bool batch)
@@ -266,10 +288,10 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 	if (filelist.empty())
 		return nullptr;
 
-	Nrrd *nrrdout = nrrdNew();
+	Nrrd* nrrdout = nrrdNew();
 
-	unsigned long long total_size = (unsigned long long)m_x_size*
-		(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+	unsigned long long total_size = (unsigned long long)m_x_size *
+		(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
 	void* val = (void*)(new unsigned char[total_size]);
 	if (!val)
 		return nullptr;
@@ -297,8 +319,8 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 	nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
 		3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
-		m_yspc*m_y_size, m_zspc*m_slice_num);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc * m_x_size,
+		m_yspc * m_y_size, m_zspc * m_slice_num);
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
 		(size_t)m_y_size, (size_t)m_slice_num);
@@ -308,6 +330,43 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 
 bool JPGReader::ReadSingleJpg(void* val, const std::wstring& filename, int c)
 {
+#ifdef _WIN32
+	FILE* infile = _wfopen(filename.c_str(), L"rb");
+#else
+	FILE* infile = fopen(ws2s(filename).c_str(), "rb");
+#endif
+	if (!infile)
+		return false;
+
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+	jpeg_stdio_src(&cinfo, infile);
+
+	jpeg_read_header(&cinfo, TRUE);
+	jpeg_start_decompress(&cinfo);
+
+	int width = cinfo.output_width;
+	int height = cinfo.output_height;
+	int channels = cinfo.output_components;
+
+	size_t row_stride = width * channels;
+	unsigned char* data = static_cast<unsigned char*>(val);
+
+	while (cinfo.output_scanline < cinfo.output_height)
+	{
+		unsigned char* buffer_array[1];
+		buffer_array[0] = data + (cinfo.output_scanline * row_stride);
+		jpeg_read_scanlines(&cinfo, buffer_array, 1);
+	}
+
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+	fclose(infile);
+
+	return true;
 }
 
 std::wstring JPGReader::GetCurDataName(int t, int c)
