@@ -6249,7 +6249,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	bool enable_rot_lock = false;
 	m_file_num = files.size();
 	int all_ch_num = 0;
-	bool multi_bricks = false;
+	bool large_data = false;
 
 	for (m_cur_file = 0; m_cur_file < m_file_num; ++m_cur_file)
 	{
@@ -6337,7 +6337,8 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 							nz_count++;
 
 						//check if brick number is larger than 1
-						multi_bricks = multi_bricks || (vd->GetAllBrickNum() > 1);
+						double data_size = double(nx)*double(ny)*double(nz)/1.04e6;
+						large_data = large_data || data_size > glbin_settings.m_large_data_size;
 					}
 				}
 				if (m_cur_file > 0)
@@ -6381,6 +6382,10 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 				vd->GetResolution(nx, ny, nz);
 				if (nz == 1)
 					enable_rot_lock = true;
+
+				//check if brick number is larger than 1
+				double data_size = double(nx)*double(ny)*double(nz)/1.04e6;
+				large_data = large_data || data_size > glbin_settings.m_large_data_size;
 			}
 		}
 
@@ -6408,7 +6413,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		glbin_settings.m_micro_blend = true;
 		vc.insert(gstMicroBlendEnable);
 	}
-	else if (multi_bricks)
+	else if (large_data)
 	{
 		glbin_settings.m_micro_blend = false;
 		vc.insert(gstMicroBlendEnable);
