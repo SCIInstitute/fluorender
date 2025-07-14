@@ -61,6 +61,8 @@ DEALINGS IN THE SOFTWARE.
 #define READER_LIF_TYPE	11
 #define READER_LOF_TYPE	11
 #define READER_MPG_TYPE	12
+#define READER_JPG_TYPE	13
+#define READER_PNG_TYPE	14
 
 class BaseReader : public Progress
 {
