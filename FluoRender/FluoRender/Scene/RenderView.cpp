@@ -3662,7 +3662,10 @@ void RenderView::Get3DBatRange(int &start_frame, int &end_frame)
 	start_frame = 0;
 	m_end_all_frame = end_frame;
 	if (cur_t > -1)
+	{
 		m_tseq_cur_num = cur_t;
+		glbin_moviemaker.SetCurrentFrameSilently(cur_t, true);
+	}
 }
 
 void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind)

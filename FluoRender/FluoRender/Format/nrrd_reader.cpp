@@ -126,7 +126,7 @@ int NRRDReader::Preprocess()
 	}
 	if (m_4d_seq.size() > 0)
 	{
-		std::sort(m_4d_seq.begin(), m_4d_seq.end(), NRRDReader::nrrd_sort);
+		//std::sort(m_4d_seq.begin(), m_4d_seq.end(), NRRDReader::nrrd_sort);
 		for (int t=0; t<(int)m_4d_seq.size(); t++)
 		{
 			if (m_4d_seq[t].filename == m_path_name)

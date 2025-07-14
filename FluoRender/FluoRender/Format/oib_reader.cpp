@@ -127,7 +127,7 @@ int OIBReader::Preprocess()
 		if (m_oib_info.size() > 0)
 		{
 			m_type = 1;
-			std::sort(m_oib_info.begin(), m_oib_info.end(), OIBReader::oib_sort);
+			//std::sort(m_oib_info.begin(), m_oib_info.end(), OIBReader::oib_sort);
 			ReadSequenceOib();
 		}
 		else

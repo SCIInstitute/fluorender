@@ -259,8 +259,8 @@ int TIFReader::Preprocess()
 				}
 				m_4d_seq.push_back(info);
 			}
-			if (isHsTimeSeq_ && m_4d_seq.size() > 0)
-				std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
+			//if (isHsTimeSeq_ && m_4d_seq.size() > 0)
+			//	std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
 
 			m_cur_time = 0;
 		}
@@ -330,8 +330,8 @@ int TIFReader::Preprocess()
 				m_4d_seq.push_back(info);
 			}
 		}
-		if (m_4d_seq.size() > 0)
-			std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
+		//if (m_4d_seq.size() > 0)
+		//	std::sort(m_4d_seq.begin(), m_4d_seq.end(), TIFReader::tif_sort);
 
 		m_slice_count.clear();
 		m_chann_count.clear();

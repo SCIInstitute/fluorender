@@ -366,55 +366,71 @@ inline std::wstring ESCAPE_REGEX(const std::wstring& input)
 
 inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id, std::vector<std::wstring>& batch_list, int& cur_batch)
 {
-	size_t begin = path_name.rfind(id);
-	size_t id_len = id.length();
+	std::wstring filename = std::filesystem::path(path_name).filename().wstring();
+
+	// Find the position of the ID in the filename
+	size_t begin = filename.rfind(id);
 	if (begin == std::wstring::npos)
 		return false;
 
-	std::wstring searchstr = path_name.substr(0, begin) + L"*";
-	std::wstring t_num;
-	size_t k;
-	bool end_digits = false;
-	for (k = begin + id_len; k < path_name.length(); ++k) {
-		wchar_t c = path_name[k];
-		if (iswdigit(c)) {
-			if (end_digits)
-				searchstr.push_back(c);
-			else
-				t_num.push_back(c);
-		}
-		else if (k == begin + id_len) {
-			return false;
-		}
-		else {
-			end_digits = true;
-			searchstr.push_back(c);
-		}
+	size_t id_len = id.length();
+
+	// Extract digits immediately after the ID
+	std::wstring index_digits;
+	size_t k = begin + id_len;
+	while (k < filename.length() && iswdigit(filename[k])) {
+		index_digits.push_back(filename[k]);
+		++k;
 	}
-	if (t_num.empty())
+
+	if (index_digits.empty())
 		return false;
 
-	std::filesystem::path p(path_name);
-	p = p.parent_path();
-	std::wstring search_path = p.wstring();
-	std::wregex regex(ESCAPE_REGEX(searchstr));
-	batch_list.clear();
-	int cnt = 0;
+	// Build regex pattern: match files with same prefix, ID, and digits
+	std::wstring prefix = filename.substr(0, begin);
+	std::wstring suffix = filename.substr(k); // anything after the digits
+	std::wstringstream pattern;
+	pattern << L"^" << ESCAPE_REGEX(prefix)
+		<< ESCAPE_REGEX(id)
+		<< L"(\\d+)"  // capture digits
+		<< ESCAPE_REGEX(suffix) << L"$";
 
-	for (const auto& entry : std::filesystem::directory_iterator(search_path))
+	std::wregex file_regex(pattern.str());
+
+	// Search in the parent directory
+	std::filesystem::path dir = std::filesystem::path(path_name).parent_path();
+	std::vector<std::pair<int, std::wstring>> indexed_files;
+	int input_index = std::stoi(index_digits);
+
+	for (const auto& entry : std::filesystem::directory_iterator(dir))
 	{
-		std::wstring str = entry.path().wstring();
-		if (std::regex_match(str, regex))
+		if (!entry.is_regular_file())
+			continue;
+
+		std::wstring fname = entry.path().filename().wstring();
+		std::wsmatch match;
+		if (std::regex_match(fname, match, file_regex))
 		{
-			std::wstring name = entry.path().wstring();
-			batch_list.push_back(name);
-			if (name == path_name)
-				cur_batch = cnt;
-			cnt++;
+			int index = std::stoi(match[1].str());
+			indexed_files.emplace_back(index, entry.path().wstring());
 		}
 	}
 
-	return !batch_list.empty();
+	if (indexed_files.empty())
+		return false;
+
+	std::sort(indexed_files.begin(), indexed_files.end());
+
+	batch_list.clear();
+	cur_batch = -1;
+	for (size_t i = 0; i < indexed_files.size(); ++i)
+	{
+		batch_list.push_back(indexed_files[i].second);
+		if (indexed_files[i].first == input_index)
+			cur_batch = static_cast<int>(i);
+	}
+
+	return true;
 }
 
 inline void FIND_FILES_BATCH(const std::wstring& path_name,
@@ -433,6 +449,8 @@ inline void FIND_FILES_BATCH(const std::wstring& path_name,
 
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
+		if (!entry.is_regular_file())
+			continue;
 		std::wstring str = entry.path().filename().wstring();
 		if (std::regex_match(str, regex))
 		{
@@ -460,6 +478,8 @@ inline void FIND_FILES(const std::wstring& path_name,
 
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
+		if (!entry.is_regular_file())
+			continue;
 		std::wstring str = entry.path().filename().wstring();
 		if (std::regex_match(str, regex))
 		{

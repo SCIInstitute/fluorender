@@ -131,7 +131,7 @@ int OIFReader::Preprocess()
 		if (m_oif_info.size() > 0)
 		{
 			m_type = 1;
-			std::sort(m_oif_info.begin(), m_oif_info.end(), OIFReader::oif_sort);
+			//std::sort(m_oif_info.begin(), m_oif_info.end(), OIFReader::oif_sort);
 			ReadSequenceOif();
 		}
 		else
