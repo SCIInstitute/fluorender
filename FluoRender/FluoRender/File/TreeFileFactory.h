@@ -121,31 +121,55 @@ private:
 			processed_content = processed_content.substr(3);
 		}
 
+		std::istringstream stream(processed_content);
+		std::string line;
+		bool hasIniSection = false;
+		bool hasIniKeyValue = false;
+
+		while (std::getline(stream, line)) {
+			// Trim whitespace
+			line.erase(0, line.find_first_not_of(" \t\r\n"));
+			line.erase(line.find_last_not_of(" \t\r\n") + 1);
+
+			if (line.empty() || line[0] == ';' || line[0] == '#') continue; // Skip comments
+
+			// INI section header
+			if (std::regex_match(line, std::regex(R"(\[\s*[^\]\r\n]+\s*\])")))
+			{
+				hasIniSection = true;
+				continue;
+			}
+
+			// INI key-value pair
+			if (std::regex_match(line, std::regex(R"(^\s*([^#;\s][^=]*[^#;\s])\s*=\s*([^\r\n]*)$)")))
+			{
+				hasIniKeyValue = true;
+				continue;
+			}
+
+			// POLE detection
+			if (std::regex_search(line, std::regex(R"(POLE\s+Structure\s+Start)"))) {
+				return 3;
+			}
+
+			// XML detection
+			if (line.find("<?xml") == 0 || line.find('<') == 0) {
+				return 1;
+			}
+		}
+
+		// Only check for JSON after scanning all lines
 		std::string firstLine = getFirstNonEmptyLine(processed_content);
-
-		// Check for INI
-		std::regex iniRegex(R"(\[.*\]\s*.*=.*)");
-		if (std::regex_search(firstLine, iniRegex)) {
-			return 0;
+		if (!hasIniSection && !hasIniKeyValue &&
+			!firstLine.empty() && (firstLine[0] == '{' || firstLine[0] == '[')) {
+			return 2; // JSON
 		}
 
-		// Check for JSON
-		if (!firstLine.empty() && (firstLine[0] == '{' || firstLine[0] == '[')) {
-			return 2;
+		if (hasIniSection || hasIniKeyValue) {
+			return 0; // INI
 		}
 
-		// Check for POLE
-		std::regex poleRegex(R"(POLE\s+Structure\s+Start)");
-		if (std::regex_search(firstLine, poleRegex)) {
-			return 3;
-		}
-
-		// Check for XML
-		if (firstLine.find("<?xml") == 0 || firstLine.find('<') == 0) {
-			return 1;
-		}
-
-		return -1;
+		return -1; // Unknown
 	}
 };
 

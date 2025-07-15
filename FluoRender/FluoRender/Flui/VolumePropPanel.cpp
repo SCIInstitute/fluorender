@@ -576,7 +576,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list2 =
 		{ "Intensity", "Z Value", "Y Value", "X Value", "T Value (4D)",
-		"Gradient", "Differential", "Intensity Delta (4D)", "Speed (4D)"};
+		"Gradient", "Normals", "Intensity Delta (4D)", "Speed (4D)"};
 	m_colormap_combo2->Append(colormap_list2);
 	m_colormap_combo2->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo2, this);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
