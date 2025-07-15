@@ -746,7 +746,11 @@ void RenderView::InitOpenXR()
 			static_cast<void*>(glxContext),
 			static_cast<uint64_t>(glxDrawable));
 #endif
-	if (!m_use_openxr)
+	if (m_use_openxr)
+	{
+		m_persp = true;// always use perspective for xr
+	}
+	else
 	{
 		glbin_settings.m_xr_api = 0;
 		//m_frame->UpdateProps({ gstHologramMode });
@@ -10406,59 +10410,142 @@ void RenderView::ProcessIdle(IdleState& state)
 
 		//move time sequence
 		//forward
-		if ((!m_tseq_forward && state.m_key_mov_forward) ||
-			(!state.m_key_ctrl && state.m_key_mov_play))
+		if (state.m_key_mov_forward)
 		{
 			m_tseq_forward = true;
-			int frame = glbin_moviemaker.GetCurrentFrame();
-			frame++;
-			glbin_moviemaker.SetCurrentFrame(frame);
+			if (m_cam_mode == 1)
+			{
+				//move right
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector side = Cross(m_up, m_head);
+				fluo::Vector trans = 10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				m_interactive = true;
+			}
+			else
+			{
+				if (!m_tseq_forward)
+				{
+					int frame = glbin_moviemaker.GetCurrentFrame();
+					frame++;
+					glbin_moviemaker.SetCurrentFrame(frame);
+					state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
+				}
+			}
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 		}
 		if (m_tseq_forward && !state.m_key_mov_forward)
 			m_tseq_forward = false;
-		//backforward
-		if ((!m_tseq_backward && state.m_key_mov_backward))
+		if (!state.m_key_ctrl && state.m_key_mov_play)
 		{
-			m_tseq_backward = true;
 			int frame = glbin_moviemaker.GetCurrentFrame();
-			frame--;
+			frame++;
 			glbin_moviemaker.SetCurrentFrame(frame);
+			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
+		}
+		//backforward
+		if (state.m_key_mov_backward)
+		{
+			m_tseq_backward = true;
+			if (m_cam_mode == 1)
+			{
+				//move left
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector side = Cross(m_up, m_head);
+				fluo::Vector trans = -10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				m_interactive = true;
+			}
+			else
+			{
+				if (!m_tseq_backward)
+				{
+					int frame = glbin_moviemaker.GetCurrentFrame();
+					frame--;
+					glbin_moviemaker.SetCurrentFrame(frame);
+					state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
+				}
+			}
+			state.m_refresh = true;
+			state.m_looking_glass_changed = true;
+			state.m_set_focus = true;
 		}
 		if (m_tseq_backward && !state.m_key_mov_backward)
 			m_tseq_backward = false;
 
 		//move clip
 		//up
-		if (!m_clip_up && state.m_key_clip_up)
+		if (state.m_key_clip_up)
 		{
 			m_clip_up = true;
-			if (glbin_current.mainframe->GetClipPlanePanel())
-				glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(-1);
+			if (m_cam_mode == 1)
+			{
+				fluo::Vector pos(m_transx, m_transy, m_transz);
+				pos.normalize();
+				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+				double delta = m_radius * 0.05;
+				ctr += delta * pos;
+				m_ctrx = ctr.x();
+				m_ctry = ctr.y();
+				m_ctrz = ctr.z();
+				m_interactive = true;
+				state.m_value_collection.insert(gstScaleFactor);
+			}
+			else
+			{
+				if (!m_clip_up)
+				{
+					if (glbin_current.mainframe->GetClipPlanePanel())
+						glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(-1);
+					state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
+				}
+			}
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 		}
 		if (m_clip_up && !state.m_key_clip_up)
 			m_clip_up = false;
 		//down
-		if (!m_clip_down && state.m_key_clip_down)
+		if (state.m_key_clip_down)
 		{
 			m_clip_down = true;
-			if (glbin_current.mainframe->GetClipPlanePanel())
-				glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(1);
+			if (m_cam_mode == 1)
+			{
+				fluo::Vector pos(m_transx, m_transy, m_transz);
+				pos.normalize();
+				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+				double delta = m_radius * 0.05;
+				ctr -= delta * pos;
+				m_ctrx = ctr.x();
+				m_ctry = ctr.y();
+				m_ctrz = ctr.z();
+				m_interactive = true;
+				state.m_value_collection.insert(gstScaleFactor);
+			}
+			else
+			{
+				if (!m_clip_down)
+				{
+					if (glbin_current.mainframe->GetClipPlanePanel())
+						glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(1);
+					state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
+				}
+			}
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 		}
 		if (m_clip_down && !state.m_key_clip_down)
 			m_clip_down = false;

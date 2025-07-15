@@ -58,9 +58,13 @@ public:
 	enum
 	{
 		ID_CamModeBtn = 0,
-		ID_DefaultBtn,
-		ID_VrChk,
-		ID_LookingGlassChk
+		ID_DefaultBtn
+	};
+	enum
+	{
+		ID_VrChk = 0,
+		ID_LookingGlassChk,
+		ID_FullScreenBtn
 	};
 	enum
 	{
@@ -124,8 +128,8 @@ public:
 	void SetBgColorInvert(bool val);
 	void SetAov(double val, bool notify);
 	void SetCamMode();
-	void SetStereography(bool val);
-	void SetHolography(bool val);
+	void SetStereography();
+	void SetHolography();
 	void SetFullScreen();
 	void CloseFullScreen();
 
@@ -181,7 +185,7 @@ private:
 	wxSingleSlider* m_aov_sldr;
 	wxTextCtrl* m_aov_text;
 	wxUndoableToolbar* m_options_toolbar2;
-	wxToolBar *m_full_screen_btn;
+	wxToolBar *m_full_screen_toolbar;
 
 	//left bar///////////////////////////////////////////////////
 	wxUndoableToolbar* m_depth_atten_btn;
@@ -227,7 +231,7 @@ private:
 	void OnAovChange(wxScrollEvent& event);
 	void OnAovText(wxCommandEvent& event);
 	void OnToolBar2(wxCommandEvent& event);
-	void OnFullScreen(wxCommandEvent& event);
+	void OnFullScreenToolbar(wxCommandEvent& event);
 	void OnSetFullScreen(wxTimerEvent& event);
 
 	//bar left

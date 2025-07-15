@@ -444,36 +444,38 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar2->AddToolWithHelp(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
+	m_options_toolbar2->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
+	m_options_toolbar2->Realize();
+	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
+
+	sizer_h_1->Add(40, 40);
+	//full screen
+	m_full_screen_toolbar = new wxToolBar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
+	m_full_screen_toolbar->SetDoubleBuffered(true);
 	//vr
 	bitmap = wxGetBitmap(vr);
-	m_options_toolbar2->AddCheckTool(
+	m_full_screen_toolbar->AddCheckTool(
 		ID_VrChk, "Stereography",
 		bitmap, wxNullBitmap,
 		"Enable stereography",
 		"Enable stereography");
 	//looking glass
 	bitmap = wxGetBitmap(looking_glass);
-	m_options_toolbar2->AddCheckTool(
+	m_full_screen_toolbar->AddCheckTool(
 		ID_LookingGlassChk, "Holography",
 		bitmap, wxNullBitmap,
 		"Enable holography",
 		"Enable holography");
-	m_options_toolbar2->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
-	m_options_toolbar2->Realize();
-	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
-
 	//full screen
-	m_full_screen_btn = new wxToolBar(this, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
-	m_full_screen_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(full_view);
-	m_full_screen_btn->AddTool(
-		0, "Full Screen",
+	m_full_screen_toolbar->AddTool(
+		ID_FullScreenBtn, "Full Screen",
 		bitmap, "Show full screen");
-	m_full_screen_btn->SetToolLongHelp(0, "Show full screen");
-	m_full_screen_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnFullScreen, this);
-	m_full_screen_btn->Realize();
-	sizer_h_1->Add(m_full_screen_btn, 0, wxALIGN_CENTER);
+	m_full_screen_toolbar->SetToolLongHelp(ID_FullScreenBtn, "Show full screen");
+	m_full_screen_toolbar->Bind(wxEVT_TOOL, &RenderViewPanel::OnFullScreenToolbar, this);
+	m_full_screen_toolbar->Realize();
+	sizer_h_1->Add(m_full_screen_toolbar, 0, wxALIGN_CENTER);
 
 	//bar left///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -859,8 +861,8 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstHologramMode))
 	{
 		ival = glbin_settings.m_hologram_mode;
-		m_options_toolbar2->ToggleTool(ID_VrChk, ival == 1);
-		m_options_toolbar2->ToggleTool(ID_LookingGlassChk, ival == 2);
+		m_full_screen_toolbar->ToggleTool(ID_VrChk, ival == 1);
+		m_full_screen_toolbar->ToggleTool(ID_LookingGlassChk, ival == 2);
 		if (ival != 2)
 			m_render_view->ResetSize();
 	}
@@ -1229,15 +1231,17 @@ void RenderViewPanel::SetCamMode()
 	FluoRefresh(2, { gstCamMode }, { GetViewId() });
 }
 
-void RenderViewPanel::SetStereography(bool val)
+void RenderViewPanel::SetStereography()
 {
-	glbin_settings.m_hologram_mode = val ? 1 : 0;
+	int ival = glbin_settings.m_hologram_mode;
+	glbin_settings.m_hologram_mode = ival == 1 ? 0 : 1;
 	FluoRefresh(0, { gstHologramMode });
 }
 
-void RenderViewPanel::SetHolography(bool val)
+void RenderViewPanel::SetHolography()
 {
-	glbin_settings.m_hologram_mode = val ? 2 : 0;
+	int ival = glbin_settings.m_hologram_mode;
+	glbin_settings.m_hologram_mode = ival == 2 ? 0 : 1;
 	FluoRefresh(0, { gstHologramMode });
 }
 
@@ -1467,7 +1471,6 @@ void RenderViewPanel::OnAovText(wxCommandEvent& event)
 void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	bool bval = m_options_toolbar2->GetToolState(id);
 
 	switch (id)
 	{
@@ -1477,18 +1480,25 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 	case ID_DefaultBtn:
 		SaveDefault();
 		break;
-	case ID_VrChk:
-		SetStereography(bval);
-		break;
-	case ID_LookingGlassChk:
-		SetHolography(bval);
-		break;
 	}
 }
 
-void RenderViewPanel::OnFullScreen(wxCommandEvent& event)
+void RenderViewPanel::OnFullScreenToolbar(wxCommandEvent& event)
 {
-	SetFullScreen();
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_VrChk:
+		SetStereography();
+		break;
+	case ID_LookingGlassChk:
+		SetHolography();
+		break;
+	case ID_FullScreenBtn:
+		SetFullScreen();
+		break;
+	}
 }
 
 void RenderViewPanel::OnSetFullScreen(wxTimerEvent& event)
