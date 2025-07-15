@@ -50,7 +50,7 @@ ViewDefault::ViewDefault()
 	m_mouse_focus = false;
 	m_persp = false;
 	m_aov = 10.0;
-	m_free = false;
+	m_cam_mode = 0;
 	m_center = fluo::Point(0);
 	m_rot_lock = false;
 	m_pin_rot_center = false;
@@ -93,7 +93,7 @@ void ViewDefault::Read()
 	f->Read("mouse focus", &m_mouse_focus, false);
 	f->Read("persp", &m_persp, false);
 	f->Read("aov", &m_aov, 15.0);
-	f->Read("free", &m_free, false);
+	f->Read("cam mode", &m_cam_mode, 0);
 	f->Read("center", &m_center);
 	f->Read("rot lock", &m_rot_lock, false);
 	f->Read("pin rot center", &m_pin_rot_center, false);
@@ -129,7 +129,7 @@ void ViewDefault::Save()
 	f->Write("mouse focus", m_mouse_focus);
 	f->Write("persp", m_persp);
 	f->Write("aov", m_aov);
-	f->Write("free", m_free);
+	f->Write("cam mode", m_cam_mode);
 	f->Write("center", m_center);
 	f->Write("rot lock", m_rot_lock);
 	f->Write("pin rot center", m_pin_rot_center);
@@ -161,7 +161,7 @@ void ViewDefault::Set(RenderView* canvas)
 	m_scalebar_unit = canvas->m_sb_unit;
 	m_persp = canvas->GetPersp();
 	m_aov = canvas->GetAov();
-	m_free = canvas->GetFree();
+	m_cam_mode = canvas->GetCamMode();
 	m_center = canvas->GetCenters();
 	m_rot_lock = canvas->GetRotLock();
 	m_pin_rot_center = canvas->m_pin_rot_ctr;
@@ -191,7 +191,7 @@ void ViewDefault::Apply(RenderView* canvas)
 	canvas->m_mouse_focus = m_mouse_focus;
 	canvas->SetPersp(m_persp);
 	canvas->SetAov(m_aov);
-	canvas->SetFree(m_free);
+	canvas->SetCamMode(m_cam_mode);
 	canvas->SetCenters(m_center);
 	canvas->SetRotLock(m_rot_lock);
 	canvas->SetPinRotCenter(m_pin_rot_center);

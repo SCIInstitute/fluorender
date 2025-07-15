@@ -263,9 +263,9 @@ public:
 
 	//camera properties
 	bool GetPersp() { return m_persp; }
-	void SetPersp(bool persp = true);
-	bool GetFree() { return m_free; }
-	void SetFree(bool free = true);
+	void SetPersp(bool persp) { m_persp = persp; }
+	int GetCamMode() { return m_cam_mode; }
+	void SetCamMode(int mode);
 	double GetAov() { return m_aov; }
 	void SetAov(double aov) { m_aov = aov; }
 	double GetNearClip() { return m_near_clip; }
@@ -530,7 +530,6 @@ public:
 	double m_ortho_top;
 	//scale factor
 	double m_scale_factor;
-	double m_scale_factor_saved;
 	//scale mode
 	int m_scale_mode;//zoom ratio meaning: 0-view; 1-pixel; 2-data(pixel*xy spc)
 	//pin rotation center
@@ -601,24 +600,18 @@ private:
 
 	//camera controls
 	bool m_persp;
-	bool m_free;
+	int m_cam_mode;//changed free to camera operation mode: 0-global; 1-flight;
 	//camera distance
 	double m_distance;
 	double m_init_dist;
 	//camera translation
 	double m_transx, m_transy, m_transz;
-	//saved camera trans
-	double m_transx_saved, m_transy_saved, m_transz_saved;
 	//camera rotation
 	double m_rotx, m_roty, m_rotz;
-	//saved camera rotation
-	double m_rotx_saved, m_roty_saved, m_rotz_saved;
 	//zero camera rotation
 	double m_zrotx, m_zroty, m_zrotz;
 	//camera center
 	double m_ctrx, m_ctry, m_ctrz;
-	//saved camera center
-	double m_ctrx_saved, m_ctry_saved, m_ctrz_saved;
 	fluo::Quaternion m_q;
 	fluo::Quaternion m_zq;//zero rotation
 	fluo::Vector m_up;
@@ -640,8 +633,6 @@ private:
 	fluo::Transform m_offset_tf;
 	//object translation
 	double m_obj_transx, m_obj_transy, m_obj_transz;
-	//saved translation for free flight
-	double m_obj_transx_saved, m_obj_transy_saved, m_obj_transz_saved;
 	//rotation lock
 	bool m_rot_lock;
 

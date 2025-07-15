@@ -57,7 +57,7 @@ public:
 	};
 	enum
 	{
-		ID_FreeChk = 0,
+		ID_CamModeBtn = 0,
 		ID_DefaultBtn,
 		ID_VrChk,
 		ID_LookingGlassChk
@@ -123,7 +123,7 @@ public:
 	void SetBgColor(fluo::Color val);
 	void SetBgColorInvert(bool val);
 	void SetAov(double val, bool notify);
-	void SetFree(bool val);
+	void SetCamMode();
 	void SetStereography(bool val);
 	void SetHolography(bool val);
 	void SetFullScreen();

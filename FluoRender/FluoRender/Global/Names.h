@@ -492,7 +492,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstClearPaint "clear paint"
 #define gstPaintMode "paint mode"
 #define gstPerspective "perspective"//camera settings
-#define gstFree "free"
+#define gstCamMode "cam mode"
 #define gstCamDist "cam dist"
 #define gstCamDistIni "cam dist ini"
 #define gstCamTransX "cam trans x"//camera translation

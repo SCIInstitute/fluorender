@@ -833,8 +833,8 @@ void Project::Open(const std::wstring& filename)
 				//properties
 				if (fconfig->Read("persp", &bval))
 					view->SetPersp(bval);
-				if (fconfig->Read("free", &bval))
-					view->SetFree(bval);
+				if (fconfig->Read("cam mode", &ival))
+					view->SetCamMode(ival);
 				if (fconfig->Read("aov", &dval))
 					view->SetAov(dval);
 				double nearclip;
@@ -1663,7 +1663,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->SetPath(path);
 			fconfig->Write("drawall", view->GetDraw());
 			fconfig->Write("persp", view->GetPersp());
-			fconfig->Write("free", view->GetFree());
+			fconfig->Write("cam mode", view->GetCamMode());
 			fconfig->Write("aov", view->GetAov());
 			fconfig->Write("nearclip", view->GetNearClip());
 			fconfig->Write("farclip", view->GetFarClip());

@@ -186,6 +186,10 @@ public:
 	const static unsigned char no_depth_atten_png[1019];
 	/* fly.png - 1142 bytes */
 	const static unsigned char fly_png[1142];
+	/* globe.png - 1347 bytes */
+	const static unsigned char globe_png[1347];
+	/* flight.png - 1039 bytes */
+	const static unsigned char flight_png[1039];
 	/* looking_glass.png - 1017 bytes */
 	const static unsigned char looking_glass_png[1017];
 	/* vr.png - 791 bytes */

@@ -435,12 +435,10 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar2 = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar2->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(fly);
-	m_options_toolbar2->AddCheckTool(
-		ID_FreeChk, "Free Fly",
-		bitmap, wxNullBitmap,
-		"Change the camera to a 'Free-Fly' Mode",
-		"Change the camera to a 'Free-Fly' Mode");
+	bitmap = wxGetBitmap(globe);
+	m_options_toolbar2->AddToolWithHelp(
+		ID_CamModeBtn, "Camera operation mode", bitmap,
+		"Change camera operation mode between globe and flight");
 	//save default
 	bitmap = wxGetBitmap(save_settings);
 	m_options_toolbar2->AddToolWithHelp(
@@ -841,8 +839,21 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//free fly
-	if (update_all || FOUND_VALUE(gstFree))
-		m_options_toolbar2->ToggleTool(ID_FreeChk, m_render_view->GetFree());
+	if (update_all || FOUND_VALUE(gstCamMode))
+	{
+		ival = m_render_view->GetCamMode();
+		switch (ival)
+		{
+		case 0:
+			m_options_toolbar2->SetToolNormalBitmap(ID_CamModeBtn,
+				wxGetBitmap(globe));
+			break;
+		case 1:
+			m_options_toolbar2->SetToolNormalBitmap(ID_CamModeBtn,
+				wxGetBitmap(flight));
+			break;
+		}
+	}
 
 	//stereo & holography
 	if (update_all || FOUND_VALUE(gstHologramMode))
@@ -1209,18 +1220,13 @@ void RenderViewPanel::SetAov(double val, bool notify)
 		FluoRefresh(2, { gstNull }, { GetViewId() });
 }
 
-void RenderViewPanel::SetFree(bool val)
+void RenderViewPanel::SetCamMode()
 {
-	m_render_view->SetFree(val);
-	if (!val)
-	{
-		if (m_render_view->GetAov() > 10)
-			m_render_view->SetPersp(true);
-		else
-			m_render_view->SetPersp(false);
-	}
+	int ival = m_render_view->GetCamMode();
+	ival = (ival + 1) % 2; // cycle through 0 and 1
+	m_render_view->SetCamMode(ival);
 
-	FluoRefresh(2, { gstFree, gstAov }, { GetViewId() });
+	FluoRefresh(2, { gstCamMode }, { GetViewId() });
 }
 
 void RenderViewPanel::SetStereography(bool val)
@@ -1465,8 +1471,8 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 
 	switch (id)
 	{
-	case ID_FreeChk:
-		SetFree(bval);
+	case ID_CamModeBtn:
+		SetCamMode();
 		break;
 	case ID_DefaultBtn:
 		SaveDefault();
@@ -2054,7 +2060,7 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 	{
 		glbin_view_def.m_persp = m_render_view->GetPersp();
 		glbin_view_def.m_aov = m_render_view->GetAov();
-		glbin_view_def.m_free = m_render_view->GetFree();
+		glbin_view_def.m_cam_mode = m_render_view->GetCamMode();
 	}
 	//rotations
 	if (mask & 0x100)

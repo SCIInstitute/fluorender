@@ -61,7 +61,7 @@ public:
 	bool m_mouse_focus;
 	bool m_persp;
 	double m_aov;
-	bool m_free;
+	int m_cam_mode;
 	fluo::Point m_center;
 	fluo::Vector m_rot;
 	bool m_rot_lock;

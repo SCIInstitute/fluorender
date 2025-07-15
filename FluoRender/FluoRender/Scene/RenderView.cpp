@@ -130,7 +130,6 @@ RenderView::RenderView() :
 	m_ortho_top(1.0),
 	//scale factor
 	m_scale_factor(1.0),
-	m_scale_factor_saved(1.0),
 	//scale mode
 	m_scale_mode(0),
 	//populated lists of data
@@ -165,19 +164,16 @@ RenderView::RenderView() :
 	m_clear_paint(true),
 	//camera controls
 	m_persp(false),
-	m_free(false),
+	m_cam_mode(0),
 	//camera distance
 	m_distance(10.0),
 	m_init_dist(10.0),
 	//camera translation
 	m_transx(0.0), m_transy(0.0), m_transz(0.0),
-	m_transx_saved(0.0), m_transy_saved(0.0), m_transz_saved(0.0),
 	//camera rotation
 	m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
-	m_rotx_saved(0.0), m_roty_saved(0.0), m_rotz_saved(0.0),
 	//camera center
 	m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
-	m_ctrx_saved(0.0), m_ctry_saved(0.0), m_ctrz_saved(0.0),
 	//camera direction
 	m_up(0.0, 1.0, 0.0),
 	m_head(0.0, 0.0, -1.0),
@@ -195,7 +191,6 @@ RenderView::RenderView() :
 	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
 	//object translation
 	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
-	m_obj_transx_saved(0.0), m_obj_transy_saved(0.0), m_obj_transz_saved(0.0),
 	m_rot_lock(false),
 	//lock cam center
 	m_lock_cam_object(false),
@@ -359,7 +354,6 @@ RenderView::RenderView(RenderView& copy):
 	m_ortho_top(1.0), //copy m_ortho_top,
 	//scale factor
 	m_scale_factor(1.0), //copy m_scale_factor,
-	m_scale_factor_saved(1.0),
 	//scale mode
 	m_scale_mode(0),
 	//populated lists of data
@@ -393,19 +387,16 @@ RenderView::RenderView(RenderView& copy):
 	m_clear_paint(true),
 	//camera controls
 	m_persp(false),
-	m_free(false),
+	m_cam_mode(0),
 	//camera distance
 	m_distance(copy.m_distance),
 	m_init_dist(copy.m_init_dist),
 	//camera translation
 	m_transx(0.0), m_transy(0.0), m_transz(0.0),
-	m_transx_saved(0.0), m_transy_saved(0.0), m_transz_saved(0.0),
 	//camera rotation
 	m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
-	m_rotx_saved(0.0), m_roty_saved(0.0), m_rotz_saved(0.0),
 	//camera center
 	m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
-	m_ctrx_saved(0.0), m_ctry_saved(0.0), m_ctrz_saved(0.0),
 	//camera direction
 	m_up(0.0, 1.0, 0.0),
 	m_head(0.0, 0.0, -1.0),
@@ -423,7 +414,6 @@ RenderView::RenderView(RenderView& copy):
 	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
 	//object translation
 	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
-	m_obj_transx_saved(0.0), m_obj_transy_saved(0.0), m_obj_transz_saved(0.0),
 	m_rot_lock(false),
 	//lock cam center
 	m_lock_cam_object(false),
@@ -2312,7 +2302,8 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 {
 	if (ny == 0 || m_aov == 0 || m_scale_factor == 0)
 		return;
-	if (!m_free)
+
+	if (m_cam_mode == 0)
 		m_distance = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 
 	double aspect = (double)nx / (double)ny;
@@ -2370,7 +2361,7 @@ void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3&
 {
 	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
-	if (m_free)
+	if (m_cam_mode == 1)
 		pos *= 0.1;
 	else
 		pos *= m_distance;
@@ -2382,7 +2373,7 @@ void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3&
 	center = glm::vec3(0.0);
 	up = glm::vec3(m_up.x(), m_up.y(), m_up.z());
 
-	if (m_free)
+	if (m_cam_mode == 1)
 	{
 		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
 		eye += center;
@@ -2815,99 +2806,20 @@ void RenderView::SetLockCenterSel()
 	m_lock_center = cover.GetCenter();
 }
 
-void RenderView::SetPersp(bool persp)
+void RenderView::SetCamMode(int mode)
 {
-	m_persp = persp;
-	if (m_free && !m_persp)
+	m_cam_mode = mode;
+	if (m_cam_mode == 1)
 	{
-		m_free = false;
-
-		//restore camera translation
-		m_transx = m_transx_saved;
-		m_transy = m_transy_saved;
-		m_transz = m_transz_saved;
-		m_ctrx = m_ctrx_saved;
-		m_ctry = m_ctry_saved;
-		m_ctrz = m_ctrz_saved;
-		//restore camera rotation
-		m_rotx = m_rotx_saved;
-		m_roty = m_roty_saved;
-		m_rotz = m_rotz_saved;
-		//restore object translation
-		m_obj_transx = m_obj_transx_saved;
-		m_obj_transy = m_obj_transy_saved;
-		m_obj_transz = m_obj_transz_saved;
-		//restore scale factor
-		m_scale_factor = m_scale_factor_saved;
-
-		if (m_render_view_panel)
-			m_render_view_panel->FluoUpdate({ gstScaleFactor, gstFree });
-		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-	}
-
-	//SetSortBricks();
-}
-
-void RenderView::SetFree(bool free)
-{
-	m_free = free;
-	if (free)
-	{
-		m_persp = true;
 		fluo::Vector pos(m_transx, m_transy, m_transz);
 		fluo::Vector d = pos;
 		d.normalize();
 		fluo::Vector ctr;
-		ctr = pos - 0.1*d;
+		ctr = pos - 0.1 * d;
 		m_ctrx = ctr.x();
 		m_ctry = ctr.y();
 		m_ctrz = ctr.z();
-
-		//save camera translation
-		m_transx_saved = m_transx;
-		m_transy_saved = m_transy;
-		m_transz_saved = m_transz;
-		m_ctrx_saved = m_ctrx;
-		m_ctry_saved = m_ctry;
-		m_ctrz_saved = m_ctrz;
-		//save camera rotation
-		m_rotx_saved = m_rotx;
-		m_roty_saved = m_roty;
-		m_rotz_saved = m_rotz;
-		//save object translateion
-		m_obj_transx_saved = m_obj_transx;
-		m_obj_transy_saved = m_obj_transy;
-		m_obj_transz_saved = m_obj_transz;
-		//save scale factor
-		m_scale_factor_saved = m_scale_factor;
 	}
-	else
-	{
-		m_ctrx = m_ctry = m_ctrz = 0.0;
-
-		//restore camera translation
-		m_transx = m_transx_saved;
-		m_transy = m_transy_saved;
-		m_transz = m_transz_saved;
-		m_ctrx = m_ctrx_saved;
-		m_ctry = m_ctry_saved;
-		m_ctrz = m_ctrz_saved;
-		//restore camera rotation
-		m_rotx = m_rotx_saved;
-		m_roty = m_roty_saved;
-		m_rotz = m_rotz_saved;
-		//restore object translation
-		m_obj_transx = m_obj_transx_saved;
-		m_obj_transy = m_obj_transy_saved;
-		m_obj_transz = m_obj_transz_saved;
-		//restore scale factor
-		m_scale_factor = m_scale_factor_saved;
-		if (m_render_view_panel)
-			m_render_view_panel->FluoUpdate({ gstScaleFactor });
-
-		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-	}
-	//SetSortBricks();
 }
 
 fluo::Color RenderView::GetTextColor()
@@ -7826,7 +7738,7 @@ void RenderView::DrawFinalBuffer()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//compute the threshold value for picking volume
-	if (m_update_rot_ctr && !m_free)
+	if (m_update_rot_ctr)
 	{
 		unsigned char pixel[4];
 		int nx, ny;
@@ -10137,12 +10049,14 @@ void RenderView::ControllerZoomDolly(double dval, int nx, int ny)
 	double delta = dval / (double)ny;
 	if (m_scale_factor < 1e5 && m_scale_factor > 1e-3)
 		m_scale_factor += m_scale_factor * delta;
-	if (m_free)
+	if (m_cam_mode == 1)
 	{
+		//move camera center
 		fluo::Vector pos(m_transx, m_transy, m_transz);
 		pos.normalize();
 		fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-		ctr -= delta * pos * 1000;
+		delta = m_distance * delta / (1 + delta);
+		ctr -= delta * pos;
 		m_ctrx = ctr.x();
 		m_ctry = ctr.y();
 		m_ctrz = ctr.z();
@@ -10313,7 +10227,8 @@ void RenderView::ProcessIdle(IdleState& state)
 
 	//update pin rotation center
 	auto cur_vd = m_cur_vol.lock();
-	if (m_update_rot_ctr && cur_vd && !m_free)
+	if (m_update_rot_ctr && cur_vd
+		&& m_cam_mode == 0)
 	{
 		fluo::Point p, ip;
 		int nx = GetCanvasSize().w();
@@ -11274,14 +11189,15 @@ void RenderView::ProcessMouse(MouseState& state)
 					double delta = abs(dx)>abs(dy) ?
 						(double)dx / (double)nx :
 						(double)-dy / (double)ny;
-					m_scale_factor += m_scale_factor*delta;
+					m_scale_factor += m_scale_factor * delta;
 
-					if (m_free)
+					if (m_cam_mode == 1)
 					{
 						fluo::Vector pos(m_transx, m_transy, m_transz);
 						pos.normalize();
 						fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-						ctr -= delta*pos * 1000;
+						delta = m_distance * delta / (1 + delta);
+						ctr -= delta * pos;
 						m_ctrx = ctr.x();
 						m_ctry = ctr.y();
 						m_ctrz = ctr.z();
@@ -11397,12 +11313,26 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			else
 			{
-				m_interactive = true;
 				if (m_pin_rot_ctr)
 					m_update_rot_ctr = true;
-				double value = wheel * m_scale_factor / 1000.0;
-				if (m_scale_factor + value > 0.01)
-					m_scale_factor += value;
+				double delta = wheel / 1000.0;
+
+				m_scale_factor += m_scale_factor * delta;
+
+				if (m_cam_mode == 1)
+				{
+					fluo::Vector pos(m_transx, m_transy, m_transz);
+					pos.normalize();
+					fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+					delta = m_distance * delta / (1 + delta);
+					ctr -= delta * pos;
+					m_ctrx = ctr.x();
+					m_ctry = ctr.y();
+					m_ctrz = ctr.z();
+				}
+
+				m_interactive = true;
+
 				if (m_render_view_panel)
 					m_render_view_panel->FluoUpdate({ gstScaleFactor });
 			}
