@@ -11196,7 +11196,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						fluo::Vector pos(m_transx, m_transy, m_transz);
 						pos.normalize();
 						fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-						delta = m_distance * delta / (1 + delta);
+						delta = m_radius * delta;
 						ctr -= delta * pos;
 						m_ctrx = ctr.x();
 						m_ctry = ctr.y();
