@@ -93,7 +93,6 @@ namespace flvr
 		blend_num_bits_(32),
 		va_slices_(0),
 		va_wirefm_(0),
-		cache_queue_(0),
 		quota_bricks_chan_(0)
 	{
 		if (!ShaderProgram::init())
@@ -117,7 +116,6 @@ namespace flvr
 		blend_num_bits_(copy.blend_num_bits_),
 		va_slices_(0),
 		va_wirefm_(0),
-		cache_queue_(0),
 		quota_bricks_chan_(0)
 	{
 		if (!ShaderProgram::init())
@@ -688,9 +686,9 @@ namespace flvr
 		int tn = 0;
 		void* raw_data = 0;
 		//get raw data from cache
-		if (cache_queue_)
+		if (auto cq = cache_queue_.lock())
 		{
-			VolCache4D* vol_cache = cache_queue_->get_offset(toffset);
+			VolCache4D* vol_cache = cq->get_offset(toffset);
 			if (vol_cache)
 			{
 				raw_data = vol_cache->GetRawData();

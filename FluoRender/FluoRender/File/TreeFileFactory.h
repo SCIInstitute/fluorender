@@ -94,6 +94,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<BaseTreeFile>> handlers;
 
 private:
+	// Helper function to get the first non-empty, non-comment line
 	std::string getFirstNonEmptyLine(const std::string& content) {
 		std::istringstream stream(content);
 		std::string line;
@@ -101,23 +102,22 @@ private:
 			// Trim whitespace
 			line.erase(0, line.find_first_not_of(" \t\r\n"));
 			line.erase(line.find_last_not_of(" \t\r\n") + 1);
-			if (!line.empty() && line[0] != '#') {
+			if (!line.empty() && line[0] != ';' && line[0] != '#') {
 				return line;
 			}
 		}
 		return "";
 	}
 
-	//0: ini, 1: xml, 2: json, 3: pole
-	int determineFileType(const std::string& content)
-	{
+	// 0: ini, 1: xml, 2: json, 3: pole
+	int determineFileType(const std::string& content) {
 		std::string processed_content = content;
 
 		// Remove BOM if present
 		if (processed_content.size() >= 3 &&
-			processed_content[0] == '\xEF' &&
-			processed_content[1] == '\xBB' &&
-			processed_content[2] == '\xBF') {
+			static_cast<unsigned char>(processed_content[0]) == 0xEF &&
+			static_cast<unsigned char>(processed_content[1]) == 0xBB &&
+			static_cast<unsigned char>(processed_content[2]) == 0xBF) {
 			processed_content = processed_content.substr(3);
 		}
 
@@ -125,48 +125,76 @@ private:
 		std::string line;
 		bool hasIniSection = false;
 		bool hasIniKeyValue = false;
+		bool isPotentiallyXml = false;
+
+		// First pass for a quick XML check
+		std::string firstLine = getFirstNonEmptyLine(processed_content);
+		if (firstLine.rfind("<?xml", 0) == 0) {
+			return 1; // XML declaration found
+		}
+
+		stream.clear();
+		stream.seekg(0);
 
 		while (std::getline(stream, line)) {
 			// Trim whitespace
 			line.erase(0, line.find_first_not_of(" \t\r\n"));
 			line.erase(line.find_last_not_of(" \t\r\n") + 1);
 
-			if (line.empty() || line[0] == ';' || line[0] == '#') continue; // Skip comments
+			if (line.empty() || line[0] == ';' || line[0] == '#') continue; // Skip comments and empty lines
+
+			// POLE detection (high priority)
+			if (std::regex_search(line, std::regex(R"(POLE\s+Structure\s+Start)"))) {
+				return 3; // POLE
+			}
+
+			// More robust XML check for a root element
+			if (line.front() == '<' && line.back() == '>') {
+				// This could be an XML/HTML tag. If we haven't found INI structures,
+				// it's likely XML.
+				isPotentiallyXml = true;
+			}
 
 			// INI section header
-			if (std::regex_match(line, std::regex(R"(\[\s*[^\]\r\n]+\s*\])")))
-			{
+			if (std::regex_match(line, std::regex(R"(\[\s*[^\]\r\n]+\s*\])"))) {
 				hasIniSection = true;
 				continue;
 			}
 
 			// INI key-value pair
-			if (std::regex_match(line, std::regex(R"(^\s*([^#;\s][^=]*[^#;\s])\s*=\s*([^\r\n]*)$)")))
-			{
+			if (std::regex_match(line, std::regex(R"(^\s*([^#;\s][^=]*[^#;\s])\s*=\s*([^\r\n]*)$)"))) {
 				hasIniKeyValue = true;
 				continue;
 			}
+		}
 
-			// POLE detection
-			if (std::regex_search(line, std::regex(R"(POLE\s+Structure\s+Start)"))) {
-				return 3;
-			}
+		// Post-loop evaluation
 
-			// XML detection
-			if (line.find("<?xml") == 0 || line.find('<') == 0) {
-				return 1;
+		// JSON check
+		if (!hasIniSection && !hasIniKeyValue && !isPotentiallyXml) {
+			if (!firstLine.empty() && (firstLine.front() == '{' || firstLine.front() == '[')) {
+				// A basic check is if the file starts with { or [ and ends with } or ]
+				std::string trimmed_content;
+				for (char c : processed_content) {
+					if (!isspace(c)) {
+						trimmed_content += c;
+					}
+				}
+				if ((trimmed_content.front() == '{' && trimmed_content.back() == '}') ||
+					(trimmed_content.front() == '[' && trimmed_content.back() == ']')) {
+					return 2; // JSON
+				}
 			}
 		}
 
-		// Only check for JSON after scanning all lines
-		std::string firstLine = getFirstNonEmptyLine(processed_content);
-		if (!hasIniSection && !hasIniKeyValue &&
-			!firstLine.empty() && (firstLine[0] == '{' || firstLine[0] == '[')) {
-			return 2; // JSON
-		}
-
+		// Final INI check
 		if (hasIniSection || hasIniKeyValue) {
 			return 0; // INI
+		}
+
+		// Fallback to XML if it was deemed potential and not INI
+		if (isPotentiallyXml) {
+			return 1; // XML
 		}
 
 		return -1; // Unknown

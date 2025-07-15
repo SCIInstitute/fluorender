@@ -214,7 +214,7 @@ namespace flvr
 		bool test_against_view(const fluo::BBox &bbox, bool persp=false);
 
 		//set cache queue
-		void set_cache_queue(CacheQueue* cache_queue) { cache_queue_ = cache_queue; }
+		void set_cache_queue(const std::shared_ptr<CacheQueue>& cq) { cache_queue_ = cq; }
 
 		//interactive modes
 		void set_interactive_mode(bool mode) { imode_ = mode; }
@@ -361,7 +361,7 @@ namespace flvr
 		VertexArray* va_wirefm_;
 
 		//cache queue for getting neighbors of time
-		CacheQueue* cache_queue_;
+		std::weak_ptr<CacheQueue> cache_queue_;
 
 		//compute view
 		fluo::Ray compute_view();

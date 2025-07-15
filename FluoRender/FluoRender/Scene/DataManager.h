@@ -1538,7 +1538,7 @@ private:
 	std::vector<std::shared_ptr<Annotations>> m_annotation_list;
 
 	//4d cache for volume data
-	std::unordered_map<VolumeData*, std::unique_ptr<flvr::CacheQueue>> m_vd_cache_queue;
+	std::unordered_map<VolumeData*, std::shared_ptr<flvr::CacheQueue>> m_vd_cache_queue;
 	//project path
 	std::wstring m_prj_path;
 	std::wstring m_prj_file;

@@ -1049,7 +1049,7 @@ void Project::Open(const std::wstring& filename)
 		{
 			if (curf && curf >= startf && curf <= endf)
 			{
-				glbin_moviemaker.SetCurrentTime(curf);
+				glbin_moviemaker.SetCurrentFrameSilently(curf, false);
 				auto view = root->GetLastView();
 				if (view)
 				{
