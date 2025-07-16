@@ -6656,29 +6656,36 @@ void RenderView::DrawGradBg()
 	glm::vec3 cam_forward = glm::normalize(glm::vec3(view_mat[2])); // Z axis
 
 	//ndc transformation
-	auto compute_angle = [](const glm::vec2& tc,
-		const glm::vec3& loc4,
-		const glm::vec3& loc5,
-		const glm::vec3& loc6)
+	float horizon = 0.3f;
+	float band_width = 0.1f;
+	float r = 3.0f; // radius to fully enclose cube
+	int nx, ny;
+	GetRenderSize(nx, ny);
+	float aspect = static_cast<float>(nx) / static_cast<float>(ny);
+	double v0, v1, v2, v3, vc;//min angle, band 1, band 2, max value
+	auto compute_angle =
+		[&cam_right, &cam_up, &cam_forward,
+		&r, &aspect, &horizon, &band_width]
+		(const glm::vec2& tc)
 	{
-		glm::vec2 ndc = (2.0f * tc - glm::vec2(1.0f))*0.01f;
-		glm::vec3 ray = glm::normalize(glm::vec3(ndc, 1.0f));
-		glm::vec3 dir = glm::normalize(
-			ray.x * loc4 +
-			ray.y * loc5 +
-			ray.z * loc6);
-		return glm::degrees(glm::atan(dir.y, glm::length(glm::vec2(dir.x, dir.z))));
+		glm::vec2 ndc = 2.0f * tc - glm::vec2(1.0f);
+		ndc.x *= aspect; // Adjust for aspect ratio
+		ndc.y += r * horizon * 0.2f; // Adjust for horizon
+		glm::vec3 origin = ndc.x * cam_right + ndc.y * cam_up;
+		glm::vec3 dir = -glm::normalize(cam_forward);
+		glm::vec3 hit = origin + r * dir;
+		return glm::degrees(glm::atan(hit.y, glm::length(glm::vec2(hit.x, hit.z))));
 	};
-	double v0, v1, v2, v3;//min angle, band 1, band 2, max value
-	v0 = compute_angle(glm::vec2(0.0, 0.0), cam_right, cam_up, cam_forward);
-	v1 = compute_angle(glm::vec2(1.0, 0.0), cam_right, cam_up, cam_forward);
-	v2 = compute_angle(glm::vec2(1.0, 1.0), cam_right, cam_up, cam_forward);
-	v3 = compute_angle(glm::vec2(0.0, 1.0), cam_right, cam_up, cam_forward);
-	double mind = std::min({ v0, v1, v2, v3 });
-	double maxd = std::max({ v0, v1, v2, v3 });
+	v0 = compute_angle(glm::vec2(0.0, 0.0));
+	v1 = compute_angle(glm::vec2(1.0, 0.0));
+	v2 = compute_angle(glm::vec2(1.0, 1.0));
+	v3 = compute_angle(glm::vec2(0.0, 1.0));
+	vc = compute_angle(glm::vec2(0.5, 0.5));
+	double mind = std::min({ v0, v1, v2, v3, vc });
+	double maxd = std::max({ v0, v1, v2, v3, vc });
 	v0 = mind;
-	v1 = mind + 0.3 * (maxd - mind);
-	v2 = mind + 0.4 * (maxd - mind);
+	v1 = mind + (horizon - band_width) * (maxd - mind);
+	v2 = mind + (horizon + band_width) * (maxd - mind);
 	v3 = maxd;
 
 	//set up shader
@@ -6694,9 +6701,9 @@ void RenderView::DrawGradBg()
 	shader->setLocalParam(1, color1.r(), color1.g(), color1.b(), 1.0);
 	shader->setLocalParam(2, color2.r(), color2.g(), color2.b(), 1.0);
 	shader->setLocalParam(3, v0, v1, v2, v3);
-	shader->setLocalParam(4, cam_right.x, cam_right.y, cam_right.z, 0.0);
-	shader->setLocalParam(5, cam_up.x, cam_up.y, cam_up.z, 0.0);
-	shader->setLocalParam(6, cam_forward.x, cam_forward.y, cam_forward.z, 0.0);
+	shader->setLocalParam(4, cam_right.x, cam_right.y, cam_right.z, r);
+	shader->setLocalParam(5, cam_up.x, cam_up.y, cam_up.z, aspect);
+	shader->setLocalParam(6, cam_forward.x, cam_forward.y, cam_forward.z, horizon);
 
 	//draw
 	glDisable(GL_DEPTH_TEST);

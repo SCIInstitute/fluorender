@@ -653,16 +653,20 @@ using std::ostringstream;
 	"uniform vec4 loc1; //color1\n" \
 	"uniform vec4 loc2; //color2\n" \
 	"uniform vec4 loc3; //(v0, v1, v2, v3)\n" \
-	"uniform vec4 loc4;//cam_right\n" \
-	"uniform vec4 loc5;//cam_up\n" \
-	"uniform vec4 loc6;//cam_forward\n" \
+	"uniform vec4 loc4;//cam_right, r\n" \
+	"uniform vec4 loc5;//cam_up, aspect\n" \
+	"uniform vec4 loc6;//cam_forward, horizon\n" \
 	"\n" \
 	"void main()\n" \
 	"{\n" \
-	"	vec4 p = vec4(OutTexCoord, 1.0);\n" \
-	"	p.xy = (p.xy * 2.0 - vec2(1.0)) * 0.01;\n" \
-	"	vec3 dir = normalize(p.x * loc4.xyz + p.y * loc5.xyz + p.z * loc6.xyz);\n" \
-	"	float pitch = degrees(atan(dir.y, length(vec2(dir.x, dir.z))));\n" \
+	"	vec2 ndc = OutTexCoord.xy;\n" \
+	"	ndc = ndc * 2.0 - vec2(1.0);\n" \
+	"	ndc.x *= loc5.w;\n" \
+	"	ndc.y += loc4.w * loc6.w * 0.2;\n" \
+	"	vec3 origin = ndc.x * loc4.xyz + ndc.y * loc5.xyz;\n" \
+	"	vec3 dir = -normalize(loc6.xyz);\n" \
+	"	vec3 hit = origin + loc4.w * dir;\n" \
+	"	float pitch = degrees(atan(hit.y, length(vec2(hit.x, hit.z))));\n" \
 	"	vec4 color;\n" \
 	"	if (pitch < loc3.y)\n" \
 	"		color = mix(loc2, loc0, (loc3.y - pitch) / (loc3.y - loc3.x));\n" \
