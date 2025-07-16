@@ -6648,40 +6648,37 @@ void RenderView::DrawGradBg()
 	}
 
 	//compute horizon
-	int nx, ny;
-	GetRenderSize(nx, ny);
-	double aspect = (double)nx / (double)ny;
-	double oh = 1000;
-	double ow = oh * aspect;
-	glm::mat4 proj_mat = glm::ortho(-ow, ow, -oh, oh, 0.1, 1.0);
-	glm::mat4 mv_mat = glm::inverse(m_mv_mat);
-	mv_mat[3][0] = 0.0;
-	mv_mat[3][1] = 0.0;
-	mv_mat[3][2] = -4000.0;
-	glm::mat4 trans_mat = proj_mat * mv_mat;
-	trans_mat = glm::inverse(trans_mat);
+	glm::mat4 view_mat = glm::inverse(m_mv_mat);
+
+	// Extract camera axes from the view matrix
+	glm::vec3 cam_right   = glm::normalize(glm::vec3(view_mat[0])); // X axis
+	glm::vec3 cam_up      = glm::normalize(glm::vec3(view_mat[1])); // Y axis
+	glm::vec3 cam_forward = glm::normalize(glm::vec3(view_mat[2])); // Z axis
 
 	//ndc transformation
-	auto compute_angle = [](const glm::vec2& tc, const glm::mat4& trans)
+	auto compute_angle = [](const glm::vec2& tc,
+		const glm::vec3& loc4,
+		const glm::vec3& loc5,
+		const glm::vec3& loc6)
 	{
-		glm::vec2 ndc = 2.0f * tc - glm::vec2(1.0f);
-		glm::vec4 p = glm::vec4(ndc, 0.0f, 1.0f);
-		p = trans * p;
-		p /= p.w;
-		glm::vec3 dir = glm::vec3(p.x, p.y, p.z);
-		dir = glm::normalize(dir);
-		return glm::degrees(glm::asin(dir.y));
+		glm::vec2 ndc = (2.0f * tc - glm::vec2(1.0f))*0.01f;
+		glm::vec3 ray = glm::normalize(glm::vec3(ndc, 1.0f));
+		glm::vec3 dir = glm::normalize(
+			ray.x * loc4 +
+			ray.y * loc5 +
+			ray.z * loc6);
+		return glm::degrees(glm::atan(dir.y, glm::length(glm::vec2(dir.x, dir.z))));
 	};
 	double v0, v1, v2, v3;//min angle, band 1, band 2, max value
-	v0 = compute_angle(glm::vec2(0.0, 0.0), trans_mat);
-	v1 = compute_angle(glm::vec2(1.0, 0.0), trans_mat);
-	v2 = compute_angle(glm::vec2(1.0, 1.0), trans_mat);
-	v3 = compute_angle(glm::vec2(0.0, 1.0), trans_mat);
+	v0 = compute_angle(glm::vec2(0.0, 0.0), cam_right, cam_up, cam_forward);
+	v1 = compute_angle(glm::vec2(1.0, 0.0), cam_right, cam_up, cam_forward);
+	v2 = compute_angle(glm::vec2(1.0, 1.0), cam_right, cam_up, cam_forward);
+	v3 = compute_angle(glm::vec2(0.0, 1.0), cam_right, cam_up, cam_forward);
 	double mind = std::min({ v0, v1, v2, v3 });
 	double maxd = std::max({ v0, v1, v2, v3 });
 	v0 = mind;
-	v1 = -8;
-	v2 = -4;
+	v1 = mind + 0.3 * (maxd - mind);
+	v2 = mind + 0.4 * (maxd - mind);
 	v3 = maxd;
 
 	//set up shader
@@ -6697,7 +6694,9 @@ void RenderView::DrawGradBg()
 	shader->setLocalParam(1, color1.r(), color1.g(), color1.b(), 1.0);
 	shader->setLocalParam(2, color2.r(), color2.g(), color2.b(), 1.0);
 	shader->setLocalParam(3, v0, v1, v2, v3);
-	shader->setLocalParamMatrix(0, glm::value_ptr(trans_mat));
+	shader->setLocalParam(4, cam_right.x, cam_right.y, cam_right.z, 0.0);
+	shader->setLocalParam(5, cam_up.x, cam_up.y, cam_up.z, 0.0);
+	shader->setLocalParam(6, cam_forward.x, cam_forward.y, cam_forward.z, 0.0);
 
 	//draw
 	glDisable(GL_DEPTH_TEST);

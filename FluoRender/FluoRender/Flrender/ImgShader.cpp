@@ -653,23 +653,23 @@ using std::ostringstream;
 	"uniform vec4 loc1; //color1\n" \
 	"uniform vec4 loc2; //color2\n" \
 	"uniform vec4 loc3; //(v0, v1, v2, v3)\n" \
-	"uniform mat4 matrix0;//transformation\n" \
+	"uniform vec4 loc4;//cam_right\n" \
+	"uniform vec4 loc5;//cam_up\n" \
+	"uniform vec4 loc6;//cam_forward\n" \
 	"\n" \
 	"void main()\n" \
 	"{\n" \
 	"	vec4 p = vec4(OutTexCoord, 1.0);\n" \
-	"	p.xy = p.xy * 2.0 - vec2(1.0);\n" \
-	"	p = matrix0 * p;\n" \
-	"	p /= p.w;\n" \
-	"	vec3 dir = normalize(p.xyz);\n" \
-	"	float d = degrees(asin(dir.y));\n" \
+	"	p.xy = (p.xy * 2.0 - vec2(1.0)) * 0.01;\n" \
+	"	vec3 dir = normalize(p.x * loc4.xyz + p.y * loc5.xyz + p.z * loc6.xyz);\n" \
+	"	float pitch = degrees(atan(dir.y, length(vec2(dir.x, dir.z))));\n" \
 	"	vec4 color;\n" \
-	"	if (d < loc3.y)\n" \
-	"		color = mix(loc2, loc0, (loc3.y - d) / (loc3.y - loc3.x));\n" \
-	"	else if (d < loc3.z)\n" \
-	"		color = mix(loc1, loc2, (loc3.z - d) / (loc3.z - loc3.y));\n" \
+	"	if (pitch < loc3.y)\n" \
+	"		color = mix(loc2, loc0, (loc3.y - pitch) / (loc3.y - loc3.x));\n" \
+	"	else if (pitch < loc3.z)\n" \
+	"		color = mix(loc1, loc2, (loc3.z - pitch) / (loc3.z - loc3.y));\n" \
 	"	else\n" \
-	"		color = mix(loc1, loc0, (d - loc3.z) / (loc3.w - loc3.z));\n" \
+	"		color = mix(loc1, loc0, (pitch - loc3.z) / (loc3.w - loc3.z));\n" \
 	"	FragColor = vec4(color.rgb, 1.0);\n" \
 	"}\n"
 
