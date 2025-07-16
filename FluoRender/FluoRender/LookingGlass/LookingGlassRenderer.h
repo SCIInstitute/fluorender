@@ -66,11 +66,12 @@ public:
 
 	//camera handling
 	void HandleCamera(bool persp);
-	void SetCamera(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up)
+	void SetCamera(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up, const float distance)
 	{
 		m_eye = eye;
 		m_center = center;
 		m_up = up;
+		m_distance = distance;
 	}
 	void SetCameraSide(const glm::vec3& side)
 	{
@@ -119,6 +120,7 @@ private:
 	glm::vec3 m_center;		//camera center position
 	glm::vec3 m_up;		//camera up vector
 	glm::vec3 m_side;		//camera side vector
+	float m_distance = 1.0f; //distance from eye to center
 	//projection
 	glm::mat4 m_proj_mat = glm::mat4(1.0); //projection matrix
 	double m_aov = 0.0; //angle of view

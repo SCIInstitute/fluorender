@@ -2330,13 +2330,16 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 			fluo::Vector side = GetSide();
 			glm::vec3 eye, center, up;
 			GetCameraSettings(eye, center, up);
-			if (m_cam_mode == 1)
-			{
-				glm::vec3 view_dir = glm::normalize(center - eye);
-				eye += view_dir * float(m_distance);
-			}
 			glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
-			glbin_lg_renderer.SetCamera(eye, center, up);
+			float dist = static_cast<float>(m_distance);
+			if (m_cam_mode == 1 && m_persp)
+			{
+				dist = GetDistanceForLookingGlass();
+				if (dist < 0.0f)
+					dist = 0.0f;
+				//dist /= 2.0f;
+			}
+			glbin_lg_renderer.SetCamera(eye, center, up, dist);
 			glbin_lg_renderer.SetProjection(
 				glm::radians(m_aov),
 				aspect,
@@ -2368,6 +2371,7 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 
 void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3& up)
 {
+	double distance = 1.0;
 	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
 	if (m_cam_mode == 1)
@@ -2427,13 +2431,15 @@ void RenderView::HandleCamera(bool vr)
 			}
 			else if (glbin_settings.m_hologram_mode == 2)
 			{
-				if (m_cam_mode == 1)
-				{
-					glm::vec3 view_dir = glm::normalize(center - eye);
-					eye += view_dir * float(m_distance);
-				}
-				glbin_lg_renderer.SetCamera(eye, center, up);
-				glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
+				//float dist = static_cast<float>(m_distance);
+				//if (m_cam_mode == 1)
+				//{
+				//	dist = GetDistance();
+				//	if (dist < 0.0f)
+				//		dist = 0.0f;
+				//}
+				//glbin_lg_renderer.SetCamera(eye, center, up, dist);
+				//glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
 				glbin_lg_renderer.HandleCamera(m_persp);
 				glm::vec3 new_eye, new_center, new_up;
 				glbin_lg_renderer.GetCamera(new_eye, new_center, new_up);
@@ -2471,6 +2477,20 @@ void RenderView::HandleCamera(bool vr)
 		glm::mat4 rot4(rot3);
 		m_mv_mat = rot4 * glm::lookAt(eye, center, up);
 	}
+}
+
+float RenderView::GetDistanceForLookingGlass()
+{
+	auto cur_vd = m_cur_vol.lock();
+	fluo::Point p, ip;
+	int nx = GetCanvasSize().w();
+	int ny = GetCanvasSize().h();
+	int mode = 2;
+	if (cur_vd->GetMode() == 1) mode = 1;
+	glbin_volume_point.SetVolumeData(cur_vd);
+	double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
+		mode, false, 0.01, p, ip);
+	return dist;
 }
 
 //camera operations

@@ -417,8 +417,7 @@ void LookingGlassRenderer::HandleProjection(bool persp)
 	if (glbin_settings.m_hologram_camera_mode == 0)
 	{
 		double d = glbin_settings.m_lg_offset;
-		double r = glm::length(m_eye - m_center);
-		d = r * sin(glm::radians(d));
+		d = m_distance * sin(glm::radians(d));
 		double shift = GetOffset() * d;
 		// Apply horizontal skew
 		if (persp)
@@ -428,7 +427,7 @@ void LookingGlassRenderer::HandleProjection(bool persp)
 		}
 		else
 		{
-			float offset = float(shift * (m_far - m_near) / ((m_right - m_left) * r));
+			float offset = float(shift * (m_far - m_near) / ((m_right - m_left) * m_distance));
 			glm::mat4 shear = glm::mat4(1.0f);
 			shear[2][0] = -offset;
 			m_proj_mat = shear * m_proj_mat;
@@ -460,8 +459,7 @@ void LookingGlassRenderer::HandleCameraShifting(bool persp)
 {
 	//linear shift
 	double d = glbin_settings.m_lg_offset;
-	double r = glm::length(m_eye - m_center);
-	d = r * sin(glm::radians(d));
+	d = m_distance * sin(glm::radians(d));
 	double shift = GetOffset() * d;
 	glm::vec3 side = m_side * float(shift);
 
@@ -474,7 +472,7 @@ void LookingGlassRenderer::HandleCameraShifting(bool persp)
 		}
 		else
 		{
-			double shear = shift * (m_far + m_near) / (2.0 * r);
+			double shear = shift * (m_far + m_near) / (2.0 * m_distance);
 			shear = shift - shear;
 			side = m_side * float(shear);
 			m_eye += side;
