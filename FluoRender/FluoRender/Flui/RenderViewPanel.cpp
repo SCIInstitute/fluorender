@@ -1241,7 +1241,7 @@ void RenderViewPanel::SetStereography()
 void RenderViewPanel::SetHolography()
 {
 	int ival = glbin_settings.m_hologram_mode;
-	glbin_settings.m_hologram_mode = ival == 2 ? 0 : 1;
+	glbin_settings.m_hologram_mode = ival == 2 ? 0 : 2;
 	FluoRefresh(0, { gstHologramMode });
 }
 

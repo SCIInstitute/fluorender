@@ -9635,9 +9635,12 @@ void RenderView::Pick(BaseState& state)
 	bool mesh_sel = PickMesh(state);
 	fluo::ValueCollection vc = { gstCurrentSelect };
 	if (vol_sel)
-		vc.insert(gstCompListSelection);
-	else if (!mesh_sel)
-		glbin_current.SetMeshData(0);
+		vc.insert({ gstVolumePropPanel, gstCompListSelection });
+	else
+	{
+		if (!mesh_sel && m_vd_pop_list.empty())
+			glbin_current.SetMeshData(0);
+	}
 	glbin_current.mainframe->UpdateProps(vc);
 }
 
@@ -10412,7 +10415,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		//forward
 		if (state.m_key_mov_forward)
 		{
-			m_tseq_forward = true;
 			if (m_cam_mode == 1)
 			{
 				//move right
@@ -10435,6 +10437,7 @@ void RenderView::ProcessIdle(IdleState& state)
 					state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 				}
 			}
+			m_tseq_forward = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
@@ -10454,7 +10457,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		//backforward
 		if (state.m_key_mov_backward)
 		{
-			m_tseq_backward = true;
 			if (m_cam_mode == 1)
 			{
 				//move left
@@ -10477,6 +10479,7 @@ void RenderView::ProcessIdle(IdleState& state)
 					state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
 				}
 			}
+			m_tseq_backward = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
@@ -10488,7 +10491,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		//up
 		if (state.m_key_clip_up)
 		{
-			m_clip_up = true;
 			if (m_cam_mode == 1)
 			{
 				fluo::Vector pos(m_transx, m_transy, m_transz);
@@ -10511,6 +10513,7 @@ void RenderView::ProcessIdle(IdleState& state)
 					state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 				}
 			}
+			m_clip_up = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;
@@ -10520,7 +10523,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		//down
 		if (state.m_key_clip_down)
 		{
-			m_clip_down = true;
 			if (m_cam_mode == 1)
 			{
 				fluo::Vector pos(m_transx, m_transy, m_transz);
@@ -10543,6 +10545,7 @@ void RenderView::ProcessIdle(IdleState& state)
 					state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 				}
 			}
+			m_clip_down = true;
 			state.m_refresh = true;
 			state.m_looking_glass_changed = true;
 			state.m_set_focus = true;

@@ -396,7 +396,7 @@ namespace flvr
 		if (orthographic_p)
 			zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 0.2f, 35.0f);
 		else
-			zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 0.5f, 2.0f);
+			zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 1.0f, 10.0f);
 
 		std::vector<TextureBrick*> *bricks = 0;
 		tex->set_matrices(m_mv_tex_scl_mat, m_proj_mat);
