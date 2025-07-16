@@ -174,10 +174,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	fluo::Ray view_ray = vr_list_[0]->compute_view();
 	fluo::Ray snapview = vr_list_[0]->compute_snapview(0.4);
 	float zoom_data_clamp = vr_list_[0]->zoom_data_;
-		if (orthographic_p)
-			zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 0.2f, 35.0f);
-		else
-			zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 0.5f, 2.0f);
+	if (orthographic_p)
+		zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 0.2f, 35.0f);
+	else
+		zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 1.0f, 10.0f);
 
 	set_interactive_mode(interactive_mode_p);
 

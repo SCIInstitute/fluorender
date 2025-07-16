@@ -2330,6 +2330,11 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 			fluo::Vector side = GetSide();
 			glm::vec3 eye, center, up;
 			GetCameraSettings(eye, center, up);
+			if (m_cam_mode == 1)
+			{
+				glm::vec3 view_dir = glm::normalize(center - eye);
+				eye += view_dir * float(m_distance);
+			}
 			glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
 			glbin_lg_renderer.SetCamera(eye, center, up);
 			glbin_lg_renderer.SetProjection(
@@ -2422,6 +2427,11 @@ void RenderView::HandleCamera(bool vr)
 			}
 			else if (glbin_settings.m_hologram_mode == 2)
 			{
+				if (m_cam_mode == 1)
+				{
+					glm::vec3 view_dir = glm::normalize(center - eye);
+					eye += view_dir * float(m_distance);
+				}
 				glbin_lg_renderer.SetCamera(eye, center, up);
 				glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
 				glbin_lg_renderer.HandleCamera(m_persp);
