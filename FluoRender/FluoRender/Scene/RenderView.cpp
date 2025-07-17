@@ -2698,10 +2698,10 @@ void RenderView::SetScale121()
 		m_render_view_panel->FluoUpdate({ gstScaleFactor });
 }
 
-void RenderView::SetPinRotCenter(bool pin)
+void RenderView::SetPinRotCenter(bool pin, bool update)
 {
 	m_pin_rot_ctr = pin;
-	if (pin)
+	if (pin && update)
 		m_update_rot_ctr = true;
 }
 
@@ -3242,6 +3242,14 @@ void RenderView::SetParams(double t)
 	keycode.l2_name = "volmethod";
 	if (glbin_interpolator.GetInt(keycode, t, ival))
 		SetVolMethod(ival);
+	//camera mode
+	keycode.l2_name = "camera mode";
+	int cam_mode;
+	if (glbin_interpolator.GetInt(keycode, t, cam_mode))
+	{
+		SetCamMode(cam_mode);
+		vc.insert(gstCamMode);
+	}
 	//perspective angle
 	keycode.l2_name = "aov";
 	double aov;

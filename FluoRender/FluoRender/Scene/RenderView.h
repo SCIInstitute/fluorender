@@ -236,7 +236,7 @@ public:
 	void SetCenter();
 	double Get121ScaleFactor();
 	void SetScale121();
-	void SetPinRotCenter(bool);
+	void SetPinRotCenter(bool, bool);
 
 	//object operations
 	fluo::Point GetObjCenters();

@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
 #include <wxUndoableColorPicker.h>
+#include <wxBoldText.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
@@ -418,7 +419,7 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 
 	//angle of view
-	st2 = new wxStaticText(this, wxID_ANY, "AOV:");
+	st2 = new wxBoldText(this, wxID_ANY, "Camera");
 	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
 		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxSL_HORIZONTAL);
 	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
@@ -435,6 +436,10 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar2 = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_options_toolbar2->SetDoubleBuffered(true);
+	bitmap = wxGetBitmap(ortho);
+	m_options_toolbar2->AddToolWithHelp(
+		ID_OrthoPerspBtn, "Camera Projection", bitmap,
+		"Change camera projection between orthographic and perspective");
 	bitmap = wxGetBitmap(globe);
 	m_options_toolbar2->AddToolWithHelp(
 		ID_CamModeBtn, "Camera operation mode", bitmap,
@@ -623,10 +628,9 @@ void RenderViewPanel::CreateBar()
 		bitmap, wxNullBitmap,
 		"Confine all angles to 45 Degrees",
 		"Confine all angles to 45 Degrees");
-	bitmap = wxGetBitmap(slider_type_rot);
-	m_rot_lock_btn->AddCheckTool(ID_RotSliderType, "Slider Style",
-		bitmap, wxNullBitmap,
-		"Choose slider style between jog and normal",
+	bitmap = wxGetBitmap(slider);
+	m_rot_lock_btn->AddToolWithHelp(
+		ID_RotSliderType, "Slider Style", bitmap,
 		"Choose slider style between jog and normal");
 	m_rot_lock_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotLockCheck, this);
 	m_rot_lock_btn->Realize();
@@ -838,6 +842,12 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		bval = m_render_view->GetPersp();
 		m_aov_sldr->ChangeValue(bval ? ival : 10);
 		m_aov_text->ChangeValue(bval ? std::to_string(ival) : "Ortho");
+		if (bval)
+			m_options_toolbar2->SetToolNormalBitmap(ID_OrthoPerspBtn,
+				wxGetBitmap(persp));
+		else
+			m_options_toolbar2->SetToolNormalBitmap(ID_OrthoPerspBtn,
+				wxGetBitmap(ortho));
 	}
 
 	//free fly
@@ -930,7 +940,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (m_pin_by_user == 0)
 		{
 			bool pin_by_canvas = m_render_view->m_pin_rot_ctr;
-			m_render_view->SetPinRotCenter(m_pin_by_scale);
+			m_render_view->SetPinRotCenter(m_pin_by_scale, false);
 			update_pin_rot_ctr = m_pin_by_scale != pin_by_canvas;
 		}
 	}
@@ -981,7 +991,6 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//lock rot
 	if (update_all || FOUND_VALUE(gstGearedEnable))
 	{
-		m_rot_lock_btn->ToggleTool(ID_RotLockChk, m_render_view->GetRotLock());
 		if (m_render_view->GetRotLock())
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmap(gear_45));
@@ -997,7 +1006,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (m_rot_slider)
 		{
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
-				wxGetBitmap(slider_type_rot));
+				wxGetBitmap(jog));
 			if (m_x_rot_sldr->GetMode() != 1)
 			{
 				m_x_rot_sldr->SetMode(1);
@@ -1008,7 +1017,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		else
 		{
 			m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
-				wxGetBitmap(slider_type_pos));
+				wxGetBitmap(slider));
 			if (m_x_rot_sldr->GetMode() != 0)
 			{
 				m_x_rot_sldr->SetMode(0);
@@ -1222,6 +1231,19 @@ void RenderViewPanel::SetAov(double val, bool notify)
 		FluoRefresh(2, { gstNull }, { GetViewId() });
 }
 
+void RenderViewPanel::SetProjection()
+{
+	bool bval = m_render_view->GetPersp();
+	if (bval)
+	{
+		SetAov(10, true);
+	}
+	else
+	{
+		SetAov(45, true);
+	}
+}
+
 void RenderViewPanel::SetCamMode()
 {
 	int ival = m_render_view->GetCamMode();
@@ -1338,9 +1360,9 @@ void RenderViewPanel::SetRotLock(bool val)
 	FluoRefresh(2, { gstGearedEnable }, { GetViewId() });
 }
 
-void RenderViewPanel::SetSliderType(bool val)
+void RenderViewPanel::SetSliderType()
 {
-	m_rot_slider = val;
+	m_rot_slider = !m_rot_slider;
 	FluoRefresh(2, { gstRotSliderMode }, { GetViewId() });
 }
 
@@ -1474,6 +1496,10 @@ void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 
 	switch (id)
 	{
+	case ID_OrthoPerspBtn:
+		//toggle between ortho and perspective
+		SetProjection();
+		break;
 	case ID_CamModeBtn:
 		SetCamMode();
 		break;
@@ -1583,7 +1609,7 @@ void RenderViewPanel::OnPin(wxCommandEvent& event)
 		m_pin_by_user = 0;
 	else
 		m_pin_by_user = val ? 2 : 1;
-	m_render_view->SetPinRotCenter(val);
+	m_render_view->SetPinRotCenter(val, true);
 	FluoRefresh(2, { gstPinRotCtr }, { GetViewId() });
 }
 
@@ -1671,7 +1697,7 @@ void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
 		SetRotLock(m_rot_lock_btn->GetToolState(ID_RotLockChk));
 		break;
 	case ID_RotSliderType:
-		SetSliderType(m_rot_lock_btn->GetToolState(ID_RotSliderType));
+		SetSliderType();
 		break;
 	}
 }

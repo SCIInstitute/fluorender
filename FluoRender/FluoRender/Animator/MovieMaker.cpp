@@ -910,6 +910,11 @@ void MovieMaker::InsertKey(int index)
 	keycode.l2_name = "volmethod";
 	flkeyI = new FlKeyInt(keycode, ival);
 	glbin_interpolator.AddKey(flkeyI);
+	////camera mode
+	//ival = view->GetCamMode();
+	//keycode.l2_name = "camera mode";
+	//flkeyI = new FlKeyInt(keycode, ival);
+	//glbin_interpolator.AddKey(flkeyI);
 	//perspective angle
 	bool persp = view->GetPersp();
 	double aov = view->GetAov();

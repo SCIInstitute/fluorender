@@ -886,7 +886,7 @@ void Project::Open(const std::wstring& filename)
 				else
 					view->m_scale_factor = view->GetRadius() / tan(d2r(view->GetAov() / 2.0)) / view->GetInitDist();
 				if (fconfig->Read("pin_rot_center", &bval))
-					view->SetPinRotCenter(bval);
+					view->SetPinRotCenter(bval, false);
 				//object
 				if (fconfig->Read("obj_center", &pval))
 					view->SetObjCenters(pval);

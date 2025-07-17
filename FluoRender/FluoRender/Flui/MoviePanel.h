@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderView;
 class wxUndoableScrollBar;
+class wxUndoableToolbar;
 
 class KeyListCtrl : public wxListCtrl
 {
@@ -138,7 +139,7 @@ public:
 	void SetFps(double val);
 	void SetMovieLength(double val);
 	void SetView(int val);
-	void SetSliderStyle(bool val);
+	void SetSliderStyle();
 	//frames
 	void SetFullFrame(int val);
 	void SetStartFrame(int val);
@@ -177,7 +178,7 @@ private:
 	wxTextCtrl *m_movie_len_text;
 	wxComboBox *m_views_cmb;
 
-	wxToolBar* m_slider_btn;
+	wxUndoableToolbar* m_slider_btn;
 	wxUndoableScrollBar* m_progress_sldr;
 
 	wxButton* m_start_btn;

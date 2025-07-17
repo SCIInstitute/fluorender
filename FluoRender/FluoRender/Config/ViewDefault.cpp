@@ -194,7 +194,7 @@ void ViewDefault::Apply(RenderView* canvas)
 	canvas->SetCamMode(m_cam_mode);
 	canvas->SetCenters(m_center);
 	canvas->SetRotLock(m_rot_lock);
-	canvas->SetPinRotCenter(m_pin_rot_center);
+	canvas->SetPinRotCenter(m_pin_rot_center, false);
 	canvas->m_scale_mode = m_scale_mode;
 	canvas->m_scale_factor = m_scale_factor;
 	canvas->SetFog(m_use_fog);

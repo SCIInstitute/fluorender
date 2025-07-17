@@ -220,10 +220,10 @@ public:
 	const static unsigned char scale_text_off_png[712];
 	/* full_screen.png - 452 bytes */
 	const static unsigned char full_view_png[452];
-	/* slider_type_pos.png - 665 bytes */
-	const static unsigned char slider_type_pos_png[665];
-	/* slider_type_rot.png - 1085 bytes */
-	const static unsigned char slider_type_rot_png[1085];
+	/* jog.png - 1228 bytes */
+	const static unsigned char jog_png[1228];
+	/* slider.png - 989 bytes */
+	const static unsigned char slider_png[989];
 	/* zrot.png - 763 bytes */
 	const static unsigned char zrot_png[763];
 	/* zoom_view.png - 312 bytes */
@@ -232,6 +232,10 @@ public:
 	const static unsigned char zoom_pixel_png[132];
 	/* zoom_data.png - 752 bytes */
 	const static unsigned char zoom_data_png[752];
+	/* ortho.png - 1177 bytes */
+	const static unsigned char ortho_png[1177];
+	/* persp.png - 1270 bytes */
+	const static unsigned char persp_png[1270];
 
 
 	//clipping view icons

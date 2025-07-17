@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <MovieMaker.h>
 #include <wxUndoableScrollBar.h>
+#include <wxUndoableToolbar.h>
 #include <ModalDlg.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
@@ -477,7 +478,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 
 	//degrees
 	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, wxID_ANY, "Rotation Angles:",
+	st = new wxStaticText(page, wxID_ANY, "Range:",
 		wxDefaultPosition, FromDIP(wxSize(200, -1)));
 	m_degree_text = new wxTextCtrl(page, wxID_ANY, "360",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT);
@@ -491,7 +492,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 
 	//rotation interpolation
 	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, wxID_ANY, "Interpolation Method:",
+	st = new wxStaticText(page, wxID_ANY, "Interpolation:",
 		wxDefaultPosition, FromDIP(wxSize(200, -1)));
 	m_rot_int_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(65, -1)), 0, NULL, wxCB_READONLY);
@@ -1038,12 +1039,11 @@ MoviePanel::MoviePanel(MainFrame* frame,
 
 	//slider
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_slider_btn = new wxToolBar(this, wxID_ANY,
+	m_slider_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_slider_btn->SetDoubleBuffered(true);
-	m_slider_btn->AddCheckTool(0, "Slider style",
-		wxGetBitmap(slider_type_pos), wxNullBitmap,
-		"Choose slider style between jog and normal",
+	m_slider_btn->AddToolWithHelp(
+		0, "Slider style", wxGetBitmap(slider),
 		"Choose slider style between jog and normal");
 	m_slider_btn->Bind(wxEVT_TOOL, &MoviePanel::OnSliderStyle, this);
 	m_slider_btn->Realize();
@@ -1231,11 +1231,10 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		bval = glbin_mov_def.m_slider_style;
 		m_progress_sldr->SetMode(bval ? 1 : 0);
-		m_slider_btn->ToggleTool(0, bval);
 		if (bval)
-			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider_type_rot));
+			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(jog));
 		else
-			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider_type_pos));
+			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider));
 	}
 
 	if (update_all || FOUND_VALUE(gstMovProgSlider))
@@ -1550,9 +1549,9 @@ void MoviePanel::SetView(int index)
 	FluoUpdate({ gstMovViewIndex });
 }
 
-void MoviePanel::SetSliderStyle(bool val)
+void MoviePanel::SetSliderStyle()
 {
-	glbin_mov_def.m_slider_style = val;
+	glbin_mov_def.m_slider_style = !glbin_mov_def.m_slider_style;
 
 	FluoUpdate({ gstMovSliderStyle });
 }
@@ -1760,8 +1759,7 @@ void MoviePanel::OnViewSelected(wxCommandEvent& event)
 
 void MoviePanel::OnSliderStyle(wxCommandEvent& event)
 {
-	bool val = m_slider_btn->GetToolState(0);
-	SetSliderStyle(val);
+	SetSliderStyle();
 }
 
 void MoviePanel::OnProgressScroll(wxScrollEvent& event)
@@ -2026,7 +2024,7 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
 	m_keylist->Update();
-	m_keylist->SelectItemSilently(item);
+	//m_keylist->SelectItemSilently(item);
 }
 
 void MoviePanel::OnDelKey(wxCommandEvent& event)

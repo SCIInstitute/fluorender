@@ -57,7 +57,8 @@ public:
 	};
 	enum
 	{
-		ID_CamModeBtn = 0,
+		ID_OrthoPerspBtn = 0,
+		ID_CamModeBtn,
 		ID_DefaultBtn
 	};
 	enum
@@ -127,6 +128,7 @@ public:
 	void SetBgColor(fluo::Color val);
 	void SetBgColorInvert(bool val);
 	void SetAov(double val, bool notify);
+	void SetProjection();
 	void SetCamMode();
 	void SetStereography();
 	void SetHolography();
@@ -142,7 +144,7 @@ public:
 	void SetScaleMode(int val);
 
 	void SetRotLock(bool val);
-	void SetSliderType(bool val);
+	void SetSliderType();
 	void SetRotations(const fluo::Vector& val, bool notify);
 	void SetZeroRotations();
 
