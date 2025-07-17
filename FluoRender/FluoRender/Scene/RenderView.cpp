@@ -9376,6 +9376,11 @@ fluo::Quaternion RenderView::Trackball(double dx, double dy)
 
 	a = fluo::Vector(-dy, dx, 0.0);
 	phi = a.length() / 3.0;
+	if (m_cam_mode == 1 &&
+		m_distance > 0.0 &&
+		m_radius > 0.0 &&
+		m_distance > m_radius)
+		phi /= m_distance / m_radius;
 	a.normalize();
 
 	if (m_rot_lock && phi < 45.0)
