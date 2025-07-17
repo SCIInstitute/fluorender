@@ -2332,12 +2332,14 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 			GetCameraSettings(eye, center, up);
 			glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
 			float dist = static_cast<float>(m_distance);
-			if (m_cam_mode == 1 && m_persp)
+			if (m_cam_mode == 1)
 			{
-				dist = GetDistanceForLookingGlass();
+				if (m_persp)
+					dist = GetDistanceForLookingGlass();
+				else
+					dist = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 				if (dist < 0.0f)
 					dist = 0.0f;
-				//dist /= 2.0f;
 			}
 			glbin_lg_renderer.SetCamera(eye, center, up, dist);
 			glbin_lg_renderer.SetProjection(
