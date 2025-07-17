@@ -2335,9 +2335,10 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 			if (m_cam_mode == 1)
 			{
 				if (m_persp)
-					dist = GetDistanceForLookingGlass();
+					dist = GetDistancePerspFlight();
 				else
-					dist = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
+					GetCameraSettingsOrthoFligt(eye, center, dist);
+					
 				if (dist < 0.0f)
 					dist = 0.0f;
 			}
@@ -2373,7 +2374,6 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 
 void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3& up)
 {
-	double distance = 1.0;
 	fluo::Vector pos(m_transx, m_transy, m_transz);
 	pos.normalize();
 	if (m_cam_mode == 1)
@@ -2393,6 +2393,16 @@ void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3&
 		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
 		eye += center;
 	}
+}
+
+void RenderView::GetCameraSettingsOrthoFligt(glm::vec3& eye, glm::vec3& center, float& dist)
+{
+	dist = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
+	glm::vec3 dir(m_transx, m_transy, m_transz);
+	dir = glm::normalize(dir);
+	dir *= dist;
+	eye = dir;
+	center = glm::vec3(0.0);
 }
 
 void RenderView::HandleCamera(bool vr)
@@ -2433,15 +2443,6 @@ void RenderView::HandleCamera(bool vr)
 			}
 			else if (glbin_settings.m_hologram_mode == 2)
 			{
-				//float dist = static_cast<float>(m_distance);
-				//if (m_cam_mode == 1)
-				//{
-				//	dist = GetDistance();
-				//	if (dist < 0.0f)
-				//		dist = 0.0f;
-				//}
-				//glbin_lg_renderer.SetCamera(eye, center, up, dist);
-				//glbin_lg_renderer.SetCameraSide(glm::vec3(side.x(), side.y(), side.z()));
 				glbin_lg_renderer.HandleCamera(m_persp);
 				glm::vec3 new_eye, new_center, new_up;
 				glbin_lg_renderer.GetCamera(new_eye, new_center, new_up);
@@ -2481,7 +2482,7 @@ void RenderView::HandleCamera(bool vr)
 	}
 }
 
-float RenderView::GetDistanceForLookingGlass()
+float RenderView::GetDistancePerspFlight()
 {
 	auto cur_vd = m_cur_vol.lock();
 	fluo::Point p, ip;

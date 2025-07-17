@@ -404,6 +404,8 @@ void LookingGlassRenderer::HandleCamera(bool persp)
 
 void LookingGlassRenderer::HandleProjection(bool persp)
 {
+	DBGPRINT(L"m_distance: %f; m_eye: %f, %f, %f; m_center: %f, %f, %f\n",
+		m_distance, m_eye.x, m_eye.y, m_eye.z, m_center.x, m_center.y, m_center.z);
 	if (persp)
 	{
 		m_proj_mat = glm::perspective(m_aov, m_aspect, m_near, m_far);
