@@ -2845,17 +2845,36 @@ void RenderView::SetLockCenterSel()
 
 void RenderView::SetCamMode(int mode)
 {
+	if (m_cam_mode == mode)
+		return;
 	m_cam_mode = mode;
-	if (m_cam_mode == 1)
+
+	switch (m_cam_mode)
 	{
-		fluo::Vector pos(m_transx, m_transy, m_transz);
-		fluo::Vector d = pos;
-		d.normalize();
-		fluo::Vector ctr;
-		ctr = pos - 0.1 * d;
-		m_ctrx = ctr.x();
-		m_ctry = ctr.y();
-		m_ctrz = ctr.z();
+	case 0://globe
+		{
+			fluo::Vector eye(m_transx, m_transy, m_transz);
+			fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+			fluo::Vector d = ctr - eye;
+			d.normalize();
+			ctr = eye + m_distance * d;
+			m_ctrx = ctr.x();
+			m_ctry = ctr.y();
+			m_ctrz = ctr.z();
+		}
+		break;
+	case 1://flight
+		{
+			fluo::Vector pos(m_transx, m_transy, m_transz);
+			fluo::Vector d = pos;
+			d.normalize();
+			fluo::Vector ctr;
+			ctr = pos - 0.1 * d;
+			m_ctrx = ctr.x();
+			m_ctry = ctr.y();
+			m_ctrz = ctr.z();
+		}
+		break;
 	}
 }
 
@@ -10548,13 +10567,21 @@ void RenderView::ProcessIdle(IdleState& state)
 				fluo::Vector pos(m_transx, m_transy, m_transz);
 				pos.normalize();
 				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-				double delta = m_radius * 0.05;
+				double factor = m_persp ? 20.0 : 5000.0;
+				double delta = m_radius / factor;
 				ctr += delta * pos;
 				m_ctrx = ctr.x();
 				m_ctry = ctr.y();
 				m_ctrz = ctr.z();
 				m_interactive = true;
-				state.m_value_collection.insert(gstScaleFactor);
+				if (!m_persp)
+				{
+					factor = m_scale_factor - m_scale_factor * delta;
+					if (factor < 0.1)
+						factor = 0.1;
+					m_scale_factor = factor;
+					state.m_value_collection.insert(gstScaleFactor);
+				}
 			}
 			else
 			{
@@ -10580,13 +10607,21 @@ void RenderView::ProcessIdle(IdleState& state)
 				fluo::Vector pos(m_transx, m_transy, m_transz);
 				pos.normalize();
 				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-				double delta = m_radius * 0.05;
+				double factor = m_persp ? 20.0 : 5000.0;
+				double delta = m_radius / factor;
 				ctr -= delta * pos;
 				m_ctrx = ctr.x();
 				m_ctry = ctr.y();
 				m_ctrz = ctr.z();
 				m_interactive = true;
-				state.m_value_collection.insert(gstScaleFactor);
+				if (!m_persp)
+				{
+					factor = m_scale_factor + m_scale_factor * delta;
+					if (factor < 0.1)
+						factor = 0.1;
+					m_scale_factor = factor;
+					state.m_value_collection.insert(gstScaleFactor);
+				}
 			}
 			else
 			{

@@ -2023,8 +2023,6 @@ void MoviePanel::OnInsKey(wxCommandEvent& event)
 	glbin_moviemaker.InsertKey(index);
 
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
-	m_keylist->Update();
-	//m_keylist->SelectItemSilently(item);
 }
 
 void MoviePanel::OnDelKey(wxCommandEvent& event)
@@ -2511,10 +2509,10 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 
 	//compressed TIFF
 	wxBoxSizer* line2 = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *tiffopts = new wxStaticText(panel, wxID_ANY, "TIFF Options:",
+	wxStaticText *tiffopts = new wxStaticText(panel, wxID_ANY, "Image Sequence Options:",
 		wxDefaultPosition, wxDefaultSize);
 	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_ANY,
-		"Lempel-Ziv-Welch Compression");
+		"Compress to save space");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
 	if (ch1)
@@ -2542,7 +2540,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	// movie quality
 	wxBoxSizer* line3 = new wxBoxSizer(wxHORIZONTAL);
 	//bitrate
-	wxStaticText *MOVopts = new wxStaticText(panel, wxID_ANY, "MOV Options:",
+	wxStaticText *MOVopts = new wxStaticText(panel, wxID_ANY, "Movie Options:",
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
 		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);

@@ -161,8 +161,8 @@ public:
 	const static unsigned char info_png[1262];
 	/* axis.png - 557 bytes */
 	const static unsigned char axis_png[577];
-	/* camera.png - 1126 bytes */
-	const static unsigned char camera_png[1126];
+	/* camera.png - 982 bytes */
+	const static unsigned char camera_png[982];
 	/* center.png - 1230 bytes */
 	const static unsigned char center_png[1230];
 	/* center_click.png - 1341 bytes */

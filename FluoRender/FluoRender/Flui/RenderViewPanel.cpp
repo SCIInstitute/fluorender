@@ -383,7 +383,7 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar, this);
 	m_options_toolbar->Realize();
 
-	sizer_h_1->Add(40, 40);
+	sizer_h_1->AddSpacer(50);
 	sizer_h_1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
 
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "50",
@@ -419,7 +419,8 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 
 	//angle of view
-	st2 = new wxBoldText(this, wxID_ANY, "Camera");
+	st2 = new wxBoldText(this, wxID_ANY, "Cam.");
+	st2->SetToolTip("Change camera settings for projection and operation mode");
 	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
 		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxSL_HORIZONTAL);
 	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
@@ -427,7 +428,6 @@ void RenderViewPanel::CreateBar()
 	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
 	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
 	m_aov_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnAovText, this);
-	sizer_h_1->Add(5, 5);
 	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_sldr, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
@@ -453,7 +453,7 @@ void RenderViewPanel::CreateBar()
 	m_options_toolbar2->Realize();
 	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
 
-	sizer_h_1->Add(40, 40);
+	sizer_h_1->AddSpacer(10);
 	//full screen
 	m_full_screen_toolbar = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER);
@@ -481,6 +481,7 @@ void RenderViewPanel::CreateBar()
 	m_full_screen_toolbar->Bind(wxEVT_TOOL, &RenderViewPanel::OnFullScreenToolbar, this);
 	m_full_screen_toolbar->Realize();
 	sizer_h_1->Add(m_full_screen_toolbar, 0, wxALIGN_CENTER);
+	sizer_h_1->AddSpacer(50);
 
 	//bar left///////////////////////////////////////////////////
 	wxBoxSizer* sizer_v_3 = new wxBoxSizer(wxVERTICAL);
@@ -679,7 +680,7 @@ void RenderViewPanel::CreateBar()
 	m_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotReset, this);
 	m_reset_btn->Realize();
 
-	sizer_h_2->AddSpacer(40);
+	sizer_h_2->AddSpacer(50);
 	sizer_h_2->Add(m_rot_lock_btn, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
@@ -695,7 +696,7 @@ void RenderViewPanel::CreateBar()
 	sizer_h_2->Add(5, 5, 0);
 	sizer_h_2->Add(m_ortho_view_cmb, 0, wxALIGN_CENTER, 2);
 	sizer_h_2->Add(m_reset_btn, 0, wxALIGN_CENTER);
-	sizer_h_2->AddSpacer(40);
+	sizer_h_2->AddSpacer(50);
 
 	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
 	sizer_v->Add(sizer_m, 1, wxEXPAND);
@@ -1961,7 +1962,7 @@ wxWindow* RenderViewPanel::CreateExtraCaptureControl(wxWindow* parent)
 
 	//compressed
 	wxCheckBox* ch1 = new wxCheckBox(panel, ID_LZW_COMP,
-		"Lempel-Ziv-Welch Compression");
+		"Compress to save space");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(RenderViewPanel::OnCh1Check), NULL, panel);
 	if (ch1)
