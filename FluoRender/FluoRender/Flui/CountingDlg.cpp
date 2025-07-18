@@ -252,11 +252,7 @@ void CountingDlg::OnAnalyzeBtn(wxCommandEvent& event)
 		return;
 
 	glbin_comp_generator.SetVolumeData(vd);
-	bool sel = glbin_comp_generator.GetUseSel();
-	vd->AddEmptyMask(1, !sel);
-	vd->AddEmptyLabel(0, !sel);
-	glbin_comp_generator.ShuffleID();
-	glbin_comp_generator.Grow();
+	glbin_comp_generator.Compute();
 	glbin_comp_analyzer.SetVolume(vd);
 	glbin_comp_analyzer.Analyze();
 	glbin_comp_analyzer.Count();

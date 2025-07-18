@@ -193,11 +193,7 @@ void NoiseCancellingDlg::Preview()
 	bool bval = glbin_comp_generator.GetUseSel();
 	glbin_comp_generator.SetThresh(glbin_comp_def.m_nr_thresh);
 	glbin_comp_generator.SetVolumeData(vd);
-	vd->AddEmptyMask(1, !bval);
-	vd->AddEmptyLabel(0, !bval);
-	glbin_comp_generator.ShuffleID();
-	double scale = vd->GetScalarScale();
-	glbin_comp_generator.Grow();
+	glbin_comp_generator.Compute();
 
 	bool use_min = glbin_comp_analyzer.GetUseMin();
 	bool use_max = glbin_comp_analyzer.GetUseMax();
