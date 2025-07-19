@@ -69,18 +69,14 @@ public:
 	};
 	enum
 	{
-		ID_RotLockChk = 0,
-		ID_RotSliderType
-	};
-	enum
-	{
 		ID_RotXScroll = 0,
 		ID_RotYScroll,
 		ID_RotZScroll
 	};
 	enum
 	{
-		ID_ZeroRotBtn = 0,
+		ID_RotLockChk = 0,
+		ID_ZeroRotBtn,
 		ID_RotResetBtn
 	};
 	enum
@@ -207,7 +203,7 @@ private:
 	wxToolBar *m_scale_reset_btn;
 
 	//bottom bar///////////////////////////////////////////////////
-	wxUndoableToolbar* m_rot_lock_btn;
+	wxUndoableToolbar* m_slider_mode_btn;
 	wxTextCtrl *m_x_rot_text;
 	wxTextCtrl *m_y_rot_text;
 	wxTextCtrl *m_z_rot_text;
@@ -215,7 +211,7 @@ private:
 	wxUndoableScrollBar* m_y_rot_sldr;
 	wxUndoableScrollBar* m_z_rot_sldr;
 	wxComboBox *m_ortho_view_cmb;
-	wxToolBar* m_reset_btn;
+	wxToolBar* m_rot_btn;
 
 private:
 	int GetViewId();
@@ -255,11 +251,11 @@ private:
 	void OnScaleFactorSpinDown(wxSpinEvent& event);
 
 	//bar bottom
-	void OnRotLockCheck(wxCommandEvent& event);
+	void OnRotSliderMode(wxCommandEvent& event);
 	void OnRotEdit(wxCommandEvent& event);
 	void OnRotScroll(wxScrollEvent& event);
 
-	void OnRotReset(wxCommandEvent& event);
+	void OnRotSettings(wxCommandEvent& event);
 	void OnOrthoViewSelected(wxCommandEvent& event);
 
 	//capture options

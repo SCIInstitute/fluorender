@@ -257,7 +257,7 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	glbin.add_undo_control(m_depth_atten_btn);
 	glbin.add_undo_control(m_depth_atten_factor_sldr);
 	glbin.add_undo_control(m_scale_factor_sldr);
-	glbin.add_undo_control(m_rot_lock_btn);
+	glbin.add_undo_control(m_slider_mode_btn);
 	glbin.add_undo_control(m_x_rot_sldr);
 	glbin.add_undo_control(m_y_rot_sldr);
 	glbin.add_undo_control(m_z_rot_sldr);
@@ -280,7 +280,7 @@ RenderViewPanel::~RenderViewPanel()
 	glbin.del_undo_control(m_depth_atten_btn);
 	glbin.del_undo_control(m_depth_atten_factor_sldr);
 	glbin.del_undo_control(m_scale_factor_sldr);
-	glbin.del_undo_control(m_rot_lock_btn);
+	glbin.del_undo_control(m_slider_mode_btn);
 	glbin.del_undo_control(m_x_rot_sldr);
 	glbin.del_undo_control(m_y_rot_sldr);
 	glbin.del_undo_control(m_z_rot_sldr);
@@ -603,8 +603,8 @@ void RenderViewPanel::CreateBar()
 	m_scale_mode_btn->Realize();
 	sizer_v_4->AddSpacer(50);
 	sizer_v_4->Add(m_pin_btn, 0, wxALIGN_CENTER);
-	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_center_click_btn, 0, wxALIGN_CENTER);
+	sizer_v_4->Add(m_center_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_121_btn, 0, wxALIGN_CENTER);
 	sizer_v_4->Add(m_scale_factor_sldr, 1, wxEXPAND);
 	sizer_v_4->Add(m_scale_factor_spin, 0, wxALIGN_CENTER);
@@ -621,20 +621,15 @@ void RenderViewPanel::CreateBar()
 	//bar bottom///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_2 = new wxBoxSizer(wxHORIZONTAL);
 	//45 lock
-	m_rot_lock_btn = new wxUndoableToolbar(this, wxID_ANY,
+	m_slider_mode_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_rot_lock_btn->SetDoubleBuffered(true);
-	bitmap = wxGetBitmap(gear_dark);
-	m_rot_lock_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
-		bitmap, wxNullBitmap,
-		"Confine all angles to 45 Degrees",
-		"Confine all angles to 45 Degrees");
+	m_slider_mode_btn->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(slider);
-	m_rot_lock_btn->AddToolWithHelp(
-		ID_RotSliderType, "Slider Style", bitmap,
+	m_slider_mode_btn->AddToolWithHelp(
+		0, "Slider Style", bitmap,
 		"Choose slider style between jog and normal");
-	m_rot_lock_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotLockCheck, this);
-	m_rot_lock_btn->Realize();
+	m_slider_mode_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotSliderMode, this);
+	m_slider_mode_btn->Realize();
 
 	st1 = new wxStaticText(this, 0, "X:");
 	m_x_rot_sldr = new wxUndoableScrollBar(this, ID_RotXScroll);
@@ -661,27 +656,32 @@ void RenderViewPanel::CreateBar()
 	//ortho view selector
 	m_ortho_view_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
-	std::vector<wxString> ov_list = { "+X", "-X", "+Y", "-Y", "+Z", "-Z", "NA" };
+	std::vector<wxString> ov_list = { "YZ", "YZ Back", "XZ", "XZ Back", "XY", "XY Back", "Free" };
 	m_ortho_view_cmb->Append(ov_list);
 	m_ortho_view_cmb->Bind(wxEVT_COMBOBOX, &RenderViewPanel::OnOrthoViewSelected, this);
 
 	//set reset
-	m_reset_btn = new wxToolBar(this, wxID_ANY,
+	m_rot_btn = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_reset_btn->SetDoubleBuffered(true);
+	m_rot_btn->SetDoubleBuffered(true);
+	bitmap = wxGetBitmap(gear_dark);
+	m_rot_btn->AddCheckTool(ID_RotLockChk, "45 Angles",
+		bitmap, wxNullBitmap,
+		"Confine all angles to 45 Degrees",
+		"Confine all angles to 45 Degrees");
 	bitmap = wxGetBitmap(zrot);
-	m_reset_btn->AddTool(ID_ZeroRotBtn, "Set Zeros",
+	m_rot_btn->AddTool(ID_ZeroRotBtn, "Set Zeros",
 		bitmap, "Set current angles as zeros");
-	m_reset_btn->SetToolLongHelp(ID_ZeroRotBtn, "Set current angles as zeros");
+	m_rot_btn->SetToolLongHelp(ID_ZeroRotBtn, "Set current angles as zeros");
 	bitmap = wxGetBitmap(reset);
-	m_reset_btn->AddTool(ID_RotResetBtn,"Reset",
+	m_rot_btn->AddTool(ID_RotResetBtn,"Reset",
 		bitmap, "Reset Rotations");
-	m_reset_btn->SetToolLongHelp(ID_RotResetBtn, "Reset Rotations");
-	m_reset_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotReset, this);
-	m_reset_btn->Realize();
+	m_rot_btn->SetToolLongHelp(ID_RotResetBtn, "Reset Rotations");
+	m_rot_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotSettings, this);
+	m_rot_btn->Realize();
 
 	sizer_h_2->AddSpacer(50);
-	sizer_h_2->Add(m_rot_lock_btn, 0, wxALIGN_CENTER);
+	sizer_h_2->Add(m_slider_mode_btn, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
 	sizer_h_2->Add(m_x_rot_text, 0, wxALIGN_CENTER);
@@ -695,7 +695,7 @@ void RenderViewPanel::CreateBar()
 	sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(5, 5, 0);
 	sizer_h_2->Add(m_ortho_view_cmb, 0, wxALIGN_CENTER, 2);
-	sizer_h_2->Add(m_reset_btn, 0, wxALIGN_CENTER);
+	sizer_h_2->Add(m_rot_btn, 0, wxALIGN_CENTER);
 	sizer_h_2->AddSpacer(50);
 
 	sizer_v->Add(sizer_h_1, 0, wxEXPAND);
@@ -992,21 +992,23 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//lock rot
 	if (update_all || FOUND_VALUE(gstGearedEnable))
 	{
-		if (m_render_view->GetRotLock())
-			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+		bval = m_render_view->GetRotLock();
+		m_rot_btn->ToggleTool(ID_RotLockChk, bval);
+		if (bval)
+			m_rot_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmap(gear_45));
 		else
-			m_rot_lock_btn->SetToolNormalBitmap(ID_RotLockChk,
+			m_rot_btn->SetToolNormalBitmap(ID_RotLockChk,
 				wxGetBitmap(gear_dark));
 	}
 
 	//slider type
 	if (update_all || FOUND_VALUE(gstRotSliderMode))
 	{
-		m_rot_lock_btn->ToggleTool(ID_RotSliderType, m_rot_slider);
+		m_slider_mode_btn->ToggleTool(0, m_rot_slider);
 		if (m_rot_slider)
 		{
-			m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
+			m_slider_mode_btn->SetToolNormalBitmap(0,
 				wxGetBitmap(jog));
 			if (m_x_rot_sldr->GetMode() != 1)
 			{
@@ -1017,7 +1019,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		else
 		{
-			m_rot_lock_btn->SetToolNormalBitmap(ID_RotSliderType,
+			m_slider_mode_btn->SetToolNormalBitmap(0,
 				wxGetBitmap(slider));
 			if (m_x_rot_sldr->GetMode() != 0)
 			{
@@ -1688,19 +1690,9 @@ void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
 	SetScaleMode(mode);
 }
 
-void RenderViewPanel::OnRotLockCheck(wxCommandEvent& event)
+void RenderViewPanel::OnRotSliderMode(wxCommandEvent& event)
 {
-	int id = event.GetId();
-
-	switch (id)
-	{
-	case ID_RotLockChk:
-		SetRotLock(m_rot_lock_btn->GetToolState(ID_RotLockChk));
-		break;
-	case ID_RotSliderType:
-		SetSliderType();
-		break;
-	}
+	SetSliderType();
 }
 
 void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
@@ -1766,12 +1758,18 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 		SetRotLock(false);
 }
 
-void RenderViewPanel::OnRotReset(wxCommandEvent& event)
+void RenderViewPanel::OnRotSettings(wxCommandEvent& event)
 {
 	int id = event.GetId();
 
 	switch (id)
 	{
+	case ID_RotLockChk:
+	{
+		bool bval = m_render_view->GetRotLock();
+		SetRotLock(!bval);
+	}
+		break;
 	case ID_ZeroRotBtn:
 		SetZeroRotations();
 		break;
