@@ -2550,17 +2550,17 @@ void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 int RenderView::GetOrientation()
 {
 	//update ortho rotation
-	if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
 		return 0;
-	else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
 		return 1;
 	else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 		return 2;
 	else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 		return 3;
-	else if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
+	else if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 		return 4;
-	else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
+	else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 		return 5;
 	else
 		return 6;

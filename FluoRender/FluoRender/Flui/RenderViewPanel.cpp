@@ -250,10 +250,11 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	CreateBar();
 
 	//add controls
-	glbin.add_undo_control(m_options_toolbar);
+	glbin.add_undo_control(m_mix_mode_tb);
+	glbin.add_undo_control(m_hud_tb);
 	glbin.add_undo_control(m_bg_color_picker);
 	glbin.add_undo_control(m_aov_sldr);
-	glbin.add_undo_control(m_options_toolbar2);
+	glbin.add_undo_control(m_cam_op_tb);
 	glbin.add_undo_control(m_depth_atten_btn);
 	glbin.add_undo_control(m_depth_atten_factor_sldr);
 	glbin.add_undo_control(m_scale_factor_sldr);
@@ -273,10 +274,11 @@ RenderViewPanel::~RenderViewPanel()
 		m_full_frame->Destroy();
 
 	//delete controls
-	glbin.del_undo_control(m_options_toolbar);
+	glbin.del_undo_control(m_mix_mode_tb);
+	glbin.del_undo_control(m_hud_tb);
 	glbin.del_undo_control(m_bg_color_picker);
 	glbin.del_undo_control(m_aov_sldr);
-	glbin.del_undo_control(m_options_toolbar2);
+	glbin.del_undo_control(m_cam_op_tb);
 	glbin.del_undo_control(m_depth_atten_btn);
 	glbin.del_undo_control(m_depth_atten_factor_sldr);
 	glbin.del_undo_control(m_scale_factor_sldr);
@@ -305,7 +307,7 @@ void RenderViewPanel::CreateBar()
 
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_m = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *st1, *st2, *st3;
+	wxStaticText *st;
 
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	wxBitmapBundle bitmap;
@@ -313,41 +315,46 @@ void RenderViewPanel::CreateBar()
 	//bar top///////////////////////////////////////////////////
 	wxBoxSizer* sizer_h_1 = new wxBoxSizer(wxHORIZONTAL);
 	//toolbar 1
-	m_options_toolbar = new wxUndoableToolbar(this, wxID_ANY,
+	m_mix_mode_tb = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_options_toolbar->SetDoubleBuffered(true);
-	wxSize tbs = m_options_toolbar->GetSize();
+	m_mix_mode_tb->SetDoubleBuffered(true);
+	wxSize tbs = m_mix_mode_tb->GetSize();
 
 	//blend mode
+	st = new wxBoldText(this, wxID_ANY, "MIX ");
 	bitmap = wxGetBitmap(layers);
-	m_options_toolbar->AddCheckTool(
+	m_mix_mode_tb->AddCheckTool(
 		ID_VolumeSeqRd, "Layer",
 		bitmap, wxNullBitmap,
 		"Render View as Layers",
 		"Render View as Layers");
 	bitmap = wxGetBitmap(depth);
-	m_options_toolbar->AddCheckTool(
+	m_mix_mode_tb->AddCheckTool(
 		ID_VolumeMultiRd, "Depth",
 		bitmap, wxNullBitmap,
 		"Render View by Depth",
 		"Render View by Depth");
 	bitmap = wxGetBitmap(composite);
-	m_options_toolbar->AddCheckTool(
+	m_mix_mode_tb->AddCheckTool(
 		ID_VolumeCompRd, "Compo",
 		bitmap, wxNullBitmap,
 		"Render View as a Composite of Colors",
 		"Render View as a Composite of Colors");
+	m_mix_mode_tb->Bind(wxEVT_TOOL, &RenderViewPanel::OnMixMode, this);
+	m_mix_mode_tb->Realize();
 
-	//capture
-	bitmap = wxGetBitmap(camera);
-	m_options_toolbar->AddToolWithHelp(
-		ID_CaptureBtn, "Snap",
-		bitmap,
-		"Capture Render View as an image");
+	sizer_h_1->AddSpacer(50);
+	sizer_h_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_mix_mode_tb, 0, wxALIGN_CENTER);
+
+	//hud
+	st = new wxBoldText(this, wxID_ANY, "HUD ");
+	m_hud_tb = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 
 	//info
 	bitmap = wxGetBitmap(info);
-	m_options_toolbar->AddCheckTool(
+	m_hud_tb->AddCheckTool(
 		ID_InfoChk, "Info",
 		bitmap, wxNullBitmap,
 		"Toggle View of FPS and Mouse Position",
@@ -355,7 +362,7 @@ void RenderViewPanel::CreateBar()
 
 	//cam center
 	bitmap = wxGetBitmap(axis);
-	m_options_toolbar->AddCheckTool(
+	m_hud_tb->AddCheckTool(
 		ID_CamCtrChk, "Axis",
 		bitmap, wxNullBitmap,
 		"Toggle View of the Center Axis",
@@ -363,7 +370,7 @@ void RenderViewPanel::CreateBar()
 
 	//legend
 	bitmap = wxGetBitmap(legend);
-	m_options_toolbar->AddCheckTool(
+	m_hud_tb->AddCheckTool(
 		ID_LegendChk, "Legend",
 		bitmap, wxNullBitmap,
 		"Toggle View of the Legend",
@@ -371,20 +378,21 @@ void RenderViewPanel::CreateBar()
 
 	//colormap
 	bitmap = wxGetBitmap(colormap_off);
-	m_options_toolbar->AddToolWithHelp(
+	m_hud_tb->AddToolWithHelp(
 		ID_Colormap, "Colormap", bitmap,
 		"Toggle Colormap Legend Options (Off, On, On with text)");
 
 	//scale bar
 	bitmap = wxGetBitmap(scalebar);
-	m_options_toolbar->AddToolWithHelp(
+	m_hud_tb->AddToolWithHelp(
 		ID_ScaleBar, "Scale", bitmap,
 		"Toggle Scalebar Options (Off, On, On with text)");
-	m_options_toolbar->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar, this);
-	m_options_toolbar->Realize();
+	m_hud_tb->Bind(wxEVT_TOOL, &RenderViewPanel::OnHud, this);
+	m_hud_tb->Realize();
 
-	sizer_h_1->AddSpacer(50);
-	sizer_h_1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
+	sizer_h_1->AddSpacer(10);
+	sizer_h_1->Add(st, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_hud_tb, 0, wxALIGN_CENTER);
 
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "50",
 		wxDefaultPosition, FromDIP(wxSize(35, tbs.y-3)), wxTE_RIGHT, vald_int);
@@ -397,9 +405,8 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_scale_text, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_scale_cmb, 0, wxALIGN_CENTER);
 
-	sizer_h_1->AddStretchSpacer(1);
-
 	//background
+	st = new wxBoldText(this, wxID_ANY, "BG ");
 	m_bg_color_picker = new wxUndoableColorPicker(this,
 		wxID_ANY, *wxBLACK, wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
@@ -415,12 +422,34 @@ void RenderViewPanel::CreateBar()
 	m_bg_inv_btn->Realize();
 	m_bg_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RenderViewPanel::OnBgColorChange, this);
 	m_bg_inv_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnBgInvBtn, this);
+	sizer_h_1->AddSpacer(10);
+	sizer_h_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_bg_inv_btn, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 
+	//capture
+	bitmap = wxGetBitmap(camera);
+	m_snapshot_btn = new wxButton(this, wxID_ANY, "Snapshot");
+	m_snapshot_btn->SetBitmap(bitmap);
+	m_snapshot_btn->SetBitmapPosition(wxLEFT);
+	m_snapshot_btn->SetToolTip("Take a snapshot of the Render View as an image");
+	m_snapshot_btn->Bind(wxEVT_BUTTON, &RenderViewPanel::OnSnapshotBtn, this);
+	sizer_h_1->AddSpacer(10);
+	sizer_h_1->Add(m_snapshot_btn, 0, wxALIGN_CENTER);
+
+	sizer_h_1->AddStretchSpacer(1);
+
+	//cam
+	m_view_manip_btn = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	m_view_manip_btn->SetDoubleBuffered(true);
+	bitmap = wxGetBitmap(camera);
+	m_view_manip_btn->AddToolWithHelp(
+		0, "Camera Manipulation", bitmap,
+		"Set the mouse interaction mode to camera manipulation");
+	m_view_manip_btn->Realize();
+	m_view_manip_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnViewManipBtn, this);
 	//angle of view
-	st2 = new wxBoldText(this, wxID_ANY, "Cam.");
-	st2->SetToolTip("Change camera settings for projection and operation mode");
 	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
 		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxSL_HORIZONTAL);
 	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
@@ -428,30 +457,30 @@ void RenderViewPanel::CreateBar()
 	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
 	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
 	m_aov_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnAovText, this);
-	sizer_h_1->Add(st2, 0, wxALIGN_CENTER);
+	sizer_h_1->Add(m_view_manip_btn, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_sldr, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_aov_text, 0, wxALIGN_CENTER);
 
 	//free fly
-	m_options_toolbar2 = new wxUndoableToolbar(this, wxID_ANY,
+	m_cam_op_tb = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	m_options_toolbar2->SetDoubleBuffered(true);
+	m_cam_op_tb->SetDoubleBuffered(true);
 	bitmap = wxGetBitmap(ortho);
-	m_options_toolbar2->AddToolWithHelp(
+	m_cam_op_tb->AddToolWithHelp(
 		ID_OrthoPerspBtn, "Camera Projection", bitmap,
 		"Change camera projection between orthographic and perspective");
 	bitmap = wxGetBitmap(globe);
-	m_options_toolbar2->AddToolWithHelp(
+	m_cam_op_tb->AddToolWithHelp(
 		ID_CamModeBtn, "Camera operation mode", bitmap,
 		"Change camera operation mode between globe and flight");
 	//save default
 	bitmap = wxGetBitmap(save_settings);
-	m_options_toolbar2->AddToolWithHelp(
+	m_cam_op_tb->AddToolWithHelp(
 		ID_DefaultBtn, "Save", bitmap,
 		"Set Default Render View Settings");
-	m_options_toolbar2->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
-	m_options_toolbar2->Realize();
-	sizer_h_1->Add(m_options_toolbar2, 0, wxALIGN_CENTER);
+	m_cam_op_tb->Bind(wxEVT_TOOL, &RenderViewPanel::OnToolBar2, this);
+	m_cam_op_tb->Realize();
+	sizer_h_1->Add(m_cam_op_tb, 0, wxALIGN_CENTER);
 
 	sizer_h_1->AddSpacer(10);
 	//full screen
@@ -631,17 +660,14 @@ void RenderViewPanel::CreateBar()
 	m_slider_mode_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnRotSliderMode, this);
 	m_slider_mode_btn->Realize();
 
-	st1 = new wxStaticText(this, 0, "X:");
 	m_x_rot_sldr = new wxUndoableScrollBar(this, ID_RotXScroll);
 	m_x_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
-	st2 = new wxStaticText(this, 0, "Y:");
 	m_y_rot_sldr = new wxUndoableScrollBar(this, ID_RotYScroll);
 	m_y_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
-	st3 = new wxStaticText(this, 0, "Z:");
 	m_z_rot_sldr = new wxUndoableScrollBar(this, ID_RotZScroll);
 	m_z_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
 	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
@@ -656,7 +682,7 @@ void RenderViewPanel::CreateBar()
 	//ortho view selector
 	m_ortho_view_cmb = new wxComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
-	std::vector<wxString> ov_list = { "YZ", "YZ Back", "XZ", "XZ Back", "XY", "XY Back", "Free" };
+	std::vector<wxString> ov_list = { "XY/Front", "XY/Back", "XZ/Top", "XZ/Bottom", "YZ/Left", "YZ/Right", "Free" };
 	m_ortho_view_cmb->Append(ov_list);
 	m_ortho_view_cmb->Bind(wxEVT_COMBOBOX, &RenderViewPanel::OnOrthoViewSelected, this);
 
@@ -682,15 +708,15 @@ void RenderViewPanel::CreateBar()
 
 	sizer_h_2->AddSpacer(50);
 	sizer_h_2->Add(m_slider_mode_btn, 0, wxALIGN_CENTER);
-	sizer_h_2->Add(st1, 0, wxALIGN_CENTER);
+	sizer_h_2->Add(new wxStaticText(this, 0, "X:"), 0, wxALIGN_CENTER);
 	sizer_h_2->Add(m_x_rot_sldr, 1, wxALIGN_CENTER);
 	sizer_h_2->Add(m_x_rot_text, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(5, 5, 0);
-	sizer_h_2->Add(st2, 0, wxALIGN_CENTER);
+	sizer_h_2->Add(new wxStaticText(this, 0, "Y:"), 0, wxALIGN_CENTER);
 	sizer_h_2->Add(m_y_rot_sldr, 1, wxALIGN_CENTER);
 	sizer_h_2->Add(m_y_rot_text, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(5, 5, 0);
-	sizer_h_2->Add(st3, 0, wxALIGN_CENTER);
+	sizer_h_2->Add(new wxStaticText(this, 0, "Z:"), 0, wxALIGN_CENTER);
 	sizer_h_2->Add(m_z_rot_sldr, 1, wxALIGN_CENTER);
 	sizer_h_2->Add(m_z_rot_text, 0, wxALIGN_CENTER);
 	sizer_h_2->Add(5, 5, 0);
@@ -726,19 +752,19 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstMixMethod))
 	{
 		ival = m_render_view->GetVolMethod();
-		int test = m_options_toolbar->GetToolsCount();
-		m_options_toolbar->ToggleTool(ID_VolumeSeqRd, ival == VOL_METHOD_SEQ);
-		m_options_toolbar->SetToolNormalBitmap(ID_VolumeSeqRd,
+		int test = m_mix_mode_tb->GetToolsCount();
+		m_mix_mode_tb->ToggleTool(ID_VolumeSeqRd, ival == VOL_METHOD_SEQ);
+		m_mix_mode_tb->SetToolNormalBitmap(ID_VolumeSeqRd,
 			ival == VOL_METHOD_SEQ ?
 			wxGetBitmap(layers) :
 			wxGetBitmap(layers_off));
-		m_options_toolbar->ToggleTool(ID_VolumeMultiRd, ival == VOL_METHOD_MULTI);
-		m_options_toolbar->SetToolNormalBitmap(ID_VolumeMultiRd,
+		m_mix_mode_tb->ToggleTool(ID_VolumeMultiRd, ival == VOL_METHOD_MULTI);
+		m_mix_mode_tb->SetToolNormalBitmap(ID_VolumeMultiRd,
 			ival == VOL_METHOD_MULTI ?
 			wxGetBitmap(depth) :
 			wxGetBitmap(depth_off));
-		m_options_toolbar->ToggleTool(ID_VolumeCompRd, ival == VOL_METHOD_COMP);
-		m_options_toolbar->SetToolNormalBitmap(ID_VolumeCompRd,
+		m_mix_mode_tb->ToggleTool(ID_VolumeCompRd, ival == VOL_METHOD_COMP);
+		m_mix_mode_tb->SetToolNormalBitmap(ID_VolumeCompRd,
 			ival == VOL_METHOD_COMP ?
 			wxGetBitmap(composite) :
 			wxGetBitmap(composite_off));
@@ -748,21 +774,21 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstDrawInfo))
 	{
 		bval = m_render_view->m_draw_info & 1;
-		m_options_toolbar->ToggleTool(ID_InfoChk, bval);
+		m_hud_tb->ToggleTool(ID_InfoChk, bval);
 	}
 
 	//cam center
 	if (update_all || FOUND_VALUE(gstDrawCamCtr))
 	{
 		bval = m_render_view->m_draw_camctr;
-		m_options_toolbar->ToggleTool(ID_CamCtrChk, bval);
+		m_hud_tb->ToggleTool(ID_CamCtrChk, bval);
 	}
 
 	//legend
 	if (update_all || FOUND_VALUE(gstDrawLegend))
 	{
 		bval = m_render_view->m_draw_legend;
-		m_options_toolbar->ToggleTool(ID_LegendChk, bval);
+		m_hud_tb->ToggleTool(ID_LegendChk, bval);
 	}
 
 	//colormap
@@ -783,7 +809,7 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			colormap_bmp = wxGetBitmap(colormap_text);
 			break;
 		}
-		m_options_toolbar->SetToolNormalBitmap(ID_Colormap, colormap_bmp);
+		m_hud_tb->SetToolNormalBitmap(ID_Colormap, colormap_bmp);
 	}
 
 	//scale bar
@@ -794,19 +820,19 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 		case 0:
 		default:
-			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
+			m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scalebar));
 			m_scale_text->Disable();
 			m_scale_cmb->Disable();
 			break;
 		case 1:
-			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
+			m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scale_text_off));
 			m_scale_text->Enable();
 			m_scale_cmb->Disable();
 			break;
 		case 2:
-			m_options_toolbar->SetToolNormalBitmap(ID_ScaleBar,
+			m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
 				wxGetBitmap(scale_text));
 			m_scale_text->Enable();
 			m_scale_cmb->Enable();
@@ -844,10 +870,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_aov_sldr->ChangeValue(bval ? ival : 10);
 		m_aov_text->ChangeValue(bval ? std::to_string(ival) : "Ortho");
 		if (bval)
-			m_options_toolbar2->SetToolNormalBitmap(ID_OrthoPerspBtn,
+			m_cam_op_tb->SetToolNormalBitmap(ID_OrthoPerspBtn,
 				wxGetBitmap(persp));
 		else
-			m_options_toolbar2->SetToolNormalBitmap(ID_OrthoPerspBtn,
+			m_cam_op_tb->SetToolNormalBitmap(ID_OrthoPerspBtn,
 				wxGetBitmap(ortho));
 	}
 
@@ -858,11 +884,11 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		switch (ival)
 		{
 		case 0:
-			m_options_toolbar2->SetToolNormalBitmap(ID_CamModeBtn,
+			m_cam_op_tb->SetToolNormalBitmap(ID_CamModeBtn,
 				wxGetBitmap(globe));
 			break;
 		case 1:
-			m_options_toolbar2->SetToolNormalBitmap(ID_CamModeBtn,
+			m_cam_op_tb->SetToolNormalBitmap(ID_CamModeBtn,
 				wxGetBitmap(flight));
 			break;
 		}
@@ -1399,7 +1425,7 @@ void RenderViewPanel::SetZeroRotations()
 	FluoRefresh(2, { gstCamRotation }, { GetViewId() });
 }
 
-void RenderViewPanel::OnToolBar(wxCommandEvent& event)
+void RenderViewPanel::OnMixMode(wxCommandEvent& event)
 {
 	int id = event.GetId();
 
@@ -1414,17 +1440,23 @@ void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 	case ID_VolumeCompRd:
 		SetVolumeMethod(VOL_METHOD_COMP);
 		break;
-	case ID_CaptureBtn:
-		Capture();
-		break;
+	}
+}
+
+void RenderViewPanel::OnHud(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
 	case ID_InfoChk:
-		SetInfo(m_options_toolbar->GetToolState(ID_InfoChk));
+		SetInfo(m_hud_tb->GetToolState(ID_InfoChk));
 		break;
 	case ID_CamCtrChk:
-		SetDrawCamCtr(m_options_toolbar->GetToolState(ID_CamCtrChk));
+		SetDrawCamCtr(m_hud_tb->GetToolState(ID_CamCtrChk));
 		break;
 	case ID_LegendChk:
-		SetLegend(m_options_toolbar->GetToolState(ID_LegendChk));
+		SetLegend(m_hud_tb->GetToolState(ID_LegendChk));
 		break;
 	case ID_Colormap:
 		SetDrawColormap();
@@ -1433,6 +1465,18 @@ void RenderViewPanel::OnToolBar(wxCommandEvent& event)
 		SetDrawScalebar();
 		break;
 	}
+}
+
+void RenderViewPanel::OnSnapshotBtn(wxCommandEvent& event)
+{
+	Capture();
+}
+
+void RenderViewPanel::OnViewManipBtn(wxCommandEvent& event)
+{
+	if (m_render_view)
+		m_render_view->SetIntMode(InteractiveMode::Viewport);
+	FluoRefresh(0, { gstFreehandToolState }, { -1 });
 }
 
 void RenderViewPanel::OnScaleText(wxCommandEvent& event)
@@ -1733,11 +1777,11 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 		sel = m_ortho_view_cmb->GetSelection();
 	switch (sel)
 	{
-	case 0://+X
-		m_render_view->SetRotations(fluo::Vector(0.0, 90.0, 0.0), false);
+	case 0://+Z
+		m_render_view->SetRotations(fluo::Vector(0.0, 0.0, 0.0), false);
 		break;
-	case 1://-X
-		m_render_view->SetRotations(fluo::Vector(0.0, 270.0, 0.0), false);
+	case 1://-Z
+		m_render_view->SetRotations(fluo::Vector(0.0, 180.0, 0.0), false);
 		break;
 	case 2://+Y
 		m_render_view->SetRotations(fluo::Vector(90.0, 0.0, 0.0), false);
@@ -1745,11 +1789,11 @@ void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 	case 3://-Y
 		m_render_view->SetRotations(fluo::Vector(270.0, 0.0, 0.0), false);
 		break;
-	case 4://+Z
-		m_render_view->SetRotations(fluo::Vector(0.0, 0.0, 0.0), false);
+	case 4://+X
+		m_render_view->SetRotations(fluo::Vector(0.0, 90.0, 0.0), false);
 		break;
-	case 5:
-		m_render_view->SetRotations(fluo::Vector(0.0, 180.0, 0.0), false);
+	case 5://-X
+		m_render_view->SetRotations(fluo::Vector(0.0, 270.0, 0.0), false);
 		break;
 	}
 	if (sel < 6)

@@ -47,9 +47,11 @@ public:
 	{
 		ID_VolumeSeqRd = 0,
 		ID_VolumeMultiRd,
-		ID_VolumeCompRd,
-		ID_CaptureBtn,
-		ID_InfoChk,
+		ID_VolumeCompRd
+	};
+	enum
+	{
+		ID_InfoChk = 0,
 		ID_CamCtrChk,
 		ID_LegendChk,
 		ID_Colormap,
@@ -175,14 +177,17 @@ private:
 	wxBoxSizer* m_view_sizer;
 
 	//top bar///////////////////////////////////////////////////
-	wxUndoableToolbar* m_options_toolbar;
+	wxUndoableToolbar* m_mix_mode_tb;
+	wxUndoableToolbar* m_hud_tb;
 	wxTextCtrl *m_scale_text;
 	wxComboBox *m_scale_cmb;
 	wxUndoableColorPicker* m_bg_color_picker;
 	wxToolBar* m_bg_inv_btn;
+	wxButton* m_snapshot_btn;
+	wxUndoableToolbar* m_view_manip_btn;
 	wxSingleSlider* m_aov_sldr;
 	wxTextCtrl* m_aov_text;
-	wxUndoableToolbar* m_options_toolbar2;
+	wxUndoableToolbar* m_cam_op_tb;
 	wxToolBar *m_full_screen_toolbar;
 
 	//left bar///////////////////////////////////////////////////
@@ -220,11 +225,14 @@ private:
 	void CreateBar();
 
 	//bar top
-	void OnToolBar(wxCommandEvent& event);
+	void OnMixMode(wxCommandEvent& event);
+	void OnHud(wxCommandEvent& event);
 	void OnScaleText(wxCommandEvent& event);
 	void OnScaleUnit(wxCommandEvent& event);
 	void OnBgColorChange(wxColourPickerEvent& event);
 	void OnBgInvBtn(wxCommandEvent& event);
+	void OnSnapshotBtn(wxCommandEvent& event);
+	void OnViewManipBtn(wxCommandEvent& event);
 	void OnAovSldrIdle(wxIdleEvent& event);
 	void OnAovChange(wxScrollEvent& event);
 	void OnAovText(wxCommandEvent& event);
