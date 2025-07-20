@@ -41,6 +41,9 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <RenderView.h>
 #include <Project.h>
+#include <VolumeSelector.h>
+#include <Ruler.h>
+#include <RulerHandler.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
@@ -1476,6 +1479,8 @@ void RenderViewPanel::OnViewManipBtn(wxCommandEvent& event)
 {
 	if (m_render_view)
 		m_render_view->SetIntMode(InteractiveMode::Viewport);
+	glbin_vol_selector.SetSelectMode(flrd::SelectMode::None);
+	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
 	FluoRefresh(0, { gstFreehandToolState }, { -1 });
 }
 
