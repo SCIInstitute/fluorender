@@ -17,6 +17,7 @@ Download the installer package for your operating system (OS).
 <h1 id="features">Latest Features</h1>
 
 - **Looking Glass Support**
+
   FluoRender now seamlessly supports the latest Looking Glass holographic displays, expanding your visualization toolkit with intuitive controls and immersive clarity.
    - **Hologram Modes:** Choose from three distinct modes to configure camera and lens shifts—whether for depth emphasis, parallax refinement, or artistic rotation.
    - **Projection Flexibility:** Easily toggle between orthographic and perspective projections to match your analytical or illustrative needs.
