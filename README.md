@@ -16,18 +16,13 @@ Download the installer package for your operating system (OS).
 
 <h1 id="features">Latest Features</h1>
 
-- **Support for the Latest Looking Glass Holographic Displays**
-   - **Hologram Modes:** Three modes for configuring how camera and lenses are shifted or rotated.
-   - **Orthographic & Perspective Projections:** Both projections are supported and can be easily switched.
-   - **Camera Operation Modes:** Globe or Flight mode for flexible camera movements.
-   - **Auto Focusing:** Auto focus on either the center point or a specific point by clicking.
-   - **Hologram Snapshot:** Snapshots of a hologram can be uploaded and shared.
-- **Support for 3D Viewing with Supported Headsets**
-  - **Head Tracking**
-  - **Hand Gestures**
-  - **Controller Thumbsticks and Poses**
-  - **Voice Commands**
-- **Dynamic Gradient Background**
+- **Looking Glass Support**
+  FluoRender now seamlessly supports the latest Looking Glass holographic displays, expanding your visualization toolkit with intuitive controls and immersive clarity.
+   - **Hologram Modes:** Choose from three distinct modes to configure camera and lens shifts—whether for depth emphasis, parallax refinement, or artistic rotation.
+   - **Projection Flexibility:** Easily toggle between orthographic and perspective projections to match your analytical or illustrative needs.
+   - **Camera Control Options:** Navigate with precision using either Globe Mode for orbital rotation or Flight Mode for dynamic pathing.
+   - **Auto Focusing:** Automatically focus on the scene’s center or snap to a user-specified point with a simple click.
+   - **Hologram Snapshot:** Capture and share high-resolution holographic snapshots—perfect for documentation, collaboration, or presentation.
 
 <h1 id="documentation">Documentation</h1>
 
