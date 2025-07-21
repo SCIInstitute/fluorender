@@ -174,6 +174,7 @@
         <eye_dist>20</eye_dist>
         <holo_ip>192.168.137.78</holo_ip>
         <hologram_debug>0</hologram_debug>
+        <hologram_camera_mode>0</hologram_camera_mode>
         <lg_offset>22</lg_offset>
         <lg_dev_id>0</lg_dev_id>
         <stay_top>0</stay_top>
@@ -273,9 +274,6 @@
     </automate_default>
     <brush_default>
         <hist_depth>1</hist_depth>
-        <iter_weak>10</iter_weak>
-        <iter_normal>30</iter_normal>
-        <iter_strong>60</iter_strong>
         <iter_num>10</iter_num>
         <ini_thresh>0</ini_thresh>
         <auto_thresh>0</auto_thresh>
@@ -288,9 +286,9 @@
         <ortho>1</ortho>
         <accurate_bricks>1</accurate_bricks>
         <_2d_infl>0</_2d_infl>
-        <size1>10</size1>
+        <size1>5</size1>
         <use_size2>1</use_size2>
-        <size2>30</size2>
+        <size2>10</size2>
         <radius_settings>
             <num>5</num>
             <_0>
@@ -415,7 +413,7 @@
         <mouse_focus>0</mouse_focus>
         <persp>0</persp>
         <aov>10</aov>
-        <free>0</free>
+        <cam_mode>0</cam_mode>
         <center>[0,0,0]</center>
         <rot_lock>0</rot_lock>
         <pin_rot_center>0</pin_rot_center>

@@ -109,7 +109,7 @@ add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Dat
 add_definitions(-DVERSION_MINOR=33)						# 
 add_definitions(-DVERSION_MAJOR_TAG="2")				# 
 add_definitions(-DVERSION_MINOR_TAG="33")				# 
-add_definitions(-DVERSION_COPYRIGHT="June 2025")	    # Up to here!
+add_definitions(-DVERSION_COPYRIGHT="July 2025")	    # Up to here!
 
 #windows
 if(WIN32)
