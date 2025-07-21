@@ -310,7 +310,6 @@ void RenderViewPanel::CreateBar()
 
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* sizer_m = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *st;
 
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	wxBitmapBundle bitmap;
@@ -324,7 +323,6 @@ void RenderViewPanel::CreateBar()
 	wxSize tbs = m_mix_mode_tb->GetSize();
 
 	//blend mode
-	st = new wxBoldText(this, wxID_ANY, "MIX ");
 	bitmap = wxGetBitmap(layers);
 	m_mix_mode_tb->AddCheckTool(
 		ID_VolumeSeqRd, "Layer",
@@ -347,11 +345,9 @@ void RenderViewPanel::CreateBar()
 	m_mix_mode_tb->Realize();
 
 	sizer_h_1->AddSpacer(50);
-	sizer_h_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_mix_mode_tb, 0, wxALIGN_CENTER);
 
 	//hud
-	st = new wxBoldText(this, wxID_ANY, "HUD ");
 	m_hud_tb = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 
@@ -394,7 +390,6 @@ void RenderViewPanel::CreateBar()
 	m_hud_tb->Realize();
 
 	sizer_h_1->AddSpacer(10);
-	sizer_h_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_hud_tb, 0, wxALIGN_CENTER);
 
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "50",
@@ -409,7 +404,6 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_scale_cmb, 0, wxALIGN_CENTER);
 
 	//background
-	st = new wxBoldText(this, wxID_ANY, "BG ");
 	m_bg_color_picker = new wxUndoableColorPicker(this,
 		wxID_ANY, *wxBLACK, wxDefaultPosition, FromDIP(wxSize(40, 20)));
 	wxSize bs = m_bg_color_picker->GetSize();
@@ -426,12 +420,11 @@ void RenderViewPanel::CreateBar()
 	m_bg_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RenderViewPanel::OnBgColorChange, this);
 	m_bg_inv_btn->Bind(wxEVT_TOOL, &RenderViewPanel::OnBgInvBtn, this);
 	sizer_h_1->AddSpacer(10);
-	sizer_h_1->Add(st, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_bg_inv_btn, 0, wxALIGN_CENTER);
 	sizer_h_1->Add(m_bg_color_picker, 0, wxALIGN_CENTER);
 
 	//capture
-	bitmap = wxGetBitmap(camera);
+	bitmap = wxGetBitmap(snap);
 	m_snapshot_btn = new wxButton(this, wxID_ANY, "Snapshot");
 	m_snapshot_btn->SetBitmap(bitmap);
 	m_snapshot_btn->SetBitmapPosition(wxLEFT);
