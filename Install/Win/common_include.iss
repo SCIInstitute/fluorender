@@ -82,8 +82,21 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
                      
 [Code]   
+procedure DeleteFilesInFolder(const FolderPath, Extension: string);
+var
+  FindRec: TFindRec;
+begin
+  if FindFirst(FolderPath + '\*' + Extension, FindRec) then
+  begin
+    repeat
+      DeleteFile(FolderPath + '\' + FindRec.Name);
+    until not FindNext(FindRec);
+    FindClose(FindRec);
+  end;
+end;
+
 const
-	vcredist2022_productcode_x64 = '{77169412-f642-45e7-b533-0c6f48de12f9}';
+	vcredist2022_productcode_x64 = '{d8bbe9f9-7c5b-42c6-b715-9ee898a2e515}';
   msvc_hkey_location = 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\';
   fr64_hkey_location = 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\';function VCRedistNeedsInstall: Boolean;
 begin
