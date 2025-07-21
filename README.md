@@ -14,7 +14,7 @@ Download the installer package for your operating system (OS).
 
 **Ubuntu:** [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/fluorender2.32_ubuntu22.04_amd64.deb)
 
-<h1 id="features">Release Highlights</h1>
+<h1 id="features">Release Highlights for Version 2.33</h1>
 
 - **Looking Glass Support**
 
