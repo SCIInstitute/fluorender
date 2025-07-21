@@ -14,7 +14,7 @@ Download the installer package for your operating system (OS).
 
 **Ubuntu:** [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/fluorender2.32_ubuntu22.04_amd64.deb)
 
-<h1 id="features">Latest Features</h1>
+<h1 id="features">Release Highlights</h1>
 
 - **Looking Glass Support**
 
@@ -24,6 +24,58 @@ Download the installer package for your operating system (OS).
    - **Camera Control Options:** Navigate with precision using either Globe Mode for orbital rotation or Flight Mode for dynamic pathing.
    - **Auto Focusing:** Automatically focus on the scene’s center or snap to a user-specified point with a simple click.
    - **Hologram Snapshot:** Capture and share high-resolution holographic snapshots—perfect for documentation, collaboration, or presentation.
+ - **Visualization & Volume Properties**
+    - Overhauled **volume property settings**, with reordered layout
+    - New UI displays:
+      - **Intensity distribution**
+      - **Color map range**
+    - Updated **multi-function buttons** and introduced **min–max/boundary high controls**
+    - Filter updates: **Lanczos-bicubic** scaling with zoom-aware window sizing
+    - Added **4D color maps** featuring time, intensity delta, and speed options
+    - Keyframe animation:
+      - Now supports **volume property changes**
+      - Enabled only when keyframes are present
+  - **Interactive Tools & Painting**
+    - New brush tools: **Segment** and **Isolate**
+    - Brushes support **fine-grained grow rate**
+    - Automatic **threshold estimation** for paint and component generation
+    - Isolate brush works with ruler tools to locate **center points**
+  - **Automation & Scripting**
+    - OpenCL filter script now runs **last-used parameters** from UI when left empty
+    - Added `script stop` command for one-time scripts
+    - Introduced **automation options** in configuration dialog, supporting:
+      - Histogram generation
+      - Paint selected size computing
+      - Component generation
+      - Colocalization
+      - Ruler relaxation
+  - **Volume Filtering**
+    - OpenCL editor renamed to **Volume Filter**
+    - Added **deconvolution filters**, including Richardson-Lucy and Wiener filters
+    - Updated **Gaussian** filters for smoother results
+    - Added other commonly used filters
+  - **UI & Usability Enhancements**
+    - Refreshed **icons and text** throughout UI
+    - Adopted **notebook-style tabs** for improved dialog navigation
+    - **Dialog layouts** can now be saved and restored
+    - Added **dark mode** support on Windows
+    - Reordered settings to prioritize frequent tasks
+    - Frequently used interactive tools now available in the **workspace panel**
+    - Added dialog buttons to the **project panel**
+    - Interactive tool states now **sync across dialogs**
+  - **File & Data Management**
+      - Added support for **INI**, **XML**, and **JSON** config file formats
+      - Refactored memory handling using **smart pointers**
+      - Updated **volume cache** system for time-sequenced data
+      - Introduced **movie playback caching** for smoother experience
+      - Enhanced capture capabilities: Support for **JPEG** and **PNG**
+      - Ability to read **JPEG/PNG sequences**
+  - **Core System & Build Improvements**
+      - Reorganized **CMake** structure and third-party libraries
+      - Switched from `wxString` and legacy path utilities to **`std::string`** and **`std::filesystem`**
+      - Resolved **type cast warnings**
+      - Updated **FFmpeg** integration to use current API
+      - Forward-declared third-party types for cleaner compilation
 
 <h1 id="documentation">Documentation</h1>
 
