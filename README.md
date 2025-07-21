@@ -8,7 +8,7 @@ This is the open-source repository for FluoRender, an interactive tool for flour
 
 Download the installer package for your operating system (OS).
 
-**Windows:** [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/FluoRender2.32_win64.exe)
+**Windows:** [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_win64.exe)
 
 **Mac OS:** [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/FluoRender2.32_mac64.pkg)
 
@@ -16,11 +16,12 @@ Download the installer package for your operating system (OS).
 
 <h1 id="features">Latest Features</h1>
 
-- **Support for a Wide Range of VR and AR Headsets**
-   - **Microsoft Hololens 2:** Utilizes Holographic Remoting over local network (WiFi or Ethernet).
-   - **Windows Mixed Reality Headsets:** Compatible with OpenXR Direct3D binding.
-   - **Meta Quest Headsets:** Supports OpenXR OpenGL binding via wired or wireless Oculus Link.
-   - **HTC Vive Headsets:** Operates using OpenVR.
+- **Support for the Latest Looking Glass Holographic Displays**
+   - **Hologram Modes:** Three modes for configuring how camera and lenses are shifted or rotated.
+   - **Orthographic & Perspective Projections:** Both projections are supported and can be easily switched.
+   - **Camera Operation Modes:** Globe or Flight mode for flexible camera movements.
+   - **Auto Focusing:** Auto focus on either the center point or a specific point by clicking.
+   - **Hologram Snapshot:** Snapshots of a hologram can be uploaded and shared.
 - **Support for 3D Viewing with Supported Headsets**
   - **Head Tracking**
   - **Hand Gestures**
