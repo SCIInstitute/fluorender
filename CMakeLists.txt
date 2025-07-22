@@ -70,6 +70,7 @@ endif()
 
 if (APPLE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "11.5" CACHE STRING "Minimum OS X deployment version")
+  set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "" FORCE)
 endif()
 
 project(FluoRender)
