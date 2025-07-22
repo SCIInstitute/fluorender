@@ -1,31 +1,50 @@
-﻿#!/bin/bash
+#!/bin/bash
 
-BOOST_SRC_DIR="$(pwd)"
-BUILD_DIR="$BOOST_SRC_DIR/build"
-STAGE_DIR="$BOOST_SRC_DIR/stage"
-UNIVERSAL_DIR="$BOOST_SRC_DIR/universal"
+set -e
+
+# Define architectures and their Boost equivalents
 ARCHS=("x86_64" "arm64")
+BOOST_ARCH_MAP=(["x86_64"]="x86" ["arm64"]="arm")
+MACOS_SDK=$(xcrun --sdk macosx --show-sdk-path)
 
-# Clean old builds
-rm -rf "$BUILD_DIR" "$STAGE_DIR" "$UNIVERSAL_DIR"
-mkdir -p "$UNIVERSAL_DIR"
+# Step 1: Bootstrap
+echo "🚀 Bootstrapping Boost..."
+./bootstrap.sh
 
-# Loop through architectures
+# Step 2: Build Boost for each architecture
 for ARCH in "${ARCHS[@]}"; do
-    echo "🧱 Building Boost for $ARCH..."
-    ./b2 toolset=clang-darwin architecture=$ARCH address-model=64 link=static \
-        cxxflags="-arch $ARCH" cflags="-arch $ARCH" linkflags="-arch $ARCH" \
-        --build-dir="$BUILD_DIR/$ARCH" --stagedir="$STAGE_DIR/$ARCH" -a
+    BOOST_ARCH=${BOOST_ARCH_MAP[$ARCH]}
+    echo "🔧 Building Boost for ${ARCH} (Boost arch: ${BOOST_ARCH})..."
+
+    BUILD_DIR="build/${ARCH}"
+    INSTALL_DIR="stage/${ARCH}"
+
+    rm -rf "$BUILD_DIR" "$INSTALL_DIR"
+
+    ./b2 --build-dir="$BUILD_DIR" --prefix="$INSTALL_DIR" toolset=clang \
+        architecture=${BOOST_ARCH} address-model=64 \
+        cxxflags="-arch ${ARCH} -isysroot ${MACOS_SDK}" \
+        linkflags="-arch ${ARCH} -isysroot ${MACOS_SDK}" \
+        install
 done
 
-# Merge static libs with lipo
-echo "🔗 Merging static libraries..."
-for LIB in "$STAGE_DIR/arm64"/lib*.a; do
-    BASE=$(basename "$LIB")
-    lipo -create \
-        "$STAGE_DIR/arm64/$BASE" \
-        "$STAGE_DIR/x86_64/$BASE" \
-        -output "$UNIVERSAL_DIR/$BASE"
+# Step 3: Create universal lib directory
+UNIVERSAL_LIB_DIR="stage/universal/lib"
+mkdir -p "${UNIVERSAL_LIB_DIR}"
+
+# Step 4: Merge static libraries using lipo
+echo "🧬 Creating universal binaries..."
+for LIB in stage/x86_64/lib/*.a; do
+    LIBNAME=$(basename "$LIB")
+    if [ -f "stage/arm64/lib/${LIBNAME}" ]; then
+        lipo -create \
+            "stage/x86_64/lib/${LIBNAME}" \
+            "stage/arm64/lib/${LIBNAME}" \
+            -output "${UNIVERSAL_LIB_DIR}/${LIBNAME}"
+        echo "✅ Created universal ${LIBNAME}"
+    else
+        echo "⚠️ Skipping ${LIBNAME} (missing in arm64)"
+    fi
 done
 
-echo "✅ Universal static Boost libraries are ready in: $UNIVERSAL_DIR"
+echo "🎉 Done! Universal libraries are in ${UNIVERSAL_LIB_DIR}"
