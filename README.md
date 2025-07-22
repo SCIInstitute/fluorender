@@ -1,6 +1,6 @@
 [![logo_crop_03-01](https://github.com/user-attachments/assets/ecc3051b-d977-4fd6-a0e1-32637a0c7e59)](https://github.com/SCIInstitute/fluorender)
 
-This is the open-source repository for FluoRender, an interactive tool for flourescence microscopy data visualization and analysis.
+This is the open-source repository for FluoRender, an interactive tool for fluorescence microscopy data visualization and analysis.
 
 <h1 id="download">Download</h1>
 
