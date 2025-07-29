@@ -1,39 +1,34 @@
 #!/bin/bash
-
 set -e
 
-# Define architectures and their Boost equivalents
-ARCHS=("x86_64" "arm64")
-BOOST_ARCH_MAP=(["x86_64"]="x86" ["arm64"]="arm")
-MACOS_SDK=$(xcrun --sdk macosx --show-sdk-path)
-
-# Step 1: Bootstrap
 echo "🚀 Bootstrapping Boost..."
 ./bootstrap.sh
 
-# Step 2: Build Boost for each architecture
-for ARCH in "${ARCHS[@]}"; do
-    BOOST_ARCH=${BOOST_ARCH_MAP[$ARCH]}
-    echo "🔧 Building Boost for ${ARCH} (Boost arch: ${BOOST_ARCH})..."
+MACOS_SDK=$(xcrun --sdk macosx --show-sdk-path)
 
-    BUILD_DIR="build/${ARCH}"
-    INSTALL_DIR="stage/${ARCH}"
+# Build for x86_64
+echo "🔧 Building Boost for x86_64..."
+./b2 --build-dir=build/x86_64 --prefix=stage/x86_64 toolset=clang \
+    architecture=x86 address-model=64 \
+    cxxflags="-arch x86_64 -isysroot ${MACOS_SDK}" \
+    linkflags="-arch x86_64 -isysroot ${MACOS_SDK}" \
+    link=static runtime-link=static \
+    install
 
-    rm -rf "$BUILD_DIR" "$INSTALL_DIR"
+# Build for arm64
+echo "🔧 Building Boost for arm64..."
+./b2 --build-dir=build/arm64 --prefix=stage/arm64 toolset=clang \
+    architecture=arm address-model=64 \
+    cxxflags="-arch arm64 -isysroot ${MACOS_SDK}" \
+    linkflags="-arch arm64 -isysroot ${MACOS_SDK}" \
+    link=static runtime-link=static \
+    install
 
-    ./b2 --build-dir="$BUILD_DIR" --prefix="$INSTALL_DIR" toolset=clang \
-        architecture=${BOOST_ARCH} address-model=64 \
-        cxxflags="-arch ${ARCH} -isysroot ${MACOS_SDK}" \
-        linkflags="-arch ${ARCH} -isysroot ${MACOS_SDK}" \
-        install
-done
-
-# Step 3: Create universal lib directory
+# Combine with lipo
+echo "🧬 Creating universal binaries..."
 UNIVERSAL_LIB_DIR="stage/universal/lib"
 mkdir -p "${UNIVERSAL_LIB_DIR}"
 
-# Step 4: Merge static libraries using lipo
-echo "🧬 Creating universal binaries..."
 for LIB in stage/x86_64/lib/*.a; do
     LIBNAME=$(basename "$LIB")
     if [ -f "stage/arm64/lib/${LIBNAME}" ]; then
@@ -47,4 +42,4 @@ for LIB in stage/x86_64/lib/*.a; do
     fi
 done
 
-echo "🎉 Done! Universal libraries are in ${UNIVERSAL_LIB_DIR}"
+echo "🎉 Done! Universal Boost libraries are in ${UNIVERSAL_LIB_DIR}"
