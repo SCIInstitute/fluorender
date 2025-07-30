@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -396,13 +396,8 @@ Nrrd* PNGReader::ReadPng(const std::vector<SliceInfo>& filelist, int c, bool get
 bool PNGReader::ReadSinglePng(void* val, const std::wstring& filename, int c)
 {
 	// Open file stream
-#ifdef _WIN32
-	FILE* infile = _wfopen(filename.c_str(), L"rb");
-#else
-	FILE* infile = fopen(ws2s(filename).c_str(), "rb");
-#endif
-	if (!infile)
-		return false;
+    FILE* infile = 0;
+    if (!WFOPEN(&infile, filename, L"rb")) return;
 
 	// Create libpng read structures
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);

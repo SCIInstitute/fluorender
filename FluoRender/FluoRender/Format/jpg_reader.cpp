@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -204,13 +204,8 @@ int JPGReader::Preprocess()
 
 void JPGReader::GetFileInfo(const std::wstring& filename)
 {
-#ifdef _WIN32
-	FILE* infile = _wfopen(filename.c_str(), L"rb");
-#else
-	FILE* infile = fopen(ws2s(filename).c_str(), "rb");
-#endif
-	if (!infile)
-		return;
+    FILE* infile = 0;
+    if (!WFOPEN(&infile, filename, L"rb")) return;
 
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;
@@ -331,13 +326,8 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 
 bool JPGReader::ReadSingleJpg(void* val, const std::wstring& filename, int c)
 {
-#ifdef _WIN32
-	FILE* infile = _wfopen(filename.c_str(), L"rb");
-#else
-	FILE* infile = fopen(ws2s(filename).c_str(), "rb");
-#endif
-	if (!infile)
-		return false;
+    FILE* infile = 0;
+    if (!WFOPEN(&infile, filename, L"rb")) return;
 
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;

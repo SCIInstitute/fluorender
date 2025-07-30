@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <tif_capture.h>
+#include <compatibility.h>
 #include <tiffio.h>
 #include <cstring>
 

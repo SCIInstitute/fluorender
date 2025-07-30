@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <png_capture.h>
+#include <compatibility.h>
 #include <png.h>
 #include <fstream>
 #include <vector>
@@ -44,8 +45,8 @@ struct PngCapture::Impl
 
     bool write(const void* image, bool flipVertically)
     {
-        FILE* fp = _wfopen(filename.c_str(), L"wb");
-        if (!fp) return false;
+        FILE* fp = 0;
+        if (!WFOPEN(&fp, filename, L"wb")) return false;
 
         png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         if (!png) return false;

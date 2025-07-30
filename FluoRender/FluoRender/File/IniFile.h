@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -108,10 +108,11 @@ public:
 	{
 #ifdef _WIN32
 		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+        std::ofstream file(long_name);
 #else
 		std::wstring long_name = filename;
+        std::ofstream file(ws2s(long_name));
 #endif
-		std::ofstream file(long_name);
 		if (!file.is_open()) {
 			return CONFINI_EIO;
 		}

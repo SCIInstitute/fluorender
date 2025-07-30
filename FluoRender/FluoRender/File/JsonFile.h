@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -70,11 +70,12 @@ public:
 	int LoadFile(const std::wstring& filename) override
 	{
 #ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+        std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+        std::ifstream file(long_name);
 #else
-		std::wstring long_name = filename;
+        std::wstring long_name = filename;
+        std::ifstream file(ws2s(long_name));
 #endif
-		std::ifstream file(long_name);
 		std::stringstream buffer;
 		buffer << file.rdbuf();
 		std::string str = buffer.str();
@@ -141,11 +142,12 @@ public:
 		}
 
 #ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+        std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+        std::ofstream file(long_name);
 #else
-		std::wstring long_name = filename;
+        std::wstring long_name = filename;
+        std::ofstream file(ws2s(long_name));
 #endif
-		std::ofstream file(long_name);
 		if (!file.is_open()) {
 			return 6; // Error: Unable to open file
 		}

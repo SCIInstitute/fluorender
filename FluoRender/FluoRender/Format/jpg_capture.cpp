@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <jpg_capture.h>
+#include <compatibility.h>
 #include <jpeglib.h>
 #include <cstdio>
 #include <vector>
@@ -45,8 +46,8 @@ struct JpgCapture::Impl
 
 	bool write(const void* image, bool flipVertically)
 	{
-		FILE* fp = _wfopen(filename.c_str(), L"wb");
-		if (!fp) return false;
+        FILE* fp = 0;
+ 		if (!WFOPEN(&fp, filename, L"wb")) return false;
 
 		jpeg_compress_struct cinfo;
 		jpeg_error_mgr jerr;

@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -61,7 +61,7 @@ bool LookingGlassRenderer::Init()
 #ifdef _WIN32
 	if (!m_lg_controller->Initialize(L"FluoRender"))
 #else
-	if (!controller->Initialize("FluoRender"))
+	if (!m_lg_controller->Initialize("FluoRender"))
 #endif
 	{
 		m_lg_controller.reset();

@@ -934,13 +934,13 @@ typedef union _LARGE_INTEGER {
 	long long QuadPart;
 } LARGE_INTEGER, * PLARGE_INTEGER;
 
-inline FILE* WFOPEN(FILE** fp, std::wstring& filename, const wchar_t* mode) {
+inline FILE* WFOPEN(FILE** fp, const std::wstring& filename, const wchar_t* mode) {
 	*fp = fopen(ws2s(filename).c_str(),
 		ws2s(std::wstring(mode)).c_str());
 	return *fp;
 }
 
-inline FILE* FOPEN(FILE** fp, std::string& filename, const char* mode) {
+inline FILE* FOPEN(FILE** fp, const std::string& filename, const char* mode) {
 	*fp = fopen(filename.c_str(), mode);
 	return *fp;
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -66,8 +66,12 @@ public:
 	}
 
 	std::shared_ptr<BaseTreeFile> createTreeFile(const std::wstring& filename, const std::string& id) {
+#ifdef _WIN32
 		std::ifstream file(filename);
-		if (!file.is_open()) {
+#else
+        std::ifstream file(ws2s(filename));
+#endif
+        if (!file.is_open()) {
 			return nullptr;
 		}
 
