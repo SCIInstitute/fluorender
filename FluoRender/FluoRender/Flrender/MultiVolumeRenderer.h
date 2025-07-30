@@ -43,7 +43,7 @@ namespace flvr
 	class VertexArray;
 	class VolumeRenderer;
 	class TextureBrick;
-	enum RenderMode;
+	enum class RenderMode : int;
 	class MultiVolumeRenderer
 	{
 	public:

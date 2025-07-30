@@ -1751,20 +1751,20 @@ void VolumeData::SetMode(int mode)
 	switch (mode)
 	{
 	case 0://normal
-		m_vr->set_mode(flvr::RENDER_MODE_OVER);
+		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
 		m_vr->set_color(m_color);
 		break;
 	case 1://MIP
-		m_vr->set_mode(flvr::RENDER_MODE_MIP);
+		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
 		m_vr->set_color(m_color);
 		break;
 	case 2://white shading
-		m_vr->set_mode(flvr::RENDER_MODE_OVER);
+		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
 		m_vr->set_colormap_mode(0);
 		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
 		break;
 	case 3://white mip
-		m_vr->set_mode(flvr::RENDER_MODE_MIP);
+		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
 		m_vr->set_colormap_mode(0);
 		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
 		break;

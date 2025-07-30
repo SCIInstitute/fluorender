@@ -204,8 +204,8 @@ int JPGReader::Preprocess()
 
 void JPGReader::GetFileInfo(const std::wstring& filename)
 {
-    FILE* infile = 0;
-    if (!WFOPEN(&infile, filename, L"rb")) return;
+	FILE* infile = 0;
+	if (!WFOPEN(&infile, filename, L"rb")) return;
 
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;
@@ -326,8 +326,8 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 
 bool JPGReader::ReadSingleJpg(void* val, const std::wstring& filename, int c)
 {
-    FILE* infile = 0;
-    if (!WFOPEN(&infile, filename, L"rb")) return;
+	FILE* infile = 0;
+	if (!WFOPEN(&infile, filename, L"rb")) return false;
 
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;

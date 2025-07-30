@@ -81,7 +81,7 @@ namespace flvr
 
 	TextureRenderer::TextureRenderer()
 		:
-		mode_(RENDER_MODE_NONE),
+		mode_(RenderMode::RENDER_MODE_NONE),
 		sample_rate_(1.0),
 		num_slices_(0),
 		imode_(false),

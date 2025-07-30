@@ -172,7 +172,7 @@ namespace flvr
 #define PALETTE_SIZE (PALETTE_W*PALETTE_H)
 #define PALETTE_ELEM_COMP 4
 
-	enum RenderMode
+	enum class RenderMode : int
 	{
 		RENDER_MODE_NONE,
 		RENDER_MODE_OVER,

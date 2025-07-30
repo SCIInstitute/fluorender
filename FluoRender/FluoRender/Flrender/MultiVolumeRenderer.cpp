@@ -47,7 +47,7 @@
 using namespace flvr;
 
 MultiVolumeRenderer::MultiVolumeRenderer()
-	: mode_(RENDER_MODE_OVER),
+	: mode_(RenderMode::RENDER_MODE_OVER),
 	depth_peel_(0),
 	blend_num_bits_(32),
 	blend_slices_(false),
@@ -211,14 +211,14 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	glEnable(GL_BLEND);
 	switch(mode_)
 	{
-	case RENDER_MODE_OVER:
+	case RenderMode::RENDER_MODE_OVER:
 		glBlendEquation(GL_FUNC_ADD);
 		if (glbin_settings.m_update_order == 0)
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		else if (glbin_settings.m_update_order == 1)
 			glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 		break;
-	case RENDER_MODE_MIP:
+	case RenderMode::RENDER_MODE_MIP:
 		glBlendEquation(GL_MAX);
 		glBlendFunc(GL_ONE, GL_ONE);
 		break;
@@ -565,7 +565,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->depth_peel_, true,
 				grad,
 				vr_list_[tn]->ml_mode_,
-				vr_list_[tn]->mode_ == RENDER_MODE_MIP,
+				vr_list_[tn]->mode_ == RenderMode::RENDER_MODE_MIP,
 				vr_list_[tn]->colormap_mode_,
 				vr_list_[tn]->colormap_,
 				vr_list_[tn]->colormap_proj_,
