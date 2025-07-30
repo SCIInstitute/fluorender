@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -2771,7 +2771,11 @@ bool TrackMapProcessor::Export(const std::wstring &filename)
 		m_map->m_frame_num != m_map->m_inter_graph_list.size() + 1)
 		return false;
 
+#ifdef _WIN32
 	std::ofstream ofs(filename, std::ios::out | std::ios::binary);
+#else
+    std::ofstream ofs(ws2s(filename), std::ios::out | std::ios::binary);
+#endif
 	if (ofs.bad())
 		return false;
 
@@ -2921,7 +2925,11 @@ bool TrackMapProcessor::Import(const std::wstring &filename)
 	//clear everything
 	m_map->Clear();
 
+#ifdef _WIN32
 	std::ifstream ifs(filename, std::ios::in | std::ios::binary);
+#else
+    std::ifstream ifs(ws2s(filename), std::ios::in | std::ios::binary);
+#endif
 	if (ifs.bad())
 		return false;
 

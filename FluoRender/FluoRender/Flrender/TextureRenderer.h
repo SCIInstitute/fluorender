@@ -1,4 +1,4 @@
-﻿//
+//
 //  For more information, please see: http://software.sci.utah.edu
 //
 //  The MIT License
@@ -33,6 +33,9 @@
 #include <stdint.h>
 #include <glm/glm.hpp>
 #include <memory>
+#ifdef _DARWIN
+#include <OpenGL/OpenGL.h>
+#endif
 
 #ifndef __glew_h__
 typedef unsigned int GLenum;

@@ -1,4 +1,4 @@
-﻿# /*
+# /*
 # For more information, please see: http://software.sci.utah.edu
 # 
 # The MIT License
@@ -211,6 +211,17 @@ if(WIN32)
     set(PNG_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxpngd.lib)
     set(ZLIB_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxzlib.lib)
     set(ZLIB_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxzlibd.lib)
+elseif(APPLE)
+    set(TIFF_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/tiff/libtiff")
+    set(PNG_PNG_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/png")
+    set(JPEG_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/jpeg")
+    set(ZLIB_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/zlib")
+    set(TIFF_LIBRARY_RELEASE "${wxWidgets_LIB_DIR}/libwxtiff.a")
+    set(TIFF_LIBRARY_DEBUG "${wxWidgets_LIB_DIR}/libwxtiffd.a")
+    set(PNG_LIBRARY_RELEASE "${wxWidgets_LIB_DIR}/libwxpng.a")
+    set(PNG_LIBRARY_DEBUG "${wxWidgets_LIB_DIR}/libwxpngd.a")
+    set(ZLIB_LIBRARY_RELEASE "${wxWidgets_LIB_DIR}/libwxzlib.a")
+    set(ZLIB_LIBRARY_DEBUG "${wxWidgets_LIB_DIR}/libwxzlibd.a")
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
@@ -354,6 +365,9 @@ set(FREETYPE_INCLUDE_DIRS "${FREETYPE_DIRS}/include")
 if(WIN32)
     set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/Release/freetype.lib")
     set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/Debug/freetyped.lib")
+elseif(APPLE)
+    set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/Release/libfreetype.a")
+    set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/Debug/libfreetype.a")
 endif()
 find_package(Freetype REQUIRED)
 
@@ -375,7 +389,13 @@ endif()
 set(ND2_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/nd2/include")
 
 # OpenCL
-find_package(OpenCL REQUIRED)
+if(APPLE)
+    find_library(OpenCL_LIBRARY OpenCL)
+    set(OpenCL_INCLUDE_DIRS "/System/Library/Frameworks/OpenCL.framework/Headers")
+    set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
+else()
+    find_package(OpenCL REQUIRED)
+endif()
 add_definitions(-DCL_TARGET_OPENCL_VERSION=300)
 
 # OpenVR
@@ -441,17 +461,29 @@ endif()
 # teem
 file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
 list(GET TEEM_DIRS 0 TEEM_DIRS)  # Get the first match
-set(Teem_DIR "${TEEM_DIRS}/build")
+
+if(WIN32)
+    set(Teem_DIR "${TEEM_DIRS}/build")
+else()
+    set(Teem_DIR "${TEEM_DIRS}/install/lib/cmake/Teem")
+endif()
+
 find_package(Teem REQUIRED)
-include(${Teem_USE_FILE})
+
+if(DEFINED Teem_USE_FILE AND EXISTS "${Teem_USE_FILE}")
+    include(${Teem_USE_FILE})
+endif()
+
 set(TEEM_PATHS ${Teem_INCLUDE_DIRS}
-  "${TEEM_DIRS}/src/nrrd")
+    "${TEEM_DIRS}/src/nrrd")
+
 # teem required definitions
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
 add_definitions(-DTEEM_ZLIB=1)
 add_definitions(-DTEEM_32BIT=0)
+
 
 # Tester
 if(BUILD_TESTER)

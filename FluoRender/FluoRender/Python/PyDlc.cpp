@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -122,7 +122,11 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 {
 	if (!rhdl)
 		return false;
+#ifdef _WIN32
 	std::ifstream f(m_result_file);
+#else
+    std::ifstream f(ws2s(m_result_file));
+#endif
 	if (!f.good())
 		return false;
 
@@ -234,7 +238,11 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 	if (toff > 0 && !has_toff)
 	{
 		//append info to the head
+#ifdef _WIN32
 		std::ifstream inf(m_result_file);
+#else
+        std::ifstream inf(ws2s(m_result_file));
+#endif
 		if (!inf.good())
 			return true;
 		inf.seekg(0, inf.end);

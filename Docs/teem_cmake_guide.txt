@@ -1,0 +1,101 @@
+Steps to Modernize and Install Teem with CMake (Cross-Platform)
+================================================================
+
+1. Download and Extract Teem Source
+-----------------------------------
+- Obtain the Teem source code (e.g., teem-1.11.0-src).
+- Extract it to a working directory.
+
+2. Create a Build Directory
+---------------------------
+From the root of the Teem source:
+$ mkdir build
+$ cd build
+
+3. Configure with CMake
+-----------------------
+Run CMake with an install prefix:
+$ cmake .. -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release
+
+4. Patch CMakeLists.txt (Modernization)
+---------------------------------------
+In the root CMakeLists.txt:
+
+- Remove or comment out deprecated lines:
+  # INCLUDE(CMakeExportBuildSettings)
+  # EXPORT_LIBRARY_DEPENDENCIES(...)
+  # CMAKE_EXPORT_BUILD_SETTINGS(...)
+
+- Replace any install(FILES ...) that references:
+  - TeemBuildSettings.cmake
+  - TeemLibraryDepends.cmake
+
+  with:
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/TeemConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/TeemConfigVersion.cmake"
+    "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
+    DESTINATION lib/cmake/Teem
+  )
+
+- Add modern CMake packaging logic:
+  set(Teem_VERSION "1.11.0")
+
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/TeemConfigVersion.cmake"
+    VERSION ${Teem_VERSION}
+    COMPATIBILITY AnyNewerVersion
+  )
+
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/TeemConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/TeemConfig.cmake"
+    INSTALL_DESTINATION lib/cmake/Teem
+  )
+
+  install(EXPORT TeemTargets
+    FILE TeemTargets.cmake
+    NAMESPACE Teem::
+    DESTINATION lib/cmake/Teem
+  )
+
+5. Create TeemConfig.cmake.in
+-----------------------------
+Create a file named TeemConfig.cmake.in in the source directory:
+
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/TeemTargets.cmake")
+
+6. Build and Install
+--------------------
+$ make
+$ make install
+
+7. Integrate Teem in Your Project
+---------------------------------
+In your own CMake project:
+
+file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
+list(GET TEEM_DIRS 0 TEEM_DIRS)
+
+if(WIN32)
+  set(Teem_DIR "${TEEM_DIRS}/build")
+else()
+  set(Teem_DIR "${TEEM_DIRS}/install/lib/cmake/Teem")
+endif()
+
+find_package(Teem REQUIRED)
+
+if(DEFINED Teem_USE_FILE AND EXISTS "${Teem_USE_FILE}")
+  include(${Teem_USE_FILE})
+endif()
+
+set(TEEM_PATHS ${Teem_INCLUDE_DIRS} "${TEEM_DIRS}/src/nrrd")
+
+add_definitions(-DTEEM_DIO=0 -DTEEM_ENDIAN=1234 -DTEEM_QNANHIBIT=1 -DTEEM_ZLIB=1 -DTEEM_32BIT=0)
+
+8. Final Notes
+--------------
+- Ensure you are not referencing the old build directory in TeemConfig.cmake.
+- Remove any INCLUDE(...) lines referencing TeemLibraryDepends.cmake.

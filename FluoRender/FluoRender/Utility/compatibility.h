@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -911,7 +911,7 @@ inline char* STRCAT(char* d, size_t n, const char* s) {
 inline char* STRDUP(const char* s) { return strdup(s); }
 
 inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
-	return TIFFOpen(ws2s(fname).c_str(), opt);
+	return TIFFOpenW(fname.c_str(), opt);
 }
 
 inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
