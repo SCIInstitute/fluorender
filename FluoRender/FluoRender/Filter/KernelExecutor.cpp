@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -65,7 +65,11 @@ void KernelExecutor::LoadCode(const std::wstring &filename)
 			filename + L" doesn't exist.\n";
 		return;
 	}
+#ifdef _WIN32
 	std::ifstream input(filename);
+#else
+    std::ifstream input(ws2s(filename));
+#endif
 	if (!input)
 	{
 		m_message = L"Kernel file " +

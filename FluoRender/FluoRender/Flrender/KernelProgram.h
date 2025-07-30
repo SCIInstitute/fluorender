@@ -1,4 +1,4 @@
-﻿//  
+//  
 //  For more information, please see: http://software.sci.utah.edu
 //  
 //  The MIT License
@@ -39,6 +39,8 @@
 #ifdef _DARWIN
 #include <OpenCL/cl.h>
 #include <OpenCL/cl_gl.h>
+#include <OpenCL/opencl.h>
+#include <OpenGL/OpenGL.h>
 #include <OpenGL/CGLCurrent.h>
 #endif
 #include <string>

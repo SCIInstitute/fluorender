@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -4456,7 +4456,11 @@ std::wstring Annotations::GetPath()
 
 int Annotations::Load(const std::wstring &filename)
 {
+#ifdef _WIN32
 	std::wifstream fis(filename);
+#else
+    std::wifstream fis(ws2s(filename));
+#endif
 	if (!fis.is_open())
 		return 0;
 

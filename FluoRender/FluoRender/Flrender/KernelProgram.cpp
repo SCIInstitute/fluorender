@@ -1,4 +1,4 @@
-﻿//  
+//  
 //  For more information, please see: http://software.sci.utah.edu
 //  
 //  The MIT License
@@ -282,7 +282,11 @@ namespace flvr
 
 		if (!queue_)
 		{
+#if defined(__APPLE__) || defined(CL_VERSION_1_2)
+            queue_ = clCreateCommandQueue(context_, device_, 0, &err);
+#else
 			queue_ = clCreateCommandQueueWithProperties(context_, device_, nullptr, &err);
+#endif
 			if (err != CL_SUCCESS)
 				return -1;
 		}

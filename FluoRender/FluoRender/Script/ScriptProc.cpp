@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -2449,7 +2449,11 @@ void ScriptProc::ExportInfo()
 	}
 
 	//print lines
+#ifdef _WIN32
 	std::ofstream ofs(outputfile);
+#else
+    std::ofstream ofs(ws2s(outputfile));
+#endif
 	OutCoordVisitor visitor(ofs, tnames);
 	m_output->accept(visitor);
 	ofs.close();
@@ -2493,8 +2497,13 @@ void ScriptProc::ExportTemplate()
 	m_fconfig->Read("js_value", &js_value);
 
 	//print lines
+#ifdef _WIN32
 	std::ifstream ifs(tempfile);
 	std::ofstream ofs(outputfile);
+#else
+    std::ifstream ifs(ws2s(tempfile));
+    std::ofstream ofs(ws2s(outputfile));
+#endif
 	std::string line;
 	int replace = 0;//1:data;2:value name;
 	while (std::getline(ifs, line))
@@ -2544,9 +2553,20 @@ void ScriptProc::ExportTemplate()
 	ifs.close();
 	ofs.close();
 
-#ifdef _DARWIN
-	outputfile.Replace(" ", "%20");
-	outputfile = "file://" + outputfile;
+#ifdef __APPLE__
+
+    // Replace spaces with %20
+    std::wstring encoded;
+    for (wchar_t ch : outputfile) {
+        if (ch == L' ') {
+            encoded += L"%20";
+        } else {
+            encoded += ch;
+        }
+    }
+
+    // Prepend file://
+    outputfile = L"file://" + encoded;
 #endif
 	glbin_moviemaker.Hold();
 	OpenFileWithDefaultProgram(outputfile);
@@ -2576,7 +2596,11 @@ void ScriptProc::ExportSpreadsheet()
 	}
 
 	//print lines
+#ifdef _WIN32
 	std::ofstream ofs(outputfile);
+#else
+    std::ofstream ofs(ws2s(outputfile));
+#endif
 	OutCsvVisitor visitor(ofs, vnames);
 	m_output->accept(visitor);
 	ofs.close();

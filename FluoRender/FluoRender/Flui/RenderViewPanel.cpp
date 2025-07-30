@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -28,7 +28,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <GL/glew.h>
 #ifdef _WIN32
-#include <GL/wglew.h>
+    #include <GL/wglew.h>
+#elif defined(__APPLE__)
+    #include <OpenGL/OpenGL.h>
+    #include <OpenGL/gl3.h>  // For modern OpenGL (3.2+)
+#elif defined(__linux__)
+    #include <GL/glx.h>
 #endif
 #include <RenderViewPanel.h>
 #include <Global.h>

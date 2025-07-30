@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FADEBUTTON_H_
 #define _FADEBUTTON_H_
 
-#include <HistoryIndicator.h>
 #include <wx/wx.h>
 #include <wx/control.h>
+#include <HistoryIndicator.h>
 
 class wxFadeButton : public wxControl, public HistoryIndicator
 {

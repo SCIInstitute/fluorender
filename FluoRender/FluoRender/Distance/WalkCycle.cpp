@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -53,7 +53,11 @@ void WalkCycle::ReadData(const std::wstring& name)
 	names_.clear();
 	data_.clear();
 
+#ifdef _WIN32
 	std::ifstream f(name);
+#else
+    std::ifstream f(ws2s(name));
+#endif
 	if (!f.good())
 		return;
 
@@ -146,7 +150,11 @@ void WalkCycle::ReadData(const std::wstring& name)
 
 void WalkCycle::SaveData(const std::wstring& name)
 {
+#ifdef _WIN32
 	std::ofstream f(name);
+#else
+    std::ofstream f(ws2s(name));
+#endif
 	if (!f.good())
 		return;
 
@@ -464,7 +472,11 @@ void WalkCycle::LoadCycle(const std::wstring& name)
 {
 	cycle_.clear();
 
+#ifdef _WIN32
 	std::ifstream f(name);
+#else
+    std::ifstream f(ws2s(name));
+#endif
 	if (!f.good())
 		return;
 
@@ -527,7 +539,11 @@ void WalkCycle::LoadCycle(const std::wstring& name)
 
 void WalkCycle::SaveCycle(const std::wstring& name)
 {
+#ifdef _WIN32
 	std::ofstream f(name);
+#else
+    std::ofstream f(ws2s(name));
+#endif
 	if (!f.good())
 		return;
 
@@ -647,7 +663,11 @@ void WalkCycle::Correct(int mode)
 
 void WalkCycle::SaveDist(const std::wstring& name)
 {
+#ifdef _WIN32
 	std::ofstream f(name);
+#else
+    std::ofstream f(ws2s(name));
+#endif
 	if (!f.good())
 		return;
 
@@ -691,7 +711,11 @@ void WalkCycle::SaveDist(const std::wstring& name)
 
 void WalkCycle::SaveAligned(const std::wstring& name)
 {
+#ifdef _WIN32
 	std::ofstream f(name);
+#else
+    std::ofstream f(ws2s(name));
+#endif
 	if (!f.good())
 		return;
 
