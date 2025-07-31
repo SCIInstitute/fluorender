@@ -419,7 +419,7 @@ list(GET OPENVR_DIRS 0 OPENVR_DIRS)  # Get the first match
 if(WIN32)
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/win64/openvr_api.lib)
 elseif(APPLE)
-    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/osx64/libopenvr_api.dylib)
+    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/osx64/libopenvr_api.a)
 else()
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/linux64/libopenvr_api.so)
 endif()

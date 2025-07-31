@@ -735,11 +735,6 @@ inline std::wstring APPEND_QUILT_INFO(const std::wstring& file, int vx, int vy, 
 	return new_path;
 }
 
-extern "C" {
-	typedef struct tiff TIFF;
-	TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
-}
-
 inline char GETSLASHA() { return std::filesystem::path::preferred_separator; }
 inline wchar_t GETSLASH() { return static_cast<wchar_t>(GETSLASHA()); }
 
@@ -778,6 +773,11 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 
 #define FSEEK64     _fseeki64
 #define SSCANF    sscanf
+
+extern "C" {
+    typedef struct tiff TIFF;
+    TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
+}
 
 inline wchar_t GETSLASHALT() { return L'/'; }
 inline char GETSLASHALTA() { return '/'; }
@@ -855,6 +855,11 @@ inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 
 #define FSEEK64     fseek
 
+extern "C" {
+    typedef struct tiff TIFF;
+    TIFF* TIFFOpen(const char* name, const char* mode);
+}
+
 inline bool str_mat(std::wstring& s1, size_t p1, std::wstring& s2, size_t p2)
 {
 	// If we reach at the end of both strings, we are done
@@ -910,8 +915,9 @@ inline char* STRCAT(char* d, size_t n, const char* s) {
 
 inline char* STRDUP(const char* s) { return strdup(s); }
 
-inline TIFF* TIFFOpenW(std::wstring fname, const char* opt) {
-	return TIFFOpenW(fname.c_str(), opt);
+inline TIFF* TIFFOpenW(const std::wstring fname, const char* opt) {
+    std::string str = ws2s(fname);
+	return TIFFOpen(str.c_str(), opt);
 }
 
 inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
