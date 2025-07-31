@@ -245,7 +245,6 @@ endif()
 message(STATUS "wxWidgets_LIB_DIR: ${wxWidgets_LIB_DIR}")
 message(STATUS "wxWidgets_LIBRARIES: ${wxWidgets_LIBRARIES}")
 
-
 # Boost
 file(GLOB BOOST_DIRS "${PARENT_DIR}/boost*")
 list(GET BOOST_DIRS 0 BOOST_DIRS)  # Get the first match
@@ -255,6 +254,15 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost COMPONENTS system chrono filesystem locale REQUIRED)
+
+# bzip2
+if (NOT WIN32)
+file(GLOB BZIP2_DIRS "${PARENT_DIR}/bzip2*")
+list(GET BZIP2_DIRS 0 BZIP2_DIRS)  # Get the first match
+set(BZIP2_ROOT "${BZIP2_DIRS}")
+find_path(BZIP2_INCLUDE_DIR bzlib.h PATHS "${BZIP2_ROOT}/include")
+find_library(BZIP2_LIBRARY bz2 PATHS "${BZIP2_ROOT}/lib")
+endif()
 
 # dlib
 if(WIN32)
@@ -751,6 +759,10 @@ target_include_directories(ANIMATORS_LIB PRIVATE
   ${GLM_DIRS}
   ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
+if (APPLE)
+    target_link_libraries(ANIMATORS_LIB PRIVATE
+      ${BZIP2_LIBRARY})
+endif()
 target_link_libraries(ANIMATORS_LIB PRIVATE
   ${TIFF_LIBRARIES})
 
@@ -896,6 +908,10 @@ else()
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2})
 endif()
+if (APPLE)
+    target_link_libraries(FORMAT_LIB PRIVATE
+      ${BZIP2_LIBRARY})
+endif()
 target_link_libraries(FORMAT_LIB PRIVATE
   teem
   ${Boost_LIBRARIES}
@@ -995,6 +1011,10 @@ else()
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2})
 endif()
+if (APPLE)
+    target_link_libraries(SCENE_LIB PRIVATE
+      ${BZIP2_LIBRARY})
+endif()
 target_link_libraries(SCENE_LIB PRIVATE
   ${TIFF_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES})
@@ -1006,6 +1026,10 @@ target_include_directories(SCRIPT_LIB PRIVATE
   ${Python3_INCLUDE_DIRS}
   ${TEEM_PATHS}
   ${TIFF_INCLUDE_DIR})
+if (APPLE)
+    target_link_libraries(SCRIPT_LIB PRIVATE
+      ${BZIP2_LIBRARY})
+endif()
 target_link_libraries(SCRIPT_LIB PRIVATE
   ${TIFF_LIBRARIES}
   ${Python3_LIBRARIES})
@@ -1063,101 +1087,82 @@ ELSEIF(WIN32)
   SET(src ${src} ${icon_rc} ${manifest_file})
 ENDIF()
 
-# platform specific rules
+# Platform-specific rules
 if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
-  # Mac OS X
+  # Set macOS deployment target and standard flags
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3")
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -DWX_PRECOMP")
+
+  # Add macOS frameworks
+  set(MACOS_FRAMEWORKS
+    "-framework OpenCL"
+    "-framework CoreFoundation"
+    "-framework CoreVideo"
+    "-framework VideoDecodeAcceleration"
+    "-framework VideoToolbox"
+    "-framework Security"
+    "-framework CoreMedia"
+  )
+
+  # Add executable with bundle
+  add_executable(FluoRender MACOSX_BUNDLE ${src} ${hdr} ${rsc} ${icns})
+
+  # Set RPATH for bundled app
+  set_target_properties(FluoRender PROPERTIES
+    INSTALL_RPATH "@executable_path"
+    BUILD_WITH_INSTALL_RPATH TRUE
+    MACOSX_BUNDLE TRUE
+  )
+
+  # Add OpenGL header defines if not set
   if(NOT OPEN_GL_HEADER_LOC)
-    add_definitions(-DOPEN_GL_HEADER_LOC=<OpenGL/gl.h>)
+    add_definitions(-DOPEN_GL_HEADER_LOC="<OpenGL/gl.h>")
   endif()
   if(NOT OPEN_GLU_HEADER_LOC)
-    add_definitions(-DOPEN_GLU_HEADER_LOC=<OpenGL/glu.h>)
+    add_definitions(-DOPEN_GLU_HEADER_LOC="<OpenGL/glu.h>")
   endif()
+
   add_definitions(-D_DARWIN)
-  set(CFLAGS "-fPIC")
-  set(CXXFLAGS "-fPIC ")
-  include(BundleUtilities)
-  add_executable(FluoRender MACOSX_BUNDLE
-    ${src} ${hdr} ${rsc} ${icns}
-    )
-  set_target_properties(FluoRender PROPERTIES MACOSX_DEPLOYMENT_TARGET "13.3")
-  # Set the rpath to the executable path
-  set(CMAKE_INSTALL_RPATH "@executable_path")
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set_target_properties(FluoRender PROPERTIES INSTALL_RPATH "@executable_path")
-elseif(UNIX OR MINGW)
-  set(CFLAGS "-fPIC")
-  set(CXXFLAGS "-fPIC ")
-  add_executable(FluoRender
-    ${src} ${hdr} ${rsc} ${icns}
-    )
+
+  # Link macOS frameworks
+  target_link_libraries(FluoRender PRIVATE ${MACOS_FRAMEWORKS})
+
 elseif(WIN32)
-  # Windows
-  if(NOT OPEN_GL_HEADER_LOC)
-    add_definitions(-DOPEN_GL_HEADER_LOC=<GL/gl.h>)
-  endif()
-  if(NOT OPEN_GLU_HEADER_LOC)
-    add_definitions(-DOPEN_GLU_HEADER_LOC=<GL/glu.h>)
-  endif()
-  # windows
-  if(WIN32)
-    add_definitions(-DWIN32)
-    add_definitions(-D_WIN32)
-    if(MSVC)
-      if (MP_THREADS GREATER 1)
-        add_definitions(/MP)
-      endif()
-      add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-      add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-      add_definitions(-Dinline=__inline)
-      add_definitions("/wd4273")
-      add_definitions(-D_XKEYCHECK_H)
-      add_definitions(-DNOMINMAX)
-      set(CFLAGS "")
-      set(CXXFLAGS "/EHsc")
-      # make sure the reference option is turned off and not incremental build linking
-      STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags ${CMAKE_EXE_LINKER_FLAGS_DEBUG})
-      STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags1 ${replacementFlags})
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags1}")
+  # Windows-specific definitions
+  add_definitions(-DWIN32 -D_WIN32 -DNOMINMAX)
 
-      STRING(REPLACE "INCREMENTAL" "INCREMENTAL:NO" replacementFlags2 ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
-      STRING(REPLACE "INCREMENTAL:NO:NO" "INCREMENTAL:NO" replacementFlags3 ${replacementFlags2})
-      SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/INCREMENTAL:NO /OPT:NOREF ${replacementFlags3}")
-
-      SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:NOREF")
-      SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -MDd")
-      SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MDd")
-      SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MD")
-      SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
+  if(MSVC)
+    if(MP_THREADS GREATER 1)
+      add_definitions(/MP)
     endif()
-    add_executable(FluoRender WIN32
-      ${src} ${hdr} ${rsc} ${icns}
+    add_definitions(
+      -D_CRT_NONSTDC_NO_DEPRECATE
+      -D_CRT_SECURE_NO_DEPRECATE
+      -Dinline=__inline
+      "/wd4273"
+      -D_XKEYCHECK_H
     )
-    if(BUILD_TESTER)
-        add_executable(Tester
-          ${tester_src} ${tester_hdr}
-        )
-        target_include_directories(Tester PRIVATE ${FluoRender_SOURCE_DIR}/FluoRender/Tester)
-    endif()
+    set(CMAKE_CXX_FLAGS "/EHsc")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:NOREF")
+    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/INCREMENTAL:NO /OPT:NOREF")
   endif()
-endif()
 
-# architecture specific rules
-#if(${ARCHITECTURE} MATCHES 64)
-#  if(APPLE)
-#    set(ARCH_FLAGS "-m64 -arch x86_64")
-#  endif()
-#  set(CMAKE_C_FLAGS "${ARCH_FLAGS} ${CFLAGS}")
-#  set(CMAKE_CXX_FLAGS "${ARCH_FLAGS} ${CXXFLAGS} ${CXX_11_FLAG}")
-#  set(CMAKE_EXE_LINKER_FLAGS "${ARCH_FLAGS} ${CXX_11_FLAG}")
-#endif()
+  add_executable(FluoRender WIN32 ${src} ${hdr} ${rsc} ${icns})
 
-if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -L/usr/lib ${CMAKE_EXE_LINKER_FLAGS} -liconv -lbz2 -framework OpenCL -framework CoreFoundation -framework CoreVideo -framework VideoDecodeAcceleration -framework VideoToolbox -framework Security -framework CoreMedia")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=13.3 -DWX_PRECOMP -std=c++20 -stdlib=libc++")
-elseif(UNIX OR MINGW)
+  if(BUILD_TESTER)
+    add_executable(Tester ${tester_src} ${tester_hdr})
+    target_include_directories(Tester PRIVATE ${FluoRender_SOURCE_DIR}/FluoRender/Tester)
+  endif()
+
+elseif(UNIX)
+  # Linux or other UNIX-like systems
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  add_executable(FluoRender ${src} ${hdr} ${rsc} ${icns})
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread -ldl")
 endif()
+
 
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>")
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
@@ -1170,8 +1175,7 @@ if(WIN32)
   target_link_libraries(FluoRender PRIVATE
     secur32.lib
   )
-elseif(APPLE)
-else()
+elseif(UNIX AND NOT APPLE)
   target_link_libraries(FluoRender PRIVATE
     stdc++fs
   )
