@@ -380,15 +380,12 @@ elseif(APPLE)
 endif()
 
 # freetype
-file(GLOB FREETYPE_DIRS "${PARENT_DIR}/freetype*")
-list(GET FREETYPE_DIRS 0 FREETYPE_DIRS)  # Get the first match
-set(FREETYPE_INCLUDE_DIRS "${FREETYPE_DIRS}/include")
 if(WIN32)
+    file(GLOB FREETYPE_DIRS "${PARENT_DIR}/freetype*")
+    list(GET FREETYPE_DIRS 0 FREETYPE_DIRS)  # Get the first match
+    set(FREETYPE_INCLUDE_DIRS "${FREETYPE_DIRS}/include")
     set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/Release/freetype.lib")
     set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/Debug/freetyped.lib")
-elseif(APPLE)
-    set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/libfreetype.a")
-    set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/libfreetype.a")
 endif()
 find_package(Freetype REQUIRED)
 
@@ -1100,6 +1097,10 @@ if(APPLE)
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -DWX_PRECOMP")
+  #set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
+  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep --timestamp")
+  #set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "")
+  #set(CMAKE_XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES")
 
   # Add macOS frameworks
   set(MACOS_FRAMEWORKS
