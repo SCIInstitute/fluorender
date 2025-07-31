@@ -241,7 +241,7 @@ void OclDlg::UpdateKernelList()
 void OclDlg::UpdateKernelListSelect()
 {
 	int idx = glbin_kernel_executor.GetFileIndex();
-	if (idx >= 0)
+	if (idx >= 0 && idx < m_kernel_list->GetItemCount())
 		m_kernel_list->SetItemState(idx,
 			wxLIST_STATE_SELECTED,
 			wxLIST_STATE_SELECTED);

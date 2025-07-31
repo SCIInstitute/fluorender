@@ -42,6 +42,8 @@ public:
 
 	void SelectItemSilently(int i)
 	{
+		if (i < 0 || i >= GetItemCount())
+			return;
 		m_silent_select = true;
 		SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 		m_silent_select = false;

@@ -57,6 +57,10 @@ public:
 
 	void SelectItemSilently(int i)
 	{
+		if (i < 0 || i >= GetItemCount()) {
+			return; // Invalid index
+		}
+
 		//DBGPRINT(L"Select Key List Item: %d\n", i);
 		m_silent_select = true;
 		Freeze(); // Optional: prevents flicker during updates

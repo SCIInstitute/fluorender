@@ -1516,7 +1516,7 @@ void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
 					break;
 				}
 			}
-			if (idx >= 0)
+			if (idx >= 0 && idx < m_script_list->GetItemCount())
 			{
 				m_script_list->SetItemState(idx,
 					wxLIST_STATE_SELECTED,
