@@ -371,6 +371,12 @@ list(APPEND FFMPEG_LIBRARIES
     strmiids.lib
     bcrypt.lib
 )
+elseif(APPLE)
+    find_library(X264_LIBRARY x264 HINTS "${FFMPEG_DIRS}/depends/lib")
+    find_library(X265_LIBRARY x265 HINTS "${FFMPEG_DIRS}/depends/lib")
+    list(APPEND FFMPEG_LIBRARIES
+        ${X264_LIBRARY}
+        ${X265_LIBRARY})
 endif()
 
 # freetype
@@ -1288,16 +1294,6 @@ if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
 	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
-    "$<TARGET_FILE_DIR:FluoRender>")
-elseif(APPLE)
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${OPENVR_DIRS}/bin/osx64/libopenvr_api.dylib"
-    "$<TARGET_FILE_DIR:FluoRender>")
-else()
-add_custom_command(TARGET FluoRender POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	"${OPENVR_DIRS}/bin/linux64/libopenvr_api.so"
     "$<TARGET_FILE_DIR:FluoRender>")
 endif()
 
