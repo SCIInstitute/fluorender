@@ -6,9 +6,9 @@ This is the open-source repository for FluoRender, an interactive tool for fluor
 
 Download the installer package for your operating system (OS).
 
-| 🖥️ Windows | 🍎 Mac OS | 🐧 Ubuntu |
-|------------|-----------|----------|
-| [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_win64.exe) | [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/FluoRender2.32_mac64.pkg) | [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/fluorender2.32_ubuntu22.04_amd64.deb) |
+| 🖥️ Windows (10 and 11, win64) | 🍎 Mac OS (mac64 x86_64) | 🍎 Mac OS (mac64 Arm_64) | 🐧 Linux |
+|------------|-----------|----------|----------|
+| [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_win64.exe) | Available Soon | [Fund me for an Arm Mac](https://paypal.me/fluorender) | [Email me](mailto:yong.wan@utah.edu) |
 
 
 <h1 id="features">Release Highlights for Version 2.33</h1>
@@ -21,6 +21,8 @@ The goal remains constant: to empower researchers with interactive tools that fe
   FluoRender now seamlessly supports the latest [Looking Glass holographic displays](https://lookingglassfactory.com/displays-overview), expanding your visualization toolkit with intuitive controls and immersive clarity.
 
   The 16" Looking Glass displays can be purchased here: https://lookingglassfactory.com/looking-glass-16-lightfield
+  
+  The 27" Looking Glass dispalys can be purchased here: https://lookingglassfactory.com/looking-glass-27
 
   And a portable holographic display, the Looking Glass Go can be purchased here: https://lookingglassfactory.com/lkg-go
    - **Hologram Modes:** Choose from three distinct modes to configure camera and lens shifts—whether for depth emphasis, parallax refinement, or artistic rotation.
@@ -93,7 +95,7 @@ The goal remains constant: to empower researchers with interactive tools that fe
 
 Contact the developer for any questions or suggestions:
 
-**Email:** yong.wan@utah.edu
+**Email:** [yong.wan@utah.edu](mailto:yong.wan@utah.edu)
 
 **Facebook Page:** [FluoRender on Facebook](https://www.facebook.com/fluorender)
 
