@@ -282,7 +282,7 @@ namespace flvr
 
 		if (!queue_)
 		{
-#if defined(__APPLE__) || defined(CL_VERSION_1_2)
+#if defined(__APPLE__)
             queue_ = clCreateCommandQueue(context_, device_, 0, &err);
 #else
 			queue_ = clCreateCommandQueueWithProperties(context_, device_, nullptr, &err);
