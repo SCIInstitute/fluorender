@@ -2,47 +2,53 @@
 
 echo "Post installation process started"
 
-#Change permissions in home directory
+# Change permissions in product home
 echo "Change permissions in product home"
 chmod -R a+rwx /Applications/FluoRender.app/Contents/MacOS
 
-# Function to download and install Python 3.10 from the official website
+# Function to download and install the latest Python 3 for macOS
 install_python() {
-    echo "Downloading Python 3.10 installer..."
-    curl -o python-3.10.9-macos11.pkg https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg
-    echo "Installing Python 3.10..."
-    sudo installer -pkg python-3.10.9-macos11.pkg -target /
-    rm python-3.10.9-macos11.pkg
+    echo "Downloading latest Python 3 installer..."
+
+    PYTHON_URL="https://www.python.org/ftp/python/3.12.3/python-3.12.3-macos11.pkg"
+    curl -o python-latest.pkg "$PYTHON_URL"
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to download Python installer."
+
+        # Show GUI alert to user
+        osascript -e 'display dialog "FluoRender requires Python 3, but it could not be downloaded. Please install it manually from https://www.python.org/downloads/" buttons {"OK"} default button "OK" with icon caution'
+
+        exit 1
+    fi
+
+    echo "Installing Python 3..."
+    installer -pkg python-latest.pkg -target /
+    rm python-latest.pkg
 }
 
-# Function to run commands as the current user
-run_as_user() {
-    su - "$USER" -c "$1"
-}
+# Check for Python 3 in common locations
+PYTHON_PATHS=(
+    "/usr/bin/python3"
+    "/opt/homebrew/bin/python3"
+    "/usr/local/bin/python3"
+    "/Library/Frameworks/Python.framework/Versions/3.*/bin/python3"
+)
 
-# Check if Python 3.10 is installed
-if ! command -v python3.10 &> /dev/null; then
-    echo "Python 3.10 not found. Installing Python 3.10..."
+PYTHON_FOUND=false
+for path in "${PYTHON_PATHS[@]}"; do
+    if ls $path &> /dev/null; then
+        echo "Found Python at $path"
+        PYTHON_FOUND=true
+        break
+    fi
+done
+
+if [ "$PYTHON_FOUND" = false ]; then
+    echo "Python 3 not found. Attempting installation..."
     install_python
 else
-    echo "Python 3.10 is already installed."
-fi
-
-# Ensure Homebrew is in the PATH
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-
-# Check if Homebrew is installed
-if ! command -v brew &> /dev/null; then
-    echo "Homebrew not found. Installing Homebrew..."
-    run_as_user "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-fi
-
-# Check if HDF5 is installed
-if ! run_as_user "brew list hdf5 &> /dev/null"; then
-    echo "HDF5 not found. Installing HDF5..."
-    run_as_user "brew install hdf5"
-else
-    echo "HDF5 is already installed."
+    echo "Python 3 is already installed."
 fi
 
 echo "Postinstall script completed."

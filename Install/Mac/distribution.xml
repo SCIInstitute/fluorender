@@ -13,5 +13,5 @@
     <choice id="FluoRender" title="FluoRender" description="Install FluoRender">
         <pkg-ref id="edu.utah.sci.fluorender.pkg"/>
     </choice>
-    <pkg-ref id="edu.utah.sci.fluorender.pkg" installKBytes="88888" version="2.32" auth="Root">#FluoRender.pkg</pkg-ref>
+    <pkg-ref id="edu.utah.sci.fluorender.pkg" installKBytes="88888" version="2.33" auth="Root">#FluoRender.pkg</pkg-ref>
 </installer-gui-script>
