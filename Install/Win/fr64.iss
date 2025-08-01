@@ -36,7 +36,7 @@ Source: "..\..\build\bin\Release\Commands\*"; DestDir: "{app}\Commands"; Flags: 
 ; Data
 Source: "..\..\build\bin\Release\Data\*"; DestDir: "{app}\Data"; Flags: ignoreversion
 ; Database
-Source: "..\..\build\bin\Release\Database\*"; DestDir: "{app}\Database"; Flags: onlyifdoesntexist; Permissions: users-full
+Source: "..\..\build\bin\Release\Database\*"; DestDir: "{app}\Database"; Flags: ignoreversion; Permissions: users-full
 ; FONT ITEMS       
 Source: "..\..\build\bin\Release\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignoreversion  
 ; Java
