@@ -41,7 +41,7 @@ if [ ! -d "Applications" ]; then
 fi
 
 # Copy FluoRender.app from build directory
-APP_SOURCE="../build/bin/Release/FluoRender.app"
+APP_SOURCE="../../build/bin/Release/FluoRender.app"
 APP_DEST="Applications/FluoRender.app"
 
 if [ -d "$APP_SOURCE" ]; then
