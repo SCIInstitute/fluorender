@@ -1327,3 +1327,19 @@ if(WIN32)
         "$<TARGET_FILE_DIR:FluoRender>"
     )
 endif()
+
+if(APPLE)
+# Path to your final app binary
+set(TARGET_BINARY "$<TARGET_FILE:FluoRender>")
+
+# Replace hardcoded Python framework with generic version
+add_custom_command(
+    TARGET FluoRender
+    POST_BUILD
+    COMMAND install_name_tool -change
+      /Library/Frameworks/Python.framework/Versions/3.13/Python
+      /Library/Frameworks/Python.framework/Python
+      ${TARGET_BINARY}
+    COMMENT "Rewriting Python framework path before signing"
+)
+endif()
