@@ -85,7 +85,7 @@ The goal remains constant: to empower researchers with interactive tools that fe
 
 <h1 id="documentation">Documentation</h1>
 
-**User Manual:** [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/FluoRender2.32_Manual.pdf)
+**User Manual:** [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_Manual.pdf))
 
 **Tutorials:** [Version 2.32](https://github.com/SCIInstitute/fluorender/releases/download/v2.32/FluoRender2.32_Tutorials.pdf)
 
