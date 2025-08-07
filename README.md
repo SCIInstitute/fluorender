@@ -22,7 +22,7 @@ The goal remains constant: to empower researchers with interactive tools that fe
 
   The 16" Looking Glass displays can be purchased here: [https://lookingglassfactory.com/looking-glass-16-lightfield](https://lookingglassfactory.com/looking-glass-16-lightfield)
   
-  The 27" Looking Glass dispalys can be purchased here: [https://lookingglassfactory.com/looking-glass-27](https://lookingglassfactory.com/looking-glass-27)
+  The 27" Looking Glass displays can be purchased here: [https://lookingglassfactory.com/looking-glass-27](https://lookingglassfactory.com/looking-glass-27)
 
   And a portable holographic display, the Looking Glass Go can be purchased here: [https://lookingglassfactory.com/lkg-go](https://lookingglassfactory.com/lkg-go)
    - **Hologram Modes:** Choose from three distinct modes to configure camera and lens shifts—whether for depth emphasis, parallax refinement, or artistic rotation.
