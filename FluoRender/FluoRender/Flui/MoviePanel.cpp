@@ -2324,10 +2324,15 @@ void MoviePanel::OnDpiText(wxCommandEvent& event)
 	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
 	bool enlarge = lval > 72;
-	m_view->SetEnlarge(enlarge);
 	if (ch_enlarge)
 		ch_enlarge->SetValue(enlarge);
 	double enlarge_scale = (double)lval / 72.0;
+	auto view = glbin_current.render_view.lock();
+	if (view)
+	{
+		view->SetEnlarge(enlarge);
+		view->SetEnlargeScale(enlarge_scale);
+	}
 	if (sl_enlarge)
 	{
 		sl_enlarge->Enable(enlarge);
@@ -2347,7 +2352,9 @@ void MoviePanel::OnChEnlargeCheck(wxCommandEvent& event)
 	if (ch_enlarge)
 	{
 		bool enlarge = ch_enlarge->GetValue();
-		m_view->SetEnlarge(enlarge);
+		auto view = glbin_current.render_view.lock();
+		if (view)
+			view->SetEnlarge(enlarge);
 		if (ch_enlarge->GetParent())
 		{
 			wxSlider* sl_enlarge = (wxSlider*)
@@ -2395,7 +2402,9 @@ void MoviePanel::OnTxEnlargeText(wxCommandEvent& event)
 	wxString str = event.GetString();
 	double dval;
 	str.ToDouble(&dval);
-	m_view->SetEnlargeScale(dval);
+	auto view = glbin_current.render_view.lock();
+	if (view)
+		view->SetEnlargeScale(dval);
 	int ival = std::round(dval * 10);
 	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
 	if (tx_enlarge && tx_enlarge->GetParent())
