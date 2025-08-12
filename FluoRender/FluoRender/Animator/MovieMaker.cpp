@@ -202,7 +202,15 @@ void MovieMaker::PlaySave()
 	m_file_ext = file_path.extension().wstring();
 	if (m_file_ext == L".mp4")
 	{
-		if (!m_crop)
+		if (glbin_settings.m_hologram_mode == 2)
+		{
+			m_crop_x = 0;
+			m_crop_y = 0;
+			Size2D size = glbin_lg_renderer.GetQuiltSize();
+			m_crop_w = size.w();
+			m_crop_h = size.h();
+		}
+		else if (!m_crop)
 		{
 			m_crop_x = 0;
 			m_crop_y = 0;
@@ -334,15 +342,12 @@ void MovieMaker::WriteFrameToFile()
 
 	if (bmov)
 	{
-		//flip vertically 
-		unsigned char* flip = new unsigned char[w * h * 3];
-		for (size_t yy = 0; yy < (size_t)h; yy++)
-			for (size_t xx = 0; xx < (size_t)w; xx++)
-				memcpy(flip + 3 * (w * yy + xx), (unsigned char*)image + chann * (w * (h - yy - 1) + xx), 3);
-		glbin_video_encoder.set_frame_rgb_data(flip);
+		//flip vertically
+		if (glbin_settings.m_hologram_mode == 2)
+			glbin_video_encoder.set_frame_rgb_data((unsigned char*)image, false);
+		else
+			glbin_video_encoder.set_frame_rgb_data((unsigned char*)image, true);
 		glbin_video_encoder.write_video_frame(m_last_frame);
-		if (flip)
-			delete[]flip;
 		if (image)
 			delete[]image;
 	}

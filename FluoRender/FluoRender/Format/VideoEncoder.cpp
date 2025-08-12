@@ -97,75 +97,50 @@ void ffmpeg_log_callback(void* ptr, int level, const char* fmt, va_list vl)
 	DBGPRINT(str.c_str());
 }
 
-bool VideoEncoder::open(
-	const std::wstring& f,
+bool VideoEncoder::open(const std::wstring& f,
 	size_t w, size_t h, size_t len,
 	size_t fps, size_t bitrate)
 {
-	//av_log_set_level(AV_LOG_DEBUG);
-	//av_log_set_callback(ffmpeg_log_callback);
-
-	output_stream_.frame = 0;
-	output_stream_.next_pts = 0;
-	output_stream_.samples_count = 0;
-	output_stream_.st = 0;
-	output_stream_.swr_ctx = 0;
-	output_stream_.sws_ctx = 0;
-	output_stream_.t = 0;
-	output_stream_.tincr = 0;
-	output_stream_.tincr2 = 0;
-	output_stream_.tmp_frame = 0;
+	output_stream_ = {}; // Zero-initialize all members
 	filename_ = f;
-	// make sure width and height are divisible by 16
+
 	actual_width_ = w;
 	actual_height_ = h;
-	width_ = ((size_t)(w / 16)) * 16;
-	height_ = ((size_t)(h / 16)) * 16;
+	width_ = ((w + 15) / 16) * 16;   // Round up to nearest multiple of 16
+	height_ = ((h + 15) / 16) * 16;
+
 	fps_ = fps;
 	bitrate_ = bitrate;
-	if (len <= fps * 3)
-	{
-		gop_ = 0;
-		avformat_alloc_output_context2(
-			&format_context_, NULL, "mpeg", ws2s(filename_).c_str());
-	}
-	else
-	{
-		gop_ = fps > 30 ? 30 : fps;
-		avformat_alloc_output_context2(
-			&format_context_, NULL, NULL, ws2s(filename_).c_str());
-	}
+	gop_ = std::min<size_t>(fps, 30);
+
+	// Try to deduce format from filename
+	avformat_alloc_output_context2(&format_context_, NULL, NULL, ws2s(filename_).c_str());
 	if (!format_context_) {
-		std::cerr << "Could not deduce output" <<
-			"format from file extension: using MPEG.\n";
-		avformat_alloc_output_context2(
-			&format_context_, NULL, "mpeg", ws2s(filename_).c_str());
+		std::cerr << "Could not deduce format, falling back to MPEG.\n";
+		avformat_alloc_output_context2(&format_context_, NULL, "mpeg", ws2s(filename_).c_str());
 	}
 	if (!format_context_) return false;
+
 	const AVOutputFormat* format = format_context_->oformat;
-	/* Add the audio and video streams using the default format codecs
-	 * and initialize the codecs. */
 	if (format->video_codec == AV_CODEC_ID_NONE)
 		return false;
-	/* Now that all the parameters are set, we can open the audio and
-	 * video codecs and allocate the necessary encode buffers. */
+
 	if (!open_video()) return false;
-	//av_dump_format(format_context_, 0, ws2s(filename_).c_str(), 1);
-	/* open the output file, if needed */
+
 	if (!(format->flags & AVFMT_NOFILE)) {
-		int ret = avio_open(&format_context_->pb,
-			ws2s(filename_).c_str(), AVIO_FLAG_WRITE);
+		int ret = avio_open(&format_context_->pb, ws2s(filename_).c_str(), AVIO_FLAG_WRITE);
 		if (ret < 0) {
 			DBGPRINT(L"Could not open '%s': %d\n", filename_.c_str(), ret);
 			return false;
 		}
 	}
-	/* Write the stream header, if any. */
+
 	int ret = avformat_write_header(format_context_, NULL);
 	if (ret < 0) {
 		DBGPRINT(L"Error occurred when opening output file: %d\n", ret);
 		return false;
 	}
+
 	valid_ = true;
 	return true;
 }
@@ -254,10 +229,8 @@ void VideoEncoder::close()
 	valid_ = false;
 }
 
-bool VideoEncoder::set_frame_rgb_data(unsigned char* data)
+bool VideoEncoder::set_frame_rgb_data(unsigned char* data, bool flip_vertical)
 {
-	/* as we only generate a YUV420P picture, we must convert it
-	 * to the codec pixel format if needed */
 	if (!output_stream_.sws_ctx) {
 		output_stream_.sws_ctx = sws_getContext(
 			static_cast<int>(width_), static_cast<int>(height_), AV_PIX_FMT_RGB24,
@@ -269,29 +242,32 @@ bool VideoEncoder::set_frame_rgb_data(unsigned char* data)
 		}
 	}
 
-	// Allocate aligned memory
 	std::unique_ptr<unsigned char[]> temp_array(new unsigned char[width_ * height_ * 3 + 16]);
 	void* aligned_data_void = temp_array.get();
 	size_t space = width_ * height_ * 3 + 16;
 	std::align(16, width_ * height_ * 3, aligned_data_void, space);
 	unsigned char* aligned_data = static_cast<unsigned char*>(aligned_data_void);
 
-	// Crop the data if width/height are not divisible by 16
+	// Copy and optionally flip vertically
+	size_t row_bytes = 3 * actual_width_;
 	for (size_t i = 0; i < height_; i++) {
+		size_t src_row = flip_vertical ? (actual_height_ - 1 - i) : i;
+		if (src_row >= actual_height_) continue; // Safety check
+
 		std::memcpy(
 			aligned_data + (3 * i * width_),
-			data + (3 * i * actual_width_),
-			3 * width_);
+			data + (src_row * row_bytes),
+			std::min(3 * width_, row_bytes)); // Avoid overruns
 	}
 
-	// Convert the pixel format
-	uint8_t* inData[] = { aligned_data }; // RGB24 has one plane
-	int inLinesize[] = { static_cast<int>(3 * width_) }; // RGB stride
 	int ret = av_frame_make_writable(output_stream_.frame);
 	if (ret < 0) {
 		DBGPRINT(L"Error making frame writable: %d\n", ret);
 		return false;
 	}
+
+	uint8_t* inData[] = { aligned_data };
+	int inLinesize[] = { static_cast<int>(3 * width_) };
 
 	sws_scale(output_stream_.sws_ctx,
 		inData, inLinesize,

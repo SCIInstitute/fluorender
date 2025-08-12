@@ -45,7 +45,7 @@ public:
 	virtual ~VideoEncoder();
 	bool open(const std::wstring& f, size_t w, size_t h, size_t len, size_t fps, size_t bitrate);
 	void close();
-	bool set_frame_rgb_data(unsigned char * data);
+	bool set_frame_rgb_data(unsigned char * data, bool);
 	bool write_video_frame(size_t frame_num);//main method to set the RGB data.
 
 protected:
