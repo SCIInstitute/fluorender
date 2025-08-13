@@ -1370,6 +1370,59 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 	return 0.0;
 }
 
+double VolumeData::GetMaskValue(int i, int j, int k, flvr::TextureBrick* b)
+{
+	void *data_data = 0;
+	int bits = 8;
+	int64_t nx, ny, nz;
+	int nmask = m_tex->nmask();
+
+	if (isBrxml())
+	{
+		if (!b || !b->isLoaded()) return 0.0;
+		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
+		data_data = b->tex_data_brk(nmask, finfo);
+		if (!data_data) return 0.0;
+		bits = b->nb(0) * 8;
+		nx = b->nx();
+		ny = b->ny();
+		nz = b->nz();
+	}
+	else
+	{
+		Nrrd* data = 0;
+		data = m_tex->get_nrrd(nmask);
+		if (!data || !data->data) return 0.0;
+		data_data = data->data;
+		if (data->type == nrrdTypeUChar)
+			bits = 8;
+		else if (data->type == nrrdTypeUShort)
+			bits = 16;
+		nx = (int64_t)(data->axis[0].size);
+		ny = (int64_t)(data->axis[1].size);
+		nz = (int64_t)(data->axis[2].size);
+	}
+
+	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
+		return 0.0;
+	uint64_t ii = i, jj = j, kk = k;
+
+	if (bits == 8)
+	{
+		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
+		uint8_t old_value = ((uint8_t*)(data_data))[index];
+		return double(old_value)/255.0;
+	}
+	else if (bits == 16)
+	{
+		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
+		uint16_t old_value = ((uint16_t*)(data_data))[index];
+		return double(old_value)*m_scalar_scale/65535.0;
+	}
+
+	return 0.0;
+}
+
 double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
@@ -6885,6 +6938,18 @@ bool DataManager::LoadMeshData(GLMmodel* mesh)
 	m_md_list.push_back(md);
 
 	return true;
+}
+
+void DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
+{
+	std::wstring name = md->GetName();
+	std::wstring new_name = name;
+	size_t i;
+	for (i=1; CheckNames(new_name); i++)
+		new_name = name + L"_" + std::to_wstring(i);
+	if (i>1)
+		md->SetName(new_name);
+	m_md_list.push_back(md);
 }
 
 std::shared_ptr<VolumeData> DataManager::GetVolumeData(size_t index)

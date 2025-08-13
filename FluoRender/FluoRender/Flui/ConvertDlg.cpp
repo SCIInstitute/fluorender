@@ -27,10 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ConvertDlg.h>
 #include <Global.h>
-#include <MainFrame.h>
-#include <VolumeMeshConv.h>
-#include <DataManager.h>
 #include <Names.h>
+#include <MainFrame.h>
+#include <DataManager.h>
+#include <RenderView.h>
+#include <BaseConvVolMesh.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
@@ -172,40 +173,40 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstVolMeshThresh))
 	{
-		dval = glbin_vol_converter.GetIsoValue();
+		dval = glbin_conv_vol_mesh.GetIsoValue();
 		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
 		m_cnv_vol_mesh_thresh_text->ChangeValue(wxString::Format("%.2f", dval));
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownXY))
 	{
-		ival = glbin_vol_converter.GetDownsample();
+		ival = glbin_conv_vol_mesh.GetDownsample();
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
 		m_cnv_vol_mesh_downsample_text->SetValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownZ))
 	{
-		ival = glbin_vol_converter.GetDownsampleZ();
+		ival = glbin_conv_vol_mesh.GetDownsampleZ();
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
 		m_cnv_vol_mesh_downsample_z_text->SetValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstUseTransferFunc))
 	{
-		bval = glbin_vol_converter.GetVolumeUseTrans();
+		bval = glbin_conv_vol_mesh.GetUseTransfer();
 		m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstUseSelection))
 	{
-		bval = glbin_vol_converter.GetVolumeUseMask();
+		bval = glbin_conv_vol_mesh.GetUseMask();
 		m_cnv_vol_mesh_selected_chk->SetValue(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshWeld))
 	{
-		bval = glbin_vol_converter.GetWeldVertices();
+		bval = glbin_conv_vol_mesh.GetVertexMerge();
 		m_cnv_vol_mesh_weld_chk->SetValue(bval);
 	}
 
@@ -217,8 +218,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			str += md->GetName();
 			str += " is ";
-			dval = glbin_vol_converter.GetArea();
-			str += wxString::Format("%f", dval);
+			str += glbin_conv_vol_mesh.GetInfo();
 		}
 		(*m_stat_text) << str << "\n";
 	}
@@ -241,7 +241,7 @@ void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_vol_converter.SetIsoValue(val);
+		glbin_conv_vol_mesh.SetIsoValue(val);
 	}
 }
 
@@ -261,7 +261,7 @@ void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent& event)
 	if (str.ToLong(&ival))
 	{
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		glbin_vol_converter.SetDownsample(ival);
+		glbin_conv_vol_mesh.SetDownsample(ival);
 	}
 }
 
@@ -281,14 +281,14 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent& event)
 	if (str.ToLong(&ival))
 	{
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		glbin_vol_converter.SetDownsampleZ(ival);
+		glbin_conv_vol_mesh.SetDownsampleZ(ival);
 	}
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
-	glbin_vol_converter.SetVolumeUseTrans(bval);
+	glbin_conv_vol_mesh.SetUseTransfer(bval);
 	wxString str;
 	if (bval)
 		str = "0.01";
@@ -300,19 +300,32 @@ void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_selected_chk->GetValue();
-	glbin_vol_converter.SetVolumeUseMask(bval);
+	glbin_conv_vol_mesh.SetUseMask(bval);
 }
 
 void ConvertDlg::OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
-	glbin_vol_converter.SetWeldVertices(bval);
+	glbin_conv_vol_mesh.SetVertexMerge(bval);
 }
 
 void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 {
-	glbin_vol_converter.Compute();
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	glbin_conv_vol_mesh.SetVolumeData(vd);
+	glbin_conv_vol_mesh.Convert();
+	auto md = glbin_conv_vol_mesh.GetMeshData();
+	if (md)
+	{
+		glbin_data_manager.AddMeshData(md);
+		auto view = glbin_current.render_view.lock();
+		if (view)
+			view->AddMeshData(md);
+		glbin_current.SetMeshData(md);
+	}
+
 	FluoRefresh(0, { gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
 		{ glbin_current.GetViewId() });
-
 }

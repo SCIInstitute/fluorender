@@ -28,6 +28,13 @@
 
 # This is an CMake configuration file for FluoRender
 
+cmake_minimum_required(VERSION 3.10)
+
+# option to build with multithreading
+SET(USE_MP_COMPILE "0" CACHE STRING "Number of parallel jobs for building")
+# Convert the string to a number
+math(EXPR MP_THREADS "${USE_MP_COMPILE}")
+
 #??
 if (NOT WIN32 AND NOT APPLE)
   SET(ENABLE_GDB OFF CACHE BOOL "Enable GDB")
@@ -48,13 +55,6 @@ if (WIN32)
   SET(BUILD_TESTER OFF CACHE BOOL "Enable building the tester")
 endif()
 
-# option to build with multithreading
-SET(USE_MP_COMPILE "0" CACHE STRING "Number of parallel jobs for building")
-# Convert the string to a number
-math(EXPR MP_THREADS "${USE_MP_COMPILE}")
-
-cmake_minimum_required(VERSION 3.10)
-
 # for MSVC builds
 if(WIN32)
   if(MSVC)
@@ -62,15 +62,25 @@ if(WIN32)
   endif()
 endif()
 
-#if (WIN32 OR APPLE)
-#else()
-#  set(CMAKE_C_COMPILER "gcc-12")
-#  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
-#endif()
-
-if (APPLE)
+if(APPLE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Minimum OS X deployment version")
-  set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "" FORCE)
+
+  # Detect native architecture
+  execute_process(
+    COMMAND uname -m
+    OUTPUT_VARIABLE NATIVE_ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # Map uname output to CMake architecture
+  if(NATIVE_ARCH STREQUAL "arm64")
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Target architecture" FORCE)
+  elseif(NATIVE_ARCH STREQUAL "x86_64")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Target architecture" FORCE)
+  else()
+    message(WARNING "Unknown architecture: ${NATIVE_ARCH}. Defaulting to x86_64.")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Target architecture" FORCE)
+  endif()
 endif()
 
 project(FluoRender)
@@ -98,6 +108,12 @@ if(${ARCHITECTURE} MATCHES "64")
 else()
   add_definitions(-DFLUORENDER_ARCH="32bit")
 endif()
+
+#if (WIN32 OR APPLE)
+#else()
+#  set(CMAKE_C_COMPILER "gcc-12")
+#  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
+#endif()
 
 #if(UNIX)
 #  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)

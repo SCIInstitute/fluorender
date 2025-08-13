@@ -1,0 +1,26 @@
+__kernel void laplacian_smooth(
+    __global float4* vertices,
+    __global int* adjacency,
+    __global int* adj_count,
+    __global float4* smoothed_vertices,
+    int num_vertices
+) {
+    int id = get_global_id(0);
+    if (id >= num_vertices) return;
+
+    float4 v = vertices[id];
+    int count = adj_count[id];
+    if (count == 0) {
+        smoothed_vertices[id] = v;
+        return;
+    }
+
+    float4 sum = (float4)(0.0f);
+    for (int i = 0; i < count; ++i) {
+        int neighbor_id = adjacency[id * MAX_NEIGHBORS + i];
+        sum += vertices[neighbor_id];
+    }
+
+    float4 avg = sum / (float)count;
+    smoothed_vertices[id] = mix(v, avg, 0.5f); // blend factor = 0.5
+}

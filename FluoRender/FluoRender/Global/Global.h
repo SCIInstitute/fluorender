@@ -86,7 +86,7 @@ namespace flrd
 	class DistCalculator;
 	class Colocalize;
 	class Clusterizer;
-	class VolumeMeshConv;
+	class BaseConvVolMesh;
 }
 namespace flvr
 {
@@ -142,7 +142,7 @@ namespace flvr
 #define glbin_xr_renderer fluo::Global::instance().get_xr_renderer()
 #define glbin_colocalizer fluo::Global::instance().get_colocalizer()
 #define glbin_clusterizer fluo::Global::instance().get_clusterizer()
-#define glbin_vol_converter fluo::Global::instance().get_vol_converter()
+#define glbin_conv_vol_mesh fluo::Global::instance().get_conv_vol_mesh()
 //graphics resources
 #define glbin_vol_kernel_factory fluo::Global::instance().get_vol_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
@@ -254,7 +254,7 @@ namespace fluo
 		VolumeLoader& get_vol_loader();
 		flrd::Colocalize& get_colocalizer();
 		flrd::Clusterizer& get_clusterizer();
-		flrd::VolumeMeshConv& get_vol_converter();
+		flrd::BaseConvVolMesh& get_conv_vol_mesh();
 
 		//xr renderer
 		LookingGlassRenderer& get_looking_glass_renderer();
@@ -347,7 +347,7 @@ namespace fluo
 		std::unique_ptr<VolumeLoader> m_vol_loader;
 		std::unique_ptr<flrd::Colocalize> m_colocalizer;
 		std::unique_ptr<flrd::Clusterizer> m_clusterizer;
-		std::unique_ptr<flrd::VolumeMeshConv> m_vol_converter;
+		std::unique_ptr<flrd::BaseConvVolMesh> m_conv_vol_mesh;
 
 		//xr renderer
 		std::unique_ptr<LookingGlassRenderer> m_lg_renderer;

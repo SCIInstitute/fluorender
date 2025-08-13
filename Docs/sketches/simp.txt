@@ -1,0 +1,28 @@
+__kernel void simplify_mesh(
+    __global float4* vertices,
+    __global int* indices,
+    __global int* valid_flags,
+    int num_triangles,
+    float threshold
+) {
+    int tid = get_global_id(0);
+    if (tid >= num_triangles) return;
+
+    int i0 = indices[tid * 3 + 0];
+    int i1 = indices[tid * 3 + 1];
+    int i2 = indices[tid * 3 + 2];
+
+    float4 v0 = vertices[i0];
+    float4 v1 = vertices[i1];
+    float4 v2 = vertices[i2];
+
+    float d01 = length(v0.xyz - v1.xyz);
+    float d12 = length(v1.xyz - v2.xyz);
+    float d20 = length(v2.xyz - v0.xyz);
+
+    if (d01 < threshold || d12 < threshold || d20 < threshold) {
+        valid_flags[tid] = 0; // mark for removal
+    } else {
+        valid_flags[tid] = 1;
+    }
+}

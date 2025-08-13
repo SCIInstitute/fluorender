@@ -1,0 +1,42 @@
+__kernel void merge_vertices(
+    __global float4* raw_vertices,
+    __global float4* merged_vertices,
+    __global int* indices,
+    __global int* hash_table,
+    __global int* merge_counter,
+    int num_raw_vertices,
+    float voxel_size
+) {
+    int id = get_global_id(0);
+    if (id >= num_raw_vertices) return;
+
+    float4 pos = raw_vertices[id];
+
+    // Quantize position to grid
+    int3 key = (int3)(
+        floor(pos.x / voxel_size),
+        floor(pos.y / voxel_size),
+        floor(pos.z / voxel_size)
+    );
+
+    // Simple hash function
+    int hash = (key.x * 73856093) ^ (key.y * 19349663) ^ (key.z * 83492791);
+    hash = abs(hash) % HASH_TABLE_SIZE;
+
+    // Try to insert into hash table
+    int existing = atomic_cmpxchg(&hash_table[hash], -1, id);
+
+    int final_index;
+    if (existing == -1) {
+        // First time this position is seen
+        int new_idx = atomic_add(merge_counter, 1);
+        merged_vertices[new_idx] = pos;
+        final_index = new_idx;
+    } else {
+        // Already inserted
+        final_index = existing;
+    }
+
+    // Write index for triangle
+    indices[id] = final_index;
+}

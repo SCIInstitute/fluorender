@@ -40,8 +40,8 @@ DEALINGS IN THE SOFTWARE.
 
 #define VERSION_CONTACT "https://sciinstitute.github.io/fluorender/"
 #define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
-						"BRIG BAGLEY\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH\n"\
-						"HOLLY A. HOLMAN"
+						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH\n"\
+						"HOLLY A. HOLMAN\n"
 #define VERSION_UPDATES "https://sciinstitute.github.io/fluorender/Releases/fluorender_v" \
 				   VERSION_MAJOR_TAG \
 				   "." \

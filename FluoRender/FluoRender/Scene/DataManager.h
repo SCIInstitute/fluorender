@@ -248,6 +248,7 @@ public:
 	//save
 	double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
 	double GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b=0);
+	double GetMaskValue(int i, int j, int k, flvr::TextureBrick* b = 0);
 	void SetResize(int resize, int nx, int ny, int nz);
 	void GetResize(bool &resize, int &nx, int &ny, int &nz);
 	//mask: 0-save none; 1-save mask; 2-save label; 3-save mask and label...
@@ -1499,6 +1500,7 @@ public:
 	void LoadMeshes(const std::vector<std::wstring>& files);
 	bool LoadMeshData(const std::wstring &filename);
 	bool LoadMeshData(GLMmodel* mesh);
+	void AddMeshData(const std::shared_ptr<MeshData>& md);
 	size_t GetMeshNum();
 	std::shared_ptr<MeshData> GetMeshData(size_t index);
 	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);

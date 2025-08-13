@@ -68,7 +68,6 @@ DEALINGS IN THE SOFTWARE.
 #include <TextureRenderer.h>
 #include <msk_writer.h>
 #include <msk_reader.h>
-#include <VolumeMeshConv.h>
 #include <DataManager.h>
 #include <RenderView.h>
 #include <ScriptProc.h>
