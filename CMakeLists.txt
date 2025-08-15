@@ -413,14 +413,39 @@ add_definitions(-DGLM_FORCE_RADIANS=1)
 # BridgeRuntime
 set(BRIDGE_RUNTIME_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/BridgeRuntime")
 
-#nikon
+# nd2
 if(WIN32)
   add_compile_options(/wd4099)
-  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.lib)
-else()
-  file(GLOB ND2_LIBRARIES ${FluoRender_SOURCE_DIR}/FluoRender/nd2/lib/*.a)
+  set(ND2_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/nd2/Win64/include")
+  # Define the base path to your ND2 SDK libs
+  set(ND2_LIB_DIR "${FluoRender_SOURCE_DIR}/FluoRender/nd2/Win64/lib")
+  
+  # Create a variable that resolves to the correct .lib file based on configuration
+  set(ND2_LIBRARIES
+      $<$<CONFIG:Debug>:
+          ${ND2_LIB_DIR}/nd2readsdk-staticd.lib;
+          ${ND2_LIB_DIR}/limfile-staticd.lib
+      >
+      $<$<NOT:$<CONFIG:Debug>>:
+          ${ND2_LIB_DIR}/nd2readsdk-static.lib;
+          ${ND2_LIB_DIR}/limfile-static.lib
+      >
+  )
+elseif(APPLE)
+  # Detect architecture: x86_64 or arm64
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(NIKON_ARCH "arm64")
+  else()
+    set(NIKON_ARCH "x86_64")
+  endif()
+
+  # Construct paths based on detected architecture
+  set(ND2_LIB_DIR "${FluoRender_SOURCE_DIR}/FluoRender/nd2/MacOS/${NIKON_ARCH}/lib")
+  set(ND2_INCLUDE_DIR "${FluoRender_SOURCE_DIR}/FluoRender/nd2/macOS/${NIKON_ARCH}/include")
+
+  file(GLOB ND2_LIBRARIES "${ND2_LIB_DIR}/*.a")
+  set(ND2_PATHS "${ND2_INCLUDE_DIR}")
 endif()
-set(ND2_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/nd2/include")
 
 # OpenCL
 if(APPLE)
