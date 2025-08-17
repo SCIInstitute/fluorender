@@ -27,4 +27,4 @@ Configure FFMpeg
 	./configure --toolchain=msvc --prefix=/mingw64 --enable-static --disable-shared --enable-gpl --enable-libx264 --enable-libx265 --extra-cflags="-I./depends/include" --extra-ldflags="/LIBPATH:./depends/lib libx264.lib libx265.lib" --pkg-config-flags="--static" --logfile=ffmpeg_configure.log
 
 Mac:
-./configure --enable-static --disable-shared --disable-programs --disable-doc --enable-gpl --enable-libx264 --enable-libx265 --enable-swresample --arch=x86_64 --target-os=darwin --cc=clang --extra-cflags="-I./depends/include" --extra-ldflags="-L./depends/lib -lx264 -lx265" --pkg-config-flags="--static"
+./configure --enable-static --disable-shared --disable-programs --disable-doc --enable-gpl --enable-libx264 --enable-libx265 --enable-swresample --extra-cflags="-I./depends/include" --extra-ldflags="-L./depends/lib -lx264 -lx265" --pkg-config-flags="--static"
