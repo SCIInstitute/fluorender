@@ -269,7 +269,7 @@ set(Boost_INCLUDE_DIR "${BOOST_DIRS}")
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost COMPONENTS system chrono filesystem locale REQUIRED)
+find_package(Boost COMPONENTS system filesystem locale graph REQUIRED)
 
 # bzip2
 if (NOT WIN32)
