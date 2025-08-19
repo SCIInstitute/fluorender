@@ -525,21 +525,8 @@ file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
 list(GET TEEM_DIRS 0 TEEM_DIRS)
 # Point to the build tree where TeemConfig.cmake was generated
 set(Teem_DIR "${TEEM_DIRS}/build")  # or wherever TeemConfig.cmake lives
-# Detect platform
-if(WIN32)
-  # Windows: use configuration-specific libraries
-  set(TEEM_LIBRARY_RELEASE "${Teem_DIR}/bin/Release/teem.lib")
-  set(TEEM_LIBRARY_DEBUG   "${Teem_DIR}/bin/Debug/teem.lib")
-  add_library(teem STATIC IMPORTED GLOBAL)
-  set_target_properties(teem PROPERTIES
-    IMPORTED_LOCATION_RELEASE "${TEEM_LIBRARY_RELEASE}"
-    IMPORTED_LOCATION_DEBUG   "${TEEM_LIBRARY_DEBUG}"
-  )
-  set(TEEM_LIBRARIES teem)
-else()
-  find_package(Teem REQUIRED CONFIG)
-  set(TEEM_LIBRARIES Teem::teem)
-endif()
+find_package(Teem REQUIRED CONFIG)
+set(TEEM_LIBRARIES Teem::teem)
 set(TEEM_INCLUDE_DIRS
   "${TEEM_DIRS}/src"
   "${TEEM_DIRS}/src/nrrd"
