@@ -526,6 +526,13 @@ list(GET TEEM_DIRS 0 TEEM_DIRS)
 # Point to the build tree where TeemConfig.cmake was generated
 set(Teem_DIR "${TEEM_DIRS}/build")  # or wherever TeemConfig.cmake lives
 find_package(Teem REQUIRED CONFIG)
+set(TEEM_INCLUDE_DIRS
+  "${TEEM_DIRS}/src"
+  "${TEEM_DIRS}/src/nrrd"
+  "${TEEM_DIRS}/src/teem"
+  "${Teem_DIR}/include"
+)
+message(STATUS "TEEM_INCLUDE_DIRS = ${TEEM_INCLUDE_DIRS}")
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
@@ -789,6 +796,7 @@ add_library(UTILITY_LIB STATIC
 target_include_directories(ANIMATORS_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR})
 if (APPLE)
     target_link_libraries(ANIMATORS_LIB PRIVATE
@@ -800,12 +808,14 @@ target_link_libraries(ANIMATORS_LIB PRIVATE
 # Calculate
 target_include_directories(CALCULATE_LIB PRIVATE
   ${GLM_DIRS}
-  ${OpenCL_INCLUDE_DIRS})
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(CLUSTER_LIB PRIVATE
   ${Boost_LIBRARIES})
 
@@ -813,7 +823,8 @@ target_link_libraries(CLUSTER_LIB PRIVATE
 target_include_directories(COMPONENT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${OpenCL_INCLUDE_DIRS})
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(COMPONENT_LIB PRIVATE
   ${Boost_LIBRARIES})
 
@@ -821,7 +832,8 @@ target_link_libraries(COMPONENT_LIB PRIVATE
 target_include_directories(CONFIG_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(CONFIG_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 
@@ -830,10 +842,7 @@ target_link_libraries(CONFIG_LIB PRIVATE
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS}
-  ${Teem_DIR}/include)
-target_link_libraries(CONVERTER_LIB PRIVATE
-  Teem::teem)
+  ${TEEM_INCLUDE_DIRS})
 
 # Database
 target_include_directories(DATABASE_LIB PRIVATE
@@ -847,10 +856,8 @@ target_include_directories(DISTANCE_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS}
-  ${Teem_DIR}/include)
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(DISTANCE_LIB PRIVATE
-  Teem::teem
   ${GLEW_STATIC_LIBRARIES}
   ${OpenCV_LIBS})
 
@@ -862,7 +869,8 @@ target_include_directories(FILE_LIB PRIVATE
 target_include_directories(FILTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${OpenCL_INCLUDE_DIRS})
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(FILTER_LIB PRIVATE
   ${Boost_LIBRARIES})
 
@@ -876,10 +884,8 @@ target_include_directories(FLRENDER_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS}
-  ${Teem_DIR}/include)
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(FLRENDER_LIB PRIVATE
-  Teem::teem
   ${FREETYPE_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES}
   ${OpenCL_LIBRARIES}
@@ -892,7 +898,8 @@ target_include_directories(FLUI_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${Python3_INCLUDE_DIRS})
+  ${Python3_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 if (WIN32)
   target_include_directories(FLUI_LIB PRIVATE
     ${WACOM_PATHS})
@@ -926,7 +933,6 @@ target_include_directories(FORMAT_LIB PRIVATE
   ${ND2_PATHS}
   ${PNG_PNG_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS}
-  ${Teem_DIR}/include
   ${TIFF_INCLUDE_DIR})
 if (WIN32 OR APPLE)
   target_include_directories(FORMAT_LIB PRIVATE
@@ -942,12 +948,12 @@ if (APPLE)
       ${BZIP2_LIBRARY})
 endif()
 target_link_libraries(FORMAT_LIB PRIVATE
-  Teem::teem
   ${Boost_LIBRARIES}
   ${FFMPEG_LIBRARIES}
   ${ND2_LIBRARIES}
   ${PNG_LIBRARIES}
   ${TIFF_LIBRARIES}
+  Teem::teem
 )
 
 # Global
@@ -956,7 +962,8 @@ target_include_directories(GLOBAL_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OPENXR_PATHS}
-  ${Python3_INCLUDE_DIRS})
+  ${Python3_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 if (WIN32 OR APPLE)
   target_include_directories(GLOBAL_LIB PRIVATE
     ${JNI_INCLUDE_DIRS})
@@ -979,7 +986,8 @@ target_link_libraries(LOOKINGGLASS_LIB PRIVATE
 
 # Main
 target_include_directories(MAIN_LIB PRIVATE
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
 
@@ -996,12 +1004,14 @@ target_link_libraries(OPENXR_LIB PRIVATE
 
 # Progress
 target_include_directories(PROGRESS_LIB PRIVATE
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 
 # Project
 target_include_directories(PROJECT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 
 # Python
 target_include_directories(PYTHON_LIB PRIVATE
@@ -1022,7 +1032,6 @@ target_include_directories(SCENE_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS}
-  ${Teem_DIR}/include
   ${TIFF_INCLUDE_DIR})
 if (WIN32)
   target_include_directories(SCENE_LIB PRIVATE
@@ -1043,14 +1052,14 @@ if (APPLE)
 endif()
 target_link_libraries(SCENE_LIB PRIVATE
   ${TIFF_LIBRARIES}
-  ${GLEW_STATIC_LIBRARIES}
-  Teem::teem)
+  ${GLEW_STATIC_LIBRARIES})
 
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${Python3_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR})
 if (APPLE)
     target_link_libraries(SCRIPT_LIB PRIVATE
@@ -1064,7 +1073,8 @@ target_link_libraries(SCRIPT_LIB PRIVATE
 target_include_directories(SELECTION_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${OpenCL_INCLUDE_DIRS})
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(SELECTION_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 
@@ -1077,11 +1087,9 @@ target_include_directories(TRACKING_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS}
-  ${Teem_DIR}/include)
+  ${TEEM_INCLUDE_DIRS})
 target_link_libraries(TRACKING_LIB PRIVATE
-  ${Boost_LIBRARIES}
-  Teem::teem)
+  ${Boost_LIBRARIES})
 
 # Trainer
 target_link_libraries(TRAINER_LIB PRIVATE
@@ -1199,7 +1207,8 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 target_include_directories(FluoRender PRIVATE
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender PRIVATE
