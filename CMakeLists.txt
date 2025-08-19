@@ -525,14 +525,29 @@ file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
 list(GET TEEM_DIRS 0 TEEM_DIRS)
 # Point to the build tree where TeemConfig.cmake was generated
 set(Teem_DIR "${TEEM_DIRS}/build")  # or wherever TeemConfig.cmake lives
-find_package(Teem REQUIRED CONFIG)
+# Detect platform
+if(WIN32)
+  # Windows: use configuration-specific libraries
+  set(TEEM_LIBRARY_RELEASE "${Teem_DIR}/bin/Release/teem.lib")
+  set(TEEM_LIBRARY_DEBUG   "${Teem_DIR}/bin/Debug/teem.lib")
+  add_library(teem STATIC IMPORTED GLOBAL)
+  set_target_properties(teem PROPERTIES
+    IMPORTED_LOCATION_RELEASE "${TEEM_LIBRARY_RELEASE}"
+    IMPORTED_LOCATION_DEBUG   "${TEEM_LIBRARY_DEBUG}"
+  )
+  set(TEEM_LIBRARIES teem)
+else()
+  find_package(Teem REQUIRED CONFIG)
+  set(TEEM_LIBRARIES Teem::teem)
+endif()
 set(TEEM_INCLUDE_DIRS
   "${TEEM_DIRS}/src"
   "${TEEM_DIRS}/src/nrrd"
   "${TEEM_DIRS}/src/teem"
   "${Teem_DIR}/include"
 )
-message(STATUS "TEEM_INCLUDE_DIRS = ${TEEM_INCLUDE_DIRS}")
+#message(STATUS "TEEM_INCLUDE_DIRS = ${TEEM_INCLUDE_DIRS}")
+add_definitions(-DTEEM_STATIC=1)
 add_definitions(-DTEEM_DIO=0)
 add_definitions(-DTEEM_ENDIAN=1234)
 add_definitions(-DTEEM_QNANHIBIT=1)
@@ -810,6 +825,8 @@ target_include_directories(CALCULATE_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
+target_link_libraries(CALCULATE_LIB PRIVATE
+  ${TEEM_LIBRARIES})
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
@@ -890,6 +907,7 @@ target_link_libraries(FLRENDER_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
   ${OpenCL_LIBRARIES}
   ${OPENGL_LIBRARIES}
+  ${TEEM_LIBRARIES}
 )
 
 # Flui
@@ -952,8 +970,8 @@ target_link_libraries(FORMAT_LIB PRIVATE
   ${FFMPEG_LIBRARIES}
   ${ND2_LIBRARIES}
   ${PNG_LIBRARIES}
+  ${TEEM_LIBRARIES}
   ${TIFF_LIBRARIES}
-  Teem::teem
 )
 
 # Global
@@ -1051,8 +1069,9 @@ if (APPLE)
       ${BZIP2_LIBRARY})
 endif()
 target_link_libraries(SCENE_LIB PRIVATE
-  ${TIFF_LIBRARIES}
-  ${GLEW_STATIC_LIBRARIES})
+  ${GLEW_STATIC_LIBRARIES}
+  ${TEEM_LIBRARIES}
+  ${TIFF_LIBRARIES})
 
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
