@@ -1338,6 +1338,14 @@ if(WIN32)
     )
 endif()
 
+# openvr
+if(WIN32)
+add_custom_command(TARGET FluoRender POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
+    "$<TARGET_FILE_DIR:FluoRender>")
+endif()
+
 if(APPLE)
 # Path to your final app binary
 set(TARGET_BINARY "$<TARGET_FILE:FluoRender>")
