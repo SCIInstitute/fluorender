@@ -10,6 +10,7 @@ Download the installer package for your operating system (OS).
 |------------|-----------|----------|----------|
 | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_win64.exe) | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_x86_64.pkg) | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_arm64.pkg) | [Email me](mailto:yong.wan@utah.edu) |
 
+Support the maintenance and bug fixes by donnation: [https://paypal.me/fluorender](https://paypal.me/fluorender)
 
 <h1 id="features">Release Highlights for Version 2.33</h1>
 This release marks a major leap forward in both functionality and usability. With a focus on clarity, speed, and intuitive interaction, FluoRender now offers a richer toolkit for analyzing volume data from fluorescence microscopy. Users can dive into tasks like painting, filtering, and color mapping with minimal setup — or no manual fine-tuning at all — and still achieve precise, insightful results.
