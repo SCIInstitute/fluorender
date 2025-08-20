@@ -8,7 +8,7 @@ Download the installer package for your operating system (OS).
 
 | 🖥️ Windows (10 and 11, 64-bit, x86_64 CPUs) | 🍎 Mac OS (13.3+, Intel CPUs) | 🍎 Mac OS (13.3+, M1, M2, etc. CPUs) | 🐧 Linux |
 |------------|-----------|----------|----------|
-| [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_win64.exe) | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_x86_64.pkg) | [Fund me for an Arm Mac](https://paypal.me/fluorender) | [Email me](mailto:yong.wan@utah.edu) |
+| [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_win64.exe) | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_x86_64.pkg) | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_arm64.pkg) | [Email me](mailto:yong.wan@utah.edu) |
 
 
 <h1 id="features">Release Highlights for Version 2.33</h1>
