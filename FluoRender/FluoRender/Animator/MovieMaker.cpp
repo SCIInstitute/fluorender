@@ -224,6 +224,17 @@ void MovieMaker::PlaySave()
 			m_crop_h *= scale;
 		}
 
+		if (glbin_settings.m_hologram_mode == 2)
+		{
+			//change the file name
+			Size2D layout = glbin_lg_renderer.GetQuiltLayout();
+			double aspect = glbin_lg_renderer.GetAspect();
+			m_filename = APPEND_QUILT_INFO(
+				m_filename,
+				layout.w(),
+				layout.h(),
+				aspect);
+		}
 		glbin_video_encoder.open(m_filename, m_crop_w, m_crop_h,
 			m_clip_frame_num + 1, m_fps, glbin_settings.m_mov_bitrate * 1e6);
 	}
