@@ -3092,8 +3092,9 @@ void RenderView::SetParams(double t)
 		keycode.l2_name = "frame";
 		if (glbin_interpolator.GetDouble(keycode, t, frame))
 		{
-			UpdateVolumeData(static_cast<int>(std::round(frame)), vd);
-			glbin_moviemaker.SetSeqCurNum(static_cast<int>(frame));
+			ival = static_cast<int>(std::round(frame));
+			UpdateVolumeData(ival, vd);
+			glbin_moviemaker.SetSeqCurNum(ival);
 		}
 		//primary color
 		fluo::Color pc;
