@@ -4,7 +4,7 @@
 #define MyAppName "FluoRender"   
 #define MyAppSetupName 'FluoRender'
 #define MyAppVersion "2.33"
-#define MyAppPublisher "SCI"
+#define MyAppPublisher "FluoRender"
 #define MyAppURL "https://sciinstitute.github.io/fluorender/"
 #define MyAppExeName "FluoRender.exe"
 #define MyAppID "{CFC06103-F420-4239-9C5D-BA1F71733278}"
@@ -54,8 +54,6 @@ Source: "..\..\build\bin\Release\FluoRender_benchmark_fullscreen.bat"; DestDir: 
 Source: "..\..\build\bin\Release\FluoRender_benchmark_fullscreen.command"; DestDir: "{app}"; Flags: ignoreversion      
 ; OpenVR      
 Source: "..\..\build\bin\Release\openvr_api.dll"; DestDir: "{app}"; Flags: ignoreversion
-; OpenXR
-Source: "..\..\build\bin\Release\openxr_loader.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; Hololens
 Source: "..\..\build\bin\Release\Microsoft.Holographic.AppRemoting.OpenXr.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\build\bin\Release\Microsoft.Holographic.AppRemoting.OpenXr.SU.dll"; DestDir: "{app}"; Flags: ignoreversion

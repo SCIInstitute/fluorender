@@ -71,7 +71,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Source: ".\bin\VC_redist.x64.exe"; DestDir: {app}; Flags: deleteafterinstall
 
 [Run]
-Filename: {app}\VC_redist.x64.exe; Check: VCRedistNeedsInstall; Parameters: "/passive"; StatusMsg: Installing VC++ 2022 Redistributable...; Flags: 
+Filename: {tmp}\VC_redist.x64.exe; Check: VCRedistNeedsInstall; Parameters: "/passive /norestart"; StatusMsg: Installing VC++ 2022 Redistributable...; Flags: waituntilterminated
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent 
     
 [Icons]
