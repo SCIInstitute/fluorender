@@ -414,11 +414,15 @@ int MovieMaker::GetViewIndex()
 	return glbin_current.GetViewId(m_view.lock().get());
 }
 
-void MovieMaker::SetKeyframeEnable(bool val)
+void MovieMaker::SetKeyframeEnable(bool val, bool update)
 {
 	if (val == m_keyframe_enable)
 		return;
 	m_keyframe_enable = val;
+
+	if (!update)
+		return;
+
 	if (m_keyframe_enable)
 	{
 		//get settings from interpolator

@@ -1692,7 +1692,7 @@ void MoviePanel::Save(const std::wstring& filename)
 
 void MoviePanel::SetKeyframeMovie(bool val)
 {
-	glbin_moviemaker.SetKeyframeEnable(val);
+	glbin_moviemaker.SetKeyframeEnable(val, true);
 
 	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
 }
@@ -1723,15 +1723,6 @@ void MoviePanel::SetScalebarValues(int x, int y)
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 {
-	//int sel = event.GetSelection();
-	//wxString str = m_notebook->GetPageText(sel);
-	//if (str == UITEXT_NBPG1)
-	//{
-	//	glbin_moviemaker.SetKeyframeEnable(true);
-	//	//DBGPRINT(L"SetKeyframeEnable: true\n");
-	//}
-
-	//FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum });
 	event.Skip();
 }
 
@@ -2006,7 +1997,7 @@ void MoviePanel::OnInterpolation(wxCommandEvent& event)
 void MoviePanel::OnInsKey(wxCommandEvent& event)
 {
 	if (!glbin_moviemaker.GetKeyframeEnable())
-		glbin_moviemaker.SetKeyframeEnable(true);
+		glbin_moviemaker.SetKeyframeEnable(true, true);
 
 	wxString str;
 	long item = m_keylist->GetNextItem(-1,
@@ -2065,7 +2056,7 @@ void MoviePanel::OnGenKey(wxCommandEvent& event)
 	{
 		glbin_moviemaker.MakeKeys(item);
 		if (!glbin_moviemaker.GetKeyframeEnable())
-			glbin_moviemaker.SetKeyframeEnable(true);
+			glbin_moviemaker.SetKeyframeEnable(true, true);
 
 		m_notebook->SetSelection(1);
 		FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });

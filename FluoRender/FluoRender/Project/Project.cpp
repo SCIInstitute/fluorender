@@ -995,8 +995,6 @@ void Project::Open(const std::wstring& filename)
 
 		//set settings for frame
 		std::shared_ptr<RenderView> view;
-		if (fconfig->Read("key frame enable", &bval))
-			glbin_moviemaker.SetKeyframeEnable(bval);
 		if (fconfig->Read("views_cmb", &ival))
 		{
 			view = root->GetView(ival);
@@ -1057,11 +1055,13 @@ void Project::Open(const std::wstring& filename)
 				}
 			}
 		}
+		if (fconfig->Read("key frame enable", &bval))
+			glbin_moviemaker.SetKeyframeEnable(bval, false);
 		if (fconfig->Read("run_script", &bval))
 			glbin_settings.m_run_script = bval;
 		if (fconfig->Read("script_file", &wsval))
 			glbin_settings.m_script_file = wsval;
-		frame->GetMoviePanel()->FluoUpdate();
+		//frame->GetMoviePanel()->FluoUpdate();
 	}
 
 	//ui layout

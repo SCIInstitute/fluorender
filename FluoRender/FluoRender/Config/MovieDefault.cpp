@@ -197,7 +197,7 @@ void MovieDefault::Apply(MovieMaker* mm)
 	if (!mm)
 		return;
 
-	mm->SetKeyframeEnable(m_keyframe_enable);
+	mm->SetKeyframeEnable(m_keyframe_enable, true);
 	mm->SetRotateEnable(m_rotate);
 	mm->SetRotateAxis(m_rot_axis);
 	mm->SetRotateDeg(m_rot_deg);

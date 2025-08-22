@@ -87,7 +87,7 @@ public:
 	void SetLoop(bool val) { m_loop = val; }
 	bool GetLoop() { return m_loop; }
 
-	void SetKeyframeEnable(bool val);
+	void SetKeyframeEnable(bool val, bool update);
 	bool GetKeyframeEnable() { return m_keyframe_enable; }
 	void SetRotateEnable(bool val);
 	bool GetRotateEnable() { return m_rotate; }
