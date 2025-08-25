@@ -83,8 +83,6 @@ namespace flvr
 		void draw_wireframe(bool adaptive, bool orthographic_p);
 		void draw_volume(bool adaptive, bool interactive_mode_p, bool orthographic_p, bool intp);
 
-		double num_slices_to_rate(int slices);
-
 		//depth peeling
 		int get_depth_peel() {return depth_peel_;}
 		void set_depth_peel(int dp) {depth_peel_ = dp;}
@@ -133,7 +131,7 @@ namespace flvr
 
 		//sample rate etc
 		bool imode_;
-		int num_slices_;
+		size_t num_slices_;
 
 		//light position
 		fluo::Vector light_pos_;

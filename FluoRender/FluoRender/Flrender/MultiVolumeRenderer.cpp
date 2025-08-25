@@ -100,7 +100,7 @@ void MultiVolumeRenderer::set_interactive_mode(bool mode)
 
 int MultiVolumeRenderer::get_slice_num()
 {
-	return num_slices_;
+	return static_cast<int>(num_slices_);
 }
 
 //set matrices
@@ -188,24 +188,25 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		diag.y()/res_.y(),
 		diag.z()/res_.z());
 	double dt;
+	size_t est_slices;
 	if (rate > 0.0)
 	{
 		dt = cell_diag.length() /
 			vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = (int)(diag.length()/dt);
+		est_slices = static_cast<int>(std::round(diag.length()/dt));
 	}
 	else
 	{
 		dt = 0.0;
-		num_slices_ = 0;
+		est_slices = 0;
 	}
 
 	std::vector<float> vertex;
 	std::vector<uint32_t> index;
 	std::vector<uint32_t> size;
-	vertex.reserve(num_slices_*12);
-	index.reserve(num_slices_*6);
-	size.reserve(num_slices_*6);
+	vertex.reserve(est_slices*12);
+	index.reserve(est_slices*6);
+	size.reserve(est_slices*6);
 
 	// set up blending
 	glEnable(GL_BLEND);
@@ -277,6 +278,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	if (bs)
 	{
+		num_slices_ = 0;
 		bool multibricks = bs->size() > 1;
 		bool drawn_once = false;
 		for (unsigned int i=0; i < bs->size(); i++)
@@ -332,6 +334,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			index.clear();
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
+
+			num_slices_ += size.size();
+
 			if (vertex.size() == 0) { continue; }
 
 			draw_polygons_vol(b, rate, vertex, index, size, view_ray,
@@ -936,24 +941,25 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 		diag.y()/res_.y(),
 		diag.z()/res_.z());
 	double dt;
+	size_t est_slices;
 	if (rate > 0.0)
 	{
 		dt = cell_diag.length() /
 			vr_list_[0]->compute_rate_scale(snapview.direction())/rate;
-		num_slices_ = static_cast<int>(std::round(diag.length()/dt));
+		est_slices = static_cast<int>(std::round(diag.length()/dt));
 	}
 	else
 	{
 		dt = 0.0;
-		num_slices_ = 0;
+		est_slices = 0;
 	}
 
 	std::vector<float> vertex;
 	std::vector<uint32_t> index;
 	std::vector<uint32_t> size;
-	vertex.reserve(num_slices_*12);
-	index.reserve(num_slices_*6);
-	size.reserve(num_slices_*6);
+	vertex.reserve(est_slices*12);
+	index.reserve(est_slices*6);
+	size.reserve(est_slices*6);
 
 	// Set up shaders
 	ShaderProgram* shader = 0;
@@ -1008,18 +1014,4 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	// Release shader.
 	if (shader && shader->valid())
 		shader->release();
-}
-
-double MultiVolumeRenderer::num_slices_to_rate(int num_slices)
-{
-	if (!bbox_.valid())
-		return 1.0;
-	fluo::Vector diag = bbox_.diagonal();
-	fluo::Vector cell_diag(diag.x()/*/tex_->nx()*/,
-		diag.y()/*/tex_->ny()*/,
-		diag.z()/*/tex_->nz()*/);
-	double dt = diag.length() / num_slices;
-	double rate = cell_diag.length() / dt;
-
-	return rate;
 }

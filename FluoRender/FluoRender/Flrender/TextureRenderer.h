@@ -292,7 +292,7 @@ namespace flvr
 		std::weak_ptr<Texture> tex_;
 		RenderMode mode_;
 		double sample_rate_;
-		int num_slices_;
+		size_t num_slices_;
 		bool imode_;
 
 		//saved framebuffer

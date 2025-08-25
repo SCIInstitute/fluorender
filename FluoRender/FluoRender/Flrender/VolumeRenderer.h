@@ -128,9 +128,8 @@ namespace flvr
 		void set_solid(bool mode) { solid_ = mode; }
 		bool get_solid() { return solid_; }
 
-		double num_slices_to_rate(int slices);
 		//slice number
-		int get_slice_num() { return num_slices_; }
+		int get_slice_num() { return static_cast<int>(num_slices_); }
 
 		//clipping planes
 		void set_planes(std::vector<fluo::Plane*> *p);

@@ -300,7 +300,7 @@ VolumeData::VolumeData()
 	//display control
 	m_disp = true;
 	m_draw_bounds = false;
-	m_test_wiref = false;
+	m_test_wiref = glbin_settings.m_test_wiref;
 
 	m_2d_mask = 0;
 	m_2d_weight1 = 0;
@@ -6211,7 +6211,6 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 	{
 		vd->ApplyMlVolProp();
 		//props not managed by ml
-		vd->SetWireframe(glbin_settings.m_test_wiref);
 		vd->SetSampleRate(glbin_vol_def.m_sample_rate);
 		if (!vd->GetSpcFromFile())
 			vd->SetBaseSpacings(

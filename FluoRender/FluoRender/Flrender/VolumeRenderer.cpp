@@ -219,22 +219,6 @@ namespace flvr
 		mask_color_set_ = set;
 	}
 
-	double VolumeRenderer::num_slices_to_rate(int num_slices)
-	{
-		auto tex = tex_.lock();
-		if (!tex)
-			return 1;
-
-		const fluo::Vector diag = tex->bbox()->diagonal();
-		const fluo::Vector cell_diag(diag.x()/tex->nx(),
-			diag.y()/tex->ny(),
-			diag.z()/tex->nz());
-		const double dt = diag.length() / num_slices;
-		const double rate = cell_diag.length() / dt;
-
-		return rate;
-	}
-
 	//clipping planes
 	void VolumeRenderer::set_planes(std::vector<fluo::Plane*> *p)
 	{
@@ -418,23 +402,24 @@ namespace flvr
 			diag.y() / tex->ny(),
 			diag.z() / tex->nz());
 		double dt;
+		size_t est_slices;
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			num_slices_ = static_cast<int>(std::round(diag.length()/dt));
+			est_slices = static_cast<int>(std::round(diag.length()/dt));
 		}
 		else
 		{
 			dt = 0.0;
-			num_slices_ = 0;
+			est_slices = 0;
 		}
 
 		std::vector<float> vertex;
 		std::vector<uint32_t> index;
 		std::vector<uint32_t> size;
-		vertex.reserve(num_slices_*12);
-		index.reserve(num_slices_*6);
-		size.reserve(num_slices_*6);
+		vertex.reserve(est_slices*12);
+		index.reserve(est_slices*6);
+		size.reserve(est_slices*6);
 
 		//--------------------------------------------------------------------------
 
@@ -672,7 +657,7 @@ namespace flvr
 			size.clear();
 			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 
-			num_slices_ += static_cast<int>(vertex.size())/12;
+			num_slices_ += size.size();
 
 			if (!vertex.empty())
 			{
@@ -872,24 +857,24 @@ namespace flvr
 			diag.y()/tex->ny(),
 			diag.z()/tex->nz());
 		double dt;
-		int num_slices;
+		size_t est_slices;
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			num_slices = static_cast<int>(std::round(diag.length()/dt));
+			est_slices = static_cast<int>(std::round(diag.length()/dt));
 		}
 		else
 		{
 			dt = 0.0;
-			num_slices = 0;
+			est_slices = 0;
 		}
 
 		std::vector<float> vertex;
 		std::vector<uint32_t> index;
 		std::vector<uint32_t> size;
-		vertex.reserve(num_slices * 12);
-		index.reserve(num_slices * 6);
-		size.reserve(num_slices * 6);
+		vertex.reserve(est_slices * 12);
+		index.reserve(est_slices * 6);
+		size.reserve(est_slices * 6);
 
 		// Set up shaders
 		ShaderProgram* shader = 0;
@@ -926,8 +911,7 @@ namespace flvr
 				index.clear();
 				size.clear();
 
-				// Scale out dt such that the slices are artificially further apart.
-				b->compute_polygons(snapview, dt * 1, vertex, index, size, multibricks);
+				b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 				draw_polygons_wireframe(vertex, index, size);
 			}
 		}
