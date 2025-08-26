@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <BaseConvVolMesh.h>
 
+namespace flvr
+{
+	class TextureBrick;
+}
 namespace flrd
 {
 	//convert volume data to mesh
@@ -45,6 +49,8 @@ namespace flrd
 	private:
 	
 	private:
+		bool GetInfo(flvr::TextureBrick* b,
+			long &bits, long &nx, long &ny, long &nz);
 	};
 
 }

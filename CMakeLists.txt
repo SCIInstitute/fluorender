@@ -846,6 +846,7 @@ target_link_libraries(CONFIG_LIB PRIVATE
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
   ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
 # Database

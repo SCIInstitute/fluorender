@@ -114,4 +114,123 @@ __kernel void kernel_0(
 }
 )CLKER";
 
+//merge vertices
+inline constexpr const char* str_cl_merge_vertices = R"CLKER(
+__kernel void kernel_0(
+	__global float4* raw_vertices,
+	__global float4* merged_vertices,
+	__global int* indices,
+	__global int* hash_table,
+	__global int* merge_counter,
+	int num_raw_vertices,
+	float voxel_size
+)
+{
+	int id = get_global_id(0);
+	if (id >= num_raw_vertices) return;
+
+	float4 pos = raw_vertices[id];
+
+	// Quantize position to grid
+	int3 key = (int3)(
+		floor(pos.x / voxel_size),
+		floor(pos.y / voxel_size),
+		floor(pos.z / voxel_size)
+	);
+
+	// Simple hash function
+	int hash = (key.x * 73856093) ^ (key.y * 19349663) ^ (key.z * 83492791);
+	hash = abs(hash) % HASH_TABLE_SIZE;
+
+	// Try to insert into hash table
+	int existing = atomic_cmpxchg(&hash_table[hash], -1, id);
+
+	int final_index;
+	if (existing == -1)
+	{
+		// First time this position is seen
+		int new_idx = atomic_add(merge_counter, 1);
+		merged_vertices[new_idx] = pos;
+		final_index = new_idx;
+	}
+	else
+	{
+		// Already inserted
+		final_index = existing;
+	}
+
+	// Write index for triangle
+	indices[id] = final_index;
+}
+)CLKER";
+
+//simplify mesh
+inline constexpr const char* str_cl_simplify_mesh = R"CLKER(
+__kernel void kernel_0(
+	__global float4* vertices,
+	__global int* indices,
+	__global int* valid_flags,
+	int num_triangles,
+	float threshold
+)
+{
+	int tid = get_global_id(0);
+	if (tid >= num_triangles) return;
+
+	int i0 = indices[tid * 3 + 0];
+	int i1 = indices[tid * 3 + 1];
+	int i2 = indices[tid * 3 + 2];
+
+	float4 v0 = vertices[i0];
+	float4 v1 = vertices[i1];
+	float4 v2 = vertices[i2];
+
+	float d01 = length(v0.xyz - v1.xyz);
+	float d12 = length(v1.xyz - v2.xyz);
+	float d20 = length(v2.xyz - v0.xyz);
+
+	if (d01 < threshold || d12 < threshold || d20 < threshold)
+	{
+		valid_flags[tid] = 0; // mark for removal
+	}
+	else
+	{
+		valid_flags[tid] = 1;
+	}
+}
+)CLKER";
+
+//laplacian smooth
+inline constexpr const char* str_cl_laplacian_smooth = R"CLKER(
+__kernel void kernel_0(
+	__global float4* vertices,
+	__global int* adjacency,
+	__global int* adj_count,
+	__global float4* smoothed_vertices,
+	int num_vertices
+)
+{
+	int id = get_global_id(0);
+	if (id >= num_vertices) return;
+
+	float4 v = vertices[id];
+	int count = adj_count[id];
+	if (count == 0)
+	{
+		smoothed_vertices[id] = v;
+		return;
+	}
+
+	float4 sum = (float4)(0.0f);
+	for (int i = 0; i < count; ++i)
+	{
+		int neighbor_id = adjacency[id * MAX_NEIGHBORS + i];
+		sum += vertices[neighbor_id];
+	}
+
+	float4 avg = sum / (float)count;
+	smoothed_vertices[id] = mix(v, avg, 0.5f); // blend factor = 0.5
+}
+)CLKER";
+
 #endif//MESH_CL_H
