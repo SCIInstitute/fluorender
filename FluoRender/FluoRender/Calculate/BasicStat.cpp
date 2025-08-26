@@ -38,189 +38,189 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 //8-bit data
-const char* str_cl_basic_stat = \
-"#define DWL unsigned char\n" \
-"#define VSCL 255\n" \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"//count\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global unsigned int* count,\n" \
-"	__global float* wcount)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0f;\n" \
-"	float val;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		val = read_imagef(data, samp, ijk).x;\n" \
-"		if (val > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lwsum += val;\n" \
-"		}\n" \
-"	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(wcount+index, lwsum);\n" \
-"}\n" \
-"//minmax\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global uint* minv,\n" \
-"	__global uint* maxv)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	DWL lminv = VSCL;\n" \
-"	DWL lmaxv = 0;\n" \
-"	DWL val;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		val = read_imagef(data, samp, ijk).x * VSCL;\n" \
-"		lminv = val ? min(val, lminv) : lminv;\n" \
-"		lmaxv = max(val, lmaxv);\n" \
-"	}\n" \
-"	lminv = lminv == VSCL ? 0 : lminv;\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(minv+index, (uint)(lminv));\n" \
-"	atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
-"}\n" \
-"//histogram\n" \
-"__kernel void kernel_2(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int minv,\n" \
-"	unsigned int maxv,\n" \
-"	unsigned int bin,\n" \
-"	__global unsigned int* hist)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int val = read_imagef(data, samp, coord).x * VSCL;\n" \
-"	if (val < minv || val > maxv)\n" \
-"		return;\n" \
-"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
-"	atomic_inc(hist+index);\n" \
-"}\n"
-"//count in mask\n" \
-"__kernel void kernel_3(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global unsigned int* count,\n" \
-"	__global float* wcount,\n" \
-"	__read_only image3d_t mask)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0f;\n" \
-"	float val, val2;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		val = read_imagef(data, samp, ijk).x;\n" \
-"		val2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (val > 0.0f && val2 > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lwsum += val;\n" \
-"		}\n" \
-"	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(wcount+index, lwsum);\n" \
-"}\n" \
-"//minmax in mask\n" \
-"__kernel void kernel_4(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global uint* minv,\n" \
-"	__global uint* maxv,\n" \
-"	__read_only image3d_t mask)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	DWL lminv = VSCL;\n" \
-"	DWL lmaxv = 0;\n" \
-"	DWL val;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		val = read_imagef(data, samp, ijk).x * VSCL;\n" \
-"		float val2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (val2 > 0.0f)\n" \
-"		{\n" \
-"			lminv = val ? min(val, lminv) : lminv;\n" \
-"			lmaxv = max(val, lmaxv);\n" \
-"		}\n" \
-"	}\n" \
-"	lminv = lminv == VSCL ? 0 : lminv;\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(minv+index, (uint)(lminv));\n" \
-"	atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
-"}\n" \
-"//histogram in mask\n" \
-"__kernel void kernel_5(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int minv,\n" \
-"	unsigned int maxv,\n" \
-"	unsigned int bin,\n" \
-"	__global unsigned int* hist,\n" \
-"	__read_only image3d_t mask)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	float val2 = read_imagef(mask, samp, coord).x;\n" \
-"	if (val2 < 1e-6)\n" \
-"		return;\n" \
-"	unsigned int val = read_imagef(data, samp, coord).x * VSCL;\n" \
-"	if (val < minv || val > maxv)\n" \
-"		return;\n" \
-"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
-"	atomic_inc(hist+index);\n" \
-"}\n";
+constexpr const char* str_cl_basic_stat = R"CLKER(
+#define DWL unsigned char
+#define VSCL 255
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+//count
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	__global unsigned int* count,
+	__global float* wcount)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	unsigned int lsum = 0;
+	float lwsum = 0.0f;
+	float val;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		val = read_imagef(data, samp, ijk).x;
+		if (val > 0.0f)
+		{
+			lsum++;
+			lwsum += val;
+		}
+	}
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(count+index, lsum);
+	atomic_xchg(wcount+index, lwsum);
+}
+//minmax
+__kernel void kernel_1(
+	__read_only image3d_t data,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	__global uint* minv,
+	__global uint* maxv)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	DWL lminv = VSCL;
+	DWL lmaxv = 0;
+	DWL val;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		val = read_imagef(data, samp, ijk).x * VSCL;
+		lminv = val ? min(val, lminv) : lminv;
+		lmaxv = max(val, lmaxv);
+	}
+	lminv = lminv == VSCL ? 0 : lminv;
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(minv+index, (uint)(lminv));
+	atomic_xchg(maxv+index, (uint)(lmaxv));
+}
+//histogram
+__kernel void kernel_2(
+	__read_only image3d_t data,
+	unsigned int minv,
+	unsigned int maxv,
+	unsigned int bin,
+	__global unsigned int* hist)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	unsigned int val = read_imagef(data, samp, coord).x * VSCL;
+	if (val < minv || val > maxv)
+		return;
+	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);
+	atomic_inc(hist+index);
+}//count in mask
+__kernel void kernel_3(
+	__read_only image3d_t data,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	__global unsigned int* count,
+	__global float* wcount,
+	__read_only image3d_t mask)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	unsigned int lsum = 0;
+	float lwsum = 0.0f;
+	float val, val2;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		val = read_imagef(data, samp, ijk).x;
+		val2 = read_imagef(mask, samp, ijk).x;
+		if (val > 0.0f && val2 > 0.0f)
+		{
+			lsum++;
+			lwsum += val;
+		}
+	}
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(count+index, lsum);
+	atomic_xchg(wcount+index, lwsum);
+}
+//minmax in mask
+__kernel void kernel_4(
+	__read_only image3d_t data,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	__global uint* minv,
+	__global uint* maxv,
+	__read_only image3d_t mask)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	DWL lminv = VSCL;
+	DWL lmaxv = 0;
+	DWL val;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		val = read_imagef(data, samp, ijk).x * VSCL;
+		float val2 = read_imagef(mask, samp, ijk).x;
+		if (val2 > 0.0f)
+		{
+			lminv = val ? min(val, lminv) : lminv;
+			lmaxv = max(val, lmaxv);
+		}
+	}
+	lminv = lminv == VSCL ? 0 : lminv;
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(minv+index, (uint)(lminv));
+	atomic_xchg(maxv+index, (uint)(lmaxv));
+}
+//histogram in mask
+__kernel void kernel_5(
+	__read_only image3d_t data,
+	unsigned int minv,
+	unsigned int maxv,
+	unsigned int bin,
+	__global unsigned int* hist,
+	__read_only image3d_t mask)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	float val2 = read_imagef(mask, samp, coord).x;
+	if (val2 < 1e-6)
+		return;
+	unsigned int val = read_imagef(data, samp, coord).x * VSCL;
+	if (val < minv || val > maxv)
+		return;
+	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);
+	atomic_inc(hist+index);
+};
+)CLKER";
 
 BasicStat::BasicStat(VolumeData* vd)
 	: m_vd(vd),

@@ -38,194 +38,195 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 //8-bit data
-const char* str_cl_backg_stat = \
-"#define DWL unsigned char\n" \
-"#define VSCL 255\n" \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"//extract background\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int dnxy,\n" \
-"	unsigned int dnx,\n" \
-"	unsigned int kx,\n" \
-"	unsigned int ky,\n" \
-"	unsigned int kxy,\n" \
-"	float varth,\n" \
-"	float gauth)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
-"	int4 kc;\n" \
-"	float4 dvalue;\n" \
-"	dvalue = read_imagef(data, samp, coord);\n" \
-"	float cvalue = dvalue.x;\n" \
-"	float sumi = 0.0f;\n" \
-"	float sumi2 = 0.0f;\n" \
-"	int i, j, k;\n" \
-"	for (i = 0; i < kx; ++i)\n" \
-"	for (j = 0; j < ky; ++j)\n" \
-"	{\n" \
-"		kc = (int4)(coord.x + (i - kx / 2),\n" \
-"			coord.y + (j - ky / 2),\n" \
-"			coord.z, 1);\n" \
-"		dvalue = read_imagef(data, samp, kc);\n" \
-"		sumi += dvalue.x;\n" \
-"		sumi2 += dvalue.x * dvalue.x;\n" \
-"	}\n" \
-"	float mean = sumi / kxy;\n" \
-"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0f * mean * sumi) / kxy);\n" \
-"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0f;\n" \
-"	DWL bv = cvalue * VSCL;\n" \
-"	bkg[index] = bv;\n" \
-"}\n" \
-"//extract background in mask\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int dnxy,\n" \
-"	unsigned int dnx,\n" \
-"	unsigned int kx,\n" \
-"	unsigned int ky,\n" \
-"	unsigned int kxy,\n" \
-"	float varth,\n" \
-"	float gauth,\n" \
-"	__read_only image3d_t mask)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;\n" \
-"	float mask_value = read_imagef(mask, samp, coord).x;\n" \
-"	if (mask_value < 1e-6f)\n" \
-"	{\n" \
-"		bkg[index] = 0;\n" \
-"		return;\n" \
-"	}\n" \
-"	int4 kc;\n" \
-"	float4 dvalue;\n" \
-"	dvalue = read_imagef(data, samp, coord);\n" \
-"	float cvalue = dvalue.x;\n" \
-"	float sumi = 0.0f;\n" \
-"	float sumi2 = 0.0f;\n" \
-"	int i, j, k;\n" \
-"	for (i = 0; i < kx; ++i)\n" \
-"	for (j = 0; j < ky; ++j)\n" \
-"	{\n" \
-"		kc = (int4)(coord.x + (i - kx / 2),\n" \
-"			coord.y + (j - ky / 2),\n" \
-"			coord.z, 1);\n" \
-"		dvalue = read_imagef(data, samp, kc);\n" \
-"		sumi += dvalue.x;\n" \
-"		sumi2 += dvalue.x * dvalue.x;\n" \
-"	}\n" \
-"	float mean = sumi / kxy;\n" \
-"	float var = sqrt((sumi2 + kxy * mean * mean - 2.0f * mean * sumi) / kxy);\n" \
-"	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0f;\n" \
-"	DWL bv = cvalue * VSCL;\n" \
-"	bkg[index] = bv;\n" \
-"}\n" \
-"//count in background\n" \
-"__kernel void kernel_2(\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
-"	__global unsigned int* count,\n" \
-"	__global float* wcount)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0f;\n" \
-"	float val;\n" \
-"	unsigned int index;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		val = bkg[index];\n" \
-"		if (val > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lwsum += val;\n" \
-"		}\n" \
-"	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	//atomic_xchg(count+index, lsum);\n" \
-"	//atomic_xchg(wcount+index, lwsum);\n" \
-"	count[index] = lsum;\n" \
-"	wcount[index] = lwsum;\n" \
-"}\n" \
-"//minmax in background\n" \
-"__kernel void kernel_3(\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
-"	__global uint* minv,\n" \
-"	__global uint* maxv)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	DWL lminv = VSCL;\n" \
-"	DWL lmaxv = 0;\n" \
-"	DWL val;\n" \
-"	unsigned int index;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;\n" \
-"		val = bkg[index];\n" \
-"		lminv = val ? min(val, lminv) : lminv;\n" \
-"		lmaxv = max(val, lmaxv);\n" \
-"	}\n" \
-"	lminv = lminv == VSCL ? 0 : lminv;\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	//atomic_xchg(minv+index, (uint)(lminv));\n" \
-"	//atomic_xchg(maxv+index, (uint)(lmaxv));\n" \
-"	minv[index] = (uint)(lminv);\n" \
-"	maxv[index] = (uint)(lmaxv);\n" \
-"}\n" \
-"//histogram in background\n" \
-"__kernel void kernel_4(\n" \
-"	__global DWL* bkg,\n" \
-"	unsigned int dnxy, \n" \
-"	unsigned int dnx,\n" \
-"	unsigned int minv,\n" \
-"	unsigned int maxv,\n" \
-"	unsigned int bin,\n" \
-"	__global unsigned int* hist)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	unsigned int index = dnxy* coord.z + dnx*coord.y + coord.x;\n" \
-"	unsigned int val = bkg[index];\n" \
-"	if (val < minv || val > maxv)\n" \
-"		return;\n" \
-"	index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
-"	atomic_inc(hist+index);\n" \
-"}\n";
+constexpr const char* str_cl_backg_stat = R"CLKER(
+#define DWL unsigned char
+#define VSCL 255
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+//extract background
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	__global DWL* bkg,
+	unsigned int dnxy,
+	unsigned int dnx,
+	unsigned int kx,
+	unsigned int ky,
+	unsigned int kxy,
+	float varth,
+	float gauth)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;
+	int4 kc;
+	float4 dvalue;
+	dvalue = read_imagef(data, samp, coord);
+	float cvalue = dvalue.x;
+	float sumi = 0.0f;
+	float sumi2 = 0.0f;
+	int i, j, k;
+	for (i = 0; i < kx; ++i)
+	for (j = 0; j < ky; ++j)
+	{
+		kc = (int4)(coord.x + (i - kx / 2),
+			coord.y + (j - ky / 2),
+			coord.z, 1);
+		dvalue = read_imagef(data, samp, kc);
+		sumi += dvalue.x;
+		sumi2 += dvalue.x * dvalue.x;
+	}
+	float mean = sumi / kxy;
+	float var = sqrt((sumi2 + kxy * mean * mean - 2.0f * mean * sumi) / kxy);
+	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0f;
+	DWL bv = cvalue * VSCL;
+	bkg[index] = bv;
+}
+//extract background in mask
+__kernel void kernel_1(
+	__read_only image3d_t data,
+	__global DWL* bkg,
+	unsigned int dnxy,
+	unsigned int dnx,
+	unsigned int kx,
+	unsigned int ky,
+	unsigned int kxy,
+	float varth,
+	float gauth,
+	__read_only image3d_t mask)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	unsigned int index = dnxy*coord.z + dnx*coord.y + coord.x;
+	float mask_value = read_imagef(mask, samp, coord).x;
+	if (mask_value < 1e-6f)
+	{
+		bkg[index] = 0;
+		return;
+	}
+	int4 kc;
+	float4 dvalue;
+	dvalue = read_imagef(data, samp, coord);
+	float cvalue = dvalue.x;
+	float sumi = 0.0f;
+	float sumi2 = 0.0f;
+	int i, j, k;
+	for (i = 0; i < kx; ++i)
+	for (j = 0; j < ky; ++j)
+	{
+		kc = (int4)(coord.x + (i - kx / 2),
+			coord.y + (j - ky / 2),
+			coord.z, 1);
+		dvalue = read_imagef(data, samp, kc);
+		sumi += dvalue.x;
+		sumi2 += dvalue.x * dvalue.x;
+	}
+	float mean = sumi / kxy;
+	float var = sqrt((sumi2 + kxy * mean * mean - 2.0f * mean * sumi) / kxy);
+	cvalue = (var < varth) || (cvalue - mean < var * gauth) ? cvalue : 0.0f;
+	DWL bv = cvalue * VSCL;
+	bkg[index] = bv;
+}
+//count in background
+__kernel void kernel_2(
+	__global DWL* bkg,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	unsigned int dnxy, 
+	unsigned int dnx,
+	__global unsigned int* count,
+	__global float* wcount)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	unsigned int lsum = 0;
+	float lwsum = 0.0f;
+	float val;
+	unsigned int index;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;
+		val = bkg[index];
+		if (val > 0.0f)
+		{
+			lsum++;
+			lwsum += val;
+		}
+	}
+	index = gsxy * gid.z + gsx * gid.y + gid.x;
+	//atomic_xchg(count+index, lsum);
+	//atomic_xchg(wcount+index, lwsum);
+	count[index] = lsum;
+	wcount[index] = lwsum;
+}
+//minmax in background
+__kernel void kernel_3(
+	__global DWL* bkg,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	unsigned int dnxy, 
+	unsigned int dnx,
+	__global uint* minv,
+	__global uint* maxv)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	DWL lminv = VSCL;
+	DWL lmaxv = 0;
+	DWL val;
+	unsigned int index;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		index = dnxy* ijk.z + dnx*ijk.y + ijk.x;
+		val = bkg[index];
+		lminv = val ? min(val, lminv) : lminv;
+		lmaxv = max(val, lmaxv);
+	}
+	lminv = lminv == VSCL ? 0 : lminv;
+	index = gsxy * gid.z + gsx * gid.y + gid.x;
+	//atomic_xchg(minv+index, (uint)(lminv));
+	//atomic_xchg(maxv+index, (uint)(lmaxv));
+	minv[index] = (uint)(lminv);
+	maxv[index] = (uint)(lmaxv);
+}
+//histogram in background
+__kernel void kernel_4(
+	__global DWL* bkg,
+	unsigned int dnxy, 
+	unsigned int dnx,
+	unsigned int minv,
+	unsigned int maxv,
+	unsigned int bin,
+	__global unsigned int* hist)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	unsigned int index = dnxy* coord.z + dnx*coord.y + coord.x;
+	unsigned int val = bkg[index];
+	if (val < minv || val > maxv)
+		return;
+	index = (val - minv) * (bin - 1) / (maxv - minv);
+	atomic_inc(hist+index);
+};
+)CLKER";
 
 BackgStat::BackgStat(VolumeData* vd)
 	: m_vd(vd),

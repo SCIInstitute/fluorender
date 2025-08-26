@@ -30,8 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <cl_code.h>
-#include <cl_code_db.h>
+#include <CompKernelCode.h>
 #include <EntryHist.h>
 #include <EntryParams.h>
 #include <Reshape.h>

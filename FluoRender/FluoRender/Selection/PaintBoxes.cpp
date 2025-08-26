@@ -35,54 +35,54 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_paint_boxes = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image2d_t paint,\n" \
-"	__global float* boxes,\n" \
-"	__global unsigned int* hits,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nbb,\n" \
-"	float4 imat0,\n" \
-"	float4 imat1,\n" \
-"	float4 imat2,\n" \
-"	float4 imat3)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	float v = read_imagef(paint, samp, (int2)(i, j)).x;\n" \
-"	if (v < 0.45f)\n" \
-"		return;\n" \
-"	float x = (float)(i) * 2.0f / (float)(nx) - 1.0f;\n" \
-"	float y = (float)(j) * 2.0f / (float)(ny) - 1.0f;\n" \
-"	float4 mp1 = (float4)(x, y, 0.0f, 1.0f);\n" \
-"	float4 mp2 = (float4)(x, y, 1.0f, 1.0f);\n" \
-"	mp1 = (float4)(dot(mp1, imat0), dot(mp1, imat1), dot(mp1, imat2), dot(mp1, imat3));\n" \
-"	mp1 /= mp1.w;\n" \
-"	mp2 = (float4)(dot(mp2, imat0), dot(mp2, imat1), dot(mp2, imat2), dot(mp2, imat3));\n" \
-"	mp2 /= mp2.w;\n" \
-"	float3 p0 = (float3)(mp1.x, mp1.y, mp1.z);\n" \
-"	float3 dir = (float3)(mp1.x - mp2.x, mp1.y - mp2.y, mp1.z - mp2.z);\n" \
-"	for (int ibb = 0; ibb < nbb; ++ibb)\n" \
-"	{\n" \
-"		float3 bbmin = (float3)(boxes[ibb*6], boxes[ibb*6+1], boxes[ibb*6+2]);\n" \
-"		float3 bbmax = (float3)(boxes[ibb*6+3], boxes[ibb*6+4], boxes[ibb*6+5]);\n" \
-"		float3 t1 = (bbmin - p0) / dir;\n" \
-"		float3 t2 = (bbmax - p0) / dir;\n" \
-"		float3 tn = fmin(t1, t2);\n" \
-"		float3 tf = fmax(t1, t2);\n" \
-"		float tnn = max(tn.x, max(tn.y, tn.z));\n" \
-"		float tff = min(tf.x, min(tf.y, tf.z));\n" \
-"		if (tnn <= tff)\n" \
-"			atomic_inc(hits+ibb);\n" \
-"	}\n" \
-"}\n" \
-;
+constexpr const char* str_cl_paint_boxes = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+__kernel void kernel_0(
+	__read_only image2d_t paint,
+	__global float* boxes,
+	__global unsigned int* hits,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nbb,
+	float4 imat0,
+	float4 imat1,
+	float4 imat2,
+	float4 imat3)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	float v = read_imagef(paint, samp, (int2)(i, j)).x;
+	if (v < 0.45f)
+		return;
+	float x = (float)(i) * 2.0f / (float)(nx) - 1.0f;
+	float y = (float)(j) * 2.0f / (float)(ny) - 1.0f;
+	float4 mp1 = (float4)(x, y, 0.0f, 1.0f);
+	float4 mp2 = (float4)(x, y, 1.0f, 1.0f);
+	mp1 = (float4)(dot(mp1, imat0), dot(mp1, imat1), dot(mp1, imat2), dot(mp1, imat3));
+	mp1 /= mp1.w;
+	mp2 = (float4)(dot(mp2, imat0), dot(mp2, imat1), dot(mp2, imat2), dot(mp2, imat3));
+	mp2 /= mp2.w;
+	float3 p0 = (float3)(mp1.x, mp1.y, mp1.z);
+	float3 dir = (float3)(mp1.x - mp2.x, mp1.y - mp2.y, mp1.z - mp2.z);
+	for (int ibb = 0; ibb < nbb; ++ibb)
+	{
+		float3 bbmin = (float3)(boxes[ibb*6], boxes[ibb*6+1], boxes[ibb*6+2]);
+		float3 bbmax = (float3)(boxes[ibb*6+3], boxes[ibb*6+4], boxes[ibb*6+5]);
+		float3 t1 = (bbmin - p0) / dir;
+		float3 t2 = (bbmax - p0) / dir;
+		float3 tn = fmin(t1, t2);
+		float3 tf = fmax(t1, t2);
+		float tnn = max(tn.x, max(tn.y, tn.z));
+		float tff = min(tf.x, min(tf.y, tf.z));
+		if (tnn <= tff)
+			atomic_inc(hits+ibb);
+	}
+}
+)CLKER";
 
 void PaintBoxes::Compute()
 {

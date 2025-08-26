@@ -39,54 +39,6 @@ using std::ostringstream;
 
 namespace flvr
 {
-#define CORE_PROFILE_VTX_SHADER 1
-
-#define VTX_SHADER_CODE_CORE_PROFILE \
-	"//VTX_SHADER_CODE_CORE_PROFILE\n" \
-	"uniform mat4 matrix0; //projection matrix\n" \
-	"uniform mat4 matrix1; //modelview matrix\n" \
-	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
-	"layout(location = 1) in vec3 InTexture;\n" \
-	"out vec3 OutVertex;\n" \
-	"out vec3 OutTexture;\n" \
-	"//-------------------\n" \
-	"void main()\n" \
-	"{\n" \
-	"	gl_Position = matrix0 * matrix1 * vec4(InVertex,1.);\n" \
-	"	OutTexture = InTexture;\n" \
-	"	OutVertex  = InVertex;\n" \
-	"}\n" 
-
-#define VTX_SHADER_CODE_FOG \
-	"//VTX_SHADER_CODE_FOG\n" \
-	"uniform mat4 matrix0; //projection matrix\n" \
-	"uniform mat4 matrix1; //modelview matrix\n" \
-	"layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically\n" \
-	"layout(location = 1) in vec3 InTexture;\n" \
-	"out vec3 OutVertex;\n" \
-	"out vec3 OutTexture;\n" \
-	"out vec4 OutFogCoord;\n" \
-	"//-------------------\n" \
-	"void main()\n" \
-	"{\n" \
-	"	OutFogCoord = matrix1 * vec4(InVertex,1.);\n" \
-	"	gl_Position = matrix0 * OutFogCoord;\n" \
-	"	OutTexture = InTexture;\n" \
-	"	OutVertex  = InVertex;\n" \
-	"}\n" 
-
-#define FRG_SHADER_CODE_CORE_PROFILE \
-	"//FRG_SHADER_CODE_CORE_PROFILE\n" \
-	"in vec3 OutVertex;\n" \
-	"in vec3 OutTexCoord;\n" \
-	"out vec4 FragColor;\n" \
-	"\n" \
-	"uniform vec4 loc0;//color\n" \
-	"void main()\n" \
-	"{\n" \
-	"	FragColor = loc0;\n" \
-	"}\n"
-
 VolShader::VolShader(
 	bool poly, int channels,
 	bool shading, bool fog,

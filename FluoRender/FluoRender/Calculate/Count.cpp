@@ -37,46 +37,47 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_count_voxels = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__read_only image3d_t mask,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global unsigned int* count,\n" \
-"	__global float* wcount)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
-"	float lwsum = 0.0f;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		float v1 = read_imagef(data, samp, ijk).x;\n" \
-"		float v2 = read_imagef(mask, samp, ijk).x;\n" \
-"		if (v2 > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lwsum += v1;\n" \
-"		}\n" \
-"	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(wcount+index, lwsum);\n" \
-"}\n";
+constexpr const char* str_cl_count_voxels = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	__read_only image3d_t mask,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	__global unsigned int* count,
+	__global float* wcount)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	unsigned int lsum = 0;
+	float lwsum = 0.0f;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		float v1 = read_imagef(data, samp, ijk).x;
+		float v2 = read_imagef(mask, samp, ijk).x;
+		if (v2 > 0.0f)
+		{
+			lsum++;
+			lwsum += v1;
+		}
+	}
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(count+index, lsum);
+	atomic_xchg(wcount+index, lwsum);
+}
+)CLKER";
 
 CountVoxels::CountVoxels() :
 	m_sum(0),

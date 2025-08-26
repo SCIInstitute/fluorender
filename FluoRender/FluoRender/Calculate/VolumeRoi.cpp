@@ -40,72 +40,72 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_volume_roi_ellipse = \
-"#define DWL unsigned char\n" \
-"#define VSCL 255\n" \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"float eval_ellipse(float2 coord, float3 ectr, float4 eaxis)\n" \
-"{\n" \
-"	float2 v = coord;\n" \
-"	v.x *= ectr.z;\n" \
-"	v -= ectr.xy; \n" \
-"	float2 l = (float2)(length(eaxis.xy), length(eaxis.zw));\n" \
-"	float2 p = (float2)(dot(v, eaxis.xy / l.x), dot(v, eaxis.zw / l.y));\n" \
-"	p = p / l;\n" \
-"	return p.x * p.x + p.y * p.y;\n" \
-"}\n" \
-"//count\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	uint ngx,\n" \
-"	uint ngy,\n" \
-"	uint ngz,\n" \
-"	uint gsxy,\n" \
-"	uint gsx,\n" \
-"	float4 spaces,\n" \
-"	float4 mat0,\n" \
-"	float4 mat1,\n" \
-"	float4 mat2,\n" \
-"	float4 mat3,\n" \
-"	float3 ectr,\n" \
-"	float4 eaxis,\n" \
-"	__global uint* count,\n" \
-"	__global float* wcount)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	uint lsum = 0;\n" \
-"	float lwsum = 0.0f;\n" \
-"	float val;\n" \
-"	float4 coord;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		coord = (convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f)) * spaces;\n" \
-"		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));\n" \
-"		coord /= coord.w;\n" \
-"		if (eval_ellipse(coord.xy, ectr, eaxis) > 1.0f)\n" \
-"			continue;\n" \
-"		val = read_imagef(data, samp, ijk).x;\n" \
-"		if (val > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lwsum += val;\n" \
-"		}\n" \
-"	}\n" \
-"	uint index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(wcount+index, lwsum);\n" \
-"}\n" \
-;
+constexpr const char* str_cl_volume_roi_ellipse = R"CLKER(
+#define DWL unsigned char
+#define VSCL 255
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+float eval_ellipse(float2 coord, float3 ectr, float4 eaxis)
+{
+	float2 v = coord;
+	v.x *= ectr.z;
+	v -= ectr.xy; 
+	float2 l = (float2)(length(eaxis.xy), length(eaxis.zw));
+	float2 p = (float2)(dot(v, eaxis.xy / l.x), dot(v, eaxis.zw / l.y));
+	p = p / l;
+	return p.x * p.x + p.y * p.y;
+}
+//count
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	uint ngx,
+	uint ngy,
+	uint ngz,
+	uint gsxy,
+	uint gsx,
+	float4 spaces,
+	float4 mat0,
+	float4 mat1,
+	float4 mat2,
+	float4 mat3,
+	float3 ectr,
+	float4 eaxis,
+	__global uint* count,
+	__global float* wcount)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	uint lsum = 0;
+	float lwsum = 0.0f;
+	float val;
+	float4 coord;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		coord = (convert_float4(ijk) + (float4)(0.5f, 0.5f, 0.5f, 0.0f)) * spaces;
+		coord = (float4)(dot(coord, mat0), dot(coord, mat1), dot(coord, mat2), dot(coord, mat3));
+		coord /= coord.w;
+		if (eval_ellipse(coord.xy, ectr, eaxis) > 1.0f)
+			continue;
+		val = read_imagef(data, samp, ijk).x;
+		if (val > 0.0f)
+		{
+			lsum++;
+			lwsum += val;
+		}
+	}
+	uint index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(count+index, lsum);
+	atomic_xchg(wcount+index, lwsum);
+}
+)CLKER";
 
 VolumeRoi::VolumeRoi(VolumeData* vd):
 	m_vd(vd),

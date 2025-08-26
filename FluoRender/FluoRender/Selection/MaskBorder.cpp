@@ -36,49 +36,49 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_check_box_borders = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"//check yz plane\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t mask,\n" \
-"	__global unsigned int* hits,\n" \
-"	unsigned int x)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	float v = read_imagef(mask, samp, (int4)(x, i, j, 1)).x;\n" \
-"	if (v > 0)\n" \
-"		atomic_inc(hits);\n" \
-"}\n" \
-"//check xz plane\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t mask,\n" \
-"	__global unsigned int* hits,\n" \
-"	unsigned int y)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	float v = read_imagef(mask, samp, (int4)(i, y, j, 1)).x;\n" \
-"	if (v > 0)\n" \
-"		atomic_inc(hits);\n" \
-"}\n" \
-"//check xy plane\n" \
-"__kernel void kernel_2(\n" \
-"	__read_only image3d_t mask,\n" \
-"	__global unsigned int* hits,\n" \
-"	unsigned int z)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	float v = read_imagef(mask, samp, (int4)(i, j, z, 1)).x;\n" \
-"	if (v > 0)\n" \
-"		atomic_inc(hits);\n" \
-"}\n" \
-;
+constexpr const char* str_cl_check_box_borders = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+//check yz plane
+__kernel void kernel_0(
+	__read_only image3d_t mask,
+	__global unsigned int* hits,
+	unsigned int x)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	float v = read_imagef(mask, samp, (int4)(x, i, j, 1)).x;
+	if (v > 0)
+		atomic_inc(hits);
+}
+//check xz plane
+__kernel void kernel_1(
+	__read_only image3d_t mask,
+	__global unsigned int* hits,
+	unsigned int y)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	float v = read_imagef(mask, samp, (int4)(i, y, j, 1)).x;
+	if (v > 0)
+		atomic_inc(hits);
+}
+//check xy plane
+__kernel void kernel_2(
+	__read_only image3d_t mask,
+	__global unsigned int* hits,
+	unsigned int z)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	float v = read_imagef(mask, samp, (int4)(i, j, z, 1)).x;
+	if (v > 0)
+		atomic_inc(hits);
+}
+)CLKER";
 
 MaskBorder::MaskBorder(VolumeData* vd)
 	: m_vd(vd)

@@ -38,148 +38,148 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_diffusion = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_LINEAR;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned char* mask,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	float4 p0,\n" \
-"	float4 p1,\n" \
-"	float4 p2,\n" \
-"	float4 p3,\n" \
-"	float4 p4,\n" \
-"	float4 p5,\n" \
-"	float3 scl,\n" \
-"	float3 trl,\n" \
-"	float3 p,\n" \
-"	float thresh,\n" \
-"	unsigned char val)\n" \
-"{\n" \
-"	unsigned int i = (int)(p.x);\n" \
-"	unsigned int j = (int)(p.y);\n" \
-"	unsigned int k = (int)(p.z);\n" \
-"	float v = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (v <= thresh)\n" \
-"		return;\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));\n" \
-"	pt = pt * scl + trl;\n" \
-"	if (dot(pt, p0.xyz)+p0.w < 0.0f ||\n" \
-"		dot(pt, p1.xyz)+p1.w < 0.0f ||\n" \
-"		dot(pt, p2.xyz)+p2.w < 0.0f ||\n" \
-"		dot(pt, p3.xyz)+p3.w < 0.0f ||\n" \
-"		dot(pt, p4.xyz)+p4.w < 0.0f ||\n" \
-"		dot(pt, p5.xyz)+p5.w < 0.0f)\n" \
-"		return;\n" \
-"	mask[index] = val;\n" \
-"}\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t data,\n" \
-"	__global unsigned char* mask,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz,\n" \
-"	float4 p0,\n" \
-"	float4 p1,\n" \
-"	float4 p2,\n" \
-"	float4 p3,\n" \
-"	float4 p4,\n" \
-"	float4 p5,\n" \
-"	float3 scl,\n" \
-"	float3 trl,\n" \
-"	float4 loc2,\n" \
-"	float4 loc3,\n" \
-"	float4 loc7)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	float3 dir = (float3)(1.0f/(float)(nx), 1.0f/(float)(ny), 1.0f/(float)(nz));\n" \
-"	float3 pt = dir * (float3)((float)(i), (float)(j), (float)(k));\n" \
-"	pt = pt * scl + trl;\n" \
-"	if (dot(pt, p0.xyz)+p0.w < 0.0f ||\n" \
-"		dot(pt, p1.xyz)+p1.w < 0.0f ||\n" \
-"		dot(pt, p2.xyz)+p2.w < 0.0f ||\n" \
-"		dot(pt, p3.xyz)+p3.w < 0.0f ||\n" \
-"		dot(pt, p4.xyz)+p4.w < 0.0f ||\n" \
-"		dot(pt, p5.xyz)+p5.w < 0.0f)\n" \
-"		return;\n" \
-"	//grad compute\n" \
-"	float3 v;\n" \
-"	v.x = read_imagef(data, samp, (int4)(i, j, k, 1)).x;\n" \
-"	float3 n = (float3)(0.0f);\n" \
-"	n.x += read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;\n" \
-"	n.x -= read_imagef(data, samp, (int4)(i-1, j, k, 1)).x;\n" \
-"	n.y += read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;\n" \
-"	n.y -= read_imagef(data, samp, (int4)(i, j-1, k, 1)).x;\n" \
-"	n.z += read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)+min((float)(nz)/(float)(nx), 1.0f), 1.0f)).x;\n" \
-"	n.z -= read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)-min((float)(nz)/(float)(nx), 1.0f), 1.0f)).x;\n" \
-"	v.y = length(n);\n" \
-"	v.y = 0.5f * (loc2.x<0.0f?(1.0f+v.y*loc2.x):v.y*loc2.x);\n" \
-"	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L\n" \
-"	float c;\n" \
-"	v.x = loc2.x < 0.0f ? (1.0f + v.x*loc2.x) : v.x*loc2.x;\n" \
-"	if (v.x < loc2.z - loc3.w || (loc2.w<1.0 && v.x>loc2.w + loc3.w))\n" \
-"		c = 0.0f;\n" \
-"	else\n" \
-"	{\n" \
-"		v.x = (v.x < loc2.z ? (loc3.w - loc2.z + v.x) / loc3.w : (loc2.w<1.0f && v.x>loc2.w ? (loc3.w - v.x + loc2.w) / loc3.w : 1.0f))*v.x;\n" \
-"		v.x = (loc2.y > 0.0f ? clamp(v.y / loc2.y, 0.0f, 1.0f + loc2.y*10.0f) : 1.0f)*v.x;\n" \
-"		c = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y), loc3.x<1.0f ? -(loc3.x - 1.0f)*0.00001f : 0.0f, 1.0f), loc3.x);\n" \
-"	}\n" \
-"	//SEG_BODY_DB_GROW_STOP_FUNC\n" \
-"	if (c <= 0.0001f)\n" \
-"		return;\n" \
-"	v.x = c > 1.0f ? 1.0f : c;\n" \
-"	float stop =\n" \
-"		(loc7.y >= 1.0f ? 1.0f : (v.y > sqrt(loc7.y)*2.12f ? 0.0f : exp(-v.y*v.y / loc7.y)))*\n" \
-"		(v.x > loc7.w ? 1.0f : (loc7.z > 0.0f ? (v.x < loc7.w - sqrt(loc7.z)*2.12f ? 0.0 : exp(-(v.x - loc7.w)*(v.x - loc7.w) / loc7.z)) : 0.0f));\n" \
-"	if (stop <= 0.0001f)\n" \
-"		return;\n" \
-"	//SEG_BODY_DB_GROW_BLEND_APPEND\n" \
-"	unsigned char cc = mask[index];\n" \
-"	float val = (1.0f - stop) * (float)(cc);\n" \
-"	int3 nb_coord;\n" \
-"	int3 max_nb;\n" \
-"	unsigned int nb_index;\n" \
-"	unsigned char m;\n" \
-"	unsigned char mx;\n" \
-"	for (int ii = -1; ii < 2; ii++)\n" \
-"	for (int jj = -1; jj < 2; jj++)\n" \
-"	for (int kk = -1; kk < 2; kk++)\n" \
-"	{\n" \
-"		nb_coord = (int3)(ii+i, jj+j, kk+k);\n" \
-"		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||\n" \
-"			nb_coord.y < 0 || nb_coord.y > ny-1 ||\n" \
-"			nb_coord.z < 0 || nb_coord.z > nz-1)\n" \
-"			continue;\n" \
-"		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;\n" \
-"		m = mask[nb_index];\n" \
-"		if (m > cc)\n" \
-"		{\n" \
-"			cc = m;\n" \
-"			max_nb = nb_coord;\n" \
-"		}\n" \
-"	}\n" \
-"	if (loc7.y > 0.0f)\n" \
-"	{\n" \
-"		m = (unsigned char)((read_imagef(data, samp, (int4)(max_nb, 1)).x + loc7.y) * 255.0f);\n" \
-"		mx = (unsigned char)(read_imagef(data, samp, (int4)(i, j, k, 1)).x * 255.0f);\n" \
-"		if (m < mx || m - mx > (unsigned char)(510.0f*loc7.y))\n" \
-"			return;\n" \
-"	}\n" \
-"	cc = clamp(cc * (unsigned char)(stop * 255.0f), 0, 255);\n" \
-"	mask[index] = cc;\n" \
-"}\n" \
-;
+constexpr const char* str_cl_diffusion = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_LINEAR;
+
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	__global unsigned char* mask,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nz,
+	float4 p0,
+	float4 p1,
+	float4 p2,
+	float4 p3,
+	float4 p4,
+	float4 p5,
+	float3 scl,
+	float3 trl,
+	float3 p,
+	float thresh,
+	unsigned char val)
+{
+	unsigned int i = (int)(p.x);
+	unsigned int j = (int)(p.y);
+	unsigned int k = (int)(p.z);
+	float v = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
+	if (v <= thresh)
+		return;
+	unsigned int index = nx*ny*k + nx*j + i;
+	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));
+	pt = pt * scl + trl;
+	if (dot(pt, p0.xyz)+p0.w < 0.0f ||
+		dot(pt, p1.xyz)+p1.w < 0.0f ||
+		dot(pt, p2.xyz)+p2.w < 0.0f ||
+		dot(pt, p3.xyz)+p3.w < 0.0f ||
+		dot(pt, p4.xyz)+p4.w < 0.0f ||
+		dot(pt, p5.xyz)+p5.w < 0.0f)
+		return;
+	mask[index] = val;
+}
+__kernel void kernel_1(
+	__read_only image3d_t data,
+	__global unsigned char* mask,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nz,
+	float4 p0,
+	float4 p1,
+	float4 p2,
+	float4 p3,
+	float4 p4,
+	float4 p5,
+	float3 scl,
+	float3 trl,
+	float4 loc2,
+	float4 loc3,
+	float4 loc7)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int k = (unsigned int)(get_global_id(2));
+	unsigned int index = nx*ny*k + nx*j + i;
+	float3 dir = (float3)(1.0f/(float)(nx), 1.0f/(float)(ny), 1.0f/(float)(nz));
+	float3 pt = dir * (float3)((float)(i), (float)(j), (float)(k));
+	pt = pt * scl + trl;
+	if (dot(pt, p0.xyz)+p0.w < 0.0f ||
+		dot(pt, p1.xyz)+p1.w < 0.0f ||
+		dot(pt, p2.xyz)+p2.w < 0.0f ||
+		dot(pt, p3.xyz)+p3.w < 0.0f ||
+		dot(pt, p4.xyz)+p4.w < 0.0f ||
+		dot(pt, p5.xyz)+p5.w < 0.0f)
+		return;
+	//grad compute
+	float3 v;
+	v.x = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
+	float3 n = (float3)(0.0f);
+	n.x += read_imagef(data, samp, (int4)(i+1, j, k, 1)).x;
+	n.x -= read_imagef(data, samp, (int4)(i-1, j, k, 1)).x;
+	n.y += read_imagef(data, samp, (int4)(i, j+1, k, 1)).x;
+	n.y -= read_imagef(data, samp, (int4)(i, j-1, k, 1)).x;
+	n.z += read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)+min((float)(nz)/(float)(nx), 1.0f), 1.0f)).x;
+	n.z -= read_imagef(data, samp, (float4)((float)(i), (float)(j), (float)(k)-min((float)(nz)/(float)(nx), 1.0f), 1.0f)).x;
+	v.y = length(n);
+	v.y = 0.5f * (loc2.x<0.0f?(1.0f+v.y*loc2.x):v.y*loc2.x);
+	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L
+	float c;
+	v.x = loc2.x < 0.0f ? (1.0f + v.x*loc2.x) : v.x*loc2.x;
+	if (v.x < loc2.z - loc3.w || (loc2.w<1.0 && v.x>loc2.w + loc3.w))
+		c = 0.0f;
+	else
+	{
+		v.x = (v.x < loc2.z ? (loc3.w - loc2.z + v.x) / loc3.w : (loc2.w<1.0f && v.x>loc2.w ? (loc3.w - v.x + loc2.w) / loc3.w : 1.0f))*v.x;
+		v.x = (loc2.y > 0.0f ? clamp(v.y / loc2.y, 0.0f, 1.0f + loc2.y*10.0f) : 1.0f)*v.x;
+		c = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y), loc3.x<1.0f ? -(loc3.x - 1.0f)*0.00001f : 0.0f, 1.0f), loc3.x);
+	}
+	//SEG_BODY_DB_GROW_STOP_FUNC
+	if (c <= 0.0001f)
+		return;
+	v.x = c > 1.0f ? 1.0f : c;
+	float stop =
+		(loc7.y >= 1.0f ? 1.0f : (v.y > sqrt(loc7.y)*2.12f ? 0.0f : exp(-v.y*v.y / loc7.y)))*
+		(v.x > loc7.w ? 1.0f : (loc7.z > 0.0f ? (v.x < loc7.w - sqrt(loc7.z)*2.12f ? 0.0 : exp(-(v.x - loc7.w)*(v.x - loc7.w) / loc7.z)) : 0.0f));
+	if (stop <= 0.0001f)
+		return;
+	//SEG_BODY_DB_GROW_BLEND_APPEND
+	unsigned char cc = mask[index];
+	float val = (1.0f - stop) * (float)(cc);
+	int3 nb_coord;
+	int3 max_nb;
+	unsigned int nb_index;
+	unsigned char m;
+	unsigned char mx;
+	for (int ii = -1; ii < 2; ii++)
+	for (int jj = -1; jj < 2; jj++)
+	for (int kk = -1; kk < 2; kk++)
+	{
+		nb_coord = (int3)(ii+i, jj+j, kk+k);
+		if (nb_coord.x < 0 || nb_coord.x > nx-1 ||
+			nb_coord.y < 0 || nb_coord.y > ny-1 ||
+			nb_coord.z < 0 || nb_coord.z > nz-1)
+			continue;
+		nb_index = nx*ny*nb_coord.z + nx*nb_coord.y + nb_coord.x;
+		m = mask[nb_index];
+		if (m > cc)
+		{
+			cc = m;
+			max_nb = nb_coord;
+		}
+	}
+	if (loc7.y > 0.0f)
+	{
+		m = (unsigned char)((read_imagef(data, samp, (int4)(max_nb, 1)).x + loc7.y) * 255.0f);
+		mx = (unsigned char)(read_imagef(data, samp, (int4)(i, j, k, 1)).x * 255.0f);
+		if (m < mx || m - mx > (unsigned char)(510.0f*loc7.y))
+			return;
+	}
+	cc = clamp(cc * (unsigned char)(stop * 255.0f), 0, 255);
+	mask[index] = cc;
+}
+)CLKER";
 
 Diffusion::Diffusion(VolumeData* vd)
 	: m_vd(vd)

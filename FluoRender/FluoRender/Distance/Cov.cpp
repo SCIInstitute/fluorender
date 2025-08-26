@@ -37,89 +37,89 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_cov = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t mask,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	__global unsigned int* count,\n" \
-"	__global float* csum)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	unsigned int lsum = 0;\n" \
-"	float3 lcsum = (float3)(0.0f, 0.0f, 0.0f);\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		float mval = read_imagef(mask, samp, ijk).x;\n" \
-"		if (mval > 0.0f)\n" \
-"		{\n" \
-"			lsum++;\n" \
-"			lcsum.x += (float)(ijk.x);\n" \
-"			lcsum.y += (float)(ijk.y);\n" \
-"			lcsum.z += (float)(ijk.z);\n" \
-"		}\n" \
-"	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lsum);\n" \
-"	atomic_xchg(csum+index*3, lcsum.x);\n" \
-"	atomic_xchg(csum+index*3+1, lcsum.y);\n" \
-"	atomic_xchg(csum+index*3+2, lcsum.z);\n" \
-"}\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t mask,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	float3 center,\n" \
-"	float3 orig,\n" \
-"	__global float* cov)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float xx = 0.0f, xy = 0.0f, xz = 0.0f, yy = 0.0f, yz = 0.0f, zz = 0.0f;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		float mval = read_imagef(mask, samp, ijk).x;\n" \
-"		if (mval < 0.0001f)\n" \
-"			continue;\n" \
-"		float3 fijk = (float3)(ijk.x, ijk.y, ijk.z) + orig - center;\n" \
-"		xx += fijk.x * fijk.x;\n" \
-"		xy += fijk.x * fijk.y;\n" \
-"		xz += fijk.x * fijk.z;\n" \
-"		yy += fijk.y * fijk.y;\n" \
-"		yz += fijk.y * fijk.z;\n" \
-"		zz += fijk.z * fijk.z;\n" \
-"	}\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(cov+index*6, xx);\n" \
-"	atomic_xchg(cov+index*6+1, xy);\n" \
-"	atomic_xchg(cov+index*6+2, xz);\n" \
-"	atomic_xchg(cov+index*6+3, yy);\n" \
-"	atomic_xchg(cov+index*6+4, yz);\n" \
-"	atomic_xchg(cov+index*6+5, zz);\n" \
-"}\n" \
-;
+constexpr const char* str_cl_cov = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+__kernel void kernel_0(
+	__read_only image3d_t mask,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	__global unsigned int* count,
+	__global float* csum)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	unsigned int lsum = 0;
+	float3 lcsum = (float3)(0.0f, 0.0f, 0.0f);
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		float mval = read_imagef(mask, samp, ijk).x;
+		if (mval > 0.0f)
+		{
+			lsum++;
+			lcsum.x += (float)(ijk.x);
+			lcsum.y += (float)(ijk.y);
+			lcsum.z += (float)(ijk.z);
+		}
+	}
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(count+index, lsum);
+	atomic_xchg(csum+index*3, lcsum.x);
+	atomic_xchg(csum+index*3+1, lcsum.y);
+	atomic_xchg(csum+index*3+2, lcsum.z);
+}
+__kernel void kernel_1(
+	__read_only image3d_t mask,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	float3 center,
+	float3 orig,
+	__global float* cov)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	float xx = 0.0f, xy = 0.0f, xz = 0.0f, yy = 0.0f, yz = 0.0f, zz = 0.0f;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		float mval = read_imagef(mask, samp, ijk).x;
+		if (mval < 0.0001f)
+			continue;
+		float3 fijk = (float3)(ijk.x, ijk.y, ijk.z) + orig - center;
+		xx += fijk.x * fijk.x;
+		xy += fijk.x * fijk.y;
+		xz += fijk.x * fijk.z;
+		yy += fijk.y * fijk.y;
+		yz += fijk.y * fijk.z;
+		zz += fijk.z * fijk.z;
+	}
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(cov+index*6, xx);
+	atomic_xchg(cov+index*6+1, xy);
+	atomic_xchg(cov+index*6+2, xz);
+	atomic_xchg(cov+index*6+3, yy);
+	atomic_xchg(cov+index*6+4, yz);
+	atomic_xchg(cov+index*6+5, zz);
+}
+)CLKER";
 
 Cov::Cov(VolumeData* vd)
 	: m_vd(vd),

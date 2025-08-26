@@ -38,51 +38,51 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_histogram =\
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"//histogram\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	float minv,\n" \
-"	float maxv,\n" \
-"	unsigned int bin,\n" \
-"	__global unsigned int* hist)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	float val = read_imagef(data, samp, coord).x;\n" \
-"	if (val < minv || val > maxv)\n" \
-"		return;\n" \
-"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
-"	atomic_inc(hist+index);\n" \
-"	atomic_inc(hist+bin);\n" \
-"}\n" \
-"//histogram in mask\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t data,\n" \
-"	float minv,\n" \
-"	float maxv,\n" \
-"	unsigned int bin,\n" \
-"	__global unsigned int* hist,\n" \
-"	__read_only image3d_t mask)\n" \
-"{\n" \
-"	int4 coord = (int4)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2), 1);\n" \
-"	float val = read_imagef(mask, samp, coord).x;\n" \
-"	if (val == 0.0f)\n" \
-"		return;\n" \
-"	val = read_imagef(data, samp, coord).x;\n" \
-"	if (val < minv || val > maxv)\n" \
-"		return;\n" \
-"	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);\n" \
-"	atomic_inc(hist+index);\n" \
-"	atomic_inc(hist+bin);\n" \
-"}\n" \
-;
+constexpr const char* str_cl_histogram = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+//histogram
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	float minv,
+	float maxv,
+	unsigned int bin,
+	__global unsigned int* hist)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	float val = read_imagef(data, samp, coord).x;
+	if (val < minv || val > maxv)
+		return;
+	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);
+	atomic_inc(hist+index);
+	atomic_inc(hist+bin);
+}
+//histogram in mask
+__kernel void kernel_1(
+	__read_only image3d_t data,
+	float minv,
+	float maxv,
+	unsigned int bin,
+	__global unsigned int* hist,
+	__read_only image3d_t mask)
+{
+	int4 coord = (int4)(get_global_id(0),
+		get_global_id(1), get_global_id(2), 1);
+	float val = read_imagef(mask, samp, coord).x;
+	if (val == 0.0f)
+		return;
+	val = read_imagef(data, samp, coord).x;
+	if (val < minv || val > maxv)
+		return;
+	unsigned int index = (val - minv) * (bin - 1) / (maxv - minv);
+	atomic_inc(hist+index);
+	atomic_inc(hist+bin);
+}
+)CLKER";
 
 Histogram::Histogram(VolumeData* vd) :
 	m_vd(vd),

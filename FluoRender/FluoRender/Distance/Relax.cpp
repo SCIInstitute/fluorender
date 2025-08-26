@@ -37,67 +37,67 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_relax = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t data,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int np,\n" \
-"	float3 org,\n" \
-"	float3 scl,\n" \
-"	float rest,\n" \
-"	float infr,\n" \
-"	__global float* spp,\n" \
-"	__global unsigned int* slk,\n" \
-"	__global float* gdsp,\n" \
-"	__global float* gwsum)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int4 ijk = (int4)(0, 0, 0, 1);\n" \
-"	float w, dist;\n" \
-"	float wsum;\n" \
-"	float3 loc, pos, dir;\n" \
-"	float3 dsp;\n" \
-"	int c;\n" \
-"	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	for (c = 0; c < np; ++c)\n" \
-"	{\n" \
-"		if (slk[c]) continue;\n" \
-"		dsp = (float3)(0.0f, 0.0f, 0.0f);\n" \
-"		wsum = 0.0f;\n" \
-"		pos = (float3)(spp[c*3], spp[c*3+1], spp[c*3+2]);\n" \
-"		for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"		for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"		for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"		{\n" \
-"			w = read_imagef(data, samp, ijk).x;\n" \
-"			if (w == 0.0f) continue;\n" \
-"			loc = (org + (float3)(ijk.x, ijk.y, ijk.z)) * scl;\n" \
-"			dir = loc - pos;\n" \
-"			dist = length(dir);\n" \
-"			if (dist > infr) continue;\n" \
-"			dist = max(rest, dist);\n" \
-"			dsp += dir * w / dist / dist;\n" \
-"			wsum += w;\n" \
-"		}\n" \
-"		atomic_xchg(gdsp+(index*np+c)*3, dsp.x);\n" \
-"		atomic_xchg(gdsp+(index*np+c)*3+1, dsp.y);\n" \
-"		atomic_xchg(gdsp+(index*np+c)*3+2, dsp.z);\n" \
-"		atomic_xchg(gwsum+index*np+c, wsum);\n" \
-"	}\n" \
-"}\n" \
-;
+constexpr const char* str_cl_relax = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+__kernel void kernel_0(
+	__read_only image3d_t data,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	unsigned int np,
+	float3 org,
+	float3 scl,
+	float rest,
+	float infr,
+	__global float* spp,
+	__global unsigned int* slk,
+	__global float* gdsp,
+	__global float* gwsum)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int4 ijk = (int4)(0, 0, 0, 1);
+	float w, dist;
+	float wsum;
+	float3 loc, pos, dir;
+	float3 dsp;
+	int c;
+	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
+	for (c = 0; c < np; ++c)
+	{
+		if (slk[c]) continue;
+		dsp = (float3)(0.0f, 0.0f, 0.0f);
+		wsum = 0.0f;
+		pos = (float3)(spp[c*3], spp[c*3+1], spp[c*3+2]);
+		for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+		for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+		for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+		{
+			w = read_imagef(data, samp, ijk).x;
+			if (w == 0.0f) continue;
+			loc = (org + (float3)(ijk.x, ijk.y, ijk.z)) * scl;
+			dir = loc - pos;
+			dist = length(dir);
+			if (dist > infr) continue;
+			dist = max(rest, dist);
+			dsp += dir * w / dist / dist;
+			wsum += w;
+		}
+		atomic_xchg(gdsp+(index*np+c)*3, dsp.x);
+		atomic_xchg(gdsp+(index*np+c)*3+1, dsp.y);
+		atomic_xchg(gdsp+(index*np+c)*3+2, dsp.z);
+		atomic_xchg(gwsum+index*np+c, wsum);
+	}
+}
+)CLKER";
 
 Relax::Relax() :
 	m_ruler(0),

@@ -40,550 +40,550 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-const char* str_cl_segrow = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"//initialize new mask regions to ids (ordered)\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	unsigned int lv = index + 1;\n" \
-"	if (value == 0.0f)\n" \
-"		lv = 0;\n" \
-"	atomic_xchg(label+index, lv);\n" \
-"}\n" \
-"//initialize but keep old values\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t mask,\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;\n" \
-"	if (value == 0.0f)\n" \
-"		return;\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	if (label[index] > 0)\n" \
-"		return;\n" \
-"	atomic_xchg(label+index, index + 1);\n" \
-"}\n" \
-"//grow ids reverse\n" \
-"__kernel void kernel_2(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx - 1, lb.y + ngy - 1, lb.z + ngz - 1);\n" \
-"	int3 ijk = (int3)(0, 0, 0);\n" \
-"	unsigned int index;\n" \
-"	unsigned int label_v;\n" \
-"	unsigned int m, label_m;\n" \
-"	for (ijk.z = ub.z; ijk.z >= lb.z; --ijk.z)\n" \
-"	for (ijk.y = ub.y; ijk.y >= lb.y; --ijk.y)\n" \
-"	for (ijk.x = ub.x; ijk.x >= lb.x; --ijk.x)\n" \
-"	{\n" \
-"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
-"			continue;\n" \
-"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		label_v = label[index];\n" \
-"		if (label_v == 0 || label_v & 0x80000000)\n" \
-"			continue;\n" \
-"		label_m = label_v;\n" \
-"		//search neighbors\n" \
-"		for (int i = -1; i < 2; ++i)\n" \
-"		for (int j = -1; j < 2; ++j)\n" \
-"		for (int k = -1; k < 2; ++k)\n" \
-"		{\n" \
-"			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)\n" \
-"				continue;\n" \
-"			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		if (label_m != label_v)\n" \
-"			label[index] = label_m;\n" \
-"	}\n" \
-"}\n" \
-"//grow id ordered\n" \
-"__kernel void kernel_3(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int3 ijk = (int3)(0, 0, 0);\n" \
-"	unsigned int index;\n" \
-"	unsigned int label_v;\n" \
-"	unsigned int m, label_m;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
-"			continue;\n" \
-"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		label_v = label[index];\n" \
-"		if (label_v == 0 || label_v & 0x80000000)\n" \
-"			continue;\n" \
-"		label_m = label_v;\n" \
-"		//search neighbors\n" \
-"		for (int i = -1; i < 2; ++i)\n" \
-"		for (int j = -1; j < 2; ++j)\n" \
-"		for (int k = -1; k < 2; ++k)\n" \
-"		{\n" \
-"			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)\n" \
-"				continue;\n" \
-"			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];\n" \
-"			if (m  && !(m & 0x80000000))\n" \
-"				label_m = max(label_m, m);\n" \
-"		}\n" \
-"		if (label_m != label_v)\n" \
-"			label[index] = label_m;\n" \
-"	}\n" \
-"}\n" \
-"//count newly grown labels\n" \
-"__kernel void kernel_4(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int maxc,\n" \
-"	__global unsigned int* count,\n" \
-"	__global unsigned int* ids,\n" \
-"	__local unsigned int* lids)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int3 ijk = (int3)(0, 0, 0);\n" \
-"	unsigned int lcount = 0;\n" \
-"	unsigned int index;\n" \
-"	unsigned int label_v;\n" \
-"	bool found;\n" \
-"	int c;\n" \
-"	for (c = 0; c < maxc; ++c)\n" \
-"		lids[c] = 0;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
-"			continue;\n" \
-"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		label_v = label[index];\n" \
-"		if (label_v == 0 || label_v & 0x80000000)\n" \
-"			continue;\n" \
-"		found = false;\n" \
-"		for (c = 0; c < lcount; ++c)\n" \
-"		if (lids[c] == label_v)\n" \
-"		{\n" \
-"			found = true;\n" \
-"			break;\n" \
-"		}\n" \
-"		if (!found && lcount < maxc)\n" \
-"		{\n" \
-"			lids[lcount] = label_v;\n" \
-"			lcount++;\n" \
-"		}\n" \
-"	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	atomic_xchg(count+index, lcount);\n" \
-"	for (c = 0; c < lcount; ++c)\n" \
-"		atomic_xchg(ids+index*maxc+c, lids[c]);\n" \
-"}\n" \
-"//find connected parts\n" \
-"__kernel void kernel_5(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int nid,\n" \
-"	__global unsigned int* ids,\n" \
-"	__global unsigned int* cids,\n" \
-"	__local unsigned int* lcids)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int3 ijk = (int3)(0, 0, 0);\n" \
-"	unsigned int index;\n" \
-"	unsigned int label_v;\n" \
-"	unsigned int m;\n" \
-"	bool found;\n" \
-"	int c;\n" \
-"	for (c = 0; c < nid * 6; ++c)\n" \
-"		lcids[c] = 0;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
-"			continue;\n" \
-"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		label_v = label[index];\n" \
-"		if (label_v == 0 || label_v & 0x80000000)\n" \
-"			continue;\n" \
-"		found = false;\n" \
-"		for (c = 0; c < nid; ++c)\n" \
-"		if (ids[c] == label_v)\n" \
-"		{\n" \
-"			found = true;\n" \
-"			break;\n" \
-"		}\n" \
-"		if (!found)\n" \
-"			continue;\n" \
-"		//-x\n" \
-"		if (ijk.x > 0)\n" \
-"		{\n" \
-"			m = label[index - 1];\n" \
-"			if (m != label_v && !(m & 0x80000000))\n" \
-"				lcids[c*6] = m;\n" \
-"		}\n" \
-"		//+x\n" \
-"		if (ijk.x < nx-1)\n" \
-"		{\n" \
-"			m = label[index + 1];\n" \
-"			if (m != label_v && !(m & 0x80000000))\n" \
-"				lcids[c*6+1] = m;\n" \
-"		}\n" \
-"		//-y\n" \
-"		if (ijk.y > 0)\n" \
-"		{\n" \
-"			m = label[index - nx];\n" \
-"			if (m != label_v && !(m & 0x80000000))\n" \
-"				lcids[c*6+2] = m;\n" \
-"		}\n" \
-"		//+y\n" \
-"		if (ijk.y < ny-1)\n" \
-"		{\n" \
-"			m = label[index + nx];\n" \
-"			if (m != label_v && !(m & 0x80000000))\n" \
-"				lcids[c*6+3] = m;\n" \
-"		}\n" \
-"		//-z\n" \
-"		if (ijk.z > 0)\n" \
-"		{\n" \
-"			m = label[index - nxy];\n" \
-"			if (m != label_v && !(m & 0x80000000))\n" \
-"				lcids[c*6+4] = m;\n" \
-"		}\n" \
-"		//+z\n" \
-"		if (ijk.z < nz-1)\n" \
-"		{\n" \
-"			m = label[index + nxy];\n" \
-"			if (m != label_v && !(m & 0x80000000))\n" \
-"				lcids[c*6+5] = m;\n" \
-"		}\n" \
-"	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	for (c = 0; c < nid*6; ++c)\n" \
-"		atomic_xchg(cids+(index*nid)*6+c, lcids[c]);\n" \
-"}\n" \
-"//merge connected ids\n" \
-"__kernel void kernel_6(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int nid,\n" \
-"	__global unsigned int* mids)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int3 ijk = (int3)(0, 0, 0);\n" \
-"	unsigned int index;\n" \
-"	unsigned int label_v;\n" \
-"	bool found;\n" \
-"	int c;\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
-"			continue;\n" \
-"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		label_v = label[index];\n" \
-"		if (label_v == 0 || label_v & 0x80000000)\n" \
-"			continue;\n" \
-"		found = false;\n" \
-"		for (c = 0; c < nid; ++c)\n" \
-"		if (mids[c*2] == label_v)\n" \
-"		{\n" \
-"			found = true;\n" \
-"			break;\n" \
-"		}\n" \
-"		if (!found)\n" \
-"			continue;\n" \
-"		label[index] = mids[c*2+1];\n" \
-"	}\n" \
-"}\n" \
-"//find connectivity/center of new ids\n" \
-"__kernel void kernel_7(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nxy,\n" \
-"	unsigned int nz,\n" \
-"	unsigned int ngx,\n" \
-"	unsigned int ngy,\n" \
-"	unsigned int ngz,\n" \
-"	unsigned int gsxy,\n" \
-"	unsigned int gsx,\n" \
-"	unsigned int nid,\n" \
-"	__global unsigned int* ids,\n" \
-"	__global unsigned int* cids,\n" \
-"	__global unsigned int* sum,\n" \
-"	__global float* csum,\n" \
-"	__local unsigned int* lcids,\n" \
-"	__local unsigned int* lsum,\n" \
-"	__local float* lcsum)\n" \
-"{\n" \
-"	int3 gid = (int3)(get_global_id(0),\n" \
-"		get_global_id(1), get_global_id(2));\n" \
-"	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);\n" \
-"	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);\n" \
-"	int3 ijk = (int3)(0, 0, 0);\n" \
-"	unsigned int index;\n" \
-"	unsigned int label_v;\n" \
-"	unsigned int m;\n" \
-"	bool found;\n" \
-"	int c;\n" \
-"	for (c = 0; c < nid; ++c)\n" \
-"	{\n" \
-"		lcids[c*3] = 0;\n" \
-"		lcids[c*3+1] = 0;\n" \
-"		lcids[c*3+2] = 0;\n" \
-"		lsum[c] = 0;\n" \
-"		lcsum[c*3] = 0.0f;\n" \
-"		lcsum[c*3+1] = 0.0f;\n" \
-"		lcsum[c*3+2] = 0.0f;\n" \
-"	}\n" \
-"	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)\n" \
-"	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)\n" \
-"	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)\n" \
-"	{\n" \
-"		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)\n" \
-"			continue;\n" \
-"		index = nxy*ijk.z + nx*ijk.y + ijk.x;\n" \
-"		label_v = label[index];\n" \
-"		if (label_v == 0 || label_v & 0x80000000)\n" \
-"			continue;\n" \
-"		found = false;\n" \
-"		for (c = 0; c < nid; ++c)\n" \
-"		if (ids[c] == label_v)\n" \
-"		{\n" \
-"			found = true;\n" \
-"			break;\n" \
-"		}\n" \
-"		if (!found)\n" \
-"			continue;\n" \
-"		lsum[c]++;\n" \
-"		lcsum[c*3] += (float)(ijk.x);\n" \
-"		lcsum[c*3+1] += (float)(ijk.y);\n" \
-"		lcsum[c*3+2] += (float)(ijk.z);\n" \
-"		//search neighbors\n" \
-"		for (int i = -1; i < 2; ++i)\n" \
-"		for (int j = -1; j < 2; ++j)\n" \
-"		for (int k = -1; k < 2; ++k)\n" \
-"		{\n" \
-"			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)\n" \
-"				continue;\n" \
-"			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];\n" \
-"			if (m != label_v && m & 0x80000000)\n" \
-"			{\n" \
-"				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;\n" \
-"				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];\n" \
-"				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];\n" \
-"			}\n" \
-"		}\n" \
-"	}\n" \
-"	index = gsxy * gid.z + gsx * gid.y + gid.x;\n" \
-"	for (c = 0; c < nid; ++c)\n" \
-"	{\n" \
-"		atomic_xchg(cids+(index*nid+c)*3, lcids[c*3]);\n" \
-"		atomic_xchg(cids+(index*nid+c)*3+1, lcids[c*3+1]);\n" \
-"		atomic_xchg(cids+(index*nid+c)*3+2, lcids[c*3+2]);\n" \
-"		atomic_xchg(sum+index*nid+c, lsum[c]);\n" \
-"		atomic_xchg(csum+(index*nid+c)*3, lcsum[c*3]);\n" \
-"		atomic_xchg(csum+(index*nid+c)*3+1, lcsum[c*3+1]);\n" \
-"		atomic_xchg(csum+(index*nid+c)*3+2, lcsum[c*3+2]);\n" \
-"	}\n" \
-"}\n" \
-"//fix processed ids\n" \
-"__kernel void kernel_8(\n" \
-"	__global unsigned int* label,\n" \
-"	unsigned int nx,\n" \
-"	unsigned int ny,\n" \
-"	unsigned int nz)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int k = (unsigned int)(get_global_id(2));\n" \
-"	if (i >= nx || j >= ny || k >= nz)\n" \
-"		return;\n" \
-"	unsigned int index = nx*ny*k + nx*j + i;\n" \
-"	unsigned int label_v = label[index];\n" \
-"	if (label_v == 0 || label_v & 0x80000000)\n" \
-"		return;\n" \
-"	label[index] = label[index] | 0x80000000;\n" \
-"}\n" \
-;
+constexpr const char* str_cl_segrow = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
 
-const char* str_cl_sg_check_borders = \
-"const sampler_t samp =\n" \
-"	CLK_NORMALIZED_COORDS_FALSE|\n" \
-"	CLK_ADDRESS_CLAMP_TO_EDGE|\n" \
-"	CLK_FILTER_NEAREST;\n" \
-"\n" \
-"//check yz plane (+-x)\n" \
-"__kernel void kernel_0(\n" \
-"	__read_only image3d_t l0,\n" \
-"	__read_only image3d_t l1,\n" \
-"	unsigned int d0,\n" \
-"	unsigned int d1,\n" \
-"	unsigned int nid,\n" \
-"	__global unsigned int* ids,\n" \
-"	__global unsigned int* cids)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int v0 = read_imageui(l0, samp, (int4)(d0, i, j, 1)).x;\n" \
-"	if (v0 == 0 || v0 & 0x80000000)\n" \
-"		return;\n" \
-"	unsigned int v1 = read_imageui(l1, samp, (int4)(d1, i, j, 1)).x;\n" \
-"	if (v1 == 0 || v1 & 0x80000000)\n" \
-"		return;\n" \
-"	bool found = false;\n" \
-"	int c;\n" \
-"	for (c = 0; c < nid; ++c)\n" \
-"	if (ids[c] == v0)\n" \
-"	{\n" \
-"		found = true;\n" \
-"		break;\n" \
-"	}\n" \
-"	if (!found)\n" \
-"		return;\n" \
-"	cids[c*3] = cids[c*3]?cids[c*3]:v1;\n" \
-"	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];\n" \
-"	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];\n" \
-"}\n" \
-"//check xz plane (+-y)\n" \
-"__kernel void kernel_1(\n" \
-"	__read_only image3d_t l0,\n" \
-"	__read_only image3d_t l1,\n" \
-"	unsigned int d0,\n" \
-"	unsigned int d1,\n" \
-"	unsigned int nid,\n" \
-"	__global unsigned int* ids,\n" \
-"	__global unsigned int* cids)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int v0 = read_imageui(l0, samp, (int4)(i, d0, j, 1)).x;\n" \
-"	if (v0 == 0 || v0 & 0x80000000)\n" \
-"		return;\n" \
-"	unsigned int v1 = read_imageui(l1, samp, (int4)(i, d1, j, 1)).x;\n" \
-"	if (v1 == 0 || v1 & 0x80000000)\n" \
-"		return;\n" \
-"	bool found = false;\n" \
-"	int c;\n" \
-"	for (c = 0; c < nid; ++c)\n" \
-"	if (ids[c] == v0)\n" \
-"	{\n" \
-"		found = true;\n" \
-"		break;\n" \
-"	}\n" \
-"	if (!found)\n" \
-"		return;\n" \
-"	cids[c*3] = cids[c*3]?cids[c*3]:v1;\n" \
-"	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];\n" \
-"	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];\n" \
-"}\n" \
-"//check xy plane (+-z)\n" \
-"__kernel void kernel_2(\n" \
-"	__read_only image3d_t l0,\n" \
-"	__read_only image3d_t l1,\n" \
-"	unsigned int d0,\n" \
-"	unsigned int d1,\n" \
-"	unsigned int nid,\n" \
-"	__global unsigned int* ids,\n" \
-"	__global unsigned int* cids)\n" \
-"{\n" \
-"	unsigned int i = (unsigned int)(get_global_id(0));\n" \
-"	unsigned int j = (unsigned int)(get_global_id(1));\n" \
-"	unsigned int v0 = read_imageui(l0, samp, (int4)(i, j, d0, 1)).x;\n" \
-"	if (v0 == 0 || v0 & 0x80000000)\n" \
-"		return;\n" \
-"	unsigned int v1 = read_imageui(l1, samp, (int4)(i, j, d1, 1)).x;\n" \
-"	if (v1 == 0 || v1 & 0x80000000)\n" \
-"		return;\n" \
-"	bool found = false;\n" \
-"	int c;\n" \
-"	for (c = 0; c < nid; ++c)\n" \
-"	if (ids[c] == v0)\n" \
-"	{\n" \
-"		found = true;\n" \
-"		break;\n" \
-"	}\n" \
-"	if (!found)\n" \
-"		return;\n" \
-"	cids[c*3] = cids[c*3]?cids[c*3]:v1;\n" \
-"	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];\n" \
-"	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];\n" \
-"}\n" \
-;
+//initialize new mask regions to ids (ordered)
+__kernel void kernel_0(
+	__read_only image3d_t mask,
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nz)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int k = (unsigned int)(get_global_id(2));
+	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;
+	unsigned int index = nx*ny*k + nx*j + i;
+	unsigned int lv = index + 1;
+	if (value == 0.0f)
+		lv = 0;
+	atomic_xchg(label+index, lv);
+}
+//initialize but keep old values
+__kernel void kernel_1(
+	__read_only image3d_t mask,
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nz)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int k = (unsigned int)(get_global_id(2));
+	float value = read_imagef(mask, samp, (int4)(i, j, k, 1)).x;
+	if (value == 0.0f)
+		return;
+	unsigned int index = nx*ny*k + nx*j + i;
+	if (label[index] > 0)
+		return;
+	atomic_xchg(label+index, index + 1);
+}
+//grow ids reverse
+__kernel void kernel_2(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nxy,
+	unsigned int nz,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx - 1, lb.y + ngy - 1, lb.z + ngz - 1);
+	int3 ijk = (int3)(0, 0, 0);
+	unsigned int index;
+	unsigned int label_v;
+	unsigned int m, label_m;
+	for (ijk.z = ub.z; ijk.z >= lb.z; --ijk.z)
+	for (ijk.y = ub.y; ijk.y >= lb.y; --ijk.y)
+	for (ijk.x = ub.x; ijk.x >= lb.x; --ijk.x)
+	{
+		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)
+			continue;
+		index = nxy*ijk.z + nx*ijk.y + ijk.x;
+		label_v = label[index];
+		if (label_v == 0 || label_v & 0x80000000)
+			continue;
+		label_m = label_v;
+		//search neighbors
+		for (int i = -1; i < 2; ++i)
+		for (int j = -1; j < 2; ++j)
+		for (int k = -1; k < 2; ++k)
+		{
+			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)
+				continue;
+			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];
+			if (m  && !(m & 0x80000000))
+				label_m = max(label_m, m);
+		}
+		if (label_m != label_v)
+			label[index] = label_m;
+	}
+}
+//grow id ordered
+__kernel void kernel_3(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nxy,
+	unsigned int nz,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int3 ijk = (int3)(0, 0, 0);
+	unsigned int index;
+	unsigned int label_v;
+	unsigned int m, label_m;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)
+			continue;
+		index = nxy*ijk.z + nx*ijk.y + ijk.x;
+		label_v = label[index];
+		if (label_v == 0 || label_v & 0x80000000)
+			continue;
+		label_m = label_v;
+		//search neighbors
+		for (int i = -1; i < 2; ++i)
+		for (int j = -1; j < 2; ++j)
+		for (int k = -1; k < 2; ++k)
+		{
+			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)
+				continue;
+			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];
+			if (m  && !(m & 0x80000000))
+				label_m = max(label_m, m);
+		}
+		if (label_m != label_v)
+			label[index] = label_m;
+	}
+}
+//count newly grown labels
+__kernel void kernel_4(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nxy,
+	unsigned int nz,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	unsigned int maxc,
+	__global unsigned int* count,
+	__global unsigned int* ids,
+	__local unsigned int* lids)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int3 ijk = (int3)(0, 0, 0);
+	unsigned int lcount = 0;
+	unsigned int index;
+	unsigned int label_v;
+	bool found;
+	int c;
+	for (c = 0; c < maxc; ++c)
+		lids[c] = 0;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)
+			continue;
+		index = nxy*ijk.z + nx*ijk.y + ijk.x;
+		label_v = label[index];
+		if (label_v == 0 || label_v & 0x80000000)
+			continue;
+		found = false;
+		for (c = 0; c < lcount; ++c)
+		if (lids[c] == label_v)
+		{
+			found = true;
+			break;
+		}
+		if (!found && lcount < maxc)
+		{
+			lids[lcount] = label_v;
+			lcount++;
+		}
+	}
+	index = gsxy * gid.z + gsx * gid.y + gid.x;
+	atomic_xchg(count+index, lcount);
+	for (c = 0; c < lcount; ++c)
+		atomic_xchg(ids+index*maxc+c, lids[c]);
+}
+//find connected parts
+__kernel void kernel_5(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nxy,
+	unsigned int nz,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	unsigned int nid,
+	__global unsigned int* ids,
+	__global unsigned int* cids,
+	__local unsigned int* lcids)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int3 ijk = (int3)(0, 0, 0);
+	unsigned int index;
+	unsigned int label_v;
+	unsigned int m;
+	bool found;
+	int c;
+	for (c = 0; c < nid * 6; ++c)
+		lcids[c] = 0;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)
+			continue;
+		index = nxy*ijk.z + nx*ijk.y + ijk.x;
+		label_v = label[index];
+		if (label_v == 0 || label_v & 0x80000000)
+			continue;
+		found = false;
+		for (c = 0; c < nid; ++c)
+		if (ids[c] == label_v)
+		{
+			found = true;
+			break;
+		}
+		if (!found)
+			continue;
+		//-x
+		if (ijk.x > 0)
+		{
+			m = label[index - 1];
+			if (m != label_v && !(m & 0x80000000))
+				lcids[c*6] = m;
+		}
+		//+x
+		if (ijk.x < nx-1)
+		{
+			m = label[index + 1];
+			if (m != label_v && !(m & 0x80000000))
+				lcids[c*6+1] = m;
+		}
+		//-y
+		if (ijk.y > 0)
+		{
+			m = label[index - nx];
+			if (m != label_v && !(m & 0x80000000))
+				lcids[c*6+2] = m;
+		}
+		//+y
+		if (ijk.y < ny-1)
+		{
+			m = label[index + nx];
+			if (m != label_v && !(m & 0x80000000))
+				lcids[c*6+3] = m;
+		}
+		//-z
+		if (ijk.z > 0)
+		{
+			m = label[index - nxy];
+			if (m != label_v && !(m & 0x80000000))
+				lcids[c*6+4] = m;
+		}
+		//+z
+		if (ijk.z < nz-1)
+		{
+			m = label[index + nxy];
+			if (m != label_v && !(m & 0x80000000))
+				lcids[c*6+5] = m;
+		}
+	}
+	index = gsxy * gid.z + gsx * gid.y + gid.x;
+	for (c = 0; c < nid*6; ++c)
+		atomic_xchg(cids+(index*nid)*6+c, lcids[c]);
+}
+//merge connected ids
+__kernel void kernel_6(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nxy,
+	unsigned int nz,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int nid,
+	__global unsigned int* mids)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int3 ijk = (int3)(0, 0, 0);
+	unsigned int index;
+	unsigned int label_v;
+	bool found;
+	int c;
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)
+			continue;
+		index = nxy*ijk.z + nx*ijk.y + ijk.x;
+		label_v = label[index];
+		if (label_v == 0 || label_v & 0x80000000)
+			continue;
+		found = false;
+		for (c = 0; c < nid; ++c)
+		if (mids[c*2] == label_v)
+		{
+			found = true;
+			break;
+		}
+		if (!found)
+			continue;
+		label[index] = mids[c*2+1];
+	}
+}
+//find connectivity/center of new ids
+__kernel void kernel_7(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nxy,
+	unsigned int nz,
+	unsigned int ngx,
+	unsigned int ngy,
+	unsigned int ngz,
+	unsigned int gsxy,
+	unsigned int gsx,
+	unsigned int nid,
+	__global unsigned int* ids,
+	__global unsigned int* cids,
+	__global unsigned int* sum,
+	__global float* csum,
+	__local unsigned int* lcids,
+	__local unsigned int* lsum,
+	__local float* lcsum)
+{
+	int3 gid = (int3)(get_global_id(0),
+		get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
+	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	int3 ijk = (int3)(0, 0, 0);
+	unsigned int index;
+	unsigned int label_v;
+	unsigned int m;
+	bool found;
+	int c;
+	for (c = 0; c < nid; ++c)
+	{
+		lcids[c*3] = 0;
+		lcids[c*3+1] = 0;
+		lcids[c*3+2] = 0;
+		lsum[c] = 0;
+		lcsum[c*3] = 0.0f;
+		lcsum[c*3+1] = 0.0f;
+		lcsum[c*3+2] = 0.0f;
+	}
+	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
+	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
+	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
+	{
+		if (ijk.x >= nx || ijk.y >= ny || ijk.z >= nz)
+			continue;
+		index = nxy*ijk.z + nx*ijk.y + ijk.x;
+		label_v = label[index];
+		if (label_v == 0 || label_v & 0x80000000)
+			continue;
+		found = false;
+		for (c = 0; c < nid; ++c)
+		if (ids[c] == label_v)
+		{
+			found = true;
+			break;
+		}
+		if (!found)
+			continue;
+		lsum[c]++;
+		lcsum[c*3] += (float)(ijk.x);
+		lcsum[c*3+1] += (float)(ijk.y);
+		lcsum[c*3+2] += (float)(ijk.z);
+		//search neighbors
+		for (int i = -1; i < 2; ++i)
+		for (int j = -1; j < 2; ++j)
+		for (int k = -1; k < 2; ++k)
+		{
+			if (ijk.x < 1 || ijk.x > nx-2 || ijk.y < 1 || ijk.y > ny-2 || ijk.z < 1 || ijk.z > nz-2)
+				continue;
+			m = label[nxy*(ijk.z+i) + nx*(ijk.y+j) + ijk.x + k];
+			if (m != label_v && m & 0x80000000)
+			{
+				lcids[c*3] = lcids[c*3]?lcids[c*3]:m;
+				lcids[c*3+1] = lcids[c*3]&&!lcids[c*3+1]&&lcids[c*3]!=m?m:lcids[c*3+1];
+				lcids[c*3+2] = lcids[c*3+1]&&!lcids[c*3+2]&&lcids[c*3+1]!=m?m:lcids[c*3+2];
+			}
+		}
+	}
+	index = gsxy * gid.z + gsx * gid.y + gid.x;
+	for (c = 0; c < nid; ++c)
+	{
+		atomic_xchg(cids+(index*nid+c)*3, lcids[c*3]);
+		atomic_xchg(cids+(index*nid+c)*3+1, lcids[c*3+1]);
+		atomic_xchg(cids+(index*nid+c)*3+2, lcids[c*3+2]);
+		atomic_xchg(sum+index*nid+c, lsum[c]);
+		atomic_xchg(csum+(index*nid+c)*3, lcsum[c*3]);
+		atomic_xchg(csum+(index*nid+c)*3+1, lcsum[c*3+1]);
+		atomic_xchg(csum+(index*nid+c)*3+2, lcsum[c*3+2]);
+	}
+}
+//fix processed ids
+__kernel void kernel_8(
+	__global unsigned int* label,
+	unsigned int nx,
+	unsigned int ny,
+	unsigned int nz)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int k = (unsigned int)(get_global_id(2));
+	if (i >= nx || j >= ny || k >= nz)
+		return;
+	unsigned int index = nx*ny*k + nx*j + i;
+	unsigned int label_v = label[index];
+	if (label_v == 0 || label_v & 0x80000000)
+		return;
+	label[index] = label[index] | 0x80000000;
+}
+)CLKER";
+
+constexpr const char* str_cl_sg_check_borders = R"CLKER(
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+//check yz plane (+-x)
+__kernel void kernel_0(
+	__read_only image3d_t l0,
+	__read_only image3d_t l1,
+	unsigned int d0,
+	unsigned int d1,
+	unsigned int nid,
+	__global unsigned int* ids,
+	__global unsigned int* cids)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int v0 = read_imageui(l0, samp, (int4)(d0, i, j, 1)).x;
+	if (v0 == 0 || v0 & 0x80000000)
+		return;
+	unsigned int v1 = read_imageui(l1, samp, (int4)(d1, i, j, 1)).x;
+	if (v1 == 0 || v1 & 0x80000000)
+		return;
+	bool found = false;
+	int c;
+	for (c = 0; c < nid; ++c)
+	if (ids[c] == v0)
+	{
+		found = true;
+		break;
+	}
+	if (!found)
+		return;
+	cids[c*3] = cids[c*3]?cids[c*3]:v1;
+	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];
+	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];
+}
+//check xz plane (+-y)
+__kernel void kernel_1(
+	__read_only image3d_t l0,
+	__read_only image3d_t l1,
+	unsigned int d0,
+	unsigned int d1,
+	unsigned int nid,
+	__global unsigned int* ids,
+	__global unsigned int* cids)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int v0 = read_imageui(l0, samp, (int4)(i, d0, j, 1)).x;
+	if (v0 == 0 || v0 & 0x80000000)
+		return;
+	unsigned int v1 = read_imageui(l1, samp, (int4)(i, d1, j, 1)).x;
+	if (v1 == 0 || v1 & 0x80000000)
+		return;
+	bool found = false;
+	int c;
+	for (c = 0; c < nid; ++c)
+	if (ids[c] == v0)
+	{
+		found = true;
+		break;
+	}
+	if (!found)
+		return;
+	cids[c*3] = cids[c*3]?cids[c*3]:v1;
+	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];
+	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];
+}
+//check xy plane (+-z)
+__kernel void kernel_2(
+	__read_only image3d_t l0,
+	__read_only image3d_t l1,
+	unsigned int d0,
+	unsigned int d1,
+	unsigned int nid,
+	__global unsigned int* ids,
+	__global unsigned int* cids)
+{
+	unsigned int i = (unsigned int)(get_global_id(0));
+	unsigned int j = (unsigned int)(get_global_id(1));
+	unsigned int v0 = read_imageui(l0, samp, (int4)(i, j, d0, 1)).x;
+	if (v0 == 0 || v0 & 0x80000000)
+		return;
+	unsigned int v1 = read_imageui(l1, samp, (int4)(i, j, d1, 1)).x;
+	if (v1 == 0 || v1 & 0x80000000)
+		return;
+	bool found = false;
+	int c;
+	for (c = 0; c < nid; ++c)
+	if (ids[c] == v0)
+	{
+		found = true;
+		break;
+	}
+	if (!found)
+		return;
+	cids[c*3] = cids[c*3]?cids[c*3]:v1;
+	cids[c*3+1] = cids[c*3]&&!cids[c*3+1]&&cids[c*3]!=v1?v1:cids[c*3+1];
+	cids[c*3+2] = cids[c*3+1]&&!cids[c*3+2]&&cids[c*3+1]!=v1?v1:cids[c*3+2];
+}
+)CLKER";
 
 SegGrow::SegGrow():
 	m_vd(0),
