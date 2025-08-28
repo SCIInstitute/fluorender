@@ -61,6 +61,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Colocalize.h>
 #include <Clusterizer.h>
 #include <ConvVolMeshSw.h>
+#include <ConvVolMesh.h>
 #include <LookingGlassRenderer.h>
 #include <HololensRenderer.h>
 #include <OpenXrRenderer.h>
@@ -284,7 +285,7 @@ Global::Global() :
 	m_vol_loader(std::make_unique<VolumeLoader>()),
 	m_colocalizer(std::make_unique<flrd::Colocalize>()),
 	m_clusterizer(std::make_unique<flrd::Clusterizer>()),
-	m_conv_vol_mesh(std::make_unique<flrd::ConvVolMeshSw>()),
+	//m_conv_vol_mesh(std::make_unique<flrd::ConvVolMeshSw>()),
 	m_lg_renderer(std::make_unique<LookingGlassRenderer>()),
 	m_atmf(std::make_unique<fluo::AsyncTimerFactory>()),
 	m_swhf(std::make_unique<fluo::StopWatchFactory>()),
@@ -317,7 +318,7 @@ void Global::InitProgress(const std::function<void(int, const std::string&)>& f)
 	m_trackmap_proc->SetProgressFunc(f);
 	m_data_manager->SetProgressFunc(f);
 	m_clusterizer->SetProgressFunc(f);
-	m_conv_vol_mesh->SetProgressFunc(f);
+	//m_conv_vol_mesh->SetProgressFunc(f);
 	project_->SetProgressFunc(f);
 }
 
@@ -650,9 +651,23 @@ flrd::Clusterizer& Global::get_clusterizer()
 	return *m_clusterizer;
 }
 
-flrd::BaseConvVolMesh& Global::get_conv_vol_mesh()
+flrd::BaseConvVolMesh* Global::get_conv_vol_mesh()
 {
-	return *m_conv_vol_mesh;
+	if (m_conv_vol_mesh)
+		return m_conv_vol_mesh.get();
+	//create
+	switch (glbin_settings.m_vol_mesh_conv_mode)
+	{
+	case 0://software
+		m_conv_vol_mesh = std::make_unique<flrd::ConvVolMeshSw>();
+		break;
+	case 1://opencl
+	default:
+		m_conv_vol_mesh = std::make_unique<flrd::ConvVolMesh>();
+		break;
+	}
+	m_conv_vol_mesh->SetProgressFunc(project_->GetProgressFunc());
+	return m_conv_vol_mesh.get();
 }
 
 LookingGlassRenderer& Global::get_looking_glass_renderer()

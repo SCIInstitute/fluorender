@@ -42,15 +42,14 @@
 
 namespace flvr
 {
-	MeshRenderer::MeshRenderer(GLMmodel* data)
-		: data_(data),
+	MeshRenderer::MeshRenderer()
+		: data_(nullptr),
 		depth_peel_(0),
 		draw_clip_(false),
 		limit_(-1),
 		light_(true),
 		fog_(false),
 		alpha_(1.0),
-		update_(true),
 		va_model_(0)
 	{
 	}
@@ -63,7 +62,6 @@ namespace flvr
 		light_(copy.light_),
 		fog_(copy.fog_),
 		alpha_(copy.alpha_),
-		update_(true),
 		va_model_(0)
 	{
 	}
@@ -72,6 +70,13 @@ namespace flvr
 	{
 		if (va_model_)
 			delete va_model_;
+	}
+
+	VertexArray* MeshRenderer::GetOrCreateVertexArray()
+	{
+		if (!va_model_ || !va_model_->valid())
+			va_model_ = glbin_vertex_array_manager.vertex_array(true, false);
+		return va_model_;
 	}
 
 	//clipping planes
@@ -100,83 +105,18 @@ namespace flvr
 		return &planes_;
 	}
 
-	void MeshRenderer::update()
-	{
-		bool bnormal = data_->normals;
-		bool btexcoord = data_->texcoords;
-		std::vector<float> verts;
-
-		GLMgroup* group = data_->groups;
-		GLMtriangle* triangle = 0;
-		while (group)
-		{
-			for (size_t i=0; i<group->numtriangles; ++i)
-			{
-				triangle = &(data_->triangles[group->triangles[i]]);
-				for (size_t j=0; j<3; ++j)
-				{
-					verts.push_back(data_->vertices[3*triangle->vindices[j]]);
-					verts.push_back(data_->vertices[3*triangle->vindices[j]+1]);
-					verts.push_back(data_->vertices[3*triangle->vindices[j]+2]);
-					if (bnormal)
-					{
-						verts.push_back(data_->normals[3*triangle->nindices[j]]);
-						verts.push_back(data_->normals[3*triangle->nindices[j]+1]);
-						verts.push_back(data_->normals[3*triangle->nindices[j]+2]);
-					}
-					if (btexcoord)
-					{
-						verts.push_back(data_->texcoords[2*triangle->tindices[j]]);
-						verts.push_back(data_->texcoords[2*triangle->tindices[j]+1]);
-					}
-				}
-			}
-			group = group->next;
-		}
-
-		if (!va_model_ || !va_model_->valid())
-			va_model_ = glbin_vertex_array_manager.vertex_array(true, false);
-		if (!va_model_)
-			return;
-		va_model_->buffer_data(
-			VABuf_Coord, sizeof(float)*verts.size(),
-			&verts[0], GL_STATIC_DRAW);
-
-		GLsizei stride = sizeof(float)*(3+(bnormal?3:0)+(btexcoord?2:0));
-		va_model_->attrib_pointer(
-			0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
-		if (bnormal)
-			va_model_->attrib_pointer(
-				1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
-		if (btexcoord)
-		{
-			if (bnormal)
-				va_model_->attrib_pointer(
-					2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
-			else
-				va_model_->attrib_pointer(
-					1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
-		}
-	}
-
 	void MeshRenderer::draw()
 	{
-		if (!data_ || !data_->vertices || !data_->triangles)
+		if (!data_ || !data_->groups)
+			return;
+		if (!va_model_ || !va_model_->valid())
 			return;
 
-		//set up vertex array object
-		if (update_)
-		{
-			update();
-			update_ = false;
-		}
-		if (!va_model_)
-			return;
 		ShaderProgram* shader = 0;
-
 		GLMgroup* group = data_->groups;
 		GLint pos = 0;
 		bool tex = data_->hastexture==GL_TRUE;
+
 		va_model_->draw_begin();
 		while (group)
 		{
@@ -253,16 +193,9 @@ namespace flvr
 
 	void MeshRenderer::draw_wireframe()
 	{
-		if (!data_ || !data_->vertices || !data_->triangles)
+		if (!data_ || !data_->groups)
 			return;
-
-		//set up vertex array object
-		if (update_)
-		{
-			update();
-			update_ = false;
-		}
-		if (!va_model_)
+		if (!va_model_ || !va_model_->valid())
 			return;
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -319,16 +252,9 @@ namespace flvr
 
 	void MeshRenderer::draw_integer(unsigned int name)
 	{
-		if (!data_ || !data_->vertices || !data_->triangles)
+		if (!data_ || !data_->groups)
 			return;
-
-		//set up vertex array object
-		if (update_)
-		{
-			update();
-			update_ = false;
-		}
-		if (!va_model_)
+		if (!va_model_ || !va_model_->valid())
 			return;
 
 		GLMgroup* group = data_->groups;

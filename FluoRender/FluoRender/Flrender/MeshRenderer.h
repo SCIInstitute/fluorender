@@ -50,9 +50,24 @@ namespace flvr
 	class MeshRenderer
 	{
 	public:
-		MeshRenderer(GLMmodel* data);
+		MeshRenderer();
 		MeshRenderer(MeshRenderer&);
 		~MeshRenderer();
+
+		void set_data(GLMmodel* data)
+		{
+			data_ = data;
+		}
+		GLMmodel* get_data()
+		{
+			return data_;
+		}
+
+		VertexArray* GetOrCreateVertexArray();
+		VertexArray* GetVertexArray()
+		{
+			return va_model_;
+		}
 
 		//set viewport
 		void set_viewport(GLint vp[4])
@@ -64,7 +79,6 @@ namespace flvr
 		void draw();
 		void draw_wireframe();
 		void draw_integer(unsigned int name);
-		void update();
 
 		//depth peeling
 		void set_depth_peel(int peel) {depth_peel_ = peel;}
@@ -121,8 +135,6 @@ namespace flvr
 		float alpha_;
 		//vertex buffer
 		VertexArray* va_model_;
-		//bool update
-		bool update_;
 	};
 
 } // End namespace flvr

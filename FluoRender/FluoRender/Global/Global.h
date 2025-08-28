@@ -254,7 +254,9 @@ namespace fluo
 		VolumeLoader& get_vol_loader();
 		flrd::Colocalize& get_colocalizer();
 		flrd::Clusterizer& get_clusterizer();
-		flrd::BaseConvVolMesh& get_conv_vol_mesh();
+
+		//mesh converter
+		flrd::BaseConvVolMesh* get_conv_vol_mesh();
 
 		//xr renderer
 		LookingGlassRenderer& get_looking_glass_renderer();

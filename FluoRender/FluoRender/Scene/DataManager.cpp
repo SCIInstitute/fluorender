@@ -3761,6 +3761,8 @@ MeshData::MeshData() :
 	m_mat_diff = color;
 
 	m_legend = true;
+
+	m_mr = std::make_unique<flvr::MeshRenderer>();
 }
 
 MeshData::~MeshData()
@@ -3832,7 +3834,7 @@ int MeshData::Load(GLMmodel* mesh)
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
-	m_mr = std::make_unique<flvr::MeshRenderer>(m_data.get());
+	SubmitData();
 
 	return 1;
 }
@@ -3899,7 +3901,7 @@ int MeshData::Load(const std::wstring &filename)
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
-	m_mr = std::make_unique<flvr::MeshRenderer>(m_data.get());
+	SubmitData();
 
 	return 1;
 }
@@ -3912,6 +3914,141 @@ void MeshData::Save(const std::wstring& filename)
 		glmWriteOBJ(m_data.get(), str.c_str(), GLM_SMOOTH);
 		m_data_path = filename;
 	}
+}
+
+void MeshData::SubmitData()
+{
+	if (!m_data || !m_mr)
+		return;
+
+	m_mr->set_data(m_data.get());
+	bool bnormal = m_data->normals;
+	bool btexcoord = m_data->texcoords;
+	std::vector<float> verts;
+
+	GLMgroup* group = m_data->groups;
+	GLMtriangle* triangle = 0;
+	while (group)
+	{
+		for (size_t i=0; i<group->numtriangles; ++i)
+		{
+			triangle = &(m_data->triangles[group->triangles[i]]);
+			for (size_t j=0; j<3; ++j)
+			{
+				verts.push_back(m_data->vertices[3*triangle->vindices[j]]);
+				verts.push_back(m_data->vertices[3*triangle->vindices[j]+1]);
+				verts.push_back(m_data->vertices[3*triangle->vindices[j]+2]);
+				if (bnormal)
+				{
+					verts.push_back(m_data->normals[3*triangle->nindices[j]]);
+					verts.push_back(m_data->normals[3*triangle->nindices[j]+1]);
+					verts.push_back(m_data->normals[3*triangle->nindices[j]+2]);
+				}
+				if (btexcoord)
+				{
+					verts.push_back(m_data->texcoords[2*triangle->tindices[j]]);
+					verts.push_back(m_data->texcoords[2*triangle->tindices[j]+1]);
+				}
+			}
+		}
+		group = group->next;
+	}
+
+	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray();
+	if (!va_model)
+		return;
+	va_model->buffer_data(
+		flvr::VABuf_Coord, sizeof(float)*verts.size(),
+		&verts[0], GL_STATIC_DRAW);
+
+	GLsizei stride = sizeof(float)*(3+(bnormal?3:0)+(btexcoord?2:0));
+	va_model->attrib_pointer(
+		0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
+	if (bnormal)
+		va_model->attrib_pointer(
+			1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
+	if (btexcoord)
+	{
+		if (bnormal)
+			va_model->attrib_pointer(
+				2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
+		else
+			va_model->attrib_pointer(
+				1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
+	}
+}
+
+void MeshData::ReturnData()
+{
+	//
+}
+
+void MeshData::AddEmptyData()
+{
+	GLMmodel* model = new GLMmodel;
+	model->pathname = 0;
+	model->mtllibname = 0;
+	model->numvertices = 0;
+	model->vertices = 0;
+	model->numnormals = 0;
+	model->normals = 0;
+	model->numtexcoords = 0;
+	model->texcoords = 0;
+	model->numfacetnorms = 0;
+	model->facetnorms = 0;
+	model->numlines = 0;
+	model->lines = 0;
+	model->numtriangles = 0;
+	model->triangles = 0;
+	model->nummaterials = 0;
+	model->materials = 0;
+	model->numgroups = 0;
+	model->groups = 0;
+	model->position[0] = 0.0f;
+	model->position[1] = 0.0f;
+	model->position[2] = 0.0f;
+	model->hastexture = false;
+	glmClear(model);
+
+	//add default group
+	GLMgroup* group = new GLMgroup;
+	group->name = STRDUP("default");
+	group->material = 0;
+	group->numtriangles = 0;
+	group->triangles = 0;
+	group->next = 0;
+	model->groups = group;
+	model->numgroups = 1;
+
+	m_data = std::unique_ptr<GLMmodel>(model);
+
+	if (!m_data->materials)
+	{
+		m_data->materials = new GLMmaterial;
+		m_data->nummaterials = 1;
+	}
+
+	/* set the default material */
+	m_data->materials[0].name = NULL;
+	m_data->materials[0].ambient[0] = m_mat_amb.r();
+	m_data->materials[0].ambient[1] = m_mat_amb.g();
+	m_data->materials[0].ambient[2] = m_mat_amb.b();
+	m_data->materials[0].ambient[3] = m_mat_alpha;
+	m_data->materials[0].diffuse[0] = m_mat_diff.r();
+	m_data->materials[0].diffuse[1] = m_mat_diff.g();
+	m_data->materials[0].diffuse[2] = m_mat_diff.b();
+	m_data->materials[0].diffuse[3] = m_mat_alpha;
+	m_data->materials[0].specular[0] = m_mat_spec.r();
+	m_data->materials[0].specular[1] = m_mat_spec.g();
+	m_data->materials[0].specular[2] = m_mat_spec.b();
+	m_data->materials[0].specular[3] = m_mat_alpha;
+	m_data->materials[0].shininess = m_mat_shine;
+	m_data->materials[0].emmissive[0] = 0.0;
+	m_data->materials[0].emmissive[1] = 0.0;
+	m_data->materials[0].emmissive[2] = 0.0;
+	m_data->materials[0].emmissive[3] = 0.0;
+	m_data->materials[0].havetexture = GL_FALSE;
+	m_data->materials[0].textureID = 0;
 }
 
 //MR

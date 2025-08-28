@@ -173,40 +173,40 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstVolMeshThresh))
 	{
-		dval = glbin_conv_vol_mesh.GetIsoValue();
+		dval = glbin_conv_vol_mesh->GetIsoValue();
 		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
 		m_cnv_vol_mesh_thresh_text->ChangeValue(wxString::Format("%.2f", dval));
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownXY))
 	{
-		ival = glbin_conv_vol_mesh.GetDownsample();
+		ival = glbin_conv_vol_mesh->GetDownsample();
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
 		m_cnv_vol_mesh_downsample_text->SetValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownZ))
 	{
-		ival = glbin_conv_vol_mesh.GetDownsampleZ();
+		ival = glbin_conv_vol_mesh->GetDownsampleZ();
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
 		m_cnv_vol_mesh_downsample_z_text->SetValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstUseTransferFunc))
 	{
-		bval = glbin_conv_vol_mesh.GetUseTransfer();
+		bval = glbin_conv_vol_mesh->GetUseTransfer();
 		m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstUseSelection))
 	{
-		bval = glbin_conv_vol_mesh.GetUseMask();
+		bval = glbin_conv_vol_mesh->GetUseMask();
 		m_cnv_vol_mesh_selected_chk->SetValue(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshWeld))
 	{
-		bval = glbin_conv_vol_mesh.GetVertexMerge();
+		bval = glbin_conv_vol_mesh->GetVertexMerge();
 		m_cnv_vol_mesh_weld_chk->SetValue(bval);
 	}
 
@@ -218,7 +218,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			str += md->GetName();
 			str += " is ";
-			str += glbin_conv_vol_mesh.GetInfo();
+			str += glbin_conv_vol_mesh->GetInfo();
 		}
 		(*m_stat_text) << str << "\n";
 	}
@@ -241,7 +241,7 @@ void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh.SetIsoValue(val);
+		glbin_conv_vol_mesh->SetIsoValue(val);
 	}
 }
 
@@ -261,7 +261,7 @@ void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent& event)
 	if (str.ToLong(&ival))
 	{
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		glbin_conv_vol_mesh.SetDownsample(ival);
+		glbin_conv_vol_mesh->SetDownsample(ival);
 	}
 }
 
@@ -281,14 +281,14 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent& event)
 	if (str.ToLong(&ival))
 	{
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		glbin_conv_vol_mesh.SetDownsampleZ(ival);
+		glbin_conv_vol_mesh->SetDownsampleZ(ival);
 	}
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
-	glbin_conv_vol_mesh.SetUseTransfer(bval);
+	glbin_conv_vol_mesh->SetUseTransfer(bval);
 	wxString str;
 	if (bval)
 		str = "0.01";
@@ -300,13 +300,13 @@ void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_selected_chk->GetValue();
-	glbin_conv_vol_mesh.SetUseMask(bval);
+	glbin_conv_vol_mesh->SetUseMask(bval);
 }
 
 void ConvertDlg::OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
-	glbin_conv_vol_mesh.SetVertexMerge(bval);
+	glbin_conv_vol_mesh->SetVertexMerge(bval);
 }
 
 void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
@@ -314,9 +314,9 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	glbin_conv_vol_mesh.SetVolumeData(vd);
-	glbin_conv_vol_mesh.Convert();
-	auto md = glbin_conv_vol_mesh.GetMeshData();
+	glbin_conv_vol_mesh->SetVolumeData(vd);
+	glbin_conv_vol_mesh->Convert();
+	auto md = glbin_conv_vol_mesh->GetMeshData();
 	if (md)
 	{
 		glbin_data_manager.AddMeshData(md);

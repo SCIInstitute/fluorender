@@ -143,6 +143,9 @@ public:
 	bool m_test_param;		//using parameter test window
 	bool m_test_wiref;		//draw wireframe of volumes
 
+	int m_vol_mesh_conv_mode;//volume to mesh conversion mode
+							//0: software; 1: hardware
+
 	int m_peeling_layers;	//peeling layer number
 	bool m_micro_blend;		//blending slice in depth mode
 	bool m_grad_bg;

@@ -576,7 +576,7 @@ endif()
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animator)
 file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
 file(GLOB ani_hdr FluoRender/FluoRender/Animator/*.h)
-add_library(ANIMATORS_LIB STATIC
+add_library(ANIMATOR_LIB STATIC
   ${ani_src} ${ani_hdr})
 
 # Calculate
@@ -795,16 +795,16 @@ add_library(UTILITY_LIB STATIC
 
 # include and link
 # Animator
-target_include_directories(ANIMATORS_LIB PRIVATE
+target_include_directories(ANIMATOR_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR})
 if (APPLE)
-    target_link_libraries(ANIMATORS_LIB PRIVATE
+    target_link_libraries(ANIMATOR_LIB PRIVATE
       ${BZIP2_LIBRARY})
 endif()
-target_link_libraries(ANIMATORS_LIB PRIVATE
+target_link_libraries(ANIMATOR_LIB PRIVATE
   ${TIFF_LIBRARIES})
 
 # Calculate
@@ -845,6 +845,7 @@ target_link_libraries(CONFIG_LIB PRIVATE
 
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
@@ -1229,7 +1230,7 @@ endif()
 
 target_link_libraries(FluoRender PRIVATE
     MAIN_LIB
-    ANIMATORS_LIB
+    ANIMATOR_LIB
     CALCULATE_LIB
     CLUSTER_LIB
     COMPONENT_LIB

@@ -30,9 +30,59 @@ DEALINGS IN THE SOFTWARE.
 
 //marching cubes
 inline constexpr const char* str_cl_marching_cubes = R"CLKER(
-__constant int edge_flags[256];       // 256 entries, each a 12-bit mask
-__constant int tri_table[256][16];    // Each row lists up to 5 triangles (15 indices + -1 terminator)
-__constant int edge_pairs[12][2];     // Maps edge index to corner indices
+const sampler_t samp =
+	CLK_NORMALIZED_COORDS_FALSE|
+	CLK_ADDRESS_CLAMP_TO_EDGE|
+	CLK_FILTER_NEAREST;
+
+__kernel void kernel_0(
+	__read_only image3d_t volume,               // 3D scalar field
+	__global int* active_voxel_counter,         // Atomic counter
+	float isovalue,
+	int volume_width,
+	int volume_height,
+	int volume_depth,
+	int xy_factor,                              // Coarsening factor for X and Y
+	int z_factor                                // Coarsening factor for Z
+)
+{
+	int gx = get_global_id(0);
+	int gy = get_global_id(1);
+	int gz = get_global_id(2);
+
+	int x = gx * xy_factor;
+	int y = gy * xy_factor;
+	int z = gz * z_factor;
+
+	if (x >= volume_width - 1 || y >= volume_height - 1 || z >= volume_depth - 1)
+		return;
+
+	// Sample the 8 corners of the coarse voxel
+	float corner[8];
+	corner[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
+	corner[1] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z, 0)).x;
+	corner[2] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x;
+	corner[3] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z, 0)).x;
+	corner[4] = read_imagef(volume, samp, (int4)(x, y, z+z_factor, 0)).x;
+	corner[5] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x;
+	corner[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
+	corner[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
+
+	// Compute cube index
+	int cube_index = 0;
+	for (int i = 0; i < 8; ++i)
+	{
+		if (corner[i] > isovalue)
+			cube_index |= (1 << i);
+	}
+
+	// Skip empty or full cubes
+	if (cube_index == 0 || cube_index == 255)
+		return;
+
+	// Count active voxel
+	atomic_inc(active_voxel_counter);
+}
 
 inline float4 interpolate_vertex(int x, int y, int z, int edge_idx, float t)
 {
@@ -53,12 +103,14 @@ inline float4 interpolate_vertex(int x, int y, int z, int edge_idx, float t)
 	return (float4)(interp.x, interp.y, interp.z, 1.0f);
 }
 
-__kernel void kernel_0(
+__kernel void kernel_1(
 	__read_only image3d_t volume,         // 3D volume texture
 	__global float4* vertex_buffer,       // Output vertex buffer (shared with OpenGL)
 	__global int* vertex_counter,         // Atomic counter for vertex allocation
+	__constant int* edge_flags,           // 256 entries, each a 12-bit mask
+	__constant int* tri_table,            // Flattened: 256 × 16 entries
+	__constant int* edge_pairs,           // Flattened: 12 × 2 entries
 	float isovalue,                       // Isosurface threshold
-	__constant float4* edge_table,        // Precomputed edge interpolation table
 	int volume_width,
 	int volume_height,
 	int volume_depth
@@ -73,14 +125,14 @@ __kernel void kernel_0(
 
 	// Sample voxel values at cube corners
 	float cube[8];
-	cube[0] = read_imagef(volume, sampler, (int4)(x, y, z, 0)).x;
-	cube[1] = read_imagef(volume, sampler, (int4)(x+1, y, z, 0)).x;
-	cube[2] = read_imagef(volume, sampler, (int4)(x+1, y+1, z, 0)).x;
-	cube[3] = read_imagef(volume, sampler, (int4)(x, y+1, z, 0)).x;
-	cube[4] = read_imagef(volume, sampler, (int4)(x, y, z+1, 0)).x;
-	cube[5] = read_imagef(volume, sampler, (int4)(x+1, y, z+1, 0)).x;
-	cube[6] = read_imagef(volume, sampler, (int4)(x+1, y+1, z+1, 0)).x;
-	cube[7] = read_imagef(volume, sampler, (int4)(x, y+1, z+1, 0)).x;
+	cube[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
+	cube[1] = read_imagef(volume, samp, (int4)(x+1, y, z, 0)).x;
+	cube[2] = read_imagef(volume, samp, (int4)(x+1, y+1, z, 0)).x;
+	cube[3] = read_imagef(volume, samp, (int4)(x, y+1, z, 0)).x;
+	cube[4] = read_imagef(volume, samp, (int4)(x, y, z+1, 0)).x;
+	cube[5] = read_imagef(volume, samp, (int4)(x+1, y, z+1, 0)).x;
+	cube[6] = read_imagef(volume, samp, (int4)(x+1, y+1, z+1, 0)).x;
+	cube[7] = read_imagef(volume, samp, (int4)(x, y+1, z+1, 0)).x;
 
 	// Determine cube index
 	int cube_index = 0;
@@ -97,19 +149,25 @@ __kernel void kernel_0(
 	float4 vert_list[12];
 	for (int i = 0; i < 12; ++i) {
 		if (edges & (1 << i)) {
-			int v0 = edge_pairs[i][0];
-			int v1 = edge_pairs[i][1];
+			int v0 = edge_pairs[i * 2 + 0];
+			int v1 = edge_pairs[i * 2 + 1];
 			float t = (isovalue - cube[v0]) / (cube[v1] - cube[v0]);
 			vert_list[i] = interpolate_vertex(x, y, z, i, t);
 		}
 	}
 
 	// Emit triangles
-	for (int i = 0; tri_table[cube_index][i] != -1; i += 3) {
+	for (int i = 0; ; i += 3) {
+		int t0 = tri_table[cube_index * 16 + i + 0];
+		if (t0 == -1)
+			break;
+		int t1 = tri_table[cube_index * 16 + i + 1];
+		int t2 = tri_table[cube_index * 16 + i + 2];
+
 		int idx = atomic_add(vertex_counter, 3);
-		vertex_buffer[idx + 0] = vert_list[tri_table[cube_index][i + 0]];
-		vertex_buffer[idx + 1] = vert_list[tri_table[cube_index][i + 1]];
-		vertex_buffer[idx + 2] = vert_list[tri_table[cube_index][i + 2]];
+		vertex_buffer[idx + 0] = vert_list[t0];
+		vertex_buffer[idx + 1] = vert_list[t1];
+		vertex_buffer[idx + 2] = vert_list[t2];
 	}
 }
 )CLKER";

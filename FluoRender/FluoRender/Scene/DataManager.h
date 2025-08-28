@@ -818,6 +818,11 @@ public:
 	int Load(GLMmodel* mesh);
 	void Save(const std::wstring &filename);
 
+	//data synchronization
+	void SubmitData();//upload data to GPU
+	void ReturnData();//download data from GPU
+	void AddEmptyData();//create empty data for gpu generated mesh
+
 	//MR
 	flvr::MeshRenderer* GetMR();
 

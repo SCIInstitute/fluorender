@@ -84,6 +84,7 @@ MainSettings::MainSettings()
 	m_test_param = false;
 	m_test_wiref = false;
 
+	m_vol_mesh_conv_mode = 1;
 	m_peeling_layers = 1;
 	m_micro_blend = false;
 	m_grad_bg = false;
@@ -306,6 +307,12 @@ void MainSettings::Read()
 		fconfig->Read("speed", &m_test_speed, false);
 		fconfig->Read("param", &m_test_param, false);
 		fconfig->Read("wiref", &m_test_wiref, false);
+	}
+	//conversion
+	if (fconfig->Exists("/conversion"))
+	{
+		fconfig->SetPath("/conversion");
+		fconfig->Read("vol mesh conv mode", &m_vol_mesh_conv_mode, 1);
 	}
 	//rendering
 	if (fconfig->Exists("/rendering"))
@@ -566,6 +573,10 @@ void MainSettings::Save()
 	fconfig->Write("speed", m_test_speed);
 	fconfig->Write("param", m_test_param);
 	fconfig->Write("wiref", m_test_wiref);
+
+	//conversion
+	fconfig->SetPath("/conversion");
+	fconfig->Write("vol mesh conv mode", m_vol_mesh_conv_mode);
 
 	//rendering
 	fconfig->SetPath("/rendering");

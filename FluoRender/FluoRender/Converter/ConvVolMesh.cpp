@@ -25,12 +25,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#include <GL/glew.h>
 #include <ConvVolMesh.h>
 #include <Global.h>
 #include <DataManager.h>
 #include <Texture.h>
 #include <TextureBrick.h>
+#include <VertexArray.h>
 #include <VolumeRenderer.h>
+#include <MeshRenderer.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <ConvVolMeshCode.h>
@@ -70,7 +73,13 @@ void ConvVolMesh::Convert()
 		return;
 
 	if (!m_mesh)
+	{
 		m_mesh = std::make_shared<MeshData>();
+		m_mesh->AddEmptyData();
+	}
+	flvr::MeshRenderer* mr = m_mesh->GetMR();
+	if (!mr)
+		return;
 
 	long bits = vd->GetBits();
 	int chars = bits / 8;
@@ -81,9 +90,12 @@ void ConvVolMesh::Convert()
 	if (!kernel_prog)
 		return;
 
-	int kernel_idx = kernel_prog->createKernel("kernel_0");
+	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
 	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 
+	//estimate the buffer size
+	int vsize = 0;
+	float iso_value = static_cast<float>(m_iso);
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
@@ -97,28 +109,38 @@ void ConvVolMesh::Convert()
 			mid = vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
-		flvr::GroupSize gsize;
-		kernel_prog->get_group_size(kernel_idx, nx, ny, nz, gsize);
-
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
-		size_t global_size1[3] = {
-			size_t(gsize.gsx), size_t(gsize.gsy), size_t(gsize.gsz) };
 
-		kernel_prog->setKernelArgBegin(kernel_idx);
+		kernel_prog->setKernelArgBegin(kernel_idx0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-		//kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
-		//kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
-		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize));
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iso_value));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample_z));
+		//if (m_use_mask)
+		//	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
-		kernel_prog->executeKernel(kernel_idx, 3, global_size1, local_size);
+		kernel_prog->executeKernel(kernel_idx0, 3, global_size, local_size);
 	}
+	//read back vsize
+	kernel_prog->readBuffer(sizeof(int), &vsize, &vsize);
 
+	//allocate vertex buffer
+	if (vsize <= 0)
+	{
+		kernel_prog->releaseAll();
+		return;
+	}
+	std::vector<float> verts(vsize * 3);
+	flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
+	va_model->buffer_data(
+		flvr::VABuf_Coord, sizeof(float)*verts.size(),
+		&verts[0], GL_STATIC_DRAW);
+	va_model->attrib_pointer(
+		0, 3, GL_FLOAT, GL_FALSE, 3, (const GLvoid*)0);
 }
