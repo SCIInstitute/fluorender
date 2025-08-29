@@ -1039,8 +1039,8 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2);
+		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1, 0);
+		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2, 0);
 
 		if (postwork) postwork(__FUNCTION__);
 	}

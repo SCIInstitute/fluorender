@@ -32,15 +32,15 @@ DEALINGS IN THE SOFTWARE.
 //these tables came from Paul Baurke's web page at 
 //				http://astronomy.swin.edu.au/~pbourke/modelling/polygonise/
 
-static double cubeTable[8][3] =
-{{0.0, 0.0, 0.0},
-{1.0, 0.0, 0.0},
-{1.0, 1.0, 0.0},
-{0.0, 1.0, 0.0},
-{0.0, 0.0, 1.0},
-{1.0, 0.0, 1.0},
-{1.0, 1.0, 1.0},
-{0.0, 1.0, 1.0}};
+static int cubeTable[8][3] = {
+{0, 0, 0},
+{1, 0, 0},
+{1, 1, 0},
+{0, 1, 0},
+{0, 0, 1},
+{1, 0, 1},
+{1, 1, 1},
+{0, 1, 1}};
 
 static int edgeTable[256]={
 0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,

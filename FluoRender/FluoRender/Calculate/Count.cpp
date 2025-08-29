@@ -183,8 +183,8 @@ void CountVoxels::Count()
 		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, mid);
+		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid, 0);
+		kernel_prog->releaseMemObject(kernel_index, 1, 0, mid, 0);
 		kernel_prog->releaseMemObject(sizeof(unsigned int)*(gsize.gsxyz), sum);
 		kernel_prog->releaseMemObject(sizeof(float)*(gsize.gsxyz), wsum);
 

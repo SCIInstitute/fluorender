@@ -456,7 +456,8 @@ namespace flvr
 		for (unsigned int i=0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].size == arg.size &&
-				arg_list_[i].texture == arg.texture)
+				arg_list_[i].texture == arg.texture &&
+				arg_list_[i].vbo == arg.vbo)
 			{
 				arg_index = i;
 				return true;
@@ -470,6 +471,20 @@ namespace flvr
 		for (unsigned int i = 0; i<arg_list_.size(); ++i)
 		{
 			if (arg_list_[i].texture == arg.texture)
+			{
+				arg_index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool KernelProgram::matchArgVBO(Argument& arg, unsigned int& arg_index)
+	{
+		for (unsigned int i = 0; i<arg_list_.size(); ++i)
+		{
+			if (arg_list_[i].vbo == arg.vbo &&
+				arg_list_[i].size == arg.size)
 			{
 				arg_index = i;
 				return true;
@@ -536,6 +551,7 @@ namespace flvr
 		arg.kernel(kernel_idx_);
 		arg.size = size;
 		arg.texture = 0;
+		arg.vbo = 0;
 		arg.orgn_addr = data;
 
 		unsigned int ai;
@@ -580,6 +596,7 @@ namespace flvr
 			arg.kernel(kernel_idx_);
 			arg.size = size;
 			arg.texture = 0;
+			arg.vbo = 0;
 			arg.orgn_addr = data;
 
 			unsigned int ai;
@@ -629,6 +646,7 @@ namespace flvr
 		//arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = texture;
+		arg.vbo = 0;
 		arg.orgn_addr = 0;
 
 		unsigned int ai;
@@ -665,6 +683,7 @@ namespace flvr
 		arg.kernel(kernel_idx_);
 		arg.size = 0;
 		arg.texture = texture;
+		arg.vbo = 0;
 		arg.orgn_addr = 0;
 
 		unsigned int ai;
@@ -705,6 +724,7 @@ namespace flvr
 		//arg.index = arg_idx_++;
 		arg.size = size;
 		arg.texture = 0;
+		arg.vbo = 0;
 		arg.orgn_addr = 0;
 
 		unsigned int ai;
@@ -765,6 +785,57 @@ namespace flvr
 		return arg;
 	}
 
+	Argument KernelProgram::setKernelArgVertexBuf(
+		cl_mem_flags flag, GLuint vbo, size_t size)
+	{
+		Argument arg;
+		cl_int err;
+		cl_mem buf = 0;
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
+			return arg;
+
+		arg.kernel(kernel_idx_);
+		arg.size = size;
+		arg.texture = 0;
+		arg.vbo = vbo;
+		arg.orgn_addr = 0;
+
+		unsigned int ai;
+		if (matchArgVBO(arg, ai))
+		{
+			arg.buffer = arg_list_[ai].buffer;
+			arg_list_[ai].kernel(kernel_idx_);
+			buf = arg.buffer;
+		}
+		else
+		{
+			buf = clCreateFromGLBuffer(context_, flag, vbo, &err);
+			if (err != CL_SUCCESS)
+				return Argument();
+			arg.buffer = buf;
+			arg_list_.push_back(arg);
+		}
+
+		// Acquire GL object before kernel use
+		err = clEnqueueAcquireGLObjects(queue_, 1, &buf, 0, NULL, NULL);
+		if (err != CL_SUCCESS)
+			return Argument();
+
+		err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_++, sizeof(cl_mem), &buf);
+		if (err != CL_SUCCESS)
+			return Argument();
+
+		err = clEnqueueReleaseGLObjects(queue_, 1, &buf, 0, NULL, NULL);
+		if (err != CL_SUCCESS)
+			return Argument();
+
+		clFlush(queue_);
+		clFinish(queue_);
+		return arg;
+	}
+
 	Argument KernelProgram::setKernelArgImage(cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
 	{
 		Argument arg;
@@ -777,6 +848,7 @@ namespace flvr
 		//arg.index = arg_idx_++;
 		arg.size = 0;
 		arg.texture = 0;
+		arg.vbo = 0;
 		arg.orgn_addr = data;
 
 		unsigned int ai;
@@ -820,6 +892,7 @@ namespace flvr
 			Argument arg;
 			arg.size = size;
 			arg.texture = 0;
+			arg.vbo = 0;
 			arg.orgn_addr = buf_data;
 
 			unsigned int ai;
@@ -900,6 +973,7 @@ namespace flvr
 			Argument arg;
 			arg.size = size;
 			arg.texture = 0;
+			arg.vbo = 0;
 			arg.orgn_addr = buf_data;
 
 			unsigned int ai;
@@ -946,6 +1020,7 @@ namespace flvr
 			Argument arg;
 			arg.size = 0;
 			arg.texture = 0;
+			arg.vbo = 0;
 			arg.orgn_addr = img_data;
 
 			unsigned int ai;
@@ -1009,16 +1084,25 @@ namespace flvr
 	}
 
 	void KernelProgram::releaseMemObject(int kernel_index,
-		int index, size_t size, GLuint texture)
+		int index, size_t size, GLuint texture, GLuint vbo)
 	{
 		Argument arg;
 		arg.size = size;
 		arg.texture = texture;
+		arg.vbo = vbo;
 		unsigned int ai;
 
 		if (texture)
 		{
 			if (matchArgTex(arg, ai))
+			{
+				clReleaseMemObject(arg_list_[ai].buffer);
+				arg_list_.erase(arg_list_.begin() + ai);
+			}
+		}
+		else if (vbo)
+		{
+			if (matchArgVBO(arg, ai))
 			{
 				clReleaseMemObject(arg_list_[ai].buffer);
 				arg_list_.erase(arg_list_.begin() + ai);
@@ -1039,6 +1123,7 @@ namespace flvr
 		Argument arg;
 		arg.size = size;
 		arg.texture = 0;
+		arg.vbo = 0;
 		arg.orgn_addr = orgn_addr;
 		unsigned int ai;
 

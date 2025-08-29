@@ -50,7 +50,8 @@ namespace flrd
 	
 	private:
 		bool GetInfo(flvr::TextureBrick* b,
-			long &bits, long &nx, long &ny, long &nz);
+			long &bits, long &nx, long &ny, long &nz,
+			long &ox, long &oy, long &oz);
 	};
 
 }

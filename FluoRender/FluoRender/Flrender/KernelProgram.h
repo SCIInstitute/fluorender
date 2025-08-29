@@ -63,6 +63,7 @@ namespace flvr
 		std::set<cl_uint> kidx;//kernels that use it
 		size_t size;
 		GLuint texture;
+		GLuint vbo;
 		cl_mem buffer;
 		void* orgn_addr;
 
@@ -70,6 +71,7 @@ namespace flvr
 			protect_(false),
 			size(0),
 			texture(0),
+			vbo(0),
 			buffer(0),
 			orgn_addr(0) {}
 
@@ -133,6 +135,7 @@ namespace flvr
 		bool matchArg(Argument&, unsigned int&);
 		bool matchArgBuf(Argument&, unsigned int&);//find buffer
 		bool matchArgTex(Argument&, unsigned int&);//use texture id to match
+		bool matchArgVBO(Argument&, unsigned int&);//use vbo id to match
 		bool matchArgAddr(Argument&, unsigned int&);//use data address to match
 		//set argument
 		void setKernelArgBegin(int kernel_idx, int arg_idx = 0)
@@ -146,6 +149,7 @@ namespace flvr
 		Argument setKernelArgTex2D(cl_mem_flags, GLuint);
 		Argument setKernelArgTex3D(cl_mem_flags, GLuint);
 		Argument setKernelArgTex3DBuf(cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
+		Argument setKernelArgVertexBuf(cl_mem_flags, GLuint, size_t);//assign existing vertex buffer to buffer
 		Argument setKernelArgImage(cl_mem_flags, cl_image_format, cl_image_desc, void*);
 		void setKernelArgLocal(size_t);
 
@@ -165,7 +169,7 @@ namespace flvr
 		//release mem obj
 		void releaseAll(bool del_mem = true);
 		void releaseMemObject(Argument&);
-		void releaseMemObject(int, int, size_t, GLuint);
+		void releaseMemObject(int, int, size_t, GLuint, GLuint);
 		void releaseMemObject(size_t, void* orgn_addr);
 
 		//initialization

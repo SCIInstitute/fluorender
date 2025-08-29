@@ -1315,9 +1315,9 @@ namespace flvr
 			kernel->executeKernel(kernel_index, 3, global_size, local_size);
 			kernel->readBuffer(hist_size * sizeof(float), (void*)hist, (void*)hist);
 			//release buffer
-			kernel->releaseMemObject(kernel_index, 0, 0, data_id);
-			kernel->releaseMemObject(kernel_index, 1, 0, mask_id);
-			kernel->releaseMemObject(kernel_index, 2, hist_size * sizeof(float), 0);
+			kernel->releaseMemObject(kernel_index, 0, 0, data_id, 0);
+			kernel->releaseMemObject(kernel_index, 1, 0, mask_id, 0);
+			kernel->releaseMemObject(kernel_index, 2, hist_size * sizeof(float), 0, 0);
 			//analyze hist
 			unsigned int i;
 			float sum = 0;

@@ -347,7 +347,7 @@ bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel,
 	kernel->readBuffer(result_size, result, result);
 
 	//release buffer
-	kernel->releaseMemObject(kernel_index, 0, 0, data_id);
-	kernel->releaseMemObject(kernel_index, 1, result_size, 0);
+	kernel->releaseMemObject(kernel_index, 0, 0, data_id, 0);
+	kernel->releaseMemObject(kernel_index, 1, result_size, 0, 0);
 	return true;
 }

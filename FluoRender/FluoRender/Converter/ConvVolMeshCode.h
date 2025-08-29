@@ -38,10 +38,10 @@ const sampler_t samp =
 __kernel void kernel_0(
 	__read_only image3d_t volume,               // 3D scalar field
 	__global int* active_voxel_counter,         // Atomic counter
-	float isovalue,
-	int volume_width,
-	int volume_height,
-	int volume_depth,
+	float isovalue,                             // Isosurface threshold
+	int volume_width,                           // nx
+	int volume_height,                          // ny
+	int volume_depth,                           // nz
 	int xy_factor,                              // Coarsening factor for X and Y
 	int z_factor                                // Coarsening factor for Z
 )
@@ -84,79 +84,115 @@ __kernel void kernel_0(
 	atomic_inc(active_voxel_counter);
 }
 
-inline float4 interpolate_vertex(int x, int y, int z, int edge_idx, float t)
+int3 get_edge_vertex(
+	int x, int y, int z,
+	int edge, int endpoint,
+	__constant int* edge_pairs,
+	__constant int* vertex_offsets
+)
 {
-	// Each edge connects two cube corners; we define their relative positions
-	const int3 edge_offsets[12][2] = {
-		{{0,0,0}, {1,0,0}}, {{1,0,0}, {1,1,0}}, {{1,1,0}, {0,1,0}}, {{0,1,0}, {0,0,0}},
-		{{0,0,1}, {1,0,1}}, {{1,0,1}, {1,1,1}}, {{1,1,1}, {0,1,1}}, {{0,1,1}, {0,0,1}},
-		{{0,0,0}, {0,0,1}}, {{1,0,0}, {1,0,1}}, {{1,1,0}, {1,1,1}}, {{0,1,0}, {0,1,1}}
-	};
+	// Each edge has two vertex indices: edge_pairs[edge * 2 + endpoint]
+	int vertex_index = edge_pairs[edge * 2 + endpoint];
 
-	int3 p0 = edge_offsets[edge_idx][0];
-	int3 p1 = edge_offsets[edge_idx][1];
+	// Each vertex has 3 components: vertex_offsets[vertex_index * 3 + {0,1,2}]
+	int dx = vertex_offsets[vertex_index * 3 + 0];
+	int dy = vertex_offsets[vertex_index * 3 + 1];
+	int dz = vertex_offsets[vertex_index * 3 + 2];
 
-	float3 pos0 = (float3)(x + p0.x, y + p0.y, z + p0.z);
-	float3 pos1 = (float3)(x + p1.x, y + p1.y, z + p1.z);
+	return (int3)(x + dx, y + dy, z + dz);
+}
 
-	float3 interp = pos0 + t * (pos1 - pos0);
-	return (float4)(interp.x, interp.y, interp.z, 1.0f);
+float3 interpolate_vertex_scaled_offset(
+	int x, int y, int z, int edge, float t,
+	int xy_factor, int z_factor,
+	int x_offset, int y_offset, int z_offset,
+	__constant int* edge_pairs,
+	__constant int* vertex_offsets
+)
+{
+	int3 p0 = get_edge_vertex(x, y, z, edge, 0, edge_pairs, vertex_offsets);
+	int3 p1 = get_edge_vertex(x, y, z, edge, 1, edge_pairs, vertex_offsets);
+
+	float3 world_p0 = (float3)(
+		p0.x * xy_factor + x_offset,
+		p0.y * xy_factor + y_offset,
+		p0.z * z_factor + z_offset
+	);
+
+	float3 world_p1 = (float3)(
+		p1.x * xy_factor + x_offset,
+		p1.y * xy_factor + y_offset,
+		p1.z * z_factor + z_offset
+	);
+
+	return world_p0 + t * (world_p1 - world_p0);
 }
 
 __kernel void kernel_1(
-	__read_only image3d_t volume,         // 3D volume texture
-	__global float4* vertex_buffer,       // Output vertex buffer (shared with OpenGL)
-	__global int* vertex_counter,         // Atomic counter for vertex allocation
-	__constant int* edge_flags,           // 256 entries, each a 12-bit mask
-	__constant int* tri_table,            // Flattened: 256 × 16 entries
-	__constant int* edge_pairs,           // Flattened: 12 × 2 entries
-	float isovalue,                       // Isosurface threshold
+	__read_only image3d_t volume,
+	__global float3* vertex_buffer,
+	__global int* vertex_counter,
+	__constant int* vertex_offsets,
+	__constant int* edge_flags,
+	__constant int* tri_table,
+	__constant int* edge_pairs,
+	float isovalue,
 	int volume_width,
 	int volume_height,
-	int volume_depth
+	int volume_depth,
+	int xy_factor,
+	int z_factor,
+	int x_offset,
+	int y_offset,
+	int z_offset
 )
 {
-	int x = get_global_id(0);
-	int y = get_global_id(1);
-	int z = get_global_id(2);
+	int gx = get_global_id(0);
+	int gy = get_global_id(1);
+	int gz = get_global_id(2);
 
-	if (x >= volume_width - 1 || y >= volume_height - 1 || z >= volume_depth - 1)
+	int x = gx * xy_factor;
+	int y = gy * xy_factor;
+	int z = gz * z_factor;
+
+	if (x >= volume_width - xy_factor || y >= volume_height - xy_factor || z >= volume_depth - z_factor)
 		return;
 
-	// Sample voxel values at cube corners
 	float cube[8];
 	cube[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
-	cube[1] = read_imagef(volume, samp, (int4)(x+1, y, z, 0)).x;
-	cube[2] = read_imagef(volume, samp, (int4)(x+1, y+1, z, 0)).x;
-	cube[3] = read_imagef(volume, samp, (int4)(x, y+1, z, 0)).x;
-	cube[4] = read_imagef(volume, samp, (int4)(x, y, z+1, 0)).x;
-	cube[5] = read_imagef(volume, samp, (int4)(x+1, y, z+1, 0)).x;
-	cube[6] = read_imagef(volume, samp, (int4)(x+1, y+1, z+1, 0)).x;
-	cube[7] = read_imagef(volume, samp, (int4)(x, y+1, z+1, 0)).x;
+	cube[1] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z, 0)).x;
+	cube[2] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x;
+	cube[3] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z, 0)).x;
+	cube[4] = read_imagef(volume, samp, (int4)(x, y, z+z_factor, 0)).x;
+	cube[5] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x;
+	cube[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
+	cube[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
 
-	// Determine cube index
 	int cube_index = 0;
 	for (int i = 0; i < 8; ++i)
 		if (cube[i] < isovalue)
 			cube_index |= (1 << i);
 
-	// Lookup edge configuration
 	int edges = edge_flags[cube_index];
 	if (edges == 0)
 		return;
 
-	// Interpolate vertices along edges
-	float4 vert_list[12];
+	float3 vert_list[12];
 	for (int i = 0; i < 12; ++i) {
 		if (edges & (1 << i)) {
 			int v0 = edge_pairs[i * 2 + 0];
 			int v1 = edge_pairs[i * 2 + 1];
 			float t = (isovalue - cube[v0]) / (cube[v1] - cube[v0]);
-			vert_list[i] = interpolate_vertex(x, y, z, i, t);
+
+			vert_list[i] = interpolate_vertex_scaled_offset(
+				x, y, z, i, t,
+				xy_factor, z_factor,
+				x_offset, y_offset, z_offset,
+				edge_pairs, vertex_offsets
+			);
 		}
 	}
 
-	// Emit triangles
 	for (int i = 0; ; i += 3) {
 		int t0 = tri_table[cube_index * 16 + i + 0];
 		if (t0 == -1)

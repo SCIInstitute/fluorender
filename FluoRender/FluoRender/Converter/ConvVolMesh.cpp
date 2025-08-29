@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <ConvVolMeshCode.h>
+#include <MCTable.h>
 #include <glm.h>
 
 using namespace flrd;
@@ -51,13 +52,17 @@ ConvVolMesh::~ConvVolMesh()
 }
 
 bool ConvVolMesh::GetInfo(
-	flvr::TextureBrick* b,
-	long &bits, long &nx, long &ny, long &nz)
+	flvr::TextureBrick* b, long &bits,
+	long &nx, long &ny, long &nz,
+	long &ox, long &oy, long &oz)
 {
 	bits = b->nb(0) * 8;
 	nx = b->nx();
 	ny = b->ny();
 	nz = b->nz();
+	ox = b->ox();
+	oy = b->oy();
+	oz = b->oz();
 	return true;
 }
 
@@ -91,16 +96,19 @@ void ConvVolMesh::Convert()
 		return;
 
 	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
+	if (kernel_idx0 < 0) return;
+	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
+	if (kernel_idx1 < 0) return;
 
+	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 	//estimate the buffer size
 	int vsize = 0;
 	float iso_value = static_cast<float>(m_iso);
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		long nx, ny, nz;
-		if (!GetInfo(b, bits, nx, ny, nz))
+		long nx, ny, nz, ox, oy, oz;
+		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
 			continue;
 		//get tex ids
 		GLint tid = vd->GetVR()->load_brick(b);
@@ -143,4 +151,50 @@ void ConvVolMesh::Convert()
 		&verts[0], GL_STATIC_DRAW);
 	va_model->attrib_pointer(
 		0, 3, GL_FLOAT, GL_FALSE, 3, (const GLvoid*)0);
+	GLuint vbo_id = static_cast<GLuint>(va_model->id());
+	size_t vbo_size = sizeof(float) * verts.size();
+	vsize = 0;//reset vsize
+
+	//marching cubes
+	for (size_t i = 0; i < brick_num; ++i)
+	{
+		flvr::TextureBrick* b = (*bricks)[i];
+		long nx, ny, nz, ox, oy, oz;
+		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
+			continue;
+		//get tex ids
+		GLint tid = vd->GetVR()->load_brick(b);
+		GLint mid = 0;
+		if (m_use_mask)
+			mid = vd->GetVR()->load_brick_mask(b);
+
+		//compute workload
+		size_t local_size[3] = { 1, 1, 1 };
+		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+
+		kernel_prog->setKernelArgBegin(kernel_idx1);
+		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, vbo_id, vbo_size);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256, (void*)(edgeTable));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256 * 16, (void*)triTable);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 12 * 2, (void*)edge_pairs);
+		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iso_value));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample_z));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ox));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oy));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oz));
+		//if (m_use_mask)
+		//	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+
+		//execute
+		kernel_prog->executeKernel(kernel_idx1, 3, global_size, local_size);
+	}
+
+	kernel_prog->releaseAll();
 }
