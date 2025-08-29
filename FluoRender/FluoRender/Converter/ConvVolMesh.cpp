@@ -144,16 +144,16 @@ void ConvVolMesh::Convert()
 		kernel_prog->releaseAll();
 		return;
 	}
-	std::vector<float> verts(vsize * 3);
+	std::vector<float> verts(vsize * 15);
 	flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
 	va_model->buffer_data(
 		flvr::VABuf_Coord, sizeof(float)*verts.size(),
-		&verts[0], GL_STATIC_DRAW);
+		&verts[0], GL_DYNAMIC_DRAW);
 	va_model->attrib_pointer(
 		0, 3, GL_FLOAT, GL_FALSE, 3, (const GLvoid*)0);
 	GLuint vbo_id = static_cast<GLuint>(va_model->id());
 	size_t vbo_size = sizeof(float) * verts.size();
-	vsize = 0;//reset vsize
+	int vsize2 = 0;//reset vsize
 
 	//marching cubes
 	for (size_t i = 0; i < brick_num; ++i)
@@ -174,8 +174,8 @@ void ConvVolMesh::Convert()
 
 		kernel_prog->setKernelArgBegin(kernel_idx1);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, vbo_id, vbo_size);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize));
+		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE, vbo_id, vbo_size);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize2));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256, (void*)(edgeTable));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256 * 16, (void*)triTable);
@@ -195,6 +195,9 @@ void ConvVolMesh::Convert()
 		//execute
 		kernel_prog->executeKernel(kernel_idx1, 3, global_size, local_size);
 	}
+	//read back vsize
+	kernel_prog->readBuffer(sizeof(int), &vsize2, &vsize2);
 
 	kernel_prog->releaseAll();
+	va_model->unbind();
 }

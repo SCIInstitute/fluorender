@@ -369,48 +369,65 @@ namespace flvr
 		clReleaseProgram(program_);
 	}
 
-	bool KernelProgram::executeKernel(int index, cl_uint dim, size_t *global_size, size_t *local_size)
+	bool KernelProgram::executeKernel(int index, cl_uint dim, size_t* global_size, size_t* local_size)
 	{
-		bool result = false;
-		if (!valid())
-			return false;
-		if (index < 0 || index >= kernels_.size())
+		bool result = true; // Start optimistic
+		if (!valid() || index < 0 || index >= kernels_.size())
 			return false;
 
 		cl_int err;
 		glFinish();
-		unsigned int i;
-		for (i=0; i<arg_list_.size(); ++i)
+
+		// Acquire GL objects (textures and VBOs)
+		for (unsigned int i = 0; i < arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].find_kernel(index) &&
-				arg_list_[i].size == 0 &&
-				arg_list_[i].texture &&
-				glIsTexture(arg_list_[i].texture))
+			if (!arg_list_[i].find_kernel(index))
+				continue;
+			// Acquire texture
+			if (arg_list_[i].texture && glIsTexture(arg_list_[i].texture) && arg_list_[i].size == 0)
+			{
+				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
+				if (err != CL_SUCCESS)
+					result = false;
+			}
+			// Acquire VBO
+			else if (arg_list_[i].vbo && glIsBuffer(arg_list_[i].vbo))
 			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
 				if (err != CL_SUCCESS)
 					result = false;
 			}
 		}
-		err = clEnqueueNDRangeKernel(queue_, kernels_[index].kernel, dim, NULL, global_size,
-			local_size, 0, NULL, NULL);
+
+		// Execute kernel
+		err = clEnqueueNDRangeKernel(queue_, kernels_[index].kernel, dim, NULL, global_size, local_size, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 		{
 			//DBGPRINT(L"clEnqueueNDRangeKernel error:\t%d\n", err);
 			result = false;
 		}
-		for (i=0; i<arg_list_.size(); ++i)
+
+		// Release GL objects
+		for (unsigned int i = 0; i < arg_list_.size(); ++i)
 		{
-			if (arg_list_[i].find_kernel(index) &&
-				arg_list_[i].size == 0 &&
-				arg_list_[i].texture &&
-				glIsTexture(arg_list_[i].texture))
+			if (!arg_list_[i].find_kernel(index))
+				continue;
+			// Release texture
+			if (arg_list_[i].texture && glIsTexture(arg_list_[i].texture) && arg_list_[i].size == 0)
+			{
+				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
+				if (err != CL_SUCCESS)
+					result = false;
+			}
+			// Release VBO
+			else if (arg_list_[i].vbo && glIsBuffer(arg_list_[i].vbo))
 			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
 				if (err != CL_SUCCESS)
 					result = false;
 			}
 		}
+
 		clFlush(queue_);
 		clFinish(queue_);
 		return result;

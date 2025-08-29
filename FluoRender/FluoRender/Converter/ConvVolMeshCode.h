@@ -54,27 +54,25 @@ __kernel void kernel_0(
 	int y = gy * xy_factor;
 	int z = gz * z_factor;
 
-	if (x >= volume_width - 1 || y >= volume_height - 1 || z >= volume_depth - 1)
+	if (x >= volume_width - xy_factor || y >= volume_height - xy_factor || z >= volume_depth - z_factor)
 		return;
 
 	// Sample the 8 corners of the coarse voxel
-	float corner[8];
-	corner[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
-	corner[1] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z, 0)).x;
-	corner[2] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x;
-	corner[3] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z, 0)).x;
-	corner[4] = read_imagef(volume, samp, (int4)(x, y, z+z_factor, 0)).x;
-	corner[5] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x;
-	corner[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
-	corner[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
+	float cube[8];
+	cube[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
+	cube[1] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z, 0)).x;
+	cube[2] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x;
+	cube[3] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z, 0)).x;
+	cube[4] = read_imagef(volume, samp, (int4)(x, y, z+z_factor, 0)).x;
+	cube[5] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x;
+	cube[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
+	cube[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
 
 	// Compute cube index
 	int cube_index = 0;
 	for (int i = 0; i < 8; ++i)
-	{
-		if (corner[i] > isovalue)
+		if (cube[i] < isovalue)
 			cube_index |= (1 << i);
-	}
 
 	// Skip empty or full cubes
 	if (cube_index == 0 || cube_index == 255)
@@ -88,16 +86,16 @@ int3 get_edge_vertex(
 	int x, int y, int z,
 	int edge, int endpoint,
 	__constant int* edge_pairs,
-	__constant int* vertex_offsets
+	__constant int* cube_table
 )
 {
 	// Each edge has two vertex indices: edge_pairs[edge * 2 + endpoint]
 	int vertex_index = edge_pairs[edge * 2 + endpoint];
 
-	// Each vertex has 3 components: vertex_offsets[vertex_index * 3 + {0,1,2}]
-	int dx = vertex_offsets[vertex_index * 3 + 0];
-	int dy = vertex_offsets[vertex_index * 3 + 1];
-	int dz = vertex_offsets[vertex_index * 3 + 2];
+	// Each vertex has 3 components: cube_table[vertex_index * 3 + {0,1,2}]
+	int dx = cube_table[vertex_index * 3 + 0];
+	int dy = cube_table[vertex_index * 3 + 1];
+	int dz = cube_table[vertex_index * 3 + 2];
 
 	return (int3)(x + dx, y + dy, z + dz);
 }
@@ -107,11 +105,11 @@ float3 interpolate_vertex_scaled_offset(
 	int xy_factor, int z_factor,
 	int x_offset, int y_offset, int z_offset,
 	__constant int* edge_pairs,
-	__constant int* vertex_offsets
+	__constant int* cube_table
 )
 {
-	int3 p0 = get_edge_vertex(x, y, z, edge, 0, edge_pairs, vertex_offsets);
-	int3 p1 = get_edge_vertex(x, y, z, edge, 1, edge_pairs, vertex_offsets);
+	int3 p0 = get_edge_vertex(x, y, z, edge, 0, edge_pairs, cube_table);
+	int3 p1 = get_edge_vertex(x, y, z, edge, 1, edge_pairs, cube_table);
 
 	float3 world_p0 = (float3)(
 		p0.x * xy_factor + x_offset,
@@ -132,8 +130,8 @@ __kernel void kernel_1(
 	__read_only image3d_t volume,
 	__global float3* vertex_buffer,
 	__global int* vertex_counter,
-	__constant int* vertex_offsets,
-	__constant int* edge_flags,
+	__constant int* cube_table,
+	__constant int* edge_table,
 	__constant int* tri_table,
 	__constant int* edge_pairs,
 	float isovalue,
@@ -173,7 +171,27 @@ __kernel void kernel_1(
 		if (cube[i] < isovalue)
 			cube_index |= (1 << i);
 
-	int edges = edge_flags[cube_index];
+if (cube_index == 0 || cube_index == 255)
+	return;
+// Emit a dummy triangle for each active voxel
+int idx = atomic_inc(vertex_counter);
+atomic_inc(vertex_counter);
+atomic_inc(vertex_counter);
+
+// Define three arbitrary vertices within the voxel bounds
+float3 v0 = (float3)(x + x_offset,     y + y_offset,     z + z_offset);
+float3 v1 = (float3)(x + x_offset + 1, y + y_offset,     z + z_offset);
+float3 v2 = (float3)(x + x_offset,     y + y_offset + 1, z + z_offset);
+
+//vertex_buffer[idx + 0] = v0;
+//vertex_buffer[idx + 1] = v1;
+//vertex_buffer[idx + 2] = v2;
+vertex_buffer[0] = v0;
+vertex_buffer[1] = v1;
+vertex_buffer[2] = v2;
+return;
+
+	int edges = edge_table[cube_index];
 	if (edges == 0)
 		return;
 
@@ -188,11 +206,12 @@ __kernel void kernel_1(
 				x, y, z, i, t,
 				xy_factor, z_factor,
 				x_offset, y_offset, z_offset,
-				edge_pairs, vertex_offsets
+				edge_pairs, cube_table
 			);
 		}
 	}
-
+	
+	// Output triangles
 	for (int i = 0; ; i += 3) {
 		int t0 = tri_table[cube_index * 16 + i + 0];
 		if (t0 == -1)
