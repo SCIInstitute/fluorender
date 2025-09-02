@@ -174,21 +174,15 @@ __kernel void kernel_1(
 if (cube_index == 0 || cube_index == 255)
 	return;
 // Emit a dummy triangle for each active voxel
-int idx = atomic_inc(vertex_counter);
-atomic_inc(vertex_counter);
-atomic_inc(vertex_counter);
+int idx = atomic_add(vertex_counter, 3);
 
 // Define three arbitrary vertices within the voxel bounds
 float3 v0 = (float3)(x + x_offset,     y + y_offset,     z + z_offset);
 float3 v1 = (float3)(x + x_offset + 1, y + y_offset,     z + z_offset);
 float3 v2 = (float3)(x + x_offset,     y + y_offset + 1, z + z_offset);
-
-//vertex_buffer[idx + 0] = v0;
-//vertex_buffer[idx + 1] = v1;
-//vertex_buffer[idx + 2] = v2;
-vertex_buffer[0] = v0;
-vertex_buffer[1] = v1;
-vertex_buffer[2] = v2;
+vertex_buffer[idx + 0] = v0;
+vertex_buffer[idx + 1] = v1;
+vertex_buffer[idx + 2] = v2;
 return;
 
 	int edges = edge_table[cube_index];

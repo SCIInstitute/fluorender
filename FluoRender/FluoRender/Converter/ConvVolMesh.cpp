@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvVolMeshCode.h>
 #include <MCTable.h>
 #include <glm.h>
+#include <random>
 
 using namespace flrd;
 
@@ -145,16 +146,23 @@ void ConvVolMesh::Convert()
 		return;
 	}
 	std::vector<float> verts(vsize * 15);
+	size_t vbo_size = sizeof(float) * verts.size();
+	//std::mt19937 rng(std::random_device{}());
+	//std::uniform_real_distribution<float> dist(0.0f, 10.0f);
+
+	//for (auto &it : verts)
+	//	it = dist(rng);
+
 	flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
 	va_model->buffer_data(
-		flvr::VABuf_Coord, sizeof(float)*verts.size(),
+		flvr::VABuf_Coord, vbo_size,
 		&verts[0], GL_DYNAMIC_DRAW);
 	va_model->attrib_pointer(
 		0, 3, GL_FLOAT, GL_FALSE, 3, (const GLvoid*)0);
 	GLuint vbo_id = static_cast<GLuint>(va_model->id());
-	size_t vbo_size = sizeof(float) * verts.size();
 	int vsize2 = 0;//reset vsize
 
+	flvr::Argument vbo_arg;
 	//marching cubes
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -174,7 +182,7 @@ void ConvVolMesh::Convert()
 
 		kernel_prog->setKernelArgBegin(kernel_idx1);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE, vbo_id, vbo_size);
+		vbo_arg = kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, vbo_id, vbo_size);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize2));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256, (void*)(edgeTable));
@@ -197,7 +205,14 @@ void ConvVolMesh::Convert()
 	}
 	//read back vsize
 	kernel_prog->readBuffer(sizeof(int), &vsize2, &vsize2);
+	kernel_prog->readBuffer(vbo_arg, &verts[0]);
+
+	//update triangle num
+	m_mesh->SetTriangleNum(vsize2 / 3);
+	//download data
+	//m_mesh->ReturnData();
+	va_model->unbind();
 
 	kernel_prog->releaseAll();
-	va_model->unbind();
+
 }

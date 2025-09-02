@@ -823,6 +823,8 @@ public:
 	void ReturnData();//download data from GPU
 	void AddEmptyData();//create empty data for gpu generated mesh
 
+	void SetTriangleNum(unsigned int num);
+
 	//MR
 	flvr::MeshRenderer* GetMR();
 

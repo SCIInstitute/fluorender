@@ -934,12 +934,45 @@ namespace flvr
 		unsigned int ai;
 		if (matchArgBuf(arg, ai))
 		{
+			// Acquire GL objects (textures and VBOs)
+			// Acquire texture
+			if (arg.texture && glIsTexture(arg.texture) && arg.size == 0)
+			{
+				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
+				if (err != CL_SUCCESS)
+					return;
+			}
+			// Acquire VBO
+			else if (arg.vbo && glIsBuffer(arg.vbo))
+			{
+				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
+				if (err != CL_SUCCESS)
+					return;
+			}
+
 			err = clEnqueueReadBuffer(
 				queue_, arg.buffer,
 				CL_TRUE, 0, arg_list_[ai].size,
 				data, 0, NULL, NULL);
 			if (err != CL_SUCCESS)
 				return;
+
+			// Release GL objects
+			// Release texture
+			if (arg.texture && glIsTexture(arg.texture) && arg.size == 0)
+			{
+				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
+				if (err != CL_SUCCESS)
+					return;
+			}
+			// Release VBO
+			else if (arg.vbo && glIsBuffer(arg.vbo))
+			{
+				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
+				if (err != CL_SUCCESS)
+					return;
+			}
+
 			clFlush(queue_);
 			clFinish(queue_);
 		}

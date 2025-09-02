@@ -68,6 +68,9 @@ namespace flvr
 		void unbind();
 		bool valid();
 		void data(GLsizeiptr size, const GLvoid* data, GLenum usage);
+		//read back
+		void* map(GLenum access);
+		void unmap();
 
 	private:
 		unsigned int id_;
@@ -121,6 +124,10 @@ namespace flvr
 		void attrib_pointer(GLuint index,
 			GLint size, GLenum type, GLboolean normalized,
 			GLsizei stride, const GLvoid* pointer);
+
+		//read back
+		void* map_buffer(VABufferType type, GLenum access);
+		void unmap_buffer(VABufferType type);
 
 		//set parameters to generate vertices
 		void set_param(unsigned int, double);

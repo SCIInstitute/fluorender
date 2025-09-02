@@ -97,6 +97,42 @@ namespace flvr
 		}
 	}
 
+	void* VertexBuffer::map(GLenum access)
+	{
+		if (!valid_)
+			return nullptr;
+
+		switch (type_)
+		{
+		case VABuf_Coord:
+			glBindBuffer(GL_ARRAY_BUFFER, id_);
+			return glMapBuffer(GL_ARRAY_BUFFER, access);
+		case VABuf_Index:
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
+			return glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, access);
+		default:
+			return nullptr;
+		}
+	}
+
+	void VertexBuffer::unmap()
+	{
+		if (!valid_)
+			return;
+
+		switch (type_)
+		{
+		case VABuf_Coord:
+			glBindBuffer(GL_ARRAY_BUFFER, id_);
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			break;
+		case VABuf_Index:
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
+			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+			break;
+		}
+	}
+
 	VertexArray::VertexArray(VAType type) :
 		id_(0),
 		type_(type),
@@ -739,6 +775,35 @@ namespace flvr
 		//glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 		attrib_pointer_list_.push_back(index);
+	}
+
+	void* VertexArray::map_buffer(VABufferType type, GLenum access)
+	{
+		VertexBuffer* vb = nullptr;
+		for (auto it = buffer_list_.begin(); it != buffer_list_.end(); ++it)
+		{
+			if ((*it)->type_ == type)
+			{
+				vb = *it;
+				break;
+			}
+		}
+		return vb ? vb->map(access) : nullptr;
+	}
+
+	void VertexArray::unmap_buffer(VABufferType type)
+	{
+		VertexBuffer* vb = nullptr;
+		for (auto it = buffer_list_.begin(); it != buffer_list_.end(); ++it)
+		{
+			if ((*it)->type_ == type)
+			{
+				vb = *it;
+				break;
+			}
+		}
+		if (vb)
+			vb->unmap();
 	}
 
 	bool VertexArray::get_dirty()

@@ -3980,7 +3980,60 @@ void MeshData::SubmitData()
 
 void MeshData::ReturnData()
 {
-	//
+	if (!m_data || !m_mr)
+		return;
+
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return;
+
+	bool bnormal = m_data->normals;
+	bool btexcoord = m_data->texcoords;
+
+	// Compute stride and total vertex count
+	GLsizei stride = sizeof(float) * (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0));
+	size_t num_triangles = 0;
+	GLMgroup* group = m_data->groups;
+	while (group)
+	{
+		num_triangles += group->numtriangles;
+		group = group->next;
+	}
+	size_t num_vertices = num_triangles * 3;
+
+	// Allocate buffer to receive data
+	std::vector<float> verts(stride / sizeof(float) * num_vertices);
+
+	// Map GPU buffer to CPU memory
+	void* mapped_ptr = va_model->map_buffer(flvr::VABuf_Coord, GL_READ_ONLY);
+	if (!mapped_ptr)
+		return;
+
+	// Copy data from mapped buffer
+	memcpy(verts.data(), mapped_ptr, verts.size() * sizeof(float));
+
+	// Unmap buffer
+	va_model->unmap_buffer(flvr::VABuf_Coord);
+
+	// Reconstruct m_data from verts
+	size_t offset = 0;
+	for (size_t i = 0; i < num_vertices; ++i)
+	{
+		m_data->vertices[3 * i] = verts[offset++];
+		m_data->vertices[3 * i + 1] = verts[offset++];
+		m_data->vertices[3 * i + 2] = verts[offset++];
+		if (bnormal)
+		{
+			m_data->normals[3 * i] = verts[offset++];
+			m_data->normals[3 * i + 1] = verts[offset++];
+			m_data->normals[3 * i + 2] = verts[offset++];
+		}
+		if (btexcoord)
+		{
+			m_data->texcoords[2 * i] = verts[offset++];
+			m_data->texcoords[2 * i + 1] = verts[offset++];
+		}
+	}
 }
 
 void MeshData::AddEmptyData()
@@ -4049,6 +4102,15 @@ void MeshData::AddEmptyData()
 	m_data->materials[0].emmissive[3] = 0.0;
 	m_data->materials[0].havetexture = GL_FALSE;
 	m_data->materials[0].textureID = 0;
+
+	m_mr->set_data(m_data.get());
+}
+
+void MeshData::SetTriangleNum(unsigned int num)
+{
+	GLMgroup* group = m_data->groups;
+	if (group)
+		group->numtriangles = static_cast<GLuint>(num);
 }
 
 //MR
