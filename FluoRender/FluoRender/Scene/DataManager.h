@@ -823,6 +823,9 @@ public:
 	void ReturnData();//download data from GPU
 	void AddEmptyData();//create empty data for gpu generated mesh
 
+	//allocate vbo
+	GLuint AddVBO(int vertex_size);
+
 	void SetTriangleNum(unsigned int num);
 
 	//MR

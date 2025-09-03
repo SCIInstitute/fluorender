@@ -84,9 +84,6 @@ void ConvVolMesh::Convert()
 		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
 	}
-	flvr::MeshRenderer* mr = m_mesh->GetMR();
-	if (!mr)
-		return;
 
 	long bits = vd->GetBits();
 	int chars = bits / 8;
@@ -146,30 +143,20 @@ void ConvVolMesh::Convert()
 		kernel_prog->releaseAll();
 		return;
 	}
-	std::vector<float> verts(vsize * 45);
-	size_t vbo_size = sizeof(float) * verts.size();
-	flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
-	va_model->buffer_data(
-		flvr::VABuf_Coord, vbo_size,
-		&verts[0], GL_DYNAMIC_DRAW);
-	va_model->attrib_pointer(
-		0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+	//std::vector<float> verts(vsize * 45);
+	//size_t vbo_size = sizeof(float) * verts.size();
+	//flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
+	//va_model->buffer_data(
+	//	flvr::VABuf_Coord, vbo_size,
+	//	&verts[0], GL_DYNAMIC_DRAW);
+	//va_model->attrib_pointer(
+	//	0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+	//GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+	GLuint vbo_id = m_mesh->AddVBO(vsize);
+	size_t vbo_size = sizeof(float) * vsize * 45;
+
 	int vsize2 = 0;//reset vsize
 
-	//flvr::Argument vbo_arg;
-	//int flatCubeTable[24];
-	//for (int i = 0; i < 8; ++i)
-	//	for (int j = 0; j < 3; ++j)
-	//		flatCubeTable[i * 3 + j] = cubeTable[i][j];
-	//int flatTriTable[256 * 16];
-	//for (int i = 0; i < 256; ++i)
-	//	for (int j = 0; j < 16; ++j)
-	//		flatTriTable[i * 16 + j] = triTable[i][j];
-	//int flatEdgePairs[12 * 2];
-	//for (int i = 0; i < 12; ++i)
-	//	for (int j = 0; j < 2; ++j)
-	//		flatEdgePairs[i * 2 + j] = edge_pairs[i][j];
 	//marching cubes
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -218,7 +205,7 @@ void ConvVolMesh::Convert()
 	m_mesh->SetTriangleNum(vsize2 / 3);
 	//download data
 	//m_mesh->ReturnData();
-	va_model->unbind();
+	//va_model->unbind();
 
 	kernel_prog->releaseAll();
 }

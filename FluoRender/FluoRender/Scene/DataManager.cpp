@@ -4114,6 +4114,20 @@ void MeshData::AddEmptyData()
 	m_mr->set_data(m_data.get());
 }
 
+GLuint MeshData::AddVBO(int vertex_size)
+{
+	std::vector<float> verts(vertex_size * 45);
+	size_t vbo_size = sizeof(float) * verts.size();
+	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray();
+	va_model->buffer_data(
+		flvr::VABuf_Coord, vbo_size,
+		&verts[0], GL_DYNAMIC_DRAW);
+	va_model->attrib_pointer(
+		0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
+	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+	return vbo_id;
+}
+
 void MeshData::SetTriangleNum(unsigned int num)
 {
 	GLMgroup* group = m_data->groups;
