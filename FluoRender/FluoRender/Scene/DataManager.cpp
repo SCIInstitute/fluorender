@@ -4000,6 +4000,8 @@ void MeshData::ReturnData()
 		group = group->next;
 	}
 	size_t num_vertices = num_triangles * 3;
+	if (num_vertices == 0)
+		return;
 
 	// Allocate buffer to receive data
 	std::vector<float> verts(stride / sizeof(float) * num_vertices);
@@ -4014,6 +4016,12 @@ void MeshData::ReturnData()
 
 	// Unmap buffer
 	va_model->unmap_buffer(flvr::VABuf_Coord);
+
+	//allocate for vertices
+	if (m_data->vertices)
+		free(m_data->vertices);
+	m_data->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
+	3 * (num_vertices + 1));
 
 	// Reconstruct m_data from verts
 	size_t offset = 0;

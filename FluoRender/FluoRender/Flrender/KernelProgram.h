@@ -183,6 +183,9 @@ namespace flvr
 		static std::string& get_device_name();
 		static void release();
 		static std::vector<CLPlatform>* GetDeviceList();
+		//context
+		static cl_device_id get_device() { return device_; }
+		static cl_context get_context() { return context_; }
 
 		//finish
 		void finish();

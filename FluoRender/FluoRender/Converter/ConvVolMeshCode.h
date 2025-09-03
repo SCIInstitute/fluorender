@@ -130,10 +130,10 @@ __kernel void kernel_1(
 	__read_only image3d_t volume,
 	__global float3* vertex_buffer,
 	__global int* vertex_counter,
-	__constant int* cube_table,
-	__constant int* edge_table,
-	__constant int* tri_table,
-	__constant int* edge_pairs,
+	//__constant int* cube_table,
+	//__constant int* edge_table,
+	//__constant int* tri_table,
+	//__constant int* edge_pairs,
 	float isovalue,
 	int volume_width,
 	int volume_height,
@@ -185,39 +185,39 @@ vertex_buffer[idx + 1] = v1;
 vertex_buffer[idx + 2] = v2;
 return;
 
-	int edges = edge_table[cube_index];
-	if (edges == 0)
-		return;
+	//int edges = edge_table[cube_index];
+	//if (edges == 0)
+	//	return;
 
-	float3 vert_list[12];
-	for (int i = 0; i < 12; ++i) {
-		if (edges & (1 << i)) {
-			int v0 = edge_pairs[i * 2 + 0];
-			int v1 = edge_pairs[i * 2 + 1];
-			float t = (isovalue - cube[v0]) / (cube[v1] - cube[v0]);
+	//float3 vert_list[12];
+	//for (int i = 0; i < 12; ++i) {
+	//	if (edges & (1 << i)) {
+	//		int v0 = edge_pairs[i * 2 + 0];
+	//		int v1 = edge_pairs[i * 2 + 1];
+	//		float t = (isovalue - cube[v0]) / (cube[v1] - cube[v0]);
 
-			vert_list[i] = interpolate_vertex_scaled_offset(
-				x, y, z, i, t,
-				xy_factor, z_factor,
-				x_offset, y_offset, z_offset,
-				edge_pairs, cube_table
-			);
-		}
-	}
-	
-	// Output triangles
-	for (int i = 0; ; i += 3) {
-		int t0 = tri_table[cube_index * 16 + i + 0];
-		if (t0 == -1)
-			break;
-		int t1 = tri_table[cube_index * 16 + i + 1];
-		int t2 = tri_table[cube_index * 16 + i + 2];
+	//		vert_list[i] = interpolate_vertex_scaled_offset(
+	//			x, y, z, i, t,
+	//			xy_factor, z_factor,
+	//			x_offset, y_offset, z_offset,
+	//			edge_pairs, cube_table
+	//		);
+	//	}
+	//}
+	//
+	//// Output triangles
+	//for (int i = 0; ; i += 3) {
+	//	int t0 = tri_table[cube_index * 16 + i + 0];
+	//	if (t0 == -1)
+	//		break;
+	//	int t1 = tri_table[cube_index * 16 + i + 1];
+	//	int t2 = tri_table[cube_index * 16 + i + 2];
 
-		int idx = atomic_add(vertex_counter, 3);
-		vertex_buffer[idx + 0] = vert_list[t0];
-		vertex_buffer[idx + 1] = vert_list[t1];
-		vertex_buffer[idx + 2] = vert_list[t2];
-	}
+	//	int idx = atomic_add(vertex_counter, 3);
+	//	vertex_buffer[idx + 0] = vert_list[t0];
+	//	vertex_buffer[idx + 1] = vert_list[t1];
+	//	vertex_buffer[idx + 2] = vert_list[t2];
+	//}
 }
 )CLKER";
 

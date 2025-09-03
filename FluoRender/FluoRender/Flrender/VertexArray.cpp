@@ -1306,9 +1306,25 @@ namespace flvr
 		return valid_;
 	}
 
-	unsigned int VertexArray::id()
+	unsigned int VertexArray::id_array()
 	{
 		return id_;
+	}
+
+	unsigned int VertexArray::id_buffer(VABufferType type)
+	{
+		VertexBuffer* vb = nullptr;
+		for (auto it = buffer_list_.begin(); it != buffer_list_.end(); ++it)
+		{
+			if ((*it)->type_ == type)
+			{
+				vb = *it;
+				break;
+			}
+		}
+		if (vb)
+			return vb->id_;
+		return 0;
 	}
 
 	bool VertexArray::match(VAType type)

@@ -116,7 +116,8 @@ namespace flvr
 		void protect();
 		void unprotect();
 		bool valid();
-		unsigned int id();
+		unsigned int id_array();
+		unsigned int id_buffer(VABufferType type);
 
 		bool attach_buffer(VertexBuffer* buf);
 		void buffer_data(VABufferType type,
