@@ -81,6 +81,7 @@ void ConvVolMesh::Convert()
 	if (!m_mesh)
 	{
 		m_mesh = std::make_shared<MeshData>();
+		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
 	}
 	flvr::MeshRenderer* mr = m_mesh->GetMR();
@@ -145,23 +146,30 @@ void ConvVolMesh::Convert()
 		kernel_prog->releaseAll();
 		return;
 	}
-	std::vector<float> verts(vsize * 15);
+	std::vector<float> verts(vsize * 45);
 	size_t vbo_size = sizeof(float) * verts.size();
-	//std::mt19937 rng(std::random_device{}());
-	//std::uniform_real_distribution<float> dist(0.0f, 10.0f);
-
-	//for (auto &it : verts)
-	//	it = dist(rng);
-
 	flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
 	va_model->buffer_data(
 		flvr::VABuf_Coord, vbo_size,
 		&verts[0], GL_DYNAMIC_DRAW);
 	va_model->attrib_pointer(
-		0, 3, GL_FLOAT, GL_FALSE, 3, (const GLvoid*)0);
+		0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
 	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
 	int vsize2 = 0;//reset vsize
 
+	//flvr::Argument vbo_arg;
+	//int flatCubeTable[24];
+	//for (int i = 0; i < 8; ++i)
+	//	for (int j = 0; j < 3; ++j)
+	//		flatCubeTable[i * 3 + j] = cubeTable[i][j];
+	//int flatTriTable[256 * 16];
+	//for (int i = 0; i < 256; ++i)
+	//	for (int j = 0; j < 16; ++j)
+	//		flatTriTable[i * 16 + j] = triTable[i][j];
+	//int flatEdgePairs[12 * 2];
+	//for (int i = 0; i < 12; ++i)
+	//	for (int j = 0; j < 2; ++j)
+	//		flatEdgePairs[i * 2 + j] = edge_pairs[i][j];
 	//marching cubes
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -183,10 +191,10 @@ void ConvVolMesh::Convert()
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, vbo_id, vbo_size);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize2));
-		//kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
-		//kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256, (void*)(edgeTable));
-		//kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256 * 16, (void*)triTable);
-		//kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 12 * 2, (void*)edge_pairs);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256, (void*)(edgeTable));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256 * 16, (void*)triTable);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 12 * 2, (void*)edgePairs);
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iso_value));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
@@ -209,174 +217,9 @@ void ConvVolMesh::Convert()
 	//update triangle num
 	m_mesh->SetTriangleNum(vsize2 / 3);
 	//download data
-	m_mesh->ReturnData();
+	//m_mesh->ReturnData();
 	va_model->unbind();
 
 	kernel_prog->releaseAll();
 }
 
-void ConvVolMesh::Test()
-{
-	cl_context clContext = flvr::KernelProgram::get_context();
-	cl_device_id device = flvr::KernelProgram::get_device();
-	const int volumeSize = 10;
-	const int maxVertices = 10000;
-	auto vd = m_volume.lock();
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	flvr::TextureBrick* b = (*bricks)[0];
-	GLint texID = vd->GetVR()->load_brick(b);
-
-	// 1. Create GL VBO
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, maxVertices * sizeof(cl_float3), nullptr, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// 2. Create CL buffer from GL VBO
-	cl_int err;
-	cl_mem clVBO = clCreateFromGLBuffer(clContext, CL_MEM_WRITE_ONLY, vbo, &err);
-	assert(err == CL_SUCCESS);
-
-	// 3. Share existing GL 3D texture with CL
-	cl_mem clVolume = clCreateFromGLTexture(clContext, CL_MEM_READ_ONLY, GL_TEXTURE_3D, 0, texID, &err);
-	assert(err == CL_SUCCESS);
-
-	// 4. Create vertex counter buffer
-	cl_int initialCount = 0;
-	cl_mem vertexCounter = clCreateBuffer(clContext, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-		sizeof(cl_int), &initialCount, &err);
-	assert(err == CL_SUCCESS);
-
-	// 5. Create command queue
-	cl_command_queue queue = clCreateCommandQueue(clContext, device, 0, &err);
-	assert(err == CL_SUCCESS);
-
-	// 6. Create and build program
-	const char* kernelSource = R"CLC(
-        __kernel void kernel_1(
-            __read_only image3d_t volume,
-            __global float3* vertex_buffer,
-            __global int* vertex_counter,
-            float isovalue,
-            int volume_width,
-            int volume_height,
-            int volume_depth,
-            int xy_factor,
-            int z_factor,
-            int x_offset,
-            int y_offset,
-            int z_offset
-        ) {
-            int gx = get_global_id(0);
-            int gy = get_global_id(1);
-            int gz = get_global_id(2);
-
-            int x = gx * xy_factor;
-            int y = gy * xy_factor;
-            int z = gz * z_factor;
-
-            if (x >= volume_width - xy_factor || y >= volume_height - xy_factor || z >= volume_depth - z_factor)
-                return;
-
-            sampler_t samp = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
-
-            float cube[8];
-            cube[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
-            cube[1] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z, 0)).x;
-            cube[2] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x;
-            cube[3] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z, 0)).x;
-            cube[4] = read_imagef(volume, samp, (int4)(x, y, z+z_factor, 0)).x;
-            cube[5] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x;
-            cube[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
-            cube[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
-
-            int cube_index = 0;
-            for (int i = 0; i < 8; ++i)
-                if (cube[i] < isovalue)
-                    cube_index |= (1 << i);
-
-            if (cube_index == 0 || cube_index == 255)
-                return;
-
-            int idx = atomic_add(vertex_counter, 3);
-            float3 v0 = (float3)(x + x_offset,     y + y_offset,     z + z_offset);
-            float3 v1 = (float3)(x + x_offset + 1, y + y_offset,     z + z_offset);
-            float3 v2 = (float3)(x + x_offset,     y + y_offset + 1, z + z_offset);
-            vertex_buffer[idx + 0] = v0;
-            vertex_buffer[idx + 1] = v1;
-            vertex_buffer[idx + 2] = v2;
-        }
-    )CLC";
-
-	cl_program program = clCreateProgramWithSource(clContext, 1, &kernelSource, nullptr, &err);
-	assert(err == CL_SUCCESS);
-	err = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-
-	// 7. Acquire GL objects
-	cl_mem glObjects[] = { clVBO, clVolume };
-	err = clEnqueueAcquireGLObjects(queue, 2, glObjects, 0, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-
-	// 8. Setup kernel
-	cl_kernel kernel = clCreateKernel(program, "kernel_1", &err);
-	assert(err == CL_SUCCESS);
-
-	err |= clSetKernelArg(kernel, 0, sizeof(cl_mem), &clVolume);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &clVBO);
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &vertexCounter);
-	err |= clSetKernelArg(kernel, 3, sizeof(cl_float), new cl_float(0.5f));
-	err |= clSetKernelArg(kernel, 4, sizeof(cl_int), new cl_int(volumeSize));
-	err |= clSetKernelArg(kernel, 5, sizeof(cl_int), new cl_int(volumeSize));
-	err |= clSetKernelArg(kernel, 6, sizeof(cl_int), new cl_int(volumeSize));
-	err |= clSetKernelArg(kernel, 7, sizeof(cl_int), new cl_int(1));
-	err |= clSetKernelArg(kernel, 8, sizeof(cl_int), new cl_int(1));
-	err |= clSetKernelArg(kernel, 9, sizeof(cl_int), new cl_int(0));
-	err |= clSetKernelArg(kernel, 10, sizeof(cl_int), new cl_int(0));
-	err |= clSetKernelArg(kernel, 11, sizeof(cl_int), new cl_int(0));
-	assert(err == CL_SUCCESS);
-
-	// 9. Launch kernel
-	size_t globalSize[3] = { volumeSize, volumeSize, volumeSize };
-	err = clEnqueueNDRangeKernel(queue, kernel, 3, nullptr, globalSize, nullptr, 0, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-
-	// 10. Release GL objects
-	err = clEnqueueReleaseGLObjects(queue, 2, glObjects, 0, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-	clFinish(queue);
-
-	// 11. Read back vertex data
-	/*glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	cl_float3* vertices = (cl_float3*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-	if (vertices) {
-		for (int i = 0; i < 10; ++i)
-			printf("Vertex %d: (%f, %f, %f)\n", i, vertices[i].x, vertices[i].y, vertices[i].z);
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-	}
-	else {
-		printf("Failed to map buffer\n");
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, 0);*/
-
-	// 11. Read back vertex data using OpenCL
-	std::vector<cl_float3> vertexData(maxVertices);
-	err = clEnqueueAcquireGLObjects(queue, 1, &clVBO, 0, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-
-	err = clEnqueueReadBuffer(queue, clVBO, CL_TRUE, 0,
-		maxVertices * sizeof(cl_float3),
-		vertexData.data(), 0, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-
-	err = clEnqueueReleaseGLObjects(queue, 1, &clVBO, 0, nullptr, nullptr);
-	assert(err == CL_SUCCESS);
-	clFinish(queue);
-
-	// Print first few vertices
-	for (int i = 0; i < 10; ++i) {
-		cl_float3 v = vertexData[i];
-		printf("Vertex %d: (%f, %f, %f)\n", i, v.x, v.y, v.z);
-	}
-}

@@ -128,12 +128,12 @@ float3 interpolate_vertex_scaled_offset(
 
 __kernel void kernel_1(
 	__read_only image3d_t volume,
-	__global float3* vertex_buffer,
+	__global float* vertex_buffer,
 	__global int* vertex_counter,
-	//__constant int* cube_table,
-	//__constant int* edge_table,
-	//__constant int* tri_table,
-	//__constant int* edge_pairs,
+	__constant int* cube_table,
+	__constant int* edge_table,
+	__constant int* tri_table,
+	__constant int* edge_pairs,
 	float isovalue,
 	int volume_width,
 	int volume_height,
@@ -171,53 +171,52 @@ __kernel void kernel_1(
 		if (cube[i] < isovalue)
 			cube_index |= (1 << i);
 
-if (cube_index == 0 || cube_index == 255)
-	return;
-// Emit a dummy triangle for each active voxel
-int idx = atomic_add(vertex_counter, 3);
+	int edges = edge_table[cube_index];
+	if (edges == 0)
+		return;
 
-// Define three arbitrary vertices within the voxel bounds
-float3 v0 = (float3)(x + x_offset,     y + y_offset,     z + z_offset);
-float3 v1 = (float3)(x + x_offset + 1, y + y_offset,     z + z_offset);
-float3 v2 = (float3)(x + x_offset,     y + y_offset + 1, z + z_offset);
-vertex_buffer[idx + 0] = v0;
-vertex_buffer[idx + 1] = v1;
-vertex_buffer[idx + 2] = v2;
-return;
+	float3 vert_list[12];
+	for (int i = 0; i < 12; ++i) {
+		if (edges & (1 << i)) {
+			int v0 = edge_pairs[i * 2 + 0];
+			int v1 = edge_pairs[i * 2 + 1];
+			float denom = cube[v1] - cube[v0];
 
-	//int edges = edge_table[cube_index];
-	//if (edges == 0)
-	//	return;
+			if (fabs(denom) < 1e-6f)
+				continue; // Skip this edge
 
-	//float3 vert_list[12];
-	//for (int i = 0; i < 12; ++i) {
-	//	if (edges & (1 << i)) {
-	//		int v0 = edge_pairs[i * 2 + 0];
-	//		int v1 = edge_pairs[i * 2 + 1];
-	//		float t = (isovalue - cube[v0]) / (cube[v1] - cube[v0]);
+			float t = (isovalue - cube[v0]) / denom;
+			vert_list[i] = interpolate_vertex_scaled_offset(
+				x, y, z, i, t,
+				xy_factor, z_factor,
+				x_offset, y_offset, z_offset,
+				edge_pairs, cube_table
+			);
+		}
+	}
+	
+	// Output triangles
+	for (int i = 0; ; i += 3) {
+		int t0 = tri_table[cube_index * 16 + i + 0];
+		if (t0 == -1)
+			break;
+		int t1 = tri_table[cube_index * 16 + i + 1];
+		int t2 = tri_table[cube_index * 16 + i + 2];
 
-	//		vert_list[i] = interpolate_vertex_scaled_offset(
-	//			x, y, z, i, t,
-	//			xy_factor, z_factor,
-	//			x_offset, y_offset, z_offset,
-	//			edge_pairs, cube_table
-	//		);
-	//	}
-	//}
-	//
-	//// Output triangles
-	//for (int i = 0; ; i += 3) {
-	//	int t0 = tri_table[cube_index * 16 + i + 0];
-	//	if (t0 == -1)
-	//		break;
-	//	int t1 = tri_table[cube_index * 16 + i + 1];
-	//	int t2 = tri_table[cube_index * 16 + i + 2];
+		int float_idx = atomic_add(vertex_counter, 3) * 3;
 
-	//	int idx = atomic_add(vertex_counter, 3);
-	//	vertex_buffer[idx + 0] = vert_list[t0];
-	//	vertex_buffer[idx + 1] = vert_list[t1];
-	//	vertex_buffer[idx + 2] = vert_list[t2];
-	//}
+		vertex_buffer[float_idx + 0] = vert_list[t0].x;
+		vertex_buffer[float_idx + 1] = vert_list[t0].y;
+		vertex_buffer[float_idx + 2] = vert_list[t0].z;
+
+		vertex_buffer[float_idx + 3] = vert_list[t1].x;
+		vertex_buffer[float_idx + 4] = vert_list[t1].y;
+		vertex_buffer[float_idx + 5] = vert_list[t1].z;
+
+		vertex_buffer[float_idx + 6] = vert_list[t2].x;
+		vertex_buffer[float_idx + 7] = vert_list[t2].y;
+		vertex_buffer[float_idx + 8] = vert_list[t2].z;
+	}
 }
 )CLKER";
 
