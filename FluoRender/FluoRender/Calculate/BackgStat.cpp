@@ -164,8 +164,6 @@ __kernel void kernel_2(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	//atomic_xchg(count+index, lsum);
-	//atomic_xchg(wcount+index, lwsum);
 	count[index] = lsum;
 	wcount[index] = lwsum;
 }
@@ -202,8 +200,6 @@ __kernel void kernel_3(
 	}
 	lminv = lminv == VSCL ? 0 : lminv;
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	//atomic_xchg(minv+index, (uint)(lminv));
-	//atomic_xchg(maxv+index, (uint)(lmaxv));
 	minv[index] = (uint)(lminv);
 	maxv[index] = (uint)(lmaxv);
 }

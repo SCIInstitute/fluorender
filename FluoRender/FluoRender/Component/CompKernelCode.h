@@ -83,15 +83,15 @@ __kernel void kernel_0(
 		dot(pt, p4.xyz)+p4.w < 0.0f ||
 		dot(pt, p5.xyz)+p5.w < 0.0f)
 	{
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 		return;
 	}
 	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
 	if (value < 1e-4f)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else if (i<1 || i>nx-2 ||
 			j<1 || j>ny-2)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else
 	{
 		x = reverse_bit(i, lenx);
@@ -104,7 +104,7 @@ __kernel void kernel_0(
 			res |= (1<<ii & y)<<(ii+1);
 		}
 		res |= z<<lenx*2;
-		atomic_xchg(label+index, res + 1);
+		label[index] = res + 1;
 	}
 }
 //use clipping planes, use mask
@@ -144,15 +144,15 @@ __kernel void kernel_1(
 		dot(pt, p4.xyz)+p4.w < 0.0f ||
 		dot(pt, p5.xyz)+p5.w < 0.0f)
 	{
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 		return;
 	}
 	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
 	if (value < 1e-4f)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else if (i<1 || i>nx-2 ||
 			j<1 || j>ny-2)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else
 	{
 		x = reverse_bit(i, lenx);
@@ -165,7 +165,7 @@ __kernel void kernel_1(
 			res |= (1<<ii & y)<<(ii+1);
 		}
 		res |= z<<lenx*2;
-		atomic_xchg(label+index, res + 1);
+		label[index] = res + 1;
 	}
 }
 //not used
@@ -186,10 +186,10 @@ __kernel void kernel_null(
 	unsigned int index = nx*ny*k + nx*j + i;
 	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
 	if (value < 1e-4f)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else if (i<1 || i>nx-2 ||
 			j<1 || j>ny-2)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else
 	{
 		x = reverse_bit(i, lenx);
@@ -202,7 +202,7 @@ __kernel void kernel_null(
 			res |= (1<<ii & y)<<(ii+1);
 		}
 		res |= z<<lenx*2;
-		atomic_xchg(label+index, res + 1);
+		label[index] = res + 1;
 	}
 }
 )CLKER";
@@ -518,7 +518,7 @@ __kernel void kernel_0(
 		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 //grow only within mask
 __kernel void kernel_1(
@@ -578,7 +578,7 @@ __kernel void kernel_1(
 		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 )CLKER";
 
@@ -788,7 +788,7 @@ __kernel void kernel_0(
 		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 //grow only within mask
 __kernel void kernel_1(
@@ -868,7 +868,7 @@ __kernel void kernel_1(
 		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 )CLKER";
 
@@ -1360,7 +1360,7 @@ __kernel void kernel_0(
 		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 //only grow within mask
 __kernel void kernel_1(
@@ -1426,7 +1426,7 @@ __kernel void kernel_1(
 		if ((m <= label_v) || (!fixed && (m & 0x80000000))) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 )CLKER";
 
@@ -1851,7 +1851,7 @@ __kernel void kernel_0(
 	if (i == 0 || i == nx-1 ||
 		j == 0 || j == ny-1 ||
 		k == 0 || k == nz-1)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 }
 __kernel void kernel_1(
 	__global unsigned int* label,
@@ -1871,7 +1871,7 @@ __kernel void kernel_1(
 	if (i == 0 || i == nx-1 ||
 		j == 0 || j == ny-1 ||
 		k == 0 || k == nz-1)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 }
 )CLKER";
 
@@ -2104,7 +2104,7 @@ __kernel void kernel_0(
 			return;
 	}
 
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 )CLKER";
 
@@ -2275,7 +2275,7 @@ __kernel void kernel_2(
 		if (m > label_v)
 			label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 )CLKER";
 
@@ -2297,7 +2297,7 @@ __kernel void kernel_0(
 	unsigned int index = nx*j + i;
 	if (i == 0 || i == nx-1 ||
 		j == 0 || j == ny-1)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 }
 )CLKER";
 
@@ -2361,12 +2361,12 @@ __kernel void kernel_0(
 	unsigned int index = nx*ny*k + nx*j + i;
 	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
 	if (value < 1e-4f)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else if (i<1 || i>nx-2 ||
 			j<1 || j>ny-2)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else
-		atomic_xchg(label+index, index + 1);
+		label[index] = index + 1;
 }
 )CLKER";
 
@@ -2407,10 +2407,10 @@ __kernel void kernel_0(
 	unsigned int index = nx*ny*k + nx*j + i;
 	float value = read_imagef(data, samp, (int4)(i, j, k, 1)).x;
 	if (value < 1e-4f)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else if (i<1 || i>nx-2 ||
 			j<1 || j>ny-2)
-		atomic_xchg(label+index, 0);
+		label[index] = 0;
 	else
 	{
 		x = reverse_bit(i, len);
@@ -2422,7 +2422,7 @@ __kernel void kernel_0(
 			res |= (1<<ii & x)<<(ii);
 			res |= (1<<ii & y)<<(ii+1);
 		}
-		atomic_xchg(label+index, nx*ny - res);
+		label[index] = nx * ny -res;
 	}
 }
 )CLKER";
@@ -2616,7 +2616,7 @@ __kernel void kernel_2(
 			return;
 	}
 
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 )CLKER";
 
@@ -3060,7 +3060,7 @@ __kernel void kernel_5(
 		if (m <= label_v) continue;
 		label_v = m;
 	}
-	atomic_xchg(label+index, label_v);
+	label[index] = label_v;
 }
 //code for clean up
 uint __attribute((always_inline)) reverse_bit(uint val, uint len)

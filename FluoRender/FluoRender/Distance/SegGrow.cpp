@@ -62,7 +62,7 @@ __kernel void kernel_0(
 	unsigned int lv = index + 1;
 	if (value == 0.0f)
 		lv = 0;
-	atomic_xchg(label+index, lv);
+	label[index] = lv;
 }
 //initialize but keep old values
 __kernel void kernel_1(
@@ -81,7 +81,7 @@ __kernel void kernel_1(
 	unsigned int index = nx*ny*k + nx*j + i;
 	if (label[index] > 0)
 		return;
-	atomic_xchg(label+index, index + 1);
+	label[index] = index + 1;
 }
 //grow ids reverse
 __kernel void kernel_2(
@@ -226,9 +226,9 @@ __kernel void kernel_4(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(count+index, lcount);
+	count[index] = lcount;
 	for (c = 0; c < lcount; ++c)
-		atomic_xchg(ids+index*maxc+c, lids[c]);
+		ids[index*maxc+c] = lids[c];
 }
 //find connected parts
 __kernel void kernel_5(
@@ -323,7 +323,7 @@ __kernel void kernel_5(
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
 	for (c = 0; c < nid*6; ++c)
-		atomic_xchg(cids+(index*nid)*6+c, lcids[c]);
+		cids[(index*nid)*6+c] = lcids[c];
 }
 //merge connected ids
 __kernel void kernel_6(
@@ -452,13 +452,13 @@ __kernel void kernel_7(
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
 	for (c = 0; c < nid; ++c)
 	{
-		atomic_xchg(cids+(index*nid+c)*3, lcids[c*3]);
-		atomic_xchg(cids+(index*nid+c)*3+1, lcids[c*3+1]);
-		atomic_xchg(cids+(index*nid+c)*3+2, lcids[c*3+2]);
-		atomic_xchg(sum+index*nid+c, lsum[c]);
-		atomic_xchg(csum+(index*nid+c)*3, lcsum[c*3]);
-		atomic_xchg(csum+(index*nid+c)*3+1, lcsum[c*3+1]);
-		atomic_xchg(csum+(index*nid+c)*3+2, lcsum[c*3+2]);
+		cids[(index*nid+c)*3] = lcids[c*3];
+		cids[(index*nid+c)*3+1] = lcids[c*3+1];
+		cids[(index*nid+c)*3+2] = lcids[c*3+2];
+		sum[index*nid+c] = lsum[c];
+		csum[(index*nid+c)*3] = lcsum[c*3];
+		csum[(index*nid+c)*3+1] = lcsum[c*3+1];
+		csum[(index*nid+c)*3+2] = lcsum[c*3+2];
 	}
 }
 //fix processed ids

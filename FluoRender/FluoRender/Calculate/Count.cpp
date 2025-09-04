@@ -38,11 +38,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 constexpr const char* str_cl_count_voxels = R"CLKER(
-const sampler_t samp =
-	CLK_NORMALIZED_COORDS_FALSE|
-	CLK_ADDRESS_CLAMP_TO_EDGE|
-	CLK_FILTER_NEAREST;
-
 __kernel void kernel_0(
 	__read_only image3d_t data,
 	__read_only image3d_t mask,
@@ -51,31 +46,42 @@ __kernel void kernel_0(
 	unsigned int ngz,
 	unsigned int gsxy,
 	unsigned int gsx,
+	unsigned int width,
+	unsigned int height,
+	unsigned int depth,
 	__global unsigned int* count,
 	__global float* wcount)
 {
-	int3 gid = (int3)(get_global_id(0),
-		get_global_id(1), get_global_id(2));
-	int3 lb = (int3)(gid.x*ngx, gid.y*ngy, gid.z*ngz);
-	int3 ub = (int3)(lb.x + ngx, lb.y + ngy, lb.z + ngz);
+	const sampler_t samp = CLK_NORMALIZED_COORDS_FALSE |
+						   CLK_ADDRESS_CLAMP_TO_EDGE |
+						   CLK_FILTER_NEAREST;
+
+	int3 gid = (int3)(get_global_id(0), get_global_id(1), get_global_id(2));
+	int3 lb = (int3)(gid.x * ngx, gid.y * ngy, gid.z * ngz);
+	int3 ub = (int3)(min(lb.x + ngx, width),
+					 min(lb.y + ngy, height),
+					 min(lb.z + ngz, depth));
+
 	int4 ijk = (int4)(0, 0, 0, 1);
 	unsigned int lsum = 0;
 	float lwsum = 0.0f;
+
 	for (ijk.x = lb.x; ijk.x < ub.x; ++ijk.x)
 	for (ijk.y = lb.y; ijk.y < ub.y; ++ijk.y)
 	for (ijk.z = lb.z; ijk.z < ub.z; ++ijk.z)
 	{
-		float v1 = read_imagef(data, samp, ijk).x;
 		float v2 = read_imagef(mask, samp, ijk).x;
 		if (v2 > 0.0f)
 		{
+			float v1 = read_imagef(data, samp, ijk).x;
 			lsum++;
 			lwsum += v1;
 		}
 	}
+
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(count+index, lsum);
-	atomic_xchg(wcount+index, lwsum);
+	count[index] = lsum;
+	wcount[index] = lwsum;
 }
 )CLKER";
 
@@ -104,12 +110,12 @@ bool CountVoxels::CheckBricks()
 
 bool CountVoxels::GetInfo(
 	flvr::TextureBrick* b,
-	long &bits, long &nx, long &ny, long &nz)
+	unsigned int &bits, unsigned int &nx, unsigned int &ny, unsigned int &nz)
 {
-	bits = b->nb(0)*8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
+	bits = static_cast<unsigned int>(b->nb(0)*8);
+	nx = static_cast<unsigned int>(b->nx());
+	ny = static_cast<unsigned int>(b->ny());
+	nz = static_cast<unsigned int>(b->nz());
 	return true;
 }
 
@@ -147,7 +153,7 @@ void CountVoxels::Count()
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		long nx, ny, nz, bits;
+		unsigned int nx, ny, nz, bits;
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
@@ -173,6 +179,9 @@ void CountVoxels::Count()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
 

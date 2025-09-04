@@ -102,8 +102,8 @@ __kernel void kernel_0(
 		}
 	}
 	uint index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(count+index, lsum);
-	atomic_xchg(wcount+index, lwsum);
+	count[index] = lsum;
+	wcount[index] = lwsum;
 }
 )CLKER";
 

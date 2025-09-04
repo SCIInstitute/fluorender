@@ -172,8 +172,8 @@ __kernel void kernel_2(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 //compare0 16 bit
 __kernel void kernel_3(
@@ -244,8 +244,8 @@ __kernel void kernel_3(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 //compare1 8 bit
 __kernel void kernel_4(
@@ -318,8 +318,8 @@ __kernel void kernel_4(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 //compare1 16 bit
 __kernel void kernel_5(
@@ -392,8 +392,8 @@ __kernel void kernel_5(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 )CLKER";
 
@@ -535,8 +535,8 @@ __kernel void kernel_2(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 //compare0 16 bit
 __kernel void kernel_3(
@@ -611,8 +611,8 @@ __kernel void kernel_3(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 //compare1 8 bit
 __kernel void kernel_4(
@@ -689,8 +689,8 @@ __kernel void kernel_4(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 //compare1 16 bit
 __kernel void kernel_5(
@@ -767,8 +767,8 @@ __kernel void kernel_5(
 		}
 	}
 	index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sumf+index, lsumf);
-	atomic_xchg(sumi+index, lsumi);
+	sumf[index] = lsumf;
+	sumi[index] = lsumi;
 }
 )CLKER";
 

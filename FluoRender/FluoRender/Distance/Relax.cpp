@@ -91,10 +91,10 @@ __kernel void kernel_0(
 			dsp += dir * w / dist / dist;
 			wsum += w;
 		}
-		atomic_xchg(gdsp+(index*np+c)*3, dsp.x);
-		atomic_xchg(gdsp+(index*np+c)*3+1, dsp.y);
-		atomic_xchg(gdsp+(index*np+c)*3+2, dsp.z);
-		atomic_xchg(gwsum+index*np+c, wsum);
+		gdsp[(index*np+c)*3] = dsp.x;
+		gdsp[(index*np+c)*3+1] = dsp.y;
+		gdsp[(index*np+c)*3+2] = dsp.z;
+		gwsum[index*np+c] = wsum;
 	}
 }
 )CLKER";

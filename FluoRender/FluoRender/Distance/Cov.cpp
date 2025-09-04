@@ -74,10 +74,10 @@ __kernel void kernel_0(
 		}
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(count+index, lsum);
-	atomic_xchg(csum+index*3, lcsum.x);
-	atomic_xchg(csum+index*3+1, lcsum.y);
-	atomic_xchg(csum+index*3+2, lcsum.z);
+	count[index] = lsum;
+	csum[index*3] = lcsum.x;
+	csum[index*3+1] = lcsum.y;
+	csum[index*3+2] = lcsum.z;
 }
 __kernel void kernel_1(
 	__read_only image3d_t mask,
@@ -112,12 +112,12 @@ __kernel void kernel_1(
 		zz += fijk.z * fijk.z;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(cov+index*6, xx);
-	atomic_xchg(cov+index*6+1, xy);
-	atomic_xchg(cov+index*6+2, xz);
-	atomic_xchg(cov+index*6+3, yy);
-	atomic_xchg(cov+index*6+4, yz);
-	atomic_xchg(cov+index*6+5, zz);
+	cov[index*6] = xx;
+	cov[index*6+1] = xy;
+	cov[index*6+2] = xz;
+	cov[index*6+3] = yy;
+	cov[index*6+4] = yz;
+	cov[index*6+5] = zz;
 }
 )CLKER";
 

@@ -60,7 +60,7 @@ namespace flrd
 
 		bool CheckBricks();
 		bool GetInfo(flvr::TextureBrick* b,
-			long &bits, long &nx, long &ny, long &nz);
+			unsigned int &bits, unsigned int &nx, unsigned int &ny, unsigned int &nz);
 	};
 
 }

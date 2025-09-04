@@ -73,7 +73,7 @@ __kernel void kernel_0(
 			lsum += v1;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 
 //with mask
@@ -113,7 +113,7 @@ __kernel void kernel_1(
 			lsum += v1;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 __kernel void kernel_2(
 	__read_only image3d_t chann1,
@@ -145,7 +145,7 @@ __kernel void kernel_2(
 			lsum += 1.0f;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 
 //with mask
@@ -185,7 +185,7 @@ __kernel void kernel_3(
 			lsum += 1.0f;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 )CLKER";
 
@@ -223,7 +223,7 @@ __kernel void kernel_0(
 		lsum += v1 * v2;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 //product with mask
 __kernel void kernel_1(
@@ -260,7 +260,7 @@ __kernel void kernel_1(
 		lsum += v1 * v2;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 
 //count voxels
@@ -293,7 +293,7 @@ __kernel void kernel_2(
 			lsum += 1.0f;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 //product with mask
 __kernel void kernel_3(
@@ -331,7 +331,7 @@ __kernel void kernel_3(
 			lsum += 1.0f;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 )CLKER";
 
@@ -369,7 +369,7 @@ __kernel void kernel_0(
 		lsum += min(v1, v2);
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 //product with mask
 __kernel void kernel_1(
@@ -406,7 +406,7 @@ __kernel void kernel_1(
 		lsum += min(v1, v2);
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 
 //count voxels
@@ -439,7 +439,7 @@ __kernel void kernel_2(
 			lsum += 1.0f;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 //product with mask
 __kernel void kernel_3(
@@ -477,7 +477,7 @@ __kernel void kernel_3(
 			lsum += 1.0f;
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(sum+index, lsum);
+	sum[index] = lsum;
 }
 )CLKER";
 

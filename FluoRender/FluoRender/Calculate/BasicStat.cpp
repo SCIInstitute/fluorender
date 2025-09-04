@@ -77,8 +77,8 @@ __kernel void kernel_0(
 		}
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(count+index, lsum);
-	atomic_xchg(wcount+index, lwsum);
+	count[index] = lsum;
+	wcount[index] = lwsum;
 }
 //minmax
 __kernel void kernel_1(
@@ -109,8 +109,8 @@ __kernel void kernel_1(
 	}
 	lminv = lminv == VSCL ? 0 : lminv;
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(minv+index, (uint)(lminv));
-	atomic_xchg(maxv+index, (uint)(lmaxv));
+	minv[index] = lminv;
+	maxv[index] = lmaxv;
 }
 //histogram
 __kernel void kernel_2(
@@ -160,8 +160,8 @@ __kernel void kernel_3(
 		}
 	}
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(count+index, lsum);
-	atomic_xchg(wcount+index, lwsum);
+	count[index] = lsum;
+	wcount[index] = lwsum;
 }
 //minmax in mask
 __kernel void kernel_4(
@@ -197,8 +197,8 @@ __kernel void kernel_4(
 	}
 	lminv = lminv == VSCL ? 0 : lminv;
 	unsigned int index = gsxy * gid.z + gsx * gid.y + gid.x;
-	atomic_xchg(minv+index, (uint)(lminv));
-	atomic_xchg(maxv+index, (uint)(lmaxv));
+	minv[index] = lminv;
+	maxv[index] = lmaxv;
 }
 //histogram in mask
 __kernel void kernel_5(
