@@ -136,25 +136,15 @@ void ConvVolMesh::Convert()
 	}
 	//read back vsize
 	kernel_prog->readBuffer(sizeof(int), &vsize, &vsize);
-
-	//allocate vertex buffer
 	if (vsize <= 0)
 	{
 		kernel_prog->releaseAll();
 		return;
 	}
-	//std::vector<float> verts(vsize * 45);
-	//size_t vbo_size = sizeof(float) * verts.size();
-	//flvr::VertexArray* va_model = mr->GetOrCreateVertexArray();
-	//va_model->buffer_data(
-	//	flvr::VABuf_Coord, vbo_size,
-	//	&verts[0], GL_DYNAMIC_DRAW);
-	//va_model->attrib_pointer(
-	//	0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	//GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+
+	//allocate vertex buffer
 	GLuint vbo_id = m_mesh->AddVBO(vsize);
 	size_t vbo_size = sizeof(float) * vsize * 45;
-
 	int vsize2 = 0;//reset vsize
 
 	//marching cubes
@@ -203,6 +193,10 @@ void ConvVolMesh::Convert()
 
 	//update triangle num
 	m_mesh->SetTriangleNum(vsize2 / 3);
+	double spcx, spcy, spcz;
+	vd->GetSpacings(spcx, spcy, spcz);
+	m_mesh->SetScaling(spcx, spcy, spcz);
+	m_mesh->SetGpuDirty();
 	//download data
 	//m_mesh->ReturnData();
 	//va_model->unbind();

@@ -3739,7 +3739,9 @@ MeshData::MeshData() :
 	m_shadow_enable(true),
 	m_shadow_intensity(0.6),
 	m_enable_limit(false),
-	m_limit(50)
+	m_limit(50),
+	m_cpu_dirty(true),
+	m_gpu_dirty(true)
 {
 	type = 3;//mesh
 
@@ -3785,12 +3787,12 @@ int MeshData::Load(GLMmodel* mesh)
 
 	m_data = std::unique_ptr<GLMmodel>(mesh);
 
-	if (!m_data->normals)
-	{
-		if (!m_data->facetnorms)
-			glmFacetNormals(m_data.get());
-		glmVertexNormals(m_data.get(), 89.0);
-	}
+	//if (!m_data->normals)
+	//{
+	//	if (!m_data->facetnorms)
+	//		glmFacetNormals(m_data.get());
+	//	glmVertexNormals(m_data.get(), 89.0);
+	//}
 
 	if (!m_data->materials)
 	{
@@ -3852,12 +3854,12 @@ int MeshData::Load(const std::wstring &filename)
 	if (!m_data)
 		return 0;
 
-	if (!m_data->normals && m_data->numtriangles)
-	{
-		if (!m_data->facetnorms)
-			glmFacetNormals(m_data.get());
-		glmVertexNormals(m_data.get(), 89.0);
-	}
+	//if (!m_data->normals && m_data->numtriangles)
+	//{
+	//	if (!m_data->facetnorms)
+	//		glmFacetNormals(m_data.get());
+	//	glmVertexNormals(m_data.get(), 89.0);
+	//}
 
 	if (!m_data->materials)
 	{
@@ -3908,6 +3910,9 @@ int MeshData::Load(const std::wstring &filename)
 
 void MeshData::Save(const std::wstring& filename)
 {
+	if (m_gpu_dirty)
+		ReturnData();
+
 	if (m_data)
 	{
 		std::string str = ws2s(filename);
@@ -3976,6 +3981,8 @@ void MeshData::SubmitData()
 			va_model->attrib_pointer(
 				1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
 	}
+
+	m_gpu_dirty = false;
 }
 
 void MeshData::ReturnData()
@@ -3990,58 +3997,80 @@ void MeshData::ReturnData()
 	bool bnormal = m_data->normals;
 	bool btexcoord = m_data->texcoords;
 
-	// Compute stride and total vertex count
 	GLsizei stride = sizeof(float) * (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0));
-	size_t num_triangles = 0;
-	GLMgroup* group = m_data->groups;
-	while (group)
-	{
-		num_triangles += group->numtriangles;
-		group = group->next;
-	}
+	size_t num_triangles = m_data->numtriangles;
 	size_t num_vertices = num_triangles * 3;
 	if (num_vertices == 0)
 		return;
 
-	// Allocate buffer to receive data
 	std::vector<float> verts(stride / sizeof(float) * num_vertices);
 
-	// Map GPU buffer to CPU memory
 	void* mapped_ptr = va_model->map_buffer(flvr::VABuf_Coord, GL_READ_ONLY);
 	if (!mapped_ptr)
 		return;
 
-	// Copy data from mapped buffer
 	memcpy(verts.data(), mapped_ptr, verts.size() * sizeof(float));
-
-	// Unmap buffer
 	va_model->unmap_buffer(flvr::VABuf_Coord);
 
-	//allocate for vertices
+	// Allocate vertex arrays with 1-based indexing (index 0 unused)
 	if (m_data->vertices)
 		free(m_data->vertices);
-	m_data->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
-	3 * (num_vertices + 1));
+	m_data->vertices = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (num_vertices + 1));
+	m_data->numvertices = (GLuint)num_vertices;
 
-	// Reconstruct m_data from verts
+	if (bnormal && !m_data->normals)
+		m_data->normals = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (num_vertices + 1));
+	if (btexcoord && !m_data->texcoords)
+		m_data->texcoords = (GLfloat*)malloc(sizeof(GLfloat) * 2 * (num_vertices + 1));
+
 	size_t offset = 0;
-	for (size_t i = 0; i < num_vertices; ++i)
+	for (size_t i = 1; i <= num_vertices; ++i)
 	{
-		m_data->vertices[3 * i] = verts[offset++];
+		m_data->vertices[3 * i + 0] = verts[offset++];
 		m_data->vertices[3 * i + 1] = verts[offset++];
 		m_data->vertices[3 * i + 2] = verts[offset++];
 		if (bnormal)
 		{
-			m_data->normals[3 * i] = verts[offset++];
+			m_data->normals[3 * i + 0] = verts[offset++];
 			m_data->normals[3 * i + 1] = verts[offset++];
 			m_data->normals[3 * i + 2] = verts[offset++];
 		}
 		if (btexcoord)
 		{
-			m_data->texcoords[2 * i] = verts[offset++];
+			m_data->texcoords[2 * i + 0] = verts[offset++];
 			m_data->texcoords[2 * i + 1] = verts[offset++];
 		}
 	}
+
+	// Allocate triangle array
+	if (m_data->triangles)
+		free(m_data->triangles);
+	m_data->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) * num_triangles);
+	m_data->numtriangles = (GLuint)num_triangles;
+
+	for (size_t i = 0; i < num_triangles; ++i)
+	{
+		GLMtriangle& tri = m_data->triangles[i];
+		tri.vindices[0] = (GLuint)(i * 3 + 1); // 1-based
+		tri.vindices[1] = (GLuint)(i * 3 + 2);
+		tri.vindices[2] = (GLuint)(i * 3 + 3);
+		tri.findex = 0;
+	}
+
+	size_t tri_offset = 0;
+	GLMgroup* group = m_data->groups;
+	while (group)
+	{
+		group->triangles = (GLuint*)malloc(sizeof(GLuint) * group->numtriangles);
+		for (size_t i = 0; i < group->numtriangles; ++i)
+		{
+			group->triangles[i] = (GLuint)(tri_offset + i);
+		}
+		tri_offset += group->numtriangles;
+		group = group->next;
+	}
+
+	m_cpu_dirty = false;
 }
 
 void MeshData::AddEmptyData()
@@ -4130,6 +4159,7 @@ GLuint MeshData::AddVBO(int vertex_size)
 
 void MeshData::SetTriangleNum(unsigned int num)
 {
+	m_data->numtriangles = static_cast<GLuint>(num);
 	GLMgroup* group = m_data->groups;
 	if (group)
 		group->numtriangles = static_cast<GLuint>(num);

@@ -42,7 +42,8 @@ namespace flvr
 	public:
 		MshShader(int type,
 			int peel, bool tex,
-			bool fog, bool light);
+			bool fog, bool light,
+			bool normal);
 		~MshShader();
 
 		bool create();
@@ -52,16 +53,19 @@ namespace flvr
 		inline bool tex() { return tex_; }
 		inline bool fog() { return fog_; }
 		inline bool light() { return light_; }
+		inline bool normal() { return normal_; }
 
 		inline bool match(int type,
 			int peel, bool tex,
-			bool fog, bool light)
+			bool fog, bool light,
+			bool normal)
 		{ 
 			return (type_ == type &&
 					fog_ == fog && 
 					peel_ == peel &&
 					tex_ == tex &&
-					light_ == light); 
+					light_ == light &&
+					normal_ == normal); 
 		}
 
 		inline ShaderProgram* program() { return program_; }
@@ -69,12 +73,14 @@ namespace flvr
 	protected:
 		bool emit_v(std::string& s);
 		bool emit_f(std::string& s);
+		bool emit_g(std::string& s);
 
 		int type_;	//0:normal; 1:integer
 		int peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
 		bool tex_;
 		bool fog_;
 		bool light_;
+		bool normal_;//0:use normal from mesh; 1:generate normal in geom shader
 
 		ShaderProgram* program_;
 	};
@@ -87,7 +93,7 @@ namespace flvr
 		~MshShaderFactory();
 
 		ShaderProgram* shader(int type, int peel, bool tex,
-			bool fog, bool light);
+			bool fog, bool light, bool normal);
 
 	protected:
 		std::vector<MshShader*> shader_;

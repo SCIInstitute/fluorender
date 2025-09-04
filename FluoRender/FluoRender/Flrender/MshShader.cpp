@@ -42,14 +42,17 @@ namespace flvr
 {
 	MshShader::MshShader(int type,
 		int peel, bool tex,
-		bool fog, bool light)
+		bool fog, bool light,
+		bool normal)
 		: type_(type),
 		peel_(peel),
 		tex_(tex),
 		fog_(fog),
 		light_(light),
+		normal_(normal),
 		program_(0)
-	{}
+	{
+	}
 
 	MshShader::~MshShader()
 	{
@@ -62,7 +65,14 @@ namespace flvr
 		if (emit_v(vs)) return true;
 		string fs;
 		if (emit_f(fs)) return true;
-		program_ = new ShaderProgram(vs, fs);
+		string gs;
+		if (normal_)
+		{
+			if (emit_g(gs)) return true;
+			program_ = new ShaderProgram(vs, fs, gs);
+		}
+		else
+			program_ = new ShaderProgram(vs, fs);
 		return false;
 	}
 
@@ -96,9 +106,14 @@ namespace flvr
 		else if (type_ == 1)
 			z << MSH_VERTEX_UNIFORM_MATRIX;
 
+		if (normal_)
+			z << MSH_VERTEX_OUTPUTS_VPOS;
+
 		z << MSH_HEAD;
 
 		//body
+		if (normal_)
+			z << MSH_VERTEX_BODY_VPOS;
 		z << MSH_VERTEX_BODY_POS;
 		if (type_ == 0)
 		{
@@ -199,6 +214,23 @@ namespace flvr
 		return false;
 	}
 
+	bool MshShader::emit_g(string& s)
+	{
+		if (!normal_)
+			return true;
+
+		ostringstream z;
+
+		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
+
+		z << MSH_GEOM_NORMALS;
+
+		s = z.str();
+
+		return false;
+	}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	MshShaderFactory::MshShaderFactory()
 		: prev_shader_(-1)
@@ -212,25 +244,26 @@ namespace flvr
 
 	ShaderProgram* MshShaderFactory::shader(int type,
 		int peel, bool tex,
-		bool fog, bool light)
+		bool fog, bool light,
+		bool normal)
 	{
 		if(prev_shader_ >= 0)
 		{
-			if(shader_[prev_shader_]->match(type, peel, tex, fog, light))
+			if(shader_[prev_shader_]->match(type, peel, tex, fog, light, normal))
 			{
 				return shader_[prev_shader_]->program();
 			}
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{
-			if(shader_[i]->match(type, peel, tex, fog, light)) 
+			if(shader_[i]->match(type, peel, tex, fog, light, normal))
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
 			}
 		}
 
-		MshShader* s = new MshShader(type, peel, tex, fog, light);
+		MshShader* s = new MshShader(type, peel, tex, fog, light, normal);
 		if(s->create())
 		{
 			delete s;

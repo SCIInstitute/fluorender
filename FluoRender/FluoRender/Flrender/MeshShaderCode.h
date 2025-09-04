@@ -64,6 +64,11 @@ inline constexpr const char* MSH_VERTEX_OUTPUTS_FOG = R"GLSHDR(
 out vec4 OutFogCoord;
 )GLSHDR";
 
+inline constexpr const char* MSH_VERTEX_OUTPUTS_VPOS = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_VPOS
+out vec3 VertexPos;
+)GLSHDR";
+
 inline constexpr const char* MSH_VERTEX_UNIFORM_MATRIX = R"GLSHDR(
 //MSH_VERTEX_UNIFORM_MATRIX
 uniform mat4 matrix0;//projection
@@ -79,6 +84,11 @@ inline constexpr const char* MSH_HEAD = R"GLSHDR(
 // MSH_HEAD
 void main()
 {
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_BODY_VPOS = R"GLSHDR(
+//MSH_VERTEX_BODY_VPOS
+	VertexPos = InVertex;
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_BODY_POS = R"GLSHDR(
@@ -218,15 +228,14 @@ inline constexpr const char* MSH_FRAG_BODY_COLOR_LIGHT = R"GLSHDR(
 	//MSH_FRAG_BODY_COLOR_LIGHT
 	vec4 spec = vec4(0.0);
 	vec3 eye = vec3(0.0, 0.0, 1.0);
-	vec3 l_dir = vec3(0.0, 0.0, 1.0);
+	vec3 l_dir = normalize(vec3(-0.3, 0.4, 1.0));
 	vec3 n = normalize(OutNormal);
-	float intensity = abs(dot(n, l_dir));
-	if (intensity > 0.0)
-	{
-		vec3 h = normalize(l_dir+eye);
-		float intSpec = max(dot(h, n), 0.0);
-		spec = loc2 * pow(intSpec, loc3.x);
-	}
+	if (dot(n, l_dir) < 0.0)
+		n = -n;
+	float intensity = max(dot(n, l_dir), 0.0);
+	vec3 h = normalize(l_dir+eye);
+	float intSpec = max(dot(h, n), 0.0);
+	spec = loc2 * pow(intSpec, loc3.x);
 	c.xyz = max(intensity * loc1 + spec, loc0).xyz;
 )GLSHDR";
 
@@ -246,6 +255,40 @@ inline constexpr const char* MSH_FRAG_BODY_INT = R"GLSHDR(
 )GLSHDR";
 
 inline constexpr const char* MSH_TAIL = R"GLSHDR(
+}
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS = R"GLSHDR(
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 3) out;
+// receive from vertex shader
+in vec3 VertexPos[];
+// Output to fragment shader
+out vec3 OutNormal;
+
+uniform mat4 matrix2; // normal matrix
+
+void main()
+{
+	vec3 v0 = VertexPos[0];
+	vec3 v1 = VertexPos[1];
+	vec3 v2 = VertexPos[2];
+
+	vec3 faceNormal = normalize(cross(v1 - v0, v2 - v0));
+
+	// Transform to eye space
+	vec3 transformedNormal = normalize((matrix2 * vec4(faceNormal, 0.0)).xyz);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		gl_Position = gl_in[i].gl_Position;
+
+		// Use computed face normal
+		OutNormal = transformedNormal;
+
+		EmitVertex();
+	}
+	EndPrimitive();
 }
 )GLSHDR";
 

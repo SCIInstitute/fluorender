@@ -205,17 +205,17 @@ __kernel void kernel_1(
 
 		int float_idx = atomic_add(vertex_counter, 3) * 3;
 
-		vertex_buffer[float_idx + 0] = vert_list[t0].x;
-		vertex_buffer[float_idx + 1] = vert_list[t0].y;
-		vertex_buffer[float_idx + 2] = vert_list[t0].z;
+		vertex_buffer[float_idx + 0] = vert_list[t0].x + 0.5;
+		vertex_buffer[float_idx + 1] = vert_list[t0].y + 0.5;
+		vertex_buffer[float_idx + 2] = vert_list[t0].z + 0.5;
 
-		vertex_buffer[float_idx + 3] = vert_list[t1].x;
-		vertex_buffer[float_idx + 4] = vert_list[t1].y;
-		vertex_buffer[float_idx + 5] = vert_list[t1].z;
+		vertex_buffer[float_idx + 3] = vert_list[t1].x + 0.5;
+		vertex_buffer[float_idx + 4] = vert_list[t1].y + 0.5;
+		vertex_buffer[float_idx + 5] = vert_list[t1].z + 0.5;
 
-		vertex_buffer[float_idx + 6] = vert_list[t2].x;
-		vertex_buffer[float_idx + 7] = vert_list[t2].y;
-		vertex_buffer[float_idx + 8] = vert_list[t2].z;
+		vertex_buffer[float_idx + 6] = vert_list[t2].x + 0.5;
+		vertex_buffer[float_idx + 7] = vert_list[t2].y + 0.5;
+		vertex_buffer[float_idx + 8] = vert_list[t2].z + 0.5;
 	}
 }
 )CLKER";

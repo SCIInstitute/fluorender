@@ -116,6 +116,7 @@ namespace flvr
 		GLMgroup* group = data_->groups;
 		GLint pos = 0;
 		bool tex = data_->hastexture==GL_TRUE;
+		bool normal = data_->numnormals > 0 ? false : true;
 
 		va_model_->draw_begin();
 		while (group)
@@ -128,7 +129,7 @@ namespace flvr
 
 			//set up shader
 			shader = glbin_msh_shader_factory.shader(0,
-				depth_peel_, tex, fog_, light_);
+				depth_peel_, tex, fog_, light_, normal);
 			if (shader)
 			{
 				if (!shader->valid())
@@ -209,7 +210,7 @@ namespace flvr
 		//set up shader
 		ShaderProgram* shader = 0;
 		shader = glbin_msh_shader_factory.shader(0,
-			peel, tex, fog_, light);
+			peel, tex, fog_, light, false);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -263,7 +264,7 @@ namespace flvr
 		//set up shader
 		ShaderProgram* shader = 0;
 		shader = glbin_msh_shader_factory.shader(1,
-			0, false, false, false);
+			0, false, false, false, false);
 		if (shader)
 		{
 			if (!shader->valid())

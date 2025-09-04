@@ -823,6 +823,9 @@ public:
 	void ReturnData();//download data from GPU
 	void AddEmptyData();//create empty data for gpu generated mesh
 
+	void SetCpuDirty() { m_cpu_dirty = true; }
+	void SetGpuDirty() { m_gpu_dirty = true; }
+
 	//allocate vbo
 	GLuint AddVBO(int vertex_size);
 
@@ -888,6 +891,10 @@ private:
 	std::unique_ptr<flvr::MeshRenderer> m_mr;
 	fluo::BBox m_bounds;
 	fluo::Point m_center;
+
+	//sync flags
+	bool m_cpu_dirty;//call SubmitData to update gpu data
+	bool m_gpu_dirty;//call ReturnData to update cpu data
 
 	bool m_disp;
 	bool m_draw_bounds;
