@@ -41,30 +41,34 @@ public:
 
 private:
 	//convert from volume to polygon mesh
+	wxButton* m_cnv_vol_mesh_convert_btn;
+	wxButton* m_cnv_vol_mesh_update_btn;
+
+	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
+	wxCheckBox* m_cnv_vol_mesh_selected_chk;
+	wxCheckBox* m_cnv_vol_mesh_weld_chk;
+
 	wxSingleSlider* m_cnv_vol_mesh_thresh_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_thresh_text;
 	wxSingleSlider* m_cnv_vol_mesh_downsample_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_downsample_text;
 	wxSingleSlider* m_cnv_vol_mesh_downsample_z_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_downsample_z_text;
-	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
-	wxCheckBox* m_cnv_vol_mesh_selected_chk;
-	wxCheckBox* m_cnv_vol_mesh_weld_chk;
-	wxButton* m_cnv_vol_mesh_convert_btn;
-	//output
-	wxTextCtrl* m_stat_text;
 
 private:
+	void OnCnvVolMeshConvert(wxCommandEvent& event);
+	void OnCnvVolMeshUpdate(wxCommandEvent& event);
+
+	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);
+	void OnCnvVolMeshUseSelCheck(wxCommandEvent& event);
+	void OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event);
+
 	void OnCnvVolMeshThreshChange(wxScrollEvent& event);
 	void OnCnvVolMeshThreshText(wxCommandEvent& event);
 	void OnCnvVolMeshDownsampleChange(wxScrollEvent& event);
 	void OnCnvVolMeshDownsampleText(wxCommandEvent& event);
 	void OnCnvVolMeshDownsampleZChange(wxScrollEvent& event);
 	void OnCnvVolMeshDownsampleZText(wxCommandEvent& event);
-	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);
-	void OnCnvVolMeshUseSelCheck(wxCommandEvent& event);
-	void OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event);
-	void OnCnvVolMeshConvert(wxCommandEvent& event);
 };
 
 #endif//_CONVERTDLG_H_

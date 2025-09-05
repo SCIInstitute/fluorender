@@ -42,6 +42,7 @@ namespace flrd
 
 		//high-level wrapper
 		virtual void Convert() override;
+		virtual void Update() override;
 
 		double GetArea() { return m_area; }
 

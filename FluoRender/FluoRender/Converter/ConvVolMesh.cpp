@@ -78,13 +78,40 @@ void ConvVolMesh::Convert()
 	if (brick_num <= 0)
 		return;
 
+	//always create new mesh
+	m_mesh = std::make_shared<MeshData>();
+	m_mesh->SetName(vd->GetName() + L"_mesh");
+	m_mesh->AddEmptyData();
+
+	MarchingCubes(vd.get(), m_mesh.get());
+}
+
+void ConvVolMesh::Update()
+{
+	auto vd = m_volume.lock();
+	if (!vd)
+		return;
+	if (!vd->GetTexture())
+		return;
+	int brick_num = vd->GetTexture()->get_brick_num();
+	if (brick_num <= 0)
+		return;
+
 	if (!m_mesh)
 	{
 		m_mesh = std::make_shared<MeshData>();
 		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
 	}
+	else
+		m_mesh->ClearData();
 
+	MarchingCubes(vd.get(), m_mesh.get());
+}
+
+void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
+{
+	int brick_num = vd->GetTexture()->get_brick_num();
 	long bits = vd->GetBits();
 	int chars = bits / 8;
 	float max_int = static_cast<float>(vd->GetMaxValue());
@@ -223,4 +250,3 @@ void ConvVolMesh::Convert()
 
 	kernel_prog->releaseAll();
 }
-

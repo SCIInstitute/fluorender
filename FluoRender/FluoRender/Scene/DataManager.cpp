@@ -3727,6 +3727,7 @@ void VolumeData::SetMaskCount(unsigned int sum, float wsum)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 MeshData::MeshData() :
+	m_data(nullptr, glmDelete),
 	m_center(0.0, 0.0, 0.0),
 	m_disp(true),
 	m_draw_bounds(false),
@@ -3785,7 +3786,7 @@ int MeshData::Load(GLMmodel* mesh)
 	m_data_path = L"";
 	m_name = L"New Mesh";
 
-	m_data = std::unique_ptr<GLMmodel>(mesh);
+	m_data = GLMmodelPtr(mesh, glmDelete);
 
 	//if (!m_data->normals)
 	//{
@@ -3849,10 +3850,10 @@ int MeshData::Load(const std::wstring &filename)
 
 	std::string str_fn = ws2s(filename);
 	bool no_fail = true;
-	m_data = std::unique_ptr<GLMmodel>(glmReadOBJ(str_fn.c_str(), &no_fail));
-
-	if (!m_data)
+	GLMmodel* new_model = glmReadOBJ(str_fn.c_str(), &no_fail);
+	if (!new_model)
 		return 0;
+	m_data.reset(new_model);
 
 	//if (!m_data->normals && m_data->numtriangles)
 	//{
@@ -4134,7 +4135,7 @@ void MeshData::AddEmptyData()
 	model->groups = group;
 	model->numgroups = 1;
 
-	m_data = std::unique_ptr<GLMmodel>(model);
+	m_data = GLMmodelPtr(model, glmDelete);
 
 	if (!m_data->materials)
 	{
@@ -4165,6 +4166,21 @@ void MeshData::AddEmptyData()
 	m_data->materials[0].textureID = 0;
 
 	m_mr->set_data(m_data.get());
+}
+
+void MeshData::ClearData()
+{
+	GLMmodel* model = m_mr->get_data();
+	glmClear(model);
+	//add default group
+	GLMgroup* group = new GLMgroup;
+	group->name = STRDUP("default");
+	group->material = 0;
+	group->numtriangles = 0;
+	group->triangles = 0;
+	group->next = 0;
+	model->groups = group;
+	model->numgroups = 1;
 }
 
 GLuint MeshData::AddVBO(int vertex_size)

@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <BaseConvVolMesh.h>
 
+class VolumeData;
+class MeshData;
 namespace flvr
 {
 	class TextureBrick;
@@ -45,13 +47,14 @@ namespace flrd
 
 		//high-level wrapper
 		virtual void Convert() override;
+		virtual void Update() override;
 
-	private:
-	
 	private:
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz,
 			long &ox, long &oy, long &oz);
+
+		void MarchingCubes(VolumeData* vd, MeshData* md);
 	};
 
 }

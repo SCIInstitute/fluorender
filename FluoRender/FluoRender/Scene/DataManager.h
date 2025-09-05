@@ -794,6 +794,7 @@ private:
 #define MESH_FLOAT_SHN	4
 #define MESH_FLOAT_ALPHA	5
 
+using GLMmodelPtr = std::unique_ptr<GLMmodel, void(*)(GLMmodel*)>;
 class MeshData : public TreeLayer
 {
 public:
@@ -822,6 +823,7 @@ public:
 	void SubmitData();//upload data to GPU
 	void ReturnData();//download data from GPU
 	void AddEmptyData();//create empty data for gpu generated mesh
+	void ClearData();
 
 	void SetCpuDirty() { m_cpu_dirty = true; }
 	void SetGpuDirty() { m_gpu_dirty = true; }
@@ -887,7 +889,7 @@ public:
 
 private:
 	std::wstring m_data_path;
-	std::unique_ptr<GLMmodel> m_data;
+	GLMmodelPtr m_data;
 	std::unique_ptr<flvr::MeshRenderer> m_mr;
 	fluo::BBox m_bounds;
 	fluo::Point m_center;

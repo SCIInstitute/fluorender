@@ -117,6 +117,11 @@ void ConvVolMeshSw::Convert()
 	SetProgress(0, "");
 }
 
+void ConvVolMeshSw::Update()
+{
+	//no update for software version
+}
+
 bool ConvVolMeshSw::Compute(void* m)
 {
 	auto vd = m_volume.lock();

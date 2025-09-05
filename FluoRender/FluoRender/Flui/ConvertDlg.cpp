@@ -52,57 +52,23 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 
 	wxStaticText *st = 0;
 
-	//group1
+	//button
+	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_cnv_vol_mesh_convert_btn = new wxButton(this, wxID_ANY, "Convert",
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_cnv_vol_mesh_update_btn = new wxButton(this, wxID_ANY, "Update",
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_cnv_vol_mesh_convert_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshConvert, this);
+	m_cnv_vol_mesh_update_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshUpdate, this);
+	sizer_1->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_cnv_vol_mesh_update_btn, 0, wxALIGN_CENTER);
+	
+	//sizer_2
 	//convert from volume to mesh
-	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+	wxStaticBoxSizer *sizer_2 = new wxStaticBoxSizer(
 		wxVERTICAL, this, "Volume to Polygon Mesh");
-	//threshold slider and text
-	wxBoxSizer *sizer11 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Threshold:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cnv_vol_mesh_thresh_sldr = new wxSingleSlider(this, wxID_ANY, 30, 1, 99,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_thresh_text = new wxTextCtrl(this, wxID_ANY, "0.30",
-		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
-	m_cnv_vol_mesh_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshThreshChange, this);
-	m_cnv_vol_mesh_thresh_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshThreshText, this);
-	sizer11->Add(st, 0, wxALIGN_CENTER);
-	sizer11->Add(10, 10);
-	sizer11->Add(m_cnv_vol_mesh_thresh_sldr, 1, wxEXPAND);
-	sizer11->Add(m_cnv_vol_mesh_thresh_text, 0, wxALIGN_CENTER);
-	sizer11->Add(15, 15);
-	//downsampling slider and text
-	wxBoxSizer *sizer12 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Downsmp. XY:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cnv_vol_mesh_downsample_sldr = new wxSingleSlider(this, wxID_ANY, 2, 1, 10,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_downsample_text = new wxTextCtrl(this, wxID_ANY, "2",
-		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
-	m_cnv_vol_mesh_downsample_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshDownsampleChange, this);
-	m_cnv_vol_mesh_downsample_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshDownsampleText, this);
-	sizer12->Add(st, 0, wxALIGN_CENTER);
-	sizer12->Add(10, 10);
-	sizer12->Add(m_cnv_vol_mesh_downsample_sldr, 1, wxEXPAND);
-	sizer12->Add(m_cnv_vol_mesh_downsample_text, 0, wxALIGN_CENTER);
-	sizer12->Add(15, 15);
-	//downsampling in z slider and text
-	wxBoxSizer *sizer13 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(this, 0, "Downsmp. Z:",
-		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cnv_vol_mesh_downsample_z_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 10,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_downsample_z_text = new wxTextCtrl(this, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
-	m_cnv_vol_mesh_downsample_z_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshDownsampleZChange, this);
-	m_cnv_vol_mesh_downsample_z_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshDownsampleZText, this);
-	sizer13->Add(st, 0, wxALIGN_CENTER);
-	sizer13->Add(10, 10);
-	sizer13->Add(m_cnv_vol_mesh_downsample_z_sldr, 1, wxEXPAND);
-	sizer13->Add(m_cnv_vol_mesh_downsample_z_text, 0, wxALIGN_CENTER);
-	sizer13->Add(15, 15);
 	//check options and convert button
-	wxBoxSizer *sizer14 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer_21 = new wxBoxSizer(wxHORIZONTAL);
 	m_cnv_vol_mesh_usetransf_chk = new wxCheckBox(this, wxID_ANY, "Use transfer function",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_selected_chk = new wxCheckBox(this, wxID_ANY, "Selected Only",
@@ -112,44 +78,72 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 	m_cnv_vol_mesh_usetransf_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshUseTransfCheck, this);
 	m_cnv_vol_mesh_selected_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshUseSelCheck, this);
 	m_cnv_vol_mesh_weld_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshWeldVerticesCheck, this);
-	sizer14->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
-	sizer14->Add(m_cnv_vol_mesh_selected_chk, 0, wxALIGN_CENTER);
-	sizer14->Add(m_cnv_vol_mesh_weld_chk, 0, wxALIGN_CENTER);
-	//button
-	wxBoxSizer *sizer15 = new wxBoxSizer(wxHORIZONTAL);
-	m_cnv_vol_mesh_convert_btn = new wxButton(this, wxID_ANY, "Convert",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_convert_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshConvert, this);
-	sizer15->AddStretchSpacer();
-	sizer15->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
-	
-	//group1
-	group1->Add(5, 5);
-	group1->Add(sizer11, 0, wxEXPAND);
-	group1->Add(5, 5);
-	group1->Add(sizer12, 0, wxEXPAND);
-	group1->Add(5, 5);
-	group1->Add(sizer13, 0, wxEXPAND);
-	group1->Add(5, 5);
-	group1->Add(sizer14, 0, wxEXPAND);
-	group1->Add(5, 5);
-	group1->Add(sizer15, 0, wxEXPAND);
-	group1->Add(5, 5);
+	sizer_21->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
+	sizer_21->Add(m_cnv_vol_mesh_selected_chk, 0, wxALIGN_CENTER);
+	sizer_21->Add(m_cnv_vol_mesh_weld_chk, 0, wxALIGN_CENTER);
+	//threshold slider and text
+	wxBoxSizer *sizer_22 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Threshold:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_cnv_vol_mesh_thresh_sldr = new wxSingleSlider(this, wxID_ANY, 30, 1, 99,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cnv_vol_mesh_thresh_text = new wxTextCtrl(this, wxID_ANY, "0.30",
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
+	m_cnv_vol_mesh_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshThreshChange, this);
+	m_cnv_vol_mesh_thresh_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshThreshText, this);
+	sizer_22->Add(st, 0, wxALIGN_CENTER);
+	sizer_22->Add(10, 10);
+	sizer_22->Add(m_cnv_vol_mesh_thresh_sldr, 1, wxEXPAND);
+	sizer_22->Add(m_cnv_vol_mesh_thresh_text, 0, wxALIGN_CENTER);
+	sizer_22->Add(15, 15);
+	//downsampling slider and text
+	wxBoxSizer *sizer_23 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Downsmp. XY:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_cnv_vol_mesh_downsample_sldr = new wxSingleSlider(this, wxID_ANY, 2, 1, 10,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cnv_vol_mesh_downsample_text = new wxTextCtrl(this, wxID_ANY, "2",
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
+	m_cnv_vol_mesh_downsample_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshDownsampleChange, this);
+	m_cnv_vol_mesh_downsample_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshDownsampleText, this);
+	sizer_23->Add(st, 0, wxALIGN_CENTER);
+	sizer_23->Add(10, 10);
+	sizer_23->Add(m_cnv_vol_mesh_downsample_sldr, 1, wxEXPAND);
+	sizer_23->Add(m_cnv_vol_mesh_downsample_text, 0, wxALIGN_CENTER);
+	sizer_23->Add(15, 15);
+	//downsampling in z slider and text
+	wxBoxSizer *sizer_24 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(this, 0, "Downsmp. Z:",
+		wxDefaultPosition, FromDIP(wxSize(100, 23)));
+	m_cnv_vol_mesh_downsample_z_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 10,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_cnv_vol_mesh_downsample_z_text = new wxTextCtrl(this, wxID_ANY, "1",
+		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
+	m_cnv_vol_mesh_downsample_z_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshDownsampleZChange, this);
+	m_cnv_vol_mesh_downsample_z_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshDownsampleZText, this);
+	sizer_24->Add(st, 0, wxALIGN_CENTER);
+	sizer_24->Add(10, 10);
+	sizer_24->Add(m_cnv_vol_mesh_downsample_z_sldr, 1, wxEXPAND);
+	sizer_24->Add(m_cnv_vol_mesh_downsample_z_text, 0, wxALIGN_CENTER);
+	sizer_24->Add(15, 15);
 
-	//stats text
-	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
-		wxVERTICAL, this, "Output");
-	m_stat_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_MULTILINE);
-	m_stat_text->SetEditable(false);
-	sizer2->Add(m_stat_text, 1, wxEXPAND);
+	//sizer_2
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer_21, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer_22, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer_23, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
+	sizer_2->Add(sizer_24, 0, wxEXPAND);
+	sizer_2->Add(5, 5);
 
 	//all controls
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
-	sizerV->Add(group1, 0, wxEXPAND);
+	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer2, 1, wxEXPAND);
+	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 
 	SetSizer(sizerV);
@@ -220,7 +214,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			str += " is ";
 			str += glbin_conv_vol_mesh->GetInfo();
 		}
-		(*m_stat_text) << str << "\n";
+		//(*m_stat_text) << str << "\n";
 	}
 }
 
@@ -323,7 +317,32 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		auto view = glbin_current.render_view.lock();
 		if (view)
 			view->AddMeshData(md);
-		glbin_current.SetMeshData(md);
+		//glbin_current.SetMeshData(md);
+	}
+
+	FluoRefresh(0, { gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
+		{ glbin_current.GetViewId() });
+}
+
+void ConvertDlg::OnCnvVolMeshUpdate(wxCommandEvent& event)
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	glbin_conv_vol_mesh->SetVolumeData(vd);
+	glbin_conv_vol_mesh->Update();
+	auto md = glbin_conv_vol_mesh->GetMeshData();
+	if (md)
+	{
+		auto temp = glbin_data_manager.GetMeshData(md->GetName());
+		if (!temp)
+		{
+			glbin_data_manager.AddMeshData(md);
+			auto view = glbin_current.render_view.lock();
+			if (view)
+				view->AddMeshData(md);
+			//glbin_current.SetMeshData(md);
+		}
 	}
 
 	FluoRefresh(0, { gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
