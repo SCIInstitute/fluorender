@@ -70,7 +70,7 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 		// For Mac: ij_path is going to be ij.app or fiji.app.
 
 #ifdef _WIN32
-		p = std::filesystem::path(ij_path) / "jars";
+		p = std::filesystem::path(ij_path) / "ij.jar";
 #else
 		p = std::filesystem::path(ij_path) / "Contents" / "Java" / "ij.jar";
 #endif
