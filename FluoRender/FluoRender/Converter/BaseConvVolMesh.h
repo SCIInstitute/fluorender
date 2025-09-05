@@ -48,7 +48,10 @@ namespace flrd
 
 		// Convert method to be implemented by derived classes
 		virtual void Convert() = 0;
-		virtual void Update() = 0;
+		virtual void Update(bool create_mesh) = 0;
+
+		//auto update
+		virtual bool GetAutoUpdate() { return false; }
 
 		// Setters and getters for common properties
 		virtual void SetUseTransfer(bool val) { m_use_transfer = val; }

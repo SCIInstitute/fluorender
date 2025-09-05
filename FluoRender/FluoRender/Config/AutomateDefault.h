@@ -47,5 +47,6 @@ public:
 	int m_comp_gen;
 	int m_colocalize;
 	int m_relax_ruler;
+	int m_conv_vol_mesh;
 };
 #endif//_AUTOMATEDEFAULT_H_

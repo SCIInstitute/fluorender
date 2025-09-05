@@ -47,7 +47,9 @@ namespace flrd
 
 		//high-level wrapper
 		virtual void Convert() override;
-		virtual void Update() override;
+		virtual void Update(bool create_mesh) override;
+
+		virtual bool GetAutoUpdate() override;
 
 	private:
 		bool GetInfo(flvr::TextureBrick* b,

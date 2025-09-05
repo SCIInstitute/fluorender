@@ -38,6 +38,7 @@ AutomateDefault::AutomateDefault()
 	m_comp_gen = 2;
 	m_colocalize = 2;
 	m_relax_ruler = 0;
+	m_conv_vol_mesh = 2;
 }
 
 AutomateDefault::~AutomateDefault()
@@ -65,6 +66,8 @@ void AutomateDefault::Read()
 	f->Read("colocalize", &m_colocalize, 2);
 	//relax ruler
 	f->Read("relax ruler", &m_relax_ruler, 0);
+	//convert volume to mesh
+	f->Read("conv vol mesh", &m_conv_vol_mesh, 2);
 }
 
 void AutomateDefault::Save()
@@ -86,4 +89,6 @@ void AutomateDefault::Save()
 	f->Write("colocalize", m_colocalize);
 	//relax ruler
 	f->Write("relax ruler", m_relax_ruler);
+	//convert volume to mesh
+	f->Write("conv vol mesh", m_conv_vol_mesh);
 }

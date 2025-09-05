@@ -274,12 +274,16 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 {
 	wxScrolledWindow *page = new wxScrolledWindow(parent);
 
-	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 5, 10); // 2 columns, 5px hgap, 10px vgap
+	wxFlexGridSizer* gridSizer = new wxFlexGridSizer(2, 6, 10); // 2 columns, 5px hgap, 10px vgap
 	gridSizer->AddGrowableCol(0, 1); // Make the text column growable
 
-	std::vector<std::string> keys =
-	{ "histogram", "paint size", "comp gen",
-		"colocalize", "relax ruler"};
+	std::vector<std::string> keys = {
+		"histogram",
+		"paint size",
+		"comp gen",
+		"colocalize",
+		"relax ruler",
+		"conv vol mesh"};
 
 	m_automate_combo.insert({
 		keys[0],
@@ -305,6 +309,11 @@ wxWindow* SettingDlg::CreateAutomationPage(wxWindow* parent)
 		keys[4],
 		ComboEntry{ 4, keys[4],
 		"Relax a multipoint ruler after creation",
+		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
+	m_automate_combo.insert({
+		keys[5],
+		ComboEntry{ 5, keys[5],
+		"Update mesh after conversion from volume data",
 		{ "Disable", "Enable", "Disable for large data" }, nullptr } });
 
 	for (const auto& key : keys)
@@ -1207,6 +1216,12 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		{
 			ComboEntry& entry = it->second;
 			entry.combo->SetSelection(glbin_automate_def.m_relax_ruler);
+		}
+		it = m_automate_combo.find("conv vol mesh");
+		if (it != m_automate_combo.end())
+		{
+			ComboEntry& entry = it->second;
+			entry.combo->SetSelection(glbin_automate_def.m_conv_vol_mesh);
 		}
 	}
 

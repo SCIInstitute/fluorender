@@ -216,6 +216,13 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 		//(*m_stat_text) << str << "\n";
 	}
+
+	if (FOUND_VALUE(gstConvVolMeshUpdate))
+	{
+		if (glbin_conv_vol_mesh->GetAutoUpdate() &&
+			!glbin_conv_vol_mesh->IsBusy())
+			glbin_conv_vol_mesh->Update(false);
+	}
 }
 
 //threshold
@@ -237,6 +244,8 @@ void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent& event)
 		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(val * 100.0));
 		glbin_conv_vol_mesh->SetIsoValue(val);
 	}
+
+	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 //downsampling
@@ -257,6 +266,8 @@ void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent& event)
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
 		glbin_conv_vol_mesh->SetDownsample(ival);
 	}
+
+	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 //downsampling Z
@@ -277,6 +288,8 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent& event)
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
 		glbin_conv_vol_mesh->SetDownsampleZ(ival);
 	}
+
+	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
@@ -330,7 +343,7 @@ void ConvertDlg::OnCnvVolMeshUpdate(wxCommandEvent& event)
 	if (!vd)
 		return;
 	glbin_conv_vol_mesh->SetVolumeData(vd);
-	glbin_conv_vol_mesh->Update();
+	glbin_conv_vol_mesh->Update(true);
 	auto md = glbin_conv_vol_mesh->GetMeshData();
 	if (md)
 	{

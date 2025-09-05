@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <ConvVolMesh.h>
 #include <Global.h>
+#include <AutomateDefault.h>
 #include <DataManager.h>
 #include <Texture.h>
 #include <TextureBrick.h>
@@ -86,7 +87,7 @@ void ConvVolMesh::Convert()
 	MarchingCubes(vd.get(), m_mesh.get());
 }
 
-void ConvVolMesh::Update()
+void ConvVolMesh::Update(bool create_mesh)
 {
 	auto vd = m_volume.lock();
 	if (!vd)
@@ -99,6 +100,9 @@ void ConvVolMesh::Update()
 
 	if (!m_mesh)
 	{
+		if (!create_mesh)
+			return;
+
 		m_mesh = std::make_shared<MeshData>();
 		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
@@ -109,8 +113,28 @@ void ConvVolMesh::Update()
 	MarchingCubes(vd.get(), m_mesh.get());
 }
 
+bool ConvVolMesh::GetAutoUpdate()
+{
+	auto vd = m_volume.lock();
+	if (!vd)
+		return false;
+	int auto_update = glbin_automate_def.m_conv_vol_mesh;
+	if (auto_update == 0)
+		return false;
+	else if (auto_update == 1)
+		return true;
+	else if (auto_update == 2)
+	{
+		if (vd->GetAllBrickNum() > 1)
+			return false;
+	}
+	return true;
+}
+
 void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 {
+	m_busy = true;
+
 	int brick_num = vd->GetTexture()->get_brick_num();
 	long bits = vd->GetBits();
 	int chars = bits / 8;
@@ -249,4 +273,6 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	//va_model->unbind();
 
 	kernel_prog->releaseAll();
+
+	m_busy = false;
 }

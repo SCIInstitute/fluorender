@@ -117,7 +117,7 @@ void ConvVolMeshSw::Convert()
 	SetProgress(0, "");
 }
 
-void ConvVolMeshSw::Update()
+void ConvVolMeshSw::Update(bool create_mesh)
 {
 	//no update for software version
 }
