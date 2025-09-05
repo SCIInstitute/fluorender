@@ -186,16 +186,36 @@ MainFrame::MainFrame(
 	m_main_tb->SetArtProvider(new wxToolbarArt());
 
 	//add tools
+	bool jvm_valid = glbin_jvm_instance->IsValid();
+	int last_type = glbin_settings.m_last_open_type;
+	if (!jvm_valid && last_type == 2)
+		last_type = 0;
 	bitmap = wxGetBitmap(icon_open_volume);
-	m_main_tb->AddTool(ID_OpenVolume, "Open Volume", bitmap,
+	m_main_tb->AddTool(ID_LastOpen, "Open Volume", bitmap,
 		"Open single or multiple volume data file(s)");
-	if (glbin_jvm_instance->IsValid())
+	m_main_tb->SetToolDropDown(ID_LastOpen, true);
+	switch (last_type)
 	{
-		bitmap = wxGetBitmap(icon_import);
-		m_main_tb->AddTool(ID_ImportVolume, "Import Volume", bitmap,
-			"Import single or multiple volume data file(s) using ImageJ");
-		m_main_tb->AddSeparator();
+	case 0://volume
+		m_main_tb->SetToolBitmap(ID_LastOpen,
+			wxGetBitmap(icon_open_volume));
+		m_main_tb->SetToolLabel(ID_LastOpen, "Open Volume");
+		m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
+		break;
+	case 1://mesh
+		m_main_tb->SetToolBitmap(ID_LastOpen,
+			wxGetBitmap(icon_open_mesh));
+		m_main_tb->SetToolLabel(ID_LastOpen, "Open Mesh");
+		m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
+		break;
+	case 2://imagej
+		m_main_tb->SetToolBitmap(ID_LastOpen,
+			wxGetBitmap(icon_import));
+		m_main_tb->SetToolLabel(ID_LastOpen, "Import Volume");
+		m_main_tb->SetToolShortHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
+		break;
 	}
+	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmap(icon_open_project);
 	m_main_tb->AddTool(ID_OpenProject, "Open Project", bitmap,
 		"Open a saved project");
@@ -211,9 +231,6 @@ MainFrame::MainFrame(
 		"Show or hide all control panels");
 	m_main_tb->SetToolDropDown(ID_Panels, true);
 	m_main_tb->AddSeparator();
-	bitmap = wxGetBitmap(icon_open_mesh);
-	m_main_tb->AddTool(ID_OpenMesh, "Open Mesh", bitmap,
-		"Open single or multiple mesh file(s)");
 	bitmap = wxGetBitmap(icon_paint_brush);
 	m_main_tb->AddTool(ID_LastTool, "Analyze", bitmap,
 		"Tools for analyzing selected channel");
@@ -321,6 +338,20 @@ MainFrame::MainFrame(
 	m_main_tb->Bind(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, &MainFrame::OnToolbarMenu, this);
 	m_main_tb->Realize();
 
+	//menu for open
+	m_tb_menu_open = std::make_unique<wxMenu>();
+	m = m_tb_menu_open->Append(ID_OpenVolume, "Open Volume...",
+		"Open single or multiple volume data file(s)");
+	m->SetBitmap(wxGetBitmap(icon_open_volume_mini));
+	m = m_tb_menu_open->Append(ID_OpenMesh, "Open Mesh...",
+		"Open single or multiple mesh file(s)");
+	m->SetBitmap(wxGetBitmap(icon_open_mesh_mini));
+	if (jvm_valid)
+	{
+		m = m_tb_menu_open->Append(ID_ImportVolume, "Import Volume...",
+			"Import single or multiple volume data file(s) using ImageJ");
+		m->SetBitmap(wxGetBitmap(icon_import_mini));
+	}
 	//create the menu for UI management
 	m_tb_menu_ui = std::make_unique<wxMenu>();
 	m = m_tb_menu_ui->Append(ID_ProjPanel, UITEXT_PROJECT,
@@ -1641,6 +1672,23 @@ void MainFrame::ToggleAllPanels(bool cur_state)
 	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
 
+void MainFrame::ToggleLastOpen()
+{
+	unsigned int last_open = glbin_settings.m_last_open_type;
+	switch (last_open)
+	{
+	case 0://volume
+		OpenVolume();
+		break;
+	case 1://mesh
+		OpenMesh();
+		break;
+	case 2://imagej
+		ImportVolume();
+		break;
+	}
+}
+
 void MainFrame::ToggleLastTool()
 {
 	unsigned int tool = glbin_settings.m_last_tool;
@@ -2149,6 +2197,12 @@ void MainFrame::OpenVolume()
 		}
 		glbin_data_manager.LoadVolumes(std_filenames, false);
 	}
+
+	glbin_settings.m_last_open_type = 0;
+	m_main_tb->SetToolBitmap(ID_LastOpen,
+		wxGetBitmap(icon_open_volume));
+	m_main_tb->SetToolLabel(ID_LastOpen, "Open Volume");
+	m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
 }
 
 void MainFrame::ImportVolume()
@@ -2170,6 +2224,12 @@ void MainFrame::ImportVolume()
 		}
 		glbin_data_manager.LoadVolumes(std_filenames, true);
 	}
+
+	glbin_settings.m_last_open_type = 2;
+	m_main_tb->SetToolBitmap(ID_LastOpen,
+		wxGetBitmap(icon_import));
+	m_main_tb->SetToolLabel(ID_LastOpen, "Import Volume");
+	m_main_tb->SetToolShortHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
 }
 
 void MainFrame::OpenMesh()
@@ -2190,6 +2250,12 @@ void MainFrame::OpenMesh()
 		}
 		glbin_data_manager.LoadMeshes(std_filenames);
 	}
+
+	glbin_settings.m_last_open_type = 1;
+	m_main_tb->SetToolBitmap(ID_LastOpen,
+		wxGetBitmap(icon_open_mesh));
+	m_main_tb->SetToolLabel(ID_LastOpen, "Open Mesh");
+	m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
 }
 
 void MainFrame::NewProject()
@@ -2269,6 +2335,9 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 		wxMenu* menu = 0;
 		switch (id)
 		{
+		case ID_LastOpen:
+			menu = m_tb_menu_open.get();
+			break;
 		case ID_Panels:
 			menu = m_tb_menu_ui.get();
 			break;
@@ -2301,11 +2370,17 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 	switch (id)
 	{
 		//toolbar
+	case ID_LastOpen:
+		ToggleLastOpen();
+		break;
 	case ID_OpenVolume:
 		OpenVolume();
 		break;
 	case ID_ImportVolume:
 		ImportVolume();
+		break;
+	case ID_OpenMesh:
+		OpenMesh();
 		break;
 	case ID_OpenProject:
 		OpenProject();
@@ -2318,9 +2393,6 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		break;
 	case ID_Panels:
 		ToggleAllPanels(true);
-		break;
-	case ID_OpenMesh:
-		OpenMesh();
 		break;
 	case ID_LastTool:
 		ToggleLastTool();

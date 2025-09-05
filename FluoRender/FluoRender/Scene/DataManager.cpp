@@ -4023,18 +4023,42 @@ void MeshData::ReturnData()
 	if (btexcoord && !m_data->texcoords)
 		m_data->texcoords = (GLfloat*)malloc(sizeof(GLfloat) * 2 * (num_vertices + 1));
 
+	//transform
+	glm::vec3 center(m_center.x(), m_center.y(), m_center.z());
+	glm::vec3 trans(m_trans[0], m_trans[1], m_trans[2]);
+	glm::vec3 rot(glm::radians(m_rot[0]), glm::radians(m_rot[1]), glm::radians(m_rot[2]));
+	glm::vec3 scale(m_scale[0], m_scale[1], m_scale[2]);
+
+	// Stepwise composition
+	glm::mat4 M = glm::mat4(1.0f);
+	M = glm::translate(M, trans + center); // move to world position
+	M = glm::rotate(M, rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	M = glm::rotate(M, rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	M = glm::rotate(M, rot.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	M = glm::scale(M, scale);
+	M = glm::translate(M, -center); // undo centering
+	glm::mat3 N = glm::transpose(glm::inverse(glm::mat3(M)));
+
 	size_t offset = 0;
 	for (size_t i = 1; i <= num_vertices; ++i)
 	{
-		m_data->vertices[3 * i + 0] = verts[offset++];
-		m_data->vertices[3 * i + 1] = verts[offset++];
-		m_data->vertices[3 * i + 2] = verts[offset++];
+		glm::vec3 v(verts[offset], verts[offset + 1], verts[offset + 2]);
+		v = glm::vec3(M * glm::vec4(v, 1.0f));
+		m_data->vertices[3 * i + 0] = v.x;
+		m_data->vertices[3 * i + 1] = v.y;
+		m_data->vertices[3 * i + 2] = v.z;
+		offset += 3;
+
 		if (bnormal)
 		{
-			m_data->normals[3 * i + 0] = verts[offset++];
-			m_data->normals[3 * i + 1] = verts[offset++];
-			m_data->normals[3 * i + 2] = verts[offset++];
+			glm::vec3 n(verts[offset], verts[offset + 1], verts[offset + 2]);
+			n = glm::normalize(N * n);
+			m_data->normals[3 * i + 0] = n.x;
+			m_data->normals[3 * i + 1] = n.y;
+			m_data->normals[3 * i + 2] = n.z;
+			offset += 3;
 		}
+
 		if (btexcoord)
 		{
 			m_data->texcoords[2 * i + 0] = verts[offset++];

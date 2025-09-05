@@ -89,6 +89,12 @@ void ConvVolMesh::Convert()
 	int chars = bits / 8;
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
+	//clamp factors
+	auto clamp_factor = [](int dim, int factor) -> int
+		{
+			return (factor < 1) ? 1 : (dim / factor < 1) ? dim : factor;
+		};
+
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_marching_cubes, bits, max_int);
 	if (!kernel_prog)
@@ -109,6 +115,13 @@ void ConvVolMesh::Convert()
 		long nx, ny, nz, ox, oy, oz;
 		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
 			continue;
+
+		int xy_factor = clamp_factor(std::min(nx, ny), m_downsample);
+		int z_factor = clamp_factor(nz, m_downsample_z);
+		int ds_nx = nx / xy_factor;
+		int ds_ny = ny / xy_factor;
+		int ds_nz = nz / z_factor;
+
 		//get tex ids
 		GLint tid = vd->GetVR()->load_brick(b);
 		GLint mid = 0;
@@ -117,7 +130,7 @@ void ConvVolMesh::Convert()
 
 		//compute workload
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t global_size[3] = { size_t(ds_nx), size_t(ds_ny), size_t(ds_nz) };
 
 		kernel_prog->setKernelArgBegin(kernel_idx0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
@@ -126,8 +139,8 @@ void ConvVolMesh::Convert()
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample_z));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&xy_factor));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&z_factor));
 		//if (m_use_mask)
 		//	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
@@ -154,6 +167,13 @@ void ConvVolMesh::Convert()
 		long nx, ny, nz, ox, oy, oz;
 		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
 			continue;
+
+		int xy_factor = clamp_factor(std::min(nx, ny), m_downsample);
+		int z_factor = clamp_factor(nz, m_downsample_z);
+		int ds_nx = nx / xy_factor;
+		int ds_ny = ny / xy_factor;
+		int ds_nz = nz / z_factor;
+
 		//get tex ids
 		GLint tid = vd->GetVR()->load_brick(b);
 		GLint mid = 0;
@@ -162,7 +182,7 @@ void ConvVolMesh::Convert()
 
 		//compute workload
 		size_t local_size[3] = { 1, 1, 1 };
-		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
+		size_t global_size[3] = { size_t(ds_nx), size_t(ds_ny), size_t(ds_nz) };
 
 		kernel_prog->setKernelArgBegin(kernel_idx1);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
@@ -176,8 +196,8 @@ void ConvVolMesh::Convert()
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&m_downsample_z));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&xy_factor));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&z_factor));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ox));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oy));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oz));

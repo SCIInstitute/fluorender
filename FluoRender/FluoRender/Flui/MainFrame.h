@@ -121,6 +121,7 @@ class MainFrame: public wxFrame
 	{
 		//toolbar
 		ID_Null = 0,
+		ID_LastOpen,
 		ID_OpenVolume,
 		ID_ImportVolume,
 		ID_OpenProject,
@@ -312,6 +313,7 @@ public:
 
 	//hide/show tools
 	void ToggleAllPanels(bool cur_state);
+	void ToggleLastOpen();
 	void ToggleLastTool();
 	void ShowPanel(wxPanel* pane, bool show = true);
 	//main toolbar
@@ -354,6 +356,7 @@ private:
 	wxAuiManager m_aui_mgr;
 	//main toolbar
 	wxAuiToolBar* m_main_tb;
+	std::unique_ptr<wxMenu> m_tb_menu_open;
 	std::unique_ptr<wxMenu> m_tb_menu_ui;
 	std::unique_ptr<wxMenu> m_tb_menu_edit;
 	std::unique_ptr<wxMenu> m_tb_menu_update;

@@ -82,24 +82,6 @@ __kernel void kernel_0(
 	atomic_inc(active_voxel_counter);
 }
 
-int3 get_edge_vertex(
-	int x, int y, int z,
-	int edge, int endpoint,
-	__constant int* edge_pairs,
-	__constant int* cube_table
-)
-{
-	// Each edge has two vertex indices: edge_pairs[edge * 2 + endpoint]
-	int vertex_index = edge_pairs[edge * 2 + endpoint];
-
-	// Each vertex has 3 components: cube_table[vertex_index * 3 + {0,1,2}]
-	int dx = cube_table[vertex_index * 3 + 0];
-	int dy = cube_table[vertex_index * 3 + 1];
-	int dz = cube_table[vertex_index * 3 + 2];
-
-	return (int3)(x + dx, y + dy, z + dz);
-}
-
 float3 interpolate_vertex_scaled_offset(
 	int x, int y, int z, int edge, float t,
 	int xy_factor, int z_factor,
@@ -108,19 +90,37 @@ float3 interpolate_vertex_scaled_offset(
 	__constant int* cube_table
 )
 {
-	int3 p0 = get_edge_vertex(x, y, z, edge, 0, edge_pairs, cube_table);
-	int3 p1 = get_edge_vertex(x, y, z, edge, 1, edge_pairs, cube_table);
+	int vertex_index0 = edge_pairs[edge * 2 + 0];
+	int vertex_index1 = edge_pairs[edge * 2 + 1];
 
-	float3 world_p0 = (float3)(
-		p0.x * xy_factor + x_offset,
-		p0.y * xy_factor + y_offset,
-		p0.z * z_factor + z_offset
+	int3 delta0 = (int3)(
+		cube_table[vertex_index0 * 3 + 0],
+		cube_table[vertex_index0 * 3 + 1],
+		cube_table[vertex_index0 * 3 + 2]
 	);
 
-	float3 world_p1 = (float3)(
-		p1.x * xy_factor + x_offset,
-		p1.y * xy_factor + y_offset,
-		p1.z * z_factor + z_offset
+	int3 delta1 = (int3)(
+		cube_table[vertex_index1 * 3 + 0],
+		cube_table[vertex_index1 * 3 + 1],
+		cube_table[vertex_index1 * 3 + 2]
+	);
+
+	float3 base = (float3)(
+		x + x_offset,
+		y + y_offset,
+		z + z_offset
+	);
+
+	float3 world_p0 = base + (float3)(
+		delta0.x * xy_factor,
+		delta0.y * xy_factor,
+		delta0.z * z_factor
+	);
+
+	float3 world_p1 = base + (float3)(
+		delta1.x * xy_factor,
+		delta1.y * xy_factor,
+		delta1.z * z_factor
 	);
 
 	return world_p0 + t * (world_p1 - world_p0);
