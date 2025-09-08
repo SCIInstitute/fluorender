@@ -41,6 +41,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MCTable.h>
 #include <glm.h>
 #include <random>
+#include <sstream>
+#include <iostream>
 
 using namespace flrd;
 
@@ -78,6 +80,8 @@ void ConvVolMesh::Convert()
 	int brick_num = vd->GetTexture()->get_brick_num();
 	if (brick_num <= 0)
 		return;
+	bool valid_mask = vd->IsValidMask();
+	m_use_sel = m_use_mask && valid_mask;
 
 	//always create new mesh
 	m_mesh = std::make_shared<MeshData>();
@@ -97,6 +101,8 @@ void ConvVolMesh::Update(bool create_mesh)
 	int brick_num = vd->GetTexture()->get_brick_num();
 	if (brick_num <= 0)
 		return;
+	bool valid_mask = vd->IsValidMask();
+	m_use_sel = m_use_mask && valid_mask;
 
 	if (!m_mesh)
 	{
@@ -131,6 +137,37 @@ bool ConvVolMesh::GetAutoUpdate()
 	return true;
 }
 
+std::string ConvVolMesh::GetKernelString(bool mask)
+{
+	std::ostringstream z;
+
+	z << str_cl_marching_cubes_head;
+	//kernel0: preprocess
+	if (mask)
+		z << str_cl_marching_cubes_kernel0_mask;
+	else
+		z << str_cl_marching_cubes_kernel0_nomask;
+	z << str_cl_marching_cubes_kernel_head;
+	z << str_cl_marching_cubes_read_volume;
+	if (mask)
+		z << str_cl_marching_cubes_read_mask;
+	z << str_cl_marching_cubes_kernel0_tail;
+	//kernel1 func: interpolation
+	z << str_cl_marching_cubes_kernel1_func;
+	//kernel1: marching cubes
+	if (mask)
+		z << str_cl_marching_cubes_kernel1_mask;
+	else
+		z << str_cl_marching_cubes_kernel1_nomask;
+	z << str_cl_marching_cubes_kernel_head;
+	z << str_cl_marching_cubes_read_volume;
+	if (mask)
+		z << str_cl_marching_cubes_read_mask;
+	z << str_cl_marching_cubes_kernel1_tail;
+
+	return z.str();
+}
+
 void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 {
 	m_busy = true;
@@ -147,7 +184,8 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		};
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_marching_cubes, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(
+		GetKernelString(m_use_sel), bits, max_int);
 	if (!kernel_prog)
 		return;
 
@@ -176,7 +214,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		//get tex ids
 		GLint tid = vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
@@ -185,6 +223,8 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 
 		kernel_prog->setKernelArgBegin(kernel_idx0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+		if (m_use_sel)
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iso_value));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
@@ -192,8 +232,6 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&xy_factor));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&z_factor));
-		//if (m_use_mask)
-		//	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_idx0, 3, global_size, local_size);
@@ -228,7 +266,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		//get tex ids
 		GLint tid = vd->GetVR()->load_brick(b);
 		GLint mid = 0;
-		if (m_use_mask)
+		if (m_use_sel)
 			mid = vd->GetVR()->load_brick_mask(b);
 
 		//compute workload
@@ -237,6 +275,8 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 
 		kernel_prog->setKernelArgBegin(kernel_idx1);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+		if (m_use_sel)
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, vbo_id, vbo_size);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize2));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
@@ -252,8 +292,6 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ox));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oy));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oz));
-		//if (m_use_mask)
-		//	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_idx1, 3, global_size, local_size);

@@ -29,12 +29,15 @@ DEALINGS IN THE SOFTWARE.
 #define MESH_CL_H
 
 //marching cubes
-inline constexpr const char* str_cl_marching_cubes = R"CLKER(
+inline constexpr const char* str_cl_marching_cubes_head = R"CLKER(
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_CLAMP_TO_EDGE|
 	CLK_FILTER_NEAREST;
 
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_kernel0_nomask = R"CLKER(
 __kernel void kernel_0(
 	__read_only image3d_t volume,               // 3D scalar field
 	__global int* active_voxel_counter,         // Atomic counter
@@ -45,6 +48,23 @@ __kernel void kernel_0(
 	int xy_factor,                              // Coarsening factor for X and Y
 	int z_factor                                // Coarsening factor for Z
 )
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_kernel0_mask = R"CLKER(
+__kernel void kernel_0(
+	__read_only image3d_t volume,               // 3D scalar field
+	__read_only image3d_t mask,                 // 3D mask field
+	__global int* active_voxel_counter,         // Atomic counter
+	float isovalue,                             // Isosurface threshold
+	int volume_width,                           // nx
+	int volume_height,                          // ny
+	int volume_depth,                           // nz
+	int xy_factor,                              // Coarsening factor for X and Y
+	int z_factor                                // Coarsening factor for Z
+)
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_kernel_head = R"CLKER(
 {
 	int gx = get_global_id(0);
 	int gy = get_global_id(1);
@@ -57,6 +77,9 @@ __kernel void kernel_0(
 	if (x >= volume_width - xy_factor || y >= volume_height - xy_factor || z >= volume_depth - z_factor)
 		return;
 
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_read_volume = R"CLKER(
 	// Sample the 8 corners of the coarse voxel
 	float cube[8];
 	cube[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
@@ -68,6 +91,22 @@ __kernel void kernel_0(
 	cube[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
 	cube[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
 
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_read_mask = R"CLKER(
+	// Sample the 8 corners of the coarse voxel
+	cube[0] = read_imagef(mask, samp, (int4)(x, y, z, 0)).x > 0.0 ? cube[0] : 0.0;
+	cube[1] = read_imagef(mask, samp, (int4)(x+xy_factor, y, z, 0)).x > 0.0 ? cube[1] : 0.0;
+	cube[2] = read_imagef(mask, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x > 0.0 ? cube[2] : 0.0;
+	cube[3] = read_imagef(mask, samp, (int4)(x, y+xy_factor, z, 0)).x > 0.0 ? cube[3] : 0.0;
+	cube[4] = read_imagef(mask, samp, (int4)(x, y, z+z_factor, 0)).x > 0.0 ? cube[4] : 0.0;
+	cube[5] = read_imagef(mask, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x > 0.0 ? cube[5] : 0.0;
+	cube[6] = read_imagef(mask, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x > 0.0 ? cube[6] : 0.0;
+	cube[7] = read_imagef(mask, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x > 0.0 ? cube[7] : 0.0;
+
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_kernel0_tail = R"CLKER(
 	// Compute cube index
 	int cube_index = 0;
 	for (int i = 0; i < 8; ++i)
@@ -82,6 +121,9 @@ __kernel void kernel_0(
 	atomic_inc(active_voxel_counter);
 }
 
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_kernel1_func = R"CLKER(
 float3 interpolate_vertex_scaled_offset(
 	int x, int y, int z, int edge, float t,
 	int xy_factor, int z_factor,
@@ -126,6 +168,9 @@ float3 interpolate_vertex_scaled_offset(
 	return world_p0 + t * (world_p1 - world_p0);
 }
 
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_kernel1_nomask = R"CLKER(
 __kernel void kernel_1(
 	__read_only image3d_t volume,
 	__global float* vertex_buffer,
@@ -144,28 +189,31 @@ __kernel void kernel_1(
 	int y_offset,
 	int z_offset
 )
-{
-	int gx = get_global_id(0);
-	int gy = get_global_id(1);
-	int gz = get_global_id(2);
+)CLKER";
 
-	int x = gx * xy_factor;
-	int y = gy * xy_factor;
-	int z = gz * z_factor;
+inline constexpr const char* str_cl_marching_cubes_kernel1_mask = R"CLKER(
+__kernel void kernel_1(
+	__read_only image3d_t volume,
+	__read_only image3d_t mask,
+	__global float* vertex_buffer,
+	__global int* vertex_counter,
+	__constant int* cube_table,
+	__constant int* edge_table,
+	__constant int* tri_table,
+	__constant int* edge_pairs,
+	float isovalue,
+	int volume_width,
+	int volume_height,
+	int volume_depth,
+	int xy_factor,
+	int z_factor,
+	int x_offset,
+	int y_offset,
+	int z_offset
+)
+)CLKER";
 
-	if (x >= volume_width - xy_factor || y >= volume_height - xy_factor || z >= volume_depth - z_factor)
-		return;
-
-	float cube[8];
-	cube[0] = read_imagef(volume, samp, (int4)(x, y, z, 0)).x;
-	cube[1] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z, 0)).x;
-	cube[2] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z, 0)).x;
-	cube[3] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z, 0)).x;
-	cube[4] = read_imagef(volume, samp, (int4)(x, y, z+z_factor, 0)).x;
-	cube[5] = read_imagef(volume, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x;
-	cube[6] = read_imagef(volume, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x;
-	cube[7] = read_imagef(volume, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x;
-
+inline constexpr const char* str_cl_marching_cubes_kernel1_tail = R"CLKER(
 	int cube_index = 0;
 	for (int i = 0; i < 8; ++i)
 		if (cube[i] < isovalue)

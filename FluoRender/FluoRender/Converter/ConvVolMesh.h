@@ -52,6 +52,11 @@ namespace flrd
 		virtual bool GetAutoUpdate() override;
 
 	private:
+		bool m_use_sel = false;//internal flag based on validity of mask
+
+	private:
+		std::string GetKernelString(bool mask);
+
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz,
 			long &ox, long &oy, long &oz);

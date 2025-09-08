@@ -217,8 +217,12 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		//(*m_stat_text) << str << "\n";
 	}
 
-	if (FOUND_VALUE(gstConvVolMeshUpdate))
+	bool brush_update = FOUND_VALUE(gstBrushCountResult);
+	if (FOUND_VALUE(gstConvVolMeshUpdate) ||
+		brush_update)
 	{
+		if (brush_update && !glbin_conv_vol_mesh->GetUseMask())
+			return;
 		if (glbin_conv_vol_mesh->GetAutoUpdate() &&
 			!glbin_conv_vol_mesh->IsBusy())
 			glbin_conv_vol_mesh->Update(false);

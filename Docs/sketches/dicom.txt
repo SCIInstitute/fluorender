@@ -1,0 +1,90 @@
+bool DICOMReader::Preprocess(const std::string& filename)
+{
+    std::ifstream file(filename, std::ios::binary);
+    if (!file.is_open()) return false;
+
+    // Skip 128-byte preamble + "DICM" marker
+    file.seekg(132, std::ios::beg);
+
+    uint16_t group, element;
+    char vr[3] = {0};
+    uint32_t length;
+    std::map<uint32_t, std::vector<char>> tag_map;
+
+    while (file.read(reinterpret_cast<char*>(&group), 2) &&
+           file.read(reinterpret_cast<char*>(&element), 2))
+    {
+        file.read(vr, 2);
+        file.read(reinterpret_cast<char*>(&length), 4);
+
+        std::vector<char> value(length);
+        file.read(value.data(), length);
+
+        uint32_t tag = (group << 16) | element;
+        tag_map[tag] = std::move(value);
+
+        // Stop if we reach pixel data tag
+        if (tag == 0x7FE00010) break;
+    }
+
+    // Extract metadata
+    rows_ = *reinterpret_cast<uint16_t*>(tag_map[0x00280010].data());
+    cols_ = *reinterpret_cast<uint16_t*>(tag_map[0x00280011].data());
+    bits_allocated_ = *reinterpret_cast<uint16_t*>(tag_map[0x00280100].data());
+    samples_per_pixel_ = *reinterpret_cast<uint16_t*>(tag_map[0x00280002].data());
+
+    // Optional: pixel spacing
+    if (tag_map.count(0x00280030)) {
+        std::string spacing_str(tag_map[0x00280030].data(), tag_map[0x00280030].size());
+        sscanf(spacing_str.c_str(), "%f\\%f", &spacing_x_, &spacing_y_);
+    }
+
+    return true;
+}
+
+bool DICOMReader::Convert(Nrrd* output)
+{
+    std::ifstream file(filename_, std::ios::binary);
+    if (!file.is_open()) return false;
+
+    // Seek to pixel data tag
+    file.seekg(132, std::ios::beg);
+    uint16_t group, element;
+    char vr[3] = {0};
+    uint32_t length;
+
+    while (file.read(reinterpret_cast<char*>(&group), 2) &&
+           file.read(reinterpret_cast<char*>(&element), 2))
+    {
+        file.read(vr, 2);
+        file.read(reinterpret_cast<char*>(&length), 4);
+
+        if ((group << 16 | element) == 0x7FE00010) {
+            std::vector<char> pixel_data(length);
+            file.read(pixel_data.data(), length);
+
+            // Allocate and populate Nrrd
+            size_t size = rows_ * cols_ * samples_per_pixel_;
+            if (bits_allocated_ == 8) {
+                output->data = new uint8_t[size];
+                memcpy(output->data, pixel_data.data(), size);
+                output->type = nrrdTypeUChar;
+            } else if (bits_allocated_ == 16) {
+                output->data = new uint16_t[size];
+                memcpy(output->data, pixel_data.data(), size * 2);
+                output->type = nrrdTypeUShort;
+            }
+
+            output->axis[0].size = cols_;
+            output->axis[1].size = rows_;
+            output->axis[0].spacing = spacing_x_;
+            output->axis[1].spacing = spacing_y_;
+
+            return true;
+        } else {
+            file.seekg(length, std::ios::cur); // Skip non-pixel data
+        }
+    }
+
+    return false;
+}
