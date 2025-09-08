@@ -3,7 +3,7 @@
 
 #define MyAppName "FluoRender"   
 #define MyAppSetupName 'FluoRender'
-#define MyAppVersion "2.33"
+#define MyAppVersion "2.34"
 #define MyAppPublisher "FluoRender"
 #define MyAppURL "https://sciinstitute.github.io/fluorender/"
 #define MyAppExeName "FluoRender.exe"
@@ -13,7 +13,7 @@
 
 [Setup]
 OutputDir=..\build
-OutputBaseFilename=FluoRender2.33_win64
+OutputBaseFilename=FluoRender2.34_win64
 SetupIconFile=.\Images\FluoRenderIcon.ico
 WizardImageFile=.\Images\fluorender_logo_cut.bmp
 WizardSmallImageFile=.\Images\fluorender_logo_square.bmp
