@@ -95,7 +95,9 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == L".m4v" ||
 					 suffix == L".mov" ||
 					 suffix == L".avi" ||
-					 suffix == L".wmv")
+					 suffix == L".wmv" ||
+					 suffix == L".dcm" ||
+					 suffix == L".dicom")
 			{
 				glbin_data_manager.LoadVolumes(std_filenames, false);
 			}

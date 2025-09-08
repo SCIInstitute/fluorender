@@ -250,6 +250,8 @@ void Project::Open(const std::wstring& filename)
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_LOF, false, cur_chan, cur_time);
 					else if (suffix == L".mp4" || suffix == L".m4v" || suffix == L".mov" || suffix == L".avi" || suffix == L".wmv")
 						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_MPG, false, cur_chan, cur_time);
+					else if (suffix == L".dcm" || suffix == L".dicom")
+						loaded_num = glbin_data_manager.LoadVolumeData(filepath, LOAD_TYPE_DCM, false, cur_chan, cur_time);
 				}
 				std::shared_ptr<VolumeData> vd;
 				if (loaded_num)

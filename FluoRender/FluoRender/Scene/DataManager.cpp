@@ -76,6 +76,7 @@ DEALINGS IN THE SOFTWARE.
 #include <mpg_reader.h>
 #include <png_reader.h>
 #include <jpg_reader.h>
+#include <dcm_reader.h>
 #include <compatibility.h>
 #include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -6647,6 +6648,8 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_LOF, false);
 		else if (suffix == L".mp4" || suffix == L".m4v" || suffix == L".mov" || suffix == L".avi" || suffix == L".wmv")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_MPG, false);
+		else if (suffix == L".dcm" || suffix == L".dicom")
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_DCM, false);
 
 		all_ch_num += ch_num;
 		if (ch_num > 1)
@@ -6811,7 +6814,9 @@ void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_m
 			suffix == L".m4v" ||
 			suffix == L".mov" ||
 			suffix == L".avi" ||
-			suffix == L".wmv")
+			suffix == L".wmv" ||
+			suffix == L".dcm" ||
+			suffix == L".dicom")
 		{
 			LoadVolumes(files, with_imagej);
 		}
@@ -6931,6 +6936,10 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				reader = std::make_shared<LOFReader>();
 			else if (type == LOAD_TYPE_MPG)
 				reader = std::make_shared<MPGReader>();
+			else if (type == LOAD_TYPE_DCM)
+				reader = std::make_shared<DCMReader>();
+			else
+				return result;
 		}
 		
 		reader->SetProgressFunc(GetProgressFunc());

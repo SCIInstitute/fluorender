@@ -63,6 +63,7 @@ typedef float GLfloat;
 #define LOAD_TYPE_MPG		12
 #define LOAD_TYPE_PNG		13
 #define LOAD_TYPE_JPG		14
+#define LOAD_TYPE_DCM		15
 
 class BaseReader;
 struct _GLMmodel;

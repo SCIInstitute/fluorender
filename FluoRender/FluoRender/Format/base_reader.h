@@ -63,6 +63,7 @@ DEALINGS IN THE SOFTWARE.
 #define READER_MPG_TYPE	12
 #define READER_JPG_TYPE	13
 #define READER_PNG_TYPE	14
+#define READER_DCM_TYPE	15
 
 class BaseReader : public Progress
 {
