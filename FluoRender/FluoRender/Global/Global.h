@@ -43,6 +43,7 @@ class ComponentDefault;
 class OutAdjDefault;
 class ViewDefault;
 class VolumeDataDefault;
+class MeshDefault;
 class MovieDefault;
 class ColocalDefault;
 class GlobalStates;
@@ -114,6 +115,7 @@ namespace flvr
 #define glbin_outadj_def fluo::Global::instance().get_outadj_def()
 #define glbin_view_def fluo::Global::instance().get_view_def()
 #define glbin_vol_def fluo::Global::instance().get_vol_def()
+#define glbin_mesh_def fluo::Global::instance().get_mesh_def()
 #define glbin_mov_def fluo::Global::instance().get_movie_def()
 #define glbin_colocal_def fluo::Global::instance().get_colocal_def()
 //states
@@ -225,6 +227,7 @@ namespace fluo
 		OutAdjDefault& get_outadj_def();
 		ViewDefault& get_view_def();
 		VolumeDataDefault& get_vol_def();
+		MeshDefault& get_mesh_def();
 		MovieDefault& get_movie_def();
 		ColocalDefault& get_colocal_def();
 

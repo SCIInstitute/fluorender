@@ -9208,7 +9208,8 @@ void RenderView::DrawBrush()
 
 		if (sel_mode == flrd::SelectMode::SingleSelect ||
 			sel_mode == flrd::SelectMode::Append ||
-			sel_mode == flrd::SelectMode::Segment)
+			sel_mode == flrd::SelectMode::Segment ||
+			sel_mode == flrd::SelectMode::Mesh)
 			DrawCircles(cx, cy, br1*pressure,
 				br2*pressure, text_color, proj_mat);
 		else if (sel_mode == flrd::SelectMode::Solid)
@@ -9232,6 +9233,7 @@ void RenderView::DrawBrush()
 			break;
 		case flrd::SelectMode::Append:
 		case flrd::SelectMode::Segment:
+		case flrd::SelectMode::Mesh:
 			wstr = L"+";
 			break;
 		case flrd::SelectMode::Eraser:

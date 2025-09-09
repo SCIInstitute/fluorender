@@ -80,6 +80,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextRenderer.h>
 #include <MshShader.h>
 #include <Project.h>
+#include <MeshDefault.h>
 
 using namespace fluo;
 
@@ -523,6 +524,11 @@ VolumeDataDefault& Global::get_vol_def()
 	return main_settings_->m_vol_def;
 }
 
+MeshDefault& Global::get_mesh_def()
+{
+	return main_settings_->m_mesh_def;
+}
+
 MovieDefault& Global::get_movie_def()
 {
 	return main_settings_->m_movie_def;
@@ -667,7 +673,10 @@ flrd::BaseConvVolMesh* Global::get_conv_vol_mesh()
 		break;
 	}
 	m_conv_vol_mesh->SetProgressFunc(project_->GetProgressFunc());
-	return m_conv_vol_mesh.get();
+	flrd::BaseConvVolMesh* cvm = m_conv_vol_mesh.get();
+	glbin_mesh_def.Apply(cvm);
+
+	return cvm;
 }
 
 LookingGlassRenderer& Global::get_looking_glass_renderer()

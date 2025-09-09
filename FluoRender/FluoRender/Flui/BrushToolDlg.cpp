@@ -131,17 +131,22 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 		"Highlight structures by painting on the render view (hold Shift)",
 		"Highlight structures by painting on the render view (hold Shift)");
 	bitmap = wxGetBitmap(brush_comp);
-	m_toolbar->AddCheckTool(ID_BrushComp, "Segment",
+	m_toolbar->AddCheckTool(ID_BrushComp, "Segmnt",
 		bitmap, wxNullBitmap,
 		"Select structures and then segment them into components",
 		"Select structures and then segment them into components");
+	bitmap = wxGetBitmap(brush_mesh);
+	m_toolbar->AddCheckTool(ID_BrushMesh, "Mesh",
+		bitmap, wxNullBitmap,
+		"Select structures and then convert them to mesh",
+		"Select structures and then convert them to mesh");
 	bitmap = wxGetBitmap(brush_single);
-	m_toolbar->AddCheckTool(ID_BrushSingle, "Isolate",
+	m_toolbar->AddCheckTool(ID_BrushSingle, "Isol.",
 		bitmap, wxNullBitmap,
 		"Select and isolate a structure by painting",
 		"Select and isolate a structure by painting");
 	bitmap = wxGetBitmap(brush_diffuse);
-	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diffuse",
+	m_toolbar->AddCheckTool(ID_BrushDiffuse, "Diff.",
 		bitmap, wxNullBitmap,
 		"Diffuse highlighted structures by painting (hold Z)",
 		"Diffuse highlighted structures by painting (hold Z)");
@@ -524,6 +529,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_toolbar->ToggleTool(ID_BrushGrow, int_mode == InteractiveMode::Grow);
 		m_toolbar->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
 		m_toolbar->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
+		m_toolbar->ToggleTool(ID_BrushMesh, sel_mode == flrd::SelectMode::Mesh);
 		m_toolbar->ToggleTool(ID_BrushSingle, sel_mode == flrd::SelectMode::SingleSelect);
 		m_toolbar->ToggleTool(ID_BrushDiffuse, sel_mode == flrd::SelectMode::Diffuse);
 		m_toolbar->ToggleTool(ID_BrushSolid, sel_mode == flrd::SelectMode::Solid);
@@ -717,6 +723,12 @@ void BrushToolDlg::BrushComp()
 	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
 }
 
+void BrushToolDlg::BrushMesh()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Mesh);
+	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
+}
+
 void BrushToolDlg::BrushSingle()
 {
 	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
@@ -841,6 +853,9 @@ void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 		break;
 	case ID_BrushComp:
 		BrushComp();
+		break;
+	case ID_BrushMesh:
+		BrushMesh();
 		break;
 	case ID_BrushSingle:
 		BrushSingle();

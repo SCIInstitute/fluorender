@@ -906,6 +906,7 @@ MainFrame::~MainFrame()
 	glbin_comp_def.Set(&glbin_comp_selector);
 	glbin_comp_def.Set(&glbin_comp_analyzer);
 	glbin_mov_def.Set(&glbin_moviemaker);
+	glbin_mesh_def.Set(glbin_conv_vol_mesh);
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	//frame layout
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();

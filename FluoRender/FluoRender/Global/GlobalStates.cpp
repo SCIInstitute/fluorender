@@ -243,5 +243,6 @@ bool GlobalStates::QueryShowBrush()
 		sel_mode == flrd::SelectMode::Append ||
 		sel_mode == flrd::SelectMode::Eraser ||
 		sel_mode == flrd::SelectMode::Diffuse ||
-		sel_mode == flrd::SelectMode::Segment;
+		sel_mode == flrd::SelectMode::Segment ||
+		sel_mode == flrd::SelectMode::Mesh;
 }

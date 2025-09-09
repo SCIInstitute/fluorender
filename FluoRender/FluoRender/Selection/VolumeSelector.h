@@ -52,6 +52,7 @@ namespace flrd
 		Solid,			//8-solid;
 		Grow,			//9-grow from point;
 		Segment,		//10-select and gen comps
+		Mesh			//11-select and gen mesh
 	};
 
 	struct BrushRadiusSet
@@ -238,7 +239,8 @@ namespace flrd
 		{
 			SelectMode mode = m_mode;
 			if (mode == SelectMode::SingleSelect ||
-				mode == SelectMode::Segment)
+				mode == SelectMode::Segment ||
+				mode == SelectMode::Mesh)
 				mode = SelectMode::Append;
 			for (auto& it : m_brush_radius_sets)
 			{

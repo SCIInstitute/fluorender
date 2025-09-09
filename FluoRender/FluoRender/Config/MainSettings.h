@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <OutAdjDefault.h>
 #include <ViewDefault.h>
 #include <VolumeDefault.h>
+#include <MeshDefault.h>
 #include <MovieDefault.h>
 #include <ColocalDefault.h>
 #include <string>
@@ -80,6 +81,7 @@ public:
 	OutAdjDefault m_outadj_def;
 	ViewDefault m_view_def;
 	VolumeDataDefault m_vol_def;
+	MeshDefault m_mesh_def;
 	MovieDefault m_movie_def;
 	ColocalDefault m_colocal_def;
 

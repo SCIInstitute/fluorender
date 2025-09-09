@@ -494,6 +494,7 @@ void MainSettings::Read()
 	m_outadj_def.Read();
 	m_view_def.Read();
 	m_vol_def.Read();
+	m_mesh_def.Read();
 	m_movie_def.Read();
 	m_colocal_def.Read();
 }
@@ -730,6 +731,7 @@ void MainSettings::Save()
 	m_outadj_def.Save();
 	m_view_def.Save();
 	m_vol_def.Save();
+	m_mesh_def.Save();
 	m_movie_def.Save();
 	m_colocal_def.Save();
 

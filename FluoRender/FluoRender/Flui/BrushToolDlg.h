@@ -54,6 +54,7 @@ public:
 		ID_BrushGrow,
 		ID_BrushAppend,
 		ID_BrushComp,
+		ID_BrushMesh,
 		ID_BrushSingle,
 		ID_BrushDiffuse,
 		ID_BrushSolid,
@@ -92,6 +93,7 @@ public:
 	void BrushGrow();
 	void BrushAppend();
 	void BrushComp();
+	void BrushMesh();
 	void BrushSingle();
 	void BrushDiffuse();
 	void BrushSolid();

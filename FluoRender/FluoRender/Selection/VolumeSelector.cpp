@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <TextureRenderer.h>
 #include <CompGenerator.h>
+#include <BaseConvVolMesh.h>
 #include <PaintBoxes.h>
 #include <MaskBorder.h>
 #include <Histogram.h>
@@ -170,6 +171,27 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		glbin_comp_generator.SetUseSel(true);
 		glbin_comp_generator.GenerateComp();
 		glbin_comp_generator.SetUseSel(bval);
+	}
+
+	if (m_mode == SelectMode::Mesh &&
+		!glbin_conv_vol_mesh->IsBusy())
+	{
+		//generate mesh
+		glbin_conv_vol_mesh->SetVolumeData(m_vd);
+		glbin_conv_vol_mesh->SetUseMask(true);
+		glbin_conv_vol_mesh->Update(true);
+		auto md = glbin_conv_vol_mesh->GetMeshData();
+		if (md)
+		{
+			auto find_md = glbin_data_manager.GetMeshData(md->GetName());
+			if (!find_md)
+			{
+				glbin_data_manager.AddMeshData(md);
+				auto view = glbin_current.render_view.lock();
+				if (view)
+					view->AddMeshData(md);
+			}
+		}
 	}
 }
 
@@ -340,7 +362,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		m_mode == SelectMode::Diffuse ||
 		m_mode == SelectMode::Solid ||
 		m_mode == SelectMode::Grow ||
-		m_mode == SelectMode::Segment)
+		m_mode == SelectMode::Segment ||
+		m_mode == SelectMode::Mesh)
 	{
 		if (bricks->size() > 1)
 		{
@@ -380,7 +403,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		int hr_mode = m_hidden_removal ? (m_ortho ? 1 : 2) : 0;
 		if ((m_mode == SelectMode::SingleSelect ||
 			m_mode == SelectMode::Append ||
-			m_mode == SelectMode::Segment) &&
+			m_mode == SelectMode::Segment ||
+			m_mode == SelectMode::Mesh) &&
 			m_estimate_threshold && est_th)
 		{
 			m_vd->DrawMask(0, static_cast<int>(m_mode), hr_mode, 0.0, gm_falloff, scl_falloff, 0.0, m_w2d, 0.0, 0, false, true);
@@ -401,7 +425,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			m_mode == SelectMode::Eraser ||
 			m_mode == SelectMode::Diffuse ||
 			m_mode == SelectMode::Grow ||
-			m_mode == SelectMode::Segment)
+			m_mode == SelectMode::Segment ||
+			m_mode == SelectMode::Mesh)
 		{
 			//loop for growing
 			m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
@@ -415,7 +440,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 					m_mode == SelectMode::Append ||
 					m_mode == SelectMode::Diffuse ||
 					m_mode == SelectMode::Grow ||
-					m_mode == SelectMode::Segment)
+					m_mode == SelectMode::Segment ||
+					m_mode == SelectMode::Mesh)
 					mb.Compute(order);
 				m_vd->DrawMask(1, static_cast<int>(m_mode), 0, ini_thresh,
 					gm_falloff, scl_falloff,
@@ -676,7 +702,9 @@ std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop)
 void VolumeSelector::ChangeBrushSetsIndex()
 {
 	SelectMode mode = m_mode;
-	if (mode == SelectMode::SingleSelect || mode == SelectMode::Segment)
+	if (mode == SelectMode::SingleSelect ||
+		mode == SelectMode::Segment ||
+		mode == SelectMode::Mesh)
 		mode = SelectMode::Append;
 	for (int i = 0; i < m_brush_radius_sets.size(); ++i)
 	{

@@ -289,6 +289,8 @@ public:
 	const static unsigned char brush_append_png[786];
 	/* brush_comp.png - 1184 bytes */
 	const static unsigned char brush_comp_png[1184];
+	/* brush_mesh.png - 1157 bytes */
+	const static unsigned char brush_mesh_png[1157];
 	/* brush_locator.png - 1001 bytes */
 	const static unsigned char brush_locator_png[1001];
 	/* brush_clear.png - 979 bytes */
