@@ -180,18 +180,6 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		glbin_conv_vol_mesh->SetVolumeData(m_vd);
 		glbin_conv_vol_mesh->SetUseMask(true);
 		glbin_conv_vol_mesh->Update(true);
-		auto md = glbin_conv_vol_mesh->GetMeshData();
-		if (md)
-		{
-			auto find_md = glbin_data_manager.GetMeshData(md->GetName());
-			if (!find_md)
-			{
-				glbin_data_manager.AddMeshData(md);
-				auto view = glbin_current.render_view.lock();
-				if (view)
-					view->AddMeshData(md);
-			}
-		}
 	}
 }
 

@@ -243,6 +243,8 @@ GLvoid glmDelete(GLMmodel* model);
 */
 GLvoid glmClear(GLMmodel* model);
 
+GLvoid glmClearGeometry(GLMmodel* model);
+
 /* glmReadOBJ: Reads a model description from a Wavefront .OBJ file.
 * Returns a pointer to the created object which should be free'd with
 * glmDelete().

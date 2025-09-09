@@ -62,6 +62,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompSelector.h>
 #include <Colocalize.h>
 #include <CompEditor.h>
+#include <BaseConvVolMesh.h>
 #include <ImgShader.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>
@@ -11120,6 +11121,22 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (glbin_vol_selector.GetAutoThreshold())
 				vc.insert({ gstBrushThreshold, gstCompThreshold });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
+			if (glbin_vol_selector.GetSelectMode() == flrd::SelectMode::Mesh)
+			{
+				auto md = glbin_conv_vol_mesh->GetMeshData();
+				if (md)
+				{
+					auto find_md = glbin_data_manager.GetMeshData(md->GetName());
+					if (!find_md)
+					{
+						glbin_data_manager.AddMeshData(md);
+						auto view = glbin_current.render_view.lock();
+						if (view)
+							view->AddMeshData(md);
+						vc.insert({ gstListCtrl, gstTreeCtrl, gstUseSelection });
+					}
+				}
+			}
 			m_int_mode = InteractiveMode::BrushSelectUpdate;
 			m_force_clear = true;
 			RefreshGL(17);

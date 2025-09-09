@@ -1948,7 +1948,8 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 	double w2d, double bins, int order, bool ortho, bool estimate)
 {
 	int pmode2 = paint_mode;
-	pmode2 = pmode2 == 10 ? 2 : pmode2; //convert to append mode
+	pmode2 = (pmode2 == 10 || pmode2 == 11) ?
+		2 : pmode2; //convert to append mode
 	if (m_vr)
 	{
 		m_vr->set_2d_mask(m_2d_mask);
@@ -4124,7 +4125,6 @@ void MeshData::AddEmptyData()
 	model->position[1] = 0.0f;
 	model->position[2] = 0.0f;
 	model->hastexture = false;
-	glmClear(model);
 
 	//add default group
 	GLMgroup* group = new GLMgroup;
@@ -4172,7 +4172,7 @@ void MeshData::AddEmptyData()
 void MeshData::ClearData()
 {
 	GLMmodel* model = m_mr->get_data();
-	glmClear(model);
+	glmClearGeometry(model);
 	//add default group
 	GLMgroup* group = new GLMgroup;
 	group->name = STRDUP("default");

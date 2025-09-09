@@ -1726,6 +1726,23 @@ GLvoid glmClear(GLMmodel* model)
 	model->hastexture = false;
 }
 
+void glmClearGeometry(GLMmodel* model)
+{
+	if (!model) return;
+
+	free(model->vertices);      model->vertices = nullptr; model->numvertices = 0;
+	free(model->normals);       model->normals = nullptr; model->numnormals = 0;
+	free(model->texcoords);     model->texcoords = nullptr; model->numtexcoords = 0;
+	free(model->facetnorms);    model->facetnorms = nullptr; model->numfacetnorms = 0;
+	free(model->triangles);     model->triangles = nullptr; model->numtriangles = 0;
+	free(model->lines);         model->lines = nullptr; model->numlines = 0;
+	free(model->groups);        model->groups = nullptr; model->numgroups = 0;
+
+	model->position[0] = 0.0f;
+	model->position[1] = 0.0f;
+	model->position[2] = 0.0f;
+}
+
 /* glmReadOBJ: Reads a model description from a Wavefront .OBJ file.
 * Returns a pointer to the created object which should be free'd with
 * glmDelete().

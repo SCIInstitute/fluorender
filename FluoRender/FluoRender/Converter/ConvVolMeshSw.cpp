@@ -85,7 +85,6 @@ void ConvVolMeshSw::Convert()
 	model->position[1] = 0.0f;
 	model->position[2] = 0.0f;
 	model->hastexture = false;
-	glmClear(model);
 
 	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
 
