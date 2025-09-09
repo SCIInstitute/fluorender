@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 //marching cubes
 inline constexpr const char* str_cl_marching_cubes_head = R"CLKER(
+#define VSCL 255
+#define MAX_INT 255
 const sampler_t samp =
 	CLK_NORMALIZED_COORDS_FALSE|
 	CLK_ADDRESS_CLAMP_TO_EDGE|
@@ -77,6 +79,7 @@ inline constexpr const char* str_cl_marching_cubes_kernel_head = R"CLKER(
 	if (x >= volume_width - xy_factor || y >= volume_height - xy_factor || z >= volume_depth - z_factor)
 		return;
 
+	isovalue = isovalue * MAX_INT / VSCL;
 )CLKER";
 
 inline constexpr const char* str_cl_marching_cubes_read_volume = R"CLKER(

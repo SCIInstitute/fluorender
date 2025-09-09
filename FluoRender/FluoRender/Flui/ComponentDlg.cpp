@@ -1056,8 +1056,16 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstUseMachineLearning))
 		m_use_ml_chk->SetValue(glbin_comp_generator.GetUseMl());
 
-	if (FOUND_VALUE(gstCompAutoUpdate))
+	bool brush_update = FOUND_VALUE(gstBrushCountResult);
+	if (FOUND_VALUE(gstCompAutoUpdate) ||
+		brush_update)
 	{
+		auto mode = glbin_vol_selector.GetSelectMode();
+		if (mode == flrd::SelectMode::Segment ||
+			mode == flrd::SelectMode::Mesh)
+			return;
+		if (brush_update && !glbin_comp_generator.GetUseSel())
+			return;
 		if (glbin_comp_generator.GetAutoCompGen())
 			LaunchAutoUpdateTimer();
 	}

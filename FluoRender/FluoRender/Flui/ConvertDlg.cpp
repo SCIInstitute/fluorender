@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <RenderView.h>
 #include <BaseConvVolMesh.h>
+#include <VolumeSelector.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
@@ -221,6 +222,10 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (FOUND_VALUE(gstConvVolMeshUpdate) ||
 		brush_update)
 	{
+		auto mode = glbin_vol_selector.GetSelectMode();
+		if (mode == flrd::SelectMode::Segment ||
+			mode == flrd::SelectMode::Mesh)
+			return;
 		if (brush_update && !glbin_conv_vol_mesh->GetUseMask())
 			return;
 		if (glbin_conv_vol_mesh->GetAutoUpdate() &&
