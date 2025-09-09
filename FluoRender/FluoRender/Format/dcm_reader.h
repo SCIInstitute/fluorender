@@ -100,6 +100,7 @@ private:
 	double m_scalar_scale;
 	int m_bits;
 	bool m_big_endian;
+	bool m_signed;
 
 	void GetFileInfo(const std::wstring& filename);
 	Nrrd* ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);

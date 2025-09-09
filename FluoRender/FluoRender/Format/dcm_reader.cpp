@@ -63,6 +63,7 @@ DCMReader::DCMReader() :
 
 	m_bits = 8; //default bits per channel
 	m_big_endian = false;
+	m_signed = false;
 }
 
 DCMReader::~DCMReader()
@@ -284,6 +285,7 @@ void DCMReader::GetFileInfo(const std::wstring& filename)
 	m_x_size = get_u16(0x00280011); // Columns
 	m_bits = get_u16(0x00280100); // Bits Allocated
 	m_chan_num = get_u16(0x00280002); // Samples per Pixel
+	m_signed = (get_u16(0x00280103) == 1); // Pixel Representation: 1 = signed
 
 	// Optional: pixel spacing
 	auto it_spc = tag_map.find(0x00280030);
@@ -463,31 +465,44 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 			file.read(pixel_data.data(), length);
 
 			size_t slice_size = m_y_size * m_x_size;
-			size_t total_size = slice_size * m_chan_num;
 
 			if (m_bits == 8)
 			{
 				const uint8_t* full_data = reinterpret_cast<const uint8_t*>(pixel_data.data());
 				uint8_t* channel_data = static_cast<uint8_t*>(val);
-				//uint8_t* channel_data = new (std::nothrow) uint8_t[slice_size];
-				//if (!channel_data) return false;
 
 				for (size_t i = 0; i < slice_size; ++i)
 					channel_data[i] = full_data[i * m_chan_num + c];
 			}
 			else if (m_bits == 16)
 			{
-				const uint16_t* full_data = reinterpret_cast<const uint16_t*>(pixel_data.data());
 				uint16_t* channel_data = static_cast<uint16_t*>(val);
-				//uint16_t* channel_data = new (std::nothrow) uint16_t[slice_size];
-				//if (!channel_data) return false;
 
-				for (size_t i = 0; i < slice_size; ++i)
+				if (m_signed)
 				{
-					uint16_t raw = full_data[i * m_chan_num + c];
-					if (m_big_endian)
-						raw = (raw >> 8) | (raw << 8); // Byte swap
-					channel_data[i] = raw;
+					const int16_t* full_data = reinterpret_cast<const int16_t*>(pixel_data.data());
+
+					for (size_t i = 0; i < slice_size; ++i)
+					{
+						int16_t raw = full_data[i * m_chan_num + c];
+						if (m_big_endian)
+							raw = (raw >> 8) | (raw << 8); // Byte swap
+
+						channel_data[i] = static_cast<uint16_t>(raw < 0 ? 0 : raw);
+					}
+				}
+				else
+				{
+					const uint16_t* full_data = reinterpret_cast<const uint16_t*>(pixel_data.data());
+
+					for (size_t i = 0; i < slice_size; ++i)
+					{
+						uint16_t raw = full_data[i * m_chan_num + c];
+						if (m_big_endian)
+							raw = (raw >> 8) | (raw << 8); // Byte swap
+
+						channel_data[i] = raw;
+					}
 				}
 			}
 			else {
