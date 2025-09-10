@@ -460,6 +460,28 @@ else()
 endif()
 add_definitions(-DCL_TARGET_OPENCL_VERSION=300)
 
+# OpenJpeg
+file(GLOB OPENJPEG_DIRS "${PARENT_DIR}/openjpeg*")
+list(GET OPENJPEG_DIRS 0 OPENJPEG_DIRS)  # Get the first match
+if(WIN32)
+  file(GLOB OPENJPEG_RELEASE_LIBRARIES ${OPENJPEG_DIRS}/build/bin/Release/*.lib)
+  file(GLOB OPENJPEG_DEBUG_LIBRARIES ${OPENJPEG_DIRS}/build/bin/Debug/*.lib)
+  set(OpenJpeg_LIBRARIES
+    $<$<CONFIG:Debug>:
+      OPENJPEG_DEBUG_LIBRARIES
+    >
+    $<$<NOT:$<CONFIG:Debug>>:
+      OPENJPEG_RELEASE_LIBRARIES
+    >
+  )
+else()
+  file(GLOB OpenJpeg_LIBRARIES "${OPENJPEG_DIRS}/build/lib/*.a")
+endif()
+set(OPENJPEG_PATHS
+  "${OPENJPEG_DIRS}/src/lib/openjp2"
+  "${OPENJPEG_DIRS}/build/src/lib/openjp2")
+add_definitions(-DOPJ_STATIC)
+
 # OpenVR
 file(GLOB OPENVR_DIRS "${PARENT_DIR}/openvr*")
 list(GET OPENVR_DIRS 0 OPENVR_DIRS)  # Get the first match
@@ -468,7 +490,7 @@ if(WIN32)
 elseif(APPLE)
     file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/osx64/libopenvr_api.a)
 else()
-    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/linux64/libopenvr_api.so)
+    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/linux64/libopenvr_api.a)
 endif()
 set(OPENVR_PATHS "${OPENVR_DIRS}/headers")
 
@@ -938,9 +960,11 @@ target_include_directories(FORMAT_LIB PRIVATE
   ${GLM_DIRS}
   ${JPEG_INCLUDE_DIR}
   ${ND2_PATHS}
+  ${OPENJPEG_PATHS}
   ${PNG_PNG_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS}
-  ${TIFF_INCLUDE_DIR})
+  ${TIFF_INCLUDE_DIR}
+  ${ZLIB_INCLUDE_DIR})
 if (WIN32 OR APPLE)
   target_include_directories(FORMAT_LIB PRIVATE
     ${JNI_INCLUDE_DIRS})
@@ -958,6 +982,7 @@ target_link_libraries(FORMAT_LIB PRIVATE
   ${Boost_LIBRARIES}
   ${FFMPEG_LIBRARIES}
   ${ND2_LIBRARIES}
+  ${OpenJpeg_LIBRARIES}
   ${PNG_LIBRARIES}
   ${TEEM_LIBRARIES}
   ${TIFF_LIBRARIES}

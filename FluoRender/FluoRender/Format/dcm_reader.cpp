@@ -29,12 +29,149 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainSettings.h>
 #include <compatibility.h>
+#include <jpeglib.h>
+#include <openjpeg.h>
+#include <zlib.h>
 #include <fstream>
 #include <map>
+
+namespace {
+	class JPEG2000Decoder {
+	public:
+		static bool Decode(const std::vector<char>& compressed,
+			std::vector<uint8_t>& output,
+			int& width, int& height,
+			int& channels, int& bits);
+
+	private:
+		struct MemoryStream {
+			const uint8_t* data;
+			size_t size;
+			size_t offset;
+		};
+
+		static OPJ_SIZE_T Read(void* buffer, OPJ_SIZE_T size, void* user_data);
+		static OPJ_OFF_T Skip(OPJ_OFF_T n, void* user_data);
+		static OPJ_BOOL Seek(OPJ_OFF_T pos, void* user_data);
+	};
+
+	bool JPEG2000Decoder::Decode(const std::vector<char>& compressed,
+		std::vector<uint8_t>& output,
+		int& width, int& height,
+		int& channels, int& bits)
+	{
+		if (compressed.size() < 2) return false;
+
+		// Heuristic: detect JP2 vs J2K
+		bool is_jp2 = (compressed.size() >= 12 &&
+			static_cast<uint8_t>(compressed[4]) == 0x6A && // 'j'
+			static_cast<uint8_t>(compressed[5]) == 0x50);  // 'P'
+
+		opj_codec_t* codec = opj_create_decompress(is_jp2 ? OPJ_CODEC_JP2 : OPJ_CODEC_J2K);
+		if (!codec) return false;
+
+		opj_dparameters_t parameters;
+		opj_set_default_decoder_parameters(&parameters);
+
+		MemoryStream* mem_stream = new MemoryStream{
+			reinterpret_cast<const uint8_t*>(compressed.data()),
+			compressed.size(),
+			0
+		};
+
+		opj_stream_t* stream = opj_stream_create(65536, true);
+		if (!stream) {
+			delete mem_stream;
+			opj_destroy_codec(codec);
+			return false;
+		}
+
+		opj_stream_set_user_data(stream, mem_stream, [](void* p) { delete static_cast<MemoryStream*>(p); });
+		opj_stream_set_read_function(stream, Read);
+		opj_stream_set_skip_function(stream, Skip);
+		opj_stream_set_seek_function(stream, Seek);
+		opj_stream_set_user_data_length(stream, static_cast<OPJ_UINT64>(compressed.size()));
+
+		if (!opj_setup_decoder(codec, &parameters)) {
+			opj_stream_destroy(stream);
+			opj_destroy_codec(codec);
+			return false;
+		}
+
+		opj_image_t* image = nullptr;
+		if (!opj_read_header(stream, codec, &image)) {
+			opj_stream_destroy(stream);
+			opj_destroy_codec(codec);
+			return false;
+		}
+
+		if (!opj_decode(codec, stream, image) || !opj_end_decompress(codec, stream)) {
+			opj_stream_destroy(stream);
+			opj_destroy_codec(codec);
+			opj_image_destroy(image);
+			return false;
+		}
+
+		opj_stream_destroy(stream);
+		opj_destroy_codec(codec);
+
+		if (!image || image->numcomps < 1) {
+			opj_image_destroy(image);
+			return false;
+		}
+
+		width = image->comps[0].w;
+		height = image->comps[0].h;
+		channels = image->numcomps;
+		bits = image->comps[0].prec;
+
+		size_t slice_size = width * height;
+		output.resize(slice_size * channels);
+
+		for (int c = 0; c < channels; ++c) {
+			const opj_image_comp_t& comp = image->comps[c];
+			bool is_signed = comp.sgnd != 0;
+			int max_val = (1 << comp.prec) - 1;
+
+			for (size_t i = 0; i < slice_size; ++i) {
+				int val = comp.data[i];
+				if (is_signed) val = std::max(val, 0);
+				val = std::min(val, max_val);
+				output[i * channels + c] = static_cast<uint8_t>(val);
+			}
+		}
+
+		opj_image_destroy(image);
+		return true;
+	}
+
+	OPJ_SIZE_T JPEG2000Decoder::Read(void* buffer, OPJ_SIZE_T size, void* user_data) {
+		MemoryStream* stream = static_cast<MemoryStream*>(user_data);
+		size_t remaining = stream->size - stream->offset;
+		size_t to_read = std::min<size_t>(size, remaining);
+		memcpy(buffer, stream->data + stream->offset, to_read);
+		stream->offset += to_read;
+		return to_read;
+	}
+
+	OPJ_OFF_T JPEG2000Decoder::Skip(OPJ_OFF_T n, void* user_data) {
+		MemoryStream* stream = static_cast<MemoryStream*>(user_data);
+		stream->offset = std::min(stream->offset + static_cast<size_t>(n), stream->size);
+		return n;
+	}
+
+	OPJ_BOOL JPEG2000Decoder::Seek(OPJ_OFF_T pos, void* user_data) {
+		MemoryStream* stream = static_cast<MemoryStream*>(user_data);
+		if (pos < 0 || static_cast<size_t>(pos) > stream->size) return OPJ_FALSE;
+		stream->offset = static_cast<size_t>(pos);
+		return OPJ_TRUE;
+	}
+}
 
 DCMReader::DCMReader() :
 	BaseReader()
 {
+	m_valid_info = false;
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
@@ -64,6 +201,7 @@ DCMReader::DCMReader() :
 	m_bits = 8; //default bits per channel
 	m_big_endian = false;
 	m_signed = false;
+	m_compression = DCM_UNCOMPRESSED;
 }
 
 DCMReader::~DCMReader()
@@ -79,6 +217,7 @@ void DCMReader::SetFile(const std::wstring& file)
 int DCMReader::Preprocess()
 {
 	m_4d_seq.clear();
+	m_valid_info = false;
 
 	std::wstring path, name;
 	if (!SEP_PATH_NAME(m_path_name, path, name))
@@ -204,11 +343,20 @@ int DCMReader::Preprocess()
 	}
 	else m_chan_num = 0;
 
+	if (m_compression == DCM_UNSUPPORTED ||
+		m_x_size == 0 ||
+		m_y_size == 0 ||
+		m_slice_num == 0 ||
+		m_time_num == 0)
+		return READER_FORMAT_ERROR;
 	return READER_OK;
 }
 
 void DCMReader::GetFileInfo(const std::wstring& filename)
 {
+	if (m_valid_info)
+		return;
+
 	std::ifstream file(filename, std::ios::binary);
 	if (!file.is_open())
 		return;
@@ -219,6 +367,18 @@ void DCMReader::GetFileInfo(const std::wstring& filename)
 	char vr[3] = { 0 };
 	uint32_t length;
 	std::map<uint32_t, std::vector<char>> tag_map;
+
+	auto ReadU16_LE = [&](std::ifstream& f) -> uint16_t {
+		uint16_t val;
+		f.read(reinterpret_cast<char*>(&val), 2);
+		return val;
+		};
+
+	auto ReadU32_LE = [&](std::ifstream& f) -> uint32_t {
+		uint32_t val;
+		f.read(reinterpret_cast<char*>(&val), 4);
+		return val;
+		};
 
 	auto ReadU16 = [&](std::ifstream& f) -> uint16_t {
 		uint16_t val;
@@ -239,6 +399,16 @@ void DCMReader::GetFileInfo(const std::wstring& filename)
 		return val;
 		};
 
+	auto trim_uid = [](std::string uid) -> std::string {
+		uid.erase(std::find_if(uid.rbegin(), uid.rend(), [](unsigned char ch) {
+			return !std::isspace(ch) && ch != '\0';
+		}).base(), uid.end());
+		return uid;
+		};
+
+	std::string transfer_syntax_uid;
+	m_compression = DCM_UNCOMPRESSED;
+
 	while (file.read(reinterpret_cast<char*>(&group), 2) &&
 		file.read(reinterpret_cast<char*>(&element), 2))
 	{
@@ -249,24 +419,43 @@ void DCMReader::GetFileInfo(const std::wstring& filename)
 		bool long_length = (vr[0] == 'O' && vr[1] == 'B') || (vr[0] == 'O' && vr[1] == 'W') ||
 			(vr[0] == 'U' && vr[1] == 'N') || (vr[0] == 'S' && vr[1] == 'Q');
 
-		if (long_length)
+		uint32_t length = 0;
+		if (long_length) {
 			file.ignore(2); // Reserved bytes
-
-		uint32_t length = long_length ? ReadU32(file) : ReadU16(file);
+			length = (group == 0x0002) ? ReadU32_LE(file) : ReadU32(file);
+		}
+		else {
+			length = (group == 0x0002) ? ReadU16_LE(file) : ReadU16(file);
+		}
 
 		if (length > 100000000) break; // Sanity check
 
 		std::vector<char> value(length);
 		if (!file.read(value.data(), length)) break;
 
-		tag_map[tag] = std::move(value);
-
-		// Detect Transfer Syntax UID
 		if (tag == 0x00020010) {
-			std::string tsuid(value.data(), value.size());
-			if (tsuid.find("1.2.840.10008.1.2.2") != std::string::npos)
+			transfer_syntax_uid = trim_uid(std::string(value.data(), value.size()));
+
+			if (transfer_syntax_uid.find("1.2.840.10008.1.2.2") != std::string::npos)
 				m_big_endian = true;
+
+			if (transfer_syntax_uid.find("1.2.840.10008.1.2.4.50") != std::string::npos)
+				m_compression = DCM_JPEG_BASELINE;
+			else if (transfer_syntax_uid.find("1.2.840.10008.1.2.4.70") != std::string::npos)
+				m_compression = DCM_JPEG_LOSSLESS;
+			else if (transfer_syntax_uid.find("1.2.840.10008.1.2.1.99") != std::string::npos)
+				m_compression = DCM_DEFLATE;
+			else if (transfer_syntax_uid.find("1.2.840.10008.1.2.4.91") != std::string::npos)
+				m_compression = DCM_JPEG2000;
+			else if (transfer_syntax_uid == "1.2.840.10008.1.2" ||
+					 transfer_syntax_uid == "1.2.840.10008.1.2.1" ||
+					 transfer_syntax_uid == "1.2.840.10008.1.2.2")
+				m_compression = DCM_UNCOMPRESSED;
+			else
+				m_compression = DCM_UNSUPPORTED;
 		}
+
+		tag_map[tag] = std::move(value);
 
 		if (tag == 0x7FE00010) break; // Pixel Data
 	}
@@ -296,6 +485,8 @@ void DCMReader::GetFileInfo(const std::wstring& filename)
 			m_valid_spc = true;
 		}
 	}
+
+	m_valid_info = true;
 }
 
 void DCMReader::SetBatch(bool batch)
@@ -460,54 +651,128 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 			length = short_len;
 		}
 
-		if ((group << 16 | element) == 0x7FE00010) {
-			std::vector<char> pixel_data(length);
-			file.read(pixel_data.data(), length);
+		uint32_t tag = (group << 16) | element;
+
+		if (tag == 0x7FE00010) {
+			std::vector<char> pixel_data;
+
+			if (length == 0xFFFFFFFF) {
+				// Encapsulated Pixel Data (fragments)
+				while (file.read(reinterpret_cast<char*>(&group), 2) &&
+					file.read(reinterpret_cast<char*>(&element), 2)) {
+
+					uint32_t item_tag = (group << 16) | element;
+
+					if (item_tag == 0xFFFEE0DD) {
+						// Sequence Delimitation Item
+						uint32_t delim_len;
+						file.read(reinterpret_cast<char*>(&delim_len), 4); // Should be 0
+						break;
+					}
+
+					if (item_tag != 0xFFFEE000) {
+						// Unexpected tag—should be Item Tag
+						return false;
+					}
+
+					uint32_t item_length;
+					file.read(reinterpret_cast<char*>(&item_length), 4); // Always little endian
+
+					if (item_length > 0) {
+						std::vector<char> fragment(item_length);
+						if (!file.read(fragment.data(), item_length)) return false;
+						pixel_data.insert(pixel_data.end(), fragment.begin(), fragment.end());
+					}
+				}
+			}
+			else {
+				// Explicit length pixel data
+				pixel_data.resize(length);
+				if (!file.read(pixel_data.data(), length)) return false;
+			}
+
+			std::vector<uint8_t> decompressed;
+
+			if (m_compression == DCM_UNCOMPRESSED) {
+				decompressed.assign(pixel_data.begin(), pixel_data.end());
+			}
+			else if (m_compression == DCM_DEFLATE) {
+				// zlib decompression
+				uLongf out_len = m_x_size * m_y_size * m_chan_num * (m_bits / 8);
+				decompressed.resize(out_len);
+				int ret = uncompress(decompressed.data(), &out_len,
+					reinterpret_cast<const Bytef*>(pixel_data.data()), pixel_data.size());
+				if (ret != Z_OK) return false;
+			}
+			else if (m_compression == DCM_JPEG_BASELINE || m_compression == DCM_JPEG_LOSSLESS) {
+				// JPEG decompression
+				jpeg_decompress_struct cinfo;
+				jpeg_error_mgr jerr;
+				cinfo.err = jpeg_std_error(&jerr);
+				jpeg_create_decompress(&cinfo);
+
+				jpeg_mem_src(&cinfo, reinterpret_cast<unsigned char*>(pixel_data.data()), pixel_data.size());
+				jpeg_read_header(&cinfo, TRUE);
+				jpeg_start_decompress(&cinfo);
+
+				size_t row_stride = cinfo.output_width * cinfo.output_components;
+				decompressed.resize(cinfo.output_height * row_stride);
+
+				while (cinfo.output_scanline < cinfo.output_height) {
+					uint8_t* rowptr = decompressed.data() + cinfo.output_scanline * row_stride;
+					jpeg_read_scanlines(&cinfo, &rowptr, 1);
+				}
+
+				jpeg_finish_decompress(&cinfo);
+				jpeg_destroy_decompress(&cinfo);
+			}
+			else if (m_compression == DCM_JPEG2000) {
+				std::vector<uint8_t> decoded;
+				int width = 0, height = 0, channels = 0, bits = 0;
+
+				if (!JPEG2000Decoder::Decode(pixel_data, decoded, width, height, channels, bits))
+					return false;
+
+				size_t slice_size = width * height;
+				decompressed.resize(slice_size * channels);
+
+				// Copy channel c from interleaved decoded buffer
+				for (size_t i = 0; i < slice_size; ++i)
+					decompressed[i] = decoded[i * channels + c];
+			}
 
 			size_t slice_size = m_y_size * m_x_size;
-
-			if (m_bits == 8)
-			{
-				const uint8_t* full_data = reinterpret_cast<const uint8_t*>(pixel_data.data());
+			if (m_bits == 8) {
+				const uint8_t* full_data = decompressed.data();
 				uint8_t* channel_data = static_cast<uint8_t*>(val);
 
 				for (size_t i = 0; i < slice_size; ++i)
 					channel_data[i] = full_data[i * m_chan_num + c];
 			}
-			else if (m_bits == 16)
-			{
+			else if (m_bits == 16) {
 				uint16_t* channel_data = static_cast<uint16_t*>(val);
 
-				if (m_signed)
-				{
-					const int16_t* full_data = reinterpret_cast<const int16_t*>(pixel_data.data());
-
-					for (size_t i = 0; i < slice_size; ++i)
-					{
+				if (m_signed) {
+					const int16_t* full_data = reinterpret_cast<const int16_t*>(decompressed.data());
+					for (size_t i = 0; i < slice_size; ++i) {
 						int16_t raw = full_data[i * m_chan_num + c];
 						if (m_big_endian)
-							raw = (raw >> 8) | (raw << 8); // Byte swap
-
+							raw = (raw >> 8) | (raw << 8);
 						channel_data[i] = static_cast<uint16_t>(raw < 0 ? 0 : raw);
 					}
 				}
-				else
-				{
-					const uint16_t* full_data = reinterpret_cast<const uint16_t*>(pixel_data.data());
-
-					for (size_t i = 0; i < slice_size; ++i)
-					{
+				else {
+					const uint16_t* full_data = reinterpret_cast<const uint16_t*>(decompressed.data());
+					for (size_t i = 0; i < slice_size; ++i) {
 						uint16_t raw = full_data[i * m_chan_num + c];
 						if (m_big_endian)
-							raw = (raw >> 8) | (raw << 8); // Byte swap
-
+							raw = (raw >> 8) | (raw << 8);
 						channel_data[i] = raw;
 					}
 				}
 			}
 			else {
-				// Unsupported bit depth
-				return false;
+				return false; // Unsupported bit depth
 			}
 
 			break;

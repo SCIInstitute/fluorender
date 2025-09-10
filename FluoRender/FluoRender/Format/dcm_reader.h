@@ -36,6 +36,15 @@ public:
 	DCMReader();
 	~DCMReader();
 
+	enum DCMCompression {
+		DCM_UNCOMPRESSED = 0,
+		DCM_JPEG_BASELINE = 1,
+		DCM_JPEG_LOSSLESS = 2,
+		DCM_DEFLATE = 3,
+		DCM_JPEG2000 = 4,
+		DCM_UNSUPPORTED = -1
+	};
+
 	int GetType() { return READER_DCM_TYPE; }
 
 	void SetFile(const std::wstring& file);
@@ -85,6 +94,7 @@ private:
 	};
 	std::vector<TimeDataInfo> m_4d_seq;
 
+	bool m_valid_info;
 	int m_time_num;
 	int m_cur_time;
 	int m_chan_num;
@@ -101,6 +111,7 @@ private:
 	int m_bits;
 	bool m_big_endian;
 	bool m_signed;
+	DCMCompression m_compression;
 
 	void GetFileInfo(const std::wstring& filename);
 	Nrrd* ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);

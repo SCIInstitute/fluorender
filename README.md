@@ -157,6 +157,9 @@ This is especially true after recent reoganization of FluoRender source code, as
  - OpenCV (https://opencv.org/) for computer vision calculations
    - https://github.com/opencv/opencv.git
    - Needs building before FluoRender
+ - OpenJPEG for reading DICOM files compressed with JPEG 2000
+   - https://github.com/uclouvain/openjpeg.git
+   - Needs building before FluoRender
  - OpenVR (https://steamvr.com) for SteamVR headset support
    - https://github.com/ValveSoftware/openvr.git
    - Needs building before FluoRender
