@@ -91,6 +91,11 @@ void ComponentGenerator::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 	m_vd = vd;
 }
 
+std::shared_ptr<VolumeData> ComponentGenerator::GetVolumeData()
+{
+	return m_vd.lock();
+}
+
 bool ComponentGenerator::CheckBricks()
 {
 	auto vd = m_vd.lock();

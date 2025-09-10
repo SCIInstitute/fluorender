@@ -50,6 +50,7 @@ namespace flrd
 		bool GetAutoCompGen();
 
 		void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
+		std::shared_ptr<VolumeData> GetVolumeData();
 
 		void SetUseSel(bool val) { m_use_sel = val; }
 		bool GetUseSel() { return m_use_sel; }

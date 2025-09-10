@@ -1064,8 +1064,17 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		if (mode == flrd::SelectMode::Segment ||
 			mode == flrd::SelectMode::Mesh)
 			return;
-		if (brush_update && !glbin_comp_generator.GetUseSel())
-			return;
+		if (brush_update)
+		{
+			if (glbin_comp_generator.GetUseSel())
+			{
+				auto vd = glbin_comp_generator.GetVolumeData();
+				if (!vd->GetLabel(false))
+					return;
+			}
+			else
+				return;
+		}
 		if (glbin_comp_generator.GetAutoCompGen())
 			LaunchAutoUpdateTimer();
 	}
