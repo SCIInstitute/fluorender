@@ -468,10 +468,10 @@ if(WIN32)
   file(GLOB OPENJPEG_DEBUG_LIBRARIES ${OPENJPEG_DIRS}/build/bin/Debug/*.lib)
   set(OpenJpeg_LIBRARIES
     $<$<CONFIG:Debug>:
-      OPENJPEG_DEBUG_LIBRARIES
+      ${OPENJPEG_DEBUG_LIBRARIES}
     >
     $<$<NOT:$<CONFIG:Debug>>:
-      OPENJPEG_RELEASE_LIBRARIES
+      ${OPENJPEG_RELEASE_LIBRARIES}
     >
   )
 else()
