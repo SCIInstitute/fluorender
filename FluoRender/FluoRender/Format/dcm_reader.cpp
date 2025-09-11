@@ -343,6 +343,7 @@ int DCMReader::Preprocess()
 	else m_chan_num = 0;
 
 	if (m_compression == DCM_UNSUPPORTED ||
+		m_compression == DCM_JPEG_LOSSLESS ||
 		m_x_size == 0 ||
 		m_y_size == 0 ||
 		m_slice_num == 0 ||
@@ -872,15 +873,32 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 	int channels = m_chan_num;
 	int bits = m_bits;
 
+	// Strip trailing padding for encapsulated formats (JPEG, JPEG2000)
+	if (m_compression == DCM_JPEG_BASELINE || m_compression == DCM_JPEG2000) {
+		size_t size = pixel_data.size();
+		if (size >= 3) {
+			unsigned char last = static_cast<unsigned char>(pixel_data[size - 1]);
+			unsigned char second_last = static_cast<unsigned char>(pixel_data[size - 2]);
+			if (second_last == 0xFF && last == 0xD9) {
+				// Valid EOI marker, no padding
+			}
+			else if (size >= 4) {
+				unsigned char third_last = static_cast<unsigned char>(pixel_data[size - 3]);
+				if (third_last == 0xFF && second_last == 0xD9 && last == 0x00) {
+					// Padding detected after EOI
+					pixel_data.resize(size - 1); // Strip trailing 0x00
+				}
+			}
+		}
+	}
+
 	if (m_compression == DCM_UNCOMPRESSED) {
-		// Assume metadata tags are valid
 		if (width == 0 || height == 0 || channels == 0 || bits == 0)
 			return false;
 
 		decompressed.assign(pixel_data.begin(), pixel_data.end());
 	}
 	else if (m_compression == DCM_DEFLATE) {
-		// Assume metadata tags are valid
 		if (width == 0 || height == 0 || channels == 0 || bits == 0)
 			return false;
 
@@ -892,7 +910,7 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 
 		if (ret != Z_OK) return false;
 	}
-	else if (m_compression == DCM_JPEG_BASELINE || m_compression == DCM_JPEG_LOSSLESS) {
+	else if (m_compression == DCM_JPEG_BASELINE) {
 		jpeg_decompress_struct cinfo;
 		jpeg_error_mgr jerr;
 		cinfo.err = jpeg_std_error(&jerr);
@@ -905,7 +923,7 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 		width = cinfo.output_width;
 		height = cinfo.output_height;
 		channels = cinfo.output_components;
-		bits = 8; // JPEG always outputs 8-bit per channel
+		//bits = 8;
 
 		size_t row_stride = width * channels;
 		decompressed.resize(height * row_stride);
@@ -926,16 +944,13 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 		size_t slice_size = width * height;
 		decompressed.resize(slice_size);
 
-		// Extract channel c from interleaved buffer
 		for (size_t i = 0; i < slice_size; ++i)
 			decompressed[i] = decoded[i * channels + c];
 	}
 	else {
-		// Unsupported compression
 		return false;
 	}
 
-	// Update internal size fields if not already set (preprocessing mode)
 	if (m_x_size == 0) m_x_size = width;
 	if (m_y_size == 0) m_y_size = height;
 	if (m_chan_num == 0) m_chan_num = channels;
