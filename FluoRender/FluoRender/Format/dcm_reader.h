@@ -113,9 +113,12 @@ private:
 	bool m_signed;
 	DCMCompression m_compression;
 
-	void GetFileInfo(const std::wstring& filename);
+	bool GetFileInfo(const std::wstring& filename);
 	Nrrd* ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);
 	bool ReadSingleDcm(void* val, const std::wstring& filename, int c);
+	bool Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& decompressed, int c);
+	std::vector<char> ParseSequenceItem(std::ifstream& file);
+	void DetectCompression(const std::string& uid);
 };
 
 #endif// _DCM_READER_H_
