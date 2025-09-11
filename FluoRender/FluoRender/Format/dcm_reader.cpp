@@ -33,7 +33,6 @@ DEALINGS IN THE SOFTWARE.
 #include <openjpeg.h>
 #include <zlib.h>
 #include <fstream>
-#include <map>
 
 namespace {
 	class JPEG2000Decoder {
@@ -365,9 +364,9 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 
 	uint16_t group = 0, element = 0;
 	char vr[2];
-	std::map<uint32_t, std::vector<char>> tag_map;
 	std::string transfer_syntax_uid;
 	m_compression = DCM_UNCOMPRESSED;
+	m_tag_map.clear();
 
 	auto ReadU16_LE = [&](std::ifstream& f) -> uint16_t {
 		uint16_t val;
@@ -409,21 +408,117 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 
 	// Safe metadata extraction
 	auto get_u16 = [&](uint32_t tag) -> uint16_t {
-		auto it = tag_map.find(tag);
-		if (it == tag_map.end() || it->second.size() < 2) return 0;
+		auto it = m_tag_map.find(tag);
+		if (it == m_tag_map.end() || it->second.size() < 2) return 0;
 		uint16_t val = *reinterpret_cast<uint16_t*>(it->second.data());
 		if (m_big_endian)
 			val = (val >> 8) | (val << 8);
 		return val;
 		};
 
+	std::streampos pixel_data_pos;
 	while (file.read(reinterpret_cast<char*>(&group), 2) &&
 		file.read(reinterpret_cast<char*>(&element), 2))
 	{
 		uint32_t tag = (group << 16) | element;
+		uint32_t length = 0;
 
-		if (!file.read(vr, 2)) break;
+		if (tag == 0x7FE00010)
+		{
+			// Save position just before reading VR/length/value
+			pixel_data_pos = file.tellg();
+			break; // Exit loop to process later
+		}
+		else if (tag == 0xFFFEE0DD)
+		{
+			// Sequence Delimitation Item — no VR, no value
+			if (!file.read(reinterpret_cast<char*>(&length), 4)) break;
 
+			if (length != 0)
+			{
+				// Technically should be zero, but skip anyway
+				file.seekg(length, std::ios::cur);
+			}
+
+			continue; // Skip tag_map insertion
+		}
+		else
+		{
+			if (!file.read(vr, 2)) break;
+
+			bool long_length = (vr[0] == 'O' && vr[1] == 'B') || (vr[0] == 'O' && vr[1] == 'W') ||
+				(vr[0] == 'U' && vr[1] == 'N') || (vr[0] == 'S' && vr[1] == 'Q');
+
+			if (long_length) {
+				file.ignore(2);
+				length = (group == 0x0002) ? ReadU32_LE(file) : ReadU32(file);
+			}
+			else {
+				length = (group == 0x0002) ? ReadU16_LE(file) : ReadU16(file);
+			}
+
+			std::vector<char> value;
+
+			if (vr[0] == 'S' && vr[1] == 'Q' && length == 0xFFFFFFFF)
+			{
+				// Sequence with undefined length
+				while (true)
+				{
+					SequenceItem item = ParseSequenceItem(file);
+					if (!item.is_valid)
+						break;
+
+					if (item.is_delim)
+						break;
+
+					if (item.is_empty)
+						continue;
+
+					value.insert(value.end(), item.data.begin(), item.data.end());
+				}
+			}
+			else
+			{
+				value.resize(length);
+				if (!file.read(value.data(), length)) break;
+			}
+
+			m_tag_map[tag] = std::move(value);
+		}
+
+	}
+
+	auto it_spc = m_tag_map.find(0x00020010);
+	if (it_spc != m_tag_map.end() && !it_spc->second.empty()) {
+		transfer_syntax_uid = trim_uid(std::string(it_spc->second.data(), it_spc->second.size()));
+		DetectCompression(transfer_syntax_uid);
+	}
+
+	// Optional: pixel spacing
+	it_spc = m_tag_map.find(0x00280030);
+	if (it_spc != m_tag_map.end() && !it_spc->second.empty()) {
+		std::string spacing_str(it_spc->second.data(), it_spc->second.size());
+		if (sscanf(spacing_str.c_str(), "%lf\\%lf", &m_xspc, &m_yspc) == 2) {
+			m_zspc = std::max(m_xspc, m_yspc);
+			m_valid_spc = true;
+		}
+	}
+
+	if (pixel_data_pos != std::streampos(-1))
+	{
+		file.seekg(pixel_data_pos);
+		// Now process Pixel Data as usual
+		// Try to get image size from tags
+		m_y_size = get_u16(0x00280010);
+		m_x_size = get_u16(0x00280011);
+		m_bits = get_u16(0x00280100);
+		m_chan_num = get_u16(0x00280002);
+		m_signed = (get_u16(0x00280103) == 1);
+
+		if (m_x_size != 0 && m_y_size != 0 && m_bits != 0)
+			return true;
+
+		// Fallback: decompress pixel data to infer size
 		bool long_length = (vr[0] == 'O' && vr[1] == 'B') || (vr[0] == 'O' && vr[1] == 'W') ||
 			(vr[0] == 'U' && vr[1] == 'N') || (vr[0] == 'S' && vr[1] == 'Q');
 
@@ -436,76 +531,34 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 			length = (group == 0x0002) ? ReadU16_LE(file) : ReadU16(file);
 		}
 
-		//if (length > 100000000) break;
-
-		std::vector<char> value;
-
-		if (vr[0] == 'S' && vr[1] == 'Q' && length == 0xFFFFFFFF)
+		std::vector<char> pixel_data;
+		if (length == 0xFFFFFFFF)
 		{
-			// Sequence with undefined length
 			while (true)
 			{
-				std::vector<char> item = ParseSequenceItem(file);
-				if (item.empty()) break;
-				value.insert(value.end(), item.begin(), item.end());
+				SequenceItem item = ParseSequenceItem(file);
+				if (!item.is_valid)
+					break;
+
+				if (item.is_delim)
+					break;
+
+				if (item.is_empty)
+					continue;
+
+				pixel_data.insert(pixel_data.end(), item.data.begin(), item.data.end());
 			}
 		}
 		else
 		{
-			value.resize(length);
-			if (!file.read(value.data(), length)) break;
+			pixel_data.resize(length);
+			if (!file.read(pixel_data.data(), length)) return false;
 		}
 
-		tag_map[tag] = std::move(value);
+		std::vector<uint8_t> decompressed;
+		if (!Decompress(pixel_data, decompressed, 0)) return false;
 
-		if (tag == 0x00020010) {
-			transfer_syntax_uid = trim_uid(std::string(tag_map[tag].data(), tag_map[tag].size()));
-			DetectCompression(transfer_syntax_uid);
-		}
-
-		if (tag == 0x7FE00010) {
-			// Try to get image size from tags
-			m_y_size = get_u16(0x00280010);
-			m_x_size = get_u16(0x00280011);
-			m_bits = get_u16(0x00280100);
-			m_chan_num = get_u16(0x00280002);
-			m_signed = (get_u16(0x00280103) == 1);
-
-			if (m_x_size != 0 && m_y_size != 0 && m_bits != 0)
-				return true;
-
-			// Fallback: decompress pixel data to infer size
-			std::vector<char> pixel_data;
-			if (length == 0xFFFFFFFF)
-			{
-				while (true)
-				{
-					std::vector<char> fragment = ParseSequenceItem(file);
-					if (fragment.empty()) break;
-					pixel_data.insert(pixel_data.end(), fragment.begin(), fragment.end());
-				}
-			}
-			else
-			{
-				pixel_data.resize(length);
-				if (!file.read(pixel_data.data(), length)) return false;
-			}
-
-			std::vector<uint8_t> decompressed;
-			if (!Decompress(pixel_data, decompressed, 0)) return false;
-
-			return (m_x_size != 0 && m_y_size != 0 && m_bits != 0);
-		}
-	}
-
-	// Optional: pixel spacing
-	auto it_spc = tag_map.find(0x00280030);
-	if (it_spc != tag_map.end() && !it_spc->second.empty()) {
-		std::string spacing_str(it_spc->second.data(), it_spc->second.size());
-		if (sscanf(spacing_str.c_str(), "%lf\\%lf", &m_xspc, &m_yspc) == 2) {
-			m_zspc = std::max(m_xspc, m_yspc);
-			m_valid_spc = true;
-		}
+		return (m_x_size != 0 && m_y_size != 0 && m_bits != 0);
 	}
 
 	m_valid_info = true;
@@ -650,32 +703,72 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 
 	file.seekg(132, std::ios::beg); // Skip DICOM preamble
 
-	uint16_t group, element;
-	char vr[3] = { 0 };
-	uint32_t length;
+	uint16_t group = 0, element = 0;
+	char vr[2];
+
+	auto ReadU16_LE = [&](std::ifstream& f) -> uint16_t {
+		uint16_t val;
+		f.read(reinterpret_cast<char*>(&val), 2);
+		return val;
+		};
+
+	auto ReadU32_LE = [&](std::ifstream& f) -> uint32_t {
+		uint32_t val;
+		f.read(reinterpret_cast<char*>(&val), 4);
+		return val;
+		};
+
+	auto ReadU16 = [&](std::ifstream& f) -> uint16_t {
+		uint16_t val;
+		f.read(reinterpret_cast<char*>(&val), 2);
+		if (m_big_endian)
+			val = (val >> 8) | (val << 8);
+		return val;
+		};
+
+	auto ReadU32 = [&](std::ifstream& f) -> uint32_t {
+		uint32_t val;
+		f.read(reinterpret_cast<char*>(&val), 4);
+		if (m_big_endian)
+			val = ((val >> 24) & 0x000000FF) |
+			((val >> 8) & 0x0000FF00) |
+			((val << 8) & 0x00FF0000) |
+			((val << 24) & 0xFF000000);
+		return val;
+		};
 
 	while (file.read(reinterpret_cast<char*>(&group), 2) &&
 		file.read(reinterpret_cast<char*>(&element), 2))
 	{
-		file.read(vr, 2);
+		uint32_t tag = (group << 16) | element;
+		uint32_t length = 0;
 
-		bool long_length = (vr[0] == 'O' && vr[1] == 'B') ||
-			(vr[0] == 'O' && vr[1] == 'W') ||
-			(vr[0] == 'S' && vr[1] == 'Q') ||
-			(vr[0] == 'U' && vr[1] == 'N');
+		if (tag == 0xFFFEE0DD)
+		{
+			// Sequence Delimitation Item — no VR, no value
+			if (!file.read(reinterpret_cast<char*>(&length), 4)) break;
 
-		if (long_length)
-			file.ignore(2); // Reserved bytes
+			if (length != 0)
+			{
+				// Technically should be zero, but skip anyway
+				file.seekg(length, std::ios::cur);
+			}
 
-		if (long_length)
-			file.read(reinterpret_cast<char*>(&length), 4);
-		else {
-			uint16_t short_len;
-			file.read(reinterpret_cast<char*>(&short_len), 2);
-			length = short_len;
+			continue; // Skip tag_map insertion
 		}
 
-		uint32_t tag = (group << 16) | element;
+		if (!file.read(vr, 2)) break;
+
+		bool long_length = (vr[0] == 'O' && vr[1] == 'B') || (vr[0] == 'O' && vr[1] == 'W') ||
+			(vr[0] == 'U' && vr[1] == 'N') || (vr[0] == 'S' && vr[1] == 'Q');
+
+		if (long_length) {
+			file.ignore(2);
+			length = (group == 0x0002) ? ReadU32_LE(file) : ReadU32(file);
+		}
+		else {
+			length = (group == 0x0002) ? ReadU16_LE(file) : ReadU16(file);
+		}
 
 		if (tag == 0x7FE00010) {
 			std::vector<char> pixel_data;
@@ -683,9 +776,17 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 			if (length == 0xFFFFFFFF) {
 				// Encapsulated Pixel Data (fragments)
 				while (true) {
-					std::vector<char> fragment = ParseSequenceItem(file);
-					if (fragment.empty()) break;
-					pixel_data.insert(pixel_data.end(), fragment.begin(), fragment.end());
+					SequenceItem item = ParseSequenceItem(file);
+					if (!item.is_valid)
+						break;
+
+					if (item.is_delim)
+						break;
+
+					if (item.is_empty)
+						continue;
+
+					pixel_data.insert(pixel_data.end(), item.data.begin(), item.data.end());
 				}
 			}
 			else {
@@ -734,7 +835,27 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 			break;
 		}
 		else {
-			file.seekg(length, std::ios::cur); // Skip non-pixel data
+			if (vr[0] == 'S' && vr[1] == 'Q' && length == 0xFFFFFFFF)
+			{
+				// Sequence with undefined length
+				while (true)
+				{
+					SequenceItem item = ParseSequenceItem(file);
+					if (!item.is_valid)
+						break;
+
+					if (item.is_delim)
+						break;
+
+					if (item.is_empty)
+						continue;
+				}
+			}
+			else
+			{
+				std::vector<char> value(length);
+				if (!file.read(value.data(), length)) break;
+			}
 		}
 	}
 
@@ -743,6 +864,9 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 
 bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& decompressed, int c)
 {
+	if (pixel_data.empty())
+		return false;
+
 	int width = m_x_size;
 	int height = m_y_size;
 	int channels = m_chan_num;
@@ -820,21 +944,45 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 	return true;
 }
 
-std::vector<char> DCMReader::ParseSequenceItem(std::ifstream& file)
+DCMReader::SequenceItem DCMReader::ParseSequenceItem(std::ifstream& file)
 {
-	std::vector<char> item_data;
-
+	SequenceItem result;
 	uint16_t group = 0, element = 0;
+	std::streampos tag_pos = file.tellg();
+
 	if (!file.read(reinterpret_cast<char*>(&group), 2) ||
 		!file.read(reinterpret_cast<char*>(&element), 2))
-		return {};
+	{
+		result.is_valid = false;
+		return result;
+	}
 
 	uint32_t item_tag = (group << 16) | element;
-	if (item_tag != 0xFFFEE000) // Item Tag
-		return {};
+
+	if (item_tag == 0xFFFEE0DD)
+	{
+		// Sequence Delimitation Item
+		uint32_t delim_len = 0;
+		if (!file.read(reinterpret_cast<char*>(&delim_len), 4))
+			result.is_valid = false;
+		result.is_delim = true;
+		return result;
+	}
+
+	if (item_tag != 0xFFFEE000)
+	{
+		// Not an Item Tag—rewind and return invalid
+		file.seekg(tag_pos);
+		result.is_valid = false;
+		return result;
+	}
 
 	uint32_t item_length = 0;
-	file.read(reinterpret_cast<char*>(&item_length), 4); // Always little endian
+	if (!file.read(reinterpret_cast<char*>(&item_length), 4))
+	{
+		result.is_valid = false;
+		return result;
+	}
 
 	auto ReadU16 = [&](std::ifstream& f) -> uint16_t {
 		uint16_t val;
@@ -855,7 +1003,12 @@ std::vector<char> DCMReader::ParseSequenceItem(std::ifstream& file)
 		return val;
 		};
 
-	if (item_length == 0xFFFFFFFF)
+	if (item_length == 0)
+	{
+		result.is_empty = true;
+		return result;
+	}
+	else if (item_length == 0xFFFFFFFF)
 	{
 		// Undefined-length item
 		while (file.read(reinterpret_cast<char*>(&group), 2) &&
@@ -863,17 +1016,24 @@ std::vector<char> DCMReader::ParseSequenceItem(std::ifstream& file)
 		{
 			uint32_t inner_tag = (group << 16) | element;
 
-			if (inner_tag == 0xFFFEE00D) {
+			if (inner_tag == 0xFFFEE00D)
+			{
 				uint32_t delim_len = 0;
-				file.read(reinterpret_cast<char*>(&delim_len), 4); // Should be 0
+				if (!file.read(reinterpret_cast<char*>(&delim_len), 4))
+					result.is_valid = false;
 				break;
 			}
 
 			char vr[2];
-			if (!file.read(vr, 2)) break;
+			if (!file.read(vr, 2)) {
+				result.is_valid = false;
+				break;
+			}
 
-			bool long_length = (vr[0] == 'O' && vr[1] == 'B') || (vr[0] == 'O' && vr[1] == 'W') ||
-				(vr[0] == 'U' && vr[1] == 'N') || (vr[0] == 'S' && vr[1] == 'Q');
+			bool long_length = (vr[0] == 'O' && vr[1] == 'B') ||
+				(vr[0] == 'O' && vr[1] == 'W') ||
+				(vr[0] == 'U' && vr[1] == 'N') ||
+				(vr[0] == 'S' && vr[1] == 'Q');
 
 			uint32_t value_length = 0;
 			if (long_length) {
@@ -885,20 +1045,23 @@ std::vector<char> DCMReader::ParseSequenceItem(std::ifstream& file)
 			}
 
 			std::vector<char> value(value_length);
-			if (!file.read(value.data(), value_length)) break;
+			if (!file.read(value.data(), value_length)) {
+				result.is_valid = false;
+				break;
+			}
 
-			item_data.insert(item_data.end(), value.begin(), value.end());
+			result.data.insert(result.data.end(), value.begin(), value.end());
 		}
 	}
 	else
 	{
 		// Fixed-length item
-		item_data.resize(item_length);
-		if (!file.read(item_data.data(), item_length))
-			return {};
+		result.data.resize(item_length);
+		if (!file.read(result.data.data(), item_length))
+			result.is_valid = false;
 	}
 
-	return item_data;
+	return result;
 }
 
 void DCMReader::DetectCompression(const std::string& uid)

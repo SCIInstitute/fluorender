@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _DCM_READER_H_
 
 #include <base_reader.h>
+#include <map>
 
 class DCMReader : public BaseReader
 {
@@ -94,6 +95,15 @@ private:
 	};
 	std::vector<TimeDataInfo> m_4d_seq;
 
+	struct SequenceItem
+	{
+		std::vector<char> data;
+		bool is_valid = true;     // True if parsing succeeded
+		bool is_delim = false;    // True if this was a Delimitation Item (0xFFFEE00D)
+		bool is_empty = false;    // True if item had zero length
+	};
+
+	std::map<uint32_t, std::vector<char>> m_tag_map;
 	bool m_valid_info;
 	int m_time_num;
 	int m_cur_time;
@@ -117,7 +127,7 @@ private:
 	Nrrd* ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);
 	bool ReadSingleDcm(void* val, const std::wstring& filename, int c);
 	bool Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& decompressed, int c);
-	std::vector<char> ParseSequenceItem(std::ifstream& file);
+	SequenceItem ParseSequenceItem(std::ifstream& file);
 	void DetectCompression(const std::string& uid);
 };
 
