@@ -76,6 +76,7 @@ DEALINGS IN THE SOFTWARE.
 #include <mpg_reader.h>
 #include <png_reader.h>
 #include <jpg_reader.h>
+#include <jp2_reader.h>
 #include <dcm_reader.h>
 #include <compatibility.h>
 #include <glm.h>
@@ -6628,6 +6629,8 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_PNG, false);
 		else if (suffix == L".jpg" || suffix == L".jpeg")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_JPG, false);
+		else if (suffix == L".jp2")
+			ch_num = LoadVolumeData(filename, LOAD_TYPE_JP2, false);
 		else if (suffix == L".oib")
 			ch_num = LoadVolumeData(filename, LOAD_TYPE_OIB, false);
 		else if (suffix == L".oif")
@@ -6908,6 +6911,8 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				reader = std::make_shared<PNGReader>();
 			else if (type == LOAD_TYPE_JPG)
 				reader = std::make_shared<JPGReader>();
+			else if (type == LOAD_TYPE_JP2)
+				reader = std::make_shared<JP2Reader>();
 			else if (type == LOAD_TYPE_NRRD)
 				reader = std::make_shared<NRRDReader>();
 			else if (type == LOAD_TYPE_OIB)

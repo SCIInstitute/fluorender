@@ -1856,7 +1856,8 @@ void MoviePanel::OnSave(wxCommandEvent& event)
 		"Tiff files(*.tiff)|*.tiff|"\
 		"Png files(*.png)|*.png|"\
 		"Jpeg files(*.jpg)|*.jpg|"\
-		"Jpeg files(*.jpeg)|*.jpeg",
+		"Jpeg files(*.jpeg)|*.jpeg|"\
+		"Jpeg2000 files(*.jp2)|*.jp2",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	fopendlg.SetExtraControlCreator(CreateExtraCaptureControl);
 	fopendlg.CenterOnParent();

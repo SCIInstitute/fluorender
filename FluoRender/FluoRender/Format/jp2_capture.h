@@ -25,23 +25,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <image_capture_factory.h>
-#include <tif_capture.h>
-#include <png_capture.h>
-#include <jpg_capture.h>
-#include <jp2_capture.h>
-#include <algorithm>
+#ifndef Jp2Capture_h
+#define Jp2Capture_h
+#include <base_image_capture.h>
+#include <string>
 
-std::unique_ptr<ImageCapture> CreateImageCapture(const std::wstring& filename)
-{
-	auto ext_pos = filename.find_last_of(L'.');
-	if (ext_pos == std::string::npos) return nullptr;
-	std::wstring ext = filename.substr(ext_pos + 1);
-	std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+class Jp2Capture : public ImageCapture {
+public:
+	Jp2Capture() {}
+	~Jp2Capture();
 
-	if (ext == L"tiff" || ext == L"tif") return std::make_unique<TifCapture>();
-	if (ext == L"png") return std::make_unique<PngCapture>();
-	if (ext == L"jpg" || ext == L"jpeg") return std::make_unique<JpgCapture>();
-	if (ext == L"jp2") return std::make_unique<Jp2Capture>();
-	return nullptr;
-}
+	bool Write() override;
+
+private:
+	struct Impl;
+	Impl* impl;
+
+};
+
+#endif

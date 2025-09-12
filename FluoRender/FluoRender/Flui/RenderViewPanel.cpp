@@ -1093,7 +1093,8 @@ void RenderViewPanel::Capture()
 		"Tiff File (*.tiff)|*.tiff|"\
 		"Png File (*.png)|*.png|"\
 		"Jpeg File (*.jpg)|*.jpg|"\
-		"Jpeg File (*.jpeg)|*.jpeg",
+		"Jpeg File (*.jpeg)|*.jpeg|"\
+		"Jpeg2000 File (*.jp2)|*.jp2",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
 	int rval = file_dlg.ShowModal();

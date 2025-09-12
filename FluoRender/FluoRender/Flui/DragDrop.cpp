@@ -82,6 +82,7 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 					 suffix == L".png" ||
 					 suffix == L".jpg" ||
 					 suffix == L".jpeg" ||
+					 suffix == L".jp2" ||
 					 suffix == L".oib" ||
 					 suffix == L".oif" ||
 					 suffix == L".lsm" ||
