@@ -98,8 +98,9 @@ private:
 	struct SequenceItem
 	{
 		std::vector<char> data;
+		std::vector<SequenceItem> children; // Nested sequence items
 		bool is_valid = true;     // True if parsing succeeded
-		bool is_delim = false;    // True if this was a Delimitation Item (0xFFFEE00D)
+		bool is_delim = false;    // True if this was a Delimitation Item (0xFFFEE0DD)
 		bool is_empty = false;    // True if item had zero length
 	};
 
@@ -126,6 +127,7 @@ private:
 	bool GetFileInfo(const std::wstring& filename);
 	Nrrd* ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);
 	bool ReadSingleDcm(void* val, const std::wstring& filename, int c);
+	bool CleanPixelData(std::vector<char>& pixel_data);
 	bool Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& decompressed, int c);
 	SequenceItem ParseSequenceItem(std::ifstream& file);
 	void DetectCompression(const std::string& uid);
