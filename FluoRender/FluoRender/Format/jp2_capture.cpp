@@ -91,7 +91,7 @@ struct Jp2Capture::Impl
 		parameters.tcp_numlayers = 1;
 		parameters.cp_disto_alloc = 1;
 		parameters.numresolution = 6;
-		parameters.cp_comment = const_cast<char*>("Created by OpenJPEG");
+		parameters.cp_comment = const_cast<char*>("Captured by FluoRender");
 
 		if (quality >= 100) {
 			parameters.tcp_rates[0] = 0; // Lossless

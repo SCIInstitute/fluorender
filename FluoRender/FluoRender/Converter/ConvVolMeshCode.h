@@ -66,6 +66,30 @@ __kernel void kernel_0(
 )
 )CLKER";
 
+inline constexpr const char* str_cl_marching_cubes_kernel0_tf = R"CLKER(
+__kernel void kernel_0(
+	__read_only image3d_t volume,               // 3D scalar field
+	__global int* active_voxel_counter,         // Atomic counter
+	float isovalue,                             // Isosurface threshold
+	int volume_width,                           // nx
+	int volume_height,                          // ny
+	int volume_depth,                           // nz
+	int xy_factor,                              // Coarsening factor for X and Y
+	int z_factor,                               // Coarsening factor for Z
+	float4 loc0,  //(lx, ly, lz, alpha)
+	float4 loc1,  //(ka, kd, ks, ns)
+	float4 loc2,  //(scalar_scale, gm_scale, left_thresh, right_thresh)
+	float4 loc3,  //(gamma, left_offset, right_offset, sw)
+	float4 loc17, //(gm_low, gm_high, gm_max, 0)
+	float4 loc10, //plane 0
+	float4 loc11, //plane 1
+	float4 loc12, //plane 2
+	float4 loc13, //plane 3
+	float4 loc14, //plane 4
+	float4 loc15  //plane 5
+)
+)CLKER";
+
 inline constexpr const char* str_cl_marching_cubes_kernel_head = R"CLKER(
 {
 	int gx = get_global_id(0);
@@ -106,6 +130,29 @@ inline constexpr const char* str_cl_marching_cubes_read_mask = R"CLKER(
 	cube[5] = read_imagef(mask, samp, (int4)(x+xy_factor, y, z+z_factor, 0)).x > 0.0 ? cube[5] : 0.0;
 	cube[6] = read_imagef(mask, samp, (int4)(x+xy_factor, y+xy_factor, z+z_factor, 0)).x > 0.0 ? cube[6] : 0.0;
 	cube[7] = read_imagef(mask, samp, (int4)(x, y+xy_factor, z+z_factor, 0)).x > 0.0 ? cube[7] : 0.0;
+
+)CLKER";
+
+inline constexpr const char* str_cl_marching_cubes_tf = R"CLKER(
+	// Apply transfer function
+	for (int i = 0; i < 8; ++i) {
+		float v = cube[i] * scalar_scale + loc3.y; // left_offset
+		if (v < loc2.z) // left_thresh
+			v = 0.0;
+		else if (v > loc2.w) // right_thresh
+			v = 1.0;
+		else {
+			v = (v - loc2.z) / (loc2.w - loc2.z); // (v - left_thresh) / (right_thresh - left_thresh)
+			if (loc3.z != 1.0) // right_offset
+				v = pow(v, loc3.x); // gamma
+			if (loc3.w > 0.0) { // sw
+				v = v * (1.0 + loc3.w) - loc3.w;
+				if (v < 0.0) v = 0.0;
+				if (v > 1.0) v = 1.0;
+			}
+		}
+		cube[i] = v * VSCL;
+	}
 
 )CLKER";
 
