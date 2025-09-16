@@ -55,7 +55,7 @@ namespace flrd
 		bool m_use_sel = false;//internal flag based on validity of mask
 
 	private:
-		std::string GetKernelString(bool mask);
+		std::string GetKernelString(bool mask, bool tf);
 
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz,

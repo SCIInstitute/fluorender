@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolKernel.h>
 #include <ConvVolMeshCode.h>
 #include <MCTable.h>
+#include <Plane.h>
 #include <glm.h>
 #include <random>
 #include <sstream>
@@ -137,32 +138,50 @@ bool ConvVolMesh::GetAutoUpdate()
 	return true;
 }
 
-std::string ConvVolMesh::GetKernelString(bool mask)
+std::string ConvVolMesh::GetKernelString(
+	bool mask,
+	bool tf)
 {
 	std::ostringstream z;
+	//if mask is used, tf is disabled
+	tf = mask ? false : tf;
 
 	z << str_cl_marching_cubes_head;
+	//transfer function defs
+	if (tf)
+	{
+		z << str_cl_marching_cubes_clip;
+		z << str_cl_marching_cubes_tf;
+	}
 	//kernel0: preprocess
 	if (mask)
 		z << str_cl_marching_cubes_kernel0_mask;
+	else if (tf)
+		z << str_cl_marching_cubes_kernel0_tf;
 	else
 		z << str_cl_marching_cubes_kernel0_nomask;
 	z << str_cl_marching_cubes_kernel_head;
 	z << str_cl_marching_cubes_read_volume;
 	if (mask)
 		z << str_cl_marching_cubes_read_mask;
+	if (tf)
+		z << str_cl_marching_cubes_apply_clip_tf;
 	z << str_cl_marching_cubes_kernel0_tail;
 	//kernel1 func: interpolation
 	z << str_cl_marching_cubes_kernel1_func;
 	//kernel1: marching cubes
 	if (mask)
 		z << str_cl_marching_cubes_kernel1_mask;
+	else if (tf)
+		z << str_cl_marching_cubes_kernel1_tf;
 	else
 		z << str_cl_marching_cubes_kernel1_nomask;
 	z << str_cl_marching_cubes_kernel_head;
 	z << str_cl_marching_cubes_read_volume;
 	if (mask)
 		z << str_cl_marching_cubes_read_mask;
+	if (tf)
+		z << str_cl_marching_cubes_apply_clip_tf;
 	z << str_cl_marching_cubes_kernel1_tail;
 
 	return z.str();
@@ -184,8 +203,9 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		};
 
 	//create program and kernels
+	bool use_tf = m_use_sel ? false : m_use_transfer;
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(
-		GetKernelString(m_use_sel), bits, max_int);
+		GetKernelString(m_use_sel, use_tf), bits, max_int);
 	if (!kernel_prog)
 		return;
 
@@ -198,6 +218,40 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	//estimate the buffer size
 	int vsize = 0;
 	float iso_value = static_cast<float>(m_iso);
+	//transfer function parameters
+	bool inv;
+	float scalar_scale, lo_thresh, hi_thresh, gamma3d,
+		gm_scale, gm_low, gm_high, gm_max,
+		lo_offset, hi_offset, sw;
+	//clipping planes
+	cl_float4 p[6];
+	if (use_tf)
+	{
+		flvr::VolumeRenderer* vr = vd->GetVR();
+		std::vector<fluo::Plane*> *planes = vr->get_planes();
+		double abcd[4];
+		for (size_t i = 0; i < 6; ++i)
+		{
+			(*planes)[i]->get(abcd);
+			p[i] = { float(abcd[0]),
+				float(abcd[1]),
+				float(abcd[2]),
+				float(abcd[3]) };
+		}
+		//params
+		inv = vd->GetInvert();
+		scalar_scale = static_cast<float>(vd->GetScalarScale());
+		lo_thresh = static_cast<float>(vd->GetLeftThresh());
+		hi_thresh = static_cast<float>(vd->GetRightThresh());
+		gamma3d = static_cast<float>(vd->GetGamma());
+		gm_scale = static_cast<float>(vd->GetGMScale());
+		gm_low = static_cast<float>(vd->GetBoundaryLow());
+		gm_high = static_cast<float>(vd->GetBoundaryHigh());
+		gm_max = static_cast<float>(vd->GetBoundaryMax());
+		lo_offset = static_cast<float>(vd->GetLowOffset());
+		hi_offset = static_cast<float>(vd->GetHighOffset());
+		sw = static_cast<float>(vd->GetSoftThreshold());
+	}
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
@@ -232,6 +286,32 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&xy_factor));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&z_factor));
+		if (use_tf)
+		{
+			cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
+			cl_float4 loc3 = { 1.0f / gamma3d, lo_offset, hi_offset, sw };
+			cl_float4 loc17 = { gm_low, gm_high, gm_max, 0.0f };
+			fluo::BBox bbx = b->dbox();
+			cl_float3 scl = {
+				float(bbx.Max().x() - bbx.Min().x()),
+				float(bbx.Max().y() - bbx.Min().y()),
+				float(bbx.Max().z() - bbx.Min().z()) };
+			cl_float3 trl = {
+				float(bbx.Min().x()),
+				float(bbx.Min().y()),
+				float(bbx.Min().z()) };
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc2));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc3));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc17));
+			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
+			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 1));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 2));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 3));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 4));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 5));
+		}
 
 		//execute
 		kernel_prog->executeKernel(kernel_idx0, 3, global_size, local_size);
@@ -292,6 +372,32 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ox));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oy));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oz));
+		if (use_tf)
+		{
+			cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
+			cl_float4 loc3 = { 1.0f / gamma3d, lo_offset, hi_offset, sw };
+			cl_float4 loc17 = { gm_low, gm_high, gm_max, 0.0f };
+			fluo::BBox bbx = b->dbox();
+			cl_float3 scl = {
+				float(bbx.Max().x() - bbx.Min().x()),
+				float(bbx.Max().y() - bbx.Min().y()),
+				float(bbx.Max().z() - bbx.Min().z()) };
+			cl_float3 trl = {
+				float(bbx.Min().x()),
+				float(bbx.Min().y()),
+				float(bbx.Min().z()) };
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc2));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc3));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc17));
+			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
+			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 1));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 2));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 3));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 4));
+			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 5));
+		}
 
 		//execute
 		kernel_prog->executeKernel(kernel_idx1, 3, global_size, local_size);
