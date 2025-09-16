@@ -1475,7 +1475,7 @@ void VolumePropPanel::ApplyMl()
 		m_group->ApplyMlVolProp();
 	else if (m_vd)
 		m_vd->ApplyMlVolProp();
-	FluoRefresh(0, { gstVolumeProps }, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(0, { gstVolumeProps, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SaveMl()
@@ -1706,9 +1706,9 @@ void VolumePropPanel::SetGamma(double val, bool notify)
 
 	m_vd->SetGamma(val);
 	if (notify)
-		FluoRefresh(0, { gstGamma3d }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstGamma3d, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetMinMax(double val1, double val2, bool notify)
@@ -1723,9 +1723,9 @@ void VolumePropPanel::SetMinMax(double val1, double val2, bool notify)
 	m_vd->SetHighOffset(val2);
 
 	if (notify)
-		FluoRefresh(0, { gstMinMax }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstMinMax, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetLuminance(double val, bool notify)
@@ -1812,9 +1812,9 @@ void VolumePropPanel::SetBoundary(double val1, double val2, bool notify)
 	m_vd->SetBoundaryHigh(val2);
 
 	if (notify)
-		FluoRefresh(0, { gstBoundary }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstBoundary, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId(m_view) });
+		FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
@@ -1828,12 +1828,9 @@ void VolumePropPanel::SetThresh(double val1, double val2, bool notify)
 	m_vd->SetLeftThresh(val1);
 	m_vd->SetRightThresh(val2);
 
-	fluo::ValueCollection vc;
-	vc.insert(notify?gstThreshold: gstNull);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
+	fluo::ValueCollection vc = { gstBrushCountAutoUpdate, gstColocalAutoUpdate, gstConvVolMeshUpdateTransf };
+	if (notify)
+		vc.insert(gstThreshold);
 
 	FluoRefresh(0, vc, { glbin_current.GetViewId(m_view) });
 }
@@ -1993,13 +1990,7 @@ void VolumePropPanel::SyncThresh(double val1, double val2)
 	m_group->SetLeftThresh(val1);
 	m_group->SetRightThresh(val2);
 
-	fluo::ValueCollection vc;
-	vc.insert(gstThreshold);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(1, vc, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(1, { gstThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, {glbin_current.GetViewId(m_view)});
 }
 
 void VolumePropPanel::SyncShadowInt(double val)
@@ -2892,12 +2883,6 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 
 	EnableColormap(true);
 
-	fluo::ValueCollection vc;
-	vc.insert(gstColormap);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
 	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId(m_view) });
 }
 
@@ -2917,12 +2902,6 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 		EnableTransparent(true);
 	}
 
-	fluo::ValueCollection vc;
-	vc.insert(gstColormap);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
 	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId(m_view) });
 }
 
@@ -3254,7 +3233,7 @@ void VolumePropPanel::SetInvert()
 	else if (m_vd)
 		m_vd->SetInvert(inv);
 
-	FluoRefresh(0, { gstInvert }, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(0, { gstInvert, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 }
 
 void VolumePropPanel::SetComponentDisplay()
@@ -3436,7 +3415,7 @@ void VolumePropPanel::ResetDefault()
 	else
 		glbin_vol_def.Apply(m_vd);
 
-	FluoRefresh(0, { gstVolumeProps }, { glbin_current.GetViewId(m_view) });
+	FluoRefresh(0, { gstVolumeProps, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId(m_view) });
 }
 
 bool VolumePropPanel::SetSpacings()

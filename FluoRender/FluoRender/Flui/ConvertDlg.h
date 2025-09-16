@@ -43,10 +43,10 @@ private:
 	//convert from volume to polygon mesh
 	wxButton* m_cnv_vol_mesh_convert_btn;
 	wxButton* m_cnv_vol_mesh_update_btn;
+	wxButton* m_cnv_vol_mesh_weld_btn;
 
-	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
 	wxCheckBox* m_cnv_vol_mesh_selected_chk;
-	wxCheckBox* m_cnv_vol_mesh_weld_chk;
+	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
 
 	wxSingleSlider* m_cnv_vol_mesh_thresh_sldr;
 	wxTextCtrl* m_cnv_vol_mesh_thresh_text;
@@ -58,10 +58,10 @@ private:
 private:
 	void OnCnvVolMeshConvert(wxCommandEvent& event);
 	void OnCnvVolMeshUpdate(wxCommandEvent& event);
+	void OnCnvVolMeshWeldVertices(wxCommandEvent& event);
 
-	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);
 	void OnCnvVolMeshUseSelCheck(wxCommandEvent& event);
-	void OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event);
+	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);
 
 	void OnCnvVolMeshThreshChange(wxScrollEvent& event);
 	void OnCnvVolMeshThreshText(wxCommandEvent& event);

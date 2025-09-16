@@ -59,10 +59,14 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_update_btn = new wxButton(this, wxID_ANY, "Update",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_cnv_vol_mesh_weld_btn = new wxButton(this, wxID_ANY, "Weld",
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_convert_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshConvert, this);
 	m_cnv_vol_mesh_update_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshUpdate, this);
+	m_cnv_vol_mesh_weld_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshWeldVertices, this);
 	sizer_1->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cnv_vol_mesh_update_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_cnv_vol_mesh_weld_btn, 0, wxALIGN_CENTER);
 	
 	//sizer_2
 	//convert from volume to mesh
@@ -70,18 +74,14 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 		wxVERTICAL, this, "Volume to Polygon Mesh");
 	//check options and convert button
 	wxBoxSizer *sizer_21 = new wxBoxSizer(wxHORIZONTAL);
-	m_cnv_vol_mesh_usetransf_chk = new wxCheckBox(this, wxID_ANY, "Use transfer function",
+	m_cnv_vol_mesh_selected_chk = new wxCheckBox(this, wxID_ANY, "Paint-Selected Data Only",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_selected_chk = new wxCheckBox(this, wxID_ANY, "Selected Only",
+	m_cnv_vol_mesh_usetransf_chk = new wxCheckBox(this, wxID_ANY, "Use Volume Properties",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_weld_chk = new wxCheckBox(this, wxID_ANY, "Weld vertices",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_usetransf_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshUseTransfCheck, this);
 	m_cnv_vol_mesh_selected_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshUseSelCheck, this);
-	m_cnv_vol_mesh_weld_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshWeldVerticesCheck, this);
-	sizer_21->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
+	m_cnv_vol_mesh_usetransf_chk->Bind(wxEVT_CHECKBOX, &ConvertDlg::OnCnvVolMeshUseTransfCheck, this);
 	sizer_21->Add(m_cnv_vol_mesh_selected_chk, 0, wxALIGN_CENTER);
-	sizer_21->Add(m_cnv_vol_mesh_weld_chk, 0, wxALIGN_CENTER);
+	sizer_21->Add(m_cnv_vol_mesh_usetransf_chk, 0, wxALIGN_CENTER);
 	//threshold slider and text
 	wxBoxSizer *sizer_22 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
@@ -199,32 +199,30 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_cnv_vol_mesh_selected_chk->SetValue(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstVolMeshWeld))
-	{
-		bval = glbin_conv_vol_mesh->GetVertexMerge();
-		m_cnv_vol_mesh_weld_chk->SetValue(bval);
-	}
-
 	if (FOUND_VALUE(gstVolMeshInfo))
 	{
-		wxString str = "The surface area of mesh object ";
-		auto md = glbin_current.mesh_data.lock();
-		if (md)
-		{
-			str += md->GetName();
-			str += " is ";
-			str += glbin_conv_vol_mesh->GetInfo();
-		}
+		//wxString str = "The surface area of mesh object ";
+		//auto md = glbin_current.mesh_data.lock();
+		//if (md)
+		//{
+		//	str += md->GetName();
+		//	str += " is ";
+		//	str += glbin_conv_vol_mesh->GetInfo();
+		//}
 		//(*m_stat_text) << str << "\n";
 	}
 
 	bool brush_update = FOUND_VALUE(gstBrushCountResult);
+	bool transf_update = FOUND_VALUE(gstConvVolMeshUpdateTransf);
 	if (FOUND_VALUE(gstConvVolMeshUpdate) ||
+		transf_update ||
 		brush_update)
 	{
 		auto mode = glbin_vol_selector.GetSelectMode();
 		if (mode == flrd::SelectMode::Segment ||
 			mode == flrd::SelectMode::Mesh)
+			return;
+		if (transf_update && !glbin_conv_vol_mesh->GetUseTransfer())
 			return;
 		if (brush_update && !glbin_conv_vol_mesh->GetUseMask())
 			return;
@@ -305,24 +303,14 @@ void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
 	glbin_conv_vol_mesh->SetUseTransfer(bval);
-	wxString str;
-	if (bval)
-		str = "0.01";
-	else
-		str = "0.50";
-	m_cnv_vol_mesh_thresh_text->SetValue(str);
+	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_selected_chk->GetValue();
 	glbin_conv_vol_mesh->SetUseMask(bval);
-}
-
-void ConvertDlg::OnCnvVolMeshWeldVerticesCheck(wxCommandEvent& event)
-{
-	bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
-	glbin_conv_vol_mesh->SetVertexMerge(bval);
+	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
@@ -369,4 +357,10 @@ void ConvertDlg::OnCnvVolMeshUpdate(wxCommandEvent& event)
 
 	FluoRefresh(0, { gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
 		{ glbin_current.GetViewId() });
+}
+
+void ConvertDlg::OnCnvVolMeshWeldVertices(wxCommandEvent& event)
+{
+	//bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
+	//glbin_conv_vol_mesh->SetVertexMerge(bval);
 }

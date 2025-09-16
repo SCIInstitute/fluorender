@@ -197,8 +197,19 @@ void ColocalizationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_use_sel_chk->SetValue(glbin_colocal_def.m_use_mask);
 	}
 
-	if (FOUND_VALUE(gstColocalResult))
+	bool colocal_update = false;
+	bool colocal_result = FOUND_VALUE(gstColocalResult);
+	bool auto_update = FOUND_VALUE(gstColocalAutoUpdate);
+	if (update_all || auto_update)
 	{
+		if (auto_update)
+			colocal_update = glbin_colocalizer.GetAutoColocalize();
+		else
+			colocal_result = true;
+	}
+	if (colocal_result)
+	{
+		glbin_colocalizer.Compute();
 		SetOutput();
 	}
 }
@@ -338,12 +349,7 @@ void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent& event)
 void ColocalizationDlg::OnUseSelChk(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_use_mask = m_use_sel_chk->GetValue();
-
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		glbin_colocalizer.Compute();
-		FluoUpdate({ gstColocalResult });
-	}
+	FluoUpdate({ gstColocalAutoUpdate });
 }
 
 void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
@@ -355,56 +361,32 @@ void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
 	else if (m_logical_and_rdb->GetValue())
 		glbin_colocal_def.m_method = 2;
 
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		glbin_colocalizer.Compute();
-		FluoUpdate({ gstColocalResult });
-	}
+	FluoUpdate({ gstColocalAutoUpdate });
 }
 
 //format
 void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_int_weighted = m_int_weight_btn->GetValue();
-
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		glbin_colocalizer.Compute();
-		FluoUpdate({ gstColocalResult });
-	}
+	FluoUpdate({ gstColocalAutoUpdate });
 }
 
 void ColocalizationDlg::OnRatioBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_get_ratio = m_ratio_btn->GetValue();
-
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		glbin_colocalizer.Compute();
-		FluoUpdate({ gstColocalResult });
-	}
+	FluoUpdate({ gstColocalAutoUpdate });
 }
 
 void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_physical_size = m_physical_btn->GetValue();
-
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		glbin_colocalizer.Compute();
-		FluoUpdate({ gstColocalResult });
-	}
+	FluoUpdate({ gstColocalAutoUpdate });
 }
 
 void ColocalizationDlg::OnColorMapBtn(wxCommandEvent& event)
 {
 	glbin_colocal_def.m_colormap = m_colormap_btn->GetValue();
-
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		glbin_colocalizer.Compute();
-		FluoUpdate({ gstColocalResult });
-	}
+	FluoUpdate({ gstColocalAutoUpdate });
 }
 
 void ColocalizationDlg::OnHistoryChk(wxCommandEvent& event)

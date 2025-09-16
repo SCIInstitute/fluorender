@@ -9651,11 +9651,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 		glbin_states.m_freehand_tool_from_kb = true;
 		state.m_set_focus = true;
 		state.m_refresh = true;
-		state.m_value_collection.insert({ gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter });
-		if (glbin_vol_selector.GetAutoPaintSize())
-			state.m_value_collection.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			state.m_value_collection.insert(gstColocalResult);
+		state.m_value_collection.insert({
+			gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 		refresh = true;
 	}
 	else if (state.m_key_erase)
@@ -9669,11 +9666,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 		glbin_states.m_freehand_tool_from_kb = true;
 		state.m_set_focus = true;
 		state.m_refresh = true;
-		state.m_value_collection.insert({ gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter });
-		if (glbin_vol_selector.GetAutoPaintSize())
-			state.m_value_collection.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			state.m_value_collection.insert(gstColocalResult);
+		state.m_value_collection.insert({
+			gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 		refresh = true;
 	}
 	else if (state.m_key_diff)
@@ -9687,11 +9681,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 		glbin_states.m_freehand_tool_from_kb = true;
 		state.m_set_focus = true;
 		state.m_refresh = true;
-		state.m_value_collection.insert({ gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter });
-		if (glbin_vol_selector.GetAutoPaintSize())
-			state.m_value_collection.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			state.m_value_collection.insert(gstColocalResult);
+		state.m_value_collection.insert({
+			gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 		refresh = true;
 	}
 	else
@@ -9709,11 +9700,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 			state.m_set_previous_focus = true;
 			state.m_set_focus = true;
 			state.m_refresh = true;
-			state.m_value_collection.insert({ gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter });
-			if (glbin_vol_selector.GetAutoPaintSize())
-				state.m_value_collection.insert(gstBrushCountResult);
-			if (glbin_colocalizer.GetAutoColocalize())
-				state.m_value_collection.insert(gstColocalResult);
+			state.m_value_collection.insert({
+				gstSelUndo, gstFreehandToolState, gstBrushThreshold, gstBrushSize1, gstBrushSize2, gstBrushIter, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 			refresh = true;
 		}
 	}
@@ -10812,10 +10800,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			state.m_looking_glass_changed = true;
 			state.m_start_loop = true;
 			//update
-			if (glbin_vol_selector.GetAutoPaintSize())
-				state.m_value_collection.insert(gstBrushCountResult);
-			if (glbin_colocalizer.GetAutoColocalize())
-				state.m_value_collection.insert(gstColocalResult);
+			state.m_value_collection.insert({ gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 			if (m_int_mode == InteractiveMode::GrowRuler)
 				state.m_value_collection.insert(gstRulerList);
 		}
@@ -11161,11 +11146,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_int_mode = InteractiveMode::BrushSelectUpdate;
 			m_force_clear = true;
 			RefreshGL(17);
-			vc.insert({ gstSelUndo, gstBrushThreshold });
-			if (glbin_vol_selector.GetAutoPaintSize())
-				vc.insert(gstBrushCountResult);
-			if (glbin_colocalizer.GetAutoColocalize())
-				vc.insert(gstColocalResult);
+			vc.insert({ gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 			glbin_current.mainframe->UpdateProps(vc);
 			return;
 		}
@@ -11198,11 +11179,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_int_mode = InteractiveMode::BrushRulerUpdate;
 			m_force_clear = true;
 			RefreshGL(19);
-			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold });
-			if (glbin_vol_selector.GetAutoPaintSize())
-				vc.insert(gstBrushCountResult);
-			if (glbin_colocalizer.GetAutoColocalize())
-				vc.insert(gstColocalResult);
+			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 			glbin_current.mainframe->UpdateProps(vc);
 			return;
 		}

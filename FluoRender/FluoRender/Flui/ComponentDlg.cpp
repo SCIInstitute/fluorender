@@ -2172,38 +2172,20 @@ void ComponentDlg::OnCompFull(wxCommandEvent& event)
 void ComponentDlg::OnCompExclusive(wxCommandEvent& event)
 {
 	glbin_comp_selector.Exclusive();
-	fluo::ValueCollection vc;
-	vc.insert({ gstCompAnalysisResult, gstSelUndo });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent& event)
 {
 	bool get_all = glbin_comp_selector.GetIdEmpty();
 	glbin_comp_selector.Select(get_all);
-	fluo::ValueCollection vc;
-	vc.insert({ gstCompAnalysisResult, gstSelUndo });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent& event)
 {
 	glbin_comp_selector.All();
-	fluo::ValueCollection vc;
-	vc.insert({ gstCompAnalysisResult, gstSelUndo });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent& event)

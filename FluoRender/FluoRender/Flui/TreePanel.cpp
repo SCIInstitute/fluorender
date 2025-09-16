@@ -1800,10 +1800,7 @@ void TreePanel::OnMenu(wxCommandEvent& event)
 			break;
 		}
 		glbin_vol_selector.PasteMask(ival);
-		if (glbin_vol_selector.GetAutoPaintSize())
-			vc.insert(gstBrushCountResult);
-		if (glbin_colocalizer.GetAutoColocalize())
-			vc.insert(gstColocalResult);
+		vc.insert({ gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 	}
 		break;
 	case ID_Brush:

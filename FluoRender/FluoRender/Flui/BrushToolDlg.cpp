@@ -636,7 +636,19 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstBrushHistoryEnable))
 		m_history_chk->SetValue(m_hold_history);
 
-	if (sel_vol && FOUND_VALUE(gstBrushCountResult))
+	bool count_result = FOUND_VALUE(gstBrushCountResult);
+	bool auto_update = FOUND_VALUE(gstBrushCountAutoUpdate);
+	bool count_update = false;
+	if (sel_vol &&
+		(count_result ||
+			auto_update))
+	{
+		if (auto_update)
+			count_update = glbin_vol_selector.GetAutoPaintSize();
+		else
+			count_update = true;
+	}
+	if (count_update)
 	{
 		GridData data;
 		flrd::CountVoxels counter;
@@ -786,50 +798,26 @@ void BrushToolDlg::MaskCopyData()
 
 void BrushToolDlg::MaskPaste()
 {
-	fluo::ValueCollection vc;
 	glbin_vol_selector.PasteMask(0);
-	vc.insert(gstSelUndo);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc);
+	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 }
 
 void BrushToolDlg::MaskMerge()
 {
-	fluo::ValueCollection vc;
 	glbin_vol_selector.PasteMask(1);
-	vc.insert(gstSelUndo);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc);
+	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 }
 
 void BrushToolDlg::MaskExclude()
 {
-	fluo::ValueCollection vc;
 	glbin_vol_selector.PasteMask(2);
-	vc.insert(gstSelUndo);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc);
+	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 }
 
 void BrushToolDlg::MaskIntersect()
 {
-	fluo::ValueCollection vc;
 	glbin_vol_selector.PasteMask(3);
-	vc.insert(gstSelUndo);
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-		vc.insert(gstColocalResult);
-	FluoRefresh(0, vc);
+	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 }
 
 //brush commands
@@ -925,17 +913,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 
 	glbin_vol_selector.PopMask();
 	glbin_vol_selector.Segment(true, false);
-	fluo::ValueCollection vc;
-	int sx = 2;
-	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		vc.insert(gstColocalResult);
-		sx = 0;
-	}
-	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
 }
 
 //gm falloff
@@ -963,17 +941,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 
 	glbin_vol_selector.PopMask();
 	glbin_vol_selector.Segment(true, false);
-	fluo::ValueCollection vc;
-	int sx = 2;
-	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		vc.insert(gstColocalResult);
-		sx = 0;
-	}
-	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
 }
 
 //2d influence
@@ -1001,17 +969,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 
 	glbin_vol_selector.PopMask();
 	glbin_vol_selector.Segment(true, false);
-	fluo::ValueCollection vc;
-	int sx = 2;
-	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		vc.insert(gstColocalResult);
-		sx = 0;
-	}
-	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
 }
 
 //edge detect
@@ -1030,17 +988,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 
 	glbin_vol_selector.PopMask();
 	glbin_vol_selector.Segment(true, false);
-	fluo::ValueCollection vc;
-	int sx = 2;
-	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		vc.insert(gstColocalResult);
-		sx = 0;
-	}
-	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
 }
 
 //hidden removal
@@ -1065,17 +1013,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 
 	glbin_vol_selector.PopMask();
 	glbin_vol_selector.Segment(true, false);
-	fluo::ValueCollection vc;
-	int sx = 2;
-	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		vc.insert(gstColocalResult);
-		sx = 0;
-	}
-	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
 }
 
 //estimate threshold
@@ -1176,17 +1114,7 @@ void BrushToolDlg::OnBrushIterText(wxCommandEvent& event)
 
 	glbin_vol_selector.PopMask();
 	glbin_vol_selector.Segment(true, false);
-	fluo::ValueCollection vc;
-	int sx = 2;
-	vc.insert({ gstSelUndo, gstBrushThreshold });
-	if (glbin_vol_selector.GetAutoPaintSize())
-		vc.insert(gstBrushCountResult);
-	if (glbin_colocalizer.GetAutoColocalize())
-	{
-		vc.insert(gstColocalResult);
-		sx = 0;
-	}
-	FluoRefresh(sx, vc, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
 }
 
 //brush size relation

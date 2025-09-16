@@ -628,6 +628,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstBrushSizeRel "brush size rel"
 #define gstBrushHistoryEnable "brush history enable"
 #define gstBrushCountResult "brush count result"
+#define gstBrushCountAutoUpdate "brush count auto update"
 #define gstBrushSpeedResult "brush speed result"
 #define gstSettingsJava "settings java"
 
@@ -644,6 +645,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstPhysSize "phys size"
 #define gstColocalColormap "colocal colormap"
 #define gstColocalResult "colocal result"
+#define gstColocalAutoUpdate "colocal auto update"
 //component agent
 #define gstCompAutoUpdate "comp auto update"//automatically gen comps
 #define gstRecordCmd "record cmd"//record command for comps
@@ -704,6 +706,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolMeshSimplify "vol mesh simplify"
 #define gstVolMeshSmooth "vol mesh smooth"
 #define gstConvVolMeshUpdate "conv vol mesh update"
+#define gstConvVolMeshUpdateTransf "conv vol mesh update transf"
 //counting agent
 #define gstCountMinValue "count min value"
 #define gstCountMaxValue "count max value"
