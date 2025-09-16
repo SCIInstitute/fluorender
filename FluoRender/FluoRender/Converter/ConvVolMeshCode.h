@@ -56,7 +56,7 @@ float clip_plane(
 )
 {
 	// Clipping planes
-	pt = (float3)((float)(coord.x) / (float)(volume_width), (float)(coord.y) / (float)(volume_height), (float)(coord.z) / (float)(volume_depth));
+	float3 pt = (float3)((float)(coord.x) / (float)(volume_width), (float)(coord.y) / (float)(volume_height), (float)(coord.z) / (float)(volume_depth));
 	pt = pt * scl + trl;
 	if (dot(pt, loc10.xyz)+loc10.w < 0.0f ||
 		dot(pt, loc11.xyz)+loc11.w < 0.0f ||
@@ -72,6 +72,7 @@ float clip_plane(
 
 inline constexpr const char* str_cl_marching_cubes_tf = R"CLKER(
 float transfer_function(
+	__read_only image3d_t volume,               // 3D scalar field
 	int3 coord,
 	int volume_width,    // nx
 	int volume_height,   // ny
@@ -96,16 +97,16 @@ float transfer_function(
 
 	// Sample center voxel intensity
 	float3 v;
-	v.x = read_imagef(data, linear_sampler, (float4)(x, y, z, 1.0f)).x;
+	v.x = read_imagef(volume, linear_sampler, (float4)(x, y, z, 1.0f)).x;
 
 	// Compute gradient using central differences and float indexing
 	float3 n = (float3)(0.0f);
-	n.x = (read_imagef(data, linear_sampler, (float4)(x + 1.0f, y, z, 1.0f)).x -
-		   read_imagef(data, linear_sampler, (float4)(x - 1.0f, y, z, 1.0f)).x) / 2.0f;
-	n.y = (read_imagef(data, linear_sampler, (float4)(x, y + 1.0f, z, 1.0f)).x -
-		   read_imagef(data, linear_sampler, (float4)(x, y - 1.0f, z, 1.0f)).x) / 2.0f;
-	n.z = (read_imagef(data, linear_sampler, (float4)(x, y, z + dz, 1.0f)).x -
-		   read_imagef(data, linear_sampler, (float4)(x, y, z - dz, 1.0f)).x) / (2.0f * dz);
+	n.x = (read_imagef(volume, linear_sampler, (float4)(x + 1.0f, y, z, 1.0f)).x -
+		   read_imagef(volume, linear_sampler, (float4)(x - 1.0f, y, z, 1.0f)).x) / 2.0f;
+	n.y = (read_imagef(volume, linear_sampler, (float4)(x, y + 1.0f, z, 1.0f)).x -
+		   read_imagef(volume, linear_sampler, (float4)(x, y - 1.0f, z, 1.0f)).x) / 2.0f;
+	n.z = (read_imagef(volume, linear_sampler, (float4)(x, y, z + dz, 1.0f)).x -
+		   read_imagef(volume, linear_sampler, (float4)(x, y, z - dz, 1.0f)).x) / (2.0f * dz);
 
 	// Store gradient magnitude
 	v.y = length(n);
@@ -223,17 +224,21 @@ inline constexpr const char* str_cl_marching_cubes_read_mask = R"CLKER(
 
 inline constexpr const char* str_cl_marching_cubes_apply_clip_tf = R"CLKER(
 	// Apply clipping planes and transfer function
+	int3 coords[8] = {
+		(int3)(x,               y,               z           ), // corner 0
+		(int3)(x + xy_factor,   y,               z           ), // corner 1
+		(int3)(x + xy_factor,   y + xy_factor,   z           ), // corner 2
+		(int3)(x,               y + xy_factor,   z           ), // corner 3
+		(int3)(x,               y,               z + z_factor), // corner 4
+		(int3)(x + xy_factor,   y,               z + z_factor), // corner 5
+		(int3)(x + xy_factor,   y + xy_factor,   z + z_factor), // corner 6
+		(int3)(x,               y + xy_factor,   z + z_factor)  // corner 7
+	};
 	for (int i = 0; i < 8; ++i) {
-		int3 coord = (int3)(x + (i & 1 ? xy_factor : 0),
-							y + (i & 2 ? xy_factor : 0),
-							z + (i & 4 ? z_factor : 0));
-		if (clip_plane(coord, volume_width, volume_height, volume_depth, scl, trl,
-			loc10, loc11, loc12, loc13, loc14, loc15) == 0.0f) {
-			cube[i] = 0.0f;
-		} else {
-			cube[i] = cube[i] * transfer_function(coord, volume_width, volume_height, volume_depth,
-				loc2, loc3, loc17);
-		}
+		cube[i] *= clip_plane(coords[i], volume_width, volume_height, volume_depth, scl, trl,
+			loc10, loc11, loc12, loc13, loc14, loc15);
+		cube[i] *= transfer_function(volume, coords[i], volume_width, volume_height, volume_depth,
+			loc2, loc3, loc17);
 	}
 
 )CLKER";
