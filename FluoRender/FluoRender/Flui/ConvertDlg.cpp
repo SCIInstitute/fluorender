@@ -177,14 +177,14 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		ival = glbin_conv_vol_mesh->GetDownsample();
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		m_cnv_vol_mesh_downsample_text->SetValue(wxString::Format("%d", ival));
+		m_cnv_vol_mesh_downsample_text->ChangeValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownZ))
 	{
 		ival = glbin_conv_vol_mesh->GetDownsampleZ();
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		m_cnv_vol_mesh_downsample_z_text->SetValue(wxString::Format("%d", ival));
+		m_cnv_vol_mesh_downsample_z_text->ChangeValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstUseTransferFunc))
@@ -212,7 +212,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		//(*m_stat_text) << str << "\n";
 	}
 
-	bool brush_update = FOUND_VALUE(gstBrushCountResult);
+	bool brush_update = FOUND_VALUE(gstBrushCountAutoUpdate);
 	bool transf_update = FOUND_VALUE(gstConvVolMeshUpdateTransf);
 	if (FOUND_VALUE(gstConvVolMeshUpdate) ||
 		transf_update ||

@@ -1056,7 +1056,7 @@ void ComponentDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstUseMachineLearning))
 		m_use_ml_chk->SetValue(glbin_comp_generator.GetUseMl());
 
-	bool brush_update = FOUND_VALUE(gstBrushCountResult);
+	bool brush_update = FOUND_VALUE(gstBrushCountAutoUpdate);
 	if (FOUND_VALUE(gstCompAutoUpdate) ||
 		brush_update)
 	{
