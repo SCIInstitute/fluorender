@@ -57,7 +57,6 @@ public:
 	double m_iso = 0.5; // Iso value for contouring
 	int m_downsample = 1; // Downsampling factor in x and y
 	int m_downsample_z = 1; // Downsampling factor in z
-	bool m_vertex_merge = false; // Merge vertices
 	double m_simplify = 0.0; // Simplification factor
 	double m_smooth = 0.0; // Smoothing factor
 };

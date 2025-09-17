@@ -57,7 +57,6 @@ void MeshDefault::Read()
 	f->Read(gstVolMeshThresh, &m_iso, 0.5);
 	f->Read(gstVolMeshDownXY, &m_downsample, 1);
 	f->Read(gstVolMeshDownZ, &m_downsample_z, 1);
-	f->Read(gstVolMeshWeld, &m_vertex_merge, false);
 	f->Read(gstVolMeshSimplify, &m_simplify, 0.0);
 	f->Read(gstVolMeshSmooth, &m_smooth, 0.0);
 
@@ -77,7 +76,6 @@ void MeshDefault::Save()
 	f->Write(gstVolMeshThresh, m_iso);
 	f->Write(gstVolMeshDownXY, m_downsample);
 	f->Write(gstVolMeshDownZ, m_downsample_z);
-	f->Write(gstVolMeshWeld, m_vertex_merge);
 	f->Write(gstVolMeshSimplify, m_simplify);
 	f->Write(gstVolMeshSmooth, m_smooth);
 }
@@ -97,7 +95,6 @@ void MeshDefault::Set(flrd::BaseConvVolMesh* cvm)
 	m_iso = cvm->GetIsoValue();
 	m_downsample = cvm->GetDownsample();
 	m_downsample_z = cvm->GetDownsampleZ();
-	m_vertex_merge = cvm->GetVertexMerge();
 	m_simplify = cvm->GetSimplify();
 	m_smooth = cvm->GetSmooth();
 }
@@ -130,7 +127,6 @@ void MeshDefault::Apply(flrd::BaseConvVolMesh* cvm)
 	cvm->SetIsoValue(m_iso);
 	cvm->SetDownsample(m_downsample);
 	cvm->SetDownsampleZ(m_downsample_z);
-	cvm->SetVertexMerge(m_vertex_merge);
 	cvm->SetSimplify(m_simplify);
 	cvm->SetSmooth(m_smooth);
 }
