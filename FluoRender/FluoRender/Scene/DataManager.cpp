@@ -4199,12 +4199,27 @@ GLuint MeshData::AddVBO(int vertex_size)
 	return vbo_id;
 }
 
+GLuint MeshData::GetVBO()
+{
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return 0;
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+}
+
 void MeshData::SetTriangleNum(unsigned int num)
 {
 	m_data->numtriangles = static_cast<GLuint>(num);
 	GLMgroup* group = m_data->groups;
 	if (group)
 		group->numtriangles = static_cast<GLuint>(num);
+}
+
+unsigned int MeshData::GetVertexNum()
+{
+	if (!m_data)
+		return 0;
+	return m_data->numvertices;
 }
 
 //MR

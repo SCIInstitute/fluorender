@@ -207,12 +207,23 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(
 		GetKernelString(m_use_sel, use_tf), bits, max_int);
 	if (!kernel_prog)
+	{
+		m_busy = false;
 		return;
+	}
 
 	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
-	if (kernel_idx0 < 0) return;
+	if (kernel_idx0 < 0)
+	{
+		m_busy = false;
+		return;
+	}
 	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
-	if (kernel_idx1 < 0) return;
+	if (kernel_idx1 < 0)
+	{
+		m_busy = false;
+		return;
+	}
 
 	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 	//estimate the buffer size
@@ -321,6 +332,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	if (vsize <= 0)
 	{
 		kernel_prog->releaseAll();
+		m_busy = false;
 		return;
 	}
 
@@ -420,3 +432,68 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 
 	m_busy = false;
 }
+
+void ConvVolMesh::MergeVertices(bool avg_normals)
+{
+	if (!m_mesh)
+		return;
+	size_t vertex_num = m_mesh->GetVertexNum();
+	if (vertex_num <= 0)
+		return;
+
+	m_busy = true;
+
+	//create program kernels
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(
+		str_cl_merge_vertices, 8, 256.0f);
+	if (!kernel_prog)
+	{
+		m_busy = false;
+		return;
+	}
+
+	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
+	if (kernel_idx0 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
+	if (kernel_idx1 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx2 = kernel_prog->createKernel("kernel_2");
+	if (kernel_idx2 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx3 = kernel_prog->createKernel("kernel_3");
+	if (kernel_idx3 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx4 = kernel_prog->createKernel("kernel_4");
+	if (kernel_idx4 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+
+	//compute workload
+	size_t local_size = 1;
+	size_t global_size = vertex_num;
+
+	//get vbo
+	GLuint vbo_id = m_mesh->GetVBO();
+	size_t vbo_size = sizeof(float) * vertex_num;
+
+	//build hash table
+	kernel_prog->setKernelArgBegin(kernel_idx0);
+	kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	m_busy = false;
+}
+

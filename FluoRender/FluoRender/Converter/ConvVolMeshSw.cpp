@@ -89,10 +89,7 @@ void ConvVolMeshSw::Convert()
 	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
 
 	SetProgress(0, "FluoRender is converting volume to mesh. Please wait.");
-	if (m_vertex_merge)
-		SetRange(0, 80);
-	else
-		SetRange(0, 100);
+	SetRange(0, 100);
 	//start converting
 	if (!Compute((void*)model))
 	{
@@ -100,16 +97,10 @@ void ConvVolMeshSw::Convert()
 		return;
 	}
 
-	SetRange(0, 100);
-	if (m_vertex_merge)
-	{
-		SetProgress(80, "FluoRender is welding vertices. Please wait.");
-		glmWeld(model, static_cast<GLfloat>(0.001 * fluo::Min(m_spcx, m_spcy, m_spcz)));
-	}
-	float scale[3] = { 1.0f, 1.0f, 1.0f };
-	glmArea(model, scale, &m_area);
+	//float scale[3] = { 1.0f, 1.0f, 1.0f };
+	//glmArea(model, scale, &m_area);
 
-	m_info = std::to_string(m_area);
+	//m_info = std::to_string(m_area);
 
 	m_mesh->Load(model);
 
@@ -119,6 +110,22 @@ void ConvVolMeshSw::Convert()
 void ConvVolMeshSw::Update(bool create_mesh)
 {
 	//no update for software version
+}
+
+void ConvVolMeshSw::MergeVertices(bool avg_normals)
+{
+	GLMmodel* model = m_mesh->GetMesh();
+	if (!model)
+		return;
+	SetRange(0, 100);
+	SetProgress(0, "FluoRender is welding vertices. Please wait.");
+	glmWeld(model, static_cast<GLfloat>(0.001 * fluo::Min(m_spcx, m_spcy, m_spcz)));
+	if (avg_normals)
+	{
+		SetProgress(50, "FluoRender is generating normals. Please wait.");
+		glmVertexNormals(model, 89.0f);
+	}
+	SetProgress(0, "");
 }
 
 bool ConvVolMeshSw::Compute(void* m)

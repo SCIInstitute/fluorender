@@ -439,51 +439,170 @@ inline constexpr const char* str_cl_marching_cubes_kernel1_tail = R"CLKER(
 
 //merge vertices
 inline constexpr const char* str_cl_merge_vertices = R"CLKER(
+#define MAX_BUCKET_SIZE 16
+
+inline int spatial_hash(int qx, int qy, int qz, int hash_table_size)
+{
+	const int p1 = 73856093;
+	const int p2 = 19349663;
+	const int p3 = 83492791;
+	return abs((qx * p1) ^ (qy * p2) ^ (qz * p3)) % hash_table_size;
+}
+
+inline int quantize(float value, float resolution)
+{
+	return (int)(value * resolution);
+}
+
 __kernel void kernel_0(
-	__global float4* raw_vertices,
-	__global float4* merged_vertices,
-	__global int* indices,
+	__global const float* vertex_buffer,
 	__global int* hash_table,
-	__global int* merge_counter,
-	int num_raw_vertices,
-	float voxel_size
+	__global int* hash_table_counts,
+	const int vertex_count,
+	const float grid_resolution,
+	const int hash_table_size
 )
 {
-	int id = get_global_id(0);
-	if (id >= num_raw_vertices) return;
+	//build grid hash table
+	int gid = get_global_id(0);
+	if (gid >= vertex_count) return;
 
-	float4 pos = raw_vertices[id];
+	float x = vertex_buffer[gid * 3 + 0];
+	float y = vertex_buffer[gid * 3 + 1];
+	float z = vertex_buffer[gid * 3 + 2];
 
-	// Quantize position to grid
-	int3 key = (int3)(
-		floor(pos.x / voxel_size),
-		floor(pos.y / voxel_size),
-		floor(pos.z / voxel_size)
-	);
+	int qx = quantize(x, grid_resolution);
+	int qy = quantize(y, grid_resolution);
+	int qz = quantize(z, grid_resolution);
 
-	// Simple hash function
-	int hash = (key.x * 73856093) ^ (key.y * 19349663) ^ (key.z * 83492791);
-	hash = abs(hash) % HASH_TABLE_SIZE;
+	int hash = spatial_hash(qx, qy, qz, hash_table_size);
 
-	// Try to insert into hash table
-	int existing = atomic_cmpxchg(&hash_table[hash], -1, id);
-
-	int final_index;
-	if (existing == -1)
-	{
-		// First time this position is seen
-		int new_idx = atomic_add(merge_counter, 1);
-		merged_vertices[new_idx] = pos;
-		final_index = new_idx;
+	int index = atomic_inc(&hash_table_counts[hash]);
+	if (index < MAX_BUCKET_SIZE) {
+		hash_table[hash * MAX_BUCKET_SIZE + index] = gid;
 	}
-	else
-	{
-		// Already inserted
-		final_index = existing;
+}
+
+__kernel void kernel_1(
+	__global const float* vertex_buffer,
+	__global const int* hash_table,
+	__global const int* hash_table_counts,
+	__global int* remap_table,
+	const int vertex_count,
+	const float merge_tolerance,
+	const float grid_resolution,
+	const int hash_table_size
+)
+{
+	//deduplicate vertices
+	int gid = get_global_id(0);
+	if (gid >= vertex_count) return;
+
+	float x = vertex_buffer[gid * 3 + 0];
+	float y = vertex_buffer[gid * 3 + 1];
+	float z = vertex_buffer[gid * 3 + 2];
+
+	int qx = quantize(x, grid_resolution);
+	int qy = quantize(y, grid_resolution);
+	int qz = quantize(z, grid_resolution);
+
+	int hash = spatial_hash(qx, qy, qz, hash_table_size);
+	int count = hash_table_counts[hash];
+
+	int canonical = gid;
+
+	for (int i = 0; i < count; ++i) {
+		int other = hash_table[hash * MAX_BUCKET_SIZE + i];
+		if (other == gid) continue;
+
+		float ox = vertex_buffer[other * 3 + 0];
+		float oy = vertex_buffer[other * 3 + 1];
+		float oz = vertex_buffer[other * 3 + 2];
+
+		float dx = x - ox;
+		float dy = y - oy;
+		float dz = z - oz;
+		float dist2 = dx*dx + dy*dy + dz*dz;
+
+		if (dist2 < merge_tolerance * merge_tolerance) {
+			canonical = min(canonical, other);
+		}
 	}
 
-	// Write index for triangle
-	indices[id] = final_index;
+	remap_table[gid] = canonical;
+}
+
+__kernel void kernel_2(
+	__global const int* remap_table,
+	__global int* triangle_indices,
+	const int triangle_count
+)
+{
+	//remap triangle indices
+	int tid = get_global_id(0);
+	if (tid >= triangle_count) return;
+
+	for (int i = 0; i < 3; ++i) {
+		int raw_index = triangle_indices[tid * 3 + i];
+		triangle_indices[tid * 3 + i] = remap_table[raw_index];
+	}
+}
+
+__kernel void kernel_3(
+	__global const float* vertex_buffer,
+	__global const int* triangle_indices,
+	__global float* vertex_normals,
+	const int triangle_count
+)
+{
+	//compute vertex normals
+	int tid = get_global_id(0);
+	if (tid >= triangle_count) return;
+
+	int i0 = triangle_indices[tid * 3 + 0];
+	int i1 = triangle_indices[tid * 3 + 1];
+	int i2 = triangle_indices[tid * 3 + 2];
+
+	float3 v0 = (float3)(vertex_buffer[i0 * 3 + 0], vertex_buffer[i0 * 3 + 1], vertex_buffer[i0 * 3 + 2]);
+	float3 v1 = (float3)(vertex_buffer[i1 * 3 + 0], vertex_buffer[i1 * 3 + 1], vertex_buffer[i1 * 3 + 2]);
+	float3 v2 = (float3)(vertex_buffer[i2 * 3 + 0], vertex_buffer[i2 * 3 + 1], vertex_buffer[i2 * 3 + 2]);
+
+	float3 edge1 = v1 - v0;
+	float3 edge2 = v2 - v0;
+	float3 normal = cross(edge1, edge2);
+
+	atomic_add(&vertex_normals[i0 * 3 + 0], normal.x);
+	atomic_add(&vertex_normals[i0 * 3 + 1], normal.y);
+	atomic_add(&vertex_normals[i0 * 3 + 2], normal.z);
+
+	atomic_add(&vertex_normals[i1 * 3 + 0], normal.x);
+	atomic_add(&vertex_normals[i1 * 3 + 1], normal.y);
+	atomic_add(&vertex_normals[i1 * 3 + 2], normal.z);
+
+	atomic_add(&vertex_normals[i2 * 3 + 0], normal.x);
+	atomic_add(&vertex_normals[i2 * 3 + 1], normal.y);
+	atomic_add(&vertex_normals[i2 * 3 + 2], normal.z);
+}
+
+__kernel void kernel_4(
+	__global float* vertex_normals,
+	const int vertex_count
+)
+{
+	//normalize vertex normals
+	int gid = get_global_id(0);
+	if (gid >= vertex_count) return;
+
+	float x = vertex_normals[gid * 3 + 0];
+	float y = vertex_normals[gid * 3 + 1];
+	float z = vertex_normals[gid * 3 + 2];
+
+	float len = sqrt(x*x + y*y + z*z);
+	if (len > 1e-6f) {
+		vertex_normals[gid * 3 + 0] = x / len;
+		vertex_normals[gid * 3 + 1] = y / len;
+		vertex_normals[gid * 3 + 2] = z / len;
+	}
 }
 )CLKER";
 

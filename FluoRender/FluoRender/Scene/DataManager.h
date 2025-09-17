@@ -832,8 +832,10 @@ public:
 
 	//allocate vbo
 	GLuint AddVBO(int vertex_size);
+	GLuint GetVBO();
 
 	void SetTriangleNum(unsigned int num);
+	unsigned int GetVertexNum();
 
 	//MR
 	flvr::MeshRenderer* GetMR();

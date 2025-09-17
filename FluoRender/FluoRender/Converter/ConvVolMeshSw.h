@@ -43,6 +43,7 @@ namespace flrd
 		//high-level wrapper
 		virtual void Convert() override;
 		virtual void Update(bool create_mesh) override;
+		virtual void MergeVertices(bool avg_normals) override;
 
 		double GetArea() { return m_area; }
 

@@ -49,6 +49,8 @@ namespace flrd
 		// Convert method to be implemented by derived classes
 		virtual void Convert() = 0;
 		virtual void Update(bool create_mesh) = 0;
+		// merge vetices
+		virtual void MergeVertices(bool avg_normals) = 0;
 
 		//auto update
 		virtual bool GetAutoUpdate() { return false; }
@@ -68,9 +70,6 @@ namespace flrd
 		virtual void SetDownsampleZ(int val) { m_downsample_z = val; }
 		virtual int GetDownsampleZ() const { return m_downsample_z; }
 
-		virtual void SetVertexMerge(bool val) { m_vertex_merge = val; }
-		virtual bool GetVertexMerge() const { return m_vertex_merge; }
-
 		virtual void SetSimplify(double val) { m_simplify = val; }
 		virtual double GetSimplify() const { return m_simplify; }
 
@@ -88,7 +87,6 @@ namespace flrd
 		double m_iso = 0.5; // Iso value for contouring
 		int m_downsample = 1; // Downsampling factor in x and y
 		int m_downsample_z = 1; // Downsampling factor in z
-		bool m_vertex_merge = false; // Merge vertices
 		double m_simplify = 0.0; // Simplification factor
 		double m_smooth = 0.0; // Smoothing factor
 
