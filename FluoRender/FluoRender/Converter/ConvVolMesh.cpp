@@ -464,24 +464,24 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		m_busy = false;
 		return;
 	}
-	int kernel_idx2 = kernel_prog->createKernel("kernel_2");
-	if (kernel_idx2 < 0)
-	{
-		m_busy = false;
-		return;
-	}
-	int kernel_idx3 = kernel_prog->createKernel("kernel_3");
-	if (kernel_idx3 < 0)
-	{
-		m_busy = false;
-		return;
-	}
-	int kernel_idx4 = kernel_prog->createKernel("kernel_4");
-	if (kernel_idx4 < 0)
-	{
-		m_busy = false;
-		return;
-	}
+	//int kernel_idx2 = kernel_prog->createKernel("kernel_2");
+	//if (kernel_idx2 < 0)
+	//{
+	//	m_busy = false;
+	//	return;
+	//}
+	//int kernel_idx3 = kernel_prog->createKernel("kernel_3");
+	//if (kernel_idx3 < 0)
+	//{
+	//	m_busy = false;
+	//	return;
+	//}
+	//int kernel_idx4 = kernel_prog->createKernel("kernel_4");
+	//if (kernel_idx4 < 0)
+	//{
+	//	m_busy = false;
+	//	return;
+	//}
 
 	//compute workload
 	size_t local_size = 1;
@@ -490,6 +490,16 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	//get vbo
 	GLuint vbo_id = m_mesh->GetVBO();
 	size_t vbo_size = sizeof(float) * vertex_num;
+	//remap table
+	std::vector<int> remap_table(vertex_num);
+	int vcount = static_cast<int>(vertex_num);
+	double spcx, spcy, spcz;
+	if (auto vd = m_volume.lock())
+		vd->GetSpacings(spcx, spcy, spcz);
+	else
+		spcx = spcy = spcz = 1.0;
+	float epsilon = static_cast<float>(0.1 * fluo::Min(spcx, spcy, spcz));
+
 
 	//build hash table
 	kernel_prog->setKernelArgBegin(kernel_idx0);

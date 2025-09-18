@@ -439,169 +439,64 @@ inline constexpr const char* str_cl_marching_cubes_kernel1_tail = R"CLKER(
 
 //merge vertices
 inline constexpr const char* str_cl_merge_vertices = R"CLKER(
-#define MAX_BUCKET_SIZE 16
-
-inline int spatial_hash(int qx, int qy, int qz, int hash_table_size)
-{
-	const int p1 = 73856093;
-	const int p2 = 19349663;
-	const int p3 = 83492791;
-	return abs((qx * p1) ^ (qy * p2) ^ (qz * p3)) % hash_table_size;
-}
-
-inline int quantize(float value, float resolution)
-{
-	return (int)(value * resolution);
-}
-
 __kernel void kernel_0(
-	__global const float* vertex_buffer,
-	__global int* hash_table,
-	__global int* hash_table_counts,
+	__global const float* vertex_buffer,   // [vertex_count * 3]
+	__global int* remap_table,             // [vertex_count]
 	const int vertex_count,
-	const float grid_resolution,
-	const int hash_table_size
+	const float merge_tolerance,
+	const int window_size
 )
 {
-	//build grid hash table
-	int gid = get_global_id(0);
-	if (gid >= vertex_count) return;
+	//windowed dedup pass
+	int i = get_global_id(0);
+	if (i >= vertex_count) return;
 
-	float x = vertex_buffer[gid * 3 + 0];
-	float y = vertex_buffer[gid * 3 + 1];
-	float z = vertex_buffer[gid * 3 + 2];
+	int base_idx = i * 3;
+	float3 vi = (float3)(vertex_buffer[base_idx], vertex_buffer[base_idx + 1], vertex_buffer[base_idx + 2]);
 
-	int qx = quantize(x, grid_resolution);
-	int qy = quantize(y, grid_resolution);
-	int qz = quantize(z, grid_resolution);
+	// Default: vertex maps to itself
+	remap_table[i] = i;
 
-	int hash = spatial_hash(qx, qy, qz, hash_table_size);
+	for (int j = i + 1; j < min(i + window_size, vertex_count); ++j) {
+		int cmp_idx = j * 3;
+		float3 vj = (float3)(vertex_buffer[cmp_idx], vertex_buffer[cmp_idx + 1], vertex_buffer[cmp_idx + 2]);
 
-	int index = atomic_inc(&hash_table_counts[hash]);
-	if (index < MAX_BUCKET_SIZE) {
-		hash_table[hash * MAX_BUCKET_SIZE + index] = gid;
+		float dist2 = dot(vi - vj, vi - vj);
+		if (dist2 < merge_tolerance * merge_tolerance) {
+			// Prefer lower index for remap target
+			remap_table[i] = j;
+			break;
+		}
 	}
 }
 
 __kernel void kernel_1(
-	__global const float* vertex_buffer,
-	__global const int* hash_table,
-	__global const int* hash_table_counts,
-	__global int* remap_table,
-	const int vertex_count,
-	const float merge_tolerance,
-	const float grid_resolution,
-	const int hash_table_size
+	__global const float* reduced_vertex_buffer, // [reduced_count * 3]
+	__global int* remap_table,                   // [reduced_count]
+	const int reduced_count,
+	const float merge_tolerance
 )
 {
-	//deduplicate vertices
-	int gid = get_global_id(0);
-	if (gid >= vertex_count) return;
+	//global dedup pass
+	int i = get_global_id(0);
+	if (i >= reduced_count) return;
 
-	float x = vertex_buffer[gid * 3 + 0];
-	float y = vertex_buffer[gid * 3 + 1];
-	float z = vertex_buffer[gid * 3 + 2];
+	int base_idx = i * 3;
+	float3 vi = (float3)(reduced_vertex_buffer[base_idx], reduced_vertex_buffer[base_idx + 1], reduced_vertex_buffer[base_idx + 2]);
 
-	int qx = quantize(x, grid_resolution);
-	int qy = quantize(y, grid_resolution);
-	int qz = quantize(z, grid_resolution);
+	remap_table[i] = i;
 
-	int hash = spatial_hash(qx, qy, qz, hash_table_size);
-	int count = hash_table_counts[hash];
+	for (int j = 0; j < reduced_count; ++j) {
+		if (i == j) continue;
 
-	int canonical = gid;
+		int cmp_idx = j * 3;
+		float3 vj = (float3)(reduced_vertex_buffer[cmp_idx], reduced_vertex_buffer[cmp_idx + 1], reduced_vertex_buffer[cmp_idx + 2]);
 
-	for (int i = 0; i < count; ++i) {
-		int other = hash_table[hash * MAX_BUCKET_SIZE + i];
-		if (other == gid) continue;
-
-		float ox = vertex_buffer[other * 3 + 0];
-		float oy = vertex_buffer[other * 3 + 1];
-		float oz = vertex_buffer[other * 3 + 2];
-
-		float dx = x - ox;
-		float dy = y - oy;
-		float dz = z - oz;
-		float dist2 = dx*dx + dy*dy + dz*dz;
-
+		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
-			canonical = min(canonical, other);
+			remap_table[i] = j;
+			break;
 		}
-	}
-
-	remap_table[gid] = canonical;
-}
-
-__kernel void kernel_2(
-	__global const int* remap_table,
-	__global int* triangle_indices,
-	const int triangle_count
-)
-{
-	//remap triangle indices
-	int tid = get_global_id(0);
-	if (tid >= triangle_count) return;
-
-	for (int i = 0; i < 3; ++i) {
-		int raw_index = triangle_indices[tid * 3 + i];
-		triangle_indices[tid * 3 + i] = remap_table[raw_index];
-	}
-}
-
-__kernel void kernel_3(
-	__global const float* vertex_buffer,
-	__global const int* triangle_indices,
-	__global float* vertex_normals,
-	const int triangle_count
-)
-{
-	//compute vertex normals
-	int tid = get_global_id(0);
-	if (tid >= triangle_count) return;
-
-	int i0 = triangle_indices[tid * 3 + 0];
-	int i1 = triangle_indices[tid * 3 + 1];
-	int i2 = triangle_indices[tid * 3 + 2];
-
-	float3 v0 = (float3)(vertex_buffer[i0 * 3 + 0], vertex_buffer[i0 * 3 + 1], vertex_buffer[i0 * 3 + 2]);
-	float3 v1 = (float3)(vertex_buffer[i1 * 3 + 0], vertex_buffer[i1 * 3 + 1], vertex_buffer[i1 * 3 + 2]);
-	float3 v2 = (float3)(vertex_buffer[i2 * 3 + 0], vertex_buffer[i2 * 3 + 1], vertex_buffer[i2 * 3 + 2]);
-
-	float3 edge1 = v1 - v0;
-	float3 edge2 = v2 - v0;
-	float3 normal = cross(edge1, edge2);
-
-	atomic_add(&vertex_normals[i0 * 3 + 0], normal.x);
-	atomic_add(&vertex_normals[i0 * 3 + 1], normal.y);
-	atomic_add(&vertex_normals[i0 * 3 + 2], normal.z);
-
-	atomic_add(&vertex_normals[i1 * 3 + 0], normal.x);
-	atomic_add(&vertex_normals[i1 * 3 + 1], normal.y);
-	atomic_add(&vertex_normals[i1 * 3 + 2], normal.z);
-
-	atomic_add(&vertex_normals[i2 * 3 + 0], normal.x);
-	atomic_add(&vertex_normals[i2 * 3 + 1], normal.y);
-	atomic_add(&vertex_normals[i2 * 3 + 2], normal.z);
-}
-
-__kernel void kernel_4(
-	__global float* vertex_normals,
-	const int vertex_count
-)
-{
-	//normalize vertex normals
-	int gid = get_global_id(0);
-	if (gid >= vertex_count) return;
-
-	float x = vertex_normals[gid * 3 + 0];
-	float y = vertex_normals[gid * 3 + 1];
-	float z = vertex_normals[gid * 3 + 2];
-
-	float len = sqrt(x*x + y*y + z*z);
-	if (len > 1e-6f) {
-		vertex_normals[gid * 3 + 0] = x / len;
-		vertex_normals[gid * 3 + 1] = y / len;
-		vertex_normals[gid * 3 + 2] = z / len;
 	}
 }
 )CLKER";
