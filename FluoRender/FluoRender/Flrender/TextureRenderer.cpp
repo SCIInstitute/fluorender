@@ -472,6 +472,11 @@ namespace flvr
 		 m_mv_mat[2][0], m_mv_mat[2][1], m_mv_mat[2][2], m_mv_mat[2][3],
 		 m_mv_mat[3][0], m_mv_mat[3][1], m_mv_mat[3][2], m_mv_mat[3][3] };
 
+		auto smoothstep = [](double edge0, double edge1, double x) -> double {
+			x = std::clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+			return x * x * (3 - 2 * x); // classic smoothstep
+			};
+
 		//snap
 		fluo::Vector vd;
 		if (snap > 0.0 && snap < 0.5)
@@ -482,16 +487,18 @@ namespace flvr
 			double vdx_abs = fabs(vdx);
 			double vdy_abs = fabs(vdy);
 			double vdz_abs = fabs(vdz);
-			//if (vdx_abs < snap) vdx = 0.0;
-			//if (vdy_abs < snap) vdy = 0.0;
-			//if (vdz_abs < snap) vdz = 0.0;
-			//transition
-			if (vdx_abs < snap - 0.1) vdx = 0.0;
-			else if (vdx_abs < snap) vdx = (vdx_abs - snap + 0.1)*snap*10.0*vdx / vdx_abs;
-			if (vdy_abs < snap - 0.1) vdy = 0.0;
-			else if (vdy_abs < snap) vdy = (vdy_abs - snap + 0.1)*snap*10.0*vdy / vdy_abs;
-			if (vdz_abs < snap - 0.1) vdz = 0.0;
-			else if (vdz_abs < snap) vdz = (vdz_abs - snap + 0.1)*snap*10.0*vdz / vdz_abs;
+
+			double deadzone = snap - 0.1;
+			double transition = snap;
+
+			double fx = smoothstep(deadzone, transition, vdx_abs);
+			double fy = smoothstep(deadzone, transition, vdy_abs);
+			double fz = smoothstep(deadzone, transition, vdz_abs);
+
+			vdx = fx * vdx;
+			vdy = fy * vdy;
+			vdz = fz * vdz;
+
 			vd = fluo::Vector(vdx, vdy, vdz);
 			vd.safe_normalize();
 		}
