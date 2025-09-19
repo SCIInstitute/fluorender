@@ -1327,6 +1327,20 @@ namespace flvr
 		return 0;
 	}
 
+	void VertexArray::add_index_buffer()
+	{
+		for (auto& it : buffer_list_)
+		{
+			//return if index buffer already exists
+			if (it->type_ == VABuf_Index)
+				return;
+		}
+		//create index buffer
+		VertexBuffer* vb = new VertexBuffer(VABuf_Index);
+		vb->create();
+		attach_buffer(vb);
+	}
+
 	bool VertexArray::match(VAType type)
 	{
 		if (protected_)

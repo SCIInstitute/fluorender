@@ -484,26 +484,37 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	//}
 
 	//compute workload
-	size_t local_size = 1;
-	size_t global_size = vertex_num;
+	size_t local_size[1] = { 1 };
+	size_t global_size[1] = { vertex_num };
 
 	//get vbo
 	GLuint vbo_id = m_mesh->GetVBO();
-	size_t vbo_size = sizeof(float) * vertex_num;
-	//remap table
-	std::vector<int> remap_table(vertex_num);
-	int vcount = static_cast<int>(vertex_num);
+	size_t vbo_size = sizeof(float) * vertex_num * 3;
+	//add index vbo
+	GLuint ibo_id = m_mesh->ConvertIndexed(vertex_num);
+	size_t ibo_size = sizeof(unsigned int) * vertex_num;
+	//get epsilon
 	double spcx, spcy, spcz;
 	if (auto vd = m_volume.lock())
 		vd->GetSpacings(spcx, spcy, spcz);
 	else
 		spcx = spcy = spcz = 1.0;
 	float epsilon = static_cast<float>(0.1 * fluo::Min(spcx, spcy, spcz));
+	//vertex count
+	int vertex_count = static_cast<int>(vertex_num);
+	//windows size
+	int window_size = 128;
 
-
-	//build hash table
+	//windowed dedup pass
 	kernel_prog->setKernelArgBegin(kernel_idx0);
 	kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE, ibo_id, ibo_size);
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	kernel_prog->setKernelArgConst(sizeof(float), (void*)(&epsilon));
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&window_size));
+	//execute
+	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
 	m_busy = false;
 }
 

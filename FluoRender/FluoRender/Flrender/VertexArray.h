@@ -118,6 +118,7 @@ namespace flvr
 		bool valid();
 		unsigned int id_array();
 		unsigned int id_buffer(VABufferType type);
+		void add_index_buffer();
 
 		bool attach_buffer(VertexBuffer* buf);
 		void buffer_data(VABufferType type,

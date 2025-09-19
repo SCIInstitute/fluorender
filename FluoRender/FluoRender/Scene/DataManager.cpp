@@ -4199,6 +4199,22 @@ GLuint MeshData::AddVBO(int vertex_size)
 	return vbo_id;
 }
 
+GLuint MeshData::ConvertIndexed(size_t vsize)
+{
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return 0;
+	va_model->add_index_buffer();
+	//assume coord buffer is a list of triangles
+	std::vector<unsigned int> indices(vsize);
+	for (size_t i = 0; i < vsize; ++i)
+		indices[i] = static_cast<unsigned int>(i);
+	size_t vbo_size = sizeof(unsigned int) * indices.size();
+	va_model->buffer_data(flvr::VABuf_Index, vbo_size,
+		&indices[0], GL_DYNAMIC_DRAW);
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Index));
+}
+
 GLuint MeshData::GetVBO()
 {
 	flvr::VertexArray* va_model = m_mr->GetVertexArray();
