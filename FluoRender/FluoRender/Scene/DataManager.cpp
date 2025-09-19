@@ -4215,6 +4215,27 @@ GLuint MeshData::ConvertIndexed(size_t vsize)
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Index));
 }
 
+void MeshData::UpdateVBO(const std::vector<float>& vbo_data, const std::vector<int>& index_data)
+{
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return;
+	if (vbo_data.size() > 0)
+	{
+		size_t vbo_size = sizeof(float) * vbo_data.size();
+		va_model->buffer_data(
+			flvr::VABuf_Coord, vbo_size,
+			&vbo_data[0], GL_DYNAMIC_DRAW);
+	}
+	if (index_data.size() > 0)
+	{
+		size_t ibo_size = sizeof(unsigned int) * index_data.size();
+		va_model->buffer_data(
+			flvr::VABuf_Index, ibo_size,
+			&index_data[0], GL_DYNAMIC_DRAW);
+	}
+}
+
 GLuint MeshData::GetVBO()
 {
 	flvr::VertexArray* va_model = m_mr->GetVertexArray();
@@ -4226,9 +4247,12 @@ GLuint MeshData::GetVBO()
 void MeshData::SetTriangleNum(unsigned int num)
 {
 	m_data->numtriangles = static_cast<GLuint>(num);
+	m_data->numvertices = static_cast<GLuint>(num * 3);
 	GLMgroup* group = m_data->groups;
 	if (group)
+	{
 		group->numtriangles = static_cast<GLuint>(num);
+	}
 }
 
 unsigned int MeshData::GetVertexNum()

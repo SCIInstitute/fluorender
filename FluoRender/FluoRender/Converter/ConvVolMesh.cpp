@@ -464,18 +464,18 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		m_busy = false;
 		return;
 	}
-	//int kernel_idx2 = kernel_prog->createKernel("kernel_2");
-	//if (kernel_idx2 < 0)
-	//{
-	//	m_busy = false;
-	//	return;
-	//}
-	//int kernel_idx3 = kernel_prog->createKernel("kernel_3");
-	//if (kernel_idx3 < 0)
-	//{
-	//	m_busy = false;
-	//	return;
-	//}
+	int kernel_idx2 = kernel_prog->createKernel("kernel_2");
+	if (kernel_idx2 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx3 = kernel_prog->createKernel("kernel_3");
+	if (kernel_idx3 < 0)
+	{
+		m_busy = false;
+		return;
+	}
 	//int kernel_idx4 = kernel_prog->createKernel("kernel_4");
 	//if (kernel_idx4 < 0)
 	//{
@@ -484,7 +484,10 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	//}
 
 	//compute workload
+	size_t ng;
+	kernel_prog->getWorkGroupSize(kernel_idx0, &ng);
 	size_t local_size[1] = { 1 };
+	size_t local_size2[1] = { ng };
 	size_t global_size[1] = { vertex_num };
 
 	//get vbo
@@ -507,13 +510,62 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 	//windowed dedup pass
 	kernel_prog->setKernelArgBegin(kernel_idx0);
-	kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
-	kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE, ibo_id, ibo_size);
+	flvr::Argument arg_vbo = kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	flvr::Argument arg_ibo = kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE, ibo_id, ibo_size);
 	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 	kernel_prog->setKernelArgConst(sizeof(float), (void*)(&epsilon));
 	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&window_size));
 	//execute
 	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+	//count unique vertices
+	std::vector<int> unique_flags(vertex_num, 0);
+	kernel_prog->setKernelArgBegin(kernel_idx1);
+	kernel_prog->setKernelArgument(arg_ibo);
+	flvr::Argument arg_uflags = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&unique_flags[0]));
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
+
+	//get count
+	kernel_prog->readBuffer(sizeof(int) * vertex_num, &unique_flags[0], &unique_flags[0]);
+	int unique_count = 0;
+	for (size_t i = 0; i < vertex_num; ++i)
+		if (unique_flags[i])
+			++unique_count;
+
+	//compute prefix sum
+	std::vector<int> prefix_sum(vertex_num, 0);
+	kernel_prog->setKernelArgBegin(kernel_idx2);
+	kernel_prog->setKernelArgument(arg_uflags);
+	flvr::Argument arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
+	kernel_prog->setKernelArgLocal(sizeof(int) * ng * 2);
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size2);
+
+	//compact and remap
+	//allocate new vbo
+	std::vector<float> compacted_vbo(unique_count * 3, 0.0f);
+	std::vector<int> compacted_ibo(vertex_num, 0);
+	kernel_prog->setKernelArgBegin(kernel_idx3);
+	kernel_prog->setKernelArgument(arg_vbo);
+	kernel_prog->setKernelArgument(arg_ibo);
+	kernel_prog->setKernelArgument(arg_uflags);
+	kernel_prog->setKernelArgument(arg_psum);
+	flvr::Argument arg_cvbo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * unique_count * 3, (void*)(&compacted_vbo[0]));
+	flvr::Argument arg_cibo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&compacted_ibo[0]));
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx3, 1, global_size, local_size);
+
+	//read back
+	kernel_prog->readBuffer(sizeof(float) * unique_count * 3, &compacted_vbo[0], &compacted_vbo[0]);
+	kernel_prog->readBuffer(sizeof(int)* vertex_num, &compacted_ibo[0], &compacted_ibo[0]);
+	//update mesh
+	m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
+	m_mesh->SetTriangleNum(unique_count / 3);
+	m_mesh->SetGpuDirty();
 
 	m_busy = false;
 }

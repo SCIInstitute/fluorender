@@ -363,4 +363,10 @@ void ConvertDlg::OnCnvVolMeshWeldVertices(wxCommandEvent& event)
 {
 	//bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
 	//glbin_conv_vol_mesh->SetVertexMerge(bval);
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	glbin_conv_vol_mesh->MergeVertices(true);
+	FluoRefresh(0, { gstNull },
+		{ glbin_current.GetViewId() });
 }

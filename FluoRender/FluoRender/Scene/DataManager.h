@@ -833,6 +833,7 @@ public:
 	//allocate vbo
 	GLuint AddVBO(int vertex_size);
 	GLuint ConvertIndexed(size_t vsize);//convert to vbo and index list
+	void UpdateVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
 	GLuint GetVBO();
 
 	void SetTriangleNum(unsigned int num);

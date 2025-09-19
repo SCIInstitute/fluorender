@@ -1,4 +1,4 @@
-/*
+﻿/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -471,6 +471,118 @@ __kernel void kernel_0(
 }
 
 __kernel void kernel_1(
+	__global const int* remap_table,   // [vertex_count]
+	__global int* unique_flags,        // [vertex_count]
+	const int vertex_count
+)
+{
+	//mark unique vertices
+	int i = get_global_id(0);
+	if (i >= vertex_count) return;
+
+	// A vertex is unique if it maps to itself
+	unique_flags[i] = (remap_table[i] == i) ? 1 : 0;
+}
+
+__kernel void kernel_2(
+	__global const int* input,       // [vertex_count] → unique_flags
+	__global int* output,            // [vertex_count] → prefix_sum
+	__local int* temp,               // [2 * local_size] → shared memory
+	const int vertex_count
+)
+{
+	// Blelloch scan (exclusive prefix sum) in shared memory
+	int tid = get_local_id(0);
+	int gid = get_global_id(0);
+	int offset = 1;
+
+	// Load input into shared memory
+	if (gid < vertex_count)
+		temp[2 * tid]     = input[gid];
+	else
+		temp[2 * tid]     = 0;
+
+	temp[2 * tid + 1] = 0;
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	// Up-sweep (reduce) phase
+	for (int d = get_local_size(0); d > 0; d >>= 1) {
+		barrier(CLK_LOCAL_MEM_FENCE);
+		if (tid < d) {
+			int ai = offset * (2 * tid + 1) - 1;
+			int bi = offset * (2 * tid + 2) - 1;
+			temp[bi] += temp[ai];
+		}
+		offset <<= 1;
+	}
+
+	// Clear last element for exclusive scan
+	if (tid == 0) {
+		temp[2 * get_local_size(0) - 1] = 0;
+	}
+
+	// Down-sweep phase
+	for (int d = 1; d < get_local_size(0) * 2; d <<= 1) {
+		offset >>= 1;
+		barrier(CLK_LOCAL_MEM_FENCE);
+		if (tid < d) {
+			int ai = offset * (2 * tid + 1) - 1;
+			int bi = offset * (2 * tid + 2) - 1;
+			int t = temp[ai];
+			temp[ai] = temp[bi];
+			temp[bi] += t;
+		}
+	}
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	// Write result to global memory
+	if (gid < vertex_count)
+		output[gid] = temp[2 * tid];
+}
+
+__kernel void kernel_3(
+	__global const float* vertex_buffer,   // [vertex_count * 3]
+	__global const int* remap_table,       // [vertex_count]
+	__global int* unique_flags,            // [vertex_count]
+	__global int* prefix_sum,              // [vertex_count]
+	__global float* compacted_vbo,         // [new_vertex_count * 3]
+	__global int* final_indices,           // [vertex_count]
+	const int vertex_count
+)
+{
+	// compact and remap
+	int i = get_global_id(0);
+	if (i >= vertex_count) return;
+
+	// Step 1: Identify unique vertices
+	if (remap_table[i] == i) {
+		unique_flags[i] = 1;
+	} else {
+		unique_flags[i] = 0;
+	}
+
+	barrier(CLK_GLOBAL_MEM_FENCE); // Ensure flags are written
+
+	// Step 2: Use prefix_sum[i] as compacted index (assume precomputed)
+	if (unique_flags[i]) {
+		int new_idx = prefix_sum[i];
+		int base = i * 3;
+		int out_base = new_idx * 3;
+		compacted_vbo[out_base + 0] = vertex_buffer[base + 0];
+		compacted_vbo[out_base + 1] = vertex_buffer[base + 1];
+		compacted_vbo[out_base + 2] = vertex_buffer[base + 2];
+	}
+
+	barrier(CLK_GLOBAL_MEM_FENCE); // Ensure VBO is written
+
+	// Step 3: Update final index array
+	int target = remap_table[i];
+	final_indices[i] = prefix_sum[target];
+}
+
+__kernel void kernel_4(
 	__global const float* reduced_vertex_buffer, // [reduced_count * 3]
 	__global int* remap_table,                   // [reduced_count]
 	const int reduced_count,
