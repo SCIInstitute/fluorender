@@ -63,6 +63,9 @@ namespace flrd
 			long &ox, long &oy, long &oz);
 
 		void MarchingCubes(VolumeData* vd, MeshData* md);
+
+		void PrefixSum(const std::vector<int>& unique_flags,
+			std::vector<int>& prefix_sum);
 	};
 
 }

@@ -542,16 +542,17 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 	//compute prefix sum
 	std::vector<int> prefix_sum(vertex_num, 0);
-	kernel_prog->setKernelArgBegin(kernel_idx2);
-	kernel_prog->setKernelArgument(arg_uflags);
-	flvr::Argument arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
-	kernel_prog->setKernelArgLocal(sizeof(int) * ng * 2);
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
-	//execute
-	kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size2);
+	//kernel_prog->setKernelArgBegin(kernel_idx2);
+	//kernel_prog->setKernelArgument(arg_uflags);
+	//flvr::Argument arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
+	//kernel_prog->setKernelArgLocal(sizeof(int) * ng * 2);
+	//kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	////execute
+	//kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size2);
 
-	//debug read back prefix sum
-	kernel_prog->readBuffer(sizeof(int) * vertex_num, &prefix_sum[0], &prefix_sum[0]);
+	////debug read back prefix sum
+	//kernel_prog->readBuffer(sizeof(int) * vertex_num, &prefix_sum[0], &prefix_sum[0]);
+	PrefixSum(unique_flags, prefix_sum);
 
 	//compact and remap
 	//allocate new vbo
@@ -561,7 +562,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	kernel_prog->setKernelArgument(arg_vbo);
 	kernel_prog->setKernelArgument(arg_ibo);
 	kernel_prog->setKernelArgument(arg_uflags);
-	kernel_prog->setKernelArgument(arg_psum);
+	kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
 	flvr::Argument arg_cvbo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * unique_count * 3, (void*)(&compacted_vbo[0]));
 	flvr::Argument arg_cibo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&compacted_ibo[0]));
 	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
@@ -579,3 +580,14 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	m_busy = false;
 }
 
+void ConvVolMesh::PrefixSum(
+	const std::vector<int>& unique_flags,
+	std::vector<int>& prefix_sum)
+{
+	int count = 0;
+	prefix_sum.resize(unique_flags.size());
+	for (size_t i = 0; i < unique_flags.size(); ++i) {
+		prefix_sum[i] = count;
+		count += unique_flags[i];
+	}
+}
