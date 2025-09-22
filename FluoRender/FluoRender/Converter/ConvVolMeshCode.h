@@ -485,9 +485,9 @@ __kernel void kernel_1(
 }
 
 __kernel void kernel_2(
-	__global const int* input,       // [vertex_count] → unique_flags
-	__global int* output,            // [vertex_count] → prefix_sum
-	__local int* temp,               // [2 * local_size] → shared memory
+	__global const int* input,       // [vertex_count] -> unique_flags
+	__global int* output,            // [vertex_count] -> prefix_sum
+	__local int* temp,               // [2 * local_size] -> shared memory
 	const int vertex_count
 )
 {

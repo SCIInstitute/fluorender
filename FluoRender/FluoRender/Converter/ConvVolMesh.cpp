@@ -506,7 +506,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	//vertex count
 	int vertex_count = static_cast<int>(vertex_num);
 	//windows size
-	int window_size = 128;
+	int window_size = static_cast<int>(ng);
 
 	//windowed dedup pass
 	kernel_prog->setKernelArgBegin(kernel_idx0);
@@ -517,6 +517,12 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&window_size));
 	//execute
 	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+	//debug read back remap_table
+	//std::vector<float> verts(vertex_num * 3, 0.0f);
+	//kernel_prog->readBuffer(arg_vbo, verts.data());
+	//std::vector<int> remap_table(vertex_num, 0);
+	//kernel_prog->readBuffer(arg_ibo, remap_table.data());
 
 	//count unique vertices
 	std::vector<int> unique_flags(vertex_num, 0);
@@ -543,6 +549,9 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size2);
+
+	//debug read back prefix sum
+	kernel_prog->readBuffer(sizeof(int) * vertex_num, &prefix_sum[0], &prefix_sum[0]);
 
 	//compact and remap
 	//allocate new vbo
