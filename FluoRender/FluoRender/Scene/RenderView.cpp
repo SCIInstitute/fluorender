@@ -105,7 +105,7 @@ RenderView::RenderView() :
 	m_total_frames(0),
 	//hud
 	m_updating(true),
-	m_draw_annotations(true),
+	m_draw_annotdata(true),
 	m_draw_camctr(false),
 	m_camctr_size(2.0),
 	m_draw_info(250),
@@ -329,7 +329,7 @@ RenderView::RenderView(RenderView& copy):
 	m_total_frames(copy.m_total_frames),
 	//hud
 	m_updating(copy.m_updating),
-	m_draw_annotations(copy.m_draw_annotations),
+	m_draw_annotdata(copy.m_draw_annotdata),
 	m_draw_camctr(copy.m_draw_camctr),
 	m_camctr_size(copy.m_camctr_size),
 	m_draw_info(copy.m_draw_info),
@@ -569,13 +569,13 @@ RenderView::~RenderView()
 		}
 		if (m_layer_list[i]->IsA() == 4)
 		{
-			auto ad = std::dynamic_pointer_cast<Annotations>(m_layer_list[i]);
+			auto ad = std::dynamic_pointer_cast<AnnotData>(m_layer_list[i]);
 			if (ad)
 				glbin_current.mainframe->DeleteProps(4, ad->GetName());
 		}
 		if (m_layer_list[i]->IsA() == 5)//group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(m_layer_list[i]);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(m_layer_list[i]);
 			for (size_t j = 0; j < group->GetVolumeNum(); ++j)
 			{
 				auto vd = group->GetVolumeData(j);
@@ -923,7 +923,7 @@ int RenderView::GetAllVolumeNum()
 			break;
 		case 5:  //group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			num += group->GetVolumeNum();
 		}
 		break;
@@ -971,7 +971,7 @@ std::shared_ptr<VolumeData> RenderView::GetAllVolumeData(int index)
 			break;
 		case 5:  //group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (!group)
 				break;
 			for (int j = 0; j<group->GetVolumeNum(); ++j)
@@ -1039,7 +1039,7 @@ std::shared_ptr<VolumeData> RenderView::GetVolumeData(const std::wstring &name)
 		break;
 		case 5://group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (!group)
 				break;
 			for (int j = 0; j<group->GetVolumeNum(); ++j)
@@ -1089,7 +1089,7 @@ std::shared_ptr<MeshData> RenderView::GetMeshData(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<Annotations> RenderView::GetAnnotations(const std::wstring &name)
+std::shared_ptr<AnnotData> RenderView::GetAnnotData(const std::wstring &name)
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1097,7 +1097,7 @@ std::shared_ptr<Annotations> RenderView::GetAnnotations(const std::wstring &name
 			continue;
 		if (it->IsA() == 4)
 		{
-			auto ann = std::dynamic_pointer_cast<Annotations>(it);
+			auto ann = std::dynamic_pointer_cast<AnnotData>(it);
 			if (ann && ann->GetName() == name)
 				return ann;
 		}
@@ -1105,7 +1105,7 @@ std::shared_ptr<Annotations> RenderView::GetAnnotations(const std::wstring &name
 	return nullptr;
 }
 
-std::shared_ptr<DataGroup> RenderView::GetGroup(const std::wstring &name)
+std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::wstring &name)
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1113,7 +1113,7 @@ std::shared_ptr<DataGroup> RenderView::GetGroup(const std::wstring &name)
 			continue;
 		if (it->IsA() == 5)
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group && group->GetName() == name)
 				return group;
 		}
@@ -1121,7 +1121,7 @@ std::shared_ptr<DataGroup> RenderView::GetGroup(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<DataGroup> RenderView::GetGroup(int index)
+std::shared_ptr<VolumeGroup> RenderView::GetGroup(int index)
 {
 	int count = 0;
 
@@ -1133,7 +1133,7 @@ std::shared_ptr<DataGroup> RenderView::GetGroup(int index)
 		{
 			if (count == index)
 			{
-				auto group = std::dynamic_pointer_cast<DataGroup>(it);
+				auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 				return group;
 			}
 			count++;
@@ -1142,7 +1142,7 @@ std::shared_ptr<DataGroup> RenderView::GetGroup(int index)
 	return nullptr;
 }
 
-std::shared_ptr<DataGroup> RenderView::GetGroup(const std::shared_ptr<VolumeData>& vd)
+std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::shared_ptr<VolumeData>& vd)
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1150,7 +1150,7 @@ std::shared_ptr<DataGroup> RenderView::GetGroup(const std::shared_ptr<VolumeData
 			continue;
 		if (it->IsA() == 5)
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			for (int j = 0; j < group->GetVolumeNum(); j++)
 			{
 				auto tmp_vd = group->GetVolumeData(j);
@@ -1178,10 +1178,10 @@ std::shared_ptr<MeshGroup> RenderView::GetMGroup(const std::wstring& str)
 	return nullptr;
 }
 
-std::shared_ptr<DataGroup> RenderView::AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring& group_name)
+std::shared_ptr<VolumeGroup> RenderView::AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring& group_name)
 {
-	std::shared_ptr<DataGroup> group;
-	std::shared_ptr<DataGroup> group_temp;
+	std::shared_ptr<VolumeGroup> group;
+	std::shared_ptr<VolumeGroup> group_temp;
 
 	for (auto& it : m_layer_list)
 	{
@@ -1190,7 +1190,7 @@ std::shared_ptr<DataGroup> RenderView::AddVolumeData(const std::shared_ptr<Volum
 		if (it->IsA() == 5)
 		{
 			//layer is group
-			group_temp = std::dynamic_pointer_cast<DataGroup>(it);
+			group_temp = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group_temp && group_temp->GetName() == group_name)
 			{
 				group = group_temp;
@@ -1248,14 +1248,14 @@ void RenderView::AddMeshData(const std::shared_ptr<MeshData>& md)
 	m_md_pop_dirty = true;
 }
 
-void RenderView::AddAnnotations(const std::shared_ptr<Annotations>& ann)
+void RenderView::AddAnnotData(const std::shared_ptr<AnnotData>& ann)
 {
 	m_layer_list.push_back(ann);
 }
 
 std::wstring RenderView::AddGroup(const std::wstring& str, const std::wstring& prev_group)
 {
-	auto group = std::make_shared<DataGroup>();
+	auto group = std::make_shared<VolumeGroup>();
 	if (group && str != L"")
 		group->SetName(str);
 
@@ -1266,7 +1266,7 @@ std::wstring RenderView::AddGroup(const std::wstring& str, const std::wstring& p
 			continue;
 		if (it->IsA() == 5)
 		{
-			auto group_temp = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group_temp = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group_temp && group_temp->GetName() == prev_group)
 			{
 				auto pos = std::find(m_layer_list.begin(),
@@ -1305,7 +1305,7 @@ std::wstring RenderView::AddGroup(const std::wstring& str, const std::wstring& p
 		return L"";
 }
 
-std::shared_ptr<DataGroup> RenderView::AddOrGetGroup()
+std::shared_ptr<VolumeGroup> RenderView::AddOrGetGroup()
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1313,13 +1313,13 @@ std::shared_ptr<DataGroup> RenderView::AddOrGetGroup()
 			continue;
 		if (it->IsA() == 5)
 		{
-			auto group_temp = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group_temp = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group_temp && !group_temp->GetVolumeNum())
 				return group_temp;
 		}
 	}
 	//group not found
-	auto group = std::make_shared<DataGroup>();
+	auto group = std::make_shared<VolumeGroup>();
 	if (!group)
 		return nullptr;
 	//set default settings
@@ -1400,7 +1400,7 @@ void RenderView::RemoveVolumeData(const std::wstring &name)
 		break;
 		case 5://group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			for (int j = 0; j < group->GetVolumeNum(); ++j)
 			{
 				auto vd = group->GetVolumeData(j);
@@ -1422,7 +1422,7 @@ void RenderView::RemoveVolumeData(const std::wstring &name)
 void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_ptr<VolumeData>& dst)
 {
 	bool found = false;
-	std::shared_ptr<DataGroup> group;
+	std::shared_ptr<VolumeGroup> group;
 
 	for (auto& it : m_layer_list)
 	{
@@ -1450,7 +1450,7 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_p
 		break;
 		case 5://group
 		{
-			auto tmpgroup = std::dynamic_pointer_cast<DataGroup>(it);
+			auto tmpgroup = std::dynamic_pointer_cast<VolumeGroup>(it);
 			for (int j = 0; j<tmpgroup->GetVolumeNum(); ++j)
 			{
 				auto vd = tmpgroup->GetVolumeData(j);
@@ -1530,7 +1530,7 @@ void RenderView::RemoveMeshData(const std::wstring &name)
 	}
 }
 
-void RenderView::RemoveAnnotations(const std::wstring &name)
+void RenderView::RemoveAnnotData(const std::wstring &name)
 {
 	glbin_current.mainframe->DeleteProps(4, name);
 
@@ -1540,7 +1540,7 @@ void RenderView::RemoveAnnotations(const std::wstring &name)
 			continue;
 		if (it->IsA() == 4)
 		{
-			auto ann = std::dynamic_pointer_cast<Annotations>(it);
+			auto ann = std::dynamic_pointer_cast<AnnotData>(it);
 			if (ann && ann->GetName() == name)
 			{
 				auto pos = std::find(m_layer_list.begin(),
@@ -1562,7 +1562,7 @@ void RenderView::RemoveGroup(const std::wstring &name)
 		{
 		case 5://group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group && group->GetName() == name)
 			{
 				for (int j = group->GetVolumeNum(); j > 0; --j)
@@ -1646,7 +1646,7 @@ void RenderView::Isolate(int type, const std::wstring& name)
 		break;
 		case 4://annotation
 		{
-			auto ann = std::dynamic_pointer_cast<Annotations>(it);
+			auto ann = std::dynamic_pointer_cast<AnnotData>(it);
 			if (ann)
 			{
 				if (type == 4 &&
@@ -1659,7 +1659,7 @@ void RenderView::Isolate(int type, const std::wstring& name)
 		break;
 		case 5://volume group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group)
 			{
 				if (type == 5)
@@ -1751,14 +1751,14 @@ void RenderView::ShowAll()
 		break;
 		case 4://annotation
 		{
-			auto ann = std::dynamic_pointer_cast<Annotations>(it);
+			auto ann = std::dynamic_pointer_cast<AnnotData>(it);
 			if (ann)
 				ann->SetDisp(true);
 		}
 		break;
 		case 5:
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (group)
 			{
 				group->SetDisp(true);
@@ -2189,7 +2189,7 @@ void RenderView::PopVolumeList()
 		break;
 		case 5://group
 		{
-			auto group = std::dynamic_pointer_cast<DataGroup>(it);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(it);
 			if (!group->GetDisp())
 				continue;
 			for (int j = 0; j<group->GetVolumeNum(); j++)
@@ -2249,7 +2249,7 @@ void RenderView::PopMeshList()
 //if no group in view
 void RenderView::OrganizeLayers()
 {
-	std::shared_ptr<DataGroup> le_group;
+	std::shared_ptr<VolumeGroup> le_group;
 
 	//find last empty group
 	for (int i = GetLayerNum(); i > 0; i--)
@@ -2258,7 +2258,7 @@ void RenderView::OrganizeLayers()
 		if (layer && layer->IsA() == 5)
 		{
 			//layer is group
-			auto group = std::dynamic_pointer_cast<DataGroup>(layer);
+			auto group = std::dynamic_pointer_cast<VolumeGroup>(layer);
 			if (group->GetVolumeNum() == 0)
 			{
 				le_group = group;
@@ -4405,7 +4405,7 @@ void RenderView::StartLoopUpdate()
 				case 5://group
 				{
 					std::vector<std::shared_ptr<VolumeData>> list;
-					auto group = std::dynamic_pointer_cast<DataGroup>(*it);
+					auto group = std::dynamic_pointer_cast<VolumeGroup>(*it);
 					if (!group->GetDisp())
 						continue;
 					for (int j = group->GetVolumeNum(); j > 0; --j)
@@ -7055,8 +7055,8 @@ void RenderView::Draw()
 		if (glbin_settings.m_test_wiref)
 			DrawBounds();
 
-		if (m_draw_annotations)
-			DrawAnnotations();
+		if (m_draw_annotdata)
+			DrawAnnots();
 
 		DrawCells();
 
@@ -7337,8 +7337,8 @@ void RenderView::DrawDP()
 		if (glbin_settings.m_test_wiref)
 			DrawBounds();
 
-		if (m_draw_annotations)
-			DrawAnnotations();
+		if (m_draw_annotdata)
+			DrawAnnots();
 
 		if (m_draw_rulers)
 			DrawRulers();
@@ -7597,7 +7597,7 @@ void RenderView::DrawVolumes(int peel)
 							DrawVolumesComp(list, true, peel);
 						list.clear();
 					}
-					auto group = std::dynamic_pointer_cast<DataGroup>(*it);
+					auto group = std::dynamic_pointer_cast<VolumeGroup>(*it);
 					if (!group->GetDisp())
 						continue;
 					for (int j = group->GetVolumeNum(); j > 0; --j)
@@ -7655,7 +7655,7 @@ void RenderView::DrawVolumes(int peel)
 	}
 }
 
-void RenderView::DrawAnnotations()
+void RenderView::DrawAnnots()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7677,7 +7677,7 @@ void RenderView::DrawAnnotations()
 			continue;
 		if (it->IsA() == 4)
 		{
-			auto ann = std::dynamic_pointer_cast<Annotations>(it);
+			auto ann = std::dynamic_pointer_cast<AnnotData>(it);
 			if (!ann)
 				continue;
 			if (ann->GetDisp())

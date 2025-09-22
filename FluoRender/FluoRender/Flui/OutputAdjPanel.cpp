@@ -31,7 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderView.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
 #include <Color.h>
 #include <wxFadeButton.h>
 #include <wxSingleSlider.h>

@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Cov.h>
 #include <KernelProgram.h>
 #include <Global.h>
+#include <VolumeData.h>
 #include <VolumeRenderer.h>
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <VolKernel.h>
-#include <DataManager.h>
 #include <algorithm>
 
 using namespace flrd;

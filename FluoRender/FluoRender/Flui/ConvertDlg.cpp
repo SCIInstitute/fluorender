@@ -29,7 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
+#include <CurrentObjects.h>
 #include <DataManager.h>
+#include <MeshData.h>
 #include <RenderView.h>
 #include <BaseConvVolMesh.h>
 #include <VolumeSelector.h>

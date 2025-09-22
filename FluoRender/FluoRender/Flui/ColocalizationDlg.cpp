@@ -32,7 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <StringConvert.h>
 #include <Colocalize.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeGroup.h>
+#include <VolumeData.h>
 
 ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
 	PropPanel(frame, frame,

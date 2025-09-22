@@ -2633,7 +2633,7 @@ void ScriptProc::ChangeData()
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->GetView(0)->ClearAll();
-		DataGroup::ResetID();
+		VolumeGroup::ResetID();
 		MeshGroup::ResetID();
 	}
 	if (!filename.empty())

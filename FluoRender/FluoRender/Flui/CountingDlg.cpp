@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
 #include <CompGenerator.h>
 #include <CompAnalyzer.h>
 #include <wx/valnum.h>

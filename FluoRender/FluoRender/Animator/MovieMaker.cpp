@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <Root.h>
+#include <VolumeData.h>
+#include <DataManager.h>
 #include <MoviePanel.h>
 #include <RenderViewPanel.h>
 #include <StopWatch.hpp>

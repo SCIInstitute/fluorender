@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <DataManager.h>
 #include <ModalDlg.h>
 #include <KernelExecutor.h>
 #include <wxSingleSlider.h>

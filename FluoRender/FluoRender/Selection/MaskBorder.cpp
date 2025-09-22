@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MaskBorder.h>
 #include <Global.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <Texture.h>

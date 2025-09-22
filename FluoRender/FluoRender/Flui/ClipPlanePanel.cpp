@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <VolumeRenderer.h>
 #include <MeshRenderer.h>
 #include <compatibility.h>

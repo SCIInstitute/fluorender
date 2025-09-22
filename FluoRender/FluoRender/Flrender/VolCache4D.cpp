@@ -28,7 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VolCache4D.h>
 #include <Texture.h>
 #include <Global.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <RenderView.h>
 #include <base_reader.h>
 #include <msk_reader.h>

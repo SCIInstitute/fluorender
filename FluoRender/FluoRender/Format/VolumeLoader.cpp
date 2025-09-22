@@ -28,7 +28,7 @@
 
 #include <VolumeLoader.h>
 #include <TextureBrick.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 
 VolumeLoader::VolumeLoader()
 {

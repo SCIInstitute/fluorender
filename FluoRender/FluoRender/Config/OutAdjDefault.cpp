@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <Global.h>
 #include <RenderView.h>
-#include <DataManager.h>
+#include <TreeLayer.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 

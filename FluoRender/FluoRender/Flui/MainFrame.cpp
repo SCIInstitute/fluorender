@@ -69,7 +69,12 @@ DEALINGS IN THE SOFTWARE.
 #include <msk_writer.h>
 #include <msk_reader.h>
 #include <DataManager.h>
+#include <CurrentObjects.h>
+#include <Root.h>
 #include <RenderView.h>
+#include <VolumeData.h>
+#include <MeshData.h>
+#include <AnnotData.h>
 #include <ScriptProc.h>
 #include <Project.h>
 #include <VolumeCalculator.h>
@@ -1142,10 +1147,10 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 
 wxWindow* MainFrame::AddProps(int type,
 	RenderView* view,
-	DataGroup* group,
+	VolumeGroup* group,
 	VolumeData* vd,
 	MeshData* md,
-	Annotations* ann)
+	AnnotData* ann)
 {
 	//wxString str;
 	//if (canvas)
@@ -1183,7 +1188,7 @@ wxWindow* MainFrame::AddProps(int type,
 		if (ann)
 		{
 			AnnotatPropPanel* pane = new AnnotatPropPanel(this, m_prop_panel);
-			pane->SetAnnotations(ann);
+			pane->SetAnnotData(ann);
 			pane->SetName(ann->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
@@ -1221,7 +1226,7 @@ void MainFrame::DeleteProps(int type, const wxString& name)
 			page = FindMeshProps(name);
 			break;
 		case 4://annotations
-			page = FindAnnotationProps(name);
+			page = FindAnnotProps(name);
 			break;
 		case 6://mesh manip
 			page = FindMeshManip(name + " M");
@@ -1242,10 +1247,10 @@ void MainFrame::DeleteProps(int type, const wxString& name)
 
 void MainFrame::ShowPropPage(int type,
 	RenderView* view,
-	DataGroup* group,
+	VolumeGroup* group,
 	VolumeData* vd,
 	MeshData* md,
-	Annotations* ann,
+	AnnotData* ann,
 	bool show )
 {
 	if (!type)
@@ -1253,7 +1258,7 @@ void MainFrame::ShowPropPage(int type,
 		int n = 0;
 		n += glbin_data_manager.GetVolumeNum();
 		n += glbin_data_manager.GetMeshNum();
-		n += glbin_data_manager.GetAnnotationNum();
+		n += glbin_data_manager.GetAnnotNum();
 		if (!n)
 		{
 			m_prop_panel->DeleteAllPages();
@@ -1284,7 +1289,7 @@ void MainFrame::ShowPropPage(int type,
 		if (ann)
 		{
 			name = ann->GetName();
-			page = FindAnnotationProps(name);
+			page = FindAnnotProps(name);
 		}
 		break;
 	case 6://mesh manip
@@ -1435,7 +1440,7 @@ MeshPropPanel* MainFrame::FindMeshProps(MeshData* md)
 	return 0;
 }
 
-AnnotatPropPanel* MainFrame::FindAnnotationProps(const wxString& name)
+AnnotatPropPanel* MainFrame::FindAnnotProps(const wxString& name)
 {
 	AnnotatPropPanel* result = 0;
 	for (auto i : m_prop_pages)
@@ -1450,10 +1455,10 @@ AnnotatPropPanel* MainFrame::FindAnnotationProps(const wxString& name)
 	return 0;
 }
 
-AnnotatPropPanel* MainFrame::FindAnnotationProps(Annotations* ad)
+AnnotatPropPanel* MainFrame::FindAnnotProps(AnnotData* ad)
 {
 	if (ad)
-		return FindAnnotationProps(ad->GetName());
+		return FindAnnotProps(ad->GetName());
 	return 0;
 }
 

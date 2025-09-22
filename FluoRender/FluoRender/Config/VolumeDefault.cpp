@@ -27,9 +27,10 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <VolumeDefault.h>
-#include <DataManager.h>
 #include <Global.h>
 #include <Names.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
 #include <Color.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
@@ -434,7 +435,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetMinMaxValue(v2->GetMinValue(), v2->GetMaxValue());
 }
 
-void VolumeDataDefault::Apply(DataGroup* g)
+void VolumeDataDefault::Apply(VolumeGroup* g)
 {
 	if (!g)
 		return;

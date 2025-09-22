@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <CombineList.h>
 #include <Global.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <VolumeDefault.h>
 #include <Texture.h>
 

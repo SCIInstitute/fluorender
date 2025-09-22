@@ -46,7 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstCurrentMesh "current mesh"
 #define gstCurrentVolumeGroup "current volume group"
 #define gstCurrentMeshGroup "current mesh group"
-#define gstCurrentAnnotations "current annotations"
+#define gstCurrentAnnot "current annot"
 #define gstCurVolIdx "cur vol idx"
 #define gstCurMshIdx "cur msh idx"
 //copy source
@@ -62,8 +62,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstDefaultVolume "default volume"
 #define gstMeshFactory "MeshData factory"
 #define gstDefaultMesh "default mesh"
-#define gstAnnotationFactory "Annotations factory"
-#define gstDefaultAnnotations "default annotations"
+#define gstAnnotFactory "AnnotData factory"
+#define gstDefaultAnnot "default annot"
 #define gstRenderviewFactory "Renderview factory"
 #define gstDefaultRenderview "default renderview"
 #define gstAgentFactory "InterfaceAgent factory"
@@ -80,7 +80,7 @@ DEALINGS IN THE SOFTWARE.
 
 //agent names
 #define gstAgentAsset "asset"
-#define gstAnnotationPropAgent "AnnotationPropPanel"
+#define gstAnnotPropAgent "AnnotatPropPanel"
 #define gstBrushToolAgent "BrushToolDlg"
 #define gstCalculationAgent "CalculationDlg"
 #define gstClipPlaneAgent "ClipPlanePanel"
@@ -397,7 +397,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMixMethod "mix method"
 #define gstPeelNum "peel num"//peeling layer num
 #define gstMicroBlendEnable "micro blend enable"//mix at slice level
-#define gstDrawAnnotations "draw annotations"
+#define gstDrawAnnot "draw annot"
 #define gstDrawCamCtr "draw cam ctr"
 #define gstCamCtrSize "cam ctr size"
 #define gstDrawInfo "draw info"

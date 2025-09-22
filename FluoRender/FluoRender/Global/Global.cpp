@@ -56,6 +56,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <MovieMaker.h>
 #include <DataManager.h>
+#include <MeshData.h>
 #include <RenderView.h>
 #include <VolumeLoader.h>
 #include <Colocalize.h>

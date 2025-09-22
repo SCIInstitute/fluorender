@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryHist.h>
 #include <EntryParams.h>
 #include <Reshape.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolKernel.h>

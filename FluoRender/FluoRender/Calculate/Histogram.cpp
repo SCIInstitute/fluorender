@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <VolKernel.h>
 #include <EntryHist.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 
 using namespace flrd;
 

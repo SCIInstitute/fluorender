@@ -35,7 +35,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Table.h>
 #include <TableHistParams.h>
 #include <CompGenerator.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
 #include <format>
 #include <filesystem>
 

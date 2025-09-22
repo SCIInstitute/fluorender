@@ -31,10 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Stencil.h>
 #include <StencilCompare.h>
 #include <VolCache4D.h>
+#include <VolumeData.h>
 #include <DataManager.h>
-#ifdef _DEBUG
-#include <Debug.h>
-#endif
 
 using namespace flrd;
 

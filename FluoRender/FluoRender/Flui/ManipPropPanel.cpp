@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
-#include <DataManager.h>
+#include <MeshData.h>
 #include <compatibility.h>
 
 ManipPropPanel::ManipPropPanel(MainFrame* frame,

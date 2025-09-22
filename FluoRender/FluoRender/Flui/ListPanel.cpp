@@ -30,8 +30,13 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
-#include <RenderView.h>
 #include <ModalDlg.h>
+#include <RenderView.h>
+#include <VolumeData.h>
+#include <MeshData.h>
+#include <AnnotData.h>
+#include <Root.h>
+#include <CurrentObjects.h>
 #include <DataManager.h>
 #include <png_resource.h>
 #include <compatibility.h>
@@ -75,8 +80,8 @@ void DataListCtrl::Append(int type, const wxString& name, const wxString& path)
 		tmp = InsertItem(GetItemCount(), "Volume");
 	else if (type == DATA_MESH)
 		tmp = InsertItem(GetItemCount(), "Mesh");
-	else if (type == DATA_ANNOTATIONS)
-		tmp = InsertItem(GetItemCount(), "Annotations");
+	else if (type == DATA_ANNOT)
+		tmp = InsertItem(GetItemCount(), "AnnotData");
 
 	SetItem(tmp, 1, name);
 	SetItem(tmp, 2, path);
@@ -283,14 +288,14 @@ void ListPanel::UpdateList()
 		}
 	}
 
-	for (int i = 0; i < glbin_data_manager.GetAnnotationNum(); i++)
+	for (int i = 0; i < glbin_data_manager.GetAnnotNum(); i++)
 	{
-		auto ann = glbin_data_manager.GetAnnotations(i);
+		auto ann = glbin_data_manager.GetAnnotData(i);
 		if (ann)
 		{
 			std::wstring name = ann->GetName();
 			std::wstring path = ann->GetPath();
-			m_datalist->Append(DATA_ANNOTATIONS, name, path);
+			m_datalist->Append(DATA_ANNOT, name, path);
 		}
 	}
 
@@ -324,7 +329,7 @@ void ListPanel::UpdateSelection()
 		auto ann = glbin_current.ann_data.lock();
 		if (ann)
 			name = ann->GetName();
-		item_type = L"Annotations";
+		item_type = L"AnnotData";
 	}
 	break;
 	}
@@ -415,7 +420,7 @@ void ListPanel::AddSelectionToView(int vid)
 			break;
 		int chan_num = view->GetAny();
 		view_empty = chan_num > 0 ? false : view_empty;
-		view->AddAnnotations(ann);
+		view->AddAnnotData(ann);
 		vc.insert(gstAnnotatPropPanel);
 	}
 		break;
@@ -542,7 +547,7 @@ void ListPanel::SaveSelection()
 		if (!ann)
 			break;
 		ModalDlg fopendlg(
-			m_frame, "Save Annotations", "", "",
+			m_frame, "Save AnnotData", "", "",
 			"Text file (*.txt)|*.txt",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
@@ -676,12 +681,12 @@ void ListPanel::DeleteSelection()
 		{
 			auto view = root->GetView(i);
 			if (view)
-				view->RemoveAnnotations(name);
+				view->RemoveAnnotData(name);
 		}
 		//from datamanager
-		int index = glbin_data_manager.GetAnnotationIndex(name);
+		int index = glbin_data_manager.GetAnnotIndex(name);
 		if (index != -1)
-			glbin_data_manager.RemoveAnnotations(index);
+			glbin_data_manager.RemoveAnnotData(index);
 	}
 	break;
 	}
@@ -881,9 +886,9 @@ void ListPanel::OnSelect(wxListEvent& event)
 	{
 		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
 	}
-	else if (stype == L"Annotations")
+	else if (stype == L"AnnotData")
 	{
-		glbin_current.SetAnnotation(glbin_data_manager.GetAnnotations(name));
+		glbin_current.SetAnnotData(glbin_data_manager.GetAnnotData(name));
 	}
 
 	FluoRefresh(1, { gstCurrentSelect });

@@ -32,7 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <dbscan.h>
 #include <kmeans.h>
 #include <exmax.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <Texture.h>
 #include <VolumeRenderer.h>
 #include <Cell.h>

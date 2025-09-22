@@ -32,11 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <VolKernel.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <Ruler.h>
-#ifdef _DEBUG
-#include <Debug.h>
-#endif
 
 using namespace flrd;
 

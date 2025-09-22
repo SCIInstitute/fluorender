@@ -28,7 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <VolumePoint.h>
 #include <Global.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <RenderView.h>
 #include <Texture.h>
 #include <TextureBrick.h>

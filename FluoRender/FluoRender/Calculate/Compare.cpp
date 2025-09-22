@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <VolKernel.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <algorithm>
 
 using namespace flrd;

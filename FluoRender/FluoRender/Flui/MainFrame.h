@@ -84,10 +84,10 @@ class TreePanel;
 class ListPanel;
 class RenderViewPanel;
 class RenderView;
-class DataGroup;
+class VolumeGroup;
 class VolumeData;
 class MeshData;
-class Annotations;
+class AnnotData;
 class PropPanel;
 class PropertyPanel;
 class VolumePropPanel;
@@ -242,27 +242,27 @@ public:
 	//prop panels
 	wxWindow* AddProps(int type,//follow above
 		RenderView* view = 0,
-		DataGroup* group = 0,
+		VolumeGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
-		Annotations* ann = 0);
+		AnnotData* ann = 0);
 	void DeleteProps(int type, const wxString& name);
 	void ShowPropPage(int type,
 		RenderView* view = 0,
-		DataGroup* group = 0,
+		VolumeGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
-		Annotations* ann = 0,
+		AnnotData* ann = 0,
 		bool show = true);
 	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, wxWindow* panel = 0);
 	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);
 	MeshPropPanel* FindMeshProps(MeshData* md);
-	AnnotatPropPanel* FindAnnotationProps(Annotations* ad);
+	AnnotatPropPanel* FindAnnotProps(AnnotData* ad);
 	ManipPropPanel* FindMeshManip(MeshData* md);
 	VolumePropPanel* FindVolumeProps(const wxString& str);
 	MeshPropPanel* FindMeshProps(const wxString& str);
-	AnnotatPropPanel* FindAnnotationProps(const wxString& str);
+	AnnotatPropPanel* FindAnnotProps(const wxString& str);
 	ManipPropPanel* FindMeshManip(const wxString& str);
 
 	//project panels

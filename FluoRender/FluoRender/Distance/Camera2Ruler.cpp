@@ -29,12 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #include <opencv2/opencv.hpp>
 #include <Camera2Ruler.h>
 #include <Global.h>
+#include <CurrentObjects.h>
 #include <Ruler.h>
 #include <RulerHandler.h>
 #include <Ray.h>
 #include <Plane.h>
 #include <Point.h>
-#include <DataManager.h>
 
 using namespace flrd;
 

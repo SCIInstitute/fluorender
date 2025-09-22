@@ -1444,7 +1444,7 @@ void VolumePropPanel::InitViews(unsigned int type)
 	}
 }
 
-void VolumePropPanel::SetGroup(DataGroup* group)
+void VolumePropPanel::SetGroup(VolumeGroup* group)
 {
 	m_group = group;
 	if (m_group)
@@ -1454,7 +1454,7 @@ void VolumePropPanel::SetGroup(DataGroup* group)
 	}
 }
 
-DataGroup* VolumePropPanel::GetGroup()
+VolumeGroup* VolumePropPanel::GetGroup()
 {
 	return m_group;
 }

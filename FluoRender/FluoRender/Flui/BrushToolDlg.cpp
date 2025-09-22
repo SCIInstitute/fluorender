@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerAlign.h>
 #include <BrushDefault.h>
 #include <GlobalStates.h>
+#include <CurrentObjects.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 //resources

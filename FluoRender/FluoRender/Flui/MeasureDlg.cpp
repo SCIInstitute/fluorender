@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Project.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
 #include <ModalDlg.h>
 #include <VertexArray.h>
 #include <VolumeRenderer.h>

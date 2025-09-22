@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RENDERVIEW_H_
 #define _RENDERVIEW_H_
 
-#include <DataManager.h>
+#include <TreeLayer.h>
 #include <Quaternion.h>
 #include <Size.h>
 #include <Value.hpp>
@@ -161,24 +161,24 @@ public:
 	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr.get(); };
 	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name);
 	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);
-	std::shared_ptr<Annotations> GetAnnotations(const std::wstring &name);
-	std::shared_ptr<DataGroup> GetGroup(const std::wstring &name);
-	std::shared_ptr<DataGroup> GetGroup(int index);
-	std::shared_ptr<DataGroup> GetGroup(const std::shared_ptr<VolumeData>& vd);
+	std::shared_ptr<AnnotData> GetAnnotData(const std::wstring &name);
+	std::shared_ptr<VolumeGroup> GetGroup(const std::wstring &name);
+	std::shared_ptr<VolumeGroup> GetGroup(int index);
+	std::shared_ptr<VolumeGroup> GetGroup(const std::shared_ptr<VolumeData>& vd);
 	std::shared_ptr<MeshGroup> GetMGroup(const std::wstring &str);
 	//add
-	std::shared_ptr<DataGroup> AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring &group_name = L"");
+	std::shared_ptr<VolumeGroup> AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring &group_name = L"");
 	void AddMeshData(const std::shared_ptr<MeshData>& md);
-	void AddAnnotations(const std::shared_ptr<Annotations>& ann);
+	void AddAnnotData(const std::shared_ptr<AnnotData>& ann);
 	std::wstring AddGroup(const std::wstring& str, const std::wstring& prev_group = L"");
-	std::shared_ptr<DataGroup> AddOrGetGroup();
+	std::shared_ptr<VolumeGroup> AddOrGetGroup();
 	std::wstring AddMGroup(const std::wstring& str);
 	std::shared_ptr<MeshGroup> AddOrGetMGroup();
 	//remove
 	void RemoveVolumeData(const std::wstring &name);
 	void ReplaceVolumeData(const std::wstring &name, const std::shared_ptr<VolumeData>& dst);
 	void RemoveMeshData(const std::wstring &name);
-	void RemoveAnnotations(const std::wstring &name);
+	void RemoveAnnotData(const std::wstring &name);
 	void RemoveGroup(const std::wstring &name);
 	//isolate
 	void Isolate(int type, const std::wstring& name);
@@ -502,7 +502,7 @@ public:
 	bool m_retain_finalbuffer;	//sometimes we don't redraw everything,
 								//just use the final buffer from last draw
 	bool m_updating;
-	bool m_draw_annotations;
+	bool m_draw_annotdata;
 	bool m_draw_camctr;
 	double m_camctr_size;
 	int m_draw_info;
@@ -812,7 +812,7 @@ private:
 								   //4: same as 3 (14, 15)
 								   //5: same as 2 (15)
 								   //annotation layer
-	void DrawAnnotations();
+	void DrawAnnots();
 	//framebuffer
 	void BindRenderBuffer();
 	//draw out the framebuffer after composition

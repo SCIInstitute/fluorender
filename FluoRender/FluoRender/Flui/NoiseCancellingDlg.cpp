@@ -31,7 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDefault.h>
 #include <MainFrame.h>
 #include <TreePanel.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <CompGenerator.h>
 #include <CompAnalyzer.h>
 #include <CompSelector.h>

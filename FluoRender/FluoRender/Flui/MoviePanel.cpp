@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieDefault.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <Root.h>
+#include <DataManager.h>
 #include <RenderViewPanel.h>
 #include <Interpolator.h>
 #include <MovieMaker.h>

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class Annotations;
+class AnnotData;
 class AnnotatPropPanel : public PropPanel
 {
 public:
@@ -42,13 +42,13 @@ public:
 		const wxString& name = "AnnotatPropPanel");
 	~AnnotatPropPanel();
 
-	void SetAnnotations(Annotations* ann);
-	Annotations* GetAnnotations();
+	void SetAnnotData(AnnotData* ann);
+	AnnotData* GetAnnotData();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	Annotations* m_ann;
+	AnnotData* m_ann;
 
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

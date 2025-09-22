@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <SegGrow.h>
 #include <Global.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <RulerHandler.h>

@@ -43,6 +43,14 @@ DEALINGS IN THE SOFTWARE.
 #include <SettingDlg.h>
 #include <TrackDlg.h>
 #include <RenderView.h>
+#include <VolumeGroup.h>
+#include <MeshGroup.h>
+#include <Root.h>
+#include <VolumeData.h>
+#include <MeshData.h>
+#include <AnnotData.h>
+#include <CurrentObjects.h>
+#include <DataManager.h>
 #include <compatibility.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
@@ -80,7 +88,7 @@ void Project::Open(const std::wstring& filename)
 
 	//clear
 	glbin_data_manager.ClearAll();
-	DataGroup::ResetID();
+	VolumeGroup::ResetID();
 	MeshGroup::ResetID();
 	root->GetView(0)->ClearAll();
 	for (int i = root->GetViewNum() - 1; i > 0; i--)
@@ -599,11 +607,11 @@ void Project::Open(const std::wstring& filename)
 				fconfig->SetPath(path);
 				if (fconfig->Read("path", &wsval))
 				{
-					glbin_data_manager.LoadAnnotations(wsval);
+					glbin_data_manager.LoadAnnotData(wsval);
 				}
 			}
 		}
-		glbin_current.ann_data = glbin_data_manager.GetAnnotations(cur_ann_data);
+		glbin_current.ann_data = glbin_data_manager.GetAnnotData(cur_ann_data);
 	}
 
 	//views
@@ -705,9 +713,9 @@ void Project::Open(const std::wstring& filename)
 							{
 								if (fconfig->Read("name", &wsval))
 								{
-									auto ann = glbin_data_manager.GetAnnotations(wsval);
+									auto ann = glbin_data_manager.GetAnnotData(wsval);
 									if (ann)
-										view->AddAnnotations(ann);
+										view->AddAnnotData(ann);
 								}
 							}
 							break;
@@ -716,7 +724,7 @@ void Project::Open(const std::wstring& filename)
 								if (fconfig->Read("name", &wsval))
 								{
 									if (fconfig->Read("id", &ival))
-										DataGroup::SetID(ival);
+										VolumeGroup::SetID(ival);
 									wsval = view->AddGroup(wsval);
 									auto group = view->GetGroup(wsval);
 									if (group)
@@ -1534,11 +1542,11 @@ void Project::Save(const std::wstring& filename, bool inc)
 	//annotations
 	path = "/data/annotations";
 	fconfig->SetPath(path);
-	num = glbin_data_manager.GetAnnotationNum();
+	num = glbin_data_manager.GetAnnotNum();
 	fconfig->Write("num", num);
 	for (size_t i = 0; i < num; i++)
 	{
-		auto ann = glbin_data_manager.GetAnnotations(i);
+		auto ann = glbin_data_manager.GetAnnotData(i);
 		if (ann)
 		{
 			if (ann->GetPath() == L"")
@@ -1594,13 +1602,13 @@ void Project::Save(const std::wstring& filename, bool inc)
 					break;
 				case 5://group
 				{
-					auto group = std::dynamic_pointer_cast<DataGroup>(layer);
+					auto group = std::dynamic_pointer_cast<VolumeGroup>(layer);
 					if (!group)
 						break;
 
 					fconfig->Write("type", 5);
 					fconfig->Write("name", layer->GetName());
-					fconfig->Write("id", DataGroup::GetID());
+					fconfig->Write("id", VolumeGroup::GetID());
 					//dispaly
 					fconfig->Write("display", group->GetDisp());
 					//2d adjustment
@@ -1858,7 +1866,7 @@ void Project::Reset()
 	//SetTitle(m_title);
 	//clear
 	glbin_data_manager.ClearAll();
-	DataGroup::ResetID();
+	VolumeGroup::ResetID();
 	MeshGroup::ResetID();
 	root->GetView(0)->ClearAll();
 	for (int i = root->GetViewNum() - 1; i > 0; i--)

@@ -45,7 +45,7 @@ namespace fluo
 	class MeshData;
 	class VolumeGroup;
 	class MeshGroup;
-	class Annotations;
+	class AnnotData;
 	class Node;
 	class NodeVisitor;
 	class View;
@@ -86,8 +86,8 @@ namespace fluo
 		virtual const VolumeGroup* asVolumeGroup() const { return 0; }
         virtual MeshGroup* asMeshGroup() { return 0; }
 		virtual const MeshGroup* asMeshGroup() const { return 0; }
-		virtual Annotations* asAnnotations() { return 0; }
-		virtual const Annotations* asAnnotations() const { return 0; }
+		virtual AnnotData* asAnnotData() { return 0; }
+		virtual const AnnotData* asAnnotData() const { return 0; }
 		virtual View* asView() { return 0; }
 		virtual const View* asView() const { return 0; }
 		virtual Root* asRoot() { return 0; }

@@ -98,8 +98,8 @@ private:
 	wxTreeItemId AddMeshItem(wxTreeItemId par_item, const wxString &text);
 	void SetMeshItemImage(const wxTreeItemId item, int image);
 	//annotation item
-	wxTreeItemId AddAnnotationItem(wxTreeItemId par_item, const wxString &text);
-	void SetAnnotationItemImage(const wxTreeItemId item, int image);
+	wxTreeItemId AddAnnotItem(wxTreeItemId par_item, const wxString &text);
+	void SetAnnotItemImage(const wxTreeItemId item, int image);
 	//group item
 	wxTreeItemId AddGroupItem(wxTreeItemId par_item, const wxString &text);
 	void SetGroupItemImage(const wxTreeItemId item, int image);

@@ -26,7 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ConvVolMeshSw.h>
-#include <DataManager.h>
+#include <VolumeData.h>
+#include <MeshData.h>
 #include <RenderView.h>
 #include <Texture.h>
 #include <VolumeRenderer.h>

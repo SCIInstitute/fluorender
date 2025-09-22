@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderView;
 class VolumeData;
-class DataGroup;
+class VolumeGroup;
 class wxFadeButton;
 class wxBasisSlider;
 class wxMapDoubleSlider;
@@ -79,8 +79,8 @@ public:
 	void InitViews(unsigned int type);
 
 	//sync group
-	void SetGroup(DataGroup* group);
-	DataGroup* GetGroup();
+	void SetGroup(VolumeGroup* group);
+	VolumeGroup* GetGroup();
 
 	//sync view in depth mode
 	void SetView(RenderView* view);
@@ -96,7 +96,7 @@ private:
 
 	bool m_lumi_change;
 	bool m_sync_group;
-	DataGroup* m_group;
+	VolumeGroup* m_group;
 	RenderView* m_view;
 	double m_max_val;
 

@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieMaker.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
+#include <Root.h>
 #include <DataManager.h>
 #include <LookingGlassRenderer.h>
 #ifdef _WIN32

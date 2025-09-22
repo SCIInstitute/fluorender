@@ -174,13 +174,13 @@ void VolumeCalculator::CalculateGroup(int type, const std::wstring& prev_group, 
 		return;
 	}
 
-	std::shared_ptr<DataGroup> group;
+	std::shared_ptr<VolumeGroup> group;
 	for (int i = 0; i < view->GetLayerNum(); ++i)
 	{
 		auto layer = view->GetLayer(i);
 		if (layer && layer->IsA() == 5)
 		{
-			auto tmp_group = std::dynamic_pointer_cast<DataGroup>(layer);
+			auto tmp_group = std::dynamic_pointer_cast<VolumeGroup>(layer);
 			for (int j = 0; j < tmp_group->GetVolumeNum(); ++j)
 			{
 				if (tmp_group->GetVolumeData(j) == vd)

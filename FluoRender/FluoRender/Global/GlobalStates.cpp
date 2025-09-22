@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <Global.h>
 #include <MainSettings.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
 #include <VolumeSelector.h>
 #include <RenderView.h>
 #include <Ruler.h>

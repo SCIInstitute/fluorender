@@ -42,6 +42,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Colocalize.h>
 #include <Ruler.h>
 #include <RulerAlign.h>
+#include <VolumeData.h>
+#include <CurrentObjects.h>
 #include <DataManager.h>
 #include <ModalDlg.h>
 #include <wxSingleSlider.h>
@@ -868,8 +870,8 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, wxDefaultSize);
 	m_output_random_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
 	m_output_size_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
-	m_output_id_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);
-	m_output_sn_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotation, this);
+	m_output_id_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotData, this);
+	m_output_sn_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotData, this);
 	sizer4_2->Add(5, 5);
 	sizer4_2->Add(st, 0, wxALIGN_CENTER);
 	sizer4_2->Add(m_output_random_btn, 1, wxEXPAND);
@@ -2293,7 +2295,7 @@ void ComponentDlg::OnOutputChannels(wxCommandEvent& event)
 	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
 }
 
-void ComponentDlg::OnOutputAnnotation(wxCommandEvent& event)
+void ComponentDlg::OnOutputAnnotData(wxCommandEvent& event)
 {
 	int id = event.GetId();
 	int val = 0;
@@ -2303,7 +2305,7 @@ void ComponentDlg::OnOutputAnnotation(wxCommandEvent& event)
 		val = 2;
 
 	glbin_comp_analyzer.SetAnnotType(val);
-	glbin_comp_analyzer.OutputAnnotations();
+	glbin_comp_analyzer.OutputAnnotData();
 	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
 }
 

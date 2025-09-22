@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <AnnotatPropPanel.h>
 #include <MainFrame.h>
-#include <DataManager.h>
+#include <AnnotData.h>
 #include <wx/valnum.h>
 
 AnnotatPropPanel::AnnotatPropPanel(MainFrame* frame,
@@ -97,14 +97,14 @@ void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 	}
 }
 
-void AnnotatPropPanel::SetAnnotations(Annotations* ann)
+void AnnotatPropPanel::SetAnnotData(AnnotData* ann)
 {
 	m_ann = ann;
 
 	FluoUpdate();
 }
 
-Annotations* AnnotatPropPanel::GetAnnotations()
+AnnotData* AnnotatPropPanel::GetAnnotData()
 {
 	return m_ann;
 }

@@ -28,8 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <Global.h>
 #include <RenderView.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <VolumeDefault.h>
+#include <CurrentObjects.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
@@ -1153,7 +1154,7 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	return surface_vox ? 1 : 0;
 }
 
-bool ComponentAnalyzer::OutputAnnotations()
+bool ComponentAnalyzer::OutputAnnotData()
 {
 	if (!m_compgroup)
 		return false;
@@ -1191,7 +1192,7 @@ bool ComponentAnalyzer::OutputAnnotations()
 	std::wstring sinfo;
 	std::wstring str;
 
-	auto ann = std::make_shared<Annotations>();
+	auto ann = std::make_shared<AnnotData>();
 
 	int bn = vd->GetAllBrickNum();
 	graph.ClearVisited();
@@ -1227,10 +1228,10 @@ bool ComponentAnalyzer::OutputAnnotations()
 
 	ann->SetVolume(vd);
 	ann->SetTransform(vd->GetTexture()->transform());
-	glbin_data_manager.AddAnnotations(ann);
+	glbin_data_manager.AddAnnotData(ann);
 	auto view = glbin_current.render_view.lock();
 	if (view)
-		view->AddAnnotations(ann);
+		view->AddAnnotData(ann);
 
 	return true;
 }
@@ -1250,7 +1251,7 @@ bool ComponentAnalyzer::OutputChannels()
 	}
 
 	std::wstring group_name = L"";
-	std::shared_ptr<DataGroup> group;
+	std::shared_ptr<VolumeGroup> group;
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;

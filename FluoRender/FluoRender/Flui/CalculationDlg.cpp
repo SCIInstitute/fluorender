@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <VolumeData.h>
+#include <CurrentObjects.h>
 #include <CombineList.h>
 #include <VolumeCalculator.h>
 

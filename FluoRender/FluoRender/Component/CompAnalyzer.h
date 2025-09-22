@@ -140,7 +140,7 @@ namespace flrd
 		bool OutputChannels();
 		bool OutputMultiChannels(std::vector<std::shared_ptr<VolumeData>> &channs);
 		bool OutputRgbChannels(std::vector<std::shared_ptr<VolumeData>> &channs);
-		bool OutputAnnotations();
+		bool OutputAnnotData();
 
 		//distance
 		void OutputDistance(std::ostream &stream);

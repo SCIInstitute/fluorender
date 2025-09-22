@@ -29,11 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Relax.h>
 #include <Global.h>
 #include <Ruler.h>
-#include <VolKernel.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
+#include <VolKernel.h>
 
 using namespace flrd;
 

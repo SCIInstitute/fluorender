@@ -387,7 +387,7 @@ private:
 	//output
 	void OnOutputTypeRadio(wxCommandEvent& event);
 	void OnOutputChannels(wxCommandEvent& event);
-	void OnOutputAnnotation(wxCommandEvent& event);
+	void OnOutputAnnotData(wxCommandEvent& event);
 	//distance
 	void OnDistNeighborCheck(wxCommandEvent& event);
 	void OnDistAllChanCheck(wxCommandEvent& event);

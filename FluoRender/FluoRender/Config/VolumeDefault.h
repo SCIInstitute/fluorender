@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEDEFAULT_H_
 
 class VolumeData;
-class DataGroup;
+class VolumeGroup;
 class VolumeDataDefault
 {
 public:
@@ -41,7 +41,7 @@ public:
 	void Set(VolumeData* vd);
 	void Apply(VolumeData* vd);
 	void Copy(VolumeData* v1, VolumeData* v2);//v2 to v1
-	void Apply(DataGroup* g);
+	void Apply(VolumeGroup* g);
 
 public:
 	//default values

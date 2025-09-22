@@ -29,7 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvVolMesh.h>
 #include <Global.h>
 #include <AutomateDefault.h>
-#include <DataManager.h>
+#include <VolumeData.h>
+#include <MeshData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VertexArray.h>

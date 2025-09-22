@@ -33,7 +33,13 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <compatibility.h>
-#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <Root.h>
+#include <VolumeData.h>
+#include <MeshData.h>
+#include <AnnotData.h>
+#include <VolumeGroup.h>
+#include <MeshGroup.h>
 #include <VolumeSelector.h>
 #include <RulerHandler.h>
 #include <Colocalize.h>
@@ -235,7 +241,7 @@ void DataTreeCtrl::SetMeshItemImage(const wxTreeItemId item, int image)
 }
 
 //annotation item
-wxTreeItemId DataTreeCtrl::AddAnnotationItem(wxTreeItemId par_item, const wxString &text)
+wxTreeItemId DataTreeCtrl::AddAnnotItem(wxTreeItemId par_item, const wxString &text)
 {
 	wxTreeItemId item = AppendItem(par_item, text, 1);
 	LayerInfo* item_data = new LayerInfo;
@@ -244,7 +250,7 @@ wxTreeItemId DataTreeCtrl::AddAnnotationItem(wxTreeItemId par_item, const wxStri
 	return item;
 }
 
-void DataTreeCtrl::SetAnnotationItemImage(const wxTreeItemId item, int image)
+void DataTreeCtrl::SetAnnotItemImage(const wxTreeItemId item, int image)
 {
 	SetItemImage(item, image);
 }
@@ -530,8 +536,8 @@ void TreePanel::Select()
 			break;
 		case 4://annotations
 		{
-			auto ann = glbin_data_manager.GetAnnotations(name);
-			glbin_current.SetAnnotation(ann);
+			auto ann = glbin_data_manager.GetAnnotData(name);
+			glbin_current.SetAnnotData(ann);
 			vc.insert(gstAnnotatPropPanel);
 		}
 			break;
@@ -801,7 +807,7 @@ void TreePanel::UpdateTree()
 				break;
 				case 4://annotations
 				{
-					auto ann = std::dynamic_pointer_cast<Annotations>(layer);
+					auto ann = std::dynamic_pointer_cast<AnnotData>(layer);
 					if (!ann)
 						break;
 					//append icon for annotations
@@ -809,15 +815,15 @@ void TreePanel::UpdateTree()
 					wxColor wxc(255, 255, 255);
 					int ii = m_datatree->GetIconNum() - 1;
 					m_datatree->ChangeIconColor(ii, wxc);
-					wxTreeItemId item = m_datatree->AddAnnotationItem(vrv_item, ann->GetName());
-					m_datatree->SetAnnotationItemImage(item, ann->GetDisp() ? 2 * ii + 1 : 2 * ii);
+					wxTreeItemId item = m_datatree->AddAnnotItem(vrv_item, ann->GetName());
+					m_datatree->SetAnnotItemImage(item, ann->GetDisp() ? 2 * ii + 1 : 2 * ii);
 					if (sel_type == 4 && glbin_current.ann_data.lock() == ann)
 						sel_item = item;
 				}
 				break;
 				case 5://group
 				{
-					auto group = std::dynamic_pointer_cast<DataGroup>(layer);
+					auto group = std::dynamic_pointer_cast<VolumeGroup>(layer);
 					if (!group)
 						break;
 					//append group item to tree
@@ -955,16 +961,16 @@ void TreePanel::UpdateTreeIcons()
 				break;
 				case 4://annotations
 				{
-					auto ann = std::dynamic_pointer_cast<Annotations>(layer);
+					auto ann = std::dynamic_pointer_cast<AnnotData>(layer);
 					if (!ann)
 						break;
 					counter++;
-					m_datatree->SetAnnotationItemImage(layer_item, ann->GetDisp() ? 2 * counter + 1 : 2 * counter);
+					m_datatree->SetAnnotItemImage(layer_item, ann->GetDisp() ? 2 * counter + 1 : 2 * counter);
 				}
 				break;
 				case 5://volume group
 				{
-					auto group = std::dynamic_pointer_cast<DataGroup>(layer);
+					auto group = std::dynamic_pointer_cast<VolumeGroup>(layer);
 					if (!group)
 						break;
 					m_datatree->SetGroupItemImage(layer_item, int(group->GetDisp()));
@@ -1069,7 +1075,7 @@ void TreePanel::UpdateTreeColors()
 				break;
 				case 4://annotations
 				{
-					auto ann = std::dynamic_pointer_cast<Annotations>(layer);
+					auto ann = std::dynamic_pointer_cast<AnnotData>(layer);
 					if (!ann)
 						break;
 					wxColor wxc(255, 255, 255);
@@ -1079,7 +1085,7 @@ void TreePanel::UpdateTreeColors()
 				break;
 				case 5://group
 				{
-					auto group = std::dynamic_pointer_cast<DataGroup>(layer);
+					auto group = std::dynamic_pointer_cast<VolumeGroup>(layer);
 					if (!group)
 						break;
 					for (k = 0; k < group->GetVolumeNum(); k++)
@@ -1274,7 +1280,7 @@ void TreePanel::DeleteSelection()
 		{
 			ann->SetDisp(true);
 			std::wstring name = ann->GetName();
-			view->RemoveAnnotations(name);
+			view->RemoveAnnotData(name);
 		}
 	}
 	break;

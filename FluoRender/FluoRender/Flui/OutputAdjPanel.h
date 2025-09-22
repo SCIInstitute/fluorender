@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class DataGroup;
+class VolumeGroup;
 class wxFadeButton;
 class wxSingleSlider;
 class wxUndoableToolbar;

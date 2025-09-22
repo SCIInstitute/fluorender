@@ -38,7 +38,6 @@
 #include <Color.h>
 #include <Utils.h>
 #include <Ray.h>
-#include <DataManager.h>
 #include <VolCache4D.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>

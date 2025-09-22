@@ -33,6 +33,12 @@
 #include <glm/mat4x4.hpp>
 #include <vector>
 
+#ifndef __glew_h__
+typedef unsigned int GLuint;
+typedef int GLint;
+typedef float GLfloat;
+#endif // !__glew_h__
+
 namespace fluo
 {
 	class Ray;

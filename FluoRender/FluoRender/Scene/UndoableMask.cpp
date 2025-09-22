@@ -29,7 +29,7 @@
 #include <UndoableMask.h>
 #include <Global.h>
 #include <BrushDefault.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <Texture.h>
 
 bool UndoableMask::trim_mask_undos_head()

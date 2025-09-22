@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeRenderer.h>
-#include <DataManager.h>
+#include <VolumeData.h>
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <VolKernel.h>

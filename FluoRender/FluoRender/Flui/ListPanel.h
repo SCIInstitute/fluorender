@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/listctrl.h>
 
+#define DATA_VOLUME			1
+#define DATA_MESH			2
+#define DATA_ANNOT			3
+
 class DataListCtrl : public wxListCtrl
 {
 public:
