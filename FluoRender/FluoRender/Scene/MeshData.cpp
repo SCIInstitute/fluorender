@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <filesystem>
+#include <unordered_map>
 
 MeshData::MeshData() :
 	m_data(nullptr, glmDelete),
@@ -238,30 +239,68 @@ void MeshData::SubmitData()
 	m_mr->set_data(m_data.get());
 	bool bnormal = m_data->normals;
 	bool btexcoord = m_data->texcoords;
-	std::vector<float> verts;
+
+	// Map composite (v, vt, vn) to unique vertex index
+	struct VertexKey {
+		unsigned int v, vt, vn;
+		bool operator==(const VertexKey& other) const {
+			return v == other.v && vt == other.vt && vn == other.vn;
+		}
+	};
+	struct VertexKeyHash {
+		size_t operator()(const VertexKey& k) const {
+			return std::hash<unsigned int>()(k.v) ^ std::hash<unsigned int>()(k.vt << 1) ^ std::hash<unsigned int>()(k.vn << 2);
+		}
+	};
+
+	std::unordered_map<VertexKey, unsigned int, VertexKeyHash> vertex_map;
+	std::vector<float> vertex_buffer;
+	std::vector<unsigned int> index_buffer;
 
 	GLMgroup* group = m_data->groups;
-	GLMtriangle* triangle = 0;
 	while (group)
 	{
-		for (size_t i=0; i<group->numtriangles; ++i)
+		for (size_t i = 0; i < group->numtriangles; ++i)
 		{
-			triangle = &(m_data->triangles[group->triangles[i]]);
-			for (size_t j=0; j<3; ++j)
+			GLMtriangle* tri = &m_data->triangles[group->triangles[i]];
+			for (size_t j = 0; j < 3; ++j)
 			{
-				verts.push_back(m_data->vertices[3*triangle->vindices[j]]);
-				verts.push_back(m_data->vertices[3*triangle->vindices[j]+1]);
-				verts.push_back(m_data->vertices[3*triangle->vindices[j]+2]);
-				if (bnormal)
+				VertexKey key = {
+					tri->vindices[j],
+					btexcoord ? tri->tindices[j] : 0,
+					bnormal ? tri->nindices[j] : 0
+				};
+
+				auto it = vertex_map.find(key);
+				if (it != vertex_map.end())
 				{
-					verts.push_back(m_data->normals[3*triangle->nindices[j]]);
-					verts.push_back(m_data->normals[3*triangle->nindices[j]+1]);
-					verts.push_back(m_data->normals[3*triangle->nindices[j]+2]);
+					index_buffer.push_back(it->second);
 				}
-				if (btexcoord)
+				else
 				{
-					verts.push_back(m_data->texcoords[2*triangle->tindices[j]]);
-					verts.push_back(m_data->texcoords[2*triangle->tindices[j]+1]);
+					unsigned int new_index = static_cast<unsigned int>(vertex_buffer.size() / (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0)));
+					vertex_map[key] = new_index;
+					index_buffer.push_back(new_index);
+
+					// Position
+					vertex_buffer.push_back(m_data->vertices[3 * key.v]);
+					vertex_buffer.push_back(m_data->vertices[3 * key.v + 1]);
+					vertex_buffer.push_back(m_data->vertices[3 * key.v + 2]);
+
+					// Normal
+					if (bnormal)
+					{
+						vertex_buffer.push_back(m_data->normals[3 * key.vn]);
+						vertex_buffer.push_back(m_data->normals[3 * key.vn + 1]);
+						vertex_buffer.push_back(m_data->normals[3 * key.vn + 2]);
+					}
+
+					// Texcoord
+					if (btexcoord)
+					{
+						vertex_buffer.push_back(m_data->texcoords[2 * key.vt]);
+						vertex_buffer.push_back(m_data->texcoords[2 * key.vt + 1]);
+					}
 				}
 			}
 		}
@@ -271,24 +310,33 @@ void MeshData::SubmitData()
 	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray();
 	if (!va_model)
 		return;
-	va_model->buffer_data(
-		flvr::VABuf_Coord, sizeof(float)*verts.size(),
-		&verts[0], GL_STATIC_DRAW);
 
-	GLsizei stride = sizeof(float)*(3+(bnormal?3:0)+(btexcoord?2:0));
-	va_model->attrib_pointer(
-		0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0);
+	// Upload vertex buffer
+	va_model->buffer_data(
+		flvr::VABuf_Coord,
+		sizeof(float) * vertex_buffer.size(),
+		&vertex_buffer[0],
+		GL_STATIC_DRAW);
+
+	// Upload index buffer
+	va_model->buffer_data(
+		flvr::VABuf_Index,
+		sizeof(unsigned int) * index_buffer.size(),
+		&index_buffer[0],
+		GL_STATIC_DRAW);
+
+	// Set attribute pointers
+	GLsizei stride = sizeof(float) * (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0));
+	va_model->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0); // Position
+
 	if (bnormal)
-		va_model->attrib_pointer(
-			1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
+		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(sizeof(float) * 3)); // Normal
+
 	if (btexcoord)
 	{
-		if (bnormal)
-			va_model->attrib_pointer(
-				2, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)24);
-		else
-			va_model->attrib_pointer(
-				1, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)12);
+		GLuint tex_slot = bnormal ? 2 : 1;
+		GLsizei tex_offset = sizeof(float) * (bnormal ? 6 : 3);
+		va_model->attrib_pointer(tex_slot, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)tex_offset); // Texcoord
 	}
 
 	m_gpu_dirty = false;

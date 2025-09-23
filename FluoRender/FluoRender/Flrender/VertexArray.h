@@ -144,6 +144,7 @@ namespace flvr
 		void draw_arrays(GLenum, GLint, GLsizei);
 		void draw_elements(GLenum, GLsizei, GLenum, const GLvoid*);
 		void draw();
+		void draw_unmanaged(GLint pos, GLint tri_num);
 		void draw_norm_square();
 		void draw_circles();
 		void draw_bound_cube();
@@ -195,6 +196,7 @@ namespace flvr
 		bool valid_;
 		bool protected_;
 		bool dirty_;
+		bool indexed_;
 		std::vector<VertexBuffer*> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
 		//parameters

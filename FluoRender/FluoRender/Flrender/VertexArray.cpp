@@ -138,7 +138,8 @@ namespace flvr
 		type_(type),
 		valid_(false),
 		protected_(false),
-		dirty_(false)
+		dirty_(false),
+		indexed_(false)
 	{
 	}
 
@@ -165,6 +166,7 @@ namespace flvr
 		id_ = 0;
 		valid_ = false;
 		protected_ = false;
+		indexed_ = false;
 	}
 
 	void VertexArray::bind()
@@ -849,15 +851,13 @@ namespace flvr
 
 	void VertexArray::draw()
 	{
-		if (!valid_)
-			return;
-		glBindVertexArray(id_);
-		//enable attrib array
-		for (auto it = attrib_pointer_list_.begin();
-			it != attrib_pointer_list_.end(); ++it)
-			glEnableVertexAttribArray(*it);
+		draw_begin();
+
 		switch (type_)
 		{
+		case VA_Unmanaged:
+			//don't use it to draw unmanaged
+			break;
 		case VA_Norm_Square:
 		case VA_Rectangle:
 		case VA_Norm_Square_d:
@@ -894,11 +894,20 @@ namespace flvr
 			draw_rulers();
 			break;
 		}
-		//disable attrib array
-		for (auto it = attrib_pointer_list_.begin();
-			it != attrib_pointer_list_.end(); ++it)
-			glDisableVertexAttribArray(*it);
-		glBindVertexArray(0);
+		
+		draw_end();
+	}
+
+	void VertexArray::draw_unmanaged(GLint pos, GLint tri_num)
+	{
+		if (indexed_)
+		{
+			draw_elements(GL_TRIANGLES, (GLsizei)(tri_num *3), GL_UNSIGNED_INT, (GLvoid*)(pos * sizeof(GLuint)));
+		}
+		else
+		{
+			draw_arrays(GL_TRIANGLES, pos, (GLsizei)(tri_num * 3));
+		}
 	}
 
 	void VertexArray::draw_norm_square()
@@ -1169,6 +1178,7 @@ namespace flvr
 			vb_list_.push_back(vb);
 			//attach buffer
 			va->attach_buffer(vb);
+			va->indexed_ = true;
 			//set param
 			std::vector<fluo::Point> pp;
 			va->set_param(pp);
@@ -1284,6 +1294,7 @@ namespace flvr
 			vb->create();
 			//attach buffer
 			va->attach_buffer(vb);
+			va->indexed_ = true;
 		}
 		//unbind
 		//va->unbind();
@@ -1339,6 +1350,7 @@ namespace flvr
 		VertexBuffer* vb = new VertexBuffer(VABuf_Index);
 		vb->create();
 		attach_buffer(vb);
+		indexed_ = true;
 	}
 
 	bool VertexArray::match(VAType type)

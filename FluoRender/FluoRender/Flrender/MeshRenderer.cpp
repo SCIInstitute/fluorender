@@ -178,7 +178,7 @@ namespace flvr
 				shader->setLocalParam(7, 1.0/double(vp_[2]), 1.0/double(vp_[3]), 0.0, 0.0);
 
 			//draw
-			va_model_->draw_arrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles * 3));
+			va_model_->draw_unmanaged(pos, group->numtriangles);
 			pos += group->numtriangles*3;
 			group = group->next;
 		}
@@ -239,7 +239,7 @@ namespace flvr
 			}
 
 			//draw
-			va_model_->draw_arrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles * 3));
+			va_model_->draw_unmanaged(pos, group->numtriangles);
 			pos += group->numtriangles*3;
 			group = group->next;
 		}
@@ -286,7 +286,7 @@ namespace flvr
 			}
 
 			//draw
-			va_model_->draw_arrays(GL_TRIANGLES, pos, (GLsizei)(group->numtriangles * 3));
+			va_model_->draw_unmanaged(pos, group->numtriangles);
 			pos += group->numtriangles*3;
 			group = group->next;
 		}
