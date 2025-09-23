@@ -420,6 +420,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	//kernel_prog->readBuffer(vbo_arg, &verts[0]);
 
 	//update triangle num
+	m_mesh->SetVertexNum(vsize2);
 	m_mesh->SetTriangleNum(vsize2 / 3);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
@@ -575,7 +576,8 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	kernel_prog->readBuffer(sizeof(int)* vertex_num, &compacted_ibo[0], &compacted_ibo[0]);
 	//update mesh
 	m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
-	m_mesh->SetTriangleNum(unique_count / 3);
+	m_mesh->SetVertexNum(unique_count);
+	m_mesh->SetTriangleNum(vertex_num / 3);//should stay the same
 	m_mesh->SetGpuDirty();
 
 	m_busy = false;

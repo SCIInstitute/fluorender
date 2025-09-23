@@ -90,8 +90,10 @@ public:
 	void UpdateVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
 	GLuint GetVBO();
 
-	void SetTriangleNum(unsigned int num);
+	void SetVertexNum(unsigned int num);
 	unsigned int GetVertexNum();
+	void SetTriangleNum(unsigned int num);
+	unsigned int GetTriangleNum();
 
 	//MR
 	flvr::MeshRenderer* GetMR();

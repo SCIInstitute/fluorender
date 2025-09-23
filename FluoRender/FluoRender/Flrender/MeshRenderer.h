@@ -63,7 +63,7 @@ namespace flvr
 			return data_;
 		}
 
-		VertexArray* GetOrCreateVertexArray();
+		VertexArray* GetOrCreateVertexArray(bool, bool);
 		VertexArray* GetVertexArray()
 		{
 			return va_model_;

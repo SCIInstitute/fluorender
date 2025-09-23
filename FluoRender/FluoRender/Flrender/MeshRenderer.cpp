@@ -72,10 +72,10 @@ namespace flvr
 			delete va_model_;
 	}
 
-	VertexArray* MeshRenderer::GetOrCreateVertexArray()
+	VertexArray* MeshRenderer::GetOrCreateVertexArray(bool vbuf, bool ibuf)
 	{
 		if (!va_model_ || !va_model_->valid())
-			va_model_ = glbin_vertex_array_manager.vertex_array(true, false);
+			va_model_ = glbin_vertex_array_manager.vertex_array(vbuf, ibuf);
 		return va_model_;
 	}
 

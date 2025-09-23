@@ -307,7 +307,7 @@ void MeshData::SubmitData()
 		group = group->next;
 	}
 
-	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray();
+	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray(true, true);
 	if (!va_model)
 		return;
 
@@ -336,7 +336,7 @@ void MeshData::SubmitData()
 	{
 		GLuint tex_slot = bnormal ? 2 : 1;
 		GLsizei tex_offset = sizeof(float) * (bnormal ? 6 : 3);
-		va_model->attrib_pointer(tex_slot, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)tex_offset); // Texcoord
+		va_model->attrib_pointer(tex_slot, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(size_t)tex_offset); // Texcoord
 	}
 
 	m_gpu_dirty = false;
@@ -353,23 +353,38 @@ void MeshData::ReturnData()
 
 	bool bnormal = m_data->normals;
 	bool btexcoord = m_data->texcoords;
+	bool indexed = va_model->is_indexed();
 
 	GLsizei stride = sizeof(float) * (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0));
+
+	// Determine vertex and triangle counts
+	size_t num_vertices = m_data->numvertices;
 	size_t num_triangles = m_data->numtriangles;
-	size_t num_vertices = num_triangles * 3;
-	if (num_vertices == 0)
+	size_t index_count = num_triangles * 3;
+	if (num_triangles == 0)
 		return;
 
+	// Map vertex buffer
 	std::vector<float> verts(stride / sizeof(float) * num_vertices);
-
 	void* mapped_ptr = va_model->map_buffer(flvr::VABuf_Coord, GL_READ_ONLY);
 	if (!mapped_ptr)
 		return;
-
 	memcpy(verts.data(), mapped_ptr, verts.size() * sizeof(float));
 	va_model->unmap_buffer(flvr::VABuf_Coord);
 
-	// Allocate vertex arrays with 1-based indexing (index 0 unused)
+	// Map index buffer if needed
+	std::vector<GLuint> indices;
+	if (indexed)
+	{
+		void* index_ptr = va_model->map_buffer(flvr::VABuf_Index, GL_READ_ONLY);
+		if (!index_ptr)
+			return;
+		indices.resize(index_count);
+		memcpy(indices.data(), index_ptr, sizeof(GLuint) * index_count);
+		va_model->unmap_buffer(flvr::VABuf_Index);
+	}
+
+	// Allocate vertex arrays with 1-based indexing
 	if (m_data->vertices)
 		free(m_data->vertices);
 	m_data->vertices = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (num_vertices + 1));
@@ -380,22 +395,22 @@ void MeshData::ReturnData()
 	if (btexcoord && !m_data->texcoords)
 		m_data->texcoords = (GLfloat*)malloc(sizeof(GLfloat) * 2 * (num_vertices + 1));
 
-	//transform
+	// Transform setup
 	glm::vec3 center(m_center.x(), m_center.y(), m_center.z());
 	glm::vec3 trans(m_trans[0], m_trans[1], m_trans[2]);
 	glm::vec3 rot(glm::radians(m_rot[0]), glm::radians(m_rot[1]), glm::radians(m_rot[2]));
 	glm::vec3 scale(m_scale[0], m_scale[1], m_scale[2]);
 
-	// Stepwise composition
 	glm::mat4 M = glm::mat4(1.0f);
-	M = glm::translate(M, trans + center); // move to world position
+	M = glm::translate(M, trans + center);
 	M = glm::rotate(M, rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	M = glm::rotate(M, rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	M = glm::rotate(M, rot.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	M = glm::scale(M, scale);
-	M = glm::translate(M, -center); // undo centering
+	M = glm::translate(M, -center);
 	glm::mat3 N = glm::transpose(glm::inverse(glm::mat3(M)));
 
+	// Copy vertex data
 	size_t offset = 0;
 	for (size_t i = 1; i <= num_vertices; ++i)
 	{
@@ -432,12 +447,22 @@ void MeshData::ReturnData()
 	for (size_t i = 0; i < num_triangles; ++i)
 	{
 		GLMtriangle& tri = m_data->triangles[i];
-		tri.vindices[0] = (GLuint)(i * 3 + 1); // 1-based
-		tri.vindices[1] = (GLuint)(i * 3 + 2);
-		tri.vindices[2] = (GLuint)(i * 3 + 3);
+		if (indexed)
+		{
+			tri.vindices[0] = indices[i * 3 + 0] + 1;
+			tri.vindices[1] = indices[i * 3 + 1] + 1;
+			tri.vindices[2] = indices[i * 3 + 2] + 1;
+		}
+		else
+		{
+			tri.vindices[0] = (GLuint)(i * 3 + 1);
+			tri.vindices[1] = (GLuint)(i * 3 + 2);
+			tri.vindices[2] = (GLuint)(i * 3 + 3);
+		}
 		tri.findex = 0;
 	}
 
+	// Rebuild group triangle lists
 	size_t tri_offset = 0;
 	GLMgroup* group = m_data->groups;
 	while (group)
@@ -542,7 +567,7 @@ GLuint MeshData::AddVBO(int vertex_size)
 {
 	std::vector<float> verts(vertex_size * 45);
 	size_t vbo_size = sizeof(float) * verts.size();
-	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray();
+	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray(true, false);
 	va_model->buffer_data(
 		flvr::VABuf_Coord, vbo_size,
 		&verts[0], GL_DYNAMIC_DRAW);
@@ -597,10 +622,23 @@ GLuint MeshData::GetVBO()
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
 }
 
+void MeshData::SetVertexNum(unsigned int num)
+{
+	if (!m_data)
+		return;
+	m_data->numvertices = static_cast<GLuint>(num);
+}
+
+unsigned int MeshData::GetVertexNum()
+{
+	if (!m_data)
+		return 0;
+	return static_cast<unsigned int>(m_data->numvertices);
+}
+
 void MeshData::SetTriangleNum(unsigned int num)
 {
 	m_data->numtriangles = static_cast<GLuint>(num);
-	m_data->numvertices = static_cast<GLuint>(num * 3);
 	GLMgroup* group = m_data->groups;
 	if (group)
 	{
@@ -608,11 +646,11 @@ void MeshData::SetTriangleNum(unsigned int num)
 	}
 }
 
-unsigned int MeshData::GetVertexNum()
+unsigned int MeshData::GetTriangleNum()
 {
 	if (!m_data)
 		return 0;
-	return m_data->numvertices;
+	return static_cast<unsigned int>(m_data->numtriangles);
 }
 
 //MR
