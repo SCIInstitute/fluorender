@@ -574,6 +574,8 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	//read back
 	kernel_prog->readBuffer(sizeof(float) * unique_count * 3, &compacted_vbo[0], &compacted_vbo[0]);
 	kernel_prog->readBuffer(sizeof(int)* vertex_num, &compacted_ibo[0], &compacted_ibo[0]);
+	kernel_prog->releaseAll();
+
 	//update mesh
 	m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
 	m_mesh->SetVertexNum(unique_count);
