@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <DataManager.h>
 #include <RenderViewPanel.h>
 #include <ShaderProgram.h>
 #include <KernelProgram.h>

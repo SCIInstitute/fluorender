@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <ModalDlg.h>
 #include <VertexArray.h>
 #include <VolumeRenderer.h>

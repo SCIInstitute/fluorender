@@ -28,6 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Colocalize.h>
 #include <Global.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
 #include <ColocalDefault.h>
 #include <AutomateDefault.h>
 #include <Compare.h>

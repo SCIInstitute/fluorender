@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeDefault.h>
 #include <AutomateDefault.h>
 #include <RenderView.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <CurrentObjects.h>
+#include <DataManager.h>
 #include <MainFrame.h>
 #include <compatibility.h>
 #include <TextureRenderer.h>

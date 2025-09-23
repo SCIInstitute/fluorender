@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <Root.h>
 #include <DataManager.h>
+#include <CurrentObjects.h>
 #include <RenderViewPanel.h>
 #include <Interpolator.h>
 #include <MovieMaker.h>

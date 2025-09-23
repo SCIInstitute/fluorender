@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshGroup.h>
 #include <VolumeData.h>
 #include <MeshData.h>
+#include <AnnotData.h>
 #include <VolumeSelector.h>
 #include <CompGenerator.h>
 

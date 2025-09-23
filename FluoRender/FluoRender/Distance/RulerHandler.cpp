@@ -27,9 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RulerHandler.h>
+#include <Global.h>
 #include <Ruler.h>
 #include <RenderView.h>
-#include <Global.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <Texture.h>
 #include <Cov.h>
 #include <WalkCycle.h>

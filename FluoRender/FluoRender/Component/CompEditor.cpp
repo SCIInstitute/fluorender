@@ -28,6 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include <CompEditor.h>
 #include <Global.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <TrackGroup.h>
+#include <DataManager.h>
 #include <MovieMaker.h>
 #include <Texture.h>
 #include <VolumeRenderer.h>

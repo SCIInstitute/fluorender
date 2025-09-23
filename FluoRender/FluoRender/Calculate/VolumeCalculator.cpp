@@ -28,6 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeCalculator.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <CurrentObjects.h>
+#include <DataManager.h>
 #include <VolumePropPanel.h>
 #include <VolumeDefault.h>
 #include <Global.h>

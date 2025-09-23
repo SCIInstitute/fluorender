@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotData.h>
 #include <VolumeGroup.h>
 #include <MeshGroup.h>
+#include <DataManager.h>
 #include <VolumeSelector.h>
 #include <RulerHandler.h>
 #include <Colocalize.h>

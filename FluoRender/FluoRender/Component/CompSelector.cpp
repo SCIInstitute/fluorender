@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <Global.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>

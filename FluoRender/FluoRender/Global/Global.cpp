@@ -58,6 +58,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <MeshData.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
 #include <VolumeLoader.h>
 #include <Colocalize.h>
 #include <Clusterizer.h>

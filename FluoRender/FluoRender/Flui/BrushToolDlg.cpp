@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <NoiseCancellingDlg.h>
 #include <CountingDlg.h>
 #include <TreePanel.h>
+#include <VolumeData.h>
 #include <Count.h>
 #include <Texture.h>
 #include <VolumeSelector.h>

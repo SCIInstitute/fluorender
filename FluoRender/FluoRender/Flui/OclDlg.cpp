@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <DataManager.h>
 #include <ModalDlg.h>
 #include <KernelExecutor.h>

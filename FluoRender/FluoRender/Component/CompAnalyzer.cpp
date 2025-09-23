@@ -29,6 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <RenderView.h>
 #include <VolumeData.h>
+#include <AnnotData.h>
+#include <VolumeGroup.h>
+#include <DataManager.h>
 #include <VolumeDefault.h>
 #include <CurrentObjects.h>
 #include <Texture.h>

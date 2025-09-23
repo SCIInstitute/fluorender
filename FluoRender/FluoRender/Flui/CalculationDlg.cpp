@@ -31,7 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <VolumeData.h>
+#include <VolumeGroup.h>
 #include <CurrentObjects.h>
+#include <DataManager.h>
 #include <CombineList.h>
 #include <VolumeCalculator.h>
 

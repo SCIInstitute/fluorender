@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainSettings.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <TrackGroup.h>
+#include <DataManager.h>
 #include <Stencil.h>
 #include <dbscan.h>
 #include <kmeans.h>

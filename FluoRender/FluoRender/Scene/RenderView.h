@@ -37,11 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <memory>
 
-class XboxController;
-namespace flvr
-{
-	class TextRenderer;
-}
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
 #define INIT_TRANSL  4
@@ -74,18 +69,32 @@ namespace flvr
 #define INFO_Y		64
 #define INFO_Z		128
 
+#ifndef __glew_h__
+typedef unsigned int GLuint;
+#endif // !__glew_h__
+
+class XboxController;
 class RenderViewPanel;
 class RenderCanvas;
 class BaseState;
 class IdleState;
 class MouseState;
+class VolumeData;
+class MeshData;
+class AnnotData;
+class VolumeGroup;
+class MeshGroup;
+class TrackGroup;
 namespace flvr
 {
 	class MultiVolumeRenderer;
+	class TextRenderer;
 }
 namespace flrd
 {
 	class CelpList;
+	class RulerList;
+	class Ruler;
 }
 
 enum class InteractiveMode

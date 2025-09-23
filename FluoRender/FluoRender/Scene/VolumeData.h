@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Quaternion.h>
 #include <BBox.h>
 #include <nrrd.h>
+#include <glm/glm.hpp>
 
 #ifndef __glew_h__
 typedef unsigned int GLuint;
@@ -45,6 +46,10 @@ namespace flvr
 	class VolumeRenderer;
 	class TextureBrick;
 	class Texture;
+}
+namespace flrd
+{
+	class EntryParams;
 }
 class BaseReader;
 

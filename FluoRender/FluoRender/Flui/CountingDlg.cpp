@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <CompGenerator.h>
 #include <CompAnalyzer.h>
 #include <wx/valnum.h>

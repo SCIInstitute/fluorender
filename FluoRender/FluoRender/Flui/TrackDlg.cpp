@@ -31,6 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <TrackGroup.h>
+#include <DataManager.h>
 #include <CompEditor.h>
 #include <CompSelector.h>
 #include <CompAnalyzer.h>

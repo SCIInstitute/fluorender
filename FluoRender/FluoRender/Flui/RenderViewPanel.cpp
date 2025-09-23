@@ -45,6 +45,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ClipPlanePanel.h>
 #include <ModalDlg.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
 #include <Project.h>
 #include <VolumeSelector.h>
 #include <Ruler.h>

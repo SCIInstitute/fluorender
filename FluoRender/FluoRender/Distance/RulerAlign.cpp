@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Quaternion.h>
 #include <Utils.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
 #include <Ruler.h>
 #include <Pca.h>
 #include <Cov.h>

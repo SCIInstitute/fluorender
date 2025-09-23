@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
+#include <MeshData.h>
+#include <DataManager.h>
 #include <VolumeRenderer.h>
 #include <MeshRenderer.h>
 #include <compatibility.h>

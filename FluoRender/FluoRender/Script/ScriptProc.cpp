@@ -37,6 +37,13 @@ DEALINGS IN THE SOFTWARE.
 #include <OutputAdjPanel.h>
 #include <ScriptBreakDlg.h>
 #include <RenderView.h>
+#include <Root.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <MeshGroup.h>
+#include <TrackGroup.h>
+#include <DataManager.h>
 #include <BackgStat.h>
 #include <CompEditor.h>
 #include <WalkCycle.h>

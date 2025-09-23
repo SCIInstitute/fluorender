@@ -31,6 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderView.h>
+#include <Root.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <CurrentObjects.h>
+#include <DataManager.h>
 #include <Histogram.h>
 #include <RecordHistParams.h>
 #include <TableHistParams.h>

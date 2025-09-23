@@ -69,6 +69,15 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePoint.h>
 #include <SegGrow.h>
 #include <VolumeRenderer.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <MeshData.h>
+#include <AnnotData.h>
+#include <VolumeGroup.h>
+#include <MeshGroup.h>
+#include <TrackGroup.h>
+#include <Root.h>
+#include <DataManager.h>
 #include <TrackMap.h>
 #include <base_reader.h>
 #include <brkxml_reader.h>
