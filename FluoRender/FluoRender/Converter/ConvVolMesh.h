@@ -54,6 +54,7 @@ namespace flrd
 
 	private:
 		bool m_use_sel = false;//internal flag based on validity of mask
+		bool m_merged = false;
 
 	private:
 		std::string GetKernelString(bool mask, bool tf);

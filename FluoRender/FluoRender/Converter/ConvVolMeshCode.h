@@ -584,32 +584,80 @@ __kernel void kernel_3(
 }
 
 __kernel void kernel_4(
-	__global const float* reduced_vertex_buffer, // [reduced_count * 3]
-	__global int* remap_table,                   // [reduced_count]
-	const int reduced_count,
+	__global const float* vertex_buffer,
+	__global int* remap_table,
+	const int vertex_count,
 	const float merge_tolerance
 )
 {
 	//global dedup pass
 	int i = get_global_id(0);
-	if (i >= reduced_count) return;
+	if (i >= vertex_count) return;
 
 	int base_idx = i * 3;
-	float3 vi = (float3)(reduced_vertex_buffer[base_idx], reduced_vertex_buffer[base_idx + 1], reduced_vertex_buffer[base_idx + 2]);
+	float3 vi = (float3)(vertex_buffer[base_idx], vertex_buffer[base_idx + 1], vertex_buffer[base_idx + 2]);
 
 	remap_table[i] = i;
 
-	for (int j = 0; j < reduced_count; ++j) {
+	for (int j = 0; j < vertex_count; ++j) {
 		if (i == j) continue;
 
 		int cmp_idx = j * 3;
-		float3 vj = (float3)(reduced_vertex_buffer[cmp_idx], reduced_vertex_buffer[cmp_idx + 1], reduced_vertex_buffer[cmp_idx + 2]);
+		float3 vj = (float3)(vertex_buffer[cmp_idx], vertex_buffer[cmp_idx + 1], vertex_buffer[cmp_idx + 2]);
 
 		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
 			remap_table[i] = j;
 			break;
 		}
+	}
+}
+
+__kernel void kernel_5(
+	__global const float* vertex_buffer,     // [vertex_count * 3] - compacted VBO from windowed pass
+	__global const int* old_ibo,             // [index_count] - index buffer from windowed pass
+	__global const int* remap_table,         // [vertex_count] - global remap table
+	__global int* unique_flags,              // [vertex_count] - output: flags for unique vertices
+	__global int* prefix_sum,                // [vertex_count] - precomputed prefix sum
+	__global int* remap_to_compact,          // [vertex_count] - global ID → compacted index
+	__global float* compacted_vbo,           // [new_vertex_count * 3] - output: globally compacted VBO
+	__global int* final_indices,             // [index_count] - output: globally remapped IBO
+	const int vertex_count,
+	const int index_count
+)
+{
+	int i = get_global_id(0);
+
+	// Step 1: Compact VBO (vertex-side work)
+	if (i < vertex_count) {
+		// Identify unique vertices
+		if (remap_table[i] == i) {
+			unique_flags[i] = 1;
+		} else {
+			unique_flags[i] = 0;
+		}
+
+		barrier(CLK_GLOBAL_MEM_FENCE); // Ensure flags are written
+
+		// Write compacted vertex
+		if (unique_flags[i]) {
+			int new_idx = prefix_sum[i];
+			int base = i * 3;
+			int out_base = new_idx * 3;
+			compacted_vbo[out_base + 0] = vertex_buffer[base + 0];
+			compacted_vbo[out_base + 1] = vertex_buffer[base + 1];
+			compacted_vbo[out_base + 2] = vertex_buffer[base + 2];
+		}
+	}
+
+	barrier(CLK_GLOBAL_MEM_FENCE); // Ensure VBO is written
+
+	// Step 2: Remap IBO (index-side work)
+	if (i < index_count) {
+		int old_idx = old_ibo[i];               // index from windowed pass
+		int global_idx = remap_table[old_idx];  // canonical global vertex ID
+		int compact_idx = remap_to_compact[global_idx]; // final compacted index
+		final_indices[i] = compact_idx;
 	}
 }
 )CLKER";
