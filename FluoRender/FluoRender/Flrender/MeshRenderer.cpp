@@ -75,7 +75,14 @@ namespace flvr
 	VertexArray* MeshRenderer::GetOrCreateVertexArray(bool vbuf, bool ibuf)
 	{
 		if (!va_model_ || !va_model_->valid())
+		{
 			va_model_ = glbin_vertex_array_manager.vertex_array(vbuf, ibuf);
+		}
+		if (!ibuf && va_model_->is_indexed())
+		{
+			//remove index
+			va_model_->delete_index_buffer();
+		}
 		return va_model_;
 	}
 

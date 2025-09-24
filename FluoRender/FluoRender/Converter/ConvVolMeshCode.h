@@ -547,6 +547,7 @@ __kernel void kernel_3(
 	__global const int* remap_table,       // [vertex_count]
 	__global int* unique_flags,            // [vertex_count]
 	__global int* prefix_sum,              // [vertex_count]
+	__global int* remap_to_compact,        // [vertex_count]
 	__global float* compacted_vbo,         // [new_vertex_count * 3]
 	__global int* final_indices,           // [vertex_count]
 	const int vertex_count
@@ -579,7 +580,7 @@ __kernel void kernel_3(
 
 	// Step 3: Update final index array
 	int target = remap_table[i];
-	final_indices[i] = prefix_sum[target];
+	final_indices[i] = remap_to_compact[target];
 }
 
 __kernel void kernel_4(

@@ -541,9 +541,12 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	for (size_t i = 0; i < vertex_num; ++i)
 		if (unique_flags[i])
 			++unique_count;
+	std::vector<int> remap_table(vertex_num, 0);
+	kernel_prog->readBuffer(arg_ibo, remap_table.data());
 
 	//compute prefix sum
 	std::vector<int> prefix_sum(vertex_num, 0);
+	std::vector<int> remap_to_compact(vertex_num, 0);
 	//kernel_prog->setKernelArgBegin(kernel_idx2);
 	//kernel_prog->setKernelArgument(arg_uflags);
 	//flvr::Argument arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
@@ -554,7 +557,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 	////debug read back prefix sum
 	//kernel_prog->readBuffer(sizeof(int) * vertex_num, &prefix_sum[0], &prefix_sum[0]);
-	PrefixSum(unique_flags, prefix_sum);
+	PrefixSum(unique_flags, remap_table, prefix_sum, remap_to_compact);
 
 	//compact and remap
 	//allocate new vbo
@@ -564,7 +567,8 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	kernel_prog->setKernelArgument(arg_vbo);
 	kernel_prog->setKernelArgument(arg_ibo);
 	kernel_prog->setKernelArgument(arg_uflags);
-	kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
+	kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&prefix_sum[0]));
+	kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&remap_to_compact[0]));
 	flvr::Argument arg_cvbo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * unique_count * 3, (void*)(&compacted_vbo[0]));
 	flvr::Argument arg_cibo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_num, (void*)(&compacted_ibo[0]));
 	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
@@ -587,12 +591,34 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 void ConvVolMesh::PrefixSum(
 	const std::vector<int>& unique_flags,
-	std::vector<int>& prefix_sum)
+	const std::vector<int>& remap_table,
+	std::vector<int>& prefix_sum,
+	std::vector<int>& remap_to_compact)
 {
 	int count = 0;
-	prefix_sum.resize(unique_flags.size());
-	for (size_t i = 0; i < unique_flags.size(); ++i) {
+	size_t vertex_count = unique_flags.size();
+	prefix_sum.resize(vertex_count);
+	remap_to_compact.resize(vertex_count, -1);
+
+	// Step 1: Compute prefix sum and assign compact index to unique vertices
+	for (size_t i = 0; i < vertex_count; ++i) {
 		prefix_sum[i] = count;
-		count += unique_flags[i];
+		if (unique_flags[i]) {
+			remap_to_compact[i] = count;
+			count++;
+		}
+	}
+
+	// Step 2: Resolve canonical and assign compact index
+	auto resolve_canonical = [&](int i) {
+		while (remap_table[i] != i) {
+			i = remap_table[i];
+		}
+		return i;
+		};
+
+	for (size_t i = 0; i < vertex_count; ++i) {
+		int canonical = resolve_canonical(remap_table[i]);
+		remap_to_compact[i] = remap_to_compact[canonical];
 	}
 }

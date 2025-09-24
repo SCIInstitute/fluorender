@@ -195,7 +195,10 @@ namespace flvr
 			}
 		}
 		if (vb)
+		{
+			bind();
 			vb->data(size, data, usage);
+		}
 		dirty_ = false;
 	}
 
@@ -1351,6 +1354,32 @@ namespace flvr
 		vb->create();
 		attach_buffer(vb);
 		indexed_ = true;
+	}
+
+	void VertexArray::delete_index_buffer()
+	{
+		indexed_ = false;
+
+		// Destroy matching buffers first
+		for (auto& it : buffer_list_)
+		{
+			if (it->type_ == VABuf_Index)
+			{
+				bind();
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				unbind();
+				it->destroy();
+			}
+		}
+
+		// Remove them from the vector
+		buffer_list_.erase(
+			std::remove_if(buffer_list_.begin(), buffer_list_.end(),
+				[](const VertexBuffer* buf) {
+					return buf->type_ == VABuf_Index;
+				}),
+			buffer_list_.end()
+		);
 	}
 
 	bool VertexArray::match(VAType type)
