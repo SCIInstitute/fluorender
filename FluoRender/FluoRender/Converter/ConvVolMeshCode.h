@@ -619,7 +619,7 @@ __kernel void kernel_5(
 	__global const int* remap_table,         // [vertex_count] - global remap table
 	__global int* unique_flags,              // [vertex_count] - output: flags for unique vertices
 	__global int* prefix_sum,                // [vertex_count] - precomputed prefix sum
-	__global int* remap_to_compact,          // [vertex_count] - global ID → compacted index
+	__global int* remap_to_compact,          // [vertex_count] - global ID -> compacted index
 	__global float* compacted_vbo,           // [new_vertex_count * 3] - output: globally compacted VBO
 	__global int* final_indices,             // [index_count] - output: globally remapped IBO
 	const int vertex_count,
