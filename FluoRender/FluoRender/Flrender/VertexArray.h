@@ -53,6 +53,8 @@ namespace flvr
 	{
 		VABuf_Coord = 0,
 		VABuf_Index,
+		VABuf_Normal,
+		VABuf_Tex
 	};
 	class VertexArray;
 	class VertexArrayManager;
@@ -121,6 +123,11 @@ namespace flvr
 		void add_index_buffer();
 		void delete_index_buffer();
 		bool is_indexed() { return indexed_; }
+		bool is_interleaved() { return interleaved_; }
+		void add_normal_buffer();
+		void delete_normal_buffer();
+		void add_tex_buffer();
+		void delete_tex_buffer();
 
 		bool attach_buffer(VertexBuffer* buf);
 		void buffer_data(VABufferType type,
@@ -199,6 +206,7 @@ namespace flvr
 		bool protected_;
 		bool dirty_;
 		bool indexed_;
+		bool interleaved_;//normals and tex coords are saved with vertex coords
 		std::vector<VertexBuffer*> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
 		//parameters

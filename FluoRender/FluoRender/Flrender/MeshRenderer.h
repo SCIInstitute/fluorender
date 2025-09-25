@@ -106,6 +106,10 @@ namespace flvr
 		{ light_ = val; }
 		bool get_lighting()
 		{ return light_; }
+		void set_flat_shading(bool val)
+		{ flat_shading_ = val; }
+		bool get_flat_shading()
+		{ return flat_shading_; }
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end)
 		{ fog_ = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
 		bool get_fog()
@@ -127,6 +131,7 @@ namespace flvr
 		glm::mat4 m_mv_mat, m_proj_mat;
 		//lighting
 		bool light_;
+		bool flat_shading_;
 		//fog
 		bool fog_;
 		double m_fog_intensity;

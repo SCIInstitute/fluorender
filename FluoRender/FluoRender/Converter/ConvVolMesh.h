@@ -35,6 +35,7 @@ class MeshData;
 namespace flvr
 {
 	class TextureBrick;
+	class Argument;
 }
 namespace flrd
 {
@@ -64,6 +65,9 @@ namespace flrd
 			long &ox, long &oy, long &oz);
 
 		void MarchingCubes(VolumeData* vd, MeshData* md);
+
+		void AverageNormals(flvr::Argument* pvbo, flvr::Argument* pibo,
+			int vertex_count, int idx_count);
 
 		void PrefixSum(const std::vector<int>& unique_flags,
 			std::vector<int>& remap_table,

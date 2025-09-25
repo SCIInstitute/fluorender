@@ -1342,22 +1342,20 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		int pid = flvr::KernelProgram::get_platform_id();
 		int did = flvr::KernelProgram::get_device_id();
 		wxTreeItemId root = m_device_tree->AddRoot("Computer");
-		std::string name;
 		if (devices)
 		{
 			for (int i = 0; i < devices->size(); ++i)
 			{
 				flvr::CLPlatform* platform = &((*devices)[i]);
-				name = platform->vendor;
-				name.back() = ';';
-				name += " " + platform->name;
+				std::string name = platform->vendor;
+				name += "; " + platform->name;
 				wxTreeItemId pfitem = m_device_tree->AppendItem(root, name);
 				for (int j = 0; j < platform->devices.size(); ++j)
 				{
 					flvr::CLDevice* device = &(platform->devices[j]);
-					name = device->vendor;
-					name.back() = ';';
-					name += " " + device->name;
+					std::string name = device->vendor;
+					name += "; " + device->name;
+					name += "; " + device->version;
 					wxTreeItemId dvitem = m_device_tree->AppendItem(pfitem, name);
 					if (i == pid && j == did)
 						m_device_tree->SelectItem(dvitem);

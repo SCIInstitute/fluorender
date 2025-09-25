@@ -41,6 +41,7 @@ MeshData::MeshData() :
 	m_disp(true),
 	m_draw_bounds(false),
 	m_light(true),
+	m_flat_shading(false),
 	m_mat_amb(0.3, 0.3, 0.3),
 	m_mat_diff(1.0, 0.0, 0.0),
 	m_mat_spec(0.2, 0.2, 0.2),
@@ -563,7 +564,7 @@ void MeshData::ClearData()
 	model->numgroups = 1;
 }
 
-GLuint MeshData::AddVBO(int vertex_size)
+GLuint MeshData::AddCoordVBO(int vertex_size)
 {
 	std::vector<float> verts(vertex_size * 45);
 	size_t vbo_size = sizeof(float) * verts.size();
@@ -593,7 +594,7 @@ GLuint MeshData::ConvertIndexed(size_t vsize)
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Index));
 }
 
-void MeshData::UpdateVBO(const std::vector<float>& vbo_data, const std::vector<int>& index_data)
+void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vector<int>& index_data)
 {
 	flvr::VertexArray* va_model = m_mr->GetVertexArray();
 	if (!va_model)
@@ -620,6 +621,23 @@ GLuint MeshData::GetVBO()
 	if (!va_model)
 		return 0;
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+}
+
+void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
+{
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return;
+	if (vbo.size() > 0)
+	{
+		va_model->add_normal_buffer();
+		size_t vbo_size = sizeof(float) * vbo.size();
+		va_model->buffer_data(
+			flvr::VABuf_Normal, vbo_size,
+			&vbo[0], GL_DYNAMIC_DRAW);
+		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
+		m_flat_shading = false;
+	}
 }
 
 void MeshData::SetVertexNum(unsigned int num)
@@ -726,6 +744,17 @@ void MeshData::SetLighting(bool bVal)
 bool MeshData::GetLighting()
 {
 	return m_light;
+}
+
+void MeshData::SetFlatShading(bool bval)
+{
+	m_flat_shading = bval;
+	if (m_mr) m_mr->set_flat_shading(bval);
+}
+
+bool MeshData::GetFlatShading()
+{
+	return m_flat_shading;
 }
 
 //fog

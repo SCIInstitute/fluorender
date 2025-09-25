@@ -84,6 +84,8 @@ namespace flvr
 			switch (type_)
 			{
 			case VABuf_Coord:
+			case VABuf_Normal:
+			case VABuf_Tex:
 				glBindBuffer(GL_ARRAY_BUFFER, id_);
 				glBufferData(GL_ARRAY_BUFFER,
 					size, data, usage);
@@ -105,6 +107,8 @@ namespace flvr
 		switch (type_)
 		{
 		case VABuf_Coord:
+		case VABuf_Normal:
+		case VABuf_Tex:
 			glBindBuffer(GL_ARRAY_BUFFER, id_);
 			return glMapBuffer(GL_ARRAY_BUFFER, access);
 		case VABuf_Index:
@@ -123,6 +127,8 @@ namespace flvr
 		switch (type_)
 		{
 		case VABuf_Coord:
+		case VABuf_Normal:
+		case VABuf_Tex:
 			glBindBuffer(GL_ARRAY_BUFFER, id_);
 			glUnmapBuffer(GL_ARRAY_BUFFER);
 			break;
@@ -139,7 +145,8 @@ namespace flvr
 		valid_(false),
 		protected_(false),
 		dirty_(false),
-		indexed_(false)
+		indexed_(false),
+		interleaved_(true)
 	{
 	}
 
@@ -1380,6 +1387,104 @@ namespace flvr
 				}),
 			buffer_list_.end()
 		);
+	}
+
+	void VertexArray::add_normal_buffer()
+	{
+		for (auto& it : buffer_list_)
+		{
+			//return if normal buffer already exists
+			if (it->type_ == VABuf_Normal)
+				return;
+		}
+		//create normal buffer
+		VertexBuffer* vb = new VertexBuffer(VABuf_Normal);
+		vb->create();
+		attach_buffer(vb);
+		interleaved_ = false;
+	}
+
+	void VertexArray::delete_normal_buffer()
+	{
+		// Destroy matching buffers first
+		for (auto& it : buffer_list_)
+		{
+			if (it->type_ == VABuf_Normal)
+			{
+				it->destroy();
+			}
+		}
+
+		// Remove them from the vector
+		buffer_list_.erase(
+			std::remove_if(buffer_list_.begin(), buffer_list_.end(),
+				[](const VertexBuffer* buf) {
+					return buf->type_ == VABuf_Normal;
+				}),
+			buffer_list_.end()
+		);
+
+		bool found = false;
+		for (auto& it : buffer_list_)
+		{
+			if (it->type_ == VABuf_Normal ||
+				it->type_ == VABuf_Tex)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			interleaved_ = true;
+	}
+
+	void VertexArray::add_tex_buffer()
+	{
+		for (auto& it : buffer_list_)
+		{
+			//return if tex buffer already exists
+			if (it->type_ == VABuf_Tex)
+				return;
+		}
+		//create tex buffer
+		VertexBuffer* vb = new VertexBuffer(VABuf_Tex);
+		vb->create();
+		attach_buffer(vb);
+		interleaved_ = false;
+	}
+
+	void VertexArray::delete_tex_buffer()
+	{
+		// Destroy matching buffers first
+		for (auto& it : buffer_list_)
+		{
+			if (it->type_ == VABuf_Tex)
+			{
+				it->destroy();
+			}
+		}
+
+		// Remove them from the vector
+		buffer_list_.erase(
+			std::remove_if(buffer_list_.begin(), buffer_list_.end(),
+				[](const VertexBuffer* buf) {
+					return buf->type_ == VABuf_Tex;
+				}),
+			buffer_list_.end()
+		);
+
+		bool found = false;
+		for (auto& it : buffer_list_)
+		{
+			if (it->type_ == VABuf_Normal ||
+				it->type_ == VABuf_Tex)
+			{
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			interleaved_ = true;
 	}
 
 	bool VertexArray::match(VAType type)

@@ -666,6 +666,57 @@ __kernel void kernel_5(
 }
 )CLKER";
 
+//compute normals for smooth shading
+inline constexpr const char* str_cl_smooth_normals = R"CLKER(
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable
+#pragma OPENCL EXTENSION cl_khr_global_float_atomics : enable
+inline void atomic_add3(__global float* ptr, float3 value)
+{
+	atomic_add(&ptr[0], value.x);
+	atomic_add(&ptr[1], value.y);
+	atomic_add(&ptr[2], value.z);
+}
+__kernel void kernel_0(
+	__global const float* vertex_buffer,   // [vertex_count * 3]
+	__global const int* index_buffer,      // [idx_count]
+	__global float* normal_buffer,         // [vertex_count * 3]
+	const int idx_count)
+{
+	// Accumulation kernel
+	int i = get_global_id(0);
+	if (i >= idx_count / 3) return;
+
+	int idx0 = index_buffer[i * 3 + 0];
+	int idx1 = index_buffer[i * 3 + 1];
+	int idx2 = index_buffer[i * 3 + 2];
+
+	float3 v0 = vload3(idx0, vertex_buffer);
+	float3 v1 = vload3(idx1, vertex_buffer);
+	float3 v2 = vload3(idx2, vertex_buffer);
+
+	float3 face_normal = normalize(cross(v1 - v0, v2 - v0));
+
+	// Atomically accumulate to each vertex
+	atomic_add3(&normal_buffer[idx0 * 3], face_normal);
+	atomic_add3(&normal_buffer[idx1 * 3], face_normal);
+	atomic_add3(&normal_buffer[idx2 * 3], face_normal);
+}
+
+__kernel void kernel_1(
+	__global float* normal_buffer,
+	const int vertex_count)
+{
+	// Normalization kernel
+	int i = get_global_id(0);
+	if (i >= vertex_count) return;
+
+	float3 n = vload3(i, normal_buffer);
+	n = normalize(n);
+	vstore3(n, i, normal_buffer);
+}
+)CLKER";
+
 //simplify mesh
 inline constexpr const char* str_cl_simplify_mesh = R"CLKER(
 __kernel void kernel_0(

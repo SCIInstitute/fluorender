@@ -98,6 +98,7 @@ namespace flvr
 		cl_device_id id;
 		std::string vendor;
 		std::string name;
+		std::string version;
 	};
 	struct CLPlatform
 	{

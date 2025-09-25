@@ -128,10 +128,20 @@ namespace flvr
 				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
 				device->vendor.resize(info_size, 0);
 				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &(device->vendor[0]), NULL);
+				if (!device->vendor.empty() && device->vendor.back() == '\0')
+					device->vendor.pop_back();
 				//get device name
 				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
 				device->name.resize(info_size, 0);
 				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &(device->name[0]), NULL);
+				if (!device->name.empty() && device->name.back() == '\0')
+					device->name.pop_back();
+				//get device version
+				err = clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
+				device->version.resize(info_size, 0);
+				err = clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &(device->version[0]), NULL);
+				if (!device->version.empty() && device->version.back() == '\0')
+					device->version.pop_back();
 			}
 			delete[] devices;
 		}

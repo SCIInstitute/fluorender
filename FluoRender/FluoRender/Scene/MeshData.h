@@ -85,10 +85,11 @@ public:
 	void SetGpuDirty() { m_gpu_dirty = true; }
 
 	//allocate vbo
-	GLuint AddVBO(int vertex_size);
+	GLuint AddCoordVBO(int vertex_size);
 	GLuint ConvertIndexed(size_t vsize);//convert to vbo and index list
-	void UpdateVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
+	void UpdateCoordVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
 	GLuint GetVBO();
+	void UpdateNormalVBO(const std::vector<float>& vbo);
 
 	void SetVertexNum(unsigned int num);
 	unsigned int GetVertexNum();
@@ -107,6 +108,8 @@ public:
 	//lighting
 	void SetLighting(bool bVal);
 	bool GetLighting();
+	void SetFlatShading(bool bval);
+	bool GetFlatShading();
 	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
 	bool GetFog();
 	void SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
@@ -165,6 +168,7 @@ private:
 
 	//lighting
 	bool m_light;
+	bool m_flat_shading;
 	bool m_fog;
 	fluo::Color m_mat_amb;
 	fluo::Color m_mat_diff;

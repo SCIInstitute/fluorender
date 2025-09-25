@@ -90,6 +90,7 @@ void ConvVolMesh::Convert()
 	m_mesh = std::make_shared<MeshData>();
 	m_mesh->SetName(vd->GetName() + L"_mesh");
 	m_mesh->AddEmptyData();
+	m_mesh->SetFlatShading(true);
 
 	MarchingCubes(vd.get(), m_mesh.get());
 }
@@ -115,6 +116,7 @@ void ConvVolMesh::Update(bool create_mesh)
 		m_mesh = std::make_shared<MeshData>();
 		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
+		m_mesh->SetFlatShading(true);
 	}
 	else
 		m_mesh->ClearData();
@@ -339,7 +341,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	}
 
 	//allocate vertex buffer
-	GLuint vbo_id = m_mesh->AddVBO(vsize);
+	GLuint vbo_id = m_mesh->AddCoordVBO(vsize);
 	size_t vbo_size = sizeof(float) * vsize * 45;
 	int vsize2 = 0;//reset vsize
 
@@ -661,9 +663,15 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		std::vector<int> compacted_ibo(idx_num, 0);
 		kernel_prog->readBuffer(arg_gcvbo, &compacted_vbo[0]);
 		kernel_prog->readBuffer(arg_gcibo, &compacted_ibo[0]);
-		kernel_prog->releaseAll();
-		//update mesh
-		m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
+		if (avg_normals)
+		{
+			AverageNormals(&arg_gcvbo, &arg_gcibo, unique_count, idx_count);
+		}
+		else
+		{
+			//update mesh
+			m_mesh->UpdateCoordVBO(compacted_vbo, compacted_ibo);
+		}
 	}
 	else
 	{
@@ -672,17 +680,72 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		std::vector<int> compacted_ibo(idx_num, 0);
 		kernel_prog->readBuffer(arg_cvbo, &compacted_vbo[0]);
 		kernel_prog->readBuffer(arg_cibo, &compacted_ibo[0]);
-		kernel_prog->releaseAll();
-		//update mesh
-		m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
+		if (avg_normals)
+		{
+			AverageNormals(&arg_cvbo, &arg_cibo, unique_count, static_cast<int>(idx_num));
+		}
+		else
+		{
+			//update mesh
+			m_mesh->UpdateCoordVBO(compacted_vbo, compacted_ibo);
+		}
 	}
 
 	m_mesh->SetVertexNum(unique_count);
 	m_mesh->SetTriangleNum(idx_num / 3);//should stay the same
 	m_mesh->SetGpuDirty();
 
+	kernel_prog->releaseAll();
+
 	m_merged = true;
 	m_busy = false;
+}
+
+void ConvVolMesh::AverageNormals(flvr::Argument* pvbo, flvr::Argument* pibo,
+	int vertex_count, int idx_count)
+{
+	if (!pvbo || !pibo)
+		return;
+
+	//create program kernels
+	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(
+		str_cl_smooth_normals, 8, 256.0f);
+	if (!kernel_prog)
+		return;
+
+	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
+	if (kernel_idx0 < 0)
+		return;
+	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
+	if (kernel_idx1 < 0)
+		return;
+
+	size_t local_size[1] = { 1 };
+	size_t global_size[1] = { static_cast<size_t>(idx_count / 3) };
+	size_t global_size2[1] = { static_cast<size_t>(vertex_count) };
+
+	std::vector<float> normals(vertex_count * 3, 0.0f);
+	//accumulation
+	kernel_prog->setKernelArgBegin(kernel_idx0);
+	kernel_prog->setKernelArgument(*pvbo);
+	kernel_prog->setKernelArgument(*pibo);
+	flvr::Argument arg_norm = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_PTR, sizeof(float) * vertex_count * 3, (void*)(&normals[0]));
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&idx_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+	//normalization
+	kernel_prog->setKernelArgBegin(kernel_idx1);
+	kernel_prog->setKernelArgument(arg_norm);
+	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx1, 1, global_size2, local_size);
+
+	//read back normals;
+	kernel_prog->readBuffer(arg_norm, normals.data());
+
+	//update mesh...
+	m_mesh->UpdateNormalVBO(normals);
 }
 
 void ConvVolMesh::PrefixSum(
