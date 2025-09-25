@@ -464,7 +464,9 @@ __kernel void kernel_0(
 		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
 			// Prefer lower index for remap target
-			remap_table[i] = j;
+			if (i > j) {
+				remap_table[i] = j;
+			}
 			break;
 		}
 	}
@@ -590,14 +592,13 @@ __kernel void kernel_4(
 	const float merge_tolerance
 )
 {
-	//global dedup pass
 	int i = get_global_id(0);
 	if (i >= vertex_count) return;
 
 	int base_idx = i * 3;
 	float3 vi = (float3)(vertex_buffer[base_idx], vertex_buffer[base_idx + 1], vertex_buffer[base_idx + 2]);
 
-	remap_table[i] = i;
+	remap_table[i] = i; // default to self
 
 	for (int j = 0; j < vertex_count; ++j) {
 		if (i == j) continue;
@@ -607,7 +608,10 @@ __kernel void kernel_4(
 
 		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
-			remap_table[i] = j;
+			// Enforce canonical direction: remap higher index to lower
+			if (i > j) {
+				remap_table[i] = j;
+			}
 			break;
 		}
 	}

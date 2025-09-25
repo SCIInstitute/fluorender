@@ -66,9 +66,10 @@ namespace flrd
 		void MarchingCubes(VolumeData* vd, MeshData* md);
 
 		void PrefixSum(const std::vector<int>& unique_flags,
-			const std::vector<int>& remap_table,
+			std::vector<int>& remap_table,
 			std::vector<int>& prefix_sum,
-			std::vector<int>& remap_to_compact);
+			std::vector<int>& remap_to_compact,
+			bool flatten_remap_table);
 	};
 
 }

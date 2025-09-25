@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <random>
 #include <sstream>
 #include <iostream>
+#include <unordered_set>
 
 using namespace flrd;
 
@@ -558,7 +559,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	//compute prefix sum
 	std::vector<int> prefix_sum(idx_num, 0);
 	std::vector<int> remap_to_compact(idx_num, 0);
-	PrefixSum(unique_flags, remap_table, prefix_sum, remap_to_compact);
+	PrefixSum(unique_flags, remap_table, prefix_sum, remap_to_compact, false);
 	//kernel_prog->setKernelArgBegin(kernel_idx2);
 	//kernel_prog->setKernelArgument(arg_uflags);
 	//flvr::Argument arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * idx_num, (void*)(&prefix_sum[0]));
@@ -605,19 +606,22 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&epsilon));
 		//execute
-		kernel_prog->executeKernel(kernel_idx0, 1, global_size2, local_size);
+		kernel_prog->executeKernel(kernel_idx4, 1, global_size2, local_size);
+
+		//debug read back remap_table
+		//kernel_prog->readBuffer(arg_rtable, remap_table.data());
 
 		//count unique vertices
 		unique_flags.resize(vertex_count, 0);
 		kernel_prog->setKernelArgBegin(kernel_idx1);
 		kernel_prog->setKernelArgument(arg_rtable);
-		arg_uflags = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(int) * vertex_count, nullptr);
+		flvr::Argument arg_guflags = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(int) * vertex_count, nullptr);
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 		//execute
 		kernel_prog->executeKernel(kernel_idx1, 1, global_size2, local_size);
 
 		//get count
-		kernel_prog->readBuffer(arg_uflags, &unique_flags[0]);
+		kernel_prog->readBuffer(arg_guflags, &unique_flags[0]);
 		unique_count = 0;
 		for (size_t i = 0; i < vertex_count; ++i)
 			if (unique_flags[i])
@@ -627,7 +631,8 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		//compute prefix sum
 		prefix_sum.resize(vertex_count, 0);
 		remap_to_compact.resize(vertex_count, 0);
-		PrefixSum(unique_flags, remap_table, prefix_sum, remap_to_compact);
+		PrefixSum(unique_flags, remap_table, prefix_sum, remap_to_compact, true);
+		int idx_count = static_cast<int>(idx_num);
 
 		//compact and remap
 		//allocate new vbo
@@ -635,25 +640,43 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		kernel_prog->setKernelArgument(arg_cvbo);
 		kernel_prog->setKernelArgument(arg_cibo);
 		kernel_prog->setKernelArgument(arg_rtable);
-		kernel_prog->setKernelArgument(arg_uflags);
+		kernel_prog->setKernelArgument(arg_guflags);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_count, (void*)(&prefix_sum[0]));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_count, (void*)(&remap_to_compact[0]));
-		arg_cvbo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(float) * unique_count * 3, nullptr);
-		arg_cibo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(int) * idx_num, nullptr);
+		flvr::Argument arg_gcvbo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(float) * unique_count * 3, nullptr);
+		flvr::Argument arg_gcibo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(int) * idx_num, nullptr);
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&idx_count));
 		//execute
 		kernel_prog->executeKernel(kernel_idx5, 1, global_size, local_size);
+
+		//debug read back
+		//std::vector<float> old_vbo(vertex_count * 3, 0.0f);
+		//std::vector<int> old_ibo(idx_num, 0);
+		//kernel_prog->readBuffer(arg_cvbo, old_vbo.data());
+		//kernel_prog->readBuffer(arg_cibo, old_ibo.data());
+
+		//global read back
+		std::vector<float> compacted_vbo(unique_count * 3, 0.0f);
+		std::vector<int> compacted_ibo(idx_num, 0);
+		kernel_prog->readBuffer(arg_gcvbo, &compacted_vbo[0]);
+		kernel_prog->readBuffer(arg_gcibo, &compacted_ibo[0]);
+		kernel_prog->releaseAll();
+		//update mesh
+		m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
+	}
+	else
+	{
+		//read back
+		std::vector<float> compacted_vbo(unique_count * 3, 0.0f);
+		std::vector<int> compacted_ibo(idx_num, 0);
+		kernel_prog->readBuffer(arg_cvbo, &compacted_vbo[0]);
+		kernel_prog->readBuffer(arg_cibo, &compacted_ibo[0]);
+		kernel_prog->releaseAll();
+		//update mesh
+		m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
 	}
 
-	//read back
-	std::vector<float> compacted_vbo(unique_count * 3, 0.0f);
-	std::vector<int> compacted_ibo(idx_num, 0);
-	kernel_prog->readBuffer(arg_cvbo, &compacted_vbo[0]);
-	kernel_prog->readBuffer(arg_cibo, &compacted_ibo[0]);
-	kernel_prog->releaseAll();
-
-	//update mesh
-	m_mesh->UpdateVBO(compacted_vbo, compacted_ibo);
 	m_mesh->SetVertexNum(unique_count);
 	m_mesh->SetTriangleNum(idx_num / 3);//should stay the same
 	m_mesh->SetGpuDirty();
@@ -664,16 +687,16 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 void ConvVolMesh::PrefixSum(
 	const std::vector<int>& unique_flags,
-	const std::vector<int>& remap_table,
+	std::vector<int>& remap_table,
 	std::vector<int>& prefix_sum,
-	std::vector<int>& remap_to_compact)
+	std::vector<int>& remap_to_compact,
+	bool flatten_remap_table)
 {
-	int count = 0;
 	size_t vertex_count = unique_flags.size();
 	prefix_sum.resize(vertex_count);
 	remap_to_compact.resize(vertex_count, -1);
 
-	// Step 1: Compute prefix sum and assign compact index to unique vertices
+	int count = 0;
 	for (size_t i = 0; i < vertex_count; ++i) {
 		prefix_sum[i] = count;
 		if (unique_flags[i]) {
@@ -682,16 +705,46 @@ void ConvVolMesh::PrefixSum(
 		}
 	}
 
-	// Step 2: Resolve canonical and assign compact index
-	auto resolve_canonical = [&](int i) {
+	// Step 1: Flatten remap_table with cycle protection
+	if (flatten_remap_table) {
+		for (size_t i = 0; i < vertex_count; ++i) {
+			std::unordered_set<int> visited;
+			int root = i;
+			while (remap_table[root] != root) {
+				if (visited.count(root)) {
+					// Cycle detected — break it
+					remap_table[root] = root;
+					break;
+				}
+				visited.insert(root);
+				root = remap_table[root];
+			}
+			// Path compression
+			int j = i;
+			while (remap_table[j] != root) {
+				int parent = remap_table[j];
+				remap_table[j] = root;
+				j = parent;
+			}
+		}
+	}
+
+	// Step 2: Resolve canonical safely
+	auto resolve_canonical_safe = [&](int i) {
+		std::unordered_set<int> visited;
 		while (remap_table[i] != i) {
+			if (visited.count(i)) {
+				// Cycle detected — break it
+				return i;
+			}
+			visited.insert(i);
 			i = remap_table[i];
 		}
 		return i;
 		};
 
 	for (size_t i = 0; i < vertex_count; ++i) {
-		int canonical = resolve_canonical(remap_table[i]);
+		int canonical = resolve_canonical_safe(remap_table[i]);
 		remap_to_compact[i] = remap_to_compact[canonical];
 	}
 }
