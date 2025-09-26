@@ -354,6 +354,8 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 
 	//allocate vertex buffer
 	GLuint vbo_id = m_mesh->AddCoordVBO(vsize);
+	if (m_merged)
+		m_mesh->DeleteNormalVBO();
 	size_t vbo_size = sizeof(float) * vsize * 45;
 	int vsize2 = 0;//reset vsize
 
@@ -619,8 +621,25 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		flvr::Argument arg_rtable = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(int) * vertex_count, nullptr);
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&epsilon));
-		//execute
-		kernel_prog->executeKernel(kernel_idx4, 1, global_size2, local_size);
+		//loop to process all vertices in batches
+		float t = fminf(1.0f, (float)1e5 / vertex_count);
+		int batch_size = (int)(window_size + t * (65535 - window_size));
+		int batch_num = vertex_count / batch_size + 1;
+		int batch_count = 0;
+		SetProgress(batch_count, "Global comparisons for vertex merge.");
+		for (int lower = 0; lower < vertex_count; lower += batch_size)
+		{
+			int upper = std::min(lower + batch_size, vertex_count);
+			size_t global_size3[1] = { static_cast<size_t>(upper - lower) };
+			kernel_prog->setKernelArgBegin(kernel_idx4, 4);
+			kernel_prog->setKernelArgConst(sizeof(int), (void*)(&lower));
+			kernel_prog->setKernelArgConst(sizeof(int), (void*)(&upper));
+			//execute
+			kernel_prog->executeKernel(kernel_idx4, 1, global_size3, local_size);
+			SetProgress(static_cast<int>(100 * batch_count / batch_num), "Global comparisons for vertex merge.");
+			batch_count++;
+		}
+		SetProgress(0, "");
 
 		//debug read back remap_table
 		//kernel_prog->readBuffer(arg_rtable, remap_table.data());

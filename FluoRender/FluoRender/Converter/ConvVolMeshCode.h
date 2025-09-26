@@ -588,27 +588,27 @@ __kernel void kernel_4(
 	__global const float* vertex_buffer,   // [vertex_count * 3]
 	__global int* remap_table,             // [vertex_count]
 	const int vertex_count,
-	const float merge_tolerance
+	const float merge_tolerance,
+	const int lower_bound,
+	const int upper_bound
 )
 {
-	int i = get_global_id(0);
-	if (i >= vertex_count) return;
+	int i = get_global_id(0) + lower_bound;
+	if (i >= upper_bound || i >= vertex_count) return;
 
 	int base_idx = i * 3;
 	float3 vi = (float3)(vertex_buffer[base_idx], vertex_buffer[base_idx + 1], vertex_buffer[base_idx + 2]);
 
-	// Default: vertex maps to itself
 	int remap_target = i;
 
-	// Scan all lower-indexed vertices to find first match
 	for (int j = 0; j < i; ++j) {
 		int cmp_idx = j * 3;
 		float3 vj = (float3)(vertex_buffer[cmp_idx], vertex_buffer[cmp_idx + 1], vertex_buffer[cmp_idx + 2]);
 
 		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
-			remap_target = j; // j < i guaranteed
-			break; // First match wins
+			remap_target = j;
+			break;
 		}
 	}
 

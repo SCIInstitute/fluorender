@@ -147,6 +147,8 @@ int MeshData::Load(GLMmodel* mesh)
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
+	SetFlatShading(m_data->numnormals == 0);
+
 	SubmitData();
 
 	return 1;
@@ -213,6 +215,8 @@ int MeshData::Load(const std::wstring &filename)
 		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
+
+	SetFlatShading(m_data->numnormals == 0);
 
 	SubmitData();
 
@@ -638,6 +642,15 @@ void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
 		SetFlatShading(false);
 	}
+}
+
+void MeshData::DeleteNormalVBO()
+{
+	SetFlatShading(true);
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return;
+	va_model->delete_normal_buffer();
 }
 
 void MeshData::SetVertexNum(unsigned int num)

@@ -90,6 +90,7 @@ public:
 	void UpdateCoordVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
 	GLuint GetVBO();
 	void UpdateNormalVBO(const std::vector<float>& vbo);
+	void DeleteNormalVBO();
 
 	void SetVertexNum(unsigned int num);
 	unsigned int GetVertexNum();
