@@ -58,7 +58,8 @@ namespace flrd
 		bool m_merged = false;
 
 	private:
-		std::string GetKernelString(bool mask, bool tf);
+		std::string GetKernelStrMarchingCubes(bool mask, bool tf);
+		std::string GetKernelStrSmoothNormals();
 
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz,

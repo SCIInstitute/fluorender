@@ -188,6 +188,9 @@ namespace flvr
 		static cl_device_id get_device() { return device_; }
 		static cl_context get_context() { return context_; }
 
+		//features
+		static bool get_float_atomics() { return float_atomics_; }
+
 		//finish
 		void finish();
 
@@ -237,6 +240,9 @@ namespace flvr
 		static int device_id_;
 		static std::string device_name_;
 		static std::vector<CLPlatform> device_list_;
+
+		//features
+		static bool float_atomics_;
 	};
 }
 

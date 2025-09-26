@@ -48,6 +48,7 @@ namespace flvr
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
 	std::vector<CLPlatform> KernelProgram::device_list_;
+	bool KernelProgram::float_atomics_ = false;
 #ifdef _DARWIN
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
@@ -199,6 +200,12 @@ namespace flvr
 		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
 		if (err == CL_SUCCESS)
 			init_ = true;
+
+		//check features
+		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
+		std::string extensions(info_size, '\0');
+		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
+		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
 	}
 
 	bool KernelProgram::init()

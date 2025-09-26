@@ -636,7 +636,7 @@ void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 			flvr::VABuf_Normal, vbo_size,
 			&vbo[0], GL_DYNAMIC_DRAW);
 		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
-		m_flat_shading = false;
+		SetFlatShading(false);
 	}
 }
 

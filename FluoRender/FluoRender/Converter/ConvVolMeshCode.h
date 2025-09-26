@@ -447,7 +447,6 @@ __kernel void kernel_0(
 	const int window_size
 )
 {
-	//windowed dedup pass
 	int i = get_global_id(0);
 	if (i >= vertex_count) return;
 
@@ -455,21 +454,21 @@ __kernel void kernel_0(
 	float3 vi = (float3)(vertex_buffer[base_idx], vertex_buffer[base_idx + 1], vertex_buffer[base_idx + 2]);
 
 	// Default: vertex maps to itself
-	remap_table[i] = i;
+	int remap_target = i;
 
-	for (int j = i + 1; j < min(i + window_size, vertex_count); ++j) {
+	// Scan backward to enforce canonical remap direction (i > j)
+	for (int j = max(0, i - window_size); j < i; ++j) {
 		int cmp_idx = j * 3;
 		float3 vj = (float3)(vertex_buffer[cmp_idx], vertex_buffer[cmp_idx + 1], vertex_buffer[cmp_idx + 2]);
 
 		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
-			// Prefer lower index for remap target
-			if (i > j) {
-				remap_table[i] = j;
-			}
-			break;
+			remap_target = j;
+			break; // First match wins
 		}
 	}
+
+	remap_table[i] = remap_target;
 }
 
 __kernel void kernel_1(
@@ -586,8 +585,8 @@ __kernel void kernel_3(
 }
 
 __kernel void kernel_4(
-	__global const float* vertex_buffer,
-	__global int* remap_table,
+	__global const float* vertex_buffer,   // [vertex_count * 3]
+	__global int* remap_table,             // [vertex_count]
 	const int vertex_count,
 	const float merge_tolerance
 )
@@ -598,23 +597,22 @@ __kernel void kernel_4(
 	int base_idx = i * 3;
 	float3 vi = (float3)(vertex_buffer[base_idx], vertex_buffer[base_idx + 1], vertex_buffer[base_idx + 2]);
 
-	remap_table[i] = i; // default to self
+	// Default: vertex maps to itself
+	int remap_target = i;
 
-	for (int j = 0; j < vertex_count; ++j) {
-		if (i == j) continue;
-
+	// Scan all lower-indexed vertices to find first match
+	for (int j = 0; j < i; ++j) {
 		int cmp_idx = j * 3;
 		float3 vj = (float3)(vertex_buffer[cmp_idx], vertex_buffer[cmp_idx + 1], vertex_buffer[cmp_idx + 2]);
 
 		float dist2 = dot(vi - vj, vi - vj);
 		if (dist2 < merge_tolerance * merge_tolerance) {
-			// Enforce canonical direction: remap higher index to lower
-			if (i > j) {
-				remap_table[i] = j;
-			}
-			break;
+			remap_target = j; // j < i guaranteed
+			break; // First match wins
 		}
 	}
+
+	remap_table[i] = remap_target;
 }
 
 __kernel void kernel_5(
@@ -667,17 +665,30 @@ __kernel void kernel_5(
 )CLKER";
 
 //compute normals for smooth shading
-inline constexpr const char* str_cl_smooth_normals = R"CLKER(
+inline constexpr const char* str_cl_smooth_normals_float_atomic_supported = R"CLKER(
+inline void atomic_add3(__global float* ptr, float3 value)
+{
+	atomic_add(&ptr[0], value.x);
+	atomic_add(&ptr[1], value.y);
+	atomic_add(&ptr[2], value.z);
+}
+)CLKER";
+
+inline constexpr const char* str_cl_smooth_normals_float_atomic_unsupported = R"CLKER(
 inline void atomic_add_float(__global float* ptr, float value)
 {
-	__global int* iptr = (__global int*)ptr;
+	__global int* iptr = (__global int*)(__global void*)ptr;
 	union { float f; int i; } old_val, new_val;
 
-	do {
-		old_val.i = *iptr;
+	int max_iter = 100;
+	while (--max_iter > 0)
+	{
+		old_val.i = atomic_cmpxchg(iptr, 0, 0); // atomic read
 		new_val.f = as_float(old_val.i) + value;
 		new_val.i = as_int(new_val.f);
-	} while (atomic_cmpxchg(iptr, old_val.i, new_val.i) != old_val.i);
+		if (atomic_cmpxchg(iptr, old_val.i, new_val.i) == old_val.i)
+			break;
+	}
 }
 inline void atomic_add3(__global float* ptr, float3 value)
 {
@@ -685,6 +696,9 @@ inline void atomic_add3(__global float* ptr, float3 value)
 	atomic_add_float(&ptr[1], value.y);
 	atomic_add_float(&ptr[2], value.z);
 }
+)CLKER";
+
+inline constexpr const char* str_cl_smooth_normals = R"CLKER(
 __kernel void kernel_0(
 	__global const float* vertex_buffer,   // [vertex_count * 3]
 	__global const int* index_buffer,      // [idx_count]
@@ -709,6 +723,9 @@ __kernel void kernel_0(
 	atomic_add3(&normal_buffer[idx0 * 3], face_normal);
 	atomic_add3(&normal_buffer[idx1 * 3], face_normal);
 	atomic_add3(&normal_buffer[idx2 * 3], face_normal);
+	//normal_buffer[0] = 1.0;
+	//normal_buffer[1] = 2.0;
+	//normal_buffer[2] = 3.0;
 }
 
 __kernel void kernel_1(
