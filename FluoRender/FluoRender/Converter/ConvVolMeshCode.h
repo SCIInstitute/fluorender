@@ -668,14 +668,22 @@ __kernel void kernel_5(
 
 //compute normals for smooth shading
 inline constexpr const char* str_cl_smooth_normals = R"CLKER(
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable
-#pragma OPENCL EXTENSION cl_khr_global_float_atomics : enable
+inline void atomic_add_float(__global float* ptr, float value)
+{
+	__global int* iptr = (__global int*)ptr;
+	union { float f; int i; } old_val, new_val;
+
+	do {
+		old_val.i = *iptr;
+		new_val.f = as_float(old_val.i) + value;
+		new_val.i = as_int(new_val.f);
+	} while (atomic_cmpxchg(iptr, old_val.i, new_val.i) != old_val.i);
+}
 inline void atomic_add3(__global float* ptr, float3 value)
 {
-	atomic_add(&ptr[0], value.x);
-	atomic_add(&ptr[1], value.y);
-	atomic_add(&ptr[2], value.z);
+	atomic_add_float(&ptr[0], value.x);
+	atomic_add_float(&ptr[1], value.y);
+	atomic_add_float(&ptr[2], value.z);
 }
 __kernel void kernel_0(
 	__global const float* vertex_buffer,   // [vertex_count * 3]
