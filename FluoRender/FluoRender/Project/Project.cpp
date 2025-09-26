@@ -2142,7 +2142,16 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 {
 	flrd::RulerList* list = glbin_current.GetRulerList();
 	if (!list)
-		return;
+	{
+		Root* root = glbin_data_manager.GetRoot();
+		if (!root)
+			return;
+		auto view = root->GetView(0);
+		if (view)
+			list = view->GetRulerList();
+		if (!list)
+			return;
+	}
 
 	std::shared_ptr<BaseTreeFile> fconfig = glbin_tree_file_factory.getTreeFile(gst_name);
 	if (!fconfig)
@@ -2195,8 +2204,8 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 			for (size_t j = 0; j < branch_num; ++j)
 			{
 				//if points
-				std::string path_nobr = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/points/" + std::to_string(j);
-				std::string path_br = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches/" + std::to_string(j);
+				std::string path_nobr = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/points" + std::to_string(j);
+				std::string path_br = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches" + std::to_string(j);
 				if (fconfig->Exists(path_nobr))
 				{
 					fconfig->SetPath(path_nobr);
