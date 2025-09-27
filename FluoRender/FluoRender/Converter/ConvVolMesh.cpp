@@ -676,8 +676,8 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		kernel_prog->setKernelArgument(arg_guflags);
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_count, (void*)(&prefix_sum[0]));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * vertex_count, (void*)(&remap_to_compact[0]));
-		flvr::Argument arg_gcvbo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(float) * unique_count * 3, nullptr);
-		flvr::Argument arg_gcibo = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, sizeof(int) * idx_num, nullptr);
+		flvr::Argument arg_gcvbo = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, sizeof(float) * unique_count * 3, nullptr);
+		flvr::Argument arg_gcibo = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, sizeof(int) * idx_num, nullptr);
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&idx_count));
 		//execute
