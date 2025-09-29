@@ -39,34 +39,39 @@ inline constexpr const char* MSH_VERTEX_INPUTS_N = R"GLSHDR(
 layout(location = 1) in vec3 InNormal;
 )GLSHDR";
 
-inline constexpr const char* MSH_VERTEX_INPUTS_T1 = R"GLSHDR(
-//MSH_VERTEX_INPUTS_T1
-layout(location = 1) in vec2 InTexcoord;
-)GLSHDR";
-
-inline constexpr const char* MSH_VERTEX_INPUTS_T2 = R"GLSHDR(
-//MSH_VERTEX_INPUTS_T1
+inline constexpr const char* MSH_VERTEX_INPUTS_T = R"GLSHDR(
+//MSH_VERTEX_INPUTS_T
 layout(location = 2) in vec2 InTexcoord;
 )GLSHDR";
 
-inline constexpr const char* MSH_VERTEX_OUTPUTS_N = R"GLSHDR(
-//MSH_VERTEX_OUTPUTS_N
-out vec3 OutNormal;
-)GLSHDR";
-
-inline constexpr const char* MSH_VERTEX_OUTPUTS_T = R"GLSHDR(
-//MSH_VERTEX_OUTPUTS_T
-out vec2 OutTexcoord;
-)GLSHDR";
-
-inline constexpr const char* MSH_VERTEX_OUTPUTS_FOG = R"GLSHDR(
-//MSH_VERTEX_OUTPUTS_FOG
-out vec4 OutFogCoord;
+inline constexpr const char* MSH_VERTEX_INPUTS_C = R"GLSHDR(
+//MSH_VERTEX_INPUTS_C
+layout(location = 3) in vec4 InColor;
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_OUTPUTS_VPOS = R"GLSHDR(
 //MSH_VERTEX_OUTPUTS_VPOS
-out vec3 VertexPos;
+layout(location = 0) out vec3 VertexPos;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_OUTPUTS_N = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_N
+layout(location = 1) out vec3 OutNormal;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_OUTPUTS_T = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_T
+layout(location = 2) out vec2 OutTexcoord;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_OUTPUTS_C = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_C
+layout(location = 3) out vec4 OutColor;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_OUTPUTS_FOG = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_FOG
+layout(location = 4) out vec4 OutFogCoord;
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_UNIFORM_MATRIX = R"GLSHDR(
@@ -123,17 +128,22 @@ out uint FragUint;
 
 inline constexpr const char* MSH_FRAG_INPUTS_N = R"GLSHDR(
 //MSH_FRAG_INPUTS_N
-in vec3 OutNormal;
+layout(location = 1) in vec3 OutNormal;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_INPUTS_T = R"GLSHDR(
 //MSH_FRAG_INPUTS_T
-in vec2 OutTexcoord;
+layout(location = 2) in vec2 OutTexcoord;
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_INPUTS_C = R"GLSHDR(
+//MSH_FRAG_INPUTS_C
+layout(location = 3) in vec4 OutColor;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_INPUTS_FOG = R"GLSHDR(
 //MSH_FRAG_INPUTS_FOG
-in vec4 OutFogCoord;
+layout(location = 4) in vec4 OutFogCoord;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_COLOR = R"GLSHDR(
@@ -258,16 +268,29 @@ inline constexpr const char* MSH_TAIL = R"GLSHDR(
 }
 )GLSHDR";
 
-inline constexpr const char* MSH_GEOM_NORMALS = R"GLSHDR(
+inline constexpr const char* MSH_GEOM_NORMALS_INPUTS = R"GLSHDR(
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_INPUTS_VPOS = R"GLSHDR(
 // receive from vertex shader
-in vec3 VertexPos[];
-// Output to fragment shader
-out vec3 OutNormal;
+layout(location = 0) in vec3 VertexPos[];
+)GLSHDR";
 
-uniform mat4 matrix2; // normal matrix
+inline constexpr const char* MSH_GEOM_NORMALS_INPUTS_T = R"GLSHDR(
+layout(location = 2) in vec2 InTexcoord[];
+)GLSHDR";
 
+inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_N = R"GLSHDR(
+layout(location = 1) out vec3 OutNormal;
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_T = R"GLSHDR(
+layout(location = 2) out vec2 OutTexcoord;
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_HEAD = R"GLSHDR(
 void main()
 {
 	vec3 v0 = VertexPos[0];
@@ -285,7 +308,13 @@ void main()
 
 		// Use computed face normal
 		OutNormal = transformedNormal;
+)GLSHDR";
 
+inline constexpr const char* MSH_GEOM_NORMALS_BODY_T = R"GLSHDR(
+		OutTexcoord = InTexcoord[i];
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_TAIL = R"GLSHDR(
 		EmitVertex();
 	}
 	EndPrimitive();

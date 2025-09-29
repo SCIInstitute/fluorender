@@ -98,12 +98,12 @@ int MeshData::Load(GLMmodel* mesh)
 
 	m_data = GLMmodelPtr(mesh, glmDelete);
 
-	//if (!m_data->normals)
-	//{
-	//	if (!m_data->facetnorms)
-	//		glmFacetNormals(m_data.get());
-	//	glmVertexNormals(m_data.get(), 89.0);
-	//}
+	if (!m_data->normals)
+	{
+		if (!m_data->facetnorms)
+			glmFacetNormals(m_data.get());
+		glmVertexNormals(m_data.get(), 89.0);
+	}
 
 	if (!m_data->materials)
 	{
@@ -167,12 +167,12 @@ int MeshData::Load(const std::wstring &filename)
 		return 0;
 	m_data.reset(new_model);
 
-	//if (!m_data->normals && m_data->numtriangles)
-	//{
-	//	if (!m_data->facetnorms)
-	//		glmFacetNormals(m_data.get());
-	//	glmVertexNormals(m_data.get(), 89.0);
-	//}
+	if (!m_data->normals && m_data->numtriangles)
+	{
+		if (!m_data->facetnorms)
+			glmFacetNormals(m_data.get());
+		glmVertexNormals(m_data.get(), 89.0);
+	}
 
 	if (!m_data->materials)
 	{

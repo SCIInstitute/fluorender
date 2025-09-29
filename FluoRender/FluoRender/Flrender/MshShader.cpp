@@ -90,7 +90,7 @@ namespace flvr
 			if (light_)
 				z << MSH_VERTEX_INPUTS_N;
 			if (tex_)
-				z << MSH_VERTEX_INPUTS_T2;
+				z << MSH_VERTEX_INPUTS_T;
 			//outputs
 			if (light_)
 				z << MSH_VERTEX_OUTPUTS_N;
@@ -98,6 +98,8 @@ namespace flvr
 				z << MSH_VERTEX_OUTPUTS_T;
 			if (fog_)
 				z << MSH_VERTEX_OUTPUTS_FOG;
+			if (normal_)
+				z << MSH_VERTEX_OUTPUTS_VPOS;
 			//uniforms
 			z << MSH_VERTEX_UNIFORM_MATRIX;
 			if (light_)
@@ -106,8 +108,6 @@ namespace flvr
 		else if (type_ == 1)
 			z << MSH_VERTEX_UNIFORM_MATRIX;
 
-		if (normal_)
-			z << MSH_VERTEX_OUTPUTS_VPOS;
 
 		z << MSH_HEAD;
 
@@ -224,7 +224,19 @@ namespace flvr
 		z << ShaderProgram::glsl_version_;
 		z << ShaderProgram::glsl_unroll_;
 
-		z << MSH_GEOM_NORMALS;
+		z << MSH_GEOM_NORMALS_INPUTS;
+		if (tex_)
+			z << MSH_GEOM_NORMALS_INPUTS_T;
+		if (normal_)
+			z << MSH_GEOM_NORMALS_INPUTS_VPOS;
+		z << MSH_GEOM_NORMALS_OUTPUTS_N;
+		if (tex_)
+			z << MSH_GEOM_NORMALS_OUTPUTS_T;
+		z << MSH_VERTEX_UNIFORM_MATRIX_NORMAL;
+		z << MSH_GEOM_NORMALS_HEAD;
+		if (tex_)
+			z << MSH_GEOM_NORMALS_BODY_T;
+		z << MSH_GEOM_NORMALS_TAIL;
 
 		s = z.str();
 
