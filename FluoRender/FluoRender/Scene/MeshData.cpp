@@ -244,22 +244,26 @@ void MeshData::SubmitData()
 	m_mr->set_data(m_data.get());
 	bool bnormal = m_data->normals;
 	bool btexcoord = m_data->texcoords;
+	bool bcolor = m_data->colors;
 
-	// Map composite (v, vt, vn) to unique vertex index
+	// Map composite (v, vt, vn, vc) to unique vertex index
 	struct VertexKey {
-		unsigned int v, vt, vn;
+		unsigned int v, vt, vn, vc;
 		bool operator==(const VertexKey& other) const {
-			return v == other.v && vt == other.vt && vn == other.vn;
+			return v == other.v && vt == other.vt && vn == other.vn && vc == other.vc;
 		}
 	};
 	struct VertexKeyHash {
 		size_t operator()(const VertexKey& k) const {
-			return std::hash<unsigned int>()(k.v) ^ std::hash<unsigned int>()(k.vt << 1) ^ std::hash<unsigned int>()(k.vn << 2);
+			return std::hash<unsigned int>()(k.v) ^ std::hash<unsigned int>()(k.vt << 1) ^ std::hash<unsigned int>()(k.vn << 2) ^ std::hash<unsigned int>()(k.vc << 3);
 		}
 	};
 
 	std::unordered_map<VertexKey, unsigned int, VertexKeyHash> vertex_map;
-	std::vector<float> vertex_buffer;
+	std::vector<float> pos_buffer;
+	std::vector<float> norm_buffer;
+	std::vector<float> tex_buffer;
+	std::vector<float> color_buffer;
 	std::vector<unsigned int> index_buffer;
 
 	GLMgroup* group = m_data->groups;
@@ -273,7 +277,8 @@ void MeshData::SubmitData()
 				VertexKey key = {
 					tri->vindices[j],
 					btexcoord ? tri->tindices[j] : 0,
-					bnormal ? tri->nindices[j] : 0
+					bnormal ? tri->nindices[j] : 0,
+					bcolor ? tri->cindices[j] : 0
 				};
 
 				auto it = vertex_map.find(key);
@@ -283,28 +288,36 @@ void MeshData::SubmitData()
 				}
 				else
 				{
-					unsigned int new_index = static_cast<unsigned int>(vertex_buffer.size() / (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0)));
+					unsigned int new_index = static_cast<unsigned int>(pos_buffer.size() / 3);
 					vertex_map[key] = new_index;
 					index_buffer.push_back(new_index);
 
 					// Position
-					vertex_buffer.push_back(m_data->vertices[3 * key.v]);
-					vertex_buffer.push_back(m_data->vertices[3 * key.v + 1]);
-					vertex_buffer.push_back(m_data->vertices[3 * key.v + 2]);
+					pos_buffer.push_back(m_data->vertices[3 * key.v]);
+					pos_buffer.push_back(m_data->vertices[3 * key.v + 1]);
+					pos_buffer.push_back(m_data->vertices[3 * key.v + 2]);
 
 					// Normal
 					if (bnormal)
 					{
-						vertex_buffer.push_back(m_data->normals[3 * key.vn]);
-						vertex_buffer.push_back(m_data->normals[3 * key.vn + 1]);
-						vertex_buffer.push_back(m_data->normals[3 * key.vn + 2]);
+						norm_buffer.push_back(m_data->normals[3 * key.vn]);
+						norm_buffer.push_back(m_data->normals[3 * key.vn + 1]);
+						norm_buffer.push_back(m_data->normals[3 * key.vn + 2]);
 					}
 
 					// Texcoord
 					if (btexcoord)
 					{
-						vertex_buffer.push_back(m_data->texcoords[2 * key.vt]);
-						vertex_buffer.push_back(m_data->texcoords[2 * key.vt + 1]);
+						tex_buffer.push_back(m_data->texcoords[2 * key.vt]);
+						tex_buffer.push_back(m_data->texcoords[2 * key.vt + 1]);
+					}
+
+					// Color
+					if (bcolor)
+					{
+						color_buffer.push_back(m_data->colors[3 * key.vc]);
+						color_buffer.push_back(m_data->colors[3 * key.vc + 1]);
+						color_buffer.push_back(m_data->colors[3 * key.vc + 2]);
 					}
 				}
 			}
@@ -316,33 +329,35 @@ void MeshData::SubmitData()
 	if (!va_model)
 		return;
 
-	// Upload vertex buffer
-	va_model->buffer_data(
-		flvr::VABuf_Coord,
-		sizeof(float) * vertex_buffer.size(),
-		&vertex_buffer[0],
-		GL_STATIC_DRAW);
-
-	// Upload index buffer
-	va_model->buffer_data(
-		flvr::VABuf_Index,
-		sizeof(unsigned int) * index_buffer.size(),
-		&index_buffer[0],
-		GL_STATIC_DRAW);
-
-	// Set attribute pointers
-	GLsizei stride = sizeof(float) * (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0));
-	va_model->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)0); // Position
+	// Add and upload buffers
+	va_model->add_buffer(flvr::VABuf_Coord);
+	va_model->buffer_data(flvr::VABuf_Coord, sizeof(float) * pos_buffer.size(), &pos_buffer[0], GL_STATIC_DRAW);
+	va_model->attrib_pointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Position
 
 	if (bnormal)
-		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(sizeof(float) * 3)); // Normal
+	{
+		va_model->add_buffer(flvr::VABuf_Normal);
+		va_model->buffer_data(flvr::VABuf_Normal, sizeof(float) * norm_buffer.size(), &norm_buffer[0], GL_STATIC_DRAW);
+		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Normal
+	}
 
 	if (btexcoord)
 	{
-		GLuint tex_slot = bnormal ? 2 : 1;
-		GLsizei tex_offset = sizeof(float) * (bnormal ? 6 : 3);
-		va_model->attrib_pointer(tex_slot, 2, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(size_t)tex_offset); // Texcoord
+		va_model->add_buffer(flvr::VABuf_Tex);
+		va_model->buffer_data(flvr::VABuf_Tex, sizeof(float) * tex_buffer.size(), &tex_buffer[0], GL_STATIC_DRAW);
+		va_model->attrib_pointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Texcoord
 	}
+
+	if (bcolor)
+	{
+		va_model->add_buffer(flvr::VABuf_Color);
+		va_model->buffer_data(flvr::VABuf_Color, sizeof(float) * color_buffer.size(), &color_buffer[0], GL_STATIC_DRAW);
+		va_model->attrib_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Color
+	}
+
+	// Index buffer
+	va_model->add_buffer(flvr::VABuf_Index);
+	va_model->buffer_data(flvr::VABuf_Index, sizeof(unsigned int) * index_buffer.size(), &index_buffer[0], GL_STATIC_DRAW);
 
 	m_gpu_dirty = false;
 }
@@ -356,28 +371,62 @@ void MeshData::ReturnData()
 	if (!va_model)
 		return;
 
-	bool bnormal = m_data->normals;
-	bool btexcoord = m_data->texcoords;
+	bool bnormal = m_data->numnormals;
+	bool btexcoord = m_data->numtexcoords;
+	bool bcolor = m_data->numcolors;
 	bool indexed = va_model->is_indexed();
 
-	GLsizei stride = sizeof(float) * (3 + (bnormal ? 3 : 0) + (btexcoord ? 2 : 0));
-
-	// Determine vertex and triangle counts
 	size_t num_vertices = m_data->numvertices;
 	size_t num_triangles = m_data->numtriangles;
 	size_t index_count = num_triangles * 3;
 	if (num_triangles == 0)
 		return;
 
-	// Map vertex buffer
-	std::vector<float> verts(stride / sizeof(float) * num_vertices);
+	// Map position buffer
+	std::vector<float> verts(3 * num_vertices);
 	void* mapped_ptr = va_model->map_buffer(flvr::VABuf_Coord, GL_READ_ONLY);
 	if (!mapped_ptr)
 		return;
 	memcpy(verts.data(), mapped_ptr, verts.size() * sizeof(float));
 	va_model->unmap_buffer(flvr::VABuf_Coord);
 
-	// Map index buffer if needed
+	// Map normal buffer
+	std::vector<float> norms;
+	if (bnormal)
+	{
+		norms.resize(3 * num_vertices);
+		void* norm_ptr = va_model->map_buffer(flvr::VABuf_Normal, GL_READ_ONLY);
+		if (!norm_ptr)
+			return;
+		memcpy(norms.data(), norm_ptr, norms.size() * sizeof(float));
+		va_model->unmap_buffer(flvr::VABuf_Normal);
+	}
+
+	// Map texcoord buffer
+	std::vector<float> texs;
+	if (btexcoord)
+	{
+		texs.resize(2 * num_vertices);
+		void* tex_ptr = va_model->map_buffer(flvr::VABuf_Tex, GL_READ_ONLY);
+		if (!tex_ptr)
+			return;
+		memcpy(texs.data(), tex_ptr, texs.size() * sizeof(float));
+		va_model->unmap_buffer(flvr::VABuf_Tex);
+	}
+
+	// Map color buffer
+	std::vector<float> colors;
+	if (bcolor)
+	{
+		colors.resize(3 * num_vertices);
+		void* color_ptr = va_model->map_buffer(flvr::VABuf_Color, GL_READ_ONLY);
+		if (!color_ptr)
+			return;
+		memcpy(colors.data(), color_ptr, colors.size() * sizeof(float));
+		va_model->unmap_buffer(flvr::VABuf_Color);
+	}
+
+	// Map index buffer
 	std::vector<GLuint> indices;
 	if (indexed)
 	{
@@ -399,6 +448,8 @@ void MeshData::ReturnData()
 		m_data->normals = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (num_vertices + 1));
 	if (btexcoord && !m_data->texcoords)
 		m_data->texcoords = (GLfloat*)malloc(sizeof(GLfloat) * 2 * (num_vertices + 1));
+	if (bcolor && !m_data->colors)
+		m_data->colors = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (num_vertices + 1));
 
 	// Transform setup
 	glm::vec3 center(m_center.x(), m_center.y(), m_center.z());
@@ -416,30 +467,34 @@ void MeshData::ReturnData()
 	glm::mat3 N = glm::transpose(glm::inverse(glm::mat3(M)));
 
 	// Copy vertex data
-	size_t offset = 0;
 	for (size_t i = 1; i <= num_vertices; ++i)
 	{
-		glm::vec3 v(verts[offset], verts[offset + 1], verts[offset + 2]);
+		glm::vec3 v(verts[3 * (i - 1)], verts[3 * (i - 1) + 1], verts[3 * (i - 1) + 2]);
 		v = glm::vec3(M * glm::vec4(v, 1.0f));
 		m_data->vertices[3 * i + 0] = v.x;
 		m_data->vertices[3 * i + 1] = v.y;
 		m_data->vertices[3 * i + 2] = v.z;
-		offset += 3;
 
 		if (bnormal)
 		{
-			glm::vec3 n(verts[offset], verts[offset + 1], verts[offset + 2]);
+			glm::vec3 n(norms[3 * (i - 1)], norms[3 * (i - 1) + 1], norms[3 * (i - 1) + 2]);
 			n = glm::normalize(N * n);
 			m_data->normals[3 * i + 0] = n.x;
 			m_data->normals[3 * i + 1] = n.y;
 			m_data->normals[3 * i + 2] = n.z;
-			offset += 3;
 		}
 
 		if (btexcoord)
 		{
-			m_data->texcoords[2 * i + 0] = verts[offset++];
-			m_data->texcoords[2 * i + 1] = verts[offset++];
+			m_data->texcoords[2 * i + 0] = texs[2 * (i - 1)];
+			m_data->texcoords[2 * i + 1] = texs[2 * (i - 1) + 1];
+		}
+
+		if (bcolor)
+		{
+			m_data->colors[3 * i + 0] = colors[3 * (i - 1)];
+			m_data->colors[3 * i + 1] = colors[3 * (i - 1) + 1];
+			m_data->colors[3 * i + 2] = colors[3 * (i - 1) + 2];
 		}
 	}
 
@@ -454,15 +509,33 @@ void MeshData::ReturnData()
 		GLMtriangle& tri = m_data->triangles[i];
 		if (indexed)
 		{
-			tri.vindices[0] = indices[i * 3 + 0] + 1;
-			tri.vindices[1] = indices[i * 3 + 1] + 1;
-			tri.vindices[2] = indices[i * 3 + 2] + 1;
+			for (int j = 0; j < 3; ++j)
+			{
+				GLuint idx = indices[i * 3 + j] + 1;
+
+				tri.vindices[j] = idx;
+				if (m_data->texcoords)
+					tri.tindices[j] = idx;
+				if (m_data->normals)
+					tri.nindices[j] = idx;
+				if (m_data->colors)
+					tri.cindices[j] = idx;
+			}
 		}
 		else
 		{
-			tri.vindices[0] = (GLuint)(i * 3 + 1);
-			tri.vindices[1] = (GLuint)(i * 3 + 2);
-			tri.vindices[2] = (GLuint)(i * 3 + 3);
+			// Fallback for non-indexed mode (rare in modern OpenGL)
+			for (int j = 0; j < 3; ++j)
+			{
+				GLuint raw_index = (GLuint)(i * 3 + j + 1);
+				tri.vindices[j] = raw_index;
+				if (m_data->texcoords)
+					tri.tindices[j] = raw_index;
+				if (m_data->normals)
+					tri.nindices[j] = raw_index;
+				if (m_data->colors)
+					tri.cindices[j] = raw_index;
+			}
 		}
 		tri.findex = 0;
 	}
@@ -495,6 +568,8 @@ void MeshData::AddEmptyData()
 	model->normals = 0;
 	model->numtexcoords = 0;
 	model->texcoords = 0;
+	model->numcolors = 0;
+	model->colors = 0;
 	model->numfacetnorms = 0;
 	model->facetnorms = 0;
 	model->numlines = 0;
@@ -641,6 +716,8 @@ void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 			&vbo[0], GL_DYNAMIC_DRAW);
 		va_model->attrib_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
 		SetFlatShading(false);
+		if (m_data)
+			m_data->numnormals = static_cast<GLuint>(vbo.size() / 3);
 	}
 }
 

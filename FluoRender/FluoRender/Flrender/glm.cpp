@@ -490,9 +490,10 @@ static bool glmReadMTL(GLMmodel* model, char* name)
 				str = ws2s(filename);
 
 				TextureImage texture;
-				if (glmLoadTGA(&texture, str.c_str(),
-					&model->materials[nummaterials].textureID))
+				GLuint tex_id = 0;
+				if (glmLoadTGA(&texture, str.c_str(), &tex_id))
 				{
+					model->materials[nummaterials].textureID = tex_id;
 					model->materials[nummaterials].havetexture = GL_TRUE;
 					free(texture.imageData);
 					model->hastexture = GL_TRUE;

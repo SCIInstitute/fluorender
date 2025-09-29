@@ -70,8 +70,6 @@ namespace flvr
 
 	MeshRenderer::~MeshRenderer()
 	{
-		if (va_model_)
-			delete va_model_;
 	}
 
 	VertexArray* MeshRenderer::GetOrCreateVertexArray(bool vbuf, bool ibuf)
