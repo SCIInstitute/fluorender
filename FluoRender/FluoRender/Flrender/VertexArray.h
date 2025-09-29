@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 #ifndef __glew_h__
 typedef ptrdiff_t GLsizeiptr;
@@ -54,7 +55,8 @@ namespace flvr
 		VABuf_Coord = 0,
 		VABuf_Index,
 		VABuf_Normal,
-		VABuf_Tex
+		VABuf_Tex,
+		VABuf_Color
 	};
 	class VertexArray;
 	class VertexArrayManager;
@@ -124,12 +126,10 @@ namespace flvr
 		void delete_index_buffer();
 		bool is_indexed() { return indexed_; }
 		bool is_interleaved() { return interleaved_; }
-		void add_normal_buffer();
-		void delete_normal_buffer();
-		void add_tex_buffer();
-		void delete_tex_buffer();
+		void add_buffer(VABufferType type);
+		void delete_buffer(VABufferType type);
 
-		bool attach_buffer(VertexBuffer* buf);
+		bool attach_buffer(const std::shared_ptr<VertexBuffer>& buf);
 		void buffer_data(VABufferType type,
 			GLsizeiptr size, const GLvoid* data, GLenum usage);
 		void attrib_pointer(GLuint index,
@@ -207,7 +207,7 @@ namespace flvr
 		bool dirty_;
 		bool indexed_;
 		bool interleaved_;//normals and tex coords are saved with vertex coords
-		std::vector<VertexBuffer*> buffer_list_;
+		std::vector<std::shared_ptr<VertexBuffer>> buffer_list_;
 		std::vector<GLuint> attrib_pointer_list_;
 		//parameters
 		std::map<unsigned int, double> param_list_;//generic
@@ -230,8 +230,7 @@ namespace flvr
 		void set_all_dirty();
 
 	private:
-		std::vector<VertexArray*> va_list_;
-		std::vector<VertexBuffer*> vb_list_;
+		std::vector<std::shared_ptr<VertexArray>> va_list_;
 	};
 
 }

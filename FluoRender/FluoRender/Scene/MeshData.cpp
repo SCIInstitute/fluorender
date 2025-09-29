@@ -634,7 +634,7 @@ void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 		return;
 	if (vbo.size() > 0)
 	{
-		va_model->add_normal_buffer();
+		va_model->add_buffer(flvr::VABuf_Normal);
 		size_t vbo_size = sizeof(float) * vbo.size();
 		va_model->buffer_data(
 			flvr::VABuf_Normal, vbo_size,
@@ -650,7 +650,7 @@ void MeshData::DeleteNormalVBO()
 	flvr::VertexArray* va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
-	va_model->delete_normal_buffer();
+	va_model->delete_buffer(flvr::VABuf_Normal);
 }
 
 void MeshData::SetVertexNum(unsigned int num)

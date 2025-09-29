@@ -86,6 +86,7 @@ namespace flvr
 			case VABuf_Coord:
 			case VABuf_Normal:
 			case VABuf_Tex:
+			case VABuf_Color:
 				glBindBuffer(GL_ARRAY_BUFFER, id_);
 				glBufferData(GL_ARRAY_BUFFER,
 					size, data, usage);
@@ -109,6 +110,7 @@ namespace flvr
 		case VABuf_Coord:
 		case VABuf_Normal:
 		case VABuf_Tex:
+		case VABuf_Color:
 			glBindBuffer(GL_ARRAY_BUFFER, id_);
 			return glMapBuffer(GL_ARRAY_BUFFER, access);
 		case VABuf_Index:
@@ -129,6 +131,7 @@ namespace flvr
 		case VABuf_Coord:
 		case VABuf_Normal:
 		case VABuf_Tex:
+		case VABuf_Color:
 			glBindBuffer(GL_ARRAY_BUFFER, id_);
 			glUnmapBuffer(GL_ARRAY_BUFFER);
 			break;
@@ -163,12 +166,7 @@ namespace flvr
 
 	void VertexArray::destroy()
 	{
-		if (type_ == VA_Unmanaged)
-		{
-			for (auto it = buffer_list_.begin();
-				it != buffer_list_.end(); ++it)
-				delete *it;
-		}
+		buffer_list_.clear();
 		glDeleteVertexArrays(1, &id_);
 		id_ = 0;
 		valid_ = false;
@@ -197,7 +195,7 @@ namespace flvr
 		{
 			if ((*it)->type_ == type)
 			{
-				vb = *it;
+				vb = it->get();
 				break;
 			}
 		}
@@ -771,7 +769,7 @@ namespace flvr
 			&float_list_[0], GL_STREAM_DRAW);
 	}
 
-	bool VertexArray::attach_buffer(VertexBuffer* buf)
+	bool VertexArray::attach_buffer(const std::shared_ptr<VertexBuffer>& buf)
 	{
 		if (!valid_)
 			return false;
@@ -796,7 +794,7 @@ namespace flvr
 		{
 			if ((*it)->type_ == type)
 			{
-				vb = *it;
+				vb = it->get();
 				break;
 			}
 		}
@@ -810,7 +808,7 @@ namespace flvr
 		{
 			if ((*it)->type_ == type)
 			{
-				vb = *it;
+				vb = it->get();
 				break;
 			}
 		}
@@ -1057,25 +1055,12 @@ namespace flvr
 
 	VertexArrayManager::~VertexArrayManager()
 	{
-		//release all opengl resources managed by the manager
-		for (auto it = va_list_.begin();
-			it != va_list_.end(); ++it)
-			delete *it;
-		for (auto it = vb_list_.begin();
-			it != vb_list_.end(); ++it)
-			delete *it;
+		va_list_.clear();
 	}
 
 	void VertexArrayManager::clear()
 	{
-		for (auto it = va_list_.begin();
-			it != va_list_.end(); ++it)
-			delete *it;
-		for (auto it = vb_list_.begin();
-			it != vb_list_.end(); ++it)
-			delete *it;
 		va_list_.clear();
-		vb_list_.clear();
 	}
 
 	VertexArray* VertexArrayManager::vertex_array(VAType type)
@@ -1085,20 +1070,18 @@ namespace flvr
 			it != va_list_.end(); ++it)
 		{
 			if ((*it)->match(type))
-				return *it;
+				return it->get();
 		}
 
 		//create new vertex array
-		VertexArray* va = new VertexArray(type);
+		auto va = std::make_shared<VertexArray>(type);
 		va->create();
 		//add to list
 		va_list_.push_back(va);
 		va->bind();
 		//create vertex buffer
-		VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+		auto vb = std::make_shared<VertexBuffer>(VABuf_Coord);
 		vb->create();
-		//add to list
-		vb_list_.push_back(vb);
 		//attach buffer
 		va->attach_buffer(vb);
 		if (type == VA_Norm_Square)
@@ -1183,9 +1166,8 @@ namespace flvr
 		else if (type == VA_Clip_Planes)
 		{
 			//index buffer
-			vb = new VertexBuffer(VABuf_Index);
+			vb = std::make_shared<VertexBuffer>(VABuf_Index);
 			vb->create();
-			vb_list_.push_back(vb);
 			//attach buffer
 			va->attach_buffer(vb);
 			va->indexed_ = true;
@@ -1279,20 +1261,21 @@ namespace flvr
 		//unbind
 		va->unbind();
 
-		return va;
+		return va.get();
 	}
 
 	VertexArray* VertexArrayManager::vertex_array(bool vbuf, bool ibuf)
 	{
 		//create new vertex array
-		VertexArray* va = new VertexArray(VA_Unmanaged);
+		auto va = std::make_shared<VertexArray>(VA_Unmanaged);
 		va->create();
 		va->bind();
+		va_list_.push_back(va);
 
 		if (vbuf)
 		{
 			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Coord);
+			auto vb = std::make_shared<VertexBuffer>(VABuf_Coord);
 			vb->create();
 			//attach buffer
 			va->attach_buffer(vb);
@@ -1300,7 +1283,7 @@ namespace flvr
 		if (ibuf)
 		{
 			//create vertex buffer
-			VertexBuffer* vb = new VertexBuffer(VABuf_Index);
+			auto vb = std::make_shared<VertexBuffer>(VABuf_Index);
 			vb->create();
 			//attach buffer
 			va->attach_buffer(vb);
@@ -1309,7 +1292,7 @@ namespace flvr
 		//unbind
 		//va->unbind();
 
-		return va;
+		return va.get();
 	}
 
 	void VertexArray::protect()
@@ -1339,7 +1322,7 @@ namespace flvr
 		{
 			if ((*it)->type_ == type)
 			{
-				vb = *it;
+				vb = it->get();
 				break;
 			}
 		}
@@ -1357,7 +1340,7 @@ namespace flvr
 				return;
 		}
 		//create index buffer
-		VertexBuffer* vb = new VertexBuffer(VABuf_Index);
+		auto vb = std::make_shared<VertexBuffer>(VABuf_Index);
 		vb->create();
 		attach_buffer(vb);
 		indexed_ = true;
@@ -1375,51 +1358,41 @@ namespace flvr
 				bind();
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 				unbind();
-				it->destroy();
 			}
 		}
 
 		// Remove them from the vector
 		buffer_list_.erase(
 			std::remove_if(buffer_list_.begin(), buffer_list_.end(),
-				[](const VertexBuffer* buf) {
+				[](const std::shared_ptr<VertexBuffer>& buf) {
 					return buf->type_ == VABuf_Index;
 				}),
 			buffer_list_.end()
 		);
 	}
 
-	void VertexArray::add_normal_buffer()
+	void VertexArray::add_buffer(VABufferType type)
 	{
 		for (auto& it : buffer_list_)
 		{
-			//return if normal buffer already exists
-			if (it->type_ == VABuf_Normal)
+			//return if buffer already exists
+			if (it->type_ == type)
 				return;
 		}
-		//create normal buffer
-		VertexBuffer* vb = new VertexBuffer(VABuf_Normal);
+		//create buffer
+		auto vb = std::make_shared<VertexBuffer>(type);
 		vb->create();
 		attach_buffer(vb);
 		interleaved_ = false;
 	}
 
-	void VertexArray::delete_normal_buffer()
+	void VertexArray::delete_buffer(VABufferType type)
 	{
-		// Destroy matching buffers first
-		for (auto& it : buffer_list_)
-		{
-			if (it->type_ == VABuf_Normal)
-			{
-				it->destroy();
-			}
-		}
-
 		// Remove them from the vector
 		buffer_list_.erase(
 			std::remove_if(buffer_list_.begin(), buffer_list_.end(),
-				[](const VertexBuffer* buf) {
-					return buf->type_ == VABuf_Normal;
+				[&type](const std::shared_ptr<VertexBuffer>& buf) {
+					return buf->type_ == type;
 				}),
 			buffer_list_.end()
 		);
@@ -1428,56 +1401,8 @@ namespace flvr
 		for (auto& it : buffer_list_)
 		{
 			if (it->type_ == VABuf_Normal ||
-				it->type_ == VABuf_Tex)
-			{
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-			interleaved_ = true;
-	}
-
-	void VertexArray::add_tex_buffer()
-	{
-		for (auto& it : buffer_list_)
-		{
-			//return if tex buffer already exists
-			if (it->type_ == VABuf_Tex)
-				return;
-		}
-		//create tex buffer
-		VertexBuffer* vb = new VertexBuffer(VABuf_Tex);
-		vb->create();
-		attach_buffer(vb);
-		interleaved_ = false;
-	}
-
-	void VertexArray::delete_tex_buffer()
-	{
-		// Destroy matching buffers first
-		for (auto& it : buffer_list_)
-		{
-			if (it->type_ == VABuf_Tex)
-			{
-				it->destroy();
-			}
-		}
-
-		// Remove them from the vector
-		buffer_list_.erase(
-			std::remove_if(buffer_list_.begin(), buffer_list_.end(),
-				[](const VertexBuffer* buf) {
-					return buf->type_ == VABuf_Tex;
-				}),
-			buffer_list_.end()
-		);
-
-		bool found = false;
-		for (auto& it : buffer_list_)
-		{
-			if (it->type_ == VABuf_Normal ||
-				it->type_ == VABuf_Tex)
+				it->type_ == VABuf_Tex ||
+				it->type_ == VABuf_Color)
 			{
 				found = true;
 				break;
