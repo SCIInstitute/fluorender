@@ -92,27 +92,32 @@ void main()
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_BODY_VPOS = R"GLSHDR(
-//MSH_VERTEX_BODY_VPOS
+	//MSH_VERTEX_BODY_VPOS
 	VertexPos = InVertex;
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_BODY_POS = R"GLSHDR(
-//MSH_VERTEX_BODY_POS
+	//MSH_VERTEX_BODY_POS
 	gl_Position = matrix0 * matrix1 * vec4(InVertex, 1.0);
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_BODY_NORMAL = R"GLSHDR(
-//MSH_VERTEX_BODY_NORMAL
+	//MSH_VERTEX_BODY_NORMAL
 	OutNormal = normalize((matrix2 * vec4(InNormal, 0.0)).xyz);
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_BODY_TEX = R"GLSHDR(
-//MSH_VERTEX_BODY_TEX
+	//MSH_VERTEX_BODY_TEX
 	OutTexcoord = InTexcoord;
 )GLSHDR";
 
+inline constexpr const char* MSH_VERTEX_BODY_COLOR = R"GLSHDR(
+	//MSH_VERTEX_BODY_COLOR
+	OutColor = InColor;
+)GLSHDR";
+
 inline constexpr const char* MSH_VERTEX_BODY_FOG = R"GLSHDR(
-//MSH_VERTEX_BODY_FOG
+	//MSH_VERTEX_BODY_FOG
 	OutFogCoord = matrix1 * vec4(InVertex,1.);
 )GLSHDR";
 
@@ -234,8 +239,13 @@ inline constexpr const char* MSH_FRAG_BODY_SIMPLE = R"GLSHDR(
 	c = loc0;
 )GLSHDR";
 
-inline constexpr const char* MSH_FRAG_BODY_COLOR_LIGHT = R"GLSHDR(
-	//MSH_FRAG_BODY_COLOR_LIGHT
+inline constexpr const char* MSH_FRAG_BODY_VERTEX_COLOR = R"GLSHDR(
+	//MSH_FRAG_BODY_VERTEX_COLOR
+	c *= InColor;
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_BODY_MATL_LIGHT = R"GLSHDR(
+	//MSH_FRAG_BODY_MATL_LIGHT
 	vec4 spec = vec4(0.0);
 	vec3 eye = vec3(0.0, 0.0, 1.0);
 	vec3 l_dir = normalize(vec3(-0.3, 0.4, 1.0));
@@ -246,12 +256,12 @@ inline constexpr const char* MSH_FRAG_BODY_COLOR_LIGHT = R"GLSHDR(
 	vec3 h = normalize(l_dir+eye);
 	float intSpec = max(dot(h, n), 0.0);
 	spec = loc2 * pow(intSpec, loc3.x);
-	c.xyz = max(intensity * loc1 + spec, loc0).xyz;
+	c.xyz *= max(intensity * loc1 + spec, loc0).xyz;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(
 	//MSH_FRAG_BODY_TEXTURE
-	c = c * texture(tex0, OutTexcoord);
+	c *= texture(tex0, OutTexcoord);
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_FOG_V = R"GLSHDR(
@@ -282,12 +292,28 @@ inline constexpr const char* MSH_GEOM_NORMALS_INPUTS_T = R"GLSHDR(
 layout(location = 2) in vec2 InTexcoord[];
 )GLSHDR";
 
+inline constexpr const char* MSH_GEOM_NORMALS_INPUTS_C = R"GLSHDR(
+layout(location = 3) in vec4 InColor[];
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_INPUTS_FOG = R"GLSHDR(
+layout(location = 4) in vec4 InFogCoord[];
+)GLSHDR";
+
 inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_N = R"GLSHDR(
 layout(location = 1) out vec3 OutNormal;
 )GLSHDR";
 
 inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_T = R"GLSHDR(
 layout(location = 2) out vec2 OutTexcoord;
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_C = R"GLSHDR(
+layout(location = 3) out vec4 OutColor;
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_FOG = R"GLSHDR(
+layout(location = 4) out vec4 OutFogCoord;
 )GLSHDR";
 
 inline constexpr const char* MSH_GEOM_NORMALS_HEAD = R"GLSHDR(
@@ -312,6 +338,14 @@ void main()
 
 inline constexpr const char* MSH_GEOM_NORMALS_BODY_T = R"GLSHDR(
 		OutTexcoord = InTexcoord[i];
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_BODY_C = R"GLSHDR(
+		OutColor = InColor[i];
+)GLSHDR";
+
+inline constexpr const char* MSH_GEOM_NORMALS_BODY_FOG = R"GLSHDR(
+		OutFogCoord = InFogCoord[i];
 )GLSHDR";
 
 inline constexpr const char* MSH_GEOM_NORMALS_TAIL = R"GLSHDR(

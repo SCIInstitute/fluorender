@@ -98,58 +98,7 @@ int MeshData::Load(GLMmodel* mesh)
 
 	m_data = GLMmodelPtr(mesh, glmDelete);
 
-	if (!m_data->normals)
-	{
-		if (!m_data->facetnorms)
-			glmFacetNormals(m_data.get());
-		glmVertexNormals(m_data.get(), 89.0);
-	}
-
-	if (!m_data->materials)
-	{
-		m_data->materials = new GLMmaterial;
-		m_data->nummaterials = 1;
-	}
-
-	/* set the default material */
-	m_data->materials[0].name = NULL;
-	m_data->materials[0].ambient[0] = m_mat_amb.r();
-	m_data->materials[0].ambient[1] = m_mat_amb.g();
-	m_data->materials[0].ambient[2] = m_mat_amb.b();
-	m_data->materials[0].ambient[3] = m_mat_alpha;
-	m_data->materials[0].diffuse[0] = m_mat_diff.r();
-	m_data->materials[0].diffuse[1] = m_mat_diff.g();
-	m_data->materials[0].diffuse[2] = m_mat_diff.b();
-	m_data->materials[0].diffuse[3] = m_mat_alpha;
-	m_data->materials[0].specular[0] = m_mat_spec.r();
-	m_data->materials[0].specular[1] = m_mat_spec.g();
-	m_data->materials[0].specular[2] = m_mat_spec.b();
-	m_data->materials[0].specular[3] = m_mat_alpha;
-	m_data->materials[0].shininess = m_mat_shine;
-	m_data->materials[0].emmissive[0] = 0.0;
-	m_data->materials[0].emmissive[1] = 0.0;
-	m_data->materials[0].emmissive[2] = 0.0;
-	m_data->materials[0].emmissive[3] = 0.0;
-	m_data->materials[0].havetexture = GL_FALSE;
-	m_data->materials[0].textureID = 0;
-
-	//bounds
-	GLfloat fbounds[6];
-	glmBoundingBox(m_data.get(), fbounds);
-	fluo::BBox bounds;
-	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
-	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	m_bounds = bounds;
-	m_center = fluo::Point(
-		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
-		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
-		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
-
-	SetFlatShading(m_data->numnormals == 0);
-
-	SubmitData();
+	BuildMesh();
 
 	return 1;
 }
@@ -167,58 +116,7 @@ int MeshData::Load(const std::wstring &filename)
 		return 0;
 	m_data.reset(new_model);
 
-	if (!m_data->normals && m_data->numtriangles)
-	{
-		if (!m_data->facetnorms)
-			glmFacetNormals(m_data.get());
-		glmVertexNormals(m_data.get(), 89.0);
-	}
-
-	if (!m_data->materials)
-	{
-		m_data->materials = new GLMmaterial;
-		m_data->nummaterials = 1;
-	}
-
-	/* set the default material */
-	m_data->materials[0].name = NULL;
-	m_data->materials[0].ambient[0] = m_mat_amb.r();
-	m_data->materials[0].ambient[1] = m_mat_amb.g();
-	m_data->materials[0].ambient[2] = m_mat_amb.b();
-	m_data->materials[0].ambient[3] = m_mat_alpha;
-	m_data->materials[0].diffuse[0] = m_mat_diff.r();
-	m_data->materials[0].diffuse[1] = m_mat_diff.g();
-	m_data->materials[0].diffuse[2] = m_mat_diff.b();
-	m_data->materials[0].diffuse[3] = m_mat_alpha;
-	m_data->materials[0].specular[0] = m_mat_spec.r();
-	m_data->materials[0].specular[1] = m_mat_spec.g();
-	m_data->materials[0].specular[2] = m_mat_spec.b();
-	m_data->materials[0].specular[3] = m_mat_alpha;
-	m_data->materials[0].shininess = m_mat_shine;
-	m_data->materials[0].emmissive[0] = 0.0;
-	m_data->materials[0].emmissive[1] = 0.0;
-	m_data->materials[0].emmissive[2] = 0.0;
-	m_data->materials[0].emmissive[3] = 0.0;
-	m_data->materials[0].havetexture = GL_FALSE;
-	m_data->materials[0].textureID = 0;
-
-	//bounds
-	GLfloat fbounds[6];
-	glmBoundingBox(m_data.get(), fbounds);
-	fluo::BBox bounds;
-	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
-	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	m_bounds = bounds;
-	m_center = fluo::Point(
-		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
-		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
-		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
-
-	SetFlatShading(m_data->numnormals == 0);
-
-	SubmitData();
+	BuildMesh();
 
 	return 1;
 }
@@ -1203,3 +1101,63 @@ int MeshData::GetLimitNumber()
 	return m_limit;
 }
 
+void MeshData::BuildMesh()
+{
+	if (!m_data->normals && m_data->numtriangles)
+	{
+		if (!m_data->facetnorms)
+			glmFacetNormals(m_data.get());
+		glmVertexNormals(m_data.get(), 89.0);
+	}
+
+	if (m_data->hastexture && !m_data->numtexcoords)
+	{
+		glmLinearTexture(m_data.get());
+	}
+
+	if (!m_data->materials)
+	{
+		m_data->materials = new GLMmaterial;
+		m_data->nummaterials = 1;
+	}
+
+	/* set the default material */
+	m_data->materials[0].name = NULL;
+	m_data->materials[0].ambient[0] = m_mat_amb.r();
+	m_data->materials[0].ambient[1] = m_mat_amb.g();
+	m_data->materials[0].ambient[2] = m_mat_amb.b();
+	m_data->materials[0].ambient[3] = m_mat_alpha;
+	m_data->materials[0].diffuse[0] = m_mat_diff.r();
+	m_data->materials[0].diffuse[1] = m_mat_diff.g();
+	m_data->materials[0].diffuse[2] = m_mat_diff.b();
+	m_data->materials[0].diffuse[3] = m_mat_alpha;
+	m_data->materials[0].specular[0] = m_mat_spec.r();
+	m_data->materials[0].specular[1] = m_mat_spec.g();
+	m_data->materials[0].specular[2] = m_mat_spec.b();
+	m_data->materials[0].specular[3] = m_mat_alpha;
+	m_data->materials[0].shininess = m_mat_shine;
+	m_data->materials[0].emmissive[0] = 0.0;
+	m_data->materials[0].emmissive[1] = 0.0;
+	m_data->materials[0].emmissive[2] = 0.0;
+	m_data->materials[0].emmissive[3] = 0.0;
+	m_data->materials[0].havetexture = GL_FALSE;
+	m_data->materials[0].textureID = 0;
+
+	//bounds
+	GLfloat fbounds[6];
+	glmBoundingBox(m_data.get(), fbounds);
+	fluo::BBox bounds;
+	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
+	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
+	bounds.extend(pmin);
+	bounds.extend(pmax);
+	m_bounds = bounds;
+	m_center = fluo::Point(
+		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
+		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
+		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
+
+	SetFlatShading(m_data->numnormals == 0);
+
+	SubmitData();
+}

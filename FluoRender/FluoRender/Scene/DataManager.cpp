@@ -822,24 +822,24 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 	return true;
 }
 
-bool DataManager::LoadMeshData(GLMmodel* mesh)
-{
-	if (!mesh) return false;
-
-	auto md = std::make_shared<MeshData>();
-	md->Load(mesh);
-
-	std::wstring name = md->GetName();
-	std::wstring new_name = name;
-	size_t i;
-	for (i=1; CheckNames(new_name); i++)
-		new_name = name + L"_" + std::to_wstring(i);
-	if (i>1)
-		md->SetName(new_name);
-	m_md_list.push_back(md);
-
-	return true;
-}
+//bool DataManager::LoadMeshData(GLMmodel* mesh)
+//{
+//	if (!mesh) return false;
+//
+//	auto md = std::make_shared<MeshData>();
+//	md->Load(mesh);
+//
+//	std::wstring name = md->GetName();
+//	std::wstring new_name = name;
+//	size_t i;
+//	for (i=1; CheckNames(new_name); i++)
+//		new_name = name + L"_" + std::to_wstring(i);
+//	if (i>1)
+//		md->SetName(new_name);
+//	m_md_list.push_back(md);
+//
+//	return true;
+//}
 
 void DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
 {

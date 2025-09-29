@@ -189,6 +189,9 @@ private:
 
 	//legend
 	bool m_legend;
+
+private:
+	void BuildMesh();
 };
 
 #endif//_MESH_DATA_H_

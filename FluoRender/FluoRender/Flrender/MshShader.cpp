@@ -43,13 +43,14 @@ namespace flvr
 	MshShader::MshShader(int type,
 		int peel, bool tex,
 		bool fog, bool light,
-		bool normal)
+		bool normal, bool color)
 		: type_(type),
 		peel_(peel),
 		tex_(tex),
 		fog_(fog),
 		light_(light),
 		normal_(normal),
+		color_(color),
 		program_(0)
 	{
 	}
@@ -91,15 +92,19 @@ namespace flvr
 				z << MSH_VERTEX_INPUTS_N;
 			if (tex_)
 				z << MSH_VERTEX_INPUTS_T;
+			if (color_)
+				z << MSH_VERTEX_INPUTS_C;
 			//outputs
+			if (normal_)
+				z << MSH_VERTEX_OUTPUTS_VPOS;
 			if (light_)
 				z << MSH_VERTEX_OUTPUTS_N;
 			if (tex_)
 				z << MSH_VERTEX_OUTPUTS_T;
+			if (color_)
+				z << MSH_VERTEX_OUTPUTS_C;
 			if (fog_)
 				z << MSH_VERTEX_OUTPUTS_FOG;
-			if (normal_)
-				z << MSH_VERTEX_OUTPUTS_VPOS;
 			//uniforms
 			z << MSH_VERTEX_UNIFORM_MATRIX;
 			if (light_)
@@ -121,6 +126,8 @@ namespace flvr
 				z << MSH_VERTEX_BODY_NORMAL;
 			if (tex_)
 				z << MSH_VERTEX_BODY_TEX;
+			if (color_)
+				z << MSH_VERTEX_BODY_COLOR;
 			if (fog_)
 				z << MSH_VERTEX_BODY_FOG;
 		}
@@ -146,6 +153,8 @@ namespace flvr
 				z << MSH_FRAG_INPUTS_N;
 			if (tex_)
 				z << MSH_FRAG_INPUTS_T;
+			if (color_)
+				z << MSH_FRAG_INPUTS_C;
 			if (fog_)
 				z << MSH_FRAG_INPUTS_FOG;
 			//uniforms
@@ -186,12 +195,14 @@ namespace flvr
 				z << VOL_HEAD_FOG;
 
 			z << MSH_FRAG_BODY_COLOR;
+			if (color_)
+				z << MSH_FRAG_BODY_VERTEX_COLOR;
 			if (light_)
-				z << MSH_FRAG_BODY_COLOR_LIGHT;
+				z << MSH_FRAG_BODY_MATL_LIGHT;
 			if (tex_)
 				z << MSH_FRAG_BODY_TEXTURE;
-			if (!light_ && !tex_)
-				z << MSH_FRAG_BODY_SIMPLE;
+			//if (!light_ && !tex_)
+			//	z << MSH_FRAG_BODY_SIMPLE;
 			if (fog_)
 			{
 				z << MSH_FRAG_BODY_FOG_V;
@@ -225,17 +236,29 @@ namespace flvr
 		z << ShaderProgram::glsl_unroll_;
 
 		z << MSH_GEOM_NORMALS_INPUTS;
-		if (tex_)
-			z << MSH_GEOM_NORMALS_INPUTS_T;
 		if (normal_)
 			z << MSH_GEOM_NORMALS_INPUTS_VPOS;
+		if (tex_)
+			z << MSH_GEOM_NORMALS_INPUTS_T;
+		if (color_)
+			z << MSH_GEOM_NORMALS_INPUTS_C;
+		if (fog_)
+			z << MSH_GEOM_NORMALS_INPUTS_FOG;
 		z << MSH_GEOM_NORMALS_OUTPUTS_N;
 		if (tex_)
 			z << MSH_GEOM_NORMALS_OUTPUTS_T;
+		if (color_)
+			z << MSH_GEOM_NORMALS_OUTPUTS_C;
+		if (fog_)
+			z << MSH_GEOM_NORMALS_OUTPUTS_FOG;
 		z << MSH_VERTEX_UNIFORM_MATRIX_NORMAL;
 		z << MSH_GEOM_NORMALS_HEAD;
 		if (tex_)
 			z << MSH_GEOM_NORMALS_BODY_T;
+		if (color_)
+			z << MSH_GEOM_NORMALS_BODY_C;
+		if (fog_)
+			z << MSH_GEOM_NORMALS_BODY_FOG;
 		z << MSH_GEOM_NORMALS_TAIL;
 
 		s = z.str();
