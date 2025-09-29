@@ -52,6 +52,7 @@ namespace flrd
 		virtual void MergeVertices(bool avg_normals) override;
 
 		virtual bool GetAutoUpdate() override;
+		virtual bool GetAutoThreshold() override;
 
 	private:
 		bool m_use_sel = false;//internal flag based on validity of mask

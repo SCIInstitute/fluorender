@@ -11148,7 +11148,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						auto view = glbin_current.render_view.lock();
 						if (view)
 							view->AddMeshData(md);
-						vc.insert({ gstListCtrl, gstTreeCtrl, gstUseSelection });
+						vc.insert({ gstVolMeshThresh, gstListCtrl, gstTreeCtrl, gstUseSelection });
 					}
 				}
 			}

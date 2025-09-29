@@ -55,6 +55,9 @@ namespace flrd
 		//auto update
 		virtual bool GetAutoUpdate() { return false; }
 
+		//if auto threshold is calculated
+		virtual bool GetAutoThreshold() { return false; }
+
 		// Setters and getters for common properties
 		virtual void SetUseTransfer(bool val) { m_use_transfer = val; }
 		virtual bool GetUseTransfer() const { return m_use_transfer; }

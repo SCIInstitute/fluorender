@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvVolMesh.h>
 #include <Global.h>
 #include <AutomateDefault.h>
+#include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <Texture.h>
@@ -91,6 +92,7 @@ void ConvVolMesh::Convert()
 	m_mesh->SetName(vd->GetName() + L"_mesh");
 	m_mesh->AddEmptyData();
 	m_mesh->SetFlatShading(true);
+	GetAutoThreshold();
 
 	MarchingCubes(vd.get(), m_mesh.get());
 }
@@ -117,6 +119,7 @@ void ConvVolMesh::Update(bool create_mesh)
 		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
 		m_mesh->SetFlatShading(true);
+		GetAutoThreshold();
 	}
 	else
 		m_mesh->ClearData();
@@ -140,6 +143,25 @@ bool ConvVolMesh::GetAutoUpdate()
 			return false;
 	}
 	return true;
+}
+
+bool ConvVolMesh::GetAutoThreshold()
+{
+	auto vd = m_volume.lock();
+	if (!vd)
+		vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return false;
+	if (vd->IsAutoThresholdValid())
+		return false;
+	double threshold = vd->GetAutoThreshold();
+	if (threshold != m_iso)
+	{
+		m_iso = threshold;
+		//glbin_comp_generator.SetThresh(m_scl_translate);
+		return true;
+	}
+	return false;
 }
 
 std::string ConvVolMesh::GetKernelStrMarchingCubes(
