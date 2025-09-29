@@ -629,6 +629,7 @@ static GLboolean glmFirstPass(GLMmodel* model, char* file)
 	GLuint numvertices;        /* number of vertices in model */
 	GLuint numnormals;         /* number of normals in model */
 	GLuint numtexcoords;       /* number of texcoords in model */
+	GLuint numcolors;          /* number of colors in model */
 	GLuint numlines;           /* number of lines in model */
 	GLuint numtriangles;       /* number of triangles in model */
 	GLMgroup* group;           /* current group */
@@ -640,7 +641,7 @@ static GLboolean glmFirstPass(GLMmodel* model, char* file)
 	char  tmp[] = "default";
 	group = glmAddGroup(model, tmp);
 
-	numvertices = numnormals = numtexcoords = numlines = numtriangles = 0;
+	numvertices = numnormals = numtexcoords = numcolors = numlines = numtriangles = 0;
 
 	while (sgets(line, sizeof(line), &file))
 	{
@@ -662,6 +663,9 @@ static GLboolean glmFirstPass(GLMmodel* model, char* file)
 				break;
 			case 't':           /* texcoord */
 				numtexcoords++;
+				break;
+			case 'c':           /* color */
+				numcolors++;
 				break;
 			default:
 				break;
@@ -715,6 +719,7 @@ static GLboolean glmFirstPass(GLMmodel* model, char* file)
 	model->numvertices  = numvertices;
 	model->numnormals   = numnormals;
 	model->numtexcoords = numtexcoords;
+	model->numcolors = numcolors;
 	model->numlines = numlines;
 	model->numtriangles = numtriangles;
 
@@ -741,14 +746,16 @@ static GLvoid glmSecondPass(GLMmodel* model, char* file)
 	GLuint numvertices;        /* number of vertices in model */
 	GLuint numnormals;         /* number of normals in model */
 	GLuint numtexcoords;       /* number of texcoords in model */
+	GLuint numcolors;          /* number of colors in model */
 	GLuint numlines;           /* number of lines in model */
 	GLuint numtriangles;       /* number of triangles in model */
 	GLfloat* vertices;         /* array of vertices  */
 	GLfloat* normals;          /* array of normals */
 	GLfloat* texcoords;        /* array of texture coordinates */
+	GLfloat* colors;           /* array of colors */
 	GLMgroup* group;           /* current group pointer */
 	GLuint material;           /* current material */
-	int v, n, t;
+	int v, n, t, c;
 	char buf[128];
 	char line[2048];
 
@@ -756,11 +763,12 @@ static GLvoid glmSecondPass(GLMmodel* model, char* file)
 	vertices       = model->vertices;
 	normals    = model->normals;
 	texcoords    = model->texcoords;
+	colors = model->colors;
 	group      = model->groups;
 
 	/* on the second pass through the file, read all the data into the
 	allocated arrays */
-	numvertices = numnormals = numtexcoords = 1;
+	numvertices = numnormals = numtexcoords = numcolors = 1;
 	numtriangles = 0;
 	numlines = 0;
 	material = 0;
@@ -796,6 +804,14 @@ static GLvoid glmSecondPass(GLMmodel* model, char* file)
 					&texcoords[2 * numtexcoords + 0],
 					&texcoords[2 * numtexcoords + 1]);
 				numtexcoords++;
+				break;
+			case 'c':           /* color */
+				SSCANF(line + 3, "%f %f %f %f",
+					&colors[4 * numcolors + 0],
+					&colors[4 * numcolors + 1],
+					&colors[4 * numcolors + 2],
+					&colors[4 * numcolors + 3]);
+				numcolors++;
 				break;
 			}
 			break;
@@ -863,114 +879,113 @@ static GLvoid glmSecondPass(GLMmodel* model, char* file)
 			}
 			numlines++;
 			break;
-		case 'f':               /* face */
+		case 'f': /* face */
+		{
+			v = n = t = c = 0;
+
+			int count = 0;
+			int buf_count = 0;
+			bool prev_is_blank = true;
+			for (int i = 0; i < (int)strlen(line); i++)
 			{
-				v = n = t = 0;
-
-				int count = 0;
-				int buf_count = 0;
-				bool prev_is_blank = true;
-				for (int i=0; i<(int)strlen(line); i++)
+				if (line[i] == ' ' || line[i] == '\n')
 				{
-					if (line[i] == ' ' || line[i] == '\n')
-					{
-						prev_is_blank = true;
-						buf[buf_count] = 0;
-						buf_count = 0;
+					prev_is_blank = true;
+					buf[buf_count] = 0;
+					buf_count = 0;
 
-						//add buf
-						if (count > 1 && count < 5)
+					if (count > 1 && count < 5)
+					{
+						if (strstr(buf, "//"))
 						{
-							if (strstr(buf, "//"))
+							if (SSCANF(buf, "%d//%d/%d", &v, &n, &c) == 3)
 							{
-								SSCANF(buf, "%d//%d", &v, &n);
-								T(numtriangles).vindices[count-2] = v < 0 ? v + numvertices : v;
-								T(numtriangles).nindices[count-2] = n < 0 ? n + numnormals : n;
-							}
-							else if (SSCANF(buf, "%d/%d/%d", &v, &t, &n) == 3)
-							{
-								T(numtriangles).vindices[count-2] = v < 0 ? v + numvertices : v;
-								T(numtriangles).tindices[count-2] = t < 0 ? t + numtexcoords : t;
-								T(numtriangles).nindices[count-2] = n < 0 ? n + numnormals : n;
-							}
-							else if (SSCANF(buf, "%d/%d", &v, &t) == 2)
-							{
-								T(numtriangles).vindices[count-2] = v < 0 ? v + numvertices : v;
-								T(numtriangles).tindices[count-2] = t < 0 ? t + numtexcoords : t;
+								T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+								T(numtriangles).nindices[count - 2] = n < 0 ? n + numnormals : n;
+								T(numtriangles).cindices[count - 2] = c < 0 ? c + numcolors : c;
 							}
 							else
 							{
-								SSCANF(buf, "%d", &v);
-								T(numtriangles).vindices[count-2] = v < 0 ? v + numvertices : v;
-							}
-
-							if (count == 4)
-							{
-								group->triangles[group->numtriangles++] = numtriangles;
-								numtriangles++;
+								SSCANF(buf, "%d//%d", &v, &n);
+								T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+								T(numtriangles).nindices[count - 2] = n < 0 ? n + numnormals : n;
 							}
 						}
-						else if (count > 4)
+						else if (SSCANF(buf, "%d/%d/%d/%d", &v, &t, &n, &c) == 4)
 						{
-							if (strstr(buf, "//"))
-							{
-								SSCANF(buf, "%d//%d", &v, &n);
-								T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
-								T(numtriangles).nindices[0] = T(numtriangles-1).nindices[0];
-								T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
-								T(numtriangles).nindices[1] = T(numtriangles-1).nindices[2];
-								T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
-								T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
-								group->triangles[group->numtriangles++] = numtriangles;
-								numtriangles++;
-							}
-							else if (SSCANF(buf, "%d/%d/%d", &v, &t, &n) == 3)
-							{
-								T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
-								T(numtriangles).tindices[0] = T(numtriangles-1).tindices[0];
-								T(numtriangles).nindices[0] = T(numtriangles-1).nindices[0];
-								T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
-								T(numtriangles).tindices[1] = T(numtriangles-1).tindices[2];
-								T(numtriangles).nindices[1] = T(numtriangles-1).nindices[2];
-								T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
-								T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
-								T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
-								group->triangles[group->numtriangles++] = numtriangles;
-								numtriangles++;
-							}
-							else if (SSCANF(buf, "%d/%d", &v, &t) == 2)
-							{
-								T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
-								T(numtriangles).tindices[0] = T(numtriangles-1).tindices[0];
-								T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
-								T(numtriangles).tindices[1] = T(numtriangles-1).tindices[2];
-								T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
-								T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
-								group->triangles[group->numtriangles++] = numtriangles;
-								numtriangles++;
-							}
-							else
-							{
-								SSCANF(buf, "%d", &v);
-								T(numtriangles).vindices[0] = T(numtriangles-1).vindices[0];
-								T(numtriangles).vindices[1] = T(numtriangles-1).vindices[2];
-								T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
-								group->triangles[group->numtriangles++] = numtriangles;
-								numtriangles++;
-							}
+							T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+							T(numtriangles).tindices[count - 2] = t < 0 ? t + numtexcoords : t;
+							T(numtriangles).nindices[count - 2] = n < 0 ? n + numnormals : n;
+							T(numtriangles).cindices[count - 2] = c < 0 ? c + numcolors : c;
+						}
+						else if (SSCANF(buf, "%d/%d/%d", &v, &t, &n) == 3)
+						{
+							T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+							T(numtriangles).tindices[count - 2] = t < 0 ? t + numtexcoords : t;
+							T(numtriangles).nindices[count - 2] = n < 0 ? n + numnormals : n;
+						}
+						else if (SSCANF(buf, "%d/%d/%d", &v, &t, &c) == 3)
+						{
+							T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+							T(numtriangles).tindices[count - 2] = t < 0 ? t + numtexcoords : t;
+							T(numtriangles).cindices[count - 2] = c < 0 ? c + numcolors : c;
+						}
+						else if (SSCANF(buf, "%d/%d", &v, &t) == 2)
+						{
+							T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+							T(numtriangles).tindices[count - 2] = t < 0 ? t + numtexcoords : t;
+						}
+						else if (SSCANF(buf, "%d/%d", &v, &c) == 2)
+						{
+							T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+							T(numtriangles).cindices[count - 2] = c < 0 ? c + numcolors : c;
+						}
+						else
+						{
+							SSCANF(buf, "%d", &v);
+							T(numtriangles).vindices[count - 2] = v < 0 ? v + numvertices : v;
+						}
+
+						if (count == 4)
+						{
+							group->triangles[group->numtriangles++] = numtriangles;
+							numtriangles++;
 						}
 					}
-					else
+					else if (count > 4)
 					{
-						if (prev_is_blank)
-							count++;
-						prev_is_blank = false;
-						buf[buf_count] = line[i];
-						buf_count++;
+						// Fan triangulation logic (same as before), extended to handle cindices
+						SSCANF(buf, "%d/%d/%d/%d", &v, &t, &n, &c);
+						T(numtriangles).vindices[0] = T(numtriangles - 1).vindices[0];
+						T(numtriangles).tindices[0] = T(numtriangles - 1).tindices[0];
+						T(numtriangles).nindices[0] = T(numtriangles - 1).nindices[0];
+						T(numtriangles).cindices[0] = T(numtriangles - 1).cindices[0];
+
+						T(numtriangles).vindices[1] = T(numtriangles - 1).vindices[2];
+						T(numtriangles).tindices[1] = T(numtriangles - 1).tindices[2];
+						T(numtriangles).nindices[1] = T(numtriangles - 1).nindices[2];
+						T(numtriangles).cindices[1] = T(numtriangles - 1).cindices[2];
+
+						T(numtriangles).vindices[2] = v < 0 ? v + numvertices : v;
+						T(numtriangles).tindices[2] = t < 0 ? t + numtexcoords : t;
+						T(numtriangles).nindices[2] = n < 0 ? n + numnormals : n;
+						T(numtriangles).cindices[2] = c < 0 ? c + numcolors : c;
+
+						group->triangles[group->numtriangles++] = numtriangles;
+						numtriangles++;
 					}
 				}
+				else
+				{
+					if (prev_is_blank)
+						count++;
+					prev_is_blank = false;
+					buf[buf_count] = line[i];
+					buf_count++;
+				}
 			}
-			break;
+		}
+		break;
 		default:
 			break;
 		}
@@ -1276,6 +1291,12 @@ GLvoid glmReverseWinding(GLMmodel* model)
 			swap = T(i).tindices[0];
 			T(i).tindices[0] = T(i).tindices[2];
 			T(i).tindices[2] = swap;
+		}
+
+		if (model->numcolors) {
+			swap = T(i).cindices[0];
+			T(i).cindices[0] = T(i).cindices[2];
+			T(i).cindices[2] = swap;
 		}
 	}
 
@@ -1628,6 +1649,7 @@ GLvoid glmDelete(GLMmodel* model)
 	if (model->vertices)     free(model->vertices);
 	if (model->normals)  free(model->normals);
 	if (model->texcoords)  free(model->texcoords);
+	if (model->colors)  free(model->colors);
 	if (model->facetnorms) free(model->facetnorms);
 	if (model->lines)
 	{
@@ -1675,6 +1697,7 @@ GLvoid glmClear(GLMmodel* model)
 	if (model->vertices)     free(model->vertices);
 	if (model->normals)  free(model->normals);
 	if (model->texcoords)  free(model->texcoords);
+	if (model->colors)  free(model->colors);
 	if (model->facetnorms) free(model->facetnorms);
 	if (model->lines)
 	{
@@ -1711,6 +1734,8 @@ GLvoid glmClear(GLMmodel* model)
 	model->normals = 0;
 	model->numtexcoords = 0;
 	model->texcoords = 0;
+	model->numcolors = 0;
+	model->colors = 0;
 	model->numfacetnorms = 0;
 	model->facetnorms = 0;
 	model->numlines = 0;
@@ -1733,6 +1758,7 @@ void glmClearGeometry(GLMmodel* model)
 	free(model->vertices);      model->vertices = nullptr; model->numvertices = 0;
 	free(model->normals);       model->normals = nullptr; model->numnormals = 0;
 	free(model->texcoords);     model->texcoords = nullptr; model->numtexcoords = 0;
+	free(model->colors);        model->colors = nullptr; model->numcolors = 0;
 	free(model->facetnorms);    model->facetnorms = nullptr; model->numfacetnorms = 0;
 	free(model->triangles);     model->triangles = nullptr; model->numtriangles = 0;
 	free(model->lines);         model->lines = nullptr; model->numlines = 0;
@@ -1782,6 +1808,8 @@ GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 	model->normals     = NULL;
 	model->numtexcoords  = 0;
 	model->texcoords       = NULL;
+	model->numcolors = 0;
+	model->colors = NULL;
 	model->numfacetnorms = 0;
 	model->facetnorms    = NULL;
 	model->numtriangles  = 0;
@@ -1818,6 +1846,9 @@ GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 	if (model->numtexcoords)
 		model->texcoords = (GLfloat*)malloc(sizeof(GLfloat) *
 		2 * (model->numtexcoords + 1));
+	if (model->numcolors)
+		model->colors = (GLfloat*)malloc(sizeof(GLfloat) *
+		4 * (model->numcolors + 1));
 
 	glmSecondPass(model, obj_content);
 
@@ -1864,6 +1895,11 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 		printf("glmWriteOBJ() warning: texture coordinate output requested "
 			"with no texture coordinates defined.\n");
 		mode &= ~GLM_TEXTURE;
+	}
+	if (mode & GLM_VERTC && !model->colors) {
+		printf("glmWriteOBJ() warning: vertex color output requested "
+			"with no vertex colors defined.\n");
+		mode &= ~GLM_VERTC;
 	}
 	if (mode & GLM_FLAT && mode & GLM_SMOOTH) {
 		printf("glmWriteOBJ() warning: flat normal output requested "
@@ -1949,18 +1985,47 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 		}
 	}
 
+	/* spit out the colors */
+	if (mode & GLM_VERTC) {
+		fprintf(file, "\n");
+		fprintf(file, "# %d colors\n", model->numcolors);
+		for (i = 1; i <= model->numcolors; i++) {
+			fprintf(file, "vc %f %f %f %f\n",
+				model->colors[4 * i + 0],
+				model->colors[4 * i + 1],
+				model->colors[4 * i + 2],
+				model->colors[4 * i + 3]);
+		}
+	}
+
 	fprintf(file, "\n");
 	fprintf(file, "# %d groups\n", model->numgroups);
 	fprintf(file, "# %d faces (triangles)\n", model->numtriangles);
 	fprintf(file, "\n");
 
 	group = model->groups;
-	while(group) {
+	while (group) {
 		fprintf(file, "g %s\n", group->name);
 		if (mode & GLM_MATERIAL)
 			fprintf(file, "usemtl %s\n", model->materials[group->material].name);
+
 		for (i = 0; i < group->numtriangles; i++) {
-			if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
+			if (mode & GLM_SMOOTH && mode & GLM_TEXTURE && mode & GLM_VERTC) {
+				fprintf(file, "f %d/%d/%d/%d %d/%d/%d/%d %d/%d/%d/%d\n",
+					T(group->triangles[i]).vindices[0],
+					T(group->triangles[i]).tindices[0],
+					T(group->triangles[i]).nindices[0],
+					T(group->triangles[i]).cindices[0],
+					T(group->triangles[i]).vindices[1],
+					T(group->triangles[i]).tindices[1],
+					T(group->triangles[i]).nindices[1],
+					T(group->triangles[i]).cindices[1],
+					T(group->triangles[i]).vindices[2],
+					T(group->triangles[i]).tindices[2],
+					T(group->triangles[i]).nindices[2],
+					T(group->triangles[i]).cindices[2]);
+			}
+			else if (mode & GLM_SMOOTH && mode & GLM_TEXTURE) {
 				fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
 					T(group->triangles[i]).vindices[0],
 					T(group->triangles[i]).tindices[0],
@@ -1971,7 +2036,20 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 					T(group->triangles[i]).vindices[2],
 					T(group->triangles[i]).tindices[2],
 					T(group->triangles[i]).nindices[2]);
-			} else if (mode & GLM_FLAT && mode & GLM_TEXTURE) {
+			}
+			else if (mode & GLM_FLAT && mode & GLM_TEXTURE && mode & GLM_VERTC) {
+				fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+					T(group->triangles[i]).vindices[0],
+					T(group->triangles[i]).findex,
+					T(group->triangles[i]).cindices[0],
+					T(group->triangles[i]).vindices[1],
+					T(group->triangles[i]).findex,
+					T(group->triangles[i]).cindices[1],
+					T(group->triangles[i]).vindices[2],
+					T(group->triangles[i]).findex,
+					T(group->triangles[i]).cindices[2]);
+			}
+			else if (mode & GLM_FLAT && mode & GLM_TEXTURE) {
 				fprintf(file, "f %d/%d %d/%d %d/%d\n",
 					T(group->triangles[i]).vindices[0],
 					T(group->triangles[i]).findex,
@@ -1979,7 +2057,20 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 					T(group->triangles[i]).findex,
 					T(group->triangles[i]).vindices[2],
 					T(group->triangles[i]).findex);
-			} else if (mode & GLM_TEXTURE) {
+			}
+			else if (mode & GLM_TEXTURE && mode & GLM_VERTC) {
+				fprintf(file, "f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+					T(group->triangles[i]).vindices[0],
+					T(group->triangles[i]).tindices[0],
+					T(group->triangles[i]).cindices[0],
+					T(group->triangles[i]).vindices[1],
+					T(group->triangles[i]).tindices[1],
+					T(group->triangles[i]).cindices[1],
+					T(group->triangles[i]).vindices[2],
+					T(group->triangles[i]).tindices[2],
+					T(group->triangles[i]).cindices[2]);
+			}
+			else if (mode & GLM_TEXTURE) {
 				fprintf(file, "f %d/%d %d/%d %d/%d\n",
 					T(group->triangles[i]).vindices[0],
 					T(group->triangles[i]).tindices[0],
@@ -1987,7 +2078,20 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 					T(group->triangles[i]).tindices[1],
 					T(group->triangles[i]).vindices[2],
 					T(group->triangles[i]).tindices[2]);
-			} else if (mode & GLM_SMOOTH) {
+			}
+			else if (mode & GLM_SMOOTH && mode & GLM_VERTC) {
+				fprintf(file, "f %d//%d/%d %d//%d/%d %d//%d/%d\n",
+					T(group->triangles[i]).vindices[0],
+					T(group->triangles[i]).nindices[0],
+					T(group->triangles[i]).cindices[0],
+					T(group->triangles[i]).vindices[1],
+					T(group->triangles[i]).nindices[1],
+					T(group->triangles[i]).cindices[1],
+					T(group->triangles[i]).vindices[2],
+					T(group->triangles[i]).nindices[2],
+					T(group->triangles[i]).cindices[2]);
+			}
+			else if (mode & GLM_SMOOTH) {
 				fprintf(file, "f %d//%d %d//%d %d//%d\n",
 					T(group->triangles[i]).vindices[0],
 					T(group->triangles[i]).nindices[0],
@@ -1995,7 +2099,20 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 					T(group->triangles[i]).nindices[1],
 					T(group->triangles[i]).vindices[2],
 					T(group->triangles[i]).nindices[2]);
-			} else if (mode & GLM_FLAT) {
+			}
+			else if (mode & GLM_FLAT && mode & GLM_VERTC) {
+				fprintf(file, "f %d//%d/%d %d//%d/%d %d//%d/%d\n",
+					T(group->triangles[i]).vindices[0],
+					T(group->triangles[i]).findex,
+					T(group->triangles[i]).cindices[0],
+					T(group->triangles[i]).vindices[1],
+					T(group->triangles[i]).findex,
+					T(group->triangles[i]).cindices[1],
+					T(group->triangles[i]).vindices[2],
+					T(group->triangles[i]).findex,
+					T(group->triangles[i]).cindices[2]);
+			}
+			else if (mode & GLM_FLAT) {
 				fprintf(file, "f %d//%d %d//%d %d//%d\n",
 					T(group->triangles[i]).vindices[0],
 					T(group->triangles[i]).findex,
@@ -2003,7 +2120,17 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 					T(group->triangles[i]).findex,
 					T(group->triangles[i]).vindices[2],
 					T(group->triangles[i]).findex);
-			} else {
+			}
+			else if (mode & GLM_VERTC) {
+				fprintf(file, "f %d/%d %d/%d %d/%d\n",
+					T(group->triangles[i]).vindices[0],
+					T(group->triangles[i]).cindices[0],
+					T(group->triangles[i]).vindices[1],
+					T(group->triangles[i]).cindices[1],
+					T(group->triangles[i]).vindices[2],
+					T(group->triangles[i]).cindices[2]);
+			}
+			else {
 				fprintf(file, "f %d %d %d\n",
 					T(group->triangles[i]).vindices[0],
 					T(group->triangles[i]).vindices[1],

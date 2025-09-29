@@ -33,6 +33,7 @@ typedef void GLvoid;
 #define GLM_COLOR    (1 << 3)       /* render with colors */
 #define GLM_MATERIAL (1 << 4)       /* render with materials */
 #define GLM_FOG      (1 << 5)		/* render with shader */
+#define GLM_VERTC    (1 << 6)       /* render with vertex colors */
 
 //for texturing
 typedef struct												// Create A Structure
@@ -72,6 +73,7 @@ typedef struct _GLMtriangle
 	GLuint vindices[3];           /* array of triangle vertex indices */
 	GLuint nindices[3];           /* array of triangle normal indices */
 	GLuint tindices[3];           /* array of triangle texcoord indices*/
+	GLuint cindices[3];           /* array of triangle color indices */
 	GLuint findex;                /* index of triangle facet normal */
 } GLMtriangle;
 
@@ -101,6 +103,9 @@ typedef struct _GLMmodel
 
 	GLuint   numtexcoords;        /* number of texcoords in model */
 	GLfloat* texcoords;           /* array of texture coordinates */
+
+	GLuint   numcolors;           /* number of colors in model */
+	GLfloat* colors;              /* array of color values rgba */
 
 	GLuint   numfacetnorms;       /* number of facetnorms in model */
 	GLfloat* facetnorms;          /* array of facetnorms */
