@@ -70,7 +70,7 @@ void ColorCompMesh::Update()
 	int vertex_count = static_cast<int>(mesh->numvertices);
 	if (vertex_count <= 0)
 		return;
-	GLuint cbo = md->AddColorVBO();
+	GLuint cbo = md->AddColorVBO(vertex_count);
 	size_t vbo_size = vertex_count * sizeof(float) * 3;
 	size_t cbo_size = vertex_count * sizeof(float) * 4;
 	int si = vd->GetShuffle();
@@ -86,7 +86,7 @@ void ColorCompMesh::Update()
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");
-	if (!kernel_index0)
+	if (kernel_index0 < 0)
 		return;
 
 	int brick_num = vd->GetTexture()->get_brick_num();
@@ -104,10 +104,11 @@ void ColorCompMesh::Update()
 			continue;
 
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(b);
-		GLint mid = 0;
+		GLint tid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
+			tid = vd->GetVR()->load_brick_mask(b);
+		else
+			vd->GetVR()->load_brick(b);
 		GLint lid = vd->GetVR()->load_brick_label(b);
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		cl_int3 voxel_cnt = { cl_int(nx), cl_int(ny), cl_int(nz) };
@@ -115,8 +116,6 @@ void ColorCompMesh::Update()
 
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		if (m_use_sel)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		flvr::Argument arg_label =
 			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_ONLY, lid, sizeof(unsigned int) * nx * ny * nz, region);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo, vbo_size);
@@ -130,5 +129,7 @@ void ColorCompMesh::Update()
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 1, global_size, local_size);
 	}
+	kernel_prog->releaseAll();
+	md->SetGpuDirty();
 }
 

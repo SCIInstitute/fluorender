@@ -72,7 +72,7 @@ __kernel void kernel_0(
 	float intensity = read_imagef(
 		volume,
 		CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR,
-		tex_coord).x;
+		(int4)(voxel_idx.x, voxel_idx.y, voxel_idx.z, 1)).x;
 
 	// Flat index into label array
 	int flat_idx = voxel_idx.z * voxel_cnt.y * voxel_cnt.x +

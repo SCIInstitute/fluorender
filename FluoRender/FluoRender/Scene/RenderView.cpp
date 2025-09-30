@@ -10795,7 +10795,7 @@ void RenderView::ProcessIdle(IdleState& state)
 			//event.RequestMore();
 			glbin_vol_selector.SetInitMask(2);
 			if (glbin_vol_selector.GetAutoThreshold())
-				state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold });
+				state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 			glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == InteractiveMode::GrowRuler)
@@ -11044,7 +11044,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_vol_selector.ResetMousePos();
 			glbin_vol_selector.SetInitMask(1);
 			if (glbin_vol_selector.GetAutoThreshold())
-				glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold });
+				glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			glbin_vol_selector.SetInitMask(3);
 			if (m_int_mode == InteractiveMode::GrowRuler && cur_vd)
@@ -11134,7 +11134,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			//segment volumes
 			m_paint_enable = true;
 			if (glbin_vol_selector.GetAutoThreshold())
-				vc.insert({ gstBrushThreshold, gstCompThreshold });
+				vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			if (glbin_vol_selector.GetSelectMode() == flrd::SelectMode::Mesh)
 			{
@@ -11179,7 +11179,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			//segment volume, calculate center, add ruler point
 			m_paint_enable = true;
 			if (glbin_vol_selector.GetAutoThreshold())
-				vc.insert({ gstBrushThreshold, gstCompThreshold });
+				vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
 			if (glbin_ruler_handler.GetRulerMode() == flrd::RulerMode::Probe)
 				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);

@@ -223,6 +223,7 @@ private:
 	wxRadioButton* m_output_rgb_rb;
 	wxButton* m_output_random_btn;
 	wxButton* m_output_size_btn;
+	wxButton* m_output_mesh_btn;
 	wxButton* m_output_id_btn;
 	wxButton* m_output_sn_btn;
 	//distance
@@ -388,6 +389,7 @@ private:
 	void OnOutputTypeRadio(wxCommandEvent& event);
 	void OnOutputChannels(wxCommandEvent& event);
 	void OnOutputAnnotData(wxCommandEvent& event);
+	void OnOutputMeshData(wxCommandEvent& event);
 	//distance
 	void OnDistNeighborCheck(wxCommandEvent& event);
 	void OnDistAllChanCheck(wxCommandEvent& event);

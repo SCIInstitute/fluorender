@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <VertexArray.h>
 #include <VolumeRenderer.h>
 #include <MeshRenderer.h>
+#include <VolumeSelector.h>
+#include <CompGenerator.h>
 #include <KernelProgram.h>
 #include <VolKernel.h>
 #include <ConvVolMeshCode.h>
@@ -158,7 +160,8 @@ bool ConvVolMesh::GetAutoThreshold()
 	if (threshold != m_iso)
 	{
 		m_iso = threshold;
-		//glbin_comp_generator.SetThresh(m_scl_translate);
+		glbin_comp_generator.SetThresh(m_iso);
+		glbin_vol_selector.SetBrushSclTranslate(m_iso);
 		return true;
 	}
 	return false;
@@ -375,11 +378,12 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	}
 
 	//allocate vertex buffer
-	GLuint vbo_id = m_mesh->AddCoordVBO(vsize);
+	int vertex_size = vsize * 15;
+	GLuint vbo_id = m_mesh->AddCoordVBO(vertex_size);
 	if (m_merged)
 		m_mesh->DeleteNormalVBO();
-	size_t vbo_size = sizeof(float) * vsize * 45;
-	int vsize2 = 0;//reset vsize
+	size_t vbo_size = sizeof(float) * vertex_size * 3;
+	vertex_size = 0;//reset vertex size
 
 	//marching cubes
 	for (size_t i = 0; i < brick_num; ++i)
@@ -410,7 +414,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		if (m_use_sel)
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, vbo_id, vbo_size);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vsize2));
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int), (void*)(&vertex_size));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 24, (void*)(cubeTable));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256, (void*)(edgeTable));
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * 256 * 16, (void*)triTable);
@@ -455,12 +459,12 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		kernel_prog->executeKernel(kernel_idx1, 3, global_size, local_size);
 	}
 	//read back vsize
-	kernel_prog->readBuffer(sizeof(int), &vsize2, &vsize2);
+	kernel_prog->readBuffer(sizeof(int), &vertex_size, &vertex_size);
 	//kernel_prog->readBuffer(vbo_arg, &verts[0]);
 
 	//update triangle num
-	m_mesh->SetVertexNum(vsize2);
-	m_mesh->SetTriangleNum(vsize2 / 3);
+	m_mesh->SetVertexNum(vertex_size);
+	m_mesh->SetTriangleNum(vertex_size / 3);
 	double spcx, spcy, spcz;
 	vd->GetSpacings(spcx, spcy, spcz);
 	m_mesh->SetScaling(spcx, spcy, spcz);
@@ -546,7 +550,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	GLuint vbo_id = m_mesh->GetCoordVBO();
 	size_t vbo_size = sizeof(float) * idx_num * 3;
 	//add index vbo
-	GLuint ibo_id = m_mesh->ConvertIndexed(idx_num);
+	GLuint ibo_id = m_mesh->AddIndexVBO(idx_num);
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
 	//get epsilon
 	double spcx, spcy, spcz;

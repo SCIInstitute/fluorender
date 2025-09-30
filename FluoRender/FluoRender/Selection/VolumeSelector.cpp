@@ -745,6 +745,7 @@ bool VolumeSelector::GetAutoThreshold()
 	{
 		m_scl_translate = threshold;
 		glbin_comp_generator.SetThresh(m_scl_translate);
+		glbin_conv_vol_mesh->SetIsoValue(m_scl_translate);
 		return true;
 	}
 	return false;

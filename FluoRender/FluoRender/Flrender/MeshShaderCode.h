@@ -241,7 +241,7 @@ inline constexpr const char* MSH_FRAG_BODY_SIMPLE = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_BODY_VERTEX_COLOR = R"GLSHDR(
 	//MSH_FRAG_BODY_VERTEX_COLOR
-	c *= InColor;
+	c *= OutColor;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_MATL_LIGHT = R"GLSHDR(

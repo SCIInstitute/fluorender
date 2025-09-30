@@ -86,11 +86,12 @@ public:
 
 	//allocate vbo
 	GLuint AddCoordVBO(int vertex_size);
-	GLuint ConvertIndexed(size_t vsize);//convert to vbo and index list
 	void UpdateCoordVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
 	GLuint GetCoordVBO();
+	GLuint AddIndexVBO(size_t vsize);//convert to vbo and index list
 	void UpdateNormalVBO(const std::vector<float>& vbo);
 	void DeleteNormalVBO();
+	GLuint AddColorVBO(int vertex_size);
 
 	void SetVertexNum(unsigned int num);
 	unsigned int GetVertexNum();
@@ -111,6 +112,8 @@ public:
 	bool GetLighting();
 	void SetFlatShading(bool bval);
 	bool GetFlatShading();
+	void SetVertexColor(bool val);
+	bool GetVertexColor();
 	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
 	bool GetFog();
 	void SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
@@ -170,6 +173,7 @@ private:
 	//lighting
 	bool m_light;
 	bool m_flat_shading;
+	bool m_vertex_color;
 	bool m_fog;
 	fluo::Color m_mat_amb;
 	fluo::Color m_mat_diff;

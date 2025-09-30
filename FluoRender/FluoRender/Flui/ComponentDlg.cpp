@@ -40,9 +40,12 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <VolumeSelector.h>
 #include <Colocalize.h>
+#include <BaseConvVolMesh.h>
+#include <ColorCompMesh.h>
 #include <Ruler.h>
 #include <RulerAlign.h>
 #include <VolumeData.h>
+#include <RenderView.h>
 #include <CurrentObjects.h>
 #include <DataManager.h>
 #include <ModalDlg.h>
@@ -860,9 +863,11 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer *sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Output:",
 		wxDefaultPosition, wxDefaultSize);
-	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Random Colors",
+	m_output_random_btn = new wxButton(page, ID_OutputRandomBtn, "Colors",
 		wxDefaultPosition, wxDefaultSize);
-	m_output_size_btn = new wxButton(page, ID_OutputSizeBtn, "Size-based",
+	m_output_size_btn = new wxButton(page, ID_OutputSizeBtn, "Sizes",
+		wxDefaultPosition, wxDefaultSize);
+	m_output_mesh_btn = new wxButton(page, wxID_ANY, "Mesh",
 		wxDefaultPosition, wxDefaultSize);
 	m_output_id_btn = new wxButton(page, ID_OutputIdBtn, "IDs",
 		wxDefaultPosition, wxDefaultSize);
@@ -872,10 +877,12 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	m_output_size_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputChannels, this);
 	m_output_id_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotData, this);
 	m_output_sn_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputAnnotData, this);
+	m_output_mesh_btn->Bind(wxEVT_BUTTON, &ComponentDlg::OnOutputMeshData, this);
 	sizer4_2->Add(5, 5);
 	sizer4_2->Add(st, 0, wxALIGN_CENTER);
 	sizer4_2->Add(m_output_random_btn, 1, wxEXPAND);
 	sizer4_2->Add(m_output_size_btn, 1, wxEXPAND);
+	sizer4_2->Add(m_output_mesh_btn, 1, wxEXPAND);
 	sizer4_2->Add(m_output_id_btn, 1, wxEXPAND);
 	sizer4_2->Add(m_output_sn_btn, 1, wxEXPAND);
 	sizer4_2->Add(5, 5);
@@ -2005,7 +2012,7 @@ void ComponentDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 	bool bval = m_use_sel_gen_chk->GetValue();
 	glbin_comp_generator.SetUseSel(bval);
 	if (glbin_comp_generator.GetAutoThreshold())
-		vc.insert({ gstBrushThreshold, gstCompThreshold });
+		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 	glbin_comp_generator.GenerateComp();
 	vc.insert(gstCompGenOutput);
 	FluoRefresh(2, vc);
@@ -2309,6 +2316,27 @@ void ComponentDlg::OnOutputAnnotData(wxCommandEvent& event)
 	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
 }
 
+void ComponentDlg::OnOutputMeshData(wxCommandEvent& event)
+{
+	auto vd = glbin_current.vol_data.lock();
+	glbin_conv_vol_mesh->SetVolumeData(vd);
+	glbin_conv_vol_mesh->Convert();
+	glbin_conv_vol_mesh->MergeVertices(true);
+	auto md = glbin_conv_vol_mesh->GetMeshData();
+	glbin_color_comp_mesh.SetVolumeData(vd);
+	glbin_color_comp_mesh.SetMeshData(md);
+	glbin_color_comp_mesh.Update();
+	if (md)
+	{
+		glbin_data_manager.AddMeshData(md);
+		auto view = glbin_current.render_view.lock();
+		if (view)
+			view->AddMeshData(md);
+	}
+	FluoRefresh(0, { gstVolMeshThresh, gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
+		{ glbin_current.GetViewId() });
+}
+
 //distance
 void ComponentDlg::OnDistNeighborCheck(wxCommandEvent& event)
 {
@@ -2398,7 +2426,7 @@ void ComponentDlg::OnGenerate(wxCommandEvent& event)
 	bool bval = m_use_sel_gen_chk->GetValue();
 	glbin_comp_generator.SetUseSel(bval);
 	if (glbin_comp_generator.GetAutoThreshold())
-		vc.insert({ gstBrushThreshold, gstCompThreshold });
+		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 	glbin_comp_generator.Compute();
 	vc.insert({ gstCompGenOutput, gstRecordCmd });
 	FluoRefresh(2, vc);

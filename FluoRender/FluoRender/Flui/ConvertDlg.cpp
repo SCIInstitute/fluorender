@@ -332,7 +332,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		//glbin_current.SetMeshData(md);
 	}
 
-	FluoRefresh(0, { gstVolMeshThresh, gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
+	FluoRefresh(0, { gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
 		{ glbin_current.GetViewId() });
 }
 

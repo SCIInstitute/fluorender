@@ -129,10 +129,10 @@ namespace flvr
 		clear_brick_buf();
 		clear_tex_current();
 
-		if (va_slices_)
-			delete va_slices_;
-		if (va_wirefm_)
-			delete va_wirefm_;
+		//if (va_slices_)
+		//	delete va_slices_;
+		//if (va_wirefm_)
+		//	delete va_wirefm_;
 	}
 
 	//set the texture for rendering

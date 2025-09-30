@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolKernel.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
+#include <BaseConvVolMesh.h>
 #include <CompSelector.h>
 #include <TableHistParams.h>
 #include <BaseTreeFile.h>
@@ -2446,6 +2447,7 @@ bool ComponentGenerator::GetAutoThreshold()
 	{
 		m_thresh = threshold;
 		glbin_vol_selector.SetBrushSclTranslate(m_thresh);
+		glbin_conv_vol_mesh->SetIsoValue(m_thresh);
 		return true;
 	}
 	return false;

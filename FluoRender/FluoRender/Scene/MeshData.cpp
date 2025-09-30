@@ -42,6 +42,7 @@ MeshData::MeshData() :
 	m_draw_bounds(false),
 	m_light(true),
 	m_flat_shading(false),
+	m_vertex_color(false),
 	m_mat_amb(0.3, 0.3, 0.3),
 	m_mat_diff(1.0, 0.0, 0.0),
 	m_mat_spec(0.2, 0.2, 0.2),
@@ -129,7 +130,7 @@ void MeshData::Save(const std::wstring& filename)
 	if (m_data)
 	{
 		std::string str = ws2s(filename);
-		glmWriteOBJ(m_data.get(), str.c_str(), GLM_SMOOTH);
+		glmWriteOBJ(m_data.get(), str.c_str(), GLM_SMOOTH | GLM_VERTC);
 		m_data_path = filename;
 	}
 }
@@ -216,6 +217,7 @@ void MeshData::SubmitData()
 						color_buffer.push_back(m_data->colors[3 * key.vc]);
 						color_buffer.push_back(m_data->colors[3 * key.vc + 1]);
 						color_buffer.push_back(m_data->colors[3 * key.vc + 2]);
+						color_buffer.push_back(m_data->colors[4 * key.vc + 3]);
 					}
 				}
 			}
@@ -250,7 +252,7 @@ void MeshData::SubmitData()
 	{
 		va_model->add_buffer(flvr::VABuf_Color);
 		va_model->buffer_data(flvr::VABuf_Color, sizeof(float) * color_buffer.size(), &color_buffer[0], GL_STATIC_DRAW);
-		va_model->attrib_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Color
+		va_model->attrib_pointer(3, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Color
 	}
 
 	// Index buffer
@@ -316,7 +318,7 @@ void MeshData::ReturnData()
 	std::vector<float> colors;
 	if (bcolor)
 	{
-		colors.resize(3 * num_vertices);
+		colors.resize(4 * num_vertices);
 		void* color_ptr = va_model->map_buffer(flvr::VABuf_Color, GL_READ_ONLY);
 		if (!color_ptr)
 			return;
@@ -347,7 +349,7 @@ void MeshData::ReturnData()
 	if (btexcoord && !m_data->texcoords)
 		m_data->texcoords = (GLfloat*)malloc(sizeof(GLfloat) * 2 * (num_vertices + 1));
 	if (bcolor && !m_data->colors)
-		m_data->colors = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (num_vertices + 1));
+		m_data->colors = (GLfloat*)malloc(sizeof(GLfloat) * 4 * (num_vertices + 1));
 
 	// Transform setup
 	glm::vec3 center(m_center.x(), m_center.y(), m_center.z());
@@ -390,9 +392,10 @@ void MeshData::ReturnData()
 
 		if (bcolor)
 		{
-			m_data->colors[3 * i + 0] = colors[3 * (i - 1)];
-			m_data->colors[3 * i + 1] = colors[3 * (i - 1) + 1];
-			m_data->colors[3 * i + 2] = colors[3 * (i - 1) + 2];
+			m_data->colors[4 * i + 0] = colors[4 * (i - 1)];
+			m_data->colors[4 * i + 1] = colors[4 * (i - 1) + 1];
+			m_data->colors[4 * i + 2] = colors[4 * (i - 1) + 2];
+			m_data->colors[4 * i + 3] = colors[4 * (i - 1) + 3];
 		}
 	}
 
@@ -543,7 +546,7 @@ void MeshData::ClearData()
 
 GLuint MeshData::AddCoordVBO(int vertex_size)
 {
-	std::vector<float> verts(vertex_size * 45);
+	std::vector<float> verts(vertex_size * 3);
 	size_t vbo_size = sizeof(float) * verts.size();
 	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray(true, false);
 	va_model->buffer_data(
@@ -555,7 +558,7 @@ GLuint MeshData::AddCoordVBO(int vertex_size)
 	return vbo_id;
 }
 
-GLuint MeshData::ConvertIndexed(size_t vsize)
+GLuint MeshData::AddIndexVBO(size_t vsize)
 {
 	flvr::VertexArray* va_model = m_mr->GetVertexArray();
 	if (!va_model)
@@ -626,6 +629,26 @@ void MeshData::DeleteNormalVBO()
 	if (!va_model)
 		return;
 	va_model->delete_buffer(flvr::VABuf_Normal);
+}
+
+GLuint MeshData::AddColorVBO(int vertex_size)
+{
+	std::vector<float> verts(vertex_size * 4);
+	size_t vbo_size = sizeof(float) * verts.size();
+	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	if (!va_model)
+		return 0;
+	va_model->add_buffer(flvr::VABuf_Color);
+	va_model->buffer_data(
+		flvr::VABuf_Color, vbo_size,
+		&verts[0], GL_DYNAMIC_DRAW);
+	va_model->attrib_pointer(
+		3, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
+	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Color));
+	if (m_data)
+		m_data->numcolors = static_cast<GLuint>(vertex_size);
+	SetVertexColor(true);
+	return vbo_id;
 }
 
 void MeshData::SetVertexNum(unsigned int num)
@@ -743,6 +766,17 @@ void MeshData::SetFlatShading(bool bval)
 bool MeshData::GetFlatShading()
 {
 	return m_flat_shading;
+}
+
+void MeshData::SetVertexColor(bool val)
+{
+	m_vertex_color = val;
+	if (m_mr) m_mr->set_color(val);
+}
+
+bool MeshData::GetVertexColor()
+{
+	return m_vertex_color;
 }
 
 //fog
@@ -1158,6 +1192,7 @@ void MeshData::BuildMesh()
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
 	SetFlatShading(m_data->numnormals == 0);
+	SetVertexColor(m_data->numcolors > 0);
 
 	SubmitData();
 }
