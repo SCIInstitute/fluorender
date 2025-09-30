@@ -66,7 +66,7 @@ namespace flvr
 					peel_ == peel &&
 					tex_ == tex &&
 					light_ == light &&
-					normal_ == normal,
+					normal_ == normal &&
 					color_ == color);
 		}
 
