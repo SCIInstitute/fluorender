@@ -280,25 +280,25 @@ namespace flvr
 	ShaderProgram* MshShaderFactory::shader(int type,
 		int peel, bool tex,
 		bool fog, bool light,
-		bool normal)
+		bool normal, bool color)
 	{
 		if(prev_shader_ >= 0)
 		{
-			if(shader_[prev_shader_]->match(type, peel, tex, fog, light, normal))
+			if(shader_[prev_shader_]->match(type, peel, tex, fog, light, normal, color))
 			{
 				return shader_[prev_shader_]->program();
 			}
 		}
 		for(unsigned int i=0; i<shader_.size(); i++)
 		{
-			if(shader_[i]->match(type, peel, tex, fog, light, normal))
+			if(shader_[i]->match(type, peel, tex, fog, light, normal, color))
 			{
 				prev_shader_ = i;
 				return shader_[i]->program();
 			}
 		}
 
-		MshShader* s = new MshShader(type, peel, tex, fog, light, normal);
+		MshShader* s = new MshShader(type, peel, tex, fog, light, normal, color);
 		if(s->create())
 		{
 			delete s;

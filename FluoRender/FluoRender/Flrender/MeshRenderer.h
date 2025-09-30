@@ -110,6 +110,10 @@ namespace flvr
 		{ flat_shading_ = val; }
 		bool get_flat_shading()
 		{ return flat_shading_; }
+		void set_color(bool val)
+		{ color_ = val; }
+		bool get_color()
+		{ return color_; }
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end)
 		{ fog_ = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
 		bool get_fog()
@@ -132,6 +136,8 @@ namespace flvr
 		//lighting
 		bool light_;
 		bool flat_shading_;
+		//color vertex
+		bool color_;
 		//fog
 		bool fog_;
 		double m_fog_intensity;

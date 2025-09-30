@@ -49,6 +49,7 @@ namespace flvr
 		limit_(-1),
 		light_(true),
 		flat_shading_(false),
+		color_(false),
 		fog_(false),
 		alpha_(1.0),
 		va_model_(0)
@@ -62,6 +63,7 @@ namespace flvr
 		limit_(copy.limit_),
 		light_(copy.light_),
 		flat_shading_(copy.flat_shading_),
+		color_(copy.color_),
 		fog_(copy.fog_),
 		alpha_(copy.alpha_),
 		va_model_(0)
@@ -136,7 +138,7 @@ namespace flvr
 
 			//set up shader
 			shader = glbin_msh_shader_factory.shader(0,
-				depth_peel_, tex, fog_, light_, flat_shading_);
+				depth_peel_, tex, fog_, light_, flat_shading_, color_);
 			if (shader)
 			{
 				if (!shader->valid())
@@ -217,7 +219,7 @@ namespace flvr
 		//set up shader
 		ShaderProgram* shader = 0;
 		shader = glbin_msh_shader_factory.shader(0,
-			peel, tex, fog_, light, false);
+			peel, tex, fog_, light, false, false);
 		if (shader)
 		{
 			if (!shader->valid())
@@ -271,7 +273,7 @@ namespace flvr
 		//set up shader
 		ShaderProgram* shader = 0;
 		shader = glbin_msh_shader_factory.shader(1,
-			0, false, false, false, false);
+			0, false, false, false, false, false);
 		if (shader)
 		{
 			if (!shader->valid())
