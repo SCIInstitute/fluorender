@@ -214,9 +214,9 @@ void MeshData::SubmitData()
 					// Color
 					if (bcolor)
 					{
-						color_buffer.push_back(m_data->colors[3 * key.vc]);
-						color_buffer.push_back(m_data->colors[3 * key.vc + 1]);
-						color_buffer.push_back(m_data->colors[3 * key.vc + 2]);
+						color_buffer.push_back(m_data->colors[4 * key.vc]);
+						color_buffer.push_back(m_data->colors[4 * key.vc + 1]);
+						color_buffer.push_back(m_data->colors[4 * key.vc + 2]);
 						color_buffer.push_back(m_data->colors[4 * key.vc + 3]);
 					}
 				}
