@@ -88,7 +88,7 @@ public:
 	GLuint AddCoordVBO(int vertex_size);
 	GLuint ConvertIndexed(size_t vsize);//convert to vbo and index list
 	void UpdateCoordVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
-	GLuint GetVBO();
+	GLuint GetCoordVBO();
 	void UpdateNormalVBO(const std::vector<float>& vbo);
 	void DeleteNormalVBO();
 

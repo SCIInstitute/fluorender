@@ -543,7 +543,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	size_t global_size2[1] = { idx_num };
 
 	//get vbo
-	GLuint vbo_id = m_mesh->GetVBO();
+	GLuint vbo_id = m_mesh->GetCoordVBO();
 	size_t vbo_size = sizeof(float) * idx_num * 3;
 	//add index vbo
 	GLuint ibo_id = m_mesh->ConvertIndexed(idx_num);

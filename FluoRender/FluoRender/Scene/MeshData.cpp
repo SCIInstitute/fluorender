@@ -592,7 +592,7 @@ void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vec
 	}
 }
 
-GLuint MeshData::GetVBO()
+GLuint MeshData::GetCoordVBO()
 {
 	flvr::VertexArray* va_model = m_mr->GetVertexArray();
 	if (!va_model)
