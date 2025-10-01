@@ -36,7 +36,6 @@ __kernel void kernel_0(
 	__global float* color_vbo,            // float4 per vertex
 	const int3 voxel_cnt,                 // brick dimensions
 	const int3 vol_org,                   // brick origin in voxel space
-	const float3 voxel_size,              // voxel spacing
 	const int si,                        // shuffle index
 	const int num_vertices)
 {
@@ -50,7 +49,7 @@ __kernel void kernel_0(
 		vertex_vbo[gid * 3 + 2]);
 
 	// Convert to voxel-space index relative to brick origin
-	int3 voxel_idx = convert_int3(pos / voxel_size) - vol_org;
+	int3 voxel_idx = convert_int3(pos) - vol_org;
 
 	// Bounds check
 	if (voxel_idx.x < 0 || voxel_idx.x >= voxel_cnt.x ||
@@ -71,7 +70,7 @@ __kernel void kernel_0(
 	// Sample intensity from volume texture
 	float intensity = read_imagef(
 		volume,
-		CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR,
+		CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR,
 		(int4)(voxel_idx.x, voxel_idx.y, voxel_idx.z, 1)).x;
 
 	// Flat index into label array

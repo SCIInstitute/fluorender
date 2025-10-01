@@ -74,9 +74,6 @@ void ColorCompMesh::Update()
 	size_t vbo_size = vertex_count * sizeof(float) * 3;
 	size_t cbo_size = vertex_count * sizeof(float) * 4;
 	int si = vd->GetShuffle();
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	cl_float3 voxel_size = { cl_float(spcx), cl_float(spcy), cl_float(spcz) };
 
 	long bits = vd->GetBits();
 	float max_int = static_cast<float>(vd->GetMaxValue());
@@ -122,7 +119,6 @@ void ColorCompMesh::Update()
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, cbo, cbo_size);
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&voxel_cnt));
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&vol_org));
-		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&voxel_size));
 		kernel_prog->setKernelArgConst(sizeof(cl_uint), (void*)(&si));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 
