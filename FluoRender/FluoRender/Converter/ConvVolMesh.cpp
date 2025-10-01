@@ -380,8 +380,10 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	//allocate vertex buffer
 	int vertex_size = vsize * 15;
 	GLuint vbo_id = m_mesh->AddCoordVBO(vertex_size);
-	if (m_merged)
+	if (m_mesh->GetNormalVBO())
 		m_mesh->DeleteNormalVBO();
+	if (m_mesh->GetColorVBO())
+		m_mesh->DeleteColorVBO();
 	size_t vbo_size = sizeof(float) * vertex_size * 3;
 	vertex_size = 0;//reset vertex size
 

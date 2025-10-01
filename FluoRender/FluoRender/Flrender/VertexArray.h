@@ -33,6 +33,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <set>
 
 #ifndef __glew_h__
 typedef ptrdiff_t GLsizeiptr;
@@ -57,6 +58,13 @@ namespace flvr
 		VABuf_Normal,
 		VABuf_Tex,
 		VABuf_Color
+	};
+	enum VAAttribIndex
+	{
+		VAAttrib_Coord = 0,
+		VAAttrib_Normal,
+		VAAttrib_Tex,
+		VAAttrib_Color
 	};
 	class VertexArray;
 	class VertexArrayManager;
@@ -135,6 +143,7 @@ namespace flvr
 		void attrib_pointer(GLuint index,
 			GLint size, GLenum type, GLboolean normalized,
 			GLsizei stride, const GLvoid* pointer);
+		void remove_attrib_pointer(GLuint index);
 
 		//read back
 		void* map_buffer(VABufferType type, GLenum access);
@@ -208,7 +217,7 @@ namespace flvr
 		bool indexed_;
 		bool interleaved_;//normals and tex coords are saved with vertex coords
 		std::vector<std::shared_ptr<VertexBuffer>> buffer_list_;
-		std::vector<GLuint> attrib_pointer_list_;
+		std::set<VAAttribIndex> attrib_pointer_list_;
 		//parameters
 		std::map<unsigned int, double> param_list_;//generic
 		fluo::BBox bbox_;//for bounding box

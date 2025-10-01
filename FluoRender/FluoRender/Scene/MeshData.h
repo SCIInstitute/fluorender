@@ -89,9 +89,13 @@ public:
 	void UpdateCoordVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
 	GLuint GetCoordVBO();
 	GLuint AddIndexVBO(size_t vsize);//convert to vbo and index list
+	GLuint GetIndexVBO();
 	void UpdateNormalVBO(const std::vector<float>& vbo);
 	void DeleteNormalVBO();
+	GLuint GetNormalVBO();
 	GLuint AddColorVBO(int vertex_size);
+	void DeleteColorVBO();
+	GLuint GetColorVBO();
 
 	void SetVertexNum(unsigned int num);
 	unsigned int GetVertexNum();

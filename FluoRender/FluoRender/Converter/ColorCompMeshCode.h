@@ -107,7 +107,7 @@ __kernel void kernel_0(
 	color_vbo[gid * 4 + 0] = sel.x;
 	color_vbo[gid * 4 + 1] = sel.y;
 	color_vbo[gid * 4 + 2] = sel.z;
-	color_vbo[gid * 4 + 3] = intensity;
+	color_vbo[gid * 4 + 3] = 0.5;//intensity;
 }
 )CLKER";
 

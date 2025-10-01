@@ -782,9 +782,13 @@ namespace flvr
 		GLint size, GLenum type, GLboolean normalized,
 		GLsizei stride, const GLvoid* pointer)
 	{
-		//glEnableVertexAttribArray(index);
 		glVertexAttribPointer(index, size, type, normalized, stride, pointer);
-		attrib_pointer_list_.push_back(index);
+		attrib_pointer_list_.insert(static_cast<VAAttribIndex>(index));
+	}
+
+	void VertexArray::remove_attrib_pointer(GLuint index)
+	{
+		attrib_pointer_list_.erase(static_cast<VAAttribIndex>(index));
 	}
 
 	void* VertexArray::map_buffer(VABufferType type, GLenum access)
