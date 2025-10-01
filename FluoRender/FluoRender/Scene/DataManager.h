@@ -107,8 +107,7 @@ public:
 	//load mesh
 	void LoadMeshes(const std::vector<std::wstring>& files);
 	bool LoadMeshData(const std::wstring &filename);
-	//bool LoadMeshData(GLMmodel* mesh);
-	void AddMeshData(const std::shared_ptr<MeshData>& md);
+	bool AddMeshData(const std::shared_ptr<MeshData>& md);
 	size_t GetMeshNum();
 	std::shared_ptr<MeshData> GetMeshData(size_t index);
 	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);

@@ -122,7 +122,7 @@ public:
 	bool GetFog();
 	void SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
 		double shine = 30.0, double alpha = 1.0);
-	void SetColor(fluo::Color &color, int type);
+	void SetColor(const fluo::Color &color, int type);
 	fluo::Color GetColor();
 	void SetFloat(double &value, int type);
 	void GetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,

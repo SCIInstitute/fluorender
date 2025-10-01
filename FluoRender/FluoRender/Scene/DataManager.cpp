@@ -841,8 +841,14 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 //	return true;
 //}
 
-void DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
+bool DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
 {
+	//check if already exist
+	for (auto& it : m_md_list)
+		if (it == md)
+			return false;
+
+	//make sure unique name
 	std::wstring name = md->GetName();
 	std::wstring new_name = name;
 	size_t i;
@@ -851,6 +857,7 @@ void DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
 	if (i>1)
 		md->SetName(new_name);
 	m_md_list.push_back(md);
+	return true;
 }
 
 std::shared_ptr<VolumeData> DataManager::GetVolumeData(size_t index)

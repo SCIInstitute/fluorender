@@ -71,6 +71,7 @@ void ColorCompMesh::Update()
 	if (vertex_count <= 0)
 		return;
 	GLuint cbo = md->AddColorVBO(vertex_count);
+	md->SetColor(fluo::Color(1.0), MESH_COLOR_DIFF);
 	size_t vbo_size = vertex_count * sizeof(float) * 3;
 	size_t cbo_size = vertex_count * sizeof(float) * 4;
 	int si = vd->GetShuffle();

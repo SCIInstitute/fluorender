@@ -2320,15 +2320,15 @@ void ComponentDlg::OnOutputMeshData(wxCommandEvent& event)
 {
 	auto vd = glbin_current.vol_data.lock();
 	glbin_conv_vol_mesh->SetVolumeData(vd);
-	glbin_conv_vol_mesh->Convert();
+	glbin_conv_vol_mesh->Update(true);
 	glbin_conv_vol_mesh->MergeVertices(true);
 	auto md = glbin_conv_vol_mesh->GetMeshData();
 	glbin_color_comp_mesh.SetVolumeData(vd);
 	glbin_color_comp_mesh.SetMeshData(md);
 	glbin_color_comp_mesh.Update();
-	if (md)
+	if (md &&
+		glbin_data_manager.AddMeshData(md))
 	{
-		glbin_data_manager.AddMeshData(md);
 		auto view = glbin_current.render_view.lock();
 		if (view)
 			view->AddMeshData(md);

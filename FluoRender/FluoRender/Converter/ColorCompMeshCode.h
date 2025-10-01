@@ -30,13 +30,13 @@ DEALINGS IN THE SOFTWARE.
 
 inline constexpr const char* str_cl_color_comp_mesh = R"CLKER(
 __kernel void kernel_0(
-	image3d_t volume,                      // intensity volume (brick)
+	__read_only image3d_t volume,         // intensity volume (brick)
 	__global const unsigned int* label,   // label volume (flat array, brick-aligned)
 	__global const float* vertex_vbo,     // float3 per vertex
 	__global float* color_vbo,            // float4 per vertex
 	const int3 voxel_cnt,                 // brick dimensions
 	const int3 vol_org,                   // brick origin in voxel space
-	const int si,                        // shuffle index
+	const int si,                         // shuffle index
 	const int num_vertices)
 {
 	int gid = get_global_id(0);
@@ -64,13 +64,10 @@ __kernel void kernel_0(
 		return;
 	}
 
-	// Convert to normalized texture coordinates within brick
-	float3 tex_coord = (convert_float3(voxel_idx) + 0.5f) / convert_float3(voxel_cnt);
-
 	// Sample intensity from volume texture
 	float intensity = read_imagef(
 		volume,
-		CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR,
+		CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST,
 		(int4)(voxel_idx.x, voxel_idx.y, voxel_idx.z, 1)).x;
 
 	// Flat index into label array
@@ -83,31 +80,31 @@ __kernel void kernel_0(
 
 	if (lbl > 0)
 	{
-		uint cv = lbl % 0xfd;
-		cv = ((cv << si) & 0xff) | (cv >> (8 - si));
+		uint cv = lbl % 253;
+		cv = (cv << si) & 0xff | (cv >> (8 - si)) & 0xff;
 		float hue = (float)cv / 45.0f;
 		float p2 = 1.0f - hue + floor(hue);
 		float p3 = hue - floor(hue);
 
 		if (hue < 1.0f)
-			sel = (float4)(1.0f, p3, 1.0f, 1.0f);
+			sel = (float4)(1.0f, p3, 0.0f, 1.0f);
 		else if (hue < 2.0f)
-			sel = (float4)(p2, 1.0f, 1.0f, 1.0f);
+			sel = (float4)(p2, 1.0f, 0.0f, 1.0f);
 		else if (hue < 3.0f)
-			sel = (float4)(1.0f, 1.0f, p3, 1.0f);
+			sel = (float4)(0.0f, 1.0f, p3, 1.0f);
 		else if (hue < 4.0f)
-			sel = (float4)(1.0f, p2, 1.0f, 1.0f);
+			sel = (float4)(0.0f, p2, 1.0f, 1.0f);
 		else if (hue < 5.0f)
-			sel = (float4)(p3, 1.0f, 1.0f, 1.0f);
+			sel = (float4)(p3, 0.0f, 1.0f, 1.0f);
 		else
-			sel = (float4)(1.0f, 1.0f, p2, 1.0f);
+			sel = (float4)(1.0f, 0.0f, p2, 1.0f);
 	}
 
 	// Final RGBA: RGB from label, alpha from intensity
 	color_vbo[gid * 4 + 0] = sel.x;
 	color_vbo[gid * 4 + 1] = sel.y;
 	color_vbo[gid * 4 + 2] = sel.z;
-	color_vbo[gid * 4 + 3] = 0.5;//intensity;
+	color_vbo[gid * 4 + 3] = intensity;
 }
 )CLKER";
 

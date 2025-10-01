@@ -816,6 +816,8 @@ void MeshData::SetVertexColor(bool val)
 {
 	m_vertex_color = val;
 	if (m_mr) m_mr->set_color(val);
+	if (val)
+		SetColor(fluo::Color(1.0), MESH_COLOR_DIFF);
 }
 
 bool MeshData::GetVertexColor()
@@ -869,7 +871,7 @@ void MeshData::SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spe
 	}
 }
 
-void MeshData::SetColor(fluo::Color &color, int type)
+void MeshData::SetColor(const fluo::Color &color, int type)
 {
 	switch (type)
 	{
