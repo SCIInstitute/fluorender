@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
+#include <MeshData.h>
 #include <MeshGroup.h>
 #include <TrackGroup.h>
 #include <DataManager.h>
@@ -65,6 +66,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Ruler.h>
 #include <RulerHandler.h>
 #include <MovieMaker.h>
+#include <BaseConvVolMesh.h>
+#include <ColorCompMesh.h>
 #include <msk_reader.h>
 #include <msk_writer.h>
 #include <lbl_reader.h>
@@ -201,8 +204,12 @@ int ScriptProc::Run4DScript(TimeMask tm, bool rewind)
 					RunRulerSpeed();
 				else if (str == "generate_walk")
 					RunGenerateWalk();
+				else if (str == "convert_mesh")
+					RunConvertMesh();
 				else if (str == "save_volume")
 					RunSaveVolume();
+				else if (str == "save_mesh")
+					RunSaveMesh();
 				else if (str == "calculate")
 					RunCalculate();
 				else if (str == "add_cells")
@@ -1085,7 +1092,6 @@ void ScriptProc::RunSaveVolume()
 	name = REM_NUM(name);
 	if (name.empty())
 		return;
-	DataManager* data_manager = &glbin_data_manager;
 	for (auto& it : vlist)
 	{
 		//time
@@ -1107,6 +1113,40 @@ void ScriptProc::RunSaveVolume()
 			bake, compression,
 			center, rot, transl,
 			fix_size);
+	}
+}
+
+void ScriptProc::RunSaveMesh()
+{
+	if (!TimeCondition())
+		return;
+
+	auto view = m_view.lock();
+	if (!view)
+		return;
+
+	std::wstring pathname;
+	m_fconfig->Read("savepath", &pathname, std::wstring(L""));
+
+	int time_num = GetTimeNum();
+	int curf = view->m_tseq_cur_num;
+	std::wstring ext, name;
+	ext = L"obj";
+	name = GetSavePath(pathname, ext);
+	name = REM_EXT(name);
+	name = REM_NUM(name);
+	if (name.empty())
+		return;
+	for (int i = 0; i < glbin_data_manager.GetMeshNum(); ++i)
+	{
+		auto md = glbin_data_manager.GetMeshData(i);
+		if (!md)
+			continue;
+		std::wstring format = std::to_wstring(time_num);
+		int fr_length = format.length();
+		std::wstring str = name + L"_T" + MAKE_NUMW(curf, fr_length);
+		str += L"." + ext;
+		md->Save(str);
 	}
 }
 
@@ -2203,6 +2243,40 @@ void ScriptProc::RunGenerateWalk()
 	cycle.ReadData(filename);
 	cycle.Correct(0);
 	glbin_ruler_handler.GenerateWalk(length, dir, cycle);
+}
+
+void ScriptProc::RunConvertMesh()
+{
+	if (!TimeCondition())
+		return;
+	std::vector<std::shared_ptr<VolumeData>> vlist;
+	if (!GetVolumes(vlist))
+		return;
+
+	int mode;
+	m_fconfig->Read("mode", &mode, 0);
+
+	for (auto& it : vlist)
+	{
+		if (!it)
+			continue;
+		glbin_conv_vol_mesh->SetVolumeData(it);
+		glbin_conv_vol_mesh->Update(true);
+		glbin_conv_vol_mesh->MergeVertices(true);
+		auto md = glbin_conv_vol_mesh->GetMeshData();
+		if (it->GetLabel(false))
+		{
+			glbin_color_comp_mesh.SetVolumeData(it);
+			glbin_color_comp_mesh.SetMeshData(md);
+			glbin_color_comp_mesh.Update();
+		}
+		if (glbin_data_manager.AddMeshData(md))
+		{
+			auto view = m_view.lock();
+			if (view)
+				view->AddMeshData(md);
+		}
+	}
 }
 
 void ScriptProc::RunPython()

@@ -126,6 +126,7 @@ namespace flrd
 		void RunClearMask();
 		void RunSaveMask();
 		void RunSaveVolume();
+		void RunSaveMesh();
 		void RunCalculate();
 		void RunOpenCL();
 		void RunCompAnalysis();
@@ -145,6 +146,7 @@ namespace flrd
 		void RunRulerTransform();
 		void RunRulerSpeed();
 		void RunGenerateWalk();
+		void RunConvertMesh();
 		//break
 		bool RunBreak();
 		//python
