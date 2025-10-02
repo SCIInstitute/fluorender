@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
 #include <BaseConvVolMesh.h>
@@ -336,7 +336,7 @@ void ComponentGenerator::ShuffleID()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_shuffle_id_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_shuffle_id_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
@@ -466,7 +466,7 @@ void ComponentGenerator::SetIDBit(int psize)
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_set_bit_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_set_bit_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -611,7 +611,7 @@ void ComponentGenerator::Grow()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_brainbow_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_brainbow_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -715,7 +715,7 @@ void ComponentGenerator::DensityField()
 
 	//create program and kernels
 	//prog density
-	flvr::KernelProgram* kernel_prog_dens = glbin_vol_kernel_factory.kernel(str_cl_density_field_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog_dens = glbin_kernel_factory.kernel(str_cl_density_field_3d, bits, max_int);
 	if (!kernel_prog_dens)
 		return;
 	int kernel_dens_index0 = kernel_prog_dens->createKernel("kernel_0");
@@ -723,7 +723,7 @@ void ComponentGenerator::DensityField()
 	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
 	//prog grow
-	flvr::KernelProgram* kernel_prog_grow = glbin_vol_kernel_factory.kernel(str_cl_density_grow_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog_grow = glbin_kernel_factory.kernel(str_cl_density_grow_3d, bits, max_int);
 	if (!kernel_prog_grow)
 		return;
 	int kernel_grow_index0;
@@ -935,7 +935,7 @@ void ComponentGenerator::DistGrow()
 
 	//create program and kernels
 	//prog dist
-	flvr::KernelProgram* kernel_prog_dist = glbin_vol_kernel_factory.kernel(str_cl_dist_field_2d, bits, max_int);
+	flvr::KernelProgram* kernel_prog_dist = glbin_kernel_factory.kernel(str_cl_dist_field_2d, bits, max_int);
 	if (!kernel_prog_dist)
 		return;
 	int kernel_dist_index0;
@@ -951,7 +951,7 @@ void ComponentGenerator::DistGrow()
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	}
 
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_dist_grow_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_dist_grow_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -1106,7 +1106,7 @@ void ComponentGenerator::DistDensityField()
 
 	//create program and kernels
 	//prog dist
-	flvr::KernelProgram* kernel_prog_dist = glbin_vol_kernel_factory.kernel(str_cl_dist_field_2d, bits, max_int);
+	flvr::KernelProgram* kernel_prog_dist = glbin_kernel_factory.kernel(str_cl_dist_field_2d, bits, max_int);
 	if (!kernel_prog_dist)
 		return;
 	int kernel_dist_index0;
@@ -1122,7 +1122,7 @@ void ComponentGenerator::DistDensityField()
 		kernel_dist_index1 = kernel_prog_dist->createKernel("kernel_2");
 	}
 	//prog density
-	flvr::KernelProgram* kernel_prog_dens = glbin_vol_kernel_factory.kernel(str_cl_distdens_field_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog_dens = glbin_kernel_factory.kernel(str_cl_distdens_field_3d, bits, max_int);
 	if (!kernel_prog_dens)
 		return;
 	int kernel_dens_index0 = kernel_prog_dens->createKernel("kernel_0");
@@ -1130,7 +1130,7 @@ void ComponentGenerator::DistDensityField()
 	int kernel_dens_index2 = kernel_prog_dens->createKernel("kernel_2");
 
 	//prog grow
-	flvr::KernelProgram* kernel_prog_grow = glbin_vol_kernel_factory.kernel(str_cl_density_grow_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog_grow = glbin_kernel_factory.kernel(str_cl_density_grow_3d, bits, max_int);
 	if (!kernel_prog_grow)
 		return;
 	int kernel_grow_index0;
@@ -1401,7 +1401,7 @@ void ComponentGenerator::CleanNoise()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_cleanup_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_cleanup_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;
@@ -1547,7 +1547,7 @@ void ComponentGenerator::ClearBorders()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_clear_borders_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_clear_borders_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
@@ -1619,7 +1619,7 @@ void ComponentGenerator::FillBorders()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_fill_borders_3d, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_fill_borders_3d, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index;
@@ -1761,7 +1761,7 @@ void ComponentGenerator::GenerateDB()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//prog
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_comp_gen_db, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_comp_gen_db, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");//generate lut

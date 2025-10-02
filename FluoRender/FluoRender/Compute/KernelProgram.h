@@ -53,7 +53,7 @@ typedef unsigned int GLuint;
 
 namespace flvr
 {
-	class VolKernel;
+	class Kernel;
 	//argument
 	struct Argument
 	{
@@ -207,7 +207,7 @@ namespace flvr
 		unsigned int optimize_group_size_xy(unsigned int nt, unsigned int target);
 		unsigned int optimize_group_size_z(unsigned int nt, unsigned int target);
 
-		friend class VolKernel;
+		friend class Kernel;
 #ifdef _DARWIN
 		static CGLContextObj gl_context_;
 #endif

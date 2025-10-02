@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <TextureBrick.h>
 #include <Texture.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <EntryHist.h>
 #include <VolumeData.h>
 
@@ -133,7 +133,7 @@ void Histogram::Compute()
 	float max_int = m_vd->GetMaxValue();
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_histogram, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_histogram, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index;

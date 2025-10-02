@@ -92,7 +92,7 @@ namespace flrd
 }
 namespace flvr
 {
-	class VolKernelFactory;
+	class KernelFactory;
 	class FramebufferManager;
 	class VertexArrayManager;
 	class VolShaderFactory;
@@ -148,7 +148,7 @@ namespace flvr
 #define glbin_conv_vol_mesh fluo::Global::instance().get_conv_vol_mesh()
 #define glbin_color_comp_mesh fluo::Global::instance().get_color_comp_mesh()
 //graphics resources
-#define glbin_vol_kernel_factory fluo::Global::instance().get_vol_kernel_factory()
+#define glbin_kernel_factory fluo::Global::instance().get_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
 #define glbin_vertex_array_manager fluo::Global::instance().get_vertex_array_manager()
 #define glbin_vol_shader_factory fluo::Global::instance().get_vol_shader_factory()
@@ -279,7 +279,7 @@ namespace fluo
 		JVMInitializer* get_jvm_instance();
 
 		//graphics resources
-		flvr::VolKernelFactory& get_vol_kernel_factory();
+		flvr::KernelFactory& get_kernel_factory();
 		flvr::FramebufferManager& get_framebuffer_manager();
 		flvr::VertexArrayManager& get_vertex_array_manager();
 		flvr::VolShaderFactory& get_vol_shader_factory();
@@ -372,7 +372,7 @@ namespace fluo
 
 		//graphics resources
 		//kernel for calculation
-		std::unique_ptr<flvr::VolKernelFactory> vol_kernel_factory_;
+		std::unique_ptr<flvr::KernelFactory> kernel_factory_;
 		//framebuffers for everything
 		std::unique_ptr<flvr::FramebufferManager> framebuffer_manager_;
 		//vertex arrays

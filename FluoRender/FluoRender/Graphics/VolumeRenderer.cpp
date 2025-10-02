@@ -38,7 +38,7 @@
 #include <SegShader.h>
 #include <ShaderProgram.h>
 #include <TextureBrick.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <VolCalShader.h>
 #include <KernelProgram.h>
 #include <MovieMaker.h>
@@ -1292,7 +1292,7 @@ namespace flvr
 
 		double result = 0.0;
 		int kernel_index = -1;
-		KernelProgram* kernel = glbin_vol_kernel_factory.kernel(KERNEL_HIST_3D);
+		KernelProgram* kernel = glbin_kernel_factory.kernel(KERNEL_HIST_3D);
 		if (kernel)
 		{
 			kernel_index = kernel->createKernel("hist_3d");

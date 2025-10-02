@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <TextureBrick.h>
 #include <Texture.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <algorithm>
 
 using namespace flrd;
@@ -271,7 +271,7 @@ void BasicStat::Run()
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_basic_stat, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_basic_stat, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0, kernel_index1;

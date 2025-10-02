@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeDefault.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
@@ -263,7 +263,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel =
-			glbin_vol_kernel_factory.
+			glbin_kernel_factory.
 			kernel(m_code, bits, max_int);
 		if (kernel)
 		{

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <KernelProgram.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <Global.h>
 #include <Texture.h>
 #include <TextureBrick.h>
@@ -80,7 +80,7 @@ void ColorCompMesh::Update()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_vol_kernel_factory.kernel(str_cl_color_comp_mesh, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_color_comp_mesh, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");

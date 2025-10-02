@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef VolKernel_h
-#define VolKernel_h
+#ifndef _KERNEL_H_
+#define _KERNEL_H_
 
 #include <string>
 #include <vector>
@@ -40,11 +40,11 @@ namespace flvr
 
 	class KernelProgram;
 
-	class VolKernel
+	class Kernel
 	{
 	public:
-		VolKernel(int type);
-		~VolKernel();
+		Kernel(int type);
+		~Kernel();
 
 		bool create();
 		bool create(std::string &s);
@@ -67,18 +67,18 @@ namespace flvr
 		KernelProgram* program_;
 	};
 
-	class VolKernelFactory
+	class KernelFactory
 	{
 	public:
-		VolKernelFactory();
-		~VolKernelFactory();
+		KernelFactory();
+		~KernelFactory();
 		void clear();
 
 		KernelProgram* kernel(int type);
 		KernelProgram* kernel(std::string s, int bits, float max_int);
 
 	protected:
-		std::vector<VolKernel*> kernels_;
+		std::vector<Kernel*> kernels_;
 		int prev_kernel_;
 
 	private:

@@ -29,9 +29,9 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <KernelProgram.h>
-#include <VolKernelCode.h>
+#include <TestKernelCode.h>
 
 using std::string;
 using std::vector;
@@ -39,18 +39,18 @@ using std::ostringstream;
 
 namespace flvr
 {
-	VolKernel::VolKernel(int type) :
+	Kernel::Kernel(int type) :
 		type_(type),
 		program_(0)
 	{
 	}
 
-	VolKernel::~VolKernel()
+	Kernel::~Kernel()
 	{
 		delete program_;
 	}
 
-	bool VolKernel::create()
+	bool Kernel::create()
 	{
 		string s;
 		if (!emit(s)) return false;
@@ -58,19 +58,19 @@ namespace flvr
 		return true;
 	}
 
-	bool VolKernel::create(std::string &s)
+	bool Kernel::create(std::string &s)
 	{
 		program_ = new KernelProgram(s);
 		return true;
 	}
 
-	inline bool VolKernel::match(std::string &s)
+	inline bool Kernel::match(std::string &s)
 	{
 		return (type_ == KERNEL_STRING &&
 			s == program_->source_);
 	}
 
-	bool VolKernel::emit(string& s)
+	bool Kernel::emit(string& s)
 	{
 		ostringstream z;
 
@@ -88,18 +88,18 @@ namespace flvr
 		return true;
 	}
 
-	VolKernelFactory::VolKernelFactory()
+	KernelFactory::KernelFactory()
 		: prev_kernel_(-1)
 	{
 	}
 
-	VolKernelFactory::~VolKernelFactory()
+	KernelFactory::~KernelFactory()
 	{
 		for (unsigned int i = 0; i<kernels_.size(); ++i)
 			delete kernels_[i];
 	}
 
-	void VolKernelFactory::clear()
+	void KernelFactory::clear()
 	{
 		for (unsigned int i=0; i<kernels_.size(); ++i)
 			delete kernels_[i];
@@ -107,7 +107,7 @@ namespace flvr
 		prev_kernel_ = -1;
 	}
 
-	KernelProgram* VolKernelFactory::kernel(int type)
+	KernelProgram* KernelFactory::kernel(int type)
 	{
 		if (prev_kernel_ >= 0)
 		{
@@ -124,7 +124,7 @@ namespace flvr
 			}
 		}
 
-		VolKernel* k = new VolKernel(type);
+		Kernel* k = new Kernel(type);
 		if (!k->create())
 		{
 			delete k;
@@ -135,7 +135,7 @@ namespace flvr
 		return k->program();
 	}
 
-	KernelProgram* VolKernelFactory::kernel(std::string s, int bits, float max_int)
+	KernelProgram* KernelFactory::kernel(std::string s, int bits, float max_int)
 	{
 		//change string according to bits
 		if (bits > 8 && bits <= 16)
@@ -165,7 +165,7 @@ namespace flvr
 			}
 		}
 
-		VolKernel* k = new VolKernel(KERNEL_STRING);
+		Kernel* k = new Kernel(KERNEL_STRING);
 		if (!k->create(s))
 		{
 			delete k;

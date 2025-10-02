@@ -86,7 +86,7 @@ DEALINGS IN THE SOFTWARE.
 #include <JVMInitializer.h>
 #include <PyBase.h>
 #include <MovieMaker.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>
 #include <VolShader.h>
@@ -894,7 +894,7 @@ MainFrame::MainFrame(
 MainFrame::~MainFrame()
 {
 	//release?
-	glbin_vol_kernel_factory.clear();
+	glbin_kernel_factory.clear();
 	glbin_framebuffer_manager.clear();
 	glbin_vertex_array_manager.clear();
 	glbin_vol_shader_factory.clear();

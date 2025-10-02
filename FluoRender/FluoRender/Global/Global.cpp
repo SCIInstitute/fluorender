@@ -72,7 +72,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AsyncTimerFactory.hpp>
 #include <StopWatchFactory.hpp>
 #include <JVMInitializer.h>
-#include <VolKernel.h>
+#include <Kernel.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>
 #include <VolShader.h>
@@ -294,7 +294,7 @@ Global::Global() :
 	m_lg_renderer(std::make_unique<LookingGlassRenderer>()),
 	m_atmf(std::make_unique<fluo::AsyncTimerFactory>()),
 	m_swhf(std::make_unique<fluo::StopWatchFactory>()),
-	vol_kernel_factory_(std::make_unique<flvr::VolKernelFactory>()),
+	kernel_factory_(std::make_unique<flvr::KernelFactory>()),
 	framebuffer_manager_(std::make_unique<flvr::FramebufferManager>()),
 	vertex_array_manager_(std::make_unique<flvr::VertexArrayManager>()),
 	vol_shader_factory_(std::make_unique<flvr::VolShaderFactory>()),
@@ -754,9 +754,9 @@ JVMInitializer* Global::get_jvm_instance()
 }
 
 //graphics resources
-flvr::VolKernelFactory& Global::get_vol_kernel_factory()
+flvr::KernelFactory& Global::get_kernel_factory()
 {
-	return *vol_kernel_factory_;
+	return *kernel_factory_;
 }
 
 flvr::FramebufferManager& Global::get_framebuffer_manager()
