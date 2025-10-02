@@ -388,60 +388,59 @@ namespace flvr
 
 	bool KernelProgram::executeKernel(int index, cl_uint dim, size_t* global_size, size_t* local_size)
 	{
-		bool result = true; // Start optimistic
-		if (!valid() || index < 0 || index >= kernels_.size())
+		if (!valid() || index < 0 || index >= kernels_.size()) {
 			return false;
+		}
 
-		cl_int err;
-		glFinish();
+		bool result = true;
+		cl_int err = CL_SUCCESS;
 
-		// Acquire GL objects (textures and VBOs)
-		for (unsigned int i = 0; i < arg_list_.size(); ++i)
-		{
-			if (!arg_list_[i].find_kernel(index))
-				continue;
-			// Acquire texture
-			if (arg_list_[i].texture && glIsTexture(arg_list_[i].texture) && arg_list_[i].size == 0)
-			{
-				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					result = false;
+		glFinish(); // Ensure GL state is settled before acquiring
+
+		// Step 1: Acquire GL objects used by this kernel
+		auto& args = arg_map_[index];
+		for (const auto& weak_arg : args) {
+			auto arg = weak_arg.lock();
+			if (!arg || !arg->valid_ || !arg->buffer) continue;
+
+			if (arg->texture && glIsTexture(arg->texture) && arg->size == 0) {
+				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+				if (err != CL_SUCCESS) result = false;
 			}
-			// Acquire VBO
-			else if (arg_list_[i].vbo && glIsBuffer(arg_list_[i].vbo))
-			{
-				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					result = false;
+			else if (arg->vbo && glIsBuffer(arg->vbo)) {
+				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+				if (err != CL_SUCCESS) result = false;
 			}
 		}
 
-		// Execute kernel
-		err = clEnqueueNDRangeKernel(queue_, kernels_[index].kernel, dim, NULL, global_size, local_size, 0, NULL, NULL);
-		if (err != CL_SUCCESS)
-		{
-			//DBGPRINT(L"clEnqueueNDRangeKernel error:\t%d\n", err);
+		// Step 2: Execute kernel
+		err = clEnqueueNDRangeKernel(
+			queue_,
+			kernels_[index].kernel,
+			dim,
+			nullptr,
+			global_size,
+			local_size,
+			0,
+			nullptr,
+			nullptr
+		);
+		if (err != CL_SUCCESS) {
 			result = false;
 		}
 
-		// Release GL objects
-		for (unsigned int i = 0; i < arg_list_.size(); ++i)
-		{
-			if (!arg_list_[i].find_kernel(index))
-				continue;
-			// Release texture
-			if (arg_list_[i].texture && glIsTexture(arg_list_[i].texture) && arg_list_[i].size == 0)
-			{
-				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					result = false;
+		// Step 3: Release GL objects
+		for (const auto& weak_arg : args) {
+			auto arg = weak_arg.lock();
+			if (!arg || !arg->valid_ || !arg->buffer) continue;
+
+			if (arg->texture && glIsTexture(arg->texture) && arg->size == 0) {
+				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+				if (err != CL_SUCCESS) result = false;
 			}
-			// Release VBO
-			else if (arg_list_[i].vbo && glIsBuffer(arg_list_[i].vbo))
-			{
-				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg_list_[i].buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					result = false;
+			else if (arg->vbo && glIsBuffer(arg->vbo)) {
+				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+				if (err != CL_SUCCESS) result = false;
 			}
 		}
 
@@ -472,732 +471,524 @@ namespace flvr
 		return true;
 	}
 
-	bool KernelProgram::matchArgBuf(Argument& arg, unsigned int& arg_index)
-	{
-		for (unsigned int i = 0; i < arg_list_.size(); ++i)
-		{
-			if (arg_list_[i].buffer == arg.buffer)
-			{
-				arg_index = i;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool KernelProgram::matchArg(Argument& arg, unsigned int& arg_index)
-	{
-		for (unsigned int i=0; i<arg_list_.size(); ++i)
-		{
-			if (arg_list_[i].size == arg.size &&
-				arg_list_[i].texture == arg.texture &&
-				arg_list_[i].vbo == arg.vbo)
-			{
-				arg_index = i;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool KernelProgram::matchArgTex(Argument& arg, unsigned int& arg_index)
-	{
-		for (unsigned int i = 0; i<arg_list_.size(); ++i)
-		{
-			if (arg_list_[i].texture == arg.texture)
-			{
-				arg_index = i;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool KernelProgram::matchArgVBO(Argument& arg, unsigned int& arg_index)
-	{
-		for (unsigned int i = 0; i<arg_list_.size(); ++i)
-		{
-			if (arg_list_[i].vbo == arg.vbo &&
-				arg_list_[i].size == arg.size)
-			{
-				arg_index = i;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool KernelProgram::matchArgAddr(Argument& arg, unsigned int& arg_index)
-	{
-		for (unsigned int i = 0; i<arg_list_.size(); ++i)
-		{
-			if (arg_list_[i].orgn_addr == arg.orgn_addr &&
-				arg_list_[i].size == arg.size)
-			{
-				arg_index = i;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	int KernelProgram::setKernelArgument(Argument& arg)
-	{
-		arg.kernel(kernel_idx_);
-
-		unsigned int ai = -1;
-		if (!matchArgBuf(arg, ai))
-		{
-			arg_list_.push_back(arg);
-			ai = static_cast<int>(arg_list_.size() - 1);
-		}
-		else
-			arg_list_[ai].kernel(kernel_idx_);
-
-		cl_int err = clSetKernelArg(kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-		if (err != CL_SUCCESS)
-			return -1;
-		return ai;
-	}
-
-	void KernelProgram::setKernelArgConst(size_t size, void* data)
+	bool KernelProgram::setKernelArgConst(size_t size, void* data)
 	{
 		cl_int err;
 
 		if (!data)
-			return;
+			return false;
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
 			return;
 
 		err = clSetKernelArg(kernels_[kernel_idx_].kernel, arg_idx_++, size, data);
 		if (err != CL_SUCCESS)
-			return;
+			return false;
+		return true;
 	}
 
-	Argument KernelProgram::setKernelArgBuf(cl_mem_flags flag, size_t size, void* data)
-	{
-		Argument arg;
-		cl_int err;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		arg.kernel(kernel_idx_);
-		arg.size = size;
-		arg.texture = 0;
-		arg.vbo = 0;
-		arg.orgn_addr = data;
-
-		unsigned int ai;
-		bool found = false;
-		if (data)
-		{
-			found = matchArgAddr(arg, ai);
-			if (found)
-			{
-				arg.buffer = arg_list_[ai].buffer;
-				arg_list_[ai].kernel(kernel_idx_);
-			}
-		}
-
-		if (!found)
-		{
-			arg.buffer = clCreateBuffer(context_, flag, size, data, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			arg_list_.push_back(arg);
-		}
-
-		err = clSetKernelArg(
-			kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-		if (err != CL_SUCCESS)
-			return Argument();
-
-		return arg;
-	}
-
-	Argument KernelProgram::setKernelArgBufWrite(cl_mem_flags flag, size_t size, void* data)
-	{
-		Argument arg;
-		cl_int err;
-		cl_mem buffer = 0;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		if (data)
-		{
-			arg.kernel(kernel_idx_);
-			arg.size = size;
-			arg.texture = 0;
-			arg.vbo = 0;
-			arg.orgn_addr = data;
-
-			unsigned int ai;
-			if (matchArgAddr(arg, ai))
-			{
-				arg.buffer = arg_list_[ai].buffer;
-				clReleaseMemObject(arg_list_[ai].buffer);
-				arg.buffer = clCreateBuffer(context_, flag, size, data, &err);
-				buffer = arg.buffer;
-				arg_list_[ai].kernel(kernel_idx_);
-				if (err != CL_SUCCESS)
-					return Argument();
-			}
-			else
-			{
-				buffer = clCreateBuffer(context_, flag, size, data, &err);
-				if (err != CL_SUCCESS)
-					return Argument();
-				arg.buffer = buffer;
-				arg_list_.push_back(arg);
-			}
-
-			err = clSetKernelArg(
-				kernels_[kernel_idx_].kernel,
-				arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-			if (err != CL_SUCCESS)
-				return Argument();
-		}
-		else
-		{
-			err = clSetKernelArg(
-				kernels_[kernel_idx_].kernel,
-				arg_idx_++, size, NULL);
-		}
-		return arg;
-	}
-
-	Argument KernelProgram::setKernelArgTex2D(cl_mem_flags flag, GLuint texture)
-	{
-		Argument arg;
-		cl_int err;
-		cl_mem buffer = 0;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		arg.kernel(kernel_idx_);
-		//arg.index = arg_idx_++;
-		arg.size = 0;
-		arg.texture = texture;
-		arg.vbo = 0;
-		arg.orgn_addr = 0;
-
-		unsigned int ai;
-		if (matchArgTex(arg, ai))
-		{
-			arg.buffer = arg_list_[ai].buffer;
-			buffer = arg.buffer;
-			arg_list_[ai].kernel(kernel_idx_);
-		}
-		else
-		{
-			buffer = clCreateFromGLTexture(context_, flag, GL_TEXTURE_2D, 0, texture, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			arg.buffer = buffer;
-			arg_list_.push_back(arg);
-		}
-		err = clSetKernelArg(
-			kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-		if (err != CL_SUCCESS)
-			return Argument();
-		return arg;
-	}
-
-	Argument KernelProgram::setKernelArgTex3D(cl_mem_flags flag, GLuint texture)
-	{
-		Argument arg;
-		cl_int err;
-		cl_mem buffer = 0;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		arg.kernel(kernel_idx_);
-		arg.size = 0;
-		arg.texture = texture;
-		arg.vbo = 0;
-		arg.orgn_addr = 0;
-
-		unsigned int ai;
-		if (matchArgTex(arg, ai))
-		{
-			arg.buffer = arg_list_[ai].buffer;
-			buffer = arg.buffer;
-			arg_list_[ai].kernel(kernel_idx_);
-		}
-		else
-		{
-			buffer = clCreateFromGLTexture(context_, flag, GL_TEXTURE_3D, 0, texture, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			arg.buffer = buffer;
-			arg_list_.push_back(arg);
-		}
-		err = clSetKernelArg(
-			kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-		if (err != CL_SUCCESS)
-			return Argument();
-		return arg;
-	}
-
-	//copy existing texure to buffer
-	Argument KernelProgram::setKernelArgTex3DBuf(
-		cl_mem_flags flag, GLuint texture,
-		size_t size, size_t *region)
-	{
-		Argument arg, argt;
-		cl_int err;
-		cl_mem buft = 0, bufb = 0;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		arg.kernel(kernel_idx_);
-		//arg.index = arg_idx_++;
-		arg.size = size;
-		arg.texture = 0;
-		arg.vbo = 0;
-		arg.orgn_addr = 0;
-
-		unsigned int ai;
-		//create texture buffer
-		argt.texture = texture;
-		if (matchArgTex(argt, ai))
-		{
-			argt.buffer = arg_list_[ai].buffer;
-			buft = argt.buffer;
-			arg_list_[ai].kernel(kernel_idx_);
-		}
-		else
-		{
-			buft = clCreateFromGLTexture(context_, CL_MEM_READ_WRITE, GL_TEXTURE_3D, 0, texture, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			argt.buffer = buft;
-			arg_list_.push_back(argt);
-		}
-		//find data buffer
-		if (matchArgBuf(arg, ai))
-		{
-			bufb = arg.buffer;
-			arg_list_[ai].kernel(kernel_idx_);
-		}
-		else
-		{
-			bufb = clCreateBuffer(context_, flag, size, 0, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			arg.buffer = bufb;
-			arg_list_.push_back(arg);
-		}
-
-		err = clEnqueueAcquireGLObjects(
-			queue_, 1, &(buft), 0, NULL, NULL);
-		if (err != CL_SUCCESS)
-			return Argument();
-		size_t sorigin[3] = { 0, 0, 0 };
-		err = clEnqueueCopyImageToBuffer(
-			queue_, buft, arg.buffer,
-			sorigin, region, 0, 0, NULL, NULL);
-		if (err != CL_SUCCESS)
-			return Argument();
-		err = clEnqueueReleaseGLObjects(
-			queue_, 1, &(buft), 0, NULL, NULL);
-		if (err != CL_SUCCESS)
-			return Argument();
-
-		err = clSetKernelArg(
-			kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-		if (err != CL_SUCCESS)
-			return Argument();
-
-		clFlush(queue_);
-		clFinish(queue_);
-		return arg;
-	}
-
-	Argument KernelProgram::setKernelArgVertexBuf(
-		cl_mem_flags flag, GLuint vbo, size_t size)
-	{
-		Argument arg;
-		cl_int err;
-		cl_mem buf = 0;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		arg.kernel(kernel_idx_);
-		arg.size = size;
-		arg.texture = 0;
-		arg.vbo = vbo;
-		arg.orgn_addr = 0;
-
-		unsigned int ai;
-		if (matchArgVBO(arg, ai))
-		{
-			arg.buffer = arg_list_[ai].buffer;
-			arg_list_[ai].kernel(kernel_idx_);
-			buf = arg.buffer;
-		}
-		else
-		{
-			buf = clCreateFromGLBuffer(context_, flag, vbo, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			arg.buffer = buf;
-			arg_list_.push_back(arg);
-		}
-
-		// Acquire GL object before kernel use
-		err = clEnqueueAcquireGLObjects(queue_, 1, &buf, 0, NULL, NULL);
-		if (err != CL_SUCCESS)
-			return Argument();
-
-		err = clSetKernelArg(
-			kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &buf);
-		if (err != CL_SUCCESS)
-			return Argument();
-
-		err = clEnqueueReleaseGLObjects(queue_, 1, &buf, 0, NULL, NULL);
-		if (err != CL_SUCCESS)
-			return Argument();
-
-		clFlush(queue_);
-		clFinish(queue_);
-		return arg;
-	}
-
-	Argument KernelProgram::setKernelArgImage(cl_mem_flags flag, cl_image_format format, cl_image_desc desc, void* data)
-	{
-		Argument arg;
-		cl_int err;
-		cl_mem buffer = 0;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return arg;
-
-		arg.kernel(kernel_idx_);
-		//arg.index = arg_idx_++;
-		arg.size = 0;
-		arg.texture = 0;
-		arg.vbo = 0;
-		arg.orgn_addr = data;
-
-		unsigned int ai;
-		if (matchArgAddr(arg, ai))
-		{
-			arg.buffer = arg_list_[ai].buffer;
-			buffer = arg.buffer;
-			arg_list_[ai].kernel(kernel_idx_);
-		}
-		else
-		{
-			buffer = clCreateImage(context_, flag,
-				&format, &desc, data, &err);
-			if (err != CL_SUCCESS)
-				return Argument();
-			arg.buffer = buffer;
-			arg_list_.push_back(arg);
-		}
-		err = clSetKernelArg(
-			kernels_[kernel_idx_].kernel,
-			arg_idx_++, sizeof(cl_mem), &(arg.buffer));
-		if (err != CL_SUCCESS)
-			return Argument();
-		return arg;
-	}
-
-	void KernelProgram::setKernelArgLocal(size_t size)
+	bool KernelProgram::setKernelArgLocal(size_t size)
 	{
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_++, size, NULL);
+		if (err != CL_SUCCESS)
+			return false;
+		return true;
 	}
 
-	void KernelProgram::readBuffer(size_t size,
-		void* buf_data, void* data)
+	bool KernelProgram::setKernelArgument(std::weak_ptr<Argument> arg)
 	{
-		cl_int err;
-
-		if (buf_data)
-		{
-			Argument arg;
-			arg.size = size;
-			arg.texture = 0;
-			arg.vbo = 0;
-			arg.orgn_addr = buf_data;
-
-			unsigned int ai;
-			if (matchArgAddr(arg, ai))
-			{
-				arg.buffer = arg_list_[ai].buffer;
-				err = clEnqueueReadBuffer(
-					queue_, arg.buffer,
-					CL_TRUE, 0, arg.size,
-					data, 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
-				clFlush(queue_);
-				clFinish(queue_);
-			}
+		// Attempt to lock the weak_ptr
+		auto shared_arg = arg.lock();
+		if (!shared_arg) {
+			// Argument has expired — return empty weak_ptr
+			return false;
 		}
+
+		// Check if the argument is already in the program's list
+		auto it = arg_list_.find(shared_arg);
+		if (it == arg_list_.end()) {
+			// Not found — insert into the list
+			arg_list_.insert(shared_arg);
+		}
+
+		// Update the kernel-to-argument map
+		arg_map_[kernel_idx_].push_back(shared_arg);
+
+		// Call clSetKernelArg
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&(shared_arg->buffer)
+		);
+
+		if (err != CL_SUCCESS) {
+			// Optionally log or handle error
+			return false; // return empty on failure
+		}
+
+		// Increment internal argument index
+		++arg_idx_;
+
+		// Return the original weak_ptr
+		return true;
 	}
 
-	void KernelProgram::readBuffer(Argument& arg, void* data)
+	std::weak_ptr<Argument> KernelProgram::setKernelArgBuf(cl_mem_flags flags, size_t size, void* data)
 	{
-		cl_int err;
-		unsigned int ai;
-		if (matchArgBuf(arg, ai))
-		{
-			// Acquire GL objects (textures and VBOs)
-			// Acquire texture
-			if (arg.texture && glIsTexture(arg.texture) && arg.size == 0)
-			{
-				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
+		// Step 1: Check if an Argument already exists for this raw pointer
+		std::shared_ptr<Argument> existing_arg;
+		for (const auto& arg : arg_list_) {
+			if (arg->orgn_addr == data) {
+				existing_arg = arg;
+				break;
 			}
-			// Acquire VBO
-			else if (arg.vbo && glIsBuffer(arg.vbo))
-			{
-				err = clEnqueueAcquireGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
-			}
-
-			err = clEnqueueReadBuffer(
-				queue_, arg.buffer,
-				CL_TRUE, 0, arg_list_[ai].size,
-				data, 0, NULL, NULL);
-			if (err != CL_SUCCESS)
-				return;
-
-			// Release GL objects
-			// Release texture
-			if (arg.texture && glIsTexture(arg.texture) && arg.size == 0)
-			{
-				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
-			}
-			// Release VBO
-			else if (arg.vbo && glIsBuffer(arg.vbo))
-			{
-				err = clEnqueueReleaseGLObjects(queue_, 1, &(arg.buffer), 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
-			}
-
-			clFlush(queue_);
-			clFinish(queue_);
 		}
+
+		// Step 2: If not found, create a new Argument
+		if (!existing_arg) {
+			existing_arg = Argument::createFromPointer(context_, flags, size, data);
+			if (!existing_arg || !existing_arg->valid_) {
+				// Failed to create buffer — return empty weak_ptr
+				return std::weak_ptr<Argument>();
+			}
+
+			// Add to program's argument list
+			arg_list_.insert(existing_arg);
+		}
+
+		// Step 3: Set as kernel argument
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&existing_arg->buffer
+		);
+
+		if (err != CL_SUCCESS) {
+			// Optionally log error
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 4: Track usage for this kernel
+		arg_map_[kernel_idx_].push_back(existing_arg);
+
+		// Step 5: Increment internal argument index
+		++arg_idx_;
+
+		// Step 6: Return weak_ptr for external use
+		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	//copy buffer back to texture
-	void KernelProgram::copyBufTex3D(
-		Argument& arg, GLuint texture,
-		size_t size, size_t* region)
+	bool KernelProgram::updateKernelArgBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data)
 	{
-		cl_int err;
-		Argument argt;
-		argt.texture = texture;
-		cl_mem buft = 0;
-		unsigned int ai1, ai2;
-		if (matchArgBuf(arg, ai1) &&
-			matchArgTex(argt, ai2))
-		{
-			argt.buffer = arg_list_[ai2].buffer;
-			buft = argt.buffer;
-			err = clEnqueueAcquireGLObjects(
-				queue_, 1, &(buft), 0, NULL, NULL);
-			if (err != CL_SUCCESS)
-				return;
-			size_t sorigin[3] = { 0, 0, 0 };
-			err = clEnqueueCopyBufferToImage(
-				queue_, arg.buffer, buft, 0,
-				sorigin, region, 0, NULL, NULL);
-			if (err != CL_SUCCESS)
-				return;
-			err = clEnqueueReleaseGLObjects(
-				queue_, 1, &(buft), 0, NULL, NULL);
-			if (err != CL_SUCCESS)
-				return;
-			clFlush(queue_);
-			clFinish(queue_);
-			//clReleaseMemObject(buft);
+		auto shared_arg = arg.lock();
+		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer) {
+			return false;
 		}
+
+		// Case 1: Size fits — just write new data
+		if (new_size <= shared_arg->size) {
+			cl_int err = clEnqueueWriteBuffer(
+				queue_,
+				shared_arg->buffer,
+				CL_TRUE,
+				0,
+				new_size,
+				data,
+				0, nullptr, nullptr
+			);
+			return err == CL_SUCCESS;
+		}
+
+		// Case 2: Size too large — destroy and reallocate
+		shared_arg->release(); // safely releases cl_mem if not protected
+
+		cl_int err = CL_SUCCESS;
+		cl_mem new_buf = clCreateBuffer(context_, flags, new_size, data, &err);
+		if (err != CL_SUCCESS || !new_buf) {
+			return false;
+		}
+
+		// Update shared Argument in-place
+		shared_arg->buffer = new_buf;
+		shared_arg->size = new_size;
+		shared_arg->orgn_addr = data;
+		shared_arg->valid_ = true;
+
+		return true;
 	}
 
-	void KernelProgram::writeBuffer(size_t size,
-		void* buf_data, void* data)
+	std::weak_ptr<Argument> KernelProgram::setKernelArgTex2D(cl_mem_flags flags, GLuint tex_id)
 	{
-		cl_int err;
-
-		if (buf_data)
-		{
-			Argument arg;
-			arg.size = size;
-			arg.texture = 0;
-			arg.vbo = 0;
-			arg.orgn_addr = buf_data;
-
-			unsigned int ai;
-			if (matchArgAddr(arg, ai))
-			{
-				arg.buffer = arg_list_[ai].buffer;
-				err = clEnqueueWriteBuffer(
-					queue_, arg.buffer,
-					CL_TRUE, 0, size,
-					data, 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
-				clFlush(queue_);
-				clFinish(queue_);
+		// Step 1: Check if texture already wrapped
+		std::shared_ptr<Argument> existing_arg;
+		for (const auto& arg : arg_list_) {
+			if (arg->matchesTexture(tex_id)) {
+				existing_arg = arg;
+				break;
 			}
 		}
-	}
 
-	void KernelProgram::writeBuffer(Argument& arg, void* data)
-	{
-		cl_int err;
-		unsigned int ai;
-		if (matchArgBuf(arg, ai))
-		{
-			err = clEnqueueWriteBuffer(
-				queue_, arg.buffer,
-				CL_TRUE, 0, arg_list_[ai].size,
-				data, 0, NULL, NULL);
-			if (err != CL_SUCCESS)
-				return;
-			clFlush(queue_);
-			clFinish(queue_);
+		// Step 2: Create new Argument if not found
+		if (!existing_arg) {
+			existing_arg = Argument::createFromTexture2D(context_, flags, tex_id);
+			if (!existing_arg || !existing_arg->valid_) {
+				return std::weak_ptr<Argument>();
+			}
+			arg_list_.insert(existing_arg);
 		}
+
+		// Step 3: Set kernel argument
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&existing_arg->buffer
+		);
+
+		if (err != CL_SUCCESS) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 4: Track usage
+		arg_map_[kernel_idx_].push_back(existing_arg);
+		++arg_idx_;
+
+		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	void KernelProgram::writeImage(
-		const size_t* origin, const size_t* region,
-		void* img_data, void* data)
+	std::weak_ptr<Argument> KernelProgram::setKernelArgTex3D(cl_mem_flags flags, GLuint tex_id)
 	{
-		cl_int err;
-
-		if (img_data)
-		{
-			Argument arg;
-			arg.size = 0;
-			arg.texture = 0;
-			arg.vbo = 0;
-			arg.orgn_addr = img_data;
-
-			unsigned int ai;
-			if (matchArgAddr(arg, ai))
-			{
-				arg.buffer = arg_list_[ai].buffer;
-				err = clEnqueueWriteImage(
-					queue_, arg.buffer,
-					CL_TRUE, origin, region,
-					0, 0, data, 0, NULL, NULL);
-				if (err != CL_SUCCESS)
-					return;
-				clFlush(queue_);
-				clFinish(queue_);
+		// Step 1: Check if texture already wrapped
+		std::shared_ptr<Argument> existing_arg;
+		for (const auto& arg : arg_list_) {
+			if (arg->matchesTexture(tex_id)) {
+				existing_arg = arg;
+				break;
 			}
 		}
+
+		// Step 2: Create new Argument if not found
+		if (!existing_arg) {
+			existing_arg = Argument::createFromTexture3D(context_, flags, tex_id);
+			if (!existing_arg || !existing_arg->valid_) {
+				return std::weak_ptr<Argument>();
+			}
+			arg_list_.insert(existing_arg);
+		}
+
+		// Step 3: Set kernel argument
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&existing_arg->buffer
+		);
+
+		if (err != CL_SUCCESS) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 4: Track usage
+		arg_map_[kernel_idx_].push_back(existing_arg);
+		++arg_idx_;
+
+		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	void KernelProgram::writeImage(
-		const size_t* origin, const size_t* region,
-		Argument& arg, void* data)
+	std::weak_ptr<Argument> KernelProgram::copyTex3DToArgBuf(
+		cl_mem_flags flags, GLuint texture_id,
+		size_t buffer_size, size_t* region)
 	{
-		cl_int err;
-		unsigned int ai;
-		if (matchArgBuf(arg, ai))
-		{
-			err = clEnqueueWriteImage(
-				queue_, arg.buffer,
-				CL_TRUE, origin, region,
-				0, 0, data, 0, NULL, NULL);
-			if (err != CL_SUCCESS)
-				return;
-			clFlush(queue_);
-			clFinish(queue_);
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size()) {
+			return std::weak_ptr<Argument>();
 		}
+
+		// Step 1: Find or create the texture wrapper
+		std::shared_ptr<Argument> tex_arg;
+		for (const auto& arg : arg_list_) {
+			if (arg->matchesTexture(texture_id)) {
+				tex_arg = arg;
+				break;
+			}
+		}
+
+		if (!tex_arg) {
+			tex_arg = Argument::createFromTexture3D(context_, CL_MEM_READ_WRITE, texture_id);
+			if (!tex_arg || !tex_arg->valid_) {
+				return std::weak_ptr<Argument>();
+			}
+			arg_list_.insert(tex_arg);
+		}
+
+		// Step 2: Find or create the buffer to hold copied texture data
+		std::shared_ptr<Argument> buf_arg;
+		for (const auto& arg : arg_list_) {
+			if (arg->orgn_addr == nullptr && arg->texture == 0 && arg->vbo == 0 && arg->size == buffer_size) {
+				buf_arg = arg;
+				break;
+			}
+		}
+
+		if (!buf_arg) {
+			buf_arg = Argument::createFromPointer(context_, flags, buffer_size, nullptr);
+			if (!buf_arg || !buf_arg->valid_) {
+				return std::weak_ptr<Argument>();
+			}
+			arg_list_.insert(buf_arg);
+		}
+
+		// Step 3: Acquire GL texture for OpenCL access
+		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &tex_arg->buffer, 0, nullptr, nullptr);
+		if (err != CL_SUCCESS) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 4: Copy texture to buffer
+		size_t origin[3] = { 0, 0, 0 };
+		err = clEnqueueCopyImageToBuffer(
+			queue_,
+			tex_arg->buffer,
+			buf_arg->buffer,
+			origin,
+			region,
+			0,
+			0, nullptr, nullptr
+		);
+		if (err != CL_SUCCESS) {
+			clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer, 0, nullptr, nullptr);
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 5: Release GL texture
+		err = clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer, 0, nullptr, nullptr);
+		if (err != CL_SUCCESS) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 6: Set buffer as kernel argument
+		err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&buf_arg->buffer
+		);
+		if (err != CL_SUCCESS) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 7: Track usage
+		arg_map_[kernel_idx_].push_back(buf_arg);
+		++arg_idx_;
+
+		// Step 8: Flush and finish
+		clFlush(queue_);
+		clFinish(queue_);
+
+		return std::weak_ptr<Argument>(buf_arg);
+	}
+
+	bool KernelProgram::copyArgBufToTex3D(std::weak_ptr<Argument> buf_arg, GLuint texture_id, size_t size, size_t* region)
+	{
+		auto buffer = buf_arg.lock();
+		if (!buffer || !buffer->valid_ || !buffer->buffer) {
+			return false;
+		}
+
+		// Step 1: Find the texture Argument
+		std::shared_ptr<Argument> texture;
+		for (const auto& arg : arg_list_) {
+			if (arg->matchesTexture(texture_id)) {
+				texture = arg;
+				break;
+			}
+		}
+
+		if (!texture || !texture->valid_ || !texture->buffer) {
+			return false;
+		}
+
+		// Step 2: Acquire GL texture
+		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &texture->buffer, 0, nullptr, nullptr);
+		if (err != CL_SUCCESS) {
+			return false;
+		}
+
+		// Step 3: Copy buffer to texture
+		size_t origin[3] = { 0, 0, 0 };
+		err = clEnqueueCopyBufferToImage(
+			queue_,
+			buffer->buffer,
+			texture->buffer,
+			0,
+			origin,
+			region,
+			0, nullptr, nullptr
+		);
+		if (err != CL_SUCCESS) {
+			clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer, 0, nullptr, nullptr);
+			return false;
+		}
+
+		// Step 4: Release GL texture
+		err = clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer, 0, nullptr, nullptr);
+		if (err != CL_SUCCESS) {
+			return false;
+		}
+
+		// Step 5: Finalize
+		clFlush(queue_);
+		clFinish(queue_);
+
+		return true;
+	}
+
+	std::weak_ptr<Argument> KernelProgram::setKernelArgVertexBuf(cl_mem_flags flags, GLuint vbo_id, size_t size)
+	{
+		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size()) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 1: Check if VBO is already wrapped
+		std::shared_ptr<Argument> existing_arg;
+		for (const auto& arg : arg_list_) {
+			if (arg->matchesVBO(vbo_id)) {
+				existing_arg = arg;
+				break;
+			}
+		}
+
+		// Step 2: Create new Argument if not found
+		if (!existing_arg) {
+			existing_arg = Argument::createFromVBO(context_, flags, vbo_id, size);
+			if (!existing_arg || !existing_arg->valid_) {
+				return std::weak_ptr<Argument>();
+			}
+			arg_list_.insert(existing_arg);
+		}
+
+		// Step 3: Set kernel argument
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&existing_arg->buffer
+		);
+
+		if (err != CL_SUCCESS) {
+			return std::weak_ptr<Argument>();
+		}
+
+		// Step 4: Track usage
+		arg_map_[kernel_idx_].push_back(existing_arg);
+		++arg_idx_;
+
+		return std::weak_ptr<Argument>(existing_arg);
+	}
+
+	bool KernelProgram::readBuffer(const std::weak_ptr<Argument> arg, void* data)
+	{
+		auto shared_arg = arg.lock();
+		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer) {
+			return false;
+		}
+
+		cl_int err = CL_SUCCESS;
+
+		// Acquire GL texture if applicable
+		if (shared_arg->texture && glIsTexture(shared_arg->texture) && shared_arg->size == 0) {
+			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+			if (err != CL_SUCCESS) return false;
+		}
+		// Acquire VBO if applicable
+		else if (shared_arg->vbo && glIsBuffer(shared_arg->vbo)) {
+			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+			if (err != CL_SUCCESS) return false;
+		}
+
+		// Read buffer contents
+		err = clEnqueueReadBuffer(
+			queue_,
+			shared_arg->buffer,
+			CL_TRUE,
+			0,
+			shared_arg->size,
+			data,
+			0, nullptr, nullptr
+		);
+		if (err != CL_SUCCESS) return false;
+
+		// Release GL texture if applicable
+		if (shared_arg->texture && glIsTexture(shared_arg->texture) && shared_arg->size == 0) {
+			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+			if (err != CL_SUCCESS) return false;
+		}
+		// Release VBO if applicable
+		else if (shared_arg->vbo && glIsBuffer(shared_arg->vbo)) {
+			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+			if (err != CL_SUCCESS) return false;
+		}
+
+		clFlush(queue_);
+		clFinish(queue_);
+		return true;
 	}
 
 	//release mem obj
-	void KernelProgram::releaseAll(bool del_mem)
+	void KernelProgram::releaseAllArgs()
 	{
-		cl_int err;
-		if (del_mem)
-		{
-			for (auto it = arg_list_.begin();
-				it != arg_list_.end(); ++it)
-			{
-				err = clReleaseMemObject(it->buffer);
-			}
-		}
-		arg_list_.clear();
+		arg_list_.clear();      // shared_ptrs dropped
+		arg_map_.clear();       // weak_ptrs dropped
 	}
 
-	void KernelProgram::releaseMemObject(Argument& arg)
+	void KernelProgram::releaseKernelArgs(int kernel_idx)
 	{
-		unsigned int ai;
-		if (matchArgBuf(arg, ai))
-		{
-			clReleaseMemObject(arg.buffer);
-			arg_list_.erase(arg_list_.begin() + ai);
+		if (kernel_idx < 0 || kernel_idx >= kernels_.size()) return;
+
+		auto& used_args = arg_map_[kernel_idx];
+
+		for (const auto& weak_arg : used_args) {
+			auto shared_arg = weak_arg.lock();
+			if (!shared_arg) continue;
+
+			// Remove from global list only if no other kernel uses it
+			bool used_elsewhere = false;
+			for (const auto& [other_idx, other_args] : arg_map_) {
+				if (other_idx == kernel_idx) continue;
+				for (const auto& other_weak : other_args) {
+					if (other_weak.lock() == shared_arg) {
+						used_elsewhere = true;
+						break;
+					}
+				}
+				if (used_elsewhere) break;
+			}
+
+			if (!used_elsewhere) {
+				arg_list_.erase(shared_arg); // shared_ptr dropped
+			}
 		}
+
+		arg_map_.erase(kernel_idx); // weak_ptrs dropped
 	}
 
-	void KernelProgram::releaseMemObject(int kernel_index,
-		int index, size_t size, GLuint texture, GLuint vbo)
+	void KernelProgram::releaseArg(const std::weak_ptr<Argument>& arg)
 	{
-		Argument arg;
-		arg.size = size;
-		arg.texture = texture;
-		arg.vbo = vbo;
-		unsigned int ai;
+		auto shared_arg = arg.lock();
+		if (!shared_arg) return;
 
-		if (texture)
-		{
-			if (matchArgTex(arg, ai))
-			{
-				clReleaseMemObject(arg_list_[ai].buffer);
-				arg_list_.erase(arg_list_.begin() + ai);
-			}
-		}
-		else if (vbo)
-		{
-			if (matchArgVBO(arg, ai))
-			{
-				clReleaseMemObject(arg_list_[ai].buffer);
-				arg_list_.erase(arg_list_.begin() + ai);
-			}
-		}
-		else
-		{
-			if (matchArg(arg, ai))
-			{
-				clReleaseMemObject(arg_list_[ai].buffer);
-				arg_list_.erase(arg_list_.begin() + ai);
-			}
-		}
-	}
+		arg_list_.erase(shared_arg); // shared_ptr dropped
 
-	void KernelProgram::releaseMemObject(size_t size, void* orgn_addr)
-	{
-		Argument arg;
-		arg.size = size;
-		arg.texture = 0;
-		arg.vbo = 0;
-		arg.orgn_addr = orgn_addr;
-		unsigned int ai;
-
-		if (matchArgAddr(arg, ai))
-		{
-			clReleaseMemObject(arg_list_[ai].buffer);
-			arg_list_.erase(arg_list_.begin() + ai);
+		for (auto& [kidx, args] : arg_map_) {
+			args.erase(
+				std::remove_if(args.begin(), args.end(),
+					[&](const std::weak_ptr<Argument>& w) {
+						return w.lock() == shared_arg;
+					}),
+				args.end()
+			);
 		}
 	}
 

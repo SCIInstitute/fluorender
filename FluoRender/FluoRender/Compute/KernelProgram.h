@@ -46,6 +46,8 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <memory>
+#include <unordered_map>
 
 #ifndef __glew_h__
 typedef unsigned int GLuint;
@@ -55,18 +57,132 @@ namespace flvr
 {
 	class Kernel;
 	//argument
-	struct Argument
+	class Argument
 	{
+	public:
 		bool protect_;
-		//int kernel_index;
-		//cl_uint index;
-		std::set<cl_uint> kidx;//kernels that use it
-		size_t size;
+		bool valid_;//buffer valid
 		GLuint texture;
 		GLuint vbo;
-		cl_mem buffer;
 		void* orgn_addr;
+		cl_mem buffer;
+		size_t size;
 
+		void protect() { protect_ = true; }
+		void unprotect() { protect_ = false; }
+		void destroy()
+		{
+			if (valid_)
+			{
+				cl_int err = clReleaseMemObject(buffer);
+				protect_ = false;
+				size = 0;
+				texture = 0;
+				vbo = 0;
+				buffer = 0;
+				orgn_addr = 0;
+			}
+		}
+		void release()
+		{
+			if (valid_ && !protect_)
+				destroy();
+		}
+
+		bool matchesPointer(void* data) const
+		{
+			return orgn_addr == data;
+		}
+
+		bool matchesTexture(GLuint tex_id) const
+		{
+			return texture == tex_id;
+		}
+
+		bool matchesVBO(GLuint vbo_id) const
+		{
+			return vbo == vbo_id;
+		}
+
+		static std::shared_ptr<Argument> createFromPointer(cl_context context, cl_mem_flags flags, size_t size, void* data)
+		{
+			cl_int err = CL_SUCCESS;
+			cl_mem buf = clCreateBuffer(context, flags, size, data, &err);
+			if (err != CL_SUCCESS || !buf) {
+				return nullptr;
+			}
+
+			auto arg = std::make_shared<Argument>();
+			arg->buffer = buf;
+			arg->size = size;
+			arg->orgn_addr = data;
+			arg->valid_ = true;
+			return arg;
+		}
+
+		static std::shared_ptr<Argument> createFromTexture2D(cl_context context, cl_mem_flags flags, GLuint tex_id)
+		{
+			cl_int err = CL_SUCCESS;
+			cl_mem buf = clCreateFromGLTexture(
+				context,
+				flags,
+				GL_TEXTURE_2D,
+				0,          // mip level
+				tex_id,
+				&err
+			);
+
+			if (err != CL_SUCCESS || !buf) {
+				return nullptr;
+			}
+
+			auto arg = std::make_shared<Argument>();
+			arg->buffer = buf;
+			arg->texture = tex_id;
+			arg->valid_ = true;
+			return arg;
+		}
+
+		static std::shared_ptr<Argument> createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id)
+		{
+			cl_int err = CL_SUCCESS;
+			cl_mem buf = clCreateFromGLTexture(
+				context,
+				flags,
+				GL_TEXTURE_3D,
+				0,          // mip level
+				tex_id,
+				&err
+			);
+
+			if (err != CL_SUCCESS || !buf) {
+				return nullptr;
+			}
+
+			auto arg = std::make_shared<Argument>();
+			arg->buffer = buf;
+			arg->texture = tex_id;
+			arg->valid_ = true;
+			return arg;
+		}
+
+		static std::shared_ptr<Argument> createFromVBO(cl_context context, cl_mem_flags flags, GLuint vbo_id, size_t size)
+		{
+			cl_int err = CL_SUCCESS;
+			cl_mem buf = clCreateFromGLBuffer(context, flags, vbo_id, &err);
+			if (err != CL_SUCCESS || !buf) {
+				return nullptr;
+			}
+
+			auto arg = std::make_shared<Argument>();
+			arg->buffer = buf;
+			arg->vbo = vbo_id;
+			arg->size = size;
+			arg->valid_ = true;
+			return arg;
+		}
+
+	private:
 		Argument() :
 			protect_(false),
 			size(0),
@@ -74,11 +190,11 @@ namespace flvr
 			vbo(0),
 			buffer(0),
 			orgn_addr(0) {}
+		~Argument()
+		{
+			destroy();
+		}
 
-		void protect() { protect_ = true; }
-		void unprotect() { protect_ = false; }
-		void kernel(cl_uint idx) { kidx.insert(idx); }
-		bool find_kernel(cl_uint idx) { return kidx.find(idx) != kidx.end(); }
 	};
 
 	typedef struct
@@ -133,45 +249,29 @@ namespace flvr
 		//get info
 		bool getWorkGroupSize(int idex, size_t*);
 
-		bool matchArg(Argument&, unsigned int&);
-		bool matchArgBuf(Argument&, unsigned int&);//find buffer
-		bool matchArgTex(Argument&, unsigned int&);//use texture id to match
-		bool matchArgVBO(Argument&, unsigned int&);//use vbo id to match
-		bool matchArgAddr(Argument&, unsigned int&);//use data address to match
 		//set argument
 		void setKernelArgBegin(int kernel_idx, int arg_idx = 0)
 		{
 			kernel_idx_ = kernel_idx; arg_idx_ = arg_idx;
 		}
-		int setKernelArgument(Argument&);
-		void setKernelArgConst(size_t, void*);
-		Argument setKernelArgBuf(cl_mem_flags, size_t, void*);
-		Argument setKernelArgBufWrite(cl_mem_flags, size_t, void*);
-		Argument setKernelArgTex2D(cl_mem_flags, GLuint);
-		Argument setKernelArgTex3D(cl_mem_flags, GLuint);
-		Argument setKernelArgTex3DBuf(cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
-		Argument setKernelArgVertexBuf(cl_mem_flags, GLuint, size_t);//assign existing vertex buffer to buffer
-		Argument setKernelArgImage(cl_mem_flags, cl_image_format, cl_image_desc, void*);
-		void setKernelArgLocal(size_t);
+		bool setKernelArgConst(size_t, void*);
+		bool setKernelArgLocal(size_t);
+		bool setKernelArgument(std::weak_ptr<Argument> arg);
+		std::weak_ptr<Argument> setKernelArgBuf(cl_mem_flags, size_t, void*);
+		bool updateKernelArgBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data);
+		std::weak_ptr<Argument> setKernelArgTex2D(cl_mem_flags, GLuint);
+		std::weak_ptr<Argument> setKernelArgTex3D(cl_mem_flags, GLuint);
+		std::weak_ptr<Argument> copyTex3DToArgBuf(cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
+		bool copyArgBufToTex3D(const std::weak_ptr<Argument> arg, GLuint, size_t, size_t*);//copy buffer back to texture
+		std::weak_ptr<Argument> setKernelArgVertexBuf(cl_mem_flags, GLuint, size_t);//assign existing vertex buffer to buffer
 
-		//read/write
-		void readBuffer(size_t size,
-			void* buf_data, void* data);
-		void readBuffer(Argument& arg, void* data);
-		void copyBufTex3D(Argument& arg, GLuint, size_t, size_t*);//copy buffer back to texture
-		void writeBuffer(size_t size,
-			void* buf_data, void* data);
-		void writeBuffer(Argument& arg, void* data);
-		void writeImage(const size_t* origin, const size_t* region,
-			void* img_data, void* data);
-		void writeImage(const size_t* origin, const size_t* region,
-			Argument& arg, void* data);
+		//read back
+		bool readBuffer(const std::weak_ptr<Argument> arg, void* data);
 
 		//release mem obj
-		void releaseAll(bool del_mem = true);
-		void releaseMemObject(Argument&);
-		void releaseMemObject(int, int, size_t, GLuint, GLuint);
-		void releaseMemObject(size_t, void* orgn_addr);
+		void releaseAllArgs();
+		void releaseKernelArgs(int kernel_idx);
+		void releaseArg(const std::weak_ptr<Argument>&);
 
 		//initialization
 		static void init_kernels_supported();
@@ -230,9 +330,12 @@ namespace flvr
 		int kernel_idx_;
 		int arg_idx_;
 
-		//memory object to release
-		std::vector<Argument> arg_list_;
+		//a list of arguments to keep track of cl mem objs
+		std::set<std::shared_ptr<Argument>> arg_list_;
+		//references which arguments are used by each kernel, without owning them
+		std::unordered_map<int, std::vector<std::weak_ptr<Argument>>> arg_map_;//maps kernel index to a list of arguments
 
+		//global settings
 		static bool init_;
 		static cl_device_id device_;
 		static cl_context context_;

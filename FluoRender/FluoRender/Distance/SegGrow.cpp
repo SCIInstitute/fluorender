@@ -682,7 +682,7 @@ void SegGrow::Compute()
 		kernel_prog->setKernelArgBegin(kernel_0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		flvr::Argument arg_label =
-			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -945,7 +945,7 @@ void SegGrow::Compute()
 		}
 
 		//read back
-		kernel_prog->copyBufTex3D(arg_label, lid,
+		kernel_prog->copyArgBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -1093,7 +1093,7 @@ void SegGrow::Compute()
 		//finalize
 		kernel_prog->setKernelArgBegin(kernel_7);
 		flvr::Argument arg_label =
-			kernel_prog->setKernelArgTex3DBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
+			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -1102,7 +1102,7 @@ void SegGrow::Compute()
 		kernel_prog->executeKernel(kernel_7, 3, global_size, local_size);
 
 		//read back
-		kernel_prog->copyBufTex3D(arg_label, lid,
+		kernel_prog->copyArgBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
