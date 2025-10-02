@@ -594,6 +594,13 @@ if(WIN32 AND USE_XINPUT)
         XInput.lib)
 endif()
 
+# Main
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
+file(GLOB src FluoRender/FluoRender/*.cpp)
+file(GLOB hdr FluoRender/FluoRender/*.h)
+add_library(MAIN_LIB STATIC
+  ${src} ${hdr})
+
 # Animator
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animator)
 file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
@@ -621,6 +628,13 @@ file(GLOB cmp_src FluoRender/FluoRender/Component/*.cpp)
 file(GLOB cmp_hdr FluoRender/FluoRender/Component/*.h)
 add_library(COMPONENT_LIB STATIC
   ${cmp_src} ${cmp_hdr})
+
+# Compute
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Compute)
+file(GLOB compute_src FluoRender/FluoRender/Compute/*.cpp)
+file(GLOB compute_hdr FluoRender/FluoRender/Compute/*.h)
+add_library(COMPUTE_LIB STATIC
+  ${compute_src} ${compute_hdr})
 
 # Config
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Config)
@@ -673,20 +687,6 @@ file(GLOB fltr_hdr FluoRender/FluoRender/Filter/*.h)
 add_library(FILTER_LIB STATIC
   ${fltr_src} ${fltr_hdr})
 
-# Flobject
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flobject)
-file(GLOB obj_src FluoRender/FluoRender/Flobject/*.cpp)
-file(GLOB obj_hdr FluoRender/FluoRender/Flobject/*.hpp)
-add_library(FLOBJECT_LIB STATIC
-  ${obj_src} ${obj_hdr})
-
-# Flrender
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flrender)
-file(GLOB flrd_src FluoRender/FluoRender/Flrender/*.cpp)
-file(GLOB flrd_hdr FluoRender/FluoRender/Flrender/*.h)
-add_library(FLRENDER_LIB STATIC
-  ${flrd_src} ${flrd_hdr})
-
 # Flui
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Flui)
 file(GLOB flui_src FluoRender/FluoRender/Flui/*.cpp)
@@ -708,6 +708,13 @@ file(GLOB glb_hdr FluoRender/FluoRender/Global/*.h)
 add_library(GLOBAL_LIB STATIC
   ${glb_src} ${glb_hdr})
 
+# Graphics
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Graphics)
+file(GLOB graphics_src FluoRender/FluoRender/Graphics/*.cpp)
+file(GLOB graphics_hdr FluoRender/FluoRender/Graphics/*.h)
+add_library(GRAPHICS_LIB STATIC
+  ${graphics_src} ${graphics_hdr})
+
 # Image
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Image)
 file(GLOB img_hdr FluoRender/FluoRender/Image/*.h)
@@ -723,12 +730,12 @@ file(GLOB lgr_hdr FluoRender/FluoRender/LookingGlass/*.h)
 add_library(LOOKINGGLASS_LIB STATIC
   ${lgr_src} ${lgr_hdr})
 
-# Main
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
-file(GLOB src FluoRender/FluoRender/*.cpp)
-file(GLOB hdr FluoRender/FluoRender/*.h)
-add_library(MAIN_LIB STATIC
-  ${src} ${hdr})
+# Object
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Object)
+file(GLOB obj_src FluoRender/FluoRender/Object/*.cpp)
+file(GLOB obj_hdr FluoRender/FluoRender/Object/*.hpp)
+add_library(OBJECT_LIB STATIC
+  ${obj_src} ${obj_hdr})
 
 # OpenXR
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/OpenXR)
@@ -816,6 +823,13 @@ add_library(UTILITY_LIB STATIC
   ${utl_src} ${utl_hdr} ${utl_rsc})
 
 # include and link
+# Main
+target_include_directories(MAIN_LIB PRIVATE
+  ${GLM_DIRS}
+  ${TEEM_INCLUDE_DIRS})
+target_link_libraries(MAIN_LIB PRIVATE
+  ${wxWidgets_LIBRARIES})
+
 # Animator
 target_include_directories(ANIMATOR_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
@@ -826,24 +840,18 @@ if (APPLE)
     target_link_libraries(ANIMATOR_LIB PRIVATE
       ${BZIP2_LIBRARY})
 endif()
-target_link_libraries(ANIMATOR_LIB PRIVATE
-  ${TIFF_LIBRARIES})
 
 # Calculate
 target_include_directories(CALCULATE_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(CALCULATE_LIB PRIVATE
-  ${TEEM_LIBRARIES})
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(CLUSTER_LIB PRIVATE
-  ${Boost_LIBRARIES})
 
 # Component
 target_include_directories(COMPONENT_LIB PRIVATE
@@ -851,8 +859,15 @@ target_include_directories(COMPONENT_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(COMPONENT_LIB PRIVATE
-  ${Boost_LIBRARIES})
+
+# Compute
+target_include_directories(COMPUTE_LIB PRIVATE
+  ${GLEW_INCLUDE_DIR}
+  ${OpenCL_INCLUDE_DIRS}
+)
+target_link_libraries(COMPUTE_LIB PRIVATE
+  ${OpenCL_LIBRARIES}
+)
 
 # Config
 target_include_directories(CONFIG_LIB PRIVATE
@@ -860,8 +875,6 @@ target_include_directories(CONFIG_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(CONFIG_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES})
 
 # Control
 
@@ -886,7 +899,6 @@ target_include_directories(DISTANCE_LIB PRIVATE
   ${OpenCV_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 target_link_libraries(DISTANCE_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
   ${OpenCV_LIBS})
 
 # File
@@ -899,27 +911,6 @@ target_include_directories(FILTER_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(FILTER_LIB PRIVATE
-  ${Boost_LIBRARIES})
-
-# Flobject
-target_include_directories(FLOBJECT_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
-
-# Flrender
-target_include_directories(FLRENDER_LIB PRIVATE
-  ${FREETYPE_INCLUDE_DIRS}
-  ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
-  ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
-target_link_libraries(FLRENDER_LIB PRIVATE
-  ${FREETYPE_LIBRARIES}
-  ${GLEW_STATIC_LIBRARIES}
-  ${OpenCL_LIBRARIES}
-  ${OPENGL_LIBRARIES}
-  ${TEEM_LIBRARIES}
-)
 
 # Flui
 target_include_directories(FLUI_LIB PRIVATE
@@ -979,7 +970,6 @@ if (APPLE)
       ${BZIP2_LIBRARY})
 endif()
 target_link_libraries(FORMAT_LIB PRIVATE
-  ${Boost_LIBRARIES}
   ${FFMPEG_LIBRARIES}
   ${ND2_LIBRARIES}
   ${OpenJpeg_LIBRARIES}
@@ -1006,6 +996,20 @@ else()
     ${JAVA_INCLUDE_PATH2})
 endif()
 
+# Graphics
+target_include_directories(GRAPHICS_LIB PRIVATE
+  ${FREETYPE_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIR}
+  ${GLM_DIRS}
+  ${OpenCL_INCLUDE_DIRS}
+  ${TEEM_INCLUDE_DIRS})
+target_link_libraries(GRAPHICS_LIB PRIVATE
+  ${FREETYPE_LIBRARIES}
+  ${GLEW_STATIC_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+  ${TEEM_LIBRARIES}
+)
+
 # Image
 
 # LookingGlass
@@ -1016,12 +1020,9 @@ target_include_directories(LOOKINGGLASS_LIB PRIVATE
 target_link_libraries(LOOKINGGLASS_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES})
 
-# Main
-target_include_directories(MAIN_LIB PRIVATE
-  ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
-target_link_libraries(MAIN_LIB PRIVATE
-  ${wxWidgets_LIBRARIES})
+# Object
+target_include_directories(OBJECT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR})
 
 # OpenXR
 target_include_directories(OPENXR_LIB PRIVATE
@@ -1054,8 +1055,7 @@ if (WIN32 OR APPLE)
     ${HDF5_INCLUDE_PATHS})
 endif()
 target_link_libraries(PYTHON_LIB PRIVATE
-  ${HDF5_LIBRARIES}
-  ${Boost_LIBRARIES})
+  ${HDF5_LIBRARIES})
 
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
@@ -1063,8 +1063,7 @@ target_include_directories(SCENE_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS}
-  ${TIFF_INCLUDE_DIR})
+  ${TEEM_INCLUDE_DIRS})
 if (WIN32)
   target_include_directories(SCENE_LIB PRIVATE
     ${WACOM_PATHS})
@@ -1084,22 +1083,19 @@ if (APPLE)
 endif()
 target_link_libraries(SCENE_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
-  ${TEEM_LIBRARIES}
-  ${TIFF_LIBRARIES})
+  ${TEEM_LIBRARIES})
 
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${Python3_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS}
-  ${TIFF_INCLUDE_DIR})
+  ${TEEM_INCLUDE_DIRS})
 if (APPLE)
     target_link_libraries(SCRIPT_LIB PRIVATE
       ${BZIP2_LIBRARY})
 endif()
 target_link_libraries(SCRIPT_LIB PRIVATE
-  ${TIFF_LIBRARIES}
   ${Python3_LIBRARIES})
 
 # Selection
@@ -1108,8 +1104,6 @@ target_include_directories(SELECTION_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(SELECTION_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES})
 
 # Timer
 target_include_directories(TIMER_LIB PRIVATE
@@ -1121,8 +1115,6 @@ target_include_directories(TRACKING_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
-target_link_libraries(TRACKING_LIB PRIVATE
-  ${Boost_LIBRARIES})
 
 # Trainer
 target_link_libraries(TRAINER_LIB PRIVATE
@@ -1132,12 +1124,8 @@ target_link_libraries(TRAINER_LIB PRIVATE
 # Type
 target_include_directories(TYPE_LIB PRIVATE
   ${GLEW_INCLUDE_DIR})
-target_link_libraries(TYPE_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES})
 
 # Utility
-target_link_libraries(UTILITY_LIB PRIVATE
-  ${Boost_LIBRARIES})
 
 # For Apple set the icns file containing icons
 IF(APPLE)
@@ -1259,6 +1247,7 @@ target_link_libraries(FluoRender PRIVATE
     CALCULATE_LIB
     CLUSTER_LIB
     COMPONENT_LIB
+    COMPUTE_LIB
     CONFIG_LIB
     CONTROL_LIB
     CONVERTER_LIB
@@ -1266,13 +1255,13 @@ target_link_libraries(FluoRender PRIVATE
     DISTANCE_LIB
     FILE_LIB
     FILTER_LIB
-    FLOBJECT_LIB
-    FLRENDER_LIB
     FLUI_LIB
     FORMAT_LIB
     GLOBAL_LIB
+    GRAPHICS_LIB
     IMAGE_LIB
     LOOKINGGLASS_LIB
+    OBJECT_LIB
     OPENXR_LIB
     PROGRESS_LIB
     PROJECT_LIB
@@ -1290,7 +1279,7 @@ if(BUILD_TESTER)
     target_link_libraries(Tester PRIVATE
       ${Boost_LIBRARIES}
       dlib::dlib
-      FLOBJECT_LIB
+      OBJECT_LIB
       TYPE_LIB
       )
 endif()
