@@ -803,6 +803,7 @@ void ConvVolMesh::AverageNormals(flvr::Argument* pvbo, flvr::Argument* pibo,
 	kernel_prog->readBuffer(arg_norm, normals.data());
 
 	kernel_prog->releaseMemObject(arg_norm);
+	kernel_prog->releaseAll(false);
 
 	//update mesh...
 	m_mesh->UpdateNormalVBO(normals);
