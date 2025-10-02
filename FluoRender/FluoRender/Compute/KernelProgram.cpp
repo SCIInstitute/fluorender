@@ -41,6 +41,52 @@
 
 namespace flvr
 {
+	std::shared_ptr<Argument> Argument::createFromTexture2D(cl_context context, cl_mem_flags flags, GLuint tex_id)
+	{
+		cl_int err = CL_SUCCESS;
+		cl_mem buf = clCreateFromGLTexture(
+			context,
+			flags,
+			GL_TEXTURE_2D,
+			0,          // mip level
+			tex_id,
+			&err
+		);
+
+		if (err != CL_SUCCESS || !buf) {
+			return nullptr;
+		}
+
+		auto arg = std::make_shared<Argument>();
+		arg->buffer = buf;
+		arg->texture = tex_id;
+		arg->valid_ = true;
+		return arg;
+	}
+
+	std::shared_ptr<Argument> Argument::createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id)
+	{
+		cl_int err = CL_SUCCESS;
+		cl_mem buf = clCreateFromGLTexture(
+			context,
+			flags,
+			GL_TEXTURE_3D,
+			0,          // mip level
+			tex_id,
+			&err
+		);
+
+		if (err != CL_SUCCESS || !buf) {
+			return nullptr;
+		}
+
+		auto arg = std::make_shared<Argument>();
+		arg->buffer = buf;
+		arg->texture = tex_id;
+		arg->valid_ = true;
+		return arg;
+	}
+
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
@@ -478,7 +524,7 @@ namespace flvr
 		if (!data)
 			return false;
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return;
+			return false;
 
 		err = clSetKernelArg(kernels_[kernel_idx_].kernel, arg_idx_++, size, data);
 		if (err != CL_SUCCESS)

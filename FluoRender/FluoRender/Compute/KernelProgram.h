@@ -120,51 +120,8 @@ namespace flvr
 			return arg;
 		}
 
-		static std::shared_ptr<Argument> createFromTexture2D(cl_context context, cl_mem_flags flags, GLuint tex_id)
-		{
-			cl_int err = CL_SUCCESS;
-			cl_mem buf = clCreateFromGLTexture(
-				context,
-				flags,
-				GL_TEXTURE_2D,
-				0,          // mip level
-				tex_id,
-				&err
-			);
-
-			if (err != CL_SUCCESS || !buf) {
-				return nullptr;
-			}
-
-			auto arg = std::make_shared<Argument>();
-			arg->buffer = buf;
-			arg->texture = tex_id;
-			arg->valid_ = true;
-			return arg;
-		}
-
-		static std::shared_ptr<Argument> createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id)
-		{
-			cl_int err = CL_SUCCESS;
-			cl_mem buf = clCreateFromGLTexture(
-				context,
-				flags,
-				GL_TEXTURE_3D,
-				0,          // mip level
-				tex_id,
-				&err
-			);
-
-			if (err != CL_SUCCESS || !buf) {
-				return nullptr;
-			}
-
-			auto arg = std::make_shared<Argument>();
-			arg->buffer = buf;
-			arg->texture = tex_id;
-			arg->valid_ = true;
-			return arg;
-		}
+		static std::shared_ptr<Argument> createFromTexture2D(cl_context context, cl_mem_flags flags, GLuint tex_id);
+		static std::shared_ptr<Argument> createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id);
 
 		static std::shared_ptr<Argument> createFromVBO(cl_context context, cl_mem_flags flags, GLuint vbo_id, size_t size)
 		{
@@ -182,7 +139,6 @@ namespace flvr
 			return arg;
 		}
 
-	private:
 		Argument() :
 			protect_(false),
 			size(0),
