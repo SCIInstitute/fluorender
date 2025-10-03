@@ -174,7 +174,7 @@ void PaintBoxes::Compute()
 	}
 
 	//release buffer
-	kernel_prog->releaseAll();
+	kernel_prog->releaseAllArgs();
 	//free memory
 	delete[] boxes;
 	delete[] hits;

@@ -949,7 +949,7 @@ void SegGrow::Compute()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		bnum++;//brick number of processed
 	}
@@ -1067,7 +1067,7 @@ void SegGrow::Compute()
 		}
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 		break;
 	}
 
@@ -1106,7 +1106,7 @@ void SegGrow::Compute()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 	}
 
 	MergeIds(merge_list);

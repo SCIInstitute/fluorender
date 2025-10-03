@@ -273,7 +273,7 @@ void VolumeRoi::Run()
 		delete[] wsum;
 	}
 
-	kernel_prog->releaseAll();
+	kernel_prog->releaseAllArgs();
 }
 
 double VolumeRoi::GetResult()

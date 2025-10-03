@@ -900,7 +900,7 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 
 void StencilCompare::Clean()
 {
-	m_prog->releaseAll();
+	m_prog->releaseAllArgs();
 }
 
 bool StencilCompare::Compare()

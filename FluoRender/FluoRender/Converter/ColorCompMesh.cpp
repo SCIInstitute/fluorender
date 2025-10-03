@@ -126,7 +126,7 @@ void ColorCompMesh::Update()
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 1, global_size, local_size);
 	}
-	kernel_prog->releaseAll();
+	kernel_prog->releaseAllArgs();
 	md->SetGpuDirty();
 }
 

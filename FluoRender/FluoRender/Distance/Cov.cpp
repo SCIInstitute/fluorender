@@ -227,7 +227,7 @@ bool Cov::ComputeCenter()
 		}
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 	}
 
 	if (!sum)
@@ -308,7 +308,7 @@ bool Cov::ComputeCov()
 		}
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 	}
 
 	return true;

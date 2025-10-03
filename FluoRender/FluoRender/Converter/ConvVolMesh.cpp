@@ -374,7 +374,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	kernel_prog->readBuffer(sizeof(int), &vsize, &vsize);
 	if (vsize <= 0)
 	{
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 		m_busy = false;
 		return;
 	}
@@ -477,7 +477,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	//m_mesh->ReturnData();
 	//va_model->unbind();
 
-	kernel_prog->releaseAll();
+	kernel_prog->releaseAllArgs();
 
 	m_merged = false;
 	m_busy = false;
@@ -750,7 +750,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	m_mesh->SetTriangleNum(idx_num / 3);//should stay the same
 	m_mesh->SetGpuDirty();
 
-	kernel_prog->releaseAll();
+	kernel_prog->releaseAllArgs();
 
 	m_merged = true;
 	m_busy = false;
@@ -803,7 +803,7 @@ void ConvVolMesh::AverageNormals(flvr::Argument* pvbo, flvr::Argument* pibo,
 	kernel_prog->readBuffer(arg_norm, normals.data());
 
 	kernel_prog->releaseMemObject(arg_norm);
-	kernel_prog->releaseAll(false);
+	kernel_prog->releaseAllArgs(false);
 
 	//update mesh...
 	m_mesh->UpdateNormalVBO(normals);

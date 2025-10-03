@@ -727,7 +727,7 @@ void ChannelCompare::Product()
 		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		//sum
 		for (size_t i=0; i< gsize.gsxyz; ++i)
@@ -837,7 +837,7 @@ void ChannelCompare::MinValue()
 		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		//sum
 		for (size_t i = 0; i < gsize.gsxyz; ++i)
@@ -951,7 +951,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		//sum
 		for (size_t i = 0; i < gsize.gsxyz; ++i)

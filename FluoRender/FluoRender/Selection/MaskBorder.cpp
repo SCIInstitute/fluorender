@@ -219,6 +219,6 @@ void MaskBorder::Compute(int order)
 		}
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 	}
 }

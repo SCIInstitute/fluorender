@@ -424,7 +424,7 @@ void ComponentGenerator::ShuffleID()
 			float(bbx.Min().z())};
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -448,7 +448,7 @@ void ComponentGenerator::ShuffleID()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -547,16 +547,16 @@ void ComponentGenerator::SetIDBit(int psize)
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
-		flvr::Argument arg_szbuf =
+		auto arg_szbuf =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
-		flvr::Argument arg_mask;
+		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
 			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 2
@@ -591,7 +591,7 @@ void ComponentGenerator::SetIDBit(int psize)
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -661,7 +661,7 @@ void ComponentGenerator::Grow()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -691,7 +691,7 @@ void ComponentGenerator::Grow()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -780,9 +780,9 @@ void ComponentGenerator::DensityField()
 		//set
 		//kernel 0
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
-		flvr::Argument arg_img =
+		auto arg_img =
 			kernel_prog_dens->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_densf =
+		auto arg_densf =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
@@ -791,9 +791,9 @@ void ComponentGenerator::DensityField()
 		//kernel 1
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
 		kernel_prog_dens->setKernelArgument(arg_densf);
-		flvr::Argument arg_gavg =
+		auto arg_gavg =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
-		flvr::Argument arg_gvar =
+		auto arg_gvar =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
@@ -838,7 +838,7 @@ void ComponentGenerator::DensityField()
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
-		flvr::Argument arg_avg =
+		auto arg_avg =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
@@ -847,7 +847,7 @@ void ComponentGenerator::DensityField()
 		count++;
 		//compute var
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
-		flvr::Argument arg_var =
+		auto arg_var =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
@@ -856,8 +856,8 @@ void ComponentGenerator::DensityField()
 		count++;
 
 		//release buffer
-		kernel_prog_dens->releaseMemObject(arg_gavg);
-		kernel_prog_dens->releaseMemObject(arg_gvar);
+		kernel_prog_dens->releaseArg(arg_gavg);
+		kernel_prog_dens->releaseArg(arg_gvar);
 
 		//density grow
 		unsigned int rcnt = 0;
@@ -873,7 +873,7 @@ void ComponentGenerator::DensityField()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
 		kernel_prog_grow->setKernelArgument(arg_img);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog_grow->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog_grow->setKernelArgument(arg_densf);
 		kernel_prog_grow->setKernelArgument(arg_avg);
@@ -910,8 +910,8 @@ void ComponentGenerator::DensityField()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog_grow->releaseAll();
-		kernel_prog_dens->releaseAll(false);
+		kernel_prog_grow->releaseAllArgs();
+		kernel_prog_dens->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -991,9 +991,9 @@ void ComponentGenerator::DistGrow()
 		//set
 		//kernel 0
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
-		flvr::Argument arg_img =
+		auto arg_img =
 			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_distf =
+		auto arg_distf =
 			kernel_prog_dist->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -1002,7 +1002,7 @@ void ComponentGenerator::DistGrow()
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
-		flvr::Argument arg_mask;
+		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
 			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
@@ -1049,7 +1049,7 @@ void ComponentGenerator::DistGrow()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		kernel_prog->setKernelArgument(arg_img);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgument(arg_distf);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
@@ -1081,8 +1081,8 @@ void ComponentGenerator::DistGrow()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
-		kernel_prog_dist->releaseAll(false);
+		kernel_prog->releaseAllArgs();
+		kernel_prog_dist->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -1190,9 +1190,9 @@ void ComponentGenerator::DistDensityField()
 		//set
 		//kernel 0
 		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
-		flvr::Argument arg_img =
+		auto arg_img =
 			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_distf = kernel_prog_dist->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
+		auto arg_distf = kernel_prog_dist->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*nx*ny*nz, NULL);
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -1200,7 +1200,7 @@ void ComponentGenerator::DistDensityField()
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
 		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&scale));
 		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
-		flvr::Argument arg_mask;
+		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
 			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
@@ -1247,7 +1247,7 @@ void ComponentGenerator::DistDensityField()
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
 		kernel_prog_dens->setKernelArgument(arg_img);
 		kernel_prog_dens->setKernelArgument(arg_distf);
-		flvr::Argument arg_densf =
+		auto arg_densf =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
@@ -1262,9 +1262,9 @@ void ComponentGenerator::DistDensityField()
 		//kernel 1
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
 		kernel_prog_dens->setKernelArgument(arg_densf);
-		flvr::Argument arg_gavg =
+		auto arg_gavg =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
-		flvr::Argument arg_gvar =
+		auto arg_gvar =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*ngx*ngy*ngz, NULL);
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
@@ -1303,7 +1303,7 @@ void ComponentGenerator::DistDensityField()
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
-		flvr::Argument arg_avg =
+		auto arg_avg =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
@@ -1312,7 +1312,7 @@ void ComponentGenerator::DistDensityField()
 		count++;
 		//compute var
 		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
-		flvr::Argument arg_var =
+		auto arg_var =
 			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, sizeof(unsigned char)*dnx*dny*dnz, NULL);
 		kernel_prog_dens->setKernelArgument(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
@@ -1321,9 +1321,9 @@ void ComponentGenerator::DistDensityField()
 		count++;
 
 		//release buffer
-		kernel_prog_dens->releaseMemObject(arg_gavg);
-		kernel_prog_dens->releaseMemObject(arg_gvar);
-		kernel_prog_dens->releaseMemObject(arg_distf);
+		kernel_prog_dens->releaseArg(arg_gavg);
+		kernel_prog_dens->releaseArg(arg_gvar);
+		kernel_prog_dens->releaseArg(arg_distf);
 
 		//distance + density grow
 		unsigned int rcnt = 0;
@@ -1339,7 +1339,7 @@ void ComponentGenerator::DistDensityField()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
 		kernel_prog_grow->setKernelArgument(arg_img);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog_grow->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog_grow->setKernelArgument(arg_densf);
 		kernel_prog_grow->setKernelArgument(arg_avg);
@@ -1375,9 +1375,9 @@ void ComponentGenerator::DistDensityField()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog_grow->releaseAll();
-		kernel_prog_dist->releaseAll(false);
-		kernel_prog_dens->releaseAll(false);
+		kernel_prog_grow->releaseAllArgs();
+		kernel_prog_dist->releaseAllArgs();
+		kernel_prog_dens->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -1472,16 +1472,16 @@ void ComponentGenerator::CleanNoise()
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index0);
-		flvr::Argument arg_szbuf =
+		auto arg_szbuf =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
-		flvr::Argument arg_mask;
+		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
 			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
@@ -1525,7 +1525,7 @@ void ComponentGenerator::CleanNoise()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -1581,7 +1581,7 @@ void ComponentGenerator::ClearBorders()
 
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -1600,7 +1600,7 @@ void ComponentGenerator::ClearBorders()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -1657,7 +1657,7 @@ void ComponentGenerator::FillBorders()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -1678,7 +1678,7 @@ void ComponentGenerator::FillBorders()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		if (postwork)
 			postwork(__FUNCTION__);
@@ -1802,7 +1802,7 @@ void ComponentGenerator::GenerateDB()
 
 		//compute local histogram and generate lut
 		kernel_prog->setKernelArgBegin(kernel_index0);
-		flvr::Argument arg_img =
+		auto arg_img =
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
 		//rechist
 		size_t fsize = bin * rec;
@@ -1813,11 +1813,11 @@ void ComponentGenerator::GenerateDB()
 //		DBMIFLOAT32 histmi2;
 //		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
 //#endif
-		flvr::Argument arg_rechist =
+		auto arg_rechist =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
 		cl_uchar* lut = new cl_uchar[fsize]();
-		flvr::Argument arg_lut =
+		auto arg_lut =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uchar)*fsize, (void*)(lut));
 		//local histogram
 		kernel_prog->setKernelArgLocal(sizeof(float)*bin);
@@ -1848,7 +1848,7 @@ void ComponentGenerator::GenerateDB()
 //		mi.nx = nx; mi.ny = ny; mi.nc = 1; mi.nt = nx; mi.data = lut;
 //#endif
 		//release
-		kernel_prog->releaseMemObject(arg_rechist);
+		kernel_prog->releaseArg(arg_rechist);
 		delete[] rechist;
 		delete[] lut;
 
@@ -1863,10 +1863,10 @@ void ComponentGenerator::GenerateDB()
 		fsize = par * rec;
 		float* params = new float[fsize]();
 		table.getRecOutput(params);
-		flvr::Argument arg_params =
+		auto arg_params =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			sizeof(float)*fsize, (void*)(params));
-		flvr::Argument arg_distf =
+		auto arg_distf =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				sizeof(unsigned char)*nxyz, NULL);
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
@@ -1906,7 +1906,7 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->setKernelArgBegin(kernel_index3);
 		kernel_prog->setKernelArgument(arg_img);
 		kernel_prog->setKernelArgument(arg_distf);
-		flvr::Argument arg_densf =
+		auto arg_densf =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				sizeof(unsigned char)*nxyz, NULL);
 		kernel_prog->setKernelArgument(arg_lut);
@@ -1918,10 +1918,10 @@ void ComponentGenerator::GenerateDB()
 		//kernel 4
 		kernel_prog->setKernelArgBegin(kernel_index4);
 		kernel_prog->setKernelArgument(arg_densf);
-		flvr::Argument arg_avg =
+		auto arg_avg =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				sizeof(unsigned char)*nxyz, NULL);
-		flvr::Argument arg_var =
+		auto arg_var =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				sizeof(unsigned char)*nxyz, NULL);
 		kernel_prog->setKernelArgument(arg_lut);
@@ -1950,7 +1950,7 @@ void ComponentGenerator::GenerateDB()
 //#endif
 
 		//release buffer
-		kernel_prog->releaseMemObject(arg_distf);
+		kernel_prog->releaseArg(arg_distf);
 
 		//grow
 		unsigned int rcnt = 0;
@@ -1961,7 +1961,7 @@ void ComponentGenerator::GenerateDB()
 		float iterf = 0;
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
 		kernel_prog->setKernelArgument(arg_img);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgument(arg_densf);
 		kernel_prog->setKernelArgument(arg_avg);
@@ -2022,7 +2022,7 @@ void ComponentGenerator::GenerateDB()
 			//set
 			//kernel 6
 			kernel_prog->setKernelArgBegin(kernel_index6);
-			flvr::Argument arg_szbuf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
+			auto arg_szbuf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, label_size, nullptr);
 			kernel_prog->setKernelArgument(arg_label);
 			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
@@ -2062,7 +2062,7 @@ void ComponentGenerator::GenerateDB()
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 		delete[] params;
 
 		if (postwork)

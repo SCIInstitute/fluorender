@@ -191,7 +191,7 @@ void Histogram::Compute()
 		count++;
 	}
 
-	kernel_prog->releaseAll();
+	kernel_prog->releaseAllArgs();
 	SetProgress(0, "");
 }
 

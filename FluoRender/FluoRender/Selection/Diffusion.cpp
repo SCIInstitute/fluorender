@@ -356,7 +356,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 		ReleaseMask(val, brick_num, b);
 	}
 }
@@ -463,7 +463,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 		ReleaseMask(val, brick_num, b);
 	}
 }

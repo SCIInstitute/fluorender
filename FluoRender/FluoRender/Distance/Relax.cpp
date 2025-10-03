@@ -293,7 +293,7 @@ bool Relax::Compute()
 		kernel_prog->readBuffer(sizeof(float)*gsize.gsxyz * m_snum, pwsum, pwsum);
 
 		//release buffer
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 
 		//collect data
 		for (size_t j = 0; j < m_snum; ++j)

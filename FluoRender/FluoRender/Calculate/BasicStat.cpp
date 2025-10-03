@@ -446,7 +446,7 @@ void BasicStat::Run()
 			delete[] hist;
 		}
 
-		kernel_prog->releaseAll();
+		kernel_prog->releaseAllArgs();
 	}
 
 	//median and mode from histogram
