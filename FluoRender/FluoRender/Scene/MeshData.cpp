@@ -816,8 +816,6 @@ void MeshData::SetVertexColor(bool val)
 {
 	m_vertex_color = val;
 	if (m_mr) m_mr->set_color(val);
-	if (val)
-		SetColor(fluo::Color(1.0), MESH_COLOR_DIFF);
 }
 
 bool MeshData::GetVertexColor()
@@ -1239,6 +1237,20 @@ void MeshData::BuildMesh()
 
 	SetFlatShading(m_data->numnormals == 0);
 	SetVertexColor(m_data->numcolors > 0);
+
+	if (m_data->numcolors)
+	{
+		if (m_data->numcolors > 0)
+		{
+			//get first color
+			float r = m_data->colors[4];
+			float g = m_data->colors[5];
+			float b = m_data->colors[6];
+
+			if (r < 1.0f || g < 1.0f || b < 1.0f)
+				SetColor(fluo::Color(1.0), MESH_COLOR_DIFF);
+		}
+	}
 
 	SubmitData();
 }

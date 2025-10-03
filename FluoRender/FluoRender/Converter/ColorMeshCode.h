@@ -28,7 +28,17 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COLOR_COMP_MESH_CODE_H_
 #define _COLOR_COMP_MESH_CODE_H_
 
-inline constexpr const char* str_cl_color_comp_mesh = R"CLKER(
+inline constexpr const char* str_cl_color_mesh_vol = R"CLKER(
+__kernel void kernel_0(
+	__read_only image3d_t volume,         // intensity volume (brick)
+	__global const float* vertex_vbo,     // float3 per vertex
+	__global float* color_vbo,            // float4 per vertex
+	const int3 voxel_cnt,                 // brick dimensions
+	const int3 vol_org,                   // brick origin in voxel space
+	const int num_vertices)
+)CLKER";
+
+inline constexpr const char* str_cl_color_mesh_comp = R"CLKER(
 __kernel void kernel_0(
 	__read_only image3d_t volume,         // intensity volume (brick)
 	__global const unsigned int* label,   // label volume (flat array, brick-aligned)
@@ -38,6 +48,9 @@ __kernel void kernel_0(
 	const int3 vol_org,                   // brick origin in voxel space
 	const int si,                         // shuffle index
 	const int num_vertices)
+)CLKER";
+
+inline constexpr const char* str_cl_color_mesh_head = R"CLKER(
 {
 	int gid = get_global_id(0);
 	if (gid >= num_vertices) return;
@@ -69,6 +82,18 @@ __kernel void kernel_0(
 		volume,
 		CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST,
 		(int4)(voxel_idx.x, voxel_idx.y, voxel_idx.z, 1)).x;
+)CLKER";
+
+inline constexpr const char* str_cl_color_mesh_body_vol = R"CLKER(
+
+	color_vbo[gid * 4 + 0] = 1.0f;
+	color_vbo[gid * 4 + 1] = 1.0f;
+	color_vbo[gid * 4 + 2] = 1.0f;
+	color_vbo[gid * 4 + 3] = intensity;
+}
+)CLKER";
+
+inline constexpr const char* str_cl_color_mesh_body_comp = R"CLKER(
 
 	// Flat index into label array
 	int flat_idx = voxel_idx.z * voxel_cnt.y * voxel_cnt.x +

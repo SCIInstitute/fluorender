@@ -67,7 +67,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <MovieMaker.h>
 #include <BaseConvVolMesh.h>
-#include <ColorCompMesh.h>
+#include <ColorMesh.h>
 #include <msk_reader.h>
 #include <msk_writer.h>
 #include <lbl_reader.h>
@@ -2266,10 +2266,22 @@ void ScriptProc::RunConvertMesh()
 		auto md = glbin_conv_vol_mesh->GetMeshData();
 		if (it->GetLabel(false))
 		{
-			glbin_color_comp_mesh.SetVolumeData(it);
-			glbin_color_comp_mesh.SetMeshData(md);
-			glbin_color_comp_mesh.Update();
+			glbin_color_mesh.SetUseSel(true);
+			glbin_color_mesh.SetUseComp(true);
 		}
+		else if (it->GetMask(false))
+		{
+			glbin_color_mesh.SetUseSel(true);
+			glbin_color_mesh.SetUseComp(false);
+		}
+		else
+		{
+			glbin_color_mesh.SetUseSel(false);
+			glbin_color_mesh.SetUseComp(false);
+		}
+		glbin_color_mesh.SetVolumeData(it);
+		glbin_color_mesh.SetMeshData(md);
+		glbin_color_mesh.Update();
 		if (glbin_data_manager.AddMeshData(md))
 		{
 			auto view = m_view.lock();

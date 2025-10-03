@@ -44,6 +44,7 @@ private:
 	wxButton* m_cnv_vol_mesh_convert_btn;
 	wxButton* m_cnv_vol_mesh_update_btn;
 	wxButton* m_cnv_vol_mesh_weld_btn;
+	wxButton* m_cnv_vol_mesh_color_btn;
 
 	wxCheckBox* m_cnv_vol_mesh_selected_chk;
 	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
@@ -59,6 +60,7 @@ private:
 	void OnCnvVolMeshConvert(wxCommandEvent& event);
 	void OnCnvVolMeshUpdate(wxCommandEvent& event);
 	void OnCnvVolMeshWeldVertices(wxCommandEvent& event);
+	void OnCnvVolMeshColor(wxCommandEvent& event);
 
 	void OnCnvVolMeshUseSelCheck(wxCommandEvent& event);
 	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);

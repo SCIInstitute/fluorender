@@ -88,7 +88,7 @@ namespace flrd
 	class Colocalize;
 	class Clusterizer;
 	class BaseConvVolMesh;
-	class ColorCompMesh;
+	class ColorMesh;
 }
 namespace flvr
 {
@@ -146,7 +146,7 @@ namespace flvr
 #define glbin_colocalizer fluo::Global::instance().get_colocalizer()
 #define glbin_clusterizer fluo::Global::instance().get_clusterizer()
 #define glbin_conv_vol_mesh fluo::Global::instance().get_conv_vol_mesh()
-#define glbin_color_comp_mesh fluo::Global::instance().get_color_comp_mesh()
+#define glbin_color_mesh fluo::Global::instance().get_color_mesh()
 //graphics resources
 #define glbin_kernel_factory fluo::Global::instance().get_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
@@ -263,7 +263,7 @@ namespace fluo
 		//mesh converter
 		flrd::BaseConvVolMesh* get_conv_vol_mesh();
 		//color mesh
-		flrd::ColorCompMesh& get_color_comp_mesh();
+		flrd::ColorMesh& get_color_mesh();
 
 		//xr renderer
 		LookingGlassRenderer& get_looking_glass_renderer();
@@ -357,7 +357,7 @@ namespace fluo
 		std::unique_ptr<flrd::Colocalize> m_colocalizer;
 		std::unique_ptr<flrd::Clusterizer> m_clusterizer;
 		std::unique_ptr<flrd::BaseConvVolMesh> m_conv_vol_mesh;
-		std::unique_ptr<flrd::ColorCompMesh> m_color_comp_mesh;
+		std::unique_ptr<flrd::ColorMesh> m_color_mesh;
 
 		//xr renderer
 		std::unique_ptr<LookingGlassRenderer> m_lg_renderer;

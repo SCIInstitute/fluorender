@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <ColorCompMesh.h>
-#include <ColorCompMeshCode.h>
+#include <ColorMesh.h>
+#include <ColorMeshCode.h>
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <KernelProgram.h>
@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-bool ColorCompMesh::GetInfo(
+bool ColorMesh::GetInfo(
 	flvr::TextureBrick* b, long& bits,
 	long& nx, long& ny, long& nz,
 	long& ox, long& oy, long& oz)
@@ -54,7 +54,7 @@ bool ColorCompMesh::GetInfo(
 	return true;
 }
 
-void ColorCompMesh::Update()
+void ColorMesh::Update()
 {
 	auto vd = m_volume.lock();
 	auto md = m_mesh.lock();
@@ -71,16 +71,27 @@ void ColorCompMesh::Update()
 	if (vertex_count <= 0)
 		return;
 	GLuint cbo = md->AddColorVBO(vertex_count);
-	md->SetColor(fluo::Color(1.0), MESH_COLOR_DIFF);
+	fluo::Color color;
+	if (m_use_comp)
+		color = fluo::Color(1.0);
+	else if (m_use_sel)
+		color = vd->GetMaskColor();
+	else
+		color = vd->GetColor();
+	md->SetColor(color, MESH_COLOR_DIFF);
 	size_t vbo_size = vertex_count * sizeof(float) * 3;
 	size_t cbo_size = vertex_count * sizeof(float) * 4;
-	int si = vd->GetShuffle();
+	int si = 0;
+	if (m_use_comp)
+		si = vd->GetShuffle();
 
 	long bits = vd->GetBits();
 	float max_int = static_cast<float>(vd->GetMaxValue());
+	int mode = m_use_comp ? 2 : (m_use_sel ? 1 : 0);
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_color_comp_mesh, bits, max_int);
+	flvr::KernelProgram* kernel_prog =
+		glbin_kernel_factory.kernel(GetKernelStrColorMesh(mode), bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");
@@ -106,20 +117,24 @@ void ColorCompMesh::Update()
 		if (m_use_sel)
 			tid = vd->GetVR()->load_brick_mask(b);
 		else
-			vd->GetVR()->load_brick(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			tid = vd->GetVR()->load_brick(b);
+		GLint lid = 0;
+		if (m_use_comp)
+			lid = vd->GetVR()->load_brick_label(b);
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		cl_int3 voxel_cnt = { cl_int(nx), cl_int(ny), cl_int(nz) };
 		cl_int3 vol_org = { cl_int(ox), cl_int(oy), cl_int(oz) };
 
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_ONLY, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		if (m_use_comp)
+			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_ONLY, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo, vbo_size);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, cbo, cbo_size);
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&voxel_cnt));
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&vol_org));
-		kernel_prog->setKernelArgConst(sizeof(cl_uint), (void*)(&si));
+		if (m_use_comp)
+			kernel_prog->setKernelArgConst(sizeof(cl_uint), (void*)(&si));
 		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
 
 		//execute
@@ -130,3 +145,22 @@ void ColorCompMesh::Update()
 	md->SetGpuDirty();
 }
 
+std::string ColorMesh::GetKernelStrColorMesh(int mode)
+{
+	bool comp = mode == 2;
+	std::ostringstream z;
+
+	if (comp)
+		z << str_cl_color_mesh_comp;
+	else
+		z << str_cl_color_mesh_vol;
+
+	z << str_cl_color_mesh_head;
+
+	if (comp)
+		z << str_cl_color_mesh_body_comp;
+	else
+		z << str_cl_color_mesh_body_vol;
+
+	return z.str();
+}

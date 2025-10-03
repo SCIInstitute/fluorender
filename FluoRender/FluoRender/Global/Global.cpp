@@ -64,7 +64,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Clusterizer.h>
 #include <ConvVolMeshSw.h>
 #include <ConvVolMesh.h>
-#include <ColorCompMesh.h>
+#include <ColorMesh.h>
 #include <LookingGlassRenderer.h>
 #include <HololensRenderer.h>
 #include <OpenXrRenderer.h>
@@ -290,7 +290,7 @@ Global::Global() :
 	m_colocalizer(std::make_unique<flrd::Colocalize>()),
 	m_clusterizer(std::make_unique<flrd::Clusterizer>()),
 	//m_conv_vol_mesh(std::make_unique<flrd::ConvVolMeshSw>()),
-	m_color_comp_mesh(std::make_unique<flrd::ColorCompMesh>()),
+	m_color_mesh(std::make_unique<flrd::ColorMesh>()),
 	m_lg_renderer(std::make_unique<LookingGlassRenderer>()),
 	m_atmf(std::make_unique<fluo::AsyncTimerFactory>()),
 	m_swhf(std::make_unique<fluo::StopWatchFactory>()),
@@ -683,9 +683,9 @@ flrd::BaseConvVolMesh* Global::get_conv_vol_mesh()
 	return cvm;
 }
 
-flrd::ColorCompMesh& Global::get_color_comp_mesh()
+flrd::ColorMesh& Global::get_color_mesh()
 {
-	return *m_color_comp_mesh;
+	return *m_color_mesh;
 }
 
 LookingGlassRenderer& Global::get_looking_glass_renderer()

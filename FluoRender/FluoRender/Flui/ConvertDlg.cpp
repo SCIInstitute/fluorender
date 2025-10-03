@@ -31,9 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <CurrentObjects.h>
 #include <DataManager.h>
+#include <VolumeData.h>
 #include <MeshData.h>
 #include <RenderView.h>
 #include <BaseConvVolMesh.h>
+#include <ColorMesh.h>
 #include <VolumeSelector.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
@@ -63,13 +65,17 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_weld_btn = new wxButton(this, wxID_ANY, "Weld",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_cnv_vol_mesh_color_btn = new wxButton(this, wxID_ANY, "Color",
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_convert_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshConvert, this);
 	m_cnv_vol_mesh_update_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshUpdate, this);
 	m_cnv_vol_mesh_weld_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshWeldVertices, this);
+	m_cnv_vol_mesh_color_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshColor, this);
 	sizer_1->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cnv_vol_mesh_update_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cnv_vol_mesh_weld_btn, 0, wxALIGN_CENTER);
-	
+	sizer_1->Add(m_cnv_vol_mesh_color_btn, 0, wxALIGN_CENTER);
+
 	//sizer_2
 	//convert from volume to mesh
 	wxStaticBoxSizer *sizer_2 = new wxStaticBoxSizer(
@@ -369,6 +375,36 @@ void ConvertDlg::OnCnvVolMeshWeldVertices(wxCommandEvent& event)
 	if (!vd)
 		return;
 	glbin_conv_vol_mesh->MergeVertices(true);
+	FluoRefresh(0, { gstNull },
+		{ glbin_current.GetViewId() });
+}
+
+void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	auto md = glbin_conv_vol_mesh->GetMeshData();
+	if (!md)
+		return;
+	if (vd->GetLabel(false))
+	{
+		glbin_color_mesh.SetUseSel(true);
+		glbin_color_mesh.SetUseComp(true);
+	}
+	else if (vd->GetMask(false))
+	{
+		glbin_color_mesh.SetUseSel(true);
+		glbin_color_mesh.SetUseComp(false);
+	}
+	else
+	{
+		glbin_color_mesh.SetUseSel(false);
+		glbin_color_mesh.SetUseComp(false);
+	}
+	glbin_color_mesh.SetVolumeData(vd);
+	glbin_color_mesh.SetMeshData(md);
+	glbin_color_mesh.Update();
 	FluoRefresh(0, { gstNull },
 		{ glbin_current.GetViewId() });
 }

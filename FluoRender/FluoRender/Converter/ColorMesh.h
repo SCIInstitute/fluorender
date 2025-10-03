@@ -25,8 +25,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _COLOR_COMP_MESH_H_
-#define _COLOR_COMP_MESH_H_
+#ifndef _COLOR_MESH_H_
+#define _COLOR_MESH_H_
 
 #include <Progress.h>
 #include <memory>
@@ -40,14 +40,17 @@ namespace flvr
 namespace flrd
 {
 	//apply per vertex color to mesh based on components
-	class ColorCompMesh : public Progress
+	class ColorMesh : public Progress
 	{
 	public:
-		ColorCompMesh() : Progress() {}
-		~ColorCompMesh() {}
+		ColorMesh() : Progress() {}
+		~ColorMesh() {}
 
 		void SetVolumeData(const std::shared_ptr<VolumeData>& vd) { m_volume = vd; }
 		void SetMeshData(const std::shared_ptr<MeshData>& md) { m_mesh = md; }
+
+		void SetUseSel(bool val) { m_use_sel = val; }
+		void SetUseComp(bool val) { m_use_comp = val; }
 
 		void Update();
 
@@ -56,8 +59,11 @@ namespace flrd
 		std::weak_ptr<MeshData> m_mesh;
 
 		bool m_use_sel = true;
+		bool m_use_comp = false;
 
 	protected:
+		std::string GetKernelStrColorMesh(int mode);//0: vol; 1: mask; 2: label
+
 		bool GetInfo(flvr::TextureBrick* b,
 			long& bits, long& nx, long& ny, long& nz,
 			long& ox, long& oy, long& oz);
@@ -65,4 +71,4 @@ namespace flrd
 	};
 }
 
-#endif//_COLOR_COMP_MESH_H_
+#endif//_COLOR_MESH_H_
