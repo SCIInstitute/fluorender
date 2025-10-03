@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 namespace flvr
 {
 	class KernelProgram;
-	struct Argument;
+	class Argument;
 }
 namespace flrd
 {
