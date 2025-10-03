@@ -681,7 +681,7 @@ void SegGrow::Compute()
 		//kernel0: init ordered
 		kernel_prog->setKernelArgBegin(kernel_0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -723,8 +723,10 @@ void SegGrow::Compute()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_branches));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*gsize.gsxyz, (void*)(pcount));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*m_branches*gsize.gsxyz, (void*)(pids));
+		auto arg_pcount =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*gsize.gsxyz, (void*)(pcount));
+		auto arg_pids =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*m_branches*gsize.gsxyz, (void*)(pids));
 		kernel_prog->setKernelArgLocal(sizeof(unsigned int)*m_branches);
 		
 		//debug
@@ -744,8 +746,8 @@ void SegGrow::Compute()
 		kernel_prog->executeKernel(kernel_3, 3, global_size2, local_size);
 
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*gsize.gsxyz, pcount, pcount);
-		kernel_prog->readBuffer(sizeof(unsigned int)*m_branches*gsize.gsxyz, pids, pids);
+		kernel_prog->readBuffer(arg_pcount, pcount);
+		kernel_prog->readBuffer(arg_pids, pids);
 
 		//get count and ids
 		std::set<unsigned int> uniqids;
@@ -781,14 +783,15 @@ void SegGrow::Compute()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&total));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total, (void*)(pids));
-			kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz*6, (void*)(pdids));
+			auto arg_pdids =
+				kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz*6, (void*)(pdids));
 			kernel_prog->setKernelArgLocal(sizeof(unsigned int)*total*6);
 
 			//execute
 			kernel_prog->executeKernel(kernel_4, 3, global_size2, local_size);
 
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz*6, pdids, pdids);
+			kernel_prog->readBuffer(arg_pdids, pdids);
 
 			//merge ids
 			std::vector<std::set<unsigned int>> id_set;
@@ -891,9 +894,12 @@ void SegGrow::Compute()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&total));
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total, (void*)(pids));
-			kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz*3, (void*)(pcids));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz, (void*)(psum));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*total*gsize.gsxyz * 3, (void*)(pcsum));
+			auto arg_pcids =
+				kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz*3, (void*)(pcids));
+			auto arg_psum =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*total*gsize.gsxyz, (void*)(psum));
+			auto arg_pcsum =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*total*gsize.gsxyz * 3, (void*)(pcsum));
 			kernel_prog->setKernelArgLocal(sizeof(unsigned int)*total*3);
 			kernel_prog->setKernelArgLocal(sizeof(unsigned int)*total);
 			kernel_prog->setKernelArgLocal(sizeof(float)*total * 3);
@@ -902,9 +908,9 @@ void SegGrow::Compute()
 			kernel_prog->executeKernel(kernel_6, 3, global_size2, local_size);
 
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz*3, pcids, pcids);
-			kernel_prog->readBuffer(sizeof(unsigned int)*total*gsize.gsxyz, psum, psum);
-			kernel_prog->readBuffer(sizeof(float)*total*gsize.gsxyz * 3, pcsum, pcsum);
+			kernel_prog->readBuffer(arg_pcids, pcids);
+			kernel_prog->readBuffer(arg_psum, psum);
+			kernel_prog->readBuffer(arg_pcsum, pcsum);
 
 			int ox, oy, oz, nc;
 			ox = b->ox(); oy = b->oy(); oz = b->oz();
@@ -987,7 +993,7 @@ void SegGrow::Compute()
 			unsigned bid;
 			bid = b->get_id();
 			kernel_prog->setKernelArgBegin(kernel_0);
-			flvr::Argument arg_tex =
+			auto arg_tex =
 				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, lid);
 
 			flvr::TextureBrick* nb;
@@ -1092,7 +1098,7 @@ void SegGrow::Compute()
 
 		//finalize
 		kernel_prog->setKernelArgBegin(kernel_7);
-		flvr::Argument arg_label =
+		auto arg_label =
 			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, sizeof(unsigned int)*nx*ny*nz, region);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
@@ -1230,7 +1236,8 @@ void SegGrow::MergeIds(std::vector<std::set<unsigned int>> &merge_list)
 void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	std::vector<unsigned int> &ids,
 	flvr::TextureBrick* nb,
-	flvr::KernelProgram *kernel_prog, int kernel, flvr::Argument &arg_tex,
+	flvr::KernelProgram *kernel_prog, int kernel,
+	std::weak_ptr<flvr::Argument> arg_tex,
 	std::vector<std::set<unsigned int>> &brick_pairs,
 	std::vector<std::set<unsigned int>> &merge_list)
 {
@@ -1252,13 +1259,14 @@ void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&d1));
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idnum));
 	kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*idnum, (void*)(ids.data()));
-	kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*idnum * 3, (void*)(pcids));
+	auto arg_pcids =
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*idnum * 3, (void*)(pcids));
 
 	//execute
 	global_size[0] = n0; global_size[1] = n1;
 	kernel_prog->executeKernel(kernel, 2, global_size, local_size);
 	//read back
-	kernel_prog->readBuffer(sizeof(unsigned int)*idnum * 3, pcids, pcids);
+	kernel_prog->readBuffer(arg_pcids, pcids);
 
 	CollectIds(ids, cids, merge_list);
 }

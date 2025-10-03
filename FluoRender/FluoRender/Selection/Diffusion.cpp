@@ -335,7 +335,8 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		unsigned char init_val = 255;
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
+		auto arg_val =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -353,7 +354,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
+		kernel_prog->readBuffer(arg_val, val);
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
@@ -441,7 +442,8 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		cl_float4 loc7 = { float(ini_thresh), float(gm_falloff), float(scl_falloff), float(scl_translate) };
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
+		auto arg_val =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -460,7 +462,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		for (int i = 0; i<iter; ++i)
 			kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned char)*nx*ny*nz, val, val);
+		kernel_prog->readBuffer(arg_val, val);
 
 		//release buffer
 		kernel_prog->releaseAllArgs();

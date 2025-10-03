@@ -140,6 +140,7 @@ namespace flvr
 		}
 
 		Argument() :
+			valid_(false),
 			protect_(false),
 			size(0),
 			texture(0),
@@ -193,10 +194,6 @@ namespace flvr
 		//return kernel index; -1 unsuccessful
 		int createKernel(const std::string &name);
 		int findKernel(const std::string &name);
-		//add a kernel from another program
-		//for sharing buffers...
-		int addKernel(KernelProgram*, int);
-		void removeExternalKernels();
 		//execute kernel
 		bool executeKernel(int, cl_uint, size_t*, size_t*);
 		bool executeKernel(std::string &name,

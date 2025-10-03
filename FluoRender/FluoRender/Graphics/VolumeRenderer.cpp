@@ -1292,13 +1292,13 @@ namespace flvr
 
 		double result = 0.0;
 		int kernel_index = -1;
-		KernelProgram* kernel = glbin_kernel_factory.kernel(KERNEL_HIST_3D);
-		if (kernel)
+		KernelProgram* kernel_prog = glbin_kernel_factory.kernel(KERNEL_HIST_3D);
+		if (kernel_prog)
 		{
-			kernel_index = kernel->createKernel("hist_3d");
-			kernel->setKernelArgBegin(kernel_index);
-			kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
-			kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, mask_id);
+			kernel_index = kernel_prog->createKernel("hist_3d");
+			kernel_prog->setKernelArgBegin(kernel_index);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mask_id);
 			unsigned int hist_size = 64;
 			if (tex->get_nrrd(0))
 			{
@@ -1308,16 +1308,15 @@ namespace flvr
 					hist_size = 1024;
 			}
 			float* hist = new float[hist_size]();
-			kernel->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
-			kernel->setKernelArgConst(sizeof(unsigned int), (void*)(&hist_size));
+			auto arg_hist =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
+			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&hist_size));
 			size_t global_size[3] = {brick_x, brick_y, brick_z};
 			size_t local_size[3] = {1, 1, 1};
-			kernel->executeKernel(kernel_index, 3, global_size, local_size);
-			kernel->readBuffer(hist_size * sizeof(float), (void*)hist, (void*)hist);
+			kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
+			kernel_prog->readBuffer(arg_hist, hist);
 			//release buffer
-			kernel->releaseMemObject(kernel_index, 0, 0, data_id, 0);
-			kernel->releaseMemObject(kernel_index, 1, 0, mask_id, 0);
-			kernel->releaseMemObject(kernel_index, 2, hist_size * sizeof(float), 0, 0);
+			kernel_prog->releaseAllArgs();
 			//analyze hist
 			unsigned int i;
 			float sum = 0;

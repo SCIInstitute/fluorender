@@ -152,15 +152,16 @@ void MaskBorder::Compute(int order)
 		unsigned int hits_x = 0;
 		idx = order == 1 ? nx - 1 : 0;
 		kernel_prog->setKernelArgBegin(kernel_index0);
-		flvr::Argument arg_tex =
+		auto arg_tex =
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_x);
+		auto arg_hits_x =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_x);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = ny; global_size[1] = nz;
 		kernel_prog->executeKernel(kernel_index0, 2, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &hits_x, &hits_x);
+		kernel_prog->readBuffer(arg_hits_x, &hits_x);
 		if (hits_x)
 		{
 			nid = order == 2 ? tex->negxid(bid) : tex->posxid(bid);
@@ -177,13 +178,14 @@ void MaskBorder::Compute(int order)
 		idx = order == 1 ? ny - 1 : 0;
 		kernel_prog->setKernelArgBegin(kernel_index1);
 		kernel_prog->setKernelArgument(arg_tex);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_y);
+		auto arg_hits_y =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_y);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = nx; global_size[1] = nz;
 		kernel_prog->executeKernel(kernel_index1, 2, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &hits_y, &hits_y);
+		kernel_prog->readBuffer(arg_hits_y, &hits_y);
 		if (hits_y)
 		{
 			nid = order == 2 ? tex->negyid(bid) : tex->posyid(bid);
@@ -200,13 +202,14 @@ void MaskBorder::Compute(int order)
 		idx = order == 1 ? nz - 1 : 0;
 		kernel_prog->setKernelArgBegin(kernel_index2);
 		kernel_prog->setKernelArgument(arg_tex);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_z);
+		auto arg_hits_z =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_z);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = nx; global_size[1] = ny;
 		kernel_prog->executeKernel(kernel_index2, 2, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int), &hits_z, &hits_z);
+		kernel_prog->readBuffer(arg_hits_z, &hits_z);
 		if (hits_z)
 		{
 			nid = order == 2 ? tex->negzid(bid) : tex->poszid(bid);

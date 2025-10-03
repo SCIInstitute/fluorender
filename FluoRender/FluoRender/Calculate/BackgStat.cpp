@@ -342,7 +342,7 @@ void BackgStat::Run()
 		unsigned int kxy = m_kx * m_ky;
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		flvr::Argument arg_bkg =
+		auto arg_bkg =
 			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, chars*nx*ny*nz, NULL);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
@@ -375,14 +375,16 @@ void BackgStat::Run()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
+			auto arg_sum =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
+			auto arg_wsum =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
 
 			//execute
 			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), sum, sum);
-			kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
+			kernel_prog->readBuffer(arg_sum, sum);
+			kernel_prog->readBuffer(arg_wsum, wsum);
 
 			//sum
 			for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
@@ -407,14 +409,16 @@ void BackgStat::Run()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(minv));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(maxv));
+			auto arg_minv =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(minv));
+			auto arg_maxv =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(maxv));
 
 			//execute
 			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), minv, minv);
-			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), maxv, maxv);
+			kernel_prog->readBuffer(arg_minv, minv);
+			kernel_prog->readBuffer(arg_maxv, maxv);
 
 			//collect
 			for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
@@ -445,12 +449,13 @@ void BackgStat::Run()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bminv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bmaxv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
+			auto arg_hist =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
 
 			//execute
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
+			kernel_prog->readBuffer(arg_hist, hist);
 
 			//collect
 			for (size_t ii = 0; ii < bin; ++ii)

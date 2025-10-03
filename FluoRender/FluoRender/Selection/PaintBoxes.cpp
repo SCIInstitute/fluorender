@@ -146,9 +146,9 @@ void PaintBoxes::Compute()
 		float(m_imat.get_mat_val(3, 3)) };
 	kernel_prog->setKernelArgBegin(kernel_index);
 	kernel_prog->setKernelArgTex2D(CL_MEM_READ_ONLY, m_paint_tex);
-	flvr::Argument arg_boxes =
+	auto arg_boxes =
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*num*6, boxes);
-	flvr::Argument arg_hits =
+	auto arg_hits =
 		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*num, hits);
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_ptx));
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_pty));
@@ -161,7 +161,7 @@ void PaintBoxes::Compute()
 	//execute
 	kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);
 	//read back
-	kernel_prog->readBuffer(sizeof(unsigned int)*num, hits, hits);
+	kernel_prog->readBuffer(arg_hits, hits);
 
 	//assign paint mask flag in bricks
 	for (int i = 0; i < num; ++i)

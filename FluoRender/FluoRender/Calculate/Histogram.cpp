@@ -148,7 +148,7 @@ void Histogram::Compute()
 
 	//sum histogram
 	m_histogram.resize(m_bins + 1, 0);
-	flvr::Argument arg_sh;
+	std::weak_ptr<flvr::Argument> arg_sh;
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -184,14 +184,15 @@ void Histogram::Compute()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*(bin+1), (void*)(m_histogram.data()), (void*)(m_histogram.data()));
+		kernel_prog->readBuffer(arg_sh, (void*)(m_histogram.data()));
+
+		kernel_prog->releaseAllArgs();
 
 		SetProgress(100 * count / brick_num,
 			"Computing histogram.");
 		count++;
 	}
 
-	kernel_prog->releaseAllArgs();
 	SetProgress(0, "");
 }
 

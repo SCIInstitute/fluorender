@@ -262,21 +262,21 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		b = (*bricks)[i];
 		b_r = (*bricks_r)[i];
 		GLint data_id = vr->load_brick(b);
-		flvr::KernelProgram* kernel =
+		flvr::KernelProgram* kernel_prog =
 			glbin_kernel_factory.
 			kernel(m_code, bits, max_int);
-		if (kernel)
+		if (kernel_prog)
 		{
 			m_message += L"OpenCL kernel created.\n";
 			if (brick_num == 1)
-				kernel_exe = ExecuteKernelBrick(kernel, data_id, result, res_x, res_y, res_z, chars);
+				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, result, res_x, res_y, res_z, chars);
 			else
 			{
 				int brick_x = b->nx();
 				int brick_y = b->ny();
 				int brick_z = b->nz();
 				void* bresult = (void*)(new unsigned char[brick_x*brick_y*brick_z*chars]);
-				kernel_exe = ExecuteKernelBrick(kernel, data_id, bresult, brick_x, brick_y, brick_z, chars);
+				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, bresult, brick_x, brick_y, brick_z, chars);
 				if (!kernel_exe)
 					break;
 				//copy data back
@@ -313,41 +313,42 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 	return kernel_exe;
 }
 
-bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel,
+bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 	unsigned int data_id, void* result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z, int chars)
 {
-	if (!kernel)
+	if (!kernel_prog)
 		return false;
 
-	int kernel_index = kernel->createKernel("kernel_main");
+	int kernel_index = kernel_prog->createKernel("kernel_main");
 
 	//textures
 	size_t result_size = brick_x*brick_y*brick_z*chars;
-	kernel->setKernelArgBegin(kernel_index);
-	kernel->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
-	kernel->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, result_size, result);
-	kernel->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_x));
-	kernel->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_y));
-	kernel->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_z));
+	kernel_prog->setKernelArgBegin(kernel_index);
+	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
+	auto arg_result =
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, result_size, result);
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_x));
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_y));
+	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_z));
 	//execute
 	size_t global_size[3] = { brick_x, brick_y, brick_z };
 	size_t local_size[3] = { 1, 1, 1 };
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	kernel->executeKernel(kernel_index, 3, global_size, local_size);
+	kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	std::wstring stime = std::to_wstring(time_span.count());
 	m_message += L"OpenCL time on ";
-	m_message += s2ws(kernel->get_device_name());
+	m_message += s2ws(kernel_prog->get_device_name());
 	m_message += L": ";
 	m_message += stime;
 	m_message += L" sec.\n";
-	kernel->readBuffer(result_size, result, result);
+	kernel_prog->readBuffer(arg_result, result);
 
 	//release buffer
-	kernel->releaseMemObject(kernel_index, 0, 0, data_id, 0);
-	kernel->releaseMemObject(kernel_index, 1, result_size, 0, 0);
+	kernel_prog->releaseAllArgs();
+
 	return true;
 }

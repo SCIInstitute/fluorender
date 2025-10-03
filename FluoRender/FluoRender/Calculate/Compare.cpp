@@ -714,7 +714,8 @@ void ChannelCompare::Product()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+		auto arg_sum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
@@ -724,7 +725,7 @@ void ChannelCompare::Product()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
+		kernel_prog->readBuffer(arg_sum, sum);
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
@@ -824,7 +825,8 @@ void ChannelCompare::MinValue()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+		auto arg_sum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
@@ -834,7 +836,7 @@ void ChannelCompare::MinValue()
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
+		kernel_prog->readBuffer(arg_sum, sum);
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
@@ -937,7 +939,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+		auto arg_sum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&th));
 		if (m_use_mask)
 		{
@@ -948,7 +951,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), sum, sum);
+		kernel_prog->readBuffer(arg_sum, sum);
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
@@ -962,7 +965,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	}
 }
 
-void ChannelCompare::Average(float weight, flvr::Argument& avg)
+void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 {
 	m_result = 0.0;
 
@@ -1017,30 +1020,30 @@ void ChannelCompare::Average(float weight, flvr::Argument& avg)
 		float* sum = 0;
 		unsigned int nxyz = nx * ny * nz;
 		kernel_prog->setKernelArgBegin(kernel_index);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid1);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid2);
+		auto arg_tid1 =
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid1);
+		auto arg_tid2 =
+			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid2);
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss1));
 		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&ss2));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		if (!avg.buffer)
+		if (avg.lock())
 		{
-			sum = new float[nxyz]();
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(nxyz), (void*)(sum));
+			kernel_prog->setKernelArgument(avg);
 		}
 		else
 		{
-			avg.kernel(kernel_index);
-			kernel_prog->setKernelArgument(avg);
+			sum = new float[nxyz]();
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(nxyz), (void*)(sum));
 		}
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid1, 0);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, tid2, 0);
+		kernel_prog->releaseAllArgs();
 
 		if (postwork) postwork(__FUNCTION__);
 	}

@@ -246,17 +246,20 @@ void VolumeRoi::Run()
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf3));
 		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&ectr));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&eaxis));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float) * (gsize.gsxyz), (void*)(wsum));
+		auto arg_sum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
+		auto arg_wsum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 		//if (m_use_mask)
 		//	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int) * (gsize.gsxyz), sum, sum);
-		kernel_prog->readBuffer(sizeof(float) * (gsize.gsxyz), wsum, wsum);
+		kernel_prog->readBuffer(arg_sum, sum);
+		kernel_prog->readBuffer(arg_wsum, wsum);
 
+		kernel_prog->releaseAllArgs();
 		//debug
 //#ifdef _DEBUG
 //		DBMIFLOAT32 mi;
@@ -272,8 +275,6 @@ void VolumeRoi::Run()
 		delete[] sum;
 		delete[] wsum;
 	}
-
-	kernel_prog->releaseAllArgs();
 }
 
 double VolumeRoi::GetResult()

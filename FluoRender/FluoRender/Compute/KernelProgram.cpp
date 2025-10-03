@@ -385,32 +385,6 @@ namespace flvr
 		return -1;
 	}
 
-	int KernelProgram::addKernel(KernelProgram* kernel_prog, int kernel_index)
-	{
-		if (kernel_index < 0 ||
-			kernel_index >= kernel_prog->kernels_.size())
-			return -1;
-
-		Kernel s_kernel;
-		s_kernel.kernel = kernel_prog->kernels_[kernel_index].kernel;
-		s_kernel.name = kernel_prog->kernels_[kernel_index].name;
-		s_kernel.external = true;
-		kernels_.push_back(s_kernel);
-		return static_cast<int>(kernels_.size() - 1);
-	}
-
-	void KernelProgram::removeExternalKernels()
-	{
-		auto it = kernels_.begin();
-		while (it != kernels_.end())
-		{
-			if (it->external)
-				it = kernels_.erase(it);
-			else
-				++it;
-		}
-	}
-
 	bool KernelProgram::valid()
 	{
 		return init_ && program_ && queue_ && !kernels_.empty();
@@ -421,13 +395,6 @@ namespace flvr
 		for (size_t i = 0; i < kernels_.size(); ++i)
 			if (!kernels_[i].external)
 				clReleaseKernel(kernels_[i].kernel);
-		//difficult to handle mem release here
-		//some may be still used after kernal prog
-		//for (unsigned int i = 0; i < arg_list_.size(); ++i)
-		//{
-		//	if (!arg_list_[i].protect_)
-		//		clReleaseMemObject(arg_list_[i].buffer);
-		//}
 		clReleaseCommandQueue(queue_);
 		clReleaseProgram(program_);
 	}

@@ -354,16 +354,18 @@ void BasicStat::Run()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
+			auto arg_sum =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
+			auto arg_wsum =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
 			if (m_use_mask)
 				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 			//execute
 			kernel_prog->executeKernel(kernel_index0, 3, global_size1, local_size);
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), sum, sum);
-			kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
+			kernel_prog->readBuffer(arg_sum, sum);
+			kernel_prog->readBuffer(arg_wsum, wsum);
 
 			//sum
 			for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
@@ -386,16 +388,18 @@ void BasicStat::Run()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(minv));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(maxv));
+			auto arg_minv =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(minv));
+			auto arg_maxv =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(maxv));
 			if (m_use_mask)
 				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 			//execute
 			kernel_prog->executeKernel(kernel_index0, 3, global_size1, local_size);
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), minv, minv);
-			kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), maxv, maxv);
+			kernel_prog->readBuffer(arg_minv, minv);
+			kernel_prog->readBuffer(arg_maxv, maxv);
 
 			//collect
 			for (size_t ii = 0; ii < gsize.gsxyz; ++ii)
@@ -424,14 +428,15 @@ void BasicStat::Run()
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bminv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bmaxv));
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
+			auto arg_hist =
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(bin), (void*)(hist));
 			if (m_use_mask)
 				kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 
 			//execute
 			kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 			//read back
-			kernel_prog->readBuffer(sizeof(unsigned int)*(bin), hist, hist);
+			kernel_prog->readBuffer(arg_hist, hist);
 
 			//collect
 			for (size_t ii = 0; ii < bin; ++ii)

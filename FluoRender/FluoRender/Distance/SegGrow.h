@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <set>
 #include <unordered_map>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -82,7 +83,8 @@ namespace flrd
 		void CheckBorders(int d0, int d1, int n0, int n1,
 			std::vector<unsigned int> &ids,
 			flvr::TextureBrick* nb,
-			flvr::KernelProgram *kernel_prog, int kernel, flvr::Argument &arg_tex,
+			flvr::KernelProgram *kernel_prog, int kernel,
+			std::weak_ptr<flvr::Argument> arg_tex,
 			std::vector<std::set<unsigned int>> &brick_pairs,
 			std::vector<std::set<unsigned int>> &merge_list);
 	};

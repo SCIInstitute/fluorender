@@ -182,20 +182,19 @@ void CountVoxels::Count()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
+		auto arg_sum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
+		auto arg_wsum =
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);
 		//read back
-		kernel_prog->readBuffer(sizeof(unsigned int)*(gsize.gsxyz), sum, sum);
-		kernel_prog->readBuffer(sizeof(float)*(gsize.gsxyz), wsum, wsum);
+		kernel_prog->readBuffer(arg_sum, sum);
+		kernel_prog->readBuffer(arg_wsum, wsum);
 
 		//release buffer
-		kernel_prog->releaseMemObject(kernel_index, 0, 0, tid, 0);
-		kernel_prog->releaseMemObject(kernel_index, 1, 0, mid, 0);
-		kernel_prog->releaseMemObject(sizeof(unsigned int)*(gsize.gsxyz), sum);
-		kernel_prog->releaseMemObject(sizeof(float)*(gsize.gsxyz), wsum);
+		kernel_prog->releaseAllArgs();
 
 		//sum
 		for (size_t i = 0; i < gsize.gsxyz; ++i)

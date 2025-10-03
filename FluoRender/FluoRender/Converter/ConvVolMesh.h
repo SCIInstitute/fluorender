@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _CONV_VOL_MESH_H_
 
 #include <BaseConvVolMesh.h>
+#include <memory>
 
 class VolumeData;
 class MeshData;
@@ -68,7 +69,7 @@ namespace flrd
 
 		void MarchingCubes(VolumeData* vd, MeshData* md);
 
-		void AverageNormals(flvr::Argument* pvbo, flvr::Argument* pibo,
+		void AverageNormals(std::weak_ptr<flvr::Argument> vbo, std::weak_ptr<flvr::Argument> ibo,
 			int vertex_count, int idx_count);
 
 		void PrefixSum(const std::vector<int>& unique_flags,

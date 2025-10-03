@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <functional>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -59,7 +60,7 @@ namespace flrd
 		void Product();
 		void MinValue();
 		void Threshold(float th1, float th2, float th3, float th4);
-		void Average(float weight, flvr::Argument& avg);
+		void Average(float weight, std::weak_ptr<flvr::Argument> avg);
 		double Result()
 		{ return m_result; }
 

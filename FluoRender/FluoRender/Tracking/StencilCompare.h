@@ -91,9 +91,9 @@ namespace flrd
 		fluo::Point m_euler;//rotation
 
 		flvr::KernelProgram* m_prog;
-		std::unique_ptr<flvr::Argument> m_img1;//filtered img
-		std::unique_ptr<flvr::Argument> m_img2;
-		std::unique_ptr<flvr::Argument> m_mask1;//mask buffer for img1
+		std::weak_ptr<flvr::Argument> m_img1;//filtered img
+		std::weak_ptr<flvr::Argument> m_img2;
+		std::weak_ptr<flvr::Argument> m_mask1;//mask buffer for img1
 
 		float Similar(const std::string& name);
 	};

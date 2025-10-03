@@ -74,7 +74,7 @@ private:
 	int m_file_index;//index of current file in the kernel list
 
 	bool ExecuteKernel(VolumeData* vd, VolumeData* vd_r);
-	bool ExecuteKernelBrick(flvr::KernelProgram* kernel,
+	bool ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 		unsigned int data_id, void* result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z, int chars);
