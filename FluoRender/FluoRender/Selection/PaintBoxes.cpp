@@ -147,9 +147,9 @@ void PaintBoxes::Compute()
 	kernel_prog->setKernelArgBegin(kernel_index);
 	kernel_prog->setKernelArgTex2D(CL_MEM_READ_ONLY, m_paint_tex);
 	auto arg_boxes =
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*num*6, boxes);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_boxes", sizeof(float) * num * 6, boxes);
 	auto arg_hits =
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*num, hits);
+		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_hits", sizeof(unsigned int) * num, hits);
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_ptx));
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_pty));
 	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&num));

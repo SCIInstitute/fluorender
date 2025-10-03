@@ -58,8 +58,9 @@ namespace flvr
 		}
 
 		auto arg = std::make_shared<Argument>();
-		arg->buffer = buf;
-		arg->texture = tex_id;
+		arg->type_ = ArgType_Tex;
+		arg->buffer_ = buf;
+		arg->tex_ = tex_id;
 		arg->valid_ = true;
 		return arg;
 	}
@@ -81,8 +82,9 @@ namespace flvr
 		}
 
 		auto arg = std::make_shared<Argument>();
-		arg->buffer = buf;
-		arg->texture = tex_id;
+		arg->type_ = ArgType_Tex;
+		arg->buffer_ = buf;
+		arg->tex_ = tex_id;
 		arg->valid_ = true;
 		return arg;
 	}
@@ -414,14 +416,14 @@ namespace flvr
 		auto& args = arg_map_[index];
 		for (const auto& weak_arg : args) {
 			auto arg = weak_arg.lock();
-			if (!arg || !arg->valid_ || !arg->buffer) continue;
+			if (!arg || !arg->valid_ || !arg->buffer_) continue;
 
-			if (arg->texture && glIsTexture(arg->texture) && arg->size == 0) {
-				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0) {
+				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
 				if (err != CL_SUCCESS) result = false;
 			}
-			else if (arg->vbo && glIsBuffer(arg->vbo)) {
-				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+			else if (arg->vbo_ && glIsBuffer(arg->vbo_)) {
+				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
 				if (err != CL_SUCCESS) result = false;
 			}
 		}
@@ -445,14 +447,14 @@ namespace flvr
 		// Step 3: Release GL objects
 		for (const auto& weak_arg : args) {
 			auto arg = weak_arg.lock();
-			if (!arg || !arg->valid_ || !arg->buffer) continue;
+			if (!arg || !arg->valid_ || !arg->buffer_) continue;
 
-			if (arg->texture && glIsTexture(arg->texture) && arg->size == 0) {
-				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0) {
+				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
 				if (err != CL_SUCCESS) result = false;
 			}
-			else if (arg->vbo && glIsBuffer(arg->vbo)) {
-				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer, 0, nullptr, nullptr);
+			else if (arg->vbo_ && glIsBuffer(arg->vbo_)) {
+				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
 				if (err != CL_SUCCESS) result = false;
 			}
 		}
@@ -533,7 +535,7 @@ namespace flvr
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&(shared_arg->buffer)
+			&(shared_arg->buffer_)
 		);
 
 		if (err != CL_SUCCESS) {
@@ -548,12 +550,12 @@ namespace flvr
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setKernelArgBuf(cl_mem_flags flags, size_t size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setKernelArgBuf(cl_mem_flags flags, const std::string& name, size_t size, void* data)
 	{
 		// Step 1: Check if an Argument already exists for this raw pointer
 		std::shared_ptr<Argument> existing_arg;
 		for (const auto& arg : arg_list_) {
-			if (arg->orgn_addr == data) {
+			if (arg->matchesPointer(name, size, data)) {
 				existing_arg = arg;
 				break;
 			}
@@ -561,7 +563,7 @@ namespace flvr
 
 		// Step 2: If not found, create a new Argument
 		if (!existing_arg) {
-			existing_arg = Argument::createFromPointer(context_, flags, size, data);
+			existing_arg = Argument::createFromPointer(context_, flags, name, size, data);
 			if (!existing_arg || !existing_arg->valid_) {
 				// Failed to create buffer — return empty weak_ptr
 				return std::weak_ptr<Argument>();
@@ -576,7 +578,7 @@ namespace flvr
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer
+			&existing_arg->buffer_
 		);
 
 		if (err != CL_SUCCESS) {
@@ -597,15 +599,15 @@ namespace flvr
 	bool KernelProgram::updateKernelArgBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data)
 	{
 		auto shared_arg = arg.lock();
-		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer) {
+		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer_) {
 			return false;
 		}
 
 		// Case 1: Size fits — just write new data
-		if (new_size <= shared_arg->size) {
+		if (new_size <= shared_arg->size_) {
 			cl_int err = clEnqueueWriteBuffer(
 				queue_,
-				shared_arg->buffer,
+				shared_arg->buffer_,
 				CL_TRUE,
 				0,
 				new_size,
@@ -625,9 +627,9 @@ namespace flvr
 		}
 
 		// Update shared Argument in-place
-		shared_arg->buffer = new_buf;
-		shared_arg->size = new_size;
-		shared_arg->orgn_addr = data;
+		shared_arg->buffer_ = new_buf;
+		shared_arg->size_ = new_size;
+		shared_arg->pointer_ = data;
 		shared_arg->valid_ = true;
 
 		return true;
@@ -658,7 +660,7 @@ namespace flvr
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer
+			&existing_arg->buffer_
 		);
 
 		if (err != CL_SUCCESS) {
@@ -697,7 +699,7 @@ namespace flvr
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer
+			&existing_arg->buffer_
 		);
 
 		if (err != CL_SUCCESS) {
@@ -713,6 +715,7 @@ namespace flvr
 
 	std::weak_ptr<Argument> KernelProgram::copyTex3DToArgBuf(
 		cl_mem_flags flags, GLuint texture_id,
+		const std::string& name,
 		size_t buffer_size, size_t* region)
 	{
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size()) {
@@ -739,14 +742,14 @@ namespace flvr
 		// Step 2: Find or create the buffer to hold copied texture data
 		std::shared_ptr<Argument> buf_arg;
 		for (const auto& arg : arg_list_) {
-			if (arg->orgn_addr == nullptr && arg->texture == 0 && arg->vbo == 0 && arg->size == buffer_size) {
+			if (arg->matchesPointer(name, buffer_size, nullptr)) {
 				buf_arg = arg;
 				break;
 			}
 		}
 
 		if (!buf_arg) {
-			buf_arg = Argument::createFromPointer(context_, flags, buffer_size, nullptr);
+			buf_arg = Argument::createFromPointer(context_, flags, name, buffer_size, nullptr);
 			if (!buf_arg || !buf_arg->valid_) {
 				return std::weak_ptr<Argument>();
 			}
@@ -754,7 +757,7 @@ namespace flvr
 		}
 
 		// Step 3: Acquire GL texture for OpenCL access
-		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &tex_arg->buffer, 0, nullptr, nullptr);
+		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
 		if (err != CL_SUCCESS) {
 			return std::weak_ptr<Argument>();
 		}
@@ -763,30 +766,30 @@ namespace flvr
 		size_t origin[3] = { 0, 0, 0 };
 		err = clEnqueueCopyImageToBuffer(
 			queue_,
-			tex_arg->buffer,
-			buf_arg->buffer,
+			tex_arg->buffer_,
+			buf_arg->buffer_,
 			origin,
 			region,
 			0,
 			0, nullptr, nullptr
 		);
 		if (err != CL_SUCCESS) {
-			clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer, 0, nullptr, nullptr);
+			clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
 			return std::weak_ptr<Argument>();
 		}
 
 		// Step 5: Release GL texture
-		err = clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer, 0, nullptr, nullptr);
+		err = clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
 		if (err != CL_SUCCESS) {
 			return std::weak_ptr<Argument>();
 		}
 
-		// Step 6: Set buffer as kernel argument
+		// Step 6: Set buffer_ as kernel argument
 		err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&buf_arg->buffer
+			&buf_arg->buffer_
 		);
 		if (err != CL_SUCCESS) {
 			return std::weak_ptr<Argument>();
@@ -806,7 +809,7 @@ namespace flvr
 	bool KernelProgram::copyArgBufToTex3D(std::weak_ptr<Argument> buf_arg, GLuint texture_id, size_t size, size_t* region)
 	{
 		auto buffer = buf_arg.lock();
-		if (!buffer || !buffer->valid_ || !buffer->buffer) {
+		if (!buffer || !buffer->valid_ || !buffer->buffer_) {
 			return false;
 		}
 
@@ -819,12 +822,12 @@ namespace flvr
 			}
 		}
 
-		if (!texture || !texture->valid_ || !texture->buffer) {
+		if (!texture || !texture->valid_ || !texture->buffer_) {
 			return false;
 		}
 
 		// Step 2: Acquire GL texture
-		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &texture->buffer, 0, nullptr, nullptr);
+		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
 		if (err != CL_SUCCESS) {
 			return false;
 		}
@@ -833,20 +836,20 @@ namespace flvr
 		size_t origin[3] = { 0, 0, 0 };
 		err = clEnqueueCopyBufferToImage(
 			queue_,
-			buffer->buffer,
-			texture->buffer,
+			buffer->buffer_,
+			texture->buffer_,
 			0,
 			origin,
 			region,
 			0, nullptr, nullptr
 		);
 		if (err != CL_SUCCESS) {
-			clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer, 0, nullptr, nullptr);
+			clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
 			return false;
 		}
 
 		// Step 4: Release GL texture
-		err = clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer, 0, nullptr, nullptr);
+		err = clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
 		if (err != CL_SUCCESS) {
 			return false;
 		}
@@ -887,7 +890,7 @@ namespace flvr
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer
+			&existing_arg->buffer_
 		);
 
 		if (err != CL_SUCCESS) {
@@ -904,43 +907,43 @@ namespace flvr
 	bool KernelProgram::readBuffer(const std::weak_ptr<Argument> arg, void* data)
 	{
 		auto shared_arg = arg.lock();
-		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer) {
+		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer_) {
 			return false;
 		}
 
 		cl_int err = CL_SUCCESS;
 
 		// Acquire GL texture if applicable
-		if (shared_arg->texture && glIsTexture(shared_arg->texture) && shared_arg->size == 0) {
-			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_) && shared_arg->size_ == 0) {
+			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
 			if (err != CL_SUCCESS) return false;
 		}
 		// Acquire VBO if applicable
-		else if (shared_arg->vbo && glIsBuffer(shared_arg->vbo)) {
-			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+		else if (shared_arg->vbo_ && glIsBuffer(shared_arg->vbo_)) {
+			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
 			if (err != CL_SUCCESS) return false;
 		}
 
 		// Read buffer contents
 		err = clEnqueueReadBuffer(
 			queue_,
-			shared_arg->buffer,
+			shared_arg->buffer_,
 			CL_TRUE,
 			0,
-			shared_arg->size,
+			shared_arg->size_,
 			data,
 			0, nullptr, nullptr
 		);
 		if (err != CL_SUCCESS) return false;
 
 		// Release GL texture if applicable
-		if (shared_arg->texture && glIsTexture(shared_arg->texture) && shared_arg->size == 0) {
-			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_) && shared_arg->size_ == 0) {
+			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
 			if (err != CL_SUCCESS) return false;
 		}
 		// Release VBO if applicable
-		else if (shared_arg->vbo && glIsBuffer(shared_arg->vbo)) {
-			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer, 0, nullptr, nullptr);
+		else if (shared_arg->vbo_ && glIsBuffer(shared_arg->vbo_)) {
+			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
 			if (err != CL_SUCCESS) return false;
 		}
 

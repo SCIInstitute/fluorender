@@ -155,7 +155,7 @@ void MaskBorder::Compute(int order)
 		auto arg_tex =
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
 		auto arg_hits_x =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_x);
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_hits_x", sizeof(unsigned int), &hits_x);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = ny; global_size[1] = nz;
@@ -179,7 +179,7 @@ void MaskBorder::Compute(int order)
 		kernel_prog->setKernelArgBegin(kernel_index1);
 		kernel_prog->setKernelArgument(arg_tex);
 		auto arg_hits_y =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_y);
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_hits_y", sizeof(unsigned int), &hits_y);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = nx; global_size[1] = nz;
@@ -203,7 +203,7 @@ void MaskBorder::Compute(int order)
 		kernel_prog->setKernelArgBegin(kernel_index2);
 		kernel_prog->setKernelArgument(arg_tex);
 		auto arg_hits_z =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int), &hits_z);
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_hits_z", sizeof(unsigned int), &hits_z);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = nx; global_size[1] = ny;

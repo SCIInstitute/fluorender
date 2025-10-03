@@ -336,7 +336,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_val =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_val", sizeof(unsigned char) * nx * ny * nz, val);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -443,7 +443,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		kernel_prog->setKernelArgBegin(kernel_index);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_val =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char)*nx*ny*nz, val);
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_val", sizeof(unsigned char) * nx * ny * nz, val);
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));

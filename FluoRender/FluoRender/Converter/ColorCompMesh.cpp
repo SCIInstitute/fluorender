@@ -114,7 +114,7 @@ void ColorCompMesh::Update()
 
 		kernel_prog->setKernelArgBegin(kernel_index0);
 		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_ONLY, lid, sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_ONLY, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo, vbo_size);
 		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, cbo, cbo_size);
 		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&voxel_cnt));

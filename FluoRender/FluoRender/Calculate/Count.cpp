@@ -183,9 +183,9 @@ void CountVoxels::Count()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
 		auto arg_sum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int)*(gsize.gsxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sum", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 		auto arg_wsum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(wsum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_wsum", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);

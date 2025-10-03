@@ -822,11 +822,11 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
 	if (m_s1->fsize < 1)
-		m_img1 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s1->data));
+		m_img1 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
 	else
 	{
-		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s1->data));
-		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, buf_size, NULL);
+		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
+		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
 		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -849,11 +849,11 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	//set up kernel
 	m_prog->setKernelArgBegin(kernel_index);
 	if (m_s2->fsize < 1)
-		m_img2 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data));
+		m_img2 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
 	else
 	{
-		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf_size, (void*)(m_s2->data));
-		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, buf_size, NULL);
+		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
+		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
 		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
@@ -890,7 +890,7 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 		m_prog->setKernelArgBegin(kernel_index, 1);
 		m_mask1 =
 			m_prog->setKernelArgBuf(
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "",
 			buf_size, m_s1->mask);
 	}
 }
@@ -1196,8 +1196,8 @@ float StencilCompare::Similar(const std::string& name)
 	if (m_use_mask)
 		m_prog->setKernelArgument(m_mask1);
 	m_prog->setKernelArgument(m_img2);
-	auto arg_sumf = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_float)*(gsize.gsxyz), (void*)(sumf));
-	auto arg_sumi = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(cl_uint) * (gsize.gsxyz), (void*)(sumi));
+	auto arg_sumf = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sumf", sizeof(cl_float) * (gsize.gsxyz), (void*)(sumf));
+	auto arg_sumi = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sumi", sizeof(cl_uint) * (gsize.gsxyz), (void*)(sumi));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
 	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));

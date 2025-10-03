@@ -59,14 +59,24 @@ namespace flvr
 	//argument
 	class Argument
 	{
+		enum ArgType
+		{
+			ArgType_Unknown = 0,
+			ArgType_Pointer,
+			ArgType_Tex,
+			ArgType_VBO
+		};
+
 	public:
 		bool protect_;
 		bool valid_;//buffer valid
-		GLuint texture;
-		GLuint vbo;
-		void* orgn_addr;
-		cl_mem buffer;
-		size_t size;
+		ArgType type_;
+		std::string name_;//id
+		GLuint tex_;
+		GLuint vbo_;
+		void* pointer_;
+		cl_mem buffer_;
+		size_t size_;
 
 		void protect() { protect_ = true; }
 		void unprotect() { protect_ = false; }
@@ -74,13 +84,15 @@ namespace flvr
 		{
 			if (valid_)
 			{
-				cl_int err = clReleaseMemObject(buffer);
+				cl_int err = clReleaseMemObject(buffer_);
+				type_ = ArgType_Unknown;
+				name_ = "";
 				protect_ = false;
-				size = 0;
-				texture = 0;
-				vbo = 0;
-				buffer = 0;
-				orgn_addr = 0;
+				size_ = 0;
+				tex_ = 0;
+				vbo_ = 0;
+				buffer_ = 0;
+				pointer_ = 0;
 			}
 		}
 		void release()
@@ -89,22 +101,29 @@ namespace flvr
 				destroy();
 		}
 
-		bool matchesPointer(void* data) const
+		bool matchesPointer(const std::string& name, size_t size, void* data) const
 		{
-			return orgn_addr == data;
+			if (type_ != ArgType_Pointer)
+				return false;
+			if (!name_.empty())
+				return name_ == name;
+			return pointer_ == data &&
+				size_ == size;
 		}
 
 		bool matchesTexture(GLuint tex_id) const
 		{
-			return texture == tex_id;
+			return type_ == ArgType_Tex &&
+				tex_ == tex_id;
 		}
 
 		bool matchesVBO(GLuint vbo_id) const
 		{
-			return vbo == vbo_id;
+			return type_ == ArgType_VBO &&
+				vbo_ == vbo_id;
 		}
 
-		static std::shared_ptr<Argument> createFromPointer(cl_context context, cl_mem_flags flags, size_t size, void* data)
+		static std::shared_ptr<Argument> createFromPointer(cl_context context, cl_mem_flags flags, const std::string& name, size_t size, void* data)
 		{
 			cl_int err = CL_SUCCESS;
 			cl_mem buf = clCreateBuffer(context, flags, size, data, &err);
@@ -113,9 +132,11 @@ namespace flvr
 			}
 
 			auto arg = std::make_shared<Argument>();
-			arg->buffer = buf;
-			arg->size = size;
-			arg->orgn_addr = data;
+			arg->type_ = ArgType_Pointer;
+			arg->name_ = name;
+			arg->buffer_ = buf;
+			arg->size_ = size;
+			arg->pointer_ = data;
 			arg->valid_ = true;
 			return arg;
 		}
@@ -132,21 +153,23 @@ namespace flvr
 			}
 
 			auto arg = std::make_shared<Argument>();
-			arg->buffer = buf;
-			arg->vbo = vbo_id;
-			arg->size = size;
+			arg->type_ = ArgType_VBO;
+			arg->buffer_ = buf;
+			arg->vbo_ = vbo_id;
+			arg->size_ = size;
 			arg->valid_ = true;
 			return arg;
 		}
 
 		Argument() :
 			valid_(false),
+			type_(ArgType_Unknown),
 			protect_(false),
-			size(0),
-			texture(0),
-			vbo(0),
-			buffer(0),
-			orgn_addr(0) {}
+			size_(0),
+			tex_(0),
+			vbo_(0),
+			buffer_(0),
+			pointer_(0) {}
 		~Argument()
 		{
 			destroy();
@@ -210,11 +233,11 @@ namespace flvr
 		bool setKernelArgConst(size_t, void*);
 		bool setKernelArgLocal(size_t);
 		bool setKernelArgument(std::weak_ptr<Argument> arg);
-		std::weak_ptr<Argument> setKernelArgBuf(cl_mem_flags, size_t, void*);
+		std::weak_ptr<Argument> setKernelArgBuf(cl_mem_flags, const std::string&, size_t, void*);
 		bool updateKernelArgBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data);
 		std::weak_ptr<Argument> setKernelArgTex2D(cl_mem_flags, GLuint);
 		std::weak_ptr<Argument> setKernelArgTex3D(cl_mem_flags, GLuint);
-		std::weak_ptr<Argument> copyTex3DToArgBuf(cl_mem_flags, GLuint, size_t, size_t*);//copy existing texure to buffer
+		std::weak_ptr<Argument> copyTex3DToArgBuf(cl_mem_flags, GLuint, const std::string&, size_t, size_t*);//copy existing texure to buffer
 		bool copyArgBufToTex3D(const std::weak_ptr<Argument> arg, GLuint, size_t, size_t*);//copy buffer back to texture
 		std::weak_ptr<Argument> setKernelArgVertexBuf(cl_mem_flags, GLuint, size_t);//assign existing vertex buffer to buffer
 

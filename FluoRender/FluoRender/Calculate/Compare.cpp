@@ -715,7 +715,7 @@ void ChannelCompare::Product()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_sum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sum", sizeof(float) * (gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
@@ -826,7 +826,7 @@ void ChannelCompare::MinValue()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_sum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sum", sizeof(float) * (gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid1);
@@ -940,7 +940,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_sum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(gsize.gsxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sum", sizeof(float) * (gsize.gsxyz), (void*)(sum));
 		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&th));
 		if (m_use_mask)
 		{
@@ -1036,7 +1036,7 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 		else
 		{
 			sum = new float[nxyz]();
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float)*(nxyz), (void*)(sum));
+			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sum", sizeof(float) * (nxyz), (void*)(sum));
 		}
 
 		//execute

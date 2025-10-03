@@ -1309,7 +1309,7 @@ namespace flvr
 			}
 			float* hist = new float[hist_size]();
 			auto arg_hist =
-				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, hist_size*sizeof(float), hist);
+				kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, "arg_hist", hist_size * sizeof(float), hist);
 			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&hist_size));
 			size_t global_size[3] = {brick_x, brick_y, brick_z};
 			size_t local_size[3] = {1, 1, 1};

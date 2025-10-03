@@ -174,7 +174,7 @@ void Histogram::Compute()
 		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
 		if (i == 0)
 			arg_sh = kernel_prog->setKernelArgBuf(
-				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sh",
 				sizeof(unsigned int)*(bin + 1), (void*)(m_histogram.data()));
 		else
 			kernel_prog->setKernelArgument(arg_sh);
