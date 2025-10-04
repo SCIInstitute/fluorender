@@ -453,6 +453,8 @@ void ComponentGenerator::ShuffleID()
 		if (postwork)
 			postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ComponentGenerator::SetIDBit(int psize)
@@ -596,6 +598,8 @@ void ComponentGenerator::SetIDBit(int psize)
 		if (postwork)
 			postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ComponentGenerator::Grow()
@@ -699,6 +703,8 @@ void ComponentGenerator::Grow()
 
 	if (glbin.get_cg_table_enable())
 		AddEntry();
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ComponentGenerator::DensityField()
@@ -919,6 +925,9 @@ void ComponentGenerator::DensityField()
 
 	if (glbin.get_cg_table_enable())
 		AddEntry();
+
+	glbin_kernel_factory.clear(kernel_prog_grow);
+	glbin_kernel_factory.clear(kernel_prog_dens);
 }
 
 void ComponentGenerator::DistGrow()
@@ -1090,6 +1099,9 @@ void ComponentGenerator::DistGrow()
 
 	if (glbin.get_cg_table_enable())
 		AddEntry();
+
+	glbin_kernel_factory.clear(kernel_prog);
+	glbin_kernel_factory.clear(kernel_prog_dist);
 }
 
 void ComponentGenerator::DistDensityField()
@@ -1386,6 +1398,10 @@ void ComponentGenerator::DistDensityField()
 
 	if (glbin.get_cg_table_enable())
 		AddEntry();
+
+	glbin_kernel_factory.clear(kernel_prog_grow);
+	glbin_kernel_factory.clear(kernel_prog_dist);
+	glbin_kernel_factory.clear(kernel_prog_dens);
 }
 
 void ComponentGenerator::CleanNoise()
@@ -1534,6 +1550,8 @@ void ComponentGenerator::CleanNoise()
 
 	if (glbin.get_cg_table_enable())
 		AddCleanEntry();
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ComponentGenerator::ClearBorders()
@@ -1606,6 +1624,8 @@ void ComponentGenerator::ClearBorders()
 		if (postwork)
 			postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ComponentGenerator::FillBorders()
@@ -1684,6 +1704,8 @@ void ComponentGenerator::FillBorders()
 		if (postwork)
 			postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ComponentGenerator::AddEntry()
@@ -2069,6 +2091,8 @@ void ComponentGenerator::GenerateDB()
 		if (postwork)
 			postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 //command

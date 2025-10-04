@@ -350,5 +350,7 @@ bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 	//release buffer
 	kernel_prog->releaseAllArgs();
 
+	glbin_kernel_factory.clear(kernel_prog);
+
 	return true;
 }

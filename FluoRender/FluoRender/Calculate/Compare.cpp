@@ -735,6 +735,8 @@ void ChannelCompare::Product()
 			m_result += sum[i];
 		delete[] sum;
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ChannelCompare::MinValue()
@@ -846,6 +848,8 @@ void ChannelCompare::MinValue()
 			m_result += sum[i];
 		delete[] sum;
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
@@ -963,6 +967,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 
 		if (postwork) postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
@@ -1047,4 +1053,6 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 
 		if (postwork) postwork(__FUNCTION__);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }

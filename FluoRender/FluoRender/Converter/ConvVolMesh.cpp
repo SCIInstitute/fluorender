@@ -498,6 +498,8 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 
 	kernel_prog->releaseAllArgs();
 
+	glbin_kernel_factory.clear(kernel_prog);
+
 	m_merged = false;
 	m_busy = false;
 }

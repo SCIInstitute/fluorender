@@ -194,6 +194,8 @@ void Histogram::Compute()
 	}
 
 	SetProgress(0, "");
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 EntryHist* Histogram::GetEntryHist()

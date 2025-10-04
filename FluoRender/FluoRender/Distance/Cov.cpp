@@ -238,6 +238,8 @@ bool Cov::ComputeCenter()
 	m_center[1] /= sum;
 	m_center[2] /= sum;
 
+	glbin_kernel_factory.clear(kernel_prog);
+
 	return true;
 }
 
@@ -313,6 +315,8 @@ bool Cov::ComputeCov()
 		//release buffer
 		kernel_prog->releaseAllArgs();
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 
 	return true;
 }

@@ -360,6 +360,8 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		kernel_prog->releaseAllArgs();
 		ReleaseMask(val, brick_num, b);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate)
@@ -468,4 +470,5 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		kernel_prog->releaseAllArgs();
 		ReleaseMask(val, brick_num, b);
 	}
+	glbin_kernel_factory.clear(kernel_prog);
 }

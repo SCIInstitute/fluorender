@@ -309,6 +309,8 @@ bool Relax::Compute()
 			}
 		}
 	}
-	
+
+	glbin_kernel_factory.clear(kernel_prog);
+
 	return true;
 }

@@ -275,6 +275,8 @@ void VolumeRoi::Run()
 		delete[] sum;
 		delete[] wsum;
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 double VolumeRoi::GetResult()

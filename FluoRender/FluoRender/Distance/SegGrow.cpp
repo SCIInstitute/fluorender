@@ -960,6 +960,8 @@ void SegGrow::Compute()
 		bnum++;//brick number of processed
 	}
 
+	glbin_kernel_factory.clear(kernel_prog);
+
 	//connect bricks
 	size_t idnum = m_list.size();
 	std::vector<std::set<unsigned int>> merge_list;//ids in different bricks to be merged
@@ -1077,6 +1079,8 @@ void SegGrow::Compute()
 		break;
 	}
 
+	glbin_kernel_factory.clear(kernel_prog);
+
 	//finalize bricks
 	kernel_prog = glbin_kernel_factory.program(str_cl_segrow, bits, max_int);
 	if (!kernel_prog)
@@ -1134,6 +1138,8 @@ void SegGrow::Compute()
 			it->second.cid,
 			it->second.bid);
 	}
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 bool SegGrow::CheckBrickPair(unsigned int id1, unsigned int id2,

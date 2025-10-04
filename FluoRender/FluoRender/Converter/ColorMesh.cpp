@@ -143,6 +143,8 @@ void ColorMesh::Update()
 		kernel_prog->releaseAllArgs();
 	}
 	md->SetGpuDirty();
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 
 std::string ColorMesh::GetKernelStrColorMesh(int mode)

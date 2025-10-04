@@ -504,5 +504,7 @@ void BackgStat::Run()
 		ii++;
 	}
 	m_medv += m_minv;
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 

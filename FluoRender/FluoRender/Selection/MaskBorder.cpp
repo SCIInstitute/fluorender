@@ -224,4 +224,5 @@ void MaskBorder::Compute(int order)
 		//release buffer
 		kernel_prog->releaseAllArgs();
 	}
+	glbin_kernel_factory.clear(kernel_prog);
 }
