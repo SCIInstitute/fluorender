@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <TextureBrick.h>
 #include <Texture.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <VolumeData.h>
 #include <algorithm>
 
@@ -136,7 +136,7 @@ void CountVoxels::Count()
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_count_voxels, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_count_voxels, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;

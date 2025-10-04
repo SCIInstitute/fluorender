@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <TextureBrick.h>
 #include <Texture.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <VolumeData.h>
 #include <algorithm>
 
@@ -636,7 +636,7 @@ void ChannelCompare::Product()
 	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_chann_dotprod, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_dotprod, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -747,7 +747,7 @@ void ChannelCompare::MinValue()
 	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_chann_minvalue, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_minvalue, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -858,7 +858,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_chann_threshold, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_threshold, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;
@@ -975,7 +975,7 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 	float max_int = static_cast<float>(m_vd1->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_chann_sum, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_sum, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = -1;

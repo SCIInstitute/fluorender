@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <KernelProgram.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <Global.h>
 #include <Texture.h>
 #include <TextureBrick.h>
@@ -91,7 +91,7 @@ void ColorMesh::Update()
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog =
-		glbin_kernel_factory.kernel(GetKernelStrColorMesh(mode), bits, max_int);
+		glbin_kernel_factory.program(GetKernelStrColorMesh(mode), bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");

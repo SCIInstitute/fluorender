@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <VolumeData.h>
 #include <KernelProgram.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
@@ -126,7 +126,7 @@ void MaskBorder::Compute(int order)
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_check_box_borders, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_check_box_borders, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0 = kernel_prog->createKernel("kernel_0");

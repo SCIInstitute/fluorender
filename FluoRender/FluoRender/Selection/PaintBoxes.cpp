@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Point.h>
 #include <KernelProgram.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <TextureBrick.h>
 
 using namespace flrd;
@@ -119,7 +119,7 @@ void PaintBoxes::Compute()
 	}
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_paint_boxes, 8, 255.0f);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_paint_boxes, 8, 255.0f);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");

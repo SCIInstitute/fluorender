@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <StencilCompare.h>
 #include <Global.h>
 #include <KernelProgram.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <Stencil.h>
 #include <Neighbor.h>
 #ifdef _DEBUG
@@ -785,7 +785,7 @@ m_method(method),
 m_use_mask(use_mask)
 {
 	//create program
-	m_prog = glbin_kernel_factory.kernel(
+	m_prog = glbin_kernel_factory.program(
 		m_use_mask ? str_cl_stencil_mask : str_cl_stencil, 8, 255.0f);
 }
 

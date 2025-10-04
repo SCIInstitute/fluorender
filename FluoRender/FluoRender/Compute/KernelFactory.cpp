@@ -26,76 +26,69 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef _KERNEL_H_
-#define _KERNEL_H_
-
 #include <string>
-#include <vector>
+#include <sstream>
+#include <iostream>
+#include <KernelFactory.h>
+#include <KernelProgram.h>
+#include <TestKernelCode.h>
+
+using std::string;
+using std::vector;
+using std::ostringstream;
 
 namespace flvr
 {
-#define KERNEL_STRING	0
-#define KERNEL_HIST_3D	1
-#define KERNEL_TEST		2
-
-	class KernelProgram;
-
-	class Kernel
+	KernelFactory::KernelFactory()
+		: prev_program_(-1)
 	{
-	public:
-		Kernel(int type);
-		~Kernel();
+	}
 
-		bool create();
-		bool create(std::string &s);
-
-		inline int type() {return type_;}
-
-		inline bool match(int type)
-		{ return (type == type_); }
-
-		inline bool match(std::string &s);
-
-		inline KernelProgram* program()
-		{ return program_; }
-
-	protected:
-		bool emit(std::string& s);
-
-		int type_;
-
-		KernelProgram* program_;
-	};
-
-	class KernelFactory
+	KernelFactory::~KernelFactory()
 	{
-	public:
-		KernelFactory();
-		~KernelFactory();
-		void clear();
+	}
 
-		KernelProgram* kernel(int type);
-		KernelProgram* kernel(std::string s, int bits, float max_int);
+	void KernelFactory::clear()
+	{
+		programs_.clear();
+		prev_program_ = -1;
+	}
 
-	protected:
-		std::vector<Kernel*> kernels_;
-		int prev_kernel_;
-
-	private:
-		std::string replace(const std::string& s,
-			const std::string& src, const std::string& rep)
+	KernelProgram* KernelFactory::program(std::string s, int bits, float max_int)
+	{
+		//change string according to bits
+		if (bits > 8 && bits <= 16)
 		{
-			std::string r = s;
-			size_t len = src.length();
-			size_t pos = r.find(src, 0);
-			while (pos != std::string::npos)
-			{
-				r.replace(pos, len, rep);
-				pos = r.find(src, pos+1);
-			}
-			return r;
+			s = replace(s, "#define DWL ",
+				"#define DWL unsigned short//");
+			s = replace(s, "#define VSCL ",
+				"#define VSCL 65535//");
+			s = replace(s, "#define MAX_INT ",
+				"#define MAX_INT " + std::to_string(max_int) + "f//");
 		}
-	};
-}
+		else if (bits > 16 && bits <= 32)
+		{
+			return nullptr;
+		}
 
-#endif
+		if (prev_program_ >= 0)
+		{
+			if (programs_[prev_program_]->matches(s))
+				return programs_[prev_program_].get();
+		}
+
+		for (size_t i = 0; i < programs_.size(); ++i)
+		{
+			if (programs_[i]->matches(s))
+			{
+				prev_program_ = i;
+				return programs_[i].get();
+			}
+		}
+
+		auto prog = std::make_shared<KernelProgram>(s);
+		programs_.push_back(prog);
+		prev_program_ = int(programs_.size())-1;
+		return prog.get();
+	}
+}

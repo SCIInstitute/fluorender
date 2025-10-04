@@ -92,6 +92,7 @@ namespace flvr
 	bool KernelProgram::init_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
+	cl_command_queue KernelProgram::queue_ = 0;
 	int KernelProgram::platform_id_ = 0;
 	int KernelProgram::device_id_ = 0;
 	std::string KernelProgram::device_name_;
@@ -101,7 +102,7 @@ namespace flvr
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
-	source_(source), program_(0), queue_(0),
+	source_(source), program_(0),
 	kernel_idx_(-1), arg_idx_(-1)
 	{
 	}
@@ -292,9 +293,12 @@ namespace flvr
 		return device_name_;
 	}
 
-	void KernelProgram::release()
+	void KernelProgram::release_context()
 	{
-		clReleaseContext(context_);
+		if (queue_)
+			clReleaseCommandQueue(queue_);
+		if (context_)
+			clReleaseContext(context_);
 	}
 
 	std::vector<CLPlatform>* KernelProgram::GetDeviceList()
@@ -397,8 +401,12 @@ namespace flvr
 		for (size_t i = 0; i < kernels_.size(); ++i)
 			if (!kernels_[i].external)
 				clReleaseKernel(kernels_[i].kernel);
-		clReleaseCommandQueue(queue_);
 		clReleaseProgram(program_);
+	}
+
+	bool KernelProgram::matches(const std::string& s)
+	{
+		return source_ == s;
 	}
 
 	bool KernelProgram::executeKernel(int index, cl_uint dim, size_t* global_size, size_t* local_size)

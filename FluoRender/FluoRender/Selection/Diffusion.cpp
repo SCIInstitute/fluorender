@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <VolumeRenderer.h>
 #include <Plane.h>
 #include <vector>
@@ -282,7 +282,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_diffusion, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_diffusion, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_0");
@@ -371,7 +371,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_diffusion, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_diffusion, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index = kernel_prog->createKernel("kernel_1");

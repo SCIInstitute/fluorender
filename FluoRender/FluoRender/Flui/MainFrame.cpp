@@ -86,7 +86,7 @@ DEALINGS IN THE SOFTWARE.
 #include <JVMInitializer.h>
 #include <PyBase.h>
 #include <MovieMaker.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>
 #include <VolShader.h>
@@ -903,7 +903,7 @@ MainFrame::~MainFrame()
 	glbin_img_shader_factory.clear();
 	glbin_light_field_shader_factory.clear();
 	glbin_text_tex_manager.clear();
-	flvr::KernelProgram::release();
+	flvr::KernelProgram::release_context();
 
 	glbin_brush_def.Set(&glbin_vol_selector);
 	glbin_comp_def.Set(&glbin_comp_generator);

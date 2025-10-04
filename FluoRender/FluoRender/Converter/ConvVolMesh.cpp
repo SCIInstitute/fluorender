@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <CompGenerator.h>
 #include <KernelProgram.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <ConvVolMeshCode.h>
 #include <MCTable.h>
 #include <Plane.h>
@@ -247,7 +247,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 
 	//create program and kernels
 	bool use_tf = m_use_sel ? false : m_use_transfer;
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
 		GetKernelStrMarchingCubes(m_use_sel, use_tf), bits, max_int);
 	if (!kernel_prog)
 	{
@@ -516,7 +516,7 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	m_busy = true;
 
 	//create program kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
 		str_cl_merge_vertices, 8, 256.0f);
 	if (!kernel_prog)
 	{
@@ -781,7 +781,7 @@ void ConvVolMesh::AverageNormals(
 	int vertex_count, int idx_count)
 {
 	//create program kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
 		GetKernelStrSmoothNormals(), 8, 256.0f);
 	if (!kernel_prog)
 		return;

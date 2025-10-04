@@ -213,6 +213,8 @@ namespace flvr
 		bool valid();
 		void destroy();
 
+		bool matches(const std::string& s);
+
 		//create a kernel in the program
 		//return kernel index; -1 unsuccessful
 		int createKernel(const std::string &name);
@@ -258,7 +260,7 @@ namespace flvr
 		static void set_device_id(int id);
 		static int get_device_id();
 		static std::string& get_device_name();
-		static void release();
+		static void release_context();
 		static std::vector<CLPlatform>* GetDeviceList();
 		//context
 		static cl_device_id get_device() { return device_; }
@@ -290,7 +292,6 @@ namespace flvr
 	protected:
 		std::string source_;
 		cl_program program_;
-		cl_command_queue queue_;
 
 		//there can be multiple kernels in one program
 		typedef struct
@@ -315,6 +316,7 @@ namespace flvr
 		static bool init_;
 		static cl_device_id device_;
 		static cl_context context_;
+		static cl_command_queue queue_;
 		static int platform_id_;
 		static int device_id_;
 		static std::string device_name_;

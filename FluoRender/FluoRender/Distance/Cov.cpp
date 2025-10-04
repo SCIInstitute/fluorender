@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <TextureBrick.h>
 #include <Texture.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <algorithm>
 
 using namespace flrd;
@@ -166,7 +166,7 @@ bool Cov::ComputeCenter()
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_cov, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_cov, bits, max_int);
 	if (!kernel_prog)
 		return false;
 	std::string name = "kernel_0";
@@ -251,7 +251,7 @@ bool Cov::ComputeCov()
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_cov, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_cov, bits, max_int);
 	if (!kernel_prog)
 		return false;
 	std::string name = "kernel_1";

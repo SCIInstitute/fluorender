@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <TextureBrick.h>
 #include <Texture.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <VolumeData.h>
 #include <algorithm>
 
@@ -278,7 +278,7 @@ void BackgStat::Run()
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_backg_stat, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_backg_stat, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_index0;

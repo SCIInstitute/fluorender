@@ -72,7 +72,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AsyncTimerFactory.hpp>
 #include <StopWatchFactory.hpp>
 #include <JVMInitializer.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>
 #include <VolShader.h>

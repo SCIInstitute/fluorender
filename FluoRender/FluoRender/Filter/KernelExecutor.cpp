@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeDefault.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <VolumeData.h>
 #include <Texture.h>
 #include <TextureBrick.h>
@@ -264,7 +264,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel_prog =
 			glbin_kernel_factory.
-			kernel(m_code, bits, max_int);
+			program(m_code, bits, max_int);
 		if (kernel_prog)
 		{
 			m_message += L"OpenCL kernel created.\n";

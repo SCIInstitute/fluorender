@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <VolumeData.h>
 #include <KernelProgram.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 #include <RulerHandler.h>
 #include <Texture.h>
 #include <TextureBrick.h>
@@ -638,7 +638,7 @@ void SegGrow::Compute()
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_segrow, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_segrow, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_0 = kernel_prog->createKernel(
@@ -969,7 +969,7 @@ void SegGrow::Compute()
 		flvr::Texture* tex = m_vd->GetTexture();
 		if (!tex)
 			break;
-		kernel_prog = glbin_kernel_factory.kernel(str_cl_sg_check_borders, bits, max_int);
+		kernel_prog = glbin_kernel_factory.program(str_cl_sg_check_borders, bits, max_int);
 		if (!kernel_prog)
 			break;
 		kernel_0 = kernel_prog->createKernel("kernel_0");//x
@@ -1078,7 +1078,7 @@ void SegGrow::Compute()
 	}
 
 	//finalize bricks
-	kernel_prog = glbin_kernel_factory.kernel(str_cl_segrow, bits, max_int);
+	kernel_prog = glbin_kernel_factory.program(str_cl_segrow, bits, max_int);
 	if (!kernel_prog)
 		return;
 	int kernel_7 = kernel_prog->createKernel("kernel_8");//finalize

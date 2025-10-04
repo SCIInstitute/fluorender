@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
-#include <Kernel.h>
+#include <KernelFactory.h>
 
 using namespace flrd;
 
@@ -233,7 +233,7 @@ bool Relax::Compute()
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
 
 	//create program and kernels
-	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.kernel(str_cl_relax, bits, max_int);
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_relax, bits, max_int);
 	if (!kernel_prog)
 		return false;
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered

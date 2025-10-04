@@ -167,7 +167,7 @@ namespace flvr
 		//for multibrick, copy border to continue diffusion
 		void copy_mask_border(GLint btex, TextureBrick *b, int order);
 
-		double calc_hist_3d(GLuint, GLuint, size_t, size_t, size_t);
+		//double calc_hist_3d(GLuint, GLuint, size_t, size_t, size_t);
 
 		//calculation
 		void calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b);
