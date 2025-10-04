@@ -208,5 +208,7 @@ void CountVoxels::Count()
 
 	//update volume
 	vd->SetMaskCount(m_sum, m_wsum);
+
+	glbin_kernel_factory.clear(kernel_prog);
 }
 

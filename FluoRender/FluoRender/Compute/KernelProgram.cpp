@@ -98,6 +98,7 @@ namespace flvr
 	std::string KernelProgram::device_name_;
 	std::vector<CLPlatform> KernelProgram::device_list_;
 	bool KernelProgram::float_atomics_ = false;
+	bool KernelProgram::need_clear_ = false;
 #ifdef _DARWIN
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
@@ -255,6 +256,13 @@ namespace flvr
 		std::string extensions(info_size, '\0');
 		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
 		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
+
+		//check if needs clear
+		bool isIntel = strstr(device->vendor.c_str(), "Intel") != nullptr;
+		bool isGenX = strstr(device->name.c_str(), "HD Graphics") ||
+			strstr(device->name.c_str(), "Iris"); // Add more as needed
+		need_clear_ = isIntel && isGenX;
+
 	}
 
 	bool KernelProgram::init()

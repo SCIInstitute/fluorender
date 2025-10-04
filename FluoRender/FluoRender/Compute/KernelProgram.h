@@ -55,7 +55,7 @@ typedef unsigned int GLuint;
 
 namespace flvr
 {
-	class Kernel;
+	class KernelFactory;
 	//argument
 	class Argument
 	{
@@ -285,7 +285,7 @@ namespace flvr
 		unsigned int optimize_group_size_xy(unsigned int nt, unsigned int target);
 		unsigned int optimize_group_size_z(unsigned int nt, unsigned int target);
 
-		friend class Kernel;
+		friend class KernelFactory;
 #ifdef _DARWIN
 		static CGLContextObj gl_context_;
 #endif
@@ -324,6 +324,7 @@ namespace flvr
 
 		//features
 		static bool float_atomics_;
+		static bool need_clear_;
 	};
 }
 

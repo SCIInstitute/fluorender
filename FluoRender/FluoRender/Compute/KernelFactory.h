@@ -41,13 +41,13 @@ namespace flvr
 	public:
 		KernelFactory();
 		~KernelFactory();
-		void clear();
 
 		KernelProgram* program(std::string s, int bits, float max_int);
+		void clear();
+		void clear(KernelProgram* prog);
 
 	protected:
 		std::vector<std::shared_ptr<KernelProgram>> programs_;
-		int prev_program_;
 
 	private:
 		std::string replace(const std::string& s,

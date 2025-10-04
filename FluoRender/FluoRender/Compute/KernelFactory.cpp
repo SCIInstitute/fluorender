@@ -40,7 +40,6 @@ using std::ostringstream;
 namespace flvr
 {
 	KernelFactory::KernelFactory()
-		: prev_program_(-1)
 	{
 	}
 
@@ -51,7 +50,21 @@ namespace flvr
 	void KernelFactory::clear()
 	{
 		programs_.clear();
-		prev_program_ = -1;
+	}
+
+	void KernelFactory::clear(KernelProgram* prog)
+	{
+		if (!KernelProgram::need_clear_)
+			return;
+
+		auto it = std::remove_if(programs_.begin(), programs_.end(),
+			[prog](const std::shared_ptr<KernelProgram>& p) {
+				return p.get() == prog;
+			});
+
+		if (it != programs_.end()) {
+			programs_.erase(it, programs_.end());
+		}
 	}
 
 	KernelProgram* KernelFactory::program(std::string s, int bits, float max_int)
@@ -71,24 +84,16 @@ namespace flvr
 			return nullptr;
 		}
 
-		if (prev_program_ >= 0)
-		{
-			if (programs_[prev_program_]->matches(s))
-				return programs_[prev_program_].get();
-		}
-
 		for (size_t i = 0; i < programs_.size(); ++i)
 		{
 			if (programs_[i]->matches(s))
 			{
-				prev_program_ = i;
 				return programs_[i].get();
 			}
 		}
 
 		auto prog = std::make_shared<KernelProgram>(s);
 		programs_.push_back(prog);
-		prev_program_ = int(programs_.size())-1;
 		return prog.get();
 	}
 }
