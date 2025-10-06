@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <FluoRender>
     <ver_major>2</ver_major>
-    <ver_minor>33</ver_minor>
+    <ver_minor>34</ver_minor>
     <project>
         <save_project>1</save_project>
         <inc_save>1</inc_save>
         <time_id>_T</time_id>
         <save_compress>0</save_compress>
         <override_vox>1</override_vox>
+        <last_open_type>0</last_open_type>
         <last_tool>1</last_tool>
         <config_file_type>1</config_file_type>
         <capture_scale>2</capture_scale>
@@ -143,6 +144,9 @@
         <param>0</param>
         <wiref>0</wiref>
     </test_mode>
+    <conversion>
+        <vol_mesh_conv_mode>1</vol_mesh_conv_mode>
+    </conversion>
     <rendering>
         <peeling_layers>2</peeling_layers>
         <micro_blend>0</micro_blend>
@@ -238,6 +242,7 @@
         <no_tex_pack>0</no_tex_pack>
         <cl_platform_id>0</cl_platform_id>
         <cl_device_id>0</cl_device_id>
+        <device_need_clear>Intel|HD Graphics;Intel|Iris</device_need_clear>
     </gpu>
     <tracking>
         <track_iter>3</track_iter>
@@ -271,6 +276,7 @@
         <comp_gen>2</comp_gen>
         <colocalize>2</colocalize>
         <relax_ruler>0</relax_ruler>
+        <conv_vol_mesh>2</conv_vol_mesh>
     </automate_default>
     <brush_default>
         <hist_depth>1</hist_depth>
@@ -468,6 +474,15 @@
         <legend>1</legend>
         <label_mode>1</label_mode>
     </volume_default>
+    <mesh_default>
+        <use_transfer_func>0</use_transfer_func>
+        <use_selection>1</use_selection>
+        <vol_mesh_thresh>0.5</vol_mesh_thresh>
+        <vol_mesh_down_xy>1</vol_mesh_down_xy>
+        <vol_mesh_down_z>1</vol_mesh_down_z>
+        <vol_mesh_simplify>0</vol_mesh_simplify>
+        <vol_mesh_smooth>0</vol_mesh_smooth>
+    </mesh_default>
     <movie_default>
         <view_idx>0</view_idx>
         <slider_style>0</slider_style>

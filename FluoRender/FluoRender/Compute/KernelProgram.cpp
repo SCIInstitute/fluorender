@@ -30,6 +30,8 @@
 #ifdef _WIN32
 #include <GL/wglew.h>
 #endif
+#include <Global.h>
+#include <MainSettings.h>
 #include <KernelProgram.h>
 #include <Debug.h>
 #ifdef _WIN32
@@ -38,6 +40,8 @@
 #endif
 #include <algorithm>
 #include <cmath>
+#include <sstream>
+#include <string>
 
 namespace flvr
 {
@@ -258,11 +262,7 @@ namespace flvr
 		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
 
 		//check if needs clear
-		bool isIntel = strstr(device->vendor.c_str(), "Intel") != nullptr;
-		bool isGenX = strstr(device->name.c_str(), "HD Graphics") ||
-			strstr(device->name.c_str(), "Iris"); // Add more as needed
-		need_clear_ = isIntel && isGenX;
-
+		need_clear_ = get_need_clear(device);
 	}
 
 	bool KernelProgram::init()
@@ -312,6 +312,28 @@ namespace flvr
 	std::vector<CLPlatform>* KernelProgram::GetDeviceList()
 	{
 		return &device_list_;
+	}
+
+	bool KernelProgram::get_need_clear(CLDevice* device)
+	{
+		if (!device)
+			return false;
+		std::istringstream stream(glbin_settings.m_device_need_clear);
+		std::string entry;
+
+		while (std::getline(stream, entry, ';')) {
+			size_t sep = entry.find('|');
+			if (sep == std::string::npos) continue;
+
+			std::string vendor_sub = entry.substr(0, sep);
+			std::string device_sub = entry.substr(sep + 1);
+
+			if (strstr(device->vendor.c_str(), vendor_sub.c_str()) &&
+				strstr(device->name.c_str(), device_sub.c_str())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//finish

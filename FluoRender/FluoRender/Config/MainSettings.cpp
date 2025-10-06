@@ -448,6 +448,7 @@ void MainSettings::Read()
 		fconfig->Read("no_tex_pack", &m_no_tex_pack, false);
 		fconfig->Read("cl_platform_id", &m_cl_platform_id, 0);
 		fconfig->Read("cl_device_id", &m_cl_device_id, 0);
+		fconfig->Read("device need clear", &m_device_need_clear, std::string(""));
 	}
 	//tracking settings
 	if (fconfig->Exists("/tracking"))
@@ -694,6 +695,7 @@ void MainSettings::Save()
 	fconfig->Write("no_tex_pack", m_no_tex_pack);
 	fconfig->Write("cl_platform_id", m_cl_platform_id);
 	fconfig->Write("cl_device_id", m_cl_device_id);
+	fconfig->Write("device need clear", m_device_need_clear);
 
 	//tracking settings
 	fconfig->SetPath("/tracking");

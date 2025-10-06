@@ -270,6 +270,7 @@ namespace flvr
 
 		//features
 		static bool get_float_atomics() { return float_atomics_; }
+		static bool get_need_clear(CLDevice* device);
 
 		//finish
 		void finish();

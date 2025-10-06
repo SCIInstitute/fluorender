@@ -241,6 +241,7 @@ public:
 	bool m_no_tex_pack;		//no tex pack
 	int m_cl_platform_id;	//cl device
 	int m_cl_device_id;
+	std::string m_device_need_clear;//list of devices that need clear
 
 	int m_track_iter;		//tracking settings
 	double m_component_size;
