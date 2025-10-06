@@ -325,13 +325,13 @@ bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 
 	//textures
 	size_t result_size = brick_x*brick_y*brick_z*chars;
-	kernel_prog->setKernelArgBegin(kernel_index);
-	kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
+	kernel_prog->beginArgs(kernel_index);
+	kernel_prog->setTex3D(CL_MEM_READ_ONLY, data_id);
 	auto arg_result =
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_result", result_size, result);
-	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_x));
-	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_y));
-	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&brick_z));
+		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", result_size, result);
+	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_x));
+	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_y));
+	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_z));
 	//execute
 	size_t global_size[3] = { brick_x, brick_y, brick_z };
 	size_t local_size[3] = { 1, 1, 1 };

@@ -820,25 +820,25 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	//DBMIUINT8 mi(m_s1->nx, m_s1->ny, 1);
 
 	//set up kernel
-	m_prog->setKernelArgBegin(kernel_index);
+	m_prog->beginArgs(kernel_index);
 	if (m_s1->fsize < 1)
-		m_img1 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
+		m_img1 = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
 	else
 	{
-		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
-		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
-		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		img[0] = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
+		img[1] = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
+		m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		m_prog->setConst(sizeof(unsigned int), (void*)(&nz));
 		//filter s1
 		for (int i = 0; i < m_s1->fsize; ++i)
 		{
 			if (i)
 			{
 				//swap images
-				m_prog->setKernelArgBegin(kernel_index);
-				m_prog->setKernelArgument(img[i%2]);
-				m_prog->setKernelArgument(img[(i+1)%2]);
+				m_prog->beginArgs(kernel_index);
+				m_prog->bindArg(img[i%2]);
+				m_prog->bindArg(img[(i+1)%2]);
 			}
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		}
@@ -847,25 +847,25 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	}
 
 	//set up kernel
-	m_prog->setKernelArgBegin(kernel_index);
+	m_prog->beginArgs(kernel_index);
 	if (m_s2->fsize < 1)
-		m_img2 = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
+		m_img2 = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
 	else
 	{
-		img[0] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
-		img[1] = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
-		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		img[0] = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
+		img[1] = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
+		m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		m_prog->setConst(sizeof(unsigned int), (void*)(&nz));
 		//filter s2
 		for (int i = 0; i < m_s2->fsize; ++i)
 		{
 			if (i)
 			{
 				//swap images
-				m_prog->setKernelArgBegin(kernel_index);
-				m_prog->setKernelArgument(img[i % 2]);
-				m_prog->setKernelArgument(img[(i + 1) % 2]);
+				m_prog->beginArgs(kernel_index);
+				m_prog->bindArg(img[i % 2]);
+				m_prog->bindArg(img[(i + 1) % 2]);
 			}
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		}
@@ -887,9 +887,9 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 		else
 			kernel_index = m_prog->createKernel(cmp_name);
 		buf_size = sizeof(unsigned char) * nx * ny * nz;
-		m_prog->setKernelArgBegin(kernel_index, 1);
+		m_prog->beginArgs(kernel_index, 1);
 		m_mask1 =
-			m_prog->setKernelArgBuf(
+			m_prog->setBufIfNew(
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "",
 			buf_size, m_s1->mask);
 	}
@@ -1191,28 +1191,28 @@ float StencilCompare::Similar(const std::string& name)
 	cl_float* sumf = new cl_float[gsize.gsxyz];
 	cl_uint* sumi = new cl_uint[gsize.gsxyz];
 	//
-	m_prog->setKernelArgBegin(kernel_index);
-	m_prog->setKernelArgument(m_img1);
+	m_prog->beginArgs(kernel_index);
+	m_prog->bindArg(m_img1);
 	if (m_use_mask)
-		m_prog->setKernelArgument(m_mask1);
-	m_prog->setKernelArgument(m_img2);
-	auto arg_sumf = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sumf", sizeof(cl_float) * (gsize.gsxyz), (void*)(sumf));
-	auto arg_sumi = m_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sumi", sizeof(cl_uint) * (gsize.gsxyz), (void*)(sumi));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
-	m_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-	m_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&bmin));
-	m_prog->setKernelArgConst(sizeof(cl_float), (void*)(&intmax));
-	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf0));
-	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf1));
-	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf2));
-	m_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&tf3));
+		m_prog->bindArg(m_mask1);
+	m_prog->bindArg(m_img2);
+	auto arg_sumf = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(cl_float) * (gsize.gsxyz), (void*)(sumf));
+	auto arg_sumi = m_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(cl_uint) * (gsize.gsxyz), (void*)(sumi));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+	m_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+	m_prog->setConst(sizeof(cl_int3), (void*)(&bmin));
+	m_prog->setConst(sizeof(cl_float), (void*)(&intmax));
+	m_prog->setConst(sizeof(cl_float4), (void*)(&tf0));
+	m_prog->setConst(sizeof(cl_float4), (void*)(&tf1));
+	m_prog->setConst(sizeof(cl_float4), (void*)(&tf2));
+	m_prog->setConst(sizeof(cl_float4), (void*)(&tf3));
 
 	//execute
 	m_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);

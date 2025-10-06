@@ -330,20 +330,20 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(ds_nx), size_t(ds_ny), size_t(ds_nz) };
 
-		kernel_prog->setKernelArgBegin(kernel_idx0);
+		kernel_prog->beginArgs(kernel_idx0);
 		auto arg_tid =
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
 		std::weak_ptr<flvr::Argument> arg_mid;
 		if (m_use_sel)
-			arg_mid = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mid = kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		arg_vsize =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_vsize", sizeof(int), (void*)(&vsize));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iso_value));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&xy_factor));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&z_factor));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(int), (void*)(&vsize));
+		kernel_prog->setConst(sizeof(float), (void*)(&iso_value));
+		kernel_prog->setConst(sizeof(int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(int), (void*)(&xy_factor));
+		kernel_prog->setConst(sizeof(int), (void*)(&z_factor));
 		if (use_tf)
 		{
 			cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
@@ -358,17 +358,17 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 				float(bbx.Min().x()),
 				float(bbx.Min().y()),
 				float(bbx.Min().z()) };
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc2));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc3));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc17));
-			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
-			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 1));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 2));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 3));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 4));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 5));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(&loc2));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(&loc3));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(&loc17));
+			kernel_prog->setConst(sizeof(cl_float3), (void*)(&scl));
+			kernel_prog->setConst(sizeof(cl_float3), (void*)(&trl));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 1));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 2));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 3));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 4));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 5));
 		}
 
 		//execute
@@ -423,29 +423,29 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(ds_nx), size_t(ds_ny), size_t(ds_nz) };
 
-		kernel_prog->setKernelArgBegin(kernel_idx1);
+		kernel_prog->beginArgs(kernel_idx1);
 		auto arg_tid =
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
 		std::weak_ptr<flvr::Argument> arg_mid;
 		if (m_use_sel)
-			arg_mid = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mid = kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		auto arg_vbo =
-			kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, vbo_id, vbo_size);
+			kernel_prog->bindVeretxBuf(CL_MEM_WRITE_ONLY, vbo_id, vbo_size);
 		arg_vertex_size =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_vertex_size", sizeof(int), (void*)(&vertex_size));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_cube_table", sizeof(int) * 24, (void*)(cubeTable));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_edge_table", sizeof(int) * 256, (void*)(edgeTable));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_tri_table", sizeof(int) * 256 * 16, (void*)triTable);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_edge_pairs", sizeof(int) * 12 * 2, (void*)edgePairs);
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iso_value));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&xy_factor));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&z_factor));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&ox));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oy));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&oz));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(int), (void*)(&vertex_size));
+		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * 24, (void*)(cubeTable));
+		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * 256, (void*)(edgeTable));
+		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * 256 * 16, (void*)triTable);
+		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * 12 * 2, (void*)edgePairs);
+		kernel_prog->setConst(sizeof(float), (void*)(&iso_value));
+		kernel_prog->setConst(sizeof(int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(int), (void*)(&xy_factor));
+		kernel_prog->setConst(sizeof(int), (void*)(&z_factor));
+		kernel_prog->setConst(sizeof(int), (void*)(&ox));
+		kernel_prog->setConst(sizeof(int), (void*)(&oy));
+		kernel_prog->setConst(sizeof(int), (void*)(&oz));
 		if (use_tf)
 		{
 			cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
@@ -460,17 +460,17 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 				float(bbx.Min().x()),
 				float(bbx.Min().y()),
 				float(bbx.Min().z()) };
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc2));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc3));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&loc17));
-			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
-			kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 1));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 2));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 3));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 4));
-			kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p + 5));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(&loc2));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(&loc3));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(&loc17));
+			kernel_prog->setConst(sizeof(cl_float3), (void*)(&scl));
+			kernel_prog->setConst(sizeof(cl_float3), (void*)(&trl));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 1));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 2));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 3));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 4));
+			kernel_prog->setConst(sizeof(cl_float4), (void*)(p + 5));
 		}
 
 		//execute
@@ -590,12 +590,12 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	int window_size = static_cast<int>(ng) * 4;
 
 	//windowed dedup pass
-	kernel_prog->setKernelArgBegin(kernel_idx0);
-	auto arg_vbo = kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
-	auto arg_ibo = kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_WRITE, ibo_id, ibo_size);
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
-	kernel_prog->setKernelArgConst(sizeof(float), (void*)(&epsilon));
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&window_size));
+	kernel_prog->beginArgs(kernel_idx0);
+	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_WRITE, ibo_id, ibo_size);
+	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
+	kernel_prog->setConst(sizeof(float), (void*)(&epsilon));
+	kernel_prog->setConst(sizeof(int), (void*)(&window_size));
 	//execute
 	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
 
@@ -607,10 +607,10 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 	//count unique vertices
 	std::vector<int> unique_flags(idx_num, 0);
-	kernel_prog->setKernelArgBegin(kernel_idx1);
-	kernel_prog->setKernelArgument(arg_ibo);
-	auto arg_uflags = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, "arg_uflags", sizeof(int) * idx_num, nullptr);
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->bindArg(arg_ibo);
+	auto arg_uflags = kernel_prog->setBufIfNew(CL_MEM_WRITE_ONLY, "arg_uflags", sizeof(int) * idx_num, nullptr);
+	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
 
@@ -627,11 +627,11 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	std::vector<int> prefix_sum(idx_num, 0);
 	std::vector<int> remap_to_compact(idx_num, 0);
 	PrefixSum(unique_flags, remap_table, prefix_sum, remap_to_compact, false);
-	//kernel_prog->setKernelArgBegin(kernel_idx2);
-	//kernel_prog->setKernelArgument(arg_uflags);
-	//flvr::Argument arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * idx_num, (void*)(&prefix_sum[0]));
-	//kernel_prog->setKernelArgLocal(sizeof(int) * ng * 2);
-	//kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	//kernel_prog->beginArgs(kernel_idx2);
+	//kernel_prog->bindArg(arg_uflags);
+	//flvr::Argument arg_psum = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(int) * idx_num, (void*)(&prefix_sum[0]));
+	//kernel_prog->setLocal(sizeof(int) * ng * 2);
+	//kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 	////execute
 	//kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size2);
 
@@ -640,15 +640,15 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 	//compact and remap
 	//allocate new vbo
-	kernel_prog->setKernelArgBegin(kernel_idx3);
-	kernel_prog->setKernelArgument(arg_vbo);
-	kernel_prog->setKernelArgument(arg_ibo);
-	kernel_prog->setKernelArgument(arg_uflags);
-	auto arg_psum = kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_psum", sizeof(int) * idx_num, (void*)(&prefix_sum[0]));
-	auto arg_rtcmp = kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_rtcmp", sizeof(int) * idx_num, (void*)(&remap_to_compact[0]));
-	auto arg_cvbo = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_cvbo", sizeof(float) * unique_count * 3, nullptr);
-	auto arg_cibo = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_cibo", sizeof(int) * idx_num, nullptr);
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	kernel_prog->beginArgs(kernel_idx3);
+	kernel_prog->bindArg(arg_vbo);
+	kernel_prog->bindArg(arg_ibo);
+	kernel_prog->bindArg(arg_uflags);
+	auto arg_psum = kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * idx_num, (void*)(&prefix_sum[0]));
+	auto arg_rtcmp = kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * idx_num, (void*)(&remap_to_compact[0]));
+	auto arg_cvbo = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_cvbo", sizeof(float) * unique_count * 3, nullptr);
+	auto arg_cibo = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_cibo", sizeof(int) * idx_num, nullptr);
+	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx3, 1, global_size, local_size);
 
@@ -667,11 +667,11 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		//find dupes
 		//new remap_table
 		remap_table.resize(vertex_count, 0);
-		kernel_prog->setKernelArgBegin(kernel_idx4);
-		kernel_prog->setKernelArgument(arg_cvbo);
-		auto arg_rtable = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, "arg_rtable", sizeof(int) * vertex_count, nullptr);
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&epsilon));
+		kernel_prog->beginArgs(kernel_idx4);
+		kernel_prog->bindArg(arg_cvbo);
+		auto arg_rtable = kernel_prog->setBufIfNew(CL_MEM_WRITE_ONLY, "arg_rtable", sizeof(int) * vertex_count, nullptr);
+		kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
+		kernel_prog->setConst(sizeof(float), (void*)(&epsilon));
 		//loop to process all vertices in batches
 		float t = fminf(1.0f, (float)1e5 / vertex_count);
 		int batch_size = (int)(window_size + t * (65535 - window_size));
@@ -682,9 +682,9 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 		{
 			int upper = std::min(lower + batch_size, vertex_count);
 			size_t global_size3[1] = { static_cast<size_t>(upper - lower) };
-			kernel_prog->setKernelArgBegin(kernel_idx4, 4);
-			kernel_prog->setKernelArgConst(sizeof(int), (void*)(&lower));
-			kernel_prog->setKernelArgConst(sizeof(int), (void*)(&upper));
+			kernel_prog->beginArgs(kernel_idx4, 4);
+			kernel_prog->setConst(sizeof(int), (void*)(&lower));
+			kernel_prog->setConst(sizeof(int), (void*)(&upper));
 			//execute
 			kernel_prog->executeKernel(kernel_idx4, 1, global_size3, local_size);
 			SetProgress(static_cast<int>(100 * batch_count / batch_num), "Global comparisons for vertex merge.");
@@ -697,10 +697,10 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 		//count unique vertices
 		unique_flags.resize(vertex_count, 0);
-		kernel_prog->setKernelArgBegin(kernel_idx1);
-		kernel_prog->setKernelArgument(arg_rtable);
-		auto arg_guflags = kernel_prog->setKernelArgBuf(CL_MEM_WRITE_ONLY, "arg_guflags", sizeof(int) * vertex_count, nullptr);
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+		kernel_prog->beginArgs(kernel_idx1);
+		kernel_prog->bindArg(arg_rtable);
+		auto arg_guflags = kernel_prog->setBufIfNew(CL_MEM_WRITE_ONLY, "arg_guflags", sizeof(int) * vertex_count, nullptr);
+		kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 		//execute
 		kernel_prog->executeKernel(kernel_idx1, 1, global_size2, local_size);
 
@@ -720,17 +720,17 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 
 		//compact and remap
 		//allocate new vbo
-		kernel_prog->setKernelArgBegin(kernel_idx5);
-		kernel_prog->setKernelArgument(arg_cvbo);
-		kernel_prog->setKernelArgument(arg_cibo);
-		kernel_prog->setKernelArgument(arg_rtable);
-		kernel_prog->setKernelArgument(arg_guflags);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_psum", sizeof(int) * vertex_count, (void*)(&prefix_sum[0]));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_rtcmp", sizeof(int) * vertex_count, (void*)(&remap_to_compact[0]));
-		auto arg_gcvbo = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_gcvbo", sizeof(float) * unique_count * 3, nullptr);
-		auto arg_gcibo = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_gcibo", sizeof(int) * idx_num, nullptr);
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&idx_count));
+		kernel_prog->beginArgs(kernel_idx5);
+		kernel_prog->bindArg(arg_cvbo);
+		kernel_prog->bindArg(arg_cibo);
+		kernel_prog->bindArg(arg_rtable);
+		kernel_prog->bindArg(arg_guflags);
+		kernel_prog->setBufUpdate(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * vertex_count, (void*)(&prefix_sum[0]));
+		kernel_prog->setBufUpdate(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(int) * vertex_count, (void*)(&remap_to_compact[0]));
+		auto arg_gcvbo = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_gcvbo", sizeof(float) * unique_count * 3, nullptr);
+		auto arg_gcibo = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_gcibo", sizeof(int) * idx_num, nullptr);
+		kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
+		kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 		//execute
 		kernel_prog->executeKernel(kernel_idx5, 1, global_size, local_size);
 
@@ -801,11 +801,11 @@ void ConvVolMesh::AverageNormals(
 
 	std::vector<float> normals(vertex_count * 3, 0.0f);
 	//accumulation
-	kernel_prog->setKernelArgBegin(kernel_idx0);
-	kernel_prog->setKernelArgument(vbo);
-	kernel_prog->setKernelArgument(ibo);
-	auto arg_norm = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_norm", sizeof(float) * vertex_count * 3, (void*)(&normals[0]));
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&idx_count));
+	kernel_prog->beginArgs(kernel_idx0);
+	kernel_prog->bindArg(vbo);
+	kernel_prog->bindArg(ibo);
+	auto arg_norm = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * vertex_count * 3, (void*)(&normals[0]));
+	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
 
@@ -813,9 +813,9 @@ void ConvVolMesh::AverageNormals(
 	//kernel_prog->readBuffer(arg_norm, normals.data());
 
 	//normalization
-	kernel_prog->setKernelArgBegin(kernel_idx1);
-	kernel_prog->setKernelArgument(arg_norm);
-	kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->bindArg(arg_norm);
+	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx1, 1, global_size2, local_size);
 

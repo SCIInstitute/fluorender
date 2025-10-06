@@ -46,6 +46,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <memory>
 #include <unordered_map>
 
@@ -228,20 +229,21 @@ namespace flvr
 		bool getWorkGroupSize(int idex, size_t*);
 
 		//set argument
-		void setKernelArgBegin(int kernel_idx, int arg_idx = 0)
+		void beginArgs(int kernel_idx, int arg_idx = 0)//Sets up kernel + arg index — short and scoped.
 		{
 			kernel_idx_ = kernel_idx; arg_idx_ = arg_idx;
 		}
-		bool setKernelArgConst(size_t, void*);
-		bool setKernelArgLocal(size_t);
-		bool setKernelArgument(std::weak_ptr<Argument> arg);
-		std::weak_ptr<Argument> setKernelArgBuf(cl_mem_flags, const std::string&, size_t, void*);
-		bool updateKernelArgBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data);
-		std::weak_ptr<Argument> setKernelArgTex2D(cl_mem_flags, GLuint);
-		std::weak_ptr<Argument> setKernelArgTex3D(cl_mem_flags, GLuint);
-		std::weak_ptr<Argument> copyTex3DToArgBuf(cl_mem_flags, GLuint, const std::string&, size_t, size_t*);//copy existing texure to buffer
-		bool copyArgBufToTex3D(const std::weak_ptr<Argument> arg, GLuint, size_t, size_t*);//copy buffer back to texture
-		std::weak_ptr<Argument> setKernelArgVertexBuf(cl_mem_flags, GLuint, size_t);//assign existing vertex buffer to buffer
+		bool setConst(size_t, void*);
+		bool setLocal(size_t);
+		bool bindArg(std::weak_ptr<Argument> arg);//Binds existing Argument object.
+		std::weak_ptr<Argument> setBufIfNew(cl_mem_flags, const std::string&, size_t, void*);//Sets from host pointer, creates buffer only if needed.
+		std::weak_ptr<Argument> setBufUpdate(cl_mem_flags, const std::string&, size_t, void*);//Always updates from host pointer.
+		bool updateBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data);//Updates existing buffer from host pointer.
+		std::weak_ptr<Argument> setTex2D(cl_mem_flags, GLuint);//OpenGL texture binding.
+		std::weak_ptr<Argument> setTex3D(cl_mem_flags, GLuint);//OpenGL texture binding.
+		std::weak_ptr<Argument> copyTex3DToBuf(cl_mem_flags, GLuint, const std::string&, size_t, size_t*);//copy existing texure to buffer
+		bool copyBufToTex3D(const std::weak_ptr<Argument> arg, GLuint, size_t, size_t*);//copy buffer back to texture
+		std::weak_ptr<Argument> bindVeretxBuf(cl_mem_flags, GLuint, size_t);//assign existing vertex buffer to buffer
 
 		//read back
 		bool readBuffer(const std::weak_ptr<Argument> arg, void* data);
@@ -310,7 +312,19 @@ namespace flvr
 		//a list of arguments to keep track of cl mem objs
 		std::set<std::shared_ptr<Argument>> arg_list_;
 		//references which arguments are used by each kernel, without owning them
-		std::unordered_map<int, std::vector<std::weak_ptr<Argument>>> arg_map_;//maps kernel index to a list of arguments
+		struct WeakPtrHash {
+			size_t operator()(const std::weak_ptr<Argument>& wp) const {
+				auto sp = wp.lock();
+				return std::hash<Argument*>()(sp.get()); // Hash by raw pointer
+			}
+		};
+
+		struct WeakPtrEqual {
+			bool operator()(const std::weak_ptr<Argument>& a, const std::weak_ptr<Argument>& b) const {
+				return !a.owner_before(b) && !b.owner_before(a); // Equivalent if neither is before the other
+			}
+		};
+		std::unordered_map<int, std::unordered_set<std::weak_ptr<Argument>, WeakPtrHash, WeakPtrEqual>> arg_map_;
 
 		//global settings
 		static bool init_;

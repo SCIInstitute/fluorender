@@ -422,29 +422,29 @@ void ComponentGenerator::ShuffleID()
 			float(bbx.Min().x()),
 			float(bbx.Min().y()),
 			float(bbx.Min().z())};
-		kernel_prog->setKernelArgBegin(kernel_index);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		kernel_prog->beginArgs(kernel_index);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p+1));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p+2));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p+3));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p+4));
-		kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(p+5));
-		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&scl));
-		kernel_prog->setKernelArgConst(sizeof(cl_float3), (void*)(&trl));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenz));
+		kernel_prog->setConst(sizeof(cl_float4), (void*)(p));
+		kernel_prog->setConst(sizeof(cl_float4), (void*)(p+1));
+		kernel_prog->setConst(sizeof(cl_float4), (void*)(p+2));
+		kernel_prog->setConst(sizeof(cl_float4), (void*)(p+3));
+		kernel_prog->setConst(sizeof(cl_float4), (void*)(p+4));
+		kernel_prog->setConst(sizeof(cl_float4), (void*)(p+5));
+		kernel_prog->setConst(sizeof(cl_float3), (void*)(&scl));
+		kernel_prog->setConst(sizeof(cl_float3), (void*)(&trl));
 		if (m_use_sel)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -548,40 +548,40 @@ void ComponentGenerator::SetIDBit(int psize)
 		//set
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index0);
+		kernel_prog->beginArgs(kernel_index0);
 		auto arg_szbuf =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenz));
 		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
-			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 2
-		kernel_prog->setKernelArgBegin(kernel_index2);
-		kernel_prog->setKernelArgument(arg_szbuf);
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
+		kernel_prog->beginArgs(kernel_index2);
+		kernel_prog->bindArg(arg_szbuf);
+		kernel_prog->bindArg(arg_label);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenz));
 		if (m_use_sel)
-			kernel_prog->setKernelArgument(arg_mask);
+			kernel_prog->bindArg(arg_mask);
 		//kernel 3
-		kernel_prog->setKernelArgBegin(kernel_index3);
-		kernel_prog->setKernelArgument(arg_szbuf);
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&psize));
+		kernel_prog->beginArgs(kernel_index3);
+		kernel_prog->bindArg(arg_szbuf);
+		kernel_prog->bindArg(arg_label);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&psize));
 		if (m_use_sel)
-			kernel_prog->setKernelArgument(arg_mask);
+			kernel_prog->bindArg(arg_mask);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
@@ -589,7 +589,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -663,22 +663,22 @@ void ComponentGenerator::Grow()
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index0);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		kernel_prog->beginArgs(kernel_index0);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_rcnt", sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&tran));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&fixed));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog->setConst(sizeof(float), (void*)(&tran));
+		kernel_prog->setConst(sizeof(float), (void*)(&scl_ff));
+		kernel_prog->setConst(sizeof(float), (void*)(&grad_ff));
+		kernel_prog->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog->setConst(sizeof(int), (void*)(&fixed));
 		if (m_use_sel)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < biter; ++j)
@@ -691,7 +691,7 @@ void ComponentGenerator::Grow()
 		}
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -785,39 +785,39 @@ void ComponentGenerator::DensityField()
 		//generate density field arg_densf
 		//set
 		//kernel 0
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
+		kernel_prog_dens->beginArgs(kernel_dens_index0);
 		auto arg_img =
-			kernel_prog_dens->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+			kernel_prog_dens->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_densf =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, NULL);
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&m_density_window_size));
-		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&scale));
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_dens->setConst(sizeof(int), (void*)(&m_density_window_size));
+		kernel_prog_dens->setConst(sizeof(float), (void*)(&scale));
 		//kernel 1
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
-		kernel_prog_dens->setKernelArgument(arg_densf);
+		kernel_prog_dens->beginArgs(kernel_dens_index1);
+		kernel_prog_dens->bindArg(arg_densf);
 		auto arg_gavg =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, NULL);
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
 		auto arg_gvar =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, NULL);
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
 		//kernel 2
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2, 2);
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_dens->beginArgs(kernel_dens_index2, 2);
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
@@ -843,19 +843,19 @@ void ComponentGenerator::DensityField()
 //#endif
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
+		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_avg =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, NULL);
-		kernel_prog_dens->setKernelArgument(arg_gavg);
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+		kernel_prog_dens->bindArg(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//compute var
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
+		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_var =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, NULL);
-		kernel_prog_dens->setKernelArgument(arg_gvar);
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+		kernel_prog_dens->bindArg(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
@@ -877,29 +877,29 @@ void ComponentGenerator::DensityField()
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
-		kernel_prog_grow->setKernelArgument(arg_img);
+		kernel_prog_grow->beginArgs(kernel_grow_index0);
+		kernel_prog_grow->bindArg(arg_img);
 		auto arg_label =
-			kernel_prog_grow->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog_grow->setKernelArgument(arg_densf);
-		kernel_prog_grow->setKernelArgument(arg_avg);
-		kernel_prog_grow->setKernelArgument(arg_var);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_rcnt", sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&tran));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog_grow->setKernelArgConst(sizeof(int), (void*)(&fixed));
+			kernel_prog_grow->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog_grow->bindArg(arg_densf);
+		kernel_prog_grow->bindArg(arg_avg);
+		kernel_prog_grow->bindArg(arg_var);
+		kernel_prog_grow->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&tran));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&scl_ff));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&grad_ff));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&density));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&varth));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog_grow->setConst(sizeof(int), (void*)(&fixed));
 		if (m_use_sel)
-			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog_grow->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < m_iter; ++j)
@@ -912,7 +912,7 @@ void ComponentGenerator::DensityField()
 		}
 
 		//read back
-		kernel_prog_grow->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog_grow->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -999,32 +999,32 @@ void ComponentGenerator::DistGrow()
 		unsigned char ini = 1;
 		//set
 		//kernel 0
-		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
+		kernel_prog_dist->beginArgs(kernel_dist_index0);
 		auto arg_img =
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+			kernel_prog_dist->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_distf =
-			kernel_prog_dist->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, NULL);
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&m_dist_filter_size));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+			kernel_prog_dist->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, nullptr);
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setConst(sizeof(int), (void*)(&m_dist_filter_size));
+		kernel_prog_dist->setConst(sizeof(float), (void*)(&dist_thresh));
+		kernel_prog_dist->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&ini));
 		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
-			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog_dist->setTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
-		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
-		kernel_prog_dist->setKernelArgument(arg_distf);
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+		kernel_prog_dist->beginArgs(kernel_dist_index1);
+		kernel_prog_dist->bindArg(arg_distf);
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&ini));
 		if (m_use_sel)
 		{
-			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
-			kernel_prog_dist->setKernelArgument(arg_mask);
+			kernel_prog_dist->beginArgs(kernel_dist_index1, 7);
+			kernel_prog_dist->bindArg(arg_mask);
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
@@ -1036,9 +1036,9 @@ void ComponentGenerator::DistGrow()
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 5);
-			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
-			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
+			kernel_prog_dist->beginArgs(kernel_dist_index1, 5);
+			kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&nn));
+			kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
 			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
@@ -1056,25 +1056,25 @@ void ComponentGenerator::DistGrow()
 		int fixed = m_grow_fixed;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index0);
-		kernel_prog->setKernelArgument(arg_img);
+		kernel_prog->beginArgs(kernel_index0);
+		kernel_prog->bindArg(arg_img);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgument(arg_distf);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_rcnt", sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&tran));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&distscl));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&fixed));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->bindArg(arg_distf);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog->setConst(sizeof(float), (void*)(&tran));
+		kernel_prog->setConst(sizeof(float), (void*)(&scl_ff));
+		kernel_prog->setConst(sizeof(float), (void*)(&grad_ff));
+		kernel_prog->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog->setConst(sizeof(float), (void*)(&distscl));
+		kernel_prog->setConst(sizeof(float), (void*)(&dist_strength));
+		kernel_prog->setConst(sizeof(int), (void*)(&fixed));
 		if (m_use_sel)
-			kernel_prog->setKernelArgument(arg_mask);
+			kernel_prog->bindArg(arg_mask);
 
 		//execute
 		for (int j = 0; j < m_iter; ++j)
@@ -1086,7 +1086,7 @@ void ComponentGenerator::DistGrow()
 		}
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -1201,32 +1201,32 @@ void ComponentGenerator::DistDensityField()
 		float dist_thresh = static_cast<float>(m_dist_thresh);
 		//set
 		//kernel 0
-		kernel_prog_dist->setKernelArgBegin(kernel_dist_index0);
+		kernel_prog_dist->beginArgs(kernel_dist_index0);
 		auto arg_img =
-			kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+			kernel_prog_dist->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_distf =
-			kernel_prog_dist->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, NULL);
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(int), (void*)(&m_dist_filter_size));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&dist_thresh));
-		kernel_prog_dist->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+			kernel_prog_dist->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, nullptr);
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setConst(sizeof(int), (void*)(&m_dist_filter_size));
+		kernel_prog_dist->setConst(sizeof(float), (void*)(&dist_thresh));
+		kernel_prog_dist->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&ini));
 		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
-			arg_mask = kernel_prog_dist->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog_dist->setTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
-		kernel_prog_dist->setKernelArgBegin(kernel_dist_index1);
-		kernel_prog_dist->setKernelArgument(arg_distf);
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
+		kernel_prog_dist->beginArgs(kernel_dist_index1);
+		kernel_prog_dist->bindArg(arg_distf);
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&ini));
 		if (m_use_sel)
 		{
-			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 7);
-			kernel_prog_dist->setKernelArgument(arg_mask);
+			kernel_prog_dist->beginArgs(kernel_dist_index1, 7);
+			kernel_prog_dist->bindArg(arg_mask);
 		}
 		//init
 		kernel_prog_dist->executeKernel(kernel_dist_index0, 3, global_size, local_size);
@@ -1238,9 +1238,9 @@ void ComponentGenerator::DistDensityField()
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			kernel_prog_dist->setKernelArgBegin(kernel_dist_index1, 5);
-			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
-			kernel_prog_dist->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
+			kernel_prog_dist->beginArgs(kernel_dist_index1, 5);
+			kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&nn));
+			kernel_prog_dist->setConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog_dist->executeKernel(kernel_dist_index1, 3, global_size, local_size);
 			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
@@ -1257,45 +1257,45 @@ void ComponentGenerator::DistDensityField()
 		//kernel 0
 		float distscl = 5.0f / m_max_dist;
 		float dist_strength = static_cast<float>(m_dist_strength);
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index0);
-		kernel_prog_dens->setKernelArgument(arg_img);
-		kernel_prog_dens->setKernelArgument(arg_distf);
+		kernel_prog_dens->beginArgs(kernel_dens_index0);
+		kernel_prog_dens->bindArg(arg_img);
+		kernel_prog_dens->bindArg(arg_distf);
 		auto arg_densf =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, NULL);
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_dens->setKernelArgConst(sizeof(int), (void*)(&m_density_window_size));
-		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&distscl));
-		kernel_prog_dens->setKernelArgConst(sizeof(float), (void*)(&dist_strength));
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_dens->setConst(sizeof(int), (void*)(&m_density_window_size));
+		kernel_prog_dens->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog_dens->setConst(sizeof(float), (void*)(&distscl));
+		kernel_prog_dens->setConst(sizeof(float), (void*)(&dist_strength));
 		//kernel 1
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index1);
-		kernel_prog_dens->setKernelArgument(arg_densf);
+		kernel_prog_dens->beginArgs(kernel_dens_index1);
+		kernel_prog_dens->bindArg(arg_densf);
 		auto arg_gavg =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, NULL);
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
 		auto arg_gvar =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, NULL);
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
 		//kernel 2
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2, 2);
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&gsz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngx));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&ngz));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_dens->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_dens->beginArgs(kernel_dens_index2, 2);
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngx));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ngz));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
 
 		//init
 		kernel_prog_dens->executeKernel(kernel_dens_index0, 3, global_size2, local_size);
@@ -1315,19 +1315,19 @@ void ComponentGenerator::DistDensityField()
 		count++;
 		//compute avg
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
+		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_avg =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, NULL);
-		kernel_prog_dens->setKernelArgument(arg_gavg);
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+		kernel_prog_dens->bindArg(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
 		count++;
 		//compute var
-		kernel_prog_dens->setKernelArgBegin(kernel_dens_index2);
+		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_var =
-			kernel_prog_dens->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, NULL);
-		kernel_prog_dens->setKernelArgument(arg_gvar);
+			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+		kernel_prog_dens->bindArg(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
 			"Generating components.");
@@ -1350,29 +1350,29 @@ void ComponentGenerator::DistDensityField()
 
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog_grow->setKernelArgBegin(kernel_grow_index0);
-		kernel_prog_grow->setKernelArgument(arg_img);
+		kernel_prog_grow->beginArgs(kernel_grow_index0);
+		kernel_prog_grow->bindArg(arg_img);
 		auto arg_label =
-			kernel_prog_grow->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog_grow->setKernelArgument(arg_densf);
-		kernel_prog_grow->setKernelArgument(arg_avg);
-		kernel_prog_grow->setKernelArgument(arg_var);
-		kernel_prog_grow->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_rcnt", sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnxy));
-		kernel_prog_grow->setKernelArgConst(sizeof(unsigned int), (void*)(&dnx));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&tran));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scl_ff));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&grad_ff));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&density));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&varth));
-		kernel_prog_grow->setKernelArgConst(sizeof(float), (void*)(&scale));
-		kernel_prog_grow->setKernelArgConst(sizeof(int), (void*)(&fixed));
+			kernel_prog_grow->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog_grow->bindArg(arg_densf);
+		kernel_prog_grow->bindArg(arg_avg);
+		kernel_prog_grow->bindArg(arg_var);
+		kernel_prog_grow->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&dnxy));
+		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&dnx));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&tran));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&scl_ff));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&grad_ff));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&density));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&varth));
+		kernel_prog_grow->setConst(sizeof(float), (void*)(&scale));
+		kernel_prog_grow->setConst(sizeof(int), (void*)(&fixed));
 		if (m_use_sel)
-			kernel_prog_grow->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog_grow->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		for (int j = 0; j < m_iter; ++j)
@@ -1384,7 +1384,7 @@ void ComponentGenerator::DistDensityField()
 		}
 
 		//read back
-		kernel_prog_grow->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog_grow->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -1488,42 +1488,42 @@ void ComponentGenerator::CleanNoise()
 		//set
 		//kernel 0
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index0);
+		kernel_prog->beginArgs(kernel_index0);
 		auto arg_szbuf =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenz));
 		std::weak_ptr<flvr::Argument> arg_mask;
 		if (m_use_sel)
-			arg_mask = kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mask = kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		//kernel 1
-		kernel_prog->setKernelArgBegin(kernel_index1);
-		kernel_prog->setKernelArgument(arg_szbuf);
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&lenz));
+		kernel_prog->beginArgs(kernel_index1);
+		kernel_prog->bindArg(arg_szbuf);
+		kernel_prog->bindArg(arg_label);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&lenz));
 		if (m_use_sel)
-			kernel_prog->setKernelArgument(arg_mask);
+			kernel_prog->bindArg(arg_mask);
 		//kernel 2
 		unsigned int size_lm = m_clean_size_vl;
-		kernel_prog->setKernelArgBegin(kernel_index2);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
-		kernel_prog->setKernelArgument(arg_szbuf);
-		kernel_prog->setKernelArgument(arg_label);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&size_lm));
+		kernel_prog->beginArgs(kernel_index2);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
+		kernel_prog->bindArg(arg_szbuf);
+		kernel_prog->bindArg(arg_label);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&size_lm));
 		if (m_use_sel)
-			kernel_prog->setKernelArgument(arg_mask);
+			kernel_prog->bindArg(arg_mask);
 
 		//execute
 		for (int j = 0; j < m_clean_iter; ++j)
@@ -1538,7 +1538,7 @@ void ComponentGenerator::CleanNoise()
 		}
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -1599,14 +1599,14 @@ void ComponentGenerator::ClearBorders()
 		size_t local_size[3] = { 1, 1, 1 };
 
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index);
+		kernel_prog->beginArgs(kernel_index);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
 		if (m_use_sel)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
@@ -1615,7 +1615,7 @@ void ComponentGenerator::ClearBorders()
 		count++;
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -1676,16 +1676,16 @@ void ComponentGenerator::FillBorders()
 		float tol = static_cast<float>(m_fill_border);
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+		kernel_prog->beginArgs(kernel_index);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&tol));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->setConst(sizeof(float), (void*)(&tol));
 		if (m_use_sel)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
@@ -1695,7 +1695,7 @@ void ComponentGenerator::FillBorders()
 		count++;
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer
@@ -1824,9 +1824,9 @@ void ComponentGenerator::GenerateDB()
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//compute local histogram and generate lut
-		kernel_prog->setKernelArgBegin(kernel_index0);
+		kernel_prog->beginArgs(kernel_index0);
 		auto arg_img =
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, did);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		//rechist
 		size_t fsize = bin * rec;
 		float* rechist = new float[fsize]();
@@ -1837,26 +1837,26 @@ void ComponentGenerator::GenerateDB()
 //		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
 //#endif
 		auto arg_rechist =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_rechist", sizeof(float) * fsize, (void*)(rechist));
+			kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
 		cl_uchar* lut = new cl_uchar[fsize]();
 		auto arg_lut =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_lut", sizeof(cl_uchar) * fsize, (void*)(lut));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(cl_uchar) * fsize, (void*)(lut));
 		//local histogram
-		kernel_prog->setKernelArgLocal(sizeof(float)*bin);
+		kernel_prog->setLocal(sizeof(float)*bin);
 		cl_int3 cl_histxyz = { cl_int(whistxy), cl_int(whistxy), cl_int(whistz) };
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_histxyz));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_histxyz));
 		cl_int3 cl_nxyz = { cl_int(nx), cl_int(ny), cl_int(nz) };
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 		float minv = 0;
 		float maxv = 1;
 		if (bits > 8) maxv = float(1.0 / vd->GetScalarScale());
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&minv));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&maxv));
+		kernel_prog->setConst(sizeof(float), (void*)(&minv));
+		kernel_prog->setConst(sizeof(float), (void*)(&maxv));
 		cl_uchar cl_bin = (cl_uchar)(bin);
-		kernel_prog->setKernelArgConst(sizeof(cl_uchar), (void*)(&cl_bin));
+		kernel_prog->setConst(sizeof(cl_uchar), (void*)(&cl_bin));
 		cl_uchar cl_rec = (cl_uchar)(rec);
-		kernel_prog->setKernelArgConst(sizeof(cl_uchar), (void*)(&cl_rec));
+		kernel_prog->setConst(sizeof(cl_uchar), (void*)(&cl_rec));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 3, global_size, local_size);
@@ -1879,30 +1879,30 @@ void ComponentGenerator::GenerateDB()
 		unsigned char ini = 1;
 		//set
 		//kernel 1
-		kernel_prog->setKernelArgBegin(kernel_index1);
-		kernel_prog->setKernelArgument(arg_img);
-		kernel_prog->setKernelArgument(arg_lut);
+		kernel_prog->beginArgs(kernel_index1);
+		kernel_prog->bindArg(arg_img);
+		kernel_prog->bindArg(arg_lut);
 		//params
 		fsize = par * rec;
 		float* params = new float[fsize]();
 		table.getRecOutput(params);
 		auto arg_params =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			"arg_params", sizeof(float) * fsize, (void*)(params));
+			kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			"", sizeof(float) * fsize, (void*)(params));
 		auto arg_distf =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
-			"arg_distf", sizeof(unsigned char) * nxyz, NULL);
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+			"arg_distf", sizeof(unsigned char) * nxyz, nullptr);
+		kernel_prog->setConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setConst(sizeof(unsigned char), (void*)(&ini));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&par));
 		//kernel 2
-		kernel_prog->setKernelArgBegin(kernel_index2);
-		kernel_prog->setKernelArgument(arg_distf);
-		kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&ini));
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->beginArgs(kernel_index2);
+		kernel_prog->bindArg(arg_distf);
+		kernel_prog->setConst(sizeof(unsigned char), (void*)(&ini));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
 		//init
 		kernel_prog->executeKernel(kernel_index1, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
@@ -1914,9 +1914,9 @@ void ComponentGenerator::GenerateDB()
 		{
 			nn = j == 0 ? 0 : j + ini;
 			re = j + ini + 1;
-			kernel_prog->setKernelArgBegin(kernel_index2, 4);
-			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&nn));
-			kernel_prog->setKernelArgConst(sizeof(unsigned char), (void*)(&re));
+			kernel_prog->beginArgs(kernel_index2, 4);
+			kernel_prog->setConst(sizeof(unsigned char), (void*)(&nn));
+			kernel_prog->setConst(sizeof(unsigned char), (void*)(&re));
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);
 			SetProgress(static_cast<int>(100 * count / ticks),
 				"Generating components.");
@@ -1926,32 +1926,32 @@ void ComponentGenerator::GenerateDB()
 		//generate density field arg_densf
 		//set
 		//kernel 3
-		kernel_prog->setKernelArgBegin(kernel_index3);
-		kernel_prog->setKernelArgument(arg_img);
-		kernel_prog->setKernelArgument(arg_distf);
+		kernel_prog->beginArgs(kernel_index3);
+		kernel_prog->bindArg(arg_img);
+		kernel_prog->bindArg(arg_distf);
 		auto arg_densf =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
-				"arg_densf", sizeof(unsigned char) * nxyz, NULL);
-		kernel_prog->setKernelArgument(arg_lut);
-		kernel_prog->setKernelArgument(arg_params);
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+				"arg_densf", sizeof(unsigned char) * nxyz, nullptr);
+		kernel_prog->bindArg(arg_lut);
+		kernel_prog->bindArg(arg_params);
+		kernel_prog->setConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&par));
 		//kernel 4
-		kernel_prog->setKernelArgBegin(kernel_index4);
-		kernel_prog->setKernelArgument(arg_densf);
+		kernel_prog->beginArgs(kernel_index4);
+		kernel_prog->bindArg(arg_densf);
 		auto arg_avg =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
-				"arg_avg", sizeof(unsigned char) * nxyz, NULL);
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+				"arg_avg", sizeof(unsigned char) * nxyz, nullptr);
 		auto arg_var =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
-				"arg_var", sizeof(unsigned char) * nxyz, NULL);
-		kernel_prog->setKernelArgument(arg_lut);
-		kernel_prog->setKernelArgument(arg_params);
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+				"arg_var", sizeof(unsigned char) * nxyz, nullptr);
+		kernel_prog->bindArg(arg_lut);
+		kernel_prog->bindArg(arg_params);
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&par));
 
 		//mix fields
 		kernel_prog->executeKernel(kernel_index3, 3, global_size, local_size);
@@ -1980,23 +1980,23 @@ void ComponentGenerator::GenerateDB()
 		unsigned int seed = iter > 10 ? iter : 11;
 		//set
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
-		kernel_prog->setKernelArgBegin(kernel_index5);
+		kernel_prog->beginArgs(kernel_index5);
 		float iterf = 0;
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
-		kernel_prog->setKernelArgument(arg_img);
+		kernel_prog->setConst(sizeof(float), (void*)(&iterf));
+		kernel_prog->bindArg(arg_img);
 		auto arg_label =
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgument(arg_densf);
-		kernel_prog->setKernelArgument(arg_avg);
-		kernel_prog->setKernelArgument(arg_var);
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_rcnt", sizeof(unsigned int), (void*)(&rcnt));
-		kernel_prog->setKernelArgument(arg_lut);
-		kernel_prog->setKernelArgument(arg_params);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&seed));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&sscale));
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->bindArg(arg_densf);
+		kernel_prog->bindArg(arg_avg);
+		kernel_prog->bindArg(arg_var);
+		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->bindArg(arg_lut);
+		kernel_prog->bindArg(arg_params);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&seed));
+		kernel_prog->setConst(sizeof(float), (void*)(&sscale));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&par));
 
 		//execute
 		for (int j = 0; j < iter; ++j)
@@ -2004,8 +2004,8 @@ void ComponentGenerator::GenerateDB()
 			if (j)
 			{
 				iterf = static_cast<float>(j);
-				kernel_prog->setKernelArgBegin(kernel_index5);
-				kernel_prog->setKernelArgConst(sizeof(float), (void*)(&iterf));
+				kernel_prog->beginArgs(kernel_index5);
+				kernel_prog->setConst(sizeof(float), (void*)(&iterf));
 			}
 			kernel_prog->executeKernel(kernel_index5, 3, global_size, local_size);
 			SetProgress(static_cast<int>(100 * count / ticks),
@@ -2044,29 +2044,29 @@ void ComponentGenerator::GenerateDB()
 
 			//set
 			//kernel 6
-			kernel_prog->setKernelArgBegin(kernel_index6);
-			auto arg_szbuf = kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
-			kernel_prog->setKernelArgument(arg_label);
-			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
+			kernel_prog->beginArgs(kernel_index6);
+			auto arg_szbuf = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
+			kernel_prog->bindArg(arg_label);
+			kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+			kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
 			//kernel 7
-			kernel_prog->setKernelArgBegin(kernel_index7);
-			kernel_prog->setKernelArgument(arg_szbuf);
-			kernel_prog->setKernelArgument(arg_label);
-			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
+			kernel_prog->beginArgs(kernel_index7);
+			kernel_prog->bindArg(arg_szbuf);
+			kernel_prog->bindArg(arg_label);
+			kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+			kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_lenxyz));
 			//kernel 8
-			kernel_prog->setKernelArgBegin(kernel_index8);
-			kernel_prog->setKernelArgument(arg_img);
-			kernel_prog->setKernelArgument(arg_szbuf);
-			kernel_prog->setKernelArgument(arg_label);
-			kernel_prog->setKernelArgument(arg_lut);
-			kernel_prog->setKernelArgument(arg_params);
-			kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&cl_nxyz));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nxy));
-			kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&par));
+			kernel_prog->beginArgs(kernel_index8);
+			kernel_prog->bindArg(arg_img);
+			kernel_prog->bindArg(arg_szbuf);
+			kernel_prog->bindArg(arg_label);
+			kernel_prog->bindArg(arg_lut);
+			kernel_prog->bindArg(arg_params);
+			kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
+			kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));
+			kernel_prog->setConst(sizeof(unsigned int), (void*)(&par));
 
 			//execute
 			for (int j = 0; j < clean_iter; ++j)
@@ -2081,7 +2081,7 @@ void ComponentGenerator::GenerateDB()
 		}
 
 		//read back
-		kernel_prog->copyArgBufToTex3D(arg_label, lid,
+		kernel_prog->copyBufToTex3D(arg_label, lid,
 			sizeof(unsigned int)*nx*ny*nz, region);
 
 		//release buffer

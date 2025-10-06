@@ -125,17 +125,17 @@ void ColorMesh::Update()
 		cl_int3 voxel_cnt = { cl_int(nx), cl_int(ny), cl_int(nz) };
 		cl_int3 vol_org = { cl_int(ox), cl_int(oy), cl_int(oz) };
 
-		kernel_prog->setKernelArgBegin(kernel_index0);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
+		kernel_prog->beginArgs(kernel_index0);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
 		if (m_use_comp)
-			kernel_prog->copyTex3DToArgBuf(CL_MEM_READ_ONLY, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
-		kernel_prog->setKernelArgVertexBuf(CL_MEM_READ_ONLY, vbo, vbo_size);
-		kernel_prog->setKernelArgVertexBuf(CL_MEM_WRITE_ONLY, cbo, cbo_size);
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&voxel_cnt));
-		kernel_prog->setKernelArgConst(sizeof(cl_int3), (void*)(&vol_org));
+			kernel_prog->copyTex3DToBuf(CL_MEM_READ_ONLY, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
+		kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo, vbo_size);
+		kernel_prog->bindVeretxBuf(CL_MEM_WRITE_ONLY, cbo, cbo_size);
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&voxel_cnt));
+		kernel_prog->setConst(sizeof(cl_int3), (void*)(&vol_org));
 		if (m_use_comp)
-			kernel_prog->setKernelArgConst(sizeof(cl_uint), (void*)(&si));
-		kernel_prog->setKernelArgConst(sizeof(int), (void*)(&vertex_count));
+			kernel_prog->setConst(sizeof(cl_uint), (void*)(&si));
+		kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index0, 1, global_size, local_size);

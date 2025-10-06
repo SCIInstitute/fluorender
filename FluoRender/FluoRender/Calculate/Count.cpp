@@ -171,21 +171,21 @@ void CountVoxels::Count()
 		//set
 		unsigned int* sum = new unsigned int[gsize.gsxyz];
 		float *wsum = new float[gsize.gsxyz];
-		kernel_prog->setKernelArgBegin(kernel_index);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.ngz));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&gsize.gsx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nx));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&ny));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&nz));
+		kernel_prog->beginArgs(kernel_index);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngy));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngz));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
 		auto arg_sum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sum", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 		auto arg_wsum =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_wsum", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0/*local_size*/);

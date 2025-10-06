@@ -38,10 +38,7 @@
 #include <SegShader.h>
 #include <ShaderProgram.h>
 #include <TextureBrick.h>
-#include <KernelFactory.h>
-#include <TestKernelCode.h>
 #include <VolCalShader.h>
-#include <KernelProgram.h>
 #include <MovieMaker.h>
 #include <VolCache4D.h>
 #include <compatibility.h>
@@ -1283,60 +1280,6 @@ namespace flvr
 			}
 		}
 	}
-
-	//double VolumeRenderer::calc_hist_3d(GLuint data_id, GLuint mask_id,
-	//	size_t brick_x, size_t brick_y, size_t brick_z)
-	//{
-	//	auto tex = tex_.lock();
-	//	if (!tex)
-	//		return 0;
-
-	//	double result = 0.0;
-	//	int kernel_index = -1;
-	//	KernelProgram* kernel_prog =
-	//		glbin_kernel_factory.program(
-	//			KERNEL_HIST_3D_CODE, bits, max_int);
-	//	if (kernel_prog)
-	//	{
-	//		kernel_index = kernel_prog->createKernel("hist_3d");
-	//		kernel_prog->setKernelArgBegin(kernel_index);
-	//		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, data_id);
-	//		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mask_id);
-	//		unsigned int hist_size = 64;
-	//		if (tex->get_nrrd(0))
-	//		{
-	//			if (tex->get_nrrd(0)->type == nrrdTypeUChar)
-	//				hist_size = 64;
-	//			else if (tex->get_nrrd(0)->type == nrrdTypeUShort)
-	//				hist_size = 1024;
-	//		}
-	//		float* hist = new float[hist_size]();
-	//		auto arg_hist =
-	//			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, "arg_hist", hist_size * sizeof(float), hist);
-	//		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&hist_size));
-	//		size_t global_size[3] = {brick_x, brick_y, brick_z};
-	//		size_t local_size[3] = {1, 1, 1};
-	//		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
-	//		kernel_prog->readBuffer(arg_hist, hist);
-	//		//release buffer
-	//		kernel_prog->releaseAllArgs();
-	//		//analyze hist
-	//		unsigned int i;
-	//		float sum = 0;
-	//		for (i=0; i<hist_size; ++i)
-	//			sum += hist[i];
-	//		for (i=hist_size-1; i>0; --i)
-	//		{
-	//			if (hist[i] > sum/hist_size && hist[i] > hist[i-1])
-	//			{
-	//				result = double(i)/double(hist_size);
-	//				break;
-	//			}
-	//		}
-	//		delete[] hist;
-	//	}
-	//	return result;
-	//}
 
 	//calculation
 	void VolumeRenderer::calculate(int type, VolumeRenderer *vr_a, VolumeRenderer *vr_b)

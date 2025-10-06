@@ -167,19 +167,19 @@ void Histogram::Compute()
 
 		unsigned int bin = m_bins;
 
-		kernel_prog->setKernelArgBegin(kernel_index);
-		kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, tid);
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&minv));
-		kernel_prog->setKernelArgConst(sizeof(float), (void*)(&maxv));
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&bin));
+		kernel_prog->beginArgs(kernel_index);
+		kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
+		kernel_prog->setConst(sizeof(float), (void*)(&minv));
+		kernel_prog->setConst(sizeof(float), (void*)(&maxv));
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&bin));
 		if (i == 0)
-			arg_sh = kernel_prog->setKernelArgBuf(
-				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_sh",
+			arg_sh = kernel_prog->setBufIfNew(
+				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "",
 				sizeof(unsigned int)*(bin + 1), (void*)(m_histogram.data()));
 		else
-			kernel_prog->setKernelArgument(arg_sh);
+			kernel_prog->bindArg(arg_sh);
 		if (m_use_mask)
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);

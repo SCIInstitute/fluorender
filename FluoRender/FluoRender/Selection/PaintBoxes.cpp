@@ -144,19 +144,19 @@ void PaintBoxes::Compute()
 		float(m_imat.get_mat_val(1, 3)),
 		float(m_imat.get_mat_val(2, 3)),
 		float(m_imat.get_mat_val(3, 3)) };
-	kernel_prog->setKernelArgBegin(kernel_index);
-	kernel_prog->setKernelArgTex2D(CL_MEM_READ_ONLY, m_paint_tex);
+	kernel_prog->beginArgs(kernel_index);
+	kernel_prog->setTex2D(CL_MEM_READ_ONLY, m_paint_tex);
 	auto arg_boxes =
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_boxes", sizeof(float) * num * 6, boxes);
+		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * num * 6, boxes);
 	auto arg_hits =
-		kernel_prog->setKernelArgBuf(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_hits", sizeof(unsigned int) * num, hits);
-	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_ptx));
-	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&m_pty));
-	kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&num));
-	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat0));
-	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat1));
-	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat2));
-	kernel_prog->setKernelArgConst(sizeof(cl_float4), (void*)(&imat3));
+		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * num, hits);
+	kernel_prog->setConst(sizeof(unsigned int), (void*)(&m_ptx));
+	kernel_prog->setConst(sizeof(unsigned int), (void*)(&m_pty));
+	kernel_prog->setConst(sizeof(unsigned int), (void*)(&num));
+	kernel_prog->setConst(sizeof(cl_float4), (void*)(&imat0));
+	kernel_prog->setConst(sizeof(cl_float4), (void*)(&imat1));
+	kernel_prog->setConst(sizeof(cl_float4), (void*)(&imat2));
+	kernel_prog->setConst(sizeof(cl_float4), (void*)(&imat3));
 
 	//execute
 	kernel_prog->executeKernel(kernel_index, 2, global_size, local_size);

@@ -502,7 +502,7 @@ namespace flvr
 		return true;
 	}
 
-	bool KernelProgram::setKernelArgConst(size_t size, void* data)
+	bool KernelProgram::setConst(size_t size, void* data)
 	{
 		cl_int err;
 
@@ -517,7 +517,7 @@ namespace flvr
 		return true;
 	}
 
-	bool KernelProgram::setKernelArgLocal(size_t size)
+	bool KernelProgram::setLocal(size_t size)
 	{
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
@@ -527,7 +527,7 @@ namespace flvr
 		return true;
 	}
 
-	bool KernelProgram::setKernelArgument(std::weak_ptr<Argument> arg)
+	bool KernelProgram::bindArg(std::weak_ptr<Argument> arg)
 	{
 		// Attempt to lock the weak_ptr
 		auto shared_arg = arg.lock();
@@ -544,7 +544,7 @@ namespace flvr
 		}
 
 		// Update the kernel-to-argument map
-		arg_map_[kernel_idx_].push_back(shared_arg);
+		arg_map_[kernel_idx_].insert(shared_arg);
 
 		// Call clSetKernelArg
 		cl_int err = clSetKernelArg(
@@ -566,7 +566,7 @@ namespace flvr
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setKernelArgBuf(cl_mem_flags flags, const std::string& name, size_t size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setBufIfNew(cl_mem_flags flags, const std::string& name, size_t size, void* data)
 	{
 		// Step 1: Check if an Argument already exists for this raw pointer
 		std::shared_ptr<Argument> existing_arg;
@@ -603,7 +603,7 @@ namespace flvr
 		}
 
 		// Step 4: Track usage for this kernel
-		arg_map_[kernel_idx_].push_back(existing_arg);
+		arg_map_[kernel_idx_].insert(existing_arg);
 
 		// Step 5: Increment internal argument index
 		++arg_idx_;
@@ -612,7 +612,36 @@ namespace flvr
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	bool KernelProgram::updateKernelArgBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setBufUpdate(cl_mem_flags flags, const std::string& name, size_t size, void* data)
+	{
+		std::shared_ptr<Argument> arg;
+		for (const auto& existing : arg_list_) {
+			if (existing->matchesPointer(name, size, data)) {
+				arg = existing;
+				break;
+			}
+		}
+
+		if (!arg) {
+			arg = Argument::createFromPointer(context_, flags, name, size, data);
+			if (!arg || !arg->valid_) return std::weak_ptr<Argument>();
+			arg_list_.insert(arg);
+		}
+		else {
+			if (!updateBuf(arg, flags, size, data)) {
+				return std::weak_ptr<Argument>();
+			}
+		}
+
+		cl_int err = clSetKernelArg(kernels_[kernel_idx_].kernel, arg_idx_, sizeof(cl_mem), &arg->buffer_);
+		if (err != CL_SUCCESS) return std::weak_ptr<Argument>();
+
+		arg_map_[kernel_idx_].insert(arg);
+		++arg_idx_;
+		return std::weak_ptr<Argument>(arg);
+	}
+
+	bool KernelProgram::updateBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data)
 	{
 		auto shared_arg = arg.lock();
 		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer_) {
@@ -651,7 +680,7 @@ namespace flvr
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setKernelArgTex2D(cl_mem_flags flags, GLuint tex_id)
+	std::weak_ptr<Argument> KernelProgram::setTex2D(cl_mem_flags flags, GLuint tex_id)
 	{
 		// Step 1: Check if texture already wrapped
 		std::shared_ptr<Argument> existing_arg;
@@ -684,13 +713,13 @@ namespace flvr
 		}
 
 		// Step 4: Track usage
-		arg_map_[kernel_idx_].push_back(existing_arg);
+		arg_map_[kernel_idx_].insert(existing_arg);
 		++arg_idx_;
 
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setKernelArgTex3D(cl_mem_flags flags, GLuint tex_id)
+	std::weak_ptr<Argument> KernelProgram::setTex3D(cl_mem_flags flags, GLuint tex_id)
 	{
 		// Step 1: Check if texture already wrapped
 		std::shared_ptr<Argument> existing_arg;
@@ -723,13 +752,13 @@ namespace flvr
 		}
 
 		// Step 4: Track usage
-		arg_map_[kernel_idx_].push_back(existing_arg);
+		arg_map_[kernel_idx_].insert(existing_arg);
 		++arg_idx_;
 
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	std::weak_ptr<Argument> KernelProgram::copyTex3DToArgBuf(
+	std::weak_ptr<Argument> KernelProgram::copyTex3DToBuf(
 		cl_mem_flags flags, GLuint texture_id,
 		const std::string& name,
 		size_t buffer_size, size_t* region)
@@ -812,7 +841,7 @@ namespace flvr
 		}
 
 		// Step 7: Track usage
-		arg_map_[kernel_idx_].push_back(buf_arg);
+		arg_map_[kernel_idx_].insert(buf_arg);
 		++arg_idx_;
 
 		// Step 8: Flush and finish
@@ -822,7 +851,7 @@ namespace flvr
 		return std::weak_ptr<Argument>(buf_arg);
 	}
 
-	bool KernelProgram::copyArgBufToTex3D(std::weak_ptr<Argument> buf_arg, GLuint texture_id, size_t size, size_t* region)
+	bool KernelProgram::copyBufToTex3D(std::weak_ptr<Argument> buf_arg, GLuint texture_id, size_t size, size_t* region)
 	{
 		auto buffer = buf_arg.lock();
 		if (!buffer || !buffer->valid_ || !buffer->buffer_) {
@@ -877,7 +906,7 @@ namespace flvr
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setKernelArgVertexBuf(cl_mem_flags flags, GLuint vbo_id, size_t size)
+	std::weak_ptr<Argument> KernelProgram::bindVeretxBuf(cl_mem_flags flags, GLuint vbo_id, size_t size)
 	{
 		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size()) {
 			return std::weak_ptr<Argument>();
@@ -914,7 +943,7 @@ namespace flvr
 		}
 
 		// Step 4: Track usage
-		arg_map_[kernel_idx_].push_back(existing_arg);
+		arg_map_[kernel_idx_].insert(existing_arg);
 		++arg_idx_;
 
 		return std::weak_ptr<Argument>(existing_arg);
@@ -1011,16 +1040,19 @@ namespace flvr
 		auto shared_arg = arg.lock();
 		if (!shared_arg) return;
 
-		arg_list_.erase(shared_arg); // shared_ptr dropped
+		// Remove from global argument list
+		arg_list_.erase(shared_arg);
 
+		// Remove from each kernel's argument set
 		for (auto& [kidx, args] : arg_map_) {
-			args.erase(
-				std::remove_if(args.begin(), args.end(),
-					[&](const std::weak_ptr<Argument>& w) {
-						return w.lock() == shared_arg;
-					}),
-				args.end()
-			);
+			for (auto it = args.begin(); it != args.end(); ) {
+				if (it->lock() == shared_arg) {
+					it = args.erase(it); // erase returns next valid iterator
+				}
+				else {
+					++it;
+				}
+			}
 		}
 	}
 

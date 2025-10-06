@@ -151,12 +151,12 @@ void MaskBorder::Compute(int order)
 		//yz plane
 		unsigned int hits_x = 0;
 		idx = order == 1 ? nx - 1 : 0;
-		kernel_prog->setKernelArgBegin(kernel_index0);
+		kernel_prog->beginArgs(kernel_index0);
 		auto arg_tex =
-			kernel_prog->setKernelArgTex3D(CL_MEM_READ_ONLY, mid);
+			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		auto arg_hits_x =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_hits_x", sizeof(unsigned int), &hits_x);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), &hits_x);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = ny; global_size[1] = nz;
 		kernel_prog->executeKernel(kernel_index0, 2, global_size, local_size);
@@ -176,11 +176,11 @@ void MaskBorder::Compute(int order)
 		//xz plane
 		unsigned int hits_y = 0;
 		idx = order == 1 ? ny - 1 : 0;
-		kernel_prog->setKernelArgBegin(kernel_index1);
-		kernel_prog->setKernelArgument(arg_tex);
+		kernel_prog->beginArgs(kernel_index1);
+		kernel_prog->bindArg(arg_tex);
 		auto arg_hits_y =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_hits_y", sizeof(unsigned int), &hits_y);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), &hits_y);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = nx; global_size[1] = nz;
 		kernel_prog->executeKernel(kernel_index1, 2, global_size, local_size);
@@ -200,11 +200,11 @@ void MaskBorder::Compute(int order)
 		//xy plane
 		unsigned int hits_z = 0;
 		idx = order == 1 ? nz - 1 : 0;
-		kernel_prog->setKernelArgBegin(kernel_index2);
-		kernel_prog->setKernelArgument(arg_tex);
+		kernel_prog->beginArgs(kernel_index2);
+		kernel_prog->bindArg(arg_tex);
 		auto arg_hits_z =
-			kernel_prog->setKernelArgBuf(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_hits_z", sizeof(unsigned int), &hits_z);
-		kernel_prog->setKernelArgConst(sizeof(unsigned int), (void*)(&idx));
+			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), &hits_z);
+		kernel_prog->setConst(sizeof(unsigned int), (void*)(&idx));
 		//execute
 		global_size[0] = nx; global_size[1] = ny;
 		kernel_prog->executeKernel(kernel_index2, 2, global_size, local_size);
