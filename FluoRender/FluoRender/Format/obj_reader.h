@@ -37,6 +37,10 @@ public:
 	virtual ~ObjReader() {};
 
 	virtual int GetType() { return READER_OBJ_TYPE; }	//get reader type
+
+	virtual GLMmodel* Convert(int t);
+
+	virtual void SetBatch(bool batch);
 };
 
 #endif//_OBJ_READER_H_

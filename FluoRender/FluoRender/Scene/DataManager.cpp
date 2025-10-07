@@ -60,6 +60,8 @@ DEALINGS IN THE SOFTWARE.
 #include <dcm_reader.h>
 #include <msk_reader.h>
 #include <lbl_reader.h>
+#include <base_mesh_reader.h>
+#include <obj_reader.h>
 #include <CurrentObjects.h>
 #include <MovieMaker.h>
 #include <Project.h>
@@ -89,8 +91,9 @@ void DataManager::ClearAll()
 {
 	m_vd_list.clear();
 	m_md_list.clear();
-	m_reader_list.clear();
 	m_ad_list.clear();
+	m_vol_reader_list.clear();
+	m_mesh_reader_list.clear();
 	m_vd_cache_queue.clear();
 }
 
@@ -456,12 +459,12 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	size_t result = 0;
 	std::shared_ptr<BaseVolReader> reader;
 
-	for (size_t i=0; i<m_reader_list.size(); i++)
+	for (size_t i=0; i<m_vol_reader_list.size(); i++)
 	{
 		std::wstring wstr = pathname;
-		if (m_reader_list[i]->Match(wstr))
+		if (m_vol_reader_list[i]->Match(wstr))
 		{
-			reader = m_reader_list[i];
+			reader = m_vol_reader_list[i];
 			break;
 		}
 	}
@@ -546,7 +549,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		
 		reader->SetProgressFunc(GetProgressFunc());
 
-		m_reader_list.push_back(reader);
+		m_vol_reader_list.push_back(reader);
 		reader->SetFile(pathname);
 		reader->SetSliceSeq(glbin_settings.m_slice_sequence);
 		reader->SetChannSeq(glbin_settings.m_chann_sequence);
@@ -575,9 +578,9 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	{
 		std::string err_str = BaseVolReader::GetError(reader_return);
 		SetProgress(0, err_str);
-		int i = (int)m_reader_list.size() - 1;
-		if (m_reader_list[i]) {
-			m_reader_list.erase(m_reader_list.begin() + (int)m_reader_list.size() - 1);
+		int i = (int)m_vol_reader_list.size() - 1;
+		if (m_vol_reader_list[i]) {
+			m_vol_reader_list.erase(m_vol_reader_list.begin() + (int)m_vol_reader_list.size() - 1);
 		}
 		return result;
 	}
@@ -807,8 +810,68 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 			return false;
 	}
 
+	std::shared_ptr<BaseMeshReader> reader;
+
+	for (size_t i=0; i<m_mesh_reader_list.size(); i++)
+	{
+		std::wstring wstr = pathname;
+		if (m_mesh_reader_list[i]->Match(wstr))
+		{
+			reader = m_mesh_reader_list[i];
+			break;
+		}
+	}
+
+	int reader_return = -1;
+	if (reader)
+	{
+		reader->SetProgressFunc(GetProgressFunc());
+		bool preprocess = false;
+		std::wstring str_w = glbin_settings.m_time_id;
+		if (reader->GetTimeId() != str_w)
+		{
+			reader->SetTimeId(str_w);
+			preprocess = true;
+		}
+		if (preprocess)
+			reader_return = reader->Preprocess();
+	}
+	else
+	{
+		if (GET_SUFFIX(pathname) == L".obj")
+			reader = std::make_shared<ObjReader>();
+		else
+			return false;
+	}
+	reader->SetProgressFunc(GetProgressFunc());
+	m_mesh_reader_list.push_back(reader);
+	reader->SetFile(pathname);
+	reader->SetTimeId(glbin_settings.m_time_id);
+	reader_return = reader->Preprocess();
+
+	if (reader_return > 0)
+	{
+		std::string err_str = BaseMeshReader::GetError(reader_return);
+		SetProgress(0, err_str);
+		int i = (int)m_mesh_reader_list.size() - 1;
+		if (m_mesh_reader_list[i]) {
+			m_mesh_reader_list.erase(m_mesh_reader_list.begin() + (int)m_mesh_reader_list.size() - 1);
+		}
+		return false;
+	}
+
+	if (glbin_settings.m_ser_num > 0)
+		reader->LoadBatch(glbin_settings.m_ser_num);
+
+	reader->SetRange(0, 100);
+
 	auto md = std::make_shared<MeshData>();
-	md->Load(pathname);
+	if (!md)
+		return false;
+	auto model = reader->Convert();
+	md->Load(model);
+	//md->Load(pathname);
+	md->SetReader(reader);
 
 	std::wstring name = md->GetName();
 	std::wstring new_name = name;
@@ -817,8 +880,12 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		md->SetName(new_name);
-	m_md_list.push_back(md);
+	//m_md_list.push_back(md);
 
+	AddMeshData(md);
+
+	SetProgress(100, "NOT_SET");
+	SetRange(0, 100);
 	return true;
 }
 

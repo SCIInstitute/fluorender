@@ -140,9 +140,9 @@ protected:
 	std::wstring m_id_string;	//the path and file name used to read files
 
 	//3d batch
-	bool m_batch;
+	bool m_batch = false;
 	std::vector<std::wstring> m_batch_list;
-	int m_cur_batch;
+	int m_cur_batch = -1;
 	
 	std::wstring m_path_name;
 

@@ -26,3 +26,37 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <obj_reader.h>
+#include <glm.h>
+#include <compatibility.h>
+
+ObjReader::ObjReader():
+	BaseMeshReader()
+{
+}
+
+GLMmodel* ObjReader::Convert(int t)
+{
+	if (t < 0 || t >= m_time_num)
+		return nullptr;
+
+	std::wstring str_name = m_4d_seq[t].filename;
+	m_data_name = GET_STEM(str_name);
+	m_cur_time = t;
+	std::string str_fn = ws2s(str_name);
+	bool no_fail = true;
+	return glmReadOBJ(str_fn.c_str(), &no_fail);
+}
+
+void ObjReader::SetBatch(bool batch)
+{
+	if (batch)
+	{
+		//read the directory info
+		std::wstring search_path = GET_PATH(m_path_name);
+		FIND_FILES_BATCH(search_path,ESCAPE_REGEX(L".obj"),m_batch_list,m_cur_batch);
+		m_batch = true;
+	}
+	else
+		m_batch = false;
+}
+

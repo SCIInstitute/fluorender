@@ -51,6 +51,7 @@ namespace flvr
 	class MeshRenderer;
 }
 using GLMmodelPtr = std::unique_ptr<GLMmodel, void(*)(GLMmodel*)>;
+class BaseMeshReader;
 class MeshData : public TreeLayer
 {
 public:
@@ -60,7 +61,9 @@ public:
 	//set viewport
 	void SetViewport(GLint vp[4]);
 
-	std::wstring GetPath();
+	//path
+	void SetPath(const std::wstring& path) { m_data_path = path; }
+	std::wstring GetPath() { return m_data_path; }
 	fluo::BBox GetBounds();
 	GLMmodel* GetMesh();
 	void SetDisp(bool disp);
@@ -71,9 +74,10 @@ public:
 	bool GetDrawBounds();
 
 	//data management
-	int Load(const std::wstring &filename);
 	int Load(GLMmodel* mesh);
 	void Save(const std::wstring &filename);
+	void SetReader(const std::shared_ptr<BaseMeshReader>& reader);
+	std::shared_ptr<BaseMeshReader> GetReader() { return m_reader.lock(); }
 
 	//data synchronization
 	void SubmitData();//upload data to GPU
@@ -160,12 +164,19 @@ public:
 	void SetLimitNumer(int val);
 	int GetLimitNumber();
 
+	//time sequence
+	void SetCurTime(int time) { m_time = time; }
+	int GetCurTime() { return m_time; }
+
 private:
 	std::wstring m_data_path;
 	GLMmodelPtr m_data;
 	std::unique_ptr<flvr::MeshRenderer> m_mr;
 	fluo::BBox m_bounds;
 	fluo::Point m_center;
+	//reader
+	std::weak_ptr<BaseMeshReader> m_reader;
+	int m_time;	//time index of the original file
 
 	//sync flags
 	bool m_cpu_dirty;//call SubmitData to update gpu data

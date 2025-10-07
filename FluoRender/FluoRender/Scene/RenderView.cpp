@@ -80,6 +80,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <TrackMap.h>
 #include <base_vol_reader.h>
+#include <base_mesh_reader.h>
 #include <brkxml_reader.h>
 #include <GlobalStates.h>
 #include <State.h>
@@ -3352,33 +3353,64 @@ void RenderView::StopMovie()
 	m_capture_param = false;
 }
 
-void RenderView::Get4DSeqRange(int &start_frame, int &end_frame)
+void RenderView::Get4DSeqRange(int& start_frame, int& end_frame)
 {
+	bool first_valid = true;
+	start_frame = 0;
+	end_frame = 0;
+
+	// Process volume datasets
 	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 	{
 		auto vd = it->lock();
 		if (vd && vd->GetReader())
 		{
 			auto reader = vd->GetReader();
-
 			int vd_start_frame = 0;
 			int vd_end_frame = reader->GetTimeNum() - 1;
-			int vd_cur_frame = reader->GetCurTime();
 
-			if (it == m_vd_pop_list.begin())
+			if (first_valid)
 			{
-				//first dataset
 				start_frame = vd_start_frame;
 				end_frame = vd_end_frame;
+				first_valid = false;
 			}
 			else
 			{
-				//datasets after the first one
+				if (vd_start_frame < start_frame)
+					start_frame = vd_start_frame;
 				if (vd_end_frame > end_frame)
 					end_frame = vd_end_frame;
 			}
 		}
 	}
+
+	// Process mesh datasets
+	for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it)
+	{
+		auto md = it->lock();
+		if (md && md->GetReader())
+		{
+			auto reader = md->GetReader();
+			int md_start_frame = 0;
+			int md_end_frame = reader->GetTimeNum() - 1;
+
+			if (first_valid)
+			{
+				start_frame = md_start_frame;
+				end_frame = md_end_frame;
+				first_valid = false;
+			}
+			else
+			{
+				if (md_start_frame < start_frame)
+					start_frame = md_start_frame;
+				if (md_end_frame > end_frame)
+					end_frame = md_end_frame;
+			}
+		}
+	}
+
 	m_end_all_frame = end_frame;
 }
 
@@ -3412,8 +3444,12 @@ void RenderView::Set4DSeqFrame(int frame, int start_frame, int end_frame, bool r
 	m_tseq_cur_num = frame;
 
 	if (update)
-	for (auto& i : m_vd_pop_list)
-		UpdateVolumeData(frame, i.lock());
+	{
+		for (auto& i : m_vd_pop_list)
+			UpdateVolumeData(frame, i.lock());
+		for (auto& i : m_md_pop_list)
+			UpdateMeshData(frame, i.lock());
+	}
 
 	//run post-change script
 	if (update && glbin_settings.m_run_script)
@@ -3485,6 +3521,25 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 
 	if (clear_pool && vd->GetVR())
 		vd->GetVR()->clear_tex_pool();
+}
+
+void RenderView::UpdateMeshData(int frame, const std::shared_ptr<MeshData>& md)
+{
+	if (!md)
+		return;
+
+	if (md->GetCurTime() == frame)
+		return;
+
+	auto reader = md->GetReader();
+	if (!reader)
+		return;
+
+	auto data = reader->Convert(frame);
+	if (!md->Load(data))
+		return;
+
+	md->SetCurTime(reader->GetCurTime());
 }
 
 void RenderView::ReloadVolumeData(int frame)
@@ -3596,13 +3651,59 @@ void RenderView::ReloadVolumeData(int frame)
 
 	InitView(INIT_BOUNDS | INIT_CENTER);
 
-	//if (m_frame)
-	//{
-	//	VolumeData* vd = m_frame->GetCurSelVol();
-	//	if (vd)
-	//		glbin.set_tree_selection(vd->GetName().ToStdString());
-	//	else
-	//glbin.set_tree_selection("");
+	glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl });
+}
+
+void RenderView::ReloadMeshData(int frame)
+{
+	std::vector<std::shared_ptr<BaseMeshReader>> reader_list;
+	m_bat_folder = L"";
+
+	for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it)
+	{
+		auto md = it->lock();
+		if (md)
+			glbin_current.mainframe->DeleteProps(3, md->GetName());
+		if (md && md->GetReader())
+		{
+			auto reader = md->GetReader();
+
+			bool found = false;
+			for (size_t j = 0; j < reader_list.size(); j++)
+			{
+				if (reader == reader_list[j])
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				reader->LoadOffset(frame);
+				reader_list.push_back(reader);
+			}
+
+			auto data = reader->Convert(0);
+			if (!data)
+			{
+				md->SetDisp(false);
+				continue;
+			}
+			md->Load(data);
+
+			std::wstring data_name = reader->GetDataName();
+			if (it != m_md_pop_list.begin())
+				m_bat_folder += L"_";
+			m_bat_folder += data_name;
+
+			md->SetName(data_name);
+			md->SetPath(reader->GetPathName());
+			md->SetCurTime(reader->GetCurTime());
+		}
+	}
+
+	InitView(INIT_BOUNDS | INIT_CENTER);
+
 	glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl });
 }
 
@@ -3685,7 +3786,10 @@ void RenderView::Set3DBatFrame(int frame, int start_frame, int end_frame, bool r
 	m_tseq_cur_num = frame;
 
 	if (update)
+	{
 		ReloadVolumeData(frame);
+		ReloadMeshData(frame);
+	}
 
 	//run post-change script
 	if (update && glbin_settings.m_run_script)

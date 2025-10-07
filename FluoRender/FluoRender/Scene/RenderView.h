@@ -328,7 +328,9 @@ public:
 	void Get4DSeqRange(int &start_frame, int &end_frame);
 	void Set4DSeqFrame(int frame, int start_frame, int end_frame, bool rewind);
 	void UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& vd);
+	void UpdateMeshData(int frame, const std::shared_ptr<MeshData>& md);
 	void ReloadVolumeData(int frame);
+	void ReloadMeshData(int frame);
 	//3d batch file calculation
 	void Get3DBatRange(int &start_frame, int &end_frame);
 	void Set3DBatFrame(int frame, int start_frame, int end_frame, bool rewind);

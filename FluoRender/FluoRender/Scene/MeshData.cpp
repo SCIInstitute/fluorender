@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData.h>
 #include <MeshRenderer.h>
 #include <VertexArray.h>
+#include <base_mesh_reader.h>
 #include <compatibility.h>
 #include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -104,24 +105,6 @@ int MeshData::Load(GLMmodel* mesh)
 	return 1;
 }
 
-int MeshData::Load(const std::wstring &filename)
-{
-	m_data_path = filename;
-	std::filesystem::path p(filename);
-	m_name = p.filename().wstring();
-
-	std::string str_fn = ws2s(filename);
-	bool no_fail = true;
-	GLMmodel* new_model = glmReadOBJ(str_fn.c_str(), &no_fail);
-	if (!new_model)
-		return 0;
-	m_data.reset(new_model);
-
-	BuildMesh();
-
-	return 1;
-}
-
 void MeshData::Save(const std::wstring& filename)
 {
 	if (m_gpu_dirty)
@@ -133,6 +116,11 @@ void MeshData::Save(const std::wstring& filename)
 		glmWriteOBJ(m_data.get(), str.c_str(), GLM_SMOOTH | GLM_VERTC);
 		m_data_path = filename;
 	}
+}
+
+void MeshData::SetReader(const std::shared_ptr<BaseMeshReader>& reader)
+{
+	m_reader = reader;
 }
 
 void MeshData::SubmitData()
@@ -973,11 +961,6 @@ void MeshData::SetShadowIntensity(double val)
 double MeshData::GetShadowIntensity()
 {
 	return m_shadow_intensity;
-}
-
-std::wstring MeshData::GetPath()
-{
-	return m_data_path;
 }
 
 fluo::BBox MeshData::GetBounds()

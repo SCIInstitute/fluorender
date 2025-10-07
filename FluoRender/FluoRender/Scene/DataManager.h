@@ -59,6 +59,7 @@ class VolumeData;
 class MeshData;
 class AnnotData;
 class BaseVolReader;
+class BaseMeshReader;
 namespace flvr
 {
 	class CacheQueue;
@@ -143,8 +144,9 @@ private:
 	std::unique_ptr<Root> m_root;// root of the scene graph
 	std::vector<std::shared_ptr<VolumeData>> m_vd_list;
 	std::vector<std::shared_ptr<MeshData>> m_md_list;
-	std::vector<std::shared_ptr<BaseVolReader>> m_reader_list;
 	std::vector<std::shared_ptr<AnnotData>> m_ad_list;
+	std::vector<std::shared_ptr<BaseVolReader>> m_vol_reader_list;
+	std::vector<std::shared_ptr<BaseMeshReader>> m_mesh_reader_list;
 
 	//4d cache for volume data
 	std::unordered_map<VolumeData*, std::shared_ptr<flvr::CacheQueue>> m_vd_cache_queue;

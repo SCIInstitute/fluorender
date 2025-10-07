@@ -38,11 +38,38 @@ public:
 	BaseMeshReader();
 	virtual ~BaseMeshReader() {};
 
+	virtual void SetFile(const std::wstring& file);
+	virtual int Preprocess();
+
 	virtual GLMmodel* Convert();
 	virtual GLMmodel* Convert(int t) = 0;
 
-	virtual std::wstring GetCurDataName(int t) = 0;
+	virtual void SetBatch(bool batch) = 0;
+	virtual bool GetBatch() { return m_batch; }
+	virtual int LoadBatch(int index);
+
+	virtual std::wstring GetPathName() {return m_path_name;}
+	virtual std::wstring GetDataName() {return m_data_name;}
+	virtual int GetTimeNum() {return m_time_num;}
+	virtual int GetCurTime() {return m_cur_time;}
+
+	virtual int GetBatchNum() {return (int)m_batch_list.size();}
+	virtual int GetCurBatch() {return m_cur_batch;}
+
+	virtual std::wstring GetCurDataName(int t);
 
 protected:
+	std::wstring m_data_name;
+
+	//4d sequence
+	struct TimeDataInfo
+	{
+		int filenumber;
+		std::wstring filename;
+	};
+	std::vector<TimeDataInfo> m_4d_seq;
+	int m_cur_time = -1;
+
+	int m_time_num = 0;
 };
 #endif//_BASE_MESH_READER_H_
