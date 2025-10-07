@@ -28,12 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _IMAGEJ_READER_H_
 #define _IMAGEJ_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <jni.h>
 #include <vector>
 #include <string>
 
-class ImageJReader : public BaseReader
+class ImageJReader : public BaseVolReader
 {
 public:
 	ImageJReader();

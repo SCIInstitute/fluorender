@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _NRRD_READER_H_
 #define _NRRD_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <string>
 #include <vector>
 
-class NRRDReader : public BaseReader
+class NRRDReader : public BaseVolReader
 {
 public:
 	NRRDReader();

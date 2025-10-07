@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <RenderView.h>
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <msk_reader.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>

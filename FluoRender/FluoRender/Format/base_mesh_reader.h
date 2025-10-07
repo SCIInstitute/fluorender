@@ -25,32 +25,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TIF_WRITER_H_
-#define _TIF_WRITER_H_
+#ifndef _BASE_MESH_READER_H_
+#define _BASE_MESH_READER_H_
 
-#include <base_vol_writer.h>
+#include <base_reader.h>
 
-class TIFWriter : public BaseVolWriter
+typedef struct _GLMmodel GLMmodel;
+
+class BaseMeshReader : public BaseReader
 {
 public:
-	TIFWriter();
-	~TIFWriter();
+	BaseMeshReader();
+	virtual ~BaseMeshReader() {};
 
-	void SetData(Nrrd* data);
-	void SetSpacings(double spcx, double spcy, double spcz);
-	void SetCompression(bool value);
-	void Save(const std::wstring& filename, int mode);	//mode: 0-single file
-											//1-file sequence
+	virtual GLMmodel* Convert();
+	virtual GLMmodel* Convert(int t) = 0;
 
-private:
-	Nrrd* m_data;
-	double m_spcx, m_spcy, m_spcz;
-	bool m_use_spacings;
-	bool m_compression;
+	virtual std::wstring GetCurDataName(int t) = 0;
 
-private:
-	void SaveSingleFile(const std::wstring& filename);
-	void SaveSequence(const std::wstring& filename);
+protected:
 };
-
-#endif//_TIF_WRITER_H_
+#endif//_BASE_MESH_READER_H_

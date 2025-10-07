@@ -51,7 +51,7 @@ namespace flrd
 {
 	class EntryParams;
 }
-class BaseReader;
+class BaseVolReader;
 
 struct VD_Landmark
 {
@@ -82,8 +82,8 @@ public:
 
 	//data related
 	//reader
-	void SetReader(const std::shared_ptr<BaseReader>& reader) {m_reader = reader;}
-	std::shared_ptr<BaseReader> GetReader() {return m_reader.lock();}
+	void SetReader(const std::shared_ptr<BaseVolReader>& reader) {m_reader = reader;}
+	std::shared_ptr<BaseVolReader> GetReader() {return m_reader.lock();}
 	//compression
 	void SetCompression(bool compression);
 	bool GetCompression();
@@ -608,7 +608,7 @@ private:
 	GLuint m_2d_dmap;
 
 	//reader
-	std::weak_ptr<BaseReader> m_reader;
+	std::weak_ptr<BaseVolReader> m_reader;
 
 	//compression
 	bool m_compression;

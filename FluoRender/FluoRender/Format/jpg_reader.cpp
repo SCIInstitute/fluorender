@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <jpeglib.h>
 
-JPGReader::JPGReader() : BaseReader()
+JPGReader::JPGReader() : BaseVolReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

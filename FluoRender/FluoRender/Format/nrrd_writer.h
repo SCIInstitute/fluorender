@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _NRRD_WRITER_H_
 #define _NRRD_WRITER_H_
 
-#include <base_writer.h>
+#include <base_vol_writer.h>
 
-class NRRDWriter : public BaseWriter
+class NRRDWriter : public BaseVolWriter
 {
 public:
 	NRRDWriter();

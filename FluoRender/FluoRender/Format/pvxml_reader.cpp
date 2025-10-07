@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iostream>
 
 PVXMLReader::PVXMLReader() :
-	BaseReader()
+	BaseVolReader()
 {
 	m_force_stack = false;
 

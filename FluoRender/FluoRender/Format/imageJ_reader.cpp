@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 
 ImageJReader::ImageJReader():
-	BaseReader()
+	BaseVolReader()
 {
 	m_imageJ_cls = 0;
 

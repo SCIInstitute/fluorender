@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _JP2_READER_H_
 #define _JP2_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 
-class JP2Reader : public BaseReader
+class JP2Reader : public BaseVolReader
 {
 public:
 	JP2Reader();

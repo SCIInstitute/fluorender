@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <openjpeg.h>
 
-JP2Reader::JP2Reader() : BaseReader()
+JP2Reader::JP2Reader() : BaseVolReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

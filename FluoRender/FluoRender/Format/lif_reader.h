@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LIF_READER_H_
 #define _LIF_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -42,7 +42,7 @@ namespace tinyxml2
 	class XMLElement;
 }
 
-class LIFReader : public BaseReader
+class LIFReader : public BaseVolReader
 {
 public:
 	LIFReader();

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OIB_READER_H_
 #define _OIB_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <string>
 #include <vector>
 
@@ -36,7 +36,7 @@ namespace POLE
 {
 	class Storage;
 }
-class OIBReader : public BaseReader
+class OIBReader : public BaseVolReader
 {
 public:
 	OIBReader();

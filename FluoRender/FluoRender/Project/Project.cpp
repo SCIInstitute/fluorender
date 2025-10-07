@@ -54,7 +54,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <msk_reader.h>
 #include <VolumeRenderer.h>
 #include <BaseXrRenderer.h>
@@ -498,7 +498,7 @@ void Project::Open(const std::wstring& filename)
 						{
 							MSKReader msk_reader;
 							msk_reader.SetFile(wsval);
-							BaseReader* br = &msk_reader;
+							BaseVolReader* br = &msk_reader;
 							Nrrd* mask = br->Convert(true);
 							if (mask)
 								vd->LoadMask(mask);

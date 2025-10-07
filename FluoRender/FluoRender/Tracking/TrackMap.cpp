@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <exmax.h>
 #include <StencilCompare.h>
 #include <Clusterizer.h>
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
 #include <Texture.h>

@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TIF_READER_H_
 #define _TIF_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <fstream>
 #include <string>
 
-class TIFReader : public BaseReader
+class TIFReader : public BaseVolReader
 {
 public:
 	TIFReader();

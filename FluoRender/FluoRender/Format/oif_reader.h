@@ -28,12 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OIF_READER_H_
 #define _OIF_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <string>
 #include <vector>
 #include <fstream>
 
-class OIFReader : public BaseReader
+class OIFReader : public BaseVolReader
 {
 public:
 	OIFReader();

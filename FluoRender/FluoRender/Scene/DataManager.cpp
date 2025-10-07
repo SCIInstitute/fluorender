@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotData.h>
 #include <VolCache4D.h>
 #include <VolumeRenderer.h>
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <imageJ_reader.h>
 #include <tif_reader.h>
 #include <png_reader.h>
@@ -454,7 +454,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	}
 
 	size_t result = 0;
-	std::shared_ptr<BaseReader> reader;
+	std::shared_ptr<BaseVolReader> reader;
 
 	for (size_t i=0; i<m_reader_list.size(); i++)
 	{
@@ -573,7 +573,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 
 	if (reader_return > 0)
 	{
-		std::string err_str = BaseReader::GetError(reader_return);
+		std::string err_str = BaseVolReader::GetError(reader_return);
 		SetProgress(0, err_str);
 		int i = (int)m_reader_list.size() - 1;
 		if (m_reader_list[i]) {

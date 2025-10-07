@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CZI_READER_H_
 #define _CZI_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -41,7 +41,7 @@ namespace tinyxml2
 	class XMLElement;
 }
 
-class CZIReader : public BaseReader
+class CZIReader : public BaseVolReader
 {
 public:
 	CZIReader();

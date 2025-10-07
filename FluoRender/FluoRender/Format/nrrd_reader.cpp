@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 NRRDReader::NRRDReader():
-	BaseReader()
+	BaseVolReader()
 {
 	m_time_num = 0;
 	m_chan_num = 0;

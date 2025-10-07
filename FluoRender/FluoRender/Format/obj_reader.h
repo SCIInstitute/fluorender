@@ -25,32 +25,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TIF_WRITER_H_
-#define _TIF_WRITER_H_
+#ifndef _OBJ_READER_H_
+#define _OBJ_READER_H_
 
-#include <base_vol_writer.h>
+#include <base_mesh_reader.h>
 
-class TIFWriter : public BaseVolWriter
+class ObjReader : public BaseMeshReader
 {
 public:
-	TIFWriter();
-	~TIFWriter();
+	ObjReader();
+	virtual ~ObjReader() {};
 
-	void SetData(Nrrd* data);
-	void SetSpacings(double spcx, double spcy, double spcz);
-	void SetCompression(bool value);
-	void Save(const std::wstring& filename, int mode);	//mode: 0-single file
-											//1-file sequence
-
-private:
-	Nrrd* m_data;
-	double m_spcx, m_spcy, m_spcz;
-	bool m_use_spacings;
-	bool m_compression;
-
-private:
-	void SaveSingleFile(const std::wstring& filename);
-	void SaveSequence(const std::wstring& filename);
+	virtual int GetType() { return READER_OBJ_TYPE; }	//get reader type
 };
 
-#endif//_TIF_WRITER_H_
+#endif//_OBJ_READER_H_

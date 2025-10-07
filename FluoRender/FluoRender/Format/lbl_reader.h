@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LBL_READER_H_
 #define _LBL_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 
-class LBLReader : public BaseReader
+class LBLReader : public BaseVolReader
 {
 public:
 	LBLReader();

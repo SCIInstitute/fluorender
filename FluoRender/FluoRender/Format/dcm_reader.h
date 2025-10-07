@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _DCM_READER_H_
 #define _DCM_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <map>
 
-class DCMReader : public BaseReader
+class DCMReader : public BaseVolReader
 {
 public:
 	DCMReader();

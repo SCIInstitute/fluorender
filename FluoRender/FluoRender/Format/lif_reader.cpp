@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <XmlUtils.h>
 
 LIFReader::LIFReader():
-	BaseReader()
+	BaseVolReader()
 {
 	m_tile_scan = false;
 	m_time_num = 0;

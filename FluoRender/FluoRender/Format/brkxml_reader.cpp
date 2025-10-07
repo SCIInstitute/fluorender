@@ -28,7 +28,7 @@ template <typename _T> inline void SafeDelete(_T*& p)
 }
 
 BRKXMLReader::BRKXMLReader() :
-	BaseReader()
+	BaseVolReader()
 {
 	m_resize_type = 0;
 	m_resample_type = 0;

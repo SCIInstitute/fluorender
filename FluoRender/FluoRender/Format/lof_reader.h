@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LOF_READER_H_
 #define _LOF_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -43,7 +43,7 @@ namespace tinyxml2
 	class XMLElement;
 }
 
-class LOFReader : public BaseReader
+class LOFReader : public BaseVolReader
 {
 public:
 	LOFReader();

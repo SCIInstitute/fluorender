@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _PVXML_READER_H_
 #define _PVXML_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <vector>
 #include <string>
 
@@ -37,7 +37,7 @@ namespace tinyxml2
 	class XMLElement;
 }
 
-class PVXMLReader : public BaseReader
+class PVXMLReader : public BaseVolReader
 {
 public:
 	PVXMLReader();

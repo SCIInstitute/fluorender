@@ -41,8 +41,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Histogram.h>
 #include <TableHistParams.h>
 #include <Reshape.h>
-#include <base_reader.h>
-#include <base_writer.h>
+#include <base_vol_reader.h>
+#include <base_vol_writer.h>
 #include <brkxml_reader.h>
 #include <tif_writer.h>
 #include <nrrd_writer.h>
@@ -1454,7 +1454,7 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 			temp = sampler.GetResult();
 	}
 
-	BaseWriter *writer = 0;
+	BaseVolWriter *writer = 0;
 	switch (mode)
 	{
 	case 0://multi-page tiff

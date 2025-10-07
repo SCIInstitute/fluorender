@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LSM_READER_H_
 #define _LSM_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <string>
 #include <vector>
 
-class LSMReader : public BaseReader
+class LSMReader : public BaseVolReader
 {
 public:
 	LSMReader();

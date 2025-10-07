@@ -2,7 +2,7 @@
 #define _BRKXML_READER_H_
 
 #include <vector>
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <XmlUtils.h>
 
 namespace flvr
@@ -11,7 +11,7 @@ namespace flvr
 	class TextureBrick;
 	struct Pyramid_Level;
 }
-class BRKXMLReader : public BaseReader
+class BRKXMLReader : public BaseVolReader
 {
 public:
 	BRKXMLReader();

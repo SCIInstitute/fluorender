@@ -25,22 +25,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _BASE_WRITER_H_
-#define _BASE_WRITER_H_
-
-#include <string>
-#include <nrrd.h>
-
-class BaseWriter
-{
-public:
-	//BaseWriter();
-	virtual ~BaseWriter() {};
-
-	virtual void SetData(Nrrd* data) = 0;
-	virtual void SetSpacings(double spcx, double spcy, double spcz) = 0;
-	virtual void SetCompression(bool value) = 0;
-	virtual void Save(const std::wstring& filename, int mode) = 0;
-};
-
-#endif//_BASE_WRITER_H_
+#include <obj_reader.h>

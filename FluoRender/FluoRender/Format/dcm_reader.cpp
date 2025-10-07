@@ -168,7 +168,7 @@ namespace {
 }
 
 DCMReader::DCMReader() :
-	BaseReader()
+	BaseVolReader()
 {
 	m_valid_info = false;
 	m_time_num = 0;

@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <compatibility.h>
 #include <png.h>
 
-PNGReader::PNGReader() : BaseReader()
+PNGReader::PNGReader() : BaseVolReader()
 {
 	m_time_num = 0;
 	m_cur_time = -1;

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MPG_READER_H_
 #define _MPG_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <unordered_map>
 #include <list>
 
@@ -37,7 +37,7 @@ struct AVCodecContext;
 struct SwsContext;
 struct AVFrame;
 
-class MPGReader : public BaseReader
+class MPGReader : public BaseVolReader
 {
 public:
 	MPGReader();

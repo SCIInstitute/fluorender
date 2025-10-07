@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ND2_READER_H_
 #define _ND2_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <vector>
 #include <string>
 #include <limits>
@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 
 #define ND2_STR_SIZE	1024
 
-class ND2Reader : public BaseReader
+class ND2Reader : public BaseVolReader
 {
 public:
 	ND2Reader();

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 
 TIFReader::TIFReader():
-	BaseReader()
+	BaseVolReader()
 {
 	m_resize_type = 0;
 	m_resample_type = 0;

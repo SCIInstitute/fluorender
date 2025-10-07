@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _PNG_READER_H_
 #define _PNG_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 
-class PNGReader : public BaseReader
+class PNGReader : public BaseVolReader
 {
 public:
 	PNGReader();

@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <inttypes.h>
 
 MSKReader::MSKReader():
-	BaseReader()
+	BaseVolReader()
 {
 	m_fp_convert = false;
 	m_fp_min = 0;

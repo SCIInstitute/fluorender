@@ -79,7 +79,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.h>
 #include <DataManager.h>
 #include <TrackMap.h>
-#include <base_reader.h>
+#include <base_vol_reader.h>
 #include <brkxml_reader.h>
 #include <GlobalStates.h>
 #include <State.h>
@@ -3489,7 +3489,7 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 
 void RenderView::ReloadVolumeData(int frame)
 {
-	std::vector<std::shared_ptr<BaseReader>> reader_list;
+	std::vector<std::shared_ptr<BaseVolReader>> reader_list;
 	m_bat_folder = L"";
 
 	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)

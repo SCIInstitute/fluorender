@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _JPG_READER_H_
 #define _JPG_READER_H_
 
-#include <base_reader.h>
+#include <base_vol_reader.h>
 
-class JPGReader : public BaseReader
+class JPGReader : public BaseVolReader
 {
 public:
 	JPGReader();
