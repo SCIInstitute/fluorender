@@ -355,9 +355,9 @@ void BasicStat::Run()
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 			auto arg_sum =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 			auto arg_wsum =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 			if (m_use_mask)
 				kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
@@ -389,9 +389,9 @@ void BasicStat::Run()
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 			auto arg_minv =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(minv));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(minv));
 			auto arg_maxv =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(maxv));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(maxv));
 			if (m_use_mask)
 				kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
@@ -429,7 +429,7 @@ void BasicStat::Run()
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&bmaxv));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&bin));
 			auto arg_hist =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (bin), (void*)(hist));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (bin), (void*)(hist));
 			if (m_use_mask)
 				kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 

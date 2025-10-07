@@ -715,7 +715,7 @@ void ChannelCompare::Product()
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_sum =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(sum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid1);
@@ -828,7 +828,7 @@ void ChannelCompare::MinValue()
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_sum =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(sum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(sum));
 		if (m_use_mask)
 		{
 			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid1);
@@ -944,7 +944,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_sum =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(sum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(sum));
 		kernel_prog->setConst(sizeof(cl_float4), (void*)(&th));
 		if (m_use_mask)
 		{
@@ -1042,7 +1042,7 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 		else
 		{
 			sum = new float[nxyz]();
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (nxyz), (void*)(sum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (nxyz), (void*)(sum));
 		}
 
 		//execute

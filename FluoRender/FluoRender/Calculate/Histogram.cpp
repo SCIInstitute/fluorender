@@ -173,7 +173,7 @@ void Histogram::Compute()
 		kernel_prog->setConst(sizeof(float), (void*)(&maxv));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&bin));
 		if (i == 0)
-			arg_sh = kernel_prog->setBufIfNew(
+			arg_sh = kernel_prog->setBufNew(
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "",
 				sizeof(unsigned int)*(bin + 1), (void*)(m_histogram.data()));
 		else

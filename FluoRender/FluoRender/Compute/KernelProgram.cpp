@@ -588,7 +588,7 @@ namespace flvr
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setBufIfNew(cl_mem_flags flags, const std::string& name, size_t size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setBufNew(cl_mem_flags flags, const std::string& name, size_t size, void* data)
 	{
 		// Step 1: Check if an Argument already exists for this raw pointer
 		std::shared_ptr<Argument> existing_arg;
@@ -634,7 +634,7 @@ namespace flvr
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setBufUpdate(cl_mem_flags flags, const std::string& name, size_t size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setBufNewOrUpdate(cl_mem_flags flags, const std::string& name, size_t size, void* data)
 	{
 		std::shared_ptr<Argument> arg;
 		for (const auto& existing : arg_list_) {

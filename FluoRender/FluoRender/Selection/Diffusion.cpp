@@ -336,7 +336,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		kernel_prog->beginArgs(kernel_index);
 		kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_val =
-			kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned char) * nx * ny * nz, val);
+			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned char) * nx * ny * nz, val);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
@@ -442,7 +442,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		kernel_prog->beginArgs(kernel_index);
 		kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_val =
-			kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned char) * nx * ny * nz, val);
+			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned char) * nx * ny * nz, val);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));

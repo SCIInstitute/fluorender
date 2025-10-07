@@ -247,9 +247,9 @@ void VolumeRoi::Run()
 		kernel_prog->setConst(sizeof(cl_float3), (void*)(&ectr));
 		kernel_prog->setConst(sizeof(cl_float4), (void*)(&eaxis));
 		auto arg_sum =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 		auto arg_wsum =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 		//if (m_use_mask)
 		//	kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 

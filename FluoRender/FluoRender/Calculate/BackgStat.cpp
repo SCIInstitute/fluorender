@@ -343,7 +343,7 @@ void BackgStat::Run()
 		kernel_prog->beginArgs(kernel_index0);
 		kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
 		auto arg_bkg =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_bkg", chars * nx * ny * nz, NULL);
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_bkg", chars * nx * ny * nz, NULL);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&m_kx));
@@ -376,9 +376,9 @@ void BackgStat::Run()
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&dnxy));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&dnx));
 			auto arg_sum =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(sum));
 			auto arg_wsum =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz), (void*)(wsum));
 
 			//execute
 			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
@@ -410,9 +410,9 @@ void BackgStat::Run()
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&dnxy));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&dnx));
 			auto arg_minv =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(minv));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(minv));
 			auto arg_maxv =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(maxv));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(maxv));
 
 			//execute
 			kernel_prog->executeKernel(kernel_index1, 3, global_size1, local_size);
@@ -450,7 +450,7 @@ void BackgStat::Run()
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&bmaxv));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&bin));
 			auto arg_hist =
-				kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (bin), (void*)(hist));
+				kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (bin), (void*)(hist));
 
 			//execute
 			kernel_prog->executeKernel(kernel_index2, 3, global_size, local_size);

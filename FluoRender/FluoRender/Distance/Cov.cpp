@@ -206,9 +206,9 @@ bool Cov::ComputeCenter()
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsxy));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.gsx));
 		auto arg_count =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(count));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * (gsize.gsxyz), (void*)(count));
 		auto arg_csum =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz * 3), (void*)(csum));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz * 3), (void*)(csum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);
@@ -294,7 +294,7 @@ bool Cov::ComputeCov()
 		kernel_prog->setConst(sizeof(cl_float3), (void*)(m_center));
 		kernel_prog->setConst(sizeof(cl_float3), (void*)(orig));
 		auto arg_cov =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz * 6), (void*)(cov));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * (gsize.gsxyz * 6), (void*)(cov));
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, 0);

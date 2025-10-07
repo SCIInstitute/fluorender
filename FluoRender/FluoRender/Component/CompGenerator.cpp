@@ -550,7 +550,7 @@ void ComponentGenerator::SetIDBit(int psize)
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->beginArgs(kernel_index0);
 		auto arg_szbuf =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
 		auto arg_label =
 			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
@@ -670,7 +670,7 @@ void ComponentGenerator::Grow()
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&seed));
 		kernel_prog->setConst(sizeof(float), (void*)(&tran));
 		kernel_prog->setConst(sizeof(float), (void*)(&scl_ff));
@@ -789,7 +789,7 @@ void ComponentGenerator::DensityField()
 		auto arg_img =
 			kernel_prog_dens->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_densf =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnxy));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&dnx));
 		kernel_prog_dens->setConst(sizeof(int), (void*)(&m_density_window_size));
@@ -798,9 +798,9 @@ void ComponentGenerator::DensityField()
 		kernel_prog_dens->beginArgs(kernel_dens_index1);
 		kernel_prog_dens->bindArg(arg_densf);
 		auto arg_gavg =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
 		auto arg_gvar =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsy));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsz));
@@ -845,7 +845,7 @@ void ComponentGenerator::DensityField()
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_avg =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
 		kernel_prog_dens->bindArg(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
@@ -854,7 +854,7 @@ void ComponentGenerator::DensityField()
 		//compute var
 		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_var =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
 		kernel_prog_dens->bindArg(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
@@ -884,7 +884,7 @@ void ComponentGenerator::DensityField()
 		kernel_prog_grow->bindArg(arg_densf);
 		kernel_prog_grow->bindArg(arg_avg);
 		kernel_prog_grow->bindArg(arg_var);
-		kernel_prog_grow->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog_grow->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
 		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&seed));
 		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&ny));
@@ -1003,7 +1003,7 @@ void ComponentGenerator::DistGrow()
 		auto arg_img =
 			kernel_prog_dist->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_distf =
-			kernel_prog_dist->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, nullptr);
+			kernel_prog_dist->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, nullptr);
 		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nz));
@@ -1064,7 +1064,7 @@ void ComponentGenerator::DistGrow()
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nz));
-		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&seed));
 		kernel_prog->setConst(sizeof(float), (void*)(&tran));
 		kernel_prog->setConst(sizeof(float), (void*)(&scl_ff));
@@ -1205,7 +1205,7 @@ void ComponentGenerator::DistDensityField()
 		auto arg_img =
 			kernel_prog_dist->setTex3D(CL_MEM_READ_ONLY, did);
 		auto arg_distf =
-			kernel_prog_dist->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, nullptr);
+			kernel_prog_dist->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_distf", sizeof(unsigned char) * nx * ny * nz, nullptr);
 		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&ny));
 		kernel_prog_dist->setConst(sizeof(unsigned int), (void*)(&nz));
@@ -1261,7 +1261,7 @@ void ComponentGenerator::DistDensityField()
 		kernel_prog_dens->bindArg(arg_img);
 		kernel_prog_dens->bindArg(arg_distf);
 		auto arg_densf =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_densf", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&nxy));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&ny));
@@ -1276,9 +1276,9 @@ void ComponentGenerator::DistDensityField()
 		kernel_prog_dens->beginArgs(kernel_dens_index1);
 		kernel_prog_dens->bindArg(arg_densf);
 		auto arg_gavg =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gavg", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
 		auto arg_gvar =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_gvar", sizeof(unsigned char) * ngx * ngy * ngz, nullptr);
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsx));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsy));
 		kernel_prog_dens->setConst(sizeof(unsigned int), (void*)(&gsz));
@@ -1317,7 +1317,7 @@ void ComponentGenerator::DistDensityField()
 		global_size[0] = size_t(nx); global_size[1] = size_t(ny); global_size[2] = size_t(nz);
 		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_avg =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_avg", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
 		kernel_prog_dens->bindArg(arg_gavg);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
@@ -1326,7 +1326,7 @@ void ComponentGenerator::DistDensityField()
 		//compute var
 		kernel_prog_dens->beginArgs(kernel_dens_index2);
 		auto arg_var =
-			kernel_prog_dens->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
+			kernel_prog_dens->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "arg_var", sizeof(unsigned char) * dnx * dny * dnz, nullptr);
 		kernel_prog_dens->bindArg(arg_gvar);
 		kernel_prog_dens->executeKernel(kernel_dens_index2, 3, global_size, local_size);
 		SetProgress(static_cast<int>(100 * count / ticks),
@@ -1357,7 +1357,7 @@ void ComponentGenerator::DistDensityField()
 		kernel_prog_grow->bindArg(arg_densf);
 		kernel_prog_grow->bindArg(arg_avg);
 		kernel_prog_grow->bindArg(arg_var);
-		kernel_prog_grow->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog_grow->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
 		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&seed));
 		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&nx));
 		kernel_prog_grow->setConst(sizeof(unsigned int), (void*)(&ny));
@@ -1490,7 +1490,7 @@ void ComponentGenerator::CleanNoise()
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		kernel_prog->beginArgs(kernel_index0);
 		auto arg_szbuf =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
 		auto arg_label =
 			kernel_prog->copyTex3DToBuf(CL_MEM_READ_WRITE, lid, "arg_label", sizeof(unsigned int) * nx * ny * nz, region);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&nx));
@@ -1837,11 +1837,11 @@ void ComponentGenerator::GenerateDB()
 //		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
 //#endif
 		auto arg_rechist =
-			kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * fsize, (void*)(rechist));
+			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * fsize, (void*)(rechist));
 		fsize = nx * ny * nz;
 		cl_uchar* lut = new cl_uchar[fsize]();
 		auto arg_lut =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(cl_uchar) * fsize, (void*)(lut));
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(cl_uchar) * fsize, (void*)(lut));
 		//local histogram
 		kernel_prog->setLocal(sizeof(float)*bin);
 		cl_int3 cl_histxyz = { cl_int(whistxy), cl_int(whistxy), cl_int(whistz) };
@@ -1887,10 +1887,10 @@ void ComponentGenerator::GenerateDB()
 		float* params = new float[fsize]();
 		table.getRecOutput(params);
 		auto arg_params =
-			kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
 			"", sizeof(float) * fsize, (void*)(params));
 		auto arg_distf =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 			"arg_distf", sizeof(unsigned char) * nxyz, nullptr);
 		kernel_prog->setConst(sizeof(float), (void*)(&sscale));
 		kernel_prog->setConst(sizeof(unsigned char), (void*)(&ini));
@@ -1930,7 +1930,7 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->bindArg(arg_img);
 		kernel_prog->bindArg(arg_distf);
 		auto arg_densf =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				"arg_densf", sizeof(unsigned char) * nxyz, nullptr);
 		kernel_prog->bindArg(arg_lut);
 		kernel_prog->bindArg(arg_params);
@@ -1942,10 +1942,10 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->beginArgs(kernel_index4);
 		kernel_prog->bindArg(arg_densf);
 		auto arg_avg =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				"arg_avg", sizeof(unsigned char) * nxyz, nullptr);
 		auto arg_var =
-			kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 				"arg_var", sizeof(unsigned char) * nxyz, nullptr);
 		kernel_prog->bindArg(arg_lut);
 		kernel_prog->bindArg(arg_params);
@@ -1989,7 +1989,7 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->bindArg(arg_densf);
 		kernel_prog->bindArg(arg_avg);
 		kernel_prog->bindArg(arg_var);
-		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
+		kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int), (void*)(&rcnt));
 		kernel_prog->bindArg(arg_lut);
 		kernel_prog->bindArg(arg_params);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&seed));
@@ -2045,7 +2045,7 @@ void ComponentGenerator::GenerateDB()
 			//set
 			//kernel 6
 			kernel_prog->beginArgs(kernel_index6);
-			auto arg_szbuf = kernel_prog->setBufIfNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
+			auto arg_szbuf = kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_szbuf", label_size, nullptr);
 			kernel_prog->bindArg(arg_label);
 			kernel_prog->setConst(sizeof(cl_int3), (void*)(&cl_nxyz));
 			kernel_prog->setConst(sizeof(unsigned int), (void*)(&nxy));

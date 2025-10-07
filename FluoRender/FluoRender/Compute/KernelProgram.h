@@ -236,8 +236,8 @@ namespace flvr
 		bool setConst(size_t, void*);
 		bool setLocal(size_t);
 		bool bindArg(std::weak_ptr<Argument> arg);//Binds existing Argument object.
-		std::weak_ptr<Argument> setBufIfNew(cl_mem_flags, const std::string&, size_t, void*);//Sets from host pointer, creates buffer only if needed.
-		std::weak_ptr<Argument> setBufUpdate(cl_mem_flags, const std::string&, size_t, void*);//Always updates from host pointer.
+		std::weak_ptr<Argument> setBufNew(cl_mem_flags, const std::string&, size_t, void*);//Sets from host pointer, creates buffer only if needed.
+		std::weak_ptr<Argument> setBufNewOrUpdate(cl_mem_flags, const std::string&, size_t, void*);//Always updates from host pointer.
 		bool updateBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data);//Updates existing buffer from host pointer.
 		std::weak_ptr<Argument> setTex2D(cl_mem_flags, GLuint);//OpenGL texture binding.
 		std::weak_ptr<Argument> setTex3D(cl_mem_flags, GLuint);//OpenGL texture binding.

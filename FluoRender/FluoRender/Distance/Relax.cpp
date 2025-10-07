@@ -280,12 +280,12 @@ bool Relax::Compute()
 		kernel_prog->setConst(sizeof(cl_float3), (void*)(&scl));
 		kernel_prog->setConst(sizeof(float), (void*)(&m_rest));
 		kernel_prog->setConst(sizeof(float), (void*)(&m_infr));
-		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * m_snum * 3, (void*)(m_spoints.data()));
-		kernel_prog->setBufIfNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * m_snum, (void*)(m_slock.data()));
+		kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * m_snum * 3, (void*)(m_spoints.data()));
+		kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(unsigned int) * m_snum, (void*)(m_slock.data()));
 		auto arg_pdsp =
-			kernel_prog->setBufIfNew(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * gsize.gsxyz * m_snum * 3, (void*)(pdsp));
+			kernel_prog->setBufNew(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * gsize.gsxyz * m_snum * 3, (void*)(pdsp));
 		auto arg_pwsum =
-			kernel_prog->setBufIfNew(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * gsize.gsxyz * m_snum, (void*)(pwsum));
+			kernel_prog->setBufNew(CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * gsize.gsxyz * m_snum, (void*)(pwsum));
 
 		//execute
 		kernel_prog->executeKernel(kernel_0, 3, global_size, local_size);

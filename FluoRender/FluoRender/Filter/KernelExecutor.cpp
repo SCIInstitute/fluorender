@@ -328,7 +328,7 @@ bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 	kernel_prog->beginArgs(kernel_index);
 	kernel_prog->setTex3D(CL_MEM_READ_ONLY, data_id);
 	auto arg_result =
-		kernel_prog->setBufIfNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", result_size, result);
+		kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", result_size, result);
 	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_x));
 	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_y));
 	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_z));
