@@ -494,7 +494,7 @@ void main()
 }
 )GLSHDR";
 
-inline constexpr const char* IMG_SHADER_CODE_GRADIENT_TO_SHADOW = R"GLSHDR(
+inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_INPUT = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_TO_SHADOW
 in vec3 OutVertex;
 in vec3 OutTexCoord;
@@ -505,85 +505,76 @@ uniform vec4 loc0; //(1/width, 1/height, zoom, 0.0)
 uniform vec4 loc1; //(darkness, 0.0, 0.0, 0.0)
 uniform sampler2D tex0;
 uniform sampler2D tex1;
-	
+
+)GLSHDR";
+
+inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_INPUT_MESH = R"GLSHDR(
+uniform sampler2D tex2;
+
+)GLSHDR";
+
+inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD = R"GLSHDR(
 void main()
 {
-	vec4 t = vec4(OutTexCoord, 1.0);
-	vec4 c0 = texture(tex1, t.xy);
+	vec2 uv = OutTexCoord.xy;
+)GLSHDR";
+
+inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD_VOL = R"GLSHDR(
+	vec4 c0 = texture(tex1, uv);
 	if (c0.w == 0.0)
 	{
 		FragColor = vec4(1.0);
 		return;
 	}
-	float c = 0.0;
-	vec2 d = loc0.xy;
-	vec2 nb;
-	vec2 delta;
-	vec4 c_nb;
-	float ang;
-	float dist;
-	float dense;
-	for (int i=-25; i<25; i++)
-	for (int j=-25; j<25; j++)
-	{
-		delta = vec2(float(i)*d.x, float(j)*d.y);
-		nb = t.st + delta;
-		c_nb = texture(tex0, nb);
-		ang = dot(normalize(delta), normalize(c_nb.xy));
-		dist = pow(float(i)*float(i)+float(j)*float(j), 0.54);
-		dist = dist==0.0?0.0:1.0/dist*clamp(loc0.z, 0.4, 3.0);
-		dense = clamp(0.02+(3.0-loc0.z)*0.015, 0.02, 0.05);
-		c += dense*(ang<-0.3?1.0:max(-ang+0.7, 0.0))*c_nb.z*dist;
-	}
-	c = clamp(1.0-clamp(c, 0.0, 1.0)*loc1.x, 0.01, 1.0);
-	FragColor = vec4(vec3(c), 1.0);
-}
 )GLSHDR";
 
-inline constexpr const char* IMG_SHADER_CODE_GRADIENT_TO_SHADOW_MESH = R"GLSHDR(
-//IMG_SHADER_CODE_GRADIENT_TO_SHADOW_MESH
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
-	
-//IMG_SHADER_CODE_GRADIENT_TO_SHADOW_MESH
-uniform vec4 loc0; //(1/width, 1/height, zoom, 0.0)
-uniform vec4 loc1; //(darkness, 0.0, 0.0, 0.0)
-uniform sampler2D tex0;
-uniform sampler2D tex1;
-uniform sampler2D tex2;
-	
-void main()
-{
-	vec4 t = vec4(OutTexCoord, 1.0);
-	vec4 c1 = texture(tex1, t.xy);
-	vec4 c2 = texture(tex2, t.xy);
-	if (c1.x==1.0 && (c1.x<1.0 || c2.w==0.0))
-	{
+inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD_MESH = R"GLSHDR(
+	vec4 c1 = texture(tex1, uv);
+	vec4 c2 = texture(tex2, uv);
+
+	if (c1.x == 1.0 && (c1.x < 1.0 || c2.w == 0.0)) {
 		FragColor = vec4(1.0);
 		return;
 	}
+)GLSHDR";
+
+inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
+
+	vec2 texel = loc0.xy;
+	float zoom = clamp(loc0.z, 0.4, 3.0);
+	float darkness = loc1.x;
+
 	float c = 0.0;
-	vec2 d = loc0.xy;
-	vec2 nb;
-	vec2 delta;
-	vec4 c_nb;
-	float ang;
-	float dist;
-	float dense;
-	for (int i=-15; i<15; i++)
-	for (int j=-15; j<15; j++)
-	{
-		delta = vec2(float(i)*d.x, float(j)*d.y);
-		nb = t.st + delta;
-		c_nb = texture(tex0, nb);
-		ang = dot(normalize(delta), normalize(c_nb.xy));
-		dist = pow(float(i)*float(i)+float(j)*float(j), 0.8);
-		dist = dist==0.0?0.0:1.0/dist*clamp(loc0.z, 0.4, 3.0);
-		dense = clamp(0.02+(3.0-loc0.z)*0.015, 0.02, 0.05);
-		c += dense*(ang<-0.3?1.0:max(-ang+0.7, 0.0))*c_nb.z*dist;
+	vec2 delta, sample_uv;
+	vec4 grad_sample;
+	float ang, dist, dense;
+
+	// Sample across mip levels
+	const int mip_levels = 4;
+	const int radius = 8;
+
+	for (int level = 0; level < mip_levels; ++level) {
+		float scale = pow(2.0, float(level));
+		float lod = float(level);
+		float step = scale;
+
+		for (int i = -radius; i <= radius; ++i)
+		for (int j = -radius; j <= radius; ++j)
+		{
+			delta = vec2(float(i) * texel.x * step, float(j) * texel.y * step);
+			sample_uv = uv + delta;
+			grad_sample = textureLod(tex0, sample_uv, lod);
+
+			ang = dot(normalize(delta), normalize(grad_sample.xy));
+			dist = pow(float(i)*float(i) + float(j)*float(j), 0.8);
+			dist = dist == 0.0 ? 0.0 : 1.0 / dist * zoom;
+			dense = clamp(0.02 + (3.0 - zoom) * 0.015, 0.02, 0.05);
+
+			c += dense * (ang < -0.3 ? 1.0 : max(-ang + 0.7, 0.0)) * grad_sample.z * dist;
+		}
 	}
-	c = clamp(1.0-clamp(c, 0.0, 1.0)*loc1.x, 0.01, 1.0);
+
+	c = clamp(1.0 - clamp(c, 0.0, 1.0) * darkness, 0.01, 1.0);
 	FragColor = vec4(vec3(c), 1.0);
 }
 )GLSHDR";

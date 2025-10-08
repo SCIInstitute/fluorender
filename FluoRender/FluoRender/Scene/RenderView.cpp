@@ -9024,14 +9024,12 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 	{
 		//shadow pass
 		//bind the fbo
-		flvr::Framebuffer* temp_buffer =
+		flvr::Framebuffer* grad_mip_buffer =
 			glbin_framebuffer_manager.framebuffer(
-				flvr::FB_Render_RGBA, nx, ny, "temp");
-		if (temp_buffer)
-		{
-			temp_buffer->bind();
-			temp_buffer->protect();
-		}
+				flvr::FB_Render_RGBA, nx, ny, "grad_mip");
+		if (grad_mip_buffer)
+			grad_mip_buffer->bind();
+
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
@@ -9071,10 +9069,12 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 		if (chann_buffer)
 			chann_buffer->bind();
 		glActiveTexture(GL_TEXTURE0);
-		if (temp_buffer)
+		if (grad_mip_buffer)
 		{
-			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-			temp_buffer->unprotect();
+			grad_mip_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			//build mipmap
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -9082,7 +9082,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 
 		//2d adjustment
 		img_shader =
-			glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW);
+			glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_VOL);
 		if (img_shader)
 		{
 			if (!img_shader->valid())
@@ -9116,14 +9116,11 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 
 	//shadow pass
 	//bind the fbo
-	flvr::Framebuffer* overlay_buffer =
+	flvr::Framebuffer* grad_mip_buffer =
 		glbin_framebuffer_manager.framebuffer(
-		flvr::FB_Render_RGBA, nx, ny);
-	if (overlay_buffer)
-	{
-		overlay_buffer->bind();
-		overlay_buffer->protect();
-	}
+		flvr::FB_Render_RGBA, nx, ny, "grad_mip");
+	if (grad_mip_buffer)
+		grad_mip_buffer->bind();
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glActiveTexture(GL_TEXTURE0);
@@ -9161,10 +9158,12 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 	//bind fbo for final composition
 	BindRenderBuffer();
 	glActiveTexture(GL_TEXTURE0);
-	if (overlay_buffer)
+	if (grad_mip_buffer)
 	{
-		overlay_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
-		overlay_buffer->unprotect();
+		grad_mip_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		//build mipmap
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ZERO, GL_SRC_COLOR);
