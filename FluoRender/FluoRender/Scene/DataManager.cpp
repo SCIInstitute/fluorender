@@ -758,11 +758,13 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 	if (!view)
 		return;
 
+	fluo::ValueCollection vc;
 	std::weak_ptr<MeshData> md_sel;
 	std::shared_ptr<MeshGroup> group;
 	size_t fn = files.size();
 	if (fn > 1)
 		group = view->AddOrGetMGroup();
+	bool enable_4d = false;
 
 	for (size_t i = 0; i < fn; i++)
 	{
@@ -785,6 +787,12 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 
 			if (i == int(fn - 1))
 				md_sel = md;
+
+			if (md->GetReader() && md->GetReader()->GetTimeNum() > 1)
+			{
+				view->m_tseq_cur_num = md->GetReader()->GetCurTime();
+				enable_4d = true;
+			}
 		}
 	}
 
@@ -794,8 +802,16 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 	if (view)
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
 
+	if (enable_4d)
+	{
+		glbin_moviemaker.SetCurrentFrameSilently(view->m_tseq_cur_num, true);
+		glbin_moviemaker.SetSeqMode(1);
+		vc.insert(gstMovieAgent);
+	}
+
 	m_frame->RefreshCanvases({ root->GetView(view.get()) });
-	m_frame->UpdateProps({ gstListCtrl, gstTreeCtrl });
+	vc.insert({ gstCurrentSelect, gstMeshPropPanel, gstListCtrl, gstTreeCtrl });
+	m_frame->UpdateProps(vc);
 
 	SetProgress(0, "");
 }
@@ -888,25 +904,6 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 	SetRange(0, 100);
 	return true;
 }
-
-//bool DataManager::LoadMeshData(GLMmodel* mesh)
-//{
-//	if (!mesh) return false;
-//
-//	auto md = std::make_shared<MeshData>();
-//	md->Load(mesh);
-//
-//	std::wstring name = md->GetName();
-//	std::wstring new_name = name;
-//	size_t i;
-//	for (i=1; CheckNames(new_name); i++)
-//		new_name = name + L"_" + std::to_wstring(i);
-//	if (i>1)
-//		md->SetName(new_name);
-//	m_md_list.push_back(md);
-//
-//	return true;
-//}
 
 bool DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
 {
