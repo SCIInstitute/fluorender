@@ -30,54 +30,70 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <memory>
 
 namespace flvr
 {
-	enum FBTexType
+	enum class FBTexType
 	{
-		FBTex_Render_RGBA = 0,
-		FBTex_UChar_RGBA,
-		FBTex_3D_Int,
-		FBTex_Render_Int32,
-		FBTex_Depth_Float,
+		Render_RGBA,
+		UChar_RGBA,
+		Render_Int32,
+		Depth_Float,
+		Ext_3D
+	};
+	enum class TexFilter {
+		Nearest,
+		Linear,
+		LinearMipmapLinear,
+		// Add more as needed
+	};
+	enum class TexWrap {
+		ClampToEdge,
+		Repeat,
+		MirroredRepeat,
+		// Add more as needed
+	};
+	struct FBTexConfig {
+		FBTexType type;
+		bool useMipmap = false;
+		TexFilter minFilter = TexFilter::Linear;
+		TexFilter magFilter = TexFilter::Linear;
+		TexWrap wrapS = TexWrap::ClampToEdge;
+		TexWrap wrapT = TexWrap::ClampToEdge;
 	};
 	class Framebuffer;
 	class FramebufferManager;
 	class FramebufferTexture
 	{
 	public:
-		FramebufferTexture(FBTexType type, int nx, int ny);
+		FramebufferTexture(const FBTexConfig& config, int nx, int ny);
 		~FramebufferTexture();
 
 		void create();
 		void destroy();
-		bool bind();
+		bool bind(int tex_unit);
 		void unbind();
-		bool valid();
+		bool valid() { return valid_; }
+		unsigned int id() { return id_; }
 		void resize(int nx, int ny);
 
 	private:
-		unsigned int id_;
-		FBTexType type_;
-		int nx_;
-		int ny_;
-		bool valid_;
+		unsigned int id_ = 0;
+		FBTexConfig config_;
+		int nx_ = 0;
+		int ny_ = 0;
+		bool valid_ = false;
+		int tex_unit_ = -1;
 
 		friend class Framebuffer;
 	};
 
-	enum FBType
-	{
-		FB_Render_RGBA = 0,
-		FB_UChar_RGBA,
-		FB_3D_Int,
-		FB_Pick_Int32_Float,
-		FB_Depth_Float,
-	};
 	class Framebuffer
 	{
 	public:
-		Framebuffer(FBType type, int nx, int ny, const std::string &name);
+		Framebuffer(const FBTexConfig& config, int nx, int ny, const std::string &name);
 		~Framebuffer();
 
 		void create();
@@ -89,40 +105,43 @@ namespace flvr
 		bool valid();
 		unsigned int id();
 
-		bool attach_texture(int ap, FramebufferTexture* tex);
+		bool attach_texture(int ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(int ap, unsigned int tex_id, int layer=0);
+		void detach_texture(const std::shared_ptr<FramebufferTexture>& tex);
 		void detach_texture(int ap);
-		void detach_texture(FramebufferTexture* tex);
 		void bind_texture(int ap);
 		unsigned int tex_id(int ap);
 
 		bool match_size(int nx, int ny);
 		void resize(int nx, int ny);
 
+		//generate mipmap
+		void generate_mipmap(int ap);
+
 		//match without size
-		bool match(FBType);
+		bool match(const FBTexConfig& config);
 		//match with size
-		bool match(FBType, int, int);
+		bool match(const FBTexConfig& config, int, int);
 		//match by name
 		bool match(const std::string &name);
 
 		//name represents its use
 		void set_name(const std::string &name);
 		void clear_name();
-		std::string &get_name() { return name_; }
+		std::string get_name() { return name_; }
 
 		//read pick value
 		unsigned int read_value(int, int);
 
 	private:
-		unsigned int id_;
-		FBType type_;
-		int nx_;
-		int ny_;
+		unsigned int id_ = 0;
+		FBTexConfig config_;
+		int nx_ = 0;
+		int ny_ = 0;
 		std::string name_;//specify its use
-		bool valid_;
-		bool protected_;
-		std::vector<std::pair<int, FramebufferTexture*>> tex_list_;
+		bool valid_ = false;
+		bool protected_ = false;
+		std::map<int, std::shared_ptr<FramebufferTexture>> attachments_;
 
 		friend class FramebufferManager;
 	};
@@ -134,13 +153,13 @@ namespace flvr
 		~FramebufferManager();
 		void clear();
 
-		Framebuffer* framebuffer(FBType type, int nx, int ny,
+		Framebuffer* framebuffer(const FBTexConfig& config, int nx, int ny,
 			const std::string &name="");
 		Framebuffer* framebuffer(const std::string &name);
 
 	private:
-		std::vector<Framebuffer*> fb_list_;
-		std::vector<FramebufferTexture*> tex_list_;
+		std::vector<std::shared_ptr<Framebuffer>> fb_list_;
+		std::vector<std::shared_ptr<FramebufferTexture>> tex_list_;
 	};
 
 }
