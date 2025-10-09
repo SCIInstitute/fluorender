@@ -454,7 +454,7 @@ namespace flvr
 		if(blend_num_bits_ > 8)
 		{
 			blend_buffer = glbin_framebuffer_manager.framebuffer(
-				FB_Render_RGBA, w2, h2, buf_name);
+				flvr::FBRole::RenderFloat, w2, h2, buf_name);
 			if (!blend_buffer)
 				return;
 			blend_buffer->bind();
@@ -771,13 +771,13 @@ namespace flvr
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = glbin_framebuffer_manager.framebuffer(
-					FB_Render_RGBA, w, h);
+					flvr::FBRole::RenderFloat, w, h);
 				filter_buffer->bind();
 
 				glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 
-				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 
 				img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
 				//img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
@@ -795,17 +795,19 @@ namespace flvr
 
 				if (img_shader && img_shader->valid())
 					img_shader->release();
+
+				blend_buffer->unbind(GL_COLOR_ATTACHMENT0);
 			}
 
 			//go back to normal
-			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_); 
+			flvr::Framebuffer::bind(cur_framebuffer_);
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 			if (noise_red_ && cm_mode != 2)
-				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 			else
-				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 
 			img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
@@ -826,6 +828,11 @@ namespace flvr
 
 			if (blend_buffer)
 				blend_buffer->unprotect();
+
+			if (noise_red_ && cm_mode != 2)
+				filter_buffer->unbind(GL_COLOR_ATTACHMENT0);
+			else
+				blend_buffer->unbind(GL_COLOR_ATTACHMENT0);
 		}
 
 		// Reset the blend functions after MIP
@@ -833,7 +840,7 @@ namespace flvr
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)
@@ -943,7 +950,7 @@ namespace flvr
 
 		//mask frame buffer object
 		Framebuffer* fbo_mask =
-			glbin_framebuffer_manager.framebuffer(FB_3D_Int, 0, 0);
+			glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
 		if (fbo_mask)
 			fbo_mask->bind();
 
@@ -1136,7 +1143,7 @@ namespace flvr
 		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
 
 		//unbind framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
+		flvr::Framebuffer::bind(cur_framebuffer_);
 
 		//release seg shader
 		if (seg_shader && seg_shader->valid())
@@ -1321,7 +1328,7 @@ namespace flvr
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
 		Framebuffer* fbo_calc =
-			glbin_framebuffer_manager.framebuffer(FB_3D_Int, 0, 0);
+			glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
 		if (fbo_calc)
 			fbo_calc->bind();
 

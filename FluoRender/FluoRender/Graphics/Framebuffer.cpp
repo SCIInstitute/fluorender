@@ -28,6 +28,7 @@
 
 #include <GL/glew.h>
 #include <Framebuffer.h>
+#include <algorithm>
 
 namespace flvr
 {
@@ -237,6 +238,11 @@ namespace flvr
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 	}
 
+	void Framebuffer::bind(unsigned int id)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, id);
+	}
+
 	void Framebuffer::unbind(unsigned int prev_id)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, prev_id);
@@ -420,7 +426,7 @@ namespace flvr
 		return false;
 	}
 
-	unsigned int Framebuffer::read_value(int px, int py)
+	unsigned int Framebuffer::read_pick(int px, int py)
 	{
 		if (!valid_ || attachments_.empty())
 			return 0;
@@ -444,6 +450,54 @@ namespace flvr
 		}
 
 		return 0; // No suitable attachment found
+	}
+
+	bool Framebuffer::read(int x, int y, int width, int height,
+		int ap, GLenum format, GLenum type, void* data)
+	{
+		if (!valid_ || !data || width <= 0 || height <= 0)
+			return false;
+
+		auto it = attachments_.find(ap);
+		if (it == attachments_.end() || !it->second || !it->second->valid())
+			return false;
+
+		// Save current framebuffer binding
+		GLint prevFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+
+		// Bind this framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, id_);
+
+		// Clamp read region to framebuffer size
+		int rx = std::clamp(x, 0, nx_ - 1);
+		int ry = std::clamp(y, 0, ny_ - 1);
+		int rw = std::min(width, nx_ - rx);
+		int rh = std::min(height, ny_ - ry);
+
+		// Read pixels from the specified attachment
+		glReadBuffer(ap); // Optional: if using multiple color attachments
+		glReadPixels(rx, ry, rw, rh, format, type, data);
+
+		// Restore previous framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, prevFramebuffer);
+
+		return true;
+	}
+
+	bool Framebuffer::read_default(int x, int y, int width, int height,
+								   GLenum format, GLenum type, void* data)
+	{
+		if (!data || width <= 0 || height <= 0)
+			return false;
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glReadBuffer(GL_BACK);
+
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(x, y, width, height, format, type, data);
+
+		return true;
 	}
 
 	FramebufferManager::FramebufferManager()

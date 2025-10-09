@@ -238,7 +238,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	if(blend_num_bits_ > 8)
 	{
 		blend_buffer = glbin_framebuffer_manager.framebuffer(
-			FB_Render_RGBA, w2, h2, buf_name);
+			flvr::FBRole::RenderFloat, w2, h2, buf_name);
 		if (!blend_buffer)
 			return;
 		blend_buffer->bind();
@@ -383,8 +383,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	glDepthMask(GL_TRUE);
 
 	//release texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D, 0);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_3D, 0);
 
 	//reset blending
 	glBlendEquation(GL_FUNC_ADD);
@@ -410,13 +410,13 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		{
 			//FILTERING
 			filter_buffer = glbin_framebuffer_manager.framebuffer(
-				FB_Render_RGBA, w, h);
+				flvr::FBRole::RenderFloat, w, h);
 			filter_buffer->bind();
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 
 			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
 			if (img_shader)
@@ -433,17 +433,19 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 			if (img_shader && img_shader->valid())
 				img_shader->release();
+
+			blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
 		}
 
 		//go back to normal
-		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
+		flvr::Framebuffer::bind(cur_framebuffer_);
 
 		glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 		if (noise_red_ /*&& colormap_mode_!=2*/)
-			filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 		else
-			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 
 		glEnable(GL_BLEND);
 		if (glbin_settings.m_update_order == 0)
@@ -470,11 +472,16 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 		if (blend_buffer)
 			blend_buffer->unprotect();
+
+		if (noise_red_)
+			filter_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+		else
+			blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
 	}
 
 	glDisable(GL_BLEND);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void MultiVolumeRenderer::draw_polygons_vol(
@@ -495,7 +502,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	Framebuffer* micro_blend_buffer = 0;
 	if (blend_slices_/* && colormap_mode_!=2*/)
 		micro_blend_buffer = glbin_framebuffer_manager.framebuffer(
-			FB_Render_RGBA, w, h);
+			flvr::FBRole::RenderFloat, w, h);
 
 	bool set_pointers = false;
 	if (!va_slices_ || !va_slices_->valid())
@@ -686,7 +693,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			//bind depth texture for rendering shadows
 			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
-				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 
 			std::vector<TextureBrick*> *bs = 0;
 			if (tex)
@@ -744,6 +751,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			// Release shader.
 			if (shader && shader->valid())
 				shader->release();
+			//unbind depth texture for rendering shadows
+			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
+				blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
 		}
 		location += idx_num*4;
 
@@ -753,9 +763,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		if (blend_slices_ /*&& colormap_mode_!=2*/)
 		{
 			//set buffer back
-			glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
+			flvr::Framebuffer::bind(cur_framebuffer_);
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-			micro_blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			micro_blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 			//blend
 			glBlendEquation(GL_FUNC_ADD);
 			if (glbin_settings.m_update_order == 0)
@@ -773,7 +783,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			vr_list_[0]->draw_view_quad();
 			if (img_shader && img_shader->valid())
 				img_shader->release();
-			glBindTexture(GL_TEXTURE_2D, 0);
+			micro_blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+			//glBindTexture(GL_TEXTURE_2D, 0);
 			glViewport(0, 0, w, h);
 		}
 	}

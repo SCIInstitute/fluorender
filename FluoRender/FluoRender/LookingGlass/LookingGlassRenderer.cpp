@@ -146,7 +146,7 @@ void LookingGlassRenderer::Setup()
 	//set up framebuffer for quilt
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FB_Render_RGBA, m_lg_data->quilt_width, m_lg_data->quilt_height, "quilt");
+			flvr::FBRole::RenderFloat, m_lg_data->quilt_width, m_lg_data->quilt_height, "quilt");
 	quilt_buffer->protect();
 
 /*	flvr::ShaderProgram* shader = 0;
@@ -227,17 +227,18 @@ void LookingGlassRenderer::Draw()
 	flvr::Framebuffer* view_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt view");
 	if (view_buffer)
-		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+		view_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
 	quad_va->draw();
 	shader->release();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	view_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	//move index for next
 	advance_views();
 
-	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+	quilt_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 	m_lg_controller->DrawInteropQuiltTextureGL(m_lg_data->wnd,
 		quilt_buffer->tex_id(GL_COLOR_ATTACHMENT0), PixelFormats::RGBA,
 		m_lg_data->quilt_width, m_lg_data->quilt_height,
@@ -253,7 +254,8 @@ void LookingGlassRenderer::Draw()
 
 	//draw quilt to view
 	//only draw the middle view
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	flvr::Framebuffer::bind(0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// reset viewport
 	glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
 	glClearDepth(1);
@@ -311,7 +313,8 @@ void LookingGlassRenderer::Draw()
 	rect_va->draw();
 	shader->release();
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	quilt_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 }
@@ -342,7 +345,7 @@ void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
 
 	flvr::Framebuffer* buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FB_Render_RGBA, nx, ny, "quilt view");
+			flvr::FBRole::RenderFloat, nx, ny, "quilt view");
 	if (buffer)
 		buffer->bind();
 }

@@ -33,6 +33,10 @@
 #include <map>
 #include <memory>
 
+#ifndef __glew_h__
+typedef unsigned int GLenum;
+#endif
+
 namespace flvr
 {
 	enum class FBTexType
@@ -121,6 +125,7 @@ namespace flvr
 		void create();
 		void destroy();
 		void bind();
+		static void bind(unsigned int id);
 		void unbind(unsigned int prev_id = 0);
 		void protect() { protected_ = true; }
 		void unprotect() { protected_ = false; }
@@ -154,7 +159,11 @@ namespace flvr
 		std::string get_name() { return name_; }
 
 		//read pick value
-		unsigned int read_value(int, int);
+		unsigned int read_pick(int, int);
+		bool read(int x, int y, int width, int height,
+			int ap, GLenum format, GLenum type, void* data);
+		static bool read_default(int x, int y, int width, int height,
+			GLenum format, GLenum type, void* data);
 
 	private:
 		unsigned int id_ = 0;

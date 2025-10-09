@@ -5150,9 +5150,14 @@ void RenderView::ReadPixels(
 		h = m_gl_size.h();
 	}
 
+	if (fp32)
+		*image = new float[w*h*chann];
+	else
+		*image = new unsigned char[w*h*chann];
+
 	if (m_enlarge || fp32)
 	{
-		glActiveTexture(GL_TEXTURE0);
+		//glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* final_buffer =
 			glbin_framebuffer_manager.framebuffer(
 				"final");
@@ -5160,7 +5165,7 @@ void RenderView::ReadPixels(
 		{
 			//draw the final buffer to itself
 			final_buffer->bind();
-			final_buffer->bind_texture(GL_COLOR_ATTACHMENT0);
+			final_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 		}
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -5184,21 +5189,18 @@ void RenderView::ReadPixels(
 
 		if (img_shader && img_shader->valid())
 			img_shader->release();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		final_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
+		final_buffer->read(x, y, w, h,
+			GL_COLOR_ATTACHMENT0,
+			chann == 3 ? GL_RGB : GL_RGBA,
+			fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
 	}
-
-	glPixelStorei(GL_PACK_ROW_LENGTH, w);
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	if (fp32)
-		*image = new float[w*h*chann];
 	else
-		*image = new unsigned char[w*h*chann];
-	glReadBuffer(GL_BACK);
-	glReadPixels(x, y, w, h,
-		chann == 3 ? GL_RGB : GL_RGBA,
-		fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
-	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+		flvr::Framebuffer::read_default(x, y, w, h,
+			chann == 3 ? GL_RGB : GL_RGBA,
+			fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
 
 	if (m_enlarge || fp32)
 		BindRenderBuffer();
@@ -5209,7 +5211,7 @@ void RenderView::ReadPixelsQuilt(
 	int& x, int& y, int& w, int& h,
 	void** image)
 {
-	glActiveTexture(GL_TEXTURE0);
+	//glActiveTexture(GL_TEXTURE0);
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt");
 	if (quilt_buffer)
@@ -7240,7 +7242,7 @@ void RenderView::DrawDP()
 			name = "peel buffer" + std::to_string(i);
 			peel_buffer =
 				glbin_framebuffer_manager.framebuffer(
-					flvr::FB_Depth_Float, nx, ny, name);
+					flvr::FBRole::Depth, nx, ny, name);
 			if (peel_buffer)
 			{
 				peel_buffer->bind();
@@ -7256,17 +7258,19 @@ void RenderView::DrawDP()
 			}
 			else
 			{
-				glActiveTexture(GL_TEXTURE15);
+				//glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(i-1);
 				peel_buffer =
 					glbin_framebuffer_manager.framebuffer(name);
 				if (peel_buffer)
-					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT);
-				glActiveTexture(GL_TEXTURE0);
+					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
+				//glActiveTexture(GL_TEXTURE0);
 				DrawMeshes(1);
-				glActiveTexture(GL_TEXTURE15);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glActiveTexture(GL_TEXTURE0);
+				//glActiveTexture(GL_TEXTURE15);
+				//glBindTexture(GL_TEXTURE_2D, 0);
+				//glActiveTexture(GL_TEXTURE0);
+				if (peel_buffer)
+					peel_buffer->unbind_texture(GL_DEPTH_ATTACHMENT);
 			}
 		}
 
