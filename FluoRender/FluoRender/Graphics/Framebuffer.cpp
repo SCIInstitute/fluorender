@@ -131,6 +131,7 @@ namespace flvr
 
 		glActiveTexture(GL_TEXTURE0 + tex_unit_);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE0);
 		tex_unit_ = -1;
 	}
 
@@ -199,9 +200,9 @@ namespace flvr
 		}
 	}
 
-	Framebuffer::Framebuffer(const FBTexConfig& config, int nx, int ny,
+	Framebuffer::Framebuffer(const FBRole& role, int nx, int ny,
 		const std::string &name):
-		config_(config), nx_(nx), ny_(ny),
+		role_(role), nx_(nx), ny_(ny),
 		name_(name)
 	{
 	}
@@ -236,9 +237,9 @@ namespace flvr
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 	}
 
-	void Framebuffer::unbind()
+	void Framebuffer::unbind(unsigned int prev_id)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, prev_id);
 	}
 
 	bool Framebuffer::attach_texture(int ap, const std::shared_ptr<FramebufferTexture>& tex)
@@ -246,24 +247,29 @@ namespace flvr
 		if (!valid_ || !tex || tex->id() == 0)
 			return false;
 
-		glBindFramebuffer(GL_FRAMEBUFFER, id_);
+		GLint prevFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+		bind();
 
-		switch (config_.type)
+		switch (role_)
 		{
-		case FBTexType::Render_RGBA:
-		case FBTexType::UChar_RGBA:
-		case FBTexType::Render_Int32:
-		case FBTexType::Depth_Float:
+		case FBRole::RenderFloat:
+		case FBRole::RenderFloatMipmap:
+		case FBRole::RenderUChar:
+		case FBRole::Pick:
+		case FBRole::Depth:
 		default:
 			glFramebufferTexture2D(GL_FRAMEBUFFER, ap, GL_TEXTURE_2D, tex->id(), 0);
 			break;
 
-		case FBTexType::Ext_3D:
+		case FBRole::Volume:
 			// This type should be handled by the second overload using tex_id + layer
 			return false;
 		}
 
 		attachments_[ap] = tex;
+		unbind(prevFramebuffer);
+
 		return true;
 	}
 
@@ -272,24 +278,29 @@ namespace flvr
 		if (!valid_ || tex_id == 0)
 			return false;
 
-		glBindFramebuffer(GL_FRAMEBUFFER, id_);
+		GLint prevFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+		bind();
 
-		switch (config_.type)
+		switch (role_)
 		{
-		case FBTexType::Render_RGBA:
-		case FBTexType::UChar_RGBA:
-		case FBTexType::Render_Int32:
-		case FBTexType::Depth_Float:
+		case FBRole::RenderFloat:
+		case FBRole::RenderFloatMipmap:
+		case FBRole::RenderUChar:
+		case FBRole::Pick:
+		case FBRole::Depth:
 		default:
 			glFramebufferTexture(GL_FRAMEBUFFER, ap, tex_id, 0);
 			break;
 
-		case FBTexType::Ext_3D:
+		case FBRole::Volume:
 			glFramebufferTexture3D(GL_FRAMEBUFFER, ap, GL_TEXTURE_3D, tex_id, 0, layer);
 			break;
 		}
 
 		attachments_.erase(ap); // External texture, not tracked via shared_ptr
+		unbind(prevFramebuffer);
+
 		return true;
 	}
 
@@ -297,11 +308,14 @@ namespace flvr
 	{
 		if (!valid_ || !tex) return;
 
+		GLint prevFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+		bind();
+
 		for (auto it = attachments_.begin(); it != attachments_.end();)
 		{
 			if (it->second == tex)
 			{
-				glBindFramebuffer(GL_FRAMEBUFFER, id_);
 				glFramebufferTexture(GL_FRAMEBUFFER, it->first, 0, 0);
 				it = attachments_.erase(it);
 			}
@@ -310,94 +324,91 @@ namespace flvr
 				++it;
 			}
 		}
+
+		unbind(prevFramebuffer);
 	}
 
 	void Framebuffer::detach_texture(int ap)
 	{
 		if (!valid_) return;
 
-		glBindFramebuffer(GL_FRAMEBUFFER, id_);
+		GLint prevFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+		bind();
+
 		glFramebufferTexture(GL_FRAMEBUFFER, ap, 0, 0);
 		attachments_.erase(ap);
+
+		unbind(prevFramebuffer);
 	}
 
-	void Framebuffer::bind_texture(int ap)
+	void Framebuffer::bind_texture(int ap, int tex_unit)
 	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-		{
-			if ((*it).first == ap)
-				(*it).second->bind();
-		}
+		auto it = attachments_.find(ap);
+		if (it == attachments_.end() || !it->second || !it->second->valid())
+			return;
+		it->second->bind(tex_unit);
+	}
+
+	void Framebuffer::unbind_texture(int ap)
+	{
+		auto it = attachments_.find(ap);
+		if (it == attachments_.end() || !it->second || !it->second->valid())
+			return;
+		it->second->unbind();
 	}
 
 	unsigned int Framebuffer::tex_id(int ap)
 	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-		{
-			if ((*it).first == ap)
-				return (*it).second->id_;
-		}
-		return 0;
+		auto it = attachments_.find(ap);
+		if (it == attachments_.end() || !it->second || !it->second->valid())
+			return 0;
+		return it->second->id();
 	}
 
 	void Framebuffer::resize(int nx, int ny)
 	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-		{
-			if ((*it).second->valid())
-				(*it).second->resize(nx, ny);
+		for (auto& [ap, tex] : attachments_) {
+			if (tex && tex->valid()) {
+				tex->resize(nx, ny);
+				tex->unbind(); // Ensures clean state per texture
+			}
 		}
-		nx_ = nx; ny_ = ny;
-		glBindTexture(GL_TEXTURE_2D, 0);
+		nx_ = nx;
+		ny_ = ny;
 	}
 
-	bool Framebuffer::match(FBType type)
+	void Framebuffer::generate_mipmap(int ap)
+	{
+		if (role_ != FBRole::RenderFloatMipmap)
+			return;
+		auto it = attachments_.find(ap);
+		if (it == attachments_.end() || !it->second || !it->second->valid())
+			return;
+		it->second->bind(0);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		it->second->unbind();
+	}
+
+	bool Framebuffer::match(const FBRole& role)
 	{
 		if (protected_)
 			return false;
-		if (type_ == type)
+		if (role_ == role)
 			return true;
 		return false;
 	}
 
-	bool Framebuffer::match(FBType type,
+	bool Framebuffer::match(const FBRole& role,
 		int nx, int ny)
 	{
 		if (protected_)
 			return false;
-		if (type_ == type &&
+		if (role_ == role &&
 			nx_ == nx &&
 			ny_ == ny)
 			return true;
 		return false;
-	}
-
-	void Framebuffer::protect()
-	{
-		protected_ = true;
-	}
-
-	void Framebuffer::unprotect()
-	{
-		protected_ = false;
-	}
-
-	bool Framebuffer::valid()
-	{
-		return valid_;
-	}
-
-	unsigned int Framebuffer::id()
-	{
-		return id_;
-	}
-
-	bool Framebuffer::match_size(int nx, int ny)
-	{
-		return (nx == nx_) && (ny == ny_);
 	}
 
 	bool Framebuffer::match(const std::string &name)
@@ -409,24 +420,30 @@ namespace flvr
 		return false;
 	}
 
-	void Framebuffer::set_name(const std::string &name)
-	{
-		name_ = name;
-	}
-
-	void Framebuffer::clear_name()
-	{
-		name_ = "";
-	}
-
 	unsigned int Framebuffer::read_value(int px, int py)
 	{
-		if (type_ != FB_Pick_Int32_Float)
+		if (!valid_ || attachments_.empty())
 			return 0;
-		unsigned int value = 0;
-		glReadPixels(px, py, 1, 1, GL_RED_INTEGER,
-			GL_UNSIGNED_INT, (GLvoid*)&value);
-		return value;
+		if (px < 0 || px >= nx_ || py < 0 || py >= ny_)
+			return 0;
+
+		GLint prevFramebuffer = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+
+		// Find the first attachment with Render_Int32 type
+		for (const auto& [ap, tex] : attachments_)
+		{
+			if (tex && tex->valid() && tex->config_.type == FBTexType::Render_Int32)
+			{
+				bind();
+				unsigned int value = 0;
+				glReadPixels(px, py, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
+				unbind(prevFramebuffer);
+				return value;
+			}
+		}
+
+		return 0; // No suitable attachment found
 	}
 
 	FramebufferManager::FramebufferManager()
@@ -435,141 +452,132 @@ namespace flvr
 
 	FramebufferManager::~FramebufferManager()
 	{
-		//release all opengl resources managed by the manager
-		for (auto it = fb_list_.begin();
-			it != fb_list_.end(); ++it)
-			delete *it;
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-			delete *it;
 	}
 
 	void FramebufferManager::clear()
 	{
-		for (auto it = fb_list_.begin();
-			it != fb_list_.end(); ++it)
-			delete *it;
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-			delete *it;
 		fb_list_.clear();
 		tex_list_.clear();
 	}
 
 	Framebuffer* FramebufferManager::framebuffer(
-		FBType type, int nx, int ny,
-		const std::string &name)
+		const FBRole& role, int nx, int ny,
+		const std::string& name)
 	{
-		if (name != "")
+		// First, try to match by name
+		if (!name.empty())
 		{
-			for (auto it = fb_list_.begin();
-				it != fb_list_.end(); ++it)
+			for (const auto& fb : fb_list_)
 			{
-				if ((*it)->match(name))
+				if (fb->match(name))
 				{
-					//size may not match
-					//how to manage size change more efficiently needs further consideration
-					if (!(*it)->match_size(nx, ny))
-						(*it)->resize(nx, ny);
-					return *it;
+					if (!fb->match_size(nx, ny))
+						fb->resize(nx, ny);
+					return fb.get();
 				}
 			}
 		}
-		for (auto it = fb_list_.begin();
-			it != fb_list_.end(); ++it)
+
+		// Then, try to match by role
+		for (const auto& fb : fb_list_)
 		{
-			if ((*it)->match(type))
+			if (fb->match(role))
 			{
-				//size may not match
-				//how to manage size change more efficiently needs further consideration
-				if (!(*it)->match_size(nx, ny))
-					(*it)->resize(nx, ny);
-				(*it)->set_name(name);
-				return *it;
+				if (!fb->match_size(nx, ny))
+					fb->resize(nx, ny);
+				fb->set_name(name);
+				return fb.get();
 			}
 		}
 
-		//create new framebuffer
-		Framebuffer* fb = new Framebuffer(type, nx, ny, name);
+		// Create new framebuffer
+		auto fb = std::make_shared<Framebuffer>(role, nx, ny, name);
 		fb->create();
-		//add to lists
 		fb_list_.push_back(fb);
 
-		switch (type)
+		// Create and attach textures based on role
+		switch (role)
 		{
-		case FB_Render_RGBA:
-			{
-				//create new texture
-				FramebufferTexture* tex =
-					new FramebufferTexture(FBTex_Render_RGBA, nx, ny);
-				tex->create();
-				//attach texture
-				fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
-				//add to lists
-				tex_list_.push_back(tex);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
+		case FBRole::RenderFloat:
+		{
+			FBTexConfig config;
+			config.type = FBTexType::Render_RGBA;
+			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
+			tex->create();
+			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
+			tex_list_.push_back(tex);
 			break;
-		case FB_UChar_RGBA:
-			{
-				//create new texture
-				FramebufferTexture* tex =
-					new FramebufferTexture(FBTex_UChar_RGBA, nx, ny);
-				tex->create();
-				//attach texture
-				fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
-				//add to lists
-				tex_list_.push_back(tex);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
+		}
+		case FBRole::RenderUChar:
+		{
+			FBTexConfig config;
+			config.type = FBTexType::UChar_RGBA;
+			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
+			tex->create();
+			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
+			tex_list_.push_back(tex);
 			break;
-		case FB_Pick_Int32_Float:
-			{
-				FramebufferTexture* tex_color =
-					new FramebufferTexture(FBTex_Render_Int32, nx, ny);
-				tex_color->create();
-				FramebufferTexture* tex_depth =
-					new FramebufferTexture(FBTex_Depth_Float, nx, ny);
-				tex_depth->create();
-				//attach textures
-				fb->attach_texture(GL_COLOR_ATTACHMENT0, tex_color);
-				fb->attach_texture(GL_DEPTH_ATTACHMENT, tex_depth);
-				//add to lists
-				tex_list_.push_back(tex_color);
-				tex_list_.push_back(tex_depth);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
+		}
+		case FBRole::RenderFloatMipmap:
+		{
+			FBTexConfig config;
+			config.type = FBTexType::Render_RGBA;
+			config.useMipmap = true;
+			config.minFilter = TexFilter::LinearMipmapLinear;
+			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
+			tex->create();
+			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex);
+			tex_list_.push_back(tex);
 			break;
-		case FB_Depth_Float:
-			{
-				//create new texture
-				FramebufferTexture* tex =
-					new FramebufferTexture(FBTex_Depth_Float, nx, ny);
-				tex->create();
-				//attach texture
-				fb->attach_texture(GL_DEPTH_ATTACHMENT, tex);
-				//add to lists
-				tex_list_.push_back(tex);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
+		}
+		case FBRole::Pick:
+		{
+			FBTexConfig color_config;
+			color_config.type = FBTexType::Render_Int32;
+			auto tex_color = std::make_shared<FramebufferTexture>(color_config, nx, ny);
+			tex_color->create();
+
+			FBTexConfig depth_config;
+			depth_config.type = FBTexType::Depth_Float;
+			auto tex_depth = std::make_shared<FramebufferTexture>(depth_config, nx, ny);
+			tex_depth->create();
+
+			fb->attach_texture(GL_COLOR_ATTACHMENT0, tex_color);
+			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex_depth);
+			tex_list_.push_back(tex_color);
+			tex_list_.push_back(tex_depth);
+			break;
+		}
+		case FBRole::Depth:
+		{
+			FBTexConfig config;
+			config.type = FBTexType::Depth_Float;
+			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
+			tex->create();
+			fb->attach_texture(GL_DEPTH_ATTACHMENT, tex);
+			tex_list_.push_back(tex);
+			break;
+		}
+		default:
 			break;
 		}
 
 		fb->set_name(name);
-		return fb;
+		return fb.get();
 	}
 
-	Framebuffer* FramebufferManager::framebuffer(const std::string &name)
+	Framebuffer* FramebufferManager::framebuffer(const std::string& name)
 	{
-		if (name == "")
-			return 0;
-		for (auto it = fb_list_.begin();
-			it != fb_list_.end(); ++it)
+		if (name.empty())
+			return nullptr;
+
+		for (const auto& fb : fb_list_)
 		{
-			if ((*it)->name_ == name)
-				return *it;
+			if (fb && fb->name_ == name)
+				return fb.get();
 		}
-		return 0;
+
+		return nullptr;
 	}
 
 }

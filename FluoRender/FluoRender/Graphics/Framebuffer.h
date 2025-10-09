@@ -63,6 +63,19 @@ namespace flvr
 		TexWrap wrapS = TexWrap::ClampToEdge;
 		TexWrap wrapT = TexWrap::ClampToEdge;
 	};
+	inline bool operator==(const FBTexConfig& a, const FBTexConfig& b)
+	{
+		return a.type == b.type &&
+				a.useMipmap == b.useMipmap &&
+				a.minFilter == b.minFilter &&
+				a.magFilter == b.magFilter &&
+				a.wrapS == b.wrapS &&
+				a.wrapT == b.wrapT;
+	}
+	inline bool operator!=(const FBTexConfig& a, const FBTexConfig& b)
+	{
+		return !(a == b);
+	}
 	class Framebuffer;
 	class FramebufferManager;
 	class FramebufferTexture
@@ -90,44 +103,54 @@ namespace flvr
 		friend class Framebuffer;
 	};
 
+	enum class FBRole
+	{
+		RenderFloat,
+		RenderFloatMipmap,
+		RenderUChar,
+		Pick,
+		Depth,
+		Volume
+	};
 	class Framebuffer
 	{
 	public:
-		Framebuffer(const FBTexConfig& config, int nx, int ny, const std::string &name);
+		Framebuffer(const FBRole& role, int nx, int ny, const std::string &name);
 		~Framebuffer();
 
 		void create();
 		void destroy();
 		void bind();
-		void unbind();
-		void protect();
-		void unprotect();
-		bool valid();
-		unsigned int id();
+		void unbind(unsigned int prev_id = 0);
+		void protect() { protected_ = true; }
+		void unprotect() { protected_ = false; }
+		bool valid() { return valid_; }
+		unsigned int id() { return id_; }
 
 		bool attach_texture(int ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(int ap, unsigned int tex_id, int layer=0);
 		void detach_texture(const std::shared_ptr<FramebufferTexture>& tex);
 		void detach_texture(int ap);
-		void bind_texture(int ap);
+		void bind_texture(int ap, int tex_unit);
+		void unbind_texture(int ap);
 		unsigned int tex_id(int ap);
 
-		bool match_size(int nx, int ny);
 		void resize(int nx, int ny);
 
 		//generate mipmap
 		void generate_mipmap(int ap);
 
+		bool match_size(int nx, int ny) { return (nx == nx_) && (ny == ny_); }
 		//match without size
-		bool match(const FBTexConfig& config);
+		bool match(const FBRole& role);
 		//match with size
-		bool match(const FBTexConfig& config, int, int);
+		bool match(const FBRole& role, int, int);
 		//match by name
 		bool match(const std::string &name);
 
 		//name represents its use
-		void set_name(const std::string &name);
-		void clear_name();
+		void set_name(const std::string& name) { name_ = name; }
+		void clear_name() { name_ = ""; }
 		std::string get_name() { return name_; }
 
 		//read pick value
@@ -135,7 +158,7 @@ namespace flvr
 
 	private:
 		unsigned int id_ = 0;
-		FBTexConfig config_;
+		FBRole role_;
 		int nx_ = 0;
 		int ny_ = 0;
 		std::string name_;//specify its use
@@ -153,7 +176,7 @@ namespace flvr
 		~FramebufferManager();
 		void clear();
 
-		Framebuffer* framebuffer(const FBTexConfig& config, int nx, int ny,
+		Framebuffer* framebuffer(const FBRole& role, int nx, int ny,
 			const std::string &name="");
 		Framebuffer* framebuffer(const std::string &name);
 
