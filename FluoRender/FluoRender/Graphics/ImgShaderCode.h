@@ -549,26 +549,31 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 	vec4 grad_sample;
 	float ang, dist, dense;
 
-	// Sample across mip levels
-	const int mip_levels = 4;
-	const int radius = 8;
+	const int mip_levels = 6;
+	const int base_radius = 10;
 
 	for (int level = 0; level < mip_levels; ++level) {
 		float scale = pow(2.0, float(level));
 		float lod = float(level);
-		float step = scale;
+		vec2 scaled_texel = texel * scale;
+
+		int radius = max(int(float(base_radius) / scale), mip_levels);
 
 		for (int i = -radius; i <= radius; ++i)
 		for (int j = -radius; j <= radius; ++j)
 		{
-			delta = vec2(float(i) * texel.x * step, float(j) * texel.y * step);
+			delta = vec2(float(i), float(j)) * scaled_texel;
 			sample_uv = uv + delta;
 			grad_sample = textureLod(tex0, sample_uv, lod);
 
+			if (grad_sample.z < 0.01) continue;
+
 			ang = dot(normalize(delta), normalize(grad_sample.xy));
-			dist = pow(float(i)*float(i) + float(j)*float(j), 0.8);
+			if (ang > 0.9) continue;
+
+			dist = pow(i*i + j*j + 1.0, 0.5); // gentler decay
 			dist = dist == 0.0 ? 0.0 : 1.0 / dist * zoom;
-			dense = clamp(0.02 + (3.0 - zoom) * 0.015, 0.02, 0.05);
+			dense = clamp(0.02 + (3.0 - zoom) * 0.02, 0.02, 0.08);
 
 			c += dense * (ang < -0.3 ? 1.0 : max(-ang + 0.7, 0.0)) * grad_sample.z * dist;
 		}

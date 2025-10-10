@@ -201,7 +201,6 @@ void LookingGlassRenderer::Draw()
 	m_finished = false;
 	//draw view tex to quilt
 	//bind quilt frame buffer
-	glActiveTexture(GL_TEXTURE0);
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt");
 	quilt_buffer->bind();

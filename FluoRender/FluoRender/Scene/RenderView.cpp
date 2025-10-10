@@ -5157,7 +5157,6 @@ void RenderView::ReadPixels(
 
 	if (m_enlarge || fp32)
 	{
-		//glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* final_buffer =
 			glbin_framebuffer_manager.framebuffer(
 				"final");
@@ -5190,8 +5189,6 @@ void RenderView::ReadPixels(
 		if (img_shader && img_shader->valid())
 			img_shader->release();
 		final_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, 0);
 		final_buffer->read(x, y, w, h,
 			GL_COLOR_ATTACHMENT0,
 			chann == 3 ? GL_RGB : GL_RGBA,
@@ -5211,7 +5208,6 @@ void RenderView::ReadPixelsQuilt(
 	int& x, int& y, int& w, int& h,
 	void** image)
 {
-	//glActiveTexture(GL_TEXTURE0);
 	flvr::Framebuffer* quilt_buffer =
 		glbin_framebuffer_manager.framebuffer("quilt");
 	if (quilt_buffer)
@@ -7200,7 +7196,6 @@ void RenderView::DrawDP()
 	flvr::Framebuffer* peel_buffer = 0;
 
 	//clear
-	//	glDrawBuffer(GL_BACK);
 	glClearDepth(1.0);
 	glClearColor(static_cast<GLfloat>(m_bg_color.r()), static_cast<GLfloat>(m_bg_color.g()), static_cast<GLfloat>(m_bg_color.b()), 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -7258,17 +7253,12 @@ void RenderView::DrawDP()
 			}
 			else
 			{
-				//glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(i-1);
 				peel_buffer =
 					glbin_framebuffer_manager.framebuffer(name);
 				if (peel_buffer)
 					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
-				//glActiveTexture(GL_TEXTURE0);
 				DrawMeshes(1);
-				//glActiveTexture(GL_TEXTURE15);
-				//glBindTexture(GL_TEXTURE_2D, 0);
-				//glActiveTexture(GL_TEXTURE0);
 				if (peel_buffer)
 					peel_buffer->unbind_texture(GL_DEPTH_ATTACHMENT);
 			}
@@ -7288,120 +7278,98 @@ void RenderView::DrawDP()
 			if (i == 0)
 			{
 				//draw volumes before the depth
-				//glActiveTexture(GL_TEXTURE15);
 				name = "peel buffer" + std::to_string(0);
 				peel_buffer =
 					glbin_framebuffer_manager.framebuffer(name);
 				if (peel_buffer)
 					peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
-				//glActiveTexture(GL_TEXTURE0);
 				DrawVolumes(1);
 				if (peel_buffer)
 					peel_buffer->unbind_texture(GL_DEPTH_ATTACHMENT);
-				//glActiveTexture(GL_TEXTURE15);
-				//glBindTexture(GL_TEXTURE_2D, 0);
-				//glActiveTexture(GL_TEXTURE0);
 			}
 			else
 			{
 				if (glbin_settings.m_peeling_layers == 1)
 				{
-					//i == glbin_settings.m_peeling_layers == 1
-					//glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
 						glbin_framebuffer_manager.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
 					fbs.insert(peel_buffer);
-					//glActiveTexture(GL_TEXTURE0);
 				}
 				else if (glbin_settings.m_peeling_layers == 2)
 				{
-					//glActiveTexture(GL_TEXTURE14);
 					name = "peel buffer" + std::to_string(0);
 					peel_buffer =
 						glbin_framebuffer_manager.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 14);
 					fbs.insert(peel_buffer);
-					//glActiveTexture(GL_TEXTURE15);
 					name = "peel buffer" + std::to_string(1);
 					peel_buffer =
 						glbin_framebuffer_manager.framebuffer(name);
 					if (peel_buffer)
 						peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
 					fbs.insert(peel_buffer);
-					//glActiveTexture(GL_TEXTURE0);
 				}
 				else if (glbin_settings.m_peeling_layers > 2)
 				{
 					if (i == glbin_settings.m_peeling_layers)
 					{
-						//glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-2);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 14);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(i-1);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE0);
 					}
 					else if (i == 1)
 					{
-						//glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(0);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 14);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(1);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE0);
 					}
 					else
 					{
-						//glActiveTexture(GL_TEXTURE13);
 						name = "peel buffer" + std::to_string(i-2);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 13);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE14);
 						name = "peel buffer" + std::to_string(i-1);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 14);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE15);
 						name = "peel buffer" + std::to_string(i);
 						peel_buffer =
 							glbin_framebuffer_manager.framebuffer(name);
 						if (peel_buffer)
 							peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 15);
 						fbs.insert(peel_buffer);
-						//glActiveTexture(GL_TEXTURE0);
 					}
 				}
 
 				//draw volumes
 				if (glbin_settings.m_peeling_layers == 1)
-					//i == glbin_settings.m_peeling_layers == 1
 					DrawVolumes(5);//draw volume after 15
 				else if (glbin_settings.m_peeling_layers == 2)
 				{
@@ -7428,7 +7396,6 @@ void RenderView::DrawDP()
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 				if (glbin_settings.m_peeling_layers == 1)
-					//i == glbin_settings.m_peeling_layers == 1
 					DrawMeshes(5);//draw mesh at 15
 				else if (glbin_settings.m_peeling_layers == 2)
 				{
@@ -7452,14 +7419,6 @@ void RenderView::DrawDP()
 					if (it)
 						it->unbind_texture(GL_DEPTH_ATTACHMENT);
 				}
-				//glActiveTexture(GL_TEXTURE13);
-				//glBindTexture(GL_TEXTURE_2D, 0);
-				//glActiveTexture(GL_TEXTURE14);
-				//glBindTexture(GL_TEXTURE_2D, 0);
-				//glActiveTexture(GL_TEXTURE15);
-				//glBindTexture(GL_TEXTURE_2D, 0);
-				//glActiveTexture(GL_TEXTURE0);
-
 			}
 		}
 
@@ -7883,8 +7842,6 @@ void RenderView::PrepFinalBuffer()
 	GetRenderSize(nx, ny);
 
 	//generate textures & buffer objects
-	//glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for final
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer(
@@ -7914,7 +7871,6 @@ void RenderView::DrawFinalBuffer()
 	BindRenderBuffer();
 
 	//draw the final buffer to the windows buffer
-	//glActiveTexture(GL_TEXTURE0);
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer("final");
 	if (final_buffer)
@@ -7943,8 +7899,6 @@ void RenderView::DrawFinalBuffer()
 	if (img_shader && img_shader->valid())
 		img_shader->release();
 	final_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	//compute the threshold value for picking volume
 	if (m_update_rot_ctr)
@@ -7969,8 +7923,6 @@ void RenderView::PrepVRBuffer()
 	GetRenderSize(nx, ny);
 
 	//generate textures & buffer objects
-	//glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
 	//frame buffer for one eye
 	std::string vr_buf_name;
 	if (m_vr_eye_idx)
@@ -8045,8 +7997,7 @@ void RenderView::DrawVRBuffer()
 
 	if (img_shader && img_shader->valid())
 		img_shader->release();
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, 0);
+
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
@@ -8169,15 +8120,12 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 		"final");
 	if (final_buffer)
 		final_buffer->bind();
-	//glActiveTexture(GL_TEXTURE0);
 	if (chann_buffer)
 	{
 		//build mipmap
 		chann_buffer->generate_mipmap(GL_COLOR_ATTACHMENT0);
 		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 	}
-	//glGenerateMipmap(GL_TEXTURE_2D);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -8350,7 +8298,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 			}
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
-			//glActiveTexture(GL_TEXTURE0);
 			flvr::Framebuffer* final_buffer =
 				glbin_framebuffer_manager.framebuffer("final");
 			if (final_buffer)
@@ -8372,7 +8319,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 
 			if (final_buffer)
 				final_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-			//glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		//bind the fbo
@@ -8443,7 +8389,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 			//DBGPRINT(L"chan buffer cleared\n");
 		}
-		//glActiveTexture(GL_TEXTURE0);
 		if (overlay_buffer)
 		{
 			//ok to unprotect
@@ -8540,7 +8485,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		//glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* temp_buffer =
 			glbin_framebuffer_manager.framebuffer(
 				"temporary");
@@ -8549,7 +8493,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 			//bind tex from temp buffer
 			//it becomes unprotected afterwards
 			temp_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
-			//temp_buffer->unprotect();
 		}
 		glDisable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
@@ -8567,18 +8510,13 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 			img_shader->release();
 		if (temp_buffer)
 			temp_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	//glActiveTexture(GL_TEXTURE0);
 	if (chann_buffer)
 	{
 		chann_buffer->generate_mipmap(GL_COLOR_ATTACHMENT0);
 		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 	}
-	//build mipmap
-	//glGenerateMipmap(GL_TEXTURE_2D);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	if (m_vol_method == VOL_METHOD_COMP)
@@ -8613,16 +8551,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 
 	vd->GetVR()->set_shading(shading);
 	vd->SetColormapMode(color_mode);
-
-	//if vd is duplicated
-	//if (glbin_settings.m_mem_swap &&
-	//	flvr::TextureRenderer::get_done_current_chan())
-	//{
-	//	vector<flvr::TextureBrick*> *bricks =
-	//		vd->GetTexture()->get_bricks();
-	//	for (int i = 0; i < bricks->size(); i++)
-	//		(*bricks)[i]->set_drawn(false);
-	//}
 }
 
 void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)
@@ -8681,7 +8609,6 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 			}
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
-			//glActiveTexture(GL_TEXTURE0);
 			flvr::Framebuffer* final_buffer =
 				glbin_framebuffer_manager.framebuffer("final");
 			if (final_buffer)
@@ -8702,7 +8629,6 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 				img_shader->release();
 			if (final_buffer)
 				final_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-			//glBindTexture(GL_TEXTURE_2D, 0);
 		}
 		//bind the fbo
 		if (chann_buffer)
@@ -8754,7 +8680,6 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 		//restore temp buffer to final buffer
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		//glActiveTexture(GL_TEXTURE0);
 		flvr::Framebuffer* temp_buffer =
 			glbin_framebuffer_manager.framebuffer(
 			"temporary");
@@ -8781,18 +8706,13 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 			img_shader->release();
 		if (temp_buffer)
 			temp_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	//glActiveTexture(GL_TEXTURE0);
 	if (chann_buffer)
 	{
 		chann_buffer->generate_mipmap(GL_COLOR_ATTACHMENT0);
 		chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 	}
-	//build mipmap
-	//glGenerateMipmap(GL_TEXTURE_2D);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glEnable(GL_BLEND);
 	if (m_vol_method == VOL_METHOD_COMP)
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -8823,16 +8743,6 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 		img_shader->release();
 	if (chann_buffer)
 		chann_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-
-	//if vd is duplicated
-	//if (glbin_settings.m_mem_swap &&
-	//	flvr::TextureRenderer::get_done_current_chan())
-	//{
-	//	vector<flvr::TextureBrick*> *bricks =
-	//		vd->GetTexture()->get_bricks();
-	//	for (int i = 0; i < bricks->size(); i++)
-	//		(*bricks)[i]->set_drawn(false);
-	//}
 }
 
 void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
@@ -8889,7 +8799,6 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 		glbin_framebuffer_manager.framebuffer("channel");
 	if (chann_buffer)
 		chann_buffer->bind();
-	//glActiveTexture(GL_TEXTURE0);
 	if (overlay_buffer)
 	{
 		//ok to unprotect
@@ -9084,7 +8993,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		//glActiveTexture(GL_TEXTURE0);
+
 		if (overlay_buffer)
 		{
 			//ok to unprotect
@@ -9107,7 +9016,6 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 		img_shader->setLocalParam(1,
 			glbin_settings.m_shadow_dir_x,
 			glbin_settings.m_shadow_dir_y, 0.0, 0.0);
-
 		//2d adjustment
 
 		DrawViewQuad();
@@ -9122,16 +9030,11 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 			glbin_framebuffer_manager.framebuffer("channel");
 		if (chann_buffer)
 			chann_buffer->bind();
-		//glActiveTexture(GL_TEXTURE0);
 		if (grad_mip_buffer)
 		{
 			grad_mip_buffer->generate_mipmap(GL_COLOR_ATTACHMENT0);
 			grad_mip_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
-			//build mipmap
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			//glGenerateMipmap(GL_TEXTURE_2D);
 		}
-		//glActiveTexture(GL_TEXTURE1);
 		if (chann_buffer)
 			chann_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 1);
 		glEnable(GL_BLEND);
@@ -9161,10 +9064,6 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 			chann_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
 	}
 
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-	//glActiveTexture(GL_TEXTURE0);
-
 	glBlendEquation(GL_FUNC_ADD);
 }
 
@@ -9182,7 +9081,6 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 		grad_mip_buffer->bind();
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	//glActiveTexture(GL_TEXTURE0);
 	std::string name = "peel buffer" + std::to_string(0);
 	flvr::Framebuffer* peel_buffer =
 		glbin_framebuffer_manager.framebuffer(name);
@@ -9218,7 +9116,6 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 	//
 	//bind fbo for final composition
 	BindRenderBuffer();
-	//glActiveTexture(GL_TEXTURE0);
 	if (grad_mip_buffer)
 	{
 		grad_mip_buffer->generate_mipmap(GL_COLOR_ATTACHMENT0);
@@ -9227,10 +9124,8 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
-	//glActiveTexture(GL_TEXTURE1);
 	if (peel_buffer)
 		peel_buffer->bind_texture(GL_DEPTH_ATTACHMENT, 1);
-	//glActiveTexture(GL_TEXTURE2);
 	flvr::Framebuffer* final_buffer =
 		glbin_framebuffer_manager.framebuffer("final");
 	if (final_buffer)
@@ -9265,10 +9160,6 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 		peel_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
 	if (final_buffer)
 		final_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -9552,7 +9443,6 @@ void RenderView::DisplayStroke()
 		return;
 
 	//draw the final buffer to the windows buffer
-	//glActiveTexture(GL_TEXTURE0);
 	paint_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -9572,7 +9462,6 @@ void RenderView::DisplayStroke()
 	if (paint_buffer)
 		paint_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
 
-	//glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_DEPTH_TEST);
 }
 
