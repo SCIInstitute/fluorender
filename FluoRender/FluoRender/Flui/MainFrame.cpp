@@ -1071,10 +1071,10 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 		glbin_current.ann_data.lock().get());
 
 	//clear mesh bounds
-	glbin_data_manager.ClearMeshSelection();
-	auto md = glbin_current.mesh_data.lock();
-	if (md)
-		md->SetDrawBounds(true);
+	//glbin_data_manager.ClearMeshSelection();
+	//auto md = glbin_current.mesh_data.lock();
+	//if (md)
+	//	md->SetDrawBounds(true);
 
 	bool update_all = vc.empty();
 	bool bval;

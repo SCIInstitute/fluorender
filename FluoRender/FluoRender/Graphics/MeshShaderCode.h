@@ -172,7 +172,7 @@ inline constexpr const char* MSH_FRAG_UNIFORMS_MATERIAL = R"GLSHDR(
 uniform vec4 loc0;//ambient color
 uniform vec4 loc1;//diffuse color
 uniform vec4 loc2;//specular color
-uniform vec4 loc3;//(shine, alpha, 0, 0)
+uniform vec4 loc3;//(shine, alpha, dirx, diry)
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_DP = R"GLSHDR(
@@ -248,7 +248,7 @@ inline constexpr const char* MSH_FRAG_BODY_MATL_LIGHT = R"GLSHDR(
 	//MSH_FRAG_BODY_MATL_LIGHT
 	vec4 spec = vec4(0.0);
 	vec3 eye = vec3(0.0, 0.0, 1.0);
-	vec3 l_dir = normalize(vec3(-0.3, 0.4, 1.0));
+	vec3 l_dir = normalize(vec3(loc3.z, loc3.w, 1.0));
 	vec3 n = normalize(OutNormal);
 	if (dot(n, l_dir) < 0.0)
 		n = -n;
