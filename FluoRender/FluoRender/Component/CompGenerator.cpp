@@ -2468,7 +2468,7 @@ bool ComponentGenerator::GetAutoThreshold()
 	if (vd->IsAutoThresholdValid())
 		return false;
 	double threshold = vd->GetAutoThreshold();
-	if (threshold != m_thresh)
+	if (threshold >= 0.0 && threshold != m_thresh)
 	{
 		m_thresh = threshold;
 		glbin_vol_selector.SetBrushSclTranslate(m_thresh);

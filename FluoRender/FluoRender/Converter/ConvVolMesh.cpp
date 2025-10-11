@@ -159,7 +159,7 @@ bool ConvVolMesh::GetAutoThreshold()
 	if (vd->IsAutoThresholdValid())
 		return false;
 	double threshold = vd->GetAutoThreshold();
-	if (threshold != m_iso)
+	if (threshold >= 0.0 && threshold != m_iso)
 	{
 		m_iso = threshold;
 		glbin_comp_generator.SetThresh(m_iso);

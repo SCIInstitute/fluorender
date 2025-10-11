@@ -2721,6 +2721,8 @@ double VolumeData::GetAutoThreshold()
 	if (m_auto_threshold < 0.0)
 	{
 		ComputeHistogram(true);
+		if (m_hist.empty())
+			return m_auto_threshold;
 		size_t bins = m_hist.size() - 1;
 		if (bins > 1)
 		{

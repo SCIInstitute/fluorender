@@ -741,7 +741,7 @@ bool VolumeSelector::GetAutoThreshold()
 	if (m_vd->IsAutoThresholdValid())
 		return false;
 	double threshold = m_vd->GetAutoThreshold();
-	if (threshold != m_scl_translate)
+	if (threshold >= 0.0 && threshold != m_scl_translate)
 	{
 		m_scl_translate = threshold;
 		glbin_comp_generator.SetThresh(m_scl_translate);
