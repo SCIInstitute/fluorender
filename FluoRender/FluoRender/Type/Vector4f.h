@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <iosfwd>
 #include <iostream>
+#include <iomanip>
 
 #ifndef __glew_h__
 typedef float GLfloat;

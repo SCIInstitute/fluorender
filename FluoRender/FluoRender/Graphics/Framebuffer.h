@@ -28,6 +28,8 @@
 #ifndef Framebuffer_h
 #define Framebuffer_h
 
+#include <Vector4f.h>
+#include <Vector4i.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -36,6 +38,7 @@
 
 #ifndef __glew_h__
 typedef unsigned int GLenum;
+typedef float GLfloat;
 #endif
 
 namespace flvr
@@ -133,6 +136,42 @@ namespace flvr
 		static AttachmentPoint Stencil() { return {Type::Stencil}; }
 		static AttachmentPoint DepthStencil() { return {Type::DepthStencil}; }
 	};
+	enum class FaceWinding
+	{
+		Front, Back, Off
+	};
+
+	struct FramebufferState
+	{
+		FramebufferState();
+
+		// General toggles
+		bool enableMultisample = false;
+		bool enableDepthTest = false;
+		bool enableBlend = false;
+		bool enableScissorTest = false;
+		bool enableCullFace = false;
+
+		// Blend settings
+		GLenum blendSrc;
+		GLenum blendDst;
+		GLenum blendEquation;
+
+		// Depth settings
+		GLenum depthFunc;
+		GLfloat clearDepth = 1.0f;
+
+		// Cull settings
+		FaceWinding faceWinding = FaceWinding::Off;
+		GLenum cullFace;
+
+		// Clear color
+		fluo::Vector4f clearColor = {1.0f, 1.0f, 1.0f, 1.0f};
+
+		// Scissor rectangle
+		fluo::Vector4i scissorRect = {0, 0, 0, 0}; // x, y, width, height
+	};
+
 	class Framebuffer
 	{
 	public:
@@ -145,6 +184,13 @@ namespace flvr
 		void unprotect() { protected_ = false; }
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
+
+		//states
+		void apply_state();
+		void restore_state();
+		FramebufferState capture_current_state();
+		FramebufferState default_state();
+		void clear(bool color, bool depth, bool stencil);
 
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer=0);
@@ -190,6 +236,9 @@ namespace flvr
 		bool valid_ = false;
 		bool protected_ = false;
 		std::map<int, std::shared_ptr<FramebufferTexture>> attachments_;
+		//states
+		FramebufferState state_;
+		FramebufferState prev_state_;
 
 	private:
 		void bind();
