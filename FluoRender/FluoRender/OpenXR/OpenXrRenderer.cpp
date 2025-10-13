@@ -395,7 +395,7 @@ void OpenXrRenderer::EndFrame()
 	}
 }
 
-void OpenXrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
+void OpenXrRenderer::Draw(const std::vector<std::shared_ptr<flvr::Framebuffer>> &fbos)
 {
 	if (!m_app_running || !m_session_running)
 		return;

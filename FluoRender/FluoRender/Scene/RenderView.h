@@ -69,10 +69,6 @@ DEALINGS IN THE SOFTWARE.
 #define INFO_Y		64
 #define INFO_Z		128
 
-#ifndef __glew_h__
-typedef unsigned int GLuint;
-#endif // !__glew_h__
-
 class XboxController;
 class RenderViewPanel;
 class RenderCanvas;
@@ -603,8 +599,6 @@ private:
 	bool m_draw_brush;
 	bool m_paint_enable;
 	bool m_paint_display;
-	//2d frame buffers
-	GLuint m_cur_framebuffer;
 	//paint buffer
 	bool m_clear_paint;
 
@@ -828,11 +822,9 @@ private:
 	void BindRenderBuffer();
 	//draw out the framebuffer after composition
 	void PrepFinalBuffer();
-	void ClearFinalBuffer();
 	void DrawFinalBuffer();
 	//vr buffers
 	void PrepVRBuffer();
-	void ClearVRBuffer();
 	void DrawVRBuffer();
 	//different volume drawing modes
 	void DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);

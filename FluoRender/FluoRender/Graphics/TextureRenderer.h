@@ -187,9 +187,6 @@ namespace flvr
 		TextureRenderer(const TextureRenderer&);
 		virtual ~TextureRenderer();
 
-		void set_cur_framebuffer(GLuint cur_framebuffer)
-		{ cur_framebuffer_ = cur_framebuffer; }
-
 		//set the texture for rendering
 		void set_texture(const std::shared_ptr<Texture>& tex);
 		void reset_texture();
@@ -294,9 +291,6 @@ namespace flvr
 		double sample_rate_;
 		size_t num_slices_;
 		bool imode_;
-
-		//saved framebuffer
-		GLuint cur_framebuffer_;
 
 		//2d mask texture
 		GLuint tex_2d_mask_;

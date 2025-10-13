@@ -83,7 +83,7 @@ public:
 
 	void BeginFrame() override;
 	void EndFrame() override;
-	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
+	void Draw(const std::vector<std::shared_ptr<flvr::Framebuffer>> &fbos) override;
 
 protected:
 	std::string m_app_name;

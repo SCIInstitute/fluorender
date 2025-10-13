@@ -57,11 +57,6 @@ namespace flvr
 		MultiVolumeRenderer(MultiVolumeRenderer&);
 		virtual ~MultiVolumeRenderer();
 
-		void set_cur_framebuffer(GLuint cur_framebuffer)
-		{
-			cur_framebuffer_ = cur_framebuffer;
-		}
-
 		//set viewport
 		void set_viewport(GLint vp[4]);
 
@@ -124,9 +119,6 @@ namespace flvr
 		int blend_num_bits_;
 		bool blend_slices_;
 
-		//saved framebuffer
-		GLuint cur_framebuffer_;
-
 		//scale factor
 		bool noise_red_;
 
@@ -153,7 +145,7 @@ namespace flvr
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
 			int quota_bricks_chan,
-			Framebuffer* blend_buffer);
+			const std::shared_ptr<Framebuffer>& blend_buffer);
 
 		//find out combined bricks in interactive mode
 		std::vector<TextureBrick*> *get_combined_bricks(

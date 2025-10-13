@@ -217,20 +217,20 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	}
 	m_vd->GetVR()->set_mouse_vec(mvec);
 
-	flvr::Framebuffer* paint_buffer =
+	auto paint_buffer =
 		glbin_framebuffer_manager.framebuffer("paint brush");
 	if (paint_buffer)
-		Set2DMask(paint_buffer->tex_id(GL_COLOR_ATTACHMENT0));
-	flvr::Framebuffer* final_buffer =
+		Set2DMask(paint_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
+	auto final_buffer =
 		glbin_framebuffer_manager.framebuffer(
 			"final");
-	flvr::Framebuffer* chann_buffer =
+	auto chann_buffer =
 		glbin_framebuffer_manager.framebuffer(
 			"channel");
 	if (final_buffer && chann_buffer)
 		Set2DWeight(
-			final_buffer->tex_id(GL_COLOR_ATTACHMENT0),
-			chann_buffer->tex_id(GL_COLOR_ATTACHMENT0));
+			final_buffer->tex_id(flvr::AttachmentPoint::Color(0)),
+			chann_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
 	//orthographic
 	SetOrthographic(!view->GetPersp());
 

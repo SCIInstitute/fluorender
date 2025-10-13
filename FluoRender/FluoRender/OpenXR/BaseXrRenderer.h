@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 
 template <typename T>
 inline bool BitwiseCheck(const T& value, const T& checkValue) {
@@ -83,7 +84,7 @@ public:
 
 	virtual void BeginFrame() = 0;
 	virtual void EndFrame() = 0;
-	virtual void Draw(const std::vector<flvr::Framebuffer*> &fbos) = 0;
+	virtual void Draw(const std::vector<std::shared_ptr<flvr::Framebuffer>> &fbos) = 0;
 
 	virtual void SetClips(float near_clip, float far_clip)
 	{

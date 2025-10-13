@@ -51,7 +51,6 @@ MultiVolumeRenderer::MultiVolumeRenderer()
 	depth_peel_(0),
 	blend_num_bits_(32),
 	blend_slices_(false),
-	cur_framebuffer_(0),
 	noise_red_(false),
 	imode_(false),
 	num_slices_(0),
@@ -234,14 +233,14 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	int w2 = new_size.w();
 	int h2 = new_size.h();
 
-	Framebuffer* blend_buffer = 0;
+	std::shared_ptr<Framebuffer> blend_buffer;
 	if(blend_num_bits_ > 8)
 	{
 		blend_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloat, w2, h2, buf_name);
 		if (!blend_buffer)
 			return;
-		blend_buffer->bind();
+		glbin_framebuffer_manager.bind(blend_buffer);
 		blend_buffer->protect();
 
 		glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
@@ -405,18 +404,18 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 		ShaderProgram* img_shader = 0;
 
-		Framebuffer* filter_buffer = 0;
+		std::shared_ptr<Framebuffer> filter_buffer;
 		if (noise_red_ /*&& colormap_mode_!=2*/)
 		{
 			//FILTERING
 			filter_buffer = glbin_framebuffer_manager.framebuffer(
 				flvr::FBRole::RenderFloat, w, h);
-			filter_buffer->bind();
+			glbin_framebuffer_manager.bind(filter_buffer);
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+			blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
 			if (img_shader)
@@ -434,18 +433,20 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			if (img_shader && img_shader->valid())
 				img_shader->release();
 
-			blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+			blend_buffer->unbind_texture(AttachmentPoint::Color(0));
+			glbin_framebuffer_manager.unbind();//filter buffer
 		}
 
 		//go back to normal
-		flvr::Framebuffer::bind(cur_framebuffer_);
+		glbin_framebuffer_manager.unbind();//blend buffer
+		//flvr::Framebuffer::bind(cur_framebuffer_);
 
 		glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 		if (noise_red_ /*&& colormap_mode_!=2*/)
-			filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+			filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 		else
-			blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+			blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 		glEnable(GL_BLEND);
 		if (glbin_settings.m_update_order == 0)
@@ -474,9 +475,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			blend_buffer->unprotect();
 
 		if (noise_red_)
-			filter_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+			filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 		else
-			blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+			blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 	}
 
 	glDisable(GL_BLEND);
@@ -493,13 +494,13 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	int bi, bool orthographic_p,
 	int w, int h, bool intp,
 	int quota_bricks_chan,
-	Framebuffer* blend_buffer)
+	const std::shared_ptr<Framebuffer>& blend_buffer)
 {
 	//check vr_list size
 	if (vr_list_.size() <= 0)
 		return;
 
-	Framebuffer* micro_blend_buffer = 0;
+	std::shared_ptr<Framebuffer> micro_blend_buffer;
 	if (blend_slices_/* && colormap_mode_!=2*/)
 		micro_blend_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloat, w, h);
@@ -541,7 +542,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			micro_blend_buffer /*&& colormap_mode_!=2*/)
 		{
 			//set blend buffer
-			micro_blend_buffer->bind();
+			glbin_framebuffer_manager.bind(micro_blend_buffer);
 			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			glClear(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_BLEND);
@@ -693,7 +694,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			//bind depth texture for rendering shadows
 			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
-				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			std::vector<TextureBrick*> *bs = 0;
 			if (tex)
@@ -753,19 +754,20 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				shader->release();
 			//unbind depth texture for rendering shadows
 			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
-				blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 		}
 		location += idx_num*4;
 
 		if (va_slices_)
 			va_slices_->draw_end();
 
-		if (blend_slices_ /*&& colormap_mode_!=2*/)
+		if (blend_slices_ && micro_blend_buffer)
 		{
 			//set buffer back
-			flvr::Framebuffer::bind(cur_framebuffer_);
+			glbin_framebuffer_manager.unbind();//micro blend buffer
+			//flvr::Framebuffer::bind(cur_framebuffer_);
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-			micro_blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+			micro_blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 			//blend
 			glBlendEquation(GL_FUNC_ADD);
 			if (glbin_settings.m_update_order == 0)
@@ -783,7 +785,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			vr_list_[0]->draw_view_quad();
 			if (img_shader && img_shader->valid())
 				img_shader->release();
-			micro_blend_buffer->unbind_texture(GL_COLOR_ATTACHMENT0);
+			micro_blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 			//glBindTexture(GL_TEXTURE_2D, 0);
 			glViewport(0, 0, w, h);
 		}

@@ -450,14 +450,14 @@ namespace flvr
 		int w2 = new_size.w();
 		int h2 = new_size.h();
 
-		Framebuffer* blend_buffer = 0;
+		std::shared_ptr<Framebuffer> blend_buffer;
 		if(blend_num_bits_ > 8)
 		{
 			blend_buffer = glbin_framebuffer_manager.framebuffer(
 				flvr::FBRole::RenderFloat, w2, h2, buf_name);
 			if (!blend_buffer)
 				return;
-			blend_buffer->bind();
+			glbin_framebuffer_manager.bind(blend_buffer);
 			blend_buffer->protect();
 
 			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
@@ -766,18 +766,18 @@ namespace flvr
 
 			ShaderProgram* img_shader = 0;
 
-			Framebuffer* filter_buffer = 0;
+			std::shared_ptr<Framebuffer> filter_buffer = 0;
 			if (noise_red_ && cm_mode !=2)
 			{
 				//FILTERING/////////////////////////////////////////////////////////////////
 				filter_buffer = glbin_framebuffer_manager.framebuffer(
 					flvr::FBRole::RenderFloat, w, h);
-				filter_buffer->bind();
+				glbin_framebuffer_manager.bind(filter_buffer);
 
 				glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 				glClear(GL_COLOR_BUFFER_BIT);
 
-				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 				img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
 				//img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
@@ -796,18 +796,19 @@ namespace flvr
 				if (img_shader && img_shader->valid())
 					img_shader->release();
 
-				blend_buffer->unbind(GL_COLOR_ATTACHMENT0);
+				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
+				glbin_framebuffer_manager.unbind();//filter buffer
 			}
 
 			//go back to normal
-			flvr::Framebuffer::bind(cur_framebuffer_);
+			glbin_framebuffer_manager.unbind();//blend buffer
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 			if (noise_red_ && cm_mode != 2)
-				filter_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+				filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 			else
-				blend_buffer->bind_texture(GL_COLOR_ATTACHMENT0, 0);
+				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
 
@@ -830,17 +831,15 @@ namespace flvr
 				blend_buffer->unprotect();
 
 			if (noise_red_ && cm_mode != 2)
-				filter_buffer->unbind(GL_COLOR_ATTACHMENT0);
+				filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 			else
-				blend_buffer->unbind(GL_COLOR_ATTACHMENT0);
+				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 		}
 
 		// Reset the blend functions after MIP
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
-
-		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void VolumeRenderer::draw_wireframe(bool orthographic_p)
@@ -949,10 +948,10 @@ namespace flvr
 			return;
 
 		//mask frame buffer object
-		Framebuffer* fbo_mask =
+		auto fbo_mask =
 			glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
 		if (fbo_mask)
-			fbo_mask->bind();
+			glbin_framebuffer_manager.bind(fbo_mask);
 
 		double rate = get_sample_rate();
 
@@ -1112,7 +1111,7 @@ namespace flvr
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				fbo_mask->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
+				fbo_mask->attach_texture(AttachmentPoint::Color(0), tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 
@@ -1143,7 +1142,7 @@ namespace flvr
 		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
 
 		//unbind framebuffer
-		flvr::Framebuffer::bind(cur_framebuffer_);
+		glbin_framebuffer_manager.unbind();//fbo_mask
 
 		//release seg shader
 		if (seg_shader && seg_shader->valid())
@@ -1327,10 +1326,10 @@ namespace flvr
 
 		glActiveTexture(GL_TEXTURE0);
 		//mask frame buffer object
-		Framebuffer* fbo_calc =
+		auto fbo_calc =
 			glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
 		if (fbo_calc)
-			fbo_calc->bind();
+			glbin_framebuffer_manager.bind(fbo_calc);
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
@@ -1392,7 +1391,7 @@ namespace flvr
 			//draw each slice
 			for (int z=0; z<b->nz(); z++)
 			{
-				fbo_calc->attach_texture(GL_COLOR_ATTACHMENT0, tex_id, z);
+				fbo_calc->attach_texture(AttachmentPoint::Color(0), tex_id, z);
 				draw_view_quad(double(z+0.5) / double(b->nz()));
 			}
 		}
@@ -1404,7 +1403,7 @@ namespace flvr
 		release_texture((*bricks)[0]->nlabel(), GL_TEXTURE_3D);
 
 		//unbind framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, cur_framebuffer_);
+		glbin_framebuffer_manager.unbind();//fbo_calc
 
 		//release seg shader
 		if (cal_shader && cal_shader->valid())

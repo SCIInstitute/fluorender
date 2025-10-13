@@ -49,7 +49,7 @@ public:
 	bool Init(void*, void*, uint64_t) override;
 	void Close() override;
 
-	void Draw(const std::vector<flvr::Framebuffer*> &fbos) override;
+	void Draw(const std::vector<std::shared_ptr<flvr::Framebuffer>> &fbos) override;
 
 protected:
 	void SetExtensions() override;

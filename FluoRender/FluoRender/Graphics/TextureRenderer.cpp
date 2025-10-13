@@ -84,7 +84,6 @@ namespace flvr
 		sample_rate_(1.0),
 		num_slices_(0),
 		imode_(false),
-		cur_framebuffer_(0),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),

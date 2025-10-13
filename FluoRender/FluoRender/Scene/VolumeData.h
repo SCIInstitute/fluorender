@@ -77,9 +77,6 @@ public:
 	//set clear color
 	void SetClearColor(GLfloat clear_color[4]);
 
-	//set current framebuffer
-	void SetCurFramebuffer(GLuint cur_framebuffer);
-
 	//data related
 	//reader
 	void SetReader(const std::shared_ptr<BaseVolReader>& reader) {m_reader = reader;}

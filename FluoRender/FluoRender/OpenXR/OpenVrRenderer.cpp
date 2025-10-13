@@ -148,7 +148,7 @@ void OpenVrRenderer::EndFrame()
 {
 }
 
-void OpenVrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
+void OpenVrRenderer::Draw(const std::vector<std::shared_ptr<flvr::Framebuffer>> &fbos)
 {
 	for (int eye_index = 0; eye_index < 2; ++eye_index)
 	{
@@ -157,7 +157,7 @@ void OpenVrRenderer::Draw(const std::vector<flvr::Framebuffer*> &fbos)
 
 		vr::Texture_t eye_tex = {};
 		eye_tex.handle = reinterpret_cast<void*>(
-			(unsigned long long)(fbos[eye_index]->tex_id(GL_COLOR_ATTACHMENT0)));
+			(unsigned long long)(fbos[eye_index]->tex_id(flvr::AttachmentPoint::Color(0))));
 		eye_tex.eType = vr::TextureType_OpenGL;
 		eye_tex.eColorSpace = vr::ColorSpace_Gamma;
 		vr::EVREye eye = eye_index ? vr::Eye_Right : vr::Eye_Left;

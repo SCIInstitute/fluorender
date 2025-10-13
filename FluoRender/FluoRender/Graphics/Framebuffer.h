@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <stdexcept>
 
 #ifndef __glew_h__
 typedef unsigned int GLenum;
@@ -116,6 +117,22 @@ namespace flvr
 		Depth,
 		Volume
 	};
+	struct AttachmentPoint {
+		enum class Type {
+			Color,
+			Depth,
+			Stencil,
+			DepthStencil
+		};
+
+		Type type;
+		int index = 0; // Only used for Color
+
+		static AttachmentPoint Color(int i) { return {Type::Color, i}; }
+		static AttachmentPoint Depth() { return {Type::Depth}; }
+		static AttachmentPoint Stencil() { return {Type::Stencil}; }
+		static AttachmentPoint DepthStencil() { return {Type::DepthStencil}; }
+	};
 	class Framebuffer
 	{
 	public:
@@ -124,26 +141,23 @@ namespace flvr
 
 		void create();
 		void destroy();
-		void bind();
-		static void bind(unsigned int id);
-		void unbind(unsigned int prev_id = 0);
 		void protect() { protected_ = true; }
 		void unprotect() { protected_ = false; }
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
 
-		bool attach_texture(int ap, const std::shared_ptr<FramebufferTexture>& tex);
-		bool attach_texture(int ap, unsigned int tex_id, int layer=0);
+		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
+		bool attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer=0);
 		void detach_texture(const std::shared_ptr<FramebufferTexture>& tex);
-		void detach_texture(int ap);
-		void bind_texture(int ap, int tex_unit);
-		void unbind_texture(int ap);
-		unsigned int tex_id(int ap);
+		void detach_texture(const AttachmentPoint& ap);
+		void bind_texture(const AttachmentPoint& ap, int tex_unit);
+		void unbind_texture(const AttachmentPoint& ap);
+		unsigned int tex_id(const AttachmentPoint& ap);
 
 		void resize(int nx, int ny);
 
 		//generate mipmap
-		void generate_mipmap(int ap);
+		void generate_mipmap(const AttachmentPoint& ap);
 
 		bool match_size(int nx, int ny) { return (nx == nx_) && (ny == ny_); }
 		//match without size
@@ -161,9 +175,11 @@ namespace flvr
 		//read pick value
 		unsigned int read_pick(int, int);
 		bool read(int x, int y, int width, int height,
-			int ap, GLenum format, GLenum type, void* data);
+			const AttachmentPoint& ap, GLenum format, GLenum type, void* data);
 		static bool read_default(int x, int y, int width, int height,
 			GLenum format, GLenum type, void* data);
+		double estimate_pick_threshold(int width, int height,
+			const AttachmentPoint& ap, GLenum format, GLenum type, double scale = 0.8);
 
 	private:
 		unsigned int id_ = 0;
@@ -175,6 +191,11 @@ namespace flvr
 		bool protected_ = false;
 		std::map<int, std::shared_ptr<FramebufferTexture>> attachments_;
 
+	private:
+		void bind();
+		static void bind(unsigned int id);
+		void unbind(unsigned int prev_id = 0);
+
 		friend class FramebufferManager;
 	};
 
@@ -183,15 +204,31 @@ namespace flvr
 	public:
 		FramebufferManager();
 		~FramebufferManager();
+
 		void clear();
 
-		Framebuffer* framebuffer(const FBRole& role, int nx, int ny,
+		// Get or create framebuffer by role and size
+		std::shared_ptr<Framebuffer> framebuffer(const FBRole& role, int nx, int ny,
 			const std::string &name="");
-		Framebuffer* framebuffer(const std::string &name);
+
+		// Get framebuffer by name (auto-binds if found)
+		std::shared_ptr<Framebuffer> framebuffer(const std::string &name);
+
+		// Explicitly bind a framebuffer (nullptr = default)
+		void bind(std::shared_ptr<Framebuffer> fb);
+
+		// Unbind current framebuffer and restore previous (or bind default)
+		void unbind();
+
+		// Get currently bound framebuffer (nullptr = default)
+		std::shared_ptr<Framebuffer> current() const;
 
 	private:
 		std::vector<std::shared_ptr<Framebuffer>> fb_list_;
 		std::vector<std::shared_ptr<FramebufferTexture>> tex_list_;
+
+		std::weak_ptr<Framebuffer> current_bound_;
+		std::weak_ptr<Framebuffer> previous_bound_;
 	};
 
 }

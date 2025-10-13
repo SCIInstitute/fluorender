@@ -374,13 +374,6 @@ void VolumeData::SetClearColor(GLfloat clear_color[4])
 		m_vr->set_clear_color(clear_color);
 }
 
-//set current framebuffer
-void VolumeData::SetCurFramebuffer(GLuint cur_framebuffer)
-{
-	if (m_vr)
-		m_vr->set_cur_framebuffer(cur_framebuffer);
-}
-
 //data related
 //compression
 void VolumeData::SetCompression(bool compression)
