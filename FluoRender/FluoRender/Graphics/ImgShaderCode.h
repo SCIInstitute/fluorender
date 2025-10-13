@@ -557,7 +557,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		float lod = float(level);
 		vec2 scaled_texel = texel * scale;
 
-		int radius = max(int(float(base_radius) / scale), mip_levels);
+		int radius = int(float(base_radius) / (float(level) / 2.0 + 1.0));
 
 		for (int i = -radius; i <= radius; ++i)
 		for (int j = -radius; j <= radius; ++j)
