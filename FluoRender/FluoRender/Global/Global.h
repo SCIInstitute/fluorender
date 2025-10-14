@@ -95,13 +95,8 @@ namespace flvr
 	class KernelFactory;
 	class FramebufferManager;
 	class VertexArrayManager;
-	class VolShaderFactory;
-	class SegShaderFactory;
-	class VolCalShaderFactory;
-	class ImgShaderFactory;
-	class LightFieldShaderFactory;
 	class TextTextureManager;
-	class MshShaderFactory;
+	class ShaderProgramManager;
 }
 
 #define glbin fluo::Global::instance()
@@ -151,13 +146,8 @@ namespace flvr
 #define glbin_kernel_factory fluo::Global::instance().get_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
 #define glbin_vertex_array_manager fluo::Global::instance().get_vertex_array_manager()
-#define glbin_vol_shader_factory fluo::Global::instance().get_vol_shader_factory()
-#define glbin_seg_shader_factory fluo::Global::instance().get_seg_shader_factory()
-#define glbin_vol_cal_shader_factory fluo::Global::instance().get_vol_cal_shader_factory()
-#define glbin_img_shader_factory fluo::Global::instance().get_img_shader_factory()
-#define glbin_light_field_shader_factory fluo::Global::instance().get_light_field_shader_factory()
 #define glbin_text_tex_manager fluo::Global::instance().get_text_tex_manager()
-#define glbin_msh_shader_factory fluo::Global::instance().get_msh_shader_factory()
+#define glbin_shader_manager fluo::Global::instance().get_shader_manager()
 
 //time
 #define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
@@ -282,13 +272,8 @@ namespace fluo
 		flvr::KernelFactory& get_kernel_factory();
 		flvr::FramebufferManager& get_framebuffer_manager();
 		flvr::VertexArrayManager& get_vertex_array_manager();
-		flvr::VolShaderFactory& get_vol_shader_factory();
-		flvr::SegShaderFactory& get_seg_shader_factory();
-		flvr::VolCalShaderFactory& get_vol_cal_shader_factory();
-		flvr::ImgShaderFactory& get_img_shader_factory();
-		flvr::LightFieldShaderFactory& get_light_field_shader_factory();
 		flvr::TextTextureManager& get_text_tex_manager();
-		flvr::MshShaderFactory& get_msh_shader_factory();
+		flvr::ShaderProgramManager& get_shader_manager();
 
 		//current selection
 		CurrentObjects& get_current_objects();
@@ -377,20 +362,10 @@ namespace fluo
 		std::unique_ptr<flvr::FramebufferManager> framebuffer_manager_;
 		//vertex arrays
 		std::unique_ptr<flvr::VertexArrayManager> vertex_array_manager_;
-		//sahder for volume rendering
-		std::unique_ptr<flvr::VolShaderFactory> vol_shader_factory_;
-		//shader for segmentation
-		std::unique_ptr<flvr::SegShaderFactory> seg_shader_factory_;
-		//shader for calculation
-		std::unique_ptr<flvr::VolCalShaderFactory> cal_shader_factory_;
-		//smooth filter
-		std::unique_ptr<flvr::ImgShaderFactory> img_shader_factory_;
-		//for looking glass
-		std::unique_ptr<flvr::LightFieldShaderFactory> light_field_shader_factory_;
 		//text texture
 		std::unique_ptr<flvr::TextTextureManager> text_texture_manager_;
-		//mesh shader
-		std::unique_ptr<flvr::MshShaderFactory> msh_shader_factory_;
+		//shader manager
+		std::unique_ptr<flvr::ShaderProgramManager> shader_manager_;
 
 		//current selection
 		std::unique_ptr<CurrentObjects> current_objects_;

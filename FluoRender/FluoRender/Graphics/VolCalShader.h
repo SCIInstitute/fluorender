@@ -29,59 +29,52 @@
 #ifndef VolCalShader_h
 #define VolCalShader_h
 
-#include <string>
-#include <vector>
+#include <ShaderProgram.h>
+
+#define CAL_SUBSTRACTION	1	//initialize the segmentation fragment shader
+#define CAL_ADDITION		2	//diffusion based grow
+#define CAL_DIVISION		3	//initialize the labeling fragment shader
+#define CAL_INTERSECTION	4	//minimum of two
+#define CAL_APPLYMASK		5	//apply mask to volume
+#define CAL_APPLYMASKINV	6	//apply the inverted mask
+#define CAL_APPLYMASKINV2	7	//apply the inverted mask
+#define CAL_INTERSECTION_WITH_MASK	8	//minimum of two with mask
 
 namespace flvr
 {
-	#define CAL_SUBSTRACTION	1	//initialize the segmentation fragment shader
-	#define CAL_ADDITION		2	//diffusion based grow
-	#define CAL_DIVISION		3	//initialize the labeling fragment shader
-	#define CAL_INTERSECTION	4	//minimum of two
-	#define CAL_APPLYMASK		5	//apply mask to volume
-	#define CAL_APPLYMASKINV	6	//apply the inverted mask
-	#define CAL_APPLYMASKINV2	7	//apply the inverted mask
-	#define CAL_INTERSECTION_WITH_MASK	8	//minimum of two with mask
-
-	class ShaderProgram;
-
-	class VolCalShader
+	struct VolCalShaderParams : public ShaderParams
 	{
-	public:
-		VolCalShader(int type);
-		~VolCalShader();
+		int type;
 
-		bool create();
-
-		inline int type() {return type_;}
-
-		inline bool match(int type)
-		{ 
-			return (type_ == type);
+		bool operator==(const VolCalShaderParams& other) const {
+			return type == other.type;
 		}
 
-		inline ShaderProgram* program() { return program_; }
+		size_t hash() const override {
+			size_t h = 0;
+			ShaderUtils::hash_combine(h, std::hash<int>{}(type));
+			return h;
+		}
 
-	protected:
-		bool emit(std::string& s);
-
-		int type_;
-
-		ShaderProgram* program_;
+		bool equals(const ShaderParams& other) const override {
+			if (auto* o = dynamic_cast<const VolCalShaderParams*>(&other))
+				return *this == *o;
+			return false;
+		}
 	};
 
-	class VolCalShaderFactory
+	class VolCalShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		VolCalShaderFactory();
-		~VolCalShaderFactory();
-		void clear();
-
-		ShaderProgram* shader(int type);
+		ShaderProgram* shader(const ShaderParams& base) override;
 
 	protected:
-		std::vector<VolCalShader*> shader_;
-		int prev_shader_;
+		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+
+	private:
+		std::unordered_map<VolCalShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
 	};
 
 } // end namespace flvr

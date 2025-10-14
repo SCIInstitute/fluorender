@@ -29,11 +29,8 @@
 #ifndef ImgShader_h
 #define ImgShader_h
 
-#include <string>
-#include <vector>
+#include <ShaderProgram.h>
 
-namespace flvr
-{
 #define IMG_SHADER_TEXTURE_LOOKUP			0
 #define IMG_SHDR_BRIGHTNESS_CONTRAST		1
 #define IMG_SHDR_BRIGHTNESS_CONTRAST_HDR	2
@@ -59,60 +56,34 @@ namespace flvr
 #define IMG_SHDR_FILTER_LANCZOS_BICUBIC		22
 #define IMG_SHDR_TEXTURE_FLIP				23
 
-	class ShaderProgram;
-
-	class ImgShader
+namespace flvr
+{
+	struct ImgShaderParams : public ShaderParams
 	{
-	public:
-		ImgShader(int type, int colormap);
-		~ImgShader();
+		int type = 0;
+		int colormap = 0;
 
-		bool create();
-
-		inline int type() {return type_;}
-		inline int colormap() {return colormap_;}
-
-		inline bool match(int type, int colormap)
-		{
-			if (type_ == type)
-			{
-				if (type_ == IMG_SHDR_GRADIENT_MAP ||
-					type_ == IMG_SHDR_GRADIENT_PROJ_MAP)
-					return (colormap_==colormap);
-				else
-					return true;
-			}
-			else
-				return false;
+		std::string to_key() const override {
+			return "type=" + std::to_string(type) + ";colormap=" + std::to_string(colormap);
 		}
 
-		inline ShaderProgram* program() { return program_; }
-
-	protected:
-		bool emit_v(std::string& s);
-		bool emit_f(std::string& s);
-		bool emit_g(std::string& s);
-		std::string get_colormap_code();
-
-		int type_;
-		int colormap_;
-		bool use_geom_shader_;
-
-		ShaderProgram* program_;
+		std::unique_ptr<ShaderParams> clone() const override {
+			return std::make_unique<ImgShaderParams>(*this);
+		}
 	};
 
-	class ImgShaderFactory
+	class ImgShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		ImgShaderFactory();
-		~ImgShaderFactory();
-		void clear();
-
-		ShaderProgram* shader(int type, int colormap_=0);
+		ShaderProgram* shader(const ShaderParams& base) override;
 
 	protected:
-		std::vector<ImgShader*> shader_;
-		int prev_shader_;
+		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+
+		std::string get_colormap_code(int colormap);
+
 	};
 
 } // end namespace flvr

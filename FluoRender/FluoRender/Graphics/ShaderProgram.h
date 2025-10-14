@@ -26,10 +26,13 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef ShaderProgram_h 
+#ifndef ShaderProgram_h
 #define ShaderProgram_h
 
 #include <string>
+#include <vector>
+#include <memory>
+#include <unordered_map>
 
 namespace flvr
 {
@@ -51,7 +54,7 @@ namespace flvr
 
 		void bind();
 		void bind_frag_data_location(int color_num, const char* name);
-		void release();
+		void unbind();
 
 		//set vector uniform (4x1)
 		void setLocalParam(int, double, double, double, double);
@@ -99,6 +102,64 @@ namespace flvr
 		static int v_major_;
 		static int v_minor_;
 	};
+
+	struct ShaderParams
+	{
+		virtual ~ShaderParams() = default;
+		virtual std::string to_key() const = 0;
+		virtual std::unique_ptr<ShaderParams> clone() const = 0;
+	};
+
+	struct ShaderEntry
+	{
+		std::unique_ptr<ShaderParams> params;
+		std::unique_ptr<ShaderProgram> program;
+	};
+
+	class ShaderProgramFactory
+	{
+	public:
+		virtual ~ShaderProgramFactory() = default;
+
+		virtual void clear() { shader_map_.clear(); }
+		virtual ShaderProgram* shader(const ShaderParams& params) = 0;
+
+	protected:
+		virtual bool emit_v(const ShaderParams& params, std::string& s) = 0;
+		virtual bool emit_g(const ShaderParams& params, std::string& s)
+		{
+			s.clear();
+			return false;
+		}
+		virtual bool emit_f(const ShaderParams& params, std::string& s) = 0;
+
+	protected:
+		std::unordered_map<std::string, ShaderEntry> shader_map_;
+	};
+
+	class ShaderProgramManager
+	{
+	public:
+		template<typename FactoryType>
+		void add_factory(const std::string& name)
+		{
+			factories_[name] = std::make_unique<FactoryType>();
+		}
+
+		ShaderProgram* shader(const std::string& factory_name, const ShaderParams& params)
+		{
+			auto it = factories_.find(factory_name);
+			if (it != factories_.end())
+			{
+				return it->second->shader(params);
+			}
+			return nullptr;
+		}
+
+	private:
+		std::unordered_map<std::string, std::unique_ptr<ShaderProgramFactory>> factories_;
+	};
+
 } // end namespace flvr
 
 #endif // ShaderProgram_h

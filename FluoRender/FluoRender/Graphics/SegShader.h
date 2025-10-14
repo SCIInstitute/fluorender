@@ -29,82 +29,70 @@
 #ifndef SegShader_h
 #define SegShader_h
 
-#include <string>
-#include <vector>
+#include <ShaderProgram.h>
 
-namespace flvr
-{
 //type definitions
 #define SEG_SHDR_INITIALIZE	1	//initialize the segmentation fragment shader
 #define SEG_SHDR_DB_GROW	2	//diffusion based grow
 
-	class ShaderProgram;
-
-	class SegShader
+namespace flvr
+{
+	struct SegShaderParams : public ShaderParams
 	{
-	public:
-		SegShader(int type, int paint_mode, int hr_mode,
-			bool use_2d, bool shading, int peel,
-			bool clip, bool use_dir);
-		~SegShader();
+		int type;
+		int paint_mode;
+		int hr_mode;
+		bool use_2d;
+		bool shading;
+		int peel;
+		bool clip;
+		bool use_dir;
 
-		bool create();
-
-		inline int type() {return type_;}
-		inline int paint_mode() {return paint_mode_;}
-		inline int hr_mode() {return hr_mode_;}
-		inline bool use_2d() {return use_2d_;}
-		inline bool shading() {return shading_;}
-		inline int peel() {return peel_;}
-		inline bool clip() {return clip_;}
-		inline bool use_dir() { return use_dir_; }
-
-		inline bool match(int type, int paint_mode, int hr_mode,
-			bool use_2d, bool shading, int peel,
-			bool clip, bool use_dir)
-		{ 
-			return (type_ == type &&
-				paint_mode_ == paint_mode &&
-				hr_mode_ == hr_mode &&
-				use_2d_ == use_2d &&
-				shading_ == shading &&
-				peel_ == peel &&
-				clip_ == clip &&
-				use_dir_ == use_dir);
+		bool operator==(const SegShaderParams& other) const
+		{
+			return
+				type == other.type &&
+				paint_mode == other.paint_mode &&
+				hr_mode == other.hr_mode &&
+				use_2d == other.use_2d &&
+				shading == other.shading &&
+				peel == other.peel &&
+				clip == other.clip &&
+				use_dir == other.use_dir;
 		}
 
-		inline ShaderProgram* program() { return program_; }
+		size_t hash() const override {
+			size_t h = 0;
+			ShaderUtils::hash_combine(h, std::hash<int>{}(type));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(paint_mode));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(hr_mode));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(use_2d));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(shading));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(peel));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(clip));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(use_dir));
+			return h;
+		}
 
-	protected:
-		bool emit(std::string& s);
-
-		int type_;
-		int paint_mode_;
-		int hr_mode_;
-		bool use_2d_;
-		bool shading_;
-		int peel_;
-		bool clip_;
-		bool use_dir_;
-
-		ShaderProgram* program_;
+		bool equals(const ShaderParams& other) const override {
+			if (auto* o = dynamic_cast<const SegShaderParams*>(&other))
+				return *this == *o;
+			return false;
+		}
 	};
 
-	class SegShaderFactory
+	class SegShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		SegShaderFactory();
-		~SegShaderFactory();
-		void clear();
-
-		ShaderProgram* shader(
-			int type, int paint_mode, int hr_mode,
-			bool use_2d, bool shading, int peel,
-			bool clip, bool use_dir);
+		ShaderProgram* shader(const ShaderParams& base) override;
 
 	protected:
-		std::vector<SegShader*> shader_;
-		int prev_shader_;
+		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+
+	private:
+		std::unordered_map<SegShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
 	};
 
 } // end namespace flvr

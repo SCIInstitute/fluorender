@@ -297,13 +297,8 @@ Global::Global() :
 	kernel_factory_(std::make_unique<flvr::KernelFactory>()),
 	framebuffer_manager_(std::make_unique<flvr::FramebufferManager>()),
 	vertex_array_manager_(std::make_unique<flvr::VertexArrayManager>()),
-	vol_shader_factory_(std::make_unique<flvr::VolShaderFactory>()),
-	seg_shader_factory_(std::make_unique<flvr::SegShaderFactory>()),
-	cal_shader_factory_(std::make_unique<flvr::VolCalShaderFactory>()),
-	img_shader_factory_(std::make_unique<flvr::ImgShaderFactory>()),
-	light_field_shader_factory_(std::make_unique<flvr::LightFieldShaderFactory>()),
 	text_texture_manager_(std::make_unique<flvr::TextTextureManager>()),
-	msh_shader_factory_(std::make_unique<flvr::MshShaderFactory>()),
+	shader_manager_(std::make_unique<flvr::ShaderProgramManager>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
 	project_(std::make_unique<Project>()),
 	m_linked_rot(false)
@@ -353,6 +348,14 @@ void Global::BuildFactories()
 {
 	m_atmf->createDefault();
 	m_swhf->createDefault();
+
+	//shader factories
+	shader_manager_->add_factory<flvr::ImgShaderFactory>(gstImgShaderFactory);
+	shader_manager_->add_factory<flvr::VolShaderFactory>(gstVolShaderFactory);
+	shader_manager_->add_factory<flvr::SegShaderFactory>(gstSegShaderFactory);
+	shader_manager_->add_factory<flvr::VolCalShaderFactory>(gstVolCalShaderFactory);
+	shader_manager_->add_factory<flvr::LightFieldShaderFactory>(gstLightFieldShaderFactory);
+	shader_manager_->add_factory<flvr::MeshShaderFactory>(gstMeshShaderFactory);
 }
 
 //locale
@@ -769,39 +772,9 @@ flvr::VertexArrayManager& Global::get_vertex_array_manager()
 	return *vertex_array_manager_;
 }
 
-flvr::VolShaderFactory& Global::get_vol_shader_factory()
-{
-	return *vol_shader_factory_;
-}
-
-flvr::SegShaderFactory& Global::get_seg_shader_factory()
-{
-	return *seg_shader_factory_;
-}
-
-flvr::VolCalShaderFactory& Global::get_vol_cal_shader_factory()
-{
-	return *cal_shader_factory_;
-}
-
-flvr::ImgShaderFactory& Global::get_img_shader_factory()
-{
-	return *img_shader_factory_;
-}
-
-flvr::LightFieldShaderFactory& Global::get_light_field_shader_factory()
-{
-	return *light_field_shader_factory_;
-}
-
 flvr::TextTextureManager& Global::get_text_tex_manager()
 {
 	return *text_texture_manager_;
-}
-
-flvr::MshShaderFactory& Global::get_msh_shader_factory()
-{
-	return *msh_shader_factory_;
 }
 
 //current selection

@@ -26,153 +26,110 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-#include <sstream>
-#include <iostream>
 #include <VolCalShader.h>
-#include <ShaderProgram.h>
 #include <VolShaderCode.h>
 #include <VolCalShaderCode.h>
+#include <sstream>
+#include <iostream>
 
-using std::string;
-using std::vector;
-using std::ostringstream;
+using namespace flvr;
 
-namespace flvr
+ShaderProgram* VolCalShaderFactory::shader(const ShaderParams& base)
 {
-	VolCalShader::VolCalShader(int type) :
-	type_(type),
-	program_(0)
-	{}
+	const auto& params = dynamic_cast<const VolCalShaderParams&>(base);
+	auto it = cache_.find(params);
+	if (it != cache_.end()) return it->second.get();
 
-	VolCalShader::~VolCalShader()
+	std::string vs;
+	bool valid_v = emit_v(params, vs);
+	std::string fs;
+	bool valid_f = emit_f(params, fs);
+
+	if (!valid_v || !valid_f) return nullptr;
+	std::unique_ptr<ShaderProgram> prog = std::make_unique<ShaderProgram>(vs, fs);
+	auto* raw = prog.get();
+	cache_[params] = std::move(prog);
+	return raw;
+}
+
+bool VolCalShaderFactory::emit_v(const ShaderParams& params, std::string& s)
+{
+	std::ostringstream z;
+
+	z << ShaderProgram::glsl_version_;
+	z << ShaderProgram::glsl_unroll_;
+	z << CAL_VERTEX_CODE;
+
+	s = z.str();
+	return true;
+}
+
+bool VolCalShaderFactory::emit_f(const ShaderParams& params, std::string& s)
+{
+	const auto& p = dynamic_cast<const VolCalShaderParams&>(params);
+
+	std::ostringstream z;
+
+	z << ShaderProgram::glsl_version_;
+	z << ShaderProgram::glsl_unroll_;
+	z << VOL_INPUTS;
+	z << CAL_OUTPUTS;
+
+	switch (p.type)
 	{
-		delete program_;
+	case CAL_SUBSTRACTION:
+	case CAL_ADDITION:
+	case CAL_DIVISION:
+	case CAL_INTERSECTION:
+	case CAL_APPLYMASK:
+		z << CAL_UNIFORMS_COMMON;
+		break;
+	case CAL_APPLYMASKINV:
+	case CAL_APPLYMASKINV2:
+		z << VOL_UNIFORMS_COMMON;
+		z << VOL_UNIFORMS_MASK;
+		break;
+	case CAL_INTERSECTION_WITH_MASK:
+		z << CAL_UNIFORMS_WITH_MASK;
+		break;
 	}
 
-	bool VolCalShader::create()
+	z << CAL_HEAD;
+
+	if (p.type == CAL_INTERSECTION_WITH_MASK)
+		z << CAL_TEX_LOOKUP_WITH_MASK;
+	else
+		z << CAL_TEX_LOOKUP;
+
+	switch (p.type)
 	{
-		string vs = ShaderProgram::glsl_version_ +
-			ShaderProgram::glsl_unroll_ +
-			CAL_VERTEX_CODE;
-		string fs;
-		if (emit(fs)) return true;
-		program_ = new ShaderProgram(vs, fs);
-		return false;
+	case CAL_SUBSTRACTION:
+		z << CAL_BODY_SUBSTRACTION;
+		break;
+	case CAL_ADDITION:
+		z << CAL_BODY_ADDITION;
+		break;
+	case CAL_DIVISION:
+		z << CAL_BODY_DIVISION;
+		break;
+	case CAL_INTERSECTION:
+		z << CAL_BODY_INTERSECTION;
+		break;
+	case CAL_APPLYMASK:
+		z << CAL_BODY_APPLYMASK;
+		break;
+	case CAL_APPLYMASKINV:
+	case CAL_APPLYMASKINV2:
+		z << CAL_BODY_APPLYMASKINV;
+		break;
+	case CAL_INTERSECTION_WITH_MASK:
+		z << CAL_BODY_INTERSECTION_WITH_MASK;
+		break;
 	}
 
-	bool VolCalShader::emit(string& s)
-	{
-		ostringstream z;
+	z << CAL_RESULT;
+	z << CAL_TAIL;
 
-		z << ShaderProgram::glsl_version_;
-		z << ShaderProgram::glsl_unroll_;
-		z << VOL_INPUTS;
-		z << CAL_OUTPUTS;
-
-		switch (type_)
-		{
-		case CAL_SUBSTRACTION:
-		case CAL_ADDITION:
-		case CAL_DIVISION:
-		case CAL_INTERSECTION:
-		case CAL_APPLYMASK:
-			z << CAL_UNIFORMS_COMMON;
-			break;
-		case CAL_APPLYMASKINV:
-		case CAL_APPLYMASKINV2:
-			z << VOL_UNIFORMS_COMMON;
-			z << VOL_UNIFORMS_MASK;
-			break;
-		case CAL_INTERSECTION_WITH_MASK:
-			z << CAL_UNIFORMS_WITH_MASK;
-			break;
-		}
-
-		z << CAL_HEAD;
-
-		if (type_ == CAL_INTERSECTION_WITH_MASK)
-			z << CAL_TEX_LOOKUP_WITH_MASK;
-		else
-			z << CAL_TEX_LOOKUP;
-
-		switch (type_)
-		{
-		case CAL_SUBSTRACTION:
-			z << CAL_BODY_SUBSTRACTION;
-			break;
-		case CAL_ADDITION:
-			z << CAL_BODY_ADDITION;
-			break;
-		case CAL_DIVISION:
-			z << CAL_BODY_DIVISION;
-			break;
-		case CAL_INTERSECTION:
-			z << CAL_BODY_INTERSECTION;
-			break;
-		case CAL_APPLYMASK:
-			z << CAL_BODY_APPLYMASK;
-			break;
-		case CAL_APPLYMASKINV:
-		case CAL_APPLYMASKINV2:
-			z << CAL_BODY_APPLYMASKINV;
-			break;
-		case CAL_INTERSECTION_WITH_MASK:
-			z << CAL_BODY_INTERSECTION_WITH_MASK;
-			break;
-		}
-
-		z << CAL_RESULT;
-		z << CAL_TAIL;
-
-		s = z.str();
-		return false;
-	}
-
-
-	VolCalShaderFactory::VolCalShaderFactory()
-		: prev_shader_(-1)
-	{}
-
-	VolCalShaderFactory::~VolCalShaderFactory()
-	{
-		for(unsigned int i=0; i<shader_.size(); i++)
-			delete shader_[i];
-	}
-
-	void VolCalShaderFactory::clear()
-	{
-		for (unsigned int i = 0; i<shader_.size(); i++)
-			delete shader_[i];
-		shader_.clear();
-		prev_shader_ = -1;
-	}
-
-	ShaderProgram* VolCalShaderFactory::shader(int type)
-	{
-		if(prev_shader_ >= 0)
-		{
-			if(shader_[prev_shader_]->match(type))
-				return shader_[prev_shader_]->program();
-		}
-		for(unsigned int i=0; i<shader_.size(); i++)
-		{
-			if(shader_[i]->match(type)) 
-			{
-				prev_shader_ = i;
-				return shader_[i]->program();
-			}
-		}
-
-		VolCalShader* s = new VolCalShader(type);
-		if(s->create())
-		{
-			delete s;
-			return 0;
-		}
-		shader_.push_back(s);
-		prev_shader_ = int(shader_.size())-1;
-		return s->program();
-	}
-
-} // end namespace flvr
+	s = z.str();
+	return true;
+}

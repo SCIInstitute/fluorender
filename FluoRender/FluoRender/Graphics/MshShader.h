@@ -29,78 +29,63 @@
 #ifndef MshShader_h
 #define MshShader_h
 
-#include <string>
-#include <vector>
+#include <ShaderProgram.h>
 
 namespace flvr
 {
-
-	class ShaderProgram;
-
-	class MshShader
+	struct MeshShaderParams : public ShaderParams
 	{
-	public:
-		MshShader(int type,
-			int peel, bool tex,
-			bool fog, bool light,
-			bool normal, bool color);
-		~MshShader();
+		int type;	//0:normal; 1:integer
+		int peel;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
+		bool tex;
+		bool fog;
+		bool light;
+		bool normal;//0:use normal from mesh; 1:generate normal in geom shader
+		bool color;//vertex color
 
-		bool create();
-
-		inline int type() { return type_; }
-		inline int peel() { return peel_; }
-		inline bool tex() { return tex_; }
-		inline bool fog() { return fog_; }
-		inline bool light() { return light_; }
-		inline bool normal() { return normal_; }
-		inline bool color() { return color_; }
-
-		inline bool match(int type,
-			int peel, bool tex,
-			bool fog, bool light,
-			bool normal, bool color)
-		{ 
-			return (type_ == type &&
-					fog_ == fog && 
-					peel_ == peel &&
-					tex_ == tex &&
-					light_ == light &&
-					normal_ == normal &&
-					color_ == color);
+		bool operator==(const MeshShaderParams& other) const
+		{
+			return
+				type == other.type &&
+				peel == other.peel &&
+				tex == other.tex &&
+				fog == other.fog &&
+				light == other.light &&
+				normal == other.normal &&
+				color == other.color;
 		}
 
-		inline ShaderProgram* program() { return program_; }
+		size_t hash() const override {
+			size_t h = 0;
+			ShaderUtils::hash_combine(h, std::hash<int>{}(type));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(peel));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(tex));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(fog));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(light));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(normal));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(color));
+			return h;
+		}
 
-	protected:
-		bool emit_v(std::string& s);
-		bool emit_f(std::string& s);
-		bool emit_g(std::string& s);
-
-		int type_;	//0:normal; 1:integer
-		int peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
-		bool tex_;
-		bool fog_;
-		bool light_;
-		bool normal_;//0:use normal from mesh; 1:generate normal in geom shader
-		bool color_;//vertex color
-
-		ShaderProgram* program_;
+		bool equals(const ShaderParams& other) const override {
+			if (auto* o = dynamic_cast<const MeshShaderParams*>(&other))
+				return *this == *o;
+			return false;
+		}
 	};
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	class MshShaderFactory
+	class MeshShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		MshShaderFactory();
-		~MshShaderFactory();
-
-		ShaderProgram* shader(int type, int peel, bool tex,
-			bool fog, bool light, bool normal, bool color);
+		ShaderProgram* shader(const ShaderParams& base) override;
 
 	protected:
-		std::vector<MshShader*> shader_;
-		int prev_shader_;
+		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+
+	private:
+		std::unordered_map<MeshShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
 	};
 
 } // end namespace flvr

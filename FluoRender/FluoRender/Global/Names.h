@@ -77,6 +77,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstDefaultProcessor "default processor"
 #define gstAsyncTimerFactory "async timer factory"
 #define gstStopWatchFactory "stop watch factory"
+//shader factories
+#define gstVolShaderFactory "volume shader factory"
+#define gstMeshShaderFactory "mesh shader factory"
+#define gstSegShaderFactory "segmentation shader factory"
+#define gstImgShaderFactory "image shader factory"
+#define gstVolCalShaderFactory "volume calculation shader factory"
+#define gstLightFieldShaderFactory "light field shader factory"
 
 //agent names
 #define gstAgentAsset "asset"

@@ -28,110 +28,89 @@
 #ifndef VolShader_h
 #define VolShader_h
 
-#include <string>
-#include <vector>
+#include <ShaderProgram.h>
 
 namespace flvr
 {
-	class ShaderProgram;
-
-	class VolShader
+	struct VolShaderParams : public ShaderParams
 	{
-	public:
-		VolShader(bool poly, int channels,
-				bool shading, bool fog,
-				int peel, bool clip,
-				bool grad, int mask, bool mip,
-				int color_mode, int colormap, int colormap_proj,
-				bool solid, int vertex_shader);
-		~VolShader();
+		bool poly;
+		int channels;
+		bool shading;
+		bool fog;
+		int peel;
+		bool clip;
+		bool grad;
+		int mask;	//0-normal, 1-render with mask, 2-render with mask excluded
+					//3-random color with label, 4-random color with label+mask
+		bool mip;
+		int color_mode;//0-normal; 1-rainbow; 2-depth
+		int colormap;//index
+		int colormap_proj;	//projection direction
+							//4D colormap: >=7
+		bool solid;//no transparency
+		int vertex_type;
 
-		bool create();
-
-		inline bool poly() {return poly_; }
-		inline int channels() { return channels_; }
-		inline bool shading() { return shading_; }
-		inline bool fog() { return fog_; }
-		inline int peel() { return peel_; }
-		inline bool clip() { return clip_; }
-		inline bool grad() {return grad_; }
-		inline int mask() {return mask_;}
-		inline bool mip() { return mip_; }
-		inline int color_mode() {return color_mode_;}
-		inline int colormap() {return colormap_;}
-		inline int colormap_proj() {return colormap_proj_;}
-		inline bool solid() {return solid_;}
-
-		inline bool match(bool poly, int channels,
-						bool shading, bool fog,
-						int peel, bool clip,
-						bool grad, int mask, bool mip,
-						int color_mode, int colormap, int colormap_proj,
-						bool solid, int vertex_shader)
-		{ 
-			return (poly_ == poly &&
-				channels_ == channels &&
-				shading_ == shading && 
-				fog_ == fog && 
-				peel_ == peel &&
-				clip_ == clip &&
-				grad_ == grad &&
-				mask_ == mask &&
-				mip_ == mip &&
-				color_mode_ == color_mode &&
-				colormap_ == colormap &&
-				colormap_proj_ == colormap_proj &&
-				solid_ == solid &&
-				vertex_type_ == vertex_shader); 
+		bool operator==(const VolShaderParams& other) const
+		{
+			return
+				poly == other.poly &&
+				channels == other.channels &&
+				shading == other.shading &&
+				fog == other.fog &&
+				peel == other.peel &&
+				clip == other.clip &&
+				grad == other.grad &&
+				mask == other.mask &&
+				mip == other.mip &&
+				color_mode == other.color_mode &&
+				colormap == other.colormap &&
+				colormap_proj == other.colormap_proj &&
+				solid == other.solid &&
+				vertex_type == other.vertex_type;
 		}
 
-		inline ShaderProgram* program() { return program_; }
+		size_t hash() const override {
+			size_t h = 0;
+			ShaderUtils::hash_combine(h, std::hash<int>{}(poly));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(channels));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(shading));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(fog));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(peel));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(clip));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(grad));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(mask));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(mip));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(color_mode));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(colormap));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(colormap_proj));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(solid));
+			ShaderUtils::hash_combine(h, std::hash<int>{}(vertex_type));
+			return h;
+		}
 
-	protected:
-		bool emit_f(std::string& s);
-		bool emit_v(std::string& s);
-		std::string get_colormap_code();
-		std::string get_colormap_proj();
-
-		bool poly_;
-		int channels_;
-		bool shading_;
-		bool fog_;
-		int peel_;
-		bool clip_;
-		bool grad_;
-		int mask_;	//0-normal, 1-render with mask, 2-render with mask excluded
-					//3-random color with label, 4-random color with label+mask
-		bool mip_;
-		int color_mode_;//0-normal; 1-rainbow; 2-depth
-		int colormap_;//index
-		int colormap_proj_;	//projection direction
-							//4D colormap: >=7
-		bool solid_;//no transparency
-		int vertex_type_;
-
-		ShaderProgram* program_;
+		bool equals(const ShaderParams& other) const override {
+			if (auto* o = dynamic_cast<const VolShaderParams*>(&other))
+				return *this == *o;
+			return false;
+		}
 	};
 
-	class VolShaderFactory
+	class VolShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		VolShaderFactory();
-		~VolShaderFactory();
-		void clear();
-
-		ShaderProgram* shader(bool poly, int channels,
-								bool shading, bool fog,
-								int peel, bool clip,
-								bool grad, int mask, bool mip,
-								int color_mode, int colormap, int colormap_proj,
-								bool solid, int vertex_type);
-		//mask: 0-no mask, 1-segmentation mask, 2-labeling mask
-		//color_mode: 0-normal; 1-rainbow; 2-depth
+		ShaderProgram* shader(const ShaderParams& base) override;
 
 	protected:
-		std::vector<VolShader*> shader_;
-		int prev_shader_;
+		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+
+		std::string get_colormap_code(int colormap, int colormap_proj);
+		std::string get_colormap_proj(int colormap_proj);
+
+	private:
+		std::unordered_map<VolShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
 	};
 
 } // end namespace flvr

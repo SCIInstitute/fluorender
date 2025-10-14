@@ -29,52 +29,43 @@
 #ifndef LightFieldShader_h
 #define LightFieldShader_h
 
-#include <string>
-#include <vector>
+#include <ShaderProgram.h>
 
 namespace flvr
 {
-	class ShaderProgram;
-
-	class LightFieldShader
+	struct LightFieldShaderParams : public ShaderParams
 	{
-	public:
-		LightFieldShader(int type);
-		~LightFieldShader();
+		int type;
 
-		bool create();
-
-		inline bool match(int type)
-		{
-			if (type_ == type)
-				return true;
-			else
-				return false;
+		bool operator==(const LightFieldShaderParams& other) const {
+			return type == other.type;
 		}
 
-		inline ShaderProgram* program() { return program_; }
+		size_t hash() const override {
+			size_t h = 0;
+			ShaderUtils::hash_combine(h, std::hash<int>{}(type));
+			return h;
+		}
 
-	protected:
-		bool emit_v(std::string& s);
-		bool emit_f(std::string& s);
-
-		int type_;
-
-		ShaderProgram* program_;
+		bool equals(const ShaderParams& other) const override {
+			if (auto* o = dynamic_cast<const LightFieldShaderParams*>(&other))
+				return *this == *o;
+			return false;
+		}
 	};
 
-	class LightFieldShaderFactory
+	class LightFieldShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		LightFieldShaderFactory();
-		~LightFieldShaderFactory();
-		void clear();
-
-		ShaderProgram* shader(int type);
+		ShaderProgram* shader(const ShaderParams& base) override;
 
 	protected:
-		std::vector<LightFieldShader*> shader_;
-		int prev_shader_;
+		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+
+	private:
+		std::unordered_map<LightFieldShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
 	};
 
 } // end namespace flvr

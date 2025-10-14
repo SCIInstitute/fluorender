@@ -27,48 +27,42 @@
 //  
 
 #include <LightFieldShader.h>
-#include <ShaderProgram.h>
 #include <LightFieldShaderCode.h>
 #include <sstream>
 #include <iostream>
 
-using std::string;
-using std::vector;
-using std::ostringstream;
-
 using namespace flvr;
 
-LightFieldShader::LightFieldShader(int type) : 
-	type_(type),
-	program_(0)
+ShaderProgram* LightFieldShaderFactory::shader(const ShaderParams& base)
 {
+	const auto& params = dynamic_cast<const LightFieldShaderParams&>(base);
+	auto it = cache_.find(params);
+	if (it != cache_.end()) return it->second.get();
+
+	std::string vs;
+	bool valid_v = emit_v(params, vs);
+	std::string fs;
+	bool valid_f = emit_f(params, fs);
+
+	if (!valid_v || !valid_f) return nullptr;
+	std::unique_ptr<ShaderProgram> prog = std::make_unique<ShaderProgram>(vs, fs);
+	auto* raw = prog.get();
+	cache_[params] = std::move(prog);
+	return raw;
 }
 
-LightFieldShader::~LightFieldShader()
+bool LightFieldShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 {
-	delete program_;
-}
+	const auto& p = dynamic_cast<const LightFieldShaderParams&>(params);
 
-bool LightFieldShader::create()
-{
-	string vs;
-	if (emit_v(vs)) return true;
-	string fs;
-	if (emit_f(fs)) return true;
-	program_ = new ShaderProgram(vs, fs);
-	return false;
-}
-
-bool LightFieldShader::emit_v(string& s)
-{
-	ostringstream z;
+	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
 	z << ShaderProgram::glsl_unroll_;
 	//type doesn't do anything for now
 #pragma warning(push)
 #pragma warning(disable : 4065)
-	switch (type_)
+	switch (p.type)
 	{
 	default:
 		z << LIGHT_FIELD_SHADER_VERTEX;
@@ -77,19 +71,21 @@ bool LightFieldShader::emit_v(string& s)
 #pragma warning(pop)
 
 	s = z.str();
-	return false;
+	return true;
 }
 
-bool LightFieldShader::emit_f(string& s)
+bool LightFieldShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 {
-	ostringstream z;
+	const auto& p = dynamic_cast<const LightFieldShaderParams&>(params);
+
+	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
 	z << ShaderProgram::glsl_unroll_;
 	//type doesn't do anything for now
 #pragma warning(push)
 #pragma warning(disable : 4065)
-	switch (type_)
+	switch (p.type)
 	{
 	default:
 		z << LIGHT_FIELD_SHADER_FRAG;
@@ -98,52 +94,7 @@ bool LightFieldShader::emit_f(string& s)
 #pragma warning(pop)
 
 	s = z.str();
-	return false;
-}
-
-LightFieldShaderFactory::LightFieldShaderFactory()
-	: prev_shader_(-1)
-{}
-
-LightFieldShaderFactory::~LightFieldShaderFactory()
-{
-	for(unsigned int i=0; i<shader_.size(); i++)
-		delete shader_[i];
-}
-
-void LightFieldShaderFactory::clear()
-{
-	for (unsigned int i = 0; i<shader_.size(); i++)
-		delete shader_[i];
-	shader_.clear();
-	prev_shader_ = -1;
-}
-
-ShaderProgram* LightFieldShaderFactory::shader(int type)
-{
-	if(prev_shader_ >= 0)
-	{
-		if(shader_[prev_shader_]->match(type))
-			return shader_[prev_shader_]->program();
-	}
-	for(unsigned int i=0; i<shader_.size(); i++)
-	{
-		if(shader_[i]->match(type)) 
-		{
-			prev_shader_ = i;
-			return shader_[i]->program();
-		}
-	}
-
-	LightFieldShader* s = new LightFieldShader(type);
-	if(s->create())
-	{
-		delete s;
-		return 0;
-	}
-	shader_.push_back(s);
-	prev_shader_ = int(shader_.size())-1;
-	return s->program();
+	return true;
 }
 
 

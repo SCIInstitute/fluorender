@@ -26,53 +26,48 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <string>
-#include <sstream>
-#include <iostream>
 #include <SegShader.h>
-#include <ShaderProgram.h>
 #include <VolShaderCode.h>
 #include <SegShaderCode.h>
+#include <sstream>
+#include <iostream>
 
-using std::string;
-using std::vector;
-using std::ostringstream;
+using namespace flvr;
 
-namespace flvr
+ShaderProgram* SegShaderFactory::shader(const ShaderParams& base)
 {
-	SegShader::SegShader(int type, int paint_mode, int hr_mode,
-		bool use_2d, bool shading, int peel,
-		bool clip, bool use_dir) :
-	type_(type),
-	paint_mode_(paint_mode),
-	hr_mode_(hr_mode),
-	use_2d_(use_2d),
-	shading_(shading),
-	peel_(peel),
-	clip_(clip),
-	use_dir_(use_dir),
-	program_(0)
-	{}
+	const auto& params = dynamic_cast<const SegShaderParams&>(base);
+	auto it = cache_.find(params);
+	if (it != cache_.end()) return it->second.get();
 
-	SegShader::~SegShader()
+	std::string vs;
+	bool valid_v = emit_v(params, vs);
+	std::string fs;
+	bool valid_f = emit_f(params, fs);
+
+	if (!valid_v || !valid_f) return nullptr;
+	std::unique_ptr<ShaderProgram> prog = std::make_unique<ShaderProgram>(vs, fs);
+	auto* raw = prog.get();
+	cache_[params] = std::move(prog);
+	return raw;
+}
+
+	bool SegShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 	{
-		delete program_;
+		std::ostringstream z;
+
+		z << ShaderProgram::glsl_version_;
+		z << ShaderProgram::glsl_unroll_;
+		z << SEG_VERTEX_CODE;
+
+		s = z.str();
+		return true;
 	}
 
-	bool SegShader::create()
+	bool SegShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 	{
-		string vs = ShaderProgram::glsl_version_ +
-			ShaderProgram::glsl_unroll_ +
-			SEG_VERTEX_CODE;
-		string fs;
-		if (emit(fs)) return true;
-		program_ = new ShaderProgram(vs, fs);
-		return false;
-	}
-
-	bool SegShader::emit(string& s)
-	{
-		ostringstream z;
+		const auto& p = dynamic_cast<const SegShaderParams&>(params);
+		std::ostringstream z;
 
 		z << ShaderProgram::glsl_version_;
 		z << ShaderProgram::glsl_unroll_;
@@ -91,52 +86,52 @@ namespace flvr
 		z << SEG_UNIFORMS_PARAMS;
 
 		//uniforms for clipping
-		if (paint_mode_!=6 && clip_)
+		if (p.paint_mode != 6 && p.clip)
 			z << VOL_UNIFORMS_CLIP;
 
 		//for hidden removal
-		if (type_==SEG_SHDR_INITIALIZE &&
-			(paint_mode_==1 || paint_mode_==2 ||
-			paint_mode_==9) &&
-			hr_mode_>0)
+		if (p.type == SEG_SHDR_INITIALIZE &&
+			(p.paint_mode == 1 || p.paint_mode == 2 ||
+				p.paint_mode == 9) &&
+			p.hr_mode > 0)
 		{
 			z << SEG_UNIFORM_MATRICES_INVERSE;
 			z << VOL_GRAD_COMPUTE_FUNC;
 			z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L_FUNC;
 		}
 
-		if (paint_mode_!=6 && clip_)
+		if (p.paint_mode!=6 && p.clip)
 			z << VOL_CLIP_FUNC;
 
 		//the common head
 		z << VOL_HEAD;
 
 		//head for clipping planes
-		if (paint_mode_!=6 && clip_)
+		if (p.paint_mode!=6 && p.clip)
 			z << VOL_HEAD_CLIP_FUNC;
 
-		if (paint_mode_ == 6)
+		if (p.paint_mode == 6)
 		{
 			z << SEG_BODY_INIT_CLEAR;
 		}
 		else
 		{
 			//bodies
-			switch (type_)
+			switch (p.type)
 			{
 			case SEG_SHDR_INITIALIZE:
 				z << SEG_BODY_INIT_2D_COORD;
-				if (paint_mode_ == 1 ||
-					paint_mode_ == 2 ||
-					paint_mode_ == 4 ||
-					paint_mode_ == 8)
+				if (p.paint_mode == 1 ||
+					p.paint_mode == 2 ||
+					p.paint_mode == 4 ||
+					p.paint_mode == 8)
 					z << SEG_BODY_INIT_CULL;
-				else if (paint_mode_ == 3)
+				else if (p.paint_mode == 3)
 					z << SEG_BODY_INIT_CULL_ERASE;
-				else if (paint_mode_ == 9)
+				else if (p.paint_mode == 9)
 					z << SEG_BODY_INIT_CULL_POINT;
 
-				if (paint_mode_ != 3)
+				if (p.paint_mode != 3)
 				{
 					z << VOL_HEAD_LIT;
 					z << VOL_DATA_VOLUME_LOOKUP;
@@ -144,43 +139,43 @@ namespace flvr
 					z << VOL_COMPUTED_GM_LOOKUP;
 					z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L;
 
-					if (use_2d_)
+					if (p.use_2d)
 					{
 						z << SEG_BODY_WEIGHT;
 						z << SEG_BODY_BLEND_WEIGHT;
 					}
 				}
 
-				if (paint_mode_==1 ||
-					paint_mode_==2 ||
-					paint_mode_==9)
+				if (p.paint_mode==1 ||
+					p.paint_mode==2 ||
+					p.paint_mode==9)
 				{
-					if (hr_mode_ == 0)
+					if (p.hr_mode == 0)
 						z << SEG_BODY_INIT_BLEND_APPEND;
-					else if (hr_mode_ == 1)//ortho
+					else if (p.hr_mode == 1)//ortho
 						z << SEG_BODY_INIT_BLEND_HR_ORTHO;
-					else if (hr_mode_ == 2)//persp
+					else if (p.hr_mode == 2)//persp
 						z << SEG_BODY_INIT_BLEND_HR_PERSP;
 				}
-				else if (paint_mode_==3)
+				else if (p.paint_mode==3)
 					z << SEG_BODY_INIT_BLEND_ERASE;
-				else if (paint_mode_==4)
+				else if (p.paint_mode==4)
 					z << SEG_BODY_INIT_BLEND_DIFFUSE;
-				else if (paint_mode_==5)
+				else if (p.paint_mode==5)
 					z << SEG_BODY_INIT_BLEND_FLOOD;
-				else if (paint_mode_==7)
+				else if (p.paint_mode==7)
 					z << SEG_BODY_INIT_BLEND_ALL;
-				else if (paint_mode_==8)
+				else if (p.paint_mode==8)
 					z << SEG_BODY_INIT_BLEND_ALL;
 				break;
 			case SEG_SHDR_DB_GROW:
 				z << SEG_BODY_DB_GROW_2D_COORD;
 
-				if (paint_mode_!=5 &&
-					paint_mode_!=9)
+				if (p.paint_mode!=5 &&
+					p.paint_mode!=9)
 					z << SEG_BODY_DB_GROW_CULL;
 
-				if (paint_mode_ != 3)
+				if (p.paint_mode != 3)
 				{
 					z << VOL_HEAD_LIT;
 					z << VOL_DATA_VOLUME_LOOKUP;
@@ -188,7 +183,7 @@ namespace flvr
 					z << VOL_COMPUTED_GM_LOOKUP;
 					z << VOL_TRANSFER_FUNCTION_SIN_COLOR_L;
 
-					if (use_2d_)
+					if (p.use_2d)
 					{
 						z << SEG_BODY_WEIGHT;
 						z << SEG_BODY_BLEND_WEIGHT;
@@ -197,18 +192,18 @@ namespace flvr
 					z << SEG_BODY_DB_GROW_STOP_FUNC;
 				}
 
-				if (paint_mode_ == 1 ||
-					paint_mode_ == 2 ||
-					paint_mode_ == 4 ||
-					paint_mode_ == 5 ||
-					paint_mode_ == 9)
+				if (p.paint_mode == 1 ||
+					p.paint_mode == 2 ||
+					p.paint_mode == 4 ||
+					p.paint_mode == 5 ||
+					p.paint_mode == 9)
 				{
 					z << SEG_BODY_DB_GROW_BLEND_APPEND_HEAD;
-					if (use_dir_)
+					if (p.use_dir)
 						z << SEG_BODY_DB_GROW_BLEND_APPEND_DIR;
 					z << SEG_BODY_DB_GROW_BLEND_APPEND_BODY;
 				}
-				else if (paint_mode_==3)
+				else if (p.paint_mode==3)
 					z << SEG_BODY_DB_GROW_BLEND_ERASE;
 				break;
 			}
@@ -218,65 +213,5 @@ namespace flvr
 		z << SEG_TAIL;
 
 		s = z.str();
-		return false;
+		return true;
 	}
-
-	SegShaderFactory::SegShaderFactory()
-		: prev_shader_(-1)
-	{}
-
-	SegShaderFactory::~SegShaderFactory()
-	{
-		for(unsigned int i=0; i<shader_.size(); i++)
-			delete shader_[i];
-	}
-
-	void SegShaderFactory::clear()
-	{
-		for (unsigned int i = 0; i<shader_.size(); i++)
-			delete shader_[i];
-		shader_.clear();
-		prev_shader_ = -1;
-	}
-
-	ShaderProgram* SegShaderFactory::shader(
-		int type, int paint_mode, int hr_mode,
-		bool use_2d, bool shading, int peel,
-		bool clip, bool use_dir)
-	{
-		if(prev_shader_ >= 0)
-		{
-			if(shader_[prev_shader_]->match(
-				type, paint_mode, hr_mode,
-				use_2d, shading, peel,
-				clip, use_dir)) 
-				return shader_[prev_shader_]->program();
-		}
-		for(unsigned int i=0; i<shader_.size(); i++)
-		{
-			if(shader_[i]->match(
-				type, paint_mode, hr_mode,
-				use_2d, shading, peel,
-				clip, use_dir)) 
-			{
-				prev_shader_ = i;
-				return shader_[i]->program();
-			}
-		}
-
-		SegShader* s = new SegShader(
-			type, paint_mode, hr_mode,
-			use_2d, shading, peel,
-			clip, use_dir);
-		if(s->create())
-		{
-			delete s;
-			return 0;
-		}
-		shader_.push_back(s);
-		prev_shader_ = (int)shader_.size()-1;
-		return s->program();
-	}
-
-} // end namespace flvr
-
