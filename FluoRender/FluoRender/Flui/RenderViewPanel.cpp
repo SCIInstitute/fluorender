@@ -150,15 +150,15 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 		attriblist.PlatformDefaults();
 		attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
 		attriblist.Depth(depth_bit);
-		attriblist.SampleBuffers(1);
-		attriblist.Samplers(samples);
+		attriblist.SampleBuffers(0);
+		//attriblist.Samplers(samples);
 	}
 #else
 	attriblist.PlatformDefaults();
 	attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
 	attriblist.Depth(depth_bit);
-	attriblist.SampleBuffers(1);
-	attriblist.Samplers(samples);
+	attriblist.SampleBuffers(0);
+	//attriblist.Samplers(samples);
 #ifdef _DARWIN
 	if (gl_major_ver == 3)
 	{

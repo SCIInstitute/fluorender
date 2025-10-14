@@ -401,7 +401,8 @@ public:
 	flvr::TextRenderer* GetTextRenderer();
 
 	//force draw
-	bool ForceDraw();//return if swap buffers
+	bool Draw();//return if swap buffers
+	void DrawDefault();
 
 	//start loop update
 	void StartLoopUpdate();
@@ -801,8 +802,8 @@ private:
 	double CalcZ(double z);
 	void CalcFogRange();
 	//different modes
-	void Draw();//draw volumes only
-	void DrawDP();//draw volumes and meshes with depth peeling
+	void DrawData();//draw volumes only
+	void DrawDataPeel();//draw volumes and meshes with depth peeling
 				  //mesh and volume
 	void DrawMeshes(int peel = 0);//0: no dp
 								  //1: draw depth after 15 (15)

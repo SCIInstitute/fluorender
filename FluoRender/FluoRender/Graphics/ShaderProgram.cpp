@@ -386,19 +386,25 @@ namespace flvr
 		return true;
 	}
 
-	void ShaderProgram::destroy ()
+	void ShaderProgram::destroy()
 	{
 		if (shaders_supported())
 		{
 			glDeleteProgram(id_);
 			id_ = 0;
+			valid_ = false;
 		}
 	}
 
-	void ShaderProgram::bind ()
+	void ShaderProgram::bind()
 	{
 		if (shaders_supported())
-			glUseProgram(id_);
+		{
+			if (!valid_)
+				create();
+			if (valid_)
+				glUseProgram(id_);
+		}
 	}
 
 	void ShaderProgram::bind_frag_data_location(int color_num, const char* name)

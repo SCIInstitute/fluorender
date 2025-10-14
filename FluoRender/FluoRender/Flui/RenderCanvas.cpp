@@ -257,9 +257,10 @@ void RenderCanvas::Draw()
 	wxPaintDC dc(this);
 	if (auto view_ptr = m_render_view.lock())
 	{
-		bool bval = view_ptr->ForceDraw();
+		bool bval = view_ptr->Draw();
 		if (bval)
 		{
+			view_ptr->DrawDefault();
 			SwapBuffers();
 		}
 	}

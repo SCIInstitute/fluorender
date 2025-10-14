@@ -218,18 +218,21 @@ namespace flvr
 
 	FramebufferState::FramebufferState()
 	{
-		blendSrc = GL_SRC_ALPHA;
+		blendSrc = GL_ONE;
 		blendDst = GL_ONE_MINUS_SRC_ALPHA;
 		blendEquation = GL_FUNC_ADD;
 		depthFunc = GL_LEQUAL;
 		cullFace = GL_BACK;
 	}
 
+	FramebufferState Framebuffer::null_state_ = FramebufferState();
+
 	Framebuffer::Framebuffer(const FBRole& role, int nx, int ny,
 		const std::string &name):
 		role_(role), nx_(nx), ny_(ny),
 		name_(name)
 	{
+		state_ = default_state();
 	}
 
 	Framebuffer::~Framebuffer()
@@ -260,7 +263,6 @@ namespace flvr
 	{
 		const auto& s = state_;
 
-		if (s.enableMultisample) glEnable(GL_MULTISAMPLE); else glDisable(GL_MULTISAMPLE);
 		if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
 		if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
 		if (s.enableScissorTest) glEnable(GL_SCISSOR_TEST);  else glDisable(GL_SCISSOR_TEST);
@@ -284,13 +286,43 @@ namespace flvr
 
 		if (s.enableScissorTest)
 			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
+
+		glViewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
+	}
+
+	void Framebuffer::apply_state(const FramebufferState& s)
+	{
+		if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
+		if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
+		if (s.enableScissorTest) glEnable(GL_SCISSOR_TEST);  else glDisable(GL_SCISSOR_TEST);
+		if (s.enableCullFace)    glEnable(GL_CULL_FACE);      else glDisable(GL_CULL_FACE);
+
+		glBlendFunc(s.blendSrc, s.blendDst);
+		glBlendEquation(s.blendEquation);
+
+		glDepthFunc(s.depthFunc);
+		glClearDepth(s.clearDepth);
+
+		switch (s.faceWinding)
+		{
+		case FaceWinding::Front: glFrontFace(GL_CCW); break;
+		case FaceWinding::Back:  glFrontFace(GL_CW);  break;
+		case FaceWinding::Off:   break;
+		}
+		glCullFace(s.cullFace);
+
+		glClearColor(s.clearColor[0], s.clearColor[1], s.clearColor[2], s.clearColor[3]);
+
+		if (s.enableScissorTest)
+			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
+
+		glViewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
 	}
 
 	void Framebuffer::restore_state()
 	{
 		const auto& s = prev_state_;
 
-		if (s.enableMultisample) glEnable(GL_MULTISAMPLE); else glDisable(GL_MULTISAMPLE);
 		if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
 		if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
 		if (s.enableScissorTest) glEnable(GL_SCISSOR_TEST);  else glDisable(GL_SCISSOR_TEST);
@@ -320,7 +352,6 @@ namespace flvr
 	{
 		FramebufferState s;
 
-		s.enableMultisample = glIsEnabled(GL_MULTISAMPLE);
 		s.enableDepthTest = glIsEnabled(GL_DEPTH_TEST);
 		s.enableBlend = glIsEnabled(GL_BLEND);
 		s.enableScissorTest = glIsEnabled(GL_SCISSOR_TEST);
@@ -369,31 +400,27 @@ namespace flvr
 		{
 		case FBRole::RenderFloat:
 		case FBRole::RenderFloatMipmap:
-			s.enableDepthTest = true;
-			s.enableBlend = false;
-			break;
-
 		case FBRole::RenderUChar:
 			s.enableBlend = true;
-			s.blendSrc = GL_SRC_ALPHA;
-			s.blendDst = GL_ONE_MINUS_SRC_ALPHA;
 			break;
 
 		case FBRole::Pick:
-			s.enableDepthTest = false;
 			s.enableBlend = false;
+			s.enableDepthTest = true;
+			s.enableScissorTest = true;
 			break;
 
 		case FBRole::Depth:
+			s.enableBlend = false;
 			s.enableDepthTest = true;
 			break;
 
 		case FBRole::Volume:
-			s.enableBlend = true;
-			s.blendSrc = GL_ONE;
-			s.blendDst = GL_ONE_MINUS_SRC_ALPHA;
+			s.enableBlend = false;
 			break;
 		}
+
+		s.viewport = { 0, 0, nx_, ny_ };
 
 		return s;
 	}
@@ -417,9 +444,12 @@ namespace flvr
 		}
 	}
 
-	void Framebuffer::bind(unsigned int id)
+	void Framebuffer::bind(unsigned int id, const fluo::Vector4i& viewport)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, id);
+		FramebufferState s = null_state_;
+		s.viewport = viewport;
+		apply_state(s);
 	}
 
 	void Framebuffer::unbind(unsigned int prev_id)

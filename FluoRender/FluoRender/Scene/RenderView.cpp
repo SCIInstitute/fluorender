@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ClipPlanePanel.h>
 #include <ComponentDlg.h>
 #include <MeasureDlg.h>
-#include <RenderCanvas.h>
+//#include <RenderCanvas.h>
 #include <BaseXrRenderer.h>
 #include <LookingGlassRenderer.h>
 #include <ShaderProgram.h>
@@ -694,7 +694,6 @@ void RenderView::Init()
 #endif
 		glbin_settings.GetMemorySettings();
 		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
-		glEnable(GL_MULTISAMPLE);
 
 		m_initialized = true;
 
@@ -4092,7 +4091,7 @@ flvr::TextRenderer* RenderView::GetTextRenderer()
 	return m_text_renderer.get();
 }
 
-bool RenderView::ForceDraw()
+bool RenderView::Draw()
 {
 	if (!m_refresh)
 		m_retain_finalbuffer = true;
@@ -4133,20 +4132,16 @@ bool RenderView::ForceDraw()
 	if (glbin_settings.m_hologram_mode == 1)
 	{
 		PrepVRBuffer();
-		BindRenderBuffer();
 	}
-	else if (glbin_settings.m_hologram_mode == 2)
-	{
-		BindRenderBuffer();
-	}
+	BindRenderBuffer();//we draw everything to renderview buffer
 
 	switch (m_draw_type)
 	{
 	case 1:  //draw volumes only
-		Draw();
+		DrawData();
 		break;
 	case 2:  //draw volumes and meshes with depth peeling
-		DrawDP();
+		DrawDataPeel();
 		break;
 	}
 
@@ -4274,6 +4269,25 @@ bool RenderView::ForceDraw()
 	}
 
 	return swap;
+}
+
+void RenderView::DrawDefault()
+{
+	auto renderview_buffer = glbin_framebuffer_manager.framebuffer(ws2s(GetName()));
+	if (renderview_buffer)
+	{
+		fluo::Vector4i viewport = { 0, 0, m_canvas_size.w(), m_canvas_size.h() };
+		flvr::Framebuffer::bind(0, viewport);
+		auto img_shader =
+			glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+		if (img_shader)
+			img_shader->bind();
+		renderview_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+		DrawViewQuad();
+		if (img_shader)
+			img_shader->release();
+		renderview_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+	}
 }
 
 //start loop update
@@ -4792,9 +4806,9 @@ void RenderView::DrawCells()
 		return;
 	double width = glbin_settings.m_line_width;
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	flvr::ShaderProgram* shader =
 		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
 	if (shader)
@@ -7134,7 +7148,7 @@ void RenderView::CalcFogRange()
 }
 
 //draw the volume data only
-void RenderView::Draw()
+void RenderView::DrawData()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7203,7 +7217,7 @@ void RenderView::Draw()
 }
 
 //draw with depth peeling
-void RenderView::DrawDP()
+void RenderView::DrawDataPeel()
 {
 	int i;
 	int nx, ny;
@@ -7864,7 +7878,17 @@ void RenderView::BindRenderBuffer()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	else
-		glbin_framebuffer_manager.bind(nullptr);
+	{
+		//find render view buffer, resize if necessary
+		auto size = GetCanvasSize();
+		auto renderview_buffer =
+			glbin_framebuffer_manager.framebuffer(
+				flvr::FBRole::RenderFloat, size.w(), size.h(), ws2s(GetName()));
+		if (renderview_buffer)
+		{
+			glbin_framebuffer_manager.bind(renderview_buffer);
+		}
+	}
 }
 
 //draw out the framebuffer after composition

@@ -145,30 +145,30 @@ namespace flvr
 	{
 		FramebufferState();
 
-		// General toggles
-		bool enableMultisample = false;
-		bool enableDepthTest = false;
-		bool enableBlend = false;
-		bool enableScissorTest = false;
-		bool enableCullFace = false;
-
 		// Blend settings
+		bool enableBlend = false;
 		GLenum blendSrc;
 		GLenum blendDst;
 		GLenum blendEquation;
 
+		// Clear color
+		fluo::Vector4f clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+
 		// Depth settings
+		bool enableDepthTest = false;
 		GLenum depthFunc;
 		GLfloat clearDepth = 1.0f;
 
 		// Cull settings
+		bool enableCullFace = false;
 		FaceWinding faceWinding = FaceWinding::Off;
 		GLenum cullFace;
 
-		// Clear color
-		fluo::Vector4f clearColor = {1.0f, 1.0f, 1.0f, 1.0f};
+		//viewport rectangle
+		fluo::Vector4i viewport = { 0, 0, 0, 0 }; // x, y, width, height
 
 		// Scissor rectangle
+		bool enableScissorTest = false;
 		fluo::Vector4i scissorRect = {0, 0, 0, 0}; // x, y, width, height
 	};
 
@@ -185,8 +185,12 @@ namespace flvr
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
 
+		//default bind
+		static void bind(unsigned int id, const fluo::Vector4i& viewport);
+
 		//states
 		void apply_state();
+		static void apply_state(const FramebufferState& s);
 		void restore_state();
 		FramebufferState capture_current_state();
 		FramebufferState default_state();
@@ -236,13 +240,14 @@ namespace flvr
 		bool valid_ = false;
 		bool protected_ = false;
 		std::map<int, std::shared_ptr<FramebufferTexture>> attachments_;
+
 		//states
 		FramebufferState state_;
 		FramebufferState prev_state_;
+		static FramebufferState null_state_;//state for default framebuffer
 
 	private:
 		void bind();
-		static void bind(unsigned int id);
 		void unbind(unsigned int prev_id = 0);
 
 		friend class FramebufferManager;
