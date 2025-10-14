@@ -316,7 +316,8 @@ namespace flvr
 		if (s.enableScissorTest)
 			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
 
-		glViewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
+		if (s.viewport[2] > 0 && s.viewport[3] > 0)
+			glViewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
 	}
 
 	void Framebuffer::restore_state()
@@ -442,6 +443,12 @@ namespace flvr
 			prev_state_ = capture_current_state();
 			apply_state();
 		}
+	}
+
+	void Framebuffer::bind(unsigned int id)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, id);
+		apply_state(null_state_);
 	}
 
 	void Framebuffer::bind(unsigned int id, const fluo::Vector4i& viewport)
@@ -700,21 +707,6 @@ namespace flvr
 
 		// Restore previous framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, prevFramebuffer);
-
-		return true;
-	}
-
-	bool Framebuffer::read_default(int x, int y, int width, int height,
-								   GLenum format, GLenum type, void* data)
-	{
-		if (!data || width <= 0 || height <= 0)
-			return false;
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glReadBuffer(GL_BACK);
-
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(x, y, width, height, format, type, data);
 
 		return true;
 	}

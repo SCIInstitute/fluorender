@@ -5212,9 +5212,18 @@ void RenderView::ReadPixels(
 			glbin_framebuffer_manager.unbind();
 	}
 	else
-		flvr::Framebuffer::read_default(x, y, w, h,
-			chann == 3 ? GL_RGB : GL_RGBA,
-			fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
+	{
+		auto renderview_buffer =
+			glbin_framebuffer_manager.framebuffer(
+				ws2s(GetName()));
+		if (renderview_buffer)
+		{
+			renderview_buffer->read(x, y, w, h,
+				flvr::AttachmentPoint::Color(0),
+				chann == 3 ? GL_RGB : GL_RGBA,
+				fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
+		}
+	}
 
 	//if (m_enlarge || fp32)
 	//	BindRenderBuffer();

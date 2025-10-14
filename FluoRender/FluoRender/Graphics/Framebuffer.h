@@ -226,8 +226,6 @@ namespace flvr
 		unsigned int read_pick(int, int);
 		bool read(int x, int y, int width, int height,
 			const AttachmentPoint& ap, GLenum format, GLenum type, void* data);
-		static bool read_default(int x, int y, int width, int height,
-			GLenum format, GLenum type, void* data);
 		double estimate_pick_threshold(int width, int height,
 			const AttachmentPoint& ap, GLenum format, GLenum type, double scale = 0.8);
 
@@ -249,6 +247,7 @@ namespace flvr
 	private:
 		void bind();
 		void unbind(unsigned int prev_id = 0);
+		static void bind(unsigned int id);
 
 		friend class FramebufferManager;
 	};
