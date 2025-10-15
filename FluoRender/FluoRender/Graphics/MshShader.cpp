@@ -29,16 +29,14 @@
 #include <MshShader.h>
 #include <VolShaderCode.h>
 #include <MeshShaderCode.h>
-#include <sstream>
-#include <iostream>
 
 using namespace flvr;
 
-ShaderProgram* MeshShaderFactory::shader(const ShaderParams& base)
+std::shared_ptr<ShaderProgram> MeshShaderFactory::shader(const ShaderParams& params)
 {
-	const auto& params = dynamic_cast<const MeshShaderParams&>(base);
-	auto it = cache_.find(params);
-	if (it != cache_.end()) return it->second.get();
+	auto it = shader_map_.find(params);
+	if (it != shader_map_.end())
+		return it->second;
 
 	bool use_geom_shader = params.normal;
 	std::string vs;
@@ -50,26 +48,25 @@ ShaderProgram* MeshShaderFactory::shader(const ShaderParams& base)
 	if (use_geom_shader)
 		valid_g = emit_g(params, gs);
 
-	std::unique_ptr<ShaderProgram> prog;
+	std::shared_ptr<ShaderProgram> prog;
 	if (use_geom_shader)
 	{
 		if (!valid_v || !valid_f || !valid_g) return nullptr;
-		prog = std::make_unique<ShaderProgram>(vs, fs, gs);
+		prog = std::make_shared<ShaderProgram>(vs, fs, gs);
 	}
 	else
 	{
 		if (!valid_v || !valid_f) return nullptr;
-		prog = std::make_unique<ShaderProgram>(vs, fs);
+		prog = std::make_shared<ShaderProgram>(vs, fs);
 	}
-	auto* raw = prog.get();
-	cache_[params] = std::move(prog);
-	return raw;
+
+	shader_map_[params] = prog;
+
+	return prog;
 }
 
-bool MeshShaderFactory::emit_v(const ShaderParams& params, std::string& s)
+bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const MeshShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -79,7 +76,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 	z << MSH_VERTEX_INPUTS_V;
 	if (p.type == 0)
 	{
-		if (p.light)
+		if (p.shading)
 			z << MSH_VERTEX_INPUTS_N;
 		if (p.tex)
 			z << MSH_VERTEX_INPUTS_T;
@@ -88,7 +85,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 		//outputs
 		if (p.normal)
 			z << MSH_VERTEX_OUTPUTS_VPOS;
-		if (p.light)
+		if (p.shading)
 			z << MSH_VERTEX_OUTPUTS_N;
 		if (p.tex)
 			z << MSH_VERTEX_OUTPUTS_T;
@@ -98,7 +95,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 			z << MSH_VERTEX_OUTPUTS_FOG;
 		//uniforms
 		z << MSH_VERTEX_UNIFORM_MATRIX;
-		if (p.light)
+		if (p.shading)
 			z << MSH_VERTEX_UNIFORM_MATRIX_NORMAL;
 	}
 	else if (p.type == 1)
@@ -112,7 +109,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 	z << MSH_VERTEX_BODY_POS;
 	if (p.type == 0)
 	{
-		if (p.light)
+		if (p.shading)
 			z << MSH_VERTEX_BODY_NORMAL;
 		if (p.tex)
 			z << MSH_VERTEX_BODY_TEX;
@@ -128,10 +125,8 @@ bool MeshShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 	return true;
 }
 
-bool MeshShaderFactory::emit_f(const ShaderParams& params, std::string& s)
+bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const MeshShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -141,7 +136,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 	{
 		z << MSH_FRAG_OUTPUTS;
 		//inputs
-		if (p.light)
+		if (p.shading)
 			z << MSH_FRAG_INPUTS_N;
 		if (p.tex)
 			z << MSH_FRAG_INPUTS_T;
@@ -150,7 +145,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 		if (p.fog)
 			z << MSH_FRAG_INPUTS_FOG;
 		//uniforms
-		if (p.light)
+		if (p.shading)
 			z << MSH_FRAG_UNIFORMS_MATERIAL;
 		else
 			z << MSH_FRAG_UNIFORMS_NOMAT;
@@ -189,11 +184,11 @@ bool MeshShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 		z << MSH_FRAG_BODY_COLOR;
 		if (p.color)
 			z << MSH_FRAG_BODY_VERTEX_COLOR;
-		if (p.light)
+		if (p.shading)
 			z << MSH_FRAG_BODY_MATL_LIGHT;
 		if (p.tex)
 			z << MSH_FRAG_BODY_TEXTURE;
-		//if (!p.light && !p.tex)
+		//if (!p.shading && !p.tex)
 		//	z << MSH_FRAG_BODY_SIMPLE;
 		if (p.fog)
 		{
@@ -217,10 +212,8 @@ bool MeshShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 	return true;
 }
 
-bool MeshShaderFactory::emit_g(const ShaderParams& params, std::string& s)
+bool MeshShaderFactory::emit_g(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const MeshShaderParams&>(params);
-
 	if (!p.normal)
 		return false;
 

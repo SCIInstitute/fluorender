@@ -58,29 +58,15 @@
 
 namespace flvr
 {
-	struct ImgShaderParams : public ShaderParams
-	{
-		int type = 0;
-		int colormap = 0;
-
-		std::string to_key() const override {
-			return "type=" + std::to_string(type) + ";colormap=" + std::to_string(colormap);
-		}
-
-		std::unique_ptr<ShaderParams> clone() const override {
-			return std::make_unique<ImgShaderParams>(*this);
-		}
-	};
-
 	class ImgShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		ShaderProgram* shader(const ShaderParams& base) override;
+		std::shared_ptr<ShaderProgram> shader(const ShaderParams& params) override;
 
 	protected:
-		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
-		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
-		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
+		virtual bool emit_v(const ShaderParams& p, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& p, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& p, std::string& s) override;
 
 		std::string get_colormap_code(int colormap);
 

@@ -33,39 +33,14 @@
 
 namespace flvr
 {
-	struct LightFieldShaderParams : public ShaderParams
-	{
-		int type;
-
-		bool operator==(const LightFieldShaderParams& other) const {
-			return type == other.type;
-		}
-
-		size_t hash() const override {
-			size_t h = 0;
-			ShaderUtils::hash_combine(h, std::hash<int>{}(type));
-			return h;
-		}
-
-		bool equals(const ShaderParams& other) const override {
-			if (auto* o = dynamic_cast<const LightFieldShaderParams*>(&other))
-				return *this == *o;
-			return false;
-		}
-	};
-
 	class LightFieldShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		ShaderProgram* shader(const ShaderParams& base) override;
+		std::shared_ptr<ShaderProgram> shader(const ShaderParams& params) override;
 
 	protected:
-		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
-		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
-		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
-
-	private:
-		std::unordered_map<LightFieldShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
+		virtual bool emit_v(const ShaderParams& p, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& p, std::string& s) override;
 	};
 
 } // end namespace flvr

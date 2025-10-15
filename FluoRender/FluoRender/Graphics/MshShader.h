@@ -33,59 +33,15 @@
 
 namespace flvr
 {
-	struct MeshShaderParams : public ShaderParams
-	{
-		int type;	//0:normal; 1:integer
-		int peel;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
-		bool tex;
-		bool fog;
-		bool light;
-		bool normal;//0:use normal from mesh; 1:generate normal in geom shader
-		bool color;//vertex color
-
-		bool operator==(const MeshShaderParams& other) const
-		{
-			return
-				type == other.type &&
-				peel == other.peel &&
-				tex == other.tex &&
-				fog == other.fog &&
-				light == other.light &&
-				normal == other.normal &&
-				color == other.color;
-		}
-
-		size_t hash() const override {
-			size_t h = 0;
-			ShaderUtils::hash_combine(h, std::hash<int>{}(type));
-			ShaderUtils::hash_combine(h, std::hash<int>{}(peel));
-			ShaderUtils::hash_combine(h, std::hash<int>{}(tex));
-			ShaderUtils::hash_combine(h, std::hash<int>{}(fog));
-			ShaderUtils::hash_combine(h, std::hash<int>{}(light));
-			ShaderUtils::hash_combine(h, std::hash<int>{}(normal));
-			ShaderUtils::hash_combine(h, std::hash<int>{}(color));
-			return h;
-		}
-
-		bool equals(const ShaderParams& other) const override {
-			if (auto* o = dynamic_cast<const MeshShaderParams*>(&other))
-				return *this == *o;
-			return false;
-		}
-	};
-
 	class MeshShaderFactory : public ShaderProgramFactory
 	{
 	public:
-		ShaderProgram* shader(const ShaderParams& base) override;
+		std::shared_ptr<ShaderProgram> shader(const ShaderParams& params) override;
 
 	protected:
-		virtual bool emit_v(const ShaderParams& params, std::string& s) override;
-		virtual bool emit_g(const ShaderParams& params, std::string& s) override;
-		virtual bool emit_f(const ShaderParams& params, std::string& s) override;
-
-	private:
-		std::unordered_map<MeshShaderParams, std::unique_ptr<ShaderProgram>, ShaderParamsKeyHasher> cache_;
+		virtual bool emit_v(const ShaderParams& p, std::string& s) override;
+		virtual bool emit_g(const ShaderParams& p, std::string& s) override;
+		virtual bool emit_f(const ShaderParams& p, std::string& s) override;
 	};
 
 } // end namespace flvr

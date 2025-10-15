@@ -28,16 +28,14 @@
 
 #include <VolShader.h>
 #include <VolShaderCode.h>
-#include <sstream>
-#include <iostream>
 
 using namespace flvr;
 
-ShaderProgram* VolShaderFactory::shader(const ShaderParams& base)
+std::shared_ptr<ShaderProgram> VolShaderFactory::shader(const ShaderParams& params)
 {
-	const auto& params = dynamic_cast<const VolShaderParams&>(base);
-	auto it = cache_.find(params);
-	if (it != cache_.end()) return it->second.get();
+	auto it = shader_map_.find(params);
+	if (it != shader_map_.end())
+		return it->second;
 
 	std::string vs;
 	bool valid_v = emit_v(params, vs);
@@ -45,15 +43,14 @@ ShaderProgram* VolShaderFactory::shader(const ShaderParams& base)
 	bool valid_f = emit_f(params, fs);
 
 	if (!valid_v || !valid_f) return nullptr;
-	std::unique_ptr<ShaderProgram> prog = std::make_unique<ShaderProgram>(vs, fs);
-	auto* raw = prog.get();
-	cache_[params] = std::move(prog);
-	return raw;
+	std::shared_ptr<ShaderProgram> prog = std::make_shared<ShaderProgram>(vs, fs);
+	shader_map_[params] = prog;
+
+	return prog;
 }
 
-bool VolShaderFactory::emit_v(const ShaderParams& params, std::string& s)
+bool VolShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const VolShaderParams&>(params);
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -67,9 +64,9 @@ bool VolShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 	return true;
 }
 
-std::string VolShaderFactory::get_colormap_code(int colormap, int colormap_proj)
+std::string VolShaderFactory::get_colormap_code(int colormap, int colormap_prj)
 {
-	if (colormap == 0 && colormap_proj == 6)
+	if (colormap == 0 && colormap_prj == 6)
 		return std::string(VOL_COLORMAP_DIFF_CALC0);
 
 	static const std::string colormap_codes[] = {
@@ -90,7 +87,7 @@ std::string VolShaderFactory::get_colormap_code(int colormap, int colormap_proj)
 	return std::string(VOL_COLORMAP_CALC0); // default fallback
 }
 
-std::string VolShaderFactory::get_colormap_proj(int colormap_proj)
+std::string VolShaderFactory::get_colormap_proj(int colormap_prj)
 {
 	static const std::string colormap_proj_codes[] = {
 		VOL_TRANSFER_FUNCTION_COLORMAP_VALU0,
@@ -104,15 +101,14 @@ std::string VolShaderFactory::get_colormap_proj(int colormap_proj)
 		VOL_TRANSFER_FUNCTION_COLORMAP_VALU8
 	};
 
-	if (colormap_proj >= 0 && colormap_proj < 9)
-		return std::string(colormap_proj_codes[colormap_proj]);
+	if (colormap_prj >= 0 && colormap_prj < 9)
+		return std::string(colormap_proj_codes[colormap_prj]);
 
 	return std::string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0); // default fallback
 }
 
-bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
+bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const VolShaderParams&>(params);
 	std::ostringstream z;
 
 	if (p.poly)
@@ -137,11 +133,11 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 	z << VOL_UNIFORMS_COMMON;
 
 	//time for 4d colormap
-	if (p.colormap_proj == 4)
+	if (p.colormap_prj == 4)
 		z << VOL_UNIFROMS_4D_COLORMAP;
 
 	//neighbors for 4d colormap
-	if (p.colormap_proj >= 7)
+	if (p.colormap_prj >= 7)
 		z << VOL_UNIFORMS_4D_CACHE;
 
 	//2d map location
@@ -235,9 +231,9 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 		else
 			z << VOL_TEXTURE_GM_LOOKUP;
 
-		if (p.colormap_proj == 7)
+		if (p.colormap_prj == 7)
 			z << VOL_DATA_4D_INTENSITY_DELTA;
-		else if (p.colormap_proj == 8)
+		else if (p.colormap_prj == 8)
 			z << VOL_DATA_4D_SPEED;
 
 		switch (p.color_mode)
@@ -252,16 +248,16 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 			if (p.solid)
 			{
 				z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
-				z << get_colormap_proj(p.colormap_proj);
-				z << get_colormap_code(p.colormap, p.colormap_proj);
+				z << get_colormap_proj(p.colormap_prj);
+				z << get_colormap_code(p.colormap, p.colormap_prj);
 				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 				z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
 			}
 			else
 			{
 				z << VOL_TRANSFER_FUNCTION_COLORMAP;
-				z << get_colormap_proj(p.colormap_proj);
-				z << get_colormap_code(p.colormap, p.colormap_proj);
+				z << get_colormap_proj(p.colormap_prj);
+				z << get_colormap_code(p.colormap, p.colormap_prj);
 				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 				z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 			}
@@ -278,7 +274,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 		{
 			// Compute Gradient magnitude and use it.
 			if (p.grad ||
-				p.colormap_proj >= 8)
+				p.colormap_prj >= 8)
 			{
 				z << VOL_GRAD_COMPUTE;
 				z << VOL_COMPUTED_GM_LOOKUP;
@@ -291,15 +287,15 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 			z << VOL_TEXTURE_GM_LOOKUP;
 		}
 
-		if (p.colormap_proj == 7)
+		if (p.colormap_prj == 7)
 			z << VOL_DATA_4D_INTENSITY_DELTA;
-		else if (p.colormap_proj == 8)
+		else if (p.colormap_prj == 8)
 			z << VOL_DATA_4D_SPEED;
 
-		if (p.mip && p.colormap_proj)
+		if (p.mip && p.colormap_prj)
 		{
 			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ;
-			z << get_colormap_proj(p.colormap_proj);
+			z << get_colormap_proj(p.colormap_prj);
 			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT;
 			z << VOL_RASTER_BLEND_SOLID;
 		}
@@ -317,16 +313,16 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 				if (p.solid)
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
-					z << get_colormap_proj(p.colormap_proj);
-					z << get_colormap_code(p.colormap, p.colormap_proj);
+					z << get_colormap_proj(p.colormap_prj);
+					z << get_colormap_code(p.colormap, p.colormap_prj);
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
 				}
 				else
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP;
-					z << get_colormap_proj(p.colormap_proj);
-					z << get_colormap_code(p.colormap, p.colormap_proj);
+					z << get_colormap_proj(p.colormap_prj);
+					z << get_colormap_code(p.colormap, p.colormap_prj);
 					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 				}
@@ -338,7 +334,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 		}
 	}
 
-	if (!(p.mip && p.colormap_proj))
+	if (!(p.mip && p.colormap_prj))
 	{
 		// fog
 		if (p.fog)

@@ -28,16 +28,14 @@
 
 #include <LightFieldShader.h>
 #include <LightFieldShaderCode.h>
-#include <sstream>
-#include <iostream>
 
 using namespace flvr;
 
-ShaderProgram* LightFieldShaderFactory::shader(const ShaderParams& base)
+std::shared_ptr<ShaderProgram> LightFieldShaderFactory::shader(const ShaderParams& params)
 {
-	const auto& params = dynamic_cast<const LightFieldShaderParams&>(base);
-	auto it = cache_.find(params);
-	if (it != cache_.end()) return it->second.get();
+	auto it = shader_map_.find(params);
+	if (it != shader_map_.end())
+		return it->second;
 
 	std::string vs;
 	bool valid_v = emit_v(params, vs);
@@ -45,16 +43,14 @@ ShaderProgram* LightFieldShaderFactory::shader(const ShaderParams& base)
 	bool valid_f = emit_f(params, fs);
 
 	if (!valid_v || !valid_f) return nullptr;
-	std::unique_ptr<ShaderProgram> prog = std::make_unique<ShaderProgram>(vs, fs);
-	auto* raw = prog.get();
-	cache_[params] = std::move(prog);
-	return raw;
+	std::shared_ptr<ShaderProgram> prog = std::make_shared<ShaderProgram>(vs, fs);
+	shader_map_[params] = prog;
+
+	return prog;
 }
 
-bool LightFieldShaderFactory::emit_v(const ShaderParams& params, std::string& s)
+bool LightFieldShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const LightFieldShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -74,10 +70,8 @@ bool LightFieldShaderFactory::emit_v(const ShaderParams& params, std::string& s)
 	return true;
 }
 
-bool LightFieldShaderFactory::emit_f(const ShaderParams& params, std::string& s)
+bool LightFieldShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const LightFieldShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;

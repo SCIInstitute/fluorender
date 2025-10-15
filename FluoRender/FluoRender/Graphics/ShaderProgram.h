@@ -32,7 +32,10 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 #include <unordered_map>
+#include <sstream>
+#include <iostream>
 
 namespace flvr
 {
@@ -105,16 +108,186 @@ namespace flvr
 
 	struct ShaderParams
 	{
-		virtual ~ShaderParams() = default;
-		virtual std::string to_key() const = 0;
-		virtual std::unique_ptr<ShaderParams> clone() const = 0;
+		int type = 0;//img, lightfield, mesh(0:normal; 1:integer), seg, cal
+		int colormap = 0;//img, vol
+		int peel = 0;//mesh(0:no peeling; 1:peel positive; 2:peel both; -1:peel negative), seg, vol
+		bool tex = false;//mesh
+		bool fog = false;//mesh, vol
+		bool shading = false;//mesh(from light), seg, vol
+		bool normal = false;//mesh(0:use normal from mesh; 1:generate normal in geom shader)
+		bool color = false;//mesh
+		int paint_mode = 0;//seg
+		int hr_mode = 0;//seg
+		bool use_2d = false;//seg
+		bool clip = false;//seg, vol
+		bool use_dir = false;//seg
+		bool poly = false;//vol
+		int channels = 0;//vol
+		bool grad = false;//vol
+		int mask = 0;//vol(0-normal, 1-render with mask, 2-render with mask excluded)
+				 //(3-random color with label, 4-random color with label+mask)
+		bool mip = false;//vol
+		int color_mode = 0;//vol(0-normal; 1-rainbow; 2-depth)
+		int colormap_prj = 0;//vol(projection direction, 4D colormap: >=7)
+		bool solid = false;//vol(no transparency)
+		int vertex_type = 0;//vol
+
+		static ShaderParams Img(int type, int colormap)
+		{
+			ShaderParams p;
+			p.type = type;
+			p.colormap = colormap;
+			return p;
+		}
+
+		static ShaderParams LightField(int type)
+		{
+			ShaderParams p;
+			p.type = type;
+			return p;
+		}
+
+		static ShaderParams Mesh(
+			int type,
+			int peel,
+			bool tex,
+			bool fog,
+			bool shading,
+			bool normal,
+			bool color
+		)
+		{
+			ShaderParams p;
+			p.type = type;
+			p.peel = peel;
+			p.tex = tex;
+			p.fog = fog;
+			p.shading = shading;
+			p.normal = normal;
+			p.color = color;
+			return p;
+		}
+
+		static ShaderParams Seg(
+			int type,
+			int paint_mode,
+			int hr_mode,
+			bool use_2d,
+			bool shading,
+			int peel,
+			bool clip,
+			bool use_dir
+		)
+		{
+			ShaderParams p;
+			p.type = type;
+			p.paint_mode = paint_mode;
+			p.hr_mode = hr_mode;
+			p.use_2d = use_2d;
+			p.shading = shading;
+			p.peel = peel;
+			p.clip = clip;
+			p.use_dir = use_dir;
+			return p;
+		}
+
+		static ShaderParams VolCal(int type)
+		{
+			ShaderParams p;
+			p.type = type;
+			return p;
+		}
+
+		static ShaderParams Volume(
+			bool poly,
+			int channels,
+			bool shading,
+			bool fog,
+			int peel,
+			bool clip,
+			bool grad,
+			int mask,
+			bool mip,
+			int color_mode,
+			int colormap,
+			int colormap_proj,
+			bool solid,
+			int vertex_type
+		)
+		{
+			ShaderParams p;
+			p.poly = poly;
+			p.channels = channels;
+			p.shading = shading;
+			p.fog = fog;
+			p.peel = peel;
+			p.clip = clip;
+			p.grad = grad;
+			p.mask = mask;
+			p.mip = mip;
+			p.color_mode = color_mode;
+			p.colormap = colormap;
+			p.colormap_prj = colormap_proj;
+			p.solid = solid;
+			p.vertex_type = vertex_type;
+			return p;
+		}
+
+		std::string to_string()
+		{
+			std::ostringstream oss;
+			oss << "ShaderParams{type=" << type
+				<< ", colormap=" << colormap
+				<< ", peel=" << peel
+				<< ", tex=" << tex
+				<< ", fog=" << fog
+				<< ", shading=" << shading
+				<< ", normal=" << normal
+				<< ", color=" << color
+				<< ", paint_mode=" << paint_mode
+				<< ", hr_mode=" << hr_mode
+				<< ", use_2d=" << use_2d
+				<< ", clip=" << clip
+				<< ", use_dir=" << use_dir
+				<< ", poly=" << poly
+				<< ", channels=" << channels
+				<< ", grad=" << grad
+				<< ", mask=" << mask
+				<< ", mip=" << mip
+				<< ", color_mode=" << color_mode
+				<< ", colormap_prj=" << colormap_prj
+				<< ", solid=" << solid
+				<< ", vertex_type=" << vertex_type
+				<< "}";
+			return oss.str();
+		}
 	};
 
-	struct ShaderEntry
+	inline bool operator==(const ShaderParams& a, const ShaderParams& b)
 	{
-		std::unique_ptr<ShaderParams> params;
-		std::unique_ptr<ShaderProgram> program;
-	};
+		return a.type == b.type &&
+			a.colormap == b.colormap &&
+			a.peel == b.peel &&
+			a.tex == b.tex &&
+			a.fog == b.fog &&
+			a.shading == b.shading &&
+			a.normal == b.normal &&
+			a.color == b.color &&
+			a.paint_mode == b.paint_mode &&
+			a.hr_mode == b.hr_mode &&
+			a.use_2d == b.use_2d &&
+			a.clip == b.clip &&
+			a.use_dir == b.use_dir &&
+			a.poly == b.poly &&
+			a.channels == b.channels &&
+			a.grad == b.grad &&
+			a.mask == b.mask &&
+			a.mip == b.mip &&
+			a.color_mode == b.color_mode &&
+			a.colormap_prj == b.colormap_prj &&
+			a.solid == b.solid &&
+			a.vertex_type == b.vertex_type;
+	}
 
 	class ShaderProgramFactory
 	{
@@ -122,7 +295,7 @@ namespace flvr
 		virtual ~ShaderProgramFactory() = default;
 
 		virtual void clear() { shader_map_.clear(); }
-		virtual ShaderProgram* shader(const ShaderParams& params) = 0;
+		virtual std::shared_ptr<ShaderProgram> shader(const ShaderParams& params) = 0;
 
 	protected:
 		virtual bool emit_v(const ShaderParams& params, std::string& s) = 0;
@@ -134,7 +307,43 @@ namespace flvr
 		virtual bool emit_f(const ShaderParams& params, std::string& s) = 0;
 
 	protected:
-		std::unordered_map<std::string, ShaderEntry> shader_map_;
+		struct ShaderParamsHasher
+		{
+			size_t operator()(const ShaderParams& p) const
+			{
+				size_t h = 0;
+				auto hash_combine = [&h](auto val) {
+					h ^= std::hash<decltype(val)>{}(val)+0x9e3779b9 + (h << 6) + (h >> 2);
+					};
+
+				hash_combine(p.type);
+				hash_combine(p.colormap);
+				hash_combine(p.peel);
+				hash_combine(p.tex);
+				hash_combine(p.fog);
+				hash_combine(p.shading);
+				hash_combine(p.normal);
+				hash_combine(p.color);
+				hash_combine(p.paint_mode);
+				hash_combine(p.hr_mode);
+				hash_combine(p.use_2d);
+				hash_combine(p.clip);
+				hash_combine(p.use_dir);
+				hash_combine(p.poly);
+				hash_combine(p.channels);
+				hash_combine(p.grad);
+				hash_combine(p.mask);
+				hash_combine(p.mip);
+				hash_combine(p.color_mode);
+				hash_combine(p.colormap_prj);
+				hash_combine(p.solid);
+				hash_combine(p.vertex_type);
+
+				return h;
+			}
+		};
+
+		std::unordered_map<ShaderParams, std::shared_ptr<ShaderProgram>, ShaderParamsHasher> shader_map_;
 	};
 
 	class ShaderProgramManager
@@ -146,7 +355,7 @@ namespace flvr
 			factories_[name] = std::make_unique<FactoryType>();
 		}
 
-		ShaderProgram* shader(const std::string& factory_name, const ShaderParams& params)
+		std::shared_ptr<ShaderProgram> shader(const std::string& factory_name, const ShaderParams& params)
 		{
 			auto it = factories_.find(factory_name);
 			if (it != factories_.end())

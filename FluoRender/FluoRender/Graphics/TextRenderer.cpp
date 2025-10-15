@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <TextRenderer.h>
 #include <Global.h>
+#include <Names.h>
 #include <ShaderProgram.h>
 #include <Color.h>
 #include <ImgShader.h>
@@ -209,11 +210,10 @@ namespace flvr
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		ShaderProgram* shader = glbin_img_shader_factory.shader(IMG_SHDR_DRAW_TEXT);
+		auto shader = glbin_shader_manager.shader(gstImgShader,
+			ShaderParams::Img(IMG_SHDR_DRAW_TEXT, 0));
 		if (shader)
 		{
-			if (!shader->valid())
-				shader->create();
 			shader->bind();
 			shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0f);
 		}
@@ -253,8 +253,8 @@ namespace flvr
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		if (shader && shader->valid())
-			shader->release();
+		if (shader)
+			shader->unbind();
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 	}

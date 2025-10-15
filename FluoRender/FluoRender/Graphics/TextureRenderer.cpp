@@ -189,17 +189,17 @@ namespace flvr
 			for (size_t j = 0; j < bricks->size(); ++j)
 			{
 				brick = (*bricks)[j];
-				if (tex_pool_[i-1].brick == brick/* &&
+				if (tex_pool_[i - 1].brick == brick/* &&
 					(tex_pool_[i].comp == 0 ||
 					tex_pool_[i].comp == brick->nmask() ||
 					tex_pool_[i].comp == brick->nlabel())*/)
 				{
 					glbin_settings.m_available_mem +=
-						tex_pool_[i-1].nx *
-						tex_pool_[i-1].ny *
-						tex_pool_[i-1].nz *
-						tex_pool_[i-1].nb / 1.04e6;
-					glDeleteTextures(1, (GLuint*)&tex_pool_[i-1].id);
+						tex_pool_[i - 1].nx *
+						tex_pool_[i - 1].ny *
+						tex_pool_[i - 1].nz *
+						tex_pool_[i - 1].nb / 1.04e6;
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i - 1].id);
 					tex_pool_.erase(tex_pool_.begin() + i - 1);
 					break;
 				}
@@ -214,11 +214,11 @@ namespace flvr
 			return;
 
 		std::vector<TextureBrick*>* bricks = tex->get_bricks();
-		TextureBrick *brick = 0;
-		TextureBrick *locbk = 0;
+		TextureBrick* brick = 0;
+		TextureBrick* locbk = 0;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
-			brick = tex_pool_[i-1].brick;
+			brick = tex_pool_[i - 1].brick;
 			if (skip && !brick->is_mask_valid())
 			{
 				//brick->reset_skip_mask();
@@ -228,14 +228,14 @@ namespace flvr
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i-1].comp == brick->nmask())
+					tex_pool_[i - 1].comp == brick->nmask())
 				{
 					glbin_settings.m_available_mem +=
-						tex_pool_[i-1].nx *
-						tex_pool_[i-1].ny *
-						tex_pool_[i-1].nz *
-						tex_pool_[i-1].nb / 1.04e6;
-					glDeleteTextures(1, (GLuint*)&tex_pool_[i-1].id);
+						tex_pool_[i - 1].nx *
+						tex_pool_[i - 1].ny *
+						tex_pool_[i - 1].nz *
+						tex_pool_[i - 1].nb / 1.04e6;
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i - 1].id);
 					tex_pool_.erase(tex_pool_.begin() + i - 1);
 					break;
 				}
@@ -250,11 +250,11 @@ namespace flvr
 			return;
 
 		std::vector<TextureBrick*>* bricks = tex->get_bricks();
-		TextureBrick *brick = 0;
-		TextureBrick *locbk = 0;
+		TextureBrick* brick = 0;
+		TextureBrick* locbk = 0;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
-			brick = tex_pool_[i-1].brick;
+			brick = tex_pool_[i - 1].brick;
 			if (!brick->is_mask_valid())
 			{
 				//brick->reset_skip_mask();
@@ -264,14 +264,14 @@ namespace flvr
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i-1].comp == brick->nlabel())
+					tex_pool_[i - 1].comp == brick->nlabel())
 				{
 					glbin_settings.m_available_mem +=
-						tex_pool_[i-1].nx *
-						tex_pool_[i-1].ny *
-						tex_pool_[i-1].nz *
-						tex_pool_[i-1].nb / 1.04e6;
-					glDeleteTextures(1, (GLuint*)&tex_pool_[i-1].id);
+						tex_pool_[i - 1].nx *
+						tex_pool_[i - 1].ny *
+						tex_pool_[i - 1].nz *
+						tex_pool_[i - 1].nb / 1.04e6;
+					glDeleteTextures(1, (GLuint*)&tex_pool_[i - 1].id);
 					tex_pool_.erase(tex_pool_.begin() + i - 1);
 					break;
 				}
@@ -318,7 +318,7 @@ namespace flvr
 		//cor_up_time_ = speed;
 		if (speed < 5) speed = 5;
 		if (speed > 20) speed = 20;
-		cor_up_time_ = (unsigned long)(log10(100.0 / speed)* glbin_settings.m_up_time);
+		cor_up_time_ = (unsigned long)(log10(100.0 / speed) * glbin_settings.m_up_time);
 		cor_up_time_ = std::max(1, (int)cor_up_time_);
 	}
 
@@ -389,8 +389,8 @@ namespace flvr
 				sum_y += y;
 				sum_x2 += x * x;
 			}
-			double beta = (sum_xy / n - sum_x*sum_y / n / n) / (sum_x2 / n - sum_x*sum_x / n / n);
-			result = std::max(sum_y / n - beta*sum_x / n + beta*n, 1.0);
+			double beta = (sum_xy / n - sum_x * sum_y / n / n) / (sum_x2 / n - sum_x * sum_x / n / n);
+			result = std::max(sum_y / n - beta * sum_x / n + beta * n, 1.0);
 		}
 		else if (mode == 3)
 		{
@@ -403,7 +403,7 @@ namespace flvr
 			int n0 = 0;
 			double sum = 0.0;
 			int n = brick_queue_.GetLimit();
-			int *sorted_queue = new int[n]();
+			int* sorted_queue = new int[n]();
 			for (int i = 0; i < n; i++)
 			{
 				sorted_queue[i] = brick_queue_.Get(i);
@@ -441,7 +441,7 @@ namespace flvr
 		if (!tex)
 			return fluo::Ray();
 
-		fluo::Transform *field_trans = tex->transform();
+		fluo::Transform* field_trans = tex->transform();
 		double mvmat[16] =
 		{ m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
 		 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
@@ -463,7 +463,7 @@ namespace flvr
 		if (!tex)
 			return fluo::Ray();
 
-		fluo::Transform *field_trans = tex->transform();
+		fluo::Transform* field_trans = tex->transform();
 		double mvmat[16] =
 		{ m_mv_mat[0][0], m_mv_mat[0][1], m_mv_mat[0][2], m_mv_mat[0][3],
 		 m_mv_mat[1][0], m_mv_mat[1][1], m_mv_mat[1][2], m_mv_mat[1][3],
@@ -532,31 +532,31 @@ namespace flvr
 			a = v_len2 / v.x();
 			b = v_len2 / v.y();
 			c = v_len2 / v.z();
-			result = n.x()*n.y()*n.z()*sqrt(a*a*b*b + b*b*c*c + c*c*a*a) /
-				sqrt(n.x()*n.x()*a*a*n.y()*n.y()*b*b +
-					n.x()*n.x()*a*a*n.z()*n.z()*c*c +
-					n.y()*n.y()*b*b*n.z()*n.z()*c*c);
+			result = n.x() * n.y() * n.z() * sqrt(a * a * b * b + b * b * c * c + c * c * a * a) /
+				sqrt(n.x() * n.x() * a * a * n.y() * n.y() * b * b +
+					n.x() * n.x() * a * a * n.z() * n.z() * c * c +
+					n.y() * n.y() * b * b * n.z() * n.z() * c * c);
 		}
 		else if (fabs(v.x()) < e && fabs(v.y()) >= e && fabs(v.z()) >= e)
 		{
 			b = v_len2 / v.y();
 			c = v_len2 / v.z();
-			result = n.y()*n.z()*sqrt(b*b + c*c) /
-				sqrt(n.y()*n.y()*b*b + n.z()*n.z()*c*c);
+			result = n.y() * n.z() * sqrt(b * b + c * c) /
+				sqrt(n.y() * n.y() * b * b + n.z() * n.z() * c * c);
 		}
 		else if (fabs(v.y()) < e && fabs(v.x()) >= e && fabs(v.z()) >= e)
 		{
 			a = v_len2 / v.x();
 			c = v_len2 / v.z();
-			result = n.x()*n.z()*sqrt(a*a + c*c) /
-				sqrt(n.x()*n.x()*a*a + n.z()*n.z()*c*c);
+			result = n.x() * n.z() * sqrt(a * a + c * c) /
+				sqrt(n.x() * n.x() * a * a + n.z() * n.z() * c * c);
 		}
 		else if (fabs(v.z()) < e && fabs(v.x()) >= e && fabs(v.y()) >= e)
 		{
 			a = v_len2 / v.x();
 			b = v_len2 / v.y();
-			result = n.x()*n.y()*sqrt(a*a + b*b) /
-				sqrt(n.x()*n.x()*a*a + n.y()*n.y()*b*b);
+			result = n.x() * n.y() * sqrt(a * a + b * b) /
+				sqrt(n.x() * n.x() * a * a + n.y() * n.y() * b * b);
 		}
 		else if (fabs(v.x()) >= e && fabs(v.y()) < e && fabs(v.z()) < e)
 		{
@@ -577,7 +577,7 @@ namespace flvr
 
 	}
 
-	bool TextureRenderer::test_against_view(const fluo::BBox &bbox, bool persp)
+	bool TextureRenderer::test_against_view(const fluo::BBox& bbox, bool persp)
 	{
 		memcpy(mvmat_, glm::value_ptr(m_mv_tex_scl_mat), 16 * sizeof(float));
 		memcpy(prmat_, glm::value_ptr(m_proj_mat), 16 * sizeof(float));
@@ -786,72 +786,118 @@ namespace flvr
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-			if (ShaderProgram::shaders_supported())
+			GLenum format;
+			GLint internal_format;
+			if (nb < 3)
 			{
-				GLenum format;
-				GLint internal_format;
-				if (nb < 3)
-				{
-					if (compression && GLEW_ARB_texture_compression_rgtc &&
-						brick->ntype(c) == TextureBrick::TYPE_INT)
-						internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-					else
-						internal_format = (brick->tex_type(c) == GL_SHORT ||
-							brick->tex_type(c) == GL_UNSIGNED_SHORT) ?
-						GL_R16 : GL_R8;
-					format = GL_RED;
-				}
+				if (compression && GLEW_ARB_texture_compression_rgtc &&
+					brick->ntype(c) == TextureBrick::TYPE_INT)
+					internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				else
-				{
-					if (compression && GLEW_ARB_texture_compression_rgtc &&
-						brick->ntype(c) == TextureBrick::TYPE_INT)
-						internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-					else
-						internal_format = (brick->tex_type(c) == GL_SHORT ||
-							brick->tex_type(c) == GL_UNSIGNED_SHORT) ?
-						GL_RGBA16UI : GL_RGBA8UI;
-					format = GL_RGBA;
-				}
+					internal_format = (brick->tex_type(c) == GL_SHORT ||
+						brick->tex_type(c) == GL_UNSIGNED_SHORT) ?
+					GL_R16 : GL_R8;
+				format = GL_RED;
+			}
+			else
+			{
+				if (compression && GLEW_ARB_texture_compression_rgtc &&
+					brick->ntype(c) == TextureBrick::TYPE_INT)
+					internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				else
+					internal_format = (brick->tex_type(c) == GL_SHORT ||
+						brick->tex_type(c) == GL_UNSIGNED_SHORT) ?
+					GL_RGBA16UI : GL_RGBA8UI;
+				format = GL_RGBA;
+			}
 
-				if (glTexImage3D)
+			if (glTexImage3D)
+			{
+				if (tex->isBrxml())
 				{
-					if (tex->isBrxml())
+					if (load_on_main_thread_)
 					{
-						if (load_on_main_thread_)
+						bool brkerror = false;
+						bool lb_swapped = false;
+						if (brick->isLoaded())
+						{
+							if (brick->get_id_in_loadedbrks() >= 0 && brick->get_id_in_loadedbrks() < loadedbrks.size())
+							{
+								loadedbrks[brick->get_id_in_loadedbrks()].swapped = true;
+								lb_swapped = true;
+							}
+							else
+								brkerror = true;
+						}
+						else if (mainmem_buf_size_ >= 1.0)
+						{
+							double bsize = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+							if (available_mainmem_buf_size_ - bsize < 0.0)
+							{
+								double free_mem_size = 0.0;
+								while (free_mem_size < bsize && del_id < loadedbrks.size())
+								{
+									TextureBrick* b = loadedbrks[del_id].brk;
+									if (!loadedbrks[del_id].swapped && b->isLoaded()) {
+										b->freeBrkData();
+										free_mem_size += b->nx() * b->ny() * b->nz() * b->nb(0) / 1.04e6;
+									}
+									del_id++;
+								}
+								available_mainmem_buf_size_ += free_mem_size;
+							}
+						}
+
+						FileLocInfo* finfo = tex->GetFileName(brick->getID());
+						void* texdata = brick->tex_data_brk(c, finfo);
+						if (texdata)
+						{
+							glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
+							glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+						}
+						else
+						{
+							glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+							tex_pool_.erase(tex_pool_.begin() + idx);
+							brkerror = true;
+							result = -1;
+						}
+
+						if (mainmem_buf_size_ == 0.0) brick->freeBrkData();
+						else
+						{
+							if (brkerror)
+							{
+								brick->freeBrkData();
+
+								double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+								available_mainmem_buf_size_ += new_mem;
+							}
+							else
+							{
+								if (!lb_swapped)
+								{
+									double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+									available_mainmem_buf_size_ -= new_mem;
+								}
+
+								LoadedBrick lb;
+								lb.swapped = false;
+								lb.size = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+								lb.brk = brick;
+								lb.brk->set_id_in_loadedbrks(static_cast<int>(loadedbrks.size()));
+								loadedbrks.push_back(lb);
+
+							}
+
+						}
+					}
+					else
+					{
+						if (brick->isLoaded())
 						{
 							bool brkerror = false;
-							bool lb_swapped = false;
-							if (brick->isLoaded())
-							{
-								if (brick->get_id_in_loadedbrks() >= 0 && brick->get_id_in_loadedbrks() < loadedbrks.size())
-								{
-									loadedbrks[brick->get_id_in_loadedbrks()].swapped = true;
-									lb_swapped = true;
-								}
-								else
-									brkerror = true;
-							}
-							else if (mainmem_buf_size_ >= 1.0)
-							{
-								double bsize = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
-								if (available_mainmem_buf_size_ - bsize < 0.0)
-								{
-									double free_mem_size = 0.0;
-									while (free_mem_size < bsize && del_id < loadedbrks.size())
-									{
-										TextureBrick* b = loadedbrks[del_id].brk;
-										if (!loadedbrks[del_id].swapped && b->isLoaded()) {
-											b->freeBrkData();
-											free_mem_size += b->nx() * b->ny() * b->nz() * b->nb(0) / 1.04e6;
-										}
-										del_id++;
-									}
-									available_mainmem_buf_size_ += free_mem_size;
-								}
-							}
-
-							FileLocInfo *finfo = tex->GetFileName(brick->getID());
-							void *texdata = brick->tex_data_brk(c, finfo);
+							void* texdata = brick->tex_data_brk(c, NULL);
 							if (texdata)
 							{
 								glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
@@ -864,42 +910,23 @@ namespace flvr
 								brkerror = true;
 								result = -1;
 							}
-
-							if (mainmem_buf_size_ == 0.0) brick->freeBrkData();
-							else
-							{
-								if (brkerror)
-								{
-									brick->freeBrkData();
-
-									double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
-									available_mainmem_buf_size_ += new_mem;
-								}
-								else
-								{
-									if (!lb_swapped)
-									{
-										double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
-										available_mainmem_buf_size_ -= new_mem;
-									}
-
-									LoadedBrick lb;
-									lb.swapped = false;
-									lb.size = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
-									lb.brk = brick;
-									lb.brk->set_id_in_loadedbrks(static_cast<int>(loadedbrks.size()));
-									loadedbrks.push_back(lb);
-
-								}
-
-							}
 						}
-						else
+						else if (!interactive_)
 						{
+							uint32_t rn_time;
+							unsigned long elapsed;
+							long t;
+							do {
+								rn_time = static_cast<uint32_t>(GET_TICK_COUNT());
+								elapsed = rn_time - st_time_;
+								t = glbin_settings.m_up_time - elapsed;
+								if (t > 0) std::this_thread::sleep_for(std::chrono::milliseconds(t));
+							} while (elapsed <= static_cast<unsigned long>(glbin_settings.m_up_time));
+
 							if (brick->isLoaded())
 							{
 								bool brkerror = false;
-								void *texdata = brick->tex_data_brk(c, NULL);
+								void* texdata = brick->tex_data_brk(c, NULL);
 								if (texdata)
 								{
 									glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
@@ -913,42 +940,6 @@ namespace flvr
 									result = -1;
 								}
 							}
-							else if (!interactive_)
-							{
-								uint32_t rn_time;
-								unsigned long elapsed;
-								long t;
-								do {
-									rn_time = static_cast<uint32_t>(GET_TICK_COUNT());
-									elapsed = rn_time - st_time_;
-									t = glbin_settings.m_up_time - elapsed;
-									if (t > 0) std::this_thread::sleep_for(std::chrono::milliseconds(t));
-								} while (elapsed <= static_cast<unsigned long>(glbin_settings.m_up_time));
-
-								if (brick->isLoaded())
-								{
-									bool brkerror = false;
-									void *texdata = brick->tex_data_brk(c, NULL);
-									if (texdata)
-									{
-										glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
-										glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
-									}
-									else
-									{
-										glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
-										tex_pool_.erase(tex_pool_.begin() + idx);
-										brkerror = true;
-										result = -1;
-									}
-								}
-								else
-								{
-									glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
-									tex_pool_.erase(tex_pool_.begin() + idx);
-									result = -1;
-								}
-							}
 							else
 							{
 								glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
@@ -956,20 +947,26 @@ namespace flvr
 								result = -1;
 							}
 						}
+						else
+						{
+							glDeleteTextures(1, (GLuint*)&tex_pool_[idx].id);
+							tex_pool_.erase(tex_pool_.begin() + idx);
+							result = -1;
+						}
 					}
-					else
-					{
-						glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-							brick->tex_type(c), 0);
+				}
+				else
+				{
+					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
+						brick->tex_type(c), 0);
 
-						load_texture(brick->tex_data(c, raw_data), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
-					}
+					load_texture(brick->tex_data(c, raw_data), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
+				}
 
-					if (glbin_settings.m_mem_swap)
-					{
-						double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
-						glbin_settings.m_available_mem -= new_mem;
-					}
+				if (glbin_settings.m_mem_swap)
+				{
+					double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+					glbin_settings.m_available_mem -= new_mem;
 				}
 			}
 
@@ -1076,17 +1073,14 @@ namespace flvr
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-			if (ShaderProgram::shaders_supported())
+			GLint internal_format = GL_R8;
+			GLenum format = (nb == 1 ? GL_RED : GL_RGBA);
+			if (glTexImage3D)
 			{
-				GLint internal_format = GL_R8;
-				GLenum format = (nb == 1 ? GL_RED : GL_RGBA);
-				if (glTexImage3D)
-				{
-					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-						brick->tex_type(c), 0);
+				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
+					brick->tex_type(c), 0);
 
-					load_texture(brick->tex_data(c), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
-				}
+				load_texture(brick->tex_data(c), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
 			}
 
 			if (!ShaderProgram::no_tex_unpack_)
@@ -1177,17 +1171,14 @@ namespace flvr
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-			if (ShaderProgram::shaders_supported())
+			GLenum format = GL_RED_INTEGER;
+			GLint internal_format = GL_R32UI;
+			if (glTexImage3D)
 			{
-				GLenum format = GL_RED_INTEGER;
-				GLint internal_format = GL_R32UI;
-				if (glTexImage3D)
-				{
-					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-						brick->tex_type(c), NULL);
+				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
+					brick->tex_type(c), NULL);
 
-					load_texture(brick->tex_data(c), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
-				}
+				load_texture(brick->tex_data(c), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
 			}
 
 			if (!ShaderProgram::no_tex_unpack_)
@@ -1210,7 +1201,7 @@ namespace flvr
 	void TextureRenderer::check_swap_memory(TextureBrick* brick, int c)
 	{
 		unsigned int i;
-		double new_mem = brick->nx()*brick->ny()*brick->nz()*brick->nb(c) / 1.04e6;
+		double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
 
 		if (glbin_settings.m_use_mem_limit)
 		{
@@ -1261,7 +1252,7 @@ namespace flvr
 			{
 				TextureBrick* btemp = bd_list[i].brick;
 				tex_pool_[bd_list[i].index].delayed_del = true;
-				double released_mem = btemp->nx()*btemp->ny()*btemp->nz()*btemp->nb(c) / 1.04e6;
+				double released_mem = btemp->nx() * btemp->ny() * btemp->nz() * btemp->nb(c) / 1.04e6;
 				est_avlb_mem += released_mem;
 				if (est_avlb_mem >= new_mem)
 					break;
@@ -1318,10 +1309,10 @@ namespace flvr
 		if (va_slices_)
 		{
 			va_slices_->buffer_data(
-				VABuf_Coord, sizeof(float)*vertex.size(),
+				VABuf_Coord, sizeof(float) * vertex.size(),
 				&vertex[0], GL_STREAM_DRAW);
 			va_slices_->buffer_data(
-				VABuf_Index, sizeof(uint32_t)*index.size(),
+				VABuf_Index, sizeof(uint32_t) * index.size(),
 				&index[0], GL_STREAM_DRAW);
 			if (set_pointers)
 			{
@@ -1359,10 +1350,10 @@ namespace flvr
 		if (va_wirefm_)
 		{
 			va_wirefm_->buffer_data(
-				VABuf_Coord, sizeof(float)*vertex.size(),
+				VABuf_Coord, sizeof(float) * vertex.size(),
 				&vertex[0], GL_STREAM_DRAW);
 			va_wirefm_->buffer_data(
-				VABuf_Index, sizeof(uint32_t)*index.size(),
+				VABuf_Index, sizeof(uint32_t) * index.size(),
 				&index[0], GL_STREAM_DRAW);
 			if (set_pointers)
 			{
@@ -1435,8 +1426,8 @@ namespace flvr
 		{
 			if (tex->get_brick_num() > 1)
 			{
-				unsigned long long mem_size = (unsigned long long)nx*
-					(unsigned long long)ny*(unsigned long long)nz*nb;
+				unsigned long long mem_size = (unsigned long long)nx *
+					(unsigned long long)ny * (unsigned long long)nz * nb;
 				unsigned char* temp = new unsigned char[mem_size];
 				unsigned char* tempp = temp;
 				unsigned char* tp = (unsigned char*)(tex_data);
@@ -1446,11 +1437,11 @@ namespace flvr
 					tp2 = tp;
 					for (size_t j = 0; j < static_cast<size_t>(ny); ++j)
 					{
-						memcpy(tempp, tp2, nx*nb);
-						tempp += nx*nb;
-						tp2 += sx*nb;
+						memcpy(tempp, tp2, nx * nb);
+						tempp += nx * nb;
+						tp2 += sx * nb;
 					}
-					tp += sx*sy*nb;
+					tp += sx * sy * nb;
 				}
 				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
 					tex_type, (GLvoid*)temp);
@@ -1506,7 +1497,7 @@ namespace flvr
 		for (size_t lv = 0; static_cast<long long>(lv) < static_cast<long long>(tex->GetLevelNum()); lv++)
 		{
 			tex->setLevel(static_cast<int>(lv));
-			std::vector<TextureBrick *> *bs = tex->get_bricks();
+			std::vector<TextureBrick*>* bs = tex->get_bricks();
 			for (size_t i = 0; i < bs->size(); i++)
 			{
 				if ((*bs)[i]->isLoaded()) {

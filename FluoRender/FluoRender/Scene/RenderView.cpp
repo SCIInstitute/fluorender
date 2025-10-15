@@ -4279,13 +4279,14 @@ void RenderView::DrawDefault()
 		fluo::Vector4i viewport = { 0, 0, m_canvas_size.w(), m_canvas_size.h() };
 		flvr::Framebuffer::bind(0, viewport);
 		auto img_shader =
-			glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 		if (img_shader)
 			img_shader->bind();
 		renderview_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 		DrawViewQuad();
 		if (img_shader)
-			img_shader->release();
+			img_shader->unbind();
 		renderview_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
 }
@@ -4809,14 +4810,12 @@ void RenderView::DrawCells()
 	//glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	glm::mat4 matrix = glm::ortho(float(0),
 		float(m_gl_size.w()), float(0), float(m_gl_size.h()));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
@@ -4838,8 +4837,8 @@ void RenderView::DrawCells()
 		}
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 }
 
 unsigned int RenderView::DrawCellVerts(std::vector<float>& verts)
@@ -5008,14 +5007,12 @@ void RenderView::DrawTraces()
 		glm::vec3(float(spcx), float(spcy), float(spcz)));
 	matrix = m_proj_mat*matrix;
 
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 	shader->setLocalParam(0, m_size.w(), m_size.h(), width, 0.0);
 
@@ -5040,8 +5037,8 @@ void RenderView::DrawTraces()
 			va_traces->draw();
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 	//glDisable(GL_LINE_SMOOTH);
 }
 
@@ -5185,14 +5182,12 @@ void RenderView::ReadPixels(
 		glDisable(GL_DEPTH_TEST);
 
 		//2d adjustment
-		flvr::ShaderProgram* img_shader =
-			glbin_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+		auto img_shader =
+			glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR, 0));
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
 			img_shader->bind();
-		}
+
 		img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
 		img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
 		img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
@@ -5200,8 +5195,8 @@ void RenderView::ReadPixels(
 
 		DrawViewQuad();
 
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+		if (img_shader)
+			img_shader->unbind();
 		final_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 		final_buffer->read(x, y, w, h,
 			flvr::AttachmentPoint::Color(0),
@@ -5529,14 +5524,12 @@ void RenderView::DrawBounds()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	shader->setLocalParam(0, 1.0, 1.0, 1.0, 1.0);
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
@@ -5549,8 +5542,8 @@ void RenderView::DrawBounds()
 		va_cube->draw();
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -5561,14 +5554,12 @@ void RenderView::DrawGrid()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	fluo::Color text_color = GetTextColor();
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	glm::mat4 matrix = m_proj_mat * m_mv_mat;
@@ -5586,8 +5577,8 @@ void RenderView::DrawGrid()
 		va_grid->draw();
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -5619,14 +5610,11 @@ void RenderView::DrawCamCtr()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
 
 	glm::mat4 matrix;
 	va_jack->draw_begin();
@@ -5653,8 +5641,8 @@ void RenderView::DrawCamCtr()
 	}
 	va_jack->draw_end();
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -5749,21 +5737,19 @@ void RenderView::DrawScaleBar()
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 	shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
 	va_scale_bar->set_param(params);
 	va_scale_bar->draw();
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }
@@ -5928,14 +5914,12 @@ void RenderView::DrawName(
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	std::vector<std::pair<unsigned int, double>> params;
@@ -5952,8 +5936,8 @@ void RenderView::DrawName(
 	va_legend_squares->draw_legend_square(1);
 	va_legend_squares->draw_end();
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 
 	float px1 = static_cast<float>(x + font_height - nx / 2.0);
 	float py1 = static_cast<float>(ny / 2.0 - y + 0.25 * font_height);
@@ -5985,14 +5969,12 @@ void RenderView::DrawFrame()
 		return;
 
 	glDisable(GL_DEPTH_TEST);
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	shader->setLocalParam(0, 1.0, 1.0, 0.0, 1.0);
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
@@ -6005,8 +5987,8 @@ void RenderView::DrawFrame()
 	va_frame->set_param(params);
 	va_frame->draw();
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -6056,21 +6038,14 @@ void RenderView::DrawClippingPlanes(int face_winding)
 	else if (face_winding == CULL_OFF)
 		glDisable(GL_CULL_FACE);
 
-	flvr::ShaderProgram* shader1 =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader1 =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader1)
-	{
-		if (!shader1->valid())
-			shader1->create();
 		shader1->bind();
-	}
-	flvr::ShaderProgram* shader2 =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES_COLOR);
-	if (shader2)
-	{
-		if (!shader2->valid())
-			shader2->create();
-	}
+	auto shader2 =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES_COLOR, 0));
 
 	for (int i = 0; i<GetDispVolumeNum(); i++)
 	{
@@ -6394,8 +6369,8 @@ void RenderView::DrawClippingPlanes(int face_winding)
 		va_clipp->draw_end();
 	}
 
-	if (shader1 && shader1->valid())
-		shader1->release();
+	if (shader1)
+		shader1->unbind();
 
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
@@ -6788,14 +6763,12 @@ void RenderView::DrawColormap()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY_COLOR4);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY_COLOR4, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	glm::mat4 proj_mat = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
@@ -6807,8 +6780,8 @@ void RenderView::DrawColormap()
 		va_colormap->draw();
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -6891,14 +6864,12 @@ void RenderView::DrawGradBg()
 	v3 = maxd;
 
 	//set up shader
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_BACKGROUND);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_BACKGROUND, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	shader->setLocalParam(0, m_bg_color.r(), m_bg_color.g(), m_bg_color.b(), 1.0);
 	shader->setLocalParam(1, color1.r(), color1.g(), color1.b(), 1.0);
 	shader->setLocalParam(2, color2.r(), color2.g(), color2.b(), 1.0);
@@ -6914,8 +6885,8 @@ void RenderView::DrawGradBg()
 	DrawViewQuad();
 
 	//restore
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 }
@@ -7934,14 +7905,12 @@ void RenderView::DrawFinalBuffer()
 	glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR);
+	auto img_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	img_shader->setLocalParam(0, m_gamma.r(), m_gamma.g(), m_gamma.b(), 1.0);
 	img_shader->setLocalParam(1, m_brightness.r(), m_brightness.g(), m_brightness.b(), 1.0);
 	img_shader->setLocalParam(2, m_hdr.r(), m_hdr.g(), m_hdr.b(), 0.0);
@@ -7949,8 +7918,8 @@ void RenderView::DrawFinalBuffer()
 
 	DrawViewQuad();
 
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+	if (img_shader)
+		img_shader->unbind();
 	final_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
 	//compute the threshold value for picking volume
@@ -8008,14 +7977,12 @@ void RenderView::DrawVRBuffer()
 	glDisable(GL_DEPTH_TEST);
 
 	//draw in fluorender
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	auto img_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	//left eye
 	auto buffer_left =
 		glbin_framebuffer_manager.framebuffer(
@@ -8042,8 +8009,8 @@ void RenderView::DrawVRBuffer()
 	if (buffer_right)
 		buffer_right->unbind_texture(flvr::AttachmentPoint::Color(0));
 
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+	if (img_shader)
+		img_shader->unbind();
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
@@ -8182,16 +8149,12 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 	glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+	auto img_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-		{
-			img_shader->create();
-		}
 		img_shader->bind();
-	}
+
 	fluo::Color gamma, brightness, hdr;
 	std::shared_ptr<VolumeData> vd;
 	if (!list.empty())
@@ -8209,8 +8172,8 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 
 	DrawViewQuad();
 
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+	if (img_shader)
+		img_shader->unbind();
 	if (chann_buffer)
 		chann_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	if (final_buffer)
@@ -8323,7 +8286,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 	bool shadow = vd->GetShadowEnable();
 	int color_mode = vd->GetColormapMode();
 	bool enable_alpha = vd->GetAlphaEnable();
-	flvr::ShaderProgram* img_shader = 0;
+	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
 	auto chann_buffer =
 		glbin_framebuffer_manager.framebuffer("channel");
@@ -8356,16 +8319,15 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_shader_manager.shader(gstImgShader,
+					flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
 				img_shader->bind();
-			}
+
 			DrawViewQuad();
-			if (img_shader && img_shader->valid())
-				img_shader->release();
+
+			if (img_shader)
+				img_shader->unbind();
 
 			if (final_buffer)
 				final_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
@@ -8463,19 +8425,16 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		{
 			//2d adjustment
 			if (vd->GetColormapProj())
-				img_shader = glbin_img_shader_factory.shader(
-					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap());
+				img_shader = glbin_shader_manager.shader(gstImgShader,
+					flvr::ShaderParams::Img(
+					IMG_SHDR_GRADIENT_PROJ_MAP, vd->GetColormap()));
 			else
-				img_shader = glbin_img_shader_factory.shader(
-					IMG_SHDR_GRADIENT_MAP, vd->GetColormap());
+				img_shader = glbin_shader_manager.shader(gstImgShader,
+					flvr::ShaderParams::Img(
+					IMG_SHDR_GRADIENT_MAP, vd->GetColormap()));
 			if (img_shader)
-			{
-				if (!img_shader->valid())
-				{
-					img_shader->create();
-				}
 				img_shader->bind();
-			}
+
 			double lo, hi;
 			vd->GetColormapValues(lo, hi);
 			img_shader->setLocalParam(
@@ -8490,25 +8449,17 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		else
 		{
 			img_shader =
-				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_shader_manager.shader(gstImgShader,
+					flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+			if (img_shader)
+				img_shader->bind();
 		}
+
+		DrawViewQuad();
 
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
-			img_shader->bind();
-		}
-		DrawViewQuad();
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+			img_shader->unbind();
 
-		if (color_mode == 1 &&
-			img_shader &&
-			img_shader->valid())
-		{
-			img_shader->release();
-		}
 		if (overlay_buffer)
 			overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 		if (chann_buffer)
@@ -8552,16 +8503,15 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
 			img_shader->bind();
-		}
+
 		DrawViewQuad();
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+
+		if (img_shader)
+			img_shader->unbind();
 		if (temp_buffer)
 			temp_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
@@ -8581,13 +8531,11 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 
 	//2d adjustment
 	img_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	fluo::Color gamma = vd->GetGammaColor();
 	fluo::Color brightness = vd->GetBrightness();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
@@ -8598,8 +8546,8 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 
 	DrawViewQuad();
 
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+	if (img_shader)
+		img_shader->unbind();
 	if (chann_buffer)
 		chann_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
@@ -8621,7 +8569,7 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
 	GLfloat clear_color[4] = { 0, 0, 0, 0 };
 
-	flvr::ShaderProgram* img_shader = 0;
+	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
 	bool do_over = true;
 	if (glbin_settings.m_mem_swap &&
@@ -8674,16 +8622,15 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 			glDisable(GL_DEPTH_TEST);
 
 			img_shader =
-				glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				glbin_shader_manager.shader(gstImgShader,
+					flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
 				img_shader->bind();
-			}
+
 			DrawViewQuad();
-			if (img_shader && img_shader->valid())
-				img_shader->release();
+
+			if (img_shader)
+				img_shader->unbind();
 			if (final_buffer)
 				final_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 			if (temp_buffer)
@@ -8754,16 +8701,15 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 		glDisable(GL_DEPTH_TEST);
 
 		img_shader =
-			glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
 			img_shader->bind();
-		}
+
 		DrawViewQuad();
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+
+		if (img_shader)
+			img_shader->unbind();
 		if (temp_buffer)
 			temp_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
@@ -8782,13 +8728,11 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 
 	//2d adjustment
 	img_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR);
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	fluo::Color gamma = vd->GetGammaColor();
 	fluo::Color brightness = vd->GetBrightness();
 	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
@@ -8799,8 +8743,8 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 
 	DrawViewQuad();
 
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+	if (img_shader)
+		img_shader->unbind();
 	if (chann_buffer)
 		chann_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	if (final_buffer)
@@ -8876,17 +8820,16 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 	//glBlendEquation(GL_MIN);
 	glDisable(GL_DEPTH_TEST);
 
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	auto img_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	DrawViewQuad();
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+
+	if (img_shader)
+		img_shader->unbind();
 	if (overlay_buffer)
 		overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
@@ -9073,14 +9016,12 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 		glDisable(GL_DEPTH_TEST);
 
 		//2d adjustment
-		flvr::ShaderProgram* img_shader =
-			glbin_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+		auto img_shader =
+			glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_GRADIENT, 0));
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
 			img_shader->bind();
-		}
+
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
 		img_shader->setLocalParam(1,
 			glbin_settings.m_shadow_dir_x,
@@ -9089,8 +9030,8 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 
 		DrawViewQuad();
 
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+		if (img_shader)
+			img_shader->unbind();
 		if (overlay_buffer)
 			overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 		glbin_framebuffer_manager.unbind();// grad_mip buffer
@@ -9114,21 +9055,19 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 
 		//2d adjustment
 		img_shader =
-			glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_VOL);
+			glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_TO_SHADOW_VOL, 0));
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
 			img_shader->bind();
-		}
+
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
 		img_shader->setLocalParam(1, shadow_darkness, 0.0, 0.0, 0.0);
 		//2d adjustment
 
 		DrawViewQuad();
 
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+		if (img_shader)
+			img_shader->unbind();
 		if (grad_mip_buffer)
 			grad_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 		if (chann_buffer)
@@ -9164,16 +9103,12 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 	glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DEPTH_TO_GRADIENT);
+	auto img_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_GRADIENT, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-		{
-			img_shader->create();
-		}
 		img_shader->bind();
-	}
+
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
 	img_shader->setLocalParam(1,
 		glbin_settings.m_shadow_dir_x,
@@ -9182,8 +9117,8 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 
 	DrawViewQuad();
 
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+	if (img_shader)
+		img_shader->unbind();
 	if (peel_buffer)
 		peel_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
@@ -9213,23 +9148,19 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 
 	//2d adjustment
 	img_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_GRADIENT_TO_SHADOW_MESH);
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_TO_SHADOW_MESH, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
 	img_shader->setLocalParam(1, darkness, 0.0, 0.0, 0.0);
 	//2d adjustment
 
 	DrawViewQuad();
 
-	if (img_shader && img_shader->valid())
-	{
-		img_shader->release();
-	}
+	if (img_shader)
+		img_shader->unbind();
 	if (grad_mip_buffer)
 		grad_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	if (peel_buffer)
@@ -9284,14 +9215,11 @@ bool RenderView::GetMeshShadow(double &val)
 void RenderView::DrawCircles(double cx, double cy,
 	double r1, double r2, fluo::Color &color, glm::mat4 &matrix)
 {
-	flvr::ShaderProgram* shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_DRAW_GEOMETRY);
+	auto shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
 
 	shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0);
 	//apply translate first
@@ -9312,8 +9240,8 @@ void RenderView::DrawCircles(double cx, double cy,
 		va_circles->draw();
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 }
 
 //draw the brush shape
@@ -9428,14 +9356,11 @@ void RenderView::PaintStroke()
 	}
 
 	//paint shader
-	flvr::ShaderProgram* paint_shader =
-		glbin_img_shader_factory.shader(IMG_SHDR_PAINT);
+	auto paint_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_PAINT, 0));
 	if (paint_shader)
-	{
-		if (!paint_shader->valid())
-			paint_shader->create();
 		paint_shader->bind();
-	}
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -9504,9 +9429,8 @@ void RenderView::PaintStroke()
 	}
 
 	//release paint shader
-	if (paint_shader && paint_shader->valid())
-		paint_shader->release();
-
+	if (paint_shader)
+		paint_shader->unbind();
 	glbin_framebuffer_manager.unbind();// paint buffer
 	//bind back the window frame buffer
 	//BindRenderBuffer();
@@ -9528,17 +9452,16 @@ void RenderView::DisplayStroke()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
-	flvr::ShaderProgram* img_shader =
-		glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	auto img_shader =
+		glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 	if (img_shader)
-	{
-		if (!img_shader->valid())
-			img_shader->create();
 		img_shader->bind();
-	}
+
 	DrawViewQuad();
-	if (img_shader && img_shader->valid())
-		img_shader->release();
+
+	if (img_shader)
+		img_shader->unbind();
 	if (paint_buffer)
 		paint_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 

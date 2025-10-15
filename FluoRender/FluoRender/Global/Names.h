@@ -78,12 +78,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstAsyncTimerFactory "async timer factory"
 #define gstStopWatchFactory "stop watch factory"
 //shader factories
-#define gstVolShaderFactory "volume shader factory"
-#define gstMeshShaderFactory "mesh shader factory"
-#define gstSegShaderFactory "segmentation shader factory"
-#define gstImgShaderFactory "image shader factory"
-#define gstVolCalShaderFactory "volume calculation shader factory"
-#define gstLightFieldShaderFactory "light field shader factory"
+#define gstVolShader "volume shader"
+#define gstMeshShader "mesh shader"
+#define gstSegShader "segmentation shader"
+#define gstImgShader "image shader"
+#define gstVolCalShader "volume calculation shader"
+#define gstLightFieldShader "light field shader"
 
 //agent names
 #define gstAgentAsset "asset"

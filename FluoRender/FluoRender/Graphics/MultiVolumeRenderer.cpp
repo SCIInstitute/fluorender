@@ -29,6 +29,7 @@
 #include <GL/glew.h>
 #include <MultiVolumeRenderer.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainSettings.h>
 #include <VolumeRenderer.h>
 #include <ShaderProgram.h>
@@ -402,7 +403,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
-		ShaderProgram* img_shader = 0;
+		std::shared_ptr<ShaderProgram> img_shader;
 
 		std::shared_ptr<Framebuffer> filter_buffer;
 		if (noise_red_ /*&& colormap_mode_!=2*/)
@@ -417,21 +418,17 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 			blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
-			img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
+			img_shader = glbin_shader_manager.shader(gstImgShader,
+				ShaderParams::Img(IMG_SHDR_FILTER_LANCZOS_BICUBIC, 0));
 			if (img_shader)
-			{
-				if (!img_shader->valid())
-				{
-					img_shader->create();
-				}
 				img_shader->bind();
-			}
+
 			img_shader->setLocalParam(0, zoom_data_clamp / w, zoom_data_clamp / h, zoom_data_clamp, 0.0);
 
 			vr_list_[0]->draw_view_quad();
 
-			if (img_shader && img_shader->valid())
-				img_shader->release();
+			if (img_shader)
+				img_shader->unbind();
 
 			blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 			glbin_framebuffer_manager.unbind();//filter buffer
@@ -454,19 +451,15 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		else if (glbin_settings.m_update_order == 1)
 			glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 
-		img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-
+		img_shader = glbin_shader_manager.shader(gstImgShader,
+			ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 		if (img_shader)
-		{
-			if (!img_shader->valid())
-				img_shader->create();
 			img_shader->bind();
-		}
 
 		vr_list_[0]->draw_view_quad();
 
-		if (img_shader && img_shader->valid())
-			img_shader->release();
+		if (img_shader)
+			img_shader->unbind();
 
 		if (depth_test) glEnable(GL_DEPTH_TEST);
 		if (cull_face) glEnable(GL_CULL_FACE);
@@ -562,7 +555,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->colormap_mode_ != 2;
 
 			// Set up shaders
-			ShaderProgram* shader = 0;
+			std::shared_ptr<ShaderProgram> shader;
 			bool grad = vr_list_[tn]->gm_low_ > 0.0 ||
 				vr_list_[tn]->gm_high_ < vr_list_[tn]->gm_max_ ||
 				(vr_list_[tn]->colormap_mode_ &&
@@ -571,7 +564,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			int nc = 0;
 			if (tex)
 				nc = tex->nc();
-			shader = glbin_vol_shader_factory.shader(
+			shader = glbin_shader_manager.shader(gstVolShader,
+				ShaderParams::Volume(
 				false,
 				nc,
 				vr_list_[tn]->shading_, use_fog,
@@ -582,13 +576,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->colormap_mode_,
 				vr_list_[tn]->colormap_,
 				vr_list_[tn]->colormap_proj_,
-				vr_list_[tn]->solid_, 1);
+				vr_list_[tn]->solid_, 1));
 			if (shader)
-			{
-				if (!shader->valid())
-					shader->create();
 				shader->bind();
-			}
 
 			//setup depth peeling
 			if (depth_peel_ || vr_list_[tn]->colormap_mode_ == 2)
@@ -750,8 +740,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			if (vr_list_[tn]->label_)
 				vr_list_[tn]->release_texture((*bs)[0]->nlabel(), GL_TEXTURE_3D);
 			// Release shader.
-			if (shader && shader->valid())
-				shader->release();
+			if (shader)
+				shader->unbind();
 			//unbind depth texture for rendering shadows
 			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
 				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
@@ -775,16 +765,15 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			else if (glbin_settings.m_update_order == 1)
 				glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
 			//draw
-			ShaderProgram* img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+			auto img_shader = glbin_shader_manager.shader(gstImgShader,
+				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
 				img_shader->bind();
-			}
+
 			vr_list_[0]->draw_view_quad();
-			if (img_shader && img_shader->valid())
-				img_shader->release();
+
+			if (img_shader)
+				img_shader->unbind();
 			micro_blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 			//glBindTexture(GL_TEXTURE_2D, 0);
 			glViewport(0, 0, w, h);
@@ -975,21 +964,16 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	size.reserve(est_slices*6);
 
 	// Set up shaders
-	ShaderProgram* shader = 0;
-	//create/bind
-	shader = glbin_vol_shader_factory.shader(
+	auto shader = glbin_shader_manager.shader(gstVolShader,
+		ShaderParams::Volume(
 		true, 0,
 		false, false,
 		false, false,
 		false, 0, false,
 		0, 0, 0,
-		false, 1);
+		false, 1));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
 
 	//--------------------------------------------------------------------------
 	// render bricks
@@ -1025,6 +1009,6 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	}
 
 	// Release shader.
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 }

@@ -29,6 +29,7 @@
 #include <GL/glew.h>
 #include <VolumeRenderer.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainSettings.h>
 #include <Plane.h>
 #include <Texture.h>
@@ -473,25 +474,22 @@ namespace flvr
 
 		//--------------------------------------------------------------------------
 		// Set up shaders
-		ShaderProgram* shader = 0;
+		std::shared_ptr<ShaderProgram> shader;
 		//create/bind
 		bool grad = gm_low_ > 0.0 ||
 			gm_high_ < gm_max_ ||
 			(cm_mode &&
 			colormap_proj_>3);
-		shader = glbin_vol_shader_factory.shader(
+		shader = glbin_shader_manager.shader(gstVolShader,
+			ShaderParams::Volume(
 			false, tex->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			grad, ml_mode_, mode_ == RenderMode::RENDER_MODE_MIP,
 			cm_mode, colormap_, colormap_proj_,
-			solid_, 1);
+			solid_, 1));
 		if (shader)
-		{
-			if (!shader->valid())
-				shader->create();
 			shader->bind();
-		}
 
 		//set uniforms
 		//set up shading
@@ -740,8 +738,8 @@ namespace flvr
 			release_texture(4, GL_TEXTURE_2D);
 
 		// Release shader.
-		if (shader && shader->valid())
-			shader->release();
+		if (shader)
+			shader->unbind();
 
 		//Release 3d texture
 		release_texture(0, GL_TEXTURE_3D);
@@ -764,7 +762,7 @@ namespace flvr
 			glDisable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
 
-			ShaderProgram* img_shader = 0;
+			std::shared_ptr<ShaderProgram> img_shader;
 
 			std::shared_ptr<Framebuffer> filter_buffer = 0;
 			if (noise_red_ && cm_mode !=2)
@@ -779,23 +777,17 @@ namespace flvr
 
 				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
-				img_shader = glbin_img_shader_factory.shader(IMG_SHDR_FILTER_LANCZOS_BICUBIC);
-				//img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+				img_shader = glbin_shader_manager.shader(gstImgShader,
+					ShaderParams::Img(IMG_SHDR_FILTER_LANCZOS_BICUBIC, 0));
 				if (img_shader)
-				{
-					if (!img_shader->valid())
-					{
-						img_shader->create();
-					}
 					img_shader->bind();
-				}
+
 				img_shader->setLocalParam(0, zoom_data_clamp / w, zoom_data_clamp / h, zoom_data_clamp, 0.0);
 
 				draw_view_quad();
 
-				if (img_shader && img_shader->valid())
-					img_shader->release();
-
+				if (img_shader)
+					img_shader->unbind();
 				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 				glbin_framebuffer_manager.unbind();//filter buffer
 			}
@@ -810,19 +802,15 @@ namespace flvr
 			else
 				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
-			img_shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
-
+			img_shader = glbin_shader_manager.shader(gstImgShader,
+				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 			if (img_shader)
-			{
-				if (!img_shader->valid())
-					img_shader->create();
 				img_shader->bind();
-			}
 
 			draw_view_quad();
 
-			if (img_shader && img_shader->valid())
-				img_shader->release();
+			if (img_shader)
+				img_shader->unbind();
 
 			if (depth_test) glEnable(GL_DEPTH_TEST);
 			if (cull_face) glEnable(GL_CULL_FACE);
@@ -881,21 +869,16 @@ namespace flvr
 		size.reserve(est_slices * 6);
 
 		// Set up shaders
-		ShaderProgram* shader = 0;
-		//create/bind
-		shader = glbin_vol_shader_factory.shader(
+		auto shader = glbin_shader_manager.shader(gstVolShader,
+			ShaderParams::Volume(
 			true, 0,
 			false, false,
 			0, false,
 			false, 0, false,
 			0, 0, 0,
-			false, 1);
+			false, 1));
 		if (shader)
-		{
-			if (!shader->valid())
-				shader->create();
 			shader->bind();
-		}
 
 		////////////////////////////////////////////////////////
 		// render bricks
@@ -921,8 +904,8 @@ namespace flvr
 		}
 
 		// Release shader.
-		if (shader && shader->valid())
-			shader->release();
+		if (shader)
+			shader->unbind();
 	}
 
 	//type: 0-initial; 1-diffusion-based growing; 2-masked filtering
@@ -958,31 +941,29 @@ namespace flvr
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//seg shader
-		ShaderProgram* seg_shader = 0;
+		std::shared_ptr<ShaderProgram> seg_shader;
 		double mvec_len = mvec_.length();
 
 		switch (type)
 		{
 		case 0://initialize
-			seg_shader = glbin_seg_shader_factory.shader(
+			seg_shader = glbin_shader_manager.shader(gstSegShader,
+				ShaderParams::Seg(
 				SEG_SHDR_INITIALIZE, paint_mode, hr_mode,
 				use_2d, true, depth_peel_,
-				true, false);
+				true, false));
 			break;
 		case 1://diffusion-based growing
-			seg_shader = glbin_seg_shader_factory.shader(
+			seg_shader = glbin_shader_manager.shader(gstSegShader,
+				ShaderParams::Seg(
 				SEG_SHDR_DB_GROW, paint_mode, hr_mode,
 				use_2d, true, depth_peel_,
-				true, mvec_len>0.5);
+				true, mvec_len>0.5));
 			break;
 		}
 
 		if (seg_shader)
-		{
-			if (!seg_shader->valid())
-				seg_shader->create();
 			seg_shader->bind();
-		}
 
 		//set uniforms
 		//set up shading
@@ -1145,8 +1126,8 @@ namespace flvr
 		glbin_framebuffer_manager.unbind();//fbo_mask
 
 		//release seg shader
-		if (seg_shader && seg_shader->valid())
-			seg_shader->release();
+		if (seg_shader)
+			seg_shader->unbind();
 
 		// Release texture
 		release_texture(0, GL_TEXTURE_3D);
@@ -1334,14 +1315,10 @@ namespace flvr
 		//--------------------------------------------------------------------------
 		// Set up shaders
 		//calculate shader
-		ShaderProgram* cal_shader = glbin_vol_cal_shader_factory.shader(type);
-
+		auto cal_shader = glbin_shader_manager.shader(gstVolCalShader,
+			ShaderParams::VolCal(type));
 		if (cal_shader)
-		{
-			if (!cal_shader->valid())
-				cal_shader->create();
 			cal_shader->bind();
-		}
 
 		//set uniforms
 		if (type == 1 ||
@@ -1406,8 +1383,8 @@ namespace flvr
 		glbin_framebuffer_manager.unbind();//fbo_calc
 
 		//release seg shader
-		if (cal_shader && cal_shader->valid())
-			cal_shader->release();
+		if (cal_shader)
+			cal_shader->unbind();
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, 0);

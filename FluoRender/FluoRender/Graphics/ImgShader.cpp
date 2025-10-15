@@ -29,19 +29,14 @@
 #include <ImgShader.h>
 #include <VolShaderCode.h>
 #include <ImgShaderCode.h>
-#include <sstream>
-#include <iostream>
 
 using namespace flvr;
 
-ShaderProgram* ImgShaderFactory::shader(const ShaderParams& base)
+std::shared_ptr<ShaderProgram> ImgShaderFactory::shader(const ShaderParams& params)
 {
-	const auto& params = dynamic_cast<const ImgShaderParams&>(base);
-	const std::string key = params.to_key();
-
-	auto it = shader_map_.find(key);
+	auto it = shader_map_.find(params);
 	if (it != shader_map_.end())
-		return it->second.program.get();
+		return it->second;
 
 	bool use_geom_shader = params.type == IMG_SHDR_DRAW_THICK_LINES ||
 		params.type == IMG_SHDR_DRAW_THICK_LINES_COLOR;
@@ -53,28 +48,23 @@ ShaderProgram* ImgShaderFactory::shader(const ShaderParams& base)
 	if (use_geom_shader)
 		valid_g = emit_g(params, gs);
 
-	std::unique_ptr<ShaderProgram> prog;
+	std::shared_ptr<ShaderProgram> prog;
 	if (use_geom_shader) {
 		if (!valid_v || !valid_f || !valid_g) return nullptr;
-		prog = std::make_unique<ShaderProgram>(vs, fs, gs);
+		prog = std::make_shared<ShaderProgram>(vs, fs, gs);
 	}
 	else {
 		if (!valid_v || !valid_f) return nullptr;
-		prog = std::make_unique<ShaderProgram>(vs, fs);
+		prog = std::make_shared<ShaderProgram>(vs, fs);
 	}
 
-	ShaderEntry entry;
-	entry.params = params.clone();
-	entry.program = std::move(prog);
-	shader_map_[key] = std::move(entry);
+	shader_map_[params] = prog;
 
-	return shader_map_[key].program.get();
+	return prog;
 }
 
-bool ImgShaderFactory::emit_v(const ShaderParams& params, std::string& s)
+bool ImgShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const ImgShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -145,10 +135,8 @@ std::string ImgShaderFactory::get_colormap_code(int colormap)
 		return std::string(VOL_COLORMAP_CALC0); // default fallback
 }
 
-bool ImgShaderFactory::emit_f(const ShaderParams& params, std::string& s)
+bool ImgShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const ImgShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -246,10 +234,8 @@ bool ImgShaderFactory::emit_f(const ShaderParams& params, std::string& s)
 	return true;
 }
 
-bool ImgShaderFactory::emit_g(const ShaderParams& params, std::string& s)
+bool ImgShaderFactory::emit_g(const ShaderParams& p, std::string& s)
 {
-	const auto& p = dynamic_cast<const ImgShaderParams&>(params);
-
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;

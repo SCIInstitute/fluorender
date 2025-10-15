@@ -893,15 +893,7 @@ MainFrame::MainFrame(
 
 MainFrame::~MainFrame()
 {
-	//release?
-	glbin_kernel_factory.clear();
-	glbin_framebuffer_manager.clear();
-	glbin_vertex_array_manager.clear();
-	glbin_vol_shader_factory.clear();
-	glbin_seg_shader_factory.clear();
-	glbin_vol_cal_shader_factory.clear();
-	glbin_img_shader_factory.clear();
-	glbin_light_field_shader_factory.clear();
+	//release
 	glbin_text_tex_manager.clear();
 	flvr::KernelProgram::release_context();
 

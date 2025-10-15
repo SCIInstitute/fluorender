@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <LookingGlassRenderer.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainSettings.h>
 #include <Framebuffer.h>
 #include <ShaderProgram.h>
@@ -208,14 +209,10 @@ void LookingGlassRenderer::Draw()
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	//texture lookup shader
-	flvr::ShaderProgram* shader = 0;
-	shader = glbin_img_shader_factory.shader(IMG_SHDR_TEXTURE_FLIP);
+	auto shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_FLIP, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
 	//set up view port for place texture
 	// get the x and y origin for this view
 	int corrected_view = m_lg_data->vx * m_lg_data->vy - 1 - m_cur_view;
@@ -230,7 +227,7 @@ void LookingGlassRenderer::Draw()
 	flvr::VertexArray* quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
 	quad_va->draw();
-	shader->release();
+	shader->unbind();
 	view_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
 	//move index for next
@@ -259,13 +256,11 @@ void LookingGlassRenderer::Draw()
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader = glbin_img_shader_factory.shader(IMG_SHADER_TEXTURE_LOOKUP);
+	shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
+
 	flvr::VertexArray* rect_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
 	int mode = glbin_settings.m_hologram_debug;
@@ -308,7 +303,7 @@ void LookingGlassRenderer::Draw()
 		rect_va->set_param(5, v1);
 	}
 	rect_va->draw();
-	shader->release();
+	shader->unbind();
 
 	quilt_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	//glBindTexture(GL_TEXTURE_2D, 0);

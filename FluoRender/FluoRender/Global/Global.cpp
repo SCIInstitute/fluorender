@@ -350,12 +350,12 @@ void Global::BuildFactories()
 	m_swhf->createDefault();
 
 	//shader factories
-	shader_manager_->add_factory<flvr::ImgShaderFactory>(gstImgShaderFactory);
-	shader_manager_->add_factory<flvr::VolShaderFactory>(gstVolShaderFactory);
-	shader_manager_->add_factory<flvr::SegShaderFactory>(gstSegShaderFactory);
-	shader_manager_->add_factory<flvr::VolCalShaderFactory>(gstVolCalShaderFactory);
-	shader_manager_->add_factory<flvr::LightFieldShaderFactory>(gstLightFieldShaderFactory);
-	shader_manager_->add_factory<flvr::MeshShaderFactory>(gstMeshShaderFactory);
+	shader_manager_->add_factory<flvr::ImgShaderFactory>(gstImgShader);
+	shader_manager_->add_factory<flvr::VolShaderFactory>(gstVolShader);
+	shader_manager_->add_factory<flvr::SegShaderFactory>(gstSegShader);
+	shader_manager_->add_factory<flvr::VolCalShaderFactory>(gstVolCalShader);
+	shader_manager_->add_factory<flvr::LightFieldShaderFactory>(gstLightFieldShader);
+	shader_manager_->add_factory<flvr::MeshShaderFactory>(gstMeshShader);
 }
 
 //locale
@@ -775,6 +775,11 @@ flvr::VertexArrayManager& Global::get_vertex_array_manager()
 flvr::TextTextureManager& Global::get_text_tex_manager()
 {
 	return *text_texture_manager_;
+}
+
+flvr::ShaderProgramManager& Global::get_shader_manager()
+{
+	return *shader_manager_;
 }
 
 //current selection

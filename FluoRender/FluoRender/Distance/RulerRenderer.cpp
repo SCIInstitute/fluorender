@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <RulerRenderer.h>
 #include <Global.h>
+#include <Names.h>
 #include <RenderView.h>
 #include <Vector.h>
 #include <Quaternion.h>
@@ -75,13 +76,10 @@ void RulerRenderer::Draw()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	flvr::ShaderProgram* shader = glbin_img_shader_factory.shader(IMG_SHDR_DRAW_THICK_LINES);
+	auto shader = glbin_shader_manager.shader(
+		gstImgShader, flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
 	if (shader)
-	{
-		if (!shader->valid())
-			shader->create();
 		shader->bind();
-	}
 	glm::mat4 matrix = glm::ortho(float(0), float(nx), float(0), float(ny));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
@@ -116,8 +114,8 @@ void RulerRenderer::Draw()
 		}
 	}
 
-	if (shader && shader->valid())
-		shader->release();
+	if (shader)
+		shader->unbind();
 
 	//draw text
 	if (m_draw_text)
