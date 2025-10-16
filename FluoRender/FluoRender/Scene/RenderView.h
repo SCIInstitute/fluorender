@@ -121,6 +121,7 @@ public:
 	RenderView(RenderView& copy);
 	virtual ~RenderView();
 
+	std::string GetBufferName(const std::string& base, int sn = -1);
 	//handle
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
 	//set render view panel

@@ -113,6 +113,7 @@ namespace flvr
 
 	enum class FBRole
 	{
+		Canvas,// Represents the default framebuffer (id == 0)
 		RenderFloat,
 		RenderFloatMipmap,
 		RenderUChar,
@@ -146,30 +147,30 @@ namespace flvr
 		FramebufferState();
 
 		// Blend settings
-		bool enableBlend = false;
-		GLenum blendSrc;
-		GLenum blendDst;
-		GLenum blendEquation;
+		bool dirty_enableBlend = true;	 bool enableBlend = false;
+		bool dirty_blendSrc = true;		 GLenum blendSrc;
+		bool dirty_blendDst = true;		 GLenum blendDst;
+		bool dirty_blendEquation = true; GLenum blendEquation;
 
 		// Clear color
-		fluo::Vector4f clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+		bool dirty_clearColor = true;	 fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		// Depth settings
-		bool enableDepthTest = false;
-		GLenum depthFunc;
-		GLfloat clearDepth = 1.0f;
+		bool dirty_enableDepthTest = true;	 bool enableDepthTest = false;
+		bool dirty_depthFunc = true;		 GLenum depthFunc;
+		bool dirty_clearDepth = true;		 GLfloat clearDepth = 1.0f;
 
 		// Cull settings
-		bool enableCullFace = false;
-		FaceWinding faceWinding = FaceWinding::Off;
-		GLenum cullFace;
+		bool dirty_enableCullFace = true;	 bool enableCullFace = false;
+		bool dirty_faceWinding = true;		 FaceWinding faceWinding = FaceWinding::Off;
+		bool dirty_cullFace = true;			 GLenum cullFace;
 
 		//viewport rectangle
-		fluo::Vector4i viewport = { 0, 0, 0, 0 }; // x, y, width, height
+		bool dirty_viewport = true;			 fluo::Vector4i viewport = { 0, 0, 0, 0 }; // x, y, width, height
 
 		// Scissor rectangle
-		bool enableScissorTest = false;
-		fluo::Vector4i scissorRect = {0, 0, 0, 0}; // x, y, width, height
+		bool dirty_enableScissorTest = true; bool enableScissorTest = false;
+		bool dirty_scissorRect = true;		 fluo::Vector4i scissorRect = { 0, 0, 0, 0 }; // x, y, width, height
 	};
 
 	class Framebuffer
@@ -185,15 +186,34 @@ namespace flvr
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
 
-		//default bind
-		static void bind(unsigned int id, const fluo::Vector4i& viewport);
-
 		//states
 		void apply_state();
-		static void apply_state(const FramebufferState& s);
 		void restore_state();
 		FramebufferState capture_current_state();
 		FramebufferState default_state();
+		void reset_state_flags();
+
+		//fine grained state control
+		//blend
+		void set_blend_enabled(bool val);
+		void set_blend_func(GLenum sfactor, GLenum dfactor);
+		void set_blend_equation(GLenum mode);
+		//depth
+		void set_depth_test_enabled(bool val);
+		void set_depth_func(GLenum func);
+		void set_clear_depth(GLfloat depth);
+		//cull
+		void set_cull_face_enabled(bool val);
+		void set_face_winding(FaceWinding winding);
+		void set_cull_face(GLenum face);
+		//scissor
+		void set_scissor_test_enabled(bool val);
+		void set_scissor_rect(const fluo::Vector4i& rect);
+		//viewport
+		void set_viewport(const fluo::Vector4i& vp);
+		//clear color
+		void set_clear_color(const fluo::Vector4f& color);
+		//clear
 		void clear(bool color, bool depth, bool stencil);
 
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
@@ -242,12 +262,10 @@ namespace flvr
 		//states
 		FramebufferState state_;
 		FramebufferState prev_state_;
-		static FramebufferState null_state_;//state for default framebuffer
 
 	private:
 		void bind();
 		void unbind(unsigned int prev_id = 0);
-		static void bind(unsigned int id);
 
 		friend class FramebufferManager;
 	};

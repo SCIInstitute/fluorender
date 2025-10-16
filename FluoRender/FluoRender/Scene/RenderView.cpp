@@ -539,6 +539,10 @@ RenderView::RenderView(RenderView& copy):
 	}
 #endif
 
+	//canvas buffer for default fbo
+	auto canvas_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
+		GetBufferName(gstRBCanvasDefault));
 }
 
 RenderView::~RenderView()
@@ -610,6 +614,14 @@ RenderView::~RenderView()
 		m_ruler_list->DeleteRulers();
 }
 
+std::string RenderView::GetBufferName(const std::string& base, int sn)
+{
+	if (sn >= 0)
+		return ws2s(m_name) + "_" + base + "_" + std::to_string(sn);
+	else
+		return ws2s(m_name) + "_" + base;
+}
+
 //set render view panel
 void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
 {
@@ -679,26 +691,26 @@ std::string RenderView::GetOGLVersion()
 
 void RenderView::Init()
 {
-	if (!m_initialized)
-	{
-		flvr::ShaderProgram::init_shaders_supported();
-		flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
-		flvr::ShaderProgram::set_no_tex_upack(glbin_settings.m_no_tex_pack);
-		flvr::KernelProgram::set_platform_id(glbin_settings.m_cl_platform_id);
-		flvr::KernelProgram::set_device_id(glbin_settings.m_cl_device_id);
-		flvr::KernelProgram::init_kernels_supported();
+	if (m_initialized)
+		return;
+
+	flvr::ShaderProgram::init_shaders_supported();
+	flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
+	flvr::ShaderProgram::set_no_tex_upack(glbin_settings.m_no_tex_pack);
+	flvr::KernelProgram::set_platform_id(glbin_settings.m_cl_platform_id);
+	flvr::KernelProgram::set_device_id(glbin_settings.m_cl_device_id);
+	flvr::KernelProgram::init_kernels_supported();
 #ifdef _DARWIN
-		CGLContextObj ctx = CGLGetCurrentContext();
-		if (ctx != flvr::TextureRenderer::gl_context_)
-			flvr::TextureRenderer::gl_context_ = ctx;
+	CGLContextObj ctx = CGLGetCurrentContext();
+	if (ctx != flvr::TextureRenderer::gl_context_)
+		flvr::TextureRenderer::gl_context_ = ctx;
 #endif
-		glbin_settings.GetMemorySettings();
-		flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
+	glbin_settings.GetMemorySettings();
+	flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 
-		m_initialized = true;
+	m_initialized = true;
 
-		glbin.getStopWatch(gstStopWatch)->start();
-	}
+	glbin.getStopWatch(gstStopWatch)->start();
 }
 
 void RenderView::InitOpenXR()
@@ -4276,8 +4288,12 @@ void RenderView::DrawDefault()
 	auto renderview_buffer = glbin_framebuffer_manager.framebuffer(ws2s(GetName()));
 	if (renderview_buffer)
 	{
-		fluo::Vector4i viewport = { 0, 0, m_canvas_size.w(), m_canvas_size.h() };
-		flvr::Framebuffer::bind(0, viewport);
+		auto canvas_buffer = glbin_framebuffer_manager.framebuffer(
+			flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
+			GetBufferName(gstRBCanvasDefault));
+		if (canvas_buffer)
+			glbin_framebuffer_manager.bind(canvas_buffer);
+
 		auto img_shader =
 			glbin_shader_manager.shader(gstImgShader,
 				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
@@ -4288,6 +4304,9 @@ void RenderView::DrawDefault()
 		if (img_shader)
 			img_shader->unbind();
 		renderview_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+
+		if (canvas_buffer)
+			glbin_framebuffer_manager.unbind();
 	}
 }
 

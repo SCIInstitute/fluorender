@@ -225,8 +225,6 @@ namespace flvr
 		cullFace = GL_BACK;
 	}
 
-	FramebufferState Framebuffer::null_state_ = FramebufferState();
-
 	Framebuffer::Framebuffer(const FBRole& role, int nx, int ny,
 		const std::string &name):
 		role_(role), nx_(nx), ny_(ny),
@@ -242,17 +240,25 @@ namespace flvr
 
 	void Framebuffer::create()
 	{
-		if (valid_ && id_ != 0)
+		if (valid_)
 			return;
-		glGenFramebuffers(1, &id_);
+		if (role_ == FBRole::Canvas)
+		{
+			id_ = 0;
+		}
+		else
+		{
+			glGenFramebuffers(1, &id_);
+		}
 		valid_ = true;
 	}
 
 	void Framebuffer::destroy()
 	{
-		if (!valid_ || id_ == 0)
+		if (!valid_)
 			return;
-		glDeleteFramebuffers(1, &id_);
+		if (role_ != FBRole::Canvas)
+			glDeleteFramebuffers(1, &id_);
 		id_ = 0;
 		valid_ = false;
 		protected_ = false;
@@ -261,63 +267,78 @@ namespace flvr
 
 	void Framebuffer::apply_state()
 	{
-		const auto& s = state_;
-
-		if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
-		if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
-		if (s.enableScissorTest) glEnable(GL_SCISSOR_TEST);  else glDisable(GL_SCISSOR_TEST);
-		if (s.enableCullFace)    glEnable(GL_CULL_FACE);      else glDisable(GL_CULL_FACE);
-
-		glBlendFunc(s.blendSrc, s.blendDst);
-		glBlendEquation(s.blendEquation);
-
-		glDepthFunc(s.depthFunc);
-		glClearDepth(s.clearDepth);
-
-		switch (s.faceWinding)
-		{
-		case FaceWinding::Front: glFrontFace(GL_CCW); break;
-		case FaceWinding::Back:  glFrontFace(GL_CW);  break;
-		case FaceWinding::Off:   break;
+		if (state_.dirty_enableBlend) {
+			state_.enableBlend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+			state_.dirty_enableBlend = false;
 		}
-		glCullFace(s.cullFace);
 
-		glClearColor(s.clearColor[0], s.clearColor[1], s.clearColor[2], s.clearColor[3]);
-
-		if (s.enableScissorTest)
-			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
-
-		glViewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
-	}
-
-	void Framebuffer::apply_state(const FramebufferState& s)
-	{
-		if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
-		if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
-		if (s.enableScissorTest) glEnable(GL_SCISSOR_TEST);  else glDisable(GL_SCISSOR_TEST);
-		if (s.enableCullFace)    glEnable(GL_CULL_FACE);      else glDisable(GL_CULL_FACE);
-
-		glBlendFunc(s.blendSrc, s.blendDst);
-		glBlendEquation(s.blendEquation);
-
-		glDepthFunc(s.depthFunc);
-		glClearDepth(s.clearDepth);
-
-		switch (s.faceWinding)
-		{
-		case FaceWinding::Front: glFrontFace(GL_CCW); break;
-		case FaceWinding::Back:  glFrontFace(GL_CW);  break;
-		case FaceWinding::Off:   break;
+		if (state_.dirty_blendSrc || state_.dirty_blendDst) {
+			glBlendFunc(state_.blendSrc, state_.blendDst);
+			state_.dirty_blendSrc = false;
+			state_.dirty_blendDst = false;
 		}
-		glCullFace(s.cullFace);
 
-		glClearColor(s.clearColor[0], s.clearColor[1], s.clearColor[2], s.clearColor[3]);
+		if (state_.dirty_blendEquation) {
+			glBlendEquation(state_.blendEquation);
+			state_.dirty_blendEquation = false;
+		}
 
-		if (s.enableScissorTest)
-			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
+		if (state_.dirty_clearColor) {
+			glClearColor(state_.clearColor[0], state_.clearColor[1],
+				state_.clearColor[2], state_.clearColor[3]);
+			state_.dirty_clearColor = false;
+		}
 
-		if (s.viewport[2] > 0 && s.viewport[3] > 0)
-			glViewport(s.viewport[0], s.viewport[1], s.viewport[2], s.viewport[3]);
+		if (state_.dirty_enableDepthTest) {
+			state_.enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+			state_.dirty_enableDepthTest = false;
+		}
+
+		if (state_.dirty_depthFunc) {
+			glDepthFunc(state_.depthFunc);
+			state_.dirty_depthFunc = false;
+		}
+
+		if (state_.dirty_clearDepth) {
+			glClearDepth(state_.clearDepth);
+			state_.dirty_clearDepth = false;
+		}
+
+		if (state_.dirty_enableCullFace) {
+			state_.enableCullFace ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+			state_.dirty_enableCullFace = false;
+		}
+
+		if (state_.dirty_cullFace) {
+			glCullFace(state_.cullFace);
+			state_.dirty_cullFace = false;
+		}
+
+		if (state_.dirty_faceWinding) {
+			switch (state_.faceWinding) {
+			case FaceWinding::Front: glFrontFace(GL_CCW); break;
+			case FaceWinding::Back: glFrontFace(GL_CW); break;
+			case FaceWinding::Off: break;
+			}
+			state_.dirty_faceWinding = false;
+		}
+
+		if (state_.dirty_viewport) {
+			glViewport(state_.viewport[0], state_.viewport[1],
+				state_.viewport[2], state_.viewport[3]);
+			state_.dirty_viewport = false;
+		}
+
+		if (state_.dirty_enableScissorTest) {
+			state_.enableScissorTest ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
+			state_.dirty_enableScissorTest = false;
+		}
+
+		if (state_.dirty_scissorRect) {
+			glScissor(state_.scissorRect[0], state_.scissorRect[1],
+				state_.scissorRect[2], state_.scissorRect[3]);
+			state_.dirty_scissorRect = false;
+		}
 	}
 
 	void Framebuffer::restore_state()
@@ -347,6 +368,8 @@ namespace flvr
 
 		if (s.enableScissorTest)
 			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
+
+		reset_state_flags();
 	}
 
 	FramebufferState Framebuffer::capture_current_state()
@@ -426,6 +449,141 @@ namespace flvr
 		return s;
 	}
 
+	void Framebuffer::reset_state_flags()
+	{
+		state_.dirty_enableBlend = true;
+		state_.dirty_blendSrc = true;
+		state_.dirty_blendDst = true;
+		state_.dirty_blendEquation = true;
+
+		state_.dirty_clearColor = true;
+
+		state_.dirty_enableDepthTest = true;
+		state_.dirty_depthFunc = true;
+		state_.dirty_clearDepth = true;
+
+		state_.dirty_enableCullFace = true;
+		state_.dirty_faceWinding = true;
+		state_.dirty_cullFace = true;
+
+		state_.dirty_viewport = true;
+
+		state_.dirty_enableScissorTest = true;
+		state_.dirty_scissorRect = true;
+	}
+
+	//blend
+	void Framebuffer::set_blend_enabled(bool val)
+	{
+		if (val == state_.enableBlend)
+			return;
+		state_.enableBlend = val;
+		state_.dirty_enableBlend = true;
+	}
+
+	void Framebuffer::set_blend_func(GLenum sfactor, GLenum dfactor)
+	{
+		if (sfactor == state_.blendSrc && dfactor == state_.blendDst)
+			return;
+		state_.blendSrc = sfactor;
+		state_.blendDst = dfactor;
+		state_.dirty_blendSrc = true;
+		state_.dirty_blendDst = true;
+	}
+
+	void Framebuffer::set_blend_equation(GLenum mode)
+	{
+		if (mode == state_.blendEquation)
+			return;
+		state_.blendEquation = mode;
+		state_.dirty_blendEquation = true;
+	}
+
+	//clear color
+	void Framebuffer::set_clear_color(const fluo::Vector4f& color)
+	{
+		if (color == state_.clearColor)
+			return;
+		state_.clearColor = color;
+		state_.dirty_clearColor = true;
+	}
+
+	//depth
+	void Framebuffer::set_depth_test_enabled(bool val)
+	{
+		if (val == state_.enableDepthTest)
+			return;
+		state_.enableDepthTest = val;
+		state_.dirty_enableDepthTest = true;
+	}
+
+	void Framebuffer::set_depth_func(GLenum func)
+	{
+		if (func == state_.depthFunc)
+			return;
+		state_.depthFunc = func;
+		state_.dirty_depthFunc = true;
+	}
+
+	void Framebuffer::set_clear_depth(GLfloat depth)
+	{
+		if (depth == state_.clearDepth)
+			return;
+		state_.clearDepth = depth;
+		state_.dirty_clearDepth = true;
+	}
+
+	//cull
+	void Framebuffer::set_cull_face_enabled(bool val)
+	{
+		if (val == state_.enableCullFace)
+			return;
+		state_.enableCullFace = val;
+		state_.dirty_enableCullFace = true;
+	}
+
+	void Framebuffer::set_face_winding(FaceWinding winding)
+	{
+		if (winding == state_.faceWinding)
+			return;
+		state_.faceWinding = winding;
+		state_.dirty_faceWinding = true;
+	}
+
+	void Framebuffer::set_cull_face(GLenum face)
+	{
+		if (face == state_.cullFace)
+			return;
+		state_.cullFace = face;
+		state_.dirty_cullFace = true;
+	}
+
+	//viewport
+	void Framebuffer::set_viewport(const fluo::Vector4i& vp)
+	{
+		if (vp == state_.viewport)
+			return;
+		state_.viewport = vp;
+		state_.dirty_viewport = true;
+	}
+
+	//scissor
+	void Framebuffer::set_scissor_test_enabled(bool val)
+	{
+		if (val == state_.enableScissorTest)
+			return;
+		state_.enableScissorTest = val;
+		state_.dirty_enableScissorTest = true;
+	}
+
+	void Framebuffer::set_scissor_rect(const fluo::Vector4i& rect)
+	{
+		if (rect == state_.scissorRect)
+			return;
+		state_.scissorRect = rect;
+		state_.dirty_scissorRect = true;
+	}
+
 	void Framebuffer::clear(bool color, bool depth, bool stencil)
 	{
 		GLbitfield mask = 0;
@@ -445,20 +603,6 @@ namespace flvr
 		}
 	}
 
-	void Framebuffer::bind(unsigned int id)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, id);
-		apply_state(null_state_);
-	}
-
-	void Framebuffer::bind(unsigned int id, const fluo::Vector4i& viewport)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, id);
-		FramebufferState s = null_state_;
-		s.viewport = viewport;
-		apply_state(s);
-	}
-
 	void Framebuffer::unbind(unsigned int prev_id)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, prev_id);
@@ -467,6 +611,8 @@ namespace flvr
 
 	bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex)
 	{
+		if (role_ == FBRole::Canvas)
+			return false;
 		if (!valid_ || !tex || tex->id() == 0)
 			return false;
 
@@ -499,6 +645,8 @@ namespace flvr
 
 	bool Framebuffer::attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer)
 	{
+		if (role_ == FBRole::Canvas)
+			return false;
 		if (!valid_ || tex_id == 0)
 			return false;
 
@@ -531,6 +679,8 @@ namespace flvr
 
 	void Framebuffer::detach_texture(const std::shared_ptr<FramebufferTexture>& tex)
 	{
+		if (role_ == FBRole::Canvas)
+			return;
 		if (!valid_ || !tex) return;
 
 		GLint prevFramebuffer = 0;
@@ -555,6 +705,8 @@ namespace flvr
 
 	void Framebuffer::detach_texture(const AttachmentPoint& ap)
 	{
+		if (role_ == FBRole::Canvas)
+			return;
 		if (!valid_) return;
 
 		GLenum glap = to_gl_attachment(ap);
@@ -570,6 +722,8 @@ namespace flvr
 
 	void Framebuffer::bind_texture(const AttachmentPoint& ap, int tex_unit)
 	{
+		if (role_ == FBRole::Canvas)
+			return;
 		GLenum glap = to_gl_attachment(ap);
 		auto it = attachments_.find(glap);
 		if (it == attachments_.end() || !it->second || !it->second->valid())
@@ -579,6 +733,8 @@ namespace flvr
 
 	void Framebuffer::unbind_texture(const AttachmentPoint& ap)
 	{
+		if (role_ == FBRole::Canvas)
+			return;
 		GLenum glap = to_gl_attachment(ap);
 		auto it = attachments_.find(glap);
 		if (it == attachments_.end() || !it->second || !it->second->valid())
@@ -588,6 +744,8 @@ namespace flvr
 
 	unsigned int Framebuffer::tex_id(const AttachmentPoint& ap)
 	{
+		if (role_ == FBRole::Canvas)
+			return 0;
 		GLenum glap = to_gl_attachment(ap);
 		auto it = attachments_.find(glap);
 		if (it == attachments_.end() || !it->second || !it->second->valid())
@@ -597,14 +755,20 @@ namespace flvr
 
 	void Framebuffer::resize(int nx, int ny)
 	{
+		nx_ = nx;
+		ny_ = ny;
+
+		set_viewport({ 0, 0, nx_, ny_ });
+
+		if (role_ == FBRole::Canvas)
+			return;
+
 		for (auto& [ap, tex] : attachments_) {
 			if (tex && tex->valid()) {
 				tex->resize(nx, ny);
 				tex->unbind(); // Ensures clean state per texture
 			}
 		}
-		nx_ = nx;
-		ny_ = ny;
 	}
 
 	void Framebuffer::generate_mipmap(const AttachmentPoint& ap)
@@ -653,6 +817,8 @@ namespace flvr
 
 	unsigned int Framebuffer::read_pick(int px, int py)
 	{
+		if (role_ == FBRole::Canvas)
+			return 0;
 		if (!valid_ || attachments_.empty())
 			return 0;
 		if (px < 0 || px >= nx_ || py < 0 || py >= ny_)
@@ -680,6 +846,8 @@ namespace flvr
 	bool Framebuffer::read(int x, int y, int width, int height,
 		const AttachmentPoint& ap, GLenum format, GLenum type, void* data)
 	{
+		if (role_ == FBRole::Canvas)
+			return false;
 		if (!valid_ || !data || width <= 0 || height <= 0)
 			return false;
 
@@ -717,6 +885,8 @@ namespace flvr
 		GLenum format, GLenum type,
 		double scale)
 	{
+		if (role_ == FBRole::Canvas)
+			return 0.0;
 		if (!valid_ || width <= 0 || height <= 0)
 			return 0.0;
 
@@ -793,6 +963,11 @@ namespace flvr
 			// Create and attach textures based on role
 			switch (role)
 			{
+			case FBRole::Canvas:
+			{
+				// No attachments for default framebuffer
+				break;
+			}
 			case FBRole::RenderFloat:
 			{
 				FBTexConfig config{ FBTexType::Render_RGBA };
@@ -852,7 +1027,6 @@ namespace flvr
 			}
 		}
 
-		// Always bind before returning
 		fb->set_name(name);
 
 		return fb;
@@ -885,22 +1059,19 @@ namespace flvr
 
 		if (fb)
 			fb->bind(); // private, accessed via friendship
-		else
-			Framebuffer::bind(0); // bind default
 
 		current_bound_ = fb;
 	}
 
 	void FramebufferManager::unbind()
 	{
+		auto cur = current_bound_.lock();
 		auto prev = previous_bound_.lock();
 
-		if (prev)
-			prev->bind(); // restore previous framebuffer
-		else
-			Framebuffer::bind(0); // bind default
+		if (cur && prev)
+			cur->unbind(prev->id());
 
-		current_bound_ = prev;
+		current_bound_.reset();
 		previous_bound_.reset();
 	}
 

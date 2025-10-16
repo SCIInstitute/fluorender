@@ -134,6 +134,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstSortMethod "sort method"
 #define gstActivated "activated"
 
+//renderview buffer names
+#define gstRBCanvasDefault "rb canvas default"
+#define gstRBViewBase "rb view base"
+#define gstRBViewFinal "rb view final"
+
 //properties
 #define gstMultiFuncTips "multi func tips"
 //list panel
