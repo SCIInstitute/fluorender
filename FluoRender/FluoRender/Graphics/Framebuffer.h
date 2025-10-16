@@ -86,6 +86,7 @@ namespace flvr
 	}
 	class Framebuffer;
 	class FramebufferManager;
+	class FramebufferStateGuard;
 	class FramebufferTexture
 	{
 	public:
@@ -261,13 +262,29 @@ namespace flvr
 
 		//states
 		FramebufferState state_;
-		FramebufferState prev_state_;
+		std::vector<FramebufferState> state_stack_;
 
 	private:
 		void bind();
 		void unbind(unsigned int prev_id = 0);
 
+		//states
+		void push_state();
+
 		friend class FramebufferManager;
+		friend class FramebufferStateGuard;
+	};
+
+	class FramebufferStateGuard {
+	public:
+		explicit FramebufferStateGuard(Framebuffer& fb) : fb_(fb) {
+			fb_.push_state();
+		}
+		~FramebufferStateGuard() {
+			fb_.restore_state();
+		}
+	private:
+		Framebuffer& fb_;
 	};
 
 	class FramebufferManager

@@ -343,7 +343,9 @@ namespace flvr
 
 	void Framebuffer::restore_state()
 	{
-		const auto& s = prev_state_;
+		if (state_stack_.empty())
+			return;
+		const auto& s = state_stack_.back();
 
 		if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
 		if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
@@ -370,6 +372,8 @@ namespace flvr
 			glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
 
 		reset_state_flags();
+
+		state_stack_.pop_back();
 	}
 
 	FramebufferState Framebuffer::capture_current_state()
@@ -439,6 +443,7 @@ namespace flvr
 			s.enableDepthTest = true;
 			break;
 
+		case FBRole::Canvas:
 		case FBRole::Volume:
 			s.enableBlend = false;
 			break;
@@ -598,7 +603,8 @@ namespace flvr
 		if (valid_)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
-			prev_state_ = capture_current_state();
+			if (state_stack_.empty())
+				state_stack_.push_back(capture_current_state());
 			apply_state();
 		}
 	}
@@ -607,6 +613,11 @@ namespace flvr
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, prev_id);
 		restore_state();
+	}
+
+	void Framebuffer::push_state()
+	{
+		state_stack_.push_back(state_);
 	}
 
 	bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex)
