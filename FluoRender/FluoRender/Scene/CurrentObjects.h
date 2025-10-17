@@ -96,6 +96,7 @@ struct CurrentObjects
 	void SetSel(const std::wstring& str);
 
 	int GetViewId(RenderView* v = 0);
+	int GetCurViewId();
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();

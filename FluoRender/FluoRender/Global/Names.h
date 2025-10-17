@@ -138,6 +138,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstRBCanvasDefault "rb canvas default"
 #define gstRBViewBase "rb view base"
 #define gstRBViewFinal "rb view final"
+#define gstRBQuilt "rb quilt"
+#define gstRBPeel "rb peel"
+#define gstRBVrRight "rb vr right"
+#define gstRBVrLeft "rb vr left"
+#define gstRBChannel "rb channel"
+#define gstRBTemporary "rb temporary"
 
 //properties
 #define gstMultiFuncTips "multi func tips"

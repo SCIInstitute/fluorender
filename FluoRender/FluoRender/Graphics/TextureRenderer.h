@@ -121,7 +121,7 @@ namespace flvr
 	class SegShaderFactory;
 	class VolCalShaderFactory;
 	class KernelFactory;
-	class FramebufferManager;
+	class FramebufferFactory;
 	class ImgShaderFactory;
 	class VertexArray;
 	class VertexArrayManager;

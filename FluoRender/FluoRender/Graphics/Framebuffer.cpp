@@ -28,6 +28,8 @@
 
 #include <GL/glew.h>
 #include <Framebuffer.h>
+#include <Global.h>
+#include <CurrentObjects.h>
 #include <algorithm>
 
 namespace flvr
@@ -911,21 +913,21 @@ namespace flvr
 		return scale * static_cast<double>(pixel[3]) / 255.0;
 	}
 
-	FramebufferManager::FramebufferManager()
+	FramebufferFactory::FramebufferFactory()
 	{
 	}
 
-	FramebufferManager::~FramebufferManager()
+	FramebufferFactory::~FramebufferFactory()
 	{
 	}
 
-	void FramebufferManager::clear()
+	void FramebufferFactory::clear()
 	{
 		fb_list_.clear();
 		tex_list_.clear();
 	}
 
-	std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(
+	std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 		const FBRole& role, int nx, int ny,
 		const std::string& name)
 	{
@@ -1043,7 +1045,7 @@ namespace flvr
 		return fb;
 	}
 
-	std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(const std::string& name)
+	std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(const std::string& name)
 	{
 		if (name.empty())
 			return nullptr;
@@ -1059,7 +1061,7 @@ namespace flvr
 		return nullptr;
 	}
 
-	void FramebufferManager::bind(std::shared_ptr<Framebuffer> fb)
+	void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 	{
 		// Skip if already bound
 		if (current_bound_.lock() == fb)
@@ -1074,7 +1076,7 @@ namespace flvr
 		current_bound_ = fb;
 	}
 
-	void FramebufferManager::unbind()
+	void FramebufferFactory::unbind()
 	{
 		auto cur = current_bound_.lock();
 		auto prev = previous_bound_.lock();
@@ -1086,9 +1088,54 @@ namespace flvr
 		previous_bound_.reset();
 	}
 
-	std::shared_ptr<Framebuffer> FramebufferManager::current() const
+	std::shared_ptr<Framebuffer> FramebufferFactory::current() const
 	{
 		return current_bound_.lock(); // nullptr if expired
 	}
 
+	std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(
+		const FBRole& role, int nx, int ny,
+		const std::string& name)
+	{
+		int view_id = glbin_current.GetCurViewId();
+		auto& factory = factory_map_[view_id];
+		if (!factory)
+			factory = std::make_unique<FramebufferFactory>();
+		return factory->framebuffer(role, nx, ny, name);
+	}
+
+	std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(const std::string& name)
+	{
+		int view_id = glbin_current.GetCurViewId();
+		auto& factory = factory_map_[view_id];
+		if (!factory)
+			factory = std::make_unique<FramebufferFactory>();
+		return factory->framebuffer(name);
+	}
+
+	void FramebufferManager::bind(std::shared_ptr<Framebuffer> fb)
+	{
+		int view_id = glbin_current.GetCurViewId();
+		auto& factory = factory_map_[view_id];
+		if (!factory)
+			factory = std::make_unique<FramebufferFactory>();
+		factory->bind(fb);
+	}
+
+	void FramebufferManager::unbind()
+	{
+		int view_id = glbin_current.GetCurViewId();
+		auto& factory = factory_map_[view_id];
+		if (factory)
+			factory->unbind();
+	}
+
+	std::shared_ptr<Framebuffer> FramebufferManager::current() const
+	{
+		int view_id = glbin_current.GetCurViewId();
+		auto it = factory_map_.find(view_id);
+		if (it != factory_map_.end() && it->second)
+			return it->second->current();
+		return nullptr;
+	}
 }

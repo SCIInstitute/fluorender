@@ -367,6 +367,13 @@ int CurrentObjects::GetViewId(RenderView* view)
 	return -1;
 }
 
+int CurrentObjects::GetCurViewId()
+{
+	if (auto vptr = render_view.lock())
+		return vptr->Id();
+	return 0;
+}
+
 flrd::RulerList* CurrentObjects::GetRulerList()
 {
 	if (auto vptr = render_view.lock())

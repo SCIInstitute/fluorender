@@ -35,6 +35,7 @@
 #include <map>
 #include <memory>
 #include <stdexcept>
+#include <unordered_map>
 
 #ifndef __glew_h__
 typedef unsigned int GLenum;
@@ -85,7 +86,7 @@ namespace flvr
 		return !(a == b);
 	}
 	class Framebuffer;
-	class FramebufferManager;
+	class FramebufferFactory;
 	class FramebufferStateGuard;
 	class FramebufferTexture
 	{
@@ -271,7 +272,7 @@ namespace flvr
 		//states
 		void push_state();
 
-		friend class FramebufferManager;
+		friend class FramebufferFactory;
 		friend class FramebufferStateGuard;
 	};
 
@@ -287,11 +288,11 @@ namespace flvr
 		Framebuffer& fb_;
 	};
 
-	class FramebufferManager
+	class FramebufferFactory
 	{
 	public:
-		FramebufferManager();
-		~FramebufferManager();
+		FramebufferFactory();
+		~FramebufferFactory();
 
 		void clear();
 
@@ -319,5 +320,27 @@ namespace flvr
 		std::weak_ptr<Framebuffer> previous_bound_;
 	};
 
+	class FramebufferManager
+	{
+	public:
+		// Get or create framebuffer by role and size
+		std::shared_ptr<Framebuffer> framebuffer(const FBRole& role, int nx, int ny,
+			const std::string &name="");
+
+		// Get framebuffer by name (auto-binds if found)
+		std::shared_ptr<Framebuffer> framebuffer(const std::string &name);
+
+		// Explicitly bind a framebuffer (nullptr = default)
+		void bind(std::shared_ptr<Framebuffer> fb);
+
+		// Unbind current framebuffer and restore previous (or bind default)
+		void unbind();
+
+		// Get currently bound framebuffer (nullptr = default)
+		std::shared_ptr<Framebuffer> current() const;
+
+	private:
+		std::unordered_map<int, std::unique_ptr<FramebufferFactory>> factory_map_;
+	};
 }
 #endif//Framebuffer_h
