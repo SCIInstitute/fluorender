@@ -224,8 +224,9 @@ void LookingGlassRenderer::Draw()
 		glbin_framebuffer_manager.framebuffer("quilt view");
 	if (view_buffer)
 		view_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-	flvr::VertexArray* quad_va =
+	auto quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
+	assert(quad_va);
 	quad_va->draw();
 	shader->unbind();
 	view_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
@@ -261,8 +262,9 @@ void LookingGlassRenderer::Draw()
 	if (shader)
 		shader->bind();
 
-	flvr::VertexArray* rect_va =
+	auto rect_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
+	assert(rect_va);
 	int mode = glbin_settings.m_hologram_debug;
 	if (mode == 3)
 	{

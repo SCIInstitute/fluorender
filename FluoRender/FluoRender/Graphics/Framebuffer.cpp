@@ -222,7 +222,8 @@ namespace flvr
 	{
 		blendSrc = GL_ONE;
 		blendDst = GL_ONE_MINUS_SRC_ALPHA;
-		blendEquation = GL_FUNC_ADD;
+		blendEquationRGB = GL_FUNC_ADD;
+		blendEquationAlpha = GL_FUNC_ADD;
 		depthFunc = GL_LEQUAL;
 		cullFace = GL_BACK;
 	}
@@ -280,9 +281,11 @@ namespace flvr
 			state_.dirty_blendDst = false;
 		}
 
-		if (state_.dirty_blendEquation) {
-			glBlendEquation(state_.blendEquation);
-			state_.dirty_blendEquation = false;
+		if (state_.dirty_blendEquationRGB ||
+			state_.dirty_blendEquationAlpha) {
+			glBlendEquationSeparate(state_.dirty_blendEquationRGB, state_.blendEquationAlpha);
+			state_.dirty_blendEquationRGB = false;
+			state_.dirty_blendEquationAlpha = false;
 		}
 
 		if (state_.dirty_clearColor) {
@@ -355,7 +358,7 @@ namespace flvr
 		if (s.enableCullFace)    glEnable(GL_CULL_FACE);      else glDisable(GL_CULL_FACE);
 
 		glBlendFunc(s.blendSrc, s.blendDst);
-		glBlendEquation(s.blendEquation);
+		glBlendEquationSeparate(s.blendEquationRGB, s.blendEquationAlpha);
 
 		glDepthFunc(s.depthFunc);
 		glClearDepth(s.clearDepth);
@@ -387,13 +390,15 @@ namespace flvr
 		s.enableScissorTest = glIsEnabled(GL_SCISSOR_TEST);
 		s.enableCullFace = glIsEnabled(GL_CULL_FACE);
 
-		GLint blendSrc, blendDst, blendEq;
+		GLint blendSrc, blendDst, blendEqRGB, blendEqAlpha;
 		glGetIntegerv(GL_BLEND_SRC, &blendSrc);
 		glGetIntegerv(GL_BLEND_DST, &blendDst);
-		glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEq);
+		glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEqRGB);
+		glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEqAlpha);
 		s.blendSrc = blendSrc;
 		s.blendDst = blendDst;
-		s.blendEquation = blendEq;
+		s.blendEquationRGB = blendEqRGB;
+		s.blendEquationAlpha = blendEqAlpha;
 
 		GLint depthFunc;
 		glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
@@ -434,6 +439,11 @@ namespace flvr
 			s.enableBlend = true;
 			break;
 
+		case FBRole::RenderFloatDepth:
+			s.enableBlend = true;
+			s.enableDepthTest = true;
+			break;
+
 		case FBRole::Pick:
 			s.enableBlend = false;
 			s.enableDepthTest = true;
@@ -461,7 +471,8 @@ namespace flvr
 		state_.dirty_enableBlend = true;
 		state_.dirty_blendSrc = true;
 		state_.dirty_blendDst = true;
-		state_.dirty_blendEquation = true;
+		state_.dirty_blendEquationRGB = true;
+		state_.dirty_blendEquationAlpha = true;
 
 		state_.dirty_clearColor = true;
 
@@ -498,12 +509,15 @@ namespace flvr
 		state_.dirty_blendDst = true;
 	}
 
-	void Framebuffer::set_blend_equation(GLenum mode)
+	void Framebuffer::set_blend_equation(GLenum rgb, GLenum alpha)
 	{
-		if (mode == state_.blendEquation)
+		if (rgb == state_.blendEquationRGB &&
+			alpha == state_.blendEquationAlpha)
 			return;
-		state_.blendEquation = mode;
-		state_.dirty_blendEquation = true;
+		state_.blendEquationRGB = rgb;
+		state_.blendEquationAlpha = alpha;
+		state_.dirty_blendEquationRGB = true;
+		state_.dirty_blendEquationAlpha = true;
 	}
 
 	//clear color
@@ -637,6 +651,7 @@ namespace flvr
 		switch (role_)
 		{
 		case FBRole::RenderFloat:
+		case FBRole::RenderFloatDepth:
 		case FBRole::RenderFloatMipmap:
 		case FBRole::RenderUChar:
 		case FBRole::Pick:
@@ -671,6 +686,7 @@ namespace flvr
 		switch (role_)
 		{
 		case FBRole::RenderFloat:
+		case FBRole::RenderFloatDepth:
 		case FBRole::RenderFloatMipmap:
 		case FBRole::RenderUChar:
 		case FBRole::Pick:
@@ -988,6 +1004,22 @@ namespace flvr
 				tex->create();
 				fb->attach_texture(AttachmentPoint::Color(0), tex);
 				tex_list_.push_back(tex);
+				break;
+			}
+			case FBRole::RenderFloatDepth:
+			{
+				FBTexConfig color_config{ FBTexType::Render_RGBA };
+				auto tex_color = std::make_shared<FramebufferTexture>(color_config, nx, ny);
+				tex_color->create();
+
+				FBTexConfig depth_config{ FBTexType::Depth_Float };
+				auto tex_depth = std::make_shared<FramebufferTexture>(depth_config, nx, ny);
+				tex_depth->create();
+
+				fb->attach_texture(AttachmentPoint::Color(0), tex_color);
+				fb->attach_texture(AttachmentPoint::Depth(), tex_depth);
+				tex_list_.push_back(tex_color);
+				tex_list_.push_back(tex_depth);
 				break;
 			}
 			case FBRole::RenderUChar:

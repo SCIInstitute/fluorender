@@ -32,6 +32,7 @@
 #include <BBox.h>
 #include <glm/mat4x4.hpp>
 #include <vector>
+#include <memory>
 
 #ifndef __glew_h__
 typedef unsigned int GLuint;
@@ -116,7 +117,6 @@ namespace flvr
 		//mode and quality control
 		RenderMode mode_;
 		int depth_peel_;
-		int blend_num_bits_;
 		bool blend_slices_;
 
 		//scale factor
@@ -135,7 +135,7 @@ namespace flvr
 		fluo::Vector light_pos_;
 
 		//vertex array for rendering slices
-		VertexArray* va_slices_;
+		std::shared_ptr<VertexArray> va_slices_;
 		void draw_polygons_vol(
 			TextureBrick* b, double rate,
 			std::vector<float>& vertex,

@@ -88,9 +88,6 @@ namespace flvr
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
 		tex_2d_dmap_(0),
-		blend_num_bits_(32),
-		va_slices_(0),
-		va_wirefm_(0),
 		quota_bricks_chan_(0)
 	{
 		if (!ShaderProgram::init())
@@ -111,9 +108,6 @@ namespace flvr
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
 		tex_2d_dmap_(0),
-		blend_num_bits_(copy.blend_num_bits_),
-		va_slices_(0),
-		va_wirefm_(0),
 		quota_bricks_chan_(0)
 	{
 		if (!ShaderProgram::init())
@@ -127,11 +121,6 @@ namespace flvr
 
 		clear_brick_buf();
 		clear_tex_current();
-
-		//if (va_slices_)
-		//	delete va_slices_;
-		//if (va_wirefm_)
-		//	delete va_wirefm_;
 	}
 
 	//set the texture for rendering
@@ -151,12 +140,6 @@ namespace flvr
 	void TextureRenderer::reset_texture()
 	{
 		tex_.reset();
-	}
-
-	//set blending bits. b>8 means 32bit blending
-	void TextureRenderer::set_blend_num_bits(int b)
-	{
-		blend_num_bits_ = b;
 	}
 
 	// Pool is static, however it is cleared each time
@@ -1276,7 +1259,7 @@ namespace flvr
 
 	void TextureRenderer::draw_view_quad(double d)
 	{
-		VertexArray* quad_va = 0;
+		std::shared_ptr<VertexArray> quad_va;
 		if (d == 0.0)
 		{
 			quad_va = glbin_vertex_array_manager.vertex_array(VA_Norm_Square);

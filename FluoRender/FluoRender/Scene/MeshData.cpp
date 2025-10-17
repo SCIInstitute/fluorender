@@ -213,9 +213,8 @@ void MeshData::SubmitData()
 		group = group->next;
 	}
 
-	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray(true, true);
-	if (!va_model)
-		return;
+	auto va_model = m_mr->GetOrCreateVertexArray(true, true);
+	assert(va_model);
 
 	// Add and upload buffers
 	va_model->add_buffer(flvr::VABuf_Coord);
@@ -255,7 +254,7 @@ void MeshData::ReturnData()
 	if (!m_data || !m_mr)
 		return;
 
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
 
@@ -536,7 +535,8 @@ GLuint MeshData::AddCoordVBO(int vertex_size)
 {
 	std::vector<float> verts(vertex_size * 3);
 	size_t vbo_size = sizeof(float) * verts.size();
-	flvr::VertexArray* va_model = m_mr->GetOrCreateVertexArray(true, false);
+	auto va_model = m_mr->GetOrCreateVertexArray(true, false);
+	assert(va_model);
 	va_model->buffer_data(
 		flvr::VABuf_Coord, vbo_size,
 		&verts[0], GL_DYNAMIC_DRAW);
@@ -548,7 +548,7 @@ GLuint MeshData::AddCoordVBO(int vertex_size)
 
 GLuint MeshData::AddIndexVBO(size_t vsize)
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
 	va_model->add_index_buffer();
@@ -564,7 +564,7 @@ GLuint MeshData::AddIndexVBO(size_t vsize)
 
 GLuint MeshData::GetIndexVBO()
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Index));
@@ -572,7 +572,7 @@ GLuint MeshData::GetIndexVBO()
 
 void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vector<int>& index_data)
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
 	if (vbo_data.size() > 0)
@@ -593,7 +593,7 @@ void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vec
 
 GLuint MeshData::GetCoordVBO()
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
@@ -601,7 +601,7 @@ GLuint MeshData::GetCoordVBO()
 
 void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
 	if (vbo.size() > 0)
@@ -621,7 +621,7 @@ void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 void MeshData::DeleteNormalVBO()
 {
 	SetFlatShading(true);
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
 	va_model->delete_buffer(flvr::VABuf_Normal);
@@ -635,7 +635,7 @@ void MeshData::DeleteNormalVBO()
 
 GLuint MeshData::GetNormalVBO()
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Normal));
@@ -645,7 +645,7 @@ GLuint MeshData::AddColorVBO(int vertex_size)
 {
 	std::vector<float> verts(vertex_size * 4);
 	size_t vbo_size = sizeof(float) * verts.size();
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
 	va_model->add_buffer(flvr::VABuf_Color);
@@ -663,7 +663,7 @@ GLuint MeshData::AddColorVBO(int vertex_size)
 
 void MeshData::DeleteColorVBO()
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
 	va_model->delete_buffer(flvr::VABuf_Color);
@@ -677,7 +677,7 @@ void MeshData::DeleteColorVBO()
 
 GLuint MeshData::GetColorVBO()
 {
-	flvr::VertexArray* va_model = m_mr->GetVertexArray();
+	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Color));

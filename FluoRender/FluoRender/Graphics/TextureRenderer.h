@@ -191,9 +191,6 @@ namespace flvr
 		void set_texture(const std::shared_ptr<Texture>& tex);
 		void reset_texture();
 
-		//set blending bits. b>8 means 32bit blending
-		void set_blend_num_bits(int b);
-
 		//clear the opengl textures from the texture pool
 		static void clear_tex_pool();
 		void clear_tex_current();
@@ -300,8 +297,6 @@ namespace flvr
 		//2d depth map texture
 		GLuint tex_2d_dmap_;
 
-		int blend_num_bits_;
-
 #ifdef _DARWIN
 		static CGLContextObj gl_context_;
 #endif
@@ -354,8 +349,8 @@ namespace flvr
 		glm::mat4 m_tex_mat = glm::mat4(1.0);
 
 		//renderer manages vertex array objects
-		VertexArray* va_slices_;
-		VertexArray* va_wirefm_;
+		std::shared_ptr<VertexArray> va_slices_;
+		std::shared_ptr<VertexArray> va_wirefm_;
 
 		//cache queue for getting neighbors of time
 		std::weak_ptr<CacheQueue> cache_queue_;

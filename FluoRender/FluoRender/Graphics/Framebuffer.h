@@ -117,6 +117,7 @@ namespace flvr
 	{
 		Canvas,// Represents the default framebuffer (id == 0)
 		RenderFloat,
+		RenderFloatDepth,
 		RenderFloatMipmap,
 		RenderUChar,
 		Pick,
@@ -149,13 +150,14 @@ namespace flvr
 		FramebufferState();
 
 		// Blend settings
-		bool dirty_enableBlend = true;	 bool enableBlend = false;
-		bool dirty_blendSrc = true;		 GLenum blendSrc;
-		bool dirty_blendDst = true;		 GLenum blendDst;
-		bool dirty_blendEquation = true; GLenum blendEquation;
+		bool dirty_enableBlend = true;		  bool enableBlend = false;
+		bool dirty_blendSrc = true;			  GLenum blendSrc;
+		bool dirty_blendDst = true;			  GLenum blendDst;
+		bool dirty_blendEquationRGB = true;	  GLenum blendEquationRGB;
+		bool dirty_blendEquationAlpha = true; GLenum blendEquationAlpha;
 
 		// Clear color
-		bool dirty_clearColor = true;	 fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+		bool dirty_clearColor = true;		 fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		// Depth settings
 		bool dirty_enableDepthTest = true;	 bool enableDepthTest = false;
@@ -199,7 +201,7 @@ namespace flvr
 		//blend
 		void set_blend_enabled(bool val);
 		void set_blend_func(GLenum sfactor, GLenum dfactor);
-		void set_blend_equation(GLenum mode);
+		void set_blend_equation(GLenum rgb, GLenum alpha);
 		//depth
 		void set_depth_test_enabled(bool val);
 		void set_depth_func(GLenum func);

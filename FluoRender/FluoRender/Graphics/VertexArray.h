@@ -233,8 +233,8 @@ namespace flvr
 		~VertexArrayManager();
 		void clear();
 
-		VertexArray* vertex_array(VAType type);//managed
-		VertexArray* vertex_array(bool, bool);//unmanaged
+		std::shared_ptr<VertexArray> vertex_array(VAType type);//managed
+		std::shared_ptr<VertexArray> vertex_array(bool, bool);//unmanaged
 		void set_dirty(VAType type);
 		void set_all_dirty();
 

@@ -78,44 +78,41 @@ void RulerRenderer::Draw()
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	auto shader = glbin_shader_manager.shader(
 		gstImgShader, flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
-	if (shader)
-		shader->bind();
+	assert(shader);
+	shader->bind();
 	glm::mat4 matrix = glm::ortho(float(0), float(nx), float(0), float(ny));
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
-	flvr::VertexArray* va_rulers =
+	auto va_rulers =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
-	if (va_rulers)
-	{
-		std::vector<float> verts;
-		unsigned int num = 0;
+	assert(va_rulers);
+	std::vector<float> verts;
+	unsigned int num = 0;
 		
-		//draw unselected first
-		shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
-		num = DrawVerts(verts, 2);
-		if (num)
-		{
-			va_rulers->buffer_data(flvr::VABuf_Coord,
-				sizeof(float)*verts.size(),
-				&verts[0], GL_STREAM_DRAW);
-			va_rulers->set_param(0, num);
-			va_rulers->draw();
-		}
-		//draw selected next
-		shader->setLocalParam(0, nx, ny, m_sel_line_size, 0.0);
-		num = DrawVerts(verts, 1);
-		if (num)
-		{
-			va_rulers->buffer_data(flvr::VABuf_Coord,
-				sizeof(float)*verts.size(),
-				&verts[0], GL_STREAM_DRAW);
-			va_rulers->set_param(0, num);
-			va_rulers->draw();
-		}
+	//draw unselected first
+	shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
+	num = DrawVerts(verts, 2);
+	if (num)
+	{
+		va_rulers->buffer_data(flvr::VABuf_Coord,
+			sizeof(float)*verts.size(),
+			&verts[0], GL_STREAM_DRAW);
+		va_rulers->set_param(0, num);
+		va_rulers->draw();
+	}
+	//draw selected next
+	shader->setLocalParam(0, nx, ny, m_sel_line_size, 0.0);
+	num = DrawVerts(verts, 1);
+	if (num)
+	{
+		va_rulers->buffer_data(flvr::VABuf_Coord,
+			sizeof(float)*verts.size(),
+			&verts[0], GL_STREAM_DRAW);
+		va_rulers->set_param(0, num);
+		va_rulers->draw();
 	}
 
-	if (shader)
-		shader->unbind();
+	shader->unbind();
 
 	//draw text
 	if (m_draw_text)

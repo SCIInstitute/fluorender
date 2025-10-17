@@ -53,8 +53,7 @@ MeshRenderer::MeshRenderer()
 	flat_shading_(false),
 	color_(false),
 	fog_(false),
-	alpha_(1.0),
-	va_model_(0)
+	alpha_(1.0)
 {
 }
 
@@ -67,8 +66,7 @@ MeshRenderer::MeshRenderer(MeshRenderer& copy)
 	flat_shading_(copy.flat_shading_),
 	color_(copy.color_),
 	fog_(copy.fog_),
-	alpha_(copy.alpha_),
-	va_model_(0)
+	alpha_(copy.alpha_)
 {
 }
 
@@ -76,18 +74,20 @@ MeshRenderer::~MeshRenderer()
 {
 }
 
-VertexArray* MeshRenderer::GetOrCreateVertexArray(bool vbuf, bool ibuf)
+std::shared_ptr<VertexArray> MeshRenderer::GetOrCreateVertexArray(bool vbuf, bool ibuf)
 {
-	if (!va_model_ || !va_model_->valid())
+	auto va = va_model_.lock();
+	if (!va || !va->valid())
 	{
-		va_model_ = glbin_vertex_array_manager.vertex_array(vbuf, ibuf);
+		va = glbin_vertex_array_manager.vertex_array(vbuf, ibuf);
+		va_model_ = va;
 	}
-	if (!ibuf && va_model_->is_indexed())
+	if (!ibuf && va->is_indexed())
 	{
 		//remove index
-		va_model_->delete_index_buffer();
+		va->delete_index_buffer();
 	}
-	return va_model_;
+	return va;
 }
 
 //clipping planes
@@ -120,7 +120,8 @@ void MeshRenderer::draw()
 {
 	if (!data_ || !data_->groups)
 		return;
-	if (!va_model_ || !va_model_->valid())
+	auto va = va_model_.lock();
+	if (!va || !va->valid())
 		return;
 
 	std::shared_ptr<ShaderProgram> shader;
@@ -129,7 +130,7 @@ void MeshRenderer::draw()
 	bool tex = data_->hastexture == GL_TRUE;
 	//bool normal = data_->numnormals > 0 ? false : true;
 
-	va_model_->draw_begin();
+	va->draw_begin();
 	while (group)
 	{
 		if (group->numtriangles == 0)
@@ -141,8 +142,8 @@ void MeshRenderer::draw()
 		//set up shader
 		shader = glbin_shader_manager.shader(gstMeshShader,
 			ShaderParams::Mesh(0, depth_peel_, tex, fog_, light_, flat_shading_, color_));
-		if (shader)
-			shader->bind();
+		assert(shader);
+		shader->bind();
 
 		//uniforms
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
@@ -186,15 +187,14 @@ void MeshRenderer::draw()
 			shader->setLocalParam(7, 1.0 / double(vp_[2]), 1.0 / double(vp_[3]), 0.0, 0.0);
 
 		//draw
-		va_model_->draw_unmanaged(pos, group->numtriangles);
+		va->draw_unmanaged(pos, group->numtriangles);
 		pos += group->numtriangles * 3;
 		group = group->next;
 	}
-	va_model_->draw_end();
+	va->draw_end();
 
 	// Release shader.
-	if (shader)
-		shader->unbind();
+	shader->unbind();
 
 	//release texture
 	glActiveTexture(GL_TEXTURE0);
@@ -205,7 +205,8 @@ void MeshRenderer::draw_wireframe()
 {
 	if (!data_ || !data_->groups)
 		return;
-	if (!va_model_ || !va_model_->valid())
+	auto va = va_model_.lock();
+	if (!va || !va->valid())
 		return;
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -219,8 +220,8 @@ void MeshRenderer::draw_wireframe()
 	//set up shader
 	auto shader = glbin_shader_manager.shader(gstMeshShader,
 		ShaderParams::Mesh(0, peel, tex, fog_, light, false, false));
-	if (shader)
-		shader->bind();
+	assert(shader);
+	shader->bind();
 
 	//uniforms
 	shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
@@ -234,7 +235,7 @@ void MeshRenderer::draw_wireframe()
 	if (fog_)
 		shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
-	va_model_->draw_begin();
+	va->draw_begin();
 	while (group)
 	{
 		if (group->numtriangles == 0)
@@ -244,15 +245,14 @@ void MeshRenderer::draw_wireframe()
 		}
 
 		//draw
-		va_model_->draw_unmanaged(pos, group->numtriangles);
+		va->draw_unmanaged(pos, group->numtriangles);
 		pos += group->numtriangles * 3;
 		group = group->next;
 	}
-	va_model_->draw_end();
+	va->draw_end();
 
 	// Release shader.
-	if (shader)
-		shader->unbind();
+	shader->unbind();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
@@ -261,7 +261,8 @@ void MeshRenderer::draw_integer(unsigned int name)
 {
 	if (!data_ || !data_->groups)
 		return;
-	if (!va_model_ || !va_model_->valid())
+	auto va = va_model_.lock();
+	if (!va || !va->valid())
 		return;
 
 	GLMgroup* group = data_->groups;
@@ -270,15 +271,15 @@ void MeshRenderer::draw_integer(unsigned int name)
 	//set up shader
 	auto shader = glbin_shader_manager.shader(gstMeshShader,
 		ShaderParams::Mesh(1, 0, false, false, false, false, false));
-	if (shader)
-		shader->bind();
+	assert(shader);
+	shader->bind();
 
 	//uniforms
 	shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 	shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
 	shader->setLocalParamUInt(0, name);
 
-	va_model_->draw_begin();
+	va->draw_begin();
 	while (group)
 	{
 		if (group->numtriangles == 0)
@@ -288,13 +289,12 @@ void MeshRenderer::draw_integer(unsigned int name)
 		}
 
 		//draw
-		va_model_->draw_unmanaged(pos, group->numtriangles);
+		va->draw_unmanaged(pos, group->numtriangles);
 		pos += group->numtriangles * 3;
 		group = group->next;
 	}
-	va_model_->draw_end();
+	va->draw_end();
 
 	// Release shader.
-	if (shader)
-		shader->unbind();
+	shader->unbind();
 }

@@ -31,6 +31,7 @@
 
 #include <vector>
 #include <cstring>
+#include <memory>
 #include <glm/glm.hpp>
 
 typedef struct _GLMmodel GLMmodel;
@@ -63,10 +64,10 @@ namespace flvr
 			return data_;
 		}
 
-		VertexArray* GetOrCreateVertexArray(bool, bool);
-		VertexArray* GetVertexArray()
+		std::shared_ptr<VertexArray> GetOrCreateVertexArray(bool, bool);
+		std::shared_ptr<VertexArray> GetVertexArray()
 		{
-			return va_model_;
+			return va_model_.lock();
 		}
 
 		//set viewport
@@ -145,7 +146,7 @@ namespace flvr
 		double m_fog_end;
 		float alpha_;
 		//vertex buffer
-		VertexArray* va_model_;
+		std::weak_ptr<VertexArray> va_model_;
 	};
 
 } // End namespace flvr

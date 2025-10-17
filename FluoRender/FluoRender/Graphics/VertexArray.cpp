@@ -1067,14 +1067,14 @@ namespace flvr
 		va_list_.clear();
 	}
 
-	VertexArray* VertexArrayManager::vertex_array(VAType type)
+	std::shared_ptr<VertexArray> VertexArrayManager::vertex_array(VAType type)
 	{
 		//find one that matches and return
 		for (auto it = va_list_.begin();
 			it != va_list_.end(); ++it)
 		{
 			if ((*it)->match(type))
-				return it->get();
+				return *it;
 		}
 
 		//create new vertex array
@@ -1265,10 +1265,10 @@ namespace flvr
 		//unbind
 		va->unbind();
 
-		return va.get();
+		return va;
 	}
 
-	VertexArray* VertexArrayManager::vertex_array(bool vbuf, bool ibuf)
+	std::shared_ptr<VertexArray> VertexArrayManager::vertex_array(bool vbuf, bool ibuf)
 	{
 		//create new vertex array
 		auto va = std::make_shared<VertexArray>(VA_Unmanaged);
@@ -1296,7 +1296,7 @@ namespace flvr
 		//unbind
 		//va->unbind();
 
-		return va.get();
+		return va;
 	}
 
 	void VertexArray::protect()

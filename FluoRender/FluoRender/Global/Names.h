@@ -144,6 +144,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstRBVrLeft "rb vr left"
 #define gstRBChannel "rb channel"
 #define gstRBTemporary "rb temporary"
+#define gstRBGradMip "rb grad mip"
+#define gstRBPaintBrush "rb paint brush"
+#define gstRBBlendInteractive "rb blend int"
+#define gstRBBlendDenoise "rb blend denoise"
+#define gstRBBlendQuality "rb blend quality"
 
 //properties
 #define gstMultiFuncTips "multi func tips"

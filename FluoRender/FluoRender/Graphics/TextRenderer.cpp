@@ -212,49 +212,44 @@ namespace flvr
 
 		auto shader = glbin_shader_manager.shader(gstImgShader,
 			ShaderParams::Img(IMG_SHDR_DRAW_TEXT, 0));
-		if (shader)
-		{
-			shader->bind();
-			shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0f);
-		}
+		assert(shader);
+		shader->bind();
+		shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0f);
 
-		VertexArray* va_text = glbin_vertex_array_manager.vertex_array(VA_Text);
-		if (va_text && shader)
+		auto va_text = glbin_vertex_array_manager.vertex_array(VA_Text);
+		assert(va_text);
+		va_text->draw_begin();
+		const wchar_t *p;
+		for (p = text.c_str(); *p; p++)
 		{
-			va_text->draw_begin();
-			const wchar_t *p;
-			for (p = text.c_str(); *p; p++)
+			TextTexture* tex_p =
+				glbin_text_tex_manager.text_texture(*p);
+			if (tex_p)
 			{
-				TextTexture* tex_p =
-					glbin_text_tex_manager.text_texture(*p);
-				if (tex_p)
-				{
-					tex_p->bind();
-					float x2 = x + tex_p->left_ * sx;
-					float y2 = -y - tex_p->top_ * sy;
-					float w = tex_p->width_ * sx;
-					float h = tex_p->rows_ * sy;
+				tex_p->bind();
+				float x2 = x + tex_p->left_ * sx;
+				float y2 = -y - tex_p->top_ * sy;
+				float w = tex_p->width_ * sx;
+				float h = tex_p->rows_ * sy;
 
-					float mat[16] = {
-						w, 0.0f, 0.0f, 0.0f,
-						0.0f, -h, 0.0f, 0.0f,
-						0.0f, 0.0f, 1.0f, 0.0f,
-						x2, -y2, 0.0f, 1.0f
-					};
-					shader->setLocalParamMatrix(0, mat);
-					va_text->draw_norm_square();
+				float mat[16] = {
+					w, 0.0f, 0.0f, 0.0f,
+					0.0f, -h, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					x2, -y2, 0.0f, 1.0f
+				};
+				shader->setLocalParamMatrix(0, mat);
+				va_text->draw_norm_square();
 
-					x += (tex_p->ax_ >> 6) * sx;
-					y += (tex_p->ay_ >> 6) * sy;
-				}
-
+				x += (tex_p->ax_ >> 6) * sx;
+				y += (tex_p->ay_ >> 6) * sy;
 			}
-			va_text->draw_end();
+
 		}
+		va_text->draw_end();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		if (shader)
-			shader->unbind();
+		shader->unbind();
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 	}

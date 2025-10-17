@@ -249,15 +249,15 @@ namespace flvr
 		bool adaptive = get_adaptive();
 		if (imode_ && adaptive)
 		{
-			return "blend_int";
+			return gstRBBlendInteractive;
 		}
 		else if (noise_red_)
 		{
-			return "blend_nr";
+			return gstRBBlendDenoise;
 		}
 		else
 		{
-			return "blend_hi";
+			return gstRBBlendQuality;
 		}
 	}
 
@@ -267,11 +267,11 @@ namespace flvr
 		int w = vp_[2];
 		int h = vp_[3];
 		double sf = 1.0;
-		if (buf_name == "blend_int")
+		if (buf_name == gstRBBlendInteractive)
 		{
 			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.1, 1.0);
 		}
-		else if (buf_name == "blend_nr")
+		else if (buf_name == gstRBBlendDenoise)
 		{
 			sf = fluo::Clamp(double(1.0 / zoom_data_), 0.5, 3.5);
 			//sf = std::min(double(1.0 / zoom_data_), 3.5);
@@ -451,21 +451,17 @@ namespace flvr
 		int w2 = new_size.w();
 		int h2 = new_size.h();
 
-		std::shared_ptr<Framebuffer> blend_buffer;
-		if(blend_num_bits_ > 8)
-		{
-			blend_buffer = glbin_framebuffer_manager.framebuffer(
-				flvr::FBRole::RenderFloat, w2, h2, buf_name);
-			if (!blend_buffer)
-				return;
-			glbin_framebuffer_manager.bind(blend_buffer);
-			blend_buffer->protect();
+		auto blend_buffer = glbin_framebuffer_manager.framebuffer(
+			flvr::FBRole::RenderFloat, w2, h2, buf_name);
+		if (!blend_buffer)
+			return;
+		glbin_framebuffer_manager.bind(blend_buffer);
+		blend_buffer->protect();
 
-			glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
-			glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-			glViewport(vp_[0], vp_[1], w2, h2);
-		}
+		glViewport(vp_[0], vp_[1], w2, h2);
 
 		//disable depth test
 		glDisable(GL_DEPTH_TEST);
@@ -754,8 +750,6 @@ namespace flvr
 		glEnable(GL_DEPTH_TEST);
 
 		//output result
-		if (blend_num_bits_ > 8)
-		{
 			//states
 			GLboolean depth_test = glIsEnabled(GL_DEPTH_TEST);
 			GLboolean cull_face = glIsEnabled(GL_CULL_FACE);
@@ -822,7 +816,6 @@ namespace flvr
 				filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 			else
 				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-		}
 
 		// Reset the blend functions after MIP
 		glBlendEquation(GL_FUNC_ADD);
