@@ -96,14 +96,15 @@ struct CurrentObjects
 	void SetSel(const std::wstring& str);
 
 	int GetViewId(RenderView* v = 0);
-	int GetCurViewId();
+	int GetDrawingViewId();
 
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();
 	TrackGroup* GetTrackGroup();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
-	std::weak_ptr<RenderView> render_view;
+	std::weak_ptr<RenderView> render_view;//currently selected render view
+	std::weak_ptr<RenderView> render_view_drawing;//currently drawing render view, may not be selected
 	std::weak_ptr<VolumeGroup> vol_group;
 	std::weak_ptr<MeshGroup> mesh_group;
 	std::weak_ptr<VolumeData> vol_data;

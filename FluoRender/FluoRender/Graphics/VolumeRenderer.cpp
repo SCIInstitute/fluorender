@@ -110,7 +110,7 @@ namespace flvr
 		//mode
 		mode_ = RenderMode::RENDER_MODE_OVER;
 		//done loop
-		for (int i=0; i<TEXTURE_RENDER_MODES; i++)
+		for (int i = 0; i < TEXTURE_RENDER_MODES; i++)
 			done_loop_[i] = false;
 	}
 
@@ -169,20 +169,20 @@ namespace flvr
 		//mode
 		mode_ = copy.mode_;
 		//clipping planes
-		for (int i=0; i<(int)copy.planes_.size(); i++)
+		for (int i = 0; i < (int)copy.planes_.size(); i++)
 		{
 			fluo::Plane* plane = new fluo::Plane(*copy.planes_[i]);
 			planes_.push_back(plane);
 		}
 		//done loop
-		for (int i=0; i<TEXTURE_RENDER_MODES; i++)
+		for (int i = 0; i < TEXTURE_RENDER_MODES; i++)
 			done_loop_[i] = false;
 	}
 
 	VolumeRenderer::~VolumeRenderer()
 	{
 		//release clipping planes
-		for (int i=0; i<(int)planes_.size(); i++)
+		for (int i = 0; i < (int)planes_.size(); i++)
 		{
 			if (planes_[i])
 				delete planes_[i];
@@ -204,10 +204,10 @@ namespace flvr
 			else
 			{
 				double h0 = hsv_color.hue();
-				h = h0<30.0?h0-180.0:h0<90.0?h0+120.0:h0<210.0?h0-120.0:h0-180.0;
+				h = h0 < 30.0 ? h0 - 180.0 : h0 < 90.0 ? h0 + 120.0 : h0 < 210.0 ? h0 - 120.0 : h0 - 180.0;
 				s = 1.0;
 				v = 1.0;
-				mask_color_ = fluo::Color(fluo::HSVColor(h<0.0?h+360.0:h, s, v));
+				mask_color_ = fluo::Color(fluo::HSVColor(h < 0.0 ? h + 360.0 : h, s, v));
 			}
 		}
 	}
@@ -219,12 +219,12 @@ namespace flvr
 	}
 
 	//clipping planes
-	void VolumeRenderer::set_planes(std::vector<fluo::Plane*> *p)
+	void VolumeRenderer::set_planes(std::vector<fluo::Plane*>* p)
 	{
 		int i;
 		if (!planes_.empty())
 		{
-			for (i=0; i<(int)planes_.size(); i++)
+			for (i = 0; i < (int)planes_.size(); i++)
 			{
 				if (planes_[i])
 					delete planes_[i];
@@ -232,9 +232,9 @@ namespace flvr
 			planes_.clear();
 		}
 
-		for (i=0; i<(int)p->size(); i++)
+		for (i = 0; i < (int)p->size(); i++)
 		{
-			fluo::Plane *plane = new fluo::Plane(*(*p)[i]);
+			fluo::Plane* plane = new fluo::Plane(*(*p)[i]);
 			planes_.push_back(plane);
 		}
 	}
@@ -243,7 +243,7 @@ namespace flvr
 	{
 		return &planes_;
 	}
-	
+
 	std::string VolumeRenderer::get_buffer_name()
 	{
 		bool adaptive = get_adaptive();
@@ -282,7 +282,7 @@ namespace flvr
 		}
 		//if (std::fabs(sf - sfactor_) > 0.05)
 		sfactor_ = sf;
-		
+
 		out_size = Size2D(
 			int(std::round(w * sfactor_)),
 			int(std::round(h * sfactor_)));
@@ -338,7 +338,7 @@ namespace flvr
 		case 4:
 			if (tex->nlabel() == -1)
 			{
-				if (tex->nmask()>-1)
+				if (tex->nmask() > -1)
 				{
 					mask_ = true;
 					label_ = false;
@@ -360,7 +360,7 @@ namespace flvr
 		bool interactive_mode_p, bool orthographic_p, int mode)
 	{
 		draw_volume(interactive_mode_p, orthographic_p, mode);
-		if(draw_wireframe_p)
+		if (draw_wireframe_p)
 			draw_wireframe(orthographic_p);
 	}
 
@@ -381,12 +381,12 @@ namespace flvr
 		else
 			zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 1.0f, 10.0f);
 
-		std::vector<TextureBrick*> *bricks = 0;
+		std::vector<TextureBrick*>* bricks = 0;
 		tex->set_matrices(m_mv_tex_scl_mat, m_proj_mat);
 		if (glbin_settings.m_mem_swap && interactive_)
 			bricks = tex->get_closest_bricks(
-			quota_center_, quota_bricks_chan_, true,
-			view_ray, orthographic_p);
+				quota_center_, quota_bricks_chan_, true,
+				view_ray, orthographic_p);
 		else
 			bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 		if (!bricks || bricks->size() == 0)
@@ -405,7 +405,7 @@ namespace flvr
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			est_slices = static_cast<int>(std::round(diag.length()/dt));
+			est_slices = static_cast<int>(std::round(diag.length() / dt));
 		}
 		else
 		{
@@ -416,18 +416,18 @@ namespace flvr
 		std::vector<float> vertex;
 		std::vector<uint32_t> index;
 		std::vector<uint32_t> size;
-		vertex.reserve(est_slices*12);
-		index.reserve(est_slices*6);
-		size.reserve(est_slices*6);
+		vertex.reserve(est_slices * 12);
+		index.reserve(est_slices * 6);
+		size.reserve(est_slices * 6);
 
 		//--------------------------------------------------------------------------
 
 		int cm_mode = mode == 4 ? 0 : colormap_mode_;
-		bool use_fog = m_use_fog && cm_mode !=2;
+		bool use_fog = m_use_fog && cm_mode != 2;
 
 		// set up blending
 		glEnable(GL_BLEND);
-		switch(mode_)
+		switch (mode_)
 		{
 		case RenderMode::RENDER_MODE_OVER:
 			glBlendEquation(GL_FUNC_ADD);
@@ -475,15 +475,15 @@ namespace flvr
 		bool grad = gm_low_ > 0.0 ||
 			gm_high_ < gm_max_ ||
 			(cm_mode &&
-			colormap_proj_>3);
+				colormap_proj_ > 3);
 		shader = glbin_shader_manager.shader(gstVolShader,
 			ShaderParams::Volume(
-			false, tex->nc(),
-			shading_, use_fog,
-			depth_peel_, true,
-			grad, ml_mode_, mode_ == RenderMode::RENDER_MODE_MIP,
-			cm_mode, colormap_, colormap_proj_,
-			solid_, 1));
+				false, tex->nc(),
+				shading_, use_fog,
+				depth_peel_, true,
+				grad, ml_mode_, mode_ == RenderMode::RENDER_MODE_MIP,
+				cm_mode, colormap_, colormap_proj_,
+				solid_, 1));
 		if (shader)
 			shader->bind();
 
@@ -502,14 +502,14 @@ namespace flvr
 		double spcx, spcy, spcz;
 		tex->get_spacings(spcx, spcy, spcz);
 		shader->setLocalParam(5,
-			spcx==0.0?1.0:spcx,
-			spcy==0.0?1.0:spcy,
-			spcz==0.0?1.0:spcz, shuffle_);
+			spcx == 0.0 ? 1.0 : spcx,
+			spcy == 0.0 ? 1.0 : spcy,
+			spcz == 0.0 ? 1.0 : spcz, shuffle_);
 
 		//transfer function
-		shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-		shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
-		if (mode_==RenderMode::RENDER_MODE_MIP &&
+		shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
+		shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
+		if (mode_ == RenderMode::RENDER_MODE_MIP &&
 			colormap_proj_)
 			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 				colormap_hi_value_ - colormap_low_value_, colormap_inv_);
@@ -525,7 +525,7 @@ namespace flvr
 				break;
 			case 1://colormap
 				shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-					colormap_hi_value_-colormap_low_value_, colormap_inv_);
+					colormap_hi_value_ - colormap_low_value_, colormap_inv_);
 				break;
 			case 2://depth map
 				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
@@ -546,7 +546,7 @@ namespace flvr
 
 		//setup depth peeling
 		if (depth_peel_ || cm_mode == 2)
-			shader->setLocalParam(7, 1.0/double(w2), 1.0/double(h2), 0.0, 0.0);
+			shader->setLocalParam(7, 1.0 / double(w2), 1.0 / double(h2), 0.0, 0.0);
 
 		//fog
 		if (m_use_fog)
@@ -572,14 +572,14 @@ namespace flvr
 		// Set up transform
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_tex_scl_mat));
-		
+
 		if (cur_chan_brick_num_ == 0) rearrangeLoadedBrkVec();
 
 		num_slices_ = 0;
 		bool multibricks = bricks->size() > 1;
 		bool drawn_once = false;
 		//std::wstring wstr;
-		for (unsigned int i=0; i < bricks->size(); i++)
+		for (unsigned int i = 0; i < bricks->size(); i++)
 		{
 			//comment off when debug_ds
 			if (mode != 2 && mode != 3 && glbin_settings.m_mem_swap && drawn_once)
@@ -606,7 +606,7 @@ namespace flvr
 
 			if (((!glbin_settings.m_mem_swap || !interactive_) &&
 				!test_against_view(b->bbox(), !orthographic_p)) || // Clip against view
-				b->get_priority()>0) //nothing to draw
+				b->get_priority() > 0) //nothing to draw
 			{
 				if (glbin_settings.m_mem_swap && start_update_loop_ && !done_update_loop_)
 				{
@@ -619,23 +619,23 @@ namespace flvr
 				continue;
 			}
 
-			if ((cm_mode ==1 ||
-				mode_==RenderMode::RENDER_MODE_MIP) &&
+			if ((cm_mode == 1 ||
+				mode_ == RenderMode::RENDER_MODE_MIP) &&
 				colormap_proj_)
 			{
 				fluo::BBox bbox = b->dbox();
 				float matrix[16];
-				matrix[0] = float(bbox.Max().x()-bbox.Min().x());
+				matrix[0] = float(bbox.Max().x() - bbox.Min().x());
 				matrix[1] = 0.0f;
 				matrix[2] = 0.0f;
 				matrix[3] = 0.0f;
 				matrix[4] = 0.0f;
-				matrix[5] = float(bbox.Max().y()-bbox.Min().y());
+				matrix[5] = float(bbox.Max().y() - bbox.Min().y());
 				matrix[6] = 0.0f;
 				matrix[7] = 0.0f;
 				matrix[8] = 0.0f;
 				matrix[9] = 0.0f;
-				matrix[10] = float(bbox.Max().z()-bbox.Min().z());
+				matrix[10] = float(bbox.Max().z() - bbox.Min().z());
 				matrix[11] = 0.0f;
 				matrix[12] = float(bbox.Min().x());
 				matrix[13] = float(bbox.Min().y());
@@ -751,71 +751,71 @@ namespace flvr
 
 		//output result
 			//states
-			GLboolean depth_test = glIsEnabled(GL_DEPTH_TEST);
-			GLboolean cull_face = glIsEnabled(GL_CULL_FACE);
-			glDisable(GL_DEPTH_TEST);
-			glDisable(GL_CULL_FACE);
+		GLboolean depth_test = glIsEnabled(GL_DEPTH_TEST);
+		GLboolean cull_face = glIsEnabled(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
 
-			std::shared_ptr<ShaderProgram> img_shader;
+		std::shared_ptr<ShaderProgram> img_shader;
 
-			std::shared_ptr<Framebuffer> filter_buffer = 0;
-			if (noise_red_ && cm_mode !=2)
-			{
-				//FILTERING/////////////////////////////////////////////////////////////////
-				filter_buffer = glbin_framebuffer_manager.framebuffer(
-					flvr::FBRole::RenderFloat, w, h);
-				glbin_framebuffer_manager.bind(filter_buffer);
-
-				glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-				glClear(GL_COLOR_BUFFER_BIT);
-
-				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
-
-				img_shader = glbin_shader_manager.shader(gstImgShader,
-					ShaderParams::Img(IMG_SHDR_FILTER_LANCZOS_BICUBIC, 0));
-				if (img_shader)
-					img_shader->bind();
-
-				img_shader->setLocalParam(0, zoom_data_clamp / w, zoom_data_clamp / h, zoom_data_clamp, 0.0);
-
-				draw_view_quad();
-
-				if (img_shader)
-					img_shader->unbind();
-				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-				glbin_framebuffer_manager.unbind();//filter buffer
-			}
-
-			//go back to normal
-			glbin_framebuffer_manager.unbind();//blend buffer
+		std::shared_ptr<Framebuffer> filter_buffer = 0;
+		if (noise_red_ && cm_mode != 2)
+		{
+			//FILTERING/////////////////////////////////////////////////////////////////
+			filter_buffer = glbin_framebuffer_manager.framebuffer(
+				flvr::FBRole::RenderFloat, w, h);
+			glbin_framebuffer_manager.bind(filter_buffer);
 
 			glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
+			glClear(GL_COLOR_BUFFER_BIT);
 
-			if (noise_red_ && cm_mode != 2)
-				filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
-			else
-				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
+			blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_shader_manager.shader(gstImgShader,
-				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+				ShaderParams::Img(IMG_SHDR_FILTER_LANCZOS_BICUBIC, 0));
 			if (img_shader)
 				img_shader->bind();
+
+			img_shader->setLocalParam(0, zoom_data_clamp / w, zoom_data_clamp / h, zoom_data_clamp, 0.0);
 
 			draw_view_quad();
 
 			if (img_shader)
 				img_shader->unbind();
+			blend_buffer->unbind_texture(AttachmentPoint::Color(0));
+			glbin_framebuffer_manager.unbind();//filter buffer
+		}
 
-			if (depth_test) glEnable(GL_DEPTH_TEST);
-			if (cull_face) glEnable(GL_CULL_FACE);
+		//go back to normal
+		glbin_framebuffer_manager.unbind();//blend buffer
 
-			if (blend_buffer)
-				blend_buffer->unprotect();
+		glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
-			if (noise_red_ && cm_mode != 2)
-				filter_buffer->unbind_texture(AttachmentPoint::Color(0));
-			else
-				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
+		if (noise_red_ && cm_mode != 2)
+			filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
+		else
+			blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
+
+		img_shader = glbin_shader_manager.shader(gstImgShader,
+			ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		if (img_shader)
+			img_shader->bind();
+
+		draw_view_quad();
+
+		if (img_shader)
+			img_shader->unbind();
+
+		if (depth_test) glEnable(GL_DEPTH_TEST);
+		if (cull_face) glEnable(GL_CULL_FACE);
+
+		if (blend_buffer)
+			blend_buffer->unprotect();
+
+		if (noise_red_ && cm_mode != 2)
+			filter_buffer->unbind_texture(AttachmentPoint::Color(0));
+		else
+			blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 
 		// Reset the blend functions after MIP
 		glBlendEquation(GL_FUNC_ADD);
@@ -833,20 +833,20 @@ namespace flvr
 		fluo::Ray snapview = compute_snapview(0.4);
 
 		glEnable(GL_DEPTH_TEST);
-		std::vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
+		std::vector<TextureBrick*>* bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 
 		bool adaptive = get_adaptive();
 		double rate = get_sample_rate();
 		fluo::Vector diag = tex->bbox()->diagonal();
-		fluo::Vector cell_diag(diag.x()/tex->nx(),
-			diag.y()/tex->ny(),
-			diag.z()/tex->nz());
+		fluo::Vector cell_diag(diag.x() / tex->nx(),
+			diag.y() / tex->ny(),
+			diag.z() / tex->nz());
 		double dt;
 		size_t est_slices;
 		if (rate > 0.0)
 		{
 			dt = cell_diag.length() / compute_rate_scale(snapview.direction()) / rate;
-			est_slices = static_cast<int>(std::round(diag.length()/dt));
+			est_slices = static_cast<int>(std::round(diag.length() / dt));
 		}
 		else
 		{
@@ -864,12 +864,12 @@ namespace flvr
 		// Set up shaders
 		auto shader = glbin_shader_manager.shader(gstVolShader,
 			ShaderParams::Volume(
-			true, 0,
-			false, false,
-			0, false,
-			false, 0, false,
-			0, 0, 0,
-			false, 1));
+				true, 0,
+				false, false,
+				0, false,
+				false, 0, false,
+				0, 0, 0,
+				false, 1));
 		if (shader)
 			shader->bind();
 
@@ -882,7 +882,7 @@ namespace flvr
 		if (bricks)
 		{
 			bool multibricks = bricks->size() > 1;
-			for (unsigned int i=0; i<bricks->size(); i++)
+			for (unsigned int i = 0; i < bricks->size(); i++)
 			{
 				TextureBrick* b = (*bricks)[i];
 				if (!test_against_view(b->bbox(), !orthographic_p)) continue;
@@ -914,12 +914,12 @@ namespace flvr
 		if (!tex)
 			return;
 
-		if (estimate && type==0)
+		if (estimate && type == 0)
 			est_thresh_ = 0.0;
-		bool use_2d = tex_2d_weight1_&&
+		bool use_2d = tex_2d_weight1_ &&
 			tex_2d_weight2_;
 
-		std::vector<TextureBrick*> *bricks = tex->get_bricks();
+		std::vector<TextureBrick*>* bricks = tex->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
@@ -942,16 +942,16 @@ namespace flvr
 		case 0://initialize
 			seg_shader = glbin_shader_manager.shader(gstSegShader,
 				ShaderParams::Seg(
-				SEG_SHDR_INITIALIZE, paint_mode, hr_mode,
-				use_2d, true, depth_peel_,
-				true, false));
+					SEG_SHDR_INITIALIZE, paint_mode, hr_mode,
+					use_2d, true, depth_peel_,
+					true, false));
 			break;
 		case 1://diffusion-based growing
 			seg_shader = glbin_shader_manager.shader(gstSegShader,
 				ShaderParams::Seg(
-				SEG_SHDR_DB_GROW, paint_mode, hr_mode,
-				use_2d, true, depth_peel_,
-				true, mvec_len>0.5));
+					SEG_SHDR_DB_GROW, paint_mode, hr_mode,
+					use_2d, true, depth_peel_,
+					true, mvec_len > 0.5));
 			break;
 		}
 
@@ -974,9 +974,9 @@ namespace flvr
 		seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
 
 		//transfer function
-		seg_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-		seg_shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
-		seg_shader->setLocalParam(6, mp_[0], vp_[3]-mp_[1], vp_[2], vp_[3]);
+		seg_shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
+		seg_shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
+		seg_shader->setLocalParam(6, mp_[0], vp_[3] - mp_[1], vp_[2], vp_[3]);
 		seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
 
 		//setup depth peeling
@@ -1042,17 +1042,17 @@ namespace flvr
 			}
 
 			fluo::BBox bbox = b->bbox();
-			matrix[0] = float(bbox.Max().x()-bbox.Min().x());
+			matrix[0] = float(bbox.Max().x() - bbox.Min().x());
 			matrix[1] = 0.0f;
 			matrix[2] = 0.0f;
 			matrix[3] = 0.0f;
 			matrix[4] = 0.0f;
-			matrix[5] = float(bbox.Max().y()-bbox.Min().y());
+			matrix[5] = float(bbox.Max().y() - bbox.Min().y());
 			matrix[6] = 0.0f;
 			matrix[7] = 0.0f;
 			matrix[8] = 0.0f;
 			matrix[9] = 0.0f;
-			matrix[10] = float(bbox.Max().z()-bbox.Min().z());
+			matrix[10] = float(bbox.Max().z() - bbox.Min().z());
 			matrix[11] = 0.0f;
 			matrix[12] = float(bbox.Min().x());
 			matrix[13] = float(bbox.Min().y());
@@ -1083,10 +1083,10 @@ namespace flvr
 				mode_ == RenderMode::RENDER_MODE_OVER ? 1.0 / rate : 1.0);
 
 			//draw each slice
-			for (int z=0; z<b->nz(); z++)
+			for (int z = 0; z < b->nz(); z++)
 			{
 				fbo_mask->attach_texture(AttachmentPoint::Color(0), tex_id, z);
-				draw_view_quad(double(z+0.5) / double(b->nz()));
+				draw_view_quad(double(z + 0.5) / double(b->nz()));
 			}
 
 			if (num > 1 && type == 1 && order)
@@ -1262,20 +1262,20 @@ namespace flvr
 	}
 
 	//calculation
-	void VolumeRenderer::calculate(int type, VolumeRenderer *vr_a, VolumeRenderer *vr_b)
+	void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b)
 	{
 		auto tex = tex_.lock();
 		if (!tex)
 			return;
 
 		//sync sorting
-		fluo::Ray view_ray(fluo::Point(0.802,0.267,0.534), fluo::Vector(0.802,0.267,0.534));
+		fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
 		tex->set_sort_bricks();
-		std::vector<TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
+		std::vector<TextureBrick*>* bricks = tex->get_sorted_bricks(view_ray);
 		if (!bricks || bricks->size() == 0)
 			return;
-		std::vector<TextureBrick*> *bricks_a = 0;
-		std::vector<TextureBrick*> *bricks_b = 0;
+		std::vector<TextureBrick*>* bricks_a = 0;
+		std::vector<TextureBrick*>* bricks_b = 0;
 
 		std::shared_ptr<Texture> tex_a, tex_b;
 		if (vr_a)
@@ -1320,26 +1320,26 @@ namespace flvr
 			type == 8)
 			cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
 				vr_b ? vr_b->get_scalar_scale() : 1.0,
-				(vr_a&&tex_a&&tex_a->nmask() != -1) ? 1.0 : 0.0,
-				(vr_b&&tex_b&&tex_b->nmask() != -1) ? 1.0 : 0.0);
+				(vr_a && tex_a && tex_a->nmask() != -1) ? 1.0 : 0.0,
+				(vr_b && tex_b && tex_b->nmask() != -1) ? 1.0 : 0.0);
 		else if (type == 4 ||
 			type == 5 ||
 			type == 6 ||
 			type == 7)
 			cal_shader->setLocalParam(0, 1.0, 1.0, 0.0, 0.0);
 		else
-			cal_shader->setLocalParam(0, vr_a?vr_a->get_scalar_scale():1.0,
-				vr_b?vr_b->get_scalar_scale():1.0,
-				(vr_a&&vr_a->get_inversion())?-1.0:0.0,
-				(vr_b&&vr_b->get_inversion())?-1.0:0.0);
-		if (vr_a && (type==6 || type==7))
+			cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
+				vr_b ? vr_b->get_scalar_scale() : 1.0,
+				(vr_a && vr_a->get_inversion()) ? -1.0 : 0.0,
+				(vr_b && vr_b->get_inversion()) ? -1.0 : 0.0);
+		if (vr_a && (type == 6 || type == 7))
 		{
-			cal_shader->setLocalParam(2, inv_?-scalar_scale_:scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-			cal_shader->setLocalParam(3, 1.0/gamma3d_, lo_offset_, hi_offset_, sw_);
+			cal_shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
+			cal_shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
 			cal_shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
 		}
 
-		for (unsigned int i=0; i < bricks->size(); i++)
+		for (unsigned int i = 0; i < bricks->size(); i++)
 		{
 			TextureBrick* b = (*bricks)[i];
 
@@ -1350,8 +1350,8 @@ namespace flvr
 			GLuint tex_id = load_brick(b, GL_NEAREST);
 			if (bricks_a) vr_a->load_brick((*bricks_a)[i], GL_NEAREST, false, 1);
 			if (bricks_b) vr_b->load_brick((*bricks_b)[i], GL_NEAREST, false, 2);
-			if ((type==5 || type==6 ||type==7) && bricks_a) vr_a->load_brick_mask((*bricks_a)[i]);
-			if (type==8)
+			if ((type == 5 || type == 6 || type == 7) && bricks_a) vr_a->load_brick_mask((*bricks_a)[i]);
+			if (type == 8)
 			{
 				if (bricks_a)
 					vr_a->load_brick_mask((*bricks_a)[i], GL_NEAREST, false, 3);
@@ -1359,10 +1359,10 @@ namespace flvr
 					vr_b->load_brick_mask((*bricks_b)[i], GL_NEAREST, false, 4);
 			}
 			//draw each slice
-			for (int z=0; z<b->nz(); z++)
+			for (int z = 0; z < b->nz(); z++)
 			{
 				fbo_calc->attach_texture(AttachmentPoint::Color(0), tex_id, z);
-				draw_view_quad(double(z+0.5) / double(b->nz()));
+				draw_view_quad(double(z + 0.5) / double(b->nz()));
 			}
 		}
 
@@ -1397,12 +1397,12 @@ namespace flvr
 		if (!tex)
 			return;
 
-		std::vector<TextureBrick*> *bricks = tex->get_bricks();
+		std::vector<TextureBrick*>* bricks = tex->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
 		int c = 0;
-		for (unsigned int i=0; i<bricks->size(); i++)
+		for (unsigned int i = 0; i < bricks->size(); i++)
 		{
 			TextureBrick* b = (*bricks)[i];
 			load_brick(b, GL_NEAREST);
@@ -1442,26 +1442,26 @@ namespace flvr
 		if (!tex)
 			return;
 
-		std::vector<TextureBrick*> *bricks = tex->get_bricks();
+		std::vector<TextureBrick*>* bricks = tex->get_bricks();
 		if (!bricks || bricks->size() == 0)
 			return;
 
 		int c = tex->nmask();
-		if (c<0 || c>=TEXTURE_MAX_COMPONENTS)
+		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
 			return;
 
 		size_t i;
 		size_t num = bricks->size();
-		for (i=((order==2)?(num-1):0);
-			(order==2)?(i>=0):(i<num);
-			i+=((order==2)?-1:1))
+		for (i = ((order == 2) ? (num - 1) : 0);
+			(order == 2) ? (i >= 0) : (i < num);
+			i += ((order == 2) ? -1 : 1))
 		{
 			TextureBrick* b = (*bricks)[i];
 			if (!b || !b->is_mask_valid())
 				continue;
 
 			load_brick_mask(b);
-			glActiveTexture(GL_TEXTURE0+c);
+			glActiveTexture(GL_TEXTURE0 + c);
 
 			// download texture data
 			int sx = b->sx();
@@ -1491,19 +1491,19 @@ namespace flvr
 		if (!tex)
 			return;
 
-		std::vector<TextureBrick*> *bricks = tex->get_bricks_id();
+		std::vector<TextureBrick*>* bricks = tex->get_bricks_id();
 		if (!bricks || bricks->size() == 0)
 			return;
 
 		int c = tex->nlabel();
-		if (c<0 || c>=TEXTURE_MAX_COMPONENTS)
+		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
 			return;
 
-		for (unsigned int i=0; i<bricks->size(); i++)
+		for (unsigned int i = 0; i < bricks->size(); i++)
 		{
-			TextureBrick *b = (*bricks)[i];
+			TextureBrick* b = (*bricks)[i];
 			load_brick_label(b);
-			glActiveTexture(GL_TEXTURE0+c);
+			glActiveTexture(GL_TEXTURE0 + c);
 
 			//download texture data
 			glPixelStorei(GL_PACK_ROW_LENGTH, b->sx());
@@ -1522,7 +1522,7 @@ namespace flvr
 		release_texture(c, GL_TEXTURE_3D);
 	}
 
-	void VolumeRenderer::set_matrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
+	void VolumeRenderer::set_matrices(glm::mat4& mv_mat, glm::mat4& proj_mat, glm::mat4& tex_mat)
 	{
 		m_mv_mat = mv_mat;
 		m_proj_mat = proj_mat;
@@ -1535,7 +1535,7 @@ namespace flvr
 		auto tex = tex_.lock();
 		if (!tex)
 			return;
-		fluo::Transform *tform = tex->transform();
+		fluo::Transform* tform = tex->transform();
 		double mvmat[16];
 		tform->get_trans(mvmat);
 		m_mv_tex_scl_mat = glm::mat4(

@@ -1129,7 +1129,7 @@ namespace flvr
 		const FBRole& role, int nx, int ny,
 		const std::string& name)
 	{
-		int view_id = glbin_current.GetCurViewId();
+		int view_id = glbin_current.GetDrawingViewId();
 		auto& factory = factory_map_[view_id];
 		if (!factory)
 			factory = std::make_unique<FramebufferFactory>();
@@ -1138,7 +1138,7 @@ namespace flvr
 
 	std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(const std::string& name)
 	{
-		int view_id = glbin_current.GetCurViewId();
+		int view_id = glbin_current.GetDrawingViewId();
 		auto& factory = factory_map_[view_id];
 		if (!factory)
 			factory = std::make_unique<FramebufferFactory>();
@@ -1147,7 +1147,7 @@ namespace flvr
 
 	void FramebufferManager::bind(std::shared_ptr<Framebuffer> fb)
 	{
-		int view_id = glbin_current.GetCurViewId();
+		int view_id = glbin_current.GetDrawingViewId();
 		auto& factory = factory_map_[view_id];
 		if (!factory)
 			factory = std::make_unique<FramebufferFactory>();
@@ -1156,7 +1156,7 @@ namespace flvr
 
 	void FramebufferManager::unbind()
 	{
-		int view_id = glbin_current.GetCurViewId();
+		int view_id = glbin_current.GetDrawingViewId();
 		auto& factory = factory_map_[view_id];
 		if (factory)
 			factory->unbind();
@@ -1164,7 +1164,7 @@ namespace flvr
 
 	std::shared_ptr<Framebuffer> FramebufferManager::current() const
 	{
-		int view_id = glbin_current.GetCurViewId();
+		int view_id = glbin_current.GetDrawingViewId();
 		auto it = factory_map_.find(view_id);
 		if (it != factory_map_.end() && it->second)
 			return it->second->current();

@@ -367,9 +367,9 @@ int CurrentObjects::GetViewId(RenderView* view)
 	return -1;
 }
 
-int CurrentObjects::GetCurViewId()
+int CurrentObjects::GetDrawingViewId()
 {
-	if (auto vptr = render_view.lock())
+	if (auto vptr = render_view_drawing.lock())
 		return vptr->Id();
 	return 0;
 }

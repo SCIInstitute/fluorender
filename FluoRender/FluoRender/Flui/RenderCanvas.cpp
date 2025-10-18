@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieMaker.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
+#include <CurrentObjects.h>
 #include <Root.h>
 #include <DataManager.h>
 #include <LookingGlassRenderer.h>
@@ -257,6 +258,7 @@ void RenderCanvas::Draw()
 	wxPaintDC dc(this);
 	if (auto view_ptr = m_render_view.lock())
 	{
+		glbin_current.render_view_drawing = view_ptr;
 		bool bval = view_ptr->Draw();
 		if (bval)
 		{
