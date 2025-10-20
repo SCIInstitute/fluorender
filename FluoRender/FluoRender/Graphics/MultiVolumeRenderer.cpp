@@ -202,28 +202,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	index.reserve(est_slices * 6);
 	size.reserve(est_slices * 6);
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	// set up blending
-	FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(true);
-	switch (mode_)
-	{
-	case RenderMode::RENDER_MODE_OVER:
-		cur_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
-		if (glbin_settings.m_update_order == 0)
-			cur_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		else if (glbin_settings.m_update_order == 1)
-			cur_buffer->set_blend_func(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
-		break;
-	case RenderMode::RENDER_MODE_MIP:
-		cur_buffer->set_blend_equation(GL_MAX, GL_MAX);
-		cur_buffer->set_blend_func(GL_ONE, GL_ONE);
-		break;
-	default:
-		break;
-	}
-	cur_buffer->apply_state();
 
 	//glEnable(GL_BLEND);
 	//switch(mode_)
@@ -255,6 +233,24 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	assert(blend_buffer);
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 	blend_buffer->set_viewport({ vp_[0], vp_[1], w2, h2 });
+	// set up blending
+	blend_buffer->set_blend_enabled(true);
+	switch (mode_)
+	{
+	case RenderMode::RENDER_MODE_OVER:
+		blend_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
+		if (glbin_settings.m_update_order == 0)
+			blend_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		else if (glbin_settings.m_update_order == 1)
+			blend_buffer->set_blend_func(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+		break;
+	case RenderMode::RENDER_MODE_MIP:
+		blend_buffer->set_blend_equation(GL_MAX, GL_MAX);
+		blend_buffer->set_blend_func(GL_ONE, GL_ONE);
+		break;
+	default:
+		break;
+	}
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->protect();
 	blend_buffer->clear(true, false, false);
@@ -450,6 +446,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	//flvr::Framebuffer::bind(cur_framebuffer_);
 
 	//current
+	auto cur_buffer = glbin_framebuffer_manager.current();
+	assert(cur_buffer);
+	FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_blend_enabled(true);
 	if (glbin_settings.m_update_order == 0)
 		cur_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

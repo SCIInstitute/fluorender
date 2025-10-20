@@ -31,6 +31,8 @@
 #include <Global.h>
 #include <CurrentObjects.h>
 #include <algorithm>
+#include <compatibility.h>
+#include <Debug.h>
 
 namespace flvr
 {
@@ -1106,6 +1108,8 @@ namespace flvr
 			fb->bind(); // private, accessed via friendship
 
 		current_bound_ = fb;
+
+		DBGPRINT(L"bind(); Current Framebuffer: %d, %s\n", fb->id_, s2ws(fb->name_).c_str());
 	}
 
 	void FramebufferFactory::unbind()
@@ -1114,10 +1118,14 @@ namespace flvr
 		auto prev = previous_bound_.lock();
 
 		if (cur && prev)
-			cur->unbind(prev->id());
+		{
+			prev->bind();
 
-		current_bound_.reset();
-		previous_bound_.reset();
+			current_bound_ = prev;
+			previous_bound_.reset();
+
+		DBGPRINT(L"unbind(); Current Framebuffer: %d, %s\n", prev->id_, s2ws(prev->name_).c_str());
+		}
 	}
 
 	std::shared_ptr<Framebuffer> FramebufferFactory::current() const

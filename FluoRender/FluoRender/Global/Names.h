@@ -139,6 +139,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstRBViewBase "rb view base"
 #define gstRBViewFinal "rb view final"
 #define gstRBQuilt "rb quilt"
+#define gstRBQuiltView "rb quilt view"
 #define gstRBPeel "rb peel"
 #define gstRBVrRight "rb vr right"
 #define gstRBVrLeft "rb vr left"

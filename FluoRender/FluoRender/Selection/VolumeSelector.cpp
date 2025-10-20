@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GL/glew.h>
 #include <VolumeSelector.h>
 #include <Global.h>
+#include <Names.h>
 #include <VolumeDefault.h>
 #include <AutomateDefault.h>
 #include <RenderView.h>
@@ -217,20 +218,15 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	}
 	m_vd->GetVR()->set_mouse_vec(mvec);
 
-	auto paint_buffer =
-		glbin_framebuffer_manager.framebuffer("paint brush");
-	if (paint_buffer)
-		Set2DMask(paint_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-	auto final_buffer =
-		glbin_framebuffer_manager.framebuffer(
-			"final");
-	auto chann_buffer =
-		glbin_framebuffer_manager.framebuffer(
-			"channel");
-	if (final_buffer && chann_buffer)
-		Set2DWeight(
-			final_buffer->tex_id(flvr::AttachmentPoint::Color(0)),
-			chann_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
+	auto paint_buffer = glbin_framebuffer_manager.framebuffer(gstRBPaintBrush);
+	assert(paint_buffer);
+	Set2DMask(paint_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
+	auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
+	auto chann_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
+	assert(final_buffer && chann_buffer);
+	Set2DWeight(
+		final_buffer->tex_id(flvr::AttachmentPoint::Color(0)),
+		chann_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
 	//orthographic
 	SetOrthographic(!view->GetPersp());
 

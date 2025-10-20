@@ -147,7 +147,8 @@ void LookingGlassRenderer::Setup()
 	//set up framebuffer for quilt
 	auto quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, m_lg_data->quilt_width, m_lg_data->quilt_height, "quilt");
+			flvr::FBRole::RenderFloatDepth, m_lg_data->quilt_width, m_lg_data->quilt_height, gstRBQuilt);
+	assert(quilt_buffer);
 	quilt_buffer->protect();
 
 /*	flvr::ShaderProgram* shader = 0;
@@ -186,11 +187,13 @@ void LookingGlassRenderer::Clear()
 		return;
 
 	auto quilt_buffer =
-		glbin_framebuffer_manager.framebuffer("quilt");
+		glbin_framebuffer_manager.framebuffer(gstRBQuilt);
+	assert(quilt_buffer);
 	glbin_framebuffer_manager.bind(quilt_buffer);
-	glClearDepth(1);
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	quilt_buffer->clear(true, true, false);
+	//glClearDepth(1);
+	//glClearColor(0, 0, 0, 0);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glbin_framebuffer_manager.unbind();
 }
 
@@ -200,30 +203,34 @@ void LookingGlassRenderer::Draw()
 		return;
 
 	m_finished = false;
-	//draw view tex to quilt
-	//bind quilt frame buffer
-	auto quilt_buffer =
-		glbin_framebuffer_manager.framebuffer("quilt");
-	glbin_framebuffer_manager.bind(quilt_buffer);
-
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	//texture lookup shader
-	auto shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_FLIP, 0));
-	if (shader)
-		shader->bind();
 	//set up view port for place texture
 	// get the x and y origin for this view
 	int corrected_view = m_lg_data->vx * m_lg_data->vy - 1 - m_cur_view;
 	int x = (corrected_view % m_lg_data->vx) * m_lg_data->view_width;
 	int y = (m_lg_data->vy - 1 - (corrected_view / m_lg_data->vx)) * m_lg_data->view_height;
-	glViewport(x, y, m_lg_data->view_width, m_lg_data->view_height);
+	//glViewport(x, y, m_lg_data->view_width, m_lg_data->view_height);
+	//draw view tex to quilt
+	//bind quilt frame buffer
+	auto quilt_buffer =
+		glbin_framebuffer_manager.framebuffer(gstRBQuilt);
+	assert(quilt_buffer);
+	quilt_buffer->set_blend_enabled(false);
+	quilt_buffer->set_depth_test_enabled(false);
+	quilt_buffer->set_viewport({ x, y, m_lg_data->view_width, m_lg_data->view_height });
+	glbin_framebuffer_manager.bind(quilt_buffer);
+
+	//glDisable(GL_BLEND);
+	//glDisable(GL_DEPTH_TEST);
+	//texture lookup shader
+	auto shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_FLIP, 0));
+	assert(shader);
+	shader->bind();
 	//bind texture
 	auto view_buffer =
-		glbin_framebuffer_manager.framebuffer("quilt view");
-	if (view_buffer)
-		view_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+		glbin_framebuffer_manager.framebuffer(gstRBQuiltView);
+	assert(view_buffer);
+	view_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 	auto quad_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
 	assert(quad_va);
@@ -251,16 +258,23 @@ void LookingGlassRenderer::Draw()
 	//draw quilt to view
 	//only draw the middle view
 	glbin_framebuffer_manager.unbind();
+
+	auto cur_buffer = glbin_framebuffer_manager.current();
 	// reset viewport
-	glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
-	glClearDepth(1);
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	assert(cur_buffer);
+	flvr::FramebufferStateGuard fbg(*cur_buffer);
+	cur_buffer->set_viewport({ 0, 0, m_render_view_size.w(), m_render_view_size.h() });
+	cur_buffer->apply_state();
+	cur_buffer->clear(true, true, false);
+	//glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
+	//glClearDepth(1);
+	//glClearColor(0, 0, 0, 0);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
-	if (shader)
-		shader->bind();
+	assert(shader);
+	shader->bind();
 
 	auto rect_va =
 		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
@@ -309,8 +323,8 @@ void LookingGlassRenderer::Draw()
 
 	quilt_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	//glBindTexture(GL_TEXTURE_2D, 0);
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glEnable(GL_DEPTH_TEST);
 }
 
 void LookingGlassRenderer::SetUpdating(bool val)
@@ -339,9 +353,9 @@ void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
 
 	auto buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, nx, ny, "quilt view");
-	if (buffer)
-		glbin_framebuffer_manager.bind(buffer);
+			flvr::FBRole::RenderFloat, nx, ny, gstRBQuiltView);
+	assert(buffer);
+	glbin_framebuffer_manager.bind(buffer);
 }
 
 Size2D LookingGlassRenderer::GetViewSize() const
