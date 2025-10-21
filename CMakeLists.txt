@@ -893,7 +893,6 @@ target_include_directories(DATABASE_LIB PRIVATE
 # Distance
 target_include_directories(DISTANCE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
@@ -1014,11 +1013,8 @@ target_link_libraries(GRAPHICS_LIB PRIVATE
 
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${BRIDGE_RUNTIME_PATHS})
-target_link_libraries(LOOKINGGLASS_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES})
 
 # Object
 target_include_directories(OBJECT_LIB PRIVATE
@@ -1060,7 +1056,6 @@ target_link_libraries(PYTHON_LIB PRIVATE
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
@@ -1082,7 +1077,6 @@ if (APPLE)
       ${BZIP2_LIBRARY})
 endif()
 target_link_libraries(SCENE_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
   ${TEEM_LIBRARIES})
 
 # Script
@@ -1100,7 +1094,6 @@ target_link_libraries(SCRIPT_LIB PRIVATE
 
 # Selection
 target_include_directories(SELECTION_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})

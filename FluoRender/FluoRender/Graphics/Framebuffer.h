@@ -140,9 +140,59 @@ namespace flvr
 		static AttachmentPoint Stencil() { return {Type::Stencil}; }
 		static AttachmentPoint DepthStencil() { return {Type::DepthStencil}; }
 	};
+
+	enum class BlendFactor
+	{
+		Zero,
+		One,
+		SrcColor,
+		OneMinusSrcColor,
+		DstColor,
+		OneMinusDstColor,
+		SrcAlpha,
+		OneMinusSrcAlpha,
+		DstAlpha,
+		OneMinusDstAlpha,
+		ConstantColor,
+		OneMinusConstantColor,
+		ConstantAlpha,
+		OneMinusConstantAlpha,
+		SrcAlphaSaturate
+	};
+
+	enum class BlendEquation
+	{
+		Add,
+		Subtract,
+		ReverseSubtract,
+		Min,
+		Max
+	};
+
+	enum class DepthFunc
+	{
+		Never,
+		Less,
+		Equal,
+		Lequal,
+		Greater,
+		Notequal,
+		Gequal,
+		Always
+	};
+
+	enum class CullFace
+	{
+		Front,
+		Back,
+		FrontAndBack
+	};
+
 	enum class FaceWinding
 	{
-		Front, Back, Off
+		Front,
+		Back,
+		Off
 	};
 
 	struct FramebufferState
@@ -150,31 +200,31 @@ namespace flvr
 		FramebufferState();
 
 		// Blend settings
-		bool dirty_enableBlend = true;		  bool enableBlend = false;
-		bool dirty_blendSrc = true;			  GLenum blendSrc;
-		bool dirty_blendDst = true;			  GLenum blendDst;
-		bool dirty_blendEquationRGB = true;	  GLenum blendEquationRGB;
-		bool dirty_blendEquationAlpha = true; GLenum blendEquationAlpha;
+		bool dirty_enableBlend = true;           bool enableBlend = false;
+		bool dirty_blendSrc = true;              BlendFactor blendSrc = BlendFactor::One;
+		bool dirty_blendDst = true;              BlendFactor blendDst = BlendFactor::OneMinusSrcAlpha;
+		bool dirty_blendEquationRGB = true;      BlendEquation blendEquationRGB = BlendEquation::Add;
+		bool dirty_blendEquationAlpha = true;    BlendEquation blendEquationAlpha = BlendEquation::Add;
 
 		// Clear color
-		bool dirty_clearColor = true;		 fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+		bool dirty_clearColor = true;            fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		// Depth settings
-		bool dirty_enableDepthTest = true;	 bool enableDepthTest = false;
-		bool dirty_depthFunc = true;		 GLenum depthFunc;
-		bool dirty_clearDepth = true;		 GLfloat clearDepth = 1.0f;
+		bool dirty_enableDepthTest = true;       bool enableDepthTest = false;
+		bool dirty_depthFunc = true;             DepthFunc depthFunc = DepthFunc::Lequal;
+		bool dirty_clearDepth = true;            float clearDepth = 1.0f;
 
 		// Cull settings
-		bool dirty_enableCullFace = true;	 bool enableCullFace = false;
-		bool dirty_faceWinding = true;		 FaceWinding faceWinding = FaceWinding::Off;
-		bool dirty_cullFace = true;			 GLenum cullFace;
+		bool dirty_enableCullFace = true;        bool enableCullFace = false;
+		bool dirty_faceWinding = true;           FaceWinding faceWinding = FaceWinding::Off;
+		bool dirty_cullFace = true;              CullFace cullFace = CullFace::Back;
 
-		//viewport rectangle
-		bool dirty_viewport = true;			 fluo::Vector4i viewport = { 0, 0, 0, 0 }; // x, y, width, height
+		// Viewport rectangle
+		bool dirty_viewport = true;              fluo::Vector4i viewport = { 0, 0, 0, 0 };
 
 		// Scissor rectangle
-		bool dirty_enableScissorTest = true; bool enableScissorTest = false;
-		bool dirty_scissorRect = true;		 fluo::Vector4i scissorRect = { 0, 0, 0, 0 }; // x, y, width, height
+		bool dirty_enableScissorTest = true;     bool enableScissorTest = false;
+		bool dirty_scissorRect = true;           fluo::Vector4i scissorRect = { 0, 0, 0, 0 };
 	};
 
 	class Framebuffer
@@ -198,18 +248,18 @@ namespace flvr
 		void reset_state_flags();
 
 		//fine grained state control
-		//blend
+		// Blend
 		void set_blend_enabled(bool val);
-		void set_blend_func(GLenum sfactor, GLenum dfactor);
-		void set_blend_equation(GLenum rgb, GLenum alpha);
-		//depth
+		void set_blend_func(BlendFactor sfactor, BlendFactor dfactor);
+		void set_blend_equation(BlendEquation rgb, BlendEquation alpha);
+		// Depth
 		void set_depth_test_enabled(bool val);
-		void set_depth_func(GLenum func);
-		void set_clear_depth(GLfloat depth);
-		//cull
+		void set_depth_func(DepthFunc func);
+		void set_clear_depth(float depth);
+		// Cull
 		void set_cull_face_enabled(bool val);
 		void set_face_winding(FaceWinding winding);
-		void set_cull_face(GLenum face);
+		void set_cull_face(CullFace face);
 		//scissor
 		void set_scissor_test_enabled(bool val);
 		void set_scissor_rect(const fluo::Vector4i& rect);
@@ -218,7 +268,7 @@ namespace flvr
 		//clear color
 		void set_clear_color(const fluo::Vector4f& color);
 		//clear
-		void clear(bool color, bool depth, bool stencil);
+		void clear(bool color, bool depth);
 
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer=0);

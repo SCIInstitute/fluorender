@@ -1262,13 +1262,13 @@ namespace flvr
 		std::shared_ptr<VertexArray> quad_va;
 		if (d == 0.0)
 		{
-			quad_va = glbin_vertex_array_manager.vertex_array(VA_Norm_Square);
+			quad_va = glbin_vertex_array_manager.vertex_array(VAType::VA_Norm_Square);
 			if (quad_va)
 				quad_va->draw();
 		}
 		else
 		{
-			quad_va = glbin_vertex_array_manager.vertex_array(VA_Norm_Square_d);
+			quad_va = glbin_vertex_array_manager.vertex_array(VAType::VA_Norm_Square_d);
 			if (quad_va)
 			{
 				quad_va->set_param(0, d);
@@ -1292,26 +1292,26 @@ namespace flvr
 		if (va_slices_)
 		{
 			va_slices_->buffer_data(
-				VABuf_Coord, sizeof(float) * vertex.size(),
-				&vertex[0], GL_STREAM_DRAW);
+				VABufferType::VABuf_Coord, sizeof(float) * vertex.size(),
+				&vertex[0], BufferUsage::StreamDraw);
 			va_slices_->buffer_data(
-				VABuf_Index, sizeof(uint32_t) * index.size(),
-				&index[0], GL_STREAM_DRAW);
+				VABufferType::VABuf_Index, sizeof(uint32_t) * index.size(),
+				&index[0], BufferUsage::StreamDraw);
 			if (set_pointers)
 			{
 				va_slices_->attrib_pointer(
-					0, 3, GL_FLOAT, GL_FALSE,
+					0, 3, VertexAttribType::Float, false,
 					6 * sizeof(float),
-					(const GLvoid*)0);
+					(const void*)0);
 				va_slices_->attrib_pointer(
-					1, 3, GL_FLOAT, GL_FALSE,
+					1, 3, VertexAttribType::Float, false,
 					6 * sizeof(float),
-					(const GLvoid*)12);
+					(const void*)12);
 			}
 			va_slices_->draw_begin();
 			va_slices_->draw_elements(
-				GL_TRIANGLES, static_cast<GLsizei>(index.size()),
-				GL_UNSIGNED_INT, 0);
+				PrimitiveType::Triangles, index.size(),
+				IndexType::UnsignedInt, 0);
 			va_slices_->draw_end();
 		}
 	}
@@ -1333,21 +1333,21 @@ namespace flvr
 		if (va_wirefm_)
 		{
 			va_wirefm_->buffer_data(
-				VABuf_Coord, sizeof(float) * vertex.size(),
-				&vertex[0], GL_STREAM_DRAW);
+				VABufferType::VABuf_Coord, sizeof(float) * vertex.size(),
+				&vertex[0], BufferUsage::StreamDraw);
 			va_wirefm_->buffer_data(
-				VABuf_Index, sizeof(uint32_t) * index.size(),
-				&index[0], GL_STREAM_DRAW);
+				VABufferType::VABuf_Index, sizeof(uint32_t) * index.size(),
+				&index[0], BufferUsage::StreamDraw);
 			if (set_pointers)
 			{
 				va_wirefm_->attrib_pointer(
-					0, 3, GL_FLOAT, GL_FALSE,
+					0, 3, VertexAttribType::Float, false,
 					6 * sizeof(float),
-					(const GLvoid*)0);
+					(const void*)0);
 				va_wirefm_->attrib_pointer(
-					1, 3, GL_FLOAT, GL_FALSE,
+					1, 3, VertexAttribType::Float, false,
 					6 * sizeof(float),
-					(const GLvoid*)12);
+					(const void*)12);
 			}
 			va_wirefm_->draw_begin();
 			unsigned int idx_num;
@@ -1355,8 +1355,8 @@ namespace flvr
 			{
 				idx_num = (size[i] - 2) * 3;
 				va_wirefm_->draw_elements(
-					GL_TRIANGLES, idx_num, GL_UNSIGNED_INT,
-					reinterpret_cast<const GLvoid*>((long long)(k)));
+					PrimitiveType::Triangles, idx_num, IndexType::UnsignedInt,
+					reinterpret_cast<const void*>((long long)(k)));
 				k += idx_num * 4;
 			}
 			va_wirefm_->draw_end();

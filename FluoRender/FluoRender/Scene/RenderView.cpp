@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
 #include <RenderView.h>
 #include <Global.h>
 #include <Names.h>
@@ -4826,7 +4825,7 @@ void RenderView::DrawCells()
 
 	//glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	auto shader = glbin_shader_manager.shader(gstImgShader,
 			flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
 	assert(shader);
@@ -4838,15 +4837,15 @@ void RenderView::DrawCells()
 	shader->setLocalParam(0, m_size.w(), m_size.h(), width, 0.0);
 
 	auto va_rulers =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Rulers);
 	assert(va_rulers);
 	std::vector<float> verts;
 	unsigned int num = DrawCellVerts(verts);
 	if (num)
 	{
-		va_rulers->buffer_data(flvr::VABuf_Coord,
+		va_rulers->buffer_data(flvr::VABufferType::VABuf_Coord,
 			sizeof(float)*verts.size(),
-			&verts[0], GL_STREAM_DRAW);
+			&verts[0], flvr::BufferUsage::StreamDraw);
 		va_rulers->set_param(0, num);
 		va_rulers->draw();
 	}
@@ -5011,13 +5010,13 @@ void RenderView::DrawTraces()
 	assert(cur_buffer);
 	flvr::FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	cur_buffer->set_depth_test_enabled(true);
 	cur_buffer->apply_state();
 	//glEnable(GL_LINE_SMOOTH);
 	//glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 
 	double width = glbin_settings.m_line_width;
 
@@ -5036,7 +5035,7 @@ void RenderView::DrawTraces()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 	shader->setLocalParam(0, m_size.w(), m_size.h(), width, 0.0);
 
-	auto va_traces = glbin_vertex_array_manager.vertex_array(flvr::VA_Traces);
+	auto va_traces = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Traces);
 	assert(va_traces);
 	if (va_traces->get_dirty())
 	{
@@ -5044,9 +5043,9 @@ void RenderView::DrawTraces()
 		unsigned int num = m_track_group->Draw(verts, cur_vd->GetShuffle());
 		if (num)
 		{
-			va_traces->buffer_data(flvr::VABuf_Coord,
+			va_traces->buffer_data(flvr::VABufferType::VABuf_Coord,
 				sizeof(float)*verts.size(),
-				&verts[0], GL_STREAM_DRAW);
+				&verts[0], flvr::BufferUsage::StreamDraw);
 			va_traces->set_param(0, num);
 			va_traces->draw();
 		}
@@ -5190,12 +5189,12 @@ void RenderView::ReadPixels(
 		assert(final_buffer);
 		//draw the final buffer to itself
 		final_buffer->set_blend_enabled(true);
-		final_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		final_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		final_buffer->set_depth_test_enabled(false);
 		glbin_framebuffer_manager.bind(final_buffer);
 		final_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		//glDisable(GL_DEPTH_TEST);
 
 		//2d adjustment
@@ -5265,7 +5264,7 @@ void RenderView::ReadPixelsQuilt(
 
 	//glPixelStorei(GL_PACK_ROW_LENGTH, w);
 	//glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	//glReadBuffer(GL_BACK);
+	//glReadBuffer(flvr::CullFace::Back);
 	//glReadPixels(x, y, w, h,
 	//	chann == 3 ? GL_RGB : GL_RGBA,
 	//	fp32 ? GL_FLOAT : GL_UNSIGNED_BYTE, *image);
@@ -5549,7 +5548,7 @@ void RenderView::DrawBounds()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
 	auto va_cube =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Bound_Cube);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Bound_Cube);
 	assert(va_cube);
 	va_cube->set_param(m_bounds);
 	va_cube->draw();
@@ -5583,7 +5582,7 @@ void RenderView::DrawGrid()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
 	auto va_grid =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Grid);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Grid);
 	assert(va_grid);
 	//set parameters
 	std::vector<std::pair<unsigned int, double>> params;
@@ -5612,9 +5611,9 @@ void RenderView::DrawCamCtr()
 
 	std::shared_ptr<flvr::VertexArray> va_jack;
 	if (m_pin_rot_ctr)
-		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VA_Cam_Center);
+		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Cam_Center);
 	else
-		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VA_Cam_Jack);
+		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Cam_Jack);
 	assert(va_jack);
 
 	float len;
@@ -5674,7 +5673,7 @@ void RenderView::DrawScaleBar()
 	if (!m_scalebar_disp)
 		return;
 	auto va_scale_bar =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Scale_Bar);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Scale_Bar);
 	assert(va_scale_bar);
 
 	//glDisable(GL_DEPTH_TEST);
@@ -5929,7 +5928,7 @@ void RenderView::DrawName(
 	bool highlighted)
 {
 	auto va_legend_squares =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Legend_Squares);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Legend_Squares);
 	assert(va_legend_squares);
 
 	//glDisable(GL_DEPTH_TEST);
@@ -5993,7 +5992,7 @@ void RenderView::DrawName(
 void RenderView::DrawFrame()
 {
 	auto va_frame =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Crop_Frame);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Crop_Frame);
 	assert(va_frame);
 
 	//glDisable(GL_DEPTH_TEST);
@@ -6029,14 +6028,14 @@ void RenderView::DrawFrame()
 	//fbg exits
 }
 
-void RenderView::DrawClippingPlanes(int face_winding)
+void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 {
 	int plane_mode = glbin_settings.m_clip_mode;
 	if (plane_mode == cm_None)
 		return;
 
 	bool border = plane_mode == cm_Frame6 ||
-		(m_clip_mask == -1 && face_winding == FRONT_FACE) ||
+		(m_clip_mask == -1 && face_winding == flvr::FaceWinding::Front) ||
 		m_clip_mask != -1;
 	if (!border && plane_mode == cm_Frame3)
 		return;
@@ -6053,39 +6052,39 @@ void RenderView::DrawClippingPlanes(int face_winding)
 		plane_mode == cm_NormalBack) &&
 		m_clip_mask == -1)
 	{
-		//glCullFace(GL_FRONT);
-		cur_buffer->set_cull_face(GL_FRONT);
-		if (face_winding == BACK_FACE)
-			face_winding = FRONT_FACE;
+		//glCullFace(flvr::CullFace::Front);
+		cur_buffer->set_cull_face(flvr::CullFace::Front);
+		if (face_winding == flvr::FaceWinding::Back)
+			face_winding = flvr::FaceWinding::Front;
 		else
 			draw_plane = false;
 	}
 	else
 	{
-		//glCullFace(GL_BACK);
-		cur_buffer->set_cull_face(GL_BACK);
+		//glCullFace(flvr::CullFace::Back);
+		cur_buffer->set_cull_face(flvr::CullFace::Back);
 	}
 	//glDisable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	cur_buffer->set_depth_test_enabled(false);
 	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	if (face_winding == FRONT_FACE)
+	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+	if (face_winding == flvr::FaceWinding::Front)
 	{
 		//glEnable(GL_CULL_FACE);
 		//glFrontFace(GL_CCW);
 		cur_buffer->set_cull_face_enabled(true);
 		cur_buffer->set_face_winding(flvr::FaceWinding::Front);
 	}
-	else if (face_winding == BACK_FACE)
+	else if (face_winding == flvr::FaceWinding::Back)
 	{
 		//glEnable(GL_CULL_FACE);
 		//glFrontFace(GL_CW);
 		cur_buffer->set_cull_face_enabled(true);
 		cur_buffer->set_face_winding(flvr::FaceWinding::Back);
 	}
-	else if (face_winding == CULL_OFF)
+	else if (face_winding == flvr::FaceWinding::Off)
 	{
 		//glDisable(GL_CULL_FACE);
 		cur_buffer->set_cull_face_enabled(false);
@@ -6182,7 +6181,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 		//get color
 		fluo::Color color(1.0, 1.0, 1.0);
 		double plane_trans = 0.0;
-		if (face_winding == BACK_FACE &&
+		if (face_winding == flvr::FaceWinding::Back &&
 			(m_clip_mask == 3 ||
 				m_clip_mask == 12 ||
 				m_clip_mask == 48 ||
@@ -6197,7 +6196,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 			plane_trans = plane_mode == cm_LowTrans ||
 			plane_mode == cm_LowTransBack ? 0.1 : 0.3;
 
-		if (face_winding == FRONT_FACE)
+		if (face_winding == flvr::FaceWinding::Front)
 		{
 			plane_trans = plane_mode == cm_LowTrans ||
 				plane_mode == cm_LowTransBack ? 0.1 : 0.3;
@@ -6258,7 +6257,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 			}
 			mv.unproject_inplace(normal);
 			dotp = fluo::Dot(normal, view);
-			if (face_winding == FRONT_FACE)
+			if (face_winding == flvr::FaceWinding::Front)
 			{
 				if (dotp >= 0)
 					draw_plane_border[pi] = false;
@@ -6270,7 +6269,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 			}
 		}
 
-		auto va_clipp = glbin_vertex_array_manager.vertex_array(flvr::VA_Clip_Planes);
+		auto va_clipp = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Clip_Planes);
 		assert(va_clipp);
 		std::vector<fluo::Point> clip_points(pp, pp+8);
 		va_clipp->set_param(clip_points);
@@ -6298,7 +6297,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(16, true);
 				shader1->bind();
-				//if (face_winding != CULL_OFF)
+				//if (face_winding != flvr::FaceWinding::Off)
 				//	glEnable(GL_CULL_FACE);
 				//fbg2 exits
 			}
@@ -6325,7 +6324,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(48, true);
 				shader1->bind();
-				//if (face_winding != CULL_OFF)
+				//if (face_winding != flvr::FaceWinding::Off)
 				//	glEnable(GL_CULL_FACE);
 				//fbg2 exits
 			}
@@ -6352,7 +6351,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(80, true);
 				shader1->bind();
-				//if (face_winding != CULL_OFF)
+				//if (face_winding != flvr::FaceWinding::Off)
 				//	glEnable(GL_CULL_FACE);
 				//fbg2 exits
 			}
@@ -6379,7 +6378,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(112, true);
 				shader1->bind();
-				//if (face_winding != CULL_OFF)
+				//if (face_winding != flvr::FaceWinding::Off)
 				//	glEnable(GL_CULL_FACE);
 				//fbg2 exits
 			}
@@ -6406,7 +6405,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(144, true);
 				shader1->bind();
-				//if (face_winding != CULL_OFF)
+				//if (face_winding != flvr::FaceWinding::Off)
 				//	glEnable(GL_CULL_FACE);
 				//fbg2 exits
 			}
@@ -6433,7 +6432,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(176, true);
 				shader1->bind();
-				//if (face_winding != CULL_OFF)
+				//if (face_winding != flvr::FaceWinding::Off)
 				//	glEnable(GL_CULL_FACE);
 				//fbg2 exits
 			}
@@ -6444,7 +6443,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 	shader1->unbind();
 
 	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
+	//glCullFace(flvr::CullFace::Back);
 	//if (cur_buffer)
 	//	cur_buffer->restore_state();
 	//fbg exits
@@ -6668,13 +6667,13 @@ void RenderView::DrawColormap()
 
 	//glDisable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	assert(cur_buffer);
 	flvr::FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_depth_test_enabled(false);
 	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	cur_buffer->apply_state();
 
 	double max_val = 255.0;
@@ -6853,7 +6852,7 @@ void RenderView::DrawColormap()
 	shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 
 	auto va_colormap =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Color_Map);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Color_Map);
 	assert(va_colormap);
 	va_colormap->set_param(vertex);
 	va_colormap->draw();
@@ -7232,7 +7231,7 @@ void RenderView::DrawData()
 		1.0f });
 	cur_buffer->set_viewport({ 0, 0, nx, ny });
 	cur_buffer->apply_state();
-	cur_buffer->clear(true, true, false);
+	cur_buffer->clear(true, true);
 
 	//projection
 	HandleProjection(nx, ny, true);
@@ -7256,18 +7255,18 @@ void RenderView::DrawData()
 		DrawGrid();
 
 	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(BACK_FACE);
+		DrawClippingPlanes(flvr::FaceWinding::Back);
 
 	//setup
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 
 	//draw the volumes
 	DrawVolumes();
 
 	//draw the clipping planes
 	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(FRONT_FACE);
+		DrawClippingPlanes(flvr::FaceWinding::Front);
 
 	if (glbin_settings.m_test_wiref)
 		DrawBounds();
@@ -7312,7 +7311,7 @@ void RenderView::DrawDataPeel()
 		1.0f });
 	cur_buffer->set_viewport({ 0, 0, nx, ny });
 	cur_buffer->apply_state();
-	cur_buffer->clear(true, true, false);
+	cur_buffer->clear(true, true);
 
 	//projection
 	HandleProjection(nx, ny, true);
@@ -7338,12 +7337,12 @@ void RenderView::DrawDataPeel()
 		DrawGrid();
 
 	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(BACK_FACE);
+		DrawClippingPlanes(flvr::FaceWinding::Back);
 
 	//setup
 	//glDisable(GL_BLEND);
 	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
+	//glDepthFunc(flvr::DepthFunc::Lequal);
 	m_use_fog = false;
 
 	std::shared_ptr<flvr::Framebuffer> peel_buffer;
@@ -7358,7 +7357,7 @@ void RenderView::DrawDataPeel()
 
 		//glClearDepth(1.0);
 		//glClear(GL_DEPTH_BUFFER_BIT);
-		peel_buffer->clear(false, true, false);
+		peel_buffer->clear(false, true);
 
 		if (i == 0)
 		{
@@ -7380,15 +7379,15 @@ void RenderView::DrawDataPeel()
 	//bind back the framebuffer
 	//BindRenderBuffer();//should be current buffer
 	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
+	//glDepthFunc(flvr::DepthFunc::Lequal);
 	//glEnable(GL_BLEND);
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendEquation(flvr::BlendEquation::Add);
+	//glBlendFunc(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	cur_buffer->set_depth_test_enabled(true);
-	cur_buffer->set_depth_func(GL_LEQUAL);
+	cur_buffer->set_depth_func(flvr::DepthFunc::Lequal);
 	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
-	cur_buffer->set_blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	cur_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	cur_buffer->apply_state();
 
 	//restore fog
@@ -7501,10 +7500,10 @@ void RenderView::DrawDataPeel()
 			}
 
 			//glEnable(GL_DEPTH_TEST);
-			//glDepthFunc(GL_LEQUAL);
+			//glDepthFunc(flvr::DepthFunc::Lequal);
 			//glEnable(GL_BLEND);
-			//glBlendEquation(GL_FUNC_ADD);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//glBlendEquation(flvr::BlendEquation::Add);
+			//glBlendFunc(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 
 			//draw meshes
 			if (glbin_settings.m_peeling_layers == 1)
@@ -7539,7 +7538,7 @@ void RenderView::DrawDataPeel()
 		DrawOLShadowsMesh(darkness);
 
 	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(FRONT_FACE);
+		DrawClippingPlanes(flvr::FaceWinding::Front);
 
 	if (glbin_settings.m_test_wiref)
 		DrawBounds();
@@ -7658,7 +7657,7 @@ void RenderView::DrawVolumes(int peel)
 		flvr::FramebufferStateGuard fbg(*final_buffer);
 		final_buffer->set_cull_face_enabled(false);
 		final_buffer->apply_state();
-		final_buffer->clear(true, false, false);
+		final_buffer->clear(true, false);
 
 		PopVolumeList();
 
@@ -7996,8 +7995,8 @@ void RenderView::DrawFinalBuffer()
 	final_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	////glBlendFunc(GL_ONE, GL_ONE);
+	//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	////glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 	//glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
@@ -8027,7 +8026,7 @@ void RenderView::DrawFinalBuffer()
 				nx, ny, flvr::AttachmentPoint::Color(0), GL_RGBA, GL_UNSIGNED_BYTE);
 	}
 
-	glbin_framebuffer_manager.unbind();
+	//glbin_framebuffer_manager.unbind();
 }
 
 void RenderView::PrepVRBuffer()
@@ -8086,7 +8085,7 @@ void RenderView::DrawVRBuffer()
 	auto buffer_left = glbin_framebuffer_manager.framebuffer(gstRBVrLeft);
 	assert(buffer_left);
 	buffer_left->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-	auto quad_va = glbin_vertex_array_manager.vertex_array(flvr::VA_Left_Square);
+	auto quad_va = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Left_Square);
 	assert(quad_va);
 	quad_va->draw();
 	buffer_left->unbind_texture(flvr::AttachmentPoint::Color(0));
@@ -8095,7 +8094,7 @@ void RenderView::DrawVRBuffer()
 	auto buffer_right = glbin_framebuffer_manager.framebuffer(gstRBVrRight);
 	assert(buffer_right);
 	buffer_right->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-	quad_va = glbin_vertex_array_manager.vertex_array(flvr::VA_Right_Square);
+	quad_va = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Right_Square);
 	assert(quad_va);
 	quad_va->draw();
 	buffer_right->unbind_texture(flvr::AttachmentPoint::Color(0));
@@ -8203,7 +8202,7 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 	{
 		//glClearColor(0.0, 0.0, 0.0, 0.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
-		chann_buffer->clear(true, false, false);
+		chann_buffer->clear(true, false);
 		flvr::TextureRenderer::reset_clear_chan_buffer();
 	}
 
@@ -8218,20 +8217,21 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 	glbin_framebuffer_manager.unbind();// chann buffer
 
 	//bind fbo for final composition
-	auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
+	auto final_buffer = glbin_framebuffer_manager.current();
 	assert(final_buffer);
 	flvr::FramebufferStateGuard fbg(*final_buffer);
 	final_buffer->set_blend_enabled(true);
-	final_buffer->set_blend_func(GL_ONE,
-		m_vol_method == VOL_METHOD_COMP ? GL_ONE :GL_ONE_MINUS_SRC_ALPHA);
+	final_buffer->set_blend_func(flvr::BlendFactor::One,
+		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One :flvr::BlendFactor::OneMinusSrcAlpha);
 	final_buffer->set_depth_test_enabled(false);
+	final_buffer->apply_state();
 	//glEnable(GL_BLEND);
 	//if (m_vol_method == VOL_METHOD_COMP)
-	//	glBlendFunc(GL_ONE, GL_ONE);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 	//else
-	//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//glDisable(GL_DEPTH_TEST);
-	glbin_framebuffer_manager.bind(final_buffer);
+	//glbin_framebuffer_manager.bind(final_buffer);
 	//build mipmap
 	chann_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chann_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
@@ -8261,7 +8261,7 @@ void RenderView::DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &
 
 	img_shader->unbind();
 	chann_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
-	glbin_framebuffer_manager.unbind();//final buffer
+	//glbin_framebuffer_manager.unbind();//final buffer
 }
 
 //Draw the volmues with compositing
@@ -8391,7 +8391,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 			temp_buffer->protect();
 			//glClearColor(0.0, 0.0, 0.0, 0.0);
 			//glClear(GL_COLOR_BUFFER_BIT);
-			temp_buffer->clear(true, false, false);
+			temp_buffer->clear(true, false);
 			auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
 			assert(final_buffer);
 			final_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
@@ -8423,7 +8423,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 				flvr::TextureRenderer::get_clear_chan_buffer());
 		//glClearColor(0.0, 0.0, 0.0, 0.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
-		overlay_buffer->clear(true, false, false);
+		overlay_buffer->clear(true, false);
 		//flvr::TextureRenderer::reset_clear_chan_buffer();
 		//DBGPRINT(L"overlay cleared\n");
 
@@ -8473,7 +8473,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		{
 			//glClearColor(0.0, 0.0, 0.0, 0.0);
 			//glClear(GL_COLOR_BUFFER_BIT);
-			chann_buffer->clear(true, false, false);
+			chann_buffer->clear(true, false);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 			//DBGPRINT(L"chan buffer cleared\n");
 		}
@@ -8484,20 +8484,20 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		flvr::FramebufferStateGuard fbg(*chann_buffer);
 		bool not_done_loop = glbin_settings.m_mem_swap && !vd->GetVR()->get_done_loop(0);
 		chann_buffer->set_blend_enabled(true);
-		chann_buffer->set_blend_equation(not_done_loop ? GL_MAX : GL_FUNC_ADD,
-			not_done_loop ? GL_MAX : GL_FUNC_ADD);
-		chann_buffer->set_blend_func(GL_ONE,
-			not_done_loop ? GL_ONE : GL_ONE_MINUS_SRC_ALPHA);
+		chann_buffer->set_blend_equation(not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add,
+			not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add);
+		chann_buffer->set_blend_func(flvr::BlendFactor::One,
+			not_done_loop ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
 		//glEnable(GL_BLEND);
 		//if (glbin_settings.m_mem_swap && !vd->GetVR()->get_done_loop(0))
 		//{
-		//	glBlendEquation(GL_MAX);
-		//	glBlendFunc(GL_ONE, GL_ONE);
+		//	glBlendEquation(flvr::BlendEquation::Max);
+		//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 		//}
 		//else
 		//{
-		//	glBlendEquation(GL_FUNC_ADD);
-		//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		//	glBlendEquation(flvr::BlendEquation::Add);
+		//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		//}
 
 		if (color_mode == 1)
@@ -8554,16 +8554,16 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 	}
 
 	//bind fbo for final composition
-	auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
+	auto final_buffer = glbin_framebuffer_manager.current();
 	assert(final_buffer);
-	glbin_framebuffer_manager.bind(final_buffer);
+	//glbin_framebuffer_manager.bind(final_buffer);
 
 	if (glbin_settings.m_mem_swap)
 	{
 		//restore temp buffer to final buffer
 		//glClearColor(0.0, 0.0, 0.0, 0.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
-		final_buffer->clear(true, false, false);
+		final_buffer->clear(true, false);
 		auto temp_buffer = glbin_framebuffer_manager.framebuffer(gstRBTemporary);
 		assert(temp_buffer);
 		//bind tex from temp buffer
@@ -8587,17 +8587,17 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 	chann_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 	flvr::FramebufferStateGuard fbg(*final_buffer);
 	final_buffer->set_blend_enabled(true);
-	final_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
-	final_buffer->set_blend_func(GL_ONE,
-		m_vol_method == VOL_METHOD_COMP ? GL_ONE : GL_ONE_MINUS_SRC_ALPHA);
+	final_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+	final_buffer->set_blend_func(flvr::BlendFactor::One,
+		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
 	final_buffer->set_depth_test_enabled(false);
 	final_buffer->apply_state();
 	//glEnable(GL_BLEND);
-	//glBlendEquation(GL_FUNC_ADD);
+	//glBlendEquation(flvr::BlendEquation::Add);
 	//if (m_vol_method == VOL_METHOD_COMP)
-	//	glBlendFunc(GL_ONE, GL_ONE);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 	//else
-	//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
@@ -8622,7 +8622,7 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 	vd->GetVR()->set_shading(shading);
 	vd->SetColormapMode(color_mode);
 
-	glbin_framebuffer_manager.unbind();//final buffer
+	//glbin_framebuffer_manager.unbind();//final buffer
 }
 
 void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)
@@ -8678,7 +8678,7 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 			temp_buffer->set_blend_enabled(false);
 			glbin_framebuffer_manager.bind(temp_buffer);
 			temp_buffer->protect();
-			temp_buffer->clear(true, false, false);
+			temp_buffer->clear(true, false);
 			//glClearColor(0.0, 0.0, 0.0, 0.0);
 			//glClear(GL_COLOR_BUFFER_BIT);
 			auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
@@ -8706,7 +8706,7 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 			(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer()))
 		{
-			chann_buffer->clear(true, false, false);
+			chann_buffer->clear(true, false);
 			//glClearColor(0.0, 0.0, 0.0, 0.0);
 			//glClear(GL_COLOR_BUFFER_BIT);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
@@ -8736,14 +8736,14 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 	}
 
 	//bind fbo for final composition
-	auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
+	auto final_buffer = glbin_framebuffer_manager.current();
 	assert(final_buffer);
-	glbin_framebuffer_manager.bind(final_buffer);
+	//glbin_framebuffer_manager.bind(final_buffer);
 
 	if (glbin_settings.m_mem_swap)
 	{
 		//restore temp buffer to final buffer
-		final_buffer->clear(true, false, false);
+		final_buffer->clear(true, false);
 		//glClearColor(0.0, 0.0, 0.0, 0.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
 		auto temp_buffer = glbin_framebuffer_manager.framebuffer(gstRBTemporary);
@@ -8773,13 +8773,13 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 	chann_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 	final_buffer->set_blend_enabled(true);
-	final_buffer->set_blend_func(GL_ONE,
-		m_vol_method == VOL_METHOD_COMP ? GL_ONE : GL_ONE_MINUS_SRC_ALPHA);
+	final_buffer->set_blend_func(flvr::BlendFactor::One,
+		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
 	//glEnable(GL_BLEND);
 	//if (m_vol_method == VOL_METHOD_COMP)
-	//	glBlendFunc(GL_ONE, GL_ONE);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 	//else
-	//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
@@ -8800,7 +8800,7 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 
 	img_shader->unbind();
 	chann_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
-	glbin_framebuffer_manager.unbind();//final buffer
+	//glbin_framebuffer_manager.unbind();//final buffer
 }
 
 void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
@@ -8834,7 +8834,7 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 	overlay_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 	glbin_framebuffer_manager.bind(overlay_buffer);
 	overlay_buffer->protect();
-	overlay_buffer->clear(true, false, false);
+	overlay_buffer->clear(true, false);
 	//glClearColor(1.0, 1.0, 1.0, 1.0);
 	//glClear(GL_COLOR_BUFFER_BIT);
 
@@ -8857,7 +8857,7 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 	auto chann_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 	assert(chann_buffer);
 	chann_buffer->set_blend_enabled(true);
-	chann_buffer->set_blend_func(GL_ZERO, GL_SRC_COLOR);
+	chann_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 	glbin_framebuffer_manager.bind(chann_buffer);
 
 	//ok to unprotect
@@ -8865,7 +8865,7 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 	overlay_buffer->unprotect();
 
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+	//glBlendFunc(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 	////glBlendEquation(GL_MIN);
 	//glDisable(GL_DEPTH_TEST);
 
@@ -8879,8 +8879,8 @@ void RenderView::DrawOLShading(const std::weak_ptr<VolumeData>& vd_ptr)
 	img_shader->unbind();
 	overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendEquation(flvr::BlendEquation::Add);
+	//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 
 	glbin_framebuffer_manager.unbind();// chann buffer
 }
@@ -8945,7 +8945,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 	{
 		//glClearColor(1.0, 1.0, 1.0, 1.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
-		overlay_buffer->clear(true, false, false);
+		overlay_buffer->clear(true, false);
 		flvr::TextureRenderer::reset_clear_chan_buffer();
 	}
 	//glDisable(GL_BLEND);
@@ -9047,7 +9047,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 		grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 		grad_mip_buffer->set_blend_enabled(false);
 		glbin_framebuffer_manager.bind(grad_mip_buffer);
-		grad_mip_buffer->clear(true, false, false);
+		grad_mip_buffer->clear(true, false);
 
 		//glClearColor(1.0, 1.0, 1.0, 1.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
@@ -9080,14 +9080,14 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 		auto chann_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 		assert(chann_buffer);
 		chann_buffer->set_blend_enabled(true);
-		chann_buffer->set_blend_func(GL_ZERO, GL_SRC_COLOR);
+		chann_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 		glbin_framebuffer_manager.bind(chann_buffer);
 
 		grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 		grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 		chann_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 1);
 		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+		//glBlendFunc(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 		//glDisable(GL_DEPTH_TEST);
 
 		//2d adjustment
@@ -9108,7 +9108,7 @@ void RenderView::DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &lis
 		glbin_framebuffer_manager.unbind();// chann buffer
 	}
 
-	//glBlendEquation(GL_FUNC_ADD);
+	//glBlendEquation(flvr::BlendEquation::Add);
 }
 
 void RenderView::DrawOLShadowsMesh(double darkness)
@@ -9124,7 +9124,7 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 	grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 	grad_mip_buffer->set_blend_enabled(false);
 	glbin_framebuffer_manager.bind(grad_mip_buffer);
-	grad_mip_buffer->clear(true, false, false);
+	grad_mip_buffer->clear(true, false);
 
 	//glClearColor(1.0, 1.0, 1.0, 1.0);
 	//glClear(GL_COLOR_BUFFER_BIT);
@@ -9168,10 +9168,10 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 	assert(cur_buffer);
 	flvr::FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(GL_ZERO, GL_SRC_COLOR);
+	cur_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 	cur_buffer->apply_state();
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+	//glBlendFunc(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 	//glDisable(GL_DEPTH_TEST);
 
 	//2d adjustment
@@ -9191,8 +9191,8 @@ void RenderView::DrawOLShadowsMesh(double darkness)
 	peel_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	final_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendEquation(flvr::BlendEquation::Add);
+	//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//glEnable(GL_DEPTH_TEST);
 
 	glbin_framebuffer_manager.unbind();//bind fbo for final composition
@@ -9250,7 +9250,7 @@ void RenderView::DrawCircles(double cx, double cy,
 	shader->setLocalParamMatrix(0, glm::value_ptr(mat0));
 
 	auto va_circles =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Brush_Circles);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Brush_Circles);
 	assert(va_circles);
 	//set parameters
 	std::vector<std::pair<unsigned int, double>> params;
@@ -9366,7 +9366,7 @@ void RenderView::PaintStroke()
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderFloat, nx, ny, gstRBPaintBrush);
 	assert(paint_buffer);
-	paint_buffer->set_blend_equation(GL_MAX, GL_MAX);
+	paint_buffer->set_blend_equation(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
 	glbin_framebuffer_manager.bind(paint_buffer);
 	paint_buffer->protect();
 	//clear if asked so
@@ -9374,7 +9374,7 @@ void RenderView::PaintStroke()
 	{
 		//glClearColor(0.0, 0.0, 0.0, 0.0);
 		//glClear(GL_COLOR_BUFFER_BIT);
-		paint_buffer->clear(true, false, false);
+		paint_buffer->clear(true, false);
 		m_clear_paint = false;
 	}
 
@@ -9386,7 +9386,7 @@ void RenderView::PaintStroke()
 
 	//glDisable(GL_DEPTH_TEST);
 	//glEnable(GL_BLEND);
-	//glBlendEquation(GL_MAX);
+	//glBlendEquation(flvr::BlendEquation::Max);
 
 	double radius1 = glbin_vol_selector.GetBrushSize1();
 	double radius2 = glbin_vol_selector.GetBrushSize2();
@@ -9455,7 +9455,7 @@ void RenderView::PaintStroke()
 	glbin_framebuffer_manager.unbind();// paint buffer
 	//bind back the window frame buffer
 	//BindRenderBuffer();
-	//glBlendEquation(GL_FUNC_ADD);
+	//glBlendEquation(flvr::BlendEquation::Add);
 }
 
 //show the stroke buffer
@@ -9469,11 +9469,11 @@ void RenderView::DisplayStroke()
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	assert(cur_buffer);
 	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	//draw the final buffer to the windows buffer
 	paint_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	//glDisable(GL_DEPTH_TEST);
 
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -9858,9 +9858,9 @@ bool RenderView::PickMesh(BaseState& state)
 	pick_buffer->set_scissor_test_enabled(true);
 	pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
 	pick_buffer->set_depth_test_enabled(true);
-	pick_buffer->set_depth_func(GL_LEQUAL);
+	pick_buffer->set_depth_func(flvr::DepthFunc::Lequal);
 	glbin_framebuffer_manager.bind(pick_buffer);
-	pick_buffer->clear(true, true, false);
+	pick_buffer->clear(true, true);
 
 	//glClearColor(0.0, 0.0, 0.0, 0.0);
 	//glClearDepth(1.0);
@@ -9869,7 +9869,7 @@ bool RenderView::PickMesh(BaseState& state)
 	//glScissor(m_mouse_x, ny - m_mouse_y, 1, 1);
 	//glEnable(GL_SCISSOR_TEST);
 	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
+	//glDepthFunc(flvr::DepthFunc::Lequal);
 	int index = 0;
 	for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it, ++index)
 	{
@@ -9981,7 +9981,7 @@ void RenderView::SetCompSelection(fluo::Point& p, int mode)
 void RenderView::DrawViewQuad()
 {
 	auto quad_va =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Norm_Square);
 	assert(quad_va);
 	quad_va->draw();
 }

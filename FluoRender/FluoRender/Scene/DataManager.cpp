@@ -25,7 +25,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <GL/glew.h>
 #include <DataManager.h>
 #include <Global.h>
 #include <Names.h>
@@ -586,7 +585,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	}
 
 	//align data for compression if vtc is not supported
-	if (!GLEW_NV_texture_compression_vtc && glbin_settings.m_realtime_compress)
+	if (glbin_settings.m_realtime_compress)
 	{
 		reader->SetResize(1);
 		reader->SetAlignment(4);

@@ -25,7 +25,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <GL/glew.h>
 #include <MeshData.h>
 #include <MeshRenderer.h>
 #include <VertexArray.h>
@@ -217,34 +216,34 @@ void MeshData::SubmitData()
 	assert(va_model);
 
 	// Add and upload buffers
-	va_model->add_buffer(flvr::VABuf_Coord);
-	va_model->buffer_data(flvr::VABuf_Coord, sizeof(float) * pos_buffer.size(), &pos_buffer[0], GL_STATIC_DRAW);
-	va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Coord), 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Position
+	va_model->add_buffer(flvr::VABufferType::VABuf_Coord);
+	va_model->buffer_data(flvr::VABufferType::VABuf_Coord, sizeof(float) * pos_buffer.size(), &pos_buffer[0], flvr::BufferUsage::StaticDraw);
+	va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Coord), 3, flvr::VertexAttribType::Float, false, 0, (const void*)0); // Position
 
 	if (bnormal)
 	{
-		va_model->add_buffer(flvr::VABuf_Normal);
-		va_model->buffer_data(flvr::VABuf_Normal, sizeof(float) * norm_buffer.size(), &norm_buffer[0], GL_STATIC_DRAW);
-		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Normal), 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Normal
+		va_model->add_buffer(flvr::VABufferType::VABuf_Normal);
+		va_model->buffer_data(flvr::VABufferType::VABuf_Normal, sizeof(float) * norm_buffer.size(), &norm_buffer[0], flvr::BufferUsage::StaticDraw);
+		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Normal), 3, flvr::VertexAttribType::Float, false, 0, (const void*)0); // Normal
 	}
 
 	if (btexcoord)
 	{
-		va_model->add_buffer(flvr::VABuf_Tex);
-		va_model->buffer_data(flvr::VABuf_Tex, sizeof(float) * tex_buffer.size(), &tex_buffer[0], GL_STATIC_DRAW);
-		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Tex), 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Texcoord
+		va_model->add_buffer(flvr::VABufferType::VABuf_Tex);
+		va_model->buffer_data(flvr::VABufferType::VABuf_Tex, sizeof(float) * tex_buffer.size(), &tex_buffer[0], flvr::BufferUsage::StaticDraw);
+		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Tex), 2, flvr::VertexAttribType::Float, false, 0, (const void*)0); // Texcoord
 	}
 
 	if (bcolor)
 	{
-		va_model->add_buffer(flvr::VABuf_Color);
-		va_model->buffer_data(flvr::VABuf_Color, sizeof(float) * color_buffer.size(), &color_buffer[0], GL_STATIC_DRAW);
-		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Color), 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0); // Color
+		va_model->add_buffer(flvr::VABufferType::VABuf_Color);
+		va_model->buffer_data(flvr::VABufferType::VABuf_Color, sizeof(float) * color_buffer.size(), &color_buffer[0], flvr::BufferUsage::StaticDraw);
+		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Color), 4, flvr::VertexAttribType::Float, false, 0, (const void*)0); // Color
 	}
 
 	// Index buffer
-	va_model->add_buffer(flvr::VABuf_Index);
-	va_model->buffer_data(flvr::VABuf_Index, sizeof(unsigned int) * index_buffer.size(), &index_buffer[0], GL_STATIC_DRAW);
+	va_model->add_buffer(flvr::VABufferType::VABuf_Index);
+	va_model->buffer_data(flvr::VABufferType::VABuf_Index, sizeof(unsigned int) * index_buffer.size(), &index_buffer[0], flvr::BufferUsage::StaticDraw);
 
 	m_gpu_dirty = false;
 }
@@ -271,22 +270,22 @@ void MeshData::ReturnData()
 
 	// Map position buffer
 	std::vector<float> verts(3 * num_vertices);
-	void* mapped_ptr = va_model->map_buffer(flvr::VABuf_Coord, GL_READ_ONLY);
+	void* mapped_ptr = va_model->map_buffer(flvr::VABufferType::VABuf_Coord, flvr::BufferAccess::ReadOnly);
 	if (!mapped_ptr)
 		return;
 	memcpy(verts.data(), mapped_ptr, verts.size() * sizeof(float));
-	va_model->unmap_buffer(flvr::VABuf_Coord);
+	va_model->unmap_buffer(flvr::VABufferType::VABuf_Coord);
 
 	// Map normal buffer
 	std::vector<float> norms;
 	if (bnormal)
 	{
 		norms.resize(3 * num_vertices);
-		void* norm_ptr = va_model->map_buffer(flvr::VABuf_Normal, GL_READ_ONLY);
+		void* norm_ptr = va_model->map_buffer(flvr::VABufferType::VABuf_Normal, flvr::BufferAccess::ReadOnly);
 		if (!norm_ptr)
 			return;
 		memcpy(norms.data(), norm_ptr, norms.size() * sizeof(float));
-		va_model->unmap_buffer(flvr::VABuf_Normal);
+		va_model->unmap_buffer(flvr::VABufferType::VABuf_Normal);
 	}
 
 	// Map texcoord buffer
@@ -294,11 +293,11 @@ void MeshData::ReturnData()
 	if (btexcoord)
 	{
 		texs.resize(2 * num_vertices);
-		void* tex_ptr = va_model->map_buffer(flvr::VABuf_Tex, GL_READ_ONLY);
+		void* tex_ptr = va_model->map_buffer(flvr::VABufferType::VABuf_Tex, flvr::BufferAccess::ReadOnly);
 		if (!tex_ptr)
 			return;
 		memcpy(texs.data(), tex_ptr, texs.size() * sizeof(float));
-		va_model->unmap_buffer(flvr::VABuf_Tex);
+		va_model->unmap_buffer(flvr::VABufferType::VABuf_Tex);
 	}
 
 	// Map color buffer
@@ -306,23 +305,23 @@ void MeshData::ReturnData()
 	if (bcolor)
 	{
 		colors.resize(4 * num_vertices);
-		void* color_ptr = va_model->map_buffer(flvr::VABuf_Color, GL_READ_ONLY);
+		void* color_ptr = va_model->map_buffer(flvr::VABufferType::VABuf_Color, flvr::BufferAccess::ReadOnly);
 		if (!color_ptr)
 			return;
 		memcpy(colors.data(), color_ptr, colors.size() * sizeof(float));
-		va_model->unmap_buffer(flvr::VABuf_Color);
+		va_model->unmap_buffer(flvr::VABufferType::VABuf_Color);
 	}
 
 	// Map index buffer
 	std::vector<GLuint> indices;
 	if (indexed)
 	{
-		void* index_ptr = va_model->map_buffer(flvr::VABuf_Index, GL_READ_ONLY);
+		void* index_ptr = va_model->map_buffer(flvr::VABufferType::VABuf_Index, flvr::BufferAccess::ReadOnly);
 		if (!index_ptr)
 			return;
 		indices.resize(index_count);
 		memcpy(indices.data(), index_ptr, sizeof(GLuint) * index_count);
-		va_model->unmap_buffer(flvr::VABuf_Index);
+		va_model->unmap_buffer(flvr::VABufferType::VABuf_Index);
 	}
 
 	// Allocate vertex arrays with 1-based indexing
@@ -510,7 +509,7 @@ void MeshData::AddEmptyData()
 	m_data->materials[0].emmissive[1] = 0.0;
 	m_data->materials[0].emmissive[2] = 0.0;
 	m_data->materials[0].emmissive[3] = 0.0;
-	m_data->materials[0].havetexture = GL_FALSE;
+	m_data->materials[0].havetexture = false;
 	m_data->materials[0].textureID = 0;
 
 	m_mr->set_data(m_data.get());
@@ -538,11 +537,11 @@ GLuint MeshData::AddCoordVBO(int vertex_size)
 	auto va_model = m_mr->GetOrCreateVertexArray(true, false);
 	assert(va_model);
 	va_model->buffer_data(
-		flvr::VABuf_Coord, vbo_size,
-		&verts[0], GL_DYNAMIC_DRAW);
+		flvr::VABufferType::VABuf_Coord, vbo_size,
+		&verts[0], flvr::BufferUsage::DynamicDraw);
 	va_model->attrib_pointer(
-		static_cast<GLuint>(flvr::VAAttrib_Coord), 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const GLvoid*)0);
-	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+		static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Coord), 3, flvr::VertexAttribType::Float, false, 3 * sizeof(float), (const void*)0);
+	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Coord));
 	return vbo_id;
 }
 
@@ -557,9 +556,9 @@ GLuint MeshData::AddIndexVBO(size_t vsize)
 	for (size_t i = 0; i < vsize; ++i)
 		indices[i] = static_cast<unsigned int>(i);
 	size_t vbo_size = sizeof(unsigned int) * indices.size();
-	va_model->buffer_data(flvr::VABuf_Index, vbo_size,
-		&indices[0], GL_DYNAMIC_DRAW);
-	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Index));
+	va_model->buffer_data(flvr::VABufferType::VABuf_Index, vbo_size,
+		&indices[0], flvr::BufferUsage::DynamicDraw);
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Index));
 }
 
 GLuint MeshData::GetIndexVBO()
@@ -567,7 +566,7 @@ GLuint MeshData::GetIndexVBO()
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
-	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Index));
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Index));
 }
 
 void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vector<int>& index_data)
@@ -579,15 +578,15 @@ void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vec
 	{
 		size_t vbo_size = sizeof(float) * vbo_data.size();
 		va_model->buffer_data(
-			flvr::VABuf_Coord, vbo_size,
-			&vbo_data[0], GL_DYNAMIC_DRAW);
+			flvr::VABufferType::VABuf_Coord, vbo_size,
+			&vbo_data[0], flvr::BufferUsage::DynamicDraw);
 	}
 	if (index_data.size() > 0)
 	{
 		size_t ibo_size = sizeof(unsigned int) * index_data.size();
 		va_model->buffer_data(
-			flvr::VABuf_Index, ibo_size,
-			&index_data[0], GL_DYNAMIC_DRAW);
+			flvr::VABufferType::VABuf_Index, ibo_size,
+			&index_data[0], flvr::BufferUsage::DynamicDraw);
 	}
 }
 
@@ -596,7 +595,7 @@ GLuint MeshData::GetCoordVBO()
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
-	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Coord));
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Coord));
 }
 
 void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
@@ -606,12 +605,12 @@ void MeshData::UpdateNormalVBO(const std::vector<float>& vbo)
 		return;
 	if (vbo.size() > 0)
 	{
-		va_model->add_buffer(flvr::VABuf_Normal);
+		va_model->add_buffer(flvr::VABufferType::VABuf_Normal);
 		size_t vbo_size = sizeof(float) * vbo.size();
 		va_model->buffer_data(
-			flvr::VABuf_Normal, vbo_size,
-			&vbo[0], GL_DYNAMIC_DRAW);
-		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Normal), 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
+			flvr::VABufferType::VABuf_Normal, vbo_size,
+			&vbo[0], flvr::BufferUsage::DynamicDraw);
+		va_model->attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Normal), 3, flvr::VertexAttribType::Float, false, 0, (const void*)0);
 		SetFlatShading(false);
 		if (m_data)
 			m_data->numnormals = static_cast<GLuint>(vbo.size() / 3);
@@ -624,8 +623,8 @@ void MeshData::DeleteNormalVBO()
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
-	va_model->delete_buffer(flvr::VABuf_Normal);
-	va_model->remove_attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Normal));
+	va_model->delete_buffer(flvr::VABufferType::VABuf_Normal);
+	va_model->remove_attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Normal));
 	if (m_data)
 	{
 		m_data->numnormals = 0;
@@ -638,7 +637,7 @@ GLuint MeshData::GetNormalVBO()
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
-	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Normal));
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Normal));
 }
 
 GLuint MeshData::AddColorVBO(int vertex_size)
@@ -648,13 +647,13 @@ GLuint MeshData::AddColorVBO(int vertex_size)
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
-	va_model->add_buffer(flvr::VABuf_Color);
+	va_model->add_buffer(flvr::VABufferType::VABuf_Color);
 	va_model->buffer_data(
-		flvr::VABuf_Color, vbo_size,
-		&verts[0], GL_DYNAMIC_DRAW);
+		flvr::VABufferType::VABuf_Color, vbo_size,
+		&verts[0], flvr::BufferUsage::DynamicDraw);
 	va_model->attrib_pointer(
-		static_cast<GLuint>(flvr::VAAttrib_Color), 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)0);
-	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Color));
+		static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Color), 4, flvr::VertexAttribType::Float, false, 0, (const void*)0);
+	GLuint vbo_id = static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Color));
 	if (m_data)
 		m_data->numcolors = static_cast<GLuint>(vertex_size);
 	SetVertexColor(true);
@@ -666,8 +665,8 @@ void MeshData::DeleteColorVBO()
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return;
-	va_model->delete_buffer(flvr::VABuf_Color);
-	va_model->remove_attrib_pointer(static_cast<GLuint>(flvr::VAAttrib_Color));
+	va_model->delete_buffer(flvr::VABufferType::VABuf_Color);
+	va_model->remove_attrib_pointer(static_cast<GLuint>(flvr::VAAttribIndex::VAAttrib_Color));
 	if (m_data)
 	{
 		m_data->numcolors = 0;
@@ -680,7 +679,7 @@ GLuint MeshData::GetColorVBO()
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
 		return 0;
-	return static_cast<GLuint>(va_model->id_buffer(flvr::VABuf_Color));
+	return static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Color));
 }
 
 void MeshData::SetVertexNum(unsigned int num)
@@ -753,12 +752,12 @@ void MeshData::Draw(int peel)
 	if (!m_mr)
 		return;
 
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 	m_mr->set_depth_peel(peel);
 	m_mr->draw();
 	if (m_draw_bounds && (peel==4 || peel==5))
 		DrawBounds();
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 }
 
 void MeshData::DrawBounds()
@@ -1201,7 +1200,7 @@ void MeshData::BuildMesh()
 	m_data->materials[0].emmissive[1] = 0.0;
 	m_data->materials[0].emmissive[2] = 0.0;
 	m_data->materials[0].emmissive[3] = 0.0;
-	m_data->materials[0].havetexture = GL_FALSE;
+	m_data->materials[0].havetexture = false;
 	m_data->materials[0].textureID = 0;
 
 	//bounds

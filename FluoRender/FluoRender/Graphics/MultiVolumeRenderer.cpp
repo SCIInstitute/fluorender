@@ -207,15 +207,15 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	//switch(mode_)
 	//{
 	//case RenderMode::RENDER_MODE_OVER:
-	//	glBlendEquation(GL_FUNC_ADD);
+	//	glBlendEquation(flvr::BlendEquation::Add);
 	//	if (glbin_settings.m_update_order == 0)
-	//		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//		glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//	else if (glbin_settings.m_update_order == 1)
-	//		glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+	//		glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 	//	break;
 	//case RenderMode::RENDER_MODE_MIP:
-	//	glBlendEquation(GL_MAX);
-	//	glBlendFunc(GL_ONE, GL_ONE);
+	//	glBlendEquation(flvr::BlenEquation::Max);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 	//	break;
 	//default:
 	//	break;
@@ -238,28 +238,28 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	switch (mode_)
 	{
 	case RenderMode::RENDER_MODE_OVER:
-		blend_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
+		blend_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
-			blend_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
-			blend_buffer->set_blend_func(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+			blend_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 		break;
 	case RenderMode::RENDER_MODE_MIP:
-		blend_buffer->set_blend_equation(GL_MAX, GL_MAX);
-		blend_buffer->set_blend_func(GL_ONE, GL_ONE);
+		blend_buffer->set_blend_equation(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
+		blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
 		break;
 	default:
 		break;
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->protect();
-	blend_buffer->clear(true, false, false);
+	blend_buffer->clear(true, false);
 	//glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 	//glClear(GL_COLOR_BUFFER_BIT);
 	//glViewport(vp_[0], vp_[1], w2, h2);
 	//disable depth buffer writing
 	//glDisable(GL_DEPTH_TEST);
-	//glDepthMask(GL_FALSE);
+	//glDepthMask(false);
 
 	for (size_t i = 0; i < vr_list_.size(); ++i)
 		vr_list_[i]->eval_ml_mode();
@@ -394,11 +394,11 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	//glBindTexture(GL_TEXTURE_3D, 0);
 
 	//reset blending
-	//glBlendEquation(GL_FUNC_ADD);
+	//glBlendEquation(flvr::BlendEquation::Add);
 	//if (glbin_settings.m_update_order == 0)
-	//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//else if (glbin_settings.m_update_order == 1)
-	//	glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+	//	glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 	//glDisable(GL_BLEND);
 
 	//output
@@ -419,7 +419,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		assert(filter_buffer);
 		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
-		filter_buffer->clear(true, false, false);
+		filter_buffer->clear(true, false);
 
 		//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 		//glClear(GL_COLOR_BUFFER_BIT);
@@ -451,9 +451,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_blend_enabled(true);
 	if (glbin_settings.m_update_order == 0)
-		cur_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	else if (glbin_settings.m_update_order == 1)
-		cur_buffer->set_blend_func(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+		cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 	cur_buffer->apply_state();
 	//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
@@ -465,9 +465,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	//glEnable(GL_BLEND);
 	//if (glbin_settings.m_update_order == 0)
-	//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	//else if (glbin_settings.m_update_order == 1)
-	//	glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+	//	glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 
 	img_shader = glbin_shader_manager.shader(gstImgShader,
 		ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
@@ -525,21 +525,21 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	if (va_slices_)
 	{
 		va_slices_->buffer_data(
-			VABuf_Coord, sizeof(float) * vertex.size(),
-			&vertex[0], GL_STREAM_DRAW);
+			VABufferType::VABuf_Coord, sizeof(float) * vertex.size(),
+			&vertex[0], BufferUsage::StreamDraw);
 		va_slices_->buffer_data(
-			VABuf_Index, sizeof(uint32_t) * index.size(),
-			&index[0], GL_STREAM_DRAW);
+			VABufferType::VABuf_Index, sizeof(uint32_t) * index.size(),
+			&index[0], BufferUsage::StreamDraw);
 		if (set_pointers)
 		{
 			va_slices_->attrib_pointer(
-				0, 3, GL_FLOAT, GL_FALSE,
+				0, 3, VertexAttribType::Float, false,
 				6 * sizeof(float),
-				(const GLvoid*)0);
+				(const void*)0);
 			va_slices_->attrib_pointer(
-				1, 3, GL_FLOAT, GL_FALSE,
+				1, 3, VertexAttribType::Float, false,
 				6 * sizeof(float),
-				(const GLvoid*)12);
+				(const void*)12);
 		}
 		va_slices_->draw_begin();
 	}
@@ -554,15 +554,15 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			//set blend buffer
 			micro_blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 			micro_blend_buffer->set_blend_enabled(true);
-			micro_blend_buffer->set_blend_equation(GL_FUNC_ADD, GL_MAX);
-			micro_blend_buffer->set_blend_func(GL_ONE, GL_ONE);
+			micro_blend_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Max);
+			micro_blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
 			glbin_framebuffer_manager.bind(micro_blend_buffer);
-			micro_blend_buffer->clear(true, false, false);
+			micro_blend_buffer->clear(true, false);
 			//glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 			//glClear(GL_COLOR_BUFFER_BIT);
 			//glEnable(GL_BLEND);
-			//glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
-			//glBlendFunc(GL_ONE, GL_ONE);
+			//glBlendEquationSeparate(flvr::BlendEquation::Add, flvr::BlenEquation::Max);
+			//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
 			////glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
 		}
 
@@ -745,9 +745,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			idx_num = (size[i] - 2) * 3;
 			if (va_slices_)
 				va_slices_->draw_elements(
-					GL_TRIANGLES, idx_num,
-					GL_UNSIGNED_INT,
-					reinterpret_cast<const GLvoid*>((long long)(location)));
+					PrimitiveType::Triangles, idx_num,
+					IndexType::UnsignedInt,
+					reinterpret_cast<const void*>((long long)(location)));
 
 			//release depth texture for rendering shadows
 			if (vr_list_[tn]->colormap_mode_ == 2)
@@ -781,20 +781,20 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			assert(cur_buffer);
 			FramebufferStateGuard fbg(*cur_buffer);
 			cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
-			cur_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
+			cur_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 			if (glbin_settings.m_update_order == 0)
-				cur_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 			else if (glbin_settings.m_update_order == 1)
-				cur_buffer->set_blend_func(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+				cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 			cur_buffer->apply_state();
 			//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 			//micro_blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 			////blend
-			//glBlendEquation(GL_FUNC_ADD);
+			//glBlendEquation(flvr::BlendEquation::Add);
 			//if (glbin_settings.m_update_order == 0)
-			//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 			//else if (glbin_settings.m_update_order == 1)
-			//	glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+			//	glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 			//draw
 			auto img_shader = glbin_shader_manager.shader(gstImgShader,
 				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));

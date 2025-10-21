@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
 #include <LookingGlassRenderer.h>
 #include <Global.h>
 #include <Names.h>
@@ -190,7 +189,7 @@ void LookingGlassRenderer::Clear()
 		glbin_framebuffer_manager.framebuffer(gstRBQuilt);
 	assert(quilt_buffer);
 	glbin_framebuffer_manager.bind(quilt_buffer);
-	quilt_buffer->clear(true, true, false);
+	quilt_buffer->clear(true, true);
 	//glClearDepth(1);
 	//glClearColor(0, 0, 0, 0);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -232,7 +231,7 @@ void LookingGlassRenderer::Draw()
 	assert(view_buffer);
 	view_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 	auto quad_va =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Norm_Square);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Norm_Square);
 	assert(quad_va);
 	quad_va->draw();
 	shader->unbind();
@@ -265,7 +264,7 @@ void LookingGlassRenderer::Draw()
 	flvr::FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_viewport({ 0, 0, m_render_view_size.w(), m_render_view_size.h() });
 	cur_buffer->apply_state();
-	cur_buffer->clear(true, true, false);
+	cur_buffer->clear(true, true);
 	//glViewport(0, 0, m_render_view_size.w(), m_render_view_size.h());
 	//glClearDepth(1);
 	//glClearColor(0, 0, 0, 0);
@@ -277,7 +276,7 @@ void LookingGlassRenderer::Draw()
 	shader->bind();
 
 	auto rect_va =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Rectangle);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Rectangle);
 	assert(rect_va);
 	int mode = glbin_settings.m_hologram_debug;
 	if (mode == 3)

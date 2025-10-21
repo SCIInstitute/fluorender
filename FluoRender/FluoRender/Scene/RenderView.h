@@ -85,6 +85,7 @@ namespace flvr
 {
 	class MultiVolumeRenderer;
 	class TextRenderer;
+	enum class FaceWinding;
 }
 namespace flrd
 {
@@ -793,7 +794,7 @@ private:
 		const std::wstring& name, const fluo::Color color,
 		double font_height, bool hilighted = false);
 	void DrawFrame();
-	void DrawClippingPlanes(int face_winding);
+	void DrawClippingPlanes(flvr::FaceWinding face_winding);
 	void SetColormapColors(int colormap, const fluo::Color &c1, const fluo::Color& c2, double inv);
 	void DrawColormap();
 	void DrawGradBg();

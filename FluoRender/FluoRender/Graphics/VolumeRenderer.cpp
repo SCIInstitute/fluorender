@@ -430,15 +430,15 @@ void VolumeRenderer::draw_volume(
 	//switch (mode_)
 	//{
 	//case RenderMode::RENDER_MODE_OVER:
-	//	glBlendEquation(GL_FUNC_ADD);
+	//	glBlendEquation(BlendEquation::Add);
 	//	if (glbin_settings.m_update_order == 0)
-	//		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//		glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 	//	else if (glbin_settings.m_update_order == 1)
-	//		glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+	//		glBlendFunc(BlendFactor::OneMinusDstAlpha, BlendFactor::One);
 	//	break;
 	//case RenderMode::RENDER_MODE_MIP:
-	//	glBlendEquation(GL_MAX);
-	//	glBlendFunc(GL_ONE, GL_ONE);
+	//	glBlendEquation(BlendEquation::Max);
+	//	glBlendFunc(BlendFactor::One, BlendFactor::One);
 	//	break;
 	//default:
 	//	break;
@@ -461,22 +461,22 @@ void VolumeRenderer::draw_volume(
 	switch (mode_)
 	{
 	case RenderMode::RENDER_MODE_OVER:
-		blend_buffer->set_blend_equation(GL_FUNC_ADD, GL_FUNC_ADD);
+		blend_buffer->set_blend_equation(BlendEquation::Add, BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
-			blend_buffer->set_blend_func(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
-			blend_buffer->set_blend_func(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+			blend_buffer->set_blend_func(BlendFactor::OneMinusDstAlpha, BlendFactor::One);
 		break;
 	case RenderMode::RENDER_MODE_MIP:
-		blend_buffer->set_blend_equation(GL_MAX, GL_MAX);
-		blend_buffer->set_blend_func(GL_ONE, GL_ONE);
+		blend_buffer->set_blend_equation(BlendEquation::Max, BlendEquation::Max);
+		blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::One);
 		break;
 	default:
 		break;
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->protect();
-	blend_buffer->clear(true, false, false);
+	blend_buffer->clear(true, false);
 
 	//glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
 	//glClear(GL_COLOR_BUFFER_BIT);
@@ -786,7 +786,7 @@ void VolumeRenderer::draw_volume(
 		assert(filter_buffer);
 		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
-		filter_buffer->clear(true, false, false);
+		filter_buffer->clear(true, false);
 
 		//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 		//glClear(GL_COLOR_BUFFER_BIT);
@@ -843,8 +843,8 @@ void VolumeRenderer::draw_volume(
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 
 	// Reset the blend functions after MIP
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendEquation(BlendEquation::Add);
+	//glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 	//glDisable(GL_BLEND);
 }
 
@@ -1153,8 +1153,8 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	glbin_framebuffer_manager.unbind();//fbo_mask
 
 	//// Reset the blend functions after MIP
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendEquation(BlendEquation::Add);
+	//glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 	//glDisable(GL_BLEND);
 
 	////enable depth test
@@ -1412,8 +1412,8 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 	//--------------------------------------------------------------------------
 
 	// Reset the blend functions after MIP
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendEquation(BlendEquation::Add);
+	//glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 
 	//glDisable(GL_BLEND);
 }

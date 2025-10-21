@@ -1120,7 +1120,7 @@ void MeasureDlg::UpdateRulerList()
 
 	m_ruler_list->AdjustSize();
 
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Rulers);
 
 	//select
 	int size = m_ruler_list->GetItemCount();

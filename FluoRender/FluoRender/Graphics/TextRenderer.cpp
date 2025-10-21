@@ -216,7 +216,7 @@ namespace flvr
 		shader->bind();
 		shader->setLocalParam(0, color.r(), color.g(), color.b(), 1.0f);
 
-		auto va_text = glbin_vertex_array_manager.vertex_array(VA_Text);
+		auto va_text = glbin_vertex_array_manager.vertex_array(VAType::VA_Text);
 		assert(va_text);
 		va_text->draw_begin();
 		const wchar_t *p;

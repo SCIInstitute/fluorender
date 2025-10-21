@@ -35,37 +35,77 @@
 #include <memory>
 #include <set>
 
-#ifndef __glew_h__
-typedef ptrdiff_t GLsizeiptr;
-typedef void GLvoid;
-typedef unsigned int GLenum;
-typedef int GLint;
-typedef unsigned int GLuint;
-typedef unsigned char GLboolean;
-typedef int GLsizei; 
-#endif
-
 namespace fluo
 {
 	class Point;
 }
 namespace flvr
 {
-	enum VABufferType
+	enum class VABufferType
 	{
-		VABuf_Coord = 0,
+		VABuf_Coord,
 		VABuf_Index,
 		VABuf_Normal,
 		VABuf_Tex,
 		VABuf_Color
 	};
-	enum VAAttribIndex
+	enum class VAAttribIndex
 	{
-		VAAttrib_Coord = 0,
+		VAAttrib_Coord,
 		VAAttrib_Normal,
 		VAAttrib_Tex,
 		VAAttrib_Color
 	};
+
+	enum class BufferAccess
+	{
+		ReadOnly,       // GL_READ_ONLY
+		WriteOnly,      // GL_WRITE_ONLY
+		ReadWrite       // GL_READ_WRITE
+	};
+
+	enum class BufferUsage
+	{
+		StreamDraw,   // GL_STREAM_DRAW
+		StreamRead,   // GL_STREAM_READ
+		StreamCopy,   // GL_STREAM_COPY
+		StaticDraw,   // GL_STATIC_DRAW
+		StaticRead,   // GL_STATIC_READ
+		StaticCopy,   // GL_STATIC_COPY
+		DynamicDraw,  // GL_DYNAMIC_DRAW
+		DynamicRead,  // GL_DYNAMIC_READ
+		DynamicCopy   // GL_DYNAMIC_COPY
+	};
+
+	enum class VertexAttribType
+	{
+		Byte,           // GL_BYTE
+		UnsignedByte,   // GL_UNSIGNED_BYTE
+		Short,          // GL_SHORT
+		UnsignedShort,  // GL_UNSIGNED_SHORT
+		Int,            // GL_INT
+		UnsignedInt,    // GL_UNSIGNED_INT
+		Float,          // GL_FLOAT
+		Double          // GL_DOUBLE
+	};
+
+	enum class PrimitiveType
+	{
+		Points,         // GL_POINTS
+		Lines,          // GL_LINES
+		LineStrip,      // GL_LINE_STRIP
+		Triangles,      // GL_TRIANGLES
+		TriangleStrip,  // GL_TRIANGLE_STRIP
+		TriangleFan     // GL_TRIANGLE_FAN
+	};
+
+	enum class IndexType
+	{
+		UnsignedByte,   // GL_UNSIGNED_BYTE
+		UnsignedShort,  // GL_UNSIGNED_SHORT
+		UnsignedInt     // GL_UNSIGNED_INT
+	};
+
 	class VertexArray;
 	class VertexArrayManager;
 	class VertexBuffer
@@ -79,9 +119,9 @@ namespace flvr
 		bool bind();
 		void unbind();
 		bool valid();
-		void data(GLsizeiptr size, const GLvoid* data, GLenum usage);
+		void data(size_t size, const void* data, BufferUsage usage);
 		//read back
-		void* map(GLenum access);
+		void* map(BufferAccess access);
 		void unmap();
 
 	private:
@@ -92,7 +132,7 @@ namespace flvr
 		friend class VertexArray;
 	};
 
-	enum VAType
+	enum class VAType
 	{
 		VA_Unmanaged = 1,
 		VA_Norm_Square,
@@ -139,14 +179,14 @@ namespace flvr
 
 		bool attach_buffer(const std::shared_ptr<VertexBuffer>& buf);
 		void buffer_data(VABufferType type,
-			GLsizeiptr size, const GLvoid* data, GLenum usage);
-		void attrib_pointer(GLuint index,
-			GLint size, GLenum type, GLboolean normalized,
-			GLsizei stride, const GLvoid* pointer);
-		void remove_attrib_pointer(GLuint index);
+			size_t size, const void* data, BufferUsage usage);
+		void attrib_pointer(unsigned int index,
+			int size, VertexAttribType type, bool normalized,
+			size_t stride, const void* pointer);
+		void remove_attrib_pointer(unsigned int index);
 
 		//read back
-		void* map_buffer(VABufferType type, GLenum access);
+		void* map_buffer(VABufferType type, BufferAccess access);
 		void unmap_buffer(VABufferType type);
 
 		//set parameters to generate vertices
@@ -159,10 +199,10 @@ namespace flvr
 
 		void draw_begin();
 		void draw_end();
-		void draw_arrays(GLenum, GLint, GLsizei);
-		void draw_elements(GLenum, GLsizei, GLenum, const GLvoid*);
+		void draw_arrays(PrimitiveType, int, size_t);
+		void draw_elements(PrimitiveType, size_t, IndexType, const void*);
 		void draw();
-		void draw_unmanaged(GLint pos, GLint tri_num);
+		void draw_unmanaged(int pos, int tri_num);
 		void draw_norm_square();
 		void draw_circles();
 		void draw_bound_cube();

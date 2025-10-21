@@ -55,7 +55,7 @@ TrackGroup::~TrackGroup()
 void TrackGroup::SetCurTime(int time)
 {
 	m_cur_time = time;
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
 int TrackGroup::GetCurTime()
@@ -75,19 +75,19 @@ int TrackGroup::GetPrvTime()
 void TrackGroup::SetGhostNum(int num)
 {
 	m_ghost_num = num;
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
 void TrackGroup::SetDrawTail(bool draw)
 {
 	m_draw_tail = draw;
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
 void TrackGroup::SetDrawLead(bool draw)
 {
 	m_draw_lead = draw;
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
 //get information
@@ -117,7 +117,7 @@ void TrackGroup::GetLinkLists(size_t frame,
 void TrackGroup::ClearCellList()
 {
 	m_cell_list->clear();
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
 //cur_sel_list: ids from previous time point
@@ -155,7 +155,7 @@ void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 		(unsigned int)m_prv_time,
 		(unsigned int)m_cur_time);
 
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
 flrd::CelpList &TrackGroup::GetCellList()

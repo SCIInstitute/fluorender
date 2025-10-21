@@ -5258,7 +5258,7 @@ void TrackMapProcessor::ConvertRulers()
 		(*iter)->Scale(spcx, spcy, spcz);
 		ruler_list->push_back(*iter);
 	}
-	glbin_vertex_array_manager.set_dirty(flvr::VA_Rulers);
+	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Rulers);
 }
 
 void TrackMapProcessor::ConvertConsistent()

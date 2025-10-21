@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.h>
 #include <DataManager.h>
 #include <LookingGlassRenderer.h>
+#include <Debug.h>
 #ifdef _WIN32
 //wacom support
 #include <wx/msw/private.h>
@@ -265,6 +266,7 @@ void RenderCanvas::Draw()
 		{
 			view_ptr->DrawDefault();
 			SwapBuffers();
+			DBGPRINT(L"SwapBuffers();\n");
 		}
 	}
 

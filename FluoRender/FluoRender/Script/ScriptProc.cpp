@@ -696,7 +696,7 @@ void ScriptProc::RunPostTracking()
 		tg->SetCurTime(view->m_tseq_cur_num);
 		tg->SetPrvTime(view->m_tseq_prv_num);
 		tg->UpdateCellList(*m_sel_labels);
-		glbin_vertex_array_manager.set_dirty(flvr::VA_Traces);
+		glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 	}
 
 	Nrrd* mask_nrrd = cur_vol->GetMask(false);

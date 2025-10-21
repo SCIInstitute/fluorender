@@ -25,7 +25,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <GL/glew.h>
 #include <VolumeSelector.h>
 #include <Global.h>
 #include <Names.h>
@@ -296,7 +295,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 	//insert the mask volume into m_vd
 	m_vd->AddEmptyMask(0, false);
 	m_vd->Set2dMask(m_2d_mask);
-	if (m_use2d && glIsTexture(m_2d_weight1) && glIsTexture(m_2d_weight2))
+	if (m_use2d && m_2d_weight1 && m_2d_weight2)
 		m_vd->Set2DWeight(m_2d_weight1, m_2d_weight2);
 	else
 		m_vd->Set2DWeight(0, 0);

@@ -26,7 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
 #include <RulerRenderer.h>
 #include <Global.h>
 #include <Names.h>
@@ -73,9 +72,9 @@ void RulerRenderer::Draw()
 	int nx = m_view->GetCanvasSize().w();
 	int ny = m_view->GetCanvasSize().h();
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	auto shader = glbin_shader_manager.shader(
 		gstImgShader, flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
 	assert(shader);
@@ -84,7 +83,7 @@ void RulerRenderer::Draw()
 	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
 
 	auto va_rulers =
-		glbin_vertex_array_manager.vertex_array(flvr::VA_Rulers);
+		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Rulers);
 	assert(va_rulers);
 	std::vector<float> verts;
 	unsigned int num = 0;
@@ -94,9 +93,9 @@ void RulerRenderer::Draw()
 	num = DrawVerts(verts, 2);
 	if (num)
 	{
-		va_rulers->buffer_data(flvr::VABuf_Coord,
+		va_rulers->buffer_data(flvr::VABufferType::VABuf_Coord,
 			sizeof(float)*verts.size(),
-			&verts[0], GL_STREAM_DRAW);
+			&verts[0], flvr::BufferUsage::StreamDraw);
 		va_rulers->set_param(0, num);
 		va_rulers->draw();
 	}
@@ -105,9 +104,9 @@ void RulerRenderer::Draw()
 	num = DrawVerts(verts, 1);
 	if (num)
 	{
-		va_rulers->buffer_data(flvr::VABuf_Coord,
+		va_rulers->buffer_data(flvr::VABufferType::VABuf_Coord,
 			sizeof(float)*verts.size(),
-			&verts[0], GL_STREAM_DRAW);
+			&verts[0], flvr::BufferUsage::StreamDraw);
 		va_rulers->set_param(0, num);
 		va_rulers->draw();
 	}
