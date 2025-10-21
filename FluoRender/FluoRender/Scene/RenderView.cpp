@@ -538,13 +538,6 @@ RenderView::RenderView(RenderView& copy):
 		m_control_connected = m_controller->IsConnected();
 	}
 #endif
-
-	//canvas buffer for default fbo
-	auto canvas_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
-		gstRBCanvasDefault);
-	assert(canvas_buffer);
-	glbin_framebuffer_manager.bind(canvas_buffer);
 }
 
 RenderView::~RenderView()
@@ -709,6 +702,13 @@ void RenderView::Init()
 #endif
 	glbin_settings.GetMemorySettings();
 	flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
+
+	//canvas buffer for default fbo
+	auto canvas_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
+		gstRBCanvasDefault);
+	assert(canvas_buffer);
+	glbin_framebuffer_manager.bind(canvas_buffer);
 
 	m_initialized = true;
 
@@ -6271,7 +6271,7 @@ void RenderView::DrawClippingPlanes(int face_winding)
 		}
 
 		auto va_clipp = glbin_vertex_array_manager.vertex_array(flvr::VA_Clip_Planes);
-		assert(!va_clipp);
+		assert(va_clipp);
 		std::vector<fluo::Point> clip_points(pp, pp+8);
 		va_clipp->set_param(clip_points);
 		va_clipp->draw_begin();

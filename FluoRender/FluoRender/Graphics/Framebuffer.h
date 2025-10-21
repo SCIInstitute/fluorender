@@ -318,8 +318,8 @@ namespace flvr
 		std::vector<std::shared_ptr<Framebuffer>> fb_list_;
 		std::vector<std::shared_ptr<FramebufferTexture>> tex_list_;
 
-		std::weak_ptr<Framebuffer> current_bound_;
-		std::weak_ptr<Framebuffer> previous_bound_;
+		std::weak_ptr<Framebuffer> current_;
+		std::vector<std::weak_ptr<Framebuffer>> stack_;
 	};
 
 	class FramebufferManager

@@ -1098,39 +1098,49 @@ namespace flvr
 	void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 	{
 		// Skip if already bound
-		if (current_bound_.lock() == fb)
+		if (current_.lock() == fb)
 			return;
 
 		// Save current as previous
-		previous_bound_ = current_bound_;
+		if (auto cur = current_.lock())
+			stack_.push_back(cur);
 
 		if (fb)
 			fb->bind(); // private, accessed via friendship
 
-		current_bound_ = fb;
+		current_ = fb;
 
 		DBGPRINT(L"bind(); Current Framebuffer: %d, %s\n", fb->id_, s2ws(fb->name_).c_str());
 	}
 
 	void FramebufferFactory::unbind()
 	{
-		auto cur = current_bound_.lock();
-		auto prev = previous_bound_.lock();
+		if (stack_.empty())
+		{
+			DBGPRINT(L"unbind(); ERROR: Stack underflow\n");
+			return;
+		}
 
-		if (cur && prev)
+		auto prev = stack_.back().lock();
+		stack_.pop_back();
+
+		if (prev)
 		{
 			prev->bind();
 
-			current_bound_ = prev;
-			previous_bound_.reset();
+			current_ = prev;
 
-		DBGPRINT(L"unbind(); Current Framebuffer: %d, %s\n", prev->id_, s2ws(prev->name_).c_str());
+			DBGPRINT(L"unbind(); Current Framebuffer: %d, %s\n", prev->id_, s2ws(prev->name_).c_str());
+		}
+		else
+		{
+			DBGPRINT(L"unbind(); ERROR: Previous framebuffer expired.\n");
 		}
 	}
 
 	std::shared_ptr<Framebuffer> FramebufferFactory::current() const
 	{
-		return current_bound_.lock(); // nullptr if expired
+		return current_.lock(); // nullptr if expired
 	}
 
 	std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(

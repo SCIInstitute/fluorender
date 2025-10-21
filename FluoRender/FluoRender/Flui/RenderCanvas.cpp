@@ -84,6 +84,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_sharedRC = m_glRC ? true : false;
 
 	auto view = std::make_shared<RenderView>();
+	glbin_current.render_view_drawing = view;
 	Root* root = glbin_data_manager.GetRoot();
 	view->SetRenderViewPanel(m_renderview_panel);
 	view->SetRenderCanvas(this);
