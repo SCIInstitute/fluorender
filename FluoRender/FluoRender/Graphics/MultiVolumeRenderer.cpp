@@ -202,25 +202,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	index.reserve(est_slices * 6);
 	size.reserve(est_slices * 6);
 
-
-	//glEnable(GL_BLEND);
-	//switch(mode_)
-	//{
-	//case RenderMode::RENDER_MODE_OVER:
-	//	glBlendEquation(flvr::BlendEquation::Add);
-	//	if (glbin_settings.m_update_order == 0)
-	//		glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-	//	else if (glbin_settings.m_update_order == 1)
-	//		glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
-	//	break;
-	//case RenderMode::RENDER_MODE_MIP:
-	//	glBlendEquation(flvr::BlenEquation::Max);
-	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
-	//	break;
-	//default:
-	//	break;
-	//}
-
 	int w = vp_[2];
 	int h = vp_[3];
 	std::string buf_name = vr_list_[0]->get_buffer_name();
@@ -231,10 +212,12 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderFloat, w2, h2, buf_name);
 	assert(blend_buffer);
+	//set up clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 	blend_buffer->set_viewport({ vp_[0], vp_[1], w2, h2 });
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
+	//normal: b2f:(1, 1-a), f2b:(1-a, 1), mip: max(1, 1)
 	switch (mode_)
 	{
 	case RenderMode::RENDER_MODE_OVER:
@@ -254,12 +237,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->protect();
 	blend_buffer->clear(true, false);
-	//glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	//glViewport(vp_[0], vp_[1], w2, h2);
-	//disable depth buffer writing
-	//glDisable(GL_DEPTH_TEST);
-	//glDepthMask(false);
 
 	for (size_t i = 0; i < vr_list_.size(); ++i)
 		vr_list_[i]->eval_ml_mode();
@@ -385,29 +362,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		}
 	}
 
-	//enable depth buffer writing
-	//glEnable(GL_DEPTH_TEST);
-	//glDepthMask(GL_TRUE);
-
-	//release texture
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_3D, 0);
-
-	//reset blending
-	//glBlendEquation(flvr::BlendEquation::Add);
-	//if (glbin_settings.m_update_order == 0)
-	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-	//else if (glbin_settings.m_update_order == 1)
-	//	glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
-	//glDisable(GL_BLEND);
-
-	//output
-	//states
-	//GLboolean depth_test = glIsEnabled(GL_DEPTH_TEST);
-	//GLboolean cull_face = glIsEnabled(GL_CULL_FACE);
-	//glDisable(GL_DEPTH_TEST);
-	//glDisable(GL_CULL_FACE);
-
 	std::shared_ptr<ShaderProgram> img_shader;
 
 	std::shared_ptr<Framebuffer> filter_buffer;
@@ -417,12 +371,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloat, w, h);
 		assert(filter_buffer);
+		//set viewport size
 		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
 		filter_buffer->clear(true, false);
-
-		//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-		//glClear(GL_COLOR_BUFFER_BIT);
 
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
@@ -443,31 +395,25 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	//go back to normal
 	glbin_framebuffer_manager.unbind();//blend buffer
-	//flvr::Framebuffer::bind(cur_framebuffer_);
 
 	//current
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	assert(cur_buffer);
 	FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_blend_enabled(true);
+	//b2f:(1, 1-a), f2b:(1-a, 1)
 	if (glbin_settings.m_update_order == 0)
 		cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	else if (glbin_settings.m_update_order == 1)
 		cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
+	//set viewport size
 	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 	cur_buffer->apply_state();
-	//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 	if (noise_red_ /*&& colormap_mode_!=2*/)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 	else
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
-
-	//glEnable(GL_BLEND);
-	//if (glbin_settings.m_update_order == 0)
-	//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-	//else if (glbin_settings.m_update_order == 1)
-	//	glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 
 	img_shader = glbin_shader_manager.shader(gstImgShader,
 		ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
@@ -478,19 +424,12 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	img_shader->unbind();
 
-	//if (depth_test) glEnable(GL_DEPTH_TEST);
-	//if (cull_face) glEnable(GL_CULL_FACE);
-
 	blend_buffer->unprotect();
 
 	if (noise_red_)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-
-	//glDisable(GL_BLEND);
-
-	//glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void MultiVolumeRenderer::draw_polygons_vol(
@@ -552,18 +491,13 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		if (blend_slices_/*&& colormap_mode_!=2*/)
 		{
 			//set blend buffer
+			//blend: (add, max)(1, 1)
 			micro_blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 			micro_blend_buffer->set_blend_enabled(true);
 			micro_blend_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Max);
 			micro_blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
 			glbin_framebuffer_manager.bind(micro_blend_buffer);
 			micro_blend_buffer->clear(true, false);
-			//glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
-			//glClear(GL_COLOR_BUFFER_BIT);
-			//glEnable(GL_BLEND);
-			//glBlendEquationSeparate(flvr::BlendEquation::Add, flvr::BlenEquation::Max);
-			//glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::One);
-			////glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
 		}
 
 		if (va_slices_)
@@ -780,21 +714,15 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			auto cur_buffer = glbin_framebuffer_manager.current();
 			assert(cur_buffer);
 			FramebufferStateGuard fbg(*cur_buffer);
+			//set viewport size
 			cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
+			//blend: (add, add)(b2f:(1, 1-a), f2b:(1-a, 1))
 			cur_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 			if (glbin_settings.m_update_order == 0)
 				cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 			else if (glbin_settings.m_update_order == 1)
 				cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 			cur_buffer->apply_state();
-			//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-			//micro_blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
-			////blend
-			//glBlendEquation(flvr::BlendEquation::Add);
-			//if (glbin_settings.m_update_order == 0)
-			//	glBlendFunc(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-			//else if (glbin_settings.m_update_order == 1)
-			//	glBlendFunc(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 			//draw
 			auto img_shader = glbin_shader_manager.shader(gstImgShader,
 				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
@@ -805,8 +733,6 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			img_shader->unbind();
 			micro_blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-			//glBindTexture(GL_TEXTURE_2D, 0);
-			//glViewport(0, 0, w, h);
 		}
 	}
 
@@ -1013,8 +939,6 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
 	//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 	shader->setLocalParam(0, vr_list_[0]->color_.r(), vr_list_[0]->color_.g(), vr_list_[0]->color_.b(), 1.0);
-
-	//glEnable(GL_DEPTH_TEST);
 
 	std::vector<TextureBrick*>* bs;
 	auto tex0 = vr_list_[0]->tex_.lock();

@@ -26,12 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
 #include <MainSettings.h>
 #include <Names.h>
 #include <Global.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
+#include <GraphicsQuery.h>
 #include <compatibility.h>
 #include <filesystem>
 
@@ -768,19 +768,14 @@ std::vector<std::string> MainSettings::GetJvmArgs()
 	return args;
 }
 
-void MainSettings::GetMemorySettings()
+void MainSettings::GetGraphicsInfo()
 {
-	//from gl
-	GLenum error = glGetError();
-	GLint mem_info[4] = { 0, 0, 0, 0 };
-	glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
-	error = glGetError();
-	if (error == GL_INVALID_ENUM)
-	{
-		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
-		error = glGetError();
-		if (error == GL_INVALID_ENUM)
-			m_use_mem_limit = true;
-	}
-	m_mem_limit = m_available_mem = m_use_mem_limit ? m_graphics_mem : mem_info[0] / 1024.0;
+	m_gl_major_ver = flvr::GraphicsQuery::getVersionMajor();
+	m_gl_minor_ver = flvr::GraphicsQuery::getVersionMinor();
+
+	int mem_size = flvr::GraphicsQuery::getTotalGPUMemoryMB();
+	if (!mem_size)
+		return;
+	m_use_mem_limit = true;
+	m_mem_limit = m_available_mem = m_use_mem_limit ? m_graphics_mem : mem_size;
 }

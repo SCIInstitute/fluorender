@@ -409,11 +409,6 @@ void OpenXrRenderer::Draw(const std::vector<std::shared_ptr<flvr::Framebuffer>> 
 		//copy buffer
 		if (fbos.size() > i)
 		{
-			//GLuint dest_fbo = (GLuint)(uint64_t)(colorSwapchainInfo.imageViews[colorImageIndex]);
-			//glBindFramebuffer(GL_FRAMEBUFFER, dest_fbo);
-			//glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-			//glClear(GL_COLOR_BUFFER_BIT);
-
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[i]->id());
 			// Read pixels to PBO
 			uint32_t array_index = m_color_image_index * 2 + i;

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <ShaderProgram.h>
+#include <FramebufferStateTracker.h>
 #include <Color.h>
 #include <ImgShader.h>
 #include <VertexArray.h>
@@ -205,10 +206,11 @@ namespace flvr
 	void TextRenderer::RenderText(const std::wstring& text, const fluo::Color &color,
 		float x, float y, float sx, float sy)
 	{
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glbin_fb_state_tracker.set_depth_test_enabled(false);
+		glbin_fb_state_tracker.set_cull_face_enabled(false);
+		glbin_fb_state_tracker.set_blend_enabled(true);
+		glbin_fb_state_tracker.set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+		glbin_fb_state_tracker.apply();
 
 		auto shader = glbin_shader_manager.shader(gstImgShader,
 			ShaderParams::Img(IMG_SHDR_DRAW_TEXT, 0));
@@ -250,8 +252,6 @@ namespace flvr
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		shader->unbind();
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
 	}
 
 	float TextRenderer::RenderTextLen(std::wstring& text)

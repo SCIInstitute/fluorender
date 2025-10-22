@@ -72,9 +72,6 @@ void RulerRenderer::Draw()
 	int nx = m_view->GetCanvasSize().w();
 	int ny = m_view->GetCanvasSize().h();
 
-	//glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	auto shader = glbin_shader_manager.shader(
 		gstImgShader, flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
 	assert(shader);

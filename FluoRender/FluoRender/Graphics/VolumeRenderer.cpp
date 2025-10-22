@@ -425,25 +425,6 @@ void VolumeRenderer::draw_volume(
 	int cm_mode = mode == 4 ? 0 : colormap_mode_;
 	bool use_fog = m_use_fog && cm_mode != 2;
 
-	// set up blending
-	//glEnable(GL_BLEND);
-	//switch (mode_)
-	//{
-	//case RenderMode::RENDER_MODE_OVER:
-	//	glBlendEquation(BlendEquation::Add);
-	//	if (glbin_settings.m_update_order == 0)
-	//		glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
-	//	else if (glbin_settings.m_update_order == 1)
-	//		glBlendFunc(BlendFactor::OneMinusDstAlpha, BlendFactor::One);
-	//	break;
-	//case RenderMode::RENDER_MODE_MIP:
-	//	glBlendEquation(BlendEquation::Max);
-	//	glBlendFunc(BlendFactor::One, BlendFactor::One);
-	//	break;
-	//default:
-	//	break;
-	//}
-
 	int w = vp_[2];
 	int h = vp_[3];
 	std::string buf_name = get_buffer_name();
@@ -454,10 +435,12 @@ void VolumeRenderer::draw_volume(
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderFloat, w2, h2, buf_name);
 	assert(blend_buffer);
+	//set clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 	blend_buffer->set_viewport({ vp_[0], vp_[1], w2, h2 });
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
+	//blend: normal: (add, add)(b2f: (1, 1-a), f2b: (1-a, a)), mip: (max, max)(1, 1)
 	switch (mode_)
 	{
 	case RenderMode::RENDER_MODE_OVER:
@@ -477,14 +460,6 @@ void VolumeRenderer::draw_volume(
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->protect();
 	blend_buffer->clear(true, false);
-
-	//glClearColor(clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3]);
-	//glClear(GL_COLOR_BUFFER_BIT);
-
-	//glViewport(vp_[0], vp_[1], w2, h2);
-
-	////disable depth test
-	//glDisable(GL_DEPTH_TEST);
 
 	eval_ml_mode();
 
@@ -765,16 +740,6 @@ void VolumeRenderer::draw_volume(
 	if (label_)
 		release_texture((*bricks)[0]->nlabel(), GL_TEXTURE_3D);
 
-	////enable
-	//glEnable(GL_DEPTH_TEST);
-
-	////output result
-	////states
-	//GLboolean depth_test = glIsEnabled(GL_DEPTH_TEST);
-	//GLboolean cull_face = glIsEnabled(GL_CULL_FACE);
-	//glDisable(GL_DEPTH_TEST);
-	//glDisable(GL_CULL_FACE);
-
 	std::shared_ptr<ShaderProgram> img_shader;
 
 	std::shared_ptr<Framebuffer> filter_buffer = 0;
@@ -787,9 +752,6 @@ void VolumeRenderer::draw_volume(
 		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
 		filter_buffer->clear(true, false);
-
-		//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-		//glClear(GL_COLOR_BUFFER_BIT);
 
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
@@ -813,9 +775,9 @@ void VolumeRenderer::draw_volume(
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	assert(cur_buffer);
 	FramebufferStateGuard fbg(*cur_buffer);
+	//set viewport size
 	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 	cur_buffer->apply_state();
-	//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
 
 	if (noise_red_ && cm_mode != 2)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
@@ -831,9 +793,6 @@ void VolumeRenderer::draw_volume(
 
 	img_shader->unbind();
 
-	//if (depth_test) glEnable(GL_DEPTH_TEST);
-	//if (cull_face) glEnable(GL_CULL_FACE);
-
 	if (blend_buffer)
 		blend_buffer->unprotect();
 
@@ -841,11 +800,6 @@ void VolumeRenderer::draw_volume(
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-
-	// Reset the blend functions after MIP
-	//glBlendEquation(BlendEquation::Add);
-	//glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
-	//glDisable(GL_BLEND);
 }
 
 void VolumeRenderer::draw_wireframe(bool orthographic_p)
@@ -857,7 +811,6 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	fluo::Ray view_ray = compute_view();
 	fluo::Ray snapview = compute_snapview(0.4);
 
-	//glEnable(GL_DEPTH_TEST);
 	std::vector<TextureBrick*>* bricks = tex->get_sorted_bricks(view_ray, orthographic_p);
 
 	bool adaptive = get_adaptive();
@@ -1040,8 +993,6 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		seg_shader->setLocalParamMatrix(3, glm::value_ptr(mv_inv));
 	}
 
-	//glDisable(GL_DEPTH_TEST);
-
 	//bind 2d mask texture
 	bind_2d_mask();
 	//bind 2d weight map
@@ -1088,7 +1039,6 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		//set viewport size the same as the texture
 		fbo_mask->set_viewport({ 0, 0, b->nx(), b->ny() });
 		fbo_mask->apply_state();
-		//glViewport(0, 0, b->nx(), b->ny());
 
 		//load the texture
 		GLint tex_id = -1;
@@ -1128,8 +1078,6 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 	}
 
-	//glViewport(vp_[0], vp_[1], vp_[2], vp_[3]);
-
 	//release 2d mask
 	release_texture(6, GL_TEXTURE_2D);
 	//release 2d weight map
@@ -1151,14 +1099,6 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 	//unbind framebuffer
 	glbin_framebuffer_manager.unbind();//fbo_mask
-
-	//// Reset the blend functions after MIP
-	//glBlendEquation(BlendEquation::Add);
-	//glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
-	//glDisable(GL_BLEND);
-
-	////enable depth test
-	//glEnable(GL_DEPTH_TEST);
 }
 
 //for multibrick, copy border to continue diffusion
@@ -1325,7 +1265,6 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 		}
 	}
 
-	//glActiveTexture(GL_TEXTURE0);
 	//mask frame buffer object
 	auto fbo_calc =
 		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
@@ -1373,7 +1312,6 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 		//set viewport size the same as the texture
 		fbo_calc->set_viewport({ 0, 0, b->nx(), b->ny() });
 		fbo_calc->apply_state();
-		//glViewport(0, 0, b->nx(), b->ny());
 
 		//load the texture
 		GLuint tex_id = load_brick(b, GL_NEAREST);
@@ -1406,16 +1344,6 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 
 	//unbind framebuffer
 	glbin_framebuffer_manager.unbind();//fbo_calc
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_3D, 0);
-	//--------------------------------------------------------------------------
-
-	// Reset the blend functions after MIP
-	//glBlendEquation(BlendEquation::Add);
-	//glBlendFunc(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
-
-	//glDisable(GL_BLEND);
 }
 
 //return the data volume

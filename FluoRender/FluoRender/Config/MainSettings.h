@@ -73,7 +73,7 @@ public:
 	void Save();
 
 	std::vector<std::string> GetJvmArgs();
-	void GetMemorySettings();
+	void GetGraphicsInfo();
 
 	AutomateDefault m_automate_def;
 	BrushDefault m_brush_def;

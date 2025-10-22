@@ -35,6 +35,8 @@
 #include <Texture.h>
 #include <ShaderProgram.h>
 #include <VertexArray.h>
+#include <GraphicsQuery.h>
+#include <FramebufferStateTracker.h>
 #include <Color.h>
 #include <Utils.h>
 #include <Ray.h>
@@ -1193,20 +1195,8 @@ namespace flvr
 		}
 		else
 		{
-			GLenum error = glGetError();
-			GLint mem_info[4] = { 0, 0, 0, 0 };
-			glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, mem_info);
-			error = glGetError();
-			if (error == GL_INVALID_ENUM)
-			{
-				glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, mem_info);
-				error = glGetError();
-				if (error == GL_INVALID_ENUM)
-					return;
-			}
-
 			//available memory size in MB
-			glbin_settings.m_available_mem = mem_info[0] / 1024.0;
+			glbin_settings.m_available_mem = GraphicsQuery::getCurrentGPUMemoryMB();
 			if (glbin_settings.m_available_mem >= new_mem)
 				return;
 		}
@@ -1322,7 +1312,8 @@ namespace flvr
 		if (vertex.empty() || index.empty())
 			return;
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glbin_fb_state_tracker.set_polygon_mode(PolygonMode::Line);
+		glbin_fb_state_tracker.apply();
 
 		bool set_pointers = false;
 		if (!va_wirefm_ || !va_wirefm_->valid())
@@ -1362,7 +1353,8 @@ namespace flvr
 			va_wirefm_->draw_end();
 		}
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glbin_fb_state_tracker.set_polygon_mode(PolygonMode::Fill);
+		glbin_fb_state_tracker.apply();
 	}
 
 	//bind 2d mask for segmentation

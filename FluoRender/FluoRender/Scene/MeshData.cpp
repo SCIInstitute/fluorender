@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshRenderer.h>
 #include <VertexArray.h>
 #include <base_mesh_reader.h>
+#include <Global.h>
+#include <FramebufferStateTracker.h>
 #include <compatibility.h>
 #include <glm.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -752,12 +754,10 @@ void MeshData::Draw(int peel)
 	if (!m_mr)
 		return;
 
-	//glDisable(GL_CULL_FACE);
 	m_mr->set_depth_peel(peel);
 	m_mr->draw();
 	if (m_draw_bounds && (peel==4 || peel==5))
 		DrawBounds();
-	//glEnable(GL_CULL_FACE);
 }
 
 void MeshData::DrawBounds()

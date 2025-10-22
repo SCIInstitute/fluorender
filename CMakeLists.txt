@@ -872,7 +872,6 @@ target_link_libraries(COMPUTE_LIB PRIVATE
 # Config
 target_include_directories(CONFIG_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
@@ -880,7 +879,6 @@ target_include_directories(CONFIG_LIB PRIVATE
 
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
@@ -980,7 +978,6 @@ target_link_libraries(FORMAT_LIB PRIVATE
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OPENXR_PATHS}
   ${Python3_INCLUDE_DIRS}
@@ -1115,8 +1112,6 @@ target_link_libraries(TRAINER_LIB PRIVATE
   dlib::dlib)
 
 # Type
-target_include_directories(TYPE_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR})
 
 # Utility
 

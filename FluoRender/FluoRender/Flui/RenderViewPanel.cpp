@@ -251,12 +251,6 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 	int ret = m_canvas->GetPixelFormat(&pfd);
 #endif
 
-	//get actual version
-	glGetIntegerv(GL_MAJOR_VERSION, &gl_major_ver);
-	glGetIntegerv(GL_MINOR_VERSION, &gl_minor_ver);
-	glbin_settings.m_gl_major_ver = gl_major_ver;
-	glbin_settings.m_gl_minor_ver = gl_minor_ver;
-
 	CreateBar();
 
 	//add controls

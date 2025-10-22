@@ -160,7 +160,7 @@ void Project::Open(const std::wstring& filename)
 		fconfig->Read("inf loop", &bval, false);
 		glbin_settings.m_inf_loop = bval;
 		//graphics memory setting may have changed
-		glbin_settings.GetMemorySettings();
+		glbin_settings.GetGraphicsInfo();
 		//peeling layers
 		fconfig->Read("peeling layers", &ival, 1);
 		glbin_settings.m_peeling_layers = ival;
