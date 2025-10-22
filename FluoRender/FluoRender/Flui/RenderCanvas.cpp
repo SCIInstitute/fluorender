@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.h>
 #include <DataManager.h>
 #include <LookingGlassRenderer.h>
+#include <FramebufferStateTracker.h>
 #include <Debug.h>
 #ifdef _WIN32
 //wacom support
@@ -261,6 +262,7 @@ void RenderCanvas::Draw()
 	if (auto view_ptr = m_render_view.lock())
 	{
 		glbin_current.render_view_drawing = view_ptr;
+		glbin_fb_state_tracker.sync();
 		bool bval = view_ptr->Draw();
 		if (bval)
 		{

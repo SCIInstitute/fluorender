@@ -28,8 +28,7 @@
 #ifndef Framebuffer_h
 #define Framebuffer_h
 
-#include <Vector4f.h>
-#include <Vector4i.h>
+#include <FramebufferState.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -141,92 +140,6 @@ namespace flvr
 		static AttachmentPoint DepthStencil() { return {Type::DepthStencil}; }
 	};
 
-	enum class BlendFactor
-	{
-		Zero,
-		One,
-		SrcColor,
-		OneMinusSrcColor,
-		DstColor,
-		OneMinusDstColor,
-		SrcAlpha,
-		OneMinusSrcAlpha,
-		DstAlpha,
-		OneMinusDstAlpha,
-		ConstantColor,
-		OneMinusConstantColor,
-		ConstantAlpha,
-		OneMinusConstantAlpha,
-		SrcAlphaSaturate
-	};
-
-	enum class BlendEquation
-	{
-		Add,
-		Subtract,
-		ReverseSubtract,
-		Min,
-		Max
-	};
-
-	enum class DepthFunc
-	{
-		Never,
-		Less,
-		Equal,
-		Lequal,
-		Greater,
-		Notequal,
-		Gequal,
-		Always
-	};
-
-	enum class CullFace
-	{
-		Front,
-		Back,
-		FrontAndBack
-	};
-
-	enum class FaceWinding
-	{
-		Front,
-		Back,
-		Off
-	};
-
-	struct FramebufferState
-	{
-		FramebufferState();
-
-		// Blend settings
-		bool dirty_enableBlend = true;           bool enableBlend = false;
-		bool dirty_blendSrc = true;              BlendFactor blendSrc = BlendFactor::One;
-		bool dirty_blendDst = true;              BlendFactor blendDst = BlendFactor::OneMinusSrcAlpha;
-		bool dirty_blendEquationRGB = true;      BlendEquation blendEquationRGB = BlendEquation::Add;
-		bool dirty_blendEquationAlpha = true;    BlendEquation blendEquationAlpha = BlendEquation::Add;
-
-		// Clear color
-		bool dirty_clearColor = true;            fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-		// Depth settings
-		bool dirty_enableDepthTest = true;       bool enableDepthTest = false;
-		bool dirty_depthFunc = true;             DepthFunc depthFunc = DepthFunc::Lequal;
-		bool dirty_clearDepth = true;            float clearDepth = 1.0f;
-
-		// Cull settings
-		bool dirty_enableCullFace = true;        bool enableCullFace = false;
-		bool dirty_faceWinding = true;           FaceWinding faceWinding = FaceWinding::Off;
-		bool dirty_cullFace = true;              CullFace cullFace = CullFace::Back;
-
-		// Viewport rectangle
-		bool dirty_viewport = true;              fluo::Vector4i viewport = { 0, 0, 0, 0 };
-
-		// Scissor rectangle
-		bool dirty_enableScissorTest = true;     bool enableScissorTest = false;
-		bool dirty_scissorRect = true;           fluo::Vector4i scissorRect = { 0, 0, 0, 0 };
-	};
-
 	class Framebuffer
 	{
 	public:
@@ -243,9 +156,7 @@ namespace flvr
 		//states
 		void apply_state();
 		void restore_state();
-		FramebufferState capture_current_state();
 		FramebufferState default_state();
-		void reset_state_flags();
 
 		//fine grained state control
 		// Blend
@@ -267,6 +178,8 @@ namespace flvr
 		void set_viewport(const fluo::Vector4i& vp);
 		//clear color
 		void set_clear_color(const fluo::Vector4f& color);
+		//polygon mode
+		void set_polygon_mode(PolygonMode mode);
 		//clear
 		void clear(bool color, bool depth);
 

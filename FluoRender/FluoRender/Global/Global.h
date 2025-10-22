@@ -97,6 +97,7 @@ namespace flvr
 	class VertexArrayManager;
 	class TextTextureManager;
 	class ShaderProgramManager;
+	class FramebufferStateTracker;
 }
 
 #define glbin fluo::Global::instance()
@@ -148,6 +149,7 @@ namespace flvr
 #define glbin_vertex_array_manager fluo::Global::instance().get_vertex_array_manager()
 #define glbin_text_tex_manager fluo::Global::instance().get_text_tex_manager()
 #define glbin_shader_manager fluo::Global::instance().get_shader_manager()
+#define glbin_fb_state_tracker fluo::Global::instance().get_framebuffer_state_tracker()
 
 //time
 #define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
@@ -274,6 +276,7 @@ namespace fluo
 		flvr::VertexArrayManager& get_vertex_array_manager();
 		flvr::TextTextureManager& get_text_tex_manager();
 		flvr::ShaderProgramManager& get_shader_manager();
+		flvr::FramebufferStateTracker& get_framebuffer_state_tracker();
 
 		//current selection
 		CurrentObjects& get_current_objects();
@@ -366,6 +369,8 @@ namespace fluo
 		std::unique_ptr<flvr::TextTextureManager> text_texture_manager_;
 		//shader manager
 		std::unique_ptr<flvr::ShaderProgramManager> shader_manager_;
+		//fb state tracker
+		std::unique_ptr<flvr::FramebufferStateTracker> fb_state_tracker_;
 
 		//current selection
 		std::unique_ptr<CurrentObjects> current_objects_;

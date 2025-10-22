@@ -84,6 +84,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MshShader.h>
 #include <Project.h>
 #include <MeshDefault.h>
+#include <FramebufferStateTracker.h>
 
 using namespace fluo;
 
@@ -299,6 +300,7 @@ Global::Global() :
 	vertex_array_manager_(std::make_unique<flvr::VertexArrayManager>()),
 	text_texture_manager_(std::make_unique<flvr::TextTextureManager>()),
 	shader_manager_(std::make_unique<flvr::ShaderProgramManager>()),
+	fb_state_tracker_(std::make_unique<flvr::FramebufferStateTracker>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
 	project_(std::make_unique<Project>()),
 	m_linked_rot(false)
@@ -780,6 +782,11 @@ flvr::TextTextureManager& Global::get_text_tex_manager()
 flvr::ShaderProgramManager& Global::get_shader_manager()
 {
 	return *shader_manager_;
+}
+
+flvr::FramebufferStateTracker& Global::get_framebuffer_state_tracker()
+{
+	return *fb_state_tracker_;
 }
 
 //current selection

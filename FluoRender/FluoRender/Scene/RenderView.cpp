@@ -6444,8 +6444,6 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 
 	//glFrontFace(GL_CCW);
 	//glCullFace(flvr::CullFace::Back);
-	//if (cur_buffer)
-	//	cur_buffer->restore_state();
 	//fbg exits
 }
 

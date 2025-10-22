@@ -30,88 +30,12 @@
 #include <Framebuffer.h>
 #include <Global.h>
 #include <CurrentObjects.h>
+#include <FramebufferStateTracker.h>
 #include <algorithm>
 #include <compatibility.h>
 #include <Debug.h>
 
 using namespace flvr;
-
-namespace
-{
-	GLenum ToGLBlendFactor(BlendFactor factor)
-	{
-		switch (factor)
-		{
-		case BlendFactor::Zero: return GL_ZERO;
-		case BlendFactor::One: return GL_ONE;
-		case BlendFactor::SrcColor: return GL_SRC_COLOR;
-		case BlendFactor::OneMinusSrcColor: return GL_ONE_MINUS_SRC_COLOR;
-		case BlendFactor::DstColor: return GL_DST_COLOR;
-		case BlendFactor::OneMinusDstColor: return GL_ONE_MINUS_DST_COLOR;
-		case BlendFactor::SrcAlpha: return GL_SRC_ALPHA;
-		case BlendFactor::OneMinusSrcAlpha: return GL_ONE_MINUS_SRC_ALPHA;
-		case BlendFactor::DstAlpha: return GL_DST_ALPHA;
-		case BlendFactor::OneMinusDstAlpha: return GL_ONE_MINUS_DST_ALPHA;
-		case BlendFactor::ConstantColor: return GL_CONSTANT_COLOR;
-		case BlendFactor::OneMinusConstantColor: return GL_ONE_MINUS_CONSTANT_COLOR;
-		case BlendFactor::ConstantAlpha: return GL_CONSTANT_ALPHA;
-		case BlendFactor::OneMinusConstantAlpha: return GL_ONE_MINUS_CONSTANT_ALPHA;
-		case BlendFactor::SrcAlphaSaturate: return GL_SRC_ALPHA_SATURATE;
-		default: return GL_ONE;
-		}
-	}
-
-	GLenum ToGLBlendEquation(BlendEquation eq)
-	{
-		switch (eq)
-		{
-		case BlendEquation::Add: return GL_FUNC_ADD;
-		case BlendEquation::Subtract: return GL_FUNC_SUBTRACT;
-		case BlendEquation::ReverseSubtract: return GL_FUNC_REVERSE_SUBTRACT;
-		case BlendEquation::Min: return GL_MIN;
-		case BlendEquation::Max: return GL_MAX;
-		default: return GL_FUNC_ADD;
-		}
-	}
-
-	GLenum ToGLDepthFunc(DepthFunc func)
-	{
-		switch (func)
-		{
-		case DepthFunc::Never: return GL_NEVER;
-		case DepthFunc::Less: return GL_LESS;
-		case DepthFunc::Equal: return GL_EQUAL;
-		case DepthFunc::Lequal: return GL_LEQUAL;
-		case DepthFunc::Greater: return GL_GREATER;
-		case DepthFunc::Notequal: return GL_NOTEQUAL;
-		case DepthFunc::Gequal: return GL_GEQUAL;
-		case DepthFunc::Always: return GL_ALWAYS;
-		default: return GL_LESS;
-		}
-	}
-
-	GLenum ToGLCullFace(CullFace face)
-	{
-		switch (face)
-		{
-		case CullFace::Front: return GL_FRONT;
-		case CullFace::Back: return GL_BACK;
-		case CullFace::FrontAndBack: return GL_FRONT_AND_BACK;
-		default: return GL_BACK;
-		}
-	}
-
-	GLenum ToGLFaceWinding(FaceWinding winding)
-	{
-		switch (winding)
-		{
-		case FaceWinding::Front: return GL_CCW;  // Counter-clockwise is front-facing
-		case FaceWinding::Back:  return GL_CW;   // Clockwise is front-facing
-		case FaceWinding::Off:   return GL_CCW;  // Default fallback (won't be used if culling is disabled)
-		default:                 return GL_CCW;
-		}
-	}
-}
 
 FramebufferTexture::FramebufferTexture(const FBTexConfig& config, int nx, int ny) :
 	config_(config), nx_(nx), ny_(ny)
@@ -297,10 +221,6 @@ GLenum to_gl_attachment(const AttachmentPoint& ap) {
 	}
 }
 
-FramebufferState::FramebufferState()
-{
-}
-
 Framebuffer::Framebuffer(const FBRole& role, int nx, int ny,
 	const std::string& name) :
 	role_(role), nx_(nx), ny_(ny),
@@ -343,78 +263,8 @@ void Framebuffer::destroy()
 
 void Framebuffer::apply_state()
 {
-	if (state_.dirty_enableBlend) {
-		state_.enableBlend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
-		state_.dirty_enableBlend = false;
-	}
-
-	if (state_.dirty_blendSrc || state_.dirty_blendDst) {
-		glBlendFunc(ToGLBlendFactor(state_.blendSrc),
-			ToGLBlendFactor(state_.blendDst));
-		state_.dirty_blendSrc = false;
-		state_.dirty_blendDst = false;
-	}
-
-	if (state_.dirty_blendEquationRGB ||
-		state_.dirty_blendEquationAlpha) {
-		glBlendEquationSeparate(ToGLBlendEquation(state_.blendEquationRGB),
-			ToGLBlendEquation(state_.blendEquationAlpha));
-		state_.dirty_blendEquationRGB = false;
-		state_.dirty_blendEquationAlpha = false;
-	}
-
-	if (state_.dirty_clearColor) {
-		glClearColor(state_.clearColor[0], state_.clearColor[1],
-			state_.clearColor[2], state_.clearColor[3]);
-		state_.dirty_clearColor = false;
-	}
-
-	if (state_.dirty_enableDepthTest) {
-		state_.enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
-		state_.dirty_enableDepthTest = false;
-	}
-
-	if (state_.dirty_depthFunc) {
-		glDepthFunc(ToGLDepthFunc(state_.depthFunc));
-		state_.dirty_depthFunc = false;
-	}
-
-	if (state_.dirty_clearDepth) {
-		glClearDepth(state_.clearDepth);
-		state_.dirty_clearDepth = false;
-	}
-
-	if (state_.dirty_enableCullFace) {
-		state_.enableCullFace ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
-		state_.dirty_enableCullFace = false;
-	}
-
-	if (state_.dirty_cullFace) {
-		glCullFace(ToGLCullFace(state_.cullFace));
-		state_.dirty_cullFace = false;
-	}
-
-	if (state_.dirty_faceWinding) {
-		glFrontFace(ToGLFaceWinding(state_.faceWinding));
-		state_.dirty_faceWinding = false;
-	}
-
-	if (state_.dirty_viewport) {
-		glViewport(state_.viewport[0], state_.viewport[1],
-			state_.viewport[2], state_.viewport[3]);
-		state_.dirty_viewport = false;
-	}
-
-	if (state_.dirty_enableScissorTest) {
-		state_.enableScissorTest ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
-		state_.dirty_enableScissorTest = false;
-	}
-
-	if (state_.dirty_scissorRect) {
-		glScissor(state_.scissorRect[0], state_.scissorRect[1],
-			state_.scissorRect[2], state_.scissorRect[3]);
-		state_.dirty_scissorRect = false;
-	}
+	state_stack_.push_back(glbin_fb_state_tracker.current());
+	glbin_fb_state_tracker.apply(state_);
 }
 
 void Framebuffer::restore_state()
@@ -422,83 +272,8 @@ void Framebuffer::restore_state()
 	if (state_stack_.empty())
 		return;
 	const auto& s = state_stack_.back();
-
-	if (s.enableDepthTest)   glEnable(GL_DEPTH_TEST);   else glDisable(GL_DEPTH_TEST);
-	if (s.enableBlend)       glEnable(GL_BLEND);         else glDisable(GL_BLEND);
-	if (s.enableScissorTest) glEnable(GL_SCISSOR_TEST);  else glDisable(GL_SCISSOR_TEST);
-	if (s.enableCullFace)    glEnable(GL_CULL_FACE);      else glDisable(GL_CULL_FACE);
-
-	glBlendFunc(ToGLBlendFactor(s.blendSrc), ToGLBlendFactor(s.blendDst));
-	glBlendEquationSeparate(ToGLBlendEquation(s.blendEquationRGB),
-		ToGLBlendEquation(s.blendEquationAlpha));
-
-	glDepthFunc(ToGLDepthFunc(s.depthFunc));
-	glClearDepth(s.clearDepth);
-
-	glFrontFace(ToGLFaceWinding(s.faceWinding));
-	glCullFace(ToGLCullFace(s.cullFace));
-
-	glClearColor(s.clearColor[0], s.clearColor[1], s.clearColor[2], s.clearColor[3]);
-
-	if (s.enableScissorTest)
-		glScissor(s.scissorRect[0], s.scissorRect[1], s.scissorRect[2], s.scissorRect[3]);
-
-	reset_state_flags();
-
 	state_stack_.pop_back();
-}
-
-FramebufferState Framebuffer::capture_current_state()
-{
-	FramebufferState s;
-
-	// Enable flags
-	s.enableDepthTest = glIsEnabled(GL_DEPTH_TEST);
-	s.enableBlend = glIsEnabled(GL_BLEND);
-	s.enableScissorTest = glIsEnabled(GL_SCISSOR_TEST);
-	s.enableCullFace = glIsEnabled(GL_CULL_FACE);
-
-	// Blend settings
-	GLint blendSrc, blendDst, blendEqRGB, blendEqAlpha;
-	glGetIntegerv(GL_BLEND_SRC, &blendSrc);
-	glGetIntegerv(GL_BLEND_DST, &blendDst);
-	glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEqRGB);
-	glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEqAlpha);
-
-	s.blendSrc = static_cast<BlendFactor>(blendSrc);
-	s.blendDst = static_cast<BlendFactor>(blendDst);
-	s.blendEquationRGB = static_cast<BlendEquation>(blendEqRGB);
-	s.blendEquationAlpha = static_cast<BlendEquation>(blendEqAlpha);
-
-	// Depth settings
-	GLint depthFunc;
-	glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
-	s.depthFunc = static_cast<DepthFunc>(depthFunc);
-
-	GLfloat clearDepth;
-	glGetFloatv(GL_DEPTH_CLEAR_VALUE, &clearDepth);
-	s.clearDepth = clearDepth;
-
-	// Cull settings
-	GLint frontFace;
-	glGetIntegerv(GL_FRONT_FACE, &frontFace);
-	s.faceWinding = (frontFace == GL_CCW) ? FaceWinding::Front : FaceWinding::Back;
-
-	GLint cullFace;
-	glGetIntegerv(GL_CULL_FACE_MODE, &cullFace);
-	s.cullFace = static_cast<CullFace>(cullFace);
-
-	// Clear color
-	GLfloat clearColor[4];
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, clearColor);
-	s.clearColor = { clearColor[0], clearColor[1], clearColor[2], clearColor[3] };
-
-	// Scissor rectangle
-	GLint scissor[4];
-	glGetIntegerv(GL_SCISSOR_BOX, scissor);
-	s.scissorRect = { scissor[0], scissor[1], scissor[2], scissor[3] };
-
-	return s;
+	glbin_fb_state_tracker.apply(s);
 }
 
 FramebufferState Framebuffer::default_state()
@@ -540,37 +315,12 @@ FramebufferState Framebuffer::default_state()
 	return s;
 }
 
-void Framebuffer::reset_state_flags()
-{
-	state_.dirty_enableBlend = true;
-	state_.dirty_blendSrc = true;
-	state_.dirty_blendDst = true;
-	state_.dirty_blendEquationRGB = true;
-	state_.dirty_blendEquationAlpha = true;
-
-	state_.dirty_clearColor = true;
-
-	state_.dirty_enableDepthTest = true;
-	state_.dirty_depthFunc = true;
-	state_.dirty_clearDepth = true;
-
-	state_.dirty_enableCullFace = true;
-	state_.dirty_faceWinding = true;
-	state_.dirty_cullFace = true;
-
-	state_.dirty_viewport = true;
-
-	state_.dirty_enableScissorTest = true;
-	state_.dirty_scissorRect = true;
-}
-
 //blend
 void Framebuffer::set_blend_enabled(bool val)
 {
 	if (val == state_.enableBlend)
 		return;
 	state_.enableBlend = val;
-	state_.dirty_enableBlend = true;
 }
 
 void Framebuffer::set_blend_func(BlendFactor sfactor, BlendFactor dfactor)
@@ -579,8 +329,6 @@ void Framebuffer::set_blend_func(BlendFactor sfactor, BlendFactor dfactor)
 		return;
 	state_.blendSrc = sfactor;
 	state_.blendDst = dfactor;
-	state_.dirty_blendSrc = true;
-	state_.dirty_blendDst = true;
 }
 
 void Framebuffer::set_blend_equation(BlendEquation rgb, BlendEquation alpha)
@@ -590,8 +338,6 @@ void Framebuffer::set_blend_equation(BlendEquation rgb, BlendEquation alpha)
 		return;
 	state_.blendEquationRGB = rgb;
 	state_.blendEquationAlpha = alpha;
-	state_.dirty_blendEquationRGB = true;
-	state_.dirty_blendEquationAlpha = true;
 }
 
 //clear color
@@ -600,7 +346,6 @@ void Framebuffer::set_clear_color(const fluo::Vector4f& color)
 	if (color == state_.clearColor)
 		return;
 	state_.clearColor = color;
-	state_.dirty_clearColor = true;
 }
 
 //depth
@@ -609,7 +354,6 @@ void Framebuffer::set_depth_test_enabled(bool val)
 	if (val == state_.enableDepthTest)
 		return;
 	state_.enableDepthTest = val;
-	state_.dirty_enableDepthTest = true;
 }
 
 void Framebuffer::set_depth_func(DepthFunc func)
@@ -617,7 +361,6 @@ void Framebuffer::set_depth_func(DepthFunc func)
 	if (func == state_.depthFunc)
 		return;
 	state_.depthFunc = func;
-	state_.dirty_depthFunc = true;
 }
 
 void Framebuffer::set_clear_depth(float depth)
@@ -625,7 +368,6 @@ void Framebuffer::set_clear_depth(float depth)
 	if (depth == state_.clearDepth)
 		return;
 	state_.clearDepth = depth;
-	state_.dirty_clearDepth = true;
 }
 
 //cull
@@ -634,7 +376,6 @@ void Framebuffer::set_cull_face_enabled(bool val)
 	if (val == state_.enableCullFace)
 		return;
 	state_.enableCullFace = val;
-	state_.dirty_enableCullFace = true;
 }
 
 void Framebuffer::set_face_winding(FaceWinding winding)
@@ -642,7 +383,6 @@ void Framebuffer::set_face_winding(FaceWinding winding)
 	if (winding == state_.faceWinding)
 		return;
 	state_.faceWinding = winding;
-	state_.dirty_faceWinding = true;
 }
 
 void Framebuffer::set_cull_face(CullFace face)
@@ -650,7 +390,6 @@ void Framebuffer::set_cull_face(CullFace face)
 	if (face == state_.cullFace)
 		return;
 	state_.cullFace = face;
-	state_.dirty_cullFace = true;
 }
 
 //viewport
@@ -659,7 +398,6 @@ void Framebuffer::set_viewport(const fluo::Vector4i& vp)
 	if (vp == state_.viewport)
 		return;
 	state_.viewport = vp;
-	state_.dirty_viewport = true;
 }
 
 //scissor
@@ -668,7 +406,6 @@ void Framebuffer::set_scissor_test_enabled(bool val)
 	if (val == state_.enableScissorTest)
 		return;
 	state_.enableScissorTest = val;
-	state_.dirty_enableScissorTest = true;
 }
 
 void Framebuffer::set_scissor_rect(const fluo::Vector4i& rect)
@@ -676,7 +413,13 @@ void Framebuffer::set_scissor_rect(const fluo::Vector4i& rect)
 	if (rect == state_.scissorRect)
 		return;
 	state_.scissorRect = rect;
-	state_.dirty_scissorRect = true;
+}
+
+void Framebuffer::set_polygon_mode(PolygonMode mode)
+{
+	if (mode == state_.polygonMode)
+		return;
+	state_.polygonMode = mode;
 }
 
 void Framebuffer::clear(bool color, bool depth)
@@ -692,8 +435,6 @@ void Framebuffer::bind()
 	if (valid_)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, id_);
-		if (state_stack_.empty())
-			state_stack_.push_back(capture_current_state());
 		apply_state();
 	}
 }
@@ -706,7 +447,7 @@ void Framebuffer::unbind(unsigned int prev_id)
 
 void Framebuffer::push_state()
 {
-	state_stack_.push_back(state_);
+	state_stack_.push_back(glbin_fb_state_tracker.current());
 }
 
 bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex)
@@ -1168,16 +909,22 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(const std::string& 
 
 void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 {
-	// Skip if already bound
-	if (current_.lock() == fb)
-	{
-		DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
-		return;
-	}
+	auto cur = current_.lock();
 
-	// Save current as previous
-	if (auto cur = current_.lock())
-		stack_.push_back(cur);
+	if (cur)
+	{
+		// Skip if already bound
+		if (cur == fb)
+		{
+			DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
+			//return;
+		}
+		else
+		{
+			// Save current as previous
+			stack_.push_back(cur);
+		}
+	}
 
 	if (fb)
 		fb->bind(); // private, accessed via friendship
