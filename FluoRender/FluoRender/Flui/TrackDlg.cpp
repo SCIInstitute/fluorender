@@ -1261,7 +1261,7 @@ void TrackDlg::OnCompExclusive(wxCommandEvent& event)
 	if (view)
 		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId(view.get()) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCompAppend(wxCommandEvent& event)
@@ -1272,7 +1272,7 @@ void TrackDlg::OnCompAppend(wxCommandEvent& event)
 	if (view)
 		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId(view.get()) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnCompClear(wxCommandEvent& event)
@@ -1282,7 +1282,7 @@ void TrackDlg::OnCompClear(wxCommandEvent& event)
 	if (view)
 		view->GetTraces(false);
 	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId(view.get()) });
+		{ glbin_current.GetViewId() });
 }
 
 void TrackDlg::OnShuffle(wxCommandEvent& event)

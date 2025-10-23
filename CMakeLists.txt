@@ -838,6 +838,16 @@ target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
 
 # Agent
+target_include_directories(AGENT_LIB PRIVATE
+  #${Boost_INCLUDE_DIR}
+  ${GLM_DIRS}
+  #${OpenCL_INCLUDE_DIRS}
+  #${TEEM_INCLUDE_DIRS}
+)
+if (WIN32)
+  target_include_directories(AGENT_LIB PRIVATE
+    ${WACOM_PATHS})
+endif()
 
 # Animator
 target_include_directories(ANIMATOR_LIB PRIVATE

@@ -84,6 +84,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <State.h>
 #include <image_capture_factory.h>
+#include <RenderScheduler.h>
 #include <compatibility.h>
 #include <Debug.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -4259,11 +4260,12 @@ bool RenderView::Draw()
 	// this will be done later
 	if (glbin_linked_rot)
 	{
-		auto master_view = glbin_master_linked_view;
-		if (!master_view ||
-			this != master_view.get())
-			return swap;
+		//auto master_view = glbin_master_linked_view;
+		//if (!master_view ||
+		//	this != master_view.get())
+		//	return swap;
 
+		std::set<int> view_ids;
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 		{
@@ -4273,12 +4275,15 @@ bool RenderView::Draw()
 				if (view && view.get() != this)
 				{
 					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-					view->RefreshGL(7);
-					if (view->m_render_canvas)
-						view->m_render_canvas->Update();
+					view_ids.insert(view->Id());
+					//view->RefreshGL(7);
+					//if (view->m_render_canvas)
+					//	view->m_render_canvas->Update();
 				}
 			}
 		}
+		if (!view_ids.empty())
+			glbin_render_scheduler_manager.requestDraw(view_ids, "Linked view refresh");
 	}
 
 	return swap;
@@ -4754,7 +4759,9 @@ void RenderView::RefreshGL(int debug_code,
 	m_refresh = true;
 	glbin_lg_renderer.SetUpdating(lg_changed);
 	assert(m_render_canvas);
-	m_render_canvas->Refresh(erase);
+	auto scheduler = glbin_render_scheduler_manager.getScheduler(m_render_canvas);
+	assert(scheduler);
+	scheduler->requestDraw("General refresh");
 }
 
 void RenderView::DrawRulers()
@@ -11137,22 +11144,6 @@ void RenderView::ProcessMouse(MouseState& state)
 					Q2A();
 
 					m_interactive = true;
-
-					if (glbin.get_linked_rot())
-					{
-						Root* root = glbin_data_manager.GetRoot();
-						if (root)
-						{
-							for (int i = 0; i < root->GetViewNum(); i++)
-							{
-								auto view = root->GetView(i);
-								if (view && view.get() != this)
-								{
-									glbin.set_master_linked_view(view);
-								}
-							}
-						}
-					}
 
 					if (!hold_old)
 						RefreshGL(24);

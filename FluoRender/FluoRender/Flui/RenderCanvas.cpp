@@ -61,6 +61,8 @@ HCTX RenderCanvas::m_hTab = 0;
 LOGCONTEXTA RenderCanvas::m_lc;
 #endif
 
+wxDEFINE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
+
 RenderCanvas::RenderCanvas(MainFrame* frame,
 	RenderViewPanel* parent,
 	const wxGLAttributes& attriblist,
@@ -69,8 +71,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	const wxSize& size,
 	long style) :
 	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
-	//set gl
-	m_set_gl(false),
 	m_frame(frame),
 	m_renderview_panel(parent),
 	//previous focus
@@ -126,6 +126,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 
 	//events
 	Bind(wxEVT_PAINT, &RenderCanvas::OnDraw, this);
+	Bind(EVT_RENDER_SCHEDULER_DRAW, &RenderCanvas::OnSchedulerDraw, this);
 	Bind(wxEVT_SIZE, &RenderCanvas::OnResize, this);
 	Bind(wxEVT_MOVE, &RenderCanvas::OnMove, this);
 	Bind(wxEVT_LEFT_DOWN, &RenderCanvas::OnMouse, this);
@@ -156,7 +157,7 @@ RenderCanvas::~RenderCanvas()
 			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
 			wxString("Frames: ") + wxString::Format("%llu\n", count) +
 			wxString("FPS: ") + wxString::Format("%.2f", fps);
-		wxMessageDialog *diag = new wxMessageDialog(this, string, "Benchmark Results",
+		wxMessageDialog* diag = new wxMessageDialog(this, string, "Benchmark Results",
 			wxOK | wxICON_INFORMATION);
 		diag->ShowModal();
 	}
@@ -203,7 +204,7 @@ RenderCanvas::~RenderCanvas()
 }
 
 #ifdef _WIN32
-int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd) {
+int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd) {
 	int pixelFormat = ::GetPixelFormat(m_hDC);
 	if (pixelFormat == 0) return GetLastError();
 	pixelFormat = DescribePixelFormat(m_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), pfd);
@@ -239,30 +240,7 @@ void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
 
 void RenderCanvas::Draw()
 {
-#ifdef _WIN32
-	if (!m_set_gl)
-	{
-		SetCurrent(*m_glRC);
-		m_set_gl = true;
-
-		Root* root = glbin_data_manager.GetRoot();
-		if (root)
-		{
-			for (int i = 0; i< root->GetViewNum(); i++)
-			{
-				auto view = root->GetView(i);
-				RenderCanvas* canvas = view->GetRenderCanvas();
-				if (canvas && canvas != this)
-				{
-					canvas->m_set_gl = false;
-				}
-			}
-		}
-	}
-#endif
-#if defined(_DARWIN) || defined(__linux__)
 	SetCurrent(*m_glRC);
-#endif
 
 	wxPaintDC dc(this);
 
@@ -347,27 +325,27 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 	else
 		glbin_vol_selector.SetBrushPnMax(1.0);
 
-/*	m_lc.lcInOrgX = 0;
-	m_lc.lcInOrgY = 0;
-	m_lc.lcInExtX = TabletX.axMax;
-	m_lc.lcInExtY = TabletY.axMax;
+	/*	m_lc.lcInOrgX = 0;
+		m_lc.lcInOrgY = 0;
+		m_lc.lcInExtX = TabletX.axMax;
+		m_lc.lcInExtY = TabletY.axMax;
 
-	// Guarantee the output coordinate space to be in screen coordinates.  
-	m_lc.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-	m_lc.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-	m_lc.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
+		// Guarantee the output coordinate space to be in screen coordinates.
+		m_lc.lcOutOrgX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		m_lc.lcOutOrgY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+		m_lc.lcOutExtX = GetSystemMetrics(SM_CXVIRTUALSCREEN); //SM_CXSCREEN );
 
-														   // In Wintab, the tablet origin is lower left.  Move origin to upper left
-														   // so that it coincides with screen origin.
-	m_lc.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);	//SM_CYSCREEN );
+															   // In Wintab, the tablet origin is lower left.  Move origin to upper left
+															   // so that it coincides with screen origin.
+		m_lc.lcOutExtY = -GetSystemMetrics(SM_CYVIRTUALSCREEN);	//SM_CYSCREEN );
 
-															// Leave the system origin and extents as received:
-															// lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
+																// Leave the system origin and extents as received:
+																// lcSysOrgX, lcSysOrgY, lcSysExtX, lcSysExtY
 
-															// open the region
-															// The Wintab spec says we must open the context disabled if we are 
-															// using cursor masks.  
-*/	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
+																// open the region
+																// The Wintab spec says we must open the context disabled if we are
+																// using cursor masks.
+	*/	hctx = gpWTOpenA(hWnd, &m_lc, TRUE);
 
 	WacomTrace("HCTX: %i\n", hctx);
 
@@ -459,7 +437,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_exit_fscreen_trigger.Start(10);
 
 	if (state.m_refresh)
-		m_renderview_panel->FluoRefresh(0, state.m_value_collection, {-1});
+		m_renderview_panel->FluoRefresh(0, state.m_value_collection, { -1 });
 	if (state.m_set_focus)
 		SetFocus();
 	if (glbin_states.m_benchmark)
@@ -521,7 +499,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 	}
 }
 
-void RenderCanvas::OnClose(wxCloseEvent &event)
+void RenderCanvas::OnClose(wxCloseEvent& event)
 {
 	if (m_full_screen)
 	{
@@ -533,7 +511,14 @@ void RenderCanvas::OnClose(wxCloseEvent &event)
 //draw
 void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
+	DBGPRINT(L"OnDraw\n");
 	Draw();
+}
+
+void RenderCanvas::OnSchedulerDraw(wxCommandEvent& event)
+{
+	if (auto view_ptr = m_render_view.lock())
+		view_ptr->RefreshGL(2);
 }
 
 #ifdef _WIN32
@@ -678,16 +663,16 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 	state.m_key_alt = event.AltDown();
 	state.m_key_ctrl = event.ControlDown();
 
-	wxWindow *window = wxWindow::FindFocus();
+	wxWindow* window = wxWindow::FindFocus();
 	if (window &&
 		(state.m_mouse_left_down ||
-		state.m_mouse_right_down ||
-		state.m_mouse_middle_down ||
-		state.m_mouse_left_up ||
-		state.m_mouse_right_up ||
-		state.m_mouse_middle_up ||
-		state.m_mouse_drag ||
-		state.m_mouse_wheel_rotate != 0))
+			state.m_mouse_right_down ||
+			state.m_mouse_middle_down ||
+			state.m_mouse_left_up ||
+			state.m_mouse_right_up ||
+			state.m_mouse_middle_up ||
+			state.m_mouse_drag ||
+			state.m_mouse_wheel_rotate != 0))
 		SetFocus();
 
 	if (auto view_ptr = m_render_view.lock())

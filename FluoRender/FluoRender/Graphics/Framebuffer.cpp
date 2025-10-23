@@ -917,7 +917,7 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 		if (cur == fb)
 		{
 			DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
-			return;
+			//return;
 		}
 		else
 		{

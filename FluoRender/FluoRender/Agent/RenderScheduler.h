@@ -30,20 +30,32 @@ DEALINGS IN THE SOFTWARE.
 
 #include <memory>
 #include <string>
+#include <vector>
+#include <set>
 
 class RenderCanvas;
 class RenderView;
+
+struct DrawRequest
+{
+	std::string reason;
+	bool clearFramebuffer;//from m_retain_finalbuffer in renderview
+	bool loadUpdate;//from m_load_update in renderview
+	bool restartLoop;
+	bool lgChanged;
+};
 
 class RenderScheduler
 {
 public:
 	RenderScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view);
 
-	void requestDraw(const std::string& reason); // Called by canvas, view, or external modules
+	void requestDraw(const std::string& reason); // Called by canvas, view
+	void requestDrawExt(const std::string& reason);//called by external modules
 	void performDraw();                          // Called by canvas during paint event
 
-	RenderCanvas* getCanvas() const;
-	std::shared_ptr<RenderView> getView() const;
+	RenderCanvas* getCanvas() const { return canvas_; }
+	std::shared_ptr<RenderView> getView() const { return view_.lock(); }
 
 private:
 	RenderCanvas* canvas_;
@@ -57,8 +69,10 @@ class RenderSchedulerManager
 public:
 	void registerScheduler(std::shared_ptr<RenderScheduler> scheduler);
 	std::shared_ptr<RenderScheduler> getScheduler(RenderCanvas* canvas);
-	void requestGlobalDraw(const std::string& reason); // Optional: broadcast draw
 	void removeScheduler(RenderCanvas* canvas);
+
+	void requestDrawAll(const std::string& reason);
+	void requestDraw(const std::set<int>& view_ids, const std::string& reason);
 
 private:
 	std::vector<std::shared_ptr<RenderScheduler>> schedulers_;

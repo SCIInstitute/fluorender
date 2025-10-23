@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <Root.h>
 #include <DataManager.h>
+#include <RenderScheduler.h>
 #include <wxNotebookSerializer.h>
 
 PropBase::PropBase(MainFrame* frame):
@@ -48,7 +49,7 @@ void PropBase::FluoRefresh(int excl_self,
 	int view_excl = 0;
 	if (dynamic_cast<RenderViewPanel*>(this))
 		view_excl = excl_self;
-	m_frame->RefreshCanvases(views);
+	glbin_render_scheduler_manager.requestDraw(views, "PropBase refresh");
 	wxWindow* win = dynamic_cast<wxWindow*>(this);
 	m_frame->UpdateProps(vc, excl_self, win);//update ui but exclude this
 }

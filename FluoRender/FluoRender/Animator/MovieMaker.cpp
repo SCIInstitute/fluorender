@@ -415,7 +415,7 @@ RenderView* MovieMaker::GetView()
 
 int MovieMaker::GetViewIndex()
 {
-	return glbin_current.GetViewId(m_view.lock().get());
+	return glbin_current.GetViewId();
 }
 
 void MovieMaker::SetKeyframeEnable(bool val, bool update)

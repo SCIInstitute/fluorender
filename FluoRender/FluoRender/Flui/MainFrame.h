@@ -306,7 +306,6 @@ public:
 	MachineLearningDlg* GetMachineLearningDlg();
 
 	//views
-	void RefreshCanvases(const std::set<int>& canvases = {});//view indices to update
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
 	void DeleteRenderViewPanel(const std::wstring& name);

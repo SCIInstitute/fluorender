@@ -107,7 +107,6 @@ public:
 	//reset counter
 	static void ResetID();
 
-	void SetGL(bool bval);
 	RenderView* GetRenderView() { return m_render_view; }
 	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }
 	wxFrame* GetFullFrame() { return m_full_frame; }
@@ -148,9 +147,6 @@ public:
 
 	//get rendering context
 	wxGLContext* GetContext();
-
-	//refresh glview
-	void RefreshGL(bool start_loop=true);
 
 	//bit mask for items to save
 	bool m_default_saved;

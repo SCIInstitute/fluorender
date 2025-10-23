@@ -168,7 +168,6 @@ namespace flvr
 
 //linked rotation
 #define glbin_linked_rot fluo::Global::instance().get_linked_rot()
-#define glbin_master_linked_view fluo::Global::instance().get_master_linked_view()
 
 //jvm
 #define glbin_jvm_instance fluo::Global::instance().get_jvm_instance()
@@ -295,8 +294,6 @@ namespace fluo
 		//linked rotation
 		bool get_linked_rot() { return m_linked_rot; }
 		void set_linked_rot(bool value) { m_linked_rot = value; }
-		std::shared_ptr<RenderView> get_master_linked_view() { return m_master_linked_view.lock(); }
-		void set_master_linked_view(const std::shared_ptr<RenderView>& view) { m_master_linked_view = view; }
 
 	private:
 		static Global instance_;
@@ -392,7 +389,6 @@ namespace fluo
 
 		//linked rotation
 		bool m_linked_rot;
-		std::weak_ptr<RenderView> m_master_linked_view;
 
 	private:
 		Global();

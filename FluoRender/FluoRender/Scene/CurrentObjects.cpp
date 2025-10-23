@@ -347,24 +347,11 @@ void CurrentObjects::SetSel(const std::wstring& str)
 	}
 }
 
-int CurrentObjects::GetViewId(RenderView* view)
+int CurrentObjects::GetViewId()
 {
-	Root* root = glbin_data_manager.GetRoot();
-	for (int i = 0; i < root->GetViewNum(); ++i)
-	{
-		auto v = root->GetView(i);
-		if (view)
-		{
-			if (v.get() == view)
-				return i;
-		}
-		else
-		{
-			if (v == render_view.lock())
-				return i;
-		}
-	}
-	return -1;
+	if (auto vptr = render_view.lock())
+		return vptr->Id();
+	return 0;
 }
 
 int CurrentObjects::GetDrawingViewId()

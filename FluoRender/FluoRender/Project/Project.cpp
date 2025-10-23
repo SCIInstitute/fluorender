@@ -63,6 +63,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <VolumePoint.h>
 #include <CompAnalyzer.h>
+#include <RenderScheduler.h>
 #include <Ruler.h>
 #include <format>
 
@@ -1230,7 +1231,7 @@ void Project::Open(const std::wstring& filename)
 
 	SetProgress(0, "");
 
-	frame->RefreshCanvases();
+	glbin_render_scheduler_manager.requestDrawAll("Open project refresh");
 	frame->UpdateProps({}, 0, 0);
 	frame->GetTreePanel()->Select();//simulate selection
 }

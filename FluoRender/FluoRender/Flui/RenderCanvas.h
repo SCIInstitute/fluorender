@@ -42,6 +42,9 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/event.h>
 #include <wx/timer.h>
 
+// Custom event for scheduler-triggered draw
+wxDECLARE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
+
 class MainFrame;
 class RenderViewPanel;
 class RenderView;
@@ -81,8 +84,6 @@ public:
 	RenderViewPanel* m_renderview_panel;
 
 private:
-	//set gl context
-	bool m_set_gl;
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	MainFrame* m_frame;
@@ -132,6 +133,7 @@ private:
 	//system call
 	void OnMouse(wxMouseEvent& event);
 	void OnDraw(wxPaintEvent& event);
+	void OnSchedulerDraw(wxCommandEvent& event);
 	void OnResize(wxSizeEvent& event);
 	void OnMove(wxMoveEvent& event);
 	void OnIdle(wxIdleEvent& event);

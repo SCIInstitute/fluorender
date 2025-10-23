@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotData.h>
 #include <VolCache4D.h>
 #include <VolumeRenderer.h>
+#include <RenderScheduler.h>
 #include <base_vol_reader.h>
 #include <imageJ_reader.h>
 #include <tif_reader.h>
@@ -342,7 +343,8 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 		}
 
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
-		m_frame->RefreshCanvases({ root->GetView(view.get()) });
+		glbin_render_scheduler_manager.requestDraw(
+			{ static_cast<int>(view->Id()) }, "Load volume refersh");
 	}
 
 	vc.insert(gstListCtrl);
@@ -808,7 +810,9 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 		vc.insert(gstMovieAgent);
 	}
 
-	m_frame->RefreshCanvases({ root->GetView(view.get()) });
+	glbin_render_scheduler_manager.requestDraw(
+		{ static_cast<int>(view->Id()) }, "Load volume refersh");
+
 	vc.insert({ gstCurrentSelect, gstMeshPropPanel, gstListCtrl, gstTreeCtrl });
 	m_frame->UpdateProps(vc);
 

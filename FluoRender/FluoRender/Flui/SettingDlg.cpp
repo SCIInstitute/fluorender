@@ -1491,7 +1491,6 @@ void SettingDlg::OnRotLink(wxCommandEvent& event)
 {
 	bool linked_rot = m_rot_link_chk->GetValue();
 	glbin.set_linked_rot(linked_rot);
-	glbin.set_master_linked_view(0);
 	FluoRefresh(3, { gstNull });
 }
 

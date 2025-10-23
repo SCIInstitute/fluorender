@@ -95,6 +95,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ImgShader.h>
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
+#include <RenderScheduler.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <wxToolbarArt.h>
@@ -947,15 +948,6 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 	if (m_movie_panel)
 		m_movie_panel->FluoUpdate({ gstMovViewList });
 
-	//reset gl
-	for (auto& it : m_render_view_panels)
-	{
-		if (it)
-		{
-			it->SetGL(false);
-		}
-	}
-
 	//m_aui_mgr.Update();
 	LayoutRenderViewPanels(1);
 
@@ -1580,22 +1572,6 @@ FpRangeDlg* MainFrame::GetFpRangeDlg()
 MachineLearningDlg* MainFrame::GetMachineLearningDlg()
 {
 	return m_machine_learning_dlg;
-}
-
-void MainFrame::RefreshCanvases(const std::set<int>& canvases)
-{
-	if (canvases.find(-1) != canvases.end())
-		return;
-	bool update_all = canvases.empty();
-
-	for (int i=0 ; i<(int)m_render_view_panels.size() ; i++)
-	{
-		if (!m_render_view_panels[i])
-			continue;
-
-		if (update_all || canvases.find(i) != canvases.end())
-			m_render_view_panels[i]->RefreshGL();
-	}
 }
 
 void MainFrame::DeleteRenderViewPanel(int i)
@@ -2261,7 +2237,7 @@ void MainFrame::OpenMesh()
 void MainFrame::NewProject()
 {
 	glbin_project.Reset();
-	RefreshCanvases();
+	glbin_render_scheduler_manager.requestDrawAll("New project refresh");
 	UpdateProps({ gstListCtrl, gstTreeCtrl, gstParamList });
 }
 

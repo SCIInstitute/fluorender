@@ -43,7 +43,17 @@ void RenderScheduler::requestDraw(const std::string& reason)
 		draw_pending_ = true;
 		last_reason_ = reason;
 		canvas_->Refresh(false); // Schedule paint event
+		DBGPRINT(L"requestDraw: %s\n", s2ws(reason).c_str());
+		//canvas_->Update();
 	}
+}
+
+void RenderScheduler::requestDrawExt(const std::string& reason)
+{
+	if (!canvas_) return;
+	wxCommandEvent evt(EVT_RENDER_SCHEDULER_DRAW);
+	evt.SetString(reason);
+	canvas_->GetEventHandler()->QueueEvent(new wxCommandEvent(evt));
 }
 
 void RenderScheduler::performDraw()
@@ -61,7 +71,7 @@ void RenderScheduler::performDraw()
 		if (canvas_)
 		{
 			canvas_->SwapBuffers();
-			DBGPRINT(L"SwapBuffers();\n");
+			DBGPRINT(L"SwapBuffers: %s\n", s2ws(last_reason_).c_str());
 		}
 	}
 }
@@ -80,20 +90,55 @@ std::shared_ptr<RenderScheduler> RenderSchedulerManager::getScheduler(RenderCanv
 	return nullptr;
 }
 
-void RenderSchedulerManager::requestGlobalDraw(const std::string& reason)
+void RenderSchedulerManager::removeScheduler(RenderCanvas* canvas)
 {
-	for (auto& sched : schedulers_) {
-		sched->requestDraw(reason);
+	schedulers_.erase(
+		std::remove_if(schedulers_.begin(), schedulers_.end(),
+			[canvas](const std::shared_ptr<RenderScheduler>& sched) {
+				return sched->getCanvas() == canvas;
+			}),
+		schedulers_.end()
+	);
+}
+
+void RenderSchedulerManager::requestDrawAll(const std::string& reason)
+{
+	for (auto& it : schedulers_)
+	{
+		if (!it)
+			continue;
+
+		auto view = it->getView();
+		if (view)
+		{
+			view->SetForceClear(true);
+			view->SetInteractive(false);
+		}
+		it->requestDrawExt(reason);
 	}
 }
 
-void RenderSchedulerManager::removeScheduler(RenderCanvas* canvas)
+void RenderSchedulerManager::requestDraw(const std::set<int>& view_ids, const std::string& reason)
 {
-	schedulars_.erase(
-		std::remove_if(schedulars_.begin(), schedulars_.end(),
-			[canvas](const std::shared_ptr<RenderSchedular>& sched) {
-				return sched->getCanvas() == canvas;
-			}),
-		schedulars_.end()
-	);
+	if (view_ids.find(-1) != view_ids.end())
+		return;
+	bool update_all = view_ids.empty();
+
+	for (auto& it : schedulers_)
+	{
+		if (!it)
+			continue;
+
+		auto view = it->getView();
+		if (view)
+		{
+			int id = view->Id();
+			if (update_all || view_ids.find(id) != view_ids.end())
+			{
+				view->SetForceClear(true);
+				view->SetInteractive(false);
+				it->requestDrawExt(reason);
+			}
+		}
+	}
 }

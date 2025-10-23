@@ -51,6 +51,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <Ruler.h>
 #include <RulerHandler.h>
+#include <RenderScheduler.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
@@ -219,7 +220,6 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 			//sharedContext->SetCurrent(*m_canvas);
 			m_canvas->SetCurrent(*sharedContext);
 			m_canvas->m_glRC = sharedContext;
-			m_canvas->m_set_gl = true;
 		}
 	}
 	m_canvas->SetCanFocus(false);
@@ -294,7 +294,9 @@ RenderViewPanel::~RenderViewPanel()
 
 int RenderViewPanel::GetViewId()
 {
-	return glbin_current.GetViewId(m_render_view);
+	if (!m_render_view)
+		return 0;
+	return m_render_view->Id();
 }
 
 void RenderViewPanel::CreateBar()
@@ -1099,7 +1101,8 @@ void RenderViewPanel::Capture()
 		m_render_view->m_cap_file = file_dlg.GetPath();
 		m_render_view->m_capture = true;
 		glbin_states.m_capture = true;
-		RefreshGL();
+		glbin_render_scheduler_manager.requestDraw(
+			{ static_cast<int>(m_render_view->Id()) }, "Capture refresh");
 
 		if (glbin_settings.m_prj_save)
 		{
@@ -1612,7 +1615,8 @@ void RenderViewPanel::OnSetFullScreen(wxTimerEvent& event)
 		m_full_frame->Show();
 		m_canvas->m_full_screen = true;
 		m_canvas->SetFocus();
-		RefreshGL();
+		glbin_render_scheduler_manager.requestDraw(
+			{ static_cast<int>(m_render_view->Id()) }, "Full screen refresh");
 	}
 	else
 	{
@@ -1829,12 +1833,6 @@ void RenderViewPanel::ResetID()
 	m_max_id = 1;
 }
 
-void RenderViewPanel::SetGL(bool bval)
-{
-	if (m_canvas)
-		m_canvas->m_set_gl = bval;
-}
-
 //get rendering context
 wxGLContext* RenderViewPanel::GetContext()
 {
@@ -1842,16 +1840,6 @@ wxGLContext* RenderViewPanel::GetContext()
 		return m_canvas->m_glRC/*GetContext()*/;
 	else
 		return 0;
-}
-
-void RenderViewPanel::RefreshGL(bool start_loop)
-{
-	if (m_render_view)
-	{
-		m_render_view->SetForceClear(true);
-		m_render_view->SetInteractive(false);
-		m_render_view->RefreshGL(0, false, start_loop);
-	}
 }
 
 //bar top
