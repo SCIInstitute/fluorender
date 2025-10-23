@@ -43,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <LookingGlassRenderer.h>
 #include <FramebufferStateTracker.h>
+#include <RenderScheduler.h>
 #include <Debug.h>
 #ifdef _WIN32
 //wacom support
@@ -96,6 +97,8 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	view->SetSize(size.x, size.y);
 	root->AddView(view);
 	m_render_view = view;
+	auto render_scheduler = std::make_shared<RenderScheduler>(this, view);
+	glbin_render_scheduler_manager.registerScheduler(render_scheduler);
 
 #ifdef _WIN32
 	//tablet initialization
@@ -166,6 +169,9 @@ RenderCanvas::~RenderCanvas()
 		if (root)
 			root->DeleteView(view_ptr.get());
 	}
+
+	//remove scheduler
+	glbin_render_scheduler_manager.removeScheduler(this);
 
 #ifdef _WIN32
 	//tablet
@@ -259,20 +265,12 @@ void RenderCanvas::Draw()
 #endif
 
 	wxPaintDC dc(this);
-	if (auto view_ptr = m_render_view.lock())
-	{
-		glbin_current.render_view_drawing = view_ptr;
-		glbin_fb_state_tracker.sync();
-		bool bval = view_ptr->Draw();
-		if (bval)
-		{
-			view_ptr->DrawDefault();
-			SwapBuffers();
-			DBGPRINT(L"SwapBuffers();\n");
-		}
-	}
 
+	auto scheduler = glbin_render_scheduler_manager.getScheduler(this);
+	assert(scheduler);
+	scheduler->performDraw();
 }
+
 void RenderCanvas::Init()
 {
 	if (auto view_ptr = m_render_view.lock())

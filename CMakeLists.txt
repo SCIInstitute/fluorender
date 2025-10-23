@@ -601,6 +601,13 @@ file(GLOB hdr FluoRender/FluoRender/*.h)
 add_library(MAIN_LIB STATIC
   ${src} ${hdr})
 
+# Agent
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Agent)
+file(GLOB agent_src FluoRender/FluoRender/Agent/*.cpp)
+file(GLOB agent_hdr FluoRender/FluoRender/Agent/*.h)
+add_library(AGENT_LIB STATIC
+  ${agent_src} ${agent_hdr})
+
 # Animator
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Animator)
 file(GLOB ani_src FluoRender/FluoRender/Animator/*.cpp)
@@ -829,6 +836,8 @@ target_include_directories(MAIN_LIB PRIVATE
   ${TEEM_INCLUDE_DIRS})
 target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
+
+# Agent
 
 # Animator
 target_include_directories(ANIMATOR_LIB PRIVATE
@@ -1231,6 +1240,7 @@ endif()
 
 target_link_libraries(FluoRender PRIVATE
     MAIN_LIB
+    AGENT_LIB
     ANIMATOR_LIB
     CALCULATE_LIB
     CLUSTER_LIB
