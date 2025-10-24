@@ -10730,7 +10730,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		m_updating = true;
 		scheduler->requestDraw(DrawRequest("Idle process refresh", { static_cast<int>(m_id) },
 			true, false, state.m_start_loop, false, state.m_looking_glass_changed));
-		//RefreshGL(12, state.m_erase_background, state.m_start_loop, state.m_looking_glass_changed);
 		if (state.m_value_collection.empty())
 			state.m_value_collection.insert(gstNull);
 	}
@@ -10769,7 +10768,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (m_crop_type)
 			{
 				m_int_mode = InteractiveMode::CropFrame;
-				//return;
 			}
 		}
 		else
@@ -10796,8 +10794,6 @@ void RenderView::ProcessMouse(MouseState& state)
 					glbin_ruler_handler.DeletePoint();
 				state.m_refresh = true;
 				vc.insert(gstRulerList);
-				//RefreshGL(14);
-				//glbin_current.mainframe->UpdateProps({ gstRulerList });
 			}
 
 			if (m_int_mode == InteractiveMode::Viewport ||
@@ -10825,7 +10821,6 @@ void RenderView::ProcessMouse(MouseState& state)
 				m_clear_paint = true;
 				glbin_vol_selector.SetBrushPressPeak(0.0);
 				state.m_refresh = true;
-				//RefreshGL(15);
 			}
 
 			if (m_int_mode == InteractiveMode::Grow ||
@@ -10850,8 +10845,6 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 2);
 				state.m_refresh = true;
 				vc.insert(gstRulerList);
-				//RefreshGL(16);
-				//glbin_current.mainframe->UpdateProps({ gstRulerList });
 			}
 
 			if (m_int_mode == InteractiveMode::CenterClick)
@@ -10883,25 +10876,21 @@ void RenderView::ProcessMouse(MouseState& state)
 					m_obj_transz = p.z();
 					m_interactive = true;
 					state.m_refresh = true;
-					//RefreshGL(17);
 				}
 			}
 		}
-		//return;
 	}
 	else if (state.m_mouse_right_down)
 	{
 		state.m_reset_focus_slider = true;
 		old_mouse_X = static_cast<long>(std::round(mp.x()));
 		old_mouse_Y = static_cast<long>(std::round(mp.y()));
-		//return;
 	}
 	else if (state.m_mouse_middle_down)
 	{
 		state.m_reset_focus_slider = true;
 		old_mouse_X = static_cast<long>(std::round(mp.x()));
 		old_mouse_Y = static_cast<long>(std::round(mp.y()));
-		//return;
 	}
 	else if (state.m_mouse_left_up)
 	{
@@ -10912,12 +10901,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				Pick(state);
 				m_pick_lock_center = false;
-				//return;
 			}
-			//else
-			//{
-			//	return;
-			//}
 		}
 		else if (m_int_mode == InteractiveMode::BrushSelect)
 		{
@@ -10946,9 +10930,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_force_clear = true;
 			state.m_refresh = true;
 			vc.insert({ gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-			//RefreshGL(17);
-			//glbin_current.mainframe->UpdateProps(vc);
-			//return;
 		}
 		else if (m_int_mode == InteractiveMode::Ruler &&
 			!state.m_key_alt)
@@ -10957,9 +10938,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 1);
 			state.m_refresh = true;
 			vc.insert(gstRulerList);
-			//RefreshGL(18);
-			//glbin_current.mainframe->UpdateProps({ gstRulerList });
-			//return;
 		}
 		else if (m_int_mode == InteractiveMode::MoveRuler ||
 			m_int_mode == InteractiveMode::RulerLockPoint)
@@ -10982,16 +10960,12 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_force_clear = true;
 			state.m_refresh = true;
 			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-			//RefreshGL(19);
-			//glbin_current.mainframe->UpdateProps(vc);
-			//return;
 		}
 		else if (m_int_mode == InteractiveMode::Grow ||
 			m_int_mode == InteractiveMode::GrowRuler)
 		{
 			//glbin_vol_selector.PushMask();
 			m_grow_on = false;
-			//return;
 		}
 		else if (m_int_mode == InteractiveMode::Pencil &&
 			!state.m_key_alt)
@@ -11003,9 +10977,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			state.m_refresh = true;
 			vc.insert(gstRulerList);
-			//RefreshGL(20);
-			//glbin_current.mainframe->UpdateProps({ gstRulerList });
-			//return;
 		}
 		else if ((m_int_mode == InteractiveMode::EditRulerPoint ||
 			m_int_mode == InteractiveMode::Magnet) &&
@@ -11022,9 +10993,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			glbin_ruler_handler.ClearMagStroke();
 			state.m_refresh = true;
 			vc.insert(gstRulerList);
-			//RefreshGL(21);
-			//glbin_current.mainframe->UpdateProps({ gstRulerList });
-			//return;
 		}
 		else if (m_int_mode == InteractiveMode::CropFrame)
 		{
@@ -11034,8 +11002,6 @@ void RenderView::ProcessMouse(MouseState& state)
 	}
 	else if (state.m_mouse_middle_up)
 	{
-		//SetSortBricks();
-		//return;
 	}
 	else if (state.m_mouse_right_up)
 	{
@@ -11058,11 +11024,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			state.m_refresh = true;
 			vc.insert(gstRulerList);
-			//RefreshGL(22);
-			//glbin_current.mainframe->UpdateProps({ gstRulerList });
-			//return;
 		}
-		//SetSortBricks();
 	}
 	else if (state.m_mouse_drag)
 	{
@@ -11072,9 +11034,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			ChangeCropFrame(mp);
 			state.m_refresh = true;
 			vc.insert(gstCropValues);
-			//RefreshGL(23);
-			//glbin_current.mainframe->UpdateProps({ gstCropValues });
-			//return;
 		}
 		else
 		{
@@ -11140,11 +11099,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 						if (!hold_old)
 							state.m_refresh = true;
-						//RefreshGL(24);
-
 						vc.insert(gstCamRotation);
-						//if (m_render_view_panel)
-						//	m_render_view_panel->FluoUpdate({ gstCamRotation });
 					}
 					if (state.m_mouse_middle_is_down || (state.m_key_ctrl && state.m_mouse_left_is_down))
 					{
@@ -11167,7 +11122,6 @@ void RenderView::ProcessMouse(MouseState& state)
 							m_update_rot_ctr = true;
 
 						state.m_refresh = true;
-						//RefreshGL(25);
 					}
 					if (state.m_mouse_right_is_down)
 					{
@@ -11195,10 +11149,6 @@ void RenderView::ProcessMouse(MouseState& state)
 
 						state.m_refresh = true;
 						vc.insert(gstScaleFactor);
-						//RefreshGL(26);
-
-						//if (m_render_view_panel)
-						//	m_render_view_panel->FluoUpdate({ gstScaleFactor });
 					}
 				}
 			}
@@ -11207,7 +11157,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				m_paint_enable = true;
 				state.m_refresh = true;
-				//RefreshGL(27);
 			}
 			else if (m_int_mode == InteractiveMode::Clipplane)
 			{
@@ -11223,7 +11172,6 @@ void RenderView::ProcessMouse(MouseState& state)
 						m_q_cl.Normalize();
 						SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 						state.m_refresh = true;
-						//RefreshGL(28);
 					}
 				}
 			}
@@ -11241,8 +11189,6 @@ void RenderView::ProcessMouse(MouseState& state)
 				{
 					state.m_refresh = true;
 					vc.insert(gstRulerList);
-					//RefreshGL(29);
-					//glbin_current.mainframe->UpdateProps({ gstRulerList });
 					glbin_ruler_handler.SetEdited(true);
 				}
 			}
@@ -11256,8 +11202,6 @@ void RenderView::ProcessMouse(MouseState& state)
 					glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);
 					state.m_refresh = true;
 					vc.insert(gstRulerList);
-					//RefreshGL(30);
-					//glbin_current.mainframe->UpdateProps({ gstRulerList });
 				}
 			}
 			else if (m_int_mode == InteractiveMode::Magnet &&
@@ -11268,7 +11212,6 @@ void RenderView::ProcessMouse(MouseState& state)
 					glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
 				glbin_ruler_handler.ApplyMagStroke();
 				state.m_refresh = true;
-				//RefreshGL(31);
 			}
 
 			//update mouse position
@@ -11289,7 +11232,6 @@ void RenderView::ProcessMouse(MouseState& state)
 				prv_mouse_X = old_mouse_X;
 				prv_mouse_Y = old_mouse_Y;
 			}
-			//return;
 		}
 	}
 	else if (state.m_mouse_wheel_rotate)
@@ -11330,14 +11272,10 @@ void RenderView::ProcessMouse(MouseState& state)
 				m_interactive = true;
 
 				vc.insert(gstScaleFactor);
-				//if (m_render_view_panel)
-				//	m_render_view_panel->FluoUpdate({ gstScaleFactor });
 			}
 		}
 
 		state.m_refresh = true;
-		//RefreshGL(32);
-		//return;
 	}
 
 	// draw the strokes into a framebuffer texture
@@ -11347,8 +11285,6 @@ void RenderView::ProcessMouse(MouseState& state)
 		old_mouse_X = static_cast<long>(std::round(mp.x()));
 		old_mouse_Y = static_cast<long>(std::round(mp.y()));
 		state.m_refresh = true;
-		//RefreshGL(33);
-		//return;
 	}
 
 	if (m_draw_info & INFO_DISP)
@@ -11359,12 +11295,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_retain_finalbuffer = true;
 			state.m_refresh = true;
 		}
-//#ifdef _WIN32
-//		RefreshGL(34, false, false);
-//#else
-//		RefreshGL(34, false, true);
-//#endif
-		//return;
 	}
 
 	if (state.m_refresh)
