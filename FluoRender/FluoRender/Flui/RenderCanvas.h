@@ -42,9 +42,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/event.h>
 #include <wx/timer.h>
 
-// Custom event for scheduler-triggered draw
-wxDECLARE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
-
 class MainFrame;
 class RenderViewPanel;
 class RenderView;
@@ -67,7 +64,7 @@ public:
 
 	RenderView* GetRenderView()
 	{
-		if (auto view_ptr = m_render_view.lock())
+		if (auto view_ptr = m_renderview.lock())
 			return view_ptr.get();
 		return 0;
 	}
@@ -90,7 +87,7 @@ private:
 	//previous focus before brush
 	wxWindow* m_prev_focus;
 	//render view
-	std::weak_ptr<RenderView> m_render_view;
+	std::weak_ptr<RenderView> m_renderview;
 
 	//timer for exit full screen
 	wxTimer m_exit_fscreen_trigger;
@@ -133,7 +130,6 @@ private:
 	//system call
 	void OnMouse(wxMouseEvent& event);
 	void OnDraw(wxPaintEvent& event);
-	void OnSchedulerDraw(wxCommandEvent& event);
 	void OnResize(wxSizeEvent& event);
 	void OnMove(wxMoveEvent& event);
 	void OnIdle(wxIdleEvent& event);

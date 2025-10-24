@@ -25,38 +25,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <RenderScheduler.h>
+#include <RefreshScheduler.h>
 #include <RenderCanvas.h>
 #include <RenderView.h>
 #include <Global.h>
 #include <CurrentObjects.h>
 #include <FramebufferStateTracker.h>
+#include <LookingGlassRenderer.h>
 #include <Debug.h>
 
-RenderScheduler::RenderScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view)
+RefreshScheduler::RefreshScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view)
 	: canvas_(canvas), view_(view), draw_pending_(false) {
 }
 
-void RenderScheduler::requestDraw(const std::string& reason)
+void RefreshScheduler::requestDraw(const DrawRequest& request)
 {
 	if (!draw_pending_) {
 		draw_pending_ = true;
-		last_reason_ = reason;
+		last_request_ = request;
 		canvas_->Refresh(false); // Schedule paint event
-		DBGPRINT(L"requestDraw: %s\n", s2ws(reason).c_str());
+		DBGPRINT(L"requestDraw: %s\n", s2ws(last_request_.reason).c_str());
 		//canvas_->Update();
 	}
 }
 
-void RenderScheduler::requestDrawExt(const std::string& reason)
-{
-	if (!canvas_) return;
-	wxCommandEvent evt(EVT_RENDER_SCHEDULER_DRAW);
-	evt.SetString(reason);
-	canvas_->GetEventHandler()->QueueEvent(new wxCommandEvent(evt));
-}
-
-void RenderScheduler::performDraw()
+void RefreshScheduler::performDraw()
 {
 	draw_pending_ = false;
 
@@ -65,79 +58,63 @@ void RenderScheduler::performDraw()
 		glbin_current.render_view_drawing = view;
 		glbin_fb_state_tracker.sync();
 
+		view->SetForceClear(last_request_.clearFramebuffer);
+		view->SetInteractive(last_request_.interactive);
+		if (last_request_.restartLoop)
+			view->StartLoopUpdate();
+		view->SetSortBricks();
+		glbin_lg_renderer.SetUpdating(last_request_.lgChanged);
 		bool bval = view->Draw();
 		view->DrawDefault();
 
 		if (canvas_)
 		{
 			canvas_->SwapBuffers();
-			DBGPRINT(L"SwapBuffers: %s\n", s2ws(last_reason_).c_str());
+			DBGPRINT(L"SwapBuffers: %s\n", s2ws(last_request_.reason).c_str());
 		}
 	}
 }
 
-void RenderSchedulerManager::registerScheduler(std::shared_ptr<RenderScheduler> scheduler)
+void RefreshSchedulerManager::registerScheduler(std::shared_ptr<RefreshScheduler> scheduler)
 {
-	schedulers_.push_back(scheduler);
+	if (!scheduler)
+		return;
+	auto view = scheduler->getView();
+	if (!view)
+		return;
+	int view_id = view->Id();
+	schedulers_[view_id] = scheduler;
 }
 
-std::shared_ptr<RenderScheduler> RenderSchedulerManager::getScheduler(RenderCanvas* canvas)
+std::shared_ptr<RefreshScheduler> RefreshSchedulerManager::getScheduler(int view_id)
 {
-	for (auto& sched : schedulers_) {
-		if (sched->getCanvas() == canvas)
-			return sched;
-	}
+	auto it = schedulers_.find(view_id);
+	if (it != schedulers_.end())
+		return it->second;
 	return nullptr;
 }
 
-void RenderSchedulerManager::removeScheduler(RenderCanvas* canvas)
+void RefreshSchedulerManager::removeScheduler(int view_id)
 {
-	schedulers_.erase(
-		std::remove_if(schedulers_.begin(), schedulers_.end(),
-			[canvas](const std::shared_ptr<RenderScheduler>& sched) {
-				return sched->getCanvas() == canvas;
-			}),
-		schedulers_.end()
-	);
+	schedulers_.erase(view_id);
 }
 
-void RenderSchedulerManager::requestDrawAll(const std::string& reason)
+void RefreshSchedulerManager::requestDraw(const DrawRequest& request)
 {
-	for (auto& it : schedulers_)
-	{
-		if (!it)
-			continue;
-
-		auto view = it->getView();
-		if (view)
-		{
-			view->SetForceClear(true);
-			view->SetInteractive(false);
-		}
-		it->requestDrawExt(reason);
-	}
-}
-
-void RenderSchedulerManager::requestDraw(const std::set<int>& view_ids, const std::string& reason)
-{
-	if (view_ids.find(-1) != view_ids.end())
+	if (request.view_ids.find(-1) != request.view_ids.end())
 		return;
-	bool update_all = view_ids.empty();
 
-	for (auto& it : schedulers_)
+	bool update_all = request.view_ids.empty();
+
+	for (const auto& [view_id, scheduler] : schedulers_)
 	{
-		if (!it)
-			continue;
-
-		auto view = it->getView();
+		auto view = scheduler->getView();
 		if (view)
 		{
 			int id = view->Id();
-			if (update_all || view_ids.find(id) != view_ids.end())
+			if (update_all || request.view_ids.find(id) != request.view_ids.end())
 			{
-				view->SetForceClear(true);
-				view->SetInteractive(false);
-				it->requestDrawExt(reason);
+				scheduler->requestDraw(request);
 			}
 		}
 	}

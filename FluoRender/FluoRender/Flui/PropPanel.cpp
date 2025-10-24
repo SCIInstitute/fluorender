@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <Root.h>
 #include <DataManager.h>
-#include <RenderScheduler.h>
+#include <RefreshScheduler.h>
 #include <wxNotebookSerializer.h>
 
 PropBase::PropBase(MainFrame* frame):
@@ -49,26 +49,9 @@ void PropBase::FluoRefresh(int excl_self,
 	int view_excl = 0;
 	if (dynamic_cast<RenderViewPanel*>(this))
 		view_excl = excl_self;
-	glbin_render_scheduler_manager.requestDraw(views, "PropBase refresh");
+	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("PropBase refresh", views));
 	wxWindow* win = dynamic_cast<wxWindow*>(this);
 	m_frame->UpdateProps(vc, excl_self, win);//update ui but exclude this
-}
-
-void PropBase::SetFocusVRenderViews(wxBasisSlider* slider)
-{
-	Root* root = glbin_data_manager.GetRoot();
-	if (root)
-	{
-		for (int i = 0; i < root->GetViewNum(); i++)
-		{
-			auto view = root->GetView(i);
-			RenderCanvas* canvas = view->GetRenderCanvas();
-			if (canvas)
-			{
-				canvas->SetFocusedSlider(slider);
-			}
-		}
-	}
 }
 
 double PropBase::getDpiScaleFactor()

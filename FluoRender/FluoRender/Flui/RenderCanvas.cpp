@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <LookingGlassRenderer.h>
 #include <FramebufferStateTracker.h>
-#include <RenderScheduler.h>
+#include <RefreshScheduler.h>
 #include <Debug.h>
 #ifdef _WIN32
 //wacom support
@@ -90,15 +90,14 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	glbin_current.render_view_drawing = view;
 	Root* root = glbin_data_manager.GetRoot();
 	view->SetRenderViewPanel(m_renderview_panel);
-	view->SetRenderCanvas(this);
 #ifdef _WIN32
 	view->SetHandle((void*)GetHWND());
 #endif
 	view->SetSize(size.x, size.y);
 	root->AddView(view);
-	m_render_view = view;
-	auto render_scheduler = std::make_shared<RenderScheduler>(this, view);
-	glbin_render_scheduler_manager.registerScheduler(render_scheduler);
+	m_renderview = view;
+	auto render_scheduler = std::make_shared<RefreshScheduler>(this, view);
+	glbin_refresh_scheduler_manager.registerScheduler(render_scheduler);
 
 #ifdef _WIN32
 	//tablet initialization
@@ -126,7 +125,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 
 	//events
 	Bind(wxEVT_PAINT, &RenderCanvas::OnDraw, this);
-	Bind(EVT_RENDER_SCHEDULER_DRAW, &RenderCanvas::OnSchedulerDraw, this);
 	Bind(wxEVT_SIZE, &RenderCanvas::OnResize, this);
 	Bind(wxEVT_MOVE, &RenderCanvas::OnMove, this);
 	Bind(wxEVT_LEFT_DOWN, &RenderCanvas::OnMouse, this);
@@ -162,17 +160,16 @@ RenderCanvas::~RenderCanvas()
 		diag->ShowModal();
 	}
 
-	if (auto view_ptr = m_render_view.lock())
+	if (auto view_ptr = m_renderview.lock())
 	{
-		view_ptr->SetRenderCanvas(0);
 		view_ptr->SetRenderViewPanel(0);
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->DeleteView(view_ptr.get());
+		//remove scheduler
+		glbin_refresh_scheduler_manager.removeScheduler(view_ptr->Id());
 	}
 
-	//remove scheduler
-	glbin_render_scheduler_manager.removeScheduler(this);
 
 #ifdef _WIN32
 	//tablet
@@ -221,7 +218,7 @@ inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
 #endif
 	fluo::Point pnt(e.GetPosition().x, e.GetPosition().y, 0);
 	pnt *= dval;
-	if (auto view_ptr = m_render_view.lock())
+	if (auto view_ptr = m_renderview.lock())
 	{
 		if (view_ptr->GetEnlarge())
 			pnt = pnt * view_ptr->GetEnlargeScale();
@@ -244,14 +241,16 @@ void RenderCanvas::Draw()
 
 	wxPaintDC dc(this);
 
-	auto scheduler = glbin_render_scheduler_manager.getScheduler(this);
+	auto view = m_renderview.lock();
+	assert(view);
+	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(view->Id());
 	assert(scheduler);
 	scheduler->performDraw();
 }
 
 void RenderCanvas::Init()
 {
-	if (auto view_ptr = m_render_view.lock())
+	if (auto view_ptr = m_renderview.lock())
 		view_ptr->Init();
 	m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
 }
@@ -360,7 +359,7 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 	dval = GetDPIScaleFactor();
 #endif
 
-	if (auto view_ptr = m_render_view.lock())
+	if (auto view_ptr = m_renderview.lock())
 	{
 		view_ptr->SetDpiFactor(dval);
 
@@ -370,7 +369,8 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 		wxRect rect = GetClientRect();
 		view_ptr->SetClient(rect.x, rect.y, rect.width, rect.height);
 
-		view_ptr->RefreshGL(1);
+		glbin_refresh_scheduler_manager.requestDraw(
+			DrawRequest("Resize refresh", { static_cast<int>(view_ptr->Id()) }));
 	}
 
 	m_renderview_panel->FluoUpdate({ gstScaleFactor });
@@ -379,14 +379,14 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 void RenderCanvas::OnMove(wxMoveEvent& event)
 {
 	wxRect rect = GetClientRect();
-	if (auto view_ptr = m_render_view.lock())
+	if (auto view_ptr = m_renderview.lock())
 		view_ptr->SetClient(rect.x, rect.y, rect.width, rect.height);
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
 	IdleState state;
-	auto view_ptr = m_render_view.lock();
+	auto view_ptr = m_renderview.lock();
 
 	state.m_movie_maker_render_canvas = view_ptr && (glbin_moviemaker.GetView() == view_ptr.get());
 	//mouse state
@@ -494,8 +494,9 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Raise();
 			m_frame->Show();
 		}
-		if (auto view_ptr = m_render_view.lock())
-			view_ptr->RefreshGL(2);
+		if (auto view_ptr = m_renderview.lock())
+			glbin_refresh_scheduler_manager.requestDraw(
+				DrawRequest("Quit fullscreen refresh", { static_cast<int>(view_ptr->Id()) }));
 	}
 }
 
@@ -513,12 +514,6 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
 	DBGPRINT(L"OnDraw\n");
 	Draw();
-}
-
-void RenderCanvas::OnSchedulerDraw(wxCommandEvent& event)
-{
-	if (auto view_ptr = m_render_view.lock())
-		view_ptr->RefreshGL(2);
 }
 
 #ifdef _WIN32
@@ -675,7 +670,7 @@ void RenderCanvas::OnMouse(wxMouseEvent& event)
 			state.m_mouse_wheel_rotate != 0))
 		SetFocus();
 
-	if (auto view_ptr = m_render_view.lock())
+	if (auto view_ptr = m_renderview.lock())
 	{
 		view_ptr->SetMousePos(event.GetPosition().x, event.GetPosition().y);
 

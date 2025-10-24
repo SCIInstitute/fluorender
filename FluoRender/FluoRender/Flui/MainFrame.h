@@ -114,6 +114,7 @@ class MachineLearningDlg;
 class TesterDlg;
 class FpRangeDlg;
 class wxGaugeStatusbar;
+class wxBasisSlider;
 
 class MainFrame: public wxFrame
 {
@@ -309,6 +310,7 @@ public:
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
 	void DeleteRenderViewPanel(const std::wstring& name);
+	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 	//hide/show tools
 	void ToggleAllPanels(bool cur_state);
@@ -370,7 +372,7 @@ private:
 	ProjectPanel* m_proj_panel;
 	TreePanel *m_tree_panel;
 	ListPanel *m_list_panel;
-	std::vector<RenderViewPanel*> m_render_view_panels;
+	std::vector<RenderViewPanel*> m_renderview_panels;
 	PropertyPanel *m_prop_panel;
 	//prop panel children
 	std::vector<PropPanel*> m_prop_pages;

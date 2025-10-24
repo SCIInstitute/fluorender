@@ -130,7 +130,7 @@ ClipPlanePanel::~ClipPlanePanel()
 	glbin.del_undo_control(m_z_rot_sldr);
 	glbin.del_undo_control(m_toolbar);
 
-	SetFocusVRenderViews(0);
+	m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
@@ -892,7 +892,7 @@ void ClipPlanePanel::OnClipXMF(wxCommandEvent& event)
 		SyncClipValue(0);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_clipx_sldr);
+		m_frame->SetFocusVRenderViews(m_clipx_sldr);
 		break;
 	case 2:
 		ResetClipValuesX();
@@ -915,7 +915,7 @@ void ClipPlanePanel::OnClipYMF(wxCommandEvent& event)
 		SyncClipValue(1);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_clipy_sldr);
+		m_frame->SetFocusVRenderViews(m_clipy_sldr);
 		break;
 	case 2:
 		ResetClipValuesY();
@@ -938,7 +938,7 @@ void ClipPlanePanel::OnClipZMF(wxCommandEvent& event)
 		SyncClipValue(2);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_clipz_sldr);
+		m_frame->SetFocusVRenderViews(m_clipz_sldr);
 		break;
 	case 2:
 		ResetClipValuesZ();
@@ -1399,7 +1399,7 @@ void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
 	case 0:
 		break;
 	case 1:
-		SetFocusVRenderViews(m_x_rot_sldr);
+		m_frame->SetFocusVRenderViews(m_x_rot_sldr);
 		break;
 	case 2:
 	{
@@ -1427,7 +1427,7 @@ void ClipPlanePanel::OnRotYMF(wxCommandEvent& event)
 	case 0:
 		break;
 	case 1:
-		SetFocusVRenderViews(m_y_rot_sldr);
+		m_frame->SetFocusVRenderViews(m_y_rot_sldr);
 		break;
 	case 2:
 	{
@@ -1455,7 +1455,7 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 	case 0:
 		break;
 	case 1:
-		SetFocusVRenderViews(m_z_rot_sldr);
+		m_frame->SetFocusVRenderViews(m_z_rot_sldr);
 		break;
 	case 2:
 	{

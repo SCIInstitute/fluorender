@@ -36,6 +36,7 @@ public:
 	BaseState()
 	{ }
 
+	bool m_refresh = false;
 	bool m_key_ctrl = false;//ctrl
 
 };
@@ -75,7 +76,6 @@ public:
 
 	bool m_request_more = false;
 	bool m_movie_maker_render_canvas = false;
-	bool m_refresh = false;
 	bool m_erase_background = false;
 	bool m_start_loop = false;
 	bool m_set_focus = false;

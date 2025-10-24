@@ -702,7 +702,7 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_colormap_combo2);
 	glbin.del_undo_control(m_options_toolbar);
 
-	SetFocusVRenderViews(0);
+	m_frame->SetFocusVRenderViews(0);
 }
 
 void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
@@ -2054,7 +2054,7 @@ void VolumePropPanel::OnGammaMF(wxCommandEvent& event)
 		SyncGamma(m_vd->GetGamma());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_gamma_sldr);
+		m_frame->SetFocusVRenderViews(m_gamma_sldr);
 		break;
 	case 2:
 		SetGamma(glbin_vol_def.m_gamma, true);
@@ -2116,7 +2116,7 @@ void VolumePropPanel::OnMinMaxMF(wxCommandEvent& event)
 		SyncMinMax(m_vd->GetLowOffset(), m_vd->GetHighOffset());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_minmax_sldr);
+		m_frame->SetFocusVRenderViews(m_minmax_sldr);
 		break;
 	case 2:
 		SetMinMax(glbin_vol_def.m_lo_offset, glbin_vol_def.m_hi_offset, true);
@@ -2208,7 +2208,7 @@ void VolumePropPanel::OnLuminanceMF(wxCommandEvent& event)
 		SyncLuminance(m_vd->GetLuminance());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_luminance_sldr);
+		m_frame->SetFocusVRenderViews(m_luminance_sldr);
 		break;
 	case 2:
 		SetLuminance(glbin_vol_def.m_luminance, true);
@@ -2278,7 +2278,7 @@ void VolumePropPanel::OnAlphaMF(wxCommandEvent& event)
 		SyncAlpha(m_vd->GetAlpha());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_alpha_sldr);
+		m_frame->SetFocusVRenderViews(m_alpha_sldr);
 		break;
 	case 2:
 		SetAlpha(glbin_vol_def.m_alpha, true);
@@ -2349,7 +2349,7 @@ void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
 		}
 		break;
 	case 1:
-		SetFocusVRenderViews(m_low_shading_sldr);
+		m_frame->SetFocusVRenderViews(m_low_shading_sldr);
 		break;
 	case 2:
 		SetLowShading(glbin_vol_def.m_low_shading, true);
@@ -2442,7 +2442,7 @@ void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
 		SyncBoundary(m_vd->GetBoundaryLow(), m_vd->GetBoundaryHigh());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_boundary_sldr);
+		m_frame->SetFocusVRenderViews(m_boundary_sldr);
 		break;
 	case 2:
 		SetBoundary(glbin_vol_def.m_boundary_low, glbin_vol_def.m_boundary_high, true);
@@ -2537,7 +2537,7 @@ void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
 		SyncThresh(m_vd->GetLeftThresh(), m_vd->GetRightThresh());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_thresh_sldr);
+		m_frame->SetFocusVRenderViews(m_thresh_sldr);
 		break;
 	case 2:
 		SetThresh(glbin_vol_def.m_lo_thresh, glbin_vol_def.m_hi_thresh, true);
@@ -2629,7 +2629,7 @@ void VolumePropPanel::OnShadowMF(wxCommandEvent& event)
 		SyncShadowInt(m_vd->GetShadowIntensity());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_shadow_sldr);
+		m_frame->SetFocusVRenderViews(m_shadow_sldr);
 		break;
 	case 2:
 		SetShadowInt(glbin_vol_def.m_shadow_intensity, true);
@@ -2716,7 +2716,7 @@ void VolumePropPanel::OnSampleMF(wxCommandEvent& event)
 		SyncSampleRate(m_vd->GetSampleRate());
 		break;
 	case 1:
-		SetFocusVRenderViews(m_sample_sldr);
+		m_frame->SetFocusVRenderViews(m_sample_sldr);
 		break;
 	case 2:
 		SetSampleRate(glbin_vol_def.m_sample_rate, true);
@@ -2783,7 +2783,7 @@ void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 		}
 		break;
 	case 1:
-		SetFocusVRenderViews(m_colormap_sldr);
+		m_frame->SetFocusVRenderViews(m_colormap_sldr);
 		break;
 	case 2:
 		SetColormapVal(glbin_vol_def.m_colormap_low_value, glbin_vol_def.m_colormap_hi_value, true);

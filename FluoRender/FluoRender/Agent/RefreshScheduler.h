@@ -25,12 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef RenderScheduler_h
-#define RenderScheduler_h
+#ifndef RefreshScheduler_h
+#define RefreshScheduler_h
 
 #include <memory>
 #include <string>
-#include <vector>
+#include <unordered_map>
 #include <set>
 
 class RenderCanvas;
@@ -38,20 +38,36 @@ class RenderView;
 
 struct DrawRequest
 {
+	DrawRequest(const std::string& r = "Refresh request",
+		const std::set<int>& ids = {},
+		bool cf = true,
+		bool lu = false,
+		bool rl = true,
+		bool ia = false,
+		bool lc = true) :
+		reason(r),
+		view_ids(ids),
+		clearFramebuffer(cf),
+		loadUpdate(lu),
+		restartLoop(rl),
+		interactive(ia),
+		lgChanged(lc)
+	{}
 	std::string reason;
-	bool clearFramebuffer;//from m_retain_finalbuffer in renderview
-	bool loadUpdate;//from m_load_update in renderview
-	bool restartLoop;
-	bool lgChanged;
+	std::set<int> view_ids;//-1: none; empty: all
+	bool clearFramebuffer = true;//from m_retain_finalbuffer in renderview
+	bool loadUpdate = false;//from m_load_update in renderview
+	bool restartLoop = true;
+	bool interactive = false;
+	bool lgChanged = true;
 };
 
-class RenderScheduler
+class RefreshScheduler
 {
 public:
-	RenderScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view);
+	RefreshScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view);
 
-	void requestDraw(const std::string& reason); // Called by canvas, view
-	void requestDrawExt(const std::string& reason);//called by external modules
+	void requestDraw(const DrawRequest& request); // Called by canvas, view
 	void performDraw();                          // Called by canvas during paint event
 
 	RenderCanvas* getCanvas() const { return canvas_; }
@@ -61,21 +77,20 @@ private:
 	RenderCanvas* canvas_;
 	std::weak_ptr<RenderView> view_;
 	bool draw_pending_;
-	std::string last_reason_;
+	DrawRequest last_request_;
 };
 
-class RenderSchedulerManager
+class RefreshSchedulerManager
 {
 public:
-	void registerScheduler(std::shared_ptr<RenderScheduler> scheduler);
-	std::shared_ptr<RenderScheduler> getScheduler(RenderCanvas* canvas);
-	void removeScheduler(RenderCanvas* canvas);
+	void registerScheduler(std::shared_ptr<RefreshScheduler> scheduler);
+	std::shared_ptr<RefreshScheduler> getScheduler(int view_id);
+	void removeScheduler(int view_id);
 
-	void requestDrawAll(const std::string& reason);
-	void requestDraw(const std::set<int>& view_ids, const std::string& reason);
+	void requestDraw(const DrawRequest& request);
 
 private:
-	std::vector<std::shared_ptr<RenderScheduler>> schedulers_;
+	std::unordered_map<int, std::shared_ptr<RefreshScheduler>> schedulers_;
 };
 
-#endif//RenderScheduler_h
+#endif//RefreshScheduler_h

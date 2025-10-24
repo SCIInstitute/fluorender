@@ -48,7 +48,6 @@ public:
 	virtual void FluoRefresh(int excl_self = 1,
 		const fluo::ValueCollection& vc = {},
 		const std::set<int>& views = {});
-	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 protected:
 	MainFrame* m_frame;

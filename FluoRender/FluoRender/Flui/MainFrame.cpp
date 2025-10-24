@@ -95,9 +95,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ImgShader.h>
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
-#include <RenderScheduler.h>
+#include <RefreshScheduler.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
+#include <wxBasisSlider.h>
 #include <wxToolbarArt.h>
 #include <ModalDlg.h>
 #include <wx/aboutdlg.h>
@@ -438,7 +439,7 @@ MainFrame::MainFrame(
 			view->InitView();
 		}
 	}
-	m_render_view_panels.push_back(vrv);
+	m_renderview_panels.push_back(vrv);
 
 	wxSize panel_size(FromDIP(wxSize(350, 450)));
 	//use the project panel for both tree and list
@@ -661,7 +662,7 @@ MainFrame::MainFrame(
 	else
 		m_aui_mgr.GetPane(m_teser_dlg).Hide();
 
-	for (auto it : m_render_view_panels)
+	for (auto it : m_renderview_panels)
 		it->LoadSettings();
 
 	SetMinSize(FromDIP(wxSize(800,600)));
@@ -930,9 +931,9 @@ MainFrame::~MainFrame()
 wxString MainFrame::CreateRenderViewPanel(int row)
 {
 	RenderViewPanel* vrv = 0;
-	if (m_render_view_panels.size()>0)
+	if (m_renderview_panels.size()>0)
 	{
-		wxGLContext* sharedContext = m_render_view_panels[0]->GetContext();
+		wxGLContext* sharedContext = m_renderview_panels[0]->GetContext();
 		vrv = new RenderViewPanel(this, sharedContext);
 	}
 	else
@@ -944,7 +945,7 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 		return "NO_NAME";
 
 	RenderView* this_view = vrv->GetRenderView();;
-	m_render_view_panels.push_back(vrv);
+	m_renderview_panels.push_back(vrv);
 	if (m_movie_panel)
 		m_movie_panel->FluoUpdate({ gstMovViewList });
 
@@ -1339,7 +1340,7 @@ void MainFrame::UpdateProps(const fluo::ValueCollection& vc, int excl_self, wxWi
 		m_output_adj_panel->FluoUpdate(vc);
 	if (update_props(excl_self, m_clip_plane_panel, panel))
 		m_clip_plane_panel->FluoUpdate(vc);
-	for (auto i : m_render_view_panels)
+	for (auto i : m_renderview_panels)
 		if (update_props(excl_self, i, panel))
 			i->FluoUpdate(vc);
 	for (auto i : m_prop_pages)
@@ -1576,16 +1577,16 @@ MachineLearningDlg* MainFrame::GetMachineLearningDlg()
 
 void MainFrame::DeleteRenderViewPanel(int i)
 {
-	if (m_render_view_panels[i])
+	if (m_renderview_panels[i])
 	{
-		RenderViewPanel* vrv = m_render_view_panels[i];
+		RenderViewPanel* vrv = m_renderview_panels[i];
 		RenderView* view = vrv->GetRenderView();
 		for (int j=0 ; j<view->GetAllVolumeNum() ; j++)
 			view->GetAllVolumeData(j)->SetDisp(true);
 		for (int j=0 ; j< view->GetMeshNum() ; j++)
 			view->GetMeshData(j)->SetDisp(true);
 
-		m_render_view_panels.erase(m_render_view_panels.begin()+i);
+		m_renderview_panels.erase(m_renderview_panels.begin()+i);
 		m_aui_mgr.DetachPane(vrv);
 		vrv->Close();
 		vrv->Destroy();
@@ -1598,14 +1599,26 @@ void MainFrame::DeleteRenderViewPanel(int i)
 
 void MainFrame::DeleteRenderViewPanel(const std::wstring &name)
 {
-	for (size_t i=0; i<m_render_view_panels.size(); i++)
+	for (size_t i=0; i<m_renderview_panels.size(); i++)
 	{
-		RenderView* view = m_render_view_panels[i]->GetRenderView();
+		RenderView* view = m_renderview_panels[i]->GetRenderView();
 		if (view && name == view->GetName() && view->Id() > 1)
 		{
 			DeleteRenderViewPanel(i);
 			break;
 		}
+	}
+}
+
+void MainFrame::SetFocusVRenderViews(wxBasisSlider* slider)
+{
+	for (auto& it : m_renderview_panels)
+	{
+		if (!it)
+			continue;
+		RenderCanvas* canvas = it->GetRenderCanvas();
+		if (canvas)
+			canvas->SetFocusedSlider(slider);
 	}
 }
 
@@ -1971,12 +1984,12 @@ void MainFrame::LayoutRenderViewPanels(int mode)
 	int miny = 0;
 	int maxx = 0;
 	int maxy = 0;
-	int paneNum = (int)m_render_view_panels.size();
+	int paneNum = (int)m_renderview_panels.size();
 	int i;
 	//get total area
 	for (i = 0; i < paneNum; i++)
 	{
-		RenderViewPanel* vrv = m_render_view_panels[i];
+		RenderViewPanel* vrv = m_renderview_panels[i];
 		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
 		{
 			wxPoint pos = vrv->GetPosition();
@@ -2011,14 +2024,14 @@ void MainFrame::LayoutRenderViewPanels(int mode)
 	//detach all panes
 	for (i = 0; i < paneNum; ++i)
 	{
-		RenderViewPanel* vrv = m_render_view_panels[i];
+		RenderViewPanel* vrv = m_renderview_panels[i];
 		if (vrv)
 			m_aui_mgr.DetachPane(vrv);
 	}
 	//add back
 	for (i = 0; i < paneNum; i++)
 	{
-		RenderViewPanel* vrv = m_render_view_panels[i];
+		RenderViewPanel* vrv = m_renderview_panels[i];
 		if (vrv)
 		{
 			switch (mode)
@@ -2058,7 +2071,7 @@ void MainFrame::LayoutRenderViewPanels(int mode)
 	m_aui_mgr.Update();
 	for (i = 0; i < paneNum; ++i)
 	{
-		RenderViewPanel* vrv = m_render_view_panels[i];
+		RenderViewPanel* vrv = m_renderview_panels[i];
 		if (vrv)
 		{
 			switch (mode)
@@ -2237,7 +2250,7 @@ void MainFrame::OpenMesh()
 void MainFrame::NewProject()
 {
 	glbin_project.Reset();
-	glbin_render_scheduler_manager.requestDrawAll("New project refresh");
+	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("New project refresh"));
 	UpdateProps({ gstListCtrl, gstTreeCtrl, gstParamList });
 }
 
@@ -2582,17 +2595,17 @@ void MainFrame::OnClose(wxCloseEvent& event)
 	glbin_moviemaker.Stop();
 
 	bool vrv_saved = false;
-	for (unsigned int i = 0; i < m_render_view_panels.size(); ++i)
+	for (unsigned int i = 0; i < m_renderview_panels.size(); ++i)
 	{
-		if (m_render_view_panels[i]->m_default_saved)
+		if (m_renderview_panels[i]->m_default_saved)
 		{
 			vrv_saved = true;
 			break;
 		}
-		m_render_view_panels[i]->CloseFullScreen();
+		m_renderview_panels[i]->CloseFullScreen();
 	}
-	if (!vrv_saved && !m_render_view_panels.empty())
-		m_render_view_panels[0]->SaveDefault(0xaff);
+	if (!vrv_saved && !m_renderview_panels.empty())
+		m_renderview_panels[0]->SaveDefault(0xaff);
 	glbin.clear_python();
 	event.Skip();
 }

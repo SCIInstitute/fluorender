@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Texture.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
-#include <RenderScheduler.h>
+#include <RefreshScheduler.h>
 
 using namespace flrd;
 
@@ -151,7 +151,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 	{
 		if (update)
 			glbin_current.mainframe->UpdateProps({ gstListCtrl, gstTreeCtrl, gstUpdateSync });
-		glbin_render_scheduler_manager.requestDrawAll("Calculate refresh");
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Calculate refresh"));
 	}
 }
 

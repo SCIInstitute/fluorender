@@ -107,7 +107,8 @@ public:
 	//reset counter
 	static void ResetID();
 
-	RenderView* GetRenderView() { return m_render_view; }
+	RenderView* GetRenderView() { return m_renderview; }
+	RenderCanvas* GetRenderCanvas() { return m_canvas; }
 	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }
 	wxFrame* GetFullFrame() { return m_full_frame; }
 	wxBoxSizer* GetViewSizer() { return m_view_sizer; }
@@ -167,7 +168,7 @@ private:
 	wxTimer m_enter_fscreen_trigger;
 
 	//render view///////////////////////////////////////////////
-	RenderView* m_render_view;
+	RenderView* m_renderview;
 	RenderCanvas *m_canvas;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;

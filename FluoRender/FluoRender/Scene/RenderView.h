@@ -71,7 +71,6 @@ DEALINGS IN THE SOFTWARE.
 
 class XboxController;
 class RenderViewPanel;
-class RenderCanvas;
 class BaseState;
 class IdleState;
 class MouseState;
@@ -127,9 +126,6 @@ public:
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
 	//set render view panel
 	void SetRenderViewPanel(RenderViewPanel* panel);
-	//set render canvas
-	void SetRenderCanvas(RenderCanvas* canvas);
-	RenderCanvas* GetRenderCanvas() { return m_render_canvas; }
 
 	//size
 	void SetSize(int x, int y);
@@ -320,7 +316,6 @@ public:
 	//set parameters
 	void SetParams(double t);
 	//reset and stop
-	void ResetMovieAngle();
 	void StopMovie();
 	//4d movie frame calculation
 	void Get4DSeqRange(int &start_frame, int &end_frame);
@@ -409,10 +404,12 @@ public:
 	//start loop update
 	void StartLoopUpdate();
 	void HaltLoopUpdate();
-	void RefreshGL(int debug_code,
-		bool erase = false,
-		bool start_loop = true,
-		bool lg_changed = true);
+	//void RefreshGL(int debug_code,
+	//	bool erase = false,
+	//	bool start_loop = true,
+	//	bool lg_changed = true);
+	//sort bricks after the view has been changed
+	void SetSortBricks();
 
 	//rulers
 	void DrawRulers();
@@ -553,7 +550,6 @@ public:
 private:
 	void* m_hWnd;
 	RenderViewPanel* m_render_view_panel;
-	RenderCanvas* m_render_canvas;
 	bool m_drawing;
 	bool m_refresh;//own refresh command
 	Size2D m_canvas_size;//size from wxwidgets window
@@ -856,8 +852,6 @@ private:
 	fluo::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
 	void A2Q();
-	//sort bricks after the view has been changed
-	void SetSortBricks();
 
 	//pre draw and post draw
 	void PreDraw();

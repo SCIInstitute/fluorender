@@ -84,7 +84,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <State.h>
 #include <image_capture_factory.h>
-#include <RenderScheduler.h>
+#include <RefreshScheduler.h>
 #include <compatibility.h>
 #include <Debug.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -298,8 +298,7 @@ RenderView::RenderView() :
 	m_dpi_factor(1.0),
 	//handle and parents
 	m_hWnd(0),
-	m_render_view_panel(0),
-	m_render_canvas(0)
+	m_render_view_panel(0)
 {
 	type = 1;
 
@@ -521,8 +520,7 @@ RenderView::RenderView(RenderView& copy):
 	m_dpi_factor(copy.m_dpi_factor),
 	//handle and parents
 	m_hWnd(0),
-	m_render_view_panel(0),
-	m_render_canvas(0)
+	m_render_view_panel(0)
 {
 	type = 1;
 
@@ -625,12 +623,6 @@ void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
 		return;
 	m_id = panel->GetId();
 	m_name = panel->GetName();
-}
-
-//set render canvas
-void RenderView::SetRenderCanvas(RenderCanvas* canvas)
-{
-	m_render_canvas = canvas;
 }
 
 void RenderView::SetSize(int x, int y)
@@ -2656,10 +2648,6 @@ void RenderView::SetCenter()
 	m_obj_ctrx = (x1 + x2) / 2.0;
 	m_obj_ctry = (y1 + y2) / 2.0;
 	m_obj_ctrz = (z1 + z2) / 2.0;
-
-	//SetSortBricks();
-
-	RefreshGL(3);
 }
 
 double RenderView::Get121ScaleFactor()
@@ -2713,13 +2701,6 @@ void RenderView::SetScale121()
 		}
 		break;
 	}
-
-	//SetSortBricks();
-
-	RefreshGL(4);
-
-	if (m_render_view_panel)
-		m_render_view_panel->FluoUpdate({ gstScaleFactor });
 }
 
 void RenderView::SetPinRotCenter(bool pin, bool update)
@@ -3344,18 +3325,6 @@ void RenderView::SetParams(double t)
 	vc.insert(gstRulerList);
 
 	glbin_current.mainframe->UpdateProps(vc);
-}
-
-void RenderView::ResetMovieAngle()
-{
-	fluo::Vector rv = GetRotations();
-	rv[m_rot_axis] = m_init_angle;
-	SetRotations(rv, true);
-
-	m_capture = false;
-	m_capture_rotat = false;
-
-	RefreshGL(5);
 }
 
 void RenderView::StopMovie()
@@ -4107,6 +4076,9 @@ flvr::TextRenderer* RenderView::GetTextRenderer()
 
 bool RenderView::Draw()
 {
+	m_updating = true;
+	m_refresh = true;
+
 	if (!m_refresh)
 		m_retain_finalbuffer = true;
 	else
@@ -4234,7 +4206,9 @@ bool RenderView::Draw()
 		else
 		{
 			m_vr_eye_idx = 1;
-			RefreshGL(6);
+			auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
+			if (scheduler)
+				scheduler->requestDraw(DrawRequest("VR right refresh"));
 		}
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
@@ -4256,15 +4230,8 @@ bool RenderView::Draw()
 	if (m_enlarge)
 		ResetEnlarge();
 
-	//need to add a root node to global to access the entire scene structure
-	// this will be done later
 	if (glbin_linked_rot)
 	{
-		//auto master_view = glbin_master_linked_view;
-		//if (!master_view ||
-		//	this != master_view.get())
-		//	return swap;
-
 		std::set<int> view_ids;
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
@@ -4276,14 +4243,12 @@ bool RenderView::Draw()
 				{
 					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
 					view_ids.insert(view->Id());
-					//view->RefreshGL(7);
-					//if (view->m_render_canvas)
-					//	view->m_render_canvas->Update();
 				}
 			}
 		}
 		if (!view_ids.empty())
-			glbin_render_scheduler_manager.requestDraw(view_ids, "Linked view refresh");
+			glbin_refresh_scheduler_manager.requestDraw(
+				DrawRequest("Linked view refresh", view_ids));
 	}
 
 	return swap;
@@ -4744,25 +4709,25 @@ void RenderView::HaltLoopUpdate()
 }
 
 //new function to refresh
-void RenderView::RefreshGL(int debug_code,
-	bool erase,
-	bool start_loop,
-	bool lg_changed)
-{
-	DBGPRINT(L"View: %d\tCode: (%d)\tErase: %d\tStart Loop: %d\tLG Changed: %d\tInteractive: %d\n",
-		m_id, debug_code, erase, start_loop, lg_changed, m_interactive);
-
-	m_updating = true;
-	if (start_loop)
-		StartLoopUpdate();
-	SetSortBricks();
-	m_refresh = true;
-	glbin_lg_renderer.SetUpdating(lg_changed);
-	assert(m_render_canvas);
-	auto scheduler = glbin_render_scheduler_manager.getScheduler(m_render_canvas);
-	assert(scheduler);
-	scheduler->requestDraw("General refresh");
-}
+//void RenderView::RefreshGL(int debug_code,
+//	bool erase,
+//	bool start_loop,
+//	bool lg_changed)
+//{
+//	DBGPRINT(L"View: %d\tCode: (%d)\tErase: %d\tStart Loop: %d\tLG Changed: %d\tInteractive: %d\n",
+//		m_id, debug_code, erase, start_loop, lg_changed, m_interactive);
+//
+//	m_updating = true;
+//	if (start_loop)
+//		StartLoopUpdate();
+//	SetSortBricks();
+//	m_refresh = true;
+//	glbin_lg_renderer.SetUpdating(lg_changed);
+//	assert(m_render_canvas);
+//	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_render_canvas);
+//	assert(scheduler);
+//	scheduler->requestDraw("General refresh");
+//}
 
 void RenderView::DrawRulers()
 {
@@ -7727,8 +7692,9 @@ void RenderView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
-		m_interactive = false;
-		RefreshGL(2);
+		auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
+		if (scheduler)
+			scheduler->requestDraw(DrawRequest("Interctive update refresh"));
 	}
 }
 
@@ -9454,7 +9420,9 @@ void RenderView::ResetEnlarge()
 	else
 		m_gl_size = m_size;
 
-	RefreshGL(9);
+	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
+	if (scheduler)
+		scheduler->requestDraw(DrawRequest("Reset enlarge refresh"));
 }
 
 bool RenderView::UpdateBrushState(IdleState& state)
@@ -9609,7 +9577,7 @@ bool RenderView::PickMesh(BaseState& state)
 		if (md)
 		{
 			glbin_current.SetMeshData(md);
-			RefreshGL(10);
+			//RefreshGL(10);
 			selected = true;
 		}
 	}
@@ -10060,6 +10028,7 @@ void RenderView::ProcessIdle(IdleState& state)
 	m_interactive = false;
 	state.m_start_loop = true;
 	m_retain_finalbuffer = false;
+	bool forced_refresh = false;
 
 	if (glbin_settings.m_hologram_mode == 2)
 	{
@@ -10183,440 +10152,440 @@ void RenderView::ProcessIdle(IdleState& state)
 		state.m_looking_glass_changed = true;
 	}
 
+	auto ProcessMouseOver = [&]() ->void
+		{
+			//forced refresh
+			if (state.m_key_refresh)
+			{
+				state.m_set_focus = true;
+				m_updating = true;
+				forced_refresh = true;
+				return;
+			}
+
+			UpdateBrushState(state);
+
+			//draw_mask
+			if (state.m_key_mask && m_draw_mask)
+			{
+				m_draw_mask = false;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (!state.m_key_mask && !m_draw_mask)
+			{
+				m_draw_mask = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+			}
+
+			//move view
+			//left
+			if (!m_move_left &&
+				state.m_key_ctrl &&
+				state.m_key_left)
+			{
+				m_move_left = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector side = fluo::Cross(m_up, m_head);
+				fluo::Vector trans = -(side * (std::round(0.8 * (m_ortho_right - m_ortho_left))));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_move_left &&
+				(!state.m_key_ctrl ||
+					!state.m_key_left))
+				m_move_left = false;
+			//right
+			if (!m_move_right &&
+				state.m_key_ctrl &&
+				state.m_key_right)
+			{
+				m_move_right = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector side = fluo::Cross(m_up, m_head);
+				fluo::Vector trans = side * (std::round(0.8 * (m_ortho_right - m_ortho_left)));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_move_right &&
+				(!state.m_key_ctrl ||
+					!state.m_key_right))
+				m_move_right = false;
+			//up
+			if (!m_move_up &&
+				state.m_key_ctrl &&
+				state.m_key_up)
+			{
+				m_move_up = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector trans = -m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_move_up &&
+				(!state.m_key_ctrl ||
+					!state.m_key_up))
+				m_move_up = false;
+			//down
+			if (!m_move_down &&
+				state.m_key_ctrl &&
+				state.m_key_down)
+			{
+				m_move_down = true;
+
+				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head.normalize();
+				fluo::Vector trans = m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
+				m_obj_transx += trans.x();
+				m_obj_transy += trans.y();
+				m_obj_transz += trans.z();
+				//if (m_persp) SetSortBricks();
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_move_down &&
+				(!state.m_key_ctrl ||
+					!state.m_key_down))
+				m_move_down = false;
+
+			//move time sequence
+			//forward
+			if (state.m_key_mov_forward)
+			{
+				if (m_cam_mode == 1)
+				{
+					//move right
+					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+					m_head.normalize();
+					fluo::Vector side = Cross(m_up, m_head);
+					fluo::Vector trans = 10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
+					m_obj_transx += trans.x();
+					m_obj_transy += trans.y();
+					m_obj_transz += trans.z();
+					m_interactive = true;
+				}
+				else
+				{
+					if (!m_tseq_forward)
+					{
+						int frame = glbin_moviemaker.GetCurrentFrame();
+						frame++;
+						glbin_moviemaker.SetCurrentFrame(frame);
+						state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
+					}
+				}
+				m_tseq_forward = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_tseq_forward && !state.m_key_mov_forward)
+				m_tseq_forward = false;
+			if (!state.m_key_ctrl && state.m_key_mov_play)
+			{
+				int frame = glbin_moviemaker.GetCurrentFrame();
+				frame++;
+				glbin_moviemaker.SetCurrentFrame(frame);
+				state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			//backforward
+			if (state.m_key_mov_backward)
+			{
+				if (m_cam_mode == 1)
+				{
+					//move left
+					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+					m_head.normalize();
+					fluo::Vector side = Cross(m_up, m_head);
+					fluo::Vector trans = -10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
+					m_obj_transx += trans.x();
+					m_obj_transy += trans.y();
+					m_obj_transz += trans.z();
+					m_interactive = true;
+				}
+				else
+				{
+					if (!m_tseq_backward)
+					{
+						int frame = glbin_moviemaker.GetCurrentFrame();
+						frame--;
+						glbin_moviemaker.SetCurrentFrame(frame);
+						state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
+					}
+				}
+				m_tseq_backward = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_tseq_backward && !state.m_key_mov_backward)
+				m_tseq_backward = false;
+
+			//move clip
+			//up
+			if (state.m_key_clip_up)
+			{
+				if (m_cam_mode == 1)
+				{
+					fluo::Vector pos(m_transx, m_transy, m_transz);
+					pos.normalize();
+					fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+					double factor = m_persp ? 20.0 : 5000.0;
+					double delta = m_radius / factor;
+					ctr += delta * pos;
+					m_ctrx = ctr.x();
+					m_ctry = ctr.y();
+					m_ctrz = ctr.z();
+					m_interactive = true;
+					if (!m_persp)
+					{
+						factor = m_scale_factor - m_scale_factor * delta;
+						if (factor < 0.1)
+							factor = 0.1;
+						m_scale_factor = factor;
+						state.m_value_collection.insert(gstScaleFactor);
+					}
+				}
+				else
+				{
+					if (!m_clip_up)
+					{
+						if (glbin_current.mainframe->GetClipPlanePanel())
+							glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(-1);
+						state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
+					}
+				}
+				m_clip_up = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_clip_up && !state.m_key_clip_up)
+				m_clip_up = false;
+			//down
+			if (state.m_key_clip_down)
+			{
+				if (m_cam_mode == 1)
+				{
+					fluo::Vector pos(m_transx, m_transy, m_transz);
+					pos.normalize();
+					fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+					double factor = m_persp ? 20.0 : 5000.0;
+					double delta = m_radius / factor;
+					ctr -= delta * pos;
+					m_ctrx = ctr.x();
+					m_ctry = ctr.y();
+					m_ctrz = ctr.z();
+					m_interactive = true;
+					if (!m_persp)
+					{
+						factor = m_scale_factor + m_scale_factor * delta;
+						if (factor < 0.1)
+							factor = 0.1;
+						m_scale_factor = factor;
+						state.m_value_collection.insert(gstScaleFactor);
+					}
+				}
+				else
+				{
+					if (!m_clip_down)
+					{
+						if (glbin_current.mainframe->GetClipPlanePanel())
+							glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(1);
+						state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
+					}
+				}
+				m_clip_down = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_clip_down && !state.m_key_clip_down)
+				m_clip_down = false;
+
+			//cell full
+			if (!m_cell_full && state.m_key_cell_full)
+			{
+				m_cell_full = true;
+				glbin_comp_selector.SelectFullComp();
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+				state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
+			}
+			if (m_cell_full && !state.m_key_cell_full)
+				m_cell_full = false;
+			//cell link
+			if (!m_cell_link && state.m_key_cell_link)
+			{
+				m_cell_link = true;
+				glbin_trackmap_proc.LinkCells(false);
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+				state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
+			}
+			if (m_cell_link && !state.m_key_cell_link)
+				m_cell_link = false;
+			//new cell id
+			if (!m_cell_new_id && state.m_key_cell_new_id)
+			{
+				m_cell_new_id = true;
+				glbin_comp_editor.NewId(false, true);
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+				state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
+			}
+			if (m_cell_new_id && !state.m_key_cell_new_id)
+				m_cell_new_id = false;
+			//clear
+			if (!m_clear_mask && state.m_key_cell_clear)
+			{
+				glbin_vol_selector.Clear();
+				glbin_comp_selector.Clear();
+				GetTraces(false);
+				m_clear_mask = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+				state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
+			}
+			if (m_clear_mask && !state.m_key_cell_clear)
+				m_clear_mask = false;
+			//save all masks
+			if (!m_save_mask && state.m_key_save_mask)
+			{
+				auto vd = glbin_current.vol_data.lock();
+				if (vd)
+				{
+					vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
+					vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
+				}
+				m_save_mask = true;
+				state.m_set_focus = true;
+			}
+			if (m_save_mask && !state.m_key_save_mask)
+				m_save_mask = false;
+			//full screen
+			if (state.m_key_exit_fullscreen)
+			{
+				state.m_exit_fullscreen = true;
+				state.m_fullscreen = false;
+			}
+			if (state.m_key_fullscreen)
+			{
+				state.m_exit_fullscreen = false;
+				state.m_fullscreen = true;
+			}
+			//brush size
+			if (state.m_key_brush_size_down)
+			{
+				ChangeBrushSize(-10, state.m_key_ctrl);
+				state.m_set_focus = true;
+			}
+			if (state.m_key_brush_size_up)
+			{
+				ChangeBrushSize(10, state.m_key_ctrl);
+				state.m_set_focus = true;
+			}
+			//comp include
+			if (!m_comp_include && state.m_key_cell_include)
+			{
+				if (glbin_current.mainframe->GetComponentDlg())
+					glbin_current.mainframe->GetComponentDlg()->IncludeComps();
+				m_comp_include = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_comp_include && !state.m_key_cell_include)
+				m_comp_include = false;
+			//comp exclude
+			if (!m_comp_exclude && state.m_key_cell_exclude)
+			{
+				if (glbin_current.mainframe->GetComponentDlg())
+					glbin_current.mainframe->GetComponentDlg()->ExcludeComps();
+				m_comp_exclude = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_comp_exclude && !state.m_key_cell_exclude)
+				m_comp_exclude = false;
+			//ruler relax
+			if (!m_ruler_relax && state.m_key_ruler_relax)
+			{
+				if (glbin_current.mainframe->GetMeasureDlg())
+					glbin_current.mainframe->GetMeasureDlg()->Relax();
+				m_ruler_relax = true;
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (m_ruler_relax && !state.m_key_ruler_relax)
+				m_ruler_relax = false;
+
+			//grow
+			if ((m_int_mode == InteractiveMode::Grow ||
+				m_int_mode == InteractiveMode::GrowRuler) &&
+				state.m_mouse_left &&
+				m_grow_on)
+			{
+				int sz = glbin_settings.m_ruler_size_thresh;
+				//event.RequestMore();
+				glbin_vol_selector.SetInitMask(2);
+				if (glbin_vol_selector.GetAutoThreshold())
+					state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
+				glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
+				glbin_vol_selector.SetInitMask(3);
+				if (m_int_mode == InteractiveMode::GrowRuler)
+				{
+					glbin_seg_grow.SetVolumeData(cur_vd.get());
+					glbin_seg_grow.SetIter(glbin_vol_selector.GetIter() * 3);
+					glbin_seg_grow.SetSizeThresh(sz);
+					glbin_seg_grow.Compute();
+				}
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_start_loop = true;
+				//update
+				state.m_value_collection.insert({ gstBrushCountAutoUpdate, gstColocalAutoUpdate });
+				if (m_int_mode == InteractiveMode::GrowRuler)
+					state.m_value_collection.insert(gstRulerList);
+			}
+		};
+
 	if (state.m_mouse_over)
 	{
-		//forced refresh
-		if (state.m_key_refresh)
-		{
-			state.m_set_focus = true;
-			m_updating = true;
-			glbin_states.m_status_str = "Forced Refresh";
-			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPush });
-			//wxSizeEvent e;
-			//OnResize(e);
-			RefreshGL(11, false, true, true);
-			glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPop });
-			return;
-		}
-
-		UpdateBrushState(state);
-
-		//draw_mask
-		if (state.m_key_mask && m_draw_mask)
-		{
-			m_draw_mask = false;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (!state.m_key_mask && !m_draw_mask)
-		{
-			m_draw_mask = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-		}
-
-		//move view
-		//left
-		if (!m_move_left &&
-			state.m_key_ctrl &&
-			state.m_key_left)
-		{
-			m_move_left = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = -(side * (std::round(0.8 * (m_ortho_right - m_ortho_left))));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_move_left &&
-			(!state.m_key_ctrl ||
-				!state.m_key_left))
-			m_move_left = false;
-		//right
-		if (!m_move_right &&
-			state.m_key_ctrl &&
-			state.m_key_right)
-		{
-			m_move_right = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector side = fluo::Cross(m_up, m_head);
-			fluo::Vector trans = side * (std::round(0.8 * (m_ortho_right - m_ortho_left)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_move_right &&
-			(!state.m_key_ctrl ||
-				!state.m_key_right))
-			m_move_right = false;
-		//up
-		if (!m_move_up &&
-			state.m_key_ctrl &&
-			state.m_key_up)
-		{
-			m_move_up = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector trans = -m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_move_up &&
-			(!state.m_key_ctrl ||
-				!state.m_key_up))
-			m_move_up = false;
-		//down
-		if (!m_move_down &&
-			state.m_key_ctrl &&
-			state.m_key_down)
-		{
-			m_move_down = true;
-
-			m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-			m_head.normalize();
-			fluo::Vector trans = m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
-			m_obj_transx += trans.x();
-			m_obj_transy += trans.y();
-			m_obj_transz += trans.z();
-			//if (m_persp) SetSortBricks();
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_move_down &&
-			(!state.m_key_ctrl ||
-				!state.m_key_down))
-			m_move_down = false;
-
-		//move time sequence
-		//forward
-		if (state.m_key_mov_forward)
-		{
-			if (m_cam_mode == 1)
-			{
-				//move right
-				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-				m_head.normalize();
-				fluo::Vector side = Cross(m_up, m_head);
-				fluo::Vector trans = 10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
-				m_obj_transx += trans.x();
-				m_obj_transy += trans.y();
-				m_obj_transz += trans.z();
-				m_interactive = true;
-			}
-			else
-			{
-				if (!m_tseq_forward)
-				{
-					int frame = glbin_moviemaker.GetCurrentFrame();
-					frame++;
-					glbin_moviemaker.SetCurrentFrame(frame);
-					state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
-				}
-			}
-			m_tseq_forward = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_tseq_forward && !state.m_key_mov_forward)
-			m_tseq_forward = false;
-		if (!state.m_key_ctrl && state.m_key_mov_play)
-		{
-			int frame = glbin_moviemaker.GetCurrentFrame();
-			frame++;
-			glbin_moviemaker.SetCurrentFrame(frame);
-			state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		//backforward
-		if (state.m_key_mov_backward)
-		{
-			if (m_cam_mode == 1)
-			{
-				//move left
-				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-				m_head.normalize();
-				fluo::Vector side = Cross(m_up, m_head);
-				fluo::Vector trans = -10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
-				m_obj_transx += trans.x();
-				m_obj_transy += trans.y();
-				m_obj_transz += trans.z();
-				m_interactive = true;
-			}
-			else
-			{
-				if (!m_tseq_backward)
-				{
-					int frame = glbin_moviemaker.GetCurrentFrame();
-					frame--;
-					glbin_moviemaker.SetCurrentFrame(frame);
-					state.m_value_collection.insert({ gstMovProgSlider, gstCurrentFrame, gstMovCurTime, gstMovSeqNum, gstTrackList });
-				}
-			}
-			m_tseq_backward = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_tseq_backward && !state.m_key_mov_backward)
-			m_tseq_backward = false;
-
-		//move clip
-		//up
-		if (state.m_key_clip_up)
-		{
-			if (m_cam_mode == 1)
-			{
-				fluo::Vector pos(m_transx, m_transy, m_transz);
-				pos.normalize();
-				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-				double factor = m_persp ? 20.0 : 5000.0;
-				double delta = m_radius / factor;
-				ctr += delta * pos;
-				m_ctrx = ctr.x();
-				m_ctry = ctr.y();
-				m_ctrz = ctr.z();
-				m_interactive = true;
-				if (!m_persp)
-				{
-					factor = m_scale_factor - m_scale_factor * delta;
-					if (factor < 0.1)
-						factor = 0.1;
-					m_scale_factor = factor;
-					state.m_value_collection.insert(gstScaleFactor);
-				}
-			}
-			else
-			{
-				if (!m_clip_up)
-				{
-					if (glbin_current.mainframe->GetClipPlanePanel())
-						glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(-1);
-					state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
-				}
-			}
-			m_clip_up = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_clip_up && !state.m_key_clip_up)
-			m_clip_up = false;
-		//down
-		if (state.m_key_clip_down)
-		{
-			if (m_cam_mode == 1)
-			{
-				fluo::Vector pos(m_transx, m_transy, m_transz);
-				pos.normalize();
-				fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-				double factor = m_persp ? 20.0 : 5000.0;
-				double delta = m_radius / factor;
-				ctr -= delta * pos;
-				m_ctrx = ctr.x();
-				m_ctry = ctr.y();
-				m_ctrz = ctr.z();
-				m_interactive = true;
-				if (!m_persp)
-				{
-					factor = m_scale_factor + m_scale_factor * delta;
-					if (factor < 0.1)
-						factor = 0.1;
-					m_scale_factor = factor;
-					state.m_value_collection.insert(gstScaleFactor);
-				}
-			}
-			else
-			{
-				if (!m_clip_down)
-				{
-					if (glbin_current.mainframe->GetClipPlanePanel())
-						glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(1);
-					state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
-				}
-			}
-			m_clip_down = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_clip_down && !state.m_key_clip_down)
-			m_clip_down = false;
-
-		//cell full
-		if (!m_cell_full && state.m_key_cell_full)
-		{
-			m_cell_full = true;
-			glbin_comp_selector.SelectFullComp();
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_cell_full && !state.m_key_cell_full)
-			m_cell_full = false;
-		//cell link
-		if (!m_cell_link && state.m_key_cell_link)
-		{
-			m_cell_link = true;
-			glbin_trackmap_proc.LinkCells(false);
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_cell_link && !state.m_key_cell_link)
-			m_cell_link = false;
-		//new cell id
-		if (!m_cell_new_id && state.m_key_cell_new_id)
-		{
-			m_cell_new_id = true;
-			glbin_comp_editor.NewId(false, true);
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_cell_new_id && !state.m_key_cell_new_id)
-			m_cell_new_id = false;
-		//clear
-		if (!m_clear_mask && state.m_key_cell_clear)
-		{
-			glbin_vol_selector.Clear();
-			glbin_comp_selector.Clear();
-			GetTraces(false);
-			m_clear_mask = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-			state.m_value_collection.insert({ gstTrackList, gstSelUndoRedo });
-		}
-		if (m_clear_mask && !state.m_key_cell_clear)
-			m_clear_mask = false;
-		//save all masks
-		if (!m_save_mask && state.m_key_save_mask)
-		{
-			auto vd = glbin_current.vol_data.lock();
-			if (vd)
-			{
-				vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-				vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-			}
-			m_save_mask = true;
-			state.m_set_focus = true;
-		}
-		if (m_save_mask && !state.m_key_save_mask)
-			m_save_mask = false;
-		//full screen
-		if (state.m_key_exit_fullscreen)
-		{
-			state.m_exit_fullscreen = true;
-			state.m_fullscreen = false;
-		}
-		if (state.m_key_fullscreen)
-		{
-			state.m_exit_fullscreen = false;
-			state.m_fullscreen = true;
-		}
-		//brush size
-		if (state.m_key_brush_size_down)
-		{
-			ChangeBrushSize(-10, state.m_key_ctrl);
-			state.m_set_focus = true;
-		}
-		if (state.m_key_brush_size_up)
-		{
-			ChangeBrushSize(10, state.m_key_ctrl);
-			state.m_set_focus = true;
-		}
-		//comp include
-		if (!m_comp_include && state.m_key_cell_include)
-		{
-			if (glbin_current.mainframe->GetComponentDlg())
-				glbin_current.mainframe->GetComponentDlg()->IncludeComps();
-			m_comp_include = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_comp_include && !state.m_key_cell_include)
-			m_comp_include = false;
-		//comp exclude
-		if (!m_comp_exclude && state.m_key_cell_exclude)
-		{
-			if (glbin_current.mainframe->GetComponentDlg())
-				glbin_current.mainframe->GetComponentDlg()->ExcludeComps();
-			m_comp_exclude = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_comp_exclude && !state.m_key_cell_exclude)
-			m_comp_exclude = false;
-		//ruler relax
-		if (!m_ruler_relax && state.m_key_ruler_relax)
-		{
-			if (glbin_current.mainframe->GetMeasureDlg())
-				glbin_current.mainframe->GetMeasureDlg()->Relax();
-			m_ruler_relax = true;
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_set_focus = true;
-		}
-		if (m_ruler_relax && !state.m_key_ruler_relax)
-			m_ruler_relax = false;
-
-		//grow
-		if ((m_int_mode == InteractiveMode::Grow ||
-			m_int_mode == InteractiveMode::GrowRuler) &&
-			state.m_mouse_left &&
-			m_grow_on)
-		{
-			int sz = glbin_settings.m_ruler_size_thresh;
-			//event.RequestMore();
-			glbin_vol_selector.SetInitMask(2);
-			if (glbin_vol_selector.GetAutoThreshold())
-				state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-			glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
-			glbin_vol_selector.SetInitMask(3);
-			if (m_int_mode == InteractiveMode::GrowRuler)
-			{
-				glbin_seg_grow.SetVolumeData(cur_vd.get());
-				glbin_seg_grow.SetIter(glbin_vol_selector.GetIter() * 3);
-				glbin_seg_grow.SetSizeThresh(sz);
-				glbin_seg_grow.Compute();
-			}
-			state.m_refresh = true;
-			state.m_looking_glass_changed = true;
-			state.m_start_loop = true;
-			//update
-			state.m_value_collection.insert({ gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-			if (m_int_mode == InteractiveMode::GrowRuler)
-				state.m_value_collection.insert(gstRulerList);
-		}
+		ProcessMouseOver();
 	}
 
 #if defined(_WIN32)
@@ -10745,18 +10714,30 @@ void RenderView::ProcessIdle(IdleState& state)
 	}
 #endif
 
+	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
+	if (!scheduler)
+		return;
+
+	if (forced_refresh)
+	{
+		glbin_states.m_status_str = "Forced Refresh";
+		glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPush });
+		scheduler->requestDraw(DrawRequest("Forced refresh"));
+		glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPop });
+	}
 	if (state.m_refresh)
 	{
 		m_updating = true;
-		RefreshGL(12, state.m_erase_background, state.m_start_loop, state.m_looking_glass_changed);
+		scheduler->requestDraw(DrawRequest("Idle process refresh", { static_cast<int>(m_id) },
+			true, false, state.m_start_loop, false, state.m_looking_glass_changed));
+		//RefreshGL(12, state.m_erase_background, state.m_start_loop, state.m_looking_glass_changed);
 		if (state.m_value_collection.empty())
 			state.m_value_collection.insert(gstNull);
 	}
 	else if (glbin_settings.m_inf_loop)
 	{
-		RefreshGL(13, false, true, true);
+		scheduler->requestDraw(DrawRequest("Infinite loop refresh"));
 		state.m_request_more = true;
-		return;
 	}
 }
 
@@ -10775,6 +10756,7 @@ void RenderView::ProcessMouse(MouseState& state)
 	mp *= m_dpi_factor;
 	if (m_enlarge)
 		mp *= m_enlarge_scale;
+	fluo::ValueCollection vc;
 
 	auto cur_vd = m_cur_vol.lock();
 
@@ -10787,136 +10769,141 @@ void RenderView::ProcessMouse(MouseState& state)
 			if (m_crop_type)
 			{
 				m_int_mode = InteractiveMode::CropFrame;
-				return;
+				//return;
 			}
 		}
-
-		state.m_reset_focus_slider = true;
-
-		bool found_rp = false;
-		if (m_int_mode == InteractiveMode::EditRulerPoint ||
-			m_int_mode == InteractiveMode::MoveRuler ||
-			m_int_mode == InteractiveMode::RulerLockPoint ||
-			m_int_mode == InteractiveMode::RulerDelPoint)
+		else
 		{
-			found_rp = glbin_ruler_handler.FindEditingRuler(
-				mp.x(), mp.y());
-		}
-		if (found_rp)
-		{
-			if (m_int_mode == InteractiveMode::RulerLockPoint)
+			state.m_reset_focus_slider = true;
+
+			bool found_rp = false;
+			if (m_int_mode == InteractiveMode::EditRulerPoint ||
+				m_int_mode == InteractiveMode::MoveRuler ||
+				m_int_mode == InteractiveMode::RulerLockPoint ||
+				m_int_mode == InteractiveMode::RulerDelPoint)
 			{
-				flrd::RulerPoint *p = glbin_ruler_handler.GetPoint();
-				if (p) p->ToggleLocked();
+				found_rp = glbin_ruler_handler.FindEditingRuler(
+					mp.x(), mp.y());
 			}
-			if (m_int_mode == InteractiveMode::RulerDelPoint)
-				glbin_ruler_handler.DeletePoint();
-			RefreshGL(14);
-			glbin_current.mainframe->UpdateProps({ gstRulerList });
-		}
-
-		if (m_int_mode == InteractiveMode::Viewport ||
-			((m_int_mode == InteractiveMode::Ruler ||
-			m_int_mode == InteractiveMode::Magnet) &&
-			state.m_key_alt) ||
-			((m_int_mode == InteractiveMode::EditRulerPoint ||
-			m_int_mode == InteractiveMode::MoveRuler ||
-			m_int_mode == InteractiveMode::RulerLockPoint ||
-			m_int_mode == InteractiveMode::RulerDelPoint) &&
-			!found_rp))
-		{
-			old_mouse_X = static_cast<long>(std::round(mp.x()));
-			old_mouse_Y = static_cast<long>(std::round(mp.y()));
-			m_pick = true;
-		}
-		else if (m_int_mode == InteractiveMode::BrushSelect ||
-			m_int_mode == InteractiveMode::BrushRuler)
-		{
-			old_mouse_X = static_cast<long>(std::round(mp.x()));
-			old_mouse_Y = static_cast<long>(std::round(mp.y()));
-			prv_mouse_X = old_mouse_X;
-			prv_mouse_Y = old_mouse_Y;
-			m_paint_enable = true;
-			m_clear_paint = true;
-			glbin_vol_selector.SetBrushPressPeak(0.0);
-			RefreshGL(15);
-		}
-
-		if (m_int_mode == InteractiveMode::Grow ||
-			m_int_mode == InteractiveMode::GrowRuler)
-		{
-			glbin_vol_selector.ResetMousePos();
-			glbin_vol_selector.SetInitMask(1);
-			if (glbin_vol_selector.GetAutoThreshold())
-				glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
-			glbin_vol_selector.SetInitMask(3);
-			if (m_int_mode == InteractiveMode::GrowRuler && cur_vd)
-				cur_vd->AddEmptyLabel(0, false);
-			m_force_clear = true;
-			m_grow_on = true;
-		}
-
-		if (m_int_mode == InteractiveMode::Pencil &&
-			!state.m_key_alt)
-		{
-			//add one point to a ruler
-			glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 2);
-			RefreshGL(16);
-			glbin_current.mainframe->UpdateProps({ gstRulerList });
-		}
-
-		if (m_int_mode == InteractiveMode::CenterClick)
-		{
-			fluo::Point p, ip;
-			glbin_volume_point.SetVolumeData(cur_vd);
-			if (glbin_volume_point.GetPointVolume(m_mouse_x, m_mouse_y, 2, true, m_pin_pick_thresh, p, ip) > 0.0 ||
-				glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p )>0.0 ||
-				glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p)>0.0)
+			if (found_rp)
 			{
-				//center view on point
-				p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
-					p.y() - m_obj_ctry - m_obj_ctr_offy,
-					p.z() - m_obj_ctrz - m_obj_ctr_offz);
-				if (glbin_settings.m_hologram_mode == 2)
+				if (m_int_mode == InteractiveMode::RulerLockPoint)
 				{
-					//only change depth to match the point
-					glm::vec3 eye, center, up;
-					GetCameraSettings(eye, center, up);
-					glm::vec3 view_dir = glm::normalize(center - eye);
-					glm::vec3 p3d = glm::vec3(p.x(), p.y(), p.z());
-					float depth = glm::dot(p3d - eye, view_dir);
-					glm::vec3 new_center = eye + depth * view_dir;
-					glm::vec3 offset = new_center - center;
-					p = fluo::Point(offset.x, offset.y, offset.z);
+					flrd::RulerPoint* p = glbin_ruler_handler.GetPoint();
+					if (p) p->ToggleLocked();
 				}
-				m_obj_transx = p.x();
-				m_obj_transy = p.y();
-				m_obj_transz = p.z();
-				m_interactive = true;
-				RefreshGL(17);
+				if (m_int_mode == InteractiveMode::RulerDelPoint)
+					glbin_ruler_handler.DeletePoint();
+				state.m_refresh = true;
+				vc.insert(gstRulerList);
+				//RefreshGL(14);
+				//glbin_current.mainframe->UpdateProps({ gstRulerList });
+			}
+
+			if (m_int_mode == InteractiveMode::Viewport ||
+				((m_int_mode == InteractiveMode::Ruler ||
+					m_int_mode == InteractiveMode::Magnet) &&
+					state.m_key_alt) ||
+				((m_int_mode == InteractiveMode::EditRulerPoint ||
+					m_int_mode == InteractiveMode::MoveRuler ||
+					m_int_mode == InteractiveMode::RulerLockPoint ||
+					m_int_mode == InteractiveMode::RulerDelPoint) &&
+					!found_rp))
+			{
+				old_mouse_X = static_cast<long>(std::round(mp.x()));
+				old_mouse_Y = static_cast<long>(std::round(mp.y()));
+				m_pick = true;
+			}
+			else if (m_int_mode == InteractiveMode::BrushSelect ||
+				m_int_mode == InteractiveMode::BrushRuler)
+			{
+				old_mouse_X = static_cast<long>(std::round(mp.x()));
+				old_mouse_Y = static_cast<long>(std::round(mp.y()));
+				prv_mouse_X = old_mouse_X;
+				prv_mouse_Y = old_mouse_Y;
+				m_paint_enable = true;
+				m_clear_paint = true;
+				glbin_vol_selector.SetBrushPressPeak(0.0);
+				state.m_refresh = true;
+				//RefreshGL(15);
+			}
+
+			if (m_int_mode == InteractiveMode::Grow ||
+				m_int_mode == InteractiveMode::GrowRuler)
+			{
+				glbin_vol_selector.ResetMousePos();
+				glbin_vol_selector.SetInitMask(1);
+				if (glbin_vol_selector.GetAutoThreshold())
+					glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
+				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
+				glbin_vol_selector.SetInitMask(3);
+				if (m_int_mode == InteractiveMode::GrowRuler && cur_vd)
+					cur_vd->AddEmptyLabel(0, false);
+				m_force_clear = true;
+				m_grow_on = true;
+			}
+
+			if (m_int_mode == InteractiveMode::Pencil &&
+				!state.m_key_alt)
+			{
+				//add one point to a ruler
+				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 2);
+				state.m_refresh = true;
+				vc.insert(gstRulerList);
+				//RefreshGL(16);
+				//glbin_current.mainframe->UpdateProps({ gstRulerList });
+			}
+
+			if (m_int_mode == InteractiveMode::CenterClick)
+			{
+				fluo::Point p, ip;
+				glbin_volume_point.SetVolumeData(cur_vd);
+				if (glbin_volume_point.GetPointVolume(m_mouse_x, m_mouse_y, 2, true, m_pin_pick_thresh, p, ip) > 0.0 ||
+					glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p) > 0.0 ||
+					glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p) > 0.0)
+				{
+					//center view on point
+					p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
+						p.y() - m_obj_ctry - m_obj_ctr_offy,
+						p.z() - m_obj_ctrz - m_obj_ctr_offz);
+					if (glbin_settings.m_hologram_mode == 2)
+					{
+						//only change depth to match the point
+						glm::vec3 eye, center, up;
+						GetCameraSettings(eye, center, up);
+						glm::vec3 view_dir = glm::normalize(center - eye);
+						glm::vec3 p3d = glm::vec3(p.x(), p.y(), p.z());
+						float depth = glm::dot(p3d - eye, view_dir);
+						glm::vec3 new_center = eye + depth * view_dir;
+						glm::vec3 offset = new_center - center;
+						p = fluo::Point(offset.x, offset.y, offset.z);
+					}
+					m_obj_transx = p.x();
+					m_obj_transy = p.y();
+					m_obj_transz = p.z();
+					m_interactive = true;
+					state.m_refresh = true;
+					//RefreshGL(17);
+				}
 			}
 		}
-
-		return;
+		//return;
 	}
-	if (state.m_mouse_right_down)
+	else if (state.m_mouse_right_down)
 	{
 		state.m_reset_focus_slider = true;
 		old_mouse_X = static_cast<long>(std::round(mp.x()));
 		old_mouse_Y = static_cast<long>(std::round(mp.y()));
-		return;
+		//return;
 	}
-	if (state.m_mouse_middle_down)
+	else if (state.m_mouse_middle_down)
 	{
 		state.m_reset_focus_slider = true;
 		old_mouse_X = static_cast<long>(std::round(mp.x()));
 		old_mouse_Y = static_cast<long>(std::round(mp.y()));
-		return;
+		//return;
 	}
-
-	//mouse button up operations
-	if (state.m_mouse_left_up)
+	else if (state.m_mouse_left_up)
 	{
 		if (m_int_mode == InteractiveMode::Viewport)
 		{
@@ -10925,16 +10912,15 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				Pick(state);
 				m_pick_lock_center = false;
-				return;
+				//return;
 			}
-			else
-			{
-				return;
-			}
+			//else
+			//{
+			//	return;
+			//}
 		}
 		else if (m_int_mode == InteractiveMode::BrushSelect)
 		{
-			fluo::ValueCollection vc;
 			//segment volumes
 			m_paint_enable = true;
 			if (glbin_vol_selector.GetAutoThreshold())
@@ -10958,19 +10944,22 @@ void RenderView::ProcessMouse(MouseState& state)
 			}
 			m_int_mode = InteractiveMode::BrushSelectUpdate;
 			m_force_clear = true;
-			RefreshGL(17);
+			state.m_refresh = true;
 			vc.insert({ gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-			glbin_current.mainframe->UpdateProps(vc);
-			return;
+			//RefreshGL(17);
+			//glbin_current.mainframe->UpdateProps(vc);
+			//return;
 		}
 		else if (m_int_mode == InteractiveMode::Ruler &&
 			!state.m_key_alt)
 		{
 			//add one point to a ruler
 			glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 1);
-			RefreshGL(18);
-			glbin_current.mainframe->UpdateProps({ gstRulerList });
-			return;
+			state.m_refresh = true;
+			vc.insert(gstRulerList);
+			//RefreshGL(18);
+			//glbin_current.mainframe->UpdateProps({ gstRulerList });
+			//return;
 		}
 		else if (m_int_mode == InteractiveMode::MoveRuler ||
 			m_int_mode == InteractiveMode::RulerLockPoint)
@@ -10991,17 +10980,18 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.AddPaintRulerPoint();
 			m_int_mode = InteractiveMode::BrushRulerUpdate;
 			m_force_clear = true;
-			RefreshGL(19);
+			state.m_refresh = true;
 			vc.insert({ gstRulerList, gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-			glbin_current.mainframe->UpdateProps(vc);
-			return;
+			//RefreshGL(19);
+			//glbin_current.mainframe->UpdateProps(vc);
+			//return;
 		}
 		else if (m_int_mode == InteractiveMode::Grow ||
 			m_int_mode == InteractiveMode::GrowRuler)
 		{
 			//glbin_vol_selector.PushMask();
 			m_grow_on = false;
-			return;
+			//return;
 		}
 		else if (m_int_mode == InteractiveMode::Pencil &&
 			!state.m_key_alt)
@@ -11011,9 +11001,11 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.SetEdited(true);
 				glbin_ruler_handler.Relax();
 			}
-			RefreshGL(20);
-			glbin_current.mainframe->UpdateProps({ gstRulerList });
-			return;
+			state.m_refresh = true;
+			vc.insert(gstRulerList);
+			//RefreshGL(20);
+			//glbin_current.mainframe->UpdateProps({ gstRulerList });
+			//return;
 		}
 		else if ((m_int_mode == InteractiveMode::EditRulerPoint ||
 			m_int_mode == InteractiveMode::Magnet) &&
@@ -11028,9 +11020,11 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
 			glbin_ruler_handler.ApplyMagPoint();
 			glbin_ruler_handler.ClearMagStroke();
-			RefreshGL(21);
-			glbin_current.mainframe->UpdateProps({ gstRulerList });
-			return;
+			state.m_refresh = true;
+			vc.insert(gstRulerList);
+			//RefreshGL(21);
+			//glbin_current.mainframe->UpdateProps({ gstRulerList });
+			//return;
 		}
 		else if (m_int_mode == InteractiveMode::CropFrame)
 		{
@@ -11038,17 +11032,13 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_crop_type = 0;
 		}
 	}
-	if (state.m_mouse_middle_up)
+	else if (state.m_mouse_middle_up)
 	{
 		//SetSortBricks();
-		return;
+		//return;
 	}
-	if (state.m_mouse_right_up)
+	else if (state.m_mouse_right_up)
 	{
-		if (m_int_mode == InteractiveMode::Viewport)
-		{
-			//return;
-		}
 		if (m_int_mode == InteractiveMode::Ruler &&
 			!state.m_key_alt)
 		{
@@ -11066,232 +11056,246 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_ruler_handler.SetEdited(true);
 				glbin_ruler_handler.Relax();
 			}
-			RefreshGL(22);
-			glbin_current.mainframe->UpdateProps({ gstRulerList });
-			return;
+			state.m_refresh = true;
+			vc.insert(gstRulerList);
+			//RefreshGL(22);
+			//glbin_current.mainframe->UpdateProps({ gstRulerList });
+			//return;
 		}
 		//SetSortBricks();
 	}
-
-	//mouse dragging
-	if (state.m_mouse_drag)
+	else if (state.m_mouse_drag)
 	{
 		//crop
 		if (m_int_mode == InteractiveMode::CropFrame)
 		{
 			ChangeCropFrame(mp);
-			RefreshGL(23);
-			glbin_current.mainframe->UpdateProps({ gstCropValues });
-			return;
-		}
-
-		flvr::TextureRenderer::set_cor_up_time(
-			static_cast<int>(std::round(
-				sqrt(double(old_mouse_X - mp.x())*
-				double(old_mouse_X - mp.x()) +
-				double(old_mouse_Y - mp.y())*
-				double(old_mouse_Y - mp.y())))));
-
-		flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
-		bool hold_old = false;
-		if (m_int_mode == InteractiveMode::Viewport ||
-			((m_int_mode == InteractiveMode::Ruler  ||
-			m_int_mode == InteractiveMode::Pencil ||
-			m_int_mode == InteractiveMode::Magnet) &&
-			state.m_key_alt) ||
-			((m_int_mode == InteractiveMode::MoveRuler ||
-			m_int_mode == InteractiveMode::Grow ||
-			m_int_mode == InteractiveMode::RulerLockPoint ||
-			m_int_mode == InteractiveMode::GrowRuler ||
-			m_int_mode == InteractiveMode::RulerDelPoint) &&
-			!p0) ||
-			((m_int_mode == InteractiveMode::EditRulerPoint ||
-			m_int_mode == InteractiveMode::Magnet ||
-			m_int_mode == InteractiveMode::Pencil) &&
-			(state.m_key_ctrl ||
-			state.m_mouse_middle_is_down ||
-			state.m_mouse_right_is_down)))
-		{
-			//disable picking
-			m_pick = false;
-
-			if (old_mouse_X != -1 &&
-				old_mouse_Y != -1 &&
-				abs(old_mouse_X - mp.x()) +
-				abs(old_mouse_Y - mp.y())<200)
-			{
-				if (state.m_mouse_left_is_down &&
-					!state.m_key_ctrl &&
-					m_int_mode != InteractiveMode::Grow &&
-					m_int_mode != InteractiveMode::GrowRuler)
-				{
-					fluo::Quaternion q_delta = Trackball(
-						mp.x() - old_mouse_X, old_mouse_Y - mp.y());
-					if (m_rot_lock && q_delta.IsIdentity())
-						hold_old = true;
-					m_q *= q_delta;
-					m_q.Normalize();
-					fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-					fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-					m_transx = cam_pos2.x;
-					m_transy = cam_pos2.y;
-					m_transz = cam_pos2.z;
-
-					fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-					fluo::Quaternion up2 = (-m_q) * up * m_q;
-					m_up = fluo::Vector(up2.x, up2.y, up2.z);
-
-					Q2A();
-
-					m_interactive = true;
-
-					if (!hold_old)
-						RefreshGL(24);
-
-					if (m_render_view_panel)
-						m_render_view_panel->FluoUpdate({ gstCamRotation });
-				}
-				if (state.m_mouse_middle_is_down || (state.m_key_ctrl && state.m_mouse_left_is_down))
-				{
-					long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
-					long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
-
-					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
-					m_head.normalize();
-					fluo::Vector side = Cross(m_up, m_head);
-					fluo::Vector trans = -(
-						side*(double(dx)*(m_ortho_right - m_ortho_left) / double(nx)) +
-						m_up*(double(dy)*(m_ortho_top - m_ortho_bottom) / double(ny)));
-					m_obj_transx += trans.x();
-					m_obj_transy += trans.y();
-					m_obj_transz += trans.z();
-
-					m_interactive = true;
-
-					if (m_pin_rot_ctr)
-						m_update_rot_ctr = true;
-
-					RefreshGL(25);
-				}
-				if (state.m_mouse_right_is_down)
-				{
-					long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
-					long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
-
-					double delta = abs(dx)>abs(dy) ?
-						(double)dx / (double)nx :
-						(double)-dy / (double)ny;
-					m_scale_factor += m_scale_factor * delta;
-
-					if (m_cam_mode == 1)
-					{
-						fluo::Vector pos(m_transx, m_transy, m_transz);
-						pos.normalize();
-						fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-						delta = m_radius * delta;
-						ctr -= delta * pos;
-						m_ctrx = ctr.x();
-						m_ctry = ctr.y();
-						m_ctrz = ctr.z();
-					}
-
-					m_interactive = true;
-
-					RefreshGL(26);
-
-					if (m_render_view_panel)
-						m_render_view_panel->FluoUpdate({ gstScaleFactor });
-				}
-			}
-		}
-		else if (m_int_mode == InteractiveMode::BrushSelect ||
-			m_int_mode == InteractiveMode::BrushRuler)
-		{
-			m_paint_enable = true;
-			RefreshGL(27);
-		}
-		else if (m_int_mode == InteractiveMode::Clipplane)
-		{
-			if (old_mouse_X != -1 &&
-				old_mouse_Y != -1 &&
-				abs(old_mouse_X - mp.x()) +
-				abs(old_mouse_Y - mp.y())<200)
-			{
-				if (state.m_mouse_left_is_down)
-				{
-					fluo::Quaternion q_delta = TrackballClip(old_mouse_X, static_cast<int>(std::round(mp.y())), static_cast<int>(std::round(mp.x())), old_mouse_Y);
-					m_q_cl = q_delta * m_q_cl;
-					m_q_cl.Normalize();
-					SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-					RefreshGL(28);
-				}
-			}
-		}
-		else if (m_int_mode == InteractiveMode::EditRulerPoint ||
-			m_int_mode == InteractiveMode::MoveRuler)
-		{
-			bool rval = false;
-			if (m_int_mode == InteractiveMode::EditRulerPoint)
-				rval = glbin_ruler_handler.EditPoint(
-					static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), state.m_key_alt);
-			else if (m_int_mode == InteractiveMode::MoveRuler)
-				rval = glbin_ruler_handler.MoveRuler(
-					static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
-			if (rval)
-			{
-				RefreshGL(29);
-				glbin_current.mainframe->UpdateProps({ gstRulerList });
-				glbin_ruler_handler.SetEdited(true);
-			}
-		}
-		else if (m_int_mode == InteractiveMode::Pencil &&
-			!state.m_key_alt)
-		{
-			double dist = glbin_settings.m_pencil_dist;
-			if (glbin_ruler_handler.GetMouseDist(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), dist))
-			{
-				//add one point to a ruler
-				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);
-				RefreshGL(30);
-				glbin_current.mainframe->UpdateProps({ gstRulerList });
-			}
-		}
-		else if (m_int_mode == InteractiveMode::Magnet &&
-			!state.m_key_alt)
-		{
-			double dist = glbin_settings.m_pencil_dist;
-			if (glbin_ruler_handler.GetMouseDist(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), dist))
-				glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
-			glbin_ruler_handler.ApplyMagStroke();
-			RefreshGL(31);
-		}
-
-		//update mouse position
-		if (old_mouse_X >= 0 && old_mouse_Y >= 0)
-		{
-			prv_mouse_X = old_mouse_X;
-			prv_mouse_Y = old_mouse_Y;
-			if (!hold_old)
-			{
-				old_mouse_X = static_cast<long>(std::round(mp.x()));
-				old_mouse_Y = static_cast<long>(std::round(mp.y()));
-			}
+			state.m_refresh = true;
+			vc.insert(gstCropValues);
+			//RefreshGL(23);
+			//glbin_current.mainframe->UpdateProps({ gstCropValues });
+			//return;
 		}
 		else
 		{
-			old_mouse_X = static_cast<long>(std::round(mp.x()));
-			old_mouse_Y = static_cast<long>(std::round(mp.y()));
-			prv_mouse_X = old_mouse_X;
-			prv_mouse_Y = old_mouse_Y;
+			flvr::TextureRenderer::set_cor_up_time(
+				static_cast<int>(std::round(
+					sqrt(double(old_mouse_X - mp.x()) *
+						double(old_mouse_X - mp.x()) +
+						double(old_mouse_Y - mp.y()) *
+						double(old_mouse_Y - mp.y())))));
+
+			flrd::RulerPoint* p0 = glbin_ruler_handler.GetPoint();
+			bool hold_old = false;
+			if (m_int_mode == InteractiveMode::Viewport ||
+				((m_int_mode == InteractiveMode::Ruler ||
+					m_int_mode == InteractiveMode::Pencil ||
+					m_int_mode == InteractiveMode::Magnet) &&
+					state.m_key_alt) ||
+				((m_int_mode == InteractiveMode::MoveRuler ||
+					m_int_mode == InteractiveMode::Grow ||
+					m_int_mode == InteractiveMode::RulerLockPoint ||
+					m_int_mode == InteractiveMode::GrowRuler ||
+					m_int_mode == InteractiveMode::RulerDelPoint) &&
+					!p0) ||
+				((m_int_mode == InteractiveMode::EditRulerPoint ||
+					m_int_mode == InteractiveMode::Magnet ||
+					m_int_mode == InteractiveMode::Pencil) &&
+					(state.m_key_ctrl ||
+						state.m_mouse_middle_is_down ||
+						state.m_mouse_right_is_down)))
+			{
+				//disable picking
+				m_pick = false;
+
+				if (old_mouse_X != -1 &&
+					old_mouse_Y != -1 &&
+					abs(old_mouse_X - mp.x()) +
+					abs(old_mouse_Y - mp.y()) < 200)
+				{
+					if (state.m_mouse_left_is_down &&
+						!state.m_key_ctrl &&
+						m_int_mode != InteractiveMode::Grow &&
+						m_int_mode != InteractiveMode::GrowRuler)
+					{
+						fluo::Quaternion q_delta = Trackball(
+							mp.x() - old_mouse_X, old_mouse_Y - mp.y());
+						if (m_rot_lock && q_delta.IsIdentity())
+							hold_old = true;
+						m_q *= q_delta;
+						m_q.Normalize();
+						fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
+						fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+						m_transx = cam_pos2.x;
+						m_transy = cam_pos2.y;
+						m_transz = cam_pos2.z;
+
+						fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
+						fluo::Quaternion up2 = (-m_q) * up * m_q;
+						m_up = fluo::Vector(up2.x, up2.y, up2.z);
+
+						Q2A();
+
+						m_interactive = true;
+
+						if (!hold_old)
+							state.m_refresh = true;
+						//RefreshGL(24);
+
+						vc.insert(gstCamRotation);
+						//if (m_render_view_panel)
+						//	m_render_view_panel->FluoUpdate({ gstCamRotation });
+					}
+					if (state.m_mouse_middle_is_down || (state.m_key_ctrl && state.m_mouse_left_is_down))
+					{
+						long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
+						long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
+
+						m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+						m_head.normalize();
+						fluo::Vector side = Cross(m_up, m_head);
+						fluo::Vector trans = -(
+							side * (double(dx) * (m_ortho_right - m_ortho_left) / double(nx)) +
+							m_up * (double(dy) * (m_ortho_top - m_ortho_bottom) / double(ny)));
+						m_obj_transx += trans.x();
+						m_obj_transy += trans.y();
+						m_obj_transz += trans.z();
+
+						m_interactive = true;
+
+						if (m_pin_rot_ctr)
+							m_update_rot_ctr = true;
+
+						state.m_refresh = true;
+						//RefreshGL(25);
+					}
+					if (state.m_mouse_right_is_down)
+					{
+						long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
+						long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
+
+						double delta = abs(dx) > abs(dy) ?
+							(double)dx / (double)nx :
+							(double)-dy / (double)ny;
+						m_scale_factor += m_scale_factor * delta;
+
+						if (m_cam_mode == 1)
+						{
+							fluo::Vector pos(m_transx, m_transy, m_transz);
+							pos.normalize();
+							fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
+							delta = m_radius * delta;
+							ctr -= delta * pos;
+							m_ctrx = ctr.x();
+							m_ctry = ctr.y();
+							m_ctrz = ctr.z();
+						}
+
+						m_interactive = true;
+
+						state.m_refresh = true;
+						vc.insert(gstScaleFactor);
+						//RefreshGL(26);
+
+						//if (m_render_view_panel)
+						//	m_render_view_panel->FluoUpdate({ gstScaleFactor });
+					}
+				}
+			}
+			else if (m_int_mode == InteractiveMode::BrushSelect ||
+				m_int_mode == InteractiveMode::BrushRuler)
+			{
+				m_paint_enable = true;
+				state.m_refresh = true;
+				//RefreshGL(27);
+			}
+			else if (m_int_mode == InteractiveMode::Clipplane)
+			{
+				if (old_mouse_X != -1 &&
+					old_mouse_Y != -1 &&
+					abs(old_mouse_X - mp.x()) +
+					abs(old_mouse_Y - mp.y()) < 200)
+				{
+					if (state.m_mouse_left_is_down)
+					{
+						fluo::Quaternion q_delta = TrackballClip(old_mouse_X, static_cast<int>(std::round(mp.y())), static_cast<int>(std::round(mp.x())), old_mouse_Y);
+						m_q_cl = q_delta * m_q_cl;
+						m_q_cl.Normalize();
+						SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+						state.m_refresh = true;
+						//RefreshGL(28);
+					}
+				}
+			}
+			else if (m_int_mode == InteractiveMode::EditRulerPoint ||
+				m_int_mode == InteractiveMode::MoveRuler)
+			{
+				bool rval = false;
+				if (m_int_mode == InteractiveMode::EditRulerPoint)
+					rval = glbin_ruler_handler.EditPoint(
+						static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), state.m_key_alt);
+				else if (m_int_mode == InteractiveMode::MoveRuler)
+					rval = glbin_ruler_handler.MoveRuler(
+						static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
+				if (rval)
+				{
+					state.m_refresh = true;
+					vc.insert(gstRulerList);
+					//RefreshGL(29);
+					//glbin_current.mainframe->UpdateProps({ gstRulerList });
+					glbin_ruler_handler.SetEdited(true);
+				}
+			}
+			else if (m_int_mode == InteractiveMode::Pencil &&
+				!state.m_key_alt)
+			{
+				double dist = glbin_settings.m_pencil_dist;
+				if (glbin_ruler_handler.GetMouseDist(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), dist))
+				{
+					//add one point to a ruler
+					glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);
+					state.m_refresh = true;
+					vc.insert(gstRulerList);
+					//RefreshGL(30);
+					//glbin_current.mainframe->UpdateProps({ gstRulerList });
+				}
+			}
+			else if (m_int_mode == InteractiveMode::Magnet &&
+				!state.m_key_alt)
+			{
+				double dist = glbin_settings.m_pencil_dist;
+				if (glbin_ruler_handler.GetMouseDist(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), dist))
+					glbin_ruler_handler.AddMagStrokePoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())));
+				glbin_ruler_handler.ApplyMagStroke();
+				state.m_refresh = true;
+				//RefreshGL(31);
+			}
+
+			//update mouse position
+			if (old_mouse_X >= 0 && old_mouse_Y >= 0)
+			{
+				prv_mouse_X = old_mouse_X;
+				prv_mouse_Y = old_mouse_Y;
+				if (!hold_old)
+				{
+					old_mouse_X = static_cast<long>(std::round(mp.x()));
+					old_mouse_Y = static_cast<long>(std::round(mp.y()));
+				}
+			}
+			else
+			{
+				old_mouse_X = static_cast<long>(std::round(mp.x()));
+				old_mouse_Y = static_cast<long>(std::round(mp.y()));
+				prv_mouse_X = old_mouse_X;
+				prv_mouse_Y = old_mouse_Y;
+			}
+			//return;
 		}
-
-		return;
 	}
-
-	//wheel operations
-	int wheel = state.m_mouse_wheel_rotate;
-	if (wheel)  //if rotation
+	else if (state.m_mouse_wheel_rotate)
 	{
+		//wheel operations
+		int wheel = state.m_mouse_wheel_rotate;
 		if (state.m_valid_focus_slider)
 		{
 			state.m_scroll_focus_slider = true;
@@ -11325,13 +11329,15 @@ void RenderView::ProcessMouse(MouseState& state)
 
 				m_interactive = true;
 
-				if (m_render_view_panel)
-					m_render_view_panel->FluoUpdate({ gstScaleFactor });
+				vc.insert(gstScaleFactor);
+				//if (m_render_view_panel)
+				//	m_render_view_panel->FluoUpdate({ gstScaleFactor });
 			}
 		}
 
-		RefreshGL(32);
-		return;
+		state.m_refresh = true;
+		//RefreshGL(32);
+		//return;
 	}
 
 	// draw the strokes into a framebuffer texture
@@ -11340,23 +11346,34 @@ void RenderView::ProcessMouse(MouseState& state)
 	{
 		old_mouse_X = static_cast<long>(std::round(mp.x()));
 		old_mouse_Y = static_cast<long>(std::round(mp.y()));
-		RefreshGL(33);
-		return;
+		state.m_refresh = true;
+		//RefreshGL(33);
+		//return;
 	}
 
 	if (m_draw_info & INFO_DISP)
 	{
-		if (glbin_moviemaker.IsRunning())
-			return;
-		if (glbin_settings.m_hologram_mode)
-			return;
-
-		m_retain_finalbuffer = true;
-#ifdef _WIN32
-		RefreshGL(34, false, false);
-#else
-		RefreshGL(34, false, true);
-#endif
-		return;
+		if (!glbin_moviemaker.IsRunning() &&
+			!glbin_settings.m_hologram_mode)
+		{
+			m_retain_finalbuffer = true;
+			state.m_refresh = true;
+		}
+//#ifdef _WIN32
+//		RefreshGL(34, false, false);
+//#else
+//		RefreshGL(34, false, true);
+//#endif
+		//return;
 	}
+
+	if (state.m_refresh)
+	{
+		auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
+		if (scheduler)
+			scheduler->requestDraw(DrawRequest("Mouse process refresh", { static_cast<int>(m_id) },
+				!m_retain_finalbuffer, false, true, m_interactive, true));
+	}
+	if (!vc.empty())
+		glbin_current.mainframe->UpdateProps(vc);
 }

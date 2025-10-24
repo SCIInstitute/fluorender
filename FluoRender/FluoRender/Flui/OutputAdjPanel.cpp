@@ -118,7 +118,7 @@ OutputAdjPanel::~OutputAdjPanel()
 	glbin.del_undo_control(m_b_brightness_sldr);
 	glbin.del_undo_control(m_b_hdr_sldr);
 
-	SetFocusVRenderViews(0);
+	m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
@@ -709,7 +709,7 @@ void OutputAdjPanel::OnRGammaMF(wxCommandEvent& event)
 		SyncGamma(0);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_r_gamma_sldr);
+		m_frame->SetFocusVRenderViews(m_r_gamma_sldr);
 		break;
 	case 2:
 		SetGamma(0, glbin_outadj_def.m_gamma_r, true);
@@ -732,7 +732,7 @@ void OutputAdjPanel::OnGGammaMF(wxCommandEvent& event)
 		SyncGamma(1);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_g_gamma_sldr);
+		m_frame->SetFocusVRenderViews(m_g_gamma_sldr);
 		break;
 	case 2:
 		SetGamma(1, glbin_outadj_def.m_gamma_g, true);
@@ -755,7 +755,7 @@ void OutputAdjPanel::OnBGammaMF(wxCommandEvent& event)
 		SyncGamma(2);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_b_gamma_sldr);
+		m_frame->SetFocusVRenderViews(m_b_gamma_sldr);
 		break;
 	case 2:
 		SetGamma(2, glbin_outadj_def.m_gamma_b, true);
@@ -778,7 +778,7 @@ void OutputAdjPanel::OnRBrightnessMF(wxCommandEvent& event)
 		SyncBrightness(0);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_r_brightness_sldr);
+		m_frame->SetFocusVRenderViews(m_r_brightness_sldr);
 		break;
 	case 2:
 		SetBrightness(0, glbin_outadj_def.m_brightness_r, true);
@@ -801,7 +801,7 @@ void OutputAdjPanel::OnGBrightnessMF(wxCommandEvent& event)
 		SyncBrightness(1);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_g_brightness_sldr);
+		m_frame->SetFocusVRenderViews(m_g_brightness_sldr);
 		break;
 	case 2:
 		SetBrightness(1, glbin_outadj_def.m_brightness_g, true);
@@ -824,7 +824,7 @@ void OutputAdjPanel::OnBBrightnessMF(wxCommandEvent& event)
 		SyncBrightness(2);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_b_brightness_sldr);
+		m_frame->SetFocusVRenderViews(m_b_brightness_sldr);
 		break;
 	case 2:
 		SetBrightness(2, glbin_outadj_def.m_brightness_b, true);
@@ -847,7 +847,7 @@ void OutputAdjPanel::OnRHdrMF(wxCommandEvent& event)
 		SyncHdr(0);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_r_hdr_sldr);
+		m_frame->SetFocusVRenderViews(m_r_hdr_sldr);
 		break;
 	case 2:
 		SetHdr(0, glbin_outadj_def.m_hdr_r, true);
@@ -870,7 +870,7 @@ void OutputAdjPanel::OnGHdrMF(wxCommandEvent& event)
 		SyncHdr(1);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_g_hdr_sldr);
+		m_frame->SetFocusVRenderViews(m_g_hdr_sldr);
 		break;
 	case 2:
 		SetHdr(1, glbin_outadj_def.m_hdr_g, true);
@@ -893,7 +893,7 @@ void OutputAdjPanel::OnBHdrMF(wxCommandEvent& event)
 		SyncHdr(2);
 		break;
 	case 1:
-		SetFocusVRenderViews(m_b_hdr_sldr);
+		m_frame->SetFocusVRenderViews(m_b_hdr_sldr);
 		break;
 	case 2:
 		SetHdr(2, glbin_outadj_def.m_hdr_b, true);
