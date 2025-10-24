@@ -53,13 +53,26 @@ struct DrawRequest
 		interactive(ia),
 		lgChanged(lc)
 	{}
+
 	std::string reason;
 	std::set<int> view_ids;//-1: none; empty: all
+	int view_origin_id = 0;//prevent loop
 	bool clearFramebuffer = true;//from m_retain_finalbuffer in renderview
 	bool loadUpdate = false;//from m_load_update in renderview
 	bool restartLoop = true;
 	bool interactive = false;
 	bool lgChanged = true;
+
+	static DrawRequest LinkedView(
+		const std::set<int>& ids,
+		int self_id
+	)
+	{
+		auto dr = DrawRequest("Linked view refresh",
+			ids);
+		dr.view_origin_id = self_id;
+		return dr;
+	}
 };
 
 class RefreshScheduler

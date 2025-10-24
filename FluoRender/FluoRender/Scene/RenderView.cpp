@@ -4222,34 +4222,11 @@ bool RenderView::Draw()
 	glbin.getStopWatch(gstStopWatch)->sample();
 	m_drawing = false;
 
-	//DBGPRINT(L"buffer swapped\t%d\n", m_interactive);
-
 	if (m_resize)
 		m_resize = false;
 
 	if (m_enlarge)
 		ResetEnlarge();
-
-	if (glbin_linked_rot)
-	{
-		std::set<int> view_ids;
-		Root* root = glbin_data_manager.GetRoot();
-		if (root)
-		{
-			for (int i = 0; i < root->GetViewNum(); i++)
-			{
-				auto view = root->GetView(i);
-				if (view && view.get() != this)
-				{
-					view->SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-					view_ids.insert(view->Id());
-				}
-			}
-		}
-		if (!view_ids.empty())
-			glbin_refresh_scheduler_manager.requestDraw(
-				DrawRequest("Linked view refresh", view_ids));
-	}
 
 	return swap;
 }
@@ -4707,27 +4684,6 @@ void RenderView::HaltLoopUpdate()
 		flvr::TextureRenderer::reset_update_loop();
 	}
 }
-
-//new function to refresh
-//void RenderView::RefreshGL(int debug_code,
-//	bool erase,
-//	bool start_loop,
-//	bool lg_changed)
-//{
-//	DBGPRINT(L"View: %d\tCode: (%d)\tErase: %d\tStart Loop: %d\tLG Changed: %d\tInteractive: %d\n",
-//		m_id, debug_code, erase, start_loop, lg_changed, m_interactive);
-//
-//	m_updating = true;
-//	if (start_loop)
-//		StartLoopUpdate();
-//	SetSortBricks();
-//	m_refresh = true;
-//	glbin_lg_renderer.SetUpdating(lg_changed);
-//	assert(m_render_canvas);
-//	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_render_canvas);
-//	assert(scheduler);
-//	scheduler->requestDraw("General refresh");
-//}
 
 void RenderView::DrawRulers()
 {
@@ -8215,7 +8171,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 				flvr::TextureRenderer::get_clear_chan_buffer());
 		overlay_buffer->clear(true, false);
 		//flvr::TextureRenderer::reset_clear_chan_buffer();
-		//DBGPRINT(L"overlay cleared\n");
 
 		if (vd->GetVR())
 			vd->GetVR()->set_depth_peel(peel);
@@ -8263,7 +8218,6 @@ void RenderView::DrawMIP(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 		{
 			chann_buffer->clear(true, false);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
-			//DBGPRINT(L"chan buffer cleared\n");
 		}
 		//ok to unprotect
 		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
@@ -8467,7 +8421,6 @@ void RenderView::DrawOVER(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, in
 		{
 			chann_buffer->clear(true, false);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
-			//DBGPRINT(L"chan buffer cleared\n");
 		}
 
 		if (vd->GetVR())
@@ -10059,9 +10012,6 @@ void RenderView::ProcessIdle(IdleState& state)
 	{
 		if (state.m_movie_maker_render_canvas)
 		{
-			//DBGPRINT(L"lg finished: %d, cur view: %d\n",
-			//	glbin_lg_renderer.GetFinished(),
-			//	glbin_lg_renderer.GetCurView());
 			if (glbin_lg_renderer.GetFinished())
 			{
 				state.m_refresh = glbin_moviemaker.Action();
@@ -10649,7 +10599,6 @@ void RenderView::ProcessIdle(IdleState& state)
 	//xinput controller
 	if (m_control_connected)
 	{
-		//DBGPRINT(L"Idle controller\n");
 		XINPUT_STATE xstate = m_controller->GetState();
 		double dzone = 0.2;
 		double sclr = 20;
@@ -11305,5 +11254,5 @@ void RenderView::ProcessMouse(MouseState& state)
 				!m_retain_finalbuffer, false, true, m_interactive, true));
 	}
 	if (!vc.empty())
-		glbin_current.mainframe->UpdateProps(vc);
+		glbin_current.mainframe->UpdateProps(vc, 2, m_render_view_panel);
 }

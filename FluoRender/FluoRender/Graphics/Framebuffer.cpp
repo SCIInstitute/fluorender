@@ -916,7 +916,7 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 		// Skip if already bound
 		if (cur == fb)
 		{
-			DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
+			//DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
 			//return;
 		}
 		else
@@ -931,14 +931,14 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 
 	current_ = fb;
 
-	DBGPRINT(L"bind(); Current Framebuffer: %d, %s\n", fb->id_, s2ws(fb->name_).c_str());
+	//DBGPRINT(L"bind(); Current Framebuffer: %d, %s\n", fb->id_, s2ws(fb->name_).c_str());
 }
 
 void FramebufferFactory::unbind()
 {
 	if (stack_.empty())
 	{
-		DBGPRINT(L"unbind(); ERROR: Stack underflow\n");
+		//DBGPRINT(L"unbind(); ERROR: Stack underflow\n");
 		return;
 	}
 
@@ -952,11 +952,11 @@ void FramebufferFactory::unbind()
 		current_ = prev;
 
 		auto id = prev->id_;
-		DBGPRINT(L"unbind(); Current Framebuffer: %d, %s\n", prev->id_, s2ws(prev->name_).c_str());
+		//DBGPRINT(L"unbind(); Current Framebuffer: %d, %s\n", prev->id_, s2ws(prev->name_).c_str());
 	}
 	else
 	{
-		DBGPRINT(L"unbind(); ERROR: Previous framebuffer expired.\n");
+		//DBGPRINT(L"unbind(); ERROR: Previous framebuffer expired.\n");
 	}
 }
 

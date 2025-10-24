@@ -437,7 +437,11 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		m_exit_fscreen_trigger.Start(10);
 
 	if (state.m_refresh)
-		m_renderview_panel->FluoRefresh(0, state.m_value_collection, { -1 });
+	{
+		auto view = m_renderview.lock();
+		int id = view ? view->Id() : -1;
+		m_renderview_panel->FluoRefresh(0, state.m_value_collection, { id });
+	}
 	if (state.m_set_focus)
 		SetFocus();
 	if (glbin_states.m_benchmark)
@@ -512,7 +516,7 @@ void RenderCanvas::OnClose(wxCloseEvent& event)
 //draw
 void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
-	DBGPRINT(L"OnDraw\n");
+	//DBGPRINT(L"OnDraw\n");
 	Draw();
 }
 
