@@ -4206,9 +4206,7 @@ bool RenderView::Draw()
 		else
 		{
 			m_vr_eye_idx = 1;
-			auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
-			if (scheduler)
-				scheduler->requestDraw(DrawRequest("VR right refresh"));
+			glbin_refresh_scheduler_manager.requestDraw(DrawRequest("VR right refresh", { static_cast<int>(m_id) }));
 		}
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
@@ -7648,9 +7646,8 @@ void RenderView::DrawVolumes(int peel)
 
 	if (m_interactive)
 	{
-		auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
-		if (scheduler)
-			scheduler->requestDraw(DrawRequest("Interctive update refresh"));
+		//the draw request is non interactive, which resets the flag
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Interctive update refresh", { static_cast<int>(m_id) }));
 	}
 }
 
@@ -9373,9 +9370,7 @@ void RenderView::ResetEnlarge()
 	else
 		m_gl_size = m_size;
 
-	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
-	if (scheduler)
-		scheduler->requestDraw(DrawRequest("Reset enlarge refresh"));
+	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Reset enlarge refresh", { static_cast<int>(m_id) }));
 }
 
 bool RenderView::UpdateBrushState(IdleState& state)
@@ -10663,28 +10658,24 @@ void RenderView::ProcessIdle(IdleState& state)
 	}
 #endif
 
-	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
-	if (!scheduler)
-		return;
-
 	if (forced_refresh)
 	{
 		glbin_states.m_status_str = "Forced Refresh";
 		glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPush });
-		scheduler->requestDraw(DrawRequest("Forced refresh"));
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Forced refresh", { static_cast<int>(m_id) }));
 		glbin_current.mainframe->FluoUpdate({ gstMainStatusbarPop });
 	}
 	if (state.m_refresh)
 	{
 		m_updating = true;
-		scheduler->requestDraw(DrawRequest("Idle process refresh", { static_cast<int>(m_id) },
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Idle process refresh", { static_cast<int>(m_id) },
 			true, false, state.m_start_loop, false, state.m_looking_glass_changed));
 		if (state.m_value_collection.empty())
 			state.m_value_collection.insert(gstNull);
 	}
 	else if (glbin_settings.m_inf_loop)
 	{
-		scheduler->requestDraw(DrawRequest("Infinite loop refresh"));
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Infinite loop refresh", { static_cast<int>(m_id) }));
 		state.m_request_more = true;
 	}
 }
@@ -11120,6 +11111,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						m_q_cl = q_delta * m_q_cl;
 						m_q_cl.Normalize();
 						SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+						vc.insert(gstCamRotation);
 						state.m_refresh = true;
 					}
 				}
@@ -11248,10 +11240,12 @@ void RenderView::ProcessMouse(MouseState& state)
 
 	if (state.m_refresh)
 	{
-		auto scheduler = glbin_refresh_scheduler_manager.getScheduler(m_id);
-		if (scheduler)
-			scheduler->requestDraw(DrawRequest("Mouse process refresh", { static_cast<int>(m_id) },
-				!m_retain_finalbuffer, false, true, m_interactive, true));
+		//check if rotation
+		int origin_id = 0;
+		if (vc.find(gstCamRotation) != vc.end())
+			origin_id = m_id;
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Mouse process refresh", { static_cast<int>(m_id) },
+				!m_retain_finalbuffer, false, true, m_interactive, true, origin_id));
 	}
 	if (!vc.empty())
 		glbin_current.mainframe->UpdateProps(vc, 2, m_render_view_panel);

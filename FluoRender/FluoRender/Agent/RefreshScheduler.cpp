@@ -51,31 +51,6 @@ void RefreshScheduler::requestDraw(const DrawRequest& request)
 		assert(view);
 		DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
 		//canvas_->Update();
-
-		//update other linked renderview panels
-		if (glbin_linked_rot)
-		{
-			std::set<int> view_ids;
-			fluo::Vector rot = view->GetRotations();
-			Root * root = glbin_data_manager.GetRoot();
-			if (root)
-			{
-				for (int i = 0; i < root->GetViewNum(); i++)
-				{
-					auto viewi = root->GetView(i);
-					if (viewi && view != viewi)
-					{
-						viewi->SetRotations(rot, true);
-						view_ids.insert(viewi->Id());
-					}
-				}
-			}
-			if (!view_ids.empty())
-			{
-				glbin_refresh_scheduler_manager.requestDraw(
-					DrawRequest::LinkedView(view_ids, view->Id()));
-			}
-		}
 	}
 }
 
@@ -132,19 +107,42 @@ void RefreshSchedulerManager::removeScheduler(int view_id)
 
 void RefreshSchedulerManager::requestDraw(const DrawRequest& request)
 {
-	if (request.view_ids.find(-1) != request.view_ids.end())
+	auto updated_ids = request.view_ids;
+	int origin_id = request.view_origin_id;
+	if (updated_ids.find(-1) != updated_ids.end())
 		return;
 
-	bool update_all = request.view_ids.empty();
+	bool update_all = updated_ids.empty();
+
+	//check linked rotation
+	if (glbin_linked_rot && origin_id > 0)
+	{
+		Root* root = glbin_data_manager.GetRoot();
+		assert(root);
+		auto origin_view = root->GetView(origin_id);
+		if (origin_view)
+		{
+			fluo::Vector rot = origin_view->GetRotations();
+			for (int i = 0; i < root->GetViewNum(); i++)
+			{
+				auto viewi = root->GetView(i);
+				if (viewi && origin_view != viewi)
+				{
+					viewi->SetRotations(rot, true);
+					updated_ids.insert(viewi->Id());
+				}
+			}
+		}
+	}
 
 	for (const auto& [view_id, scheduler] : schedulers_)
 	{
 		auto view = scheduler->getView();
 		if (view)
 		{
-			if (request.view_origin_id == view_id)
-				continue;//don't call self
-			if (update_all || request.view_ids.find(view_id) != request.view_ids.end())
+			//if (request.view_origin_id == view_id)
+			//	continue;//don't call self
+			if (update_all || updated_ids.find(view_id) != updated_ids.end())
 			{
 				//DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(request.reason).c_str(), view_id);
 				scheduler->requestDraw(request);

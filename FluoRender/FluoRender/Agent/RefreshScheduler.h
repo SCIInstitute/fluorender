@@ -44,14 +44,16 @@ struct DrawRequest
 		bool lu = false,
 		bool rl = true,
 		bool ia = false,
-		bool lc = true) :
+		bool lc = true,
+		int id = 0) :
 		reason(r),
 		view_ids(ids),
 		clearFramebuffer(cf),
 		loadUpdate(lu),
 		restartLoop(rl),
 		interactive(ia),
-		lgChanged(lc)
+		lgChanged(lc),
+		view_origin_id(id)
 	{}
 
 	std::string reason;
@@ -62,23 +64,19 @@ struct DrawRequest
 	bool restartLoop = true;
 	bool interactive = false;
 	bool lgChanged = true;
-
-	static DrawRequest LinkedView(
-		const std::set<int>& ids,
-		int self_id
-	)
-	{
-		auto dr = DrawRequest("Linked view refresh",
-			ids);
-		dr.view_origin_id = self_id;
-		return dr;
-	}
 };
 
+class RefreshSchedulerManager;
 class RefreshScheduler
 {
 public:
 	RefreshScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view);
+
+private:
+	RenderCanvas* canvas_;
+	std::weak_ptr<RenderView> view_;
+	bool draw_pending_;
+	DrawRequest last_request_;
 
 	void requestDraw(const DrawRequest& request); // Called by canvas, view
 	void performDraw();                          // Called by canvas during paint event
@@ -86,11 +84,8 @@ public:
 	RenderCanvas* getCanvas() const { return canvas_; }
 	std::shared_ptr<RenderView> getView() const { return view_.lock(); }
 
-private:
-	RenderCanvas* canvas_;
-	std::weak_ptr<RenderView> view_;
-	bool draw_pending_;
-	DrawRequest last_request_;
+	friend class RenderCanvas;
+	friend class RefreshSchedulerManager;
 };
 
 class RefreshSchedulerManager
