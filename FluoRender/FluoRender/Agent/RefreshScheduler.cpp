@@ -47,35 +47,33 @@ void RefreshScheduler::requestDraw(const DrawRequest& request)
 		draw_pending_ = true;
 		last_request_ = request;
 		canvas_->Refresh(false); // Schedule paint event
-		DBGPRINT(L"requestDraw: %s, origin: %d\n", s2ws(last_request_.reason).c_str(), last_request_.view_origin_id);
+		auto view = view_.lock();
+		assert(view);
+		DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
 		//canvas_->Update();
 
 		//update other linked renderview panels
 		if (glbin_linked_rot)
 		{
 			std::set<int> view_ids;
-			auto view = view_.lock();
-			if (view)
+			fluo::Vector rot = view->GetRotations();
+			Root * root = glbin_data_manager.GetRoot();
+			if (root)
 			{
-				fluo::Vector rot = view->GetRotations();
-				Root * root = glbin_data_manager.GetRoot();
-				if (root)
+				for (int i = 0; i < root->GetViewNum(); i++)
 				{
-					for (int i = 0; i < root->GetViewNum(); i++)
+					auto viewi = root->GetView(i);
+					if (viewi && view != viewi)
 					{
-						auto viewi = root->GetView(i);
-						if (viewi && view != viewi)
-						{
-							viewi->SetRotations(rot, true);
-							view_ids.insert(viewi->Id());
-						}
+						viewi->SetRotations(rot, true);
+						view_ids.insert(viewi->Id());
 					}
 				}
-				if (!view_ids.empty())
-				{
-					glbin_refresh_scheduler_manager.requestDraw(
-						DrawRequest::LinkedView(view_ids, view->Id()));
-				}
+			}
+			if (!view_ids.empty())
+			{
+				glbin_refresh_scheduler_manager.requestDraw(
+					DrawRequest::LinkedView(view_ids, view->Id()));
 			}
 		}
 	}
@@ -102,7 +100,7 @@ void RefreshScheduler::performDraw()
 		if (canvas_)
 		{
 			canvas_->SwapBuffers();
-			DBGPRINT(L"SwapBuffers: %s, origin: %d\n", s2ws(last_request_.reason).c_str(), last_request_.view_origin_id);
+			DBGPRINT(L"SwapBuffers: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
 			//DBGPRINT(L"SwapBuffers: %s\n", s2ws(last_request_.reason).c_str());
 		}
 	}
@@ -144,11 +142,11 @@ void RefreshSchedulerManager::requestDraw(const DrawRequest& request)
 		auto view = scheduler->getView();
 		if (view)
 		{
-			int id = view->Id();
-			if (request.view_origin_id == id)
+			if (request.view_origin_id == view_id)
 				continue;//don't call self
-			if (update_all || request.view_ids.find(id) != request.view_ids.end())
+			if (update_all || request.view_ids.find(view_id) != request.view_ids.end())
 			{
+				//DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(request.reason).c_str(), view_id);
 				scheduler->requestDraw(request);
 			}
 		}
