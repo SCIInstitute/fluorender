@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <Global.h>
 #include <CurrentObjects.h>
+#include <Root.h>
+#include <DataManager.h>
 #include <FramebufferStateTracker.h>
 #include <LookingGlassRenderer.h>
 #include <Debug.h>
@@ -40,12 +42,42 @@ RefreshScheduler::RefreshScheduler(RenderCanvas* canvas, std::shared_ptr<RenderV
 
 void RefreshScheduler::requestDraw(const DrawRequest& request)
 {
-	if (!draw_pending_) {
+	if (!draw_pending_)
+	{
 		draw_pending_ = true;
 		last_request_ = request;
 		canvas_->Refresh(false); // Schedule paint event
 		DBGPRINT(L"requestDraw: %s, origin: %d\n", s2ws(last_request_.reason).c_str(), last_request_.view_origin_id);
 		//canvas_->Update();
+
+		//update other linked renderview panels
+		if (glbin_linked_rot)
+		{
+			std::set<int> view_ids;
+			auto view = view_.lock();
+			if (view)
+			{
+				fluo::Vector rot = view->GetRotations();
+				Root * root = glbin_data_manager.GetRoot();
+				if (root)
+				{
+					for (int i = 0; i < root->GetViewNum(); i++)
+					{
+						auto viewi = root->GetView(i);
+						if (viewi && view != viewi)
+						{
+							viewi->SetRotations(rot, true);
+							view_ids.insert(viewi->Id());
+						}
+					}
+				}
+				if (!view_ids.empty())
+				{
+					glbin_refresh_scheduler_manager.requestDraw(
+						DrawRequest::LinkedView(view_ids, view->Id()));
+				}
+			}
+		}
 	}
 }
 

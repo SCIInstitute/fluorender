@@ -47,8 +47,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
-#include <Root.h>
-#include <DataManager.h>
 #include <Project.h>
 #include <VolumeSelector.h>
 #include <Ruler.h>
@@ -1072,29 +1070,29 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_z_rot_text->Update();
 		m_ortho_view_cmb->Select(m_renderview->GetOrientation());
 
-		//update other linked renderview panels
-		if (glbin_linked_rot)
-		{
-			std::set<int> view_ids;
-			Root* root = glbin_data_manager.GetRoot();
-			if (root)
-			{
-				for (int i = 0; i < root->GetViewNum(); i++)
-				{
-					auto view = root->GetView(i);
-					if (view && view.get() != m_renderview)
-					{
-						view->SetRotations(rot, false);
-						view_ids.insert(view->Id());
-					}
-				}
-			}
-			if (!view_ids.empty())
-			{
-				glbin_refresh_scheduler_manager.requestDraw(
-					DrawRequest::LinkedView(view_ids, m_id));
-			}
-		}
+		////update other linked renderview panels
+		//if (glbin_linked_rot)
+		//{
+		//	std::set<int> view_ids;
+		//	Root* root = glbin_data_manager.GetRoot();
+		//	if (root)
+		//	{
+		//		for (int i = 0; i < root->GetViewNum(); i++)
+		//		{
+		//			auto view = root->GetView(i);
+		//			if (view && view.get() != m_renderview)
+		//			{
+		//				view->SetRotations(rot, false);
+		//				view_ids.insert(view->Id());
+		//			}
+		//		}
+		//	}
+		//	if (!view_ids.empty())
+		//	{
+		//		glbin_refresh_scheduler_manager.requestDraw(
+		//			DrawRequest::LinkedView(view_ids, m_id));
+		//	}
+		//}
 	}
 }
 
