@@ -57,6 +57,16 @@ std::shared_ptr<RenderView> Root::GetView(int i)
 	else return nullptr;
 }
 
+std::shared_ptr<RenderView> Root::GetViewById(int id)
+{
+	for (auto& view : m_views)
+	{
+		if (view && view->Id() == id)
+			return view;
+	}
+	return nullptr;
+}
+
 std::shared_ptr<RenderView> Root::GetView(const std::wstring& name)
 {
 	for (auto& view : m_views)

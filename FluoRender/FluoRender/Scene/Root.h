@@ -42,6 +42,7 @@ public:
 	//view functions
 	int GetViewNum();
 	std::shared_ptr<RenderView> GetView(int i);
+	std::shared_ptr<RenderView> GetViewById(int id);
 	std::shared_ptr<RenderView> GetView(const std::wstring& name);
 	int GetView(RenderView* view);
 	std::shared_ptr<RenderView> GetLastView();

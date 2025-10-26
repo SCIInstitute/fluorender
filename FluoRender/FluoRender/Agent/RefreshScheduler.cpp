@@ -119,7 +119,7 @@ void RefreshSchedulerManager::requestDraw(const DrawRequest& request)
 	{
 		Root* root = glbin_data_manager.GetRoot();
 		assert(root);
-		auto origin_view = root->GetView(origin_id);
+		auto origin_view = root->GetViewById(origin_id);
 		if (origin_view)
 		{
 			fluo::Vector rot = origin_view->GetRotations();
