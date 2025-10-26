@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <PropPanel.h>
 #include <Global.h>
+#include <Names.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>
@@ -49,7 +50,11 @@ void PropBase::FluoRefresh(int excl_self,
 	int view_excl = 0;
 	if (dynamic_cast<RenderViewPanel*>(this))
 		view_excl = excl_self;
-	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("PropBase refresh", views));
+	int origin_id = 0;
+	if (vc.find(gstCamRotation) != vc.end())
+		origin_id = *views.begin();
+	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("PropBase refresh", views,
+		true, false, true, false, true, origin_id));
 	wxWindow* win = dynamic_cast<wxWindow*>(this);
 	m_frame->UpdateProps(vc, excl_self, win);//update ui but exclude this
 }

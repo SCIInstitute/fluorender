@@ -1753,10 +1753,7 @@ void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
 	str.ToDouble(&roty);
 	str = m_z_rot_text->GetValue();
 	str.ToDouble(&rotz);
-	m_x_rot_sldr->ChangeValue(std::round(rotx));
-	m_y_rot_sldr->ChangeValue(std::round(roty));
-	m_z_rot_sldr->ChangeValue(std::round(rotz));
-	SetRotations(fluo::Vector(rotx, roty, rotz), false);
+	SetRotations(fluo::Vector(rotx, roty, rotz), true);
 }
 
 void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
@@ -1765,13 +1762,7 @@ void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
 	rotx = m_x_rot_sldr->GetValue();
 	roty = m_y_rot_sldr->GetValue();
 	rotz = m_z_rot_sldr->GetValue();
-	m_x_rot_text->ChangeValue(wxString::Format("%.1f", rotx));
-	m_y_rot_text->ChangeValue(wxString::Format("%.1f", roty));
-	m_z_rot_text->ChangeValue(wxString::Format("%.1f", rotz));
-	m_x_rot_text->Update();
-	m_y_rot_text->Update();
-	m_z_rot_text->Update();
-	SetRotations(fluo::Vector(rotx, roty, rotz), false);
+	SetRotations(fluo::Vector(rotx, roty, rotz), true);
 }
 
 void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
