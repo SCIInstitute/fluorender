@@ -263,56 +263,7 @@ void Framebuffer::destroy()
 
 void Framebuffer::apply_state()
 {
-	state_stack_.push_back(glbin_fb_state_tracker.current());
 	glbin_fb_state_tracker.apply(state_);
-}
-
-void Framebuffer::restore_state()
-{
-	if (state_stack_.empty())
-		return;
-	const auto& s = state_stack_.back();
-	state_stack_.pop_back();
-	glbin_fb_state_tracker.apply(s);
-}
-
-FramebufferState Framebuffer::default_state()
-{
-	FramebufferState s;
-
-	switch (role_)
-	{
-	case FBRole::RenderFloat:
-	case FBRole::RenderFloatMipmap:
-	case FBRole::RenderUChar:
-		s.enableBlend = true;
-		break;
-
-	case FBRole::RenderFloatDepth:
-		s.enableBlend = true;
-		s.enableDepthTest = true;
-		break;
-
-	case FBRole::Pick:
-		s.enableBlend = false;
-		s.enableDepthTest = true;
-		s.enableScissorTest = true;
-		break;
-
-	case FBRole::Depth:
-		s.enableBlend = false;
-		s.enableDepthTest = true;
-		break;
-
-	case FBRole::Canvas:
-	case FBRole::Volume:
-		s.enableBlend = false;
-		break;
-	}
-
-	s.viewport = { 0, 0, nx_, ny_ };
-
-	return s;
 }
 
 //blend
@@ -448,6 +399,61 @@ void Framebuffer::unbind(unsigned int prev_id)
 void Framebuffer::push_state()
 {
 	state_stack_.push_back(glbin_fb_state_tracker.current());
+	//DBGPRINT(L"Current state stack size: %d, %s, %d\n", id_, s2ws(name_).c_str(), state_stack_.size());
+}
+
+void Framebuffer::pop_state()
+{
+	if (state_stack_.empty())
+		return;
+	state_stack_.pop_back();
+}
+
+void Framebuffer::restore_state()
+{
+	if (state_stack_.empty())
+		return;
+	const auto& s = state_stack_.back();
+	glbin_fb_state_tracker.apply(s);
+}
+
+FramebufferState Framebuffer::default_state()
+{
+	FramebufferState s;
+
+	switch (role_)
+	{
+	case FBRole::RenderFloat:
+	case FBRole::RenderFloatMipmap:
+	case FBRole::RenderUChar:
+		s.enableBlend = true;
+		break;
+
+	case FBRole::RenderFloatDepth:
+		s.enableBlend = true;
+		s.enableDepthTest = true;
+		break;
+
+	case FBRole::Pick:
+		s.enableBlend = false;
+		s.enableDepthTest = true;
+		s.enableScissorTest = true;
+		break;
+
+	case FBRole::Depth:
+		s.enableBlend = false;
+		s.enableDepthTest = true;
+		break;
+
+	case FBRole::Canvas:
+	case FBRole::Volume:
+		s.enableBlend = false;
+		break;
+	}
+
+	s.viewport = { 0, 0, nx_, ny_ };
+
+	return s;
 }
 
 bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex)
@@ -917,7 +923,8 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 		if (cur == fb)
 		{
 			//DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
-			//return;
+			fb->restore_state();
+			return;
 		}
 		else
 		{
@@ -927,7 +934,10 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 	}
 
 	if (fb)
+	{
 		fb->bind(); // private, accessed via friendship
+		fb->push_state();
+	}
 
 	current_ = fb;
 
@@ -944,6 +954,9 @@ void FramebufferFactory::unbind()
 
 	auto prev = stack_.back().lock();
 	stack_.pop_back();
+
+	if (auto cur = current_.lock())
+		cur->pop_state();
 
 	if (prev)
 	{

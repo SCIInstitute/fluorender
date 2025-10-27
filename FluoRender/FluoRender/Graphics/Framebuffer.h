@@ -155,8 +155,6 @@ namespace flvr
 
 		//states
 		void apply_state();
-		void restore_state();
-		FramebufferState default_state();
 
 		//fine grained state control
 		// Blend
@@ -236,6 +234,9 @@ namespace flvr
 
 		//states
 		void push_state();
+		void pop_state();
+		void restore_state();
+		FramebufferState default_state();
 
 		friend class FramebufferFactory;
 		friend class FramebufferStateGuard;
@@ -248,6 +249,7 @@ namespace flvr
 		}
 		~FramebufferStateGuard() {
 			fb_.restore_state();
+			fb_.pop_state();
 		}
 	private:
 		Framebuffer& fb_;
