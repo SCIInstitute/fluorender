@@ -396,16 +396,28 @@ void Framebuffer::unbind(unsigned int prev_id)
 	restore_state();
 }
 
+constexpr size_t kMaxStateStackDepth = 10;
+
 void Framebuffer::push_state()
 {
 	state_stack_.push_back(glbin_fb_state_tracker.current());
-	//DBGPRINT(L"Current state stack size: %d, %s, %d\n", id_, s2ws(name_).c_str(), state_stack_.size());
+	if (state_stack_.size() > kMaxStateStackDepth)
+	{
+		DBGPRINT(L"[WARN] Framebuffer %d (%s) state stack depth exceeded: %zu\n",
+			id_, s2ws(name_).c_str(), state_stack_.size());
+		assert(state_stack_.size() <= kMaxStateStackDepth);
+	}
 }
 
 void Framebuffer::pop_state()
 {
 	if (state_stack_.empty())
+	{
+		DBGPRINT(L"[ERROR] Framebuffer %d (%s) attempted to pop empty state stack\n",
+			id_, s2ws(name_).c_str());
+		assert(state_stack_.size() > 0);
 		return;
+	}
 	state_stack_.pop_back();
 }
 

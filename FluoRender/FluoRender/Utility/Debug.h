@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <stdio.h>
+#include <cassert>
 
 #define GLHINT glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE)
 
