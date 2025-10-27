@@ -47,10 +47,11 @@ void RefreshScheduler::requestDraw(const DrawRequest& request)
 		draw_pending_ = true;
 		last_request_ = request;
 		canvas_->Refresh(false); // Schedule paint event
-		auto view = view_.lock();
-		assert(view);
-		DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
-		//canvas_->Update();
+		//auto view = view_.lock();
+		//assert(view);
+		//DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
+		if (glbin_linked_rot)
+			canvas_->Update();
 	}
 }
 
@@ -75,7 +76,7 @@ void RefreshScheduler::performDraw()
 		if (canvas_)
 		{
 			canvas_->SwapBuffers();
-			DBGPRINT(L"SwapBuffers: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
+			//DBGPRINT(L"SwapBuffers: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());
 			//DBGPRINT(L"SwapBuffers: %s\n", s2ws(last_request_.reason).c_str());
 		}
 	}
@@ -140,8 +141,6 @@ void RefreshSchedulerManager::requestDraw(const DrawRequest& request)
 		auto view = scheduler->getView();
 		if (view)
 		{
-			//if (request.view_origin_id == view_id)
-			//	continue;//don't call self
 			if (update_all || updated_ids.find(view_id) != updated_ids.end())
 			{
 				//DBGPRINT(L"requestDraw: %s, id: %d\n", s2ws(request.reason).c_str(), view_id);
