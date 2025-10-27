@@ -11218,17 +11218,7 @@ void RenderView::ProcessMouse(MouseState& state)
 
 		state.m_refresh = true;
 	}
-
-	// draw the strokes into a framebuffer texture
-	//not actually for displaying it
-	if (m_draw_brush)
-	{
-		old_mouse_X = static_cast<long>(std::round(mp.x()));
-		old_mouse_Y = static_cast<long>(std::round(mp.y()));
-		state.m_refresh = true;
-	}
-
-	if (m_draw_info & INFO_DISP)
+	else if (m_draw_info & INFO_DISP)
 	{
 		if (!glbin_moviemaker.IsRunning() &&
 			!glbin_settings.m_hologram_mode)
@@ -11236,6 +11226,15 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_retain_finalbuffer = true;
 			state.m_refresh = true;
 		}
+	}
+
+	if (m_draw_brush)
+	{
+		// draw the strokes into a framebuffer texture
+		//not actually for displaying it
+		old_mouse_X = static_cast<long>(std::round(mp.x()));
+		old_mouse_Y = static_cast<long>(std::round(mp.y()));
+		//state.m_refresh = true;
 	}
 
 	if (state.m_refresh)
