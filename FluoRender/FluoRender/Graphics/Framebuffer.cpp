@@ -349,6 +349,10 @@ void Framebuffer::set_viewport(const fluo::Vector4i& vp)
 	if (vp == state_.viewport)
 		return;
 	state_.viewport = vp;
+	for (auto& it : state_stack_)
+	{
+		it.viewport = vp;
+	}
 }
 
 //scissor

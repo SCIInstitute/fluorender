@@ -27,6 +27,7 @@
 
 #include <GL/glew.h>
 #include <FramebufferStateManager.h>
+#include <Debug.h>
 
 using namespace flvr;
 
@@ -56,46 +57,88 @@ void FramebufferStateManager::applyFull(const FramebufferState& state)
 
 void FramebufferStateManager::applyDiff(const FramebufferState& current, const FramebufferState& desired) {
 	if (current.enableBlend != desired.enableBlend)
+	{
 		desired.enableBlend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
+		DBGPRINT(L"glEnableBlend(%d)\n", desired.enableBlend);
+	}
 
 	if (current.blendSrc != desired.blendSrc || current.blendDst != desired.blendDst)
+	{
 		glBlendFunc(toGLBlendFactor(desired.blendSrc), toGLBlendFactor(desired.blendDst));
+		DBGPRINT(L"glBlendFunc(%d, %d)\n", desired.blendSrc, desired.blendDst);
+	}
 
 	if (current.blendEquationRGB != desired.blendEquationRGB || current.blendEquationAlpha != desired.blendEquationAlpha)
+	{
 		glBlendEquationSeparate(toGLBlendEquation(desired.blendEquationRGB), toGLBlendEquation(desired.blendEquationAlpha));
+		DBGPRINT(L"glBlendEquationSeparate(%d, %d)\n", desired.blendEquationRGB, desired.blendEquationAlpha);
+	}
 
 	if (current.clearColor != desired.clearColor)
+	{
 		glClearColor(desired.clearColor[0], desired.clearColor[1], desired.clearColor[2], desired.clearColor[3]);
+		DBGPRINT(L"glClearColor(%f, %f, %f, %f)\n", desired.clearColor[0], desired.clearColor[1], desired.clearColor[2], desired.clearColor[3]);
+	}
 
 	if (current.enableDepthTest != desired.enableDepthTest)
+	{
 		desired.enableDepthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+		DBGPRINT(L"glEnableDepthTest(%d)\n", desired.enableDepthTest);
+	}
 
 	if (current.depthFunc != desired.depthFunc)
+	{
 		glDepthFunc(toGLDepthFunc(desired.depthFunc));
+		DBGPRINT(L"glDepthFunc(%d)\n", desired.depthFunc);
+	}
 
 	if (current.clearDepth != desired.clearDepth)
+	{
 		glClearDepth(desired.clearDepth);
+		DBGPRINT(L"glClearDepth(%f)\n", desired.clearDepth);
+	}
 
 	if (current.enableCullFace != desired.enableCullFace)
+	{
 		desired.enableCullFace ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+		DBGPRINT(L"glEnableCullFace(%d)\n", desired.enableCullFace);
+	}
 
 	if (current.faceWinding != desired.faceWinding)
+	{
 		glFrontFace(toGLFaceWinding(desired.faceWinding));
+		DBGPRINT(L"glFrontFace(%d)\n", desired.faceWinding);
+	}
 
 	if (current.cullFace != desired.cullFace)
+	{
 		glCullFace(toGLCullFace(desired.cullFace));
+		DBGPRINT(L"glCullFace(%d)\n", desired.cullFace);
+	}
 
 	if (current.viewport != desired.viewport)
+	{
 		glViewport(desired.viewport[0], desired.viewport[1], desired.viewport[2], desired.viewport[3]);
+		DBGPRINT(L"glViewport(%d, %d, %d, %d)\n", desired.viewport[0], desired.viewport[1], desired.viewport[2], desired.viewport[3]);
+	}
 
 	if (current.enableScissorTest != desired.enableScissorTest)
+	{
 		desired.enableScissorTest ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
+		DBGPRINT(L"glEnableScissorTest(%d)\n", desired.enableScissorTest);
+	}
 
 	if (current.scissorRect != desired.scissorRect)
+	{
 		glScissor(desired.scissorRect[0], desired.scissorRect[1], desired.scissorRect[2], desired.scissorRect[3]);
+		DBGPRINT(L"glScissor(%d, %d, %d, %d)\n", desired.scissorRect[0], desired.scissorRect[1], desired.scissorRect[2], desired.scissorRect[3]);
+	}
 
 	if (current.polygonMode != desired.polygonMode)
+	{
 		glPolygonMode(GL_FRONT_AND_BACK, toGLPolygonMode(desired.polygonMode));
+		DBGPRINT(L"glPolygonMode(%d)\n", desired.polygonMode);
+	}
 }
 
 FramebufferState FramebufferStateManager::capture()
