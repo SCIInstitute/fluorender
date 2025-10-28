@@ -85,6 +85,7 @@ namespace flvr
 	class MultiVolumeRenderer;
 	class TextRenderer;
 	enum class FaceWinding;
+	class Framebuffer;
 }
 namespace flrd
 {
@@ -772,7 +773,8 @@ private:
 	//framebuffer for final output including vr and lg
 	void BindViewBaseFramebuffer();
 	//draw out the framebuffer after composition
-	void PrepareDataFramebuffer();
+	std::shared_ptr<flvr::Framebuffer> PrepareDataFramebuffer(int nx, int ny);
+	std::shared_ptr<flvr::Framebuffer> GetDataFramebuffer();
 	void DrawDataFramebuffer();
 	//vr buffers
 	void PrepareHologramFramebuffer();

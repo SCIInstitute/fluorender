@@ -73,7 +73,7 @@ void RefreshScheduler::performDraw()
 		bool bval = view->Draw();
 		view->DrawDefault();
 
-		if (canvas_)
+		if (canvas_ && bval)
 		{
 			canvas_->SwapBuffers();
 			//DBGPRINT(L"SwapBuffers: %s, id: %d\n", s2ws(last_request_.reason).c_str(), view->Id());

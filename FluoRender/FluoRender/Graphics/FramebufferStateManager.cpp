@@ -59,19 +59,19 @@ void FramebufferStateManager::applyDiff(const FramebufferState& current, const F
 	if (current.enableBlend != desired.enableBlend)
 	{
 		desired.enableBlend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
-		DBGPRINT(L"glEnableBlend(%d)\n", desired.enableBlend);
+		//DBGPRINT(L"glEnableBlend(%d)\n", desired.enableBlend);
 	}
 
 	if (current.blendSrc != desired.blendSrc || current.blendDst != desired.blendDst)
 	{
 		glBlendFunc(toGLBlendFactor(desired.blendSrc), toGLBlendFactor(desired.blendDst));
-		DBGPRINT(L"glBlendFunc(%d, %d)\n", desired.blendSrc, desired.blendDst);
+		//DBGPRINT(L"glBlendFunc(%d, %d)\n", desired.blendSrc, desired.blendDst);
 	}
 
 	if (current.blendEquationRGB != desired.blendEquationRGB || current.blendEquationAlpha != desired.blendEquationAlpha)
 	{
 		glBlendEquationSeparate(toGLBlendEquation(desired.blendEquationRGB), toGLBlendEquation(desired.blendEquationAlpha));
-		DBGPRINT(L"glBlendEquationSeparate(%d, %d)\n", desired.blendEquationRGB, desired.blendEquationAlpha);
+		//DBGPRINT(L"glBlendEquationSeparate(%d, %d)\n", desired.blendEquationRGB, desired.blendEquationAlpha);
 	}
 
 	if (current.clearColor != desired.clearColor)

@@ -443,7 +443,6 @@ FramebufferState Framebuffer::default_state()
 
 	switch (role_)
 	{
-	case FBRole::RenderFloat:
 	case FBRole::RenderFloatMipmap:
 	case FBRole::RenderUChar:
 		s.enableBlend = true;
@@ -465,10 +464,11 @@ FramebufferState Framebuffer::default_state()
 		s.enableDepthTest = true;
 		break;
 
-	case FBRole::Canvas:
-	case FBRole::Volume:
-		s.enableBlend = false;
-		break;
+	//case FBRole::RenderFloat:
+	//case FBRole::Canvas:
+	//case FBRole::Volume:
+	//	s.enableBlend = false;
+	//	break;
 	}
 
 	s.viewport = { 0, 0, nx_, ny_ };
@@ -943,7 +943,8 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 		if (cur == fb)
 		{
 			//DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
-			fb->restore_state();
+			//fb->restore_state();
+			fb->apply_state();
 			return;
 		}
 		else
