@@ -137,7 +137,8 @@ DEALINGS IN THE SOFTWARE.
 //renderview buffer names
 #define gstRBCanvasDefault "rb canvas default"
 #define gstRBViewBase "rb view base"
-#define gstRBViewFinal "rb view final"
+#define gstRBViewData "rb view data"//when scene graph only 
+#define gstRBViewDataWithDepth "rb view data with depth"
 #define gstRBQuilt "rb quilt"
 #define gstRBQuiltView "rb quilt view"
 #define gstRBPeel "rb peel"

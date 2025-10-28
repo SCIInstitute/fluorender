@@ -220,7 +220,7 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(gstRBPaintBrush);
 	if (paint_buffer)//paint buffer can be empty for grow tool
 		Set2DMask(paint_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-	auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewFinal);
+	auto final_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewData);
 	auto chann_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 	assert(final_buffer && chann_buffer);
 	Set2DWeight(

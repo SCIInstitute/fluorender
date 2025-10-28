@@ -397,33 +397,22 @@ public:
 	//text renderer
 	flvr::TextRenderer* GetTextRenderer();
 
-	//force draw
-	bool Draw();//return if swap buffers
-	void DrawDefault();
+	//entry point for drawing the view
+	bool Draw();			//return if swap buffers
+	void DrawDefault();		//draw the base fbo to default on canvas
 
 	//start loop update
 	void StartLoopUpdate();
 	void HaltLoopUpdate();
-	//void RefreshGL(int debug_code,
-	//	bool erase = false,
-	//	bool start_loop = true,
-	//	bool lg_changed = true);
-	//sort bricks after the view has been changed
+
+	//sort bricks after view change
 	void SetSortBricks();
 
 	//rulers
-	void DrawRulers();
 	flrd::RulerList* GetRulerList();
 	void SetCurRuler(flrd::Ruler* ruler);
 	flrd::Ruler* GetCurRuler();
 	flrd::Ruler* GetRuler(unsigned int id);
-
-	//draw highlighted comps
-	void DrawCells();
-	unsigned int DrawCellVerts(std::vector<float>& verts);
-	void GetCellPoints(fluo::BBox& box,
-		fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
-		fluo::Transform& mv, fluo::Transform& p);
 
 	//traces
 	//track map file
@@ -434,7 +423,6 @@ public:
 	int LoadTrackGroup(const std::wstring& filename);
 	int SaveTrackGroup(const std::wstring& filename);
 	void ExportTrackGroup(const std::wstring& filename, unsigned int id);
-	void DrawTraces();
 	void GetTraces(bool update = false);
 
 	//enlarge output image
@@ -781,29 +769,27 @@ private:
 #endif
 
 private:
-	void DrawBounds();
-	void DrawGrid();
-	void DrawCamCtr();
-	void DrawScaleBar();
-	void DrawLegend();
-	void DrawName(double x, double y, int nx, int ny,
-		const std::wstring& name, const fluo::Color color,
-		double font_height, bool hilighted = false);
-	void DrawFrame();
-	void DrawClippingPlanes(flvr::FaceWinding face_winding);
-	void SetColormapColors(int colormap, const fluo::Color &c1, const fluo::Color& c2, double inv);
-	void DrawColormap();
-	void DrawGradBg();
-	void DrawInfo(int nx, int ny, bool intactive);
+	//framebuffer for final output including vr and lg
+	void BindViewBaseFramebuffer();
+	//draw out the framebuffer after composition
+	void PrepareDataFramebuffer();
+	void DrawDataFramebuffer();
+	//vr buffers
+	void PrepareHologramFramebuffer();
+	void DrawHologramFramebuffer();
+	//pre draw and post draw actions
+	void PreDraw();
+	void PostDraw();
 
-	//depth
-	double CalcZ(double z);
-	void CalcFogRange();
+	//draw quad for framebuffer texture
+	void DrawViewQuad();
+
+	//draw calls used internally
 	//different modes
-	void DrawData();//draw volumes only
-	void DrawDataPeel();//draw volumes and meshes with depth peeling
-				  //mesh and volume
-	void DrawMeshes(int peel = 0);//0: no dp
+	void DrawData();		//draw volumes only
+	void DrawDataPeel();	//draw volumes and meshes with depth peeling
+	//mesh and volume
+	void DrawMesh(int peel = 0);//0: no dp
 								  //1: draw depth after 15 (15)
 								  //2: draw mesh after 14 (14, 15)
 								  //3: draw mesh after 13 and before 15 (13, 14, 15)
@@ -815,48 +801,74 @@ private:
 								   //3: draw volume after 14 and before 15 (13, 14, 15)
 								   //4: same as 3 (14, 15)
 								   //5: same as 2 (15)
-								   //annotation layer
-	void DrawAnnots();
-	//framebuffer
-	void BindRenderBuffer();
-	//draw out the framebuffer after composition
-	void PrepFinalBuffer();
-	void DrawFinalBuffer();
-	//vr buffers
-	void PrepVRBuffer();
-	void DrawVRBuffer();
 	//different volume drawing modes
-	void DrawVolumesMulti(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
+	void DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
 	void DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>> &list, bool mask = false, int peel = 0);
-	void DrawMIP(const std::weak_ptr<VolumeData>& vd, int peel = 0);
-	void DrawOVER(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
-	//overlay passes
-	void DrawOLShading(const std::weak_ptr<VolumeData>& vd);
-	void DrawOLShadows(const std::vector<std::weak_ptr<VolumeData>> &list);
-	void DrawOLShadowsMesh(double darkenss);
-
+	void DrawVolumeMip(const std::weak_ptr<VolumeData>& vd, int peel = 0);
+	void DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
+	//effect overlays
+	void DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd);
+	void DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>> &list);
+	void DrawOverlayShadowMesh(double darkenss);
 	//get mesh shadow
-	bool GetMeshShadow(double &val);
+	bool CheckMeshShadowExist(double &val);
 
+	//other data types
+	void DrawAnnots();
+	//rulers
+	void DrawRulers();
+	//cells
+	void DrawCells();
+	//draw highlighted comps
+	void GetCellPoints(fluo::BBox& box,
+		fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
+		fluo::Transform& mv, fluo::Transform& p);
+	unsigned int GenerateCellVerts(std::vector<float>& verts);
+	//tracks
+	void DrawTracks();
+	//clipping planes
+	void DrawClippingPlanes(flvr::FaceWinding face_winding);
+	//data elements
+	void DrawBounds();
+	void DrawGrid();
+	void DrawCamCtr();
+
+	//interactive tools
 	//painting
-	void DrawCircles(
+	void DrawBrushOutlines();
+	void DrawBrushCircles(
 		double cx, double cy,
 		double r1, double r2,
 		fluo::Color &color,
 		glm::mat4 &matrix);
-	void DrawBrush();
-	void PaintStroke();
-	void DisplayStroke();
+	void GenerateBrushStrokes();
+	void DrawBrushStrokes();
+
+	//other hud elements
+	void DrawScaleBar();
+	void DrawLegend();
+	void DrawText(double x, double y, int nx, int ny,
+		const std::wstring& name, const fluo::Color& color,
+		double font_height, bool hilighted = false);
+	void SetColormapColors(int colormap, const fluo::Color &c1, const fluo::Color& c2, double inv);
+	void DrawColormap();
+	void DrawGradBg();
+
+	//info and frame not saved by capture
+	void DrawInfo(int nx, int ny, bool intactive);
+	void DrawFrame();
+
+	//reset enlargement for capture
+	void ResetEnlarge();
+
+	//depth
+	double CalcZ(double z);
+	void CalcFogRange();
 
 	fluo::Quaternion Trackball(double dx, double dy);
 	fluo::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
 	void A2Q();
-
-	//pre draw and post draw
-	void PreDraw();
-	void PostDraw();
-	void ResetEnlarge();
 
 	//brush states update
 	bool UpdateBrushState(IdleState& state);
@@ -866,9 +878,6 @@ private:
 	bool PickMesh(BaseState& state);
 	bool PickVolume(BaseState& state);
 	void SetCompSelection(fluo::Point& p, int mode);//node: 0-exclusive; 1-add or remove
-
-	//draw quad
-	void DrawViewQuad();
 
 	//find crop frame
 	int HitCropFrame(fluo::Point& mp);

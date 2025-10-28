@@ -389,6 +389,8 @@ void Framebuffer::bind()
 {
 	if (valid_)
 	{
+		DBGPRINT(L"Binding framebuffer: %d, %s\n", id_, s2ws(name_).c_str());
+
 		glBindFramebuffer(GL_FRAMEBUFFER, id_);
 		apply_state();
 	}
@@ -396,6 +398,8 @@ void Framebuffer::bind()
 
 void Framebuffer::unbind(unsigned int prev_id)
 {
+	DBGPRINT(L"Unbinding framebuffer: %d, %s\n", id_, s2ws(name_).c_str());
+
 	glBindFramebuffer(GL_FRAMEBUFFER, prev_id);
 	restore_state();
 }

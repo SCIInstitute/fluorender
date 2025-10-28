@@ -54,7 +54,7 @@ public:
 	int GetCurView() { return m_cur_view; }
 	bool GetFinished() { return m_finished; }
 	double GetOffset();//range of offset [-1, 1]; 0 = center
-	void BindRenderBuffer(int nx, int ny);
+	void BindViewBaseFramebuffer(int nx, int ny);
 	Size2D GetViewSize() const;
 	void SetRenderViewSize(const Size2D& size)
 	{

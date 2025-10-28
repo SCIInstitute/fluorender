@@ -335,7 +335,7 @@ double LookingGlassRenderer::GetOffset()
 	return (m_cur_view - len) / len;
 }
 
-void LookingGlassRenderer::BindRenderBuffer(int nx, int ny)
+void LookingGlassRenderer::BindViewBaseFramebuffer(int nx, int ny)
 {
 	if (!m_initialized)
 		return;
