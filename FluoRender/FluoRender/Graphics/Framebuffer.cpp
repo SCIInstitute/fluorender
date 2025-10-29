@@ -401,7 +401,7 @@ void Framebuffer::unbind(unsigned int prev_id)
 	DBGPRINT(L"Unbinding framebuffer: %d, %s\n", id_, s2ws(name_).c_str());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, prev_id);
-	restore_state();
+	//restore_state();
 }
 
 constexpr size_t kMaxStateStackDepth = 10;
@@ -933,7 +933,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(const std::string& 
 	return nullptr;
 }
 
-void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
+void FramebufferFactory::bind(const std::shared_ptr<Framebuffer>& fb)
 {
 	auto cur = current_.lock();
 
@@ -943,21 +943,14 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 		if (cur == fb)
 		{
 			//DBGPRINT(L"bind(); ERROR: Framebuffer already bound\n");
-			//fb->restore_state();
 			fb->apply_state();
 			return;
-		}
-		else
-		{
-			// Save current as previous
-			stack_.push_back(cur);
 		}
 	}
 
 	if (fb)
 	{
 		fb->bind(); // private, accessed via friendship
-		fb->push_state();
 	}
 
 	current_ = fb;
@@ -965,33 +958,9 @@ void FramebufferFactory::bind(std::shared_ptr<Framebuffer> fb)
 	//DBGPRINT(L"bind(); Current Framebuffer: %d, %s\n", fb->id_, s2ws(fb->name_).c_str());
 }
 
-void FramebufferFactory::unbind()
+FramebufferFactory::Guard FramebufferFactory::bind_scoped(const std::shared_ptr<Framebuffer>& fb)
 {
-	if (stack_.empty())
-	{
-		//DBGPRINT(L"unbind(); ERROR: Stack underflow\n");
-		return;
-	}
-
-	auto prev = stack_.back().lock();
-	stack_.pop_back();
-
-	if (auto cur = current_.lock())
-		cur->pop_state();
-
-	if (prev)
-	{
-		prev->bind();
-
-		current_ = prev;
-
-		auto id = prev->id_;
-		//DBGPRINT(L"unbind(); Current Framebuffer: %d, %s\n", prev->id_, s2ws(prev->name_).c_str());
-	}
-	else
-	{
-		//DBGPRINT(L"unbind(); ERROR: Previous framebuffer expired.\n");
-	}
+	return Guard(*this, fb);
 }
 
 std::shared_ptr<Framebuffer> FramebufferFactory::current() const
@@ -1019,7 +988,7 @@ std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(const std::string& 
 	return factory->framebuffer(name);
 }
 
-void FramebufferManager::bind(std::shared_ptr<Framebuffer> fb)
+void FramebufferManager::bind(const std::shared_ptr<Framebuffer>& fb)
 {
 	int view_id = glbin_current.GetDrawingViewId();
 	auto& factory = factory_map_[view_id];
@@ -1028,13 +997,21 @@ void FramebufferManager::bind(std::shared_ptr<Framebuffer> fb)
 	factory->bind(fb);
 }
 
-void FramebufferManager::unbind()
+FramebufferFactory::Guard FramebufferManager::bind_scoped(const std::shared_ptr<Framebuffer>& fb)
 {
 	int view_id = glbin_current.GetDrawingViewId();
 	auto& factory = factory_map_[view_id];
-	if (factory)
-		factory->unbind();
+	if (!factory)
+		factory = std::make_unique<FramebufferFactory>();
+	return factory->bind_scoped(fb);
 }
+//void FramebufferManager::unbind()
+//{
+//	int view_id = glbin_current.GetDrawingViewId();
+//	auto& factory = factory_map_[view_id];
+//	if (factory)
+//		factory->unbind();
+//}
 
 std::shared_ptr<Framebuffer> FramebufferManager::current() const
 {

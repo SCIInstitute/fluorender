@@ -271,10 +271,32 @@ namespace flvr
 		std::shared_ptr<Framebuffer> framebuffer(const std::string &name);
 
 		// Explicitly bind a framebuffer (nullptr = default)
-		void bind(std::shared_ptr<Framebuffer> fb);
+		void bind(const std::shared_ptr<Framebuffer>& fb);
 
-		// Unbind current framebuffer and restore previous (or bind default)
-		void unbind();
+		class Guard
+		{
+		public:
+			Guard(FramebufferFactory& factory, const std::shared_ptr<Framebuffer>& fb) :
+				factory_(factory),
+				prev_fb_(factory.current())
+			{
+				factory_.bind(fb);
+			}
+
+			~Guard()
+			{
+				if (auto fb = prev_fb_.lock()) {
+					factory_.bind(fb);
+				}
+			}
+
+		private:
+			FramebufferFactory& factory_;
+			std::weak_ptr<Framebuffer> prev_fb_;
+		};
+
+		//scoped bind that automatically unbind and restore previous
+		[[nodiscard]] Guard bind_scoped(const std::shared_ptr<Framebuffer>& fb);
 
 		// Get currently bound framebuffer (nullptr = default)
 		std::shared_ptr<Framebuffer> current() const;
@@ -284,7 +306,6 @@ namespace flvr
 		std::vector<std::shared_ptr<FramebufferTexture>> tex_list_;
 
 		std::weak_ptr<Framebuffer> current_;
-		std::vector<std::weak_ptr<Framebuffer>> stack_;
 	};
 
 	class FramebufferManager
@@ -298,10 +319,10 @@ namespace flvr
 		std::shared_ptr<Framebuffer> framebuffer(const std::string &name);
 
 		// Explicitly bind a framebuffer (nullptr = default)
-		void bind(std::shared_ptr<Framebuffer> fb);
+		void bind(const std::shared_ptr<Framebuffer>& fb);
 
-		// Unbind current framebuffer and restore previous (or bind default)
-		void unbind();
+		//scoped bind that automatically unbind and restore previous
+		[[nodiscard]] FramebufferFactory::Guard bind_scoped(const std::shared_ptr<Framebuffer>& fb);
 
 		// Get currently bound framebuffer (nullptr = default)
 		std::shared_ptr<Framebuffer> current() const;
