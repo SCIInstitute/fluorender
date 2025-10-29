@@ -4120,12 +4120,12 @@ bool RenderView::Draw()
 		PrepareHologramFramebuffer();
 	}
 	BindViewBaseFramebuffer();
+	ClearViewBaseFramebuffer();
 
 	//projection
 	HandleProjection(nx, ny, true);
 	//Transformation
 	HandleCamera(true);
-	m_mv_mat = GetDrawMat();
 
 	//gradient background
 	if (glbin_settings.m_grad_bg)
@@ -4133,6 +4133,8 @@ bool RenderView::Draw()
 
 	if (!m_draw_all)
 		return true;
+
+	m_mv_mat = GetDrawMat();
 
 	if (glbin_settings.m_test_wiref)
 		DrawGrid();
@@ -5248,7 +5250,38 @@ void RenderView::BindViewBaseFramebuffer()
 		assert(renderview_buffer);
 		renderview_buffer->set_blend_enabled(true);
 		renderview_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+		renderview_buffer->set_clear_color({
+			static_cast<GLfloat>(m_bg_color.r()),
+			static_cast<GLfloat>(m_bg_color.g()),
+			static_cast<GLfloat>(m_bg_color.b()),
+			1.0f });
 		glbin_framebuffer_manager.bind(renderview_buffer);
+	}
+}
+
+void RenderView::ClearViewBaseFramebuffer()
+{
+	if (glbin_settings.m_hologram_mode == 1)
+	{
+		std::string vr_buf_name;
+		if (m_vr_eye_idx)
+			vr_buf_name = gstRBVrRight;
+		else
+			vr_buf_name = gstRBVrLeft;
+		auto vr_buffer =
+			glbin_framebuffer_manager.framebuffer(vr_buf_name);
+		assert(vr_buffer);
+		vr_buffer->clear(true, true);
+	}
+	else if (glbin_settings.m_hologram_mode == 2)
+	{
+	}
+	else
+	{
+		//find render view buffer, resize if necessary
+		auto renderview_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewBase);
+		assert(renderview_buffer);
+		renderview_buffer->clear(true, true);
 	}
 }
 
@@ -5502,7 +5535,7 @@ void RenderView::DrawData()
 		static_cast<GLfloat>(m_bg_color.r()),
 		static_cast<GLfloat>(m_bg_color.g()),
 		static_cast<GLfloat>(m_bg_color.b()),
-		1.0f });
+		0.0f });
 	data_buffer->set_viewport({ 0, 0, nx, ny });
 	glbin_framebuffer_manager.bind(data_buffer);
 	data_buffer->clear(true, false);
@@ -5565,7 +5598,7 @@ void RenderView::DrawDataPeel()
 		static_cast<GLfloat>(m_bg_color.r()),
 		static_cast<GLfloat>(m_bg_color.g()),
 		static_cast<GLfloat>(m_bg_color.b()),
-		1.0f });
+		0.0f });
 	data_buffer->set_viewport({ 0, 0, nx, ny });
 	glbin_framebuffer_manager.bind(data_buffer);
 	data_buffer->clear(true, true);
@@ -5573,9 +5606,6 @@ void RenderView::DrawDataPeel()
 	bool use_fog_save = m_use_fog;
 	if (m_use_fog)
 		CalcFogRange();
-
-	if (glbin_settings.m_test_wiref)
-		DrawGrid();
 
 	if (glbin_states.m_clip_display)
 		DrawClippingPlanes(flvr::FaceWinding::Back);
@@ -6585,6 +6615,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 			auto temp_buffer = glbin_framebuffer_manager.framebuffer(
 				flvr::FBRole::RenderFloat, nx, ny, gstRBTemporary);
 			assert(temp_buffer);
+			flvr::FramebufferStateGuard fbg2(*temp_buffer);
 			temp_buffer->set_blend_enabled(false);
 			glbin_framebuffer_manager.bind(temp_buffer);
 			temp_buffer->protect();
@@ -6648,7 +6679,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 		//temp buffer becomes unused after texture is bound
 		//ok to unprotect
 		temp_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-		flvr::FramebufferStateGuard fbg(*data_buffer);
+		flvr::FramebufferStateGuard fbg2(*data_buffer);
 		data_buffer->set_blend_enabled(false);
 		data_buffer->apply_state();
 
@@ -6666,9 +6697,11 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 	chann_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chann_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
+	flvr::FramebufferStateGuard fbg(*data_buffer);
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::One,
 		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
+	data_buffer->apply_state();
 
 	//2d adjustment
 	img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -8796,12 +8829,12 @@ void RenderView::DrawColormap()
 
 void RenderView::DrawGradBg()
 {
-	//auto cur_buffer = glbin_framebuffer_manager.current();
-	//assert(cur_buffer);
-	//flvr::FramebufferStateGuard fbg(*cur_buffer);
-	//cur_buffer->set_depth_test_enabled(false);
-	//cur_buffer->set_blend_enabled(false);
-	//cur_buffer->apply_state();
+	auto cur_buffer = glbin_framebuffer_manager.current();
+	assert(cur_buffer);
+	flvr::FramebufferStateGuard fbg(*cur_buffer);
+	cur_buffer->set_depth_test_enabled(false);
+	cur_buffer->set_blend_enabled(false);
+	cur_buffer->apply_state();
 
 	//define colors
 	fluo::Color color1, color2;

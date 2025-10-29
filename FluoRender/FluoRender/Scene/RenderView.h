@@ -772,6 +772,7 @@ private:
 private:
 	//framebuffer for final output including vr and lg
 	void BindViewBaseFramebuffer();
+	void ClearViewBaseFramebuffer();
 	//draw out the framebuffer after composition
 	std::shared_ptr<flvr::Framebuffer> PrepareDataFramebuffer(int nx, int ny);
 	std::shared_ptr<flvr::Framebuffer> GetDataFramebuffer();
