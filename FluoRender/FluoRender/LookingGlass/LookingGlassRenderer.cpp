@@ -189,9 +189,8 @@ void LookingGlassRenderer::Clear()
 		glbin_framebuffer_manager.framebuffer(gstRBQuilt);
 	assert(quilt_buffer);
 	//clear fbo
-	glbin_framebuffer_manager.bind(quilt_buffer);
+	auto guard = glbin_framebuffer_manager.bind_scoped(quilt_buffer);
 	quilt_buffer->clear(true, true);
-	glbin_framebuffer_manager.unbind();
 }
 
 void LookingGlassRenderer::Draw()
@@ -200,6 +199,9 @@ void LookingGlassRenderer::Draw()
 		return;
 
 	m_finished = false;
+
+	auto cur_buffer = glbin_framebuffer_manager.current();
+
 	//set up view port for place texture
 	// get the x and y origin for this view
 	int corrected_view = m_lg_data->vx * m_lg_data->vy - 1 - m_cur_view;
@@ -252,15 +254,11 @@ void LookingGlassRenderer::Draw()
 
 	//draw quilt to view
 	//only draw the middle view
-	glbin_framebuffer_manager.unbind();
-
-	auto cur_buffer = glbin_framebuffer_manager.current();
 	// reset viewport
 	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
 	//set viewport size and clear
 	cur_buffer->set_viewport({ 0, 0, m_render_view_size.w(), m_render_view_size.h() });
-	cur_buffer->apply_state();
+	glbin_framebuffer_manager.bind(cur_buffer);
 	cur_buffer->clear(true, true);
 
 	shader = glbin_shader_manager.shader(gstImgShader,

@@ -432,6 +432,7 @@ void VolumeRenderer::draw_volume(
 	int w2 = new_size.w();
 	int h2 = new_size.h();
 
+	auto cur_buffer = glbin_framebuffer_manager.current();
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderFloat, w2, h2, buf_name);
 	assert(blend_buffer);
@@ -766,18 +767,13 @@ void VolumeRenderer::draw_volume(
 
 		img_shader->unbind();
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-		glbin_framebuffer_manager.unbind();//filter buffer
 	}
 
 	//go back to normal
-	glbin_framebuffer_manager.unbind();//blend buffer
-
-	auto cur_buffer = glbin_framebuffer_manager.current();
 	assert(cur_buffer);
-	FramebufferStateGuard fbg(*cur_buffer);
 	//set viewport size
 	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
-	cur_buffer->apply_state();
+	glbin_framebuffer_manager.bind(cur_buffer);//blend buffer
 
 	if (noise_red_ && cm_mode != 2)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
@@ -905,7 +901,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	auto fbo_mask =
 		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
 	assert(fbo_mask);
-	glbin_framebuffer_manager.bind(fbo_mask);
+	auto guard = glbin_framebuffer_manager.bind_scoped(fbo_mask);
 
 	double rate = get_sample_rate();
 
@@ -1096,9 +1092,6 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 	// Release texture
 	release_texture(0, GL_TEXTURE_3D);
-
-	//unbind framebuffer
-	glbin_framebuffer_manager.unbind();//fbo_mask
 }
 
 //for multibrick, copy border to continue diffusion
@@ -1269,7 +1262,7 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 	auto fbo_calc =
 		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
 	assert(fbo_calc);
-	glbin_framebuffer_manager.bind(fbo_calc);
+	auto guard = glbin_framebuffer_manager.bind_scoped(fbo_calc);
 
 	//--------------------------------------------------------------------------
 	// Set up shaders
@@ -1341,9 +1334,6 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 
 	//release seg shader
 	cal_shader->unbind();
-
-	//unbind framebuffer
-	glbin_framebuffer_manager.unbind();//fbo_calc
 }
 
 //return the data volume

@@ -209,6 +209,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	int w2 = new_size.w();
 	int h2 = new_size.h();
 
+	auto cur_buffer = glbin_framebuffer_manager.current();
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderFloat, w2, h2, buf_name);
 	assert(blend_buffer);
@@ -390,16 +391,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		img_shader->unbind();
 
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
-		glbin_framebuffer_manager.unbind();//filter buffer
 	}
 
-	//go back to normal
-	glbin_framebuffer_manager.unbind();//blend buffer
-
 	//current
-	auto cur_buffer = glbin_framebuffer_manager.current();
 	assert(cur_buffer);
-	FramebufferStateGuard fbg(*cur_buffer);
 	cur_buffer->set_blend_enabled(true);
 	//b2f:(1, 1-a), f2b:(1-a, 1)
 	if (glbin_settings.m_update_order == 0)
@@ -408,7 +403,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 	//set viewport size
 	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
-	cur_buffer->apply_state();
+	glbin_framebuffer_manager.bind(cur_buffer);
 
 	if (noise_red_ /*&& colormap_mode_!=2*/)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
@@ -448,8 +443,10 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		return;
 
 	std::shared_ptr<Framebuffer> micro_blend_buffer;
+	std::shared_ptr<Framebuffer> cur_buffer;
 	if (blend_slices_/* && colormap_mode_!=2*/)
 	{
+		cur_buffer = glbin_framebuffer_manager.current();
 		micro_blend_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloat, w, h);
 		assert(micro_blend_buffer);
@@ -709,11 +706,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		if (blend_slices_)
 		{
 			//set buffer back
-			glbin_framebuffer_manager.unbind();//micro blend buffer
-			//flvr::Framebuffer::bind(cur_framebuffer_);
-			auto cur_buffer = glbin_framebuffer_manager.current();
 			assert(cur_buffer);
-			FramebufferStateGuard fbg(*cur_buffer);
 			//set viewport size
 			cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 			//blend: (add, add)(b2f:(1, 1-a), f2b:(1-a, 1))
@@ -722,7 +715,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 			else if (glbin_settings.m_update_order == 1)
 				cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
-			cur_buffer->apply_state();
+			glbin_framebuffer_manager.bind(cur_buffer);
 			//draw
 			auto img_shader = glbin_shader_manager.shader(gstImgShader,
 				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
