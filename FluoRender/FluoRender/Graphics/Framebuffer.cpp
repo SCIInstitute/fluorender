@@ -257,7 +257,6 @@ void Framebuffer::destroy()
 		glDeleteFramebuffers(1, &id_);
 	id_ = 0;
 	valid_ = false;
-	protected_ = false;
 	name_ = "";
 }
 
@@ -656,8 +655,6 @@ void Framebuffer::generate_mipmap(const AttachmentPoint& ap)
 
 bool Framebuffer::match(const FBRole& role)
 {
-	if (protected_)
-		return false;
 	if (role_ == role)
 		return true;
 	return false;
@@ -666,8 +663,6 @@ bool Framebuffer::match(const FBRole& role)
 bool Framebuffer::match(const FBRole& role,
 	int nx, int ny)
 {
-	if (protected_)
-		return false;
 	if (role_ == role &&
 		nx_ == nx &&
 		ny_ == ny)
@@ -789,9 +784,9 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 {
 	std::shared_ptr<Framebuffer> fb;
 
-	// First, try to match by name
 	if (!name.empty())
 	{
+		//match name if non empty
 		for (const auto& candidate : fb_list_)
 		{
 			if (candidate->match(name))
@@ -801,10 +796,9 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			}
 		}
 	}
-
-	// Then, try to match by role
-	if (!fb)
+	else
 	{
+		//otherwise match role
 		for (const auto& candidate : fb_list_)
 		{
 			if (candidate->match(role))
@@ -816,14 +810,15 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 		}
 	}
 
-	// If found, resize if needed
 	if (fb)
 	{
+		// If found, resize if needed
 		if (!fb->match_size(nx, ny))
 			fb->resize(nx, ny);
 	}
 	else
 	{
+		// if no name or role match
 		// Create new framebuffer
 		fb = std::make_shared<Framebuffer>(role, nx, ny, name);
 		fb->create();

@@ -148,8 +148,6 @@ namespace flvr
 
 		void create();
 		void destroy();
-		void protect() { protected_ = true; }
-		void unprotect() { protected_ = false; }
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
 
@@ -221,7 +219,6 @@ namespace flvr
 		int ny_ = 0;
 		std::string name_;//specify its use
 		bool valid_ = false;
-		bool protected_ = false;
 		std::map<int, std::shared_ptr<FramebufferTexture>> attachments_;
 
 		//states
@@ -265,7 +262,7 @@ namespace flvr
 
 		// Get or create framebuffer by role and size
 		std::shared_ptr<Framebuffer> framebuffer(const FBRole& role, int nx, int ny,
-			const std::string &name="");
+			const std::string &name);
 
 		// Get framebuffer by name (auto-binds if found)
 		std::shared_ptr<Framebuffer> framebuffer(const std::string &name);
@@ -313,7 +310,7 @@ namespace flvr
 	public:
 		// Get or create framebuffer by role and size
 		std::shared_ptr<Framebuffer> framebuffer(const FBRole& role, int nx, int ny,
-			const std::string &name="");
+			const std::string &name);
 
 		// Get framebuffer by name (auto-binds if found)
 		std::shared_ptr<Framebuffer> framebuffer(const std::string &name);

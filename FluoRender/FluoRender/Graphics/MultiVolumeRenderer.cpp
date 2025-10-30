@@ -236,7 +236,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		break;
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
-	blend_buffer->protect();
 	blend_buffer->clear(true, false);
 
 	for (size_t i = 0; i < vr_list_.size(); ++i)
@@ -370,7 +369,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	{
 		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, w, h);
+			flvr::FBRole::RenderFloat, w, h, gstRBFilter);
 		assert(filter_buffer);
 		//set viewport size
 		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
@@ -419,8 +418,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	img_shader->unbind();
 
-	blend_buffer->unprotect();
-
 	if (noise_red_)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
@@ -448,7 +445,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	{
 		cur_buffer = glbin_framebuffer_manager.current();
 		micro_blend_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, w, h);
+			flvr::FBRole::RenderFloat, w, h, gstRBMicroBlend);
 		assert(micro_blend_buffer);
 	}
 

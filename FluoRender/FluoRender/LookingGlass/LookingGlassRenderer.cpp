@@ -148,7 +148,6 @@ void LookingGlassRenderer::Setup()
 		glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloatDepth, m_lg_data->quilt_width, m_lg_data->quilt_height, gstRBQuilt);
 	assert(quilt_buffer);
-	quilt_buffer->protect();
 
 /*	flvr::ShaderProgram* shader = 0;
 	//set up shader to render quilt

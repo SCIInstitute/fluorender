@@ -459,7 +459,6 @@ void VolumeRenderer::draw_volume(
 		break;
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
-	blend_buffer->protect();
 	blend_buffer->clear(true, false);
 
 	eval_ml_mode();
@@ -748,7 +747,7 @@ void VolumeRenderer::draw_volume(
 	{
 		//FILTERING/////////////////////////////////////////////////////////////////
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, w, h);
+			flvr::FBRole::RenderFloat, w, h, gstRBFilter);
 		assert(filter_buffer);
 		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
@@ -788,9 +787,6 @@ void VolumeRenderer::draw_volume(
 	draw_view_quad();
 
 	img_shader->unbind();
-
-	if (blend_buffer)
-		blend_buffer->unprotect();
 
 	if (noise_red_ && cm_mode != 2)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
@@ -899,7 +895,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 	//mask frame buffer object
 	auto fbo_mask =
-		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
+		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0, "");
 	assert(fbo_mask);
 	auto guard = glbin_framebuffer_manager.bind_scoped(fbo_mask);
 
@@ -1260,7 +1256,7 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 
 	//mask frame buffer object
 	auto fbo_calc =
-		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0);
+		glbin_framebuffer_manager.framebuffer(flvr::FBRole::Volume, 0, 0, "");
 	assert(fbo_calc);
 	auto guard = glbin_framebuffer_manager.bind_scoped(fbo_calc);
 

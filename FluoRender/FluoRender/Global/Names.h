@@ -147,10 +147,14 @@ DEALINGS IN THE SOFTWARE.
 #define gstRBChannel "rb channel"
 #define gstRBTemporary "rb temporary"
 #define gstRBGradMip "rb grad mip"
+#define gstRBFilter "rb filter"
+#define gstRBMicroBlend "rb micro blend"
+#define gstRBOverlay "rb overlay"
 #define gstRBPaintBrush "rb paint brush"
 #define gstRBBlendInteractive "rb blend int"
 #define gstRBBlendDenoise "rb blend denoise"
 #define gstRBBlendQuality "rb blend quality"
+#define gstRBPick "rb pick"
 
 //properties
 #define gstMultiFuncTips "multi func tips"
