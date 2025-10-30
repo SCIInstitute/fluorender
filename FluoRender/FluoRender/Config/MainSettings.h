@@ -151,7 +151,8 @@ public:
 
 	int m_peeling_layers;	//peeling layer number
 	bool m_micro_blend;		//blending slice in depth mode
-	bool m_grad_bg;
+	bool m_grad_bg;			//draw a gradient background
+	bool m_clear_color_bg;	//clear the backgournd of data buffer to match base color
 	int m_interactive_quality;//enable lower sample rate for mouse interactions
 	double m_pin_threshold;	//rot center anchor thresh
 	double m_line_width;	//line width

@@ -1811,82 +1811,12 @@ void OutputAdjPanel::UpdateSync()
 			}
 		}
 	}
-	else if (type == 1 && view)
+	else if (view)
 	{
-		//means this is depth mode
-		if (view->GetVolMethod() != VOL_METHOD_MULTI)
-			return;
-		
-		for (i=0; i<view->GetDispVolumeNum(); i++)
-		{
-			auto vd = view->GetDispVolumeData(i);
-			if (vd)
-			{
-				if (vd->GetColormapMode())
-				{
-					r_v = g_v = b_v = true;
-				}
-				else
-				{
-					fluo::Color c = vd->GetColor();
-					bool r, g, b;
-					r = g = b = false;
-					cnt = 0;
-					if (c.r()>0) {cnt++; r = true;}
-					if (c.g()>0) {cnt++; g = true;}
-					if (c.b()>0) {cnt++; b = true;}
-
-					if (cnt > 1)
-					{
-						r_v = r_v||r;
-						g_v = g_v||g;
-						b_v = b_v||b;
-					}
-				}
-			}
-		}
-
-		cnt = 0;
-
-		if (r_v) cnt++;
-		if (g_v) cnt++;
-		if (b_v) cnt++;
-
-		SetSync(0, r_v, true);
-		SetSync(1, g_v, true);
-		SetSync(2, b_v, true);
-
-		if (cnt > 1)
-		{
-			double gamma = 1.0, brightness = 1.0, hdr = 0.0;
-			if (r_v)
-			{
-				gamma = view->GetGammaColor().r();
-				brightness = view->GetBrightness().r();
-				hdr = view->GetHdr().r();
-			}
-			else if (g_v)
-			{
-				gamma = view->GetGammaColor().g();
-				brightness = view->GetBrightness().g();
-				hdr = view->GetHdr().g();
-			}
-
-			if (g_v)
-			{
-				SetGamma(1, gamma, b_v ? false : true);
-				SetBrightness(1, brightness, b_v ? false : true);
-				SetHdr(1, hdr, b_v ? false : true);
-			}
-			if (b_v)
-			{
-				SetGamma(2, gamma, true);
-				SetBrightness(2, brightness, true);
-				SetHdr(2, hdr, true);
-			}
-		}
+		SetSync(0, true, true);
+		SetSync(1, true, true);
+		SetSync(2, true, true);
 	}
-
 }
 
 void OutputAdjPanel::OnRReset(wxCommandEvent& event)

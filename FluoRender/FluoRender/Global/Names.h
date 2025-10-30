@@ -490,6 +490,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstBgColor "background color"//bg
 #define gstBgColorInv "background color inv"//inverted background color
 #define gstGradBg "gradient background"
+#define gstClearColorBg "clear color background"
 #define gstAov "aov"//angle of view frustrum
 #define gstNearClip "near clip"
 #define gstFarClip "far clip"

@@ -813,7 +813,7 @@ void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
 	glbin_refresh_scheduler_manager.requestDraw(
 		DrawRequest("Load volume refersh", { static_cast<int>(view->Id()) }));
 
-	vc.insert({ gstCurrentSelect, gstMeshPropPanel, gstListCtrl, gstTreeCtrl });
+	vc.insert({ gstCurrentSelect, gstMeshPropPanel, gstListCtrl, gstTreeCtrl, gstUpdateSync });
 	m_frame->UpdateProps(vc);
 
 	SetProgress(0, "");

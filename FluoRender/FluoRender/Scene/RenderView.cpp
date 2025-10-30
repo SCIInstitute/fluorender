@@ -4226,6 +4226,12 @@ bool RenderView::Draw()
 	if (m_enlarge)
 		ResetEnlarge();
 
+	if (m_interactive)
+	{
+		//the draw request is non interactive, which resets the flag
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Interctive update refresh", { static_cast<int>(m_id) }));
+	}
+
 	return swap;
 }
 
@@ -5528,11 +5534,14 @@ void RenderView::DrawData()
 
 	auto data_buffer = PrepareDataFramebuffer(nx, ny);
 	assert(data_buffer);
-	data_buffer->set_clear_color({
-		static_cast<GLfloat>(m_bg_color.r()),
-		static_cast<GLfloat>(m_bg_color.g()),
-		static_cast<GLfloat>(m_bg_color.b()),
-		0.0f });
+	if (glbin_settings.m_clear_color_bg)
+		data_buffer->set_clear_color({
+			static_cast<GLfloat>(m_bg_color.r()),
+			static_cast<GLfloat>(m_bg_color.g()),
+			static_cast<GLfloat>(m_bg_color.b()),
+			0.0f });
+	else
+		data_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	data_buffer->set_viewport({ 0, 0, nx, ny });
@@ -5575,12 +5584,6 @@ void RenderView::DrawData()
 
 	//final composition
 	DrawDataFramebuffer();
-
-	if (m_vd_pop_list.size() > 0 && m_interactive)
-	{
-		//the draw request is non interactive, which resets the flag
-		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Interctive update refresh", { static_cast<int>(m_id) }));
-	}
 }
 
 //draw with depth peeling
@@ -5592,11 +5595,14 @@ void RenderView::DrawDataPeel()
 	auto data_buffer = PrepareDataFramebuffer(nx, ny);
 	assert(data_buffer);
 	data_buffer->set_clear_depth(1.0);
-	data_buffer->set_clear_color({
-		static_cast<GLfloat>(m_bg_color.r()),
-		static_cast<GLfloat>(m_bg_color.g()),
-		static_cast<GLfloat>(m_bg_color.b()),
-		0.0f });
+	if (glbin_settings.m_clear_color_bg)
+		data_buffer->set_clear_color({
+			static_cast<GLfloat>(m_bg_color.r()),
+			static_cast<GLfloat>(m_bg_color.g()),
+			static_cast<GLfloat>(m_bg_color.b()),
+			0.0f });
+	else
+		data_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	data_buffer->set_viewport({ 0, 0, nx, ny });
@@ -5814,14 +5820,6 @@ void RenderView::DrawDataPeel()
 
 	//final composition
 	DrawDataFramebuffer();
-
-	if ((m_vd_pop_list.size() > 0 ||
-		m_md_pop_list.size() >0) &&
-		m_interactive)
-	{
-		//the draw request is non interactive, which resets the flag
-		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Interctive update refresh", { static_cast<int>(m_id) }));
-	}
 }
 
 //draw mesh

@@ -430,16 +430,19 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group3->Add(sizer4_2, 0, wxEXPAND);
 	group3->Add(10, 5);
 
-	//gradient background
+	//background
 	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Gradient Background");
-	wxBoxSizer *sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
+		wxVERTICAL, page, "Background");
 	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Gradient Background");
+	m_clear_color_bg_chk = new wxCheckBox(page, wxID_ANY,
+		"Match Transparency to Render View Background Color");
 	m_grad_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnGradBgCheck, this);
-	sizer5_1->Add(m_grad_bg_chk, 0, wxALIGN_CENTER);
+	m_clear_color_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnClearColorBgCheck, this);
 	group4->Add(10, 5);
-	group4->Add(sizer5_1, 0, wxEXPAND);
+	group4->Add(m_grad_bg_chk);
+	group4->Add(10, 5);
+	group4->Add(m_clear_color_bg_chk);
 	group4->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
@@ -1163,6 +1166,10 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstGradBg))
 		m_grad_bg_chk->SetValue(glbin_settings.m_grad_bg);
 
+	//match background color
+	if (update_all || FOUND_VALUE(gstClearColorBg))
+		m_clear_color_bg_chk->SetValue(glbin_settings.m_clear_color_bg);
+
 	//performance page
 	//mouse interactions
 	if (update_all || FOUND_VALUE(gstMouseInt))
@@ -1465,6 +1472,13 @@ void SettingDlg::OnMicroBlendCheck(wxCommandEvent& event)
 void SettingDlg::OnGradBgCheck(wxCommandEvent& event)
 {
 	glbin_settings.m_grad_bg = m_grad_bg_chk->GetValue();
+	FluoRefresh(3, { gstNull });
+}
+
+//match background color
+void SettingDlg::OnClearColorBgCheck(wxCommandEvent& event)
+{
+	glbin_settings.m_clear_color_bg = m_clear_color_bg_chk->GetValue();
 	FluoRefresh(3, { gstNull });
 }
 

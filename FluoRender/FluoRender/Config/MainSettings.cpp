@@ -89,6 +89,7 @@ MainSettings::MainSettings()
 	m_peeling_layers = 1;
 	m_micro_blend = false;
 	m_grad_bg = false;
+	m_clear_color_bg = false;
 	m_interactive_quality = 2;//enable for large data
 	m_pin_threshold = 10.0;
 	m_line_width = 3.0;
@@ -323,6 +324,7 @@ void MainSettings::Read()
 		fconfig->Read("peeling layers", &m_peeling_layers, 1);
 		fconfig->Read("micro blend", &m_micro_blend, false);
 		fconfig->Read("grad bg", &m_grad_bg, false);
+		fconfig->Read("clear color bg", &m_clear_color_bg, false);
 		fconfig->Read("interactive quality", &m_interactive_quality, 2);
 		fconfig->Read("pin thresh", &m_pin_threshold, 10.0);
 		fconfig->Read("line width", &m_line_width, 3.0);
@@ -588,6 +590,7 @@ void MainSettings::Save()
 	fconfig->Write("peeling layers", m_peeling_layers);
 	fconfig->Write("micro blend", m_micro_blend);
 	fconfig->Write("grad bg", m_grad_bg);
+	fconfig->Write("clear color bg", m_clear_color_bg);
 	fconfig->Write("interactive quality", m_interactive_quality);
 	fconfig->Write("pin thresh", m_pin_threshold);
 	fconfig->Write("line width", m_line_width);

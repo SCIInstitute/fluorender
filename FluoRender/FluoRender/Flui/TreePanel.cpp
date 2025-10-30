@@ -573,7 +573,7 @@ void TreePanel::Select()
 		}
 	}
 
-	vc.insert(gstCurrentSelect);
+	vc.insert({ gstCurrentSelect, gstUpdateSync });
 	FluoRefresh(1, { vc });
 }
 
