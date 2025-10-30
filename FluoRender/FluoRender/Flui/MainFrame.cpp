@@ -2092,6 +2092,11 @@ void MainFrame::LayoutRenderViewPanels(int mode)
 	m_aui_mgr.Update();
 }
 
+void MainFrame::LayoutOutputAdjPanel()
+{
+	m_output_adj_panel->LoadPerspective("");
+}
+
 //reset layout
 void MainFrame::ResetLayout()
 {
@@ -2118,6 +2123,7 @@ void MainFrame::ResetLayout()
 		FloatingSize(FromDIP(wxSize(150, 800))).
 		Right().Show().Dock().Layer(1);
 	LayoutRenderViewPanels(1);
+	LayoutOutputAdjPanel();
 	glbin_settings.m_layout.clear();
 	FluoUpdate({ gstMainToolbar, gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
@@ -2547,6 +2553,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		break;
 	case ID_LayoutMenu:
 		LayoutRenderViewPanels(1);
+		LayoutOutputAdjPanel();
 		break;
 	case ID_ResetMenu:
 		ResetLayout();

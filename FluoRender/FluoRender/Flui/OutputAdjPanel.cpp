@@ -409,7 +409,10 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	int type = glbin_current.GetType();
-	if (type != 1 && type != 2 && type != 5)
+	if (type == 0 ||
+		type == 4 ||
+		type == 7 ||
+		type == 8)
 	{
 		EnableAll(false);
 		return;
@@ -515,6 +518,8 @@ void OutputAdjPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	switch (type)
 	{
 	case 1://view
+	case 3://mesh
+	case 6://mesh group
 	{
 		auto view = glbin_current.render_view.lock();
 		if (view)
@@ -1089,6 +1094,8 @@ void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 	switch (type)
 	{
 	case 1://view
+	case 3://mesh
+	case 6://mesh group
 		glbin_outadj_def.Set(glbin_current.render_view.lock().get());
 		break;
 	case 2://volume data
@@ -1231,6 +1238,8 @@ void OutputAdjPanel::SyncGamma(int i)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 	{
 		if (view)
 			gamma = view->GetGammaColor();
@@ -1254,6 +1263,8 @@ void OutputAdjPanel::SyncGamma(int i)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			if (view->GetGammaColor() == gamma)
@@ -1301,6 +1312,8 @@ void OutputAdjPanel::SyncBrightness(int i)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 	{
 		if (view)
 			brightness = view->GetBrightness();
@@ -1324,6 +1337,8 @@ void OutputAdjPanel::SyncBrightness(int i)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			if (view->GetBrightness() == brightness)
@@ -1371,6 +1386,8 @@ void OutputAdjPanel::SyncHdr(int i)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 	{
 		if (view)
 			hdr = view->GetHdr();
@@ -1394,6 +1411,8 @@ void OutputAdjPanel::SyncHdr(int i)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			if (view->GetHdr() == hdr)
@@ -1443,6 +1462,8 @@ void OutputAdjPanel::SetSync(int i, bool val, bool update)
 	switch (type)
 	{
 	case 1://view
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			view->SetSync(i, val);
@@ -1533,6 +1554,8 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1://view
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 			gamma = view->GetGammaColor();
 		break;
@@ -1550,6 +1573,8 @@ void OutputAdjPanel::SetGamma(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			if (view->GetGammaColor() == gamma)
@@ -1591,6 +1616,8 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1://view
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 			brightness = view->GetBrightness();
 		break;
@@ -1608,6 +1635,8 @@ void OutputAdjPanel::SetBrightness(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			if (view->GetBrightness() == brightness)
@@ -1649,6 +1678,8 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1://view
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 			hdr = view->GetHdr();
 		break;
@@ -1666,6 +1697,8 @@ void OutputAdjPanel::SetHdr(int i, double val, bool notify)
 	switch (type)
 	{
 	case 1:
+	case 3://mesh
+	case 6://mesh group
 		if (view)
 		{
 			if (view->GetHdr() == hdr)

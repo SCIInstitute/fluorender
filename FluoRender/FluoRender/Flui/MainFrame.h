@@ -344,6 +344,7 @@ public:
 		const std::wstring& wildcard, long style);
 	//organize render views
 	void LayoutRenderViewPanels(int mode);
+	void LayoutOutputAdjPanel();
 	//reset layout
 	void ResetLayout();
 	//fullscreen
