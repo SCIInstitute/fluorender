@@ -264,8 +264,8 @@ std::string VolumeRenderer::get_buffer_name()
 Size2D VolumeRenderer::resize(const std::string& buf_name)
 {
 	Size2D out_size(0, 0);
-	int w = vp_[2];
-	int h = vp_[3];
+	int w = viewport_[2];
+	int h = viewport_[3];
 	double sf = 1.0;
 	if (buf_name == gstRBBlendInteractive)
 	{
@@ -425,8 +425,8 @@ void VolumeRenderer::draw_volume(
 	int cm_mode = mode == 4 ? 0 : colormap_mode_;
 	bool use_fog = m_use_fog && cm_mode != 2;
 
-	int w = vp_[2];
-	int h = vp_[3];
+	int w = viewport_[2];
+	int h = viewport_[3];
 	std::string buf_name = get_buffer_name();
 	Size2D new_size = resize(buf_name);
 	int w2 = new_size.w();
@@ -438,7 +438,7 @@ void VolumeRenderer::draw_volume(
 	assert(blend_buffer);
 	//set clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
-	blend_buffer->set_viewport({ vp_[0], vp_[1], w2, h2 });
+	blend_buffer->set_viewport({ viewport_[0], viewport_[1], w2, h2 });
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
 	//blend: normal: (add, add)(b2f: (1, 1-a), f2b: (1-a, a)), mip: (max, max)(1, 1)
@@ -749,7 +749,7 @@ void VolumeRenderer::draw_volume(
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloat, w, h, gstRBFilter);
 		assert(filter_buffer);
-		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
+		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
 		filter_buffer->clear(true, false);
 
@@ -771,7 +771,7 @@ void VolumeRenderer::draw_volume(
 	//go back to normal
 	assert(cur_buffer);
 	//set viewport size
-	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
+	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);//blend buffer
 
 	if (noise_red_ && cm_mode != 2)
@@ -946,7 +946,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	//transfer function
 	seg_shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 	seg_shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
-	seg_shader->setLocalParam(6, mp_[0], vp_[3] - mp_[1], vp_[2], vp_[3]);
+	seg_shader->setLocalParam(6, mp_[0], viewport_[3] - mp_[1], viewport_[2], viewport_[3]);
 	seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
 
 	//setup depth peeling

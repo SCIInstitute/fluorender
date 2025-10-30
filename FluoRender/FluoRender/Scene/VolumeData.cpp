@@ -361,17 +361,17 @@ VolumeData::~VolumeData()
 }
 
 //set viewport
-void VolumeData::SetViewport(GLint vp[4])
+void VolumeData::SetViewport(const fluo::Vector4i& vp)
 {
 	if (m_vr)
 		m_vr->set_viewport(vp);
 }
 
 //set clear color
-void VolumeData::SetClearColor(GLfloat clear_color[4])
+void VolumeData::SetClearColor(const fluo::Vector4f& cc)
 {
 	if (m_vr)
-		m_vr->set_clear_color(clear_color);
+		m_vr->set_clear_color(cc);
 }
 
 //data related
@@ -1813,20 +1813,20 @@ void VolumeData::Calculate(int type, VolumeData *vd_a, VolumeData *vd_b)
 }
 
 //set 2d mask for segmentation
-void VolumeData::Set2dMask(GLuint mask)
+void VolumeData::Set2dMask(unsigned int mask)
 {
 	m_2d_mask = mask;
 }
 
 //set 2d weight map for segmentation
-void VolumeData::Set2DWeight(GLuint weight1, GLuint weight2)
+void VolumeData::Set2DWeight(unsigned int weight1, unsigned int weight2)
 {
 	m_2d_weight1 = weight1;
 	m_2d_weight2 = weight2;
 }
 
 //set 2d depth map for rendering shadows
-void VolumeData::Set2dDmap(GLuint dmap)
+void VolumeData::Set2dDmap(unsigned int dmap)
 {
 	m_2d_dmap = dmap;
 	if (m_vr)

@@ -30,15 +30,11 @@
 #define MultiVolumeRenderer_h
 
 #include <BBox.h>
+#include <Vector4i.h>
+#include <Vector4f.h>
 #include <glm/mat4x4.hpp>
 #include <vector>
 #include <memory>
-
-#ifndef __glew_h__
-typedef unsigned int GLuint;
-typedef int GLint;
-typedef float GLfloat;
-#endif // !__glew_h__
 
 namespace fluo
 {
@@ -59,12 +55,12 @@ namespace flvr
 		virtual ~MultiVolumeRenderer();
 
 		//set viewport
-		void set_viewport(GLint vp[4]);
+		void set_viewport(const fluo::Vector4i& vp);
 
 		//set clear color
-		void set_clear_color(GLfloat clear_color[4])
+		void set_clear_color(const fluo::Vector4f& cc)
 		{
-			memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4);
+			clear_color_ = cc;
 		}
 
 		//mode and sampling rate
@@ -102,9 +98,9 @@ namespace flvr
 
 	private:
 		//viewport
-		GLint vp_[4];
+		fluo::Vector4i viewport_;
 		//clear color
-		GLfloat clear_color_[4];
+		fluo::Vector4f clear_color_;
 
 		//volume renderer list
 		std::vector<VolumeRenderer*> vr_list_;

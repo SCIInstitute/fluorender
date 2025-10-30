@@ -5533,14 +5533,6 @@ void RenderView::DrawData()
 
 	auto data_buffer = PrepareDataFramebuffer(nx, ny);
 	assert(data_buffer);
-	if (glbin_settings.m_clear_color_bg)
-		data_buffer->set_clear_color({
-			static_cast<GLfloat>(m_bg_color.r()),
-			static_cast<GLfloat>(m_bg_color.g()),
-			static_cast<GLfloat>(m_bg_color.b()),
-			0.0f });
-	else
-		data_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	data_buffer->set_viewport({ 0, 0, nx, ny });
@@ -5595,14 +5587,6 @@ void RenderView::DrawDataPeel()
 	auto data_buffer = PrepareDataFramebuffer(nx, ny);
 	assert(data_buffer);
 	data_buffer->set_clear_depth(1.0);
-	if (glbin_settings.m_clear_color_bg)
-		data_buffer->set_clear_color({
-			static_cast<GLfloat>(m_bg_color.r()),
-			static_cast<GLfloat>(m_bg_color.g()),
-			static_cast<GLfloat>(m_bg_color.b()),
-			0.0f });
-	else
-		data_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	data_buffer->set_viewport({ 0, 0, nx, ny });
@@ -6109,10 +6093,17 @@ void RenderView::DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
-	GLfloat zoom = static_cast<GLfloat>(m_scale_factor);
-	GLfloat sf121 = static_cast<GLfloat>(Get121ScaleFactor());
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color;
+	if (glbin_settings.m_clear_color_bg)
+		clear_color = { 
+			static_cast<float>(m_bg_color.r()),
+			static_cast<float>(m_bg_color.g()),
+			static_cast<float>(m_bg_color.b()), 0.0f };
+	else
+		clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float zoom = m_scale_factor;
+	float sf121 = Get121ScaleFactor();
 
 	m_mvr->set_blend_slices(glbin_settings.m_micro_blend);
 
@@ -6311,8 +6302,15 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color;
+	if (glbin_settings.m_clear_color_bg)
+		clear_color = { 
+			static_cast<float>(m_bg_color.r()),
+			static_cast<float>(m_bg_color.g()),
+			static_cast<float>(m_bg_color.b()), 0.0f };
+	else
+		clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	bool do_mip = true;
 	if (glbin_settings.m_mem_swap &&
@@ -6516,6 +6514,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 	data_buffer->set_blend_func(flvr::BlendFactor::One,
@@ -6554,8 +6553,15 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 0, 0, 0, 0 };
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color;
+	if (glbin_settings.m_clear_color_bg)
+		clear_color = { 
+			static_cast<float>(m_bg_color.r()),
+			static_cast<float>(m_bg_color.g()),
+			static_cast<float>(m_bg_color.b()), 0.0f };
+	else
+		clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
@@ -6679,11 +6685,12 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
-	//flvr::FramebufferStateGuard fbg(*data_buffer);
-	//data_buffer->set_blend_enabled(true);
-	//data_buffer->set_blend_func(flvr::BlendFactor::One,
-	//	m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
-	//data_buffer->apply_state();
+	data_buffer->set_blend_enabled(true);
+	data_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+	data_buffer->set_blend_func(flvr::BlendFactor::One,
+		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
+	data_buffer->set_depth_test_enabled(false);
+	data_buffer->apply_state();
 
 	//2d adjustment
 	img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -6781,8 +6788,8 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
-	GLint vp[4] = { 0, 0, (GLint)nx, (GLint)ny };
-	GLfloat clear_color[4] = { 1, 1, 1, 1 };
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	bool has_shadow = false;
 	std::vector<int> colormodes;

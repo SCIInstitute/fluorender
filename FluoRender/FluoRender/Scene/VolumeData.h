@@ -32,14 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Quaternion.h>
 #include <BBox.h>
+#include <Vector4i.h>
+#include <Vector4f.h>
 #include <nrrd.h>
 #include <glm/glm.hpp>
-
-#ifndef __glew_h__
-typedef unsigned int GLuint;
-typedef int GLint;
-typedef float GLfloat;
-#endif // !__glew_h__
 
 namespace flvr
 {
@@ -72,10 +68,10 @@ public:
 	virtual ~VolumeData();
 
 	//set viewport
-	void SetViewport(GLint vp[4]);
+	void SetViewport(const fluo::Vector4i& vp);
 
 	//set clear color
-	void SetClearColor(GLfloat clear_color[4]);
+	void SetClearColor(const fluo::Vector4f& cc);
 
 	//data related
 	//reader
@@ -171,11 +167,11 @@ public:
 	void Calculate(int type, VolumeData* vd_a, VolumeData* vd_b);
 
 	//set 2d mask for segmentation
-	void Set2dMask(GLuint mask);
+	void Set2dMask(unsigned int mask);
 	//set 2d weight map for segmentation
-	void Set2DWeight(GLuint weight1, GLuint weight2);
+	void Set2DWeight(unsigned int weight1, unsigned int weight2);
 	//set 2d depth map for rendering shadows
-	void Set2dDmap(GLuint dmap);
+	void Set2dDmap(unsigned int dmap);
 
 	//properties
 	//transfer function
@@ -596,13 +592,13 @@ private:
 	bool m_invert;
 
 	//2d mask texture for segmentation
-	GLuint m_2d_mask;
+	unsigned int m_2d_mask;
 	//2d weight map for segmentation
-	GLuint m_2d_weight1;	//after tone mapping
-	GLuint m_2d_weight2;	//before tone mapping
+	unsigned int m_2d_weight1;	//after tone mapping
+	unsigned int m_2d_weight2;	//before tone mapping
 
 	//2d depth map texture for rendering shadows
-	GLuint m_2d_dmap;
+	unsigned int m_2d_dmap;
 
 	//reader
 	std::weak_ptr<BaseVolReader> m_reader;

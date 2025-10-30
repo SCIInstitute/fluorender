@@ -32,12 +32,8 @@
 #include <TextureRenderer.h>
 #include <Color.h>
 #include <Size.h>
-
-#ifndef __glew_h__
-typedef int GLint;
-typedef unsigned int GLuint;
-typedef float GLfloat;
-#endif
+#include <Vector4i.h>
+#include <Vector4f.h>
 
 #ifndef TextureBrick_h
 #define TEXTURE_RENDER_MODES	5
@@ -60,17 +56,17 @@ namespace flvr
 		virtual ~VolumeRenderer();
 
 		//set viewport
-		void set_viewport(GLint vp[4]) { memcpy(vp_, vp, sizeof(GLint) * 4); }
+		void set_viewport(const fluo::Vector4i& vp) { viewport_ = vp; }
 
 		//mouse position in viewport
-		void set_mouse_position(GLint mp[2]) { memcpy(mp_, mp, sizeof(GLint) * 2); }
+		void set_mouse_position(int mp[2]) { memcpy(mp_, mp, sizeof(int) * 2); }
 		//mouse direction
 		void set_mouse_vec(fluo::Vector &mvec) { mvec_ = mvec; }
 		//set scale/zoom factor for 2d
-		void set_zoom(GLfloat sf, GLfloat sf121) { zoom_ = sf; zoom_data_ = sf / sf121; }
+		void set_zoom(float sf, float sf121) { zoom_ = sf; zoom_data_ = sf / sf121; }
 
 		//set clear color
-		void set_clear_color(GLfloat clear_color[4]) { memcpy(clear_color_, clear_color, sizeof(GLfloat) * 4); }
+		void set_clear_color(const fluo::Vector4f& clear_color) { clear_color_ = clear_color; }
 
 		//render mode
 		void set_mode(RenderMode mode) { mode_ = mode; }
@@ -213,14 +209,14 @@ namespace flvr
 		friend class MultiVolumeRenderer;
 
 	protected:
-		GLint vp_[4];//viewport
-		GLint mp_[2];//mouse position in viewport
+		fluo::Vector4i viewport_;//viewport
+		int mp_[2];//mouse position in viewport
 		fluo::Vector mvec_;//mouse direction vector for grow selection
-		GLfloat zoom_;//zoom ratio for 2d processings
-		GLfloat zoom_data_;//for point grow
+		float zoom_;//zoom ratio for 2d processings
+		float zoom_data_;//for point grow
 
 		//clear color
-		GLfloat clear_color_[4];
+		fluo::Vector4f clear_color_;
 
 		double scalar_scale_;
 		double gm_scale_;

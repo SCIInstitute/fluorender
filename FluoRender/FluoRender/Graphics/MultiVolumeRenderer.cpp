@@ -71,9 +71,9 @@ MultiVolumeRenderer::~MultiVolumeRenderer()
 {
 }
 
-void MultiVolumeRenderer::set_viewport(GLint vp[4])
+void MultiVolumeRenderer::set_viewport(const fluo::Vector4i& vp)
 {
-	memcpy(vp_, vp, sizeof(GLint) * 4);
+	viewport_ = vp;
 	for (auto it : vr_list_)
 	{
 		if (it)
@@ -202,8 +202,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	index.reserve(est_slices * 6);
 	size.reserve(est_slices * 6);
 
-	int w = vp_[2];
-	int h = vp_[3];
+	int w = viewport_[2];
+	int h = viewport_[3];
 	std::string buf_name = vr_list_[0]->get_buffer_name();
 	Size2D new_size = vr_list_[0]->resize(buf_name);
 	int w2 = new_size.w();
@@ -215,7 +215,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	assert(blend_buffer);
 	//set up clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
-	blend_buffer->set_viewport({ vp_[0], vp_[1], w2, h2 });
+	blend_buffer->set_viewport({ viewport_[0], viewport_[1], w2, h2 });
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
 	//normal: b2f:(1, 1-a), f2b:(1-a, 1), mip: max(1, 1)
@@ -372,7 +372,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			flvr::FBRole::RenderFloat, w, h, gstRBFilter);
 		assert(filter_buffer);
 		//set viewport size
-		filter_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
+		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
 		filter_buffer->clear(true, false);
 
@@ -401,7 +401,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	else if (glbin_settings.m_update_order == 1)
 		cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 	//set viewport size
-	cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
+	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);
 
 	if (noise_red_ /*&& colormap_mode_!=2*/)
@@ -705,7 +705,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			//set buffer back
 			assert(cur_buffer);
 			//set viewport size
-			cur_buffer->set_viewport({ vp_[0], vp_[1], vp_[2], vp_[3] });
+			cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 			//blend: (add, add)(b2f:(1, 1-a), f2b:(1-a, 1))
 			cur_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 			if (glbin_settings.m_update_order == 0)
