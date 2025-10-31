@@ -799,7 +799,7 @@ void main()
 	vec4 lanczosColor = lanczosFilter(OutTexCoord.xy);
 	vec4 bicubicColor = bicubicFilter(OutTexCoord.xy);
 	FragColor = mix(lanczosColor, bicubicColor, blend);
-	FragColor = clamp(FragColor, 0.0, 1.0);
+	//FragColor = clamp(FragColor, 0.0, 1.0);
 }
 )GLSHDR";
 

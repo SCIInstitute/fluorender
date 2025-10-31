@@ -6324,7 +6324,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 	bool shading = vr->get_shading();
 	bool shadow = vd->GetShadowEnable();
-	int color_mode = vd->GetColormapMode();
+	int colormap_mode = vd->GetColormapMode();
 	bool enable_alpha = vd->GetAlphaEnable();
 	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
@@ -6388,9 +6388,13 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		vr->set_depth_peel(peel);
 		vr->set_shading(false);
 		//turn off colormap proj
-		if (color_mode == 0)
+		if (colormap_mode == 0)
+		{
+			//normal mip
 			vr->set_colormap_proj(0);
-		if (color_mode == 1)
+			vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		}
+		else
 		{
 			//white mip
 			vr->set_colormap_mode(0);
@@ -6398,11 +6402,6 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
 			vr->set_solid(true);
 			vr->set_alpha(1.0);
-		}
-		else
-		{
-			//normal mip
-			vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 		//draw
 		vd->SetStreamMode(1);
@@ -6414,7 +6413,6 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 		//clear = !glbin_settings.m_mem_swap ||
 		//	(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
-		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 		flvr::FramebufferStateGuard fbg(*chan_buffer);
 		bool not_done_loop = glbin_settings.m_mem_swap && !vr->get_done_loop(0);
@@ -6432,7 +6430,15 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		if (color_mode == 1)
+		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+		if (colormap_mode == 0)
+		{
+			img_shader = glbin_shader_manager.shader(gstImgShader,
+				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+			assert(img_shader);
+			img_shader->bind();
+		}
+		else
 		{
 			//2d adjustment
 			if (vd->GetColormapProj())
@@ -6456,13 +6462,6 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			img_shader->setLocalParam(
 				9, c.r(), c.g(), c.b(), 0.0);
 			//2d adjustment
-		}
-		else
-		{
-			img_shader = glbin_shader_manager.shader(gstImgShader,
-				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
-			assert(img_shader);
-			img_shader->bind();
 		}
 
 		DrawViewQuad();
@@ -6537,9 +6536,6 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 	img_shader->unbind();
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
-
-	vr->set_shading(shading);
-	//vd->SetColormapMode(color_mode);
 }
 
 void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)

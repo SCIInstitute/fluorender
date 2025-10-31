@@ -469,8 +469,8 @@ void VolumeRenderer::draw_volume(
 	//create/bind
 	bool grad = gm_low_ > 0.0 ||
 		gm_high_ < gm_max_ ||
-		(cm_mode &&
-			colormap_proj_ > 3);
+		colormap_proj_ == 5 ||
+		colormap_proj_ == 6;
 	shader = glbin_shader_manager.shader(gstVolShader,
 		ShaderParams::Volume(
 			false, tex->nc(),
