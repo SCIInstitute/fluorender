@@ -42,6 +42,7 @@ namespace flvr
 	class VolumeRenderer;
 	class TextureBrick;
 	class Texture;
+	enum class RenderMode;
 }
 namespace flrd
 {
@@ -346,9 +347,8 @@ public:
 	void SetWireframe(bool val);
 
 	//MIP & normal modes
-	void SetMode(int mode);
-	int GetMode();
-	void RestoreMode();
+	void SetRenderMode(flvr::RenderMode mode);
+	flvr::RenderMode GetRenderMode() { return m_render_mode; }
 	//transparency
 	void SetAlphaPower(double val);
 	double GetAlphaPower();
@@ -493,7 +493,7 @@ private:
 	bool m_ml_comp_gen_applied;
 
 	//modes (MIP & normal)
-	int m_mode;	//0-normal; 1-MIP; 2-white shading; 3-white mip
+	flvr::RenderMode m_render_mode;	//0-normal; 1-MIP; 2-white shading; 3-white mip
 	//modes for streaming
 	int m_stream_mode;	//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 
@@ -581,9 +581,6 @@ private:
 
 	//transparent
 	bool m_transparent;
-
-	//save the mode for restoring
-	int m_saved_mode;
 
 	//blend mode
 	int m_blend_mode;	//0: ignore; 1: layered; 2: depth; 3: composite

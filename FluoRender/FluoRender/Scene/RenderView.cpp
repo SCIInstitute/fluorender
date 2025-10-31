@@ -2505,7 +2505,8 @@ float RenderView::GetDistancePerspFlight()
 	int nx = GetCanvasSize().w();
 	int ny = GetCanvasSize().h();
 	int mode = 2;
-	if (cur_vd->GetMode() == 1) mode = 1;
+	if (cur_vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP)
+		mode = 1;
 	glbin_volume_point.SetVolumeData(cur_vd);
 	double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
 		mode, false, 0.01, p, ip);
@@ -4316,7 +4317,7 @@ void RenderView::StartLoopUpdate()
 						(*bricks)[j]->set_disp(true);
 					total_num++;
 					num_chan++;
-					if (vd->GetMode() == 1 &&
+					if (vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP &&
 						vd->GetShadingEnable())
 						total_num++;
 					if (vd->GetShadowEnable())
@@ -4360,7 +4361,7 @@ void RenderView::StartLoopUpdate()
 				flvr::Texture* tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
 				std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-				int mode = vd->GetMode() == 1 ? 1 : 0;
+				int mode = vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShadingEnable());
 				bool shadow = vd->GetShadowEnable();
 				for (size_t j = 0; j < bricks->size(); ++j)
@@ -4446,7 +4447,7 @@ void RenderView::StartLoopUpdate()
 						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (!bricks || bricks->size() == 0)
 							continue;
-						int mode = vd->GetMode() == 1 ? 1 : 0;
+						int mode = vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP ? 1 : 0;
 						bool shade = (mode == 1 && vd->GetShadingEnable());
 						bool shadow = vd->GetShadowEnable();
 						for (size_t j = 0; j<bricks->size(); j++)
@@ -4528,7 +4529,7 @@ void RenderView::StartLoopUpdate()
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-							int mode = vd->GetMode() == 1 ? 1 : 0;
+							int mode = vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
 							bool shadow = vd->GetShadowEnable();
 							for (size_t j = 0; j < bricks->size(); j++)
@@ -4603,7 +4604,7 @@ void RenderView::StartLoopUpdate()
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-							int mode = vd->GetMode() == 1 ? 1 : 0;
+							int mode = vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
 							bool shadow = vd->GetShadowEnable();
 							for (size_t k = 0; k<bricks->size(); k++)
@@ -6267,7 +6268,7 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 				vd->SetMaskMode(1);
 				int vol_method = m_vol_method;
 				m_vol_method = VOL_METHOD_COMP;
-				if (vd->GetMode() == 1)
+				if (vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP)
 					DrawVolumeMip(vd, peel);
 				else
 					DrawVolumeStandard(vd, mask, peel);
@@ -6285,7 +6286,7 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 					vd->GetLabel(false))
 					vd->SetMaskMode(4);
 
-				if (vd->GetMode() == 1)
+				if (vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP)
 					DrawVolumeMip(vd, peel);
 				else
 					DrawVolumeStandard(vd, mask, peel);
@@ -6299,18 +6300,14 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 	auto vd = vd_ptr.lock();
 	if (!vd)
 		return;
+	flvr::VolumeRenderer* vr = vd->GetVR();
+	if (!vr)
+		return;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
 	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
-	fluo::Vector4f clear_color;
-	if (glbin_settings.m_clear_color_bg)
-		clear_color = { 
-			static_cast<float>(m_bg_color.r()),
-			static_cast<float>(m_bg_color.g()),
-			static_cast<float>(m_bg_color.b()), 0.0f };
-	else
-		clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
+	fluo::Vector4f clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	bool do_mip = true;
 	if (glbin_settings.m_mem_swap &&
@@ -6321,11 +6318,11 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (vd->GetVR()->get_done_loop(1))
+		if (vr->get_done_loop(1))
 			do_mip = false;
 	}
 
-	bool shading = vd->GetVR()->get_shading();
+	bool shading = vr->get_shading();
 	bool shadow = vd->GetShadowEnable();
 	int color_mode = vd->GetColormapMode();
 	bool enable_alpha = vd->GetAlphaEnable();
@@ -6371,6 +6368,14 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		overlay_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderFloat, nx, ny, gstRBOverlay);
 		assert(overlay_buffer);
+		overlay_buffer->set_blend_enabled(true);
+		if (glbin_settings.m_clear_color_bg)
+			overlay_buffer->set_clear_color({
+				static_cast<float>(m_bg_color.r()),
+				static_cast<float>(m_bg_color.g()),
+				static_cast<float>(m_bg_color.b()), 0.0f });
+		else
+			overlay_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
 		glbin_framebuffer_manager.bind(overlay_buffer);
 
 		bool clear = !glbin_settings.m_mem_swap ||
@@ -6379,48 +6384,40 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		overlay_buffer->clear(true, false);
 		//flvr::TextureRenderer::reset_clear_chan_buffer();
 
-		if (vd->GetVR())
-			vd->GetVR()->set_depth_peel(peel);
-		vd->GetVR()->set_shading(false);
+		flvr::RenderModeGuard rmg(*vr);
+		vr->set_depth_peel(peel);
+		vr->set_shading(false);
 		//turn off colormap proj
-		int saved_colormap_proj = vd->GetColormapProj();
 		if (color_mode == 0)
-			vd->SetColormapProj(0);
+			vr->set_colormap_proj(0);
 		if (color_mode == 1)
 		{
-			vd->SetMode(3);
-			vd->SetFog(false, m_fog_intensity, m_fog_start, m_fog_end);
+			//white mip
+			vr->set_colormap_mode(0);
+			vr->set_color(fluo::Color(1.0));
+			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
+			vr->set_solid(true);
+			vr->set_alpha(1.0);
 		}
 		else
 		{
-			vd->SetMode(1);
-			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			//normal mip
+			vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		}
-		//turn off alpha
-		if (color_mode == 1)
-			vd->SetAlphaEnable(false);
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetViewport(vp);
 		vd->SetClearColor(clear_color);
 		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
-		//restore
-		if (color_mode == 0)
-			vd->SetColormapProj(saved_colormap_proj);
-		if (color_mode == 1)
-		{
-			vd->RestoreMode();
-			//restore alpha
-			vd->SetAlphaEnable(enable_alpha);
-		}
+		//restore the guard should restore settings after exit
 
 		//clear = !glbin_settings.m_mem_swap ||
 		//	(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
 		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 		flvr::FramebufferStateGuard fbg(*chan_buffer);
-		bool not_done_loop = glbin_settings.m_mem_swap && !vd->GetVR()->get_done_loop(0);
+		bool not_done_loop = glbin_settings.m_mem_swap && !vr->get_done_loop(0);
 		chan_buffer->set_blend_enabled(true);
 		chan_buffer->set_blend_equation(not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add,
 			not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add);
@@ -6541,14 +6538,17 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 	img_shader->unbind();
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
-	vd->GetVR()->set_shading(shading);
-	vd->SetColormapMode(color_mode);
+	vr->set_shading(shading);
+	//vd->SetColormapMode(color_mode);
 }
 
 void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)
 {
 	auto vd = vd_ptr.lock();
 	if (!vd)
+		return;
+	flvr::VolumeRenderer* vr = vd->GetVR();
+	if (!vr)
 		return;
 
 	int nx, ny;
@@ -6576,12 +6576,12 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 			return;
 		if (mask)
 		{
-			if (vd->GetVR()->get_done_loop(4))
+			if (vr->get_done_loop(4))
 				do_over = false;
 		}
 		else
 		{
-			if (vd->GetVR()->get_done_loop(0))
+			if (vr->get_done_loop(0))
 				do_over = false;
 		}
 	}
@@ -6634,8 +6634,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		if (vd->GetVR())
-			vd->GetVR()->set_depth_peel(peel);
+		vr->set_depth_peel(peel);
 		if (mask)
 			vd->SetStreamMode(4);
 		else
@@ -6721,6 +6720,9 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 	auto vd = vd_ptr.lock();
 	if (!vd)
 		return;
+	flvr::VolumeRenderer* vr = vd->GetVR();
+	if (!vr)
+		return;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6744,18 +6746,17 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 	glbin_framebuffer_manager.bind(overlay_buffer);
 	overlay_buffer->clear(true, false);
 
-	vd->GetVR()->set_shading(true);
-	bool alpha = vd->GetAlphaEnable();
-	vd->SetAlphaEnable(true);
-	vd->SetMode(2);
-	int colormode = vd->GetColormapMode();
+	flvr::RenderModeGuard rmg(*vr);
+	vr->set_shading(true);
+	vr->set_solid(false);
+	vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+	vr->set_colormap_mode(0);
+	vr->set_color(fluo::Color(1.0));
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 	vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
-	vd->RestoreMode();
-	vd->SetColormapMode(colormode);
-	vd->SetAlphaEnable(alpha);
+	//restore after guard exits
 
 	//bind fbo for final composition
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
@@ -6840,85 +6841,67 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	}
 
 	double shadow_darkness = 0.0;
-
-	if (local_list.empty())
-		;
-	else if (local_list.size() == 1)
+	if (!local_list.empty())
 	{
 		auto vd = local_list[0].lock();
 		if (vd)
+			shadow_darkness = vd->GetShadowIntensity();
+	}
+
+	if (local_list.size() == 1)
+	{
+		auto vd = local_list[0].lock();
+		assert(vd);
+		auto vr = vd->GetVR();
+		assert(vr);
+
+		//save
+		flvr::RenderModeGuard rmg(*vr);
+		//set to draw depth
+		vr->set_shading(false);
+		vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+		vr->set_colormap_mode(2);
+		if (overlay_buffer)
+			vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
+		vr->set_ml_mode(0);
+		//draw
+		vd->SetStreamMode(3);
+		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		vd->SetViewport(vp);
+		vd->SetClearColor(clear_color);
+		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
+	}
+	else if (!local_list.empty())
+	{
+		assert(m_mvr);
+
+		m_mvr->clear_vr();
+		std::vector<flvr::RenderModeGuard> rmgs;
+		for (auto it = local_list.begin(); it != local_list.end(); ++it)
 		{
+			auto vd = it->lock();
+			if (!vd)
+				continue;
+			auto vr = vd->GetVR();
+			assert(vr);
+
 			//save
-			int colormode = vd->GetColormapMode();
-			bool shading = vd->GetVR()->get_shading();
-			//set to draw depth
-			vd->GetVR()->set_shading(false);
-			vd->SetMode(0);
-			vd->SetColormapMode(2);
+			rmgs.emplace_back(*vr);
+			vr->set_shading(false);
+			vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+			vr->set_colormap_mode(2);
 			if (overlay_buffer)
-				vd->Set2dDmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-			int msk_mode = vd->GetMaskMode();
-			vd->SetMaskMode(0);
-			//draw
-			vd->SetStreamMode(3);
+				vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-			vd->SetViewport(vp);
-			vd->SetClearColor(clear_color);
-			vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
-			//restore
-			vd->RestoreMode();
-			vd->SetMaskMode(msk_mode);
-			vd->SetColormapMode(colormode);
-			vd->GetVR()->set_shading(shading);
-			shadow_darkness = vd->GetShadowIntensity();
+			m_mvr->add_vr(vr);
+			m_mvr->SetNoiseRed(vr->GetNoiseRed());
 		}
-	}
-	else
-	{
-		if (m_mvr)
-		{
-			m_mvr->clear_vr();
-			for (auto it = local_list.begin(); it != local_list.end(); ++it)
-			{
-				auto vd = it->lock();
-				if (vd)
-				{
-					vd->GetVR()->set_shading(false);
-					vd->SetMode(0);
-					vd->SetColormapMode(2);
-					if (overlay_buffer)
-						vd->Set2dDmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-					flvr::VolumeRenderer* vr = vd->GetVR();
-					if (vr)
-					{
-						vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-						vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-						m_mvr->add_vr(vr);
-						m_mvr->SetNoiseRed(vr->GetNoiseRed());
-					}
-				}
-			}
-			//draw
-			m_mvr->set_viewport(vp);
-			m_mvr->set_clear_color(clear_color);
-			m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
-
-			int index = 0;
-			for (auto it = local_list.begin(); it != local_list.end(); ++it, ++index)
-			{
-				auto vd = it->lock();
-				if (vd)
-				{
-					vd->RestoreMode();
-					vd->SetColormapMode(colormodes[index]);
-					vd->GetVR()->set_shading(shadings[index]);
-				}
-			}
-			auto vd = local_list[0].lock();
-			if (vd)
-				shadow_darkness = vd->GetShadowIntensity();
-		}
+		//draw
+		m_mvr->set_viewport(vp);
+		m_mvr->set_clear_color(clear_color);
+		m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
 	}
 
 	if (!glbin_settings.m_mem_swap ||
@@ -9531,7 +9514,8 @@ bool RenderView::PickVolume(BaseState& state)
 		if (!vd)
 			continue;
 		int mode = 2;
-		if (vd->GetMode() == 1) mode = 1;
+		if (vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP)
+			mode = 1;
 		glbin_volume_point.SetVolumeData(vd);
 		dist = glbin_volume_point.GetPointVolume(old_mouse_X, old_mouse_Y,
 			mode, true, 0.5, p, ip);
@@ -10033,7 +10017,8 @@ void RenderView::ProcessIdle(IdleState& state)
 		int nx = GetCanvasSize().w();
 		int ny = GetCanvasSize().h();
 		int mode = 2;
-		if (cur_vd->GetMode() == 1) mode = 1;
+		if (cur_vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP)
+			mode = 1;
 		glbin_volume_point.SetVolumeData(cur_vd);
 		double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
 			mode, true, m_pin_pick_thresh, p, ip);

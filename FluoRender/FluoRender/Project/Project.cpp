@@ -475,7 +475,7 @@ void Project::Open(const std::wstring& filename)
 							vd->SetInvert(bval);
 						//mip enable
 						if (fconfig->Read("mode", &ival))
-							vd->SetMode(ival);
+							vd->SetRenderMode(static_cast<flvr::RenderMode>(ival));
 						//noise reduction
 						if (fconfig->Read("noise_red", &bval))
 							vd->SetNR(bval);
@@ -1462,7 +1462,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			//inversion
 			fconfig->Write("inv", vd->GetInvert());
 			//mip enable
-			fconfig->Write("mode", vd->GetMode());
+			fconfig->Write("mode", static_cast<int>(vd->GetRenderMode()));
 			//noise reduction
 			fconfig->Write("noise_red", vd->GetNR());
 			//depth override

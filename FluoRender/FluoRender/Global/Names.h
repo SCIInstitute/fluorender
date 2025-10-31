@@ -210,7 +210,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstBits "bits"
 //render modes
 #define gstBlendMode "blend mode"
-#define gstMipMode "mip mode"
+#define gstRenderMode "render mode"
 #define gstOverlayMode "overlay mode"
 #define gstMaskMode "mask mode"
 #define gstUseMaskThresh "use mask thresh"

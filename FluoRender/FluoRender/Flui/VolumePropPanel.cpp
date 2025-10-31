@@ -1329,9 +1329,9 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//MIP
-	if (update_all || FOUND_VALUE(gstMipMode))
+	if (update_all || FOUND_VALUE(gstRenderMode))
 	{
-		bool mip = m_vd->GetMode() == 1;
+		bool mip = m_vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP;
 		m_options_toolbar->ToggleTool(ID_MipChk, mip);
 	}
 
@@ -1494,7 +1494,7 @@ void VolumePropPanel::SaveMl()
 	val.push_back(float(m_vd->GetShadingEnable()));
 	val.push_back(float(m_vd->GetInterpolate()));
 	val.push_back(float(m_vd->GetInvert()));
-	val.push_back(float(m_vd->GetMode() == 1));
+	val.push_back(float(m_vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP));
 	val.push_back(float(m_vd->GetTransparent()));
 	val.push_back(float(m_vd->GetNR()));
 	val.push_back(float(m_vd->GetShadowEnable()));
@@ -1671,11 +1671,11 @@ void VolumePropPanel::EnableColormap(bool bval)
 void VolumePropPanel::EnableMip(bool bval)
 {
 	if (m_sync_group && m_group)
-		m_group->SetMode(bval ? 1 : 0);
+		m_group->SetRenderMode(bval ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER);
 	else if (m_vd)
-		m_vd->SetMode(bval ? 1 : 0);
+		m_vd->SetRenderMode(bval ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER);
 
-	FluoRefresh(0, { gstMipMode }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstRenderMode }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::EnableTransparent(bool bval)
@@ -3327,7 +3327,7 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetInterpolate(m_vd->GetInterpolate());
 		m_view->SetIntp(m_vd->GetInterpolate());
 		//MIP
-		m_group->SetMode(m_vd->GetMode());
+		m_group->SetRenderMode(m_vd->GetRenderMode());
 		//transp
 		m_group->SetAlphaPower(m_vd->GetAlphaPower());
 		//noise reduction

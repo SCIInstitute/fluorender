@@ -34,6 +34,7 @@
 #include <Size.h>
 #include <Vector4i.h>
 #include <Vector4f.h>
+#include <vector>
 
 #ifndef TextureBrick_h
 #define TEXTURE_RENDER_MODES	5
@@ -47,6 +48,7 @@ namespace flvr
 {
 	class MultiVolumeRenderer;
 	class Texture;
+	class RenderModeGuard;
 
 	class VolumeRenderer : public TextureRenderer
 	{
@@ -205,6 +207,7 @@ namespace flvr
 
 		//fog
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end) { m_use_fog = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
+		void set_fog(bool use_fog) { m_use_fog = use_fog; }
 
 		friend class MultiVolumeRenderer;
 
@@ -283,10 +286,58 @@ namespace flvr
 		double m_fog_start;
 		double m_fog_end;
 
+	private:
 		std::string get_buffer_name();
 		Size2D resize(const std::string& buf_name);
+
+		friend class RenderModeGuard;
 	};
 
+	struct ScopedRenderMode
+	{
+		RenderMode mode;
+		fluo::Color color;
+		int colormap_mode;
+		int colormap_proj;
+		bool solid;
+		double alpha;
+		bool shading;
+		int ml_mode;
+	};
+
+	class RenderModeGuard
+	{
+	public:
+		RenderModeGuard(VolumeRenderer& renderer)
+			: renderer_(renderer)
+		{
+			prev_mode_ = {
+				renderer_.mode_,
+				renderer_.color_,
+				renderer_.colormap_mode_,
+				renderer_.colormap_proj_,
+				renderer_.solid_,
+				renderer_.alpha_,
+				renderer_.shading_,
+				renderer_.ml_mode_
+			};
+		}
+
+		~RenderModeGuard()
+		{
+			renderer_.mode_ = prev_mode_.mode;
+			renderer_.color_ = prev_mode_.color;
+			renderer_.colormap_mode_ = prev_mode_.colormap_mode;
+			renderer_.colormap_proj_ = prev_mode_.colormap_proj;
+			renderer_.solid_ = prev_mode_.solid;
+			renderer_.alpha_ = prev_mode_.alpha;
+			renderer_.shading_ = prev_mode_.shading;
+			renderer_.ml_mode_ = prev_mode_.ml_mode;
+		}
+	private:
+		VolumeRenderer& renderer_;
+		ScopedRenderMode prev_mode_;
+	};
 } // End namespace flvr
 
 #endif 

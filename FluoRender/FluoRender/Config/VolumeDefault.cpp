@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
+#include <TextureRenderer.h>
 
 VolumeDataDefault::VolumeDataDefault()
 {
@@ -89,7 +90,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_noise_rd = true;
 	m_interpolate = true;
 	m_inverted = false;
-	m_mip_enable = false;
+	m_render_mode = flvr::RenderMode::RENDER_MODE_OVER;
 	m_transparent = false;
 
 	//blend mode
@@ -163,7 +164,9 @@ void VolumeDataDefault::Read()
 	f->Read(gstNoiseRedct, &m_noise_rd, true);
 	f->Read(gstInterpolate, &m_interpolate, true);
 	f->Read(gstInvert, &m_inverted, false);
-	f->Read(gstMipMode, &m_mip_enable, false);
+	int ival;
+	f->Read(gstRenderMode, &ival, 1);
+	m_render_mode = static_cast<flvr::RenderMode>(ival);
 	f->Read(gstTransparent, &m_transparent, false);
 
 	f->Read(gstBlendMode, &m_blend_mode, 0);
@@ -228,7 +231,7 @@ void VolumeDataDefault::Save()
 	f->Write(gstNoiseRedct, m_noise_rd);
 	f->Write(gstInterpolate, m_interpolate);
 	f->Write(gstInvert, m_inverted);
-	f->Write(gstMipMode, m_mip_enable);
+	f->Write(gstRenderMode, static_cast<int>(m_render_mode));
 	f->Write(gstTransparent, m_transparent);
 
 	f->Write(gstBlendMode, m_blend_mode);
@@ -287,7 +290,7 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_noise_rd = vd->GetNR();
 	m_interpolate = vd->GetInterpolate();
 	m_inverted = vd->GetInvert();
-	m_mip_enable = vd->GetMode() == 1;
+	m_render_mode = vd->GetRenderMode();
 	m_transparent = vd->GetTransparent();
 
 	m_blend_mode = vd->GetBlendMode();
@@ -355,7 +358,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetNR(m_noise_rd);
 	vd->SetInterpolate(m_interpolate);
 	vd->SetInvert(m_inverted);
-	vd->SetMode(m_mip_enable?1:0);
+	vd->SetRenderMode(m_render_mode);
 	vd->SetTransparent(m_transparent);
 
 	vd->SetBlendMode(m_blend_mode);
@@ -415,7 +418,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetNR(v2->GetNR());
 	v1->SetInterpolate(v2->GetInterpolate());
 	v1->SetInvert(v2->GetInvert());
-	v1->SetMode(v2->GetMode());
+	v1->SetRenderMode(v2->GetRenderMode());
 	v1->SetTransparent(v2->GetTransparent());
 
 	v1->SetBlendMode(v2->GetBlendMode());
@@ -489,7 +492,7 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 	g->SetNR(m_noise_rd);
 	g->SetInterpolate(m_interpolate);
 	g->SetInvert(m_inverted);
-	g->SetMode(m_mip_enable ? 1 : 0);
+	g->SetRenderMode(m_render_mode);
 	g->SetTransparent(m_transparent);
 
 	g->SetBlendMode(m_blend_mode);

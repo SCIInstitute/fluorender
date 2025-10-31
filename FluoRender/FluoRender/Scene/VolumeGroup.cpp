@@ -514,12 +514,12 @@ void VolumeGroup::SetColormapProj(int value)
 	}
 }
 
-void VolumeGroup::SetMode(int mode)
+void VolumeGroup::SetRenderMode(flvr::RenderMode mode)
 {
 	for (auto& it : m_vd_list)
 	{
 		if (it)
-			it->SetMode(mode);
+			it->SetRenderMode(mode);
 	}
 }
 

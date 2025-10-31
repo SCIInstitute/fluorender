@@ -34,6 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 
 class VolumeData;
+namespace flvr
+{
+	enum class RenderMode;
+}
 class VolumeGroup : public TreeLayer
 {
 public:
@@ -167,7 +171,7 @@ public:
 	void SetColormapInv(double val);
 	void SetColormap(int value);
 	void SetColormapProj(int value);
-	void SetMode(int mode);
+	void SetRenderMode(flvr::RenderMode mode);
 	void SetAlphaPower(double val);
 	void SetLabelMode(int mode);
 	void SetNR(bool val);

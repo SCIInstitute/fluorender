@@ -59,7 +59,7 @@ VolumeData::VolumeData()
 	m_time = 0;
 
 	//mdoes
-	m_mode = 0;
+	m_render_mode = flvr::RenderMode::RENDER_MODE_OVER;
 	//stream modes
 	m_stream_mode = 0;
 
@@ -132,8 +132,6 @@ VolumeData::VolumeData()
 
 	//blend mode
 	m_blend_mode = 0;
-
-	m_saved_mode = 0;
 
 	//resolution, scaling, spacing
 	m_res_x = 0;	m_res_y = 0;	m_res_z = 0;
@@ -218,7 +216,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_time = 0;
 
 	//mdoes
-	m_mode = copy.m_mode;
+	m_render_mode = copy.m_render_mode;
 	//stream modes
 	m_stream_mode = copy.m_stream_mode;
 
@@ -291,8 +289,6 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//blend mode
 	m_blend_mode = copy.m_blend_mode;
-
-	m_saved_mode = copy.m_saved_mode;
 
 	//resolution, scaling, spacing
 	m_res_x = copy.m_res_x;	m_res_y = copy.m_res_y;	m_res_z = copy.m_res_z;
@@ -477,8 +473,8 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		m_vr->set_shading(true);
 		m_vr->set_scalar_scale(m_scalar_scale);
 		m_vr->set_gm_scale(m_scalar_scale);
-
-		SetMode(m_mode);
+		m_vr->set_mode(m_render_mode);
+		//SetRenderMode(m_mode);
 	}
 
 	//clip distance
@@ -652,8 +648,9 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_shading(true);
 	m_vr->set_scalar_scale(m_scalar_scale);
 	m_vr->set_gm_scale(m_scalar_scale);
+	m_vr->set_mode(m_render_mode);
 
-	SetMode(m_mode);
+	//SetMode(m_mode);
 	m_bg_valid = false;
 
 	//clip distance
@@ -1630,45 +1627,36 @@ int VolumeData::GetCurTime()
 }
 
 //MIP & normal modes
-void VolumeData::SetMode(int mode)
+void VolumeData::SetRenderMode(flvr::RenderMode mode)
 {
-	if (!m_vr)
-		return;
+	m_render_mode = mode;
+	if (m_vr)
+		m_vr->set_mode(m_render_mode);
 
-	m_saved_mode = m_mode;
-	m_mode = mode;
+	//if (!m_vr)
+	//	return;
 
-	switch (mode)
-	{
-	case 0://normal
-		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
-		m_vr->set_color(m_color);
-		break;
-	case 1://MIP
-		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
-		m_vr->set_color(m_color);
-		break;
-	case 2://white shading
-		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
-		m_vr->set_colormap_mode(0);
-		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
-		break;
-	case 3://white mip
-		m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
-		m_vr->set_colormap_mode(0);
-		m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
-		break;
-	}
-}
-
-int VolumeData::GetMode()
-{
-	return m_mode;
-}
-
-void VolumeData::RestoreMode()
-{
-	SetMode(m_saved_mode);
+	//switch (mode)
+	//{
+	//case 0://normal
+	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+	//	m_vr->set_color(m_color);
+	//	break;
+	//case 1://MIP
+	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
+	//	m_vr->set_color(m_color);
+	//	break;
+	//case 2://white shading
+	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+	//	m_vr->set_colormap_mode(0);
+	//	m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
+	//	break;
+	//case 3://white mip
+	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
+	//	m_vr->set_colormap_mode(0);
+	//	m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
+	//	break;
+	//}
 }
 
 //transparency
@@ -3545,7 +3533,8 @@ void VolumeData::ApplyMlVolProp()
 		SetInvert(dval > 0.5);
 		//enable mip
 		dval = m_ep->getParam("mip_enable");
-		SetMode(std::round(dval));
+		flvr::RenderMode mode = dval > 0.5 ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER;
+		SetRenderMode(mode);
 		//enable hi transp
 		dval = m_ep->getParam("transparent_enable");
 		SetAlphaPower(dval > 0.5 ? 2.0 : 1.0);

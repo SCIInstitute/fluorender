@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 class VolumeData;
 class VolumeGroup;
+namespace flvr
+{
+	enum class RenderMode;
+}
 class VolumeDataDefault
 {
 public:
@@ -99,7 +103,7 @@ public:
 	//inverted
 	bool m_inverted;
 	//mip
-	bool m_mip_enable;
+	flvr::RenderMode m_render_mode;
 	//transparent
 	bool m_transparent;
 	//blend mode
