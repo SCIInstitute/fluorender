@@ -6370,13 +6370,18 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			flvr::FBRole::RenderFloat, nx, ny, gstRBOverlay);
 		assert(overlay_buffer);
 		overlay_buffer->set_blend_enabled(true);
-		if (glbin_settings.m_clear_color_bg)
+		if (glbin_settings.m_clear_color_bg &&
+			vd->GetColormapMode() == 0)
+		{
 			overlay_buffer->set_clear_color({
 				static_cast<float>(m_bg_color.r()),
 				static_cast<float>(m_bg_color.g()),
 				static_cast<float>(m_bg_color.b()), 0.0f });
+		}
 		else
+		{
 			overlay_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
+		}
 		glbin_framebuffer_manager.bind(overlay_buffer);
 
 		bool clear = !glbin_settings.m_mem_swap ||

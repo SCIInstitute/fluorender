@@ -1671,11 +1671,17 @@ void VolumePropPanel::EnableColormap(bool bval)
 void VolumePropPanel::EnableMip(bool bval)
 {
 	if (m_sync_group && m_group)
+	{
 		m_group->SetRenderMode(bval ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER);
+		m_group->SetAlphaEnable(!bval);
+	}
 	else if (m_vd)
+	{
 		m_vd->SetRenderMode(bval ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER);
+		m_vd->SetAlphaEnable(!bval);
+	}
 
-	FluoRefresh(0, { gstRenderMode }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstRenderMode, gstAlpha }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::EnableTransparent(bool bval)
