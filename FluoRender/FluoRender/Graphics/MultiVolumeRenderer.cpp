@@ -369,7 +369,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	{
 		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, w, h, gstRBFilter);
+			flvr::FBRole::RenderFloatFilter, w, h, gstRBFilter);
 		assert(filter_buffer);
 		//set viewport size
 		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });

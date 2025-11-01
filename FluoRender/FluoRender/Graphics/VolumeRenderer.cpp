@@ -747,7 +747,7 @@ void VolumeRenderer::draw_volume(
 	{
 		//FILTERING/////////////////////////////////////////////////////////////////
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, w, h, gstRBFilter);
+			flvr::FBRole::RenderFloatFilter, w, h, gstRBFilter);
 		assert(filter_buffer);
 		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);

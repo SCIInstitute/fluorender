@@ -841,6 +841,17 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			tex_list_.push_back(tex);
 			break;
 		}
+		case FBRole::RenderFloatFilter:
+		{
+			FBTexConfig config{ FBTexType::Render_RGBA };
+			config.minFilter = TexFilter::Linear;
+			config.magFilter = TexFilter::Linear;
+			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
+			tex->create();
+			fb->attach_texture(AttachmentPoint::Color(0), tex);
+			tex_list_.push_back(tex);
+			break;
+		}
 		case FBRole::RenderFloatDepth:
 		{
 			FBTexConfig color_config{ FBTexType::Render_RGBA };
@@ -871,6 +882,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			FBTexConfig config{ FBTexType::Render_RGBA };
 			config.useMipmap = true;
 			config.minFilter = TexFilter::LinearMipmapLinear;
+			config.magFilter = TexFilter::Linear;
 			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
 			tex->create();
 			fb->attach_texture(AttachmentPoint::Color(0), tex);

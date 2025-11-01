@@ -66,8 +66,8 @@ namespace flvr
 	struct FBTexConfig {
 		FBTexType type;
 		bool useMipmap = false;
-		TexFilter minFilter = TexFilter::Linear;
-		TexFilter magFilter = TexFilter::Linear;
+		TexFilter minFilter = TexFilter::Nearest;
+		TexFilter magFilter = TexFilter::Nearest;
 		TexWrap wrapS = TexWrap::ClampToEdge;
 		TexWrap wrapT = TexWrap::ClampToEdge;
 	};
@@ -117,6 +117,7 @@ namespace flvr
 		Canvas,// Represents the default framebuffer (id == 0)
 		RenderFloat,
 		RenderFloatDepth,
+		RenderFloatFilter,
 		RenderFloatMipmap,
 		RenderUChar,
 		Pick,
