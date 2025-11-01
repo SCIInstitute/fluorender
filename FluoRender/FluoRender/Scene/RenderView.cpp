@@ -6325,6 +6325,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 	bool shading = vr->get_shading();
 	bool shadow = vd->GetShadowEnable();
 	int colormap_mode = vd->GetColormapMode();
+	int colormap_proj = vd->GetColormapProj();
 	bool enable_alpha = vd->GetAlphaEnable();
 	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
@@ -6400,8 +6401,11 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			vr->set_colormap_mode(0);
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
-			vr->set_solid(true);
-			vr->set_alpha(1.0);
+			if (colormap_proj > 0)
+			{
+				vr->set_solid(true);
+				vr->set_alpha(1.0);
+			}
 		}
 		//draw
 		vd->SetStreamMode(1);
@@ -6789,8 +6793,6 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	fluo::Vector4f clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	bool has_shadow = false;
-	std::vector<int> colormodes;
-	std::vector<bool> shadings;
 	std::vector<std::weak_ptr<VolumeData>> local_list;
 	//generate list
 	for (auto it = list.begin(); it != list.end(); ++it)
@@ -6798,8 +6800,6 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		auto vd = it->lock();
 		if (vd && vd->GetShadowEnable())
 		{
-			colormodes.push_back(vd->GetColormapMode());
-			shadings.push_back(vd->GetVR()->get_shading());
 			local_list.push_back(vd);
 			has_shadow = true;
 		}
