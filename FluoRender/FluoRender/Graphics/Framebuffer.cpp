@@ -433,6 +433,7 @@ void Framebuffer::restore_state()
 	if (state_stack_.empty())
 		return;
 	const auto& s = state_stack_.back();
+	state_ = s;
 	glbin_fb_state_tracker.apply(s);
 }
 
