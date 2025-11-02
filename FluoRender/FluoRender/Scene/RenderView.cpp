@@ -6629,6 +6629,9 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 		}
 
 		//bind the fbo
+		//chan_buffer->set_blend_enabled(true);
+		//chan_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+		chan_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		glbin_framebuffer_manager.bind(chan_buffer);
 
 		if (!glbin_settings.m_mem_swap ||
@@ -6766,6 +6769,7 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 	//bind fbo for final composition
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 	assert(chan_buffer);
+	flvr::FramebufferStateGuard fbg(*chan_buffer);
 	chan_buffer->set_blend_enabled(true);
 	chan_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 	glbin_framebuffer_manager.bind(chan_buffer);
@@ -6942,6 +6946,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		//bind fbo for final composition
 		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 		assert(chan_buffer);
+		flvr::FramebufferStateGuard fbg(*chan_buffer);
 		chan_buffer->set_blend_enabled(true);
 		chan_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 		glbin_framebuffer_manager.bind(chan_buffer);
