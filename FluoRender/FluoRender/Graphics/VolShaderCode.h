@@ -429,7 +429,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR  = R"GLSHDR(
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
 		float pa = pow(tf_alp, loc18.y);
 		alpha = 1.0 - pow(1.0-pa, loc4.w);
-		c = vec4(loc9.rgb*loc18.z*(loc18.y>1.1?tf_alp:pa), alpha);
+		c = vec4(loc9.rgb*loc18.z*alpha*(loc18.y>1.1?1.0:tf_alp), alpha);
 	}
 )GLSHDR";
 
@@ -644,7 +644,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_RESULT  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT
 		float pa = pow(tf_alp, loc18.y);
 		float alpha = 1.0 - pow(1.0-pa, loc4.w);
-		c = vec4(rb.rgb*loc18.z*(loc18.y>1.1?tf_alp:pa), alpha);
+		c = vec4(rb.rgb*loc18.z*alpha*(loc18.y>1.1?1.0:tf_alp), alpha);
 	}
 )GLSHDR";
 
