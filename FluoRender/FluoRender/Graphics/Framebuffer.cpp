@@ -407,12 +407,12 @@ FramebufferState Framebuffer::default_state()
 
 	switch (role_)
 	{
-	case FBRole::RenderFloatMipmap:
+	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 		s.enableBlend = true;
 		break;
 
-	case FBRole::RenderFloatDepth:
+	case FBRole::RenderColorDepth:
 		s.enableBlend = true;
 		s.enableDepthTest = true;
 		break;
@@ -428,7 +428,7 @@ FramebufferState Framebuffer::default_state()
 		s.enableDepthTest = true;
 		break;
 
-	//case FBRole::RenderFloat:
+	//case FBRole::RenderColor:
 	//case FBRole::Canvas:
 	//case FBRole::Volume:
 	//	s.enableBlend = false;
@@ -454,9 +454,9 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_pt
 
 	switch (role_)
 	{
-	case FBRole::RenderFloat:
-	case FBRole::RenderFloatDepth:
-	case FBRole::RenderFloatMipmap:
+	case FBRole::RenderColor:
+	case FBRole::RenderColorDepth:
+	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 	case FBRole::Pick:
 	case FBRole::Depth:
@@ -489,9 +489,9 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, unsigned int tex_id,
 
 	switch (role_)
 	{
-	case FBRole::RenderFloat:
-	case FBRole::RenderFloatDepth:
-	case FBRole::RenderFloatMipmap:
+	case FBRole::RenderColor:
+	case FBRole::RenderColorDepth:
+	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 	case FBRole::Pick:
 	case FBRole::Depth:
@@ -606,7 +606,7 @@ void Framebuffer::resize(int nx, int ny)
 
 void Framebuffer::generate_mipmap(const AttachmentPoint& ap)
 {
-	if (role_ != FBRole::RenderFloatMipmap)
+	if (role_ != FBRole::RenderColorMipmap)
 		return;
 
 	GLenum glap = to_gl_attachment(ap);
@@ -809,7 +809,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			// No attachments for default framebuffer
 			break;
 		}
-		case FBRole::RenderFloat:
+		case FBRole::RenderColor:
 		{
 			FBTexConfig config{ FBTexType::Render_RGBA };
 			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
@@ -818,7 +818,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			tex_list_.push_back(tex);
 			break;
 		}
-		case FBRole::RenderFloatFilter:
+		case FBRole::RenderColorFilter:
 		{
 			FBTexConfig config{ FBTexType::Render_RGBA };
 			config.minFilter = TexFilter::Linear;
@@ -829,7 +829,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			tex_list_.push_back(tex);
 			break;
 		}
-		case FBRole::RenderFloatDepth:
+		case FBRole::RenderColorDepth:
 		{
 			FBTexConfig color_config{ FBTexType::Render_RGBA };
 			auto tex_color = std::make_shared<FramebufferTexture>(color_config, nx, ny);
@@ -854,7 +854,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			tex_list_.push_back(tex);
 			break;
 		}
-		case FBRole::RenderFloatMipmap:
+		case FBRole::RenderColorMipmap:
 		{
 			FBTexConfig config{ FBTexType::Render_RGBA };
 			config.useMipmap = true;

@@ -332,10 +332,10 @@ void Project::Open(const std::wstring& filename)
 							vd->SetRightThresh(dval);
 						if (fconfig->Read("luminance enable", &bval))
 							vd->SetLuminanceEnable(bval);
+						if (fconfig->Read("luminance", &dval))
+							vd->SetLuminance(dval);
 						if (fconfig->Read("color", &cval))
 							vd->SetColor(cval);
-						if (fconfig->Read("hsv", &hval))
-							vd->SetHSV(hval.hue(), hval.sat(), hval.val());
 						if (fconfig->Read("mask_color", &cval))
 						{
 							if (fconfig->Read("mask_color_set", &bval))
@@ -1383,8 +1383,8 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("left_thresh", vd->GetLeftThresh());
 			fconfig->Write("right_thresh", vd->GetRightThresh());
 			fconfig->Write("luminance enable", vd->GetLuminanceEnable());
+			fconfig->Write("luminance", vd->GetLuminance());
 			fconfig->Write("color", vd->GetColor());
-			fconfig->Write("hsv", vd->GetHSVColor());
 			fconfig->Write("mask_color", vd->GetMaskColor());
 			fconfig->Write("mask_color_set", vd->GetMaskColorSet());
 			fconfig->Write("enable_alpha", vd->GetAlphaEnable());

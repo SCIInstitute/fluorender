@@ -167,6 +167,11 @@ inline constexpr const char* MSH_FRAG_UNIFORMS_TEX = R"GLSHDR(
 uniform sampler2D tex0;
 )GLSHDR";
 
+inline constexpr const char* MSH_FRAG_UNIFORMS_FOG = R"GLSHDR(
+// MSH_FRAG_UNIFORMS_TEX
+uniform vec4 loc8;//(int, start, end, 0.0) fog loc
+)GLSHDR";
+
 inline constexpr const char* MSH_FRAG_UNIFORMS_MATERIAL = R"GLSHDR(
 //MSH_FRAG_UNIFORMS_MATERIAL
 uniform vec4 loc0;//ambient color

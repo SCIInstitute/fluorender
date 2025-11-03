@@ -115,7 +115,6 @@ VolumeData::VolumeData()
 
 	m_color = fluo::Color(1.0, 1.0, 1.0);
 	m_wl_color = false;
-	SetHSV();
 
 	//noise reduction
 	m_noise_rd = false;
@@ -272,7 +271,6 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	m_color = copy.m_color;
 	m_wl_color = copy.m_wl_color;
-	SetHSV();
 
 	//noise reduction
 	m_noise_rd = copy.m_noise_rd;
@@ -2088,17 +2086,12 @@ bool VolumeData::GetLuminanceEnable()
 	return m_luminance_enable;
 }
 
-fluo::Color VolumeData::SetLuminance(double val, bool set_this)
+void VolumeData::SetLuminance(double val, bool set_this)
 {
 	if (set_this)
 		m_luminance = val;
-	double h, s, v;
-	GetHSV(h, s, v);
-	fluo::HSVColor hsv(h, s, val);
-	m_color = fluo::Color(hsv);
 	if (m_vr)
-		m_vr->set_color(m_color);
-	return m_color;
+		m_vr->set_luminance(m_luminance);
 }
 
 double VolumeData::GetLuminance()
@@ -2305,11 +2298,10 @@ double VolumeData::GetMlSampleRate()
 		return glbin_vol_def.m_sample_rate;
 }
 
-void VolumeData::SetColor(const fluo::Color &color, bool update_hsv)
+void VolumeData::SetColor(const fluo::Color &color, bool set_this)
 {
-	m_color = color;
-	if (update_hsv)
-		SetHSV();
+	if (set_this)
+		m_color = color;
 	if (m_vr)
 		m_vr->set_color(color);
 }
@@ -2355,37 +2347,6 @@ void VolumeData::ResetMaskColorSet()
 {
 	if (m_vr)
 		m_vr->reset_mask_color_set();
-}
-
-void VolumeData::SetHSV(double hue, double sat, double val)
-{
-	if (hue < 0 || sat < 0 || val < 0)
-	{
-		m_hsv = fluo::HSVColor(m_color);
-	}
-	else
-	{
-		m_hsv = fluo::HSVColor(hue, sat, val);
-	}
-	m_luminance = m_hsv.val();
-}
-
-void VolumeData::GetHSV(double &hue, double &sat, double &val)
-{
-	hue = m_hsv.hue();
-	sat = m_hsv.sat();
-	val = m_hsv.val();
-}
-
-void VolumeData::SetHSVColor(const fluo::HSVColor& hsv)
-{
-	m_hsv = hsv;
-	m_luminance = m_hsv.val();
-}
-
-fluo::HSVColor VolumeData::GetHSVColor()
-{
-	return m_hsv;
 }
 
 //mask threshold
@@ -3456,12 +3417,7 @@ void VolumeData::ApplyMlVolProp()
 		if (m_luminance_enable)
 		{
 			dval = std::max(0.0f, m_ep->getParam("luminance"));
-			double h, s, v;
-			GetHSV(h, s, v);
-			fluo::HSVColor hsv(h, s, dval);
-			fluo::Color color(hsv);
-			ResetMaskColorSet();
-			SetColor(color);
+			SetLuminance(dval);
 		}
 		//sample rate
 		if (m_sample_rate_enable)

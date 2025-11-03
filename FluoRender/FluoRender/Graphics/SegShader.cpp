@@ -73,7 +73,6 @@ bool SegShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	//uniforms
 	z << SEG_OUTPUTS;
 	z << VOL_UNIFORMS_COMMON;
-	z << VOL_UNIFORMS_SIN_COLOR;
 	//for paint_mode==9, loc6 = (px, py, view_nx, view_ny)
 	z << VOL_UNIFORMS_MASK;
 	z << SEG_UNIFORMS_WMAP_2D;

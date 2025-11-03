@@ -434,7 +434,7 @@ void VolumeRenderer::draw_volume(
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloatFilter, w2, h2, buf_name);
+		flvr::FBRole::RenderColorFilter, w2, h2, buf_name);
 	assert(blend_buffer);
 	//set clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
@@ -487,7 +487,7 @@ void VolumeRenderer::draw_volume(
 	//set the light
 	fluo::Vector light = view_ray.direction();
 	light.safe_normalize();
-	shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
+	shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
 	if (shading_)
 		shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
 	else
@@ -504,34 +504,15 @@ void VolumeRenderer::draw_volume(
 	//transfer function
 	shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 	shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
-	if (mode_ == RenderMode::RENDER_MODE_MIP &&
-		colormap_proj_)
-		shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-			colormap_hi_value_ - colormap_low_value_, colormap_inv_);
-	else
-	{
-		switch (cm_mode)
-		{
-		case 0://normal
-			if (mask_ && !label_)
-				shader->setLocalParam(6, mask_color_.r(), mask_color_.g(), mask_color_.b(), 0.0);
-			else
-				shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-			break;
-		case 1://colormap
-			shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
-				colormap_hi_value_ - colormap_low_value_, colormap_inv_);
-			break;
-		case 2://depth map
-			shader->setLocalParam(6, color_.r(), color_.g(), color_.b(), 0.0);
-			break;
-		}
-	}
+	shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
+		colormap_hi_value_ - colormap_low_value_, colormap_inv_);
 	//color
-	shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), alpha_power_);
+	shader->setLocalParam(9, color_.r(), color_.g(), color_.b(), 0.0);
 	shader->setLocalParam(16, mask_color_.r(), mask_color_.g(), mask_color_.b(), mask_thresh_);
 	//gm
 	shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
+	//alpha & luminance
+	shader->setLocalParam(18, alpha_, alpha_power_, luminance_, 0.0);
 
 	if (colormap_proj_ == 4)
 	{
@@ -747,7 +728,7 @@ void VolumeRenderer::draw_volume(
 	{
 		//FILTERING/////////////////////////////////////////////////////////////////
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloatFilter, w, h, gstRBFilter);
+			flvr::FBRole::RenderColorFilter, w, h, gstRBFilter);
 		assert(filter_buffer);
 		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
@@ -847,7 +828,7 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	// render bricks
 	shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 	shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_tex_scl_mat));
-	shader->setLocalParam(0, color_.r(), color_.g(), color_.b(), 1.0);
+	shader->setLocalParam(0, color_.r(), color_.g(), color_.b(), 0.0);
 
 	if (bricks)
 	{
@@ -932,7 +913,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	//set up shading
 	fluo::Vector light = compute_view().direction();
 	light.safe_normalize();
-	seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), alpha_);
+	seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
 	if (shading_)
 		seg_shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
 	else
@@ -948,6 +929,8 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	seg_shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
 	seg_shader->setLocalParam(6, mp_[0], viewport_[3] - mp_[1], viewport_[2], viewport_[3]);
 	seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
+	//alpha & luminance
+	seg_shader->setLocalParam(18, alpha_, alpha_power_, luminance_, 0.0);
 
 	//setup depth peeling
 	//if (depth_peel_)

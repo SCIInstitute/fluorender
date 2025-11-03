@@ -140,21 +140,14 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	if (p.colormap_prj >= 7)
 		z << VOL_UNIFORMS_4D_CACHE;
 
-	//2d map location
-	if (p.peel != 0 || p.color_mode == 2)
-		z << VOL_UNIFORMS_2DMAP_LOC;
-
 	//color modes
 	switch (p.color_mode)
 	{
 	case 0://normal
-		z << VOL_UNIFORMS_SIN_COLOR;
 		break;
 	case 1://colormap
-		z << VOL_UNIFORMS_COLORMAP;
 		break;
 	case 2://depth map
-		z << VOL_UNIFORMS_SIN_COLOR;
 		z << VOL_UNIFORMS_DEPTHMAP;
 		break;
 	}
@@ -185,10 +178,6 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		z << VOL_UNIFORMS_LABEL;
 		break;
 	}
-
-	//uniform for fog
-	if (p.fog)
-		z << VOL_UNIFORMS_FOG_LOC;
 
 	//functions
 	if (p.clip)

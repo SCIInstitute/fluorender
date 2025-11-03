@@ -105,6 +105,8 @@ namespace flvr
 		double get_mask_thresh() { return mask_thresh_; }
 		void set_alpha(double alpha) { alpha_ = alpha; }
 		double get_alpha() { return alpha_; }
+		void set_luminance(double luminance) { luminance_ = luminance; }
+		double get_luminance() { return luminance_; }
 
 		//shading
 		void set_shading(bool shading) { shading_ = shading; }
@@ -239,6 +241,7 @@ namespace flvr
 		bool mask_color_set_;
 		double mask_thresh_;
 		double alpha_;
+		double luminance_;
 		//shading
 		bool shading_;
 		double ambient_, diffuse_, specular_, shine_;

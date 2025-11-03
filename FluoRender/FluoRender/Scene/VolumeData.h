@@ -216,7 +216,7 @@ public:
 
 	void SetLuminanceEnable(bool);
 	bool GetLuminanceEnable();
-	fluo::Color SetLuminance(double val, bool set_this = true);
+	void SetLuminance(double val, bool set_this = true);
 	double GetLuminance();
 	double GetMlLuminance();
 
@@ -253,7 +253,7 @@ public:
 	double GetMlSampleRate();
 
 	//colors
-	void SetColor(const fluo::Color &color, bool update_hsv=true);
+	void SetColor(const fluo::Color &color, bool set_this = true);
 	fluo::Color GetColor();
 	void SetWlColor(bool bval = true);
 	bool GetWlColor();
@@ -261,10 +261,6 @@ public:
 	fluo::Color GetMaskColor();
 	bool GetMaskColorSet();
 	void ResetMaskColorSet();
-	void SetHSV(double hue = -1, double sat = -1, double val = -1);
-	void GetHSV(double &hue, double &sat, double &val);
-	void SetHSVColor(const fluo::HSVColor& hsv);
-	fluo::HSVColor GetHSVColor();
 
 	//mask threshold
 	void SetMaskThreshold(double thresh);
@@ -550,7 +546,7 @@ private:
 
 	fluo::Color m_color;
 	bool m_wl_color;//if color has been set by wavelength
-	fluo::HSVColor m_hsv;
+
 	//noise reduction
 	bool m_noise_rd;
 

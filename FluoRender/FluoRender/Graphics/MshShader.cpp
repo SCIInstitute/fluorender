@@ -152,7 +152,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		if (p.tex)
 			z << MSH_FRAG_UNIFORMS_TEX;
 		if (p.fog)
-			z << VOL_UNIFORMS_FOG_LOC;
+			z << MSH_FRAG_UNIFORMS_FOG;
 		if (p.peel)
 			z << MSH_FRAG_UNIFORMS_DP;
 

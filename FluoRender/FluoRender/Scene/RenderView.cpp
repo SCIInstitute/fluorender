@@ -5252,7 +5252,7 @@ void RenderView::BindViewBaseFramebuffer()
 		//find render view buffer, resize if necessary
 		auto size = GetCanvasSize();
 		auto base_buffer = glbin_framebuffer_manager.framebuffer(
-				flvr::FBRole::RenderFloat, size.w(), size.h(), gstRBViewBase);
+				flvr::FBRole::RenderColor, size.w(), size.h(), gstRBViewBase);
 		assert(base_buffer);
 		base_buffer->set_blend_enabled(true);
 		base_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
@@ -5300,11 +5300,11 @@ std::shared_ptr<flvr::Framebuffer> RenderView::PrepareDataFramebuffer(int nx, in
 	case 1:
 	default:
 		name = gstRBViewData;
-		role = flvr::FBRole::RenderFloat;
+		role = flvr::FBRole::RenderColor;
 		break;
 	case 2:
 		name = gstRBViewDataWithDepth;
-		role = flvr::FBRole::RenderFloatDepth;
+		role = flvr::FBRole::RenderColorDepth;
 		break;
 	}
 	return glbin_framebuffer_manager.framebuffer(
@@ -6160,7 +6160,7 @@ void RenderView::DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &
 	//generate textures & buffer objects
 	//frame buffer for each volume
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBChannel);
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
 	assert(chan_buffer);
 
 	//bind the fbo
@@ -6247,7 +6247,7 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 	//generate textures & buffer objects
 	//frame buffer for each volume
 	//auto chan_buffer = glbin_framebuffer_manager.framebuffer(
-	//	flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBChannel);
+	//	flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
 	//assert(chan_buffer);
 
 	//draw each volume to fbo
@@ -6332,7 +6332,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 	auto data_buffer = glbin_framebuffer_manager.current();
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBChannel);
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
 	assert(chan_buffer);
 	std::shared_ptr<flvr::Framebuffer> overlay_buffer;
 	if (do_mip)
@@ -6346,7 +6346,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 			//bind temporary framebuffer for comp in stream mode
 			auto temp_buffer = glbin_framebuffer_manager.framebuffer(
-				flvr::FBRole::RenderFloat, nx, ny, gstRBTemporary);
+				flvr::FBRole::RenderColor, nx, ny, gstRBTemporary);
 			assert(temp_buffer);
 			glbin_framebuffer_manager.bind(temp_buffer);
 			temp_buffer->clear(true, false);
@@ -6368,7 +6368,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 		//bind the fbo
 		overlay_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, nx, ny, gstRBOverlay);
+			flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 		assert(overlay_buffer);
 		overlay_buffer->set_blend_enabled(true);
 		if (glbin_settings.m_clear_color_bg &&
@@ -6596,7 +6596,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 	auto data_buffer = glbin_framebuffer_manager.current();
 	assert(data_buffer);
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBChannel);
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
 	assert(chan_buffer);
 
 	if (do_over)
@@ -6610,7 +6610,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 
 			//bind temporary framebuffer for comp in stream mode
 			auto temp_buffer = glbin_framebuffer_manager.framebuffer(
-				flvr::FBRole::RenderFloat, nx, ny, gstRBTemporary);
+				flvr::FBRole::RenderColor, nx, ny, gstRBTemporary);
 			assert(temp_buffer);
 			flvr::FramebufferStateGuard fbg2(*temp_buffer);
 			temp_buffer->set_blend_enabled(false);
@@ -6749,7 +6749,7 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 
 	//shading pass
 	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloat, nx, ny, gstRBOverlay);
+		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 	assert(overlay_buffer);
 	overlay_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 	glbin_framebuffer_manager.bind(overlay_buffer);
@@ -6832,7 +6832,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	//}
 
 	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloat, nx, ny, gstRBOverlay);
+		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 	assert(overlay_buffer);
 	overlay_buffer->set_blend_enabled(false);
 	overlay_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
@@ -6917,7 +6917,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		//shadow pass
 		//bind the fbo
 		auto grad_mip_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBGradMip);
+			flvr::FBRole::RenderColorMipmap, nx, ny, gstRBGradMip);
 		assert(grad_mip_buffer);
 		grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 		grad_mip_buffer->set_blend_enabled(false);
@@ -6982,7 +6982,7 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	//shadow pass
 	//bind the fbo
 	auto grad_mip_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBGradMip);
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBGradMip);
 	assert(grad_mip_buffer);
 	grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 	grad_mip_buffer->set_blend_enabled(false);
@@ -7971,7 +7971,7 @@ void RenderView::GenerateBrushStrokes()
 	//generate texture and buffer objects
 	//painting fbo
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloat, nx, ny, gstRBPaintBrush);
+		flvr::FBRole::RenderColor, nx, ny, gstRBPaintBrush);
 	assert(paint_buffer);
 	paint_buffer->set_blend_equation(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
 	glbin_framebuffer_manager.bind(paint_buffer);

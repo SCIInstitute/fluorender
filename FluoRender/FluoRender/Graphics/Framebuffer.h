@@ -115,10 +115,10 @@ namespace flvr
 	enum class FBRole
 	{
 		Canvas,// Represents the default framebuffer (id == 0)
-		RenderFloat,
-		RenderFloatDepth,
-		RenderFloatFilter,
-		RenderFloatMipmap,
+		RenderColor,
+		RenderColorDepth,
+		RenderColorFilter,
+		RenderColorMipmap,
 		RenderUChar,
 		Pick,
 		Depth,

@@ -101,20 +101,34 @@ out vec4 FragColor;
 
 inline constexpr const char* VOL_UNIFORMS_COMMON  = R"GLSHDR(
 // VOL_UNIFORMS_COMMON
-uniform vec4 loc0;//(lx, ly, lz, alpha)
+uniform vec4 loc0;//(lx, ly, lz, 0)
 uniform vec4 loc1;//(ka, kd, ks, ns)
 uniform vec4 loc2;//(scalar_scale, gm_scale, left_thresh, right_thresh)
 uniform vec4 loc3;//(gamma, left_offset, right_offset, sw)
 uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)
 uniform vec4 loc5;//(spcx, spcy, spcz, shuffle)
-uniform vec4 loc9;//(primary red, green, blue, alpha_power)
+uniform vec4 loc6;//(low, hi, hi-lo, inv)
+uniform vec4 loc7;//(1/vx, 1/vy, 0, 0) 2dmap loc
+uniform vec4 loc8;//(int, start, end, 0.0) fog loc
+uniform vec4 loc9;//(primary red, green, blue, 0)
 uniform vec4 loc16;//(secondary red, green, blue, mask_threshold)
 uniform vec4 loc17;//(gm_low, gm_high, gm_max, 0)
+uniform vec4 loc18;//(alpha, alpha_power, luminance, 0)
 	
 uniform sampler3D tex0;//data volume
 uniform sampler3D tex1;//gm volume
 	
 uniform mat4 matrix5;//texture
+)GLSHDR";
+
+inline constexpr const char* VOL_UNIFORMS_CLIP  = R"GLSHDR(
+//VOL_UNIFORMS_CLIP
+uniform vec4 loc10; //plane0
+uniform vec4 loc11; //plane1
+uniform vec4 loc12; //plane2
+uniform vec4 loc13; //plane3
+uniform vec4 loc14; //plane4
+uniform vec4 loc15; //plane5
 )GLSHDR";
 
 inline constexpr const char* VOL_UNIFORMS_4D_CACHE  = R"GLSHDR(
@@ -127,46 +141,16 @@ inline constexpr const char* VOL_UNIFORMS_MATRICES  = R"GLSHDR(
 uniform mat4 matrix2;//tex transform for bricking
 )GLSHDR";
 
-inline constexpr const char* VOL_UNIFORMS_SIN_COLOR  = R"GLSHDR(
-//VOL_UNIFORMS_SIN_COLOR
-uniform vec4 loc6;//(red, green, blue, 0)
-)GLSHDR";
-
-inline constexpr const char* VOL_UNIFORMS_COLORMAP  = R"GLSHDR(
-//VOL_UNIFORMS_COLORMAP
-uniform vec4 loc6;//(low, hi, hi-lo, inv)
-)GLSHDR";
-
 inline constexpr const char* VOL_UNIFROMS_4D_COLORMAP  = R"GLSHDR(
 //VOL_UNIFROMS_4D_COLORMAP
 uniform uint loci0;//time
 uniform uint loci1;//time length
 )GLSHDR";
 
-inline constexpr const char* VOL_UNIFORMS_2DMAP_LOC  = R"GLSHDR(
-//VOL_UNIFORMS_2DMAP_LOC
-uniform vec4 loc7;//(1/vx, 1/vy, 0, 0)
-)GLSHDR";
-
-inline constexpr const char* VOL_UNIFORMS_FOG_LOC  = R"GLSHDR(
-//VOL_UNIFORMS_FOG_LOC
-uniform vec4 loc8;//(int, start, end, 0.0)
-)GLSHDR";
-
 inline constexpr const char* VOL_UNIFORMS_DP  = R"GLSHDR(
 //VOL_UNIFORMS_DP
 uniform sampler2D tex14;//depth texture 1
 uniform sampler2D tex15;//depth texture 2
-)GLSHDR";
-
-inline constexpr const char* VOL_UNIFORMS_CLIP  = R"GLSHDR(
-//VOL_UNIFORMS_CLIP
-uniform vec4 loc10; //plane0
-uniform vec4 loc11; //plane1
-uniform vec4 loc12; //plane2
-uniform vec4 loc13; //plane3
-uniform vec4 loc14; //plane4
-uniform vec4 loc15; //plane5
 )GLSHDR";
 
 inline constexpr const char* VOL_UNIFORMS_MASK  = R"GLSHDR(
@@ -265,7 +249,7 @@ bool vol_clip_func(vec4 t)
 
 inline constexpr const char* VOL_HEAD_LIT  = R"GLSHDR(
 	//VOL_HEAD_LIT
-	vec4 l = loc0; // {lx, ly, lz, alpha}
+	vec4 l = loc0; // {lx, ly, lz, 0}
 	vec4 k = vec4(0.3, 0.7, loc1.z, loc1.w); // {ka, kd, ks, ns}
 	vec4 n, w;
 )GLSHDR";
@@ -443,8 +427,9 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR  = R"GLSHDR(
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
 		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		alpha = 1.0 - pow(1.0-pow(tf_alp, loc9.w), loc4.w);
-		c = vec4(loc6.rgb*alpha*(loc9.w>1.1?1.0:tf_alp), alpha);
+		float pa = pow(tf_alp, loc18.y);
+		alpha = 1.0 - pow(1.0-pa, loc4.w);
+		c = vec4(loc9.rgb*loc18.z*(loc18.y>1.1?tf_alp:pa), alpha);
 	}
 )GLSHDR";
 
@@ -463,7 +448,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID  = R"GLSHDR(
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
 		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		c = vec4(loc6.rgb*tf_alp, 1.0);
+		c = vec4(loc9.rgb*loc18.z*tf_alp, 1.0);
 	}
 )GLSHDR";
 
@@ -657,8 +642,9 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU8  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_RESULT  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT
-		float alpha = 1.0 - pow(1.0-pow(tf_alp, loc9.w), loc4.w);
-		c = vec4(rb.rgb*alpha*(loc9.w>1.1?1.0:tf_alp), alpha);
+		float pa = pow(tf_alp, loc18.y);
+		float alpha = 1.0 - pow(1.0-pa, loc4.w);
+		c = vec4(rb.rgb*loc18.z*(loc18.y>1.1?tf_alp:pa), alpha);
 	}
 )GLSHDR";
 
@@ -680,7 +666,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_SOLID  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT
-		c = vec4(rb.rgb, 1.0);
+		c = vec4(rb.rgb*loc18.z, 1.0);
 	}
 )GLSHDR";
 
@@ -738,7 +724,7 @@ inline constexpr const char* VOL_COLOR_OUTPUT_LABEL  = R"GLSHDR(
 	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
 		(n.w+n.z);
 	sel.xyz *= loc1.y>0.0?shad:1.0;
-	FragColor = sel*l.w;
+	FragColor = sel*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK  = R"GLSHDR(
@@ -746,7 +732,7 @@ inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK  = R"GLSHDR(
 	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
 		(n.w+n.z);
 	sel.xyz *= loc1.y>0.0?shad:1.0;
-	FragColor = sel*alpha*tf_alp*l.w;
+	FragColor = sel*alpha*tf_alp*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
@@ -767,7 +753,7 @@ inline constexpr const char* VOL_FOG_BODY  = R"GLSHDR(
 
 inline constexpr const char* VOL_RASTER_BLEND  = R"GLSHDR(
 	//VOL_RASTER_BLEND
-	FragColor = c*l.w; // VOL_RASTER_BLEND
+	FragColor = c*loc18.x; // VOL_RASTER_BLEND
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_SOLID  = R"GLSHDR(
@@ -779,7 +765,7 @@ inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_DMAP
 	//float prevz = texture(tex4, fcf).r;
 	float currz = gl_FragCoord.z;
-	float intpo = (c*l.w).r;
+	float intpo = (c*loc18.x).r;
 	//FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 	if (intpo < 0.05) discard;
 	FragColor = vec4(vec3(currz), 1.0);
@@ -788,7 +774,7 @@ inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_NOMASK
 	vec4 cmask = texture(tex2, t.stp); //get mask value
-	FragColor = vec4(1.0-cmask.x)*c*l.w;
+	FragColor = vec4(1.0-cmask.x)*c*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK_SOLID  = R"GLSHDR(
@@ -802,14 +788,14 @@ inline constexpr const char* VOL_RASTER_BLEND_NOMASK_DMAP  = R"GLSHDR(
 	float prevz = texture(tex4, fcf).r;
 	float currz = gl_FragCoord.z;
 	vec4 cmask = texture(tex2, t.stp); //get mask value
-	float intpo = (vec4(1.0-cmask.x)*c*l.w).r;
+	float intpo = (vec4(1.0-cmask.x)*c*loc18.x).r;
 	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_MASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_MASK
 	vec4 cmask = texture(tex2, t.stp); //get mask value
-	FragColor = tf_alp*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c*l.w;
+	FragColor = tf_alp*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c*loc18.x;
 	//FragColor = cmask;
 )GLSHDR";
 
@@ -824,7 +810,7 @@ inline constexpr const char* VOL_RASTER_BLEND_MASK_DMAP  = R"GLSHDR(
 	float prevz = texture(tex4, fcf).r;
 	float currz = gl_FragCoord.z;
 	vec4 cmask = texture(tex2, t.stp); //get mask value
-	float intpo = (vec4(cmask.x)*c*l.w).r;
+	float intpo = (vec4(cmask.x)*c*loc18.x).r;
 	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 )GLSHDR";
 
@@ -864,7 +850,7 @@ inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
 	vec4 cmask = texture(tex2, t.stp); //get mask value
 	if (cmask.x <= loc16.w)
 	{
-		FragColor = c*l.w;
+		FragColor = c*loc18.x;
 		return;
 	}
 	uint label = texture(tex3, t.stp).x; //get mask value
@@ -931,7 +917,7 @@ inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
 	vec4 cmask = texture(tex2, t.stp); //get mask value
 	if (cmask.x <= loc16.w)
 	{
-		FragColor = c*l.w;
+		FragColor = c*loc18.x;
 		return;
 	}
 	uint label = texture(tex3, t.stp).x; //get mask value

@@ -211,7 +211,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloatFilter, w2, h2, buf_name);
+		flvr::FBRole::RenderColorFilter, w2, h2, buf_name);
 	assert(blend_buffer);
 	//set up clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
@@ -369,7 +369,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	{
 		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloatFilter, w, h, gstRBFilter);
+			flvr::FBRole::RenderColorFilter, w, h, gstRBFilter);
 		assert(filter_buffer);
 		//set viewport size
 		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
@@ -445,7 +445,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	{
 		cur_buffer = glbin_framebuffer_manager.current();
 		micro_blend_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderFloat, w, h, gstRBMicroBlend);
+			flvr::FBRole::RenderColor, w, h, gstRBMicroBlend);
 		assert(micro_blend_buffer);
 	}
 
