@@ -36,6 +36,7 @@
 #include <ShaderProgram.h>
 #include <VertexArray.h>
 #include <GraphicsQuery.h>
+#include <Framebuffer.h>
 #include <FramebufferStateTracker.h>
 #include <Color.h>
 #include <Utils.h>
@@ -1312,8 +1313,11 @@ namespace flvr
 		if (vertex.empty() || index.empty())
 			return;
 
-		glbin_fb_state_tracker.set_polygon_mode(PolygonMode::Line);
-		glbin_fb_state_tracker.apply();
+		auto cur_buffer = glbin_framebuffer_manager.current();
+		assert(cur_buffer);
+		FramebufferStateGuard fbg(*cur_buffer);
+		cur_buffer->set_polygon_mode(PolygonMode::Line);
+		cur_buffer->apply_state();
 
 		bool set_pointers = false;
 		if (!va_wirefm_ || !va_wirefm_->valid())
@@ -1352,9 +1356,6 @@ namespace flvr
 			}
 			va_wirefm_->draw_end();
 		}
-
-		glbin_fb_state_tracker.set_polygon_mode(PolygonMode::Fill);
-		glbin_fb_state_tracker.apply();
 	}
 
 	//bind 2d mask for segmentation

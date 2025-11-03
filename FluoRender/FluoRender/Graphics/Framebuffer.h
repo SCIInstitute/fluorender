@@ -224,16 +224,11 @@ namespace flvr
 
 		//states
 		FramebufferState state_;
-		std::vector<FramebufferState> state_stack_;
 
 	private:
 		void bind();
 		void unbind(unsigned int prev_id = 0);
 
-		//states
-		void push_state();
-		void pop_state();
-		void restore_state();
 		FramebufferState default_state();
 
 		friend class FramebufferFactory;
@@ -242,13 +237,8 @@ namespace flvr
 
 	class FramebufferStateGuard {
 	public:
-		explicit FramebufferStateGuard(Framebuffer& fb) : fb_(fb) {
-			fb_.push_state();
-		}
-		~FramebufferStateGuard() {
-			fb_.restore_state();
-			fb_.pop_state();
-		}
+		explicit FramebufferStateGuard(Framebuffer& fb);
+		~FramebufferStateGuard();
 	private:
 		Framebuffer& fb_;
 	};

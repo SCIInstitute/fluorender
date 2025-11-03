@@ -37,6 +37,7 @@
 #include <MainSettings.h>
 #include <Plane.h>
 #include <FramebufferStateTracker.h>
+#include <Framebuffer.h>
 #include <glm.h>
 #include <iostream>
 #include <vector>
@@ -210,8 +211,11 @@ void MeshRenderer::draw_wireframe()
 	if (!va || !va->valid())
 		return;
 
-	glbin_fb_state_tracker.set_polygon_mode(flvr::PolygonMode::Line);
-	glbin_fb_state_tracker.apply();
+	auto cur_buffer = glbin_framebuffer_manager.current();
+	assert(cur_buffer);
+	FramebufferStateGuard fbg(*cur_buffer);
+	cur_buffer->set_polygon_mode(PolygonMode::Line);
+	cur_buffer->apply_state();
 
 	GLMgroup* group = data_->groups;
 	GLint pos = 0;
@@ -255,9 +259,6 @@ void MeshRenderer::draw_wireframe()
 
 	// Release shader.
 	shader->unbind();
-
-	glbin_fb_state_tracker.set_polygon_mode(flvr::PolygonMode::Fill);
-	glbin_fb_state_tracker.apply();
 }
 
 void MeshRenderer::draw_integer(unsigned int name)

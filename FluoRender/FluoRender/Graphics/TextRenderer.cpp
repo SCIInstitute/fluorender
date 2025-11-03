@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <ShaderProgram.h>
+#include <Framebuffer.h>
 #include <FramebufferStateTracker.h>
 #include <Color.h>
 #include <ImgShader.h>
@@ -206,11 +207,14 @@ namespace flvr
 	void TextRenderer::RenderText(const std::wstring& text, const fluo::Color &color,
 		float x, float y, float sx, float sy)
 	{
-		glbin_fb_state_tracker.set_depth_test_enabled(false);
-		glbin_fb_state_tracker.set_cull_face_enabled(false);
-		glbin_fb_state_tracker.set_blend_enabled(true);
-		glbin_fb_state_tracker.set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
-		glbin_fb_state_tracker.apply();
+		auto cur_buffer = glbin_framebuffer_manager.current();
+		assert(cur_buffer);
+		FramebufferStateGuard fbg(*cur_buffer);
+		cur_buffer->set_depth_test_enabled(false);
+		cur_buffer->set_cull_face_enabled(false);
+		cur_buffer->set_blend_enabled(true);
+		cur_buffer->set_blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+		cur_buffer->apply_state();
 
 		auto shader = glbin_shader_manager.shader(gstImgShader,
 			ShaderParams::Img(IMG_SHDR_DRAW_TEXT, 0));

@@ -29,6 +29,7 @@
 #define FramebufferStateTracker_h
 
 #include <FramebufferState.h>
+#include <vector>
 
 namespace flvr
 {
@@ -36,6 +37,7 @@ namespace flvr
 	public:
 		// Apply a new desired state by diffing against current tracked state
 		void apply(const FramebufferState& desired);
+		void restore();
 		void apply();//reapply current state to gl
 
 		// Reset tracker to gl state (e.g. on context loss)
@@ -69,6 +71,11 @@ namespace flvr
 
 	private:
 		FramebufferState currentState_;
+		std::vector<FramebufferState> state_stack_;
+
+	private:
+		void push_state();
+		void pop_state();
 	};
 }
 

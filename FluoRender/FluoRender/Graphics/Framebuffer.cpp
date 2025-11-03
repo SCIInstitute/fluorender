@@ -348,10 +348,6 @@ void Framebuffer::set_viewport(const fluo::Vector4i& vp)
 	if (vp == state_.viewport)
 		return;
 	state_.viewport = vp;
-	for (auto& it : state_stack_)
-	{
-		it.viewport = vp;
-	}
 }
 
 //scissor
@@ -404,38 +400,6 @@ void Framebuffer::unbind(unsigned int prev_id)
 }
 
 constexpr size_t kMaxStateStackDepth = 10;
-
-void Framebuffer::push_state()
-{
-	state_stack_.push_back(glbin_fb_state_tracker.current());
-	if (state_stack_.size() > kMaxStateStackDepth)
-	{
-		DBGPRINT(L"[WARN] Framebuffer %d (%s) state stack depth exceeded: %zu\n",
-			id_, s2ws(name_).c_str(), state_stack_.size());
-		assert(state_stack_.size() <= kMaxStateStackDepth);
-	}
-}
-
-void Framebuffer::pop_state()
-{
-	if (state_stack_.empty())
-	{
-		DBGPRINT(L"[ERROR] Framebuffer %d (%s) attempted to pop empty state stack\n",
-			id_, s2ws(name_).c_str());
-		assert(state_stack_.size() > 0);
-		return;
-	}
-	state_stack_.pop_back();
-}
-
-void Framebuffer::restore_state()
-{
-	if (state_stack_.empty())
-		return;
-	const auto& s = state_stack_.back();
-	state_ = s;
-	glbin_fb_state_tracker.apply(s);
-}
 
 FramebufferState Framebuffer::default_state()
 {
@@ -763,6 +727,18 @@ double Framebuffer::estimate_pick_threshold(
 		return 0.0;
 
 	return scale * static_cast<double>(pixel[3]) / 255.0;
+}
+
+FramebufferStateGuard::FramebufferStateGuard(Framebuffer& fb) :
+	fb_(fb)
+{
+	glbin_fb_state_tracker.apply(fb.state_);
+}
+
+FramebufferStateGuard::~FramebufferStateGuard()
+{
+	glbin_fb_state_tracker.restore();
+	fb_.state_ = glbin_fb_state_tracker.current();
 }
 
 FramebufferFactory::FramebufferFactory()

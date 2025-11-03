@@ -33,7 +33,18 @@ using namespace flvr;
 void FramebufferStateTracker::apply(const FramebufferState& desired)
 {
 	FramebufferStateManager::applyDiff(currentState_, desired);
+	push_state();
 	currentState_ = desired;
+}
+
+void FramebufferStateTracker::restore()
+{
+	if (state_stack_.empty())
+		return;
+	auto& s = state_stack_.back();
+	FramebufferStateManager::applyDiff(currentState_, s);
+	currentState_ = s;
+	pop_state();
 }
 
 void FramebufferStateTracker::apply()
@@ -153,3 +164,13 @@ void FramebufferStateTracker::set_polygon_mode(PolygonMode mode)
 	currentState_.polygonMode = mode;
 }
 
+void FramebufferStateTracker::push_state()
+{
+	state_stack_.push_back(currentState_);
+}
+
+void FramebufferStateTracker::pop_state()
+{
+	if (!state_stack_.empty())
+		state_stack_.pop_back();
+}

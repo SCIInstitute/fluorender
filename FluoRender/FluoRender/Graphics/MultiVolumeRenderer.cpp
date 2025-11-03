@@ -211,7 +211,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderFloat, w2, h2, buf_name);
+		flvr::FBRole::RenderFloatFilter, w2, h2, buf_name);
 	assert(blend_buffer);
 	//set up clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
