@@ -6423,15 +6423,16 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		//clear = !glbin_settings.m_mem_swap ||
 		//	(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
 
-		flvr::FramebufferStateGuard fbg(*chan_buffer);
-		bool not_done_loop = glbin_settings.m_mem_swap && !vr->get_done_loop(0);
-		chan_buffer->set_blend_enabled(true);
-		chan_buffer->set_blend_equation(not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add,
-			not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add);
-		chan_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
-		//chan_buffer->set_blend_func(not_done_loop ? flvr::BlendFactor::One : flvr::BlendFactor::SrcAlpha,
+		//flvr::FramebufferStateGuard fbg(*chan_buffer);
+		//bool not_done_loop = glbin_settings.m_mem_swap && !vr->get_done_loop(0);
+		//chan_buffer->set_blend_enabled(true);
+		//chan_buffer->set_blend_equation(not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add,
+		//	not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add);
+		////chan_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
+		//chan_buffer->set_blend_func(flvr::BlendFactor::One,
 		//	not_done_loop ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
 		//bind channel fbo for final composition
+		chan_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		glbin_framebuffer_manager.bind(chan_buffer);
 		if (clear)
 		{
