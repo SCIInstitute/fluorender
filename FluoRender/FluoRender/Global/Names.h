@@ -241,6 +241,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstHighThreshold "high threshold"
 #define gstSoftThresh "soft thresh"
 #define gstLuminanceEnable "luminance enable"
+#define gstLuminance "luminance"
 #define gstAlphaEnable "alpha enable"
 #define gstAlpha "alpha"
 #define gstAlphaPower "alpha power"
@@ -265,7 +266,6 @@ DEALINGS IN THE SOFTWARE.
 //color
 #define gstColor "color"
 #define gstHsv "hsv"
-#define gstLuminance "luminance"
 #define gstSecColor "sec color"
 #define gstSecColorSet "sec color set"
 #define gstRandomizeColor "randomize color"

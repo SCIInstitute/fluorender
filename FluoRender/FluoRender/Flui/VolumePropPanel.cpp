@@ -736,6 +736,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool update_threshold = update_all || FOUND_VALUE(gstThreshold);
 	bool update_color = update_all || FOUND_VALUE(gstColor);
 	bool update_alpha = update_all || FOUND_VALUE(gstAlpha);
+	bool update_luminance = update_all || FOUND_VALUE(gstLuminance);
 	bool update_shading = update_all || FOUND_VALUE(gstShading);
 	bool update_shadow = update_all || FOUND_VALUE(gstShadow);
 	bool update_sample = update_all || FOUND_VALUE(gstSampleRate);
@@ -1004,31 +1005,6 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (m_thresh_st->IsEnabled() != bval)
 			m_thresh_st->Enable(bval);
 	}
-	//luminance
-	if (update_color)
-	{
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
-			vald_i->SetMin(0);
-		dval = m_vd->GetLuminance();
-		bval = m_vd->GetLuminanceEnable();
-		ival = std::round(dval * m_max_val);
-		m_luminance_sldr->SetRange(0, std::round(m_max_val));
-		str = wxString::Format("%d", ival);
-		m_luminance_sldr->ChangeValue(ival);
-		m_luminance_text->ChangeValue(str);
-		m_luminance_chk->SetValue(bval);
-		if (m_luminance_sldr->IsEnabled() != bval)
-		{
-			m_luminance_sldr->Enable(bval);
-			m_luminance_text->Enable(bval);
-		}
-	}
-	if (update_color || update_tips)
-	{
-		bval = m_vd->GetLuminanceEnable() || mf_enable;
-		if (m_luminance_st->IsEnabled() != bval)
-			m_luminance_st->Enable(bval);
-	}
 	//alpha
 	if (update_alpha)
 	{
@@ -1053,6 +1029,31 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		bval = m_vd->GetAlphaEnable() || mf_enable;
 		if (m_alpha_st->IsEnabled() != bval)
 			m_alpha_st->Enable(bval);
+	}
+	//luminance
+	if (update_luminance)
+	{
+		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
+			vald_i->SetMin(0);
+		dval = m_vd->GetLuminance();
+		bval = m_vd->GetLuminanceEnable();
+		ival = std::round(dval * m_max_val);
+		m_luminance_sldr->SetRange(0, std::round(m_max_val));
+		str = wxString::Format("%d", ival);
+		m_luminance_sldr->ChangeValue(ival);
+		m_luminance_text->ChangeValue(str);
+		m_luminance_chk->SetValue(bval);
+		if (m_luminance_sldr->IsEnabled() != bval)
+		{
+			m_luminance_sldr->Enable(bval);
+			m_luminance_text->Enable(bval);
+		}
+	}
+	if (update_luminance || update_tips)
+	{
+		bval = m_vd->GetLuminanceEnable() || mf_enable;
+		if (m_luminance_st->IsEnabled() != bval)
+			m_luminance_st->Enable(bval);
 	}
 	//shadings
 	if (update_shading)
@@ -1735,25 +1736,10 @@ void VolumePropPanel::SetLuminance(double val, bool notify)
 
 	m_vd->SetLuminance(val);
 
-	fluo::Color c = m_vd->GetColor();
-	wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
-		(unsigned char)(c.g() * 255 + 0.5),
-		(unsigned char)(c.b() * 255 + 0.5));
-	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-		wxc.Red(), wxc.Green(), wxc.Blue()));
-	m_color_btn->SetValue(wxc);
-	c = m_vd->GetMaskColor();
-	wxc = wxColor((unsigned char)(c.r() * 255 + 0.5),
-		(unsigned char)(c.g() * 255 + 0.5),
-		(unsigned char)(c.b() * 255 + 0.5));
-	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
-		wxc.Red(), wxc.Green(), wxc.Blue()));
-	m_color2_btn->SetValue(wxc);
-
 	if (notify)
-		FluoRefresh(0, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId() });
+		FluoRefresh(0, { gstLuminance }, { glbin_current.GetViewId() });
 	else
-		FluoRefresh(0, { gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId() });
+		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::SetAlpha(double val, bool notify)
@@ -2931,12 +2917,6 @@ void VolumePropPanel::OnColorChange(wxColor c)
 		else
 			m_vd->SetColor(color);
 
-		double lum = m_vd->GetLuminance();
-		int ilum = std::round(lum*m_max_val);
-		m_luminance_sldr->ChangeValue(ilum);
-		wxString str = wxString::Format("%d", ilum);
-		m_luminance_text->ChangeValue(str);
-
 		if (!m_vd->GetMaskColorSet())
 		{
 			color = m_vd->GetMaskColor();
@@ -2948,7 +2928,7 @@ void VolumePropPanel::OnColorChange(wxColor c)
 			m_color2_btn->SetValue(wxc);
 		}
 
-		FluoRefresh(0, { gstColor, gstLuminance, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync, gstColormap, gstUpdateHistogram }, { glbin_current.GetViewId() });
+		FluoRefresh(0, { gstColor, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync, gstColormap, gstUpdateHistogram }, { glbin_current.GetViewId() });
 	}
 }
 

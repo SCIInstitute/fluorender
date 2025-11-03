@@ -6156,6 +6156,7 @@ void RenderView::DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &
 	//}
 
 	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
 	//generate textures & buffer objects
 	//frame buffer for each volume
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
@@ -6182,11 +6183,11 @@ void RenderView::DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &
 	DrawOverlayShadowVolume(list);
 
 	//bind fbo for final composition
-	assert(data_buffer);
 	//data_buffer->set_blend_enabled(true);
 	//data_buffer->set_blend_func(flvr::BlendFactor::One,
 	//	m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One :flvr::BlendFactor::OneMinusSrcAlpha);
 	//data_buffer->set_depth_test_enabled(false);
+	data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	glbin_framebuffer_manager.bind(data_buffer);
 	//build mipmap
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
@@ -6593,6 +6594,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 	}
 
 	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderFloatMipmap, nx, ny, gstRBChannel);
 	assert(chan_buffer);
@@ -6614,8 +6616,7 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 			temp_buffer->set_blend_enabled(false);
 			glbin_framebuffer_manager.bind(temp_buffer);
 			temp_buffer->clear(true, false);
-			auto data_buffer = GetDataFramebuffer();
-			assert(data_buffer);
+			//auto data_buffer = GetDataFramebuffer();
 			data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -6663,7 +6664,6 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 	}
 
 	//bind fbo for final composition
-	assert(data_buffer);
 	glbin_framebuffer_manager.bind(data_buffer);
 
 	if (glbin_settings.m_mem_swap)
