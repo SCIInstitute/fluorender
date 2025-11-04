@@ -1250,7 +1250,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		//mode
-		bval = m_vd->GetColormapMode() == 1;
+		bval = m_vd->GetColorMode() == 1;
 		m_colormap_chk->SetValue(bval);
 		if (m_colormap_sldr->IsEnabled() != bval)
 		{
@@ -1292,7 +1292,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_colormap || update_tips)
 	{
-		bval = m_vd->GetColormapMode() == 1 || mf_enable;
+		bval = m_vd->GetColorMode() == 1 || mf_enable;
 		if (m_colormap_st->IsEnabled() != bval)
 			m_colormap_st->Enable(bval);
 	}
@@ -1485,7 +1485,7 @@ void VolumePropPanel::SaveMl()
 	val.push_back(float(m_vd->GetAlpha()));
 	val.push_back(float(m_vd->GetSampleRate()));
 	val.push_back(float(m_vd->GetLuminance()));
-	val.push_back(float(m_vd->GetColormapMode() == 1));
+	val.push_back(float(m_vd->GetColorMode() == 1));
 	val.push_back(float(m_vd->GetColormapInv()));
 	val.push_back(float(m_vd->GetColormap()));
 	val.push_back(float(m_vd->GetColormapProj()));
@@ -1655,13 +1655,13 @@ void VolumePropPanel::EnableColormap(bool bval)
 {
 	if (m_sync_group && m_group)
 	{
-		m_group->SetColormapMode(bval ? 1 : 0);
+		m_group->SetColorMode(bval ? 1 : 0);
 		m_group->SetColormapDisp(bval);
 		m_group->SetLabelMode(bval ? 0 : 1);
 	}
 	else if (m_vd)
 	{
-		m_vd->SetColormapMode(bval ? 1 : 0);
+		m_vd->SetColorMode(bval ? 1 : 0);
 		m_vd->SetColormapDisp(bval);
 		m_vd->SetLabelMode(bval ? 0 : 1);
 	}
@@ -2781,7 +2781,7 @@ void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 		m_colormap_sldr->Undo();
 		break;
 	case 5:
-		EnableColormap(m_vd->GetColormapMode() == 0);
+		EnableColormap(m_vd->GetColorMode() == 0);
 		break;
 	}
 }
@@ -3313,7 +3313,7 @@ void VolumePropPanel::SetSyncGroup()
 		//noise reduction
 		m_group->SetNR(m_vd->GetNR());
 		//colormap mode
-		m_group->SetColormapMode(m_vd->GetColormapMode());
+		m_group->SetColorMode(m_vd->GetColorMode());
 		//colormap values
 		m_group->SetColormapValues(m_vd->GetColormapLow(), m_vd->GetColormapHigh());
 		//colormap type

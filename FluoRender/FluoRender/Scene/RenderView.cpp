@@ -3189,7 +3189,7 @@ void RenderView::SetParams(double t)
 		//colormap
 		keycode.l2_name = "colormap enable";
 		if (glbin_interpolator.GetBoolean(keycode, t, bval))
-			vd->SetColormapMode(bval ? 1 : 0);
+			vd->SetColorMode(bval ? 1 : 0);
 		keycode.l2_name = "colormap low";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
 			vd->SetColormapLow(dval);
@@ -6325,7 +6325,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 
 	bool shading = vr->get_shading();
 	bool shadow = vd->GetShadowEnable();
-	int colormap_mode = vd->GetColormapMode();
+	auto color_mode = vd->GetColorMode();
 	bool enable_alpha = vd->GetAlphaEnable();
 	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
@@ -6371,7 +6371,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		assert(overlay_buffer);
 		overlay_buffer->set_blend_enabled(true);
 		if (glbin_settings.m_clear_color_bg &&
-			vd->GetColormapMode() == 0)
+			vd->GetColorMode() == 0)
 		{
 			overlay_buffer->set_clear_color({
 				static_cast<float>(m_bg_color.r()),
@@ -6394,16 +6394,16 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		vr->set_depth_peel(peel);
 		vr->set_shading(false);
 		//turn off colormap proj
-		if (colormap_mode == 0)
+		if (color_mode == flvr::ColorMode::SingleColor)
 		{
 			//normal mip
-			vr->set_colormap_proj(0);
+			vr->set_colormap_proj(flvr::ColormapProj::Disabled);
 			vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 		else
 		{
 			//white mip
-			vr->set_colormap_mode(0);
+			vr->set_color_mode(flvr::ColorMode::SingleColor);
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
 			vr->set_solid(true);
@@ -6438,7 +6438,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 		}
 
 		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-		if (colormap_mode == 0)
+		if (color_mode == flvr::ColorMode::SingleColor)
 		{
 			img_shader = glbin_shader_manager.shader(gstImgShader,
 				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
@@ -6755,7 +6755,7 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 	vr->set_shading(true);
 	vr->set_solid(false);
 	vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
-	vr->set_colormap_mode(0);
+	vr->set_color_mode(0);
 	vr->set_color(fluo::Color(1.0));
 	vd->SetStreamMode(2);
 	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -6862,7 +6862,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		//set to draw depth
 		vr->set_shading(false);
 		vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
-		vr->set_colormap_mode(2);
+		vr->set_color_mode(2);
 		if (overlay_buffer)
 			vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
 		vr->set_ml_mode(0);
@@ -6892,7 +6892,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 			rmgs.emplace_back(*vr);
 			vr->set_shading(false);
 			vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
-			vr->set_colormap_mode(2);
+			vr->set_color_mode(2);
 			if (overlay_buffer)
 				vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -8601,7 +8601,7 @@ void RenderView::DrawColormap()
 	auto cur_vd = m_cur_vol.lock();
 	if (!cur_vd)
 		return;
-	if (!cur_vd->GetColormapMode())
+	if (!cur_vd->GetColorMode())
 		return;
 
 	auto cur_buffer = glbin_framebuffer_manager.current();

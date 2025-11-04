@@ -1647,12 +1647,12 @@ void VolumeData::SetRenderMode(flvr::RenderMode mode)
 	//	break;
 	//case 2://white shading
 	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
-	//	m_vr->set_colormap_mode(0);
+	//	m_vr->set_color_mode(0);
 	//	m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
 	//	break;
 	//case 3://white mip
 	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
-	//	m_vr->set_colormap_mode(0);
+	//	m_vr->set_color_mode(0);
 	//	m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
 	//	break;
 	//}
@@ -2370,7 +2370,7 @@ void VolumeData::SetColorMode(flvr::ColorMode mode)
 	m_color_mode = mode;
 	if (m_vr)
 	{
-		m_vr->set_colormap_mode(m_color_mode);
+		m_vr->set_color_mode(m_color_mode);
 		m_vr->set_color(m_color);
 	}
 }
@@ -3467,8 +3467,8 @@ void VolumeData::ApplyMlVolProp()
 		}
 		//colormap enable
 		dval = m_ep->getParam("colormap_enable");
-		SetColormapMode(dval>0.5);
-		if (m_colormap_mode > 0)
+		SetColorMode(dval>0.5);
+		if (m_color_mode > 0)
 		{
 			//colormap inv
 			dval = m_ep->getParam("colormap_inv");

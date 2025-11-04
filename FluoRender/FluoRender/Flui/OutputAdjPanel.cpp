@@ -1749,7 +1749,7 @@ void OutputAdjPanel::UpdateSync()
 			auto vd = group->GetVolumeData(i);
 			if (vd)
 			{
-				if (vd->GetColormapMode())
+				if (vd->GetColorMode())
 				{
 					r_v = g_v = b_v = true;
 				}

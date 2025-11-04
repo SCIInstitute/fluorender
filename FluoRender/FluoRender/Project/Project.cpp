@@ -453,7 +453,7 @@ void Project::Open(const std::wstring& filename)
 
 						//colormap settings
 						if (fconfig->Read("colormap_mode", &ival))
-							vd->SetColormapMode(ival);
+							vd->SetColorMode(ival);
 						if (fconfig->Read("colormap_inv", &dval))
 							vd->SetColormapInv(dval);
 						if (fconfig->Read("colormap", &ival))
@@ -1448,7 +1448,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("sync_b", vd->GetSync(2));
 
 			//colormap settings
-			fconfig->Write("colormap_mode", vd->GetColormapMode());
+			fconfig->Write("colormap_mode", vd->GetColorMode());
 			fconfig->Write("colormap_inv", vd->GetColormapInv());
 			fconfig->Write("colormap", vd->GetColormap());
 			fconfig->Write("colormap_proj", vd->GetColormapProj());

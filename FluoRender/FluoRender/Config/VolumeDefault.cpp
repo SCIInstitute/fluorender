@@ -491,7 +491,7 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 	g->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
 	g->SetColormapInv(m_colormap_inv);
 	g->SetColormap(m_colormap_type);
-	g->SetColormapProj(m_color_proj);
+	g->SetColormapProj(m_colormap_proj);
 
 	g->SetNR(m_noise_rd);
 	g->SetInterpolate(m_interpolate);
