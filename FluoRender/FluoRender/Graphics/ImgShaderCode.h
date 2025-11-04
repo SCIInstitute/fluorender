@@ -287,9 +287,10 @@ in vec3 OutTexCoord;
 out vec4 FragColor;
 	
 // IMG_SHADER_CODE_GRADIENT_MAP
-uniform vec4 loc0; //(lo, hi, hi-lo, alpha) 
-uniform vec4 loc6; //(r, g, b, inv)
-uniform vec4 loc9; //(r, g, b, 0)
+uniform vec4 loc6; //(lo, hi, hi-lo, inv)
+uniform vec4 loc9; //(main color)
+uniform vec4 loc16; //(alt color)
+uniform vec4 loc18;//(alpha, alpha_power, luminance, 0)
 uniform sampler2D tex0;
 	
 void main()
@@ -299,12 +300,12 @@ void main()
 	vec4 c = texture(tex0, t.xy);
 	rb.a = c.a;
 	float valu = c.r - c.a * 260.0;
-	valu = (valu-loc0.x)/loc0.z;
+	valu = (valu-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT = R"GLSHDR(
 	//IMG_SHADER_CODE_GRADIENT_MAP_RESULT
-	FragColor = vec4(rb.rgb*(loc0.w>0.5?(rb.a==0.0?0.0:1.0):rb.a), rb.a);
+	FragColor = vec4(rb.rgb*loc18.z*(loc18.x>0.5?(rb.a==0.0?0.0:1.0):rb.a), rb.a);
 }
 )GLSHDR";
 

@@ -151,6 +151,7 @@
         <peeling_layers>2</peeling_layers>
         <micro_blend>0</micro_blend>
         <grad_bg>0</grad_bg>
+        <clear_color_bg>0</clear_color_bg>
         <interactive_quality>2</interactive_quality>
         <pin_thresh>10</pin_thresh>
         <line_width>3</line_width>
@@ -464,11 +465,11 @@
         <colormap_high>1</colormap_high>
         <colormap_inv>1</colormap_inv>
         <colormap_type>0</colormap_type>
-        <colormap_proj>0</colormap_proj>
+        <colormap_proj>1</colormap_proj>
         <noise_redct>1</noise_redct>
         <interpolate>1</interpolate>
         <invert>0</invert>
-        <mip_mode>0</mip_mode>
+        <render_mode>1</render_mode>
         <transparent>0</transparent>
         <blend_mode>0</blend_mode>
         <legend>1</legend>

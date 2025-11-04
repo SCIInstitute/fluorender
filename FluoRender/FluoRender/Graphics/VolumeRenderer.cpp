@@ -194,17 +194,12 @@ void VolumeRenderer::set_color(const fluo::Color& color)
 	{
 		//generate opposite color for mask
 		fluo::HSVColor hsv_color(color_);
-		double h, s, v;
-		if (hsv_color.sat() < 0.2)
-			mask_color_ = fluo::Color(0.0, 1.0, 0.0);	//if low saturation, set to green
-		else
-		{
-			double h0 = hsv_color.hue();
-			h = h0 < 30.0 ? h0 - 180.0 : h0 < 90.0 ? h0 + 120.0 : h0 < 210.0 ? h0 - 120.0 : h0 - 180.0;
-			s = 1.0;
-			v = 1.0;
-			mask_color_ = fluo::Color(fluo::HSVColor(h < 0.0 ? h + 360.0 : h, s, v));
-		}
+
+		double h0 = hsv_color.hue();
+		double h = h0 < 30.0 ? h0 - 180.0 : h0 < 90.0 ? h0 + 120.0 : h0 < 210.0 ? h0 - 120.0 : h0 - 180.0;
+		double s = 1.0;
+		double v = 1.0;
+		mask_color_ = fluo::Color(fluo::HSVColor(h < 0.0 ? h + 360.0 : h, s, v));
 	}
 }
 
