@@ -43,6 +43,8 @@ namespace flvr
 	class TextureBrick;
 	class Texture;
 	enum class RenderMode;
+	enum class ColorMode;
+	enum class ColormapProj;
 }
 namespace flrd
 {
@@ -267,8 +269,8 @@ public:
 	void SetUseMaskThreshold(bool mode);
 
 	//colormap mode
-	void SetColormapMode(int mode);
-	int GetColormapMode();
+	void SetColorMode(flvr::ColorMode);
+	flvr::ColorMode GetColorMode();
 	void SetColormapDisp(bool disp);
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
@@ -286,9 +288,9 @@ public:
 	void SetColormapInv(double val);
 	double GetColormapInv();
 	void SetColormap(int value);
-	void SetColormapProj(int value);
 	int GetColormap();
-	int GetColormapProj();
+	void SetColormapProj(flvr::ColormapProj);
+	flvr::ColormapProj GetColormapProj();
 	fluo::Color GetColorFromColormap(double value, bool raw = false);
 	bool GetColormapData(std::vector<unsigned char>& data);
 	//see if need update histogram
@@ -563,10 +565,10 @@ private:
 
 	//color map mode
 	double m_colormap_inv;
-	int m_colormap_mode;	//0-normal; 1-rainbow
+	flvr::ColorMode m_color_mode;	//0-normal; 1-rainbow
 	bool m_colormap_disp;	//true/false
 	int m_colormap;//index to a colormap
-	int m_colormap_proj;//index to method of mapping
+	flvr::ColormapProj m_colormap_proj;//index to method of mapping
 						//0-intensity; 1-z-value; 2-y-value; 3-x-value; 4-t-value;
 						//5 - gradient magnitude; 6 - gradient dir; 7 - intensity delta; 8 - speed	
 	double m_colormap_low_value;

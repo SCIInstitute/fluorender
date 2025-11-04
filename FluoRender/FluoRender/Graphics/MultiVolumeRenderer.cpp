@@ -502,14 +502,14 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		{
 			//--------------------------------------------------------------------------
 			bool use_fog = vr_list_[tn]->m_use_fog &&
-				vr_list_[tn]->colormap_mode_ != 2;
+				vr_list_[tn]->color_mode_ != ColorMode::Depth;
 
 			// Set up shaders
 			std::shared_ptr<ShaderProgram> shader;
 			bool grad = vr_list_[tn]->gm_low_ > 0.0 ||
 				vr_list_[tn]->gm_high_ < vr_list_[tn]->gm_max_ ||
-				(vr_list_[tn]->colormap_mode_ &&
-					vr_list_[tn]->colormap_proj_);
+				vr_list_[tn]->colormap_proj_ == ColormapProj::Gradient ||
+				vr_list_[tn]->colormap_proj_ == ColormapProj::Normal;
 			auto tex = vr_list_[tn]->tex_.lock();
 			int nc = 0;
 			if (tex)
@@ -523,7 +523,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					grad,
 					vr_list_[tn]->ml_mode_,
 					vr_list_[tn]->mode_ == RenderMode::RENDER_MODE_MIP,
-					vr_list_[tn]->colormap_mode_,
+					vr_list_[tn]->color_mode_,
 					vr_list_[tn]->colormap_,
 					vr_list_[tn]->colormap_proj_,
 					vr_list_[tn]->solid_, 1));
@@ -531,7 +531,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->bind();
 
 			//setup depth peeling
-			if (depth_peel_ || vr_list_[tn]->colormap_mode_ == 2)
+			if (depth_peel_ || vr_list_[tn]->color_mode_ == ColorMode::Depth)
 				shader->setLocalParam(7, 1.0 / double(w), 1.0 / double(h), 0.0, 0.0);
 
 			//fog
@@ -595,20 +595,10 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			if (tex)
 				tex->get_spacings(spcx, spcy, spcz);
 			shader->setLocalParam(5, spcx, spcy, spcz, vr_list_[tn]->shuffle_);
-			switch (vr_list_[tn]->colormap_mode_)
-			{
-			case 0://normal
-				shader->setLocalParam(6, vr_list_[tn]->color_.r(),
-					vr_list_[tn]->color_.g(),
-					vr_list_[tn]->color_.b(), 0.0);
-				break;
-			case 1://colormap
 				shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
 					vr_list_[tn]->colormap_hi_value_,
 					vr_list_[tn]->colormap_hi_value_ - vr_list_[tn]->colormap_low_value_,
 					vr_list_[tn]->colormap_inv_);
-				break;
-			}
 			shader->setLocalParam(9, vr_list_[tn]->color_.r(),
 				vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(),
 				vr_list_[tn]->alpha_power_);
@@ -633,7 +623,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 			//bind depth texture for rendering shadows
-			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
+			if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
 				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			std::vector<TextureBrick*>* bs = 0;
@@ -678,7 +668,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					reinterpret_cast<const void*>((long long)(location)));
 
 			//release depth texture for rendering shadows
-			if (vr_list_[tn]->colormap_mode_ == 2)
+			if (vr_list_[tn]->color_mode_ == ColorMode::Depth)
 				vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
 
 			if (glbin_settings.m_mem_swap && i == 0)
@@ -692,7 +682,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			// Release shader.
 			shader->unbind();
 			//unbind depth texture for rendering shadows
-			if (vr_list_[tn]->colormap_mode_ == 2 && blend_buffer)
+			if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
 				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 		}
 		location += idx_num * 4;

@@ -33,6 +33,8 @@ class VolumeGroup;
 namespace flvr
 {
 	enum class RenderMode;
+	enum class ColorMode;
+	enum class ColormapProj;
 }
 class VolumeDataDefault
 {
@@ -88,13 +90,13 @@ public:
 	double m_spcx, m_spcy, m_spcz;
 
 	//color map mode
-	int m_colormap_mode;	//0-normal; 1-rainbow
+	flvr::ColorMode m_color_mode;	//0-normal; 1-rainbow
 	bool m_colormap_disp;	//true/false
 	double m_colormap_low_value;
 	double m_colormap_hi_value;
 	double m_colormap_inv;
 	int m_colormap_type;//index to a colormap
-	int m_colormap_proj;//index to a way of projection
+	flvr::ColormapProj m_colormap_proj;//index to a way of projection
 
 	//noise reduction
 	bool m_noise_rd;

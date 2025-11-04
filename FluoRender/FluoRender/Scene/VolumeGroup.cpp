@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeGroup.h>
 #include <VolumeData.h>
+#include <ShaderProgram.h>
 
 int VolumeGroup::m_num = 0;
 VolumeGroup::VolumeGroup()
@@ -444,12 +445,12 @@ double VolumeGroup::GetSampleRate()
 	return m_sample_rate;
 }
 
-void VolumeGroup::SetColormapMode(int mode)
+void VolumeGroup::SetColorMode(flvr::ColorMode mode)
 {
 	for (auto& it : m_vd_list)
 	{
 		if (it)
-			it->SetColormapMode(mode);
+			it->SetColorMode(mode);
 	}
 }
 
@@ -505,7 +506,7 @@ void VolumeGroup::SetColormap(int value)
 	}
 }
 
-void VolumeGroup::SetColormapProj(int value)
+void VolumeGroup::SetColormapProj(flvr::ColormapProj value)
 {
 	for (auto& it : m_vd_list)
 	{

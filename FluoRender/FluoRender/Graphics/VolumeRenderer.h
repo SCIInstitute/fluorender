@@ -49,6 +49,8 @@ namespace flvr
 	class MultiVolumeRenderer;
 	class Texture;
 	class RenderModeGuard;
+	enum class ColorMode;
+	enum class ColormapProj;
 
 	class VolumeRenderer : public TextureRenderer
 	{
@@ -115,10 +117,10 @@ namespace flvr
 
 		//colormap mode
 		void set_colormap_inv(double val) { colormap_inv_ = val; }
-		void set_colormap_mode(int mode) { colormap_mode_ = mode; }
+		void set_color_mode(ColorMode mode) { color_mode_ = mode; }
 		void set_colormap_values(double low, double hi) { colormap_low_value_ = low; colormap_hi_value_ = hi; }
 		void set_colormap(int value) { colormap_ = value; }
-		void set_colormap_proj(int value) { colormap_proj_ = value; }
+		void set_colormap_proj(ColormapProj value) { colormap_proj_ = value; }
 
 		//label color shuffling
 		void set_shuffle(int val) { shuffle_ = val; }
@@ -247,11 +249,11 @@ namespace flvr
 		double ambient_, diffuse_, specular_, shine_;
 		//colormap mode
 		double colormap_inv_;
-		int colormap_mode_;//0-normal; 1-rainbow; 2-depth
+		ColorMode color_mode_;//0-normal; 1-rainbow; 2-depth
 		double colormap_low_value_;
 		double colormap_hi_value_;
 		int colormap_;
-		int colormap_proj_;
+		ColormapProj colormap_proj_;
 		//solid
 		bool solid_;
 		//interpolation
@@ -300,8 +302,8 @@ namespace flvr
 	{
 		RenderMode mode;
 		fluo::Color color;
-		int colormap_mode;
-		int colormap_proj;
+		ColorMode color_mode;
+		ColormapProj colormap_proj;
 		bool solid;
 		double alpha;
 		bool shading;
@@ -317,7 +319,7 @@ namespace flvr
 			prev_mode_ = {
 				renderer_.mode_,
 				renderer_.color_,
-				renderer_.colormap_mode_,
+				renderer_.color_mode_,
 				renderer_.colormap_proj_,
 				renderer_.solid_,
 				renderer_.alpha_,
@@ -330,7 +332,7 @@ namespace flvr
 		{
 			renderer_.mode_ = prev_mode_.mode;
 			renderer_.color_ = prev_mode_.color;
-			renderer_.colormap_mode_ = prev_mode_.colormap_mode;
+			renderer_.color_mode_ = prev_mode_.color_mode;
 			renderer_.colormap_proj_ = prev_mode_.colormap_proj;
 			renderer_.solid_ = prev_mode_.solid;
 			renderer_.alpha_ = prev_mode_.alpha;

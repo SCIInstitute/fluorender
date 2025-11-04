@@ -36,6 +36,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <iostream>
+#include <unordered_set>
 
 namespace flvr
 {
@@ -106,6 +107,27 @@ namespace flvr
 		static int v_minor_;
 	};
 
+	enum class ColorMode
+	{
+		SingleColor,
+		Colormap,
+		Depth
+	};
+
+	enum class ColormapProj
+	{
+		Disabled,//0: new
+		Intensity,//previously 0
+		ZValue,
+		YValue,
+		XValue,
+		TValue,
+		Gradient,
+		Normal,
+		IntDelta,//previously 7
+		Speed
+	};
+
 	struct ShaderParams
 	{
 		int type = 0;//img, lightfield, mesh(0:normal; 1:integer), seg, cal
@@ -127,10 +149,24 @@ namespace flvr
 		int mask = 0;//vol(0-normal, 1-render with mask, 2-render with mask excluded)
 				 //(3-random color with label, 4-random color with label+mask)
 		bool mip = false;//vol
-		int color_mode = 0;//vol(0-normal; 1-rainbow; 2-depth)
-		int colormap_prj = 0;//vol(projection direction, 4D colormap: >=7)
+		ColorMode color_mode = ColorMode::SingleColor;//vol(0-normal; 1-rainbow; 2-depth)
+		ColormapProj colormap_prj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
 		bool solid = false;//vol(no transparency)
 		int vertex_type = 0;//vol
+
+		static bool ValidColormapProj(ColormapProj p)
+		{
+			return p != ColormapProj::Disabled;
+		}
+
+		static bool IsTimeProj(ColormapProj p)
+		{
+			static const std::unordered_set<ColormapProj> time_modes = {
+				ColormapProj::IntDelta,
+				ColormapProj::Speed
+			};
+			return time_modes.count(p) > 0;
+		}
 
 		static ShaderParams Img(int type, int colormap)
 		{
@@ -208,9 +244,9 @@ namespace flvr
 			bool grad,
 			int mask,
 			bool mip,
-			int color_mode,
+			ColorMode color_mode,
 			int colormap,
-			int colormap_proj,
+			ColormapProj colormap_proj,
 			bool solid,
 			int vertex_type
 		)
@@ -254,8 +290,8 @@ namespace flvr
 				<< ", grad=" << grad
 				<< ", mask=" << mask
 				<< ", mip=" << mip
-				<< ", color_mode=" << color_mode
-				<< ", colormap_prj=" << colormap_prj
+				<< ", color_mode=" << static_cast<int>(color_mode)
+				<< ", colormap_prj=" << static_cast<int>(colormap_prj)
 				<< ", solid=" << solid
 				<< ", vertex_type=" << vertex_type
 				<< "}";

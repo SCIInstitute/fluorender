@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 #include <TextureRenderer.h>
+#include <ShaderProgram.h>
 
 VolumeDataDefault::VolumeDataDefault()
 {
@@ -79,13 +80,13 @@ VolumeDataDefault::VolumeDataDefault()
 	m_spcz = 1.0;
 
 	//colormap mode
-	m_colormap_mode = 0;
+	m_color_mode = flvr::ColorMode::SingleColor;
 	m_colormap_disp = false;
 	m_colormap_low_value = 0.0;
 	m_colormap_hi_value = 1.0;
 	m_colormap_inv = 1.0;
 	m_colormap_type = 0;
-	m_colormap_proj = 0;
+	m_colormap_proj = flvr::ColormapProj::Intensity;
 
 	m_noise_rd = true;
 	m_interpolate = true;
@@ -112,6 +113,8 @@ void VolumeDataDefault::Read()
 		glbin_tree_file_factory.getTreeFile(gstConfigFile);
 	if (!f)
 		return;
+
+	int ival;
 
 	if (f->Exists("/volume default"))
 		f->SetPath("/volume default");
@@ -153,18 +156,19 @@ void VolumeDataDefault::Read()
 	f->Read(gstSpcY, &m_spcy, 1.0);
 	f->Read(gstSpcZ, &m_spcz, 1.0);
 
-	f->Read(gstColormapMode, &m_colormap_mode, 0);
+	f->Read(gstColormapMode, &ival, 0);
+	m_color_mode = static_cast<flvr::ColorMode>(ival);
 	f->Read(gstColormapDisp, &m_colormap_disp, false);
 	f->Read(gstColormapLow, &m_colormap_low_value, 0.0);
 	f->Read(gstColormapHigh, &m_colormap_hi_value, 1.0);
 	f->Read(gstColormapInv, &m_colormap_inv, 1.0);
 	f->Read(gstColormapType, &m_colormap_type, 0);
-	f->Read(gstColormapProj, &m_colormap_proj, 0);
+	f->Read(gstColormapProj, &ival, 0);
+	m_colormap_proj = static_cast<flvr::ColormapProj>(ival);
 
 	f->Read(gstNoiseRedct, &m_noise_rd, true);
 	f->Read(gstInterpolate, &m_interpolate, true);
 	f->Read(gstInvert, &m_inverted, false);
-	int ival;
 	f->Read(gstRenderMode, &ival, 1);
 	m_render_mode = static_cast<flvr::RenderMode>(ival);
 	f->Read(gstTransparent, &m_transparent, false);
@@ -220,13 +224,13 @@ void VolumeDataDefault::Save()
 	f->Write(gstSpcY, m_spcy);
 	f->Write(gstSpcZ, m_spcz);
 
-	f->Write(gstColormapMode, m_colormap_mode);
+	f->Write(gstColormapMode, static_cast<int>(m_color_mode));
 	f->Write(gstColormapDisp, m_colormap_disp);
 	f->Write(gstColormapLow, m_colormap_low_value);
 	f->Write(gstColormapHigh, m_colormap_hi_value);
 	f->Write(gstColormapInv, m_colormap_inv);
 	f->Write(gstColormapType, m_colormap_type);
-	f->Write(gstColormapProj, m_colormap_proj);
+	f->Write(gstColormapProj, static_cast<int>(m_colormap_proj));
 
 	f->Write(gstNoiseRedct, m_noise_rd);
 	f->Write(gstInterpolate, m_interpolate);
@@ -279,7 +283,7 @@ void VolumeDataDefault::Set(VolumeData* vd)
 
 	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
 
-	m_colormap_mode = vd->GetColormapMode();
+	m_color_mode = vd->GetColorMode();
 	m_colormap_disp = vd->GetColormapDisp();
 	m_colormap_low_value = vd->GetColormapLow();
 	m_colormap_hi_value = vd->GetColormapHigh();
@@ -348,7 +352,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	if (!vd->GetSpcFromFile())
 		vd->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
 
-	vd->SetColormapMode(m_colormap_mode);
+	vd->SetColorMode(m_color_mode);
 	vd->SetColormapDisp(m_colormap_disp);
 	vd->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
 	vd->SetColormapInv(m_colormap_inv);
@@ -408,7 +412,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v2->GetSpacings(spcx, spcy, spcz);
 	v1->SetBaseSpacings(spcx, spcy, spcz);
 
-	v1->SetColormapMode(v2->GetColormapMode());
+	v1->SetColorMode(v2->GetColorMode());
 	v1->SetColormapDisp(v2->GetColormapDisp());
 	v1->SetColormapValues(v2->GetColormapLow(), v2->GetColormapHigh());
 	v1->SetColormapInv(v2->GetColormapInv());
@@ -482,12 +486,12 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 	//if (!g->GetSpcFromFile())
 	//	g->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
 
-	g->SetColormapMode(m_colormap_mode);
+	g->SetColorMode(m_color_mode);
 	g->SetColormapDisp(m_colormap_disp);
 	g->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
 	g->SetColormapInv(m_colormap_inv);
 	g->SetColormap(m_colormap_type);
-	g->SetColormapProj(m_colormap_proj);
+	g->SetColormapProj(m_color_proj);
 
 	g->SetNR(m_noise_rd);
 	g->SetInterpolate(m_interpolate);

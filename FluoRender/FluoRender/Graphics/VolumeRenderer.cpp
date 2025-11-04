@@ -79,11 +79,11 @@ VolumeRenderer::VolumeRenderer(
 	shine_(10.0),
 	//colormap mode
 	colormap_inv_(1.0),
-	colormap_mode_(0),
+	color_mode_(ColorMode::SingleColor),
 	colormap_low_value_(0.0),
 	colormap_hi_value_(1.0),
 	colormap_(0),
-	colormap_proj_(0),
+	colormap_proj_(ColormapProj::Intensity),
 	//shuffling
 	shuffle_(0),
 	//solid
@@ -142,7 +142,7 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	shine_(copy.shine_),
 	//colormap mode
 	colormap_inv_(copy.colormap_inv_),
-	colormap_mode_(copy.colormap_mode_),
+	color_mode_(copy.color_mode_),
 	colormap_low_value_(copy.colormap_low_value_),
 	colormap_hi_value_(copy.colormap_hi_value_),
 	colormap_(copy.colormap_),
@@ -422,8 +422,8 @@ void VolumeRenderer::draw_volume(
 
 	//--------------------------------------------------------------------------
 
-	int cm_mode = mode == 4 ? 0 : colormap_mode_;
-	bool use_fog = m_use_fog && cm_mode != 2;
+	ColorMode color_mode = mode == 4 ? ColorMode::SingleColor : color_mode_;
+	bool use_fog = m_use_fog && color_mode != ColorMode::Depth;
 
 	int w = viewport_[2];
 	int h = viewport_[3];
@@ -469,15 +469,15 @@ void VolumeRenderer::draw_volume(
 	//create/bind
 	bool grad = gm_low_ > 0.0 ||
 		gm_high_ < gm_max_ ||
-		colormap_proj_ == 5 ||
-		colormap_proj_ == 6;
+		colormap_proj_ == ColormapProj::Gradient ||
+		colormap_proj_ == ColormapProj::Normal;
 	shader = glbin_shader_manager.shader(gstVolShader,
 		ShaderParams::Volume(
 			false, tex->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
 			grad, ml_mode_, mode_ == RenderMode::RENDER_MODE_MIP,
-			cm_mode, colormap_, colormap_proj_,
+			color_mode, colormap_, colormap_proj_,
 			solid_, 1));
 	assert(shader);
 	shader->bind();
@@ -514,14 +514,14 @@ void VolumeRenderer::draw_volume(
 	//alpha & luminance
 	shader->setLocalParam(18, alpha_, alpha_power_, luminance_, 0.0);
 
-	if (colormap_proj_ == 4)
+	if (colormap_proj_ == ColormapProj::TValue)
 	{
 		shader->setLocalParamUInt(0, static_cast<unsigned int>(glbin_moviemaker.GetSeqCurNum()));
 		shader->setLocalParamUInt(1, static_cast<unsigned int>(glbin_moviemaker.GetSeqAllNum()));
 	}
 
 	//setup depth peeling
-	if (depth_peel_ || cm_mode == 2)
+	if (depth_peel_ || color_mode == ColorMode::Depth)
 		shader->setLocalParam(7, 1.0 / double(w2), 1.0 / double(h2), 0.0, 0.0);
 
 	//fog
@@ -595,9 +595,9 @@ void VolumeRenderer::draw_volume(
 			continue;
 		}
 
-		if ((cm_mode == 1 ||
+		if ((color_mode == ColorMode::Colormap ||
 			mode_ == RenderMode::RENDER_MODE_MIP) &&
-			colormap_proj_)
+			ShaderParams::ValidColormapProj(colormap_proj_))
 		{
 			fluo::BBox bbox = b->dbox();
 			float matrix[16];
@@ -637,7 +637,7 @@ void VolumeRenderer::draw_volume(
 
 			if (!load_brick(b, filter, compression_, 0, mode, 0))
 				continue;
-			if (colormap_proj_ >= 7)
+			if (ShaderParams::IsTimeProj(colormap_proj_))
 				load_brick(b, filter, compression_, 10, mode, -1);
 			if (mask_)
 				load_brick_mask(b, filter);
@@ -706,7 +706,7 @@ void VolumeRenderer::draw_volume(
 	}
 
 	//release depth texture for rendering shadows
-	if (cm_mode == 2)
+	if (color_mode == ColorMode::Depth)
 		release_texture(4, GL_TEXTURE_2D);
 
 	// Release shader.
@@ -714,7 +714,7 @@ void VolumeRenderer::draw_volume(
 
 	//Release 3d texture
 	release_texture(0, GL_TEXTURE_3D);
-	if (colormap_proj_ >= 7)
+	if (ShaderParams::IsTimeProj(colormap_proj_))
 		release_texture(10, GL_TEXTURE_3D);
 	if (mask_)
 		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
@@ -724,7 +724,7 @@ void VolumeRenderer::draw_volume(
 	std::shared_ptr<ShaderProgram> img_shader;
 
 	std::shared_ptr<Framebuffer> filter_buffer = 0;
-	if (noise_red_ && cm_mode != 2)
+	if (noise_red_ && color_mode != ColorMode::Depth)
 	{
 		//FILTERING/////////////////////////////////////////////////////////////////
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
@@ -755,7 +755,7 @@ void VolumeRenderer::draw_volume(
 	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);//blend buffer
 
-	if (noise_red_ && cm_mode != 2)
+	if (noise_red_ && color_mode != ColorMode::Depth)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 	else
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
@@ -769,7 +769,7 @@ void VolumeRenderer::draw_volume(
 
 	img_shader->unbind();
 
-	if (noise_red_ && cm_mode != 2)
+	if (noise_red_ && color_mode != ColorMode::Depth)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
@@ -819,7 +819,7 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 			false, false,
 			0, false,
 			false, 0, false,
-			0, 0, 0,
+			ColorMode::SingleColor, 0, ColormapProj::Intensity,
 			false, 1));
 	if (shader)
 		shader->bind();

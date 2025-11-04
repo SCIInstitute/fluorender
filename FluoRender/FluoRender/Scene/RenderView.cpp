@@ -6326,7 +6326,6 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 	bool shading = vr->get_shading();
 	bool shadow = vd->GetShadowEnable();
 	int colormap_mode = vd->GetColormapMode();
-	int colormap_proj = vd->GetColormapProj();
 	bool enable_alpha = vd->GetAlphaEnable();
 	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
@@ -6407,11 +6406,8 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			vr->set_colormap_mode(0);
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
-			if (colormap_proj > 0)
-			{
-				vr->set_solid(true);
-				vr->set_alpha(1.0);
-			}
+			vr->set_solid(true);
+			//vr->set_alpha(1.0);
 		}
 		//draw
 		vd->SetStreamMode(1);

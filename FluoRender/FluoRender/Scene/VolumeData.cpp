@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeBaker.h>
 #include <Count.h>
 #include <VolCache4D.h>
+#include <ShaderProgram.h>
 #include <Texture.h>
 #include <TextureBrick.h>
 #include <Plane.h>
@@ -121,10 +122,10 @@ VolumeData::VolumeData()
 
 	//colormap mode
 	m_colormap_inv = 1.0;
-	m_colormap_mode = 0;
+	m_color_mode = flvr::ColorMode::SingleColor;
 	m_colormap_disp = false;
 	m_colormap = 0;
-	m_colormap_proj = 0;
+	m_colormap_proj = flvr::ColormapProj::Intensity;
 	m_colormap_low_value = 0.0;
 	m_colormap_hi_value = 1.0;
 	UpdateColormapRange();
@@ -277,7 +278,7 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//colormap mode
 	m_colormap_inv = copy.m_colormap_inv;
-	m_colormap_mode = copy.m_colormap_mode;
+	m_color_mode = copy.m_color_mode;
 	m_colormap_disp = copy.m_colormap_disp;
 	m_colormap = copy.m_colormap;
 	m_colormap_proj = copy.m_colormap_proj;
@@ -984,38 +985,38 @@ void VolumeData::UpdateColormapRange()
 {
 	switch (m_colormap_proj)
 	{
-	case 0://intensity
+	case flvr::ColormapProj::Intensity://intensity
 	default:
 		m_colormap_min_value = m_min_value;
 		m_colormap_max_value = m_max_value;
 		break;
-	case 1://z-value
+	case flvr::ColormapProj::ZValue://z-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_res_z * m_spcz;
 		break;
-	case 2://y-value
+	case flvr::ColormapProj::YValue://y-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_res_y * m_spcy;
 		break;
-	case 3://x-value
+	case flvr::ColormapProj::XValue://x-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_res_x * m_spcx;
 		break;
-	case 4://t-value
+	case flvr::ColormapProj::TValue://t-value
 		m_colormap_min_value = 0;
 		if (auto reader = m_reader.lock())
 			m_colormap_max_value = reader->GetTimeNum();
 		break;
-	case 5://gradient magnitude
-	case 6://gradient dir
+	case flvr::ColormapProj::Gradient://gradient magnitude
+	case flvr::ColormapProj::Normal://gradient dir
 		m_colormap_min_value = 0;
 		m_colormap_max_value = 1;
 		break;
-	case 7://intensity delta
+	case flvr::ColormapProj::IntDelta://intensity delta
 		m_colormap_min_value = -m_max_value;
 		m_colormap_max_value = m_max_value;
 		break;
-	case 8://speed
+	case flvr::ColormapProj::Speed://speed
 		m_colormap_min_value = 0;
 		m_colormap_max_value = 1;
 		break;
@@ -2364,19 +2365,19 @@ void VolumeData::SetUseMaskThreshold(bool mode)
 }
 
 //colormap mode
-void VolumeData::SetColormapMode(int mode)
+void VolumeData::SetColorMode(flvr::ColorMode mode)
 {
-	m_colormap_mode = mode;
+	m_color_mode = mode;
 	if (m_vr)
 	{
-		m_vr->set_colormap_mode(m_colormap_mode);
+		m_vr->set_colormap_mode(m_color_mode);
 		m_vr->set_color(m_color);
 	}
 }
 
-int VolumeData::GetColormapMode()
+flvr::ColorMode VolumeData::GetColorMode()
 {
-	return m_colormap_mode;
+	return m_color_mode;
 }
 
 void VolumeData::SetColormapDisp(bool disp)
@@ -2491,7 +2492,7 @@ void VolumeData::SetColormap(int value)
 		m_vr->set_colormap(m_colormap);
 }
 
-void VolumeData::SetColormapProj(int value)
+void VolumeData::SetColormapProj(flvr::ColormapProj value)
 {
 	m_colormap_proj = value;
 	if (m_vr)
@@ -2504,7 +2505,7 @@ int VolumeData::GetColormap()
 	return m_colormap;
 }
 
-int VolumeData::GetColormapProj()
+flvr::ColormapProj VolumeData::GetColormapProj()
 {
 	return m_colormap_proj;
 }

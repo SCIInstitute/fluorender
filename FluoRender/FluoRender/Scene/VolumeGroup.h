@@ -37,6 +37,8 @@ class VolumeData;
 namespace flvr
 {
 	enum class RenderMode;
+	enum class ColorMode;
+	enum class ColormapProj;
 }
 class VolumeGroup : public TreeLayer
 {
@@ -163,14 +165,14 @@ public:
 	void SetSampleRate(double, bool set_this = true);
 	double GetSampleRate();
 
-	void SetColormapMode(int mode);
+	void SetColorMode(flvr::ColorMode mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
 	double GetColormapLow();
 	double GetColormapHigh();
 	void SetColormapInv(double val);
 	void SetColormap(int value);
-	void SetColormapProj(int value);
+	void SetColormapProj(flvr::ColormapProj value);
 	void SetRenderMode(flvr::RenderMode mode);
 	void SetAlphaPower(double val);
 	void SetLabelMode(int mode);
