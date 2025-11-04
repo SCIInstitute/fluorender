@@ -453,13 +453,13 @@ void Project::Open(const std::wstring& filename)
 
 						//colormap settings
 						if (fconfig->Read("colormap_mode", &ival))
-							vd->SetColorMode(ival);
+							vd->SetColorMode(static_cast<flvr::ColorMode>(ival));
 						if (fconfig->Read("colormap_inv", &dval))
 							vd->SetColormapInv(dval);
 						if (fconfig->Read("colormap", &ival))
 							vd->SetColormap(ival);
 						if (fconfig->Read("colormap_proj", &ival))
-							vd->SetColormapProj(ival);
+							vd->SetColormapProj(static_cast<flvr::ColormapProj>(ival));
 						double low, high;
 						if (fconfig->Read("colormap_lo_value", &low) &&
 							fconfig->Read("colormap_hi_value", &high))
@@ -1448,10 +1448,10 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("sync_b", vd->GetSync(2));
 
 			//colormap settings
-			fconfig->Write("colormap_mode", vd->GetColorMode());
+			fconfig->Write("colormap_mode", static_cast<int>(vd->GetColorMode()));
 			fconfig->Write("colormap_inv", vd->GetColormapInv());
 			fconfig->Write("colormap", vd->GetColormap());
-			fconfig->Write("colormap_proj", vd->GetColormapProj());
+			fconfig->Write("colormap_proj", static_cast<int>(vd->GetColormapProj()));
 			double low, high;
 			vd->GetColormapValues(low, high);
 			fconfig->Write("colormap_lo_value", low);

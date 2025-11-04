@@ -42,9 +42,9 @@ namespace flvr
 	class VolumeRenderer;
 	class TextureBrick;
 	class Texture;
-	enum class RenderMode;
-	enum class ColorMode;
-	enum class ColormapProj;
+	enum class RenderMode : int;
+	enum class ColorMode : int;
+	enum class ColormapProj : int;
 }
 namespace flrd
 {

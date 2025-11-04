@@ -33,7 +33,7 @@
 
 namespace flvr
 {
-	enum class BlendFactor
+	enum class BlendFactor : int
 	{
 		Zero,
 		One,
@@ -52,7 +52,7 @@ namespace flvr
 		SrcAlphaSaturate
 	};
 
-	enum class BlendEquation
+	enum class BlendEquation : int
 	{
 		Add,
 		Subtract,
@@ -61,7 +61,7 @@ namespace flvr
 		Max
 	};
 
-	enum class DepthFunc
+	enum class DepthFunc : int
 	{
 		Never,
 		Less,
@@ -73,21 +73,21 @@ namespace flvr
 		Always
 	};
 
-	enum class CullFace
+	enum class CullFace : int
 	{
 		Front,
 		Back,
 		FrontAndBack
 	};
 
-	enum class FaceWinding
+	enum class FaceWinding : int
 	{
 		Front,
 		Back,
 		Off
 	};
 
-	enum class PolygonMode
+	enum class PolygonMode : int
 	{
 		Point,
 		Line,

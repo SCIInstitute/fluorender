@@ -48,7 +48,7 @@
 using namespace flvr;
 
 MultiVolumeRenderer::MultiVolumeRenderer()
-	: mode_(RenderMode::RENDER_MODE_OVER),
+	: mode_(RenderMode::Standard),
 	depth_peel_(0),
 	blend_slices_(false),
 	noise_red_(false),
@@ -221,14 +221,14 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	//normal: b2f:(1, 1-a), f2b:(1-a, 1), mip: max(1, 1)
 	switch (mode_)
 	{
-	case RenderMode::RENDER_MODE_OVER:
+	case RenderMode::Standard:
 		blend_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
 			blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
 			blend_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 		break;
-	case RenderMode::RENDER_MODE_MIP:
+	case RenderMode::Mip:
 		blend_buffer->set_blend_equation(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
 		blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
 		break;
@@ -522,7 +522,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					vr_list_[tn]->depth_peel_, true,
 					grad,
 					vr_list_[tn]->ml_mode_,
-					vr_list_[tn]->mode_ == RenderMode::RENDER_MODE_MIP,
+					vr_list_[tn]->render_mode_,
 					vr_list_[tn]->color_mode_,
 					vr_list_[tn]->colormap_,
 					vr_list_[tn]->colormap_proj_,
@@ -905,8 +905,10 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 			true, 0,
 			false, false,
 			false, false,
-			false, 0, false,
-			0, 0, 0,
+			false, 0,
+			RenderMode::Standard,
+			ColorMode::SingleColor,
+			0, ColormapProj::Disabled,
 			false, 1));
 	assert(shader);
 	shader->bind();

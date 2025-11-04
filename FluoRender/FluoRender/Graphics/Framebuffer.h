@@ -43,7 +43,7 @@ typedef float GLfloat;
 
 namespace flvr
 {
-	enum class FBTexType
+	enum class FBTexType : int
 	{
 		Render_RGBA,
 		UChar_RGBA,
@@ -51,13 +51,13 @@ namespace flvr
 		Depth_Float,
 		Ext_3D
 	};
-	enum class TexFilter {
+	enum class TexFilter : int {
 		Nearest,
 		Linear,
 		LinearMipmapLinear,
 		// Add more as needed
 	};
-	enum class TexWrap {
+	enum class TexWrap : int {
 		ClampToEdge,
 		Repeat,
 		MirroredRepeat,
@@ -112,7 +112,7 @@ namespace flvr
 		friend class Framebuffer;
 	};
 
-	enum class FBRole
+	enum class FBRole : int
 	{
 		Canvas,// Represents the default framebuffer (id == 0)
 		RenderColor,
@@ -125,7 +125,7 @@ namespace flvr
 		Volume
 	};
 	struct AttachmentPoint {
-		enum class Type {
+		enum class Type : int {
 			Color,
 			Depth,
 			Stencil,

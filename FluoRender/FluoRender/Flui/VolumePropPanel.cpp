@@ -44,6 +44,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
 #include <Colocalize.h>
+#include <ShaderProgram.h>
 #include <Color.h>
 #include <BBox.h>
 #include <Point.h>
@@ -914,13 +915,16 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_boundary_st->Enable(bval);
 	}
 	//minmax
-	if (update_minmax)
+	if (update_minmax || FOUND_VALUE(gstTransparent))
 	{
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_low_offset_text->GetValidator()))
 			vald_i->SetMin(0);
 		dval = m_vd->GetLowOffset();
 		ival = std::round(dval * m_max_val);
-		m_minmax_sldr->SetRange(0, std::round(m_max_val));
+		if (m_vd->GetAlphaPower() > 1.1)
+			m_minmax_sldr->SetRange(0, std::round(m_max_val * 2));
+		else
+			m_minmax_sldr->SetRange(0, std::round(m_max_val));
 		str = wxString::Format("%d", ival);
 		m_minmax_sldr->ChangeLowValue(ival);
 		m_low_offset_text->ChangeValue(str);
@@ -1038,7 +1042,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		dval = m_vd->GetLuminance();
 		bval = m_vd->GetLuminanceEnable();
 		ival = std::round(dval * m_max_val);
-		m_luminance_sldr->SetRange(0, std::round(m_max_val));
+		m_luminance_sldr->SetRange(0, std::round(m_max_val*2));
 		str = wxString::Format("%d", ival);
 		m_luminance_sldr->ChangeValue(ival);
 		m_luminance_text->ChangeValue(str);
@@ -1250,7 +1254,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		//mode
-		bval = m_vd->GetColorMode() == 1;
+		bval = m_vd->GetColorMode() == flvr::ColorMode::Colormap;
 		m_colormap_chk->SetValue(bval);
 		if (m_colormap_sldr->IsEnabled() != bval)
 		{
@@ -1272,7 +1276,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 					wxGetBitmap(invert_off));
 		}
 		m_colormap_combo->SetSelection(m_vd->GetColormap());
-		m_colormap_combo2->SetSelection(m_vd->GetColormapProj());
+		flvr::ColormapProj colormap_proj = m_vd->GetColormapProj();
+		ival = 0;
+		if (flvr::ShaderParams::ValidColormapProj(colormap_proj))
+			ival = static_cast<int>(colormap_proj) - 1;
+		m_colormap_combo2->SetSelection(ival);
 		//show colormap on slider
 		std::vector<unsigned char> colormap_data;
 		if (m_vd->GetColormapData(colormap_data))
@@ -1292,7 +1300,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_colormap || update_tips)
 	{
-		bval = m_vd->GetColorMode() == 1 || mf_enable;
+		bval = m_vd->GetColorMode() ==
+			flvr::ColorMode::Colormap || mf_enable;
 		if (m_colormap_st->IsEnabled() != bval)
 			m_colormap_st->Enable(bval);
 	}
@@ -1332,7 +1341,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//MIP
 	if (update_all || FOUND_VALUE(gstRenderMode))
 	{
-		bool mip = m_vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP;
+		bool mip = m_vd->GetRenderMode() == flvr::RenderMode::Mip;
 		m_options_toolbar->ToggleTool(ID_MipChk, mip);
 	}
 
@@ -1485,7 +1494,7 @@ void VolumePropPanel::SaveMl()
 	val.push_back(float(m_vd->GetAlpha()));
 	val.push_back(float(m_vd->GetSampleRate()));
 	val.push_back(float(m_vd->GetLuminance()));
-	val.push_back(float(m_vd->GetColorMode() == 1));
+	val.push_back(float(m_vd->GetColorMode() == flvr::ColorMode::Colormap));
 	val.push_back(float(m_vd->GetColormapInv()));
 	val.push_back(float(m_vd->GetColormap()));
 	val.push_back(float(m_vd->GetColormapProj()));
@@ -1495,7 +1504,7 @@ void VolumePropPanel::SaveMl()
 	val.push_back(float(m_vd->GetShadingEnable()));
 	val.push_back(float(m_vd->GetInterpolate()));
 	val.push_back(float(m_vd->GetInvert()));
-	val.push_back(float(m_vd->GetRenderMode() == flvr::RenderMode::RENDER_MODE_MIP));
+	val.push_back(float(m_vd->GetRenderMode() == flvr::RenderMode::Mip));
 	val.push_back(float(m_vd->GetTransparent()));
 	val.push_back(float(m_vd->GetNR()));
 	val.push_back(float(m_vd->GetShadowEnable()));
@@ -1655,13 +1664,13 @@ void VolumePropPanel::EnableColormap(bool bval)
 {
 	if (m_sync_group && m_group)
 	{
-		m_group->SetColorMode(bval ? 1 : 0);
+		m_group->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_group->SetColormapDisp(bval);
 		m_group->SetLabelMode(bval ? 0 : 1);
 	}
 	else if (m_vd)
 	{
-		m_vd->SetColorMode(bval ? 1 : 0);
+		m_vd->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_vd->SetColormapDisp(bval);
 		m_vd->SetLabelMode(bval ? 0 : 1);
 	}
@@ -1672,9 +1681,9 @@ void VolumePropPanel::EnableColormap(bool bval)
 void VolumePropPanel::EnableMip(bool bval)
 {
 	if (m_sync_group && m_group)
-		m_group->SetRenderMode(bval ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER);
+		m_group->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 	else if (m_vd)
-		m_vd->SetRenderMode(bval ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER);
+		m_vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 
 	FluoRefresh(0, { gstRenderMode }, { glbin_current.GetViewId() });
 }
@@ -2781,7 +2790,7 @@ void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 		m_colormap_sldr->Undo();
 		break;
 	case 5:
-		EnableColormap(m_vd->GetColorMode() == 0);
+		EnableColormap(m_vd->GetColorMode() == flvr::ColorMode::SingleColor);
 		break;
 	}
 }
@@ -2885,7 +2894,9 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 
 void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)
 {
-	int colormap_proj = m_colormap_combo2->GetCurrentSelection();
+	int ival = m_colormap_combo2->GetCurrentSelection() + 1;
+	flvr::ColormapProj colormap_proj =
+		static_cast<flvr::ColormapProj>(ival);
 
 	if (m_sync_group && m_group)
 		m_group->SetColormapProj(colormap_proj);

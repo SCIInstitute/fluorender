@@ -40,7 +40,7 @@ class VolumeData;
 
 namespace flrd
 {
-	enum class RulerMode;
+	enum class RulerMode : int;
 	class Ruler;
 	class RulerPoint;
 	class RulerList;

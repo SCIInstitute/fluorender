@@ -83,7 +83,7 @@ namespace flvr
 
 	TextureRenderer::TextureRenderer()
 		:
-		mode_(RenderMode::RENDER_MODE_NONE),
+		render_mode_(RenderMode::Standard),
 		sample_rate_(1.0),
 		num_slices_(0),
 		imode_(false),
@@ -103,7 +103,7 @@ namespace flvr
 	TextureRenderer::TextureRenderer(const TextureRenderer& copy)
 		:
 		tex_(copy.tex_),
-		mode_(copy.mode_),
+		render_mode_(copy.render_mode_),
 		sample_rate_(copy.sample_rate_),
 		num_slices_(0),
 		imode_(copy.imode_),

@@ -107,14 +107,22 @@ namespace flvr
 		static int v_minor_;
 	};
 
-	enum class ColorMode
+	enum class RenderMode : int
+	{
+		Disabled,
+		Standard,
+		Mip,
+		Slice
+	};
+
+	enum class ColorMode : int
 	{
 		SingleColor,
 		Colormap,
 		Depth
 	};
 
-	enum class ColormapProj
+	enum class ColormapProj : int
 	{
 		Disabled,//0: new
 		Intensity,//previously 0
@@ -148,9 +156,9 @@ namespace flvr
 		bool grad = false;//vol
 		int mask = 0;//vol(0-normal, 1-render with mask, 2-render with mask excluded)
 				 //(3-random color with label, 4-random color with label+mask)
-		bool mip = false;//vol
+		RenderMode render_mode = RenderMode::Standard;//vol
 		ColorMode color_mode = ColorMode::SingleColor;//vol(0-normal; 1-rainbow; 2-depth)
-		ColormapProj colormap_prj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
+		ColormapProj colormap_proj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
 		bool solid = false;//vol(no transparency)
 		int vertex_type = 0;//vol
 
@@ -243,7 +251,7 @@ namespace flvr
 			bool clip,
 			bool grad,
 			int mask,
-			bool mip,
+			RenderMode render_mode,
 			ColorMode color_mode,
 			int colormap,
 			ColormapProj colormap_proj,
@@ -260,10 +268,10 @@ namespace flvr
 			p.clip = clip;
 			p.grad = grad;
 			p.mask = mask;
-			p.mip = mip;
+			p.render_mode = render_mode;
 			p.color_mode = color_mode;
 			p.colormap = colormap;
-			p.colormap_prj = colormap_proj;
+			p.colormap_proj = colormap_proj;
 			p.solid = solid;
 			p.vertex_type = vertex_type;
 			return p;
@@ -289,9 +297,9 @@ namespace flvr
 				<< ", channels=" << channels
 				<< ", grad=" << grad
 				<< ", mask=" << mask
-				<< ", mip=" << mip
+				<< ", render_mode=" << static_cast<int>(render_mode)
 				<< ", color_mode=" << static_cast<int>(color_mode)
-				<< ", colormap_prj=" << static_cast<int>(colormap_prj)
+				<< ", colormap_proj=" << static_cast<int>(colormap_proj)
 				<< ", solid=" << solid
 				<< ", vertex_type=" << vertex_type
 				<< "}";
@@ -318,9 +326,9 @@ namespace flvr
 			a.channels == b.channels &&
 			a.grad == b.grad &&
 			a.mask == b.mask &&
-			a.mip == b.mip &&
+			a.render_mode == b.render_mode &&
 			a.color_mode == b.color_mode &&
-			a.colormap_prj == b.colormap_prj &&
+			a.colormap_proj == b.colormap_proj &&
 			a.solid == b.solid &&
 			a.vertex_type == b.vertex_type;
 	}
@@ -369,9 +377,9 @@ namespace flvr
 				hash_combine(p.channels);
 				hash_combine(p.grad);
 				hash_combine(p.mask);
-				hash_combine(p.mip);
+				hash_combine(p.render_mode);
 				hash_combine(p.color_mode);
-				hash_combine(p.colormap_prj);
+				hash_combine(p.colormap_proj);
 				hash_combine(p.solid);
 				hash_combine(p.vertex_type);
 

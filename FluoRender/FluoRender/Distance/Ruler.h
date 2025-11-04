@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
-	enum class RulerMode
+	enum class RulerMode : int
 	{
 		None,
 		Line,		//0: 2 point

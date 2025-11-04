@@ -49,8 +49,8 @@ namespace flvr
 	class MultiVolumeRenderer;
 	class Texture;
 	class RenderModeGuard;
-	enum class ColorMode;
-	enum class ColormapProj;
+	enum class ColorMode : int;
+	enum class ColormapProj : int;
 
 	class VolumeRenderer : public TextureRenderer
 	{
@@ -72,8 +72,6 @@ namespace flvr
 		//set clear color
 		void set_clear_color(const fluo::Vector4f& clear_color) { clear_color_ = clear_color; }
 
-		//render mode
-		void set_mode(RenderMode mode) { mode_ = mode; }
 		//range and scale
 		void set_scalar_scale(double val) { scalar_scale_ = val; }
 		double get_scalar_scale() { return scalar_scale_; }
@@ -300,7 +298,7 @@ namespace flvr
 
 	struct ScopedRenderMode
 	{
-		RenderMode mode;
+		RenderMode render_mode;
 		fluo::Color color;
 		ColorMode color_mode;
 		ColormapProj colormap_proj;
@@ -317,7 +315,7 @@ namespace flvr
 			: renderer_(renderer)
 		{
 			prev_mode_ = {
-				renderer_.mode_,
+				renderer_.render_mode_,
 				renderer_.color_,
 				renderer_.color_mode_,
 				renderer_.colormap_proj_,
@@ -330,7 +328,7 @@ namespace flvr
 
 		~RenderModeGuard()
 		{
-			renderer_.mode_ = prev_mode_.mode;
+			renderer_.render_mode_ = prev_mode_.render_mode;
 			renderer_.color_ = prev_mode_.color;
 			renderer_.color_mode_ = prev_mode_.color_mode;
 			renderer_.colormap_proj_ = prev_mode_.colormap_proj;

@@ -62,6 +62,7 @@ namespace flvr
 	class CacheQueue;
 	class Texture;
 	class TextureBrick;
+	enum class RenderMode : int;
 	//a simple fixed-length fifo sequence
 	class BrickQueue
 	{
@@ -172,20 +173,15 @@ namespace flvr
 #define PALETTE_SIZE (PALETTE_W*PALETTE_H)
 #define PALETTE_ELEM_COMP 4
 
-	enum class RenderMode : int
-	{
-		RENDER_MODE_NONE,
-		RENDER_MODE_OVER,
-		RENDER_MODE_MIP,
-		RENDER_MODE_SLICE
-	};
-
 	class TextureRenderer
 	{
 	public:
 		TextureRenderer();
 		TextureRenderer(const TextureRenderer&);
 		virtual ~TextureRenderer();
+
+		//render mode
+		void set_mode(RenderMode mode) { render_mode_ = mode; }
 
 		//set the texture for rendering
 		void set_texture(const std::shared_ptr<Texture>& tex);
@@ -284,7 +280,7 @@ namespace flvr
 			double dist;      //distance to another brick
 		};
 		std::weak_ptr<Texture> tex_;
-		RenderMode mode_;
+		RenderMode render_mode_;
 		double sample_rate_;
 		size_t num_slices_;
 		bool imode_;

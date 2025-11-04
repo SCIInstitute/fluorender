@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flrd
 {
-	enum class SelectMode
+	enum class SelectMode : int
 	{
 		None,			//0-no selection
 		SingleSelect,	//1-select;

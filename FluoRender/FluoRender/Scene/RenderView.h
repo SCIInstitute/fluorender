@@ -84,7 +84,7 @@ namespace flvr
 {
 	class MultiVolumeRenderer;
 	class TextRenderer;
-	enum class FaceWinding;
+	enum class FaceWinding : int;
 	class Framebuffer;
 }
 namespace flrd
@@ -94,7 +94,7 @@ namespace flrd
 	class Ruler;
 }
 
-enum class InteractiveMode
+enum class InteractiveMode : int
 {
 	None,
 	Viewport,			//1-normal viewing

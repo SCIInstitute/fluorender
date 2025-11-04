@@ -36,9 +36,9 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	enum class RenderMode;
-	enum class ColorMode;
-	enum class ColormapProj;
+	enum class RenderMode : int;
+	enum class ColorMode : int;
+	enum class ColormapProj : int;
 }
 class VolumeGroup : public TreeLayer
 {

@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <VolumeGroup.h>
 #include <Color.h>
+#include <ShaderProgram.h>
 #include <wxFadeButton.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
@@ -1749,7 +1750,7 @@ void OutputAdjPanel::UpdateSync()
 			auto vd = group->GetVolumeData(i);
 			if (vd)
 			{
-				if (vd->GetColorMode())
+				if (vd->GetColorMode() == flvr::ColorMode::Colormap)
 				{
 					r_v = g_v = b_v = true;
 				}

@@ -107,8 +107,6 @@ VolumeRenderer::VolumeRenderer(
 	zoom_(1.0),
 	zoom_data_(1.0)
 {
-	//mode
-	mode_ = RenderMode::RENDER_MODE_OVER;
 	//done loop
 	for (int i = 0; i < TEXTURE_RENDER_MODES; i++)
 		done_loop_[i] = false;
@@ -166,8 +164,6 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	alpha_power_(copy.alpha_power_),
 	sw_(0)
 {
-	//mode
-	mode_ = copy.mode_;
 	//clipping planes
 	for (int i = 0; i < (int)copy.planes_.size(); i++)
 	{
@@ -442,16 +438,16 @@ void VolumeRenderer::draw_volume(
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
 	//blend: normal: (add, add)(b2f: (1, 1-a), f2b: (1-a, a)), mip: (max, max)(1, 1)
-	switch (mode_)
+	switch (render_mode_)
 	{
-	case RenderMode::RENDER_MODE_OVER:
+	case RenderMode::Standard:
 		blend_buffer->set_blend_equation(BlendEquation::Add, BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
 			blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
 			blend_buffer->set_blend_func(BlendFactor::OneMinusDstAlpha, BlendFactor::One);
 		break;
-	case RenderMode::RENDER_MODE_MIP:
+	case RenderMode::Mip:
 		blend_buffer->set_blend_equation(BlendEquation::Max, BlendEquation::Max);
 		blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::One);
 		break;
@@ -476,7 +472,7 @@ void VolumeRenderer::draw_volume(
 			false, tex->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
-			grad, ml_mode_, mode_ == RenderMode::RENDER_MODE_MIP,
+			grad, ml_mode_, render_mode_,
 			color_mode, colormap_, colormap_proj_,
 			solid_, 1));
 	assert(shader);
@@ -596,7 +592,7 @@ void VolumeRenderer::draw_volume(
 		}
 
 		if ((color_mode == ColorMode::Colormap ||
-			mode_ == RenderMode::RENDER_MODE_MIP) &&
+			render_mode_ == RenderMode::Mip) &&
 			ShaderParams::ValidColormapProj(colormap_proj_))
 		{
 			fluo::BBox bbox = b->dbox();
@@ -644,7 +640,7 @@ void VolumeRenderer::draw_volume(
 			if (label_)
 				load_brick_label(b);
 			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
-				mode_ == RenderMode::RENDER_MODE_OVER ? 1.0 / rate : 1.0);
+				render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
 
 			//for brick transformation
 			float matrix[16];
@@ -818,8 +814,9 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 			true, 0,
 			false, false,
 			0, false,
-			false, 0, false,
-			ColorMode::SingleColor, 0, ColormapProj::Intensity,
+			false, 0, RenderMode::Standard,
+			ColorMode::SingleColor,
+			0, ColormapProj::Intensity,
 			false, 1));
 	if (shader)
 		shader->bind();
@@ -1032,7 +1029,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 		//size and sample rate
 		seg_shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
-			mode_ == RenderMode::RENDER_MODE_OVER ? 1.0 / rate : 1.0);
+			render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
 
 		//draw each slice
 		for (int z = 0; z < b->nz(); z++)

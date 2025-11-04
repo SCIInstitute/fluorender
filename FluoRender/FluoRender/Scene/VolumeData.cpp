@@ -60,7 +60,7 @@ VolumeData::VolumeData()
 	m_time = 0;
 
 	//mdoes
-	m_render_mode = flvr::RenderMode::RENDER_MODE_OVER;
+	m_render_mode = flvr::RenderMode::Standard;
 	//stream modes
 	m_stream_mode = 0;
 
@@ -1638,20 +1638,20 @@ void VolumeData::SetRenderMode(flvr::RenderMode mode)
 	//switch (mode)
 	//{
 	//case 0://normal
-	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+	//	m_vr->set_mode(flvr::RenderMode::Standard);
 	//	m_vr->set_color(m_color);
 	//	break;
 	//case 1://MIP
-	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
+	//	m_vr->set_mode(flvr::RenderMode::Mip);
 	//	m_vr->set_color(m_color);
 	//	break;
 	//case 2://white shading
-	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_OVER);
+	//	m_vr->set_mode(flvr::RenderMode::Standard);
 	//	m_vr->set_color_mode(0);
 	//	m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
 	//	break;
 	//case 3://white mip
-	//	m_vr->set_mode(flvr::RenderMode::RENDER_MODE_MIP);
+	//	m_vr->set_mode(flvr::RenderMode::Mip);
 	//	m_vr->set_color_mode(0);
 	//	m_vr->set_color(fluo::Color(1.0, 1.0, 1.0));
 	//	break;
@@ -3389,6 +3389,7 @@ void VolumeData::ApplyMlVolProp()
 	if (m_ep && m_ep->getValid())
 	{
 		double dval, dval2;
+		int ival;
 
 		//minmax
 		if (m_minmax_enable)
@@ -3467,8 +3468,8 @@ void VolumeData::ApplyMlVolProp()
 		}
 		//colormap enable
 		dval = m_ep->getParam("colormap_enable");
-		SetColorMode(dval>0.5);
-		if (m_color_mode > 0)
+		SetColorMode(dval>0.5 ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+		if (m_color_mode == flvr::ColorMode::Colormap)
 		{
 			//colormap inv
 			dval = m_ep->getParam("colormap_inv");
@@ -3478,7 +3479,9 @@ void VolumeData::ApplyMlVolProp()
 			SetColormap(std::round(dval));
 			//colormap projection
 			dval = m_ep->getParam("colormap_proj");
-			SetColormapProj(std::round(dval));
+			ival = static_cast<int>(std::round(dval));
+			auto colormap_proj = static_cast<flvr::ColormapProj>(ival);
+			SetColormapProj(colormap_proj);
 			//colormap low value
 			dval = std::max(0.0f, m_ep->getParam("colormap_low"));
 			//colormap high value
@@ -3490,7 +3493,7 @@ void VolumeData::ApplyMlVolProp()
 		SetInvert(dval > 0.5);
 		//enable mip
 		dval = m_ep->getParam("mip_enable");
-		flvr::RenderMode mode = dval > 0.5 ? flvr::RenderMode::RENDER_MODE_MIP : flvr::RenderMode::RENDER_MODE_OVER;
+		flvr::RenderMode mode = dval > 0.5 ? flvr::RenderMode::Mip : flvr::RenderMode::Standard;
 		SetRenderMode(mode);
 		//enable hi transp
 		dval = m_ep->getParam("transparent_enable");

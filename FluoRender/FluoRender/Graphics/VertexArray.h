@@ -41,7 +41,7 @@ namespace fluo
 }
 namespace flvr
 {
-	enum class VABufferType
+	enum class VABufferType : int
 	{
 		VABuf_Coord,
 		VABuf_Index,
@@ -49,7 +49,7 @@ namespace flvr
 		VABuf_Tex,
 		VABuf_Color
 	};
-	enum class VAAttribIndex
+	enum class VAAttribIndex : int
 	{
 		VAAttrib_Coord,
 		VAAttrib_Normal,
@@ -57,14 +57,14 @@ namespace flvr
 		VAAttrib_Color
 	};
 
-	enum class BufferAccess
+	enum class BufferAccess : int
 	{
 		ReadOnly,       // GL_READ_ONLY
 		WriteOnly,      // GL_WRITE_ONLY
 		ReadWrite       // GL_READ_WRITE
 	};
 
-	enum class BufferUsage
+	enum class BufferUsage : int
 	{
 		StreamDraw,   // GL_STREAM_DRAW
 		StreamRead,   // GL_STREAM_READ
@@ -77,7 +77,7 @@ namespace flvr
 		DynamicCopy   // GL_DYNAMIC_COPY
 	};
 
-	enum class VertexAttribType
+	enum class VertexAttribType : int
 	{
 		Byte,           // GL_BYTE
 		UnsignedByte,   // GL_UNSIGNED_BYTE
@@ -89,7 +89,7 @@ namespace flvr
 		Double          // GL_DOUBLE
 	};
 
-	enum class PrimitiveType
+	enum class PrimitiveType : int
 	{
 		Points,         // GL_POINTS
 		Lines,          // GL_LINES
@@ -99,7 +99,7 @@ namespace flvr
 		TriangleFan     // GL_TRIANGLE_FAN
 	};
 
-	enum class IndexType
+	enum class IndexType : int
 	{
 		UnsignedByte,   // GL_UNSIGNED_BYTE
 		UnsignedShort,  // GL_UNSIGNED_SHORT
@@ -132,7 +132,7 @@ namespace flvr
 		friend class VertexArray;
 	};
 
-	enum class VAType
+	enum class VAType : int
 	{
 		VA_Unmanaged = 1,
 		VA_Norm_Square,

@@ -91,7 +91,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_noise_rd = true;
 	m_interpolate = true;
 	m_inverted = false;
-	m_render_mode = flvr::RenderMode::RENDER_MODE_OVER;
+	m_render_mode = flvr::RenderMode::Standard;
 	m_transparent = false;
 
 	//blend mode

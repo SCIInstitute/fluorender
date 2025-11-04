@@ -32,10 +32,10 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
-	enum class SelectMode;
-	enum class RulerMode;
+	enum class SelectMode : int;
+	enum class RulerMode : int;
 }
-enum class InteractiveMode;
+enum class InteractiveMode : int;
 class GlobalStates
 {
 public:

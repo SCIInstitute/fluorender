@@ -708,6 +708,7 @@ void MovieMaker::InsertKey(int index)
 	double t = glbin_interpolator.GetLastT();
 	int kn = glbin_interpolator.GetKeyNum();
 	t = kn == 0 ? t : t + m_key_duration;
+	bool bval;
 
 	glbin_interpolator.Begin(t, m_key_duration);
 
@@ -851,7 +852,8 @@ void MovieMaker::InsertKey(int index)
 		glbin_interpolator.AddKey(flkey);
 		//colormap
 		keycode.l2_name = "colormap enable";
-		flkeyB = new FlKeyBoolean(keycode, vd->GetColorMode() > 0);
+		bval = static_cast<int>(vd->GetColorMode()) > 0;
+		flkeyB = new FlKeyBoolean(keycode, bval);
 		glbin_interpolator.AddKey(flkeyB);
 		keycode.l2_name = "colormap low";
 		flkey = new FlKeyDouble(keycode, vd->GetColormapLow());
