@@ -278,9 +278,20 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		if (p.render_mode == RenderMode::Mip &&
 			ShaderParams::ValidColormapProj(p.colormap_proj))
 		{
-			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ;
+			//this is the colormap mode for mip
+			//mip without colormap is rendered the same as standard
+			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_HEAD;
+			if (p.solid)
+				z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO_SOLID;
+			else
+				z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO;
+			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_TF;
 			z << get_colormap_proj(p.colormap_proj);
-			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT;
+			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE;
+			if (p.solid)
+				z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID;
+			else
+				z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP;
 			z << VOL_RASTER_BLEND_SOLID;
 		}
 		else

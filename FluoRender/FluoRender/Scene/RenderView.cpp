@@ -6406,7 +6406,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 			vr->set_color_mode(flvr::ColorMode::SingleColor);
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
-			vr->set_solid(true);
+			//vr->set_solid(true);
 			//vr->set_alpha(1.0);
 		}
 		//draw

@@ -299,13 +299,16 @@ void main()
 	vec4 t = vec4(OutTexCoord, 1.0);
 	vec4 c = texture(tex0, t.xy);
 	rb.a = c.a;
-	float valu = c.r - c.a * 260.0;
+	float l1 = c.r - c.b * 247.3;
+	float l2 = c.g - c.b * 53.1;
+	float valu = 0.7 * l1 + 0.3 * l2;
 	valu = (valu-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT = R"GLSHDR(
 	//IMG_SHADER_CODE_GRADIENT_MAP_RESULT
-	FragColor = vec4(rb.rgb*loc18.z*(loc18.x>0.5?(rb.a==0.0?0.0:1.0):rb.a), rb.a);
+	float alpha = pow(loc18.x, loc18.y);
+	FragColor = vec4(rb.rgb*loc18.z*alpha, rb.a);
 }
 )GLSHDR";
 

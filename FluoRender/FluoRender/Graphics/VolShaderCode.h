@@ -670,13 +670,26 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT  = R"GL
 	}
 )GLSHDR";
 
-inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ  = R"GLSHDR(
-	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_HEAD = R"GLSHDR(
+	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_HEAD
 	vec4 c;
 	float tf_alp = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
+)GLSHDR";
+
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO = R"GLSHDR(
+		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO
 		c = vec4(0.0, 0.0, 0.0, 0.0);
+)GLSHDR";
+
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO_SOLID = R"GLSHDR(
+		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO_SOLID
+		c = vec4(0.0, 0.0, 0.0, 1.0);
+)GLSHDR";
+
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_TF = R"GLSHDR(
+	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_TF
 	else
 	{
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
@@ -686,9 +699,21 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ  = R"GLSHDR(
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
 )GLSHDR";
 
-inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT  = R"GLSHDR(
-		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT
-		c = vec4(vec3(tf_alp*260.0+valu), tf_alp);
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE = R"GLSHDR(
+		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE
+		float l1 = tf_alp * 247.3;
+		float l2 = tf_alp * 53.1;
+)GLSHDR";
+
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP = R"GLSHDR(
+		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP
+		c = vec4(l1 + valu, l2 + valu, tf_alp, tf_alp);
+	}
+)GLSHDR";
+
+inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  = R"GLSHDR(
+		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID
+		c = vec4(l1 + valu, l2 + valu, tf_alp, 1.0);
 	}
 )GLSHDR";
 
