@@ -415,7 +415,7 @@ inline constexpr const char* VOL_DATA_4D_SPEED  = R"GLSHDR(
 inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_SIN_COLOR
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	float alpha = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
@@ -425,18 +425,18 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR  = R"GLSHDR(
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
 		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		float pa = pow(tf_alp, loc18.y);
+		float pa = pow(tf_val, loc18.y);
 		alpha = 1.0 - pow(1.0-pa, loc4.w);
-		c = vec4(loc9.rgb*loc18.z*alpha*(loc18.y>1.1?1.0:tf_alp), alpha);
+		c = vec4(loc9.rgb*loc18.z*alpha*(loc18.y>1.1?1.0:tf_val), alpha);
 	}
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	float alpha = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
@@ -446,16 +446,16 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID  = R"GLSHDR(
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
 		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		c = vec4(loc9.rgb*loc18.z*tf_alp, 1.0);
+		c = vec4(loc9.rgb*loc18.z*tf_val, 1.0);
 	}
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_L  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_SIN_COLOR_L
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	float alpha = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
@@ -465,9 +465,9 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_L  = R"GLSHDR(
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
 		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		c = vec4(tf_alp);
+		c = vec4(tf_val);
 	}
 )GLSHDR";
 
@@ -476,7 +476,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_L_FUNC  = R"GLSHDR(
 vec4 vol_trans_sin_color_l(vec4 v)
 {
 	vec4 c;
-	float tf_alp;
+	float tf_val;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
 		c = vec4(0.0);
@@ -485,9 +485,9 @@ vec4 vol_trans_sin_color_l(vec4 v)
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
 		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		c = vec4(tf_alp);
+		c = vec4(tf_val);
 	}
 	return c;
 }
@@ -495,7 +495,7 @@ vec4 vol_trans_sin_color_l(vec4 v)
 
 inline constexpr const char* VOL_COMMON_TRANSFER_FUNCTION_CALC  = R"GLSHDR(
 		//VOL_COMMON_TRANSFER_FUNCTION_CALC
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
 )GLSHDR";
 
@@ -569,7 +569,7 @@ inline constexpr const char* VOL_COLORMAP_CALC8  = R"GLSHDR(
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_COLORMAP
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	float alpha = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
@@ -583,8 +583,8 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP  = R"GLSHDR(
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU0  = R"GLSHDR(
-		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU
-		float valu = (v.x-loc6.x)/loc6.z;
+		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU0
+		float valu = (tf_val-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU1  = R"GLSHDR(
@@ -642,16 +642,16 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU8  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_RESULT  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_RESULT
-		float pa = pow(tf_alp, loc18.y);
+		float pa = pow(tf_val, loc18.y);
 		float alpha = 1.0 - pow(1.0-pa, loc4.w);
-		c = vec4(rb.rgb*loc18.z*alpha*(loc18.y>1.1?1.0:tf_alp), alpha);
+		c = vec4(rb.rgb*loc18.z*alpha*(loc18.y>1.1?1.0:tf_val), alpha);
 	}
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_SOLID  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_COLORMAP_SOLID
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	float alpha = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
@@ -673,7 +673,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT  = R"GL
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_HEAD = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_HEAD
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w))
 )GLSHDR";
@@ -695,32 +695,32 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_TF = R"GLSHDR(
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
 		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE
-		float l1 = tf_alp * 247.3;
-		float l2 = tf_alp * 53.1;
+		float l1 = tf_val * 256.3;
+		float l2 = tf_val * 1053.1;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP
-		c = vec4(l1 + valu, l2 + valu, tf_alp, tf_alp);
+		c = vec4(l1 + valu, l2 + valu, tf_val, tf_val);
 	}
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID
-		c = vec4(l1 + valu, l2 + valu, tf_alp, 1.0);
+		c = vec4(l1 + valu, l2 + valu, tf_val, 1.0);
 	}
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_DEPTHMAP  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_DEPTHMAP
 	vec4 c;
-	float tf_alp = 0.0;
+	float tf_val = 0.0;
 	float alpha = 0.0;
 	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
 	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) )
@@ -730,10 +730,10 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_DEPTHMAP  = R"GLSHDR(
 		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
 		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
 		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_alp = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
+		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		float alpha = tf_alp;
-		c = vec4(vec3(alpha*tf_alp), alpha);
+		float alpha = tf_val;
+		c = vec4(vec3(alpha*tf_val), alpha);
 	}
 )GLSHDR";
 
@@ -757,7 +757,7 @@ inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK  = R"GLSHDR(
 	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
 		(n.w+n.z);
 	sel.xyz *= loc1.y>0.0?shad:1.0;
-	FragColor = sel*alpha*tf_alp*loc18.x;
+	FragColor = sel*alpha*tf_val*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
@@ -820,14 +820,14 @@ inline constexpr const char* VOL_RASTER_BLEND_NOMASK_DMAP  = R"GLSHDR(
 inline constexpr const char* VOL_RASTER_BLEND_MASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_MASK
 	vec4 cmask = texture(tex2, t.stp); //get mask value
-	FragColor = tf_alp*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c*loc18.x;
+	FragColor = tf_val*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c*loc18.x;
 	//FragColor = cmask;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_MASK_SOLID  = R"GLSHDR(
 	//VOL_RASTER_BLEND_MASK_SOLID
 	vec4 cmask = texture(tex2, t.stp); //get mask value
-	FragColor = tf_alp*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c;
+	FragColor = tf_val*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_MASK_DMAP  = R"GLSHDR(

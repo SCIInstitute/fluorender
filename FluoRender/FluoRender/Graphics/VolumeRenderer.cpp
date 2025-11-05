@@ -411,8 +411,6 @@ void VolumeRenderer::draw_volume(
 	index.reserve(est_slices * 6);
 	size.reserve(est_slices * 6);
 
-	//--------------------------------------------------------------------------
-
 	ColorMode color_mode = mode == 4 ? ColorMode::SingleColor : color_mode_;
 	bool use_fog = m_use_fog && color_mode != ColorMode::Depth;
 
@@ -454,7 +452,6 @@ void VolumeRenderer::draw_volume(
 
 	eval_ml_mode();
 
-	//--------------------------------------------------------------------------
 	// Set up shaders
 	std::shared_ptr<ShaderProgram> shader;
 	//create/bind
@@ -534,7 +531,6 @@ void VolumeRenderer::draw_volume(
 	planes_[5]->get(abcd);
 	shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
-	////////////////////////////////////////////////////////
 	// render bricks
 	// Set up transform
 	shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
@@ -717,7 +713,7 @@ void VolumeRenderer::draw_volume(
 	std::shared_ptr<Framebuffer> filter_buffer = 0;
 	if (noise_red_ && color_mode != ColorMode::Depth)
 	{
-		//FILTERING/////////////////////////////////////////////////////////////////
+		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderColorFilter, w, h, gstRBFilter);
 		assert(filter_buffer);

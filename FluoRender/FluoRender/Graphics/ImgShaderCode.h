@@ -299,8 +299,8 @@ void main()
 	vec4 t = vec4(OutTexCoord, 1.0);
 	vec4 c = texture(tex0, t.xy);
 	rb.a = c.a;
-	float l1 = c.r - c.b * 247.3;
-	float l2 = c.g - c.b * 53.1;
+	float l1 = c.r - c.b * 256.3;
+	float l2 = c.g - c.b * 1053.1;
 	float valu = 0.7 * l1 + 0.3 * l2;
 	valu = (valu-loc6.x)/loc6.z;
 )GLSHDR";
