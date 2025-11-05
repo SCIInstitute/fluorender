@@ -410,7 +410,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 	img_shader = glbin_shader_manager.shader(gstImgShader,
-		ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 	assert(img_shader);
 	img_shader->bind();
 
@@ -705,7 +705,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			glbin_framebuffer_manager.bind(cur_buffer);
 			//draw
 			auto img_shader = glbin_shader_manager.shader(gstImgShader,
-				ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+				ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 			assert(img_shader);
 			img_shader->bind();
 

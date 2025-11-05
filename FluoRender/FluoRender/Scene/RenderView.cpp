@@ -4240,7 +4240,7 @@ void RenderView::DrawDefault()
 	glbin_framebuffer_manager.bind(default_buffer);
 
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 	assert(img_shader);
 	img_shader->bind();
 	auto base_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewBase);
@@ -5396,7 +5396,7 @@ void RenderView::DrawHologramFramebuffer()
 
 	//draw in fluorender
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 	assert(img_shader);
 	img_shader->bind();
 
@@ -5982,9 +5982,9 @@ void RenderView::DrawVolumes(int peel)
 				bool mip_mode = vd_list[0].lock()->GetRenderMode() ==
 					flvr::RenderMode::Mip;
 				if (mip_mode)
-					DrawVolumesDepthMip(vd_list, peel);
+					DrawVolumesMipDepth(vd_list, peel);
 				else
-					DrawVolumesDepthStandard(vd_list, peel);
+					DrawVolumesStandardDepth(vd_list, peel);
 				//draw masks
 				if (m_draw_mask)
 					DrawVolumesComp(m_vd_pop_list, true, peel);
@@ -6050,7 +6050,14 @@ void RenderView::DrawVolumes(int peel)
 					if (!list.empty())
 					{
 						if (group->GetChannelMixMode() == ChannelMixMode::Depth)
-							DrawVolumesDepthStandard(list, peel);
+						{
+							bool mip_mode = list[0].lock()->GetRenderMode() ==
+								flvr::RenderMode::Mip;
+							if (mip_mode)
+								DrawVolumesMipDepth(list, peel);
+							else
+								DrawVolumesStandardDepth(list, peel);
+						}
 						else
 							DrawVolumesComp(list, false, peel);
 						//draw masks
@@ -6087,7 +6094,7 @@ void RenderView::DrawVolumes(int peel)
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void RenderView::DrawVolumesDepthStandard(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
+void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -6225,7 +6232,7 @@ void RenderView::DrawVolumesDepthStandard(const std::vector<std::weak_ptr<Volume
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
-void RenderView::DrawVolumesDepthMip(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
+void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -6467,7 +6474,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 			data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_shader_manager.shader(gstImgShader,
-					flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+					flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 			assert(img_shader);
 			img_shader->bind();
 
@@ -6554,7 +6561,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		if (color_mode == flvr::ColorMode::SingleColor)
 		{
 			img_shader = glbin_shader_manager.shader(gstImgShader,
-				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+				flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 			assert(img_shader);
 			img_shader->bind();
 		}
@@ -6616,7 +6623,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		temp_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 		img_shader = glbin_shader_manager.shader(gstImgShader,
-				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+				flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 		assert(img_shader);
 		img_shader->bind();
 
@@ -6728,7 +6735,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 			data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_shader_manager.shader(gstImgShader,
-				flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+				flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 			assert(img_shader);
 			img_shader->bind();
 
@@ -6788,7 +6795,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 		data_buffer->apply_state();
 
 		img_shader = glbin_shader_manager.shader(gstImgShader,
-			flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+			flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 		assert(img_shader);
 		img_shader->bind();
 
@@ -6888,7 +6895,7 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 	overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 	assert(img_shader);
 	img_shader->bind();
 
@@ -8180,7 +8187,7 @@ void RenderView::DrawBrushStrokes()
 	paint_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 	assert(img_shader);
 	img_shader->bind();
 

@@ -532,7 +532,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
 	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
-	st = new wxBoldText(this, 0, "Main Color",
+	st = new wxBoldText(this, 0, "Main/Unsel.",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
@@ -546,7 +546,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r3->Add(m_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
-	st = new wxBoldText(this, 0, "Alt. Color",
+	st = new wxBoldText(this, 0, "Alt./Mask",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_color2_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);

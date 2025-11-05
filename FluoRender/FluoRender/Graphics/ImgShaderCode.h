@@ -190,6 +190,23 @@ void main()
 }
 )GLSHDR";
 
+inline constexpr const char* IMG_SHADER_CODE_TEXTURE_EX_ALPHA = R"GLSHDR(
+//IMG_SHADER_CODE_TEXTURE_EX_ALPHA
+in vec3 OutVertex;
+in vec3 OutTexCoord;
+out vec4 FragColor;
+	
+// IMG_SHADER_CODE_TEXTURE_EX_ALPHA
+uniform sampler2D tex0;
+	
+void main()
+{
+	vec4 t = vec4(OutTexCoord, 1.0);
+	vec4 c = texture(tex0, t.xy);
+	FragColor = vec4(c.rgb * (c.a==0.0?0.0:1.0), c.a);
+}
+)GLSHDR";
+
 inline constexpr const char* IMG_SHADER_CODE_BRIGHTNESS_CONTRAST = R"GLSHDR(
 //IMG_SHADER_CODE_BRIGHTNESS_CONTRAST
 in vec3 OutVertex;
@@ -306,9 +323,9 @@ void main()
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT = R"GLSHDR(
-	//IMG_SHADER_CODE_GRADIENT_MAP_RESULT
+	//IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT
 	float alpha = pow(loc18.x, loc18.y);
-	FragColor = vec4(rb.rgb*loc18.z*alpha, rb.a);
+	FragColor = vec4(rb.rgb*loc18.z*alpha*(rb.a==0.0?0.0:1.0), rb.a*alpha);
 }
 )GLSHDR";
 

@@ -87,7 +87,7 @@ bool ImgShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 	case IMG_SHDR_DRAW_TEXT:
 		z << IMG_VTX_CODE_DRAW_TEXT;
 		break;
-	case IMG_SHADER_TEXTURE_LOOKUP:
+	case IMG_SHDR_TEXTURE_LOOKUP:
 	case IMG_SHDR_BRIGHTNESS_CONTRAST:
 	case IMG_SHDR_BRIGHTNESS_CONTRAST_HDR:
 	case IMG_SHDR_GRADIENT_MAP:
@@ -105,6 +105,7 @@ bool ImgShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 	case IMG_SHDR_GRADIENT_BACKGROUND:
 	case IMG_SHDR_FILTER_LANCZOS_BICUBIC:
 	case IMG_SHDR_TEXTURE_FLIP:
+	case IMG_SHDR_TEXTURE_EX_ALPHA:
 	default:
 		z << IMG_VERTEX_CODE;
 		break;
@@ -156,7 +157,7 @@ bool ImgShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
 		z << IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4;
 		break;
-	case IMG_SHADER_TEXTURE_LOOKUP:
+	case IMG_SHDR_TEXTURE_LOOKUP:
 		z << IMG_SHADER_CODE_TEXTURE_LOOKUP;
 		break;
 	case IMG_SHDR_BRIGHTNESS_CONTRAST:
@@ -223,6 +224,9 @@ bool ImgShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		break;
 	case IMG_SHDR_TEXTURE_FLIP:
 		z << IMG_SHADER_CODE_TEXTURE_FLIP;
+		break;
+	case IMG_SHDR_TEXTURE_EX_ALPHA:
+		z << IMG_SHADER_CODE_TEXTURE_EX_ALPHA;
 		break;
 	default:
 		z << IMG_SHADER_CODE_TEXTURE_LOOKUP;

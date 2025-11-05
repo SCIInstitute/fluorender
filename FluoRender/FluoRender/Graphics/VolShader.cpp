@@ -231,17 +231,17 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			if (p.solid)
 			{
 				z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 				z << get_colormap_proj(p.colormap_proj);
 				z << get_colormap_code(p.colormap, p.colormap_proj);
-				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 				z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
 			}
 			else
 			{
 				z << VOL_TRANSFER_FUNCTION_COLORMAP;
+				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 				z << get_colormap_proj(p.colormap_proj);
 				z << get_colormap_code(p.colormap, p.colormap_proj);
-				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 				z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 			}
 			break;
@@ -308,17 +308,17 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 				if (p.solid)
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
+					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << get_colormap_proj(p.colormap_proj);
 					z << get_colormap_code(p.colormap, p.colormap_proj);
-					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
 				}
 				else
 				{
 					z << VOL_TRANSFER_FUNCTION_COLORMAP;
+					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << get_colormap_proj(p.colormap_proj);
 					z << get_colormap_code(p.colormap, p.colormap_proj);
-					z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 				}
 				break;

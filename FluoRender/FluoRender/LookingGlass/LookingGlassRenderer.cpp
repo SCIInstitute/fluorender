@@ -261,7 +261,7 @@ void LookingGlassRenderer::Draw()
 	cur_buffer->clear(true, true);
 
 	shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHADER_TEXTURE_LOOKUP, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 	assert(shader);
 	shader->bind();
 

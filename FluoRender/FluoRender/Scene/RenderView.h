@@ -807,8 +807,8 @@ private:
 								   //4: same as 3 (14, 15)
 								   //5: same as 2 (15)
 	//different volume drawing modes
-	void DrawVolumesDepthStandard(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
-	void DrawVolumesDepthMip(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
+	void DrawVolumesStandardDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
+	void DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
 	void DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>> &list, bool mask = false, int peel = 0);
 	void DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd, int peel = 0);
 	void DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
