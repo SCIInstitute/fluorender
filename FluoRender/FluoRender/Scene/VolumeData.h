@@ -51,6 +51,7 @@ namespace flrd
 	class EntryParams;
 }
 class BaseVolReader;
+enum class ChannelMixMode : int;
 
 struct VD_Landmark
 {
@@ -369,8 +370,8 @@ public:
 	bool GetNR();
 
 	//blend mode
-	void SetBlendMode(int mode);
-	int GetBlendMode();
+	void SetChannelMixMode(ChannelMixMode mode) { m_channel_mix_mode = mode; }
+	ChannelMixMode GetChannelMixMode() { return m_channel_mix_mode; }
 
 	//transparent
 	void SetTransparent(bool val);
@@ -581,7 +582,7 @@ private:
 	bool m_transparent;
 
 	//blend mode
-	int m_blend_mode;	//0: ignore; 1: layered; 2: depth; 3: composite
+	ChannelMixMode m_channel_mix_mode;
 
 	//inverted
 	bool m_invert;

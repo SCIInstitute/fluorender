@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
+#include <RenderView.h>
 #include <Color.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
@@ -95,7 +96,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_transparent = false;
 
 	//blend mode
-	m_blend_mode = 0;
+	m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 	//legend
 	m_legend = true;
 	//lable
@@ -173,7 +174,8 @@ void VolumeDataDefault::Read()
 	m_render_mode = static_cast<flvr::RenderMode>(ival);
 	f->Read(gstTransparent, &m_transparent, false);
 
-	f->Read(gstBlendMode, &m_blend_mode, 0);
+	f->Read(gstChannelMixMode, &ival, 3);
+	m_channel_mix_mode = static_cast<ChannelMixMode>(ival);
 	f->Read(gstLegend, &m_legend, true);
 	f->Read(gstLabelMode, &m_label_mode, 1);
 }
@@ -238,7 +240,7 @@ void VolumeDataDefault::Save()
 	f->Write(gstRenderMode, static_cast<int>(m_render_mode));
 	f->Write(gstTransparent, m_transparent);
 
-	f->Write(gstBlendMode, m_blend_mode);
+	f->Write(gstChannelMixMode, static_cast<int>(m_channel_mix_mode));
 	f->Write(gstLegend, m_legend);
 	f->Write(gstLabelMode, m_label_mode);
 }
@@ -297,7 +299,7 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_render_mode = vd->GetRenderMode();
 	m_transparent = vd->GetTransparent();
 
-	m_blend_mode = vd->GetBlendMode();
+	m_channel_mix_mode = vd->GetChannelMixMode();
 	m_legend = vd->GetLegend();
 	m_label_mode = vd->GetLabelMode();
 }
@@ -365,7 +367,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetRenderMode(m_render_mode);
 	vd->SetTransparent(m_transparent);
 
-	vd->SetBlendMode(m_blend_mode);
+	vd->SetChannelMixMode(m_channel_mix_mode);
 	vd->SetLegend(m_legend);
 	vd->SetLabelMode(m_label_mode);
 }
@@ -425,7 +427,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetRenderMode(v2->GetRenderMode());
 	v1->SetTransparent(v2->GetTransparent());
 
-	v1->SetBlendMode(v2->GetBlendMode());
+	v1->SetChannelMixMode(v2->GetChannelMixMode());
 	v1->SetLegend(v2->GetLegend());
 	v1->SetLabelMode(v2->GetLabelMode());
 
@@ -499,7 +501,7 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 	g->SetRenderMode(m_render_mode);
 	g->SetTransparent(m_transparent);
 
-	g->SetBlendMode(m_blend_mode);
+	g->SetChannelMixMode(m_channel_mix_mode);
 	//g->SetLegend(m_legend);
 	g->SetLabelMode(m_label_mode);
 }

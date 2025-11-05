@@ -43,10 +43,6 @@ DEALINGS IN THE SOFTWARE.
 #define INIT_ROTATE  8
 #define INIT_OBJ_TRANSL  16
 
-#define VOL_METHOD_SEQ    1
-#define VOL_METHOD_MULTI  2
-#define VOL_METHOD_COMP    3
-
 //clipping plane mask
 #define CLIP_X1  1
 #define CLIP_X2  2
@@ -54,10 +50,6 @@ DEALINGS IN THE SOFTWARE.
 #define CLIP_Y2  8
 #define CLIP_Z1  16
 #define CLIP_Z2  32
-//clipping plane winding
-#define CULL_OFF  0
-#define FRONT_FACE  1
-#define BACK_FACE  2
 
 //information bits
 #define INFO_DISP	1
@@ -80,6 +72,7 @@ class AnnotData;
 class VolumeGroup;
 class MeshGroup;
 class TrackGroup;
+class RenderMixModeGuard;
 namespace flvr
 {
 	class MultiVolumeRenderer;
@@ -93,6 +86,13 @@ namespace flrd
 	class RulerList;
 	class Ruler;
 }
+
+enum class ChannelMixMode : int
+{
+	Layered = 1,
+	Depth,
+	CompositeAdd
+};
 
 enum class InteractiveMode : int
 {
@@ -150,6 +150,9 @@ public:
 	void Clear();
 	void ClearVolList();
 	void ClearMeshList();
+
+	ChannelMixMode GetChannelMixMode() { return m_channel_mix_mode; }
+	void SetChannelMixMode(ChannelMixMode mode) { m_channel_mix_mode = mode; }
 
 	//data management
 	int GetAny();
@@ -292,8 +295,6 @@ public:
 
 	//disply modes
 	int GetDrawType() { return m_draw_type; }
-	void SetVolMethod(int method);
-	int GetVolMethod() { return m_vol_method; }
 	void SetFog(bool b = true) { m_use_fog = b; }
 	bool GetFog() { return m_use_fog; }
 	void SetFogIntensity(double i) { m_fog_intensity = i; }
@@ -547,6 +548,8 @@ private:
 	double m_dpi_factor;
 	std::string m_GLversion;
 
+	ChannelMixMode m_channel_mix_mode;
+
 	//populated lists of data
 	bool m_vd_pop_dirty;
 	std::vector<std::weak_ptr<VolumeData>> m_vd_pop_list;
@@ -647,7 +650,6 @@ private:
 	//draw controls
 	bool m_draw_all;
 	int m_draw_type;
-	int m_vol_method;
 
 	//fog
 	bool m_use_fog;
@@ -805,10 +807,11 @@ private:
 								   //4: same as 3 (14, 15)
 								   //5: same as 2 (15)
 	//different volume drawing modes
-	void DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
+	void DrawVolumesDepthStandard(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
+	void DrawVolumesDepthMip(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
 	void DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>> &list, bool mask = false, int peel = 0);
-	void DrawVolumeMip(const std::weak_ptr<VolumeData>& vd, int peel = 0);
-	void DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
+	void DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd, int peel = 0);
+	void DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
 	//effect overlays
 	void DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd);
 	void DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>> &list);
@@ -904,6 +907,24 @@ private:
 		else
 			return true;
 	}
+};
+
+class ChannelMixModeGuard
+{
+public:
+	ChannelMixModeGuard(RenderView& view)
+		: m_view(view)
+	{
+		m_old_mode = m_view.GetChannelMixMode();
+	}
+	~ChannelMixModeGuard()
+	{
+		m_view.SetChannelMixMode(m_old_mode);
+	}
+
+private:
+	RenderView& m_view;
+	ChannelMixMode m_old_mode;
 };
 
 #endif//_RENDERVIEW_H_

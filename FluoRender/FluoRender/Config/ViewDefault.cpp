@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 ViewDefault::ViewDefault()
 {
-	m_vol_method = 1;
+	m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 	m_bg_color = fluo::Color(0, 0, 0);
 	m_draw_camctr = false;
 	m_camctr_size = 2.0;
@@ -77,8 +77,10 @@ void ViewDefault::Read()
 
 	if (f->Exists("/view default"))
 		f->SetPath("/view default");
+	int ival;
 
-	f->Read("vol method", &m_vol_method, 1);
+	f->Read("channel_mix_mode", &ival, 3);
+	m_channel_mix_mode = static_cast<ChannelMixMode>(ival);
 	f->Read("bg color", &m_bg_color);
 	f->Read("draw camctr", &m_draw_camctr, false);
 	f->Read("camctr size", &m_camctr_size, 2.0);
@@ -114,7 +116,7 @@ void ViewDefault::Save()
 
 	f->SetPath("/view default");
 
-	f->Write("vol method", m_vol_method);
+	f->Write("channel_mix_mode", static_cast<int>(m_channel_mix_mode));
 	f->Write("bg color", m_bg_color);
 	f->Write("draw camctr", m_draw_camctr);
 	f->Write("camctr size", m_camctr_size);
@@ -141,63 +143,63 @@ void ViewDefault::Save()
 	f->Write("rot slider", m_rot_slider);
 }
 
-void ViewDefault::Set(RenderView* canvas)
+void ViewDefault::Set(RenderView* view)
 {
-	if (!canvas)
+	if (!view)
 		return;
 
-	m_vol_method = canvas->GetVolMethod();
-	m_bg_color = canvas->GetBackgroundColor();
-	m_draw_camctr = canvas->m_draw_camctr;
-	m_camctr_size = canvas->m_camctr_size;
-	m_draw_info = canvas->m_draw_info;
-	m_draw_legend = canvas->m_draw_legend;
-	m_colormap_disp = canvas->m_colormap_disp;
-	m_mouse_focus = canvas->m_mouse_focus;
-	m_scalebar_disp = canvas->m_scalebar_disp;
-	m_scalebar_len = canvas->m_sb_length;
-	m_scalebar_text = canvas->m_sb_text;
-	m_scalebar_num = canvas->m_sb_num;
-	m_scalebar_unit = canvas->m_sb_unit;
-	m_persp = canvas->GetPersp();
-	m_aov = canvas->GetAov();
-	m_cam_mode = canvas->GetCamMode();
-	m_center = canvas->GetCenters();
-	m_rot_lock = canvas->GetRotLock();
-	m_pin_rot_center = canvas->m_pin_rot_ctr;
-	m_scale_mode = canvas->m_scale_mode;
-	m_scale_factor = canvas->m_scale_factor;
-	m_use_fog = canvas->GetFog();
-	m_fog_intensity = canvas->GetFogIntensity();
+	m_channel_mix_mode = view->GetChannelMixMode();
+	m_bg_color = view->GetBackgroundColor();
+	m_draw_camctr = view->m_draw_camctr;
+	m_camctr_size = view->m_camctr_size;
+	m_draw_info = view->m_draw_info;
+	m_draw_legend = view->m_draw_legend;
+	m_colormap_disp = view->m_colormap_disp;
+	m_mouse_focus = view->m_mouse_focus;
+	m_scalebar_disp = view->m_scalebar_disp;
+	m_scalebar_len = view->m_sb_length;
+	m_scalebar_text = view->m_sb_text;
+	m_scalebar_num = view->m_sb_num;
+	m_scalebar_unit = view->m_sb_unit;
+	m_persp = view->GetPersp();
+	m_aov = view->GetAov();
+	m_cam_mode = view->GetCamMode();
+	m_center = view->GetCenters();
+	m_rot_lock = view->GetRotLock();
+	m_pin_rot_center = view->m_pin_rot_ctr;
+	m_scale_mode = view->m_scale_mode;
+	m_scale_factor = view->m_scale_factor;
+	m_use_fog = view->GetFog();
+	m_fog_intensity = view->GetFogIntensity();
 }
 
-void ViewDefault::Apply(RenderView* canvas)
+void ViewDefault::Apply(RenderView* view)
 {
-	if (!canvas)
+	if (!view)
 		return;
 
-	canvas->SetVolMethod(m_vol_method);
-	canvas->SetBackgroundColor(m_bg_color);
-	canvas->m_draw_camctr = m_draw_camctr;
-	canvas->m_camctr_size = m_camctr_size;
-	canvas->m_draw_info = m_draw_info;
-	canvas->m_draw_legend = m_draw_legend;
-	canvas->m_colormap_disp = m_colormap_disp;
-	canvas->m_scalebar_disp = m_scalebar_disp;
-	canvas->m_sb_length = m_scalebar_len;
-	canvas->m_sb_text = m_scalebar_text;
-	canvas->m_sb_num = m_scalebar_num;
-	canvas->m_sb_unit = m_scalebar_unit;
-	canvas->m_mouse_focus = m_mouse_focus;
-	canvas->SetPersp(m_persp);
-	canvas->SetAov(m_aov);
-	canvas->SetCamMode(m_cam_mode);
-	canvas->SetCenters(m_center);
-	canvas->SetRotLock(m_rot_lock);
-	canvas->SetPinRotCenter(m_pin_rot_center, false);
-	canvas->m_scale_mode = m_scale_mode;
-	canvas->m_scale_factor = m_scale_factor;
-	canvas->SetFog(m_use_fog);
-	canvas->SetFogIntensity(m_fog_intensity);
+	view->SetChannelMixMode(m_channel_mix_mode);
+	view->SetBackgroundColor(m_bg_color);
+	view->m_draw_camctr = m_draw_camctr;
+	view->m_camctr_size = m_camctr_size;
+	view->m_draw_info = m_draw_info;
+	view->m_draw_legend = m_draw_legend;
+	view->m_colormap_disp = m_colormap_disp;
+	view->m_scalebar_disp = m_scalebar_disp;
+	view->m_sb_length = m_scalebar_len;
+	view->m_sb_text = m_scalebar_text;
+	view->m_sb_num = m_scalebar_num;
+	view->m_sb_unit = m_scalebar_unit;
+	view->m_mouse_focus = m_mouse_focus;
+	view->SetPersp(m_persp);
+	view->SetAov(m_aov);
+	view->SetCamMode(m_cam_mode);
+	view->SetCenters(m_center);
+	view->SetRotLock(m_rot_lock);
+	view->SetPinRotCenter(m_pin_rot_center, false);
+	view->m_scale_mode = m_scale_mode;
+	view->m_scale_factor = m_scale_factor;
+	view->SetFog(m_use_fog);
+	view->SetFogIntensity(m_fog_intensity);
 }
 

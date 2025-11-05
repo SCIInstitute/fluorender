@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainSettings.h>
 #include <DataManager.h>
+#include <RenderView.h>
 #include <VolumeRenderer.h>
 #include <VolumeSampler.h>
 #include <VolumeBaker.h>
@@ -131,7 +132,7 @@ VolumeData::VolumeData()
 	UpdateColormapRange();
 
 	//blend mode
-	m_blend_mode = 0;
+	m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 
 	//resolution, scaling, spacing
 	m_res_x = 0;	m_res_y = 0;	m_res_z = 0;
@@ -287,7 +288,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	UpdateColormapRange();
 
 	//blend mode
-	m_blend_mode = copy.m_blend_mode;
+	m_channel_mix_mode = copy.m_channel_mix_mode;
 
 	//resolution, scaling, spacing
 	m_res_x = copy.m_res_x;	m_res_y = copy.m_res_y;	m_res_z = copy.m_res_z;
@@ -2921,17 +2922,6 @@ void VolumeData::ToggleDrawBounds()
 void VolumeData::SetWireframe(bool val)
 {
 	m_test_wiref = val;
-}
-
-//blend mode
-void VolumeData::SetBlendMode(int mode)
-{
-	m_blend_mode = mode;
-}
-
-int VolumeData::GetBlendMode()
-{
-	return m_blend_mode;
 }
 
 //transparent

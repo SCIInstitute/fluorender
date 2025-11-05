@@ -481,7 +481,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Sync current channel with other channels in the group");
 	//depth mode
 	bitmap = wxGetBitmap(depth_off);
-	m_options_toolbar->AddCheckTool(ID_DepthChk, "Depth Mode",
+	m_options_toolbar->AddCheckTool(ID_ChannelMixDepthChk, "Depth Mode",
 		bitmap, wxNullBitmap,
 		"Enable Depth Mode within a group",
 		"Enable Depth Mode within a group");
@@ -1395,18 +1395,18 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//blend mode
-	if (update_all || FOUND_VALUE(gstBlendMode))
+	if (update_all || FOUND_VALUE(gstChannelMixMode))
 	{
-		int blend_mode = m_vd->GetBlendMode();
-		if (blend_mode == 2)
+		auto channel_mix_mode = m_vd->GetChannelMixMode();
+		if (channel_mix_mode == ChannelMixMode::Depth)
 		{
-			m_options_toolbar->ToggleTool(ID_DepthChk, true);
-			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmap(depth));
+			m_options_toolbar->ToggleTool(ID_ChannelMixDepthChk, true);
+			m_options_toolbar->SetToolNormalBitmap(ID_ChannelMixDepthChk, wxGetBitmap(depth));
 		}
 		else
 		{
-			m_options_toolbar->ToggleTool(ID_DepthChk, false);
-			m_options_toolbar->SetToolNormalBitmap(ID_DepthChk, wxGetBitmap(depth_off));
+			m_options_toolbar->ToggleTool(ID_ChannelMixDepthChk, false);
+			m_options_toolbar->SetToolNormalBitmap(ID_ChannelMixDepthChk, wxGetBitmap(depth_off));
 		}
 	}
 
@@ -1619,7 +1619,7 @@ void VolumePropPanel::EnableShadow(bool bval)
 {
 	if (m_sync_group && m_group)
 		m_group->SetShadowEnable(bval);
-	else if (m_group && m_group->GetBlendMode() == 2)
+	else if (m_group && m_group->GetChannelMixMode() == ChannelMixMode::Depth)
 		m_group->SetShadowEnable(bval);
 	else if (m_vd)
 		m_vd->SetShadowEnable(bval);
@@ -1997,7 +1997,7 @@ void VolumePropPanel::SyncSampleRate(double val)
 		return;
 
 	bool changed = false;
-	if (m_view->GetVolMethod() == VOL_METHOD_MULTI)
+	if (m_view->GetChannelMixMode() == ChannelMixMode::Depth)
 		for (int i = 0; i < m_view->GetAllVolumeNum(); i++)
 		{
 			auto vd = m_view->GetAllVolumeData(i);
@@ -3166,8 +3166,8 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 	case ID_SyncGroupChk:
 		SetSyncGroup();
 		break;
-	case ID_DepthChk:
-		SetBlendDepth();
+	case ID_ChannelMixDepthChk:
+		SetChannelMixDepth();
 		break;
 	case ID_LegendChk:
 		SetLegend();
@@ -3251,7 +3251,7 @@ void VolumePropPanel::SetNoiseReduction()
 {
 	bool val = m_options_toolbar->GetToolState(ID_NRChk);
 
-	if (m_view && m_view->GetVolMethod()==VOL_METHOD_MULTI)
+	if (m_view && m_view->GetChannelMixMode()==ChannelMixMode::Depth)
 	{
 		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
 		{
@@ -3264,7 +3264,7 @@ void VolumePropPanel::SetNoiseReduction()
 	{
 		if (m_sync_group && m_group)
 			m_group->SetNR(val);
-		else if (m_group && m_group->GetBlendMode()==2)
+		else if (m_group && m_group->GetChannelMixMode()==ChannelMixMode::Depth)
 			m_group->SetNR(val);
 		else if (m_vd)
 			m_vd->SetNR(val);
@@ -3339,15 +3339,15 @@ void VolumePropPanel::SetSyncGroup()
 }
 
 //depth mode
-void VolumePropPanel::SetBlendDepth()
+void VolumePropPanel::SetChannelMixDepth()
 {
-	bool val = m_options_toolbar->GetToolState(ID_DepthChk);
+	bool val = m_options_toolbar->GetToolState(ID_ChannelMixDepthChk);
 
 	if (val)
 	{
 		if (m_group)
 		{
-			m_group->SetBlendMode(2);
+			m_group->SetChannelMixMode(ChannelMixMode::Depth);
 			if (m_vd)
 			{
 				m_group->SetNR(m_vd->GetNR());
@@ -3360,10 +3360,10 @@ void VolumePropPanel::SetBlendDepth()
 	else
 	{
 		if (m_group)
-			m_group->SetBlendMode(0);
+			m_group->SetChannelMixMode(ChannelMixMode::CompositeAdd);
 	}
 
-	FluoRefresh(0, { gstBlendMode }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstChannelMixMode }, { glbin_current.GetViewId() });
 }
 
 //legend

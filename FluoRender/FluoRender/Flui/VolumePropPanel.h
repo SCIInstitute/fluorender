@@ -57,7 +57,7 @@ class VolumePropPanel: public PropPanel
 		ID_InterpolateChk,
 		ID_NRChk,
 		ID_SyncGroupChk,
-		ID_DepthChk,
+		ID_ChannelMixDepthChk,
 		ID_LegendChk,
 		ID_ResetDefault,
 		ID_SaveDefault
@@ -244,7 +244,7 @@ private:
 	void SetInterpolate();
 	void SetNoiseReduction();
 	void SetSyncGroup();
-	void SetBlendDepth();
+	void SetChannelMixDepth();
 	void SetLegend();
 	void SaveDefault();
 	void ResetDefault();

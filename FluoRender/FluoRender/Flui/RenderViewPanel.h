@@ -40,14 +40,15 @@ class wxUndoableScrollBar;
 class wxUndoableToolbar;
 class wxUndoableColorPicker;
 class RenderView;
+enum class ChannelMixMode : int;
 class RenderViewPanel: public PropPanel
 {
 public:
 	enum
 	{
-		ID_VolumeSeqRd = 0,
-		ID_VolumeMultiRd,
-		ID_VolumeCompRd
+		ID_ChannelMixLayered = 0,
+		ID_ChannelMixDepth,
+		ID_ChannelMixCompositeAdd
 	};
 	enum
 	{
@@ -114,7 +115,7 @@ public:
 	wxBoxSizer* GetViewSizer() { return m_view_sizer; }
 
 	//update
-	void SetVolumeMethod(int val);
+	void SetChannelMixMode(ChannelMixMode val);
 	void Capture();
 	void SetInfo(bool val);
 	void SetDrawCamCtr(bool val);
@@ -222,7 +223,7 @@ private:
 	void CreateBar();
 
 	//bar top
-	void OnMixMode(wxCommandEvent& event);
+	void OnChannelMixMode(wxCommandEvent& event);
 	void OnHud(wxCommandEvent& event);
 	void OnScaleText(wxCommandEvent& event);
 	void OnScaleUnit(wxCommandEvent& event);

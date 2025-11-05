@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeGroup.h>
 #include <VolumeData.h>
+#include <RenderView.h>
 #include <ShaderProgram.h>
 
 int VolumeGroup::m_num = 0;
@@ -63,12 +64,20 @@ VolumeGroup::~VolumeGroup()
 {
 }
 
-int VolumeGroup::GetBlendMode()
+void VolumeGroup::SetChannelMixMode(ChannelMixMode mode)
+{
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->SetChannelMixMode(mode);
+	}
+}
+
+ChannelMixMode VolumeGroup::GetChannelMixMode()
 {
 	if (!m_vd_list.empty())
-		return m_vd_list[0]->GetBlendMode();
-	else
-		return 0;
+		return m_vd_list[0]->GetChannelMixMode();
+	return ChannelMixMode::CompositeAdd;
 }
 
 //set gamma to all
@@ -586,16 +595,6 @@ void VolumeGroup::ApplyMlVolProp()
 	{
 		if (it)
 			it->ApplyMlVolProp();
-	}
-}
-
-//blend mode
-void VolumeGroup::SetBlendMode(int mode)
-{
-	for (auto& it : m_vd_list)
-	{
-		if (it)
-			it->SetBlendMode(mode);
 	}
 }
 

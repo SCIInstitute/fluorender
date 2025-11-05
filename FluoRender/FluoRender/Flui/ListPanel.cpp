@@ -397,7 +397,7 @@ void ListPanel::AddSelectionToView(int vid)
 
 		auto group = view->AddVolumeData(vd_add);
 		glbin_current.SetVolumeData(vd_add);
-		if (view->GetVolMethod() == VOL_METHOD_MULTI)
+		if (view->GetChannelMixMode() == ChannelMixMode::Depth)
 			vc.insert(gstUpdateSync);
 		vc.insert(gstVolumePropPanel);
 	}

@@ -328,23 +328,23 @@ void RenderViewPanel::CreateBar()
 	//blend mode
 	bitmap = wxGetBitmap(layers);
 	m_mix_mode_tb->AddCheckTool(
-		ID_VolumeSeqRd, "Layer",
+		ID_ChannelMixLayered, "Layer",
 		bitmap, wxNullBitmap,
 		"Render View as Layers",
 		"Render View as Layers");
 	bitmap = wxGetBitmap(depth);
 	m_mix_mode_tb->AddCheckTool(
-		ID_VolumeMultiRd, "Depth",
+		ID_ChannelMixDepth, "Depth",
 		bitmap, wxNullBitmap,
 		"Render View by Depth",
 		"Render View by Depth");
 	bitmap = wxGetBitmap(composite);
 	m_mix_mode_tb->AddCheckTool(
-		ID_VolumeCompRd, "Compo",
+		ID_ChannelMixCompositeAdd, "Compo",
 		bitmap, wxNullBitmap,
 		"Render View as a Composite of Colors",
 		"Render View as a Composite of Colors");
-	m_mix_mode_tb->Bind(wxEVT_TOOL, &RenderViewPanel::OnMixMode, this);
+	m_mix_mode_tb->Bind(wxEVT_TOOL, &RenderViewPanel::OnChannelMixMode, this);
 	m_mix_mode_tb->Realize();
 
 	sizer_h_1->AddSpacer(50);
@@ -750,21 +750,21 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//blend mode
 	if (update_all || FOUND_VALUE(gstMixMethod))
 	{
-		ival = m_renderview->GetVolMethod();
+		ChannelMixMode mode = m_renderview->GetChannelMixMode();
 		int test = m_mix_mode_tb->GetToolsCount();
-		m_mix_mode_tb->ToggleTool(ID_VolumeSeqRd, ival == VOL_METHOD_SEQ);
-		m_mix_mode_tb->SetToolNormalBitmap(ID_VolumeSeqRd,
-			ival == VOL_METHOD_SEQ ?
+		m_mix_mode_tb->ToggleTool(ID_ChannelMixLayered, mode == ChannelMixMode::Layered);
+		m_mix_mode_tb->SetToolNormalBitmap(ID_ChannelMixLayered,
+			mode == ChannelMixMode::Layered ?
 			wxGetBitmap(layers) :
 			wxGetBitmap(layers_off));
-		m_mix_mode_tb->ToggleTool(ID_VolumeMultiRd, ival == VOL_METHOD_MULTI);
-		m_mix_mode_tb->SetToolNormalBitmap(ID_VolumeMultiRd,
-			ival == VOL_METHOD_MULTI ?
+		m_mix_mode_tb->ToggleTool(ID_ChannelMixDepth, mode == ChannelMixMode::Depth);
+		m_mix_mode_tb->SetToolNormalBitmap(ID_ChannelMixDepth,
+			mode == ChannelMixMode::Depth ?
 			wxGetBitmap(depth) :
 			wxGetBitmap(depth_off));
-		m_mix_mode_tb->ToggleTool(ID_VolumeCompRd, ival == VOL_METHOD_COMP);
-		m_mix_mode_tb->SetToolNormalBitmap(ID_VolumeCompRd,
-			ival == VOL_METHOD_COMP ?
+		m_mix_mode_tb->ToggleTool(ID_ChannelMixCompositeAdd, mode == ChannelMixMode::CompositeAdd);
+		m_mix_mode_tb->SetToolNormalBitmap(ID_ChannelMixCompositeAdd,
+			mode == ChannelMixMode::CompositeAdd ?
 			wxGetBitmap(composite) :
 			wxGetBitmap(composite_off));
 	}
@@ -1072,9 +1072,9 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 }
 
-void RenderViewPanel::SetVolumeMethod(int val)
+void RenderViewPanel::SetChannelMixMode(ChannelMixMode val)
 {
-	m_renderview->SetVolMethod(val);
+	m_renderview->SetChannelMixMode(val);
 
 	FluoRefresh(2, { gstMixMethod }, { GetViewId() });
 }
@@ -1426,20 +1426,20 @@ void RenderViewPanel::SetZeroRotations()
 	FluoRefresh(2, { gstCamRotation }, { GetViewId() });
 }
 
-void RenderViewPanel::OnMixMode(wxCommandEvent& event)
+void RenderViewPanel::OnChannelMixMode(wxCommandEvent& event)
 {
 	int id = event.GetId();
 
 	switch (id)
 	{
-	case ID_VolumeSeqRd:
-		SetVolumeMethod(VOL_METHOD_SEQ);
+	case ID_ChannelMixLayered:
+		SetChannelMixMode(ChannelMixMode::Layered);
 		break;
-	case ID_VolumeMultiRd:
-		SetVolumeMethod(VOL_METHOD_MULTI);
+	case ID_ChannelMixDepth:
+		SetChannelMixMode(ChannelMixMode::Depth);
 		break;
-	case ID_VolumeCompRd:
-		SetVolumeMethod(VOL_METHOD_COMP);
+	case ID_ChannelMixCompositeAdd:
+		SetChannelMixMode(ChannelMixMode::CompositeAdd);
 		break;
 	}
 }
@@ -2094,7 +2094,7 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 
 	//render modes
 	if (mask & 0x1)
-		glbin_view_def.m_vol_method = m_renderview->GetVolMethod();
+		glbin_view_def.m_channel_mix_mode = m_renderview->GetChannelMixMode();
 	//background color
 	if (mask & 0x2)
 		glbin_view_def.m_bg_color = m_renderview->GetBackgroundColor();

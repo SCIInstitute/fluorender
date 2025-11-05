@@ -94,6 +94,7 @@ DEALINGS IN THE SOFTWARE.
 #endif
 
 RenderView::RenderView() :
+	m_channel_mix_mode(ChannelMixMode::CompositeAdd),
 	//ruler
 	m_cur_ruler(0),
 	//capture modes
@@ -214,7 +215,6 @@ RenderView::RenderView() :
 	//draw controls
 	m_draw_all(true),
 	m_draw_type(1),
-	m_vol_method(VOL_METHOD_SEQ),
 	//fog
 	m_use_fog(true),
 	m_fog_intensity(0.0),
@@ -317,6 +317,7 @@ RenderView::RenderView() :
 }
 
 RenderView::RenderView(RenderView& copy):
+	m_channel_mix_mode(copy.m_channel_mix_mode),
 	//ruler
 	m_cur_ruler(copy.m_cur_ruler),
 	//capture modes
@@ -436,7 +437,6 @@ RenderView::RenderView(RenderView& copy):
 	//draw controls
 	m_draw_all(copy.m_draw_all),
 	m_draw_type(copy.m_draw_type),
-	m_vol_method(copy.m_vol_method),
 	//fog
 	m_use_fog(true),
 	m_fog_intensity(0.0),
@@ -2923,14 +2923,6 @@ void RenderView::SetBackgroundColor(fluo::Color &color)
 	}
 }
 
-void RenderView::SetVolMethod(int method)
-{
-	//get the volume list m_vd_pop_list
-	PopVolumeList();
-
-	m_vol_method = method;
-}
-
 void RenderView::Set3DRotCapture(double start_angle,
 	double end_angle,
 	double step,
@@ -3265,9 +3257,12 @@ void RenderView::SetParams(double t)
 		vc.insert(gstCamRotation);
 	}
 	//intermixing mode
-	keycode.l2_name = "volmethod";
+	keycode.l2_name = "channel_mix_mode";
 	if (glbin_interpolator.GetInt(keycode, t, ival))
-		SetVolMethod(ival);
+	{
+		if (ival > 0 && ival <= 3)
+			m_channel_mix_mode = static_cast<ChannelMixMode>(ival);
+	}
 	//camera mode
 	keycode.l2_name = "camera mode";
 	int cam_mode;
@@ -4337,7 +4332,7 @@ void RenderView::StartLoopUpdate()
 		}
 
 		std::vector<VolumeLoaderData> queues;
-		if (m_vol_method == VOL_METHOD_MULTI)
+		if (m_channel_mix_mode == ChannelMixMode::Depth)
 		{
 			std::vector<std::shared_ptr<VolumeData>> list;
 			for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
@@ -4521,7 +4516,7 @@ void RenderView::StartLoopUpdate()
 					std::vector<VolumeLoaderData> tmp_q;
 					std::vector<VolumeLoaderData> tmp_shade;
 					std::vector<VolumeLoaderData> tmp_shadow;
-					if (group->GetBlendMode() == VOL_METHOD_MULTI)
+					if (group->GetChannelMixMode() == ChannelMixMode::Depth)
 					{
 						for (size_t k = 0; k < list.size(); k++)
 						{
@@ -5973,17 +5968,27 @@ void RenderView::DrawVolumes(int peel)
 		}
 
 		//handle intermixing modes
-		if (m_vol_method == VOL_METHOD_MULTI)
+		if (m_channel_mix_mode == ChannelMixMode::Depth)
 		{
+			auto& vd_list = m_vd_pop_list;
 			if (glbin_settings.m_mem_swap &&
 				flvr::TextureRenderer::get_interactive() &&
 				quota_vd_list.size() > 0)
-				DrawVolumesDepth(quota_vd_list, peel);
-			else
-				DrawVolumesDepth(m_vd_pop_list, peel);
-			//draw masks
-			if (m_draw_mask)
-				DrawVolumesComp(m_vd_pop_list, true, peel);
+				vd_list = quota_vd_list;
+
+			if (!vd_list.empty())
+			{
+				//check if vol in mip mode
+				bool mip_mode = vd_list[0].lock()->GetRenderMode() ==
+					flvr::RenderMode::Mip;
+				if (mip_mode)
+					DrawVolumesDepthMip(vd_list, peel);
+				else
+					DrawVolumesDepthStandard(vd_list, peel);
+				//draw masks
+				if (m_draw_mask)
+					DrawVolumesComp(m_vd_pop_list, true, peel);
+			}
 		}
 		else
 		{
@@ -6044,8 +6049,8 @@ void RenderView::DrawVolumes(int peel)
 					}
 					if (!list.empty())
 					{
-						if (group->GetBlendMode() == VOL_METHOD_MULTI)
-							DrawVolumesDepth(list, peel);
+						if (group->GetChannelMixMode() == ChannelMixMode::Depth)
+							DrawVolumesDepthStandard(list, peel);
 						else
 							DrawVolumesComp(list, false, peel);
 						//draw masks
@@ -6082,7 +6087,7 @@ void RenderView::DrawVolumes(int peel)
 
 //draw multi volumes with depth consideration
 //peel==true -- depth peeling
-void RenderView::DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
+void RenderView::DrawVolumesDepthStandard(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
 {
 	if (list.empty())
 		return;
@@ -6220,6 +6225,124 @@ void RenderView::DrawVolumesDepth(const std::vector<std::weak_ptr<VolumeData>> &
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
+void RenderView::DrawVolumesDepthMip(const std::vector<std::weak_ptr<VolumeData>> &list, int peel)
+{
+	if (list.empty())
+		return;
+
+	if (!m_mvr)
+		m_mvr = std::make_unique<flvr::MultiVolumeRenderer>();
+	if (!m_mvr)
+		return;
+
+	int nx, ny;
+	GetRenderSize(nx, ny);
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color;
+	if (glbin_settings.m_clear_color_bg)
+		clear_color = { 
+			static_cast<float>(m_bg_color.r()),
+			static_cast<float>(m_bg_color.g()),
+			static_cast<float>(m_bg_color.b()), 0.0f };
+	else
+		clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float zoom = m_scale_factor;
+	float sf121 = Get121ScaleFactor();
+
+	m_mvr->set_blend_slices(glbin_settings.m_micro_blend);
+
+	m_mvr->clear_vr();
+	for (auto it = list.begin(); it != list.end(); ++it)
+	{
+		auto vd = it->lock();
+		if (vd && vd->GetDisp())
+		{
+			flvr::VolumeRenderer* vr = vd->GetVR();
+			if (vr)
+			{
+				//drawlabel
+				if (vd->GetLabelMode() &&
+					vd->GetMask(false) &&
+					vd->GetLabel(false))
+					vd->SetMaskMode(4);
+				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				vr->set_zoom(zoom, sf121);
+				m_mvr->add_vr(vr);
+				m_mvr->SetNoiseRed(vr->GetNoiseRed());
+			}
+		}
+	}
+
+	if (m_mvr->get_vr_num() <= 0)
+		return;
+	m_mvr->set_depth_peel(peel);
+
+	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
+	//generate textures & buffer objects
+	//frame buffer for each volume
+	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
+	assert(chan_buffer);
+
+	//bind the fbo
+	glbin_framebuffer_manager.bind(chan_buffer);
+
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
+		flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		chan_buffer->clear(true, false);
+		flvr::TextureRenderer::reset_clear_chan_buffer();
+	}
+
+	//draw multiple volumes at the same time
+	m_mvr->set_viewport(vp);
+	m_mvr->set_clear_color(clear_color);
+	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
+
+	//draw shadows
+	DrawOverlayShadowVolume(list);
+
+	//bind fbo for final composition
+	//data_buffer->set_blend_enabled(true);
+	//data_buffer->set_blend_func(flvr::BlendFactor::One,
+	//	m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One :flvr::BlendFactor::OneMinusSrcAlpha);
+	//data_buffer->set_depth_test_enabled(false);
+	data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	glbin_framebuffer_manager.bind(data_buffer);
+	//build mipmap
+	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
+	chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+
+	//2d adjustment
+	auto img_shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR, 0));
+	assert(img_shader);
+	img_shader->bind();
+
+	fluo::Color gamma, brightness, hdr;
+	std::shared_ptr<VolumeData> vd;
+	if (!list.empty())
+		vd = list[0].lock();
+	if (vd)
+	{
+		gamma = vd->GetGammaColor();
+		brightness = vd->GetBrightness();
+		hdr = vd->GetHdr();
+		img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+		img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+		img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
+	}
+	//2d adjustment
+
+	DrawViewQuad();
+
+	img_shader->unbind();
+	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+}
+
 //Draw the volmues with compositing
 //peel==true -- depth peeling
 void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& list, bool mask, int peel)
@@ -6241,15 +6364,6 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 	if (mask && cnt_mask == 0)
 		return;
 
-	//int nx, ny;
-	//GetRenderSize(nx, ny);
-
-	//generate textures & buffer objects
-	//frame buffer for each volume
-	//auto chan_buffer = glbin_framebuffer_manager.framebuffer(
-	//	flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
-	//assert(chan_buffer);
-
 	//draw each volume to fbo
 	for (auto it = list.begin(); it != list.end(); ++it)
 	{
@@ -6267,19 +6381,18 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
 			{
 				vd->SetMaskMode(1);
-				int vol_method = m_vol_method;
-				m_vol_method = VOL_METHOD_COMP;
+				ChannelMixModeGuard cmg(*this);
+				m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 				if (vd->GetRenderMode() == flvr::RenderMode::Mip)
-					DrawVolumeMip(vd, peel);
+					DrawVolumeCompMip(vd, peel);
 				else
-					DrawVolumeStandard(vd, mask, peel);
+					DrawVolumeCompStandard(vd, mask, peel);
 				vd->SetMaskMode(0);
-				m_vol_method = vol_method;
 			}
 		}
 		else
 		{
-			if (vd->GetBlendMode() != 2)
+			if (vd->GetChannelMixMode() != ChannelMixMode::Depth)
 			{
 				//drawlabel
 				if (vd->GetLabelMode() &&
@@ -6288,15 +6401,15 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 					vd->SetMaskMode(4);
 
 				if (vd->GetRenderMode() == flvr::RenderMode::Mip)
-					DrawVolumeMip(vd, peel);
+					DrawVolumeCompMip(vd, peel);
 				else
-					DrawVolumeStandard(vd, mask, peel);
+					DrawVolumeCompStandard(vd, mask, peel);
 			}
 		}
 	}
 }
 
-void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
+void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 {
 	auto vd = vd_ptr.lock();
 	if (!vd)
@@ -6519,7 +6632,8 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 	data_buffer->set_blend_func(flvr::BlendFactor::One,
-		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
+		m_channel_mix_mode == ChannelMixMode::CompositeAdd ?
+		flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
 	data_buffer->set_depth_test_enabled(false);
 	data_buffer->apply_state();
 
@@ -6543,7 +6657,7 @@ void RenderView::DrawVolumeMip(const std::weak_ptr<VolumeData>& vd_ptr, int peel
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
-void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)
+void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)
 {
 	auto vd = vd_ptr.lock();
 	if (!vd)
@@ -6690,7 +6804,8 @@ void RenderView::DrawVolumeStandard(const std::weak_ptr<VolumeData>& vd_ptr, boo
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 	data_buffer->set_blend_func(flvr::BlendFactor::One,
-		m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
+		m_channel_mix_mode == ChannelMixMode::CompositeAdd ?
+		flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
 	data_buffer->set_depth_test_enabled(false);
 	data_buffer->apply_state();
 
@@ -9021,7 +9136,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 
 	if (glbin_settings.m_test_wiref)
 	{
-		if (m_vol_method == VOL_METHOD_MULTI && m_mvr)
+		if (m_channel_mix_mode == ChannelMixMode::Depth && m_mvr)
 		{
 			str = L"SLICES: " + std::to_wstring(m_mvr->get_slice_num());
 			px = static_cast<float>(gapw - nx / 2.0);

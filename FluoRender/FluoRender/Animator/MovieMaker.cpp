@@ -932,8 +932,8 @@ void MovieMaker::InsertKey(int index)
 	flkey = new FlKeyDouble(keycode, scale);
 	glbin_interpolator.AddKey(flkey);
 	//intermixing mode
-	int ival = view->GetVolMethod();
-	keycode.l2_name = "volmethod";
+	int ival = static_cast<int>(view->GetChannelMixMode());
+	keycode.l2_name = "channel_mix_mode";
 	flkeyI = new FlKeyInt(keycode, ival);
 	glbin_interpolator.AddKey(flkeyI);
 	//camera mode

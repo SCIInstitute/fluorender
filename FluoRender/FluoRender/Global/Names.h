@@ -209,7 +209,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstTime "time"
 #define gstBits "bits"
 //render modes
-#define gstBlendMode "blend mode"
+#define gstChannelMixMode "channel mix mode"
 #define gstRenderMode "render mode"
 #define gstOverlayMode "overlay mode"
 #define gstMaskMode "mask mode"

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 
 class VolumeData;
+enum class ChannelMixMode : int;
 namespace flvr
 {
 	enum class RenderMode : int;
@@ -112,7 +113,8 @@ public:
 	}
 
 	//group blend mode
-	int GetBlendMode();
+	void SetChannelMixMode(ChannelMixMode mode);
+	ChannelMixMode GetChannelMixMode();
 
 	//set gamma to all
 	void SetGammaAll(const fluo::Color &gamma);
@@ -183,9 +185,6 @@ public:
 
 	//use ml
 	void ApplyMlVolProp();
-
-	//blend mode
-	void SetBlendMode(int mode);
 
 	//sync prop
 	void SetVolumeSyncProp(bool bVal)

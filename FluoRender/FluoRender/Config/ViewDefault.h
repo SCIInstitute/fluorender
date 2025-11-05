@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 
 class RenderView;
+enum class ChannelMixMode : int;
 class ViewDefault
 {
 public:
@@ -46,7 +47,7 @@ public:
 
 public:
 	//default values
-	int m_vol_method;
+	ChannelMixMode m_channel_mix_mode;
 	fluo::Color m_bg_color;
 	bool m_draw_camctr;
 	double m_camctr_size;

@@ -480,8 +480,8 @@ void Project::Open(const std::wstring& filename)
 						if (fconfig->Read("noise_red", &bval))
 							vd->SetNR(bval);
 						//depth override
-						if (fconfig->Read("depth_ovrd", &ival))
-							vd->SetBlendMode(ival);
+						if (fconfig->Read("channel_mix_mode", &ival))
+							vd->SetChannelMixMode(static_cast<ChannelMixMode>(ival));
 
 						//shadow
 						if (fconfig->Read("shadow", &bval))
@@ -862,8 +862,8 @@ void Project::Open(const std::wstring& filename)
 				}
 				if (fconfig->Read("backgroundcolor", &cval))
 					view->SetBackgroundColor(cval);
-				if (fconfig->Read("volmethod", &ival))
-					view->SetVolMethod(ival);
+				if (fconfig->Read("channel_mix_mode", &ival))
+					view->SetChannelMixMode(static_cast<ChannelMixMode>(ival));
 				if (fconfig->Read("fog", &bval))
 					view->SetFog(bval);
 				if (fconfig->Read("fogintensity", &dval))
@@ -1466,7 +1466,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			//noise reduction
 			fconfig->Write("noise_red", vd->GetNR());
 			//depth override
-			fconfig->Write("depth_ovrd", vd->GetBlendMode());
+			fconfig->Write("channel_mix_mode", static_cast<int>(vd->GetChannelMixMode()));
 
 			//shadow
 			fconfig->Write("shadow", vd->GetShadowEnable());
@@ -1682,7 +1682,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("farclip", view->GetFarClip());
 			fconfig->Write("backgroundcolor", view->GetBackgroundColor());
 			fconfig->Write("drawtype", view->GetDrawType());
-			fconfig->Write("volmethod", view->GetVolMethod());
+			fconfig->Write("channel_mix_mode", static_cast<int>(view->GetChannelMixMode()));
 			fconfig->Write("fog", view->GetFog());
 			fconfig->Write("fogintensity", view->GetFogIntensity());
 			fconfig->Write("draw_camctr", view->m_draw_camctr);

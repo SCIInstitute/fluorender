@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 class VolumeData;
 class VolumeGroup;
+enum class ChannelMixMode : int;
 namespace flvr
 {
 	enum class RenderMode : int;
@@ -109,7 +110,7 @@ public:
 	//transparent
 	bool m_transparent;
 	//blend mode
-	int m_blend_mode;	//0: ignore; 1: layered; 2: depth; 3: composite
+	ChannelMixMode m_channel_mix_mode;
 	//shown in legend
 	bool m_legend;
 	//lable
