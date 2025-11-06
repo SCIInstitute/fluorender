@@ -79,8 +79,8 @@ out uint FragUint;
 
 inline constexpr const char* SEG_UNIFORMS_PARAMS = R"GLSHDR(
 //SEG_UNIFORMS_PARAMS
-uniform vec4 loc7;//(ini_thresh, gm_falloff, scl_falloff, scl_translate)
-uniform vec4 loc8;//(weight_2d, post_bins, zoom, 0)
+uniform vec4 loc20;//(ini_thresh, gm_falloff, scl_falloff, scl_translate)
+uniform vec4 loc21;//(weight_2d, post_bins, zoom, 0)
 )GLSHDR";
 
 inline constexpr const char* SEG_TAIL = R"GLSHDR(
@@ -101,7 +101,7 @@ inline constexpr const char* SEG_BODY_WEIGHT = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_BLEND_WEIGHT = R"GLSHDR(
 	//SEG_BODY_BLEND_WEIGHT
-	c = loc8.x>1.0?c*loc8.x*weight2d:(1.0-loc8.x)*c+loc8.x*c*weight2d;
+	c = loc21.x>1.0?c*loc21.x*weight2d:(1.0-loc21.x)*c+loc21.x*c*weight2d;
 )GLSHDR";
 
 inline constexpr const char* SEG_BODY_INIT_CLEAR = R"GLSHDR(
@@ -142,7 +142,7 @@ inline constexpr const char* SEG_BODY_INIT_CULL_POINT = R"GLSHDR(
 		any(greaterThan(s.xy, vec2(1.0, 1.0))))
 		discard;
 	float dist = length(s.xy*loc6.zw - loc6.xy);
-	if (dist > loc8.w * 0.6)
+	if (dist > loc21.w * 0.6)
 		discard;
 )GLSHDR";
 
@@ -153,7 +153,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HEAD = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_APPEND = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_APPEND
-	FragColor = vec4(c.x>0.0?(c.x>loc7.x?1.0:0.0):0.0);
+	FragColor = vec4(c.x>0.0?(c.x>loc20.x?1.0:0.0):0.0);
 )GLSHDR";
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_ERASE = R"GLSHDR(
@@ -168,7 +168,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_DIFFUSE = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_FLOOD = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_FLOOD
-	FragColor = vec4(c.x>0.0?(c.x>loc7.x?1.0:0.0):0.0);
+	FragColor = vec4(c.x>0.0?(c.x>loc20.x?1.0:0.0):0.0);
 )GLSHDR";
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_ALL = R"GLSHDR(
@@ -178,7 +178,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_ALL = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_HR_ORTHO = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_HR_ORTHO
-	if (c.x <= loc7.x)
+	if (c.x <= loc20.x)
 		discard;
 	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);
 	vec3 step = cv.xyz;
@@ -187,7 +187,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_ORTHO = R"GLSHDR(
 	vec3 ray = t.xyz;
 	vec4 cray;
 	bool flag = false;
-	float th = loc7.x<0.01?0.01:loc7.x;
+	float th = loc20.x<0.01?0.01:loc20.x;
 	while (true)
 	{
 		ray += step;
@@ -209,7 +209,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_ORTHO = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_HR_PERSP = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_HR_PERSP
-	if (c.x <= loc7.x)
+	if (c.x <= loc20.x)
 		discard;
 	vec4 cv = matrix3 * vec4(0.0, 0.0, 0.0, 1.0);
 	cv = cv / cv.w;
@@ -219,7 +219,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_PERSP = R"GLSHDR(
 	vec3 ray = t.xyz;
 	vec4 cray;
 	bool flag = false;
-	float th = loc7.x<0.01?0.01:loc7.x;
+	float th = loc20.x<0.01?0.01:loc20.x;
 	while (true)
 	{
 		ray += step;
@@ -266,8 +266,8 @@ inline constexpr const char* SEG_BODY_DB_GROW_STOP_FUNC = R"GLSHDR(
 		discard;
 	v.x = c.x>1.0?1.0:c.x;
 	float stop = 
-		(loc7.y>=1.0?1.0:(v.y>sqrt(loc7.y)*2.12?0.0:exp(-v.y*v.y/loc7.y)))*
-		(v.x>loc7.w?1.0:(loc7.z>0.0?(v.x<loc7.w-sqrt(loc7.z)*2.12?0.0:exp(-(v.x-loc7.w)*(v.x-loc7.w)/loc7.z)):0.0));
+		(loc20.y>=1.0?1.0:(v.y>sqrt(loc20.y)*2.12?0.0:exp(-v.y*v.y/loc20.y)))*
+		(v.x>loc20.w?1.0:(loc20.z>0.0?(v.x<loc20.w-sqrt(loc20.z)*2.12?0.0:exp(-(v.x-loc20.w)*(v.x-loc20.w)/loc20.z)):0.0));
 	if (stop == 0.0)
 		discard;
 )GLSHDR";
@@ -303,11 +303,11 @@ inline constexpr const char* SEG_BODY_DB_GROW_BLEND_APPEND_BODY = R"GLSHDR(
 			max_nb = nb;
 		}
 	}
-	if (loc7.y>0.0)
+	if (loc20.y>0.0)
 	{
-		m = texture(tex0, max_nb).x + loc7.y;
+		m = texture(tex0, max_nb).x + loc20.y;
 		mx = texture(tex0, t.stp).x;
-		if (m < mx || m - mx > 2.0*loc7.y)
+		if (m < mx || m - mx > 2.0*loc20.y)
 			discard;
 	}
 	FragColor += cc*stop;

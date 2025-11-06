@@ -205,7 +205,7 @@ bool ShaderProgram::create()
 {
 	// create the GLSL program and attach the shader
 	id_ = glCreateProgram();
-	if (id_ == 0) return true;
+	if (id_ == 0) return false;
 	valid_ = true;
 
 	GLuint v_shader = 0;
@@ -214,12 +214,12 @@ bool ShaderProgram::create()
 
 	v_shader = glCreateShader(GL_VERTEX_SHADER);
 	f_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	if (v_shader == 0 || f_shader == 0) return true;
+	if (v_shader == 0 || f_shader == 0) return false;
 	if (use_geom_shader_)
 	{
 		g_shader = glCreateShader(GL_GEOMETRY_SHADER);
 		if (g_shader == 0)
-			return true;
+			return false;
 	}
 
 	GLint shader_status[1];
@@ -244,9 +244,9 @@ bool ShaderProgram::create()
 		std::string str = shader_log;
 		std::wstring wstr = L"Error compiling vertex shader: " + s2ws(str) + L"\n";
 		DBGPRINT(wstr.c_str());
-		//std::cerr << "Error compiling vertex shader: " << shader_log << std::endl;
 #endif
 		attach_vert = false;
+		valid_ = false;
 	}
 
 	// set the source code and compile the shader // fragment
@@ -269,6 +269,7 @@ bool ShaderProgram::create()
 		//std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
 #endif
 		attach_frag = false;
+		valid_ = false;
 	}
 
 	bool attach_geom = false;
@@ -293,7 +294,8 @@ bool ShaderProgram::create()
 			DBGPRINT(wstr.c_str());
 			//std::cerr << "Error compiling geometry shader: " << shader_log << std::endl;
 #endif
-			attach_frag = false;
+			attach_geom = false;
+			valid_ = false;
 		}
 	}
 
@@ -316,7 +318,8 @@ bool ShaderProgram::create()
 		DBGPRINT(wstr.c_str());
 		//std::cerr << "Error linking shaders: " << shader_log << std::endl;
 #endif
-		return true;
+		valid_ = false;
+		return false;
 	}
 
 	glUseProgram(id_);
@@ -368,14 +371,6 @@ bool ShaderProgram::create()
 	}
 	glActiveTexture(GL_TEXTURE0);
 
-	//glValidateProgram(id_);
-	//glGetProgramiv(id_, GL_VALIDATE_STATUS, shader_status);
-	//if (shader_status[0] == GL_FALSE)
-	//{
-	//	glGetProgramInfoLog(id_, sizeof(shader_log), shader_length, shader_log);
-	//	std::cerr << "Invalid shader program: " << shader_log << std::endl;
-	//	return true;
-	//}
 	return true;
 }
 

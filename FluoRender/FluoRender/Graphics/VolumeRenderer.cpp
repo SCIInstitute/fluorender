@@ -918,19 +918,15 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	seg_shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
 	seg_shader->setLocalParam(6, mp_[0], viewport_[3] - mp_[1], viewport_[2], viewport_[3]);
 	seg_shader->setLocalParam(9, mvec_.x(), mvec_.y(), mvec_.z(), 0);
+	//gm
+	seg_shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
 	//alpha & luminance
 	seg_shader->setLocalParam(18, alpha_, alpha_power_, luminance_, 0.0);
 
-	//setup depth peeling
-	//if (depth_peel_)
-	//	seg_shader->setLocalParam(7, 1.0/double(w2), 1.0/double(h2), 0.0, 0.0);
-
 	//thresh1
-	seg_shader->setLocalParam(7, ini_thresh, gm_falloff, scl_falloff, scl_translate);
+	seg_shader->setLocalParam(20, ini_thresh, gm_falloff, scl_falloff, scl_translate);
 	//w2d
-	seg_shader->setLocalParam(8, w2d, bins, zoom_, zoom_data_);
-	//gm
-	seg_shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
+	seg_shader->setLocalParam(21, w2d, bins, zoom_, zoom_data_);
 
 	//set clipping planes
 	double abcd[4];

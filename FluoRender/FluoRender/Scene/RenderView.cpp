@@ -8089,12 +8089,14 @@ void RenderView::GenerateBrushStrokes()
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderColor, nx, ny, gstRBPaintBrush);
 	assert(paint_buffer);
+	flvr::FramebufferStateGuard fbg(*paint_buffer);
 	paint_buffer->set_blend_equation(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
 	glbin_framebuffer_manager.bind(paint_buffer);
 	//clear if asked so
 	if (m_clear_paint)
 	{
 		paint_buffer->clear(true, false);
+		DBGPRINT(L"Paint cleared\n");
 		m_clear_paint = false;
 	}
 
@@ -8162,6 +8164,7 @@ void RenderView::GenerateBrushStrokes()
 		paint_shader->setLocalParam(0, cx, cy,
 			radius1*pressure,
 			radius2*pressure);
+		//DBGPRINT(L"Generate stroke: cx: %f, cy: %f, r1: %f, r2: %f\n", cx, cy, radius1 * pressure, radius2 * pressure);
 		//draw a square
 		DrawViewQuad();
 	}
