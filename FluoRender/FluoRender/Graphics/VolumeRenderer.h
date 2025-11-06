@@ -105,6 +105,8 @@ namespace flvr
 		double get_mask_thresh() { return mask_thresh_; }
 		void set_alpha(double alpha) { alpha_ = alpha; }
 		double get_alpha() { return alpha_; }
+		void set_alpha_power(double val) { alpha_power_ = val; }
+		double get_alpha_power() { return alpha_power_; }
 		void set_luminance(double luminance) { luminance_ = luminance; }
 		double get_luminance() { return luminance_; }
 
@@ -115,9 +117,14 @@ namespace flvr
 
 		//colormap mode
 		void set_colormap_inv(double val) { colormap_inv_ = val; }
+		double get_colormap_inv() { return colormap_inv_; }
 		void set_color_mode(ColorMode mode) { color_mode_ = mode; }
+		ColorMode get_color_mode() { return color_mode_; }
 		void set_colormap_values(double low, double hi) { colormap_low_value_ = low; colormap_hi_value_ = hi; }
+		double get_colormap_low() { return colormap_low_value_; }
+		double get_colormap_high() { return colormap_hi_value_; }
 		void set_colormap(int value) { colormap_ = value; }
+		int get_colormap() { return colormap_; }
 		void set_colormap_proj(ColormapProj value) { colormap_proj_ = value; }
 
 		//label color shuffling
@@ -186,10 +193,6 @@ namespace flvr
 		//inversion
 		void set_inversion(bool mode) { inv_ = mode; }
 		bool get_inversion() { return inv_; }
-
-		//alpha power
-		void set_alpha_power(double val) { alpha_power_ = val; }
-		double get_alpha_power() { return alpha_power_; }
 
 		//compression
 		void set_compression(bool compression) { compression_ = compression; }

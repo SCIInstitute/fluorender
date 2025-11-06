@@ -813,8 +813,8 @@ private:
 	void DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd, int peel = 0);
 	void DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
 	//effect overlays
-	void DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd);
-	void DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>> &list);
+	void DrawOverlayShadingVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
+	void DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
 	void DrawOverlayShadowMesh(double darkenss);
 	//get mesh shadow
 	bool CheckMeshShadowExist(double &val);

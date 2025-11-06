@@ -6235,25 +6235,65 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 		clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float zoom = m_scale_factor;
 	float sf121 = Get121ScaleFactor();
+	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
 	m_mvr->set_blend_slices(glbin_settings.m_micro_blend);
 
 	m_mvr->clear_vr();
-	for (auto it = list.begin(); it != list.end(); ++it)
+	//set up guard
+	std::vector<flvr::RenderModeGuard> guards;
+	flvr::ColorMode color_mode;
+	int colormap = 0;
+	double colormap_low, colormap_hi, colormap_inv;
+	fluo::Color vol_color, mask_color;
+	double alpha, alpha_power, luminance;
+	fluo::Color gamma, brightness, hdr;
+	bool first = true;
+	for (auto it = list.begin(); it != list.end(); ++it, first = false)
 	{
 		auto vd = it->lock();
 		if (vd && vd->GetDisp())
 		{
+			color_mode = vd->GetColorMode();
+			if (first)
+			{
+				colormap = vd->GetColormap();
+				colormap_low = vd->GetColormapLow();
+				colormap_hi = vd->GetColormapHigh();
+				colormap_inv = vd->GetColormapInv();
+				vol_color = vd->GetColor();
+				mask_color = vd->GetMaskColor();
+				alpha = vd->GetAlpha();
+				alpha_power = vd->GetAlphaPower();
+				luminance = vd->GetLuminance();
+				gamma = vd->GetGammaColor();
+				brightness = vd->GetBrightness();
+				hdr = vd->GetHdr();
+			}
 			flvr::VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
+				guards.emplace_back(*vr);
+				//turn off colormap proj
+				if (color_mode == flvr::ColorMode::SingleColor)
+				{
+					//normal mip
+					vr->set_colormap_proj(flvr::ColormapProj::Disabled);
+					vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				}
+				else
+				{
+					//white mip
+					vr->set_color_mode(flvr::ColorMode::SingleColor);
+					vr->set_color(fluo::Color(1.0));
+					vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
+				}
 				//drawlabel
 				if (vd->GetLabelMode() &&
 					vd->GetMask(false) &&
 					vd->GetLabel(false))
 					vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				vr->set_zoom(zoom, sf121);
 				m_mvr->add_vr(vr);
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -6274,21 +6314,74 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	assert(chan_buffer);
 
 	//bind the fbo
-	glbin_framebuffer_manager.bind(chan_buffer);
-
-	if (!glbin_settings.m_mem_swap ||
+	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
+	assert(overlay_buffer);
+	overlay_buffer->set_blend_enabled(true);
+	glbin_framebuffer_manager.bind(overlay_buffer);
+	bool clear = !glbin_settings.m_mem_swap ||
 		(glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_clear_chan_buffer()))
-	{
-		chan_buffer->clear(true, false);
-		flvr::TextureRenderer::reset_clear_chan_buffer();
-	}
+			flvr::TextureRenderer::get_clear_chan_buffer());
+	overlay_buffer->clear(true, false);
+	//glbin_framebuffer_manager.bind(chan_buffer);
+
+	//if (!glbin_settings.m_mem_swap ||
+	//	(glbin_settings.m_mem_swap &&
+	//	flvr::TextureRenderer::get_clear_chan_buffer()))
+	//{
+	//	chan_buffer->clear(true, false);
+	//	flvr::TextureRenderer::reset_clear_chan_buffer();
+	//}
 
 	//draw multiple volumes at the same time
 	m_mvr->set_viewport(vp);
 	m_mvr->set_clear_color(clear_color);
 	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
 
+	chan_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	glbin_framebuffer_manager.bind(chan_buffer);
+	if (clear)
+	{
+		chan_buffer->clear(true, false);
+		flvr::TextureRenderer::reset_clear_chan_buffer();
+	}
+
+	overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+	if (color_mode == flvr::ColorMode::SingleColor)
+	{
+		img_shader = glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
+		assert(img_shader);
+		img_shader->bind();
+	}
+	else
+	{
+		//2d adjustment
+		img_shader = glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(
+				IMG_SHDR_GRADIENT_PROJ_MAP, colormap));
+		assert(img_shader);
+		img_shader->bind();
+
+		img_shader->setLocalParam(
+			6, colormap_low, colormap_hi, colormap_hi - colormap_low, colormap_inv);
+		img_shader->setLocalParam(
+			9, vol_color.r(), vol_color.g(), vol_color.b(), 0.0);
+		img_shader->setLocalParam(
+			16, mask_color.r(), mask_color.g(), mask_color.b(), 0.0);
+		img_shader->setLocalParam(
+			18, alpha, alpha_power, luminance, 0.0);
+		//2d adjustment
+	}
+
+	DrawViewQuad();
+
+	img_shader->unbind();
+
+	overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+
+	//draw shading
+	DrawOverlayShadingVolume(list);
 	//draw shadows
 	DrawOverlayShadowVolume(list);
 
@@ -6297,31 +6390,29 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	//data_buffer->set_blend_func(flvr::BlendFactor::One,
 	//	m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One :flvr::BlendFactor::OneMinusSrcAlpha);
 	//data_buffer->set_depth_test_enabled(false);
-	data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	//data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 	glbin_framebuffer_manager.bind(data_buffer);
 	//build mipmap
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
+	data_buffer->set_blend_enabled(true);
+	data_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+	data_buffer->set_blend_func(flvr::BlendFactor::One,
+		m_channel_mix_mode == ChannelMixMode::CompositeAdd ?
+		flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
+	data_buffer->set_depth_test_enabled(false);
+	data_buffer->apply_state();
+
 	//2d adjustment
-	auto img_shader = glbin_shader_manager.shader(gstImgShader,
+	img_shader = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHDR_BRIGHTNESS_CONTRAST_HDR, 0));
 	assert(img_shader);
 	img_shader->bind();
 
-	fluo::Color gamma, brightness, hdr;
-	std::shared_ptr<VolumeData> vd;
-	if (!list.empty())
-		vd = list[0].lock();
-	if (vd)
-	{
-		gamma = vd->GetGammaColor();
-		brightness = vd->GetBrightness();
-		hdr = vd->GetHdr();
-		img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
-		img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
-		img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
-	}
+	img_shader->setLocalParam(0, gamma.r(), gamma.g(), gamma.b(), 1.0);
+	img_shader->setLocalParam(1, brightness.r(), brightness.g(), brightness.b(), 1.0);
+	img_shader->setLocalParam(2, hdr.r(), hdr.g(), hdr.b(), 0.0);
 	//2d adjustment
 
 	DrawViewQuad();
@@ -6430,9 +6521,11 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	std::shared_ptr<flvr::ShaderProgram> img_shader;
 
 	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
 	auto chan_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBChannel);
 	assert(chan_buffer);
+
 	std::shared_ptr<flvr::Framebuffer> overlay_buffer;
 	if (do_mip)
 	{
@@ -6449,8 +6542,6 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 			assert(temp_buffer);
 			glbin_framebuffer_manager.bind(temp_buffer);
 			temp_buffer->clear(true, false);
-			auto data_buffer = GetDataFramebuffer();
-			assert(data_buffer);
 			data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -6506,8 +6597,6 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 			vr->set_color_mode(flvr::ColorMode::SingleColor);
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
-			//vr->set_solid(true);
-			//vr->set_alpha(1.0);
 		}
 		//draw
 		vd->SetStreamMode(1);
@@ -6576,20 +6665,18 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
 
+	std::vector<std::weak_ptr<VolumeData>> list;
+	list.push_back(vd);
 	if (shading)
 	{
-		DrawOverlayShadingMip(vd);
+		DrawOverlayShadingVolume(list);
 	}
-
 	if (shadow)
 	{
-		std::vector<std::weak_ptr<VolumeData>> list;
-		list.push_back(vd);
 		DrawOverlayShadowVolume(list);
 	}
 
 	//bind fbo for final composition
-	assert(data_buffer);
 	glbin_framebuffer_manager.bind(data_buffer);
 
 	if (glbin_settings.m_mem_swap)
@@ -6613,6 +6700,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		temp_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
 
+	//build mipmap
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
@@ -6816,21 +6904,35 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
-void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
+void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<VolumeData>>& list)
 {
+	if (list.empty())
+		return;
 	if (glbin_settings.m_mem_swap &&
 		!flvr::TextureRenderer::get_done_current_chan())
 		return;
 
-	auto vd = vd_ptr.lock();
-	if (!vd)
-		return;
-	flvr::VolumeRenderer* vr = vd->GetVR();
-	if (!vr)
-		return;
-
 	int nx, ny;
 	GetRenderSize(nx, ny);
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	bool has_shading = false;
+	std::vector<std::weak_ptr<VolumeData>> local_list;
+	//generate list
+	for (auto it = list.begin(); it != list.end(); ++it)
+	{
+		auto vd = it->lock();
+		if (vd && vd->GetShadingEnable())
+		{
+			local_list.push_back(vd);
+			has_shading = true;
+		}
+	}
+
+	if (!has_shading)
+		return;
+
 	//if (glbin_settings.m_mem_swap &&
 	//	flvr::TextureRenderer::get_start_update_loop() &&
 	//	!flvr::TextureRenderer::get_done_update_loop())
@@ -6847,42 +6949,97 @@ void RenderView::DrawOverlayShadingMip(const std::weak_ptr<VolumeData>& vd_ptr)
 	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 	assert(overlay_buffer);
-	overlay_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
+	overlay_buffer->set_clear_color(clear_color);
 	glbin_framebuffer_manager.bind(overlay_buffer);
-	overlay_buffer->clear(true, false);
 
-	flvr::RenderModeGuard rmg(*vr);
-	vr->set_shading(true);
-	vr->set_solid(false);
-	vr->set_mode(flvr::RenderMode::Standard);
-	vr->set_color_mode(flvr::ColorMode::SingleColor);
-	vr->set_color(fluo::Color(1.0));
-	vd->SetStreamMode(2);
-	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
-	//restore after guard exits
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		overlay_buffer->clear(true, false);
+		flvr::TextureRenderer::reset_clear_chan_buffer();
+	}
 
-	//bind fbo for final composition
-	auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
-	assert(chan_buffer);
-	flvr::FramebufferStateGuard fbg(*chan_buffer);
-	chan_buffer->set_blend_enabled(true);
-	chan_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
-	glbin_framebuffer_manager.bind(chan_buffer);
+	if (local_list.size() == 1)
+	{
+		auto vd = local_list[0].lock();
+		assert(vd);
+		auto vr = vd->GetVR();
+		assert(vr);
 
-	//ok to unprotect
-	overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+		//save
+		flvr::RenderModeGuard rmg(*vr);
+		//set to draw white shading
+		vr->set_shading(true);
+		vr->set_solid(false);
+		vr->set_mode(flvr::RenderMode::Standard);
+		vr->set_color_mode(flvr::ColorMode::SingleColor);
+		vr->set_color(fluo::Color(1.0));
+		//draw
+		vd->SetStreamMode(2);
+		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		vd->SetViewport(vp);
+		vd->SetClearColor(clear_color);
+		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
+	}
+	else if (!local_list.empty())
+	{
+		assert(m_mvr);
 
-	auto img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
-	assert(img_shader);
-	img_shader->bind();
+		m_mvr->clear_vr();
+		std::vector<flvr::RenderModeGuard> rmgs;
+		for (auto it = local_list.begin(); it != local_list.end(); ++it)
+		{
+			auto vd = it->lock();
+			if (!vd)
+				continue;
+			auto vr = vd->GetVR();
+			assert(vr);
 
-	DrawViewQuad();
+			//save
+			rmgs.emplace_back(*vr);
+			vr->set_shading(true);
+			vr->set_solid(false);
+			vr->set_mode(flvr::RenderMode::Standard);
+			vr->set_color_mode(flvr::ColorMode::SingleColor);
+			vr->set_color(fluo::Color(1.0));
+			vd->SetStreamMode(2);
+			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			m_mvr->add_vr(vr);
+			m_mvr->SetNoiseRed(vr->GetNoiseRed());
+		}
+		//draw
+		m_mvr->set_viewport(vp);
+		m_mvr->set_clear_color(clear_color);
+		m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
+	}
 
-	img_shader->unbind();
-	overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		//bind fbo for final composition
+		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
+		assert(chan_buffer);
+		flvr::FramebufferStateGuard fbg(*chan_buffer);
+		chan_buffer->set_blend_enabled(true);
+		chan_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
+		glbin_framebuffer_manager.bind(chan_buffer);
+
+		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+
+		auto img_shader = glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
+		assert(img_shader);
+		img_shader->bind();
+
+		DrawViewQuad();
+
+		img_shader->unbind();
+		overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+	}
 }
 
 void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>> &list)
@@ -6931,7 +7088,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 	assert(overlay_buffer);
 	overlay_buffer->set_blend_enabled(false);
-	overlay_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
+	overlay_buffer->set_clear_color(clear_color);
 	glbin_framebuffer_manager.bind(overlay_buffer);
 
 	if (!glbin_settings.m_mem_swap ||
