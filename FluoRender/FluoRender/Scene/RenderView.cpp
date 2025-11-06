@@ -8089,9 +8089,10 @@ void RenderView::GenerateBrushStrokes()
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderColor, nx, ny, gstRBPaintBrush);
 	assert(paint_buffer);
-	flvr::FramebufferStateGuard fbg(*paint_buffer);
+	paint_buffer->set_blend_enabled(true);
 	paint_buffer->set_blend_equation(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
-	glbin_framebuffer_manager.bind(paint_buffer);
+	paint_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
+	auto fbg = glbin_framebuffer_manager.bind_scoped(paint_buffer);
 	//clear if asked so
 	if (m_clear_paint)
 	{
