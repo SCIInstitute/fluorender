@@ -476,22 +476,16 @@ void VolumeRenderer::draw_volume(
 	fluo::Vector light = view_ray.direction();
 	light.safe_normalize();
 	shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
-	if (shading_)
-		shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
-	else
-		shader->setLocalParam(1, 2.0 - ambient_, 0.0, specular_, shine_);
-
-	//spacings
-	double spcx, spcy, spcz;
-	tex->get_spacings(spcx, spcy, spcz);
-	shader->setLocalParam(5,
-		spcx == 0.0 ? 1.0 : spcx,
-		spcy == 0.0 ? 1.0 : spcy,
-		spcz == 0.0 ? 1.0 : spcz, shuffle_);
-
+	shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
 	//transfer function
 	shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 	shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
+
+	//spacings
+	double spcx = 1, spcy = 1, spcz = 1;
+	tex->get_spacings(spcx, spcy, spcz);
+	shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
+
 	shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 		colormap_hi_value_ - colormap_low_value_, colormap_inv_);
 	//color

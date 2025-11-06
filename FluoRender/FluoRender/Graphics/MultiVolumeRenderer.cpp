@@ -511,9 +511,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->colormap_proj_ == ColormapProj::Gradient ||
 				vr_list_[tn]->colormap_proj_ == ColormapProj::Normal;
 			auto tex = vr_list_[tn]->tex_.lock();
-			int nc = 0;
-			if (tex)
-				nc = tex->nc();
+			assert(tex);
+			int nc = tex->nc();
 			shader = glbin_shader_manager.shader(gstVolShader,
 				ShaderParams::Volume(
 					false,
@@ -580,6 +579,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->shading_ ? vr_list_[tn]->diffuse_ : 0.0,
 				vr_list_[tn]->specular_,
 				vr_list_[tn]->shine_);
+			//transfer function
 			shader->setLocalParam(2,
 				vr_list_[tn]->inv_ ?
 				-vr_list_[tn]->scalar_scale_ :
@@ -591,22 +591,30 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->lo_offset_,
 				vr_list_[tn]->hi_offset_,
 				vr_list_[tn]->sw_);
+
+			//spacings
 			double spcx = 1, spcy = 1, spcz = 1;
-			if (tex)
-				tex->get_spacings(spcx, spcy, spcz);
+			tex->get_spacings(spcx, spcy, spcz);
 			shader->setLocalParam(5, spcx, spcy, spcz, vr_list_[tn]->shuffle_);
-				shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
-					vr_list_[tn]->colormap_hi_value_,
-					vr_list_[tn]->colormap_hi_value_ - vr_list_[tn]->colormap_low_value_,
-					vr_list_[tn]->colormap_inv_);
+
+			//colormap
+			shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
+				vr_list_[tn]->colormap_hi_value_,
+				vr_list_[tn]->colormap_hi_value_ - vr_list_[tn]->colormap_low_value_,
+				vr_list_[tn]->colormap_inv_);
+			//color
 			shader->setLocalParam(9, vr_list_[tn]->color_.r(),
 				vr_list_[tn]->color_.g(), vr_list_[tn]->color_.b(),
 				vr_list_[tn]->alpha_power_);
 			shader->setLocalParam(16, vr_list_[tn]->mask_color_.r(),
 				vr_list_[tn]->mask_color_.g(), vr_list_[tn]->mask_color_.b(),
 				vr_list_[tn]->mask_thresh_);
+			//gm
 			shader->setLocalParam(17, vr_list_[tn]->gm_low_,
 				vr_list_[tn]->gm_high_, vr_list_[tn]->gm_max_, 0.0);
+			//alpha & luminance
+			shader->setLocalParam(18, vr_list_[tn]->alpha_,
+				vr_list_[tn]->alpha_power_, vr_list_[tn]->luminance_, 0.0);
 
 			double abcd[4];
 			vr_list_[tn]->planes_[0]->get(abcd);
