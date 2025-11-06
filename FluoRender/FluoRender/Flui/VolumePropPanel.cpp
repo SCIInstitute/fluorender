@@ -1680,7 +1680,19 @@ void VolumePropPanel::EnableColormap(bool bval)
 
 void VolumePropPanel::EnableMip(bool bval)
 {
-	if (m_sync_group && m_group)
+	bool depth = m_view->GetChannelMixMode() == ChannelMixMode::Depth ||
+		m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
+	if (depth)
+	{
+		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+		{
+			auto vd = m_view->GetAllVolumeData(i);
+			if (!vd)
+				continue;
+			vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
+		}
+	}
+	else if (m_sync_group && m_group)
 		m_group->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 	else if (m_vd)
 		m_vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);

@@ -477,10 +477,10 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		va_slices_->draw_begin();
 	}
 
-	unsigned int location = 0;
-	unsigned int idx_num;
+	size_t location = 0;
+	size_t idx_num;
 
-	for (unsigned int i = 0; i < size.size(); i++)
+	for (size_t i = 0; i < size.size(); i++)
 	{
 		if (blend_slices_/*&& colormap_mode_!=2*/)
 		{
@@ -498,7 +498,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			va_slices_->draw_begin();
 
 		//draw a single slice
-		for (int tn = 0; tn < (int)vr_list_.size(); tn++)
+		for (size_t tn = 0; tn < vr_list_.size(); ++tn)
 		{
 			//--------------------------------------------------------------------------
 			bool use_fog = vr_list_[tn]->m_use_fog &&
@@ -626,27 +626,27 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
 				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
-			std::vector<TextureBrick*>* bs = 0;
+			std::vector<TextureBrick*>* bs2 = 0;
 			if (tex)
 			{
 				if (glbin_settings.m_mem_swap &&
 					TextureRenderer::interactive_)
-					//bs = tex->get_closest_bricks(
+					//bs2 = tex->get_closest_bricks(
 					//TextureRenderer::quota_center_,
 					//quota_bricks_chan, false,
 					//view_ray, orthographic_p);
-					bs = tex->get_quota_bricks();
+					bs2 = tex->get_quota_bricks();
 				else
-					bs = tex->get_sorted_bricks(
+					bs2 = tex->get_sorted_bricks(
 						view_ray, orthographic_p);
 			}
-			if (!bs) break;
-			if (bi >= (int)bs->size()) break;
+			if (!bs2) break;
+			if (bi >= (int)bs2->size()) break;
 
-			TextureBrick* b = (*bs)[bi];
-			//if (glbin_settings.m_mem_swap && !b->drawn(0))
-			//	b->set_drawn(0, true);
-			if (b->get_priority() > 0)
+			TextureBrick* b2 = (*bs2)[bi];
+			//if (glbin_settings.m_mem_swap && !b2->drawn(0))
+			//	b2->set_drawn(0, true);
+			if (b2->get_priority() > 0)
 				continue;
 
 			GLint filter;
@@ -654,18 +654,18 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				filter = GL_LINEAR;
 			else
 				filter = GL_NEAREST;
-			vr_list_[tn]->load_brick(b, filter, vr_list_[tn]->compression_);
+			vr_list_[tn]->load_brick(b2, filter, vr_list_[tn]->compression_);
 			if (vr_list_[tn]->mask_)
-				vr_list_[tn]->load_brick_mask(b, filter);
+				vr_list_[tn]->load_brick_mask(b2, filter);
 			if (vr_list_[tn]->label_)
-				vr_list_[tn]->load_brick_label(b);
+				vr_list_[tn]->load_brick_label(b2);
 
 			idx_num = (size[i] - 2) * 3;
 			if (va_slices_)
 				va_slices_->draw_elements(
 					PrimitiveType::Triangles, idx_num,
 					IndexType::UnsignedInt,
-					reinterpret_cast<const void*>((long long)(location)));
+					(const void*)location);
 
 			//release depth texture for rendering shadows
 			if (vr_list_[tn]->color_mode_ == ColorMode::Depth)
@@ -676,9 +676,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			//release
 			if (vr_list_[tn]->mask_)
-				vr_list_[tn]->release_texture((*bs)[0]->nmask(), GL_TEXTURE_3D);
+				vr_list_[tn]->release_texture((*bs2)[0]->nmask(), GL_TEXTURE_3D);
 			if (vr_list_[tn]->label_)
-				vr_list_[tn]->release_texture((*bs)[0]->nlabel(), GL_TEXTURE_3D);
+				vr_list_[tn]->release_texture((*bs2)[0]->nlabel(), GL_TEXTURE_3D);
 			// Release shader.
 			shader->unbind();
 			//unbind depth texture for rendering shadows

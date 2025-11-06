@@ -1345,13 +1345,13 @@ namespace flvr
 					(const void*)12);
 			}
 			va_wirefm_->draw_begin();
-			unsigned int idx_num;
-			for (unsigned int i = 0, k = 0; i < size.size(); ++i)
+			size_t idx_num;
+			for (size_t i = 0, k = 0; i < size.size(); ++i)
 			{
 				idx_num = (size[i] - 2) * 3;
 				va_wirefm_->draw_elements(
 					PrimitiveType::Triangles, idx_num, IndexType::UnsignedInt,
-					reinterpret_cast<const void*>((long long)(k)));
+					(const void*)k);
 				k += idx_num * 4;
 			}
 			va_wirefm_->draw_end();

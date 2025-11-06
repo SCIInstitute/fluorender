@@ -5770,9 +5770,9 @@ void RenderView::DrawDataPeel()
 		}
 	}
 
-	//double darkness;
-	//if (CheckMeshShadowExist(darkness))
-	//	DrawOverlayShadowMesh(darkness);
+	double darkness;
+	if (CheckMeshShadowExist(darkness))
+		DrawOverlayShadowMesh(darkness);
 
 	//draw the clipping planes
 	if (glbin_states.m_clip_display)
@@ -6078,8 +6078,8 @@ void RenderView::DrawVolumes(int peel)
 		unsigned char pixel[4];
 		int nx, ny;
 		GetRenderSize(nx, ny);
-		if (auto cur_fb = glbin_framebuffer_manager.current())
-			m_pin_pick_thresh = cur_fb->estimate_pick_threshold(
+		if (auto data_buffer = glbin_framebuffer_manager.current())
+			m_pin_pick_thresh = data_buffer->estimate_pick_threshold(
 				nx, ny, flvr::AttachmentPoint::Color(0), GL_RGBA, GL_UNSIGNED_BYTE);
 	}
 
@@ -6146,26 +6146,6 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 	if (m_mvr->get_vr_num() <= 0)
 		return;
 	m_mvr->set_depth_peel(peel);
-
-	// Set up transform
-	//std::shared_ptr<VolumeData> front_vd;
-	//if (!m_vd_pop_list.empty())
-	//	front_vd = m_vd_pop_list.front().lock();
-	//if (front_vd)
-	//{
-	//	fluo::Transform* tform = front_vd->GetTexture()->transform();
-	//	float mvmat[16];
-	//	tform->get_trans(mvmat);
-	//	glm::mat4 mv_mat2 = glm::mat4(
-	//		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
-	//		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
-	//		mvmat[2], mvmat[6], mvmat[10], mvmat[14],
-	//		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
-	//	mv_mat2 = front_vd->GetVR()->m_mv_mat * mv_mat2;
-	//	m_mvr->set_matrices(mv_mat2,
-	//		front_vd->GetVR()->m_proj_mat,
-	//		front_vd->GetVR()->m_tex_mat);
-	//}
 
 	auto data_buffer = glbin_framebuffer_manager.current();
 	assert(data_buffer);
@@ -7395,13 +7375,13 @@ void RenderView::DrawTracks()
 	if (!m_track_group)
 		return;
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-	//cur_buffer->set_depth_test_enabled(true);
-	cur_buffer->apply_state();
+	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
+	flvr::FramebufferStateGuard fbg(*data_buffer);
+	data_buffer->set_blend_enabled(true);
+	data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	//data_buffer->set_depth_test_enabled(true);
+	data_buffer->apply_state();
 
 	double width = glbin_settings.m_line_width;
 
@@ -7454,19 +7434,19 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 	if (!border && plane_mode == cm_Frame3)
 		return;
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
+	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
 
 	bool link = glbin_settings.m_clip_link;
 	double width = glbin_settings.m_line_width;
 	bool draw_plane = plane_mode != cm_Frame6 && plane_mode != cm_Frame3;
 
-	flvr::FramebufferStateGuard fbg(*cur_buffer);//outer guard
+	flvr::FramebufferStateGuard fbg(*data_buffer);//outer guard
 	if ((plane_mode == cm_LowTransBack ||
 		plane_mode == cm_NormalBack) &&
 		m_clip_mask == -1)
 	{
-		cur_buffer->set_cull_face(flvr::CullFace::Front);
+		data_buffer->set_cull_face(flvr::CullFace::Front);
 		if (face_winding == flvr::FaceWinding::Back)
 			face_winding = flvr::FaceWinding::Front;
 		else
@@ -7474,26 +7454,26 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 	}
 	else
 	{
-		cur_buffer->set_cull_face(flvr::CullFace::Back);
+		data_buffer->set_cull_face(flvr::CullFace::Back);
 	}
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+	data_buffer->set_depth_test_enabled(false);
+	data_buffer->set_blend_enabled(true);
+	data_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	if (face_winding == flvr::FaceWinding::Front)
 	{
-		cur_buffer->set_cull_face_enabled(true);
-		cur_buffer->set_face_winding(flvr::FaceWinding::Front);
+		data_buffer->set_cull_face_enabled(true);
+		data_buffer->set_face_winding(flvr::FaceWinding::Front);
 	}
 	else if (face_winding == flvr::FaceWinding::Back)
 	{
-		cur_buffer->set_cull_face_enabled(true);
-		cur_buffer->set_face_winding(flvr::FaceWinding::Back);
+		data_buffer->set_cull_face_enabled(true);
+		data_buffer->set_face_winding(flvr::FaceWinding::Back);
 	}
 	else if (face_winding == flvr::FaceWinding::Off)
 	{
-		cur_buffer->set_cull_face_enabled(false);
+		data_buffer->set_cull_face_enabled(false);
 	}
-	cur_buffer->apply_state();
+	data_buffer->apply_state();
 
 	auto shader1 = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
@@ -7693,9 +7673,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			}
 			if (border && draw_plane_border[0])
 			{
-				flvr::FramebufferStateGuard fbg2(*cur_buffer);//inner guard
-				cur_buffer->set_cull_face_enabled(false);
-				cur_buffer->apply_state();
+				flvr::FramebufferStateGuard fbg2(*data_buffer);//inner guard
+				data_buffer->set_cull_face_enabled(false);
+				data_buffer->apply_state();
 				shader2->bind();
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(16, true);
@@ -7717,9 +7697,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			}
 			if (border && draw_plane_border[1])
 			{
-				flvr::FramebufferStateGuard fbg2(*cur_buffer);//inner guard
-				cur_buffer->set_cull_face_enabled(false);
-				cur_buffer->apply_state();
+				flvr::FramebufferStateGuard fbg2(*data_buffer);//inner guard
+				data_buffer->set_cull_face_enabled(false);
+				data_buffer->apply_state();
 				shader2->bind();
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(48, true);
@@ -7741,9 +7721,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			}
 			if (border && draw_plane_border[2])
 			{
-				flvr::FramebufferStateGuard fbg2(*cur_buffer);//inner guard
-				cur_buffer->set_cull_face_enabled(false);
-				cur_buffer->apply_state();
+				flvr::FramebufferStateGuard fbg2(*data_buffer);//inner guard
+				data_buffer->set_cull_face_enabled(false);
+				data_buffer->apply_state();
 				shader2->bind();
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(80, true);
@@ -7765,9 +7745,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			}
 			if (border && draw_plane_border[3])
 			{
-				flvr::FramebufferStateGuard fbg2(*cur_buffer);//inner guard
-				cur_buffer->set_cull_face_enabled(false);
-				cur_buffer->apply_state();
+				flvr::FramebufferStateGuard fbg2(*data_buffer);//inner guard
+				data_buffer->set_cull_face_enabled(false);
+				data_buffer->apply_state();
 				shader2->bind();
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(112, true);
@@ -7789,9 +7769,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			}
 			if (border && draw_plane_border[4])
 			{
-				flvr::FramebufferStateGuard fbg2(*cur_buffer);//inner guard
-				cur_buffer->set_cull_face_enabled(false);
-				cur_buffer->apply_state();
+				flvr::FramebufferStateGuard fbg2(*data_buffer);//inner guard
+				data_buffer->set_cull_face_enabled(false);
+				data_buffer->apply_state();
 				shader2->bind();
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(144, true);
@@ -7813,9 +7793,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			}
 			if (border && draw_plane_border[5])
 			{
-				flvr::FramebufferStateGuard fbg2(*cur_buffer);//inner guard
-				cur_buffer->set_cull_face_enabled(false);
-				cur_buffer->apply_state();
+				flvr::FramebufferStateGuard fbg2(*data_buffer);//inner guard
+				data_buffer->set_cull_face_enabled(false);
+				data_buffer->apply_state();
 				shader2->bind();
 				shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 				va_clipp->draw_clip_plane(176, true);
@@ -7832,12 +7812,12 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 
 void RenderView::DrawBounds()
 {
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(false);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->apply_state();
+	auto data_buffer = glbin_framebuffer_manager.current();
+	assert(data_buffer);
+	flvr::FramebufferStateGuard fbg(*data_buffer);
+	data_buffer->set_blend_enabled(false);
+	data_buffer->set_depth_test_enabled(false);
+	data_buffer->apply_state();
 
 	auto shader = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
@@ -7860,12 +7840,12 @@ void RenderView::DrawBounds()
 
 void RenderView::DrawGrid()
 {
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(false);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_blend_enabled(false);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->apply_state();
 
 	auto shader = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
@@ -7893,12 +7873,12 @@ void RenderView::DrawGrid()
 
 void RenderView::DrawCamCtr()
 {
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(false);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_blend_enabled(false);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->apply_state();
 
 	std::shared_ptr<flvr::VertexArray> va_jack;
 	if (m_pin_rot_ctr)
@@ -8016,11 +7996,11 @@ void RenderView::DrawBrushOutlines()
 	}
 
 	//attributes
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->apply_state();
 
 	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
 
@@ -8182,11 +8162,11 @@ void RenderView::DrawBrushStrokes()
 	if (!paint_buffer)
 		return;
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_blend_enabled(true);
+	base_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
 	//draw the final buffer to the windows buffer
 	paint_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
@@ -8209,12 +8189,12 @@ void RenderView::DrawScaleBar()
 		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Scale_Bar);
 	assert(va_scale_bar);
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(false);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_blend_enabled(false);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->apply_state();
 
 	bool draw_text = m_scalebar_disp > 1;
 
@@ -8460,13 +8440,13 @@ void RenderView::DrawText(
 		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Legend_Squares);
 	assert(va_legend_squares);
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_blend_enabled(false);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->set_cull_face_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_blend_enabled(false);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->set_cull_face_enabled(false);
+	base_buffer->apply_state();
 
 	float sx, sy;
 	sx = static_cast<float>(2.0 / nx);
@@ -8728,13 +8708,13 @@ void RenderView::DrawColormap()
 	if (cur_vd->GetColorMode() != flvr::ColorMode::Colormap)
 		return;
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->set_blend_enabled(true);
-	cur_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->set_blend_enabled(true);
+	base_buffer->set_blend_func(flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+	base_buffer->apply_state();
 
 	double max_val = 255.0;
 	bool enable_alpha = false;
@@ -8923,12 +8903,12 @@ void RenderView::DrawColormap()
 
 void RenderView::DrawGradBg()
 {
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->set_blend_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->set_blend_enabled(false);
+	base_buffer->apply_state();
 
 	//define colors
 	fluo::Color color1, color2;
@@ -9182,11 +9162,11 @@ void RenderView::DrawFrame()
 		glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Crop_Frame);
 	assert(va_frame);
 
-	auto cur_buffer = glbin_framebuffer_manager.current();
-	assert(cur_buffer);
-	flvr::FramebufferStateGuard fbg(*cur_buffer);
-	cur_buffer->set_depth_test_enabled(false);
-	cur_buffer->apply_state();
+	auto base_buffer = glbin_framebuffer_manager.current();
+	assert(base_buffer);
+	flvr::FramebufferStateGuard fbg(*base_buffer);
+	base_buffer->set_depth_test_enabled(false);
+	base_buffer->apply_state();
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
