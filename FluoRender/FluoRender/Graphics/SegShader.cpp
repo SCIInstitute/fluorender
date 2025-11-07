@@ -78,7 +78,6 @@ bool SegShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << SEG_UNIFORMS_WMAP_2D;
 	z << SEG_UNIFORMS_MASK_2D;
 	z << SEG_UNIFORMS_MATRICES;
-	z << VOL_UNIFORMS_MATRICES;
 	z << SEG_UNIFORMS_PARAMS;
 
 	//uniforms for clipping

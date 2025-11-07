@@ -1577,9 +1577,11 @@ void VolumePropPanel::EnableLuminance(bool bval)
 
 void VolumePropPanel::EnableAlpha(bool bval)
 {
-	if (m_sync_group && m_group)
+	assert(m_group);
+	assert(m_vd);
+	if (m_sync_group)
 		m_group->SetAlphaEnable(bval);
-	else if (m_vd)
+	else
 		m_vd->SetAlphaEnable(bval);
 
 	FluoRefresh(0, { gstAlpha }, { glbin_current.GetViewId() });
@@ -1662,13 +1664,31 @@ void VolumePropPanel::EnableSample(bool bval)
 
 void VolumePropPanel::EnableColormap(bool bval)
 {
-	if (m_sync_group && m_group)
+	assert(m_view);
+	assert(m_group);
+	assert(m_vd);
+	bool mip_enable = m_vd->GetRenderMode() == flvr::RenderMode::Mip;
+	bool sync_view_depth_mip = m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool sync_group_depth_mip = !sync_view_depth_mip && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
+	if (sync_view_depth_mip && mip_enable)
+	{
+		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
+		{
+			auto vd = m_view->GetAllVolumeData(i);
+			if (!vd)
+				continue;
+			vd->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+			vd->SetColormapDisp(bval);
+			vd->SetLabelMode(bval ? 0 : 1);
+		}
+	}
+	else if (m_sync_group || (sync_group_depth_mip && mip_enable))
 	{
 		m_group->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_group->SetColormapDisp(bval);
 		m_group->SetLabelMode(bval ? 0 : 1);
 	}
-	else if (m_vd)
+	else
 	{
 		m_vd->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_vd->SetColormapDisp(bval);
@@ -1680,9 +1700,12 @@ void VolumePropPanel::EnableColormap(bool bval)
 
 void VolumePropPanel::EnableMip(bool bval)
 {
-	bool depth = m_view->GetChannelMixMode() == ChannelMixMode::Depth ||
-		m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
-	if (depth)
+	assert(m_view);
+	assert(m_group);
+	assert(m_vd);
+	bool depth_view = m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool depth_group = !depth_view && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
+	if (depth_view)
 	{
 		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
 		{
@@ -1692,9 +1715,9 @@ void VolumePropPanel::EnableMip(bool bval)
 			vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 		}
 	}
-	else if (m_sync_group && m_group)
+	else if (m_sync_group || depth_group)
 		m_group->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
-	else if (m_vd)
+	else
 		m_vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 
 	FluoRefresh(0, { gstRenderMode }, { glbin_current.GetViewId() });

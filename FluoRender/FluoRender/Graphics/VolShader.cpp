@@ -152,10 +152,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 
 	// add uniforms for clipping
 	if (p.clip)
-	{
 		z << VOL_UNIFORMS_CLIP;
-		z << VOL_UNIFORMS_MATRICES;
-	}
 
 	// add uniforms for masking
 	switch (p.mask)

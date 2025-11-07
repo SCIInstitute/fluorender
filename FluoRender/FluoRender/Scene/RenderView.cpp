@@ -6243,7 +6243,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 
 	m_mvr->clear_vr();
 	//set up guard
-	std::vector<flvr::RenderModeGuard> guards;
+	std::list<flvr::RenderModeGuard> guards;
 	flvr::ColorMode color_mode;
 	int colormap = 0;
 	double colormap_low, colormap_hi, colormap_inv;
@@ -6256,9 +6256,10 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 		auto vd = it->lock();
 		if (vd && vd->GetDisp())
 		{
-			color_mode = vd->GetColorMode();
 			if (first)
 			{
+				//colormap and single color modes can't be mixed together in mip depth mode
+				color_mode = vd->GetColorMode();
 				colormap = vd->GetColormap();
 				colormap_low = vd->GetColormapLow();
 				colormap_hi = vd->GetColormapHigh();
@@ -6679,6 +6680,8 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	}
 
 	//bind fbo for final composition
+	//need alpha blending if colormap is on
+	flvr::FramebufferStateGuard fbg(*data_buffer);
 	glbin_framebuffer_manager.bind(data_buffer);
 
 	if (glbin_settings.m_mem_swap)
@@ -6708,9 +6711,15 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
-	data_buffer->set_blend_func(flvr::BlendFactor::One,
-		m_channel_mix_mode == ChannelMixMode::CompositeAdd ?
-		flvr::BlendFactor::One : flvr::BlendFactor::OneMinusSrcAlpha);
+	switch (m_channel_mix_mode)
+	{
+	case ChannelMixMode::Layered:
+		data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+		break;
+	case ChannelMixMode::CompositeAdd:
+		data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::One);
+		break;
+	}
 	data_buffer->set_depth_test_enabled(false);
 	data_buffer->apply_state();
 
@@ -6990,7 +6999,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 		assert(m_mvr);
 
 		m_mvr->clear_vr();
-		std::vector<flvr::RenderModeGuard> rmgs;
+		std::list<flvr::RenderModeGuard> guards;
 		for (auto it = local_list.begin(); it != local_list.end(); ++it)
 		{
 			auto vd = it->lock();
@@ -7000,7 +7009,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 			assert(vr);
 
 			//save
-			rmgs.emplace_back(*vr);
+			guards.emplace_back(*vr);
 			vr->set_shading(true);
 			vr->set_solid(false);
 			vr->set_mode(flvr::RenderMode::Standard);
@@ -7138,7 +7147,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		assert(m_mvr);
 
 		m_mvr->clear_vr();
-		std::vector<flvr::RenderModeGuard> rmgs;
+		std::list<flvr::RenderModeGuard> guards;
 		for (auto it = local_list.begin(); it != local_list.end(); ++it)
 		{
 			auto vd = it->lock();
@@ -7148,7 +7157,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 			assert(vr);
 
 			//save
-			rmgs.emplace_back(*vr);
+			guards.emplace_back(*vr);
 			vr->set_shading(false);
 			vr->set_mode(flvr::RenderMode::Standard);
 			vr->set_color_mode(flvr::ColorMode::Depth);

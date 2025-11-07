@@ -118,7 +118,7 @@ uniform vec4 loc18;//(alpha, alpha_power, luminance, 0)
 uniform sampler3D tex0;//data volume
 uniform sampler3D tex1;//gm volume
 	
-uniform mat4 matrix5;//texture
+uniform mat4 matrix2;//texture
 )GLSHDR";
 
 inline constexpr const char* VOL_UNIFORMS_CLIP  = R"GLSHDR(
@@ -134,11 +134,6 @@ uniform vec4 loc15; //plane5
 inline constexpr const char* VOL_UNIFORMS_4D_CACHE  = R"GLSHDR(
 // VOL_UNIFORMS_4D_CACHE
 uniform sampler3D tex10;//data from t-1
-)GLSHDR";
-
-inline constexpr const char* VOL_UNIFORMS_MATRICES  = R"GLSHDR(
-// VOL_UNIFORMS_MATRICES
-uniform mat4 matrix2;//tex transform for bricking
 )GLSHDR";
 
 inline constexpr const char* VOL_UNIFROMS_4D_COLORMAP  = R"GLSHDR(
@@ -589,19 +584,19 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU0  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU1  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z
-		vec4 tt = matrix5 * t;
+		vec4 tt = matrix2 * t;
 		float valu = (tt.z-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU2  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Y
-		vec4 tt = matrix5 * t;
+		vec4 tt = matrix2 * t;
 		float valu = (tt.y-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU3  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_X
-		vec4 tt = matrix5 * t;
+		vec4 tt = matrix2 * t;
 		float valu = (tt.x-loc6.x)/loc6.z;
 )GLSHDR";
 

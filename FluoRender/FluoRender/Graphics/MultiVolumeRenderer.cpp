@@ -97,14 +97,6 @@ int MultiVolumeRenderer::get_slice_num()
 	return static_cast<int>(num_slices_);
 }
 
-//set matrices
-//void MultiVolumeRenderer::set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat, glm::mat4 &tex_mat)
-//{
-//	mv_mat2_ = mv_mat2;
-//	proj_mat_ = proj_mat;
-//	tex_mat_ = tex_mat;
-//}
-
 //manages volume renderers for rendering
 void MultiVolumeRenderer::add_vr(VolumeRenderer* vr)
 {
@@ -394,13 +386,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	//current
 	assert(cur_buffer);
-	//cur_buffer->set_blend_enabled(true);
-	////b2f:(1, 1-a), f2b:(1-a, 1)
-	//if (glbin_settings.m_update_order == 0)
-	//	cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-	//else if (glbin_settings.m_update_order == 1)
-	//	cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
-	//set viewport size
 	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);
 
@@ -500,7 +485,6 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		//draw a single slice
 		for (size_t tn = 0; tn < vr_list_.size(); ++tn)
 		{
-			//--------------------------------------------------------------------------
 			bool use_fog = vr_list_[tn]->m_use_fog &&
 				vr_list_[tn]->color_mode_ != ColorMode::Depth;
 
@@ -540,13 +524,11 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					vr_list_[tn]->m_fog_start,
 					vr_list_[tn]->m_fog_end, 0.0);
 
-			//--------------------------------------------------------------------------
 			// render bricks
 			glm::mat4 mv_tex_scl_mat = vr_list_[tn]->get_mv_tex_scl_mat();
 			glm::mat4 proj_mat = vr_list_[tn]->get_proj_mat();
 			shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 			shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
-			//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 
 			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
 				render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
@@ -703,20 +685,14 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		{
 			//set buffer back
 			assert(cur_buffer);
-			//set viewport size
-			cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
-			//blend: (add, add)(b2f:(1, 1-a), f2b:(1-a, 1))
-			cur_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
-			if (glbin_settings.m_update_order == 0)
-				cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-			else if (glbin_settings.m_update_order == 1)
-				cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 			glbin_framebuffer_manager.bind(cur_buffer);
 			//draw
 			auto img_shader = glbin_shader_manager.shader(gstImgShader,
 				ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
 			assert(img_shader);
 			img_shader->bind();
+
+			micro_blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			vr_list_[0]->draw_view_quad();
 

@@ -576,31 +576,6 @@ void VolumeRenderer::draw_volume(
 			continue;
 		}
 
-		if ((color_mode == ColorMode::Colormap ||
-			render_mode_ == RenderMode::Mip) &&
-			ShaderParams::ValidColormapProj(colormap_proj_))
-		{
-			fluo::BBox bbox = b->dbox();
-			float matrix[16];
-			matrix[0] = float(bbox.Max().x() - bbox.Min().x());
-			matrix[1] = 0.0f;
-			matrix[2] = 0.0f;
-			matrix[3] = 0.0f;
-			matrix[4] = 0.0f;
-			matrix[5] = float(bbox.Max().y() - bbox.Min().y());
-			matrix[6] = 0.0f;
-			matrix[7] = 0.0f;
-			matrix[8] = 0.0f;
-			matrix[9] = 0.0f;
-			matrix[10] = float(bbox.Max().z() - bbox.Min().z());
-			matrix[11] = 0.0f;
-			matrix[12] = float(bbox.Min().x());
-			matrix[13] = float(bbox.Min().y());
-			matrix[14] = float(bbox.Min().z());
-			matrix[15] = 1.0f;
-			shader->setLocalParamMatrix(5, matrix);
-		}
-
 		vertex.clear();
 		index.clear();
 		size.clear();
