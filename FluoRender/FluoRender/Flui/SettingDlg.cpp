@@ -252,6 +252,19 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group5->Add(sizer5_2, 0, wxEXPAND);
 	group5->Add(10, 5);
 
+	//reset
+	wxStaticBoxSizer* group6 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Reset Settings");
+	wxBoxSizer* sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_reset_btn = new wxButton(page, wxID_ANY, "Reset to Default");
+	m_reset_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnResetBtn, this);
+	sizer6_1->AddStretchSpacer();
+	sizer6_1->Add(m_reset_btn, 0, wxALIGN_CENTER);
+	sizer6_1->Add(10, 10);
+	group6->Add(10, 5);
+	group6->Add(sizer6_1, 0, wxEXPAND);
+	group6->Add(10, 5);
+
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(group1, 0, wxEXPAND);
@@ -264,6 +277,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(group5, 0, wxEXPAND);
 	sizerV->Add(10, 10);
+	sizerV->Add(group6, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	page->SetAutoLayout(true);
@@ -2051,4 +2065,10 @@ void SettingDlg::OnAutomationCombo(wxCommandEvent& event)
 		glbin_automate_def.m_relax_ruler = index;
 		break;
 	}
+}
+
+void SettingDlg::OnResetBtn(wxCommandEvent& event)
+{
+	glbin_settings.Reset();
+	FluoRefresh(0);
 }

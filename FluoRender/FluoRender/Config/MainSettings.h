@@ -71,6 +71,7 @@ public:
 
 	void Read();
 	void Save();
+	void Reset();
 
 	std::vector<std::string> GetJvmArgs();
 	void GetGraphicsInfo();

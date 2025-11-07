@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 
 class VolumeData;
+struct BrushRadiusSet;
 namespace flrd
 {
 	enum class SelectMode : int
@@ -53,15 +54,6 @@ namespace flrd
 		Grow,			//9-grow from point;
 		Segment,		//10-select and gen comps
 		Mesh			//11-select and gen mesh
-	};
-
-	struct BrushRadiusSet
-	{
-		SelectMode type;//brush type
-		double radius1;//radius 1
-		double radius2;//radius 2
-		bool use_radius2;//use radius 2
-		int iter_num;//iteration number
 	};
 
 	class VolumeSelector
@@ -185,74 +177,11 @@ namespace flrd
 		void SetBrushSizeData(bool val) { m_brush_size_data = val; }
 		bool GetBrushSizeData() { return m_brush_size_data; }
 		//change display
-		void ChangeBrushSize(int value, bool ctrl)
-		{
-			if (!value) return;
-
-			if (m_mode == SelectMode::Solid || !m_use_brush_radius2)
-			{
-				double delta = value * m_brush_radius1 / 1000.0;
-				m_brush_radius1 += delta;
-				m_brush_radius1 = std::max(m_brush_radius1, 1.0);
-				m_brush_radius2 = m_brush_radius1;
-			}
-			else
-			{
-				if (ctrl)
-				{
-					double delta = value * m_brush_radius1 / 1000.0;
-					m_brush_radius1 += delta;
-					m_brush_radius1 = std::max(m_brush_radius1, 1.0);
-					m_brush_radius2 = std::max(m_brush_radius2, m_brush_radius1);
-				}
-				else
-				{
-					double delta = value * m_brush_radius2 / 2000.0;
-					m_brush_radius2 += delta;
-					m_brush_radius2 = std::max(1.0, m_brush_radius2);
-					m_brush_radius1 = std::min(m_brush_radius2, m_brush_radius1);
-				}
-			}
-
-			UpdateBrushRadiusSet();
-		}
+		void ChangeBrushSize(int value, bool ctrl);
 		//brush sets
-		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets)
-		{
-			sets.assign(m_brush_radius_sets.begin(), m_brush_radius_sets.end());
-		}
-		void SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
-		{
-			m_brush_radius_sets.assign(sets.begin(), sets.end());
-			if (!m_brush_radius_sets.empty() &&
-				m_brush_sets_index >= 0 &&
-				m_brush_sets_index < m_brush_radius_sets.size())
-			{
-				BrushRadiusSet& radius_set = m_brush_radius_sets.at(m_brush_sets_index);
-				m_brush_radius1 = radius_set.radius1;
-				m_brush_radius2 = radius_set.radius2;
-				m_use_brush_radius2 = radius_set.use_radius2;
-				m_iter_num = radius_set.iter_num;
-			}
-		}
-		void UpdateBrushRadiusSet()
-		{
-			SelectMode mode = m_mode;
-			if (mode == SelectMode::SingleSelect ||
-				mode == SelectMode::Segment ||
-				mode == SelectMode::Mesh)
-				mode = SelectMode::Append;
-			for (auto& it : m_brush_radius_sets)
-			{
-				if (it.type == mode)
-				{
-					it.radius1 = m_brush_radius1;
-					it.radius2 = m_brush_radius2;
-					it.use_radius2 = m_use_brush_radius2;
-					it.iter_num = m_iter_num;
-				}
-			}
-		}
+		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets);
+		void SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets);
+		void UpdateBrushRadiusSet();
 		void ChangeBrushSetsIndex();
 		//set use 2d rendering results
 		void SetPaintUse2d(bool use2d) { m_use2d = use2d; }

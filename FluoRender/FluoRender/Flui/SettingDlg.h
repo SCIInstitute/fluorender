@@ -123,6 +123,8 @@ private:
 	//pencil distance
 	wxSingleSlider* m_pencil_dist_sldr;
 	wxTextCtrl* m_pencil_dist_text;
+	//reset
+	wxButton* m_reset_btn;
 
 	// Java settings.
 	wxTextCtrl* m_java_jvm_text;
@@ -246,6 +248,8 @@ private:
 	void OnSelChanged(wxTreeEvent& event);
 	//automation
 	void OnAutomationCombo(wxCommandEvent& event);
+	//reset
+	void OnResetBtn(wxCommandEvent& event);
 };
 
 #endif//_SETTINGDLG_H_

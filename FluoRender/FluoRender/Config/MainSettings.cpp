@@ -762,6 +762,12 @@ void MainSettings::Save()
 	fconfig->SaveFile(dft);
 }
 
+void MainSettings::Reset()
+{
+	MainSettings def;
+	*this = def;
+}
+
 std::vector<std::string> MainSettings::GetJvmArgs()
 {
 	std::vector<std::string> args;

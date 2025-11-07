@@ -325,7 +325,7 @@ void main()
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT = R"GLSHDR(
 	//IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT
 	float alpha = pow(loc18.x, loc18.y);
-	FragColor = vec4(rb.rgb*loc18.z*alpha*(rb.a<0.5?rb.a:1.0), rb.a*alpha);
+	FragColor = vec4(rb.rgb*loc18.z*alpha*(rb.a<0.5?2.0*rb.a:1.0), rb.a*alpha);
 }
 )GLSHDR";
 

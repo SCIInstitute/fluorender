@@ -135,7 +135,7 @@ void BrushDefault::Read()
 	}
 	if (m_brush_radius_sets.size() == 0)
 	{
-		flrd::BrushRadiusSet radius_set;
+		BrushRadiusSet radius_set;
 		//select brush
 		radius_set.type = flrd::SelectMode::Append;
 		radius_set.radius1 = 10;
@@ -212,7 +212,7 @@ void BrushDefault::Save()
 	f->Write("num", brush_num);
 	for (size_t i = 0; i < brush_num; ++i)
 	{
-		flrd::BrushRadiusSet radius_set = m_brush_radius_sets[i];
+		BrushRadiusSet radius_set = m_brush_radius_sets[i];
 		std::string str = "/brush default/radius_settings/" + std::to_string(i);
 		f->SetPath(str);
 		//type

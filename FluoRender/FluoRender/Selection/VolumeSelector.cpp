@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <VolumeDefault.h>
+#include <BrushDefault.h>
 #include <AutomateDefault.h>
 #include <RenderView.h>
 #include <VolumeData.h>
@@ -342,7 +343,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 
 	//set up paint mask flags
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	std::vector<flvr::TextureBrick*>* bricks = m_vd->GetTexture()->get_bricks();
 	if (m_mode == SelectMode::SingleSelect ||
 		m_mode == SelectMode::Append ||
 		m_mode == SelectMode::Eraser ||
@@ -357,7 +358,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			flrd::PaintBoxes pb;
 			pb.SetBricks(bricks);
 			pb.SetPersp(!view->GetPersp());
-			fluo::Transform *tform = m_vd->GetTexture()->transform();
+			fluo::Transform* tform = m_vd->GetTexture()->transform();
 			double mvmat[16];
 			tform->get_trans(mvmat);
 			glm::mat4 mv_mat2 = glm::mat4(
@@ -422,7 +423,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			flrd::MaskBorder mb(m_vd.get());
 			for (int i = 0; i < m_iter; i++)
 			{
-				order = m_update_order ? (i%div) : 0;
+				order = m_update_order ? (i % div) : 0;
 				if (m_mode == SelectMode::SingleSelect ||
 					m_mode == SelectMode::Append ||
 					m_mode == SelectMode::Diffuse ||
@@ -438,7 +439,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		}
 	}
 
-	if (flvr::Texture::mask_undo_num_>0 &&
+	if (flvr::Texture::mask_undo_num_ > 0 &&
 		m_vd->GetVR())
 		m_vd->GetVR()->return_mask();
 
@@ -518,8 +519,8 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd ||
 		!m_vd->GetTexture() ||
-		(select&&m_vd->GetTexture()->nmask()==-1) ||
-		m_vd->GetTexture()->nlabel()==-1)
+		(select && m_vd->GetTexture()->nmask() == -1) ||
+		m_vd->GetTexture()->nlabel() == -1)
 		return;
 
 	if (select)
@@ -535,9 +536,9 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	Nrrd* nrrd_mvd_label = tex_mvd->get_nrrd(tex_mvd->nlabel());
 	if (!nrrd_mvd_label) return;
 	void* data_mvd = nrrd_mvd->data;
-	unsigned char* data_mvd_mask = select?(unsigned char*)nrrd_mvd_mask->data:0;
+	unsigned char* data_mvd_mask = select ? (unsigned char*)nrrd_mvd_mask->data : 0;
 	unsigned int* data_mvd_label = (unsigned int*)nrrd_mvd_label->data;
-	if (!data_mvd || (select&&!data_mvd_mask) || !data_mvd_label) return;
+	if (!data_mvd || (select && !data_mvd_mask) || !data_mvd_label) return;
 
 	//create new volumes
 	int res_x, res_y, res_z;
@@ -546,7 +547,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	m_vd->GetResolution(res_x, res_y, res_z);
 	m_vd->GetSpacings(spc_x, spc_y, spc_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
-	unsigned long long for_size = (unsigned long long)(res_x)*res_y*res_z;
+	unsigned long long for_size = (unsigned long long)(res_x) * res_y * res_z;
 
 	bool push_new = true;
 	//red volume
@@ -606,7 +607,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	if (!data_vd_b) return;
 
 	if (hide)
-		m_randv = int((double)std::rand()/(RAND_MAX)*900+100);
+		m_randv = int((double)std::rand() / (RAND_MAX) * 900 + 100);
 	//populate the data
 	unsigned long long idx;
 	for (idx = 0; idx < for_size; ++idx)
@@ -643,10 +644,10 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 				color = fluo::Color(fluo::HSVColor(hue, 1.0, 1.0));
 			}
 			//color
-			value = value>1.0?1.0:value;
-			data_vd_r[idx] = (unsigned char)(color.r()*255.0*value);
-			data_vd_g[idx] = (unsigned char)(color.g()*255.0*value);
-			data_vd_b[idx] = (unsigned char)(color.b()*255.0*value);
+			value = value > 1.0 ? 1.0 : value;
+			data_vd_r[idx] = (unsigned char)(color.r() * 255.0 * value);
+			data_vd_g[idx] = (unsigned char)(color.g() * 255.0 * value);
+			data_vd_b[idx] = (unsigned char)(color.b() * 255.0 * value);
 		}
 	}
 
@@ -654,9 +655,9 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	glbin_vol_def.Copy(vd_g.get(), m_vd.get());
 	glbin_vol_def.Copy(vd_b.get(), m_vd.get());
 
-	fluo::Color red(  1.0,0.0,0.0);
-	fluo::Color green(0.0,1.0,0.0);
-	fluo::Color blue( 0.0,0.0,1.0);
+	fluo::Color red(1.0, 0.0, 0.0);
+	fluo::Color green(0.0, 1.0, 0.0);
+	fluo::Color blue(0.0, 0.0, 1.0);
 	vd_r->SetColor(red);
 	vd_g->SetColor(green);
 	vd_b->SetColor(blue);
@@ -686,6 +687,75 @@ std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop)
 }
 
 //brush sets
+void VolumeSelector::ChangeBrushSize(int value, bool ctrl)
+{
+	if (!value) return;
+
+	if (m_mode == SelectMode::Solid || !m_use_brush_radius2)
+	{
+		double delta = value * m_brush_radius1 / 1000.0;
+		m_brush_radius1 += delta;
+		m_brush_radius1 = std::max(m_brush_radius1, 1.0);
+		m_brush_radius2 = m_brush_radius1;
+	}
+	else
+	{
+		if (ctrl)
+		{
+			double delta = value * m_brush_radius1 / 1000.0;
+			m_brush_radius1 += delta;
+			m_brush_radius1 = std::max(m_brush_radius1, 1.0);
+			m_brush_radius2 = std::max(m_brush_radius2, m_brush_radius1);
+		}
+		else
+		{
+			double delta = value * m_brush_radius2 / 2000.0;
+			m_brush_radius2 += delta;
+			m_brush_radius2 = std::max(1.0, m_brush_radius2);
+			m_brush_radius1 = std::min(m_brush_radius2, m_brush_radius1);
+		}
+	}
+
+	UpdateBrushRadiusSet();
+}
+//brush sets
+void VolumeSelector::GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets)
+{
+	sets.assign(m_brush_radius_sets.begin(), m_brush_radius_sets.end());
+}
+void VolumeSelector::SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
+{
+	m_brush_radius_sets.assign(sets.begin(), sets.end());
+	if (!m_brush_radius_sets.empty() &&
+		m_brush_sets_index >= 0 &&
+		m_brush_sets_index < m_brush_radius_sets.size())
+	{
+		BrushRadiusSet& radius_set = m_brush_radius_sets.at(m_brush_sets_index);
+		m_brush_radius1 = radius_set.radius1;
+		m_brush_radius2 = radius_set.radius2;
+		m_use_brush_radius2 = radius_set.use_radius2;
+		m_iter_num = radius_set.iter_num;
+	}
+}
+void VolumeSelector::UpdateBrushRadiusSet()
+{
+	SelectMode mode = m_mode;
+	if (mode == SelectMode::SingleSelect ||
+		mode == SelectMode::Segment ||
+		mode == SelectMode::Mesh)
+		mode = SelectMode::Append;
+	for (auto& it : m_brush_radius_sets)
+	{
+		if (it.type == mode)
+		{
+			it.radius1 = m_brush_radius1;
+			it.radius2 = m_brush_radius2;
+			it.use_radius2 = m_use_brush_radius2;
+			it.iter_num = m_iter_num;
+		}
+	}
+}
+
 void VolumeSelector::ChangeBrushSetsIndex()
 {
 	SelectMode mode = m_mode;
@@ -715,8 +785,8 @@ bool VolumeSelector::GetThUpdate()
 	auto view = glbin_current.render_view.lock();
 	if (!view ||
 		(m_mode != SelectMode::SingleSelect &&
-		m_mode != SelectMode::Append &&
-		m_mode != SelectMode::Diffuse))
+			m_mode != SelectMode::Append &&
+			m_mode != SelectMode::Diffuse))
 		return false;
 	glm::mat4 mv_mat = view->GetDrawMat();
 	glm::mat4 prj_mat = view->GetProjection();
@@ -841,7 +911,7 @@ void VolumeSelector::PasteMask(int op)
 	m_vd->ResetMaskCount();
 }
 
-bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
+bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector& mvec)
 {
 	//DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
 	auto view = glbin_current.render_view.lock();
@@ -850,9 +920,9 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 	if (!view || !m_vd)
 		return false;
 	if (mx >= 0 && my >= 0 &&
-		m_mx0 >=0 && m_my0 >=0)
+		m_mx0 >= 0 && m_my0 >= 0)
 	{
-		double dist = (m_mx - mx)*(m_mx - mx) + (m_my - my)*(m_my - my);
+		double dist = (m_mx - mx) * (m_mx - mx) + (m_my - my) * (m_my - my);
 		if (dist < 5000.0)
 		{
 			//user can set a direction then stay
@@ -867,10 +937,10 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 	if (m_mx < 0 || m_my < 0 ||
 		m_mx0 < 0 || m_my0 < 0)
 		return false;
-	
+
 	int nx = view->GetCanvasSize().w();
 	int ny = view->GetCanvasSize().h();
-	fluo::Transform *tform = m_vd->GetTexture()->transform();
+	fluo::Transform* tform = m_vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
 	glm::mat4 mv_mat2 = glm::mat4(
@@ -886,8 +956,8 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector &mvec)
 	mv.invert();
 	pr.invert();
 	fluo::Vector v;
-	fluo::Point p0(double(m_mx0)*2/nx - 1.0, 1.0 - double(m_my0)*2/ny, 0);
-	fluo::Point p1(double(m_mx)*2/nx - 1.0, 1.0 - double(m_my)*2/ny, 0);
+	fluo::Point p0(double(m_mx0) * 2 / nx - 1.0, 1.0 - double(m_my0) * 2 / ny, 0);
+	fluo::Point p1(double(m_mx) * 2 / nx - 1.0, 1.0 - double(m_my) * 2 / ny, 0);
 	//transform
 	p0 = pr.transform(p0);
 	p0 = mv.transform(p0);
