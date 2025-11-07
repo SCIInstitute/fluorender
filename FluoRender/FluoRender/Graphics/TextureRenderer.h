@@ -210,7 +210,7 @@ namespace flvr
 		void set_cache_queue(const std::shared_ptr<CacheQueue>& cq) { cache_queue_ = cq; }
 
 		//interactive modes
-		void set_interactive_mode(bool mode) { imode_ = mode; }
+		void set_interactive_mode(bool mode) { interactive_mode_ = mode; }
 		bool get_adaptive();
 		double get_data_size();//size in mb
 		int get_size_type();//0:normal; 1:small; 2:large
@@ -283,7 +283,7 @@ namespace flvr
 		RenderMode render_mode_;
 		double sample_rate_;
 		size_t num_slices_;
-		bool imode_;
+		bool interactive_mode_;
 
 		//2d mask texture
 		GLuint tex_2d_mask_;

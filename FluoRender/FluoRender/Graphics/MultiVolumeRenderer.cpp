@@ -48,21 +48,21 @@
 using namespace flvr;
 
 MultiVolumeRenderer::MultiVolumeRenderer()
-	: mode_(RenderMode::Standard),
+	: render_mode_(RenderMode::Standard),
 	depth_peel_(0),
 	blend_slices_(false),
 	noise_red_(false),
-	imode_(false),
+	interactive_mode_(false),
 	num_slices_(0)
 {
 }
 
 MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
-	: mode_(copy.mode_),
+	: render_mode_(copy.render_mode_),
 	depth_peel_(copy.depth_peel_),
 	blend_slices_(copy.blend_slices_),
 	noise_red_(false),
-	imode_(copy.imode_),
+	interactive_mode_(copy.interactive_mode_),
 	num_slices_(0)
 {
 }
@@ -82,14 +82,14 @@ void MultiVolumeRenderer::set_viewport(const fluo::Vector4i& vp)
 }
 
 //mode and sampling rate
-void MultiVolumeRenderer::set_mode(const RenderMode& mode)
+void MultiVolumeRenderer::set_render_mode(const RenderMode& mode)
 {
-	mode_ = mode;
+	render_mode_ = mode;
 }
 
 void MultiVolumeRenderer::set_interactive_mode(bool mode)
 {
-	imode_ = mode;
+	interactive_mode_ = mode;
 }
 
 int MultiVolumeRenderer::get_slice_num()
@@ -219,7 +219,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
 	//normal: b2f:(1, 1-a), f2b:(1-a, 1), mip: max(1, 1)
-	switch (mode_)
+	switch (render_mode_)
 	{
 	case RenderMode::Standard:
 		blend_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
@@ -394,12 +394,12 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	//current
 	assert(cur_buffer);
-	cur_buffer->set_blend_enabled(true);
-	//b2f:(1, 1-a), f2b:(1-a, 1)
-	if (glbin_settings.m_update_order == 0)
-		cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
-	else if (glbin_settings.m_update_order == 1)
-		cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
+	//cur_buffer->set_blend_enabled(true);
+	////b2f:(1, 1-a), f2b:(1-a, 1)
+	//if (glbin_settings.m_update_order == 0)
+	//	cur_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	//else if (glbin_settings.m_update_order == 1)
+	//	cur_buffer->set_blend_func(flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 	//set viewport size
 	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);
@@ -548,7 +548,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
 			//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 
-			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), 1.0 / rate);
+			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
+				render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
 
 			//for brick transformation
 			float matrix[16];

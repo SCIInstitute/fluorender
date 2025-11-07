@@ -6103,6 +6103,7 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 		m_mvr = std::make_unique<flvr::MultiVolumeRenderer>();
 	if (!m_mvr)
 		return;
+	m_mvr->set_render_mode(flvr::RenderMode::Standard);
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6221,6 +6222,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 		m_mvr = std::make_unique<flvr::MultiVolumeRenderer>();
 	if (!m_mvr)
 		return;
+	m_mvr->set_render_mode(flvr::RenderMode::Mip);
 
 	int nx, ny;
 	GetRenderSize(nx, ny);

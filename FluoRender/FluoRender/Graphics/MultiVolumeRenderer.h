@@ -64,7 +64,7 @@ namespace flvr
 		}
 
 		//mode and sampling rate
-		void set_mode(const RenderMode& mode);
+		void set_render_mode(const RenderMode& mode);
 		void set_interactive_mode(bool mode);
 		int get_slice_num();
 
@@ -111,7 +111,7 @@ namespace flvr
 		//glm::mat4 tex_mat_;
 
 		//mode and quality control
-		RenderMode mode_;
+		RenderMode render_mode_;
 		int depth_peel_;
 		bool blend_slices_;
 
@@ -124,7 +124,7 @@ namespace flvr
 		fluo::Vector res_;
 
 		//sample rate etc
-		bool imode_;
+		bool interactive_mode_;
 		size_t num_slices_;
 
 		//light position

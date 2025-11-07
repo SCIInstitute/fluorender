@@ -86,7 +86,7 @@ namespace flvr
 		render_mode_(RenderMode::Standard),
 		sample_rate_(1.0),
 		num_slices_(0),
-		imode_(false),
+		interactive_mode_(false),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -106,7 +106,7 @@ namespace flvr
 		render_mode_(copy.render_mode_),
 		sample_rate_(copy.sample_rate_),
 		num_slices_(0),
-		imode_(copy.imode_),
+		interactive_mode_(copy.interactive_mode_),
 		tex_2d_mask_(0),
 		tex_2d_weight1_(0),
 		tex_2d_weight2_(0),
@@ -650,7 +650,7 @@ namespace flvr
 
 	double TextureRenderer::get_sample_rate()
 	{
-		bool interactive = imode_ && get_adaptive();
+		bool interactive = interactive_mode_ && get_adaptive();
 		bool capture = glbin_states.m_capture;
 		int size_type = get_size_type();
 		double rate = sample_rate_;

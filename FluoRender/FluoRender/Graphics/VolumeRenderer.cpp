@@ -238,7 +238,7 @@ std::vector<fluo::Plane*>* VolumeRenderer::get_planes()
 std::string VolumeRenderer::get_buffer_name()
 {
 	bool adaptive = get_adaptive();
-	if (imode_ && adaptive)
+	if (interactive_mode_ && adaptive)
 	{
 		return gstRBBlendInteractive;
 	}

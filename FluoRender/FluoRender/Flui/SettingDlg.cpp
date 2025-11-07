@@ -798,7 +798,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_color_depth_comb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 	m_color_depth_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnColorDepthComb, this);
-	cmb_str = { "8", "10", "16" };
+	cmb_str = { "8", "10", "12+" };
 	m_color_depth_comb->Append(cmb_str);
 	sizer3_1->Add(st, 0, wxALIGN_CENTER);
 	sizer3_1->Add(5, 5);
