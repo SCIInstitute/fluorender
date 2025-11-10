@@ -224,12 +224,15 @@ namespace flvr
 
 		//states
 		FramebufferState state_;
+		std::vector<FramebufferState> state_stack_;
 
 	private:
 		void bind();
 		void unbind(unsigned int prev_id = 0);
 
 		FramebufferState default_state();
+		void push_state();
+		void pop_state();
 
 		friend class FramebufferFactory;
 		friend class FramebufferStateGuard;

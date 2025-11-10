@@ -440,6 +440,20 @@ FramebufferState Framebuffer::default_state()
 	return s;
 }
 
+void Framebuffer::push_state()
+{
+	assert(state_stack_.size() < 5);
+	state_stack_.push_back(state_);
+	//DBGPRINT(L"Framebuffer stack size : %zu\n", state_stack_.size());
+}
+
+void Framebuffer::pop_state()
+{
+	assert(state_stack_.size() > 0);
+	state_stack_.pop_back();
+	//DBGPRINT(L"Framebuffer stack size : %zu\n", state_stack_.size());
+}
+
 bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex)
 {
 	if (role_ == FBRole::Canvas)
@@ -732,13 +746,25 @@ double Framebuffer::estimate_pick_threshold(
 FramebufferStateGuard::FramebufferStateGuard(Framebuffer& fb) :
 	fb_(fb)
 {
-	glbin_fb_state_tracker.apply(fb.state_);
+	//save current global state
+	glbin_fb_state_tracker.push_state();
+	//save framebuffer state
+	fb_.push_state();
 }
 
 FramebufferStateGuard::~FramebufferStateGuard()
 {
-	glbin_fb_state_tracker.restore();
-	fb_.state_ = glbin_fb_state_tracker.current();
+	assert(glbin_fb_state_tracker.state_stack_.size() > 0);
+	//get saved global state
+	auto& s = glbin_fb_state_tracker.state_stack_.back();
+	glbin_fb_state_tracker.pop_state();
+	//restore global state
+	glbin_fb_state_tracker.apply(s);
+	//get saved framebuffer state
+	s = fb_.state_stack_.back();
+	fb_.pop_state();
+	//restore framebuffer state
+	fb_.state_ = s;
 }
 
 FramebufferFactory::FramebufferFactory()

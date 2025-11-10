@@ -33,11 +33,11 @@
 
 namespace flvr
 {
+	class FramebufferStateGuard;
 	class FramebufferStateTracker {
 	public:
 		// Apply a new desired state by diffing against current tracked state
 		void apply(const FramebufferState& desired);
-		void restore();
 		void apply();//reapply current state to gl
 
 		// Reset tracker to gl state (e.g. on context loss)
@@ -76,6 +76,8 @@ namespace flvr
 	private:
 		void push_state();
 		void pop_state();
+
+		friend class FramebufferStateGuard;
 	};
 }
 

@@ -27,24 +27,14 @@
 
 #include <FramebufferStateTracker.h>
 #include <FramebufferStateManager.h>
+#include <Debug.h>
 
 using namespace flvr;
 
 void FramebufferStateTracker::apply(const FramebufferState& desired)
 {
 	FramebufferStateManager::applyDiff(currentState_, desired);
-	push_state();
 	currentState_ = desired;
-}
-
-void FramebufferStateTracker::restore()
-{
-	if (state_stack_.empty())
-		return;
-	auto& s = state_stack_.back();
-	FramebufferStateManager::applyDiff(currentState_, s);
-	currentState_ = s;
-	pop_state();
 }
 
 void FramebufferStateTracker::apply()
@@ -166,11 +156,14 @@ void FramebufferStateTracker::set_polygon_mode(PolygonMode mode)
 
 void FramebufferStateTracker::push_state()
 {
+	assert(state_stack_.size() < 5);
 	state_stack_.push_back(currentState_);
+	//DBGPRINT(L"FramebufferStateTracker stack size : %zu\n", state_stack_.size());
 }
 
 void FramebufferStateTracker::pop_state()
 {
-	if (!state_stack_.empty())
-		state_stack_.pop_back();
+	assert(state_stack_.size() > 0);
+	state_stack_.pop_back();
+	//DBGPRINT(L"FramebufferStateTracker stack size : %zu\n", state_stack_.size());
 }

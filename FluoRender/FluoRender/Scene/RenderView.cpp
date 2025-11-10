@@ -6960,6 +6960,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 	assert(overlay_buffer);
+	flvr::FramebufferStateGuard fbg(*overlay_buffer);
 	overlay_buffer->set_clear_color(clear_color);
 	glbin_framebuffer_manager.bind(overlay_buffer);
 
@@ -7034,7 +7035,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 		//bind fbo for final composition
 		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 		assert(chan_buffer);
-		flvr::FramebufferStateGuard fbg(*chan_buffer);
+		flvr::FramebufferStateGuard fbg2(*chan_buffer);
 		chan_buffer->set_blend_enabled(true);
 		chan_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 		glbin_framebuffer_manager.bind(chan_buffer);
@@ -7098,6 +7099,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
 	assert(overlay_buffer);
+	flvr::FramebufferStateGuard fbg(*overlay_buffer);
 	overlay_buffer->set_blend_enabled(false);
 	overlay_buffer->set_clear_color(clear_color);
 	glbin_framebuffer_manager.bind(overlay_buffer);
@@ -7211,7 +7213,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		//bind fbo for final composition
 		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 		assert(chan_buffer);
-		flvr::FramebufferStateGuard fbg(*chan_buffer);
+		flvr::FramebufferStateGuard fbg2(*chan_buffer);
 		chan_buffer->set_blend_enabled(true);
 		chan_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 		glbin_framebuffer_manager.bind(chan_buffer);
