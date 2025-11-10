@@ -1074,9 +1074,10 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 void RenderViewPanel::SetChannelMixMode(ChannelMixMode val)
 {
-	m_renderview->SetChannelMixMode(val);
-
-	FluoRefresh(2, { gstMixMethod }, { GetViewId() });
+	fluo::ValueCollection vc;
+	m_renderview->UpdateChannelMixMode(val, vc);
+	vc.insert(gstMixMethod);
+	FluoRefresh(0, vc, { GetViewId() });
 }
 
 void RenderViewPanel::Capture()

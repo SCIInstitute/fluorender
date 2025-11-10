@@ -1668,21 +1668,15 @@ void VolumePropPanel::EnableColormap(bool bval)
 	assert(m_group);
 	assert(m_vd);
 	bool mip_enable = m_vd->GetRenderMode() == flvr::RenderMode::Mip;
-	bool sync_view_depth_mip = m_view->GetChannelMixMode() == ChannelMixMode::Depth;
-	bool sync_group_depth_mip = !sync_view_depth_mip && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
-	if (sync_view_depth_mip && mip_enable)
+	bool sync_view_depth_mip = mip_enable && m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool sync_group_depth_mip = mip_enable && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
+	if (sync_view_depth_mip)
 	{
-		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
-		{
-			auto vd = m_view->GetAllVolumeData(i);
-			if (!vd)
-				continue;
-			vd->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
-			vd->SetColormapDisp(bval);
-			vd->SetLabelMode(bval ? 0 : 1);
-		}
+		m_view->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+		m_view->SetColormapDisp(bval);
+		m_view->SetLabelMode(bval ? 0 : 1);
 	}
-	else if (m_sync_group || (sync_group_depth_mip && mip_enable))
+	else if (m_sync_group || sync_group_depth_mip)
 	{
 		m_group->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_group->SetColormapDisp(bval);
@@ -1704,17 +1698,9 @@ void VolumePropPanel::EnableMip(bool bval)
 	assert(m_group);
 	assert(m_vd);
 	bool depth_view = m_view->GetChannelMixMode() == ChannelMixMode::Depth;
-	bool depth_group = !depth_view && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool depth_group = m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
 	if (depth_view)
-	{
-		for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
-		{
-			auto vd = m_view->GetAllVolumeData(i);
-			if (!vd)
-				continue;
-			vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
-		}
-	}
+		m_view->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 	else if (m_sync_group || depth_group)
 		m_group->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 	else
@@ -2028,33 +2014,14 @@ void VolumePropPanel::SyncShadowInt(double val)
 
 void VolumePropPanel::SyncSampleRate(double val)
 {
-	if (!m_group || !m_view)
-		return;
+	assert(m_view);
+	assert(m_group);
 
-	bool changed = false;
-	if (m_view->GetChannelMixMode() == ChannelMixMode::Depth)
-		for (int i = 0; i < m_view->GetAllVolumeNum(); i++)
-		{
-			auto vd = m_view->GetAllVolumeData(i);
-			if (vd)
-			{
-				if (vd->GetSampleRate() != val)
-				{
-					vd->SetSampleRate(val);
-					changed = true;
-				}
-			}
-		}
+	bool depth_view = m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	if (depth_view)
+		m_view->SetSampleRate(val);
 	else
-	{
-		if (m_group->GetSampleRate() != val)
-		{
-			m_group->SetSampleRate(val);
-			changed = true;
-		}
-	}
-	if (!changed)
-		return;
+		m_group->SetSampleRate(val);
 
 	FluoRefresh(1, { gstSampleRate }, { glbin_current.GetViewId() });
 }
@@ -2897,8 +2864,16 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 	else
 		m_colormap_inv_btn->SetToolNormalBitmap(0,
 			wxGetBitmap(invert_off));
+	assert(m_view);
+	assert(m_group);
+	assert(m_vd);
+	bool mip_enable = m_vd->GetRenderMode() == flvr::RenderMode::Mip;
+	bool sync_view_depth_mip = mip_enable && m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool sync_group_depth_mip = mip_enable && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
 
-	if (m_sync_group && m_group)
+	if (sync_view_depth_mip)
+		m_view->SetColormapInv(val ? -1.0 : 1.0);
+	else if (m_sync_group || sync_group_depth_mip)
 		m_group->SetColormapInv(val ? -1.0 : 1.0);
 	else if (m_vd)
 		m_vd->SetColormapInv(val ? -1.0 : 1.0);
@@ -2911,8 +2886,16 @@ void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 {
 	int colormap = m_colormap_combo->GetCurrentSelection();
+	assert(m_view);
+	assert(m_group);
+	assert(m_vd);
+	bool mip_enable = m_vd->GetRenderMode() == flvr::RenderMode::Mip;
+	bool sync_view_depth_mip = mip_enable && m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool sync_group_depth_mip = mip_enable && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
 
-	if (m_sync_group && m_group)
+	if (sync_view_depth_mip)
+		m_view->SetColormap(colormap);
+	else if (m_sync_group || sync_group_depth_mip)
 		m_group->SetColormap(colormap);
 	else if (m_vd)
 		m_vd->SetColormap(colormap);
@@ -3286,24 +3269,14 @@ void VolumePropPanel::SetNoiseReduction()
 {
 	bool val = m_options_toolbar->GetToolState(ID_NRChk);
 
-	if (m_view && m_view->GetChannelMixMode()==ChannelMixMode::Depth)
-	{
-		for (int i=0; i< m_view->GetAllVolumeNum(); i++)
-		{
-			auto vd = m_view->GetAllVolumeData(i);
-			if (vd)
-				vd->SetNR(val);
-		}
-	}
+	bool depth_view = m_view && m_view->GetChannelMixMode() == ChannelMixMode::Depth;
+	bool depth_group = m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
+	if (depth_view)
+		m_view->SetNR(val);
+	else if (m_sync_group || depth_group)
+		m_group->SetNR(val);
 	else
-	{
-		if (m_sync_group && m_group)
-			m_group->SetNR(val);
-		else if (m_group && m_group->GetChannelMixMode()==ChannelMixMode::Depth)
-			m_group->SetNR(val);
-		else if (m_vd)
-			m_vd->SetNR(val);
-	}
+		m_vd->SetNR(val);
 
 	FluoRefresh(0, { gstNoiseRedct }, { glbin_current.GetViewId() });
 }

@@ -79,6 +79,9 @@ namespace flvr
 	class TextRenderer;
 	enum class FaceWinding : int;
 	class Framebuffer;
+	enum class RenderMode : int;
+	enum class ColorMode : int;
+	enum class ColormapProj : int;
 }
 namespace flrd
 {
@@ -153,6 +156,7 @@ public:
 
 	ChannelMixMode GetChannelMixMode() { return m_channel_mix_mode; }
 	void SetChannelMixMode(ChannelMixMode mode) { m_channel_mix_mode = mode; }
+	void UpdateChannelMixMode(ChannelMixMode mode, fluo::ValueCollection& vc);
 
 	//data management
 	int GetAny();
@@ -471,6 +475,45 @@ public:
 	std::shared_ptr<VolumeData> GetVolPopList(int index) { return m_vd_pop_list[index].lock(); }
 	bool GetMeshPopListEmpty() { return m_md_pop_list.empty(); }
 	std::shared_ptr<MeshData> GetMeshPopList(int index) { return m_md_pop_list[index].lock(); }
+
+	//volume properties
+	void SetGammaEnable(bool);
+	void SetGamma(double val, bool set_this = true);
+	void SetBoundaryEnable(bool);
+	void SetBoundaryLow(double, bool set_this = true);
+	void SetBoundaryHigh(double, bool set_this = true);
+	void SetBoundaryMax(double val);
+	void SetMinMaxEnable(bool);
+	void SetLowOffset(double, bool set_this = true);
+	void SetHighOffset(double, bool set_this = true);
+	void SetThreshEnable(bool);
+	void SetLeftThresh(double, bool set_this = true);
+	void SetRightThresh(double, bool set_this = true);
+	void SetLuminanceEnable(bool);
+	void SetLuminance(double, bool set_this = true);
+	void SetAlphaEnable(bool);
+	void SetAlpha(double, bool set_this = true);
+	void SetShadingEnable(bool);
+	void SetLowShading(double);
+	void SetHiShading(double);
+	void SetShadowEnable(bool);
+	void SetShadowIntensity(double);
+	void SetSampleRateEnable(bool);
+	void SetSampleRate(double, bool set_this = true);
+
+	void SetColorMode(flvr::ColorMode mode);
+	void SetColormapDisp(bool disp);
+	void SetColormapValues(double low, double high);
+	void SetColormapInv(double val);
+	void SetColormap(int value);
+	void SetColormapProj(flvr::ColormapProj value);
+	void SetRenderMode(flvr::RenderMode mode);
+	void SetAlphaPower(double val);
+	void SetLabelMode(int mode);
+	void SetNR(bool val);
+	void SetInterpolate(bool mode);
+	void SetInvert(bool mode);
+	void SetTransparent(bool val);
 
 public:
 	//capture modes

@@ -909,6 +909,28 @@ void RenderView::ClearMeshList()
 	m_md_pop_list.clear();
 }
 
+void RenderView::UpdateChannelMixMode(ChannelMixMode mode, fluo::ValueCollection& vc)
+{
+	m_channel_mix_mode = mode;
+	if (mode == ChannelMixMode::Depth)
+	{
+		//sync settings of volume data
+		auto vd = glbin_current.vol_data.lock();
+		if (vd)
+		{
+			SetRenderMode(vd->GetRenderMode());
+			SetColorMode(vd->GetColorMode());
+			SetColormap(vd->GetColormap());
+			SetColormapValues(vd->GetColormapLow(), vd->GetColormapHigh());
+			SetColormapInv(vd->GetColormapInv());
+			SetNR(vd->GetNR());
+			SetSampleRate(vd->GetSampleRate());
+
+			vc.insert({ gstVolumeProps });
+		}
+	}
+}
+
 int RenderView::GetAny()
 {
 	PopVolumeList();
@@ -11482,4 +11504,369 @@ void RenderView::ProcessMouse(MouseState& state)
 	}
 	if (!vc.empty())
 		glbin_current.mainframe->UpdateProps(vc, 2, m_render_view_panel);
+}
+
+//volume properties
+void RenderView::SetGammaEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetGammaEnable(bval);
+	}
+}
+
+void RenderView::SetGamma(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetGamma(val, set_this);
+	}
+}
+
+void RenderView::SetBoundaryEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetBoundaryEnable(bval);
+	}
+}
+
+void RenderView::SetBoundaryLow(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetBoundaryLow(val, set_this);
+	}
+}
+
+void RenderView::SetBoundaryHigh(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetBoundaryHigh(val, set_this);
+	}
+}
+
+void RenderView::SetBoundaryMax(double val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetBoundaryMax(val);
+	}
+}
+
+void RenderView::SetMinMaxEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetMinMaxEnable(bval);
+	}
+}
+
+void RenderView::SetLowOffset(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetLowOffset(val, set_this);
+	}
+}
+
+void RenderView::SetHighOffset(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetHighOffset(val, set_this);
+	}
+}
+
+void RenderView::SetThreshEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetThreshEnable(bval);
+	}
+}
+
+void RenderView::SetLeftThresh(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetLeftThresh(val, set_this);
+	}
+}
+
+void RenderView::SetRightThresh(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetRightThresh(val, set_this);
+	}
+}
+
+void RenderView::SetLuminanceEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetLuminanceEnable(bval);
+	}
+}
+
+void RenderView::SetLuminance(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetLuminance(val, set_this);
+	}
+}
+
+void RenderView::SetAlphaEnable(bool mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetAlphaEnable(mode);
+	}
+}
+
+void RenderView::SetAlpha(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetAlpha(val, set_this);
+	}
+}
+
+void RenderView::SetShadingEnable(bool shading)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetShadingEnable(shading);
+	}
+}
+
+void RenderView::SetLowShading(double val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetLowShading(val);
+	}
+}
+
+void RenderView::SetHiShading(double val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetHiShading(val);
+	}
+}
+
+void RenderView::SetShadowEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetShadowEnable(bval);
+	}
+}
+
+void RenderView::SetShadowIntensity(double val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetShadowIntensity(val);
+	}
+}
+
+void RenderView::SetSampleRateEnable(bool bval)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetSampleRateEnable(bval);
+	}
+}
+
+void RenderView::SetSampleRate(double val, bool set_this)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetSampleRate(val, set_this);
+	}
+}
+
+void RenderView::SetColorMode(flvr::ColorMode mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetColorMode(mode);
+	}
+}
+
+void RenderView::SetColormapDisp(bool disp)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetColormapDisp(disp);
+	}
+}
+
+void RenderView::SetColormapValues(double low, double high)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+		{
+			double l, h;
+			vd->GetColormapValues(l, h);
+			vd->SetColormapValues(low<0?l:low, high<0?h:high);
+		}
+	}
+}
+
+void RenderView::SetColormapInv(double val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetColormapInv(val);
+	}
+}
+
+void RenderView::SetColormap(int value)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetColormap(value);
+	}
+}
+
+void RenderView::SetColormapProj(flvr::ColormapProj value)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetColormapProj(value);
+	}
+}
+
+void RenderView::SetRenderMode(flvr::RenderMode mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetRenderMode(mode);
+	}
+}
+
+void RenderView::SetAlphaPower(double val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetAlphaPower(val);
+	}
+}
+
+void RenderView::SetLabelMode(int val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetLabelMode(val);
+	}
+}
+
+void RenderView::SetNR(bool val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetNR(val);
+	}
+}
+
+void RenderView::SetInterpolate(bool mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetInterpolate(mode);
+	}
+}
+
+void RenderView::SetInvert(bool mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetInvert(mode);
+	}
+}
+
+void RenderView::SetTransparent(bool val)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetTransparent(val);
+	}
 }
