@@ -46,7 +46,7 @@ MainSettings::MainSettings()
 	m_override_vox = true;
 	m_last_open_type = 0;
 	m_last_tool = 0;
-	m_config_file_type = 0;
+	m_config_file_type = 1;
 	m_capture_scale = 2.0;
 	m_int_scale = 0.5;
 	m_large_scale = 0.5;
@@ -202,19 +202,23 @@ MainSettings::~MainSettings()
 
 }
 
-void MainSettings::Read()
+void MainSettings::Read(const std::string& filename)
 {
 	std::filesystem::path p = std::filesystem::current_path();
 	std::wstring fbase = L"fluorender";
+	if (!filename.empty())
+	{
+		fbase = s2ws(filename);
+	}
 	std::wstring dft;
 	//search for the file
 	for (const auto& entry : std::filesystem::directory_iterator(p))
 	{
 		if (entry.is_regular_file())
 		{
-			std::wstring filename = entry.path().filename().wstring();
+			std::wstring filename = entry.path().stem().wstring();
 			std::wstring extension = entry.path().extension().wstring();
-			if (filename.find(fbase) == 0 &&
+			if (filename == fbase &&
 				(extension == L".ini" ||
 					extension == L".xml" ||
 					extension == L".json"))

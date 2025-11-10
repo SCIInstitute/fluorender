@@ -256,9 +256,14 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	wxStaticBoxSizer* group6 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Reset Settings");
 	wxBoxSizer* sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_reset_btn = new wxButton(page, wxID_ANY, "Reset to Default");
+	st = new wxStaticText(page, 0, "Reset to:");
+	m_recommended_btn = new wxButton(page, wxID_ANY, "Recommended");
+	m_recommended_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnRecommendedBtn, this);
+	m_reset_btn = new wxButton(page, wxID_ANY, "Factory Default");
 	m_reset_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnResetBtn, this);
+	sizer6_1->Add(st, 0, wxALIGN_CENTER);
 	sizer6_1->AddStretchSpacer();
+	sizer6_1->Add(m_recommended_btn, 0, wxALIGN_CENTER);
 	sizer6_1->Add(m_reset_btn, 0, wxALIGN_CENTER);
 	sizer6_1->Add(10, 10);
 	group6->Add(10, 5);
@@ -2070,5 +2075,11 @@ void SettingDlg::OnAutomationCombo(wxCommandEvent& event)
 void SettingDlg::OnResetBtn(wxCommandEvent& event)
 {
 	glbin_settings.Reset();
+	FluoRefresh(0);
+}
+
+void SettingDlg::OnRecommendedBtn(wxCommandEvent& event)
+{
+	glbin_settings.Read("fluorender_default");
 	FluoRefresh(0);
 }

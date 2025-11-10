@@ -117,6 +117,7 @@ MainFrame::MainFrame(
 	const wxString& title,
 	int x, int y,
 	int w, int h,
+	int reset,
 	bool benchmark,
 	bool fullscreen,
 	bool windowed,
@@ -153,7 +154,10 @@ MainFrame::MainFrame(
 	SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 	//create this first to read the settings
-	glbin_settings.Read();
+	if (reset == 0)
+		glbin_settings.Read();
+	else if (reset == 2)
+		glbin_settings.Read("fluorender_default");
 	glbin.apply_processor_settings();
 	glbin_comp_def.Apply(&glbin_clusterizer);
 	glbin_comp_def.Apply(&glbin_comp_analyzer);

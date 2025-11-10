@@ -1337,8 +1337,12 @@ add_custom_command(TARGET FluoRender POST_BUILD
 # settings files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  "${FluoRender_SOURCE_DIR}/Settings/fluorender.xml"
-  "$<TARGET_FILE_DIR:FluoRender>")
+    "${FluoRender_SOURCE_DIR}/Settings/fluorender.xml"
+    "$<TARGET_FILE_DIR:FluoRender>/fluorender.xml"
+  COMMAND ${CMAKE_COMMAND} -E copy
+    "${FluoRender_SOURCE_DIR}/Settings/fluorender.xml"
+    "$<TARGET_FILE_DIR:FluoRender>/fluorender_default.xml"
+)
 
 # copy data dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD

@@ -125,6 +125,7 @@ private:
 	wxTextCtrl* m_pencil_dist_text;
 	//reset
 	wxButton* m_reset_btn;
+	wxButton* m_recommended_btn;
 
 	// Java settings.
 	wxTextCtrl* m_java_jvm_text;
@@ -250,6 +251,7 @@ private:
 	void OnAutomationCombo(wxCommandEvent& event);
 	//reset
 	void OnResetBtn(wxCommandEvent& event);
+	void OnRecommendedBtn(wxCommandEvent& event);
 };
 
 #endif//_SETTINGDLG_H_

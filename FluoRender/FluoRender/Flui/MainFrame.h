@@ -220,6 +220,7 @@ public:
 		const wxString& title,
 		int x, int y,
 		int w, int h,
+		int reset,
 		bool benchmark,
 		bool fullscreen,
 		bool windowed,

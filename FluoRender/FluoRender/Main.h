@@ -42,6 +42,7 @@ public:
 private:
 	std::vector<std::wstring> m_files;
 	size_t m_file_num;
+	int m_reset;// 0: no reset, 1: factory reset, 2: recommended reset
 	bool m_benchmark;
 	bool m_fullscreen;
 	bool m_windowed;

@@ -69,7 +69,7 @@ public:
 	MainSettings();
 	~MainSettings();
 
-	void Read();
+	void Read(const std::string& filename = "");
 	void Save();
 	void Reset();
 

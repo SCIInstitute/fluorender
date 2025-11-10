@@ -46,6 +46,10 @@ IMPLEMENT_APP(FluoRenderApp)
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
+	{ wxCMD_LINE_SWITCH, "r", "reset", "reset to factory default settings",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
+	{ wxCMD_LINE_SWITCH, "rr", "resetrec", "reset to recommended settings",
+		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "u", "usage", "list command line usage",
 		wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL },
 	{ wxCMD_LINE_SWITCH, "b", "benchmark", "start FluoRender in the benchmark mode",
@@ -107,7 +111,7 @@ bool FluoRenderApp::OnInit()
 		wxString(title),
 		-1, -1,
 		m_win_width, m_win_height,
-		m_benchmark, m_fullscreen,
+		m_reset, m_benchmark, m_fullscreen,
 		m_windowed, m_hidepanels);
 	SetTopWindow(frame);
 	frame->Show();
@@ -144,6 +148,7 @@ void FluoRenderApp::OnInitCmdLine(wxCmdLineParser& parser)
 bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 {
 	m_file_num = 0;
+	m_reset = 0;
 	m_benchmark = false;
 	m_fullscreen = false;
 	m_windowed = false;
@@ -161,6 +166,10 @@ bool FluoRenderApp::OnCmdLineParsed(wxCmdLineParser& parser)
 	//control string
 	if (parser.Found("u"))
 		parser.Usage();
+	if (parser.Found("r"))
+		m_reset = 1;
+	if (parser.Found("rr"))
+		m_reset = 2;
 	if (parser.Found("b"))
 		m_benchmark = true;
 	if (parser.Found("f"))
