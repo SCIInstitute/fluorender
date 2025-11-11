@@ -498,19 +498,32 @@ uniform sampler2D tex0;
 	
 void main()
 {
-	vec4 t = vec4(OutTexCoord, 1.0);
-	float c;
-	vec4 c2 = texture(tex0, vec2(t.x, t.y-loc0.y));
-	vec4 c4 = texture(tex0, vec2(t.x-loc0.x, t.y));
-	vec4 c5 = texture(tex0, vec2(t.x+loc0.x, t.y));
-	vec4 c7 = texture(tex0, vec2(t.x, t.y+loc0.y));
-	vec2 grad = vec2(c5.r-c4.r, c7.r-c2.r);
+	vec2 uv = OutTexCoord.xy;
+
+	// 3x3 neighbors
+	float tl = texture(tex0, uv + vec2(-loc0.x, -loc0.y)).r;
+	float tc = texture(tex0, uv + vec2( 0.0     , -loc0.y)).r;
+	float tr = texture(tex0, uv + vec2( loc0.x  , -loc0.y)).r;
+
+	float ml = texture(tex0, uv + vec2(-loc0.x,  0.0     )).r;
+	float mc = texture(tex0, uv).r;
+	float mr = texture(tex0, uv + vec2( loc0.x  ,  0.0   )).r;
+
+	float bl = texture(tex0, uv + vec2(-loc0.x,  loc0.y)).r;
+	float bc = texture(tex0, uv + vec2( 0.0     ,  loc0.y)).r;
+	float br = texture(tex0, uv + vec2( loc0.x  ,  loc0.y)).r;
+
+	// Sobel kernel
+	float gx = (tr + 2.0*mr + br) - (tl + 2.0*ml + bl);
+	float gy = (bl + 2.0*bc + br) - (tl + 2.0*tc + tr);
+
+	vec2 grad = vec2(gx, gy);
 	vec2 pert = loc1.xy;
 	float ang = max(dot(normalize(grad), pert)*2.0, -1.0);
 	pert = grad*ang;
 	grad += pert;
-	c = grad.x*grad.x+grad.y*grad.y;
-	c = clamp(c*loc0.z, 0.0, 1.0);
+	float c = grad.x*grad.x+grad.y*grad.y;
+	c = c * loc0.z;
 	FragColor = vec4(grad, c, 1.0);
 }
 )GLSHDR";
@@ -573,7 +586,8 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 	const int mip_levels = 6;
 	const int base_radius = 10;
 
-	for (int level = 0; level < mip_levels; ++level) {
+	for (int level = 0; level < mip_levels; ++level)
+	{
 		float scale = pow(2.0, float(level));
 		float lod = float(level);
 		vec2 scaled_texel = texel * scale;

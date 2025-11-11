@@ -7221,7 +7221,8 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		assert(img_shader);
 		img_shader->bind();
 
-		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
+		//img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
+		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 1.0, 0.0);
 		img_shader->setLocalParam(1,
 			glbin_settings.m_shadow_dir_x,
 			glbin_settings.m_shadow_dir_y, 0.0, 0.0);
@@ -7287,7 +7288,8 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	assert(img_shader);
 	img_shader->bind();
 
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
+	//img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, m_persp ? 2e10 : 1e6, 0.0);
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 1.0, 0.0);
 	img_shader->setLocalParam(1,
 		glbin_settings.m_shadow_dir_x,
 		glbin_settings.m_shadow_dir_y, 0.0, 0.0);
