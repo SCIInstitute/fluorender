@@ -7240,7 +7240,6 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 
 		grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 		grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-		//chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 1);
 
 		//2d adjustment
 		img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -7256,7 +7255,6 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 
 		img_shader->unbind();
 		grad_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
-		chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
 }
 
@@ -7296,21 +7294,19 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	img_shader->unbind();
 	peel_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
-	//build mipmap
-	grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
-	grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-	peel_buffer->bind_texture(flvr::AttachmentPoint::Depth(), 1);
-
 	//bind fbo for final composition
-	//BindViewBaseFramebuffer();
 	auto data_buffer = GetDataFramebuffer();
 	assert(data_buffer);
-	//data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 2);
+	flvr::FramebufferStateGuard fbg(*data_buffer);
 	//check this later
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
-	//data_buffer->apply_state();
+	data_buffer->set_depth_test_enabled(false);
 	glbin_framebuffer_manager.bind(data_buffer);
+
+	//build mipmap
+	grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
+	grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 	//2d adjustment
 	img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -7326,8 +7322,6 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 
 	img_shader->unbind();
 	grad_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
-	peel_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
-	data_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
 //get mesh shadow
