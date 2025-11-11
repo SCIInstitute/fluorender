@@ -538,12 +538,6 @@ out vec4 FragColor;
 uniform vec4 loc0; //(1/width, 1/height, zoom, 0.0)
 uniform vec4 loc1; //(darkness, 0.0, 0.0, 0.0)
 uniform sampler2D tex0;
-uniform sampler2D tex1;
-
-)GLSHDR";
-
-inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_INPUT_MESH = R"GLSHDR(
-uniform sampler2D tex2;
 
 )GLSHDR";
 
@@ -551,25 +545,6 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD = R"GLSHDR(
 void main()
 {
 	vec2 uv = OutTexCoord.xy;
-)GLSHDR";
-
-inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD_VOL = R"GLSHDR(
-	vec4 c0 = texture(tex1, uv);
-	if (c0.w == 0.0)
-	{
-		FragColor = vec4(1.0);
-		return;
-	}
-)GLSHDR";
-
-inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD_MESH = R"GLSHDR(
-	vec4 c1 = texture(tex1, uv);
-	vec4 c2 = texture(tex2, uv);
-
-	if (c1.x == 1.0 && (c1.x < 1.0 || c2.w == 0.0)) {
-		FragColor = vec4(1.0);
-		return;
-	}
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
@@ -584,7 +559,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 	float ang, dist, dense;
 
 	const int mip_levels = 6;
-	const int base_radius = 10;
+	int base_radius = int(5.0 * max(darkness * 3.0, 1.0));
 
 	for (int level = 0; level < mip_levels; ++level)
 	{
@@ -592,7 +567,8 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		float lod = float(level);
 		vec2 scaled_texel = texel * scale;
 
-		int radius = int(float(base_radius) / (float(level) / 2.0 + 1.0));
+		dense = 1.0 / (float(level) / 2.0 + 1.0);
+		int radius = int(float(base_radius) * dense);
 
 		for (int i = -radius; i <= radius; ++i)
 		for (int j = -radius; j <= radius; ++j)
@@ -601,20 +577,20 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 			sample_uv = uv + delta;
 			grad_sample = textureLod(tex0, sample_uv, lod);
 
-			if (grad_sample.z < 0.01) continue;
+			//if (grad_sample.z < 0.01) continue;
 
 			ang = dot(normalize(delta), normalize(grad_sample.xy));
 			if (ang > 0.9) continue;
-
+			ang = ang < -0.3 ? 1.0 : max(-ang + 0.7, 0.0);
 			dist = pow(i*i + j*j + 1.0, 0.5); // gentler decay
 			dist = dist == 0.0 ? 0.0 : 1.0 / dist * zoom;
-			dense = clamp(0.02 + (3.0 - zoom) * 0.02, 0.02, 0.08);
 
-			c += dense * (ang < -0.3 ? 1.0 : max(-ang + 0.7, 0.0)) * grad_sample.z * dist;
+			c += dense * ang * grad_sample.z * dist;
 		}
 	}
 
-	c = clamp(1.0 - clamp(c, 0.0, 1.0) * darkness, 0.01, 1.0);
+	c = min(pow(c, 0.4) * darkness * 0.5, darkness);
+	c = clamp(1.0 - c, 0.0, 1.0);
 	FragColor = vec4(vec3(c), 1.0);
 }
 )GLSHDR";

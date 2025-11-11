@@ -5558,8 +5558,7 @@ void RenderView::DrawData()
 	if (!m_retain_finalbuffer)
 		data_buffer->clear(true, false);
 
-	if (m_use_fog)
-		CalcFogRange();
+	CalcFogRange();
 
 	if (glbin_states.m_clip_display)
 		DrawClippingPlanes(flvr::FaceWinding::Back);
@@ -5613,8 +5612,7 @@ void RenderView::DrawDataPeel()
 		data_buffer->clear(true, true);
 
 	bool use_fog_save = m_use_fog;
-	if (m_use_fog)
-		CalcFogRange();
+	CalcFogRange();
 
 	if (glbin_states.m_clip_display)
 		DrawClippingPlanes(flvr::FaceWinding::Back);
@@ -7242,11 +7240,11 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 
 		grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 		grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
-		chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 1);
+		//chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 1);
 
 		//2d adjustment
 		img_shader = glbin_shader_manager.shader(gstImgShader,
-			flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_TO_SHADOW_VOL, 0));
+			flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_TO_SHADOW, 0));
 		assert(img_shader);
 		img_shader->bind();
 
@@ -7307,7 +7305,7 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	//BindViewBaseFramebuffer();
 	auto data_buffer = GetDataFramebuffer();
 	assert(data_buffer);
-	data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 2);
+	//data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 2);
 	//check this later
 	data_buffer->set_blend_enabled(true);
 	data_buffer->set_blend_func(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
@@ -7316,7 +7314,7 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 
 	//2d adjustment
 	img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_TO_SHADOW_MESH, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_GRADIENT_TO_SHADOW, 0));
 	assert(img_shader);
 	img_shader->bind();
 
