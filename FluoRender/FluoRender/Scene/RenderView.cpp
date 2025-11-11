@@ -6272,29 +6272,29 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	fluo::Color vol_color, mask_color;
 	double alpha, alpha_power, luminance;
 	fluo::Color gamma, brightness, hdr;
-	bool first = true;
-	for (auto it = list.begin(); it != list.end(); ++it, first = false)
+	auto cur_vd = glbin_current.vol_data.lock();
+	if (cur_vd)
+	{
+		//colormap and single color modes can't be mixed together in mip depth mode
+		color_mode = cur_vd->GetColorMode();
+		colormap = cur_vd->GetColormap();
+		colormap_low = cur_vd->GetColormapLow();
+		colormap_hi = cur_vd->GetColormapHigh();
+		colormap_inv = cur_vd->GetColormapInv();
+		vol_color = cur_vd->GetColor();
+		mask_color = cur_vd->GetMaskColor();
+		alpha = cur_vd->GetAlpha();
+		alpha_power = cur_vd->GetAlphaPower();
+		luminance = cur_vd->GetLuminance();
+		gamma = cur_vd->GetGammaColor();
+		brightness = cur_vd->GetBrightness();
+		hdr = cur_vd->GetHdr();
+	}
+	for (auto it = list.begin(); it != list.end(); ++it)
 	{
 		auto vd = it->lock();
 		if (vd && vd->GetDisp())
 		{
-			if (first)
-			{
-				//colormap and single color modes can't be mixed together in mip depth mode
-				color_mode = vd->GetColorMode();
-				colormap = vd->GetColormap();
-				colormap_low = vd->GetColormapLow();
-				colormap_hi = vd->GetColormapHigh();
-				colormap_inv = vd->GetColormapInv();
-				vol_color = vd->GetColor();
-				mask_color = vd->GetMaskColor();
-				alpha = vd->GetAlpha();
-				alpha_power = vd->GetAlphaPower();
-				luminance = vd->GetLuminance();
-				gamma = vd->GetGammaColor();
-				brightness = vd->GetBrightness();
-				hdr = vd->GetHdr();
-			}
 			flvr::VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
