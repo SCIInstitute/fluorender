@@ -474,6 +474,7 @@ void VolumeRenderer::draw_volume(
 	//set up shading
 	//set the light
 	fluo::Vector light = view_ray.direction();
+	light -= fluo::Vector(glbin_settings.m_shadow_dir_x, glbin_settings.m_shadow_dir_y, 0.0);
 	light.safe_normalize();
 	shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
 	shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
@@ -865,16 +866,6 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 	assert(seg_shader);
 	seg_shader->bind();
-
-	//set uniforms
-	//set up shading
-	fluo::Vector light = compute_view().direction();
-	light.safe_normalize();
-	seg_shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
-	if (shading_)
-		seg_shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
-	else
-		seg_shader->setLocalParam(1, 2.0 - ambient_, 0.0, specular_, shine_);
 
 	//spacings
 	double spcx, spcy, spcz;
