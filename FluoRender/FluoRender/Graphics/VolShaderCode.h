@@ -783,12 +783,11 @@ inline constexpr const char* VOL_RASTER_BLEND_SOLID  = R"GLSHDR(
 
 inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_DMAP
-	//float prevz = texture(tex4, fcf).r;
-	float currz = gl_FragCoord.z;
+	float curz = (fp.z-fp.w)/(fp.z-fp.y);
+	curz = clamp(curz, 0.0, 1.0);
 	float intpo = (c*loc18.x).r;
-	//FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 	if (intpo < 0.05) discard;
-	FragColor = vec4(vec3(currz), 1.0);
+	FragColor = vec4(vec3(curz), 1.0);
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK  = R"GLSHDR(

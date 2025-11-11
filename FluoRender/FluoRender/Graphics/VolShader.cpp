@@ -56,10 +56,7 @@ bool VolShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 
 	z << ShaderProgram::glsl_version_;
 	z << ShaderProgram::glsl_unroll_;
-	if (p.fog)
-		z << VTX_SHADER_CODE_FOG;
-	else
-		z << VTX_SHADER_CODE_CORE_PROFILE;
+	z << VTX_SHADER_CODE_FOG;
 
 	s = z.str();
 	return true;
@@ -127,8 +124,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << ShaderProgram::glsl_version_;
 	z << ShaderProgram::glsl_unroll_;
 	z << VOL_INPUTS;
-	if (p.fog)
-		z << VOL_INPUTS_FOG;
+	z << VOL_INPUTS_FOG;
 	z << VOL_OUTPUTS;
 
 	//the common uniforms
@@ -195,8 +191,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << VOL_HEAD_LIT;
 
 	// Set up fog variables and input parameters.
-	if (p.fog)
-		z << VOL_HEAD_FOG;
+	z << VOL_HEAD_FOG;
 
 	//bodies
 	if (p.shading)

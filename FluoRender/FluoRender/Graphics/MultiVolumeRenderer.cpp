@@ -518,11 +518,10 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				shader->setLocalParam(7, 1.0 / double(w), 1.0 / double(h), 0.0, 0.0);
 
 			//fog
-			if (use_fog)
-				shader->setLocalParam(8,
-					vr_list_[tn]->m_fog_intensity,
-					vr_list_[tn]->m_fog_start,
-					vr_list_[tn]->m_fog_end, 0.0);
+			shader->setLocalParam(8,
+				vr_list_[tn]->m_fog_intensity,
+				vr_list_[tn]->m_fog_start,
+				vr_list_[tn]->m_fog_end, 0.0);
 
 			// render bricks
 			glm::mat4 mv_tex_scl_mat = vr_list_[tn]->get_mv_tex_scl_mat();

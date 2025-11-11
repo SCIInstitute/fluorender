@@ -507,8 +507,7 @@ void VolumeRenderer::draw_volume(
 		shader->setLocalParam(7, 1.0 / double(w2), 1.0 / double(h2), 0.0, 0.0);
 
 	//fog
-	if (m_use_fog)
-		shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
+	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 	//set clipping planes
 	double abcd[4];
