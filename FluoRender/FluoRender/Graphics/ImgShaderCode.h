@@ -519,7 +519,7 @@ void main()
 
 	vec2 grad = vec2(gx, gy);
 	vec2 pert = loc1.xy;
-	float ang = max(dot(normalize(grad), pert)*2.0, -1.0);
+	float ang = max(dot(normalize(grad), pert), 0.0);
 	pert = grad*ang;
 	grad += pert;
 	float c = grad.x*grad.x+grad.y*grad.y;
@@ -560,6 +560,10 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 
 	const int mip_levels = 6;
 	int base_radius = int(5.0 * max(darkness * 3.0, 1.0));
+	//shadow parameters
+	const float cutoff_angle = 0.95;
+	const float thresh_angle = -0.3;
+	const float bias_angle = 0.5;
 
 	for (int level = 0; level < mip_levels; ++level)
 	{
@@ -567,7 +571,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		float lod = float(level);
 		vec2 scaled_texel = texel * scale;
 
-		dense = 1.0 / (float(level) / 2.0 + 1.0);
+		dense = 1.0 / (float(level) + 1.0);
 		int radius = int(float(base_radius) * dense * zoom);
 
 		for (int i = -radius; i <= radius; ++i)
@@ -580,8 +584,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 			//if (grad_sample.z < 0.01) continue;
 
 			ang = dot(normalize(delta), normalize(grad_sample.xy));
-			if (ang > 0.9) continue;
-			ang = ang < -0.3 ? 1.0 : max(-ang + 0.7, 0.0);
+			ang = (ang > cutoff_angle) ? ang : (ang < thresh_angle ? 1.0 : max(-ang + bias_angle, 0.0));
 			dist = pow(i*i + j*j + 1.0, 0.5); // gentler decay
 			dist = dist == 0.0 ? 0.0 : 1.0 / dist * zoom;
 

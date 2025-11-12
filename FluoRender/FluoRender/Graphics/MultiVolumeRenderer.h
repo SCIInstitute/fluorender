@@ -46,7 +46,6 @@ namespace flvr
 	class VertexArray;
 	class VolumeRenderer;
 	class TextureBrick;
-	enum class RenderMode : int;
 	class MultiVolumeRenderer
 	{
 	public:
@@ -64,7 +63,6 @@ namespace flvr
 		}
 
 		//mode and sampling rate
-		void set_render_mode(const RenderMode& mode);
 		void set_interactive_mode(bool mode);
 		int get_slice_num();
 
@@ -86,8 +84,8 @@ namespace flvr
 		void set_depth_peel(int dp) {depth_peel_ = dp;}
 
 		//blend slices
-		bool get_blend_slices() {return blend_slices_;}
-		void set_blend_slices(bool bs) {blend_slices_ = bs;}
+		bool get_blend_slices() {return micro_blend_;}
+		void set_blend_slices(bool bs) {micro_blend_ = bs;}
 
 		//set noise reduction
 		void SetNoiseRed(bool nd) {noise_red_ = nd;}
@@ -111,9 +109,8 @@ namespace flvr
 		//glm::mat4 tex_mat_;
 
 		//mode and quality control
-		RenderMode render_mode_;
 		int depth_peel_;
-		bool blend_slices_;
+		bool micro_blend_;
 
 		//scale factor
 		bool noise_red_;

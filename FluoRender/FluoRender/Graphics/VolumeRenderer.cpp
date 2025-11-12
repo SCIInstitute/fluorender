@@ -238,7 +238,8 @@ std::vector<fluo::Plane*>* VolumeRenderer::get_planes()
 std::string VolumeRenderer::get_buffer_name()
 {
 	bool adaptive = get_adaptive();
-	if (interactive_mode_ && adaptive)
+	if (interactive_mode_ && adaptive ||
+		render_mode_ == RenderMode::Overlay)
 	{
 		return gstRBBlendInteractive;
 	}
@@ -412,7 +413,7 @@ void VolumeRenderer::draw_volume(
 	size.reserve(est_slices * 6);
 
 	ColorMode color_mode = mode == 4 ? ColorMode::SingleColor : color_mode_;
-	bool use_fog = m_use_fog && color_mode != ColorMode::Depth;
+	bool use_fog = m_use_fog && render_mode_ != RenderMode::Overlay;
 
 	int w = viewport_[2];
 	int h = viewport_[3];
@@ -434,6 +435,7 @@ void VolumeRenderer::draw_volume(
 	switch (render_mode_)
 	{
 	case RenderMode::Standard:
+	case RenderMode::Overlay:
 		blend_buffer->set_blend_equation(BlendEquation::Add, BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
 			blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
@@ -504,8 +506,7 @@ void VolumeRenderer::draw_volume(
 	}
 
 	//setup depth peeling
-	if (depth_peel_ || color_mode == ColorMode::Depth)
-		shader->setLocalParam(7, 1.0 / double(w2), 1.0 / double(h2), 0.0, 0.0);
+	shader->setLocalParam(7, 1.0 / double(w2), 1.0 / double(h2), 0.0, 0.0);
 
 	//fog
 	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
@@ -535,8 +536,12 @@ void VolumeRenderer::draw_volume(
 	num_slices_ = 0;
 	bool multibricks = bricks->size() > 1;
 	bool drawn_once = false;
-	//std::wstring wstr;
-	for (unsigned int i = 0; i < bricks->size(); i++)
+	double rate_factor = 1.0;
+	if (render_mode_ == RenderMode::Standard ||
+		render_mode_ == RenderMode::Overlay)
+		rate_factor = 1.0 / rate;
+
+	for (size_t i = 0; i < bricks->size(); ++i)
 	{
 		//comment off when debug_ds
 		if (mode != 2 && mode != 3 && glbin_settings.m_mem_swap && drawn_once)
@@ -599,8 +604,7 @@ void VolumeRenderer::draw_volume(
 				load_brick_mask(b, filter);
 			if (label_)
 				load_brick_label(b);
-			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
-				render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
+			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), rate_factor);
 
 			//for brick transformation
 			float matrix[16];
@@ -662,8 +666,8 @@ void VolumeRenderer::draw_volume(
 	}
 
 	//release depth texture for rendering shadows
-	if (color_mode == ColorMode::Depth)
-		release_texture(4, GL_TEXTURE_2D);
+	//if (color_mode == ColorMode::Depth)
+	//	release_texture(4, GL_TEXTURE_2D);
 
 	// Release shader.
 	shader->unbind();
@@ -680,7 +684,8 @@ void VolumeRenderer::draw_volume(
 	std::shared_ptr<ShaderProgram> img_shader;
 
 	std::shared_ptr<Framebuffer> filter_buffer = 0;
-	if (noise_red_ && color_mode != ColorMode::Depth)
+	if (noise_red_ &&
+		render_mode_ != RenderMode::Overlay)
 	{
 		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
@@ -711,14 +716,14 @@ void VolumeRenderer::draw_volume(
 	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);//blend buffer
 
-	if (noise_red_ && color_mode != ColorMode::Depth)
+	if (noise_red_ &&
+		render_mode_ != RenderMode::Overlay)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 	else
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 	img_shader = glbin_shader_manager.shader(gstImgShader,
 		ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
-		//ShaderParams::Img(IMG_SHDR_TEXTURE_EX_ALPHA, 0));
 	assert(img_shader);
 	img_shader->bind();
 
@@ -726,7 +731,8 @@ void VolumeRenderer::draw_volume(
 
 	img_shader->unbind();
 
-	if (noise_red_ && color_mode != ColorMode::Depth)
+	if (noise_red_ &&
+		render_mode_ != RenderMode::Overlay)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
@@ -975,8 +981,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		}
 
 		//size and sample rate
-		seg_shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
-			render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
+		seg_shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), 1.0);
 
 		//draw each slice
 		for (int z = 0; z < b->nz(); z++)

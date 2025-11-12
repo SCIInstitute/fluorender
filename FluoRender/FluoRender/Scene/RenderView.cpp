@@ -6123,7 +6123,6 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 		m_mvr = std::make_unique<flvr::MultiVolumeRenderer>();
 	if (!m_mvr)
 		return;
-	m_mvr->set_render_mode(flvr::RenderMode::Standard);
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6242,7 +6241,6 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 		m_mvr = std::make_unique<flvr::MultiVolumeRenderer>();
 	if (!m_mvr)
 		return;
-	m_mvr->set_render_mode(flvr::RenderMode::Mip);
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7004,7 +7002,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 		//set to draw white shading
 		vr->set_shading(true);
 		vr->set_solid(false);
-		vr->set_mode(flvr::RenderMode::Standard);
+		vr->set_mode(flvr::RenderMode::Overlay);
 		vr->set_color_mode(flvr::ColorMode::SingleColor);
 		vr->set_color(fluo::Color(1.0));
 		//draw
@@ -7033,7 +7031,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 			guards.emplace_back(*vr);
 			vr->set_shading(true);
 			vr->set_solid(false);
-			vr->set_mode(flvr::RenderMode::Standard);
+			vr->set_mode(flvr::RenderMode::Overlay);
 			vr->set_color_mode(flvr::ColorMode::SingleColor);
 			vr->set_color(fluo::Color(1.0));
 			vd->SetStreamMode(2);
@@ -7151,7 +7149,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		flvr::RenderModeGuard rmg(*vr);
 		//set to draw depth
 		vr->set_shading(false);
-		vr->set_mode(flvr::RenderMode::Standard);
+		vr->set_mode(flvr::RenderMode::Overlay);
 		vr->set_color_mode(flvr::ColorMode::Depth);
 		if (overlay_buffer)
 			vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
@@ -7181,7 +7179,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 			//save
 			guards.emplace_back(*vr);
 			vr->set_shading(false);
-			vr->set_mode(flvr::RenderMode::Standard);
+			vr->set_mode(flvr::RenderMode::Overlay);
 			vr->set_color_mode(flvr::ColorMode::Depth);
 			if (overlay_buffer)
 				vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));

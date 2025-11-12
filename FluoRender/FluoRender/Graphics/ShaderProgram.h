@@ -112,7 +112,8 @@ namespace flvr
 		Disabled,
 		Standard,
 		Mip,
-		Slice
+		Slice,
+		Overlay
 	};
 
 	enum class ColorMode : int

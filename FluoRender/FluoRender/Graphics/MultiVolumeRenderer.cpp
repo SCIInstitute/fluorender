@@ -48,9 +48,8 @@
 using namespace flvr;
 
 MultiVolumeRenderer::MultiVolumeRenderer()
-	: render_mode_(RenderMode::Standard),
-	depth_peel_(0),
-	blend_slices_(false),
+	: depth_peel_(0),
+	micro_blend_(false),
 	noise_red_(false),
 	interactive_mode_(false),
 	num_slices_(0)
@@ -58,9 +57,8 @@ MultiVolumeRenderer::MultiVolumeRenderer()
 }
 
 MultiVolumeRenderer::MultiVolumeRenderer(MultiVolumeRenderer& copy)
-	: render_mode_(copy.render_mode_),
-	depth_peel_(copy.depth_peel_),
-	blend_slices_(copy.blend_slices_),
+	: depth_peel_(copy.depth_peel_),
+	micro_blend_(copy.micro_blend_),
 	noise_red_(false),
 	interactive_mode_(copy.interactive_mode_),
 	num_slices_(0)
@@ -82,11 +80,6 @@ void MultiVolumeRenderer::set_viewport(const fluo::Vector4i& vp)
 }
 
 //mode and sampling rate
-void MultiVolumeRenderer::set_render_mode(const RenderMode& mode)
-{
-	render_mode_ = mode;
-}
-
 void MultiVolumeRenderer::set_interactive_mode(bool mode)
 {
 	interactive_mode_ = mode;
@@ -169,6 +162,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	// Set sampling rate based on interaction.
 	double rate = vr_list_[0]->get_sample_rate();
+	RenderMode render_mode = vr_list_[0]->render_mode_;
 	fluo::Vector diag = bbox_.diagonal();
 	fluo::Vector cell_diag(diag.x() / res_.x(),
 		diag.y() / res_.y(),
@@ -211,9 +205,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	// set up blending
 	blend_buffer->set_blend_enabled(true);
 	//normal: b2f:(1, 1-a), f2b:(1-a, 1), mip: max(1, 1)
-	switch (render_mode_)
+	switch (render_mode)
 	{
 	case RenderMode::Standard:
+	case RenderMode::Overlay:
 		blend_buffer->set_blend_equation(flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
 			blend_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
@@ -357,7 +352,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	std::shared_ptr<ShaderProgram> img_shader;
 
 	std::shared_ptr<Framebuffer> filter_buffer;
-	if (noise_red_ /*&& colormap_mode_!=2*/)
+	if (noise_red_ &&
+		render_mode != RenderMode::Overlay)
 	{
 		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
@@ -389,7 +385,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);
 
-	if (noise_red_ /*&& colormap_mode_!=2*/)
+	if (noise_red_ &&
+		render_mode != RenderMode::Overlay)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 	else
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
@@ -403,7 +400,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	img_shader->unbind();
 
-	if (noise_red_)
+	if (noise_red_ &&
+		render_mode != RenderMode::Overlay)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
@@ -426,7 +424,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 	std::shared_ptr<Framebuffer> micro_blend_buffer;
 	std::shared_ptr<Framebuffer> cur_buffer;
-	if (blend_slices_/* && colormap_mode_!=2*/)
+	if (micro_blend_/* && colormap_mode_!=2*/)
 	{
 		cur_buffer = glbin_framebuffer_manager.current();
 		micro_blend_buffer = glbin_framebuffer_manager.framebuffer(
@@ -464,10 +462,15 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 	size_t location = 0;
 	size_t idx_num;
+	double rate_factor = 1.0;
+	RenderMode render_mode = vr_list_[0]->render_mode_;
+	if (render_mode == RenderMode::Standard ||
+		render_mode == RenderMode::Overlay)
+		rate_factor = 1.0 / rate;
 
 	for (size_t i = 0; i < size.size(); i++)
 	{
-		if (blend_slices_/*&& colormap_mode_!=2*/)
+		if (micro_blend_/*&& colormap_mode_!=2*/)
 		{
 			//set blend buffer
 			//blend: (add, max)(1, 1)
@@ -514,8 +517,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->bind();
 
 			//setup depth peeling
-			if (depth_peel_ || vr_list_[tn]->color_mode_ == ColorMode::Depth)
-				shader->setLocalParam(7, 1.0 / double(w), 1.0 / double(h), 0.0, 0.0);
+			shader->setLocalParam(7, 1.0 / double(w), 1.0 / double(h), 0.0, 0.0);
 
 			//fog
 			shader->setLocalParam(8,
@@ -529,8 +531,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 			shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
 
-			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(),
-				render_mode_ == RenderMode::Standard ? 1.0 / rate : 1.0);
+			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), rate_factor);
 
 			//for brick transformation
 			float matrix[16];
@@ -658,8 +659,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					(const void*)location);
 
 			//release depth texture for rendering shadows
-			if (vr_list_[tn]->color_mode_ == ColorMode::Depth)
-				vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
+			//if (vr_list_[tn]->color_mode_ == ColorMode::Depth)
+			//	vr_list_[tn]->release_texture(4, GL_TEXTURE_2D);
 
 			if (glbin_settings.m_mem_swap && i == 0)
 				TextureRenderer::finished_bricks_++;
@@ -680,7 +681,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		if (va_slices_)
 			va_slices_->draw_end();
 
-		if (blend_slices_)
+		if (micro_blend_)
 		{
 			//set buffer back
 			assert(cur_buffer);

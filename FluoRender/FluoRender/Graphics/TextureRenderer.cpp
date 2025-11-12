@@ -650,6 +650,8 @@ namespace flvr
 
 	double TextureRenderer::get_sample_rate()
 	{
+		if (render_mode_ == RenderMode::Overlay)
+			return sample_rate_;
 		bool interactive = interactive_mode_ && get_adaptive();
 		bool capture = glbin_states.m_capture;
 		int size_type = get_size_type();
