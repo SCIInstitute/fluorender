@@ -123,12 +123,17 @@ inline constexpr const char* MSH_VERTEX_BODY_FOG = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_OUTPUTS = R"GLSHDR(
 //MSH_FRAG_OUTPUTS
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_OUTPUTS_DEPTH = R"GLSHDR(
+//MSH_FRAG_OUTPUTS_DEPTH
+layout(location = 1) out float FragDepth;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_OUTPUTS_INT = R"GLSHDR(
 //MSH_FRAG_OUTPUTS_INT
-out uint FragUint;
+layout(location = 0) out uint FragUint;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_INPUTS_N = R"GLSHDR(
@@ -243,7 +248,7 @@ inline constexpr const char* MSH_FRAG_BODY_DEPTH_OUT = R"GLSHDR(
 	// MSH_FRAG_BODY_DEPTH_OUT
 	float curz = (fp.z-fp.w)/(fp.z-fp.y);
 	curz = clamp(curz, 0.0, 1.0);
-	gl_FragDepth = curz;
+	FragDepth = curz;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_SIMPLE = R"GLSHDR(

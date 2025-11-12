@@ -180,6 +180,7 @@ namespace flvr
 		void set_polygon_mode(PolygonMode mode);
 		//clear
 		void clear(bool color, bool depth);
+		void clear_attachment(const AttachmentPoint& ap, const float* value);
 
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer=0);

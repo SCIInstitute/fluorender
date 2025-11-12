@@ -31,11 +31,7 @@ using namespace flvr;
 
 bool FramebufferState::operator==(const FramebufferState& other) const
 {
-    return enableBlend == other.enableBlend &&
-           blendSrc == other.blendSrc &&
-           blendDst == other.blendDst &&
-           blendEquationRGB == other.blendEquationRGB &&
-           blendEquationAlpha == other.blendEquationAlpha &&
+    return blendStates == other.blendStates &&
            clearColor == other.clearColor &&
            enableDepthTest == other.enableDepthTest &&
            depthFunc == other.depthFunc &&

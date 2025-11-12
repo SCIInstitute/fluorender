@@ -131,6 +131,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	if (p.type == 0)
 	{
 		z << MSH_FRAG_OUTPUTS;
+		z << MSH_FRAG_OUTPUTS_DEPTH;
 		//inputs
 		if (p.shading)
 			z << MSH_FRAG_INPUTS_N;

@@ -278,26 +278,37 @@ void Framebuffer::apply_state()
 //blend
 void Framebuffer::set_blend_enabled(bool val)
 {
-	if (val == state_.enableBlend)
-		return;
-	state_.enableBlend = val;
+	for (auto& [index, bs] : state_.blendStates)
+	{
+		if (index == 0 && bs.enabled != val)
+		{
+			bs.enabled = val;
+		}
+	}
 }
 
 void Framebuffer::set_blend_func(BlendFactor sfactor, BlendFactor dfactor)
 {
-	if (sfactor == state_.blendSrc && dfactor == state_.blendDst)
-		return;
-	state_.blendSrc = sfactor;
-	state_.blendDst = dfactor;
+	for (auto& [index, bs] : state_.blendStates)
+	{
+		if (index == 0 && (bs.src != sfactor || bs.dst != dfactor))
+		{
+			bs.src = sfactor;
+			bs.dst = dfactor;
+		}
+	}
 }
 
 void Framebuffer::set_blend_equation(BlendEquation rgb, BlendEquation alpha)
 {
-	if (rgb == state_.blendEquationRGB &&
-		alpha == state_.blendEquationAlpha)
-		return;
-	state_.blendEquationRGB = rgb;
-	state_.blendEquationAlpha = alpha;
+	for (auto& [index, bs] : state_.blendStates)
+	{
+		if (index == 0 && (bs.eqRGB != rgb || bs.eqAlpha != alpha))
+		{
+			bs.eqRGB = rgb;
+			bs.eqAlpha = alpha;
+		}
+	}
 }
 
 //clear color
@@ -388,6 +399,26 @@ void Framebuffer::clear(bool color, bool depth)
 	if (color)   mask |= GL_COLOR_BUFFER_BIT;
 	if (depth)   mask |= GL_DEPTH_BUFFER_BIT;
 	if (mask)    glClear(mask);
+	switch (role_)
+	{
+	case FBRole::RenderColorDepth:
+		if (depth)
+			clear_attachment(AttachmentPoint::Color(1), &state_.clearDepth);
+		break;
+	}
+}
+
+void Framebuffer::clear_attachment(const AttachmentPoint& ap, const float* value)
+{
+	// For color attachments
+	if (ap.type == AttachmentPoint::Type::Color)
+	{
+		glClearBufferfv(GL_COLOR, ap.index, value);
+	}
+	// For depth
+	else if (ap.type == AttachmentPoint::Type::Depth) {
+		glClearBufferfv(GL_DEPTH, 0, value);
+	}
 }
 
 void Framebuffer::bind()
@@ -414,27 +445,28 @@ constexpr size_t kMaxStateStackDepth = 10;
 FramebufferState Framebuffer::default_state()
 {
 	FramebufferState s;
+	BlendState bs;
+	s.blendStates[0] = bs;
 
 	switch (role_)
 	{
 	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
-		s.enableBlend = true;
+		s.blendStates[0].enabled = true;
 		break;
 
 	case FBRole::RenderColorDepth:
-		s.enableBlend = true;
+		s.blendStates[0].enabled = true;
+		s.blendStates[1].enabled = false;
 		s.enableDepthTest = true;
 		break;
 
 	case FBRole::Pick:
-		s.enableBlend = false;
 		s.enableDepthTest = true;
 		s.enableScissorTest = true;
 		break;
 
 	case FBRole::Depth:
-		s.enableBlend = false;
 		s.enableDepthTest = true;
 		break;
 
@@ -493,7 +525,18 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_pt
 		return false;
 	}
 
+	//set up more than one color attachment if needed
 	attachments_[glap] = tex;
+
+	if (ap.type == AttachmentPoint::Type::Color) {
+		std::vector<GLenum> drawBuffers;
+		for (const auto& [attachment, texture] : attachments_) {
+			if (attachment >= GL_COLOR_ATTACHMENT0)
+				drawBuffers.push_back(attachment);
+		}
+		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
+	}
+
 	unbind(prevFramebuffer);
 
 	return true;
@@ -555,6 +598,22 @@ void Framebuffer::detach_texture(const std::shared_ptr<FramebufferTexture>& tex)
 		{
 			++it;
 		}
+	}
+
+	// After attachments_ has been updated
+	std::vector<GLenum> drawBuffers;
+	for (const auto& [attachment, texture] : attachments_) {
+		if (attachment >= GL_COLOR_ATTACHMENT0)
+			drawBuffers.push_back(attachment);
+	}
+
+	if (!drawBuffers.empty()) {
+		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
+	}
+	else {
+		// No color attachments left
+		GLenum none = GL_NONE;
+		glDrawBuffers(1, &none);
 	}
 
 	unbind(prevFramebuffer);
@@ -867,17 +926,23 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 		}
 		case FBRole::RenderColorDepth:
 		{
-			FBTexConfig color_config{ FBTexType::Render_RGBA };
-			auto tex_color = std::make_shared<FramebufferTexture>(color_config, nx, ny);
-			tex_color->create();
+			FBTexConfig color0_config{ FBTexType::Render_RGBA };
+			auto tex_color0 = std::make_shared<FramebufferTexture>(color0_config, nx, ny);
+			tex_color0->create();
+
+			FBTexConfig color1_config{ FBTexType::Render_Float };
+			auto tex_color1 = std::make_shared<FramebufferTexture>(color1_config, nx, ny);
+			tex_color1->create();
 
 			FBTexConfig depth_config{ FBTexType::Depth_Float };
 			auto tex_depth = std::make_shared<FramebufferTexture>(depth_config, nx, ny);
 			tex_depth->create();
 
-			fb->attach_texture(AttachmentPoint::Color(0), tex_color);
+			fb->attach_texture(AttachmentPoint::Color(0), tex_color0);
+			fb->attach_texture(AttachmentPoint::Color(1), tex_color1);
 			fb->attach_texture(AttachmentPoint::Depth(), tex_depth);
-			tex_list_.push_back(tex_color);
+			tex_list_.push_back(tex_color0);
+			tex_list_.push_back(tex_color1);
 			tex_list_.push_back(tex_depth);
 			break;
 		}
@@ -920,10 +985,10 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 		}
 		case FBRole::Depth:
 		{
-			FBTexConfig config{ FBTexType::Depth_Float };
+			FBTexConfig config{ FBTexType::Render_Float };
 			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
 			tex->create();
-			fb->attach_texture(AttachmentPoint::Depth(), tex);
+			fb->attach_texture(AttachmentPoint::Color(1), tex);
 			tex_list_.push_back(tex);
 			break;
 		}

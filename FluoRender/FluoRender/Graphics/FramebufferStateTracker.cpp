@@ -50,26 +50,37 @@ void FramebufferStateTracker::sync()
 //blend
 void FramebufferStateTracker::set_blend_enabled(bool val)
 {
-	if (val == currentState_.enableBlend)
-		return;
-	currentState_.enableBlend = val;
+	for (auto& [index, bs] : currentState_.blendStates)
+	{
+		if (index == 0 && bs.enabled != val)
+		{
+			bs.enabled = val;
+		}
+	}
 }
 
 void FramebufferStateTracker::set_blend_func(BlendFactor sfactor, BlendFactor dfactor)
 {
-	if (sfactor == currentState_.blendSrc && dfactor == currentState_.blendDst)
-		return;
-	currentState_.blendSrc = sfactor;
-	currentState_.blendDst = dfactor;
+	for (auto& [index, bs] : currentState_.blendStates)
+	{
+		if (index == 0 && (bs.src != sfactor || bs.dst != dfactor))
+		{
+			bs.src = sfactor;
+			bs.dst = dfactor;
+		}
+	}
 }
 
 void FramebufferStateTracker::set_blend_equation(BlendEquation rgb, BlendEquation alpha)
 {
-	if (rgb == currentState_.blendEquationRGB &&
-		alpha == currentState_.blendEquationAlpha)
-		return;
-	currentState_.blendEquationRGB = rgb;
-	currentState_.blendEquationAlpha = alpha;
+	for (auto& [index, bs] : currentState_.blendStates)
+	{
+		if (index == 0 && (bs.eqRGB != rgb || bs.eqAlpha != alpha))
+		{
+			bs.eqRGB = rgb;
+			bs.eqAlpha = alpha;
+		}
+	}
 }
 
 //clear color

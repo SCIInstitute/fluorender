@@ -30,6 +30,7 @@
 
 #include <Vector4f.h>
 #include <Vector4i.h>
+#include <unordered_map>
 
 namespace flvr
 {
@@ -94,14 +95,28 @@ namespace flvr
 		Fill
 	};
 
+	struct BlendState
+	{
+		bool enabled = false;
+		BlendFactor src = BlendFactor::One;
+		BlendFactor dst = BlendFactor::OneMinusSrcAlpha;
+		BlendEquation eqRGB = BlendEquation::Add;
+		BlendEquation eqAlpha = BlendEquation::Add;
+
+		bool operator==(const BlendState& other) const
+		{
+			return enabled == other.enabled &&
+				src == other.src &&
+				dst == other.dst &&
+				eqRGB == other.eqRGB &&
+				eqAlpha == other.eqAlpha;
+		}
+	};
+
 	struct FramebufferState
 	{
-		// Blend settings
-		bool enableBlend = false;
-		BlendFactor blendSrc = BlendFactor::One;
-		BlendFactor blendDst = BlendFactor::OneMinusSrcAlpha;
-		BlendEquation blendEquationRGB = BlendEquation::Add;
-		BlendEquation blendEquationAlpha = BlendEquation::Add;
+		// Blend settings per draw buffer index
+		std::unordered_map<int, BlendState> blendStates;
 
 		// Clear color
 		fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };

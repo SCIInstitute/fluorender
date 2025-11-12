@@ -33,9 +33,23 @@ using namespace flvr;
 
 void FramebufferStateManager::applyFull(const FramebufferState& state)
 {
-	state.enableBlend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
-	glBlendFunc(toGLBlendFactor(state.blendSrc), toGLBlendFactor(state.blendDst));
-	glBlendEquationSeparate(toGLBlendEquation(state.blendEquationRGB), toGLBlendEquation(state.blendEquationAlpha));
+	for (const auto& [index, bs] : state.blendStates)
+	{
+		if (bs.enabled)
+		{
+			glEnablei(GL_BLEND, index);
+			glBlendFunci(index,
+				toGLBlendFactor(bs.src),
+				toGLBlendFactor(bs.dst));
+			glBlendEquationSeparatei(index,
+				toGLBlendEquation(bs.eqRGB),
+				toGLBlendEquation(bs.eqAlpha));
+		}
+		else
+		{
+			glDisablei(GL_BLEND, index);
+		}
+	}
 
 	glClearColor(state.clearColor[0], state.clearColor[1], state.clearColor[2], state.clearColor[3]);
 
@@ -55,23 +69,47 @@ void FramebufferStateManager::applyFull(const FramebufferState& state)
 	glPolygonMode(GL_FRONT_AND_BACK, toGLPolygonMode(state.polygonMode));
 }
 
-void FramebufferStateManager::applyDiff(const FramebufferState& current, const FramebufferState& desired) {
-	if (current.enableBlend != desired.enableBlend)
+void FramebufferStateManager::applyDiff(const FramebufferState& current, const FramebufferState& desired)
+{
+	// Iterate over all desired blend states
+	for (const auto& [index, desiredBS] : desired.blendStates)
 	{
-		desired.enableBlend ? glEnable(GL_BLEND) : glDisable(GL_BLEND);
-		//DBGPRINT(L"glEnableBlend(%d)\n", desired.enableBlend);
-	}
+		// Look up current state for this index (if missing, treat as default)
+		auto it = current.blendStates.find(index);
+		BlendState currentBS;
+		if (it != current.blendStates.end())
+			currentBS = it->second;
 
-	if (current.blendSrc != desired.blendSrc || current.blendDst != desired.blendDst)
-	{
-		glBlendFunc(toGLBlendFactor(desired.blendSrc), toGLBlendFactor(desired.blendDst));
-		//DBGPRINT(L"glBlendFunc(%d, %d)\n", desired.blendSrc, desired.blendDst);
-	}
+		// Enable/disable
+		if (currentBS.enabled != desiredBS.enabled)
+		{
+			if (desiredBS.enabled)
+				glEnablei(GL_BLEND, index);
+			else
+				glDisablei(GL_BLEND, index);
 
-	if (current.blendEquationRGB != desired.blendEquationRGB || current.blendEquationAlpha != desired.blendEquationAlpha)
-	{
-		glBlendEquationSeparate(toGLBlendEquation(desired.blendEquationRGB), toGLBlendEquation(desired.blendEquationAlpha));
-		//DBGPRINT(L"glBlendEquationSeparate(%d, %d)\n", desired.blendEquationRGB, desired.blendEquationAlpha);
+			//DBGPRINT(L"glEnablei(GL_BLEND, %d, %d)\n", index, desiredBS.enabled);
+		}
+
+		// Blend factors
+		if (currentBS.src != desiredBS.src || currentBS.dst != desiredBS.dst)
+		{
+			glBlendFunci(index,
+				toGLBlendFactor(desiredBS.src),
+				toGLBlendFactor(desiredBS.dst));
+
+			//DBGPRINT(L"glBlendFunci(%d, %d, %d)\n", index, desiredBS.src, desiredBS.dst);
+		}
+
+		// Blend equations
+		if (currentBS.eqRGB != desiredBS.eqRGB || currentBS.eqAlpha != desiredBS.eqAlpha)
+		{
+			glBlendEquationSeparatei(index,
+				toGLBlendEquation(desiredBS.eqRGB),
+				toGLBlendEquation(desiredBS.eqAlpha));
+
+			//DBGPRINT(L"glBlendEquationSeparatei(%d, %d, %d)\n", index, desiredBS.eqRGB, desiredBS.eqAlpha);
+		}
 	}
 
 	if (current.clearColor != desired.clearColor)
@@ -147,21 +185,37 @@ FramebufferState FramebufferStateManager::capture()
 
 	// Enable flags
 	s.enableDepthTest = glIsEnabled(GL_DEPTH_TEST);
-	s.enableBlend = glIsEnabled(GL_BLEND);
 	s.enableScissorTest = glIsEnabled(GL_SCISSOR_TEST);
 	s.enableCullFace = glIsEnabled(GL_CULL_FACE);
 
 	// Blend settings
-	GLint blendSrc, blendDst, blendEqRGB, blendEqAlpha;
-	glGetIntegerv(GL_BLEND_SRC, &blendSrc);
-	glGetIntegerv(GL_BLEND_DST, &blendDst);
-	glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEqRGB);
-	glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEqAlpha);
+	GLint maxDrawBuffers = 0;
+	glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
 
-	s.blendSrc = static_cast<BlendFactor>(blendSrc);
-	s.blendDst = static_cast<BlendFactor>(blendDst);
-	s.blendEquationRGB = static_cast<BlendEquation>(blendEqRGB);
-	s.blendEquationAlpha = static_cast<BlendEquation>(blendEqAlpha);
+	for (int i = 0; i < maxDrawBuffers; ++i)
+	{
+		BlendState bs;
+
+		// Enabled flag
+		bs.enabled = glIsEnabledi(GL_BLEND, i);
+
+		// Factors
+		GLint srcRGB, dstRGB;
+		glGetIntegeri_v(GL_BLEND_SRC_RGB, i, &srcRGB);
+		glGetIntegeri_v(GL_BLEND_DST_RGB, i, &dstRGB);
+		bs.src = static_cast<BlendFactor>(srcRGB);
+		bs.dst = static_cast<BlendFactor>(dstRGB);
+
+		// Equations
+		GLint eqRGB, eqAlpha;
+		glGetIntegeri_v(GL_BLEND_EQUATION_RGB, i, &eqRGB);
+		glGetIntegeri_v(GL_BLEND_EQUATION_ALPHA, i, &eqAlpha);
+		bs.eqRGB = static_cast<BlendEquation>(eqRGB);
+		bs.eqAlpha = static_cast<BlendEquation>(eqAlpha);
+
+		// Store in map
+		s.blendStates[i] = bs;
+	}
 
 	// Depth settings
 	GLint depthFunc;
