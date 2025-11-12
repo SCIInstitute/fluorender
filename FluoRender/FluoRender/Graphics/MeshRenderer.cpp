@@ -182,8 +182,7 @@ void MeshRenderer::draw()
 					material->textureID);
 			}
 		}
-		if (fog_)
-			shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
+		shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 		if (depth_peel_)
 			shader->setLocalParam(7, 1.0 / double(vp_[2]), 1.0 / double(vp_[3]), 0.0, 0.0);
@@ -238,8 +237,7 @@ void MeshRenderer::draw_wireframe()
 	else
 		shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
 	shader->setLocalParam(3, 0.0, 1.0, 0.0, 0.0);//alpha
-	if (fog_)
-		shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
+	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 	va->draw_begin();
 	while (group)

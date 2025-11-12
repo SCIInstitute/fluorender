@@ -91,15 +91,12 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 			z << MSH_VERTEX_OUTPUTS_T;
 		if (p.color)
 			z << MSH_VERTEX_OUTPUTS_C;
-		if (p.fog)
-			z << MSH_VERTEX_OUTPUTS_FOG;
-		//uniforms
-		z << MSH_VERTEX_UNIFORM_MATRIX;
+		z << MSH_VERTEX_OUTPUTS_FOG;
 		if (p.shading)
 			z << MSH_VERTEX_UNIFORM_MATRIX_NORMAL;
 	}
-	else if (p.type == 1)
-		z << MSH_VERTEX_UNIFORM_MATRIX;
+	//uniforms
+	z << MSH_VERTEX_UNIFORM_MATRIX;
 
 	z << MSH_HEAD;
 
@@ -115,8 +112,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 			z << MSH_VERTEX_BODY_TEX;
 		if (p.color)
 			z << MSH_VERTEX_BODY_COLOR;
-		if (p.fog)
-			z << MSH_VERTEX_BODY_FOG;
+		z << MSH_VERTEX_BODY_FOG;
 	}
 
 	z << MSH_TAIL;
@@ -142,8 +138,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			z << MSH_FRAG_INPUTS_T;
 		if (p.color)
 			z << MSH_FRAG_INPUTS_C;
-		if (p.fog)
-			z << MSH_FRAG_INPUTS_FOG;
+		z << MSH_FRAG_INPUTS_FOG;
 		//uniforms
 		if (p.shading)
 			z << MSH_FRAG_UNIFORMS_MATERIAL;
@@ -151,8 +146,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			z << MSH_FRAG_UNIFORMS_NOMAT;
 		if (p.tex)
 			z << MSH_FRAG_UNIFORMS_TEX;
-		if (p.fog)
-			z << MSH_FRAG_UNIFORMS_FOG;
+		z << MSH_FRAG_UNIFORMS_FOG;
 		if (p.peel)
 			z << MSH_FRAG_UNIFORMS_DP;
 
@@ -178,8 +172,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			break;
 		}
 
-		if (p.fog)
-			z << VOL_HEAD_FOG;
+		z << VOL_HEAD_FOG;
 
 		z << MSH_FRAG_BODY_COLOR;
 		if (p.color)
@@ -190,12 +183,11 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			z << MSH_FRAG_BODY_TEXTURE;
 		//if (!p.shading && !p.tex)
 		//	z << MSH_FRAG_BODY_SIMPLE;
+		z << MSH_FRAG_BODY_FOG;
 		if (p.fog)
-		{
-			z << MSH_FRAG_BODY_FOG_V;
 			z << VOL_FOG_BODY;
-		}
 		z << MSH_FRAG_BODY_COLOR_OUT;
+		z << MSH_FRAG_BODY_DEPTH_OUT;
 	}
 	else if (p.type == 1)
 	{
@@ -229,23 +221,20 @@ bool MeshShaderFactory::emit_g(const ShaderParams& p, std::string& s)
 		z << MSH_GEOM_NORMALS_INPUTS_T;
 	if (p.color)
 		z << MSH_GEOM_NORMALS_INPUTS_C;
-	if (p.fog)
-		z << MSH_GEOM_NORMALS_INPUTS_FOG;
+	z << MSH_GEOM_NORMALS_INPUTS_FOG;
 	z << MSH_GEOM_NORMALS_OUTPUTS_N;
 	if (p.tex)
 		z << MSH_GEOM_NORMALS_OUTPUTS_T;
 	if (p.color)
 		z << MSH_GEOM_NORMALS_OUTPUTS_C;
-	if (p.fog)
-		z << MSH_GEOM_NORMALS_OUTPUTS_FOG;
+	z << MSH_GEOM_NORMALS_OUTPUTS_FOG;
 	z << MSH_VERTEX_UNIFORM_MATRIX_NORMAL;
 	z << MSH_GEOM_NORMALS_HEAD;
 	if (p.tex)
 		z << MSH_GEOM_NORMALS_BODY_T;
 	if (p.color)
 		z << MSH_GEOM_NORMALS_BODY_C;
-	if (p.fog)
-		z << MSH_GEOM_NORMALS_BODY_FOG;
+	z << MSH_GEOM_NORMALS_BODY_FOG;
 	z << MSH_GEOM_NORMALS_TAIL;
 
 	s = z.str();

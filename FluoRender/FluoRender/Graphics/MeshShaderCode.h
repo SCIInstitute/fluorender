@@ -168,7 +168,7 @@ uniform sampler2D tex0;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_FOG = R"GLSHDR(
-// MSH_FRAG_UNIFORMS_TEX
+// MSH_FRAG_UNIFORMS_FOG
 uniform vec4 loc8;//(int, start, end, 0.0) fog loc
 )GLSHDR";
 
@@ -239,6 +239,13 @@ inline constexpr const char* MSH_FRAG_BODY_COLOR_OUT = R"GLSHDR(
 	FragColor = vec4(c.xyz, c.w*loc3.y);
 )GLSHDR";
 
+inline constexpr const char* MSH_FRAG_BODY_DEPTH_OUT = R"GLSHDR(
+	// MSH_FRAG_BODY_DEPTH_OUT
+	float curz = (fp.z-fp.w)/(fp.z-fp.y);
+	curz = clamp(curz, 0.0, 1.0);
+	gl_FragDepth = curz;
+)GLSHDR";
+
 inline constexpr const char* MSH_FRAG_BODY_SIMPLE = R"GLSHDR(
 	//MSH_FRAG_BODY_SIMPLE
 	c = loc0;
@@ -269,9 +276,12 @@ inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(
 	c *= texture(tex0, OutTexcoord);
 )GLSHDR";
 
-inline constexpr const char* MSH_FRAG_BODY_FOG_V = R"GLSHDR(
+inline constexpr const char* MSH_FRAG_BODY_FOG = R"GLSHDR(
 	// MSH_FRAG_BODY_FOG
 	vec4 v;
+	v.x = (fp.z-fp.w)/(fp.z-fp.y);
+	v.x = 1.0-clamp(v.x, 0.0, 1.0);
+	v.x = 1.0-exp(-pow(v.x*2.5, 2.0));
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_INT = R"GLSHDR(
