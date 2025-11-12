@@ -589,7 +589,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		}
 	}
 
-	c = min(pow(c, 0.4) * darkness * 0.5, darkness);
+	c = min(pow(c, 0.4) * darkness * 0.5, darkness * darkness);
 	c = clamp(1.0 - c, 0.0, 1.0);
 	FragColor = vec4(vec3(c), 1.0);
 }
