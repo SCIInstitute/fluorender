@@ -48,6 +48,7 @@ namespace flvr
 		Render_RGBA,
 		UChar_RGBA,
 		Render_Int32,
+		Render_Float,
 		Depth_Float,
 		Ext_3D
 	};

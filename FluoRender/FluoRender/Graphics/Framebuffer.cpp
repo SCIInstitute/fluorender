@@ -98,6 +98,11 @@ void FramebufferTexture::create()
 			GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
 		break;
 
+	case FBTexType::Render_Float:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, nx_, ny_, 0,
+			GL_RED, GL_FLOAT, nullptr);
+		break;
+
 	case FBTexType::Depth_Float:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx_, ny_, 0,
 			GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -192,6 +197,11 @@ void FramebufferTexture::resize(int nx, int ny)
 	case FBTexType::Render_Int32:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, nx_, ny_, 0,
 			GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+		break;
+
+	case FBTexType::Render_Float:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, nx_, ny_, 0,
+			GL_RED, GL_FLOAT, nullptr);
 		break;
 
 	case FBTexType::Depth_Float:
