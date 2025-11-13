@@ -74,11 +74,12 @@ void FramebufferStateManager::applyDiff(const FramebufferState& current, const F
 	// Iterate over all desired blend states
 	for (const auto& [index, desiredBS] : desired.blendStates)
 	{
-		// Look up current state for this index (if missing, treat as default)
+		// Only proceed if current also has this index
 		auto it = current.blendStates.find(index);
-		BlendState currentBS;
-		if (it != current.blendStates.end())
-			currentBS = it->second;
+		if (it == current.blendStates.end())
+			continue; // ignore mismatched indices
+
+		const BlendState& currentBS = it->second;
 
 		// Enable/disable
 		if (currentBS.enabled != desiredBS.enabled)
