@@ -364,10 +364,10 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shadow_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shadow_dir_chk = new wxUndoableCheckBox(this, wxID_ANY, "D:",
 		wxDefaultPosition, tts4);
-	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, -45, -180, 180,
+	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
-	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "-45",
+	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts4, wxTE_RIGHT, vald_int);
 	m_shadow_st->SetFontBold();
 	m_shadow_st->SetTintColor(wxColor(160, 150, 255));

@@ -141,6 +141,13 @@ namespace flvr
 		// Polygon mode
 		PolygonMode polygonMode = PolygonMode::Fill;
 
+		//set up for two attachments
+		FramebufferState()
+		{
+			blendStates[0] = BlendState();
+			blendStates[1] = BlendState();
+		}
+
 		// Equality operator for diffing
 		bool operator==(const FramebufferState& other) const;
 		bool operator!=(const FramebufferState& other) const { return !(*this == other); }

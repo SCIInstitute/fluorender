@@ -160,7 +160,7 @@ void MeshRenderer::draw()
 				shader->setLocalParam(0, material->ambient[0], material->ambient[1], material->ambient[2], material->ambient[3]);
 				shader->setLocalParam(1, material->diffuse[0], material->diffuse[1], material->diffuse[2], material->diffuse[3]);
 				shader->setLocalParam(2, material->specular[0], material->specular[1], material->specular[2], material->specular[3]);
-				shader->setLocalParam(3, material->shininess, alpha_, glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_y);
+				shader->setLocalParam(3, material->shininess, alpha_, glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
 			}
 		}
 		else

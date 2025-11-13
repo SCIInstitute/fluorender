@@ -53,6 +53,9 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
+	void EnableShadowDir(bool);
+	void SetShadowDir(double, bool);
+
 private:
 	RenderView* m_view;
 	MeshData* m_md;
@@ -68,13 +71,12 @@ private:
 	wxCheckBox* m_shadow_chk;
 	wxSingleSlider* m_shadow_sldr;
 	wxTextCtrl* m_shadow_text;
+	wxCheckBox* m_shadow_dir_chk;
+	wxSingleSlider* m_shadow_dir_sldr;
+	wxTextCtrl* m_shadow_dir_text;
 
 	wxSingleSlider *m_scale_sldr;
 	wxTextCtrl* m_scale_text;
-	//size limiter
-	wxCheckBox *m_size_chk;
-	wxSingleSlider *m_size_sldr;
-	wxTextCtrl *m_size_text;
 
 private:
 	//lighting
@@ -91,10 +93,9 @@ private:
 	void OnShadowCheck(wxCommandEvent& event);
 	void OnShadowChange(wxScrollEvent& event);
 	void OnShadowText(wxCommandEvent& event);
-	//size limiter
-	void OnSizeCheck(wxCommandEvent& event);
-	void OnSizeChange(wxScrollEvent& event);
-	void OnSizeText(wxCommandEvent& event);
+	void OnShadowDirCheck(wxCommandEvent& event);
+	void OnShadowDirChange(wxScrollEvent& event);
+	void OnShadowDirText(wxCommandEvent& event);
 };
 
 #endif//_MESHPROPPANEL_H_

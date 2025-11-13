@@ -765,8 +765,8 @@ inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
 
 inline constexpr const char* VOL_FOG_BODY  = R"GLSHDR(
 	//VOL_FOG_BODY
-	v.x = (fp.z-fp.w)/(fp.z-fp.y);
-	v.x = 1.0-clamp(v.x, 0.0, 1.0);
+	v.x = (fp.y-fp.w)/(fp.y-fp.z);
+	v.x = clamp(v.x, 0.0, 1.0);
 	v.x = 1.0-exp(-pow(v.x*2.5, 2.0));
 	c.xyz = mix(c.xyz, vec3(0.0), v.x*fp.x); 
 )GLSHDR";
@@ -783,7 +783,7 @@ inline constexpr const char* VOL_RASTER_BLEND_SOLID  = R"GLSHDR(
 
 inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_DMAP
-	float curz = (fp.z-fp.w)/(fp.z-fp.y);
+	float curz = (fp.y-fp.w)/(fp.y-fp.z);
 	curz = clamp(curz, 0.0, 1.0);
 	float intpo = (c*loc18.x).r;
 	if (intpo < 0.05) discard;

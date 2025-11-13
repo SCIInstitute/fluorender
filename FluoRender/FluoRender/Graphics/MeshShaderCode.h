@@ -246,7 +246,7 @@ inline constexpr const char* MSH_FRAG_BODY_COLOR_OUT = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_BODY_DEPTH_OUT = R"GLSHDR(
 	// MSH_FRAG_BODY_DEPTH_OUT
-	float curz = (fp.z-fp.w)/(fp.z-fp.y);
+	float curz = (fp.y-fp.w)/(fp.y-fp.z);
 	curz = clamp(curz, 0.0, 1.0);
 	FragDepth = curz;
 )GLSHDR";

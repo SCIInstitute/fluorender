@@ -542,6 +542,13 @@ uniform sampler2D tex0;
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD = R"GLSHDR(
+// Simple hash function for pseudo-random jitter
+float hash(vec2 p)
+{
+	// fractional sine hash
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
 void main()
 {
 	vec2 uv = OutTexCoord.xy;
@@ -561,9 +568,9 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 	const int mip_levels = 6;
 	int base_radius = int(5.0 * max(darkness * 3.0, 1.0));
 	//shadow parameters
-	const float cutoff_angle = 0.95;
-	const float thresh_angle = -0.3;
-	const float bias_angle = 0.5;
+	const float cutoff_angle = 0.9;
+	const float thresh_angle = 0.5;
+	const float bias_angle = 1.5;
 
 	for (int level = 0; level < mip_levels; ++level)
 	{
@@ -572,23 +579,22 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		vec2 scaled_texel = texel * scale;
 
 		dense = 1.0 / (float(level) + 1.0);
-		int radius = int(float(base_radius) * dense * zoom);
+		int radius = int(float(base_radius) * dense);
 
 		for (int i = -radius; i <= radius; ++i)
 		for (int j = -radius; j <= radius; ++j)
 		{
-			delta = vec2(float(i), float(j)) * scaled_texel;
-			sample_uv = uv + delta;
+			delta = vec2(float(i), float(j));
+			sample_uv = uv + delta * scaled_texel;
 			grad_sample = textureLod(tex0, sample_uv, lod);
 
-			//if (grad_sample.z < 0.01) continue;
-
-			ang = dot(normalize(delta), normalize(grad_sample.xy));
-			ang = (ang > cutoff_angle) ? ang : (ang < thresh_angle ? 1.0 : max(-ang + bias_angle, 0.0));
-			dist = pow(i*i + j*j + 1.0, 0.5); // gentler decay
+			ang = -dot(normalize(delta), normalize(grad_sample.xy));
+			ang = (ang > cutoff_angle) ? ang + bias_angle : (ang > thresh_angle ? ang : 0.0);
+			dist = length(delta);
+			dist = pow(dist, 0.5);
 			dist = dist == 0.0 ? 0.0 : 1.0 / dist * zoom;
 
-			c += dense * ang * grad_sample.z * dist;
+			c += dense * ang * grad_sample.z * dist * dist;
 		}
 	}
 

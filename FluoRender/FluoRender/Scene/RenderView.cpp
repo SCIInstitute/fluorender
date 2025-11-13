@@ -7271,11 +7271,10 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	glbin_framebuffer_manager.bind(grad_mip_buffer);
 	grad_mip_buffer->clear(true, false);
 
-	auto peel_buffer = glbin_framebuffer_manager.framebuffer(GetBufferName(gstRBPeel, 0));
-	assert(peel_buffer);
-	peel_buffer->bind_texture(flvr::AttachmentPoint::Depth(), 0);
+	auto data_buffer = GetDataFramebuffer();
+	assert(data_buffer);
+	data_buffer->bind_texture(flvr::AttachmentPoint::Color(1), 0);
 
-	//2d adjustment
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_GRADIENT, 0));
 	assert(img_shader);
@@ -7285,16 +7284,13 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	img_shader->setLocalParam(1,
 		glbin_settings.m_shadow_dir_x,
 		glbin_settings.m_shadow_dir_y, 0.0, 0.0);
-	//2d adjustment
 
 	DrawViewQuad();
 
 	img_shader->unbind();
-	peel_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+	data_buffer->unbind_texture(flvr::AttachmentPoint::Color(1));
 
 	//bind fbo for final composition
-	auto data_buffer = GetDataFramebuffer();
-	assert(data_buffer);
 	flvr::FramebufferStateGuard fbg(*data_buffer);
 	//check this later
 	data_buffer->set_blend_enabled(true);
@@ -9414,72 +9410,47 @@ double RenderView::CalcZ(double z)
 
 void RenderView::CalcFogRange()
 {
-	fluo::BBox bbox;
-	bool use_box = false;
+	fluo::Transform mv;
+	mv.set(glm::value_ptr(m_mv_mat));
 
-	auto cur_vd = m_cur_vol.lock();
-	if (cur_vd)
+	double minx, maxx, miny, maxy, minz, maxz;
+	minx = m_bounds.Min().x();
+	maxx = m_bounds.Max().x();
+	miny = m_bounds.Min().y();
+	maxy = m_bounds.Max().y();
+	minz = m_bounds.Min().z();
+	maxz = m_bounds.Max().z();
+
+	std::vector<fluo::Point> points;
+	points.push_back(fluo::Point(minx, miny, minz));
+	points.push_back(fluo::Point(minx, miny, maxz));
+	points.push_back(fluo::Point(minx, maxy, minz));
+	points.push_back(fluo::Point(minx, maxy, maxz));
+	points.push_back(fluo::Point(maxx, miny, minz));
+	points.push_back(fluo::Point(maxx, miny, maxz));
+	points.push_back(fluo::Point(maxx, maxy, minz));
+	points.push_back(fluo::Point(maxx, maxy, maxz));
+
+	fluo::Point p;
+	minz = std::numeric_limits<double>::max();
+	maxz = -std::numeric_limits<double>::max();
+	for (size_t i = 0; i<points.size(); ++i)
 	{
-		bbox = cur_vd->GetClippedBounds();
-		use_box = true;
-	}
-	else if (!m_md_pop_list.empty())
-	{
-		for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it)
-		{
-			auto md = it->lock();
-			if (md->GetDisp())
-			{
-				bbox.extend(md->GetBounds());
-				use_box = true;
-			}
-		}
+		p = mv.transform(points[i]);
+		minz = p.z()<minz ? p.z() : minz;
+		maxz = p.z()>maxz ? p.z() : maxz;
 	}
 
-	if (use_box)
-	{
-		fluo::Transform mv;
-		mv.set(glm::value_ptr(m_mv_mat));
-
-		double minz, maxz;
-		minz = std::numeric_limits<double>::max();
-		maxz = -std::numeric_limits<double>::max();
-
-		std::vector<fluo::Point> points;
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z()));
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z()));
-		points.push_back(fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Max().z()));
-
-		fluo::Point p;
-		for (size_t i = 0; i<points.size(); ++i)
-		{
-			p = mv.transform(points[i]);
-			minz = p.z()<minz ? p.z() : minz;
-			maxz = p.z()>maxz ? p.z() : maxz;
-		}
-
-		minz = fabs(minz);
-		maxz = fabs(maxz);
-		m_fog_start = minz<maxz ? minz : maxz;
-		m_fog_end = maxz>minz ? maxz : minz;
-		if (m_pin_rot_ctr)
-		{
-			p = -mv.transform(m_pin_ctr);
-			if (p.z() > m_fog_start && p.z() < m_fog_end)
-				m_fog_start = p.z();
-		}
-	}
-	else
-	{
-		m_fog_start = m_distance - m_radius / 2.0;
-		m_fog_start = m_fog_start<0.0 ? 0.0 : m_fog_start;
-		m_fog_end = m_distance + m_radius / 4.0;
-	}
+	minz = fabs(minz);
+	maxz = fabs(maxz);
+	m_fog_start = minz<maxz ? minz : maxz;
+	m_fog_end = maxz>minz ? maxz : minz;
+	//if (m_pin_rot_ctr)
+	//{
+	//	p = -mv.transform(m_pin_ctr);
+	//	if (p.z() > m_fog_start && p.z() < m_fog_end)
+	//		m_fog_start = p.z();
+	//}
 }
 
 fluo::Quaternion RenderView::Trackball(double dx, double dy)

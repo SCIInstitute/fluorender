@@ -476,7 +476,7 @@ void VolumeRenderer::draw_volume(
 	//set up shading
 	//set the light
 	fluo::Vector light = view_ray.direction();
-	light -= fluo::Vector(glbin_settings.m_shadow_dir_x, glbin_settings.m_shadow_dir_y, 0.0);
+	light -= fluo::Vector(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x, 0.0);
 	light.safe_normalize();
 	shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
 	shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
