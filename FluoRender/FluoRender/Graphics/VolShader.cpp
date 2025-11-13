@@ -138,10 +138,6 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	if (ShaderParams::IsTimeProj(p.colormap_proj))
 		z << VOL_UNIFORMS_4D_CACHE;
 
-	//color modes
-	if (p.color_mode == ColorMode::Depth)
-		z << VOL_UNIFORMS_DEPTHMAP;
-
 	// add uniform for depth peeling
 	if (p.peel != 0)
 		z << VOL_UNIFORMS_DP;
@@ -172,8 +168,8 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	//the common head
 	z << VOL_HEAD;
 
-	if (p.peel != 0 || p.color_mode == ColorMode::Depth)
-		z << VOL_HEAD_2DMAP_LOC;
+	//if (p.peel != 0 || p.color_mode == ColorMode::Depth)
+	//z << VOL_HEAD_2DMAP_LOC;
 
 	//head for depth peeling
 	if (p.peel == 1)//draw volume before 15
@@ -314,9 +310,9 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 				}
 				break;
-			case ColorMode::Depth://depth map
-				z << VOL_TRANSFER_FUNCTION_DEPTHMAP;
-				break;
+			//case ColorMode::Depth://depth map
+			//	z << VOL_TRANSFER_FUNCTION_DEPTHMAP;
+			//	break;
 			}
 		}
 	}
@@ -335,37 +331,22 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		switch (p.mask)
 		{
 		case 0:
-			if (p.color_mode == ColorMode::Depth)
-				z << VOL_RASTER_BLEND_DMAP;
+			if (p.solid)
+				z << VOL_RASTER_BLEND_SOLID;
 			else
-			{
-				if (p.solid)
-					z << VOL_RASTER_BLEND_SOLID;
-				else
-					z << VOL_RASTER_BLEND;
-			}
+				z << VOL_RASTER_BLEND;
 			break;
 		case 1:
-			if (p.color_mode == ColorMode::Depth)
-				z << VOL_RASTER_BLEND_MASK_DMAP;
+			if (p.solid)
+				z << VOL_RASTER_BLEND_MASK_SOLID;
 			else
-			{
-				if (p.solid)
-					z << VOL_RASTER_BLEND_MASK_SOLID;
-				else
-					z << VOL_RASTER_BLEND_MASK;
-			}
+				z << VOL_RASTER_BLEND_MASK;
 			break;
 		case 2:
-			if (p.color_mode == ColorMode::Depth)
-				z << VOL_RASTER_BLEND_NOMASK_DMAP;
+			if (p.solid)
+				z << VOL_RASTER_BLEND_NOMASK_SOLID;
 			else
-			{
-				if (p.solid)
-					z << VOL_RASTER_BLEND_NOMASK_SOLID;
-				else
-					z << VOL_RASTER_BLEND_NOMASK;
-			}
+				z << VOL_RASTER_BLEND_NOMASK;
 			break;
 		case 3:
 			z << VOL_RASTER_BLEND_LABEL;
@@ -380,6 +361,10 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			break;
 		}
 	}
+
+	//output depth map
+	if (p.depth)
+		z << VOL_RASTER_BLEND_DMAP;
 
 	//the common tail
 	z << VOL_TAIL;

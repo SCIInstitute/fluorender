@@ -137,8 +137,7 @@ namespace flvr
 			fluo::Ray &view_ray,
 			int bi, bool orthographic_p,
 			int w, int h, bool intp,
-			int quota_bricks_chan,
-			const std::shared_ptr<Framebuffer>& blend_buffer);
+			int quota_bricks_chan);
 
 		//find out combined bricks in interactive mode
 		std::vector<TextureBrick*> *get_combined_bricks(

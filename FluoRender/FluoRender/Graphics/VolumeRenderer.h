@@ -150,6 +150,10 @@ namespace flvr
 		void set_depth_peel(int dp) {depth_peel_ = dp;}
 		int get_depth_peel() {return depth_peel_;}
 
+		//depth output
+		void set_depth(bool depth) { depth_ = depth; }
+		bool get_depth() { return depth_; }
+
 		//draw
 		void eval_ml_mode();
 		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
@@ -263,6 +267,8 @@ namespace flvr
 		std::vector<fluo::Plane *> planes_;
 		//depth peel
 		int depth_peel_;
+		//depth output
+		bool depth_;
 		//segmentation
 		int ml_mode_;	//0-normal, 1-render with mask, 2-render with mask excluded,
 						//3-random color with label, 4-random color with label+mask

@@ -401,7 +401,8 @@ void Framebuffer::clear(bool color, bool depth)
 	if (mask)    glClear(mask);
 	switch (role_)
 	{
-	case FBRole::RenderColorDepth:
+	case FBRole::RenderColorFxDepth:
+	case FBRole::RenderColorFx:
 		if (depth)
 			clear_attachment(AttachmentPoint::Color(1), &state_.clearDepth);
 		break;
@@ -455,10 +456,15 @@ FramebufferState Framebuffer::default_state()
 		s.blendStates[0].enabled = true;
 		break;
 
-	case FBRole::RenderColorDepth:
+	case FBRole::RenderColorFxDepth:
 		s.blendStates[0].enabled = true;
 		s.blendStates[1].enabled = false;
 		s.enableDepthTest = true;
+		break;
+
+	case FBRole::RenderColorFx:
+		s.blendStates[0].enabled = true;
+		s.blendStates[1].enabled = true;
 		break;
 
 	case FBRole::Pick:
@@ -511,7 +517,8 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_pt
 	switch (role_)
 	{
 	case FBRole::RenderColor:
-	case FBRole::RenderColorDepth:
+	case FBRole::RenderColorFxDepth:
+	case FBRole::RenderColorFx:
 	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 	case FBRole::Pick:
@@ -557,7 +564,8 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, unsigned int tex_id,
 	switch (role_)
 	{
 	case FBRole::RenderColor:
-	case FBRole::RenderColorDepth:
+	case FBRole::RenderColorFxDepth:
+	case FBRole::RenderColorFx:
 	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 	case FBRole::Pick:
@@ -925,7 +933,7 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			tex_list_.push_back(tex);
 			break;
 		}
-		case FBRole::RenderColorDepth:
+		case FBRole::RenderColorFxDepth:
 		{
 			FBTexConfig color0_config{ FBTexType::Render_RGBA };
 			auto tex_color0 = std::make_shared<FramebufferTexture>(color0_config, nx, ny);
@@ -945,6 +953,22 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 			tex_list_.push_back(tex_color0);
 			tex_list_.push_back(tex_color1);
 			tex_list_.push_back(tex_depth);
+			break;
+		}
+		case FBRole::RenderColorFx:
+		{
+			FBTexConfig color0_config{ FBTexType::Render_RGBA };
+			auto tex_color0 = std::make_shared<FramebufferTexture>(color0_config, nx, ny);
+			tex_color0->create();
+
+			FBTexConfig color1_config{ FBTexType::Render_Float };
+			auto tex_color1 = std::make_shared<FramebufferTexture>(color1_config, nx, ny);
+			tex_color1->create();
+
+			fb->attach_texture(AttachmentPoint::Color(0), tex_color0);
+			fb->attach_texture(AttachmentPoint::Color(1), tex_color1);
+			tex_list_.push_back(tex_color0);
+			tex_list_.push_back(tex_color1);
 			break;
 		}
 		case FBRole::RenderUChar:

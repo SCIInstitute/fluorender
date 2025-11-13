@@ -94,6 +94,8 @@ VolumeRenderer::VolumeRenderer(
 	planes_(planes),
 	//depth peel
 	depth_peel_(0),
+	//depth output
+	depth_(false),
 	//segmentation
 	ml_mode_(0),
 	mask_(false),
@@ -153,6 +155,8 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	interpolate_(copy.interpolate_),
 	//depth peel
 	depth_peel_(copy.depth_peel_),
+	//depth output
+	depth_(copy.depth_),
 	//segmentation
 	ml_mode_(copy.ml_mode_),
 	mask_(copy.mask_),
@@ -468,7 +472,7 @@ void VolumeRenderer::draw_volume(
 			depth_peel_, true,
 			grad, ml_mode_, render_mode_,
 			color_mode, colormap_, colormap_proj_,
-			solid_, 1));
+			solid_, 1, depth_));
 	assert(shader);
 	shader->bind();
 
@@ -784,7 +788,7 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 			false, 0, RenderMode::Standard,
 			ColorMode::SingleColor,
 			0, ColormapProj::Intensity,
-			false, 1));
+			false, 1, false));
 	if (shader)
 		shader->bind();
 

@@ -311,7 +311,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			if (vertex.size() == 0) { continue; }
 
 			draw_polygons_vol(b, rate, vertex, index, size, view_ray,
-				i, orthographic_p, w2, h2, intp, quota_bricks_chan, blend_buffer);
+				i, orthographic_p, w2, h2, intp, quota_bricks_chan);
 
 			int vrn = (int)(vr_list_.size());
 			if (glbin_settings.m_mem_swap && !b->drawn(0))
@@ -415,8 +415,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	fluo::Ray& view_ray,
 	int bi, bool orthographic_p,
 	int w, int h, bool intp,
-	int quota_bricks_chan,
-	const std::shared_ptr<Framebuffer>& blend_buffer)
+	int quota_bricks_chan)
 {
 	//check vr_list size
 	if (vr_list_.size() <= 0)
@@ -488,8 +487,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		//draw a single slice
 		for (size_t tn = 0; tn < vr_list_.size(); ++tn)
 		{
-			bool use_fog = vr_list_[tn]->m_use_fog &&
-				vr_list_[tn]->color_mode_ != ColorMode::Depth;
+			bool use_fog = vr_list_[tn]->m_use_fog;
 
 			// Set up shaders
 			std::shared_ptr<ShaderProgram> shader;
@@ -512,7 +510,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					vr_list_[tn]->color_mode_,
 					vr_list_[tn]->colormap_,
 					vr_list_[tn]->colormap_proj_,
-					vr_list_[tn]->solid_, 1));
+					vr_list_[tn]->solid_,
+					1,
+					vr_list_[tn]->depth_));
 			assert(shader);
 			shader->bind();
 
@@ -614,8 +614,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 			//bind depth texture for rendering shadows
-			if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
-				blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
+			//if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
+			//	blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
 			std::vector<TextureBrick*>* bs2 = 0;
 			if (tex)
@@ -673,8 +673,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			// Release shader.
 			shader->unbind();
 			//unbind depth texture for rendering shadows
-			if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
-				blend_buffer->unbind_texture(AttachmentPoint::Color(0));
+			//if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
+			//	blend_buffer->unbind_texture(AttachmentPoint::Color(0));
 		}
 		location += idx_num * 4;
 
@@ -894,7 +894,7 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 			RenderMode::Standard,
 			ColorMode::SingleColor,
 			0, ColormapProj::Disabled,
-			false, 1));
+			false, 1, false));
 	assert(shader);
 	shader->bind();
 

@@ -37,8 +37,8 @@ uniform mat4 matrix0; //projection matrix
 uniform mat4 matrix1; //modelview matrix
 layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically
 layout(location = 1) in vec3 InTexture;
-out vec3 OutVertex;
-out vec3 OutTexture;
+layout(location = 0) out vec3 OutVertex;
+layout(location = 1) out vec3 OutTexture;
 //-------------------
 void main()
 {
@@ -54,9 +54,9 @@ uniform mat4 matrix0; //projection matrix
 uniform mat4 matrix1; //modelview matrix
 layout(location = 0) in vec3 InVertex;  //w will be set to 1.0 automatically
 layout(location = 1) in vec3 InTexture;
-out vec3 OutVertex;
-out vec3 OutTexture;
-out vec4 OutFogCoord;
+layout(location = 0) out vec3 OutVertex;
+layout(location = 1) out vec3 OutTexture;
+layout(location = 2) out vec4 OutFogCoord;
 //-------------------
 void main()
 {
@@ -69,9 +69,9 @@ void main()
 
 inline constexpr const char* FRG_SHADER_CODE_CORE_PROFILE  = R"GLSHDR(
 //FRG_SHADER_CODE_CORE_PROFILE
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 uniform vec4 loc0;//color
 void main()
@@ -87,16 +87,17 @@ void main() {
 )GLSHDR";
 
 inline constexpr const char* VOL_INPUTS  = R"GLSHDR(
-in vec3 OutVertex;
-in vec3 OutTexture;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexture;
 )GLSHDR";
 
 inline constexpr const char* VOL_INPUTS_FOG  = R"GLSHDR(
-in vec4 OutFogCoord;
+layout(location = 2) in vec4 OutFogCoord;
 )GLSHDR";
 
 inline constexpr const char* VOL_OUTPUTS  = R"GLSHDR(
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out float FragDepth;
 )GLSHDR";
 
 inline constexpr const char* VOL_UNIFORMS_COMMON  = R"GLSHDR(
@@ -171,10 +172,10 @@ void main()
 	vec4 t = TexCoord;
 )GLSHDR";
 
-inline constexpr const char* VOL_HEAD_2DMAP_LOC  = R"GLSHDR(
-	//VOL_HEAD_2DMAP_LOC
-	vec2 fcf = vec2(gl_FragCoord.x*loc7.x, gl_FragCoord.y*loc7.y);
-)GLSHDR";
+//inline constexpr const char* VOL_HEAD_2DMAP_LOC  = R"GLSHDR(
+//	//VOL_HEAD_2DMAP_LOC
+//	vec2 fcf = vec2(gl_FragCoord.x*loc7.x, gl_FragCoord.y*loc7.y);
+//)GLSHDR";
 
 inline constexpr const char* VOL_HEAD_DP_1  = R"GLSHDR(
 	//VOL_HEAD_DP_NEG
@@ -784,10 +785,10 @@ inline constexpr const char* VOL_RASTER_BLEND_SOLID  = R"GLSHDR(
 inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_DMAP
 	float curz = (fp.y-fp.w)/(fp.y-fp.z);
-	curz = clamp(curz, 0.0, 1.0);
-	float intpo = (c*loc18.x).r;
-	if (intpo < 0.05) discard;
-	FragColor = vec4(vec3(curz), 1.0);
+	//curz = clamp(curz, 0.0, 1.0);
+	//float intpo = (c*loc18.x).r;
+	//if (intpo < 0.05) discard;
+	FragDepth = curz;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK  = R"GLSHDR(

@@ -146,7 +146,7 @@ void LookingGlassRenderer::Setup()
 	//set up framebuffer for quilt
 	auto quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderColorDepth, m_lg_data->quilt_width, m_lg_data->quilt_height, gstRBQuilt);
+			flvr::FBRole::RenderColorFxDepth, m_lg_data->quilt_width, m_lg_data->quilt_height, gstRBQuilt);
 	assert(quilt_buffer);
 
 /*	flvr::ShaderProgram* shader = 0;

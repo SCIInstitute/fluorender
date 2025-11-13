@@ -5321,7 +5321,7 @@ std::shared_ptr<flvr::Framebuffer> RenderView::PrepareDataFramebuffer(int nx, in
 		break;
 	case 2:
 		name = gstRBViewDataWithDepth;
-		role = flvr::FBRole::RenderColorDepth;
+		role = flvr::FBRole::RenderColorFxDepth;
 		break;
 	}
 	return glbin_framebuffer_manager.framebuffer(
@@ -7138,61 +7138,61 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 			shadow_darkness = vd->GetShadowIntensity();
 	}
 
-	if (local_list.size() == 1)
-	{
-		auto vd = local_list[0].lock();
-		assert(vd);
-		auto vr = vd->GetVR();
-		assert(vr);
+	//if (local_list.size() == 1)
+	//{
+	//	auto vd = local_list[0].lock();
+	//	assert(vd);
+	//	auto vr = vd->GetVR();
+	//	assert(vr);
 
-		//save
-		flvr::RenderModeGuard rmg(*vr);
-		//set to draw depth
-		vr->set_shading(false);
-		vr->set_mode(flvr::RenderMode::Overlay);
-		vr->set_color_mode(flvr::ColorMode::Depth);
-		if (overlay_buffer)
-			vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-		vr->set_ml_mode(0);
-		//draw
-		vd->SetStreamMode(3);
-		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-		vd->SetViewport(vp);
-		vd->SetClearColor(clear_color);
-		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
-	}
-	else if (!local_list.empty())
-	{
-		assert(m_mvr);
+	//	//save
+	//	flvr::RenderModeGuard rmg(*vr);
+	//	//set to draw depth
+	//	vr->set_shading(false);
+	//	vr->set_mode(flvr::RenderMode::Overlay);
+	//	vr->set_color_mode(flvr::ColorMode::Depth);
+	//	if (overlay_buffer)
+	//		vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
+	//	vr->set_ml_mode(0);
+	//	//draw
+	//	vd->SetStreamMode(3);
+	//	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+	//	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+	//	vd->SetViewport(vp);
+	//	vd->SetClearColor(clear_color);
+	//	vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
+	//}
+	//else if (!local_list.empty())
+	//{
+	//	assert(m_mvr);
 
-		m_mvr->clear_vr();
-		std::list<flvr::RenderModeGuard> guards;
-		for (auto it = local_list.begin(); it != local_list.end(); ++it)
-		{
-			auto vd = it->lock();
-			if (!vd)
-				continue;
-			auto vr = vd->GetVR();
-			assert(vr);
+	//	m_mvr->clear_vr();
+	//	std::list<flvr::RenderModeGuard> guards;
+	//	for (auto it = local_list.begin(); it != local_list.end(); ++it)
+	//	{
+	//		auto vd = it->lock();
+	//		if (!vd)
+	//			continue;
+	//		auto vr = vd->GetVR();
+	//		assert(vr);
 
-			//save
-			guards.emplace_back(*vr);
-			vr->set_shading(false);
-			vr->set_mode(flvr::RenderMode::Overlay);
-			vr->set_color_mode(flvr::ColorMode::Depth);
-			if (overlay_buffer)
-				vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-			m_mvr->add_vr(vr);
-			m_mvr->SetNoiseRed(vr->GetNoiseRed());
-		}
-		//draw
-		m_mvr->set_viewport(vp);
-		m_mvr->set_clear_color(clear_color);
-		m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
-	}
+	//		//save
+	//		guards.emplace_back(*vr);
+	//		vr->set_shading(false);
+	//		vr->set_mode(flvr::RenderMode::Overlay);
+	//		vr->set_color_mode(flvr::ColorMode::Depth);
+	//		if (overlay_buffer)
+	//			vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
+	//		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+	//		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+	//		m_mvr->add_vr(vr);
+	//		m_mvr->SetNoiseRed(vr->GetNoiseRed());
+	//	}
+	//	//draw
+	//	m_mvr->set_viewport(vp);
+	//	m_mvr->set_clear_color(clear_color);
+	//	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
+	//}
 
 	if (!glbin_settings.m_mem_swap ||
 		(glbin_settings.m_mem_swap &&

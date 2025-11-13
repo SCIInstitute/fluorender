@@ -119,8 +119,7 @@ namespace flvr
 	enum class ColorMode : int
 	{
 		SingleColor,
-		Colormap,
-		Depth
+		Colormap
 	};
 
 	enum class ColormapProj : int
@@ -162,6 +161,7 @@ namespace flvr
 		ColormapProj colormap_proj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
 		bool solid = false;//vol(no transparency)
 		int vertex_type = 0;//vol
+		bool depth = false;//vol, if render a depth map
 
 		static bool ValidColormapProj(ColormapProj p)
 		{
@@ -257,7 +257,8 @@ namespace flvr
 			int colormap,
 			ColormapProj colormap_proj,
 			bool solid,
-			int vertex_type
+			int vertex_type,
+			bool depth
 		)
 		{
 			ShaderParams p;
@@ -275,6 +276,7 @@ namespace flvr
 			p.colormap_proj = colormap_proj;
 			p.solid = solid;
 			p.vertex_type = vertex_type;
+			p.depth = depth;
 			return p;
 		}
 
@@ -303,6 +305,7 @@ namespace flvr
 				<< ", colormap_proj=" << static_cast<int>(colormap_proj)
 				<< ", solid=" << solid
 				<< ", vertex_type=" << vertex_type
+				<< ", depth=" << depth
 				<< "}";
 			return oss.str();
 		}
@@ -331,7 +334,8 @@ namespace flvr
 			a.color_mode == b.color_mode &&
 			a.colormap_proj == b.colormap_proj &&
 			a.solid == b.solid &&
-			a.vertex_type == b.vertex_type;
+			a.vertex_type == b.vertex_type &&
+			a.depth == b.depth;
 	}
 
 	class ShaderProgramFactory
@@ -383,6 +387,7 @@ namespace flvr
 				hash_combine(p.colormap_proj);
 				hash_combine(p.solid);
 				hash_combine(p.vertex_type);
+				hash_combine(p.depth);
 
 				return h;
 			}
