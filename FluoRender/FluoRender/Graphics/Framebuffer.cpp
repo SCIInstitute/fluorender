@@ -986,10 +986,10 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 		}
 		case FBRole::Depth:
 		{
-			FBTexConfig config{ FBTexType::Render_Float };
+			FBTexConfig config{ FBTexType::Depth_Float };
 			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
 			tex->create();
-			fb->attach_texture(AttachmentPoint::Color(1), tex);
+			fb->attach_texture(AttachmentPoint::Depth(), tex);
 			tex_list_.push_back(tex);
 			break;
 		}
