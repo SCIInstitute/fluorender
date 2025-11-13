@@ -826,14 +826,15 @@ FramebufferStateGuard::~FramebufferStateGuard()
 	assert(glbin_fb_state_tracker.state_stack_.size() > 0);
 	//get saved global state
 	auto& s = glbin_fb_state_tracker.state_stack_.back();
-	glbin_fb_state_tracker.pop_state();
 	//restore global state
 	glbin_fb_state_tracker.apply(s);
 	//get saved framebuffer state
 	s = fb_.state_stack_.back();
-	fb_.pop_state();
 	//restore framebuffer state
 	fb_.state_ = s;
+
+	glbin_fb_state_tracker.pop_state();
+	fb_.pop_state();
 }
 
 FramebufferFactory::FramebufferFactory()
