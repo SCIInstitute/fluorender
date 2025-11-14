@@ -434,27 +434,32 @@ void VolumeRenderer::draw_volume(
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 	blend_buffer->set_viewport({ viewport_[0], viewport_[1], w2, h2 });
 	// set up blending
-	blend_buffer->set_blend_enabled(true);
+	blend_buffer->set_blend_enabled_all(true);
 	//blend: normal: (add, add)(b2f: (1, 1-a), f2b: (1-a, a)), mip: (max, max)(1, 1)
 	switch (render_mode_)
 	{
 	case RenderMode::Standard:
 	case RenderMode::Overlay:
-		blend_buffer->set_blend_equation(BlendEquation::Add, BlendEquation::Add);
+		blend_buffer->set_blend_equation(0, BlendEquation::Add, BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
-			blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
+			blend_buffer->set_blend_func(0, BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
-			blend_buffer->set_blend_func(BlendFactor::OneMinusDstAlpha, BlendFactor::One);
+			blend_buffer->set_blend_func(0, BlendFactor::OneMinusDstAlpha, BlendFactor::One);
 		break;
 	case RenderMode::Mip:
-		blend_buffer->set_blend_equation(BlendEquation::Max, BlendEquation::Max);
-		blend_buffer->set_blend_func(BlendFactor::One, BlendFactor::One);
+		blend_buffer->set_blend_equation(0, BlendEquation::Max, BlendEquation::Max);
+		blend_buffer->set_blend_func(0, BlendFactor::One, BlendFactor::One);
 		break;
 	default:
 		break;
 	}
+	if (depth_)
+	{
+		blend_buffer->set_blend_equation(1, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+		blend_buffer->set_blend_func(1, flvr::BlendFactor::One, flvr::BlendFactor::One);
+	}
 	glbin_framebuffer_manager.bind(blend_buffer);
-	blend_buffer->clear(true, false);
+	blend_buffer->clear(true, depth_ ? true : false);
 
 	eval_ml_mode();
 

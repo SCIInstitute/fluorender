@@ -100,7 +100,7 @@ layout(location = 0) out vec4 FragColor;
 )GLSHDR";
 
 inline constexpr const char* VOL_OUTPUTS_DEPTH = R"GLSHDR(
-layout(location = 1) out float FragDepth;
+layout(location = 1) out vec2 FragDepth;
 )GLSHDR";
 
 inline constexpr const char* VOL_UNIFORMS_COMMON  = R"GLSHDR(
@@ -788,10 +788,7 @@ inline constexpr const char* VOL_RASTER_BLEND_SOLID  = R"GLSHDR(
 inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_DMAP
 	float curz = (fp.y-fp.w)/(fp.y-fp.z);
-	//curz = clamp(curz, 0.0, 1.0);
-	//float intpo = (c*loc18.x).r;
-	//if (intpo < 0.05) discard;
-	FragDepth = curz;
+	FragDepth = vec2(curz, 1.0) * (c * loc18.x).a;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK  = R"GLSHDR(

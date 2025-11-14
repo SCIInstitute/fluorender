@@ -103,6 +103,11 @@ void FramebufferTexture::create()
 			GL_RED, GL_FLOAT, nullptr);
 		break;
 
+	case FBTexType::Render_FloatRG:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, nx_, ny_, 0,
+			GL_RG, GL_FLOAT, nullptr);
+		break;
+
 	case FBTexType::Depth_Float:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx_, ny_, 0,
 			GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -204,6 +209,11 @@ void FramebufferTexture::resize(int nx, int ny)
 			GL_RED, GL_FLOAT, nullptr);
 		break;
 
+	case FBTexType::Render_FloatRG:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, nx_, ny_, 0,
+			GL_RG, GL_FLOAT, nullptr);
+		break;
+
 	case FBTexType::Depth_Float:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, nx_, ny_, 0,
 			GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -276,38 +286,56 @@ void Framebuffer::apply_state()
 }
 
 //blend
-void Framebuffer::set_blend_enabled(bool val)
+void Framebuffer::set_blend_enabled_all(bool val)
+{
+	for (auto& [index, bs] : state_.blendStates)
+		bs.enabled = val;
+}
+
+void Framebuffer::set_blend_func_all(BlendFactor sfactor, BlendFactor dfactor)
 {
 	for (auto& [index, bs] : state_.blendStates)
 	{
-		if (index == 0 && bs.enabled != val)
-		{
-			bs.enabled = val;
-		}
+		bs.src = sfactor;
+		bs.dst = dfactor;
 	}
 }
 
-void Framebuffer::set_blend_func(BlendFactor sfactor, BlendFactor dfactor)
+void Framebuffer::set_blend_equation_all(BlendEquation rgb, BlendEquation alpha)
 {
 	for (auto& [index, bs] : state_.blendStates)
 	{
-		if (index == 0 && (bs.src != sfactor || bs.dst != dfactor))
-		{
-			bs.src = sfactor;
-			bs.dst = dfactor;
-		}
+		bs.eqRGB = rgb;
+		bs.eqAlpha = alpha;
 	}
 }
 
-void Framebuffer::set_blend_equation(BlendEquation rgb, BlendEquation alpha)
+void Framebuffer::set_blend_enabled(int index, bool val)
 {
-	for (auto& [index, bs] : state_.blendStates)
+	auto it = state_.blendStates.find(index);
+	if (it != state_.blendStates.end() && it->second.enabled != val)
+		it->second.enabled = val;
+}
+
+void Framebuffer::set_blend_func(int index, BlendFactor sfactor, BlendFactor dfactor)
+{
+	auto it = state_.blendStates.find(index);
+	if (it != state_.blendStates.end() &&
+		(it->second.src != sfactor || it->second.dst != dfactor))
 	{
-		if (index == 0 && (bs.eqRGB != rgb || bs.eqAlpha != alpha))
-		{
-			bs.eqRGB = rgb;
-			bs.eqAlpha = alpha;
-		}
+		it->second.src = sfactor;
+		it->second.dst = dfactor;
+	}
+}
+
+void Framebuffer::set_blend_equation(int index, BlendEquation rgb, BlendEquation alpha)
+{
+	auto it = state_.blendStates.find(index);
+	if (it != state_.blendStates.end() &&
+		(it->second.eqRGB != rgb || it->second.eqAlpha != alpha))
+	{
+		it->second.eqRGB = rgb;
+		it->second.eqAlpha = alpha;
 	}
 }
 
@@ -402,9 +430,15 @@ void Framebuffer::clear(bool color, bool depth)
 	switch (role_)
 	{
 	case FBRole::RenderColorFxDepth:
-	case FBRole::RenderColorFxFilter:
 		if (depth)
 			clear_attachment(AttachmentPoint::Color(1), &state_.clearDepth);
+		break;
+	case FBRole::RenderColorFxFilter:
+		if (depth)
+		{
+			float vals[2] = { 0.0f, 0.0f };
+			clear_attachment(AttachmentPoint::Color(1), vals);
+		}
 		break;
 	}
 }
@@ -867,6 +901,7 @@ static const AttachmentLayout& layout_for(FBRole role)
 	static const FBTexConfig RGBA{ FBTexType::Render_RGBA };
 	static const FBTexConfig RGBAFilter{ FBTexType::Render_RGBA, false, TexFilter::Linear, TexFilter::Linear };
 	static const FBTexConfig Float{ FBTexType::Render_Float };
+	static const FBTexConfig FloatRG{ FBTexType::Render_FloatRG };
 	static const FBTexConfig DepthFloat{ FBTexType::Depth_Float };
 	static const FBTexConfig UChar{ FBTexType::UChar_RGBA };
 	static const FBTexConfig RGBAMipmap{ FBTexType::Render_RGBA, true, TexFilter::LinearMipmapLinear, TexFilter::Linear };
@@ -903,7 +938,7 @@ static const AttachmentLayout& layout_for(FBRole role)
 	{
 		static const AttachmentLayout rcfx{
 			{ AttachmentPoint::Color(0), RGBAFilter },
-			{ AttachmentPoint::Color(1), Float }
+			{ AttachmentPoint::Color(1), FloatRG }
 		};
 		return rcfx;
 	}

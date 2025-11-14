@@ -49,6 +49,7 @@ namespace flvr
 		UChar_RGBA,
 		Render_Int32,
 		Render_Float,
+		Render_FloatRG,//two channel
 		Depth_Float,
 		Ext_3D
 	};
@@ -179,9 +180,12 @@ namespace flvr
 
 		//fine grained state control
 		// Blend
-		void set_blend_enabled(bool val);
-		void set_blend_func(BlendFactor sfactor, BlendFactor dfactor);
-		void set_blend_equation(BlendEquation rgb, BlendEquation alpha);
+		void set_blend_enabled_all(bool val);
+		void set_blend_func_all(BlendFactor sfactor, BlendFactor dfactor);
+		void set_blend_equation_all(BlendEquation rgb, BlendEquation alpha);
+		void set_blend_enabled(int index, bool val);
+		void set_blend_func(int index, BlendFactor sfactor, BlendFactor dfactor);
+		void set_blend_equation(int index, BlendEquation rgb, BlendEquation alpha);
 		// Depth
 		void set_depth_test_enabled(bool val);
 		void set_depth_func(DepthFunc func);

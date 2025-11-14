@@ -212,8 +212,8 @@ namespace flvr
 		FramebufferStateGuard fbg(*cur_buffer);
 		cur_buffer->set_depth_test_enabled(false);
 		cur_buffer->set_cull_face_enabled(false);
-		cur_buffer->set_blend_enabled(true);
-		cur_buffer->set_blend_func(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
+		cur_buffer->set_blend_enabled_all(true);
+		cur_buffer->set_blend_func_all(BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha);
 		cur_buffer->apply_state();
 
 		auto shader = glbin_shader_manager.shader(gstImgShader,

@@ -211,7 +211,7 @@ void LookingGlassRenderer::Draw()
 	auto quilt_buffer =
 		glbin_framebuffer_manager.framebuffer(gstRBQuilt);
 	assert(quilt_buffer);
-	quilt_buffer->set_blend_enabled(false);
+	quilt_buffer->set_blend_enabled_all(false);
 	quilt_buffer->set_depth_test_enabled(false);
 	//set viewport size
 	quilt_buffer->set_viewport({ x, y, m_lg_data->view_width, m_lg_data->view_height });
