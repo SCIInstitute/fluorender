@@ -502,7 +502,8 @@ void Framebuffer::pop_state()
 	//DBGPRINT(L"Framebuffer stack size : %zu\n", state_stack_.size());
 }
 
-bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex)
+bool Framebuffer::attach_texture(const AttachmentPoint& ap,
+	const std::shared_ptr<FramebufferTexture>& tex)
 {
 	if (role_ == FBRole::Canvas)
 		return false;
@@ -532,15 +533,28 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, const std::shared_pt
 		return false;
 	}
 
-	//set up more than one color attachment if needed
-	attachments_[glap] = tex;
+	// Replace or add record
+	auto it = std::find_if(attachments_.begin(), attachments_.end(),
+		[&](const AttachmentRecord& rec) { return rec.point == ap; });
+	if (it != attachments_.end()) {
+		it->texture = tex;
+		it->config = tex->config_;
+	}
+	else {
+		attachments_.push_back({ ap, tex, tex->config_ });
+	}
 
 	if (ap.type == AttachmentPoint::Type::Color) {
 		std::vector<GLenum> drawBuffers;
-		for (const auto& [attachment, texture] : attachments_) {
-			if (attachment >= GL_COLOR_ATTACHMENT0)
-				drawBuffers.push_back(attachment);
+
+		for (const auto& rec : attachments_) {
+			if (rec.point.type == AttachmentPoint::Type::Color) {
+				// Convert the AttachmentPoint to the GL enum
+				GLenum glAttachment = GL_COLOR_ATTACHMENT0 + rec.point.index;
+				drawBuffers.push_back(glAttachment);
+			}
 		}
+
 		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
 	}
 
@@ -579,52 +593,9 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, unsigned int tex_id,
 		break;
 	}
 
-	attachments_.erase(glap); // External texture, not tracked via shared_ptr
 	unbind(prevFramebuffer);
 
 	return true;
-}
-
-void Framebuffer::detach_texture(const std::shared_ptr<FramebufferTexture>& tex)
-{
-	if (role_ == FBRole::Canvas)
-		return;
-	if (!valid_ || !tex) return;
-
-	GLint prevFramebuffer = 0;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
-	bind();
-
-	for (auto it = attachments_.begin(); it != attachments_.end();)
-	{
-		if (it->second == tex)
-		{
-			glFramebufferTexture(GL_FRAMEBUFFER, it->first, 0, 0);
-			it = attachments_.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
-
-	// After attachments_ has been updated
-	std::vector<GLenum> drawBuffers;
-	for (const auto& [attachment, texture] : attachments_) {
-		if (attachment >= GL_COLOR_ATTACHMENT0)
-			drawBuffers.push_back(attachment);
-	}
-
-	if (!drawBuffers.empty()) {
-		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
-	}
-	else {
-		// No color attachments left
-		GLenum none = GL_NONE;
-		glDrawBuffers(1, &none);
-	}
-
-	unbind(prevFramebuffer);
 }
 
 void Framebuffer::detach_texture(const AttachmentPoint& ap)
@@ -639,7 +610,11 @@ void Framebuffer::detach_texture(const AttachmentPoint& ap)
 	bind();
 
 	glFramebufferTexture(GL_FRAMEBUFFER, glap, 0, 0);
-	attachments_.erase(glap);
+
+	attachments_.erase(
+		std::remove_if(attachments_.begin(), attachments_.end(),
+			[&](const AttachmentRecord& rec) { return rec.point == ap; }),
+		attachments_.end());
 
 	unbind(prevFramebuffer);
 }
@@ -648,33 +623,52 @@ void Framebuffer::bind_texture(const AttachmentPoint& ap, int tex_unit)
 {
 	if (role_ == FBRole::Canvas)
 		return;
-	GLenum glap = to_gl_attachment(ap);
-	auto it = attachments_.find(glap);
-	if (it == attachments_.end() || !it->second || !it->second->valid())
-		return;
-	it->second->bind(tex_unit);
+
+	for (const auto& rec : attachments_) {
+		if (rec.point == ap && rec.texture && rec.texture->valid()) {
+			rec.texture->bind(tex_unit);
+			return;
+		}
+	}
 }
 
 void Framebuffer::unbind_texture(const AttachmentPoint& ap)
 {
 	if (role_ == FBRole::Canvas)
 		return;
-	GLenum glap = to_gl_attachment(ap);
-	auto it = attachments_.find(glap);
-	if (it == attachments_.end() || !it->second || !it->second->valid())
-		return;
-	it->second->unbind();
+
+	for (const auto& rec : attachments_) {
+		if (rec.point == ap && rec.texture && rec.texture->valid()) {
+			rec.texture->unbind();
+			return;
+		}
+	}
 }
 
 unsigned int Framebuffer::tex_id(const AttachmentPoint& ap)
 {
 	if (role_ == FBRole::Canvas)
 		return 0;
-	GLenum glap = to_gl_attachment(ap);
-	auto it = attachments_.find(glap);
-	if (it == attachments_.end() || !it->second || !it->second->valid())
-		return 0;
-	return it->second->id();
+
+	for (const auto& rec : attachments_) {
+		if (rec.point == ap && rec.texture && rec.texture->valid()) {
+			return rec.texture->id();
+		}
+	}
+	return 0;
+}
+
+std::shared_ptr<FramebufferTexture> Framebuffer::get_texture(const AttachmentPoint& ap)
+{
+	if (role_ == FBRole::Canvas)
+		return nullptr;
+
+	for (const auto& rec : attachments_) {
+		if (rec.point == ap && rec.texture && rec.texture->valid()) {
+			return rec.texture;
+		}
+	}
+	return nullptr;
 }
 
 void Framebuffer::resize(int nx, int ny)
@@ -687,10 +681,10 @@ void Framebuffer::resize(int nx, int ny)
 	if (role_ == FBRole::Canvas)
 		return;
 
-	for (auto& [ap, tex] : attachments_) {
-		if (tex && tex->valid()) {
-			tex->resize(nx, ny);
-			tex->unbind(); // Ensures clean state per texture
+	for (const auto& rec : attachments_) {
+		if (rec.texture && rec.texture->valid()) {
+			rec.texture->resize(nx, ny);
+			rec.texture->unbind(); // Ensures clean state per texture
 		}
 	}
 }
@@ -700,13 +694,14 @@ void Framebuffer::generate_mipmap(const AttachmentPoint& ap)
 	if (role_ != FBRole::RenderColorMipmap)
 		return;
 
-	GLenum glap = to_gl_attachment(ap);
-	auto it = attachments_.find(glap);
-	if (it == attachments_.end() || !it->second || !it->second->valid())
-		return;
-	it->second->bind(0);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	it->second->unbind();
+	for (const auto& rec : attachments_) {
+		if (rec.point == ap && rec.texture && rec.texture->valid()) {
+			rec.texture->bind(0);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			rec.texture->unbind();
+			return;
+		}
+	}
 }
 
 bool Framebuffer::match(const FBRole& role)
@@ -748,9 +743,10 @@ unsigned int Framebuffer::read_pick(int px, int py)
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
 
 	// Find the first attachment with Render_Int32 type
-	for (const auto& [ap, tex] : attachments_)
-	{
-		if (tex && tex->valid() && tex->config_.type == FBTexType::Render_Int32)
+	for (const auto& rec : attachments_) {
+		if (rec.texture &&
+			rec.texture->valid() &&
+			rec.texture->config_.type == FBTexType::Render_Int32)
 		{
 			bind();
 			unsigned int value = 0;
@@ -771,9 +767,14 @@ bool Framebuffer::read(int x, int y, int width, int height,
 	if (!valid_ || !data || width <= 0 || height <= 0)
 		return false;
 
-	GLenum glap = to_gl_attachment(ap);
-	auto it = attachments_.find(glap);
-	if (it == attachments_.end() || !it->second || !it->second->valid())
+	std::shared_ptr<FramebufferTexture> texture;
+	for (const auto& rec : attachments_) {
+		if (rec.point == ap && rec.texture && rec.texture->valid()) {
+			texture = rec.texture;
+			break;
+		}
+	}
+	if (!texture)
 		return false;
 
 	// Save current framebuffer binding
@@ -790,7 +791,7 @@ bool Framebuffer::read(int x, int y, int width, int height,
 	int rh = std::min(height, ny_ - ry);
 
 	// Read pixels from the specified attachment
-	glReadBuffer(glap); // Optional: if using multiple color attachments
+	glReadBuffer(to_gl_attachment(ap)); // Optional: if using multiple color attachments
 	glReadPixels(rx, ry, rw, rh, format, type, data);
 
 	// Restore previous framebuffer
@@ -859,169 +860,127 @@ void FramebufferFactory::clear()
 	tex_list_.clear();
 }
 
+using AttachmentLayout = std::vector<AttachmentSpec>;
+
+static const AttachmentLayout& layout_for(FBRole role)
+{
+	static const FBTexConfig RGBA{ FBTexType::Render_RGBA };
+	static const FBTexConfig RGBAFilter{ FBTexType::Render_RGBA, false, TexFilter::Linear, TexFilter::Linear };
+	static const FBTexConfig Float{ FBTexType::Render_Float };
+	static const FBTexConfig DepthFloat{ FBTexType::Depth_Float };
+	static const FBTexConfig UChar{ FBTexType::UChar_RGBA };
+	static const FBTexConfig RGBAMipmap{ FBTexType::Render_RGBA, true, TexFilter::LinearMipmapLinear, TexFilter::Linear };
+	static const FBTexConfig Int32{ FBTexType::Render_Int32 };
+
+	switch (role) {
+	case FBRole::RenderColor:
+	{
+		static const AttachmentLayout rc{
+			{ AttachmentPoint::Color(0), RGBA }
+		};
+		return rc;
+	}
+
+	case FBRole::RenderColorFilter:
+	{
+		static const AttachmentLayout rcf{
+			{ AttachmentPoint::Color(0), RGBAFilter }
+		};
+		return rcf;
+	}
+
+	case FBRole::RenderColorFxDepth:
+	{
+		static const AttachmentLayout rcfxd{
+			{ AttachmentPoint::Color(0), RGBA },
+			{ AttachmentPoint::Color(1), Float },
+			{ AttachmentPoint::Depth(), DepthFloat }
+		};
+		return rcfxd;
+	}
+
+	case FBRole::RenderColorFx:
+	{
+		static const AttachmentLayout rcfx{
+			{ AttachmentPoint::Color(0), RGBA },
+			{ AttachmentPoint::Color(1), Float }
+		};
+		return rcfx;
+	}
+
+	case FBRole::RenderUChar:
+	{
+		static const AttachmentLayout ruc{
+			{ AttachmentPoint::Color(0), UChar }
+		};
+		return ruc;
+	}
+
+	case FBRole::RenderColorMipmap:
+	{
+		static const AttachmentLayout rcm{
+			{ AttachmentPoint::Color(0), RGBAMipmap }
+		};
+		return rcm;
+	}
+
+	case FBRole::Pick:
+	{
+		static const AttachmentLayout rp{
+			{ AttachmentPoint::Color(0), Int32 },
+			{ AttachmentPoint::Depth(), DepthFloat }
+		};
+		return rp;
+	}
+
+	case FBRole::Depth:
+	{
+		static const AttachmentLayout rd{
+			{ AttachmentPoint::Depth(), DepthFloat }
+		};
+		return rd;
+	}
+
+	default:
+	{
+		static const AttachmentLayout empty{};
+		return empty;
+	}
+	}
+}
+
 std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
-	const FBRole& role, int nx, int ny,
-	const std::string& name)
+	const FBRole& role, int nx, int ny, const std::string& name)
 {
 	std::shared_ptr<Framebuffer> fb;
 
-	if (!name.empty())
-	{
-		//match name if non empty
-		for (const auto& candidate : fb_list_)
-		{
-			if (candidate->match(name))
-			{
-				fb = candidate;
-				break;
-			}
+	if (!name.empty()) {
+		for (const auto& candidate : fb_list_) {
+			if (candidate->match(name)) { fb = candidate; break; }
 		}
 	}
-	else
-	{
-		//otherwise match role
-		for (const auto& candidate : fb_list_)
-		{
-			if (candidate->match(role))
-			{
-				fb = candidate;
-				fb->set_name(name);
-				break;
-			}
+	else {
+		for (const auto& candidate : fb_list_) {
+			if (candidate->match(role)) { fb = candidate; candidate->set_name(name); break; }
 		}
 	}
 
-	if (fb)
-	{
-		// If found, resize if needed
-		if (!fb->match_size(nx, ny))
-			fb->resize(nx, ny);
-	}
-	else
-	{
-		// if no name or role match
-		// Create new framebuffer
+	if (!fb) {
 		fb = std::make_shared<Framebuffer>(role, nx, ny, name);
 		fb->create();
 		fb_list_.push_back(fb);
-
-		// Create and attach textures based on role
-		switch (role)
-		{
-		case FBRole::Canvas:
-		{
-			// No attachments for default framebuffer
-			break;
-		}
-		case FBRole::RenderColor:
-		{
-			FBTexConfig config{ FBTexType::Render_RGBA };
-			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
-			tex->create();
-			fb->attach_texture(AttachmentPoint::Color(0), tex);
-			tex_list_.push_back(tex);
-			break;
-		}
-		case FBRole::RenderColorFilter:
-		{
-			FBTexConfig config{ FBTexType::Render_RGBA };
-			config.minFilter = TexFilter::Linear;
-			config.magFilter = TexFilter::Linear;
-			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
-			tex->create();
-			fb->attach_texture(AttachmentPoint::Color(0), tex);
-			tex_list_.push_back(tex);
-			break;
-		}
-		case FBRole::RenderColorFxDepth:
-		{
-			FBTexConfig color0_config{ FBTexType::Render_RGBA };
-			auto tex_color0 = std::make_shared<FramebufferTexture>(color0_config, nx, ny);
-			tex_color0->create();
-
-			FBTexConfig color1_config{ FBTexType::Render_Float };
-			auto tex_color1 = std::make_shared<FramebufferTexture>(color1_config, nx, ny);
-			tex_color1->create();
-
-			FBTexConfig depth_config{ FBTexType::Depth_Float };
-			auto tex_depth = std::make_shared<FramebufferTexture>(depth_config, nx, ny);
-			tex_depth->create();
-
-			fb->attach_texture(AttachmentPoint::Color(0), tex_color0);
-			fb->attach_texture(AttachmentPoint::Color(1), tex_color1);
-			fb->attach_texture(AttachmentPoint::Depth(), tex_depth);
-			tex_list_.push_back(tex_color0);
-			tex_list_.push_back(tex_color1);
-			tex_list_.push_back(tex_depth);
-			break;
-		}
-		case FBRole::RenderColorFx:
-		{
-			FBTexConfig color0_config{ FBTexType::Render_RGBA };
-			auto tex_color0 = std::make_shared<FramebufferTexture>(color0_config, nx, ny);
-			tex_color0->create();
-
-			FBTexConfig color1_config{ FBTexType::Render_Float };
-			auto tex_color1 = std::make_shared<FramebufferTexture>(color1_config, nx, ny);
-			tex_color1->create();
-
-			fb->attach_texture(AttachmentPoint::Color(0), tex_color0);
-			fb->attach_texture(AttachmentPoint::Color(1), tex_color1);
-			tex_list_.push_back(tex_color0);
-			tex_list_.push_back(tex_color1);
-			break;
-		}
-		case FBRole::RenderUChar:
-		{
-			FBTexConfig config{ FBTexType::UChar_RGBA };
-			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
-			tex->create();
-			fb->attach_texture(AttachmentPoint::Color(0), tex);
-			tex_list_.push_back(tex);
-			break;
-		}
-		case FBRole::RenderColorMipmap:
-		{
-			FBTexConfig config{ FBTexType::Render_RGBA };
-			config.useMipmap = true;
-			config.minFilter = TexFilter::LinearMipmapLinear;
-			config.magFilter = TexFilter::Linear;
-			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
-			tex->create();
-			fb->attach_texture(AttachmentPoint::Color(0), tex);
-			tex_list_.push_back(tex);
-			break;
-		}
-		case FBRole::Pick:
-		{
-			FBTexConfig color_config{ FBTexType::Render_Int32 };
-			auto tex_color = std::make_shared<FramebufferTexture>(color_config, nx, ny);
-			tex_color->create();
-
-			FBTexConfig depth_config{ FBTexType::Depth_Float };
-			auto tex_depth = std::make_shared<FramebufferTexture>(depth_config, nx, ny);
-			tex_depth->create();
-
-			fb->attach_texture(AttachmentPoint::Color(0), tex_color);
-			fb->attach_texture(AttachmentPoint::Depth(), tex_depth);
-			tex_list_.push_back(tex_color);
-			tex_list_.push_back(tex_depth);
-			break;
-		}
-		case FBRole::Depth:
-		{
-			FBTexConfig config{ FBTexType::Depth_Float };
-			auto tex = std::make_shared<FramebufferTexture>(config, nx, ny);
-			tex->create();
-			fb->attach_texture(AttachmentPoint::Depth(), tex);
-			tex_list_.push_back(tex);
-			break;
-		}
-		default:
-			break;
-		}
 	}
 
+	assert(fb);
+
+	//resize if needed
+	if (!fb->match_size(nx, ny))
+		fb->resize(nx, ny);
+
+	// Always reconcile to requested role and size
+	ensure_layout(fb, role, nx, ny);
+
+	// Keep name authoritative
 	fb->set_name(name);
 
 	return fb;
@@ -1076,6 +1035,38 @@ FramebufferFactory::Guard FramebufferFactory::bind_scoped(const std::shared_ptr<
 std::shared_ptr<Framebuffer> FramebufferFactory::current() const
 {
 	return current_.lock(); // nullptr if expired
+}
+
+void FramebufferFactory::ensure_layout(std::shared_ptr<Framebuffer>& fb,
+	FBRole role, int nx, int ny)
+{
+	const auto& layout = layout_for(role);
+
+	for (const auto& spec : layout) {
+		auto existing = fb->get_texture(spec.point);
+		if (!existing || !existing->match_config(spec.config)) {
+			// detach old if present
+			if (existing) fb->detach_texture(spec.point);
+
+			// create new
+			auto tex = std::make_shared<FramebufferTexture>(spec.config, nx, ny);
+			tex->create();
+			fb->attach_texture(spec.point, tex);
+			tex_list_.push_back(tex);
+		}
+		else if (!existing->match_size(nx, ny)) {
+			existing->resize(nx, ny);
+		}
+	}
+
+	// detach anything not in layout
+	for (auto& att : fb->attachments()) {
+		bool keep = std::any_of(layout.begin(), layout.end(),
+			[&](const AttachmentSpec& s) { return s.point == att.point; });
+		if (!keep) fb->detach_texture(att.point);
+	}
+
+	fb->set_role(role);
 }
 
 std::shared_ptr<Framebuffer> FramebufferManager::framebuffer(

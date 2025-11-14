@@ -101,6 +101,8 @@ namespace flvr
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
 		void resize(int nx, int ny);
+		bool match_config(const FBTexConfig& config) { return config == config_; }
+		bool match_size(int nx, int ny) { return nx == nx_ && ny == ny_; }
 
 	private:
 		unsigned int id_ = 0;
@@ -142,6 +144,22 @@ namespace flvr
 		static AttachmentPoint Stencil() { return {Type::Stencil}; }
 		static AttachmentPoint DepthStencil() { return {Type::DepthStencil}; }
 	};
+	inline bool operator==(const AttachmentPoint& a, const AttachmentPoint& b) {
+		return a.type == b.type && a.index == b.index;
+	}
+
+	struct AttachmentSpec
+	{
+		AttachmentPoint point;
+		FBTexConfig config;
+	};
+
+	struct AttachmentRecord
+	{
+		AttachmentPoint point;                       // where it attaches
+		std::shared_ptr<FramebufferTexture> texture; // the texture object
+		FBTexConfig config;                          // how it was created
+	};
 
 	class Framebuffer
 	{
@@ -153,6 +171,8 @@ namespace flvr
 		void destroy();
 		bool valid() { return valid_; }
 		unsigned int id() { return id_; }
+
+		void set_role(const FBRole& role) { role_ = role; }
 
 		//states
 		void apply_state();
@@ -185,11 +205,14 @@ namespace flvr
 
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer=0);
-		void detach_texture(const std::shared_ptr<FramebufferTexture>& tex);
 		void detach_texture(const AttachmentPoint& ap);
 		void bind_texture(const AttachmentPoint& ap, int tex_unit);
 		void unbind_texture(const AttachmentPoint& ap);
 		unsigned int tex_id(const AttachmentPoint& ap);
+		std::shared_ptr<FramebufferTexture> get_texture(const AttachmentPoint& ap);
+		const std::vector<AttachmentRecord>& attachments() const {
+			return attachments_;
+		}
 
 		void resize(int nx, int ny);
 
@@ -223,7 +246,7 @@ namespace flvr
 		int ny_ = 0;
 		std::string name_;//specify its use
 		bool valid_ = false;
-		std::map<int, std::shared_ptr<FramebufferTexture>> attachments_;
+		std::vector<AttachmentRecord> attachments_;
 
 		//states
 		FramebufferState state_;
@@ -297,9 +320,13 @@ namespace flvr
 
 	private:
 		std::vector<std::shared_ptr<Framebuffer>> fb_list_;
-		std::vector<std::shared_ptr<FramebufferTexture>> tex_list_;
+		std::vector<std::weak_ptr<FramebufferTexture>> tex_list_;
 
 		std::weak_ptr<Framebuffer> current_;
+
+	private:
+		void ensure_layout(std::shared_ptr<Framebuffer>& fb,
+			FBRole role, int nx, int ny);
 	};
 
 	class FramebufferManager
