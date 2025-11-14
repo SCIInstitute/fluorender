@@ -120,7 +120,7 @@ namespace flvr
 		Canvas,// Represents the default framebuffer (id == 0)
 		RenderColor,
 		RenderColorFxDepth,
-		RenderColorFx,
+		RenderColorFxFilter,
 		RenderColorFilter,
 		RenderColorMipmap,
 		RenderUChar,

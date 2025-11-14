@@ -2235,6 +2235,8 @@ double VolumeData::GetMlHiShading()
 void VolumeData::SetShadowEnable(bool bVal)
 {
 	m_shadow_enable = bVal;
+	if (m_vr)
+		m_vr->set_depth(bVal);
 }
 
 bool VolumeData::GetShadowEnable()

@@ -95,8 +95,11 @@ inline constexpr const char* VOL_INPUTS_FOG  = R"GLSHDR(
 layout(location = 2) in vec4 OutFogCoord;
 )GLSHDR";
 
-inline constexpr const char* VOL_OUTPUTS  = R"GLSHDR(
+inline constexpr const char* VOL_OUTPUTS_COLOR  = R"GLSHDR(
 layout(location = 0) out vec4 FragColor;
+)GLSHDR";
+
+inline constexpr const char* VOL_OUTPUTS_DEPTH = R"GLSHDR(
 layout(location = 1) out float FragDepth;
 )GLSHDR";
 

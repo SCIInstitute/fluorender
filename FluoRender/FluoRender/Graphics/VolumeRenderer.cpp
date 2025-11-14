@@ -427,8 +427,8 @@ void VolumeRenderer::draw_volume(
 	int h2 = new_size.h();
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
-	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderColorFilter, w2, h2, buf_name);
+	flvr::FBRole role = depth_ ? flvr::FBRole::RenderColorFxFilter : flvr::FBRole::RenderColorFilter;
+	auto blend_buffer = glbin_framebuffer_manager.framebuffer(role, w2, h2, buf_name);
 	assert(blend_buffer);
 	//set clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });

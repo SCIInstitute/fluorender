@@ -194,10 +194,13 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	Size2D new_size = vr_list_[0]->resize(buf_name);
 	int w2 = new_size.w();
 	int h2 = new_size.h();
+	bool depth = false;
+	for (size_t i = 0; i < vr_list_.size(); ++i)
+		depth |= vr_list_[i]->depth_;
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
-	auto blend_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderColorFilter, w2, h2, buf_name);
+	flvr::FBRole role = depth ? flvr::FBRole::RenderColorFxFilter : flvr::FBRole::RenderColorFilter;
+	auto blend_buffer = glbin_framebuffer_manager.framebuffer(role, w2, h2, buf_name);
 	assert(blend_buffer);
 	//set up clear color and viewport size
 	blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });

@@ -402,7 +402,7 @@ void Framebuffer::clear(bool color, bool depth)
 	switch (role_)
 	{
 	case FBRole::RenderColorFxDepth:
-	case FBRole::RenderColorFx:
+	case FBRole::RenderColorFxFilter:
 		if (depth)
 			clear_attachment(AttachmentPoint::Color(1), &state_.clearDepth);
 		break;
@@ -462,7 +462,7 @@ FramebufferState Framebuffer::default_state()
 		s.enableDepthTest = true;
 		break;
 
-	case FBRole::RenderColorFx:
+	case FBRole::RenderColorFxFilter:
 		s.blendStates[0].enabled = true;
 		s.blendStates[1].enabled = true;
 		break;
@@ -519,7 +519,7 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 	{
 	case FBRole::RenderColor:
 	case FBRole::RenderColorFxDepth:
-	case FBRole::RenderColorFx:
+	case FBRole::RenderColorFxFilter:
 	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 	case FBRole::Pick:
@@ -579,7 +579,7 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, unsigned int tex_id,
 	{
 	case FBRole::RenderColor:
 	case FBRole::RenderColorFxDepth:
-	case FBRole::RenderColorFx:
+	case FBRole::RenderColorFxFilter:
 	case FBRole::RenderColorMipmap:
 	case FBRole::RenderUChar:
 	case FBRole::Pick:
@@ -899,10 +899,10 @@ static const AttachmentLayout& layout_for(FBRole role)
 		return rcfxd;
 	}
 
-	case FBRole::RenderColorFx:
+	case FBRole::RenderColorFxFilter:
 	{
 		static const AttachmentLayout rcfx{
-			{ AttachmentPoint::Color(0), RGBA },
+			{ AttachmentPoint::Color(0), RGBAFilter },
 			{ AttachmentPoint::Color(1), Float }
 		};
 		return rcfx;
@@ -973,12 +973,12 @@ std::shared_ptr<Framebuffer> FramebufferFactory::framebuffer(
 
 	assert(fb);
 
+	// Always reconcile to requested role and size
+	ensure_layout(fb, role, nx, ny);
+
 	//resize if needed
 	if (!fb->match_size(nx, ny))
 		fb->resize(nx, ny);
-
-	// Always reconcile to requested role and size
-	ensure_layout(fb, role, nx, ny);
 
 	// Keep name authoritative
 	fb->set_name(name);

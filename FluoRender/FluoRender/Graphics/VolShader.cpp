@@ -125,7 +125,9 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << ShaderProgram::glsl_unroll_;
 	z << VOL_INPUTS;
 	z << VOL_INPUTS_FOG;
-	z << VOL_OUTPUTS;
+	z << VOL_OUTPUTS_COLOR;
+	if (p.depth)
+		z << VOL_OUTPUTS_DEPTH;
 
 	//the common uniforms
 	z << VOL_UNIFORMS_COMMON;
