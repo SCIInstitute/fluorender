@@ -582,7 +582,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 
 		dense = 1.0 / (float(level) + 2.0);
 		int radius = int(float(base_radius) * dense);
-		dense = pow(dense, 0.5);
+		dense = pow(dense, 0.1);
 
 		for (int i = -radius; i <= radius; ++i)
 		for (int j = -radius; j <= radius; ++j)
@@ -612,7 +612,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		}
 	}
 
-	c = min(pow(c, 0.4) * darkness * 0.5, darkness * darkness);
+	c = min(pow(c, 0.1) * darkness, darkness) * 0.9;
 	c = clamp(1.0 - c, 0.0, 1.0);
 	FragColor = vec4(vec3(c), 1.0);
 }
