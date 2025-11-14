@@ -59,6 +59,8 @@ namespace flvr
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
+		std::string get_buffer_name();
+
 		//set viewport
 		void set_viewport(const fluo::Vector4i& vp) { viewport_ = vp; }
 
@@ -299,7 +301,6 @@ namespace flvr
 		double m_fog_end;
 
 	private:
-		std::string get_buffer_name();
 		Size2D resize(const std::string& buf_name);
 
 		friend class RenderModeGuard;

@@ -528,6 +528,87 @@ void main()
 }
 )GLSHDR";
 
+inline constexpr const char* IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT = R"GLSHDR(
+//IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT
+in vec3 OutVertex;
+in vec3 OutTexCoord;
+out vec4 FragColor;
+	
+//IMG_SHADER_CODE_DEPTH_TO_GRADIENT
+uniform vec4 loc0; //(width, height, scale, 0.0)
+uniform vec4 loc1; //(pert.x, pert.y, 0.0, 0.0)
+uniform sampler2D tex0;
+	
+void main()
+{
+	vec2 uv = OutTexCoord.xy;
+	vec4 txcl;
+
+	// 3x3 neighbors
+	txcl = texture(tex0, uv + vec2(-loc0.x, -loc0.y));
+	float tl = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+	txcl = texture(tex0, uv + vec2( 0.0     , -loc0.y));
+	float tc = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+	txcl = texture(tex0, uv + vec2( loc0.x  , -loc0.y));
+	float tr = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+
+	txcl = texture(tex0, uv + vec2(-loc0.x,  0.0     ));
+	float ml = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+	txcl = texture(tex0, uv);
+	float mc = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+	txcl = texture(tex0, uv + vec2( loc0.x  ,  0.0   ));
+	float mr = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+
+	txcl = texture(tex0, uv + vec2(-loc0.x,  loc0.y));
+	float bl = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+	txcl = texture(tex0, uv + vec2( 0.0     ,  loc0.y));
+	float bc = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+	txcl = texture(tex0, uv + vec2( loc0.x  ,  loc0.y));
+	float br = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
+
+	// Sobel kernel
+	float gx = (tr + 2.0*mr + br) - (tl + 2.0*ml + bl);
+	float gy = (bl + 2.0*bc + br) - (tl + 2.0*tc + tr);
+
+	vec2 grad = vec2(gx, gy);
+	vec2 pert = loc1.xy;
+	float ang = max(dot(normalize(grad), pert), 0.0);
+	pert = grad*ang;
+	grad += pert;
+	float c = grad.x*grad.x+grad.y*grad.y;
+	c = c * loc0.z;
+	FragColor = vec4(grad, c, 1.0);
+}
+)GLSHDR";
+
+//inline constexpr const char* IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT = R"GLSHDR(
+////IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT
+//in vec3 OutVertex;
+//in vec3 OutTexCoord;
+//out vec4 FragColor;
+//	
+////IMG_SHADER_CODE_DEPTH_TO_GRADIENT
+//uniform vec4 loc0; //(width, height, scale, 0.0)
+//uniform vec4 loc1; //(pert.x, pert.y, 0.0, 0.0)
+//uniform sampler2D tex0;
+//	
+//void main()
+//{
+//	vec2 uv = OutTexCoord.xy;
+//	vec4 txcl;
+//
+//	txcl = texture(tex0, uv);
+//	if (txcl.g < 0.001)
+//	{
+//		FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+//		return;
+//	}
+//	float mc = txcl.r / txcl.g;
+//
+//	FragColor = vec4(vec3(mc), 1.0);
+//}
+//)GLSHDR";
+
 inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_INPUT = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_TO_SHADOW
 in vec3 OutVertex;
@@ -542,13 +623,6 @@ uniform sampler2D tex0;
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_HEAD = R"GLSHDR(
-// Simple hash function for pseudo-random jitter
-float hash(vec2 p)
-{
-	// fractional sine hash
-	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
 void main()
 {
 	vec2 uv = OutTexCoord.xy;
@@ -580,9 +654,8 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 
 		vec2 scaled_texel = texel * scale;
 
-		dense = 1.0 / (float(level) + 2.0);
+		dense = 1.0 / (float(level) + 1.0);
 		int radius = int(float(base_radius) * dense);
-		dense = pow(dense, 0.1);
 
 		for (int i = -radius; i <= radius; ++i)
 		for (int j = -radius; j <= radius; ++j)
@@ -592,12 +665,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 			if (dist > float(radius))
 				continue;
 
-			// hash-based jitter: unique per (i,j,level)
-			float rnd = hash(vec2(i * 13 + level, j * 17 + level));
-			vec2 jitter = vec2(rnd, hash(vec2(j * 29 + level, i * 31 + level))) - 0.5;
-			jitter *= 0.3; // reduce jitter amount
-
-			sample_uv = uv + (delta + jitter) * scaled_texel;
+			sample_uv = uv + delta * scaled_texel;
 
 			// slight negative bias to keep detail
 			grad_sample = textureLod(tex0, sample_uv, lod - 0.25);

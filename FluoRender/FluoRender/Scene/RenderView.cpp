@@ -7114,29 +7114,21 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	//			return;
 	//}
 
-	auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
-	assert(overlay_buffer);
-	flvr::FramebufferStateGuard fbg(*overlay_buffer);
-	overlay_buffer->set_blend_enabled_all(false);
-	overlay_buffer->set_clear_color(clear_color);
-	glbin_framebuffer_manager.bind(overlay_buffer);
+	//auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
+	//	flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
+	//assert(overlay_buffer);
+	//flvr::FramebufferStateGuard fbg(*overlay_buffer);
+	//overlay_buffer->set_blend_enabled_all(false);
+	//overlay_buffer->set_clear_color(clear_color);
+	//glbin_framebuffer_manager.bind(overlay_buffer);
 
-	if (!glbin_settings.m_mem_swap ||
-		(glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_clear_chan_buffer()))
-	{
-		overlay_buffer->clear(true, false);
-		flvr::TextureRenderer::reset_clear_chan_buffer();
-	}
-
-	double shadow_darkness = 0.0;
-	if (!local_list.empty())
-	{
-		auto vd = local_list[0].lock();
-		if (vd)
-			shadow_darkness = vd->GetShadowIntensity();
-	}
+	//if (!glbin_settings.m_mem_swap ||
+	//	(glbin_settings.m_mem_swap &&
+	//	flvr::TextureRenderer::get_clear_chan_buffer()))
+	//{
+	//	overlay_buffer->clear(true, false);
+	//	flvr::TextureRenderer::reset_clear_chan_buffer();
+	//}
 
 	//if (local_list.size() == 1)
 	//{
@@ -7193,6 +7185,22 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	//	m_mvr->set_clear_color(clear_color);
 	//	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
 	//}
+	std::string buf_name;
+	double shadow_darkness = 0.0;
+	if (!local_list.empty())
+	{
+		auto vd = local_list[0].lock();
+		assert(vd);
+		shadow_darkness = vd->GetShadowIntensity();
+		auto vr = vd->GetVR();
+		assert(vr);
+		buf_name = vr->get_buffer_name();
+	}
+	if (buf_name.empty())
+		return;
+
+	auto blend_buffer = glbin_framebuffer_manager.framebuffer(buf_name);
+	assert(blend_buffer);
 
 	if (!glbin_settings.m_mem_swap ||
 		(glbin_settings.m_mem_swap &&
@@ -7208,12 +7216,11 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		glbin_framebuffer_manager.bind(grad_mip_buffer);
 		grad_mip_buffer->clear(true, false);
 
-		//ok to unprotect
-		overlay_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+		blend_buffer->bind_texture(flvr::AttachmentPoint::Color(1), 0);
 
 		//2d adjustment
 		auto img_shader = glbin_shader_manager.shader(gstImgShader,
-			flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_GRADIENT, 0));
+			flvr::ShaderParams::Img(IMG_SHDR_DEPTH_ACC_TO_GRADIENT, 0));
 		assert(img_shader);
 		img_shader->bind();
 
@@ -7226,7 +7233,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		DrawViewQuad();
 
 		img_shader->unbind();
-		overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+		blend_buffer->unbind_texture(flvr::AttachmentPoint::Color(1));
 
 		//bind fbo for final composition
 		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
