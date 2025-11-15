@@ -170,8 +170,8 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	//the common head
 	z << VOL_HEAD;
 
-	//if (p.peel != 0 || p.color_mode == ColorMode::Depth)
-	//z << VOL_HEAD_2DMAP_LOC;
+	if (p.peel != 0)
+		z << VOL_HEAD_2DMAP_LOC;
 
 	//head for depth peeling
 	if (p.peel == 1)//draw volume before 15

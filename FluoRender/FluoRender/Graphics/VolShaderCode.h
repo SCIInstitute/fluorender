@@ -175,10 +175,10 @@ void main()
 	vec4 t = TexCoord;
 )GLSHDR";
 
-//inline constexpr const char* VOL_HEAD_2DMAP_LOC  = R"GLSHDR(
-//	//VOL_HEAD_2DMAP_LOC
-//	vec2 fcf = vec2(gl_FragCoord.x*loc7.x, gl_FragCoord.y*loc7.y);
-//)GLSHDR";
+inline constexpr const char* VOL_HEAD_2DMAP_LOC  = R"GLSHDR(
+	//VOL_HEAD_2DMAP_LOC
+	vec2 fcf = vec2(gl_FragCoord.x*loc7.x, gl_FragCoord.y*loc7.y);
+)GLSHDR";
 
 inline constexpr const char* VOL_HEAD_DP_1  = R"GLSHDR(
 	//VOL_HEAD_DP_NEG
