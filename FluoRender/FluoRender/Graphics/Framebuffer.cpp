@@ -421,26 +421,12 @@ void Framebuffer::set_polygon_mode(PolygonMode mode)
 	state_.polygonMode = mode;
 }
 
-void Framebuffer::clear(bool color, bool depth)
+void Framebuffer::clear_base(bool color, bool depth)
 {
 	GLbitfield mask = 0;
 	if (color)   mask |= GL_COLOR_BUFFER_BIT;
 	if (depth)   mask |= GL_DEPTH_BUFFER_BIT;
 	if (mask)    glClear(mask);
-	switch (role_)
-	{
-	case FBRole::RenderColorFxDepth:
-		if (depth)
-			clear_attachment(AttachmentPoint::Color(1), &state_.clearDepth);
-		break;
-	case FBRole::RenderColorFxFilter:
-		if (depth)
-		{
-			float vals[2] = { 0.0f, 0.0f };
-			clear_attachment(AttachmentPoint::Color(1), vals);
-		}
-		break;
-	}
 }
 
 void Framebuffer::clear_attachment(const AttachmentPoint& ap, const float* value)

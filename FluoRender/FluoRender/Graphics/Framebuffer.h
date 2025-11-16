@@ -204,7 +204,7 @@ namespace flvr
 		//polygon mode
 		void set_polygon_mode(PolygonMode mode);
 		//clear
-		void clear(bool color, bool depth);
+		void clear_base(bool color, bool depth);
 		void clear_attachment(const AttachmentPoint& ap, const float* value);
 
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);

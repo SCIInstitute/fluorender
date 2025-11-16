@@ -45,6 +45,7 @@
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>
+#include <array>
 #include <glm/gtc/type_ptr.hpp>
 #include <Debug.h>
 
@@ -459,7 +460,14 @@ void VolumeRenderer::draw_volume(
 		blend_buffer->set_blend_func(1, flvr::BlendFactor::One, flvr::BlendFactor::One);
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
-	blend_buffer->clear(true, depth_ ? true : false);
+	blend_buffer->clear_base(true, false);
+	bool clear_depth = depth_;
+	if (glbin_settings.m_mem_swap &&
+		TextureRenderer::start_update_loop_ &&
+		!TextureRenderer::done_update_loop_)
+		clear_depth = false;
+	if (clear_depth)
+		blend_buffer->clear_attachment(AttachmentPoint::Color(1), std::array<float, 2>{ 0.0f, 0.0f }.data());
 
 	eval_ml_mode();
 
@@ -702,7 +710,7 @@ void VolumeRenderer::draw_volume(
 		assert(filter_buffer);
 		filter_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 		glbin_framebuffer_manager.bind(filter_buffer);
-		filter_buffer->clear(true, false);
+		filter_buffer->clear_base(true, false);
 
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 

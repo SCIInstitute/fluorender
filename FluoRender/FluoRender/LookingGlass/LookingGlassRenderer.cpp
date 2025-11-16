@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <bridge_utils.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
+#include <array>
 #include <Debug.h>
 
 LookingGlassRenderer::LookingGlassRenderer()
@@ -189,7 +190,9 @@ void LookingGlassRenderer::Clear()
 	assert(quilt_buffer);
 	//clear fbo
 	auto guard = glbin_framebuffer_manager.bind_scoped(quilt_buffer);
-	quilt_buffer->clear(true, true);
+	quilt_buffer->clear_base(true, true);
+	quilt_buffer->clear_attachment(
+		flvr::AttachmentPoint::Color(0), std::array<float, 1>{ 1.0f }.data());
 }
 
 void LookingGlassRenderer::Draw()
@@ -258,7 +261,7 @@ void LookingGlassRenderer::Draw()
 	//set viewport size and clear
 	cur_buffer->set_viewport({ 0, 0, m_render_view_size.w(), m_render_view_size.h() });
 	glbin_framebuffer_manager.bind(cur_buffer);
-	cur_buffer->clear(true, true);
+	cur_buffer->clear_base(true, true);
 
 	shader = glbin_shader_manager.shader(gstImgShader,
 		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));

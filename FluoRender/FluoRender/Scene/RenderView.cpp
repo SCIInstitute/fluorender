@@ -89,6 +89,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <array>
 #if defined(_WIN32) && defined(USE_XINPUT)
 #include <XInput/XboxController.h>
 #endif
@@ -5294,7 +5295,7 @@ void RenderView::ClearViewBaseFramebuffer()
 		auto vr_buffer =
 			glbin_framebuffer_manager.framebuffer(vr_buf_name);
 		assert(vr_buffer);
-		vr_buffer->clear(true, true);
+		vr_buffer->clear_base(true, true);
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
 	{
@@ -5304,7 +5305,7 @@ void RenderView::ClearViewBaseFramebuffer()
 		//find render view buffer, resize if necessary
 		auto base_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewBase);
 		assert(base_buffer);
-		base_buffer->clear(true, true);
+		base_buffer->clear_base(true, true);
 	}
 }
 
@@ -5556,7 +5557,7 @@ void RenderView::DrawData()
 	data_buffer->set_viewport({ 0, 0, nx, ny });
 	glbin_framebuffer_manager.bind(data_buffer);
 	if (!m_retain_finalbuffer)
-		data_buffer->clear(true, false);
+		data_buffer->clear_base(true, false);
 
 	CalcFogRange();
 
@@ -5609,7 +5610,10 @@ void RenderView::DrawDataPeel()
 	data_buffer->set_viewport({ 0, 0, nx, ny });
 	glbin_framebuffer_manager.bind(data_buffer);
 	if (!m_retain_finalbuffer)
-		data_buffer->clear(true, true);
+	{
+		data_buffer->clear_base(true, true);
+		data_buffer->clear_attachment(flvr::AttachmentPoint::Depth(), std::array<float, 1>{ 1.0f }.data());
+	}
 
 	bool use_fog_save = m_use_fog;
 	CalcFogRange();
@@ -5628,7 +5632,7 @@ void RenderView::DrawDataPeel()
 		assert(peel_buffer);
 		glbin_framebuffer_manager.bind(peel_buffer);
 
-		peel_buffer->clear(false, true);
+		peel_buffer->clear_base(false, true);
 
 		if (i == 0)
 		{
@@ -6182,7 +6186,7 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 		(glbin_settings.m_mem_swap &&
 		flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
-		chan_buffer->clear(true, false);
+		chan_buffer->clear_base(true, false);
 		flvr::TextureRenderer::reset_clear_chan_buffer();
 	}
 
@@ -6343,7 +6347,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	bool clear = !glbin_settings.m_mem_swap ||
 		(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer());
-	overlay_buffer->clear(true, false);
+	overlay_buffer->clear_base(true, false);
 	//glbin_framebuffer_manager.bind(chan_buffer);
 
 	//if (!glbin_settings.m_mem_swap ||
@@ -6363,7 +6367,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	glbin_framebuffer_manager.bind(chan_buffer);
 	if (clear)
 	{
-		chan_buffer->clear(true, false);
+		chan_buffer->clear_base(true, false);
 		flvr::TextureRenderer::reset_clear_chan_buffer();
 	}
 
@@ -6562,7 +6566,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 				flvr::FBRole::RenderColor, nx, ny, gstRBTemporary);
 			assert(temp_buffer);
 			glbin_framebuffer_manager.bind(temp_buffer);
-			temp_buffer->clear(true, false);
+			temp_buffer->clear_base(true, false);
 			data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 			img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -6599,7 +6603,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		bool clear = !glbin_settings.m_mem_swap ||
 			(glbin_settings.m_mem_swap &&
 				flvr::TextureRenderer::get_clear_chan_buffer());
-		overlay_buffer->clear(true, false);
+		overlay_buffer->clear_base(true, false);
 		//flvr::TextureRenderer::reset_clear_chan_buffer();
 
 		flvr::RenderModeGuard rmg(*vr);
@@ -6643,7 +6647,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		glbin_framebuffer_manager.bind(chan_buffer);
 		if (clear)
 		{
-			chan_buffer->clear(true, false);
+			chan_buffer->clear_base(true, false);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
@@ -6705,7 +6709,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	if (glbin_settings.m_mem_swap)
 	{
 		//restore temp buffer to final buffer
-		data_buffer->clear(true, false);
+		data_buffer->clear_base(true, false);
 		auto temp_buffer = glbin_framebuffer_manager.framebuffer(gstRBTemporary);
 		assert(temp_buffer);
 		//bind tex from temp buffer
@@ -6827,7 +6831,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 			flvr::FramebufferStateGuard fbg2(*temp_buffer);
 			temp_buffer->set_blend_enabled_all(false);
 			glbin_framebuffer_manager.bind(temp_buffer);
-			temp_buffer->clear(true, false);
+			temp_buffer->clear_base(true, false);
 			//auto data_buffer = GetDataFramebuffer();
 			data_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
@@ -6852,7 +6856,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 			(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer()))
 		{
-			chan_buffer->clear(true, false);
+			chan_buffer->clear_base(true, false);
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
@@ -6881,7 +6885,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 	if (glbin_settings.m_mem_swap)
 	{
 		//restore temp buffer to final buffer
-		data_buffer->clear(true, false);
+		data_buffer->clear_base(true, false);
 		auto temp_buffer = glbin_framebuffer_manager.framebuffer(gstRBTemporary);
 		assert(temp_buffer);
 		//temp buffer becomes unused after texture is bound
@@ -6986,7 +6990,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 		(glbin_settings.m_mem_swap &&
 			flvr::TextureRenderer::get_clear_chan_buffer()))
 	{
-		overlay_buffer->clear(true, false);
+		overlay_buffer->clear_base(true, false);
 		flvr::TextureRenderer::reset_clear_chan_buffer();
 	}
 
@@ -7101,90 +7105,6 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	if (!has_shadow)
 		return;
 
-	//if (glbin_settings.m_mem_swap &&
-	//	flvr::TextureRenderer::get_start_update_loop() &&
-	//	!flvr::TextureRenderer::get_done_update_loop())
-	//{
-	//	unsigned int rn_time = GET_TICK_COUNT();
-	//	if (rn_time - flvr::TextureRenderer::get_st_time() >
-	//		flvr::TextureRenderer::get_up_time())
-	//		return;
-	//	if (list.size() == 1 && list[0]->GetShadowEnable())
-	//		if (list[0]->GetVR()->get_done_loop(3))
-	//			return;
-	//}
-
-	//auto overlay_buffer = glbin_framebuffer_manager.framebuffer(
-	//	flvr::FBRole::RenderColor, nx, ny, gstRBOverlay);
-	//assert(overlay_buffer);
-	//flvr::FramebufferStateGuard fbg(*overlay_buffer);
-	//overlay_buffer->set_blend_enabled_all(false);
-	//overlay_buffer->set_clear_color(clear_color);
-	//glbin_framebuffer_manager.bind(overlay_buffer);
-
-	//if (!glbin_settings.m_mem_swap ||
-	//	(glbin_settings.m_mem_swap &&
-	//	flvr::TextureRenderer::get_clear_chan_buffer()))
-	//{
-	//	overlay_buffer->clear(true, false);
-	//	flvr::TextureRenderer::reset_clear_chan_buffer();
-	//}
-
-	//if (local_list.size() == 1)
-	//{
-	//	auto vd = local_list[0].lock();
-	//	assert(vd);
-	//	auto vr = vd->GetVR();
-	//	assert(vr);
-
-	//	//save
-	//	flvr::RenderModeGuard rmg(*vr);
-	//	//set to draw depth
-	//	vr->set_shading(false);
-	//	vr->set_mode(flvr::RenderMode::Overlay);
-	//	vr->set_color_mode(flvr::ColorMode::Depth);
-	//	if (overlay_buffer)
-	//		vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-	//	vr->set_ml_mode(0);
-	//	//draw
-	//	vd->SetStreamMode(3);
-	//	vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	//	vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	//	vd->SetViewport(vp);
-	//	vd->SetClearColor(clear_color);
-	//	vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
-	//}
-	//else if (!local_list.empty())
-	//{
-	//	assert(m_mvr);
-
-	//	m_mvr->clear_vr();
-	//	std::list<flvr::RenderModeGuard> guards;
-	//	for (auto it = local_list.begin(); it != local_list.end(); ++it)
-	//	{
-	//		auto vd = it->lock();
-	//		if (!vd)
-	//			continue;
-	//		auto vr = vd->GetVR();
-	//		assert(vr);
-
-	//		//save
-	//		guards.emplace_back(*vr);
-	//		vr->set_shading(false);
-	//		vr->set_mode(flvr::RenderMode::Overlay);
-	//		vr->set_color_mode(flvr::ColorMode::Depth);
-	//		if (overlay_buffer)
-	//			vr->set_2d_dmap(overlay_buffer->tex_id(flvr::AttachmentPoint::Color(0)));
-	//		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-	//		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-	//		m_mvr->add_vr(vr);
-	//		m_mvr->SetNoiseRed(vr->GetNoiseRed());
-	//	}
-	//	//draw
-	//	m_mvr->set_viewport(vp);
-	//	m_mvr->set_clear_color(clear_color);
-	//	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
-	//}
 	std::string buf_name;
 	double shadow_darkness = 0.0;
 	if (!local_list.empty())
@@ -7214,7 +7134,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 		grad_mip_buffer->set_blend_enabled_all(false);
 		glbin_framebuffer_manager.bind(grad_mip_buffer);
-		grad_mip_buffer->clear(true, false);
+		grad_mip_buffer->clear_base(true, false);
 
 		blend_buffer->bind_texture(flvr::AttachmentPoint::Color(1), 0);
 
@@ -7276,7 +7196,7 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 	grad_mip_buffer->set_blend_enabled_all(false);
 	glbin_framebuffer_manager.bind(grad_mip_buffer);
-	grad_mip_buffer->clear(true, false);
+	grad_mip_buffer->clear_base(true, false);
 
 	auto data_buffer = GetDataFramebuffer();
 	assert(data_buffer);
@@ -8261,7 +8181,7 @@ void RenderView::GenerateBrushStrokes()
 	//clear if asked so
 	if (m_clear_paint)
 	{
-		paint_buffer->clear(true, false);
+		paint_buffer->clear_base(true, false);
 		DBGPRINT(L"Paint cleared\n");
 		m_clear_paint = false;
 	}
@@ -9732,7 +9652,7 @@ bool RenderView::PickMesh(BaseState& state)
 	pick_buffer->set_depth_test_enabled(true);
 	pick_buffer->set_depth_func(flvr::DepthFunc::Lequal);
 	auto guard = glbin_framebuffer_manager.bind_scoped(pick_buffer);
-	pick_buffer->clear(true, true);
+	pick_buffer->clear_base(true, true);
 
 	int index = 0;
 	for (auto it = m_md_pop_list.begin(); it != m_md_pop_list.end(); ++it, ++index)
