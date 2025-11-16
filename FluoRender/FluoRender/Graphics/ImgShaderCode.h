@@ -519,8 +519,7 @@ void main()
 
 	vec2 grad = vec2(gx, gy);
 	vec2 pert = loc1.xy;
-	float ang = max(dot(normalize(grad), pert), 0.0);
-	pert = grad*ang;
+	pert *= length(grad) * 0.5;
 	grad += pert;
 	float c = grad.x*grad.x+grad.y*grad.y;
 	c = c * loc0.z;
@@ -572,8 +571,7 @@ void main()
 
 	vec2 grad = vec2(gx, gy);
 	vec2 pert = loc1.xy;
-	float ang = max(dot(normalize(grad), pert), 0.0);
-	pert = grad*ang;
+	pert *= length(grad) * 0.5;
 	grad += pert;
 	float c = grad.x*grad.x+grad.y*grad.y;
 	c = c * loc0.z;
@@ -673,14 +671,14 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 			ang = -dot(normalize(delta), normalize(grad_sample.xy));
 			ang = (ang > cutoff_angle) ? ang + bias_angle : (ang > thresh_angle ? ang : 0.0);
 
-			dist = pow(dist, 1.5);
+			dist = pow(dist, 1.3);
 			dist = dist == 0.0 ? 0.0 : 1.0 / dist * zoom;
 
 			c += dense * ang * grad_sample.z * dist;
 		}
 	}
 
-	c = min(pow(c, 0.1) * darkness, darkness) * 0.9;
+	c = min(pow(c, 0.2) * darkness, darkness) * 0.9;
 	c = clamp(1.0 - c, 0.0, 1.0);
 	FragColor = vec4(vec3(c), 1.0);
 }

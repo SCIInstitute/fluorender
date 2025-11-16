@@ -1093,8 +1093,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//shadow
 	if (update_shadow)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
-			vald_fp->SetRange(0.0, 1.0);
+		//if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
+		//	vald_fp->SetRange(0.0, 1.0);
 		bval = m_vd->GetShadowEnable();
 		dval = m_vd->GetShadowIntensity();
 		str = wxString::Format("%.2f", dval);

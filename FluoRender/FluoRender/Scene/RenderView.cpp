@@ -5612,7 +5612,7 @@ void RenderView::DrawDataPeel()
 	if (!m_retain_finalbuffer)
 	{
 		data_buffer->clear_base(true, true);
-		data_buffer->clear_attachment(flvr::AttachmentPoint::Depth(), std::array<float, 1>{ 1.0f }.data());
+		data_buffer->clear_attachment(flvr::AttachmentPoint::Color(1), std::array<float, 1>{ 1.0f }.data());
 	}
 
 	bool use_fog_save = m_use_fog;
