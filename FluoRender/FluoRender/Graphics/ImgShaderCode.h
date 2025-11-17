@@ -641,9 +641,9 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 	int base_radius = int(5.0 * max(darkness * 3.0, 1.0));
 
 	// shadow parameters
-	const float cutoff_angle = 0.9;
+	const float cutoff_angle = 0.95;
 	const float thresh_angle = 0.5;
-	const float bias_angle = 1.5;
+	const float bias_angle = 1.0;
 
 	for (int level = 0; level < mip_levels; ++level)
 	{
@@ -665,8 +665,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 
 			sample_uv = uv + delta * scaled_texel;
 
-			// slight negative bias to keep detail
-			grad_sample = textureLod(tex0, sample_uv, lod - 0.25);
+			grad_sample = textureLod(tex0, sample_uv, lod);
 
 			ang = -dot(normalize(delta), normalize(grad_sample.xy));
 			ang = (ang > cutoff_angle) ? ang + bias_angle : (ang > thresh_angle ? ang : 0.0);
@@ -678,7 +677,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 		}
 	}
 
-	c = min(pow(c, 0.2) * darkness, darkness) * 0.9;
+	c = min(pow(c, 0.2) * darkness, darkness) * 0.8;
 	c = clamp(1.0 - c, 0.0, 1.0);
 	FragColor = vec4(vec3(c), 1.0);
 }

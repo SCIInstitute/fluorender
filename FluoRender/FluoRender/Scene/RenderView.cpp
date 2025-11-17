@@ -7160,7 +7160,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		assert(chan_buffer);
 		flvr::FramebufferStateGuard fbg2(*chan_buffer);
 		chan_buffer->set_blend_enabled_all(true);
-		chan_buffer->set_blend_func_all(flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
+		chan_buffer->set_blend_func(0, flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
 		glbin_framebuffer_manager.bind(chan_buffer);
 
 		grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
