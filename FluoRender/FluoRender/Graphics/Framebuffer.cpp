@@ -292,12 +292,14 @@ void Framebuffer::set_blend_enabled_all(bool val)
 		bs.enabled = val;
 }
 
-void Framebuffer::set_blend_func_all(BlendFactor sfactor, BlendFactor dfactor)
+void Framebuffer::set_blend_func_all(BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha)
 {
 	for (auto& [index, bs] : state_.blendStates)
 	{
-		bs.src = sfactor;
-		bs.dst = dfactor;
+		bs.srcRGB = src_rgb;
+		bs.dstRGB = dst_rgb;
+		bs.srcAlpha = src_alpha;
+		bs.dstAlpha = dst_alpha;
 	}
 }
 
@@ -317,14 +319,19 @@ void Framebuffer::set_blend_enabled(int index, bool val)
 		it->second.enabled = val;
 }
 
-void Framebuffer::set_blend_func(int index, BlendFactor sfactor, BlendFactor dfactor)
+void Framebuffer::set_blend_func(int index, BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha)
 {
 	auto it = state_.blendStates.find(index);
 	if (it != state_.blendStates.end() &&
-		(it->second.src != sfactor || it->second.dst != dfactor))
+		(it->second.srcRGB != src_rgb ||
+		 it->second.dstRGB != dst_rgb ||
+		 it->second.srcAlpha != src_alpha ||
+		 it->second.dstAlpha != dst_alpha))
 	{
-		it->second.src = sfactor;
-		it->second.dst = dfactor;
+		it->second.srcRGB = src_rgb;
+		it->second.dstRGB = dst_rgb;
+		it->second.srcAlpha = src_alpha;
+		it->second.dstAlpha = dst_alpha;
 	}
 }
 
@@ -1127,13 +1134,6 @@ FramebufferFactory::Guard FramebufferManager::bind_scoped(const std::shared_ptr<
 		factory = std::make_unique<FramebufferFactory>();
 	return factory->bind_scoped(fb);
 }
-//void FramebufferManager::unbind()
-//{
-//	int view_id = glbin_current.GetDrawingViewId();
-//	auto& factory = factory_map_[view_id];
-//	if (factory)
-//		factory->unbind();
-//}
 
 std::shared_ptr<Framebuffer> FramebufferManager::current() const
 {

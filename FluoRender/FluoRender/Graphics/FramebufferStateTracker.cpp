@@ -59,14 +59,18 @@ void FramebufferStateTracker::set_blend_enabled(bool val)
 	}
 }
 
-void FramebufferStateTracker::set_blend_func(BlendFactor sfactor, BlendFactor dfactor)
+void FramebufferStateTracker::set_blend_func(BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha)
 {
 	for (auto& [index, bs] : currentState_.blendStates)
 	{
-		if (index == 0 && (bs.src != sfactor || bs.dst != dfactor))
+		if (index == 0 &&
+			(bs.srcRGB != src_rgb || bs.dstRGB != dst_rgb ||
+			bs.srcAlpha != src_alpha || bs.dstAlpha != dst_alpha))
 		{
-			bs.src = sfactor;
-			bs.dst = dfactor;
+			bs.srcRGB = src_rgb;
+			bs.dstRGB = dst_rgb;
+			bs.srcAlpha = src_alpha;
+			bs.dstAlpha = dst_alpha;
 		}
 	}
 }

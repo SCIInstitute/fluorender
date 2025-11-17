@@ -38,9 +38,11 @@ void FramebufferStateManager::applyFull(const FramebufferState& state)
 		if (bs.enabled)
 		{
 			glEnablei(GL_BLEND, index);
-			glBlendFunci(index,
-				toGLBlendFactor(bs.src),
-				toGLBlendFactor(bs.dst));
+			glBlendFuncSeparatei(index,
+				toGLBlendFactor(bs.srcRGB),
+				toGLBlendFactor(bs.dstRGB),
+				toGLBlendFactor(bs.srcAlpha),
+				toGLBlendFactor(bs.dstAlpha));
 			glBlendEquationSeparatei(index,
 				toGLBlendEquation(bs.eqRGB),
 				toGLBlendEquation(bs.eqAlpha));
@@ -93,11 +95,14 @@ void FramebufferStateManager::applyDiff(const FramebufferState& current, const F
 		}
 
 		// Blend factors
-		if (currentBS.src != desiredBS.src || currentBS.dst != desiredBS.dst)
+		if (currentBS.srcRGB != desiredBS.srcRGB || currentBS.dstRGB != desiredBS.dstRGB ||
+			currentBS.srcAlpha != desiredBS.srcAlpha || currentBS.dstAlpha != desiredBS.dstAlpha)
 		{
-			glBlendFunci(index,
-				toGLBlendFactor(desiredBS.src),
-				toGLBlendFactor(desiredBS.dst));
+			glBlendFuncSeparatei(index,
+				toGLBlendFactor(desiredBS.srcRGB),
+				toGLBlendFactor(desiredBS.dstRGB),
+				toGLBlendFactor(desiredBS.srcAlpha),
+				toGLBlendFactor(desiredBS.dstAlpha));
 
 			//DBGPRINT(L"glBlendFunci(%d, %d, %d)\n", index, desiredBS.src, desiredBS.dst);
 		}
@@ -201,11 +206,15 @@ FramebufferState FramebufferStateManager::capture()
 		bs.enabled = glIsEnabledi(GL_BLEND, i);
 
 		// Factors
-		GLint srcRGB, dstRGB;
+		GLint srcRGB, dstRGB, srcAlpha, dstAlpha;
 		glGetIntegeri_v(GL_BLEND_SRC_RGB, i, &srcRGB);
 		glGetIntegeri_v(GL_BLEND_DST_RGB, i, &dstRGB);
-		bs.src = static_cast<BlendFactor>(srcRGB);
-		bs.dst = static_cast<BlendFactor>(dstRGB);
+		glGetIntegeri_v(GL_BLEND_SRC_ALPHA, i, &srcAlpha);
+		glGetIntegeri_v(GL_BLEND_DST_ALPHA, i, &dstAlpha);
+		bs.srcRGB = static_cast<BlendFactor>(srcRGB);
+		bs.dstRGB = static_cast<BlendFactor>(dstRGB);
+		bs.srcAlpha = static_cast<BlendFactor>(srcAlpha);
+		bs.dstAlpha = static_cast<BlendFactor>(dstAlpha);
 
 		// Equations
 		GLint eqRGB, eqAlpha;

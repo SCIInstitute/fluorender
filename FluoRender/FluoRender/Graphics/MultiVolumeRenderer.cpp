@@ -215,13 +215,19 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	case RenderMode::Overlay:
 		blend_buffer->set_blend_equation(0, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
-			blend_buffer->set_blend_func(0, flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+			blend_buffer->set_blend_func(0,
+				flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha,
+				flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
-			blend_buffer->set_blend_func(0, flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
+			blend_buffer->set_blend_func(0,
+				flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One,
+				flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 		break;
 	case RenderMode::Mip:
 		blend_buffer->set_blend_equation(0, flvr::BlendEquation::Max, flvr::BlendEquation::Max);
-		blend_buffer->set_blend_func(0, flvr::BlendFactor::One, flvr::BlendFactor::One);
+		blend_buffer->set_blend_func(0,
+			flvr::BlendFactor::One, flvr::BlendFactor::One,
+			flvr::BlendFactor::One, flvr::BlendFactor::One);
 		break;
 	default:
 		break;
@@ -229,7 +235,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	if (depth)
 	{
 		blend_buffer->set_blend_equation(1, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
-		blend_buffer->set_blend_func(1, flvr::BlendFactor::One, flvr::BlendFactor::One);
+		blend_buffer->set_blend_func(1,
+			flvr::BlendFactor::One, flvr::BlendFactor::One,
+			flvr::BlendFactor::One, flvr::BlendFactor::One);
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->clear_base(true, false);
@@ -492,7 +500,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			micro_blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 			micro_blend_buffer->set_blend_enabled_all(true);
 			micro_blend_buffer->set_blend_equation_all(flvr::BlendEquation::Add, flvr::BlendEquation::Max);
-			micro_blend_buffer->set_blend_func_all(flvr::BlendFactor::One, flvr::BlendFactor::One);
+			micro_blend_buffer->set_blend_func_all(flvr::BlendFactor::One, flvr::BlendFactor::One, flvr::BlendFactor::One, flvr::BlendFactor::One);
 			glbin_framebuffer_manager.bind(micro_blend_buffer);
 			micro_blend_buffer->clear_base(true, false);
 		}

@@ -443,13 +443,19 @@ void VolumeRenderer::draw_volume(
 	case RenderMode::Overlay:
 		blend_buffer->set_blend_equation(0, BlendEquation::Add, BlendEquation::Add);
 		if (glbin_settings.m_update_order == 0)
-			blend_buffer->set_blend_func(0, BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
+			blend_buffer->set_blend_func(0,
+				BlendFactor::One, BlendFactor::OneMinusSrcAlpha,
+				BlendFactor::One, BlendFactor::OneMinusSrcAlpha);
 		else if (glbin_settings.m_update_order == 1)
-			blend_buffer->set_blend_func(0, BlendFactor::OneMinusDstAlpha, BlendFactor::One);
+			blend_buffer->set_blend_func(0,
+				BlendFactor::OneMinusDstAlpha, BlendFactor::One,
+				BlendFactor::OneMinusDstAlpha, BlendFactor::One);
 		break;
 	case RenderMode::Mip:
 		blend_buffer->set_blend_equation(0, BlendEquation::Max, BlendEquation::Max);
-		blend_buffer->set_blend_func(0, BlendFactor::One, BlendFactor::One);
+		blend_buffer->set_blend_func(0,
+			BlendFactor::One, BlendFactor::One,
+			BlendFactor::One, BlendFactor::One);
 		break;
 	default:
 		break;
@@ -457,7 +463,9 @@ void VolumeRenderer::draw_volume(
 	if (depth_)
 	{
 		blend_buffer->set_blend_equation(1, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
-		blend_buffer->set_blend_func(1, flvr::BlendFactor::One, flvr::BlendFactor::One);
+		blend_buffer->set_blend_func(1,
+			flvr::BlendFactor::One, flvr::BlendFactor::One,
+			BlendFactor::One, BlendFactor::One);
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->clear_base(true, false);

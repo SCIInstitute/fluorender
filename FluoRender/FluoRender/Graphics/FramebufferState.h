@@ -98,16 +98,22 @@ namespace flvr
 	struct BlendState
 	{
 		bool enabled = false;
-		BlendFactor src = BlendFactor::One;
-		BlendFactor dst = BlendFactor::OneMinusSrcAlpha;
+
+		BlendFactor srcRGB = BlendFactor::One;
+		BlendFactor dstRGB = BlendFactor::OneMinusSrcAlpha;
+		BlendFactor srcAlpha = BlendFactor::One;
+		BlendFactor dstAlpha = BlendFactor::OneMinusSrcAlpha;
+
 		BlendEquation eqRGB = BlendEquation::Add;
 		BlendEquation eqAlpha = BlendEquation::Add;
 
 		bool operator==(const BlendState& other) const
 		{
 			return enabled == other.enabled &&
-				src == other.src &&
-				dst == other.dst &&
+				srcRGB == other.srcRGB &&
+				dstRGB == other.dstRGB &&
+				srcAlpha == other.srcAlpha &&
+				dstAlpha == other.dstAlpha &&
 				eqRGB == other.eqRGB &&
 				eqAlpha == other.eqAlpha;
 		}
