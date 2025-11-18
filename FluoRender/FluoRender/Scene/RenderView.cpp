@@ -7161,7 +7161,6 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		auto grad_mip_buffer = glbin_framebuffer_manager.framebuffer(
 			flvr::FBRole::RenderColorMipmap, nx, ny, gstRBGradMip);
 		assert(grad_mip_buffer);
-		grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
 		grad_mip_buffer->set_blend_enabled_all(false);
 		glbin_framebuffer_manager.bind(grad_mip_buffer);
 		grad_mip_buffer->clear_base(true, false);
@@ -7190,10 +7189,11 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		assert(chan_buffer);
 		flvr::FramebufferStateGuard fbg2(*chan_buffer);
 		chan_buffer->set_blend_enabled(0, true);
-		chan_buffer->set_blend_equation(0, flvr::BlendEquation::ReverseSubtract, flvr::BlendEquation::Add);
+		chan_buffer->set_blend_equation(0,
+			flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		chan_buffer->set_blend_func(0,
-			flvr::BlendFactor::One, flvr::BlendFactor::One,
-			flvr::BlendFactor::One, flvr::BlendFactor::Zero);
+			flvr::BlendFactor::DstColor, flvr::BlendFactor::Zero,
+			flvr::BlendFactor::Zero, flvr::BlendFactor::One);
 		glbin_framebuffer_manager.bind(chan_buffer);
 
 		grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
@@ -7254,8 +7254,8 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	flvr::FramebufferStateGuard fbg(*data_buffer);
 	data_buffer->set_blend_enabled(0, true);
 	data_buffer->set_blend_func(0,
-		flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor,
-		flvr::BlendFactor::Zero, flvr::BlendFactor::SrcColor);
+			flvr::BlendFactor::DstColor, flvr::BlendFactor::Zero,
+			flvr::BlendFactor::Zero, flvr::BlendFactor::One);
 	data_buffer->set_depth_test_enabled(false);
 	glbin_framebuffer_manager.bind(data_buffer);
 

@@ -181,9 +181,11 @@ namespace flvr
 		//fine grained state control
 		// Blend
 		void set_blend_enabled_all(bool val);
+		void set_color_mask_all(bool r, bool g, bool b, bool a);
 		void set_blend_func_all(BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha);
 		void set_blend_equation_all(BlendEquation rgb, BlendEquation alpha);
 		void set_blend_enabled(int index, bool val);
+		void set_color_mask(int index, bool r, bool g, bool b, bool a);
 		void set_blend_func(int index, BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha);
 		void set_blend_equation(int index, BlendEquation rgb, BlendEquation alpha);
 		// Depth

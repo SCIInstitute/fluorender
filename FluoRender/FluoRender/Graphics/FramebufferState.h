@@ -99,6 +99,11 @@ namespace flvr
 	{
 		bool enabled = false;
 
+		bool maskRed = true;
+		bool maskGreen = true;
+		bool maskBlue = true;
+		bool maskAlpha = true;
+
 		BlendFactor srcRGB = BlendFactor::One;
 		BlendFactor dstRGB = BlendFactor::OneMinusSrcAlpha;
 		BlendFactor srcAlpha = BlendFactor::One;
@@ -110,6 +115,10 @@ namespace flvr
 		bool operator==(const BlendState& other) const
 		{
 			return enabled == other.enabled &&
+				maskRed == other.maskRed &&
+				maskGreen == other.maskGreen &&
+				maskBlue == other.maskBlue &&
+				maskAlpha == other.maskAlpha &&
 				srcRGB == other.srcRGB &&
 				dstRGB == other.dstRGB &&
 				srcAlpha == other.srcAlpha &&

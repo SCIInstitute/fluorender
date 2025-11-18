@@ -94,6 +94,24 @@ void FramebufferStateManager::applyDiff(const FramebufferState& current, const F
 			//DBGPRINT(L"glEnablei(GL_BLEND, %d, %d)\n", index, desiredBS.enabled);
 		}
 
+		// Color mask
+		if (currentBS.maskRed != desiredBS.maskRed ||
+			currentBS.maskGreen != desiredBS.maskGreen ||
+			currentBS.maskBlue != desiredBS.maskBlue ||
+			currentBS.maskAlpha != desiredBS.maskAlpha)
+		{
+			glColorMaski(index,
+				desiredBS.maskRed ? GL_TRUE : GL_FALSE,
+				desiredBS.maskGreen ? GL_TRUE : GL_FALSE,
+				desiredBS.maskBlue ? GL_TRUE : GL_FALSE,
+				desiredBS.maskAlpha ? GL_TRUE : GL_FALSE);
+			//DBGPRINT(L"glColorMaski(%d, %d, %d, %d, %d)\n", index,
+			//	desiredBS.maskRed ? 1 : 0,
+			//	desiredBS.maskGreen ? 1 : 0,
+			//	desiredBS.maskBlue ? 1 : 0,
+			//	desiredBS.maskAlpha ? 1 : 0);
+		}
+
 		// Blend factors
 		if (currentBS.srcRGB != desiredBS.srcRGB || currentBS.dstRGB != desiredBS.dstRGB ||
 			currentBS.srcAlpha != desiredBS.srcAlpha || currentBS.dstAlpha != desiredBS.dstAlpha)
@@ -204,6 +222,14 @@ FramebufferState FramebufferStateManager::capture()
 
 		// Enabled flag
 		bs.enabled = glIsEnabledi(GL_BLEND, i);
+
+		//color mask
+		GLboolean mask[4];
+		glGetBooleani_v(GL_COLOR_WRITEMASK, i, mask);
+		bs.maskRed = mask[0];
+		bs.maskGreen = mask[1];
+		bs.maskBlue = mask[2];
+		bs.maskAlpha = mask[3];
 
 		// Factors
 		GLint srcRGB, dstRGB, srcAlpha, dstAlpha;

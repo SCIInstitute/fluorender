@@ -59,6 +59,24 @@ void FramebufferStateTracker::set_blend_enabled(bool val)
 	}
 }
 
+void FramebufferStateTracker::set_color_mask(bool r, bool g, bool b, bool a)
+{
+	for (auto& [index, bs] : currentState_.blendStates)
+	{
+		if (index == 0 &&
+			bs.maskRed != r ||
+			bs.maskGreen != g ||
+			bs.maskBlue != b ||
+			bs.maskAlpha != a)
+		{
+			bs.maskRed = r;
+			bs.maskGreen = g;
+			bs.maskBlue = b;
+			bs.maskAlpha = a;
+		}
+	}
+}
+
 void FramebufferStateTracker::set_blend_func(BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha)
 {
 	for (auto& [index, bs] : currentState_.blendStates)

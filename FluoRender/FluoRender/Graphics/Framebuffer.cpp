@@ -292,6 +292,17 @@ void Framebuffer::set_blend_enabled_all(bool val)
 		bs.enabled = val;
 }
 
+void Framebuffer::set_color_mask_all(bool r, bool g, bool b, bool a)
+{
+	for (auto& [index, bs] : state_.blendStates)
+	{
+		bs.maskRed = r;
+		bs.maskGreen = g;
+		bs.maskBlue = b;
+		bs.maskAlpha = a;
+	}
+}
+
 void Framebuffer::set_blend_func_all(BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha)
 {
 	for (auto& [index, bs] : state_.blendStates)
@@ -317,6 +328,22 @@ void Framebuffer::set_blend_enabled(int index, bool val)
 	auto it = state_.blendStates.find(index);
 	if (it != state_.blendStates.end() && it->second.enabled != val)
 		it->second.enabled = val;
+}
+
+void Framebuffer::set_color_mask(int index, bool r, bool g, bool b, bool a)
+{
+	auto it = state_.blendStates.find(index);
+	if (it != state_.blendStates.end() &&
+		(it->second.maskRed != r ||
+		 it->second.maskGreen != g ||
+		 it->second.maskBlue != b ||
+		 it->second.maskAlpha != a))
+	{
+		it->second.maskRed = r;
+		it->second.maskGreen = g;
+		it->second.maskBlue = b;
+		it->second.maskAlpha = a;
+	}
 }
 
 void Framebuffer::set_blend_func(int index, BlendFactor src_rgb, BlendFactor dst_rgb, BlendFactor src_alpha, BlendFactor dst_alpha)
