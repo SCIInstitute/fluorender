@@ -94,7 +94,7 @@ void ConvVolMesh::Convert()
 	m_mesh->SetName(vd->GetName() + L"_mesh");
 	m_mesh->AddEmptyData();
 	m_mesh->SetFlatShading(true);
-	m_mesh->SetColor(vd->GetColor(), MESH_COLOR_DIFF);
+	m_mesh->SetColor(vd->GetColor());
 	GetAutoThreshold();
 
 	MarchingCubes(vd.get(), m_mesh.get());
@@ -122,7 +122,7 @@ void ConvVolMesh::Update(bool create_mesh)
 		m_mesh->SetName(vd->GetName() + L"_mesh");
 		m_mesh->AddEmptyData();
 		m_mesh->SetFlatShading(true);
-		m_mesh->SetColor(vd->GetColor(), MESH_COLOR_DIFF);
+		m_mesh->SetColor(vd->GetColor());
 		GetAutoThreshold();
 	}
 	else

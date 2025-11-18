@@ -51,9 +51,9 @@ MeshRenderer::MeshRenderer()
 	depth_peel_(0),
 	draw_clip_(false),
 	limit_(-1),
-	light_(true),
+	shading_(true),
 	flat_shading_(false),
-	color_(false),
+	has_vertex_color_(false),
 	fog_(false),
 	alpha_(1.0)
 {
@@ -64,9 +64,9 @@ MeshRenderer::MeshRenderer(MeshRenderer& copy)
 	depth_peel_(copy.depth_peel_),
 	draw_clip_(copy.draw_clip_),
 	limit_(copy.limit_),
-	light_(copy.light_),
+	shading_(copy.shading_),
 	flat_shading_(copy.flat_shading_),
-	color_(copy.color_),
+	has_vertex_color_(copy.has_vertex_color_),
 	fog_(copy.fog_),
 	alpha_(copy.alpha_)
 {
@@ -143,35 +143,23 @@ void MeshRenderer::draw()
 
 		//set up shader
 		shader = glbin_shader_manager.shader(gstMeshShader,
-			ShaderParams::Mesh(0, depth_peel_, tex, fog_, light_, flat_shading_, color_));
+			ShaderParams::Mesh(0, depth_peel_, tex, fog_, shading_, flat_shading_, has_vertex_color_));
 		assert(shader);
 		shader->bind();
 
 		//uniforms
 		shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 		shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
-		if (light_)
+		if (shading_)
 		{
 			glm::mat4 normal_mat = glm::mat4(glm::inverseTranspose(glm::mat3(m_mv_mat)));
 			shader->setLocalParamMatrix(2, glm::value_ptr(normal_mat));
-			GLMmaterial* material = &data_->materials[group->material];
-			if (material)
-			{
-				shader->setLocalParam(0, material->ambient[0], material->ambient[1], material->ambient[2], material->ambient[3]);
-				shader->setLocalParam(1, material->diffuse[0], material->diffuse[1], material->diffuse[2], material->diffuse[3]);
-				shader->setLocalParam(2, material->specular[0], material->specular[1], material->specular[2], material->specular[3]);
-				shader->setLocalParam(3, material->shininess, alpha_, glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
-			}
 		}
-		else
-		{//color
-			GLMmaterial* material = &data_->materials[group->material];
-			if (material)
-				shader->setLocalParam(0, material->diffuse[0], material->diffuse[1], material->diffuse[2], material->diffuse[3]);
-			else
-				shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);//color
-			shader->setLocalParam(3, 0.0, alpha_, 0.0, 0.0);//alpha
-		}
+		shader->setLocalParam(0,
+			color_.r(), color_.g(), color_.b(), alpha_);
+		shader->setLocalParam(1,
+			shading_strength_, shading_shine_,
+			glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
 		if (tex)
 		{
 			GLMmaterial* material = &data_->materials[group->material];
@@ -232,11 +220,8 @@ void MeshRenderer::draw_wireframe()
 	shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 	shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
 	GLMmaterial* material = &data_->materials[0];
-	if (material)
-		shader->setLocalParam(0, material->diffuse[0], material->diffuse[1], material->diffuse[2], material->diffuse[3]);
-	else
-		shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
-	shader->setLocalParam(3, 0.0, 1.0, 0.0, 0.0);//alpha
+		shader->setLocalParam(0,
+			color_.r(), color_.g(), color_.b(), alpha_);
 	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 	va->draw_begin();

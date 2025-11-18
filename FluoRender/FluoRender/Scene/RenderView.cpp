@@ -8556,10 +8556,6 @@ void RenderView::DrawLegend()
 				xpos = 0.0;
 				cur_line++;
 			}
-			fluo::Color amb, diff, spec;
-			double shine, alpha;
-			md->GetMaterial(amb, diff, spec, shine, alpha);
-			fluo::Color c(diff.r(), diff.g(), diff.b());
 			bool highlighted = false;
 			auto cur_md = glbin_current.mesh_data.lock();
 			if (glbin_current.GetType() == 3 &&

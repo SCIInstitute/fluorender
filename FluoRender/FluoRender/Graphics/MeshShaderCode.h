@@ -156,15 +156,10 @@ inline constexpr const char* MSH_FRAG_INPUTS_FOG = R"GLSHDR(
 layout(location = 4) in vec4 OutFogCoord;
 )GLSHDR";
 
-inline constexpr const char* MSH_FRAG_UNIFORMS_COLOR = R"GLSHDR(
-//MSH_FRAG_UNIFORMS_COLOR
-uniform vec4 loc0;//color
-)GLSHDR";
-
-inline constexpr const char* MSH_FRAG_UNIFORMS_NOMAT = R"GLSHDR(
-//MSH_FRAG_UNIFORMS_NOMAT
-uniform vec4 loc0;//color
-uniform vec4 loc3;//(0, alpha, 0, 0)
+inline constexpr const char* MSH_FRAG_UNIFORMS_SHADING = R"GLSHDR(
+//MSH_FRAG_UNIFORMS_SHADING
+uniform vec4 loc0;//(r, g, b, a) base color
+uniform vec4 loc1;//(strength, shine, dirx, diry)
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_TEX = R"GLSHDR(
@@ -175,14 +170,6 @@ uniform sampler2D tex0;
 inline constexpr const char* MSH_FRAG_UNIFORMS_FOG = R"GLSHDR(
 // MSH_FRAG_UNIFORMS_FOG
 uniform vec4 loc8;//(int, start, end, 0.0) fog loc
-)GLSHDR";
-
-inline constexpr const char* MSH_FRAG_UNIFORMS_MATERIAL = R"GLSHDR(
-//MSH_FRAG_UNIFORMS_MATERIAL
-uniform vec4 loc0;//ambient color
-uniform vec4 loc1;//diffuse color
-uniform vec4 loc2;//specular color
-uniform vec4 loc3;//(shine, alpha, dirx, diry)
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_DP = R"GLSHDR(
@@ -241,7 +228,7 @@ inline constexpr const char* MSH_FRAG_BODY_COLOR = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_BODY_COLOR_OUT = R"GLSHDR(
 	// MSH_FRAG_BODY_COLOR_OUT
-	FragColor = vec4(c.xyz, c.w*loc3.y);
+	FragColor = vec4(c.xyz, c.w*loc0.a);
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_DEPTH_OUT = R"GLSHDR(
@@ -261,19 +248,36 @@ inline constexpr const char* MSH_FRAG_BODY_VERTEX_COLOR = R"GLSHDR(
 	c *= OutColor;
 )GLSHDR";
 
-inline constexpr const char* MSH_FRAG_BODY_MATL_LIGHT = R"GLSHDR(
-	//MSH_FRAG_BODY_MATL_LIGHT
-	vec4 spec = vec4(0.0);
-	vec3 eye = vec3(0.0, 0.0, 1.0);
-	vec3 l_dir = normalize(vec3(loc3.z, loc3.w, 1.0));
+inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
+	//MSH_FRAG_BODY_SHADING
 	vec3 n = normalize(OutNormal);
-	if (dot(n, l_dir) < 0.0)
-		n = -n;
-	float intensity = max(dot(n, l_dir), 0.0);
-	vec3 h = normalize(l_dir+eye);
-	float intSpec = max(dot(h, n), 0.0);
-	spec = loc2 * pow(intSpec, loc3.x);
-	c.xyz *= max(intensity * loc1 + spec, loc0).xyz;
+	vec3 eye = vec3(0.0, 0.0, 1.0);
+
+	// Key light direction
+	vec3 l_dir = normalize(vec3(loc1.z, loc1.w, 1.0));
+	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 0.2));
+	if (dot(n, l_dir) < 0.0) n = -n;
+
+	// Lambert diffuse with frosted gradient modulation
+	float lambert = max(dot(n, l_dir), 0.0);
+	float front = smoothstep(0.3, 1.0, lambert);
+	float back  = 1.0 - smoothstep(0.0, 0.3, lambert);
+	float shade = 0.5*back + 0.2*(1.0-front) + front;
+	float frost = mix(0.7, 1.3, 1.0 - abs(dot(n, eye)));
+	vec3 diffuse = loc0.rgb * shade * frost;
+
+	// Key light highlight (sharp, white)
+	vec3 h = normalize(l_dir + eye);
+	float keySpec = pow(max(dot(h, n), 0.0), loc1.y * 20.0);
+	vec3 keyHighlight = vec3(1.0) * keySpec;
+
+	// Diffuser highlight (opposite direction, softer)
+	vec3 h_diff = normalize(l_diff + eye);
+	float diffSpec = pow(abs(dot(h_diff, n)), mix(1.0, 10.0, loc1.y));
+	vec3 diffHighlight = vec3(0.8) * diffSpec;
+
+	// Combine
+	c.xyz *= diffuse + 0.0 * keyHighlight + loc1.x * diffHighlight;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(

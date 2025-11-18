@@ -106,7 +106,7 @@ public:
 	std::shared_ptr<VolumeData> GetLastVolumeData();
 
 	//load mesh
-	void LoadMeshes(const std::vector<std::wstring>& files);
+	void LoadMeshFiles(const std::vector<std::wstring>& files);
 	bool LoadMeshData(const std::wstring &filename);
 	bool AddMeshData(const std::shared_ptr<MeshData>& md);
 	size_t GetMeshNum();

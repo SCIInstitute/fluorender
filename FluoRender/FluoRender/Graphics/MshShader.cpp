@@ -141,10 +141,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			z << MSH_FRAG_INPUTS_C;
 		z << MSH_FRAG_INPUTS_FOG;
 		//uniforms
-		if (p.shading)
-			z << MSH_FRAG_UNIFORMS_MATERIAL;
-		else
-			z << MSH_FRAG_UNIFORMS_NOMAT;
+		z << MSH_FRAG_UNIFORMS_SHADING;
 		if (p.tex)
 			z << MSH_FRAG_UNIFORMS_TEX;
 		z << MSH_FRAG_UNIFORMS_FOG;
@@ -179,7 +176,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		if (p.color)
 			z << MSH_FRAG_BODY_VERTEX_COLOR;
 		if (p.shading)
-			z << MSH_FRAG_BODY_MATL_LIGHT;
+			z << MSH_FRAG_BODY_SHADING;
 		if (p.tex)
 			z << MSH_FRAG_BODY_TEXTURE;
 		//if (!p.shading && !p.tex)

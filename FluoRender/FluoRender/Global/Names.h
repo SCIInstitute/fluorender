@@ -356,6 +356,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstStreamMode "stream mode"
 
 //specific to mesh
+#define gstMeshProps "mesh props"
 #define gstBoundsTf "bounds tf"//bounding box after transformation
 #define gstCenter "center"
 #define gstLimitEnable "limit enable"//size limiter

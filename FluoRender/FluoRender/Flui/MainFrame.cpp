@@ -2247,7 +2247,7 @@ void MainFrame::OpenMesh()
 		for (const auto& filename : files) {
 			std_filenames.push_back(filename.ToStdWstring());
 		}
-		glbin_data_manager.LoadMeshes(std_filenames);
+		glbin_data_manager.LoadMeshFiles(std_filenames);
 	}
 
 	glbin_settings.m_last_open_type = 1;

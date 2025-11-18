@@ -104,7 +104,7 @@ bool DnDFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString &filenames)
 			}
 			else if (suffix == L".obj")
 			{
-				glbin_data_manager.LoadMeshes(std_filenames);
+				glbin_data_manager.LoadMeshFiles(std_filenames);
 			}
 			else
 			{

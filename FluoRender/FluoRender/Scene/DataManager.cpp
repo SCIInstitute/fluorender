@@ -426,7 +426,7 @@ void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_m
 		}
 		else if (suffix == L".obj")
 		{
-			LoadMeshes(files);
+			LoadMeshFiles(files);
 		}
 		else if (with_imagej)
 		{
@@ -747,7 +747,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 	return result;
 }
 
-void DataManager::LoadMeshes(const std::vector<std::wstring>& files)
+void DataManager::LoadMeshFiles(const std::vector<std::wstring>& files)
 {
 	Root* root = glbin_data_manager.GetRoot();
 	if (!root)

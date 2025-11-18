@@ -78,7 +78,7 @@ void ColorMesh::Update()
 		color = vd->GetMaskColor();
 	else
 		color = vd->GetColor();
-	md->SetColor(color, MESH_COLOR_DIFF);
+	md->SetColor(color);
 	size_t vbo_size = vertex_count * sizeof(float) * 3;
 	size_t cbo_size = vertex_count * sizeof(float) * 4;
 	int si = 0;

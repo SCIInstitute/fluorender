@@ -791,13 +791,11 @@ void TreePanel::UpdateTree()
 						break;
 					//append icon for mesh
 					m_datatree->AppendIcon();
-					fluo::Color amb, diff, spec;
-					double shine, alpha;
-					md->GetMaterial(amb, diff, spec, shine, alpha);
+					fluo::Color color = md->GetColor();
 					wxColor wxc(
-						(unsigned char)(diff.r() * 255),
-						(unsigned char)(diff.g() * 255),
-						(unsigned char)(diff.b() * 255));
+						(unsigned char)(color.r() * 255),
+						(unsigned char)(color.g() * 255),
+						(unsigned char)(color.b() * 255));
 					int ii = m_datatree->GetIconNum() - 1;
 					m_datatree->ChangeIconColor(ii, wxc);
 					wxTreeItemId item = m_datatree->AddMeshItem(vrv_item, md->GetName());
@@ -870,13 +868,11 @@ void TreePanel::UpdateTree()
 							continue;
 						//add icon
 						m_datatree->AppendIcon();
-						fluo::Color amb, diff, spec;
-						double shine, alpha;
-						md->GetMaterial(amb, diff, spec, shine, alpha);
+						fluo::Color color = md->GetColor();
 						wxColor wxc(
-							(unsigned char)(diff.r() * 255),
-							(unsigned char)(diff.g() * 255),
-							(unsigned char)(diff.b() * 255));
+							(unsigned char)(color.r() * 255),
+							(unsigned char)(color.g() * 255),
+							(unsigned char)(color.b() * 255));
 						int ii = m_datatree->GetIconNum() - 1;
 						m_datatree->ChangeIconColor(ii, wxc);
 						wxTreeItemId item = m_datatree->AddMeshItem(group_item, md->GetName());
@@ -1063,13 +1059,11 @@ void TreePanel::UpdateTreeColors()
 					auto md = std::dynamic_pointer_cast<MeshData>(layer);
 					if (!md)
 						break;
-					fluo::Color amb, diff, spec;
-					double shine, alpha;
-					md->GetMaterial(amb, diff, spec, shine, alpha);
+					fluo::Color color = md->GetColor();
 					wxColor wxc(
-						(unsigned char)(diff.r() * 255),
-						(unsigned char)(diff.g() * 255),
-						(unsigned char)(diff.b() * 255));
+						(unsigned char)(color.r() * 255),
+						(unsigned char)(color.g() * 255),
+						(unsigned char)(color.b() * 255));
 					m_datatree->ChangeIconColor(counter + 1, wxc);
 					counter++;
 				}
@@ -1114,13 +1108,11 @@ void TreePanel::UpdateTreeColors()
 						auto md = group->GetMeshData(k);
 						if (!md)
 							break;
-						fluo::Color amb, diff, spec;
-						double shine, alpha;
-						md->GetMaterial(amb, diff, spec, shine, alpha);
+						fluo::Color color = md->GetColor();
 						wxColor wxc(
-							(unsigned char)(diff.r() * 255),
-							(unsigned char)(diff.g() * 255),
-							(unsigned char)(diff.b() * 255));
+							(unsigned char)(color.r() * 255),
+							(unsigned char)(color.g() * 255),
+							(unsigned char)(color.b() * 255));
 						m_datatree->ChangeIconColor(counter + 1, wxc);
 						counter++;
 					}

@@ -544,16 +544,16 @@ void Project::Open(const std::wstring& filename)
 						if (fconfig->Read("display", &bval))
 							md->SetDisp(bval);
 						//lighting
-						if (fconfig->Read("lighting", &bval))
-							md->SetLighting(bval);
-						double shine, alpha;
-						fconfig->Read("shininess", &shine, 30.0);
-						fconfig->Read("alpha", &alpha, 0.5);
-						fluo::Color amb, diff, spec;
-						fconfig->Read("ambient", &amb);
-						fconfig->Read("diffuse", &diff);
-						fconfig->Read("specular", &spec);
-						md->SetMaterial(amb, diff, spec, shine, alpha);
+						if (fconfig->Read("shading", &bval))
+							md->SetShading(bval);
+						if (fconfig->Read("shading_strength", &dval))
+							md->SetShadingStrength(dval);
+						if (fconfig->Read("shininess", &dval, 30.0))
+							md->SetShadingShine(dval);
+						if (fconfig->Read("alpha", &dval, 0.5))
+							md->SetAlpha(dval);
+						if (fconfig->Read("color", &cval))
+							md->SetColor(cval);
 						//2d adjusment settings
 						if (fconfig->Read("gamma", &cval))
 							md->SetGammaColor(cval);
@@ -1511,16 +1511,11 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->SetPath("properties");
 			fconfig->Write("display", md->GetDisp());
 			//lighting
-			fconfig->Write("lighting", md->GetLighting());
-			//material
-			fluo::Color amb, diff, spec;
-			double shine, alpha;
-			md->GetMaterial(amb, diff, spec, shine, alpha);
-			fconfig->Write("ambient", amb);
-			fconfig->Write("diffuse", diff);
-			fconfig->Write("specular", spec);
-			fconfig->Write("shininess", shine);
-			fconfig->Write("alpha", alpha);
+			fconfig->Write("shading", md->GetShading());
+			fconfig->Write("shading_strength", md->GetShadingStrength());
+			fconfig->Write("shininess", md->GetShadingShine());
+			fconfig->Write("alpha", md->GetAlpha());
+			fconfig->Write("color", md->GetColor());
 			//2d adjustment settings
 			fconfig->Write("gamma", md->GetGammaColor());
 			fconfig->Write("brightness", md->GetBrightness());

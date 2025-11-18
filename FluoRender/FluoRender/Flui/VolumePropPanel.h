@@ -94,7 +94,6 @@ public:
 private:
 	VolumeData* m_vd;
 
-	bool m_lumi_change;
 	bool m_sync_group;
 	VolumeGroup* m_group;
 	RenderView* m_view;
@@ -316,7 +315,6 @@ private:
 	void OnColormapInvBtn(wxCommandEvent& event);
 	void OnColormapCombo(wxCommandEvent& event);
 	void OnColormapCombo2(wxCommandEvent& event);
-	int GetColorString(wxString& str, wxColor& wxc);
 	void OnColorChange(wxColor c);
 	void OnColorTextChange(wxCommandEvent& event);
 	void OnColorTextFocus(wxMouseEvent& event);

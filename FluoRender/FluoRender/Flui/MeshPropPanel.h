@@ -29,13 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #define _MESHPROPPANEL_H_
 
 #include <PropPanel.h>
-#include <wx/scrolwin.h>
-#include <wx/clrpicker.h>
-#include <wx/slider.h>
 
 class RenderView;
 class MeshData;
 class wxSingleSlider;
+class wxUndoableColorPicker;
+class wxColourPickerEvent;
 class MeshPropPanel: public PropPanel
 {
 public:
@@ -60,14 +59,18 @@ private:
 	RenderView* m_view;
 	MeshData* m_md;
 
-	wxCheckBox *m_light_chk;
-	wxColourPickerCtrl *m_diff_picker;
-	wxColourPickerCtrl *m_spec_picker;
-	wxSingleSlider *m_shine_sldr;
-	wxTextCtrl* m_shine_text;
+	wxTextCtrl *m_color_text;
+	wxUndoableColorPicker* m_color_btn;
 
 	wxSingleSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
+
+	wxCheckBox *m_shading_chk;
+	wxSingleSlider *m_shading_sldr;
+	wxTextCtrl* m_shading_text;
+	wxSingleSlider *m_shine_sldr;
+	wxTextCtrl* m_shine_text;
+
 	wxCheckBox* m_shadow_chk;
 	wxSingleSlider* m_shadow_sldr;
 	wxTextCtrl* m_shadow_text;
@@ -79,23 +82,30 @@ private:
 	wxTextCtrl* m_scale_text;
 
 private:
-	//lighting
+	void OnColorChange(const wxColor& c);
+	void OnColorTextChange(wxCommandEvent& event);
+	void OnColorTextFocus(wxMouseEvent& event);
+	void OnColorBtn(wxColourPickerEvent& event);
+
 	void OnAlphaChange(wxScrollEvent & event);
 	void OnAlphaText(wxCommandEvent& event);
-	void OnLightingCheck(wxCommandEvent& event);
-	void OnDiffChange(wxColourPickerEvent& event);
-	void OnSpecChange(wxColourPickerEvent& event);
+
+	void OnShadingCheck(wxCommandEvent& event);
+	void OnShadingChange(wxScrollEvent & event);
+	void OnShadingText(wxCommandEvent& event);
 	void OnShineChange(wxScrollEvent & event);
 	void OnShineText(wxCommandEvent& event);
-	void OnScaleChange(wxScrollEvent & event);
-	void OnScaleText(wxCommandEvent& event);
-	//shadow
+
 	void OnShadowCheck(wxCommandEvent& event);
 	void OnShadowChange(wxScrollEvent& event);
 	void OnShadowText(wxCommandEvent& event);
+
 	void OnShadowDirCheck(wxCommandEvent& event);
 	void OnShadowDirChange(wxScrollEvent& event);
 	void OnShadowDirText(wxCommandEvent& event);
+
+	void OnScaleChange(wxScrollEvent & event);
+	void OnScaleText(wxCommandEvent& event);
 };
 
 #endif//_MESHPROPPANEL_H_

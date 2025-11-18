@@ -29,6 +29,7 @@
 #ifndef MeshRenderer_h
 #define MeshRenderer_h
 
+#include <Color.h>
 #include <vector>
 #include <cstring>
 #include <memory>
@@ -102,19 +103,44 @@ namespace flvr
 		{ alpha_ = alpha; }
 		float get_alpha()
 		{ return alpha_; }
+		//color
+		void set_color(const fluo::Color& color)
+		{
+			color_ = color;
+		}
+		fluo::Color get_color()
+		{
+			return color_;
+		}
 		//effects
-		void set_lighting(bool val)
-		{ light_ = val; }
-		bool get_lighting()
-		{ return light_; }
+		void set_shading(bool val)
+		{ shading_ = val; }
+		bool get_shading()
+		{ return shading_; }
 		void set_flat_shading(bool val)
 		{ flat_shading_ = val; }
 		bool get_flat_shading()
 		{ return flat_shading_; }
-		void set_color(bool val)
-		{ color_ = val; }
-		bool get_color()
-		{ return color_; }
+		void set_shading_strength(double val)
+		{
+			shading_strength_ = val;
+		}
+		double get_shading_strength()
+		{
+			return shading_strength_;
+		}
+		void set_shading_shine(double val)
+		{
+			shading_shine_ = val;
+		}
+		double get_shading_shine()
+		{
+			return shading_shine_;
+		}
+		void set_vertex_color(bool val)
+		{ has_vertex_color_ = val; }
+		bool get_vertex_color()
+		{ return has_vertex_color_; }
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end)
 		{ fog_ = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
 		bool get_fog()
@@ -134,11 +160,15 @@ namespace flvr
 		int limit_;
 		//matrices
 		glm::mat4 m_mv_mat, m_proj_mat;
-		//lighting
-		bool light_;
+		//shading
+		bool shading_;
 		bool flat_shading_;
+		double shading_strength_;
+		double shading_shine_;
 		//color vertex
-		bool color_;
+		bool has_vertex_color_;
+		//base color
+		fluo::Color color_;
 		//fog
 		bool fog_;
 		double m_fog_intensity;

@@ -35,14 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef __glew_h__
 typedef unsigned int GLuint;
 typedef int GLint;
-typedef float GLfloat;
 #endif // !__glew_h__
-
-#define MESH_COLOR_AMB	1
-#define MESH_COLOR_DIFF	2
-#define MESH_COLOR_SPEC	3
-#define MESH_FLOAT_SHN	4
-#define MESH_FLOAT_ALPHA	5
 
 struct _GLMmodel;
 typedef struct _GLMmodel GLMmodel;
@@ -116,22 +109,23 @@ public:
 	void DrawInt(unsigned int name);
 
 	//lighting
-	void SetLighting(bool bVal);
-	bool GetLighting();
+	void SetShading(bool bVal);
+	bool GetShading();
 	void SetFlatShading(bool bval);
 	bool GetFlatShading();
 	void SetVertexColor(bool val);
 	bool GetVertexColor();
+	void SetColor(const fluo::Color &color);
+	fluo::Color GetColor();
+	void SetAlpha(double val);
+	double GetAlpha();
+	bool GetTransparent();
+	void SetShadingStrength(double val);
+	double GetShadingStrength();
+	void SetShadingShine(double val);
+	double GetShadingShine();
 	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
 	bool GetFog();
-	void SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
-		double shine = 30.0, double alpha = 1.0);
-	void SetColor(const fluo::Color &color, int type);
-	fluo::Color GetColor();
-	void SetFloat(double &value, int type);
-	void GetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
-		double& shine, double& alpha);
-	bool IsTransp();
 	//shadow
 	void SetShadowEnable(bool bVal);
 	bool GetShadowEnable();
@@ -158,12 +152,6 @@ public:
 	void SetLegend(bool val);
 	bool GetLegend();
 
-	//size limiter
-	void SetLimit(bool bVal);
-	bool GetLimit();
-	void SetLimitNumer(int val);
-	int GetLimitNumber();
-
 	//time sequence
 	void SetCurTime(int time) { m_time = time; }
 	int GetCurTime() { return m_time; }
@@ -186,21 +174,18 @@ private:
 	bool m_draw_bounds;
 
 	//lighting
-	bool m_light;
+	bool m_shading;
 	bool m_flat_shading;
 	bool m_vertex_color;
+	fluo::Color m_color;
+	double m_alpha;
+	double m_shading_strength;
+	double m_shading_shine;
+	//fog
 	bool m_fog;
-	fluo::Color m_mat_amb;
-	fluo::Color m_mat_diff;
-	fluo::Color m_mat_spec;
-	double m_mat_shine;
-	double m_mat_alpha;
 	//shadow
 	bool m_shadow_enable;
 	double m_shadow_intensity;
-	//size limiter
-	bool m_enable_limit;
-	int m_limit;
 
 	double m_trans[3];
 	double m_rot[3];

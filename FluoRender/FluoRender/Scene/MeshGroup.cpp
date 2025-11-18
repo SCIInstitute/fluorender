@@ -51,9 +51,7 @@ void MeshGroup::RandomizeColor()
 		{
 			double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 			fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
-			it->SetColor(color, MESH_COLOR_DIFF);
-			fluo::Color amb = color * 0.3;
-			it->SetColor(amb, MESH_COLOR_AMB);
+			it->SetColor(color);
 		}
 	}
 }

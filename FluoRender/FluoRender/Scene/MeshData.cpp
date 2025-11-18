@@ -42,18 +42,16 @@ MeshData::MeshData() :
 	m_center(0.0, 0.0, 0.0),
 	m_disp(true),
 	m_draw_bounds(false),
-	m_light(true),
+	m_shading(true),
 	m_flat_shading(false),
 	m_vertex_color(false),
-	m_mat_amb(0.3, 0.3, 0.3),
-	m_mat_diff(1.0, 0.0, 0.0),
-	m_mat_spec(0.2, 0.2, 0.2),
-	m_mat_shine(30.0),
-	m_mat_alpha(1.0),
+	m_alpha(0.7),
+	m_fog(true),
+	m_time(0),
+	m_shading_strength(1.0),
+	m_shading_shine(1.0),
 	m_shadow_enable(true),
 	m_shadow_intensity(0.6),
-	m_enable_limit(false),
-	m_limit(50),
 	m_cpu_dirty(true),
 	m_gpu_dirty(true)
 {
@@ -73,12 +71,17 @@ MeshData::MeshData() :
 	hue = double(std::rand()%360);
 	sat = 1.0;
 	val = 1.0;
-	fluo::Color color(fluo::HSVColor(hue, sat, val));
-	m_mat_diff = color;
+	m_color = fluo::Color(fluo::HSVColor(hue, sat, val));
 
 	m_legend = true;
 
 	m_mr = std::make_unique<flvr::MeshRenderer>();
+	m_mr->set_shading(m_shading);
+	m_mr->set_flat_shading(m_flat_shading);
+	m_mr->set_color(m_color);
+	m_mr->set_alpha(static_cast<float>(m_alpha));
+	m_mr->set_shading_strength(m_shading_strength);
+	m_mr->set_shading_shine(m_shading_shine);
 }
 
 MeshData::~MeshData()
@@ -494,19 +497,19 @@ void MeshData::AddEmptyData()
 
 	/* set the default material */
 	m_data->materials[0].name = NULL;
-	m_data->materials[0].ambient[0] = m_mat_amb.r();
-	m_data->materials[0].ambient[1] = m_mat_amb.g();
-	m_data->materials[0].ambient[2] = m_mat_amb.b();
-	m_data->materials[0].ambient[3] = m_mat_alpha;
-	m_data->materials[0].diffuse[0] = m_mat_diff.r();
-	m_data->materials[0].diffuse[1] = m_mat_diff.g();
-	m_data->materials[0].diffuse[2] = m_mat_diff.b();
-	m_data->materials[0].diffuse[3] = m_mat_alpha;
-	m_data->materials[0].specular[0] = m_mat_spec.r();
-	m_data->materials[0].specular[1] = m_mat_spec.g();
-	m_data->materials[0].specular[2] = m_mat_spec.b();
-	m_data->materials[0].specular[3] = m_mat_alpha;
-	m_data->materials[0].shininess = m_mat_shine;
+	m_data->materials[0].ambient[0] = 0.0;
+	m_data->materials[0].ambient[1] = 0.0;
+	m_data->materials[0].ambient[2] = 0.0;
+	m_data->materials[0].ambient[3] = 0.0;
+	m_data->materials[0].diffuse[0] = 0.0;
+	m_data->materials[0].diffuse[1] = 0.0;
+	m_data->materials[0].diffuse[2] = 0.0;
+	m_data->materials[0].diffuse[3] = 0.0;
+	m_data->materials[0].specular[0] = 0.0;
+	m_data->materials[0].specular[1] = 0.0;
+	m_data->materials[0].specular[2] = 0.0;
+	m_data->materials[0].specular[3] = 0.0;
+	m_data->materials[0].shininess = 0.0;
 	m_data->materials[0].emmissive[0] = 0.0;
 	m_data->materials[0].emmissive[1] = 0.0;
 	m_data->materials[0].emmissive[2] = 0.0;
@@ -777,21 +780,23 @@ void MeshData::DrawInt(unsigned int name)
 }
 
 //lighting
-void MeshData::SetLighting(bool bVal)
+void MeshData::SetShading(bool bVal)
 {
-	m_light = bVal;
-	if (m_mr) m_mr->set_lighting(m_light);
+	m_shading = bVal;
+	if (m_mr)
+		m_mr->set_shading(m_shading);
 }
 
-bool MeshData::GetLighting()
+bool MeshData::GetShading()
 {
-	return m_light;
+	return m_shading;
 }
 
 void MeshData::SetFlatShading(bool bval)
 {
 	m_flat_shading = bval;
-	if (m_mr) m_mr->set_flat_shading(bval);
+	if (m_mr)
+		m_mr->set_flat_shading(bval);
 }
 
 bool MeshData::GetFlatShading()
@@ -802,7 +807,8 @@ bool MeshData::GetFlatShading()
 void MeshData::SetVertexColor(bool val)
 {
 	m_vertex_color = val;
-	if (m_mr) m_mr->set_color(val);
+	if (m_mr)
+		m_mr->set_vertex_color(val);
 }
 
 bool MeshData::GetVertexColor()
@@ -815,7 +821,8 @@ void MeshData::SetFog(bool bVal,
 	double fog_intensity, double fog_start, double fog_end)
 {
 	m_fog = bVal;
-	if (m_mr) m_mr->set_fog(m_fog, fog_intensity, fog_start, fog_end);
+	if (m_mr)
+		m_mr->set_fog(m_fog, fog_intensity, fog_start, fog_end);
 }
 
 bool MeshData::GetFog()
@@ -823,122 +830,59 @@ bool MeshData::GetFog()
 	return m_fog;
 }
 
-void MeshData::SetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
-	double shine, double alpha)
+void MeshData::SetColor(const fluo::Color &color)
 {
-	m_mat_amb = amb;
-	m_mat_diff = diff;
-	m_mat_spec = spec;
-	m_mat_shine = shine;
-	m_mat_alpha = alpha;
-
-	if (m_data && m_data->materials)
-	{
-		for (int i=0; i<(int)m_data->nummaterials; i++)
-		{
-			if (i==0)
-			{
-				m_data->materials[i].ambient[0] = m_mat_amb.r();
-				m_data->materials[i].ambient[1] = m_mat_amb.g();
-				m_data->materials[i].ambient[2] = m_mat_amb.b();
-				m_data->materials[i].diffuse[0] = m_mat_diff.r();
-				m_data->materials[i].diffuse[1] = m_mat_diff.g();
-				m_data->materials[i].diffuse[2] = m_mat_diff.b();
-				m_data->materials[i].specular[0] = m_mat_spec.r();
-				m_data->materials[i].specular[1] = m_mat_spec.g();
-				m_data->materials[i].specular[2] = m_mat_spec.b();
-				m_data->materials[i].shininess = m_mat_shine;
-			}
-			m_data->materials[i].specular[3] = m_mat_alpha;
-			m_data->materials[i].ambient[3] = m_mat_alpha;
-			m_data->materials[i].diffuse[3] = m_mat_alpha;
-		}
-	}
-}
-
-void MeshData::SetColor(const fluo::Color &color, int type)
-{
-	switch (type)
-	{
-	case MESH_COLOR_AMB:
-		m_mat_amb = color;
-		if (m_data && m_data->materials)
-		{
-			m_data->materials[0].ambient[0] = m_mat_amb.r();
-			m_data->materials[0].ambient[1] = m_mat_amb.g();
-			m_data->materials[0].ambient[2] = m_mat_amb.b();
-		}
-		break;
-	case MESH_COLOR_DIFF:
-		m_mat_diff = color;
-		if (m_data && m_data->materials)
-		{
-			m_data->materials[0].diffuse[0] = m_mat_diff.r();
-			m_data->materials[0].diffuse[1] = m_mat_diff.g();
-			m_data->materials[0].diffuse[2] = m_mat_diff.b();
-		}
-		break;
-	case MESH_COLOR_SPEC:
-		m_mat_spec = color;
-		if (m_data && m_data->materials)
-		{
-			m_data->materials[0].specular[0] = m_mat_spec.r();
-			m_data->materials[0].specular[1] = m_mat_spec.g();
-			m_data->materials[0].specular[2] = m_mat_spec.b();
-		}
-		break;
-	}
+	m_color = color;
+	if (m_mr)
+		m_mr->set_color(color);
 }
 
 fluo::Color MeshData::GetColor()
 {
-	return m_mat_amb;
+	return m_color;
 }
 
-void MeshData::SetFloat(double &value, int type)
+void MeshData::SetAlpha(double alpha)
 {
-	switch (type)
-	{
-	case MESH_FLOAT_SHN:
-		m_mat_shine = value;
-		if (m_data && m_data->materials)
-		{
-			m_data->materials[0].shininess = m_mat_shine;
-		}
-		break;
-	case MESH_FLOAT_ALPHA:
-		m_mat_alpha = value;
-		if (m_data && m_data->materials)
-		{
-			for (int i=0; i<(int)m_data->nummaterials; i++)
-			{
-				m_data->materials[i].ambient[3] = m_mat_alpha;
-				m_data->materials[i].diffuse[3] = m_mat_alpha;
-				m_data->materials[i].specular[3] = m_mat_alpha;
-			}
-		}
-		if (m_mr) m_mr->set_alpha(value);
-		break;
-	}
-
+	m_alpha = alpha;
+	if (m_mr)
+		m_mr->set_alpha(alpha);
 }
 
-void MeshData::GetMaterial(fluo::Color& amb, fluo::Color& diff, fluo::Color& spec,
-	double& shine, double& alpha)
+double MeshData::GetAlpha()
 {
-	amb = m_mat_amb;
-	diff = m_mat_diff;
-	spec = m_mat_spec;
-	shine = m_mat_shine;
-	alpha = m_mat_alpha;
+	return m_alpha;
 }
 
-bool MeshData::IsTransp()
+void MeshData::SetShadingStrength(double val)
 {
-	if (m_mat_alpha>=1.0)
-		return false;
-	else
+	m_shading_strength = val;
+	if (m_mr)
+		m_mr->set_shading_strength(val);
+}
+
+double MeshData::GetShadingStrength()
+{
+	return m_shading_strength;
+}
+
+void MeshData::SetShadingShine(double val)
+{
+	m_shading_shine = val;
+	if (m_mr)
+		m_mr->set_shading_shine(val);
+}
+
+double MeshData::GetShadingShine()
+{
+	return m_shading_shine;
+}
+
+bool MeshData::GetTransparent()
+{
+	if (m_alpha < 1.0)
 		return true;
+	return false;
 }
 
 //shadow
@@ -1114,9 +1058,7 @@ void MeshData::RandomizeColor()
 {
 	double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 	fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
-	SetColor(color, MESH_COLOR_DIFF);
-	fluo::Color amb = color * 0.3;
-	SetColor(amb, MESH_COLOR_AMB);
+	SetColor(color);
 }
 
 //shown in legend
@@ -1128,37 +1070,6 @@ void MeshData::SetLegend(bool val)
 bool MeshData::GetLegend()
 {
 	return m_legend;
-}
-
-//size limiter
-void MeshData::SetLimit(bool bVal)
-{
-	m_enable_limit = bVal;
-	if (m_enable_limit)
-		m_mr->set_limit(m_limit);
-	else
-		m_mr->set_limit(-1);
-//	m_mr->update();
-}
-
-bool MeshData::GetLimit()
-{
-	return m_enable_limit;
-}
-
-void MeshData::SetLimitNumer(int val)
-{
-	m_limit = val;
-	if (m_enable_limit)
-	{
-		m_mr->set_limit(val);
-//		m_mr->update();
-	}
-}
-
-int MeshData::GetLimitNumber()
-{
-	return m_limit;
 }
 
 void MeshData::BuildMesh()
@@ -1183,19 +1094,19 @@ void MeshData::BuildMesh()
 
 	/* set the default material */
 	m_data->materials[0].name = NULL;
-	m_data->materials[0].ambient[0] = m_mat_amb.r();
-	m_data->materials[0].ambient[1] = m_mat_amb.g();
-	m_data->materials[0].ambient[2] = m_mat_amb.b();
-	m_data->materials[0].ambient[3] = m_mat_alpha;
-	m_data->materials[0].diffuse[0] = m_mat_diff.r();
-	m_data->materials[0].diffuse[1] = m_mat_diff.g();
-	m_data->materials[0].diffuse[2] = m_mat_diff.b();
-	m_data->materials[0].diffuse[3] = m_mat_alpha;
-	m_data->materials[0].specular[0] = m_mat_spec.r();
-	m_data->materials[0].specular[1] = m_mat_spec.g();
-	m_data->materials[0].specular[2] = m_mat_spec.b();
-	m_data->materials[0].specular[3] = m_mat_alpha;
-	m_data->materials[0].shininess = m_mat_shine;
+	m_data->materials[0].ambient[0] = 0.0;
+	m_data->materials[0].ambient[1] = 0.0;
+	m_data->materials[0].ambient[2] = 0.0;
+	m_data->materials[0].ambient[3] = 0.0;
+	m_data->materials[0].diffuse[0] = 0.0;
+	m_data->materials[0].diffuse[1] = 0.0;
+	m_data->materials[0].diffuse[2] = 0.0;
+	m_data->materials[0].diffuse[3] = 0.0;
+	m_data->materials[0].specular[0] = 0.0;
+	m_data->materials[0].specular[1] = 0.0;
+	m_data->materials[0].specular[2] = 0.0;
+	m_data->materials[0].specular[3] = 0.0;
+	m_data->materials[0].shininess = 0.0;
 	m_data->materials[0].emmissive[0] = 0.0;
 	m_data->materials[0].emmissive[1] = 0.0;
 	m_data->materials[0].emmissive[2] = 0.0;
@@ -1230,7 +1141,7 @@ void MeshData::BuildMesh()
 			float b = m_data->colors[6];
 
 			if (r < 1.0f || g < 1.0f || b < 1.0f)
-				SetColor(fluo::Color(1.0), MESH_COLOR_DIFF);
+				SetColor(fluo::Color(1.0));
 		}
 	}
 
