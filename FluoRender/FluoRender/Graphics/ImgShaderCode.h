@@ -630,7 +630,7 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 
 	vec2 texel = loc0.xy;
 	float zoom = clamp(loc0.z, 0.4, 3.0);
-	float darkness = loc1.x;
+	float darkness = loc1.x * sqrt(2.0);
 
 	float c = 0.0;
 	float wsum = 0.0;
