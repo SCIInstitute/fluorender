@@ -74,7 +74,7 @@ VolumeRenderer::VolumeRenderer(
 	alpha_(1.0),
 	//shading
 	shading_(false),
-	shading_strength_(0.5),
+	shading_strength_(1.0),
 	shading_shine_(1.0),
 	//colormap mode
 	colormap_inv_(1.0),

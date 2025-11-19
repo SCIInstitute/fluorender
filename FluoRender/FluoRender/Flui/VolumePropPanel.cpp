@@ -341,10 +341,10 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shading_strength_sldr->SetHistoryIndicator(m_shade_st);
 	//bind events
 	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
-	m_shading_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadingShineChange, this);
-	m_shading_strength_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadingShineText, this);
-	m_shading_shine_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadingStrengthChange, this);
-	m_shading_shine_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadingStrengthText, this);
+	m_shading_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadingStrengthChange, this);
+	m_shading_strength_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadingStrengthText, this);
+	m_shading_shine_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadingShineChange, this);
+	m_shading_shine_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadingShineText, this);
 	m_shade_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadingChk, this);
 	//add to sizer
 	sizer_m3->Add(m_shade_st, 0, wxALIGN_CENTER);
@@ -2359,36 +2359,7 @@ void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
 	}
 }
 
-//hi shading
 void VolumePropPanel::OnShadingStrengthChange(wxScrollEvent& event)
-{
-	double val = m_shading_shine_sldr->GetValue() / 10.0;
-	wxString str = wxString::Format("%.2f", val);
-	if (str != m_shading_shine_text->GetValue())
-		m_shading_shine_text->ChangeValue(str);
-
-	//set high shading value
-	if (m_sync_group)
-		SyncShadingShine(val);
-	else
-		SetShadingShine(val, false);
-}
-
-void VolumePropPanel::OnShadingStrengthText(wxCommandEvent& event)
-{
-	wxString str = m_shading_shine_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_shading_shine_sldr->ChangeValue(std::round(val * 10));
-
-	//set high shading value
-	if (m_sync_group)
-		SyncShadingShine(val);
-	else
-		SetShadingShine(val, false);
-}
-
-void VolumePropPanel::OnShadingShineChange(wxScrollEvent& event)
 {
 	double val = m_shading_strength_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
@@ -2402,7 +2373,7 @@ void VolumePropPanel::OnShadingShineChange(wxScrollEvent& event)
 		SetShadingStrength(val, false);
 }
 
-void VolumePropPanel::OnShadingShineText(wxCommandEvent& event)
+void VolumePropPanel::OnShadingStrengthText(wxCommandEvent& event)
 {
 	wxString str = m_shading_strength_text->GetValue();
 	double val = 0.0;
@@ -2414,6 +2385,34 @@ void VolumePropPanel::OnShadingShineText(wxCommandEvent& event)
 		SyncShadingStrength(val);
 	else
 		SetShadingStrength(val, false);
+}
+
+void VolumePropPanel::OnShadingShineChange(wxScrollEvent& event)
+{
+	double val = m_shading_shine_sldr->GetValue() / 100.0;
+	wxString str = wxString::Format("%.2f", val);
+	if (str != m_shading_shine_text->GetValue())
+		m_shading_shine_text->ChangeValue(str);
+
+	//set high shading value
+	if (m_sync_group)
+		SyncShadingShine(val);
+	else
+		SetShadingShine(val, false);
+}
+
+void VolumePropPanel::OnShadingShineText(wxCommandEvent& event)
+{
+	wxString str = m_shading_shine_text->GetValue();
+	double val = 0.0;
+	str.ToDouble(&val);
+	m_shading_shine_sldr->ChangeValue(std::round(val * 100));
+
+	//set high shading value
+	if (m_sync_group)
+		SyncShadingShine(val);
+	else
+		SetShadingShine(val, false);
 }
 
 void VolumePropPanel::OnShadingChk(wxCommandEvent& event)

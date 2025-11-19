@@ -111,7 +111,7 @@ inline constexpr const char* SEG_BODY_INIT_CLEAR = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_INIT_2D_COORD = R"GLSHDR(
 	//SEG_BODY_INIT_2D_COORD
-	vec4 s = matrix1 * matrix0 * matrix2 * t;
+	vec4 s = matrix1 * matrix0 * matrix2 * vec4(texCoord, 1.0);
 	s = s / s.w;
 	s.xy = s.xy / 2.0 + 0.5;
 )GLSHDR";
@@ -163,7 +163,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_ERASE = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_DIFFUSE = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_DIFFUSE
-	FragColor = texture(tex2, t.stp);
+	FragColor = texture(tex2, texCoord);
 )GLSHDR";
 
 inline constexpr const char* SEG_BODY_INIT_BLEND_FLOOD = R"GLSHDR(
@@ -184,7 +184,7 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_ORTHO = R"GLSHDR(
 	vec3 step = cv.xyz;
 	step = normalize(step);
 	step = step * length(step * loc4.xyz);
-	vec3 ray = t.xyz;
+	vec3 ray = texCoord;
 	vec4 cray;
 	bool flag = false;
 	float th = loc20.x<0.01?0.01:loc20.x;
@@ -213,10 +213,10 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_PERSP = R"GLSHDR(
 		discard;
 	vec4 cv = matrix3 * vec4(0.0, 0.0, 0.0, 1.0);
 	cv = cv / cv.w;
-	vec3 step = cv.xyz - t.xyz;
+	vec3 step = cv.xyz - texCoord;
 	step = normalize(step);
 	step = step * length(step * loc4.xyz);
-	vec3 ray = t.xyz;
+	vec3 ray = texCoord;
 	vec4 cray;
 	bool flag = false;
 	float th = loc20.x<0.01?0.01:loc20.x;
@@ -244,10 +244,10 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_PERSP = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_DB_GROW_2D_COORD = R"GLSHDR(
 	//SEG_BODY_DB_GROW_2D_COORD
-	vec4 s = matrix1 * matrix0 * matrix2 * t;
+	vec4 s = matrix1 * matrix0 * matrix2 * vec4(texCoord, 1.0);
 	s = s / s.w;
 	s.xy = s.xy / 2.0 + 0.5;
-	vec4 cc = texture(tex2, t.stp);
+	vec4 cc = texture(tex2, texCoord);
 )GLSHDR";
 
 inline constexpr const char* SEG_BODY_DB_GROW_CULL = R"GLSHDR(
@@ -276,7 +276,7 @@ inline constexpr const char* SEG_BODY_DB_GROW_BLEND_APPEND_HEAD = R"GLSHDR(
 	//SEG_BODY_DB_GROW_BLEND_APPEND
 	FragColor = (1.0-stop) * cc;
 	vec3 nb;
-	vec3 max_nb = t.stp;
+	vec3 max_nb = texCoord;
 	float m;
 	float mx;
 	for (int i=-1; i<2; i++)
@@ -295,7 +295,7 @@ inline constexpr const char* SEG_BODY_DB_GROW_BLEND_APPEND_DIR = R"GLSHDR(
 
 inline constexpr const char* SEG_BODY_DB_GROW_BLEND_APPEND_BODY = R"GLSHDR(
 		//SEG_BODY_DB_GROW_BLEND_APPEND_BODY
-		nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);
+		nb = vec3(texCoord.s+float(i)*loc4.x, texCoord.t+float(j)*loc4.y, texCoord.p+float(k)*loc4.z);
 		m = texture(tex2, nb).x;
 		if (m > cc.x)
 		{
@@ -306,7 +306,7 @@ inline constexpr const char* SEG_BODY_DB_GROW_BLEND_APPEND_BODY = R"GLSHDR(
 	if (loc20.y>0.0)
 	{
 		m = texture(tex0, max_nb).x + loc20.y;
-		mx = texture(tex0, t.stp).x;
+		mx = texture(tex0, texCoord).x;
 		if (m < mx || m - mx > 2.0*loc20.y)
 			discard;
 	}
@@ -319,7 +319,7 @@ inline constexpr const char* SEG_BODY_DB_GROW_BLEND_ERASE0 = R"GLSHDR(
 	for (int j=-1; j<2; j++)
 	for (int k=-1; k<2; k++)
 	{
-		vec3 nb = vec3(t.s+float(i)*loc4.x, t.t+float(j)*loc4.y, t.p+float(k)*loc4.z);
+		vec3 nb = vec3(texCoord.s+float(i)*loc4.x, texCoord.t+float(j)*loc4.y, texCoord.p+float(k)*loc4.z);
 		cc = vec4(min(cc.x, texture(tex2, nb).x));
 	}
 	FragColor = cc*clamp(1.0-stop, 0.0, 1.0);

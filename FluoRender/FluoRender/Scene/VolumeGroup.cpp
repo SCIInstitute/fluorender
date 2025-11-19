@@ -50,7 +50,7 @@ VolumeGroup::VolumeGroup()
 	m_sw = 0.0;
 	m_luminance = 1.0;
 	m_alpha = 1.0;
-	m_shading_strength = 0.5;
+	m_shading_strength = 1.0;
 	m_shading_shine = 1.0;
 	m_shadow_intensity = 0.0;
 	m_sample_rate = 2.0;

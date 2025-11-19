@@ -103,7 +103,7 @@ VolumeData::VolumeData()
 
 	//shading
 	m_shading_enable = false;
-	m_shading_strength = 0.5;
+	m_shading_strength = 1.0;
 	m_shading_shine = 1.0;
 
 	//shadow

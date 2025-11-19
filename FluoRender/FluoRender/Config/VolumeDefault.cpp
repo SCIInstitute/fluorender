@@ -66,7 +66,7 @@ VolumeDataDefault::VolumeDataDefault()
 
 	//shading
 	m_shading_enable = false;
-	m_shading_strength = 0.5;
+	m_shading_strength = 1.0;
 	m_shading_shine = 1.0;
 
 	//shadow
@@ -145,7 +145,7 @@ void VolumeDataDefault::Read()
 
 	f->Read(gstShadingEnable, &m_shading_enable, false);
 	f->Read(gstShadingStrength, &m_shading_strength, 1.0);
-	f->Read(gstShadingShine, &m_shading_shine, 10.0);
+	f->Read(gstShadingShine, &m_shading_shine, 1.0);
 
 	f->Read(gstShadowEnable, &m_shadow_enable, false);
 	f->Read(gstShadowInt, &m_shadow_intensity, 0.0);

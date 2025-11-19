@@ -171,8 +171,7 @@ inline constexpr const char* VOL_HEAD  = R"GLSHDR(
 //VOL_HEAD
 void main()
 {
-	vec4 TexCoord = vec4(OutTexture, 1.0);
-	vec4 t = TexCoord;
+	vec3 texCoord = OutTexture;
 )GLSHDR";
 
 inline constexpr const char* VOL_HEAD_2DMAP_LOC  = R"GLSHDR(
@@ -207,7 +206,7 @@ inline constexpr const char* VOL_HEAD_FOG  = R"GLSHDR(
 
 inline constexpr const char* VOL_HEAD_CLIP  = R"GLSHDR(
 	//VOL_HEAD_CLIP
-	vec4 brickt = matrix2 * t;
+	vec4 brickt = matrix2 * vec4(texCoord, 1.0);
 	if (dot(brickt.xyz, loc10.xyz)+loc10.w < 0.0 ||
 		dot(brickt.xyz, loc11.xyz)+loc11.w < 0.0 ||
 		dot(brickt.xyz, loc12.xyz)+loc12.w < 0.0 ||
@@ -222,7 +221,7 @@ inline constexpr const char* VOL_HEAD_CLIP  = R"GLSHDR(
 
 inline constexpr const char* VOL_HEAD_CLIP_FUNC  = R"GLSHDR(
 	//VOL_HEAD_CLIP_FUNC
-	if (vol_clip_func(t))
+	if (vol_clip_func(vec4(texCoord, 1.0)))
 	{
 		discard;
 		return;
@@ -248,8 +247,8 @@ bool vol_clip_func(vec4 t)
 
 inline constexpr const char* VOL_HEAD_LIT  = R"GLSHDR(
 	//VOL_HEAD_LIT
-	vec3 eye = loc0.xyz; // {lx, ly, lz, 0}
-	vec4 n, w;
+	vec3 view = loc0.xyz; // {lx, ly, lz, 0}
+	vec3 grad;
 )GLSHDR";
 
 inline constexpr const char* VOL_TAIL  = R"GLSHDR(
@@ -259,71 +258,33 @@ inline constexpr const char* VOL_TAIL  = R"GLSHDR(
 
 inline constexpr const char* VOL_DATA_VOLUME_LOOKUP  = R"GLSHDR(
 	//VOL_DATA_VOLUME_LOOKUP
-	vec4 v = texture(tex0, t.stp);
-)GLSHDR";
-
-inline constexpr const char* VOL_DATA_VOLUME_LOOKUP_130  = R"GLSHDR(
-	//VOL_DATA_VOLUME_LOOKUP_130
-	vec4 v = texture(tex0, t.stp);
-)GLSHDR";
-
-inline constexpr const char* VOL_GRAD_COMPUTE_LO  = R"GLSHDR(
-	//VOL_GRAD_COMPUTE_LO
-	vec4 dir = loc4; // 
-	vec4 r, p; 
-	v = vec4(v.x); 
-	n = vec4(0.0); 
-	w = vec4(0.0);
-	w.x = dir.x; 
-	p = clamp(TexCoord + w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.x = v.x - r.x; 
-	w = vec4(0.0); 
-	w.y = dir.y; 
-	p = clamp(TexCoord + w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.y = v.y - r.x; 
-	w = vec4(0.0); 
-	w.z = dir.x<dir.z?dir.x:dir.z; 
-	p = clamp(TexCoord + w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.z = v.z - r.x; 
-	p.y = length(n.xyz); 
-	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); 
+	vec4 v = texture(tex0, texCoord);
 )GLSHDR";
 
 inline constexpr const char* VOL_GRAD_COMPUTE  = R"GLSHDR(
 	// VOL_GRAD_COMPUTE
-	vec4 dir = loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)
-	vec4 r, p; 
-	v = vec4(v.x); 
-	n = vec4(0.0); 
-	w = vec4(0.0);
-	w.x = dir.x; 
-	p = clamp(TexCoord + w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.x = r.x + n.x; 
-	p = clamp(TexCoord - w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.x = r.x - n.x; 
-	w = vec4(0.0); 
-	w.y = dir.y; 
-	p = clamp(TexCoord + w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.y = r.x + n.y; 
-	p = clamp(TexCoord - w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.y = r.x - n.y; 
-	w = vec4(0.0); 
-	w.z = dir.x<dir.z?dir.x:dir.z; 
-	p = clamp(TexCoord + w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.z = r.x + n.z; 
-	p = clamp(TexCoord - w, 0.0, 1.0); 
-	r = texture(tex0, p.stp); 
-	n.z = r.x - n.z; 
-	p.y = length(n.xyz); 
-	p.y = 0.5 * (loc2.x<0.0?(1.0+p.y*loc2.x):p.y*loc2.x); 
+	vec3 dir = loc4.xyz; // (1/nx, 1/ny, 1/nz)
+
+	// Sample neighbors in +x and -x
+	float xp = texture(tex0, clamp(texCoord + vec3(dir.x, 0.0, 0.0), 0.0, 1.0)).r;
+	float xm = texture(tex0, clamp(texCoord - vec3(dir.x, 0.0, 0.0), 0.0, 1.0)).r;
+	grad.x = (xp - xm) * 0.5;
+
+	// Sample neighbors in +y and -y
+	float yp = texture(tex0, clamp(texCoord + vec3(0.0, dir.y, 0.0), 0.0, 1.0)).r;
+	float ym = texture(tex0, clamp(texCoord - vec3(0.0, dir.y, 0.0), 0.0, 1.0)).r;
+	grad.y = (yp - ym) * 0.5;
+
+	// Sample neighbors in +z and -z
+	float zp = texture(tex0, clamp(texCoord + vec3(0.0, 0.0, dir.z), 0.0, 1.0)).r;
+	float zm = texture(tex0, clamp(texCoord - vec3(0.0, 0.0, dir.z), 0.0, 1.0)).r;
+	grad.z = (zp - zm) * 0.5;
+
+	// Gradient magnitude
+	float gradMag = length(grad);
+
+	// Apply scaling
+	gradMag = 0.5 * (loc2.x < 0.0 ? (1.0 + gradMag * loc2.x) : gradMag * loc2.x);
 )GLSHDR";
 
 inline constexpr const char* VOL_GRAD_COMPUTE_FUNC  = R"GLSHDR(
@@ -362,36 +323,38 @@ vec4 vol_grad_func(vec4 pos, vec4 dir)
 
 inline constexpr const char* VOL_BODY_SHADING  = R"GLSHDR(
 	//VOL_BODY_SHADING
-	n.xyz *= loc5.xyz;
-	n.xyz = normalize(n.xyz);
+	grad *= loc5.xyz;
+	float gradLen = length(grad);
+	grad = (gradLen > 1e-6) ? grad / gradLen : vec3(0.0);
+	vec3 eye = vec3(0.0, 0.0, 1.0);
 
 	// Key light direction
-	vec3 l_dir = normalize(eye.xyz + vec3(loc1.z, loc1.w, 0.0));
-	vec3 l_diff = normalize(eye.xyz - vec3(loc1.z, loc1.w, 0.0));
-	if (dot(n.xyz, l_dir) < 0.0) n = -n;
+	vec3 l_dir = normalize(vec3(loc1.z, loc1.w, 0.2));
+	float lambert = dot(grad, l_dir);
+	if (lambert < 0.0) grad = -grad;
+	lambert = abs(lambert);
 
 	// Lambert diffuse with frosted gradient modulation
-	float lambert = max(dot(n.xyz, l_dir), 0.0);
 	float front = smoothstep(0.3, 1.0, lambert);
 	float back  = 1.0 - smoothstep(0.0, 0.5, lambert);
 	float shade = 0.5*back + 0.7*front + 0.3;
-	float frost = 1.0 + loc1.x * (1.0 - abs(dot(n.xyz, eye)));
+	float frost = 1.0 + loc1.x * smoothstep(0.0, 0.1, gradMag) * 0.2;
 	float diffuse = shade * frost;
 
 	// Key light highlight (sharp, white)
+	l_dir = normalize(vec3(loc1.z, loc1.w, 3.0));
 	vec3 h = normalize(l_dir + eye);
-	float keySpec = pow(abs(dot(h, n.xyz)), mix(10.0, 100.0, loc1.y));
-	float keyHighlight = 5.0 * keySpec;
+	float keyHighlight = 3.0 * pow(abs(dot(h, grad)), mix(10.0, 100.0, loc1.y));
 
 	// Diffuser highlight (opposite direction, softer)
+	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 1.0));
 	vec3 h_diff = normalize(l_diff + eye);
-	float diffSpec = pow(abs(dot(h_diff, n.xyz)), mix(1.0, 10.0, loc1.y));
-	float diffHighlight = 0.8 * diffSpec;
+	float diffHighlight = pow(abs(dot(h_diff, grad)), mix(1.0, 10.0, loc1.y));
 )GLSHDR";
 
 inline constexpr const char* VOL_COMPUTED_GM_LOOKUP  = R"GLSHDR(
 	//VOL_COMPUTED_GM_LOOKUP
-	v.y = p.y;
+	v.y = gradMag;
 )GLSHDR";
 
 inline constexpr const char* VOL_COMPUTED_GM_NOUSE  = R"GLSHDR(
@@ -406,18 +369,18 @@ inline constexpr const char* VOL_COMPUTED_GM_INVALIDATE  = R"GLSHDR(
 
 inline constexpr const char* VOL_TEXTURE_GM_LOOKUP  = R"GLSHDR(
 	//VOL_TEXTURE_GM_LOOKUP
-	v.y = texture(tex1, t.stp).x;
+	v.y = texture(tex1, texCoord).x;
 )GLSHDR";
 
 inline constexpr const char* VOL_DATA_4D_INTENSITY_DELTA  = R"GLSHDR(
 	//VOL_DATA_4D_INTENSITY_DELTA
-	float v4d = v.x - texture(tex10, t.stp).x;
+	float v4d = v.x - texture(tex10, texCoord).x;
 )GLSHDR";
 
 inline constexpr const char* VOL_DATA_4D_SPEED  = R"GLSHDR(
 	//VOL_DATA_4D_SPEED
-	float grad_t = v.x - texture(tex10, t.stp).x;
-	vec3 grad_s = n.xyz * loc5.xyz;
+	float grad_t = v.x - texture(tex10, texCoord).x;
+	vec3 grad_s = grad * loc5.xyz;
 	float denom = dot(grad_s, grad_s) + 1e-4;
 	grad_s = -grad_s * grad_t / denom;
 	float v4d = length(grad_s);
@@ -523,7 +486,7 @@ inline constexpr const char* VOL_COLORMAP_CALC0  = R"GLSHDR(
 
 inline constexpr const char* VOL_COLORMAP_DIFF_CALC0  = R"GLSHDR(
 		//VOL_COLORMAP_DIFF_CALC0
-		rb.rgb = clamp(n.xyz*loc6.w, -1.0, 1.0) + vec3(1.0);
+		rb.rgb = clamp(grad*loc6.w, -1.0, 1.0) + vec3(1.0);
 )GLSHDR";
 
 //primary-secondary
@@ -603,19 +566,19 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU0  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU1  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z
-		vec4 tt = matrix2 * t;
+		vec4 tt = matrix2 * vec4(texCoord, 1.0);
 		float valu = (tt.z-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU2  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Y
-		vec4 tt = matrix2 * t;
+		vec4 tt = matrix2 * vec4(texCoord, 1.0);
 		float valu = (tt.y-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU3  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_X
-		vec4 tt = matrix2 * t;
+		vec4 tt = matrix2 * vec4(texCoord, 1.0);
 		float valu = (tt.x-loc6.x)/loc6.z;
 )GLSHDR";
 
@@ -632,7 +595,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU5  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU6  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU6
-		float valu = dot(clamp(n.xyz, -1.0, 1.0), eye.xyz/*vec3(1.0, 1.0, 0.0)*/);
+		float valu = dot(clamp(grad, -1.0, 1.0), view.xyz/*vec3(1.0, 1.0, 0.0)*/);
 		valu = valu + 1.0;
 		valu = (valu-loc6.x)/loc6.z;
 )GLSHDR";
@@ -736,24 +699,24 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  
 
 inline constexpr const char* VOL_SHADING_OUTPUT  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT
-	c.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
+	c.xyz *= (diffuse + loc1.x * (diffHighlight + keyHighlight)) / (1.0 + 2.0 * loc1.x);
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL
-	sel.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
+	sel.xyz *= (diffuse + loc1.x * (diffHighlight + keyHighlight)) / (1.0 + 2.0 * loc1.x);
 	FragColor = sel*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL_MASK
-	sel.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
+	sel.xyz *= (diffuse + loc1.x * (diffHighlight + keyHighlight)) / (1.0 + 2.0 * loc1.x);
 	FragColor = sel*alpha*tf_val*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL_MASK_SOLID
-	sel.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
+	sel.xyz *= (diffuse + loc1.x * (diffHighlight + keyHighlight)) / (1.0 + 2.0 * loc1.x);
 	FragColor = vec4(sel.xyz, 1.0);
 )GLSHDR";
 
@@ -786,13 +749,13 @@ inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_NOMASK
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	FragColor = vec4(1.0-cmask.x)*c*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_NOMASK_SOLID  = R"GLSHDR(
 	//VOL_RASTER_BLEND_NOMASK_SOLID
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	FragColor = vec4(1.0-cmask.x)*c;
 )GLSHDR";
 
@@ -800,21 +763,21 @@ inline constexpr const char* VOL_RASTER_BLEND_NOMASK_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_NOMASK_DMAP
 	float prevz = texture(tex4, fcf).r;
 	float currz = gl_FragCoord.z;
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	float intpo = (vec4(1.0-cmask.x)*c*loc18.x).r;
 	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_MASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_MASK
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	FragColor = tf_val*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c*loc18.x;
 	//FragColor = cmask;
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND_MASK_SOLID  = R"GLSHDR(
 	//VOL_RASTER_BLEND_MASK_SOLID
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	FragColor = tf_val*cmask.x<loc16.w?vec4(0.0):vec4(cmask.x)*c;
 )GLSHDR";
 
@@ -822,7 +785,7 @@ inline constexpr const char* VOL_RASTER_BLEND_MASK_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_MASK_DMAP
 	float prevz = texture(tex4, fcf).r;
 	float currz = gl_FragCoord.z;
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	float intpo = (vec4(cmask.x)*c*loc18.x).r;
 	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 )GLSHDR";
@@ -830,7 +793,7 @@ inline constexpr const char* VOL_RASTER_BLEND_MASK_DMAP  = R"GLSHDR(
 #ifdef _WIN32
 inline constexpr const char* VOL_RASTER_BLEND_LABEL  = R"GLSHDR(
 	//VOL_RASTER_BLEND_LABEL
-	uint label = texture(tex3, t.stp).x; //get mask value
+	uint label = texture(tex3, texCoord).x; //get mask value
 	vec4 sel = vec4(0.2,
 					0.4,
 					0.4, 1.0);
@@ -860,13 +823,13 @@ inline constexpr const char* VOL_RASTER_BLEND_LABEL  = R"GLSHDR(
 
 inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_LABEL_MASK
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	if (cmask.x <= loc16.w)
 	{
 		FragColor = c*loc18.x;
 		return;
 	}
-	uint label = texture(tex3, t.stp).x; //get mask value
+	uint label = texture(tex3, texCoord).x; //get mask value
 	vec4 sel = vec4(0.1,
 					0.2,
 					0.2, 0.5);
@@ -897,7 +860,7 @@ inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
 #else
 inline constexpr const char* VOL_RASTER_BLEND_LABEL  = R"GLSHDR(
 	//VOL_RASTER_BLEND_LABEL
-	uint label = texture(tex3, t.stp).x; //get mask value
+	uint label = texture(tex3, texCoord).x; //get mask value
 	vec4 sel = vec4(0.2,
 					0.4,
 					0.4, 1.0);
@@ -927,13 +890,13 @@ inline constexpr const char* VOL_RASTER_BLEND_LABEL  = R"GLSHDR(
 
 inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
 	//VOL_RASTER_BLEND_LABEL_MASK
-	vec4 cmask = texture(tex2, t.stp); //get mask value
+	vec4 cmask = texture(tex2, texCoord); //get mask value
 	if (cmask.x <= loc16.w)
 	{
 		FragColor = c*loc18.x;
 		return;
 	}
-	uint label = texture(tex3, t.stp).x; //get mask value
+	uint label = texture(tex3, texCoord).x; //get mask value
 	vec4 sel = vec4(0.1,
 					0.2,
 					0.2, 0.5);
