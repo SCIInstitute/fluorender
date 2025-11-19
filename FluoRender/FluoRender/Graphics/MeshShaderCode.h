@@ -254,22 +254,22 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	vec3 eye = vec3(0.0, 0.0, 1.0);
 
 	// Key light direction
-	vec3 l_dir = normalize(vec3(loc1.z, loc1.w, 1.0));
+	vec3 l_dir = normalize(vec3(loc1.z, loc1.w, 0.2));
 	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 0.2));
 	if (dot(n, l_dir) < 0.0) n = -n;
 
 	// Lambert diffuse with frosted gradient modulation
 	float lambert = max(dot(n, l_dir), 0.0);
 	float front = smoothstep(0.3, 1.0, lambert);
-	float back  = 1.0 - smoothstep(0.0, 0.3, lambert);
+	float back  = 1.0 - smoothstep(0.0, 0.5, lambert);
 	float shade = 0.5*back + 0.2*(1.0-front) + front;
 	float frost = mix(0.7, 1.3, 1.0 - abs(dot(n, eye)));
 	vec3 diffuse = loc0.rgb * shade * frost;
 
 	// Key light highlight (sharp, white)
 	vec3 h = normalize(l_dir + eye);
-	float keySpec = pow(max(dot(h, n), 0.0), loc1.y * 20.0);
-	vec3 keyHighlight = vec3(1.0) * keySpec;
+	float keySpec = pow(abs(dot(h, n)), mix(1.0, 100.0, loc1.y));
+	vec3 keyHighlight = vec3(5.0) * keySpec;
 
 	// Diffuser highlight (opposite direction, softer)
 	vec3 h_diff = normalize(l_diff + eye);
@@ -277,7 +277,7 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	vec3 diffHighlight = vec3(0.8) * diffSpec;
 
 	// Combine
-	c.xyz *= diffuse + 0.0 * keyHighlight + loc1.x * diffHighlight;
+	c.xyz *= diffuse + loc1.x * keyHighlight + loc1.x * diffHighlight;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(
