@@ -837,11 +837,11 @@ void MovieMaker::InsertKey(int index)
 		keycode.l2_name = "shading enable";
 		flkeyB = new FlKeyBoolean(keycode, vd->GetShadingEnable());
 		glbin_interpolator.AddKey(flkeyB);
-		keycode.l2_name = "low shading";
-		flkey = new FlKeyDouble(keycode, vd->GetLowShading());
+		keycode.l2_name = "shading strength";
+		flkey = new FlKeyDouble(keycode, vd->GetShadingStrength());
 		glbin_interpolator.AddKey(flkey);
-		keycode.l2_name = "high shading";
-		flkey = new FlKeyDouble(keycode, vd->GetHiShading());
+		keycode.l2_name = "shading shine";
+		flkey = new FlKeyDouble(keycode, vd->GetShadingShine());
 		glbin_interpolator.AddKey(flkey);
 		//shadow
 		keycode.l2_name = "shadow enable";

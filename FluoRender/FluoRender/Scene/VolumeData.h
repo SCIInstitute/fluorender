@@ -232,14 +232,12 @@ public:
 	//shading
 	void SetShadingEnable(bool bVal);
 	bool GetShadingEnable();
-	void SetMaterial(double amb, double diff, double spec, double shine);
-	void GetMaterial(double& amb, double& diff, double& spec, double& shine);
-	void SetLowShading(double val);
-	void SetHiShading(double val);
-	double GetLowShading();
-	double GetHiShading();
-	double GetMlLowShading();
-	double GetMlHiShading();
+	void SetShadingStrength(double val);
+	double GetShadingStrength();
+	double GetMlShadingStrength();
+	void SetShadingShine(double val);
+	double GetShadingShine();
+	double GetMlShadingShine();
 
 	//shadow
 	void SetShadowEnable(bool bVal);
@@ -535,10 +533,8 @@ private:
 
 	//shading
 	bool m_shading_enable;
-	double m_mat_amb;
-	double m_mat_diff;
-	double m_mat_spec;
-	double m_mat_shine;
+	double m_shading_strength;
+	double m_shading_shine;
 
 	//shadow
 	bool m_shadow_enable;

@@ -262,14 +262,14 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	float lambert = max(dot(n, l_dir), 0.0);
 	float front = smoothstep(0.3, 1.0, lambert);
 	float back  = 1.0 - smoothstep(0.0, 0.5, lambert);
-	float shade = 0.5*back + 0.2*(1.0-front) + front;
-	float frost = mix(1.0, 3.0, 1.0 - abs(dot(n, eye)));
+	float shade = 0.5*back + 0.7*front + 0.3;
+	float frost = 1.0 + loc1.x * (1.0 - abs(dot(n, eye)));
 	vec3 diffuse = loc0.rgb * shade * frost;
 
 	// Key light highlight (sharp, white)
-	vec3 h = normalize(l_dir + eye);
-	float keySpec = pow(abs(dot(h, n)), mix(10.0, 100.0, loc1.y));
-	vec3 keyHighlight = vec3(5.0) * keySpec;
+	//vec3 h = normalize(l_dir + eye);
+	//float keySpec = pow(abs(dot(h, n)), mix(10.0, 100.0, loc1.y));
+	//vec3 keyHighlight = vec3(5.0) * keySpec;
 
 	// Diffuser highlight (opposite direction, softer)
 	vec3 h_diff = normalize(l_diff + eye);
@@ -277,7 +277,7 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	vec3 diffHighlight = vec3(0.8) * diffSpec;
 
 	// Combine
-	c.xyz *= diffuse + loc1.x * keyHighlight + loc1.x * diffHighlight;
+	c.xyz *= diffuse + loc1.x * diffHighlight;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(

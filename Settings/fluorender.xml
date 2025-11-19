@@ -450,8 +450,8 @@
         <alpha_enable>1</alpha_enable>
         <alpha>0.70588200000000001</alpha>
         <shading_enable>0</shading_enable>
-        <low_shading>1</low_shading>
-        <high_shading>10</high_shading>
+        <shading_strength>0.5</shading_strength>
+        <shading_shine>1</shading_shine>
         <shadow_enable>0</shadow_enable>
         <shadow_int>0.5</shadow_int>
         <sample_rate_enable>1</sample_rate_enable>

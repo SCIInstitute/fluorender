@@ -106,7 +106,7 @@ layout(location = 1) out vec2 FragDepth;
 inline constexpr const char* VOL_UNIFORMS_COMMON  = R"GLSHDR(
 // VOL_UNIFORMS_COMMON
 uniform vec4 loc0;//(lx, ly, lz, 0)
-uniform vec4 loc1;//(ka, kd, ks, ns)
+uniform vec4 loc1;//(strength, shine, dir_y, dir_x)
 uniform vec4 loc2;//(scalar_scale, gm_scale, left_thresh, right_thresh)
 uniform vec4 loc3;//(gamma, left_offset, right_offset, sw)
 uniform vec4 loc4;//(1/nx, 1/ny, 1/nz, 1/sample_rate)
@@ -248,8 +248,7 @@ bool vol_clip_func(vec4 t)
 
 inline constexpr const char* VOL_HEAD_LIT  = R"GLSHDR(
 	//VOL_HEAD_LIT
-	vec4 l = loc0; // {lx, ly, lz, 0}
-	vec4 k = vec4(0.3, 0.7, loc1.z, loc1.w); // {ka, kd, ks, ns}
+	vec3 eye = loc0.xyz; // {lx, ly, lz, 0}
 	vec4 n, w;
 )GLSHDR";
 
@@ -365,16 +364,29 @@ inline constexpr const char* VOL_BODY_SHADING  = R"GLSHDR(
 	//VOL_BODY_SHADING
 	n.xyz *= loc5.xyz;
 	n.xyz = normalize(n.xyz);
-	float lambert = dot(l.xyz, n.xyz); // calculate angle between light and normal. 
-	lambert = clamp(abs(lambert), 0.0, 1.0); // two-sided lighting, n.w = abs(cos(angle))  
-	n.w = lambert;
-	w = k; // w.x = weight*ka, w.y = weight*kd, w.z = weight*ks 
-	w.x = k.x - w.y; // w.x = ka - kd*weight 
-	w.x = w.x + k.y; // w.x = ka + kd - kd*weight 
-	n.z = pow(n.w, k.w); // n.z = abs(cos(angle))^ns 
-	n.z = isnan(n.z)? 1.0:n.z;
-	n.w = (n.w * w.y) + w.x; // n.w = abs(cos(angle))*kd+ka
-	n.z = w.z * n.z; // n.z = weight*ks*abs(cos(angle))^ns 
+
+	// Key light direction
+	vec3 l_dir = normalize(eye.xyz + vec3(loc1.z, loc1.w, 0.0));
+	vec3 l_diff = normalize(eye.xyz - vec3(loc1.z, loc1.w, 0.0));
+	if (dot(n.xyz, l_dir) < 0.0) n = -n;
+
+	// Lambert diffuse with frosted gradient modulation
+	float lambert = max(dot(n.xyz, l_dir), 0.0);
+	float front = smoothstep(0.3, 1.0, lambert);
+	float back  = 1.0 - smoothstep(0.0, 0.5, lambert);
+	float shade = 0.5*back + 0.7*front + 0.3;
+	float frost = 1.0 + loc1.x * (1.0 - abs(dot(n.xyz, eye)));
+	float diffuse = shade * frost;
+
+	// Key light highlight (sharp, white)
+	vec3 h = normalize(l_dir + eye);
+	float keySpec = pow(abs(dot(h, n.xyz)), mix(10.0, 100.0, loc1.y));
+	float keyHighlight = 5.0 * keySpec;
+
+	// Diffuser highlight (opposite direction, softer)
+	vec3 h_diff = normalize(l_diff + eye);
+	float diffSpec = pow(abs(dot(h_diff, n.xyz)), mix(1.0, 10.0, loc1.y));
+	float diffHighlight = 0.8 * diffSpec;
 )GLSHDR";
 
 inline constexpr const char* VOL_COMPUTED_GM_LOOKUP  = R"GLSHDR(
@@ -619,8 +631,8 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU5  = R"GLSHDR(
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU6  = R"GLSHDR(
-		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU5
-		float valu = dot(clamp(n.xyz, -1.0, 1.0), l.xyz/*vec3(1.0, 1.0, 0.0)*/);
+		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU6
+		float valu = dot(clamp(n.xyz, -1.0, 1.0), eye.xyz/*vec3(1.0, 1.0, 0.0)*/);
 		valu = valu + 1.0;
 		valu = (valu-loc6.x)/loc6.z;
 )GLSHDR";
@@ -722,54 +734,26 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  
 	}
 )GLSHDR";
 
-inline constexpr const char* VOL_TRANSFER_FUNCTION_DEPTHMAP  = R"GLSHDR(
-	//VOL_TRANSFER_FUNCTION_DEPTHMAP
-	vec4 c;
-	float tf_val = 0.0;
-	float alpha = 0.0;
-	v.x = loc2.x<0.0?(1.0+v.x*loc2.x):v.x*loc2.x;
-	if (v.x<loc2.z-loc3.w || (loc2.w<1.0 && v.x>loc2.w+loc3.w) )
-		c = vec4(0.0);
-	else
-	{
-		v.x *= v.x<loc2.z?(loc3.w-loc2.z+v.x)/loc3.w:(loc2.w<1.0 && v.x>loc2.w?(loc3.w-v.x+loc2.w)/loc3.w:1.0);
-		float gmf = 5.0*(v.y-loc17.x)*(loc17.z-loc17.y)/loc17.z/(loc17.y-loc17.x);
-		v.x *= v.y<loc17.x?v.y/loc17.x:1.0+gmf*gmf;
-		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
-			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
-		alpha = pow(tf_val, loc18.y);
-		c = vec4(vec3(pa*tf_val), alpha);
-	}
+inline constexpr const char* VOL_SHADING_OUTPUT  = R"GLSHDR(
+	//VOL_SHADING_OUTPUT
+	c.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
 )GLSHDR";
 
-inline constexpr const char* VOL_COLOR_OUTPUT  = R"GLSHDR(
-	//VOL_COLOR_OUTPUT
-	float shd = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
-		((loc1.x-1.0)*lambert+(2.0-loc1.x)*(n.w+n.z));
-	c.xyz *= loc1.y>0.0?shd:1.0;
-)GLSHDR";
-
-inline constexpr const char* VOL_COLOR_OUTPUT_LABEL  = R"GLSHDR(
-	//VOL_COLOR_OUTPUT_LABEL
-	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
-		(n.w+n.z);
-	sel.xyz *= loc1.y>0.0?shad:1.0;
+inline constexpr const char* VOL_SHADING_OUTPUT_LABEL  = R"GLSHDR(
+	//VOL_SHADING_OUTPUT_LABEL
+	sel.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
 	FragColor = sel*loc18.x;
 )GLSHDR";
 
-inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK  = R"GLSHDR(
-	//VOL_COLOR_OUTPUT_LABEL_MASK
-	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
-		(n.w+n.z);
-	sel.xyz *= loc1.y>0.0?shad:1.0;
+inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK  = R"GLSHDR(
+	//VOL_SHADING_OUTPUT_LABEL_MASK
+	sel.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
 	FragColor = sel*alpha*tf_val*loc18.x;
 )GLSHDR";
 
-inline constexpr const char* VOL_COLOR_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
-	//VOL_COLOR_OUTPUT_LABEL_MASK_SOLID
-	float shad = loc1.x < 1.0 ? (loc1.x*(n.w+n.z)+1.0-loc1.x) :
-		(n.w+n.z);
-	sel.xyz *= loc1.y>0.0?shad:1.0;
+inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
+	//VOL_SHADING_OUTPUT_LABEL_MASK_SOLID
+	sel.xyz *= diffuse + loc1.x * (diffHighlight + keyHighlight);
 	FragColor = vec4(sel.xyz, 1.0);
 )GLSHDR";
 

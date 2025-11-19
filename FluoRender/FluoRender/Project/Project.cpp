@@ -349,14 +349,12 @@ void Project::Open(const std::wstring& filename)
 							vd->SetAlpha(dval);
 
 						//shading
-						double amb, diff, spec, shine;
-						if (fconfig->Read("ambient", &amb) &&
-							fconfig->Read("diffuse", &diff) &&
-							fconfig->Read("specular", &spec) &&
-							fconfig->Read("shininess", &shine))
-							vd->SetMaterial(amb, diff, spec, shine);
 						if (fconfig->Read("shading", &bval))
 							vd->SetShadingEnable(bval);
+						if (fconfig->Read("shading_strength", &dval))
+							vd->SetShadingStrength(dval);
+						if (fconfig->Read("shading_shine", &dval))
+							vd->SetShadingShine(dval);
 						if (fconfig->Read("samplerate", &dval))
 						{
 							if (l_major < 2)
@@ -1389,13 +1387,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("mask_color_set", vd->GetMaskColorSet());
 			fconfig->Write("enable_alpha", vd->GetAlphaEnable());
 			fconfig->Write("alpha", vd->GetAlpha());
-			double amb, diff, spec, shine;
-			vd->GetMaterial(amb, diff, spec, shine);
-			fconfig->Write("ambient", amb);
-			fconfig->Write("diffuse", diff);
-			fconfig->Write("specular", spec);
-			fconfig->Write("shininess", shine);
 			fconfig->Write("shading", vd->GetShadingEnable());
+			fconfig->Write("shading_strength", vd->GetShadingStrength());
+			fconfig->Write("shading_shine", vd->GetShadingShine());
 			fconfig->Write("samplerate", vd->GetSampleRate());
 
 			//resolution scale

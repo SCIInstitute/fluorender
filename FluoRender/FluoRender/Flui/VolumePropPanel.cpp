@@ -324,36 +324,36 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m2->Add(m_boundary_link_tb, 0, wxALIGN_CENTER, 0);
 	m_boundary_link_tb->Realize();
 	//shading
-	m_low_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
+	m_shading_strength_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_low_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_shading_strength_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	//highlight
 	m_shade_st = new wxFadeButton(this, wxID_ANY, "Shading",
 		wxDefaultPosition, bts);
-	m_hi_shading_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
+	m_shading_shine_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_hi_shading_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_shading_shine_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts3, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shade_st->SetFontBold();
 	m_shade_st->SetTintColor(wxColor(150, 180, 255));
-	m_low_shading_sldr->SetHistoryIndicator(m_shade_st);
+	m_shading_strength_sldr->SetHistoryIndicator(m_shade_st);
 	//bind events
 	m_shade_st->Bind(wxEVT_BUTTON, &VolumePropPanel::OnShadingMF, this);
-	m_low_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnLowShadingChange, this);
-	m_low_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnLowShadingText, this);
-	m_hi_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnHiShadingChange, this);
-	m_hi_shading_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnHiShadingText, this);
+	m_shading_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadingShineChange, this);
+	m_shading_strength_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadingShineText, this);
+	m_shading_shine_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadingStrengthChange, this);
+	m_shading_shine_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadingStrengthText, this);
 	m_shade_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadingChk, this);
 	//add to sizer
 	sizer_m3->Add(m_shade_st, 0, wxALIGN_CENTER);
 	sizer_m3->Add(5, 5);
 	sizer_m3->Add(m_shade_chk, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_low_shading_text, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_low_shading_sldr, 1, wxEXPAND);
-	sizer_m3->Add(m_hi_shading_text, 0, wxALIGN_CENTER);
-	sizer_m3->Add(m_hi_shading_sldr, 1, wxEXPAND);
+	sizer_m3->Add(m_shading_strength_text, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_shading_strength_sldr, 1, wxEXPAND);
+	sizer_m3->Add(m_shading_shine_text, 0, wxALIGN_CENTER);
+	sizer_m3->Add(m_shading_shine_sldr, 1, wxEXPAND);
 	//shadow
 	m_shadow_st = new wxFadeButton(this, wxID_ANY, "Shadow",
 		wxDefaultPosition, bts);
@@ -634,8 +634,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	glbin.add_undo_control(m_sample_sldr);
 	glbin.add_undo_control(m_thresh_sldr);
 	glbin.add_undo_control(m_boundary_sldr);
-	glbin.add_undo_control(m_hi_shading_sldr);
-	glbin.add_undo_control(m_low_shading_sldr);
+	glbin.add_undo_control(m_shading_shine_sldr);
+	glbin.add_undo_control(m_shading_strength_sldr);
 	glbin.add_undo_control(m_shadow_sldr);
 	glbin.add_undo_control(m_shadow_dir_sldr);
 	glbin.add_undo_control(m_colormap_sldr);
@@ -675,8 +675,8 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_sample_sldr);
 	glbin.del_undo_control(m_thresh_sldr);
 	glbin.del_undo_control(m_boundary_sldr);
-	glbin.del_undo_control(m_hi_shading_sldr);
-	glbin.del_undo_control(m_low_shading_sldr);
+	glbin.del_undo_control(m_shading_shine_sldr);
+	glbin.del_undo_control(m_shading_strength_sldr);
 	glbin.del_undo_control(m_shadow_sldr);
 	glbin.del_undo_control(m_shadow_dir_sldr);
 	glbin.del_undo_control(m_colormap_sldr);
@@ -1062,26 +1062,26 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//shadings
 	if (update_shading)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_low_shading_text->GetValidator()))
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_strength_text->GetValidator()))
 			vald_fp->SetRange(0.0, 10.0);
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_hi_shading_text->GetValidator()))
+		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_shine_text->GetValidator()))
 			vald_fp->SetRange(0.0, 100.0);
-		dval = m_vd->GetLowShading();
+		dval = m_vd->GetShadingStrength();
 		str = wxString::Format("%.2f", dval);
-		m_low_shading_sldr->ChangeValue(dval * 100.0);
-		m_low_shading_text->ChangeValue(str);
-		dval = m_vd->GetHiShading();
+		m_shading_strength_sldr->ChangeValue(dval * 100.0);
+		m_shading_strength_text->ChangeValue(str);
+		dval = m_vd->GetShadingShine();
 		str = wxString::Format("%.2f", dval);
-		m_hi_shading_sldr->ChangeValue(dval * 10.0);
-		m_hi_shading_text->ChangeValue(str);
+		m_shading_shine_sldr->ChangeValue(dval * 100.0);
+		m_shading_shine_text->ChangeValue(str);
 		bval = m_vd->GetShadingEnable();
 		m_shade_chk->SetValue(bval);
-		if (m_low_shading_sldr->IsEnabled() != bval)
+		if (m_shading_strength_sldr->IsEnabled() != bval)
 		{
-			m_low_shading_sldr->Enable(bval);
-			m_low_shading_text->Enable(bval);
-			m_hi_shading_sldr->Enable(bval);
-			m_hi_shading_text->Enable(bval);
+			m_shading_strength_sldr->Enable(bval);
+			m_shading_strength_text->Enable(bval);
+			m_shading_shine_sldr->Enable(bval);
+			m_shading_shine_text->Enable(bval);
 		}
 	}
 	if (update_shading || update_tips)
@@ -1489,8 +1489,8 @@ void VolumePropPanel::SaveMl()
 	val.push_back(float(m_vd->GetHighOffset()));
 	val.push_back(float(m_vd->GetLeftThresh()));
 	val.push_back(float(m_vd->GetRightThresh()));
-	val.push_back(float(m_vd->GetLowShading()));
-	val.push_back(float(m_vd->GetHiShading()));
+	val.push_back(float(m_vd->GetShadingStrength()));
+	val.push_back(float(m_vd->GetShadingShine()));
 	val.push_back(float(m_vd->GetAlpha()));
 	val.push_back(float(m_vd->GetSampleRate()));
 	val.push_back(float(m_vd->GetLuminance()));
@@ -1534,8 +1534,8 @@ void VolumePropPanel::ClearUndo()
 	m_minmax_sldr->Clear();
 	m_luminance_sldr->Clear();
 	m_alpha_sldr->Clear();
-	m_hi_shading_sldr->Clear();
-	m_low_shading_sldr->Clear();
+	m_shading_shine_sldr->Clear();
+	m_shading_strength_sldr->Clear();
 	m_boundary_sldr->Clear();
 	m_thresh_sldr->Clear();
 	m_shadow_sldr->Clear();
@@ -1780,28 +1780,28 @@ void VolumePropPanel::SetAlpha(double val, bool notify)
 		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanel::SetLowShading(double val, bool notify)
+void VolumePropPanel::SetShadingStrength(double val, bool notify)
 {
 	if (!m_vd)
 		return;
-	if (m_vd->GetLowShading() == val)
+	if (m_vd->GetShadingStrength() == val)
 		return;
 
-	m_vd->SetLowShading(val);
+	m_vd->SetShadingStrength(val);
 	if (notify)
 		FluoRefresh(0, { gstShading }, { glbin_current.GetViewId() });
 	else
 		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanel::SetHiShading(double val, bool notify)
+void VolumePropPanel::SetShadingShine(double val, bool notify)
 {
 	if (!m_vd)
 		return;
-	if (m_vd->GetHiShading() == val)
+	if (m_vd->GetShadingShine() == val)
 		return;
 
-	m_vd->SetHiShading(val);
+	m_vd->SetShadingShine(val);
 	if (notify)
 		FluoRefresh(0, { gstShading }, { glbin_current.GetViewId() });
 	else
@@ -1951,25 +1951,25 @@ void VolumePropPanel::SyncAlpha(double val)
 	FluoRefresh(1, { gstAlpha }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanel::SyncLowShading(double val)
+void VolumePropPanel::SyncShadingStrength(double val)
 {
 	if (!m_group)
 		return;
-	if (m_group->GetLowShading() == val)
+	if (m_group->GetShadingStrength() == val)
 		return;
 
-	m_group->SetLowShading(val);
+	m_group->SetShadingStrength(val);
 	FluoRefresh(1, { gstShading }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanel::SyncHiShading(double val)
+void VolumePropPanel::SyncShadingShine(double val)
 {
 	if (!m_group)
 		return;
-	if (m_group->GetHiShading() == val)
+	if (m_group->GetShadingShine() == val)
 		return;
 
-	m_group->SetHiShading(val);
+	m_group->SetShadingShine(val);
 	FluoRefresh(1, { gstShading }, { glbin_current.GetViewId() });
 }
 
@@ -2335,25 +2335,23 @@ void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
 	{
 	case 0:
 		{
-			double amb, diff, spec, shine;
-			m_vd->GetMaterial(amb, diff, spec, shine);
-			SyncLowShading(amb);
-			SyncHiShading(shine);
+			SyncShadingStrength(m_vd->GetShadingStrength());
+			SyncShadingShine(m_vd->GetShadingShine());
 		}
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_low_shading_sldr);
+		m_frame->SetFocusVRenderViews(m_shading_strength_sldr);
 		break;
 	case 2:
-		SetLowShading(glbin_vol_def.m_low_shading, true);
-		SetHiShading(glbin_vol_def.m_high_shading, true);
+		SetShadingStrength(glbin_vol_def.m_shading_strength, true);
+		SetShadingShine(glbin_vol_def.m_shading_shine, true);
 		break;
 	case 3:
-		SetLowShading(m_vd->GetMlLowShading(), true);
-		SetHiShading(m_vd->GetMlHiShading(), true);
+		SetShadingStrength(m_vd->GetMlShadingStrength(), true);
+		SetShadingShine(m_vd->GetMlShadingShine(), true);
 		break;
 	case 4:
-		m_low_shading_sldr->Undo();
+		m_shading_strength_sldr->Undo();
 		break;
 	case 5:
 		EnableShading(!m_vd->GetShadingEnable());
@@ -2362,60 +2360,60 @@ void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
 }
 
 //hi shading
-void VolumePropPanel::OnHiShadingChange(wxScrollEvent& event)
+void VolumePropPanel::OnShadingStrengthChange(wxScrollEvent& event)
 {
-	double val = m_hi_shading_sldr->GetValue() / 10.0;
+	double val = m_shading_shine_sldr->GetValue() / 10.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_hi_shading_text->GetValue())
-		m_hi_shading_text->ChangeValue(str);
+	if (str != m_shading_shine_text->GetValue())
+		m_shading_shine_text->ChangeValue(str);
 
 	//set high shading value
 	if (m_sync_group)
-		SyncHiShading(val);
+		SyncShadingShine(val);
 	else
-		SetHiShading(val, false);
+		SetShadingShine(val, false);
 }
 
-void VolumePropPanel::OnHiShadingText(wxCommandEvent& event)
+void VolumePropPanel::OnShadingStrengthText(wxCommandEvent& event)
 {
-	wxString str = m_hi_shading_text->GetValue();
+	wxString str = m_shading_shine_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_hi_shading_sldr->ChangeValue(std::round(val * 10));
+	m_shading_shine_sldr->ChangeValue(std::round(val * 10));
 
 	//set high shading value
 	if (m_sync_group)
-		SyncHiShading(val);
+		SyncShadingShine(val);
 	else
-		SetHiShading(val, false);
+		SetShadingShine(val, false);
 }
 
-void VolumePropPanel::OnLowShadingChange(wxScrollEvent& event)
+void VolumePropPanel::OnShadingShineChange(wxScrollEvent& event)
 {
-	double val = m_low_shading_sldr->GetValue() / 100.0;
+	double val = m_shading_strength_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	if (str != m_low_shading_text->GetValue())
-		m_low_shading_text->ChangeValue(str);
+	if (str != m_shading_strength_text->GetValue())
+		m_shading_strength_text->ChangeValue(str);
 
 	//set low shading value
 	if (m_sync_group)
-		SyncLowShading(val);
+		SyncShadingStrength(val);
 	else
-		SetLowShading(val, false);
+		SetShadingStrength(val, false);
 }
 
-void VolumePropPanel::OnLowShadingText(wxCommandEvent& event)
+void VolumePropPanel::OnShadingShineText(wxCommandEvent& event)
 {
-	wxString str = m_low_shading_text->GetValue();
+	wxString str = m_shading_strength_text->GetValue();
 	double val = 0.0;
 	str.ToDouble(&val);
-	m_low_shading_sldr->ChangeValue(std::round(val * 100));
+	m_shading_strength_sldr->ChangeValue(std::round(val * 100));
 
 	//set low shading value
 	if (m_sync_group)
-		SyncLowShading(val);
+		SyncShadingStrength(val);
 	else
-		SetLowShading(val, false);
+		SetShadingStrength(val, false);
 }
 
 void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
@@ -3165,9 +3163,9 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetAlpha(m_vd->GetAlpha());
 		//shading
 		m_group->SetShadingEnable(m_vd->GetShadingEnable());
-		m_group->SetLowShading(m_vd->GetLowShading());
+		m_group->SetShadingStrength(m_vd->GetShadingStrength());
 		//high shading
-		m_group->SetHiShading(m_vd->GetHiShading());
+		m_group->SetShadingShine(m_vd->GetShadingShine());
 		//boundary
 		m_group->SetBoundaryEnable(m_vd->GetBoundaryEnable());
 		m_group->SetBoundaryLow(m_vd->GetBoundaryLow());

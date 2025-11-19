@@ -494,8 +494,8 @@ public:
 	void SetAlphaEnable(bool);
 	void SetAlpha(double, bool set_this = true);
 	void SetShadingEnable(bool);
-	void SetLowShading(double);
-	void SetHiShading(double);
+	void SetShadingStrength(double);
+	void SetShadingShine(double);
 	void SetShadowEnable(bool);
 	void SetShadowIntensity(double);
 	void SetSampleRateEnable(bool);

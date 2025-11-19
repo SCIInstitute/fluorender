@@ -115,7 +115,10 @@ namespace flvr
 		//shading
 		void set_shading(bool shading) { shading_ = shading; }
 		bool get_shading() { return shading_; }
-		void set_material(double amb, double diff, double spec, double shine) { ambient_ = amb; diffuse_ = amb+0.7; diffuse_ = diffuse_>1.0?1.0:diffuse_; specular_ = spec; shine_ = shine; }
+		void set_shading_strength(double val) { shading_strength_ = val; }
+		double get_shading_strength() { return shading_strength_; }
+		void set_shading_shine(double val) { shading_shine_ = val; }
+		double get_shading_shine() { return shading_shine_; }
 
 		//colormap mode
 		void set_colormap_inv(double val) { colormap_inv_ = val; }
@@ -253,7 +256,8 @@ namespace flvr
 		double luminance_;
 		//shading
 		bool shading_;
-		double ambient_, diffuse_, specular_, shine_;
+		double shading_strength_;
+		double shading_shine_;
 		//colormap mode
 		double colormap_inv_;
 		ColorMode color_mode_;//0-normal; 1-rainbow; 2-depth

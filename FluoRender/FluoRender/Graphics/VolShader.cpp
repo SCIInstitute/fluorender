@@ -237,7 +237,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			break;
 		}
 
-		z << VOL_COLOR_OUTPUT;
+		z << VOL_SHADING_OUTPUT;
 	}
 	else // No shading
 	{
@@ -312,9 +312,6 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 					z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
 				}
 				break;
-			//case ColorMode::Depth://depth map
-			//	z << VOL_TRANSFER_FUNCTION_DEPTHMAP;
-			//	break;
 			}
 		}
 	}
@@ -352,14 +349,14 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			break;
 		case 3:
 			z << VOL_RASTER_BLEND_LABEL;
-			z << VOL_COLOR_OUTPUT_LABEL;
+			z << VOL_SHADING_OUTPUT_LABEL;
 			break;
 		case 4:
 			z << VOL_RASTER_BLEND_LABEL_MASK;
 			if (p.solid)
-				z << VOL_COLOR_OUTPUT_LABEL_MASK_SOLID;
+				z << VOL_SHADING_OUTPUT_LABEL_MASK_SOLID;
 			else
-				z << VOL_COLOR_OUTPUT_LABEL_MASK;
+				z << VOL_SHADING_OUTPUT_LABEL_MASK;
 			break;
 		}
 	}

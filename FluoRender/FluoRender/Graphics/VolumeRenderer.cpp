@@ -74,10 +74,8 @@ VolumeRenderer::VolumeRenderer(
 	alpha_(1.0),
 	//shading
 	shading_(false),
-	ambient_(1.0),
-	diffuse_(1.0),
-	specular_(1.0),
-	shine_(10.0),
+	shading_strength_(0.5),
+	shading_shine_(1.0),
 	//colormap mode
 	colormap_inv_(1.0),
 	color_mode_(ColorMode::SingleColor),
@@ -137,10 +135,8 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	alpha_(copy.alpha_),
 	//shading
 	shading_(copy.shading_),
-	ambient_(copy.ambient_),
-	diffuse_(copy.diffuse_),
-	specular_(copy.specular_),
-	shine_(copy.shine_),
+	shading_strength_(copy.shading_strength_),
+	shading_shine_(copy.shading_shine_),
 	//colormap mode
 	colormap_inv_(copy.colormap_inv_),
 	color_mode_(copy.color_mode_),
@@ -501,13 +497,19 @@ void VolumeRenderer::draw_volume(
 	//set up shading
 	//set the light
 	fluo::Vector light = view_ray.direction();
-	light -= fluo::Vector(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x, 0.0);
+	//light -= fluo::Vector(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x, 0.0);
 	light.safe_normalize();
-	shader->setLocalParam(0, light.x(), light.y(), light.z(), 0.0);
-	shader->setLocalParam(1, 2.0 - ambient_, diffuse_, specular_, shine_);
+	shader->setLocalParam(0,
+		light.x(), light.y(), light.z(), 0.0);
+	shader->setLocalParam(1,
+		shading_strength_, shading_shine_,
+		glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
 	//transfer function
-	shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
-	shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
+	shader->setLocalParam(2,
+		inv_ ? -scalar_scale_ : scalar_scale_,
+		gm_scale_, lo_thresh_, hi_thresh_);
+	shader->setLocalParam(3,
+		1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
 
 	//spacings
 	double spcx = 1, spcy = 1, spcz = 1;

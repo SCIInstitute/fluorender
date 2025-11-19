@@ -66,8 +66,8 @@ VolumeDataDefault::VolumeDataDefault()
 
 	//shading
 	m_shading_enable = false;
-	m_low_shading = 1.0;
-	m_high_shading = 10.0;
+	m_shading_strength = 0.5;
+	m_shading_shine = 1.0;
 
 	//shadow
 	m_shadow_enable = false;
@@ -144,8 +144,8 @@ void VolumeDataDefault::Read()
 	f->Read(gstAlpha, &m_alpha, 1.0);
 
 	f->Read(gstShadingEnable, &m_shading_enable, false);
-	f->Read(gstLowShading, &m_low_shading, 1.0);
-	f->Read(gstHighShading, &m_high_shading, 10.0);
+	f->Read(gstShadingStrength, &m_shading_strength, 1.0);
+	f->Read(gstShadingShine, &m_shading_shine, 10.0);
 
 	f->Read(gstShadowEnable, &m_shadow_enable, false);
 	f->Read(gstShadowInt, &m_shadow_intensity, 0.0);
@@ -213,8 +213,8 @@ void VolumeDataDefault::Save()
 	f->Write(gstAlpha, m_alpha);
 
 	f->Write(gstShadingEnable, m_shading_enable);
-	f->Write(gstLowShading, m_low_shading);
-	f->Write(gstHighShading, m_high_shading);
+	f->Write(gstShadingStrength, m_shading_strength);
+	f->Write(gstShadingShine, m_shading_shine);
 
 	f->Write(gstShadowEnable, m_shadow_enable);
 	f->Write(gstShadowInt, m_shadow_intensity);
@@ -274,8 +274,8 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_alpha = vd->GetAlpha();
 
 	m_shading_enable = vd->GetShadingEnable();
-	m_low_shading = vd->GetLowShading();
-	m_high_shading = vd->GetHiShading();
+	m_shading_strength = vd->GetShadingStrength();
+	m_shading_shine = vd->GetShadingShine();
 
 	m_shadow_enable = vd->GetShadingEnable();
 	m_shadow_intensity = vd->GetShadowIntensity();
@@ -339,8 +339,8 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 		vd->SetShadingEnable(m_shading_enable);
 	else
 		vd->SetShadingEnable(false);
-	vd->SetLowShading(m_low_shading);
-	vd->SetHiShading(m_high_shading);
+	vd->SetShadingStrength(m_shading_strength);
+	vd->SetShadingShine(m_shading_shine);
 
 	if (resz > 1)
 		vd->SetShadowEnable(m_shadow_enable);
@@ -401,8 +401,8 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetAlpha(v2->GetAlpha());
 
 	v1->SetShadingEnable(v2->GetShadingEnable());
-	v1->SetLowShading(v2->GetLowShading());
-	v1->SetHiShading(v2->GetHiShading());
+	v1->SetShadingStrength(v2->GetShadingStrength());
+	v1->SetShadingShine(v2->GetShadingShine());
 
 	v1->SetShadowEnable(v2->GetShadowEnable());
 	v1->SetShadowIntensity(v2->GetShadowIntensity());
@@ -476,8 +476,8 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 	g->SetAlpha(m_alpha);
 
 	g->SetShadingEnable(m_shading_enable);
-	g->SetLowShading(m_low_shading);
-	g->SetHiShading(m_high_shading);
+	g->SetShadingStrength(m_shading_strength);
+	g->SetShadingShine(m_shading_shine);
 
 	g->SetShadowEnable(m_shadow_enable);
 	g->SetShadowIntensity(m_shadow_intensity);

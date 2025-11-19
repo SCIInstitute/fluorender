@@ -103,10 +103,8 @@ VolumeData::VolumeData()
 
 	//shading
 	m_shading_enable = false;
-	m_mat_amb = 1.0;
-	m_mat_diff = 1.0;
-	m_mat_spec = 1.0;
-	m_mat_shine = 10;
+	m_shading_strength = 0.5;
+	m_shading_shine = 1.0;
 
 	//shadow
 	m_shadow_enable = false;
@@ -259,10 +257,8 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//shading
 	m_shading_enable = copy.m_shading_enable;
-	m_mat_amb = copy.m_mat_amb;
-	m_mat_diff = copy.m_mat_diff;
-	m_mat_spec = copy.m_mat_spec;
-	m_mat_shine = copy.m_mat_shine;
+	m_shading_strength = copy.m_shading_strength;
+	m_shading_shine = copy.m_shading_shine;
 
 	//shadow
 	m_shadow_enable = copy.m_shadow_enable;
@@ -469,8 +465,9 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
 		m_vr->set_texture(m_tex);
 		m_vr->set_sample_rate(m_sample_rate);
-		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 		m_vr->set_shading(true);
+		m_vr->set_shading_strength(m_shading_strength);
+		m_vr->set_shading_shine(m_shading_shine);
 		m_vr->set_scalar_scale(m_scalar_scale);
 		m_vr->set_gm_scale(m_scalar_scale);
 		m_vr->set_mode(m_render_mode);
@@ -644,8 +641,9 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
 	m_vr->set_texture(m_tex);
 	m_vr->set_sample_rate(m_sample_rate);
-	m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
 	m_vr->set_shading(true);
+	m_vr->set_shading_strength(m_shading_strength);
+	m_vr->set_shading_shine(m_shading_shine);
 	m_vr->set_scalar_scale(m_scalar_scale);
 	m_vr->set_gm_scale(m_scalar_scale);
 	m_vr->set_mode(m_render_mode);
@@ -2165,70 +2163,48 @@ bool VolumeData::GetShadingEnable()
 	return m_shading_enable;
 }
 
-void VolumeData::SetMaterial(double amb, double diff, double spec, double shine)
+void VolumeData::SetShadingStrength(double val)
 {
-	m_mat_amb = amb;
-	m_mat_diff = diff;
-	m_mat_spec = spec;
-	m_mat_shine = shine;
+	m_shading_strength = val;
 	if (m_vr)
-		m_vr->set_material(m_mat_amb, m_mat_diff, m_mat_spec, m_mat_shine);
+		m_vr->set_shading_strength(val);
 }
 
-void VolumeData::GetMaterial(double& amb, double& diff, double& spec, double& shine)
+double VolumeData::GetShadingStrength()
 {
-	amb = m_mat_amb;
-	diff = m_mat_diff;
-	spec = m_mat_spec;
-	shine = m_mat_shine;
+	return m_shading_strength;
 }
 
-void VolumeData::SetLowShading(double val)
-{
-	double amb, diff, spec, shine;
-	GetMaterial(amb, diff, spec, shine);
-	SetMaterial(val, diff, spec, shine);
-}
-
-void VolumeData::SetHiShading(double val)
-{
-	double amb, diff, spec, shine;
-	GetMaterial(amb, diff, spec, shine);
-	SetMaterial(amb, diff, spec, val);
-}
-
-double VolumeData::GetLowShading()
-{
-	double amb, diff, spec, shine;
-	GetMaterial(amb, diff, spec, shine);
-	return amb;
-}
-
-double VolumeData::GetMlLowShading()
+double VolumeData::GetMlShadingStrength()
 {
 	GetMlParams();
 
 	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("low_shading");
 	else
-		return glbin_vol_def.m_low_shading;
+		return glbin_vol_def.m_shading_strength;
 }
 
-double VolumeData::GetHiShading()
+void VolumeData::SetShadingShine(double val)
 {
-	double amb, diff, spec, shine;
-	GetMaterial(amb, diff, spec, shine);
-	return shine;
+	m_shading_shine = val;
+	if (m_vr)
+		m_vr->set_shading_shine(val);
 }
 
-double VolumeData::GetMlHiShading()
+double VolumeData::GetShadingShine()
+{
+	return m_shading_shine;
+}
+
+double VolumeData::GetMlShadingShine()
 {
 	GetMlParams();
 
 	if (m_ep && m_ep->getValid())
 		return m_ep->getParam("high_shading");
 	else
-		return glbin_vol_def.m_high_shading;
+		return glbin_vol_def.m_shading_shine;
 }
 
 //shadow
@@ -3443,11 +3419,10 @@ void VolumeData::ApplyMlVolProp()
 		{
 			//low shading
 			dval = std::max(0.0f, m_ep->getParam("low_shading"));
+			SetShadingStrength(dval);
 			//high shading
-			dval2 = std::max(0.0f, m_ep->getParam("high_shading"));
-			double amb, diff, spec, shine;
-			GetMaterial(amb, diff, spec, shine);
-			SetMaterial(dval, diff, spec, dval2);
+			dval = std::max(0.0f, m_ep->getParam("high_shading"));
+			SetShadingShine(dval);
 		}
 		//shadow
 		dval = m_ep->getParam("shadow_enable");

@@ -3188,10 +3188,10 @@ void RenderView::SetParams(double t)
 			vd->SetShadingEnable(bval);
 		keycode.l2_name = "low shading";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			vd->SetLowShading(dval);
+			vd->SetShadingStrength(dval);
 		keycode.l2_name = "high shading";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			vd->SetHiShading(dval);
+			vd->SetShadingShine(dval);
 		vc.insert(gstShading);
 		//shadow
 		keycode.l2_name = "shadow enable";
@@ -11605,23 +11605,23 @@ void RenderView::SetShadingEnable(bool shading)
 	}
 }
 
-void RenderView::SetLowShading(double val)
+void RenderView::SetShadingStrength(double val)
 {
 	for (auto it : m_vd_pop_list)
 	{
 		auto vd = it.lock();
 		if (vd)
-			vd->SetLowShading(val);
+			vd->SetShadingStrength(val);
 	}
 }
 
-void RenderView::SetHiShading(double val)
+void RenderView::SetShadingShine(double val)
 {
 	for (auto it : m_vd_pop_list)
 	{
 		auto vd = it.lock();
 		if (vd)
-			vd->SetHiShading(val);
+			vd->SetShadingShine(val);
 	}
 }
 

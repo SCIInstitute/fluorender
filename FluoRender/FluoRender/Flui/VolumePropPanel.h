@@ -145,10 +145,10 @@ private:
 	wxUndoableCheckBox* m_boundary_chk;
 	//shading
 	wxFadeButton* m_shade_st;
-	wxSingleSlider *m_hi_shading_sldr;
-	wxTextCtrl *m_hi_shading_text;
-	wxSingleSlider *m_low_shading_sldr;
-	wxTextCtrl *m_low_shading_text;
+	wxSingleSlider *m_shading_shine_sldr;
+	wxTextCtrl *m_shading_shine_text;
+	wxSingleSlider *m_shading_strength_sldr;
+	wxTextCtrl *m_shading_strength_text;
 	wxUndoableCheckBox* m_shade_chk;
 	//shadow
 	wxFadeButton* m_shadow_st;
@@ -215,8 +215,8 @@ private:
 	void SetSampleRate(double, bool);
 	void SetThresh(double, double, bool);
 	void SetBoundary(double, double, bool);
-	void SetLowShading(double, bool);
-	void SetHiShading(double, bool);
+	void SetShadingStrength(double, bool);
+	void SetShadingShine(double, bool);
 	void SetShadowInt(double, bool);
 	void SetShadowDir(double, bool);
 	void SetColormapVal(double, double, bool);
@@ -229,8 +229,8 @@ private:
 	void SyncSampleRate(double);
 	void SyncThresh(double, double);
 	void SyncBoundary(double, double);
-	void SyncLowShading(double);
-	void SyncHiShading(double);
+	void SyncShadingStrength(double);
+	void SyncShadingShine(double);
 	void SyncShadowInt(double);
 	void SyncColormapVal(double, double);
 
@@ -289,10 +289,10 @@ private:
 	void OnBoundaryChk(wxCommandEvent& event);
 	//
 	void OnShadingMF(wxCommandEvent& event);
-	void OnLowShadingChange(wxScrollEvent& event);
-	void OnLowShadingText(wxCommandEvent& event);
-	void OnHiShadingChange(wxScrollEvent& event);
-	void OnHiShadingText(wxCommandEvent& event);
+	void OnShadingShineChange(wxScrollEvent& event);
+	void OnShadingShineText(wxCommandEvent& event);
+	void OnShadingStrengthChange(wxScrollEvent& event);
+	void OnShadingStrengthText(wxCommandEvent& event);
 	void OnShadingChk(wxCommandEvent& event);
 	//
 	void OnShadowMF(wxCommandEvent& event);

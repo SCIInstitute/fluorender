@@ -1332,8 +1332,6 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 	vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
-	double amb, diff, spec, shine;
-	vd->GetMaterial(amb, diff, spec, shine);
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	unsigned int count = 1;
@@ -1515,8 +1513,6 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 	vd->GetSpacings(spcx, spcy, spcz);
 	int nx, ny, nz;
 	vd->GetResolution(nx, ny, nz);
-	double amb, diff, spec, shine;
-	vd->GetMaterial(amb, diff, spec, shine);
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//red volume

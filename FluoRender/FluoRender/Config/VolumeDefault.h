@@ -77,8 +77,8 @@ public:
 
 	//shading
 	bool m_shading_enable;
-	double m_low_shading;
-	double m_high_shading;
+	double m_shading_strength;
+	double m_shading_shine;
 
 	//shadow
 	bool m_shadow_enable;

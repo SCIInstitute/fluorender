@@ -490,6 +490,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	if (render_mode == RenderMode::Standard ||
 		render_mode == RenderMode::Overlay)
 		rate_factor = 1.0 / rate;
+	fluo::Vector light = view_ray.direction();
+	//light -= fluo::Vector(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x, 0.0);
+	light.safe_normalize();
 
 	for (size_t i = 0; i < size.size(); i++)
 	{
@@ -579,13 +582,11 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParamMatrix(2, matrix);
 
 			// set shader parameters
-			light_pos_ = view_ray.direction();
-			light_pos_.safe_normalize();
-			shader->setLocalParam(0, light_pos_.x(), light_pos_.y(), light_pos_.z(), vr_list_[tn]->alpha_);
-			shader->setLocalParam(1, 2.0 - vr_list_[tn]->ambient_,
-				vr_list_[tn]->shading_ ? vr_list_[tn]->diffuse_ : 0.0,
-				vr_list_[tn]->specular_,
-				vr_list_[tn]->shine_);
+			shader->setLocalParam(0,
+				light.x(), light.y(), light.z(), 0.0);
+			shader->setLocalParam(1,
+				vr_list_[tn]->shading_strength_, vr_list_[tn]->shading_shine_,
+				glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
 			//transfer function
 			shader->setLocalParam(2,
 				vr_list_[tn]->inv_ ?
@@ -594,7 +595,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->gm_scale_,
 				vr_list_[tn]->lo_thresh_,
 				vr_list_[tn]->hi_thresh_);
-			shader->setLocalParam(3, 1.0 / vr_list_[tn]->gamma3d_,
+			shader->setLocalParam(3,
+				1.0 / vr_list_[tn]->gamma3d_,
 				vr_list_[tn]->lo_offset_,
 				vr_list_[tn]->hi_offset_,
 				vr_list_[tn]->sw_);

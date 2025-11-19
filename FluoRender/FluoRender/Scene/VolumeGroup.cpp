@@ -50,10 +50,8 @@ VolumeGroup::VolumeGroup()
 	m_sw = 0.0;
 	m_luminance = 1.0;
 	m_alpha = 1.0;
-	m_mat_amb = 1.0;
-	m_mat_diff = 1.0;
-	m_mat_spec = 1.0;
-	m_mat_shine = 10;
+	m_shading_strength = 0.5;
+	m_shading_shine = 1.0;
 	m_shadow_intensity = 0.0;
 	m_sample_rate = 2.0;
 	m_colormap_low = 0.0;
@@ -376,34 +374,34 @@ void VolumeGroup::SetShadingEnable(bool shading)
 	}
 }
 
-void VolumeGroup::SetLowShading(double val)
+void VolumeGroup::SetShadingStrength(double val)
 {
-	m_mat_amb = val;
+	m_shading_strength = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
-			it->SetLowShading(val);
+			it->SetShadingStrength(val);
 	}
 }
 
-double VolumeGroup::GetLowShading()
+double VolumeGroup::GetShadingStrength()
 {
-	return m_mat_amb;
+	return m_shading_strength;
 }
 
-void VolumeGroup::SetHiShading(double val)
+void VolumeGroup::SetShadingShine(double val)
 {
-	m_mat_shine = val;
+	m_shading_shine = val;
 	for (auto& it : m_vd_list)
 	{
 		if (it)
-			it->SetHiShading(val);
+			it->SetShadingShine(val);
 	}
 }
 
-double VolumeGroup::GetHiShading()
+double VolumeGroup::GetShadingShine()
 {
-	return m_mat_shine;
+	return m_shading_shine;
 }
 
 void VolumeGroup::SetShadowEnable(bool bval)

@@ -124,9 +124,6 @@ namespace flvr
 		bool interactive_mode_;
 		size_t num_slices_;
 
-		//light position
-		fluo::Vector light_pos_;
-
 		//vertex array for rendering slices
 		std::shared_ptr<VertexArray> va_slices_;
 		void draw_polygons_vol(
