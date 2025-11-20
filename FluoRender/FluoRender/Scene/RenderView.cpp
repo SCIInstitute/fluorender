@@ -7206,7 +7206,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		img_shader->bind();
 
 		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
-		img_shader->setLocalParam(1, shadow_darkness, 4.0, 0.0, 0.0);
+		img_shader->setLocalParam(1, std::sqrt(shadow_darkness), 4.0, 0.0, 0.0);
 		//2d adjustment
 
 		DrawViewQuad();
@@ -7270,7 +7270,7 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	img_shader->bind();
 
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, std::max(m_scale_factor, 1.0), 0.0);
-	img_shader->setLocalParam(1, darkness, 4.0, 0.0, 0.0);
+	img_shader->setLocalParam(1, std::sqrt(darkness), 4.0, 0.0, 0.0);
 	//2d adjustment
 
 	DrawViewQuad();

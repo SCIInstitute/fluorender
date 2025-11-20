@@ -357,7 +357,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//shadow
 	m_shadow_st = new wxFadeButton(this, wxID_ANY, "Shadow",
 		wxDefaultPosition, bts);
-	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
+	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);

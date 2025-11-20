@@ -123,7 +123,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_shadow_chk = new wxCheckBox(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 60, 0, 100,
+	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 60, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.60",
 		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp2);
