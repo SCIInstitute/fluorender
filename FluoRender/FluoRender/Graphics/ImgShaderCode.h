@@ -223,9 +223,9 @@ void main()
 	vec4 t = vec4(OutTexCoord, 1.0);
 	vec4 c = texture(tex0, t.xy);
 	vec4 b = loc1;
-	b.x = b.x>1.0?1.0/(2.0-b.x):loc1.x;
-	b.y = b.y>1.0?1.0/(2.0-b.y):loc1.y;
-	b.z = b.z>1.0?1.0/(2.0-b.z):loc1.z;
+	b.x = b.x>1.0?(b.x<2.0?1.0/(2.0-b.x):256.0):loc1.x;
+	b.y = b.y>1.0?(b.y<2.0?1.0/(2.0-b.y):256.0):loc1.y;
+	b.z = b.z>1.0?(b.z<2.0?1.0/(2.0-b.z):256.0):loc1.z;
 	FragColor = pow(c, loc0)*b;
 }
 )GLSHDR";
@@ -607,13 +607,14 @@ void main()
 //}
 //)GLSHDR";
 
-inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_SHADING = R"GLSHDR(
-//IMG_SHADER_CODE_DEPTH_TO_SHADING
+inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_SCATTERING = R"GLSHDR(
+//IMG_SHADER_CODE_DEPTH_TO_SCATTERING
 in vec3 OutVertex;
 in vec3 OutTexCoord;
 out vec4 FragColor;
 
-uniform vec4 loc0; //(width, height, lod, strength)
+uniform vec4 loc0; //(width, height, lod, 0)
+uniform vec4 loc1; //(strength, shine, 0, 0)
 uniform sampler2D tex0;
 
 void main()
@@ -621,8 +622,70 @@ void main()
 	vec2 t = OutTexCoord.xy;
 	float localDepth = texture(tex0, t).r;
 	float centerDepth = textureLod(tex0, t, loc0.z).r;
-	float depthDiff = loc0.w * clamp(centerDepth - localDepth, -0.1, 1.0);
+	float depthDiff = loc1.x * (pow(smoothstep(-1.0, 1.0, centerDepth - localDepth), 3.0) - 0.5);
 	FragColor = vec4(vec3(1.0 + depthDiff), 1.0);
+}
+)GLSHDR";
+
+inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_HIGHLIGHTING = R"GLSHDR(
+//IMG_SHADER_CODE_DEPTH_TO_HIGHLIGHTING
+in vec3 OutVertex;
+in vec3 OutTexCoord;
+out vec4 FragColor;
+
+uniform vec4 loc0; //(width, height, lod, 0)
+uniform vec4 loc1; //(strength, shine, pert.x, pert.y)
+uniform sampler2D tex0;
+
+void main()
+{
+	vec2 texCoord = OutTexCoord.xy;
+	vec2 texelSize = loc0.xy;
+	vec3 lightDir = vec3(loc1.zw, 0.2);
+
+	// --- Sample depth from multiple mip levels ---
+	float d0 = textureLod(tex0, texCoord, 0.0).r; // sharp
+	float d2 = textureLod(tex0, texCoord, loc0.z * 0.5).r; // medium blur
+	float d4 = textureLod(tex0, texCoord, loc0.z).r; // strong blur
+
+	// Blend across mip levels: weights can be tuned
+	float d = 0.5 * d0 + 0.3 * d2 + 0.2 * d4;
+
+	// --- Gradient from multiple mip levels ---
+	float dx0 = textureLod(tex0, texCoord + vec2(texelSize.x, 0), 0.0).r -
+				textureLod(tex0, texCoord - vec2(texelSize.x, 0), 0.0).r;
+	float dy0 = textureLod(tex0, texCoord + vec2(0, texelSize.y), 0.0).r -
+				textureLod(tex0, texCoord - vec2(0, texelSize.y), 0.0).r;
+
+	float dx2 = textureLod(tex0, texCoord + vec2(texelSize.x, 0), 2.0).r -
+				textureLod(tex0, texCoord - vec2(texelSize.x, 0), 2.0).r;
+	float dy2 = textureLod(tex0, texCoord + vec2(0, texelSize.y), 2.0).r -
+				textureLod(tex0, texCoord - vec2(0, texelSize.y), 2.0).r;
+
+	float dx4 = textureLod(tex0, texCoord + vec2(texelSize.x, 0), 4.0).r -
+				textureLod(tex0, texCoord - vec2(texelSize.x, 0), 4.0).r;
+	float dy4 = textureLod(tex0, texCoord + vec2(0, texelSize.y), 4.0).r -
+				textureLod(tex0, texCoord - vec2(0, texelSize.y), 4.0).r;
+
+	// Weighted blend of gradients
+	float dx = 0.5 * dx0 + 0.3 * dx2 + 0.2 * dx4;
+	float dy = 0.5 * dy0 + 0.3 * dy2 + 0.2 * dy4;
+
+	// Construct pseudo-normal from blended gradient
+	vec3 N = normalize(vec3(-dx, -dy, texelSize.x));
+
+	// Light direction normalized
+	vec3 L = normalize(lightDir);
+
+	// Highlight intensity: sharper than Phong
+	float NdotL = max(dot(N, L), 0.0);
+	float highlight = pow(NdotL, mix(10.0, 100.0, loc1.y));
+
+	// Distortion: modulate by blended depth to mimic warped reflection
+	float distortion = pow(d, 2.0);
+	highlight *= (1.0 + distortion) * loc1.x;
+
+	FragColor = vec4(vec3(highlight), 1.0);
 }
 )GLSHDR";
 
@@ -749,9 +812,9 @@ void main()
 	float alpha = clamp(c.a, 0.0, 1.0);
 	alpha = clamp(2.0*alpha - alpha*alpha, 0.0, 1.0);
 	vec4 b = loc1;
-	b.x = b.x>1.0?1.0/(2.0-b.x):loc1.x;
-	b.y = b.y>1.0?1.0/(2.0-b.y):loc1.y;
-	b.z = b.z>1.0?1.0/(2.0-b.z):loc1.z;
+	b.x = b.x>1.0?(b.x<2.0?1.0/(2.0-b.x):256.0):loc1.x;
+	b.y = b.y>1.0?(b.y<2.0?1.0/(2.0-b.y):256.0):loc1.y;
+	b.z = b.z>1.0?(b.z<2.0?1.0/(2.0-b.z):256.0):loc1.z;
 	c = pow(c, loc0)*b;
 	vec4 unit = vec4(1.0);
 	FragColor = c*(unit-loc2)+loc2*(unit-unit/(c+unit));

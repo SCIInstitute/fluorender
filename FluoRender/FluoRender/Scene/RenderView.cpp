@@ -5804,9 +5804,9 @@ void RenderView::DrawDataPeel()
 		}
 	}
 
-	double dval;
-	if (CheckMeshShadingExist(dval))
-		DrawOverlayShadingMesh(dval);
+	double dval, dval2;
+	if (CheckMeshShadingExist(dval, dval2))
+		DrawOverlayShadingMesh(dval, dval2);
 	if (CheckMeshShadowExist(dval))
 		DrawOverlayShadowMesh(dval);
 
@@ -7218,7 +7218,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	}
 }
 
-void RenderView::DrawOverlayShadingMesh(double strength)
+void RenderView::DrawOverlayShadingMesh(double strength, double shine)
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7260,12 +7260,30 @@ void RenderView::DrawOverlayShadingMesh(double strength)
 
 	//2d adjustment
 	img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_SHADING, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_SCATTERING, 0));
 	assert(img_shader);
 	img_shader->bind();
 
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 9.0, strength);
-	//img_shader->setLocalParam(1, std::sqrt(darkness), 4.0, 0.0, 0.0);
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 5.0, 0.0);
+	img_shader->setLocalParam(1, strength, shine, 0.0, 0.0);
+
+	DrawViewQuad();
+
+	img_shader->unbind();
+
+	//additional highlight pass
+	data_buffer->set_blend_func(0,
+		flvr::BlendFactor::One, flvr::BlendFactor::One,
+		flvr::BlendFactor::Zero, flvr::BlendFactor::One);
+	data_buffer->apply_state();
+
+	img_shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_HIGHLIGHTING, 0));
+	assert(img_shader);
+	img_shader->bind();
+
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 4.0, 0.0);
+	img_shader->setLocalParam(1, strength, shine, glbin_settings.m_shadow_dir_x, glbin_settings.m_shadow_dir_y);
 
 	DrawViewQuad();
 
@@ -7337,7 +7355,7 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 }
 
 //get mesh effects
-bool RenderView::CheckMeshShadingExist(double& val)
+bool RenderView::CheckMeshShadingExist(double& strength, double& shine)
 {
 	for (auto& it : m_layer_list)
 	{
@@ -7348,7 +7366,8 @@ bool RenderView::CheckMeshShadingExist(double& val)
 			auto md = std::dynamic_pointer_cast<MeshData>(it);
 			if (md && md->GetDisp())
 			{
-				val = md->GetShadingStrength();
+				strength = md->GetShadingStrength();
+				shine = md->GetShadingShine();
 				return md->GetShading();
 			}
 		}
@@ -7362,14 +7381,16 @@ bool RenderView::CheckMeshShadingExist(double& val)
 					auto md = group->GetMeshData(j);
 					if (md && md->GetDisp())
 					{
-						val = md->GetShadingStrength();
+						strength = md->GetShadingStrength();
+						shine = md->GetShadingShine();
 						return md->GetShading();
 					}
 				}
 			}
 		}
 	}
-	val = 0.0;
+	strength = 0.0;
+	shine = 0.0;
 	return false;
 }
 

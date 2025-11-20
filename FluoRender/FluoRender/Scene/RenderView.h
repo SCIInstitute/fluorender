@@ -858,10 +858,10 @@ private:
 	//effect overlays
 	void DrawOverlayShadingVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
 	void DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
-	void DrawOverlayShadingMesh(double strength);
+	void DrawOverlayShadingMesh(double strength, double shine);
 	void DrawOverlayShadowMesh(double darkenss);
 	//get mesh effects and return strength/darkness
-	bool CheckMeshShadingExist(double& val);
+	bool CheckMeshShadingExist(double& strength, double& shine);
 	bool CheckMeshShadowExist(double &val);
 
 	//other data types
