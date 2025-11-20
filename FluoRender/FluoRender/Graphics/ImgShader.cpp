@@ -98,6 +98,7 @@ bool ImgShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 	case IMG_SHDR_DEPTH_TO_OUTLINES:
 	case IMG_SHDR_DEPTH_TO_GRADIENT:
 	case IMG_SHDR_DEPTH_ACC_TO_GRADIENT:
+	case IMG_SHDR_DEPTH_TO_SHADING:
 	case IMG_SHDR_GRADIENT_TO_SHADOW:
 	case IMG_SHDR_BLEND_BRIGHT_BACKGROUND:
 	case IMG_SHDR_BLEND_BRIGHT_BACKGROUND_HDR:
@@ -193,6 +194,9 @@ bool ImgShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		break;
 	case IMG_SHDR_DEPTH_ACC_TO_GRADIENT:
 		z << IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT;
+		break;
+	case IMG_SHDR_DEPTH_TO_SHADING:
+		z << IMG_SHADER_CODE_DEPTH_TO_SHADING;
 		break;
 	case IMG_SHDR_GRADIENT_TO_SHADOW:
 		z << IMG_SHADER_CODE_GRAD2SHADOW_INPUT;

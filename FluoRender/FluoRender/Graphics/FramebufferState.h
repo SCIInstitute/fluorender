@@ -133,6 +133,9 @@ namespace flvr
 		// Blend settings per draw buffer index
 		std::unordered_map<int, BlendState> blendStates;
 
+		// Enabled flags per draw buffer index
+		std::unordered_map<int, bool> drawEnabled;
+
 		// Clear color
 		fluo::Vector4f clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -161,6 +164,8 @@ namespace flvr
 		{
 			blendStates[0] = BlendState();
 			blendStates[1] = BlendState();
+			drawEnabled[0] = true; // default: enabled
+			drawEnabled[1] = true;
 		}
 
 		// Equality operator for diffing

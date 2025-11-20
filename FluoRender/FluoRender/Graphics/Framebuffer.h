@@ -209,6 +209,9 @@ namespace flvr
 		void clear_base(bool color, bool depth);
 		void clear_attachment(const AttachmentPoint& ap, const float* value);
 
+		//enable/disable drawing an attachment
+		void apply_draw_mask(const std::unordered_map<int, bool>& drawEnabled);
+		bool set_draw_enabled(const AttachmentPoint& ap, bool enabled);
 		bool attach_texture(const AttachmentPoint& ap, const std::shared_ptr<FramebufferTexture>& tex);
 		bool attach_texture(const AttachmentPoint& ap, unsigned int tex_id, int layer=0);
 		void detach_texture(const AttachmentPoint& ap);

@@ -556,6 +556,71 @@ void Framebuffer::pop_state()
 	//DBGPRINT(L"Framebuffer stack size : %zu\n", state_stack_.size());
 }
 
+void Framebuffer::apply_draw_mask(const std::unordered_map<int, bool>& drawEnabled)
+{
+	GLint prevFramebuffer = 0;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+	bind();
+
+	std::vector<GLenum> drawBuffers;
+	for (const auto& kv : drawEnabled)
+	{
+		int index = kv.first;
+		bool enabled = kv.second;
+		if (enabled)
+		{
+			drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
+		}
+	}
+
+	if (!drawBuffers.empty())
+	{
+		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
+	}
+	else
+	{
+		// Disable all color writes if nothing is enabled
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
+
+	unbind(prevFramebuffer);
+}
+
+bool Framebuffer::set_draw_enabled(const AttachmentPoint& ap, bool enabled)
+{
+	if (role_ == FBRole::Canvas || !valid_)
+		return false;
+
+	GLint prevFramebuffer = 0;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
+	bind();
+
+	// Update state
+	state_.drawEnabled[ap.index] = enabled;
+
+	// Rebuild draw buffer list from state
+	std::vector<GLenum> drawBuffers;
+	for (const auto& rec : attachments_) {
+		if (rec.point.type == AttachmentPoint::Type::Color &&
+			state_.drawEnabled[rec.point.index]) {
+			GLenum glAttachment = GL_COLOR_ATTACHMENT0 + rec.point.index;
+			drawBuffers.push_back(glAttachment);
+		}
+	}
+
+	if (!drawBuffers.empty()) {
+		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
+	}
+	else {
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
+
+	unbind(prevFramebuffer);
+	return true;
+}
+
 bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 	const std::shared_ptr<FramebufferTexture>& tex)
 {
@@ -569,23 +634,8 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
 	bind();
 
-	switch (role_)
-	{
-	case FBRole::RenderColor:
-	case FBRole::RenderColorFxDepth:
-	case FBRole::RenderColorFxFilter:
-	case FBRole::RenderColorMipmap:
-	case FBRole::RenderUChar:
-	case FBRole::Pick:
-	case FBRole::Depth:
-	default:
-		glFramebufferTexture2D(GL_FRAMEBUFFER, glap, GL_TEXTURE_2D, tex->id(), 0);
-		break;
-
-	case FBRole::Volume:
-		// This type should be handled by the second overload using tex_id + layer
-		return false;
-	}
+	// Attach texture
+	glFramebufferTexture2D(GL_FRAMEBUFFER, glap, GL_TEXTURE_2D, tex->id(), 0);
 
 	// Replace or add record
 	auto it = std::find_if(attachments_.begin(), attachments_.end(),
@@ -598,22 +648,30 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 		attachments_.push_back({ ap, tex, tex->config_ });
 	}
 
+	// Sync state: mark enabled
 	if (ap.type == AttachmentPoint::Type::Color) {
-		std::vector<GLenum> drawBuffers;
+		state_.drawEnabled[ap.index] = true;
+	}
 
-		for (const auto& rec : attachments_) {
-			if (rec.point.type == AttachmentPoint::Type::Color) {
-				// Convert the AttachmentPoint to the GL enum
-				GLenum glAttachment = GL_COLOR_ATTACHMENT0 + rec.point.index;
-				drawBuffers.push_back(glAttachment);
-			}
+	// Rebuild draw buffer list from state
+	std::vector<GLenum> drawBuffers;
+	for (const auto& rec : attachments_) {
+		if (rec.point.type == AttachmentPoint::Type::Color &&
+			state_.drawEnabled[rec.point.index]) {
+			GLenum glAttachment = GL_COLOR_ATTACHMENT0 + rec.point.index;
+			drawBuffers.push_back(glAttachment);
 		}
+	}
 
+	if (!drawBuffers.empty()) {
 		glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
+	}
+	else {
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
 	}
 
 	unbind(prevFramebuffer);
-
 	return true;
 }
 
@@ -887,15 +945,22 @@ FramebufferStateGuard::FramebufferStateGuard(Framebuffer& fb) :
 FramebufferStateGuard::~FramebufferStateGuard()
 {
 	assert(glbin_fb_state_tracker.state_stack_.size() > 0);
-	//get saved global state
-	auto& s = glbin_fb_state_tracker.state_stack_.back();
-	//restore global state
-	glbin_fb_state_tracker.apply(s);
-	//get saved framebuffer state
-	s = fb_.state_stack_.back();
-	//restore framebuffer state
-	fb_.state_ = s;
+	assert(fb_.state_stack_.size() > 0);
 
+	// restore global state
+	const auto& globalState = glbin_fb_state_tracker.state_stack_.back();
+	glbin_fb_state_tracker.apply(globalState);
+
+	// restore framebuffer state
+	const auto& fbState = fb_.state_stack_.back();
+	// restore draw buffer mask if needed
+	if (fb_.state_.drawEnabled != fbState.drawEnabled) {
+		fb_.apply_draw_mask(fbState.drawEnabled);
+	}
+
+	fb_.state_ = fbState;
+
+	// pop stacks
 	glbin_fb_state_tracker.pop_state();
 	fb_.pop_state();
 }

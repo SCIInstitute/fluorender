@@ -161,8 +161,8 @@
     </rendering>
     <shadow>
         <dir_enable>1</dir_enable>
-        <dir_x>0</dir_x>
-        <dir_y>0</dir_y>
+        <dir_x>0.70710678118654757</dir_x>
+        <dir_y>-0.70710678118654757</dir_y>
     </shadow>
     <wavelength_to_color>
         <c1>3</c1>

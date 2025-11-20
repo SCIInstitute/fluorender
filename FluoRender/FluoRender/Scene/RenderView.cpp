@@ -5804,9 +5804,11 @@ void RenderView::DrawDataPeel()
 		}
 	}
 
-	double darkness;
-	if (CheckMeshShadowExist(darkness))
-		DrawOverlayShadowMesh(darkness);
+	double dval;
+	if (CheckMeshShadingExist(dval))
+		DrawOverlayShadingMesh(dval);
+	if (CheckMeshShadowExist(dval))
+		DrawOverlayShadowMesh(dval);
 
 	//draw the clipping planes
 	if (glbin_states.m_clip_display)
@@ -7158,12 +7160,12 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	{
 		//shadow pass
 		//bind the fbo
-		auto grad_mip_buffer = glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderColorMipmap, nx, ny, gstRBGradMip);
-		assert(grad_mip_buffer);
-		grad_mip_buffer->set_blend_enabled_all(false);
-		glbin_framebuffer_manager.bind(grad_mip_buffer);
-		grad_mip_buffer->clear_base(true, false);
+		auto fx_mip_buffer = glbin_framebuffer_manager.framebuffer(
+			flvr::FBRole::RenderColorMipmap, nx, ny, gstRBFxMip);
+		assert(fx_mip_buffer);
+		fx_mip_buffer->set_blend_enabled_all(false);
+		glbin_framebuffer_manager.bind(fx_mip_buffer);
+		fx_mip_buffer->clear_base(true, false);
 
 		blend_buffer->bind_texture(flvr::AttachmentPoint::Color(1), 0);
 
@@ -7196,8 +7198,8 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 			flvr::BlendFactor::Zero, flvr::BlendFactor::One);
 		glbin_framebuffer_manager.bind(chan_buffer);
 
-		grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
-		grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+		fx_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
+		fx_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 		//2d adjustment
 		img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -7212,8 +7214,63 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		DrawViewQuad();
 
 		img_shader->unbind();
-		grad_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+		fx_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 	}
+}
+
+void RenderView::DrawOverlayShadingMesh(double strength)
+{
+	int nx, ny;
+	GetRenderSize(nx, ny);
+
+	//shadow pass
+	//bind the fbo
+	auto fx_mip_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBFxMip);
+	assert(fx_mip_buffer);
+	fx_mip_buffer->set_blend_enabled_all(false);
+	glbin_framebuffer_manager.bind(fx_mip_buffer);
+
+	auto data_buffer = GetDataFramebuffer();
+	assert(data_buffer);
+	data_buffer->bind_texture(flvr::AttachmentPoint::Color(1), 0);
+
+	auto img_shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHDR_TEXTURE_LOOKUP, 0));
+	assert(img_shader);
+	img_shader->bind();
+
+	DrawViewQuad();
+
+	img_shader->unbind();
+	data_buffer->unbind_texture(flvr::AttachmentPoint::Color(1));
+
+	//bind fbo for final composition
+	flvr::FramebufferStateGuard fbg(*data_buffer);
+	data_buffer->set_blend_enabled(0, true);
+	data_buffer->set_blend_func(0,
+		flvr::BlendFactor::DstColor, flvr::BlendFactor::Zero,
+		flvr::BlendFactor::Zero, flvr::BlendFactor::One);
+	data_buffer->set_depth_test_enabled(false);
+	data_buffer->set_draw_enabled(flvr::AttachmentPoint::Color(1), false);
+	glbin_framebuffer_manager.bind(data_buffer);
+
+	fx_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
+	fx_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+
+	//2d adjustment
+	img_shader = glbin_shader_manager.shader(gstImgShader,
+		flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_SHADING, 0));
+	assert(img_shader);
+	img_shader->bind();
+
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 9.0, strength);
+	//img_shader->setLocalParam(1, std::sqrt(darkness), 4.0, 0.0, 0.0);
+
+	DrawViewQuad();
+
+	img_shader->unbind();
+	fx_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
 void RenderView::DrawOverlayShadowMesh(double darkness)
@@ -7223,13 +7280,13 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 
 	//shadow pass
 	//bind the fbo
-	auto grad_mip_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBGradMip);
-	assert(grad_mip_buffer);
-	grad_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
-	grad_mip_buffer->set_blend_enabled_all(false);
-	glbin_framebuffer_manager.bind(grad_mip_buffer);
-	grad_mip_buffer->clear_base(true, false);
+	auto fx_mip_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::RenderColorMipmap, nx, ny, gstRBFxMip);
+	assert(fx_mip_buffer);
+	fx_mip_buffer->set_clear_color({ 1.0f, 1.0f, 1.0f, 1.0f });
+	fx_mip_buffer->set_blend_enabled_all(false);
+	glbin_framebuffer_manager.bind(fx_mip_buffer);
+	fx_mip_buffer->clear_base(true, false);
 
 	auto data_buffer = GetDataFramebuffer();
 	assert(data_buffer);
@@ -7260,8 +7317,8 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	glbin_framebuffer_manager.bind(data_buffer);
 
 	//build mipmap
-	grad_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
-	grad_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+	fx_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
+	fx_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
 	//2d adjustment
 	img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -7276,10 +7333,46 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 	DrawViewQuad();
 
 	img_shader->unbind();
-	grad_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+	fx_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
-//get mesh shadow
+//get mesh effects
+bool RenderView::CheckMeshShadingExist(double& val)
+{
+	for (auto& it : m_layer_list)
+	{
+		if (!it)
+			continue;
+		if (it->IsA() == 3)
+		{
+			auto md = std::dynamic_pointer_cast<MeshData>(it);
+			if (md && md->GetDisp())
+			{
+				val = md->GetShadingStrength();
+				return md->GetShading();
+			}
+		}
+		else if (it->IsA() == 6)
+		{
+			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
+			if (group && group->GetDisp())
+			{
+				for (int j = 0; j < group->GetMeshNum(); j++)
+				{
+					auto md = group->GetMeshData(j);
+					if (md && md->GetDisp())
+					{
+						val = md->GetShadingStrength();
+						return md->GetShading();
+					}
+				}
+			}
+		}
+	}
+	val = 0.0;
+	return false;
+}
+
 bool RenderView::CheckMeshShadowExist(double &val)
 {
 	for (auto& it : m_layer_list)

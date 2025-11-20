@@ -607,6 +607,25 @@ void main()
 //}
 //)GLSHDR";
 
+inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_SHADING = R"GLSHDR(
+//IMG_SHADER_CODE_DEPTH_TO_SHADING
+in vec3 OutVertex;
+in vec3 OutTexCoord;
+out vec4 FragColor;
+
+uniform vec4 loc0; //(width, height, lod, strength)
+uniform sampler2D tex0;
+
+void main()
+{
+	vec2 t = OutTexCoord.xy;
+	float localDepth = texture(tex0, t).r;
+	float centerDepth = textureLod(tex0, t, loc0.z).r;
+	float depthDiff = loc0.w * clamp(centerDepth - localDepth, -0.1, 1.0);
+	FragColor = vec4(vec3(1.0 + depthDiff), 1.0);
+}
+)GLSHDR";
+
 inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_INPUT = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_TO_SHADOW
 in vec3 OutVertex;
