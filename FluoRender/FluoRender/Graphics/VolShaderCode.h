@@ -338,13 +338,13 @@ inline constexpr const char* VOL_BODY_SHADING  = R"GLSHDR(
 	float front = smoothstep(0.3, 1.0, lambert);
 	float back  = 1.0 - smoothstep(0.0, 0.5, lambert);
 	float shade = 0.5*back + 0.7*front + 0.3;
-	float frost = 1.0 + loc1.x * smoothstep(0.0, 0.1, gradMag) * 0.2;
-	float diffuse = shade * frost;
+	float frost = smoothstep(0.0, 0.1, gradMag) * 0.5;
+	float diffuse = shade + frost;
 
 	// Key light highlight (sharp, white)
 	l_dir = normalize(vec3(loc1.z, loc1.w, 3.0));
 	vec3 h = normalize(l_dir + eye);
-	float keyHighlight = 3.0 * pow(abs(dot(h, grad)), mix(10.0, 100.0, loc1.y));
+	float keyHighlight = 3.0 * pow(smoothstep(0.9, 1.0, abs(dot(h, grad))), mix(10.0, 40.0, loc1.y));
 
 	// Diffuser highlight (opposite direction, softer)
 	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 1.0));
@@ -699,24 +699,24 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  
 
 inline constexpr const char* VOL_SHADING_OUTPUT  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT
-	c.xyz *= mix(diffuse, diffHighlight + keyHighlight, loc1.x);
+	c.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL
-	sel.xyz *= mix(diffuse, diffHighlight + keyHighlight, loc1.x);
+	sel.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
 	FragColor = sel*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL_MASK
-	sel.xyz *= mix(diffuse, diffHighlight + keyHighlight, loc1.x);
+	sel.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
 	FragColor = sel*alpha*tf_val*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL_MASK_SOLID
-	sel.xyz *= mix(diffuse, diffHighlight + keyHighlight, loc1.x);
+	sel.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
 	FragColor = vec4(sel.xyz, 1.0);
 )GLSHDR";
 

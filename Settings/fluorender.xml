@@ -160,7 +160,7 @@
         <clip_hold>0</clip_hold>
     </rendering>
     <shadow>
-        <dir_enable>0</dir_enable>
+        <dir_enable>1</dir_enable>
         <dir_x>0</dir_x>
         <dir_y>0</dir_y>
     </shadow>

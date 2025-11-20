@@ -491,7 +491,6 @@ void MultiVolumeRenderer::draw_polygons_vol(
 		render_mode == RenderMode::Overlay)
 		rate_factor = 1.0 / rate;
 	fluo::Vector light = view_ray.direction();
-	//light -= fluo::Vector(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x, 0.0);
 	light.safe_normalize();
 
 	for (size_t i = 0; i < size.size(); i++)

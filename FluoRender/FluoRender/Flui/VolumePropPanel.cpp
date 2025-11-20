@@ -1113,9 +1113,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_shadow_dir_chk->SetValue(bval);
 		m_shadow_dir_sldr->Enable(bval);
 		m_shadow_dir_text->Enable(bval);
-		double deg = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x));
-		m_shadow_dir_sldr->ChangeValue(std::round(deg));
-		m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", deg));
+		double dirx = glbin_settings.m_shadow_dir_x;
+		double diry = glbin_settings.m_shadow_dir_y;
+		if (dirx == 0.0 && diry == 0.0)
+			dval = 0.0;
+		else
+			dval = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x)) + 45.0;
+		m_shadow_dir_sldr->ChangeValue(std::round(dval));
+		m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", dval));
 	}
 	if (update_shadow || update_tips)
 	{
@@ -1641,6 +1646,7 @@ void VolumePropPanel::EnableShadowDir(bool bval)
 		str = m_shadow_dir_text->GetValue();
 		double deg;
 		str.ToDouble(&deg);
+		deg -= 45.0;
 		glbin_settings.m_shadow_dir_x = cos(d2r(deg));
 		glbin_settings.m_shadow_dir_y = sin(d2r(deg));
 	}
@@ -1859,6 +1865,7 @@ void VolumePropPanel::SetShadowInt(double val, bool notify)
 
 void VolumePropPanel::SetShadowDir(double dval, bool notify)
 {
+	dval -= 45.0;
 	double dir_x = cos(d2r(dval));
 	double dir_y = sin(d2r(dval));
 	if (glbin_settings.m_shadow_dir_x == dir_x &&
