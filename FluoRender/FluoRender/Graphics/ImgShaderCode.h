@@ -634,21 +634,27 @@ in vec3 OutTexCoord;
 out vec4 FragColor;
 
 uniform vec4 loc0; //(width, height, lod, 0)
-uniform vec4 loc1; //(strength, shine, pert.x, pert.y)
+uniform vec4 loc1; //(strength, shine, lightDir.x, lightDir.y)
 uniform sampler2D tex0;
 
 void main()
 {
 	vec2 texCoord = OutTexCoord.xy;
 	vec2 texelSize = loc0.xy;
-	vec3 lightDir = vec3(loc1.zw, 0.2);
+
+	// Light direction in 2D (screen space), normalized
+	vec2 L2 = normalize(loc1.zw);
+	vec2 P2 = vec2(-L2.y, L2.x); // perpendicular axis
+
+	// Extend into 3D for dot products
+	vec3 L = normalize(vec3(L2, 0.2));
 
 	// --- Sample depth from multiple mip levels ---
-	float d0 = textureLod(tex0, texCoord, 0.0).r; // sharp
-	float d2 = textureLod(tex0, texCoord, loc0.z * 0.5).r; // medium blur
-	float d4 = textureLod(tex0, texCoord, loc0.z).r; // strong blur
+	float d0 = textureLod(tex0, texCoord, 0.0).r;              // sharp
+	float d2 = textureLod(tex0, texCoord, loc0.z * 0.5).r;     // medium blur
+	float d4 = textureLod(tex0, texCoord, loc0.z).r;           // strong blur
 
-	// Blend across mip levels: weights can be tuned
+	// Blend across mip levels
 	float d = 0.5 * d0 + 0.3 * d2 + 0.2 * d4;
 
 	// --- Gradient from multiple mip levels ---
@@ -674,14 +680,21 @@ void main()
 	// Construct pseudo-normal from blended gradient
 	vec3 N = normalize(vec3(-dx, -dy, texelSize.x));
 
-	// Light direction normalized
-	vec3 L = normalize(lightDir);
-
-	// Highlight intensity: sharper than Phong
+	// --- Anisotropic highlight ---
 	float NdotL = max(dot(N, L), 0.0);
-	float highlight = pow(NdotL, mix(10.0, 100.0, loc1.y));
+	float NdotP = dot(N.xy, P2);
 
-	// Distortion: modulate by blended depth to mimic warped reflection
+	// Control anisotropy: smaller = more elongated
+	float anisotropy = 0.3;
+
+	// Elliptical shaping term
+	float ellipse = (NdotL * NdotL) + (NdotP * NdotP) / (anisotropy * anisotropy);
+
+	// Highlight intensity
+	float highlight = pow(NdotL, mix(10.0, 100.0, loc1.y));
+	highlight *= exp(-ellipse) * 5.0;
+
+	// Distortion by depth
 	float distortion = pow(d, 2.0);
 	highlight *= (1.0 + distortion) * loc1.x;
 
