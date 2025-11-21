@@ -455,7 +455,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Gradient Background");
 	m_clear_color_bg_chk = new wxCheckBox(page, wxID_ANY,
-		"Match Transparency to Render View Background Color");
+		"Match Attenuation and Transparency to Render View Background Color");
 	m_grad_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnGradBgCheck, this);
 	m_clear_color_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnClearColorBgCheck, this);
 	group4->Add(10, 5);

@@ -169,7 +169,8 @@ uniform sampler2D tex0;
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_FOG = R"GLSHDR(
 // MSH_FRAG_UNIFORMS_FOG
-uniform vec4 loc8;//(int, start, end, 0.0) fog loc
+uniform vec4 loc8;//(int, start, end, 0.0)
+uniform vec4 loc19;//(r, g, b, a) fog color
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_UNIFORMS_DP = R"GLSHDR(
@@ -221,9 +222,24 @@ inline constexpr const char* MSH_FRAG_BODY_DP_5 = R"GLSHDR(
 	if (texture(tex15, t).r <= gl_FragCoord.z-1e-6) discard;
 )GLSHDR";
 
-inline constexpr const char* MSH_FRAG_BODY_COLOR = R"GLSHDR(
-	//MSH_FRAG_BODY_COLOR
+inline constexpr const char* MSH_FRAG_HEAD_FOG = R"GLSHDR(
+	//MSH_FRAG_HEAD_FOG
+	vec4 fp;
+	fp.x = loc8.x;
+	fp.y = loc8.y;
+	fp.z = loc8.z;
+	fp.w = abs(OutFogCoord.z/OutFogCoord.w);
+
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_BODY_SHADING_COLOR = R"GLSHDR(
+	//MSH_FRAG_BODY_SHADING_COLOR
 	vec4 c = vec4(1.0);
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_BODY_PLAIN_COLOR = R"GLSHDR(
+	//MSH_FRAG_BODY_PLAIN_COLOR
+	vec4 c = vec4(loc0.xyz, 1.0);
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_COLOR_OUT = R"GLSHDR(
@@ -234,13 +250,7 @@ inline constexpr const char* MSH_FRAG_BODY_COLOR_OUT = R"GLSHDR(
 inline constexpr const char* MSH_FRAG_BODY_DEPTH_OUT = R"GLSHDR(
 	// MSH_FRAG_BODY_DEPTH_OUT
 	float curz = (fp.y-fp.w)/(fp.y-fp.z);
-	//curz = clamp(curz, 0.0, 1.0);
 	FragDepth = curz;
-)GLSHDR";
-
-inline constexpr const char* MSH_FRAG_BODY_SIMPLE = R"GLSHDR(
-	//MSH_FRAG_BODY_SIMPLE
-	c = loc0;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_VERTEX_COLOR = R"GLSHDR(
@@ -270,7 +280,8 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	vec3 r = normalize(reflect(-eye, n));
 
 	// Build rectangle basis around light direction
-	vec3 uAxis = normalize(cross(l_dir, vec3(0,0,1)));
+	vec3 refAxis = (abs(l_dir.z) > 0.99) ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 0.0, 1.0);
+	vec3 uAxis = normalize(cross(l_dir, refAxis));
 	vec3 vAxis = normalize(cross(l_dir, uAxis));
 
 	// Rectangle half-sizes
@@ -318,9 +329,12 @@ inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(
 inline constexpr const char* MSH_FRAG_BODY_FOG = R"GLSHDR(
 	// MSH_FRAG_BODY_FOG
 	vec4 v;
-	v.x = (fp.z-fp.w)/(fp.z-fp.y);
-	v.x = 1.0-clamp(v.x, 0.0, 1.0);
-	v.x = 1.0-exp(-pow(v.x*2.5, 2.0));
+	v.x = (fp.y-fp.w)/(fp.y-fp.z);
+	v.x = clamp(v.x, 0.0, 1.0);
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_BODY_FOG_MIX = R"GLSHDR(
+	c.xyz = mix(c.xyz, loc19.xyz, v.x*fp.x); 
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_INT = R"GLSHDR(

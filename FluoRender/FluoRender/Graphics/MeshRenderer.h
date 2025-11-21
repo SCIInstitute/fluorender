@@ -143,6 +143,8 @@ namespace flvr
 		{ return has_vertex_color_; }
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end)
 		{ fog_ = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
+		void set_fog_color(const fluo::Color& color)
+		{ m_fog_color = color; }
 		bool get_fog()
 		{ return fog_; }
 
@@ -169,12 +171,13 @@ namespace flvr
 		bool has_vertex_color_;
 		//base color
 		fluo::Color color_;
+		float alpha_;
 		//fog
 		bool fog_;
 		double m_fog_intensity;
 		double m_fog_start;
 		double m_fog_end;
-		float alpha_;
+		fluo::Color m_fog_color;
 		//vertex buffer
 		std::weak_ptr<VertexArray> va_model_;
 	};

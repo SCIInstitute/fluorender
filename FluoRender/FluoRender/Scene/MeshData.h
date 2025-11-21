@@ -125,6 +125,7 @@ public:
 	void SetShadingShine(double val);
 	double GetShadingShine();
 	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
+	void SetFogColor(const fluo::Color& color);
 	bool GetFog();
 	//shadow
 	void SetShadowEnable(bool bVal);

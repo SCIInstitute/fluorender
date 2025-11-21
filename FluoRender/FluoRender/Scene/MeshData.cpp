@@ -825,6 +825,12 @@ void MeshData::SetFog(bool bVal,
 		m_mr->set_fog(m_fog, fog_intensity, fog_start, fog_end);
 }
 
+void MeshData::SetFogColor(const fluo::Color &color)
+{
+	if (m_mr)
+		m_mr->set_fog_color(color);
+}
+
 bool MeshData::GetFog()
 {
 	return m_fog;

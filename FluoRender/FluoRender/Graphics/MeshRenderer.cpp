@@ -171,6 +171,7 @@ void MeshRenderer::draw()
 			}
 		}
 		shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
+		shader->setLocalParam(19, m_fog_color.r(), m_fog_color.g(), m_fog_color.b(), 1.0);
 
 		if (depth_peel_)
 			shader->setLocalParam(7, 1.0 / double(vp_[2]), 1.0 / double(vp_[3]), 0.0, 0.0);

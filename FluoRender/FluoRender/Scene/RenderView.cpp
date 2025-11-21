@@ -5610,6 +5610,14 @@ void RenderView::DrawDataPeel()
 
 	auto data_buffer = PrepareDataFramebuffer(nx, ny);
 	assert(data_buffer);
+	//if (glbin_settings.m_clear_color_bg)
+	//	data_buffer->set_clear_color({
+	//	static_cast<GLfloat>(m_bg_color.r()),
+	//	static_cast<GLfloat>(m_bg_color.g()),
+	//	static_cast<GLfloat>(m_bg_color.b()),
+	//	1.0f });
+	//else
+	//	data_buffer->set_clear_color({ 0.0f, 0.0f, 0.0f, 0.0f });
 	data_buffer->set_clear_depth(1.0);
 	data_buffer->set_blend_enabled(0, true);
 	data_buffer->set_blend_func(0,
@@ -5854,6 +5862,7 @@ void RenderView::DrawMesh(int peel)
 			continue;
 		md->SetMatrices(m_mv_mat, m_proj_mat);
 		md->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+		md->SetFogColor(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 		md->SetViewport(vp);
 		md->Draw(peel);
 	}

@@ -27,7 +27,6 @@
 //  
 
 #include <MshShader.h>
-#include <VolShaderCode.h>
 #include <MeshShaderCode.h>
 
 using namespace flvr;
@@ -170,20 +169,21 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			break;
 		}
 
-		z << VOL_HEAD_FOG;
+		z << MSH_FRAG_HEAD_FOG;
 
-		z << MSH_FRAG_BODY_COLOR;
+		if (p.shading || p.tex)
+			z << MSH_FRAG_BODY_SHADING_COLOR;
+		else
+			z << MSH_FRAG_BODY_PLAIN_COLOR;
 		if (p.color)
 			z << MSH_FRAG_BODY_VERTEX_COLOR;
 		if (p.shading)
 			z << MSH_FRAG_BODY_SHADING;
 		if (p.tex)
 			z << MSH_FRAG_BODY_TEXTURE;
-		//if (!p.shading && !p.tex)
-		//	z << MSH_FRAG_BODY_SIMPLE;
 		z << MSH_FRAG_BODY_FOG;
 		if (p.fog)
-			z << VOL_FOG_BODY;
+			z << MSH_FRAG_BODY_FOG_MIX;
 		z << MSH_FRAG_BODY_COLOR_OUT;
 		z << MSH_FRAG_BODY_DEPTH_OUT;
 	}

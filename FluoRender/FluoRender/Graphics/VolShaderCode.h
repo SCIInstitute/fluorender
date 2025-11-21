@@ -405,7 +405,8 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR  = R"GLSHDR(
 		float pa = pow(tf_val, loc18.y);
 		alpha = pa;
 		pa = 1.0 - pow(1.0-pa, loc4.w);
-		c = vec4(loc9.rgb*loc18.z*pa*(loc18.y>1.1?1.0:tf_val), pa);
+		tf_val = loc18.z*pa*(loc18.y>1.1?1.0:tf_val);
+		c = vec4(loc9.rgb*tf_val, pa);
 	}
 )GLSHDR";
 
@@ -425,7 +426,8 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID  = R"GLSHDR(
 		tf_val = pow(clamp((v.x-loc3.y)/(loc3.z-loc3.y),
 			loc3.x<1.0?-(loc3.x-1.0)*0.00001:0.0, 1.0), loc3.x);
 		alpha = pow(tf_val, loc18.y);
-		c = vec4(loc9.rgb*loc18.z*tf_val, 1.0);
+		tf_val = loc18.z*tf_val;
+		c = vec4(loc9.rgb*tf_val, 1.0);
 	}
 )GLSHDR";
 
@@ -623,7 +625,8 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_RESULT  = R"GLSHDR(
 		float pa = pow(tf_val, loc18.y);
 		alpha = pa;
 		pa = 1.0 - pow(1.0-pa, loc4.w);
-		c = vec4(rb.rgb*loc18.z*pa*(loc18.y>1.1?1.0:tf_val), pa);
+		tf_val = loc18.z*pa*(loc18.y>1.1?1.0:tf_val);
+		c = vec4(rb.rgb*tf_val, pa);
 	}
 )GLSHDR";
 
@@ -725,8 +728,9 @@ inline constexpr const char* VOL_FOG_BODY  = R"GLSHDR(
 	//VOL_FOG_BODY
 	v.x = (fp.y-fp.w)/(fp.y-fp.z);
 	v.x = clamp(v.x, 0.0, 1.0);
-	v.x = 1.0-exp(-pow(v.x*2.5, 2.0));
-	c.xyz = mix(c.xyz, loc19.xyz, v.x*fp.x); 
+	c.xyz = mix(c.xyz, loc19.xyz*tf_val, v.x*fp.x);
+	if (any(greaterThan(loc19.xyz, vec3(0.5))))
+		c.a = mix(c.a, 0.0, v.x*fp.x);
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND  = R"GLSHDR(
