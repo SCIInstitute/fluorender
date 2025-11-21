@@ -51,8 +51,7 @@
 
 using namespace flvr;
 
-VolumeRenderer::VolumeRenderer(
-	const std::vector<fluo::Plane*>& planes)
+VolumeRenderer::VolumeRenderer()
 	:TextureRenderer(),
 	//scalar scaling factor
 	scalar_scale_(1.0),
@@ -89,8 +88,6 @@ VolumeRenderer::VolumeRenderer(
 	solid_(false),
 	//interpolate
 	interpolate_(true),
-	//clipping planes
-	planes_(planes),
 	//depth peel
 	depth_peel_(0),
 	//depth output
@@ -150,6 +147,8 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	solid_(copy.solid_),
 	//interpolate
 	interpolate_(copy.interpolate_),
+	//clipping planes
+	clipping_box_(copy.clipping_box_),
 	//depth peel
 	depth_peel_(copy.depth_peel_),
 	//depth output
@@ -165,12 +164,6 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	alpha_power_(copy.alpha_power_),
 	sw_(0)
 {
-	//clipping planes
-	for (int i = 0; i < (int)copy.planes_.size(); i++)
-	{
-		fluo::Plane* plane = new fluo::Plane(*copy.planes_[i]);
-		planes_.push_back(plane);
-	}
 	//done loop
 	for (int i = 0; i < TEXTURE_RENDER_MODES; i++)
 		done_loop_[i] = false;
@@ -178,13 +171,6 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 
 VolumeRenderer::~VolumeRenderer()
 {
-	//release clipping planes
-	for (int i = 0; i < (int)planes_.size(); i++)
-	{
-		if (planes_[i])
-			delete planes_[i];
-	}
-	planes_.clear();
 }
 
 void VolumeRenderer::set_color(const fluo::Color& color)
@@ -208,32 +194,6 @@ void VolumeRenderer::set_mask_color(const fluo::Color& color, bool set)
 {
 	mask_color_ = color;
 	mask_color_set_ = set;
-}
-
-//clipping planes
-void VolumeRenderer::set_planes(std::vector<fluo::Plane*>* p)
-{
-	int i;
-	if (!planes_.empty())
-	{
-		for (i = 0; i < (int)planes_.size(); i++)
-		{
-			if (planes_[i])
-				delete planes_[i];
-		}
-		planes_.clear();
-	}
-
-	for (i = 0; i < (int)p->size(); i++)
-	{
-		fluo::Plane* plane = new fluo::Plane(*(*p)[i]);
-		planes_.push_back(plane);
-	}
-}
-
-std::vector<fluo::Plane*>* VolumeRenderer::get_planes()
-{
-	return &planes_;
 }
 
 std::string VolumeRenderer::get_buffer_name()
@@ -541,17 +501,17 @@ void VolumeRenderer::draw_volume(
 
 	//set clipping planes
 	double abcd[4];
-	planes_[0]->get(abcd);
+	clipping_box_[0].get(abcd);
 	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[1]->get(abcd);
+	clipping_box_[1].get(abcd);
 	shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[2]->get(abcd);
+	clipping_box_[2].get(abcd);
 	shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[3]->get(abcd);
+	clipping_box_[3].get(abcd);
 	shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[4]->get(abcd);
+	clipping_box_[4].get(abcd);
 	shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[5]->get(abcd);
+	clipping_box_[5].get(abcd);
 	shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 	// render bricks
@@ -923,17 +883,17 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 
 	//set clipping planes
 	double abcd[4];
-	planes_[0]->get(abcd);
+	clipping_box_[0].get(abcd);
 	seg_shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[1]->get(abcd);
+	clipping_box_[1].get(abcd);
 	seg_shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[2]->get(abcd);
+	clipping_box_[2].get(abcd);
 	seg_shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[3]->get(abcd);
+	clipping_box_[3].get(abcd);
 	seg_shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[4]->get(abcd);
+	clipping_box_[4].get(abcd);
 	seg_shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
-	planes_[5]->get(abcd);
+	clipping_box_[5].get(abcd);
 	seg_shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 	////////////////////////////////////////////////////////

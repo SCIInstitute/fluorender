@@ -34,6 +34,7 @@
 #include <Size.h>
 #include <Vector4i.h>
 #include <Vector4f.h>
+#include <ClippingBox.h>
 #include <vector>
 
 #ifndef TextureBrick_h
@@ -55,7 +56,7 @@ namespace flvr
 	class VolumeRenderer : public TextureRenderer
 	{
 	public:
-		VolumeRenderer(const std::vector<fluo::Plane*> &planes);
+		VolumeRenderer();
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
@@ -144,8 +145,10 @@ namespace flvr
 		int get_slice_num() { return static_cast<int>(num_slices_); }
 
 		//clipping planes
-		void set_planes(std::vector<fluo::Plane*> *p);
-		std::vector<fluo::Plane*> *get_planes();
+		void set_clipping_box(const fluo::ClippingBox& box) { clipping_box_ = box; }
+		void set_clipping_box(fluo::ClippingBox&& box) { clipping_box_ = std::move(box); }
+		fluo::ClippingBox& get_clipping_box() { return clipping_box_; }
+		const fluo::ClippingBox& get_clipping_box() const { return clipping_box_; }
 
 		//interpolation
 		bool get_interpolate() {return interpolate_; }
@@ -271,8 +274,8 @@ namespace flvr
 		bool solid_;
 		//interpolation
 		bool interpolate_;
-		//planes
-		std::vector<fluo::Plane *> planes_;
+		//clipping planes
+		fluo::ClippingBox clipping_box_;
 		//depth peel
 		int depth_peel_;
 		//depth output

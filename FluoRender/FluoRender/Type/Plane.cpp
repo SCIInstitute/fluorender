@@ -137,8 +137,6 @@ namespace fluo
 		n_=Cross(v2,v1);
 		n_.normalize();
 		d_=-Dot(p1, n_);
-
-		Remember();
 	}
 
 	void Plane::ChangePlane(const Point &P, const Vector &N)
@@ -148,8 +146,6 @@ namespace fluo
 		n_ = N;
 		n_.safe_normalize();
 		d_ = -Dot(P,n_);
-
-		Remember();
 	}
 
 	int Plane::Intersect( Point s, Vector v, Point& hit ) const

@@ -93,10 +93,6 @@ namespace fluo
 		//scale the plane from the origin by a vector
 		void Scale(Vector &v);
 
-		//remember and restore
-		void Remember() {n_copy = n_; d_copy = d_;};
-		void Restore() {n_ = n_copy; d_ = d_copy;};
-
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
@@ -115,7 +111,6 @@ namespace fluo
 
 	class PlaneSet
 	{
-		std::vector<Plane> planes_;
 	public:
 		PlaneSet(const PlaneSet &copy);
 		PlaneSet(const std::vector<Plane> &planes);
@@ -151,6 +146,9 @@ namespace fluo
 			}
 			return is;
 		}
+
+	protected:
+		std::vector<Plane> planes_;
 	};
 
 } // End namespace fluo

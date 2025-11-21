@@ -92,32 +92,6 @@ std::shared_ptr<VertexArray> MeshRenderer::GetOrCreateVertexArray(bool vbuf, boo
 	return va;
 }
 
-//clipping planes
-void MeshRenderer::set_planes(std::vector<fluo::Plane*>* p)
-{
-	int i;
-	if (!planes_.empty())
-	{
-		for (i = 0; i < (int)planes_.size(); i++)
-		{
-			if (planes_[i])
-				delete planes_[i];
-		}
-		planes_.clear();
-	}
-
-	for (i = 0; i < (int)p->size(); i++)
-	{
-		fluo::Plane* plane = new fluo::Plane(*(*p)[i]);
-		planes_.push_back(plane);
-	}
-}
-
-std::vector<fluo::Plane*>* MeshRenderer::get_planes()
-{
-	return &planes_;
-}
-
 void MeshRenderer::draw()
 {
 	if (!data_ || !data_->groups)

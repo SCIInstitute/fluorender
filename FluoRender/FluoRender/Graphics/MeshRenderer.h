@@ -30,6 +30,7 @@
 #define MeshRenderer_h
 
 #include <Color.h>
+#include <ClippingBox.h>
 #include <vector>
 #include <cstring>
 #include <memory>
@@ -148,6 +149,12 @@ namespace flvr
 		bool get_fog()
 		{ return fog_; }
 
+		//clipping planes
+		void set_clipping_box(const fluo::ClippingBox& box) { clipping_box_ = box; }
+		void set_clipping_box(fluo::ClippingBox&& box) { clipping_box_ = std::move(box); }
+		fluo::ClippingBox& get_clipping_box() { return clipping_box_; }
+		const fluo::ClippingBox& get_clipping_box() const { return clipping_box_; }
+
 	protected:
 		//viewport
 		GLint vp_[4];
@@ -155,8 +162,8 @@ namespace flvr
 		GLMmodel* data_;
 		//depth peeling
 		int depth_peel_;	//0:no peeling; 1:peel positive; 2:peel both; -1:peel negative
-		//planes
-		std::vector<fluo::Plane *> planes_;
+		//clipping planes
+		fluo::ClippingBox clipping_box_;
 		//draw with clipping
 		bool draw_clip_;
 		int limit_;
