@@ -266,10 +266,40 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	float frost = 1.0 + loc1.x * (1.0 - abs(dot(n, eye)));
 	vec3 diffuse = loc0.rgb * shade * frost;
 
-	// Key light highlight (sharp, white)
-	//vec3 h = normalize(l_dir + eye);
-	//float keySpec = pow(abs(dot(h, n)), mix(10.0, 100.0, loc1.y));
-	//vec3 keyHighlight = vec3(5.0) * keySpec;
+	// Reflection vector
+	vec3 r = normalize(reflect(-eye, n));
+
+	// Build rectangle basis around light direction
+	vec3 uAxis = normalize(cross(l_dir, vec3(0,0,1)));
+	vec3 vAxis = normalize(cross(l_dir, uAxis));
+
+	// Rectangle half-sizes
+	float uSize = mix(0.6, 0.4, loc1.y);
+	float vSize = mix(0.4, 0.3, loc1.y);
+
+	// Project reflection into rectangle space
+	float ru = dot(r, uAxis);
+	float rv = dot(r, vAxis) - 0.65;
+
+	// Inside check
+	float inside = step(abs(ru), uSize) * step(abs(rv), vSize);
+
+	// Edge falloff — scaled by shine factor
+	float softScale = mix(0.2, 0.95, loc1.y);
+	float edgeU = smoothstep(uSize*softScale, uSize, abs(ru));
+	float edgeV = smoothstep(vSize*softScale, vSize, abs(rv));
+	float edgeFalloff = max(edgeU, edgeV);
+
+	// Facing term
+	float facing = max(dot(r, l_dir), 0.0);
+
+	// Center softness — also modulated by shine
+	float viewAlign = abs(dot(n, eye));
+	float centerSoft = mix(0.1, 1.0, 1.0 - viewAlign * loc1.y);
+
+	// Highlight intensity
+	float rectSpec = inside * (1.0 - edgeFalloff) * facing * centerSoft;
+	vec3 keyHighlight = vec3(5.0) * rectSpec;
 
 	// Diffuser highlight (opposite direction, softer)
 	vec3 h_diff = normalize(l_diff + eye);
@@ -277,7 +307,7 @@ inline constexpr const char* MSH_FRAG_BODY_SHADING = R"GLSHDR(
 	vec3 diffHighlight = vec3(0.8) * diffSpec;
 
 	// Combine
-	c.xyz *= diffuse + loc1.x * diffHighlight;
+	c.xyz *= diffuse + loc1.x * (keyHighlight + diffHighlight);
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_BODY_TEXTURE = R"GLSHDR(

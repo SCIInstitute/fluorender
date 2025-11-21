@@ -7274,24 +7274,6 @@ void RenderView::DrawOverlayShadingMesh(double strength, double shine)
 	DrawViewQuad();
 
 	img_shader->unbind();
-
-	//additional highlight pass
-	data_buffer->set_blend_func(0,
-		flvr::BlendFactor::One, flvr::BlendFactor::One,
-		flvr::BlendFactor::Zero, flvr::BlendFactor::One);
-	data_buffer->apply_state();
-
-	img_shader = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_HIGHLIGHTING, 0));
-	assert(img_shader);
-	img_shader->bind();
-
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 4.0, 0.0);
-	img_shader->setLocalParam(1, strength, shine, glbin_settings.m_shadow_dir_x, glbin_settings.m_shadow_dir_y);
-
-	DrawViewQuad();
-
-	img_shader->unbind();
 	fx_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
