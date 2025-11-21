@@ -623,6 +623,11 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			//alpha & luminance
 			shader->setLocalParam(18, vr_list_[tn]->alpha_,
 				vr_list_[tn]->alpha_power_, vr_list_[tn]->luminance_, 0.0);
+			//fog color
+			shader->setLocalParam(19,
+				vr_list_[tn]->fog_color_.r(),
+				vr_list_[tn]->fog_color_.g(),
+				vr_list_[tn]->fog_color_.b(), 0.0);
 
 			double abcd[4];
 			vr_list_[tn]->planes_[0]->get(abcd);

@@ -222,6 +222,7 @@ namespace flvr
 		//fog
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end) { m_use_fog = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }
 		void set_fog(bool use_fog) { m_use_fog = use_fog; }
+		void set_fog_color(const fluo::Color& c) { fog_color_ = c; }
 
 		friend class MultiVolumeRenderer;
 
@@ -249,6 +250,7 @@ namespace flvr
 		double sw_;//soft threshold
 		fluo::Color color_;
 		fluo::Color mask_color_;
+		fluo::Color fog_color_;
 		double alpha_power_;
 		bool mask_color_set_;
 		double mask_thresh_;

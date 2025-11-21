@@ -118,10 +118,11 @@ uniform vec4 loc9;//(primary red, green, blue, 0)
 uniform vec4 loc16;//(secondary red, green, blue, mask_threshold)
 uniform vec4 loc17;//(gm_low, gm_high, gm_max, 0)
 uniform vec4 loc18;//(alpha, alpha_power, luminance, 0)
-	
+uniform vec4 loc19;//(fog/background color)
+
 uniform sampler3D tex0;//data volume
 uniform sampler3D tex1;//gm volume
-	
+
 uniform mat4 matrix2;//texture
 )GLSHDR";
 
@@ -725,7 +726,7 @@ inline constexpr const char* VOL_FOG_BODY  = R"GLSHDR(
 	v.x = (fp.y-fp.w)/(fp.y-fp.z);
 	v.x = clamp(v.x, 0.0, 1.0);
 	v.x = 1.0-exp(-pow(v.x*2.5, 2.0));
-	c.xyz = mix(c.xyz, vec3(0.0), v.x*fp.x); 
+	c.xyz = mix(c.xyz, loc19.xyz, v.x*fp.x); 
 )GLSHDR";
 
 inline constexpr const char* VOL_RASTER_BLEND  = R"GLSHDR(

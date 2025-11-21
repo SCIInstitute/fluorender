@@ -6172,6 +6172,7 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 					vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 				vr->set_zoom(zoom, sf121);
 				m_mvr->add_vr(vr);
 				m_mvr->SetNoiseRed(vr->GetNoiseRed());
@@ -6327,6 +6328,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 					vr->set_color(fluo::Color(1.0));
 					vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
 				}
+				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 				//drawlabel
 				if (vd->GetLabelMode() &&
 					vd->GetMask(false) &&
@@ -6642,6 +6644,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
 		}
+		vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -6888,6 +6891,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 		}
 
 		vr->set_depth_peel(peel);
+		vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 		if (mask)
 			vd->SetStreamMode(4);
 		else

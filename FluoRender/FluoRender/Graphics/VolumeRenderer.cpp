@@ -524,6 +524,8 @@ void VolumeRenderer::draw_volume(
 	shader->setLocalParam(17, gm_low_, gm_high_, gm_max_, 0.0);
 	//alpha & luminance
 	shader->setLocalParam(18, alpha_, alpha_power_, luminance_, 0.0);
+	//fog color
+	shader->setLocalParam(19, fog_color_.r(), fog_color_.g(), fog_color_.b(), 0.0);
 
 	if (colormap_proj_ == ColormapProj::TValue)
 	{
