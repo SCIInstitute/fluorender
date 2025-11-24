@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Vector4f.h>
 #include <nrrd.h>
 #include <glm/glm.hpp>
+#include <array>
 
 namespace flvr
 {
@@ -402,7 +403,7 @@ public:
 		int &nx, int &ny, int &nz);
 	void SetClipValue(int i, int val);
 	void SetClipValues(int i, int val1, int val2);
-	void SetClipValues(const int val[6]);
+	void SetClipValues(const std::array<int, 6>& vals);
 	void ResetClipValues();
 	void ResetClipValuesX();
 	void ResetClipValuesY();

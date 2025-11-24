@@ -282,12 +282,12 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	cl_float4 p[6];
 	if (use_tf)
 	{
-		flvr::VolumeRenderer* vr = vd->GetVR();
-		std::vector<fluo::Plane*> *planes = vr->get_planes();
+		double dp[6];
+		auto planes = vd->GetVR()->get_clipping_box().GetPlanes();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{
-			(*planes)[i]->get(abcd);
+			planes[i].get(abcd);
 			p[i] = { float(abcd[0]),
 				float(abcd[1]),
 				float(abcd[2]),

@@ -378,19 +378,19 @@ public:
 	void SetClipMode(int mode);
 	int GetClipMode() { return m_clip_mode; }
 	//restore clipping planes
-	void RestorePlanes();
+	//void RestorePlanes();
 	//clipping plane rotations
-	void ClipRotate();
-	void SetClippingPlaneRotations(const fluo::Vector& val);
-	fluo::Vector GetClippingPlaneRotations();
-	void SetClipRotX(double val);
-	void SetClipRotY(double val);
-	void SetClipRotZ(double val);
-	fluo::Quaternion GetClipRotation() { return m_q_cl; }
+	//void ClipRotate();
+	//void SetClippingPlaneRotations(const fluo::Vector& val);
+	//fluo::Vector GetClippingPlaneRotations();
+	//void SetClipRotX(double val);
+	//void SetClipRotY(double val);
+	//void SetClipRotZ(double val);
+	//fluo::Quaternion GetClipRotation() { return m_q_cl; }
 	//set clip values
 	void SetClipValue(int i, int val);
 	void SetClipValues(int i, int val1, int val2);
-	void SetClipValues(const int val[6]);
+	void SetClipValues(const std::array<int, 6>& vals);
 	void ResetClipValues();
 	void ResetClipValuesX();
 	void ResetClipValuesY();
@@ -460,7 +460,7 @@ public:
 	fluo::Transform GetInvOffsetMat();
 	fluo::Vector GetSide();
 
-	void UpdateClips();
+	void RotateClips();
 
 	//mouse position
 	void SetMousePos(int x, int y) { m_mouse_x = x; m_mouse_y = y; }
@@ -646,34 +646,42 @@ private:
 	double m_distance;
 	double m_init_dist;
 	//camera translation
-	double m_transx, m_transy, m_transz;
+	fluo::Vector m_cam_trans;
 	//camera rotation
-	double m_rotx, m_roty, m_rotz;
+	fluo::Vector m_cam_rot;
 	//zero camera rotation
-	double m_zrotx, m_zroty, m_zrotz;
+	fluo::Vector m_cam_rot_zero;
+	//double m_zrotx, m_zroty, m_zrotz;
 	//camera center
-	double m_ctrx, m_ctry, m_ctrz;
+	fluo::Point m_cam_ctr;
+	//double m_ctrx, m_ctry, m_ctrz;
 	fluo::Quaternion m_q;
 	fluo::Quaternion m_zq;//zero rotation
 	fluo::Vector m_up;
 	fluo::Vector m_head;
 
 	//object center
-	double m_obj_ctrx, m_obj_ctry, m_obj_ctrz;
+	fluo::Point m_obj_ctr;
+	//double m_obj_ctrx, m_obj_ctry, m_obj_ctrz;
 	//object rotation
-	double m_obj_rotx, m_obj_roty, m_obj_rotz;
+	fluo::Vector m_obj_rot;
+	//double m_obj_rotx, m_obj_roty, m_obj_rotz;
 	//flag for using offset values
 	bool m_offset;
 	//obj center offset (for registration currently)
-	double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
+	fluo::Vector m_obj_ctr_off;
+	//double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
 	//obj rotation center offset
-	double m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz;
+	fluo::Vector m_obj_rot_ctr_off;
+	//double m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz;
 	//obj rotation offset (for registration currently)
-	double m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz;
+	fluo::Vector m_obj_rot_off;
+	//double m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz;
 	//offset transform
 	fluo::Transform m_offset_tf;
 	//object translation
-	double m_obj_transx, m_obj_transy, m_obj_transz;
+	fluo::Vector m_obj_trans;
+	//double m_obj_transx, m_obj_transy, m_obj_transz;
 	//rotation lock
 	bool m_rot_lock;
 
@@ -735,9 +743,9 @@ private:
 	fluo::Color m_color_7;
 
 	//clipping plane rotations
-	fluo::Quaternion m_q_cl;
-	fluo::Quaternion m_q_cl_zero;
-	double m_rotx_cl, m_roty_cl, m_rotz_cl;
+	//fluo::Quaternion m_q_cl;
+	//fluo::Quaternion m_q_cl_zero;
+	//fluo::Vector m_rot_cl;
 
 	//for selection
 	bool m_pick;
@@ -917,7 +925,6 @@ private:
 	void CalcFogRange();
 
 	fluo::Quaternion Trackball(double dx, double dy);
-	fluo::Quaternion TrackballClip(int p1x, int p1y, int p2x, int p2y);
 	void Q2A();
 	void A2Q();
 

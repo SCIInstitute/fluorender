@@ -87,11 +87,10 @@ namespace fluo
 		int Intersect(Plane p, Point &s, Vector &v);
 
 		//translate the plane by a vector
-		void Translate(Vector &v);
+		void Translate(const Vector &v);
 		//rotate the plane around origin by a quaternion
-		void Rotate(Quaternion &q);
-		//scale the plane from the origin by a vector
-		void Scale(Vector &v);
+		void Rotate(const Quaternion &q);
+		void RotatePoint(const Quaternion& q, const Point& p);
 
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
@@ -112,17 +111,34 @@ namespace fluo
 	class PlaneSet
 	{
 	public:
-		PlaneSet(const PlaneSet &copy);
-		PlaneSet(const std::vector<Plane> &planes);
-		PlaneSet(unsigned int size);
-		PlaneSet();
-		~PlaneSet();
+		PlaneSet() = default;
+		explicit PlaneSet(size_t size) : planes_(size) {}
+		PlaneSet(const std::vector<Plane>& planes) : planes_(planes) {}
+		PlaneSet(const PlaneSet& copy) = default;
+		PlaneSet(PlaneSet&& other) noexcept = default;
+		~PlaneSet() = default;
 
-		PlaneSet& operator=(const PlaneSet &ps);
-		bool operator==(const PlaneSet &ps) const;
-		bool operator!=(const PlaneSet &ps) const;
-		Plane &operator[](const size_t index);
-		Plane Get(const size_t index);
+		PlaneSet& operator=(const PlaneSet& ps) = default;
+		PlaneSet& operator=(PlaneSet&& ps) noexcept = default;
+
+		bool operator==(const PlaneSet& ps) const { return planes_ == ps.planes_; }
+		bool operator!=(const PlaneSet& ps) const { return planes_ != ps.planes_; }
+
+		// Container-like interface
+		size_t size() const { return planes_.size(); }
+		bool empty() const { return planes_.empty(); }
+		void clear() { planes_.clear(); }
+		void resize(size_t n) { planes_.resize(n); }
+		void assign(size_t n, const Plane& p = Plane()) { planes_.assign(n, p); }
+		void push_back(const Plane& p) { planes_.push_back(p); }
+
+		Plane& operator[](size_t i) { return planes_[i]; }
+		const Plane& operator[](size_t i) const { return planes_[i]; }
+
+		auto begin() { return planes_.begin(); }
+		auto end() { return planes_.end(); }
+		auto begin() const { return planes_.begin(); }
+		auto end() const { return planes_.end(); }
 
 		friend std::ostream& operator<<(std::ostream& os, const PlaneSet& ps)
 		{

@@ -106,10 +106,9 @@ void RulerAlign::AlignRuler()
 	double ang = Dot(m_axis, axis);
 	ang = r2d(std::acos(ang));
 	fluo::Quaternion q(ang, rotv);
-	double qx, qy, qz;
 	view->ResetZeroRotations();
-	q.ToEuler(qx, qy, qz);
-	view->SetRotations(fluo::Vector(qx, -qy, -qz), true);
+	fluo::Vector euler = q.ToEuler();
+	view->SetRotations(fluo::Vector(euler.x(), -euler.y(), -euler.z()), true);
 
 	if (m_align_center)
 	{
@@ -229,10 +228,9 @@ void RulerAlign::AlignPca(bool rulers)
 	fluo::Quaternion rotq(ang, source0);
 	rotq.Normalize();
 	fluo::Quaternion q2 = q * rotq;
-	double qx, qy, qz;
 	view->ResetZeroRotations();
-	q2.ToEuler(qx, qy, qz);
-	view->SetRotations(fluo::Vector(qx, -qy, -qz), true);
+	fluo::Vector euler = q2.ToEuler();
+	view->SetRotations(fluo::Vector(euler.x(), -euler.y(), -euler.z()), true);
 
 	if (m_align_center)
 	{

@@ -606,28 +606,25 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
-	std::vector<fluo::Plane*>* planes = 0;
+	fluo::ClippingBox cb;
 	switch (type)
 	{
 	case 2:	//volume
 		if (vd && vd->GetVR())
-			planes = vd->GetVR()->get_planes();
+			cb = vd->GetVR()->get_clipping_box();
 		break;
 	case 3:	//mesh
 		if (md && md->GetMR())
-			planes = md->GetMR()->get_planes();
+			cb = md->GetMR()->get_clipping_box();
 		break;
+	default:
+		return;
 	}
-	if (!planes)
-		return;
-	if (planes->size() != 6)	//it has to be 6
-		return;
 
 	bool bval;
+	double dval;
+	int ival;
 	wxString str;
-	fluo::Plane* plane = 0;
-	int val = 0;
-	double abcd[4];
 
 	bool linkx = m_clipx_sldr->GetLink();
 	bool linky = m_clipy_sldr->GetLink();
@@ -638,66 +635,60 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//x1
 	if (update_all || FOUND_VALUE(gstClipX1))
 	{
-		plane = (*planes)[0];
-		plane->get_copy(abcd);
-		val = std::round(-abcd[3] * resx);
-		m_clipx_sldr->ChangeLowValue(val);
-		str = wxString::Format("%d", val);
+		dval = cb.GetClip(fluo::ClipPlane::XNeg);
+		ival = static_cast<int>(std::round(dval));
+		m_clipx_sldr->ChangeLowValue(ival);
+		str = wxString::Format("%d", ival);
 		m_x1_clip_text->ChangeValue(str);
 		m_x1_clip_text->Update();
 	}
 	//x2
 	if (update_all || FOUND_VALUE(gstClipX2))
 	{
-		plane = (*planes)[1];
-		plane->get_copy(abcd);
-		val = std::round(abcd[3] * resx);
-		m_clipx_sldr->ChangeHighValue(val);
-		str = wxString::Format("%d", val);
+		dval = cb.GetClip(fluo::ClipPlane::XPos);
+		ival = static_cast<int>(std::round(dval));
+		m_clipx_sldr->ChangeHighValue(ival);
+		str = wxString::Format("%d", ival);
 		m_x2_clip_text->ChangeValue(str);
 		m_x2_clip_text->Update();
 	}
 	//y1
 	if (update_all || FOUND_VALUE(gstClipY1))
 	{
-		plane = (*planes)[2];
-		plane->get_copy(abcd);
-		val = std::round(-abcd[3] * resy);
-		m_clipy_sldr->ChangeLowValue(val);
-		str = wxString::Format("%d", val);
+		dval = cb.GetClip(fluo::ClipPlane::YNeg);
+		ival = static_cast<int>(std::round(dval));
+		m_clipy_sldr->ChangeLowValue(ival);
+		str = wxString::Format("%d", ival);
 		m_y1_clip_text->ChangeValue(str);
 		m_y1_clip_text->Update();
 	}
 	//y2
 	if (update_all || FOUND_VALUE(gstClipY2))
 	{
-		plane = (*planes)[3];
-		plane->get_copy(abcd);
-		val = std::round(abcd[3] * resy);
-		m_clipy_sldr->ChangeHighValue(val);
-		str = wxString::Format("%d", val);
+		dval = cb.GetClip(fluo::ClipPlane::YPos);
+		ival = static_cast<int>(std::round(dval));
+		m_clipy_sldr->ChangeHighValue(ival);
+		str = wxString::Format("%d", ival);
 		m_y2_clip_text->ChangeValue(str);
 		m_y2_clip_text->Update();
 	}
 	//z1
 	if (update_all || FOUND_VALUE(gstClipZ1))
 	{
-		plane = (*planes)[4];
-		plane->get_copy(abcd);
-		val = std::round(-abcd[3] * resz);
-		m_clipz_sldr->ChangeLowValue(val);
-		str = wxString::Format("%d", val);
+		dval = cb.GetClip(fluo::ClipPlane::ZNeg);
+		ival = static_cast<int>(std::round(dval));
+		m_clipz_sldr->ChangeLowValue(ival);
+		str = wxString::Format("%d", ival);
 		m_z1_clip_text->ChangeValue(str);
 		m_z1_clip_text->Update();
 	}
 	//z2
 	if (update_all || FOUND_VALUE(gstClipZ2))
 	{
-		plane = (*planes)[5];
-		plane->get_copy(abcd);
-		val = std::round(abcd[3] * resz);
-		m_clipz_sldr->ChangeHighValue(val);
-		str = wxString::Format("%d", val);
+		dval = cb.GetClip(fluo::ClipPlane::ZPos);
+		ival = static_cast<int>(std::round(dval));
+		m_clipz_sldr->ChangeHighValue(ival);
+		str = wxString::Format("%d", ival);
 		m_z2_clip_text->ChangeValue(str);
 		m_z2_clip_text->Update();
 	}
@@ -752,7 +743,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//rotations
 	if (view)
 	{
-		fluo::Vector rot = view->GetClippingPlaneRotations();
+		fluo::Vector rot = cb.GetEuler();
 		//x
 		if (update_all || FOUND_VALUE(gstClipRotX))
 		{
@@ -830,7 +821,7 @@ void ClipPlanePanel::LinkChannels()
 		long z2_val = 0;
 		str.ToLong(&z2_val);
 
-		int val[6] = { (int)x1_val, (int)x2_val, (int)y1_val, (int)y2_val, (int)z1_val, (int)z2_val };
+		std::array<int, 6> val = { (int)x1_val, (int)x2_val, (int)y1_val, (int)y2_val, (int)z1_val, (int)z2_val };
 		SetClipValues(val);
 	}
 	FluoUpdate({ gstClipLinkChan });
@@ -1180,7 +1171,6 @@ void ClipPlanePanel::SetClipValue(int i, int val, bool link)
 			vc.insert(gstClipZ1);
 		break;
 	}
-	view->UpdateClips();
 
 	vc.insert(gstConvVolMeshUpdateTransf);
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
@@ -1198,7 +1188,6 @@ void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 		vd->SetClipValues(i, val1, val2);
 
 	view->m_clip_mask = i;
-	view->UpdateClips();
 
 	fluo::ValueCollection vc;
 	if (i & 1)
@@ -1218,18 +1207,17 @@ void ClipPlanePanel::SetClipValues(int i, int val1, int val2)
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
 
-void ClipPlanePanel::SetClipValues(const int val[6])
+void ClipPlanePanel::SetClipValues(const std::array<int, 6>& vals)
 {
 	auto vd = glbin_current.vol_data.lock();
 	auto view = glbin_current.render_view.lock();
 	if (!vd || !view)
 		return;
 	if (glbin_settings.m_clip_link)
-		view->SetClipValues(val);
+		view->SetClipValues(vals);
 	else
-		vd->SetClipValues(val);
+		vd->SetClipValues(vals);
 	view->m_clip_mask = 63;
-	view->UpdateClips();
 
 	FluoRefresh(0,
 		{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf },
@@ -1247,7 +1235,6 @@ void ClipPlanePanel::ResetClipValues()
 	else
 		vd->ResetClipValues();
 	view->m_clip_mask = -1;
-	view->UpdateClips();
 
 	//links
 	SetXLink(false);
@@ -1269,7 +1256,6 @@ void ClipPlanePanel::ResetClipValuesX()
 	else
 		vd->ResetClipValuesX();
 	view->m_clip_mask = -1;
-	view->UpdateClips();
 
 	//links
 	SetXLink(false);
@@ -1288,7 +1274,6 @@ void ClipPlanePanel::ResetClipValuesY()
 	else
 		vd->ResetClipValuesY();
 	view->m_clip_mask = -1;
-	view->UpdateClips();
 
 	//links
 	SetYLink(false);
@@ -1307,7 +1292,6 @@ void ClipPlanePanel::ResetClipValuesZ()
 	else
 		vd->ResetClipValuesZ();
 	view->m_clip_mask = -1;
-	view->UpdateClips();
 
 	//links
 	SetZLink(false);

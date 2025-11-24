@@ -237,6 +237,20 @@ namespace fluo
 		//scale around center
 		void scale_center(double sx, double sy, double sz);
 
+		//access
+		inline void minx(double v) { cmin_.x(v); }
+		inline void miny(double v) { cmin_.y(v); }
+		inline void minz(double v) { cmin_.z(v); }
+		inline void maxx(double v) { cmax_.x(v); }
+		inline void maxy(double v) { cmax_.y(v); }
+		inline void maxz(double v) { cmax_.z(v); }
+		inline double minx() const { return cmin_.x(); }
+		inline double miny() const { return cmin_.y(); }
+		inline double minz() const { return cmin_.z(); }
+		inline double maxx() const { return cmax_.x(); }
+		inline double maxy() const { return cmax_.y(); }
+		inline double maxz() const { return cmax_.z(); }
+
 		inline Point Min() const
 		{ return cmin_; }
 

@@ -181,29 +181,11 @@ RenderView::RenderView() :
 	//camera distance
 	m_distance(10.0),
 	m_init_dist(10.0),
-	//camera translation
-	m_transx(0.0), m_transy(0.0), m_transz(0.0),
-	//camera rotation
-	m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
-	//camera center
-	m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
 	//camera direction
 	m_up(0.0, 1.0, 0.0),
 	m_head(0.0, 0.0, -1.0),
-	//object center
-	m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
-	//object rotation
-	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
 	//flag for using offset values
 	m_offset(false),
-	//object center offset
-	m_obj_ctr_offx(0), m_obj_ctr_offy(0), m_obj_ctr_offz(0),
-	//object rotation center offset
-	m_obj_rot_ctr_offx(0), m_obj_rot_ctr_offy(0), m_obj_rot_ctr_offz(0),
-	//object rotation offset
-	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
-	//object translation
-	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
 	m_rot_lock(false),
 	//lock cam center
 	m_lock_cam_object(false),
@@ -249,8 +231,6 @@ RenderView::RenderView() :
 	m_value_6(1.0),
 	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
 	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
-	//clipping plane rotations
-	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
 	//selection
 	m_pick(false),
 	m_draw_mask(true),
@@ -403,29 +383,11 @@ RenderView::RenderView(RenderView& copy):
 	//camera distance
 	m_distance(copy.m_distance),
 	m_init_dist(copy.m_init_dist),
-	//camera translation
-	m_transx(0.0), m_transy(0.0), m_transz(0.0),
-	//camera rotation
-	m_rotx(0.0), m_roty(0.0), m_rotz(0.0),
-	//camera center
-	m_ctrx(0.0), m_ctry(0.0), m_ctrz(0.0),
 	//camera direction
 	m_up(0.0, 1.0, 0.0),
 	m_head(0.0, 0.0, -1.0),
-	//object center
-	m_obj_ctrx(0.0), m_obj_ctry(0.0), m_obj_ctrz(0.0),
-	//object rotation
-	m_obj_rotx(0.0), m_obj_roty(180.0), m_obj_rotz(180.0),
 	//flag for using offset values
 	m_offset(false),
-	//object center offset
-	m_obj_ctr_offx(0), m_obj_ctr_offy(0), m_obj_ctr_offz(0),
-	//object rotation center offset
-	m_obj_rot_ctr_offx(0), m_obj_rot_ctr_offy(0), m_obj_rot_ctr_offz(0),
-	//object rotation offset
-	m_obj_rot_offx(0), m_obj_rot_offy(0), m_obj_rot_offz(0),
-	//object translation
-	m_obj_transx(0.0), m_obj_transy(0.0), m_obj_transz(0.0),
 	m_rot_lock(false),
 	//lock cam center
 	m_lock_cam_object(false),
@@ -471,8 +433,6 @@ RenderView::RenderView(RenderView& copy):
 	m_value_6(1.0),
 	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
 	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
-	//clipping plane rotations
-	m_rotx_cl(0), m_roty_cl(0), m_rotz_cl(0),
 	//selection
 	m_pick(false),
 	m_draw_mask(true),
@@ -840,9 +800,7 @@ void RenderView::InitView(unsigned int type)
 	{
 		if (m_bounds.valid())
 		{
-			m_obj_ctrx = (m_bounds.Min().x() + m_bounds.Max().x()) / 2.0;
-			m_obj_ctry = (m_bounds.Min().y() + m_bounds.Max().y()) / 2.0;
-			m_obj_ctrz = (m_bounds.Min().z() + m_bounds.Max().z()) / 2.0;
+			m_obj_ctr = m_bounds.center();
 		}
 	}
 
@@ -850,22 +808,19 @@ void RenderView::InitView(unsigned int type)
 	{
 		m_distance = m_radius / tan(d2r(m_aov / 2.0));
 		m_init_dist = m_distance;
-		m_transx = 0.0;
-		m_transy = 0.0;
-		m_transz = m_distance;
+		m_cam_trans = fluo::Vector(0.0, 0.0, m_distance);
 	}
 
 	if (type&INIT_OBJ_TRANSL)
 	{
-		m_obj_transx = 0.0;
-		m_obj_transy = 0.0;
-		m_obj_transz = 0.0;
+		m_obj_trans = fluo::Vector(0.0, 0.0, 0.0);
 	}
 
 	if (type&INIT_ROTATE || !m_init_view)
 	{
 		m_q = fluo::Quaternion(0, 0, 0, 1);
-		m_q.ToEuler(m_rotx, m_roty, m_rotz);
+		m_cam_rot = m_q.ToEuler();
+		m_cam_rot.normalize_euler_unsigned();
 	}
 
 	m_init_view = true;
@@ -886,7 +841,7 @@ void RenderView::ClearAll()
 		m_track_group->Clear();
 	m_cell_list->clear();
 	InitView();
-	SetClippingPlaneRotations(fluo::Vector(0.0));
+	//SetClippingPlaneRotations(fluo::Vector(0.0));
 }
 
 void RenderView::Clear()
@@ -2413,23 +2368,21 @@ void RenderView::HandleProjection(int nx, int ny, bool vr)
 
 void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3& up)
 {
-	fluo::Vector pos(m_transx, m_transy, m_transz);
+	fluo::Vector pos = m_cam_trans;
 	pos.normalize();
 	if (m_cam_mode == 1)
 		pos *= 0.1;
 	else
 		pos *= m_distance;
-	m_transx = pos.x();
-	m_transy = pos.y();
-	m_transz = pos.z();
+	m_cam_trans = pos;
 
-	eye = glm::vec3(m_transx, m_transy, m_transz);
+	eye = glm::vec3(m_cam_trans.x(), m_cam_trans.y(), m_cam_trans.z());
 	center = glm::vec3(0.0);
 	up = glm::vec3(m_up.x(), m_up.y(), m_up.z());
 
 	if (m_cam_mode == 1)
 	{
-		center = glm::vec3(m_ctrx, m_ctry, m_ctrz);
+		center = glm::vec3(m_cam_ctr.x(), m_cam_ctr.y(), m_cam_ctr.z());
 		eye += center;
 	}
 }
@@ -2437,7 +2390,7 @@ void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3&
 void RenderView::GetCameraSettingsOrthoFligt(glm::vec3& eye, glm::vec3& center, float& dist)
 {
 	dist = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
-	glm::vec3 dir(m_transx, m_transy, m_transz);
+	glm::vec3 dir(m_cam_trans.x(), m_cam_trans.y(), m_cam_trans.z());
 	dir = glm::normalize(dir);
 	dir *= dist;
 	eye = dir;
@@ -2539,49 +2492,37 @@ float RenderView::GetDistancePerspFlight()
 //camera operations
 fluo::Vector RenderView::GetTranslations()
 {
-	return fluo::Vector(m_transx, m_transy, m_transz);
+	return m_cam_trans;
 }
+
 void RenderView::SetTranslations(const fluo::Vector& val)
 {
-	m_transx = val.x(); m_transy = val.y(); m_transz = val.z();
-	m_distance = sqrt(m_transx*m_transx + m_transy*m_transy + m_transz*m_transz);
+	m_cam_trans = val;
+	m_distance = m_cam_trans.length();
 }
 
 fluo::Vector RenderView::GetRotations()
 {
-	return fluo::Vector(m_rotx, m_roty, m_rotz);
+	return m_cam_rot;
 }
 
 void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 {
-	m_rotx = val.x();
-	m_roty = val.y();
-	m_rotz = val.z();
-
-	if (m_roty>360.0)
-		m_roty -= 360.0;
-	if (m_roty<0.0)
-		m_roty += 360.0;
-	if (m_rotx>360.0)
-		m_rotx -= 360.0;
-	if (m_rotx<0.0)
-		m_rotx += 360.0;
-	if (m_rotz>360.0)
-		m_rotz -= 360.0;
-	if (m_rotz<0.0)
-		m_rotz += 360.0;
+	m_cam_rot = val;
+	m_cam_rot.normalize_euler_unsigned();
 
 	A2Q();
 
 	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
 	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-	m_transx = cam_pos2.x;
-	m_transy = cam_pos2.y;
-	m_transz = cam_pos2.z;
+	m_cam_trans = cam_pos2.GetVector();
 
 	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
 	fluo::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
+
+	if (m_clip_mode)
+		RotateClips();
 
 	if (notify && m_render_view_panel)
 		m_render_view_panel->FluoUpdate({ gstCamRotation });
@@ -2608,32 +2549,20 @@ int RenderView::GetOrientation()
 
 fluo::Vector RenderView::ResetZeroRotations()
 {
-	double rotx, roty, rotz;
 	m_zq = fluo::Quaternion();
-	m_q.ToEuler(rotx, roty, rotz);
-	if (roty > 360.0)
-		roty -= 360.0;
-	if (roty < 0.0)
-		roty += 360.0;
-	if (rotx > 360.0)
-		rotx -= 360.0;
-	if (rotx < 0.0)
-		rotx += 360.0;
-	if (rotz > 360.0)
-		rotz -= 360.0;
-	if (rotz < 0.0)
-		rotz += 360.0;
-	return fluo::Vector(rotx, roty, rotz);
+	fluo::Vector result = m_q.ToEuler();
+	result.normalize_euler_unsigned();
+	return result;
 }
 
 fluo::Point RenderView::GetCenters()
 {
-	return fluo::Point(m_ctrx, m_ctry, m_ctrz);
+	return m_cam_ctr;
 }
 
 void RenderView::SetCenters(const fluo::Point& val)
 {
-	m_ctrx = val.x(); m_ctry = val.y(); m_ctrz = val.z();
+	m_cam_ctr = val;
 }
 
 void RenderView::SetCenter()
@@ -2649,29 +2578,10 @@ void RenderView::SetCenter()
 	if (!vd)
 		return;
 
-	fluo::BBox bbox = vd->GetBounds();
 	flvr::VolumeRenderer *vr = vd->GetVR();
 	if (!vr) return;
-	std::vector<fluo::Plane*> *planes = vr->get_planes();
-	if (planes->size() != 6) return;
-	double x1, x2, y1, y2, z1, z2;
-	double abcd[4];
-	(*planes)[0]->get_copy(abcd);
-	x1 = fabs(abcd[3])*bbox.Max().x();
-	(*planes)[1]->get_copy(abcd);
-	x2 = fabs(abcd[3])*bbox.Max().x();
-	(*planes)[2]->get_copy(abcd);
-	y1 = fabs(abcd[3])*bbox.Max().y();
-	(*planes)[3]->get_copy(abcd);
-	y2 = fabs(abcd[3])*bbox.Max().y();
-	(*planes)[4]->get_copy(abcd);
-	z1 = fabs(abcd[3])*bbox.Max().z();
-	(*planes)[5]->get_copy(abcd);
-	z2 = fabs(abcd[3])*bbox.Max().z();
-
-	m_obj_ctrx = (x1 + x2) / 2.0;
-	m_obj_ctry = (y1 + y2) / 2.0;
-	m_obj_ctrz = (z1 + z2) / 2.0;
+	auto bbox = vr->get_clipping_box().GetClipBox();
+	m_obj_ctr = bbox.center();
 }
 
 double RenderView::Get121ScaleFactor()
@@ -2737,74 +2647,62 @@ void RenderView::SetPinRotCenter(bool pin, bool update)
 //object operations
 fluo::Point RenderView::GetObjCenters()
 {
-	return fluo::Point(m_obj_ctrx, m_obj_ctry, m_obj_ctrz);
+	return m_obj_ctr;
 }
 
 void RenderView::SetObjCenters(const fluo::Point& val)
 {
-	m_obj_ctrx = val.x();
-	m_obj_ctry = val.y();
-	m_obj_ctrz = val.z();
+	m_obj_ctr = val;
 }
 
 fluo::Vector RenderView::GetObjRot()
 {
-	return fluo::Vector(m_obj_rotx, m_obj_roty, m_obj_rotz);
+	return m_obj_rot;
 }
 
 void RenderView::SetObjRot(const fluo::Vector& val)
 {
-	m_obj_rotx = val.x();
-	m_obj_roty = val.y();
-	m_obj_rotz = val.z();
+	m_obj_rot = val;
 }
 
 void RenderView::SetOffset()
 {
-	if (m_obj_ctr_offx != 0.0 || m_obj_ctr_offy != 0.0 || m_obj_ctr_offz != 0.0 ||
-		m_obj_rot_ctr_offx != 0.0 || m_obj_rot_ctr_offy != 0.0 || m_obj_rot_ctr_offz != 0.0 ||
-		m_obj_rot_offx != 0.0 || m_obj_rot_offy != 0.0 || m_obj_rot_offz != 0.0)
-		m_offset = true;
-	else
-		m_offset = false;
+	m_offset =
+		m_obj_ctr_off.any_non_zero() ||
+		m_obj_rot_ctr_off.any_non_zero() ||
+		m_obj_rot_off.any_non_zero();
 }
 
 fluo::Vector RenderView::GetObjCtrOff()
 {
-	return fluo::Vector(m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz);
+	return m_obj_ctr_off;
 }
 
 void RenderView::SetObjCtrOff(const fluo::Vector& val)
 {
-	m_obj_ctr_offx = val.x();
-	m_obj_ctr_offy = val.y();
-	m_obj_ctr_offz = val.z();
+	m_obj_ctr_off = val;
 	SetOffset();
 }
 
 fluo::Vector RenderView::GetObjRotCtrOff()
 {
-	return fluo::Vector(m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz);
+	return m_obj_rot_ctr_off;
 }
 
 void RenderView::SetObjRotCtrOff(const fluo::Vector& val)
 {
-	m_obj_rot_ctr_offx = val.x() == 0.0 ? m_obj_ctrx : val.x();
-	m_obj_rot_ctr_offy = val.y() == 0.0 ? m_obj_ctry : val.y();
-	m_obj_rot_ctr_offz = val.z() == 0.0 ? m_obj_ctrz : val.z();
+	m_obj_rot_ctr_off = val;
 	SetOffset();
 }
 
 fluo::Vector RenderView::GetObjRotOff()
 {
-	return fluo::Vector(m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz);
+	return m_obj_rot_off;
 }
 
 void RenderView::SetObjRotOff(const fluo::Vector& val)
 {
-	m_obj_rot_offx = val.x();
-	m_obj_rot_offy = val.y();
-	m_obj_rot_offz = val.z();
+	m_obj_rot_off = val;
 	SetOffset();
 }
 
@@ -2815,14 +2713,12 @@ void RenderView::SetOffsetTransform(const fluo::Transform &tf)
 
 fluo::Vector RenderView::GetObjTrans()
 {
-	return fluo::Vector(m_obj_transx, m_obj_transy, m_obj_transz);
+	return m_obj_trans;
 }
 
 void RenderView::SetObjTrans(const fluo::Vector& val)
 {
-	m_obj_transx = val.x();
-	m_obj_transy = val.y();
-	m_obj_transz = val.z();
+	m_obj_trans = val;
 }
 
 void RenderView::SetLockCenter()
@@ -2882,26 +2778,18 @@ void RenderView::SetCamMode(int mode)
 	{
 	case 0://globe
 		{
-			fluo::Vector eye(m_transx, m_transy, m_transz);
-			fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
-			fluo::Vector d = ctr - eye;
+			fluo::Vector eye = m_cam_trans;
+			fluo::Vector d = fluo::Vector(m_cam_ctr) - eye;
 			d.normalize();
-			ctr = eye + m_distance * d;
-			m_ctrx = ctr.x();
-			m_ctry = ctr.y();
-			m_ctrz = ctr.z();
+			m_cam_ctr = fluo::Point(eye + m_distance * d);
 		}
 		break;
 	case 1://flight
 		{
-			fluo::Vector pos(m_transx, m_transy, m_transz);
+			fluo::Vector pos = m_cam_trans;
 			fluo::Vector d = pos;
 			d.normalize();
-			fluo::Vector ctr;
-			ctr = pos - 0.1 * d;
-			m_ctrx = ctr.x();
-			m_ctry = ctr.y();
-			m_ctrz = ctr.z();
+			m_cam_ctr = fluo::Point(pos - 0.1 * d);
 		}
 		break;
 	}
@@ -3061,52 +2949,36 @@ void RenderView::SetParams(double t)
 			vd->SetDisp(bval);
 
 		//clipping planes
-		std::vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
-		if (!planes) continue;
-		if (planes->size() != 6) continue;
-		fluo::Plane *plane = 0;
-		double val = 0;
+		fluo::ClippingBox cb = vd->GetVR()->get_clipping_box();
 		//x1
-		plane = (*planes)[0];
 		keycode.l2_name = "x1_val";
-		if (glbin_interpolator.GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
-				fluo::Vector(1.0, 0.0, 0.0));
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			cb.SetClip(fluo::ClipPlane::XNeg, dval);
 		vc.insert(gstClipX1);
 		//x2
-		plane = (*planes)[1];
 		keycode.l2_name = "x2_val";
-		if (glbin_interpolator.GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(abs(val), 0.0, 0.0),
-				fluo::Vector(-1.0, 0.0, 0.0));
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			cb.SetClip(fluo::ClipPlane::XPos, dval);
 		vc.insert(gstClipX2);
 		//y1
-		plane = (*planes)[2];
 		keycode.l2_name = "y1_val";
-		if (glbin_interpolator.GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
-				fluo::Vector(0.0, 1.0, 0.0));
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			cb.SetClip(fluo::ClipPlane::YNeg, dval);
 		vc.insert(gstClipY1);
 		//y2
-		plane = (*planes)[3];
 		keycode.l2_name = "y2_val";
-		if (glbin_interpolator.GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, abs(val), 0.0),
-				fluo::Vector(0.0, -1.0, 0.0));
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			cb.SetClip(fluo::ClipPlane::YPos, dval);
 		vc.insert(gstClipY2);
 		//z1
-		plane = (*planes)[4];
 		keycode.l2_name = "z1_val";
-		if (glbin_interpolator.GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
-				fluo::Vector(0.0, 0.0, 1.0));
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			cb.SetClip(fluo::ClipPlane::ZNeg, dval);
 		vc.insert(gstClipZ1);
 		//z2
-		plane = (*planes)[5];
 		keycode.l2_name = "z2_val";
-		if (glbin_interpolator.GetDouble(keycode, t, val))
-			plane->ChangePlane(fluo::Point(0.0, 0.0, abs(val)),
-				fluo::Vector(0.0, 0.0, -1.0));
+		if (glbin_interpolator.GetDouble(keycode, t, dval))
+			cb.SetClip(fluo::ClipPlane::ZPos, dval);
 		vc.insert(gstClipZ2);
 		//t
 		double frame;
@@ -3274,9 +3146,7 @@ void RenderView::SetParams(double t)
 	{
 		m_q = q;
 		q *= -m_zq;
-		double rotx, roty, rotz;
-		q.ToEuler(rotx, roty, rotz);
-		SetRotations(fluo::Vector(rotx, roty, rotz), true);
+		SetRotations(q.ToEuler(), true);
 		vc.insert(gstCamRotation);
 	}
 	//intermixing mode
@@ -3919,98 +3789,97 @@ void RenderView::SetClipMode(int mode)
 	{
 	case 0:
 		m_clip_mode = 0;
-		RestorePlanes();
-		m_rotx_cl = 0;
-		m_roty_cl = 0;
-		m_rotz_cl = 0;
+		//RestorePlanes();
+		//m_rot_cl = fluo::Vector(0, 0, 0);
 		break;
 	case 1:
 		m_clip_mode = 1;
-		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+		SetRotations(m_cam_rot, true);
 		break;
 	case 2:
+	{
 		m_clip_mode = 2;
-		{
-			double rx, ry, rz;
-			m_q.ToEuler(rx, ry, rz);
-			m_q_cl_zero.FromEuler(rx, -ry, -rz);
-		}
-		m_q_cl = m_q_cl_zero;
-		m_q_cl.ToEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
-		if (m_rotx_cl > 180.0) m_rotx_cl -= 360.0;
-		if (m_roty_cl > 180.0) m_roty_cl -= 360.0;
-		if (m_rotz_cl > 180.0) m_rotz_cl -= 360.0;
-		SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+		//{
+		//	fluo::Vector euler = m_q.ToEuler();
+		//	euler.y(-euler.y());
+		//	euler.z(-euler.z());
+		//	m_q_cl_zero.FromEuler(euler);
+		//}
+		//m_q_cl = m_q_cl_zero;
+		//m_rot_cl = m_q_cl.ToEuler();
+		//m_rot_cl.normalize_euler_signed();
+		SetRotations(m_cam_rot, true);
+	}
 		break;
 	}
 }
 
-void RenderView::RestorePlanes()
-{
-	std::vector<fluo::Plane*> *planes = 0;
-	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
-	{
-		auto vd = it->lock();
-		if (!vd)
-			continue;
+//void RenderView::RestorePlanes()
+//{
+	//std::vector<fluo::Plane*> *planes = 0;
+	//for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
+	//{
+	//	auto vd = it->lock();
+	//	if (!vd)
+	//		continue;
 
-		planes = 0;
-		if (vd->GetVR())
-			planes = vd->GetVR()->get_planes();
-		if (planes && planes->size() == 6)
-		{
-			(*planes)[0]->Restore();
-			(*planes)[1]->Restore();
-			(*planes)[2]->Restore();
-			(*planes)[3]->Restore();
-			(*planes)[4]->Restore();
-			(*planes)[5]->Restore();
-		}
-	}
-}
+	//	planes = 0;
+	//	if (vd->GetVR())
+	//		planes = vd->GetVR()->get_planes();
+	//	if (planes && planes->size() == 6)
+	//	{
+	//		(*planes)[0]->Restore();
+	//		(*planes)[1]->Restore();
+	//		(*planes)[2]->Restore();
+	//		(*planes)[3]->Restore();
+	//		(*planes)[4]->Restore();
+	//		(*planes)[5]->Restore();
+	//	}
+	//}
+//}
 
-void RenderView::ClipRotate()
-{
-	m_q_cl.FromEuler(m_rotx_cl, m_roty_cl, m_rotz_cl);
-	m_q_cl.Normalize();
-
-	SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-}
-
-void RenderView::SetClippingPlaneRotations(const fluo::Vector& val)
-{
-	m_rotx_cl = -val.x();
-	m_roty_cl = val.y();
-	m_rotz_cl = val.z();
-	ClipRotate();
-}
-
-fluo::Vector RenderView::GetClippingPlaneRotations()
-{
-	return fluo::Vector(
-		m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl,
-		m_roty_cl,
-		m_rotz_cl);
-}
-
-void RenderView::SetClipRotX(double val)
-{
-	m_rotx_cl = -val;
-	ClipRotate();
-}
-
-void RenderView::SetClipRotY(double val)
-{
-	m_roty_cl = val;
-	ClipRotate();
-}
-
-void RenderView::SetClipRotZ(double val)
-{
-	m_rotz_cl = val;
-	ClipRotate();
-}
-
+//void RenderView::ClipRotate()
+//{
+//	m_q_cl.FromEuler(m_rot_cl);
+//	m_q_cl.Normalize();
+//
+//	SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
+//}
+//
+//void RenderView::SetClippingPlaneRotations(const fluo::Vector& val)
+//{
+//	m_rotx_cl = -val.x();
+//	m_roty_cl = val.y();
+//	m_rotz_cl = val.z();
+//	ClipRotate();
+//}
+//
+//fluo::Vector RenderView::GetClippingPlaneRotations()
+//{
+//	return fluo::Vector(
+//		m_rotx_cl == 0.0 ? m_rotx_cl : -m_rotx_cl,
+//		m_roty_cl,
+//		m_rotz_cl);
+//}
+//
+//void RenderView::SetClipRotX(double val)
+//{
+//	m_rotx_cl = -val;
+//	ClipRotate();
+//}
+//
+//void RenderView::SetClipRotY(double val)
+//{
+//	m_roty_cl = val;
+//	ClipRotate();
+//}
+//
+//void RenderView::SetClipRotZ(double val)
+//{
+//	m_rotz_cl = val;
+//	ClipRotate();
+//}
+//
 void RenderView::SetClipValue(int mask, int val)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
@@ -4033,7 +3902,7 @@ void RenderView::SetClipValues(int mask, int val1, int val2)
 	}
 }
 
-void RenderView::SetClipValues(const int val[6])
+void RenderView::SetClipValues(const std::array<int, 6>& vals)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
@@ -5007,37 +4876,39 @@ glm::mat4 RenderView::GetObjectMat()
 	glm::mat4 obj_mat = m_mv_mat;
 	//translate object
 	obj_mat = glm::translate(obj_mat, glm::vec3(
-		m_obj_transx,
-		m_obj_transy,
-		m_obj_transz));
+		m_obj_trans.x(),
+		m_obj_trans.y(),
+		m_obj_trans.z()));
 
 	if (m_offset)
 	{
 		obj_mat = glm::translate(obj_mat, glm::vec3(
-			m_obj_rot_ctr_offx - m_obj_ctrx,
-			m_obj_ctry - m_obj_rot_ctr_offy,
-			m_obj_rot_ctr_offz - m_obj_ctrz));
+			m_obj_rot_ctr_off.x() - m_obj_ctr.x(),
+			m_obj_ctr.y() - m_obj_rot_ctr_off.y(),
+			m_obj_rot_ctr_off.z() - m_obj_ctr.z()));
 		//rotate object
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		fluo::Vector v = m_obj_rot + m_obj_rot_off;
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(v.y())), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(v.z())), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(v.x())), glm::vec3(1.0, 0.0, 0.0));
 		//center object
+		v = -(m_obj_rot_ctr_off + m_obj_ctr_off);
 		obj_mat = glm::translate(obj_mat, glm::vec3(
-			-m_obj_rot_ctr_offx - m_obj_ctr_offx,
-			-m_obj_rot_ctr_offy - m_obj_ctr_offy,
-			-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+			v.x(),
+			v.y(),
+			v.z()));
 	}
 	else
 	{
 		//rotate object
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rot.y())), glm::vec3(0.0, 1.0, 0.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rot.z())), glm::vec3(0.0, 0.0, 1.0));
+		obj_mat = glm::rotate(obj_mat, float(glm::radians(m_obj_rot.x())), glm::vec3(1.0, 0.0, 0.0));
 		//center object
 		obj_mat = glm::translate(obj_mat, glm::vec3(
-			-m_obj_ctrx,
-			-m_obj_ctry,
-			-m_obj_ctrz));
+			-m_obj_ctr.x(),
+			-m_obj_ctr.y(),
+			-m_obj_ctr.z()));
 	}
 
 	return obj_mat;
@@ -5048,37 +4919,39 @@ glm::mat4 RenderView::GetDrawMat()
 	glm::mat4 drw_mat = m_mv_mat;
 	//translate object
 	drw_mat = glm::translate(drw_mat, glm::vec3(
-		m_obj_transx,
-		m_obj_transy,
-		m_obj_transz));
+		m_obj_trans.x(),
+		m_obj_trans.y(),
+		m_obj_trans.z()));
 
 	if (m_offset)
 	{
 		drw_mat = glm::translate(drw_mat, glm::vec3(
-			m_obj_rot_ctr_offx - m_obj_ctrx,
-			m_obj_ctry - m_obj_rot_ctr_offy,
-			m_obj_rot_ctr_offz - m_obj_ctrz));
+			m_obj_rot_ctr_off.x() - m_obj_ctr.x(),
+			m_obj_ctr.y() - m_obj_rot_ctr_off.y(),
+			m_obj_rot_ctr_off.z() - m_obj_ctr.z()));
 		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
+		fluo::Vector v = m_obj_rot + m_obj_rot_off;
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(v.x())), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(v.y())), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(v.z())), glm::vec3(0.0, 0.0, 1.0));
 		//center object
+		v = -(m_obj_rot_ctr_off + m_obj_ctr_off);
 		drw_mat = glm::translate(drw_mat, glm::vec3(
-			-m_obj_rot_ctr_offx - m_obj_ctr_offx,
-			-m_obj_rot_ctr_offy - m_obj_ctr_offy,
-			-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+			v.x(),
+			v.y(),
+			v.z()));
 	}
 	else
 	{
 		//rotate object
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot.x())), glm::vec3(1.0, 0.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot.y())), glm::vec3(0.0, 1.0, 0.0));
+		drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot.z())), glm::vec3(0.0, 0.0, 1.0));
 		//center object
 		drw_mat = glm::translate(drw_mat, glm::vec3(
-			-m_obj_ctrx,
-			-m_obj_ctry,
-			-m_obj_ctrz));
+			-m_obj_ctr.x(),
+			-m_obj_ctr.y(),
+			-m_obj_ctr.z()));
 	}
 
 	return drw_mat;
@@ -5089,37 +4962,39 @@ glm::mat4 RenderView::GetInvtMat()
 	glm::mat4 inv_mat = m_mv_mat;
 	//translate object
 	inv_mat = glm::translate(inv_mat, glm::vec3(
-		m_obj_transx,
-		m_obj_transy,
-		m_obj_transz));
+		m_obj_trans.x(),
+		m_obj_trans.y(),
+		m_obj_trans.z()));
 
 	if (m_offset)
 	{
 		inv_mat = glm::translate(inv_mat, glm::vec3(
-			m_obj_rot_ctr_offx - m_obj_ctrx,
-			m_obj_ctry - m_obj_rot_ctr_offy,
-			m_obj_rot_ctr_offz - m_obj_ctrz));
+			m_obj_rot_ctr_off.x() - m_obj_ctr.x(),
+			m_obj_ctr.y() - m_obj_rot_ctr_off.y(),
+			m_obj_rot_ctr_off.z() - m_obj_ctr.z()));
 		//rotate object
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz + m_obj_rot_offz)), glm::vec3(0.0, 0.0, 1.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty + m_obj_rot_offy)), glm::vec3(0.0, 1.0, 0.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx + m_obj_rot_offx)), glm::vec3(1.0, 0.0, 0.0));
+		fluo::Vector v = m_obj_rot + m_obj_rot_off;
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(v.z())), glm::vec3(0.0, 0.0, 1.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(v.y())), glm::vec3(0.0, 1.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(v.x())), glm::vec3(1.0, 0.0, 0.0));
 		//center object
+		v = -(m_obj_rot_ctr_off + m_obj_ctr_off);
 		inv_mat = glm::translate(inv_mat, glm::vec3(
-			-m_obj_rot_ctr_offx - m_obj_ctr_offx,
-			-m_obj_rot_ctr_offy - m_obj_ctr_offy,
-			-m_obj_rot_ctr_offz - m_obj_ctr_offz));
+			v.x(),
+			v.y(),
+			v.z()));
 	}
 	else
 	{
 		//rotate object
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rot.z())), glm::vec3(0.0, 0.0, 1.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rot.y())), glm::vec3(0.0, 1.0, 0.0));
+		inv_mat = glm::rotate(inv_mat, float(glm::radians(m_obj_rot.x())), glm::vec3(1.0, 0.0, 0.0));
 		//center object
 		inv_mat = glm::translate(inv_mat, glm::vec3(
-			-m_obj_ctrx,
-			-m_obj_ctry,
-			-m_obj_ctrz));
+			-m_obj_ctr.x(),
+			-m_obj_ctr.y(),
+			-m_obj_ctr.z()));
 	}
 
 	return inv_mat;
@@ -5130,19 +5005,19 @@ glm::mat4 RenderView::GetDrawWorldMat()
 	glm::mat4 drw_mat = m_mv_mat;
 	//translate object
 	drw_mat = glm::translate(drw_mat, glm::vec3(
-		m_obj_transx,
-		m_obj_transy,
-		m_obj_transz));
+		m_obj_trans.x(),
+		m_obj_trans.y(),
+		m_obj_trans.z()));
 
 	//rotate object
-	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotx)), glm::vec3(1.0, 0.0, 0.0));
-	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_roty)), glm::vec3(0.0, 1.0, 0.0));
-	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rotz)), glm::vec3(0.0, 0.0, 1.0));
+	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot.x())), glm::vec3(1.0, 0.0, 0.0));
+	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot.y())), glm::vec3(0.0, 1.0, 0.0));
+	drw_mat = glm::rotate(drw_mat, float(glm::radians(m_obj_rot.z())), glm::vec3(0.0, 0.0, 1.0));
 	//center object
 	drw_mat = glm::translate(drw_mat, glm::vec3(
-		-m_obj_ctrx,
-		-m_obj_ctry,
-		-m_obj_ctrz));
+		-m_obj_ctr.x(),
+		-m_obj_ctr.y(),
+		-m_obj_ctr.z()));
 
 	return drw_mat;
 }
@@ -5154,95 +5029,27 @@ fluo::Transform RenderView::GetInvOffsetMat()
 
 fluo::Vector RenderView::GetSide()
 {
-	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+	m_head = -m_cam_trans;
 	m_head.normalize();
 	fluo::Vector side = Cross(m_up, m_head);
 	return side;
 }
 
-void RenderView::UpdateClips()
+void RenderView::RotateClips()
 {
 	if (m_clip_mode == 1)
-		m_q_cl.FromEuler(m_rotx, -m_roty, -m_rotz);
-
-	std::vector<fluo::Plane*> *planes = 0;
-	for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 	{
-		auto vd = it->lock();
-		if (!vd)
-			continue;
+		fluo::Quaternion q_cl;
+		q_cl.FromEuler(fluo::Vector(m_cam_rot.x(), -m_cam_rot.y(), -m_cam_rot.z()));
 
-		double spcx, spcy, spcz;
-		int resx, resy, resz;
-		vd->GetSpacings(spcx, spcy, spcz);
-		vd->GetResolution(resx, resy, resz);
-		fluo::Vector scale;
-		if (spcx > 0.0 && spcy > 0.0 && spcz > 0.0)
+		for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 		{
-			scale = fluo::Vector(1.0 / resx / spcx, 1.0 / resy / spcy, 1.0 / resz / spcz);
-			scale.safe_normalize();
-		}
-		else
-			scale = fluo::Vector(1.0, 1.0, 1.0);
+			auto vd = it->lock();
+			if (!vd)
+				continue;
 
-		if (vd->GetVR())
-			planes = vd->GetVR()->get_planes();
-		if (planes && planes->size() == 6)
-		{
-			double x1, x2, y1, y2, z1, z2;
-			double abcd[4];
-
-			(*planes)[0]->get_copy(abcd);
-			x1 = fabs(abcd[3]);
-			(*planes)[1]->get_copy(abcd);
-			x2 = fabs(abcd[3]);
-			(*planes)[2]->get_copy(abcd);
-			y1 = fabs(abcd[3]);
-			(*planes)[3]->get_copy(abcd);
-			y2 = fabs(abcd[3]);
-			(*planes)[4]->get_copy(abcd);
-			z1 = fabs(abcd[3]);
-			(*planes)[5]->get_copy(abcd);
-			z2 = fabs(abcd[3]);
-
-			fluo::Vector trans1(-0.5, -0.5, -0.5);
-			fluo::Vector trans2(0.5, 0.5, 0.5);
-
-			(*planes)[0]->Restore();
-			(*planes)[0]->Translate(trans1);
-			(*planes)[0]->Rotate(m_q_cl);
-			(*planes)[0]->Scale(scale);
-			(*planes)[0]->Translate(trans2);
-
-			(*planes)[1]->Restore();
-			(*planes)[1]->Translate(trans1);
-			(*planes)[1]->Rotate(m_q_cl);
-			(*planes)[1]->Scale(scale);
-			(*planes)[1]->Translate(trans2);
-
-			(*planes)[2]->Restore();
-			(*planes)[2]->Translate(trans1);
-			(*planes)[2]->Rotate(m_q_cl);
-			(*planes)[2]->Scale(scale);
-			(*planes)[2]->Translate(trans2);
-
-			(*planes)[3]->Restore();
-			(*planes)[3]->Translate(trans1);
-			(*planes)[3]->Rotate(m_q_cl);
-			(*planes)[3]->Scale(scale);
-			(*planes)[3]->Translate(trans2);
-
-			(*planes)[4]->Restore();
-			(*planes)[4]->Translate(trans1);
-			(*planes)[4]->Rotate(m_q_cl);
-			(*planes)[4]->Scale(scale);
-			(*planes)[4]->Translate(trans2);
-
-			(*planes)[5]->Restore();
-			(*planes)[5]->Translate(trans1);
-			(*planes)[5]->Rotate(m_q_cl);
-			(*planes)[5]->Scale(scale);
-			(*planes)[5]->Translate(trans2);
+			fluo::ClippingBox cb = vd->GetVR()->get_clipping_box();
+			cb.Rotate(q_cl);
 		}
 	}
 }
@@ -5893,7 +5700,6 @@ void RenderView::DrawVolumes(int peel)
 			m_updating) ||
 			(!m_retain_finalbuffer &&
 		(m_int_mode == InteractiveMode::Viewport ||
-			m_int_mode == InteractiveMode::Clipplane ||
 			m_int_mode == InteractiveMode::BrushSelectUpdate ||
 			m_int_mode == InteractiveMode::Ruler ||
 			((m_int_mode == InteractiveMode::EditRulerPoint ||
@@ -7747,59 +7553,58 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 		flvr::VolumeRenderer *vr = vd->GetVR();
 		assert(vr);
 
-		std::vector<fluo::Plane*> *planes = vr->get_planes();
-		assert(planes->size() == 6);
-
+		fluo::ClippingBox cb = vr->get_clipping_box();
+		auto planes = cb.GetPlanes();
 		//calculating planes
 		//get six planes
-		fluo::Plane* px1 = (*planes)[0];
-		fluo::Plane* px2 = (*planes)[1];
-		fluo::Plane* py1 = (*planes)[2];
-		fluo::Plane* py2 = (*planes)[3];
-		fluo::Plane* pz1 = (*planes)[4];
-		fluo::Plane* pz2 = (*planes)[5];
+		fluo::Plane px1 = planes[0];
+		fluo::Plane px2 = planes[1];
+		fluo::Plane py1 = planes[2];
+		fluo::Plane py2 = planes[3];
+		fluo::Plane pz1 = planes[4];
+		fluo::Plane pz2 = planes[5];
 
 		//calculate 4 lines
 		fluo::Vector lv_x1z1, lv_x1z2, lv_x2z1, lv_x2z2;
 		fluo::Point lp_x1z1, lp_x1z2, lp_x2z1, lp_x2z2;
 		//x1z1
-		if (!px1->Intersect(*pz1, lp_x1z1, lv_x1z1))
+		if (!px1.Intersect(pz1, lp_x1z1, lv_x1z1))
 			continue;
 		//x1z2
-		if (!px1->Intersect(*pz2, lp_x1z2, lv_x1z2))
+		if (!px1.Intersect(pz2, lp_x1z2, lv_x1z2))
 			continue;
 		//x2z1
-		if (!px2->Intersect(*pz1, lp_x2z1, lv_x2z1))
+		if (!px2.Intersect(pz1, lp_x2z1, lv_x2z1))
 			continue;
 		//x2z2
-		if (!px2->Intersect(*pz2, lp_x2z2, lv_x2z2))
+		if (!px2.Intersect(pz2, lp_x2z2, lv_x2z2))
 			continue;
 
 		//calculate 8 points
 		fluo::Point pp[8];
 		//p0 = l_x1z1 * py1
-		if (!py1->Intersect(lp_x1z1, lv_x1z1, pp[0]))
+		if (!py1.Intersect(lp_x1z1, lv_x1z1, pp[0]))
 			continue;
 		//p1 = l_x1z2 * py1
-		if (!py1->Intersect(lp_x1z2, lv_x1z2, pp[1]))
+		if (!py1.Intersect(lp_x1z2, lv_x1z2, pp[1]))
 			continue;
 		//p2 = l_x2z1 *py1
-		if (!py1->Intersect(lp_x2z1, lv_x2z1, pp[2]))
+		if (!py1.Intersect(lp_x2z1, lv_x2z1, pp[2]))
 			continue;
 		//p3 = l_x2z2 * py1
-		if (!py1->Intersect(lp_x2z2, lv_x2z2, pp[3]))
+		if (!py1.Intersect(lp_x2z2, lv_x2z2, pp[3]))
 			continue;
 		//p4 = l_x1z1 * py2
-		if (!py2->Intersect(lp_x1z1, lv_x1z1, pp[4]))
+		if (!py2.Intersect(lp_x1z1, lv_x1z1, pp[4]))
 			continue;
 		//p5 = l_x1z2 * py2
-		if (!py2->Intersect(lp_x1z2, lv_x1z2, pp[5]))
+		if (!py2.Intersect(lp_x1z2, lv_x1z2, pp[5]))
 			continue;
 		//p6 = l_x2z1 * py2
-		if (!py2->Intersect(lp_x2z1, lv_x2z1, pp[6]))
+		if (!py2.Intersect(lp_x2z1, lv_x2z1, pp[6]))
 			continue;
 		//p7 = l_x2z2 * py2
-		if (!py2->Intersect(lp_x2z2, lv_x2z2, pp[7]))
+		if (!py2.Intersect(lp_x2z2, lv_x2z2, pp[7]))
 			continue;
 		fluo::Vector plane_centers[6];
 		if (m_persp)
@@ -7883,7 +7688,7 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 		mv.set(glm::value_ptr(mv_mat));
 		for (int pi = 0; pi < 6; ++pi)
 		{
-			normal = (*planes)[pi]->normal();
+			normal = planes[pi].normal();
 			if (m_persp)
 			{
 				//look at plane center from origin
@@ -9355,10 +9160,10 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			cur_vd->GetResolution(resx, resy, resz);
 			double spcx, spcy, spcz;
 			cur_vd->GetSpacings(spcx, spcy, spcz);
-			std::vector<fluo::Plane*> *planes = cur_vd->GetVR()->get_planes();
-			fluo::Plane* plane = (*planes)[4];
+			auto planes = cur_vd->GetVR()->get_clipping_box().GetPlanes();
+			fluo::Plane plane = planes[4];
 			double abcd[4];
-			plane->get_copy(abcd);
+			plane.get_copy(abcd);
 			int val = static_cast<int>(std::round(std::fabs(abcd[3] * resz)));
 
 			tos << L"Z: " << std::fixed << std::setprecision(2) << val * spcz << L"\u03BCm";
@@ -9594,58 +9399,16 @@ fluo::Quaternion RenderView::Trackball(double dx, double dy)
 	return q;
 }
 
-fluo::Quaternion RenderView::TrackballClip(int p1x, int p1y, int p2x, int p2y)
-{
-	fluo::Quaternion q;
-	fluo::Vector a; /* Axis of rotation */
-	double phi;  /* how much to rotate about axis */
-
-	if (p1x == p2x && p1y == p2y)
-	{
-		/* Zero rotation */
-		return q;
-	}
-
-	a = fluo::Vector(p2y - p1y, p2x - p1x, 0.0);
-	phi = a.length() / 3.0;
-	a.normalize();
-	fluo::Quaternion q_a(a);
-	//rotate back to local
-	fluo::Quaternion q2;
-	q2.FromEuler(-m_rotx, m_roty, m_rotz);
-	q_a = (q2)* q_a * (-q2);
-	q_a = (m_q_cl)* q_a * (-m_q_cl);
-	a = fluo::Vector(q_a.x, q_a.y, q_a.z);
-	a.normalize();
-
-	q = fluo::Quaternion(phi, a);
-	q.Normalize();
-
-	return q;
-}
-
 void RenderView::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
 	fluo::Quaternion q = m_q * (-m_zq);
-	q.ToEuler(m_rotx, m_roty, m_rotz);
-
-	if (m_roty > 360.0)
-		m_roty -= 360.0;
-	if (m_roty < 0.0)
-		m_roty += 360.0;
-	if (m_rotx > 360.0)
-		m_rotx -= 360.0;
-	if (m_rotx < 0.0)
-		m_rotx += 360.0;
-	if (m_rotz > 360.0)
-		m_rotz -= 360.0;
-	if (m_rotz < 0.0)
-		m_rotz += 360.0;
+	m_cam_rot = q.ToEuler();
+	m_cam_rot.normalize_euler_unsigned();
 
 	if (m_clip_mode)
-		UpdateClips();
+		RotateClips();
 }
 
 void RenderView::A2Q()
@@ -9653,11 +9416,8 @@ void RenderView::A2Q()
 	//view changed, re-sort bricks
 	//SetSortBricks();
 
-	m_q.FromEuler(m_rotx, m_roty, m_rotz);
+	m_q.FromEuler(m_cam_rot);
 	m_q = m_q * m_zq;
-
-	if (m_clip_mode)
-		UpdateClips();
 }
 
 //sort bricks after view changes
@@ -10156,13 +9916,11 @@ void RenderView::switchLevel(VolumeData *vd)
 //controller interactions
 void RenderView::ControllerMoveHorizontal(double dval, int nx, int ny)
 {
-	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+	m_head = -m_cam_trans;
 	m_head.normalize();
 	fluo::Vector side = fluo::Cross(m_up, m_head);
 	fluo::Vector trans = side * (dval*(m_ortho_right - m_ortho_left) / double(nx));
-	m_obj_transx += trans.x();
-	m_obj_transy += trans.y();
-	m_obj_transz += trans.z();
+	m_obj_trans += trans;
 }
 
 void RenderView::ControllerZoomDolly(double dval, int nx, int ny)
@@ -10173,14 +9931,10 @@ void RenderView::ControllerZoomDolly(double dval, int nx, int ny)
 	if (m_cam_mode == 1)
 	{
 		//move camera center
-		fluo::Vector pos(m_transx, m_transy, m_transz);
+		fluo::Vector pos = m_cam_trans;
 		pos.normalize();
-		fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 		delta = m_distance * delta / (1 + delta);
-		ctr -= delta * pos;
-		m_ctrx = ctr.x();
-		m_ctry = ctr.y();
-		m_ctrz = ctr.z();
+		m_cam_ctr -= delta * pos;
 	}
 }
 
@@ -10191,38 +9945,23 @@ void RenderView::ControllerRotate(double dx, double dy, int nx, int ny)
 	m_q.Normalize();
 	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
 	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-	m_transx = cam_pos2.x;
-	m_transy = cam_pos2.y;
-	m_transz = cam_pos2.z;
+	m_cam_trans = cam_pos2.GetVector();
 	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
 	fluo::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
-	m_q.ToEuler(m_rotx, m_roty, m_rotz);
-	if (m_roty > 360.0)
-		m_roty -= 360.0;
-	if (m_roty < 0.0)
-		m_roty += 360.0;
-	if (m_rotx > 360.0)
-		m_rotx -= 360.0;
-	if (m_rotx < 0.0)
-		m_rotx += 360.0;
-	if (m_rotz > 360.0)
-		m_rotz -= 360.0;
-	if (m_rotz < 0.0)
-		m_rotz += 360.0;
+	m_cam_rot = m_q.ToEuler();
+	m_cam_rot.normalize_euler_unsigned();
 }
 
 void RenderView::ControllerPan(double dx, double dy, int nx, int ny)
 {
-	m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+	m_head = -m_cam_trans;
 	m_head.normalize();
 	fluo::Vector side = fluo::Cross(m_up, m_head);
 	fluo::Vector trans =
 		side * (dx * (m_ortho_right - m_ortho_left) / double(nx)) +
 		m_up * (dy * (m_ortho_top - m_ortho_bottom) / double(ny));
-	m_obj_transx += trans.x() * m_scale_factor;
-	m_obj_transy += trans.y() * m_scale_factor;
-	m_obj_transz += trans.z() * m_scale_factor;
+	m_obj_trans += trans * m_scale_factor;
 }
 
 void RenderView::GrabRotate(const glm::mat4& pose)
@@ -10238,25 +9977,12 @@ void RenderView::GrabRotate(const glm::mat4& pose)
 	m_q.Normalize();
 	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
 	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-	m_transx = cam_pos2.x;
-	m_transy = cam_pos2.y;
-	m_transz = cam_pos2.z;
+	m_cam_trans = cam_pos2.GetVector();
 	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
 	fluo::Quaternion up2 = (-m_q) * up * m_q;
 	m_up = fluo::Vector(up2.x, up2.y, up2.z);
-	m_q.ToEuler(m_rotx, m_roty, m_rotz);
-	if (m_roty > 360.0)
-		m_roty -= 360.0;
-	if (m_roty < 0.0)
-		m_roty += 360.0;
-	if (m_rotx > 360.0)
-		m_rotx -= 360.0;
-	if (m_rotx < 0.0)
-		m_rotx += 360.0;
-	if (m_rotz > 360.0)
-		m_rotz -= 360.0;
-	if (m_rotz < 0.0)
-		m_rotz += 360.0;
+	m_cam_rot = m_q.ToEuler();
+	m_cam_rot.normalize_euler_unsigned();
 }
 
 void RenderView::ProcessIdle(IdleState& state)
@@ -10365,24 +10091,17 @@ void RenderView::ProcessIdle(IdleState& state)
 		if (dist > 0.0)
 		{
 			m_pin_ctr = p;
-			double obj_transx, obj_transy, obj_transz;
-			p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
-				p.y() - m_obj_ctry - m_obj_ctr_offy,
-				p.z() - m_obj_ctrz - m_obj_ctr_offz);
-			obj_transx = p.x();
-			obj_transy = p.y();
-			obj_transz = p.z();
+			fluo::Point op = m_obj_ctr + m_obj_ctr_off;
+			fluo::Vector obj_trans = p - op;
+			obj_trans.x(-obj_trans.x());
 			double thresh = 10.0;
 			double spcx, spcy, spcz;
 			cur_vd->GetSpacings(spcx, spcy, spcz);
 			thresh *= spcx;
-			if (sqrt((m_obj_transx - obj_transx)*(m_obj_transx - obj_transx) +
-				(m_obj_transy - obj_transy)*(m_obj_transy - obj_transy) +
-				(m_obj_transz - obj_transz)*(m_obj_transz - obj_transz)) > thresh)
+			obj_trans -= m_obj_trans;
+			if (obj_trans.length() > thresh)
 			{
-				m_obj_transx = obj_transx;
-				m_obj_transy = obj_transy;
-				m_obj_transz = obj_transz;
+				m_obj_trans = -obj_trans;
 			}
 		}
 		m_update_rot_ctr = false;
@@ -10426,13 +10145,11 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_left = true;
 
-				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head = -m_cam_trans;
 				m_head.normalize();
 				fluo::Vector side = fluo::Cross(m_up, m_head);
 				fluo::Vector trans = -(side * (std::round(0.8 * (m_ortho_right - m_ortho_left))));
-				m_obj_transx += trans.x();
-				m_obj_transy += trans.y();
-				m_obj_transz += trans.z();
+				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
 				state.m_refresh = true;
 				state.m_looking_glass_changed = true;
@@ -10449,13 +10166,11 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_right = true;
 
-				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head = -m_cam_trans;
 				m_head.normalize();
 				fluo::Vector side = fluo::Cross(m_up, m_head);
 				fluo::Vector trans = side * (std::round(0.8 * (m_ortho_right - m_ortho_left)));
-				m_obj_transx += trans.x();
-				m_obj_transy += trans.y();
-				m_obj_transz += trans.z();
+				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
 				state.m_refresh = true;
 				state.m_looking_glass_changed = true;
@@ -10472,12 +10187,10 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_up = true;
 
-				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head = -m_cam_trans;
 				m_head.normalize();
 				fluo::Vector trans = -m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
-				m_obj_transx += trans.x();
-				m_obj_transy += trans.y();
-				m_obj_transz += trans.z();
+				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
 				state.m_refresh = true;
 				state.m_looking_glass_changed = true;
@@ -10494,12 +10207,10 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_down = true;
 
-				m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+				m_head = -m_cam_trans;
 				m_head.normalize();
 				fluo::Vector trans = m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
-				m_obj_transx += trans.x();
-				m_obj_transy += trans.y();
-				m_obj_transz += trans.z();
+				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
 				state.m_refresh = true;
 				state.m_looking_glass_changed = true;
@@ -10517,13 +10228,11 @@ void RenderView::ProcessIdle(IdleState& state)
 				if (m_cam_mode == 1)
 				{
 					//move right
-					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+					m_head = -m_cam_trans;
 					m_head.normalize();
 					fluo::Vector side = Cross(m_up, m_head);
 					fluo::Vector trans = 10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
-					m_obj_transx += trans.x();
-					m_obj_transy += trans.y();
-					m_obj_transz += trans.z();
+					m_obj_trans += trans;
 					m_interactive = true;
 				}
 				else
@@ -10559,13 +10268,11 @@ void RenderView::ProcessIdle(IdleState& state)
 				if (m_cam_mode == 1)
 				{
 					//move left
-					m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+					m_head = -m_cam_trans;
 					m_head.normalize();
 					fluo::Vector side = Cross(m_up, m_head);
 					fluo::Vector trans = -10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
-					m_obj_transx += trans.x();
-					m_obj_transy += trans.y();
-					m_obj_transz += trans.z();
+					m_obj_trans += trans;
 					m_interactive = true;
 				}
 				else
@@ -10592,15 +10299,11 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				if (m_cam_mode == 1)
 				{
-					fluo::Vector pos(m_transx, m_transy, m_transz);
+					fluo::Vector pos = m_cam_trans;
 					pos.normalize();
-					fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 					double factor = m_persp ? 20.0 : 5000.0;
 					double delta = m_radius / factor;
-					ctr += delta * pos;
-					m_ctrx = ctr.x();
-					m_ctry = ctr.y();
-					m_ctrz = ctr.z();
+					m_cam_ctr += delta * pos;
 					m_interactive = true;
 					if (!m_persp)
 					{
@@ -10632,15 +10335,11 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				if (m_cam_mode == 1)
 				{
-					fluo::Vector pos(m_transx, m_transy, m_transz);
+					fluo::Vector pos = m_cam_trans;
 					pos.normalize();
-					fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 					double factor = m_persp ? 20.0 : 5000.0;
 					double delta = m_radius / factor;
-					ctr -= delta * pos;
-					m_ctrx = ctr.x();
-					m_ctry = ctr.y();
-					m_ctrz = ctr.z();
+					m_cam_ctr -= delta * pos;
 					m_interactive = true;
 					if (!m_persp)
 					{
@@ -11089,9 +10788,8 @@ void RenderView::ProcessMouse(MouseState& state)
 					glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p) > 0.0)
 				{
 					//center view on point
-					p = fluo::Point(m_obj_ctrx + m_obj_ctr_offx - p.x(),
-						p.y() - m_obj_ctry - m_obj_ctr_offy,
-						p.z() - m_obj_ctrz - m_obj_ctr_offz);
+					p -= m_obj_ctr + m_obj_ctr_off;
+					p.x(-p.x());
 					if (glbin_settings.m_hologram_mode == 2)
 					{
 						//only change depth to match the point
@@ -11104,9 +10802,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						glm::vec3 offset = new_center - center;
 						p = fluo::Point(offset.x, offset.y, offset.z);
 					}
-					m_obj_transx = p.x();
-					m_obj_transy = p.y();
-					m_obj_transz = p.z();
+					m_obj_trans = fluo::Vector(p);
 					m_interactive = true;
 					state.m_refresh = true;
 				}
@@ -11318,9 +11014,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						m_q.Normalize();
 						fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
 						fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
-						m_transx = cam_pos2.x;
-						m_transy = cam_pos2.y;
-						m_transz = cam_pos2.z;
+						m_cam_trans = cam_pos2.GetVector();
 
 						fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
 						fluo::Quaternion up2 = (-m_q) * up * m_q;
@@ -11339,15 +11033,13 @@ void RenderView::ProcessMouse(MouseState& state)
 						long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
 						long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
 
-						m_head = fluo::Vector(-m_transx, -m_transy, -m_transz);
+						m_head = -m_cam_trans;
 						m_head.normalize();
 						fluo::Vector side = Cross(m_up, m_head);
 						fluo::Vector trans = -(
 							side * (double(dx) * (m_ortho_right - m_ortho_left) / double(nx)) +
 							m_up * (double(dy) * (m_ortho_top - m_ortho_bottom) / double(ny)));
-						m_obj_transx += trans.x();
-						m_obj_transy += trans.y();
-						m_obj_transz += trans.z();
+						m_obj_trans += trans;
 
 						m_interactive = true;
 
@@ -11368,14 +11060,10 @@ void RenderView::ProcessMouse(MouseState& state)
 
 						if (m_cam_mode == 1)
 						{
-							fluo::Vector pos(m_transx, m_transy, m_transz);
+							fluo::Vector pos = m_cam_trans;
 							pos.normalize();
-							fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 							delta = m_radius * delta;
-							ctr -= delta * pos;
-							m_ctrx = ctr.x();
-							m_ctry = ctr.y();
-							m_ctrz = ctr.z();
+							m_cam_ctr -= delta * pos;
 						}
 
 						m_interactive = true;
@@ -11390,24 +11078,6 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				m_paint_enable = true;
 				state.m_refresh = true;
-			}
-			else if (m_int_mode == InteractiveMode::Clipplane)
-			{
-				if (old_mouse_X != -1 &&
-					old_mouse_Y != -1 &&
-					abs(old_mouse_X - mp.x()) +
-					abs(old_mouse_Y - mp.y()) < 200)
-				{
-					if (state.m_mouse_left_is_down)
-					{
-						fluo::Quaternion q_delta = TrackballClip(old_mouse_X, static_cast<int>(std::round(mp.y())), static_cast<int>(std::round(mp.x())), old_mouse_Y);
-						m_q_cl = q_delta * m_q_cl;
-						m_q_cl.Normalize();
-						SetRotations(fluo::Vector(m_rotx, m_roty, m_rotz), true);
-						vc.insert(gstCamRotation);
-						state.m_refresh = true;
-					}
-				}
 			}
 			else if (m_int_mode == InteractiveMode::EditRulerPoint ||
 				m_int_mode == InteractiveMode::MoveRuler)
@@ -11493,14 +11163,10 @@ void RenderView::ProcessMouse(MouseState& state)
 
 				if (m_cam_mode == 1)
 				{
-					fluo::Vector pos(m_transx, m_transy, m_transz);
+					fluo::Vector pos = m_cam_trans;
 					pos.normalize();
-					fluo::Vector ctr(m_ctrx, m_ctry, m_ctrz);
 					delta = m_distance * delta / (1 + delta);
-					ctr -= delta * pos;
-					m_ctrx = ctr.x();
-					m_ctry = ctr.y();
-					m_ctrz = ctr.z();
+					m_cam_ctr -= delta * pos;
 				}
 
 				m_interactive = true;

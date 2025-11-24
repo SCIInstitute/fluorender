@@ -88,8 +88,10 @@ namespace flvr
 		int get_depth_peel() {return depth_peel_;}
 
 		//clipping planes
-		void set_planes(std::vector<fluo::Plane*> *p);
-		std::vector<fluo::Plane*> *get_planes();
+		void set_clipping_box(const fluo::ClippingBox& box) { clipping_box_ = box; }
+		void set_clipping_box(fluo::ClippingBox&& box) { clipping_box_ = std::move(box); }
+		fluo::ClippingBox& get_clipping_box() { return clipping_box_; }
+		const fluo::ClippingBox& get_clipping_box() const { return clipping_box_; }
 
 		//size limiter
 		void set_limit(int val) {limit_ = val;}

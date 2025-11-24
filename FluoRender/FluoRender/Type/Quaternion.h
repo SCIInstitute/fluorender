@@ -219,11 +219,11 @@ public:
 	}
 
 	//object to initial
-	void FromEuler(double rx, double ry, double rz)
+	void FromEuler(const Vector& r)
 	{
-		rx = d2r(rx);
-		ry = d2r(ry);
-		rz = d2r(rz);
+		double rx = d2r(r.x());
+		double ry = d2r(r.y());
+		double rz = d2r(r.z());
 
 		// Compute sine and cosine of the half angles
 		double	sp, sb, sh;
@@ -240,8 +240,9 @@ public:
 	}
 
 	//object to initial
-	void ToEuler(double &rx, double &ry, double &rz)
+	Vector ToEuler()
 	{
+		double rx, ry, rz;
 		// Extract sin(pitch)
 		double sp = -2.0 * (y*z - w*x);
 
@@ -273,6 +274,8 @@ public:
 		rx = rx==0.0?0.0:rx;
 		ry = ry==0.0?0.0:ry;
 		rz = rz==0.0?0.0:rz;
+
+		return Vector(rx, ry, rz);
 	}
 
 	int Normalize()

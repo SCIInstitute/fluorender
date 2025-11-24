@@ -339,6 +339,11 @@ inline float SmoothClamp(float x, float edge0, float edge1, float smoothness)
 	return x;
 }
 
+inline double CleanZero(double v)
+{
+	return v == 0.0 ? 0.0 : v;
+}
+
 } // namespace fluo
 
 #endif//_FLTYPEUTILS_H_

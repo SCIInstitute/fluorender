@@ -46,52 +46,54 @@ namespace fluo
 		ZPos = 5  // far
 	};
 
-	class ClippingBox : public PlaneSet
+	class ClippingBox
 	{
 	public:
 		// Constructors
 		ClippingBox();
 		ClippingBox(const BBox& box);
 		ClippingBox(const ClippingBox& copy);
-		~ClippingBox();
+		~ClippingBox() {}
 
 		ClippingBox& operator=(const ClippingBox& cb);
 		bool operator==(const ClippingBox& rhs) const;
 		bool operator!=(const ClippingBox& rhs) const;
 
+		//plane access
+		const PlaneSet& GetPlanes() const { return planes_; }
+
 		// Access to the bounding box
 		inline const BBox& GetBBox() const { return bbox_; }
 		inline void SetBBox(const BBox& box) { bbox_ = box; Update(); }
 		inline Vector GetSize() const { return bbox_.diagonal(); }
-
-		// Update planes from the bbox
-		void Update();
+		//clip
+		inline const BBox& GetClipBox() const { return clips_; }
 
 		void ResetClip();
+		void ResetClip(ClipPlane plane);
 		void ResetRotation();
 		void ResetAll();
 
 		//clip
-		void SetClip(ClipPlane plane, int value);
-		int GetClip(ClipPlane plane) const;
-		void SetClipPair(ClipPlane axis, int val1, int val2);
-		void GetClipPair(ClipPlane axis, int& val1, int& val2) const;
-		void SetAllClip(const int val[6]);
-		void GetAllClip(int val[6]) const;
+		void SetClip(ClipPlane plane, double value);
+		double GetClip(ClipPlane plane) const;
+		void SetClipPair(ClipPlane axis, double val1, double val2);
+		void GetClipPair(ClipPlane axis, double& val1, double& val2) const;
+		void SetAllClip(const double val[6]);
+		void GetAllClip(double val[6]) const;
 
 		// Transformations
-		void SetZeroRotation(const Quaternion& q) { m_q_zero = q; }
-		Quaternion GetZeroRotation() const { return m_q_zero; }
-		Vector GetZeroEuler();
-		void Rotate(const Quaternion& q);
-		Vector GetEuler();
+		void Rotate(const Quaternion& q);//rotate by quaternion
+		void Rotate(const Vector& euler); //rotate by euler angles
+		Quaternion GetRotation() const { return q_; }
+		Vector GetEuler() const { return euler_; }
 
-		// Test if a point is inside the clipping box
+		// Test if a point is inside the clipping box in world coordinates
 		bool Contains(const Point& p) const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClippingBox& cb)
 		{
-			os << "ClippingBox: " << cb.GetBBox() << " planes: " << static_cast<const PlaneSet&>(cb);
+			os << "ClippingBox: " << cb.GetBBox() << " planes: " << cb.planes_;
 			return os;
 		}
 		friend std::istream& operator>>(std::istream& is, ClippingBox& cb)
@@ -103,11 +105,17 @@ namespace fluo
 		}
 
 	protected:
-		BBox bbox_;   // the finite bounding box that defines the clipping region
+		PlaneSet planes_;//planes in world coordinates
+		PlaneSet planes_normalized_;//planes in normalized coordinates
 
-		Quaternion m_q;
-		Quaternion m_q_zero;
-		Vector m_rot;
+		BBox bbox_;   // the finite bounding box that defines the clipping region
+		BBox clips_;  // the current clipping
+
+		Quaternion q_;
+		Vector euler_;
+
+	protected:
+		void Update();
 	};
 
 } // namespace fluo

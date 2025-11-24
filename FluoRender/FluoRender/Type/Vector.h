@@ -116,6 +116,9 @@ namespace fluo
 		inline int inty() const;
 		inline int intz() const;
 
+		inline void normalize_euler_signed();
+		inline void normalize_euler_unsigned();
+
 		inline Vector unit_sign() const;
 
 		inline double volume() const;//product of all
@@ -130,10 +133,12 @@ namespace fluo
 		inline void w(double);
 		inline double w() const;
 
+		inline bool any_non_zero() const;
+		inline bool is_zero() const;
+
 		void rotz90(const int);
 
 		string get_string() const;
-
 
 		friend class Point;
 		friend class Transform;
@@ -472,6 +477,39 @@ namespace fluo
 		return int(std::round(z_));
 	}
 
+	inline void Vector::normalize_euler_signed()
+	{
+		x_ = fmod(x_ + 180.0, 360.0);
+		if (x_ < 0.0) x_ += 360.0;
+		x_ -= 180.0;
+		x_ = CleanZero(x_);
+
+		y_ = fmod(y_ + 180.0, 360.0);
+		if (y_ < 0.0) y_ += 360.0;
+		y_ -= 180.0;
+		y_ = CleanZero(y_);
+
+		z_ = fmod(z_ + 180.0, 360.0);
+		if (z_ < 0.0) z_ += 360.0;
+		z_ -= 180.0;
+		z_ = CleanZero(z_);
+	}
+
+	inline void Vector::normalize_euler_unsigned()
+	{
+		x_ = fmod(x_, 360.0);
+		if (x_ < 0.0) x_ += 360.0;
+		x_ = CleanZero(x_);
+
+		y_ = fmod(y_, 360.0);
+		if (y_ < 0.0) y_ += 360.0;
+		y_ = CleanZero(y_);
+
+		z_ = fmod(z_, 360.0);
+		if (z_ < 0.0) z_ += 360.0;
+		z_ = CleanZero(z_);
+	}
+
 	inline Vector Vector::unit_sign() const
 	{
 		return Vector(
@@ -547,6 +585,24 @@ namespace fluo
 	inline double Vector::w() const
 	{
 		return z_;
+	}
+
+	inline bool Vector::any_non_zero() const
+	{
+		return (
+			fabs(x_) > Epsilon(9) ||
+			fabs(y_) > Epsilon(9) ||
+			fabs(z_) > Epsilon(9)
+			);
+	}
+
+	inline bool Vector::is_zero() const
+	{
+		return (
+			fabs(x_) <= Epsilon(9)&&
+			fabs(y_) <= Epsilon(9)&&
+			fabs(z_) <= Epsilon(9)
+			);
 	}
 
 	inline double Dot(const Vector& v1, const Vector& v2)

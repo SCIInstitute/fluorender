@@ -63,7 +63,7 @@ public:
 
 	void SetClipValue(int i, int val, bool link = false);//index: 0~5 = X1~Z2
 	void SetClipValues(int i, int val1, int val2);//index: clip mask
-	void SetClipValues(const int val[6]);
+	void SetClipValues(const std::array<int, 6>& vals);
 	void ResetClipValues();
 	void ResetClipValuesX();
 	void ResetClipValuesY();

@@ -347,18 +347,16 @@ void ComponentGenerator::ShuffleID()
 
 	//clipping planes
 	cl_float4 p[6];
-	if (auto vr = vd->GetVR())
+	double dp[6];
+	auto planes = vd->GetVR()->get_clipping_box().GetPlanes();
+	double abcd[4];
+	for (size_t i = 0; i < 6; ++i)
 	{
-		std::vector<fluo::Plane*> *planes = vr->get_planes();
-		double abcd[4];
-		for (size_t i = 0; i < 6; ++i)
-		{
-			(*planes)[i]->get(abcd);
-			p[i] = { float(abcd[0]),
-				float(abcd[1]),
-				float(abcd[2]),
-				float(abcd[3]) };
-		}
+		planes[i].get(abcd);
+		p[i] = { float(abcd[0]),
+			float(abcd[1]),
+			float(abcd[2]),
+			float(abcd[3]) };
 	}
 
 	size_t brick_num = vd->GetTexture()->get_brick_num();

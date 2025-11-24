@@ -726,48 +726,32 @@ void MovieMaker::InsertKey(int index)
 		flkeyB = new FlKeyBoolean(keycode, vd->GetDisp());
 		glbin_interpolator.AddKey(flkeyB);
 		//clipping planes
-		std::vector<fluo::Plane*>* planes = vd->GetVR()->get_planes();
-		if (!planes)
-			continue;
-		if (planes->size() != 6)
-			continue;
-		fluo::Plane* plane = 0;
-		double abcd[4];
+		auto cb = vd->GetVR()->get_clipping_box();
+		double val[6];
+		cb.GetAllClip(val);
 		//x1
-		plane = (*planes)[0];
-		plane->get_copy(abcd);
 		keycode.l2_name = "x1_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		flkey = new FlKeyDouble(keycode, val[0]);
 		glbin_interpolator.AddKey(flkey);
 		//x2
-		plane = (*planes)[1];
-		plane->get_copy(abcd);
 		keycode.l2_name = "x2_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		flkey = new FlKeyDouble(keycode, val[1]);
 		glbin_interpolator.AddKey(flkey);
 		//y1
-		plane = (*planes)[2];
-		plane->get_copy(abcd);
 		keycode.l2_name = "y1_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		flkey = new FlKeyDouble(keycode, val[2]);
 		glbin_interpolator.AddKey(flkey);
 		//y2
-		plane = (*planes)[3];
-		plane->get_copy(abcd);
 		keycode.l2_name = "y2_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		flkey = new FlKeyDouble(keycode, val[3]);
 		glbin_interpolator.AddKey(flkey);
 		//z1
-		plane = (*planes)[4];
-		plane->get_copy(abcd);
 		keycode.l2_name = "z1_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		flkey = new FlKeyDouble(keycode, val[4]);
 		glbin_interpolator.AddKey(flkey);
 		//z2
-		plane = (*planes)[5];
-		plane->get_copy(abcd);
 		keycode.l2_name = "z2_val";
-		flkey = new FlKeyDouble(keycode, abs(abcd[3]));
+		flkey = new FlKeyDouble(keycode, val[5]);
 		glbin_interpolator.AddKey(flkey);
 		//t
 		int frame = vd->GetCurTime();
@@ -1142,7 +1126,7 @@ void MovieMaker::MakeKeysCameraTumble()
 	FlKeyQuaternion* flkey = 0;
 	FlKeyGroup* kg = 0;
 	fluo::Quaternion q;
-	double x, y, z;
+	fluo::Vector vval;
 
 	double t = glbin_interpolator.GetLastT();
 	if (t > 0.0) t += m_key_duration;
@@ -1167,9 +1151,9 @@ void MovieMaker::MakeKeysCameraTumble()
 	t += m_key_duration;
 	//negative y
 	glbin_interpolator.Begin(t, m_key_duration);
-	q.ToEuler(x, y, z);
-	y -= m_key_duration;
-	q.FromEuler(x, y, z);
+	vval = q.ToEuler();
+	vval.y(vval.y() - m_key_duration);
+	q.FromEuler(vval);
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();
@@ -1187,9 +1171,9 @@ void MovieMaker::MakeKeysCameraTumble()
 	t += m_key_duration;
 	//positive y
 	glbin_interpolator.Begin(t, m_key_duration);
-	q.ToEuler(x, y, z);
-	y += m_key_duration;
-	q.FromEuler(x, y, z);
+	vval = q.ToEuler();
+	vval.y(vval.y() + m_key_duration);
+	q.FromEuler(vval);
 	flkey = new FlKeyQuaternion(keycode, q);
 	glbin_interpolator.AddKey(flkey);
 	glbin_interpolator.End();

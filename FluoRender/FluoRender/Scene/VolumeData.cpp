@@ -471,6 +471,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		m_vr->set_scalar_scale(m_scalar_scale);
 		m_vr->set_gm_scale(m_scalar_scale);
 		m_vr->set_mode(m_render_mode);
+		m_vr->get_clipping_box().SetBBox(m_bounds);
 		//SetRenderMode(m_mode);
 	}
 
@@ -647,6 +648,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_scalar_scale(m_scalar_scale);
 	m_vr->set_gm_scale(m_scalar_scale);
 	m_vr->set_mode(m_render_mode);
+	m_vr->get_clipping_box().SetBBox(m_bounds);
 
 	//SetMode(m_mode);
 	m_bg_valid = false;
@@ -1563,31 +1565,8 @@ fluo::BBox VolumeData::GetBounds()
 
 fluo::BBox VolumeData::GetClippedBounds()
 {
-	std::vector<fluo::Plane*> *planes = m_vr->get_planes();
-	if (planes->size() != 6)
-		return m_bounds;
-
-	//calculating planes
-	//get six planes
-	fluo::Plane* px1 = (*planes)[0];
-	fluo::Plane* px2 = (*planes)[1];
-	fluo::Plane* py1 = (*planes)[2];
-	fluo::Plane* py2 = (*planes)[3];
-	fluo::Plane* pz1 = (*planes)[4];
-	fluo::Plane* pz2 = (*planes)[5];
-
-	fluo::Vector diff =
-		m_bounds.Max() - m_bounds.Min();
-	fluo::Point min = fluo::Point(
-		m_bounds.Min().x() - diff.x()*px1->d(),
-		m_bounds.Min().y() - diff.y()*py1->d(),
-		m_bounds.Min().z() - diff.z()*pz1->d());
-	fluo::Point max = fluo::Point(
-		m_bounds.Min().x() + diff.x()*px2->d(),
-		m_bounds.Min().y() + diff.y()*py2->d(),
-		m_bounds.Min().z() + diff.z()*pz2->d());
-
-	return fluo::BBox(min, max);
+	auto cb = m_vr->get_clipping_box();
+	return cb.GetClipBox();
 }
 
 //path
@@ -2951,290 +2930,63 @@ double VolumeData::GetMinValueScale()
 void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
 	int &nx, int &ny, int &nz)
 {
-	std::vector<fluo::Plane*> *planes = m_vr->get_planes();
-	if (planes->size() != 6)
-		return;
+	auto cb = m_vr->get_clipping_box();
+	double val[6];
+	cb.GetAllClip(val);
 
-	int resx, resy, resz;
-	GetResolution(resx, resy, resz);
-
-	//calculating planes
-	//get six planes
-	fluo::Plane* px1 = (*planes)[0];
-	fluo::Plane* px2 = (*planes)[1];
-	fluo::Plane* py1 = (*planes)[2];
-	fluo::Plane* py2 = (*planes)[3];
-	fluo::Plane* pz1 = (*planes)[4];
-	fluo::Plane* pz2 = (*planes)[5];
-
-	ox = std::round(-resx*px1->d());
-	oy = std::round(-resy*py1->d());
-	oz = std::round(-resz*pz1->d());
-	nx = std::round(resx*px2->d()) - ox;
-	ny = std::round(resy*py2->d()) - oy;
-	nz = std::round(resz*pz2->d()) - oz;
+	ox = static_cast<int>(std::round(val[0]));
+	nx = static_cast<int>(std::round(val[1]));
+	oy = static_cast<int>(std::round(val[2]));
+	ny = static_cast<int>(std::round(val[3]));
+	oz = static_cast<int>(std::round(val[4]));
+	nz = static_cast<int>(std::round(val[5]));
 }
 
 void VolumeData::SetClipValue(int i, int val)
 {
-	if (i < 0 || i > 5)
-		return;
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	double clip = 0;
-	fluo::Point p;
-	fluo::Vector v;
-	switch (i)
-	{
-	case 0://x1
-		clip = (double)val / m_res_x;
-		p = fluo::Point(clip, 0, 0);
-		v = fluo::Vector(1, 0, 0);
-		break;
-	case 1://x2
-		clip = (double)val / m_res_x;
-		p = fluo::Point(clip, 0, 0);
-		v = fluo::Vector(-1, 0, 0);
-		break;
-	case 2://y1
-		clip = (double)val / m_res_y;
-		p = fluo::Point(0, clip, 0);
-		v = fluo::Vector(0, 1, 0);
-		break;
-	case 3://y2
-		clip = (double)val / m_res_y;
-		p = fluo::Point(0, clip, 0);
-		v = fluo::Vector(0, -1, 0);
-		break;
-	case 4://z1
-		clip = (double)val / m_res_z;
-		p = fluo::Point(0, 0, clip);
-		v = fluo::Vector(0, 0, 1);
-		break;
-	case 5://z2
-		clip = (double)val / m_res_z;
-		p = fluo::Point(0, 0, clip);
-		v = fluo::Vector(0, 0, -1);
-		break;
-	}
-	(*planes)[i]->ChangePlane(p, v);
+	fluo::ClipPlane p = static_cast<fluo::ClipPlane>(i);
+	auto cb = m_vr->get_clipping_box();
+	cb.SetClip(p, val);
 }
 
 void VolumeData::SetClipValues(int i, int val1, int val2)
 {
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	double clip1 = 0, clip2 = 0;
-	fluo::Point p1, p2;
-	fluo::Vector v1, v2;
-	switch (i)
-	{
-	case 1://x
-	case 2:
-	case 3:
-		clip1 = (double)val1 / m_res_x;
-		clip2 = (double)val2 / m_res_x;
-		p1 = fluo::Point(clip1, 0, 0);
-		v1 = fluo::Vector(1, 0, 0);
-		p2 = fluo::Point(clip2, 0, 0);
-		v2 = fluo::Vector(-1, 0, 0);
-		(*planes)[0]->ChangePlane(p1, v1);
-		(*planes)[1]->ChangePlane(p2, v2);
-		break;
-	case 4://y1
-	case 8:
-	case 12:
-		clip1 = (double)val1 / m_res_y;
-		clip2 = (double)val2 / m_res_y;
-		p1 = fluo::Point(0, clip1, 0);
-		v1 = fluo::Vector(0, 1, 0);
-		p2 = fluo::Point(0, clip2, 0);
-		v2 = fluo::Vector(0, -1, 0);
-		(*planes)[2]->ChangePlane(p1, v1);
-		(*planes)[3]->ChangePlane(p2, v2);
-		break;
-	case 16://z1
-	case 32:
-	case 48:
-		clip1 = (double)val1 / m_res_z;
-		clip2 = (double)val2 / m_res_z;
-		p1 = fluo::Point(0, 0, clip1);
-		v1 = fluo::Vector(0, 0, 1);
-		p2 = fluo::Point(0, 0, clip2);
-		v2 = fluo::Vector(0, 0, -1);
-		(*planes)[4]->ChangePlane(p1, v1);
-		(*planes)[5]->ChangePlane(p2, v2);
-		break;
-	}
+	fluo::ClipPlane p = static_cast<fluo::ClipPlane>(i);
+	auto cb = m_vr->get_clipping_box();
+	cb.SetClipPair(p, val1, val2);
 }
 
-void VolumeData::SetClipValues(const int val[6])
+void VolumeData::SetClipValues(const std::array<int, 6>& vals)
 {
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	double clip;
-	fluo::Point p;
-	fluo::Vector v;
-	for (int i : { 0, 1, 2, 3, 4, 5 })
-	{
-		switch (i)
-		{
-		case 0:
-			clip = (double)val[i] / m_res_x;
-			p = fluo::Point(clip, 0, 0);
-			v = fluo::Vector(1, 0, 0);
-			break;
-		case 1:
-			clip = (double)val[i] / m_res_x;
-			p = fluo::Point(clip, 0, 0);
-			v = fluo::Vector(-1, 0, 0);
-			break;
-		case 2:
-			clip = (double)val[i] / m_res_y;
-			p = fluo::Point(0, clip, 0);
-			v = fluo::Vector(0, 1, 0);
-			break;
-		case 3:
-			clip = (double)val[i] / m_res_y;
-			p = fluo::Point(0, clip, 0);
-			v = fluo::Vector(0, -1, 0);
-			break;
-		case 4:
-			clip = (double)val[i] / m_res_z;
-			p = fluo::Point(0, 0, clip);
-			v = fluo::Vector(0, 0, 1);
-			break;
-		case 5:
-			clip = (double)val[i] / m_res_z;
-			p = fluo::Point(0, 0, clip);
-			v = fluo::Vector(0, 0, -1);
-			break;
-		}
-		(*planes)[i]->ChangePlane(p, v);
-	}
+	auto cb = m_vr->get_clipping_box();
+	std::array<double, 6> dvals;
+	std::transform(vals.begin(), vals.end(), dvals.begin(),
+		[](int v) { return static_cast<double>(v); });
+	cb.SetAllClip(dvals.data());
 }
 
 void VolumeData::ResetClipValues()
 {
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	fluo::Point p;
-	fluo::Vector v;
-	for (int i : { 0, 1, 2, 3, 4, 5 })
-	{
-		switch (i)
-		{
-		case 0:
-			p = fluo::Point(0, 0, 0);
-			v = fluo::Vector(1, 0, 0);
-			break;
-		case 1:
-			p = fluo::Point(1, 0, 0);
-			v = fluo::Vector(-1, 0, 0);
-			break;
-		case 2:
-			p = fluo::Point(0, 0, 0);
-			v = fluo::Vector(0, 1, 0);
-			break;
-		case 3:
-			p = fluo::Point(0, 1, 0);
-			v = fluo::Vector(0, -1, 0);
-			break;
-		case 4:
-			p = fluo::Point(0, 0, 0);
-			v = fluo::Vector(0, 0, 1);
-			break;
-		case 5:
-			p = fluo::Point(0, 0, 1);
-			v = fluo::Vector(0, 0, -1);
-			break;
-		}
-		(*planes)[i]->ChangePlane(p, v);
-	}
+	auto cb = m_vr->get_clipping_box();
+	cb.ResetClip();
 }
 
 void VolumeData::ResetClipValuesX()
 {
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	fluo::Point p;
-	fluo::Vector v;
-	p = fluo::Point(0, 0, 0);
-	v = fluo::Vector(1, 0, 0);
-	(*planes)[0]->ChangePlane(p, v);
-	p = fluo::Point(1, 0, 0);
-	v = fluo::Vector(-1, 0, 0);
-	(*planes)[1]->ChangePlane(p, v);
+	auto cb = m_vr->get_clipping_box();
+	cb.ResetClip(fluo::ClipPlane::XNeg);
 }
 
 void VolumeData::ResetClipValuesY()
 {
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	fluo::Point p;
-	fluo::Vector v;
-	p = fluo::Point(0, 0, 0);
-	v = fluo::Vector(0, 1, 0);
-	(*planes)[2]->ChangePlane(p, v);
-	p = fluo::Point(0, 1, 0);
-	v = fluo::Vector(0, -1, 0);
-	(*planes)[3]->ChangePlane(p, v);
+	auto cb = m_vr->get_clipping_box();
+	cb.ResetClip(fluo::ClipPlane::YNeg);
 }
 
 void VolumeData::ResetClipValuesZ()
 {
-	std::vector<fluo::Plane*>* planes = 0;
-	if (GetVR())
-		planes = GetVR()->get_planes();
-	if (!planes)
-		return;
-	if (planes->size() != 6)
-		return;
-
-	fluo::Point p;
-	fluo::Vector v;
-	p = fluo::Point(0, 0, 0);
-	v = fluo::Vector(0, 0, 1);
-	(*planes)[4]->ChangePlane(p, v);
-	p = fluo::Point(0, 0, 1);
-	v = fluo::Vector(0, 0, -1);
-	(*planes)[5]->ChangePlane(p, v);
+	auto cb = m_vr->get_clipping_box();
+	cb.ResetClip(fluo::ClipPlane::ZNeg);
 }
 
 //randomize color

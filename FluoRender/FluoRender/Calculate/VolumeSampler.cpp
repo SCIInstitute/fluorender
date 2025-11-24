@@ -207,63 +207,16 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		}
 
 		//recalculate range
-		std::vector<fluo::Plane*> *planes =
-			input->GetVR()->get_planes();
-		fluo::Plane p[6];
-		int np = int(planes->size());
+		auto cb = input->GetVR()->get_clipping_box();
+		double val[6];
+		cb.GetAllClip(val);
 
-		//get six planes
-		for (int i = 0; i < 6; ++i)
-		{
-			if (i < np)
-			{
-				p[i] = *((*planes)[i]);
-				p[i].Restore();
-			}
-			else
-			{
-				switch (i)
-				{
-				case 0:
-					p[i] = fluo::Plane(
-						fluo::Point(0.0, 0.0, 0.0)
-						, fluo::Vector(1.0, 0.0, 0.0));
-					break;
-				case 1:
-					p[i] = fluo::Plane(
-						fluo::Point(1.0, 0.0, 0.0),
-						fluo::Vector(-1.0, 0.0, 0.0));
-					break;
-				case 2:
-					p[i] = fluo::Plane(
-						fluo::Point(0.0, 0.0, 0.0),
-						fluo::Vector(0.0, 1.0, 0.0));
-					break;
-				case 3:
-					p[i] = fluo::Plane(
-						fluo::Point(0.0, 1.0, 0.0),
-						fluo::Vector(0.0, -1.0, 0.0));
-					break;
-				case 4:
-					p[i] = fluo::Plane(
-						fluo::Point(0.0, 0.0, 0.0),
-						fluo::Vector(0.0, 0.0, 1.0));
-					break;
-				case 5:
-					p[i] = fluo::Plane(
-						fluo::Point(0.0, 0.0, 1.0),
-						fluo::Vector(0.0, 0.0, -1.0));
-					break;
-				}
-			}
-		}
-
-		m_ox = int(-m_nx * p[0].d() + 0.499);
-		m_oy = int(-m_ny * p[2].d() + 0.499);
-		m_oz = int(-m_nz * p[4].d() + 0.499);
-		m_lx = int(m_nx * p[1].d() + 0.499) - m_ox;
-		m_ly = int(m_ny * p[3].d() + 0.499) - m_oy;
-		m_lz = int(m_nz * p[5].d() + 0.499) - m_oz;
+		m_ox = static_cast<int>(std::round(val[0]));
+		m_lx = static_cast<int>(std::round(val[1]));
+		m_oy = static_cast<int>(std::round(val[2]));
+		m_ly = static_cast<int>(std::round(val[3]));
+		m_oz = static_cast<int>(std::round(val[4]));
+		m_lz = static_cast<int>(std::round(val[5]));
 	}
 	else
 	{
