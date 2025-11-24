@@ -377,16 +377,6 @@ public:
 	//set clip mode
 	void SetClipMode(int mode);
 	int GetClipMode() { return m_clip_mode; }
-	//restore clipping planes
-	//void RestorePlanes();
-	//clipping plane rotations
-	//void ClipRotate();
-	//void SetClippingPlaneRotations(const fluo::Vector& val);
-	//fluo::Vector GetClippingPlaneRotations();
-	//void SetClipRotX(double val);
-	//void SetClipRotY(double val);
-	//void SetClipRotZ(double val);
-	//fluo::Quaternion GetClipRotation() { return m_q_cl; }
 	//set clip values
 	void SetClipValue(int i, int val);
 	void SetClipValues(int i, int val1, int val2);
@@ -395,6 +385,10 @@ public:
 	void ResetClipValuesX();
 	void ResetClipValuesY();
 	void ResetClipValuesZ();
+	//clip rotation
+	void SetClipRotation(int i, double val);
+	void SetClipRotation(const fluo::Vector& euler);
+	void SetClipRotation(const fluo::Quaternion& q);
 
 	//interpolation
 	void SetIntp(bool mode) { m_intp = mode; }
@@ -662,26 +656,20 @@ private:
 
 	//object center
 	fluo::Point m_obj_ctr;
-	//double m_obj_ctrx, m_obj_ctry, m_obj_ctrz;
 	//object rotation
 	fluo::Vector m_obj_rot;
-	//double m_obj_rotx, m_obj_roty, m_obj_rotz;
 	//flag for using offset values
 	bool m_offset;
 	//obj center offset (for registration currently)
 	fluo::Vector m_obj_ctr_off;
-	//double m_obj_ctr_offx, m_obj_ctr_offy, m_obj_ctr_offz;
 	//obj rotation center offset
 	fluo::Vector m_obj_rot_ctr_off;
-	//double m_obj_rot_ctr_offx, m_obj_rot_ctr_offy, m_obj_rot_ctr_offz;
 	//obj rotation offset (for registration currently)
 	fluo::Vector m_obj_rot_off;
-	//double m_obj_rot_offx, m_obj_rot_offy, m_obj_rot_offz;
 	//offset transform
 	fluo::Transform m_offset_tf;
 	//object translation
 	fluo::Vector m_obj_trans;
-	//double m_obj_transx, m_obj_transy, m_obj_transz;
 	//rotation lock
 	bool m_rot_lock;
 

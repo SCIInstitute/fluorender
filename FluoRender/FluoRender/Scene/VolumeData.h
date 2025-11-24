@@ -408,6 +408,10 @@ public:
 	void ResetClipValuesX();
 	void ResetClipValuesY();
 	void ResetClipValuesZ();
+	//clip rotation
+	void SetClipRotation(int i, double val);
+	void SetClipRotation(const fluo::Vector& euler);
+	void SetClipRotation(const fluo::Quaternion& q);
 
 	//clip distance
 	void SetClipDistX(int val) { m_clip_dist[0] = std::min(m_res_x, std::max(0, val)); }
