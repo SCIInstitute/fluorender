@@ -1059,6 +1059,89 @@ fluo::Vector MeshData::GetScaling()
 	return fluo::Vector(m_scale[0], m_scale[1], m_scale[2]);
 }
 
+void MeshData::SetClipValue(fluo::ClipPlane i, int val)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.SetClipIndex(i, val);
+}
+
+void MeshData::SetClipValues(fluo::ClipPlane i, int val1, int val2)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.SetClipPairIndex(i, val1, val2);
+}
+
+void MeshData::SetClipValues(const std::array<int, 6>& vals)
+{
+	auto cb = m_mr->get_clipping_box();
+	std::array<double, 6> dvals;
+	std::transform(vals.begin(), vals.end(), dvals.begin(),
+		[](int v) { return static_cast<double>(v); });
+	cb.SetAllClipsIndex(dvals.data());
+}
+
+void MeshData::ResetClipValues()
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.ResetClips();
+}
+
+void MeshData::ResetClipValues(fluo::ClipPlane i)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.ResetClips(i);
+}
+
+void MeshData::SetClipRotation(int i, double val)
+{
+	auto cb = m_mr->get_clipping_box();
+	auto euler = cb.GetEuler();
+	euler[i] = val;
+	cb.Rotate(euler);
+}
+
+void MeshData::SetClipRotation(const fluo::Vector& euler)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.Rotate(euler);
+}
+
+void MeshData::SetClipRotation(const fluo::Quaternion& q)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.Rotate(q);
+}
+
+void MeshData::SetLink(fluo::ClipPlane i, bool link)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.SetLink(i, link);
+}
+
+bool MeshData::GetLink(fluo::ClipPlane i)
+{
+	auto cb = m_mr->get_clipping_box();
+	return cb.GetLink(i);
+}
+
+void MeshData::ResetLink()
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.ResetLink();
+}
+
+void MeshData::SetLinkedDist(fluo::ClipPlane i, int val)
+{
+	auto cb = m_mr->get_clipping_box();
+	cb.SetLinkedDistIndex(i, val);
+}
+
+int MeshData::GetLinkedDist(fluo::ClipPlane i)
+{
+	auto cb = m_mr->get_clipping_box();
+	return static_cast<int>(std::round(cb.GetLinkedDistIndex(i)));
+}
+
 //randomize color
 void MeshData::RandomizeColor()
 {
@@ -1133,6 +1216,10 @@ void MeshData::BuildMesh()
 		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
+
+	auto& cb = m_mr->get_clipping_box();
+	cb.SetBBoxWorld(m_bounds);
+	cb.SetBBoxIndex(m_bounds);
 
 	SetFlatShading(m_data->numnormals == 0);
 	SetVertexColor(m_data->numcolors > 0);

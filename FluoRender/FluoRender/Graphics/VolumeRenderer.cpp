@@ -500,18 +500,19 @@ void VolumeRenderer::draw_volume(
 	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 
 	//set clipping planes
+	auto planes = clipping_box_.GetPlanesUnit();
 	double abcd[4];
-	clipping_box_[0].get(abcd);
+	planes[0].get(abcd);
 	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[1].get(abcd);
+	planes[1].get(abcd);
 	shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[2].get(abcd);
+	planes[2].get(abcd);
 	shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[3].get(abcd);
+	planes[3].get(abcd);
 	shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[4].get(abcd);
+	planes[4].get(abcd);
 	shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[5].get(abcd);
+	planes[5].get(abcd);
 	shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 	// render bricks
@@ -882,18 +883,19 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	seg_shader->setLocalParam(21, w2d, bins, zoom_, zoom_data_);
 
 	//set clipping planes
+	auto planes = clipping_box_.GetPlanesUnit();
 	double abcd[4];
-	clipping_box_[0].get(abcd);
+	planes[0].get(abcd);
 	seg_shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[1].get(abcd);
+	planes[1].get(abcd);
 	seg_shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[2].get(abcd);
+	planes[2].get(abcd);
 	seg_shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[3].get(abcd);
+	planes[3].get(abcd);
 	seg_shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[4].get(abcd);
+	planes[4].get(abcd);
 	seg_shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
-	clipping_box_[5].get(abcd);
+	planes[5].get(abcd);
 	seg_shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 	////////////////////////////////////////////////////////

@@ -38,14 +38,11 @@ namespace fluo
 
 	class Point;
 	class Quaternion;
+	class Transform;
 	class Plane
 	{
 		Vector n_;
 		double d_;
-
-		//copy of the values for restoration
-		Vector n_copy;
-		double d_copy;
 
 	public:
 		Plane(const Plane &copy);
@@ -69,7 +66,6 @@ namespace fluo
 		Vector project(const Vector& v) const;
 		Vector normal() const;
 		void get(double (&abcd)[4]) const;
-		void get_copy(double (&abcd)[4]) const;
 
 		// Not a great ==, doesnt take into account for floating point error.
 		bool operator==(const Plane &rhs) const;
@@ -91,6 +87,8 @@ namespace fluo
 		//rotate the plane around origin by a quaternion
 		void Rotate(const Quaternion &q);
 		void RotatePoint(const Quaternion& q, const Point& p);
+		//full transform
+		Plane Transformed(const Transform& t);
 
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{

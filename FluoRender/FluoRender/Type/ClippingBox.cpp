@@ -27,31 +27,49 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ClippingBox.h>
+#include <Transform.h>
 
 using namespace fluo;
 
 // Default constructor: empty bbox, six planes
 ClippingBox::ClippingBox() :
-	planes_(6),
-	planes_normalized_(6)
+	planes_world_(6),
+	planes_unit_(6),
+	planes_index_(6)
 {
 }
 
 // Construct from a bbox
-ClippingBox::ClippingBox(const BBox& box) :
-	planes_(6),
-	planes_normalized_(6),
-	bbox_(box)
+ClippingBox::ClippingBox(const BBox& box, const BBox& index_box) :
+	planes_world_(6),
+	planes_unit_(6),
+	planes_index_(6),
+	bbox_world_(box)
 {
+	if (index_box.valid())
+		bbox_index_ = index_box;
+	else
+		bbox_index_ = bbox_world_;
+	clips_world_ = bbox_world_;
+	clips_index_ = bbox_index_;
+	clips_unit_.unit();
 	Update();
 }
 
 // Copy constructor
 ClippingBox::ClippingBox(const ClippingBox& copy) :
-	planes_(copy.planes_),
-	planes_normalized_(copy.planes_normalized_),
-	bbox_(copy.bbox_),
-	clips_(copy.clips_),
+	planes_world_(copy.planes_world_),
+	planes_unit_(copy.planes_unit_),
+	planes_index_(copy.planes_index_),
+	bbox_world_(copy.bbox_world_),
+	bbox_index_(copy.bbox_index_),
+	clips_world_(copy.clips_world_),
+	clips_index_(copy.clips_index_),
+	clips_unit_(copy.clips_unit_),
+	links_(copy.links_),
+	linked_ds_world_(copy.linked_ds_world_),
+	linked_ds_index_(copy.linked_ds_index_),
+	linked_ds_unit_(copy.linked_ds_unit_),
 	q_(copy.q_),
 	euler_(copy.euler_)
 {
@@ -62,10 +80,16 @@ ClippingBox& ClippingBox::operator=(const ClippingBox& cb)
 {
 	if (this != &cb)
 	{
-		planes_ = cb.planes_;
-		planes_normalized_ = cb.planes_normalized_;
-		bbox_ = cb.bbox_;
-		clips_ = cb.clips_;
+		planes_world_ = cb.planes_world_;
+		planes_unit_ = cb.planes_unit_;
+		planes_index_ = cb.planes_index_;
+		bbox_world_ = cb.bbox_world_;
+		bbox_index_ = cb.bbox_index_;
+		clips_world_ = cb.clips_world_;
+		clips_index_ = cb.clips_index_;
+		clips_unit_ = cb.clips_unit_;
+		links_ = cb.links_;
+		linked_ds_unit_ = cb.linked_ds_unit_;
 		q_ = cb.q_;
 		euler_ = cb.euler_;
 	}
@@ -75,19 +99,27 @@ ClippingBox& ClippingBox::operator=(const ClippingBox& cb)
 bool ClippingBox::operator==(const ClippingBox& rhs) const
 {
 	// Compare planes
-	if (!(planes_ == rhs.planes_))
+	if (!(planes_world_ == rhs.planes_world_))
 		return false;
-
-	// Compare normalized planes
-	if (!(planes_normalized_ == rhs.planes_normalized_))
+	if (!(planes_unit_ == rhs.planes_unit_))
+		return false;
+	if (!(planes_index_ == rhs.planes_index_))
 		return false;
 
 	// Compare bbox
-	if (!(bbox_ == rhs.bbox_))
+	if (!(bbox_world_ == rhs.bbox_world_))
+		return false;
+	if (!(bbox_index_ == rhs.bbox_index_))
 		return false;
 
 	// Compare clips
-	if (clips_ != rhs.clips_)
+	if (clips_unit_ != rhs.clips_unit_)
+		return false;
+
+	//links
+	if (links_ != rhs.links_)
+		return false;
+	if (linked_ds_unit_ != rhs.linked_ds_unit_)
 		return false;
 
 	// Compare quaternion
@@ -106,81 +138,171 @@ bool ClippingBox::operator!=(const ClippingBox& rhs) const
 // Canonical inputs: bbox_, clips_, q_
 void ClippingBox::Update()
 {
-	// --- Ensure exactly 6 planes in both sets ---
-	planes_.resize(6);
-	planes_normalized_.resize(6);
+	// --- Ensure plane arrays are sized ---
+	planes_world_.resize(6);
+	planes_unit_.resize(6);
+	planes_index_.resize(6);
 
-	// --- World coordinate planes from clips_ ---
-	const Point& minp = clips_.Min();
-	const Point& maxp = clips_.Max();
+	// --- Use clips_unit_ as canonical ---
+	const Point minUnit = clips_unit_.Min();
+	const Point maxUnit = clips_unit_.Max();
 
-	planes_[static_cast<int>(ClipPlane::XNeg)].ChangePlane(minp, Vector(1, 0, 0));
-	planes_[static_cast<int>(ClipPlane::XPos)].ChangePlane(maxp, Vector(-1, 0, 0));
-	planes_[static_cast<int>(ClipPlane::YNeg)].ChangePlane(minp, Vector(0, 1, 0));
-	planes_[static_cast<int>(ClipPlane::YPos)].ChangePlane(maxp, Vector(0, -1, 0));
-	planes_[static_cast<int>(ClipPlane::ZNeg)].ChangePlane(minp, Vector(0, 0, 1));
-	planes_[static_cast<int>(ClipPlane::ZPos)].ChangePlane(maxp, Vector(0, 0, -1));
+	// --- Construct UNIT planes axis-aligned ---
+	planes_unit_[static_cast<int>(ClipPlane::XNeg)].ChangePlane(minUnit, Vector(1, 0, 0));
+	planes_unit_[static_cast<int>(ClipPlane::XPos)].ChangePlane(maxUnit, Vector(-1, 0, 0));
+	planes_unit_[static_cast<int>(ClipPlane::YNeg)].ChangePlane(minUnit, Vector(0, 1, 0));
+	planes_unit_[static_cast<int>(ClipPlane::YPos)].ChangePlane(maxUnit, Vector(0, -1, 0));
+	planes_unit_[static_cast<int>(ClipPlane::ZNeg)].ChangePlane(minUnit, Vector(0, 0, 1));
+	planes_unit_[static_cast<int>(ClipPlane::ZPos)].ChangePlane(maxUnit, Vector(0, 0, -1));
 
-	// --- Rotate planes around bbox center ---
-	Point center = bbox_.center();
-	for (auto& plane : planes_)
-		plane.RotatePoint(q_, center);
+	// --- Rotate UNIT planes around (0.5,0.5,0.5) ---
+	const Point unitCenter(0.5, 0.5, 0.5);
+	for (auto& plane : planes_unit_)
+		plane.RotatePoint(q_, unitCenter);
 
-	// --- Normalized coordinate planes ---
-	Vector diag = bbox_.diagonal();
-	Point origin = bbox_.Min();
+	// --- Denormalize to INDEX space ---
+	Transform trans;
+	trans.load_identity();
+	trans.post_scale(bbox_index_.diagonal());
+	trans.post_translate(fluo::Vector(bbox_index_.Min()));
+	for (int k = 0; k < 6; ++k)
+		planes_index_[k] = planes_unit_[k].Transformed(trans);
 
-	auto normalizePoint = [&](const Point& p) -> Point {
-		return Point(
-			(p.x() - origin.x()) / diag.x(),
-			(p.y() - origin.y()) / diag.y(),
-			(p.z() - origin.z()) / diag.z()
-		);
-		};
-
-	Point minNorm = normalizePoint(clips_.Min());
-	Point maxNorm = normalizePoint(clips_.Max());
-
-	planes_normalized_[static_cast<int>(ClipPlane::XNeg)].ChangePlane(minNorm, Vector(1, 0, 0));
-	planes_normalized_[static_cast<int>(ClipPlane::XPos)].ChangePlane(maxNorm, Vector(-1, 0, 0));
-	planes_normalized_[static_cast<int>(ClipPlane::YNeg)].ChangePlane(minNorm, Vector(0, 1, 0));
-	planes_normalized_[static_cast<int>(ClipPlane::YPos)].ChangePlane(maxNorm, Vector(0, -1, 0));
-	planes_normalized_[static_cast<int>(ClipPlane::ZNeg)].ChangePlane(minNorm, Vector(0, 0, 1));
-	planes_normalized_[static_cast<int>(ClipPlane::ZPos)].ChangePlane(maxNorm, Vector(0, 0, -1));
-
-	// --- Rotate normalized planes around (0.5,0.5,0.5) ---
-	Point normCenter(0.5, 0.5, 0.5);
-	for (auto& plane : planes_normalized_)
-		plane.RotatePoint(q_, normCenter);
+	// --- Map INDEX planes to WORLD space ---
+	trans.load_identity();
+	Vector voxel_size = bbox_index_.scale_to(bbox_world_);
+	trans.post_scale(voxel_size);
+	trans.post_translate(fluo::Vector(bbox_world_.Min()));
+	for (int k = 0; k < 6; ++k)
+		planes_world_[k] = planes_index_[k].Transformed(trans);
 
 	// --- Sync Euler angles from quaternion ---
 	euler_ = q_.ToEuler();
 }
 
-void ClippingBox::ResetClip()
-{
-	clips_ = bbox_;
-	Update();
-}
-
-void ClippingBox::ResetClip(ClipPlane plane)
+void ClippingBox::SetLink(ClipPlane plane, bool link)
 {
 	switch (plane)
 	{
 	case ClipPlane::XNeg:
 	case ClipPlane::XPos:
-		clips_.minx(bbox_.minx());
-		clips_.maxx(bbox_.maxx());
+		links_[0] = link;
 		break;
 	case ClipPlane::YNeg:
 	case ClipPlane::YPos:
-		clips_.miny(bbox_.miny());
-		clips_.maxy(bbox_.maxy());
+		links_[1] = link;
 		break;
 	case ClipPlane::ZNeg:
 	case ClipPlane::ZPos:
-		clips_.minz(bbox_.minz());
-		clips_.maxz(bbox_.maxz());
+		links_[2] = link;
+		break;
+	}
+}
+
+bool ClippingBox::GetLink(ClipPlane plane)
+{
+	switch (plane)
+	{
+	case ClipPlane::XNeg:
+	case ClipPlane::XPos:
+		return links_[0];
+	case ClipPlane::YNeg:
+	case ClipPlane::YPos:
+		return links_[1];
+	case ClipPlane::ZNeg:
+	case ClipPlane::ZPos:
+		return links_[2];
+	}
+}
+
+void ClippingBox::ResetLink()
+{
+	links_.fill(false);
+}
+
+void ClippingBox::ResetLinkedDist()
+{
+	double dist = 1.0;
+	linked_ds_index_.fill(dist);
+	for (int i = 0; i < 3; ++i)
+	{
+		linked_ds_world_[i] = IndexToWorldDist(i, dist);
+		linked_ds_unit_[i] = IndexToUnitDist(i, dist);
+	}
+}
+
+void ClippingBox::SetLinkedDistWorld(ClipPlane plane, double dist)
+{
+	int axis = (plane == ClipPlane::XNeg || plane == ClipPlane::XPos) ? 0 :
+		(plane == ClipPlane::YNeg || plane == ClipPlane::YPos) ? 1 : 2;
+
+	linked_ds_world_[axis] = dist;
+	linked_ds_index_[axis] = WorldToIndexDist(axis, dist);
+	linked_ds_unit_[axis] = IndexToUnitDist(axis, linked_ds_index_[axis]);
+}
+
+double ClippingBox::GetLinkedDistWorld(ClipPlane plane)
+{
+	int axis = (plane == ClipPlane::XNeg || plane == ClipPlane::XPos) ? 0 :
+		(plane == ClipPlane::YNeg || plane == ClipPlane::YPos) ? 1 : 2;
+	return linked_ds_world_[axis];
+}
+
+void ClippingBox::SetLinkedDistIndex(ClipPlane plane, double dist)
+{
+	int axis = (plane == ClipPlane::XNeg || plane == ClipPlane::XPos) ? 0 :
+		(plane == ClipPlane::YNeg || plane == ClipPlane::YPos) ? 1 : 2;
+
+	linked_ds_index_[axis] = dist;
+	linked_ds_world_[axis] = IndexToWorldDist(axis, dist);
+	linked_ds_unit_[axis] = IndexToUnitDist(axis, dist);
+}
+
+double ClippingBox::GetLinkedDistIndex(ClipPlane plane)
+{
+	int axis = (plane == ClipPlane::XNeg || plane == ClipPlane::XPos) ? 0 :
+		(plane == ClipPlane::YNeg || plane == ClipPlane::YPos) ? 1 : 2;
+	return linked_ds_index_[axis];
+}
+
+void ClippingBox::ResetClips()
+{
+	clips_world_ = bbox_world_;
+	clips_index_ = bbox_index_;
+	clips_unit_.unit();
+	Update();
+}
+
+void ClippingBox::ResetClips(ClipPlane plane)
+{
+	switch (plane)
+	{
+	case ClipPlane::XNeg:
+	case ClipPlane::XPos:
+		clips_world_.minx(bbox_world_.minx());
+		clips_world_.maxx(bbox_world_.maxx());
+		clips_index_.minx(bbox_index_.minx());
+		clips_index_.maxx(bbox_index_.maxx());
+		clips_unit_.minx(0.0);
+		clips_unit_.maxx(1.0);
+		break;
+	case ClipPlane::YNeg:
+	case ClipPlane::YPos:
+		clips_world_.miny(bbox_world_.miny());
+		clips_world_.maxy(bbox_world_.maxy());
+		clips_index_.miny(bbox_index_.miny());
+		clips_index_.maxy(bbox_index_.maxy());
+		clips_unit_.miny(0.0);
+		clips_unit_.maxy(1.0);
+		break;
+	case ClipPlane::ZNeg:
+	case ClipPlane::ZPos:
+		clips_world_.minz(bbox_world_.minz());
+		clips_world_.maxz(bbox_world_.maxz());
+		clips_index_.minz(bbox_index_.minz());
+		clips_index_.maxz(bbox_index_.maxz());
+		clips_unit_.minz(0.0);
+		clips_unit_.maxz(1.0);
 	}
 	Update();
 }
@@ -193,110 +315,270 @@ void ClippingBox::ResetRotation()
 
 void ClippingBox::ResetAll()
 {
-	clips_ = bbox_;
+	clips_world_ = bbox_world_;
+	clips_index_ = bbox_index_;
+	clips_unit_.unit();
 	q_ = Quaternion();
+	links_.fill(false);
 	Update();
 }
 
-void ClippingBox::SetClip(ClipPlane plane, double value)
+void ClippingBox::SetClipWorld(ClipPlane plane, double value)
 {
 	switch (plane)
 	{
 	case ClipPlane::XNeg:
-		clips_.minx(value);
+		clips_world_.minx(value);
+		if (links_[0])
+			clips_world_.maxx(value + linked_ds_world_[0]);
 		break;
 	case ClipPlane::XPos:
-		clips_.maxx(value);
+		clips_world_.maxx(value);
+		if (links_[0])
+			clips_world_.minx(value - linked_ds_world_[0]);
 		break;
 	case ClipPlane::YNeg:
-		clips_.miny(value);
+		clips_world_.miny(value);
+		if (links_[1])
+			clips_world_.maxy(value + linked_ds_world_[1]);
 		break;
 	case ClipPlane::YPos:
-		clips_.maxy(value);
+		clips_world_.maxy(value);
+		if (links_[1])
+			clips_world_.miny(value - linked_ds_world_[1]);
 		break;
 	case ClipPlane::ZNeg:
-		clips_.minz(value);
+		clips_world_.minz(value);
+		if (links_[2])
+			clips_world_.maxz(value + linked_ds_world_[2]);
 		break;
 	case ClipPlane::ZPos:
-		clips_.maxz(value);
+		clips_world_.maxz(value);
+		if (links_[2])
+			clips_world_.minz(value - linked_ds_world_[2]);
+		break;
 	}
+
+	// --- Sync unit and index clips ---
+	clips_unit_ = clips_world_.normalized(bbox_world_);
+	clips_index_ = clips_unit_.denormalized(bbox_index_);
+
 	Update();
 }
 
-double ClippingBox::GetClip(ClipPlane plane) const
+double ClippingBox::GetClipWorld(ClipPlane plane) const
 {
 	switch (plane)
 	{
-	case ClipPlane::XNeg: return clips_.minx();
-	case ClipPlane::XPos: return clips_.maxx();
-	case ClipPlane::YNeg: return clips_.miny();
-	case ClipPlane::YPos: return clips_.maxy();
-	case ClipPlane::ZNeg: return clips_.minz();
-	case ClipPlane::ZPos: return clips_.maxz();
+	case ClipPlane::XNeg: return clips_world_.minx();
+	case ClipPlane::XPos: return clips_world_.maxx();
+	case ClipPlane::YNeg: return clips_world_.miny();
+	case ClipPlane::YPos: return clips_world_.maxy();
+	case ClipPlane::ZNeg: return clips_world_.minz();
+	case ClipPlane::ZPos: return clips_world_.maxz();
 	}
 	return 0.0;
 }
 
-void ClippingBox::SetClipPair(ClipPlane axis, double val1, double val2)
+void ClippingBox::SetClipPairWorld(ClipPlane axis, double val1, double val2)
 {
 	switch (axis)
 	{
 	case ClipPlane::XNeg: // treat as X axis pair
 	case ClipPlane::XPos:
-		clips_.minx(val1);
-		clips_.maxx(val2);
+		clips_world_.minx(val1);
+		clips_world_.maxx(val2);
 		break;
 	case ClipPlane::YNeg:
 	case ClipPlane::YPos:
-		clips_.miny(val1);
-		clips_.maxy(val2);
+		clips_world_.miny(val1);
+		clips_world_.maxy(val2);
 		break;
 	case ClipPlane::ZNeg:
 	case ClipPlane::ZPos:
-		clips_.minz(val1);
-		clips_.maxz(val2);
+		clips_world_.minz(val1);
+		clips_world_.maxz(val2);
 		break;
 	}
+
+	// --- Sync unit and index clips ---
+	clips_unit_ = clips_world_.normalized(bbox_world_);
+	clips_index_ = clips_unit_.denormalized(bbox_index_);
+
 	Update();
 }
 
-void ClippingBox::GetClipPair(ClipPlane axis, double& val1, double& val2) const
+void ClippingBox::GetClipPairWorld(ClipPlane axis, double& val1, double& val2) const
 {
 	switch (axis)
 	{
 	case ClipPlane::XNeg: // treat as X axis pair
 	case ClipPlane::XPos:
-		val1 = GetClip(ClipPlane::XNeg);
-		val2 = GetClip(ClipPlane::XPos);
+		val1 = GetClipWorld(ClipPlane::XNeg);
+		val2 = GetClipWorld(ClipPlane::XPos);
 		break;
 	case ClipPlane::YNeg:
 	case ClipPlane::YPos:
-		val1 = GetClip(ClipPlane::YNeg);
-		val2 = GetClip(ClipPlane::YPos);
+		val1 = GetClipWorld(ClipPlane::YNeg);
+		val2 = GetClipWorld(ClipPlane::YPos);
 		break;
 	case ClipPlane::ZNeg:
 	case ClipPlane::ZPos:
-		val1 = GetClip(ClipPlane::ZNeg);
-		val2 = GetClip(ClipPlane::ZPos);
+		val1 = GetClipWorld(ClipPlane::ZNeg);
+		val2 = GetClipWorld(ClipPlane::ZPos);
 		break;
 	}
 }
 
-void ClippingBox::SetAllClip(const double val[6])
+void ClippingBox::SetAllClipsWorld(const double val[6])
 {
-	clips_.minx(val[0]);
-	clips_.maxx(val[1]);
-	clips_.miny(val[2]);
-	clips_.maxy(val[3]);
-	clips_.minz(val[4]);
-	clips_.maxz(val[5]);
+	clips_world_.minx(val[0]);
+	clips_world_.maxx(val[1]);
+	clips_world_.miny(val[2]);
+	clips_world_.maxy(val[3]);
+	clips_world_.minz(val[4]);
+	clips_world_.maxz(val[5]);
+
+	// --- Sync unit and index clips ---
+	clips_unit_ = clips_world_.normalized(bbox_world_);
+	clips_index_ = clips_unit_.denormalized(bbox_index_);
+
 	Update();
 }
 
-void ClippingBox::GetAllClip(double val[6]) const
+void ClippingBox::GetAllClipsWorld(double val[6]) const
 {
 	for (int i = 0; i < 6; ++i)
-		val[i] = GetClip(static_cast<ClipPlane>(i));
+		val[i] = GetClipWorld(static_cast<ClipPlane>(i));
+}
+
+void ClippingBox::SetClipIndex(ClipPlane plane, double value)
+{
+	switch (plane)
+	{
+	case ClipPlane::XNeg:
+		clips_index_.minx(value);
+		if (links_[0])
+			clips_index_.maxx(value + linked_ds_index_[0]);
+		break;
+	case ClipPlane::XPos:
+		clips_index_.maxx(value);
+		if (links_[0])
+			clips_index_.minx(value - linked_ds_index_[0]);
+		break;
+	case ClipPlane::YNeg:
+		clips_index_.miny(value);
+		if (links_[1])
+			clips_index_.maxy(value + linked_ds_index_[1]);
+		break;
+	case ClipPlane::YPos:
+		clips_index_.maxy(value);
+		if (links_[1])
+			clips_index_.miny(value - linked_ds_index_[1]);
+		break;
+	case ClipPlane::ZNeg:
+		clips_index_.minz(value);
+		if (links_[2])
+			clips_index_.maxz(value + linked_ds_index_[2]);
+		break;
+	case ClipPlane::ZPos:
+		clips_index_.maxz(value);
+		if (links_[2])
+			clips_index_.minz(value - linked_ds_index_[2]);
+		break;
+	}
+
+	// --- Sync unit and index clips ---
+	clips_unit_ = clips_index_.normalized(bbox_index_);
+	clips_world_ = clips_unit_.denormalized(bbox_world_);
+
+	Update();
+}
+
+double ClippingBox::GetClipIndex(ClipPlane plane) const
+{
+	switch (plane)
+	{
+	case ClipPlane::XNeg: return clips_index_.minx();
+	case ClipPlane::XPos: return clips_index_.maxx();
+	case ClipPlane::YNeg: return clips_index_.miny();
+	case ClipPlane::YPos: return clips_index_.maxy();
+	case ClipPlane::ZNeg: return clips_index_.minz();
+	case ClipPlane::ZPos: return clips_index_.maxz();
+	}
+	return 0.0;
+}
+
+void ClippingBox::SetClipPairIndex(ClipPlane axis, double val1, double val2)
+{
+	switch (axis)
+	{
+	case ClipPlane::XNeg: // treat as X axis pair
+	case ClipPlane::XPos:
+		clips_index_.minx(val1);
+		clips_index_.maxx(val2);
+		break;
+	case ClipPlane::YNeg:
+	case ClipPlane::YPos:
+		clips_index_.miny(val1);
+		clips_index_.maxy(val2);
+		break;
+	case ClipPlane::ZNeg:
+	case ClipPlane::ZPos:
+		clips_index_.minz(val1);
+		clips_index_.maxz(val2);
+		break;
+	}
+
+	// --- Sync unit and index clips ---
+	clips_unit_ = clips_index_.normalized(bbox_index_);
+	clips_world_ = clips_unit_.denormalized(bbox_world_);
+
+	Update();
+}
+
+void ClippingBox::GetClipPairIndex(ClipPlane axis, double& val1, double& val2) const
+{
+	switch (axis)
+	{
+	case ClipPlane::XNeg: // treat as X axis pair
+	case ClipPlane::XPos:
+		val1 = GetClipIndex(ClipPlane::XNeg);
+		val2 = GetClipIndex(ClipPlane::XPos);
+		break;
+	case ClipPlane::YNeg:
+	case ClipPlane::YPos:
+		val1 = GetClipIndex(ClipPlane::YNeg);
+		val2 = GetClipIndex(ClipPlane::YPos);
+		break;
+	case ClipPlane::ZNeg:
+	case ClipPlane::ZPos:
+		val1 = GetClipIndex(ClipPlane::ZNeg);
+		val2 = GetClipIndex(ClipPlane::ZPos);
+		break;
+	}
+}
+
+void ClippingBox::SetAllClipsIndex(const double val[6])
+{
+	clips_index_.minx(val[0]);
+	clips_index_.maxx(val[1]);
+	clips_index_.miny(val[2]);
+	clips_index_.maxy(val[3]);
+	clips_index_.minz(val[4]);
+	clips_index_.maxz(val[5]);
+
+	// --- Sync unit and index clips ---
+	clips_unit_ = clips_index_.normalized(bbox_index_);
+	clips_world_ = clips_unit_.denormalized(bbox_world_);
+
+	Update();
+}
+
+void ClippingBox::GetAllClipsIndex(double val[6]) const
+{
+	for (int i = 0; i < 6; ++i)
+		val[i] = GetClipIndex(static_cast<ClipPlane>(i));
 }
 
 void ClippingBox::Rotate(const Quaternion& q)
@@ -313,9 +595,29 @@ void ClippingBox::Rotate(const Vector& euler)
 }
 
 // Point containment test
-bool ClippingBox::Contains(const Point& p) const
+bool ClippingBox::ContainsWorld(const Point& p) const
 {
-	for (const auto& plane : planes_)
+	for (const auto& plane : planes_world_)
+	{
+		if (plane.eval_point(p) > 0.0) // point is outside
+			return false;
+	}
+	return true;
+}
+
+bool ClippingBox::ContainsIndex(const Point& p) const
+{
+	for (const auto& plane : planes_index_)
+	{
+		if (plane.eval_point(p) > 0.0) // point is outside
+			return false;
+	}
+	return true;
+}
+
+bool ClippingBox::ContainsUnit(const Point& p) const
+{
+	for (const auto& plane : planes_unit_)
 	{
 		if (plane.eval_point(p) > 0.0) // point is outside
 			return false;

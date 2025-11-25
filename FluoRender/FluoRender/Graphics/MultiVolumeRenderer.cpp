@@ -629,18 +629,19 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->fog_color_.g(),
 				vr_list_[tn]->fog_color_.b(), 0.0);
 
+			auto planes = vr_list_[tn]->clipping_box_.GetPlanesUnit();
 			double abcd[4];
-			vr_list_[tn]->planes_[0]->get(abcd);
+			planes[0].get(abcd);
 			shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
-			vr_list_[tn]->planes_[1]->get(abcd);
+			planes[1].get(abcd);
 			shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
-			vr_list_[tn]->planes_[2]->get(abcd);
+			planes[2].get(abcd);
 			shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
-			vr_list_[tn]->planes_[3]->get(abcd);
+			planes[3].get(abcd);
 			shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
-			vr_list_[tn]->planes_[4]->get(abcd);
+			planes[4].get(abcd);
 			shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
-			vr_list_[tn]->planes_[5]->get(abcd);
+			planes[5].get(abcd);
 			shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 			//bind depth texture for rendering shadows

@@ -464,17 +464,17 @@ namespace fluo
 
 	inline int Vector::intx() const
 	{
-		return int(std::round(x_));
+		return static_cast<int>(std::round(x_));
 	}
 
 	inline int Vector::inty() const
 	{
-		return int(std::round(y_));
+		return static_cast<int>(std::round(y_));
 	}
 
 	inline int Vector::intz() const
 	{
-		return int(std::round(z_));
+		return static_cast<int>(std::round(z_));
 	}
 
 	inline void Vector::normalize_euler_signed()

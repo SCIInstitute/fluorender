@@ -407,17 +407,17 @@ namespace fluo
 
 	inline int Point::intx() const
 	{
-		return int(std::round(x_));
+		return static_cast<int>(std::round(x_));
 	}
 
 	inline int Point::inty() const
 	{
-		return int(std::round(y_));
+		return static_cast<int>(std::round(y_));
 	}
 
 	inline int Point::intz() const
 	{
-		return int(std::round(z_));
+		return static_cast<int>(std::round(z_));
 	}
 
 	inline Point Point::unit_sign() const

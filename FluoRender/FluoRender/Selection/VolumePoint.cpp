@@ -104,12 +104,10 @@ double VolumePoint::GetPointVolume(
 	double max_int = 0.0;
 	double alpha = 0.0;
 	double value = 0.0;
-	std::vector<fluo::Plane*> *planes = 0;
 	double mspc = 1.0;
 	if (vd->GetSampleRate() > 0.0)
 		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / vd->GetSampleRate();
-	if (vd->GetVR())
-		planes = vd->GetVR()->get_planes();
+	auto cb = vd->GetVR()->get_clipping_box();
 	int counter = 0;//counter to determine if the ray casting has run
 	if (bbox.intersect(mp1, vv, hit))
 	{
@@ -151,18 +149,7 @@ double VolumePoint::GetPointVolume(
 			nmp.x(hit.x() / bbox.Max().x());
 			nmp.y(hit.y() / bbox.Max().y());
 			nmp.z(hit.z() / bbox.Max().z());
-			bool inside = true;
-			if (planes)
-			{
-				for (int i = 0; i < 6; i++)
-					if ((*planes)[i] &&
-						(*planes)[i]->eval_point(nmp) < 0.0)
-					{
-						inside = false;
-						break;
-					}
-			}
-			if (inside)
+			if (cb.ContainsWorld(nmp))
 			{
 				xx = xx == resx ? resx - 1 : xx;
 				yy = yy == resy ? resy - 1 : yy;
@@ -273,10 +260,6 @@ double VolumePoint::GetPointVolumeBox(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	std::vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
-	if (planes->size() != 6)
-		return -1.0;
-
 	fluo::Transform mv;
 	fluo::Transform p;
 	glm::mat4 mv_temp;
@@ -322,34 +305,22 @@ double VolumePoint::GetPointVolumeBox(
 	fluo::Ray ray(mp1, ray_d);
 	double mint = -1.0;
 	double t;
-	//for each plane, calculate the intersection point
-	fluo::Plane* plane = 0;
 	fluo::Point pp;//a point on plane
-	int i, j;
-	bool pp_out;
-	for (i = 0; i < 6; i++)
+
+	auto cb = vd->GetVR()->get_clipping_box();
+	auto planes = cb.GetPlanesWorld();
+	//for each plane, calculate the intersection point
+	for (int i = 0; i < 6; i++)
 	{
-		plane = (*planes)[i];
-		fluo::Vector vec = plane->normal();
-		fluo::Point pnt = plane->get_point();
+		auto plane = planes[i];
+		fluo::Vector vec = plane.normal();
+		fluo::Point pnt = plane.get_point();
 		if (ray.planeIntersectParameter(vec, pnt, t))
 		{
 			pp = ray.parameter(t);
 
-			pp_out = false;
 			//determine if the point is inside the box
-			for (j = 0; j < 6; j++)
-			{
-				if (j == i)
-					continue;
-				if ((*planes)[j]->eval_point(pp) < 0)
-				{
-					pp_out = true;
-					break;
-				}
-			}
-
-			if (!pp_out)
+			if (cb.ContainsWorld(pp))
 			{
 				if (t > mint)
 				{
@@ -378,10 +349,6 @@ double VolumePoint::GetPointVolumeBox2(
 	int nx = view->GetCanvasSize().w();
 	int ny = view->GetCanvasSize().h();
 	if (nx <= 0 || ny <= 0)
-		return -1.0;
-
-	std::vector<fluo::Plane*> *planes = vd->GetVR()->get_planes();
-	if (planes->size() != 6)
 		return -1.0;
 
 	//projection
@@ -422,34 +389,21 @@ double VolumePoint::GetPointVolumeBox2(
 	double mint = -1.0;
 	double maxt = std::numeric_limits<double>::max();
 	double t;
-	//for each plane, calculate the intersection point
-	fluo::Plane* plane = 0;
 	fluo::Point pp;//a point on plane
-	int i, j;
-	bool pp_out;
-	for (i = 0; i < 6; i++)
+
+	auto cb = vd->GetVR()->get_clipping_box();
+	auto planes = cb.GetPlanesWorld();
+	//for each plane, calculate the intersection point
+	for (int i = 0; i < 6; i++)
 	{
-		plane = (*planes)[i];
-		fluo::Vector vec = plane->normal();
-		fluo::Point pnt = plane->get_point();
+		auto plane = planes[i];
+		fluo::Vector vec = plane.normal();
+		fluo::Point pnt = plane.get_point();
 		if (ray.planeIntersectParameter(vec, pnt, t))
 		{
 			pp = ray.parameter(t);
 
-			pp_out = false;
-			//determine if the point is inside the box
-			for (j = 0; j < 6; j++)
-			{
-				if (j == i)
-					continue;
-				if ((*planes)[j]->eval_point(pp) < 0)
-				{
-					pp_out = true;
-					break;
-				}
-			}
-
-			if (!pp_out)
+			if (cb.ContainsWorld(pp))
 			{
 				if (t > mint)
 				{

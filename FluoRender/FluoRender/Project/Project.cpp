@@ -57,6 +57,7 @@ DEALINGS IN THE SOFTWARE.
 #include <base_vol_reader.h>
 #include <msk_reader.h>
 #include <VolumeRenderer.h>
+#include <MeshRenderer.h>
 #include <BaseXrRenderer.h>
 #include <VolumeSelector.h>
 #include <MovieMaker.h>
@@ -379,61 +380,36 @@ void Project::Open(const std::wstring& filename)
 						if (fconfig->Read("scl", &vval))
 							vd->SetScalings(vval.x(), vval.y(), vval.z());
 
-						std::vector<fluo::Plane*>* planes = 0;
-						if (vd->GetVR())
-							planes = vd->GetVR()->get_planes();
-						int iresx, iresy, iresz;
-						vd->GetResolution(iresx, iresy, iresz);
-						if (planes && planes->size() == 6)
-						{
-							//x1
-							if (fconfig->Read("x1_vali", &dval))
-								(*planes)[0]->ChangePlane(fluo::Point(abs(dval / iresx), 0.0, 0.0),
-									fluo::Vector(1.0, 0.0, 0.0));
-							else if (fconfig->Read("x1_val", &dval))
-								(*planes)[0]->ChangePlane(fluo::Point(abs(dval), 0.0, 0.0),
-									fluo::Vector(1.0, 0.0, 0.0));
-
-							//x2
-							if (fconfig->Read("x2_vali", &dval))
-								(*planes)[1]->ChangePlane(fluo::Point(abs(dval / iresx), 0.0, 0.0),
-									fluo::Vector(-1.0, 0.0, 0.0));
-							else if (fconfig->Read("x2_val", &dval))
-								(*planes)[1]->ChangePlane(fluo::Point(abs(dval), 0.0, 0.0),
-									fluo::Vector(-1.0, 0.0, 0.0));
-
-							//y1
-							if (fconfig->Read("y1_vali", &dval))
-								(*planes)[2]->ChangePlane(fluo::Point(0.0, abs(dval / iresy), 0.0),
-									fluo::Vector(0.0, 1.0, 0.0));
-							else if (fconfig->Read("y1_val", &dval))
-								(*planes)[2]->ChangePlane(fluo::Point(0.0, abs(dval), 0.0),
-									fluo::Vector(0.0, 1.0, 0.0));
-
-							//y2
-							if (fconfig->Read("y2_vali", &dval))
-								(*planes)[3]->ChangePlane(fluo::Point(0.0, abs(dval / iresy), 0.0),
-									fluo::Vector(0.0, -1.0, 0.0));
-							else if (fconfig->Read("y2_val", &dval))
-								(*planes)[3]->ChangePlane(fluo::Point(0.0, abs(dval), 0.0),
-									fluo::Vector(0.0, -1.0, 0.0));
-
-							//z1
-							if (fconfig->Read("z1_vali", &dval))
-								(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, abs(dval / iresz)),
-									fluo::Vector(0.0, 0.0, 1.0));
-							else if (fconfig->Read("z1_val", &dval))
-								(*planes)[4]->ChangePlane(fluo::Point(0.0, 0.0, abs(dval)),
-									fluo::Vector(0.0, 0.0, 1.0));
-
-							//z2
-							if (fconfig->Read("z2_vali", &dval))
-								(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, abs(dval / iresz)),
-									fluo::Vector(0.0, 0.0, -1.0));
-							else if (fconfig->Read("z2_val", &dval))
-								(*planes)[5]->ChangePlane(fluo::Point(0.0, 0.0, abs(dval)),
-									fluo::Vector(0.0, 0.0, -1.0));
-						}
+						//clip values
+						if (fconfig->Read("clip_xneg", &dval))
+							vd->SetClipValue(fluo::ClipPlane::XNeg, dval);
+						if (fconfig->Read("clip_xpos", &dval))
+							vd->SetClipValue(fluo::ClipPlane::XPos, dval);
+						if (fconfig->Read("clip_yneg", &dval))
+							vd->SetClipValue(fluo::ClipPlane::YNeg, dval);
+						if (fconfig->Read("clip_ypos", &dval))
+							vd->SetClipValue(fluo::ClipPlane::YPos, dval);
+						if (fconfig->Read("clip_zneg", &dval))
+							vd->SetClipValue(fluo::ClipPlane::ZNeg, dval);
+						if (fconfig->Read("clip_zpos", &dval))
+							vd->SetClipValue(fluo::ClipPlane::ZPos, dval);
+						//clip rotation
+						if (fconfig->Read("clip_rot", &vval))
+							vd->SetClipRotation(vval);
+						//clip link
+						if (fconfig->Read("clip_link_x", &bval))
+							vd->SetLink(fluo::ClipPlane::XNeg, bval);
+						if (fconfig->Read("clip_link_y", &bval))
+							vd->SetLink(fluo::ClipPlane::YNeg, bval);
+						if (fconfig->Read("clip_link_z", &bval))
+							vd->SetLink(fluo::ClipPlane::ZNeg, bval);
+						//dist
+						if (fconfig->Read("clip_dist_x", &ival))
+							vd->SetLinkedDist(fluo::ClipPlane::XNeg, ival);
+						if (fconfig->Read("clip_dist_y", &ival))
+							vd->SetLinkedDist(fluo::ClipPlane::YNeg, ival);
+						if (fconfig->Read("clip_dist_z", &ival))
+							vd->SetLinkedDist(fluo::ClipPlane::ZNeg, ival);
 
 						//2d adjustment settings
 						if (fconfig->Read("gamma", &cval))
@@ -571,6 +547,37 @@ void Project::Open(const std::wstring& filename)
 						double darkness;
 						if (fconfig->Read("shadow_darkness", &darkness))
 							md->SetShadowIntensity(darkness);
+
+						//clip values
+						if (fconfig->Read("clip_xneg", &dval))
+							md->SetClipValue(fluo::ClipPlane::XNeg, dval);
+						if (fconfig->Read("clip_xpos", &dval))
+							md->SetClipValue(fluo::ClipPlane::XPos, dval);
+						if (fconfig->Read("clip_yneg", &dval))
+							md->SetClipValue(fluo::ClipPlane::YNeg, dval);
+						if (fconfig->Read("clip_ypos", &dval))
+							md->SetClipValue(fluo::ClipPlane::YPos, dval);
+						if (fconfig->Read("clip_zneg", &dval))
+							md->SetClipValue(fluo::ClipPlane::ZNeg, dval);
+						if (fconfig->Read("clip_zpos", &dval))
+							md->SetClipValue(fluo::ClipPlane::ZPos, dval);
+						//clip rotation
+						if (fconfig->Read("clip_rot", &vval))
+							md->SetClipRotation(vval);
+						//clip link
+						if (fconfig->Read("clip_link_x", &bval))
+							md->SetLink(fluo::ClipPlane::XNeg, bval);
+						if (fconfig->Read("clip_link_y", &bval))
+							md->SetLink(fluo::ClipPlane::YNeg, bval);
+						if (fconfig->Read("clip_link_z", &bval))
+							md->SetLink(fluo::ClipPlane::ZNeg, bval);
+						//dist
+						if (fconfig->Read("clip_dist_x", &ival))
+							md->SetLinkedDist(fluo::ClipPlane::XNeg, ival);
+						if (fconfig->Read("clip_dist_y", &ival))
+							md->SetLinkedDist(fluo::ClipPlane::YNeg, ival);
+						if (fconfig->Read("clip_dist_z", &ival))
+							md->SetLinkedDist(fluo::ClipPlane::ZNeg, ival);
 
 						//mesh transform
 						path = "../transform";
@@ -941,13 +948,6 @@ void Project::Open(const std::wstring& filename)
 				//clipping plane rotations
 				if (fconfig->Read("clip_mode", &ival))
 					view->SetClipMode(ival);
-				double rotx_cl, roty_cl, rotz_cl;
-				if (fconfig->Read("rot_cl", &vval))
-					view->SetClippingPlaneRotations(vval);
-				else if (fconfig->Read("rotx_cl", &rotx_cl) &&
-					fconfig->Read("roty_cl", &roty_cl) &&
-					fconfig->Read("rotz_cl", &rotz_cl))
-					view->SetClippingPlaneRotations(fluo::Vector(rotx_cl, roty_cl, rotz_cl));
 
 				//painting parameters
 				if (fconfig->Read("brush_use_pres", &dval))
@@ -1334,7 +1334,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 				p /= vd->GetName() + L".tif";
 				vd->Save(p.wstring(), 0, 3, false,
 					false, 0, false, glbin_settings.m_save_compress,
-					fluo::Point(), fluo::Quaternion(), fluo::Point(), false);
+					fluo::Point(), fluo::Quaternion(), fluo::Vector(), false);
 				fconfig->Write("path", p.wstring());
 				new_chan = true;
 			}
@@ -1398,40 +1398,27 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("s_res", vd->GetSpacingScales());
 			fconfig->Write("scl", vd->GetScalings());
 
-			//planes
-			std::vector<fluo::Plane*>* planes = 0;
-			if (vd->GetVR())
-				planes = vd->GetVR()->get_planes();
-			if (planes && planes->size() == 6)
-			{
-				fluo::Plane* plane = 0;
-				double abcd[4];
-
-				//x1
-				plane = (*planes)[0];
-				plane->get_copy(abcd);
-				fconfig->Write("x1_val", abcd[3]);
-				//x2
-				plane = (*planes)[1];
-				plane->get_copy(abcd);
-				fconfig->Write("x2_val", abcd[3]);
-				//y1
-				plane = (*planes)[2];
-				plane->get_copy(abcd);
-				fconfig->Write("y1_val", abcd[3]);
-				//y2
-				plane = (*planes)[3];
-				plane->get_copy(abcd);
-				fconfig->Write("y2_val", abcd[3]);
-				//z1
-				plane = (*planes)[4];
-				plane->get_copy(abcd);
-				fconfig->Write("z1_val", abcd[3]);
-				//z2
-				plane = (*planes)[5];
-				plane->get_copy(abcd);
-				fconfig->Write("z2_val", abcd[3]);
-			}
+			auto& cb = vd->GetVR()->get_clipping_box();
+			//clip values
+			double clips[6];
+			cb.GetAllClipsWorld(clips);
+			fconfig->Write("clip_xneg", clips[0]);
+			fconfig->Write("clip_xpos", clips[1]);
+			fconfig->Write("clip_yneg", clips[2]);
+			fconfig->Write("clip_ypos", clips[3]);
+			fconfig->Write("clip_zneg", clips[4]);
+			fconfig->Write("clip_zpos", clips[5]);
+			//clip rotation
+			auto euler = cb.GetEuler();
+			fconfig->Write("clip_rot", euler);
+			//clip link
+			fconfig->Write("clip_link_x", cb.GetLink(fluo::ClipPlane::XNeg));
+			fconfig->Write("clip_link_y", cb.GetLink(fluo::ClipPlane::YNeg));
+			fconfig->Write("clip_link_z", cb.GetLink(fluo::ClipPlane::ZNeg));
+			//dist
+			fconfig->Write("clip_dist_x", cb.GetLinkedDistWorld(fluo::ClipPlane::XNeg));
+			fconfig->Write("clip_dist_y", cb.GetLinkedDistWorld(fluo::ClipPlane::YNeg));
+			fconfig->Write("clip_dist_z", cb.GetLinkedDistWorld(fluo::ClipPlane::ZNeg));
 
 			//2d adjustment settings
 			fconfig->Write("gamma", vd->GetGammaColor());
@@ -1520,6 +1507,28 @@ void Project::Save(const std::wstring& filename, bool inc)
 			//shadow
 			fconfig->Write("shadow", md->GetShadowEnable());
 			fconfig->Write("shadow_darkness", md->GetShadowIntensity());
+
+			auto& cb = md->GetMR()->get_clipping_box();
+			//clip values
+			double clips[6];
+			cb.GetAllClipsWorld(clips);
+			fconfig->Write("clip_xneg", clips[0]);
+			fconfig->Write("clip_xpos", clips[1]);
+			fconfig->Write("clip_yneg", clips[2]);
+			fconfig->Write("clip_ypos", clips[3]);
+			fconfig->Write("clip_zneg", clips[4]);
+			fconfig->Write("clip_zpos", clips[5]);
+			//clip rotation
+			auto euler = cb.GetEuler();
+			fconfig->Write("clip_rot", euler);
+			//clip link
+			fconfig->Write("clip_link_x", cb.GetLink(fluo::ClipPlane::XNeg));
+			fconfig->Write("clip_link_y", cb.GetLink(fluo::ClipPlane::YNeg));
+			fconfig->Write("clip_link_z", cb.GetLink(fluo::ClipPlane::ZNeg));
+			//dist
+			fconfig->Write("clip_dist_x", cb.GetLinkedDistWorld(fluo::ClipPlane::XNeg));
+			fconfig->Write("clip_dist_y", cb.GetLinkedDistWorld(fluo::ClipPlane::YNeg));
+			fconfig->Write("clip_dist_z", cb.GetLinkedDistWorld(fluo::ClipPlane::ZNeg));
 
 			//mesh transform
 			path = "../transform";
@@ -1712,7 +1721,6 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 			//clipping plane rotations
 			fconfig->Write("clip_mode", view->GetClipMode());
-			fconfig->Write("rot_cl", view->GetClippingPlaneRotations());
 
 			//painting parameters
 			fconfig->Write("brush_use_pres", glbin_vol_selector.GetBrushUsePres());

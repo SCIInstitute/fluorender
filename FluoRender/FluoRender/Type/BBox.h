@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FLBBOX_H_
 #define _FLBBOX_H_
 
+#include <Vector.h>
 #include <Point.h>
 #include <Utils.h>
 #include <ostream>
@@ -37,21 +38,22 @@ DEALINGS IN THE SOFTWARE.
 
 namespace fluo
 {
-	class Vector;
-
 	class BBox
 	{
 	public:
 
-		BBox():
-		is_valid_(false)
-		{}
+		BBox() :
+			is_valid_(false)
+		{
+		}
 
-		~BBox() 
-		{}
+		~BBox()
+		{
+		}
 
-		BBox(const BBox& copy) 
-			: cmin_(copy.cmin_), cmax_(copy.cmax_), is_valid_(copy.is_valid_) {}
+		BBox(const BBox& copy)
+			: cmin_(copy.cmin_), cmax_(copy.cmax_), is_valid_(copy.is_valid_) {
+		}
 
 		BBox& operator=(const BBox& copy)
 		{
@@ -72,7 +74,75 @@ namespace fluo
 		}
 
 		BBox(const Point& min, const Point& max)
-			: cmin_(min), cmax_(max), is_valid_(true) {}
+			: cmin_(min), cmax_(max), is_valid_(true) {
+		}
+
+		Vector scale_to(const BBox& bbox) const
+		{
+			Vector d1 = this->diagonal();
+			Vector d2 = bbox.diagonal();
+			return Vector(d2.x() / d1.x(), d2.y() / d1.y(), d2.z() / d1.z());
+		}
+
+		BBox normalized(const BBox& ref) const
+		{
+			Point refMin = ref.Min();
+			Vector refDiag = ref.diagonal();
+
+			auto safeNormalize = [&](double val, double refMin, double refExtent) -> double {
+				if (refExtent == 0.0) return 0.0; // avoid divide by zero
+				double u = (val - refMin) / refExtent;
+				// clamp to [0,1] to stay inside unit box
+				if (u < 0.0) u = 0.0;
+				if (u > 1.0) u = 1.0;
+				return u;
+				};
+
+			Point nmin(
+				safeNormalize(cmin_.x(), refMin.x(), refDiag.x()),
+				safeNormalize(cmin_.y(), refMin.y(), refDiag.y()),
+				safeNormalize(cmin_.z(), refMin.z(), refDiag.z())
+			);
+
+			Point nmax(
+				safeNormalize(cmax_.x(), refMin.x(), refDiag.x()),
+				safeNormalize(cmax_.y(), refMin.y(), refDiag.y()),
+				safeNormalize(cmax_.z(), refMin.z(), refDiag.z())
+			);
+
+			return BBox(nmin, nmax);
+		}
+
+		BBox denormalized(const BBox& ref) const
+		{
+			Point refMin = ref.Min();
+			Vector refDiag = ref.diagonal();
+
+			auto safeDenorm = [&](double u, double refMin, double refExtent) -> double {
+				return refMin + u * refExtent;
+				};
+
+			Point dmin(
+				safeDenorm(cmin_.x(), refMin.x(), refDiag.x()),
+				safeDenorm(cmin_.y(), refMin.y(), refDiag.y()),
+				safeDenorm(cmin_.z(), refMin.z(), refDiag.z())
+			);
+
+			Point dmax(
+				safeDenorm(cmax_.x(), refMin.x(), refDiag.x()),
+				safeDenorm(cmax_.y(), refMin.y(), refDiag.y()),
+				safeDenorm(cmax_.z(), refMin.z(), refDiag.z())
+			);
+
+			return BBox(dmin, dmax);
+		}
+
+		void unit()
+		{
+			cmin_ = Point(0.0);
+			cmax_ = Point(1.0);
+			is_valid_ = true;
+		}
 
 		inline int valid() const { return is_valid_; }
 
@@ -82,15 +152,15 @@ namespace fluo
 		//! Expand the bounding box to include point p
 		inline void extend(const Point& p)
 		{
-			if(is_valid_)
+			if (is_valid_)
 			{
-				cmin_=fluo::Min(p, cmin_);
-				cmax_=fluo::Max(p, cmax_);
-			} 
-			else 
+				cmin_ = fluo::Min(p, cmin_);
+				cmax_ = fluo::Max(p, cmax_);
+			}
+			else
 			{
-				cmin_=p;
-				cmax_=p;
+				cmin_ = p;
+				cmax_ = p;
 				is_valid_ = true;
 			}
 		}
@@ -102,12 +172,12 @@ namespace fluo
 		{
 			if (is_valid_)
 			{
-				cmin_.x(cmin_.x()-val);
-				cmin_.y(cmin_.y()-val);
-				cmin_.z(cmin_.z()-val);
-				cmax_.x(cmax_.x()+val);
-				cmax_.y(cmax_.y()+val);
-				cmax_.z(cmax_.z()+val);
+				cmin_.x(cmin_.x() - val);
+				cmin_.y(cmin_.y() - val);
+				cmin_.z(cmin_.z() - val);
+				cmax_.x(cmax_.x() + val);
+				cmax_.y(cmax_.y() + val);
+				cmax_.z(cmax_.z() + val);
 			}
 		}
 
@@ -148,16 +218,16 @@ namespace fluo
 		//! and centered at point p
 		inline void extend(const Point& p, double radius)
 		{
-			Vector r(radius,radius,radius);
-			if(is_valid_)
+			Vector r(radius, radius, radius);
+			if (is_valid_)
 			{
-				cmin_=fluo::Min(p-r, cmin_);
-				cmax_=fluo::Max(p+r, cmax_);
-			} 
-			else 
+				cmin_ = fluo::Min(p - r, cmin_);
+				cmax_ = fluo::Max(p + r, cmax_);
+			}
+			else
 			{
-				cmin_=p-r;
-				cmax_=p+r;
+				cmin_ = p - r;
+				cmax_ = p + r;
 				is_valid_ = true;
 			}
 		}
@@ -165,7 +235,7 @@ namespace fluo
 		//! Expand the bounding box to include bounding box b
 		inline void extend(const BBox& b)
 		{
-			if(b.valid())
+			if (b.valid())
 			{
 				extend(b.Min());
 				extend(b.Max());
@@ -188,7 +258,7 @@ namespace fluo
 		}
 
 		//clamp the box to another one
-		inline void clamp(const BBox &box)
+		inline void clamp(const BBox& box)
 		{
 			if (is_valid_)
 			{
@@ -207,31 +277,33 @@ namespace fluo
 		}
 
 		inline Point center() const
-		{ assert(is_valid_); Vector d = diagonal(); return cmin_ + (d * 0.5); }
+		{
+			assert(is_valid_); Vector d = diagonal(); return cmin_ + (d * 0.5);
+		}
 
 		inline double longest_edge() const
 		{
 			assert(is_valid_);
-			Vector diagonal(cmax_-cmin_);
+			Vector diagonal(cmax_ - cmin_);
 			return fluo::Max(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		inline double shortest_edge() const
 		{
 			assert(is_valid_);
-			Vector diagonal(cmax_-cmin_);
+			Vector diagonal(cmax_ - cmin_);
 			return fluo::Min(diagonal.x(), diagonal.y(), diagonal.z());
 		}
 
 		//! Move the bounding box 
-		inline void translate(const Vector &v)
+		inline void translate(const Vector& v)
 		{
 			cmin_ += v;
 			cmax_ += v;
 		}
 
 		//! Scale the bounding box by s, centered around o
-		void scale(double s, const Vector &o);
+		void scale(double s, const Vector& o);
 		//scale around origin
 		void scale(double sx, double sy, double sz);
 		//scale around center
@@ -250,21 +322,33 @@ namespace fluo
 		inline double maxx() const { return cmax_.x(); }
 		inline double maxy() const { return cmax_.y(); }
 		inline double maxz() const { return cmax_.z(); }
+		inline int minintx() const { return static_cast<int>(std::round(cmin_.x())); }
+		inline int mininty() const { return static_cast<int>(std::round(cmin_.y())); }
+		inline int minintz() const { return static_cast<int>(std::round(cmin_.z())); }
+		inline int maxintx() const { return static_cast<int>(std::round(cmax_.x())); }
+		inline int maxinty() const { return static_cast<int>(std::round(cmax_.y())); }
+		inline int maxintz() const { return static_cast<int>(std::round(cmax_.z())); }
 
 		inline Point Min() const
-		{ return cmin_; }
+		{
+			return cmin_;
+		}
 
 		inline Point Max() const
-		{ return cmax_; }
+		{
+			return cmax_;
+		}
 
 		inline Vector diagonal() const
-		{ assert(is_valid_); return cmax_-cmin_; }
-
-		inline bool inside(const Point &p) const 
 		{
-			return (is_valid_ && p.x() >= cmin_.x() && 
-				p.y() >= cmin_.y() && p.z() >= cmin_.z() && 
-				p.x() <= cmax_.x() && p.y() <= cmax_.y() && 
+			assert(is_valid_); return cmax_ - cmin_;
+		}
+
+		inline bool inside(const Point& p) const
+		{
+			return (is_valid_ && p.x() >= cmin_.x() &&
+				p.y() >= cmin_.y() && p.z() >= cmin_.z() &&
+				p.x() <= cmax_.x() && p.y() <= cmax_.y() &&
 				p.z() <= cmax_.z());
 		}
 
@@ -278,7 +362,7 @@ namespace fluo
 		bool intersect(const Point& e, const Vector& v, Point& hitNear);
 
 		//if it intersects another bbox
-		bool intersect(const BBox &box) const;
+		bool intersect(const BBox& box) const;
 
 		//distance between two bboxes
 		double distance(const BBox& bb) const;
@@ -328,7 +412,7 @@ namespace fluo
 		return ibox;
 	}
 
-	inline	bool BBox::intersect(const BBox &box) const
+	inline	bool BBox::intersect(const BBox& box) const
 	{
 		if (!valid() || !box.valid())
 			return false;

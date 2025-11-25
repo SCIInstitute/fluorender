@@ -51,6 +51,10 @@ namespace flrd
 {
 	class EntryParams;
 }
+namespace fluo
+{
+	enum class ClipPlane : int;
+}
 class BaseVolReader;
 enum class ChannelMixMode : int;
 
@@ -399,27 +403,21 @@ public:
 	void SetMinMaxValue(double val1, double val2) { m_min_value = val1; m_max_value = val2; }
 
 	//clip size
-	void GetClipValues(int &ox, int &oy, int &oz,
-		int &nx, int &ny, int &nz);
-	void SetClipValue(int i, int val);
-	void SetClipValues(int i, int val1, int val2);
+	void SetClipValue(fluo::ClipPlane i, int val);
+	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
 	void SetClipValues(const std::array<int, 6>& vals);
 	void ResetClipValues();
-	void ResetClipValuesX();
-	void ResetClipValuesY();
-	void ResetClipValuesZ();
+	void ResetClipValues(fluo::ClipPlane i);
 	//clip rotation
 	void SetClipRotation(int i, double val);
 	void SetClipRotation(const fluo::Vector& euler);
 	void SetClipRotation(const fluo::Quaternion& q);
-
 	//clip distance
-	void SetClipDistX(int val) { m_clip_dist[0] = std::min(m_res_x, std::max(0, val)); }
-	void SetClipDistY(int val) { m_clip_dist[1] = std::min(m_res_y, std::max(0, val)); }
-	void SetClipDistZ(int val) { m_clip_dist[2] = std::min(m_res_z, std::max(0, val)); }
-	int GetClipDistX() { return m_clip_dist[0]; }
-	int GetClipDistY() { return m_clip_dist[1]; }
-	int GetClipDistZ() { return m_clip_dist[2]; }
+	void SetLink(fluo::ClipPlane i, bool link);
+	bool GetLink(fluo::ClipPlane i);
+	void ResetLink();
+	void SetLinkedDist(fluo::ClipPlane i, int val);
+	int GetLinkedDist(fluo::ClipPlane i);
 
 	//randomize color
 	void RandomizeColor();
@@ -629,9 +627,6 @@ private:
 	//background intensity
 	bool m_bg_valid;
 	double m_bg_int;
-
-	//clip distance
-	int m_clip_dist[3];
 
 	//colormap of histogram
 	bool m_hist_dirty;

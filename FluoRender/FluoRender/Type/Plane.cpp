@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Vector.h>
 #include <Quaternion.h>
+#include <Transform.h>
 #include <iostream>
 
 namespace fluo
@@ -37,8 +38,6 @@ namespace fluo
 	Plane::Plane()
 		: n_(Vector(0, 0, 1)), d_(0)
 	{
-		n_copy = n_;
-		d_copy = d_;
 	}
 
 	Plane::Plane(double a, double b, double c, double d) : n_(Vector(a, b, c)), d_(d)
@@ -46,23 +45,16 @@ namespace fluo
 		double l = n_.length();
 		d_ /= l;
 		n_.normalize();
-
-		n_copy = n_;
-		d_copy = d_;
 	}
 
 	Plane::Plane(const Point& p, const Vector& normal)
 		: n_(normal), d_(-Dot(p, normal))
 	{
-		n_copy = n_;
-		d_copy = d_;
 	}
 
 	Plane::Plane(const Plane& copy)
 		: n_(copy.n_), d_(copy.d_)
 	{
-		n_copy = copy.n_copy;
-		d_copy = copy.d_copy;
 	}
 
 	Plane::Plane(const Point& p1, const Point& p2, const Point& p3)
@@ -72,9 +64,6 @@ namespace fluo
 		n_ = Cross(v2, v1);
 		n_.normalize();
 		d_ = -Dot(p1, n_);
-
-		n_copy = n_;
-		d_copy = d_;
 	}
 
 	Plane::~Plane()
@@ -85,8 +74,6 @@ namespace fluo
 	{
 		n_ = copy.n_;
 		d_ = copy.d_;
-		n_copy = copy.n_copy;
-		d_copy = copy.d_copy;
 		return *this;
 	}
 
@@ -253,14 +240,6 @@ namespace fluo
 		abcd[3] = d_;
 	}
 
-	void Plane::get_copy(double(&abcd)[4]) const
-	{
-		abcd[0] = n_copy.x();
-		abcd[1] = n_copy.y();
-		abcd[2] = n_copy.z();
-		abcd[3] = d_copy;
-	}
-
 	bool Plane::operator==(const Plane& rhs) const
 	{
 		double cosine = Dot(this->n_, rhs.n_);
@@ -305,6 +284,19 @@ namespace fluo
 		// Recompute plane: passes through newPivot with newNormal
 		n_ = newNormal;
 		d_ = Dot(Vector(newPivot.x(), newPivot.y(), newPivot.z()), n_);
+	}
+
+	Plane Plane::Transformed(const Transform& t)
+	{
+		// Transform a representative point on the plane
+		Point p0 = Point(n_.x() * -d_, n_.y() * -d_, n_.z() * -d_);
+		Point pT = t.transform(p0);
+
+		// Transform the normal using inverse-transpose
+		Vector nT = t.project_normal(n_);
+		nT.normalize();
+
+		return Plane(pT, nT);
 	}
 
 } // End namespace fluo

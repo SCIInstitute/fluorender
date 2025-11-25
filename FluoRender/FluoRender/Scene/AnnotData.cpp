@@ -355,23 +355,8 @@ bool AnnotData::InsideClippingPlanes(fluo::Point &pos)
 	if (!vd_ptr)
 		return true;
 
-	std::vector<fluo::Plane*> *planes = vd_ptr->GetVR()->get_planes();
-	if (!planes)
-		return true;
-	if (planes->size() != 6)
-		return true;
-
-	fluo::Plane* plane = 0;
-	for (int i=0; i<6; i++)
-	{
-		plane = (*planes)[i];
-		if (!plane)
-			continue;
-		if (plane->eval_point(pos) < 0)
-			return false;
-	}
-
-	return true;
+	auto cb = vd_ptr->GetVR()->get_clipping_box();
+	return cb.ContainsWorld(pos);
 }
 
 std::shared_ptr<AText> AnnotData::GetAText(const std::wstring& str)

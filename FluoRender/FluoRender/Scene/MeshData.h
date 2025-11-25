@@ -43,6 +43,11 @@ namespace flvr
 {
 	class MeshRenderer;
 }
+namespace fluo
+{
+	enum class ClipPlane : int;
+	class Quaternion;
+}
 using GLMmodelPtr = std::unique_ptr<GLMmodel, void(*)(GLMmodel*)>;
 class BaseMeshReader;
 class MeshData : public TreeLayer
@@ -145,6 +150,23 @@ public:
 	void GetScaling(double &x, double &y, double &z);
 	void SetScaling(const fluo::Vector& val);
 	fluo::Vector GetScaling();
+
+	//clip size
+	void SetClipValue(fluo::ClipPlane i, int val);
+	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
+	void SetClipValues(const std::array<int, 6>& vals);
+	void ResetClipValues();
+	void ResetClipValues(fluo::ClipPlane i);
+	//clip rotation
+	void SetClipRotation(int i, double val);
+	void SetClipRotation(const fluo::Vector& euler);
+	void SetClipRotation(const fluo::Quaternion& q);
+	//clip distance
+	void SetLink(fluo::ClipPlane i, bool link);
+	bool GetLink(fluo::ClipPlane i);
+	void ResetLink();
+	void SetLinkedDist(fluo::ClipPlane i, int val);
+	int GetLinkedDist(fluo::ClipPlane i);
 
 	//randomize color
 	void RandomizeColor();

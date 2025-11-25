@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #define _RENDERVIEW_H_
 
 #include <TreeLayer.h>
-#include <Quaternion.h>
 #include <Size.h>
 #include <Value.hpp>
 #include <glm/glm.hpp>
@@ -42,14 +41,6 @@ DEALINGS IN THE SOFTWARE.
 #define INIT_TRANSL  4
 #define INIT_ROTATE  8
 #define INIT_OBJ_TRANSL  16
-
-//clipping plane mask
-#define CLIP_X1  1
-#define CLIP_X2  2
-#define CLIP_Y1  4
-#define CLIP_Y2  8
-#define CLIP_Z1  16
-#define CLIP_Z2  32
 
 //information bits
 #define INFO_DISP	1
@@ -88,6 +79,11 @@ namespace flrd
 	class CelpList;
 	class RulerList;
 	class Ruler;
+}
+namespace fluo
+{
+	enum class ClipPlane : int;
+	class Quaternion;
 }
 
 enum class ChannelMixMode : int
@@ -378,13 +374,11 @@ public:
 	void SetClipMode(int mode);
 	int GetClipMode() { return m_clip_mode; }
 	//set clip values
-	void SetClipValue(int i, int val);
-	void SetClipValues(int i, int val1, int val2);
+	void SetClipValue(fluo::ClipPlane i, int val);
+	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
 	void SetClipValues(const std::array<int, 6>& vals);
 	void ResetClipValues();
-	void ResetClipValuesX();
-	void ResetClipValuesY();
-	void ResetClipValuesZ();
+	void ResetClipValues(fluo::ClipPlane i);
 	//clip rotation
 	void SetClipRotation(int i, double val);
 	void SetClipRotation(const fluo::Vector& euler);
@@ -729,11 +723,6 @@ private:
 	fluo::Color m_color_6;
 	//double m_value_7;
 	fluo::Color m_color_7;
-
-	//clipping plane rotations
-	//fluo::Quaternion m_q_cl;
-	//fluo::Quaternion m_q_cl_zero;
-	//fluo::Vector m_rot_cl;
 
 	//for selection
 	bool m_pick;

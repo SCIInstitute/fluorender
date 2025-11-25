@@ -209,7 +209,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		//recalculate range
 		auto cb = input->GetVR()->get_clipping_box();
 		double val[6];
-		cb.GetAllClip(val);
+		cb.GetAllClipsIndex(val);
 
 		m_ox = static_cast<int>(std::round(val[0]));
 		m_lx = static_cast<int>(std::round(val[1]));

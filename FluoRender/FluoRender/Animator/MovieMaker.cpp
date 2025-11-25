@@ -728,7 +728,7 @@ void MovieMaker::InsertKey(int index)
 		//clipping planes
 		auto cb = vd->GetVR()->get_clipping_box();
 		double val[6];
-		cb.GetAllClip(val);
+		cb.GetAllClipsWorld(val);
 		//x1
 		keycode.l2_name = "x1_val";
 		flkey = new FlKeyDouble(keycode, val[0]);

@@ -33,10 +33,11 @@
 #include <Point.h>
 #include <Vector.h>
 #include <Quaternion.h>
+#include <array>
 
 namespace fluo
 {
-	enum class ClipPlane
+	enum class ClipPlane : int
 	{
 		XNeg = 0, // left
 		XPos = 1, // right
@@ -51,7 +52,7 @@ namespace fluo
 	public:
 		// Constructors
 		ClippingBox();
-		ClippingBox(const BBox& box);
+		ClippingBox(const BBox& world_box, const BBox& index_box = BBox());
 		ClippingBox(const ClippingBox& copy);
 		~ClippingBox() {}
 
@@ -59,63 +60,138 @@ namespace fluo
 		bool operator==(const ClippingBox& rhs) const;
 		bool operator!=(const ClippingBox& rhs) const;
 
-		//plane access
-		const PlaneSet& GetPlanes() const { return planes_; }
+		// --- Plane access ---
+		const PlaneSet& GetPlanesWorld() const { return planes_world_; }
+		const PlaneSet& GetPlanesIndex() const { return planes_index_; }
+		const PlaneSet& GetPlanesUnit()  const { return planes_unit_; }
 
-		// Access to the bounding box
-		inline const BBox& GetBBox() const { return bbox_; }
-		inline void SetBBox(const BBox& box) { bbox_ = box; Update(); }
-		inline Vector GetSize() const { return bbox_.diagonal(); }
-		//clip
-		inline const BBox& GetClipBox() const { return clips_; }
+		// --- Bounding boxes (dataset initialization) ---
+		const BBox& GetBBoxWorld() const { return bbox_world_; }
+		void SetBBoxWorld(const BBox& box) { bbox_world_ = box; Update(); }
 
-		void ResetClip();
-		void ResetClip(ClipPlane plane);
+		const BBox& GetBBoxIndex() const { return bbox_index_; }
+		void SetBBoxIndex(const BBox& box) { bbox_index_ = box; Update(); }
+
+		Vector GetWorldSize() const { return bbox_world_.diagonal(); }
+		Vector GetIndexSize() const { return bbox_index_.diagonal(); }
+
+		// --- Clip boxes (UI input) ---
+		const BBox& GetClipsWorld() const { return clips_world_; }
+		const BBox& GetClipsIndex() const { return clips_index_; }
+
+		Vector GetClipWorldSize() const { return clips_world_.diagonal(); }
+		Vector GetClipIndexSize() const { return clips_index_.diagonal(); }
+
+		// --- Linking controls ---
+		void SetLink(ClipPlane plane, bool link);
+		bool GetLink(ClipPlane plane);
+		void ResetLink();
+		void ResetLinkedDist();
+
+		void SetLinkedDistWorld(ClipPlane plane, double dist);
+		double GetLinkedDistWorld(ClipPlane plane);
+
+		void SetLinkedDistIndex(ClipPlane plane, double dist);
+		double GetLinkedDistIndex(ClipPlane plane);
+
+		// --- Reset helpers ---
+		void ResetClips();
+		void ResetClips(ClipPlane plane);
 		void ResetRotation();
 		void ResetAll();
 
-		//clip
-		void SetClip(ClipPlane plane, double value);
-		double GetClip(ClipPlane plane) const;
-		void SetClipPair(ClipPlane axis, double val1, double val2);
-		void GetClipPair(ClipPlane axis, double& val1, double& val2) const;
-		void SetAllClip(const double val[6]);
-		void GetAllClip(double val[6]) const;
+		// --- Clip setters/getters (UI convenience) ---
+		void SetClipWorld(ClipPlane plane, double value);
+		double GetClipWorld(ClipPlane plane) const;
+		void SetClipPairWorld(ClipPlane axis, double val1, double val2);
+		void GetClipPairWorld(ClipPlane axis, double& val1, double& val2) const;
+		void SetAllClipsWorld(const double val[6]);
+		void GetAllClipsWorld(double val[6]) const;
 
-		// Transformations
-		void Rotate(const Quaternion& q);//rotate by quaternion
-		void Rotate(const Vector& euler); //rotate by euler angles
+		void SetClipIndex(ClipPlane plane, double value);
+		double GetClipIndex(ClipPlane plane) const;
+		void SetClipPairIndex(ClipPlane axis, double val1, double val2);
+		void GetClipPairIndex(ClipPlane axis, double& val1, double& val2) const;
+		void SetAllClipsIndex(const double val[6]);
+		void GetAllClipsIndex(double val[6]) const;
+
+		// --- Rotation ---
+		void Rotate(const Quaternion& q);   // rotate by quaternion
+		void Rotate(const Vector& euler);   // rotate by euler angles
 		Quaternion GetRotation() const { return q_; }
 		Vector GetEuler() const { return euler_; }
 
-		// Test if a point is inside the clipping box in world coordinates
-		bool Contains(const Point& p) const;
+		// --- Point containment (world space) ---
+		bool ContainsWorld(const Point& p) const;
+		bool ContainsIndex(const Point& p) const;
+		bool ContainsUnit(const Point& p) const;
 
 		friend std::ostream& operator<<(std::ostream& os, const ClippingBox& cb)
 		{
-			os << "ClippingBox: " << cb.GetBBox() << " planes: " << cb.planes_;
+			os << "ClippingBox: world bbox " << cb.bbox_world_ << " planes: " << cb.planes_world_;
 			return os;
 		}
 		friend std::istream& operator>>(std::istream& is, ClippingBox& cb)
 		{
 			BBox box;
 			is >> box;
-			cb.SetBBox(box);
+			cb.SetBBoxWorld(box);
 			return is;
 		}
 
 	protected:
-		PlaneSet planes_;//planes in world coordinates
-		PlaneSet planes_normalized_;//planes in normalized coordinates
+		// --- Plane sets ---
+		PlaneSet planes_world_;   // planes in world coordinates
+		PlaneSet planes_index_;   // planes in voxel index space
+		PlaneSet planes_unit_;    // planes in normalized coordinates
 
-		BBox bbox_;   // the finite bounding box that defines the clipping region
-		BBox clips_;  // the current clipping
+		// --- Bounding boxes (dataset initialization) ---
+		BBox bbox_world_;         // finite bounding box in world coordinates
+		BBox bbox_index_;         // bounding box in voxel index space
 
+		// --- Clip boxes (UI input) ---
+		BBox clips_world_;        // clip values in world coordinates
+		BBox clips_index_;        // clip values in voxel index space
+		BBox clips_unit_;         // internal canonical values
+
+		// --- Linking state ---
+		std::array<bool, 3> links_ = { false, false, false };
+		std::array<double, 3> linked_ds_world_ = { 1.0, 1.0, 1.0 };
+		std::array<double, 3> linked_ds_index_ = { 1.0, 1.0, 1.0 };
+		std::array<double, 3> linked_ds_unit_ = { 1.0, 1.0, 1.0 };
+
+		// --- Rotation ---
 		Quaternion q_;
 		Vector euler_;
 
 	protected:
 		void Update();
+
+		// Convert a distance in world space to index space
+		double WorldToIndexDist(int axis, double dist) const {
+			Vector scale = bbox_index_.scale_to(bbox_world_);
+			if (scale[axis] == 0.0) return 0.0;
+			return dist / scale[axis];
+		}
+
+		// Convert a distance in index space to world space
+		double IndexToWorldDist(int axis, double dist) const {
+			Vector scale = bbox_index_.scale_to(bbox_world_);
+			return dist * scale[axis];
+		}
+
+		// Convert a distance in index space to unit space
+		double IndexToUnitDist(int axis, double dist) const {
+			Vector extent = bbox_index_.diagonal();
+			if (extent[axis] == 0.0) return 0.0;
+			return dist / extent[axis];
+		}
+
+		// Convert a distance in unit space to index space
+		double UnitToIndexDist(int axis, double dist) const {
+			Vector extent = bbox_index_.diagonal();
+			return dist * extent[axis];
+		}
 	};
 
 } // namespace fluo

@@ -545,25 +545,21 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
-	int resx, resy, resz;
-	int resx_n, resy_n, resz_n;
 	fluo::Color fc;
+	fluo::ClippingBox cb;
 	switch (type)
 	{
 	case 2:	//volume
-		resx = resy = resz = 0;
-		resx_n = resy_n = resz_n = 0;
 		if (!vd)
 			break;
-		vd->GetResolution(resx, resy, resz);
 		fc = vd->GetColor();
+		cb = vd->GetVR()->get_clipping_box();
 		break;
 	case 3:	//mesh
-		resx = resy = resz = 0;
-		resx_n = resy_n = resz_n = 0;
 		if (!md)
 			break;
 		fc = md->GetColor();
+		cb = md->GetMR()->get_clipping_box();
 		break;
 	}
 	wxColor c(fc.r() * 255, fc.g() * 255, fc.b() * 255);
@@ -571,9 +567,10 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstClipPlaneRanges))
 	{
 		//slider range
-		m_clipx_sldr->SetRange(resx_n, resx);
-		m_clipy_sldr->SetRange(resy_n, resy);
-		m_clipz_sldr->SetRange(resz_n, resz);
+		auto bbox = cb.GetBBox();
+		m_clipx_sldr->SetRange(bbox.minintx(), bbox.maxintx());
+		m_clipy_sldr->SetRange(resy, resy);
+		m_clipz_sldr->SetRange(resz, resz);
 	}
 
 	if (update_all || FOUND_VALUE(gstClipPlaneRangeColor))

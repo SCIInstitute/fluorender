@@ -180,10 +180,6 @@ VolumeData::VolumeData()
 	//transparent
 	m_transparent = false;
 
-	//m_clip
-	for (int i : { 0, 1, 2 })
-		m_clip_dist[i] = 1;
-
 	m_hist_dirty = true;
 
 	m_mask_count_dirty = true;
@@ -335,10 +331,6 @@ VolumeData::VolumeData(VolumeData &copy)
 	//transparent
 	m_transparent = false;
 
-	//m_clip
-	for (int i : { 0, 1, 2 })
-		m_clip_dist[i] = copy.m_clip_dist[i];
-
 	m_hist_dirty = true;
 
 	m_mask_count_dirty = true;
@@ -453,14 +445,19 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		m_vr->set_scalar_scale(m_scalar_scale);
 		m_vr->set_gm_scale(m_scalar_scale);
 		m_vr->set_mode(m_render_mode);
-		m_vr->get_clipping_box().SetBBox(m_bounds);
+		auto& cb = m_vr->get_clipping_box();
+		cb.SetBBoxWorld(m_bounds);
+		cb.SetBBoxIndex(fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 		//SetRenderMode(m_mode);
 	}
 
 	//clip distance
-	m_clip_dist[0] = std::max(1, m_res_x / 20);
-	m_clip_dist[1] = std::max(1, m_res_y / 20);
-	m_clip_dist[2] = std::max(1, m_res_z / 20);
+	SetLinkedDist(fluo::ClipPlane::XNeg,
+		static_cast<int>(std::round(std::max(1, m_res_x / 20))));
+	SetLinkedDist(fluo::ClipPlane::YNeg,
+		static_cast<int>(std::round(std::max(1, m_res_y / 20))));
+	SetLinkedDist(fluo::ClipPlane::ZNeg,
+		static_cast<int>(std::round(std::max(1, m_res_z / 20))));
 
 	m_bg_valid = false;
 	m_hist_dirty = true;
@@ -498,9 +495,12 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	m_bg_valid = false;
 
 	//clip distance
-	m_clip_dist[0] = std::max(1, m_res_x / 20);
-	m_clip_dist[1] = std::max(1, m_res_y / 20);
-	m_clip_dist[2] = std::max(1, m_res_z / 20);
+	SetLinkedDist(fluo::ClipPlane::XNeg,
+		static_cast<int>(std::round(std::max(1, m_res_x / 20))));
+	SetLinkedDist(fluo::ClipPlane::YNeg,
+		static_cast<int>(std::round(std::max(1, m_res_y / 20))));
+	SetLinkedDist(fluo::ClipPlane::ZNeg,
+		static_cast<int>(std::round(std::max(1, m_res_z / 20))));
 
 	m_hist_dirty = true;
 
@@ -611,15 +611,20 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_scalar_scale(m_scalar_scale);
 	m_vr->set_gm_scale(m_scalar_scale);
 	m_vr->set_mode(m_render_mode);
-	m_vr->get_clipping_box().SetBBox(m_bounds);
+	auto& cb = m_vr->get_clipping_box();
+	cb.SetBBoxWorld(m_bounds);
+	cb.SetBBoxIndex(fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 
 	//SetMode(m_mode);
 	m_bg_valid = false;
 
 	//clip distance
-	m_clip_dist[0] = std::max(1, m_res_x / 20);
-	m_clip_dist[1] = std::max(1, m_res_y / 20);
-	m_clip_dist[2] = std::max(1, m_res_z / 20);
+	SetLinkedDist(fluo::ClipPlane::XNeg,
+		static_cast<int>(std::round(std::max(1, m_res_x / 20))));
+	SetLinkedDist(fluo::ClipPlane::YNeg,
+		static_cast<int>(std::round(std::max(1, m_res_y / 20))));
+	SetLinkedDist(fluo::ClipPlane::ZNeg,
+		static_cast<int>(std::round(std::max(1, m_res_z / 20))));
 
 	m_hist_dirty = true;
 
@@ -1528,8 +1533,8 @@ fluo::BBox VolumeData::GetBounds()
 
 fluo::BBox VolumeData::GetClippedBounds()
 {
-	auto cb = m_vr->get_clipping_box();
-	return cb.GetClipBox();
+	auto& cb = m_vr->get_clipping_box();
+	return cb.GetBBoxWorld();
 }
 
 //path
@@ -2889,34 +2894,16 @@ double VolumeData::GetMinValueScale()
 	return 0.0;
 }
 
-//clip size
-void VolumeData::GetClipValues(int &ox, int &oy, int &oz,
-	int &nx, int &ny, int &nz)
+void VolumeData::SetClipValue(fluo::ClipPlane i, int val)
 {
 	auto cb = m_vr->get_clipping_box();
-	double val[6];
-	cb.GetAllClip(val);
-
-	ox = static_cast<int>(std::round(val[0]));
-	nx = static_cast<int>(std::round(val[1]));
-	oy = static_cast<int>(std::round(val[2]));
-	ny = static_cast<int>(std::round(val[3]));
-	oz = static_cast<int>(std::round(val[4]));
-	nz = static_cast<int>(std::round(val[5]));
+	cb.SetClipIndex(i, val);
 }
 
-void VolumeData::SetClipValue(int i, int val)
+void VolumeData::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 {
-	fluo::ClipPlane p = static_cast<fluo::ClipPlane>(i);
 	auto cb = m_vr->get_clipping_box();
-	cb.SetClip(p, val);
-}
-
-void VolumeData::SetClipValues(int i, int val1, int val2)
-{
-	fluo::ClipPlane p = static_cast<fluo::ClipPlane>(i);
-	auto cb = m_vr->get_clipping_box();
-	cb.SetClipPair(p, val1, val2);
+	cb.SetClipPairIndex(i, val1, val2);
 }
 
 void VolumeData::SetClipValues(const std::array<int, 6>& vals)
@@ -2925,31 +2912,69 @@ void VolumeData::SetClipValues(const std::array<int, 6>& vals)
 	std::array<double, 6> dvals;
 	std::transform(vals.begin(), vals.end(), dvals.begin(),
 		[](int v) { return static_cast<double>(v); });
-	cb.SetAllClip(dvals.data());
+	cb.SetAllClipsIndex(dvals.data());
 }
 
 void VolumeData::ResetClipValues()
 {
 	auto cb = m_vr->get_clipping_box();
-	cb.ResetClip();
+	cb.ResetClips();
 }
 
-void VolumeData::ResetClipValuesX()
+void VolumeData::ResetClipValues(fluo::ClipPlane i)
 {
 	auto cb = m_vr->get_clipping_box();
-	cb.ResetClip(fluo::ClipPlane::XNeg);
+	cb.ResetClips(i);
 }
 
-void VolumeData::ResetClipValuesY()
+void VolumeData::SetClipRotation(int i, double val)
 {
 	auto cb = m_vr->get_clipping_box();
-	cb.ResetClip(fluo::ClipPlane::YNeg);
+	auto euler = cb.GetEuler();
+	euler[i] = val;
+	cb.Rotate(euler);
 }
 
-void VolumeData::ResetClipValuesZ()
+void VolumeData::SetClipRotation(const fluo::Vector& euler)
 {
 	auto cb = m_vr->get_clipping_box();
-	cb.ResetClip(fluo::ClipPlane::ZNeg);
+	cb.Rotate(euler);
+}
+
+void VolumeData::SetClipRotation(const fluo::Quaternion& q)
+{
+	auto cb = m_vr->get_clipping_box();
+	cb.Rotate(q);
+}
+
+void VolumeData::SetLink(fluo::ClipPlane i, bool link)
+{
+	auto cb = m_vr->get_clipping_box();
+	cb.SetLink(i, link);
+}
+
+bool VolumeData::GetLink(fluo::ClipPlane i)
+{
+	auto cb = m_vr->get_clipping_box();
+	return cb.GetLink(i);
+}
+
+void VolumeData::ResetLink()
+{
+	auto cb = m_vr->get_clipping_box();
+	cb.ResetLink();
+}
+
+void VolumeData::SetLinkedDist(fluo::ClipPlane i, int val)
+{
+	auto cb = m_vr->get_clipping_box();
+	cb.SetLinkedDistIndex(i, val);
+}
+
+int VolumeData::GetLinkedDist(fluo::ClipPlane i)
+{
+	auto cb = m_vr->get_clipping_box();
+	return static_cast<int>(std::round(cb.GetLinkedDistIndex(i)));
 }
 
 //randomize color

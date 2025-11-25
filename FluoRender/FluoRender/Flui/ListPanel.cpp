@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Root.h>
 #include <CurrentObjects.h>
 #include <DataManager.h>
+#include <VolumeRenderer.h>
 #include <png_resource.h>
 #include <compatibility.h>
 #include <wx/valnum.h>
@@ -491,10 +492,7 @@ void ListPanel::SaveSelection()
 		auto vd = glbin_current.vol_data.lock();
 		if (!vd)
 			break;
-		auto view = glbin_current.render_view.lock();
-		if (!view)
-			break;
-		fluo::Quaternion q = view->GetClipRotation();
+		fluo::Quaternion q = vd->GetVR()->get_clipping_box().GetRotation();
 		vd->SetResize(0, 0, 0, 0);
 
 		ModalDlg fopendlg(
@@ -513,7 +511,7 @@ void ListPanel::SaveSelection()
 			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
 				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 				false, glbin_settings.m_save_compress,
-				fluo::Point(), q, fluo::Point(), false);
+				fluo::Point(), q, fluo::Vector(), false);
 			std::wstring str = vd->GetPath();
 			m_datalist->SetText(item, 2, str);
 		}
@@ -591,17 +589,13 @@ void ListPanel::BakeSelection()
 	{
 		std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
-		auto view = glbin_current.render_view.lock();
-		if (view)
-		{
-			fluo::Quaternion q = view->GetClipRotation();
-			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
-				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-				true, glbin_settings.m_save_compress,
-				fluo::Point(), q, fluo::Point(), false);
-			std::wstring str = vd->GetPath();
-			m_datalist->SetText(item, 2, str);
-		}
+		fluo::Quaternion q = vd->GetVR()->get_clipping_box().GetRotation();
+		vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
+			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
+			true, glbin_settings.m_save_compress,
+			fluo::Point(), q, fluo::Vector(), false);
+		std::wstring str = vd->GetPath();
+		m_datalist->SetText(item, 2, str);
 	}
 }
 
