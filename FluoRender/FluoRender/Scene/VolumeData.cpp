@@ -444,25 +444,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 
 	if (m_tex)
 	{
-		std::vector<fluo::Plane*> planelist(0);
-		fluo::Plane* plane = 0;
-		//x
-		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-		planelist.push_back(plane);
-		plane = new fluo::Plane(fluo::Point(1.0, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-		planelist.push_back(plane);
-		//y
-		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-		planelist.push_back(plane);
-		plane = new fluo::Plane(fluo::Point(0.0, 1.0, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-		planelist.push_back(plane);
-		//z
-		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 0.0, 1.0));
-		planelist.push_back(plane);
-		plane = new fluo::Plane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
-		planelist.push_back(plane);
-
-		m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
+		m_vr = std::make_unique<flvr::VolumeRenderer>();
 		m_vr->set_texture(m_tex);
 		m_vr->set_sample_rate(m_sample_rate);
 		m_vr->set_shading(true);
@@ -619,27 +601,8 @@ void VolumeData::AddEmptyData(int bits,
 	m_tex->build(nv, 0, 0, 256, 0, 0);
 	m_tex->set_spacings(spcx, spcy, spcz);
 
-	//clipping planes
-	std::vector<fluo::Plane*> planelist(0);
-	fluo::Plane* plane = 0;
-	//x
-	plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(1.0, 0.0, 0.0));
-	planelist.push_back(plane);
-	plane = new fluo::Plane(fluo::Point(1.0, 0.0, 0.0), fluo::Vector(-1.0, 0.0, 0.0));
-	planelist.push_back(plane);
-	//y
-	plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 1.0, 0.0));
-	planelist.push_back(plane);
-	plane = new fluo::Plane(fluo::Point(0.0, 1.0, 0.0), fluo::Vector(0.0, -1.0, 0.0));
-	planelist.push_back(plane);
-	//z
-	plane = new fluo::Plane(fluo::Point(0.0, 0.0, 0.0), fluo::Vector(0.0, 0.0, 1.0));
-	planelist.push_back(plane);
-	plane = new fluo::Plane(fluo::Point(0.0, 0.0, 1.0), fluo::Vector(0.0, 0.0, -1.0));
-	planelist.push_back(plane);
-
 	//create volume renderer
-	m_vr = std::make_unique<flvr::VolumeRenderer>(planelist);
+	m_vr = std::make_unique<flvr::VolumeRenderer>();
 	m_vr->set_texture(m_tex);
 	m_vr->set_sample_rate(m_sample_rate);
 	m_vr->set_shading(true);
@@ -1410,7 +1373,7 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 	bool bake, bool compress,
 	const fluo::Point &c,//rotation center
 	const fluo::Quaternion &q,//rotation
-	const fluo::Point &t,//translate
+	const fluo::Vector &t,//translate
 	bool fix_size)
 {
 	if (!m_vr || !m_tex)

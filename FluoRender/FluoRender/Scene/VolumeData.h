@@ -132,7 +132,7 @@ public:
 		bool bake, bool compress,
 		const fluo::Point &c,
 		const fluo::Quaternion &q,
-		const fluo::Point &t,
+		const fluo::Vector &t,
 		bool fix_size);
 	void SaveMask(bool use_reader, int t, int c);
 	void SaveLabel(bool use_reader, int t, int c);

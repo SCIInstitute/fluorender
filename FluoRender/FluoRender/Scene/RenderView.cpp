@@ -3909,7 +3909,7 @@ void RenderView::SetClipValues(const std::array<int, 6>& vals)
 		auto vd = GetAllVolumeData(i);
 		if (!vd)
 			continue;
-		vd->SetClipValues(val);
+		vd->SetClipValues(vals);
 	}
 }
 

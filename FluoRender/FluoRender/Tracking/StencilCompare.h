@@ -57,7 +57,7 @@ namespace flrd
 		void Label();
 		void Lookup();
 
-		fluo::Point GetTranslate()
+		fluo::Vector GetTranslate()
 		{
 			return m_translate;
 		}
@@ -65,7 +65,7 @@ namespace flrd
 		{
 			return m_center;
 		}
-		fluo::Point GetEuler()
+		fluo::Vector GetEuler()
 		{
 			return m_euler;
 		}
@@ -86,9 +86,9 @@ namespace flrd
 		int m_fsize;//filer size
 
 		//rigid transform
-		fluo::Point m_translate;
+		fluo::Vector m_translate;
 		fluo::Point m_center;//center of rotation
-		fluo::Point m_euler;//rotation
+		fluo::Vector m_euler;//rotation
 
 		flvr::KernelProgram* m_prog;
 		std::weak_ptr<flvr::Argument> m_img1;//filtered img

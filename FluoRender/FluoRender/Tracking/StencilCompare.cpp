@@ -941,7 +941,8 @@ bool StencilCompare::Compare()
 	float p, maxp;
 	m_s2->load_identity();
 	maxp = Similar(name);//start with origin
-	fluo::Point center(m_off1), euler(m_off2);//for outer loop
+	fluo::Point center(m_off1);
+	fluo::Vector euler(m_off2);//for outer loop
 	fluo::Point c, e;//for inner loops
 	int counter = 0;
 	bool rot = false;//loop mode
@@ -973,7 +974,7 @@ bool StencilCompare::Compare()
 			{
 				//compute transform
 				m_s2->load_identity();
-				m_s2->rotate(euler + j, s1cp + center + i);
+				m_s2->rotate(fluo::Vector(euler + j), s1cp + center + i);
 				m_s2->translate(center + i);
 
 				//compare images
@@ -992,7 +993,7 @@ bool StencilCompare::Compare()
 		{
 			if (rot)
 			{
-				euler += e;
+				euler += fluo::Vector(e);
 				//update neighborhood
 				nbr.c(e);
 			}
@@ -1046,7 +1047,7 @@ bool StencilCompare::Compare()
 	}
 
 	//for read externally
-	m_translate = center;
+	m_translate = fluo::Vector(center);
 	m_euler = -euler;
 	m_center = fluo::Point(s1cp);
 	//for internal use

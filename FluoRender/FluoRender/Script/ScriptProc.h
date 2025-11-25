@@ -113,7 +113,7 @@ namespace flrd
 		std::wstring GetDataDir(const std::wstring &ext);
 		std::wstring GetConfigFile(const std::wstring& str, const std::wstring& ext, const std::wstring& type, int mode);//mode-0 open;1-save
 		int GetItems(const std::wstring& str, std::vector<std::wstring>& items);
-		bool GetRegistrationTransform(fluo::Point& transl, fluo::Point& center, fluo::Point& euler, int sn);//sn: smooth frame number
+		bool GetRegistrationTransform(fluo::Vector& transl, fluo::Point& center, fluo::Vector& euler, int sn);//sn: smooth frame number
 		
 		void RunNoiseReduction();
 		void RunPreTracking();

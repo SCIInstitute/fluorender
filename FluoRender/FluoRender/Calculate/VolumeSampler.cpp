@@ -127,7 +127,7 @@ void VolumeSampler::SetCenter(const fluo::Point &p)
 	m_center = p;
 }
 
-void VolumeSampler::SetTranslate(const fluo::Point &t)
+void VolumeSampler::SetTranslate(const fluo::Vector &t)
 {
 	m_trans = t;
 }
@@ -182,7 +182,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	}
 	//check rotation & translation
 	bool rot = !m_q_cl.IsIdentity();
-	bool trans = m_trans != fluo::Point();
+	bool trans = m_trans != fluo::Vector();
 	fluo::Vector size(m_nx - 0.5, m_ny - 0.5, m_nz - 0.5);
 	fluo::Vector size_in(m_nx_in - 0.5, m_ny_in - 0.5, m_nz_in - 0.5);
 	//spacing

@@ -548,9 +548,9 @@ int ScriptProc::GetItems(const std::wstring& str, std::vector<std::wstring>& ite
 }
 
 bool ScriptProc::GetRegistrationTransform(
-	fluo::Point& transl,
+	fluo::Vector& transl,
 	fluo::Point& center,
-	fluo::Point& euler,
+	fluo::Vector& euler,
 	int sn)
 {
 	auto view = m_view.lock();
@@ -561,9 +561,9 @@ bool ScriptProc::GetRegistrationTransform(
 	int bgnf = view->m_begin_play_frame;
 	typedef struct
 	{
-		fluo::Point t;
+		fluo::Vector t;
 		fluo::Point c;
-		fluo::Point e;
+		fluo::Vector e;
 	} RegTrans;
 	std::vector<RegTrans> list;
 
@@ -1044,7 +1044,8 @@ void ScriptProc::RunSaveVolume()
 	m_fconfig->Read("smooth", &smooth, 0);
 
 	fluo::Quaternion rot;
-	fluo::Point transl, center;
+	fluo::Vector transl, euler;
+	fluo::Point center;
 	bool fix_size = false;
 	std::vector<std::shared_ptr<VolumeData>> vlist;
 	if (source == "channels" ||
@@ -1070,10 +1071,9 @@ void ScriptProc::RunSaveVolume()
 	else if (source == "registrator")
 	{
 		GetVolumes(vlist);
-		fluo::Point euler;
 		if (GetRegistrationTransform(transl, center, euler, smooth))
 		{
-			rot.FromEuler(euler.x(), euler.y(), euler.z());
+			rot.FromEuler(euler);
 			crop = true;
 			fix_size = true;
 			neg_mask = true;
@@ -1890,7 +1890,9 @@ void ScriptProc::RunRegistration()
 			cache_queue->SetHandleFlags(
 				flvr::CQCallback::HDL_DATA);
 	}
-	fluo::Point transl, transl2, center, center2, euler;
+	fluo::Vector transl, transl2;
+	fluo::Point center, center2;
+	fluo::Vector euler;
 	fluo::Transform tf;
 	fluo::Quaternion rot;
 	if (regg_prv)
@@ -1912,7 +1914,7 @@ void ScriptProc::RunRegistration()
 		center = registrator.GetCenter();
 		center2 = registrator.GetCenterVol();
 		euler = registrator.GetEuler();
-		rot.FromEuler(euler.x(), euler.y(), euler.z());
+		rot.FromEuler(euler);
 		tf = registrator.GetTransform();
 		regg_cur->addSetValue("transl", transl);
 		regg_cur->addSetValue("center", center);

@@ -143,9 +143,9 @@ bool Registrator::Run(size_t f1, size_t f2,
 	return true;
 }
 
-fluo::Point Registrator::GetTranslateVol()
+fluo::Vector Registrator::GetTranslateVol()
 {
-	fluo::Point result = m_translate;
+	fluo::Vector result = m_translate;
 	double dx = 1, dy = 1, dz = 1;
 	if (m_vd)
 		m_vd->GetSpacings(dx, dy, dz);

@@ -63,7 +63,7 @@ namespace flrd
 		void SetNegMask(bool bval);
 		void SetClipRotation(const fluo::Quaternion &q);
 		void SetCenter(const fluo::Point &p);
-		void SetTranslate(const fluo::Point &t);
+		void SetTranslate(const fluo::Vector &t);
 		void Resize(SampDataType type, bool replace);
 		double Sample(double x, double y, double z);
 		unsigned int SampleInt(double x, double y, double z);
@@ -98,7 +98,7 @@ namespace flrd
 		bool m_neg_mask;//use negative transformation for mask
 		fluo::Quaternion m_q_cl;//rotation
 		fluo::Point m_center;//rotation center
-		fluo::Point m_trans;//translate
+		fluo::Vector m_trans;//translate
 
 		int m_filter;	//sampler type
 						//0:nearest neighbor;
