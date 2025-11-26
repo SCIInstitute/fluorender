@@ -282,7 +282,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	cl_float4 p[6];
 	if (use_tf)
 	{
-		auto planes = vd->GetVR()->get_clipping_box().GetPlanesUnit();
+		auto planes = vd->GetClippingBox().GetPlanesUnit();
 		double abcd[4];
 		for (size_t i = 0; i < 6; ++i)
 		{

@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Quaternion.h>
 #include <BBox.h>
+#include <ClippingBox.h>
 #include <Vector4i.h>
 #include <Vector4f.h>
 #include <nrrd.h>
@@ -402,6 +403,9 @@ public:
 	double GetMinValueScale();
 	void SetMinMaxValue(double val1, double val2) { m_min_value = val1; m_max_value = val2; }
 
+	fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
+	const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
+	void SetClippingBox(const fluo::ClippingBox& box);
 	//clip size
 	void SetClipValue(fluo::ClipPlane i, int val);
 	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
@@ -483,6 +487,9 @@ private:
 
 	std::wstring m_tex_path;
 	fluo::BBox m_bounds;
+
+	fluo::ClippingBox m_clipping_box;
+
 	//save label
 	void* m_label_save;
 

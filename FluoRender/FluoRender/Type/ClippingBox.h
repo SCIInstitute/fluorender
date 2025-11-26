@@ -60,6 +60,8 @@ namespace fluo
 		bool operator==(const ClippingBox& rhs) const;
 		bool operator!=(const ClippingBox& rhs) const;
 
+		void SyncWorld(const ClippingBox& src);
+
 		// --- Plane access ---
 		const PlaneSet& GetPlanesWorld() const { return planes_world_; }
 		const PlaneSet& GetPlanesIndex() const { return planes_index_; }

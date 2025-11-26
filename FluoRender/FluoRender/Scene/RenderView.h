@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeLayer.h>
 #include <Size.h>
 #include <Value.hpp>
+#include <ClippingBox.h>
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
@@ -373,6 +374,11 @@ public:
 	//set clip mode
 	void SetClipMode(int mode);
 	int GetClipMode() { return m_clip_mode; }
+	//clipping box
+	fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
+	const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
+	//sync
+	void SyncClippingBoxes(const fluo::ClippingBox& cb);
 	//set clip values
 	void SetClipValue(fluo::ClipPlane i, int val);
 	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
@@ -383,6 +389,12 @@ public:
 	void SetClipRotation(int i, double val);
 	void SetClipRotation(const fluo::Vector& euler);
 	void SetClipRotation(const fluo::Quaternion& q);
+	//clip distance
+	void SetLink(fluo::ClipPlane i, bool link);
+	bool GetLink(fluo::ClipPlane i);
+	void ResetLink();
+	void SetLinkedDist(fluo::ClipPlane i, int val);
+	int GetLinkedDist(fluo::ClipPlane i);
 
 	//interpolation
 	void SetIntp(bool mode) { m_intp = mode; }
@@ -675,6 +687,9 @@ private:
 	//object bounding box
 	fluo::BBox m_bounds;
 	double m_radius;
+
+	//clipping box
+	fluo::ClippingBox m_clipping_box;
 
 	//mouse position
 	long old_mouse_X, old_mouse_Y;

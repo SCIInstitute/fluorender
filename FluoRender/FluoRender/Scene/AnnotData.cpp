@@ -355,7 +355,7 @@ bool AnnotData::InsideClippingPlanes(fluo::Point &pos)
 	if (!vd_ptr)
 		return true;
 
-	auto cb = vd_ptr->GetVR()->get_clipping_box();
+	auto cb = vd_ptr->GetClippingBox();
 	return cb.ContainsWorld(pos);
 }
 

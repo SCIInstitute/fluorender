@@ -289,18 +289,15 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 	//clipping planes
 	cl_float4 p[6];
-	if (m_vd && m_vd->GetVR())
+	auto planes = m_vd->GetClippingBox().GetPlanesUnit();
+	double abcd[4];
+	for (size_t i = 0; i < 6; ++i)
 	{
-		auto planes = m_vd->GetVR()->get_clipping_box().GetPlanesUnit();
-		double abcd[4];
-		for (size_t i = 0; i < 6; ++i)
-		{
-			planes[i].get(abcd);
-			p[i] = { float(abcd[0]),
-				float(abcd[1]),
-				float(abcd[2]),
-				float(abcd[3]) };
-		}
+		planes[i].get(abcd);
+		p[i] = { float(abcd[0]),
+			float(abcd[1]),
+			float(abcd[2]),
+			float(abcd[3]) };
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_num();
@@ -384,8 +381,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	float scalar_scale, lo_thresh, hi_thresh, gamma3d,
 		gm_scale, gm_low, gm_high, gm_max,
 		lo_offset, hi_offset, sw;
-	flvr::VolumeRenderer* vr = m_vd->GetVR();
-	auto planes = vr->get_clipping_box().GetPlanesUnit();
+	auto planes = m_vd->GetClippingBox().GetPlanesUnit();
 	double abcd[4];
 	for (size_t i = 0; i < 6; ++i)
 	{

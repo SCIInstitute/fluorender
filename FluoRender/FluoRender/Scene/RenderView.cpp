@@ -68,6 +68,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePoint.h>
 #include <SegGrow.h>
 #include <VolumeRenderer.h>
+#include <MeshRenderer.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <MeshData.h>
@@ -784,8 +785,8 @@ void RenderView::InitView(unsigned int type)
 		if (m_bounds.valid())
 		{
 			fluo::Vector diag = m_bounds.diagonal();
-			m_radius = sqrt(diag.x()*diag.x() + diag.y()*diag.y()) / 2.0;
-			if (m_radius<0.1)
+			m_radius = sqrt(diag.x() * diag.x() + diag.y() * diag.y()) / 2.0;
+			if (m_radius < 0.1)
 				m_radius = 348.0;
 			m_near_clip = m_radius / 1000.0;
 			m_far_clip = m_radius * 100.0;
@@ -793,7 +794,11 @@ void RenderView::InitView(unsigned int type)
 				glbin_xr_renderer->SetClips(
 					static_cast<float>(m_near_clip),
 					static_cast<float>(m_far_clip));
+			m_clipping_box.SetBBoxWorld(m_bounds);
+			m_clipping_box.SetBBoxIndex(m_bounds);
 		}
+		else
+			m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(100.0));
 	}
 
 	if (type&INIT_CENTER)
@@ -2569,19 +2574,7 @@ void RenderView::SetCenter()
 {
 	InitView(INIT_BOUNDS | INIT_CENTER | INIT_OBJ_TRANSL);
 
-	std::shared_ptr<VolumeData> vd;
-	if (auto cur_vd_ptr = m_cur_vol.lock())
-		vd = cur_vd_ptr;
-	else if (m_vd_pop_list.size())
-		vd = m_vd_pop_list[0].lock();
-
-	if (!vd)
-		return;
-
-	flvr::VolumeRenderer *vr = vd->GetVR();
-	if (!vr) return;
-	auto bbox = vr->get_clipping_box().GetClipsWorld();
-	m_obj_ctr = bbox.center();
+	m_obj_ctr = m_bounds.center();
 }
 
 double RenderView::Get121ScaleFactor()
@@ -2949,36 +2942,35 @@ void RenderView::SetParams(double t)
 			vd->SetDisp(bval);
 
 		//clipping planes
-		fluo::ClippingBox cb = vd->GetVR()->get_clipping_box();
 		//x1
 		keycode.l2_name = "x1_val";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			cb.SetClipWorld(fluo::ClipPlane::XNeg, dval);
+			vd->SetClipValue(fluo::ClipPlane::XNeg, dval);
 		vc.insert(gstClipX1);
 		//x2
 		keycode.l2_name = "x2_val";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			cb.SetClipWorld(fluo::ClipPlane::XPos, dval);
+			vd->SetClipValue(fluo::ClipPlane::XPos, dval);
 		vc.insert(gstClipX2);
 		//y1
 		keycode.l2_name = "y1_val";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			cb.SetClipWorld(fluo::ClipPlane::YNeg, dval);
+			vd->SetClipValue(fluo::ClipPlane::YNeg, dval);
 		vc.insert(gstClipY1);
 		//y2
 		keycode.l2_name = "y2_val";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			cb.SetClipWorld(fluo::ClipPlane::YPos, dval);
+			vd->SetClipValue(fluo::ClipPlane::YPos, dval);
 		vc.insert(gstClipY2);
 		//z1
 		keycode.l2_name = "z1_val";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			cb.SetClipWorld(fluo::ClipPlane::ZNeg, dval);
+			vd->SetClipValue(fluo::ClipPlane::ZNeg, dval);
 		vc.insert(gstClipZ1);
 		//z2
 		keycode.l2_name = "z2_val";
 		if (glbin_interpolator.GetDouble(keycode, t, dval))
-			cb.SetClipWorld(fluo::ClipPlane::ZPos, dval);
+			vd->SetClipValue(fluo::ClipPlane::ZPos, dval);
 		vc.insert(gstClipZ2);
 		//t
 		double frame;
@@ -3814,148 +3806,103 @@ void RenderView::SetClipMode(int mode)
 	}
 }
 
-void RenderView::SetClipValue(fluo::ClipPlane p, int val)
+void RenderView::SyncClippingBoxes(const fluo::ClippingBox& cb)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)
 	{
 		auto vd = GetAllVolumeData(i);
 		if (!vd)
 			continue;
-		vd->SetClipValue(p, val);
+		vd->GetVR()->sync_clipping_box(cb);
 	}
 	for (int i = 0; i < GetMeshNum(); ++i)
 	{
 		auto md = GetMeshData(i);
 		if (!md)
 			continue;
-		md->SetClipValue(p, val);
+		md->GetMR()->sync_clipping_box(cb);
 	}
 }
 
-void RenderView::SetClipValues(fluo::ClipPlane p, int val1, int val2)
+void RenderView::SetClipValue(fluo::ClipPlane i, int val)
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->SetClipValues(p, val1, val2);
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->SetClipValues(p, val1, val2);
-	}
+	m_clipping_box.SetClipIndex(i, val);
+	SyncClippingBoxes(m_clipping_box);
+}
+
+void RenderView::SetClipValues(fluo::ClipPlane i, int val1, int val2)
+{
+	m_clipping_box.SetClipPairIndex(i, val1, val2);
+	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipValues(const std::array<int, 6>& vals)
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->SetClipValues(vals);
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->SetClipValues(vals);
-	}
+	std::array<double, 6> dvals;
+	std::transform(vals.begin(), vals.end(), dvals.begin(),
+		[](int v) { return static_cast<double>(v); });
+	m_clipping_box.SetAllClipsIndex(dvals.data());
+	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::ResetClipValues()
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->ResetClipValues();
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->ResetClipValues();
-	}
+	m_clipping_box.ResetClips();
+	SyncClippingBoxes(m_clipping_box);
 }
 
-void RenderView::ResetClipValues(fluo::ClipPlane p)
+void RenderView::ResetClipValues(fluo::ClipPlane i)
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->ResetClipValues(p);
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->ResetClipValues(p);
-	}
+	m_clipping_box.ResetClips(i);
+	SyncClippingBoxes(m_clipping_box);
 }
 
-void RenderView::SetClipRotation(int index, double val)
+void RenderView::SetClipRotation(int i, double val)
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->SetClipRotation(index, val);
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->SetClipRotation(index, val);
-	}
+	auto euler = m_clipping_box.GetEuler();
+	euler[i] = val;
+	m_clipping_box.Rotate(euler);
+	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipRotation(const fluo::Vector& euler)
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->SetClipRotation(euler);
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->SetClipRotation(euler);
-	}
+	m_clipping_box.Rotate(euler);
+	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipRotation(const fluo::Quaternion& q)
 {
-	for (int i = 0; i < GetAllVolumeNum(); ++i)
-	{
-		auto vd = GetAllVolumeData(i);
-		if (!vd)
-			continue;
-		vd->SetClipRotation(q);
-	}
-	for (int i = 0; i < GetMeshNum(); ++i)
-	{
-		auto md = GetMeshData(i);
-		if (!md)
-			continue;
-		md->SetClipRotation(q);
-	}
+	m_clipping_box.Rotate(q);
+	SyncClippingBoxes(m_clipping_box);
+}
+
+void RenderView::SetLink(fluo::ClipPlane i, bool link)
+{
+	m_clipping_box.SetLink(i, link);
+	SyncClippingBoxes(m_clipping_box);
+}
+
+bool RenderView::GetLink(fluo::ClipPlane i)
+{
+	return m_clipping_box.GetLink(i);
+}
+
+void RenderView::ResetLink()
+{
+	m_clipping_box.ResetLink();
+	SyncClippingBoxes(m_clipping_box);
+}
+
+void RenderView::SetLinkedDist(fluo::ClipPlane i, int val)
+{
+	m_clipping_box.SetLinkedDistIndex(i, val);
+	SyncClippingBoxes(m_clipping_box);
+}
+
+int RenderView::GetLinkedDist(fluo::ClipPlane i)
+{
+	return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i)));
 }
 
 flvr::TextRenderer* RenderView::GetTextRenderer()
@@ -5043,14 +4990,11 @@ void RenderView::RotateClips()
 		fluo::Quaternion q_cl;
 		q_cl.FromEuler(fluo::Vector(m_cam_rot.x(), -m_cam_rot.y(), -m_cam_rot.z()));
 
-		for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
-		{
-			auto vd = it->lock();
-			if (!vd)
-				continue;
+		auto vd = glbin_current.vol_data.lock();
 
-			fluo::ClippingBox cb = vd->GetVR()->get_clipping_box();
-			cb.Rotate(q_cl);
+		if (vd)
+		{
+			vd->SetClipRotation(q_cl);
 		}
 	}
 }
@@ -7551,11 +7495,7 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 		if (vd != cur_vd)
 			continue;
 
-		flvr::VolumeRenderer *vr = vd->GetVR();
-		assert(vr);
-
-		fluo::ClippingBox cb = vr->get_clipping_box();
-		auto planes = cb.GetPlanesWorld();
+		auto planes = vd->GetClippingBox().GetPlanesWorld();
 		//calculating planes
 		//get six planes
 		fluo::Plane px1 = planes[0];
@@ -9161,7 +9101,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			cur_vd->GetResolution(resx, resy, resz);
 			double spcx, spcy, spcz;
 			cur_vd->GetSpacings(spcx, spcy, spcz);
-			auto planes = cur_vd->GetVR()->get_clipping_box().GetPlanesWorld();
+			auto planes = cur_vd->GetClippingBox().GetPlanesWorld();
 			fluo::Plane plane = planes[4];
 			double abcd[4];
 			plane.get(abcd);

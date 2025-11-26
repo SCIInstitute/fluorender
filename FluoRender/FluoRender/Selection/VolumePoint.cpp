@@ -107,7 +107,7 @@ double VolumePoint::GetPointVolume(
 	double mspc = 1.0;
 	if (vd->GetSampleRate() > 0.0)
 		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / vd->GetSampleRate();
-	auto cb = vd->GetVR()->get_clipping_box();
+	auto cb = vd->GetClippingBox();
 	int counter = 0;//counter to determine if the ray casting has run
 	if (bbox.intersect(mp1, vv, hit))
 	{
@@ -307,7 +307,7 @@ double VolumePoint::GetPointVolumeBox(
 	double t;
 	fluo::Point pp;//a point on plane
 
-	auto cb = vd->GetVR()->get_clipping_box();
+	auto cb = vd->GetClippingBox();
 	auto planes = cb.GetPlanesWorld();
 	//for each plane, calculate the intersection point
 	for (int i = 0; i < 6; i++)
@@ -391,7 +391,7 @@ double VolumePoint::GetPointVolumeBox2(
 	double t;
 	fluo::Point pp;//a point on plane
 
-	auto cb = vd->GetVR()->get_clipping_box();
+	auto cb = vd->GetClippingBox();
 	auto planes = cb.GetPlanesWorld();
 	//for each plane, calculate the intersection point
 	for (int i = 0; i < 6; i++)

@@ -492,7 +492,7 @@ void ListPanel::SaveSelection()
 		auto vd = glbin_current.vol_data.lock();
 		if (!vd)
 			break;
-		fluo::Quaternion q = vd->GetVR()->get_clipping_box().GetRotation();
+		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
 		vd->SetResize(0, 0, 0, 0);
 
 		ModalDlg fopendlg(
@@ -589,7 +589,7 @@ void ListPanel::BakeSelection()
 	{
 		std::wstring filename = fopendlg.GetPath().ToStdWstring();
 
-		fluo::Quaternion q = vd->GetVR()->get_clipping_box().GetRotation();
+		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
 		vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
 			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 			true, glbin_settings.m_save_compress,

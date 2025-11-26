@@ -134,49 +134,110 @@ bool ClippingBox::operator!=(const ClippingBox& rhs) const
 	return !(*this == rhs);
 }
 
-// Protected: synchronize planes_, planes_normalized_, and euler_
-// Canonical inputs: bbox_, clips_, q_
+// Sync this clipping box to match another box's WORLD clipping and rotation,
+// but keep this object's own bounding boxes.
+void ClippingBox::SyncWorld(const ClippingBox& src)
+{
+	// --- Copy world-space clipping values ---
+	clips_world_ = src.clips_world_;
+
+	// --- Copy rotation (quaternion is canonical) ---
+	q_ = src.q_;
+
+	// --- Recompute unit-space clipping from world-space ---
+	{
+		const Point wmin = bbox_world_.Min();
+		const Vector wsize = bbox_world_.diagonal();
+
+		const Point cmin = clips_world_.Min();
+		const Point cmax = clips_world_.Max();
+
+		// Normalize into [0,1] unit space
+		Point umin(
+			(cmin.x() - wmin.x()) / wsize.x(),
+			(cmin.y() - wmin.y()) / wsize.y(),
+			(cmin.z() - wmin.z()) / wsize.z()
+		);
+
+		Point umax(
+			(cmax.x() - wmin.x()) / wsize.x(),
+			(cmax.y() - wmin.y()) / wsize.y(),
+			(cmax.z() - wmin.z()) / wsize.z()
+		);
+
+		clips_unit_ = BBox(umin, umax);
+	}
+
+	// --- Recompute index-space clipping from unit-space ---
+	{
+		const Point imin = bbox_index_.Min();
+		const Vector isize = bbox_index_.diagonal();
+
+		const Point umin = clips_unit_.Min();
+		const Point umax = clips_unit_.Max();
+
+		Point cimin(
+			imin.x() + umin.x() * isize.x(),
+			imin.y() + umin.y() * isize.y(),
+			imin.z() + umin.z() * isize.z()
+		);
+
+		Point cimax(
+			imin.x() + umax.x() * isize.x(),
+			imin.y() + umax.y() * isize.y(),
+			imin.z() + umax.z() * isize.z()
+		);
+
+		clips_index_ = BBox(cimin, cimax);
+	}
+
+	// --- Rebuild planes in all spaces ---
+	Update();
+}
+
 void ClippingBox::Update()
 {
-	// --- Ensure plane arrays are sized ---
 	planes_world_.resize(6);
-	planes_unit_.resize(6);
 	planes_index_.resize(6);
+	planes_unit_.resize(6);
 
-	// --- Use clips_unit_ as canonical ---
-	const Point minUnit = clips_unit_.Min();
-	const Point maxUnit = clips_unit_.Max();
+	// --- Use clips_world_ as canonical ---
+	const Point minWorld = clips_world_.Min();
+	const Point maxWorld = clips_world_.Max();
 
-	// --- Construct UNIT planes axis-aligned ---
-	planes_unit_[static_cast<int>(ClipPlane::XNeg)].ChangePlane(minUnit, Vector(1, 0, 0));
-	planes_unit_[static_cast<int>(ClipPlane::XPos)].ChangePlane(maxUnit, Vector(-1, 0, 0));
-	planes_unit_[static_cast<int>(ClipPlane::YNeg)].ChangePlane(minUnit, Vector(0, 1, 0));
-	planes_unit_[static_cast<int>(ClipPlane::YPos)].ChangePlane(maxUnit, Vector(0, -1, 0));
-	planes_unit_[static_cast<int>(ClipPlane::ZNeg)].ChangePlane(minUnit, Vector(0, 0, 1));
-	planes_unit_[static_cast<int>(ClipPlane::ZPos)].ChangePlane(maxUnit, Vector(0, 0, -1));
+	// --- Construct WORLD planes axis-aligned ---
+	planes_world_[static_cast<int>(ClipPlane::XNeg)].ChangePlane(minWorld, Vector(1, 0, 0));
+	planes_world_[static_cast<int>(ClipPlane::XPos)].ChangePlane(maxWorld, Vector(-1, 0, 0));
+	planes_world_[static_cast<int>(ClipPlane::YNeg)].ChangePlane(minWorld, Vector(0, 1, 0));
+	planes_world_[static_cast<int>(ClipPlane::YPos)].ChangePlane(maxWorld, Vector(0, -1, 0));
+	planes_world_[static_cast<int>(ClipPlane::ZNeg)].ChangePlane(minWorld, Vector(0, 0, 1));
+	planes_world_[static_cast<int>(ClipPlane::ZPos)].ChangePlane(maxWorld, Vector(0, 0, -1));
 
-	// --- Rotate UNIT planes around (0.5,0.5,0.5) ---
-	const Point unitCenter(0.5, 0.5, 0.5);
-	for (auto& plane : planes_unit_)
-		plane.RotatePoint(q_, unitCenter);
+	// --- Rotate WORLD planes around world center ---
+	const Point worldCenter = bbox_world_.center();
+	for (auto& plane : planes_world_)
+		plane.RotatePoint(q_, worldCenter);
 
-	// --- Denormalize to INDEX space ---
+	// --- Map WORLD planes to INDEX space ---
 	Transform trans;
 	trans.load_identity();
-	trans.post_scale(bbox_index_.diagonal());
+	Vector invVoxelSize = bbox_world_.scale_to(bbox_index_);
+	trans.post_scale(invVoxelSize);
 	trans.post_translate(fluo::Vector(bbox_index_.Min()));
 	for (int k = 0; k < 6; ++k)
-		planes_index_[k] = planes_unit_[k].Transformed(trans);
+		planes_index_[k] = planes_world_[k].Transformed(trans);
 
-	// --- Map INDEX planes to WORLD space ---
+	// --- Map WORLD planes to UNIT space ---
+	BBox bbox_unit;
+	bbox_unit.unit();
 	trans.load_identity();
-	Vector voxel_size = bbox_index_.scale_to(bbox_world_);
-	trans.post_scale(voxel_size);
-	trans.post_translate(fluo::Vector(bbox_world_.Min()));
+	Vector invIndexSize = bbox_index_.scale_to(bbox_unit);
+	trans.post_scale(invIndexSize);
+	trans.post_translate(fluo::Vector(bbox_unit.Min()));
 	for (int k = 0; k < 6; ++k)
-		planes_world_[k] = planes_index_[k].Transformed(trans);
+		planes_unit_[k] = planes_world_[k].Transformed(trans);
 
-	// --- Sync Euler angles from quaternion ---
+	// --- Sync Euler angles ---
 	euler_ = q_.ToEuler();
 }
 

@@ -138,6 +138,8 @@ private:
 
 	void EnableAll(bool val);
 
+	bool GetClippingBoxColor(fluo::ClippingBox& box, fluo::Color& fc);
+
 	void OnIdle(wxIdleEvent &event);
 
 	void OnToolbar(wxCommandEvent& event);

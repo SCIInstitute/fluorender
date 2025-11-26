@@ -146,9 +146,7 @@ namespace flvr
 
 		//clipping planes
 		void set_clipping_box(const fluo::ClippingBox& box) { clipping_box_ = box; }
-		void set_clipping_box(fluo::ClippingBox&& box) { clipping_box_ = std::move(box); }
-		fluo::ClippingBox& get_clipping_box() { return clipping_box_; }
-		const fluo::ClippingBox& get_clipping_box() const { return clipping_box_; }
+		void sync_clipping_box(const fluo::ClippingBox& box) { clipping_box_.SyncWorld(box); }
 
 		//interpolation
 		bool get_interpolate() {return interpolate_; }

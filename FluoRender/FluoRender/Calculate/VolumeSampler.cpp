@@ -207,7 +207,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		}
 
 		//recalculate range
-		auto cb = input->GetVR()->get_clipping_box();
+		auto& cb = input->GetClippingBox();
 		double val[6];
 		cb.GetAllClipsIndex(val);
 

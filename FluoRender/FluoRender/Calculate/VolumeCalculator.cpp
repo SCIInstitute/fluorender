@@ -97,7 +97,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 	if (vd && vd_a)
 	{
 		//clipping planes
-		vd->GetVR()->get_clipping_box() = vd_a->GetVR()->get_clipping_box();
+		vd->SetClippingBox(vd_a->GetClippingBox());
 		//transfer function
 		glbin_vol_def.Copy(vd.get(), vd_a.get());
 

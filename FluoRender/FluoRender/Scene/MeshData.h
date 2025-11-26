@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TreeLayer.h>
 #include <BBox.h>
+#include <ClippingBox.h>
 #include <glm/glm.hpp>
 
 #ifndef __glew_h__
@@ -151,6 +152,8 @@ public:
 	void SetScaling(const fluo::Vector& val);
 	fluo::Vector GetScaling();
 
+	fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
+	const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
 	//clip size
 	void SetClipValue(fluo::ClipPlane i, int val);
 	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
@@ -184,6 +187,7 @@ private:
 	GLMmodelPtr m_data;
 	std::unique_ptr<flvr::MeshRenderer> m_mr;
 	fluo::BBox m_bounds;
+	fluo::ClippingBox m_clipping_box;
 	fluo::Point m_center;
 	//reader
 	std::weak_ptr<BaseMeshReader> m_reader;

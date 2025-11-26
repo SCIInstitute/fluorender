@@ -1398,7 +1398,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("s_res", vd->GetSpacingScales());
 			fconfig->Write("scl", vd->GetScalings());
 
-			auto& cb = vd->GetVR()->get_clipping_box();
+			auto& cb = vd->GetClippingBox();
 			//clip values
 			double clips[6];
 			cb.GetAllClipsWorld(clips);
@@ -1508,7 +1508,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("shadow", md->GetShadowEnable());
 			fconfig->Write("shadow_darkness", md->GetShadowIntensity());
 
-			auto& cb = md->GetMR()->get_clipping_box();
+			auto& cb = md->GetClippingBox();
 			//clip values
 			double clips[6];
 			cb.GetAllClipsWorld(clips);
