@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TreeLayer.h>
 #include <BBox.h>
-#include <ClippingBox.h>
 #include <glm/glm.hpp>
 
 #ifndef __glew_h__
@@ -122,7 +121,7 @@ public:
 	void SetVertexColor(bool val);
 	bool GetVertexColor();
 	void SetColor(const fluo::Color &color);
-	fluo::Color GetColor();
+	virtual fluo::Color GetColor() override;
 	void SetAlpha(double val);
 	double GetAlpha();
 	bool GetTransparent();
@@ -152,24 +151,21 @@ public:
 	void SetScaling(const fluo::Vector& val);
 	fluo::Vector GetScaling();
 
-	fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
-	const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
+	virtual void SetClippingBox(const fluo::ClippingBox& box) override;
 	//clip size
-	void SetClipValue(fluo::ClipPlane i, int val);
-	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
-	void SetClipValues(const std::array<int, 6>& vals);
-	void ResetClipValues();
-	void ResetClipValues(fluo::ClipPlane i);
+	virtual void SetClipValue(fluo::ClipPlane i, int val) override;
+	virtual void SetClipValues(fluo::ClipPlane i, int val1, int val2) override;
+	virtual void SetClipValues(const std::array<int, 6>& vals) override;
+	virtual void ResetClipValues() override;
+	virtual void ResetClipValues(fluo::ClipPlane i) override;
 	//clip rotation
-	void SetClipRotation(int i, double val);
-	void SetClipRotation(const fluo::Vector& euler);
-	void SetClipRotation(const fluo::Quaternion& q);
+	virtual void SetClipRotation(int i, double val) override;
+	virtual void SetClipRotation(const fluo::Vector& euler) override;
+	virtual void SetClipRotation(const fluo::Quaternion& q) override;
 	//clip distance
-	void SetLink(fluo::ClipPlane i, bool link);
-	bool GetLink(fluo::ClipPlane i);
-	void ResetLink();
-	void SetLinkedDist(fluo::ClipPlane i, int val);
-	int GetLinkedDist(fluo::ClipPlane i);
+	virtual void SetLink(fluo::ClipPlane i, bool link) override;
+	virtual void ResetLink() override;
+	virtual void SetLinkedDist(fluo::ClipPlane i, int val) override;
 
 	//randomize color
 	void RandomizeColor();
@@ -187,7 +183,6 @@ private:
 	GLMmodelPtr m_data;
 	std::unique_ptr<flvr::MeshRenderer> m_mr;
 	fluo::BBox m_bounds;
-	fluo::ClippingBox m_clipping_box;
 	fluo::Point m_center;
 	//reader
 	std::weak_ptr<BaseMeshReader> m_reader;

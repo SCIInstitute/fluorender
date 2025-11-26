@@ -794,8 +794,7 @@ void RenderView::InitView(unsigned int type)
 				glbin_xr_renderer->SetClips(
 					static_cast<float>(m_near_clip),
 					static_cast<float>(m_far_clip));
-			m_clipping_box.SetBBoxWorld(m_bounds);
-			m_clipping_box.SetBBoxIndex(m_bounds);
+			m_clipping_box.SetBBoxes(m_bounds, m_bounds);
 		}
 		else
 			m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(100.0));
@@ -3826,83 +3825,68 @@ void RenderView::SyncClippingBoxes(const fluo::ClippingBox& cb)
 
 void RenderView::SetClipValue(fluo::ClipPlane i, int val)
 {
-	m_clipping_box.SetClipIndex(i, val);
+	TreeLayer::SetClipValue(i, val);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 {
-	m_clipping_box.SetClipPairIndex(i, val1, val2);
+	TreeLayer::SetClipValues(i, val1, val2);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipValues(const std::array<int, 6>& vals)
 {
-	std::array<double, 6> dvals;
-	std::transform(vals.begin(), vals.end(), dvals.begin(),
-		[](int v) { return static_cast<double>(v); });
-	m_clipping_box.SetAllClipsIndex(dvals.data());
+	TreeLayer::SetClipValues(vals);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::ResetClipValues()
 {
-	m_clipping_box.ResetClips();
+	TreeLayer::ResetClipValues();
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::ResetClipValues(fluo::ClipPlane i)
 {
-	m_clipping_box.ResetClips(i);
+	TreeLayer::ResetClipValues(i);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipRotation(int i, double val)
 {
-	auto euler = m_clipping_box.GetEuler();
-	euler[i] = val;
-	m_clipping_box.Rotate(euler);
+	TreeLayer::SetClipRotation(i, val);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipRotation(const fluo::Vector& euler)
 {
-	m_clipping_box.Rotate(euler);
+	TreeLayer::SetClipRotation(euler);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetClipRotation(const fluo::Quaternion& q)
 {
-	m_clipping_box.Rotate(q);
+	TreeLayer::SetClipRotation(q);
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetLink(fluo::ClipPlane i, bool link)
 {
-	m_clipping_box.SetLink(i, link);
+	TreeLayer::SetLink(i, link);
 	SyncClippingBoxes(m_clipping_box);
-}
-
-bool RenderView::GetLink(fluo::ClipPlane i)
-{
-	return m_clipping_box.GetLink(i);
 }
 
 void RenderView::ResetLink()
 {
-	m_clipping_box.ResetLink();
+	TreeLayer::ResetLink();
 	SyncClippingBoxes(m_clipping_box);
 }
 
 void RenderView::SetLinkedDist(fluo::ClipPlane i, int val)
 {
-	m_clipping_box.SetLinkedDistIndex(i, val);
+	TreeLayer::SetLinkedDist(i, val);
 	SyncClippingBoxes(m_clipping_box);
-}
-
-int RenderView::GetLinkedDist(fluo::ClipPlane i)
-{
-	return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i)));
 }
 
 flvr::TextRenderer* RenderView::GetTextRenderer()
@@ -5564,9 +5548,8 @@ void RenderView::DrawDataPeel()
 		}
 	}
 
-	double dval, dval2;
-	if (CheckMeshShadingExist(dval, dval2))
-		DrawOverlayShadingMesh(dval, dval2);
+	double dval;
+	DrawOverlayShadingMesh();
 	if (CheckMeshShadowExist(dval))
 		DrawOverlayShadowMesh(dval);
 
@@ -6982,7 +6965,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	}
 }
 
-void RenderView::DrawOverlayShadingMesh(double strength, double shine)
+void RenderView::DrawOverlayShadingMesh()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -7029,7 +7012,6 @@ void RenderView::DrawOverlayShadingMesh(double strength, double shine)
 	img_shader->bind();
 
 	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 5.0, 0.0);
-	img_shader->setLocalParam(1, strength, shine, 0.0, 0.0);
 
 	DrawViewQuad();
 
@@ -7101,45 +7083,6 @@ void RenderView::DrawOverlayShadowMesh(double darkness)
 }
 
 //get mesh effects
-bool RenderView::CheckMeshShadingExist(double& strength, double& shine)
-{
-	for (auto& it : m_layer_list)
-	{
-		if (!it)
-			continue;
-		if (it->IsA() == 3)
-		{
-			auto md = std::dynamic_pointer_cast<MeshData>(it);
-			if (md && md->GetDisp())
-			{
-				strength = md->GetShadingStrength();
-				shine = md->GetShadingShine();
-				return md->GetShading();
-			}
-		}
-		else if (it->IsA() == 6)
-		{
-			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
-			if (group && group->GetDisp())
-			{
-				for (int j = 0; j < group->GetMeshNum(); j++)
-				{
-					auto md = group->GetMeshData(j);
-					if (md && md->GetDisp())
-					{
-						strength = md->GetShadingStrength();
-						shine = md->GetShadingShine();
-						return md->GetShading();
-					}
-				}
-			}
-		}
-	}
-	strength = 0.0;
-	shine = 0.0;
-	return false;
-}
-
 bool RenderView::CheckMeshShadowExist(double &val)
 {
 	for (auto& it : m_layer_list)

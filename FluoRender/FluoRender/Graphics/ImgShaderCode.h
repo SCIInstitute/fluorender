@@ -614,7 +614,6 @@ in vec3 OutTexCoord;
 out vec4 FragColor;
 
 uniform vec4 loc0; //(width, height, lod, 0)
-uniform vec4 loc1; //(strength, shine, 0, 0)
 uniform sampler2D tex0;
 
 void main()
@@ -622,7 +621,7 @@ void main()
 	vec2 t = OutTexCoord.xy;
 	float localDepth = texture(tex0, t).r;
 	float centerDepth = textureLod(tex0, t, loc0.z).r;
-	float depthDiff = loc1.x * (pow(smoothstep(-1.0, 1.0, centerDepth - localDepth), 3.0) - 0.5);
+	float depthDiff = pow(smoothstep(-1.0, 1.0, localDepth - centerDepth), 3.0) - 0.5;
 	FragColor = vec4(vec3(1.0 + depthDiff), 1.0);
 }
 )GLSHDR";

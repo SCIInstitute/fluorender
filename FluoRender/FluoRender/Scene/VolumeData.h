@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Quaternion.h>
 #include <BBox.h>
-#include <ClippingBox.h>
 #include <Vector4i.h>
 #include <Vector4f.h>
 #include <nrrd.h>
@@ -261,7 +260,7 @@ public:
 
 	//colors
 	void SetColor(const fluo::Color &color, bool set_this = true);
-	fluo::Color GetColor();
+	virtual fluo::Color GetColor() override;
 	void SetWlColor(bool bval = true);
 	bool GetWlColor();
 	void SetMaskColor(const fluo::Color &color, bool set=true);
@@ -403,25 +402,21 @@ public:
 	double GetMinValueScale();
 	void SetMinMaxValue(double val1, double val2) { m_min_value = val1; m_max_value = val2; }
 
-	fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
-	const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
-	void SetClippingBox(const fluo::ClippingBox& box);
+	virtual void SetClippingBox(const fluo::ClippingBox& box) override;
 	//clip size
-	void SetClipValue(fluo::ClipPlane i, int val);
-	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
-	void SetClipValues(const std::array<int, 6>& vals);
-	void ResetClipValues();
-	void ResetClipValues(fluo::ClipPlane i);
+	virtual void SetClipValue(fluo::ClipPlane i, int val) override;
+	virtual void SetClipValues(fluo::ClipPlane i, int val1, int val2) override;
+	virtual void SetClipValues(const std::array<int, 6>& vals) override;
+	virtual void ResetClipValues() override;
+	virtual void ResetClipValues(fluo::ClipPlane i) override;
 	//clip rotation
-	void SetClipRotation(int i, double val);
-	void SetClipRotation(const fluo::Vector& euler);
-	void SetClipRotation(const fluo::Quaternion& q);
+	virtual void SetClipRotation(int i, double val) override;
+	virtual void SetClipRotation(const fluo::Vector& euler) override;
+	virtual void SetClipRotation(const fluo::Quaternion& q) override;
 	//clip distance
-	void SetLink(fluo::ClipPlane i, bool link);
-	bool GetLink(fluo::ClipPlane i);
-	void ResetLink();
-	void SetLinkedDist(fluo::ClipPlane i, int val);
-	int GetLinkedDist(fluo::ClipPlane i);
+	virtual void SetLink(fluo::ClipPlane i, bool link) override;
+	virtual void ResetLink() override;
+	virtual void SetLinkedDist(fluo::ClipPlane i, int val) override;
 
 	//randomize color
 	void RandomizeColor();
@@ -487,8 +482,6 @@ private:
 
 	std::wstring m_tex_path;
 	fluo::BBox m_bounds;
-
-	fluo::ClippingBox m_clipping_box;
 
 	//save label
 	void* m_label_save;

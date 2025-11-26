@@ -274,6 +274,7 @@ bool ClippingBox::GetLink(ClipPlane plane)
 	case ClipPlane::ZPos:
 		return links_[2];
 	}
+	return false;
 }
 
 void ClippingBox::ResetLink()

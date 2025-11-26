@@ -1059,85 +1059,76 @@ fluo::Vector MeshData::GetScaling()
 	return fluo::Vector(m_scale[0], m_scale[1], m_scale[2]);
 }
 
+void MeshData::SetClippingBox(const fluo::ClippingBox& box)
+{
+	TreeLayer::SetClippingBox(box);
+	m_mr->set_clipping_box(m_clipping_box);
+}
+
 void MeshData::SetClipValue(fluo::ClipPlane i, int val)
 {
-	m_clipping_box.SetClipIndex(i, val);
+	TreeLayer::SetClipValue(i, val);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 {
-	m_clipping_box.SetClipPairIndex(i, val1, val2);
+	TreeLayer::SetClipValues(i, val1, val2);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetClipValues(const std::array<int, 6>& vals)
 {
-	std::array<double, 6> dvals;
-	std::transform(vals.begin(), vals.end(), dvals.begin(),
-		[](int v) { return static_cast<double>(v); });
-	m_clipping_box.SetAllClipsIndex(dvals.data());
+	TreeLayer::SetClipValues(vals);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::ResetClipValues()
 {
-	m_clipping_box.ResetClips();
+	TreeLayer::ResetClipValues();
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::ResetClipValues(fluo::ClipPlane i)
 {
-	m_clipping_box.ResetClips(i);
+	TreeLayer::ResetClipValues(i);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetClipRotation(int i, double val)
 {
-	auto euler = m_clipping_box.GetEuler();
-	euler[i] = val;
-	m_clipping_box.Rotate(euler);
+	TreeLayer::SetClipRotation(i, val);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetClipRotation(const fluo::Vector& euler)
 {
-	m_clipping_box.Rotate(euler);
+	TreeLayer::SetClipRotation(euler);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetClipRotation(const fluo::Quaternion& q)
 {
-	m_clipping_box.Rotate(q);
+	TreeLayer::SetClipRotation(q);
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetLink(fluo::ClipPlane i, bool link)
 {
-	m_clipping_box.SetLink(i, link);
+	TreeLayer::SetLink(i, link);
 	m_mr->set_clipping_box(m_clipping_box);
-}
-
-bool MeshData::GetLink(fluo::ClipPlane i)
-{
-	return m_clipping_box.GetLink(i);
 }
 
 void MeshData::ResetLink()
 {
-	m_clipping_box.ResetLink();
+	TreeLayer::ResetLink();
 	m_mr->set_clipping_box(m_clipping_box);
 }
 
 void MeshData::SetLinkedDist(fluo::ClipPlane i, int val)
 {
-	m_clipping_box.SetLinkedDistIndex(i, val);
+	TreeLayer::SetLinkedDist(i, val);
 	m_mr->set_clipping_box(m_clipping_box);
-}
-
-int MeshData::GetLinkedDist(fluo::ClipPlane i)
-{
-	return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i)));
 }
 
 //randomize color
@@ -1215,8 +1206,7 @@ void MeshData::BuildMesh()
 		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
 		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
 
-	m_clipping_box.SetBBoxWorld(m_bounds);
-	m_clipping_box.SetBBoxIndex(m_bounds);
+	m_clipping_box.SetBBoxes(m_bounds, m_bounds);
 	m_mr->set_clipping_box(m_clipping_box);
 
 	SetFlatShading(m_data->numnormals == 0);

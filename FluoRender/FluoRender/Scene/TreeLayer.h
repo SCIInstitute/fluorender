@@ -28,8 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TREE_LAYER_H
 #define _TREE_LAYER_H
 
-#include <string>
 #include <Color.h>
+#include <ClippingBox.h>
+#include <string>
 
 class TreeLayer
 {
@@ -58,6 +59,7 @@ public:
 		m_id = id;
 	}
 
+	virtual fluo::Color GetColor() { return fluo::Color(1.0); }
 	//layer adjustment
 	//gamma
 	const fluo::Color GetGammaColor()
@@ -81,6 +83,39 @@ public:
 	//randomize color
 	virtual void RandomizeColor() {}
 
+	virtual fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
+	virtual const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
+	virtual void SetClippingBox(const fluo::ClippingBox& box) { m_clipping_box = box; }
+	//sync
+	virtual void SyncClippingBoxes(const fluo::ClippingBox& cb) {}
+	//clip size
+	virtual void SetClipValue(fluo::ClipPlane i, int val) { m_clipping_box.SetClipIndex(i, val); }
+	virtual void SetClipValues(fluo::ClipPlane i, int val1, int val2) { m_clipping_box.SetClipPairIndex(i, val1, val2); }
+	virtual void SetClipValues(const std::array<int, 6>& vals)
+	{
+		std::array<double, 6> dvals;
+		std::transform(vals.begin(), vals.end(), dvals.begin(),
+			[](int v) { return static_cast<double>(v); });
+		m_clipping_box.SetAllClipsIndex(dvals.data());
+	}
+	virtual void ResetClipValues() { m_clipping_box.ResetClips(); }
+	virtual void ResetClipValues(fluo::ClipPlane i) { m_clipping_box.ResetClips(i); }
+	//clip rotation
+	virtual void SetClipRotation(int i, double val)
+	{
+		auto euler = m_clipping_box.GetEuler();
+		euler[i] = val;
+		m_clipping_box.Rotate(euler);
+	}
+	virtual void SetClipRotation(const fluo::Vector& euler) { m_clipping_box.Rotate(euler); }
+	virtual void SetClipRotation(const fluo::Quaternion& q) { m_clipping_box.Rotate(q); }
+	//clip distance
+	virtual void SetLink(fluo::ClipPlane i, bool link) { m_clipping_box.SetLink(i, link); }
+	virtual bool GetLink(fluo::ClipPlane i) { return m_clipping_box.GetLink(i); }
+	virtual void ResetLink() { m_clipping_box.ResetLink(); }
+	virtual void SetLinkedDist(fluo::ClipPlane i, int val) { m_clipping_box.SetLinkedDistIndex(i, val); }
+	virtual int GetLinkedDist(fluo::ClipPlane i) { return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i))); }
+
 protected:
 	int type;//-1:invalid, 0:root 1: canvas, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	std::wstring m_name;
@@ -91,6 +126,9 @@ protected:
 	fluo::Color m_brightness;
 	fluo::Color m_hdr;
 	bool m_sync[3];//for rgb
+
+	//clipping box
+	fluo::ClippingBox m_clipping_box;
 };
 
 #endif//_TREE_LAYER_H

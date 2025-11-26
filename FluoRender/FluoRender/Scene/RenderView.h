@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeLayer.h>
 #include <Size.h>
 #include <Value.hpp>
-#include <ClippingBox.h>
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
@@ -374,27 +373,23 @@ public:
 	//set clip mode
 	void SetClipMode(int mode);
 	int GetClipMode() { return m_clip_mode; }
-	//clipping box
-	fluo::ClippingBox& GetClippingBox() { return m_clipping_box; }
-	const fluo::ClippingBox& GetClippingBox() const { return m_clipping_box; }
+
 	//sync
-	void SyncClippingBoxes(const fluo::ClippingBox& cb);
-	//set clip values
-	void SetClipValue(fluo::ClipPlane i, int val);
-	void SetClipValues(fluo::ClipPlane i, int val1, int val2);
-	void SetClipValues(const std::array<int, 6>& vals);
-	void ResetClipValues();
-	void ResetClipValues(fluo::ClipPlane i);
+	virtual void SyncClippingBoxes(const fluo::ClippingBox& cb) override;
+	//clip size
+	virtual void SetClipValue(fluo::ClipPlane i, int val) override;
+	virtual void SetClipValues(fluo::ClipPlane i, int val1, int val2) override;
+	virtual void SetClipValues(const std::array<int, 6>& vals) override;
+	virtual void ResetClipValues() override;
+	virtual void ResetClipValues(fluo::ClipPlane i) override;
 	//clip rotation
-	void SetClipRotation(int i, double val);
-	void SetClipRotation(const fluo::Vector& euler);
-	void SetClipRotation(const fluo::Quaternion& q);
+	virtual void SetClipRotation(int i, double val) override;
+	virtual void SetClipRotation(const fluo::Vector& euler) override;
+	virtual void SetClipRotation(const fluo::Quaternion& q) override;
 	//clip distance
-	void SetLink(fluo::ClipPlane i, bool link);
-	bool GetLink(fluo::ClipPlane i);
-	void ResetLink();
-	void SetLinkedDist(fluo::ClipPlane i, int val);
-	int GetLinkedDist(fluo::ClipPlane i);
+	virtual void SetLink(fluo::ClipPlane i, bool link) override;
+	virtual void ResetLink() override;
+	virtual void SetLinkedDist(fluo::ClipPlane i, int val) override;
 
 	//interpolation
 	void SetIntp(bool mode) { m_intp = mode; }
@@ -688,9 +683,6 @@ private:
 	fluo::BBox m_bounds;
 	double m_radius;
 
-	//clipping box
-	fluo::ClippingBox m_clipping_box;
-
 	//mouse position
 	long old_mouse_X, old_mouse_Y;
 	long prv_mouse_X, prv_mouse_Y;
@@ -858,10 +850,9 @@ private:
 	//effect overlays
 	void DrawOverlayShadingVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
 	void DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
-	void DrawOverlayShadingMesh(double strength, double shine);
+	void DrawOverlayShadingMesh();
 	void DrawOverlayShadowMesh(double darkenss);
 	//get mesh effects and return strength/darkness
-	bool CheckMeshShadingExist(double& strength, double& shine);
 	bool CheckMeshShadowExist(double &val);
 
 	//other data types

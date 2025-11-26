@@ -403,8 +403,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	bounds.extend(pmin);
 	bounds.extend(pmax);
 	m_bounds = bounds;
-	m_clipping_box.SetBBoxWorld(m_bounds);
-	m_clipping_box.SetBBoxIndex(fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
+	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 
 	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(m_skip_brick);
@@ -592,8 +591,7 @@ void VolumeData::AddEmptyData(int bits,
 	bounds.extend(pmin);
 	bounds.extend(pmax);
 	m_bounds = bounds;
-	m_clipping_box.SetBBoxWorld(m_bounds);
-	m_clipping_box.SetBBoxIndex(fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
+	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 
 	//create texture
 	m_tex = std::make_shared<flvr::Texture>();
@@ -2894,89 +2892,74 @@ double VolumeData::GetMinValueScale()
 
 void VolumeData::SetClippingBox(const fluo::ClippingBox& box)
 {
-	m_clipping_box = box;
+	TreeLayer::SetClippingBox(box);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetClipValue(fluo::ClipPlane i, int val)
 {
-	m_clipping_box.SetClipIndex(i, val);
+	TreeLayer::SetClipValue(i, val);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 {
-	m_clipping_box.SetClipPairIndex(i, val1, val2);
+	TreeLayer::SetClipValues(i, val1, val2);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetClipValues(const std::array<int, 6>& vals)
 {
-	std::array<double, 6> dvals;
-	std::transform(vals.begin(), vals.end(), dvals.begin(),
-		[](int v) { return static_cast<double>(v); });
-	m_clipping_box.SetAllClipsIndex(dvals.data());
+	TreeLayer::SetClipValues(vals);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::ResetClipValues()
 {
-	m_clipping_box.ResetClips();
+	TreeLayer::ResetClipValues();
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::ResetClipValues(fluo::ClipPlane i)
 {
-	m_clipping_box.ResetClips(i);
+	TreeLayer::ResetClipValues(i);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetClipRotation(int i, double val)
 {
-	auto euler = m_clipping_box.GetEuler();
-	euler[i] = val;
-	m_clipping_box.Rotate(euler);
+	TreeLayer::SetClipRotation(i, val);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetClipRotation(const fluo::Vector& euler)
 {
-	m_clipping_box.Rotate(euler);
+	TreeLayer::SetClipRotation(euler);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetClipRotation(const fluo::Quaternion& q)
 {
-	m_clipping_box.Rotate(q);
+	TreeLayer::SetClipRotation(q);
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetLink(fluo::ClipPlane i, bool link)
 {
-	m_clipping_box.SetLink(i, link);
+	TreeLayer::SetLink(i, link);
 	m_vr->set_clipping_box(m_clipping_box);
-}
-
-bool VolumeData::GetLink(fluo::ClipPlane i)
-{
-	return m_clipping_box.GetLink(i);
 }
 
 void VolumeData::ResetLink()
 {
-	m_clipping_box.ResetLink();
+	TreeLayer::ResetLink();
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
 void VolumeData::SetLinkedDist(fluo::ClipPlane i, int val)
 {
-	m_clipping_box.SetLinkedDistIndex(i, val);
+	TreeLayer::SetLinkedDist(i, val);
 	m_vr->set_clipping_box(m_clipping_box);
-}
-
-int VolumeData::GetLinkedDist(fluo::ClipPlane i)
-{
-	return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i)));
 }
 
 //randomize color

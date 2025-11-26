@@ -69,10 +69,9 @@ namespace fluo
 
 		// --- Bounding boxes (dataset initialization) ---
 		const BBox& GetBBoxWorld() const { return bbox_world_; }
-		void SetBBoxWorld(const BBox& box) { bbox_world_ = box; Update(); }
+		void SetBBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; ResetClips(); }
 
 		const BBox& GetBBoxIndex() const { return bbox_index_; }
-		void SetBBoxIndex(const BBox& box) { bbox_index_ = box; Update(); }
 
 		Vector GetWorldSize() const { return bbox_world_.diagonal(); }
 		Vector GetIndexSize() const { return bbox_index_.diagonal(); }
@@ -135,9 +134,9 @@ namespace fluo
 		}
 		friend std::istream& operator>>(std::istream& is, ClippingBox& cb)
 		{
-			BBox box;
-			is >> box;
-			cb.SetBBoxWorld(box);
+			BBox box_world, box_index;
+			is >> box_world >> box_index;
+			cb.SetBBoxes(box_world, box_index);
 			return is;
 		}
 

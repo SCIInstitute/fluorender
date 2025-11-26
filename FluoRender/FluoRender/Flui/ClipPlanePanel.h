@@ -31,10 +31,15 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/spinbutt.h>
 
+namespace fluo
+{
+	enum class ClipPlane : int;
+}
 class wxFadeButton;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableToolbar;
+class TreeLayer;
 class ClipPlanePanel: public TabbedPanel
 {
 	enum
@@ -61,15 +66,13 @@ public:
 	void SetYLink(bool val);
 	void SetZLink(bool val);
 
-	void SetClipValue(int i, int val, bool link = false);//index: 0~5 = X1~Z2
-	void SetClipValues(int i, int val1, int val2);//index: clip mask
+	void SetClipValue(fluo::ClipPlane i, int val, bool link = false);//index: 0~5 = X1~Z2
+	void SetClipValues(fluo::ClipPlane i, int val1, int val2);//index: clip mask
 	void SetClipValues(const std::array<int, 6>& vals);
 	void ResetClipValues();
-	void ResetClipValuesX();
-	void ResetClipValuesY();
-	void ResetClipValuesZ();
+	void ResetClipValues(fluo::ClipPlane i);
 
-	void SyncClipValue(int i);//index: 0~2 = X~Z
+	void SyncClipValue(int i);
 
 	//move linked clipping planes
 	void MoveLinkedClippingPlanes(int dir);
@@ -138,7 +141,7 @@ private:
 
 	void EnableAll(bool val);
 
-	bool GetClippingBoxColor(fluo::ClippingBox& box, fluo::Color& fc);
+	std::shared_ptr<TreeLayer> GetObject();
 
 	void OnIdle(wxIdleEvent &event);
 
