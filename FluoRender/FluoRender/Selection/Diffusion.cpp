@@ -71,12 +71,12 @@ __kernel void kernel_0(
 	unsigned int index = nx*ny*k + nx*j + i;
 	float3 pt = (float3)((float)(i) / (float)(nx), (float)(j) / (float)(ny), (float)(k) / (float)(nz));
 	pt = pt * scl + trl;
-	if (dot(pt, p0.xyz)+p0.w > 0.0f ||
-		dot(pt, p1.xyz)+p1.w > 0.0f ||
-		dot(pt, p2.xyz)+p2.w > 0.0f ||
-		dot(pt, p3.xyz)+p3.w > 0.0f ||
-		dot(pt, p4.xyz)+p4.w > 0.0f ||
-		dot(pt, p5.xyz)+p5.w > 0.0f)
+	if (dot(pt, p0.xyz)+p0.w < 0.0f ||
+		dot(pt, p1.xyz)+p1.w < 0.0f ||
+		dot(pt, p2.xyz)+p2.w < 0.0f ||
+		dot(pt, p3.xyz)+p3.w < 0.0f ||
+		dot(pt, p4.xyz)+p4.w < 0.0f ||
+		dot(pt, p5.xyz)+p5.w < 0.0f)
 		return;
 	mask[index] = val;
 }
@@ -105,12 +105,12 @@ __kernel void kernel_1(
 	float3 dir = (float3)(1.0f/(float)(nx), 1.0f/(float)(ny), 1.0f/(float)(nz));
 	float3 pt = dir * (float3)((float)(i), (float)(j), (float)(k));
 	pt = pt * scl + trl;
-	if (dot(pt, p0.xyz)+p0.w > 0.0f ||
-		dot(pt, p1.xyz)+p1.w > 0.0f ||
-		dot(pt, p2.xyz)+p2.w > 0.0f ||
-		dot(pt, p3.xyz)+p3.w > 0.0f ||
-		dot(pt, p4.xyz)+p4.w > 0.0f ||
-		dot(pt, p5.xyz)+p5.w > 0.0f)
+	if (dot(pt, p0.xyz)+p0.w < 0.0f ||
+		dot(pt, p1.xyz)+p1.w < 0.0f ||
+		dot(pt, p2.xyz)+p2.w < 0.0f ||
+		dot(pt, p3.xyz)+p3.w < 0.0f ||
+		dot(pt, p4.xyz)+p4.w < 0.0f ||
+		dot(pt, p5.xyz)+p5.w < 0.0f)
 		return;
 	//grad compute
 	float3 v;

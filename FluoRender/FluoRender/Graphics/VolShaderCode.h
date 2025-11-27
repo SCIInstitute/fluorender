@@ -208,12 +208,12 @@ inline constexpr const char* VOL_HEAD_FOG  = R"GLSHDR(
 inline constexpr const char* VOL_HEAD_CLIP  = R"GLSHDR(
 	//VOL_HEAD_CLIP
 	vec4 brickt = matrix2 * vec4(texCoord, 1.0);
-	if (dot(brickt.xyz, loc10.xyz)+loc10.w > 0.0 ||
-		dot(brickt.xyz, loc11.xyz)+loc11.w > 0.0 ||
-		dot(brickt.xyz, loc12.xyz)+loc12.w > 0.0 ||
-		dot(brickt.xyz, loc13.xyz)+loc13.w > 0.0 ||
-		dot(brickt.xyz, loc14.xyz)+loc14.w > 0.0 ||
-		dot(brickt.xyz, loc15.xyz)+loc15.w > 0.0)
+	if (dot(brickt.xyz, loc10.xyz)+loc10.w < 0.0 ||
+		dot(brickt.xyz, loc11.xyz)+loc11.w < 0.0 ||
+		dot(brickt.xyz, loc12.xyz)+loc12.w < 0.0 ||
+		dot(brickt.xyz, loc13.xyz)+loc13.w < 0.0 ||
+		dot(brickt.xyz, loc14.xyz)+loc14.w < 0.0 ||
+		dot(brickt.xyz, loc15.xyz)+loc15.w < 0.0)
 	{
 		discard;//FragColor = vec4(0.0);
 		return;
@@ -234,12 +234,12 @@ inline constexpr const char* VOL_CLIP_FUNC  = R"GLSHDR(
 bool vol_clip_func(vec4 t)
 {
 	vec4 brickt = matrix2 * t;
-	if (dot(brickt.xyz, loc10.xyz)+loc10.w > 0.0 ||
-		dot(brickt.xyz, loc11.xyz)+loc11.w > 0.0 ||
-		dot(brickt.xyz, loc12.xyz)+loc12.w > 0.0 ||
-		dot(brickt.xyz, loc13.xyz)+loc13.w > 0.0 ||
-		dot(brickt.xyz, loc14.xyz)+loc14.w > 0.0 ||
-		dot(brickt.xyz, loc15.xyz)+loc15.w > 0.0)
+	if (dot(brickt.xyz, loc10.xyz)+loc10.w < 0.0 ||
+		dot(brickt.xyz, loc11.xyz)+loc11.w < 0.0 ||
+		dot(brickt.xyz, loc12.xyz)+loc12.w < 0.0 ||
+		dot(brickt.xyz, loc13.xyz)+loc13.w < 0.0 ||
+		dot(brickt.xyz, loc14.xyz)+loc14.w < 0.0 ||
+		dot(brickt.xyz, loc15.xyz)+loc15.w < 0.0)
 		return true;
 	else
 		return false;

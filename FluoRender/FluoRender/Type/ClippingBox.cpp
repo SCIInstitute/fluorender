@@ -244,7 +244,7 @@ void ClippingBox::Update()
 		Point(uCtr.x(), uCtr.y(), uMax.z())
 	};
 	for (int k = 0; k < 6; ++k)
-		planes_unit_[k].ChangeD(Dot(Vector(unitFacePoints[k].x(),
+		planes_unit_[k].ChangeD(-Dot(Vector(unitFacePoints[k].x(),
 			unitFacePoints[k].y(),
 			unitFacePoints[k].z()), planes_unit_[k].n()));
 
