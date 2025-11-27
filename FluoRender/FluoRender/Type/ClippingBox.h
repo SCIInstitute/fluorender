@@ -70,6 +70,7 @@ namespace fluo
 		// --- Bounding boxes (dataset initialization) ---
 		const BBox& GetBBoxWorld() const { return bbox_world_; }
 		void SetBBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; ResetClips(); }
+		void UpdateBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; Update(); }
 
 		const BBox& GetBBoxIndex() const { return bbox_index_; }
 

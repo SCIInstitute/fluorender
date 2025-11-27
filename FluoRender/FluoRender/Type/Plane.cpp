@@ -271,19 +271,34 @@ namespace fluo
 
 	void Plane::RotatePoint(const Quaternion& q, const Point& pivot)
 	{
-		// Rotate normal
-		Quaternion p(n_.x(), n_.y(), n_.z(), 0.0);
-		Quaternion p2 = (-q) * p * q;
-		Vector newNormal(p2.x, p2.y, p2.z);
+		// Ensure unit quaternion
+		Quaternion qn = q;
+		qn.Normalize();
 
-		// Rotate pivot
-		Quaternion pv(pivot.x(), pivot.y(), pivot.z(), 0.0);
-		Quaternion pv2 = (-q) * pv * q;
-		Point newPivot(pv2.x, pv2.y, pv2.z);
+		// Ensure the plane is in canonical form: unit normal
+		double len = n_.length();
+		if (len > 0.0)
+		{
+			n_ /= len;
+			d_ /= len;
+		}
 
-		// Recompute plane: passes through newPivot with newNormal
-		n_ = newNormal;
-		d_ = Dot(Vector(newPivot.x(), newPivot.y(), newPivot.z()), n_);
+		// Rotate normal: v' = q * v * q^{-1}
+		auto rotateVec = [&](const Vector& v) -> Vector {
+			Quaternion p(v.x(), v.y(), v.z(), 0.0);
+			Quaternion qnc = qn;
+			qnc.Conjugate();
+			Quaternion r = qn * p * qnc;
+			return Vector(r.x, r.y, r.z);
+			};
+		Vector nprime = rotateVec(n_);
+
+		// Compute new d using the pivot (which is NOT rotated)
+		Vector cvec(pivot.x(), pivot.y(), pivot.z());
+		double dprime = d_ - Dot(n_, cvec) + Dot(nprime, cvec);
+
+		n_ = nprime;
+		d_ = dprime;
 	}
 
 	Plane Plane::Transformed(const Transform& t)

@@ -318,7 +318,6 @@ public:
 	void SetSpacings(double spcx, double spcy, double spcz);
 	void GetSpacings(double &spcx, double &spcy, double & spcz, int lv = -1);
 	fluo::Vector GetSpacings(int lv = -1);
-	void GetFileSpacings(double &spcx, double &spcy, double &spcz);
 	//read resolutions from file
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
 	bool GetSpcFromFile() {return m_spc_from_file;}

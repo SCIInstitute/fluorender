@@ -201,7 +201,17 @@ void ClippingBox::Update()
 	planes_index_.resize(6);
 	planes_unit_.resize(6);
 
-	// --- Use clips_world_ as canonical ---
+	// --- Canonical CLIPS in UNIT space ---
+	const Point minUnit = clips_unit_.Min();
+	const Point maxUnit = clips_unit_.Max();
+
+	// --- Update CLIPS in WORLD space ---
+	clips_world_ = clips_unit_.denormalized(bbox_world_);
+
+	// --- Update CLIPS in INDEX space ---
+	clips_index_ = clips_unit_.denormalized(bbox_index_);
+
+	// --- Use clips_world_ as canonical for PLANES ---
 	const Point minWorld = clips_world_.Min();
 	const Point maxWorld = clips_world_.Max();
 

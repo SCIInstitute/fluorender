@@ -294,6 +294,13 @@ public:
 		return 0;
 	}
 
+	void Conjugate()
+	{
+		x = -x;
+		y = -y;
+		z = -z;
+	}
+
 public:
 	double x, y, z, w;
 

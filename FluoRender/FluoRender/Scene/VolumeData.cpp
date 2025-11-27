@@ -202,6 +202,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	//path and bounds
 	m_tex_path = copy.m_tex_path;
 	m_bounds = copy.m_bounds;
+	m_clipping_box = copy.m_clipping_box;
 
 	//volume renderer and texture
 	m_tex = copy.m_tex;
@@ -397,12 +398,9 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	m_res_y = nv->axis[1].size;
 	m_res_z = nv->axis[2].size;
 
-	fluo::BBox bounds;
-	fluo::Point pmax(data->axis[0].max, data->axis[1].max, data->axis[2].max);
-	fluo::Point pmin(data->axis[0].min, data->axis[1].min, data->axis[2].min);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	m_bounds = bounds;
+	fluo::Point pmax(m_res_x * m_spcx, m_res_y * m_spcy, m_res_z * m_spcz);
+	fluo::Point pmin(0.0);
+	m_bounds = fluo::BBox(pmin, pmax);
 	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 
 	m_tex = std::make_shared<flvr::Texture>();
@@ -585,12 +583,9 @@ void VolumeData::AddEmptyData(int bits,
 	m_res_z = nv->axis[2].size;
 
 	//bounding box
-	fluo::BBox bounds;
-	fluo::Point pmax(nv->axis[0].max, nv->axis[1].max, nv->axis[2].max);
-	fluo::Point pmin(nv->axis[0].min, nv->axis[1].min, nv->axis[2].min);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	m_bounds = bounds;
+	fluo::Point pmax(m_res_x * m_spcx, m_res_y * m_spcy, m_res_z * m_spcz);
+	fluo::Point pmin(0.0);
+	m_bounds = fluo::BBox(pmin, pmax);
 	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 
 	//create texture
@@ -1427,8 +1422,8 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 	Nrrd* data = 0;
 	if (temp)
 	{
-		if (temp->GetTexture())
-			data = temp->GetTexture()->get_nrrd(0);
+		if (temp->m_tex)
+			data = temp->m_tex->get_nrrd(0);
 	}
 	else
 	{
@@ -2679,59 +2674,49 @@ fluo::Vector VolumeData::GetScalings()
 
 void VolumeData::SetSpacings(double spcx, double spcy, double spcz)
 {
-	if (GetTexture())
-	{
-		GetTexture()->set_spacings(spcx, spcy, spcz);
-		m_bounds.reset();
-		GetTexture()->get_bounds(m_bounds);
-	}
+	m_spcx = spcx; m_spcy = spcy; m_spcz = spcz;
+	if (m_tex)
+		m_tex->set_spacings(spcx, spcy, spcz);
+	fluo::Point pmax(m_res_x * m_spcx, m_res_y * m_spcy, m_res_z * m_spcz);
+	fluo::Point pmin(0.0);
+	m_bounds = fluo::BBox(pmin, pmax);
+	m_clipping_box.UpdateBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
 }
 
 void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz, int lv)
 {
-	if (GetTexture())
-		GetTexture()->get_spacings(spcx, spcy, spcz, lv);
+	if (m_tex)
+		m_tex->get_spacings(spcx, spcy, spcz, lv);
 }
 
 fluo::Vector VolumeData::GetSpacings(int lv)
 {
 	double x, y, z;
-	if (GetTexture())
+	if (m_tex)
 	{
-		GetTexture()->get_spacings(x, y, z, lv);
+		m_tex->get_spacings(x, y, z, lv);
 		return fluo::Vector(x, y, z);
 	}
 	return fluo::Vector(0);
 }
 
-void VolumeData::GetFileSpacings(double &spcx, double &spcy, double &spcz)
-{
-	spcx = m_spcx; spcy = m_spcy; spcz = m_spcz;
-}
-
 //brkxml
 void VolumeData::SetBaseSpacings(double spcx, double spcy, double spcz)
 {
-	if (GetTexture())
-	{
-		GetTexture()->set_base_spacings(spcx, spcy, spcz);
-		m_bounds.reset();
-		GetTexture()->get_bounds(m_bounds);
-	}
+	SetSpacings(spcx, spcy, spcz);
 }
 
 void VolumeData::GetBaseSpacings(double &spcx, double &spcy, double & spcz)
 {
-	if (GetTexture())
-		GetTexture()->get_base_spacings(spcx, spcy, spcz);
+	GetSpacings(spcx, spcy, spcz);
 }
 
 fluo::Vector VolumeData::GetBaseSpacings()
 {
 	double x, y, z;
-	if (GetTexture())
+	if (m_tex)
 	{
-		GetTexture()->get_base_spacings(x, y, z);
+		m_tex->get_base_spacings(x, y, z);
 		return fluo::Vector(x, y, z);
 	}
 	return fluo::Vector(0);
@@ -2739,26 +2724,26 @@ fluo::Vector VolumeData::GetBaseSpacings()
 
 void VolumeData::SetSpacingScales(double s_spcx, double s_spcy, double s_spcz)
 {
-	if (GetTexture())
+	if (m_tex)
 	{
-		GetTexture()->set_spacing_scales(s_spcx, s_spcy, s_spcz);
+		m_tex->set_spacing_scales(s_spcx, s_spcy, s_spcz);
 		m_bounds.reset();
-		GetTexture()->get_bounds(m_bounds);
+		m_tex->get_bounds(m_bounds);
 	}
 }
 
 void VolumeData::GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz)
 {
-	if (GetTexture())
-		GetTexture()->get_spacing_scales(s_spcx, s_spcy, s_spcz);
+	if (m_tex)
+		m_tex->get_spacing_scales(s_spcx, s_spcy, s_spcz);
 }
 
 fluo::Vector VolumeData::GetSpacingScales()
 {
 	double x, y, z;
-	if (GetTexture())
+	if (m_tex)
 	{
-		GetTexture()->get_spacing_scales(x, y, z);
+		m_tex->get_spacing_scales(x, y, z);
 		return fluo::Vector(x, y, z);
 	}
 	return fluo::Vector(0);
@@ -2766,26 +2751,26 @@ fluo::Vector VolumeData::GetSpacingScales()
 
 void VolumeData::SetLevel(int lv)
 {
-	if (GetTexture() && isBrxml())
+	if (m_tex && isBrxml())
 	{
-		GetTexture()->setLevel(lv);
+		m_tex->setLevel(lv);
 		m_bounds.reset();
-		GetTexture()->get_bounds(m_bounds);
+		m_tex->get_bounds(m_bounds);
 	}
 }
 
 int VolumeData::GetLevel()
 {
-	if (GetTexture() && isBrxml())
-		return GetTexture()->GetCurLevel();
+	if (m_tex && isBrxml())
+		return m_tex->GetCurLevel();
 	else
 		return -1;
 }
 
 int VolumeData::GetLevelNum()
 {
-	if (GetTexture() && isBrxml())
-		return GetTexture()->GetLevelNum();
+	if (m_tex && isBrxml())
+		return m_tex->GetLevelNum();
 	else
 		return -1;
 }
@@ -2809,7 +2794,7 @@ int VolumeData::GetBits()
 void VolumeData::SetDisp(bool disp)
 {
 	m_disp = disp;
-	GetTexture()->set_sort_bricks();
+	m_tex->set_sort_bricks();
 }
 
 bool VolumeData::GetDisp()
@@ -2820,7 +2805,7 @@ bool VolumeData::GetDisp()
 void VolumeData::ToggleDisp()
 {
 	m_disp = !m_disp;
-	GetTexture()->set_sort_bricks();
+	m_tex->set_sort_bricks();
 }
 
 //bounding box
