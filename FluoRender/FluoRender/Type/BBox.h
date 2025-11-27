@@ -77,6 +77,9 @@ namespace fluo
 			: cmin_(min), cmax_(max), is_valid_(true) {
 		}
 
+		BBox(const Point& max)
+			: cmin_(Point(0.0)), cmax_(max), is_valid_(true) { }
+
 		Vector scale_to(const BBox& bbox) const
 		{
 			Vector d1 = this->diagonal();

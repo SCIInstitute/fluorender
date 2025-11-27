@@ -50,6 +50,7 @@ namespace fluo
 		Plane(const Point &p, const Vector &n);
 		Plane();
 		Plane(double a, double b, double c, double d);
+		Plane(const Vector& n, double d);
 		~Plane();
 
 		inline double d() const
@@ -72,7 +73,9 @@ namespace fluo
 		bool operator!=(const Plane &rhs) const;
 		// changes the plane ( n and d )
 		void ChangePlane( const Point &p1, const Point &p2, const Point &p3 );
-		void ChangePlane( const Point &p1, const Vector &v); 
+		void ChangePlane( const Point &p1, const Vector &v);
+		void ChangeNormal(const Vector& n);
+		void ChangeD(double d);
 
 		// plane-line intersection
 		// returns true if the line  v*t+s  for -inf < t < inf intersects
@@ -86,10 +89,9 @@ namespace fluo
 		void Translate(const Vector &v);
 		//rotate the plane around origin by a quaternion
 		void Rotate(const Quaternion &q);
-		void RotatePoint(const Quaternion& q, const Point& p);
+		void RotateAroundPoint(const Quaternion& q, const Point& p);
 		//full transform
 		Plane Transformed(const Transform& t);
-
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
@@ -105,6 +107,31 @@ namespace fluo
 			return is;
 		}
 	};
+
+	// Affine transform of a plane under x' = S x + t
+	// S is diagonal scale (sx, sy, sz), t is translation (tx, ty, tz)
+	inline fluo::Plane TransformPlaneAffine(const fluo::Plane& p, const Vector& S, const Vector& t)
+	{
+		// Original plane: n·x + d = 0
+		Vector n = p.n();
+		double d = p.d();
+
+		// n' = S^{-T} n  (for diagonal S, divide per axis)
+		Vector nprime(n.x() / S.x(), n.y() / S.y(), n.z() / S.z());
+
+		// d' = d - n'·t  (translation term with minus sign)
+		double dprime = d - Dot(t, nprime);
+
+		// Optional: normalize (maintain equation by scaling d' identically)
+		double k = nprime.length();
+		if (k > 0.0)
+		{
+			nprime /= k;
+			dprime /= k;
+		}
+
+		return fluo::Plane(nprime, dprime);
+	}
 
 	class PlaneSet
 	{

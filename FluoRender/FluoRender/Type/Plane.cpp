@@ -47,6 +47,12 @@ namespace fluo
 		n_.normalize();
 	}
 
+	Plane::Plane(const Vector& n, double d)
+		: n_(n), d_(d)
+	{
+		n_.normalize();
+	}
+
 	Plane::Plane(const Point& p, const Vector& normal)
 		: n_(normal), d_(-Dot(p, normal))
 	{
@@ -133,6 +139,17 @@ namespace fluo
 		n_ = N;
 		n_.safe_normalize();
 		d_ = -Dot(P, n_);
+	}
+
+	void Plane::ChangeNormal(const Vector& n)
+	{
+		n_ = n;
+		n_.normalize();
+	}
+
+	void Plane::ChangeD(double d)
+	{
+		d_ = d;
 	}
 
 	int Plane::Intersect(Point s, Vector v, Point& hit) const
@@ -269,7 +286,7 @@ namespace fluo
 		n_ = Vector(p2.x, p2.y, p2.z);
 	}
 
-	void Plane::RotatePoint(const Quaternion& q, const Point& pivot)
+	void Plane::RotateAroundPoint(const Quaternion& q, const Point& pivot)
 	{
 		// Ensure unit quaternion
 		Quaternion qn = q;

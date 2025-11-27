@@ -58,12 +58,12 @@ float clip_plane(
 	// Clipping planes
 	float3 pt = (float3)((float)(coord.x) / (float)(volume_width), (float)(coord.y) / (float)(volume_height), (float)(coord.z) / (float)(volume_depth));
 	pt = pt * scl + trl;
-	if (dot(pt, loc10.xyz)+loc10.w < 0.0f ||
-		dot(pt, loc11.xyz)+loc11.w < 0.0f ||
-		dot(pt, loc12.xyz)+loc12.w < 0.0f ||
-		dot(pt, loc13.xyz)+loc13.w < 0.0f ||
-		dot(pt, loc14.xyz)+loc14.w < 0.0f ||
-		dot(pt, loc15.xyz)+loc15.w < 0.0f)
+	if (dot(pt, loc10.xyz)+loc10.w > 0.0f ||
+		dot(pt, loc11.xyz)+loc11.w > 0.0f ||
+		dot(pt, loc12.xyz)+loc12.w > 0.0f ||
+		dot(pt, loc13.xyz)+loc13.w > 0.0f ||
+		dot(pt, loc14.xyz)+loc14.w > 0.0f ||
+		dot(pt, loc15.xyz)+loc15.w > 0.0f)
 		return 0.0f;
 	return 1.0f;
 }

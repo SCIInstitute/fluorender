@@ -1,4 +1,4 @@
-/*
+﻿/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -201,53 +201,66 @@ void ClippingBox::Update()
 	planes_index_.resize(6);
 	planes_unit_.resize(6);
 
-	// --- Canonical CLIPS in UNIT space ---
-	const Point minUnit = clips_unit_.Min();
-	const Point maxUnit = clips_unit_.Max();
+	// Canonical clips in UNIT space
+	const Point uMin = clips_unit_.Min();
+	const Point uMax = clips_unit_.Max();
+	const Point uCtr((uMin.x() + uMax.x()) * 0.5,
+		(uMin.y() + uMax.y()) * 0.5,
+		(uMin.z() + uMax.z()) * 0.5);
 
-	// --- Update CLIPS in WORLD space ---
+	// Denormalize clips for bookkeeping
 	clips_world_ = clips_unit_.denormalized(bbox_world_);
-
-	// --- Update CLIPS in INDEX space ---
 	clips_index_ = clips_unit_.denormalized(bbox_index_);
 
-	// --- Use clips_world_ as canonical for PLANES ---
-	const Point minWorld = clips_world_.Min();
-	const Point maxWorld = clips_world_.Max();
+	// Build WORLD planes with dummy points (only normals matter initially)
+	planes_world_[0].ChangePlane(Point(0, 0, 0), Vector(1, 0, 0));
+	planes_world_[1].ChangePlane(Point(0, 0, 0), Vector(-1, 0, 0));
+	planes_world_[2].ChangePlane(Point(0, 0, 0), Vector(0, 1, 0));
+	planes_world_[3].ChangePlane(Point(0, 0, 0), Vector(0, -1, 0));
+	planes_world_[4].ChangePlane(Point(0, 0, 0), Vector(0, 0, 1));
+	planes_world_[5].ChangePlane(Point(0, 0, 0), Vector(0, 0, -1));
 
-	// --- Construct WORLD planes axis-aligned ---
-	planes_world_[static_cast<int>(ClipPlane::XNeg)].ChangePlane(minWorld, Vector(1, 0, 0));
-	planes_world_[static_cast<int>(ClipPlane::XPos)].ChangePlane(maxWorld, Vector(-1, 0, 0));
-	planes_world_[static_cast<int>(ClipPlane::YNeg)].ChangePlane(minWorld, Vector(0, 1, 0));
-	planes_world_[static_cast<int>(ClipPlane::YPos)].ChangePlane(maxWorld, Vector(0, -1, 0));
-	planes_world_[static_cast<int>(ClipPlane::ZNeg)].ChangePlane(minWorld, Vector(0, 0, 1));
-	planes_world_[static_cast<int>(ClipPlane::ZPos)].ChangePlane(maxWorld, Vector(0, 0, -1));
+	// Rotate WORLD planes around world center
+	const Point cW = bbox_world_.center();
+	for (auto& pw : planes_world_)
+		pw.RotateAroundPoint(q_, cW);
 
-	// --- Rotate WORLD planes around world center ---
-	const Point worldCenter = bbox_world_.center();
-	for (auto& plane : planes_world_)
-		plane.RotatePoint(q_, worldCenter);
+	// World -> Unit affine parameters
+	BBox unitBox; unitBox.unit();
+	const Vector S_WU = bbox_world_.scale_to(unitBox);
+	const Vector t_WU = Vector(unitBox.Min());
 
-	// --- Map WORLD planes to INDEX space ---
-	Transform trans;
-	trans.load_identity();
-	Vector invVoxelSize = bbox_world_.scale_to(bbox_index_);
-	trans.post_scale(invVoxelSize);
-	trans.post_translate(fluo::Vector(bbox_index_.Min()));
+	// Convert rotated WORLD planes to UNIT planes
 	for (int k = 0; k < 6; ++k)
-		planes_index_[k] = planes_world_[k].Transformed(trans);
+		planes_unit_[k] = TransformPlaneAffine(planes_world_[k], S_WU, t_WU);
 
-	// --- Map WORLD planes to UNIT space ---
-	BBox bbox_unit;
-	bbox_unit.unit();
-	trans.load_identity();
-	Vector invIndexSize = bbox_index_.scale_to(bbox_unit);
-	trans.post_scale(invIndexSize);
-	trans.post_translate(fluo::Vector(bbox_unit.Min()));
+	// Apply unit-space clipping by setting d to pass through unit clip faces
+	std::array<Point, 6> unitFacePoints = {
+		Point(uMin.x(), uCtr.y(), uCtr.z()),
+		Point(uMax.x(), uCtr.y(), uCtr.z()),
+		Point(uCtr.x(), uMin.y(), uCtr.z()),
+		Point(uCtr.x(), uMax.y(), uCtr.z()),
+		Point(uCtr.x(), uCtr.y(), uMin.z()),
+		Point(uCtr.x(), uCtr.y(), uMax.z())
+	};
 	for (int k = 0; k < 6; ++k)
-		planes_unit_[k] = planes_world_[k].Transformed(trans);
+		planes_unit_[k].ChangeD(Dot(Vector(unitFacePoints[k].x(),
+			unitFacePoints[k].y(),
+			unitFacePoints[k].z()), planes_unit_[k].n()));
 
-	// --- Sync Euler angles ---
+	// Unit -> Index / World affine parameters
+	const Vector S_UI = unitBox.scale_to(bbox_index_);
+	const Vector t_UI = Vector(bbox_index_.Min());
+	const Vector S_UW = unitBox.scale_to(bbox_world_);
+	const Vector t_UW = Vector(bbox_world_.Min());
+
+	// Generate INDEX and WORLD clipped planes from UNIT planes
+	for (int k = 0; k < 6; ++k) {
+		planes_index_[k] = TransformPlaneAffine(planes_unit_[k], S_UI, t_UI);
+		planes_world_[k] = TransformPlaneAffine(planes_unit_[k], S_UW, t_UW);
+	}
+
+	// Sync Euler angles
 	euler_ = q_.ToEuler();
 }
 
