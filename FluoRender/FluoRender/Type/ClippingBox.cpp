@@ -206,39 +206,91 @@ void ClippingBox::Update()
 	clips_index_ = clips_unit_.denormalized(bbox_index_);
 
 	// Build WORLD planes with dummy points (only normals matter initially)
-	planes_world_[0].ChangePlane(Point(0, 0, 0), Vector(1, 0, 0));
+	planes_world_[0].ChangePlane(Point(0, 0, 0), Vector(1, 0, 0)); // X pair
 	planes_world_[1].ChangePlane(Point(0, 0, 0), Vector(-1, 0, 0));
-	planes_world_[2].ChangePlane(Point(0, 0, 0), Vector(0, 1, 0));
+	planes_world_[2].ChangePlane(Point(0, 0, 0), Vector(0, 1, 0)); // Y pair
 	planes_world_[3].ChangePlane(Point(0, 0, 0), Vector(0, -1, 0));
-	planes_world_[4].ChangePlane(Point(0, 0, 0), Vector(0, 0, 1));
+	planes_world_[4].ChangePlane(Point(0, 0, 0), Vector(0, 0, 1)); // Z pair
 	planes_world_[5].ChangePlane(Point(0, 0, 0), Vector(0, 0, -1));
 
-	// Rotate WORLD planes around world center
-	const Point cW = bbox_world_.center();
+	// Rotate WORLD planes around the clipping box center in world space
+	const Point cW = clips_world_.center();
 	for (auto& pw : planes_world_)
 		pw.RotateAroundPoint(q_, cW);
 
-	// World -> Unit affine parameters
+	// World -> Unit affine parameters (centered)
 	BBox unitBox; unitBox.unit();
 	const Vector S_WU = bbox_world_.scale_to(unitBox);
 	const Vector t_WU = Vector(unitBox.center());
 
-	// Convert rotated WORLD planes to UNIT planes
+	// Convert rotated WORLD planes to UNIT planes (normals correct; d will be recalculated)
 	for (int k = 0; k < 6; ++k)
 		planes_unit_[k] = TransformPlaneAffine(planes_world_[k], S_WU, t_WU);
 
-	// Apply unit-space clipping by setting d to pass through unit clip faces
-	// Canonical clips in UNIT space
+	// Normalize normals in unit space
+	//auto normalize = [](const Vector& v) {
+	//	const double len = std::sqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z());
+	//	return len > 0.0 ? Vector(v.x() / len, v.y() / len, v.z() / len) : Vector(0, 0, 0);
+	//	};
+	//for (int k = 0; k < 6; ++k)
+	//	planes_unit_[k].ChangeNormal(normalize(planes_unit_[k].n()));
+
+	// Build unit-box corners once
+	const Point uMinBox = unitBox.Min();
+	const Point uMaxBox = unitBox.Max();
+	std::array<Point, 8> corners = {
+		Point(uMinBox.x(), uMinBox.y(), uMinBox.z()),
+		Point(uMaxBox.x(), uMinBox.y(), uMinBox.z()),
+		Point(uMinBox.x(), uMaxBox.y(), uMinBox.z()),
+		Point(uMaxBox.x(), uMaxBox.y(), uMinBox.z()),
+		Point(uMinBox.x(), uMinBox.y(), uMaxBox.z()),
+		Point(uMaxBox.x(), uMinBox.y(), uMaxBox.z()),
+		Point(uMinBox.x(), uMaxBox.y(), uMaxBox.z()),
+		Point(uMaxBox.x(), uMaxBox.y(), uMaxBox.z())
+	};
+
+	// Recompute d for each plane
+	for (int k = 0; k < 6; ++k) {
+		const Vector n = planes_unit_[k].n(); // already normalized, inward
+		double sMin = std::numeric_limits<double>::infinity();
+		for (const auto& c : corners) {
+			double s = Dot(n, Vector(c));
+			if (s < sMin) sMin = s;
+		}
+		planes_unit_[k].ChangeD(-sMin);
+	}
+
+	// Compute ranges between opposite plane pairs (normals are normalized)
+	auto pairRange = [&](int iMin, int iMax) {
+		return std::fabs(planes_unit_[iMax].d() - planes_unit_[iMin].d());
+		};
+	const double rangeX = pairRange(0, 1);
+	const double rangeY = pairRange(2, 3);
+	const double rangeZ = pairRange(4, 5);
+
+	// Apply unit-space clipping fractions
 	const Point uMin = clips_unit_.Min();
 	const Point uMax = clips_unit_.Max();
-	planes_unit_[0].ChangeD(-uMin.x());   // -X
-	planes_unit_[1].ChangeD(uMax.x());  // +X
-	planes_unit_[2].ChangeD(-uMin.y());   // -Y
-	planes_unit_[3].ChangeD(uMax.y());  // +Y
-	planes_unit_[4].ChangeD(-uMin.z());   // -Z
-	planes_unit_[5].ChangeD(uMax.z());  // +Z
 
-	// Unit -> Index / World affine parameters
+	auto shiftPlane = [&](int idx, double clipVal, double range, bool isMin) {
+		const Vector n = planes_unit_[idx].n();
+		// sign = -1 if normal points positive, +1 if normal points negative
+		double sign = (n.x() + n.y() + n.z() > 0.0) ? -1.0 : +1.0;
+		double delta = clipVal * range * sign;
+		planes_unit_[idx].ChangeD(planes_unit_[idx].d() + delta);
+		};
+
+	// Apply clipping fractions uniformly
+	planes_unit_[0].ChangeD(planes_unit_[0].d() - uMin.x() * rangeX);
+	planes_unit_[1].ChangeD(planes_unit_[1].d() - (1.0 - uMax.x()) * rangeX);
+
+	planes_unit_[2].ChangeD(planes_unit_[2].d() - uMin.y() * rangeY);
+	planes_unit_[3].ChangeD(planes_unit_[3].d() - (1.0 - uMax.y()) * rangeY);
+
+	planes_unit_[4].ChangeD(planes_unit_[4].d() - uMin.z() * rangeZ);
+	planes_unit_[5].ChangeD(planes_unit_[5].d() - (1.0 - uMax.z()) * rangeZ);
+
+	// Unit -> Index / World affine parameters (centered)
 	const Vector S_UI = unitBox.scale_to(bbox_index_);
 	const Vector t_UI = Vector(bbox_index_.center());
 	const Vector S_UW = unitBox.scale_to(bbox_world_);
