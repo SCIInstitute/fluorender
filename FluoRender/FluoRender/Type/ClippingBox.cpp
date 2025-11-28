@@ -218,10 +218,10 @@ void ClippingBox::Update()
 	for (auto& pw : planes_world_)
 		pw.RotateAroundPoint(q_, cW);
 
-	// World -> Unit affine parameters (centered)
+	// World -> Unit affine parameters
 	BBox unitBox; unitBox.unit();
 	const Vector S_WU = bbox_world_.scale_to(unitBox);
-	const Vector t_WU = Vector(unitBox.center());
+	const Vector t_WU = Vector(unitBox.Min());
 
 	// Convert rotated WORLD planes to UNIT planes (normals correct; d will be recalculated)
 	for (int k = 0; k < 6; ++k)
@@ -294,11 +294,11 @@ void ClippingBox::Update()
 	planes_unit_[4].ChangeD(planes_unit_[4].d() - uMin.z() * rangeZ);
 	planes_unit_[5].ChangeD(planes_unit_[5].d() - (1.0 - uMax.z()) * rangeZ);
 
-	// Unit -> Index / World affine parameters (centered)
+	// Unit -> Index / World affine parameters
 	const Vector S_UI = unitBox.scale_to(bbox_index_);
-	const Vector t_UI = Vector(bbox_index_.center());
+	const Vector t_UI = Vector(bbox_index_.Min());
 	const Vector S_UW = unitBox.scale_to(bbox_world_);
-	const Vector t_UW = Vector(bbox_world_.center());
+	const Vector t_UW = Vector(bbox_world_.Min());
 
 	// Generate INDEX and WORLD clipped planes from UNIT planes
 	for (int k = 0; k < 6; ++k) {

@@ -658,7 +658,7 @@ private:
 	//object center
 	fluo::Point m_obj_ctr;
 	//object rotation
-	fluo::Vector m_obj_rot;
+	fluo::Vector m_obj_rot = fluo::Vector(0.0, 180.0, 180.0);
 	//flag for using offset values
 	bool m_offset;
 	//obj center offset (for registration currently)
