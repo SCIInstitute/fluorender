@@ -201,13 +201,6 @@ void ClippingBox::Update()
 	planes_index_.resize(6);
 	planes_unit_.resize(6);
 
-	// Canonical clips in UNIT space
-	const Point uMin = clips_unit_.Min();
-	const Point uMax = clips_unit_.Max();
-	const Point uCtr((uMin.x() + uMax.x()) * 0.5,
-		(uMin.y() + uMax.y()) * 0.5,
-		(uMin.z() + uMax.z()) * 0.5);
-
 	// Denormalize clips for bookkeeping
 	clips_world_ = clips_unit_.denormalized(bbox_world_);
 	clips_index_ = clips_unit_.denormalized(bbox_index_);
@@ -228,31 +221,28 @@ void ClippingBox::Update()
 	// World -> Unit affine parameters
 	BBox unitBox; unitBox.unit();
 	const Vector S_WU = bbox_world_.scale_to(unitBox);
-	const Vector t_WU = Vector(unitBox.Min());
+	const Vector t_WU = Vector(unitBox.center());
 
 	// Convert rotated WORLD planes to UNIT planes
 	for (int k = 0; k < 6; ++k)
 		planes_unit_[k] = TransformPlaneAffine(planes_world_[k], S_WU, t_WU);
 
 	// Apply unit-space clipping by setting d to pass through unit clip faces
-	std::array<Point, 6> unitFacePoints = {
-		Point(uMin.x(), uCtr.y(), uCtr.z()),
-		Point(uMax.x(), uCtr.y(), uCtr.z()),
-		Point(uCtr.x(), uMin.y(), uCtr.z()),
-		Point(uCtr.x(), uMax.y(), uCtr.z()),
-		Point(uCtr.x(), uCtr.y(), uMin.z()),
-		Point(uCtr.x(), uCtr.y(), uMax.z())
-	};
-	for (int k = 0; k < 6; ++k)
-		planes_unit_[k].ChangeD(-Dot(Vector(unitFacePoints[k].x(),
-			unitFacePoints[k].y(),
-			unitFacePoints[k].z()), planes_unit_[k].n()));
+	// Canonical clips in UNIT space
+	const Point uMin = clips_unit_.Min();
+	const Point uMax = clips_unit_.Max();
+	planes_unit_[0].ChangeD(-uMin.x());   // -X
+	planes_unit_[1].ChangeD(uMax.x());  // +X
+	planes_unit_[2].ChangeD(-uMin.y());   // -Y
+	planes_unit_[3].ChangeD(uMax.y());  // +Y
+	planes_unit_[4].ChangeD(-uMin.z());   // -Z
+	planes_unit_[5].ChangeD(uMax.z());  // +Z
 
 	// Unit -> Index / World affine parameters
 	const Vector S_UI = unitBox.scale_to(bbox_index_);
-	const Vector t_UI = Vector(bbox_index_.Min());
+	const Vector t_UI = Vector(bbox_index_.center());
 	const Vector S_UW = unitBox.scale_to(bbox_world_);
-	const Vector t_UW = Vector(bbox_world_.Min());
+	const Vector t_UW = Vector(bbox_world_.center());
 
 	// Generate INDEX and WORLD clipped planes from UNIT planes
 	for (int k = 0; k < 6; ++k) {
