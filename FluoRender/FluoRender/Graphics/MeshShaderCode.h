@@ -136,6 +136,11 @@ inline constexpr const char* MSH_FRAG_OUTPUTS_INT = R"GLSHDR(
 layout(location = 0) out uint FragUint;
 )GLSHDR";
 
+inline constexpr const char* MSH_FRAG_INPUTS_VPO = R"GLSHDR(
+//MSH_FRAG_INPUTS_VPO
+layout(location = 0) in vec3 VertexPos;
+)GLSHDR";
+
 inline constexpr const char* MSH_FRAG_INPUTS_N = R"GLSHDR(
 //MSH_FRAG_INPUTS_N
 layout(location = 1) in vec3 OutNormal;
@@ -186,6 +191,32 @@ inline constexpr const char* MSH_FRAG_UNIFORMS_INT = R"GLSHDR(
 uniform uint loci0;//name
 )GLSHDR";
 
+inline constexpr const char* MSH_FRAG_UNIFORMS_CLIP = R"GLSHDR(
+//MSH_FRAG_UNIFORMS_CLIP
+uniform vec4 loc10; //plane0
+uniform vec4 loc11; //plane1
+uniform vec4 loc12; //plane2
+uniform vec4 loc13; //plane3
+uniform vec4 loc14; //plane4
+uniform vec4 loc15; //plane5
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_CLIP_FUNC = R"GLSHDR(
+//MSH_FRAG_CLIP_FUNC
+bool vol_clip_func(vec4 t)
+{
+	if (dot(t.xyz, loc10.xyz)+loc10.w < 0.0 ||
+		dot(t.xyz, loc11.xyz)+loc11.w < 0.0 ||
+		dot(t.xyz, loc12.xyz)+loc12.w < 0.0 ||
+		dot(t.xyz, loc13.xyz)+loc13.w < 0.0 ||
+		dot(t.xyz, loc14.xyz)+loc14.w < 0.0 ||
+		dot(t.xyz, loc15.xyz)+loc15.w < 0.0)
+		return true;
+	else
+		return false;
+}
+)GLSHDR";
+
 //1: draw depth after 15 (15)
 inline constexpr const char* MSH_FRAG_BODY_DP_1 = R"GLSHDR(
 	// MSH_FRAG_BODY_DP_1
@@ -220,6 +251,15 @@ inline constexpr const char* MSH_FRAG_BODY_DP_5 = R"GLSHDR(
 	// MSH_FRAG_BODY_DP_5
 	vec2 t = vec2(gl_FragCoord.x*loc7.x, gl_FragCoord.y*loc7.y);
 	if (texture(tex15, t).r <= gl_FragCoord.z-1e-6) discard;
+)GLSHDR";
+
+inline constexpr const char* MSH_FRAG_HEAD_CLIP_FUNC = R"GLSHDR(
+	//MSH_FRAG_HEAD_CLIP_FUNC
+	if (vol_clip_func(vec4(VertexPos, 1.0)))
+	{
+		discard;
+		return;
+	}
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_HEAD_FOG = R"GLSHDR(
@@ -368,6 +408,10 @@ inline constexpr const char* MSH_GEOM_NORMALS_INPUTS_FOG = R"GLSHDR(
 layout(location = 4) in vec4 InFogCoord[];
 )GLSHDR";
 
+inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_VPO = R"GLSHDR(
+layout(location = 0) out vec3 OutVertexPos;
+)GLSHDR";
+
 inline constexpr const char* MSH_GEOM_NORMALS_OUTPUTS_N = R"GLSHDR(
 layout(location = 1) out vec3 OutNormal;
 )GLSHDR";
@@ -400,6 +444,7 @@ void main()
 	{
 		gl_Position = gl_in[i].gl_Position;
 
+		OutVertexPos = VertexPos[i];
 		// Use computed face normal
 		OutNormal = transformedNormal;
 )GLSHDR";

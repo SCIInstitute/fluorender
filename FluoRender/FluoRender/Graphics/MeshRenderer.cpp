@@ -117,7 +117,7 @@ void MeshRenderer::draw()
 
 		//set up shader
 		shader = glbin_shader_manager.shader(gstMeshShader,
-			ShaderParams::Mesh(0, depth_peel_, tex, fog_, shading_, flat_shading_, has_vertex_color_));
+			ShaderParams::Mesh(0, depth_peel_, true, tex, fog_, shading_, flat_shading_, has_vertex_color_));
 		assert(shader);
 		shader->bind();
 
@@ -149,6 +149,22 @@ void MeshRenderer::draw()
 
 		if (depth_peel_)
 			shader->setLocalParam(7, 1.0 / double(vp_[2]), 1.0 / double(vp_[3]), 0.0, 0.0);
+
+		//set clipping planes
+		auto planes = clipping_box_.GetPlanesWorld();
+		double abcd[4];
+		planes[0].get(abcd);
+		shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
+		planes[1].get(abcd);
+		shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
+		planes[2].get(abcd);
+		shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
+		planes[3].get(abcd);
+		shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
+		planes[4].get(abcd);
+		shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
+		planes[5].get(abcd);
+		shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 		//draw
 		va->draw_unmanaged(pos, group->numtriangles);
@@ -187,7 +203,7 @@ void MeshRenderer::draw_wireframe()
 
 	//set up shader
 	auto shader = glbin_shader_manager.shader(gstMeshShader,
-		ShaderParams::Mesh(0, peel, tex, fog_, light, false, false));
+		ShaderParams::Mesh(0, peel, true, tex, fog_, light, false, false));
 	assert(shader);
 	shader->bind();
 
@@ -198,6 +214,21 @@ void MeshRenderer::draw_wireframe()
 		shader->setLocalParam(0,
 			color_.r(), color_.g(), color_.b(), alpha_);
 	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
+	//set clipping planes
+	auto planes = clipping_box_.GetPlanesWorld();
+	double abcd[4];
+	planes[0].get(abcd);
+	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[1].get(abcd);
+	shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[2].get(abcd);
+	shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[3].get(abcd);
+	shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[4].get(abcd);
+	shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[5].get(abcd);
+	shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 	va->draw_begin();
 	while (group)
@@ -232,7 +263,7 @@ void MeshRenderer::draw_integer(unsigned int name)
 
 	//set up shader
 	auto shader = glbin_shader_manager.shader(gstMeshShader,
-		ShaderParams::Mesh(1, 0, false, false, false, false, false));
+		ShaderParams::Mesh(1, 0, true, false, false, false, false, false));
 	assert(shader);
 	shader->bind();
 
@@ -240,6 +271,21 @@ void MeshRenderer::draw_integer(unsigned int name)
 	shader->setLocalParamMatrix(0, glm::value_ptr(m_proj_mat));
 	shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
 	shader->setLocalParamUInt(0, name);
+	//set clipping planes
+	auto planes = clipping_box_.GetPlanesWorld();
+	double abcd[4];
+	planes[0].get(abcd);
+	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[1].get(abcd);
+	shader->setLocalParam(11, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[2].get(abcd);
+	shader->setLocalParam(12, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[3].get(abcd);
+	shader->setLocalParam(13, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[4].get(abcd);
+	shader->setLocalParam(14, abcd[0], abcd[1], abcd[2], abcd[3]);
+	planes[5].get(abcd);
+	shader->setLocalParam(15, abcd[0], abcd[1], abcd[2], abcd[3]);
 
 	va->draw_begin();
 	while (group)

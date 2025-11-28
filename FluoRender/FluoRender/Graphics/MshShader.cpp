@@ -82,8 +82,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 		if (p.color)
 			z << MSH_VERTEX_INPUTS_C;
 		//outputs
-		if (p.normal)
-			z << MSH_VERTEX_OUTPUTS_VPOS;
+		z << MSH_VERTEX_OUTPUTS_VPOS;
 		if (p.shading)
 			z << MSH_VERTEX_OUTPUTS_N;
 		if (p.tex)
@@ -100,8 +99,7 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 	z << MSH_HEAD;
 
 	//body
-	if (p.normal)
-		z << MSH_VERTEX_BODY_VPOS;
+	z << MSH_VERTEX_BODY_VPOS;
 	z << MSH_VERTEX_BODY_POS;
 	if (p.type == 0)
 	{
@@ -132,6 +130,7 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		z << MSH_FRAG_OUTPUTS;
 		z << MSH_FRAG_OUTPUTS_DEPTH;
 		//inputs
+		z << MSH_FRAG_INPUTS_VPO;
 		if (p.shading)
 			z << MSH_FRAG_INPUTS_N;
 		if (p.tex)
@@ -146,6 +145,12 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		z << MSH_FRAG_UNIFORMS_FOG;
 		if (p.peel)
 			z << MSH_FRAG_UNIFORMS_DP;
+		// add uniforms for clipping
+		if (p.clip)
+			z << MSH_FRAG_UNIFORMS_CLIP;
+
+		if (p.clip)
+			z << MSH_FRAG_CLIP_FUNC;
 
 		z << MSH_HEAD;
 
@@ -168,6 +173,10 @@ bool MeshShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 			z << MSH_FRAG_BODY_DP_5;
 			break;
 		}
+
+		//head for clipping planes
+		if (p.clip)
+			z << MSH_FRAG_HEAD_CLIP_FUNC;
 
 		z << MSH_FRAG_HEAD_FOG;
 
@@ -220,6 +229,7 @@ bool MeshShaderFactory::emit_g(const ShaderParams& p, std::string& s)
 	if (p.color)
 		z << MSH_GEOM_NORMALS_INPUTS_C;
 	z << MSH_GEOM_NORMALS_INPUTS_FOG;
+	z << MSH_GEOM_NORMALS_OUTPUTS_VPO;
 	z << MSH_GEOM_NORMALS_OUTPUTS_N;
 	if (p.tex)
 		z << MSH_GEOM_NORMALS_OUTPUTS_T;

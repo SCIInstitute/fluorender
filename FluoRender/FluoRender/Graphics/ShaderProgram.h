@@ -195,6 +195,7 @@ namespace flvr
 		static ShaderParams Mesh(
 			int type,
 			int peel,
+			bool clip,
 			bool tex,
 			bool fog,
 			bool shading,
@@ -205,6 +206,7 @@ namespace flvr
 			ShaderParams p;
 			p.type = type;
 			p.peel = peel;
+			p.clip = clip;
 			p.tex = tex;
 			p.fog = fog;
 			p.shading = shading;
