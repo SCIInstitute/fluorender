@@ -227,14 +227,6 @@ void ClippingBox::Update()
 	for (int k = 0; k < 6; ++k)
 		planes_unit_[k] = TransformPlaneAffine(planes_world_[k], S_WU, t_WU);
 
-	// Normalize normals in unit space
-	//auto normalize = [](const Vector& v) {
-	//	const double len = std::sqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z());
-	//	return len > 0.0 ? Vector(v.x() / len, v.y() / len, v.z() / len) : Vector(0, 0, 0);
-	//	};
-	//for (int k = 0; k < 6; ++k)
-	//	planes_unit_[k].ChangeNormal(normalize(planes_unit_[k].n()));
-
 	// Build unit-box corners once
 	const Point uMinBox = unitBox.Min();
 	const Point uMaxBox = unitBox.Max();
@@ -261,8 +253,28 @@ void ClippingBox::Update()
 	}
 
 	// Compute ranges between opposite plane pairs (normals are normalized)
-	auto pairRange = [&](int iMin, int iMax) {
-		return std::fabs(planes_unit_[iMax].d() - planes_unit_[iMin].d());
+	auto pairRange = [&](int i0, int i1) {
+		const Vector n0 = planes_unit_[i0].n();
+		const Vector n1 = planes_unit_[i1].n();
+		const double l0 = n0.length();
+		const double l1 = n1.length();
+		// Expect normalized normals; handle gracefully if not
+		const Vector nn0 = (l0 > 0.0) ? n0 / l0 : n0;
+		const Vector nn1 = (l1 > 0.0) ? n1 / l1 : n1;
+
+		// Align n1 to n0
+		const double align = Dot(nn0, nn1);
+		double d0 = planes_unit_[i0].d();
+		double d1 = planes_unit_[i1].d();
+		if (align < 0.0) {
+			// Flip plane 1 to match orientation of plane 0
+			d1 = -d1;
+			// nn1 = -nn1; (not needed further since we only use d's after alignment)
+		}
+
+		// If normals weren’t unit, scale distance by n0 length
+		const double denom = (l0 > 0.0) ? l0 : 1.0;
+		return std::fabs(d1 - d0) / denom;
 		};
 	const double rangeX = pairRange(0, 1);
 	const double rangeY = pairRange(2, 3);
@@ -271,14 +283,6 @@ void ClippingBox::Update()
 	// Apply unit-space clipping fractions
 	const Point uMin = clips_unit_.Min();
 	const Point uMax = clips_unit_.Max();
-
-	auto shiftPlane = [&](int idx, double clipVal, double range, bool isMin) {
-		const Vector n = planes_unit_[idx].n();
-		// sign = -1 if normal points positive, +1 if normal points negative
-		double sign = (n.x() + n.y() + n.z() > 0.0) ? -1.0 : +1.0;
-		double delta = clipVal * range * sign;
-		planes_unit_[idx].ChangeD(planes_unit_[idx].d() + delta);
-		};
 
 	// Apply clipping fractions uniformly
 	planes_unit_[0].ChangeD(planes_unit_[0].d() - uMin.x() * rangeX);
