@@ -382,9 +382,10 @@ void VolumeRenderer::draw_volume(
 	Size2D new_size = resize(buf_name);
 	int w2 = new_size.w();
 	int h2 = new_size.h();
+	bool depth = depth_ || shading_;
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
-	flvr::FBRole role = depth_ ? flvr::FBRole::RenderColorFxFilter : flvr::FBRole::RenderColorFilter;
+	flvr::FBRole role = depth ? flvr::FBRole::RenderColorFxFilter : flvr::FBRole::RenderColorFilter;
 	auto blend_buffer = glbin_framebuffer_manager.framebuffer(role, w2, h2, buf_name);
 	assert(blend_buffer);
 	//set clear color and viewport size
@@ -416,7 +417,7 @@ void VolumeRenderer::draw_volume(
 	default:
 		break;
 	}
-	if (depth_)
+	if (depth)
 	{
 		blend_buffer->set_blend_equation(1, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		blend_buffer->set_blend_func(1,
@@ -425,7 +426,7 @@ void VolumeRenderer::draw_volume(
 	}
 	glbin_framebuffer_manager.bind(blend_buffer);
 	blend_buffer->clear_base(true, false);
-	bool clear_depth = depth_;
+	bool clear_depth = depth;
 	if (glbin_settings.m_mem_swap &&
 		TextureRenderer::start_update_loop_ &&
 		!TextureRenderer::done_update_loop_)
@@ -449,7 +450,7 @@ void VolumeRenderer::draw_volume(
 			depth_peel_, true,
 			grad, ml_mode_, render_mode_,
 			color_mode, colormap_, colormap_proj_,
-			solid_, 1, depth_));
+			solid_, 1, depth));
 	assert(shader);
 	shader->bind();
 

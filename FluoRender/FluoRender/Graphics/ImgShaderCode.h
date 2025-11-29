@@ -626,78 +626,21 @@ void main()
 }
 )GLSHDR";
 
-inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_HIGHLIGHTING = R"GLSHDR(
-//IMG_SHADER_CODE_DEPTH_TO_HIGHLIGHTING
+inline constexpr const char* IMG_SHADER_CODE_DEPTH_ACC_TO_DEPTH = R"GLSHDR(
+//IMG_SHADER_CODE_DEPTH_ACC_TO_DEPTH
 in vec3 OutVertex;
 in vec3 OutTexCoord;
 out vec4 FragColor;
 
-uniform vec4 loc0; //(width, height, lod, 0)
-uniform vec4 loc1; //(strength, shine, lightDir.x, lightDir.y)
 uniform sampler2D tex0;
 
 void main()
 {
 	vec2 texCoord = OutTexCoord.xy;
-	vec2 texelSize = loc0.xy;
+	vec4 txcl = texture(tex0, texCoord);
+	float depth = txcl.g < 0.01? 1.0 : txcl.r / txcl.g;
 
-	// Light direction in 2D (screen space), normalized
-	vec2 L2 = normalize(loc1.zw);
-	vec2 P2 = vec2(-L2.y, L2.x); // perpendicular axis
-
-	// Extend into 3D for dot products
-	vec3 L = normalize(vec3(L2, 0.2));
-
-	// --- Sample depth from multiple mip levels ---
-	float d0 = textureLod(tex0, texCoord, 0.0).r;              // sharp
-	float d2 = textureLod(tex0, texCoord, loc0.z * 0.5).r;     // medium blur
-	float d4 = textureLod(tex0, texCoord, loc0.z).r;           // strong blur
-
-	// Blend across mip levels
-	float d = 0.5 * d0 + 0.3 * d2 + 0.2 * d4;
-
-	// --- Gradient from multiple mip levels ---
-	float dx0 = textureLod(tex0, texCoord + vec2(texelSize.x, 0), 0.0).r -
-				textureLod(tex0, texCoord - vec2(texelSize.x, 0), 0.0).r;
-	float dy0 = textureLod(tex0, texCoord + vec2(0, texelSize.y), 0.0).r -
-				textureLod(tex0, texCoord - vec2(0, texelSize.y), 0.0).r;
-
-	float dx2 = textureLod(tex0, texCoord + vec2(texelSize.x, 0), 2.0).r -
-				textureLod(tex0, texCoord - vec2(texelSize.x, 0), 2.0).r;
-	float dy2 = textureLod(tex0, texCoord + vec2(0, texelSize.y), 2.0).r -
-				textureLod(tex0, texCoord - vec2(0, texelSize.y), 2.0).r;
-
-	float dx4 = textureLod(tex0, texCoord + vec2(texelSize.x, 0), 4.0).r -
-				textureLod(tex0, texCoord - vec2(texelSize.x, 0), 4.0).r;
-	float dy4 = textureLod(tex0, texCoord + vec2(0, texelSize.y), 4.0).r -
-				textureLod(tex0, texCoord - vec2(0, texelSize.y), 4.0).r;
-
-	// Weighted blend of gradients
-	float dx = 0.5 * dx0 + 0.3 * dx2 + 0.2 * dx4;
-	float dy = 0.5 * dy0 + 0.3 * dy2 + 0.2 * dy4;
-
-	// Construct pseudo-normal from blended gradient
-	vec3 N = normalize(vec3(-dx, -dy, texelSize.x));
-
-	// --- Anisotropic highlight ---
-	float NdotL = max(dot(N, L), 0.0);
-	float NdotP = dot(N.xy, P2);
-
-	// Control anisotropy: smaller = more elongated
-	float anisotropy = 0.3;
-
-	// Elliptical shaping term
-	float ellipse = (NdotL * NdotL) + (NdotP * NdotP) / (anisotropy * anisotropy);
-
-	// Highlight intensity
-	float highlight = pow(NdotL, mix(10.0, 100.0, loc1.y));
-	highlight *= exp(-ellipse) * 5.0;
-
-	// Distortion by depth
-	float distortion = pow(d, 2.0);
-	highlight *= (1.0 + distortion) * loc1.x;
-
-	FragColor = vec4(vec3(highlight), 1.0);
+	FragColor = vec4(vec3(depth)*2.0, 1.0);
 }
 )GLSHDR";
 

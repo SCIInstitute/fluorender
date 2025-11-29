@@ -5549,7 +5549,7 @@ void RenderView::DrawDataPeel()
 	}
 
 	double dval;
-	DrawOverlayShadingMesh();
+	DrawOverlayScatteringMesh();
 	if (CheckMeshShadowExist(dval))
 		DrawOverlayShadowMesh(dval);
 
@@ -5951,7 +5951,8 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 	m_mvr->set_clear_color(clear_color);
 	m_mvr->draw(glbin_settings.m_test_wiref, m_interactive, !m_persp, m_intp);
 
-	//draw shadows
+	//draw effects
+	DrawOverlayScatteringVolume(list);
 	DrawOverlayShadowVolume(list);
 
 	//bind fbo for final composition
@@ -6166,6 +6167,8 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 
 	overlay_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 
+	//draw scattering
+	DrawOverlayScatteringVolume(list);
 	//draw shading
 	DrawOverlayShadingVolume(list);
 	//draw shadows
@@ -6461,6 +6464,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	list.push_back(vd);
 	if (shading)
 	{
+		DrawOverlayScatteringVolume(list);
 		DrawOverlayShadingVolume(list);
 	}
 	if (shadow)
@@ -6646,10 +6650,11 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 		vd->Draw(!m_persp, m_interactive, m_scale_factor, Get121ScaleFactor());
 	}
 
+	std::vector<std::weak_ptr<VolumeData>> list;
+	list.push_back(vd);
+	DrawOverlayScatteringVolume(list);
 	if (vd->GetShadowEnable())
 	{
-		std::vector<std::weak_ptr<VolumeData>> list;
-		list.push_back(vd);
 		DrawOverlayShadowVolume(list);
 	}
 
@@ -6855,6 +6860,105 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 	}
 }
 
+void RenderView::DrawOverlayScatteringVolume(const std::vector<std::weak_ptr<VolumeData>>& list)
+{
+	if (list.empty())
+		return;
+	if (glbin_settings.m_mem_swap &&
+		!flvr::TextureRenderer::get_done_current_chan())
+		return;
+
+	int nx, ny;
+	GetRenderSize(nx, ny);
+	fluo::Vector4i vp = { 0, 0, (GLint)nx, (GLint)ny };
+	fluo::Vector4f clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	bool has_shading = false;
+	std::vector<std::weak_ptr<VolumeData>> local_list;
+	//generate list
+	for (auto it = list.begin(); it != list.end(); ++it)
+	{
+		auto vd = it->lock();
+		if (vd && vd->GetShadingEnable())
+		{
+			local_list.push_back(vd);
+			has_shading = true;
+		}
+	}
+
+	if (!has_shading)
+		return;
+
+	std::string buf_name;
+	if (!local_list.empty())
+	{
+		auto vd = local_list[0].lock();
+		assert(vd);
+		auto vr = vd->GetVR();
+		assert(vr);
+		buf_name = vr->get_buffer_name();
+	}
+	if (buf_name.empty())
+		return;
+
+	auto blend_buffer = glbin_framebuffer_manager.framebuffer(buf_name);
+	assert(blend_buffer);
+
+	if (!glbin_settings.m_mem_swap ||
+		(glbin_settings.m_mem_swap &&
+			flvr::TextureRenderer::get_clear_chan_buffer()))
+	{
+		//shadow pass
+		//bind the fbo
+		auto fx_mip_buffer = glbin_framebuffer_manager.framebuffer(
+			flvr::FBRole::RenderColorMipmap, nx, ny, gstRBFxMip);
+		assert(fx_mip_buffer);
+		fx_mip_buffer->set_blend_enabled_all(false);
+		glbin_framebuffer_manager.bind(fx_mip_buffer);
+		fx_mip_buffer->clear_base(true, false);
+
+		blend_buffer->bind_texture(flvr::AttachmentPoint::Color(1), 0);
+
+		auto img_shader = glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DEPTH_ACC_TO_DEPTH, 0));
+		assert(img_shader);
+		img_shader->bind();
+
+		DrawViewQuad();
+
+		img_shader->unbind();
+		blend_buffer->unbind_texture(flvr::AttachmentPoint::Color(1));
+
+		//bind fbo for final composition
+		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
+		assert(chan_buffer);
+		flvr::FramebufferStateGuard fbg2(*chan_buffer);
+		chan_buffer->set_blend_enabled(0, true);
+		chan_buffer->set_blend_equation(0,
+			flvr::BlendEquation::Add, flvr::BlendEquation::Add);
+		chan_buffer->set_blend_func(0,
+			flvr::BlendFactor::DstColor, flvr::BlendFactor::Zero,
+			flvr::BlendFactor::Zero, flvr::BlendFactor::One);
+		glbin_framebuffer_manager.bind(chan_buffer);
+
+		fx_mip_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
+		fx_mip_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
+
+		//2d adjustment
+		img_shader = glbin_shader_manager.shader(gstImgShader,
+			flvr::ShaderParams::Img(IMG_SHDR_DEPTH_TO_SCATTERING, 0));
+		assert(img_shader);
+		img_shader->bind();
+
+		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 7.0, 0.0);
+
+		DrawViewQuad();
+
+		img_shader->unbind();
+		fx_mip_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
+	}
+}
+
 void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeData>> &list)
 {
 	if (list.empty())
@@ -6965,7 +7069,7 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 	}
 }
 
-void RenderView::DrawOverlayShadingMesh()
+void RenderView::DrawOverlayScatteringMesh()
 {
 	int nx, ny;
 	GetRenderSize(nx, ny);

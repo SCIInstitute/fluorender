@@ -351,6 +351,9 @@ inline constexpr const char* VOL_BODY_SHADING  = R"GLSHDR(
 	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 1.0));
 	vec3 h_diff = normalize(l_diff + eye);
 	float diffHighlight = pow(abs(dot(h_diff, grad)), mix(1.0, 10.0, loc1.y));
+
+	//composition
+	float all_light = mix(1.0, (diffuse + keyHighlight + diffHighlight) * 0.5, loc1.x);
 )GLSHDR";
 
 inline constexpr const char* VOL_COMPUTED_GM_LOOKUP  = R"GLSHDR(
@@ -703,24 +706,24 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  
 
 inline constexpr const char* VOL_SHADING_OUTPUT  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT
-	c.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
+	c.xyz *= all_light;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL
-	sel.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
+	sel.xyz *= all_light;
 	FragColor = sel*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL_MASK
-	sel.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
+	sel.xyz *= all_light;
 	FragColor = sel*alpha*tf_val*loc18.x;
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT_LABEL_MASK_SOLID  = R"GLSHDR(
 	//VOL_SHADING_OUTPUT_LABEL_MASK_SOLID
-	sel.xyz *= diffuse * mix(1.0, 0.5, loc1.x) + (diffHighlight + keyHighlight) * 0.5 * loc1.x;
+	sel.xyz *= all_light;
 	FragColor = vec4(sel.xyz, 1.0);
 )GLSHDR";
 
