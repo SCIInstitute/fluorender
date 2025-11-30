@@ -6933,7 +6933,7 @@ void RenderView::DrawOverlayScatteringVolume(const std::vector<std::weak_ptr<Vol
 		auto chan_buffer = glbin_framebuffer_manager.framebuffer(gstRBChannel);
 		assert(chan_buffer);
 		flvr::FramebufferStateGuard fbg2(*chan_buffer);
-		chan_buffer->set_blend_enabled(0, true);
+		chan_buffer->set_blend_enabled(0, false);
 		chan_buffer->set_blend_equation(0,
 			flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 		chan_buffer->set_blend_func(0,
