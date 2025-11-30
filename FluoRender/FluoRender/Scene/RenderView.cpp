@@ -6950,7 +6950,7 @@ void RenderView::DrawOverlayScatteringVolume(const std::vector<std::weak_ptr<Vol
 		assert(img_shader);
 		img_shader->bind();
 
-		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 7.0, 0.0);
+		img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 8.0, 1.2);
 
 		DrawViewQuad();
 
@@ -7115,7 +7115,7 @@ void RenderView::DrawOverlayScatteringMesh()
 	assert(img_shader);
 	img_shader->bind();
 
-	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 5.0, 0.0);
+	img_shader->setLocalParam(0, 1.0 / nx, 1.0 / ny, 6.0, 1.0);
 
 	DrawViewQuad();
 
