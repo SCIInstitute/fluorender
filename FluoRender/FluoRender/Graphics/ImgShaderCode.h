@@ -614,34 +614,32 @@ in vec3 OutTexCoord;
 out vec4 FragColor;
 
 uniform vec4 loc0; //(width, height, lod, contrast)
+uniform vec4 loc1; //(zoomLOD, glowScale, scatterScale, blendFactor)
 uniform sampler2D tex0;
 
 void main()
 {
 	vec2 t = OutTexCoord.xy;
-	float localDepth  = texture(tex0, t).r;
-	float centerDepth = (textureLod(tex0, t, loc0.z * 0.5).r +
-						 textureLod(tex0, t, loc0.z).r) * 0.5;
 
-	const float scale = 5.0;   // amplifies depth difference
-	const float bias  = 0.5;   // baseline brightness
+	// --- Rim glow from low LODs (zoom dependent) ---
+	float depthFine   = textureLod(tex0, t, loc1.x).r;
+	float depthCoarse = textureLod(tex0, t, loc1.x + 1.0).r;
+	float diffGlow    = abs(depthCoarse - depthFine);
+	float rimGlow     = pow(max(diffGlow * loc1.y, 0.0), loc0.w);
 
-	float diff = (centerDepth - localDepth) * scale;
+	// --- General scattering from higher LODs ---
+	float depthFine2   = textureLod(tex0, t, loc0.z).r;
+	float depthCoarse2 = textureLod(tex0, t, loc0.z * 2.0).r;
+	float diffScatter  = abs(depthCoarse2 - depthFine2);
+	float scatterGlow  = pow(max(diffScatter * loc1.z, 0.0), loc0.w);
 
-	// --- scattering-like glow ---
-	float scatter = pow(smoothstep(-1.0, 1.0, diff), loc0.w);
+	// --- Blend glow and scattering ---
+	float combined = mix(rimGlow, scatterGlow, loc1.w);
 
-	// --- inner glow ---
-	float inner = pow(1.0 - abs(diff), loc0.w);
+	// --- Baseline intensity ---
+	float intensity = 1.0 + combined * 0.5;
 
-	// --- blend based on apparent size ---
-	float sizeFactor = clamp(abs(centerDepth - localDepth) * 10.0, 0.0, 1.0);
-	// small structures -> sizeFactor ~0 -> inner glow
-	// large structures -> sizeFactor ~1 -> scattering
-
-	float depthDiff = mix(inner, scatter, sizeFactor) + bias;
-
-	FragColor = vec4(vec3(depthDiff), 1.0);
+	FragColor = vec4(vec3(intensity), 1.0);
 }
 )GLSHDR";
 
