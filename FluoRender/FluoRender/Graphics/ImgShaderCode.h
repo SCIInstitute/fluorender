@@ -621,8 +621,8 @@ void main()
 	vec2 t = OutTexCoord.xy;
 	float localDepth = texture(tex0, t).r;
 	float centerDepth = (textureLod(tex0, t, loc0.z * 0.5).r + textureLod(tex0, t, loc0.z).r) * 0.5;
-	float depthDiff = pow(smoothstep(-1.0, 1.0, centerDepth - localDepth), 3.0) + 0.7;
-	FragColor = vec4(vec3(depthDiff * loc0.w), 1.0);
+	float depthDiff = pow(smoothstep(-loc0.w, loc0.w, centerDepth - localDepth), 3.0) + 0.8;
+	FragColor = vec4(vec3(depthDiff), 1.0);
 }
 )GLSHDR";
 
