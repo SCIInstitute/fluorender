@@ -56,17 +56,17 @@ namespace flrd
 		std::shared_ptr<VolumeData> GetInput();
 		std::shared_ptr<VolumeData> GetResult();
 		void SetFixSize(bool bval);
-		void SetSize(int nx, int ny, int nz);
+		void SetSize(const fluo::Vector& size);
 		void SetFilter(int type);
-		void SetFilterSize(int fx, int fy, int fz);
+		void SetFilterSize(const fluo::Vector& size);
 		void SetCrop(bool crop);
 		void SetNegMask(bool bval);
 		void SetClipRotation(const fluo::Quaternion &q);
 		void SetCenter(const fluo::Point &p);
 		void SetTranslate(const fluo::Vector &t);
 		void Resize(SampDataType type, bool replace);
-		double Sample(double x, double y, double z);
-		unsigned int SampleInt(double x, double y, double z);
+		double Sample(const fluo::Point& coord);
+		unsigned int SampleInt(const fluo::Point& coord);
 
 	private:
 		std::weak_ptr<VolumeData> m_input;	//input
@@ -75,25 +75,23 @@ namespace flrd
 		void* m_raw_result;		//
 
 		//input size
-		int m_nx_in;
-		int m_ny_in;
-		int m_nz_in;
+		fluo::Vector m_size_in;
 		//new size (resize)
 		bool m_fix_size;
-		int m_nx;
-		int m_ny;
-		int m_nz;
+		fluo::Vector m_size_out;
 		//input bits
 		int m_bits;
 		//crop
 		bool m_crop;
 		//crop size (of new size)
-		int m_ox;
-		int m_oy;
-		int m_oz;
-		int m_lx;
-		int m_ly;
-		int m_lz;
+		fluo::Point m_crop_origin;
+		fluo::Vector m_crop_size;
+		//int m_ox;
+		//int m_oy;
+		//int m_oz;
+		//int m_lx;
+		//int m_ly;
+		//int m_lz;
 		//transform
 		bool m_neg_mask;//use negative transformation for mask
 		fluo::Quaternion m_q_cl;//rotation
@@ -106,9 +104,7 @@ namespace flrd
 						//2:trilinear;
 						//3:box;
 		//filter size
-		int m_fx;
-		int m_fy;
-		int m_fz;
+		fluo::Vector m_filter_size;
 
 		int m_border;	//border handling
 						//0:set to 0;
@@ -118,19 +114,16 @@ namespace flrd
 	private:
 		Nrrd* GetNrrd(VolumeData* vd, SampDataType type);
 		void* GetRaw(VolumeData* vd, SampDataType type);
-		double SampleNearestNeighbor(double x, double y, double z);
-		double SampleBiLinear(double x, double y, double z);
-		double SampleTriLinear(double x, double y, double z);
-		double SampleBox(double x, double y, double z);
+		double SampleNearestNeighbor(const fluo::Point& coord);
+		double SampleBiLinear(const fluo::Point& coord);
+		double SampleTriLinear(const fluo::Point& coord);
+		double SampleBox(const fluo::Point& coord);
 		int rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
 			fluo::Vector &vsize, fluo::Vector &vspc);
 		int consv_volume(fluo::Vector &vec, fluo::Vector &vec_in);
-		bool ijk(int &i, int &j, int &k);
-		void xyz2ijk(double x, double y, double z,
-			int &i, int &j, int &k);
-		void xyz2ijkt(double x, double y, double z,
-			int &i, int &j, int &k,
-			double &tx, double &ty, double &tz);
+		bool normalize_ijk(fluo::Point& ijk);
+		fluo::Point xyz2ijk(const fluo::Point& coord);
+		std::pair<fluo::Point, fluo::Vector> xyz2ijkt(const fluo::Point& coord);
 		//interpolation linear
 		//t - normalized factor [0, 1]
 		double lerp(double t, double q0, double q1)

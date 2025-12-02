@@ -44,48 +44,36 @@ namespace flvr
 {
 	std::map<std::wstring, std::wstring> TextureBrick::cache_table_ = std::map<std::wstring, std::wstring>();
 
-	TextureBrick::TextureBrick(Nrrd* n0, Nrrd* n1,
-		int nx, int ny, int nz, int nc, int* nb,
-		int ox, int oy, int oz,
-		int mx, int my, int mz,
-		const fluo::BBox& bbox, const fluo::BBox& tbox, const fluo::BBox& dbox,
+	TextureBrick::TextureBrick(Nrrd* n0,
+		const fluo::Vector& size, int byte,
+		const fluo::Vector& off_size,
+		const fluo::Vector& msize,
+		const fluo::BBox& bbox,
+		const fluo::BBox& tbox,
+		const fluo::BBox& dbox,
 		unsigned int id,
-		int findex, long long offset, long long fsize)
-		: nx_(nx), ny_(ny), nz_(nz), nc_(nc), ox_(ox), oy_(oy), oz_(oz),
-		mx_(mx), my_(my), mz_(mz), bbox_(bbox), tbox_(tbox), dbox_(dbox),
+		int findex,
+		long long offset,
+		long long fsize)
+		: size_(size),
+		off_size_(off_size),
+		msize_(msize),
+		bbox_(bbox),
+		tbox_(tbox),
+		dbox_(dbox),
 		id_(id),
-		findex_(findex), offset_(offset), fsize_(fsize),
-		mask_valid_(false), mask_act_(false),
+		findex_(findex),
+		offset_(offset),
+		fsize_(fsize),
+		mask_valid_(false),
+		mask_act_(false),
 		new_grown_(false)
 	{
-		for (int i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
-		{
-			data_[i] = 0;
-			nb_[i] = 0;
-			ntype_[i] = TYPE_NONE;
-		}
-
-		for (int c = 0; c < nc_; c++)
-		{
-			nb_[c] = nb[c];
-		}
-		if (nc_ == 1)
-		{
-			ntype_[0] = TYPE_INT;
-		}
-		else if (nc_ > 1)
-		{
-			ntype_[0] = TYPE_INT_GRAD;
-			ntype_[1] = TYPE_GM;
-		}
-
 		compute_edge_rays(bbox_);
 		compute_edge_rays_tex(tbox_);
 
-		data_[0] = n0;
-		data_[1] = n1;
-
-		nmask_ = -1;
+		TexComp comp = { CompType::Data, byte, n0 };
+		set_nrrd(comp, CompType::Data);
 
 		//if it's been drawn in a full update loop
 		for (int i = 0; i < TEXTURE_RENDER_MODES; i++)
@@ -104,11 +92,6 @@ namespace flvr
 
 	TextureBrick::~TextureBrick()
 	{
-		// Creator of the brick owns the nrrds.
-		// This object never deletes that memory.
-		data_[0] = 0;
-		data_[1] = 0;
-
 		if (brkdata_) delete[] brkdata_;
 	}
 
@@ -359,22 +342,6 @@ namespace flvr
 		}
 	}
 
-	int TextureBrick::sx()
-	{
-		if (data_[0]->dim == 3)
-			return (int)data_[0]->axis[0].size;
-		else
-			return (int)data_[0]->axis[1].size;
-	}
-
-	int TextureBrick::sy()
-	{
-		if (data_[0]->dim == 3)
-			return (int)data_[0]->axis[1].size;
-		else
-			return (int)data_[0]->axis[2].size;
-	}
-
 	GLenum TextureBrick::tex_type_aux(Nrrd* n)
 	{
 		// GL_BITMAP!?
@@ -400,64 +367,78 @@ namespace flvr
 		return 0;
 	}
 
-	GLenum TextureBrick::tex_type(int c)
+	GLenum TextureBrick::tex_type(CompType type)
 	{
-		if (c < nc_)
-			return tex_type_aux(data_[c]);
-		else if (c == nmask_)
-			return GL_UNSIGNED_BYTE;
-		else if (c == nlabel_)
-			return GL_UNSIGNED_INT;
-		else
+		auto c = data_.find(type);
+		if (c == data_.end())
 			return GL_NONE;
+
+		Nrrd* nrrd = c->second.data;
+		if (!nrrd)
+			return GL_NONE;
+		return tex_type_aux(nrrd);
 	}
 
-	void *TextureBrick::tex_data(int c)
+	void *TextureBrick::tex_data(CompType type)
 	{
-		if (c >= 0 && data_[c])
-		{
-			unsigned char *ptr = (unsigned char *)(data_[c]->data);
-			long long offset = (long long)(oz()) *
-				(long long)(sx()) *
-				(long long)(sy()) +
-				(long long)(oy()) *
-				(long long)(sx()) +
-				(long long)(ox());
-			return ptr + offset * tex_type_size(tex_type(c));
-		}
-		else
-			return NULL;
+		auto c = data_.find(type);
+		if (c == data_.end())
+			return nullptr;
+		Nrrd* nrrd = c->second.data;
+		if (!nrrd)
+			return nullptr;
+
+		int bytes = c->second.bytes;
+		unsigned char *ptr = (unsigned char *)(nrrd->data);
+		unsigned long long offset =
+			(unsigned long long)(off_size_.intz()) *
+			(unsigned long long)(size_.intx()) *
+			(unsigned long long)(size_.inty()) +
+			(unsigned long long)(off_size_.inty()) *
+			(unsigned long long)(size_.intx()) +
+			(unsigned long long)(off_size_.intx());
+		return ptr + offset * bytes;
 	}
 
-	void* TextureBrick::tex_data(int c, void* raw_data)
+	void* TextureBrick::tex_data(CompType type, void* raw_data)
 	{
-		if (c >= 0 && raw_data)
-		{
-			unsigned char *ptr = (unsigned char *)(raw_data);
-			long long offset = (long long)(oz()) *
-				(long long)(sx()) *
-				(long long)(sy()) +
-				(long long)(oy()) *
-				(long long)(sx()) +
-				(long long)(ox());
-			return ptr + offset * tex_type_size(tex_type(c));
-		}
-		else
-			return NULL;
+		auto c = data_.find(type);
+		if (c == data_.end())
+			return nullptr;
+		Nrrd* nrrd = c->second.data;
+		if (!nrrd)
+			return nullptr;
+
+		int bytes = c->second.bytes;
+		unsigned char *ptr = (unsigned char *)(raw_data);
+		unsigned long long offset =
+			(unsigned long long)(off_size_.intz()) *
+			(unsigned long long)(size_.intx()) *
+			(unsigned long long)(size_.inty()) +
+			(unsigned long long)(off_size_.inty()) *
+			(unsigned long long)(size_.intx()) +
+			(unsigned long long)(off_size_.intx());
+		return ptr + offset * bytes;
 	}
 
-	void *TextureBrick::tex_data_brk(int c, const FileLocInfo* finfo)
+	void *TextureBrick::tex_data_brk(CompType type, const FileLocInfo* finfo)
 	{
-		unsigned char *ptr = NULL;
-		if (brkdata_) ptr = (unsigned char *)(brkdata_);
+		auto c = data_.find(type);
+		if (c == data_.end())
+			return nullptr;
+		int bytes = c->second.bytes;
+
+		unsigned char *ptr = nullptr;
+		if (brkdata_)
+			ptr = (unsigned char *)(brkdata_);
 		else
 		{
-			size_t bd = tex_type_size(tex_type(c));
-			ptr = new unsigned char[(size_t)nx_*(size_t)ny_*(size_t)nz_*bd];
-			if (!read_brick((char *)ptr, (size_t)nx_*(size_t)ny_*(size_t)nz_*bd, finfo))
+			size_t mem_size = (size_t)size_.intx() * (size_t)size_.inty() * (size_t)size_.intz() * bytes;
+			ptr = new unsigned char[mem_size];
+			if (!read_brick((char *)ptr, mem_size, finfo))
 			{
 				delete[] ptr;
-				return NULL;
+				return nullptr;
 			}
 			brkdata_ = (char*)ptr;
 		}
@@ -466,49 +447,83 @@ namespace flvr
 
 	void TextureBrick::set_priority()
 	{
-		if (!data_[0])
+		CompType type = CompType::Data;
+		auto c = data_.find(type);
+		if (c == data_.end())
+			return;
+		Nrrd* nrrd = c->second.data;
+		if (!nrrd)
 		{
 			priority_ = 0;
 			return;
 		}
-		size_t vs = tex_type_size(tex_type(0));
-		size_t sx = data_[0]->axis[0].size;
-		size_t sy = data_[0]->axis[1].size;
-		if (vs == 1)
+
+		int bytes = c->second.bytes;
+		switch (bytes)
+		{
+		case 1:
 		{
 			unsigned char max = 0;
-			unsigned char *ptr = (unsigned char *)(data_[0]->data);
-			for (int i = 0; i < nx_; i++)
-				for (int j = 0; j < ny_; j++)
-					for (int k = 0; k < nz_; k++)
-					{
-						long long index = (long long)(sx)* (long long)(sy)*
-							(long long)(oz_ + k) + (long long)(sx)*
-							(long long)(oy_ + j) + (long long)(ox_ + i);
-						max = ptr[index] > max ? ptr[index] : max;
-					}
+			unsigned char *ptr = (unsigned char *)(nrrd->data);
+			for (int i = 0; i < size_.intx(); ++i) for (int j = 0; j < size_.inty(); ++j) for (int k = 0; k < size_.intz(); ++k)
+			{
+				unsigned long long index =
+					(unsigned long long)(size_.intx()) *
+					(unsigned long long)(size_.inty()) *
+					(unsigned long long)(off_size_.intz() + k) +
+					(unsigned long long)(size_.intx()) *
+					(unsigned long long)(off_size_.inty() + j) +
+					(unsigned long long)(off_size_.intx() + i);
+				max = ptr[index] > max ? ptr[index] : max;
+			}
 			if (max == 0)
 				priority_ = 1;
 			else
 				priority_ = 0;
 		}
-		else if (vs == 2)
+			break;
+		case 2:
 		{
 			unsigned short max = 0;
-			unsigned short *ptr = (unsigned short *)(data_[0]->data);
-			for (int i = 0; i < nx_; i++)
-				for (int j = 0; j < ny_; j++)
-					for (int k = 0; k < nz_; k++)
-					{
-						long long index = (long long)(sx)* (long long)(sy)*
-							(long long)(oz_ + k) + (long long)(sx)*
-							(long long)(oy_ + j) + (long long)(ox_ + i);
-						max = ptr[index] > max ? ptr[index] : max;
-					}
+			unsigned short *ptr = (unsigned short *)(nrrd->data);
+			for (int i = 0; i < size_.intx(); ++i) for (int j = 0; j < size_.inty(); ++j) for (int k = 0; k < size_.intz(); ++k)
+			{
+				unsigned long long index =
+					(unsigned long long)(size_.intx()) *
+					(unsigned long long)(size_.inty()) *
+					(unsigned long long)(off_size_.intz() + k) +
+					(unsigned long long)(size_.intx()) *
+					(unsigned long long)(off_size_.inty() + j) +
+					(unsigned long long)(off_size_.intx() + i);
+				max = ptr[index] > max ? ptr[index] : max;
+			}
 			if (max == 0)
 				priority_ = 1;
 			else
 				priority_ = 0;
+		}
+			break;
+		case 4:
+		{
+			unsigned int max = 0;
+			unsigned int *ptr = (unsigned int *)(nrrd->data);
+			for (int i = 0; i < size_.intx(); ++i) for (int j = 0; j < size_.inty(); ++j) for (int k = 0; k < size_.intz(); ++k)
+			{
+				unsigned long long index =
+					(unsigned long long)(size_.intx()) *
+					(unsigned long long)(size_.inty()) *
+					(unsigned long long)(off_size_.intz() + k) +
+					(unsigned long long)(size_.intx()) *
+					(unsigned long long)(off_size_.inty() + j) +
+					(unsigned long long)(off_size_.intx() + i);
+				max = ptr[index] > max ? ptr[index] : max;
+			}
+			if (max == 0)
+				priority_ = 1;
+			else
+				priority_ = 0;
+		}
+			break;
 		}
 	}
 

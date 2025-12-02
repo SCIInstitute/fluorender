@@ -118,6 +118,7 @@ namespace fluo
 
 		inline void normalize_euler_signed();
 		inline void normalize_euler_unsigned();
+		inline void normalize_at_least_one();
 
 		inline Vector unit_sign() const;
 
@@ -134,7 +135,9 @@ namespace fluo
 		inline double w() const;
 
 		inline bool any_non_zero() const;
+		inline bool all_non_zero() const;
 		inline bool is_zero() const;
+		inline bool any_le_zero() const;
 
 		void rotz90(const int);
 
@@ -510,6 +513,13 @@ namespace fluo
 		z_ = CleanZero(z_);
 	}
 
+	inline void Vector::normalize_at_least_one()
+	{
+		x_ = std::max(1.0, x_);
+		y_ = std::max(1.0, y_);
+		z_ = std::max(1.0, z_);
+	}
+
 	inline Vector Vector::unit_sign() const
 	{
 		return Vector(
@@ -596,12 +606,30 @@ namespace fluo
 			);
 	}
 
+	inline bool Vector::all_non_zero() const
+	{
+		return (
+			fabs(x_) > Epsilon(9) &&
+			fabs(y_) > Epsilon(9) &&
+			fabs(z_) > Epsilon(9)
+			);
+	}
+
 	inline bool Vector::is_zero() const
 	{
 		return (
 			fabs(x_) <= Epsilon(9)&&
 			fabs(y_) <= Epsilon(9)&&
 			fabs(z_) <= Epsilon(9)
+			);
+	}
+
+	inline bool Vector::any_le_zero() const
+	{
+		return (
+			x_ <= 0.0 ||
+			y_ <= 0.0 ||
+			z_ <= 0.0
 			);
 	}
 
@@ -673,6 +701,18 @@ namespace fluo
 	inline double Min(const Vector &v)
 	{
 		return Min(v.x(), v.y(), v.z());
+	}
+
+	inline Vector Pow2(const Vector& v)
+	{
+		unsigned int x, y, z;
+		x = static_cast<unsigned int>(v.intx());
+		x = Pow2(x);
+		y = static_cast<unsigned int>(v.inty());
+		y = Pow2(y);
+		z = static_cast<unsigned int>(v.intz());
+		z = Pow2(z);
+		return Vector(x, y, z);
 	}
 
 } // End namespace fluo

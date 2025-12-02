@@ -44,43 +44,29 @@ namespace flvr
 {
 	size_t Texture::mask_undo_num_ = 0;
 	Texture::Texture():
-	build_max_tex_size_(0),
-	brick_size_(0),
-	sort_bricks_(true),
-	nx_(0),
-	ny_(0),
-	nz_(0),
-	nc_(0),
-	nmask_(-1),
-	nlabel_(-1),
-	vmin_(0.0),
-	vmax_(0.0),
-	gmin_(0.0),
-	gmax_(0.0),
-	use_priority_(false),
-	n_p0_(0),
-	mask_undo_pointer_(-1),
-	brkxml_(false),
-	pyramid_lv_num_(0),
-	pyramid_cur_lv_(0),
-	pyramid_cur_fr_(0),
-	pyramid_cur_ch_(0),
-	pyramid_copy_lv_(-1),
-	b_spcx_(1.0),
-	b_spcy_(1.0),
-	b_spcz_(1.0),
-	s_spcx_(1.0),
-	s_spcy_(1.0),
-	s_spcz_(1.0),
-	filetype_(BRICK_FILE_TYPE_NONE),
-	filename_(NULL)
+		build_max_tex_size_(0),
+		brick_size_(0),
+		sort_bricks_(true),
+		res_(0.0),
+		brick_res_(0.0),
+		brick_num_(0.0),
+		vmin_(0.0),
+		vmax_(0.0),
+		use_priority_(false),
+		n_p0_(0),
+		mask_undo_pointer_(-1),
+		brkxml_(false),
+		pyramid_lv_num_(0),
+		pyramid_cur_lv_(0),
+		pyramid_cur_fr_(0),
+		pyramid_cur_ch_(0),
+		pyramid_copy_lv_(-1),
+		spacing_(1.0),
+		base_spacing_(1.0),
+		spacing_scale_(1.0),
+		filetype_(BRICK_FILE_TYPE_NONE),
+		filename_(NULL)
 	{
-		for (size_t i = 0; i < TEXTURE_MAX_COMPONENTS; i++)
-		{
-			nb_[i] = 0;
-			data_[i] = 0;
-			ntype_[i] = TYPE_NONE;
-		}
 		bricks_ = &default_vec_;
 	}
 
@@ -99,20 +85,22 @@ namespace flvr
 		clear_undos();
 
 		//release other data
-		for (int i=0; i<TEXTURE_MAX_COMPONENTS; i++)
+		for (auto& it : data_)
 		{
-			if (data_[i])
+			Nrrd* nrrd = it.second.data;
+			auto type = it.second.type;
+			if (nrrd)
 			{
 				bool existInPyramid = false;
 				for (int j = 0; j < pyramid_.size(); j++)
-					if (pyramid_[j].data == data_[i]) existInPyramid = true;
+					if (pyramid_[j].data == nrrd) existInPyramid = true;
 
 				if (!existInPyramid)
 				{
-					if (ntype_[i] == TYPE_MASK && mask_undo_num_)
-						nrrdNix(data_[i]);
+					if (type == CompType::Mask && mask_undo_num_)
+						nrrdNix(nrrd);
 					else
-						nrrdNuke(data_[i]);
+						nrrdNuke(nrrd);
 				}
 			}
 		}
@@ -313,89 +301,80 @@ namespace flvr
 		return &quota_bricks_;
 	}
 
-	void Texture::set_spacings(double x, double y, double z)
+	void Texture::set_spacing(const fluo::Vector& spc)
 	{
 		if (!brkxml_)
 		{
-			spcx_ = x;
-			spcy_ = y;
-			spcz_ = z;
+			spacing_ = spc;
 			fluo::Transform tform;
 			tform.load_identity();
-			fluo::Point nmax(nx_*x, ny_*y, nz_*z);
-			tform.pre_scale(fluo::Vector(nmax));
+			fluo::Vector nmax(res_ * spacing_);
+			tform.pre_scale(nmax);
 			set_transform(tform);
 		}
 		else
 		{
-			s_spcx_ = x / b_spcx_;
-			s_spcy_ = y / b_spcy_;
-			s_spcz_ = z / b_spcz_;
+			spacing_scale_ = spacing_ / base_spacing_;
 			fluo::Transform tform;
 			tform.load_identity();
-			fluo::Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
+			fluo::Vector nmax(res_* spacing_* spacing_scale_);
 			tform.pre_scale(fluo::Vector(nmax));
 			set_transform(tform);
 		}
 	}
 
-	void Texture::get_spacings(double &x, double &y, double &z, int lv)
+	fluo::Vector Texture::get_spacing(int lv)
 	{
 		if (!brkxml_)
 		{
-			x = spcx_;
-			y = spcy_;
-			z = spcz_;
+			return spacing_;
 		}
 		else if (lv < 0 || lv >= pyramid_lv_num_ || pyramid_.empty())
 		{
-			x = spcx_ * s_spcx_;
-			y = spcy_ * s_spcy_;
-			z = spcz_ * s_spcz_;
+			return spacing_ * spacing_scale_;
 		}
 		else if (pyramid_[lv].data)
 		{
 			int offset = 0;
 			if (pyramid_[lv].data->dim > 3) offset = 1;
-			x = pyramid_[lv].data->axis[offset + 0].spacing * s_spcx_;
-			y = pyramid_[lv].data->axis[offset + 1].spacing * s_spcy_;
-			z = pyramid_[lv].data->axis[offset + 2].spacing * s_spcz_;
+			fluo::Vector spc(
+				pyramid_[lv].data->axis[offset + 0].spacing,
+				pyramid_[lv].data->axis[offset + 1].spacing,
+				pyramid_[lv].data->axis[offset + 2].spacing);
+			return spc * spacing_scale_;
 		}
 	}
 
-	void Texture::set_base_spacings(double x, double y, double z)
+	void Texture::set_base_spacing(const fluo::Vector& spc)
 	{
-		spcx_ = x;
-		spcy_ = y;
-		spcz_ = z;
-		b_spcx_ = x;
-		b_spcy_ = y;
-		b_spcz_ = z;
+		base_spacing_ = spacing_ = spc;
+
 		fluo::Transform tform;
 		tform.load_identity();
-		size_t nx, ny, nz;
+		fluo::Vector res;
 		if (brkxml_)
 		{
-			nx = pyramid_[0].data->axis[0].size;
-			ny = pyramid_[0].data->axis[1].size;
-			nz = pyramid_[0].data->axis[2].size;
+			res = fluo::Vector(
+				pyramid_[0].data->axis[0].size,
+				pyramid_[0].data->axis[1].size,
+				pyramid_[0].data->axis[2].size);
 		}
 		else
 		{
-			nx = nx_;
-			ny = ny_;
-			nz = nz_;
+			res = res_;
 		}
-		fluo::Point nmax(nx*x, ny*y, nz*z);
+		fluo::Vector nmax = res * spacing_;
 		tform.pre_scale(fluo::Vector(nmax));
 		set_transform(tform);
 	}
 
-	bool Texture::build(Nrrd* nv_nrrd, Nrrd* gm_nrrd,
+	bool Texture::build(Nrrd* nv_nrrd,
 		double vmn, double vmx,
-		double gmn, double gmx,
 		std::vector<flvr::TextureBrick*>* brks)
 	{
+		if (!nv_nrrd)
+			return false;
+
 		size_t axis_size[4];
 		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoSize, axis_size);
 		double axis_min[4];
@@ -403,61 +382,66 @@ namespace flvr
 		double axis_max[4];
 		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoMax, axis_max);
 
-		int numc = gm_nrrd ? 2 : 1;
-		int numb[2];
-		if (nv_nrrd)
+		int bytes = 0;
+		switch (nv_nrrd->type)
 		{
-			if (nv_nrrd->type == nrrdTypeChar ||
-				nv_nrrd->type == nrrdTypeUChar)
-				numb[0] = 1;
-			else
-				numb[0] = 2;
+		case nrrdTypeChar:
+		case nrrdTypeUChar:
+			bytes = 1;
+			break;
+		case nrrdTypeShort:
+		case nrrdTypeUShort:
+			bytes = 2;
+			break;
+		case nrrdTypeInt:
+		case nrrdTypeUInt:
+			bytes = 4;
+			break;
 		}
-		else
-			numb[0] = 0;
-		numb[1] = gm_nrrd ? 1 : 0;
-
 		fluo::BBox bb(fluo::Point(0,0,0), fluo::Point(1,1,1));
 
 		fluo::Transform tform;
 		tform.load_identity();
 
 		size_t dim = nv_nrrd->dim;
-		std::vector<int> size(dim);
+		fluo::Vector size;
 
 		int offset = 0;
-		if (dim > 3) offset = 1; 
+		if (dim > 3) offset = 1;
 
 		for (size_t p = 0; p < dim; p++) 
 			size[p] = (int)nv_nrrd->axis[p + offset].size;
 
+		TexComp comp = { CompType::Data, bytes, nv_nrrd };
+		set_nrrd(comp, CompType::Data);
+
 		if (!brks)
 		{
 			//when all of them equal to old values, the result should be the same as an old one.  
-			if (size[0] != nx() || size[1] != ny() || size[2] != nz() ||
-				numc != nc() || numb[0] != nb(0) ||
+			if (size != res_ ||
+				bytes != nb(CompType::Data) ||
 				bb.Min() != bbox()->Min() ||
 				bb.Max() != bbox()->Max() ||
 				vmn != vmin() ||
-				vmx != vmax() ||
-				gmn != gmin() ||
-				gmx != gmax())
+				vmx != vmax())
 			{
 				clearPyramid();
 				bricks_ = &default_vec_;
-				build_bricks((*bricks_), size[0], size[1], size[2], numc, numb);
-				set_size(size[0], size[1], size[2], numc, numb);
+				build_bricks((*bricks_), size, bytes);
+				set_res(fluo::Vector(size[0], size[1], size[2]));
+				nb(CompType::Data, bytes);
 			}
 			brkxml_ = false;
 		}
 		else
 		{
 			bricks_ = brks;
-			set_size(size[0], size[1], size[2], numc, numb);
+			set_res(size);
+			nb(CompType::Data, bytes);
 		}
 
 		set_bbox(bb);
-		set_minmax(vmn, vmx, gmn, gmx);
+		set_minmax(vmn, vmx);
 		set_transform(tform);
 
 		n_p0_ = 0;
@@ -466,8 +450,7 @@ namespace flvr
 			for (unsigned int i = 0; i < (*bricks_).size(); i++)
 			{
 				TextureBrick *tb = (*bricks_)[i];
-				tb->set_nrrd(nv_nrrd, 0);
-				tb->set_nrrd(gm_nrrd, 1);
+				tb->set_nrrd(CompType::Data, comp);
 				if (use_priority_ && !brkxml_)
 				{
 					tb->set_priority();
@@ -479,19 +462,13 @@ namespace flvr
 		fluo::BBox tempb;
 		tempb.extend(transform_.project(bbox_.Min()));
 		tempb.extend(transform_.project(bbox_.Max()));
-		spcx_ = (tempb.Max().x() - tempb.Min().x()) / double(nx_);
-		spcy_ = (tempb.Max().y() - tempb.Min().y()) / double(ny_);
-		spcz_ = (tempb.Max().z() - tempb.Min().z()) / double(nz_);
-
-		set_nrrd(nv_nrrd, 0);
-		set_nrrd(gm_nrrd, 1);
+		spacing_ = tempb.diagonal() / res_;
 
 		return true;
 	}
 
 	void Texture::build_bricks(std::vector<TextureBrick*> &bricks, 
-		int sz_x, int sz_y, int sz_z,
-		int numc, int* numb)
+		const fluo::Vector& size, int bytes)
 	{
 		bool force_pow2 = false;
 		if (ShaderProgram::init())
@@ -507,7 +484,7 @@ namespace flvr
 				max_texture_size = ShaderProgram::max_texture_size();
 
 			//further determine the max texture size
-			double data_size = double(sz_x)*double(sz_y)*double(sz_z)/1.04e6;
+			double data_size = size.x()*size.y()*size.z()/1.04e6;
 			glbin_data_manager.UpdateStreamMode(data_size);
 			if (glbin_settings.m_mem_swap)
 				max_texture_size = glbin_settings.m_force_brick_size;
@@ -519,106 +496,115 @@ namespace flvr
 			max_texture_size = 2048;
 
 		// Initial brick size
-		int bsize[3];
+		fluo::Vector bsize, off_size;
+		fluo::Vector pow_size = fluo::Pow2(size);
 
 		if (force_pow2)
 		{
-			if (fluo::Pow2(sz_x) > (unsigned)sz_x)
-				bsize[0] = fluo::Min(int(fluo::Pow2(sz_x))/2, max_texture_size);
-			if (fluo::Pow2(sz_y) > (unsigned)sz_y)
-				bsize[1] = fluo::Min(int(fluo::Pow2(sz_x))/2, max_texture_size);
-			if (fluo::Pow2(sz_z) > (unsigned)sz_z)
-				bsize[2] = fluo::Min(int(fluo::Pow2(sz_x))/2, max_texture_size);
+			if (pow_size.intx() > size.intx())
+				bsize.x(std::min(pow_size.intx()/2, max_texture_size));
+			if (pow_size.inty() > size.inty())
+				bsize.y(std::min(pow_size.inty()/2, max_texture_size));
+			if (pow_size.intz() > size.intz())
+				bsize.z(std::min(pow_size.intz()/2, max_texture_size));
 		}
 		else
 		{
-			bsize[0] = fluo::Min(int(fluo::Pow2(sz_x)), max_texture_size);
-			bsize[1] = fluo::Min(int(fluo::Pow2(sz_y)), max_texture_size);
-			bsize[2] = fluo::Min(int(fluo::Pow2(sz_z)), max_texture_size);
+			bsize.x(std::min(pow_size.intx(), max_texture_size));
+			bsize.y(std::min(pow_size.inty(), max_texture_size));
+			bsize.z(std::min(pow_size.intz(), max_texture_size));
 		}
 
-		bszx_ = bsize[0]; bszy_ = bsize[1]; bszz_ = bsize[2];
-		bnx_ = bszx_>1?((sz_x-1) / (bszx_-1) + (((sz_x-1) % (bszx_-1)) ? 1 : 0)):1;
-		bny_ = bszy_>1?((sz_y-1) / (bszy_-1) + (((sz_y-1) % (bszy_-1)) ? 1 : 0)):1;
-		bnz_ = bszz_>1?((sz_z-1) / (bszz_-1) + (((sz_z-1) % (bszz_-1)) ? 1 : 0)):1;
+		brick_res_ = bsize;
+		auto brickCount1D = [](int size, int bsize) {
+			if (bsize > 1) {
+				int span = size - 1;
+				int step = bsize - 1;
+				return span / step + (span % step ? 1 : 0);
+			}
+			return 1;
+		};
+
+		brick_num_ = fluo::Vector(
+			brickCount1D(size.intx(), bsize.intx()),
+			brickCount1D(size.inty(), bsize.inty()),
+			brickCount1D(size.intz(), bsize.intz())
+		);
 
 		bricks.clear();
 
 		int i, j, k;
-		int mx, my, mz, mx2, my2, mz2, ox, oy, oz;
-		double tx0, ty0, tz0, tx1, ty1, tz1;
-		double bx1, by1, bz1;
-		double dx0, dy0, dz0, dx1, dy1, dz1;
-		for (k = 0; k < sz_z; k += bsize[2])
+		fluo::Vector mxyz, mxyz2;
+		fluo::Point t0, t1;
+		fluo::Point b0, b1;
+		fluo::Point d0, d1;
+
+		for (k = 0; k < size.intz(); k += bsize.intz())
 		{
 			if (k) k--;
-			for (j = 0; j < sz_y; j += bsize[1])
+			for (j = 0; j < size.inty(); j += bsize.inty())
 			{
 				if (j) j--;
-				for (i = 0; i < sz_x; i += bsize[0])
+				for (i = 0; i < size.intx(); i += bsize.intx())
 				{
 					if (i) i--;
-					mx = fluo::Min(bsize[0], sz_x - i);
-					my = fluo::Min(bsize[1], sz_y - j);
-					mz = fluo::Min(bsize[2], sz_z - k);
+					mxyz2 = mxyz = fluo::Min(bsize, size - fluo::Vector(i, j, k));
 
-					mx2 = mx;
-					my2 = my;
-					mz2 = mz;
 					if (force_pow2)
 					{
-						mx2 = fluo::Pow2(mx);
-						my2 = fluo::Pow2(my);
-						mz2 = fluo::Pow2(mz);
+						mxyz2 = fluo::Pow2(mxyz);
 					}
 
 					// Compute Texture Box.
-					tx0 = i?((mx2 - mx + 0.5) / mx2): 0.0;
-					ty0 = j?((my2 - my + 0.5) / my2): 0.0;
-					tz0 = k?((mz2 - mz + 0.5) / mz2): 0.0;
+					t0 = fluo::Point((mxyz2 - mxyz + fluo::Vector(0.5)) / mxyz2);
+					if (i == 0) t0.x(0.0);
+					if (j == 0) t0.y(0.0);
+					if (k == 0) t0.z(0.0);
 
-					tx1 = 1.0 - 0.5 / mx2;
-					if (mx < bsize[0]) tx1 = 1.0;
-					if (sz_x - i == bsize[0]) tx1 = 1.0;
+					t1 = fluo::Point(fluo::Vector(1.0) - fluo::Vector(0.5) / mxyz2);
+					if (mxyz.intx() < bsize.intx() ||
+						size.intx() - i == bsize.intx())
+						t1.x(1.0);
+					if (mxyz.inty() < bsize.inty() ||
+						size.inty() - j == bsize.inty())
+						t1.y(1.0);
+					if (mxyz.intz() < bsize.intz() ||
+						size.intz() - k == bsize.intz())
+						t1.z(1.0);
 
-					ty1 = 1.0 - 0.5 / my2;
-					if (my < bsize[1]) ty1 = 1.0;
-					if (sz_y - j == bsize[1]) ty1 = 1.0;
-
-					tz1 = 1.0 - 0.5 / mz2;
-					if (mz < bsize[2]) tz1 = 1.0;
-					if (sz_z - k == bsize[2]) tz1 = 1.0;
-
-					fluo::BBox tbox(fluo::Point(tx0, ty0, tz0), fluo::Point(tx1, ty1, tz1));
+					fluo::BBox tbox(t0, t1);
 
 					// Compute BBox.
-					bx1 = fluo::Min((i + bsize[0] - 0.5) / (double)sz_x, 1.0);
-					if (sz_x - i == bsize[0]) bx1 = 1.0;
+					b0 = fluo::Point((fluo::Vector(i, j, k) + fluo::Vector(0.5)) / size);
+					if (i == 0)
+						b0.x(0.0);
+					if (j == 0)
+						b0.y(0.0);
+					if (k == 0)
+						b0.z(0.0);
+					b1 = fluo::Point(fluo::Min((fluo::Vector(i, j, k) + bsize - fluo::Vector(0.5) / size), fluo::Vector(1.0)));
+					if (size.intx() - i == bsize.intx())
+						b1.x(1.0);
+					if (size.inty() - j == bsize.inty())
+						b1.y(1.0);
+					if (size.intz() - k == bsize.intz())
+						b1.z(1.0);
 
-					by1 = fluo::Min((j + bsize[1] - 0.5) / (double)sz_y, 1.0);
-					if (sz_y - j == bsize[1]) by1 = 1.0;
+					fluo::BBox bbox(b0, b1);
 
-					bz1 = fluo::Min((k + bsize[2] - 0.5) / (double)sz_z, 1.0);
-					if (sz_z - k == bsize[2]) bz1 = 1.0;
+					off_size = fluo::Vector(i, j, k) - mxyz2 + mxyz;
+					d0 = fluo::Point(off_size / size);
+					d1 = fluo::Point((off_size + mxyz2) / size);
 
-					fluo::BBox bbox(fluo::Point(i==0?0:(i+0.5) / (double)sz_x,
-						j==0?0:(j+0.5) / (double)sz_y,
-						k==0?0:(k+0.5) / (double)sz_z),
-						fluo::Point(bx1, by1, bz1));
-
-					ox = i - (mx2 - mx);
-					oy = j - (my2 - my);
-					oz = k - (mz2 - mz);
-					dx0 = (double)ox / sz_x;
-					dy0 = (double)oy / sz_y;
-					dz0 = (double)oz / sz_z;
-					dx1 = (double)(ox + mx2) / sz_x;
-					dy1 = (double)(oy + my2) / sz_y;
-					dz1 = (double)(oz + mz2) / sz_z;
-
-					fluo::BBox dbox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
-					TextureBrick *b = new TextureBrick(0, 0, mx2, my2, mz2, numc, numb,
-						ox, oy, oz, mx2, my2, mz2, bbox, tbox, dbox, static_cast<unsigned int>(bricks.size()));
+					fluo::BBox dbox(d0, d1);
+					TextureBrick *b = new TextureBrick(nullptr,
+						mxyz2, bytes,
+						off_size,
+						mxyz2,
+						bbox,
+						tbox,
+						dbox,
+						static_cast<unsigned int>(bricks.size()));
 					bricks.push_back(b);
 				}
 			}
@@ -649,48 +635,29 @@ namespace flvr
 	//add one more texture component as the volume mask
 	bool Texture::add_empty_mask()
 	{
-		if (nc_>0 && nc_<=2 && nmask_==-1)
-		{
-			//fix to texture2
-			nmask_ = 2;
-			nb_[nmask_] = 1;
-			ntype_[nmask_] = TYPE_MASK;
-
-			int i;
-			for (i=0; i<(int)(*bricks_).size(); i++)
-			{
-				(*bricks_)[i]->nmask(nmask_);
-				(*bricks_)[i]->nb(1, nmask_);
-				(*bricks_)[i]->ntype(TextureBrick::TYPE_MASK, nmask_);
-			}
-			return true;
-		}
-		else
+		auto c = data_.find(CompType::Mask);
+		if (c != data_.end())
 			return false;
+		TexComp comp = { CompType::Mask, 1, nullptr };
+		data_[CompType::Mask] = comp;
+		for (size_t i = 0; i < (*bricks_).size(); ++i)
+		{
+			(*bricks_)[i]->set_nrrd(CompType::Mask, comp);
+		}
 	}
 
 	//add one more texture component as the labeling volume
 	bool Texture::add_empty_label()
 	{
-		if (nc_>0 && nc_<=2 && nlabel_==-1)
-		{
-			if (nmask_==-1)	//no mask
-				nlabel_ = 3;
-			else			//label is after mask
-				nlabel_ = nmask_+1;
-			nb_[nlabel_] = 4;
-
-			int i;
-			for (i=0; i<(int)(*bricks_).size(); i++)
-			{
-				(*bricks_)[i]->nlabel(nlabel_);
-				(*bricks_)[i]->nb(4, nlabel_);
-				(*bricks_)[i]->ntype(TextureBrick::TYPE_LABEL, nlabel_);
-			}
-			return true;
-		}
-		else
+		auto c = data_.find(CompType::Label);
+		if (c != data_.end())
 			return false;
+		TexComp comp = { CompType::Label, 4, nullptr };
+		data_[CompType::Label] = comp;
+		for (size_t i = 0; i < (*bricks_).size(); ++i)
+		{
+			(*bricks_)[i]->set_nrrd(CompType::Label, comp);
+		}
 	}
 
 	void Texture::deact_all_mask()
@@ -742,6 +709,8 @@ namespace flvr
 
 		clearPyramid();
 
+		int bytes = nb(CompType::Data);
+
 		pyramid_lv_num_ = static_cast<int>(pyramid.size());
 		pyramid_ = pyramid;
 		filenames_ = filenames;
@@ -753,10 +722,10 @@ namespace flvr
 				return false;
 			}
 
+			TexComp comp = { CompType::Data, bytes, pyramid_[i].data };
 			for (int j = 0; j < pyramid_[i].bricks.size(); j++)
 			{
-				pyramid_[i].bricks[j]->set_nrrd(pyramid_[i].data, 0);
-				pyramid_[i].bricks[j]->set_nrrd(0, 1);
+				pyramid_[i].bricks[j]->set_nrrd(CompType::Data, comp);
 			}
 		}
 		setLevel(pyramid_lv_num_ - 1);

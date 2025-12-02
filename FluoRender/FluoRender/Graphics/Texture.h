@@ -32,8 +32,11 @@
 #include <nrrd.h>
 #include <BBox.h>
 #include <Transform.h>
+#include <Point.h>
+#include <Vector.h>
 #include <glm/mat4x4.hpp>
 #include <vector>
+#include <unordered_map>
 
 #ifndef TextureBrick_h
 #define TEXTURE_MAX_COMPONENTS	4
@@ -48,6 +51,21 @@ namespace flvr
 	class TextureBrick;
 	struct Pyramid_Level;
 	class FileLocInfo;
+	enum class CompType : int
+	{
+		None,
+		Data,
+		Gradient,
+		GradientMagnitude,
+		Mask,
+		Label
+	};
+	struct TexComp
+	{
+		CompType type;
+		int bytes;
+		Nrrd* data;
+	};
 	class Texture 
 	{
 	public:
@@ -57,23 +75,14 @@ namespace flvr
 
 		int get_build_max_tex_size() { return build_max_tex_size_; }
 		void set_brick_size(int size) { brick_size_ = size; }
-		bool build(Nrrd* val, Nrrd* grad,
+		bool build(Nrrd* val,
 			double vmn, double vmx,
-			double gmn, double gmx,
 			std::vector<flvr::TextureBrick*>* brks = NULL);
 
-		fluo::Vector res() { return fluo::Vector(nx_, ny_, nz_); }
-		int nx() { return nx_; }
-		int ny() { return ny_; }
-		int nz() { return nz_; }
+		fluo::Vector get_res() { return res_; }
+		fluo::Vector get_brick_res() { return brick_res_; }
+		fluo::Vector get_brick_num() { return brick_num_; }
 
-		//bricks
-		int bszx() { return bszx_; }
-		int bszy() { return bszy_; }
-		int bszz() { return bszz_; }
-		int bnx() { return bnx_; }
-		int bny() { return bny_; }
-		int bnz() { return bnz_; }
 		//get neighbor id
 		unsigned int negxid(unsigned int id);
 		unsigned int negyid(unsigned int id);
@@ -85,31 +94,24 @@ namespace flvr
 		unsigned int get_brick_id(unsigned long long index);
 		TextureBrick* get_brick(unsigned int bid);
 
-		int nc() { return nc_; }
-		int nb(int i)
+		int nc() { return data_.size(); }
+		int nb(CompType type)
 		{
-			assert(i >= 0 && i < TEXTURE_MAX_COMPONENTS);
-			return nb_[i];
+			auto c = data_.find(type);
+			if (c != data_.end())
+				return c->second.bytes;
+			return 0;
 		}
-		int nmask() { return nmask_; }
-		int nlabel() { return nlabel_; }
-
-		void set_size(int nx, int ny, int nz, int nc, int* nb) 
+		void nb(CompType type, int bytes)
 		{
-			nx_ = nx; ny_ = ny; nz_ = nz; nc_ = nc;
-			for(int c = 0; c < nc_; c++)
-			{
-				nb_[c] = nb[c];
-			}
-			if (nc==1)
-			{
-				ntype_[0] = TYPE_INT;
-			}
-			else if (nc>1)
-			{
-				ntype_[0] = TYPE_INT_GRAD;
-				ntype_[1] = TYPE_GM;
-			}
+			auto c = data_.find(type);
+			if (c != data_.end())
+				c->second.bytes = bytes;
+		}
+
+		void set_res(const fluo::Vector& res) 
+		{
+			res_ = res;
 		}
 
 		//! Interface that does not expose flvr::BBox.
@@ -138,7 +140,7 @@ namespace flvr
 		std::vector<TextureBrick*>* get_bricks();
 		//get bricks sorted by id
 		std::vector<TextureBrick*>* get_bricks_id();
-		int get_brick_num() {return int((*bricks_).size());}
+		int get_brick_size() {return int((*bricks_).size());}
 		//quota bricks
 		std::vector<TextureBrick*>* get_quota_bricks();
 
@@ -152,40 +154,18 @@ namespace flvr
 
 		double vmin() const { return vmin_; }
 		double vmax() const { return vmax_; }
-		double gmin() const { return gmin_; }
-		double gmax() const { return gmax_; }
-		void set_minmax(double vmin, double vmax, double gmin, double gmax)
-		{vmin_ = vmin; vmax_ = vmax; gmin_ = gmin; gmax_ = gmax;}
+		void set_minmax(double vmin, double vmax) {vmin_ = vmin; vmax_ = vmax;}
 
-		void set_spacings(double x, double y, double z);
-		void get_spacings(double& x, double& y, double& z, int lv = -1);
-		void set_base_spacings(double x, double y, double z);
-
-		void get_base_spacings(double &x, double &y, double &z)
-		{
-			x = b_spcx_;
-			y = b_spcy_;
-			z = b_spcz_;
-		}
-		void set_spacing_scales(double x, double y, double z)
-		{
-			if (x > 0.0) s_spcx_ = x;
-			if (y > 0.0) s_spcy_ = y;
-			if (z > 0.0) s_spcz_ = z;
-		}
-
-		void get_spacing_scales(double &x, double &y, double &z)
-		{
-			x = s_spcx_;
-			y = s_spcy_;
-			z = s_spcz_;
-		}
+		void set_spacing(const fluo::Vector& spc);
+		fluo::Vector get_spacing(int lv = -1);
+		void set_base_spacing(const fluo::Vector& spc);
+		fluo::Vector get_base_spacing() { return base_spacing_; }
+		void set_spacing_scale(const fluo::Vector& scl) { spacing_scale_ = scl; }
+		fluo::Vector get_spacing_scale() { return spacing_scale_; }
 
 		// Creator of the brick owns the nrrd memory.
-		void set_nrrd(Nrrd* data, int index);
-		Nrrd* get_nrrd(int index);
-		int get_max_tex_comp()
-		{return TEXTURE_MAX_COMPONENTS;}
+		void set_nrrd(TexComp comp, CompType type);
+		TexComp get_nrrd(CompType type);
 		bool trim_mask_undos_head();
 		bool trim_mask_undos_tail();
 		bool get_undo();
@@ -231,8 +211,7 @@ namespace flvr
 
 	protected:
 		void build_bricks(std::vector<TextureBrick*> &bricks,
-			int nx, int ny, int nz,
-			int nc, int* nb);
+			const fluo::Vector& size, int bytes);
 
 		//remember the brick size, as it may change
 		int build_max_tex_size_;
@@ -245,57 +224,29 @@ namespace flvr
 		//sort texture brick
 		bool sort_bricks_;
 		//! data size
-		int											nx_;
-		int											ny_;
-		int											nz_;
+		fluo::Vector res_;
 		//brick size, planned
-		int											bszx_;
-		int											bszy_;
-		int											bszz_;
+		fluo::Vector brick_res_;
 		//brick num
-		int											bnx_;
-		int											bny_;
-		int											bnz_;
-		//! number of components currently used.
-		int											nc_; 
-		//type of all the components
-		enum CompType
-		{
-			TYPE_NONE=0, TYPE_INT, TYPE_INT_GRAD, TYPE_GM, TYPE_MASK, TYPE_LABEL
-		};
-		CompType									ntype_[TEXTURE_MAX_COMPONENTS];
-		//the index of current mask
-		int											nmask_;
-		//the index of current label
-		int											nlabel_;
-		//! bytes per texel for each component.
-		int											nb_[TEXTURE_MAX_COMPONENTS];
+		fluo::Vector brick_num_;
 		//! data tform
 		fluo::Transform								transform_;
 		double										vmin_;
 		double										vmax_;
-		double										gmin_;
-		double										gmax_;
 		//! data bbox
 		fluo::BBox									bbox_;
 		//! spacings
-		double										spcx_;
-		double										spcy_;
-		double										spcz_;
+		fluo::Vector spacing_;
 		//! base spacings (for brxml)
-		double										b_spcx_;
-		double										b_spcy_;
-		double										b_spcz_;
+		fluo::Vector base_spacing_;
 		//! scales of spacings (for brxml)
-		double										s_spcx_;
-		double										s_spcy_;
-		double										s_spcz_;
+		fluo::Vector spacing_scale_;
 		//priority
 		bool use_priority_;
 		int n_p0_;
 
-		//actual data
-		Nrrd* data_[TEXTURE_MAX_COMPONENTS];
+		std::unordered_map<CompType, TexComp> data_;
+
 		//undos for mask
 		std::vector<void*> mask_undos_;
 		int mask_undo_pointer_;

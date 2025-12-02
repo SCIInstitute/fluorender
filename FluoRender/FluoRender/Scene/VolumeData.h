@@ -552,10 +552,13 @@ private:
 	bool m_noise_rd;
 
 	//resolution, scaling, spacing
-	int m_res_x, m_res_y, m_res_z;
-	double m_sclx, m_scly, m_sclz;
-	double m_spcx, m_spcy, m_spcz;
+	fluo::Vector m_size;
+	fluo::Vector m_scaling;
+	fluo::Vector m_spacing;
 	bool m_spc_from_file;
+	//resample
+	bool m_resample;
+	fluo::Vector m_resampled_size;
 
 	//display control
 	bool m_disp;
@@ -599,9 +602,6 @@ private:
 
 	//compression
 	bool m_compression;
-	//resize
-	bool m_resize;
-	int m_rnx, m_rny, m_rnz;
 
 	//brick skipping
 	bool m_skip_brick;

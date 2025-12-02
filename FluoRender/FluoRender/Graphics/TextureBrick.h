@@ -30,17 +30,10 @@
 #define TextureBrick_h
 
 #include <Ray.h>
-#include <BBox.h>
-#include <vector>
-#include <nrrd.h>
+#include <Texture.h>
 #include <stdint.h>
 #include <map>
 
-// We use no more than 2 texture units.
-// GL_MAX_TEXTURE_UNITS is the actual maximum.
-//we now added maximum to 4
-//which can include mask volumes
-#define TEXTURE_MAX_COMPONENTS	4
 //these are the render modes used to determine if each mode is drawn
 #define TEXTURE_RENDER_MODES	5
 
@@ -98,64 +91,44 @@ namespace flvr
 		std::wstring cache_filename;
 	};
 
-	class Texture;
 	class TextureBrick
 	{
 	public:
-		enum CompType
-		{
-			TYPE_NONE=0, TYPE_INT, TYPE_INT_GRAD, TYPE_GM, TYPE_MASK, TYPE_LABEL
-		};
 		// Creator of the brick owns the nrrd memory.
-		TextureBrick(Nrrd* n0, Nrrd* n1,
-			int nx, int ny, int nz, int nc, int* nb, int ox, int oy, int oz,
-			int mx, int my, int mz, const fluo::BBox& bbox, const fluo::BBox& tbox, const fluo::BBox& dbox,
-			unsigned int id, int findex = 0, long long offset = 0LL, long long fsize = 0LL);
+		TextureBrick(Nrrd* n0,
+			const fluo::Vector& size, int byte,
+			const fluo::Vector& off_size,
+			const fluo::Vector& msize,
+			const fluo::BBox& bbox,
+			const fluo::BBox& tbox,
+			const fluo::BBox& dbox,
+			unsigned int id,
+			int findex = 0,
+			long long offset = 0LL,
+			long long fsize = 0LL);
 		virtual ~TextureBrick();
 
 		inline fluo::BBox &bbox() { return bbox_; }
 		inline fluo::BBox &tbox() { return tbox_; }
 		inline fluo::BBox &dbox() { return dbox_; }
 
-		inline int nx() { return nx_<0?0:nx_; }
-		inline int ny() { return ny_<0?0:ny_; }
-		inline int nz() { return nz_<0?0:nz_; }
-		inline int nc() { return nc_<0?0:nc_; }
-		inline int nb(int c)
+		inline int nc() { return static_cast<int>(data_.size()); }
+		inline int nb(CompType type)
 		{
-			assert(c >= 0 && c < TEXTURE_MAX_COMPONENTS);
-			return nb_[c];
+			auto c = data_.find(type);
+			if (c != data_.end())
+				return c->second.bytes;
+			return 0;
 		}
-		void nb(int n, int c)
+		void nb(CompType type, int bytes)
 		{
-			assert(c >= 0 && c < TEXTURE_MAX_COMPONENTS);
-			nb_[c] = n;
-		}
-		inline void nmask(int mask) { nmask_ = mask; }
-		inline int nmask() { return nmask_; }
-		inline void nlabel(int label) {nlabel_ = label;}
-		inline int nlabel() {return nlabel_;}
-		inline void ntype(CompType type, int c)
-		{
-			assert(c >= 0 && c < TEXTURE_MAX_COMPONENTS);
-			ntype_[c] = type;
-		}
-		inline CompType ntype(int c)
-		{
-			assert(c >= 0 && c < TEXTURE_MAX_COMPONENTS);
-			return ntype_[c];
+			auto c = data_.find(type);
+			if (c != data_.end())
+				c->second.bytes = bytes;
 		}
 
-		inline int mx() { return mx_; }
-		inline int my() { return my_; }
-		inline int mz() { return mz_; }
-
-		inline int ox() { return ox_; }
-		inline int oy() { return oy_; }
-		inline int oz() { return oz_; }
-
-		virtual int sx();
-		virtual int sy();
+		inline fluo::Vector get_msize() { return msize_; }
+		inline fluo::Vector get_off_size() { return off_size_; }
 
 		inline void set_drawn(int mode, bool val)
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) drawn_[mode] = val; }
@@ -166,19 +139,24 @@ namespace flvr
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) return drawn_[mode]; else return false;}
 
 		// Creator of the brick owns the nrrd memory.
-		void set_nrrd(Nrrd* data, int index)
-		{if (index>=0&&index<TEXTURE_MAX_COMPONENTS) data_[index] = data;}
-		Nrrd* get_nrrd(int index)
-		{if (index>=0&&index<TEXTURE_MAX_COMPONENTS) return data_[index]; else return 0;}
+		void set_nrrd(CompType type, TexComp comp) { data_[type] = comp;}
+		TexComp get_nrrd(CompType type)
+		{
+			auto c = data_.find(type);
+			if (c == data_.end())
+				return TexComp();
+			else
+				return c->second;
+		}
 
 		//find out priority
 		void set_priority();
 		inline int get_priority() {return priority_;}
 
-		virtual GLenum tex_type(int c);
-		virtual void* tex_data(int c);
-		virtual void* tex_data(int c, void* raw_data);//given external raw data, using the same address in brick
-		virtual void* tex_data_brk(int c, const FileLocInfo* finfo);
+		GLenum tex_type(CompType type);
+		void* tex_data(CompType type);
+		void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick
+		void* tex_data_brk(CompType type, const FileLocInfo* finfo);
 
 		void compute_polygons(fluo::Ray& view, double tmin, double tmax, double dt,
 			std::vector<float>& vertex, std::vector<uint32_t>& index, std::vector<uint32_t>& size);
@@ -205,7 +183,7 @@ namespace flvr
 		inline unsigned int get_id() { return id_; }
 
 		//get value
-		double get_data(unsigned int i, unsigned int j, unsigned int k);
+		double get_data(const fluo::Point& ijk);
 
 		void freeBrkData();
 		bool read_brick(char* data, size_t size, const FileLocInfo* finfo);
@@ -248,23 +226,15 @@ namespace flvr
 		fluo::Ray edge_[12];
 		//! tbox edges
 		fluo::Ray tex_edge_[12];
-		Nrrd* data_[TEXTURE_MAX_COMPONENTS];
+		//data, same from texture
+		std::unordered_map<CompType, TexComp> data_;
+
 		//! axis sizes (pow2)
-		int nx_, ny_, nz_; 
-		//! number of components (< TEXTURE_MAX_COMPONENTS)
-		int nc_; 
-		//type of all the components
-		CompType ntype_[TEXTURE_MAX_COMPONENTS];
-		//the index of current mask
-		int nmask_;
-		//the index of current label
-		int nlabel_;
-		//! bytes per texel for each component.
-		int nb_[TEXTURE_MAX_COMPONENTS]; 
+		fluo::Vector size_;
 		//! offset into volume texture
-		int ox_, oy_, oz_; 
+		fluo::Vector off_size_;
 		//! data axis sizes (not necessarily pow2)
-		int mx_, my_, mz_; 
+		fluo::Vector msize_;
 		//! bounding box and texcoord box
 		fluo::BBox bbox_, tbox_, dbox_;
 		fluo::Vector view_vector_;
@@ -298,24 +268,39 @@ namespace flvr
 		static std::map<std::wstring, std::wstring> cache_table_;
 	};
 
-	inline double TextureBrick::get_data(unsigned int i, unsigned int j, unsigned int k)
+	inline double TextureBrick::get_data(const fluo::Point& ijk)
 	{
 		unsigned long long offset =
-			(unsigned long long)(oz() + k) *
-			(unsigned long long)(sx()) *
-			(unsigned long long)(sy()) +
-			(unsigned long long)(oy() + j) *
-			(unsigned long long)(sx()) +
-			(unsigned long long)(ox() + i);
-		if (nb_[0] == 1)
+			(unsigned long long)(off_size_.intz() + ijk.intz()) *
+			(unsigned long long)(size_.intx()) *
+			(unsigned long long)(size_.inty()) +
+			(unsigned long long)(off_size_.inty() + ijk.inty()) *
+			(unsigned long long)(size_.intx()) +
+			(unsigned long long)(off_size_.intx() + ijk.intx());
+		int bytes = nb(CompType::Data);
+		Nrrd* nrrd = data_[CompType::Data].data;
+		if (!nrrd)
+			return 0.0;
+		switch (bytes)
 		{
-			unsigned char *ptr = (unsigned char*)(data_[0]->data);
+		case 1:
+		{
+			unsigned char* ptr = (unsigned char*)(nrrd->data);
 			return ptr[offset] / 255.0;
 		}
-		else
+			break;
+		case 2:
 		{
-			unsigned short *ptr = (unsigned short*)(data_[0]->data);
+			unsigned short* ptr = (unsigned short*)(nrrd->data);
 			return ptr[offset] / 65535.0;
+		}
+			break;
+		case 4:
+		{
+			unsigned int* ptr = (unsigned int*)(nrrd->data);
+			return ptr[offset] / 4294967295.0;
+		}
+			break;
 		}
 		return 0.0;
 	}

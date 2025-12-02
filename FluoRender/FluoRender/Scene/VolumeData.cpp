@@ -133,10 +133,12 @@ VolumeData::VolumeData()
 	m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 
 	//resolution, scaling, spacing
-	m_res_x = 0;	m_res_y = 0;	m_res_z = 0;
-	m_sclx = 1.0;	m_scly = 1.0;	m_sclz = 1.0;
-	m_spcx = 1.0;	m_spcy = 1.0;	m_spcz = 1.0;
+	m_size = fluo::Vector(0.0);
+	m_scaling = fluo::Vector(1.0);
+	m_spacing = fluo::Vector(1.0);
 	m_spc_from_file = false;
+	m_resample = false;
+	m_resampled_size = fluo::Vector(0.0);
 
 	//display control
 	m_disp = true;
@@ -150,11 +152,6 @@ VolumeData::VolumeData()
 
 	//compression
 	m_compression = false;
-	//resize
-	m_resize = false;
-	m_rnx = 0;
-	m_rny = 0;
-	m_rnz = 0;
 
 	//skip brick
 	m_skip_brick = false;
@@ -284,10 +281,12 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_channel_mix_mode = copy.m_channel_mix_mode;
 
 	//resolution, scaling, spacing
-	m_res_x = copy.m_res_x;	m_res_y = copy.m_res_y;	m_res_z = copy.m_res_z;
-	m_sclx = copy.m_sclx;	m_scly = copy.m_scly;	m_sclz = copy.m_sclz;
-	m_spcx = copy.m_spcx;	m_spcy = copy.m_spcy;	m_spcz = copy.m_spcz;
+	m_size = copy.m_size;
+	m_scaling = copy.m_scaling;
+	m_spacing = copy.m_spacing;
 	m_spc_from_file = copy.m_spc_from_file;
+	m_resample = copy.m_resample;
+	m_resampled_size = copy.m_resampled_size;
 
 	//display control
 	m_disp = copy.m_disp;
@@ -301,11 +300,6 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//compression
 	m_compression = copy.m_compression;
-	//resize
-	m_resize = false;
-	m_rnx = 0;
-	m_rny = 0;
-	m_rnz = 0;
 
 	//skip brick
 	m_skip_brick = false;
@@ -394,14 +388,13 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 
 	Nrrd *nv = data;
 	Nrrd *gm = 0;
-	m_res_x = nv->axis[0].size;
-	m_res_y = nv->axis[1].size;
-	m_res_z = nv->axis[2].size;
+	m_size = fluo::Vector(
+		nv->axis[0].size,
+		nv->axis[1].size,
+		nv->axis[2].size);
 
-	fluo::Point pmax(m_res_x * m_spcx, m_res_y * m_spcy, m_res_z * m_spcz);
-	fluo::Point pmin(0.0);
-	m_bounds = fluo::BBox(pmin, pmax);
-	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
+	m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(m_size * m_spacing));
+	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 
 	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(m_skip_brick);
@@ -448,12 +441,10 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	}
 
 	//clip distance
-	SetLinkedDist(fluo::ClipPlane::XNeg,
-		static_cast<int>(std::round(std::max(1, m_res_x / 20))));
-	SetLinkedDist(fluo::ClipPlane::YNeg,
-		static_cast<int>(std::round(std::max(1, m_res_y / 20))));
-	SetLinkedDist(fluo::ClipPlane::ZNeg,
-		static_cast<int>(std::round(std::max(1, m_res_z / 20))));
+	fluo::Vector clip_dist = fluo::Max(fluo::Vector(1.0), m_size / fluo::Vector(20.0));
+	SetLinkedDist(fluo::ClipPlane::XNeg, clip_dist.intx());
+	SetLinkedDist(fluo::ClipPlane::YNeg, clip_dist.inty());
+	SetLinkedDist(fluo::ClipPlane::ZNeg, clip_dist.intz());
 
 	m_bg_valid = false;
 	m_hist_dirty = true;
@@ -471,9 +462,10 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	{
 		Nrrd *nv = data;
 		Nrrd *gm = 0;
-		m_res_x = nv->axis[0].size;
-		m_res_y = nv->axis[1].size;
-		m_res_z = nv->axis[2].size;
+		m_size = fluo::Vector(
+			nv->axis[0].size,
+			nv->axis[1].size,
+			nv->axis[2].size);
 
 		m_tex = std::make_shared<flvr::Texture>();
 		m_tex->set_use_priority(m_skip_brick);
@@ -491,12 +483,10 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	m_bg_valid = false;
 
 	//clip distance
-	SetLinkedDist(fluo::ClipPlane::XNeg,
-		static_cast<int>(std::round(std::max(1, m_res_x / 20))));
-	SetLinkedDist(fluo::ClipPlane::YNeg,
-		static_cast<int>(std::round(std::max(1, m_res_y / 20))));
-	SetLinkedDist(fluo::ClipPlane::ZNeg,
-		static_cast<int>(std::round(std::max(1, m_res_z / 20))));
+	fluo::Vector clip_dist = fluo::Max(fluo::Vector(1.0), m_size / fluo::Vector(20.0));
+	SetLinkedDist(fluo::ClipPlane::XNeg, clip_dist.intx());
+	SetLinkedDist(fluo::ClipPlane::YNeg, clip_dist.inty());
+	SetLinkedDist(fluo::ClipPlane::ZNeg, clip_dist.intz());
 
 	m_hist_dirty = true;
 
@@ -508,9 +498,7 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 int VolumeData::Replace(VolumeData* data)
 {
 	if (!data ||
-		m_res_x!=data->m_res_x ||
-		m_res_y!=data->m_res_y ||
-		m_res_z!=data->m_res_z)
+		m_size != data->m_size)
 		return 0;
 
 	double spcx = 1.0, spcy = 1.0, spcz = 1.0;
@@ -578,15 +566,14 @@ void VolumeData::AddEmptyData(int bits,
 	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
 
 	//resolution
-	m_res_x = nv->axis[0].size;
-	m_res_y = nv->axis[1].size;
-	m_res_z = nv->axis[2].size;
+	m_size = fluo::Vector(
+		nv->axis[0].size,
+		nv->axis[1].size,
+		nv->axis[2].size);
 
 	//bounding box
-	fluo::Point pmax(m_res_x * m_spcx, m_res_y * m_spcy, m_res_z * m_spcz);
-	fluo::Point pmin(0.0);
-	m_bounds = fluo::BBox(pmin, pmax);
-	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
+	m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(m_size * m_spacing));
+	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 
 	//create texture
 	m_tex = std::make_shared<flvr::Texture>();
@@ -611,12 +598,10 @@ void VolumeData::AddEmptyData(int bits,
 	m_bg_valid = false;
 
 	//clip distance
-	SetLinkedDist(fluo::ClipPlane::XNeg,
-		static_cast<int>(std::round(std::max(1, m_res_x / 20))));
-	SetLinkedDist(fluo::ClipPlane::YNeg,
-		static_cast<int>(std::round(std::max(1, m_res_y / 20))));
-	SetLinkedDist(fluo::ClipPlane::ZNeg,
-		static_cast<int>(std::round(std::max(1, m_res_z / 20))));
+	fluo::Vector clip_dist = fluo::Max(fluo::Vector(1.0), m_size / fluo::Vector(20.0));
+	SetLinkedDist(fluo::ClipPlane::XNeg, clip_dist.intx());
+	SetLinkedDist(fluo::ClipPlane::YNeg, clip_dist.inty());
+	SetLinkedDist(fluo::ClipPlane::ZNeg, clip_dist.intz());
 
 	m_hist_dirty = true;
 
@@ -633,15 +618,15 @@ void VolumeData::LoadMask(Nrrd* mask)
 	m_tex->add_empty_mask();
 	m_tex->set_nrrd(mask, m_tex->nmask());
 
-	int nx2, ny2, nz2;
-	nx2 = mask->axis[0].size;
-	ny2 = mask->axis[1].size;
-	nz2 = mask->axis[2].size;
-	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
+	fluo::Vector mask_size(
+		mask->axis[0].size,
+		mask->axis[1].size,
+		mask->axis[2].size);
+	if (m_size != mask_size)
 	{
 		flrd::VolumeSampler sampler;
 		sampler.SetInput(shared_from_this());
-		sampler.SetSize(m_res_x, m_res_y, m_res_z);
+		sampler.SetSize(m_size);
 		sampler.SetFilter(0);
 		//sampler.SetFilterSize(2, 2, 0);
 		sampler.Resize(flrd::SDT_Mask, true);
@@ -655,8 +640,8 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 
 	Nrrd *nrrd_mask = 0;
 	uint8_t *val8 = 0;
-	unsigned long long mem_size = (unsigned long long)m_res_x*
-		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+	unsigned long long mem_size = (unsigned long long)m_size.intx()*
+		(unsigned long long)m_size.inty()*(unsigned long long)m_size.intz();
 	//prepare the texture bricks for the mask
 	bool empty = m_tex->add_empty_mask();
 	if (empty)
@@ -671,8 +656,8 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 		}
 		double spcx, spcy, spcz;
 		m_tex->get_spacings(spcx, spcy, spcz);
-		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
+		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, spcx*m_res_x, spcy*m_res_y, spcz*m_res_z);
