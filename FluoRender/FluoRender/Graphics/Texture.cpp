@@ -45,7 +45,7 @@ namespace flvr
 	size_t Texture::mask_undo_num_ = 0;
 	Texture::Texture():
 		build_max_tex_size_(0),
-		brick_size_(0),
+		brick_planned_size_(0),
 		sort_bricks_(true),
 		res_(0.0),
 		brick_res_(0.0),
@@ -343,6 +343,7 @@ namespace flvr
 				pyramid_[lv].data->axis[offset + 2].spacing);
 			return spc * spacing_scale_;
 		}
+		return spacing_;
 	}
 
 	void Texture::set_base_spacing(const fluo::Vector& spc)
@@ -413,7 +414,7 @@ namespace flvr
 			size[p] = (int)nv_nrrd->axis[p + offset].size;
 
 		TexComp comp = { CompType::Data, bytes, nv_nrrd };
-		set_nrrd(comp, CompType::Data);
+		set_nrrd(CompType::Data, comp);
 
 		if (!brks)
 		{
@@ -476,8 +477,8 @@ namespace flvr
 
 		int max_texture_size = 2048;
 
-		if (brick_size_ > 1)
-			max_texture_size = brick_size_;
+		if (brick_planned_size_ > 1)
+			max_texture_size = brick_planned_size_;
 		else
 		{
 			if (ShaderProgram::init())
@@ -644,6 +645,7 @@ namespace flvr
 		{
 			(*bricks_)[i]->set_nrrd(CompType::Mask, comp);
 		}
+		return true;
 	}
 
 	//add one more texture component as the labeling volume
@@ -658,6 +660,7 @@ namespace flvr
 		{
 			(*bricks_)[i]->set_nrrd(CompType::Label, comp);
 		}
+		return true;
 	}
 
 	void Texture::deact_all_mask()
@@ -767,29 +770,33 @@ namespace flvr
 	{
 		if (lv < 0 || lv >= pyramid_lv_num_ || !brkxml_ || pyramid_cur_lv_ == lv) return;
 		pyramid_cur_lv_ = lv;
-		build(pyramid_[pyramid_cur_lv_].data, 0, 0, 256, 0, 0, &pyramid_[pyramid_cur_lv_].bricks);
+		build(pyramid_[pyramid_cur_lv_].data, 0, 256, &pyramid_[pyramid_cur_lv_].bricks);
 		set_data_file(pyramid_[pyramid_cur_lv_].filenames, pyramid_[pyramid_cur_lv_].filetype);
 
 		int offset = 0;
 		if (pyramid_[lv].data->dim > 3) offset = 1;
-		spcx_ = pyramid_[lv].data->axis[offset + 0].spacing;
-		spcy_ = pyramid_[lv].data->axis[offset + 1].spacing;
-		spcz_ = pyramid_[lv].data->axis[offset + 2].spacing;
+		spacing_ = fluo::Vector(
+			pyramid_[lv].data->axis[offset + 0].spacing,
+			pyramid_[lv].data->axis[offset + 1].spacing,
+			pyramid_[lv].data->axis[offset + 2].spacing);
 		fluo::Transform tform;
 		tform.load_identity();
-		fluo::Point nmax(nx_*spcx_*s_spcx_, ny_*spcy_*s_spcy_, nz_*spcz_*s_spcz_);
+		fluo::Vector nmax = res_ * spacing_ * spacing_scale_;
 		tform.pre_scale(fluo::Vector(nmax));
 		set_transform(tform);
 		//additional information
-		nx_ = pyramid_[lv].szx;
-		ny_ = pyramid_[lv].szy;
-		nz_ = pyramid_[lv].szz;
-		bszx_ = pyramid_[lv].bszx;
-		bszy_ = pyramid_[lv].bszy;
-		bszz_ = pyramid_[lv].bszz;
-		bnx_ = pyramid_[lv].bnx;
-		bny_ = pyramid_[lv].bny;
-		bnz_ = pyramid_[lv].bnz;
+		res_ = fluo::Vector(
+			pyramid_[lv].szx,
+			pyramid_[lv].szy,
+			pyramid_[lv].szz);
+		brick_res_ = fluo::Vector(
+			pyramid_[lv].bszx,
+			pyramid_[lv].bszy,
+			pyramid_[lv].bszz);
+		brick_num_ = fluo::Vector(
+			pyramid_[lv].bnx,
+			pyramid_[lv].bny,
+			pyramid_[lv].bnz);
 	}
 
 	void Texture::set_data_file(std::vector<FileLocInfo *> *fname, int type)
@@ -824,46 +831,50 @@ namespace flvr
 	}
 
 	//set nrrd
-	void Texture::set_nrrd(Nrrd* data, int index)
+	void Texture::set_nrrd(CompType type, TexComp comp)
 	{
-		if (index>=0&&index<TEXTURE_MAX_COMPONENTS)
+		Nrrd* nrrd = comp.data;
+		if (!nrrd)
+			return;
+
+		bool existInPyramid = false;
+		for (int i = 0; i < pyramid_.size(); i++)
+			if (pyramid_[i].data == nrrd)
+				existInPyramid = true;
+
+		auto c = data_.find(type);
+		if (c != data_.end() && !existInPyramid)
 		{
-			bool existInPyramid = false;
-			for (int i = 0; i < pyramid_.size(); i++)
-				if (pyramid_[i].data == data) existInPyramid = true;
+			if (type == CompType::Mask && mask_undo_num_)
+				nrrdNix(c->second.data);
+			else
+				nrrdNuke(c->second.data);
+		}
+		data_[type] = comp;
 
-			if (data_[index] && data && !existInPyramid)
-			{
-				if (index == nmask_ && mask_undo_num_)
-					nrrdNix(data_[index]);
-				else
-					nrrdNuke(data_[index]);
-			}
+		if (!existInPyramid)
+		{
+			for (int i = 0; i < (int)(*bricks_).size(); i++)
+				(*bricks_)[i]->set_nrrd(type, comp);
 
-			data_[index] = data;
-			if (!existInPyramid)
-			{
-				for (int i = 0; i < (int)(*bricks_).size(); i++)
-					(*bricks_)[i]->set_nrrd(data, index);
-
-				//add to undo list
-				if (index == nmask_)
-					set_mask(data->data);
-			}
+			//add to undo list
+			if (type == CompType::Mask)
+				set_mask(nrrd->data);
 		}
 	}
 
-	Nrrd* Texture::get_nrrd(int index)
+	TexComp Texture::get_nrrd(CompType type)
 	{
-		if (index>=0&&index<TEXTURE_MAX_COMPONENTS)
-			return data_[index];
-		else return 0;
+		auto c = data_.find(type);
+		if (c == data_.end())
+			return TexComp();
+		return c->second;
 	}
 
 	//mask undo management
 	bool Texture::trim_mask_undos_head()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return true;
 		if (mask_undos_.size() <= mask_undo_num_+1)
 			return true;
@@ -882,7 +893,7 @@ namespace flvr
 
 	bool Texture::trim_mask_undos_tail()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return true;
 		if (mask_undos_.size() <= mask_undo_num_+1)
 			return true;
@@ -900,7 +911,7 @@ namespace flvr
 
 	bool Texture::get_undo()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return false;
 		if (mask_undo_pointer_ <= 0)
 			return false;
@@ -909,7 +920,7 @@ namespace flvr
 
 	bool Texture::get_redo()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return false;
 		if (mask_undo_pointer_ >= mask_undos_.size()-1)
 			return false;
@@ -918,7 +929,7 @@ namespace flvr
 
 	void Texture::set_mask(void* mask_data)
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return;
 
 		if (mask_undo_pointer_>-1 &&
@@ -941,15 +952,15 @@ namespace flvr
 
 	void Texture::push_mask()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return;
 		if (mask_undo_pointer_<0 ||
 			mask_undo_pointer_>mask_undos_.size()-1)
 			return;
 
 		//duplicate at pointer position
-		unsigned long long mem_size = (unsigned long long)nx_*
-			(unsigned long long)ny_*(unsigned long long)nz_;
+		unsigned long long mem_size = (unsigned long long)res_.intx()*
+			(unsigned long long)res_.inty()*(unsigned long long)res_.intz();
 		void* new_data = (void*)new (std::nothrow) unsigned char[mem_size];
 		memcpy(new_data, mask_undos_[mask_undo_pointer_], size_t(mem_size));
 		if (mask_undo_pointer_<mask_undos_.size()-1)
@@ -977,15 +988,19 @@ namespace flvr
 //		img2.data = (unsigned char*)(mask_undos_[1]);
 //#endif
 		//update mask data
-		nrrdWrap_va(data_[nmask_],
+		auto c = data_.find(CompType::Mask);
+		if (c == data_.end())
+			return;
+		Nrrd* nrrd = c->second.data;
+		nrrdWrap_va(nrrd,
 			mask_undos_[mask_undo_pointer_],
-			nrrdTypeUChar, 3, (size_t)nx_,
-			(size_t)ny_, (size_t)nz_);
+			nrrdTypeUChar, 3, (size_t)res_.intx(),
+			(size_t)res_.inty(), (size_t)res_.intz());
 	}
 
 	void Texture::pop_mask()
 	{
-		if (nmask_ <= -1 || mask_undo_num_ == 0)
+		if (mask_undo_num_ == 0)
 			return;
 		if (mask_undo_pointer_ <= 0 ||
 			mask_undo_pointer_ > mask_undos_.size() - 1)
@@ -996,15 +1011,19 @@ namespace flvr
 		mask_undo_pointer_--;
 
 		//update mask data
-		nrrdWrap_va(data_[nmask_],
+		auto c = data_.find(CompType::Mask);
+		if (c == data_.end())
+			return;
+		Nrrd* nrrd = c->second.data;
+		nrrdWrap_va(nrrd,
 			mask_undos_[mask_undo_pointer_],
-			nrrdTypeUChar, 3, (size_t)nx_,
-			(size_t)ny_, (size_t)nz_);
+			nrrdTypeUChar, 3, (size_t)res_.intx(),
+			(size_t)res_.inty(), (size_t)res_.intz());
 	}
 
 	void Texture:: mask_undos_backward()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return;
 		if (mask_undo_pointer_<=0 ||
 			mask_undo_pointer_>mask_undos_.size()-1)
@@ -1014,15 +1033,19 @@ namespace flvr
 		mask_undo_pointer_--;
 
 		//update mask data
-		nrrdWrap_va(data_[nmask_],
+		auto c = data_.find(CompType::Mask);
+		if (c == data_.end())
+			return;
+		Nrrd* nrrd = c->second.data;
+		nrrdWrap_va(nrrd,
 			mask_undos_[mask_undo_pointer_],
-			nrrdTypeUChar, 3, (size_t)nx_,
-			(size_t)ny_, (size_t)nz_);
+			nrrdTypeUChar, 3, (size_t)res_.intx(),
+			(size_t)res_.inty(), (size_t)res_.intz());
 	}
 
 	void Texture::mask_undos_forward()
 	{
-		if (nmask_<=-1 || mask_undo_num_==0)
+		if (mask_undo_num_==0)
 			return;
 		if (mask_undo_pointer_<0 ||
 			mask_undo_pointer_>mask_undos_.size()-2)
@@ -1032,10 +1055,14 @@ namespace flvr
 		mask_undo_pointer_++;
 
 		//update mask data
-		nrrdWrap_va(data_[nmask_],
+		auto c = data_.find(CompType::Mask);
+		if (c == data_.end())
+			return;
+		Nrrd* nrrd = c->second.data;
+		nrrdWrap_va(nrrd,
 			mask_undos_[mask_undo_pointer_],
-			nrrdTypeUChar, 3, (size_t)nx_,
-			(size_t)ny_, (size_t)nz_);
+			nrrdTypeUChar, 3, (size_t)res_.intx(),
+			(size_t)res_.inty(), (size_t)res_.intz());
 	}
 
 	void Texture::clear_undos()
@@ -1052,13 +1079,17 @@ namespace flvr
 
 	unsigned int Texture::negxid(unsigned int id)
 	{
-		int x = (id % (bnx_ * bny_)) % bnx_;
+		int bnx, bny, bnz;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
+		bnz = brick_num_.intz();
+		int x = (id % (bnx * bny)) % bnx;
 		if (x == 0)
 			return id;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + y * bnx_ + x - 1;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+		int y = (id % (bnx * bny)) / bnx;
+		int z = id / (bnx * bny);
+		int r = z * bnx * bny + y * bnx + x - 1;
+		if (r < 0 || r >= bnx * bny * bnz)
 			return id;
 		else
 			return r;
@@ -1066,13 +1097,17 @@ namespace flvr
 
 	unsigned int Texture::negyid(unsigned int id)
 	{
-		int y = (id % (bnx_ * bny_)) / bnx_;
+		int bnx, bny, bnz;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
+		bnz = brick_num_.intz();
+		int y = (id % (bnx * bny)) / bnx;
 		if (y == 0)
 			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + (y - 1) * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+		int x = (id % (bnx * bny)) % bnx;
+		int z = id / (bnx * bny);
+		int r = z * bnx * bny + (y - 1) * bnx + x;
+		if (r < 0 || r >= bnx * bny * bnz)
 			return id;
 		else
 			return r;
@@ -1080,13 +1115,17 @@ namespace flvr
 
 	unsigned int Texture::negzid(unsigned int id)
 	{
-		int z = id / (bnx_ * bny_);
+		int bnx, bny, bnz;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
+		bnz = brick_num_.intz();
+		int z = id / (bnx * bny);
 		if (z == 0)
 			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int r = (z - 1) * bnx_ * bny_ + y * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+		int x = (id % (bnx * bny)) % bnx;
+		int y = (id % (bnx * bny)) / bnx;
+		int r = (z - 1) * bnx * bny + y * bnx + x;
+		if (r < 0 || r >= bnx * bny * bnz)
 			return id;
 		else
 			return r;
@@ -1094,13 +1133,17 @@ namespace flvr
 
 	unsigned int Texture::posxid(unsigned int id)
 	{
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		if (x == bnx_ - 1)
+		int bnx, bny, bnz;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
+		bnz = brick_num_.intz();
+		int x = (id % (bnx * bny)) % bnx;
+		if (x == bnx - 1)
 			return id;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + y * bnx_ + x + 1;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+		int y = (id % (bnx * bny)) / bnx;
+		int z = id / (bnx * bny);
+		int r = z * bnx * bny + y * bnx + x + 1;
+		if (r < 0 || r >= bnx * bny * bnz)
 			return id;
 		else
 			return r;
@@ -1108,13 +1151,17 @@ namespace flvr
 
 	unsigned int Texture::posyid(unsigned int id)
 	{
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		if (y == bny_ - 1)
+		int bnx, bny, bnz;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
+		bnz = brick_num_.intz();
+		int y = (id % (bnx * bny)) / bnx;
+		if (y == bny - 1)
 			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int z = id / (bnx_ * bny_);
-		int r = z * bnx_ * bny_ + (y + 1) * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+		int x = (id % (bnx * bny)) % bnx;
+		int z = id / (bnx * bny);
+		int r = z * bnx * bny + (y + 1) * bnx + x;
+		if (r < 0 || r >= bnx * bny * bnz)
 			return id;
 		else
 			return r;
@@ -1122,13 +1169,17 @@ namespace flvr
 
 	unsigned int Texture::poszid(unsigned int id)
 	{
-		int z = id / (bnx_ * bny_);
-		if (z == bnz_ - 1)
+		int bnx, bny, bnz;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
+		bnz = brick_num_.intz();
+		int z = id / (bnx * bny);
+		if (z == bnz - 1)
 			return id;
-		int x = (id % (bnx_ * bny_)) % bnx_;
-		int y = (id % (bnx_ * bny_)) / bnx_;
-		int r = (z + 1) * bnx_ * bny_ + y * bnx_ + x;
-		if (r < 0 || r >= bnx_ * bny_ * bnz_)
+		int x = (id % (bnx * bny)) % bnx;
+		int y = (id % (bnx * bny)) / bnx;
+		int r = (z + 1) * bnx * bny + y * bnx + x;
+		if (r < 0 || r >= bnx * bny * bnz)
 			return id;
 		else
 			return r;
@@ -1136,15 +1187,25 @@ namespace flvr
 
 	unsigned int Texture::get_brick_id(unsigned long long index)
 	{
+		int nx, ny;
+		nx = res_.intx();
+		ny = res_.inty();
+		int bszx, bszy, bszz;
+		bszx = brick_res_.intx();
+		bszy = brick_res_.inty();
+		bszz = brick_res_.intz();
+		int bnx, bny;
+		bnx = brick_num_.intx();
+		bny = brick_num_.inty();
 		unsigned long long x, y, z;
-		z = index / (nx_ * ny_);
-		y = index % (nx_ * ny_);
-		x = y % nx_;
-		y = y / nx_;
+		z = index / (nx * ny);
+		y = index % (nx * ny);
+		x = y % nx;
+		y = y / nx;
 		//get brick indices
-		x = bszx_ <= 1 ? 0 : x / (bszx_-1);
-		y = bszy_ <= 1 ? 0 : y / (bszy_-1);
-		z = bszz_ <= 1 ? 0 : z / (bszz_-1);
-		return static_cast<unsigned int>(z * bnx_ * bny_ + y * bnx_ + x);
+		x = bszx <= 1 ? 0 : x / (bszx-1);
+		y = bszy <= 1 ? 0 : y / (bszy-1);
+		z = bszz <= 1 ? 0 : z / (bszz-1);
+		return static_cast<unsigned int>(z * bnx * bny + y * bnx + x);
 	}
 } // namespace flvr

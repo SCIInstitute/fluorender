@@ -81,6 +81,39 @@ namespace flvr
 	CGLContextObj TextureRenderer::gl_context_ = 0;
 #endif
 
+	TexParam::TexParam() :
+		nx(0), ny(0), nz(0), nb(0),
+		id(0), brick(0), comp_type(CompType::None), time(0),
+		textype(GL_UNSIGNED_BYTE),
+		delayed_del(false)
+	{
+	}
+
+	TexParam::TexParam(CompType c, int t,
+		int x, int y, int z, int b,
+		GLenum f,
+		unsigned int i) :
+		nx(x), ny(y), nz(z), nb(b),
+		id(i), brick(0), comp_type(c), time(t),
+		textype(f),
+		delayed_del(false)
+	{
+	}
+
+	bool TexParam::Match(TextureBrick* bk,
+		CompType c, int t, int x, int y, int z, int b, GLenum f)
+	{
+		return id != 0 &&
+			brick == bk &&
+			comp_type == c &&
+			time == t &&
+			nx == x &&
+			ny == y &&
+			nz == z &&
+			nb == b &&
+			textype == f;
+	}
+
 	TextureRenderer::TextureRenderer()
 		:
 		render_mode_(RenderMode::Standard),
@@ -214,7 +247,7 @@ namespace flvr
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i - 1].comp == brick->nmask())
+					tex_pool_[i - 1].comp_type == CompType::Mask)
 				{
 					glbin_settings.m_available_mem +=
 						tex_pool_[i - 1].nx *
@@ -250,7 +283,7 @@ namespace flvr
 			{
 				locbk = (*bricks)[j];
 				if (brick == locbk &&
-					tex_pool_[i - 1].comp == brick->nlabel())
+					tex_pool_[i - 1].comp_type == CompType::Label)
 				{
 					glbin_settings.m_available_mem +=
 						tex_pool_[i - 1].nx *
@@ -504,10 +537,11 @@ namespace flvr
 		if (!tex)
 			return 0;
 
-		double basen = std::min(tex->nx(), std::min(tex->ny(), tex->nz()));
-		fluo::Vector n(double(tex->nx() / basen),
-			double(tex->ny() / basen),
-			double(tex->nz() / basen));
+		auto res = tex->get_res();
+		double basen = std::min(res.intx(), std::min(res.inty(), res.intz()));
+		fluo::Vector n(double(res.intx() / basen),
+			double(res.inty() / basen),
+			double(res.intz() / basen));
 
 		double e = 0.0001;
 		double a, b, c;
@@ -634,7 +668,8 @@ namespace flvr
 		auto tex = tex_.lock();
 		if (!tex)
 			return 0.0;
-		return tex->nx() * tex->ny() * tex->nz() / 1.04e6;
+		auto res = tex->get_res();
+		return res.intx() * res.inty() * res.intz() / 1.04e6;
 	}
 
 	int TextureRenderer::get_size_type()
@@ -675,7 +710,6 @@ namespace flvr
 			return 0;
 
 		GLint result = -1;
-		int c = 0;
 		int tn = 0;
 		void* raw_data = 0;
 		//get raw data from cache
@@ -689,29 +723,26 @@ namespace flvr
 			}
 		}
 		else
-			raw_data = brick->tex_data(c);
+			raw_data = brick->tex_data(CompType::Data);
 
 		if (!tex->isBrxml() &&
 			(!brick || !raw_data))
 			return 0;
-		if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
-			return 0;
-		if (brick->ntype(c) != TextureBrick::TYPE_INT)
-			return 0;
 
 		glActiveTexture(GL_TEXTURE0 + unit);
 
-		int nb = brick->nb(c);
-		unsigned int nx = brick->nx();
-		unsigned int ny = brick->ny();
-		unsigned int nz = brick->nz();
-		GLenum textype = brick->tex_type(c);
+		int nb = brick->nb(CompType::Data);
+		auto res = brick->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
+		GLenum textype = brick->tex_type(CompType::Data);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
 		int idx = -1;
-		for (unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
+		for (size_t i = 0; i < tex_pool_.size() && idx < 0; ++i)
 		{
-			if (tex_pool_[i].Match(brick, c, tn, nx, ny, nz, nb, textype))
+			if (tex_pool_[i].Match(brick, CompType::Data, tn, nx, ny, nz, nb, textype))
 			{
 				//found!
 				idx = i;
@@ -732,18 +763,18 @@ namespace flvr
 		{
 			//see if it needs to free some memory
 			if (glbin_settings.m_mem_swap)
-				check_swap_memory(brick, c);
+				check_swap_memory(brick, CompType::Data);
 
 			// allocate new object
 			unsigned int tex_id;
 			glGenTextures(1, (GLuint*)&tex_id);
 
 			// create new entry
-			tex_pool_.push_back(TexParam(c, tn, nx, ny, nz, nb, textype, tex_id));
+			tex_pool_.push_back(TexParam(CompType::Data, tn, nx, ny, nz, nb, textype, tex_id));
 			idx = int(tex_pool_.size()) - 1;
 
 			tex_pool_[idx].brick = brick;
-			tex_pool_[idx].comp = c;
+			tex_pool_[idx].comp_type = CompType::Data;
 			// bind texture object
 			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
 			result = tex_pool_[idx].id;
@@ -768,8 +799,8 @@ namespace flvr
 			}
 			else
 			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
 			}
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -778,23 +809,21 @@ namespace flvr
 			GLint internal_format;
 			if (nb < 3)
 			{
-				if (compression && GLEW_ARB_texture_compression_rgtc &&
-					brick->ntype(c) == TextureBrick::TYPE_INT)
+				if (compression && GLEW_ARB_texture_compression_rgtc)
 					internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				else
-					internal_format = (brick->tex_type(c) == GL_SHORT ||
-						brick->tex_type(c) == GL_UNSIGNED_SHORT) ?
+					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
+						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?
 					GL_R16 : GL_R8;
 				format = GL_RED;
 			}
 			else
 			{
-				if (compression && GLEW_ARB_texture_compression_rgtc &&
-					brick->ntype(c) == TextureBrick::TYPE_INT)
+				if (compression && GLEW_ARB_texture_compression_rgtc)
 					internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				else
-					internal_format = (brick->tex_type(c) == GL_SHORT ||
-						brick->tex_type(c) == GL_UNSIGNED_SHORT) ?
+					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
+						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?
 					GL_RGBA16UI : GL_RGBA8UI;
 				format = GL_RGBA;
 			}
@@ -819,16 +848,18 @@ namespace flvr
 						}
 						else if (mainmem_buf_size_ >= 1.0)
 						{
-							double bsize = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+							double bsize = nx * ny * nz * nb / 1.04e6;
 							if (available_mainmem_buf_size_ - bsize < 0.0)
 							{
 								double free_mem_size = 0.0;
 								while (free_mem_size < bsize && del_id < loadedbrks.size())
 								{
 									TextureBrick* b = loadedbrks[del_id].brk;
-									if (!loadedbrks[del_id].swapped && b->isLoaded()) {
+									if (!loadedbrks[del_id].swapped && b->isLoaded())
+									{
 										b->freeBrkData();
-										free_mem_size += b->nx() * b->ny() * b->nz() * b->nb(0) / 1.04e6;
+										auto res_b = b->get_size();
+										free_mem_size += res_b.intx() * res_b.inty() * res_b.intz() * b->nb(CompType::Data) / 1.04e6;
 									}
 									del_id++;
 								}
@@ -837,11 +868,11 @@ namespace flvr
 						}
 
 						FileLocInfo* finfo = tex->GetFileName(brick->getID());
-						void* texdata = brick->tex_data_brk(c, finfo);
+						void* texdata = brick->tex_data_brk(CompType::Data, finfo);
 						if (texdata)
 						{
-							glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
-							glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+							glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(CompType::Data), 0);
+							glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(CompType::Data), texdata);
 						}
 						else
 						{
@@ -858,20 +889,20 @@ namespace flvr
 							{
 								brick->freeBrkData();
 
-								double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+								double new_mem = nx * ny * nz * nb / 1.04e6;
 								available_mainmem_buf_size_ += new_mem;
 							}
 							else
 							{
 								if (!lb_swapped)
 								{
-									double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+									double new_mem = nx * ny * nz * nb / 1.04e6;
 									available_mainmem_buf_size_ -= new_mem;
 								}
 
 								LoadedBrick lb;
 								lb.swapped = false;
-								lb.size = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+								lb.size = nx * ny * nz * nb / 1.04e6;
 								lb.brk = brick;
 								lb.brk->set_id_in_loadedbrks(static_cast<int>(loadedbrks.size()));
 								loadedbrks.push_back(lb);
@@ -885,11 +916,11 @@ namespace flvr
 						if (brick->isLoaded())
 						{
 							bool brkerror = false;
-							void* texdata = brick->tex_data_brk(c, NULL);
+							void* texdata = brick->tex_data_brk(CompType::Data, NULL);
 							if (texdata)
 							{
-								glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
-								glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+								glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(CompType::Data), 0);
+								glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(CompType::Data), texdata);
 							}
 							else
 							{
@@ -914,11 +945,11 @@ namespace flvr
 							if (brick->isLoaded())
 							{
 								bool brkerror = false;
-								void* texdata = brick->tex_data_brk(c, NULL);
+								void* texdata = brick->tex_data_brk(CompType::Data, NULL);
 								if (texdata)
 								{
-									glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(c), 0);
-									glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(c), texdata);
+									glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(CompType::Data), 0);
+									glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format, brick->tex_type(CompType::Data), texdata);
 								}
 								else
 								{
@@ -946,14 +977,14 @@ namespace flvr
 				else
 				{
 					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-						brick->tex_type(c), 0);
+						brick->tex_type(CompType::Data), 0);
 
-					load_texture(brick->tex_data(c, raw_data), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
+					load_texture(brick->tex_data(CompType::Data, raw_data), nx, ny, nz, nb, brick->tex_type(CompType::Data), format);
 				}
 
 				if (glbin_settings.m_mem_swap)
 				{
-					double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+					double new_mem = nx * ny * nz * nb / 1.04e6;
 					glbin_settings.m_available_mem -= new_mem;
 				}
 			}
@@ -990,24 +1021,22 @@ namespace flvr
 		GLint result = -1;
 		if (!brick)
 			return result;
-		int c = brick->nmask();
-		if (c < 0)
-			return result;
 		int tn = 0;
 
-		glActiveTexture(GL_TEXTURE0 + (unit > 0 ? unit : c));
+		glActiveTexture(GL_TEXTURE0 + (unit > 0 ? unit : 2));
 
-		int nb = brick->nb(c);
-		unsigned int nx = brick->nx();
-		unsigned int ny = brick->ny();
-		unsigned int nz = brick->nz();
-		GLenum textype = brick->tex_type(c);
+		auto res = brick->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
+		int nb = brick->nb(CompType::Mask);
+		GLenum textype = brick->tex_type(CompType::Mask);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
 		int idx = -1;
 		for (size_t i = 0; i < tex_pool_.size() && idx < 0; i++)
 		{
-			if (tex_pool_[i].Match(brick, c, tn, nx, ny, nz, nb, textype))
+			if (tex_pool_[i].Match(brick, CompType::Mask, tn, nx, ny, nz, nb, textype))
 			{
 				//found!
 				idx = static_cast<int>(i);
@@ -1030,11 +1059,11 @@ namespace flvr
 			unsigned int tex_id;
 			glGenTextures(1, (GLuint*)&tex_id);
 
-			tex_pool_.push_back(TexParam(c, tn, nx, ny, nz, nb, textype, tex_id));
+			tex_pool_.push_back(TexParam(CompType::Mask, tn, nx, ny, nz, nb, textype, tex_id));
 			idx = int(tex_pool_.size()) - 1;
 
 			tex_pool_[idx].brick = brick;
-			tex_pool_[idx].comp = c;
+			tex_pool_[idx].comp_type = CompType::Mask;
 			// bind texture object
 			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
 			result = tex_pool_[idx].id;
@@ -1055,8 +1084,8 @@ namespace flvr
 			}
 			else
 			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
 			}
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -1066,9 +1095,9 @@ namespace flvr
 			if (glTexImage3D)
 			{
 				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-					brick->tex_type(c), 0);
+					brick->tex_type(CompType::Mask), 0);
 
-				load_texture(brick->tex_data(c), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
+				load_texture(brick->tex_data(CompType::Mask), nx, ny, nz, nb, brick->tex_type(CompType::Mask), format);
 			}
 
 			if (!ShaderProgram::no_tex_unpack_)
@@ -1092,22 +1121,22 @@ namespace flvr
 		if (!brick)
 			return result;
 
-		int c = brick->nlabel();
 		int tn = 0;
 
-		glActiveTexture(GL_TEXTURE0 + c);
+		glActiveTexture(GL_TEXTURE0 + 3);
 
-		int nb = brick->nb(c);
-		int nx = brick->nx();
-		int ny = brick->ny();
-		int nz = brick->nz();
-		GLenum textype = brick->tex_type(c);
+		auto res = brick->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
+		int nb = brick->nb(CompType::Label);
+		GLenum textype = brick->tex_type(CompType::Label);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
 		int idx = -1;
 		for (unsigned int i = 0; i < tex_pool_.size() && idx < 0; i++)
 		{
-			if (tex_pool_[i].Match(brick, c, tn, nx, ny, nz, nb, textype))
+			if (tex_pool_[i].Match(brick, CompType::Label, tn, nx, ny, nz, nb, textype))
 			{
 				//found!
 				idx = i;
@@ -1128,11 +1157,11 @@ namespace flvr
 		{
 			unsigned int tex_id;
 			glGenTextures(1, (GLuint*)&tex_id);
-			tex_pool_.push_back(TexParam(c, tn, nx, ny, nz, nb, textype, tex_id));
+			tex_pool_.push_back(TexParam(CompType::Label, tn, nx, ny, nz, nb, textype, tex_id));
 			idx = int(tex_pool_.size()) - 1;
 
 			tex_pool_[idx].brick = brick;
-			tex_pool_[idx].comp = c;
+			tex_pool_[idx].comp_type = CompType::Label;
 			// bind texture object
 			glBindTexture(GL_TEXTURE_3D, tex_pool_[idx].id);
 			result = tex_pool_[idx].id;
@@ -1153,8 +1182,8 @@ namespace flvr
 			}
 			else
 			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, brick->sx());
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, brick->sy());
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
 			}
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -1164,9 +1193,9 @@ namespace flvr
 			if (glTexImage3D)
 			{
 				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
-					brick->tex_type(c), NULL);
+					brick->tex_type(CompType::Label), NULL);
 
-				load_texture(brick->tex_data(c), nx, ny, nz, nb, brick->sx(), brick->sy(), brick->tex_type(c), format);
+				load_texture(brick->tex_data(CompType::Label), nx, ny, nz, nb, brick->tex_type(CompType::Label), format);
 			}
 
 			if (!ShaderProgram::no_tex_unpack_)
@@ -1186,10 +1215,11 @@ namespace flvr
 		return bd1.dist > bd2.dist;
 	}
 
-	void TextureRenderer::check_swap_memory(TextureBrick* brick, int c)
+	void TextureRenderer::check_swap_memory(TextureBrick* brick, CompType c)
 	{
 		unsigned int i;
-		double new_mem = brick->nx() * brick->ny() * brick->nz() * brick->nb(c) / 1.04e6;
+		auto res = brick->get_size();
+		double new_mem = res.intx() * res.inty() * res.intz() * brick->nb(c) / 1.04e6;
 
 		if (glbin_settings.m_use_mem_limit)
 		{
@@ -1228,7 +1258,8 @@ namespace flvr
 			{
 				TextureBrick* btemp = bd_list[i].brick;
 				tex_pool_[bd_list[i].index].delayed_del = true;
-				double released_mem = btemp->nx() * btemp->ny() * btemp->nz() * btemp->nb(c) / 1.04e6;
+				auto res_temp = btemp->get_size();
+				double released_mem = res_temp.intx() * res_temp.inty() * res_temp.intz() * btemp->nb(c) / 1.04e6;
 				est_avlb_mem += released_mem;
 				if (est_avlb_mem >= new_mem)
 					break;
@@ -1391,8 +1422,6 @@ namespace flvr
 		unsigned int ny,
 		unsigned int nz,
 		unsigned int nb,
-		unsigned int sx,
-		unsigned int sy,
 		GLenum tex_type,
 		GLenum format)
 	{
@@ -1400,39 +1429,16 @@ namespace flvr
 		if (!tex)
 			return;
 
-		if (ShaderProgram::no_tex_unpack_)
-		{
-			if (tex->get_brick_num() > 1)
-			{
-				unsigned long long mem_size = (unsigned long long)nx *
-					(unsigned long long)ny * (unsigned long long)nz * nb;
-				unsigned char* temp = new unsigned char[mem_size];
-				unsigned char* tempp = temp;
-				unsigned char* tp = (unsigned char*)(tex_data);
-				unsigned char* tp2;
-				for (size_t k = 0; k < static_cast<size_t>(nz); ++k)
-				{
-					tp2 = tp;
-					for (size_t j = 0; j < static_cast<size_t>(ny); ++j)
-					{
-						memcpy(tempp, tp2, nx * nb);
-						tempp += nx * nb;
-						tp2 += sx * nb;
-					}
-					tp += sx * sy * nb;
-				}
-				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
-					tex_type, (GLvoid*)temp);
-				delete[]temp;
-			}
-			else
-				glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
-					tex_type, tex_data);
-		}
-		else
-			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
-				tex_type, tex_data);
+		// Ensure tight packing (no padding between rows/slices)
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+		glTexSubImage3D(GL_TEXTURE_3D,
+			0,                // mipmap level
+			0, 0, 0,          // x, y, z offsets
+			nx, ny, nz,       // width, height, depth
+			format,           // pixel format
+			tex_type,         // pixel type
+			tex_data);        // pointer to raw data
 	}
 
 	//release texture
@@ -1478,8 +1484,11 @@ namespace flvr
 			std::vector<TextureBrick*>* bs = tex->get_bricks();
 			for (size_t i = 0; i < bs->size(); i++)
 			{
-				if ((*bs)[i]->isLoaded()) {
-					available_mainmem_buf_size_ += (*bs)[i]->nx() * (*bs)[i]->ny() * (*bs)[i]->nz() * (*bs)[i]->nb(0) / 1.04e6;
+				if ((*bs)[i]->isLoaded())
+				{
+					auto res = (*bs)[i]->get_size();
+					int nb = (*bs)[i]->nb(CompType::Data);
+					available_mainmem_buf_size_ += res.intx() * res.inty() * res.intz() * nb / 1.04e6;
 					(*bs)[i]->freeBrkData();
 				}
 			}

@@ -127,6 +127,7 @@ namespace flvr
 				c->second.bytes = bytes;
 		}
 
+		inline fluo::Vector get_size() { return size_; }
 		inline fluo::Vector get_msize() { return msize_; }
 		inline fluo::Vector get_off_size() { return off_size_; }
 

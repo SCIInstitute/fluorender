@@ -63,6 +63,7 @@ namespace flvr
 	class Texture;
 	class TextureBrick;
 	enum class RenderMode : int;
+	enum class CompType : int;
 	//a simple fixed-length fifo sequence
 	class BrickQueue
 	{
@@ -133,39 +134,18 @@ namespace flvr
 		int nx, ny, nz, nb;
 		unsigned int id;
 		TextureBrick *brick;
-		int comp;
+		CompType comp_type;
 		int time;
 		GLenum textype;
 		bool delayed_del;
-		TexParam() :
-			nx(0), ny(0), nz(0), nb(0),
-			id(0), brick(0), comp(0), time(0),
-			textype(GL_UNSIGNED_BYTE),
-			delayed_del(false)
-		{}
-		TexParam(int c, int t,
+		TexParam();
+		TexParam(CompType c, int t,
 			int x, int y, int z, int b,
 			GLenum f,
-			unsigned int i) :
-			nx(x), ny(y), nz(z), nb(b),
-			id(i), brick(0), comp(c), time(t),
-			textype(f),
-			delayed_del(false)
-		{}
+			unsigned int i);
 
 		bool Match(TextureBrick* bk,
-			int c, int t, int x, int y, int z, int b, GLenum f)
-		{
-			return id != 0 &&
-				brick == bk &&
-				comp == c &&
-				time == t &&
-				nx == x &&
-				ny == y &&
-				nz == z &&
-				nb == b &&
-				textype == f;
-		}
+			CompType c, int t, int x, int y, int z, int b, GLenum f);
 	};
 
 #define PALETTE_W 256
@@ -359,7 +339,7 @@ namespace flvr
 		//brick distance sort
 		static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);
 		//check and swap memory
-		void check_swap_memory(TextureBrick* brick, int c);
+		void check_swap_memory(TextureBrick* brick, CompType c);
 		//load texture bricks for drawing
 		//unit:assigned unit, c:channel
 		GLint load_brick(TextureBrick* brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0);
@@ -367,7 +347,10 @@ namespace flvr
 		GLint load_brick_mask(TextureBrick* brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
 		//load the texture for volume labeling into texture pool
 		GLint load_brick_label(TextureBrick* brick);
-		void load_texture(void* tex_data, unsigned int nx, unsigned int ny, unsigned int nz, unsigned int nb, unsigned int sx, unsigned int sy, GLenum tex_type, GLenum format);
+		void load_texture(void* tex_data,
+			unsigned int nx, unsigned int ny,
+			unsigned int nz, unsigned int nb,
+			GLenum tex_type, GLenum format);
 		void release_texture(int unit, GLenum target);
 
 		//draw slices of the volume

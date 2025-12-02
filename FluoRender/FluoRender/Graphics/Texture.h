@@ -74,7 +74,7 @@ namespace flvr
 		virtual ~Texture();
 
 		int get_build_max_tex_size() { return build_max_tex_size_; }
-		void set_brick_size(int size) { brick_size_ = size; }
+		void set_brick_planned_size(int size) { brick_planned_size_ = size; }
 		bool build(Nrrd* val,
 			double vmn, double vmx,
 			std::vector<flvr::TextureBrick*>* brks = NULL);
@@ -140,7 +140,7 @@ namespace flvr
 		std::vector<TextureBrick*>* get_bricks();
 		//get bricks sorted by id
 		std::vector<TextureBrick*>* get_bricks_id();
-		int get_brick_size() {return int((*bricks_).size());}
+		int get_brick_list_size() {return int((*bricks_).size());}
 		//quota bricks
 		std::vector<TextureBrick*>* get_quota_bricks();
 
@@ -164,7 +164,7 @@ namespace flvr
 		fluo::Vector get_spacing_scale() { return spacing_scale_; }
 
 		// Creator of the brick owns the nrrd memory.
-		void set_nrrd(TexComp comp, CompType type);
+		void set_nrrd(CompType type, TexComp comp);
 		TexComp get_nrrd(CompType type);
 		bool trim_mask_undos_head();
 		bool trim_mask_undos_tail();
@@ -216,7 +216,7 @@ namespace flvr
 		//remember the brick size, as it may change
 		int build_max_tex_size_;
 		//expected brick size, 0: ignored
-		int brick_size_;
+		int brick_planned_size_;
 		//! data carved up to texture memory sized chunks.
 		std::vector<TextureBrick*>						*bricks_;
 		//for limited number of bricks during interactions
