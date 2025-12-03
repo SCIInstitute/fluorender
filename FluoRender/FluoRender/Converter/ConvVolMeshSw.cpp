@@ -87,7 +87,7 @@ void ConvVolMeshSw::Convert()
 	model->position[2] = 0.0f;
 	model->hastexture = false;
 
-	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
+	m_spacing = vd->GetSpacing();
 
 	SetProgress(0, "FluoRender is converting volume to mesh. Please wait.");
 	SetRange(0, 100);
@@ -120,7 +120,7 @@ void ConvVolMeshSw::MergeVertices(bool avg_normals)
 		return;
 	SetRange(0, 100);
 	SetProgress(0, "FluoRender is welding vertices. Please wait.");
-	glmWeld(model, static_cast<GLfloat>(0.001 * fluo::Min(m_spcx, m_spcy, m_spcz)));
+	glmWeld(model, static_cast<GLfloat>(0.001 * m_spacing.minComponent()));
 	if (avg_normals)
 	{
 		SetProgress(50, "FluoRender is generating normals. Please wait.");
@@ -313,21 +313,21 @@ double ConvVolMeshSw::GetValue(VolumeData* vd, int x, int y, int z)
 		return 0.0;
 	if (m_use_mask)
 	{
-		double v = vd->GetMaskValue(x, y, z);
+		double v = vd->GetMaskValue(fluo::Point(x, y, z));
 		if (v > 0.0)
 		{
 			if (m_use_transfer)
-				return vd->GetTransferedValue(x, y, z);
+				return vd->GetTransferedValue(fluo::Point(x, y, z));
 			else
-				return vd->GetOriginalValue(x, y, z);
+				return vd->GetOriginalValue(fluo::Point(x, y, z));
 		}
 	}
 	else
 	{
 		if (m_use_transfer)
-			return vd->GetTransferedValue(x, y, z);
+			return vd->GetTransferedValue(fluo::Point(x, y, z));
 		else
-			return vd->GetOriginalValue(x, y, z);
+			return vd->GetOriginalValue(fluo::Point(x, y, z));
 	}
 	return 0.0;
 }
@@ -361,8 +361,8 @@ fluo::Vector ConvVolMeshSw::Intersect(double verts[8], int v1, int v2,
 	else
 		p = p1;
 
-	p = fluo::Vector(x*m_spcx, y*m_spcy, z*m_spcz) +
-		fluo::Vector(p.x()*m_spcx*m_downsample, p.y()*m_spcy*m_downsample, p.z()*m_spcz*m_downsample_z);
+	p = fluo::Vector(x, y, z) * m_spacing +
+		p * m_spacing * fluo::Vector(m_downsample, m_downsample, m_downsample_z);
 
 	return p;
 }

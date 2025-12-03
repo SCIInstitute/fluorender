@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Progress.h>
 #include <Cell.h>
+#include <Vector.h>
+#include <Point.h>
 #include <functional>
 #include <string>
 #include <vector>
@@ -198,17 +200,15 @@ namespace flrd
 		unsigned int GetExt(unsigned int* data_label,
 			unsigned long long index,
 			unsigned int id,
-			int nx, int ny, int nz,
-			int i, int j, int k);
+			const fluo::Vector& size,
+			const fluo::Point& p);
 
 		bool GetColor(unsigned int id,
 			int brick_id,
 			VolumeData* vd,
 			fluo::Color &color);
 		int GetColocalization(size_t bid,
-			unsigned int bi,
-			unsigned int bj,
-			unsigned int bk,
+			const fluo::Point& p,
 			std::vector<unsigned int> &sumi,
 			std::vector<double> &sumd);
 
@@ -216,7 +216,7 @@ namespace flrd
 		void ReplaceId(unsigned int base_id, Celp &info);
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
-			int nx, int ny, int nz,
+			const fluo::Vector& size,
 			flvr::TextureBrick* b,
 			unsigned int* data);
 

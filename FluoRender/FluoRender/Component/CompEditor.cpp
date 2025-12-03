@@ -110,11 +110,9 @@ void ComponentEditor::Clean(int mode)
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
 		switch (mode)
@@ -166,20 +164,18 @@ void ComponentEditor::NewId(bool append, bool track)
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
+	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
+	if (!comp_label.data)
 	{
 		vd->AddEmptyLabel();
-		nrrd_label = tex->get_nrrd(tex->nlabel());
+		comp_label = tex->get_nrrd(flvr::CompType::Label);
 	}
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	auto res = vd->GetResolution();
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	unsigned long long index;
 
 	//get ID of currently/previously masked region
@@ -246,20 +242,18 @@ void ComponentEditor::NewId(bool append, bool track)
 	Celp cell;
 	if (new_id)
 		cell = Celp(new Cell(new_id));
-	for (i = 0; i < nx; ++i)
-		for (j = 0; j < ny; ++j)
-			for (k = 0; k < nz; ++k)
-			{
-				index = nx * ny*k + nx * j + i;
-				if (data_mask[index])
-				{
-					if (append && data_label[index])
-						continue;
-					data_label[index] = new_id;
-					if (new_id)
-						cell->Inc(i, j, k, 1.0f);
-				}
-			}
+	for (i = 0; i < res.intx(); ++i) for (j = 0; j < res.inty(); ++j) for (k = 0; k < res.intz(); ++k)
+	{
+		index = res.get_size_xy()*k + res.intx() * j + i;
+		if (data_mask[index])
+		{
+			if (append && data_label[index])
+				continue;
+			data_label[index] = new_id;
+			if (new_id)
+				cell->Inc(fluo::Point(i, j, k), 1.0f);
+		}
+	}
 
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();
@@ -307,19 +301,17 @@ void ComponentEditor::ReplaceId()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
+	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
+	if (!comp_label.data)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
 	if (!data_label)
 		return;
 
 	unsigned int old_id;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
 		old_id = data_label[index];
@@ -368,10 +360,10 @@ void ComponentEditor::ReplaceList()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
+	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
+	if (!comp_label.data)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
 	if (!data_label)
 		return;
 
@@ -380,11 +372,9 @@ void ComponentEditor::ReplaceList()
 	std::unordered_map<unsigned int, unsigned int> list_rep;
 	std::unordered_map<unsigned int, unsigned int>::iterator list_rep_iter;
 	unsigned int old_id, new_id;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
 		old_id = data_label[index];
@@ -441,20 +431,18 @@ void ComponentEditor::CombineId()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
+	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
+	if (!comp_label.data)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
 	if (!data_label)
 		return;
 
 	//combine IDs
 	unsigned int id = 0;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
 		if (!data_mask[index] ||
@@ -518,18 +506,16 @@ void ComponentEditor::CombineList()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
+	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
+	if (!comp_label.data)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
 	if (!data_label)
 		return;
 	//combine IDs
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
 		if (!data_mask[index] ||

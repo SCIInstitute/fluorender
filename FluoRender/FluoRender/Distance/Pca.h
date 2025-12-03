@@ -64,7 +64,7 @@ namespace flrd
 				m_points.insert(m_points.end(), pca.m_points.begin(), pca.m_points.end());
 			m_bpoint.extend(pca.m_bpoint);
 		}
-		void AddPoint(fluo::Point &point)
+		void AddPoint(const fluo::Point &point)
 		{
 			if (m_mode == 0)
 			{
@@ -81,10 +81,10 @@ namespace flrd
 				m_points.push_back(point);
 			m_bpoint.extend(point);
 		}
-		void AddPointScale(fluo::Point &point, double sx, double sy, double sz)
+		void AddPointScale(const fluo::Point &point, const fluo::Vector& scale)
 		{
 			fluo::Point sp(point);
-			sp.scale(sx, sy, sz);
+			sp.scale(scale);
 			AddPoint(sp);
 		}
 		void SetPoints(std::vector<fluo::Point> &points)

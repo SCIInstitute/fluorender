@@ -44,13 +44,15 @@ bool ColorMesh::GetInfo(
 	long& nx, long& ny, long& nz,
 	long& ox, long& oy, long& oz)
 {
-	bits = b->nb(0) * 8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
-	ox = b->ox();
-	oy = b->oy();
-	oz = b->oz();
+	bits = b->nb(flvr::CompType::Data) * 8;
+	auto res = b->get_size();
+	auto off_size = b->get_off_size();
+	nx = res.intx();
+	ny = res.inty();
+	nz = res.intz();
+	ox = off_size.intx();
+	oy = off_size.inty();
+	oz = off_size.intz();
 	return true;
 }
 
@@ -98,7 +100,7 @@ void ColorMesh::Update()
 	if (kernel_index0 < 0)
 		return;
 
-	int brick_num = vd->GetTexture()->get_brick_num();
+	int brick_num = vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*>* bricks = vd->GetTexture()->get_bricks();
 
 	//compute workload

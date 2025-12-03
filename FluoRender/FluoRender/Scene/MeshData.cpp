@@ -57,16 +57,6 @@ MeshData::MeshData() :
 {
 	type = 3;//mesh
 
-	m_trans[0] = 0.0;
-	m_trans[1] = 0.0;
-	m_trans[2] = 0.0;
-	m_rot[0] = 0.0;
-	m_rot[1] = 0.0;
-	m_rot[2] = 0.0;
-	m_scale[0] = 1.0;
-	m_scale[1] = 1.0;
-	m_scale[2] = 1.0;
-
 	double hue, sat, val;
 	hue = double(std::rand()%360);
 	sat = 1.0;
@@ -979,84 +969,6 @@ void MeshData::ToggleDrawBounds()
 bool MeshData::GetDrawBounds()
 {
 	return m_draw_bounds;
-}
-
-void MeshData::SetTranslation(double x, double y, double z)
-{
-	m_trans[0] = x;
-	m_trans[1] = y;
-	m_trans[2] = z;
-}
-
-void MeshData::GetTranslation(double &x, double &y, double &z)
-{
-	x = m_trans[0];
-	y = m_trans[1];
-	z = m_trans[2];
-}
-
-void MeshData::SetTranslation(const fluo::Vector& val)
-{
-	m_trans[0] = val.x();
-	m_trans[1] = val.y();
-	m_trans[2] = val.z();
-}
-
-fluo::Vector MeshData::GetTranslation()
-{
-	return fluo::Vector(m_trans[0], m_trans[1], m_trans[2]);
-}
-
-void MeshData::SetRotation(double x, double y, double z)
-{
-	m_rot[0] = x;
-	m_rot[1] = y;
-	m_rot[2] = z;
-}
-
-void MeshData::GetRotation(double &x, double &y, double &z)
-{
-	x = m_rot[0];
-	y = m_rot[1];
-	z = m_rot[2];
-}
-
-void MeshData::SetRotation(const fluo::Vector& val)
-{
-	m_rot[0] = val.x();
-	m_rot[1] = val.y();
-	m_rot[2] = val.z();
-}
-
-fluo::Vector MeshData::GetRotation()
-{
-	return fluo::Vector(m_rot[0], m_rot[1], m_rot[2]);
-}
-
-void MeshData::SetScaling(double x, double y, double z)
-{
-	m_scale[0] = x;
-	m_scale[1] = y;
-	m_scale[2] = z;
-}
-
-void MeshData::GetScaling(double &x, double &y, double &z)
-{
-	x = m_scale[0];
-	y = m_scale[1];
-	z = m_scale[2];
-}
-
-void MeshData::SetScaling(const fluo::Vector& val)
-{
-	m_scale[0] = val.x();
-	m_scale[1] = val.y();
-	m_scale[2] = val.z();
-}
-
-fluo::Vector MeshData::GetScaling()
-{
-	return fluo::Vector(m_scale[0], m_scale[1], m_scale[2]);
 }
 
 void MeshData::SetClippingBox(const fluo::ClippingBox& box)

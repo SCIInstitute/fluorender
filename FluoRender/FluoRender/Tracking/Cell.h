@@ -137,8 +137,8 @@ namespace flrd
 		{}
 		Cell(unsigned int id, unsigned int brick_id,
 			unsigned int size_ui, double size_d, unsigned int ext_ui,
-			double x, double y, double z,
-			double sx, double sy, double sz) :
+			const fluo::Point& center,
+			const fluo::Vector& scale) :
 			m_id(id), m_brick_id(brick_id),
 			m_use_d(true), m_size_ui(size_ui), m_size_d(size_d),
 			m_ext_ui(ext_ui), m_ext_d(size_d * ext_ui),
@@ -148,15 +148,15 @@ namespace flrd
 			m_count0(0), m_count1(0),
 			m_celvrtx(CellGraph::null_vertex())
 		{
-			m_center = fluo::Point(x, y, z);
+			m_center = center;
 			m_pos = m_center;
 			m_box.extend(m_center);
-			m_pca.AddPointScale(m_center, sx, sy, sz);
+			m_pca.AddPointScale(m_center, scale);
 		}
 		Cell(unsigned int id, unsigned int brick_id,
 			unsigned int size_ui, double size_d, unsigned int ext_ui,
-			double x, double y, double z,
-			double sx, double sy, double sz,
+			const fluo::Point& center,
+			const fluo::Vector& scale,
 			std::vector<unsigned int> &sumi, std::vector<double> &sumd) :
 			m_id(id), m_brick_id(brick_id),
 			m_use_d(true), m_size_ui(size_ui), m_size_d(size_d),
@@ -167,10 +167,10 @@ namespace flrd
 			m_count0(0), m_count1(0),
 			m_celvrtx(CellGraph::null_vertex())
 		{
-			m_center = fluo::Point(x, y, z);
+			m_center = center;
 			m_pos = m_center;
 			m_box.extend(m_center);
-			m_pca.AddPointScale(m_center, sx, sy, sz);
+			m_pca.AddPointScale(m_center, scale);
 			m_size_ui_list = sumi;
 			m_size_d_list = sumd;
 		}
@@ -192,16 +192,16 @@ namespace flrd
 		CelVrtx GetCelVrtx();
 		void SetCelVrtx(CelVrtx intra_vert);
 		void Set(Celp &celp);
-		void Inc(size_t i, size_t j, size_t k, double value);
+		void Inc(const fluo::Point& p, double value);
 		void Inc(Celp &celp);
 		void Inc();
 		void IncExt(double value);
 		void Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
-			double x, double y, double z,
-			double sx, double sy, double sz);
+			const fluo::Point& p,
+			const fluo::Vector& scale);
 		void Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
-			double x, double y, double z,
-			double sx, double sy, double sz,
+			const fluo::Point& p,
+			const fluo::Vector& scale,
 			std::vector<unsigned int> &sumi, std::vector<double> &sumd);
 		void Calc();//calculate mean etc
 		void AddVertex(Verp &vertex);
@@ -227,9 +227,9 @@ namespace flrd
 		//coords
 		void SetCalc(bool bval = true) { m_calc = bval; }
 		fluo::Point &GetCenter();
-		fluo::Point GetCenter(double sx, double sy, double sz);
+		fluo::Point GetCenter(const fluo::Vector& scale);
 		fluo::BBox &GetBox();
-		fluo::BBox GetBox(double sx, double sy, double sz);
+		fluo::BBox GetBox(const fluo::Vector& scale);
 		fluo::Point &GetProjp();
 		//flvr::Point GetProjp(double sx, double sy, double sz);
 		//colocalization
@@ -329,7 +329,7 @@ namespace flrd
 		m_calc = true;
 	}
 
-	inline void Cell::Inc(size_t i, size_t j, size_t k, double value)
+	inline void Cell::Inc(const fluo::Point& p, double value)
 	{
 		m_size_ui++;
 		m_size_d += value;
@@ -338,10 +338,6 @@ namespace flrd
 		m_min = std::min(m_min, value);
 		m_max = std::max(m_max, value);
 
-		fluo::Point p(
-			static_cast<double>(i),
-			static_cast<double>(j),
-			static_cast<double>(k));
 		m_pos += p;
 		m_box.extend(p);
 
@@ -385,8 +381,8 @@ namespace flrd
 	}
 
 	inline void Cell::Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
-		double x, double y, double z,
-		double sx, double sy, double sz)
+		const fluo::Point& p,
+		const fluo::Vector& scale)
 	{
 		m_size_ui += size_ui;
 		m_size_d += size_d;
@@ -397,17 +393,16 @@ namespace flrd
 		m_min = std::min(m_min, size_d);
 		m_max = std::max(m_max, size_d);
 
-		fluo::Point p(x, y, z);
 		m_pos += p;
 		m_box.extend(p);
-		m_pca.AddPointScale(p, sx, sy, sz);
+		m_pca.AddPointScale(p, scale);
 
 		m_calc = false;
 	}
 
 	inline void Cell::Inc(unsigned int size_ui, double size_d, unsigned int ext_ui,
-		double x, double y, double z,
-		double sx, double sy, double sz,
+		const fluo::Point& p,
+		const fluo::Vector& scale,
 		std::vector<unsigned int> &sumi, std::vector<double> &sumd)
 	{
 		m_size_ui += size_ui;
@@ -419,10 +414,9 @@ namespace flrd
 		m_min = std::min(m_min, size_d);
 		m_max = std::max(m_max, size_d);
 
-		fluo::Point p(x, y, z);
 		m_pos += p;
 		m_box.extend(p);
-		m_pca.AddPointScale(p, sx, sy, sz);
+		m_pca.AddPointScale(p, scale);
 
 		for (size_t i = 0; i < m_size_ui_list.size(); ++i)
 			m_size_ui_list[i] += sumi[i];
@@ -530,12 +524,14 @@ namespace flrd
 		return m_center;
 	}
 
-	inline fluo::Point Cell::GetCenter(double sx, double sy, double sz)
+	inline fluo::Point Cell::GetCenter(const fluo::Vector& scale)
 	{
 		if (!m_calc)
 			Calc();
 
-		return fluo::Point(m_center.x()*sx, m_center.y()*sy, m_center.z()*sz);
+		auto p = m_center;
+		p.scale(scale);
+		return p;
 	}
 
 	inline fluo::BBox &Cell::GetBox()
@@ -543,10 +539,10 @@ namespace flrd
 		return m_box;
 	}
 
-	inline fluo::BBox Cell::GetBox(double sx, double sy, double sz)
+	inline fluo::BBox Cell::GetBox(const fluo::Vector& scale)
 	{
 		fluo::BBox box(m_box);
-		box.scale(sx, sy, sz);
+		box.scale(scale);
 		return box;
 	}
 

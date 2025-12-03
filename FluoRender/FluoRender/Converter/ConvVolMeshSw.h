@@ -56,7 +56,7 @@ namespace flrd
 	
 	private:
 		//properties from volume data
-		double m_spcx = 1.0, m_spcy = 1.0, m_spcz = 1.0;
+		fluo::Vector m_spacing = fluo::Vector(1.0);
 
 		bool Compute(void* model);
 		double GetValue(VolumeData* vd, int x, int y, int z);

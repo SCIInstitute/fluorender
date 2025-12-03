@@ -165,13 +165,12 @@ void ComponentSelector::CompFull()
 
 	//get selected IDs
 	int i, j, k;
-	int nx, ny, nz;
 	unsigned long long index;
 	unsigned int label_value;
 	unsigned int brick_id;
 	CelpList sel_labels;
 	CelpListIter label_iter;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
@@ -180,12 +179,14 @@ void ComponentSelector::CompFull()
 			continue;
 
 		brick_id = b->get_id();
-		for (i = 0; i < b->nx(); ++i)
-		for (j = 0; j < b->ny(); ++j)
-		for (k = 0; k < b->nz(); ++k)
+		auto res_b = b->get_size();
+		auto off_size = b->get_off_size();
+		for (i = 0; i < res_b.intx(); ++i)
+		for (j = 0; j < res_b.inty(); ++j)
+		for (k = 0; k < res_b.intz(); ++k)
 		{
-			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)(k + b->oz()) +
-				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			index = (unsigned long long)res.get_size_xy()*(unsigned long long)(k + off_size.intz()) +
+				(unsigned long long)res.intx()*(unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
 			if (data_mask[index] &&
 				data_label[index])
 			{
@@ -218,12 +219,14 @@ void ComponentSelector::CompFull()
 			!comp_list->FindBrick(brick_id))
 			continue;
 		
-		for (i = 0; i < b->nx(); ++i)
-		for (j = 0; j < b->ny(); ++j)
-		for (k = 0; k < b->nz(); ++k)
+		auto res_b = b->get_size();
+		auto off_size = b->get_off_size();
+		for (i = 0; i < res_b.intx(); ++i)
+		for (j = 0; j < res_b.inty(); ++j)
+		for (k = 0; k < res_b.intz(); ++k)
 		{
-			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)(k + b->oz()) +
-				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			index = (unsigned long long)res.get_size_xy()*(unsigned long long)(k + off_size.intz()) +
+				(unsigned long long)res.intx()*(unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
 			if (data_label[index])
 			{
 				label_value = data_label[index];
@@ -294,10 +297,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 	}
 
 	//select append
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx*
-		(unsigned long long)ny * (unsigned long long)nz;
+	auto res = vd->GetResolution();
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	unsigned long long index;
 	unsigned int label_value;
 	CelpListIter label_iter;
@@ -481,10 +482,8 @@ void ComponentSelector::All()
 		return;
 
 	//select append
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	auto res = vd->GetResolution();
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	std::memset(data_mask, 255, for_size);
 	vd->GetTexture()->valid_all_mask();
 	//invalidate label mask in gpu
@@ -510,10 +509,8 @@ void ComponentSelector::Clear(bool invalidate)
 		return;
 
 	//select append
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	auto res = vd->GetResolution();
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	std::memset(data_mask, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
@@ -544,11 +541,9 @@ void ComponentSelector::Delete()
 	if (!data_label)
 		return;
 	//select append
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
 		if (m_id == data_label[index])
@@ -589,11 +584,9 @@ void ComponentSelector::DeleteList()
 	if (!data_label)
 		return;
 	//select append
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	unsigned long long index;
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	unsigned long long key;
 	int bn = vd->GetBrickNum();
 	for (index = 0; index < for_size; ++index)
@@ -660,18 +653,19 @@ void ComponentSelector::SelectList()
 	unsigned long long index;
 	unsigned long long key;
 	int i, j, k;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
 		brick_id = b->get_id();
-		for (i = 0; i < b->nx(); ++i)
-		for (j = 0; j < b->ny(); ++j)
-		for (k = 0; k < b->nz(); ++k)
+		auto res_b = b->get_size();
+		auto off_size = b->get_off_size();
+		for (i = 0; i < res_b.intx(); ++i)
+		for (j = 0; j < res_b.inty(); ++j)
+		for (k = 0; k < res_b.intz(); ++k)
 		{
-			index = (unsigned long long)nx*(unsigned long long)ny*(unsigned long long)(k + b->oz()) +
-				(unsigned long long)nx*(unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			index = (unsigned long long)res.get_size_xy() * (unsigned long long)(k + off_size.intz()) +
+				(unsigned long long)res.intx() * (unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
 			key = brick_id;
 			key = (key << 32) | data_label[index];
 			if (m_list->find(key) != m_list->end())
@@ -735,16 +729,19 @@ void ComponentSelector::EraseList()
 	unsigned long long index;
 	unsigned long long key;
 	int i, j, k;
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	for (size_t bi = 0; bi < bn; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
 		brick_id = b->get_id();
-		for (i = 0; i < b->nx(); ++i) for (j = 0; j < b->ny(); ++j) for (k = 0; k < b->nz(); ++k)
+		auto res_b = b->get_size();
+		auto off_size = b->get_off_size();
+		for (i = 0; i < res_b.intx(); ++i)
+		for (j = 0; j < res_b.inty(); ++j)
+		for (k = 0; k < res_b.intz(); ++k)
 		{
-			index = (unsigned long long)nx * (unsigned long long)ny * (unsigned long long)(k + b->oz()) +
-				(unsigned long long)nx * (unsigned long long)(j + b->oy()) + (unsigned long long)(i + b->ox());
+			index = (unsigned long long)res.get_size_xy() * (unsigned long long)(k + off_size.intz()) +
+				(unsigned long long)res.intx() * (unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
 			key = brick_id;
 			key = (key << 32) | data_label[index];
 			if (m_list->find(key) != m_list->end())

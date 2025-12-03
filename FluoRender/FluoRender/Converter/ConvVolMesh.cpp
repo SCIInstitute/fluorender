@@ -66,13 +66,15 @@ bool ConvVolMesh::GetInfo(
 	long &nx, long &ny, long &nz,
 	long &ox, long &oy, long &oz)
 {
-	bits = b->nb(0) * 8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
-	ox = b->ox();
-	oy = b->oy();
-	oz = b->oz();
+	bits = b->nb(flvr::CompType::Data) * 8;
+	auto res = b->get_size();
+	auto off_size = b->get_off_size();
+	nx = res.intx();
+	ny = res.inty();
+	nz = res.intz();
+	ox = off_size.intx();
+	oy = off_size.inty();
+	oz = off_size.intz();
 	return true;
 }
 
@@ -83,8 +85,8 @@ void ConvVolMesh::Convert()
 		return;
 	if (!vd->GetTexture())
 		return;
-	int brick_num = vd->GetTexture()->get_brick_num();
-	if (brick_num <= 0)
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
+	if (brick_num == 0)
 		return;
 	bool valid_mask = vd->IsValidMask();
 	m_use_sel = m_use_mask && valid_mask;
@@ -107,8 +109,8 @@ void ConvVolMesh::Update(bool create_mesh)
 		return;
 	if (!vd->GetTexture())
 		return;
-	int brick_num = vd->GetTexture()->get_brick_num();
-	if (brick_num <= 0)
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
+	if (brick_num == 0)
 		return;
 	bool valid_mask = vd->IsValidMask();
 	m_use_sel = m_use_mask && valid_mask;
@@ -234,7 +236,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 {
 	m_busy = true;
 
-	int brick_num = vd->GetTexture()->get_brick_num();
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
 	long bits = vd->GetBits();
 	int chars = bits / 8;
 	float max_int = static_cast<float>(vd->GetMaxValue());
@@ -487,9 +489,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	//update triangle num
 	m_mesh->SetVertexNum(vertex_size);
 	m_mesh->SetTriangleNum(vertex_size / 3);
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	m_mesh->SetScaling(spcx, spcy, spcz);
+	m_mesh->SetScaling(vd->GetSpacing());
 	m_mesh->SetGpuDirty();
 	//download data
 	//m_mesh->ReturnData();
@@ -577,12 +577,10 @@ void ConvVolMesh::MergeVertices(bool avg_normals)
 	GLuint ibo_id = m_mesh->AddIndexVBO(idx_num);
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
 	//get epsilon
-	double spcx, spcy, spcz;
+	fluo::Vector spc(1.0);
 	if (auto vd = m_volume.lock())
-		vd->GetSpacings(spcx, spcy, spcz);
-	else
-		spcx = spcy = spcz = 1.0;
-	float epsilon = static_cast<float>(0.1 * fluo::Min(spcx, spcy, spcz));
+		spc = vd->GetSpacing();
+	float epsilon = static_cast<float>(0.1 * spc.minComponent());
 	//vertex count
 	int vertex_count = static_cast<int>(idx_num);
 	//windows size

@@ -70,11 +70,11 @@ void Clusterizer::Compute()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data)
+	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
+	if (!comp_data.data)
 		return;
 	int bits = vd->GetBits();
-	void* data_data = nrrd_data->data;
+	void* data_data = comp_data.data->data;
 	if (!data_data)
 		return;
 	//get mask
@@ -84,21 +84,19 @@ void Clusterizer::Compute()
 	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
 	if (!data_mask)
 		return;
-	Nrrd* nrrd_label = tex->get_nrrd(tex->nlabel());
-	if (!nrrd_label)
+	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
+	if (!comp_label.data)
 	{
 		vd->AddEmptyLabel();
-		nrrd_label = tex->get_nrrd(tex->nlabel());
+		comp_label = tex->get_nrrd(flvr::CompType::Label);
 	}
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
 	if (!data_label)
 		return;
 
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
+	auto res = vd->GetResolution();
 	double scale = vd->GetScalarScale();
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	auto spc = vd->GetSpacing();
 
 	flrd::ClusterMethod* method = 0;
 	//switch method
@@ -134,12 +132,12 @@ void Clusterizer::Compute()
 	if (!method)
 		return;
 
-	method->SetSpacing(spcx, spcy, spcz);
+	method->SetSpacing(spc);
 
 	//add cluster points
 	size_t i, j, k;
 	size_t index;
-	size_t nxyz = nx * ny * nz;
+	size_t nxyz = res.get_size_xyz();
 	unsigned char mask_value;
 	float data_value;
 	unsigned int label_value;
@@ -200,9 +198,9 @@ void Clusterizer::Compute()
 		SetRange(20, 40);
 	else
 		SetRange(0, 40);
-	for (i = 0; i < nx; ++i) for (j = 0; j < ny; ++j) for (k = 0; k < nz; ++k)
+	for (i = 0; i < res.intx(); ++i) for (j = 0; j < res.inty(); ++j) for (k = 0; k < res.intz(); ++k)
 	{
-		index = nx * ny * k + nx * j + i;
+		index = res.get_size_xy() * k + res.intx() * j + i;
 		mask_value = data_mask[index];
 		if (mask_value)
 		{
@@ -237,12 +235,12 @@ void Clusterizer::Compute()
 			auto iter = m_in_cells->find(label_value);
 			if (iter != m_in_cells->end())
 			{
-				iter->second->Inc(i, j, k, data_value);
+				iter->second->Inc(fluo::Point(i, j, k), data_value);
 			}
 			else
 			{
 				flrd::Cell* cell = new flrd::Cell(label_value);
-				cell->Inc(i, j, k, data_value);
+				cell->Inc(fluo::Point(i, j, k), data_value);
 				m_in_cells->insert(std::pair<unsigned int, flrd::Celp>
 					(label_value, flrd::Celp(cell)));
 			}
@@ -261,7 +259,7 @@ void Clusterizer::Compute()
 	if (method->Execute())
 	{
 		method->SetRange(90, 100);
-		method->GenerateNewIDs(0, (void*)data_label, nx, ny, nz, true);
+		method->GenerateNewIDs(0, (void*)data_label, res, true);
 		m_out_cells = std::make_unique<CelpList>(method->GetCellList());
 		vd->GetVR()->clear_tex_label();
 		//m_view->RefreshGL(39);//refresh needs to be performed by caller

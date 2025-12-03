@@ -74,6 +74,7 @@ namespace fluo {
 		inline double& operator()(int idx);
 		inline double operator()(int idx) const;
 		inline void addscaled(const Point& p, const double scale);  // this += p * w;
+		inline void scale(const Vector& scale);
 		inline void scale(const double sx, const double sy, const double sz);
 		inline void x(const double);
 		inline double x() const;
@@ -373,6 +374,13 @@ namespace fluo
 		x_ *= sx;
 		y_ *= sy;
 		z_ *= sz;
+	}
+
+	inline void Point::scale(const Vector& scale)
+	{
+		x_ *= scale.x();
+		y_ *= scale.y();
+		z_ *= scale.z();
 	}
 
 	inline void Point::x(const double d)

@@ -159,10 +159,10 @@ namespace flrd
 		{ m_spc = {spc.x(), spc.y(), spc.z()}; }
 		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
 		void GenerateNewIDs(unsigned int id, void* label,
-			size_t nx, size_t ny, size_t nz,
+			const fluo::Vector& size,
 			bool out_cells = false, unsigned int inc = 42);
 		bool FindId(void* label, unsigned int id,
-			size_t nx, size_t ny, size_t nz);
+			const fluo::Vector& size);
 		std::vector<unsigned int> &GetNewIDs()
 		{ return m_id_list; }
 		virtual bool Execute() = 0;

@@ -57,7 +57,7 @@ void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 }
 
 void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
-	size_t nx, size_t ny, size_t nz,
+	const fluo::Vector& size,
 	bool out_cells, unsigned int inc)
 {
 	m_id_list.clear();
@@ -85,7 +85,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 			id2 += inc;
 			if (id2 == id)
 				break;
-		} while (!id2 || FindId(label, id2, nx, ny, nz));
+		} while (!id2 || FindId(label, id2, size));
 
 		if (out_cells)
 			cell = new Cell(id2);
@@ -94,19 +94,19 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 			iter != cluster.end(); ++iter)
 		{
 			i = int(boost::qvm::A0((*iter)->centeri) + 0.5);
-			if (i <= 0 || i >= nx - 1)
+			if (i <= 0 || i >= size.intx() - 1)
 				continue;
 			j = int(boost::qvm::A1((*iter)->centeri) + 0.5);
-			if (j <= 0 || j >= ny - 1)
+			if (j <= 0 || j >= size.inty() - 1)
 				continue;
 			k = int(boost::qvm::A2((*iter)->centeri) + 0.5);
-			if (k < 0 || k > nz - 1)
+			if (k < 0 || k > size.intz() - 1)
 				continue;
-			index = nx*ny*k + nx*j + i;
+			index = size.get_size_xy()*k + size.intx()*j + i;
 			((unsigned int*)label)[index] = id2;
 
 			if (out_cells)
-				cell->Inc(i, j, k, (*iter)->intensity);
+				cell->Inc(fluo::Point(i, j, k), (*iter)->intensity);
 
 			if (count % 100 == 0)
 				SetProgress(static_cast<int>(count / ticks),
@@ -123,10 +123,9 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 }
 
 bool ClusterMethod::FindId(void* label, unsigned int id,
-	size_t nx, size_t ny, size_t nz)
+	const fluo::Vector& size)
 {
-	unsigned long long for_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long for_size = (unsigned long long)size.get_size_xyz();
 	unsigned long long index;
 	for (index = 0; index < for_size; ++index)
 	{

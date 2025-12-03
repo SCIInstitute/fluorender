@@ -64,6 +64,12 @@ void BBox::scale(double sx, double sy, double sz)
 	cmax_.scale(sx, sy, sz);
 }
 
+void BBox::scale(const Vector& scale)
+{
+	cmin_.scale(scale);
+	cmax_.scale(scale);
+}
+
 void BBox::scale_center(double sx, double sy, double sz)
 {
 	Point c = center();
@@ -71,6 +77,17 @@ void BBox::scale_center(double sx, double sy, double sz)
 	cmax_ -= c;
 	cmin_.scale(sx, sy, sz);
 	cmax_.scale(sx, sy, sz);
+	cmin_ += c;
+	cmax_ += c;
+}
+
+void BBox::scale_center(const Vector& scale)
+{
+	Point c = center();
+	cmin_ -= c;
+	cmax_ -= c;
+	cmin_.scale(scale);
+	cmax_.scale(scale);
 	cmin_ += c;
 	cmax_ += c;
 }

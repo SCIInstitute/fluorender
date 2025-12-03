@@ -309,8 +309,10 @@ namespace fluo
 		void scale(double s, const Vector& o);
 		//scale around origin
 		void scale(double sx, double sy, double sz);
+		void scale(const Vector& scale);
 		//scale around center
 		void scale_center(double sx, double sy, double sz);
+		void scale_center(const Vector& scale);
 
 		//access
 		inline void minx(double v) { cmin_.x(v); }

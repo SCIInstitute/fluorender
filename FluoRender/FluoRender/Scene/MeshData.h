@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TreeLayer.h>
 #include <BBox.h>
+#include <Vector.h>
 #include <glm/glm.hpp>
 
 #ifndef __glew_h__
@@ -138,18 +139,12 @@ public:
 	void SetShadowIntensity(double val);
 	double GetShadowIntensity();
 
-	void SetTranslation(double x, double y, double z);
-	void GetTranslation(double &x, double &y, double &z);
-	void SetTranslation(const fluo::Vector& val);
-	fluo::Vector GetTranslation();
-	void SetRotation(double x, double y, double z);
-	void GetRotation(double &x, double &y, double &z);
-	void SetRotation(const fluo::Vector& val);
-	fluo::Vector GetRotation();
-	void SetScaling(double x, double y, double z);
-	void GetScaling(double &x, double &y, double &z);
-	void SetScaling(const fluo::Vector& val);
-	fluo::Vector GetScaling();
+	void SetTranslation(const fluo::Vector& val) { m_trans = val; }
+	fluo::Vector GetTranslation() { return m_trans; }
+	void SetRotation(const fluo::Vector& val) { m_rot = val; }
+	fluo::Vector GetRotation() { return m_rot; }
+	void SetScaling(const fluo::Vector& val) { m_scale = val; }
+	fluo::Vector GetScaling() { return m_scale; }
 
 	virtual void SetClippingBox(const fluo::ClippingBox& box) override;
 	//clip size
@@ -209,9 +204,9 @@ private:
 	bool m_shadow_enable;
 	double m_shadow_intensity;
 
-	double m_trans[3];
-	double m_rot[3];
-	double m_scale[3];
+	fluo::Vector m_trans;
+	fluo::Vector m_rot;
+	fluo::Vector m_scale = fluo::Vector(1.0);
 
 	//legend
 	bool m_legend;
