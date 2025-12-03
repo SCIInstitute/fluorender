@@ -46,14 +46,9 @@ TIFReader::TIFReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 1;
-	m_yspc = 1;
-	m_zspc = 1;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0;
 	m_max_value = 0;
@@ -186,10 +181,7 @@ int TIFReader::Preprocess()
 				num = get_number(img_desc, str_pos + search_str.length());
 			else
 				num = 1;
-			if (num)
-				m_slice_num = num;
-			else
-				m_slice_num = 1;
+			m_size.z(num ? num : 1);
 			//frames
 			search_str = "frames=";
 			str_pos = img_desc.find(search_str);
@@ -247,7 +239,7 @@ int TIFReader::Preprocess()
 				}
 
 				//add slices
-				for (int j = 0; j < m_slice_num; ++j)
+				for (int j = 0; j < m_size.intz(); ++j)
 				{
 					SliceInfo sliceinfo;
 					sliceinfo.slicenumber = 0;
@@ -276,11 +268,11 @@ int TIFReader::Preprocess()
 				num = 1;
 			if (num)
 			{
-				m_slice_num = num;
+				m_size.z(num);
 				imagej_raw_possible_ = true;
 			}
 			else
-				m_slice_num = 1;
+				m_size.z(1);
 		}
 
 	}
@@ -1387,9 +1379,9 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		{
 			for (size_t j = 0; j < rows_per_strip; j++)
 				if (eight_bits)
-					DecodeAcc8((tidata_t)data + j*m_x_size*samples, static_cast<tsize_t>(m_x_size*samples), stride);
+					DecodeAcc8((tidata_t)data + j*m_size.intx()*samples, static_cast<tsize_t>(m_size.intx()*samples), stride);
 				else
-					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, static_cast<tsize_t>(m_x_size*samples * 2), stride);
+					DecodeAcc16((tidata_t)data + j*m_size.intx()*samples * 2, static_cast<tsize_t>(m_size.intx()*samples * 2), stride);
 		}
 	}
 	else
@@ -1460,9 +1452,9 @@ void TIFReader::GetTiffTile(uint64_t page, uint64_t tile,
 		{
 			for (size_t j = 0; j < tile_height; j++)
 				if (eight_bits)
-					DecodeAcc8((tidata_t)data + j*m_x_size*samples, static_cast<tsize_t>(m_x_size*samples), stride);
+					DecodeAcc8((tidata_t)data + j*m_size.intx()*samples, static_cast<tsize_t>(m_size.intx()*samples), stride);
 				else
-					DecodeAcc16((tidata_t)data + j*m_x_size*samples * 2, static_cast<tsize_t>(m_x_size*samples * 2), stride);
+					DecodeAcc16((tidata_t)data + j*m_size.intx()*samples * 2, static_cast<tsize_t>(m_size.intx()*samples * 2), stride);
 		}
 	}
 	else
@@ -1705,7 +1697,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 		if (get_max && !isHyperstack_ && !imagej_raw_possible_)
 			numPages = GetNumTiffPages();
 		else
-			numPages = m_slice_num;
+			numPages = m_size.intz();
 	}
 
 	//cache for page info
@@ -1733,31 +1725,31 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				atof(spacing.substr(0, end).c_str()));
 	}
 
-	if (x_res > 0.0 && y_res > 0.0 && z_res > 0.0) {
-		m_xspc = 1 / x_res;
-		m_yspc = 1 / y_res;
-		m_zspc = z_res;
-		if (m_zspc < 1e-3) m_zspc = m_xspc;
+	if (x_res > 0.0 && y_res > 0.0 && z_res > 0.0)
+	{
+		m_spacing.x(1 / x_res);
+		m_spacing.y(1 / y_res);
+		m_spacing.z(z_res < 1e-3 ? 1 / x_res : z_res);
 		m_valid_spc = true;
 	}
 	else {
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 
-	if (m_resize_type == 1 && m_alignment > 1) {
-		m_x_size = static_cast<int>((width / m_alignment + (width%m_alignment ? 1 : 0))*m_alignment);
-		m_y_size = static_cast<int>((height / m_alignment + (height%m_alignment ? 1 : 0))*m_alignment);
+	if (m_resize_type == 1 && m_alignment > 1)
+	{
+		m_size.x(static_cast<int>((width / m_alignment + (width%m_alignment ? 1 : 0))*m_alignment));
+		m_size.y(static_cast<int>((height / m_alignment + (height%m_alignment ? 1 : 0))*m_alignment));
 	}
-	else {
-		m_x_size = static_cast<int>(width);
-		m_y_size = static_cast<int>(height);
+	else
+	{
+		m_size.x(static_cast<int>(width));
+		m_size.y(static_cast<int>(height));
 	}
 
-	m_slice_num = static_cast<int>(numPages);
-	uint64_t pagepixels = (unsigned long long)m_x_size*(unsigned long long)m_y_size;
+	m_size.z(static_cast<int>(numPages));
+	uint64_t pagepixels = (unsigned long long)m_size.get_size_xy();
 
 	if (sequence && !isHyperstack_) CloseTiff();
 
@@ -1767,8 +1759,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	void *val = 0;
 	bool eight_bit = bits == 8;
 
-	unsigned long long total_size = (unsigned long long)m_x_size*
-		(unsigned long long)m_y_size*(unsigned long long)numPages;
+	unsigned long long total_size = m_size.get_size_xyz();
 	val = eight_bit ? (void*)(new unsigned char[total_size]) :
 		(void*)(new unsigned short[total_size]);
 	if (!val)
@@ -2064,16 +2055,15 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	//write to nrrd
 	if (eight_bit)
 		nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	else
 		nrrdWrap_va(nrrdout, (uint16_t*)val, nrrdTypeUShort,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
-		m_yspc*m_y_size, m_zspc*numPages);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+	auto max_size = m_spacing * m_size;
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
-		(size_t)m_y_size, (size_t)numPages);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 
 	if (!eight_bit) {
 		if (get_max) {
@@ -2084,8 +2074,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 			}
 			else {
 				double value;
-				unsigned long long totali = (unsigned long long)m_slice_num*
-					(unsigned long long)m_x_size*(unsigned long long)m_y_size;
+				unsigned long long totali = (unsigned long long)m_size.get_size_xyz();
 				for (unsigned long long i = 0; i < totali; ++i)
 				{
 					value = ((unsigned short*)nrrdout->data)[i];

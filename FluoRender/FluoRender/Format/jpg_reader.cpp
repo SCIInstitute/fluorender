@@ -36,14 +36,9 @@ JPGReader::JPGReader() : BaseVolReader()
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 1.0;
-	m_yspc = 1.0;
-	m_zspc = 1.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 255.0;
@@ -195,7 +190,7 @@ int JPGReader::Preprocess()
 		}
 		else m_chan_num = 0;
 
-		m_slice_num = static_cast<int>(m_4d_seq[m_cur_time].slices.size());
+		m_size.z(static_cast<int>(m_4d_seq[m_cur_time].slices.size()));
 	}
 	else m_chan_num = 0;
 
@@ -215,8 +210,8 @@ void JPGReader::GetFileInfo(const std::wstring& filename)
 	jpeg_stdio_src(&cinfo, infile);
 	jpeg_read_header(&cinfo, TRUE);
 
-	m_x_size = cinfo.image_width;
-	m_y_size = cinfo.image_height;
+	m_size.x(cinfo.image_width);
+	m_size.y(cinfo.image_height);
 	m_chan_num = cinfo.num_components;
 
 	jpeg_destroy_decompress(&cinfo);
@@ -286,8 +281,7 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 
 	Nrrd* nrrdout = nrrdNew();
 
-	unsigned long long total_size = (unsigned long long)m_x_size *
-		(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+	unsigned long long total_size = m_size.get_size_xyz();
 	void* val = (void*)(new unsigned char[total_size]);
 	if (!val)
 		return nullptr;
@@ -308,18 +302,19 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 		}
 		if (show_progress)
 			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr += m_x_size * m_y_size;
+		val_ptr += m_size.get_size_xy();
 	}
 
 	//write to nrrd
 	nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-		3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc * m_x_size,
-		m_yspc * m_y_size, m_zspc * m_slice_num);
+		3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+	auto max_size = m_size * m_spacing;
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(),
+		max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
-		(size_t)m_y_size, (size_t)m_slice_num);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(),
+		(size_t)m_size.inty(), (size_t)m_size.intz());
 
 	return nrrdout;
 }

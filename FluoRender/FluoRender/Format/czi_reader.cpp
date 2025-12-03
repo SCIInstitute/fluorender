@@ -54,14 +54,9 @@ CZIReader::CZIReader() :
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -183,9 +178,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0 &&
+		!m_size.any_le_zero() &&
 		t < (int)m_czi_info.times.size() &&
 		c < (int)m_czi_info.times[t].channels.size())
 	{
@@ -198,8 +191,7 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		//allocate memory for nrrd
 		bool show_progress = false;
 		size_t blk_num = cinfo->blocks.size();
-		unsigned long long mem_size = (unsigned long long)m_x_size *
-			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+		unsigned long long mem_size = m_size.get_size_xyz();
 		void* val = 0;
 		switch (m_datatype)
 		{
@@ -225,16 +217,17 @@ Nrrd* CZIReader::Convert(int t, int c, bool get_max)
 		switch (m_datatype)
 		{
 		case 1:
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		case 2:
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		}
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+		auto max_size = m_spacing * m_size;
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	}
 
 	m_scalar_scale = 65535.0 / m_max_value;
@@ -477,9 +470,7 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 	m_czi_info.init();
 	m_time_num = 0;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
+	m_size = fluo::Vector(0.0);
 
 	//read entries
 	for (int i = 0; i < entry_count; ++i)
@@ -499,9 +490,10 @@ bool CZIReader::ReadDirectory(FILE* pfile, unsigned long long ioffset)
 			}
 	m_time_num = static_cast<int>(timenums.size());
 	m_chan_num = static_cast<int>(channums.size());
-	m_slice_num = m_czi_info.zmax - m_czi_info.zmin;
-	m_x_size = m_czi_info.xmax - m_czi_info.xmin;
-	m_y_size = m_czi_info.ymax - m_czi_info.ymin;
+	m_size = fluo::Vector(
+		m_czi_info.xmax - m_czi_info.xmin,
+		m_czi_info.ymax - m_czi_info.ymin,
+		m_czi_info.zmax - m_czi_info.zmin);
 	if (!pixtypes.empty())
 	{
 		m_datatype = *--pixtypes.end();
@@ -573,18 +565,14 @@ bool CZIReader::ReadMetadata(FILE* pfile, unsigned long long ioffset)
 	//get values
 	FindNodeRecursive(root);
 
-	if (m_xspc > 0.0 &&
-		m_yspc > 0.0 &&
-		m_zspc > 0.0)
+	if (!m_spacing.any_le_zero())
 	{
 		m_valid_spc = true;
 	}
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 	return result;
 }
@@ -653,19 +641,19 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 
 	//data
 	bool bricks = true;
-	if (sbi->x_size == m_x_size &&
-		sbi->y_size == m_y_size)
+	if (sbi->x_size == m_size.intx() &&
+		sbi->y_size == m_size.inty())
 		bricks = false;
 	bool compress = sbi->compress == 2;//only supports lzw for now
 	unsigned long long pxcount = (unsigned long long)sbi->x_size *
 		sbi->y_size * sbi->z_size;
 	unsigned short minv = std::numeric_limits<unsigned short>::max();
 	unsigned short maxv = 0;
-	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
+	unsigned long long xysize = m_size.get_size_xy();
 	unsigned long long pos = 0;
 	if (bricks)
 		pos = xysize * sbi->z +
-		(unsigned long long)m_x_size * sbi->y +
+		(unsigned long long)m_size.intx() * sbi->y +
 		(unsigned long long)sbi->x;//consider it a brick
 	else
 		pos = xysize * sbi->z;
@@ -683,14 +671,14 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				LZWDecode(block, (unsigned char*)val + pos, static_cast<tsize_t>(data_size));
 				for (int i = 0; i < sbi->z_size; ++i)
 					for (int j = 0; j < sbi->y_size; ++j)
-						DecodeAcc8((unsigned char*)val + pos + xysize * i + m_x_size * j,
+						DecodeAcc8((unsigned char*)val + pos + xysize * i + m_size.intx() * j,
 							sbi->x_size, 1);
 			}
 			else
 			{
 				for (int i = 0; i < sbi->z_size; ++i)
 					for (int j = 0; j < sbi->y_size; ++j)
-						memcpy((unsigned char*)val + pos + xysize * i + m_x_size * j,
+						memcpy((unsigned char*)val + pos + xysize * i + m_size.intx() * j,
 							block + i * sbi->x_size * sbi->y_size + j * sbi->x_size, sbi->x_size);
 			}
 		}
@@ -702,21 +690,21 @@ bool CZIReader::ReadSegSubBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 				LZWDecode(block, (unsigned char*)((unsigned short*)val + pos), static_cast<tsize_t>(data_size));
 				for (int i = 0; i < sbi->z_size; ++i)
 					for (int j = 0; j < sbi->y_size; ++j)
-						DecodeAcc16((unsigned char*)((unsigned short*)val + pos + xysize * i + m_x_size * j),
+						DecodeAcc16((unsigned char*)((unsigned short*)val + pos + xysize * i + m_size.intx() * j),
 							sbi->x_size, 1);
 			}
 			else
 			{
 				for (int i = 0; i < sbi->z_size; ++i)
 					for (int j = 0; j < sbi->y_size; ++j)
-						memcpy((unsigned short*)val + pos + xysize * i + m_x_size * j,
+						memcpy((unsigned short*)val + pos + xysize * i + m_size.intx() * j,
 							(unsigned short*)block + i * sbi->x_size * sbi->y_size + j * sbi->x_size,
 							2 * sbi->x_size);
 			}
 			//get min max
 			GetMinMax16B((unsigned short*)val + pos,
 				sbi->x_size, sbi->y_size, sbi->z_size,
-				m_x_size, m_y_size,
+				m_size.intx(), m_size.inty(),
 				minv, maxv);
 			m_min_value = m_min_value == 0.0 ? minv : std::min(m_min_value, static_cast<double>(minv));
 			m_max_value = maxv > m_max_value ? maxv : m_max_value;
@@ -787,19 +775,19 @@ void CZIReader::FindNodeRecursive(tinyxml2::XMLElement* node)
 		{
 			str = child->GetText();
 			dval = STOD(str);
-			m_xspc = dval * 1e6;
+			m_spacing.x(dval * 1e6);
 		}
 		else if (name == "ScalingY")
 		{
 			str = child->GetText();
 			dval = STOD(str);
-			m_yspc = dval * 1e6;
+			m_spacing.y(dval * 1e6);
 		}
 		else if (name == "ScalingZ")
 		{
 			str = child->GetText();
 			dval = STOD(str);
-				m_zspc = dval * 1e6;
+			m_spacing.z(dval * 1e6);
 		}
 		else if (name == "ExcitationWavelength")
 		{

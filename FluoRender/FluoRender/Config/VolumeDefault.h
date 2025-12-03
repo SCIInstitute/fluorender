@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEDEFAULT_H_
 #define _VOLUMEDEFAULT_H_
 
+#include <Vector.h>
+
 class VolumeData;
 class VolumeGroup;
 enum class ChannelMixMode : int;

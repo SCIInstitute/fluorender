@@ -38,14 +38,9 @@ ND2Reader::ND2Reader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -162,40 +157,38 @@ Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0)
+		!m_size.any_le_zero())
 	{
 		switch (m_bits)
 		{
 		case 8:
 		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+			unsigned long long mem_size = m_size.get_size_xyz();
 			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
 			ReadChannel(h, t, c, val);
 			//create nrrd
 			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+			auto max_size = m_spacing * m_size;
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 		}
 		break;
 		case 16:
 		{
-			unsigned long long mem_size = (unsigned long long)m_x_size*
-				(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+			unsigned long long mem_size = m_size.get_size_xyz();
 			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
 			ReadChannel(h, t, c, val);
 			//create nrrd
 			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+			auto max_size = m_spacing * m_size;
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 		}
 		break;
 		}
@@ -269,12 +262,12 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 	if (!cinfo)
 		return false;
 
-	unsigned long long xysize = (unsigned long long)m_x_size * m_y_size;
+	unsigned long long xysize = (unsigned long long)m_size.get_size_xy();
 	unsigned long long pos;
 	int bytes = m_bits / 8;
 	unsigned char *dst, *src;
 	size_t num = cinfo->chann.size();
-	unsigned long long mem_size = m_x_size * m_y_size * m_slice_num;
+	unsigned long long mem_size = m_size.get_size_xyz();
 	bool show_progress = mem_size > glbin_settings.m_prg_size;
 
 	for (size_t i = 0; i < num; ++i)
@@ -285,14 +278,14 @@ bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 		int y = cinfo->chann[i].y;
 		LIMPICTURE pic = { 0 };
 		Lim_FileGetImageData(h, seq, &pic);
-		pos = xysize * z + m_x_size * y + x;//consider it a brick
+		pos = xysize * z + m_size.intx() * y + x;//consider it a brick
 
 		for (unsigned int j = 0; j < pic.uiHeight; ++j)
 		{
 			for (unsigned int k = 0; k < pic.uiWidth; ++k)
 			{
 				dst = (unsigned char*)val;
-				dst += (pos + m_x_size * j + k) * bytes;
+				dst += (pos + m_size.intx() * j + k) * bytes;
 				src = (unsigned char*)(pic.pImageData);
 				src += pic.uiWidthBytes * j + k * pic.uiComponents * bytes + c * bytes;
 				memcpy(dst, src, bytes);
@@ -324,9 +317,9 @@ void ND2Reader::ReadAttributes(LIMFILEHANDLE h)
 		else if (str == "componentCount")
 			m_chan_num = it.value();
 		else if (str == "widthPx")
-			m_x_size = it.value();
+			m_size.x(it.value());
 		else if (str == "heightPx")
-			m_y_size = it.value();
+			m_size.y(it.value());
 	}
 	if (m_bits > 8)
 	{
@@ -434,9 +427,10 @@ void ND2Reader::ReadMetadata(LIMFILEHANDLE h)
 		}
 		if (count >= 3)
 		{
-			m_xspc = stod(x);
-			m_yspc = stod(y);
-			m_zspc = stod(z);
+			m_spacing = fluo::Vector(
+				stod(x),
+				stod(y),
+				stod(z));
 			m_valid_spc = true;
 		}
 	}
@@ -496,8 +490,8 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 			frame.seq = 0;
 			frame.x = 0;
 			frame.y = 0;
-			frame.xsize = m_x_size;
-			frame.ysize = m_y_size;
+			frame.xsize = m_size.intx();
+			frame.ysize = m_size.inty();
 			frame.posx = 0.0;
 			frame.posy = 0.0;
 			frame.posz = 0.0;
@@ -506,13 +500,13 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 	}
 
 	m_time_num = static_cast<int>(m_nd2_info.times.size());
-	m_slice_num = maxz + 1;
+	m_size.z(maxz + 1);
 	m_cur_time = 0;
 	m_data_name = GET_STEM(m_path_name);
 
 	//get tiles
 	ChannelInfo* cinfo = GetChaninfo(0, 0);
-	if (cinfo && cinfo->chann.size() > m_slice_num &&
+	if (cinfo && cinfo->chann.size() > m_size.intz() &&
 		m_valid_spc)
 	{
 		for (int t = 0; t < m_time_num; ++t)
@@ -522,10 +516,10 @@ void ND2Reader::ReadSequences(LIMFILEHANDLE h)
 				continue;
 			for (size_t i = 0; i < cinfo->chann.size(); ++i)
 			{
-				cinfo->chann[i].x = static_cast<int>((cinfo->chann[i].posx - m_nd2_info.xmin) / m_xspc);
-				cinfo->chann[i].y = static_cast<int>((cinfo->chann[i].posy - m_nd2_info.ymin) / m_yspc);
-				m_x_size = std::max(m_x_size, cinfo->chann[i].x + cinfo->chann[i].xsize);
-				m_y_size = std::max(m_y_size, cinfo->chann[i].y + cinfo->chann[i].ysize);
+				cinfo->chann[i].x = static_cast<int>((cinfo->chann[i].posx - m_nd2_info.xmin) / m_spacing.x());
+				cinfo->chann[i].y = static_cast<int>((cinfo->chann[i].posy - m_nd2_info.ymin) / m_spacing.y());
+				m_size.x(std::max(m_size.intx(), cinfo->chann[i].x + cinfo->chann[i].xsize));
+				m_size.y(std::max(m_size.inty(), cinfo->chann[i].y + cinfo->chann[i].ysize));
 			}
 		}
 	}

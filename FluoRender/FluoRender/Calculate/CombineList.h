@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMBINELIST_H_
 #define _COMBINELIST_H_
 
+#include <Vector.h>
 #include <list>
 #include <string>
 #include <memory>
@@ -50,8 +51,8 @@ namespace flrd
 	private:
 		std::list<std::weak_ptr<VolumeData>> m_channs;
 		std::list<std::shared_ptr<VolumeData>> m_results;
-		int m_resx, m_resy, m_resz;
-		double m_spcx, m_spcy, m_spcz;
+		fluo::Vector m_size;
+		fluo::Vector m_spacing;
 		int m_bits;
 		std::wstring m_name;
 

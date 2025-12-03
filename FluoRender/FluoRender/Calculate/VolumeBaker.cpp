@@ -35,9 +35,6 @@ using namespace flrd;
 VolumeBaker::VolumeBaker() :
 	m_raw_input(0),
 	m_raw_result(0),
-	m_nx(0),
-	m_ny(0),
-	m_nz(0),
 	m_bits(0)
 {
 
@@ -75,9 +72,10 @@ void VolumeBaker::Bake(bool replace)
 		return;
 
 	//input size
-	m_nx = static_cast<int>(input_nrrd->axis[0].size);
-	m_ny = static_cast<int>(input_nrrd->axis[1].size);
-	m_nz = static_cast<int>(input_nrrd->axis[2].size);
+	m_size = fluo::Vector(
+		input_nrrd->axis[0].size,
+		input_nrrd->axis[1].size,
+		input_nrrd->axis[2].size);
 	//bits
 	switch (input_nrrd->type)
 	{
@@ -96,24 +94,22 @@ void VolumeBaker::Bake(bool replace)
 	}
 
 	//output raw
-	unsigned long long total_size = (unsigned long long)m_nx*
-		(unsigned long long)m_ny*(unsigned long long)m_nz;
+	unsigned long long total_size = (unsigned long long)m_size.get_size_xyz();
 	m_raw_result = (void*)(new unsigned char[total_size * (m_bits / 8)]);
 	if (!m_raw_result)
 		return;
 
 	//transfer function
 	unsigned long long index;
-	for (int i = 0; i < m_nx; i++)
-	for (int j = 0; j < m_ny; j++)
-	for (int k = 0; k < m_nz; k++)
+	for (int i = 0; i < m_size.intx(); i++)
+	for (int j = 0; j < m_size.inty(); j++)
+	for (int k = 0; k < m_size.intz(); k++)
 	{
-		index = (unsigned long long)m_nx * m_ny * k +
-			(unsigned long long)m_nx * j + i;
-		fluo::Point p(double(i) / double(m_nx),
-			double(j) / double(m_ny),
-			double(k) / double(m_nz));
-		double new_value = input->GetTransferedValue(i, j, k);
+		index = (unsigned long long)m_size.get_size_xy() * k +
+			(unsigned long long)m_size.intx() * j + i;
+		fluo::Vector p(i, j, k);
+		p /= m_size;
+		double new_value = input->GetTransferedValue(fluo::Point(p));
 		if (m_bits == 8)
 			((unsigned char*)m_raw_result)[index] = uint8_t(new_value*255.0);
 		else if (m_bits == 16)
@@ -124,20 +120,20 @@ void VolumeBaker::Bake(bool replace)
 	Nrrd* nrrd_result = nrrdNew();
 	if (m_bits == 8)
 		nrrdWrap_va(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
-			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	else if (m_bits == 16)
 		nrrdWrap_va(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
-			3, (size_t)m_nx, (size_t)m_ny, (size_t)m_nz);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 
 	//spacing
-	double spcx, spcy, spcz;
-	input->GetSpacings(spcx, spcy, spcz);
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, spcx*m_nx,
-		spcy*m_ny, spcz*m_nz);
+	auto spc = input->GetSpacing();
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
+	auto max_size = spc * m_size;
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, max_size.x(),
+		max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSize, (size_t)m_nx,
-		(size_t)m_ny, (size_t)m_nz);
+	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSize, (size_t)m_size.intx(),
+		(size_t)m_size.inty(), (size_t)m_size.intz());
 
 	if (replace)
 	{
@@ -153,17 +149,19 @@ void VolumeBaker::Bake(bool replace)
 		}
 		else
 			m_result->Replace(nrrd_result, false);
-		m_result->SetSpacing(spcx, spcy, spcz);
-		m_result->SetBaseSpacings(spcx, spcy, spcz);
+		m_result->SetSpacing(spc);
+		m_result->SetBaseSpacing(spc);
 	}
 }
 
 Nrrd* VolumeBaker::GetNrrd(VolumeData* vd)
 {
 	if (!vd || !vd->GetTexture())
-		return 0;
+		return nullptr;
 	flvr::Texture* tex = vd->GetTexture();
-	return tex->get_nrrd(0);
+	if (!tex)
+		return nullptr;
+	return tex->get_nrrd(flvr::CompType::Data).data;
 }
 
 void* VolumeBaker::GetRaw(VolumeData* vd)

@@ -37,14 +37,9 @@ OIFReader::OIFReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -147,7 +142,7 @@ int OIFReader::Preprocess()
 	if (m_type == 0)
 		m_cur_time = 0;
 	m_chan_num = m_time_num > 0 ? int(m_oif_info[0].dataset.size()) : 0;
-	m_slice_num = m_chan_num > 0 ? int(m_oif_info[0].dataset[0].size()) : 0;
+	m_size.z(m_chan_num > 0 ? int(m_oif_info[0].dataset[0].size()) : 0);
 
 	return READER_OK;
 }
@@ -343,11 +338,9 @@ void OIFReader::ReadOif()
 	{
 		//reset
 		m_excitation_wavelength_list.clear();
-		m_x_size = 0;
-		m_y_size = 0;
-		m_xspc = 0.0;
-		m_yspc = 0.0;
-		m_zspc = 0.0;
+		m_size.x(0);
+		m_size.y(0);
+		m_spacing = fluo::Vector(0.0);
 		//axis count
 		axis_num = -1;
 		cur_axis = -1;
@@ -379,19 +372,17 @@ void OIFReader::ReadOif()
 		is.close();
 	}
 
-	if (m_xspc > 0.0 && m_xspc<100.0 &&
-		m_yspc>0.0 && m_yspc<100.0)
+	if (m_spacing.x() > 0.0 &&
+		m_spacing.y() > 0.0)
 	{
 		m_valid_spc = true;
-		if (m_zspc <= 0.0 || m_zspc>100.0)
-			m_zspc = std::max(m_xspc, m_yspc);
+		if (m_spacing.z() <= 0.0)
+			m_spacing.z(std::max(m_spacing.x(), m_spacing.y()));
 	}
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 }
 
@@ -535,16 +526,16 @@ void OIFReader::ReadOifLine(const std::wstring oneline)
 			spc /= 1000.0;
 		if ((int64_t)axis_code.find(L"X") != -1)
 		{
-			m_x_size = WSTOI(max_size);
-			m_xspc = spc;
+			m_size.x(WSTOI(max_size));
+			m_spacing.x(spc);
 		}
 		else if ((int64_t)axis_code.find(L"Y") != -1)
 		{
-			m_y_size = WSTOI(max_size);
-			m_yspc = spc;
+			m_size.y(WSTOI(max_size));
+			m_spacing.y(spc);
 		}
 		else if ((int64_t)axis_code.find(L"Z") != -1)
-			m_zspc = spc;
+			m_spacing.z(spc);
 
 		axis_code.clear();
 		pix_unit.clear();
@@ -571,13 +562,10 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num>0 &&
-		m_x_size>0 &&
-		m_y_size>0)
+		!m_size.any_le_zero())
 	{
 		//allocate memory for nrrd
-		unsigned long long mem_size = (unsigned long long)m_x_size*
-			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+		unsigned long long mem_size = m_size.get_size_xyz();
 		unsigned short *val = new (std::nothrow) unsigned short[mem_size];
 		bool show_progress = mem_size > glbin_settings.m_prg_size;
 
@@ -620,15 +608,16 @@ Nrrd* OIFReader::Convert(int t, int c, bool get_max)
 		}
 
 		//create nrrd
-		if (val && sl_num == m_slice_num)
+		if (val && sl_num == m_size.intz())
 		{
 			//ok
 			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+			auto max_size = m_spacing * m_size;
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 		}
 		else
 		{
@@ -785,7 +774,7 @@ void OIFReader::ReadTiff(char *pbyData, unsigned short *val, int z)
 	{
 		strips = s_num1;
 
-		unsigned int val_pos = z*m_x_size*m_y_size;
+		unsigned int val_pos = z*m_size.get_size_xy();
 		for (int i = 0; i < strips; i++)
 		{
 			unsigned int data_pos = strip_offsets[i];
@@ -793,8 +782,8 @@ void OIFReader::ReadTiff(char *pbyData, unsigned short *val, int z)
 			if (compression == 1)//no copmression
 				memcpy((void*)(val + val_pos), (void*)(pbyData + data_pos), data_size);
 			else if (compression == 5)
-				LZWDecode((tidata_t)(pbyData + data_pos), (tidata_t)(val + val_pos), m_x_size*rows * 2);
-			val_pos += rows*m_x_size;
+				LZWDecode((tidata_t)(pbyData + data_pos), (tidata_t)(val + val_pos), m_size.intx()*rows * 2);
+			val_pos += rows*m_size.intx();
 		}
 	}
 }

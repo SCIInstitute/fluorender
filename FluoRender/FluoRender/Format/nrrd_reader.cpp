@@ -35,14 +35,9 @@ NRRDReader::NRRDReader():
 {
 	m_time_num = 0;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -217,25 +212,23 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		fclose(nrrd_file);
 		return 0;
 	}
-	m_slice_num = int(output->axis[2].size);
-	m_x_size = int(output->axis[0].size);
-	m_y_size = int(output->axis[1].size);
-	m_xspc = output->axis[0].spacing;
-	m_yspc = output->axis[1].spacing;
-	m_zspc = output->axis[2].spacing;
-	if (m_xspc>0.0 && m_xspc<100.0 &&
-		m_yspc>0.0 && m_yspc<100.0 &&
-		m_zspc>0.0 && m_zspc<100.0)
+	m_size = fluo::Vector(
+		output->axis[0].size,
+		output->axis[1].size,
+		output->axis[2].size);
+	m_spacing = fluo::Vector(
+		output->axis[0].spacing,
+		output->axis[1].spacing,
+		output->axis[2].spacing);
+	if (!m_spacing.any_le_zero())
 		m_valid_spc = true;
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 
-	unsigned long long data_size = (unsigned long long)(m_slice_num) * m_x_size * m_y_size;
+	unsigned long long data_size = (unsigned long long)m_size.get_size_xyz();
 	unsigned long long nsize = data_size;
 	if (output->type == nrrdTypeUShort || output->type == nrrdTypeShort)
 		data_size *= 2;

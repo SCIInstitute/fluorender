@@ -115,6 +115,8 @@ namespace fluo
 		inline int intx() const;
 		inline int inty() const;
 		inline int intz() const;
+		inline uint64_t get_size_xyz() const;
+		inline uint64_t get_size_xy() const;
 
 		inline void normalize_euler_signed();
 		inline void normalize_euler_unsigned();
@@ -138,6 +140,8 @@ namespace fluo
 		inline bool all_non_zero() const;
 		inline bool is_zero() const;
 		inline bool any_le_zero() const;
+		inline bool any_l_zero() const;
+		inline bool any_ge(const Vector& v) const;
 
 		void rotz90(const int);
 
@@ -480,6 +484,16 @@ namespace fluo
 		return static_cast<int>(std::round(z_));
 	}
 
+	inline uint64_t Vector::get_size_xyz() const
+	{
+		return (uint64_t)intx() * inty() * intz();
+	}
+
+	inline uint64_t Vector::get_size_xy() const
+	{
+		return (uint64_t)intx() * inty();
+	}
+
 	inline void Vector::normalize_euler_signed()
 	{
 		x_ = fmod(x_ + 180.0, 360.0);
@@ -630,6 +644,24 @@ namespace fluo
 			x_ <= 0.0 ||
 			y_ <= 0.0 ||
 			z_ <= 0.0
+			);
+	}
+
+	inline bool Vector::any_l_zero() const
+	{
+		return (
+			x_ < 0.0 ||
+			y_ < 0.0 ||
+			z_ < 0.0
+			);
+	}
+
+	inline bool Vector::any_ge(const Vector& v) const
+	{
+		return (
+			x_ >= v.x_ ||
+			y_ >= v.y_ ||
+			z_ >= v.z_
 			);
 	}
 

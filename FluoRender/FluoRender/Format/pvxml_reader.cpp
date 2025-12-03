@@ -45,14 +45,9 @@ PVXMLReader::PVXMLReader() :
 	m_cur_time = -1;
 	m_chan_num = 0;
 	m_group_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -100,7 +95,7 @@ void PVXMLReader::SetFile(const std::wstring& file)
 int PVXMLReader::Preprocess()
 {
 	m_pvxml_info.clear();
-	m_slice_num = 0;
+	m_size.z(0);
 	m_chan_num = 0;
 	m_group_num = 0;
 	m_min_value = 0.0;
@@ -159,9 +154,9 @@ int PVXMLReader::Preprocess()
 			for (k = 0; k < sequence_info->frames.size(); k++)
 			{
 				FrameInfo* frame_info = &((sequence_info->frames)[k]);
-				x_end = frame_info->x_start + frame_info->x_size * m_xspc;
-				y_end = frame_info->y_start + frame_info->y_size * m_yspc;
-				z_end = frame_info->z_start + m_zspc;
+				x_end = frame_info->x_start + frame_info->x_size * m_spacing.x();
+				y_end = frame_info->y_start + frame_info->y_size * m_spacing.y();
+				z_end = frame_info->z_start + m_spacing.z();
 
 				if (k == 0)
 					chan_num += static_cast<int>(frame_info->channels.size());
@@ -215,16 +210,21 @@ int PVXMLReader::Preprocess()
 	}
 
 	//make sure not divide by zero
-	m_xspc = m_xspc == 0.0 ? 1.0 : m_xspc;
-	m_yspc = m_yspc == 0.0 ? 1.0 : m_yspc;
-	m_zspc = m_zspc == 0.0 ? 1.0 : (m_zspc == FLT_MAX ? 1.0 : m_zspc);
+	if (m_spacing.x() == 0.0)
+		m_spacing.x(1.0);
+	if (m_spacing.y() == 0.0)
+		m_spacing.y(1.0);
+	if (m_spacing.z() == 0.0 || m_spacing.z() == std::numeric_limits<double>::max())
+		m_spacing.z(1.0);
 
-	m_x_size = int((m_x_max - m_x_min) / m_xspc + 0.5);
-	m_y_size = int((m_y_max - m_y_min) / m_yspc + 0.5);
-	if (m_z_max == FLT_MAX) m_z_max = m_seq_slice_num;
+	if (m_z_max == std::numeric_limits<double>::max()) m_z_max = m_seq_slice_num;
 	double dt = m_z_max - m_z_min;
 	if (std::abs(dt) > fluo::Epsilon(10))
-		m_slice_num = int(dt / m_zspc + 0.5);
+		dt /= m_spacing.z();
+	m_size = fluo::Vector(
+		(m_x_max - m_x_min) / m_spacing.x(),
+		(m_y_max - m_y_min) / m_spacing.y(),
+		dt);
 
 	if (m_user_flip_y == 1 ||
 		m_user_flip_y == 0)
@@ -251,15 +251,15 @@ int PVXMLReader::Preprocess()
 				}
 				else
 				{
-					frame_info->x = int((frame_info->x_start - m_x_min) / m_xspc + 0.5);
-					frame_info->y = int((frame_info->y_start - m_y_min) / m_yspc + 0.5);
+					frame_info->x = int(std::round((frame_info->x_start - m_x_min) / m_spacing.x()));
+					frame_info->y = int(std::round((frame_info->y_start - m_y_min) / m_spacing.y()));
 					if (m_force_stack)
 						frame_info->z = static_cast<int>(k);
 					else
 					{
 						double dt = frame_info->z_start - m_z_min;
 						if (std::abs(dt) > fluo::Epsilon(10))
-							frame_info->z = int(dt / m_zspc + 0.5);
+							frame_info->z = int(std::round(dt / m_spacing.z()));
 						else frame_info->z = static_cast<int>(k);
 					}
 				}
@@ -502,7 +502,7 @@ void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 		m_new_seq = true;
 		m_seq_slice_num = 0;
 	}
-	m_seq_zspc = FLT_MAX;
+	m_seq_zspc = std::numeric_limits<double>::max();
 	m_seq_zpos = 0.0;
 	tinyxml2::XMLElement* child = seqNode->FirstChildElement();
 	int stack_push_count = 0;
@@ -534,24 +534,25 @@ void PVXMLReader::ReadSequence(tinyxml2::XMLElement* seqNode)
 	for (int i = 0; i < stack_push_count; i++)
 		m_state_shard_stack.pop_back();
 
-	if (m_slice_num)
+	if (m_size.intz() > 0)
 	{
-		m_slice_num = m_seq_slice_num > m_slice_num ? m_seq_slice_num : m_slice_num;
+		if (m_seq_slice_num > m_size.intz())
+			m_size.z(m_seq_slice_num);
 		if (m_seq_zspc > 0.0)
 		{
-			if (m_zspc == 0.0)
-				m_zspc = m_seq_zspc;
-			else
-				m_zspc = m_seq_zspc < m_zspc ? m_seq_zspc : m_zspc;
+			if (m_spacing.z() == 0.0)
+				m_spacing.z(m_seq_zspc);
+			else if (m_seq_zspc < m_spacing.z())
+				m_spacing.z(m_seq_zspc);
 		}
 	}
 	else
 	{
 		if (m_seq_type == 2)
-			m_slice_num = 1;
+			m_size.z(1);
 		else
-			m_slice_num = m_seq_slice_num;
-		m_zspc = m_seq_zspc;
+			m_size.z(m_seq_slice_num);
+		m_spacing.z(m_seq_zspc);
 	}
 	m_pvxml_info.back().back().grid_index = m_current_state.grid_index;
 }
@@ -595,15 +596,17 @@ void PVXMLReader::ReadFrame(tinyxml2::XMLElement* frameNode)
 		m_seq_zspc = spc < m_seq_zspc ? spc : m_seq_zspc;
 	}
 	m_seq_zpos = frame_info.z_start;
-	if (m_xspc == 0.0)
+	if (m_spacing.x() == 0.0)
 	{
-		m_xspc = m_current_state.mpp_x;
-		m_yspc = m_current_state.mpp_y;
+		m_spacing.x(m_current_state.mpp_x);
+		m_spacing.y(m_current_state.mpp_y);
 	}
 	else
 	{
-		m_xspc = m_current_state.mpp_x < m_xspc ? m_current_state.mpp_x : m_xspc;
-		m_yspc = m_current_state.mpp_y < m_yspc ? m_current_state.mpp_y : m_yspc;
+		if (m_current_state.mpp_x < m_spacing.x())
+			m_spacing.x(m_current_state.mpp_x);
+		if (m_current_state.mpp_y < m_spacing.y())
+			m_spacing.y(m_current_state.mpp_y);
 	}
 
 	bool apart = false;
@@ -757,14 +760,18 @@ bool PVXMLReader::ConvertN(int c, TimeDataInfo* time_data_info, unsigned short* 
 					delete[] pbyData;
 
 				//copy frame val to val
-				unsigned long long index = (unsigned long long)m_x_size * m_y_size * frame_info->z + m_x_size * (m_y_size - frame_info->y - frame_info->y_size) + frame_info->x;
+				unsigned long long index =
+					(unsigned long long)m_size.get_size_xy() *
+					frame_info->z + m_size.intx() *
+					(m_size.inty() - frame_info->y - frame_info->y_size) +
+					frame_info->x;
 				long frame_index = 0;
 				if (m_flip_y)
 					frame_index = frame_info->x_size * (frame_info->y_size - 1);
 				for (k = 0; k < frame_info->y_size; k++)
 				{
 					memcpy((void*)(val + index), (void*)(frame_val + frame_index), frame_info->x_size * sizeof(unsigned short));
-					index += m_x_size;
+					index += m_size.intx();
 					if (m_flip_y)
 						frame_index -= frame_info->x_size;
 					else
@@ -828,14 +835,18 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short* 
 						delete[] pbyData;
 
 					//copy frame val to val
-					unsigned long long index = (unsigned long long)m_x_size * m_y_size * frame_info->z + m_x_size * (m_y_size - frame_info->y - frame_info->y_size) + frame_info->x;
+					unsigned long long index =
+						(unsigned long long)m_size.get_size_xy() *
+						frame_info->z + m_size.intx() *
+						(m_size.inty() - frame_info->y - frame_info->y_size) +
+						frame_info->x;
 					long frame_index = 0;
 					if (m_flip_y)
 						frame_index = frame_info->x_size * (frame_info->y_size - 1);
 					for (k = 0; k < frame_info->y_size; k++)
 					{
 						memcpy((void*)(val + index), (void*)(frame_val + frame_index), frame_info->x_size * sizeof(unsigned short));
-						index += m_x_size;
+						index += m_size.intx();
 						if (m_flip_y)
 							frame_index -= frame_info->x_size;
 						else
@@ -861,13 +872,10 @@ Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
 	int chan_num = m_sep_seq ? m_group_num : m_chan_num;
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < chan_num &&
-		m_slice_num>0 &&
-		m_x_size>0 &&
-		m_y_size > 0)
+		!m_size.any_le_zero())
 	{
 		//allocate memory for nrrd
-		unsigned long long mem_size = (unsigned long long)m_x_size *
-			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+		unsigned long long mem_size = (unsigned long long)m_size.get_size_xyz();
 		unsigned short* val = new (std::nothrow) unsigned short[mem_size]();
 		if (!val) return 0;
 
@@ -882,17 +890,20 @@ Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
 		{
 			//ok
 			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort,
+				3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+			auto max_size = m_size * m_spacing;
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(),
+				max_size.y(), max_size.z());
 			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(),
+				(size_t)m_size.inty(), (size_t)m_size.intz());
 
 			if (get_max)
 			{
 				double value;
-				unsigned long long totali = (unsigned long long)m_slice_num *
-					m_x_size * m_y_size;
+				unsigned long long totali = (unsigned long long)m_size.get_size_xyz();
 				for (unsigned long long i = 0; i < totali; ++i)
 				{
 					value = val[i];
@@ -907,19 +918,17 @@ Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
 	if (m_max_value > 0.0)
 		m_scalar_scale = 65535.0 / m_max_value;
 
-	if (m_xspc > 0.0 && m_xspc < 100.0 &&
-		m_yspc>0.0 && m_yspc < 100.0)
+	if (m_spacing.x() > 0.0 &&
+		m_spacing.y() > 0.0)
 	{
 		m_valid_spc = true;
-		if (m_zspc <= 0.0 || m_zspc > 100.0)
-			m_zspc = std::max(m_xspc, m_yspc);
+		if (m_spacing.z() <= 0.0)
+			m_spacing.z(std::max(m_spacing.x(), m_spacing.y()));
 	}
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 	return data;
 }
@@ -1088,7 +1097,7 @@ void PVXMLReader::ReadTiff(char* pbyData, unsigned short* val)
 			if (compression == 1)//no copmression
 				memcpy((void*)(val + val_pos), (void*)(pbyData + data_pos), data_size);
 			else if (compression == 5)
-				LZWDecode((tidata_t)(pbyData + data_pos), (tidata_t)(val + val_pos), m_x_size * rows * 2);
+				LZWDecode((tidata_t)(pbyData + data_pos), (tidata_t)(val + val_pos), m_size.intx() * rows * 2);
 			val_pos += rows * width;
 		}
 	}

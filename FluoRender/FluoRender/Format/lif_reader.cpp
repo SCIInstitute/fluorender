@@ -38,14 +38,9 @@ LIFReader::LIFReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -161,9 +156,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0)
+		!m_size.any_le_zero())
 	{
 		TimeInfo *tinfo = GetTimeInfo(c, t);
 		if (!tinfo)
@@ -173,8 +166,7 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 		//allocate memory for nrrd
 		bool show_progress = false;
 		size_t blk_num = tinfo->blocks.size();
-		unsigned long long mem_size = (unsigned long long)m_x_size*
-			(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+		unsigned long long mem_size = m_size.get_size_xyz();
 		void* val = 0;
 		switch (m_datatype)
 		{
@@ -200,16 +192,17 @@ Nrrd* LIFReader::Convert(int t, int c, bool get_max)
 		switch (m_datatype)
 		{
 		case 1:
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		case 2:
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		}
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+		auto max_size = m_spacing * m_size;
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	}
 
 	fclose(pfile);
@@ -498,8 +491,8 @@ bool LIFReader::CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 	}
 
 	unsigned long long line_size = (unsigned long long)sbi->x_size * m_datatype;
-	unsigned long long offset = ((unsigned long long)(sbi->z) * (m_x_size * m_y_size) +
-		sbi->y * m_x_size + sbi->x) * m_datatype;
+	unsigned long long offset = ((unsigned long long)(sbi->z) * m_size.get_size_xy() +
+		sbi->y * m_size.intx() + sbi->x) * m_datatype;
 	unsigned char* pos = (unsigned char*)val + offset;
 	unsigned char* pos2;
 	bool result = true;
@@ -509,9 +502,9 @@ bool LIFReader::CopyMemoryBlock(FILE* pfile, SubBlockInfo* sbi, void* val)
 		for (int j = 0; j < sbi->y_size; ++j)
 		{
 			result &= fread(pos2, 1, line_size, pfile) == line_size;
-			pos2 += m_x_size * m_datatype;
+			pos2 += m_size.intx() * m_datatype;
 		}
-		pos += (unsigned long long)m_x_size * m_y_size * m_datatype;
+		pos += (unsigned long long)m_size.get_size_xy() * m_datatype;
 	}
 	return result;
 }
@@ -771,11 +764,11 @@ void LIFReader::GenImageInfo(ImageInfo* imgi)
 		SubBlockInfo &block0 = tinfo->blocks[0];
 		//spacings
 		if (block0.x_size)
-			m_xspc = block0.x_len / block0.x_size;
+			m_spacing.x(block0.x_len / block0.x_size);
 		if (block0.y_size)
-			m_yspc = block0.y_len / block0.y_size;
+			m_spacing.y(block0.y_len / block0.y_size);
 		if (block0.z_size)
-			m_zspc = block0.z_len / block0.z_size;
+			m_spacing.z(block0.z_len / block0.z_size);
 
 		//determine if seq or pos is used
 		bool pos_valid = false;
@@ -817,17 +810,19 @@ void LIFReader::GenImageInfo(ImageInfo* imgi)
 					maxz = std::max(maxz, block.z_start + block.z_len);
 				}
 			}
-			m_x_size = int((maxx - minx) / m_xspc + 0.5);
-			m_y_size = int((maxy - miny) / m_yspc + 0.5);
-			m_slice_num = int((maxz - minz) / m_zspc + 0.5);
+			m_size = fluo::Vector(
+				maxx - minx,
+				maxy - miny,
+				maxz - minz);
+			m_size /= m_spacing;
 
 			//assign corner coords
 			for (size_t i = 0; i < block_num; ++i)
 			{
 				SubBlockInfo &block = tinfo->blocks[i];
-				block.x = int((block.x_start - minx) / m_xspc + 0.5);
-				block.y = int((block.y_start - miny) / m_yspc + 0.5);
-				block.z = int((block.z_start - minz) / m_zspc + 0.5);
+				block.x = int(std::round(block.x_start - minx) / m_spacing.x());
+				block.y = int(std::round(block.y_start - miny) / m_spacing.y());
+				block.z = int(std::round(block.z_start - minz) / m_spacing.z());
 			}
 		}
 		else
@@ -853,9 +848,10 @@ void LIFReader::GenImageInfo(ImageInfo* imgi)
 					maxz = std::max(maxz, tile.fieldz);
 				}
 			}
-			m_x_size = (maxx - minx + 1) * block0.x_size;
-			m_y_size = (maxy - miny + 1) * block0.y_size;
-			m_slice_num = (maxz - minz + 1) * block0.z_size;
+			m_size = fluo::Vector(
+				(maxx - minx + 1) * block0.x_size,
+				(maxy - miny + 1) * block0.y_size,
+				(maxz - minz + 1) * block0.z_size);
 
 			//assign corner coords
 			for (size_t i = 0; i < block_num; ++i)
@@ -865,9 +861,9 @@ void LIFReader::GenImageInfo(ImageInfo* imgi)
 				block.x = (tile.fieldx - minx) * block0.x_size;
 				block.y = (tile.fieldy - miny) * block0.y_size;
 				block.z = (tile.fieldz - minz) * block0.z_size;
-				block.x_start = block.x * m_xspc;
-				block.y_start = block.y * m_yspc;
-				block.z_start = block.z * m_zspc;
+				block.x_start = block.x * m_spacing.x();
+				block.y_start = block.y * m_spacing.y();
+				block.z_start = block.z * m_spacing.z();
 			}
 		}
 
@@ -877,30 +873,27 @@ void LIFReader::GenImageInfo(ImageInfo* imgi)
 	{
 		SubBlockInfo &block0 = tinfo->blocks[0];
 		//pixel size
-		m_slice_num = block0.z_size;
-		m_x_size = block0.x_size;
-		m_y_size = block0.y_size;
+		m_size = fluo::Vector(
+			block0.x_size,
+			block0.y_size,
+			block0.z_size);
 		//spacings
-		if (m_x_size)
-			m_xspc = block0.x_len / m_x_size;
-		if (m_y_size)
-			m_yspc = block0.y_len / m_y_size;
-		if (m_slice_num)
-			m_zspc = block0.z_len / m_slice_num;
+		if (m_size.x() > 0)
+			m_spacing.x(block0.x_len / m_size.x());
+		if (m_size.y() > 0)
+			m_spacing.y(block0.y_len / m_size.y());
+		if (m_size.z() > 0)
+			m_spacing.z(block0.z_len / m_size.z());
 	}
 
-	if (m_xspc > 0.0 &&
-		m_yspc > 0.0 &&
-		m_zspc > 0.0)
+	if (!m_spacing.any_le_zero())
 	{
 		m_valid_spc = true;
 	}
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 
 	if (m_datatype > 1)

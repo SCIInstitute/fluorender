@@ -1107,7 +1107,7 @@ Nrrd* VolumeData::GetLabel(bool ret)
 	return 0;
 }
 
-double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
+double VolumeData::GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	int bits = 8;
@@ -1139,9 +1139,10 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 		nz = (int64_t)(comp.data->axis[2].size);
 	}
 
-	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
+	fluo::Vector pv(p);
+	if (pv.any_l_zero() || pv.any_ge(m_size))
 		return 0.0;
-	uint64_t ii = i, jj = j, kk = k;
+	uint64_t ii = p.intx(), jj = p.inty(), kk = p.intz();
 
 	if (bits == 8)
 	{
@@ -1159,7 +1160,7 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 	return 0.0;
 }
 
-double VolumeData::GetMaskValue(int i, int j, int k, flvr::TextureBrick* b)
+double VolumeData::GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	int bits = 8;
@@ -1191,9 +1192,10 @@ double VolumeData::GetMaskValue(int i, int j, int k, flvr::TextureBrick* b)
 		nz = (int64_t)(comp.data->axis[2].size);
 	}
 
-	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
+	fluo::Vector pv(p);
+	if (pv.any_l_zero() || pv.any_ge(m_size))
 		return 0.0;
-	uint64_t ii = i, jj = j, kk = k;
+	uint64_t ii = p.intx(), jj = p.inty(), kk = p.intz();
 
 	if (bits == 8)
 	{
@@ -1211,7 +1213,7 @@ double VolumeData::GetMaskValue(int i, int j, int k, flvr::TextureBrick* b)
 	return 0.0;
 }
 
-double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b)
+double VolumeData::GetTransferedValue(const fluo::Point& p, flvr::TextureBrick* b)
 {
 	void *data_data = 0;
 	int bits = 8;
@@ -1243,9 +1245,10 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 		nz = (int64_t)(comp.data->axis[2].size);
 	}
 
-	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
+	fluo::Vector pv(p);
+	if (pv.any_l_zero() || pv.any_ge(m_size))
 		return 0.0;
-	int64_t ii = i, jj = j, kk = k;
+	uint64_t ii = p.intx(), jj = p.inty(), kk = p.intz();
 
 	if (bits == 8)
 	{
@@ -1255,9 +1258,9 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 		double new_value = double(old_value)/255.0;
 		if (m_vr->get_inversion())
 			new_value = 1.0-new_value;
-		if (i>0 && i<nx-1 &&
-			j>0 && j<ny-1 &&
-			k>0 && k<nz-1)
+		if (ii > 0 && ii < nx - 1 &&
+			jj>0 && jj < ny - 1 &&
+			kk>0 && kk < nz - 1)
 		{
 			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii-1];
 			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii+1];

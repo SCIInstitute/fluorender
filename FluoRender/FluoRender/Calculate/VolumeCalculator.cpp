@@ -274,11 +274,9 @@ void VolumeCalculator::CreateVolumeResult1()
 	if (!vd_a)
 		return;
 
-	int res_x, res_y, res_z;
-	double spc_x, spc_y, spc_z;
 
-	vd_a->GetResolution(res_x, res_y, res_z);
-	vd_a->GetSpacings(spc_x, spc_y, spc_z);
+	auto res = vd_a->GetResolution();
+	auto spc = vd_a->GetSpacing();
 	int brick_size = vd_a->GetTexture()->get_build_max_tex_size();
 
 	int bits = (vd_a->GetMaxValue()>255.0) ? 16:8;
@@ -286,8 +284,8 @@ void VolumeCalculator::CreateVolumeResult1()
 
 	auto vd = std::make_shared<VolumeData>();
 	vd->AddEmptyData(bits,
-		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z,
+		res,
+		spc,
 		brick_size);
 	vd->SetSpcFromFile(true);
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
@@ -317,33 +315,21 @@ void VolumeCalculator::CreateVolumeResult2()
 	if (!vd_a || !vd_b)
 		return;
 
-	int res_x_a, res_y_a, res_z_a;
-	int res_x_b, res_y_b, res_z_b;
-	double spc_x_a, spc_y_a, spc_z_a;
-	double spc_x_b, spc_y_b, spc_z_b;
-
-	vd_a->GetResolution(res_x_a, res_y_a, res_z_a);
-	vd_b->GetResolution(res_x_b, res_y_b, res_z_b);
-	vd_a->GetSpacings(spc_x_a, spc_y_a, spc_z_a);
-	vd_b->GetSpacings(spc_x_b, spc_y_b, spc_z_b);
+	auto res_a = vd_a->GetResolution();
+	auto res_b = vd_b->GetResolution();
+	auto spc_a = vd_a->GetSpacing();
+	auto spc_b = vd_b->GetSpacing();
 	int brick_size = vd_a->GetTexture()->get_build_max_tex_size();
 
 	int bits = (vd_a->GetMaxValue()>255.0||vd_b->GetMaxValue()>255.0) ? 16:8;
 	//int bits = 8;  //it has an unknown problem with 16 bit data
-	int res_x, res_y, res_z;
-	double spc_x, spc_y, spc_z;
-
-	res_x = std::max(res_x_a, res_x_b);
-	res_y = std::max(res_y_a, res_y_b);
-	res_z = std::max(res_z_a, res_z_b);
-	spc_x = std::max(spc_x_a, spc_x_b);
-	spc_y = std::max(spc_y_a, spc_y_b);
-	spc_z = std::max(spc_z_a, spc_z_b);
+	auto res_max = fluo::Max(res_a, res_b);
+	auto spc_max = fluo::Max(spc_a, spc_b);
 
 	auto vd = std::make_shared<VolumeData>();
 	vd->AddEmptyData(bits,
-		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z,
+		res_max,
+		spc_max,
 		brick_size);
 	vd->SetSpcFromFile(true);
 	m_vd_r.push_back(vd);
@@ -390,44 +376,42 @@ void VolumeCalculator::FillHoles(double thresh)
 	flvr::Texture* tex_a = vd_a->GetTexture();
 	if (!tex_a)
 		return;
-	Nrrd* nrrd_a = tex_a->get_nrrd(0);
-	if (!nrrd_a)
+	auto comp_a = tex_a->get_nrrd(flvr::CompType::Data);
+	if (!comp_a.data)
 		return;
-	void* data_a = nrrd_a->data;
+	void* data_a = comp_a.data->data;
 	if (!data_a)
 		return;
 
 	flvr::Texture* tex_r = vd->GetTexture();
 	if (!tex_r)
 		return;
-	Nrrd* nrrd_r = tex_r->get_nrrd(0);
-	if (!nrrd_r)
+	auto comp_r = tex_r->get_nrrd(flvr::CompType::Data);
+	if (!comp_r.data)
 		return;
-	void* data_r = nrrd_r->data;
+	void* data_r = comp_r.data->data;
 	if (!data_r)
 		return;
 
 	//resolution
-	int nx, ny, nz;
-	vd_a->GetResolution(nx, ny, nz);
+	auto res = vd_a->GetResolution();
 
 	int progress = 0;
-	int total_prg = nx * 2;
+	int total_prg = res.intx() * 2;
 	SetProgress(0, "FluoRender is filling gaps in the volume. Please wait.");
 
 	int i, j, k;
 	fluo::BBox bbox;
 	//first pass: finding BBox
-	for (i = 0; i < nx; i++)
+	for (i = 0; i < res.intx(); i++)
 	{
-		for (j = 0; j < ny; j++)
-		for (k = 0; k < nz; k++)
+		for (j = 0; j < res.inty(); j++) for (k = 0; k < res.intz(); k++)
 		{
-			int index = nx*ny*k + nx*j + i;
+			int index = res.get_size_xy()*k + res.intx()*j + i;
 			unsigned char value_a = 0;
-			if (nrrd_a->type == nrrdTypeUChar)
+			if (comp_a.data->type == nrrdTypeUChar)
 				value_a = ((unsigned char*)data_a)[index];
-			else if (nrrd_a->type == nrrdTypeUShort)
+			else if (comp_a.data->type == nrrdTypeUShort)
 				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*vd_a->GetScalarScale() / 257.0);
 			if (value_a > thresh * 255)
 			{
@@ -452,7 +436,7 @@ void VolumeCalculator::FillHoles(double thresh)
 		for (j = int(bbox.Min().y()); j <= int(bbox.Max().y()); j++)
 		for (k = int(bbox.Min().z()); k <= int(bbox.Max().z()); k++)
 		{
-			int index = nx*ny*k + nx*j + i;
+			int index = res.get_size_xy()*k + res.intx()*j + i;
 			unsigned char value_r = ((unsigned char*)data_r)[index];
 			if (!value_r)
 			{
@@ -464,7 +448,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				while (s_n_x >= int(bbox.Min().x()) &&
 					s_n_x >= int(i - dx))
 				{
-					si = nx*ny*k + nx*j + s_n_x;
+					si = res.get_size_xy()*k + res.intx()*j + s_n_x;
 					if (((unsigned char*)data_r)[si])
 					{
 						found_n = true;
@@ -478,7 +462,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				while (s_p_x <= int(bbox.Max().x()) &&
 					s_p_x <= int(i + dx))
 				{
-					si = nx*ny*k + nx*j + s_p_x;
+					si = res.get_size_xy()*k + res.intx()*j + s_p_x;
 					if (((unsigned char*)data_r)[si])
 					{
 						found_p = true;
@@ -498,7 +482,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				while (s_n_y >= int(bbox.Min().y()) &&
 					s_n_y >= int(j - dy))
 				{
-					si = nx*ny*k + nx*s_n_y + i;
+					si = res.get_size_xy()*k + res.intx()*s_n_y + i;
 					if (((unsigned char*)data_r)[si])
 					{
 						found_n = true;
@@ -512,7 +496,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				while (s_p_y <= int(bbox.Max().y()) &&
 					s_p_y <= int(j + dy))
 				{
-					si = nx*ny*k + nx*s_p_y + i;
+					si = res.get_size_xy()*k + res.intx()*s_p_y + i;
 					if (((unsigned char*)data_r)[si])
 					{
 						found_p = true;
@@ -532,7 +516,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				while (s_n_z >= int(bbox.Min().z()) &&
 					s_n_z >= int(k - dz))
 				{
-					si = nx*ny*s_n_z + nx*j + i;
+					si = res.get_size_xy()*s_n_z + res.intx()*j + i;
 					if (((unsigned char*)data_r)[si])
 					{
 						found_n = true;
@@ -546,7 +530,7 @@ void VolumeCalculator::FillHoles(double thresh)
 				while (s_p_z <= int(bbox.Max().z()) &&
 					s_p_z <= int(k + dz))
 				{
-					si = nx*ny*s_p_z + nx*j + i;
+					si = res.get_size_xy()*s_p_z + res.intx()*j + i;
 					if (((unsigned char*)data_r)[si])
 					{
 						found_p = true;

@@ -38,14 +38,9 @@ LOFReader::LOFReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -197,9 +192,7 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0)
+		!m_size.any_le_zero())
 	{
 		TimeInfo *tinfo = m_lof_info.GetTimeInfo(c, t);
 		if (!tinfo)
@@ -209,8 +202,7 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 		//allocate memory for nrrd
 		bool show_progress = false;
 		size_t blk_num = tinfo->blocks.size();
-		unsigned long long mem_size = (unsigned long long)m_x_size *
-			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+		unsigned long long mem_size = m_size.get_size_xyz();
 		void* val = 0;
 		switch (m_datatype)
 		{
@@ -236,16 +228,17 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 		switch (m_datatype)
 		{
 		case 1:
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		case 2:
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		}
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+		auto max_size = m_spacing * m_size;
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	}
 
 	fclose(pfile);
@@ -476,28 +469,25 @@ void LOFReader::FillLofInfo()
 	if (tinfo && tinfo->blocks.size() > 0)
 	{
 		//pixel size
-		m_slice_num = tinfo->blocks[0].z_size;
-		m_x_size = tinfo->blocks[0].x_size;
-		m_y_size = tinfo->blocks[0].y_size;
+		m_size = fluo::Vector(
+			tinfo->blocks[0].x_size,
+			tinfo->blocks[0].y_size,
+			tinfo->blocks[0].z_size);
 		//spacings
-		if (m_x_size)
-			m_xspc = tinfo->blocks[0].x_len / m_x_size;
-		if (m_y_size)
-			m_yspc = tinfo->blocks[0].y_len / m_y_size;
-		if (m_slice_num)
-			m_zspc = tinfo->blocks[0].z_len / m_slice_num;
-		if (m_xspc > 0.0 &&
-			m_yspc > 0.0 &&
-			m_zspc > 0.0)
+		if (m_size.x() > 0)
+			m_spacing.x(tinfo->blocks[0].x_len / m_size.x());
+		if (m_size.y() > 0)
+			m_spacing.y(tinfo->blocks[0].y_len / m_size.y());
+		if (m_size.z() > 0)
+			m_spacing.z(tinfo->blocks[0].z_len / m_size.z());
+		if (!m_spacing.any_le_zero())
 		{
 			m_valid_spc = true;
 		}
 		else
 		{
 			m_valid_spc = false;
-			m_xspc = 1.0;
-			m_yspc = 1.0;
-			m_zspc = 1.0;
+			m_spacing = fluo::Vector(1.0);
 		}
 	}
 	if (m_datatype > 1)

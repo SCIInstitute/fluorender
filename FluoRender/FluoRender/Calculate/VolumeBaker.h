@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEBAKER_H_
 #define _VOLUMEBAKER_H_
 
+#include <Vector.h>
 #include <nrrd.h>
 #include <memory>
 
@@ -52,9 +53,7 @@ namespace flrd
 		void* m_raw_result;		//
 
 		//size
-		int m_nx;
-		int m_ny;
-		int m_nz;
+		fluo::Vector m_size;
 		//input bits
 		int m_bits;
 

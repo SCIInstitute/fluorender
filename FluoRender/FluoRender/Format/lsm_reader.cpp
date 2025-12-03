@@ -36,14 +36,9 @@ LSMReader::LSMReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -175,11 +170,11 @@ int LSMReader::Preprocess()
 				break;
 			case 0x0100://256, image width
 				if (full_image && cnt_image == 1)
-					m_x_size = value;
+					m_size.x(value);
 				break;
 			case 0x0101://257, image length
 				if (full_image && cnt_image == 1)
-					m_y_size = value;
+					m_size.y(value);
 				break;
 			case 0x0102://258, bits per sample
 				break;
@@ -292,7 +287,7 @@ int LSMReader::Preprocess()
 		//build lsm info, which contains all offset values and sizes
 		if (full_image)
 		{
-			int time = (cnt_image - 1) / m_slice_num;
+			int time = (cnt_image - 1) / m_size.intz();
 			if (time + 1 > (int)m_lsm_info.size())
 			{
 				DatasetInfo dinfo;
@@ -349,7 +344,7 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 	offset += 4;  //dimension y
 	if (offset < size) value = *((int*)(pdata + offset));
 	offset += 4;  //dimension z
-	if (offset < size) m_slice_num = *((int*)(pdata + offset));
+	if (offset < size) m_size.z(*((int*)(pdata + offset)));
 	offset += 4;  //channels
 	if (offset < size) value = *((int*)(pdata + offset));
 	offset += 4;  //time
@@ -388,17 +383,16 @@ void LSMReader::ReadLsmInfo(FILE* pfile, unsigned char* pdata, unsigned int size
 		spcz>0.0 && spcz < 1e-4)
 	{
 		m_valid_spc = true;
-		m_xspc = spcx * 1e6;
-		m_yspc = spcy * 1e6;
-		m_zspc = spcz * 1e6;
-		if (m_zspc < 1e-3) m_zspc = m_xspc;
+		m_spacing = fluo::Vector(
+			spcx * 1e6,
+			spcy * 1e6,
+			spcz * 1e6);
+		if (m_spacing.z() < 1e-3) m_spacing.z(m_spacing.x());
 	}
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 	//read data type if m_datatype is 0
 	if (m_datatype == 0)
@@ -665,9 +659,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num > 0 &&
-		m_x_size > 0 &&
-		m_y_size > 0 &&
+		!m_size.any_le_zero() &&
 		t < (int)m_lsm_info.size() &&
 		c < (int)m_lsm_info[t].size())
 	{
@@ -675,8 +667,7 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 		bool show_progress = false;
 		ChannelInfo *cinfo = &m_lsm_info[t][c];
 		size_t blk_num = cinfo->size();
-		unsigned long long mem_size = (unsigned long long)m_x_size *
-			(unsigned long long)m_y_size * (unsigned long long)m_slice_num;
+		unsigned long long mem_size = m_size.get_size_xyz();
 		void* val = 0;
 		switch (m_datatype)
 		{
@@ -701,11 +692,11 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 				switch (m_datatype)
 				{
 				case 1:
-					val_pos = m_x_size * m_y_size * i;
+					val_pos = m_size.get_size_xy() * i;
 					break;
 				case 2:
 				case 3:
-					val_pos = m_x_size * m_y_size * i * 2;
+					val_pos = m_size.get_size_xy() * i * 2;
 					break;
 				}
 
@@ -718,16 +709,16 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 					unsigned char* tif = new (std::nothrow) unsigned char[(*cinfo)[i].size];
 					fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
 					LZWDecode(tif, tidata_t(val) + val_pos, (*cinfo)[i].size);
-					for (size_t j = 0; j < m_y_size; j++)
+					for (size_t j = 0; j < m_size.inty(); j++)
 					{
 						switch (m_datatype)
 						{
 						case 1:
-							DecodeAcc8(tidata_t(val) + val_pos + j * m_x_size, m_x_size, 1);
+							DecodeAcc8(tidata_t(val) + val_pos + j * m_size.intx(), m_size.intx(), 1);
 							break;
 						case 2:
 						case 3:
-							DecodeAcc16(tidata_t(val) + val_pos + j * m_x_size * 2, m_x_size, 1);
+							DecodeAcc16(tidata_t(val) + val_pos + j * m_size.intx() * 2, m_size.intx(), 1);
 							break;
 						}
 					}
@@ -743,17 +734,17 @@ Nrrd* LSMReader::Convert(int t, int c, bool get_max)
 		switch (m_datatype)
 		{
 		case 1:
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		case 2:
-		case 3:
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 			break;
 		}
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+		auto max_size = m_spacing * m_size;
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	}
 
 	fclose(pfile);

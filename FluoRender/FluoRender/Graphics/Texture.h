@@ -145,7 +145,7 @@ namespace flvr
 		std::vector<TextureBrick*>* get_bricks();
 		//get bricks sorted by id
 		std::vector<TextureBrick*>* get_bricks_id();
-		int get_brick_list_size() {return int((*bricks_).size());}
+		size_t get_brick_list_size() {return (*bricks_).size();}
 		//quota bricks
 		std::vector<TextureBrick*>* get_quota_bricks();
 

@@ -102,7 +102,7 @@ bool CountVoxels::CheckBricks()
 		return false;
 	if (!vd->GetTexture())
 		return false;
-	int brick_num = vd->GetTexture()->get_brick_num();
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
 		return false;
 	return true;
@@ -112,10 +112,11 @@ bool CountVoxels::GetInfo(
 	flvr::TextureBrick* b,
 	unsigned int &bits, unsigned int &nx, unsigned int &ny, unsigned int &nz)
 {
-	bits = static_cast<unsigned int>(b->nb(0)*8);
-	nx = static_cast<unsigned int>(b->nx());
-	ny = static_cast<unsigned int>(b->ny());
-	nz = static_cast<unsigned int>(b->nz());
+	bits = static_cast<unsigned int>(b->nb(flvr::CompType::Data)*8);
+	auto res = b->get_size();
+	nx = static_cast<unsigned int>(res.intx());
+	ny = static_cast<unsigned int>(res.inty());
+	nz = static_cast<unsigned int>(res.intz());
 	return true;
 }
 
@@ -146,7 +147,7 @@ void CountVoxels::Count()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = vd->GetTexture()->get_brick_num();
+	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
 
 	m_sum = 0; m_wsum = 0.0;

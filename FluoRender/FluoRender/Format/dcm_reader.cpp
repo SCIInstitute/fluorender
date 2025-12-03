@@ -174,14 +174,9 @@ DCMReader::DCMReader() :
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 1.0;
-	m_yspc = 1.0;
-	m_zspc = 1.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -338,15 +333,13 @@ int DCMReader::Preprocess()
 		}
 		else m_chan_num = 0;
 
-		m_slice_num = static_cast<int>(m_4d_seq[m_cur_time].slices.size());
+		m_size.z(static_cast<int>(m_4d_seq[m_cur_time].slices.size()));
 	}
 	else m_chan_num = 0;
 
 	if (m_compression == DCM_UNSUPPORTED ||
 		m_compression == DCM_JPEG_LOSSLESS ||
-		m_x_size == 0 ||
-		m_y_size == 0 ||
-		m_slice_num == 0 ||
+		m_size.any_le_zero() ||
 		m_time_num == 0)
 		return READER_FORMAT_ERROR;
 	return READER_OK;
@@ -497,10 +490,14 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 
 	// Optional: pixel spacing
 	it_spc = m_tag_map.find(0x00280030);
-	if (it_spc != m_tag_map.end() && !it_spc->second.empty()) {
+	if (it_spc != m_tag_map.end() && !it_spc->second.empty())
+	{
 		std::string spacing_str(it_spc->second.data(), it_spc->second.size());
-		if (sscanf(spacing_str.c_str(), "%lf\\%lf", &m_xspc, &m_yspc) == 2) {
-			m_zspc = std::max(m_xspc, m_yspc);
+		double xspc, yspc, zspc;
+		if (sscanf(spacing_str.c_str(), "%lf\\%lf", &xspc, &yspc) == 2)
+		{
+			zspc = std::max(xspc, yspc);
+			m_spacing = fluo::Vector(xspc, yspc, zspc);
 			m_valid_spc = true;
 		}
 	}
@@ -508,13 +505,13 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 	if (pixel_data_pos != std::streampos(-1))
 	{
 		// Try to get image size from tags
-		m_y_size = get_u16(0x00280010);
-		m_x_size = get_u16(0x00280011);
+		m_size.y(get_u16(0x00280010));
+		m_size.x(get_u16(0x00280011));
 		m_bits = get_u16(0x00280100);
 		m_chan_num = get_u16(0x00280002);
 		m_signed = (get_u16(0x00280103) == 1);
 
-		if (m_x_size != 0 && m_y_size != 0 && m_bits != 0)
+		if (m_size.intx() > 0 && m_size.inty() > 0 && m_bits != 0)
 		{
 			m_valid_info = true;
 			return true;
@@ -562,7 +559,7 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 		std::vector<uint8_t> decompressed;
 		if (!Decompress(pixel_data, decompressed, 0)) return false;
 
-		return (m_x_size != 0 && m_y_size != 0 && m_bits != 0);
+		return (m_size.intx() > 0 && m_size.inty() > 0 && m_bits != 0);
 	}
 
 	m_valid_info = true;
@@ -634,8 +631,7 @@ Nrrd* DCMReader::ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get
 	Nrrd *nrrdout = nrrdNew();
 	bool eight_bit = m_bits == 8;
 
-	unsigned long long total_size = (unsigned long long)m_x_size*
-		(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+	unsigned long long total_size = m_size.get_size_xyz();
 	void* val = eight_bit ? (void*)(new unsigned char[total_size]) :
 		(void*)(new unsigned short[total_size]);
 	if (!val)
@@ -657,30 +653,30 @@ Nrrd* DCMReader::ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get
 		}
 		if (show_progress)
 			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr += m_x_size * m_y_size * (m_bits / 8);
+		val_ptr += m_size.get_size_xy() * (m_bits / 8);
 	}
 
 	//write to nrrd
 	if (eight_bit)
 		nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	else
 		nrrdWrap_va(nrrdout, (uint16_t*)val, nrrdTypeUShort,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
-		m_yspc*m_y_size, m_zspc*m_slice_num);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+	auto max_size = m_size * m_spacing;
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(),
+		max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
-		(size_t)m_y_size, (size_t)m_slice_num);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(),
+		(size_t)m_size.inty(), (size_t)m_size.intz());
 
 	if (!eight_bit)
 	{
 		if (get_max)
 		{
 			double value;
-			unsigned long long totali = (unsigned long long)m_slice_num*
-				(unsigned long long)m_x_size*(unsigned long long)m_y_size;
+			unsigned long long totali = m_size.get_size_xyz();
 			for (unsigned long long i = 0; i < totali; ++i)
 			{
 				value = ((unsigned short*)nrrdout->data)[i];
@@ -802,7 +798,7 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 			std::vector<uint8_t> decompressed;
 			if (!Decompress(pixel_data, decompressed, c)) return false;
 
-			size_t slice_size = m_y_size * m_x_size;
+			size_t slice_size = static_cast<size_t>(m_size.get_size_xy());
 			if (m_bits == 8) {
 				const uint8_t* full_data = decompressed.data();
 				uint8_t* channel_data = static_cast<uint8_t*>(val);
@@ -926,8 +922,8 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 			return false;
 	}
 
-	int width = m_x_size;
-	int height = m_y_size;
+	int width = m_size.intx();
+	int height = m_size.inty();
 	int channels = m_chan_num;
 	int bits = m_bits;
 
@@ -1024,8 +1020,8 @@ bool DCMReader::Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& 
 		return false;
 	}
 
-	if (m_x_size == 0) m_x_size = width;
-	if (m_y_size == 0) m_y_size = height;
+	if (m_size.intx() == 0) m_size.x(width);
+	if (m_size.inty() == 0) m_size.y(height);
 	if (m_chan_num == 0) m_chan_num = channels;
 	if (m_bits == 0) m_bits = bits;
 

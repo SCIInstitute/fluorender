@@ -122,7 +122,7 @@ bool VolumeRoi::CheckBricks()
 		return false;
 	if (!m_vd->GetTexture())
 		return false;
-	int brick_num = m_vd->GetTexture()->get_brick_num();
+	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
 		return false;
 	return true;
@@ -132,10 +132,11 @@ bool VolumeRoi::GetInfo(
 	flvr::TextureBrick* b,
 	long& bits, long& nx, long& ny, long& nz)
 {
-	bits = b->nb(0) * 8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
+	bits = b->nb(flvr::CompType::Data) * 8;
+	auto res = b->get_size();
+	nx = res.intx();
+	ny = res.inty();
+	nz = res.intz();
 	return true;
 }
 
@@ -156,15 +157,14 @@ void VolumeRoi::Run()
 	int kernel_index0;
 	kernel_index0 = kernel_prog->createKernel("kernel_0");
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*>* bricks = m_vd->GetTexture()->get_bricks();
 
 	//init
 	m_sum = 0;
 	m_wsum = 0.0;
-	double spcx, spcy, spcz;
-	m_vd->GetSpacings(spcx, spcy, spcz);
-	cl_float4 spaces = { cl_float(spcx), cl_float(spcy), cl_float(spcz), cl_float(1) };
+	auto spc = m_vd->GetSpacing();
+	cl_float4 spaces = { cl_float(spc.x()), cl_float(spc.y()), cl_float(spc.z()), cl_float(1) };
 	cl_float4 tf0 = {
 		float(m_tf.get_mat_val(0, 0)),
 		float(m_tf.get_mat_val(1, 0)),

@@ -71,6 +71,7 @@ BRKXMLReader::BRKXMLReader() :
 	m_cur_chan = 0;
 
 	m_valid_spc = false;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;

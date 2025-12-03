@@ -550,8 +550,8 @@ bool ChannelCompare::CheckBricks()
 		return false;
 	if (!m_vd2->GetTexture())
 		return false;
-	int brick_num1 = m_vd1->GetTexture()->get_brick_num();
-	int brick_num2 = m_vd2->GetTexture()->get_brick_num();
+	auto brick_num1 = m_vd1->GetTexture()->get_brick_list_size();
+	auto brick_num2 = m_vd2->GetTexture()->get_brick_list_size();
 	if (!brick_num1 || !brick_num2 || brick_num1 != brick_num2)
 		return false;
 	return true;
@@ -562,17 +562,13 @@ bool ChannelCompare::GetInfo(
 	long &bits1, long &bits2,
 	long &nx, long &ny, long &nz)
 {
-	bits1 = b1->nb(0)*8;
-	bits2 = b2->nb(0)*8;
-	long nx1 = b1->nx();
-	long nx2 = b2->nx();
-	long ny1 = b1->ny();
-	long ny2 = b2->ny();
-	long nz1 = b1->nz();
-	long nz2 = b2->nz();
-	if (nx1 != nx2 || ny1 != ny2 || nz1 != nz2)
+	bits1 = b1->nb(flvr::CompType::Data)*8;
+	bits2 = b2->nb(flvr::CompType::Data)*8;
+	auto res1 = b1->get_size();
+	auto res2 = b2->get_size();
+	if (res1 != res2)
 		return false;
-	nx = nx1; ny = ny1; nz = nz1;
+	nx = res1.intx(); ny = res1.inty(); nz = res1.intz();
 	return true;
 }
 
@@ -581,41 +577,34 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	if (!b)
 		return 0;
 
-	size_t nx, ny, nz;
 	int bits = 8;
-	int c = 0;
 	int nb = 1;
 
-	c = m_use_mask ? b->nmask() : 0;
+	flvr::CompType c = m_use_mask ? flvr::CompType::Data : flvr::CompType::None;
 	nb = b->nb(c);
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
+	auto res = b->get_size();
 	bits = nb * 8;
-	unsigned long long mem_size = (unsigned long long)nx*
-		(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
+	unsigned long long mem_size = (unsigned long long)res.get_size_xyz()*(unsigned long long)nb;
 	unsigned char* temp = new unsigned char[mem_size];
 	unsigned char* tempp = temp;
 	unsigned char* tp = (unsigned char*)(b->tex_data(c));
 	unsigned char* tp2;
-	for (size_t k = 0; k < nz; ++k)
+	for (size_t k = 0; k < res.intz(); ++k)
 	{
 		tp2 = tp;
-		for (size_t j = 0; j < ny; ++j)
+		for (size_t j = 0; j < res.inty(); ++j)
 		{
-			memcpy(tempp, tp2, nx*nb);
-			tempp += nx * nb;
-			tp2 += b->sx()*nb;
+			memcpy(tempp, tp2, res.intx()*nb);
+			tempp += res.intx() * nb;
+			tp2 += res.intx()*nb;
 		}
-		tp += b->sx()*b->sy()*nb;
+		tp += res.get_size_xy()*nb;
 	}
 	return (void*)temp;
 }
 
 void* ChannelCompare::GetVolData(VolumeData* vd)
 {
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
 	Nrrd* nrrd_data = 0;
 	if (m_use_mask)
 		nrrd_data = vd->GetMask(false);
@@ -662,7 +651,7 @@ void ChannelCompare::Product()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
@@ -775,7 +764,7 @@ void ChannelCompare::MinValue()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
@@ -888,7 +877,7 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
@@ -993,7 +982,7 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
 	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());

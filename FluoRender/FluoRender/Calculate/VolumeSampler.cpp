@@ -167,9 +167,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	fluo::Vector size = m_size_out - fluo::Vector(0.5);
 	fluo::Vector size_in = m_size_in - fluo::Vector(0.5);
 	//spacing
-	double spcx_in, spcy_in, spcz_in;
-	input->GetSpacings(spcx_in, spcy_in, spcz_in);
-	fluo::Vector spc_in(spcx_in, spcy_in, spcz_in);
+	auto spc_in = input->GetSpacing();
 	fluo::Vector spc;
 
 	if (m_crop || rot)
@@ -336,22 +334,20 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)
 {
 	if (!vd || !vd->GetTexture())
-		return 0;
+		return nullptr;
 	flvr::Texture* tex = vd->GetTexture();
-	int index = 0;
+	if (!tex)
+		return nullptr;
 	switch (type)
 	{
 	case SDT_Data:
-		index = 0;
-		break;
+		return tex->get_nrrd(flvr::CompType::Data).data;
 	case SDT_Mask:
-		index = tex->nmask();
-		break;
+		return tex->get_nrrd(flvr::CompType::Mask).data;
 	case SDT_Label:
-		index = tex->nlabel();
-		break;
+		return tex->get_nrrd(flvr::CompType::Label).data;
 	}
-	return tex->get_nrrd(index);
+	return nullptr;
 }
 
 void* VolumeSampler::GetRaw(VolumeData* vd, SampDataType type)

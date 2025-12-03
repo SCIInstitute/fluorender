@@ -245,7 +245,7 @@ bool BasicStat::CheckBricks()
 		return false;
 	if (!m_vd->GetTexture())
 		return false;
-	int brick_num = m_vd->GetTexture()->get_brick_num();
+	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
 		return false;
 	return true;
@@ -255,10 +255,11 @@ bool BasicStat::GetInfo(
 	flvr::TextureBrick* b,
 	long &bits, long &nx, long &ny, long &nz)
 {
-	bits = b->nb(0) * 8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
+	bits = b->nb(flvr::CompType::Data) * 8;
+	auto res = b->get_size();
+	nx = res.intx();
+	ny = res.inty();
+	nz = res.intz();
 	return true;
 }
 
@@ -306,7 +307,7 @@ void BasicStat::Run()
 		break;
 	}
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	m_sum = 0;

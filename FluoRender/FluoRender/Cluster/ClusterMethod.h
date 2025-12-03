@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_ClusterMethod_h
 #define FL_ClusterMethod_h
 
+#include <Vector.h>
 #include <boost/qvm/vec.hpp>
 #include <boost/qvm/mat.hpp>
 #include <boost/qvm/vec_operations.hpp>
@@ -37,10 +38,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <memory>
 
-namespace fluo
-{
-	class Vector;
-}
 namespace flrd
 {
 	class CelpList;

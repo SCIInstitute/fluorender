@@ -57,8 +57,8 @@ int CombineList::Execute()
 	auto vd0 = (*m_channs.begin()).lock();
 	if (!vd0)
 		return 0;
-	vd0->GetResolution(m_resx, m_resy, m_resz);
-	vd0->GetSpacings(m_spcx, m_spcy, m_spcz);
+	m_size = vd0->GetResolution();
+	m_spacing = vd0->GetSpacing();
 	m_bits = vd0->GetBits();
 	int brick_size = vd0->GetTexture()->get_build_max_tex_size();
 	if (m_name == L"")
@@ -67,24 +67,24 @@ int CombineList::Execute()
 	//red volume
 	auto vd_r = std::make_shared<VolumeData>();
 	vd_r->AddEmptyData(m_bits,
-		m_resx, m_resy, m_resz,
-		m_spcx, m_spcy, m_spcz,
+		m_size,
+		m_spacing,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_name + L"_CH_R");
 	//green volume
 	auto vd_g = std::make_shared<VolumeData>();
 	vd_g->AddEmptyData(m_bits,
-		m_resx, m_resy, m_resz,
-		m_spcx, m_spcy, m_spcz,
+		m_size,
+		m_spacing,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_name + L"_CH_G");
 	//blue volume
 	auto vd_b = std::make_shared<VolumeData>();
 	vd_b->AddEmptyData(m_bits,
-		m_resx, m_resy, m_resz,
-		m_spcx, m_spcy, m_spcz,
+		m_size,
+		m_spacing,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_name + L"_CH_B");
@@ -93,36 +93,33 @@ int CombineList::Execute()
 	//red volume
 	flvr::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return 0;
-	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
-	if (!nrrd_vd_r) return 0;
-	void* data_vd_r = nrrd_vd_r->data;
+	auto comp_vd_r = tex_vd_r->get_nrrd(flvr::CompType::Data);
+	if (!comp_vd_r.data) return 0;
+	void* data_vd_r = comp_vd_r.data->data;
 	if (!data_vd_r) return 0;
 	//green volume
 	flvr::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return 0;
-	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
-	if (!nrrd_vd_g) return 0;
-	void* data_vd_g = nrrd_vd_g->data;
+	auto comp_vd_g = tex_vd_g->get_nrrd(flvr::CompType::Data);
+	if (!comp_vd_g.data) return 0;
+	void* data_vd_g = comp_vd_g.data->data;
 	if (!data_vd_g) return 0;
 	//blue volume
 	flvr::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return 0;
-	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
-	if (!nrrd_vd_b) return 0;
-	void* data_vd_b = nrrd_vd_b->data;
+	auto comp_vd_b = tex_vd_b->get_nrrd(flvr::CompType::Data);
+	if (!comp_vd_b.data) return 0;
+	void* data_vd_b = comp_vd_b.data->data;
 	if (!data_vd_b) return 0;
 
-	unsigned long long for_size = (unsigned long long)m_resx *
-		(unsigned long long)m_resy * (unsigned long long)m_resz;
+	unsigned long long for_size = m_size.get_size_xyz();
 	unsigned long long index;
 	std::shared_ptr<VolumeData> volume;
 	for (auto iter = m_channs.begin();
 		iter != m_channs.end(); ++iter)
 	{
-		int nx, ny, nz;
 		auto vd = iter->lock();
-		vd->GetResolution(nx, ny, nz);
-		if (!(nx == m_resx && ny == m_resy && nz == m_resz))
+		if (vd->GetResolution() != m_size)
 			continue;
 		fluo::Color color = vd->GetColor();
 		Nrrd* nrrd_iter = vd->GetVolume(false);

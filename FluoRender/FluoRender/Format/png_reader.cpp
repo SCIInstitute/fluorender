@@ -36,14 +36,9 @@ PNGReader::PNGReader() : BaseVolReader()
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 1.0;
-	m_yspc = 1.0;
-	m_zspc = 1.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -197,7 +192,7 @@ int PNGReader::Preprocess()
 		}
 		else m_chan_num = 0;
 
-		m_slice_num = static_cast<int>(m_4d_seq[m_cur_time].slices.size());
+		m_size.z(static_cast<int>(m_4d_seq[m_cur_time].slices.size()));
 	}
 	else m_chan_num = 0;
 
@@ -236,8 +231,8 @@ void PNGReader::GetFileInfo(const std::wstring& filename)
 	uint8_t dim_bytes[8];
 	png_stream.read(reinterpret_cast<char*>(dim_bytes), 8);
 
-	m_x_size = (dim_bytes[0] << 24) | (dim_bytes[1] << 16) | (dim_bytes[2] << 8) | dim_bytes[3];
-	m_y_size = (dim_bytes[4] << 24) | (dim_bytes[5] << 16) | (dim_bytes[6] << 8) | dim_bytes[7];
+	m_size.x((dim_bytes[0] << 24) | (dim_bytes[1] << 16) | (dim_bytes[2] << 8) | dim_bytes[3]);
+	m_size.y((dim_bytes[4] << 24) | (dim_bytes[5] << 16) | (dim_bytes[6] << 8) | dim_bytes[7]);
 
 	uint8_t bit_depth = 0, color_type = 0;
 	png_stream.read(reinterpret_cast<char*>(&bit_depth), 1);
@@ -331,8 +326,7 @@ Nrrd* PNGReader::ReadPng(const std::vector<SliceInfo>& filelist, int c, bool get
 	Nrrd *nrrdout = nrrdNew();
 	bool eight_bit = m_bits == 8;
 
-	unsigned long long total_size = (unsigned long long)m_x_size*
-		(unsigned long long)m_y_size*(unsigned long long)m_slice_num;
+	unsigned long long total_size = m_size.get_size_xyz();
 	void* val = eight_bit ? (void*)(new unsigned char[total_size]) :
 		(void*)(new unsigned short[total_size]);
 	if (!val)
@@ -354,30 +348,30 @@ Nrrd* PNGReader::ReadPng(const std::vector<SliceInfo>& filelist, int c, bool get
 		}
 		if (show_progress)
 			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr += m_x_size * m_y_size * (m_bits / 8);
+		val_ptr += m_size.get_size_xy() * (m_bits / 8);
 	}
 
 	//write to nrrd
 	if (eight_bit)
 		nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	else
 		nrrdWrap_va(nrrdout, (uint16_t*)val, nrrdTypeUShort,
-			3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size,
-		m_yspc*m_y_size, m_zspc*m_slice_num);
+			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+	auto max_size = m_size * m_spacing;
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(),
+		max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size,
-		(size_t)m_y_size, (size_t)m_slice_num);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(),
+		(size_t)m_size.inty(), (size_t)m_size.intz());
 
 	if (!eight_bit)
 	{
 		if (get_max)
 		{
 			double value;
-			unsigned long long totali = (unsigned long long)m_slice_num*
-				(unsigned long long)m_x_size*(unsigned long long)m_y_size;
+			unsigned long long totali = m_size.get_size_xyz();
 			for (unsigned long long i = 0; i < totali; ++i)
 			{
 				value = ((unsigned short*)nrrdout->data)[i];

@@ -124,9 +124,9 @@ public:
 	bool GetMaskClear() { return m_mask_clear; }
 
 	//save
-	double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
-	double GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b=0);
-	double GetMaskValue(int i, int j, int k, flvr::TextureBrick* b = 0);
+	double GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b = 0);
+	double GetTransferedValue(const fluo::Point& p, flvr::TextureBrick* b=0);
+	double GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b = 0);
 	void SetResample(bool resample) { m_resample = resample; }
 	void SetResampledSize(const fluo::Vector& size) { m_resampled_size = size; }
 	bool GetResample() { return m_resample; }
@@ -335,7 +335,7 @@ public:
 	//bits
 	int GetBits();
 	//voxel count
-	size_t GetVoxelCount() { return (size_t)m_size.intx() * m_size.inty() * m_size.intz(); }
+	uint64_t GetVoxelCount() { return m_size.get_size_xyz(); }
 
 	//display controls
 	void SetDisp(bool disp);

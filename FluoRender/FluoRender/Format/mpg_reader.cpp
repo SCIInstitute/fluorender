@@ -43,14 +43,9 @@ MPGReader::MPGReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
+	m_spacing = fluo::Vector(1.0);
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -198,14 +193,13 @@ int MPGReader::Preprocess()
 	m_cur_time = 0;
 
 	m_chan_num = 3;
-	m_x_size = m_av_codec_context->width;
-	m_y_size = m_av_codec_context->height;
-	m_slice_num = 1;
+	m_size = fluo::Vector(
+		m_av_codec_context->width,
+		m_av_codec_context->height,
+		1);
 
 	m_valid_spc = true;
-	m_xspc = 1;
-	m_yspc = 1;
-	m_zspc = 1;
+	m_spacing = fluo::Vector(1.0);
 
 	m_max_value = 255.0;
 	m_scalar_scale = 1;
@@ -287,13 +281,13 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 			return data;
 
 		// Determine required buffer size and allocate buffer
-		int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+		int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_size.intx(), m_size.inty(), 1);
 		m_frame_buffer = static_cast<uint8_t*>(av_malloc(numBytes));
 
 		// Assign appropriate parts of buffer to image planes in pFrameRGB
 		// Note that pFrameRGB is an AVFrame, but AVFrame is a superset
 		// of AVPicture
-		av_image_fill_arrays(m_frame_rgb->data, m_frame_rgb->linesize, m_frame_buffer, AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+		av_image_fill_arrays(m_frame_rgb->data, m_frame_rgb->linesize, m_frame_buffer, AV_PIX_FMT_RGB24, m_size.intx(), m_size.inty(), 1);
 	}
 
 	//seek frame
@@ -380,7 +374,7 @@ MPGReader::FrameInfo MPGReader::get_frame_info(int64_t dts, int64_t pts)
 Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 {
 	//extract channel
-	unsigned long long total_size = (unsigned long long)m_x_size * (unsigned long long)m_y_size;
+	unsigned long long total_size = m_size.get_size_xy();
 	uint8_t* val = new unsigned char[total_size];
 	unsigned long long index;
 	for (index = 0; index < total_size; ++index)
@@ -389,11 +383,12 @@ Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 	//create nrrd
 	Nrrd* data = nrrdNew();
 	nrrdWrap_va(data, (uint8_t*)val, nrrdTypeUChar,
-		3, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc);
+		3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+	auto max_size = m_spacing * m_size;
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)1);
+	nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 
 	return data;
 }
@@ -417,7 +412,7 @@ void MPGReader::add_cache(int t, AVFrame* frame)
 	}
 
 	// Allocate the image buffer
-	int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+	int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, m_size.intx(), m_size.inty(), 1);
 	uint8_t* buffer = static_cast<uint8_t*>(av_malloc(numBytes));
 	if (!buffer) {
 		av_frame_free(&cached_frame);
@@ -425,14 +420,14 @@ void MPGReader::add_cache(int t, AVFrame* frame)
 	}
 
 	// Fill the frame data arrays
-	av_image_fill_arrays(cached_frame->data, cached_frame->linesize, buffer, AV_PIX_FMT_RGB24, m_x_size, m_y_size, 1);
+	av_image_fill_arrays(cached_frame->data, cached_frame->linesize, buffer, AV_PIX_FMT_RGB24, m_size.intx(), m_size.inty(), 1);
 
 	// Copy the frame data from the source frame
 	av_frame_copy_props(cached_frame, frame); // Copy frame properties
 	for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i)
 	{
 		if (frame->data[i]) {
-			memcpy(cached_frame->data[i], frame->data[i], frame->linesize[i] * m_y_size);
+			memcpy(cached_frame->data[i], frame->data[i], frame->linesize[i] * m_size.inty());
 		}
 	}
 

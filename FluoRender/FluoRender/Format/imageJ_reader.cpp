@@ -43,15 +43,10 @@ ImageJReader::ImageJReader():
 	m_time_num = 0;
 	m_cur_time = -1;
 	m_chan_num = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 	m_eight_bit = true;
 
 	m_valid_spc = false;
-	m_xspc = 1.0;
-	m_yspc = 1.0;
-	m_zspc = 1.0;
+	m_spacing = fluo::Vector(1.0);
 	m_excitation_wavelength = nullptr;
 
 	m_min_value = 0.0;
@@ -163,13 +158,13 @@ int ImageJReader::Preprocess()
 					case 0:
 						break;
 					case 1:
-						m_x_size = test;
+						m_size.x(test);
 						break;
 					case 2:
-						m_y_size = test;
+						m_size.y(test);
 						break;
 					case 3:
-						m_slice_num = test;
+						m_size.z(test);
 						break;
 					case 4:
 						m_chan_num = test;
@@ -177,31 +172,31 @@ int ImageJReader::Preprocess()
 						break;
 					case 5:
 						m_time_num = test;
-						break;				
+						break;
 					case 6:
 						if (test == 1)
 							m_eight_bit = true;
 						else
 							m_eight_bit = false;
 						break;
-					case 7:						
-						m_xspc = test;
+					case 7:
+						m_spacing.x(test);
 						break;
 					case 8:
-						m_xspc += (test*0.0001);
+						m_spacing.x(m_spacing.x() + test * 0.0001);
 						break;
 					case 9:
-						m_yspc = test;
+						m_spacing.y(test);
 						break;
 					case 10:
-						m_yspc += (test*0.0001);
+						m_spacing.y(m_spacing.y() + test*0.0001);
 						break;
 					case 11:
-						m_zspc = test;
+						m_spacing.z(test);
 						break;
 					case 12:
-						m_zspc += (test*0.0001);
-						if (!double_equals(m_xspc, 0.0) && !double_equals(m_yspc, 0.0) && !double_equals(m_zspc, 0.0))
+						m_spacing.z(m_spacing.z() + test*0.0001);
+						if (!m_spacing.any_le_zero())
 						{
 							m_valid_spc = true;
 						}						
@@ -413,27 +408,26 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 	}
 
 	// Creating Nrrd out of the data.
-	Nrrd *nrrdout = nrrdNew();	
+	Nrrd *nrrdout = nrrdNew();
 	
-	int numPages = m_slice_num;	
-	unsigned long long total_size = (unsigned long long)m_x_size*(unsigned long long)m_y_size*(unsigned long long)numPages;	
+	unsigned long long total_size = m_size.get_size_xyz();
 	if (!t_data)
 		return NULL;
 	
 	if (m_eight_bit)
-		nrrdWrap_va(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+		nrrdWrap_va(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 	else
-		nrrdWrap_va(nrrdout, (uint16_t*)t_data, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, m_xspc*m_x_size, m_yspc*m_y_size, m_zspc*numPages);
+		nrrdWrap_va(nrrdout, (uint16_t*)t_data, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+	auto max_size = m_size * m_spacing;
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)numPages);
+	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 
 	if (!m_eight_bit) {
 		if (get_max) {
 			double value;
-			unsigned long long totali = (unsigned long long)m_slice_num*
-				(unsigned long long)m_x_size*(unsigned long long)m_y_size;
+			unsigned long long totali = m_size.get_size_xyz();
 			for (unsigned long long i = 0; i < totali; ++i)
 			{
 				value = ((unsigned short*)nrrdout->data)[i];

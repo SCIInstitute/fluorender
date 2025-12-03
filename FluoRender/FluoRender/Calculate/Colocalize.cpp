@@ -80,18 +80,13 @@ void Colocalize::Compute()
 		return;
 
 	//spacings, assuming they are all same for channels
-	double spcx, spcy, spcz;
-	double spc;
+	double spc = 1.0;
 	std::wstring unit;
 	auto vd = group->GetVolumeData(0);
-	if (!vd)
+	if (vd)
 	{
-		spc = spcx = spcy = spcz = 1.0;
-	}
-	else
-	{
-		vd->GetSpacings(spcx, spcy, spcz);
-		spc = spcx * spcy * spcz;
+		auto spacing = vd->GetSpacing();
+		spc = spacing.x() * spacing.y() * spacing.z();
 	}
 	if (view)
 	{
