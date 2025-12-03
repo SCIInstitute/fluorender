@@ -2583,19 +2583,18 @@ double RenderView::Get121ScaleFactor()
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	double spc_x = 1.0;
-	double spc_y = 1.0;
-	double spc_z = 1.0;
 	std::shared_ptr<VolumeData> vd;
 	if (auto cur_vd_ptr = m_cur_vol.lock())
 		vd = cur_vd_ptr;
 	else if (m_vd_pop_list.size())
 		vd = m_vd_pop_list[0].lock();
 	if (vd)
-		vd->GetSpacings(spc_x, spc_y, spc_z, vd->GetLevel());
-	spc_y = spc_y<EPS ? 1.0 : spc_y;
+	{
+		auto spc = vd->GetSpacing(vd->GetLevel());
+		spc.y(spc.y() < EPS ? 1.0 : spc.y());
 
-	result = 2.0*m_radius / spc_y / double(ny);
+		result = 2.0 * m_radius / spc.y() / double(ny);
+	}
 
 	return result;
 }
@@ -2620,10 +2619,9 @@ void RenderView::SetScale121()
 			vd = m_vd_pop_list[0].lock();
 		if (!vd)
 			break;
-		double spcx = 0, spcy = 0, spcz = 0;
-		vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-		if (spcx > 0.0)
-			value /= spcx;
+		auto spc = vd->GetSpacing(vd->GetLevel());
+		if (spc.x() > 0.0)
+			value /= spc.x();
 		}
 		break;
 	}
@@ -3366,15 +3364,14 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 	}
 	else
 	{
-		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
+		auto spc = vd->GetSpacing();
 
 		Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
 		if (!vd->Replace(data, false))
 			return;
 
 		vd->SetCurTime(reader->GetCurTime());
-		vd->SetSpacings(spcx, spcy, spcz);
+		vd->SetSpacing(spc);
 
 		clear_pool = true;
 	}
@@ -3469,8 +3466,7 @@ void RenderView::ReloadVolumeData(int frame)
 					reader_list.push_back(reader);
 				}
 
-				double spcx, spcy, spcz;
-				vd->GetSpacings(spcx, spcy, spcz);
+				auto spc = vd->GetSpacing();
 
 				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
 				if (vd->Replace(data, true))
@@ -3502,9 +3498,9 @@ void RenderView::ReloadVolumeData(int frame)
 				vd->SetPath(reader->GetPathName());
 				vd->SetCurTime(reader->GetCurTime());
 				if (!reader->IsSpcInfoValid())
-					vd->SetSpacings(spcx, spcy, spcz);
+					vd->SetSpacing(spc);
 				else
-					vd->SetSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+					vd->SetSpacing(reader->GetSpacing());
 				if (vd->GetVR())
 					vd->GetVR()->clear_tex_pool();
 			}
@@ -4143,10 +4139,10 @@ void RenderView::StartLoopUpdate()
 						total_num++;
 					//mask
 					if (vd->GetTexture() &&
-						vd->GetTexture()->nmask() != -1 &&
+						vd->GetTexture()->has_comp(flvr::CompType::Mask) &&
 						(!vd->GetLabelMode() ||
 						(vd->GetLabelMode() &&
-						vd->GetTexture()->nlabel() == -1)))
+						!vd->GetTexture()->has_comp(flvr::CompType::Label))))
 						total_num++;
 				}
 			}
@@ -4620,10 +4616,9 @@ void RenderView::GetTraces(bool update)
 		return;
 
 	int ii, jj, kk;
-	int nx, ny, nz;
 	//return current mask (into system memory)
 	cur_vd->GetVR()->return_mask();
-	cur_vd->GetResolution(nx, ny, nz);
+	auto res = cur_vd->GetResolution();
 	//find labels in the old that are selected by the current mask
 	Nrrd* mask_nrrd = cur_vd->GetMask(true);
 	if (!mask_nrrd) return;
@@ -4635,11 +4630,11 @@ void RenderView::GetTraces(bool update)
 	if (!label_data) return;
 	flrd::CelpList sel_labels;
 	flrd::CelpListIter label_iter;
-	for (ii = 0; ii<nx; ii++)
-	for (jj = 0; jj<ny; jj++)
-	for (kk = 0; kk<nz; kk++)
+	for (ii = 0; ii<res.intx(); ii++)
+	for (jj = 0; jj<res.inty(); jj++)
+	for (kk = 0; kk<res.intz(); kk++)
 	{
-		int index = nx*ny*kk + nx*jj + ii;
+		int index = res.intx()*res.inty()*kk + res.intx()*jj + ii;
 		unsigned int label_value = label_data[index];
 		if (mask_data[index] && label_value)
 		{
@@ -5730,15 +5725,10 @@ void RenderView::DrawVolumes(int peel)
 				if (glbin_volume_point.GetPointVolumeBox(nx / 2.0, ny / 2.0, false, p) > 0.0 ||
 					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, false, p) > 0.0))
 				{
-					int resx, resy, resz;
-					double sclx, scly, sclz;
-					double spcx, spcy, spcz;
-					vd->GetResolution(resx, resy, resz);
-					vd->GetScalings(sclx, scly, sclz);
-					vd->GetSpacings(spcx, spcy, spcz);
-					p = fluo::Point(p.x() / (resx*sclx*spcx),
-						p.y() / (resy*scly*spcy),
-						p.z() / (resz*sclz*spcz));
+					auto res = vd->GetResolution();
+					auto scaling = vd->GetScaling();
+					auto spacing = vd->GetSpacing();
+					p = fluo::Point(fluo::Vector(p) / (res * scaling * spacing));
 					flvr::TextureRenderer::set_qutoa_center(p);
 				}
 				else
@@ -6227,7 +6217,7 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 		auto vd = it->lock();
 		if (!vd || !vd->GetDisp())
 			continue;
-		if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+		if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
 			cnt_mask++;
 	}
 
@@ -6248,7 +6238,7 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 				vd->GetLabel(false))
 				continue;
 
-			if (vd->GetTexture() && vd->GetTexture()->nmask() != -1)
+			if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
 			{
 				vd->SetMaskMode(1);
 				ChannelMixModeGuard cmg(*this);
@@ -7434,10 +7424,9 @@ void RenderView::DrawTracks()
 
 	double width = glbin_settings.m_line_width;
 
-	double spcx, spcy, spcz;
-	cur_vd->GetSpacings(spcx, spcy, spcz);
+	auto spc = cur_vd->GetSpacing();
 	glm::mat4 matrix = glm::scale(m_mv_mat,
-		glm::vec3(float(spcx), float(spcy), float(spcz)));
+		glm::vec3(spc.x(), spc.y(), spc.z()));
 	matrix = m_proj_mat*matrix;
 
 	auto shader =
@@ -7649,10 +7638,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 			continue;
 		double mvmat[16];
 		tform->get_trans(mvmat);
-		double sclx, scly, sclz;
-		vd->GetScalings(sclx, scly, sclz);
+		auto scaling = vd->GetScaling();
 		glm::mat4 mv_mat = glm::scale(m_mv_mat,
-			glm::vec3(float(sclx), float(scly), float(sclz)));
+			glm::vec3(scaling.x(), scaling.y(), scaling.z()));
 		glm::mat4 mv_mat2 = glm::mat4(
 			mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 			mvmat[1], mvmat[5], mvmat[9], mvmat[13],
@@ -9145,17 +9133,9 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 	{
 		if (cur_vd)
 		{
-			int resx, resy, resz;
-			cur_vd->GetResolution(resx, resy, resz);
-			double spcx, spcy, spcz;
-			cur_vd->GetSpacings(spcx, spcy, spcz);
-			auto planes = cur_vd->GetClippingBox().GetPlanesWorld();
-			fluo::Plane plane = planes[4];
-			double abcd[4];
-			plane.get(abcd);
-			int val = static_cast<int>(std::round(std::fabs(abcd[3] * resz)));
-
-			tos << L"Z: " << std::fixed << std::setprecision(2) << val * spcz << L"\u03BCm";
+			auto clips = cur_vd->GetClippingBox();
+			double val = clips.GetClipWorld(fluo::ClipPlane::ZNeg);
+			tos << L"Z: " << std::fixed << std::setprecision(2) << val << L"\u03BCm";
 			str = tos.str();
 			if (m_draw_frame)
 			{
@@ -9858,18 +9838,15 @@ void RenderView::switchLevel(VolumeData *vd)
 			{
 				double aspect = (double)nx / (double)ny;
 
-				double spc_x;
-				double spc_y;
-				double spc_z;
-				vtex->get_spacings(spc_x, spc_y, spc_z, i);
-				spc_x = spc_x<EPS ? 1.0 : spc_x;
-				spc_y = spc_y<EPS ? 1.0 : spc_y;
+				auto spc = vtex->get_spacing(i);
+				spc.x(spc.x()<EPS ? 1.0 : spc.x());
+				spc.y(spc.y()<EPS ? 1.0 : spc.y());
 
-				spx.push_back(spc_x);
-				spy.push_back(spc_y);
-				spz.push_back(spc_z);
+				spx.push_back(spc.x());
+				spy.push_back(spc.y());
+				spz.push_back(spc.z());
 
-				double sf = 2.0*m_radius*res_scale / spc_y / double(ny);
+				double sf = 2.0*m_radius*res_scale / spc.y() / double(ny);
 				sfs.push_back(sf);
 			}
 
@@ -10084,9 +10061,8 @@ void RenderView::ProcessIdle(IdleState& state)
 			fluo::Vector obj_trans = p - op;
 			obj_trans.x(-obj_trans.x());
 			double thresh = 10.0;
-			double spcx, spcy, spcz;
-			cur_vd->GetSpacings(spcx, spcy, spcz);
-			thresh *= spcx;
+			auto spc = cur_vd->GetSpacing();
+			thresh *= spc.x();
 			obj_trans -= m_obj_trans;
 			if (obj_trans.length() > thresh)
 			{

@@ -259,7 +259,7 @@ void VolumeRenderer::eval_ml_mode()
 		label_ = false;
 		break;
 	case 1:
-		if (tex->nmask() == -1)
+		if (!tex->has_comp(CompType::Mask))
 		{
 			mask_ = false;
 			ml_mode_ = 0;
@@ -269,7 +269,7 @@ void VolumeRenderer::eval_ml_mode()
 		label_ = false;
 		break;
 	case 2:
-		if (tex->nmask() == -1)
+		if (!tex->has_comp(CompType::Mask))
 		{
 			mask_ = false;
 			ml_mode_ = 0;
@@ -279,7 +279,7 @@ void VolumeRenderer::eval_ml_mode()
 		label_ = false;
 		break;
 	case 3:
-		if (tex->nlabel() == -1)
+		if (!tex->has_comp(CompType::Label))
 		{
 			label_ = false;
 			ml_mode_ = 0;
@@ -289,9 +289,9 @@ void VolumeRenderer::eval_ml_mode()
 		mask_ = false;
 		break;
 	case 4:
-		if (tex->nlabel() == -1)
+		if (!tex->has_comp(CompType::Label))
 		{
-			if (tex->nmask() > -1)
+			if (tex->has_comp(CompType::Mask))
 			{
 				mask_ = true;
 				label_ = false;
@@ -349,10 +349,7 @@ void VolumeRenderer::draw_volume(
 
 	double rate = get_sample_rate();
 	fluo::Vector diag = tex->bbox()->diagonal();
-	fluo::Vector cell_diag(
-		diag.x() / tex->nx(),
-		diag.y() / tex->ny(),
-		diag.z() / tex->nz());
+	fluo::Vector cell_diag = diag / tex->get_res();
 	double dt;
 	size_t est_slices;
 	if (rate > 0.0)
@@ -472,9 +469,8 @@ void VolumeRenderer::draw_volume(
 		1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
 
 	//spacings
-	double spcx = 1, spcy = 1, spcz = 1;
-	tex->get_spacings(spcx, spcy, spcz);
-	shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
+	auto spcing = tex->get_spacing();
+	shader->setLocalParam(5, spcing.x(), spcing.y(), spcing.z(), shuffle_);
 
 	shader->setLocalParam(6, colormap_low_value_, colormap_hi_value_,
 		colormap_hi_value_ - colormap_low_value_, colormap_inv_);
@@ -594,7 +590,8 @@ void VolumeRenderer::draw_volume(
 				load_brick_mask(b, filter);
 			if (label_)
 				load_brick_label(b);
-			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), rate_factor);
+			auto texel_b = fluo::Vector(1.0) / b->get_size();
+			shader->setLocalParam(4, texel_b.x(), texel_b.y(), texel_b.z(), rate_factor);
 
 			//for brick transformation
 			float matrix[16];
@@ -667,9 +664,9 @@ void VolumeRenderer::draw_volume(
 	if (ShaderParams::IsTimeProj(colormap_proj_))
 		release_texture(10, GL_TEXTURE_3D);
 	if (mask_)
-		release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
+		release_texture(2, GL_TEXTURE_3D);
 	if (label_)
-		release_texture((*bricks)[0]->nlabel(), GL_TEXTURE_3D);
+		release_texture(3, GL_TEXTURE_3D);
 
 	std::shared_ptr<ShaderProgram> img_shader;
 
@@ -742,9 +739,7 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	bool adaptive = get_adaptive();
 	double rate = get_sample_rate();
 	fluo::Vector diag = tex->bbox()->diagonal();
-	fluo::Vector cell_diag(diag.x() / tex->nx(),
-		diag.y() / tex->ny(),
-		diag.z() / tex->nz());
+	fluo::Vector cell_diag = diag / tex->get_res();
 	double dt;
 	size_t est_slices;
 	if (rate > 0.0)
@@ -864,9 +859,8 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	seg_shader->bind();
 
 	//spacings
-	double spcx, spcy, spcz;
-	tex->get_spacings(spcx, spcy, spcz);
-	seg_shader->setLocalParam(5, spcx, spcy, spcz, shuffle_);
+	auto spcing = tex->get_spacing();
+	seg_shader->setLocalParam(5, spcing.x(), spcing.y(), spcing.z(), shuffle_);
 
 	//transfer function
 	seg_shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
@@ -953,7 +947,8 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		seg_shader->setLocalParamMatrix(2, matrix);
 
 		//set viewport size the same as the texture
-		fbo_mask->set_viewport({ 0, 0, b->nx(), b->ny() });
+		auto res_b = b->get_size();
+		fbo_mask->set_viewport({ 0, 0, res_b.intx(), res_b.inty() });
 		fbo_mask->apply_state();
 
 		//load the texture
@@ -972,13 +967,14 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 		}
 
 		//size and sample rate
-		seg_shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), 1.0);
+		auto texel_b = fluo::Vector(1.0) / b->get_size();
+		seg_shader->setLocalParam(4, texel_b.x(), texel_b.y(), texel_b.z(), 1.0);
 
 		//draw each slice
-		for (int z = 0; z < b->nz(); z++)
+		for (int z = 0; z < res_b.intz(); z++)
 		{
 			fbo_mask->attach_texture(AttachmentPoint::Color(0), tex_id, z);
-			draw_view_quad(double(z + 0.5) / double(b->nz()));
+			draw_view_quad(double(z + 0.5) / res_b.z());
 		}
 
 		if (num > 1 && type == 1 && order)
@@ -1003,7 +999,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	}
 
 	//release 3d mask
-	release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
+	release_texture(2, GL_TEXTURE_3D);
 
 	//release seg shader
 	if (seg_shader)
@@ -1032,7 +1028,10 @@ void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 	unsigned int bid = b->get_id();
 	GLint nbtex;//tex name of neighbor
 	int bnx, bny, bnz, nbnx, nbny, nbnz;
-	bnx = b->nx(); bny = b->ny(); bnz = b->nz();
+	auto res_b = b->get_size();
+	bnx = res_b.intx();
+	bny = res_b.inty();
+	bnz = res_b.intz();
 	if (order == 2)
 	{
 		//negx
@@ -1042,7 +1041,7 @@ void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 			nb = tex->get_brick(nid);
 			if (nb && nb->is_mask_act())
 			{
-				nbnx = nb->nx();
+				nbnx = nb->get_size().intx();
 				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
 					btex, GL_TEXTURE_3D, 0,
@@ -1059,7 +1058,7 @@ void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 			nb = tex->get_brick(nid);
 			if (nb && nb->is_mask_act())
 			{
-				nbny = nb->ny();
+				nbny = nb->get_size().inty();
 				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
 					btex, GL_TEXTURE_3D, 0,
@@ -1076,7 +1075,7 @@ void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 			nb = tex->get_brick(nid);
 			if (nb && nb->is_mask_act())
 			{
-				nbnz = nb->nz();
+				nbnz = nb->get_size().intz();
 				nbtex = load_brick_mask(nb);
 				glCopyImageSubData(
 					btex, GL_TEXTURE_3D, 0,
@@ -1198,8 +1197,8 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 		type == 8)
 		cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
 			vr_b ? vr_b->get_scalar_scale() : 1.0,
-			(vr_a && tex_a && tex_a->nmask() != -1) ? 1.0 : 0.0,
-			(vr_b && tex_b && tex_b->nmask() != -1) ? 1.0 : 0.0);
+			(vr_a && tex_a && tex_a->has_comp(CompType::Mask)) ? 1.0 : 0.0,
+			(vr_b && tex_b && tex_b->has_comp(CompType::Mask)) ? 1.0 : 0.0);
 	else if (type == 4 ||
 		type == 5 ||
 		type == 6 ||
@@ -1222,7 +1221,8 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 		TextureBrick* b = (*bricks)[i];
 
 		//set viewport size the same as the texture
-		fbo_calc->set_viewport({ 0, 0, b->nx(), b->ny() });
+		auto res_b = b->get_size();
+		fbo_calc->set_viewport({ 0, 0, res_b.intx(), res_b.inty() });
 		fbo_calc->apply_state();
 
 		//load the texture
@@ -1238,18 +1238,18 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 				vr_b->load_brick_mask((*bricks_b)[i], GL_NEAREST, false, 4);
 		}
 		//draw each slice
-		for (int z = 0; z < b->nz(); z++)
+		for (int z = 0; z < res_b.intz(); z++)
 		{
 			fbo_calc->attach_texture(AttachmentPoint::Color(0), tex_id, z);
-			draw_view_quad(double(z + 0.5) / double(b->nz()));
+			draw_view_quad(double(z + 0.5) / res_b.z());
 		}
 	}
 
 	//release 3d mask
-	release_texture((*bricks)[0]->nmask(), GL_TEXTURE_3D);
+	release_texture(2, GL_TEXTURE_3D);
 	release_texture(4, GL_TEXTURE_3D);
 	//release 3d label
-	release_texture((*bricks)[0]->nlabel(), GL_TEXTURE_3D);
+	release_texture(3, GL_TEXTURE_3D);
 
 	//release seg shader
 	cal_shader->unbind();
@@ -1266,12 +1266,11 @@ void VolumeRenderer::return_volume()
 	if (!bricks || bricks->size() == 0)
 		return;
 
-	int c = 0;
-	for (unsigned int i = 0; i < bricks->size(); i++)
+	for (size_t i = 0; i < bricks->size(); ++i)
 	{
 		TextureBrick* b = (*bricks)[i];
 		load_brick(b, GL_NEAREST);
-		int nb = b->nb(c);
+		int nb = b->nb(CompType::Data);
 		GLenum format;
 		if (nb < 3)
 			format = GL_RED;
@@ -1279,14 +1278,13 @@ void VolumeRenderer::return_volume()
 			format = GL_RGBA;
 
 		// download texture data
-		int sx = b->sx();
-		int sy = b->sy();
-		glPixelStorei(GL_PACK_ROW_LENGTH, sx);
-		glPixelStorei(GL_PACK_IMAGE_HEIGHT, sy);
+		auto res_b = b->get_size();
+		glPixelStorei(GL_PACK_ROW_LENGTH, res_b.intx());
+		glPixelStorei(GL_PACK_IMAGE_HEIGHT, res_b.inty());
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-		GLenum type = b->tex_type(c);
-		void* data = b->tex_data(c);
+		GLenum type = b->tex_type(CompType::Data);
+		void* data = b->tex_data(CompType::Data);
 		glGetTexImage(GL_TEXTURE_3D, 0, format,
 			type, data);
 
@@ -1311,8 +1309,7 @@ void VolumeRenderer::return_mask(int order)
 	if (!bricks || bricks->size() == 0)
 		return;
 
-	int c = tex->nmask();
-	if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
+	if (!tex->has_comp(CompType::Mask))
 		return;
 
 	size_t i;
@@ -1326,17 +1323,16 @@ void VolumeRenderer::return_mask(int order)
 			continue;
 
 		load_brick_mask(b);
-		glActiveTexture(GL_TEXTURE0 + c);
+		glActiveTexture(GL_TEXTURE0 + 2);
 
 		// download texture data
-		int sx = b->sx();
-		int sy = b->sy();
-		glPixelStorei(GL_PACK_ROW_LENGTH, sx);
-		glPixelStorei(GL_PACK_IMAGE_HEIGHT, sy);
+		auto res_b = b->get_size();
+		glPixelStorei(GL_PACK_ROW_LENGTH, res_b.intx());
+		glPixelStorei(GL_PACK_IMAGE_HEIGHT, res_b.inty());
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-		GLenum type = b->tex_type(c);
-		void* data = b->tex_data(c);
+		GLenum type = b->tex_type(CompType::Mask);
+		void* data = b->tex_data(CompType::Mask);
 		glGetTexImage(GL_TEXTURE_3D, 0, GL_RED,
 			type, data);
 
@@ -1346,7 +1342,7 @@ void VolumeRenderer::return_mask(int order)
 	}
 
 	//release mask texture
-	release_texture(c, GL_TEXTURE_3D);
+	release_texture(2, GL_TEXTURE_3D);
 }
 
 //return the label volume
@@ -1360,23 +1356,24 @@ void VolumeRenderer::return_label()
 	if (!bricks || bricks->size() == 0)
 		return;
 
-	int c = tex->nlabel();
-	if (c < 0 || c >= TEXTURE_MAX_COMPONENTS)
+	if (!tex->has_comp(CompType::Label))
 		return;
 
 	for (unsigned int i = 0; i < bricks->size(); i++)
 	{
 		TextureBrick* b = (*bricks)[i];
 		load_brick_label(b);
-		glActiveTexture(GL_TEXTURE0 + c);
+		glActiveTexture(GL_TEXTURE0 + 3);
 
 		//download texture data
-		glPixelStorei(GL_PACK_ROW_LENGTH, b->sx());
-		glPixelStorei(GL_PACK_IMAGE_HEIGHT, b->sy());
+		auto res_b = b->get_size();
+		glPixelStorei(GL_PACK_ROW_LENGTH, res_b.intx());
+		glPixelStorei(GL_PACK_IMAGE_HEIGHT, res_b.inty());
 		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
 		glGetTexImage(GL_TEXTURE_3D, 0, GL_RED_INTEGER,
-			b->tex_type(c), b->tex_data(c));
+			b->tex_type(CompType::Label),
+			b->tex_data(CompType::Label));
 
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
@@ -1384,7 +1381,7 @@ void VolumeRenderer::return_label()
 	}
 
 	//release label texture
-	release_texture(c, GL_TEXTURE_3D);
+	release_texture(3, GL_TEXTURE_3D);
 }
 
 void VolumeRenderer::set_matrices(glm::mat4& mv_mat, glm::mat4& proj_mat, glm::mat4& tex_mat)

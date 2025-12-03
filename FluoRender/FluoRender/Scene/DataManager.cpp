@@ -106,10 +106,7 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 		//props not managed by ml
 		vd->SetSampleRate(glbin_vol_def.m_sample_rate);
 		if (!vd->GetSpcFromFile())
-			vd->SetBaseSpacings(
-				glbin_vol_def.m_spcx,
-				glbin_vol_def.m_spcy,
-				glbin_vol_def.m_spcz);
+			vd->SetBaseSpacing(glbin_vol_def.m_spacing);
 		vd->SetLabelMode(glbin_vol_def.m_label_mode);
 	}
 	else
@@ -117,9 +114,8 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 		glbin_vol_def.Apply(vd.get());
 	}
 	//disable alpha for z = 1
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	if (nz == 1)
+	auto res = vd->GetResolution();
+	if (res.intz() == 1)
 		vd->SetAlphaEnable(false);
 }
 
@@ -284,13 +280,12 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 						if (vd->GetReader() && vd->GetReader()->GetTimeNum() > 1)
 							enable_4d = true;
 
-						int nx, ny, nz;
-						vd->GetResolution(nx, ny, nz);
-						if (nz == 1)
+						auto res = vd->GetResolution();
+						if (res.intz() == 1)
 							nz_count++;
 
 						//check if brick number is larger than 1
-						double data_size = double(nx)*double(ny)*double(nz)/1.04e6;
+						double data_size = double(vd->GetVoxelCount())/1.04e6;
 						large_data = large_data || data_size > glbin_settings.m_large_data_size;
 					}
 				}
@@ -331,13 +326,12 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 					enable_4d = true;
 				}
 
-				int nx, ny, nz;
-				vd->GetResolution(nx, ny, nz);
-				if (nz == 1)
+				auto res = vd->GetResolution();
+				if (res.intz() == 1)
 					enable_rot_lock = true;
 
 				//check if brick number is larger than 1
-				double data_size = double(nx)*double(ny)*double(nz)/1.04e6;
+				double data_size = double(vd->GetVoxelCount())/1.04e6;
 				large_data = large_data || data_size > glbin_settings.m_large_data_size;
 			}
 		}
@@ -679,12 +673,14 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 					breader->SetLevel(0);
 			}
 			//for 2D data
-			int xres, yres, zres;
-			vd->GetResolution(xres, yres, zres);
-			double zspcfac = (double)std::max(xres, yres) / 256.0;
-			if (zspcfac < 1.0) zspcfac = 1.0;
-			if (zres == 1) vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetXSpc()*zspcfac);
-			else vd->SetBaseSpacings(reader->GetXSpc(), reader->GetYSpc(), reader->GetZSpc());
+			auto res = vd->GetResolution();
+			double zspcfac = std::max(res.x(), res.y()) / 256.0;
+			if (zspcfac < 1.0)
+				zspcfac = 1.0;
+			if (res.intz() == 1)
+				vd->SetBaseSpacing(reader->GetSpacing() * fluo::Vector(1.0, 1.0, zspcfac));
+			else
+				vd->SetBaseSpacing(reader->GetSpacing());
 			vd->SetSpcFromFile(valid_spc);
 			vd->SetScalarScale(reader->GetScalarScale());
 			vd->SetMinMaxValue(reader->GetMinValue(), reader->GetMaxValue());
@@ -1079,10 +1075,9 @@ void DataManager::AddVolumeData(const std::shared_ptr<VolumeData>& vd)
 	{
 		if (m_vd_list.size() > 0)
 		{
-			double spcx, spcy, spcz;
-			m_vd_list[0]->GetBaseSpacings(spcx, spcy, spcz);
-			vd->SetSpacings(spcx, spcy, spcz);
-			vd->SetBaseSpacings(spcx, spcy, spcz);
+			auto spc = m_vd_list[0]->GetBaseSpacing();
+			vd->SetSpacing(spc);
+			vd->SetBaseSpacing(spc);
 			//vd->SetSpcFromFile(true);
 		}
 	}

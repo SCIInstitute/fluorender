@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <nrrd.h>
 
+namespace fluo
+{
+	class Vector;
+}
 class BaseVolWriter
 {
 public:
@@ -38,7 +42,7 @@ public:
 	virtual ~BaseVolWriter() {};
 
 	virtual void SetData(Nrrd* data) = 0;
-	virtual void SetSpacings(double spcx, double spcy, double spcz) = 0;
+	virtual void SetSpacings(const fluo::Vector& spc) = 0;
 	virtual void SetCompression(bool value) = 0;
 	virtual void Save(const std::wstring& filename, int mode) = 0;
 };

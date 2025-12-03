@@ -32,9 +32,6 @@ DEALINGS IN THE SOFTWARE.
 MSKWriter::MSKWriter()
 {
 	m_data = 0;
-	m_spcx = 0.0;
-	m_spcy = 0.0;
-	m_spcz = 0.0;
 	m_use_spacings = false;
 	m_time = 0;
 	m_channel = 0;
@@ -49,11 +46,9 @@ void MSKWriter::SetData(Nrrd *data)
 	m_data = data;
 }
 
-void MSKWriter::SetSpacings(double spcx, double spcy, double spcz)
+void MSKWriter::SetSpacings(const fluo::Vector& spc)
 {
-	m_spcx = spcx;
-	m_spcy = spcy;
-	m_spcz = spcz;
+	m_spc = spc;
 	m_use_spacings = true;
 }
 
@@ -80,11 +75,11 @@ void MSKWriter::Save(const std::wstring& filename, int mode)
 	if (m_use_spacings &&
 		m_data->dim == 3)
 	{
-		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoSpacing, m_spcx, m_spcy, m_spcz);
+		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoSpacing, m_spc.x(), m_spc.y(), m_spc.z());
 		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoMax,
-			m_spcx*m_data->axis[0].size,
-			m_spcy*m_data->axis[1].size,
-			m_spcz*m_data->axis[2].size);
+			m_spc.x()*m_data->axis[0].size,
+			m_spc.y()*m_data->axis[1].size,
+			m_spc.z()*m_data->axis[2].size);
 	}
 
 	std::string str;

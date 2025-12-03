@@ -109,7 +109,7 @@ void MultiVolumeRenderer::add_vr(VolumeRenderer* vr)
 	if (tex)
 	{
 		bbox_.extend(*(tex->bbox()));
-		res_ = Max(res_, tex->res());
+		res_ = Max(res_, tex->get_res());
 	}
 }
 
@@ -557,7 +557,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			shader->setLocalParamMatrix(0, glm::value_ptr(proj_mat));
 			shader->setLocalParamMatrix(1, glm::value_ptr(mv_tex_scl_mat));
 
-			shader->setLocalParam(4, 1.0 / b->nx(), 1.0 / b->ny(), 1.0 / b->nz(), rate_factor);
+			auto texel_b = fluo::Vector(1.0) / b->get_size();
+			shader->setLocalParam(4, texel_b.x(), texel_b.y(), texel_b.z(), rate_factor);
 
 			//for brick transformation
 			float matrix[16];
@@ -601,9 +602,8 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->sw_);
 
 			//spacings
-			double spcx = 1, spcy = 1, spcz = 1;
-			tex->get_spacings(spcx, spcy, spcz);
-			shader->setLocalParam(5, spcx, spcy, spcz, vr_list_[tn]->shuffle_);
+			auto spacing = tex->get_spacing();
+			shader->setLocalParam(5, spacing.x(), spacing.y(), spacing.z(), vr_list_[tn]->shuffle_);
 
 			//colormap
 			shader->setLocalParam(6, vr_list_[tn]->colormap_low_value_,
@@ -698,9 +698,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 
 			//release
 			if (vr_list_[tn]->mask_)
-				vr_list_[tn]->release_texture((*bs2)[0]->nmask(), GL_TEXTURE_3D);
+				vr_list_[tn]->release_texture(2, GL_TEXTURE_3D);
 			if (vr_list_[tn]->label_)
-				vr_list_[tn]->release_texture((*bs2)[0]->nlabel(), GL_TEXTURE_3D);
+				vr_list_[tn]->release_texture(3, GL_TEXTURE_3D);
 			// Release shader.
 			shader->unbind();
 			//unbind depth texture for rendering shadows

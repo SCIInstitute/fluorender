@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _TIF_WRITER_H_
 
 #include <base_vol_writer.h>
+#include <Vector.h>
 
 class TIFWriter : public BaseVolWriter
 {
@@ -37,14 +38,14 @@ public:
 	~TIFWriter();
 
 	void SetData(Nrrd* data);
-	void SetSpacings(double spcx, double spcy, double spcz);
+	void SetSpacings(const fluo::Vector& spc);
 	void SetCompression(bool value);
 	void Save(const std::wstring& filename, int mode);	//mode: 0-single file
 											//1-file sequence
 
 private:
 	Nrrd* m_data;
-	double m_spcx, m_spcy, m_spcz;
+	fluo::Vector m_spc;
 	bool m_use_spacings;
 	bool m_compression;
 

@@ -41,8 +41,7 @@ bool UndoableMask::trim_mask_undos_head()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return true;
 	if (mask_undos_.size() <= undo_num + 1)
 		return true;
@@ -68,8 +67,7 @@ bool UndoableMask::trim_mask_undos_tail()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return true;
 	if (mask_undos_.size() <= undo_num + 1)
 		return true;
@@ -94,8 +92,7 @@ bool UndoableMask::get_undo()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return false;
 	if (mask_undo_pointer_ <= 0)
 		return false;
@@ -111,8 +108,7 @@ bool UndoableMask::get_redo()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return false;
 	if (mask_undo_pointer_ >= mask_undos_.size() - 1)
 		return false;
@@ -128,8 +124,7 @@ void UndoableMask::set_mask(void* mask_data)
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return;
 
 	if (mask_undo_pointer_ > -1 &&
@@ -159,19 +154,14 @@ void UndoableMask::push_mask()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return;
 	if (mask_undo_pointer_<0 ||
 		mask_undo_pointer_>mask_undos_.size() - 1)
 		return;
 
-	int nx = tex->nx();
-	int ny = tex->ny();
-	int nz = tex->nz();
 	//duplicate at pointer position
-	unsigned long long mem_size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
+	unsigned long long mem_size = vd->GetVoxelCount();
 	void* new_data = (void*)new (std::nothrow) unsigned char[mem_size];
 	memcpy(new_data, mask_undos_[mask_undo_pointer_], size_t(mem_size));
 	if (mask_undo_pointer_ < mask_undos_.size() - 1)
@@ -214,8 +204,7 @@ void UndoableMask::pop_mask()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return;
 	if (mask_undo_pointer_ <= 0 ||
 		mask_undo_pointer_ > mask_undos_.size() - 1)
@@ -241,8 +230,7 @@ void UndoableMask::mask_undos_backward()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return;
 	if (mask_undo_pointer_ <= 0 ||
 		mask_undo_pointer_ > mask_undos_.size() - 1)
@@ -267,8 +255,7 @@ void UndoableMask::mask_undos_forward()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	int nmask = tex->nmask();
-	if (nmask < 0)
+	if (!tex->has_comp(flvr::CompType::Mask))
 		return;
 	if (mask_undo_pointer_<0 ||
 		mask_undo_pointer_>mask_undos_.size() - 2)

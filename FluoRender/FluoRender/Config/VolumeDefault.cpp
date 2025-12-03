@@ -76,9 +76,7 @@ VolumeDataDefault::VolumeDataDefault()
 	m_sample_rate_enable = true;
 	m_sample_rate = 2.0;
 
-	m_spcx = 1.0;
-	m_spcy = 1.0;
-	m_spcz = 1.0;
+	m_spacing = fluo::Vector(1.0);
 
 	//colormap mode
 	m_color_mode = flvr::ColorMode::SingleColor;
@@ -153,9 +151,7 @@ void VolumeDataDefault::Read()
 	f->Read(gstSampleRateEnable, &m_sample_rate_enable, true);
 	f->Read(gstSampleRate, &m_sample_rate, 2.0);
 
-	f->Read(gstSpcX, &m_spcx, 1.0);
-	f->Read(gstSpcY, &m_spcy, 1.0);
-	f->Read(gstSpcZ, &m_spcz, 1.0);
+	f->Read(gstSpacing, &m_spacing, fluo::Vector(1.0));
 
 	f->Read(gstColormapMode, &ival, 0);
 	m_color_mode = static_cast<flvr::ColorMode>(ival);
@@ -222,9 +218,7 @@ void VolumeDataDefault::Save()
 	f->Write(gstSampleRateEnable, m_sample_rate_enable);
 	f->Write(gstSampleRate, m_sample_rate);
 
-	f->Write(gstSpcX, m_spcx);
-	f->Write(gstSpcY, m_spcy);
-	f->Write(gstSpcZ, m_spcz);
+	f->Write(gstSpacing, m_spacing);
 
 	f->Write(gstColormapMode, static_cast<int>(m_color_mode));
 	f->Write(gstColormapDisp, m_colormap_disp);
@@ -283,7 +277,7 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_sample_rate_enable = vd->GetSampleRateEnable();
 	m_sample_rate = vd->GetSampleRate();
 
-	vd->GetSpacings(m_spcx, m_spcy, m_spcz);
+	m_spacing = vd->GetSpacing();
 
 	m_color_mode = vd->GetColorMode();
 	m_colormap_disp = vd->GetColormapDisp();
@@ -309,8 +303,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	if (!vd)
 		return;
 
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	auto res = vd->GetResolution();
 
 	vd->SetGammaEnable(m_gamma_enable);
 	vd->SetGamma(m_gamma);
@@ -335,14 +328,14 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetAlphaEnable(m_alpha_enable);
 	vd->SetAlpha(m_alpha);
 
-	if (resz > 1)
+	if (res.intz() > 1)
 		vd->SetShadingEnable(m_shading_enable);
 	else
 		vd->SetShadingEnable(false);
 	vd->SetShadingStrength(m_shading_strength);
 	vd->SetShadingShine(m_shading_shine);
 
-	if (resz > 1)
+	if (res.intz() > 1)
 		vd->SetShadowEnable(m_shadow_enable);
 	else
 		vd->SetShadingEnable(false);
@@ -352,7 +345,7 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetSampleRate(m_sample_rate);
 
 	if (!vd->GetSpcFromFile())
-		vd->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
+		vd->SetBaseSpacing(m_spacing);
 
 	vd->SetColorMode(m_color_mode);
 	vd->SetColormapDisp(m_colormap_disp);
@@ -410,9 +403,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetSampleRateEnable(v2->GetSampleRateEnable());
 	v1->SetSampleRate(v2->GetSampleRate());
 
-	double spcx, spcy, spcz;
-	v2->GetSpacings(spcx, spcy, spcz);
-	v1->SetBaseSpacings(spcx, spcy, spcz);
+	v1->SetBaseSpacing(v2->GetSpacing());
 
 	v1->SetColorMode(v2->GetColorMode());
 	v1->SetColormapDisp(v2->GetColormapDisp());

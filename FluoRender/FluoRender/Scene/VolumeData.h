@@ -100,8 +100,8 @@ public:
 	Nrrd* GetVolume(bool ret);
 	//empty data
 	void AddEmptyData(int bits,
-		int nx, int ny, int nz,
-		double spcx, double spcy, double spcz,
+		const fluo::Vector& res,
+		const fluo::Vector& spc,
 		int brick_size = 0);
 	//load mask
 	void LoadMask(Nrrd* mask);
@@ -127,8 +127,10 @@ public:
 	double GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b = 0);
 	double GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b=0);
 	double GetMaskValue(int i, int j, int k, flvr::TextureBrick* b = 0);
-	void SetResize(int resize, int nx, int ny, int nz);
-	void GetResize(bool &resize, int &nx, int &ny, int &nz);
+	void SetResample(bool resample) { m_resample = resample; }
+	void SetResampledSize(const fluo::Vector& size) { m_resampled_size = size; }
+	bool GetResample() { return m_resample; }
+	fluo::Vector GetResampledSize() { return m_resampled_size; }
 	//mask: 0-save none; 1-save mask; 2-save label; 3-save mask and label...
 	void Save(const std::wstring &filename, int mode,
 		int mask, bool neg_mask,
@@ -311,30 +313,29 @@ public:
 	void IncShuffle();
 
 	//resolution  scaling and spacing
-	void GetResolution(int &res_x, int &res_y, int &res_z, int lv = -1);
-	void SetScalings(double sclx, double scly, double sclz);
-	void GetScalings(double &sclx, double &scly, double &sclz);
-	fluo::Vector GetScalings();
-	void SetSpacings(double spcx, double spcy, double spcz);
-	void GetSpacings(double &spcx, double &spcy, double & spcz, int lv = -1);
-	fluo::Vector GetSpacings(int lv = -1);
+	fluo::Vector GetResolution(int lv = -1);
+	void SetScaling(const fluo::Vector& scaling);
+	fluo::Vector GetScaling();
+	void SetSpacing(const fluo::Vector& spacing);
+	fluo::Vector GetSpacing(int lv = -1);
 	//read resolutions from file
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
 	bool GetSpcFromFile() {return m_spc_from_file;}
 
 	//brkxml
-	void SetBaseSpacings(double spcx, double spcy, double spcz);
-	void GetBaseSpacings(double &spcx, double &spcy, double & spcz);
-	fluo::Vector GetBaseSpacings();
-	void SetSpacingScales(double s_spcx, double s_spcy, double s_spcz);
-	void GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz);
-	fluo::Vector GetSpacingScales();
+	void SetBaseSpacing(const fluo::Vector& spacing);
+	fluo::Vector GetBaseSpacing();
+	void SetSpacingScale(const fluo::Vector& scaling);
+	fluo::Vector GetSpacingScale();
+
 	void SetLevel(int lv);
 	int GetLevel();
 	int GetLevelNum();
 
 	//bits
 	int GetBits();
+	//voxel count
+	size_t GetVoxelCount() { return (size_t)m_size.intx() * m_size.inty() * m_size.intz(); }
 
 	//display controls
 	void SetDisp(bool disp);

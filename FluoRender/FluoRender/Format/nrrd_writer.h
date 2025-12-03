@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _NRRD_WRITER_H_
 
 #include <base_vol_writer.h>
+#include <Vector.h>
 
 class NRRDWriter : public BaseVolWriter
 {
@@ -37,13 +38,13 @@ public:
 	~NRRDWriter();
 
 	void SetData(Nrrd* data);
-	void SetSpacings(double spcx, double spcy, double spcz);
+	void SetSpacings(const fluo::Vector& spc);
 	void SetCompression(bool value);
 	void Save(const std::wstring& filename, int mode);
 
 private:
 	Nrrd* m_data;
-	double m_spcx, m_spcy, m_spcz;
+	fluo::Vector m_spc;
 	bool m_use_spacings;
 };
 

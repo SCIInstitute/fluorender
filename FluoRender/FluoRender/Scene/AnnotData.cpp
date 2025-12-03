@@ -299,12 +299,10 @@ void AnnotData::Save(const std::wstring &filename)
 	std::wofstream os;
 	OutputStreamOpenW(os, filename);
 
-	int resx = 1;
-	int resy = 1;
-	int resz = 1;
+	fluo::Vector res(1.0);
 	auto vd_ptr = m_vd.lock();
 	if (vd_ptr)
-		vd_ptr->GetResolution(resx, resy, resz);
+		res = vd_ptr->GetResolution();
 
 	os << L"Name: " << m_name << L"\n";
 	os << L"Display: " << m_disp << L"\n";
@@ -314,9 +312,8 @@ void AnnotData::Save(const std::wstring &filename)
 	{
 		os << L"Volume: " << vd_ptr->GetName() << L"\n";
 		os << L"Voxel size (X Y Z):\n";
-		double spcx, spcy, spcz;
-		vd_ptr->GetSpacings(spcx, spcy, spcz);
-		os << spcx << L"\t" << spcy << L"\t" << spcz << L"\n";
+		auto spc = vd_ptr->GetSpacing();
+		os << spc.x() << L"\t" << spc.y() << L"\t" << spc.z() << L"\n";
 	}
 
 
@@ -327,9 +324,9 @@ void AnnotData::Save(const std::wstring &filename)
 		if (it)
 		{
 			os << it->m_txt << L"\t";
-			os << int(it->m_pos.x()*resx+1.0) << L"\t";
-			os << int(it->m_pos.y()*resy+1.0) << L"\t";
-			os << int(it->m_pos.z()*resz+1.0) << L"\t";
+			os << int(it->m_pos.x()*res.x()+1.0) << L"\t";
+			os << int(it->m_pos.y()*res.y()+1.0) << L"\t";
+			os << int(it->m_pos.z()*res.z()+1.0) << L"\t";
 			os << it->m_info << L"\n";
 		}
 	}
@@ -396,15 +393,13 @@ std::shared_ptr<AText> AnnotData::GetAText(const std::wstring& str)
 		double x = WSTOD(sX);
 		double y = WSTOD(sY);
 		double z = WSTOD(sZ);
-		int resx = 1;
-		int resy = 1;
-		int resz = 1;
+		fluo::Vector res(1.0);
 		auto vd_ptr = m_vd.lock();
 		if (vd_ptr)
-			vd_ptr->GetResolution(resx, resy, resz);
-		x /= resx?resx:1;
-		y /= resy?resy:1;
-		z /= resz?resz:1;
+			res = vd_ptr->GetResolution();
+		x /= res.intx()?res.x():1;
+		y /= res.inty()?res.y():1;
+		z /= res.intz()?res.z():1;
 		fluo::Point pos(x, y, z);
 		auto atext = std::make_shared<AText>(sID, pos);
 		atext->SetInfo(sInfo);

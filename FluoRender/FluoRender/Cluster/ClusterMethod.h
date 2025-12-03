@@ -37,6 +37,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <memory>
 
+namespace fluo
+{
+	class Vector;
+}
 namespace flrd
 {
 	class CelpList;
@@ -154,8 +158,8 @@ namespace flrd
 		{ return m_result.size(); }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
-		void SetSpacings(double spcx, double spcy, double spcz)
-		{ m_spc = {spcx, spcy, spcz}; }
+		void SetSpacings(const fluo::Vector& spc)
+		{ m_spc = {spc.x(), spc.y(), spc.z()}; }
 		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
 		void GenerateNewIDs(unsigned int id, void* label,
 			size_t nx, size_t ny, size_t nz,

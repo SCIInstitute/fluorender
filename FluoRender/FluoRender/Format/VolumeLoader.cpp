@@ -106,7 +106,9 @@ bool VolumeLoader::Run()
 		}
 		else
 		{
-			size_t bsize = (size_t)(b.brick->nx())*(size_t)(b.brick->ny())*(size_t)(b.brick->nz())*(size_t)(b.brick->nb(0));
+			auto res = b.brick->get_size();
+			int nb = b.brick->nb(flvr::CompType::Data);
+			size_t bsize = (size_t)(res.intx())*(size_t)(res.inty())*(size_t)(res.intz())*(size_t)(nb);
 			b.datasize = bsize;
 
 			if (m_loaded.find(b.brick) != m_loaded.end())
@@ -125,7 +127,11 @@ void VolumeLoader::CleanupLoadedBrick()
 	{
 		flvr::TextureBrick *b = m_queues[i].brick;
 		if (!m_queues[i].brick->isLoaded())
-			required += (size_t)b->nx()*(size_t)b->ny()*(size_t)b->nz()*(size_t)b->nb(0);
+		{
+			auto res = b->get_size();
+			int nb = b->nb(flvr::CompType::Data);
+			required += (size_t)(res.intx()) * (size_t)(res.inty()) * (size_t)(res.intz()) * (size_t)(nb);
+		}
 	}
 
 	std::vector<VolumeLoaderData> vd_undisp;
@@ -198,7 +204,9 @@ void VolumeLoader::CleanupLoadedBrick()
 				if (!skip)
 				{
 					b->freeBrkData();
-					long long datasize = (size_t)(b->nx())*(size_t)(b->ny())*(size_t)(b->nz())*(size_t)(b->nb(0));
+					auto res = b->get_size();
+					int nb = b->nb(flvr::CompType::Data);
+					long long datasize = (size_t)(res.intx()) * (size_t)(res.inty()) * (size_t)(res.intz()) * (size_t)(nb);
 					required -= datasize;
 					m_used_memory -= datasize;
 					m_loaded.erase(b);

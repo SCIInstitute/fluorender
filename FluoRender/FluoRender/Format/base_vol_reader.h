@@ -35,6 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <deque>
 #include <set>
 
+namespace fluo
+{
+	class Vector;
+}
 class BaseVolReader : public BaseReader
 {
 public:
@@ -78,20 +82,12 @@ public:
 	//not all file formats can provide this information
 	virtual double GetExcitationWavelength(int chan) = 0;
 	//get the total number of z slices in a stack
-	virtual int GetSliceNum() = 0;
-	//get the number of voxels/pixels of the x dimension
-	virtual int GetXSize() = 0;
-	//get the number of voxels/pixels in the y dimension
-	virtual int GetYSize() = 0;
+	virtual fluo::Vector GetResolution() = 0;
 	//sometimes the spacing info in the file is incorrect (too small or big)
 	//if the flag is set to false, default spacing values will be applied after reading
 	virtual bool IsSpcInfoValid() = 0;
 	//get the x spacing value, the physical size of the voxel
-	virtual double GetXSpc() = 0;
-	//get the y spacing value
-	virtual double GetYSpc() = 0;
-	//get the z spacing value
-	virtual double GetZSpc() = 0;
+	virtual fluo::Vector GetSpacing() = 0;
 	//get the max intensity value
 	//for 8-bit data, the max value is usually 255
 	//for 16-bit data, the microscope sensor may not generate full range, a smaller number is usually used

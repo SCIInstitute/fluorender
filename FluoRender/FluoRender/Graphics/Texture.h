@@ -108,6 +108,11 @@ namespace flvr
 			if (c != data_.end())
 				c->second.bytes = bytes;
 		}
+		bool has_comp(CompType type)
+		{
+			auto c = data_.find(type);
+			return c != data_.end();
+		}
 
 		void set_res(const fluo::Vector& res) 
 		{

@@ -88,7 +88,7 @@ public:
 	double m_sample_rate;
 
 	//spacing
-	double m_spcx, m_spcy, m_spcz;
+	fluo::Vector m_spacing;
 
 	//color map mode
 	flvr::ColorMode m_color_mode;	//0-normal; 1-rainbow

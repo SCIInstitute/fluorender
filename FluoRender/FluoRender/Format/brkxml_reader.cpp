@@ -1,8 +1,36 @@
-﻿#include <brkxml_reader.h>
+﻿/*
+For more information, please see: http://software.sci.utah.edu
+
+The MIT License
+
+Copyright (c) 2025 Scientific Computing and Imaging Institute,
+University of Utah.
+
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+*/
+#include <brkxml_reader.h>
 #include <TextureRenderer.h>
 #include <ShaderProgram.h>
 #include <TextureBrick.h>
 #include <Utils.h>
+#include <Vector.h>
 #include <compatibility.h>
 #include <fstream>
 #include <iostream>
@@ -41,14 +69,8 @@ BRKXMLReader::BRKXMLReader() :
 	m_cur_time = -1;
 	m_chan_num = 0;
 	m_cur_chan = 0;
-	m_slice_num = 0;
-	m_x_size = 0;
-	m_y_size = 0;
 
 	m_valid_spc = false;
-	m_xspc = 0.0;
-	m_yspc = 0.0;
-	m_zspc = 0.0;
 
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -187,7 +209,7 @@ void BRKXMLReader::SetDir(const std::wstring& dir)
 int BRKXMLReader::Preprocess()
 {
 	Clear();
-	m_slice_num = 0;
+	m_size = fluo::Vector(0);
 	m_chan_num = 0;
 	m_min_value = 0.0;
 	m_max_value = 0.0;
@@ -226,13 +248,15 @@ int BRKXMLReader::Preprocess()
 
 	if (m_pyramid.empty()) return READER_OPEN_FAIL;
 
-	m_xspc = m_pyramid[0].xspc;
-	m_yspc = m_pyramid[0].yspc;
-	m_zspc = m_pyramid[0].zspc;
+	m_spacing = fluo::Vector(
+		m_pyramid[0].xspc,
+		m_pyramid[0].yspc,
+		m_pyramid[0].zspc);
 
-	m_x_size = m_pyramid[0].imageW;
-	m_y_size = m_pyramid[0].imageH;
-	m_slice_num = m_pyramid[0].imageD;
+	m_size = fluo::Vector(
+		m_pyramid[0].imageW,
+		m_pyramid[0].imageH,
+		m_pyramid[0].imageD);
 
 	m_file_type = m_pyramid[0].file_type;
 
@@ -725,13 +749,15 @@ void BRKXMLReader::SetLevel(int lv)
 	if (lv < 0 || lv > m_level_num - 1) return;
 	m_cur_level = lv;
 
-	m_xspc = m_pyramid[lv].xspc;
-	m_yspc = m_pyramid[lv].yspc;
-	m_zspc = m_pyramid[lv].zspc;
+	m_spacing = fluo::Vector(
+		m_pyramid[lv].xspc,
+		m_pyramid[lv].yspc,
+		m_pyramid[lv].zspc);
 
-	m_x_size = m_pyramid[lv].imageW;
-	m_y_size = m_pyramid[lv].imageH;
-	m_slice_num = m_pyramid[lv].imageD;
+	m_size = fluo::Vector(
+		m_pyramid[lv].imageW,
+		m_pyramid[lv].imageH,
+		m_pyramid[lv].imageD);
 
 	m_file_type = m_pyramid[lv].file_type;
 }
@@ -1038,11 +1064,11 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 	if (flvr::ShaderProgram::init())
 		max_texture_size = flvr::ShaderProgram::max_texture_size();
 
-	int numb[1];
+	int numb;
 	if (m_pyramid[lev].bit_depth == 8 || m_pyramid[lev].bit_depth == 16 || m_pyramid[lev].bit_depth == 32)
-		numb[0] = m_pyramid[lev].bit_depth / 8;
+		numb = m_pyramid[lev].bit_depth / 8;
 	else
-		numb[0] = 0;
+		numb = 0;
 
 	//further determine the max texture size
 //	if (flvr::TextureRenderer::get_mem_swap())
@@ -1086,11 +1112,13 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
 		//numc? gm_nrrd?
-		flvr::TextureBrick* b = new flvr::TextureBrick(
-			0, 0, (*bite)->x_size, (*bite)->y_size, (*bite)->z_size, 1, numb,
-			(*bite)->x_start, (*bite)->y_start, (*bite)->z_start,
-			(*bite)->x_size, (*bite)->y_size, (*bite)->z_size, bbox, tbox, dbox,
-			static_cast<unsigned int>(tbrks.size()), (*bite)->id, (*bite)->offset, (*bite)->fsize);
+		flvr::TextureBrick* b = new flvr::TextureBrick(0,
+			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size), numb,
+			fluo::Vector((*bite)->x_start, (*bite)->y_start, (*bite)->z_start),
+			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size),
+			bbox, tbox, dbox,
+			static_cast<unsigned int>(tbrks.size()),
+			(*bite)->id, (*bite)->offset, (*bite)->fsize);
 		tbrks.push_back(b);
 
 		bite++;

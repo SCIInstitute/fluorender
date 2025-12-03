@@ -33,9 +33,6 @@ DEALINGS IN THE SOFTWARE.
 TIFWriter::TIFWriter()
 {
 	m_data = 0;
-	m_spcx = 0.0;
-	m_spcy = 0.0;
-	m_spcz = 0.0;
 	m_use_spacings = false;
 	m_compression = false;
 }
@@ -49,11 +46,9 @@ void TIFWriter::SetData(Nrrd *data)
 	m_data = data;
 }
 
-void TIFWriter::SetSpacings(double spcx, double spcy, double spcz)
+void TIFWriter::SetSpacings(const fluo::Vector& spc)
 {
-	m_spcx = spcx;
-	m_spcy = spcy;
-	m_spcz = spcz;
+	m_spc = spc;
 	m_use_spacings = true;
 }
 
@@ -90,9 +85,9 @@ void TIFWriter::SaveSingleFile(const std::wstring& filename)
 	double z_res;
 	if (m_use_spacings)
 	{
-		x_res = float(m_spcx>0.0?1.0/m_spcx:1.0);
-		y_res = float(m_spcy>0.0?1.0/m_spcy:1.0);
-		z_res = m_spcz;
+		x_res = float(m_spc.x()>0.0 ? 1.0 / m_spc.x() : 1.0);
+		y_res = float(m_spc.y()>0.0 ? 1.0 / m_spc.y() : 1.0);
+		z_res = m_spc.z();
 	}
 	else
 	{
@@ -183,9 +178,9 @@ void TIFWriter::SaveSequence(const std::wstring& filename)
 	double z_res;
 	if (m_use_spacings)
 	{
-		x_res = float(m_spcx>0.0?1.0/m_spcx:1.0);
-		y_res = float(m_spcy>0.0?1.0/m_spcy:1.0);
-		z_res = m_spcz;
+		x_res = float(m_spc.x()>0.0?1.0/m_spc.x():1.0);
+		y_res = float(m_spc.y()>0.0?1.0/m_spc.y():1.0);
+		z_res = m_spc.z();
 	}
 	else
 	{

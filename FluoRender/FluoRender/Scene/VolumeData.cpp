@@ -422,7 +422,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	}
 	else
 	{
-		if (!m_tex->build(nv, gm, 0, 256, 0, 0))
+		if (!m_tex->build(nv, 0, 256))
 			return 0;
 	}
 
@@ -461,7 +461,6 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 	if (del_tex)
 	{
 		Nrrd *nv = data;
-		Nrrd *gm = 0;
 		m_size = fluo::Vector(
 			nv->axis[0].size,
 			nv->axis[1].size,
@@ -469,12 +468,14 @@ int VolumeData::Replace(Nrrd* data, bool del_tex)
 
 		m_tex = std::make_shared<flvr::Texture>();
 		m_tex->set_use_priority(m_skip_brick);
-		m_tex->build(nv, gm, m_min_value, m_max_value, 0, 0);
+		m_tex->build(nv, m_min_value, m_max_value);
 	}
 	else
 	{
 		//set new
-		m_tex->set_nrrd(data, 0);
+		int bytes = GetBits() / 8;
+		flvr::TexComp comp = { flvr::CompType::Data, bytes, data};
+		m_tex->set_nrrd(flvr::CompType::Data, comp);
 	}
 
 	if (m_vr)
@@ -501,11 +502,8 @@ int VolumeData::Replace(VolumeData* data)
 		m_size != data->m_size)
 		return 0;
 
-	double spcx = 1.0, spcy = 1.0, spcz = 1.0;
-
 	if (m_tex && m_vr)
 	{
-		m_tex->get_spacings(spcx, spcy, spcz);
 		m_vr->clear_tex_current();
 		m_vr->reset_texture();
 	}
@@ -528,8 +526,8 @@ int VolumeData::Replace(VolumeData* data)
 
 //volume data
 void VolumeData::AddEmptyData(int bits,
-	int nx, int ny, int nz,
-	double spcx, double spcy, double spcz,
+	const fluo::Vector& res,
+	const fluo::Vector& spc,
 	int brick_size)
 {
 	if (bits!=8 && bits!=16)
@@ -538,32 +536,33 @@ void VolumeData::AddEmptyData(int bits,
 	Nrrd *nv = nrrdNew();
 	if (bits == 8)
 	{
-		unsigned long long mem_size = (unsigned long long)nx*
-			(unsigned long long)ny*(unsigned long long)nz;
+		unsigned long long mem_size = (unsigned long long)res.intx()*
+			(unsigned long long)res.inty()*(unsigned long long)res.intz();
 		uint8_t *val8 = new (std::nothrow) uint8_t[mem_size]();
 		if (!val8)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
 			return;
 		}
-		nrrdWrap_va(nv, val8, nrrdTypeUChar, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+		nrrdWrap_va(nv, val8, nrrdTypeUChar, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
 	}
 	else if (bits == 16)
 	{
-		unsigned long long mem_size = (unsigned long long)nx*
-			(unsigned long long)ny*(unsigned long long)nz;
+		unsigned long long mem_size = (unsigned long long)res.intx()*
+			(unsigned long long)res.inty() * (unsigned long long)res.intz();
 		uint16_t *val16 = new (std::nothrow) uint16_t[mem_size]();
 		if (!val16)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
 			return;
 		}
-		nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)nx, (size_t)ny, (size_t)nz);
+		nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
 	}
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSpacing, spcx, spcy, spcz);
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoMax, spcx*nx, spcy*ny, spcz*nz);
+	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
+	auto max_size = res * spc;
+	nrrdAxisInfoSet_va(nv, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 	nrrdAxisInfoSet_va(nv, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSize, (size_t)nx, (size_t)ny, (size_t)nz);
+	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSize, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
 
 	//resolution
 	m_size = fluo::Vector(
@@ -578,9 +577,9 @@ void VolumeData::AddEmptyData(int bits,
 	//create texture
 	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(false);
-	m_tex->set_brick_size(brick_size);
-	m_tex->build(nv, 0, 0, 256, 0, 0);
-	m_tex->set_spacings(spcx, spcy, spcz);
+	m_tex->set_brick_planned_size(brick_size);
+	m_tex->build(nv, 0, 256, 0);
+	m_tex->set_spacing(spc);
 
 	//create volume renderer
 	m_vr = std::make_unique<flvr::VolumeRenderer>();
@@ -616,7 +615,8 @@ void VolumeData::LoadMask(Nrrd* mask)
 
 	//prepare the texture bricks for the mask
 	m_tex->add_empty_mask();
-	m_tex->set_nrrd(mask, m_tex->nmask());
+	flvr::TexComp comp = { flvr::CompType::Mask, 1, mask };
+	m_tex->set_nrrd(flvr::CompType::Mask, comp);
 
 	fluo::Vector mask_size(
 		mask->axis[0].size,
@@ -654,20 +654,21 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 			//SetProgress("Not enough memory. Please save project and restart.");
 			return;
 		}
-		double spcx, spcy, spcz;
-		m_tex->get_spacings(spcx, spcy, spcz);
+		auto spc = m_tex->get_spacing();
 		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, spcx*m_res_x, spcy*m_res_y, spcz*m_res_z);
+		auto max_size = spc * m_size;
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 
-		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
+		flvr::TexComp comp = { flvr::CompType::Mask, 1, nrrd_mask };
+		m_tex->set_nrrd(comp.type, comp);
 	}
 	else
 	{
-		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8_t*)nrrd_mask->data;
+		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
+		val8 = (uint8_t*)comp.data->data;
 	}
 
 	if (empty || change)
@@ -686,15 +687,15 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 	if (!mask || !mask->data || !m_tex || !m_vr)
 		return;
 	if (mask->dim != 3 ||
-		mask->axis[0].size != m_res_x ||
-		mask->axis[1].size != m_res_y ||
-		mask->axis[2].size != m_res_z)
+		mask->axis[0].size != m_size.intx() ||
+		mask->axis[1].size != m_size.inty() ||
+		mask->axis[2].size != m_size.intz())
 		return;
 
 	Nrrd *nrrd_mask = 0;
 	uint8_t *val8 = 0;
-	unsigned long long mem_size = (unsigned long long)m_res_x*
-		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+	unsigned long long mem_size = (unsigned long long)m_size.intx()*
+		(unsigned long long)m_size.inty()*(unsigned long long)m_size.intz();
 	//prepare the texture bricks for the mask
 	bool empty = m_tex->add_empty_mask();
 	if (empty)
@@ -707,20 +708,21 @@ void VolumeData::AddMask(Nrrd* mask, int op)
 			//SetProgress("Not enough memory. Please save project and restart.");
 			return;
 		}
-		double spcx, spcy, spcz;
-		m_tex->get_spacings(spcx, spcy, spcz);
-		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		auto spc = m_tex->get_spacing();
+		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, spcx*m_res_x, spcy*m_res_y, spcz*m_res_z);
+		auto max_size = spc * m_size;
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 
-		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
+		flvr::TexComp comp = { flvr::CompType::Mask, 1, nrrd_mask };
+		m_tex->set_nrrd(comp.type, comp);
 	}
 	else
 	{
-		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8_t*)nrrd_mask->data;
+		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
+		val8 = (uint8_t*)comp.data->data;
 	}
 
 	if (val8)
@@ -769,15 +771,15 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 	if (!mask || !mask->data || !m_tex || !m_vr)
 		return;
 	if (mask->dim != 3 ||
-		mask->axis[0].size != m_res_x ||
-		mask->axis[1].size != m_res_y ||
-		mask->axis[2].size != m_res_z)
+		mask->axis[0].size != m_size.intx() ||
+		mask->axis[1].size != m_size.inty() ||
+		mask->axis[2].size != m_size.intz())
 		return;
 
 	Nrrd *nrrd_mask = 0;
 	uint8_t *val8 = 0;
-	unsigned long long mem_size = (unsigned long long)m_res_x*
-		(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+	unsigned long long mem_size = (unsigned long long)m_size.intx()*
+		(unsigned long long)m_size.inty()*(unsigned long long)m_size.intz();
 	//prepare the texture bricks for the mask
 	bool empty = m_tex->add_empty_mask();
 	if (empty)
@@ -790,20 +792,21 @@ void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
 			//SetProgress("Not enough memory. Please save project and restart.");
 			return;
 		}
-		double spcx, spcy, spcz;
-		m_tex->get_spacings(spcx, spcy, spcz);
-		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		auto spc = m_tex->get_spacing();
+		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
 		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, spcx*m_res_x, spcy*m_res_y, spcz*m_res_z);
+		auto max_size = spc * m_size;
+		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 
-		m_tex->set_nrrd(nrrd_mask, m_tex->nmask());
+		flvr::TexComp comp = { flvr::CompType::Mask, 1, nrrd_mask };
+		m_tex->set_nrrd(comp.type, comp);
 	}
 	else
 	{
-		nrrd_mask = m_tex->get_nrrd(m_tex->nmask());
-		val8 = (uint8_t*)nrrd_mask->data;
+		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
+		val8 = (uint8_t*)comp.data->data;
 	}
 
 	if (val8)
@@ -858,17 +861,18 @@ void VolumeData::LoadLabel(Nrrd* label)
 		return;
 
 	m_tex->add_empty_label();
-	m_tex->set_nrrd(label, m_tex->nlabel());
+	flvr::TexComp comp = { flvr::CompType::Label, 4, label };
+	m_tex->set_nrrd(flvr::CompType::Label, comp);
 
-	int nx2, ny2, nz2;
-	nx2 = label->axis[0].size;
-	ny2 = label->axis[1].size;
-	nz2 = label->axis[2].size;
-	if (m_res_x != nx2 || m_res_y != ny2 || m_res_z != nz2)
+	fluo::Vector size2(
+		label->axis[0].size,
+		label->axis[1].size,
+		label->axis[2].size);
+	if (m_size != size2)
 	{
 		flrd::VolumeSampler sampler;
 		sampler.SetInput(shared_from_this());
-		sampler.SetSize(m_res_x, m_res_y, m_res_z);
+		sampler.SetSize(m_size);
 		sampler.Resize(flrd::SDT_Label, true);
 		//nrrdNuke(label);
 		//label = sampler.GetResult();
@@ -877,54 +881,60 @@ void VolumeData::LoadLabel(Nrrd* label)
 
 void VolumeData::SetOrderedID(unsigned int* val)
 {
-	for (int i=0; i<m_res_x; i++)
-		for (int j=0; j<m_res_y; j++)
-			for (int k=0; k<m_res_z; k++)
-			{
-				unsigned int index = m_res_y*m_res_z*i + m_res_z*j + k;
-				val[index] = index+1;
-			}
+	int res_x, res_y, res_z;
+	res_x = m_size.intx();
+	res_y = m_size.inty();
+	res_z = m_size.intz();
+	for (int i=0; i<res_x; i++) for (int j=0; j<res_y; j++) for (int k=0; k<res_z; k++)
+	{
+		unsigned int index = res_y*res_z*i + res_z*j + k;
+		val[index] = index+1;
+	}
 }
 
 void VolumeData::SetReverseID(unsigned int* val)
 {
-	for (int i=0; i<m_res_x; i++)
-		for (int j=0; j<m_res_y; j++)
-			for (int k=0; k<m_res_z; k++)
-			{
-				unsigned int index = m_res_y*m_res_z*i + m_res_z*j + k;
-				val[index] = m_res_x*m_res_y*m_res_z - index;
-			}
+	int res_x, res_y, res_z;
+	res_x = m_size.intx();
+	res_y = m_size.inty();
+	res_z = m_size.intz();
+	for (int i = 0; i < res_x; i++) for (int j = 0; j < res_y; j++) for (int k = 0; k < res_z; k++)
+	{
+		unsigned int index = res_y*res_z*i + res_z*j + k;
+		val[index] = res_x*res_y*res_z - index;
+	}
 }
 
 void VolumeData::SetShuffledID(unsigned int* val)
 {
+	int res_x, res_y, res_z;
+	res_x = m_size.intx();
+	res_y = m_size.inty();
+	res_z = m_size.intz();
 	unsigned int x, y, z;
 	unsigned int res;
 	unsigned int len = 0;
-	unsigned int r = std::max(m_res_x, std::max(m_res_y, m_res_z));
+	unsigned int r = std::max(res_x, std::max(res_y, res_z));
 	while (r > 0)
 	{
 		r /= 2;
 		len++;
 	}
-	for (int i=0; i<m_res_x; i++)
-		for (int j=0; j<m_res_y; j++)
-			for (int k=0; k<m_res_z; k++)
-			{
-				x = reverse_bit(i, len);
-				y = reverse_bit(j, len);
-				z = reverse_bit(k, len);
-				res = 0;
-				for (unsigned int ii=0; ii<len; ii++)
-				{
-					res |= (1<<ii & x)<<(2*ii);
-					res |= (1<<ii & y)<<(2*ii+1);
-					res |= (1<<ii & z)<<(2*ii+2);
-				}
-				unsigned int index = m_res_x*m_res_y*k + m_res_x*j + i;
-				val[index] = m_res_x*m_res_y*m_res_z - res;
-			}
+	for (int i = 0; i < res_x; i++) for (int j = 0; j < res_y; j++) for (int k = 0; k < res_z; k++)
+	{
+		x = reverse_bit(i, len);
+		y = reverse_bit(j, len);
+		z = reverse_bit(k, len);
+		res = 0;
+		for (unsigned int ii=0; ii<len; ii++)
+		{
+			res |= (1<<ii & x)<<(2*ii);
+			res |= (1<<ii & y)<<(2*ii+1);
+			res |= (1<<ii & z)<<(2*ii+2);
+		}
+		unsigned int index = res_x*res_y*k + res_x*j + i;
+		val[index] = res_x*res_y*res_z - res;
+	}
 }
 
 void VolumeData::UpdateColormapRange()
@@ -938,15 +948,15 @@ void VolumeData::UpdateColormapRange()
 		break;
 	case flvr::ColormapProj::ZValue://z-value
 		m_colormap_min_value = 0;
-		m_colormap_max_value = m_res_z * m_spcz;
+		m_colormap_max_value = m_size.z() * m_spacing.z();
 		break;
 	case flvr::ColormapProj::YValue://y-value
 		m_colormap_min_value = 0;
-		m_colormap_max_value = m_res_y * m_spcy;
+		m_colormap_max_value = m_size.y() * m_spacing.y();
 		break;
 	case flvr::ColormapProj::XValue://x-value
 		m_colormap_min_value = 0;
-		m_colormap_max_value = m_res_x * m_spcx;
+		m_colormap_max_value = m_size.x() * m_spacing.x();
 		break;
 	case flvr::ColormapProj::TValue://t-value
 		m_colormap_min_value = 0;
@@ -982,8 +992,8 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 	{
 		//add the nrrd data for the labeling mask
 		nrrd_label = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)m_res_x*
-			(unsigned long long)m_res_y*(unsigned long long)m_res_z;
+		unsigned long long mem_size = (unsigned long long)m_size.intx() *
+			(unsigned long long)m_size.inty() * (unsigned long long)m_size.intz();
 		val32 = new (std::nothrow) unsigned int[mem_size];
 		if (!val32)
 		{
@@ -991,20 +1001,21 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 			return;
 		}
 
-		double spcx, spcy, spcz;
-		m_tex->get_spacings(spcx, spcy, spcz);
-		nrrdWrap_va(nrrd_label, val32, nrrdTypeUInt, 3, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		auto spc = m_tex->get_spacing();
+		nrrdWrap_va(nrrd_label, val32, nrrdTypeUInt, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
 		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMax, spcx*m_res_x, spcy*m_res_y, spcz*m_res_z);
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSize, (size_t)m_res_x, (size_t)m_res_y, (size_t)m_res_z);
+		auto max_size = spc * m_size;
+		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 
-		m_tex->set_nrrd(nrrd_label, m_tex->nlabel());
+		flvr::TexComp comp = { flvr::CompType::Label, 1, nrrd_label };
+		m_tex->set_nrrd(comp.type, comp);
 	}
 	else
 	{
-		nrrd_label = m_tex->get_nrrd(m_tex->nlabel());
-		val32 = (unsigned int*)nrrd_label->data;
+		auto comp = m_tex->get_nrrd(flvr::CompType::Label);
+		val32 = (unsigned int*)comp.data->data;
 		exist = true;
 	}
 
@@ -1014,7 +1025,7 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 		switch (mode)
 		{
 		case 0://zeros
-			std::memset(val32, 0, sizeof(unsigned int)*m_res_x*m_res_y*m_res_z);
+			std::memset(val32, 0, sizeof(unsigned int)*GetVoxelCount());
 			break;
 		case 1://ordered
 			SetOrderedID(val32);
@@ -1031,15 +1042,14 @@ bool VolumeData::SearchLabel(unsigned int label)
 	if (!m_tex)
 		return false;
 
-	Nrrd* nrrd_label = m_tex->get_nrrd(m_tex->nlabel());
-	if (!nrrd_label)
+	auto comp = m_tex->get_nrrd(flvr::CompType::Label);
+	if (!comp.data)
 		return false;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
+	unsigned int* data_label = (unsigned int*)(comp.data->data);
 	if (!data_label)
 		return false;
 
-	unsigned long long for_size = (unsigned long long)m_res_x *
-		(unsigned long long)m_res_y * (unsigned long long)m_res_z;
+	unsigned long long for_size = GetVoxelCount();
 	for (unsigned long long index = 0; index < for_size; ++index)
 		if (data_label[index] == label)
 			return true;
@@ -1051,7 +1061,7 @@ Nrrd* VolumeData::GetVolume(bool ret)
 	if (m_vr && m_tex)
 	{
 		if (ret) m_vr->return_volume();
-		return m_tex->get_nrrd(0);
+		return m_tex->get_nrrd(flvr::CompType::Data).data;
 	}
 
 	return 0;
@@ -1059,10 +1069,10 @@ Nrrd* VolumeData::GetVolume(bool ret)
 
 Nrrd* VolumeData::GetMask(bool ret)
 {
-	if (m_vr && m_tex && m_tex->nmask()!=-1)
+	if (m_vr && m_tex && m_tex->has_comp(flvr::CompType::Mask))
 	{
 		if (ret) m_vr->return_mask();
-		return m_tex->get_nrrd(m_tex->nmask());
+		return m_tex->get_nrrd(flvr::CompType::Mask).data;
 	}
 
 	return 0;
@@ -1072,7 +1082,7 @@ bool VolumeData::IsValidMask()
 {
 	if (!m_tex)
 		return false;
-	if (m_tex->nmask() == -1)
+	if (!m_tex->has_comp(flvr::CompType::Mask))
 		return false;
 	if (m_mask_count_dirty)
 	{
@@ -1088,10 +1098,10 @@ bool VolumeData::IsValidMask()
 
 Nrrd* VolumeData::GetLabel(bool ret)
 {
-	if (m_vr && m_tex && m_tex->nlabel() != -1)
+	if (m_vr && m_tex && m_tex->has_comp(flvr::CompType::Label))
 	{
 		if (ret) m_vr->return_label();
-		return m_tex->get_nrrd(m_tex->nlabel());
+		return m_tex->get_nrrd(flvr::CompType::Label).data;
 	}
 
 	return 0;
@@ -1107,26 +1117,26 @@ double VolumeData::GetOriginalValue(int i, int j, int k, flvr::TextureBrick* b)
 	{
 		if (!b || !b->isLoaded()) return 0.0;
 		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
-		data_data = b->tex_data_brk(0, finfo);
+		data_data = b->tex_data_brk(flvr::CompType::Data, finfo);
 		if (!data_data) return 0.0;
-		bits = b->nb(0) * 8;
-		nx = b->nx();
-		ny = b->ny();
-		nz = b->nz();
+		bits = b->nb(flvr::CompType::Data) * 8;
+		auto res_b = b->get_size();
+		nx = res_b.intx();
+		ny = res_b.inty();
+		nz = res_b.intz();
 	}
 	else
 	{
-		Nrrd* data = 0;
-		data = m_tex->get_nrrd(0);
-		if (!data || !data->data) return 0.0;
-		data_data = data->data;
-		if (data->type == nrrdTypeUChar)
+		auto comp = m_tex->get_nrrd(flvr::CompType::Data);
+		if (!comp.data || !comp.data->data) return 0.0;
+		data_data = comp.data->data;
+		if (comp.data->type == nrrdTypeUChar)
 			bits = 8;
-		else if (data->type == nrrdTypeUShort)
+		else if (comp.data->type == nrrdTypeUShort)
 			bits = 16;
-		nx = (int64_t)(data->axis[0].size);
-		ny = (int64_t)(data->axis[1].size);
-		nz = (int64_t)(data->axis[2].size);
+		nx = (int64_t)(comp.data->axis[0].size);
+		ny = (int64_t)(comp.data->axis[1].size);
+		nz = (int64_t)(comp.data->axis[2].size);
 	}
 
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
@@ -1154,32 +1164,31 @@ double VolumeData::GetMaskValue(int i, int j, int k, flvr::TextureBrick* b)
 	void *data_data = 0;
 	int bits = 8;
 	int64_t nx, ny, nz;
-	int nmask = m_tex->nmask();
 
 	if (isBrxml())
 	{
 		if (!b || !b->isLoaded()) return 0.0;
 		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
-		data_data = b->tex_data_brk(nmask, finfo);
+		data_data = b->tex_data_brk(flvr::CompType::Mask, finfo);
 		if (!data_data) return 0.0;
-		bits = b->nb(0) * 8;
-		nx = b->nx();
-		ny = b->ny();
-		nz = b->nz();
+		bits = b->nb(flvr::CompType::Mask) * 8;
+		auto res_b = b->get_size();
+		nx = res_b.intx();
+		ny = res_b.inty();
+		nz = res_b.intz();
 	}
 	else
 	{
-		Nrrd* data = 0;
-		data = m_tex->get_nrrd(nmask);
-		if (!data || !data->data) return 0.0;
-		data_data = data->data;
-		if (data->type == nrrdTypeUChar)
+		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
+		if (!comp.data || !comp.data->data) return 0.0;
+		data_data = comp.data->data;
+		if (comp.data->type == nrrdTypeUChar)
 			bits = 8;
-		else if (data->type == nrrdTypeUShort)
+		else if (comp.data->type == nrrdTypeUShort)
 			bits = 16;
-		nx = (int64_t)(data->axis[0].size);
-		ny = (int64_t)(data->axis[1].size);
-		nz = (int64_t)(data->axis[2].size);
+		nx = (int64_t)(comp.data->axis[0].size);
+		ny = (int64_t)(comp.data->axis[1].size);
+		nz = (int64_t)(comp.data->axis[2].size);
 	}
 
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
@@ -1212,26 +1221,26 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 	{
 		if (!b || !b->isLoaded()) return 0.0;
 		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
-		data_data = b->tex_data_brk(0, finfo);
+		data_data = b->tex_data_brk(flvr::CompType::Data, finfo);
 		if (!data_data) return 0.0;
-		bits = b->nb(0) * 8;
-		nx = b->nx();
-		ny = b->ny();
-		nz = b->nz();
+		bits = b->nb(flvr::CompType::Data) * 8;
+		auto res_b = b->get_size();
+		nx = res_b.intx();
+		ny = res_b.inty();
+		nz = res_b.intz();
 	}
 	else
 	{
-		Nrrd* data = 0;
-		data = m_tex->get_nrrd(0);
-		if (!data || !data->data) return 0.0;
-		data_data = data->data;
-		if (data->type == nrrdTypeUChar)
+		auto comp = m_tex->get_nrrd(flvr::CompType::Data);
+		if (!comp.data || !comp.data->data) return 0.0;
+		data_data = comp.data->data;
+		if (comp.data->type == nrrdTypeUChar)
 			bits = 8;
-		else if (data->type == nrrdTypeUShort)
+		else if (comp.data->type == nrrdTypeUShort)
 			bits = 16;
-		nx = (int64_t)(data->axis[0].size);
-		ny = (int64_t)(data->axis[1].size);
-		nz = (int64_t)(data->axis[2].size);
+		nx = (int64_t)(comp.data->axis[0].size);
+		ny = (int64_t)(comp.data->axis[1].size);
+		nz = (int64_t)(comp.data->axis[2].size);
 	}
 
 	if (i<0 || i>=nx || j<0 || j>=ny || k<0 || k>=nz)
@@ -1328,26 +1337,6 @@ double VolumeData::GetTransferedValue(int i, int j, int k, flvr::TextureBrick* b
 	return 0.0;
 }
 
-void VolumeData::SetResize(int resize, int nx, int ny, int nz)
-{
-	if (resize > -1)
-		m_resize = resize > 0;
-	if (nx > -1)
-		m_rnx = nx;
-	if (ny > -1)
-		m_rny = ny;
-	if (nz > -1)
-		m_rnz = nz;
-}
-
-void VolumeData::GetResize(bool &resize, int &nx, int &ny, int &nz)
-{
-	resize = m_resize;
-	nx = m_rnx;
-	ny = m_rny;
-	nz = m_rnz;
-}
-
 //save
 void VolumeData::Save(const std::wstring &filename, int mode,
 	int mask, bool neg_mask,
@@ -1370,14 +1359,14 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 		temp = baker.GetResult();
 	}
 
-	if (m_resize || crop)
+	if (m_resample || crop)
 	{
 		flrd::VolumeSampler sampler;
 		sampler.SetInput(temp ? temp : shared_from_this());
 		sampler.SetFixSize(fix_size);
-		sampler.SetSize(m_rnx, m_rny, m_rnz);
+		sampler.SetSize(m_resampled_size);
 		sampler.SetFilter(filter);
-		sampler.SetFilterSize(1, 1, 1);
+		sampler.SetFilterSize(fluo::Vector(1.0));
 		sampler.SetCrop(crop);
 		sampler.SetCenter(c);
 		sampler.SetClipRotation(q);
@@ -1404,30 +1393,30 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 	}
 
 	//save data
-	Nrrd* data = 0;
+	flvr::TexComp comp;
 	if (temp)
 	{
 		if (temp->m_tex)
-			data = temp->m_tex->get_nrrd(0);
+			comp = temp->m_tex->get_nrrd(flvr::CompType::Data);
 	}
 	else
 	{
-		data = m_tex->get_nrrd(0);
+		comp = m_tex->get_nrrd(flvr::CompType::Data);
 	}
-	if (data)
+	if (comp.data)
 	{
-		double spcx, spcy, spcz;
-		spcx = data->axis[0].spacing;
-		spcy = data->axis[1].spacing;
-		spcz = data->axis[2].spacing;
-		writer->SetData(data);
-		writer->SetSpacings(spcx, spcy, spcz);
+		auto spc = fluo::Vector(
+			comp.data->axis[0].spacing,
+			comp.data->axis[1].spacing,
+			comp.data->axis[2].spacing);
+		writer->SetData(comp.data);
+		writer->SetSpacings(spc);
 		writer->SetCompression(compress);
 		writer->Save(filename, mode);
 	}
 	delete writer;
 
-	if (m_resize || crop)
+	if (m_resample || crop)
 	{
 		temp->SetPath(filename);
 		if (mask & 1)
@@ -1452,8 +1441,7 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 		return;
 
 	Nrrd* data = 0;
-	double spcx, spcy, spcz;
-	GetSpacings(spcx, spcy, spcz);
+	auto spc = GetSpacing();
 
 	//save mask
 	data = GetMask(true);
@@ -1462,7 +1450,7 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 
 	MSKWriter msk_writer;
 	msk_writer.SetData(data);
-	msk_writer.SetSpacings(spcx, spcy, spcz);
+	msk_writer.SetSpacings(spc);
 	std::wstring filename;
 	if (use_reader)
 	{
@@ -1480,8 +1468,7 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 		return;
 
 	Nrrd* data = 0;
-	double spcx, spcy, spcz;
-	GetSpacings(spcx, spcy, spcz);
+	auto spc = GetSpacing();
 
 	//save label
 	data = GetLabel(true);
@@ -1490,7 +1477,7 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 
 	MSKWriter msk_writer;
 	msk_writer.SetData(data);
-	msk_writer.SetSpacings(spcx, spcy, spcz);
+	msk_writer.SetSpacings(spc);
 	std::wstring filename;
 	if (use_reader)
 	{
@@ -1662,7 +1649,9 @@ void VolumeData::ResetVolume()
 void VolumeData::SetMatrices(glm::mat4 &mv_mat,
 	glm::mat4 &proj_mat, glm::mat4 &tex_mat)
 {
-	glm::mat4 scale_mv = glm::scale(mv_mat, glm::vec3(m_sclx, m_scly, m_sclz));
+	glm::mat4 scale_mv =
+		glm::scale(mv_mat,
+			glm::vec3(m_scaling.x(), m_scaling.y(), m_scaling.z()));
 	if (m_vr)
 		m_vr->set_matrices(scale_mv, proj_mat, tex_mat);
 }
@@ -2626,112 +2615,67 @@ void VolumeData::IncShuffle()
 }
 
 //resolution  scaling and spacing
-void VolumeData::GetResolution(int &res_x, int &res_y, int &res_z, int lv)
+fluo::Vector VolumeData::GetResolution(int lv)
 {
 	if (lv >= 0 && isBrxml() && m_tex)
 	{
-		res_x = m_tex->nx();
-		res_y = m_tex->ny();
-		res_z = m_tex->nz();
+		return m_tex->get_res();
 	}
 	else
 	{
-		res_x = m_res_x;
-		res_y = m_res_y;
-		res_z = m_res_z;
+		return m_size;
 	}
 }
 
-void VolumeData::SetScalings(double sclx, double scly, double sclz)
+void VolumeData::SetScaling(const fluo::Vector& scaling)
 {
-	m_sclx = sclx; m_scly = scly; m_sclz = sclz;
+	m_scaling = scaling;
 }
 
-void VolumeData::GetScalings(double &sclx, double &scly, double &sclz)
+fluo::Vector VolumeData::GetScaling()
 {
-	sclx = m_sclx; scly = m_scly; sclz = m_sclz;
+	return m_scaling;
 }
 
-fluo::Vector VolumeData::GetScalings()
+void VolumeData::SetSpacing(const fluo::Vector& spacing)
 {
-	return fluo::Vector(m_sclx, m_scly, m_sclz);
-}
-
-void VolumeData::SetSpacings(double spcx, double spcy, double spcz)
-{
-	m_spcx = spcx; m_spcy = spcy; m_spcz = spcz;
+	m_spacing = spacing;
 	if (m_tex)
-		m_tex->set_spacings(spcx, spcy, spcz);
-	fluo::Point pmax(m_res_x * m_spcx, m_res_y * m_spcy, m_res_z * m_spcz);
-	fluo::Point pmin(0.0);
-	m_bounds = fluo::BBox(pmin, pmax);
-	m_clipping_box.UpdateBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_res_x, m_res_y, m_res_z)));
+		m_tex->set_spacing(spacing);
+	m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(m_size * m_spacing));
+	m_clipping_box.UpdateBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 }
 
-void VolumeData::GetSpacings(double &spcx, double &spcy, double & spcz, int lv)
+fluo::Vector VolumeData::GetSpacing(int lv)
 {
-	if (m_tex)
-		m_tex->get_spacings(spcx, spcy, spcz, lv);
-}
-
-fluo::Vector VolumeData::GetSpacings(int lv)
-{
-	double x, y, z;
-	if (m_tex)
-	{
-		m_tex->get_spacings(x, y, z, lv);
-		return fluo::Vector(x, y, z);
-	}
-	return fluo::Vector(0);
+	return m_tex->get_spacing(lv);
 }
 
 //brkxml
-void VolumeData::SetBaseSpacings(double spcx, double spcy, double spcz)
+void VolumeData::SetBaseSpacing(const fluo::Vector& spacing)
 {
-	SetSpacings(spcx, spcy, spcz);
+	SetSpacing(spacing);
 }
 
-void VolumeData::GetBaseSpacings(double &spcx, double &spcy, double & spcz)
+fluo::Vector VolumeData::GetBaseSpacing()
 {
-	GetSpacings(spcx, spcy, spcz);
+	return GetSpacing();
 }
 
-fluo::Vector VolumeData::GetBaseSpacings()
-{
-	double x, y, z;
-	if (m_tex)
-	{
-		m_tex->get_base_spacings(x, y, z);
-		return fluo::Vector(x, y, z);
-	}
-	return fluo::Vector(0);
-}
-
-void VolumeData::SetSpacingScales(double s_spcx, double s_spcy, double s_spcz)
+void VolumeData::SetSpacingScale(const fluo::Vector& scaling)
 {
 	if (m_tex)
 	{
-		m_tex->set_spacing_scales(s_spcx, s_spcy, s_spcz);
+		m_tex->set_spacing_scale(scaling);
 		m_bounds.reset();
 		m_tex->get_bounds(m_bounds);
+		m_clipping_box.UpdateBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 	}
 }
 
-void VolumeData::GetSpacingScales(double &s_spcx, double &s_spcy, double &s_spcz)
+fluo::Vector VolumeData::GetSpacingScale()
 {
-	if (m_tex)
-		m_tex->get_spacing_scales(s_spcx, s_spcy, s_spcz);
-}
-
-fluo::Vector VolumeData::GetSpacingScales()
-{
-	double x, y, z;
-	if (m_tex)
-	{
-		m_tex->get_spacing_scales(x, y, z);
-		return fluo::Vector(x, y, z);
-	}
-	return fluo::Vector(0);
+	return m_tex->get_spacing_scale();
 }
 
 void VolumeData::SetLevel(int lv)
@@ -2765,12 +2709,12 @@ int VolumeData::GetBits()
 {
 	if (!m_tex)
 		return 0;
-	Nrrd* nrrd_data = m_tex->get_nrrd(0);
-	if (!nrrd_data)
+	auto comp = m_tex->get_nrrd(flvr::CompType::Data);
+	if (!comp.data)
 		return 0;
-	if (nrrd_data->type == nrrdTypeUChar)
+	if (comp.data->type == nrrdTypeUChar)
 		return 8;
-	else if (nrrd_data->type == nrrdTypeUShort)
+	else if (comp.data->type == nrrdTypeUShort)
 		return 16;
 	return 0;
 }
@@ -2975,7 +2919,7 @@ int VolumeData::GetAllBrickNum()
 {
 	if (!m_tex)
 		return 0;
-	return m_tex->get_brick_num();
+	return m_tex->get_brick_list_size();
 }
 
 bool VolumeData::isBrxml()
@@ -2992,18 +2936,16 @@ void VolumeData::PushLabel(bool ret)
 		m_vr->return_label();
 	if (!m_tex)
 		return;
-	if (m_tex->nlabel() == -1)
+	if (!m_tex->has_comp(flvr::CompType::Label))
 		return;
 
-	Nrrd* data = m_tex->get_nrrd(m_tex->nlabel());
-	if (!data || ! data->data)
+	auto comp = m_tex->get_nrrd(flvr::CompType::Label);
+	if (!comp.data || !comp.data->data)
 		return;
-	int nx, ny, nz;
-	GetResolution(nx, ny, nz);
-	unsigned long long size = (unsigned long long)nx * ny * nz;
+	unsigned long long size = GetVoxelCount();
 	if (!m_label_save)
 		m_label_save = new unsigned int[size];
-	memcpy(m_label_save, data->data, size * sizeof(unsigned int));
+	memcpy(m_label_save, comp.data->data, size * sizeof(unsigned int));
 }
 
 void VolumeData::PopLabel()
@@ -3016,13 +2958,12 @@ void VolumeData::LoadLabel2()
 {
 	if (m_label_save && m_vr)
 	{
-		Nrrd* data = m_tex->get_nrrd(m_tex->nlabel());
-		if (!data || !data->data)
+		auto comp = m_tex->get_nrrd(flvr::CompType::Label);
+		if (!comp.data || !comp.data->data)
 			return;
 		int nx, ny, nz;
-		GetResolution(nx, ny, nz);
-		unsigned long long size = (unsigned long long)nx * ny * nz;
-		memcpy(data->data, m_label_save, size * sizeof(unsigned int));
+		unsigned long long size = GetVoxelCount();
+		memcpy(comp.data->data, m_label_save, size * sizeof(unsigned int));
 		m_vr->clear_tex_current();
 	}
 }
