@@ -31,16 +31,13 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <base_vol_reader.h>
 #include <XmlUtils.h>
+#include <Vector.h>
 
 namespace flvr
 {
 	class FileLocInfo;
 	class TextureBrick;
 	struct Pyramid_Level;
-}
-namespace fluo
-{
-	class Vector;
 }
 class BRKXMLReader : public BaseVolReader
 {

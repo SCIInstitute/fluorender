@@ -64,7 +64,7 @@ namespace flrd
 		{
 			return m_data;
 		}
-		void SetSpacings(double spcx, double spcy, double spcz)
+		void SetSpacing(double spcx, double spcy, double spcz)
 		{
 			m_spc = { spcx, spcy, spcz };
 			m_eps = static_cast<float>(std::min(spcx, std::min(spcy, spcz)));

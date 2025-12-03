@@ -153,7 +153,7 @@ void VolumeBaker::Bake(bool replace)
 		}
 		else
 			m_result->Replace(nrrd_result, false);
-		m_result->SetSpacings(spcx, spcy, spcz);
+		m_result->SetSpacing(spcx, spcy, spcz);
 		m_result->SetBaseSpacings(spcx, spcy, spcz);
 	}
 }

@@ -184,7 +184,7 @@ private:
 	wxUndoableToolbar* m_options_toolbar;
 
 private:
-	bool SetSpacings();
+	bool SetSpacing();
 
 	//update max value
 	void UpdateMaxVal(double value);

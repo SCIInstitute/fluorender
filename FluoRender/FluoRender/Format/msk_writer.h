@@ -38,7 +38,7 @@ public:
 	~MSKWriter();
 
 	void SetData(Nrrd* data);
-	void SetSpacings(const fluo::Vector& spc);
+	void SetSpacing(const fluo::Vector& spc);
 	void SetCompression(bool value);
 	void Save(const std::wstring& filename, int mode);//mode: 0-normal mask; 1-label mask
 

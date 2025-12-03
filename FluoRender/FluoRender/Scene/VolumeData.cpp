@@ -1410,7 +1410,7 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 			comp.data->axis[1].spacing,
 			comp.data->axis[2].spacing);
 		writer->SetData(comp.data);
-		writer->SetSpacings(spc);
+		writer->SetSpacing(spc);
 		writer->SetCompression(compress);
 		writer->Save(filename, mode);
 	}
@@ -1450,7 +1450,7 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 
 	MSKWriter msk_writer;
 	msk_writer.SetData(data);
-	msk_writer.SetSpacings(spc);
+	msk_writer.SetSpacing(spc);
 	std::wstring filename;
 	if (use_reader)
 	{
@@ -1477,7 +1477,7 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 
 	MSKWriter msk_writer;
 	msk_writer.SetData(data);
-	msk_writer.SetSpacings(spc);
+	msk_writer.SetSpacing(spc);
 	std::wstring filename;
 	if (use_reader)
 	{

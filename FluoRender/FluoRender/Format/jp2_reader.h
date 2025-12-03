@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _JP2_READER_H_
 
 #include <base_vol_reader.h>
+#include <Vector.h>
 
 class JP2Reader : public BaseVolReader
 {
@@ -54,13 +55,9 @@ public:
 	virtual int GetCurTime() {return m_cur_time;}
 	virtual int GetChanNum() {return m_chan_num;}
 	virtual double GetExcitationWavelength(int chan) {return 0.0;}
-	virtual int GetSliceNum() {return m_slice_num;}
-	virtual int GetXSize() {return m_x_size;}
-	virtual int GetYSize() {return m_y_size;}
+	virtual fluo::Vector GetResolution() { return m_size; }
 	virtual bool IsSpcInfoValid() {return m_valid_spc;}
-	virtual double GetXSpc() {return m_xspc;}
-	virtual double GetYSpc() {return m_yspc;}
-	virtual double GetZSpc() {return m_zspc;}
+	virtual fluo::Vector GetSpacing() { return m_spacing; }
 	virtual double GetMinValue() { return m_min_value; }
 	virtual double GetMaxValue() {return m_max_value;}
 	virtual double GetScalarScale() {return m_scalar_scale;}
@@ -89,13 +86,9 @@ private:
 
 	int m_time_num;
 	int m_chan_num;
-	int m_slice_num;
-	int m_x_size;
-	int m_y_size;
+	fluo::Vector m_size;
 	bool m_valid_spc;
-	double m_xspc;
-	double m_yspc;
-	double m_zspc;
+	fluo::Vector m_spacing;
 	double m_min_value;
 	double m_max_value;
 	double m_scalar_scale;

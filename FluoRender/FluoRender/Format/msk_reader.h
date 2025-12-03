@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _MSK_READER_H_
 
 #include <base_vol_reader.h>
+#include <Vector.h>
 
 class MSKReader : public BaseVolReader
 {
@@ -54,13 +55,9 @@ public:
 	int GetCurTime() {return 0;}
 	int GetChanNum() {return 0;}
 	double GetExcitationWavelength(int chan) {return 0.0;}
-	int GetSliceNum() {return 0;}
-	int GetXSize() {return 0;}
-	int GetYSize() {return 0;}
+	fluo::Vector GetResolution() { return fluo::Vector(0.0); }
 	bool IsSpcInfoValid() {return false;}
-	double GetXSpc() {return 0.0;}
-	double GetYSpc() {return 0.0;}
-	double GetZSpc() {return 0.0;}
+	fluo::Vector GetSpacing() { return fluo::Vector(0.0); }
 	double GetMinValue() { return 0.0; }
 	double GetMaxValue() {return 0.0;}
 	double GetScalarScale() {return 0.0;}

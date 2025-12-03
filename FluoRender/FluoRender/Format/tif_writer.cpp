@@ -46,7 +46,7 @@ void TIFWriter::SetData(Nrrd *data)
 	m_data = data;
 }
 
-void TIFWriter::SetSpacings(const fluo::Vector& spc)
+void TIFWriter::SetSpacing(const fluo::Vector& spc)
 {
 	m_spc = spc;
 	m_use_spacings = true;

@@ -1214,7 +1214,7 @@ std::shared_ptr<VolumeGroup> RenderView::AddVolumeData(const std::shared_ptr<Vol
 	{
 	double spcx, spcy, spcz;
 	vol_data->GetSpacings(spcx, spcy, spcz);
-	vd->SetSpacings(spcx, spcy, spcz);
+	vd->SetSpacing(spcx, spcy, spcz);
 	}
 	}*/
 

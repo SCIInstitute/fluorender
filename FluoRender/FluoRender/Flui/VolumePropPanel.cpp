@@ -3276,7 +3276,7 @@ void VolumePropPanel::ResetDefault()
 	FluoRefresh(0, { gstVolumeProps, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
 }
 
-bool VolumePropPanel::SetSpacings()
+bool VolumePropPanel::SetSpacing()
 {
 	if (!m_space_x_text || !m_space_y_text || !m_space_z_text)
 		return false;
@@ -3305,13 +3305,13 @@ bool VolumePropPanel::SetSpacings()
 	{
 		for (int i = 0; i < m_group->GetVolumeNum(); i++)
 		{
-			m_group->GetVolumeData(i)->SetSpacings(spcx, spcy, spcz);
+			m_group->GetVolumeData(i)->SetSpacing(spcx, spcy, spcz);
 			m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
 		}
 	}
 	else if (m_vd)
 	{
-		m_vd->SetSpacings(spcx, spcy, spcz);
+		m_vd->SetSpacing(spcx, spcy, spcz);
 		m_vd->SetBaseSpacings(spcx, spcy, spcz);
 	}
 	else return false;
@@ -3346,7 +3346,7 @@ void VolumePropPanel::UpdateMaxVal(double value)
 
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
-	if (SetSpacings())
+	if (SetSpacing())
 	{
 		InitViews(INIT_BOUNDS|INIT_CENTER);
 		FluoRefresh(3, { gstNull });

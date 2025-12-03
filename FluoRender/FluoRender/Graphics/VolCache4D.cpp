@@ -199,19 +199,18 @@ bool CQCallback::HandleMask(VolCache4D& vol_cache)
 	Nrrd* mask = msk_reader.Convert(frame, chan, true);
 	if (!mask)
 	{
-		int resx, resy, resz;
-		vd->GetResolution(resx, resy, resz);
-		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
+		auto res = vd->GetResolution();
+		auto spc = vd->GetSpacing();
 		mask = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)resx *
-			(unsigned long long)resy * (unsigned long long)resz;
+		unsigned long long mem_size = (unsigned long long)res.intx() *
+			(unsigned long long)res.inty() * (unsigned long long)res.intz();
 		uint8_t* val8 = new (std::nothrow) uint8_t[mem_size]();
-		nrrdWrap_va(mask, val8, nrrdTypeUChar, 3, (size_t)resx, (size_t)resy, (size_t)resz);
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdWrap_va(mask, val8, nrrdTypeUChar, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
+		nrrdAxisInfoSet_va(mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
 		nrrdAxisInfoSet_va(mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoMax, spcx * resx, spcy * resy, spcz * resz);
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+		auto max_size = spc * res;
+		nrrdAxisInfoSet_va(mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
+		nrrdAxisInfoSet_va(mask, nrrdAxisInfoSize, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
 	}
 	vol_cache.m_mask = mask;
 	vol_cache.m_valid &= (mask != 0);
@@ -238,19 +237,18 @@ bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 	Nrrd* label = lbl_reader.Convert(frame, chan, true);
 	if (!label)
 	{
-		int resx, resy, resz;
-		vd->GetResolution(resx, resy, resz);
-		double spcx, spcy, spcz;
-		vd->GetSpacings(spcx, spcy, spcz);
+		auto res = vd->GetResolution();
+		auto spc = vd->GetSpacing();
 		label = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)resx *
-			(unsigned long long)resy * (unsigned long long)resz;
+		unsigned long long mem_size = (unsigned long long)res.intx() *
+			(unsigned long long)res.inty() * (unsigned long long)res.intz();
 		unsigned int* val32 = new (std::nothrow) unsigned int[mem_size]();
-		nrrdWrap_va(label, val32, nrrdTypeUInt, 3, (size_t)resx, (size_t)resy, (size_t)resz);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoSpacing, spcx, spcy, spcz);
+		nrrdWrap_va(label, val32, nrrdTypeUInt, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
 		nrrdAxisInfoSet_va(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoMax, spcx * resx, spcy * resy, spcz * resz);
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoSize, (size_t)resx, (size_t)resy, (size_t)resz);
+		auto max_size = spc * res;
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
+		nrrdAxisInfoSet_va(label, nrrdAxisInfoSize, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
 	}
 	vol_cache.m_label = label;
 	vol_cache.m_valid &= (label != 0);
@@ -315,9 +313,7 @@ bool CQCallback::SaveMask(VolCache4D& vol_cache)
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
 	msk_writer.SetData((Nrrd*)vol_cache.GetNrrdMask());
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	msk_writer.SetSpacings(spcx, spcy, spcz);
+	msk_writer.SetSpacing(vd->GetSpacing());
 	std::wstring filename = reader->GetCurMaskName(frame, chan);
 	msk_writer.Save(filename, 0);
 	return true;
@@ -339,9 +335,7 @@ bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
 	msk_writer.SetData((Nrrd*)vol_cache.GetNrrdLabel());
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	msk_writer.SetSpacings(spcx, spcy, spcz);
+	msk_writer.SetSpacing(vd->GetSpacing());
 	std::wstring filename = reader->GetCurLabelName(frame, chan);
 	msk_writer.Save(filename, 1);
 	return true;

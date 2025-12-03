@@ -134,7 +134,7 @@ void Clusterizer::Compute()
 	if (!method)
 		return;
 
-	method->SetSpacings(spcx, spcy, spcz);
+	method->SetSpacing(spcx, spcy, spcz);
 
 	//add cluster points
 	size_t i, j, k;

@@ -42,7 +42,7 @@ void NRRDWriter::SetData(Nrrd* data)
 	m_data = data;
 }
 
-void NRRDWriter::SetSpacings(const fluo::Vector& spc)
+void NRRDWriter::SetSpacing(const fluo::Vector& spc)
 {
 	m_spc = spc;
 	m_use_spacings = true;

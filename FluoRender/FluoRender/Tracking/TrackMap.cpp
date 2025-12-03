@@ -113,7 +113,7 @@ void TrackMapProcessor::GenMap()
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
 	SetSizes(resx, resy, resz);
-	SetSpacings(spcx, spcy, spcz);
+	SetSpacing(spcx, spcy, spcz);
 	SetSizeThresh(glbin_settings.m_component_size);
 	SetContactThresh(glbin_settings.m_contact_factor);
 	SetSimilarThresh(glbin_settings.m_similarity);
@@ -246,7 +246,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
 	SetSizes(resx, resy, resz);
-	SetSpacings(spcx, spcy, spcz);
+	SetSpacing(spcx, spcy, spcz);
 	SetSizeThresh(glbin_settings.m_component_size);
 	SetContactThresh(glbin_settings.m_contact_factor);
 	SetSimilarThresh(glbin_settings.m_similarity);
@@ -335,7 +335,7 @@ void TrackMapProcessor::SetScale(double scale)
 	m_map->m_scale = static_cast<float>(scale);
 }
 
-void TrackMapProcessor::SetSpacings(double spcx, double spcy, double spcz)
+void TrackMapProcessor::SetSpacing(double spcx, double spcy, double spcz)
 {
 	m_map->m_spc_x = static_cast<float>(spcx);
 	m_map->m_spc_y = static_cast<float>(spcy);
@@ -4193,8 +4193,8 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	//needs a way to choose processor
 	ClusterKmeans cs_proc_km;
 	ClusterExmax cs_proc_em;
-	cs_proc_km.SetSpacings(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
-	cs_proc_em.SetSpacings(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+	cs_proc_km.SetSpacing(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+	cs_proc_em.SetSpacing(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
 
 	size_t index;
 	size_t i, j, k;
@@ -5281,7 +5281,7 @@ void TrackMapProcessor::ConvertConsistent()
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
 	SetSizes(resx, resy, resz);
-	SetSpacings(spcx, spcy, spcz);
+	SetSpacing(spcx, spcy, spcz);
 	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
 	if (cache_queue)
 	{

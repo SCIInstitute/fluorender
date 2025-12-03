@@ -158,7 +158,7 @@ namespace flrd
 		{ return m_result.size(); }
 		void ResetIDCounter()
 		{ m_id_counter = 1; }
-		void SetSpacings(const fluo::Vector& spc)
+		void SetSpacing(const fluo::Vector& spc)
 		{ m_spc = {spc.x(), spc.y(), spc.z()}; }
 		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
 		void GenerateNewIDs(unsigned int id, void* label,

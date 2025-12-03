@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _PVXML_READER_H_
 
 #include <base_vol_reader.h>
+#include <Vector.h>
 #include <vector>
 #include <string>
 
@@ -62,13 +63,9 @@ public:
 	int GetChanNum()
 	{if (m_sep_seq) return m_group_num; else return m_chan_num;}
 	double GetExcitationWavelength(int chan);
-	int GetSliceNum() {return m_slice_num;}
-	int GetXSize() {return m_x_size;}
-	int GetYSize() {return m_y_size;}
+	fluo::Vector GetResolution() { return m_size; }
 	bool IsSpcInfoValid() {return m_valid_spc;}
-	double GetXSpc() {return m_xspc;}
-	double GetYSpc() {return m_yspc;}
-	double GetZSpc() {return m_zspc;}
+	fluo::Vector GetSpacing() { return m_spacing; }
 	double GetMinValue() { return m_min_value; }
 	double GetMaxValue() {return m_max_value;}
 	double GetScalarScale() {return m_scalar_scale;}
@@ -197,13 +194,9 @@ private:
 	int m_group_num;
 	bool m_sep_seq;//non-overlapping sequences
 
-	int m_slice_num;
-	int m_x_size;
-	int m_y_size;
+	fluo::Vector m_size;
 	bool m_valid_spc;
-	double m_xspc;
-	double m_yspc;
-	double m_zspc;
+	fluo::Vector m_spacing;
 	double m_min_value;
 	double m_max_value;
 	double m_scalar_scale;

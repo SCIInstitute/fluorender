@@ -46,7 +46,7 @@ void MSKWriter::SetData(Nrrd *data)
 	m_data = data;
 }
 
-void MSKWriter::SetSpacings(const fluo::Vector& spc)
+void MSKWriter::SetSpacing(const fluo::Vector& spc)
 {
 	m_spc = spc;
 	m_use_spacings = true;

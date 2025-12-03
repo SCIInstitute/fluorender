@@ -42,7 +42,7 @@ public:
 	virtual ~BaseVolWriter() {};
 
 	virtual void SetData(Nrrd* data) = 0;
-	virtual void SetSpacings(const fluo::Vector& spc) = 0;
+	virtual void SetSpacing(const fluo::Vector& spc) = 0;
 	virtual void SetCompression(bool value) = 0;
 	virtual void Save(const std::wstring& filename, int mode) = 0;
 };

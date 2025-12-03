@@ -93,7 +93,7 @@ namespace flrd
 		void SetSizes(size_t nx, size_t ny, size_t nz);
 		void SetBits(size_t bits);
 		void SetScale(double scale);
-		void SetSpacings(double spcx, double spcy, double spcz);
+		void SetSpacing(double spcx, double spcy, double spcz);
 
 		void SetClusterNum(int val);
 		int GetClusterNum();

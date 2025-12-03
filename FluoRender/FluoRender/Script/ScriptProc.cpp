@@ -793,7 +793,7 @@ void ScriptProc::RunMaskTracking()
 	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
 	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
 	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	glbin_trackmap_proc.SetSpacings(spcx, spcy, spcz);
+	glbin_trackmap_proc.SetSpacing(spcx, spcy, spcz);
 	glbin_trackmap_proc.SetMaxIter(iter);
 	glbin_trackmap_proc.SetEps(eps);
 	glbin_trackmap_proc.SetFilterSize(fsize);

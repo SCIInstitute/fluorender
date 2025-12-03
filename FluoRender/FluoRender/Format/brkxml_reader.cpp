@@ -850,36 +850,33 @@ Nrrd* BRKXMLReader::Convert(int t, int c, bool get_max)
 	//	m_scalar_scale = 65535.0 / m_max_value;
 	m_scalar_scale = 1.0;
 
-	if (m_xspc > 0.0 && m_xspc < 100.0 &&
-		m_yspc>0.0 && m_yspc < 100.0)
+	if (m_spacing.x() > 0.0 && m_spacing.x() < 100.0 &&
+		m_spacing .y()>0.0 && m_spacing.y() < 100.0)
 	{
 		m_valid_spc = true;
-		if (m_zspc <= 0.0 || m_zspc > 100.0)
-			m_zspc = std::max(m_xspc, m_yspc);
+		if (m_spacing.z() <= 0.0 || m_spacing.z() > 100.0)
+			m_spacing.z(std::max(m_spacing.x(), m_spacing.y()));
 	}
 	else
 	{
 		m_valid_spc = false;
-		m_xspc = 1.0;
-		m_yspc = 1.0;
-		m_zspc = 1.0;
+		m_spacing = fluo::Vector(1.0);
 	}
 
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < m_chan_num &&
-		m_slice_num>0 &&
-		m_x_size>0 &&
-		m_y_size > 0)
+		!m_size.any_le_zero())
 	{
 		char dummy = 0;
 		data = nrrdNew();
-		if (m_pyramid[m_cur_level].bit_depth == 8)nrrdWrap_va(data, &dummy, nrrdTypeUChar, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		else if (m_pyramid[m_cur_level].bit_depth == 16)nrrdWrap_va(data, &dummy, nrrdTypeUShort, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		else if (m_pyramid[m_cur_level].bit_depth == 32)nrrdWrap_va(data, &dummy, nrrdTypeFloat, 3, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_xspc, m_yspc, m_zspc);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, m_xspc * m_x_size, m_yspc * m_y_size, m_zspc * m_slice_num);
+		if (m_pyramid[m_cur_level].bit_depth == 8)nrrdWrap_va(data, &dummy, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		else if (m_pyramid[m_cur_level].bit_depth == 16)nrrdWrap_va(data, &dummy, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		else if (m_pyramid[m_cur_level].bit_depth == 32)nrrdWrap_va(data, &dummy, nrrdTypeFloat, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
+		auto max_size = m_spacing * m_size;
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
 		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_x_size, (size_t)m_y_size, (size_t)m_slice_num);
+		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
 		data->data = NULL;//dangerous//
 
 		m_cur_chan = c;
@@ -1203,9 +1200,9 @@ void BRKXMLReader::SetInfo()
 	wss << L"------------------------\n";
 	wss << m_path_name << '\n';
 	wss << L"File type: VVD\n";
-	wss << L"Width: " << m_x_size << L'\n';
-	wss << L"Height: " << m_y_size << L'\n';
-	wss << L"Depth: " << m_slice_num << L'\n';
+	wss << L"Width: " << m_size.intx() << L'\n';
+	wss << L"Height: " << m_size.inty() << L'\n';
+	wss << L"Depth: " << m_size.intz() << L'\n';
 	wss << L"Channels: " << m_chan_num << L'\n';
 	wss << L"Frames: " << m_time_num << L'\n';
 
