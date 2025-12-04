@@ -128,6 +128,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstMainStatusbarPush "main statusbar push"
 #define gstMainStatusbarPop "main statusbar pop"
 
+//renderers
+#define gstClippingBoxRenderer "clipping box renderer"
+
 //root
 #define gstRoot "Scene Graph"
 #define gstSortValue "sort value"

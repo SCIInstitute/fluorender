@@ -363,15 +363,12 @@ void MeshPropPanel::OnColorBtn(wxColourPickerEvent& event)
 
 void MeshPropPanel::OnShadingCheck(wxCommandEvent& event)
 {
-	assert(m_md && m_view);
 	bool val = m_shading_chk->GetValue();
-	for (int i=0; i< m_view->GetMeshNum(); i++)
+	if (m_md)
 	{
-		auto md = m_view->GetMeshData(i);
-		if (md)
-			md->SetShading(val);
+		m_md->SetShading(val);
+		FluoRefresh(0, { gstMeshProps });
 	}
-	FluoRefresh(0, {gstMeshProps});
 }
 
 void MeshPropPanel::OnShadingChange(wxScrollEvent & event)

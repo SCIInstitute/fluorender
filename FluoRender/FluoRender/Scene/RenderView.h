@@ -129,6 +129,7 @@ public:
 
 	//size
 	void SetSize(int x, int y);
+	Size2D GetSize() { return m_size; }
 	void ResetSize();
 	Size2D GetCanvasSize();
 	void GetRenderSize(int& nx, int& ny);

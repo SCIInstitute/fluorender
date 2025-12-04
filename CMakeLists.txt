@@ -772,6 +772,13 @@ file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
 add_library(PYTHON_LIB STATIC
   ${pyth_hdr} ${pyth_src})
 
+# Renderer
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Renderer)
+file(GLOB renderer_hdr FluoRender/FluoRender/Renderer/*.h)
+file(GLOB renderer_src FluoRender/FluoRender/Renderer/*.cpp)
+add_library(RENDERER_LIB STATIC
+  ${renderer_hdr} ${renderer_src})
+
 # Scene
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
 file(GLOB scn_src FluoRender/FluoRender/Scene/*.cpp)
@@ -1069,6 +1076,10 @@ endif()
 target_link_libraries(PYTHON_LIB PRIVATE
   ${HDF5_LIBRARIES})
 
+# Renderer
+target_include_directories(RENDERER_LIB PRIVATE
+  ${GLM_DIRS})
+
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
@@ -1274,6 +1285,7 @@ target_link_libraries(FluoRender PRIVATE
     PROGRESS_LIB
     PROJECT_LIB
     PYTHON_LIB
+    RENDERER_LIB
     SCENE_LIB
     SCRIPT_LIB
     SELECTION_LIB

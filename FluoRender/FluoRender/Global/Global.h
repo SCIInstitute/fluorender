@@ -90,6 +90,8 @@ namespace flrd
 	class Clusterizer;
 	class BaseConvVolMesh;
 	class ColorMesh;
+
+	class RendererFactory;
 }
 namespace flvr
 {
@@ -144,6 +146,10 @@ namespace flvr
 #define glbin_clusterizer fluo::Global::instance().get_clusterizer()
 #define glbin_conv_vol_mesh fluo::Global::instance().get_conv_vol_mesh()
 #define glbin_color_mesh fluo::Global::instance().get_color_mesh()
+
+//renderers
+#define glbin_renderer_factory fluo::Global::instance().get_renderer_factory()
+
 //graphics resources
 #define glbin_kernel_factory fluo::Global::instance().get_kernel_factory()
 #define glbin_framebuffer_manager fluo::Global::instance().get_framebuffer_manager()
@@ -259,6 +265,9 @@ namespace fluo
 		//color mesh
 		flrd::ColorMesh& get_color_mesh();
 
+		//renderers
+		flrd::RendererFactory& get_renderer_factory();
+
 		//xr renderer
 		LookingGlassRenderer& get_looking_glass_renderer();
 		BaseXrRenderer* get_xr_renderer();
@@ -349,6 +358,9 @@ namespace fluo
 		std::unique_ptr<flrd::Clusterizer> m_clusterizer;
 		std::unique_ptr<flrd::BaseConvVolMesh> m_conv_vol_mesh;
 		std::unique_ptr<flrd::ColorMesh> m_color_mesh;
+
+		//renderers
+		std::unique_ptr<flrd::RendererFactory> m_renderer_factory;
 
 		//xr renderer
 		std::unique_ptr<LookingGlassRenderer> m_lg_renderer;

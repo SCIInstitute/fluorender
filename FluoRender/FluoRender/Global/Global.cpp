@@ -86,6 +86,8 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshDefault.h>
 #include <FramebufferStateTracker.h>
 #include <RefreshScheduler.h>
+//renderers
+#include <RendererFactory.h>
 
 using namespace fluo;
 
@@ -293,6 +295,8 @@ Global::Global() :
 	m_clusterizer(std::make_unique<flrd::Clusterizer>()),
 	//m_conv_vol_mesh(std::make_unique<flrd::ConvVolMeshSw>()),
 	m_color_mesh(std::make_unique<flrd::ColorMesh>()),
+	//renderers
+	m_renderer_factory(std::make_unique<flrd::RendererFactory>()),
 	m_lg_renderer(std::make_unique<LookingGlassRenderer>()),
 	m_atmf(std::make_unique<fluo::AsyncTimerFactory>()),
 	m_swhf(std::make_unique<fluo::StopWatchFactory>()),
@@ -693,6 +697,12 @@ flrd::BaseConvVolMesh* Global::get_conv_vol_mesh()
 flrd::ColorMesh& Global::get_color_mesh()
 {
 	return *m_color_mesh;
+}
+
+//renderers
+flrd::RendererFactory& Global::get_renderer_factory()
+{
+	return *m_renderer_factory;
 }
 
 LookingGlassRenderer& Global::get_looking_glass_renderer()

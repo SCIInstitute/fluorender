@@ -51,18 +51,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ColocalDefault.h>
 #include <string>
 
-//clipping plane modes
-enum CLIPPLANE_MODES
-{
-	cm_Normal = 0,
-	cm_Frame6,
-	cm_Frame3,
-	cm_LowTrans,
-	cm_LowTransBack,
-	cm_NormalBack,
-	cm_None
-};
-
 class MainSettings
 {
 public:
