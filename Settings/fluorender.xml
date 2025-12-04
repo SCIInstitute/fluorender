@@ -405,7 +405,7 @@
         <hdr_b>0</hdr_b>
     </outadj_default>
     <view_default>
-        <vol_method>3</vol_method>
+        <channel_mix_mode>3</channel_mix_mode>
         <bg_color>[0,0,0]</bg_color>
         <draw_camctr>0</draw_camctr>
         <camctr_size>2</camctr_size>
@@ -450,15 +450,13 @@
         <alpha_enable>1</alpha_enable>
         <alpha>0.70588200000000001</alpha>
         <shading_enable>0</shading_enable>
-        <shading_strength>1.0</shading_strength>
+        <shading_strength>1</shading_strength>
         <shading_shine>1</shading_shine>
         <shadow_enable>0</shadow_enable>
         <shadow_int>0.5</shadow_int>
         <sample_rate_enable>1</sample_rate_enable>
         <sample_rate>2</sample_rate>
-        <spc_x>1</spc_x>
-        <spc_y>1</spc_y>
-        <spc_z>3</spc_z>
+        <spacing>[1,1,3]</spacing>
         <colormap_mode>0</colormap_mode>
         <colormap_disp>0</colormap_disp>
         <colormap_low>0</colormap_low>
@@ -471,7 +469,7 @@
         <invert>0</invert>
         <render_mode>1</render_mode>
         <transparent>0</transparent>
-        <blend_mode>0</blend_mode>
+        <channel_mix_mode>3</channel_mix_mode>
         <legend>1</legend>
         <label_mode>1</label_mode>
     </volume_default>

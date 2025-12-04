@@ -345,7 +345,7 @@ inline constexpr const char* VOL_BODY_SHADING  = R"GLSHDR(
 	// Key light highlight (sharp, white)
 	l_dir = normalize(vec3(loc1.z, loc1.w, 3.0));
 	vec3 h = normalize(l_dir + eye);
-	float keyHighlight = 3.0 * pow(smoothstep(0.9, 1.0, abs(dot(h, grad))), mix(10.0, 40.0, loc1.y));
+	float keyHighlight = pow(smoothstep(0.9, 1.0, abs(dot(h, grad))), mix(10.0, 40.0, loc1.y));
 
 	// Diffuser highlight (opposite direction, softer)
 	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 1.0));

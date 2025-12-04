@@ -613,33 +613,37 @@ in vec3 OutVertex;
 in vec3 OutTexCoord;
 out vec4 FragColor;
 
-uniform vec4 loc0; //(width, height, lod, contrast)
-uniform vec4 loc1; //(zoomLOD, glowScale, scatterScale, blendFactor)
+uniform vec4 loc0; //(texelx, texely, lod1, lod2)
+uniform vec4 loc1; //(glowContrast, glowScale, scatterContrast, scatterScale)
 uniform sampler2D tex0;
 
 void main()
 {
 	vec2 t = OutTexCoord.xy;
 
-	// --- Rim glow from low LODs (zoom dependent) ---
-	float depthFine   = textureLod(tex0, t, loc1.x).r;
-	float depthCoarse = textureLod(tex0, t, loc1.x + 1.0).r;
-	float diffGlow    = abs(depthCoarse - depthFine);
-	float rimGlow     = pow(max(diffGlow * loc1.y, 0.0), loc0.w);
+	float depthFine = textureLod(tex0, t, 0.0).r;
 
-	// --- General scattering from higher LODs ---
-	float depthFine2   = textureLod(tex0, t, loc0.z).r;
-	float depthCoarse2 = textureLod(tex0, t, loc0.z * 2.0).r;
-	float diffScatter  = abs(depthCoarse2 - depthFine2);
-	float scatterGlow  = pow(max(diffScatter * loc1.z, 0.0), loc0.w);
+	// --- Inner glow with dual-offset sampling ---
+	vec2 texelSize = vec2(loc0.x, loc0.y);
+	// footprint size grows with LOD level
+	vec2 offset = texelSize * exp2(loc0.z) * 0.5;
+
+	float coarseA = textureLod(tex0, t + offset, loc0.z).r;
+	float coarseB = textureLod(tex0, t - offset, loc0.z).r;
+	float depthCoarse = 0.5 * (coarseA + coarseB);
+
+	float diffGlow = depthCoarse - depthFine;
+	float innerGlow = pow(max(diffGlow, 0.0), loc1.x) * loc1.y;
+
+	// --- General scattering from higher LODs (unchanged) ---
+	depthCoarse = textureLod(tex0, t, loc0.w).r;
+	float diffScatter = depthCoarse - depthFine;
+	float scatterGlow = pow(max(diffScatter, 0.0), loc1.z) * loc1.w;
 
 	// --- Blend glow and scattering ---
-	float combined = mix(rimGlow, scatterGlow, loc1.w);
+	float combined = 1.0 + innerGlow + scatterGlow;
 
-	// --- Baseline intensity ---
-	float intensity = 1.0 + combined * 0.5;
-
-	FragColor = vec4(vec3(intensity), 1.0);
+	FragColor = vec4(vec3(combined), 1.0);
 }
 )GLSHDR";
 
