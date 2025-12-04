@@ -140,9 +140,10 @@ void MaskBorder::Compute(int order)
 	{
 		flvr::TextureBrick* b = bricks[i];
 		bid = b->get_id();
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
+		auto res = b->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
 		GLint mid = m_vd->GetVR()->load_brick_mask(b);
 
 		size_t global_size[2] = { 1, 1 };

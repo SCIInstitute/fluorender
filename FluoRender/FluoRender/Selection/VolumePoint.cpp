@@ -57,9 +57,9 @@ double VolumePoint::GetPointVolume(
 
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return -1.0;
-	Nrrd* nrrd = tex->get_nrrd(0);
-	if (!nrrd) return -1.0;
-	void* data = nrrd->data;
+	auto comp = tex->get_nrrd(flvr::CompType::Data);
+	if (!comp.data) return -1.0;
+	void* data = comp.data->data;
 	if (!data && vd->GetAllBrickNum() < 1) return -1.0;
 
 	//projection
@@ -90,12 +90,10 @@ double VolumePoint::GetPointVolume(
 	int xx = -1;
 	int yy = -1;
 	int zz = -1;
-	int tmp_xx, tmp_yy, tmp_zz;
+	fluo::Vector temp_xyz;
 	fluo::Point nmp;
-	double spcx, spcy, spcz;
-	vd->GetSpacing(spcx, spcy, spcz);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz, vd->GetLevel());
+	auto spc = vd->GetSpacing();
+	auto res = vd->GetResolution(vd->GetLevel());
 	//volume bounding box
 	fluo::BBox bbox = vd->GetBounds();
 	fluo::Vector vv = mp2 - mp1;
@@ -106,7 +104,7 @@ double VolumePoint::GetPointVolume(
 	double value = 0.0;
 	double mspc = 1.0;
 	if (vd->GetSampleRate() > 0.0)
-		mspc = sqrt(spcx*spcx + spcy * spcy + spcz * spcz) / vd->GetSampleRate();
+		mspc = spc.length() / vd->GetSampleRate();
 	auto cb = vd->GetClippingBox();
 	int counter = 0;//counter to determine if the ray casting has run
 	if (bbox.intersect(mp1, vv, hit))
@@ -114,21 +112,17 @@ double VolumePoint::GetPointVolume(
 		int brick_id = -1;
 		flvr::TextureBrick* hit_brick = 0;
 		unsigned long long vindex;
-		int data_nx, data_ny, data_nz;
+		fluo::Vector data_res;
 		if (vd->isBrxml())
 		{
-			data_nx = tex->nx();
-			data_ny = tex->ny();
-			data_nz = tex->nz();
+			data_res = tex->get_res();
 		}
 
 		while (true)
 		{
-			tmp_xx = int(hit.x() / spcx);
-			tmp_yy = int(hit.y() / spcy);
-			tmp_zz = int(hit.z() / spcz);
+			temp_xyz = fluo::Vector(hit) / spc;
 			if (mode == 1 &&
-				tmp_xx == xx && tmp_yy == yy && tmp_zz == zz)
+				temp_xyz.intx() == xx && temp_xyz.inty() == yy && temp_xyz.intz() == zz)
 			{
 				//same, skip
 				hit += vv * mspc;
@@ -136,14 +130,14 @@ double VolumePoint::GetPointVolume(
 			}
 			else
 			{
-				xx = tmp_xx;
-				yy = tmp_yy;
-				zz = tmp_zz;
+				xx = temp_xyz.intx();
+				yy = temp_xyz.inty();
+				zz = temp_xyz.intz();
 			}
 			//out of bound, stop
-			if (xx<0 || xx>resx ||
-				yy<0 || yy>resy ||
-				zz<0 || zz>resz)
+			if (xx<0 || xx>res.intx() ||
+				yy<0 || yy>res.inty() ||
+				zz<0 || zz>res.intz())
 				break;
 			//normalize
 			nmp.x(hit.x() / bbox.Max().x());
@@ -151,15 +145,14 @@ double VolumePoint::GetPointVolume(
 			nmp.z(hit.z() / bbox.Max().z());
 			if (cb.ContainsWorld(nmp))
 			{
-				xx = xx == resx ? resx - 1 : xx;
-				yy = yy == resy ? resy - 1 : yy;
-				zz = zz == resz ? resz - 1 : zz;
+				xx = xx == res.intx() ? res.intx() - 1 : xx;
+				yy = yy == res.inty() ? res.inty() - 1 : yy;
+				zz = zz == res.intz() ? res.intz() - 1 : zz;
 
 				//if it's multiresolution, get brick first
 				if (vd->isBrxml())
 				{
-					vindex = (unsigned long long)data_nx*(unsigned long long)data_ny*
-						(unsigned long long)zz + (unsigned long long)data_nx*
+					vindex = (unsigned long long)data_res.get_size_xyz()*
 						(unsigned long long)yy + (unsigned long long)xx;
 					int id = tex->get_brick_id(vindex);
 					if (id != brick_id)
@@ -172,21 +165,22 @@ double VolumePoint::GetPointVolume(
 					{
 						//coords in brick
 						int ii, jj, kk;
-						ii = xx - hit_brick->ox();
-						jj = yy - hit_brick->oy();
-						kk = zz - hit_brick->oz();
+						auto off_size = hit_brick->get_off_size();
+						ii = xx - off_size.intx();
+						jj = yy - off_size.inty();
+						kk = zz - off_size.intz();
 						if (use_transf)
-							value = vd->GetTransferedValue(ii, jj, kk, hit_brick);
+							value = vd->GetTransferedValue(fluo::Point(ii, jj, kk), hit_brick);
 						else
-							value = vd->GetOriginalValue(ii, jj, kk, hit_brick);
+							value = vd->GetOriginalValue(fluo::Point(ii, jj, kk), hit_brick);
 					}
 				}
 				else
 				{
 					if (use_transf)
-						value = vd->GetTransferedValue(xx, yy, zz);
+						value = vd->GetTransferedValue(fluo::Point(xx, yy, zz));
 					else
-						value = vd->GetOriginalValue(xx, yy, zz);
+						value = vd->GetOriginalValue(fluo::Point(xx, yy, zz));
 				}
 
 				if (mode == 1)
@@ -224,7 +218,7 @@ double VolumePoint::GetPointVolume(
 		return -1.0;
 
 	mp = ip + fluo::Vector(0.5);
-	mp.scale(spcx, spcy, spcz);
+	mp.scale(spc);
 
 	if (mode == 1)
 	{

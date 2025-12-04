@@ -208,16 +208,16 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 	Nrrd* nrrd_mask = m_vd->GetMask(true);
 	if (brick_num > 1)
 	{
-		int c = b->nmask();
-		int nb = b->nb(c);
-		unsigned int nx = b->nx();
-		unsigned int ny = b->ny();
-		unsigned int nz = b->nz();
+		int nb = b->nb(flvr::CompType::Mask);
+		auto res = b->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
 		unsigned long long mem_size = (unsigned long long)nx*
 			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
 		unsigned char* temp = new unsigned char[mem_size];
 		unsigned char* tempp = temp;
-		unsigned char* tp = (unsigned char*)(b->tex_data(c));
+		unsigned char* tp = (unsigned char*)(b->tex_data(flvr::CompType::Mask));
 		unsigned char* tp2;
 		for (size_t k = 0; k < nz; ++k)
 		{
@@ -226,9 +226,9 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 			{
 				memcpy(tempp, tp2, nx*nb);
 				tempp += nx * nb;
-				tp2 += b->sx()*nb;
+				tp2 += nx*nb;
 			}
-				tp += b->sx()*b->sy()*nb;
+				tp += res.get_size_xy()*nb;
 		}
 		*val = (void*)temp;
 	}
@@ -246,12 +246,12 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 		return;
 
 	unsigned char* tempp = (unsigned char*)val;
-	int c = b->nmask();
-	int nb = b->nb(c);
-	unsigned int nx = b->nx();
-	unsigned int ny = b->ny();
-	unsigned int nz = b->nz();
-	unsigned char* tp = (unsigned char*)(b->tex_data(c));
+	int nb = b->nb(flvr::CompType::Mask);
+	auto res = b->get_size();
+	int nx = res.intx();
+	int ny = res.inty();
+	int nz = res.intz();
+	unsigned char* tp = (unsigned char*)(b->tex_data(flvr::CompType::Mask));
 	unsigned char* tp2;
 	for (size_t k = 0; k < nz; ++k)
 	{
@@ -260,9 +260,9 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 		{
 			memcpy(tp2, tempp, nx*nb);
 			tempp += nx * nb;
-			tp2 += b->sx()*nb;
+			tp2 += nx*nb;
 		}
-		tp += b->sx()*b->sy()*nb;
+		tp += res.get_size_xy()*nb;
 	}
 	delete[] (unsigned char*)val;
 }
@@ -300,15 +300,16 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 			float(abcd[3]) };
 	}
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		int bits = b->nb(0) * 8;
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
+		int bits = b->nb(flvr::CompType::Data) * 8;
+		auto res = b->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);
@@ -405,15 +406,16 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	hi_offset = static_cast<float>(m_vd->GetHighOffset());
 	sw = static_cast<float>(m_vd->GetSoftThreshold());
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t i = 0; i < brick_num; ++i)
 	{
 		flvr::TextureBrick* b = (*bricks)[i];
-		int bits = b->nb(0) * 8;
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
+		int bits = b->nb(flvr::CompType::Data) * 8;
+		auto res = b->get_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
 		GLint did = m_vd->GetVR()->load_brick(b);
 		void* val = 0;
 		GetMask(brick_num, b, &val);

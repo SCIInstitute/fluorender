@@ -519,8 +519,8 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd ||
 		!m_vd->GetTexture() ||
-		(select && m_vd->GetTexture()->nmask() == -1) ||
-		m_vd->GetTexture()->nlabel() == -1)
+		(select && !m_vd->GetTexture()->has_comp(flvr::CompType::Mask)) ||
+		!m_vd->GetTexture()->has_comp(flvr::CompType::Label))
 		return;
 
 	if (select)
@@ -529,25 +529,23 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	//get all the data from original volume
 	flvr::Texture* tex_mvd = m_vd->GetTexture();
 	if (!tex_mvd) return;
-	Nrrd* nrrd_mvd = tex_mvd->get_nrrd(0);
-	if (!nrrd_mvd) return;
-	Nrrd* nrrd_mvd_mask = tex_mvd->get_nrrd(tex_mvd->nmask());
-	if (select && !nrrd_mvd_mask) return;
-	Nrrd* nrrd_mvd_label = tex_mvd->get_nrrd(tex_mvd->nlabel());
-	if (!nrrd_mvd_label) return;
-	void* data_mvd = nrrd_mvd->data;
-	unsigned char* data_mvd_mask = select ? (unsigned char*)nrrd_mvd_mask->data : 0;
-	unsigned int* data_mvd_label = (unsigned int*)nrrd_mvd_label->data;
+	auto comp_mvd = tex_mvd->get_nrrd(flvr::CompType::Data);
+	if (!comp_mvd.data) return;
+	auto comp_mvd_mask = tex_mvd->get_nrrd(flvr::CompType::Mask);
+	if (select && !comp_mvd_mask.data) return;
+	auto comp_mvd_label = tex_mvd->get_nrrd(flvr::CompType::Label);
+	if (!comp_mvd_label.data) return;
+	void* data_mvd = comp_mvd.data->data;
+	unsigned char* data_mvd_mask = select ? (unsigned char*)comp_mvd_mask.data->data : 0;
+	unsigned int* data_mvd_label = (unsigned int*)comp_mvd_label.data->data;
 	if (!data_mvd || (select && !data_mvd_mask) || !data_mvd_label) return;
 
 	//create new volumes
-	int res_x, res_y, res_z;
-	double spc_x, spc_y, spc_z;
 	int bits = 8;
-	m_vd->GetResolution(res_x, res_y, res_z);
-	m_vd->GetSpacing(spc_x, spc_y, spc_z);
+	auto res = m_vd->GetResolution();
+	auto spc = m_vd->GetSpacing();
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
-	unsigned long long for_size = (unsigned long long)(res_x) * res_y * res_z;
+	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 
 	bool push_new = true;
 	//red volume
@@ -556,8 +554,8 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	else
 		push_new = false;
 	vd_r->AddEmptyData(bits,
-		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z,
+		res,
+		spc,
 		brick_size);
 	vd_r->SetSpcFromFile(true);
 	vd_r->SetName(m_vd->GetName() + L"_COMP1");
@@ -566,8 +564,8 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	if (!vd_g)
 		vd_g = std::make_shared<VolumeData>();
 	vd_g->AddEmptyData(bits,
-		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z,
+		res,
+		spc,
 		brick_size);
 	vd_g->SetSpcFromFile(true);
 	vd_g->SetName(m_vd->GetName() + L"_COMP2");
@@ -576,8 +574,8 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	if (!vd_b)
 		vd_b = std::make_shared<VolumeData>();
 	vd_b->AddEmptyData(bits,
-		res_x, res_y, res_z,
-		spc_x, spc_y, spc_z,
+		res,
+		spc,
 		brick_size);
 	vd_b->SetSpcFromFile(true);
 	vd_b->SetName(m_vd->GetName() + L"_COMP3");
@@ -587,23 +585,23 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	//red volume
 	flvr::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return;
-	Nrrd* nrrd_vd_r = tex_vd_r->get_nrrd(0);
-	if (!nrrd_vd_r) return;
-	unsigned char* data_vd_r = (unsigned char*)nrrd_vd_r->data;
+	auto comp_vd_r = tex_vd_r->get_nrrd(flvr::CompType::Data);
+	if (!comp_vd_r.data) return;
+	unsigned char* data_vd_r = (unsigned char*)comp_vd_r.data->data;
 	if (!data_vd_r) return;
 	//green volume
 	flvr::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return;
-	Nrrd* nrrd_vd_g = tex_vd_g->get_nrrd(0);
-	if (!nrrd_vd_g) return;
-	unsigned char* data_vd_g = (unsigned char*)nrrd_vd_g->data;
+	auto comp_vd_g = tex_vd_g->get_nrrd(flvr::CompType::Data);
+	if (!comp_vd_g.data) return;
+	unsigned char* data_vd_g = (unsigned char*)comp_vd_g.data->data;
 	if (!data_vd_g) return;
 	//blue volume
 	flvr::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return;
-	Nrrd* nrrd_vd_b = tex_vd_b->get_nrrd(0);
-	if (!nrrd_vd_b) return;
-	unsigned char* data_vd_b = (unsigned char*)nrrd_vd_b->data;
+	auto comp_vd_b = tex_vd_b->get_nrrd(flvr::CompType::Data);
+	if (!comp_vd_b.data) return;
+	unsigned char* data_vd_b = (unsigned char*)comp_vd_b.data->data;
 	if (!data_vd_b) return;
 
 	if (hide)
@@ -617,7 +615,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		{
 			//intensity value
 			double value = 0.0;
-			if (nrrd_mvd->type == nrrdTypeUChar)
+			if (comp_mvd.data->type == nrrdTypeUChar)
 			{
 				if (select)
 					value = double(((unsigned char*)data_mvd)[idx]) *
@@ -625,7 +623,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 				else
 					value = double(((unsigned char*)data_mvd)[idx]) / 255.0;
 			}
-			else if (nrrd_mvd->type == nrrdTypeUShort)
+			else if (comp_mvd.data->type == nrrdTypeUShort)
 			{
 				if (select)
 					value = double(((unsigned short*)data_mvd)[idx]) *
