@@ -167,9 +167,8 @@ void NoiseCancellingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		//voxel
 		ival = glbin_comp_def.m_nr_size;
-		int nx, ny, nz;
-		vd->GetResolution(nx, ny, nz);
-		m_voxel_sldr->SetRange(1, nx);
+		auto res = vd->GetResolution();
+		m_voxel_sldr->SetRange(1, res.intx());
 		m_voxel_sldr->ChangeValue(std::round(ival));
 		m_voxel_text->ChangeValue(wxString::Format("%d", int(std::round(ival))));
 	}

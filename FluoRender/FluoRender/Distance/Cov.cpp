@@ -139,7 +139,7 @@ bool Cov::CheckBricks()
 		return false;
 	if (!m_vd->GetTexture())
 		return false;
-	int brick_num = m_vd->GetTexture()->get_brick_num();
+	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
 		return false;
 	return true;
@@ -149,10 +149,11 @@ bool Cov::GetInfo(
 	flvr::TextureBrick* b,
 	long &bits, long &nx, long &ny, long &nz)
 {
-	bits = b->nb(0) * 8;
-	nx = b->nx();
-	ny = b->ny();
-	nz = b->nz();
+	bits = b->nb(flvr::CompType::Data) * 8;
+	auto res = b->get_size();
+	nx = res.intx();
+	ny = res.inty();
+	nz = res.intz();
 	return true;
 }
 
@@ -172,7 +173,7 @@ bool Cov::ComputeCenter()
 	std::string name = "kernel_0";
 	int kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get center
@@ -217,7 +218,10 @@ bool Cov::ComputeCenter()
 		kernel_prog->readBuffer(arg_csum, csum);
 
 		int ox, oy, oz, nc;
-		ox = b->ox(); oy = b->oy(); oz = b->oz();
+		auto off_size = b->get_off_size();
+		ox = off_size.intx();
+		oy = off_size.inty();
+		oz = off_size.intz();
 		//compute center
 		for (size_t i = 0; i < gsize.gsxyz; ++i)
 		{
@@ -259,7 +263,7 @@ bool Cov::ComputeCov()
 	std::string name = "kernel_1";
 	int kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 
 	//get cov
@@ -283,7 +287,8 @@ bool Cov::ComputeCov()
 		//set
 		unsigned int* count = new unsigned int[gsize.gsxyz];
 		float *cov = new float[gsize.gsxyz * 6];
-		float orig[3] = { float(b->ox()), float(b->oy()), float(b->oz()) };
+		auto off_size = b->get_off_size();
+		float orig[3] = { float(off_size.x()), float(off_size.y()), float(off_size.z()) };
 		kernel_prog->beginArgs(kernel_index);
 		kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&gsize.ngx));
@@ -335,14 +340,13 @@ std::vector<double> Cov::GetCov()
 	if (m_vd)
 	{
 		//set to correct spacings
-		double spcx, spcy, spcz;
-		m_vd->GetSpacings(spcx, spcy, spcz);
-		m_cov[0] *= static_cast<float>(spcx * spcx);
-		m_cov[1] *= static_cast<float>(spcx * spcy);
-		m_cov[2] *= static_cast<float>(spcx * spcz);
-		m_cov[3] *= static_cast<float>(spcy * spcy);
-		m_cov[4] *= static_cast<float>(spcy * spcz);
-		m_cov[5] *= static_cast<float>(spcz * spcz);
+		auto spc = m_vd->GetSpacing();
+		m_cov[0] *= static_cast<float>(spc.x() * spc.x());
+		m_cov[1] *= static_cast<float>(spc.x() * spc.y());
+		m_cov[2] *= static_cast<float>(spc.x() * spc.z());
+		m_cov[3] *= static_cast<float>(spc.y() * spc.y());
+		m_cov[4] *= static_cast<float>(spc.y() * spc.z());
+		m_cov[5] *= static_cast<float>(spc.z() * spc.z());
 	}
 
 	std::vector<double> cov;
@@ -356,11 +360,10 @@ fluo::Point Cov::GetCenter()
 	if (m_vd)
 	{
 		//set to correct spacings
-		double spcx, spcy, spcz;
-		m_vd->GetSpacings(spcx, spcy, spcz);
-		m_center[0] *= static_cast<float>(spcx);
-		m_center[1] *= static_cast<float>(spcy);
-		m_center[2] *= static_cast<float>(spcz);
+		auto spc = m_vd->GetSpacing();
+		m_center[0] *= static_cast<float>(spc.x());
+		m_center[1] *= static_cast<float>(spc.y());
+		m_center[2] *= static_cast<float>(spc.z());
 	}
 
 	fluo::Point center;

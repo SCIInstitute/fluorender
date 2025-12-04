@@ -667,9 +667,8 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			else if (sel_vol->GetBits() == 16)
 				data.avg_int *= sel_vol->GetMaxValue();
 		}
-		double spcx, spcy, spcz;
-		sel_vol->GetSpacings(spcx, spcy, spcz);
-		double vvol = spcx * spcy * spcz;
+		auto spc = sel_vol->GetSpacing();
+		double vvol = spc.x() * spc.y() * spc.z();
 		vvol = vvol == 0.0 ? 1.0 : vvol;
 		data.size = data.voxel_sum * vvol;
 		data.wsize = data.voxel_wsum * vvol;

@@ -713,10 +713,9 @@ void ScriptProc::RunPostTracking()
 		UpdateTraceDlg();
 		return;
 	}
-	int nx, ny, nz;
-	cur_vol->GetResolution(nx, ny, nz);
+	auto res = cur_vol->GetResolution();
 	//update the mask according to the new label
-	unsigned long long for_size = nx * ny * nz;
+	unsigned long long for_size = res.get_size_xyz();
 	std::memset((void*)mask_data, 0, sizeof(uint8_t) * for_size);
 	for (unsigned long long idx = 0;
 		idx < for_size; ++idx)
@@ -786,14 +785,12 @@ void ScriptProc::RunMaskTracking()
 
 	flrd::pTrackMap track_map = tg->GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
-	int resx, resy, resz;
-	cur_vol->GetResolution(resx, resy, resz);
-	double spcx, spcy, spcz;
-	cur_vol->GetSpacings(spcx, spcy, spcz);
+	auto res = cur_vol->GetResolution();
+	auto spc = cur_vol->GetSpacing();
 	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
 	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
-	glbin_trackmap_proc.SetSpacing(spcx, spcy, spcz);
+	glbin_trackmap_proc.SetSizes(res);
+	glbin_trackmap_proc.SetSpacing(spc);
 	glbin_trackmap_proc.SetMaxIter(iter);
 	glbin_trackmap_proc.SetEps(eps);
 	glbin_trackmap_proc.SetFilterSize(fsize);
@@ -1289,10 +1286,11 @@ void ScriptProc::RunCompAnalysis()
 		CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
 		if (!celp_list || !graph)
 			continue;
-		double sx = celp_list->sx;
-		double sy = celp_list->sy;
-		double sz = celp_list->sz;
-		double size_scale = sx * sy * sz;
+		fluo::Vector scale(
+			celp_list->sx,
+			celp_list->sy,
+			celp_list->sz);
+		double size_scale = scale.x() * scale.y() * scale.z();
 		double maxscale = (*itvol)->GetMaxScale();
 		double scalarscale = (*itvol)->GetScalarScale();
 		for (auto itc = celp_list->begin();
@@ -1334,7 +1332,7 @@ void ScriptProc::RunCompAnalysis()
 			//result node
 			fluo::Node* node = cmdg->getOrAddNode(std::to_string(id));
 			node->addSetValue("type", std::string("comp"));
-			node->addSetValue("comp_center", itc->second->GetCenter(sx, sy, sz));
+			node->addSetValue("comp_center", itc->second->GetCenter(scale));
 			node->addSetValue("comp_size_ui", (unsigned long)(itc->second->GetSizeUi()));
 			node->addSetValue("comp_size_d", itc->second->GetSizeD(scalarscale));
 			node->addSetValue("comp_phys_size_ui", size_scale * itc->second->GetSizeUi());
@@ -1671,9 +1669,7 @@ void ScriptProc::RunAddCells()
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
 	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
-	int resx, resy, resz;
-	cur_vol->GetResolution(resx, resy, resz);
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSizes(cur_vol->GetResolution());
 	glbin_trackmap_proc.AddCells(*m_sel_labels,
 		view->m_tseq_cur_num);
 }
@@ -1693,13 +1689,11 @@ void ScriptProc::RunLinkCells()
 	if (!trkg)
 		return;
 
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
 	flrd::pTrackMap track_map = trkg->GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	glbin_trackmap_proc.SetBits(vd->GetBits());
 	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSizes(vd->GetResolution());
 	//register file reading and deleteing functions
 	glbin_trackmap_proc.LinkAddedCells(*m_sel_labels, view->m_tseq_cur_num, view->m_tseq_cur_num - 1);
 	glbin_trackmap_proc.LinkAddedCells(*m_sel_labels, view->m_tseq_cur_num, view->m_tseq_cur_num + 1);
@@ -1725,9 +1719,7 @@ void ScriptProc::RunUnlinkCells()
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
 	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
-	int resx, resy, resz;
-	cur_vol->GetResolution(resx, resy, resz);
-	glbin_trackmap_proc.SetSizes(resx, resy, resz);
+	glbin_trackmap_proc.SetSizes(cur_vol->GetResolution());
 	glbin_trackmap_proc.RemoveCells(*m_sel_labels,
 		view->m_tseq_cur_num);
 }
@@ -1994,11 +1986,10 @@ void ScriptProc::RunCameraPoints()
 	auto cur_vol = glbin_current.vol_data.lock();
 	if (!cur_vol)
 		return;
-	int nx, ny, nz;
-	cur_vol->GetResolution(nx, ny, nz);
+	auto res = cur_vol->GetResolution();
 
 	Camera2Ruler c2r;
-	c2r.SetImageSize(nx, ny);
+	c2r.SetImageSize(res.intx(), res.inty());
 	c2r.SetList(1, ruler_list);
 	c2r.SetRange(1, view->m_begin_frame, view->m_end_frame);
 	int startf, endf;
@@ -2401,9 +2392,8 @@ void ScriptProc::RunDlcCreateProj()
 		return;
 
 	//resoultion
-	int nx, ny, nz;
-	cur_vol->GetResolution(nx, ny, nz);
-	dlc->SetFrameSize(nx, ny);
+	auto res = cur_vol->GetResolution();
+	dlc->SetFrameSize(res.intx(), res.inty());
 	//range
 	dlc->SetFrameNumber(view->m_end_all_frame);
 	dlc->SetFrameRange(view->m_begin_frame, view->m_end_frame);
@@ -2447,23 +2437,22 @@ void ScriptProc::RunDlcLabel()
 	{
 		int vn = std::min(view->GetAllVolumeNum(), 3);
 		std::vector<std::shared_ptr<VolumeData>> vd_rgb(3);
-		int nx, ny, nz;
 		for (int i = 0; i < vn; ++i)
 			vd_rgb[i] = view->GetAllVolumeData(i);
 
 		//get data
-		vd_rgb[0]->GetResolution(nx, ny, nz);
-		char* image = new char[nx * ny * 3]();
-		size_t isize = nx * ny;
+		auto res = vd_rgb[0]->GetResolution();
+		size_t isize = res.get_size_xy();
+		char* image = new char[res.get_size_xy() * 3]();
 		char* datar = 0;
 		if (vd_rgb[0])
-			datar = (char*)(vd_rgb[0]->GetTexture()->get_nrrd(0)->data);
+			datar = (char*)(vd_rgb[0]->GetTexture()->get_nrrd(flvr::CompType::Data).data->data);
 		char* datag = 0;
 		if (vd_rgb[1])
-			datag = (char*)(vd_rgb[1]->GetTexture()->get_nrrd(0)->data);
+			datag = (char*)(vd_rgb[1]->GetTexture()->get_nrrd(flvr::CompType::Data).data->data);
 		char* datab = 0;
 		if (vd_rgb[2])
-			datab = (char*)(vd_rgb[2]->GetTexture()->get_nrrd(0)->data);
+			datab = (char*)(vd_rgb[2]->GetTexture()->get_nrrd(flvr::CompType::Data).data->data);
 		for (int i = 0; i < isize; ++i)
 		{
 			if (datar)
@@ -2487,7 +2476,7 @@ void ScriptProc::RunDlcLabel()
 		if (img_capture)
 		{
 			img_capture->SetFilename(filename);
-			img_capture->SetData(image, nx, ny, 3);
+			img_capture->SetData(image, res.intx(), res.inty(), 3);
 			img_capture->SetFlipVertically(false);
 			img_capture->SetIsFloat(false);
 			img_capture->SetUseCompression(false);

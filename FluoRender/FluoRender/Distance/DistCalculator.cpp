@@ -131,15 +131,16 @@ void DistCalculator::Project()
 	if (m_spring.empty())
 		return;
 
-	double sx = m_celps->sx;
-	double sy = m_celps->sy;
-	double sz = m_celps->sz;
+	fluo::Vector scale(
+		m_celps->sx,
+		m_celps->sy,
+		m_celps->sz);
 
 	fluo::Point p0, pp;
 	for (auto it = m_celps->begin();
 		it != m_celps->end(); ++it)
 	{
-		p0 = it->second->GetCenter(sx, sy, sz);
+		p0 = it->second->GetCenter(scale);
 		SpringProject(p0, pp);
 		it->second->SetProjp(pp);
 	}
@@ -203,15 +204,16 @@ void DistCalculator::BuildCloud()
 	if (!m_cloud.empty())
 		m_cloud.clear();
 
-	double sx = m_celps->sx;
-	double sy = m_celps->sy;
-	double sz = m_celps->sz;
+	fluo::Vector scale(
+		m_celps->sx,
+		m_celps->sy,
+		m_celps->sz);
 
 	fluo::Point p;
 	for (auto it = m_celps->begin();
 		it != m_celps->end(); ++it)
 	{
-		p = it->second->GetCenter(sx, sy, sz);
+		p = it->second->GetCenter(scale);
 		m_cloud.push_back(p);
 	}
 }

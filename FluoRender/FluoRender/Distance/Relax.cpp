@@ -222,9 +222,8 @@ bool Relax::Compute()
 
 	BuildSpring();
 
-	double dx, dy, dz;
-	m_vd->GetSpacings(dx, dy, dz);
-	cl_float3 scl = { (float)dx, (float)dy, (float)dz };
+	auto spc = m_vd->GetSpacing();
+	cl_float3 scl = { (float)spc.x(), (float)spc.y(), (float)spc.z()};
 
 	m_dsp.assign(m_snum * 3, 0.0);
 	m_wsum.assign(m_snum, 0.0);
@@ -238,17 +237,19 @@ bool Relax::Compute()
 		return false;
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_num();
+	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
 	for (size_t bi = 0; bi < brick_num; ++bi)
 	{
 		flvr::TextureBrick* b = (*bricks)[bi];
-		int nx = b->nx();
-		int ny = b->ny();
-		int nz = b->nz();
-		int ox = b->ox();
-		int oy = b->oy();
-		int oz = b->oz();
+		auto res = b->get_size();
+		auto off_size = b->get_off_size();
+		int nx = res.intx();
+		int ny = res.inty();
+		int nz = res.intz();
+		int ox = off_size.intx();
+		int oy = off_size.inty();
+		int oz = off_size.intz();
 		cl_float3 org = { (float)ox, (float)oy, (float)oz };
 		GLint tid;
 		if (m_use_mask)

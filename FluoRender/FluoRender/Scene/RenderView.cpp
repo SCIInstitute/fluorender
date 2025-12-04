@@ -1213,7 +1213,7 @@ std::shared_ptr<VolumeGroup> RenderView::AddVolumeData(const std::shared_ptr<Vol
 	if (vol_data)
 	{
 	double spcx, spcy, spcz;
-	vol_data->GetSpacings(spcx, spcy, spcz);
+	vol_data->GetSpacing(spcx, spcy, spcz);
 	vd->SetSpacing(spcx, spcy, spcz);
 	}
 	}*/
@@ -4642,13 +4642,13 @@ void RenderView::GetTraces(bool update)
 			if (label_iter == sel_labels.end())
 			{
 				flrd::Celp cell(new flrd::Cell(label_value));
-				cell->Inc(ii, jj, kk, 1.0f);
+				cell->Inc(fluo::Point(ii, jj, kk), 1.0f);
 				sel_labels.insert(std::pair<unsigned int, flrd::Celp>
 					(label_value, cell));
 			}
 			else
 			{
-				label_iter->second->Inc(ii, jj, kk, 1.0f);
+				label_iter->second->Inc(fluo::Point(ii, jj, kk), 1.0f);
 			}
 		}
 	}
@@ -7372,14 +7372,14 @@ unsigned int RenderView::GenerateCellVerts(std::vector<float>& verts)
 	unsigned int num = 0;
 	fluo::Point p1, p2, p3, p4;
 	fluo::Color c = GetTextColor();
-	double sx, sy, sz;
-	sx = m_cell_list->sx;
-	sy = m_cell_list->sy;
-	sz = m_cell_list->sz;
+	fluo::Vector scale(
+		m_cell_list->sx,
+		m_cell_list->sy,
+		m_cell_list->sz);
 	for (auto it = m_cell_list->begin();
 		it != m_cell_list->end(); ++it)
 	{
-		fluo::BBox box = it->second->GetBox(sx, sy, sz);
+		fluo::BBox box = it->second->GetBox(scale);
 		GetCellPoints(box, p1, p2, p3, p4, mv, p);
 
 		verts.push_back(static_cast<float>(p1.x())); verts.push_back(static_cast<float>(p1.y())); verts.push_back(0.0f);

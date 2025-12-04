@@ -1535,30 +1535,28 @@ int RulerHandler::Profile(Ruler* ruler)
 	fluo::Transform tf = view->GetInvOffsetMat();
 	ruler->SetTransform(tf);
 
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
-		nx <= 0 || ny <= 0 || nz <= 0)
+	auto spc = vd->GetSpacing();
+	auto res = vd->GetResolution();
+	if (spc.any_le_zero() ||
+		res.any_le_zero())
 		return 0;
 	//get data
 	vd->GetVR()->return_mask();
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return 0;
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data) return 0;
-	void* data = nrrd_data->data;
+	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
+	if (!comp_data.data) return 0;
+	void* data = comp_data.data->data;
 	if (!data) return 0;
 	//mask
-	Nrrd* nrrd_mask = tex->get_nrrd(tex->nmask());
+	auto comp_mask = tex->get_nrrd(flvr::CompType::Mask);
 	void* mask = 0;
-	if (nrrd_mask)
-		mask = nrrd_mask->data;
+	if (comp_mask.data)
+		mask = comp_mask.data->data;
 	double scale = vd->GetScalarScale();
 	//set up sampler
 	m_data = data;
-	m_nx = nx; m_ny = ny; m_nz = nz;
+	m_nx = res.intx(); m_ny = res.inty(); m_nz = res.intz();
 	m_bits = vd->GetBits();
 	m_scale = vd->GetScalarScale();
 	ruler->SetScalarScale(m_bits == 8 ? 255: 65535);
@@ -1573,8 +1571,8 @@ int RulerHandler::Profile(Ruler* ruler)
 		p1 = ruler->GetPoint(0);
 		p2 = ruler->GetPoint(1);
 		//object space
-		p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
-		p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+		p1 = fluo::Point(fluo::Vector(p1) / spc);
+		p2 = fluo::Point(fluo::Vector(p2) / spc);
 		fluo::Vector dir = p2 - p1;
 		double dist = dir.length();
 		if (dist < EPS)
@@ -1597,37 +1595,35 @@ int RulerHandler::Profile(Ruler* ruler)
 		int i, j, k;
 		long long vol_index;
 		//go through data
-		for (i = 0; i < nx; ++i)
-			for (j = 0; j < ny; ++j)
-				for (k = 0; k < nz; ++k)
-				{
-					vol_index = (long long)nx*ny*k + nx * j + i;
-					unsigned char mask_value = ((unsigned char*)mask)[vol_index];
-					if (mask_value)
-					{
-						//find bin
-						fluo::Point p(i, j, k);
-						fluo::Vector pdir = p - p1;
-						double proj = fluo::Dot(pdir, dir);
-						int bin_num = int(proj / bin_dist);
-						if (bin_num < 0 || bin_num >= bins)
-							continue;
-						//make sure it's within the brush radius
-						fluo::Point p_ruler = p1 + proj * dir;
-						if ((p_ruler - p).length() > brush_radius)
-							continue;
+		for (i = 0; i < res.intx(); ++i) for (j = 0; j < res.inty(); ++j) for (k = 0; k < res.intz(); ++k)
+		{
+			vol_index = (long long)res.get_size_xy()*k + res.intx() * j + i;
+			unsigned char mask_value = ((unsigned char*)mask)[vol_index];
+			if (mask_value)
+			{
+				//find bin
+				fluo::Point p(i, j, k);
+				fluo::Vector pdir = p - p1;
+				double proj = fluo::Dot(pdir, dir);
+				int bin_num = int(proj / bin_dist);
+				if (bin_num < 0 || bin_num >= bins)
+					continue;
+				//make sure it's within the brush radius
+				fluo::Point p_ruler = p1 + proj * dir;
+				if ((p_ruler - p).length() > brush_radius)
+					continue;
 
-						double intensity = get_data(i, j, k);
+				double intensity = get_data(i, j, k);
 
-						(*profile)[bin_num].m_pixels++;
-						(*profile)[bin_num].m_accum += intensity;
-					}
-				}
+				(*profile)[bin_num].m_pixels++;
+				(*profile)[bin_num].m_accum += intensity;
+			}
+		}
 	}
 	else
 	{
 		//calculate length in object space
-		double total_length = ruler->GetLengthObject(spcx, spcy, spcz);
+		double total_length = ruler->GetLengthObject(spc);
 		int bins = int(total_length / m_step_length);
 		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
 		if (!profile) return 0;
@@ -1644,7 +1640,7 @@ int RulerHandler::Profile(Ruler* ruler)
 
 			p = ruler->GetPointTransformed(0);
 			//object space
-			p = fluo::Point(p.x() / spcx, p.y() / spcy, p.z() / spcz);
+			p = fluo::Point(fluo::Vector(p) / spc);
 			intensity = get_filtered_data(p.x(), p.y(), p.z());
 			(*profile)[0].m_pixels++;
 			(*profile)[0].m_accum += intensity;
@@ -1667,13 +1663,13 @@ int RulerHandler::Profile(Ruler* ruler)
 				p1 = ruler->GetPointTransformed(pn);
 				p2 = ruler->GetPointTransformed(pn + 1);
 				//object space
-				p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
-				p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+				p1 = fluo::Point(fluo::Vector(p1) / spc);
+				p2 = fluo::Point(fluo::Vector(p2) / spc);
 				dir = p2 - p1;
 				dist = dir.length();
 				dir.normalize();
 				dir2 = dir * m_step_length;
-				dir2 *= fluo::Vector(spcx, spcy, spcz);
+				dir2 *= spc;
 				real_step = dir2.length();
 
 				for (double dn = 0; dn < dist; dn += m_step_length)
@@ -1737,31 +1733,29 @@ int RulerHandler::Roi(Ruler* ruler)
 	fluo::Transform tf;// = m_view->GetInvOffsetMat();
 	//ruler->SetTransform(tf);
 
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
-	int nx, ny, nz;
-	vd->GetResolution(nx, ny, nz);
-	if (spcx <= 0.0 || spcy <= 0.0 || spcz <= 0.0 ||
-		nx <= 0 || ny <= 0 || nz <= 0)
+	auto spc = vd->GetSpacing();
+	auto res = vd->GetResolution();
+	if (spc.any_le_zero() ||
+		res.any_le_zero())
 		return 0;
 
 	//get data
 	vd->GetVR()->return_mask();
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return 0;
-	Nrrd* nrrd_data = tex->get_nrrd(0);
-	if (!nrrd_data) return 0;
-	void* data = nrrd_data->data;
+	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
+	if (!comp_data.data) return 0;
+	void* data = comp_data.data->data;
 	if (!data) return 0;
 	//mask
-	Nrrd* nrrd_mask = tex->get_nrrd(tex->nmask());
+	auto comp_mask = tex->get_nrrd(flvr::CompType::Mask);
 	void* mask = 0;
-	if (nrrd_mask)
-		mask = nrrd_mask->data;
+	if (comp_mask.data)
+		mask = comp_mask.data->data;
 	double scale = vd->GetScalarScale();
 	//set up sampler
 	m_data = data;
-	m_nx = nx; m_ny = ny; m_nz = nz;
+	m_nx = res.intx(); m_ny = res.inty(); m_nz = res.intz();
 	m_bits = vd->GetBits();
 	m_scale = vd->GetScalarScale();
 	ruler->SetScalarScale(m_bits == 8 ? 255 : 65535);
@@ -1827,9 +1821,10 @@ void RulerHandler::Distance(const std::set<int>& rulers, const std::wstring& fil
 	str = str.substr(0, str.find_last_of(L'.'));
 	std::wstring fi;
 
-	double sx = cplist->sx;
-	double sy = cplist->sy;
-	double sz = cplist->sz;
+	fluo::Vector scale(
+		cplist->sx,
+		cplist->sy,
+		cplist->sz);
 
 	size_t c = 0;
 	for (auto i : *list)
@@ -1846,7 +1841,7 @@ void RulerHandler::Distance(const std::set<int>& rulers, const std::wstring& fil
 			for (auto it = cplist->begin();
 				it != cplist->end(); ++it)
 			{
-				double dist = (p - it->second->GetCenter(sx, sy, sz)).length();
+				double dist = (p - it->second->GetCenter(scale)).length();
 				it->second->SetDistp(dist);
 			}
 

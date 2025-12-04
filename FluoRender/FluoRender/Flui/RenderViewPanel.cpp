@@ -948,10 +948,9 @@ void RenderViewPanel::FluoUpdate(const fluo::ValueCollection& vc)
 				vd = m_renderview->GetVolPopList(0);
 			if (!vd)
 				break;
-			double spcx, spcy, spcz;
-			vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-			if (spcx > 0.0)
-				scale /= m_renderview->Get121ScaleFactor() * spcx;
+			auto spc = vd->GetSpacing(vd->GetLevel());
+			if (spc.x() > 0.0)
+				scale /= m_renderview->Get121ScaleFactor() * spc.x();
 		}
 		break;
 		}
@@ -1355,12 +1354,11 @@ void RenderViewPanel::SetScaleFactor(double val)
 			auto vd = m_renderview->m_cur_vol.lock();
 			if (!vd && !m_renderview->GetVolPopListEmpty())
 				vd = m_renderview->GetVolPopList(0);
-			double spcx, spcy, spcz;
 			if (vd)
 			{
-				vd->GetSpacings(spcx, spcy, spcz, vd->GetLevel());
-				if (spcx > 0.0)
-					factor = val * m_renderview->Get121ScaleFactor() * spcx;
+				auto spc = vd->GetSpacing(vd->GetLevel());
+				if (spc.x() > 0.0)
+					factor = val * m_renderview->Get121ScaleFactor() * spc.x();
 			}
 		}
 		break;

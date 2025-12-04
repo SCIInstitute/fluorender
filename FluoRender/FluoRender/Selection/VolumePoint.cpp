@@ -93,7 +93,7 @@ double VolumePoint::GetPointVolume(
 	int tmp_xx, tmp_yy, tmp_zz;
 	fluo::Point nmp;
 	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	vd->GetSpacing(spcx, spcy, spcz);
 	int resx, resy, resz;
 	vd->GetResolution(resx, resy, resz, vd->GetLevel());
 	//volume bounding box

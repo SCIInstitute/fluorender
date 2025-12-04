@@ -79,28 +79,27 @@ bool Registrator::Run(size_t f1, size_t f2,
 		return false;
 	cache_queue->protect(f0);
 
-	int nx, ny, nz;
-	m_vd->GetResolution(nx, ny, nz);
+	auto res = m_vd->GetResolution();
 	Stencil s1, s2;
 	s1.data = data1;
 	s1.mask = mask1;
 	s2.data = data2;
-	s1.nx = s2.nx = nx;
-	s1.ny = s2.ny = ny;
-	s1.nz = s2.nz = nz;
+	s1.nx = s2.nx = res.intx();
+	s1.ny = s2.ny = res.inty();
+	s1.nz = s2.nz = res.intz();
 	int bits = m_vd->GetBits();
 	s1.bits = s2.bits = bits;
 	s1.scale = s2.scale = static_cast<float>(m_vd->GetScalarScale());
 	s1.max_int = s2.max_int = static_cast<float>(m_vd->GetMaxValue());
 	s1.fsize = s2.fsize = m_fsize;
-	fluo::BBox extent(fluo::Point(0), fluo::Point(nx, ny, nz));
+	fluo::BBox extent(fluo::Point(0), fluo::Point(res));
 	if (m_use_mask)
 	{
 		if (mask1)
-			extent = GetExtent(mask1, nx, ny, nz);
+			extent = GetExtent(mask1, res);
 		if (!extent.valid() || !mask1)
 		{
-			extent = fluo::BBox(fluo::Point(0), fluo::Point(nx, ny, nz));
+			extent = fluo::BBox(fluo::Point(0), fluo::Point(res));
 			m_use_mask = false;
 		}
 	}
@@ -146,36 +145,32 @@ bool Registrator::Run(size_t f1, size_t f2,
 fluo::Vector Registrator::GetTranslateVol()
 {
 	fluo::Vector result = m_translate;
-	double dx = 1, dy = 1, dz = 1;
+	fluo::Vector spc = fluo::Vector(1.0);
 	if (m_vd)
-		m_vd->GetSpacings(dx, dy, dz);
-	result.x(result.x() * dx);
-	result.y(result.y() * dy);
-	result.z(result.z() * dz);
+		spc = m_vd->GetSpacing();
+	result *= spc;
 	return result;
 }
 
 fluo::Point Registrator::GetCenterVol()
 {
 	fluo::Point result = m_center;
-	double dx = 1, dy = 1, dz = 1;
+	fluo::Vector spc = fluo::Vector(1.0);
 	if (m_vd)
-		m_vd->GetSpacings(dx, dy, dz);
-	result.x(result.x() * dx);
-	result.y(result.y() * dy);
-	result.z(result.z() * dz);
+		spc = m_vd->GetSpacing();
+	result.scale(spc);
 	return result;
 }
 
-fluo::BBox Registrator::GetExtent(void* mask, int nx, int ny, int nz)
+fluo::BBox Registrator::GetExtent(void* mask, const fluo::Vector& res)
 {
 	fluo::BBox result;
 	unsigned long long index;
 	unsigned char* data = (unsigned char*)mask;
-	for (int k = 0; k < nz; ++k) for (int j = 0; j < ny; ++j) for (int i = 0; i < nx; ++i)
+	for (int k = 0; k < res.intz(); ++k) for (int j = 0; j < res.inty(); ++j) for (int i = 0; i < res.intx(); ++i)
 	{
-		index = (unsigned long long)nx * ny * k +
-			(unsigned long long)nx * j + (unsigned long long)i;
+		index = (unsigned long long)res.get_size_xy() * k +
+			(unsigned long long)res.intx() * j + (unsigned long long)i;
 		if (data[index])
 			result.extend(fluo::Point(i, j, k));
 	}

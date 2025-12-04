@@ -144,8 +144,7 @@ bool KernelExecutor::Execute()
 	}
 
 	int bits = vd->GetBits();
-	int res_x, res_y, res_z;
-	vd->GetResolution(res_x, res_y, res_z);
+	auto res = vd->GetResolution();
 	int brick_size = vd->GetTexture()->get_build_max_tex_size();
 
 	//get bricks
@@ -168,12 +167,11 @@ bool KernelExecutor::Execute()
 	if (m_duplicate)
 	{
 		//result
-		double spc_x, spc_y, spc_z;
-		vd->GetSpacings(spc_x, spc_y, spc_z);
+		auto spc = vd->GetSpacing();
 		m_vd_r.push_back(vd_r);
 		vd_r->AddEmptyData(bits,
-			res_x, res_y, res_z,
-			spc_x, spc_y, spc_z,
+			res,
+			spc,
 			brick_size);
 		vd_r->SetSpcFromFile(true);
 		vd_r->SetName(vd->GetName() + L"_CL");
@@ -250,8 +248,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 	size_t brick_num = bricks->size();
 	int bits = vd->GetBits();
 	int chars = bits / 8;
-	int res_x, res_y, res_z;
-	vd->GetResolution(res_x, res_y, res_z);
+	auto res = vd->GetResolution();
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	flvr::TextureBrick *b, *b_r;
@@ -269,31 +266,29 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		{
 			m_message += L"OpenCL kernel created.\n";
 			if (brick_num == 1)
-				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, result, res_x, res_y, res_z, chars);
+				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, result, res.intx(), res.inty(), res.intz(), chars);
 			else
 			{
-				int brick_x = b->nx();
-				int brick_y = b->ny();
-				int brick_z = b->nz();
-				void* bresult = (void*)(new unsigned char[brick_x*brick_y*brick_z*chars]);
-				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, bresult, brick_x, brick_y, brick_z, chars);
+				auto res_b = b->get_size();
+				void* bresult = (void*)(new unsigned char[res_b.get_size_xyz()*chars]);
+				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, bresult, res_b.intx(), res_b.inty(), res_b.intz(), chars);
 				if (!kernel_exe)
 					break;
 				//copy data back
 				unsigned char* ptr_br = (unsigned char*)bresult;
 				unsigned char* ptr_z;
-				ptr_z = (unsigned char*)(b_r->tex_data(0));
+				ptr_z = (unsigned char*)(b_r->tex_data(flvr::CompType::Data));
 				unsigned char* ptr_y;
-				for (int bk = 0; bk < brick_z; ++bk)
+				for (int bk = 0; bk < res_b.intz(); ++bk)
 				{
 					ptr_y = ptr_z;
-					for (int bj = 0; bj < brick_y; ++bj)
+					for (int bj = 0; bj < res_b.inty(); ++bj)
 					{
-						memcpy(ptr_y, ptr_br, brick_x*chars);
-						ptr_y += res_x*chars;
-						ptr_br += brick_x*chars;
+						memcpy(ptr_y, ptr_br, res_b.intx()*chars);
+						ptr_y += res.intx()*chars;
+						ptr_br += res_b.intx()*chars;
 					}
-					ptr_z += res_x*res_y*chars;
+					ptr_z += res.get_size_xy()*chars;
 				}
 				delete[] bresult;
 			}

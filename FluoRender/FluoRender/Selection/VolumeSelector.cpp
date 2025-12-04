@@ -545,7 +545,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 	double spc_x, spc_y, spc_z;
 	int bits = 8;
 	m_vd->GetResolution(res_x, res_y, res_z);
-	m_vd->GetSpacings(spc_x, spc_y, spc_z);
+	m_vd->GetSpacing(spc_x, spc_y, spc_z);
 	int brick_size = m_vd->GetTexture()->get_build_max_tex_size();
 	unsigned long long for_size = (unsigned long long)(res_x) * res_y * res_z;
 

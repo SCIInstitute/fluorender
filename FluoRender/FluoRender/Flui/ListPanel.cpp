@@ -493,7 +493,7 @@ void ListPanel::SaveSelection()
 		if (!vd)
 			break;
 		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
-		vd->SetResize(0, 0, 0, 0);
+		vd->SetResample(false);
 
 		ModalDlg fopendlg(
 			m_frame, "Save Volume Data", "", "",
@@ -966,11 +966,10 @@ void ListPanel::OnResizeCheck(wxCommandEvent& event)
 	{
 		if (resize)
 		{
-			int nx, ny, nz;
-			vd->GetResolution(nx, ny, nz);
-			size_x_txt->ChangeValue(std::to_string(nx));
-			size_y_txt->ChangeValue(std::to_string(ny));
-			size_z_txt->ChangeValue(std::to_string(nz));
+			auto res = vd->GetResolution();
+			size_x_txt->ChangeValue(std::to_string(res.intx()));
+			size_y_txt->ChangeValue(std::to_string(res.inty()));
+			size_z_txt->ChangeValue(std::to_string(res.intz()));
 		}
 		else
 		{
@@ -979,7 +978,7 @@ void ListPanel::OnResizeCheck(wxCommandEvent& event)
 			size_z_txt->ChangeValue("");
 		}
 	}
-	vd->SetResize(resize ? 1 : 0, -1, -1, -1);
+	vd->SetResample(resize);
 }
 
 void ListPanel::OnSizeXText(wxCommandEvent& event)
@@ -987,7 +986,11 @@ void ListPanel::OnSizeXText(wxCommandEvent& event)
 	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
 	auto vd = glbin_current.vol_data.lock();
 	if (size_x_txt && vd)
-		vd->SetResize(-1, STOI(size_x_txt->GetValue().ToStdString()), -1, -1);
+	{
+		auto size = vd->GetResampledSize();
+		size.x(STOI(size_x_txt->GetValue().ToStdString()));
+		vd->SetResampledSize(size);
+	}
 }
 
 void ListPanel::OnSizeYText(wxCommandEvent& event)
@@ -995,7 +998,11 @@ void ListPanel::OnSizeYText(wxCommandEvent& event)
 	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
 	auto vd = glbin_current.vol_data.lock();
 	if (size_y_txt && vd)
-		vd->SetResize(-1, -1, STOI(size_y_txt->GetValue().ToStdString()), -1);
+	{
+		auto size = vd->GetResampledSize();
+		size.y(STOI(size_y_txt->GetValue().ToStdString()));
+		vd->SetResampledSize(size);
+	}
 }
 
 void ListPanel::OnSizeZText(wxCommandEvent& event)
@@ -1003,7 +1010,11 @@ void ListPanel::OnSizeZText(wxCommandEvent& event)
 	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
 	auto vd = glbin_current.vol_data.lock();
 	if (size_z_txt && vd)
-		vd->SetResize(-1, -1, -1, STOI(size_z_txt->GetValue().ToStdString()));
+	{
+		auto size = vd->GetResampledSize();
+		size.z(STOI(size_z_txt->GetValue().ToStdString()));
+		vd->SetResampledSize(size);
+	}
 }
 
 void ListPanel::OnFilterChange(wxCommandEvent& event)
@@ -1077,15 +1088,14 @@ wxWindow* ListPanel::CreateExtraControl(wxWindow* parent)
 
 	if (auto vd = glbin_current.vol_data.lock())
 	{
-		bool resize;
-		int nx, ny, nz;
-		vd->GetResize(resize, nx, ny, nz);
+		bool resize = vd->GetResample();
+		auto size = vd->GetResampledSize();
 		resize_chk->SetValue(resize);
 		if (resize)
 		{
-			size_x_txt->ChangeValue(std::to_string(nx));
-			size_y_txt->ChangeValue(std::to_string(ny));
-			size_z_txt->ChangeValue(std::to_string(nz));
+			size_x_txt->ChangeValue(std::to_string(size.intx()));
+			size_y_txt->ChangeValue(std::to_string(size.inty()));
+			size_z_txt->ChangeValue(std::to_string(size.intz()));
 		}
 	}
 	sizer3->Add(10, 10);

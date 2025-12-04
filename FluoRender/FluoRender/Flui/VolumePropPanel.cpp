@@ -1155,19 +1155,18 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//spacings
 	if (update_all || FOUND_VALUE(gstSpacing))
 	{
-		double spcx, spcy, spcz;
-		m_vd->GetBaseSpacings(spcx, spcy, spcz);
+		auto spc = m_vd->GetBaseSpacing();
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 			vald_fp->SetMin(0.0);
-		str = wxString::Format("%.3f", spcx);
+		str = wxString::Format("%.3f", spc.x());
 		m_space_x_text->ChangeValue(str);
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_y_text->GetValidator()))
 			vald_fp->SetMin(0.0);
-		str = wxString::Format("%.3f", spcy);
+		str = wxString::Format("%.3f", spc.y());
 		m_space_y_text->ChangeValue(str);
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_z_text->GetValidator()))
 			vald_fp->SetMin(0.0);
-		str = wxString::Format("%.3f", spcz);
+		str = wxString::Format("%.3f", spc.z());
 		m_space_z_text->ChangeValue(str);
 	}
 
@@ -3301,18 +3300,19 @@ bool VolumePropPanel::SetSpacing()
 	if (spcz<=0.0)
 		return false;
 
+	fluo::Vector spc(spcx, spcy, spcz);
 	if ((m_sync_group || glbin_settings.m_override_vox) && m_group)
 	{
 		for (int i = 0; i < m_group->GetVolumeNum(); i++)
 		{
-			m_group->GetVolumeData(i)->SetSpacing(spcx, spcy, spcz);
-			m_group->GetVolumeData(i)->SetBaseSpacings(spcx, spcy, spcz);
+			m_group->GetVolumeData(i)->SetSpacing(spc);
+			m_group->GetVolumeData(i)->SetBaseSpacing(spc);
 		}
 	}
 	else if (m_vd)
 	{
-		m_vd->SetSpacing(spcx, spcy, spcz);
-		m_vd->SetBaseSpacings(spcx, spcy, spcz);
+		m_vd->SetSpacing(spc);
+		m_vd->SetBaseSpacing(spc);
 	}
 	else return false;
 

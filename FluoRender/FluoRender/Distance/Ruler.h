@@ -155,11 +155,11 @@ namespace flrd
 				return get_point_smooth(t);
 			}
 		}
-		void ScalePoint(double sx, double sy, double sz)
+		void ScalePoint(const fluo::Vector& scale)
 		{
 			//scale all points
 			for (auto &i : m_tp)
-				i.second.scale(sx, sy, sz);
+				i.second.scale(scale);
 		}
 		void DisplacePoint(fluo::Vector& dp, size_t t, int interp)
 		{
@@ -459,9 +459,9 @@ namespace flrd
 		bool GetFinished();
 		void SetFinished();
 		double GetLength();
-		double GetLengthObject(double spcx, double spcy, double spcz);
+		double GetLengthObject(const fluo::Vector& scale);
 		double GetAngle();
-		void Scale(double spcx, double spcy, double spcz);
+		void Scale(const fluo::Vector& scale);
 
 		bool AddPoint(fluo::Point &point);
 		bool AddPointAfterId(fluo::Point &point, unsigned int id,

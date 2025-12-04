@@ -58,14 +58,10 @@ using namespace flrd;
 TrackMap::TrackMap() :
 	m_counter(0),
 	m_frame_num(0),
-	m_size_x(0),
-	m_size_y(0),
-	m_size_z(0),
+	m_size(0),
 	m_data_bits(8),
 	m_scale(1.0f),
-	m_spc_x(1.0f),
-	m_spc_y(1.0f),
-	m_spc_z(1.0f)
+	m_spacing(1.0)
 {
 }
 
@@ -106,14 +102,12 @@ void TrackMapProcessor::GenMap()
 	//get and set parameters
 	flrd::pTrackMap track_map = trkg->GetTrackMap();
 	SetTrackMap(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	auto res = vd->GetResolution();
+	auto spc = vd->GetSpacing();
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
-	SetSizes(resx, resy, resz);
-	SetSpacing(spcx, spcy, spcz);
+	SetSizes(res);
+	SetSpacing(spc);
 	SetSizeThresh(glbin_settings.m_component_size);
 	SetContactThresh(glbin_settings.m_contact_factor);
 	SetSimilarThresh(glbin_settings.m_similarity);
@@ -239,14 +233,12 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 
 	//get and set parameters
 	SetTrackMap(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	auto res = vd->GetResolution();
+	auto spc = vd->GetSpacing();
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
-	SetSizes(resx, resy, resz);
-	SetSpacing(spcx, spcy, spcz);
+	SetSizes(res);
+	SetSpacing(spc);
 	SetSizeThresh(glbin_settings.m_component_size);
 	SetContactThresh(glbin_settings.m_contact_factor);
 	SetSimilarThresh(glbin_settings.m_similarity);
@@ -318,11 +310,9 @@ void TrackMapProcessor::SetTrackMap(const pTrackMap& map)
 	m_map = map;
 }
 
-void TrackMapProcessor::SetSizes(size_t nx, size_t ny, size_t nz)
+void TrackMapProcessor::SetSizes(const fluo::Vector& size)
 {
-	m_map->m_size_x = nx;
-	m_map->m_size_y = ny;
-	m_map->m_size_z = nz;
+	m_map->m_size = size;
 }
 
 void TrackMapProcessor::SetBits(size_t bits)
@@ -335,11 +325,9 @@ void TrackMapProcessor::SetScale(double scale)
 	m_map->m_scale = static_cast<float>(scale);
 }
 
-void TrackMapProcessor::SetSpacing(double spcx, double spcy, double spcz)
+void TrackMapProcessor::SetSpacing(const fluo::Vector& spc)
 {
-	m_map->m_spc_x = static_cast<float>(spcx);
-	m_map->m_spc_y = static_cast<float>(spcy);
-	m_map->m_spc_z = static_cast<float>(spcz);
+	m_map->m_spacing = spc;
 }
 
 void TrackMapProcessor::SetClusterNum(int val)
@@ -378,9 +366,9 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	float data_value;
 	unsigned int label_value;
 
@@ -403,12 +391,12 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 		iter = cell_list.find(label_value);
 		if (iter != cell_list.end())
 		{
-			iter->second->Inc(i, j, k, data_value);
+			iter->second->Inc(fluo::Point(i, j, k), data_value);
 		}
 		else
 		{
 			Cell* cell = new Cell(label_value);
-			cell->Inc(i, j, k, data_value);
+			cell->Inc(fluo::Point(i, j, k), data_value);
 			cell_list.insert(std::pair<unsigned int, Celp>
 				(label_value, Celp(cell)));
 		}
@@ -503,9 +491,9 @@ bool TrackMapProcessor::CheckCellContact(
 {
 	int ec = 0;//external count
 	int cc = 0;//contact count
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	size_t indexn;//neighbor index
 	unsigned int idn;//neighbor id
 	float valuen;//neighbor vlaue
@@ -581,12 +569,10 @@ bool TrackMapProcessor::CheckCellContact(
 bool TrackMapProcessor::CheckCellDist(
 	Celp &celp, void *label, size_t ci, size_t cj, size_t ck)
 {
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
-	float spcx = m_map->m_spc_x;
-	float spcy = m_map->m_spc_y;
-	float spcz = m_map->m_spc_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
+	auto spc = m_map->m_spacing;
 	size_t indexn;//neighbor index
 	unsigned int idn;//neighbor id
 	unsigned int id = celp->Id();
@@ -613,8 +599,10 @@ bool TrackMapProcessor::CheckCellDist(
 		iter = cell_list.find(idn);
 		if (iter != cell_list.end())
 		{
-			dist_v = static_cast<float>(sqrt(i*i + j*j + k*k));
-			dist_s = sqrt(i*i*spcx*spcx + j*j*spcy*spcy + k*k*spcz*spcz);
+			fluo::Vector ijk(i, j, k);
+			dist_v = static_cast<float>(ijk.length());
+			fluo::Vector ijks = ijk * spc;
+			dist_s = static_cast<float>(ijks.length());
 			AddNeighbor(intra_graph, celp, iter->second, dist_v, dist_s);
 		}
 	}
@@ -743,9 +731,9 @@ bool TrackMapProcessor::LinkFrames(
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	float data_value1, data_value2;
 	unsigned int label_value1, label_value2;
 	Verp v1, v2;
@@ -1175,9 +1163,9 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 	if (!label)
 		return false;
 	//size
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	unsigned long long size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -1238,9 +1226,9 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 	if (!label)
 		return false;
 	//size
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	unsigned long long size = (unsigned long long)nx *
 		(unsigned long long)ny * (unsigned long long)nz;
 	unsigned long long index;
@@ -3853,8 +3841,8 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
 	//size_t nz = m_map->m_size_z;
 	size_t minx, miny, minz;
 	size_t maxx, maxy, maxz;
@@ -4115,8 +4103,8 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 	ClusterDbscan cs_processor;
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
 	//size_t nz = m_map->m_size_z;
 	size_t minx, miny, minz;
 	size_t maxx, maxy, maxz;
@@ -4193,14 +4181,14 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	//needs a way to choose processor
 	ClusterKmeans cs_proc_km;
 	ClusterExmax cs_proc_em;
-	cs_proc_km.SetSpacing(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
-	cs_proc_em.SetSpacing(m_map->m_spc_x, m_map->m_spc_y, m_map->m_spc_z);
+	cs_proc_km.SetSpacing(m_map->m_spacing);
+	cs_proc_em.SetSpacing(m_map->m_spacing);
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	size_t minx, miny, minz;
 	size_t maxx, maxy, maxz;
 	unsigned int label_value;
@@ -4262,7 +4250,7 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	if (result)
 	{
 		cs_proc_em.GenerateNewIDs(id, label,
-			nx, ny, nz, true);
+			m_map->m_size, true);
 		listout = cs_proc_em.GetCellList();
 		//generate output cell list
 /*		Cluster &points = cs_proc_em.GetData();
@@ -4321,11 +4309,10 @@ bool TrackMapProcessor::SegmentCells()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
+	auto res = vd->GetResolution();
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
-	SetSizes(resx, resy, resz);
+	SetSizes(res);
 	//register file reading and deleteing functions
 	cache_queue->SetHandleFlags(
 		flvr::CQCallback::HDL_DATA |
@@ -4350,9 +4337,9 @@ bool TrackMapProcessor::SegmentCells()
 	//ClusterExmax cs_proc_em;
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	unsigned int label_value;
 	unsigned int id = 0;
 	float data_value = 0;
@@ -4399,7 +4386,7 @@ bool TrackMapProcessor::SegmentCells()
 	cs_proc_km.Execute();
 	cs_proc_km.AddIDsToData();
 	//cs_proc_em.SetData(cs_proc_km.GetData());
-	cs_proc_km.GenerateNewIDs(id, label, nx, ny, nz, true);
+	cs_proc_km.GenerateNewIDs(id, label, m_map->m_size, true);
 	//label modified, save before delete
 	cache_queue->set_modified(frame);
 
@@ -5112,9 +5099,9 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 
 	size_t index;
 	size_t i, j, k;
-	size_t nx = m_map->m_size_x;
-	size_t ny = m_map->m_size_y;
-	size_t nz = m_map->m_size_z;
+	size_t nx = m_map->m_size.intx();
+	size_t ny = m_map->m_size.inty();
+	size_t nz = m_map->m_size.intz();
 	unsigned int label_value;
 
 	//clear label2
@@ -5243,8 +5230,7 @@ void TrackMapProcessor::ConvertRulers()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	auto spc = vd->GetSpacing();
 	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
 	if (!ruler_list)
 		return;
@@ -5255,7 +5241,7 @@ void TrackMapProcessor::ConvertRulers()
 	for (auto iter = rulers.begin();
 		iter != rulers.end(); ++iter)
 	{
-		(*iter)->Scale(spcx, spcy, spcz);
+		(*iter)->Scale(spc);
 		ruler_list->push_back(*iter);
 	}
 	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Rulers);
@@ -5274,14 +5260,12 @@ void TrackMapProcessor::ConvertConsistent()
 
 	flrd::pTrackMap track_map = trkg->GetTrackMap();
 	SetTrackMap(track_map);
-	int resx, resy, resz;
-	vd->GetResolution(resx, resy, resz);
-	double spcx, spcy, spcz;
-	vd->GetSpacings(spcx, spcy, spcz);
+	auto res = vd->GetResolution();
+	auto spc = vd->GetSpacing();
 	SetBits(vd->GetBits());
 	SetScale(vd->GetScalarScale());
-	SetSizes(resx, resy, resz);
-	SetSpacing(spcx, spcy, spcz);
+	SetSizes(res);
+	SetSpacing(spc);
 	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
 	if (cache_queue)
 	{

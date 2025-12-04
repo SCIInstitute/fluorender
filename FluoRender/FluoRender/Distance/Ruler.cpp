@@ -298,7 +298,7 @@ double Ruler::GetLength()
 	return length;
 }
 
-double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
+double Ruler::GetLengthObject(const fluo::Vector& scale)
 {
 	double length = 0.0;
 	fluo::Point p1, p2;
@@ -310,8 +310,8 @@ double Ruler::GetLengthObject(double spcx, double spcy, double spcz)
 		{
 			p1 = (*it)[i - 1]->GetPoint(m_work_time, m_interp);
 			p2 = (*it)[i]->GetPoint(m_work_time, m_interp);
-			p1 = fluo::Point(p1.x() / spcx, p1.y() / spcy, p1.z() / spcz);
-			p2 = fluo::Point(p2.x() / spcx, p2.y() / spcy, p2.z() / spcz);
+			p1 = fluo::Point(fluo::Vector(p1) / scale);
+			p2 = fluo::Point(fluo::Vector(p2) / scale);
 			length += (p2 - p1).length();
 		}
 	}
@@ -359,14 +359,14 @@ double Ruler::GetAngle()
 	return angle;
 }
 
-void Ruler::Scale(double spcx, double spcy, double spcz)
+void Ruler::Scale(const fluo::Vector& scale)
 {
 	bool first = true;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
 	{
 		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
 		{
-			m_ruler[i][j]->ScalePoint(spcx, spcy, spcz);
+			m_ruler[i][j]->ScalePoint(scale);
 		}
 		first = false;
 	}

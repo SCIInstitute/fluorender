@@ -259,8 +259,8 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//scaling
 	if (update_all)
 	{
-		double sy, sz;
-		m_md->GetScaling(dval, sy, sz);
+		auto vval = m_md->GetScaling();
+		dval = vval.x();
 		m_scale_sldr->ChangeValue(std::round(dval * 100.0));
 		str = wxString::Format("%.2f", dval);
 		m_scale_text->ChangeValue(str);
@@ -457,7 +457,7 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 
 	if (m_md)
 	{
-		m_md->SetScaling(dval, dval, dval);
+		m_md->SetScaling(fluo::Vector(dval, dval, dval));
 		FluoRefresh(0, { gstMeshProps });
 	}
 }

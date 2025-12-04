@@ -187,37 +187,37 @@ void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		return;
 	bool update_all = vc.empty();
 
-	double x, y, z;
 	wxString str;
+	fluo::Vector vval;
 
 	if (update_all || FOUND_VALUE(gstMeshTranslation))
 	{
-		m_md->GetTranslation(x, y, z);
-		str = wxString::Format("%.2f", x);
+		vval = m_md->GetTranslation();
+		str = wxString::Format("%.2f", vval.x());
 		m_x_trans_text->ChangeValue(str);
-		str = wxString::Format("%.2f", y);
+		str = wxString::Format("%.2f", vval.y());
 		m_y_trans_text->ChangeValue(str);
-		str = wxString::Format("%.2f", z);
+		str = wxString::Format("%.2f", vval.z());
 		m_z_trans_text->ChangeValue(str);
 	}
 	if (update_all || FOUND_VALUE(gstMeshRotation))
 	{
-		m_md->GetRotation(x, y, z);
-		str = wxString::Format("%.2f", x);
+		vval = m_md->GetRotation();
+		str = wxString::Format("%.2f", vval.x());
 		m_x_rot_text->ChangeValue(str);
-		str = wxString::Format("%.2f", y);
+		str = wxString::Format("%.2f", vval.y());
 		m_y_rot_text->ChangeValue(str);
-		str = wxString::Format("%.2f", z);
+		str = wxString::Format("%.2f", vval.z());
 		m_z_rot_text->ChangeValue(str);
 	}
 	if (update_all || FOUND_VALUE(gstMeshScale))
 	{
-		m_md->GetScaling(x, y, z);
-		str = wxString::Format("%.2f", x);
+		vval = m_md->GetScaling();
+		str = wxString::Format("%.2f", vval.x());
 		m_x_scl_text->ChangeValue(str);
-		str = wxString::Format("%.2f", y);
+		str = wxString::Format("%.2f", vval.y());
 		m_y_scl_text->ChangeValue(str);
-		str = wxString::Format("%.2f", z);
+		str = wxString::Format("%.2f", vval.z());
 		m_z_scl_text->ChangeValue(str);
 	}
 }
@@ -336,7 +336,7 @@ void ManipPropPanel::UpdateMeshData()
 	str.ToDouble(&y);
 	str = m_z_trans_text->GetValue();
 	str.ToDouble(&z);
-	m_md->SetTranslation(x, y, z);
+	m_md->SetTranslation(fluo::Vector(x, y, z));
 
 	str = m_x_rot_text->GetValue();
 	str.ToDouble(&x);
@@ -344,7 +344,7 @@ void ManipPropPanel::UpdateMeshData()
 	str.ToDouble(&y);
 	str = m_z_rot_text->GetValue();
 	str.ToDouble(&z);
-	m_md->SetRotation(x, y, z);
+	m_md->SetRotation(fluo::Vector(x, y, z));
 
 	str = m_x_scl_text->GetValue();
 	str.ToDouble(&x);
@@ -352,7 +352,7 @@ void ManipPropPanel::UpdateMeshData()
 	str.ToDouble(&y);
 	str = m_z_scl_text->GetValue();
 	str.ToDouble(&z);
-	m_md->SetScaling(x, y, z);
+	m_md->SetScaling(fluo::Vector(x, y, z));
 
 	FluoRefresh(1, { gstNull });
 }

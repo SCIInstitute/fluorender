@@ -90,10 +90,10 @@ namespace flrd
 		void SetFilterSize(size_t value);
 		void SetStencilThresh(const fluo::Point &value);
 
-		void SetSizes(size_t nx, size_t ny, size_t nz);
+		void SetSizes(const fluo::Vector& size);
 		void SetBits(size_t bits);
 		void SetScale(double scale);
-		void SetSpacing(double spcx, double spcy, double spcz);
+		void SetSpacing(const fluo::Vector& spc);
 
 		void SetClusterNum(int val);
 		int GetClusterNum();
@@ -618,14 +618,10 @@ namespace flrd
 		unsigned int m_counter;//counter for frame processing
 		//data information
 		size_t m_frame_num;
-		size_t m_size_x;
-		size_t m_size_y;
-		size_t m_size_z;
+		fluo::Vector m_size;
 		size_t m_data_bits;
 		float m_scale;
-		float m_spc_x;
-		float m_spc_y;
-		float m_spc_z;
+		fluo::Vector m_spacing;
 
 		//lists
 		std::deque<CelpList> m_celp_list;
@@ -686,7 +682,7 @@ namespace flrd
 		m_intra_graph_list.clear();
 		m_inter_graph_list.clear();
 		m_frame_num = 0;
-		m_size_x = m_size_y = m_size_z = 0;
+		m_size = fluo::Vector(0);
 		m_data_bits = 8;
 		m_scale = 1.0f;
 		m_counter = 0;

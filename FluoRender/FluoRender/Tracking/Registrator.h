@@ -130,7 +130,7 @@ namespace flrd
 		fluo::Transform m_tf;
 
 	private:
-		fluo::BBox GetExtent(void* mask, int nx, int ny, int nz);
+		fluo::BBox GetExtent(void* mask, const fluo::Vector& res);
 	};
 }
 #endif//REGISTRATOR_H
