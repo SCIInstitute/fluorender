@@ -7465,9 +7465,61 @@ void RenderView::DrawTracks()
 
 void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 {
-	auto renderer = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
-	assert(renderer);
+	//get clipping box to render
+	auto view = glbin_current.render_view.lock();
+	if (!view || view.get() != this)
+		return;
+	fluo::ClippingBox cb;
+	fluo::Color color;
+	int type = glbin_current.GetType();
+	switch (type)
+	{
+	case 1://view
+		cb = view->GetClippingBox();
+		break;
+	case 2://volume
+	{
+		auto vd = glbin_current.vol_data.lock();
+		if (vd)
+		{
+			cb = vd->GetClippingBox();
+			color = vd->GetColor();
+		}
+	}
+		break;
+	case 3://mesh
+	{
+		auto md = glbin_current.mesh_data.lock();
+		if (md)
+		{
+			cb = md->GetClippingBox();
+			color = md->GetColor();
+		}
+	}
+	break;
+	default:
+		return;
+	}
 
+	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
+	if (!renderer)
+		return;
+
+	renderer->setData(cb);
+
+	auto settings = std::make_shared<flrd::ClippingBoxSettings>();
+	settings->mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
+	settings->winding = static_cast<flrd::FaceWinding>(face_winding);
+	settings->plane_mask = -1;
+	settings->draw_face = true;
+	settings->draw_border = true;
+	settings->view = view;
+	settings->color = color;
+	settings->alpha = 0.3;
+	renderer->setSettings(settings);
+
+	renderer->render();
 }
 
 void RenderView::DrawBounds()

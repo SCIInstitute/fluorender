@@ -584,7 +584,8 @@ void Framebuffer::apply_draw_mask(const std::unordered_map<int, bool>& drawEnabl
 		glReadBuffer(GL_NONE);
 	}
 
-	unbind(prevFramebuffer);
+	if (prevFramebuffer != id_)
+		unbind(prevFramebuffer);
 }
 
 bool Framebuffer::set_draw_enabled(const AttachmentPoint& ap, bool enabled)
@@ -617,7 +618,8 @@ bool Framebuffer::set_draw_enabled(const AttachmentPoint& ap, bool enabled)
 		glReadBuffer(GL_NONE);
 	}
 
-	unbind(prevFramebuffer);
+	if (prevFramebuffer != id_)
+		unbind(prevFramebuffer);
 	return true;
 }
 
@@ -671,7 +673,8 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 		glReadBuffer(GL_NONE);
 	}
 
-	unbind(prevFramebuffer);
+	if (prevFramebuffer != id_)
+		unbind(prevFramebuffer);
 	return true;
 }
 
@@ -705,7 +708,8 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap, unsigned int tex_id,
 		break;
 	}
 
-	unbind(prevFramebuffer);
+	if (prevFramebuffer != id_)
+		unbind(prevFramebuffer);
 
 	return true;
 }
@@ -728,7 +732,8 @@ void Framebuffer::detach_texture(const AttachmentPoint& ap)
 			[&](const AttachmentRecord& rec) { return rec.point == ap; }),
 		attachments_.end());
 
-	unbind(prevFramebuffer);
+	if (prevFramebuffer != id_)
+		unbind(prevFramebuffer);
 }
 
 void Framebuffer::bind_texture(const AttachmentPoint& ap, int tex_unit)
@@ -863,7 +868,8 @@ unsigned int Framebuffer::read_pick(int px, int py)
 			bind();
 			unsigned int value = 0;
 			glReadPixels(px, py, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
-			unbind(prevFramebuffer);
+			if (prevFramebuffer != id_)
+				unbind(prevFramebuffer);
 			return value;
 		}
 	}
@@ -902,12 +908,18 @@ bool Framebuffer::read(int x, int y, int width, int height,
 	int rw = std::min(width, nx_ - rx);
 	int rh = std::min(height, ny_ - ry);
 
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+
 	// Read pixels from the specified attachment
 	glReadBuffer(to_gl_attachment(ap)); // Optional: if using multiple color attachments
 	glReadPixels(rx, ry, rw, rh, format, type, data);
 
 	// Restore previous framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, prevFramebuffer);
+	if (prevFramebuffer != id_)
+		glBindFramebuffer(GL_FRAMEBUFFER, prevFramebuffer);
 
 	return true;
 }

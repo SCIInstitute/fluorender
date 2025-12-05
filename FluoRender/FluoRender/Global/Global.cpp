@@ -88,6 +88,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RefreshScheduler.h>
 //renderers
 #include <RendererFactory.h>
+#include <ClippingBoxRenderer.h>
 
 using namespace fluo;
 
@@ -364,6 +365,10 @@ void Global::BuildFactories()
 	shader_manager_->add_factory<flvr::VolCalShaderFactory>(gstVolCalShader);
 	shader_manager_->add_factory<flvr::LightFieldShaderFactory>(gstLightFieldShader);
 	shader_manager_->add_factory<flvr::MeshShaderFactory>(gstMeshShader);
+
+	//renderer factory
+	m_renderer_factory->registerRenderer(gstClippingBoxRenderer,
+		[]() { return std::make_shared<flrd::ClippingBoxRenderer>(); });
 }
 
 //locale
