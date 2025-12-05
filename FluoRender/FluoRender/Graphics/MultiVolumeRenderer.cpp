@@ -586,7 +586,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				light.x(), light.y(), light.z(), 0.0);
 			shader->setLocalParam(1,
 				vr_list_[tn]->shading_strength_, vr_list_[tn]->shading_shine_,
-				glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
+				glbin_settings.m_shadow_dir_x, glbin_settings.m_shadow_dir_y);
 			//transfer function
 			shader->setLocalParam(2,
 				vr_list_[tn]->inv_ ?

@@ -248,7 +248,7 @@ bool vol_clip_func(vec4 t)
 
 inline constexpr const char* VOL_HEAD_LIT  = R"GLSHDR(
 	//VOL_HEAD_LIT
-	vec3 view = loc0.xyz; // {lx, ly, lz, 0}
+	vec3 eye = loc0.xyz; // {lx, ly, lz, 0}
 	vec3 grad;
 )GLSHDR";
 
@@ -282,6 +282,7 @@ inline constexpr const char* VOL_GRAD_COMPUTE  = R"GLSHDR(
 	grad.z = (zp - zm) * 0.5;
 
 	// Gradient magnitude
+	grad /= loc5.xyz;
 	float gradMag = length(grad);
 
 	// Apply scaling
@@ -324,33 +325,34 @@ vec4 vol_grad_func(vec4 pos, vec4 dir)
 
 inline constexpr const char* VOL_BODY_SHADING  = R"GLSHDR(
 	//VOL_BODY_SHADING
-	grad *= loc5.xyz;
 	float gradLen = length(grad);
 	grad = (gradLen > 1e-6) ? grad / gradLen : vec3(0.0);
-	vec3 eye = vec3(0.0, 0.0, 1.0);
+
+	// Build perturbation basis
+	vec3 up = vec3(0.0, 1.0, 0.0);
+	vec3 side = normalize(cross(eye, up));
+	vec3 up2  = normalize(cross(side, eye));
 
 	// Key light direction
-	vec3 l_dir = normalize(vec3(loc1.z, loc1.w, 0.2));
-	float lambert = dot(grad, l_dir);
-	if (lambert < 0.0) grad = -grad;
-	lambert = abs(lambert);
+	vec3 l_dir = normalize(eye + side * loc1.z + up2 * loc1.w + eye * 0.2);
+	float lambert = max(dot(grad, l_dir), 0.0);
 
 	// Lambert diffuse with frosted gradient modulation
 	float front = smoothstep(0.3, 1.0, lambert);
 	float back  = 1.0 - smoothstep(0.0, 0.5, lambert);
 	float shade = 0.5*back + 0.7*front + 0.3;
-	float frost = smoothstep(0.0, 0.1, gradMag) * 0.5;
+	float frost = smoothstep(0.0, 0.1, gradMag);
 	float diffuse = shade + frost;
 
 	// Key light highlight (sharp, white)
-	l_dir = normalize(vec3(loc1.z, loc1.w, 3.0));
-	vec3 h = normalize(l_dir + eye);
-	float keyHighlight = pow(smoothstep(0.9, 1.0, abs(dot(h, grad))), mix(10.0, 40.0, loc1.y));
+	vec3 l_high = normalize(eye - side * loc1.z - up2 * loc1.w + eye * 5.0);
+	vec3 h = normalize(l_high + eye);
+	float keyHighlight = 6.0 * pow(smoothstep(0.9, 1.0, abs(dot(h, grad))), mix(10.0, 100.0, loc1.y));
 
 	// Diffuser highlight (opposite direction, softer)
-	vec3 l_diff = normalize(vec3(-loc1.z, -loc1.w, 1.0));
+	vec3 l_diff = normalize(eye + side * loc1.z + up2 * loc1.w + eye * 3.0);
 	vec3 h_diff = normalize(l_diff + eye);
-	float diffHighlight = pow(abs(dot(h_diff, grad)), mix(1.0, 10.0, loc1.y));
+	float diffHighlight = 3.0 * pow(abs(dot(h_diff, grad)), mix(1.0, 10.0, loc1.y));
 
 	//composition
 	float all_light = mix(1.0, (diffuse + keyHighlight + diffHighlight) * 0.5, loc1.x);
@@ -601,7 +603,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU5  = R"GLSHDR(
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU6  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU6
-		float valu = dot(clamp(grad, -1.0, 1.0), view.xyz/*vec3(1.0, 1.0, 0.0)*/);
+		float valu = dot(clamp(grad, -1.0, 1.0), eye.xyz/*vec3(1.0, 1.0, 0.0)*/);
 		valu = valu + 1.0;
 		valu = (valu-loc6.x)/loc6.z;
 )GLSHDR";

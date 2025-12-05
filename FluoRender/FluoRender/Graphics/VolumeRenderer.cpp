@@ -460,7 +460,7 @@ void VolumeRenderer::draw_volume(
 		light.x(), light.y(), light.z(), 0.0);
 	shader->setLocalParam(1,
 		shading_strength_, shading_shine_,
-		glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x);
+		glbin_settings.m_shadow_dir_x, glbin_settings.m_shadow_dir_y);
 	//transfer function
 	shader->setLocalParam(2,
 		inv_ ? -scalar_scale_ : scalar_scale_,
