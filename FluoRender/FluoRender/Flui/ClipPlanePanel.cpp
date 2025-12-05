@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <VolumeRenderer.h>
 #include <MeshRenderer.h>
+#include <ClippingBoxRenderer.h>
 #include <compatibility.h>
 #include <png_resource.h>
 #include <icons.h>
@@ -511,33 +512,34 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//modes
 	if (update_all || FOUND_VALUE(gstClipPlaneMode))
 	{
-		switch (glbin_settings.m_clip_mode)
+		auto mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
+		switch (mode)
 		{
-		case cm_Normal:
+		case flrd::ClippingRenderMode::ColoredFront:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_normal));
 			break;
-		case cm_Frame6:
+		case flrd::ClippingRenderMode::FrameAll:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_frame6));
 			break;
-		case cm_Frame3:
+		case flrd::ClippingRenderMode::FrameFront:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_frame3));
 			break;
-		case cm_LowTrans:
+		case flrd::ClippingRenderMode::TransFront:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_low));
 			break;
-		case cm_LowTransBack:
+		case flrd::ClippingRenderMode::TransBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_low_back));
 			break;
-		case cm_NormalBack:
+		case flrd::ClippingRenderMode::ColoredBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_normal_back));
 			break;
-		case cm_None:
+		case flrd::ClippingRenderMode::None:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_none));
 			break;
@@ -797,7 +799,8 @@ void ClipPlanePanel::SetPlaneMode()
 {
 	int ival = glbin_settings.m_clip_mode;
 	ival++;
-	ival = ival > cm_None ? cm_Normal : ival;
+	ival = ival > static_cast<int>(flrd::ClippingRenderMode::TransBack) ?
+		static_cast<int>(flrd::ClippingRenderMode::None) : ival;
 	glbin_settings.m_clip_mode = ival;
 	FluoRefresh(2, { gstClipPlaneMode },
 		{ glbin_current.GetViewId() });

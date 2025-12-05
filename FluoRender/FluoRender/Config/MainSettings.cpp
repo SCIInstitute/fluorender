@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 #include <GraphicsQuery.h>
+#include <ClippingBoxRenderer.h>
 #include <compatibility.h>
 #include <filesystem>
 
@@ -93,7 +94,7 @@ MainSettings::MainSettings()
 	m_interactive_quality = 2;//enable for large data
 	m_pin_threshold = 10.0;
 	m_line_width = 3.0;
-	m_clip_mode = cm_Normal;
+	m_clip_mode = static_cast<int>(flrd::ClippingRenderMode::ColoredFront);
 	m_clip_link = false;
 	m_clip_hold = false;
 
@@ -332,7 +333,7 @@ void MainSettings::Read(const std::string& filename)
 		fconfig->Read("interactive quality", &m_interactive_quality, 2);
 		fconfig->Read("pin thresh", &m_pin_threshold, 10.0);
 		fconfig->Read("line width", &m_line_width, 3.0);
-		fconfig->Read("clip mode", &m_clip_mode, static_cast<int>(cm_Normal));
+		fconfig->Read("clip mode", &m_clip_mode, static_cast<int>(flrd::ClippingRenderMode::ColoredFront));
 		fconfig->Read("clip link", &m_clip_link, false);
 		fconfig->Read("clip hold", &m_clip_hold, false);
 	}
