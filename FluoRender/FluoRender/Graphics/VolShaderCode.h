@@ -750,7 +750,7 @@ inline constexpr const char* VOL_RASTER_BLEND_DMAP  = R"GLSHDR(
 	//VOL_RASTER_BLEND_DMAP
 	float curz = (fp.y-fp.w)/(fp.y-fp.z);
 	float w_a = alpha * loc18.x;
-	w_a = w_a > 0.1 ? w_a : 0.1 * smoothstep(0.02, 0.1, w_a);
+	w_a = w_a > 0.3 ? w_a : 0.3 * smoothstep(0.02, 0.3, w_a);
 	float w_d = pow(1.0 - curz, 3.0);
 	FragDepth = vec2(curz, 1.0) * w_d * w_a;
 )GLSHDR";
