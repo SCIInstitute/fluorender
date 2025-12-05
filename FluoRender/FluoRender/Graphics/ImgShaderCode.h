@@ -632,13 +632,16 @@ void main()
 	float coarseB = textureLod(tex0, t - offset, loc0.z).r;
 	float depthCoarse = 0.5 * (coarseA + coarseB);
 
-	float diffGlow = depthCoarse - depthFine;
-	float innerGlow = pow(max(diffGlow, 0.0), loc1.x) * loc1.y;
+	float diff = depthCoarse - depthFine;
+	float innerGlow = pow(max(diff, 0.0), loc1.x) * loc1.y;
 
 	// --- General scattering from higher LODs (unchanged) ---
-	depthCoarse = textureLod(tex0, t, loc0.w).r;
-	float diffScatter = depthCoarse - depthFine;
-	float scatterGlow = pow(max(diffScatter, 0.0), loc1.z) * loc1.w;
+	offset = texelSize * exp2(loc0.w) * 0.5;
+	coarseA = textureLod(tex0, t + offset, loc0.w).r;
+	coarseB = textureLod(tex0, t - offset, loc0.w).r;
+	depthCoarse = 0.5 * (coarseA + coarseB);
+	diff = depthCoarse - depthFine;
+	float scatterGlow = pow(max(diff, 0.0), loc1.z) * loc1.w;
 
 	// --- Blend glow and scattering ---
 	float combined = 1.0 + innerGlow + scatterGlow;
