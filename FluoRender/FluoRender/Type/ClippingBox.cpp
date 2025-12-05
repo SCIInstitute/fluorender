@@ -712,6 +712,25 @@ void ClippingBox::GetAllClipsIndex(double val[6]) const
 		val[i] = GetClipIndex(static_cast<ClipPlane>(i));
 }
 
+void ClippingBox::IncLLinkedPairIndex(double val)
+{
+	if (links_[0])
+	{
+		double x1 = clips_index_.minx();
+		SetClipIndex(ClipPlane::XNeg, x1 + val);
+	}
+	if (links_[1])
+	{
+		double y1 = clips_index_.miny();
+		SetClipIndex(ClipPlane::YNeg, y1 + val);
+	}
+	if (links_[2])
+	{
+		double z1 = clips_index_.minz();
+		SetClipIndex(ClipPlane::ZNeg, z1 + val);
+	}
+}
+
 void ClippingBox::Rotate(const Quaternion& q)
 {
 	q_ = q;

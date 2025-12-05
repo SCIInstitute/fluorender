@@ -46,6 +46,10 @@ namespace flrd
 	typedef std::shared_ptr<TrackMap> pTrackMap;
 	class CelpList;
 }
+namespace fluo
+{
+	class ClippingBox;
+}
 class MainFrame;
 class RenderView;
 class VolumeGroup;
@@ -101,6 +105,9 @@ struct CurrentObjects
 	flrd::RulerList* GetRulerList();
 	flrd::Ruler* GetRuler();
 	TrackGroup* GetTrackGroup();
+
+	//clipping box
+	fluo::ClippingBox* GetClippingBox();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	std::weak_ptr<RenderView> render_view;//currently selected render view

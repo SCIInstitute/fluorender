@@ -155,7 +155,7 @@
         <interactive_quality>2</interactive_quality>
         <pin_thresh>10</pin_thresh>
         <line_width>3</line_width>
-        <clip_mode>0</clip_mode>
+        <clip_mode>1</clip_mode>
         <clip_link>0</clip_link>
         <clip_hold>0</clip_hold>
     </rendering>

@@ -552,7 +552,6 @@ public:
 	std::weak_ptr<VolumeData> m_cur_vol;
 	std::weak_ptr<VolumeData> m_cur_vol_save;
 	//clipping settings
-	int m_clip_mask;
 	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference
 	//scale bar
 	int m_scalebar_disp;//0-no display; 1-length; 2-with text

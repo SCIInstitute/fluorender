@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <MeshRenderer.h>
 #include <ClippingBoxRenderer.h>
+#include <RendererFactory.h>
 #include <compatibility.h>
 #include <png_resource.h>
 #include <icons.h>
@@ -789,8 +790,7 @@ void ClipPlanePanel::HoldPlanes()
 {
 	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
 	glbin_states.ClipDisplayChanged();
-	if (auto view = glbin_current.render_view.lock())
-		view->m_clip_mask = -1;
+	SetPlaneMask(-1);
 	FluoRefresh(2, { gstClipHold },
 		{ glbin_current.GetViewId() });
 }
@@ -976,7 +976,7 @@ void ClipPlanePanel::OnClipZChange(wxScrollEvent& event)
 	int ival1 = m_clipz_sldr->GetLowValue();
 	int ival2 = m_clipz_sldr->GetHighValue();
 	wxString str = event.GetString();
-	if (!m_clipz_sldr->GetLink())
+	if (m_clipz_sldr->GetLink())
 		SetClipValues(fluo::ClipPlane::ZNeg, ival1, ival2);
 	else
 	{
@@ -1023,7 +1023,7 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 	glbin_states.m_mouse_in_clip_plane_panel = bval;
 	if (glbin_states.ClipDisplayChanged())
 	{
-		view->m_clip_mask = -1;
+		SetPlaneMask(-1);
 		FluoRefresh(3, { gstNull },
 			{ glbin_current.GetViewId() });
 	}
@@ -1091,47 +1091,49 @@ void ClipPlanePanel::SetClipValue(fluo::ClipPlane i, int val, bool link)
 	else if (glbin_settings.m_clip_link)
 		view->SyncClippingBoxes(obj->GetClippingBox());
 
+	int mask = -1;
 	fluo::ValueCollection vc;
 	switch (i)
 	{
 	case fluo::ClipPlane::XNeg:
-		view->m_clip_mask = link ? 3 : 1;
+		mask = link ? 3 : 1;
 		vc.insert(gstClipX1);
 		if (link)
 			vc.insert(gstClipX2);
 		break;
 	case fluo::ClipPlane::XPos:
-		view->m_clip_mask = link ? 3 : 2;
+		mask = link ? 3 : 2;
 		vc.insert(gstClipX2);
 		if (link)
 			vc.insert(gstClipX1);
 		break;
 	case fluo::ClipPlane::YNeg:
-		view->m_clip_mask = link ? 12 : 4;
+		mask = link ? 12 : 4;
 		vc.insert(gstClipY1);
 		if (link)
 			vc.insert(gstClipY2);
 		break;
 	case fluo::ClipPlane::YPos:
-		view->m_clip_mask = link ? 12 : 8;
+		mask = link ? 12 : 8;
 		vc.insert(gstClipY2);
 		if (link)
 			vc.insert(gstClipY1);
 		break;
 	case fluo::ClipPlane::ZNeg:
-		view->m_clip_mask = link ? 48 : 16;
+		mask = link ? 48 : 16;
 		vc.insert(gstClipZ1);
 		if (link)
 			vc.insert(gstClipZ2);
 		break;
 	case fluo::ClipPlane::ZPos:
-		view->m_clip_mask = link ? 48 : 32;
+		mask = link ? 48 : 32;
 		vc.insert(gstClipZ2);
 		if (link)
 			vc.insert(gstClipZ1);
 		break;
 	}
 
+	SetPlaneMask(mask);
 	vc.insert(gstConvVolMeshUpdateTransf);
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
@@ -1149,7 +1151,7 @@ void ClipPlanePanel::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 	else if (glbin_settings.m_clip_link)
 		view->SyncClippingBoxes(obj->GetClippingBox());
 
-	int mask;
+	int mask = -1;
 	switch (i)
 	{
 	case fluo::ClipPlane::XNeg:
@@ -1165,7 +1167,7 @@ void ClipPlanePanel::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 		mask = 48;
 		break;
 	}
-	view->m_clip_mask = mask;
+	SetPlaneMask(mask);
 
 	fluo::ValueCollection vc;
 	if (mask & 1)
@@ -1183,6 +1185,9 @@ void ClipPlanePanel::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 
 	vc.insert(gstConvVolMeshUpdateTransf);
 	FluoRefresh(0, vc, { glbin_current.GetViewId() });
+	double zmin, zmax;
+	obj->GetClippingBox().GetClipPairIndex(fluo::ClipPlane::ZNeg, zmin, zmax);
+	DBGPRINT(L"Clipping Zmin, Zmax: %f, %f\n", zmin, zmax);
 }
 
 void ClipPlanePanel::SetClipValues(const std::array<int, 6>& vals)
@@ -1197,7 +1202,7 @@ void ClipPlanePanel::SetClipValues(const std::array<int, 6>& vals)
 		view->SyncClippingBoxes(view->GetClippingBox());
 	else if (glbin_settings.m_clip_link)
 		view->SyncClippingBoxes(obj->GetClippingBox());
-	view->m_clip_mask = 63;
+	SetPlaneMask(63);
 
 	FluoRefresh(0,
 		{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf },
@@ -1216,7 +1221,7 @@ void ClipPlanePanel::ResetClipValues()
 		view->SyncClippingBoxes(view->GetClippingBox());
 	else if (glbin_settings.m_clip_link)
 		view->SyncClippingBoxes(obj->GetClippingBox());
-	view->m_clip_mask = -1;
+	SetPlaneMask(-1);
 
 	//links
 	SetXLink(false);
@@ -1239,7 +1244,7 @@ void ClipPlanePanel::ResetClipValues(fluo::ClipPlane i)
 		view->SyncClippingBoxes(view->GetClippingBox());
 	else if (glbin_settings.m_clip_link)
 		view->SyncClippingBoxes(obj->GetClippingBox());
-	view->m_clip_mask = -1;
+	SetPlaneMask(-1);
 
 	fluo::ValueCollection vc = { gstConvVolMeshUpdateTransf };
 	//links
@@ -1807,37 +1812,14 @@ void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 	SetClipValues(fluo::ClipPlane::ZNeg, 0, dist);
 }
 
-//move linked clipping planes
-void ClipPlanePanel::MoveLinkedClippingPlanes(int dir)
+void ClipPlanePanel::SetPlaneMask(int val)
 {
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-
-	wxString str;
-	long dist;
-
-	//moving lower
-	if (m_clipx_sldr->GetLink())
+	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
+	if (renderer)
 	{
-		str = m_yz_dist_text->GetValue();
-		str.ToLong(&dist);
-		dist = dist < 2 ? dist + 1 : dist;
-		m_clipx_sldr->Scroll(dir * dist);
-	}
-	if (m_clipy_sldr->GetLink())
-	{
-		str = m_xz_dist_text->GetValue();
-		str.ToLong(&dist);
-		dist = dist < 2 ? dist + 1 : dist;
-		m_clipy_sldr->Scroll(dir * dist);
-	}
-	if (m_clipz_sldr->GetLink())
-	{
-		str = m_xy_dist_text->GetValue();
-		str.ToLong(&dist);
-		dist = dist < 2 ? dist + 1 : dist;
-		m_clipz_sldr->Scroll(dir * dist);
+		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
+		settings->plane_mask = val;
 	}
 }
 

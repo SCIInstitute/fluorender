@@ -132,7 +132,6 @@ RenderView::RenderView() :
 	m_mouse_focus(false),
 	m_draw_rulers(true),
 	//clipping settings
-	m_clip_mask(-1),
 	m_clip_mode(2),
 	//scale bar
 	m_scalebar_disp(0),
@@ -335,7 +334,6 @@ RenderView::RenderView(RenderView& copy):
 	m_mouse_focus(copy.m_mouse_focus),
 	m_draw_rulers(true), //copy m_draw_rulers,
 	//clipping settings
-	m_clip_mask(-1), //copy m_clip_mask,
 	m_clip_mode(2), //copy m_clip_mode,
 	//scale bar
 	m_scalebar_disp(copy.m_scalebar_disp), //copy m_scalebar_disp,
@@ -7476,6 +7474,7 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 	{
 	case 1://view
 		cb = view->GetClippingBox();
+		color = view->GetColor();
 		break;
 	case 2://volume
 	{
@@ -7508,16 +7507,19 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 
 	renderer->setData(cb);
 
-	auto settings = std::make_shared<flrd::ClippingBoxSettings>();
-	settings->mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
-	settings->winding = static_cast<flrd::FaceWinding>(face_winding);
-	settings->plane_mask = -1;
-	settings->draw_face = true;
-	settings->draw_border = true;
-	settings->view = view;
-	settings->color = color;
-	settings->alpha = 0.3;
-	renderer->setSettings(settings);
+	auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
+	if (settings)
+	{
+		//settings->mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
+		settings->winding = static_cast<flrd::FaceWinding>(face_winding);
+		//settings->plane_mask = -1;
+		//settings->draw_face = true;
+		//settings->draw_border = true;
+		settings->view = view;
+		settings->color = color;
+		//settings->alpha = 0.3;
+		renderer->setSettings(settings);
+	}
 
 	renderer->render();
 }
@@ -9961,8 +9963,9 @@ void RenderView::ProcessIdle(IdleState& state)
 				{
 					if (!m_clip_up)
 					{
-						if (glbin_current.mainframe->GetClipPlanePanel())
-							glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(-1);
+						auto cb = glbin_current.GetClippingBox();
+						if (cb)
+							cb->IncLLinkedPairIndex(-1);
 						state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 					}
 				}
@@ -9997,8 +10000,9 @@ void RenderView::ProcessIdle(IdleState& state)
 				{
 					if (!m_clip_down)
 					{
-						if (glbin_current.mainframe->GetClipPlanePanel())
-							glbin_current.mainframe->GetClipPlanePanel()->MoveLinkedClippingPlanes(1);
+						auto cb = glbin_current.GetClippingBox();
+						if (cb)
+							cb->IncLLinkedPairIndex(1);
 						state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 					}
 				}

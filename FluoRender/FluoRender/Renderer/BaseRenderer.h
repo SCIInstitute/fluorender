@@ -76,6 +76,7 @@ namespace flrd
 		}
 
 		virtual void setSettings(const std::shared_ptr<RendererSettings>& settings) = 0;
+		virtual std::shared_ptr<RendererSettings> getSettings() = 0;
 		virtual void render() = 0;
 		virtual std::string type() const = 0;
 

@@ -117,6 +117,8 @@ namespace fluo
 		void SetAllClipsIndex(const double val[6]);
 		void GetAllClipsIndex(double val[6]) const;
 
+		void IncLLinkedPairIndex(double val);
+
 		// --- Rotation ---
 		void Rotate(const Quaternion& q);   // rotate by quaternion
 		void Rotate(const Vector& euler);   // rotate by euler angles

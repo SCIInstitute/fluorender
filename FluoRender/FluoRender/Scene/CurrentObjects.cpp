@@ -381,3 +381,32 @@ TrackGroup* CurrentObjects::GetTrackGroup()
 		return vptr->GetTrackGroup();
 	return nullptr;
 }
+
+fluo::ClippingBox* CurrentObjects::GetClippingBox()
+{
+	switch (GetType())
+	{
+	case 1://view
+	{
+		auto view = render_view.lock();
+		if (view)
+			return &view->GetClippingBox();
+	}
+	break;
+	case 2://volume
+	{
+		auto vd = vol_data.lock();
+		if (vd)
+			return &vd->GetClippingBox();
+	}
+	break;
+	case 3://mesh
+	{
+		auto md = mesh_data.lock();
+		if (md)
+			return &md->GetClippingBox();
+	}
+	break;
+	}
+	return nullptr;
+}

@@ -74,8 +74,7 @@ public:
 
 	void SyncClipValue(int i);
 
-	//move linked clipping planes
-	void MoveLinkedClippingPlanes(int dir);
+	void SetPlaneMask(int val);
 
 	void ClearUndo();
 

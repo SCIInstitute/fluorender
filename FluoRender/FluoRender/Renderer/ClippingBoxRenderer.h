@@ -57,7 +57,7 @@ namespace flrd
 		ColoredBack,
 		FrameAll,
 		FrameFront,
-		FrameBack,
+		//FrameBack,
 		TransFront,
 		TransBack,
 	};
@@ -71,7 +71,7 @@ namespace flrd
 		bool draw_border = true;
 		std::weak_ptr<RenderView> view;
 		fluo::Color color;
-		double alpha;
+		double alpha = 0.3;
 	};
 
 	class ClippingBoxRenderer : public BaseRenderer {
@@ -85,6 +85,11 @@ namespace flrd
 
 		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
 			settings_ = std::dynamic_pointer_cast<ClippingBoxSettings>(settings);
+		}
+
+		std::shared_ptr<RendererSettings> getSettings() override
+		{
+			return settings_;
 		}
 
 		void render() override;
