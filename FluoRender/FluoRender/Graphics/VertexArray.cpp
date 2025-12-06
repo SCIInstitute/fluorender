@@ -630,20 +630,21 @@ void VertexArray::update_clip_planes(bool update_index)
 	if (update_index)
 	{
 		std::vector<uint32_t> index;
-		index.reserve(6 * 4 * 2);
-		//indices
-		index.push_back(4); index.push_back(0); index.push_back(5); index.push_back(1);
-		index.push_back(4); index.push_back(0); index.push_back(1); index.push_back(5);
-		index.push_back(7); index.push_back(3); index.push_back(6); index.push_back(2);
-		index.push_back(7); index.push_back(3); index.push_back(2); index.push_back(6);
-		index.push_back(1); index.push_back(0); index.push_back(3); index.push_back(2);
-		index.push_back(1); index.push_back(0); index.push_back(2); index.push_back(3);
-		index.push_back(4); index.push_back(5); index.push_back(6); index.push_back(7);
-		index.push_back(4); index.push_back(5); index.push_back(7); index.push_back(6);
-		index.push_back(0); index.push_back(4); index.push_back(2); index.push_back(6);
-		index.push_back(0); index.push_back(4); index.push_back(6); index.push_back(2);
-		index.push_back(5); index.push_back(1); index.push_back(7); index.push_back(3);
-		index.push_back(5); index.push_back(1); index.push_back(3); index.push_back(7);
+		index.reserve(6 * 4);
+
+		// -X face
+		index.insert(index.end(), { 4,0,1,5 });
+		// +X face
+		index.insert(index.end(), { 7,3,2,6 });
+		// -Y face
+		index.insert(index.end(), { 1,0,2,3 });
+		// +Y face
+		index.insert(index.end(), { 4,5,7,6 });
+		// -Z face
+		index.insert(index.end(), { 0,4,2,6 });
+		// +Z face
+		index.insert(index.end(), { 5,1,3,7 });
+
 		buffer_data(VABufferType::VABuf_Index,
 			sizeof(uint32_t) * index.size(),
 			&index[0], BufferUsage::StaticDraw);
@@ -1029,10 +1030,10 @@ void VertexArray::draw_clip_plane(int plane, bool border)
 {
 	if (border)
 		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT,
-			reinterpret_cast<const GLvoid*>((long long)(plane)));
+			reinterpret_cast<const GLvoid*>(plane * 4 * sizeof(uint32_t)));
 	else
 		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
-			reinterpret_cast<const GLvoid*>((long long)(plane)));
+			reinterpret_cast<const GLvoid*>(plane * 4 * sizeof(uint32_t)));
 }
 
 void VertexArray::draw_grid()

@@ -190,7 +190,7 @@ void ClippingBoxRenderer::drawPlane(int index,
 		shader1->setLocalParam(0, color.r(), color.g(), color.b(), alpha);
 
 		// Each plane has a slot in the VA
-		va_clipp->draw_clip_plane(index * 32, false);
+		va_clipp->draw_clip_plane(index, false);
 	}
 
 	if (draw_border)
@@ -203,7 +203,7 @@ void ClippingBoxRenderer::drawPlane(int index,
 		shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
 
 		// Border planes are offset by +16 in VA indexing
-		va_clipp->draw_clip_plane(index * 32 + 16, true);
+		va_clipp->draw_clip_plane(index, true);
 
 		shader1->bind();
 		// fbg2 exits automatically
