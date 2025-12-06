@@ -3955,6 +3955,9 @@ bool RenderView::Draw()
 	if (glbin_settings.m_test_wiref)
 		DrawGrid();
 
+	//if (glbin_states.m_clip_display)
+	//	DrawClippingPlanes(flvr::FaceWinding::Back);
+
 	switch (m_draw_type)
 	{
 	case 1:  //draw volumes only
@@ -3964,6 +3967,9 @@ bool RenderView::Draw()
 		DrawDataPeel();
 		break;
 	}
+
+	if (glbin_states.m_clip_display)
+		DrawClippingPlanes(flvr::FaceWinding::Back);
 
 	if (m_draw_camctr)
 		DrawCamCtr();
@@ -5298,15 +5304,8 @@ void RenderView::DrawData()
 
 	CalcFogRange();
 
-	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(flvr::FaceWinding::Back);
-
 	//draw the volumes
 	DrawVolumes();
-
-	//draw the clipping planes
-	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(flvr::FaceWinding::Front);
 
 	if (glbin_settings.m_test_wiref)
 		DrawBounds();
@@ -5364,9 +5363,6 @@ void RenderView::DrawDataPeel()
 
 	bool use_fog_save = m_use_fog;
 	CalcFogRange();
-
-	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(flvr::FaceWinding::Back);
 
 	m_use_fog = false;
 
@@ -5547,10 +5543,6 @@ void RenderView::DrawDataPeel()
 	DrawOverlayScatteringMesh();
 	if (CheckMeshShadowExist(dval))
 		DrawOverlayShadowMesh(dval);
-
-	//draw the clipping planes
-	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(flvr::FaceWinding::Front);
 
 	if (glbin_settings.m_test_wiref)
 		DrawBounds();
