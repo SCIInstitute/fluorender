@@ -3955,8 +3955,8 @@ bool RenderView::Draw()
 	if (glbin_settings.m_test_wiref)
 		DrawGrid();
 
-	//if (glbin_states.m_clip_display)
-	//	DrawClippingPlanes(flvr::FaceWinding::Back);
+	if (glbin_states.m_clip_display)
+		DrawClippingPlanes(flvr::FaceWinding::Back);
 
 	switch (m_draw_type)
 	{
@@ -3969,7 +3969,7 @@ bool RenderView::Draw()
 	}
 
 	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(flvr::FaceWinding::Back);
+		DrawClippingPlanes(flvr::FaceWinding::Front);
 
 	if (m_draw_camctr)
 		DrawCamCtr();

@@ -121,7 +121,7 @@ void ClippingBoxRenderer::render()
 	{
 		data_buffer->set_cull_face_enabled(true);
 		data_buffer->set_face_winding(flvr::FaceWinding::Back);
-		data_buffer->set_cull_face(flvr::CullFace::Back);
+		data_buffer->set_cull_face(flvr::CullFace::Front);
 	}
 	else if (settings_->winding == flrd::FaceWinding::Off)
 	{
