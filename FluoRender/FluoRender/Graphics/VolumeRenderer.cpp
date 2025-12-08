@@ -1278,9 +1278,9 @@ void VolumeRenderer::return_volume()
 			format = GL_RGBA;
 
 		// download texture data
-		auto res_b = b->get_size();
-		glPixelStorei(GL_PACK_ROW_LENGTH, res_b.intx());
-		glPixelStorei(GL_PACK_IMAGE_HEIGHT, res_b.inty());
+		auto stride = b->get_stride();
+		glPixelStorei(GL_PACK_ROW_LENGTH, stride.intx());
+		glPixelStorei(GL_PACK_IMAGE_HEIGHT, stride.inty());
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 		GLenum type = b->tex_type(CompType::Data);
@@ -1326,9 +1326,9 @@ void VolumeRenderer::return_mask(int order)
 		glActiveTexture(GL_TEXTURE0 + 2);
 
 		// download texture data
-		auto res_b = b->get_size();
-		glPixelStorei(GL_PACK_ROW_LENGTH, res_b.intx());
-		glPixelStorei(GL_PACK_IMAGE_HEIGHT, res_b.inty());
+		auto stride = b->get_stride();
+		glPixelStorei(GL_PACK_ROW_LENGTH, stride.intx());
+		glPixelStorei(GL_PACK_IMAGE_HEIGHT, stride.inty());
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 		GLenum type = b->tex_type(CompType::Mask);
@@ -1366,9 +1366,9 @@ void VolumeRenderer::return_label()
 		glActiveTexture(GL_TEXTURE0 + 3);
 
 		//download texture data
-		auto res_b = b->get_size();
-		glPixelStorei(GL_PACK_ROW_LENGTH, res_b.intx());
-		glPixelStorei(GL_PACK_IMAGE_HEIGHT, res_b.inty());
+		auto stride = b->get_stride();
+		glPixelStorei(GL_PACK_ROW_LENGTH, stride.intx());
+		glPixelStorei(GL_PACK_IMAGE_HEIGHT, stride.inty());
 		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
 		glGetTexImage(GL_TEXTURE_3D, 0, GL_RED_INTEGER,

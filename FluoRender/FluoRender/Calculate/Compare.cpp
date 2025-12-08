@@ -583,6 +583,7 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	flvr::CompType c = m_use_mask ? flvr::CompType::Data : flvr::CompType::None;
 	nb = b->nb(c);
 	auto res = b->get_size();
+	auto stride = b->get_stride();
 	bits = nb * 8;
 	unsigned long long mem_size = (unsigned long long)res.get_size_xyz()*(unsigned long long)nb;
 	unsigned char* temp = new unsigned char[mem_size];
@@ -596,9 +597,9 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 		{
 			memcpy(tempp, tp2, res.intx()*nb);
 			tempp += res.intx() * nb;
-			tp2 += res.intx()*nb;
+			tp2 += stride.intx()*nb;
 		}
-		tp += res.get_size_xy()*nb;
+		tp += stride.get_size_xy()*nb;
 	}
 	return (void*)temp;
 }

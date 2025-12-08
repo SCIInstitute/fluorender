@@ -376,13 +376,6 @@ namespace flvr
 		if (!nv_nrrd)
 			return false;
 
-		size_t axis_size[4];
-		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoSize, axis_size);
-		double axis_min[4];
-		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoMin, axis_min);
-		double axis_max[4];
-		nrrdAxisInfoGet_nva(nv_nrrd, nrrdAxisInfoMax, axis_max);
-
 		int bytes = 0;
 		switch (nv_nrrd->type)
 		{
@@ -429,7 +422,7 @@ namespace flvr
 				clearPyramid();
 				bricks_ = &default_vec_;
 				build_bricks((*bricks_), size, bytes);
-				set_res(fluo::Vector(size[0], size[1], size[2]));
+				set_res(size);
 				nb(CompType::Data, bytes);
 			}
 			brkxml_ = false;
@@ -452,6 +445,7 @@ namespace flvr
 			{
 				TextureBrick *tb = (*bricks_)[i];
 				tb->set_nrrd(CompType::Data, comp);
+				tb->set_stride(size);
 				if (use_priority_ && !brkxml_)
 				{
 					tb->set_priority();

@@ -210,6 +210,7 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 	{
 		int nb = b->nb(flvr::CompType::Mask);
 		auto res = b->get_size();
+		auto stride = b->get_stride();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
@@ -226,9 +227,9 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 			{
 				memcpy(tempp, tp2, nx*nb);
 				tempp += nx * nb;
-				tp2 += nx*nb;
+				tp2 += stride.intx()*nb;
 			}
-				tp += res.get_size_xy()*nb;
+				tp += stride.get_size_xy()*nb;
 		}
 		*val = (void*)temp;
 	}
@@ -248,6 +249,7 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 	unsigned char* tempp = (unsigned char*)val;
 	int nb = b->nb(flvr::CompType::Mask);
 	auto res = b->get_size();
+	auto stride = b->get_stride();
 	int nx = res.intx();
 	int ny = res.inty();
 	int nz = res.intz();
@@ -260,9 +262,9 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 		{
 			memcpy(tp2, tempp, nx*nb);
 			tempp += nx * nb;
-			tp2 += nx*nb;
+			tp2 += stride.intx()*nb;
 		}
-		tp += res.get_size_xy()*nb;
+		tp += stride.get_size_xy()*nb;
 	}
 	delete[] (unsigned char*)val;
 }

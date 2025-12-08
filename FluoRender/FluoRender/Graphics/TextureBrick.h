@@ -286,12 +286,13 @@ namespace flvr
 
 	inline double TextureBrick::get_data(const fluo::Point& ijk)
 	{
+		auto stride = get_stride();
 		unsigned long long offset =
 			(unsigned long long)(off_size_.intz() + ijk.intz()) *
-			(unsigned long long)(size_.intx()) *
-			(unsigned long long)(size_.inty()) +
+			(unsigned long long)(stride.intx()) *
+			(unsigned long long)(stride.inty()) +
 			(unsigned long long)(off_size_.inty() + ijk.inty()) *
-			(unsigned long long)(size_.intx()) +
+			(unsigned long long)(stride.intx()) +
 			(unsigned long long)(off_size_.intx() + ijk.intx());
 		int bytes = nb(CompType::Data);
 		Nrrd* nrrd = data_[CompType::Data].data;

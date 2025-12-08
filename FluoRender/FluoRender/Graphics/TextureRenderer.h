@@ -350,6 +350,7 @@ namespace flvr
 		void load_texture(void* tex_data,
 			unsigned int nx, unsigned int ny,
 			unsigned int nz, unsigned int nb,
+			unsigned int sx, unsigned int sy,
 			GLenum tex_type, GLenum format);
 		void release_texture(int unit, GLenum target);
 

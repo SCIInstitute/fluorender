@@ -389,13 +389,14 @@ namespace flvr
 			return nullptr;
 
 		int bytes = c->second.bytes;
+		auto stride = get_stride();
 		unsigned char *ptr = (unsigned char *)(nrrd->data);
 		unsigned long long offset =
 			(unsigned long long)(off_size_.intz()) *
-			(unsigned long long)(size_.intx()) *
-			(unsigned long long)(size_.inty()) +
+			(unsigned long long)(stride.intx()) *
+			(unsigned long long)(stride.inty()) +
 			(unsigned long long)(off_size_.inty()) *
-			(unsigned long long)(size_.intx()) +
+			(unsigned long long)(stride.intx()) +
 			(unsigned long long)(off_size_.intx());
 		return ptr + offset * bytes;
 	}
@@ -410,13 +411,14 @@ namespace flvr
 			return nullptr;
 
 		int bytes = c->second.bytes;
+		auto stride = get_stride();
 		unsigned char *ptr = (unsigned char *)(raw_data);
 		unsigned long long offset =
 			(unsigned long long)(off_size_.intz()) *
-			(unsigned long long)(size_.intx()) *
-			(unsigned long long)(size_.inty()) +
+			(unsigned long long)(stride.intx()) *
+			(unsigned long long)(stride.inty()) +
 			(unsigned long long)(off_size_.inty()) *
-			(unsigned long long)(size_.intx()) +
+			(unsigned long long)(stride.intx()) +
 			(unsigned long long)(off_size_.intx());
 		return ptr + offset * bytes;
 	}

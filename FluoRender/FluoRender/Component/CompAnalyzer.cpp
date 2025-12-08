@@ -252,6 +252,7 @@ void ComponentAnalyzer::Analyze()
 			bits = nb==1? nrrdTypeUChar: nrrdTypeUShort;
 			auto res_b = b->get_size();
 			res = res_b - fluo::Vector(1);
+			auto stride = b->get_stride();
 			int cnt = (res.intx()>0 ? 1 : 0) + (res.inty()>0 ? 1 : 0) + (res.intz()>0 ? 1 : 0);
 			if (cnt < 2) continue;
 
@@ -272,9 +273,9 @@ void ComponentAnalyzer::Analyze()
 				{
 					memcpy(tempp, tp2, res.intx()*nb);
 					tempp += res.intx()*nb;
-					tp2 += res_b.intx()*nb;
+					tp2 += stride.intx()*nb;
 				}
-				tp += res_b.get_size_xy()*nb;
+				tp += stride.get_size_xy()*nb;
 			}
 			data_data = (void*)temp;
 			//mask
@@ -293,9 +294,9 @@ void ComponentAnalyzer::Analyze()
 					{
 						memcpy(tempp, tp2, res.intx()*nb);
 						tempp += res.intx()*nb;
-						tp2 += res_b.intx()*nb;
+						tp2 += stride.intx()*nb;
 					}
-					tp += res_b.get_size_xy() * nb;
+					tp += stride.get_size_xy() * nb;
 				}
 				data_mask = temp;
 			}
@@ -313,9 +314,9 @@ void ComponentAnalyzer::Analyze()
 				{
 					memcpy(tempp, tp2, res.intx()*nb);
 					tempp += res.intx()*nb;
-					tp2 += res_b.intx() *nb;
+					tp2 += stride.intx() *nb;
 				}
-				tp += res_b.get_size_xy() *nb;
+				tp += stride.get_size_xy() *nb;
 			}
 			data_label = (unsigned int*)temp;
 		}
@@ -530,6 +531,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 		unsigned int* data_label = 0;
 		int nb = 1;
 		auto res = b->get_size();
+		auto stride = b->get_stride();
 		nb = b->nb(flvr::CompType::Data);
 		bits = nb * 8;
 		//label
@@ -546,9 +548,9 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 			{
 				memcpy(tempp, tp2, res.intx()*nb);
 				tempp += res.intx()*nb;
-				tp2 += res.intx()*nb;
+				tp2 += stride.intx()*nb;
 			}
-			tp += res.get_size_xy()*nb;
+			tp += stride.get_size_xy()*nb;
 		}
 		data_label = (unsigned int*)temp;
 		//check 3 positive faces
@@ -1376,6 +1378,8 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 				flvr::TextureBrick* b_new = tex_vd->get_brick(iter->second->BrickId());
 				auto res_bo = b_orig->get_size();
 				auto res_bn = b_new->get_size();
+				auto stride_bo = b_orig->get_stride();
+				auto stride_bn = b_new->get_stride();
 				int nx2 = res_bo.intx();
 				int ny2 = res_bo.inty();
 				int nz2 = res_bo.intz();
@@ -1409,28 +1413,28 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 									((unsigned short*)tp2_new)[i] = ((unsigned short*)tp2_old)[i];
 							}
 						}
-						tp2 += res_bo.intx();
+						tp2 += stride_bo.intx();
 						if (bits == 8)
 						{
-							tp2_old += res_bo.intx();
-							tp2_new += res_bn.intx();
+							tp2_old += stride_bo.intx();
+							tp2_new += stride_bn.intx();
 						}
 						else
 						{
-							tp2_old += res_bo.intx()*2;
-							tp2_new += res_bn.intx()*2;
+							tp2_old += stride_bo.intx()*2;
+							tp2_new += stride_bn.intx()*2;
 						}
 					}
-					tp += res_bo.intx()*res_bo.inty();
+					tp += stride_bo.get_size_xy();
 					if (bits == 8)
 					{
-						tp_old += res_bo.intx()*res_bo.inty();
-						tp_new += res_bn.intx()*res_bn.inty();
+						tp_old += stride_bo.get_size_xy();
+						tp_new += stride_bn.get_size_xy();
 					}
 					else
 					{
-						tp_old += res_bo.intx()*res_bo.inty()*2;
-						tp_new += res_bn.intx()*res_bn.inty()*2;
+						tp_old += stride_bo.get_size_xy()*2;
+						tp_new += stride_bn.get_size_xy()*2;
 					}
 				}
 			}
@@ -2012,6 +2016,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 	//get brick label data
 	flvr::TextureBrick* b = tex->get_brick(brick_id);
 	auto res = b->get_size();
+	auto stride = b->get_stride();
 	unsigned int* data_label = (unsigned int*)(b->tex_data(flvr::CompType::Label));
 
 	//get nonconflict id
@@ -2033,9 +2038,9 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 				if (lv == rep_id)
 					tp2[i] = new_id;
 			}
-			tp2 += res.intx();
+			tp2 += stride.intx();
 		}
-		tp += res.get_size_xy();
+		tp += stride.get_size_xy();
 	}
 
 	//info->alt_id = new_id;
@@ -2053,6 +2058,7 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 	unsigned int kz = size.intz() > 1 ? size.intz() - 1 : 1;
 	unsigned int *tp, *tp2;
 	unsigned int lv;
+	auto stride = b->get_stride();
 	do
 	{
 		bool found = false;
@@ -2073,10 +2079,10 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 					}
 				}
 				if (found) break;
-				tp2 += b->get_size().intx();
+				tp2 += stride.intx();
 			}
 			if (found) break;
-			tp += b->get_size().get_size_xy();
+			tp += stride.get_size_xy();
 		}
 
 		if (!found)

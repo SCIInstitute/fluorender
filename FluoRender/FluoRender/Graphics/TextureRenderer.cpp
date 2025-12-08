@@ -736,6 +736,7 @@ namespace flvr
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
+		auto stride = brick->get_stride();
 		GLenum textype = brick->tex_type(CompType::Data);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
@@ -799,8 +800,8 @@ namespace flvr
 			}
 			else
 			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, stride.intx());
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, stride.inty());
 			}
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -978,8 +979,10 @@ namespace flvr
 				{
 					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 						brick->tex_type(CompType::Data), 0);
-
-					load_texture(brick->tex_data(CompType::Data, raw_data), nx, ny, nz, nb, brick->tex_type(CompType::Data), format);
+					load_texture(brick->tex_data(CompType::Data, raw_data),
+						nx, ny, nz, nb,
+						stride.intx(), stride.inty(),
+						brick->tex_type(CompType::Data), format);
 				}
 
 				if (glbin_settings.m_mem_swap)
@@ -1030,6 +1033,7 @@ namespace flvr
 		int ny = res.inty();
 		int nz = res.intz();
 		int nb = brick->nb(CompType::Mask);
+		auto stride = brick->get_stride();
 		GLenum textype = brick->tex_type(CompType::Mask);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
@@ -1084,8 +1088,8 @@ namespace flvr
 			}
 			else
 			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, stride.intx());
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, stride.inty());
 			}
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -1097,7 +1101,10 @@ namespace flvr
 				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 					brick->tex_type(CompType::Mask), 0);
 
-				load_texture(brick->tex_data(CompType::Mask), nx, ny, nz, nb, brick->tex_type(CompType::Mask), format);
+				load_texture(brick->tex_data(CompType::Mask),
+					nx, ny, nz, nb,
+					stride.intx(), stride.inty(),
+					brick->tex_type(CompType::Mask), format);
 			}
 
 			if (!ShaderProgram::no_tex_unpack_)
@@ -1130,6 +1137,7 @@ namespace flvr
 		int ny = res.inty();
 		int nz = res.intz();
 		int nb = brick->nb(CompType::Label);
+		auto stride = brick->get_stride();
 		GLenum textype = brick->tex_type(CompType::Label);
 
 		//! Try to find the existing texture in tex_pool_, for this brick.
@@ -1182,8 +1190,8 @@ namespace flvr
 			}
 			else
 			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, nx);
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, ny);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, stride.intx());
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, stride.inty());
 			}
 
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -1195,7 +1203,10 @@ namespace flvr
 				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 					brick->tex_type(CompType::Label), NULL);
 
-				load_texture(brick->tex_data(CompType::Label), nx, ny, nz, nb, brick->tex_type(CompType::Label), format);
+				load_texture(brick->tex_data(CompType::Label),
+					nx, ny, nz, nb,
+					stride.intx(), stride.inty(),
+					brick->tex_type(CompType::Label), format);
 			}
 
 			if (!ShaderProgram::no_tex_unpack_)
@@ -1422,6 +1433,8 @@ namespace flvr
 		unsigned int ny,
 		unsigned int nz,
 		unsigned int nb,
+		unsigned int sx,
+		unsigned int sy,
 		GLenum tex_type,
 		GLenum format)
 	{
@@ -1429,16 +1442,37 @@ namespace flvr
 		if (!tex)
 			return;
 
-		// Ensure tight packing (no padding between rows/slices)
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glTexSubImage3D(GL_TEXTURE_3D,
-			0,                // mipmap level
-			0, 0, 0,          // x, y, z offsets
-			nx, ny, nz,       // width, height, depth
-			format,           // pixel format
-			tex_type,         // pixel type
-			tex_data);        // pointer to raw data
+		if (ShaderProgram::no_tex_unpack_ && tex->get_brick_list_size() > 1)
+		{
+			unsigned long long mem_size = (unsigned long long)nx *
+				(unsigned long long)ny * (unsigned long long)nz * nb;
+			unsigned char* temp = new unsigned char[mem_size];
+			unsigned char* tempp = temp;
+			unsigned char* tp = (unsigned char*)(tex_data);
+			unsigned char* tp2;
+			for (size_t k = 0; k < static_cast<size_t>(nz); ++k)
+			{
+				tp2 = tp;
+				for (size_t j = 0; j < static_cast<size_t>(ny); ++j)
+				{
+					memcpy(tempp, tp2, nx * nb);
+					tempp += nx * nb;
+					tp2 += sx * nb;
+				}
+				tp += sx * sy * nb;
+			}
+			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, nx, ny, nz, format,
+				tex_type, (GLvoid*)temp);
+			delete[]temp;
+		}
+		else
+			glTexSubImage3D(GL_TEXTURE_3D,
+				0,                // mipmap level
+				0, 0, 0,          // x, y, z offsets
+				nx, ny, nz,       // width, height, depth
+				format,           // pixel format
+				tex_type,         // pixel type
+				tex_data);        // pointer to raw data
 	}
 
 	//release texture
