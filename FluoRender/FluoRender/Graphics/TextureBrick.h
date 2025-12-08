@@ -130,6 +130,18 @@ namespace flvr
 		inline fluo::Vector get_size() { return size_; }
 		inline fluo::Vector get_msize() { return msize_; }
 		inline fluo::Vector get_off_size() { return off_size_; }
+		inline void set_stride(const fluo::Vector& stride)
+		{
+			stride_ = stride;
+			stride_valid_ = true;
+		}
+		inline fluo::Vector get_stride()
+		{
+			if (stride_valid_)
+				return stride_;
+			else
+				return size_;
+		}
 
 		inline void set_drawn(int mode, bool val)
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) drawn_[mode] = val; }
@@ -236,6 +248,9 @@ namespace flvr
 		fluo::Vector off_size_;
 		//! data axis sizes (not necessarily pow2)
 		fluo::Vector msize_;
+		//stride size
+		bool stride_valid_ = false;
+		fluo::Vector stride_;
 		//! bounding box and texcoord box
 		fluo::BBox bbox_, tbox_, dbox_;
 		fluo::Vector view_vector_;
