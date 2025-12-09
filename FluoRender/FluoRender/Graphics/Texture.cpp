@@ -577,7 +577,7 @@ namespace flvr
 						b0.y(0.0);
 					if (k == 0)
 						b0.z(0.0);
-					b1 = fluo::Point(fluo::Min((fluo::Vector(i, j, k) + bsize - fluo::Vector(0.5) / size), fluo::Vector(1.0)));
+					b1 = fluo::Point(fluo::Min((fluo::Vector(i, j, k) + bsize - fluo::Vector(0.5)) / size, fluo::Vector(1.0)));
 					if (size.intx() - i == bsize.intx())
 						b1.x(1.0);
 					if (size.inty() - j == bsize.inty())
