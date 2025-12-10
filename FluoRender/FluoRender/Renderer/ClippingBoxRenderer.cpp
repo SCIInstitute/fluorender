@@ -41,8 +41,31 @@ using namespace flrd;
 
 void ClippingBoxRenderer::render()
 {
-	if (settings_->mode == ClippingRenderMode::None)
-		return;
+	ClippingRenderMode mode = settings_->mode;
+	FaceWinding winding = settings_->winding;
+	bool all_planes = (settings_->plane_mask & 0x3F) == 0x3F;
+	switch (mode)
+	{
+		case ClippingRenderMode::None:
+			return;
+		case ClippingRenderMode::ColoredFront:
+		case ClippingRenderMode::FrameFront:
+		case ClippingRenderMode::TransFront:
+			if (winding != FaceWinding::Front &&
+				all_planes)
+				return;
+			break;
+		case ClippingRenderMode::ColoredBack:
+		case ClippingRenderMode::FrameBack:
+		case ClippingRenderMode::TransBack:
+			if (winding != FaceWinding::Back &&
+				all_planes)
+				return;
+			break;
+		case ClippingRenderMode::FrameAll:
+			break;
+	}
+
 	auto view = settings_->view.lock();
 	if (!view)
 		return;
@@ -148,10 +171,13 @@ void ClippingBoxRenderer::render()
 		shader2->setLocalParamMatrix(0, glm::value_ptr(mv_mat));
 		shader2->setLocalParamMatrix(1, glm::value_ptr(proj_mat));
 		double cull = 0.0;
-		if (settings_->winding == flrd::FaceWinding::Front)
-			cull = 1.0;
-		else if (settings_->winding == flrd::FaceWinding::Back)
-			cull = -1.0;
+		//if (all_planes)
+		{
+			if (settings_->winding == flrd::FaceWinding::Front)
+				cull = 1.0;
+			else if (settings_->winding == flrd::FaceWinding::Back)
+				cull = -1.0;
+		}
 		shader2->setLocalParam(0, size.w(), size.h(), width, cull);
 		shader1->bind();
 	}
@@ -181,6 +207,10 @@ void ClippingBoxRenderer::drawPlane(int index,
 		return;
 
 	bool draw_plane = settings_->draw_face;
+	if (settings_->mode == ClippingRenderMode::FrameAll ||
+		settings_->mode == ClippingRenderMode::FrameFront ||
+		settings_->mode == ClippingRenderMode::FrameBack)
+		draw_plane = false;
 	bool draw_border = settings_->draw_border;
 	auto plane_mode = settings_->mode;
 	auto color = settings_->color;
@@ -192,6 +222,12 @@ void ClippingBoxRenderer::drawPlane(int index,
 		if (plane_mode == ClippingRenderMode::ColoredFront ||
 			plane_mode == ClippingRenderMode::ColoredBack)
 			color = getPlaneColor(index);
+		else if (plane_mode == ClippingRenderMode::TransFront ||
+			plane_mode == ClippingRenderMode::TransBack)
+			color = fluo::Color(1.0);
+		if (plane_mode == ClippingRenderMode::TransFront ||
+			plane_mode == ClippingRenderMode::TransBack)
+			alpha /= 3.0;
 
 		shader1->setLocalParam(0, color.r(), color.g(), color.b(), alpha);
 
@@ -208,7 +244,11 @@ void ClippingBoxRenderer::drawPlane(int index,
 		shader2->bind();
 		shader2->setLocalParam(1, color.r(), color.g(), color.b(), 1.0);
 		auto normal = getPlaneNormal(index);
-		shader2->setLocalParam(2, normal.x(), normal.y(), normal.z(), 0.0);
+		double persp = -1.0;
+		auto view = settings_->view.lock();
+		if (view)
+			persp = view->GetPersp() ? 1.0 : -1.0;
+		shader2->setLocalParam(2, normal.x(), normal.y(), normal.z(), persp);
 
 		// Border planes are offset by +16 in VA indexing
 		va_clipp->draw_clip_plane(index, true);

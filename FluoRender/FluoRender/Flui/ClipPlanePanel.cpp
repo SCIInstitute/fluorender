@@ -516,9 +516,17 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
 		switch (mode)
 		{
+		case flrd::ClippingRenderMode::None:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmap(clip_none));
+			break;
 		case flrd::ClippingRenderMode::ColoredFront:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_normal));
+			break;
+		case flrd::ClippingRenderMode::ColoredBack:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmap(clip_normal_back));
 			break;
 		case flrd::ClippingRenderMode::FrameAll:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
@@ -528,6 +536,10 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_frame3));
 			break;
+		case flrd::ClippingRenderMode::FrameBack:
+			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
+				wxGetBitmap(clip_frame_back));
+			break;
 		case flrd::ClippingRenderMode::TransFront:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_low));
@@ -535,14 +547,6 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		case flrd::ClippingRenderMode::TransBack:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_low_back));
-			break;
-		case flrd::ClippingRenderMode::ColoredBack:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_normal_back));
-			break;
-		case flrd::ClippingRenderMode::None:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_none));
 			break;
 		}
 	}

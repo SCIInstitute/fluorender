@@ -1037,7 +1037,7 @@ void main() {
 inline constexpr const char* IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
 // IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES
 uniform vec4 loc0;   // (viewportWidth, viewportHeight, thickness, cull mode)
-uniform vec4 loc2;   // plane normal in eye space (xyz used)
+uniform vec4 loc2;   // plane normal in eye space (xyz) w: perspective(1)/orthographic(-1)
 
 layout(lines) in;
 layout(triangle_strip, max_vertices = 4) out;
@@ -1061,14 +1061,22 @@ void main()
 	vec3 planeNormal = normalize(loc2.xyz);
 	vec3 eyeN = normalize((matrix0 * vec4(planeNormal, 0.0)).xyz);
 
+	float facing;
 	// perspective: use per-vertex viewDir
-	vec3 viewDir0 = normalize(-OutEyePos[0]);
-	vec3 viewDir1 = normalize(-OutEyePos[1]);
-	float facing0 = dot(eyeN, viewDir0);
-	float facing1 = dot(eyeN, viewDir1);
-
-	// decide based on average
-	float facing = 0.5 * (facing0 + facing1);
+	if (loc2.w > 0.0)
+	{
+		vec3 viewDir0 = normalize(-OutEyePos[0]);
+		vec3 viewDir1 = normalize(-OutEyePos[1]);
+		float facing0 = dot(eyeN, viewDir0);
+		float facing1 = dot(eyeN, viewDir1);
+		// decide based on average
+		facing = 0.5 * (facing0 + facing1);
+	}
+	// orthographic: use plane normal directly
+	else
+	{
+		facing = dot(eyeN, vec3(0.0, 0.0, 1.0));
+	}
 
 	// cull
 	if(loc0.w == 1.0 && facing < 0.0) return;

@@ -249,6 +249,8 @@ public:
 	const static unsigned char clip_frame6_png[967];
 	/* clip_frame3.png - 730 bytes */
 	const static unsigned char clip_frame3_png[730];
+	/* clip_frame_back.png - 890 bytes */
+	const static unsigned char clip_frame_back_png[890];
 	/* clip_low.png - 566 bytes */
 	const static unsigned char clip_low_png[566];
 	/* clip_low_back.png - 609 bytes */

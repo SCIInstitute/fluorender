@@ -57,7 +57,7 @@ namespace flrd
 		ColoredBack,
 		FrameAll,
 		FrameFront,
-		//FrameBack,
+		FrameBack,
 		TransFront,
 		TransBack,
 	};
