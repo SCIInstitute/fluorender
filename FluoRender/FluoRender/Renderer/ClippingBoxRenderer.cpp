@@ -134,7 +134,7 @@ void ClippingBoxRenderer::render()
 	assert(shader1);
 	shader1->bind();
 	auto shader2 = glbin_shader_manager.shader(gstImgShader,
-		flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES_COLOR, 0));
+		flvr::ShaderParams::Img(IMG_SHDR_DRAW_CLIPPING_BOX_LINES, 0));
 
 	//transform
 	glm::mat4 mv_mat = view->GetModelView();
@@ -145,8 +145,14 @@ void ClippingBoxRenderer::render()
 	if (settings_->draw_border)
 	{
 		shader2->bind();
-		shader2->setLocalParamMatrix(0, glm::value_ptr(matrix));
-		shader2->setLocalParam(0, size.w(), size.h(), width, 0.0);
+		shader2->setLocalParamMatrix(0, glm::value_ptr(mv_mat));
+		shader2->setLocalParamMatrix(1, glm::value_ptr(proj_mat));
+		double cull = 0.0;
+		if (settings_->winding == flrd::FaceWinding::Front)
+			cull = 1.0;
+		else if (settings_->winding == flrd::FaceWinding::Back)
+			cull = -1.0;
+		shader2->setLocalParam(0, size.w(), size.h(), width, cull);
 		shader1->bind();
 	}
 
@@ -200,7 +206,9 @@ void ClippingBoxRenderer::drawPlane(int index,
 		data_buffer->apply_state();
 
 		shader2->bind();
-		shader2->setLocalParam(1, color.r(), color.g(), color.b(), 0.0);
+		shader2->setLocalParam(1, color.r(), color.g(), color.b(), 1.0);
+		auto normal = getPlaneNormal(index);
+		shader2->setLocalParam(2, normal.x(), normal.y(), normal.z(), 0.0);
 
 		// Border planes are offset by +16 in VA indexing
 		va_clipp->draw_clip_plane(index, true);
@@ -228,4 +236,15 @@ fluo::Color ClippingBoxRenderer::getPlaneColor(int index)
 		return fluo::Color(0.5, 1.0, 1.0);
 	}
 	return fluo::Color(1.0);
+}
+
+fluo::Vector ClippingBoxRenderer::getPlaneNormal(int idx)
+{
+	if (idx == 0) return fluo::Vector(-1.0, 0.0, 0.0); // -X
+	if (idx == 1) return fluo::Vector(1.0, 0.0, 0.0); // +X
+	if (idx == 2) return fluo::Vector(0.0, -1.0, 0.0); // -Y
+	if (idx == 3) return fluo::Vector(0.0, 1.0, 0.0); // +Y
+	if (idx == 4) return fluo::Vector(0.0, 0.0, -1.0); // -Z
+	if (idx == 5) return fluo::Vector(0.0, 0.0, 1.0); // +Z
+	return fluo::Vector(0.0, 0.0, 0.0); // fallback
 }

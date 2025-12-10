@@ -3968,8 +3968,8 @@ bool RenderView::Draw()
 		break;
 	}
 
-	if (glbin_states.m_clip_display)
-		DrawClippingPlanes(flvr::FaceWinding::Front);
+	//if (glbin_states.m_clip_display)
+	//	DrawClippingPlanes(flvr::FaceWinding::Front);
 
 	if (m_draw_camctr)
 		DrawCamCtr();

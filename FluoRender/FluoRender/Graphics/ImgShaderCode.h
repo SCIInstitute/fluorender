@@ -56,7 +56,7 @@ void main()
 )GLSHDR";
 
 inline constexpr const char* IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI = R"GLSHDR(
-//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3
+//IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI
 layout(location = 0) in vec3 InVertex;
 out vec3 OutColor;
 uniform mat4 matrix0;//transformation
@@ -66,6 +66,24 @@ void main()
 {
 	gl_Position = matrix0 * vec4(InVertex, 1.0);
 	OutColor = loc1.xyz;
+}
+)GLSHDR";
+
+inline constexpr const char* IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
+//IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES
+layout(location = 0) in vec3 InVertex;
+out vec3 OutColor;
+out vec3 OutEyePos;
+uniform mat4 matrix0;//model view
+uniform mat4 matrix1;//projection
+uniform vec4 loc1; //(color, alpha)
+	
+void main()
+{
+	vec4 eyePos = matrix0 * vec4(InVertex, 1.0);
+	gl_Position = matrix1 * eyePos;
+	OutEyePos = eyePos.xyz;
+	OutColor = loc1.rgb;
 }
 )GLSHDR";
 
@@ -1015,8 +1033,78 @@ void main() {
 }
 )GLSHDR";
 
+
+inline constexpr const char* IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
+// IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES
+uniform vec4 loc0;   // (viewportWidth, viewportHeight, thickness, cull mode)
+uniform vec4 loc2;   // plane normal in eye space (xyz used)
+
+layout(lines) in;
+layout(triangle_strip, max_vertices = 4) out;
+
+in vec3 OutColor[];
+in vec3 OutEyePos[];      // bring in eye-space positions
+out vec3 OutColor2;
+
+uniform mat4 matrix0;//model view
+
+vec2 toScreenSpace(vec4 vertex) {
+	return vec2(vertex.xy / vertex.w) * loc0.xy;
+}
+float toZValue(vec4 vertex) {
+	return (vertex.z / vertex.w);
+}
+
+void main()
+{
+	// eye-space plane normal
+	vec3 planeNormal = normalize(loc2.xyz);
+	vec3 eyeN = normalize((matrix0 * vec4(planeNormal, 0.0)).xyz);
+
+	// perspective: use per-vertex viewDir
+	vec3 viewDir0 = normalize(-OutEyePos[0]);
+	vec3 viewDir1 = normalize(-OutEyePos[1]);
+	float facing0 = dot(eyeN, viewDir0);
+	float facing1 = dot(eyeN, viewDir1);
+
+	// decide based on average
+	float facing = 0.5 * (facing0 + facing1);
+
+	// cull
+	if(loc0.w == 1.0 && facing < 0.0) return;
+	if(loc0.w == -1.0 && facing > 0.0) return;
+
+	OutColor2 = OutColor[0];
+
+	// Use clip-space inputs for rasterization; expand thickness in screen space
+	vec4 pps0 = gl_in[0].gl_Position;
+	vec4 pps1 = gl_in[1].gl_Position;
+
+	vec2 sps0 = toScreenSpace(pps0);
+	vec2 sps1 = toScreenSpace(pps1);
+
+	float z0 = toZValue(pps0);
+	float z1 = toZValue(pps1);
+
+	vec2 v  = normalize(sps1 - sps0);
+	vec2 n  = vec2(-v.y, v.x);
+	float hw = loc0.z * 0.5;
+
+	vec2 t0 = sps0 + n * hw;
+	vec2 t1 = sps0 - n * hw;
+	vec2 t2 = sps1 + n * hw;
+	vec2 t3 = sps1 - n * hw;
+
+	gl_Position = vec4(t0 / loc0.xy, z0, 1.0); EmitVertex();
+	gl_Position = vec4(t1 / loc0.xy, z0, 1.0); EmitVertex();
+	gl_Position = vec4(t2 / loc0.xy, z1, 1.0); EmitVertex();
+	gl_Position = vec4(t3 / loc0.xy, z1, 1.0); EmitVertex();
+	EndPrimitive();
+}
+)GLSHDR";
+
 inline constexpr const char* IMG_FRG_CODE_DRAW_THICKLINES = R"GLSHDR(
-//IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3
+//IMG_FRG_CODE_DRAW_THICKLINES
 in vec3 OutColor2;
 out vec4 FragColor;
 	

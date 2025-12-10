@@ -802,6 +802,13 @@ void ClipPlanePanel::SetPlaneMode()
 	ival = ival > static_cast<int>(flrd::ClippingRenderMode::TransBack) ?
 		static_cast<int>(flrd::ClippingRenderMode::None) : ival;
 	glbin_settings.m_clip_mode = ival;
+	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
+	if (renderer)
+	{
+		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
+		settings->mode = static_cast<flrd::ClippingRenderMode>(ival);
+	}
 	FluoRefresh(2, { gstClipPlaneMode },
 		{ glbin_current.GetViewId() });
 }

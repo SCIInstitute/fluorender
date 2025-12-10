@@ -38,8 +38,10 @@ std::shared_ptr<ShaderProgram> ImgShaderFactory::shader(const ShaderParams& para
 	if (it != shader_map_.end())
 		return it->second;
 
-	bool use_geom_shader = params.type == IMG_SHDR_DRAW_THICK_LINES ||
-		params.type == IMG_SHDR_DRAW_THICK_LINES_COLOR;
+	bool use_geom_shader =
+		params.type == IMG_SHDR_DRAW_THICK_LINES ||
+		params.type == IMG_SHDR_DRAW_THICK_LINES_COLOR ||
+		params.type == IMG_SHDR_DRAW_CLIPPING_BOX_LINES;
 
 	std::string vs, fs, gs;
 	bool valid_v = emit_v(params, vs);
@@ -76,6 +78,9 @@ bool ImgShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 		break;
 	case IMG_SHDR_DRAW_THICK_LINES_COLOR:
 		z << IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI;
+		break;
+	case IMG_SHDR_DRAW_CLIPPING_BOX_LINES:
+		z << IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES;
 		break;
 	case IMG_SHDR_DRAW_GEOMETRY_COLOR3:
 	case IMG_SHDR_DRAW_THICK_LINES:
@@ -154,6 +159,7 @@ bool ImgShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		break;
 	case IMG_SHDR_DRAW_THICK_LINES:
 	case IMG_SHDR_DRAW_THICK_LINES_COLOR:
+	case IMG_SHDR_DRAW_CLIPPING_BOX_LINES:
 		z << IMG_FRG_CODE_DRAW_THICKLINES;
 		break;
 	case IMG_SHDR_DRAW_GEOMETRY_COLOR4:
@@ -252,6 +258,9 @@ bool ImgShaderFactory::emit_g(const ShaderParams& p, std::string& s)
 	case IMG_SHDR_DRAW_THICK_LINES:
 	case IMG_SHDR_DRAW_THICK_LINES_COLOR:
 		z << IMG_SHDR_CODE_DRAW_THICK_LINES;
+		break;
+	case IMG_SHDR_DRAW_CLIPPING_BOX_LINES:
+		z << IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES;
 		break;
 	}
 

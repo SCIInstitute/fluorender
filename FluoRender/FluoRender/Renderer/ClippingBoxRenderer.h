@@ -106,6 +106,7 @@ namespace flrd
 			const std::shared_ptr<flvr::Framebuffer>& data_buffer);
 
 		fluo::Color getPlaneColor(int index);
+		fluo::Vector getPlaneNormal(int idx);
 
 		fluo::ClippingBox box_;
 		std::shared_ptr<ClippingBoxSettings> settings_;
