@@ -332,37 +332,18 @@ void MeshData::ReturnData()
 	if (bcolor && !m_data->colors)
 		m_data->colors = (GLfloat*)malloc(sizeof(GLfloat) * 4 * (num_vertices + 1));
 
-	// Transform setup
-	glm::vec3 center(m_center.x(), m_center.y(), m_center.z());
-	glm::vec3 trans(m_trans[0], m_trans[1], m_trans[2]);
-	glm::vec3 rot(glm::radians(m_rot[0]), glm::radians(m_rot[1]), glm::radians(m_rot[2]));
-	glm::vec3 scale(m_scale[0], m_scale[1], m_scale[2]);
-
-	glm::mat4 M = glm::mat4(1.0f);
-	M = glm::translate(M, trans + center);
-	M = glm::rotate(M, rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	M = glm::rotate(M, rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	M = glm::rotate(M, rot.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	M = glm::scale(M, scale);
-	M = glm::translate(M, -center);
-	glm::mat3 N = glm::transpose(glm::inverse(glm::mat3(M)));
-
 	// Copy vertex data
 	for (size_t i = 1; i <= num_vertices; ++i)
 	{
-		glm::vec3 v(verts[3 * (i - 1)], verts[3 * (i - 1) + 1], verts[3 * (i - 1) + 2]);
-		v = glm::vec3(M * glm::vec4(v, 1.0f));
-		m_data->vertices[3 * i + 0] = v.x;
-		m_data->vertices[3 * i + 1] = v.y;
-		m_data->vertices[3 * i + 2] = v.z;
+		m_data->vertices[3 * i + 0] = verts[3 * (i - 1)];
+		m_data->vertices[3 * i + 1] = verts[3 * (i - 1) + 1];
+		m_data->vertices[3 * i + 2] = verts[3 * (i - 1) + 2];
 
 		if (bnormal)
 		{
-			glm::vec3 n(norms[3 * (i - 1)], norms[3 * (i - 1) + 1], norms[3 * (i - 1) + 2]);
-			n = glm::normalize(N * n);
-			m_data->normals[3 * i + 0] = n.x;
-			m_data->normals[3 * i + 1] = n.y;
-			m_data->normals[3 * i + 2] = n.z;
+			m_data->normals[3 * i + 0] = norms[3 * (i - 1)];
+			m_data->normals[3 * i + 1] = norms[3 * (i - 1) + 1];
+			m_data->normals[3 * i + 2] = norms[3 * (i - 1) + 2];
 		}
 
 		if (btexcoord)

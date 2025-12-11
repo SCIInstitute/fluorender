@@ -255,11 +255,11 @@ inline constexpr const char* MSH_FRAG_BODY_DP_5 = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_HEAD_CLIP_FUNC = R"GLSHDR(
 	//MSH_FRAG_HEAD_CLIP_FUNC
-	if (mesh_clip_func(vec4(VertexPos, 1.0)))
-	{
-		discard;
-		return;
-	}
+	//if (mesh_clip_func(vec4(VertexPos, 1.0)))
+	//{
+	//	discard;
+	//	return;
+	//}
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_HEAD_FOG = R"GLSHDR(
