@@ -147,6 +147,7 @@ public:
 	fluo::Vector GetScaling() { return m_scale; }
 
 	virtual void SetClippingBox(const fluo::ClippingBox& box) override;
+	virtual fluo::ClippingBox& GetClippingBox() override;
 	//clip size
 	virtual void SetClipValue(fluo::ClipPlane i, int val) override;
 	virtual void SetClipValues(fluo::ClipPlane i, int val1, int val2) override;
@@ -213,6 +214,7 @@ private:
 
 private:
 	void BuildMesh();
+	void UpdateBounds();
 };
 
 #endif//_MESH_DATA_H_

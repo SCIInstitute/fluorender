@@ -203,7 +203,7 @@ uniform vec4 loc15; //plane5
 
 inline constexpr const char* MSH_FRAG_CLIP_FUNC = R"GLSHDR(
 //MSH_FRAG_CLIP_FUNC
-bool vol_clip_func(vec4 t)
+bool mesh_clip_func(vec4 t)
 {
 	if (dot(t.xyz, loc10.xyz)+loc10.w < 0.0 ||
 		dot(t.xyz, loc11.xyz)+loc11.w < 0.0 ||
@@ -255,7 +255,7 @@ inline constexpr const char* MSH_FRAG_BODY_DP_5 = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_HEAD_CLIP_FUNC = R"GLSHDR(
 	//MSH_FRAG_HEAD_CLIP_FUNC
-	if (vol_clip_func(vec4(VertexPos, 1.0)))
+	if (mesh_clip_func(vec4(VertexPos, 1.0)))
 	{
 		discard;
 		return;

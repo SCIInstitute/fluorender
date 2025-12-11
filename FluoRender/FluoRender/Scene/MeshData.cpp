@@ -904,6 +904,13 @@ double MeshData::GetShadowIntensity()
 
 fluo::BBox MeshData::GetBounds()
 {
+	if (!m_bounds.valid())
+	{
+		if (m_gpu_dirty)
+			ReturnData();
+		UpdateBounds();
+	}
+
 	fluo::BBox bounds;
 	fluo::Point p[8];
 	p[0] = fluo::Point(m_bounds.Min().x(), m_bounds.Min().y(), m_bounds.Min().z());
@@ -975,6 +982,17 @@ void MeshData::SetClippingBox(const fluo::ClippingBox& box)
 {
 	TreeLayer::SetClippingBox(box);
 	m_mr->set_clipping_box(m_clipping_box);
+}
+
+fluo::ClippingBox& MeshData::GetClippingBox()
+{
+	if (!m_bounds.valid())
+	{
+		if (m_gpu_dirty)
+			ReturnData();
+		UpdateBounds();
+	}
+	return m_clipping_box;
 }
 
 void MeshData::SetClipValue(fluo::ClipPlane i, int val)
@@ -1104,22 +1122,7 @@ void MeshData::BuildMesh()
 	m_data->materials[0].havetexture = false;
 	m_data->materials[0].textureID = 0;
 
-	//bounds
-	GLfloat fbounds[6];
-	glmBoundingBox(m_data.get(), fbounds);
-	fluo::BBox bounds;
-	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
-	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	m_bounds = bounds;
-	m_center = fluo::Point(
-		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
-		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
-		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
-
-	m_clipping_box.SetBBoxes(m_bounds, m_bounds);
-	m_mr->set_clipping_box(m_clipping_box);
+	UpdateBounds();
 
 	SetFlatShading(m_data->numnormals == 0);
 	SetVertexColor(m_data->numcolors > 0);
@@ -1139,4 +1142,25 @@ void MeshData::BuildMesh()
 	}
 
 	SubmitData();
+}
+
+void MeshData::UpdateBounds()
+{
+	//bounds
+	GLfloat fbounds[6];
+	glmBoundingBox(m_data.get(), fbounds);
+	fluo::BBox bounds;
+	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
+	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
+	bounds.extend(pmin);
+	bounds.extend(pmax);
+	bounds.expand_to_int();
+	m_bounds = bounds;
+	m_center = fluo::Point(
+		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
+		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
+		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
+
+	m_clipping_box.SetBBoxes(m_bounds, m_bounds);
+	m_mr->set_clipping_box(m_clipping_box);
 }

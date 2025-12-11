@@ -272,6 +272,20 @@ namespace fluo
 			}
 		}
 
+		//expand the box to closest integer values greater than current min and max
+		inline void expand_to_int()
+		{
+			if (is_valid_)
+			{
+				cmin_.x(std::floor(cmin_.x()));
+				cmin_.y(std::floor(cmin_.y()));
+				cmin_.z(std::floor(cmin_.z()));
+				cmax_.x(std::ceil(cmax_.x()));
+				cmax_.y(std::ceil(cmax_.y()));
+				cmax_.z(std::ceil(cmax_.z()));
+			}
+		}
+
 		//x, y, z size
 		inline Point size() const
 		{
