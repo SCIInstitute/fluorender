@@ -125,6 +125,8 @@ typedef struct _GLMmodel
 	GLfloat position[3];          /* position of the model */
 	GLfloat rotation[3];          /* axis-angle */
 	GLfloat scale[3];             /* non-uniform scaling */
+	GLfloat trans_center[3];      /* center of transformation */
+	GLboolean valid_trans_center; /* if trans center is read from file */
 
 	GLboolean hastexture;
 

@@ -133,6 +133,10 @@ void MeshData::SetTransformation()
 	m_data->scale[0] = static_cast<float>(m_scale.x());
 	m_data->scale[1] = static_cast<float>(m_scale.y());
 	m_data->scale[2] = static_cast<float>(m_scale.z());
+
+	m_data->trans_center[0] = static_cast<float>(m_trans_center.x());
+	m_data->trans_center[1] = static_cast<float>(m_trans_center.y());
+	m_data->trans_center[2] = static_cast<float>(m_trans_center.z());
 }
 
 void MeshData::SubmitData()
@@ -720,9 +724,9 @@ void MeshData::SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
 		glm::mat4 mv_temp;
 		mv_temp = glm::translate(
 			mv_mat, glm::vec3(
-		m_trans[0]+m_center.x(),
-		m_trans[1]+m_center.y(),
-		m_trans[2]+m_center.z()));
+		m_trans[0]+ m_trans_center.x(),
+		m_trans[1]+ m_trans_center.y(),
+		m_trans[2]+ m_trans_center.z()));
 		mv_temp = glm::rotate(
 			mv_temp, float(glm::radians(m_rot[0])),
 			glm::vec3(1.0, 0.0, 0.0));
@@ -735,7 +739,7 @@ void MeshData::SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat)
 		mv_temp = glm::scale(mv_temp,
 			glm::vec3(float(m_scale[0]), float(m_scale[1]), float(m_scale[2])));
 		mv_temp = glm::translate(mv_temp,
-			glm::vec3(-m_center.x(), -m_center.y(), -m_center.z()));
+			glm::vec3(-m_trans_center.x(), -m_trans_center.y(), -m_trans_center.z()));
 
 		m_mr->SetMatrices(mv_temp, proj_mat);
 	}
@@ -910,36 +914,7 @@ fluo::BBox MeshData::GetBounds()
 		UpdateBounds();
 	}
 
-	fluo::BBox bounds;
-	fluo::Point p[8];
-	p[0] = fluo::Point(m_bounds.Min().x(), m_bounds.Min().y(), m_bounds.Min().z());
-	p[1] = fluo::Point(m_bounds.Min().x(), m_bounds.Min().y(), m_bounds.Max().z());
-	p[2] = fluo::Point(m_bounds.Min().x(), m_bounds.Max().y(), m_bounds.Min().z());
-	p[3] = fluo::Point(m_bounds.Min().x(), m_bounds.Max().y(), m_bounds.Max().z());
-	p[4] = fluo::Point(m_bounds.Max().x(), m_bounds.Min().y(), m_bounds.Min().z());
-	p[5] = fluo::Point(m_bounds.Max().x(), m_bounds.Min().y(), m_bounds.Max().z());
-	p[6] = fluo::Point(m_bounds.Max().x(), m_bounds.Max().y(), m_bounds.Min().z());
-	p[7] = fluo::Point(m_bounds.Max().x(), m_bounds.Max().y(), m_bounds.Max().z());
-	double s, c;
-	fluo::Point temp;
-	for (int i=0 ; i<8 ; i++)
-	{
-		p[i] = fluo::Point(p[i].x()*m_scale[0], p[i].y()*m_scale[1], p[i].z()*m_scale[2]);
-		s = sin(d2r(m_rot[2]));
-		c = cos(d2r(m_rot[2]));
-		temp = fluo::Point(c*p[i].x()-s*p[i].y(), s*p[i].x()+c*p[i].y(), p[i].z());
-		p[i] = temp;
-		s = sin(d2r(m_rot[1]));
-		c = cos(d2r(m_rot[1]));
-		temp = fluo::Point(c*p[i].x()+s*p[i].z(), p[i].y(), -s*p[i].x()+c*p[i].z());
-		p[i] = temp;
-		s = sin(d2r(m_rot[0]));
-		c = cos(d2r(m_rot[0]));
-		temp = fluo::Point(p[i].x(), c*p[i].y()-s*p[i].z(), s*p[i].y()+c*p[i].z());
-		p[i] = fluo::Point(temp.x()+m_trans[0], temp.y()+m_trans[1], temp.z()+m_trans[2]);
-		bounds.extend(p[i]);
-	}
-	return bounds;
+	return m_bounds;
 }
 
 GLMmodel* MeshData::GetMesh()
@@ -1121,12 +1096,16 @@ void MeshData::BuildMesh()
 	m_data->materials[0].havetexture = false;
 	m_data->materials[0].textureID = 0;
 
+	UpdateBounds();
+
 	//transformation
 	m_trans = fluo::Vector(m_data->position[0], m_data->position[1], m_data->position[2]);
 	m_rot = fluo::Vector(m_data->rotation[0], m_data->rotation[1], m_data->rotation[2]);
 	m_scale = fluo::Vector(m_data->scale[0], m_data->scale[1], m_data->scale[2]);
-
-	UpdateBounds();
+	if (m_data->valid_trans_center)
+		m_trans_center = fluo::Point(m_data->trans_center[0], m_data->trans_center[1], m_data->trans_center[2]);
+	else
+		m_trans_center = m_center;
 
 	SetFlatShading(m_data->numnormals == 0);
 	SetVertexColor(m_data->numcolors > 0);

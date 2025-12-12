@@ -622,6 +622,7 @@ char *sgets( char * str, int num, char **input )
 //read custom transformation from comments
 static void glmReadTransforms(GLMmodel* model, char* file) {
 	char line[256];
+	model->valid_trans_center = false;
 	while (sgets(line, sizeof(line), &file))
 	{
 		if (strncmp(line, "# Position:", 11) == 0) {
@@ -641,6 +642,14 @@ static void glmReadTransforms(GLMmodel* model, char* file) {
 				&model->scale[0],
 				&model->scale[1],
 				&model->scale[2]);
+		}
+		else if (strncmp(line, "# Trans_center:", 15) == 0) {
+			auto val = SSCANF(line + 15, "%f %f %f",
+				&model->trans_center[0],
+				&model->trans_center[1],
+				&model->trans_center[2]);
+			if (val == 3)
+				model->valid_trans_center = true;
 		}
 	}
 }
@@ -1101,11 +1110,12 @@ GLvoid glmBoundingBox(GLMmodel* model, GLfloat* boundingbox)
 	assert(model->vertices);
 	assert(boundingbox);
 
-	// Helper: apply scale, rotation (Euler XYZ), and translation
+	// Helper: apply scale, rotation (Euler XYZ), and translation with pivot at trans_center
 	auto transformVertex = [&](GLfloat in[3], GLfloat out[3]) {
-		float x = in[0];
-		float y = in[1];
-		float z = in[2];
+		// shift to pivot
+		float x = in[0] - model->trans_center[0];
+		float y = in[1] - model->trans_center[1];
+		float z = in[2] - model->trans_center[2];
 
 		// scale
 		x *= model->scale[0];
@@ -1132,7 +1142,12 @@ GLvoid glmBoundingBox(GLMmodel* model, GLfloat* boundingbox)
 		float y3 = x * sinf(rz) + y * cosf(rz);
 		x = x3; y = y3;
 
-		// translate
+		// shift back from pivot
+		x += model->trans_center[0];
+		y += model->trans_center[1];
+		z += model->trans_center[2];
+
+		// final translation
 		x += model->position[0];
 		y += model->position[1];
 		z += model->position[2];
@@ -1827,6 +1842,9 @@ GLvoid glmClear(GLMmodel* model)
 	model->scale[0] = 1.0f;
 	model->scale[1] = 1.0f;
 	model->scale[2] = 1.0f;
+	model->trans_center[0] = 0.0f;
+	model->trans_center[1] = 0.0f;
+	model->trans_center[2] = 0.0f;
 	model->hastexture = false;
 }
 
@@ -1852,6 +1870,9 @@ void glmClearGeometry(GLMmodel* model)
 	model->scale[0] = 1.0f;
 	model->scale[1] = 1.0f;
 	model->scale[2] = 1.0f;
+	model->trans_center[0] = 0.0f;
+	model->trans_center[1] = 0.0f;
+	model->trans_center[2] = 0.0f;
 }
 
 /* glmReadOBJ: Reads a model description from a Wavefront .OBJ file.
@@ -1914,6 +1935,9 @@ GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 	model->scale[0] = 1.0f;
 	model->scale[1] = 1.0f;
 	model->scale[2] = 1.0f;
+	model->trans_center[0] = 0.0f;
+	model->trans_center[1] = 0.0f;
+	model->trans_center[2] = 0.0f;
 	model->hastexture = GL_FALSE;
 
 	//read transformation info first
@@ -2030,6 +2054,7 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 	fprintf(file, "# Position: %f %f %f\n", model->position[0], model->position[1], model->position[2]);
 	fprintf(file, "# Rotation: %f %f %f\n", model->rotation[0], model->rotation[1], model->rotation[2]);
 	fprintf(file, "# Scale: %f %f %f\n", model->scale[0], model->scale[1], model->scale[2]);
+	fprintf(file, "# Trans_center: %f %f %f\n", model->trans_center[0], model->trans_center[1], model->trans_center[2]);
 
 	if (mode & GLM_MATERIAL && model->mtllibname) {
 		fprintf(file, "\nmtllib %s\n\n", model->mtllibname);

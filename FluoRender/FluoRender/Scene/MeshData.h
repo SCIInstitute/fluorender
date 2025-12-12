@@ -209,6 +209,7 @@ private:
 	fluo::Vector m_trans;
 	fluo::Vector m_rot;
 	fluo::Vector m_scale = fluo::Vector(1.0);
+	fluo::Point m_trans_center;
 
 	//legend
 	bool m_legend;
