@@ -9197,8 +9197,8 @@ bool RenderView::PickMesh(BaseState& state)
 	auto pick_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::Pick, nx, ny, gstRBPick);
 	assert(pick_buffer);
-	pick_buffer->set_scissor_test_enabled(true);
-	pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
+	//pick_buffer->set_scissor_test_enabled(true);
+	//pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
 	pick_buffer->set_depth_test_enabled(true);
 	pick_buffer->set_depth_func(flvr::DepthFunc::Lequal);
 	auto guard = glbin_framebuffer_manager.bind_scoped(pick_buffer);
