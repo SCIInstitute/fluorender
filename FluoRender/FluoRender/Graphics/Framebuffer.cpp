@@ -867,7 +867,15 @@ unsigned int Framebuffer::read_pick(int px, int py)
 		{
 			bind();
 			unsigned int value = 0;
+
+			glPixelStorei(GL_PACK_ALIGNMENT, 1);
+			glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+			glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+
+			glReadBuffer(to_gl_attachment(AttachmentPoint::Color(0)));
 			glReadPixels(px, py, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
+
 			if (prevFramebuffer != id_)
 				unbind(prevFramebuffer);
 			return value;
