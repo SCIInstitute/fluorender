@@ -619,6 +619,32 @@ char *sgets( char * str, int num, char **input )
 	return str;
 }
 
+//read custom transformation from comments
+static void glmReadTransforms(GLMmodel* model, char* file) {
+	char line[256];
+	while (sgets(line, sizeof(line), &file))
+	{
+		if (strncmp(line, "# Position:", 11) == 0) {
+			SSCANF(line + 11, "%f %f %f",
+				&model->position[0],
+				&model->position[1],
+				&model->position[2]);
+		}
+		else if (strncmp(line, "# Rotation:", 11) == 0) {
+			SSCANF(line + 11, "%f %f %f",
+				&model->rotation[0],
+				&model->rotation[1],
+				&model->rotation[2]);
+		}
+		else if (strncmp(line, "# Scale:", 8) == 0) {
+			SSCANF(line + 8, "%f %f %f",
+				&model->scale[0],
+				&model->scale[1],
+				&model->scale[2]);
+		}
+	}
+}
+
 /* glmFirstPass: first pass at a Wavefront OBJ file that gets all the
 * statistics of the model (such as #vertices, #normals, etc)
 *
@@ -1075,28 +1101,74 @@ GLvoid glmBoundingBox(GLMmodel* model, GLfloat* boundingbox)
 	assert(model->vertices);
 	assert(boundingbox);
 
-	/* get the max/mins */
-	maxx = minx = model->vertices[3 + 0];
-	maxy = miny = model->vertices[3 + 1];
-	maxz = minz = model->vertices[3 + 2];
+	// Helper: apply scale, rotation (Euler XYZ), and translation
+	auto transformVertex = [&](GLfloat in[3], GLfloat out[3]) {
+		float x = in[0];
+		float y = in[1];
+		float z = in[2];
+
+		// scale
+		x *= model->scale[0];
+		y *= model->scale[1];
+		z *= model->scale[2];
+
+		// rotation (degrees around X,Y,Z axes)
+		float rx = model->rotation[0] * (3.14159265f / 180.0f);
+		float ry = model->rotation[1] * (3.14159265f / 180.0f);
+		float rz = model->rotation[2] * (3.14159265f / 180.0f);
+
+		// rotate around X
+		float y1 = y * cosf(rx) - z * sinf(rx);
+		float z1 = y * sinf(rx) + z * cosf(rx);
+		y = y1; z = z1;
+
+		// rotate around Y
+		float x2 = x * cosf(ry) + z * sinf(ry);
+		float z2 = -x * sinf(ry) + z * cosf(ry);
+		x = x2; z = z2;
+
+		// rotate around Z
+		float x3 = x * cosf(rz) - y * sinf(rz);
+		float y3 = x * sinf(rz) + y * cosf(rz);
+		x = x3; y = y3;
+
+		// translate
+		x += model->position[0];
+		y += model->position[1];
+		z += model->position[2];
+
+		out[0] = x;
+		out[1] = y;
+		out[2] = z;
+		};
+
+	// transform first vertex
+	GLfloat v0[3] = { model->vertices[3 + 0],
+					  model->vertices[3 + 1],
+					  model->vertices[3 + 2] };
+	GLfloat vt[3];
+	transformVertex(v0, vt);
+
+	maxx = minx = vt[0];
+	maxy = miny = vt[1];
+	maxz = minz = vt[2];
+
+	// loop through all vertices
 	for (i = 1; i < model->numvertices; i++) {
-		if (maxx < model->vertices[3 * i + 0])
-			maxx = model->vertices[3 * i + 0];
-		if (minx > model->vertices[3 * i + 0])
-			minx = model->vertices[3 * i + 0];
+		GLfloat v[3] = { model->vertices[3 * i + 0],
+						 model->vertices[3 * i + 1],
+						 model->vertices[3 * i + 2] };
+		GLfloat vt[3];
+		transformVertex(v, vt);
 
-		if (maxy < model->vertices[3 * i + 1])
-			maxy = model->vertices[3 * i + 1];
-		if (miny > model->vertices[3 * i + 1])
-			miny = model->vertices[3 * i + 1];
-
-		if (maxz < model->vertices[3 * i + 2])
-			maxz = model->vertices[3 * i + 2];
-		if (minz > model->vertices[3 * i + 2])
-			minz = model->vertices[3 * i + 2];
+		if (vt[0] > maxx) maxx = vt[0];
+		if (vt[0] < minx) minx = vt[0];
+		if (vt[1] > maxy) maxy = vt[1];
+		if (vt[1] < miny) miny = vt[1];
+		if (vt[2] > maxz) maxz = vt[2];
+		if (vt[2] < minz) minz = vt[2];
 	}
 
-	/* calculate model width, height, and depth */
 	boundingbox[0] = minx;
 	boundingbox[1] = maxx;
 	boundingbox[2] = miny;
@@ -1749,6 +1821,12 @@ GLvoid glmClear(GLMmodel* model)
 	model->position[0] = 0.0f;
 	model->position[1] = 0.0f;
 	model->position[2] = 0.0f;
+	model->rotation[0] = 0.0f;
+	model->rotation[1] = 0.0f;
+	model->rotation[2] = 0.0f;
+	model->scale[0] = 1.0f;
+	model->scale[1] = 1.0f;
+	model->scale[2] = 1.0f;
 	model->hastexture = false;
 }
 
@@ -1768,6 +1846,12 @@ void glmClearGeometry(GLMmodel* model)
 	model->position[0] = 0.0f;
 	model->position[1] = 0.0f;
 	model->position[2] = 0.0f;
+	model->rotation[0] = 0.0f;
+	model->rotation[1] = 0.0f;
+	model->rotation[2] = 0.0f;
+	model->scale[0] = 1.0f;
+	model->scale[1] = 1.0f;
+	model->scale[2] = 1.0f;
 }
 
 /* glmReadOBJ: Reads a model description from a Wavefront .OBJ file.
@@ -1824,7 +1908,16 @@ GLMmodel* glmReadOBJ(const char* filename, bool *no_fail)
 	model->position[0]   = 0.0;
 	model->position[1]   = 0.0;
 	model->position[2]   = 0.0;
+	model->rotation[0] = 0.0f;
+	model->rotation[1] = 0.0f;
+	model->rotation[2] = 0.0f;
+	model->scale[0] = 1.0f;
+	model->scale[1] = 1.0f;
+	model->scale[2] = 1.0f;
 	model->hastexture = GL_FALSE;
+
+	//read transformation info first
+	glmReadTransforms(model, obj_content);
 
 	/* make a first pass through the file to get a count of the number
 	of vertices, normals, texcoords & triangles */
@@ -1923,7 +2016,6 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 		mode &= ~GLM_COLOR;
 	}
 
-
 	/* open the file */
 	std::string str = filename;
 	if (!FOPEN(&file, str, "wt"))
@@ -1931,13 +2023,13 @@ GLvoid glmWriteOBJ(GLMmodel* model, const char* filename, GLuint mode)
 
 	/* spit out a header */
 	fprintf(file, "#  \n");
-	fprintf(file, "#  Wavefront OBJ generated by GLM library\n");
+	fprintf(file, "#  Wavefront OBJ generated by customized GLM library for FluoRender\n");
+	fprintf(file, "#  Transformation information is used by FluoRender\n");
 	fprintf(file, "#  \n");
-	fprintf(file, "#  GLM library\n");
-	fprintf(file, "#  Nate Robins\n");
-	fprintf(file, "#  ndr@pobox.com\n");
-	fprintf(file, "#  http://www.pobox.com/~ndr\n");
-	fprintf(file, "#  \n");
+
+	fprintf(file, "# Position: %f %f %f\n", model->position[0], model->position[1], model->position[2]);
+	fprintf(file, "# Rotation: %f %f %f\n", model->rotation[0], model->rotation[1], model->rotation[2]);
+	fprintf(file, "# Scale: %f %f %f\n", model->scale[0], model->scale[1], model->scale[2]);
 
 	if (mode & GLM_MATERIAL && model->mtllibname) {
 		fprintf(file, "\nmtllib %s\n\n", model->mtllibname);

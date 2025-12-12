@@ -79,6 +79,7 @@ public:
 	std::shared_ptr<BaseMeshReader> GetReader() { return m_reader.lock(); }
 
 	//data synchronization
+	void SetTransformation();
 	void SubmitData();//upload data to GPU
 	void ReturnData();//download data from GPU
 	void AddEmptyData();//create empty data for gpu generated mesh
@@ -139,11 +140,11 @@ public:
 	void SetShadowIntensity(double val);
 	double GetShadowIntensity();
 
-	void SetTranslation(const fluo::Vector& val) { m_trans = val; }
+	void SetTranslation(const fluo::Vector& val) { m_trans = val; SetTransformation(); }
 	fluo::Vector GetTranslation() { return m_trans; }
-	void SetRotation(const fluo::Vector& val) { m_rot = val; }
+	void SetRotation(const fluo::Vector& val) { m_rot = val; SetTransformation(); }
 	fluo::Vector GetRotation() { return m_rot; }
-	void SetScaling(const fluo::Vector& val) { m_scale = val; }
+	void SetScaling(const fluo::Vector& val) { m_scale = val; SetTransformation(); }
 	fluo::Vector GetScaling() { return m_scale; }
 
 	virtual void SetClippingBox(const fluo::ClippingBox& box) override;

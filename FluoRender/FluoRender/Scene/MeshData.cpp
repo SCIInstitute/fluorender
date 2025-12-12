@@ -117,6 +117,24 @@ void MeshData::SetReader(const std::shared_ptr<BaseMeshReader>& reader)
 	m_reader = reader;
 }
 
+void MeshData::SetTransformation()
+{
+	if (!m_data)
+		return;
+
+	m_data->position[0] = static_cast<float>(m_trans.x());
+	m_data->position[1] = static_cast<float>(m_trans.y());
+	m_data->position[2] = static_cast<float>(m_trans.z());
+
+	m_data->rotation[0] = static_cast<float>(m_rot.x());
+	m_data->rotation[1] = static_cast<float>(m_rot.y());
+	m_data->rotation[2] = static_cast<float>(m_rot.z());
+
+	m_data->scale[0] = static_cast<float>(m_scale.x());
+	m_data->scale[1] = static_cast<float>(m_scale.y());
+	m_data->scale[2] = static_cast<float>(m_scale.z());
+}
+
 void MeshData::SubmitData()
 {
 	if (!m_data || !m_mr)
@@ -1103,6 +1121,11 @@ void MeshData::BuildMesh()
 	m_data->materials[0].havetexture = false;
 	m_data->materials[0].textureID = 0;
 
+	//transformation
+	m_trans = fluo::Vector(m_data->position[0], m_data->position[1], m_data->position[2]);
+	m_rot = fluo::Vector(m_data->rotation[0], m_data->rotation[1], m_data->rotation[2]);
+	m_scale = fluo::Vector(m_data->scale[0], m_data->scale[1], m_data->scale[2]);
+
 	UpdateBounds();
 
 	SetFlatShading(m_data->numnormals == 0);
@@ -1137,10 +1160,7 @@ void MeshData::UpdateBounds()
 	bounds.extend(pmax);
 	bounds.expand_to_int();
 	m_bounds = bounds;
-	m_center = fluo::Point(
-		(m_bounds.Min().x()+m_bounds.Max().x())*0.5,
-		(m_bounds.Min().y()+m_bounds.Max().y())*0.5,
-		(m_bounds.Min().z()+m_bounds.Max().z())*0.5);
+	m_center = bounds.center();
 
 	m_clipping_box.SetBBoxes(m_bounds, m_bounds);
 	m_mr->set_clipping_box(m_clipping_box);

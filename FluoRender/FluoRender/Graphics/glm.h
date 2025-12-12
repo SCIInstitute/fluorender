@@ -123,6 +123,8 @@ typedef struct _GLMmodel
 	GLMgroup*    groups;          /* linked list of groups */
 
 	GLfloat position[3];          /* position of the model */
+	GLfloat rotation[3];          /* axis-angle */
+	GLfloat scale[3];             /* non-uniform scaling */
 
 	GLboolean hastexture;
 
