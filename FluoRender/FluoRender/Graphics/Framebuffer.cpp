@@ -865,7 +865,8 @@ unsigned int Framebuffer::read_pick(int px, int py)
 			rec.texture->valid() &&
 			rec.texture->config_.type == FBTexType::Render_Int32)
 		{
-			bind();
+			// Bind this framebuffer
+			glBindFramebuffer(GL_FRAMEBUFFER, id_);
 			unsigned int value = 0;
 
 			glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -874,10 +875,15 @@ unsigned int Framebuffer::read_pick(int px, int py)
 			glPixelStorei(GL_PACK_SKIP_ROWS, 0);
 
 			glReadBuffer(to_gl_attachment(AttachmentPoint::Color(0)));
-			glReadPixels(px, py, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
+			//glReadPixels(px, py, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
+
+			unsigned int* image = new unsigned int[nx_ * ny_];
+			DBMIINT32 img;
+			img.nx = nx_; img.ny = ny_; img.nc = 1; img.nt = nx_ * 4; img.data = image;
+			glReadPixels(0, 0, nx_, ny_, GL_RED_INTEGER, GL_UNSIGNED_INT, image);
 
 			if (prevFramebuffer != id_)
-				unbind(prevFramebuffer);
+				glBindFramebuffer(GL_FRAMEBUFFER, prevFramebuffer);
 			return value;
 		}
 	}

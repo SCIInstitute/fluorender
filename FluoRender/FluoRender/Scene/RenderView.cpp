@@ -9215,12 +9215,6 @@ bool RenderView::PickMesh(BaseState& state)
 		}
 	}
 
-	unsigned int* image = new unsigned int[m_gl_size.w() * m_gl_size.h()];
-	pick_buffer->read(0, 0, m_gl_size.w(), m_gl_size.h(),
-		flvr::AttachmentPoint::Color(0), 0x8D94, GL_UNSIGNED_INT, image);
-	DBMIINT32 img;
-	img.nx = m_gl_size.w(); img.ny = m_gl_size.h(); img.nc = 1; img.nt = nx * 4; img.data = image;
-
 	size_t choose = 0;
 	choose = pick_buffer->read_pick(m_mouse_x, ny - m_mouse_y);
 
