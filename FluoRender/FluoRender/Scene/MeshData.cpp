@@ -85,12 +85,12 @@ void MeshData::SetViewport(GLint vp[4])
 		m_mr->set_viewport(vp);
 }
 
-int MeshData::Load(GLMmodel* mesh)
+int MeshData::Load(GLMmodel* mesh, const std::wstring& name, const std::wstring& path)
 {
 	if (!mesh) return 0;
 
-	m_data_path = L"";
-	m_name = L"New Mesh";
+	m_data_path = path;
+	m_name = name;
 
 	m_data = GLMmodelPtr(mesh, glmDelete);
 
@@ -482,34 +482,6 @@ void MeshData::AddEmptyData()
 
 	m_data = GLMmodelPtr(model, glmDelete);
 
-	if (!m_data->materials)
-	{
-		m_data->materials = new GLMmaterial;
-		m_data->nummaterials = 1;
-	}
-
-	/* set the default material */
-	m_data->materials[0].name = NULL;
-	m_data->materials[0].ambient[0] = 0.0;
-	m_data->materials[0].ambient[1] = 0.0;
-	m_data->materials[0].ambient[2] = 0.0;
-	m_data->materials[0].ambient[3] = 0.0;
-	m_data->materials[0].diffuse[0] = 0.0;
-	m_data->materials[0].diffuse[1] = 0.0;
-	m_data->materials[0].diffuse[2] = 0.0;
-	m_data->materials[0].diffuse[3] = 0.0;
-	m_data->materials[0].specular[0] = 0.0;
-	m_data->materials[0].specular[1] = 0.0;
-	m_data->materials[0].specular[2] = 0.0;
-	m_data->materials[0].specular[3] = 0.0;
-	m_data->materials[0].shininess = 0.0;
-	m_data->materials[0].emmissive[0] = 0.0;
-	m_data->materials[0].emmissive[1] = 0.0;
-	m_data->materials[0].emmissive[2] = 0.0;
-	m_data->materials[0].emmissive[3] = 0.0;
-	m_data->materials[0].havetexture = false;
-	m_data->materials[0].textureID = 0;
-
 	m_mr->set_data(m_data.get());
 }
 
@@ -841,6 +813,13 @@ fluo::Color MeshData::GetColor()
 	return m_color;
 }
 
+fluo::Color MeshData::GetDataColor()
+{
+	if (m_mr)
+		return m_mr->get_color();
+	return m_color;
+}
+
 void MeshData::SetAlpha(double alpha)
 {
 	m_alpha = alpha;
@@ -1068,33 +1047,16 @@ void MeshData::BuildMesh()
 		glmLinearTexture(m_data.get());
 	}
 
-	if (!m_data->materials)
+	if (m_data->materials)
 	{
-		m_data->materials = new GLMmaterial;
-		m_data->nummaterials = 1;
+		//set color based on material
+		GLMmaterial* mat = &(m_data->materials[0]);
+		if (m_mr)
+		{
+			fluo::Color color(mat->diffuse[0], mat->diffuse[1], mat->diffuse[2]);
+			m_mr->set_color(color);
+		}
 	}
-
-	/* set the default material */
-	m_data->materials[0].name = NULL;
-	m_data->materials[0].ambient[0] = 0.0;
-	m_data->materials[0].ambient[1] = 0.0;
-	m_data->materials[0].ambient[2] = 0.0;
-	m_data->materials[0].ambient[3] = 0.0;
-	m_data->materials[0].diffuse[0] = 0.0;
-	m_data->materials[0].diffuse[1] = 0.0;
-	m_data->materials[0].diffuse[2] = 0.0;
-	m_data->materials[0].diffuse[3] = 0.0;
-	m_data->materials[0].specular[0] = 0.0;
-	m_data->materials[0].specular[1] = 0.0;
-	m_data->materials[0].specular[2] = 0.0;
-	m_data->materials[0].specular[3] = 0.0;
-	m_data->materials[0].shininess = 0.0;
-	m_data->materials[0].emmissive[0] = 0.0;
-	m_data->materials[0].emmissive[1] = 0.0;
-	m_data->materials[0].emmissive[2] = 0.0;
-	m_data->materials[0].emmissive[3] = 0.0;
-	m_data->materials[0].havetexture = false;
-	m_data->materials[0].textureID = 0;
 
 	UpdateBounds();
 

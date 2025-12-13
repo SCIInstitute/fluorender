@@ -73,6 +73,8 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 
 	//inputs
 	z << MSH_VERTEX_INPUTS_V;
+	//outputs
+	z << MSH_VERTEX_OUTPUTS_VPOS;
 	if (p.type == 0)
 	{
 		if (p.shading)
@@ -81,8 +83,6 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 			z << MSH_VERTEX_INPUTS_T;
 		if (p.color)
 			z << MSH_VERTEX_INPUTS_C;
-		//outputs
-		z << MSH_VERTEX_OUTPUTS_VPOS;
 		if (p.shading)
 			z << MSH_VERTEX_OUTPUTS_N;
 		if (p.tex)

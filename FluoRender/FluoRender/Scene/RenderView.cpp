@@ -3395,7 +3395,9 @@ void RenderView::UpdateMeshData(int frame, const std::shared_ptr<MeshData>& md)
 		return;
 
 	auto data = reader->Convert(frame);
-	if (!md->Load(data))
+	auto name = reader->GetDataName();
+	auto path = reader->GetPathName();
+	if (!md->Load(data, name, path))
 		return;
 
 	md->SetCurTime(reader->GetCurTime());
@@ -3547,9 +3549,10 @@ void RenderView::ReloadMeshData(int frame)
 				md->SetDisp(false);
 				continue;
 			}
-			md->Load(data);
-
 			std::wstring data_name = reader->GetDataName();
+			auto path = reader->GetPathName();
+			md->Load(data, data_name, path);
+
 			if (it != m_md_pop_list.begin())
 				m_bat_folder += L"_";
 			m_bat_folder += data_name;
@@ -9166,10 +9169,16 @@ void RenderView::Pick(BaseState& state)
 	bool mesh_sel = PickMesh(state);
 	fluo::ValueCollection vc = { gstCurrentSelect };
 	if (vol_sel)
+	{
 		vc.insert({ gstVolumePropPanel, gstCompListSelection });
+	}
+	else if (mesh_sel)
+	{
+		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Refresh mesh selection", { static_cast<int>(m_id) }));
+	}
 	else
 	{
-		if (!mesh_sel && m_vd_pop_list.empty())
+		if (m_vd_pop_list.empty())
 			glbin_current.SetMeshData(0);
 	}
 	glbin_current.mainframe->UpdateProps(vc);
@@ -9197,8 +9206,8 @@ bool RenderView::PickMesh(BaseState& state)
 	auto pick_buffer = glbin_framebuffer_manager.framebuffer(
 		flvr::FBRole::Pick, nx, ny, gstRBPick);
 	assert(pick_buffer);
-	//pick_buffer->set_scissor_test_enabled(true);
-	//pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
+	pick_buffer->set_scissor_test_enabled(true);
+	pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
 	pick_buffer->set_depth_test_enabled(true);
 	pick_buffer->set_depth_func(flvr::DepthFunc::Lequal);
 	auto guard = glbin_framebuffer_manager.bind_scoped(pick_buffer);

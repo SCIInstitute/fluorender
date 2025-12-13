@@ -197,7 +197,7 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//color
 	if (update_all)
 	{
-		cval = m_md->GetColor();
+		cval = m_md->GetDataColor();
 		wxColor wxc(cval.r() * 255, cval.g() * 255, cval.b() * 255);
 		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));

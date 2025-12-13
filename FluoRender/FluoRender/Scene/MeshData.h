@@ -73,7 +73,7 @@ public:
 	bool GetDrawBounds();
 
 	//data management
-	int Load(GLMmodel* mesh);
+	int Load(GLMmodel* mesh, const std::wstring& name, const std::wstring& path);
 	void Save(const std::wstring &filename);
 	void SetReader(const std::shared_ptr<BaseMeshReader>& reader);
 	std::shared_ptr<BaseMeshReader> GetReader() { return m_reader.lock(); }
@@ -124,6 +124,7 @@ public:
 	bool GetVertexColor();
 	void SetColor(const fluo::Color &color);
 	virtual fluo::Color GetColor() override;
+	fluo::Color GetDataColor();
 	void SetAlpha(double val);
 	double GetAlpha();
 	bool GetTransparent();

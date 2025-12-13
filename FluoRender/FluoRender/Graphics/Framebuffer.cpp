@@ -522,10 +522,6 @@ FramebufferState Framebuffer::default_state()
 		break;
 
 	case FBRole::Pick:
-		s.enableDepthTest = true;
-		s.enableScissorTest = true;
-		break;
-
 	case FBRole::Depth:
 		s.enableDepthTest = true;
 		break;
@@ -876,11 +872,6 @@ unsigned int Framebuffer::read_pick(int px, int py)
 
 			glReadBuffer(to_gl_attachment(AttachmentPoint::Color(0)));
 			glReadPixels(px, py, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
-
-			unsigned int* image = new unsigned int[nx_ * ny_](0);
-			DBMIINT32 img;
-			img.nx = nx_; img.ny = ny_; img.nc = 1; img.nt = nx_ * 4; img.data = image;
-			glReadPixels(0, 0, nx_, ny_, GL_RED_INTEGER, GL_UNSIGNED_INT, image);
 
 			if (prevFramebuffer != id_)
 				glBindFramebuffer(GL_FRAMEBUFFER, prevFramebuffer);

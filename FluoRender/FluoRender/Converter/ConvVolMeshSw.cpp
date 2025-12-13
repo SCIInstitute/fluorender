@@ -103,7 +103,8 @@ void ConvVolMeshSw::Convert()
 
 	//m_info = std::to_string(m_area);
 
-	m_mesh->Load(model);
+	auto md_name = vd->GetName() + L"_Mesh";
+	m_mesh->Load(model, md_name, L"");
 
 	SetProgress(0, "");
 }

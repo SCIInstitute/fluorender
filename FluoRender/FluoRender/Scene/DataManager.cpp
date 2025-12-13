@@ -884,18 +884,16 @@ bool DataManager::LoadMeshData(const std::wstring &filename)
 	if (!md)
 		return false;
 	auto model = reader->Convert();
-	md->Load(model);
-	//md->Load(pathname);
+	auto name = reader->GetDataName();
+	md->Load(model, name, filename);
 	md->SetReader(reader);
 
-	std::wstring name = md->GetName();
-	std::wstring new_name = name;
+	std::wstring new_name = md->GetName();
 	size_t i;
 	for (i=1; CheckNames(new_name); i++)
 		new_name = name + L"_" + std::to_wstring(i);
 	if (i>1)
 		md->SetName(new_name);
-	//m_md_list.push_back(md);
 
 	AddMeshData(md);
 
