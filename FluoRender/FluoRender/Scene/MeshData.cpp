@@ -1092,17 +1092,23 @@ void MeshData::BuildMesh()
 void MeshData::UpdateBounds()
 {
 	//bounds
-	GLfloat fbounds[6];
-	glmBoundingBox(m_data.get(), fbounds);
-	fluo::BBox bounds;
-	fluo::Point pmin(fbounds[0], fbounds[2], fbounds[4]);
-	fluo::Point pmax(fbounds[1], fbounds[3], fbounds[5]);
-	bounds.extend(pmin);
-	bounds.extend(pmax);
-	bounds.expand_to_int();
-	m_bounds = bounds;
-	m_center = bounds.center();
+	GLfloat worldbox[6];
+	GLfloat indexbox[6];
+	glmBoundingBoxWorldIndex(m_data.get(), worldbox, indexbox);
+	fluo::BBox worldbounds, indexbounds;
+	fluo::Point pmin(worldbox[0], worldbox[2], worldbox[4]);
+	fluo::Point pmax(worldbox[1], worldbox[3], worldbox[5]);
+	worldbounds.extend(pmin);
+	worldbounds.extend(pmax);
+	worldbounds.expand_to_int();
+	pmin = fluo::Point(indexbox[0], indexbox[2], indexbox[4]);
+	pmax = fluo::Point(indexbox[1], indexbox[3], indexbox[5]);
+	indexbounds.extend(pmin);
+	indexbounds.extend(pmax);
+	indexbounds.expand_to_int();
+	m_bounds = worldbounds;
+	m_center = worldbounds.center();
 
-	m_clipping_box.SetBBoxes(m_bounds, m_bounds);
+	m_clipping_box.SetBBoxes(worldbounds, indexbounds);
 	m_mr->set_clipping_box(m_clipping_box);
 }

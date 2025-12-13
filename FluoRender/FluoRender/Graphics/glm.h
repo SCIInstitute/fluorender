@@ -149,7 +149,7 @@ GLfloat glmUnitize(GLMmodel* model);
 * model   - initialized GLMmodel structure
 * boundingbox - array of 6 GLfloats (GLfloat boundingbox[6])
 */
-GLvoid glmBoundingBox(GLMmodel* model, GLfloat* boundingbox);
+GLvoid glmBoundingBoxWorldIndex(GLMmodel* model, GLfloat* worldbox, GLfloat* indexbox);
 
 //get the center
 GLvoid glmCenter(GLMmodel* model, GLfloat* center);

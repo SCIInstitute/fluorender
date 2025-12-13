@@ -1101,14 +1101,26 @@ GLfloat glmUnitize(GLMmodel* model)
 * model   - initialized GLMmodel structure
 * boundingbox - array of 6 GLfloats (GLfloat boundingbox[6])
 */
-GLvoid glmBoundingBox(GLMmodel* model, GLfloat* boundingbox)
+GLvoid glmBoundingBoxWorldIndex(GLMmodel* model, GLfloat* worldbox, GLfloat* indexbox)
 {
 	GLuint i;
-	GLfloat maxx, minx, maxy, miny, maxz, minz;
+	GLfloat maxxw, minxw, maxyw, minyw, maxzw, minzw;
+	GLfloat maxxi, minxi, maxyi, minyi, maxzi, minzi;
 
 	assert(model);
 	assert(model->vertices);
-	assert(boundingbox);
+	assert(worldbox);
+	assert(indexbox);
+	bool has_trans =
+		model->position[0] != 0.0 ||
+		model->position[1] != 0.0 ||
+		model->position[2] != 0.0 ||
+		model->rotation[0] != 0.0 ||
+		model->rotation[1] != 0.0 ||
+		model->rotation[2] != 0.0 ||
+		model->scale[0] != 1.0 ||
+		model->scale[1] != 1.0 ||
+		model->scale[2] != 1.0;
 
 	// Helper: apply scale, rotation (Euler XYZ), and translation with pivot at trans_center
 	auto transformVertex = [&](GLfloat in[3], GLfloat out[3]) {
@@ -1161,45 +1173,82 @@ GLvoid glmBoundingBox(GLMmodel* model, GLfloat* boundingbox)
 	GLfloat v0[3] = { model->vertices[3 + 0],
 					  model->vertices[3 + 1],
 					  model->vertices[3 + 2] };
-	GLfloat vt[3];
-	transformVertex(v0, vt);
+	maxxi = minxi = v0[0];
+	maxyi = minyi = v0[1];
+	maxzi = minzi = v0[2];
 
-	maxx = minx = vt[0];
-	maxy = miny = vt[1];
-	maxz = minz = vt[2];
+	if (has_trans)
+	{
+		GLfloat vt[3];
+		transformVertex(v0, vt);
+
+		maxxw = minxw = vt[0];
+		maxyw = minyw = vt[1];
+		maxzw = minzw = vt[2];
+	}
 
 	// loop through all vertices
-	for (i = 1; i < model->numvertices; i++) {
+	for (i = 1; i < model->numvertices; i++)
+	{
 		GLfloat v[3] = { model->vertices[3 * i + 0],
 						 model->vertices[3 * i + 1],
 						 model->vertices[3 * i + 2] };
-		GLfloat vt[3];
-		transformVertex(v, vt);
+		if (v[0] > maxxi) maxxi = v[0];
+		if (v[0] < minxi) minxi = v[0];
+		if (v[1] > maxyi) maxyi = v[1];
+		if (v[1] < minyi) minyi = v[1];
+		if (v[2] > maxzi) maxzi = v[2];
+		if (v[2] < minzi) minzi = v[2];
 
-		if (vt[0] > maxx) maxx = vt[0];
-		if (vt[0] < minx) minx = vt[0];
-		if (vt[1] > maxy) maxy = vt[1];
-		if (vt[1] < miny) miny = vt[1];
-		if (vt[2] > maxz) maxz = vt[2];
-		if (vt[2] < minz) minz = vt[2];
+		if (has_trans)
+		{
+			GLfloat vt[3];
+			transformVertex(v, vt);
+
+			if (vt[0] > maxxw) maxxw = vt[0];
+			if (vt[0] < minxw) minxw = vt[0];
+			if (vt[1] > maxyw) maxyw = vt[1];
+			if (vt[1] < minyw) minyw = vt[1];
+			if (vt[2] > maxzw) maxzw = vt[2];
+			if (vt[2] < minzw) minzw = vt[2];
+		}
 	}
 
-	boundingbox[0] = minx;
-	boundingbox[1] = maxx;
-	boundingbox[2] = miny;
-	boundingbox[3] = maxy;
-	boundingbox[4] = minz;
-	boundingbox[5] = maxz;
+	indexbox[0] = minxi;
+	indexbox[1] = maxxi;
+	indexbox[2] = minyi;
+	indexbox[3] = maxyi;
+	indexbox[4] = minzi;
+	indexbox[5] = maxzi;
+	if (has_trans)
+	{
+		worldbox[0] = minxw;
+		worldbox[1] = maxxw;
+		worldbox[2] = minyw;
+		worldbox[3] = maxyw;
+		worldbox[4] = minzw;
+		worldbox[5] = maxzw;
+	}
+	else
+	{
+		worldbox[0] = minxi;
+		worldbox[1] = maxxi;
+		worldbox[2] = minyi;
+		worldbox[3] = maxyi;
+		worldbox[4] = minzi;
+		worldbox[5] = maxzi;
+	}
 }
 
 //get the center
 GLvoid glmCenter(GLMmodel* model, GLfloat* center)
 {
-	GLfloat boundingbox[6];
-	glmBoundingBox(model, boundingbox);
-	center[0] = (boundingbox[0] + boundingbox[1]) / 2.0f;
-	center[1] = (boundingbox[2] + boundingbox[3]) / 2.0f;
-	center[2] = (boundingbox[4] + boundingbox[5]) / 2.0f;
+	GLfloat worldbox[6];
+	GLfloat indexbox[6];
+	glmBoundingBoxWorldIndex(model, worldbox, indexbox);
+	center[0] = (worldbox[0] + worldbox[1]) / 2.0f;
+	center[1] = (worldbox[2] + worldbox[3]) / 2.0f;
+	center[2] = (worldbox[4] + worldbox[5]) / 2.0f;
 }
 
 /* glmDimensions: Calculates the dimensions (width, height, depth) of
@@ -1214,13 +1263,14 @@ GLvoid glmDimensions(GLMmodel* model, GLfloat* dimensions)
 	assert(model->vertices);
 	assert(dimensions);
 
-	GLfloat bbox[6];
-	glmBoundingBox(model,bbox);
+	GLfloat worldbox[6];
+	GLfloat indexbox[6];
+	glmBoundingBoxWorldIndex(model, worldbox, indexbox);
 
 	// Computation changed by Scott D. Anderson
-	dimensions[0] = glmAbs(bbox[1]-bbox[0]);
-	dimensions[1] = glmAbs(bbox[3]-bbox[2]);
-	dimensions[2] = glmAbs(bbox[5]-bbox[4]);
+	dimensions[0] = glmAbs(worldbox[1]-worldbox[0]);
+	dimensions[1] = glmAbs(worldbox[3]-worldbox[2]);
+	dimensions[2] = glmAbs(worldbox[5]-worldbox[4]);
 }
 
 /* glmArea: Calculates the sum of face areas of a model
