@@ -151,7 +151,7 @@ void MeshRenderer::draw()
 			shader->setLocalParam(7, 1.0 / double(vp_[2]), 1.0 / double(vp_[3]), 0.0, 0.0);
 
 		//set clipping planes
-		auto planes = clipping_box_.GetPlanesWorld();
+		auto planes = clipping_box_.GetPlanesIndex();
 		double abcd[4];
 		planes[0].get(abcd);
 		shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
@@ -215,7 +215,7 @@ void MeshRenderer::draw_wireframe()
 			color_.r(), color_.g(), color_.b(), alpha_);
 	shader->setLocalParam(8, m_fog_intensity, m_fog_start, m_fog_end, 0.0);
 	//set clipping planes
-	auto planes = clipping_box_.GetPlanesWorld();
+	auto planes = clipping_box_.GetPlanesIndex();
 	double abcd[4];
 	planes[0].get(abcd);
 	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
@@ -272,7 +272,7 @@ void MeshRenderer::draw_integer(unsigned int name)
 	shader->setLocalParamMatrix(1, glm::value_ptr(m_mv_mat));
 	shader->setLocalParamUInt(0, name);
 	//set clipping planes
-	auto planes = clipping_box_.GetPlanesWorld();
+	auto planes = clipping_box_.GetPlanesIndex();
 	double abcd[4];
 	planes[0].get(abcd);
 	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
