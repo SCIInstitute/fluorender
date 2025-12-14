@@ -94,11 +94,7 @@ namespace fluo
 
 			auto safeNormalize = [&](double val, double refMin, double refExtent) -> double {
 				if (refExtent == 0.0) return 0.0; // avoid divide by zero
-				double u = (val - refMin) / refExtent;
-				// clamp to [0,1] to stay inside unit box
-				if (u < 0.0) u = 0.0;
-				if (u > 1.0) u = 1.0;
-				return u;
+				return (val - refMin) / refExtent;
 				};
 
 			Point nmin(

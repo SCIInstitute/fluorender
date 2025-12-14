@@ -3804,6 +3804,24 @@ void RenderView::SetClipMode(int mode)
 	}
 }
 
+void RenderView::ResetAllClipValues()
+{
+	for (int i = 0; i < GetAllVolumeNum(); ++i)
+	{
+		auto vd = GetAllVolumeData(i);
+		if (!vd)
+			continue;
+		vd->ResetClipValues();
+	}
+	for (int i = 0; i < GetMeshNum(); ++i)
+	{
+		auto md = GetMeshData(i);
+		if (!md)
+			continue;
+		md->ResetClipValues();
+	}
+}
+
 void RenderView::SyncClippingBoxes(const fluo::ClippingBox& cb)
 {
 	for (int i = 0; i < GetAllVolumeNum(); ++i)

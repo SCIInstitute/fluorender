@@ -1231,7 +1231,7 @@ void ClipPlanePanel::ResetClipValues()
 	if (type == 1)
 		view->SyncClippingBoxes(view->GetClippingBox());
 	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
+		view->ResetAllClipValues();
 	SetPlaneMask(-1);
 
 	//links

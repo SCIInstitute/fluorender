@@ -375,6 +375,7 @@ public:
 	void SetClipMode(int mode);
 	int GetClipMode() { return m_clip_mode; }
 
+	void ResetAllClipValues();
 	//sync
 	virtual void SyncClippingBoxes(const fluo::ClippingBox& cb) override;
 	//clip size
