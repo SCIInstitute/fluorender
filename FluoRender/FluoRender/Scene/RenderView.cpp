@@ -4991,17 +4991,14 @@ fluo::Vector RenderView::GetSide()
 
 void RenderView::RotateClips()
 {
-	if (m_clip_mode == 1)
+	fluo::Quaternion q_cl;
+	q_cl.FromEuler(fluo::Vector(m_cam_rot.x(), -m_cam_rot.y(), -m_cam_rot.z()));
+
+	auto vd = glbin_current.vol_data.lock();
+
+	if (vd)
 	{
-		fluo::Quaternion q_cl;
-		q_cl.FromEuler(fluo::Vector(m_cam_rot.x(), -m_cam_rot.y(), -m_cam_rot.z()));
-
-		auto vd = glbin_current.vol_data.lock();
-
-		if (vd)
-		{
-			vd->SetClipRotation(q_cl);
-		}
+		vd->SetClipRotation(q_cl);
 	}
 }
 
@@ -9069,7 +9066,7 @@ void RenderView::Q2A()
 	m_cam_rot = q.ToEuler();
 	m_cam_rot.normalize_euler_unsigned();
 
-	if (m_clip_mode)
+	if (m_clip_mode == 1)
 		RotateClips();
 }
 
