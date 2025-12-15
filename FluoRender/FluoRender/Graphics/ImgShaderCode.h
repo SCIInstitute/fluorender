@@ -74,6 +74,7 @@ inline constexpr const char* IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
 layout(location = 0) in vec3 InVertex;
 out vec3 OutColor;
 out vec3 OutEyePos;
+out vec4 OutClipPos;
 uniform mat4 matrix0;//model view
 uniform mat4 matrix1;//projection
 uniform vec4 loc1; //(color, alpha)
@@ -83,6 +84,7 @@ void main()
 	vec4 eyePos = matrix0 * vec4(InVertex, 1.0);
 	gl_Position = matrix1 * eyePos;
 	OutEyePos = eyePos.xyz;
+	OutClipPos = gl_Position;
 	OutColor = loc1.rgb;
 }
 )GLSHDR";
@@ -1039,14 +1041,13 @@ inline constexpr const char* IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
 uniform vec4 loc0;   // (viewportWidth, viewportHeight, thickness, cull mode)
 uniform vec4 loc2;   // plane normal in eye space (xyz) w: perspective(1)/orthographic(-1)
 
-layout(lines) in;
-layout(triangle_strip, max_vertices = 4) out;
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 24) out;
 
 in vec3 OutColor[];
 in vec3 OutEyePos[];      // bring in eye-space positions
+in vec4 OutClipPos[];     // bring in clip-space positions
 out vec3 OutColor2;
-
-uniform mat4 matrix0;//model view
 
 vec2 toScreenSpace(vec4 vertex) {
 	return vec2(vertex.xy / vertex.w) * loc0.xy;
@@ -1057,30 +1058,30 @@ float toZValue(vec4 vertex) {
 
 void main()
 {
-	// eye-space plane normal
-	vec3 planeNormal = normalize(loc2.xyz);
-	vec3 eyeN = normalize((matrix0 * vec4(planeNormal, 0.0)).xyz);
+	// Transform vertices to clip space
+	vec4 clip0 = OutClipPos[0];
+	vec4 clip1 = OutClipPos[1];
+	vec4 clip2 = OutClipPos[2];
 
-	float facing;
-	// perspective: use per-vertex viewDir
-	if (loc2.w > 0.0)
-	{
-		vec3 viewDir0 = normalize(-OutEyePos[0]);
-		vec3 viewDir1 = normalize(-OutEyePos[1]);
-		float facing0 = dot(eyeN, viewDir0);
-		float facing1 = dot(eyeN, viewDir1);
-		// decide based on average
-		facing = 0.5 * (facing0 + facing1);
-	}
-	// orthographic: use plane normal directly
-	else
-	{
-		facing = dot(eyeN, vec3(0.0, 0.0, 1.0));
+	// Perspective divide to get NDC
+	vec2 p0 = clip0.xy / clip0.w;
+	vec2 p1 = clip1.xy / clip1.w;
+	vec2 p2 = clip2.xy / clip2.w;
+
+	// Compute signed area (2D cross product of edges)
+	float area = (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
+
+	// CCW winding -> area > 0
+	bool frontFacing;
+	if (gl_PrimitiveIDIn % 2 == 1) {
+		frontFacing = (area > 0.0);
+	} else {
+		frontFacing = (area < 0.0); // flip for odd triangles
 	}
 
-	// cull
-	if(loc0.w == 1.0 && facing < 0.0) return;
-	if(loc0.w == -1.0 && facing > 0.0) return;
+	// Cull based on OpenGL convention (default front face = CCW)
+	if (loc0.w == 1.0 && !frontFacing) return;
+	if (loc0.w == -1.0 && frontFacing) return;
 
 	OutColor2 = OutColor[0];
 

@@ -1035,7 +1035,7 @@ void VertexArray::draw_bound_cube()
 void VertexArray::draw_clip_plane(int plane, bool border)
 {
 	if (border)
-		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT,
+		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
 			reinterpret_cast<const GLvoid*>((plane * 8 + 4) * sizeof(uint32_t)));
 	else
 		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
