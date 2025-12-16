@@ -630,26 +630,20 @@ void VertexArray::update_clip_planes(bool update_index)
 	if (update_index)
 	{
 		std::vector<uint32_t> index;
-		index.reserve(6 * 4 * 2);
+		index.reserve(6 * 4);
 
 		// -X face
 		index.insert(index.end(), { 0,4,1,5 });
-		index.insert(index.end(), { 0,4,5,1 });
 		// +X face
 		index.insert(index.end(), { 2,3,6,7 });
-		index.insert(index.end(), { 2,3,7,6 });
 		// -Y face
 		index.insert(index.end(), { 0,1,2,3 });
-		index.insert(index.end(), { 0,1,3,2 });
 		// +Y face
 		index.insert(index.end(), { 4,6,5,7 });
-		index.insert(index.end(), { 4,6,7,5 });
 		// -Z face
 		index.insert(index.end(), { 0,2,4,6 });
-		index.insert(index.end(), { 0,2,6,4 });
 		// +Z face
 		index.insert(index.end(), { 1,5,3,7 });
-		index.insert(index.end(), { 1,5,7,3 });
 
 		buffer_data(VABufferType::VABuf_Index,
 			sizeof(uint32_t) * index.size(),
@@ -1034,12 +1028,8 @@ void VertexArray::draw_bound_cube()
 
 void VertexArray::draw_clip_plane(int plane, bool border)
 {
-	if (border)
-		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
-			reinterpret_cast<const GLvoid*>((plane * 8 + 4) * sizeof(uint32_t)));
-	else
-		glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
-			reinterpret_cast<const GLvoid*>(plane * 8 * sizeof(uint32_t)));
+	glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT,
+		reinterpret_cast<const GLvoid*>(plane * 4 * sizeof(uint32_t)));
 }
 
 void VertexArray::draw_grid()

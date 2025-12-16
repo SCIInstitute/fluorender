@@ -1039,76 +1039,77 @@ void main() {
 inline constexpr const char* IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
 // IMG_SHDR_CODE_DRAW_CLIPPING_BOX_LINES
 uniform vec4 loc0;   // (viewportWidth, viewportHeight, thickness, cull mode)
-uniform vec4 loc2;   // plane normal in eye space (xyz) w: perspective(1)/orthographic(-1)
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 24) out;
 
 in vec3 OutColor[];
-in vec3 OutEyePos[];      // bring in eye-space positions
-in vec4 OutClipPos[];     // bring in clip-space positions
+in vec4 OutClipPos[];
 out vec3 OutColor2;
 
-vec2 toScreenSpace(vec4 vertex) {
-	return vec2(vertex.xy / vertex.w) * loc0.xy;
+vec2 toScreen(vec4 clip) {
+	return (clip.xy / clip.w) * loc0.xy; // NDC -> screen
 }
-float toZValue(vec4 vertex) {
-	return (vertex.z / vertex.w);
+float ndcZ(vec4 clip) {
+	return clip.z / clip.w;
+}
+
+void emitThickEdge(vec4 aClip, vec4 bClip, vec3 aColor, vec3 bColor, vec3 aEye, vec3 bEye)
+{
+	// Cull if either endpoint is behind the eye (z <= 0)
+	//if (aEye.z <= 0.0 || bEye.z <= 0.0) return;
+
+	vec2 aS = toScreen(aClip);
+	vec2 bS = toScreen(bClip);
+	float az = ndcZ(aClip);
+	float bz = ndcZ(bClip);
+
+	vec2 dir = normalize(bS - aS);
+	vec2 n = vec2(-dir.y, dir.x);
+	float hw = loc0.z * 0.5;
+
+	vec2 aP = aS + n * hw;
+	vec2 aM = aS - n * hw;
+	vec2 bP = bS + n * hw;
+	vec2 bM = bS - n * hw;
+
+	// back to NDC (divide by viewport) and emit as two triangles
+	gl_Position = vec4(aP / loc0.xy, az, 1.0); OutColor2 = aColor; EmitVertex();
+	gl_Position = vec4(aM / loc0.xy, az, 1.0); OutColor2 = aColor; EmitVertex();
+	gl_Position = vec4(bP / loc0.xy, bz, 1.0); OutColor2 = bColor; EmitVertex();
+	gl_Position = vec4(bM / loc0.xy, bz, 1.0); OutColor2 = bColor; EmitVertex();
+	EndPrimitive();
 }
 
 void main()
 {
-	// Transform vertices to clip space
-	vec4 clip0 = OutClipPos[0];
-	vec4 clip1 = OutClipPos[1];
-	vec4 clip2 = OutClipPos[2];
+	// Clip-space vertices of current triangle
+	vec4 c0 = OutClipPos[0];
+	vec4 c1 = OutClipPos[1];
+	vec4 c2 = OutClipPos[2];
 
-	// Perspective divide to get NDC
-	vec2 p0 = clip0.xy / clip0.w;
-	vec2 p1 = clip1.xy / clip1.w;
-	vec2 p2 = clip2.xy / clip2.w;
-
-	// Compute signed area (2D cross product of edges)
+	// Signed area for winding in NDC
+	vec2 p0 = c0.xy / c0.w;
+	vec2 p1 = c1.xy / c1.w;
+	vec2 p2 = c2.xy / c2.w;
 	float area = (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
 
-	// CCW winding -> area > 0
-	bool frontFacing;
-	if (gl_PrimitiveIDIn % 2 == 1) {
-		frontFacing = (area > 0.0);
-	} else {
-		frontFacing = (area < 0.0); // flip for odd triangles
-	}
+	bool frontFacing = (area < 0.0);
 
-	// Cull based on OpenGL convention (default front face = CCW)
+	// Cull
 	if (loc0.w == 1.0 && !frontFacing) return;
 	if (loc0.w == -1.0 && frontFacing) return;
 
-	OutColor2 = OutColor[0];
-
-	// Use clip-space inputs for rasterization; expand thickness in screen space
-	vec4 pps0 = gl_in[0].gl_Position;
-	vec4 pps1 = gl_in[1].gl_Position;
-
-	vec2 sps0 = toScreenSpace(pps0);
-	vec2 sps1 = toScreenSpace(pps1);
-
-	float z0 = toZValue(pps0);
-	float z1 = toZValue(pps1);
-
-	vec2 v  = normalize(sps1 - sps0);
-	vec2 n  = vec2(-v.y, v.x);
-	float hw = loc0.z * 0.5;
-
-	vec2 t0 = sps0 + n * hw;
-	vec2 t1 = sps0 - n * hw;
-	vec2 t2 = sps1 + n * hw;
-	vec2 t3 = sps1 - n * hw;
-
-	gl_Position = vec4(t0 / loc0.xy, z0, 1.0); EmitVertex();
-	gl_Position = vec4(t1 / loc0.xy, z0, 1.0); EmitVertex();
-	gl_Position = vec4(t2 / loc0.xy, z1, 1.0); EmitVertex();
-	gl_Position = vec4(t3 / loc0.xy, z1, 1.0); EmitVertex();
-	EndPrimitive();
+	// Emit only boundary edges, skip the shared diagonal
+	if (gl_PrimitiveIDIn % 2 == 0) {
+		// Triangle (v0, v1, v2): emit (v0,v1) and (v0,v2)
+		emitThickEdge(c0, c1, OutColor[0], OutColor[1], OutEyePos[0], OutEyePos[1]);
+		emitThickEdge(c0, c2, OutColor[0], OutColor[2], OutEyePos[0], OutEyePos[2]);
+	} else {
+		// Triangle (v2, v1, v3): emit (v1,v3) and (v2,v3)
+		emitThickEdge(c1, c2, OutColor[1], OutColor[2], OutEyePos[1], OutEyePos[2]);
+		emitThickEdge(c0, c2, OutColor[0], OutColor[2], OutEyePos[0], OutEyePos[2]);
+	}
 }
 )GLSHDR";
 

@@ -70,7 +70,7 @@ namespace fluo
 		// --- Bounding boxes (dataset initialization) ---
 		const BBox& GetBBoxWorld() const { return bbox_world_; }
 		void SetBBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; ResetClips(); }
-		void UpdateBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; Update(); }
+		void UpdateBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; Update(false); }
 
 		const BBox& GetBBoxIndex() const { return bbox_index_; }
 
@@ -169,7 +169,7 @@ namespace fluo
 		Vector euler_;
 
 	protected:
-		void Update();
+		void Update(bool update_euler);
 
 		// Convert a distance in world space to index space
 		double WorldToIndexDist(int axis, double dist) const {

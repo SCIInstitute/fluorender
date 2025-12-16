@@ -53,7 +53,7 @@ ClippingBox::ClippingBox(const BBox& box, const BBox& index_box) :
 	clips_world_ = bbox_world_;
 	clips_index_ = bbox_index_;
 	clips_unit_.unit();
-	Update();
+	Update(false);
 }
 
 // Copy constructor
@@ -192,10 +192,10 @@ void ClippingBox::SyncWorld(const ClippingBox& src)
 	}
 
 	// --- Rebuild planes in all spaces ---
-	Update();
+	Update(false);
 }
 
-void ClippingBox::Update()
+void ClippingBox::Update(bool update_euler)
 {
 	planes_world_.resize(6);
 	planes_index_.resize(6);
@@ -307,7 +307,8 @@ void ClippingBox::Update()
 	}
 
 	// Sync Euler angles
-	euler_ = q_.ToEuler();
+	if (update_euler)
+		euler_ = q_.ToEuler();
 }
 
 void ClippingBox::SetLink(ClipPlane plane, bool link)
@@ -401,7 +402,7 @@ void ClippingBox::ResetClips()
 	clips_world_ = bbox_world_;
 	clips_index_ = bbox_index_;
 	clips_unit_.unit();
-	Update();
+	Update(false);
 }
 
 void ClippingBox::ResetClips(ClipPlane plane)
@@ -435,13 +436,13 @@ void ClippingBox::ResetClips(ClipPlane plane)
 		clips_unit_.minz(0.0);
 		clips_unit_.maxz(1.0);
 	}
-	Update();
+	Update(false);
 }
 
 void ClippingBox::ResetRotation()
 {
 	q_ = Quaternion();
-	Update();
+	Update(true);
 }
 
 void ClippingBox::ResetAll()
@@ -451,7 +452,7 @@ void ClippingBox::ResetAll()
 	clips_unit_.unit();
 	q_ = Quaternion();
 	links_.fill(false);
-	Update();
+	Update(false);
 }
 
 void ClippingBox::SetClipWorld(ClipPlane plane, double value)
@@ -494,7 +495,7 @@ void ClippingBox::SetClipWorld(ClipPlane plane, double value)
 	clips_unit_ = clips_world_.normalized(bbox_world_);
 	clips_index_ = clips_unit_.denormalized(bbox_index_);
 
-	Update();
+	Update(false);
 }
 
 double ClippingBox::GetClipWorld(ClipPlane plane) const
@@ -536,7 +537,7 @@ void ClippingBox::SetClipPairWorld(ClipPlane axis, double val1, double val2)
 	clips_unit_ = clips_world_.normalized(bbox_world_);
 	clips_index_ = clips_unit_.denormalized(bbox_index_);
 
-	Update();
+	Update(false);
 }
 
 void ClippingBox::GetClipPairWorld(ClipPlane axis, double& val1, double& val2) const
@@ -574,7 +575,7 @@ void ClippingBox::SetAllClipsWorld(const double val[6])
 	clips_unit_ = clips_world_.normalized(bbox_world_);
 	clips_index_ = clips_unit_.denormalized(bbox_index_);
 
-	Update();
+	Update(false);
 }
 
 void ClippingBox::GetAllClipsWorld(double val[6]) const
@@ -623,7 +624,7 @@ void ClippingBox::SetClipIndex(ClipPlane plane, double value)
 	clips_unit_ = clips_index_.normalized(bbox_index_);
 	clips_world_ = clips_unit_.denormalized(bbox_world_);
 
-	Update();
+	Update(false);
 }
 
 double ClippingBox::GetClipIndex(ClipPlane plane) const
@@ -665,7 +666,7 @@ void ClippingBox::SetClipPairIndex(ClipPlane axis, double val1, double val2)
 	clips_unit_ = clips_index_.normalized(bbox_index_);
 	clips_world_ = clips_unit_.denormalized(bbox_world_);
 
-	Update();
+	Update(false);
 }
 
 void ClippingBox::GetClipPairIndex(ClipPlane axis, double& val1, double& val2) const
@@ -703,7 +704,7 @@ void ClippingBox::SetAllClipsIndex(const double val[6])
 	clips_unit_ = clips_index_.normalized(bbox_index_);
 	clips_world_ = clips_unit_.denormalized(bbox_world_);
 
-	Update();
+	Update(false);
 }
 
 void ClippingBox::GetAllClipsIndex(double val[6]) const
@@ -734,14 +735,14 @@ void ClippingBox::IncLLinkedPairIndex(double val)
 void ClippingBox::Rotate(const Quaternion& q)
 {
 	q_ = q;
-	Update();
+	Update(true);
 }
 
 void ClippingBox::Rotate(const Vector& euler)
 {
 	euler_ = euler;
 	q_.FromEuler(euler);
-	Update();
+	Update(false);
 }
 
 // Point containment test

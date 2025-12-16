@@ -1180,25 +1180,8 @@ void ClipPlanePanel::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 	}
 	SetPlaneMask(mask);
 
-	fluo::ValueCollection vc;
-	if (mask & 1)
-		vc.insert(gstClipX1);
-	if (mask & 2)
-		vc.insert(gstClipX2);
-	if (mask & 4)
-		vc.insert(gstClipY1);
-	if (mask & 8)
-		vc.insert(gstClipY2);
-	if (mask & 16)
-		vc.insert(gstClipZ1);
-	if (mask & 32)
-		vc.insert(gstClipZ2);
-
-	vc.insert(gstConvVolMeshUpdateTransf);
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
-	double zmin, zmax;
-	obj->GetClippingBox().GetClipPairIndex(fluo::ClipPlane::ZNeg, zmin, zmax);
-	DBGPRINT(L"Clipping Zmin, Zmax: %f, %f\n", zmin, zmax);
+	FluoRefresh(0, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf },
+		{glbin_current.GetViewId()});
 }
 
 void ClipPlanePanel::SetClipValues(const std::array<int, 6>& vals)

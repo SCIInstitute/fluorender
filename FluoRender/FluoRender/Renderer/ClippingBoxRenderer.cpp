@@ -243,12 +243,6 @@ void ClippingBoxRenderer::drawPlane(int index,
 
 		shader2->bind();
 		shader2->setLocalParam(1, color.r(), color.g(), color.b(), 1.0);
-		auto normal = getPlaneNormal(index);
-		double persp = -1.0;
-		auto view = settings_->view.lock();
-		if (view)
-			persp = view->GetPersp() ? 1.0 : -1.0;
-		shader2->setLocalParam(2, normal.x(), normal.y(), normal.z(), persp);
 
 		// Border planes are offset by +16 in VA indexing
 		va_clipp->draw_clip_plane(index, true);
