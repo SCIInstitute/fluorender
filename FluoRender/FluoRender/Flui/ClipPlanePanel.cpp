@@ -1785,7 +1785,7 @@ void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 	//set y
 	SetYLink(true);
 
-	SetClipValues(fluo::ClipPlane::XNeg, 0, dist);
+	SetClipValues(fluo::ClipPlane::YNeg, 0, dist);
 }
 
 void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)

@@ -1044,6 +1044,7 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 24) out;
 
 in vec3 OutColor[];
+in vec3 OutEyePos[];
 in vec4 OutClipPos[];
 out vec3 OutColor2;
 
@@ -1054,10 +1055,10 @@ float ndcZ(vec4 clip) {
 	return clip.z / clip.w;
 }
 
-void emitThickEdge(vec4 aClip, vec4 bClip, vec3 aColor, vec3 bColor, vec3 aEye, vec3 bEye)
+void emitThickEdge(vec4 aClip, vec4 bClip, vec3 aEye, vec3 bEye)
 {
 	// Cull if either endpoint is behind the eye (z <= 0)
-	//if (aEye.z <= 0.0 || bEye.z <= 0.0) return;
+	if (aEye.z >= 0.0 || bEye.z >= 0.0) return;
 
 	vec2 aS = toScreen(aClip);
 	vec2 bS = toScreen(bClip);
@@ -1074,15 +1075,17 @@ void emitThickEdge(vec4 aClip, vec4 bClip, vec3 aColor, vec3 bColor, vec3 aEye, 
 	vec2 bM = bS - n * hw;
 
 	// back to NDC (divide by viewport) and emit as two triangles
-	gl_Position = vec4(aP / loc0.xy, az, 1.0); OutColor2 = aColor; EmitVertex();
-	gl_Position = vec4(aM / loc0.xy, az, 1.0); OutColor2 = aColor; EmitVertex();
-	gl_Position = vec4(bP / loc0.xy, bz, 1.0); OutColor2 = bColor; EmitVertex();
-	gl_Position = vec4(bM / loc0.xy, bz, 1.0); OutColor2 = bColor; EmitVertex();
+	gl_Position = vec4(aP / loc0.xy, az, 1.0); EmitVertex();
+	gl_Position = vec4(aM / loc0.xy, az, 1.0); EmitVertex();
+	gl_Position = vec4(bP / loc0.xy, bz, 1.0); EmitVertex();
+	gl_Position = vec4(bM / loc0.xy, bz, 1.0); EmitVertex();
 	EndPrimitive();
 }
 
 void main()
 {
+	OutColor2 = OutColor[0];
+
 	// Clip-space vertices of current triangle
 	vec4 c0 = OutClipPos[0];
 	vec4 c1 = OutClipPos[1];
@@ -1103,12 +1106,12 @@ void main()
 	// Emit only boundary edges, skip the shared diagonal
 	if (gl_PrimitiveIDIn % 2 == 0) {
 		// Triangle (v0, v1, v2): emit (v0,v1) and (v0,v2)
-		emitThickEdge(c0, c1, OutColor[0], OutColor[1], OutEyePos[0], OutEyePos[1]);
-		emitThickEdge(c0, c2, OutColor[0], OutColor[2], OutEyePos[0], OutEyePos[2]);
+		emitThickEdge(c0, c1, OutEyePos[0], OutEyePos[1]);
+		emitThickEdge(c0, c2, OutEyePos[0], OutEyePos[2]);
 	} else {
 		// Triangle (v2, v1, v3): emit (v1,v3) and (v2,v3)
-		emitThickEdge(c1, c2, OutColor[1], OutColor[2], OutEyePos[1], OutEyePos[2]);
-		emitThickEdge(c0, c2, OutColor[0], OutColor[2], OutEyePos[0], OutEyePos[2]);
+		emitThickEdge(c1, c2, OutEyePos[1], OutEyePos[2]);
+		emitThickEdge(c0, c2, OutEyePos[0], OutEyePos[2]);
 	}
 }
 )GLSHDR";
