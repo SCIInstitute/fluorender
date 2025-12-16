@@ -184,8 +184,8 @@ RenderView::RenderView() :
 	m_distance(10.0),
 	m_init_dist(10.0),
 	//camera direction
-	m_up(0.0, 1.0, 0.0),
-	m_head(0.0, 0.0, -1.0),
+	m_cam_up(0.0, 1.0, 0.0),
+	m_cam_head(0.0, 0.0, -1.0),
 	//flag for using offset values
 	m_offset(false),
 	m_rot_lock(false),
@@ -385,8 +385,8 @@ RenderView::RenderView(RenderView& copy):
 	m_distance(copy.m_distance),
 	m_init_dist(copy.m_init_dist),
 	//camera direction
-	m_up(0.0, 1.0, 0.0),
-	m_head(0.0, 0.0, -1.0),
+	m_cam_up(0.0, 1.0, 0.0),
+	m_cam_head(0.0, 0.0, -1.0),
 	//flag for using offset values
 	m_offset(false),
 	m_rot_lock(false),
@@ -822,8 +822,8 @@ void RenderView::InitView(unsigned int type)
 
 	if (type&INIT_ROTATE || !m_init_view)
 	{
-		m_q = fluo::Quaternion(0, 0, 0, 1);
-		m_cam_rot = m_q.ToEuler();
+		m_cam_q = fluo::Quaternion(0, 0, 0, 1);
+		m_cam_rot = m_cam_q.ToEuler();
 		m_cam_rot.normalize_euler_unsigned();
 	}
 
@@ -2382,7 +2382,7 @@ void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3&
 
 	eye = glm::vec3(m_cam_trans.x(), m_cam_trans.y(), m_cam_trans.z());
 	center = glm::vec3(0.0);
-	up = glm::vec3(m_up.x(), m_up.y(), m_up.z());
+	up = glm::vec3(m_cam_up.x(), m_cam_up.y(), m_cam_up.z());
 
 	if (m_cam_mode == 1)
 	{
@@ -2518,12 +2518,12 @@ void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 	A2Q();
 
 	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	fluo::Quaternion cam_pos2 = (-m_cam_q) * cam_pos * m_cam_q;
 	m_cam_trans = cam_pos2.GetVector();
 
 	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-	fluo::Quaternion up2 = (-m_q) * up * m_q;
-	m_up = fluo::Vector(up2.x, up2.y, up2.z);
+	fluo::Quaternion up2 = (-m_cam_q) * up * m_cam_q;
+	m_cam_up = fluo::Vector(up2.x, up2.y, up2.z);
 
 	if (m_clip_mode)
 		RotateClips();
@@ -2535,17 +2535,17 @@ void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 int RenderView::GetOrientation()
 {
 	//update ortho rotation
-	if (m_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
+	if (m_cam_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
 		return 0;
-	else if (m_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
+	else if (m_cam_q.AlmostEqual(fluo::Quaternion(0, -1, 0, 0)))
 		return 1;
-	else if (m_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+	else if (m_cam_q.AlmostEqual(fluo::Quaternion(sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 		return 2;
-	else if (m_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
+	else if (m_cam_q.AlmostEqual(fluo::Quaternion(-sqrt(2.0) / 2.0, 0, 0, sqrt(2.0) / 2.0)))
 		return 3;
-	else if (m_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	else if (m_cam_q.AlmostEqual(fluo::Quaternion(0, sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 		return 4;
-	else if (m_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
+	else if (m_cam_q.AlmostEqual(fluo::Quaternion(0, -sqrt(2.0) / 2.0, 0, sqrt(2.0) / 2.0)))
 		return 5;
 	else
 		return 6;
@@ -2553,8 +2553,8 @@ int RenderView::GetOrientation()
 
 fluo::Vector RenderView::ResetZeroRotations()
 {
-	m_zq = fluo::Quaternion();
-	fluo::Vector result = m_q.ToEuler();
+	m_cam_zero_q = fluo::Quaternion();
+	fluo::Vector result = m_cam_q.ToEuler();
 	result.normalize_euler_unsigned();
 	return result;
 }
@@ -3133,8 +3133,8 @@ void RenderView::SetParams(double t)
 	fluo::Quaternion q;
 	if (glbin_interpolator.GetQuaternion(keycode, t, q))
 	{
-		m_q = q;
-		q *= -m_zq;
+		m_cam_q = q;
+		q *= -m_cam_zero_q;
 		SetRotations(q.ToEuler(), true);
 		vc.insert(gstCamRotation);
 	}
@@ -3790,7 +3790,7 @@ void RenderView::SetClipMode(int mode)
 	{
 		m_clip_mode = 2;
 		//{
-		//	fluo::Vector euler = m_q.ToEuler();
+		//	fluo::Vector euler = m_cam_q.ToEuler();
 		//	euler.y(-euler.y());
 		//	euler.z(-euler.z());
 		//	m_q_cl_zero.FromEuler(euler);
@@ -4983,22 +4983,23 @@ fluo::Transform RenderView::GetInvOffsetMat()
 
 fluo::Vector RenderView::GetSide()
 {
-	m_head = -m_cam_trans;
-	m_head.normalize();
-	fluo::Vector side = Cross(m_up, m_head);
+	m_cam_head = -m_cam_trans;
+	m_cam_head.normalize();
+	fluo::Vector side = Cross(m_cam_up, m_cam_head);
 	return side;
 }
 
 void RenderView::RotateClips()
 {
-	fluo::Quaternion q_cl;
-	q_cl.FromEuler(fluo::Vector(m_cam_rot.x(), -m_cam_rot.y(), -m_cam_rot.z()));
+	fluo::Quaternion q;
+	q.FromEuler(m_obj_rot);
+	q = (-q) * (-m_cam_q);
 
 	auto vd = glbin_current.vol_data.lock();
 
 	if (vd)
 	{
-		vd->SetClipRotation(q_cl);
+		vd->SetClipRotation(q);
 	}
 }
 
@@ -9022,11 +9023,11 @@ fluo::Quaternion RenderView::Trackball(double dx, double dy)
 
 	//rotate back to local
 	fluo::Quaternion aq(a);
-	aq = (-m_q) * aq * m_q;
+	aq = (-m_cam_q) * aq * m_cam_q;
 	if (m_rot_lock)
 	{
 		//rotate back to basis
-		aq = (m_zq)* aq * (-m_zq);
+		aq = (m_cam_zero_q)* aq * (-m_cam_zero_q);
 		a = fluo::Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 		//snap to closest basis component
@@ -9040,7 +9041,7 @@ fluo::Quaternion RenderView::Trackball(double dx, double dy)
 			a = fluo::Vector(0, 0, a.z() < 0?-1:1);
 		aq = fluo::Quaternion(a);
 		//rotate again to restore
-		aq = (-m_zq) * aq * m_zq;
+		aq = (-m_cam_zero_q) * aq * m_cam_zero_q;
 		a = fluo::Vector(aq.x, aq.y, aq.z);
 		a.normalize();
 		//snap to 45 deg
@@ -9062,7 +9063,7 @@ void RenderView::Q2A()
 {
 	//view changed, re-sort bricks
 	//SetSortBricks();
-	fluo::Quaternion q = m_q * (-m_zq);
+	fluo::Quaternion q = m_cam_q * (-m_cam_zero_q);
 	m_cam_rot = q.ToEuler();
 	m_cam_rot.normalize_euler_unsigned();
 
@@ -9075,8 +9076,8 @@ void RenderView::A2Q()
 	//view changed, re-sort bricks
 	//SetSortBricks();
 
-	m_q.FromEuler(m_cam_rot);
-	m_q = m_q * m_zq;
+	m_cam_q.FromEuler(m_cam_rot);
+	m_cam_q = m_cam_q * m_cam_zero_q;
 }
 
 //sort bricks after view changes
@@ -9578,9 +9579,9 @@ void RenderView::switchLevel(VolumeData *vd)
 //controller interactions
 void RenderView::ControllerMoveHorizontal(double dval, int nx, int ny)
 {
-	m_head = -m_cam_trans;
-	m_head.normalize();
-	fluo::Vector side = fluo::Cross(m_up, m_head);
+	m_cam_head = -m_cam_trans;
+	m_cam_head.normalize();
+	fluo::Vector side = fluo::Cross(m_cam_up, m_cam_head);
 	fluo::Vector trans = side * (dval*(m_ortho_right - m_ortho_left) / double(nx));
 	m_obj_trans += trans;
 }
@@ -9603,26 +9604,26 @@ void RenderView::ControllerZoomDolly(double dval, int nx, int ny)
 void RenderView::ControllerRotate(double dx, double dy, int nx, int ny)
 {
 	fluo::Quaternion q_delta = Trackball(dx, dy);
-	m_q *= q_delta;
-	m_q.Normalize();
+	m_cam_q *= q_delta;
+	m_cam_q.Normalize();
 	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	fluo::Quaternion cam_pos2 = (-m_cam_q) * cam_pos * m_cam_q;
 	m_cam_trans = cam_pos2.GetVector();
 	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-	fluo::Quaternion up2 = (-m_q) * up * m_q;
-	m_up = fluo::Vector(up2.x, up2.y, up2.z);
-	m_cam_rot = m_q.ToEuler();
+	fluo::Quaternion up2 = (-m_cam_q) * up * m_cam_q;
+	m_cam_up = fluo::Vector(up2.x, up2.y, up2.z);
+	m_cam_rot = m_cam_q.ToEuler();
 	m_cam_rot.normalize_euler_unsigned();
 }
 
 void RenderView::ControllerPan(double dx, double dy, int nx, int ny)
 {
-	m_head = -m_cam_trans;
-	m_head.normalize();
-	fluo::Vector side = fluo::Cross(m_up, m_head);
+	m_cam_head = -m_cam_trans;
+	m_cam_head.normalize();
+	fluo::Vector side = fluo::Cross(m_cam_up, m_cam_head);
 	fluo::Vector trans =
 		side * (dx * (m_ortho_right - m_ortho_left) / double(nx)) +
-		m_up * (dy * (m_ortho_top - m_ortho_bottom) / double(ny));
+		m_cam_up * (dy * (m_ortho_top - m_ortho_bottom) / double(ny));
 	m_obj_trans += trans * m_scale_factor;
 }
 
@@ -9635,15 +9636,15 @@ void RenderView::GrabRotate(const glm::mat4& pose)
 	//glm::quat rotationQuat = glm::angleAxis(glm::radians(-50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	//q = rotationQuat * q;
 
-	m_q = fluo::Quaternion(q.x, q.y, q.z, q.w);
-	m_q.Normalize();
+	m_cam_q = fluo::Quaternion(q.x, q.y, q.z, q.w);
+	m_cam_q.Normalize();
 	fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-	fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+	fluo::Quaternion cam_pos2 = (-m_cam_q) * cam_pos * m_cam_q;
 	m_cam_trans = cam_pos2.GetVector();
 	fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-	fluo::Quaternion up2 = (-m_q) * up * m_q;
-	m_up = fluo::Vector(up2.x, up2.y, up2.z);
-	m_cam_rot = m_q.ToEuler();
+	fluo::Quaternion up2 = (-m_cam_q) * up * m_cam_q;
+	m_cam_up = fluo::Vector(up2.x, up2.y, up2.z);
+	m_cam_rot = m_cam_q.ToEuler();
 	m_cam_rot.normalize_euler_unsigned();
 }
 
@@ -9806,9 +9807,9 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_left = true;
 
-				m_head = -m_cam_trans;
-				m_head.normalize();
-				fluo::Vector side = fluo::Cross(m_up, m_head);
+				m_cam_head = -m_cam_trans;
+				m_cam_head.normalize();
+				fluo::Vector side = fluo::Cross(m_cam_up, m_cam_head);
 				fluo::Vector trans = -(side * (std::round(0.8 * (m_ortho_right - m_ortho_left))));
 				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
@@ -9827,9 +9828,9 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_right = true;
 
-				m_head = -m_cam_trans;
-				m_head.normalize();
-				fluo::Vector side = fluo::Cross(m_up, m_head);
+				m_cam_head = -m_cam_trans;
+				m_cam_head.normalize();
+				fluo::Vector side = fluo::Cross(m_cam_up, m_cam_head);
 				fluo::Vector trans = side * (std::round(0.8 * (m_ortho_right - m_ortho_left)));
 				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
@@ -9848,9 +9849,9 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_up = true;
 
-				m_head = -m_cam_trans;
-				m_head.normalize();
-				fluo::Vector trans = -m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
+				m_cam_head = -m_cam_trans;
+				m_cam_head.normalize();
+				fluo::Vector trans = -m_cam_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
 				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
 				state.m_refresh = true;
@@ -9868,9 +9869,9 @@ void RenderView::ProcessIdle(IdleState& state)
 			{
 				m_move_down = true;
 
-				m_head = -m_cam_trans;
-				m_head.normalize();
-				fluo::Vector trans = m_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
+				m_cam_head = -m_cam_trans;
+				m_cam_head.normalize();
+				fluo::Vector trans = m_cam_up * (std::round(0.8 * (m_ortho_top - m_ortho_bottom)));
 				m_obj_trans += trans;
 				//if (m_persp) SetSortBricks();
 				state.m_refresh = true;
@@ -9889,9 +9890,9 @@ void RenderView::ProcessIdle(IdleState& state)
 				if (m_cam_mode == 1)
 				{
 					//move right
-					m_head = -m_cam_trans;
-					m_head.normalize();
-					fluo::Vector side = Cross(m_up, m_head);
+					m_cam_head = -m_cam_trans;
+					m_cam_head.normalize();
+					fluo::Vector side = Cross(m_cam_up, m_cam_head);
 					fluo::Vector trans = 10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
 					m_obj_trans += trans;
 					m_interactive = true;
@@ -9929,9 +9930,9 @@ void RenderView::ProcessIdle(IdleState& state)
 				if (m_cam_mode == 1)
 				{
 					//move left
-					m_head = -m_cam_trans;
-					m_head.normalize();
-					fluo::Vector side = Cross(m_up, m_head);
+					m_cam_head = -m_cam_trans;
+					m_cam_head.normalize();
+					fluo::Vector side = Cross(m_cam_up, m_cam_head);
 					fluo::Vector trans = -10.0 * side * (m_ortho_right - m_ortho_left) / double(m_gl_size.w());
 					m_obj_trans += trans;
 					m_interactive = true;
@@ -10673,15 +10674,15 @@ void RenderView::ProcessMouse(MouseState& state)
 							mp.x() - old_mouse_X, old_mouse_Y - mp.y());
 						if (m_rot_lock && q_delta.IsIdentity())
 							hold_old = true;
-						m_q *= q_delta;
-						m_q.Normalize();
+						m_cam_q *= q_delta;
+						m_cam_q.Normalize();
 						fluo::Quaternion cam_pos(0.0, 0.0, m_distance, 0.0);
-						fluo::Quaternion cam_pos2 = (-m_q) * cam_pos * m_q;
+						fluo::Quaternion cam_pos2 = (-m_cam_q) * cam_pos * m_cam_q;
 						m_cam_trans = cam_pos2.GetVector();
 
 						fluo::Quaternion up(0.0, 1.0, 0.0, 0.0);
-						fluo::Quaternion up2 = (-m_q) * up * m_q;
-						m_up = fluo::Vector(up2.x, up2.y, up2.z);
+						fluo::Quaternion up2 = (-m_cam_q) * up * m_cam_q;
+						m_cam_up = fluo::Vector(up2.x, up2.y, up2.z);
 
 						Q2A();
 
@@ -10696,12 +10697,12 @@ void RenderView::ProcessMouse(MouseState& state)
 						long dx = static_cast<long>(std::round(mp.x() - old_mouse_X));
 						long dy = static_cast<long>(std::round(mp.y() - old_mouse_Y));
 
-						m_head = -m_cam_trans;
-						m_head.normalize();
-						fluo::Vector side = Cross(m_up, m_head);
+						m_cam_head = -m_cam_trans;
+						m_cam_head.normalize();
+						fluo::Vector side = Cross(m_cam_up, m_cam_head);
 						fluo::Vector trans = -(
 							side * (double(dx) * (m_ortho_right - m_ortho_left) / double(nx)) +
-							m_up * (double(dy) * (m_ortho_top - m_ortho_bottom) / double(ny)));
+							m_cam_up * (double(dy) * (m_ortho_top - m_ortho_bottom) / double(ny)));
 						m_obj_trans += trans;
 
 						m_interactive = true;

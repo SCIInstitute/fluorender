@@ -225,13 +225,13 @@ public:
 	//camera operations
 	fluo::Vector GetTranslations();
 	void SetTranslations(const fluo::Vector& val);
-	fluo::Quaternion GetZeroQuat() { return m_zq; }
-	void SetZeroQuat(const fluo::Quaternion& val) { m_zq = val; }
-	fluo::Quaternion GetRotQuat() { return m_q; }
+	fluo::Quaternion GetZeroQuat() { return m_cam_zero_q; }
+	void SetZeroQuat(const fluo::Quaternion& val) { m_cam_zero_q = val; }
+	fluo::Quaternion GetRotQuat() { return m_cam_q; }
 	fluo::Vector GetRotations();
 	void SetRotations(const fluo::Vector& val, bool notify);
 	int GetOrientation();//same as the indices in the view panel
-	void SetZeroRotations() { m_zq = m_q; }
+	void SetZeroRotations() { m_cam_zero_q = m_cam_q; }
 	fluo::Vector ResetZeroRotations();
 	fluo::Point GetCenters();
 	void SetCenters(const fluo::Point& val);
@@ -651,10 +651,10 @@ private:
 	//camera center
 	fluo::Point m_cam_ctr;
 	//double m_ctrx, m_ctry, m_ctrz;
-	fluo::Quaternion m_q;
-	fluo::Quaternion m_zq;//zero rotation
-	fluo::Vector m_up;
-	fluo::Vector m_head;
+	fluo::Quaternion m_cam_q;
+	fluo::Quaternion m_cam_zero_q;//zero rotation
+	fluo::Vector m_cam_up;
+	fluo::Vector m_cam_head;
 
 	//object center
 	fluo::Point m_obj_ctr;
