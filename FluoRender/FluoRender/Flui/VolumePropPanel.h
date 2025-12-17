@@ -53,9 +53,9 @@ class VolumePropPanel: public PropPanel
 		ID_TranspChk,
 		ID_MipChk,
 		ID_InvChk,
-		ID_CompChk,
+		ID_OutlineChk,
 		ID_InterpolateChk,
-		ID_NRChk,
+		ID_NoiseReductChk,
 		ID_SyncGroupChk,
 		ID_ChannelMixDepthChk,
 		ID_LegendChk,
@@ -168,10 +168,12 @@ private:
 
 	//3
 	//color
-	wxTextCtrl *m_color_text;
-	wxUndoableColorPicker* m_color_btn;
-	wxTextCtrl *m_color2_text;
-	wxUndoableColorPicker* m_color2_btn;
+	wxTextCtrl *m_main_color_text;
+	wxUndoableToolbar* m_main_color_mode_tb;
+	wxUndoableColorPicker* m_main_color_btn;
+	wxTextCtrl *m_alt_color_text;
+	wxUndoableToolbar* m_alt_color_mode_tb;
+	wxUndoableColorPicker* m_alt_color_btn;
 	//space
 	wxUndoableTextCtrl* m_space_x_text;
 	wxUndoableTextCtrl* m_space_y_text;
@@ -239,7 +241,7 @@ private:
 	void SetTransparent();
 	void SetMIP();
 	void SetInvert();
-	void SetComponentDisplay();
+	void SetOutline();
 	void SetInterpolate();
 	void SetNoiseReduction();
 	void SetSyncGroup();
@@ -311,18 +313,21 @@ private:
 
 	//others
 	void OnOptions(wxCommandEvent& event);
-	//color / colormap
+	//colormap
 	void OnColormapInvBtn(wxCommandEvent& event);
 	void OnColormapCombo(wxCommandEvent& event);
 	void OnColormapCombo2(wxCommandEvent& event);
-	void OnColorChange(wxColor c);
-	void OnColorTextChange(wxCommandEvent& event);
-	void OnColorTextFocus(wxMouseEvent& event);
-	void OnColorBtn(wxColourPickerEvent& event);
-	void OnColor2Change(wxColor c);
-	void OnColor2TextChange(wxCommandEvent& event);
-	void OnColor2TextFocus(wxMouseEvent& event);
-	void OnColor2Btn(wxColourPickerEvent& event);
+	//color and display modes
+	void OnMainColorMode(wxCommandEvent& event);
+	void OnMainColorChange(wxColor c);
+	void OnMainColorTextChange(wxCommandEvent& event);
+	void OnMainColorTextFocus(wxMouseEvent& event);
+	void OnMainColorBtn(wxColourPickerEvent& event);
+	void OnAltColorMode(wxCommandEvent& event);
+	void OnAltColorChange(wxColor c);
+	void OnAltColorTextChange(wxCommandEvent& event);
+	void OnAltColorTextFocus(wxMouseEvent& event);
+	void OnAltColorBtn(wxColourPickerEvent& event);
 	//spacings
 	void OnSpaceText(wxCommandEvent& event);
 };

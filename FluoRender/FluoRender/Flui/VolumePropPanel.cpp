@@ -455,12 +455,12 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Invert data intensity values",
 		"Invert data intensity values");
-	//component display
-	bitmap = wxGetBitmap(comp_off);
-	m_options_toolbar->AddCheckTool(ID_CompChk, "Components",
+	//outline
+	bitmap = wxGetBitmap(filter);
+	m_options_toolbar->AddCheckTool(ID_OutlineChk, "Outline",
 		bitmap, wxNullBitmap,
-		"Show components",
-		"Show components");
+		"Show outlines",
+		"Show outlines");
 	//interpolation
 	bitmap = wxGetBitmap(interpolate);
 	m_options_toolbar->AddCheckTool(ID_InterpolateChk, "Trilinear",
@@ -469,7 +469,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Enable trilinear interpolation of voxel intensity values");
 	//noise reduction
 	bitmap = wxGetBitmap(filter);
-	m_options_toolbar->AddCheckTool(ID_NRChk, "Lanczos-Bicubic",
+	m_options_toolbar->AddCheckTool(ID_NoiseReductChk, "Lanczos-Bicubic",
 		bitmap, wxNullBitmap,
 		"Enable Lanczos-Bicubic filtering to reduce artifacts",
 		"Enable Lanczos-Bicubic filtering to reduce artifacts");
@@ -534,31 +534,45 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//color 1
 	st = new wxBoldText(this, 0, "Main/Unsel.",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
-	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
+	m_main_color_mode_tb = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(comp_off);
+	m_main_color_mode_tb->AddToolWithHelp(0, "Display Mode",
+		bitmap, "Set display mode of main/unselected data");
+	m_main_color_mode_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnMainColorMode, this);
+	m_main_color_mode_tb->Realize();
+	m_main_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
-	m_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColorTextChange, this);
-	m_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnColorTextFocus, this);
-	m_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
+	m_main_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnMainColorTextChange, this);
+	m_main_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnMainColorTextFocus, this);
+	m_main_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
-	m_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnColorBtn, this);
+	m_main_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnMainColorBtn, this);
 	sizer_r3->Add(st, 0, wxALIGN_CENTER, 0); 
-	sizer_r3->Add(5, 5, 0);
-	sizer_r3->Add(m_color_text, 1, wxALIGN_CENTER, 0);
-	sizer_r3->Add(m_color_btn, 1, wxALIGN_CENTER, 0);
+	sizer_r3->Add(m_main_color_mode_tb, 0, wxALIGN_CENTER, 0);
+	sizer_r3->Add(m_main_color_text, 1, wxALIGN_CENTER, 0);
+	sizer_r3->Add(m_main_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
 	st = new wxBoldText(this, 0, "Alt./Mask",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
-	m_color2_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
+	m_alt_color_mode_tb = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(comp_off);
+	m_alt_color_mode_tb->AddToolWithHelp(0, "Display Mode",
+		bitmap, "Set display mode of alt/selected data");
+	m_alt_color_mode_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnAltColorMode, this);
+	m_alt_color_mode_tb->Realize();
+	m_alt_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
-	m_color2_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnColor2TextChange, this);
-	m_color2_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnColor2TextFocus, this);
-	m_color2_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
+	m_alt_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnAltColorTextChange, this);
+	m_alt_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnAltColorTextFocus, this);
+	m_alt_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
-	m_color2_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnColor2Btn, this);
+	m_alt_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnAltColorBtn, this);
 	sizer_r4->Add(st, 0, wxALIGN_CENTER, 0);
-	sizer_r4->Add(5, 5, 0);
-	sizer_r4->Add(m_color2_text, 1, wxALIGN_CENTER, 0);
-	sizer_r4->Add(m_color2_btn, 1, wxALIGN_CENTER, 0);
+	sizer_r4->Add(m_alt_color_mode_tb, 0, wxALIGN_CENTER, 0);
+	sizer_r4->Add(m_alt_color_text, 1, wxALIGN_CENTER, 0);
+	sizer_r4->Add(m_alt_color_btn, 1, wxALIGN_CENTER, 0);
 	// colormap chooser
 	m_colormap_inv_btn = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -586,7 +600,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_colormap_combo2->Append(colormap_list2);
 	m_colormap_combo2->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo2, this);
 	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
-	sizer_r5->Add(5, 5, 0);
 	sizer_r5->Add(m_colormap_inv_btn, 0, wxALIGN_CENTER);
 	sizer_r5->Add(m_colormap_combo, 1, wxALIGN_CENTER, 0);
 	sizer_r5->Add(m_colormap_combo2, 1, wxALIGN_CENTER, 0);
@@ -652,8 +665,8 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	glbin.add_undo_control(m_shadow_dir_chk);
 	glbin.add_undo_control(m_colormap_chk);
 	//add others
-	glbin.add_undo_control(m_color_btn);
-	glbin.add_undo_control(m_color2_btn);
+	glbin.add_undo_control(m_main_color_btn);
+	glbin.add_undo_control(m_alt_color_btn);
 	glbin.add_undo_control(m_space_x_text);
 	glbin.add_undo_control(m_space_y_text);
 	glbin.add_undo_control(m_space_z_text);
@@ -693,8 +706,8 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_shadow_dir_chk);
 	glbin.del_undo_control(m_colormap_chk);
 	//delete others
-	glbin.del_undo_control(m_color_btn);
-	glbin.del_undo_control(m_color2_btn);
+	glbin.del_undo_control(m_main_color_btn);
+	glbin.del_undo_control(m_alt_color_btn);
 	glbin.del_undo_control(m_space_x_text);
 	glbin.del_undo_control(m_space_y_text);
 	glbin.del_undo_control(m_space_z_text);
@@ -1170,44 +1183,6 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_space_z_text->ChangeValue(str);
 	}
 
-	//legend
-	if (update_all || FOUND_VALUE(gstLegend))
-		m_options_toolbar->ToggleTool(ID_LegendChk,m_vd->GetLegend());
-
-	//component
-	if (update_all || FOUND_VALUE(gstLabelMode))
-	{
-		bval = m_vd->GetLabelMode() > 0;
-		m_options_toolbar->ToggleTool(ID_CompChk, bval);
-		if (bval)
-			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmap(comp));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmap(comp_off));
-	}
-
-	//interpolate
-	if (update_all || FOUND_VALUE(gstInterpolate))
-	{
-		bool interp = m_vd->GetInterpolate();
-		m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
-		if (interp)
-			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
-				wxGetBitmap(interpolate));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
-				wxGetBitmap(interpolate_off));
-	}
-
-	//sync group
-	if (update_all || FOUND_VALUE(gstSyncGroup))
-	{
-		if (m_group)
-			m_sync_group = m_group->GetVolumeSyncProp();
-		m_options_toolbar->ToggleTool(ID_SyncGroupChk, m_sync_group);
-	}
-
 	//colormap
 	if (update_colormap)
 	{
@@ -1317,16 +1292,16 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		wxColor wxc((unsigned char)(cval.r() * 255 + 0.5),
 			(unsigned char)(cval.g() * 255 + 0.5),
 			(unsigned char)(cval.b() * 255 + 0.5));
-		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+		m_main_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color_btn->SetValue(wxc);
+		m_main_color_btn->SetValue(wxc);
 		cval = m_vd->GetMaskColor();
 		wxc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
 			(unsigned char)(cval.g() * 255 + 0.5),
 			(unsigned char)(cval.b() * 255 + 0.5));
-		m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+		m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color2_btn->SetValue(wxc);
+		m_alt_color_btn->SetValue(wxc);
 	}
 
 	//inversion
@@ -1367,34 +1342,54 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		}
 	}
 
-	//component display
+	//legend
+	if (update_all || FOUND_VALUE(gstLegend))
+		m_options_toolbar->ToggleTool(ID_LegendChk, m_vd->GetLegend());
+
+	//outline
 	if (update_all || FOUND_VALUE(gstLabelMode))
 	{
-		int label_mode = m_vd->GetLabelMode();
-		if (label_mode)
-		{
-			m_options_toolbar->ToggleTool(ID_CompChk, true);
-			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmap(comp));
-		}
+		bval = m_vd->GetLabelMode() > 0;
+		m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
+		if (bval)
+			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+				wxGetBitmap(filter));
 		else
-		{
-			m_options_toolbar->ToggleTool(ID_CompChk, false);
-			m_options_toolbar->SetToolNormalBitmap(ID_CompChk,
-				wxGetBitmap(comp_off));
-		}
+			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+				wxGetBitmap(filter_off));
+	}
+
+	//interpolate
+	if (update_all || FOUND_VALUE(gstInterpolate))
+	{
+		bool interp = m_vd->GetInterpolate();
+		m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
+		if (interp)
+			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
+				wxGetBitmap(interpolate));
+		else
+			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
+				wxGetBitmap(interpolate_off));
+	}
+
+	//sync group
+	if (update_all || FOUND_VALUE(gstSyncGroup))
+	{
+		if (m_group)
+			m_sync_group = m_group->GetVolumeSyncProp();
+		m_options_toolbar->ToggleTool(ID_SyncGroupChk, m_sync_group);
 	}
 
 	//noise reduction
 	if (update_all || FOUND_VALUE(gstNoiseRedct))
 	{
 		bool nr = m_vd->GetNR();
-		m_options_toolbar->ToggleTool(ID_NRChk, nr);
+		m_options_toolbar->ToggleTool(ID_NoiseReductChk, nr);
 		if (nr)
-			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
+			m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
 				wxGetBitmap(filter));
 		else
-			m_options_toolbar->SetToolNormalBitmap(ID_NRChk,
+			m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
 				wxGetBitmap(filter_off));
 	}
 
@@ -2926,7 +2921,12 @@ void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)
 }
 
 //6
-void VolumePropPanel::OnColorChange(wxColor c)
+void VolumePropPanel::OnMainColorMode(wxCommandEvent& event)
+{
+
+}
+
+void VolumePropPanel::OnMainColorChange(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
@@ -2939,16 +2939,21 @@ void VolumePropPanel::OnColorChange(wxColor c)
 			wxColor wxc((unsigned char)(color.r()*255),
 				(unsigned char)(color.g()*255),
 				(unsigned char)(color.b()*255));
-			m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+			m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 				wxc.Red(), wxc.Green(), wxc.Blue()));
-			m_color2_btn->SetValue(wxc);
+			m_alt_color_btn->SetValue(wxc);
 		}
 
 		FluoRefresh(0, { gstColor, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync, gstColormap, gstUpdateHistogram }, { glbin_current.GetViewId() });
 	}
 }
 
-void VolumePropPanel::OnColor2Change(wxColor c)
+void VolumePropPanel::OnAltColorMode(wxCommandEvent& event)
+{
+
+}
+
+void VolumePropPanel::OnAltColorChange(wxColor c)
 {
 	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 	if (m_vd)
@@ -2958,66 +2963,66 @@ void VolumePropPanel::OnColor2Change(wxColor c)
 	}
 }
 
-void VolumePropPanel::OnColorTextChange(wxCommandEvent& event)
+void VolumePropPanel::OnMainColorTextChange(wxCommandEvent& event)
 {
-	wxString str = m_color_text->GetValue();
+	wxString str = m_main_color_text->GetValue();
 	wxColor wxc;
 	if (GetColorString(str, wxc) == 3)
 	{
 		wxString new_str = wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue());
 		if (str != new_str)
-			m_color_text->ChangeValue(new_str);
-		m_color_btn->SetValue(wxc);
+			m_main_color_text->ChangeValue(new_str);
+		m_main_color_btn->SetValue(wxc);
 
-		OnColorChange(wxc);
+		OnMainColorChange(wxc);
 	}
 }
 
-void VolumePropPanel::OnColor2TextChange(wxCommandEvent& event)
+void VolumePropPanel::OnAltColorTextChange(wxCommandEvent& event)
 {
-	wxString str = m_color2_text->GetValue();
+	wxString str = m_alt_color_text->GetValue();
 	wxColor wxc;
 	if (GetColorString(str, wxc) == 3)
 	{
 		wxString new_str = wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue());
 		if (str != new_str)
-			m_color2_text->ChangeValue(new_str);
-		m_color2_btn->SetValue(wxc);
+			m_alt_color_text->ChangeValue(new_str);
+		m_alt_color_btn->SetValue(wxc);
 
-		OnColor2Change(wxc);
+		OnAltColorChange(wxc);
 	}
 }
 
-void VolumePropPanel::OnColorBtn(wxColourPickerEvent& event)
+void VolumePropPanel::OnMainColorBtn(wxColourPickerEvent& event)
 {
 	wxColor wxc = event.GetColour();
 
-	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+	m_main_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
-	OnColorChange(wxc);
+	OnMainColorChange(wxc);
 }
 
-void VolumePropPanel::OnColor2Btn(wxColourPickerEvent& event)
+void VolumePropPanel::OnAltColorBtn(wxColourPickerEvent& event)
 {
 	wxColor wxc = event.GetColour();
 
-	m_color2_text->ChangeValue(wxString::Format("%d , %d , %d",
+	m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
-	OnColor2Change(wxc);
+	OnAltColorChange(wxc);
 }
 
-void VolumePropPanel::OnColorTextFocus(wxMouseEvent& event)
+void VolumePropPanel::OnMainColorTextFocus(wxMouseEvent& event)
 {
-	m_color_text->SetSelection(0, -1);
+	m_main_color_text->SetSelection(0, -1);
 }
 
-void VolumePropPanel::OnColor2TextFocus(wxMouseEvent& event)
+void VolumePropPanel::OnAltColorTextFocus(wxMouseEvent& event)
 {
-	m_color2_text->SetSelection(0, -1);
+	m_alt_color_text->SetSelection(0, -1);
 }
 
 void VolumePropPanel::OnOptions(wxCommandEvent& event)
@@ -3038,13 +3043,13 @@ void VolumePropPanel::OnOptions(wxCommandEvent& event)
 	case ID_InvChk:
 		SetInvert();
 		break;
-	case ID_CompChk:
-		SetComponentDisplay();
+	case ID_OutlineChk:
+		SetOutline();
 		break;
 	case ID_InterpolateChk:
 		SetInterpolate();
 		break;
-	case ID_NRChk:
+	case ID_NoiseReductChk:
 		SetNoiseReduction();
 		break;
 	case ID_SyncGroupChk:
@@ -3071,12 +3076,12 @@ void VolumePropPanel::SetMachineLearning()
 	ApplyMl();
 	//settings not managed by ml
 	//component display
-	int ival = glbin_vol_def.m_label_mode;
-	m_options_toolbar->ToggleTool(ID_CompChk, ival ? true : false);
-	if (m_sync_group && m_group)
-		m_group->SetLabelMode(ival);
-	else
-		m_vd->SetLabelMode(ival);
+	//int ival = glbin_vol_def.m_label_mode;
+	//m_options_toolbar->ToggleTool(ID_CompChk, ival ? true : false);
+	//if (m_sync_group && m_group)
+	//	m_group->SetLabelMode(ival);
+	//else
+	//	m_vd->SetLabelMode(ival);
 }
 
 void VolumePropPanel::SetTransparent()
@@ -3103,16 +3108,16 @@ void VolumePropPanel::SetInvert()
 	FluoRefresh(0, { gstInvert, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanel::SetComponentDisplay()
+void VolumePropPanel::SetOutline()
 {
-	bool bval = m_options_toolbar->GetToolState(ID_CompChk);
-	int mode = bval ? 1 : 0;
-	if (m_sync_group && m_group)
-		m_group->SetLabelMode(mode);
-	else if (m_vd)
-		m_vd->SetLabelMode(mode);
+	//bool bval = m_options_toolbar->GetToolState(ID_CompChk);
+	//int mode = bval ? 1 : 0;
+	//if (m_sync_group && m_group)
+	//	m_group->SetLabelMode(mode);
+	//else if (m_vd)
+	//	m_vd->SetLabelMode(mode);
 
-	FluoRefresh(0, { gstLabelMode }, { glbin_current.GetViewId() });
+	//FluoRefresh(0, { gstLabelMode }, { glbin_current.GetViewId() });
 }
 
 //interpolation
@@ -3133,7 +3138,7 @@ void VolumePropPanel::SetInterpolate()
 //noise reduction
 void VolumePropPanel::SetNoiseReduction()
 {
-	bool val = m_options_toolbar->GetToolState(ID_NRChk);
+	bool val = m_options_toolbar->GetToolState(ID_NoiseReductChk);
 
 	bool depth_view = m_view && m_view->GetChannelMixMode() == ChannelMixMode::Depth;
 	bool depth_group = m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
