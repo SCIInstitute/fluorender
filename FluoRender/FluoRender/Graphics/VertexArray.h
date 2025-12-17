@@ -145,7 +145,7 @@ namespace flvr
 		VA_Clip_Planes,
 		VA_Grid,
 		VA_Cam_Jack,
-		VA_Cam_Center,
+		VA_Cam_Crosshair,
 		VA_Crop_Frame,
 		VA_Scale_Bar,
 		VA_Legend_Squares,

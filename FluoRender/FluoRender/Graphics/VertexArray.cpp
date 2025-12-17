@@ -435,7 +435,7 @@ void VertexArray::update_buffer()
 	case VAType::VA_Cam_Jack:
 		update_cam_jack();
 		break;
-	case VAType::VA_Cam_Center:
+	case VAType::VA_Cam_Crosshair:
 		update_cam_center();
 		break;
 	case VAType::VA_Crop_Frame:
@@ -1265,7 +1265,7 @@ std::shared_ptr<VertexArray> VertexArrayManager::vertex_array(VAType type)
 		//set attrib
 		va->attrib_pointer(0, 3, VertexAttribType::Float, false, 3 * sizeof(float), (const void*)0);
 	}
-	else if (type == VAType::VA_Cam_Center)
+	else if (type == VAType::VA_Cam_Crosshair)
 	{
 		//set param
 		va->set_param(0, 1.0);

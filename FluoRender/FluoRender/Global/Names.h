@@ -131,6 +131,7 @@ DEALINGS IN THE SOFTWARE.
 //renderers
 #define gstClippingBoxRenderer "clipping box renderer"
 #define gstRulerRenderer "ruler renderer"
+#define gstCamCenterRenderer "cam center renderer"
 
 //root
 #define gstRoot "Scene Graph"

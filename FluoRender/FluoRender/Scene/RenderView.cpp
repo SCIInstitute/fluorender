@@ -87,6 +87,7 @@ DEALINGS IN THE SOFTWARE.
 #include <image_capture_factory.h>
 #include <RefreshScheduler.h>
 #include <ClippingBoxRenderer.h>
+#include <CamCenterRenderer.h>
 #include <RendererFactory.h>
 #include <compatibility.h>
 #include <Debug.h>
@@ -7527,14 +7528,9 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 	auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
 	if (settings)
 	{
-		//settings->mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
 		settings->winding = static_cast<flrd::FaceWinding>(face_winding);
-		//settings->plane_mask = -1;
-		//settings->draw_face = true;
-		//settings->draw_border = true;
 		settings->view = view;
 		settings->color = color;
-		//settings->alpha = 0.3;
 		renderer->setSettings(settings);
 	}
 
@@ -7604,67 +7600,29 @@ void RenderView::DrawGrid()
 
 void RenderView::DrawCamCtr()
 {
-	auto base_buffer = glbin_framebuffer_manager.current();
-	assert(base_buffer);
-	flvr::FramebufferStateGuard fbg(*base_buffer);
-	base_buffer->set_blend_enabled_all(false);
-	base_buffer->set_depth_test_enabled(false);
-	base_buffer->apply_state();
-
-	std::shared_ptr<flvr::VertexArray> va_jack;
-	if (m_pin_rot_ctr)
-		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Cam_Center);
-	else
-		va_jack = glbin_vertex_array_manager.vertex_array(flvr::VAType::VA_Cam_Jack);
-	assert(va_jack);
-
-	float len;
-	if (m_pin_rot_ctr)
+	auto base = glbin_renderer_factory.getOrCreate(gstCamCenterRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::CamCenterRenderer>(base);
+	if (!renderer)
+		return;
+	auto settings = std::dynamic_pointer_cast<flrd::CamCenterSettings>(renderer->getSettings());
+	if (settings)
 	{
-		len = static_cast<float>(m_scale_factor * 5);
-	}
-	else
-	{
-		if (m_camctr_size > 0.0)
-			len = static_cast<float>(m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0);
+		settings->view = glbin_current.render_view;
+		if (m_pin_rot_ctr)
+		{
+			settings->style = flrd::CamCenterStyle::Crosshair;
+			settings->size = m_scale_factor * 5;
+		}
 		else
-			len = static_cast<float>(std::fabs(m_camctr_size));
+		{
+			settings->style = flrd::CamCenterStyle::CenterJack;
+			if (m_camctr_size > 0.0)
+				settings->size = m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0;
+			else
+				settings->size = std::fabs(m_camctr_size);
+		}
 	}
-	va_jack->set_param(0, len);
-
-	auto shader =
-		glbin_shader_manager.shader(gstImgShader,
-			flvr::ShaderParams::Img(IMG_SHDR_DRAW_GEOMETRY, 0));
-	assert(shader);
-	shader->bind();
-
-	glm::mat4 matrix;
-	va_jack->draw_begin();
-	if (m_pin_rot_ctr)
-	{
-		int nx, ny;
-		GetRenderSize(nx, ny);
-		matrix = glm::ortho(-nx / 2.0f, nx / 2.0f, -ny / 2.0f, ny / 2.0f);
-		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-		fluo::Color text_color = GetTextColor();
-		shader->setLocalParam(0, text_color.r(), text_color.g(), text_color.b(), 1.0);
-		va_jack->draw_cam_center();
-	}
-	else
-	{
-		matrix = m_proj_mat * m_mv_mat;
-		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
-		shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
-		va_jack->draw_cam_jack(0);
-		shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);
-		va_jack->draw_cam_jack(1);
-		shader->setLocalParam(0, 0.0, 0.0, 1.0, 1.0);
-		va_jack->draw_cam_jack(2);
-	}
-	va_jack->draw_end();
-
-	shader->unbind();
-	//fbg exits
+	renderer->render();
 }
 
 void RenderView::DrawBrushCircles(double cx, double cy,

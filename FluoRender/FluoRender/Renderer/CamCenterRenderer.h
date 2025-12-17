@@ -26,46 +26,39 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef _RulerRenderer_H_
-#define _RulerRenderer_H_
+#ifndef _CAM_CENTER_RENDERER_H_
+#define _CAM_CENTER_RENDERER_H_
 
 #include <BaseRenderer.h>
 #include <Names.h>
-#include <vector>
-#include <set>
 
 class RenderView;
-namespace fluo
+namespace flvr
 {
-	class Color;
-	class Point;
-	class Transform;
+	class VertexArray;
+	class ShaderProgram;
 }
 namespace flrd
 {
-	class RulerList;
-	struct RulerSettings : public RendererSettings
+	enum class CamCenterStyle : int
+	{
+		CenterJack = 0,
+		CornerJack,
+		Crosshair
+	};
+	struct CamCenterSettings : public RendererSettings
 	{
 		std::weak_ptr<RenderView> view;
-		double line_size;
-		double sel_line_size;//line size for selected ruler
-		bool draw_text;
-		std::set<int> sel_list;//index to selected rulers
+		CamCenterStyle style;
+		double size;
 	};
-	class RulerRenderer : public BaseRenderer
+	class CamCenterRenderer : public BaseRenderer
 	{
 	public:
-		RulerRenderer() :
-			m_ruler_list(nullptr),
-			settings_(std::make_shared<RulerSettings>()) {}
-
-		void setData(flrd::RulerList* ruler_list)
-		{
-			m_ruler_list = ruler_list;
-		}
+		CamCenterRenderer() : settings_(std::make_shared<CamCenterSettings>()) {}
 
 		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
-			settings_ = std::dynamic_pointer_cast<RulerSettings>(settings);
+			settings_ = std::dynamic_pointer_cast<CamCenterSettings>(settings);
 		}
 
 		std::shared_ptr<RendererSettings> getSettings() override
@@ -76,21 +69,16 @@ namespace flrd
 		void render() override;
 
 		std::string type() const override {
-			return gstRulerRenderer;
+			return gstCamCenterRenderer;
 		}
 
 	private:
-		RulerList* m_ruler_list;
-		std::shared_ptr<RulerSettings> settings_;
+		std::shared_ptr<CamCenterSettings> settings_;
 
 	private:
-		unsigned int DrawVerts(std::vector<float> &verts, int sel_mode);//sel_mode: 0: all; 1: selected; 2 unselected
-		void DrawPoint(std::vector<float> &verts, int type, float px, float py, float w, fluo::Color &c);
-		void DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp1,
-			fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
-			std::vector<float> &verts, unsigned int& num);
-		void DrawTextAt(int, int);
+		void drawCrosshair(const std::shared_ptr<flvr::VertexArray>& va, const std::shared_ptr<flvr::ShaderProgram>& shader);
+		void drawJack(const std::shared_ptr<flvr::VertexArray>& va, const std::shared_ptr<flvr::ShaderProgram>& shader);
 	};
-
 }
-#endif//_RulerRenderer_H_
+
+#endif//_CAM_CENTER_RENDERER_H_
