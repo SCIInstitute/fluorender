@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <RulerAlign.h>
 #include <RulerRenderer.h>
+#include <RendererFactory.h>
 #include <DistCalculator.h>
 #include <VolumeSelector.h>
 #include <wx/artprov.h>
@@ -1263,13 +1264,15 @@ void MeasureDlg::Pencil()
 void MeasureDlg::Grow()
 {
 	bool bval = glbin_states.ToggleIntMode(InteractiveMode::GrowRuler);
-	if (bval)
+	auto base = glbin_renderer_factory.getOrCreate(gstRulerRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::RulerRenderer>(base);
+	if (renderer)
 	{
-		glbin_ruler_renderer.SetDrawText(true);
+		auto settings = std::dynamic_pointer_cast<flrd::RulerSettings>(renderer->getSettings());
+		settings->draw_text = bval;
 	}
-	else
+	if (!bval)
 	{
-		glbin_ruler_renderer.SetDrawText(false);
 		//reset label volume
 		auto vd = glbin_current.vol_data.lock();
 		if (vd)

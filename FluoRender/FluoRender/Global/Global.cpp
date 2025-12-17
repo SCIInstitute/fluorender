@@ -49,7 +49,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerAlign.h>
 #include <TrackMap.h>
 #include <RulerHandler.h>
-#include <RulerRenderer.h>
 #include <VolumePoint.h>
 #include <SegGrow.h>
 #include <DistCalculator.h>
@@ -89,6 +88,7 @@ DEALINGS IN THE SOFTWARE.
 //renderers
 #include <RendererFactory.h>
 #include <ClippingBoxRenderer.h>
+#include <RulerRenderer.h>
 
 using namespace fluo;
 
@@ -284,7 +284,6 @@ Global::Global() :
 	m_aligner(std::make_unique<flrd::RulerAlign>()),
 	m_trackmap_proc(std::make_unique<flrd::TrackMapProcessor>()),
 	m_ruler_handler(std::make_unique<flrd::RulerHandler>()),
-	m_ruler_renderer(std::make_unique<flrd::RulerRenderer>()),
 	m_volume_point(std::make_unique<flrd::VolumePoint>()),
 	m_seg_grow(std::make_unique<flrd::SegGrow>()),
 	m_dist_calculator(std::make_unique<flrd::DistCalculator>()),
@@ -369,6 +368,8 @@ void Global::BuildFactories()
 	//renderer factory
 	m_renderer_factory->registerRenderer(gstClippingBoxRenderer,
 		[]() { return std::make_shared<flrd::ClippingBoxRenderer>(); });
+	m_renderer_factory->registerRenderer(gstRulerRenderer,
+		[]() { return std::make_shared<flrd::RulerRenderer>(); });
 }
 
 //locale
@@ -625,11 +626,6 @@ flrd::TrackMapProcessor& Global::get_trackmap_proc()
 flrd::RulerHandler& Global::get_ruler_handler()
 {
 	return *m_ruler_handler;
-}
-
-flrd::RulerRenderer& Global::get_ruler_renderer()
-{
-	return *m_ruler_renderer;
 }
 
 flrd::VolumePoint& Global::get_volume_point()

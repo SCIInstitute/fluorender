@@ -46,31 +46,17 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-RulerRenderer::RulerRenderer() :
-	m_view(0),
-	m_ruler_list(0),
-	m_line_size(3),
-	m_sel_line_size(5),
-	m_draw_text(true)
+void RulerRenderer::render()
 {
-
-}
-
-RulerRenderer::~RulerRenderer()
-{
-
-}
-
-
-void RulerRenderer::Draw()
-{
-	if (!m_view || !m_ruler_list)
+	auto view = settings_->view.lock();
+	if (!view || !m_ruler_list)
 		return;
 	if (m_ruler_list->empty())
 		return;
 
-	int nx = m_view->GetCanvasSize().w();
-	int ny = m_view->GetCanvasSize().h();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
+	double dval;
 
 	auto shader = glbin_shader_manager.shader(
 		gstImgShader, flvr::ShaderParams::Img(IMG_SHDR_DRAW_THICK_LINES, 0));
@@ -86,7 +72,8 @@ void RulerRenderer::Draw()
 	unsigned int num = 0;
 		
 	//draw unselected first
-	shader->setLocalParam(0, nx, ny, m_line_size, 0.0);
+	dval = settings_->line_size;
+	shader->setLocalParam(0, nx, ny, dval, 0.0);
 	num = DrawVerts(verts, 2);
 	if (num)
 	{
@@ -97,7 +84,8 @@ void RulerRenderer::Draw()
 		va_rulers->draw();
 	}
 	//draw selected next
-	shader->setLocalParam(0, nx, ny, m_sel_line_size, 0.0);
+	dval = settings_->sel_line_size;
+	shader->setLocalParam(0, nx, ny, dval, 0.0);
 	num = DrawVerts(verts, 1);
 	if (num)
 	{
@@ -111,32 +99,33 @@ void RulerRenderer::Draw()
 	shader->unbind();
 
 	//draw text
-	if (m_draw_text)
+	if (settings_->draw_text)
 		DrawTextAt(nx, ny);
 }
 
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 {
-	if (!m_view || !m_ruler_list)
+	auto view = settings_->view.lock();
+	if (!view || !m_ruler_list)
 		return 0;
 
 	verts.clear();
 
 	size_t tseq_cur_num;
-	if (m_view->m_frame_num_type == 1)
-		tseq_cur_num = m_view->m_param_cur_num;
+	if (view->m_frame_num_type == 1)
+		tseq_cur_num = view->m_param_cur_num;
 	else
-		tseq_cur_num = m_view->m_tseq_cur_num;
-	bool persp = m_view->GetPersp();
-	int nx = m_view->GetCanvasSize().w();
-	int ny = m_view->GetCanvasSize().h();
+		tseq_cur_num = view->m_tseq_cur_num;
+	bool persp = view->GetPersp();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float px, py;
 
 	fluo::Transform mv, p;
-	glm::mat4 mv_mat = m_view->GetModelView();
+	glm::mat4 mv_mat = view->GetModelView();
 	mv.set(glm::value_ptr(mv_mat));
-	glm::mat4 proj_mat = m_view->GetProjection();
+	glm::mat4 proj_mat = view->GetProjection();
 	p.set(glm::value_ptr(proj_mat));
 
 	std::set<int> sel_list = glbin_ruler_handler.GetSelRulers();
@@ -167,7 +156,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 	fluo::Point p1, p2;
 	RulerPoint *rp1, *rp2;
 	fluo::Color c;
-	fluo::Color text_color = m_view->GetTextColor();
+	fluo::Color text_color = view->GetTextColor();
 	size_t rwt = tseq_cur_num;
 	for (size_t i = 0; i < m_ruler_list->size(); i++)
 	{
@@ -503,12 +492,13 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 	fluo::Color &c, fluo::Transform& mv, fluo::Transform& p,
 	std::vector<float> &verts, unsigned int& num)
 {
-	if (!m_view)
+	auto view = settings_->view.lock();
+	if (!view)
 		return;
 
-	bool persp = m_view->GetPersp();
-	int nx = m_view->GetCanvasSize().w();
-	int ny = m_view->GetCanvasSize().h();
+	bool persp = view->GetPersp();
+	int nx = view->GetCanvasSize().w();
+	int ny = view->GetCanvasSize().h();
 	float px, py;
 	fluo::Point p1, p2;
 	int sec = 20;
@@ -561,25 +551,26 @@ void RulerRenderer::DrawArc(fluo::Point & ppc, fluo::Point& pp0, fluo::Point& pp
 
 void RulerRenderer::DrawTextAt(int nx, int ny)
 {
+	auto view = settings_->view.lock();
 	size_t tseq_cur_num;
-	if (m_view->m_frame_num_type == 1)
-		tseq_cur_num = m_view->m_param_cur_num;
+	if (view->m_frame_num_type == 1)
+		tseq_cur_num = view->m_param_cur_num;
 	else
-		tseq_cur_num = m_view->m_tseq_cur_num;
+		tseq_cur_num = view->m_tseq_cur_num;
 	float w = glbin_text_tex_manager.GetSize() / 4.0f;
 	float sx, sy;
 	sx = static_cast<float>(2.0 / nx);
 	sy = static_cast<float>(2.0 / ny);
 	fluo::Color c;
-	fluo::Color text_color = m_view->GetTextColor();
+	fluo::Color text_color = view->GetTextColor();
 	fluo::Point p2;
 	float p2x, p2y;
 	fluo::Transform mv, p;
-	glm::mat4 mv_mat = m_view->GetModelView();
+	glm::mat4 mv_mat = view->GetModelView();
 	mv.set(glm::value_ptr(mv_mat));
-	glm::mat4 proj_mat = m_view->GetProjection();
+	glm::mat4 proj_mat = view->GetProjection();
 	p.set(glm::value_ptr(proj_mat));
-	flvr::TextRenderer* text_renderer = m_view->GetTextRenderer();
+	flvr::TextRenderer* text_renderer = view->GetTextRenderer();
 	if (!text_renderer)
 		return;
 	size_t rwt = tseq_cur_num;

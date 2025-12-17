@@ -7288,11 +7288,17 @@ void RenderView::DrawRulers()
 	if (m_ruler_list->empty())
 		return;
 	double width = glbin_settings.m_line_width;
-	glbin_ruler_renderer.SetLineSize(width);
-	glbin_ruler_renderer.SetSelLineSize(width * 1.5);
-	glbin_ruler_renderer.SetView(this);
-	glbin_ruler_renderer.SetRulerList(m_ruler_list.get());
-	glbin_ruler_renderer.Draw();
+	auto base = glbin_renderer_factory.getOrCreate(gstRulerRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::RulerRenderer>(base);
+	if (renderer)
+	{
+		auto settings = std::dynamic_pointer_cast<flrd::RulerSettings>(renderer->getSettings());
+		settings->line_size = width;
+		settings->sel_line_size = width * 1.5;
+		settings->view = glbin_current.render_view.lock();
+		renderer->setData(m_ruler_list.get());
+		renderer->render();
+	}
 }
 
 //draw highlighted comps

@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RulerRenderer_H_
 #define _RulerRenderer_H_
 
+#include <BaseRenderer.h>
+#include <Names.h>
 #include <vector>
 #include <set>
 
@@ -42,56 +44,42 @@ namespace fluo
 namespace flrd
 {
 	class RulerList;
-	class RulerRenderer
+	struct RulerSettings : public RendererSettings
+	{
+		std::weak_ptr<RenderView> view;
+		double line_size;
+		double sel_line_size;//line size for selected ruler
+		bool draw_text;
+		std::set<int> sel_list;//index to selected rulers
+	};
+	class RulerRenderer : public BaseRenderer
 	{
 	public:
-		RulerRenderer();
-		~RulerRenderer();
+		RulerRenderer() : settings_(std::make_shared<RulerSettings>()) {}
 
-		void SetView(RenderView* view)
-		{
-			m_view = view;
-		}
-
-		void SetRulerList(flrd::RulerList* ruler_list)
+		void setData(flrd::RulerList* ruler_list)
 		{
 			m_ruler_list = ruler_list;
 		}
 
-		flrd::RulerList* GetRulerList()
-		{
-			return m_ruler_list;
+		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
+			settings_ = std::dynamic_pointer_cast<RulerSettings>(settings);
 		}
 
-		void SetLineSize(double val)
+		std::shared_ptr<RendererSettings> getSettings() override
 		{
-			m_line_size = val;
+			return settings_;
 		}
 
-		void SetSelLineSize(double val)
-		{
-			m_sel_line_size = val;
-		}
+		void render() override;
 
-		void SetDrawText(bool val)
-		{
-			m_draw_text = val;
+		std::string type() const override {
+			return gstRulerRenderer;
 		}
-
-		void SetSelection(const std::set<int>& sel_list)
-		{
-			m_sel_list = sel_list;
-		}
-
-		void Draw();
 
 	private:
-		RenderView *m_view;
-		RulerList *m_ruler_list;
-		double m_line_size;
-		double m_sel_line_size;//line size for selected ruler
-		bool m_draw_text;
-		std::set<int> m_sel_list;//index to selected rulers
+		RulerList* m_ruler_list;
+		std::shared_ptr<RulerSettings> settings_;
 
 	private:
 		unsigned int DrawVerts(std::vector<float> &verts, int sel_mode);//sel_mode: 0: all; 1: selected; 2 unselected
