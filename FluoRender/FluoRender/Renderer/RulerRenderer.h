@@ -49,7 +49,6 @@ namespace flrd
 		std::weak_ptr<RenderView> view;
 		double line_size;
 		double sel_line_size;//line size for selected ruler
-		bool draw_text;
 		std::set<int> sel_list;//index to selected rulers
 	};
 	class RulerRenderer : public BaseRenderer

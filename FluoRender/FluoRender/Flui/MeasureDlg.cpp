@@ -1264,13 +1264,6 @@ void MeasureDlg::Pencil()
 void MeasureDlg::Grow()
 {
 	bool bval = glbin_states.ToggleIntMode(InteractiveMode::GrowRuler);
-	auto base = glbin_renderer_factory.getOrCreate(gstRulerRenderer);
-	auto renderer = std::dynamic_pointer_cast<flrd::RulerRenderer>(base);
-	if (renderer)
-	{
-		auto settings = std::dynamic_pointer_cast<flrd::RulerSettings>(renderer->getSettings());
-		settings->draw_text = bval;
-	}
 	if (!bval)
 	{
 		//reset label volume

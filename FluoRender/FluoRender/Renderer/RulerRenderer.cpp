@@ -98,9 +98,7 @@ void RulerRenderer::render()
 
 	shader->unbind();
 
-	//draw text
-	if (settings_->draw_text)
-		DrawTextAt(nx, ny);
+	DrawTextAt(nx, ny);
 }
 
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
