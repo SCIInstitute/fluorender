@@ -548,7 +548,6 @@ public:
 	bool m_draw_legend;
 	int m_colormap_disp;//0-no display; 1-color map; 2-with text
 	bool m_mouse_focus;
-	bool m_draw_rulers;
 	//current volume
 	std::weak_ptr<VolumeData> m_cur_vol;
 	std::weak_ptr<VolumeData> m_cur_vol_save;

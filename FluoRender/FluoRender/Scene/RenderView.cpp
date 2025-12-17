@@ -131,7 +131,6 @@ RenderView::RenderView() :
 	m_draw_legend(false),
 	m_colormap_disp(0),
 	m_mouse_focus(false),
-	m_draw_rulers(true),
 	//clipping settings
 	m_clip_mode(2),
 	//scale bar
@@ -333,7 +332,6 @@ RenderView::RenderView(RenderView& copy):
 	m_draw_legend(copy.m_draw_legend),
 	m_colormap_disp(copy.m_colormap_disp),
 	m_mouse_focus(copy.m_mouse_focus),
-	m_draw_rulers(true), //copy m_draw_rulers,
 	//clipping settings
 	m_clip_mode(2), //copy m_clip_mode,
 	//scale bar
@@ -5335,18 +5333,9 @@ void RenderView::DrawData()
 
 	DrawCells();
 
-	//traces
 	DrawTracks();
 
-	glm::mat4 mv_temp = m_mv_mat;
-
-	//obj independent items
-	m_mv_mat = GetDrawWorldMat();
-
-	if (m_draw_rulers)
-		DrawRulers();
-
-	m_mv_mat = mv_temp;
+	DrawRulers();
 
 	//final composition
 	DrawDataFramebuffer();
@@ -5575,15 +5564,7 @@ void RenderView::DrawDataPeel()
 	//traces
 	DrawTracks();
 
-	glm::mat4 mv_temp = m_mv_mat;
-
-	//obj independent items
-	m_mv_mat = GetDrawWorldMat();
-
-	if (m_draw_rulers)
-		DrawRulers();
-
-	m_mv_mat = mv_temp;
+	DrawRulers();
 
 	//final composition
 	DrawDataFramebuffer();
@@ -10834,7 +10815,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				!m_retain_finalbuffer, false, true, m_interactive, true, origin_id));
 	}
 	if (!vc.empty())
-		glbin_current.mainframe->UpdateProps(vc, 2, m_render_view_panel);
+		glbin_current.mainframe->UpdateProps(vc, 0, m_render_view_panel);
 }
 
 //volume properties
