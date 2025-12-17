@@ -750,7 +750,7 @@ bool ClippingBox::ContainsWorld(const Point& p) const
 {
 	for (const auto& plane : planes_world_)
 	{
-		if (plane.eval_point(p) > 0.0) // point is outside
+		if (plane.eval_point(p) < 0.0) // point is outside
 			return false;
 	}
 	return true;
@@ -760,7 +760,7 @@ bool ClippingBox::ContainsIndex(const Point& p) const
 {
 	for (const auto& plane : planes_index_)
 	{
-		if (plane.eval_point(p) > 0.0) // point is outside
+		if (plane.eval_point(p) < 0.0) // point is outside
 			return false;
 	}
 	return true;
@@ -770,7 +770,7 @@ bool ClippingBox::ContainsUnit(const Point& p) const
 {
 	for (const auto& plane : planes_unit_)
 	{
-		if (plane.eval_point(p) > 0.0) // point is outside
+		if (plane.eval_point(p) < 0.0) // point is outside
 			return false;
 	}
 	return true;

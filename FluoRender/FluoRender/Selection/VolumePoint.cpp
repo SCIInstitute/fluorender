@@ -140,10 +140,7 @@ double VolumePoint::GetPointVolume(
 				zz<0 || zz>res.intz())
 				break;
 			//normalize
-			nmp.x(hit.x() / bbox.Max().x());
-			nmp.y(hit.y() / bbox.Max().y());
-			nmp.z(hit.z() / bbox.Max().z());
-			if (cb.ContainsWorld(nmp))
+			if (cb.ContainsWorld(hit))
 			{
 				xx = xx == res.intx() ? res.intx() - 1 : xx;
 				yy = yy == res.inty() ? res.inty() - 1 : yy;
