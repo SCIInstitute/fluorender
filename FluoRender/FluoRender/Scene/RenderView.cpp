@@ -4992,7 +4992,7 @@ void RenderView::RotateClips()
 {
 	fluo::Quaternion q;
 	q.FromEuler(m_obj_rot);
-	q = (-q) * (-m_cam_q);
+	q *= -m_cam_q;
 
 	auto vd = glbin_current.vol_data.lock();
 
