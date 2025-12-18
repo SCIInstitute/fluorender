@@ -197,7 +197,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	int h2 = new_size.h();
 	bool depth = false;
 	for (size_t i = 0; i < vr_list_.size(); ++i)
-		depth |= (vr_list_[i]->depth_ || vr_list_[i]->shading_);
+		depth |= (vr_list_[i]->depth_ || vr_list_[i]->shading_ || vr_list_[i]->outline_);
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	flvr::FBRole role = depth ? flvr::FBRole::RenderColorFxFilter : flvr::FBRole::RenderColorFilter;
@@ -524,6 +524,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			auto tex = vr_list_[tn]->tex_.lock();
 			assert(tex);
 			int nc = tex->nc();
+			bool depth = vr_list_[tn]->depth_ || vr_list_[tn]->shading_ || vr_list_[tn]->outline_;
 			shader = glbin_shader_manager.shader(gstVolShader,
 				ShaderParams::Volume(
 					false,
@@ -538,7 +539,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					vr_list_[tn]->colormap_proj_,
 					vr_list_[tn]->solid_,
 					1,
-					vr_list_[tn]->depth_ || vr_list_[tn]->shading_));
+					depth));
 			assert(shader);
 			shader->bind();
 

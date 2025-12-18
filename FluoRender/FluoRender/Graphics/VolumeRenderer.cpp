@@ -71,6 +71,8 @@ VolumeRenderer::VolumeRenderer()
 	mask_color_set_(false),
 	mask_thresh_(0.0),
 	alpha_(1.0),
+	//outline
+	outline_(false),
 	//shading
 	shading_(false),
 	shading_strength_(1.0),
@@ -130,6 +132,8 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	mask_color_set_(copy.mask_color_set_),
 	mask_thresh_(0.0),
 	alpha_(copy.alpha_),
+	//outline
+	outline_(copy.outline_),
 	//shading
 	shading_(copy.shading_),
 	shading_strength_(copy.shading_strength_),
@@ -379,7 +383,7 @@ void VolumeRenderer::draw_volume(
 	Size2D new_size = resize(buf_name);
 	int w2 = new_size.w();
 	int h2 = new_size.h();
-	bool depth = depth_ || shading_;
+	bool depth = depth_ || shading_ || outline_;
 
 	auto cur_buffer = glbin_framebuffer_manager.current();
 	flvr::FBRole role = depth ? flvr::FBRole::RenderColorFxFilter : flvr::FBRole::RenderColorFilter;

@@ -329,6 +329,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstLegend "legend"
 //interpolate
 #define gstInterpolate "interpolate"
+//outline
+#define gstOutline "outline"
 //label
 #define gstLabelMode "label mode"
 //depth atten

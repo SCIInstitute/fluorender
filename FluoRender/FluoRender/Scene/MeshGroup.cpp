@@ -55,3 +55,13 @@ void MeshGroup::RandomizeColor()
 		}
 	}
 }
+
+void MeshGroup::SetOutline(bool val)
+{
+	TreeLayer::SetOutline(val);
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetOutline(val);
+	}
+}

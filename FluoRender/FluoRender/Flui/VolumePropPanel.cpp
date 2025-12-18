@@ -456,7 +456,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Invert data intensity values",
 		"Invert data intensity values");
 	//outline
-	bitmap = wxGetBitmap(filter);
+	bitmap = wxGetBitmap(outline);
 	m_options_toolbar->AddCheckTool(ID_OutlineChk, "Outline",
 		bitmap, wxNullBitmap,
 		"Show outlines",
@@ -1347,16 +1347,16 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_options_toolbar->ToggleTool(ID_LegendChk, m_vd->GetLegend());
 
 	//outline
-	if (update_all || FOUND_VALUE(gstLabelMode))
+	if (update_all || FOUND_VALUE(gstOutline))
 	{
-		bval = m_vd->GetLabelMode() > 0;
+		bval = m_vd->GetOutline();
 		m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
 		if (bval)
 			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
-				wxGetBitmap(filter));
+				wxGetBitmap(outline));
 		else
 			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
-				wxGetBitmap(filter_off));
+				wxGetBitmap(outline_off));
 	}
 
 	//interpolate
@@ -3110,14 +3110,14 @@ void VolumePropPanel::SetInvert()
 
 void VolumePropPanel::SetOutline()
 {
-	//bool bval = m_options_toolbar->GetToolState(ID_CompChk);
-	//int mode = bval ? 1 : 0;
-	//if (m_sync_group && m_group)
-	//	m_group->SetLabelMode(mode);
-	//else if (m_vd)
-	//	m_vd->SetLabelMode(mode);
+	bool bval = m_options_toolbar->GetToolState(ID_OutlineChk);
 
-	//FluoRefresh(0, { gstLabelMode }, { glbin_current.GetViewId() });
+	if (m_sync_group && m_group)
+		m_group->SetOutline(bval);
+	else if (m_vd)
+		m_vd->SetOutline(bval);
+
+	FluoRefresh(0, { gstOutline }, { glbin_current.GetViewId() });
 }
 
 //interpolation

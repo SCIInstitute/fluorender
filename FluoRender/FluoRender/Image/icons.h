@@ -438,6 +438,10 @@ public:
 	const static unsigned char filter_png[905];
 	/* filter_off.png - 880 bytes */
 	const static unsigned char filter_off_png[880];
+	/* outline.png - 851 bytes */
+	const static unsigned char outline_png[851];
+	/* outline_off.png - 1085 bytes */
+	const static unsigned char outline_off_png[1085];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

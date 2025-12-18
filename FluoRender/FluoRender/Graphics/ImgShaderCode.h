@@ -482,26 +482,38 @@ inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_OUTLINES = R"GLSHDR(
 in vec3 OutVertex;
 in vec3 OutTexCoord;
 out vec4 FragColor;
-	
+
 //IMG_SHADER_CODE_DEPTH_TO_OUTLINES
-uniform vec4 loc0; //(width, height, 0.0, 0.0)
+uniform vec4 loc0; //(width, height, low, high)
+uniform vec4 loc1; //color (r, g, b, a)
 uniform sampler2D tex0;
-	
+
 void main()
 {
-	vec4 t = vec4(OutTexCoord, 1.0);
-	vec4 c = texture(tex0, t.xy);
-	//vec4 c1 = texture(tex0, vec2(t.x-0.70711*loc0.x, t.y-0.70711*loc0.y));
-	vec4 c2 = texture(tex0, vec2(t.x, t.y-loc0.y));
-	//vec4 c3 = texture(tex0, vec2(t.x+0.70711*loc0.x, t.y-0.70711*loc0.y));
-	vec4 c4 = texture(tex0, vec2(t.x-loc0.x, t.y));
-	vec4 c5 = texture(tex0, vec2(t.x+loc0.x, t.y));
-	//vec4 c6 = texture(tex0, vec2(t.x-0.70711*loc0.x, t.y+0.70711*loc0.y));
-	vec4 c7 = texture(tex0, vec2(t.x, t.y+loc0.y));
-	//vec4 c8 = texture(tex0, vec2(t.x+0.70711*loc0.x, t.y+0.70711*loc0.y));
-	c = (c5-c4)*(c5-c4)+(c7-c2)*(c7-c2);
-	c = clamp(c*2e6, 0.0, 1.0);
-	FragColor = vec4(1.0-c.r, 1.0-c.g, 1.0-c.b, 1.0);
+	vec2 uv = OutTexCoord.xy;
+	vec2 texel = vec2(loc0.x, loc0.y); // step size in texture coords
+
+	// Sample neighbors
+	float d   = texture(tex0, uv).r;
+	float dxL = texture(tex0, uv - vec2(texel.x, 0.0)).r;
+	float dxR = texture(tex0, uv + vec2(texel.x, 0.0)).r;
+	float dyD = texture(tex0, uv - vec2(0.0, texel.y)).r;
+	float dyU = texture(tex0, uv + vec2(0.0, texel.y)).r;
+
+	// Central differences
+	float gx = (dxR - dxL) * 0.5;
+	float gy = (dyU - dyD) * 0.5;
+
+	// Gradient magnitude
+	float edge = length(vec2(gx, gy));
+
+	// Compress strong peaks to keep outlines smooth
+	float compressed = pow(edge / (1.0 + edge), 0.3);
+
+	// Smooth thresholding for clean outlines
+	float outline = smoothstep(loc0.z, loc0.w, compressed);
+
+	FragColor = outline * loc1;
 }
 )GLSHDR";
 

@@ -418,6 +418,9 @@ public:
 	virtual void ResetLink() override;
 	virtual void SetLinkedDist(fluo::ClipPlane i, int val) override;
 
+	//outline
+	virtual void SetOutline(bool val) override;
+
 	//randomize color
 	void RandomizeColor();
 	//legend

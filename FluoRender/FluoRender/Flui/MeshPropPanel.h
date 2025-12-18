@@ -32,11 +32,23 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderView;
 class MeshData;
+class MeshGroup;
 class wxSingleSlider;
 class wxUndoableColorPicker;
 class wxColourPickerEvent;
+class wxUndoableToolbar;
 class MeshPropPanel: public PropPanel
 {
+	enum
+	{
+		//toolbar
+		ID_OutlineChk = 0,
+		ID_SyncGroupChk,
+		ID_LegendChk,
+		ID_ResetDefault,
+		ID_SaveDefault
+	};
+
 public:
 	MeshPropPanel(MainFrame* frame,
 		wxWindow* parent,
@@ -57,7 +69,11 @@ public:
 
 private:
 	RenderView* m_view;
+	MeshGroup* m_group;
 	MeshData* m_md;
+	bool m_sync_group;
+
+	wxUndoableToolbar* m_options_toolbar;
 
 	wxTextCtrl *m_color_text;
 	wxUndoableColorPicker* m_color_btn;
@@ -82,6 +98,14 @@ private:
 	wxTextCtrl* m_scale_text;
 
 private:
+	void SetOutline();
+	void SetSyncGroup();
+	void SetLegend();
+	void SaveDefault();
+	void ResetDefault();
+
+	void OnOptions(wxCommandEvent& event);
+
 	void OnColorChange(const wxColor& c);
 	void OnColorTextChange(wxCommandEvent& event);
 	void OnColorTextFocus(wxMouseEvent& event);

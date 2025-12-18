@@ -116,6 +116,15 @@ public:
 	virtual void SetLinkedDist(fluo::ClipPlane i, int val) { m_clipping_box.SetLinkedDistIndex(i, val); }
 	virtual int GetLinkedDist(fluo::ClipPlane i) { return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i))); }
 
+	virtual void SetOutline(bool outline)
+	{
+		m_outline = outline;
+	}
+	virtual bool GetOutline()
+	{
+		return m_outline;
+	}
+
 protected:
 	int type;//-1:invalid, 0:root 1: canvas, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
 	std::wstring m_name;
@@ -129,6 +138,8 @@ protected:
 
 	//clipping box
 	fluo::ClippingBox m_clipping_box;
+
+	bool m_outline;
 };
 
 #endif//_TREE_LAYER_H

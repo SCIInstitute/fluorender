@@ -618,3 +618,13 @@ void VolumeGroup::AddMask(Nrrd* mask, int op)
 			it->AddMask(mask, op);
 	}
 }
+
+void VolumeGroup::SetOutline(bool outline)
+{
+	TreeLayer::SetOutline(outline);
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->SetOutline(outline);
+	}
+}

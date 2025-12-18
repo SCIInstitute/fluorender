@@ -201,6 +201,8 @@ public:
 
 	void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
 
+	virtual void SetOutline(bool outline) override;
+
 private:
 	static int m_num;
 	std::vector<std::shared_ptr<VolumeData>> m_vd_list;

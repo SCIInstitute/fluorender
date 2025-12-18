@@ -2879,6 +2879,13 @@ void VolumeData::SetLinkedDist(fluo::ClipPlane i, int val)
 	m_vr->set_clipping_box(m_clipping_box);
 }
 
+//outline
+void VolumeData::SetOutline(bool val)
+{
+	TreeLayer::SetOutline(val);
+	m_vr->set_outline(m_outline);
+}
+
 //randomize color
 void VolumeData::RandomizeColor()
 {

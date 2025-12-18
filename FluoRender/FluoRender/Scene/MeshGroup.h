@@ -111,6 +111,8 @@ public:
 	//randomize color
 	void RandomizeColor();
 
+	virtual void SetOutline(bool val) override;
+
 private:
 	static int m_num;
 	std::vector<std::shared_ptr<MeshData>> m_md_list;

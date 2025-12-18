@@ -33,10 +33,14 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <RenderView.h>
 #include <MeshData.h>
+#include <MeshGroup.h>
 #include <wxSingleSlider.h>
 #include <wxBoldText.h>
 #include <wxUndoableColorPicker.h>
+#include <wxUndoableToolbar.h>
 #include <Helper.h>
+#include <png_resource.h>
+#include <icons.h>
 #include <wx/valnum.h>
 
 MeshPropPanel::MeshPropPanel(MainFrame* frame,
@@ -47,13 +51,16 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	const wxString& name) :
 	PropPanel(frame, parent, pos, size,style, name),
 	m_md(0),
-	m_view(0)
+	m_view(0),
+	m_group(0),
+	m_sync_group(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 
 	wxBoldText* st = 0;
+	wxBitmapBundle bitmap;
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp2(2);
 	//validator: integer
@@ -72,10 +79,43 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	m_color_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnColorTextChange, this);
 	m_color_text->Bind(wxEVT_LEFT_DCLICK, &MeshPropPanel::OnColorTextFocus, this);
 	m_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &MeshPropPanel::OnColorBtn, this);
+	//options
+	m_options_toolbar = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
+	//outline
+	bitmap = wxGetBitmap(outline);
+	m_options_toolbar->AddCheckTool(ID_OutlineChk, "Outline",
+		bitmap, wxNullBitmap,
+		"Show outlines",
+		"Show outlines");
+	//sync group
+	bitmap = wxGetBitmap(sync_chan);
+	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
+		bitmap, wxNullBitmap,
+		"Sync current channel with other channels in the group",
+		"Sync current channel with other channels in the group");
+	//legend
+	bitmap = wxGetBitmap(legend);
+	m_options_toolbar->AddCheckTool(ID_LegendChk, "Legend",
+		bitmap, wxNullBitmap,
+		"Enable name legend display for current channel",
+		"Enable name legend display for current channel");
+	//reset default
+	bitmap = wxGetBitmap(reset);
+	m_options_toolbar->AddToolWithHelp(ID_ResetDefault,"Reset",
+		bitmap, "Reset all properties");
+	//save default
+	bitmap = wxGetBitmap(save_settings);
+	m_options_toolbar->AddToolWithHelp(ID_SaveDefault,"Save",
+		bitmap, "Set current settings as default");
+	m_options_toolbar->Bind(wxEVT_TOOL, &MeshPropPanel::OnOptions, this);
+	m_options_toolbar->Realize();
 	sizer_1->Add(st, 0, wxALIGN_CENTER, 0);
 	sizer_1->Add(5, 5, 0);
 	sizer_1->Add(m_color_text, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_color_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(10, 10, 0);
+	sizer_1->Add(m_options_toolbar, 0, wxALIGN_CENTER);
 
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxBoldText(this, 0, "Alpha:",
@@ -193,6 +233,19 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	double dval;
 	wxString str;
 	bool bval;
+
+	//outline
+	if (update_all || FOUND_VALUE(gstOutline))
+	{
+		bval = m_md->GetOutline();
+		m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
+		if (bval)
+			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+				wxGetBitmap(outline));
+		else
+			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+				wxGetBitmap(outline_off));
+	}
 
 	//color
 	if (update_all)
@@ -322,6 +375,80 @@ void MeshPropPanel::SetShadowDir(double dval, bool notify)
 		FluoRefresh(0, { gstShadowDir }, { glbin_current.GetViewId() });
 	else
 		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+}
+
+void MeshPropPanel::SetOutline()
+{
+	bool bval = m_options_toolbar->GetToolState(ID_OutlineChk);
+
+	if (m_sync_group && m_group)
+		m_group->SetOutline(bval);
+	else if (m_md)
+		m_md->SetOutline(bval);
+
+	FluoRefresh(0, { gstOutline }, { glbin_current.GetViewId() });
+}
+
+void MeshPropPanel::SetSyncGroup()
+{
+	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
+	//if (m_group)
+	//	m_group->SetVolumeSyncProp(m_sync_group);
+
+	//if (m_sync_group && m_group && m_md && m_view)
+	//{
+	//}
+}
+
+void MeshPropPanel::SetLegend()
+{
+	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
+	//if (m_sync_group && m_group)
+	//	m_group->SetLegendEnable(bval);
+	//else if (m_md)
+	//	m_md->SetLegendEnable(bval);
+	FluoRefresh(0, { gstLegend }, { glbin_current.GetViewId() });
+}
+
+void MeshPropPanel::SaveDefault()
+{
+	if (m_md)
+	{
+		glbin_mesh_def.Set(m_md);
+	}
+}
+
+void MeshPropPanel::ResetDefault()
+{
+	if (m_md)
+	{
+		glbin_mesh_def.Apply(m_md);
+		FluoRefresh(0, { gstMeshProps }, { glbin_current.GetViewId() });
+	}
+}
+
+void MeshPropPanel::OnOptions(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_OutlineChk:
+		SetOutline();
+		break;
+	case ID_SyncGroupChk:
+		SetSyncGroup();
+		break;
+	case ID_LegendChk:
+		SetLegend();
+		break;
+	case ID_ResetDefault:
+		ResetDefault();
+		break;
+	case ID_SaveDefault:
+		SaveDefault();
+		break;
+	}
 }
 
 void MeshPropPanel::OnColorChange(const wxColor& c)

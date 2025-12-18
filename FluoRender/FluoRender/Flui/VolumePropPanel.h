@@ -236,7 +236,7 @@ private:
 	void SyncShadowInt(double);
 	void SyncColormapVal(double, double);
 
-	//optioins
+	//options
 	void SetMachineLearning();
 	void SetTransparent();
 	void SetMIP();

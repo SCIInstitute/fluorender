@@ -35,6 +35,8 @@ TreeLayer::TreeLayer()
 	m_brightness = fluo::Color(1.0, 1.0, 1.0);
 	m_hdr = fluo::Color(0.0, 0.0, 0.0);
 	for (int i : {0, 1, 2}) m_sync[i] = false;
+
+	m_outline = false;
 }
 
 TreeLayer::~TreeLayer()

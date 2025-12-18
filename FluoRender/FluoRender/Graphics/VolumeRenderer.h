@@ -113,6 +113,10 @@ namespace flvr
 		void set_luminance(double luminance) { luminance_ = luminance; }
 		double get_luminance() { return luminance_; }
 
+		//outline
+		void set_outline(bool outline) { outline_ = outline; }
+		bool get_outline() { return outline_; }
+
 		//shading
 		void set_shading(bool shading) { shading_ = shading; }
 		bool get_shading() { return shading_; }
@@ -257,6 +261,8 @@ namespace flvr
 		double mask_thresh_;
 		double alpha_;
 		double luminance_;
+		//outline
+		bool outline_;
 		//shading
 		bool shading_;
 		double shading_strength_;
