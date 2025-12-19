@@ -418,8 +418,6 @@ public:
 	const static unsigned char smooth_off_png[322];
 	/* alpha.png - 300 bytes */
 	const static unsigned char alpha_png[300];
-	/* palette.png - 375 bytes */
-	const static unsigned char palette_png[375];
 	/* shade.png - 350 bytes */
 	const static unsigned char shade_png[350];
 	/* shadow.png - 358 bytes */
@@ -442,6 +440,8 @@ public:
 	const static unsigned char outline_png[851];
 	/* outline_off.png - 1085 bytes */
 	const static unsigned char outline_off_png[1085];
+	/* palette.png - 1202 bytes */
+	const static unsigned char palette_png[1202];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

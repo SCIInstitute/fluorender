@@ -52,6 +52,7 @@ namespace flvr
 	class RenderModeGuard;
 	enum class ColorMode : int;
 	enum class ColormapProj : int;
+	enum class MaskMode : int;
 
 	class VolumeRenderer : public TextureRenderer
 	{
@@ -196,9 +197,11 @@ namespace flvr
 		void return_mask(int order = 0);//return the mask volume
 		void return_label(); //return the label volume
 
-		//mask and label
-		int get_ml_mode() { return ml_mode_; }
-		void set_ml_mode(int mode) { ml_mode_ = mode; }
+		//mask mode
+		MaskMode get_main_mode() { return main_mode_; }
+		void set_main_mode(MaskMode mode) { main_mode_ = mode; }
+		MaskMode get_mask_mode() { return mask_mode_; }
+		void set_mask_mode(MaskMode mode) { mask_mode_ = mode; }
 
 		//set noise reduction
 		void SetNoiseRed(bool nd) { noise_red_ = nd; }
@@ -285,8 +288,11 @@ namespace flvr
 		//depth output
 		bool depth_;
 		//segmentation
-		int ml_mode_;	//0-normal, 1-render with mask, 2-render with mask excluded,
-						//3-random color with label, 4-random color with label+mask
+		//int ml_mode_;	//0-normal, 1-render with mask, 2-render with mask excluded,
+		//				//3-random color with label, 4-random color with label+mask
+		MaskMode main_mode_;
+		MaskMode mask_mode_;
+
 		bool mask_;
 		bool label_;
 		int shuffle_;//for label color shuffling
@@ -328,7 +334,8 @@ namespace flvr
 		bool solid;
 		double alpha;
 		bool shading;
-		int ml_mode;
+		MaskMode main_mode;
+		MaskMode mask_mode;
 	};
 
 	class RenderModeGuard
@@ -345,7 +352,8 @@ namespace flvr
 				renderer_.solid_,
 				renderer_.alpha_,
 				renderer_.shading_,
-				renderer_.ml_mode_
+				renderer_.main_mode_,
+				renderer_.mask_mode_
 			};
 		}
 
@@ -358,7 +366,8 @@ namespace flvr
 			renderer_.solid_ = prev_mode_.solid;
 			renderer_.alpha_ = prev_mode_.alpha;
 			renderer_.shading_ = prev_mode_.shading;
-			renderer_.ml_mode_ = prev_mode_.ml_mode;
+			renderer_.main_mode_ = prev_mode_.main_mode;
+			renderer_.mask_mode_ = prev_mode_.mask_mode;
 		}
 	private:
 		VolumeRenderer& renderer_;

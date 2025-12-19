@@ -97,8 +97,9 @@ VolumeDataDefault::VolumeDataDefault()
 	m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 	//legend
 	m_legend = true;
-	//lable
-	m_label_mode = 1;
+	//mask mode
+	m_main_mode = flvr::MaskMode::SingleColor;
+	m_mask_mode = flvr::MaskMode::SingleColor;
 }
 
 VolumeDataDefault::~VolumeDataDefault()
@@ -173,7 +174,10 @@ void VolumeDataDefault::Read()
 	f->Read(gstChannelMixMode, &ival, 3);
 	m_channel_mix_mode = static_cast<ChannelMixMode>(ival);
 	f->Read(gstLegend, &m_legend, true);
-	f->Read(gstLabelMode, &m_label_mode, 1);
+	f->Read(gstMainMode, &ival, 1);
+	m_main_mode = static_cast<flvr::MaskMode>(ival);
+	f->Read(gstMaskMode, &ival, 1);
+	m_mask_mode = static_cast<flvr::MaskMode>(ival);
 }
 
 void VolumeDataDefault::Save()
@@ -236,7 +240,8 @@ void VolumeDataDefault::Save()
 
 	f->Write(gstChannelMixMode, static_cast<int>(m_channel_mix_mode));
 	f->Write(gstLegend, m_legend);
-	f->Write(gstLabelMode, m_label_mode);
+	f->Write(gstMainMode, static_cast<int>(m_main_mode));
+	f->Write(gstMaskMode, static_cast<int>(m_mask_mode));
 }
 
 void VolumeDataDefault::Set(VolumeData* vd)
@@ -295,7 +300,8 @@ void VolumeDataDefault::Set(VolumeData* vd)
 
 	m_channel_mix_mode = vd->GetChannelMixMode();
 	m_legend = vd->GetLegend();
-	m_label_mode = vd->GetLabelMode();
+	m_main_mode = vd->GetMainMaskMode();
+	m_mask_mode = vd->GetMaskMode();
 }
 
 void VolumeDataDefault::Apply(VolumeData* vd)
@@ -362,7 +368,8 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 
 	vd->SetChannelMixMode(m_channel_mix_mode);
 	vd->SetLegend(m_legend);
-	vd->SetLabelMode(m_label_mode);
+	vd->SetMainMaskMode(m_main_mode);
+	vd->SetMaskMode(m_mask_mode);
 }
 
 void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
@@ -420,7 +427,8 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 
 	v1->SetChannelMixMode(v2->GetChannelMixMode());
 	v1->SetLegend(v2->GetLegend());
-	v1->SetLabelMode(v2->GetLabelMode());
+	v1->SetMainMaskMode(v2->GetMainMaskMode());
+	v1->SetMaskMode(v2->GetMaskMode());
 
 	v1->SetColor(v2->GetColor());
 
@@ -494,5 +502,6 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 
 	g->SetChannelMixMode(m_channel_mix_mode);
 	//g->SetLegend(m_legend);
-	g->SetLabelMode(m_label_mode);
+	g->SetMainMaskMode(m_main_mode);
+	g->SetMaskMode(m_mask_mode);
 }

@@ -66,8 +66,10 @@ VolumeData::VolumeData()
 	m_stream_mode = 0;
 
 	//mask mode
-	m_label_mode = 0;
-	m_mask_mode = 0;
+	m_main_mode = flvr::MaskMode::SingleColor;
+	m_mask_mode = flvr::MaskMode::SingleColor;
+	//m_label_mode = 0;
+	//m_mask_mode = 0;
 	m_use_mask_threshold = false;
 	m_mask_clear = false;
 
@@ -214,8 +216,10 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_stream_mode = copy.m_stream_mode;
 
 	//mask mode
-	m_label_mode = copy.m_label_mode;
+	m_main_mode = copy.m_main_mode;
 	m_mask_mode = copy.m_mask_mode;
+	//m_label_mode = copy.m_label_mode;
+	//m_mask_mode = copy.m_mask_mode;
 	m_use_mask_threshold = false;
 	m_mask_clear = true;
 
@@ -1602,17 +1606,31 @@ bool VolumeData::GetInvert()
 }
 
 //mask mode
-void VolumeData::SetMaskMode(int mode)
+void VolumeData::SetMainMaskMode(flvr::MaskMode mode)
+{
+	m_main_mode = mode;
+	if (m_vr)
+		m_vr->set_main_mode(mode);
+}
+
+void VolumeData::SetMaskMode(flvr::MaskMode mode)
 {
 	m_mask_mode = mode;
 	if (m_vr)
-		m_vr->set_ml_mode(mode);
+		m_vr->set_mask_mode(mode);
 }
 
-int VolumeData::GetMaskMode()
-{
-	return m_mask_mode;
-}
+//void VolumeData::SetMaskMode(int mode)
+//{
+//	m_mask_mode = mode;
+//	if (m_vr)
+//		m_vr->set_ml_mode(mode);
+//}
+//
+//int VolumeData::GetMaskMode()
+//{
+//	return m_mask_mode;
+//}
 
 //noise reduction
 void VolumeData::SetNR(bool val)

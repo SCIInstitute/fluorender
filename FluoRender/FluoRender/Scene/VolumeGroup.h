@@ -40,6 +40,7 @@ namespace flvr
 	enum class RenderMode : int;
 	enum class ColorMode : int;
 	enum class ColormapProj : int;
+	enum class MaskMode : int;
 }
 class VolumeGroup : public TreeLayer
 {
@@ -177,11 +178,14 @@ public:
 	void SetColormapProj(flvr::ColormapProj value);
 	void SetRenderMode(flvr::RenderMode mode);
 	void SetAlphaPower(double val);
-	void SetLabelMode(int mode);
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
 	void SetTransparent(bool val);
+
+	//mask mode
+	void SetMainMaskMode(flvr::MaskMode mode);
+	void SetMaskMode(flvr::MaskMode mode);
 
 	//use ml
 	void ApplyMlVolProp();

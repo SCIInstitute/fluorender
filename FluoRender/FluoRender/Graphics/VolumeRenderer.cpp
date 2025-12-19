@@ -95,7 +95,8 @@ VolumeRenderer::VolumeRenderer()
 	//depth output
 	depth_(false),
 	//segmentation
-	ml_mode_(0),
+	main_mode_(MaskMode::SingleColor),
+	mask_mode_(MaskMode::SingleColor),
 	mask_(false),
 	label_(false),
 	//scale factor
@@ -158,7 +159,8 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	//depth output
 	depth_(copy.depth_),
 	//segmentation
-	ml_mode_(copy.ml_mode_),
+	main_mode_(copy.main_mode_),
+	mask_mode_(copy.mask_mode_),
 	mask_(copy.mask_),
 	label_(copy.label_),
 	//scale factor
@@ -256,61 +258,61 @@ void VolumeRenderer::eval_ml_mode()
 	//reassess the mask/label mode
 	//0-normal, 1-render with mask, 2-render with mask excluded
 	//3-random color with label, 4-random color with label+mask
-	switch (ml_mode_)
-	{
-	case 0:
-		mask_ = false;
-		label_ = false;
-		break;
-	case 1:
-		if (!tex->has_comp(CompType::Mask))
-		{
-			mask_ = false;
-			ml_mode_ = 0;
-		}
-		else
-			mask_ = true;
-		label_ = false;
-		break;
-	case 2:
-		if (!tex->has_comp(CompType::Mask))
-		{
-			mask_ = false;
-			ml_mode_ = 0;
-		}
-		else
-			mask_ = true;
-		label_ = false;
-		break;
-	case 3:
-		if (!tex->has_comp(CompType::Label))
-		{
-			label_ = false;
-			ml_mode_ = 0;
-		}
-		else
-			label_ = true;
-		mask_ = false;
-		break;
-	case 4:
-		if (!tex->has_comp(CompType::Label))
-		{
-			if (tex->has_comp(CompType::Mask))
-			{
-				mask_ = true;
-				label_ = false;
-				ml_mode_ = 1;
-			}
-			else
-			{
-				mask_ = label_ = false;
-				ml_mode_ = 0;
-			}
-		}
-		else
-			mask_ = label_ = true;
-		break;
-	}
+	//switch (ml_mode_)
+	//{
+	//case 0:
+	//	mask_ = false;
+	//	label_ = false;
+	//	break;
+	//case 1:
+	//	if (!tex->has_comp(CompType::Mask))
+	//	{
+	//		mask_ = false;
+	//		ml_mode_ = 0;
+	//	}
+	//	else
+	//		mask_ = true;
+	//	label_ = false;
+	//	break;
+	//case 2:
+	//	if (!tex->has_comp(CompType::Mask))
+	//	{
+	//		mask_ = false;
+	//		ml_mode_ = 0;
+	//	}
+	//	else
+	//		mask_ = true;
+	//	label_ = false;
+	//	break;
+	//case 3:
+	//	if (!tex->has_comp(CompType::Label))
+	//	{
+	//		label_ = false;
+	//		ml_mode_ = 0;
+	//	}
+	//	else
+	//		label_ = true;
+	//	mask_ = false;
+	//	break;
+	//case 4:
+	//	if (!tex->has_comp(CompType::Label))
+	//	{
+	//		if (tex->has_comp(CompType::Mask))
+	//		{
+	//			mask_ = true;
+	//			label_ = false;
+	//			ml_mode_ = 1;
+	//		}
+	//		else
+	//		{
+	//			mask_ = label_ = false;
+	//			ml_mode_ = 0;
+	//		}
+	//	}
+	//	else
+	//		mask_ = label_ = true;
+	//	break;
+	//}
 }
 
 void VolumeRenderer::draw(bool draw_wireframe_p,
@@ -449,7 +451,7 @@ void VolumeRenderer::draw_volume(
 			false, tex->nc(),
 			shading_, use_fog,
 			depth_peel_, true,
-			grad, ml_mode_, render_mode_,
+			grad, main_mode_, mask_mode_, render_mode_,
 			color_mode, colormap_, colormap_proj_,
 			solid_, 1, depth));
 	assert(shader);
@@ -769,8 +771,9 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 		ShaderParams::Volume(
 			true, 0,
 			false, false,
-			0, false,
-			false, 0, RenderMode::Standard,
+			0, false, false,
+			MaskMode::None, MaskMode::None,
+			RenderMode::Standard,
 			ColorMode::SingleColor,
 			0, ColormapProj::Intensity,
 			false, 1, false));

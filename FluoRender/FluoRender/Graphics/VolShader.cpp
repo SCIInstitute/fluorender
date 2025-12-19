@@ -149,20 +149,20 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		z << VOL_UNIFORMS_CLIP;
 
 	// add uniforms for masking
-	switch (p.mask)
-	{
-	case 1:
-	case 2:
-		z << VOL_UNIFORMS_MASK;
-		break;
-	case 3:
-		z << VOL_UNIFORMS_LABEL;
-		break;
-	case 4:
-		z << VOL_UNIFORMS_MASK;
-		z << VOL_UNIFORMS_LABEL;
-		break;
-	}
+	//switch (p.mask)
+	//{
+	//case 1:
+	//case 2:
+	//	z << VOL_UNIFORMS_MASK;
+	//	break;
+	//case 3:
+	//	z << VOL_UNIFORMS_LABEL;
+	//	break;
+	//case 4:
+	//	z << VOL_UNIFORMS_MASK;
+	//	z << VOL_UNIFORMS_LABEL;
+	//	break;
+	//}
 
 	//functions
 	if (p.clip)
@@ -327,38 +327,38 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		}
 
 		//final blend
-		switch (p.mask)
-		{
-		case 0:
+		//switch (p.mask)
+		//{
+		//case 0:
 			if (p.solid)
 				z << VOL_RASTER_BLEND_SOLID;
 			else
 				z << VOL_RASTER_BLEND;
-			break;
-		case 1:
-			if (p.solid)
-				z << VOL_RASTER_BLEND_MASK_SOLID;
-			else
-				z << VOL_RASTER_BLEND_MASK;
-			break;
-		case 2:
-			if (p.solid)
-				z << VOL_RASTER_BLEND_NOMASK_SOLID;
-			else
-				z << VOL_RASTER_BLEND_NOMASK;
-			break;
-		case 3:
-			z << VOL_RASTER_BLEND_LABEL;
-			z << VOL_SHADING_OUTPUT_LABEL;
-			break;
-		case 4:
-			z << VOL_RASTER_BLEND_LABEL_MASK;
-			if (p.solid)
-				z << VOL_SHADING_OUTPUT_LABEL_MASK_SOLID;
-			else
-				z << VOL_SHADING_OUTPUT_LABEL_MASK;
-			break;
-		}
+		//	break;
+		//case 1:
+		//	if (p.solid)
+		//		z << VOL_RASTER_BLEND_MASK_SOLID;
+		//	else
+		//		z << VOL_RASTER_BLEND_MASK;
+		//	break;
+		//case 2:
+		//	if (p.solid)
+		//		z << VOL_RASTER_BLEND_NOMASK_SOLID;
+		//	else
+		//		z << VOL_RASTER_BLEND_NOMASK;
+		//	break;
+		//case 3:
+		//	z << VOL_RASTER_BLEND_LABEL;
+		//	z << VOL_SHADING_OUTPUT_LABEL;
+		//	break;
+		//case 4:
+		//	z << VOL_RASTER_BLEND_LABEL_MASK;
+		//	if (p.solid)
+		//		z << VOL_SHADING_OUTPUT_LABEL_MASK_SOLID;
+		//	else
+		//		z << VOL_SHADING_OUTPUT_LABEL_MASK;
+		//	break;
+		//}
 	}
 
 	//output depth map

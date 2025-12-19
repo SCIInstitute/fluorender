@@ -38,6 +38,7 @@ namespace flvr
 	enum class RenderMode : int;
 	enum class ColorMode : int;
 	enum class ColormapProj : int;
+	enum class MaskMode : int;
 }
 class VolumeDataDefault
 {
@@ -115,8 +116,9 @@ public:
 	ChannelMixMode m_channel_mix_mode;
 	//shown in legend
 	bool m_legend;
-	//lable
-	int m_label_mode;
+	//mask mode
+	flvr::MaskMode m_main_mode;
+	flvr::MaskMode m_mask_mode;
 
 };
 #endif

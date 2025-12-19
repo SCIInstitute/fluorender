@@ -217,11 +217,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstChannelMixMode "channel mix mode"
 #define gstRenderMode "render mode"
 #define gstOverlayMode "overlay mode"
-#define gstMaskMode "mask mode"
 #define gstUseMaskThresh "use mask thresh"
 #define gstMaskThresh "mask thresh"
 #define gstInvert "invert"
 #define gstTransparent "transparent"
+//mask mode
+#define gstMainMode "main mode"
+#define gstMaskMode "mask mode"
 //trasnfer function
 #define gstVolumeProps "volume props"
 #define gstUpdateHistogram "update histogram"
@@ -331,8 +333,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstInterpolate "interpolate"
 //outline
 #define gstOutline "outline"
-//label
-#define gstLabelMode "label mode"
 //depth atten
 #define gstDepthAtten "depth atten"
 #define gstDaInt "da int"

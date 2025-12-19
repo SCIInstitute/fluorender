@@ -73,6 +73,7 @@ namespace flvr
 	enum class RenderMode : int;
 	enum class ColorMode : int;
 	enum class ColormapProj : int;
+	enum class MaskMode : int;
 }
 namespace flrd
 {
@@ -506,11 +507,14 @@ public:
 	void SetColormapProj(flvr::ColormapProj value);
 	void SetRenderMode(flvr::RenderMode mode);
 	void SetAlphaPower(double val);
-	void SetLabelMode(int mode);
 	void SetNR(bool val);
 	void SetInterpolate(bool mode);
 	void SetInvert(bool mode);
 	void SetTransparent(bool val);
+
+	//mask mode
+	void SetMainMaskMode(flvr::MaskMode mode);
+	void SetMaskMode(flvr::MaskMode mode);
 
 public:
 	//capture modes
@@ -735,7 +739,6 @@ private:
 	bool m_pick;
 
 	//draw mask
-	bool m_draw_mask;
 	bool m_clear_mask;
 	bool m_save_mask;
 
@@ -844,9 +847,9 @@ private:
 	//different volume drawing modes
 	void DrawVolumesStandardDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
 	void DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
-	void DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>> &list, bool mask = false, int peel = 0);
+	void DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>> &list, int peel = 0);
 	void DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd, int peel = 0);
-	void DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd, bool mask, int peel = 0);
+	void DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd, int peel = 0);
 	//effect overlays
 	void DrawOverlayShadingVolume(const std::vector<std::weak_ptr<VolumeData>>& list);
 	void DrawOverlayScatteringVolume(const std::vector<std::weak_ptr<VolumeData>>& list);

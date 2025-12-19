@@ -136,6 +136,14 @@ namespace flvr
 		Speed
 	};
 
+	enum class MaskMode : int
+	{
+		None = 0,
+		SingleColor,
+		Colormap,
+		Component
+	};
+
 	struct ShaderParams
 	{
 		int type = 0;//img, lightfield, mesh(0:normal; 1:integer), seg, cal
@@ -154,8 +162,10 @@ namespace flvr
 		bool poly = false;//vol
 		int channels = 0;//vol
 		bool grad = false;//vol
-		int mask = 0;//vol(0-normal, 1-render with mask, 2-render with mask excluded)
-				 //(3-random color with label, 4-random color with label+mask)
+		//int mask = 0;//vol(0-normal, 1-render with mask, 2-render with mask excluded)
+		//		 //(3-random color with label, 4-random color with label+mask)
+		MaskMode main_mode = MaskMode::SingleColor;//vol
+		MaskMode mask_mode = MaskMode::SingleColor;//vol
 		RenderMode render_mode = RenderMode::Standard;//vol
 		ColorMode color_mode = ColorMode::SingleColor;//vol(0-normal; 1-rainbow; 2-depth)
 		ColormapProj colormap_proj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
@@ -253,7 +263,8 @@ namespace flvr
 			int peel,
 			bool clip,
 			bool grad,
-			int mask,
+			MaskMode main_mode,
+			MaskMode mask_mode,
 			RenderMode render_mode,
 			ColorMode color_mode,
 			int colormap,
@@ -271,7 +282,8 @@ namespace flvr
 			p.peel = peel;
 			p.clip = clip;
 			p.grad = grad;
-			p.mask = mask;
+			p.main_mode = main_mode;
+			p.mask_mode = mask_mode;
 			p.render_mode = render_mode;
 			p.color_mode = color_mode;
 			p.colormap = colormap;
@@ -301,7 +313,8 @@ namespace flvr
 				<< ", poly=" << poly
 				<< ", channels=" << channels
 				<< ", grad=" << grad
-				<< ", mask=" << mask
+				<< ", main_mode=" << static_cast<int>(main_mode)
+				<< ", mask_mode=" << static_cast<int>(mask_mode)
 				<< ", render_mode=" << static_cast<int>(render_mode)
 				<< ", color_mode=" << static_cast<int>(color_mode)
 				<< ", colormap_proj=" << static_cast<int>(colormap_proj)
@@ -331,7 +344,8 @@ namespace flvr
 			a.poly == b.poly &&
 			a.channels == b.channels &&
 			a.grad == b.grad &&
-			a.mask == b.mask &&
+			a.main_mode == b.main_mode &&
+			a.mask_mode == b.mask_mode &&
 			a.render_mode == b.render_mode &&
 			a.color_mode == b.color_mode &&
 			a.colormap_proj == b.colormap_proj &&
@@ -383,7 +397,8 @@ namespace flvr
 				hash_combine(p.poly);
 				hash_combine(p.channels);
 				hash_combine(p.grad);
-				hash_combine(p.mask);
+				hash_combine(p.main_mode);
+				hash_combine(p.mask_mode);
 				hash_combine(p.render_mode);
 				hash_combine(p.color_mode);
 				hash_combine(p.colormap_proj);

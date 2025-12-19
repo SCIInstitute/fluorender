@@ -235,7 +235,6 @@ RenderView::RenderView() :
 	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
 	//selection
 	m_pick(false),
-	m_draw_mask(true),
 	m_clear_mask(false),
 	m_save_mask(false),
 	//move view
@@ -435,7 +434,6 @@ RenderView::RenderView(RenderView& copy):
 	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
 	//selection
 	m_pick(false),
-	m_draw_mask(true),
 	m_clear_mask(false),
 	m_save_mask(false),
 	//move view
@@ -4165,10 +4163,7 @@ void RenderView::StartLoopUpdate()
 						total_num++;
 					//mask
 					if (vd->GetTexture() &&
-						vd->GetTexture()->has_comp(flvr::CompType::Mask) &&
-						(!vd->GetLabelMode() ||
-						(vd->GetLabelMode() &&
-						!vd->GetTexture()->has_comp(flvr::CompType::Label))))
+						vd->GetTexture()->has_comp(flvr::CompType::Mask))
 						total_num++;
 				}
 			}
@@ -5750,8 +5745,8 @@ void RenderView::DrawVolumes(int peel)
 				else
 					DrawVolumesStandardDepth(vd_list, peel);
 				//draw masks
-				if (m_draw_mask)
-					DrawVolumesComp(m_vd_pop_list, true, peel);
+				//if (m_draw_mask)
+				//	DrawVolumesComp(m_vd_pop_list, peel);
 			}
 		}
 		else
@@ -5785,10 +5780,10 @@ void RenderView::DrawVolumes(int peel)
 				{
 					if (!list.empty())
 					{
-						DrawVolumesComp(list, false, peel);
+						DrawVolumesComp(list, peel);
 						//draw masks
-						if (m_draw_mask)
-							DrawVolumesComp(list, true, peel);
+						//if (m_draw_mask)
+						//	DrawVolumesComp(list, peel);
 						list.clear();
 					}
 					auto group = std::dynamic_pointer_cast<VolumeGroup>(*it);
@@ -5823,10 +5818,10 @@ void RenderView::DrawVolumes(int peel)
 								DrawVolumesStandardDepth(list, peel);
 						}
 						else
-							DrawVolumesComp(list, false, peel);
+							DrawVolumesComp(list, peel);
 						//draw masks
-						if (m_draw_mask)
-							DrawVolumesComp(list, true, peel);
+						//if (m_draw_mask)
+						//	DrawVolumesComp(list, peel);
 						list.clear();
 					}
 				}
@@ -5894,10 +5889,10 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 			if (vr)
 			{
 				//drawlabel
-				if (vd->GetLabelMode() &&
-					vd->GetMask(false) &&
-					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+				//if (vd->GetLabelMode() &&
+				//	vd->GetMask(false) &&
+				//	vd->GetLabel(false))
+				//	vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
@@ -6060,10 +6055,10 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 				}
 				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 				//drawlabel
-				if (vd->GetLabelMode() &&
-					vd->GetMask(false) &&
-					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+				//if (vd->GetLabelMode() &&
+				//	vd->GetMask(false) &&
+				//	vd->GetLabel(false))
+				//	vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				vr->set_zoom(zoom, sf121);
 				m_mvr->add_vr(vr);
@@ -6203,24 +6198,24 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 
 //Draw the volmues with compositing
 //peel==true -- depth peeling
-void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& list, bool mask, int peel)
+void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& list, int peel)
 {
 	if (list.empty())
 		return;
 
 	//count volumes with mask
-	int cnt_mask = 0;
-	for (auto it = list.begin(); it != list.end(); ++it)
-	{
-		auto vd = it->lock();
-		if (!vd || !vd->GetDisp())
-			continue;
-		if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
-			cnt_mask++;
-	}
+	//int cnt_mask = 0;
+	//for (auto it = list.begin(); it != list.end(); ++it)
+	//{
+	//	auto vd = it->lock();
+	//	if (!vd || !vd->GetDisp())
+	//		continue;
+	//	if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
+	//		cnt_mask++;
+	//}
 
-	if (mask && cnt_mask == 0)
-		return;
+	//if (mask && cnt_mask == 0)
+	//	return;
 
 	//draw each volume to fbo
 	for (auto it = list.begin(); it != list.end(); ++it)
@@ -6228,40 +6223,40 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 		auto vd = it->lock();
 		if (!vd || !vd->GetDisp())
 			continue;
-		if (mask)
-		{
-			//drawlabel
-			if (vd->GetLabelMode() &&
-				vd->GetMask(false) &&
-				vd->GetLabel(false))
-				continue;
+		//if (mask)
+		//{
+		//	//drawlabel
+		//	if (vd->GetLabelMode() &&
+		//		vd->GetMask(false) &&
+		//		vd->GetLabel(false))
+		//		continue;
 
-			if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
-			{
-				vd->SetMaskMode(1);
-				ChannelMixModeGuard cmg(*this);
-				m_channel_mix_mode = ChannelMixMode::CompositeAdd;
-				if (vd->GetRenderMode() == flvr::RenderMode::Mip)
-					DrawVolumeCompMip(vd, peel);
-				else
-					DrawVolumeCompStandard(vd, mask, peel);
-				vd->SetMaskMode(0);
-			}
-		}
-		else
+		//	if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
+		//	{
+		//		vd->SetMaskMode(1);
+		//		ChannelMixModeGuard cmg(*this);
+		//		m_channel_mix_mode = ChannelMixMode::CompositeAdd;
+		//		if (vd->GetRenderMode() == flvr::RenderMode::Mip)
+		//			DrawVolumeCompMip(vd, peel);
+		//		else
+		//			DrawVolumeCompStandard(vd, mask, peel);
+		//		vd->SetMaskMode(0);
+		//	}
+		//}
+		//else
 		{
 			if (vd->GetChannelMixMode() != ChannelMixMode::Depth)
 			{
 				//drawlabel
-				if (vd->GetLabelMode() &&
-					vd->GetMask(false) &&
-					vd->GetLabel(false))
-					vd->SetMaskMode(4);
+				//if (vd->GetLabelMode() &&
+				//	vd->GetMask(false) &&
+				//	vd->GetLabel(false))
+				//	vd->SetMaskMode(4);
 
 				if (vd->GetRenderMode() == flvr::RenderMode::Mip)
 					DrawVolumeCompMip(vd, peel);
 				else
-					DrawVolumeCompStandard(vd, mask, peel);
+					DrawVolumeCompStandard(vd, peel);
 			}
 		}
 	}
@@ -6533,7 +6528,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	chan_buffer->unbind_texture(flvr::AttachmentPoint::Color(0));
 }
 
-void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr, bool mask, int peel)
+void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr, int peel)
 {
 	auto vd = vd_ptr.lock();
 	if (!vd)
@@ -6565,12 +6560,12 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (mask)
-		{
-			if (vr->get_done_loop(4))
-				do_over = false;
-		}
-		else
+		//if (mask)
+		//{
+		//	if (vr->get_done_loop(4))
+		//		do_over = false;
+		//}
+		//else
 		{
 			if (vr->get_done_loop(0))
 				do_over = false;
@@ -6632,9 +6627,9 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 
 		vr->set_depth_peel(peel);
 		vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
-		if (mask)
-			vd->SetStreamMode(4);
-		else
+		//if (mask)
+		//	vd->SetStreamMode(4);
+		//else
 			vd->SetStreamMode(0);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
@@ -9932,19 +9927,19 @@ void RenderView::ProcessIdle(IdleState& state)
 			UpdateBrushState(state);
 
 			//draw_mask
-			if (state.m_key_mask && m_draw_mask)
-			{
-				m_draw_mask = false;
-				state.m_refresh = true;
-				state.m_looking_glass_changed = true;
-				state.m_set_focus = true;
-			}
-			if (!state.m_key_mask && !m_draw_mask)
-			{
-				m_draw_mask = true;
-				state.m_refresh = true;
-				state.m_looking_glass_changed = true;
-			}
+			//if (state.m_key_mask && m_draw_mask)
+			//{
+			//	m_draw_mask = false;
+			//	state.m_refresh = true;
+			//	state.m_looking_glass_changed = true;
+			//	state.m_set_focus = true;
+			//}
+			//if (!state.m_key_mask && !m_draw_mask)
+			//{
+			//	m_draw_mask = true;
+			//	state.m_refresh = true;
+			//	state.m_looking_glass_changed = true;
+			//}
 
 			//move view
 			//left
@@ -11335,16 +11330,6 @@ void RenderView::SetAlphaPower(double val)
 	}
 }
 
-void RenderView::SetLabelMode(int val)
-{
-	for (auto it : m_vd_pop_list)
-	{
-		auto vd = it.lock();
-		if (vd)
-			vd->SetLabelMode(val);
-	}
-}
-
 void RenderView::SetNR(bool val)
 {
 	for (auto it : m_vd_pop_list)
@@ -11384,3 +11369,24 @@ void RenderView::SetTransparent(bool val)
 			vd->SetTransparent(val);
 	}
 }
+
+void RenderView::SetMainMaskMode(flvr::MaskMode mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetMainMaskMode(mode);
+	}
+}
+
+void RenderView::SetMaskMode(flvr::MaskMode mode)
+{
+	for (auto it : m_vd_pop_list)
+	{
+		auto vd = it.lock();
+		if (vd)
+			vd->SetMaskMode(mode);
+	}
+}
+

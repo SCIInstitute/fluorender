@@ -1304,6 +1304,55 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_alt_color_btn->SetValue(wxc);
 	}
 
+	//mask mode
+	if (update_all || FOUND_VALUE(gstMainMode))
+	{
+		auto main_mode = m_vd->GetMainMaskMode();
+		switch (main_mode)
+		{
+		case flvr::MaskMode::None:
+			m_main_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(clip_none));
+			break;
+		case flvr::MaskMode::SingleColor:
+			m_main_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(palette));
+			break;
+		case flvr::MaskMode::Colormap:
+			m_main_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(colormap));
+			break;
+		case flvr::MaskMode::Component:
+			m_main_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(comp));
+			break;
+		}
+	}
+
+	if (update_all || FOUND_VALUE(gstMaskMode))
+	{
+		auto mask_mode = m_vd->GetMaskMode();
+		switch (mask_mode)
+		{
+		case flvr::MaskMode::None:
+			m_alt_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(clip_none));
+			break;
+		case flvr::MaskMode::SingleColor:
+			m_alt_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(palette));
+			break;
+		case flvr::MaskMode::Colormap:
+			m_alt_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(colormap));
+			break;
+		case flvr::MaskMode::Component:
+			m_alt_color_mode_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(comp));
+			break;
+		}
+	}
+
 	//inversion
 	if (update_all || FOUND_VALUE(gstInvert))
 	{
@@ -1674,22 +1723,22 @@ void VolumePropPanel::EnableColormap(bool bval)
 	{
 		m_view->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_view->SetColormapDisp(bval);
-		m_view->SetLabelMode(bval ? 0 : 1);
+		//m_view->SetLabelMode(bval ? 0 : 1);
 	}
 	else if (m_sync_group || sync_group_depth_mip)
 	{
 		m_group->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_group->SetColormapDisp(bval);
-		m_group->SetLabelMode(bval ? 0 : 1);
+		//m_group->SetLabelMode(bval ? 0 : 1);
 	}
 	else
 	{
 		m_vd->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_vd->SetColormapDisp(bval);
-		m_vd->SetLabelMode(bval ? 0 : 1);
+		//m_vd->SetLabelMode(bval ? 0 : 1);
 	}
 
-	FluoRefresh(0, { gstColormap, gstLabelMode, gstUpdateSync }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstColormap, gstMainMode, gstMaskMode, gstUpdateSync }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::EnableMip(bool bval)
@@ -2923,7 +2972,21 @@ void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)
 //6
 void VolumePropPanel::OnMainColorMode(wxCommandEvent& event)
 {
+	if (!m_vd)
+		return;
 
+	auto mode = m_vd->GetMainMaskMode();
+	int ival = static_cast<int>(mode);
+	ival++;
+	ival = ival > static_cast<int>(flvr::MaskMode::Component) ?
+		static_cast<int>(flvr::MaskMode::None) : ival;
+	mode = static_cast<flvr::MaskMode>(ival);
+	if (m_sync_group && m_group)
+		m_group->SetMainMaskMode(mode);
+	else
+		m_vd->SetMainMaskMode(mode);
+
+	FluoRefresh(0, { gstMainMode, gstMaskMode }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::OnMainColorChange(wxColor c)
@@ -2950,7 +3013,21 @@ void VolumePropPanel::OnMainColorChange(wxColor c)
 
 void VolumePropPanel::OnAltColorMode(wxCommandEvent& event)
 {
+	if (!m_vd)
+		return;
 
+	auto mode = m_vd->GetMaskMode();
+	int ival = static_cast<int>(mode);
+	ival++;
+	ival = ival > static_cast<int>(flvr::MaskMode::Component) ?
+		static_cast<int>(flvr::MaskMode::None) : ival;
+	mode = static_cast<flvr::MaskMode>(ival);
+	if (m_sync_group && m_group)
+		m_group->SetMaskMode(mode);
+	else
+		m_vd->SetMaskMode(mode);
+
+	FluoRefresh(0, { gstMainMode, gstMaskMode }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::OnAltColorChange(wxColor c)

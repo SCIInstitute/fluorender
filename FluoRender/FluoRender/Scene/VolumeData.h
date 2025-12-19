@@ -46,6 +46,7 @@ namespace flvr
 	enum class RenderMode : int;
 	enum class ColorMode : int;
 	enum class ColormapProj : int;
+	enum class MaskMode : int;
 }
 namespace flrd
 {
@@ -363,10 +364,14 @@ public:
 	bool GetInvert();
 
 	//mask mode
-	void SetLabelMode(int mode) { m_label_mode = mode; }
-	int GetLabelMode() { return m_label_mode; }
-	void SetMaskMode(int mode);
-	int GetMaskMode();
+	void SetMainMaskMode(flvr::MaskMode mode);
+	flvr::MaskMode GetMainMaskMode() { return m_main_mode; }
+	void SetMaskMode(flvr::MaskMode mode);
+	flvr::MaskMode GetMaskMode() { return m_mask_mode; }
+	//void SetLabelMode(int mode) { m_label_mode = mode; }
+	//int GetLabelMode() { return m_label_mode; }
+	//void SetMaskMode(int mode);
+	//int GetMaskMode();
 
 	//noise reduction
 	void SetNR(bool val);
@@ -501,9 +506,11 @@ private:
 	int m_stream_mode;	//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 
 	//mask mode
-	int m_label_mode;	//0-not used, 1-show label
-	int m_mask_mode;	//0-normal, 1-render with mask, 2-render with mask excluded,
-						//3-random color with label, 4-random color with label+mask
+	flvr::MaskMode m_main_mode;
+	flvr::MaskMode m_mask_mode;
+	//int m_label_mode;	//0-not used, 1-show label
+	//int m_mask_mode;	//0-normal, 1-render with mask, 2-render with mask excluded,
+	//					//3-random color with label, 4-random color with label+mask
 	bool m_use_mask_threshold;// use mask threshold
 
 	//volume properties

@@ -107,7 +107,8 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 		vd->SetSampleRate(glbin_vol_def.m_sample_rate);
 		if (!vd->GetSpcFromFile())
 			vd->SetBaseSpacing(glbin_vol_def.m_spacing);
-		vd->SetLabelMode(glbin_vol_def.m_label_mode);
+		vd->SetMainMaskMode(glbin_vol_def.m_main_mode);
+		vd->SetMaskMode(glbin_vol_def.m_mask_mode);
 	}
 	else
 	{

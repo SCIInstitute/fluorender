@@ -540,15 +540,6 @@ void VolumeGroup::SetAlphaPower(double val)
 	}
 }
 
-void VolumeGroup::SetLabelMode(int val)
-{
-	for (auto& it : m_vd_list)
-	{
-		if (it)
-			it->SetLabelMode(val);
-	}
-}
-
 void VolumeGroup::SetNR(bool val)
 {
 	for (auto& it : m_vd_list)
@@ -583,6 +574,24 @@ void VolumeGroup::SetTransparent(bool val)
 	{
 		if (it)
 			it->SetTransparent(val);
+	}
+}
+
+void VolumeGroup::SetMainMaskMode(flvr::MaskMode val)
+{
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->SetMainMaskMode(val);
+	}
+}
+
+void VolumeGroup::SetMaskMode(flvr::MaskMode val)
+{
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->SetMaskMode(val);
 	}
 }
 
