@@ -79,7 +79,6 @@ VolumeDataDefault::VolumeDataDefault()
 	m_spacing = fluo::Vector(1.0);
 
 	//colormap mode
-	m_color_mode = flvr::ColorMode::SingleColor;
 	m_colormap_disp = false;
 	m_colormap_low_value = 0.0;
 	m_colormap_hi_value = 1.0;
@@ -98,8 +97,8 @@ VolumeDataDefault::VolumeDataDefault()
 	//legend
 	m_legend = true;
 	//mask mode
-	m_main_mode = flvr::MaskMode::SingleColor;
-	m_mask_mode = flvr::MaskMode::SingleColor;
+	m_main_mode = flvr::ColorMode::SingleColor;
+	m_mask_mode = flvr::ColorMode::SingleColor;
 }
 
 VolumeDataDefault::~VolumeDataDefault()
@@ -154,8 +153,6 @@ void VolumeDataDefault::Read()
 
 	f->Read(gstSpacing, &m_spacing, fluo::Vector(1.0));
 
-	f->Read(gstColormapMode, &ival, 0);
-	m_color_mode = static_cast<flvr::ColorMode>(ival);
 	f->Read(gstColormapDisp, &m_colormap_disp, false);
 	f->Read(gstColormapLow, &m_colormap_low_value, 0.0);
 	f->Read(gstColormapHigh, &m_colormap_hi_value, 1.0);
@@ -175,9 +172,9 @@ void VolumeDataDefault::Read()
 	m_channel_mix_mode = static_cast<ChannelMixMode>(ival);
 	f->Read(gstLegend, &m_legend, true);
 	f->Read(gstMainMode, &ival, 1);
-	m_main_mode = static_cast<flvr::MaskMode>(ival);
+	m_main_mode = static_cast<flvr::ColorMode>(ival);
 	f->Read(gstMaskMode, &ival, 1);
-	m_mask_mode = static_cast<flvr::MaskMode>(ival);
+	m_mask_mode = static_cast<flvr::ColorMode>(ival);
 }
 
 void VolumeDataDefault::Save()
@@ -224,7 +221,6 @@ void VolumeDataDefault::Save()
 
 	f->Write(gstSpacing, m_spacing);
 
-	f->Write(gstColormapMode, static_cast<int>(m_color_mode));
 	f->Write(gstColormapDisp, m_colormap_disp);
 	f->Write(gstColormapLow, m_colormap_low_value);
 	f->Write(gstColormapHigh, m_colormap_hi_value);
@@ -240,6 +236,7 @@ void VolumeDataDefault::Save()
 
 	f->Write(gstChannelMixMode, static_cast<int>(m_channel_mix_mode));
 	f->Write(gstLegend, m_legend);
+
 	f->Write(gstMainMode, static_cast<int>(m_main_mode));
 	f->Write(gstMaskMode, static_cast<int>(m_mask_mode));
 }
@@ -284,7 +281,6 @@ void VolumeDataDefault::Set(VolumeData* vd)
 
 	m_spacing = vd->GetSpacing();
 
-	m_color_mode = vd->GetColorMode();
 	m_colormap_disp = vd->GetColormapDisp();
 	m_colormap_low_value = vd->GetColormapLow();
 	m_colormap_hi_value = vd->GetColormapHigh();
@@ -300,8 +296,8 @@ void VolumeDataDefault::Set(VolumeData* vd)
 
 	m_channel_mix_mode = vd->GetChannelMixMode();
 	m_legend = vd->GetLegend();
-	m_main_mode = vd->GetMainMaskMode();
-	m_mask_mode = vd->GetMaskMode();
+	m_main_mode = vd->GetMainColorMode();
+	m_mask_mode = vd->GetMaskColorMode();
 }
 
 void VolumeDataDefault::Apply(VolumeData* vd)
@@ -353,7 +349,6 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	if (!vd->GetSpcFromFile())
 		vd->SetBaseSpacing(m_spacing);
 
-	vd->SetColorMode(m_color_mode);
 	vd->SetColormapDisp(m_colormap_disp);
 	vd->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
 	vd->SetColormapInv(m_colormap_inv);
@@ -412,7 +407,6 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 
 	v1->SetBaseSpacing(v2->GetSpacing());
 
-	v1->SetColorMode(v2->GetColorMode());
 	v1->SetColormapDisp(v2->GetColormapDisp());
 	v1->SetColormapValues(v2->GetColormapLow(), v2->GetColormapHigh());
 	v1->SetColormapInv(v2->GetColormapInv());
@@ -427,8 +421,8 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 
 	v1->SetChannelMixMode(v2->GetChannelMixMode());
 	v1->SetLegend(v2->GetLegend());
-	v1->SetMainMaskMode(v2->GetMainMaskMode());
-	v1->SetMaskMode(v2->GetMaskMode());
+	v1->SetMainMaskMode(v2->GetMainColorMode());
+	v1->SetMaskMode(v2->GetMaskColorMode());
 
 	v1->SetColor(v2->GetColor());
 
@@ -487,7 +481,6 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 	//if (!g->GetSpcFromFile())
 	//	g->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
 
-	g->SetColorMode(m_color_mode);
 	g->SetColormapDisp(m_colormap_disp);
 	g->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
 	g->SetColormapInv(m_colormap_inv);
@@ -502,6 +495,7 @@ void VolumeDataDefault::Apply(VolumeGroup* g)
 
 	g->SetChannelMixMode(m_channel_mix_mode);
 	//g->SetLegend(m_legend);
+
 	g->SetMainMaskMode(m_main_mode);
 	g->SetMaskMode(m_mask_mode);
 }

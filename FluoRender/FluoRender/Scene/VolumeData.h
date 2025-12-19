@@ -44,9 +44,8 @@ namespace flvr
 	class TextureBrick;
 	class Texture;
 	enum class RenderMode : int;
-	enum class ColorMode : int;
 	enum class ColormapProj : int;
-	enum class MaskMode : int;
+	enum class ColorMode : int;
 }
 namespace flrd
 {
@@ -276,8 +275,6 @@ public:
 	void SetUseMaskThreshold(bool mode);
 
 	//colormap mode
-	void SetColorMode(flvr::ColorMode);
-	flvr::ColorMode GetColorMode();
 	void SetColormapDisp(bool disp);
 	bool GetColormapDisp();
 	void SetColormapValues(double low, double high);
@@ -364,14 +361,10 @@ public:
 	bool GetInvert();
 
 	//mask mode
-	void SetMainMaskMode(flvr::MaskMode mode);
-	flvr::MaskMode GetMainMaskMode() { return m_main_mode; }
-	void SetMaskMode(flvr::MaskMode mode);
-	flvr::MaskMode GetMaskMode() { return m_mask_mode; }
-	//void SetLabelMode(int mode) { m_label_mode = mode; }
-	//int GetLabelMode() { return m_label_mode; }
-	//void SetMaskMode(int mode);
-	//int GetMaskMode();
+	void SetMainMaskMode(flvr::ColorMode mode);
+	flvr::ColorMode GetMainColorMode() { return m_main_mode; }
+	void SetMaskMode(flvr::ColorMode mode);
+	flvr::ColorMode GetMaskColorMode() { return m_mask_mode; }
 
 	//noise reduction
 	void SetNR(bool val);
@@ -506,8 +499,8 @@ private:
 	int m_stream_mode;	//0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 
 	//mask mode
-	flvr::MaskMode m_main_mode;
-	flvr::MaskMode m_mask_mode;
+	flvr::ColorMode m_main_mode;
+	flvr::ColorMode m_mask_mode;
 	//int m_label_mode;	//0-not used, 1-show label
 	//int m_mask_mode;	//0-normal, 1-render with mask, 2-render with mask excluded,
 	//					//3-random color with label, 4-random color with label+mask
@@ -578,7 +571,6 @@ private:
 
 	//color map mode
 	double m_colormap_inv;
-	flvr::ColorMode m_color_mode;	//0-normal; 1-rainbow
 	bool m_colormap_disp;	//true/false
 	int m_colormap;//index to a colormap
 	flvr::ColormapProj m_colormap_proj;//index to method of mapping

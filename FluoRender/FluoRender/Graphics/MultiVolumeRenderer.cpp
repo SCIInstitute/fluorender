@@ -249,9 +249,6 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	if (clear_depth)
 		blend_buffer->clear_attachment(AttachmentPoint::Color(1), std::array<float, 2>{ 0.0f, 0.0f }.data());
 
-	for (size_t i = 0; i < vr_list_.size(); ++i)
-		vr_list_[i]->eval_ml_mode();
-
 	int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
 	std::vector<TextureBrick*>* bs = 0;
 	fluo::Point pt = TextureRenderer::quota_center_;
@@ -523,19 +520,22 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				vr_list_[tn]->colormap_proj_ == ColormapProj::Normal;
 			auto tex = vr_list_[tn]->tex_.lock();
 			assert(tex);
-			int nc = tex->nc();
 			bool depth = vr_list_[tn]->depth_ || vr_list_[tn]->shading_ || vr_list_[tn]->outline_;
+			bool has_mask = tex->has_comp(CompType::Mask);
+			bool has_label = tex->has_comp(CompType::Label);
 			shader = glbin_shader_manager.shader(gstVolShader,
 				ShaderParams::Volume(
 					false,
-					nc,
-					vr_list_[tn]->shading_, use_fog,
-					vr_list_[tn]->depth_peel_, true,
+					vr_list_[tn]->shading_,
+					use_fog,
+					vr_list_[tn]->depth_peel_,
+					true,
 					grad,
+					has_mask,
+					has_label,
 					vr_list_[tn]->main_mode_,
 					vr_list_[tn]->mask_mode_,
 					vr_list_[tn]->render_mode_,
-					vr_list_[tn]->color_mode_,
 					vr_list_[tn]->colormap_,
 					vr_list_[tn]->colormap_proj_,
 					vr_list_[tn]->solid_,
@@ -679,9 +679,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			else
 				filter = GL_NEAREST;
 			vr_list_[tn]->load_brick(b2, filter, vr_list_[tn]->compression_);
-			if (vr_list_[tn]->mask_)
+			if (has_mask)
 				vr_list_[tn]->load_brick_mask(b2, filter);
-			if (vr_list_[tn]->label_)
+			if (has_label)
 				vr_list_[tn]->load_brick_label(b2);
 
 			idx_num = (size[i] - 2) * 3;
@@ -699,9 +699,9 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				TextureRenderer::finished_bricks_++;
 
 			//release
-			if (vr_list_[tn]->mask_)
+			if (has_mask)
 				vr_list_[tn]->release_texture(2, GL_TEXTURE_3D);
-			if (vr_list_[tn]->label_)
+			if (has_label)
 				vr_list_[tn]->release_texture(3, GL_TEXTURE_3D);
 			// Release shader.
 			shader->unbind();
@@ -920,14 +920,17 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	// Set up shaders
 	auto shader = glbin_shader_manager.shader(gstVolShader,
 		ShaderParams::Volume(
-			true, 0,
-			false, false,
-			false, false,
+			true,
 			false,
-			MaskMode::None,
-			MaskMode::None,
-			RenderMode::Standard,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
 			ColorMode::SingleColor,
+			ColorMode::SingleColor,
+			RenderMode::Standard,
 			0, ColormapProj::Disabled,
 			false, 1, false));
 	assert(shader);

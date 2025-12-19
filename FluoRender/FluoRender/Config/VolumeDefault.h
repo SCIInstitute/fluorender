@@ -36,9 +36,8 @@ enum class ChannelMixMode : int;
 namespace flvr
 {
 	enum class RenderMode : int;
-	enum class ColorMode : int;
 	enum class ColormapProj : int;
-	enum class MaskMode : int;
+	enum class ColorMode : int;
 }
 class VolumeDataDefault
 {
@@ -93,8 +92,7 @@ public:
 	//spacing
 	fluo::Vector m_spacing;
 
-	//color map mode
-	flvr::ColorMode m_color_mode;	//0-normal; 1-rainbow
+	//color map settings
 	bool m_colormap_disp;	//true/false
 	double m_colormap_low_value;
 	double m_colormap_hi_value;
@@ -116,9 +114,10 @@ public:
 	ChannelMixMode m_channel_mix_mode;
 	//shown in legend
 	bool m_legend;
+
 	//mask mode
-	flvr::MaskMode m_main_mode;
-	flvr::MaskMode m_mask_mode;
+	flvr::ColorMode m_main_mode;
+	flvr::ColorMode m_mask_mode;
 
 };
 #endif

@@ -66,8 +66,8 @@ VolumeData::VolumeData()
 	m_stream_mode = 0;
 
 	//mask mode
-	m_main_mode = flvr::MaskMode::SingleColor;
-	m_mask_mode = flvr::MaskMode::SingleColor;
+	m_main_mode = flvr::ColorMode::SingleColor;
+	m_mask_mode = flvr::ColorMode::SingleColor;
 	//m_label_mode = 0;
 	//m_mask_mode = 0;
 	m_use_mask_threshold = false;
@@ -123,7 +123,6 @@ VolumeData::VolumeData()
 
 	//colormap mode
 	m_colormap_inv = 1.0;
-	m_color_mode = flvr::ColorMode::SingleColor;
 	m_colormap_disp = false;
 	m_colormap = 0;
 	m_colormap_proj = flvr::ColormapProj::Intensity;
@@ -273,7 +272,6 @@ VolumeData::VolumeData(VolumeData &copy)
 
 	//colormap mode
 	m_colormap_inv = copy.m_colormap_inv;
-	m_color_mode = copy.m_color_mode;
 	m_colormap_disp = copy.m_colormap_disp;
 	m_colormap = copy.m_colormap;
 	m_colormap_proj = copy.m_colormap_proj;
@@ -1606,14 +1604,14 @@ bool VolumeData::GetInvert()
 }
 
 //mask mode
-void VolumeData::SetMainMaskMode(flvr::MaskMode mode)
+void VolumeData::SetMainMaskMode(flvr::ColorMode mode)
 {
 	m_main_mode = mode;
 	if (m_vr)
 		m_vr->set_main_mode(mode);
 }
 
-void VolumeData::SetMaskMode(flvr::MaskMode mode)
+void VolumeData::SetMaskMode(flvr::ColorMode mode)
 {
 	m_mask_mode = mode;
 	if (m_vr)
@@ -1627,7 +1625,7 @@ void VolumeData::SetMaskMode(flvr::MaskMode mode)
 //		m_vr->set_ml_mode(mode);
 //}
 //
-//int VolumeData::GetMaskMode()
+//int VolumeData::GetMaskColorMode()
 //{
 //	return m_mask_mode;
 //}
@@ -2276,22 +2274,7 @@ void VolumeData::SetUseMaskThreshold(bool mode)
 		m_vr->set_mask_thresh(0.0);
 }
 
-//colormap mode
-void VolumeData::SetColorMode(flvr::ColorMode mode)
-{
-	m_color_mode = mode;
-	if (m_vr)
-	{
-		m_vr->set_color_mode(m_color_mode);
-		m_vr->set_color(m_color);
-	}
-}
-
-flvr::ColorMode VolumeData::GetColorMode()
-{
-	return m_color_mode;
-}
-
+//colormap settings
 void VolumeData::SetColormapDisp(bool disp)
 {
 	m_colormap_disp = disp;
@@ -3099,8 +3082,8 @@ void VolumeData::ApplyMlVolProp()
 		}
 		//colormap enable
 		dval = m_ep->getParam("colormap_enable");
-		SetColorMode(dval>0.5 ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
-		if (m_color_mode == flvr::ColorMode::Colormap)
+		SetMainMaskMode(dval > 0.5 ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+		if (dval > 0.5)
 		{
 			//colormap inv
 			dval = m_ep->getParam("colormap_inv");

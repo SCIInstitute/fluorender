@@ -71,9 +71,8 @@ namespace flvr
 	enum class FaceWinding : int;
 	class Framebuffer;
 	enum class RenderMode : int;
-	enum class ColorMode : int;
 	enum class ColormapProj : int;
-	enum class MaskMode : int;
+	enum class ColorMode : int;
 }
 namespace flrd
 {
@@ -499,7 +498,6 @@ public:
 	void SetSampleRateEnable(bool);
 	void SetSampleRate(double, bool set_this = true);
 
-	void SetColorMode(flvr::ColorMode mode);
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
 	void SetColormapInv(double val);
@@ -513,8 +511,8 @@ public:
 	void SetTransparent(bool val);
 
 	//mask mode
-	void SetMainMaskMode(flvr::MaskMode mode);
-	void SetMaskMode(flvr::MaskMode mode);
+	void SetMainMaskMode(flvr::ColorMode mode);
+	void SetMaskMode(flvr::ColorMode mode);
 
 public:
 	//capture modes

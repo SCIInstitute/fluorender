@@ -835,16 +835,19 @@ void MovieMaker::InsertKey(int index)
 		flkey = new FlKeyDouble(keycode, vd->GetShadowIntensity());
 		glbin_interpolator.AddKey(flkey);
 		//colormap
-		keycode.l2_name = "colormap enable";
-		bval = static_cast<int>(vd->GetColorMode()) > 0;
-		flkeyB = new FlKeyBoolean(keycode, bval);
-		glbin_interpolator.AddKey(flkeyB);
 		keycode.l2_name = "colormap low";
 		flkey = new FlKeyDouble(keycode, vd->GetColormapLow());
 		glbin_interpolator.AddKey(flkey);
 		keycode.l2_name = "colormap high";
 		flkey = new FlKeyDouble(keycode, vd->GetColormapHigh());
 		glbin_interpolator.AddKey(flkey);
+		//color modes
+		keycode.l2_name = "main color mode";
+		flkeyI = new FlKeyInt(keycode, static_cast<int>(vd->GetMainColorMode()));
+		glbin_interpolator.AddKey(flkeyI);
+		keycode.l2_name = "mask color mode";
+		flkeyI = new FlKeyInt(keycode, static_cast<int>(vd->GetMaskColorMode()));
+		glbin_interpolator.AddKey(flkeyI);
 
 		//output adj
 		keycode.l2_name = "gamma";

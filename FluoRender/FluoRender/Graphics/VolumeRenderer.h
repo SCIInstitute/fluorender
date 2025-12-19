@@ -50,9 +50,8 @@ namespace flvr
 	class MultiVolumeRenderer;
 	class Texture;
 	class RenderModeGuard;
-	enum class ColorMode : int;
 	enum class ColormapProj : int;
-	enum class MaskMode : int;
+	enum class ColorMode : int;
 
 	class VolumeRenderer : public TextureRenderer
 	{
@@ -129,8 +128,6 @@ namespace flvr
 		//colormap mode
 		void set_colormap_inv(double val) { colormap_inv_ = val; }
 		double get_colormap_inv() { return colormap_inv_; }
-		void set_color_mode(ColorMode mode) { color_mode_ = mode; }
-		ColorMode get_color_mode() { return color_mode_; }
 		void set_colormap_values(double low, double hi) { colormap_low_value_ = low; colormap_hi_value_ = hi; }
 		double get_colormap_low() { return colormap_low_value_; }
 		double get_colormap_high() { return colormap_hi_value_; }
@@ -166,7 +163,6 @@ namespace flvr
 		bool get_depth() { return depth_; }
 
 		//draw
-		void eval_ml_mode();
 		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		virtual void draw(bool draw_wireframe_p,
 			bool interactive_mode_p,
@@ -198,10 +194,10 @@ namespace flvr
 		void return_label(); //return the label volume
 
 		//mask mode
-		MaskMode get_main_mode() { return main_mode_; }
-		void set_main_mode(MaskMode mode) { main_mode_ = mode; }
-		MaskMode get_mask_mode() { return mask_mode_; }
-		void set_mask_mode(MaskMode mode) { mask_mode_ = mode; }
+		ColorMode get_main_mode() { return main_mode_; }
+		void set_main_mode(ColorMode mode) { main_mode_ = mode; }
+		ColorMode get_mask_mode() { return mask_mode_; }
+		void set_mask_mode(ColorMode mode) { mask_mode_ = mode; }
 
 		//set noise reduction
 		void SetNoiseRed(bool nd) { noise_red_ = nd; }
@@ -270,9 +266,8 @@ namespace flvr
 		bool shading_;
 		double shading_strength_;
 		double shading_shine_;
-		//colormap mode
+		//colormap settings
 		double colormap_inv_;
-		ColorMode color_mode_;//0-normal; 1-rainbow; 2-depth
 		double colormap_low_value_;
 		double colormap_hi_value_;
 		int colormap_;
@@ -287,15 +282,13 @@ namespace flvr
 		int depth_peel_;
 		//depth output
 		bool depth_;
-		//segmentation
-		//int ml_mode_;	//0-normal, 1-render with mask, 2-render with mask excluded,
-		//				//3-random color with label, 4-random color with label+mask
-		MaskMode main_mode_;
-		MaskMode mask_mode_;
 
-		bool mask_;
-		bool label_;
-		int shuffle_;//for label color shuffling
+		//mask modes
+		ColorMode main_mode_;
+		ColorMode mask_mode_;
+
+		//for label color shuffling
+		int shuffle_;
 
 		//noise reduction
 		bool noise_red_;
@@ -329,13 +322,12 @@ namespace flvr
 	{
 		RenderMode render_mode;
 		fluo::Color color;
-		ColorMode color_mode;
 		ColormapProj colormap_proj;
 		bool solid;
 		double alpha;
 		bool shading;
-		MaskMode main_mode;
-		MaskMode mask_mode;
+		ColorMode main_mode;
+		ColorMode mask_mode;
 	};
 
 	class RenderModeGuard
@@ -347,7 +339,6 @@ namespace flvr
 			prev_mode_ = {
 				renderer_.render_mode_,
 				renderer_.color_,
-				renderer_.color_mode_,
 				renderer_.colormap_proj_,
 				renderer_.solid_,
 				renderer_.alpha_,
@@ -361,7 +352,6 @@ namespace flvr
 		{
 			renderer_.render_mode_ = prev_mode_.render_mode;
 			renderer_.color_ = prev_mode_.color;
-			renderer_.color_mode_ = prev_mode_.color_mode;
 			renderer_.colormap_proj_ = prev_mode_.colormap_proj;
 			renderer_.solid_ = prev_mode_.solid;
 			renderer_.alpha_ = prev_mode_.alpha;

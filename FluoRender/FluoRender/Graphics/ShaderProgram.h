@@ -116,12 +116,6 @@ namespace flvr
 		Overlay
 	};
 
-	enum class ColorMode : int
-	{
-		SingleColor,
-		Colormap
-	};
-
 	enum class ColormapProj : int
 	{
 		Disabled,//0: new
@@ -136,7 +130,7 @@ namespace flvr
 		Speed
 	};
 
-	enum class MaskMode : int
+	enum class ColorMode : int
 	{
 		None = 0,
 		SingleColor,
@@ -160,14 +154,12 @@ namespace flvr
 		bool clip = false;//seg, vol
 		bool use_dir = false;//seg
 		bool poly = false;//vol
-		int channels = 0;//vol
 		bool grad = false;//vol
-		//int mask = 0;//vol(0-normal, 1-render with mask, 2-render with mask excluded)
-		//		 //(3-random color with label, 4-random color with label+mask)
-		MaskMode main_mode = MaskMode::SingleColor;//vol
-		MaskMode mask_mode = MaskMode::SingleColor;//vol
+		bool has_mask = false;//vol
+		bool has_label = false;//vol
+		ColorMode main_mode = ColorMode::SingleColor;//vol
+		ColorMode mask_mode = ColorMode::SingleColor;//vol
 		RenderMode render_mode = RenderMode::Standard;//vol
-		ColorMode color_mode = ColorMode::SingleColor;//vol(0-normal; 1-rainbow; 2-depth)
 		ColormapProj colormap_proj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
 		bool solid = false;//vol(no transparency)
 		int vertex_type = 0;//vol
@@ -257,16 +249,16 @@ namespace flvr
 
 		static ShaderParams Volume(
 			bool poly,
-			int channels,
 			bool shading,
 			bool fog,
 			int peel,
 			bool clip,
 			bool grad,
-			MaskMode main_mode,
-			MaskMode mask_mode,
+			bool has_mask,
+			bool has_label,
+			ColorMode main_mode,
+			ColorMode mask_mode,
 			RenderMode render_mode,
-			ColorMode color_mode,
 			int colormap,
 			ColormapProj colormap_proj,
 			bool solid,
@@ -276,16 +268,16 @@ namespace flvr
 		{
 			ShaderParams p;
 			p.poly = poly;
-			p.channels = channels;
 			p.shading = shading;
 			p.fog = fog;
 			p.peel = peel;
 			p.clip = clip;
 			p.grad = grad;
+			p.has_mask = has_mask;
+			p.has_label = has_label;
 			p.main_mode = main_mode;
 			p.mask_mode = mask_mode;
 			p.render_mode = render_mode;
-			p.color_mode = color_mode;
 			p.colormap = colormap;
 			p.colormap_proj = colormap_proj;
 			p.solid = solid;
@@ -311,12 +303,12 @@ namespace flvr
 				<< ", clip=" << clip
 				<< ", use_dir=" << use_dir
 				<< ", poly=" << poly
-				<< ", channels=" << channels
 				<< ", grad=" << grad
+				<< ", has_mask=" << has_mask
+				<< ", has_label=" << has_label
 				<< ", main_mode=" << static_cast<int>(main_mode)
 				<< ", mask_mode=" << static_cast<int>(mask_mode)
 				<< ", render_mode=" << static_cast<int>(render_mode)
-				<< ", color_mode=" << static_cast<int>(color_mode)
 				<< ", colormap_proj=" << static_cast<int>(colormap_proj)
 				<< ", solid=" << solid
 				<< ", vertex_type=" << vertex_type
@@ -342,12 +334,12 @@ namespace flvr
 			a.clip == b.clip &&
 			a.use_dir == b.use_dir &&
 			a.poly == b.poly &&
-			a.channels == b.channels &&
 			a.grad == b.grad &&
+			a.has_mask == b.has_mask &&
+			a.has_label == b.has_label &&
 			a.main_mode == b.main_mode &&
 			a.mask_mode == b.mask_mode &&
 			a.render_mode == b.render_mode &&
-			a.color_mode == b.color_mode &&
 			a.colormap_proj == b.colormap_proj &&
 			a.solid == b.solid &&
 			a.vertex_type == b.vertex_type &&
@@ -395,12 +387,12 @@ namespace flvr
 				hash_combine(p.clip);
 				hash_combine(p.use_dir);
 				hash_combine(p.poly);
-				hash_combine(p.channels);
 				hash_combine(p.grad);
+				hash_combine(p.has_mask);
+				hash_combine(p.has_label);
 				hash_combine(p.main_mode);
 				hash_combine(p.mask_mode);
 				hash_combine(p.render_mode);
-				hash_combine(p.color_mode);
 				hash_combine(p.colormap_proj);
 				hash_combine(p.solid);
 				hash_combine(p.vertex_type);

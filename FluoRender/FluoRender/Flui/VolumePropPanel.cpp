@@ -449,12 +449,6 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Enable Maximum Intensity Projection (MIP) mode",
 		"Enable Maximum Intensity Projection (MIP) mode");
-	//inversion
-	bitmap = wxGetBitmap(invert_off);
-	m_options_toolbar->AddCheckTool(ID_InvChk, "Invert",
-		bitmap, wxNullBitmap,
-		"Invert data intensity values",
-		"Invert data intensity values");
 	//outline
 	bitmap = wxGetBitmap(outline);
 	m_options_toolbar->AddCheckTool(ID_OutlineChk, "Outline",
@@ -473,12 +467,12 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Enable Lanczos-Bicubic filtering to reduce artifacts",
 		"Enable Lanczos-Bicubic filtering to reduce artifacts");
-	//sync group
-	bitmap = wxGetBitmap(sync_chan);
-	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
+	//inversion
+	bitmap = wxGetBitmap(invert_off);
+	m_options_toolbar->AddCheckTool(ID_InvChk, "Invert",
 		bitmap, wxNullBitmap,
-		"Sync current channel with other channels in the group",
-		"Sync current channel with other channels in the group");
+		"Invert data intensity values",
+		"Invert data intensity values");
 	//depth mode
 	bitmap = wxGetBitmap(depth_off);
 	m_options_toolbar->AddCheckTool(ID_ChannelMixDepthChk, "Depth Mode",
@@ -491,6 +485,12 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		bitmap, wxNullBitmap,
 		"Enable name legend display for current channel",
 		"Enable name legend display for current channel");
+	//sync group
+	bitmap = wxGetBitmap(sync_chan);
+	m_options_toolbar->AddCheckTool(ID_SyncGroupChk, "Group Sync",
+		bitmap, wxNullBitmap,
+		"Sync current channel with other channels in the group",
+		"Sync current channel with other channels in the group");
 	//buttons
 	bitmap = wxGetBitmap(reset);
 	m_options_toolbar->AddToolWithHelp(ID_ResetDefault,"Reset",
@@ -506,11 +506,11 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	//spacings
 	//x
 	st = new wxBoldText(this, 0, "Voxel Size",
-		wxDefaultPosition, bts, wxALIGN_CENTER);
+		wxDefaultPosition, bts, wxALIGN_LEFT);
 	m_space_x_text = new wxUndoableTextCtrl(this, wxID_ANY, "1.000",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT, vald_fp3);
 	m_space_x_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnSpaceText, this);
-	sizer_r2->Add(st, 0, wxALIGN_CENTER);
+	sizer_r2->Add(st, 0, wxALIGN_LEFT);
 	//sizer_r2->AddStretchSpacer();
 	st = new wxStaticText(this, 0, "X ");
 	sizer_r2->Add(st, 0, wxALIGN_CENTER);
@@ -533,7 +533,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_r2->Add(m_space_z_text, 1, wxALIGN_CENTER);
 	//color 1
 	st = new wxBoldText(this, 0, "Main/Unsel.",
-		wxDefaultPosition, bts, wxALIGN_CENTER);
+		wxDefaultPosition, bts, wxALIGN_LEFT);
 	m_main_color_mode_tb = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(comp_off);
@@ -548,13 +548,13 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_main_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_main_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnMainColorBtn, this);
-	sizer_r3->Add(st, 0, wxALIGN_CENTER, 0); 
+	sizer_r3->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_r3->Add(m_main_color_mode_tb, 0, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_main_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r3->Add(m_main_color_btn, 1, wxALIGN_CENTER, 0);
 	//color 2
 	st = new wxBoldText(this, 0, "Alt./Mask",
-		wxDefaultPosition, bts, wxALIGN_CENTER);
+		wxDefaultPosition, bts, wxALIGN_LEFT);
 	m_alt_color_mode_tb = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(comp_off);
@@ -569,7 +569,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_alt_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
 	m_alt_color_btn->Bind(wxEVT_COLOURPICKER_CHANGED, &VolumePropPanel::OnAltColorBtn, this);
-	sizer_r4->Add(st, 0, wxALIGN_CENTER, 0);
+	sizer_r4->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_r4->Add(m_alt_color_mode_tb, 0, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_alt_color_text, 1, wxALIGN_CENTER, 0);
 	sizer_r4->Add(m_alt_color_btn, 1, wxALIGN_CENTER, 0);
@@ -586,7 +586,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	wxSize st_size = wxSize(bts.GetWidth() - m_colormap_inv_btn->GetSize().GetWidth(),
 		bts.GetHeight());
 	st = new wxBoldText(this, 0, "Effects",
-		wxDefaultPosition, st_size, wxALIGN_CENTER);
+		wxDefaultPosition, st_size, wxALIGN_LEFT);
 	m_colormap_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list = { "Rainbow", "Main-Alt", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
@@ -599,7 +599,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		"Gradient", "Normals", "Intensity Delta (4D)", "Speed (4D)"};
 	m_colormap_combo2->Append(colormap_list2);
 	m_colormap_combo2->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo2, this);
-	sizer_r5->Add(st, 0, wxALIGN_CENTER, 0);
+	sizer_r5->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_r5->Add(m_colormap_inv_btn, 0, wxALIGN_CENTER);
 	sizer_r5->Add(m_colormap_combo, 1, wxALIGN_CENTER, 0);
 	sizer_r5->Add(m_colormap_combo2, 1, wxALIGN_CENTER, 0);
@@ -1233,7 +1233,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		//mode
-		bval = m_vd->GetColorMode() == flvr::ColorMode::Colormap;
+		bval = m_vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
+			m_vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
 		m_colormap_chk->SetValue(bval);
 		if (m_colormap_sldr->IsEnabled() != bval)
 		{
@@ -1279,8 +1280,9 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_colormap || update_tips)
 	{
-		bval = m_vd->GetColorMode() ==
-			flvr::ColorMode::Colormap || mf_enable;
+		bval = mf_enable ||
+			m_vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
+			m_vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
 		if (m_colormap_st->IsEnabled() != bval)
 			m_colormap_st->Enable(bval);
 	}
@@ -1307,22 +1309,22 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//mask mode
 	if (update_all || FOUND_VALUE(gstMainMode))
 	{
-		auto main_mode = m_vd->GetMainMaskMode();
+		auto main_mode = m_vd->GetMainColorMode();
 		switch (main_mode)
 		{
-		case flvr::MaskMode::None:
+		case flvr::ColorMode::None:
 			m_main_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(clip_none));
 			break;
-		case flvr::MaskMode::SingleColor:
+		case flvr::ColorMode::SingleColor:
 			m_main_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(palette));
 			break;
-		case flvr::MaskMode::Colormap:
+		case flvr::ColorMode::Colormap:
 			m_main_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(colormap));
 			break;
-		case flvr::MaskMode::Component:
+		case flvr::ColorMode::Component:
 			m_main_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(comp));
 			break;
@@ -1331,22 +1333,22 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstMaskMode))
 	{
-		auto mask_mode = m_vd->GetMaskMode();
+		auto mask_mode = m_vd->GetMaskColorMode();
 		switch (mask_mode)
 		{
-		case flvr::MaskMode::None:
+		case flvr::ColorMode::None:
 			m_alt_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(clip_none));
 			break;
-		case flvr::MaskMode::SingleColor:
+		case flvr::ColorMode::SingleColor:
 			m_alt_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(palette));
 			break;
-		case flvr::MaskMode::Colormap:
+		case flvr::ColorMode::Colormap:
 			m_alt_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(colormap));
 			break;
-		case flvr::MaskMode::Component:
+		case flvr::ColorMode::Component:
 			m_alt_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(comp));
 			break;
@@ -1542,7 +1544,7 @@ void VolumePropPanel::SaveMl()
 	val.push_back(float(m_vd->GetAlpha()));
 	val.push_back(float(m_vd->GetSampleRate()));
 	val.push_back(float(m_vd->GetLuminance()));
-	val.push_back(float(m_vd->GetColorMode() == flvr::ColorMode::Colormap));
+	val.push_back(float(m_vd->GetMainColorMode() == flvr::ColorMode::Colormap));
 	val.push_back(float(m_vd->GetColormapInv()));
 	val.push_back(float(m_vd->GetColormap()));
 	val.push_back(float(m_vd->GetColormapProj()));
@@ -1721,19 +1723,19 @@ void VolumePropPanel::EnableColormap(bool bval)
 	bool sync_group_depth_mip = mip_enable && m_vd->GetChannelMixMode() == ChannelMixMode::Depth;
 	if (sync_view_depth_mip)
 	{
-		m_view->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+		m_view->SetMainMaskMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_view->SetColormapDisp(bval);
 		//m_view->SetLabelMode(bval ? 0 : 1);
 	}
 	else if (m_sync_group || sync_group_depth_mip)
 	{
-		m_group->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+		m_group->SetMainMaskMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_group->SetColormapDisp(bval);
 		//m_group->SetLabelMode(bval ? 0 : 1);
 	}
 	else
 	{
-		m_vd->SetColorMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
+		m_vd->SetMainMaskMode(bval ? flvr::ColorMode::Colormap : flvr::ColorMode::SingleColor);
 		m_vd->SetColormapDisp(bval);
 		//m_vd->SetLabelMode(bval ? 0 : 1);
 	}
@@ -2835,7 +2837,9 @@ void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 		m_colormap_sldr->Undo();
 		break;
 	case 5:
-		EnableColormap(m_vd->GetColorMode() == flvr::ColorMode::SingleColor);
+		EnableColormap(
+			m_vd->GetMainColorMode() == flvr::ColorMode::SingleColor &&
+			m_vd->GetMaskColorMode() == flvr::ColorMode::SingleColor);
 		break;
 	}
 }
@@ -2975,12 +2979,12 @@ void VolumePropPanel::OnMainColorMode(wxCommandEvent& event)
 	if (!m_vd)
 		return;
 
-	auto mode = m_vd->GetMainMaskMode();
+	auto mode = m_vd->GetMainColorMode();
 	int ival = static_cast<int>(mode);
 	ival++;
-	ival = ival > static_cast<int>(flvr::MaskMode::Component) ?
-		static_cast<int>(flvr::MaskMode::None) : ival;
-	mode = static_cast<flvr::MaskMode>(ival);
+	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
+		static_cast<int>(flvr::ColorMode::None) : ival;
+	mode = static_cast<flvr::ColorMode>(ival);
 	if (m_sync_group && m_group)
 		m_group->SetMainMaskMode(mode);
 	else
@@ -3016,12 +3020,12 @@ void VolumePropPanel::OnAltColorMode(wxCommandEvent& event)
 	if (!m_vd)
 		return;
 
-	auto mode = m_vd->GetMaskMode();
+	auto mode = m_vd->GetMaskColorMode();
 	int ival = static_cast<int>(mode);
 	ival++;
-	ival = ival > static_cast<int>(flvr::MaskMode::Component) ?
-		static_cast<int>(flvr::MaskMode::None) : ival;
-	mode = static_cast<flvr::MaskMode>(ival);
+	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
+		static_cast<int>(flvr::ColorMode::None) : ival;
+	mode = static_cast<flvr::ColorMode>(ival);
 	if (m_sync_group && m_group)
 		m_group->SetMaskMode(mode);
 	else
@@ -3279,8 +3283,6 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetAlphaPower(m_vd->GetAlphaPower());
 		//noise reduction
 		m_group->SetNR(m_vd->GetNR());
-		//colormap mode
-		m_group->SetColorMode(m_vd->GetColorMode());
 		//colormap values
 		m_group->SetColormapValues(m_vd->GetColormapLow(), m_vd->GetColormapHigh());
 		//colormap type
@@ -3289,6 +3291,9 @@ void VolumePropPanel::SetSyncGroup()
 		m_group->SetColormapInv(m_vd->GetColormapInv());
 		//colormap proj
 		m_group->SetColormapProj(m_vd->GetColormapProj());
+		//color mode
+		m_group->SetMainMaskMode(m_vd->GetMainColorMode());
+		m_group->SetMaskMode(m_vd->GetMaskColorMode());
 	}
 
 	FluoRefresh(1, { gstVolumeProps }, { glbin_current.GetViewId() });

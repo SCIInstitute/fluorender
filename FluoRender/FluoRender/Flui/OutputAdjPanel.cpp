@@ -1750,7 +1750,7 @@ void OutputAdjPanel::UpdateSync()
 			auto vd = group->GetVolumeData(i);
 			if (vd)
 			{
-				if (vd->GetColorMode() == flvr::ColorMode::Colormap)
+				if (vd->GetMainColorMode() == flvr::ColorMode::Colormap)
 				{
 					r_v = g_v = b_v = true;
 				}

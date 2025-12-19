@@ -305,7 +305,6 @@ DEALINGS IN THE SOFTWARE.
 //colormap
 #define gstColormap "colormap"
 #define gstColormapEnable "colormap enable"
-#define gstColormapMode "colormap mode"
 #define gstColormapDisp "colormap disp"
 #define gstColormapLow "colormap low"
 #define gstColormapHigh "colormap high"

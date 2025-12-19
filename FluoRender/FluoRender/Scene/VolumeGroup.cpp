@@ -452,15 +452,6 @@ double VolumeGroup::GetSampleRate()
 	return m_sample_rate;
 }
 
-void VolumeGroup::SetColorMode(flvr::ColorMode mode)
-{
-	for (auto& it : m_vd_list)
-	{
-		if (it)
-			it->SetColorMode(mode);
-	}
-}
-
 void VolumeGroup::SetColormapDisp(bool disp)
 {
 	for (auto& it : m_vd_list)
@@ -577,7 +568,7 @@ void VolumeGroup::SetTransparent(bool val)
 	}
 }
 
-void VolumeGroup::SetMainMaskMode(flvr::MaskMode val)
+void VolumeGroup::SetMainMaskMode(flvr::ColorMode val)
 {
 	for (auto& it : m_vd_list)
 	{
@@ -586,7 +577,7 @@ void VolumeGroup::SetMainMaskMode(flvr::MaskMode val)
 	}
 }
 
-void VolumeGroup::SetMaskMode(flvr::MaskMode val)
+void VolumeGroup::SetMaskMode(flvr::ColorMode val)
 {
 	for (auto& it : m_vd_list)
 	{

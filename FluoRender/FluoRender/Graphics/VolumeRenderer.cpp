@@ -77,9 +77,8 @@ VolumeRenderer::VolumeRenderer()
 	shading_(false),
 	shading_strength_(1.0),
 	shading_shine_(1.0),
-	//colormap mode
+	//colormap settings
 	colormap_inv_(1.0),
-	color_mode_(ColorMode::SingleColor),
 	colormap_low_value_(0.0),
 	colormap_hi_value_(1.0),
 	colormap_(0),
@@ -95,10 +94,8 @@ VolumeRenderer::VolumeRenderer()
 	//depth output
 	depth_(false),
 	//segmentation
-	main_mode_(MaskMode::SingleColor),
-	mask_mode_(MaskMode::SingleColor),
-	mask_(false),
-	label_(false),
+	main_mode_(ColorMode::SingleColor),
+	mask_mode_(ColorMode::SingleColor),
 	//scale factor
 	noise_red_(false),
 	sfactor_(1.0),
@@ -139,9 +136,8 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	shading_(copy.shading_),
 	shading_strength_(copy.shading_strength_),
 	shading_shine_(copy.shading_shine_),
-	//colormap mode
+	//colormap settings
 	colormap_inv_(copy.colormap_inv_),
-	color_mode_(copy.color_mode_),
 	colormap_low_value_(copy.colormap_low_value_),
 	colormap_hi_value_(copy.colormap_hi_value_),
 	colormap_(copy.colormap_),
@@ -161,8 +157,6 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	//segmentation
 	main_mode_(copy.main_mode_),
 	mask_mode_(copy.mask_mode_),
-	mask_(copy.mask_),
-	label_(copy.label_),
 	//scale factor
 	noise_red_(copy.noise_red_),
 	inv_(copy.inv_),
@@ -249,72 +243,6 @@ Size2D VolumeRenderer::resize(const std::string& buf_name)
 }
 
 //darw
-void VolumeRenderer::eval_ml_mode()
-{
-	auto tex = tex_.lock();
-	if (!tex)
-		return;
-
-	//reassess the mask/label mode
-	//0-normal, 1-render with mask, 2-render with mask excluded
-	//3-random color with label, 4-random color with label+mask
-	//switch (ml_mode_)
-	//{
-	//case 0:
-	//	mask_ = false;
-	//	label_ = false;
-	//	break;
-	//case 1:
-	//	if (!tex->has_comp(CompType::Mask))
-	//	{
-	//		mask_ = false;
-	//		ml_mode_ = 0;
-	//	}
-	//	else
-	//		mask_ = true;
-	//	label_ = false;
-	//	break;
-	//case 2:
-	//	if (!tex->has_comp(CompType::Mask))
-	//	{
-	//		mask_ = false;
-	//		ml_mode_ = 0;
-	//	}
-	//	else
-	//		mask_ = true;
-	//	label_ = false;
-	//	break;
-	//case 3:
-	//	if (!tex->has_comp(CompType::Label))
-	//	{
-	//		label_ = false;
-	//		ml_mode_ = 0;
-	//	}
-	//	else
-	//		label_ = true;
-	//	mask_ = false;
-	//	break;
-	//case 4:
-	//	if (!tex->has_comp(CompType::Label))
-	//	{
-	//		if (tex->has_comp(CompType::Mask))
-	//		{
-	//			mask_ = true;
-	//			label_ = false;
-	//			ml_mode_ = 1;
-	//		}
-	//		else
-	//		{
-	//			mask_ = label_ = false;
-	//			ml_mode_ = 0;
-	//		}
-	//	}
-	//	else
-	//		mask_ = label_ = true;
-	//	break;
-	//}
-}
-
 void VolumeRenderer::draw(bool draw_wireframe_p,
 	bool interactive_mode_p, bool orthographic_p, int mode)
 {
@@ -376,7 +304,6 @@ void VolumeRenderer::draw_volume(
 	index.reserve(est_slices * 6);
 	size.reserve(est_slices * 6);
 
-	ColorMode color_mode = mode == 4 ? ColorMode::SingleColor : color_mode_;
 	bool use_fog = m_use_fog && render_mode_ != RenderMode::Overlay;
 
 	int w = viewport_[2];
@@ -437,8 +364,6 @@ void VolumeRenderer::draw_volume(
 	if (clear_depth)
 		blend_buffer->clear_attachment(AttachmentPoint::Color(1), std::array<float, 2>{ 0.0f, 0.0f }.data());
 
-	eval_ml_mode();
-
 	// Set up shaders
 	std::shared_ptr<ShaderProgram> shader;
 	//create/bind
@@ -446,14 +371,26 @@ void VolumeRenderer::draw_volume(
 		gm_high_ < gm_max_ ||
 		colormap_proj_ == ColormapProj::Gradient ||
 		colormap_proj_ == ColormapProj::Normal;
+	bool has_mask = tex->has_comp(CompType::Mask);
+	bool has_label = tex->has_comp(CompType::Label);
 	shader = glbin_shader_manager.shader(gstVolShader,
 		ShaderParams::Volume(
-			false, tex->nc(),
-			shading_, use_fog,
-			depth_peel_, true,
-			grad, main_mode_, mask_mode_, render_mode_,
-			color_mode, colormap_, colormap_proj_,
-			solid_, 1, depth));
+			false,
+			shading_,
+			use_fog,
+			depth_peel_,
+			true,
+			grad,
+			has_mask,
+			has_label,
+			main_mode_,
+			mask_mode_,
+			render_mode_,
+			colormap_,
+			colormap_proj_,
+			solid_,
+			1,
+			depth));
 	assert(shader);
 	shader->bind();
 
@@ -592,9 +529,9 @@ void VolumeRenderer::draw_volume(
 				continue;
 			if (ShaderParams::IsTimeProj(colormap_proj_))
 				load_brick(b, filter, compression_, 10, mode, -1);
-			if (mask_)
+			if (has_mask)
 				load_brick_mask(b, filter);
-			if (label_)
+			if (has_label)
 				load_brick_label(b);
 			auto texel_b = fluo::Vector(1.0) / b->get_size();
 			shader->setLocalParam(4, texel_b.x(), texel_b.y(), texel_b.z(), rate_factor);
@@ -669,9 +606,9 @@ void VolumeRenderer::draw_volume(
 	release_texture(0, GL_TEXTURE_3D);
 	if (ShaderParams::IsTimeProj(colormap_proj_))
 		release_texture(10, GL_TEXTURE_3D);
-	if (mask_)
+	if (has_mask)
 		release_texture(2, GL_TEXTURE_3D);
-	if (label_)
+	if (has_label)
 		release_texture(3, GL_TEXTURE_3D);
 
 	std::shared_ptr<ShaderProgram> img_shader;
@@ -769,14 +706,22 @@ void VolumeRenderer::draw_wireframe(bool orthographic_p)
 	// Set up shaders
 	auto shader = glbin_shader_manager.shader(gstVolShader,
 		ShaderParams::Volume(
-			true, 0,
-			false, false,
-			0, false, false,
-			MaskMode::None, MaskMode::None,
-			RenderMode::Standard,
+			true,
+			false,
+			false,
+			0,
+			false,
+			false,
+			false,
+			false,
 			ColorMode::SingleColor,
-			0, ColormapProj::Intensity,
-			false, 1, false));
+			ColorMode::SingleColor,
+			RenderMode::Standard,
+			0,
+			ColormapProj::Intensity,
+			false,
+			1,
+			false));
 	if (shader)
 		shader->bind();
 

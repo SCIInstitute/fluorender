@@ -149,20 +149,10 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		z << VOL_UNIFORMS_CLIP;
 
 	// add uniforms for masking
-	//switch (p.mask)
-	//{
-	//case 1:
-	//case 2:
-	//	z << VOL_UNIFORMS_MASK;
-	//	break;
-	//case 3:
-	//	z << VOL_UNIFORMS_LABEL;
-	//	break;
-	//case 4:
-	//	z << VOL_UNIFORMS_MASK;
-	//	z << VOL_UNIFORMS_LABEL;
-	//	break;
-	//}
+	if (p.has_mask)
+		z << VOL_UNIFORMS_MASK;
+	if (p.has_label)
+		z << VOL_UNIFORMS_LABEL;
 
 	//functions
 	if (p.clip)
@@ -199,17 +189,14 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		z << VOL_GRAD_COMPUTE;
 		z << VOL_BODY_SHADING;
 
-		if (p.channels == 1)
-			z << VOL_COMPUTED_GM_LOOKUP;
-		else
-			z << VOL_TEXTURE_GM_LOOKUP;
+		z << VOL_COMPUTED_GM_LOOKUP;
 
 		if (p.colormap_proj == ColormapProj::IntDelta)
 			z << VOL_DATA_4D_INTENSITY_DELTA;
 		else if (p.colormap_proj == ColormapProj::Speed)
 			z << VOL_DATA_4D_SPEED;
 
-		switch (p.color_mode)
+		switch (p.main_mode)
 		{
 		case ColorMode::SingleColor://normal
 			if (p.solid)
@@ -243,22 +230,15 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	{
 		z << VOL_DATA_VOLUME_LOOKUP;
 
-		if (p.channels == 1)
+		// Compute Gradient magnitude and use it.
+		if (p.grad ||
+			p.colormap_proj == ColormapProj::Speed)
 		{
-			// Compute Gradient magnitude and use it.
-			if (p.grad ||
-				p.colormap_proj == ColormapProj::Speed)
-			{
-				z << VOL_GRAD_COMPUTE;
-				z << VOL_COMPUTED_GM_LOOKUP;
-			}
-			else
-				z << VOL_COMPUTED_GM_NOUSE;
+			z << VOL_GRAD_COMPUTE;
+			z << VOL_COMPUTED_GM_LOOKUP;
 		}
 		else
-		{
-			z << VOL_TEXTURE_GM_LOOKUP;
-		}
+			z << VOL_COMPUTED_GM_NOUSE;
 
 		if (p.colormap_proj == ColormapProj::IntDelta)
 			z << VOL_DATA_4D_INTENSITY_DELTA;
@@ -286,7 +266,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 		}
 		else
 		{
-			switch (p.color_mode)
+			switch (p.main_mode)
 			{
 			case ColorMode::SingleColor://normal
 				if (p.solid)

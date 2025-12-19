@@ -426,8 +426,6 @@ void Project::Open(const std::wstring& filename)
 							vd->SetSync(2, bval);
 
 						//colormap settings
-						if (fconfig->Read("colormap_mode", &ival))
-							vd->SetColorMode(static_cast<flvr::ColorMode>(ival));
 						if (fconfig->Read("colormap_inv", &dval))
 							vd->SetColormapInv(dval);
 						if (fconfig->Read("colormap", &ival))
@@ -467,6 +465,12 @@ void Project::Open(const std::wstring& filename)
 						//legend
 						if (fconfig->Read("legend", &bval))
 							vd->SetLegend(bval);
+
+						//color modes
+						if (fconfig->Read("main color mode", &ival))
+							vd->SetMainMaskMode(static_cast<flvr::ColorMode>(ival));
+						if (fconfig->Read("mask color mode", &ival))
+							vd->SetMaskMode(static_cast<flvr::ColorMode>(ival));
 
 						//mask
 						if (fconfig->Read("mask", &wsval))
@@ -1429,7 +1433,6 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("sync_b", vd->GetSync(2));
 
 			//colormap settings
-			fconfig->Write("colormap_mode", static_cast<int>(vd->GetColorMode()));
 			fconfig->Write("colormap_inv", vd->GetColormapInv());
 			fconfig->Write("colormap", vd->GetColormap());
 			fconfig->Write("colormap_proj", static_cast<int>(vd->GetColormapProj()));
@@ -1456,6 +1459,10 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 			//legend
 			fconfig->Write("legend", vd->GetLegend());
+
+			//color modes
+			fconfig->Write("main color mode", static_cast<int>(vd->GetMainColorMode()));
+			fconfig->Write("mask color mode", static_cast<int>(vd->GetMaskColorMode()));
 
 			//mask
 			vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());

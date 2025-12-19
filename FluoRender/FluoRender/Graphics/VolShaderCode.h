@@ -121,7 +121,6 @@ uniform vec4 loc18;//(alpha, alpha_power, luminance, 0)
 uniform vec4 loc19;//(fog/background color)
 
 uniform sampler3D tex0;//data volume
-uniform sampler3D tex1;//gm volume
 
 uniform mat4 matrix2;//texture
 )GLSHDR";
@@ -371,11 +370,6 @@ inline constexpr const char* VOL_COMPUTED_GM_NOUSE  = R"GLSHDR(
 inline constexpr const char* VOL_COMPUTED_GM_INVALIDATE  = R"GLSHDR(
 	//VOL_COMPUTED_GM_INVALIDATE
 	v.y = loc2.y;
-)GLSHDR";
-
-inline constexpr const char* VOL_TEXTURE_GM_LOOKUP  = R"GLSHDR(
-	//VOL_TEXTURE_GM_LOOKUP
-	v.y = texture(tex1, texCoord).x;
 )GLSHDR";
 
 inline constexpr const char* VOL_DATA_4D_INTENSITY_DELTA  = R"GLSHDR(
