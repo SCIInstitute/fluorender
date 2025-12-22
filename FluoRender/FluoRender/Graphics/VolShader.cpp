@@ -62,11 +62,13 @@ bool VolShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 	return true;
 }
 
-std::string VolShaderFactory::get_color_mode_code(const ShaderParams& p, int mode)
+std::string VolShaderFactory::get_color_mode_code(const ShaderParams& p, int mode, bool mip_colormap)
 {
 	std::ostringstream z;
 
 	ColorMode cm = mode == 0 ? p.main_mode : p.mask_mode;
+	if (mip_colormap)
+		cm = ColorMode::Colormap;
 
 	switch (cm)
 	{
@@ -95,7 +97,9 @@ std::string VolShaderFactory::get_color_mode_code(const ShaderParams& p, int mod
 			z << VOL_SINGLE_COLOR_ALPHA;
 		break;
 	case ColorMode::Component:
-		z << VOL_OUT_COLOR_COMPONENT;
+		if (p.has_label)
+			z << VOL_OUT_COLOR_COMPONENT;
+		else z << VOL_OUT_COLOR_NO_COMP;
 		if (p.solid)
 			z << VOL_SINGLE_COLOR_SOLID;
 		else
@@ -230,6 +234,8 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	//mask value in m
 	if (p.has_mask)
 		z << VOL_MASK_LOOKUP;
+	else
+		z << VOL_NO_MASK;
 
 	//compute grad
 	if (p.shading ||
@@ -253,177 +259,54 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << VOL_TRANSFER_FUNCTION;
 
 	z << VOL_OUT_COLOR_DECLARE;
+	bool mip_colormap =
+		p.render_mode == RenderMode::Mip &&
+		ShaderParams::ValidColormapProj(p.colormap_proj);
 	if (p.has_mask)
 	{
 		//separate mode for sel and unsel
 		z << VOL_COLOR_MODE_MASK_IF;
 		//mask mode
-		z << get_color_mode_code(p, 1);
+		z << get_color_mode_code(p, 1, false);
 		//else
 		z << VOL_COLOR_MODE_MASK_ELSE;
 		//main mode
-		z << get_color_mode_code(p, 0);
+		z << get_color_mode_code(p, 0, mip_colormap);
 		//end
 		z << VOL_SHADER_MODE_MASK_END;
 	}
 	else
 	{
 		//use main mode
-		z << get_color_mode_code(p, 0);
+		z << get_color_mode_code(p, 0, mip_colormap);
 	}
 
-	if (p.shading)
-		z << VOL_SHADING_OUTPUT;
-
-	//bodies
-	//{
-	//	//no gradient volume, need to calculate in real-time
-	//	z << VOL_GRAD_COMPUTE;
-
-	//	z << VOL_COMPUTED_GM_LOOKUP;
-
-	//	switch (p.main_mode)
-	//	{
-	//	case ColorMode::SingleColor://normal
-	//		if (p.solid)
-	//			z << VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID;
-	//		else
-	//			z << VOL_TRANSFER_FUNCTION_SIN_COLOR;
-	//		break;
-	//	case ColorMode::Colormap://colormap
-	//		if (p.solid)
-	//		{
-	//			z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
-	//			z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-	//			z << get_colormap_proj(p.colormap_proj);
-	//			z << get_colormap_code(p.colormap, p.colormap_proj);
-	//			z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
-	//		}
-	//		else
-	//		{
-	//			z << VOL_TRANSFER_FUNCTION_COLORMAP;
-	//			z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-	//			z << get_colormap_proj(p.colormap_proj);
-	//			z << get_colormap_code(p.colormap, p.colormap_proj);
-	//			z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
-	//		}
-	//		break;
-	//	}
-
-	//	z << VOL_SHADING_OUTPUT;
-	//}
-	//else // No shading
-	//{
-
-	//	// Compute Gradient magnitude and use it.
-	//	if (p.grad ||
-	//		p.colormap_proj == ColormapProj::Speed)
-	//	{
-	//		z << VOL_GRAD_COMPUTE;
-	//		z << VOL_COMPUTED_GM_LOOKUP;
-	//	}
-	//	else
-	//		z << VOL_COMPUTED_GM_NOUSE;
-
-	//	if (p.colormap_proj == ColormapProj::IntDelta)
-	//		z << VOL_DATA_4D_INTENSITY_DELTA;
-	//	else if (p.colormap_proj == ColormapProj::Speed)
-	//		z << VOL_DATA_4D_SPEED;
-
-	//	if (p.render_mode == RenderMode::Mip &&
-	//		ShaderParams::ValidColormapProj(p.colormap_proj))
-	//	{
-	//		//this is the colormap mode for mip
-	//		//mip without colormap is rendered the same as standard
-	//		z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_HEAD;
-	//		if (p.solid)
-	//			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO_SOLID;
-	//		else
-	//			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_ZERO;
-	//		z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_TF;
-	//		z << get_colormap_proj(p.colormap_proj);
-	//		z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE;
-	//		if (p.solid)
-	//			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID;
-	//		else
-	//			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP;
-	//		z << VOL_RASTER_BLEND_SOLID;
-	//	}
-	//	else
-	//	{
-	//		switch (p.main_mode)
-	//		{
-	//		case ColorMode::SingleColor://normal
-	//			if (p.solid)
-	//				z << VOL_TRANSFER_FUNCTION_SIN_COLOR_SOLID;
-	//			else
-	//				z << VOL_TRANSFER_FUNCTION_SIN_COLOR;
-	//			break;
-	//		case ColorMode::Colormap://colormap
-	//			if (p.solid)
-	//			{
-	//				z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID;
-	//				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-	//				z << get_colormap_proj(p.colormap_proj);
-	//				z << get_colormap_code(p.colormap, p.colormap_proj);
-	//				z << VOL_TRANSFER_FUNCTION_COLORMAP_SOLID_RESULT;
-	//			}
-	//			else
-	//			{
-	//				z << VOL_TRANSFER_FUNCTION_COLORMAP;
-	//				z << VOL_COMMON_TRANSFER_FUNCTION_CALC;
-	//				z << get_colormap_proj(p.colormap_proj);
-	//				z << get_colormap_code(p.colormap, p.colormap_proj);
-	//				z << VOL_TRANSFER_FUNCTION_COLORMAP_RESULT;
-	//			}
-	//			break;
-	//		}
-	//	}
-	//}
-
-	//if (!(p.mip && p.colormap_proj))
-	if (!(p.render_mode == RenderMode::Mip &&
-		ShaderParams::ValidColormapProj(p.colormap_proj)))
+	if (mip_colormap)
 	{
+		//this is the colormap mode for mip
+		//mip without colormap is rendered the same as standard
+		z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE;
+		if (p.solid)
+			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID;
+		else
+			z << VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP;
+		z << VOL_RASTER_BLEND_SOLID;
+	}
+	else
+	{
+		//shading
+		if (p.shading)
+			z << VOL_SHADING_OUTPUT;
+
 		// fog
 		if (p.fog)
-		{
 			z << VOL_FOG_BODY;
-		}
 
-		//final blend
-		//switch (p.mask)
-		//{
-		//case 0:
-			if (p.solid)
-				z << VOL_RASTER_BLEND_SOLID;
-			else
-				z << VOL_RASTER_BLEND;
-		//	break;
-		//case 1:
-		//	if (p.solid)
-		//		z << VOL_RASTER_BLEND_MASK_SOLID;
-		//	else
-		//		z << VOL_RASTER_BLEND_MASK;
-		//	break;
-		//case 2:
-		//	if (p.solid)
-		//		z << VOL_RASTER_BLEND_NOMASK_SOLID;
-		//	else
-		//		z << VOL_RASTER_BLEND_NOMASK;
-		//	break;
-		//case 3:
-		//	z << VOL_RASTER_BLEND_LABEL;
-		//	z << VOL_SHADING_OUTPUT_LABEL;
-		//	break;
-		//case 4:
-		//	z << VOL_RASTER_BLEND_LABEL_MASK;
-		//	if (p.solid)
-		//		z << VOL_SHADING_OUTPUT_LABEL_MASK_SOLID;
-		//	else
-		//		z << VOL_SHADING_OUTPUT_LABEL_MASK;
-		//	break;
-		//}
+		//output color
+		if (p.solid)
+			z << VOL_RASTER_BLEND_SOLID;
+		else
+			z << VOL_RASTER_BLEND;
 	}
 
 	//output depth map

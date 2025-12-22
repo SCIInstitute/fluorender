@@ -266,7 +266,6 @@ bool ShaderProgram::create()
 		std::string str = shader_log;
 		std::wstring wstr = L"Error compiling fragment shader: " + s2ws(str) + L"\n";
 		DBGPRINT(wstr.c_str());
-		//std::cerr << "Error compiling fragment shader: " << shader_log << std::endl;
 #endif
 		attach_frag = false;
 		valid_ = false;
@@ -292,7 +291,6 @@ bool ShaderProgram::create()
 			std::string str = shader_log;
 			std::wstring wstr = L"Error compiling geometry shader: " + s2ws(str) + L"\n";
 			DBGPRINT(wstr.c_str());
-			//std::cerr << "Error compiling geometry shader: " << shader_log << std::endl;
 #endif
 			attach_geom = false;
 			valid_ = false;
@@ -316,7 +314,6 @@ bool ShaderProgram::create()
 		std::string str = shader_log;
 		std::wstring wstr = L"Error linking shaders: " + s2ws(str) + L"\n";
 		DBGPRINT(wstr.c_str());
-		//std::cerr << "Error linking shaders: " << shader_log << std::endl;
 #endif
 		valid_ = false;
 		return false;
