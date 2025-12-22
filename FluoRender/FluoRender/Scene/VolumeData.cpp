@@ -2412,40 +2412,40 @@ fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
 	if (!raw)
 		v = (v - m_colormap_low_value) /
 			(m_colormap_hi_value - m_colormap_low_value);
-	double valu = fluo::Clamp(v, 0.0, 1.0);
+	double cm_value = fluo::Clamp(v, 0.0, 1.0);
 	double inv = GetColormapInv();
 	switch (m_colormap)
 	{
 	case 0://rainbow
 	default:
-		rb.r(fluo::Clamp((4.0*valu - 2.0)*inv, 0.0, 1.0));
-		rb.g(fluo::Clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0));
-		rb.b(fluo::Clamp((2.0 - 4.0*valu)*inv, 0.0, 1.0));
+		rb.r(fluo::Clamp((4.0*cm_value - 2.0)*inv, 0.0, 1.0));
+		rb.g(fluo::Clamp(cm_value<0.5 ? 4.0*cm_value : -4.0*cm_value+4.0, 0.0, 1.0));
+		rb.b(fluo::Clamp((2.0 - 4.0*cm_value)*inv, 0.0, 1.0));
 		break;
 	case 1://primary-secondary
 	{
 		fluo::Color mask_color = m_vr->get_mask_color();
-		rb = (inv > 0.0 ? mask_color : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : mask_color) * valu;
+		rb = (inv > 0.0 ? mask_color : m_color) * (1.0 - cm_value) + (inv > 0.0 ? m_color : mask_color) * cm_value;
 	}
 		break;
 	case 2://hot
-		rb.r(fluo::Clamp(inv*2.0*valu+(inv>0.0?0.0:2.0), 0.0, 1.0));
-		rb.g(fluo::Clamp(inv*(4.0*valu - 2.0), 0.0, 1.0));
-		rb.b(fluo::Clamp(inv*4.0*valu+(inv>0.0?-3.0:1.0), 0.0, 1.0));
+		rb.r(fluo::Clamp(inv*2.0*cm_value+(inv>0.0?0.0:2.0), 0.0, 1.0));
+		rb.g(fluo::Clamp(inv*(4.0*cm_value - 2.0), 0.0, 1.0));
+		rb.b(fluo::Clamp(inv*4.0*cm_value+(inv>0.0?-3.0:1.0), 0.0, 1.0));
 		break;
 	case 3://cool
-		rb.r(fluo::Clamp(inv>0.0?valu:(1.0-valu), 0.0, 1.0));
-		rb.g(fluo::Clamp(inv>0.0?(1.0-valu):valu, 0.0, 1.0));
+		rb.r(fluo::Clamp(inv>0.0?cm_value:(1.0-cm_value), 0.0, 1.0));
+		rb.g(fluo::Clamp(inv>0.0?(1.0-cm_value):cm_value, 0.0, 1.0));
 		rb.b(1.0);
 		break;
 	case 4://diverging
-		rb.r(fluo::Clamp(inv>0.0?(valu<0.5?valu*0.9+0.25:0.7):(valu<0.5?0.7:-0.9*valu+1.15), 0.0, 1.0));
-		rb.g(fluo::Clamp(inv>0.0?(valu<0.5?valu*0.8+0.3:1.4-1.4*valu):(valu<0.5?1.4*valu:-0.8*valu+1.1), 0.0, 1.0));
-		rb.b(fluo::Clamp(inv>0.0?(valu<0.5?-0.1*valu+0.75:-1.1*valu+1.25):(valu<0.5?1.1*valu+0.15:0.1*valu+0.65), 0.0, 1.0));
+		rb.r(fluo::Clamp(inv>0.0?(cm_value<0.5?cm_value*0.9+0.25:0.7):(cm_value<0.5?0.7:-0.9*cm_value+1.15), 0.0, 1.0));
+		rb.g(fluo::Clamp(inv>0.0?(cm_value<0.5?cm_value*0.8+0.3:1.4-1.4*cm_value):(cm_value<0.5?1.4*cm_value:-0.8*cm_value+1.1), 0.0, 1.0));
+		rb.b(fluo::Clamp(inv>0.0?(cm_value<0.5?-0.1*cm_value+0.75:-1.1*cm_value+1.25):(cm_value<0.5?1.1*cm_value+0.15:0.1*cm_value+0.65), 0.0, 1.0));
 		break;
 	case 5://monochrome
 	{
-		double cv = (inv > 0.0 ? 0.0 : 1.0) + inv * fluo::Clamp(valu, 0.0, 1.0);
+		double cv = (inv > 0.0 ? 0.0 : 1.0) + inv * fluo::Clamp(cm_value, 0.0, 1.0);
 		rb.r(cv);
 		rb.g(cv);
 		rb.b(cv);
@@ -2454,19 +2454,19 @@ fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
 	case 6://high-key
 	{
 		fluo::Color w(1.0, 1.0, 1.0);
-		rb = (inv > 0.0 ? w : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : w) * valu;
+		rb = (inv > 0.0 ? w : m_color) * (1.0 - cm_value) + (inv > 0.0 ? m_color : w) * cm_value;
 	}
 		break;
 	case 7://low-key
 	{
 		fluo::Color l = m_color * 0.1;
-		rb = (inv > 0.0 ? m_color : l) * (1.0 - valu) + (inv > 0.0 ? l : m_color) * valu;
+		rb = (inv > 0.0 ? m_color : l) * (1.0 - cm_value) + (inv > 0.0 ? l : m_color) * cm_value;
 	}
 		break;
 	case 8://increased transp
 	{
 		fluo::Color l(0.0, 0.0, 0.0);
-		rb = (inv > 0.0 ? l : m_color) * (1.0 - valu) + (inv > 0.0 ? m_color : l) * valu;
+		rb = (inv > 0.0 ? l : m_color) * (1.0 - cm_value) + (inv > 0.0 ? m_color : l) * cm_value;
 	}
 		break;
 	}

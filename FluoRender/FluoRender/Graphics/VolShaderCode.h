@@ -419,6 +419,11 @@ inline constexpr const char* VOL_OUT_COLOR_DECLARE = R"GLSHDR(
 	vec3 out_color = vec3(0.0);
 )GLSHDR";
 
+inline constexpr const char* VOL_OUT_COLORMAP_VALUE_DECLARE = R"GLSHDR(
+	//VOL_OUT_COLORMAP_VALUE_DECLARE
+	float cm_value = 0.0;
+)GLSHDR";
+
 inline constexpr const char* VOL_COLORMAP_COLOR_DECLARE = R"GLSHDR(
 	//VOL_COLORMAP_COLOR_DECLARE
 	vec3 rb = vec3(0.0);
@@ -569,9 +574,9 @@ inline constexpr const char* VOL_COMMON_TRANSFER_FUNCTION_CALC  = R"GLSHDR(
 //rainbow
 inline constexpr const char* VOL_COLORMAP_CALC0  = R"GLSHDR(
 		//VOL_COLORMAP_CALC0
-		rb.r = clamp((4.0*valu - 2.0)*loc6.w, 0.0, 1.0);
-		rb.g = clamp(valu<0.5 ? 4.0*valu : -4.0*valu+4.0, 0.0, 1.0);
-		rb.b = clamp((2.0 - 4.0*valu)*loc6.w, 0.0, 1.0);
+		rb.r = clamp((4.0*cm_value - 2.0)*loc6.w, 0.0, 1.0);
+		rb.g = clamp(cm_value<0.5 ? 4.0*cm_value : -4.0*cm_value+4.0, 0.0, 1.0);
+		rb.b = clamp((2.0 - 4.0*cm_value)*loc6.w, 0.0, 1.0);
 )GLSHDR";
 
 inline constexpr const char* VOL_COLORMAP_DIFF_CALC0  = R"GLSHDR(
@@ -582,113 +587,113 @@ inline constexpr const char* VOL_COLORMAP_DIFF_CALC0  = R"GLSHDR(
 //primary-secondary
 inline constexpr const char* VOL_COLORMAP_CALC1  = R"GLSHDR(
 		//VOL_COLORMAP_CALC1
-		rb.rgb = mix(loc6.w>0.0?loc16.rgb:loc9.rgb, loc6.w>0.0?loc9.rgb:loc16.rgb, clamp(valu, 0.0, 1.0));
+		rb.rgb = mix(loc6.w>0.0?loc16.rgb:loc9.rgb, loc6.w>0.0?loc9.rgb:loc16.rgb, clamp(cm_value, 0.0, 1.0));
 )GLSHDR";
 
 //hot
 inline constexpr const char* VOL_COLORMAP_CALC2  = R"GLSHDR(
 		//VOL_COLORMAP_CALC2
-		rb.r = clamp(loc6.w*2.0*valu+(loc6.w>0.0?0.0:2.0), 0.0, 1.0);
-		rb.g = clamp(loc6.w*(4.0*valu - 2.0), 0.0, 1.0);
-		rb.b = clamp(loc6.w*4.0*valu+(loc6.w>0.0?-3.0:1.0), 0.0, 1.0);
+		rb.r = clamp(loc6.w*2.0*cm_value+(loc6.w>0.0?0.0:2.0), 0.0, 1.0);
+		rb.g = clamp(loc6.w*(4.0*cm_value - 2.0), 0.0, 1.0);
+		rb.b = clamp(loc6.w*4.0*cm_value+(loc6.w>0.0?-3.0:1.0), 0.0, 1.0);
 )GLSHDR";
 
 //cool
 inline constexpr const char* VOL_COLORMAP_CALC3  = R"GLSHDR(
 		//VOL_COLORMAP_CALC3
-		rb.r = clamp(loc6.w>0.0?valu:(1.0-valu), 0.0, 1.0);
-		rb.g = clamp(loc6.w>0.0?(1.0-valu):valu, 0.0, 1.0);
+		rb.r = clamp(loc6.w>0.0?cm_value:(1.0-cm_value), 0.0, 1.0);
+		rb.g = clamp(loc6.w>0.0?(1.0-cm_value):cm_value, 0.0, 1.0);
 		rb.b = 1.0;
 )GLSHDR";
 
 //diverging
 inline constexpr const char* VOL_COLORMAP_CALC4  = R"GLSHDR(
 		//VOL_COLORMAP_CALC4
-		rb.r = clamp(loc6.w>0.0?(valu<0.5?valu*0.9+0.25:0.7):(valu<0.5?0.7:-0.9*valu+1.15), 0.0, 1.0);
-		rb.g = clamp(loc6.w>0.0?(valu<0.5?valu*0.8+0.3:1.4-1.4*valu):(valu<0.5?1.4*valu:-0.8*valu+1.1), 0.0, 1.0);
-		rb.b = clamp(loc6.w>0.0?(valu<0.5?-0.1*valu+0.75:-1.1*valu+1.25):(valu<0.5?1.1*valu+0.15:0.1*valu+0.65), 0.0, 1.0);
+		rb.r = clamp(loc6.w>0.0?(cm_value<0.5?cm_value*0.9+0.25:0.7):(cm_value<0.5?0.7:-0.9*cm_value+1.15), 0.0, 1.0);
+		rb.g = clamp(loc6.w>0.0?(cm_value<0.5?cm_value*0.8+0.3:1.4-1.4*cm_value):(cm_value<0.5?1.4*cm_value:-0.8*cm_value+1.1), 0.0, 1.0);
+		rb.b = clamp(loc6.w>0.0?(cm_value<0.5?-0.1*cm_value+0.75:-1.1*cm_value+1.25):(cm_value<0.5?1.1*cm_value+0.15:0.1*cm_value+0.65), 0.0, 1.0);
 )GLSHDR";
 
 //monochrome
 inline constexpr const char* VOL_COLORMAP_CALC5  = R"GLSHDR(
 		//VOL_COLORMAP_CALC5
-		rb.rgb = vec3((loc6.w>0.0?0.0:1.0) + loc6.w*clamp(valu, 0.0, 1.0));
+		rb.rgb = vec3((loc6.w>0.0?0.0:1.0) + loc6.w*clamp(cm_value, 0.0, 1.0));
 )GLSHDR";
 
 //high-key
 inline constexpr const char* VOL_COLORMAP_CALC6  = R"GLSHDR(
 		//VOL_COLORMAP_CALC6
-		rb.rgb = mix(loc6.w>0.0?vec3(1.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(1.0), clamp(valu, 0.0, 1.0));
+		rb.rgb = mix(loc6.w>0.0?vec3(1.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(1.0), clamp(cm_value, 0.0, 1.0));
 )GLSHDR";
 
 //low-key
 inline constexpr const char* VOL_COLORMAP_CALC7  = R"GLSHDR(
 		//VOL_COLORMAP_CALC7
-		rb.rgb = mix(loc6.w>0.0?loc9.rgb:loc9.rgb*0.1, loc6.w>0.0?loc9.rgb*0.1:loc9.rgb, clamp(valu, 0.0, 1.0));
+		rb.rgb = mix(loc6.w>0.0?loc9.rgb:loc9.rgb*0.1, loc6.w>0.0?loc9.rgb*0.1:loc9.rgb, clamp(cm_value, 0.0, 1.0));
 )GLSHDR";
 
 //increased transp
 inline constexpr const char* VOL_COLORMAP_CALC8  = R"GLSHDR(
 		//VOL_COLORMAP_CALC8
-		rb.rgb = mix(loc6.w>0.0?vec3(0.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(0.0), clamp(valu, 0.0, 1.0));
+		rb.rgb = mix(loc6.w>0.0?vec3(0.0):loc9.rgb, loc6.w>0.0?loc9.rgb:vec3(0.0), clamp(cm_value, 0.0, 1.0));
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU0  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU0
-		float valu = (tf_val-loc6.x)/loc6.z;
+		cm_value = (tf_val-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU1  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Z
 		vec4 tt = matrix2 * vec4(texCoord, 1.0);
-		float valu = (tt.z-loc6.x)/loc6.z;
+		cm_value = (tt.z-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU2  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_Y
 		vec4 tt = matrix2 * vec4(texCoord, 1.0);
-		float valu = (tt.y-loc6.x)/loc6.z;
+		cm_value = (tt.y-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU3  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_X
 		vec4 tt = matrix2 * vec4(texCoord, 1.0);
-		float valu = (tt.x-loc6.x)/loc6.z;
+		cm_value = (tt.x-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU4  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_T
-		float valu = (loci1 != 0u) ? float(loci0) / float(loci1) : 0.0;
-		valu = (valu-loc6.x)/loc6.z;
+		cm_value = (loci1 != 0u) ? float(loci0) / float(loci1) : 0.0;
+		cm_value = (cm_value-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU5  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU_GM
-		float valu = (v.y-loc6.x)/loc6.z;
+		cm_value = (v.y-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU6  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU6
-		float valu = dot(clamp(grad, -1.0, 1.0), eye.xyz/*vec3(1.0, 1.0, 0.0)*/);
-		valu = valu + 1.0;
-		valu = (valu-loc6.x)/loc6.z;
+		cm_value = dot(clamp(grad, -1.0, 1.0), eye.xyz/*vec3(1.0, 1.0, 0.0)*/);
+		cm_value = cm_value + 1.0;
+		cm_value = (cm_value-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU7  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU7
-		float valu = v4d;
+		cm_value = v4d;
 		float exponent = max(loc6.z / 10.0, 0.01);
-		valu = valu < 0.0 ? -pow(-valu, exponent) : pow(valu, exponent);
-		valu = (valu + 1.0) / 2.0;
-		valu = (valu-loc6.x)/loc6.z;
+		cm_value = cm_value < 0.0 ? -pow(-cm_value, exponent) : pow(cm_value, exponent);
+		cm_value = (cm_value + 1.0) / 2.0;
+		cm_value = (cm_value-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP_VALU8  = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP_VALU8
-		float valu = v4d;
+		cm_value = v4d;
 		float exponent = max(loc6.z, 0.01);
-		valu = pow(valu, exponent);
-		valu = (valu-loc6.x)/loc6.z;
+		cm_value = pow(cm_value, exponent);
+		cm_value = (cm_value-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE = R"GLSHDR(
@@ -699,12 +704,12 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_ENCODE 
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_TRANSP
-	c = vec4(l1 + valu, l2 + valu, tf_val, tf_val);
+	c = vec4(l1 + cm_value, l2 + cm_value, tf_val, tf_val);
 )GLSHDR";
 
 inline constexpr const char* VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID  = R"GLSHDR(
 	//VOL_TRANSFER_FUNCTION_MIP_COLOR_PROJ_RESULT_SOLID
-	c = vec4(l1 + valu, l2 + valu, tf_val, 1.0);
+	c = vec4(l1 + cm_value, l2 + cm_value, tf_val, 1.0);
 )GLSHDR";
 
 inline constexpr const char* VOL_SHADING_OUTPUT  = R"GLSHDR(

@@ -307,8 +307,8 @@ void main()
 	vec4 t = vec4(OutTexCoord, 1.0);
 	vec4 c = texture(tex0, t.xy);
 	rb.a = (loc0.w>0.5?loc0.w:c.x)*c.a;
-	float valu = (c.r + c.g + c.b)/3.0;
-	valu = (valu-loc0.x)/loc0.z;
+	float cm_value = (c.r + c.g + c.b)/3.0;
+	cm_value = (cm_value-loc0.x)/loc0.z;
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_MAP_RESULT = R"GLSHDR(
@@ -338,8 +338,8 @@ void main()
 	rb.a = c.a;
 	float l1 = c.r - c.b * 256.3;
 	float l2 = c.g - c.b * 1053.1;
-	float valu = 0.7 * l1 + 0.3 * l2;
-	valu = (valu-loc6.x)/loc6.z;
+	float cm_value = 0.7 * l1 + 0.3 * l2;
+	cm_value = (cm_value-loc6.x)/loc6.z;
 )GLSHDR";
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT = R"GLSHDR(

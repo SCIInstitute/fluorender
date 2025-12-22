@@ -67,7 +67,7 @@ std::string VolShaderFactory::get_color_mode_code(const ShaderParams& p, int mod
 	std::ostringstream z;
 
 	ColorMode cm = mode == 0 ? p.main_mode : p.mask_mode;
-	if (mip_colormap)
+	if (mip_colormap && cm == ColorMode::SingleColor)
 		cm = ColorMode::Colormap;
 
 	switch (cm)
@@ -259,9 +259,15 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << VOL_TRANSFER_FUNCTION;
 
 	z << VOL_OUT_COLOR_DECLARE;
+
 	bool mip_colormap =
 		p.render_mode == RenderMode::Mip &&
 		ShaderParams::ValidColormapProj(p.colormap_proj);
+	if (p.main_mode == ColorMode::Colormap ||
+		p.mask_mode == ColorMode::Colormap ||
+		mip_colormap)
+		z << VOL_OUT_COLORMAP_VALUE_DECLARE;
+
 	if (p.has_mask)
 	{
 		//separate mode for sel and unsel
