@@ -434,6 +434,34 @@ inline constexpr const char* VOL_OUT_COLOR_COLORMAP = R"GLSHDR(
 	out_color = rb;
 )GLSHDR";
 
+inline constexpr const char* VOL_OUT_COLOR_COMPONENT = R"GLSHDR(
+	//VOL_OUT_COLOR_COMPONENT
+	uint comp = texture(tex3, texCoord).x;
+	out_color = vec3(0.2, 0.4, 0.4);
+	float hue, p2, p3;
+	if (comp > uint(0))
+	{
+		uint cv = comp % uint(0xfd);
+		uint si = uint(loc5.w);
+		cv = (cv << si) & 0xff | (cv >> (8 - si));
+		hue = float(cv)/45.0;
+		p2 = 1.0 - hue + floor(hue);
+		p3 = hue - floor(hue);
+		if (hue < 1.0)
+			out_color = vec3(1.0, p3, 0.0);
+		else if (hue < 2.0)
+			out_color = vec3(p2, 1.0, 0.0);
+		else if (hue < 3.0)
+			out_color = vec3(0.0, 1.0, p3);
+		else if (hue < 4.0)
+			out_color = vec3(0.0, p2, 1.0);
+		else if (hue < 5.0)
+			out_color = vec3(p3, 0.0, 1.0);
+		else
+			out_color = vec3(1.0, 0.0, p2);
+	}
+)GLSHDR";
+
 inline constexpr const char* VOL_COLOR_NONE = R"GLSHDR(
 	//VOL_COLOR_NONE
 	c = vec4(0.0);
@@ -844,141 +872,5 @@ inline constexpr const char* VOL_RASTER_BLEND_MASK_DMAP  = R"GLSHDR(
 	float intpo = (vec4(cmask.x)*c*loc18.x).r;
 	FragColor = vec4(vec3(intpo>0.05?currz:prevz), 1.0);
 )GLSHDR";
-
-#ifdef _WIN32
-inline constexpr const char* VOL_RASTER_BLEND_LABEL  = R"GLSHDR(
-	//VOL_RASTER_BLEND_LABEL
-	uint label = texture(tex3, texCoord).x; //get mask value
-	vec4 sel = vec4(0.2,
-					0.4,
-					0.4, 1.0);
-	float hue, p2, p3;
-	if (label > uint(0))
-	{
-		uint cv = label % uint(0xfd);
-		uint si = uint(loc5.w);
-		cv = (cv << si) & 0xff | (cv >> (8 - si));
-		hue = float(cv)/45.0;
-		p2 = 1.0 - hue + floor(hue);
-		p3 = hue - floor(hue);
-		if (hue < 1.0)
-			sel = vec4(1.0, p3, 1.0, 1.0);
-		else if (hue < 2.0)
-			sel = vec4(p2, 1.0, 1.0, 1.0);
-		else if (hue < 3.0)
-			sel = vec4(1.0, 1.0, p3, 1.0);
-		else if (hue < 4.0)
-			sel = vec4(1.0, p2, 1.0, 1.0);
-		else if (hue < 5.0)
-			sel = vec4(p3, 1.0, 1.0, 1.0);
-		else
-			sel = vec4(1.0, 1.0, p2, 1.0);
-	}
-)GLSHDR";
-
-inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
-	//VOL_RASTER_BLEND_LABEL_MASK
-	vec4 cmask = texture(tex2, texCoord); //get mask value
-	if (cmask.x <= loc16.w)
-	{
-		FragColor = c*loc18.x;
-		return;
-	}
-	uint label = texture(tex3, texCoord).x; //get mask value
-	vec4 sel = vec4(0.1,
-					0.2,
-					0.2, 0.5);
-	float hue, p2, p3;
-	if (label > uint(0))
-	{
-		uint cv = label % uint(0xfd);
-		uint si = uint(loc5.w);
-		cv = (cv << si) & 0xff | (cv >> (8 - si));
-		hue = float(cv)/45.0;
-		p2 = 1.0 - hue + floor(hue);
-		p3 = hue - floor(hue);
-		if (hue < 1.0)
-			sel = vec4(1.0, p3, 0.0, 1.0);
-		else if (hue < 2.0)
-			sel = vec4(p2, 1.0, 0.0, 1.0);
-		else if (hue < 3.0)
-			sel = vec4(0.0, 1.0, p3, 1.0);
-		else if (hue < 4.0)
-			sel = vec4(0.0, p2, 1.0, 1.0);
-		else if (hue < 5.0)
-			sel = vec4(p3, 0.0, 1.0, 1.0);
-		else
-			sel = vec4(1.0, 0.0, p2, 1.0);
-	}
-)GLSHDR";
-
-#else
-inline constexpr const char* VOL_RASTER_BLEND_LABEL  = R"GLSHDR(
-	//VOL_RASTER_BLEND_LABEL
-	uint label = texture(tex3, texCoord).x; //get mask value
-	vec4 sel = vec4(0.2,
-					0.4,
-					0.4, 1.0);
-	float hue, p2, p3;
-	if (label > uint(0))
-	{
-		uint cv = label % uint(0xfd);
-		uint si = uint(loc5.w);
-		cv = ((cv << si) << 24 >> 24) | (cv >> (8 - si));
-		hue = float(cv)/45.0;
-		p2 = 1.0 - hue + floor(hue);
-		p3 = hue - floor(hue);
-		if (hue < 1.0)
-			sel = vec4(1.0, p3, 1.0, 1.0);
-		else if (hue < 2.0)
-			sel = vec4(p2, 1.0, 1.0, 1.0);
-		else if (hue < 3.0)
-			sel = vec4(1.0, 1.0, p3, 1.0);
-		else if (hue < 4.0)
-			sel = vec4(1.0, p2, 1.0, 1.0);
-		else if (hue < 5.0)
-			sel = vec4(p3, 1.0, 1.0, 1.0);
-		else
-			sel = vec4(1.0, 1.0, p2, 1.0);
-	}
-)GLSHDR";
-
-inline constexpr const char* VOL_RASTER_BLEND_LABEL_MASK  = R"GLSHDR(
-	//VOL_RASTER_BLEND_LABEL_MASK
-	vec4 cmask = texture(tex2, texCoord); //get mask value
-	if (cmask.x <= loc16.w)
-	{
-		FragColor = c*loc18.x;
-		return;
-	}
-	uint label = texture(tex3, texCoord).x; //get mask value
-	vec4 sel = vec4(0.1,
-					0.2,
-					0.2, 0.5);
-	float hue, p2, p3;
-	if (label > uint(0))
-	{
-		uint cv = label % uint(0xfd);
-		uint si = uint(loc5.w);
-		cv = ((cv << si) << 24 >> 24) | (cv >> (8 - si));
-		hue = float(cv)/45.0;
-		p2 = 1.0 - hue + floor(hue);
-		p3 = hue - floor(hue);
-		if (hue < 1.0)
-			sel = vec4(1.0, p3, 0.0, 1.0);
-		else if (hue < 2.0)
-			sel = vec4(p2, 1.0, 0.0, 1.0);
-		else if (hue < 3.0)
-			sel = vec4(0.0, 1.0, p3, 1.0);
-		else if (hue < 4.0)
-			sel = vec4(0.0, p2, 1.0, 1.0);
-		else if (hue < 5.0)
-			sel = vec4(p3, 0.0, 1.0, 1.0);
-		else
-			sel = vec4(1.0, 0.0, p2, 1.0);
-	}
-)GLSHDR";
-
-#endif
 
 #endif//VolShaderCode_h

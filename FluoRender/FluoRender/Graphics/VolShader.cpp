@@ -95,6 +95,11 @@ std::string VolShaderFactory::get_color_mode_code(const ShaderParams& p, int mod
 			z << VOL_SINGLE_COLOR_ALPHA;
 		break;
 	case ColorMode::Component:
+		z << VOL_OUT_COLOR_COMPONENT;
+		if (p.solid)
+			z << VOL_SINGLE_COLOR_SOLID;
+		else
+			z << VOL_SINGLE_COLOR_ALPHA;
 		break;
 	}
 
