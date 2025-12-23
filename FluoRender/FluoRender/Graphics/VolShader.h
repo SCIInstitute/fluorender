@@ -41,7 +41,7 @@ namespace flvr
 		virtual bool emit_v(const ShaderParams& p, std::string& s) override;
 		virtual bool emit_f(const ShaderParams& p, std::string& s) override;
 
-		std::string get_color_mode_code(const ShaderParams& p, int mode, bool mip_colormap);//0: main mode; 1: mask mode
+		std::string get_color_mode_code(const ShaderParams& p, int mode);//0: main mode; 1: mask mode
 		std::string get_colormap_code(int colormap, ColormapProj colormap_proj);
 		std::string get_colormap_proj(ColormapProj colormap_proj);
 	};

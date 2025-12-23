@@ -6369,7 +6369,6 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 			mask_mode == flvr::ColorMode::Colormap)
 		{
 			//white mip
-			vr->set_main_mode(flvr::ColorMode::SingleColor);
 			vr->set_color(fluo::Color(1.0));
 			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
 		}
