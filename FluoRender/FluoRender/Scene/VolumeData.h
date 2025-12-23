@@ -50,6 +50,7 @@ namespace flvr
 namespace flrd
 {
 	class EntryParams;
+	class Ruler;
 }
 namespace fluo
 {
@@ -297,6 +298,14 @@ public:
 	flvr::ColormapProj GetColormapProj();
 	fluo::Color GetColorFromColormap(double value, bool raw = false);
 	bool GetColormapData(std::vector<unsigned char>& data);
+	//gradient
+	void UpdateGradient(flrd::Ruler* ruler);
+	void SetRadialCenter(const fluo::Point& p);
+	fluo::Point GetRadialCenter();
+	void SetRadialRadius(double r);
+	double GetRadialRadius();
+	void SetLinearPlanes(const fluo::Plane& p0, const fluo::Plane& p1);
+	fluo::Plane GetLinearPlane(int index);
 	//see if need update histogram
 	bool GetHistogramDirty() { return m_hist_dirty; }
 	void ComputeHistogram(bool set_prog_func);
@@ -581,6 +590,11 @@ private:
 	//the min/max values are needed because it can be mapped to values other than intensity
 	double m_colormap_min_value;
 	double m_colormap_max_value;
+	//gradient
+	fluo::Point m_radial_center;
+	double m_radial_radius;
+	fluo::Plane m_linear_p0;
+	fluo::Plane m_linear_p1;
 
 	//transparent
 	bool m_transparent;
@@ -648,6 +662,8 @@ private:
 
 	//update colormap range
 	void UpdateColormapRange();
+	bool UpdateGradientRuler(flrd::Ruler* ruler);
+	bool UpdateGradientVolume();
 };
 
 #endif//_VOLUME_DATA_H_

@@ -134,6 +134,10 @@ namespace flvr
 		void set_colormap(int value) { colormap_ = value; }
 		int get_colormap() { return colormap_; }
 		void set_colormap_proj(ColormapProj value) { colormap_proj_ = value; }
+		//gradient
+		void set_radial_center(const fluo::Point& p) { radial_center_ = p; }
+		void set_radial_radius(double r) { radial_radius_ = r; }
+		void set_linear_planes(const fluo::Plane& p0, const fluo::Plane& p1) { linear_p0_ = p0; linear_p1_ = p1; }
 
 		//label color shuffling
 		void set_shuffle(int val) { shuffle_ = val; }
@@ -272,6 +276,11 @@ namespace flvr
 		double colormap_hi_value_;
 		int colormap_;
 		ColormapProj colormap_proj_;
+		//gradient
+		fluo::Point radial_center_;
+		double radial_radius_;
+		fluo::Plane linear_p0_;
+		fluo::Plane linear_p1_;
 		//solid
 		bool solid_;
 		//interpolation

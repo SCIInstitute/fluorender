@@ -427,6 +427,7 @@ void VolumeRenderer::draw_volume(
 	//fog color
 	shader->setLocalParam(19, fog_color_.r(), fog_color_.g(), fog_color_.b(), 0.0);
 
+	double abcd[4];
 	if (colormap_proj_ == ColormapProj::TValue)
 	{
 		shader->setLocalParamUInt(0, static_cast<unsigned int>(glbin_moviemaker.GetSeqCurNum()));
@@ -434,12 +435,14 @@ void VolumeRenderer::draw_volume(
 	}
 	else if (colormap_proj_ == ColormapProj::Radial)
 	{
-		shader->setLocalParam(22, 0.0, 0.0, 0.0, 1.0);
+		shader->setLocalParam(22, radial_center_.x(), radial_center_.y(), radial_center_.z(), radial_radius_);
 	}
 	else if (colormap_proj_ == ColormapProj::Linear)
 	{
-		shader->setLocalParam(22, 0.0, 0.0, 1.0, 0.0);
-		shader->setLocalParam(23, 0.0, 0.0, 1.0, 1.0);
+		linear_p0_.get(abcd);
+		shader->setLocalParam(22, abcd[0], abcd[1], abcd[2], abcd[3]);
+		linear_p1_.get(abcd);
+		shader->setLocalParam(23, abcd[0], abcd[1], abcd[2], abcd[3]);
 	}
 
 	//setup depth peeling
@@ -450,7 +453,6 @@ void VolumeRenderer::draw_volume(
 
 	//set clipping planes
 	auto planes = clipping_box_.GetPlanesUnit();
-	double abcd[4];
 	planes[0].get(abcd);
 	shader->setLocalParam(10, abcd[0], abcd[1], abcd[2], abcd[3]);
 	planes[1].get(abcd);

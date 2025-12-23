@@ -1288,6 +1288,16 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (m_colormap_st->IsEnabled() != bval)
 			m_colormap_st->Enable(bval);
 	}
+	if (update_all || FOUND_VALUE(gstRulerList))
+	{
+		auto proj = m_vd->GetColormapProj();
+		if (proj == flvr::ColormapProj::Radial ||
+			proj == flvr::ColormapProj::Linear)
+		{
+			auto ruler = glbin_current.GetRuler();
+			m_vd->UpdateGradient(ruler);
+		}
+	}
 
 	//color
 	if (update_color)

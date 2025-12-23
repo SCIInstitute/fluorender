@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <DataManager.h>
 #include <RenderView.h>
+#include <CurrentObjects.h>
+#include <Ruler.h>
+#include <Cov.h>
+#include <Pca.h>
 #include <VolumeRenderer.h>
 #include <VolumeSampler.h>
 #include <VolumeBaker.h>
@@ -967,11 +971,11 @@ void VolumeData::UpdateColormapRange()
 		break;
 	case flvr::ColormapProj::Radial://raidal
 		m_colormap_min_value = 0;
-		m_colormap_max_value = 1;
+		m_colormap_max_value = m_radial_radius;
 		break;
 	case flvr::ColormapProj::Linear://raidal
 		m_colormap_min_value = 0;
-		m_colormap_max_value = 1;
+		m_colormap_max_value = fluo::PlaneDistance(m_linear_p0, m_linear_p1);
 		break;
 	case flvr::ColormapProj::Gradient://gradient magnitude
 	case flvr::ColormapProj::Normal://gradient dir
@@ -987,6 +991,53 @@ void VolumeData::UpdateColormapRange()
 		m_colormap_max_value = 1;
 		break;
 	}
+}
+
+bool VolumeData::UpdateGradientRuler(flrd::Ruler* ruler)
+{
+	if (!ruler)
+		return false;
+
+	if (m_colormap_proj == flvr::ColormapProj::Radial)
+	{
+		auto center = ruler->GetCenter();
+		double r = m_bounds.diagonal().maxComponent() / 2.0;
+		SetRadialCenter(center);
+		SetRadialRadius(r);
+		return true;
+	}
+	else if (m_colormap_proj == flvr::ColormapProj::Linear)
+	{
+		//get two end points and perpendicular planes
+	}
+
+	return false;
+}
+
+bool VolumeData::UpdateGradientVolume()
+{
+	flrd::Cov cover(this);
+	if (!cover.Compute(0))
+		return false;
+
+	if (m_colormap_proj == flvr::ColormapProj::Radial)
+	{
+		auto center = cover.GetCenter();
+		double r = m_bounds.diagonal().maxComponent() / 2.0;
+		SetRadialCenter(center);
+		SetRadialRadius(r);
+		return true;
+	}
+	else if (m_colormap_proj == flvr::ColormapProj::Linear)
+	{
+		flrd::Pca solver;
+		auto cov = cover.GetCov();
+		solver.SetCovMat(cov);
+		solver.Compute();
+
+	}
+
+	return false;
 }
 
 void VolumeData::AddEmptyLabel(int mode, bool change)
@@ -2400,6 +2451,12 @@ void VolumeData::SetColormapProj(flvr::ColormapProj value)
 	m_colormap_proj = value;
 	if (m_vr)
 		m_vr->set_colormap_proj(m_colormap_proj);
+	if (value == flvr::ColormapProj::Radial ||
+		value == flvr::ColormapProj::Linear)
+	{
+		auto ruler = glbin_current.GetRuler();
+		UpdateGradient(ruler);
+	}
 	UpdateColormapRange();
 }
 
@@ -2492,6 +2549,57 @@ bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
 		data[i * 3 + 2] = static_cast<unsigned char>(std::round(c.b() * 255.0));
 	}
 	return true;
+}
+
+void VolumeData::UpdateGradient(flrd::Ruler* ruler)
+{
+	if (!UpdateGradientRuler(ruler))
+		UpdateGradientVolume();
+	UpdateColormapRange();
+}
+
+void VolumeData::SetRadialCenter(const fluo::Point& p)
+{
+	m_radial_center = p;
+	if (m_vr)
+		m_vr->set_radial_center(p);
+}
+
+fluo::Point VolumeData::GetRadialCenter()
+{
+	return m_radial_center;
+}
+
+void VolumeData::SetRadialRadius(double r)
+{
+	m_radial_radius = r;
+	if (m_vr)
+		m_vr->set_radial_radius(r);
+}
+
+double VolumeData::GetRadialRadius()
+{
+	return m_radial_radius;
+}
+
+void VolumeData::SetLinearPlanes(const fluo::Plane& p0, const fluo::Plane& p1)
+{
+	m_linear_p0 = p0;
+	m_linear_p1 = p1;
+	if (m_vr)
+		m_vr->set_linear_planes(p0, p1);
+}
+
+fluo::Plane VolumeData::GetLinearPlane(int index)
+{
+	switch (index)
+	{
+	case 0:
+		return m_linear_p0;
+	case 1:
+		return m_linear_p1;
+	}
+	return m_linear_p0;
 }
 
 void VolumeData::ComputeHistogram(bool set_prog_func)

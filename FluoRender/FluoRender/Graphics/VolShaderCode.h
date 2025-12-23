@@ -687,6 +687,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP4  = R"GLSHDR(
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP5 = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP5_RADIAL_GRADIENT
 		vec4 tt = matrix2 * vec4(texCoord, 1.0);
+		tt.xyz /= loc4.xyz;
 		cm_value = length(tt.xyz - loc22.xyz) / loc22.w;
 		cm_value = (cm_value-loc6.x)/loc6.z;
 )GLSHDR";
@@ -695,6 +696,7 @@ inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP5 = R"GLSHDR(
 inline constexpr const char* VOL_TRANSFER_FUNCTION_COLORMAP6 = R"GLSHDR(
 		//VOL_TRANSFER_FUNCTION_COLORMAP6_LINEAR_GRADIENT
 		vec4 tt = matrix2 * vec4(texCoord, 1.0);
+		tt.xyz /= loc4.xyz;
 		float d0 = dot(loc22.xyz, tt.xyz) + loc22.w;
 		float d1 = dot(loc23.xyz, tt.xyz) + loc23.w;
 		cm_value = d0 / (d0 - d1);

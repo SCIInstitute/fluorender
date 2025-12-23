@@ -110,7 +110,7 @@ namespace fluo
 
 	// Affine transform of a plane under x' = S x + t
 	// S is diagonal scale (sx, sy, sz), t is translation (tx, ty, tz)
-	inline fluo::Plane TransformPlaneAffine(const fluo::Plane& p, const Vector& S, const Vector& t)
+	inline Plane TransformPlaneAffine(const Plane& p, const Vector& S, const Vector& t)
 	{
 		// Original plane: n·x + d = 0
 		Vector n = p.n();
@@ -130,7 +130,18 @@ namespace fluo
 			dprime /= k;
 		}
 
-		return fluo::Plane(nprime, dprime);
+		return Plane(nprime, dprime);
+	}
+
+	inline double PlaneDistance(const Plane& a, const Plane& b)
+	{
+		if (Dot(a.n(), b.n()) < 0.0)
+		{
+			Vector n = -b.n();
+			double d = -b.d();
+			return std::abs(d - a.d()) / a.n().length();
+		}
+		return std::abs(b.d() - a.d()) / a.n().length();
 	}
 
 	class PlaneSet
