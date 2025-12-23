@@ -592,17 +592,19 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	std::vector<wxString> colormap_list = { "Rainbow", "Main-Alt", "Hot", "Cool", "Diverging", "Monochrome", "High-key", "Low-key", "Hi Transparency" };
 	m_colormap_combo->Append(colormap_list);
 	m_colormap_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo, this);
-	m_colormap_combo2 = new wxUndoableComboBox(this, wxID_ANY, "",
+	m_colormap_proj_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list2 =
 		{ "Intensity", "Z Value", "Y Value", "X Value", "T Value (4D)",
-		"Gradient", "Normals", "Intensity Delta (4D)", "Speed (4D)"};
-	m_colormap_combo2->Append(colormap_list2);
-	m_colormap_combo2->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapCombo2, this);
+		"Radial", "Linear", "Gradient", "Normals",
+		"Intensity Delta (4D)", "Speed (4D)",
+		};
+	m_colormap_proj_combo->Append(colormap_list2);
+	m_colormap_proj_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapProjCombo, this);
 	sizer_r5->Add(st, 0, wxALIGN_LEFT, 0);
 	sizer_r5->Add(m_colormap_inv_btn, 0, wxALIGN_CENTER);
 	sizer_r5->Add(m_colormap_combo, 1, wxALIGN_CENTER, 0);
-	sizer_r5->Add(m_colormap_combo2, 1, wxALIGN_CENTER, 0);
+	sizer_r5->Add(m_colormap_proj_combo, 1, wxALIGN_CENTER, 0);
 
 	//ADD COLUMNS//////////////////////////////////////
 	wxFlexGridSizer* sizer_all = new wxFlexGridSizer(3, 2, 2);
@@ -672,7 +674,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	glbin.add_undo_control(m_space_z_text);
 	glbin.add_undo_control(m_colormap_inv_btn);
 	glbin.add_undo_control(m_colormap_combo);
-	glbin.add_undo_control(m_colormap_combo2);
+	glbin.add_undo_control(m_colormap_proj_combo);
 	glbin.add_undo_control(m_options_toolbar);
 
 	Thaw();
@@ -713,7 +715,7 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_space_z_text);
 	glbin.del_undo_control(m_colormap_inv_btn);
 	glbin.del_undo_control(m_colormap_combo);
-	glbin.del_undo_control(m_colormap_combo2);
+	glbin.del_undo_control(m_colormap_proj_combo);
 	glbin.del_undo_control(m_options_toolbar);
 
 	m_frame->SetFocusVRenderViews(0);
@@ -1260,7 +1262,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		ival = 0;
 		if (flvr::ShaderParams::ValidColormapProj(colormap_proj))
 			ival = static_cast<int>(colormap_proj) - 1;
-		m_colormap_combo2->SetSelection(ival);
+		m_colormap_proj_combo->SetSelection(ival);
 		//show colormap on slider
 		std::vector<unsigned char> colormap_data;
 		if (m_vd->GetColormapData(colormap_data))
@@ -2953,9 +2955,9 @@ void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanel::OnColormapCombo2(wxCommandEvent& event)
+void VolumePropPanel::OnColormapProjCombo(wxCommandEvent& event)
 {
-	int ival = m_colormap_combo2->GetCurrentSelection() + 1;
+	int ival = m_colormap_proj_combo->GetCurrentSelection() + 1;
 	flvr::ColormapProj colormap_proj =
 		static_cast<flvr::ColormapProj>(ival);
 

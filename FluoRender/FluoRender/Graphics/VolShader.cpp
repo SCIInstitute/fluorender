@@ -133,23 +133,25 @@ std::string VolShaderFactory::get_colormap_code(int colormap, ColormapProj color
 
 std::string VolShaderFactory::get_colormap_proj(ColormapProj colormap_proj)
 {
-	static const std::array<std::string, 9> colormap_proj_codes = {
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU0,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU1,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU2,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU3,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU4,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU5,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU6,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU7,
-		VOL_TRANSFER_FUNCTION_COLORMAP_VALU8
+	static const std::array<std::string, 11> colormap_proj_codes = {
+		VOL_TRANSFER_FUNCTION_COLORMAP0,
+		VOL_TRANSFER_FUNCTION_COLORMAP1,
+		VOL_TRANSFER_FUNCTION_COLORMAP2,
+		VOL_TRANSFER_FUNCTION_COLORMAP3,
+		VOL_TRANSFER_FUNCTION_COLORMAP4,
+		VOL_TRANSFER_FUNCTION_COLORMAP5,
+		VOL_TRANSFER_FUNCTION_COLORMAP6,
+		VOL_TRANSFER_FUNCTION_COLORMAP7,
+		VOL_TRANSFER_FUNCTION_COLORMAP8,
+		VOL_TRANSFER_FUNCTION_COLORMAP9,
+		VOL_TRANSFER_FUNCTION_COLORMAP10
 	};
 
 	size_t index = static_cast<size_t>(colormap_proj) - 1;
 	if (index < colormap_proj_codes.size())
 		return colormap_proj_codes[index];
 
-	return std::string(VOL_TRANSFER_FUNCTION_COLORMAP_VALU0); // default fallback
+	return std::string(VOL_TRANSFER_FUNCTION_COLORMAP0); // default fallback
 }
 
 bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
@@ -181,6 +183,12 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	//time for 4d colormap
 	if (p.colormap_proj == ColormapProj::TValue)
 		z << VOL_UNIFROMS_4D_COLORMAP;
+	//radial gradient
+	else if (p.colormap_proj == ColormapProj::Radial)
+		z << VOL_UNIFORMS_RADIAL_GRADIENT;
+	//linear gradient
+	else if (p.colormap_proj == ColormapProj::Linear)
+		z << VOL_UNIFORMS_LINEAR_GRADIENT;
 
 	//neighbors for 4d colormap
 	if (ShaderParams::IsTimeProj(p.colormap_proj))

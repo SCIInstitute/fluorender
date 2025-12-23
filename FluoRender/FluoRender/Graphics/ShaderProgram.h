@@ -124,9 +124,11 @@ namespace flvr
 		YValue,
 		XValue,
 		TValue,
+		Radial,
+		Linear,
 		Gradient,
 		Normal,
-		IntDelta,//previously 7
+		IntDelta,//10, previously 7
 		Speed
 	};
 
@@ -160,7 +162,7 @@ namespace flvr
 		ColorMode main_mode = ColorMode::SingleColor;//vol
 		ColorMode mask_mode = ColorMode::SingleColor;//vol
 		RenderMode render_mode = RenderMode::Standard;//vol
-		ColormapProj colormap_proj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=7)
+		ColormapProj colormap_proj = ColormapProj::Intensity;//vol(projection direction, 4D colormap: >=10)
 		bool solid = false;//vol(no transparency)
 		int vertex_type = 0;//vol
 		bool depth = false;//vol, if render a depth map

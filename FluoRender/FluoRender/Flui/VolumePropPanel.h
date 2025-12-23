@@ -180,7 +180,7 @@ private:
 	wxUndoableTextCtrl* m_space_z_text;
 	wxUndoableToolbar* m_colormap_inv_btn;
 	wxUndoableComboBox* m_colormap_combo;
-	wxUndoableComboBox* m_colormap_combo2;
+	wxUndoableComboBox* m_colormap_proj_combo;
 
 	//buttons
 	wxUndoableToolbar* m_options_toolbar;
@@ -316,7 +316,7 @@ private:
 	//colormap
 	void OnColormapInvBtn(wxCommandEvent& event);
 	void OnColormapCombo(wxCommandEvent& event);
-	void OnColormapCombo2(wxCommandEvent& event);
+	void OnColormapProjCombo(wxCommandEvent& event);
 	//color and display modes
 	void OnMainColorMode(wxCommandEvent& event);
 	void OnMainColorChange(wxColor c);

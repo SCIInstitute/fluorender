@@ -965,6 +965,14 @@ void VolumeData::UpdateColormapRange()
 		if (auto reader = m_reader.lock())
 			m_colormap_max_value = reader->GetTimeNum();
 		break;
+	case flvr::ColormapProj::Radial://raidal
+		m_colormap_min_value = 0;
+		m_colormap_max_value = 1;
+		break;
+	case flvr::ColormapProj::Linear://raidal
+		m_colormap_min_value = 0;
+		m_colormap_max_value = 1;
+		break;
 	case flvr::ColormapProj::Gradient://gradient magnitude
 	case flvr::ColormapProj::Normal://gradient dir
 		m_colormap_min_value = 0;

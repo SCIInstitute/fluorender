@@ -432,6 +432,15 @@ void VolumeRenderer::draw_volume(
 		shader->setLocalParamUInt(0, static_cast<unsigned int>(glbin_moviemaker.GetSeqCurNum()));
 		shader->setLocalParamUInt(1, static_cast<unsigned int>(glbin_moviemaker.GetSeqAllNum()));
 	}
+	else if (colormap_proj_ == ColormapProj::Radial)
+	{
+		shader->setLocalParam(22, 0.0, 0.0, 0.0, 1.0);
+	}
+	else if (colormap_proj_ == ColormapProj::Linear)
+	{
+		shader->setLocalParam(22, 0.0, 0.0, 1.0, 0.0);
+		shader->setLocalParam(23, 0.0, 0.0, 1.0, 1.0);
+	}
 
 	//setup depth peeling
 	shader->setLocalParam(7, 1.0 / double(w2), 1.0 / double(h2), 0.0, 0.0);
