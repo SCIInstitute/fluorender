@@ -1186,6 +1186,17 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//colormap
+	if (update_colormap || FOUND_VALUE(gstRulerList))
+	{
+		auto proj = m_vd->GetColormapProj();
+		if (proj == flvr::ColormapProj::Radial ||
+			proj == flvr::ColormapProj::Linear)
+		{
+			auto ruler = glbin_current.GetRuler();
+			m_vd->UpdateGradient(ruler);
+		}
+	}
+
 	if (update_colormap)
 	{
 		//slider
@@ -1287,16 +1298,6 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
 		if (m_colormap_st->IsEnabled() != bval)
 			m_colormap_st->Enable(bval);
-	}
-	if (update_all || FOUND_VALUE(gstRulerList))
-	{
-		auto proj = m_vd->GetColormapProj();
-		if (proj == flvr::ColormapProj::Radial ||
-			proj == flvr::ColormapProj::Linear)
-		{
-			auto ruler = glbin_current.GetRuler();
-			m_vd->UpdateGradient(ruler);
-		}
 	}
 
 	//color
@@ -2978,7 +2979,7 @@ void VolumePropPanel::OnColormapProjCombo(wxCommandEvent& event)
 
 	EnableColormap(true);
 
-	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstColormap }, { glbin_current.GetViewId() });
 }
 
 //6

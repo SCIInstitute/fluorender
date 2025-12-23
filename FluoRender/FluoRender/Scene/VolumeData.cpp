@@ -1016,13 +1016,9 @@ bool VolumeData::UpdateGradientRuler(flrd::Ruler* ruler)
 
 bool VolumeData::UpdateGradientVolume()
 {
-	flrd::Cov cover(this);
-	if (!cover.Compute(0))
-		return false;
-
 	if (m_colormap_proj == flvr::ColormapProj::Radial)
 	{
-		auto center = cover.GetCenter();
+		auto center = m_bounds.center();
 		double r = m_bounds.diagonal().maxComponent() / 2.0;
 		SetRadialCenter(center);
 		SetRadialRadius(r);
@@ -1030,6 +1026,10 @@ bool VolumeData::UpdateGradientVolume()
 	}
 	else if (m_colormap_proj == flvr::ColormapProj::Linear)
 	{
+		flrd::Cov cover(this);
+		if (!cover.Compute(0))
+			return false;
+
 		flrd::Pca solver;
 		auto cov = cover.GetCov();
 		solver.SetCovMat(cov);
