@@ -161,10 +161,16 @@ bool Cov::ComputeCenter()
 {
 	if (!CheckBricks())
 		return false;
+	bool use_mask = m_use_mask;
 	if (!m_vd->GetMask(false))
-		return false;
+		use_mask = false;
 	long bits = m_vd->GetBits();
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	if (use_mask)
+	{
+		bits = 8;
+		max_int = 255;
+	}
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_cov, bits, max_int);
@@ -186,7 +192,11 @@ bool Cov::ComputeCenter()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint mid = 0;
+		if (use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(b);
+		else
+			mid = m_vd->GetVR()->load_brick(b);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -251,10 +261,16 @@ bool Cov::ComputeCov()
 {
 	if (!CheckBricks())
 		return false;
+	bool use_mask = m_use_mask;
 	if (!m_vd->GetMask(false))
-		return false;
+		use_mask = false;
 	long bits = m_vd->GetBits();
 	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	if (use_mask)
+	{
+		bits = 8;
+		max_int = 255;
+	}
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_cov, bits, max_int);
@@ -274,7 +290,11 @@ bool Cov::ComputeCov()
 		if (!GetInfo(b, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint mid = 0;
+		if (use_mask)
+			mid = m_vd->GetVR()->load_brick_mask(b);
+		else
+			mid = m_vd->GetVR()->load_brick(b);
 
 		//compute workload
 		flvr::GroupSize gsize;

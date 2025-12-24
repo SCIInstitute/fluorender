@@ -1042,9 +1042,22 @@ bool VolumeData::UpdateGradientVolume()
 
 		flrd::Pca solver;
 		auto cov = cover.GetCov();
+		auto center = cover.GetCenter();
 		solver.SetCovMat(cov);
 		solver.Compute();
 
+		auto axis = solver.GetAxis(0);
+		axis.normalize();
+		double l = m_bounds.diagonal().x();
+		fluo::Point pp0, pp1;
+		pp0 = center - axis * l / 2.0;
+		pp1 = pp0 + axis * l;
+		fluo::Vector d = pp1 - pp0;
+		d.normalize();
+		auto p0 = fluo::Plane(pp0, d);
+		auto p1 = fluo::Plane(pp1, d);
+		SetLinearPlanes(p0, p1);
+		return true;
 	}
 
 	return false;

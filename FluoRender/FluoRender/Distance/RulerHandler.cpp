@@ -2306,6 +2306,28 @@ std::pair<bool, std::pair<fluo::Plane, fluo::Plane>> RulerHandler::GetLinearPlan
 		else if (num > 2)
 		{
 			//use pca
+			Pca solver;
+			std::vector<fluo::Point> list;
+			for (size_t i = 0; i < ruler->GetNumPoint(); ++i)
+			{
+				fluo::Point p;
+				if (ruler->GetPoint(static_cast<int>(i), p))
+					list.push_back(p);
+			}
+			solver.SetPoints(list);
+			solver.Compute();
+			auto axis = solver.GetAxis(0);
+			axis.normalize();
+			double l = solver.GetLengths().x();
+			auto center = ruler->GetCenter();
+			fluo::Point pp0, pp1;
+			pp0 = center - axis * l / 2.0;
+			pp1 = pp0 + axis * l;
+			fluo::Vector d = pp1 - pp0;
+			d.normalize();
+			p0 = fluo::Plane(pp0, d);
+			p1 = fluo::Plane(pp1, d);
+			return { true, { p0, p1 } };
 		}
 	}
 	return { false, { p0, p1 } };
