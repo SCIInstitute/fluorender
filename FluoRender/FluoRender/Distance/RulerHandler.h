@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerHandler_H_
 
 #include <Point.h>
+#include <Plane.h>
 #include <string>
 #include <algorithm>
 #include <set>
@@ -168,6 +169,11 @@ namespace flrd
 
 		//generate walk
 		void GenerateWalk(size_t nl, double dir, WalkCycle& cycle);
+
+		//get values for gradient
+		std::pair<bool, fluo::Point> GetCenter();
+		std::pair<bool, double> GetRadius();
+		std::pair<bool, std::pair<fluo::Plane, fluo::Plane>> GetLinearPlanes();
 
 	private:
 		std::set<int> m_sel_list;

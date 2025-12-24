@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Color.h>
 #include <Transform.h>
+#include <BBox.h>
 #include <memory>
 #include <vector>
 #include <set>
@@ -404,6 +405,9 @@ namespace flrd
 		{
 			m_group = group;
 		}
+
+		//bounding box
+		fluo::BBox GetBounds();
 
 		//data
 		int GetNumBranch();

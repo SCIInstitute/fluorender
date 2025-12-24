@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <Ruler.h>
+#include <RulerHandler.h>
 #include <Cov.h>
 #include <Pca.h>
 #include <VolumeRenderer.h>
@@ -993,22 +994,31 @@ void VolumeData::UpdateColormapRange()
 	}
 }
 
-bool VolumeData::UpdateGradientRuler(flrd::Ruler* ruler)
+bool VolumeData::UpdateGradientRuler()
 {
-	if (!ruler)
-		return false;
-
 	if (m_colormap_proj == flvr::ColormapProj::Radial)
 	{
-		auto center = ruler->GetCenter();
-		double r = m_bounds.diagonal().maxComponent() / 2.0;
-		SetRadialCenter(center);
-		SetRadialRadius(r);
+		auto center = glbin_ruler_handler.GetCenter();
+		auto r = glbin_ruler_handler.GetRadius();
+		if (!center.first)
+			return false;
+		if (!r.first)
+		{
+			r.second = m_bounds.diagonal().length() / 2.0;
+		}
+
+		SetRadialCenter(center.second);
+		SetRadialRadius(r.second);
 		return true;
 	}
 	else if (m_colormap_proj == flvr::ColormapProj::Linear)
 	{
-		//get two end points and perpendicular planes
+		auto planes = glbin_ruler_handler.GetLinearPlanes();
+		if (!planes.first)
+			return false;
+
+		SetLinearPlanes(planes.second.first, planes.second.second);
+		return true;
 	}
 
 	return false;
@@ -1019,7 +1029,7 @@ bool VolumeData::UpdateGradientVolume()
 	if (m_colormap_proj == flvr::ColormapProj::Radial)
 	{
 		auto center = m_bounds.center();
-		double r = m_bounds.diagonal().maxComponent() / 2.0;
+		double r = m_bounds.diagonal().length() / 2.0;
 		SetRadialCenter(center);
 		SetRadialRadius(r);
 		return true;
@@ -2454,8 +2464,7 @@ void VolumeData::SetColormapProj(flvr::ColormapProj value)
 	if (value == flvr::ColormapProj::Radial ||
 		value == flvr::ColormapProj::Linear)
 	{
-		auto ruler = glbin_current.GetRuler();
-		UpdateGradient(ruler);
+		UpdateGradient();
 	}
 	UpdateColormapRange();
 }
@@ -2551,9 +2560,9 @@ bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
 	return true;
 }
 
-void VolumeData::UpdateGradient(flrd::Ruler* ruler)
+void VolumeData::UpdateGradient()
 {
-	if (!UpdateGradientRuler(ruler))
+	if (!UpdateGradientRuler())
 		UpdateGradientVolume();
 	UpdateColormapRange();
 }
@@ -2590,16 +2599,9 @@ void VolumeData::SetLinearPlanes(const fluo::Plane& p0, const fluo::Plane& p1)
 		m_vr->set_linear_planes(p0, p1);
 }
 
-fluo::Plane VolumeData::GetLinearPlane(int index)
+std::pair<fluo::Plane, fluo::Plane> VolumeData::GetLinearPlanes()
 {
-	switch (index)
-	{
-	case 0:
-		return m_linear_p0;
-	case 1:
-		return m_linear_p1;
-	}
-	return m_linear_p0;
+	return { m_linear_p0, m_linear_p1 };
 }
 
 void VolumeData::ComputeHistogram(bool set_prog_func)

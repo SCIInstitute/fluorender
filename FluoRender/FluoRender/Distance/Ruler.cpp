@@ -72,6 +72,22 @@ Ruler::~Ruler()
 }
 
 //data
+fluo::BBox Ruler::GetBounds()
+{
+	fluo::BBox box;
+	bool first = true;
+	for (size_t i = 0; i < m_ruler.size(); ++i)
+	{
+		for (size_t j = first ? 0 : 1; j < m_ruler[i].size(); ++j)
+		{
+			auto point = m_ruler[i][j]->GetPoint(m_work_time, m_interp);
+			box.extend(point);
+			first = false;
+		}
+	}
+	return box;
+}
+
 int Ruler::GetNumBranch()
 {
 	return static_cast<int>(m_ruler.size());

@@ -1192,8 +1192,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		if (proj == flvr::ColormapProj::Radial ||
 			proj == flvr::ColormapProj::Linear)
 		{
-			auto ruler = glbin_current.GetRuler();
-			m_vd->UpdateGradient(ruler);
+			m_vd->UpdateGradient();
 		}
 	}
 

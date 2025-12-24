@@ -299,13 +299,13 @@ public:
 	fluo::Color GetColorFromColormap(double value, bool raw = false);
 	bool GetColormapData(std::vector<unsigned char>& data);
 	//gradient
-	void UpdateGradient(flrd::Ruler* ruler);
+	void UpdateGradient();
 	void SetRadialCenter(const fluo::Point& p);
 	fluo::Point GetRadialCenter();
 	void SetRadialRadius(double r);
 	double GetRadialRadius();
 	void SetLinearPlanes(const fluo::Plane& p0, const fluo::Plane& p1);
-	fluo::Plane GetLinearPlane(int index);
+	std::pair<fluo::Plane, fluo::Plane> GetLinearPlanes();
 	//see if need update histogram
 	bool GetHistogramDirty() { return m_hist_dirty; }
 	void ComputeHistogram(bool set_prog_func);
@@ -662,7 +662,7 @@ private:
 
 	//update colormap range
 	void UpdateColormapRange();
-	bool UpdateGradientRuler(flrd::Ruler* ruler);
+	bool UpdateGradientRuler();
 	bool UpdateGradientVolume();
 };
 

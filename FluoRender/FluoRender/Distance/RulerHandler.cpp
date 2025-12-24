@@ -2255,3 +2255,58 @@ void RulerHandler::GenerateWalk(size_t nl, double dir, WalkCycle& cycle)
 		}
 	}
 }
+
+//get values for gradient
+std::pair<bool, fluo::Point> RulerHandler::GetCenter()
+{
+	fluo::Point p;
+	Ruler* ruler = glbin_current.GetRuler();
+	if (ruler)
+	{
+		p = ruler->GetCenter();
+		return { true, p };
+	}
+	return { false, p };
+}
+
+std::pair<bool, double> RulerHandler::GetRadius()
+{
+	double r = 0;
+	Ruler* ruler = glbin_current.GetRuler();
+	if (ruler)
+	{
+		auto box = ruler->GetBounds();
+		if (box.valid())
+			r = box.diagonal().length() / 2.0;
+		if (r > 0.0)
+			return { true, r };
+	}
+	return { false, r };
+}
+
+std::pair<bool, std::pair<fluo::Plane, fluo::Plane>> RulerHandler::GetLinearPlanes()
+{
+	fluo::Plane p0, p1;
+	Ruler* ruler = glbin_current.GetRuler();
+	if (ruler)
+	{
+		int num = ruler->GetNumPoint();
+		if (num == 2)
+		{
+			//use points
+			fluo::Point pp0, pp1;
+			pp0 = ruler->GetPoint(0);
+			pp1 = ruler->GetPoint(1);
+			fluo::Vector d = pp1 - pp0;
+			d.normalize();
+			p0 = fluo::Plane(pp0, d);
+			p1 = fluo::Plane(pp1, d);
+			return { true, { p0, p1 } };
+		}
+		else if (num > 2)
+		{
+			//use pca
+		}
+	}
+	return { false, { p0, p1 } };
+}
