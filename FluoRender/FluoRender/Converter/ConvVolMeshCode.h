@@ -723,9 +723,6 @@ __kernel void kernel_0(
 	atomic_add3(&normal_buffer[idx0 * 3], face_normal);
 	atomic_add3(&normal_buffer[idx1 * 3], face_normal);
 	atomic_add3(&normal_buffer[idx2 * 3], face_normal);
-	//normal_buffer[0] = 1.0;
-	//normal_buffer[1] = 2.0;
-	//normal_buffer[2] = 3.0;
 }
 
 __kernel void kernel_1(
@@ -743,38 +740,56 @@ __kernel void kernel_1(
 )CLKER";
 
 //simplify mesh
-inline constexpr const char* str_cl_simplify_mesh = R"CLKER(
+inline constexpr const char* str_cl_mesh_simplify = R"CLKER(
 __kernel void kernel_0(
-	__global float4* vertices,
-	__global int* indices,
-	__global int* valid_flags,
-	int num_triangles,
-	float threshold
-)
+	__global const float* vertex_buffer,   // [vertex_count * 3]
+	__global const int* index_buffer,      // [idx_count]
+	__global int* tri_mask,                // [idx_count/3], 1 = keep, 0 = remove
+	const float collapse_threshold,
+	const int idx_count)
 {
-	int tid = get_global_id(0);
-	if (tid >= num_triangles) return;
+	//mark triangles for removal
+	int i = get_global_id(0);
+	if (i >= idx_count / 3) return;
 
-	int i0 = indices[tid * 3 + 0];
-	int i1 = indices[tid * 3 + 1];
-	int i2 = indices[tid * 3 + 2];
+	int idx0 = index_buffer[i * 3 + 0];
+	int idx1 = index_buffer[i * 3 + 1];
+	int idx2 = index_buffer[i * 3 + 2];
 
-	float4 v0 = vertices[i0];
-	float4 v1 = vertices[i1];
-	float4 v2 = vertices[i2];
+	float3 v0 = vload3(idx0, vertex_buffer);
+	float3 v1 = vload3(idx1, vertex_buffer);
+	float3 v2 = vload3(idx2, vertex_buffer);
 
-	float d01 = length(v0.xyz - v1.xyz);
-	float d12 = length(v1.xyz - v2.xyz);
-	float d20 = length(v2.xyz - v0.xyz);
+	// Compute squared edge lengths
+	float e0 = dot(v1 - v0, v1 - v0);
+	float e1 = dot(v2 - v1, v2 - v1);
+	float e2 = dot(v0 - v2, v0 - v2);
 
-	if (d01 < threshold || d12 < threshold || d20 < threshold)
-	{
-		valid_flags[tid] = 0; // mark for removal
-	}
-	else
-	{
-		valid_flags[tid] = 1;
-	}
+	float min_edge = fmin(e0, fmin(e1, e2));
+
+	// If the smallest edge is below threshold, mark for collapse
+	tri_mask[i] = (min_edge < collapse_threshold * collapse_threshold) ? 0 : 1;
+}
+
+__kernel void kernel_1(
+	__global const int* index_buffer,      // original
+	__global const int* tri_mask,          // 1 = keep, 0 = remove
+	__global const int* tri_prefix_sum,    // prefix sum of tri_mask
+	__global int* new_index_buffer,        // compacted output
+	const int idx_count)
+{
+	//rewrite index buffer
+	int i = get_global_id(0);
+	if (i >= idx_count / 3) return;
+
+	if (tri_mask[i] == 0) return;
+
+	int new_tri_id = tri_prefix_sum[i];
+	int dst = new_tri_id * 3;
+
+	new_index_buffer[dst + 0] = index_buffer[i * 3 + 0];
+	new_index_buffer[dst + 1] = index_buffer[i * 3 + 1];
+	new_index_buffer[dst + 2] = index_buffer[i * 3 + 2];
 }
 )CLKER";
 

@@ -45,6 +45,10 @@ namespace flrd
 		virtual void Update(bool create_mesh) override;
 		virtual void MergeVertices(bool avg_normals) override;
 
+		//simplify and smooth
+		virtual void Simplify() override {}
+		virtual void Smooth() override {}
+
 		double GetArea() { return m_area; }
 
 	private:

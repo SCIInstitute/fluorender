@@ -888,3 +888,72 @@ void ConvVolMesh::PrefixSum(
 		remap_to_compact[i] = remap_to_compact[canonical];
 	}
 }
+
+//simplify
+void ConvVolMesh::Simplify()
+{
+	if (!m_mesh)
+		return;
+
+	size_t vertex_num = m_mesh->GetVertexNum();
+	if (vertex_num <= 0)
+		return;
+	size_t tri_num = m_mesh->GetTriangleNum();
+	if (tri_num <= 0)
+		return;
+	size_t idx_num = tri_num * 3;
+
+	m_busy = true;
+
+	//create program kernels
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
+		str_cl_mesh_simplify, 8, 256.0f);
+	if (!kernel_prog)
+	{
+		m_busy = false;
+		return;
+	}
+
+	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
+	if (kernel_idx0 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
+	if (kernel_idx1 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+
+	//compute workload
+	size_t local_size[1] = { 1 };
+	size_t global_size[1] = { tri_num };
+
+	//get vbo
+	GLuint vbo_id = m_mesh->GetCoordVBO();
+	size_t vbo_size = sizeof(float) * vertex_num * 3;
+	//get index vbo
+	GLuint ibo_id = m_mesh->GetIndexVBO();
+	size_t ibo_size = sizeof(unsigned int) * idx_num;
+
+	//mark triangles for removal
+	kernel_prog->beginArgs(kernel_idx0);
+	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
+	auto arg_tri_mask = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_tri_mask", sizeof(int) * tri_num, nullptr);
+	float threshold = static_cast<float>(m_simplify);
+	kernel_prog->setConst(sizeof(float), (void*)(&threshold));
+	int idx_count = static_cast<int>(idx_num);
+	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+}
+
+//smooth
+void ConvVolMesh::Smooth()
+{
+
+}

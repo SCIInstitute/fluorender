@@ -51,6 +51,10 @@ namespace flrd
 		virtual void Update(bool create_mesh) = 0;
 		// merge vetices
 		virtual void MergeVertices(bool avg_normals) = 0;
+		//simplify
+		virtual void Simplify() = 0;
+		//smooth
+		virtual void Smooth() = 0;
 
 		//auto update
 		virtual bool GetAutoUpdate() { return false; }

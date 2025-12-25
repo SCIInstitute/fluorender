@@ -67,14 +67,22 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_color_btn = new wxButton(this, wxID_ANY, "Color",
 		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_cnv_vol_mesh_simplify_btn = new wxButton(this, wxID_ANY, "Simplify",
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
+	m_cnv_vol_mesh_smooth_btn = new wxButton(this, wxID_ANY, "Smooth",
+		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
 	m_cnv_vol_mesh_convert_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshConvert, this);
 	m_cnv_vol_mesh_update_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshUpdate, this);
 	m_cnv_vol_mesh_weld_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshWeldVertices, this);
 	m_cnv_vol_mesh_color_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshColor, this);
+	m_cnv_vol_mesh_simplify_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshSimplify, this);
+	m_cnv_vol_mesh_smooth_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshSmooth, this);
 	sizer_1->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cnv_vol_mesh_update_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cnv_vol_mesh_weld_btn, 0, wxALIGN_CENTER);
 	sizer_1->Add(m_cnv_vol_mesh_color_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_cnv_vol_mesh_simplify_btn, 0, wxALIGN_CENTER);
+	sizer_1->Add(m_cnv_vol_mesh_smooth_btn, 0, wxALIGN_CENTER);
 
 	//sizer_2
 	//convert from volume to mesh
@@ -405,6 +413,20 @@ void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
 	glbin_color_mesh.SetVolumeData(vd);
 	glbin_color_mesh.SetMeshData(md);
 	glbin_color_mesh.Update();
+	FluoRefresh(0, { gstNull },
+		{ glbin_current.GetViewId() });
+}
+
+void ConvertDlg::OnCnvVolMeshSimplify(wxCommandEvent& event)
+{
+	glbin_conv_vol_mesh->Simplify();
+	FluoRefresh(0, { gstNull },
+		{ glbin_current.GetViewId() });
+}
+
+void ConvertDlg::OnCnvVolMeshSmooth(wxCommandEvent& event)
+{
+	glbin_conv_vol_mesh->Smooth();
 	FluoRefresh(0, { gstNull },
 		{ glbin_current.GetViewId() });
 }
