@@ -942,13 +942,40 @@ void ConvVolMesh::Simplify()
 	kernel_prog->beginArgs(kernel_idx0);
 	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
 	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
-	auto arg_tri_mask = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_tri_mask", sizeof(int) * tri_num, nullptr);
+	auto arg_tri_mask = kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_tri_mask", sizeof(int) * tri_num, nullptr);
 	float threshold = static_cast<float>(m_simplify);
 	kernel_prog->setConst(sizeof(float), (void*)(&threshold));
 	int idx_count = static_cast<int>(idx_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+	std::vector<int> tri_mask(tri_num);
+	std::vector<int> tri_prefix(tri_num);
+
+	// read back mask from GPU
+	kernel_prog->readBuffer(arg_tri_mask, tri_mask.data());
+
+	// compute exclusive prefix sum
+	int sum = 0;
+	for (size_t i = 0; i < tri_num; ++i)
+	{
+		tri_prefix[i] = sum;
+		sum += tri_mask[i];
+	}
+
+	// total number of kept triangles = sum
+	size_t new_tri_num = sum;
+
+	//rewrite index buffer
+	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->bindArg(arg_ibo);
+	kernel_prog->bindArg(arg_tri_mask);
+	auto arg_tri_prefix = kernel_prog->setBufNew(CL_MEM_READ_ONLY, "arg_tri_prefix", sizeof(int) * tri_num, tri_prefix.data());
+	auto arg_new_ibo = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_new_ibo", sizeof(int) * tri_num, nullptr);
+	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
 
 }
 
