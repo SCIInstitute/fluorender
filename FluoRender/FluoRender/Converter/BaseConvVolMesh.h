@@ -80,8 +80,11 @@ namespace flrd
 		virtual void SetSimplify(double val) { m_simplify = val; }
 		virtual double GetSimplify() const { return m_simplify; }
 
-		virtual void SetSmooth(double val) { m_smooth = val; }
-		virtual double GetSmooth() const { return m_smooth; }
+		virtual void SetSmooth(double vn, double vt) { m_smooth_n = vn; m_smooth_t = vt; }
+		virtual void SetSmoothN(double val) { m_smooth_n = val; }
+		virtual void SetSmoothT(double val) { m_smooth_t = val; }
+		virtual double GetSmoothN() const { return m_smooth_n; }
+		virtual double GetSmoothT() const { return m_smooth_t; }
 
 		virtual std::string GetInfo() const { return m_info; }
 
@@ -95,7 +98,8 @@ namespace flrd
 		int m_downsample = 1; // Downsampling factor in x and y
 		int m_downsample_z = 1; // Downsampling factor in z
 		double m_simplify = 0.0; // Simplification factor
-		double m_smooth = 0.0; // Smoothing factor
+		double m_smooth_n = 0.0; // Smoothing factor in normal direction
+		double m_smooth_t = 0.0; // smoothing factor in tangential direction
 
 		std::string m_info; // Information string
 	};

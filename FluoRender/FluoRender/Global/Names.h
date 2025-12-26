@@ -741,7 +741,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolMeshWeld "vol mesh weld"
 #define gstVolMeshInfo "vol mesh info"
 #define gstVolMeshSimplify "vol mesh simplify"
-#define gstVolMeshSmooth "vol mesh smooth"
+#define gstVolMeshSmoothN "vol mesh smooth n"
+#define gstVolMeshSmoothT "vol mesh smooth t"
 #define gstConvVolMeshUpdate "conv vol mesh update"
 #define gstConvVolMeshUpdateTransf "conv vol mesh update transf"
 //counting agent

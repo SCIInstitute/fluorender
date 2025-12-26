@@ -31,10 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
-#include <wx/clipbrd.h>
 
 class wxSingleSlider;
-struct GridData
+struct BrushGridData
 {
 	int voxel_sum = 0;
 	double voxel_wsum = 0;
@@ -169,7 +168,7 @@ private:
 
 private:
 	//output
-	void SetOutput(const GridData& data, const wxString& unit);
+	void SetOutput(const BrushGridData& data, const wxString& unit);
 	void CopyData();
 	void PasteData();
 

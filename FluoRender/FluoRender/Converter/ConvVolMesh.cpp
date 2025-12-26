@@ -1100,8 +1100,8 @@ void ConvVolMesh::Smooth()
 	auto normal_arg = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, normal_id, vbo_size);
 	kernel_prog->bindArg(arg_nbr_sum);
 	kernel_prog->bindArg(arg_nbr_count);
-	float lambda;
-	float mu;
+	float lambda = static_cast<float>(m_smooth_t);
+	float mu = static_cast<float>(m_smooth_n);
 	kernel_prog->setConst(sizeof(float), (void*)(&lambda));
 	kernel_prog->setConst(sizeof(float), (void*)(&mu));
 	int vertex_count = static_cast<int>(vertex_num);

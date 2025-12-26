@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
+#include <wx/clipbrd.h>
 //resources
 #include <png_resource.h>
 #include <icons.h>
@@ -652,7 +653,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (count_update)
 	{
-		GridData data;
+		BrushGridData data;
 		flrd::CountVoxels counter;
 		counter.SetVolumeData(sel_vol);
 		counter.Count();
@@ -697,7 +698,7 @@ void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if (glbin_vol_selector.m_test_speed)
 		{
-			GridData data;
+			BrushGridData data;
 			data.size = glbin_vol_selector.GetSpanSec();
 			data.wsize = data.size;
 			wxString unit = "Sec.";
@@ -1152,7 +1153,7 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 }
 
 //output
-void BrushToolDlg::SetOutput(const GridData &data, const wxString &unit)
+void BrushToolDlg::SetOutput(const BrushGridData &data, const wxString &unit)
 {
 	if (m_output_grid->GetNumberRows()==0 ||
 		m_hold_history)
