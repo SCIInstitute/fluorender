@@ -966,21 +966,160 @@ void ConvVolMesh::Simplify()
 
 	// total number of kept triangles = sum
 	size_t new_tri_num = sum;
+	size_t new_idx_count = new_tri_num * 3;
 
 	//rewrite index buffer
 	kernel_prog->beginArgs(kernel_idx1);
 	kernel_prog->bindArg(arg_ibo);
 	kernel_prog->bindArg(arg_tri_mask);
 	auto arg_tri_prefix = kernel_prog->setBufNew(CL_MEM_READ_ONLY, "arg_tri_prefix", sizeof(int) * tri_num, tri_prefix.data());
-	auto arg_new_ibo = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_new_ibo", sizeof(int) * tri_num, nullptr);
+	auto arg_new_ibo = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_new_ibo", sizeof(int) * idx_num, nullptr);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
 	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
 
+	// Read back GPU buffers
+	std::vector<float> vbo(vertex_num * 3);
+	std::vector<int>   ibo(new_idx_count * 3);
+
+	kernel_prog->readBuffer(arg_vbo, vbo.data());
+	kernel_prog->readBuffer(arg_new_ibo, ibo.data());
+
+	// Step 1: Build a remap table for used vertices
+	std::vector<int> remap(vertex_num, -1);
+	size_t new_vertex_count = 0;
+
+	for (size_t i = 0; i < new_idx_count; ++i)
+	{
+		int old_vid = ibo[i];
+		if (remap[old_vid] == -1)
+			remap[old_vid] = new_vertex_count++;
+	}
+
+	// Step 2: Build trimmed VBO
+	std::vector<float> trimmed_vbo(new_vertex_count * 3);
+
+	for (size_t old_vid = 0; old_vid < vertex_num; ++old_vid)
+	{
+		int new_vid = remap[old_vid];
+		if (new_vid >= 0)
+		{
+			trimmed_vbo[new_vid * 3 + 0] = vbo[old_vid * 3 + 0];
+			trimmed_vbo[new_vid * 3 + 1] = vbo[old_vid * 3 + 1];
+			trimmed_vbo[new_vid * 3 + 2] = vbo[old_vid * 3 + 2];
+		}
+	}
+
+	// Step 3: Rewrite IBO to reference trimmed VBO
+	for (size_t i = 0; i < new_idx_count; ++i)
+	{
+		int old_vid = ibo[i];
+		ibo[i] = remap[old_vid];
+	}
+
+	// Step 4: Update mesh
+	m_mesh->UpdateCoordVBO(trimmed_vbo, ibo);
+	m_mesh->SetVertexNum(new_vertex_count);
+	m_mesh->SetTriangleNum(new_idx_count / 3);
+	m_mesh->SetGpuDirty();
+
+	kernel_prog->releaseAllArgs();
+	m_busy = false;
 }
 
 //smooth
 void ConvVolMesh::Smooth()
 {
+	if (!m_mesh)
+		return;
 
+	size_t vertex_num = m_mesh->GetVertexNum();
+	if (vertex_num <= 0)
+		return;
+	size_t tri_num = m_mesh->GetTriangleNum();
+	if (tri_num <= 0)
+		return;
+	size_t idx_num = tri_num * 3;
+
+	m_busy = true;
+
+	//create program kernels
+	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
+		str_cl_mesh_smooth, 8, 256.0f);
+	if (!kernel_prog)
+	{
+		m_busy = false;
+		return;
+	}
+
+	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
+	if (kernel_idx0 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
+	if (kernel_idx1 < 0)
+	{
+		m_busy = false;
+		return;
+	}
+
+	//compute workload
+	size_t local_size[1] = { 1 };
+	size_t global_size1[1] = { tri_num };
+	size_t global_size2[1] = { vertex_num };
+
+	//get vbo
+	GLuint vbo_id = m_mesh->GetCoordVBO();
+	size_t vbo_size = sizeof(float) * vertex_num * 3;
+	//get index vbo
+	GLuint ibo_id = m_mesh->GetIndexVBO();
+	size_t ibo_size = sizeof(unsigned int) * idx_num;
+	//get normals
+	GLuint normal_id = m_mesh->GetNormalVBO();
+	//neighbor sum
+	std::vector<float> nbr_sum_buf(vertex_num * 3, 0.0);
+	//neighbor count
+	std::vector<int> nbr_count_buf(vertex_num, 0);
+
+	//accumulate neighbor positions
+	kernel_prog->beginArgs(kernel_idx0);
+	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
+	auto arg_nbr_sum = kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_nbr_sum", vbo_size, nbr_sum_buf.data());
+	auto arg_nbr_count = kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_nbr_count", sizeof(int) * vertex_num, nbr_count_buf.data());
+	int idx_count = static_cast<int>(idx_num);
+	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx0, 1, global_size1, local_size);
+
+	//component wise smoothing
+	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->bindArg(arg_vbo);
+	auto normal_arg = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, normal_id, vbo_size);
+	kernel_prog->bindArg(arg_nbr_sum);
+	kernel_prog->bindArg(arg_nbr_count);
+	float lambda;
+	float mu;
+	kernel_prog->setConst(sizeof(float), (void*)(&lambda));
+	kernel_prog->setConst(sizeof(float), (void*)(&mu));
+	int vertex_count = static_cast<int>(vertex_num);
+	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx1, 1, global_size2, local_size);
+
+	//read back
+	std::vector<float> vbo(vertex_num * 3);
+	std::vector<int>   ibo(idx_num);
+
+	kernel_prog->readBuffer(arg_vbo, vbo.data());
+	kernel_prog->readBuffer(arg_ibo, ibo.data());
+
+	//update
+	m_mesh->UpdateCoordVBO(vbo, ibo);
+	m_mesh->SetGpuDirty();
+
+	kernel_prog->releaseAllArgs();
+	m_busy = false;
 }
