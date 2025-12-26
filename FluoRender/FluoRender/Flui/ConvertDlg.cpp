@@ -58,7 +58,7 @@ ConvertDlg::ConvertDlg(MainFrame *frame) :
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-	m_notebook->AddPage(CreateSettingPage(m_notebook), "Convert", true);
+	m_notebook->AddPage(CreateSettingPage(m_notebook), "Volume to Mesh", true);
 	m_notebook->AddPage(CreateInfoPage(m_notebook), "Information");
 
 	Bind(wxEVT_SIZE, &ConvertDlg::OnSize, this);
@@ -119,7 +119,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 	//sizer_2
 	//convert from volume to mesh
 	wxStaticBoxSizer* sizer_2 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Volume to Polygon Mesh");
+		wxVERTICAL, page, "Mesh Generation");
 	//check options and convert button
 	wxBoxSizer* sizer_21 = new wxBoxSizer(wxHORIZONTAL);
 	m_cnv_vol_mesh_selected_chk = new wxCheckBox(page, wxID_ANY, "Paint-Selected Data Only",
