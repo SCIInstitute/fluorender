@@ -304,6 +304,7 @@ void MainSettings::Read(const std::string& filename)
 		fconfig->Read("layout measure", &str);m_layout_measure = fconfig->DecodeXml(str);
 		fconfig->Read("layout settings", &str);m_layout_settings = fconfig->DecodeXml(str);
 		fconfig->Read("layout track", &str);m_layout_track = fconfig->DecodeXml(str);
+		fconfig->Read("layout convert", &str); m_layout_convert = fconfig->DecodeXml(str);
 		fconfig->Read("invert slider", &m_inverse_slider, false);
 		fconfig->Read("mulfunc", &m_mulfunc, 0);
 		fconfig->Read("time span", &m_time_span, 1.0);
@@ -576,6 +577,7 @@ void MainSettings::Save()
 	str = fconfig->EncodeXml(m_layout_measure); fconfig->Write("layout measure", str);
 	str = fconfig->EncodeXml(m_layout_settings); fconfig->Write("layout settings", str);
 	str = fconfig->EncodeXml(m_layout_track); fconfig->Write("layout track", str);
+	str = fconfig->EncodeXml(m_layout_convert); fconfig->Write("layout convert", str);
 	fconfig->Write("invert slider", m_inverse_slider);
 	fconfig->Write("mulfunc", m_mulfunc);
 	fconfig->Write("time span", m_time_span);

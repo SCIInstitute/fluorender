@@ -135,6 +135,25 @@
   &lt;/notebooks&gt;
 &lt;/aui-layout&gt;
 </layout_track>
+        <layout_convert>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;aui-layout version="3.3.0"&gt;
+  &lt;notebooks&gt;
+    &lt;notebook name="ConvertDlg"&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;0&lt;/pages&gt;
+        &lt;size&gt;18&lt;/size&gt;
+        &lt;direction&gt;5&lt;/direction&gt;
+      &lt;/tab&gt;
+      &lt;tab&gt;
+        &lt;pages&gt;1&lt;/pages&gt;
+        &lt;size&gt;451&lt;/size&gt;
+        &lt;row&gt;1&lt;/row&gt;
+        &lt;direction&gt;3&lt;/direction&gt;
+      &lt;/tab&gt;
+    &lt;/notebook&gt;
+  &lt;/notebooks&gt;
+&lt;/aui-layout&gt;
+</layout_convert>
         <invert_slider>0</invert_slider>
         <mulfunc>1</mulfunc>
         <time_span>1</time_span>

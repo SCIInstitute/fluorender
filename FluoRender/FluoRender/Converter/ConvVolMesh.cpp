@@ -915,6 +915,17 @@ void ConvVolMesh::Simplify()
 		return;
 	size_t idx_num = tri_num * 3;
 
+	//get vbo
+	GLuint vbo_id = m_mesh->GetCoordVBO();
+	if (vbo_id == 0)
+		return;
+	size_t vbo_size = sizeof(float) * vertex_num * 3;
+	//get index vbo
+	GLuint ibo_id = m_mesh->GetIndexVBO();
+	if (ibo_id == 0)
+		return;
+	size_t ibo_size = sizeof(unsigned int) * idx_num;
+
 	m_busy = true;
 
 	//create program kernels
@@ -948,13 +959,6 @@ void ConvVolMesh::Simplify()
 	//compute workload
 	size_t local_size[1] = { 1 };
 	size_t global_size[1] = { tri_num };
-
-	//get vbo
-	GLuint vbo_id = m_mesh->GetCoordVBO();
-	size_t vbo_size = sizeof(float) * vertex_num * 3;
-	//get index vbo
-	GLuint ibo_id = m_mesh->GetIndexVBO();
-	size_t ibo_size = sizeof(unsigned int) * idx_num;
 
 	//snap vertices
 	kernel_prog->beginArgs(kernel_idx0);
@@ -1073,6 +1077,21 @@ void ConvVolMesh::Smooth()
 		return;
 	size_t idx_num = tri_num * 3;
 
+	//get vbo
+	GLuint vbo_id = m_mesh->GetCoordVBO();
+	if (vbo_id == 0)
+		return;
+	size_t vbo_size = sizeof(float) * vertex_num * 3;
+	//get index vbo
+	GLuint ibo_id = m_mesh->GetIndexVBO();
+	if (ibo_id == 0)
+		return;
+	size_t ibo_size = sizeof(unsigned int) * idx_num;
+	//get normals
+	GLuint normal_id = m_mesh->GetNormalVBO();
+	if (normal_id == 0)
+		return;
+
 	m_busy = true;
 
 	//create program kernels
@@ -1102,14 +1121,6 @@ void ConvVolMesh::Smooth()
 	size_t global_size1[1] = { tri_num };
 	size_t global_size2[1] = { vertex_num };
 
-	//get vbo
-	GLuint vbo_id = m_mesh->GetCoordVBO();
-	size_t vbo_size = sizeof(float) * vertex_num * 3;
-	//get index vbo
-	GLuint ibo_id = m_mesh->GetIndexVBO();
-	size_t ibo_size = sizeof(unsigned int) * idx_num;
-	//get normals
-	GLuint normal_id = m_mesh->GetNormalVBO();
 	//neighbor sum
 	std::vector<float> nbr_sum_buf(vertex_num * 3, 0.0);
 	//neighbor count

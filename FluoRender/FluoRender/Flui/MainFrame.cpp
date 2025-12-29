@@ -886,6 +886,7 @@ MainFrame::MainFrame(
 	m_measure_dlg->LoadPerspective(glbin_settings.m_layout_measure);
 	m_setting_dlg->LoadPerspective(glbin_settings.m_layout_settings);
 	m_track_dlg->LoadPerspective(glbin_settings.m_layout_track);
+	m_convert_dlg->LoadPerspective(glbin_settings.m_layout_convert);
 	glbin_moviemaker.SetMainFrame(this);
 	glbin_moviemaker.SetView(view);
 	glbin_mov_def.Apply(&glbin_moviemaker);
@@ -925,6 +926,7 @@ MainFrame::~MainFrame()
 	glbin_settings.m_layout_measure = m_measure_dlg->SavePerspective();
 	glbin_settings.m_layout_settings = m_setting_dlg->SavePerspective();
 	glbin_settings.m_layout_track = m_track_dlg->SavePerspective();
+	glbin_settings.m_layout_convert = m_convert_dlg->SavePerspective();
 	glbin_settings.Save();
 
 	m_aui_mgr.UnInit();

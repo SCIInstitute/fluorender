@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <BaseConvVolMesh.h>
 #include <ColorMesh.h>
+#include <MeshStat.h>
 #include <VolumeSelector.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
@@ -283,11 +284,12 @@ wxWindow* ConvertDlg::CreateInfoPage(wxWindow* parent)
 	sizer1->Add(m_clear_hist_btn, 0, wxALIGN_CENTER);
 	//grid
 	m_output_grid = new wxGrid(page, wxID_ANY);
-	m_output_grid->CreateGrid(0, 4);
+	m_output_grid->CreateGrid(0, 5);
 	m_output_grid->SetColLabelValue(0, "Surface Area");
 	m_output_grid->SetColLabelValue(1, "Volume");
 	m_output_grid->SetColLabelValue(2, "Vertex Count");
 	m_output_grid->SetColLabelValue(3, "Triangle Count");
+	m_output_grid->SetColLabelValue(4, "Normal Count");
 	//m_output_grid->Fit();
 	m_output_grid->Bind(wxEVT_GRID_SELECT_CELL, &ConvertDlg::OnSelectCell, this);
 	m_output_grid->Bind(wxEVT_KEY_DOWN, &ConvertDlg::OnKeyDown, this);
@@ -352,15 +354,37 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (FOUND_VALUE(gstVolMeshInfo))
 	{
-		//wxString str = "The surface area of mesh object ";
-		//auto md = glbin_current.mesh_data.lock();
-		//if (md)
-		//{
-		//	str += md->GetName();
-		//	str += " is ";
-		//	str += glbin_conv_vol_mesh->GetInfo();
-		//}
-		//(*m_stat_text) << str << "\n";
+		auto md = glbin_conv_vol_mesh->GetMeshData();
+		if (md)
+		{
+			flrd::MeshStat stat(md.get());
+			stat.Run();
+			ConvertGridData data;
+			data.area = stat.GetArea();
+			data.volume = stat.GetVolume();
+			data.vertex_count = stat.GetVertexNum();
+			data.triangle_count = stat.GetTriangleNum();
+			data.normal_count = stat.GetNormalNum();
+			wxString unit;
+			auto view = glbin_current.render_view.lock();
+			if (view)
+			{
+				switch (view->m_sb_unit)
+				{
+				case 0:
+					unit = L"nm\u00B3";
+					break;
+				case 1:
+				default:
+					unit = L"\u03BCm\u00B3";
+					break;
+				case 2:
+					unit = L"mm\u00B3";
+					break;
+				}
+			}
+			SetOutput(data, unit);
+		}
 	}
 
 	bool brush_update = FOUND_VALUE(gstBrushCountAutoUpdate);
@@ -547,7 +571,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		//glbin_current.SetMeshData(md);
 	}
 
-	FluoRefresh(0, { gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
+	FluoRefresh(0, { gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
 		{ glbin_current.GetViewId() });
 }
 
@@ -584,7 +608,7 @@ void ConvertDlg::OnCnvVolMeshWeldVertices(wxCommandEvent& event)
 	if (!vd)
 		return;
 	glbin_conv_vol_mesh->MergeVertices(true);
-	FluoRefresh(0, { gstNull },
+	FluoRefresh(0, { gstVolMeshInfo },
 		{ glbin_current.GetViewId() });
 }
 
@@ -648,6 +672,8 @@ void ConvertDlg::SetOutput(const ConvertGridData& data, const wxString& unit)
 		wxString::Format("%d", data.vertex_count));
 	m_output_grid->SetCellValue(0, 3,
 		wxString::Format("%d", data.triangle_count));
+	m_output_grid->SetCellValue(0, 4,
+		wxString::Format("%d", data.normal_count));
 	//m_output_grid->Fit();
 	//m_output_grid->AutoSizeColumns();
 	m_output_grid->ClearSelection();
@@ -655,7 +681,7 @@ void ConvertDlg::SetOutput(const ConvertGridData& data, const wxString& unit)
 
 void ConvertDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	FluoUpdate({ gstBrushCountResult });
+	FluoUpdate({ gstVolMeshInfo });
 }
 
 void ConvertDlg::OnHistoryChk(wxCommandEvent& event)

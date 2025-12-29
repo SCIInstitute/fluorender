@@ -88,6 +88,7 @@ public:
 	std::string m_layout_measure;	//layout of the measurement dialog
 	std::string m_layout_settings;	//layout of the settings dialog
 	std::string m_layout_track;		//layout of the tracking dialog
+	std::string m_layout_convert;	//layout of the convert dialog
 
 	bool m_prj_save;		//save project automatically
 	bool m_prj_save_inc;	//save project incrementally

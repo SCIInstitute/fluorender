@@ -37,6 +37,7 @@ struct ConvertGridData
 	double volume = 0;
 	int vertex_count = 0;
 	int triangle_count = 0;
+	int normal_count = 0;
 };
 
 class wxSingleSlider;

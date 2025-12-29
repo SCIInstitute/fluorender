@@ -114,6 +114,23 @@ void MeshStat::Run()
 	m_triangle_num = static_cast<int>(tri_num);
 	size_t idx_num = tri_num * 3;
 
+	//get vbo
+	GLuint vbo_id = m_md->GetCoordVBO();
+	if (vbo_id == 0)
+		return;
+	size_t vbo_size = sizeof(float) * vertex_num * 3;
+	//get index vbo
+	GLuint ibo_id = m_md->GetIndexVBO();
+	if (ibo_id == 0)
+		return;
+	size_t ibo_size = sizeof(unsigned int) * idx_num;
+	//get normals
+	GLuint normal_id = m_md->GetNormalVBO();
+	if (normal_id)
+		m_normal_num = m_triangle_num;
+	else
+		m_normal_num = 0;
+
 	m_busy = true;
 
 	//create program and kernels
@@ -141,19 +158,6 @@ void MeshStat::Run()
 	//compute workload
 	size_t local_size[1] = { 1 };
 	size_t global_size[1] = { tri_num };
-
-	//get vbo
-	GLuint vbo_id = m_md->GetCoordVBO();
-	size_t vbo_size = sizeof(float) * vertex_num * 3;
-	//get index vbo
-	GLuint ibo_id = m_md->GetIndexVBO();
-	size_t ibo_size = sizeof(unsigned int) * idx_num;
-	//get normals
-	GLuint normal_id = m_md->GetNormalVBO();
-	if (normal_id)
-		m_normal_num = m_triangle_num;
-	else
-		m_normal_num = 0;
 
 	//compute area
 	kernel_prog->beginArgs(kernel_idx0);
