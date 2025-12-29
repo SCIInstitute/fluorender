@@ -875,7 +875,7 @@ __kernel void kernel_2(
 // - lambda controls tangential smoothing (triangle quality)
 // - mu controls normal-direction smoothing (surface gradient / noise)
 // - Use small values (e.g., lambda ~ 0.1, mu ~ 0.01) and iterate a few times on host side.
-inline constexpr const char* str_cl_mesh_smooth = R"CLKER(
+inline constexpr const char* str_cl_smooth_mesh = R"CLKER(
 __kernel void kernel_0(
 	__global const float* vertex_buffer,    // [vertex_count * 3] (not strictly needed here but kept for symmetry)
 	__global const int*   index_buffer,     // [idx_count]

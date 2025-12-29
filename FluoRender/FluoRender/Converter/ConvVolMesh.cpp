@@ -232,6 +232,18 @@ std::string ConvVolMesh::GetKernelStrSmoothNormals()
 	return z.str();
 }
 
+std::string ConvVolMesh::GetKernelStrSmoothMesh()
+{
+	std::ostringstream z;
+	if (flvr::KernelProgram::get_float_atomics())
+		z << str_cl_smooth_normals_float_atomic_supported;
+	else
+		z << str_cl_smooth_normals_float_atomic_unsupported;
+	z << str_cl_smooth_mesh;
+
+	return z.str();
+}
+
 void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 {
 	m_busy = true;
@@ -949,7 +961,7 @@ void ConvVolMesh::Simplify()
 	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
 	//compute threshold from bounding box
 	auto bbox = m_mesh->GetBounds();
-	float threshold = static_cast<float>(m_simplify * bbox.diagonal().length());
+	float threshold = static_cast<float>(m_simplify * bbox.diagonal().length() * 0.2);
 	kernel_prog->setConst(sizeof(float), (void*)(&threshold));
 	int vertex_count = static_cast<int>(vertex_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
@@ -1065,7 +1077,7 @@ void ConvVolMesh::Smooth()
 
 	//create program kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
-		str_cl_mesh_smooth, 8, 256.0f);
+		GetKernelStrSmoothMesh(), 8, 256.0f);
 	if (!kernel_prog)
 	{
 		m_busy = false;
@@ -1120,8 +1132,10 @@ void ConvVolMesh::Smooth()
 	auto normal_arg = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, normal_id, vbo_size);
 	kernel_prog->bindArg(arg_nbr_sum);
 	kernel_prog->bindArg(arg_nbr_count);
-	float lambda = static_cast<float>(m_smooth_t);
-	float mu = static_cast<float>(m_smooth_n);
+	auto bbox = m_mesh->GetBounds();
+	double scale = bbox.diagonal().length() * 0.1;
+	float lambda = static_cast<float>(m_smooth_t * scale);
+	float mu = static_cast<float>(m_smooth_n * scale);
 	kernel_prog->setConst(sizeof(float), (void*)(&lambda));
 	kernel_prog->setConst(sizeof(float), (void*)(&mu));
 	int vertex_count = static_cast<int>(vertex_num);

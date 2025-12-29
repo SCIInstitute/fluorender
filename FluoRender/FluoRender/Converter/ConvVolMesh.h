@@ -66,6 +66,7 @@ namespace flrd
 	private:
 		std::string GetKernelStrMarchingCubes(bool mask, bool tf);
 		std::string GetKernelStrSmoothNormals();
+		std::string GetKernelStrSmoothMesh();
 
 		bool GetInfo(flvr::TextureBrick* b,
 			long &bits, long &nx, long &ny, long &nz,
