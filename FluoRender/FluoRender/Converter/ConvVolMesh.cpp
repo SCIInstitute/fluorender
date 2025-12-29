@@ -926,6 +926,12 @@ void ConvVolMesh::Simplify()
 		m_busy = false;
 		return;
 	}
+	int kernel_idx2 = kernel_prog->createKernel("kernel_2");
+	if (kernel_idx2 < 0)
+	{
+		m_busy = false;
+		return;
+	}
 
 	//compute workload
 	size_t local_size[1] = { 1 };
@@ -938,17 +944,31 @@ void ConvVolMesh::Simplify()
 	GLuint ibo_id = m_mesh->GetIndexVBO();
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
 
-	//mark triangles for removal
+	//snap vertices
 	kernel_prog->beginArgs(kernel_idx0);
 	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	//compute threshold from bounding box
+	auto bbox = m_mesh->GetBounds();
+	float threshold = static_cast<float>(m_simplify * bbox.diagonal().length());
+	kernel_prog->setConst(sizeof(float), (void*)(&threshold));
+	int vertex_count = static_cast<int>(vertex_num);
+	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+	//debug
+	//std::vector<float> vbo(vertex_num * 3);
+	//kernel_prog->readBuffer(arg_vbo, vbo.data());
+
+	//mark triangles for removal
+	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->bindArg(arg_vbo);
 	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
 	auto arg_tri_mask = kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_tri_mask", sizeof(int) * tri_num, nullptr);
-	float threshold = static_cast<float>(m_simplify);
-	kernel_prog->setConst(sizeof(float), (void*)(&threshold));
 	int idx_count = static_cast<int>(idx_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
-	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
 
 	std::vector<int> tri_mask(tri_num);
 	std::vector<int> tri_prefix(tri_num);
@@ -969,18 +989,18 @@ void ConvVolMesh::Simplify()
 	size_t new_idx_count = new_tri_num * 3;
 
 	//rewrite index buffer
-	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->beginArgs(kernel_idx2);
 	kernel_prog->bindArg(arg_ibo);
 	kernel_prog->bindArg(arg_tri_mask);
-	auto arg_tri_prefix = kernel_prog->setBufNew(CL_MEM_READ_ONLY, "arg_tri_prefix", sizeof(int) * tri_num, tri_prefix.data());
+	auto arg_tri_prefix = kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_tri_prefix", sizeof(int) * tri_num, tri_prefix.data());
 	auto arg_new_ibo = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_new_ibo", sizeof(int) * idx_num, nullptr);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
-	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
+	kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size);
 
 	// Read back GPU buffers
 	std::vector<float> vbo(vertex_num * 3);
-	std::vector<int>   ibo(new_idx_count * 3);
+	std::vector<int>   ibo(idx_num);
 
 	kernel_prog->readBuffer(arg_vbo, vbo.data());
 	kernel_prog->readBuffer(arg_new_ibo, ibo.data());

@@ -740,45 +740,108 @@ __kernel void kernel_1(
 )CLKER";
 
 //simplify mesh
+/*
+    Pass 0: Snap vertices to a voxel grid (voxel clustering)
+
+    Each vertex position is quantized to a grid of size `cell_size`.
+    Vertices that fall in the same voxel get the same position, which
+    causes redundant / tiny triangles to become degenerate and removable.
+
+	Pass 1: Mark triangles for removal
+
+	After snapping, many triangles will have zero-length edges
+	(two or three vertices collapsed onto the same voxel position).
+	We remove those degenerate triangles.
+
+	You can treat `cell_size` as your simplification knob.
+
+	Pass 2: Compact index buffer (unchanged logic)
+
+	Takes tri_mask and its prefix sum to rewrite the index buffer
+	without removed triangles.
+*/
 inline constexpr const char* str_cl_mesh_simplify = R"CLKER(
 __kernel void kernel_0(
-	__global const float* vertex_buffer,   // [vertex_count * 3]
-	__global const int* index_buffer,      // [idx_count]
-	__global int* tri_mask,                // [idx_count/3], 1 = keep, 0 = remove
-	const float collapse_threshold,
-	const int idx_count)
+	__global float* vertex_buffer,   // [vertex_count * 3], in-place
+	const float cell_size,
+	const int vertex_count)
 {
-	//mark triangles for removal
+	//snap vertices
 	int i = get_global_id(0);
-	if (i >= idx_count / 3) return;
+	if (i >= vertex_count) return;
 
-	int idx0 = index_buffer[i * 3 + 0];
-	int idx1 = index_buffer[i * 3 + 1];
-	int idx2 = index_buffer[i * 3 + 2];
+	float3 v = vload3(i, vertex_buffer);
 
-	float3 v0 = vload3(idx0, vertex_buffer);
-	float3 v1 = vload3(idx1, vertex_buffer);
-	float3 v2 = vload3(idx2, vertex_buffer);
+	// If cell_size == 0, do NOT snap — keep original vertex
+	if (cell_size == 0.0f)
+	{
+		vstore3(v, i, vertex_buffer);
+		return;
+	}
 
-	// Compute squared edge lengths
-	float e0 = dot(v1 - v0, v1 - v0);
-	float e1 = dot(v2 - v1, v2 - v1);
-	float e2 = dot(v0 - v2, v0 - v2);
+	// Quantize to voxel grid.
+	// Option A: snap to voxel centers.
+	float inv_cell = 1.0f / cell_size;
 
-	float min_edge = fmin(e0, fmin(e1, e2));
+	float3 q;
+	q.x = floor(v.x * inv_cell + 0.5f);
+	q.y = floor(v.y * inv_cell + 0.5f);
+	q.z = floor(v.z * inv_cell + 0.5f);
 
-	// If the smallest edge is below threshold, mark for collapse
-	tri_mask[i] = (min_edge < collapse_threshold * collapse_threshold) ? 0 : 1;
+	float3 snapped;
+	snapped.x = q.x * cell_size;
+	snapped.y = q.y * cell_size;
+	snapped.z = q.z * cell_size;
+
+	vstore3(snapped, i, vertex_buffer);
 }
 
 __kernel void kernel_1(
+	__global const float* vertex_buffer,   // [vertex_count * 3], snapped positions
+	__global const int* index_buffer,      // [idx_count]
+	__global int* tri_mask,                // [idx_count/3], 1 = keep, 0 = remove
+	const int idx_count)
+{
+	//mark triangles
+	int i = get_global_id(0);
+	if (i >= idx_count / 3) return;
+
+	int i0 = index_buffer[i * 3 + 0];
+	int i1 = index_buffer[i * 3 + 1];
+	int i2 = index_buffer[i * 3 + 2];
+
+	float3 v0 = vload3(i0, vertex_buffer);
+	float3 v1 = vload3(i1, vertex_buffer);
+	float3 v2 = vload3(i2, vertex_buffer);
+
+	float3 e0 = v1 - v0;
+	float3 e1 = v2 - v1;
+	float3 e2 = v0 - v2;
+
+	float e0_len2 = dot(e0, e0);
+	float e1_len2 = dot(e1, e1);
+	float e2_len2 = dot(e2, e2);
+
+	// If any edge is effectively zero length, the triangle is degenerate.
+	// Use a small epsilon to account for float round-off.
+	const float eps2 = 1e-12f;
+
+	int degenerate =
+		(e0_len2 < eps2) ||
+		(e1_len2 < eps2) ||
+		(e2_len2 < eps2);
+
+	tri_mask[i] = degenerate ? 0 : 1;
+}
+
+__kernel void kernel_2(
 	__global const int* index_buffer,      // original
 	__global const int* tri_mask,          // 1 = keep, 0 = remove
 	__global const int* tri_prefix_sum,    // prefix sum of tri_mask
 	__global int* new_index_buffer,        // compacted output
 	const int idx_count)
 {
-	//rewrite index buffer
+	//compact indices
 	int i = get_global_id(0);
 	if (i >= idx_count / 3) return;
 
