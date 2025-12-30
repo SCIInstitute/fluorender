@@ -856,36 +856,16 @@ __kernel void kernel_2(
 }
 )CLKER";
 
-// Assumptions:
-// - vertex_buffer: [vertex_count * 3], float3 positions
-// - index_buffer:  [idx_count], triangle indices (3 per triangle)
-// - normal_buffer: [vertex_count * 3], float3 normals (unit length)
-// - nbr_sum_buffer: [vertex_count * 3], float3 accumulator (must be zeroed on host before kernel_0)
-// - nbr_count_buffer: [vertex_count], int accumulator (must be zeroed on host before kernel_0)
-//
-// Smoothing model:
-// - First pass: accumulate neighbor positions & counts using 1-ring from triangles
-// - Second pass: compute Laplacian and split into tangential and normal components
-//      lap = avg(neighbors) - v
-//      lap_tan  = lap - dot(lap, n) * n
-//      lap_norm = dot(lap, n) * n
-//      v' = v + lambda * lap_tan + mu * lap_norm
-//
-// Notes:
-// - lambda controls tangential smoothing (triangle quality)
-// - mu controls normal-direction smoothing (surface gradient / noise)
-// - Use small values (e.g., lambda ~ 0.1, mu ~ 0.01) and iterate a few times on host side.
 inline constexpr const char* str_cl_smooth_mesh = R"CLKER(
 __kernel void kernel_0(
-	__global const float* vertex_buffer,    // [vertex_count * 3] (not strictly needed here but kept for symmetry)
+	__global const float* vertex_buffer,    // [vertex_count * 3] (not needed but kept for symmetry)
 	__global const int*   index_buffer,     // [idx_count]
 	__global float*       nbr_sum_buffer,   // [vertex_count * 3], float3 sums of neighbor positions
 	__global int*         nbr_count_buffer, // [vertex_count], counts of neighbors
 	const int             idx_count)
 {
-	//accumulate neighbor positions
 	// Each work item processes one triangle.
-	int tri_id = get_global_id(0);
+	int tri_id   = get_global_id(0);
 	int tri_count = idx_count / 3;
 	if (tri_id >= tri_count) return;
 
@@ -893,13 +873,12 @@ __kernel void kernel_0(
 	int i1 = index_buffer[tri_id * 3 + 1];
 	int i2 = index_buffer[tri_id * 3 + 2];
 
-	// Load vertex positions
+	// Load vertex positions (not strictly needed here, but might be useful if you change weighting).
 	float3 v0 = vload3(i0, vertex_buffer);
 	float3 v1 = vload3(i1, vertex_buffer);
 	float3 v2 = vload3(i2, vertex_buffer);
 
-	// For each vertex, the neighbors are the other two vertices in the triangle.
-	// Accumulate neighbor positions and counts atomically.
+	// 1-ring neighbors: each triangle contributes the other two vertices as neighbors.
 
 	// Vertex 0 neighbors: v1, v2
 	atomic_add3(&nbr_sum_buffer[i0 * 3], v1);
@@ -919,14 +898,13 @@ __kernel void kernel_0(
 
 __kernel void kernel_1(
 	__global float*       vertex_buffer,    // [vertex_count * 3], in-place update
-	__global const float* normal_buffer,    // [vertex_count * 3], per-vertex normals
 	__global const float* nbr_sum_buffer,   // [vertex_count * 3], neighbor position sums
 	__global const int*   nbr_count_buffer, // [vertex_count], neighbor counts
-	const float           lambda,           // tangential smoothing weight
-	const float           mu,               // normal-direction smoothing weight
+	const float           lambda,           // smoothing strength, e.g. 0.1f
+	const float           max_disp_scale,   // e.g. 0.1f, max displacement as fraction of some scale
+	const float           scene_scale,      // e.g. average edge length, or 1.0f
 	const int             vertex_count)
 {
-	//component wise smoothing
 	int vid = get_global_id(0);
 	if (vid >= vertex_count) return;
 
@@ -934,28 +912,28 @@ __kernel void kernel_1(
 	if (count <= 0)
 		return;
 
-	float3 v = vload3(vid, vertex_buffer);
-	float3 n = vload3(vid, normal_buffer);
+	float3 v            = vload3(vid, vertex_buffer);
 	float3 sum_neighbors = vload3(vid, nbr_sum_buffer);
 
 	float inv_count = 1.0f / (float)count;
-	float3 avg = sum_neighbors * inv_count;
+	float3 avg      = sum_neighbors * inv_count;
 
-	// Laplacian displacement
+	// Laplacian displacement (umbrella operator)
 	float3 lap = avg - v;
 
-	// Split into tangential and normal components
-	float proj = dot(lap, n);
-	float3 lap_norm = proj * n;
-	float3 lap_tan  = lap - lap_norm;
+	// Optional: clamp the displacement to avoid exploding vertices
+	float3 delta = lambda * lap;
 
-	// Combined update
-	float3 delta = lambda * lap_tan + mu * lap_norm;
+	float max_disp = max_disp_scale * scene_scale;   // user-supplied scale
+	float len2     = dot(delta, delta);
+	if (len2 > max_disp * max_disp && max_disp > 0.0f) {
+		float len = sqrt(len2);
+		delta *= (max_disp / len);
+	}
+
 	float3 v_new = v + delta;
-
 	vstore3(v_new, vid, vertex_buffer);
 }
-
 )CLKER";
 
 #endif//MESH_CL_H

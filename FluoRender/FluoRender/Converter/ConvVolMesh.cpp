@@ -1093,10 +1093,6 @@ void ConvVolMesh::Smooth(bool avg_normals)
 
 	size_t vbo_size = sizeof(float) * vertex_num * 3;
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
-	//get normals
-	GLuint normal_id = m_mesh->GetNormalVBO();
-	if (normal_id == 0)
-		return;
 
 	m_busy = true;
 
@@ -1146,15 +1142,20 @@ void ConvVolMesh::Smooth(bool avg_normals)
 	//component wise smoothing
 	kernel_prog->beginArgs(kernel_idx1);
 	kernel_prog->bindArg(arg_vbo);
-	auto normal_arg = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, normal_id, vbo_size);
 	kernel_prog->bindArg(arg_nbr_sum);
 	kernel_prog->bindArg(arg_nbr_count);
-	auto bbox = m_mesh->GetBounds();
-	double scale = bbox.diagonal().length() * 0.1;
-	float lambda = static_cast<float>(m_smooth_t * scale);
-	float mu = static_cast<float>(m_smooth_n * scale);
+	float lambda = static_cast<float>(m_smooth_scale);
+	float mu = static_cast<float>(m_smooth_strength);
+	float edge_scale = 1.0f;
+	if (auto vd = m_volume.lock())
+	{
+		fluo::Vector spc = vd->GetSpacing();
+		spc *= fluo::Vector(m_downsample, m_downsample, m_downsample_z);
+		edge_scale = spc.maxComponent();
+	}
 	kernel_prog->setConst(sizeof(float), (void*)(&lambda));
 	kernel_prog->setConst(sizeof(float), (void*)(&mu));
+	kernel_prog->setConst(sizeof(float), (void*)(&edge_scale));
 	int vertex_count = static_cast<int>(vertex_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 	//execute

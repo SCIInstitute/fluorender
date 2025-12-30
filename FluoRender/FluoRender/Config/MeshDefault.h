@@ -58,8 +58,8 @@ public:
 	int m_downsample = 1; // Downsampling factor in x and y
 	int m_downsample_z = 1; // Downsampling factor in z
 	double m_simplify = 0.1; // Simplification factor
-	double m_smooth_n = 0.1; // Smoothing factor in normal direction
-	double m_smooth_t = 0.1; // smoothing factor in tangential direction
+	double m_smooth_strength = 0.1; // Smoothing factor in normal direction
+	double m_smooth_scale = 0.1; // smoothing factor in tangential direction
 };
 
 #endif//_MESHDEFAULT_H_

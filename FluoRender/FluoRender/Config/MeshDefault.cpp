@@ -58,8 +58,8 @@ void MeshDefault::Read()
 	f->Read(gstVolMeshDownXY, &m_downsample, 1);
 	f->Read(gstVolMeshDownZ, &m_downsample_z, 1);
 	f->Read(gstVolMeshSimplify, &m_simplify, 0.1);
-	f->Read(gstVolMeshSmoothN, &m_smooth_n, 0.1);
-	f->Read(gstVolMeshSmoothT, &m_smooth_t, 0.1);
+	f->Read(gstVolMeshSmoothN, &m_smooth_strength, 0.1);
+	f->Read(gstVolMeshSmoothT, &m_smooth_scale, 0.1);
 }
 
 void MeshDefault::Save()
@@ -77,8 +77,8 @@ void MeshDefault::Save()
 	f->Write(gstVolMeshDownXY, m_downsample);
 	f->Write(gstVolMeshDownZ, m_downsample_z);
 	f->Write(gstVolMeshSimplify, m_simplify);
-	f->Write(gstVolMeshSmoothN, m_smooth_n);
-	f->Write(gstVolMeshSmoothT, m_smooth_t);
+	f->Write(gstVolMeshSmoothN, m_smooth_strength);
+	f->Write(gstVolMeshSmoothT, m_smooth_scale);
 }
 
 void MeshDefault::Set(MeshData* md)
@@ -97,8 +97,8 @@ void MeshDefault::Set(flrd::BaseConvVolMesh* cvm)
 	m_downsample = cvm->GetDownsample();
 	m_downsample_z = cvm->GetDownsampleZ();
 	m_simplify = cvm->GetSimplify();
-	m_smooth_n = cvm->GetSmoothN();
-	m_smooth_t = cvm->GetSmoothT();
+	m_smooth_strength = cvm->GetSmoothStrength();
+	m_smooth_scale = cvm->GetSmoothScale();
 }
 
 void MeshDefault::Apply(MeshData* md)
@@ -130,5 +130,5 @@ void MeshDefault::Apply(flrd::BaseConvVolMesh* cvm)
 	cvm->SetDownsample(m_downsample);
 	cvm->SetDownsampleZ(m_downsample_z);
 	cvm->SetSimplify(m_simplify);
-	cvm->SetSmooth(m_smooth_n, m_smooth_t);
+	cvm->SetSmooth(m_smooth_strength, m_smooth_scale);
 }

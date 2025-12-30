@@ -209,11 +209,11 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 	sizer_31->Add(15, 15);
 	//smooth n
 	wxBoxSizer* sizer_32 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Smooth N:",
+	st = new wxStaticText(page, 0, "Smooth Strength:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cnv_vol_mesh_smooth_n_sldr = new wxSingleSlider(page, wxID_ANY, 30, 0, 100,
+	m_cnv_vol_mesh_smooth_n_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_smooth_n_text = new wxTextCtrl(page, wxID_ANY, "0.30",
+	m_cnv_vol_mesh_smooth_n_text = new wxTextCtrl(page, wxID_ANY, "0.10",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	m_cnv_vol_mesh_smooth_n_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshSmoothNChange, this);
 	m_cnv_vol_mesh_smooth_n_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshSmoothNText, this);
@@ -224,11 +224,11 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 	sizer_32->Add(15, 15);
 	//smooth t
 	wxBoxSizer* sizer_33 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0, "Smooth T:",
+	st = new wxStaticText(page, 0, "Smooth Scale:",
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
-	m_cnv_vol_mesh_smooth_t_sldr = new wxSingleSlider(page, wxID_ANY, 30, 0, 100,
+	m_cnv_vol_mesh_smooth_t_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_smooth_t_text = new wxTextCtrl(page, wxID_ANY, "0.30",
+	m_cnv_vol_mesh_smooth_t_text = new wxTextCtrl(page, wxID_ANY, "0.10",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	m_cnv_vol_mesh_smooth_t_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshSmoothTChange, this);
 	m_cnv_vol_mesh_smooth_t_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshSmoothTText, this);
@@ -363,7 +363,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstVolMeshSmoothN))
 	{
 		//settings
-		dval = glbin_conv_vol_mesh->GetSmoothN();
+		dval = glbin_conv_vol_mesh->GetSmoothStrength();
 		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
 		m_cnv_vol_mesh_smooth_n_text->ChangeValue(wxString::Format("%.2f", dval));
 	}
@@ -371,21 +371,9 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstVolMeshSmoothT))
 	{
 		//settings
-		dval = glbin_conv_vol_mesh->GetSmoothT();
+		dval = glbin_conv_vol_mesh->GetSmoothScale();
 		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
 		m_cnv_vol_mesh_smooth_t_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	if (FOUND_VALUE(gstVolMeshSimplifyUpdate))
-	{
-		glbin_conv_vol_mesh->Simplify(true);
-	}
-
-	if (FOUND_VALUE(gstVolMeshSmoothUpdate))
-	{
-		if (!glbin_conv_vol_mesh->GetMerged())
-			glbin_conv_vol_mesh->MergeVertices(true);
-		glbin_conv_vol_mesh->Smooth(true);
 	}
 
 	if (FOUND_VALUE(gstVolMeshInfo))
@@ -551,7 +539,7 @@ void ConvertDlg::OnCnvVolMeshSmoothNText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh->SetSmoothN(val);
+		glbin_conv_vol_mesh->SetSmoothStrength(val);
 	}
 
 	//FluoRefresh(2, { gstVolMeshInfo });
@@ -573,7 +561,7 @@ void ConvertDlg::OnCnvVolMeshSmoothTText(wxCommandEvent& event)
 	if (str.ToDouble(&val))
 	{
 		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh->SetSmoothN(val);
+		glbin_conv_vol_mesh->SetSmoothStrength(val);
 	}
 
 	//FluoRefresh(2, { gstVolMeshInfo });
@@ -683,13 +671,17 @@ void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
 
 void ConvertDlg::OnCnvVolMeshSimplify(wxCommandEvent& event)
 {
-	FluoRefresh(0, { gstVolMeshSimplifyUpdate },
+	glbin_conv_vol_mesh->Simplify(true);
+	FluoRefresh(0, { gstVolMeshInfo },
 		{ glbin_current.GetViewId() });
 }
 
 void ConvertDlg::OnCnvVolMeshSmooth(wxCommandEvent& event)
 {
-	FluoRefresh(0, { gstVolMeshSmoothUpdate },
+	if (!glbin_conv_vol_mesh->GetMerged())
+		glbin_conv_vol_mesh->MergeVertices(false);
+	glbin_conv_vol_mesh->Smooth(true);
+	FluoRefresh(0, { gstVolMeshInfo },
 		{ glbin_current.GetViewId() });
 }
 
