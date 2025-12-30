@@ -352,6 +352,42 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_cnv_vol_mesh_selected_chk->SetValue(bval);
 	}
 
+	if (update_all || FOUND_VALUE(gstVolMeshSimplify))
+	{
+		//settings
+		dval = glbin_conv_vol_mesh->GetSimplify();
+		m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(dval * 100.0));
+		m_cnv_vol_mesh_simplify_text->ChangeValue(wxString::Format("%.2f", dval));
+	}
+
+	if (update_all || FOUND_VALUE(gstVolMeshSmoothN))
+	{
+		//settings
+		dval = glbin_conv_vol_mesh->GetSmoothN();
+		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
+		m_cnv_vol_mesh_smooth_n_text->ChangeValue(wxString::Format("%.2f", dval));
+	}
+
+	if (update_all || FOUND_VALUE(gstVolMeshSmoothT))
+	{
+		//settings
+		dval = glbin_conv_vol_mesh->GetSmoothT();
+		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
+		m_cnv_vol_mesh_smooth_t_text->ChangeValue(wxString::Format("%.2f", dval));
+	}
+
+	if (FOUND_VALUE(gstVolMeshSimplifyUpdate))
+	{
+		glbin_conv_vol_mesh->Simplify(true);
+	}
+
+	if (FOUND_VALUE(gstVolMeshSmoothUpdate))
+	{
+		if (!glbin_conv_vol_mesh->GetMerged())
+			glbin_conv_vol_mesh->MergeVertices(true);
+		glbin_conv_vol_mesh->Smooth(true);
+	}
+
 	if (FOUND_VALUE(gstVolMeshInfo))
 	{
 		auto md = glbin_conv_vol_mesh->GetMeshData();
@@ -365,25 +401,28 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			data.vertex_count = stat.GetVertexNum();
 			data.triangle_count = stat.GetTriangleNum();
 			data.normal_count = stat.GetNormalNum();
-			wxString unit;
+			wxString unit_area, unit_vol;
 			auto view = glbin_current.render_view.lock();
 			if (view)
 			{
 				switch (view->m_sb_unit)
 				{
 				case 0:
-					unit = L"nm\u00B3";
+					unit_area = L"nm\u00B2";
+					unit_vol = L"nm\u00B3";
 					break;
 				case 1:
 				default:
-					unit = L"\u03BCm\u00B3";
+					unit_area = L"\u03BCm\u00B2";
+					unit_vol = L"\u03BCm\u00B3";
 					break;
 				case 2:
-					unit = L"mm\u00B3";
+					unit_area = L"mm\u00B2";
+					unit_vol = L"mm\u00B3";
 					break;
 				}
 			}
-			SetOutput(data, unit);
+			SetOutput(data, unit_area, unit_vol);
 		}
 	}
 
@@ -493,7 +532,7 @@ void ConvertDlg::OnCnvVolMeshSimplifyText(wxCommandEvent& event)
 		glbin_conv_vol_mesh->SetSimplify(val);
 	}
 
-	FluoRefresh(2, { gstVolMeshInfo });
+	//FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothNChange(wxScrollEvent& event)
@@ -515,7 +554,7 @@ void ConvertDlg::OnCnvVolMeshSmoothNText(wxCommandEvent& event)
 		glbin_conv_vol_mesh->SetSmoothN(val);
 	}
 
-	FluoRefresh(2, { gstVolMeshInfo });
+	//FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothTChange(wxScrollEvent& event)
@@ -537,7 +576,7 @@ void ConvertDlg::OnCnvVolMeshSmoothTText(wxCommandEvent& event)
 		glbin_conv_vol_mesh->SetSmoothN(val);
 	}
 
-	FluoRefresh(2, { gstVolMeshInfo });
+	//FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
@@ -644,20 +683,18 @@ void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
 
 void ConvertDlg::OnCnvVolMeshSimplify(wxCommandEvent& event)
 {
-	glbin_conv_vol_mesh->Simplify();
-	FluoRefresh(0, { gstNull },
+	FluoRefresh(0, { gstVolMeshSimplifyUpdate },
 		{ glbin_current.GetViewId() });
 }
 
 void ConvertDlg::OnCnvVolMeshSmooth(wxCommandEvent& event)
 {
-	glbin_conv_vol_mesh->Smooth();
-	FluoRefresh(0, { gstNull },
+	FluoRefresh(0, { gstVolMeshSmoothUpdate },
 		{ glbin_current.GetViewId() });
 }
 
 //output
-void ConvertDlg::SetOutput(const ConvertGridData& data, const wxString& unit)
+void ConvertDlg::SetOutput(const ConvertGridData& data, const wxString& unit_area, const wxString& unit_vol)
 {
 	if (m_output_grid->GetNumberRows() == 0 ||
 		m_hold_history)
@@ -665,9 +702,9 @@ void ConvertDlg::SetOutput(const ConvertGridData& data, const wxString& unit)
 		m_output_grid->InsertRows();
 	}
 	m_output_grid->SetCellValue(0, 0,
-		wxString::Format("%f", data.area));
+		wxString::Format("%f", data.area) + unit_area);
 	m_output_grid->SetCellValue(0, 1,
-		wxString::Format("%f", data.volume));
+		wxString::Format("%f", data.volume) + unit_vol);
 	m_output_grid->SetCellValue(0, 2,
 		wxString::Format("%d", data.vertex_count));
 	m_output_grid->SetCellValue(0, 3,

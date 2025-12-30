@@ -52,9 +52,9 @@ namespace flrd
 		// merge vetices
 		virtual void MergeVertices(bool avg_normals) = 0;
 		//simplify
-		virtual void Simplify() = 0;
+		virtual void Simplify(bool avg_normals) = 0;
 		//smooth
-		virtual void Smooth() = 0;
+		virtual void Smooth(bool avg_normals) = 0;
 
 		//auto update
 		virtual bool GetAutoUpdate() { return false; }
@@ -88,9 +88,12 @@ namespace flrd
 
 		virtual std::string GetInfo() const { return m_info; }
 
+		virtual bool GetMerged() const { return m_merged; }
+
 	protected:
 		std::weak_ptr<VolumeData> m_volume; // Pointer to the volume data
 		std::shared_ptr<MeshData> m_mesh;
+		bool m_merged = false;
 
 		bool m_use_transfer = false; // Use transfer function
 		bool m_use_mask = false; // Use mask for volume data

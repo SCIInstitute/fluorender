@@ -476,7 +476,6 @@
         <sample_rate_enable>1</sample_rate_enable>
         <sample_rate>2</sample_rate>
         <spacing>[1,1,3]</spacing>
-        <colormap_mode>0</colormap_mode>
         <colormap_disp>0</colormap_disp>
         <colormap_low>0</colormap_low>
         <colormap_high>1</colormap_high>
@@ -490,7 +489,8 @@
         <transparent>0</transparent>
         <channel_mix_mode>3</channel_mix_mode>
         <legend>1</legend>
-        <label_mode>1</label_mode>
+        <main_mode>1</main_mode>
+        <mask_mode>1</mask_mode>
     </volume_default>
     <mesh_default>
         <use_transfer_func>0</use_transfer_func>
@@ -498,8 +498,9 @@
         <vol_mesh_thresh>0.5</vol_mesh_thresh>
         <vol_mesh_down_xy>1</vol_mesh_down_xy>
         <vol_mesh_down_z>1</vol_mesh_down_z>
-        <vol_mesh_simplify>0</vol_mesh_simplify>
-        <vol_mesh_smooth>0</vol_mesh_smooth>
+        <vol_mesh_simplify>0.1</vol_mesh_simplify>
+        <vol_mesh_smooth_n>0.1</vol_mesh_smooth_n>
+        <vol_mesh_smooth_t>0.1</vol_mesh_smooth_t>
     </mesh_default>
     <movie_default>
         <view_idx>0</view_idx>

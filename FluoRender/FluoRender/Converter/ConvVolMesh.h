@@ -53,15 +53,14 @@ namespace flrd
 		virtual void MergeVertices(bool avg_normals) override;
 
 		//simplify and smooth
-		virtual void Simplify() override;
-		virtual void Smooth() override;
+		virtual void Simplify(bool avg_normals) override;
+		virtual void Smooth(bool avg_normals) override;
 
 		virtual bool GetAutoUpdate() override;
 		virtual bool GetAutoThreshold() override;
 
 	private:
 		bool m_use_sel = false;//internal flag based on validity of mask
-		bool m_merged = false;
 
 	private:
 		std::string GetKernelStrMarchingCubes(bool mask, bool tf);

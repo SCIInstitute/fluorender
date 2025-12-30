@@ -57,9 +57,9 @@ public:
 	double m_iso = 0.5; // Iso value for contouring
 	int m_downsample = 1; // Downsampling factor in x and y
 	int m_downsample_z = 1; // Downsampling factor in z
-	double m_simplify = 0.0; // Simplification factor
-	double m_smooth_n = 0.0; // Smoothing factor in normal direction
-	double m_smooth_t = 0.0; // smoothing factor in tangential direction
+	double m_simplify = 0.1; // Simplification factor
+	double m_smooth_n = 0.1; // Smoothing factor in normal direction
+	double m_smooth_t = 0.1; // smoothing factor in tangential direction
 };
 
 #endif//_MESHDEFAULT_H_

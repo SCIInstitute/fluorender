@@ -57,9 +57,9 @@ void MeshDefault::Read()
 	f->Read(gstVolMeshThresh, &m_iso, 0.5);
 	f->Read(gstVolMeshDownXY, &m_downsample, 1);
 	f->Read(gstVolMeshDownZ, &m_downsample_z, 1);
-	f->Read(gstVolMeshSimplify, &m_simplify, 0.0);
-	f->Read(gstVolMeshSmoothN, &m_smooth_n, 0.0);
-	f->Read(gstVolMeshSmoothT, &m_smooth_t, 0.0);
+	f->Read(gstVolMeshSimplify, &m_simplify, 0.1);
+	f->Read(gstVolMeshSmoothN, &m_smooth_n, 0.1);
+	f->Read(gstVolMeshSmoothT, &m_smooth_t, 0.1);
 }
 
 void MeshDefault::Save()

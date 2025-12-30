@@ -91,7 +91,7 @@ private:
 	wxWindow* CreateInfoPage(wxWindow* parent);
 
 	//output
-	void SetOutput(const ConvertGridData& data, const wxString& unit);
+	void SetOutput(const ConvertGridData& data, const wxString& unit_area, const wxString& unit_vol);
 	void CopyData();
 	void PasteData();
 

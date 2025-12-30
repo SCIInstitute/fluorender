@@ -902,9 +902,18 @@ void ConvVolMesh::PrefixSum(
 }
 
 //simplify
-void ConvVolMesh::Simplify()
+void ConvVolMesh::Simplify(bool avg_normals)
 {
 	if (!m_mesh)
+		return;
+
+	//get index vbo
+	GLuint ibo_id = m_mesh->GetIndexVBO();
+	if (ibo_id == 0)
+		return;
+	//get vbo
+	GLuint vbo_id = m_mesh->GetCoordVBO();
+	if (vbo_id == 0)
 		return;
 
 	size_t vertex_num = m_mesh->GetVertexNum();
@@ -915,15 +924,7 @@ void ConvVolMesh::Simplify()
 		return;
 	size_t idx_num = tri_num * 3;
 
-	//get vbo
-	GLuint vbo_id = m_mesh->GetCoordVBO();
-	if (vbo_id == 0)
-		return;
 	size_t vbo_size = sizeof(float) * vertex_num * 3;
-	//get index vbo
-	GLuint ibo_id = m_mesh->GetIndexVBO();
-	if (ibo_id == 0)
-		return;
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
 
 	m_busy = true;
@@ -1055,6 +1056,10 @@ void ConvVolMesh::Simplify()
 
 	// Step 4: Update mesh
 	m_mesh->UpdateCoordVBO(trimmed_vbo, ibo);
+	if (avg_normals)
+	{
+		AverageNormals(arg_vbo, arg_ibo, new_vertex_count, idx_count);
+	}
 	m_mesh->SetVertexNum(new_vertex_count);
 	m_mesh->SetTriangleNum(new_idx_count / 3);
 	m_mesh->SetGpuDirty();
@@ -1064,9 +1069,18 @@ void ConvVolMesh::Simplify()
 }
 
 //smooth
-void ConvVolMesh::Smooth()
+void ConvVolMesh::Smooth(bool avg_normals)
 {
 	if (!m_mesh)
+		return;
+
+	//get index vbo
+	GLuint ibo_id = m_mesh->GetIndexVBO();
+	if (ibo_id == 0)
+		return;
+	//get vbo
+	GLuint vbo_id = m_mesh->GetCoordVBO();
+	if (vbo_id == 0)
 		return;
 
 	size_t vertex_num = m_mesh->GetVertexNum();
@@ -1077,15 +1091,7 @@ void ConvVolMesh::Smooth()
 		return;
 	size_t idx_num = tri_num * 3;
 
-	//get vbo
-	GLuint vbo_id = m_mesh->GetCoordVBO();
-	if (vbo_id == 0)
-		return;
 	size_t vbo_size = sizeof(float) * vertex_num * 3;
-	//get index vbo
-	GLuint ibo_id = m_mesh->GetIndexVBO();
-	if (ibo_id == 0)
-		return;
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
 	//get normals
 	GLuint normal_id = m_mesh->GetNormalVBO();
@@ -1163,6 +1169,10 @@ void ConvVolMesh::Smooth()
 
 	//update
 	m_mesh->UpdateCoordVBO(vbo, ibo);
+	if (avg_normals)
+	{
+		AverageNormals(arg_vbo, arg_ibo, vertex_num, idx_count);
+	}
 	m_mesh->SetGpuDirty();
 
 	kernel_prog->releaseAllArgs();
