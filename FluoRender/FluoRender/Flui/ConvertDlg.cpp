@@ -493,7 +493,7 @@ void ConvertDlg::OnCnvVolMeshSimplifyText(wxCommandEvent& event)
 		glbin_conv_vol_mesh->SetSimplify(val);
 	}
 
-	FluoRefresh(2, { gstConvVolMeshUpdate });
+	FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothNChange(wxScrollEvent& event)
@@ -515,7 +515,7 @@ void ConvertDlg::OnCnvVolMeshSmoothNText(wxCommandEvent& event)
 		glbin_conv_vol_mesh->SetSmoothN(val);
 	}
 
-	FluoRefresh(2, { gstConvVolMeshUpdate });
+	FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothTChange(wxScrollEvent& event)
@@ -537,7 +537,7 @@ void ConvertDlg::OnCnvVolMeshSmoothTText(wxCommandEvent& event)
 		glbin_conv_vol_mesh->SetSmoothN(val);
 	}
 
-	FluoRefresh(2, { gstConvVolMeshUpdate });
+	FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
@@ -571,7 +571,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		//glbin_current.SetMeshData(md);
 	}
 
-	FluoRefresh(0, { gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
+	FluoRefresh(0, { gstVolMeshInfo, gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
 		{ glbin_current.GetViewId() });
 }
 

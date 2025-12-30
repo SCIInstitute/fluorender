@@ -64,6 +64,31 @@ __kernel void kernel_0(
 }
 
 __kernel void kernel_1(
+	__global const float* vertex_buffer,   // [idx_count * 3]
+	__global float* tri_area,              // [idx_count / 3]
+	const int idx_count)
+{
+	int tri_id = get_global_id(0);
+	int tri_count = idx_count / 3;
+	if (tri_id >= tri_count) return;
+
+	// Each triangle uses 3 consecutive vertices
+	int base = tri_id * 3;
+
+	float3 v0 = vload3(base + 0, vertex_buffer);
+	float3 v1 = vload3(base + 1, vertex_buffer);
+	float3 v2 = vload3(base + 2, vertex_buffer);
+
+	float3 e1 = v1 - v0;
+	float3 e2 = v2 - v0;
+
+	float3 crossp = cross(e1, e2);
+	float area = 0.5f * length(crossp);
+
+	tri_area[tri_id] = area;
+}
+
+__kernel void kernel_2(
 	__global const float* vertex_buffer,
 	__global const int* index_buffer,
 	__global float* tri_volume,            // [idx_count/3]
@@ -85,6 +110,29 @@ __kernel void kernel_1(
 	float vol = dot(v0, crossp) / 6.0f;
 
 	tri_volume[i] = vol;
+}
+
+__kernel void kernel_3(
+	__global const float* vertex_buffer,   // [idx_count * 3]
+	__global float* tri_volume,            // [idx_count / 3]
+	const int idx_count)
+{
+	int tri_id = get_global_id(0);
+	int tri_count = idx_count / 3;
+	if (tri_id >= tri_count) return;
+
+	int base = tri_id * 3;
+
+	float3 v0 = vload3(base + 0, vertex_buffer);
+	float3 v1 = vload3(base + 1, vertex_buffer);
+	float3 v2 = vload3(base + 2, vertex_buffer);
+
+	// Signed tetrahedral volume contribution:
+	// V = dot(v0, cross(v1, v2)) / 6
+	float3 crossp = cross(v1, v2);
+	float vol = dot(v0, crossp) / 6.0f;
+
+	tri_volume[tri_id] = vol;
 }
 )CLKER";
 
@@ -114,6 +162,7 @@ void MeshStat::Run()
 	m_triangle_num = static_cast<int>(tri_num);
 	size_t idx_num = tri_num * 3;
 
+	bool indexed_array = true;
 	//get vbo
 	GLuint vbo_id = m_md->GetCoordVBO();
 	if (vbo_id == 0)
@@ -122,7 +171,7 @@ void MeshStat::Run()
 	//get index vbo
 	GLuint ibo_id = m_md->GetIndexVBO();
 	if (ibo_id == 0)
-		return;
+		indexed_array = false;
 	size_t ibo_size = sizeof(unsigned int) * idx_num;
 	//get normals
 	GLuint normal_id = m_md->GetNormalVBO();
@@ -142,13 +191,16 @@ void MeshStat::Run()
 		return;
 	}
 
-	int kernel_idx0 = kernel_prog->createKernel("kernel_0");
+	std::string kernel_name;
+	kernel_name = indexed_array ? "kernel_0" : "kernel_1";
+	int kernel_idx0 = kernel_prog->createKernel(kernel_name);
 	if (kernel_idx0 < 0)
 	{
 		m_busy = false;
 		return;
 	}
-	int kernel_idx1 = kernel_prog->createKernel("kernel_1");
+	kernel_name = indexed_array ? "kernel_2" : "kernel_3";
+	int kernel_idx1 = kernel_prog->createKernel(kernel_name);
 	if (kernel_idx1 < 0)
 	{
 		m_busy = false;
@@ -159,10 +211,12 @@ void MeshStat::Run()
 	size_t local_size[1] = { 1 };
 	size_t global_size[1] = { tri_num };
 
+	std::weak_ptr<flvr::Argument> arg_vbo, arg_ibo;
 	//compute area
 	kernel_prog->beginArgs(kernel_idx0);
-	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
-	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
+	arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
+	if (indexed_array)
+		arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
 	auto arg_area = kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_area", sizeof(float) * tri_num, nullptr);
 	int idx_count = static_cast<int>(idx_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
@@ -184,7 +238,8 @@ void MeshStat::Run()
 	//compute volume
 	kernel_prog->beginArgs(kernel_idx1);
 	kernel_prog->bindArg(arg_vbo);
-	kernel_prog->bindArg(arg_ibo);
+	if (indexed_array && arg_ibo.lock())
+		kernel_prog->bindArg(arg_ibo);
 	auto arg_volume = kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_volume", sizeof(float) * tri_num, nullptr);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
