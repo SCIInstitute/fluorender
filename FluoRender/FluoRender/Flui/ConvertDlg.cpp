@@ -671,6 +671,8 @@ void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
 
 void ConvertDlg::OnCnvVolMeshSimplify(wxCommandEvent& event)
 {
+	if (!glbin_conv_vol_mesh->GetMerged())
+		glbin_conv_vol_mesh->MergeVertices(false);
 	glbin_conv_vol_mesh->Simplify(true);
 	FluoRefresh(0, { gstVolMeshInfo },
 		{ glbin_current.GetViewId() });

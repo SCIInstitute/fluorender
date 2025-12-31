@@ -665,7 +665,7 @@ __kernel void kernel_5(
 )CLKER";
 
 //compute normals for smooth shading
-inline constexpr const char* str_cl_smooth_normals_float_atomic_supported = R"CLKER(
+inline constexpr const char* str_cl_atomic_add3 = R"CLKER(
 inline void atomic_add3(__global float* ptr, float3 value)
 {
 	atomic_add(&ptr[0], value.x);
@@ -674,7 +674,7 @@ inline void atomic_add3(__global float* ptr, float3 value)
 }
 )CLKER";
 
-inline constexpr const char* str_cl_smooth_normals_float_atomic_unsupported = R"CLKER(
+inline constexpr const char* str_cl_atomic_add_float = R"CLKER(
 inline void atomic_add_float(__global float* ptr, float value)
 {
 	__global int* iptr = (__global int*)(__global void*)ptr;
@@ -739,124 +739,7 @@ __kernel void kernel_1(
 }
 )CLKER";
 
-//simplify mesh
-/*
-    Pass 0: Snap vertices to a voxel grid (voxel clustering)
-
-    Each vertex position is quantized to a grid of size `cell_size`.
-    Vertices that fall in the same voxel get the same position, which
-    causes redundant / tiny triangles to become degenerate and removable.
-
-	Pass 1: Mark triangles for removal
-
-	After snapping, many triangles will have zero-length edges
-	(two or three vertices collapsed onto the same voxel position).
-	We remove those degenerate triangles.
-
-	You can treat `cell_size` as your simplification knob.
-
-	Pass 2: Compact index buffer (unchanged logic)
-
-	Takes tri_mask and its prefix sum to rewrite the index buffer
-	without removed triangles.
-*/
-inline constexpr const char* str_cl_mesh_simplify = R"CLKER(
-__kernel void kernel_0(
-	__global float* vertex_buffer,   // [vertex_count * 3], in-place
-	const float cell_size,
-	const int vertex_count)
-{
-	//snap vertices
-	int i = get_global_id(0);
-	if (i >= vertex_count) return;
-
-	float3 v = vload3(i, vertex_buffer);
-
-	// If cell_size == 0, do NOT snap — keep original vertex
-	if (cell_size == 0.0f)
-	{
-		vstore3(v, i, vertex_buffer);
-		return;
-	}
-
-	// Quantize to voxel grid.
-	// Option A: snap to voxel centers.
-	float inv_cell = 1.0f / cell_size;
-
-	float3 q;
-	q.x = floor(v.x * inv_cell + 0.5f);
-	q.y = floor(v.y * inv_cell + 0.5f);
-	q.z = floor(v.z * inv_cell + 0.5f);
-
-	float3 snapped;
-	snapped.x = q.x * cell_size;
-	snapped.y = q.y * cell_size;
-	snapped.z = q.z * cell_size;
-
-	vstore3(snapped, i, vertex_buffer);
-}
-
-__kernel void kernel_1(
-	__global const float* vertex_buffer,   // [vertex_count * 3], snapped positions
-	__global const int* index_buffer,      // [idx_count]
-	__global int* tri_mask,                // [idx_count/3], 1 = keep, 0 = remove
-	const int idx_count)
-{
-	//mark triangles
-	int i = get_global_id(0);
-	if (i >= idx_count / 3) return;
-
-	int i0 = index_buffer[i * 3 + 0];
-	int i1 = index_buffer[i * 3 + 1];
-	int i2 = index_buffer[i * 3 + 2];
-
-	float3 v0 = vload3(i0, vertex_buffer);
-	float3 v1 = vload3(i1, vertex_buffer);
-	float3 v2 = vload3(i2, vertex_buffer);
-
-	float3 e0 = v1 - v0;
-	float3 e1 = v2 - v1;
-	float3 e2 = v0 - v2;
-
-	float e0_len2 = dot(e0, e0);
-	float e1_len2 = dot(e1, e1);
-	float e2_len2 = dot(e2, e2);
-
-	// If any edge is effectively zero length, the triangle is degenerate.
-	// Use a small epsilon to account for float round-off.
-	const float eps2 = 1e-12f;
-
-	int degenerate =
-		(e0_len2 < eps2) ||
-		(e1_len2 < eps2) ||
-		(e2_len2 < eps2);
-
-	tri_mask[i] = degenerate ? 0 : 1;
-}
-
-__kernel void kernel_2(
-	__global const int* index_buffer,      // original
-	__global const int* tri_mask,          // 1 = keep, 0 = remove
-	__global const int* tri_prefix_sum,    // prefix sum of tri_mask
-	__global int* new_index_buffer,        // compacted output
-	const int idx_count)
-{
-	//compact indices
-	int i = get_global_id(0);
-	if (i >= idx_count / 3) return;
-
-	if (tri_mask[i] == 0) return;
-
-	int new_tri_id = tri_prefix_sum[i];
-	int dst = new_tri_id * 3;
-
-	new_index_buffer[dst + 0] = index_buffer[i * 3 + 0];
-	new_index_buffer[dst + 1] = index_buffer[i * 3 + 1];
-	new_index_buffer[dst + 2] = index_buffer[i * 3 + 2];
-}
-)CLKER";
-
-inline constexpr const char* str_cl_smooth_mesh = R"CLKER(
+inline constexpr const char* str_cl_mesh_get_neighbors = R"CLKER(
 __kernel void kernel_0(
 	__global const float* vertex_buffer,    // [vertex_count * 3] (not needed but kept for symmetry)
 	__global const int*   index_buffer,     // [idx_count]
@@ -895,7 +778,121 @@ __kernel void kernel_0(
 	atomic_add3(&nbr_sum_buffer[i2 * 3], v1);
 	atomic_add(&nbr_count_buffer[i2], 2);
 }
+)CLKER";
 
+//simplify mesh
+inline constexpr const char* str_cl_mesh_simplify = R"CLKER(
+inline float hash11(float x)
+{
+	float s = sin(x * 12.9898f) * 43758.5453f;
+	return s - floor(s);   // fract(s)
+}
+
+__kernel void kernel_1(
+	__global float*       vertex_buffer,    
+	__global const float* nbr_sum_buffer,   
+	__global const int*   nbr_count_buffer, 
+	const float           collapse_dist,    
+	const int             vertex_count)
+{
+	int vid = get_global_id(0);
+	if (vid >= vertex_count) return;
+
+	float3 v = vload3(vid, vertex_buffer);
+
+	if (collapse_dist == 0.0f) {
+		vstore3(v, vid, vertex_buffer);
+		return;
+	}
+
+	int count = nbr_count_buffer[vid];
+	if (count <= 0) {
+		vstore3(v, vid, vertex_buffer);
+		return;
+	}
+
+	float3 sum_neighbors = vload3(vid, nbr_sum_buffer);
+	float3 avg = sum_neighbors / (float)count;
+
+	float3 lap = avg - v;
+	float len2 = dot(lap, lap);
+
+	// Deterministic per-vertex jitter in [-j, +j]
+	float jitter_strength = 0.25f;  // 25% of collapse_dist
+	float r = hash11((float)vid);   // [0,1)
+	float jitter = (r * 2.0f - 1.0f) * (jitter_strength * collapse_dist);
+
+	float effective_dist = collapse_dist + jitter;
+	float thresh2 = effective_dist * effective_dist;
+
+	if (len2 <= thresh2) {
+		vstore3(avg, vid, vertex_buffer);
+	} else {
+		vstore3(v, vid, vertex_buffer);
+	}
+}
+
+__kernel void kernel_2(
+	__global const float* vertex_buffer,   // [vertex_count * 3], snapped positions
+	__global const int* index_buffer,      // [idx_count]
+	__global int* tri_mask,                // [idx_count/3], 1 = keep, 0 = remove
+	const int idx_count)
+{
+	//mark triangles
+	int i = get_global_id(0);
+	if (i >= idx_count / 3) return;
+
+	int i0 = index_buffer[i * 3 + 0];
+	int i1 = index_buffer[i * 3 + 1];
+	int i2 = index_buffer[i * 3 + 2];
+
+	float3 v0 = vload3(i0, vertex_buffer);
+	float3 v1 = vload3(i1, vertex_buffer);
+	float3 v2 = vload3(i2, vertex_buffer);
+
+	float3 e0 = v1 - v0;
+	float3 e1 = v2 - v1;
+	float3 e2 = v0 - v2;
+
+	float e0_len2 = dot(e0, e0);
+	float e1_len2 = dot(e1, e1);
+	float e2_len2 = dot(e2, e2);
+
+	// If any edge is effectively zero length, the triangle is degenerate.
+	// Use a small epsilon to account for float round-off.
+	const float eps2 = 1e-12f;
+
+	int degenerate =
+		(e0_len2 < eps2) ||
+		(e1_len2 < eps2) ||
+		(e2_len2 < eps2);
+
+	tri_mask[i] = degenerate ? 0 : 1;
+}
+
+__kernel void kernel_3(
+	__global const int* index_buffer,      // original
+	__global const int* tri_mask,          // 1 = keep, 0 = remove
+	__global const int* tri_prefix_sum,    // prefix sum of tri_mask
+	__global int* new_index_buffer,        // compacted output
+	const int idx_count)
+{
+	//compact indices
+	int i = get_global_id(0);
+	if (i >= idx_count / 3) return;
+
+	if (tri_mask[i] == 0) return;
+
+	int new_tri_id = tri_prefix_sum[i];
+	int dst = new_tri_id * 3;
+
+	new_index_buffer[dst + 0] = index_buffer[i * 3 + 0];
+	new_index_buffer[dst + 1] = index_buffer[i * 3 + 1];
+	new_index_buffer[dst + 2] = index_buffer[i * 3 + 2];
+}
+)CLKER";
+
+inline constexpr const char* str_cl_smooth_mesh = R"CLKER(
 __kernel void kernel_1(
 	__global float*       vertex_buffer,    // [vertex_count * 3], in-place update
 	__global const float* nbr_sum_buffer,   // [vertex_count * 3], neighbor position sums

@@ -224,10 +224,23 @@ std::string ConvVolMesh::GetKernelStrSmoothNormals()
 {
 	std::ostringstream z;
 	if (flvr::KernelProgram::get_float_atomics())
-		z << str_cl_smooth_normals_float_atomic_supported;
+		z << str_cl_atomic_add3;
 	else
-		z << str_cl_smooth_normals_float_atomic_unsupported;
+		z << str_cl_atomic_add_float;
 	z << str_cl_smooth_normals;
+
+	return z.str();
+}
+
+std::string ConvVolMesh::GetKernelStrSimplifyMesh()
+{
+	std::ostringstream z;
+	if (flvr::KernelProgram::get_float_atomics())
+		z << str_cl_atomic_add3;
+	else
+		z << str_cl_atomic_add_float;
+	z << str_cl_mesh_get_neighbors;
+	z << str_cl_mesh_simplify;
 
 	return z.str();
 }
@@ -236,9 +249,10 @@ std::string ConvVolMesh::GetKernelStrSmoothMesh()
 {
 	std::ostringstream z;
 	if (flvr::KernelProgram::get_float_atomics())
-		z << str_cl_smooth_normals_float_atomic_supported;
+		z << str_cl_atomic_add3;
 	else
-		z << str_cl_smooth_normals_float_atomic_unsupported;
+		z << str_cl_atomic_add_float;
+	z << str_cl_mesh_get_neighbors;
 	z << str_cl_smooth_mesh;
 
 	return z.str();
@@ -931,7 +945,7 @@ void ConvVolMesh::Simplify(bool avg_normals)
 
 	//create program kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(
-		str_cl_mesh_simplify, 8, 256.0f);
+		GetKernelStrSimplifyMesh(), 8, 256.0f);
 	if (!kernel_prog)
 	{
 		m_busy = false;
@@ -956,36 +970,63 @@ void ConvVolMesh::Simplify(bool avg_normals)
 		m_busy = false;
 		return;
 	}
+	int kernel_idx3 = kernel_prog->createKernel("kernel_3");
+	if (kernel_idx3 < 0)
+	{
+		m_busy = false;
+		return;
+	}
 
 	//compute workload
 	size_t local_size[1] = { 1 };
 	size_t global_size[1] = { tri_num };
 
-	//snap vertices
+	//neighbor sum
+	std::vector<float> nbr_sum_buf(vertex_num * 3, 0.0);
+	//neighbor count
+	std::vector<int> nbr_count_buf(vertex_num, 0);
+
+	//accumulate neighbor positions
 	kernel_prog->beginArgs(kernel_idx0);
 	auto arg_vbo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, vbo_id, vbo_size);
-	//compute threshold from bounding box
-	auto bbox = m_mesh->GetBounds();
-	float threshold = static_cast<float>(m_simplify * bbox.diagonal().length() * 0.2);
-	kernel_prog->setConst(sizeof(float), (void*)(&threshold));
+	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
+	auto arg_nbr_sum = kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_nbr_sum", vbo_size, nbr_sum_buf.data());
+	auto arg_nbr_count = kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "arg_nbr_count", sizeof(int) * vertex_num, nbr_count_buf.data());
+	int idx_count = static_cast<int>(idx_num);
+	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
+	//execute
+	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+
+	//snap vertices
+	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->bindArg(arg_vbo);
+	kernel_prog->bindArg(arg_nbr_sum);
+	kernel_prog->bindArg(arg_nbr_count);
+	float edge_scale = static_cast<float>(m_simplify);
+	if (auto vd = m_volume.lock())
+	{
+		fluo::Vector spc = vd->GetSpacing();
+		spc *= fluo::Vector(m_downsample, m_downsample, m_downsample_z);
+		edge_scale *= static_cast<float>(spc.maxComponent());
+	}
+	kernel_prog->setConst(sizeof(float), (void*)(&edge_scale));
 	int vertex_count = static_cast<int>(vertex_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&vertex_count));
 	//execute
-	kernel_prog->executeKernel(kernel_idx0, 1, global_size, local_size);
+	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
 
 	//debug
 	//std::vector<float> vbo(vertex_num * 3);
 	//kernel_prog->readBuffer(arg_vbo, vbo.data());
 
 	//mark triangles for removal
-	kernel_prog->beginArgs(kernel_idx1);
+	kernel_prog->beginArgs(kernel_idx2);
 	kernel_prog->bindArg(arg_vbo);
-	auto arg_ibo = kernel_prog->bindVeretxBuf(CL_MEM_READ_ONLY, ibo_id, ibo_size);
+	kernel_prog->bindArg(arg_ibo);
 	auto arg_tri_mask = kernel_prog->setBufNew(CL_MEM_READ_WRITE, "arg_tri_mask", sizeof(int) * tri_num, nullptr);
-	int idx_count = static_cast<int>(idx_num);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
-	kernel_prog->executeKernel(kernel_idx1, 1, global_size, local_size);
+	kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size);
 
 	std::vector<int> tri_mask(tri_num);
 	std::vector<int> tri_prefix(tri_num);
@@ -1006,14 +1047,14 @@ void ConvVolMesh::Simplify(bool avg_normals)
 	size_t new_idx_count = new_tri_num * 3;
 
 	//rewrite index buffer
-	kernel_prog->beginArgs(kernel_idx2);
+	kernel_prog->beginArgs(kernel_idx3);
 	kernel_prog->bindArg(arg_ibo);
 	kernel_prog->bindArg(arg_tri_mask);
 	auto arg_tri_prefix = kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "arg_tri_prefix", sizeof(int) * tri_num, tri_prefix.data());
 	auto arg_new_ibo = kernel_prog->setBufNew(CL_MEM_WRITE_ONLY, "arg_new_ibo", sizeof(int) * idx_num, nullptr);
 	kernel_prog->setConst(sizeof(int), (void*)(&idx_count));
 	//execute
-	kernel_prog->executeKernel(kernel_idx2, 1, global_size, local_size);
+	kernel_prog->executeKernel(kernel_idx3, 1, global_size, local_size);
 
 	// Read back GPU buffers
 	std::vector<float> vbo(vertex_num * 3);
