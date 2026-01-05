@@ -5944,10 +5944,8 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 	DrawOverlayOutlineVolume(list);
 
 	//bind fbo for final composition
-	//data_buffer->set_blend_enabled(true);
-	//data_buffer->set_blend_func(flvr::BlendFactor::One,
-	//	m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One :flvr::BlendFactor::OneMinusSrcAlpha);
-	//data_buffer->set_depth_test_enabled(false);
+	flvr::FramebufferStateGuard fbg(*data_buffer);
+	data_buffer->set_color_mask(1, false, false, false, false);//prevent overriding depth for mesh
 	data_buffer->set_blend_func(0,
 		flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha,
 		flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
@@ -6206,61 +6204,19 @@ void RenderView::DrawVolumesComp(const std::vector<std::weak_ptr<VolumeData>>& l
 	if (list.empty())
 		return;
 
-	//count volumes with mask
-	//int cnt_mask = 0;
-	//for (auto it = list.begin(); it != list.end(); ++it)
-	//{
-	//	auto vd = it->lock();
-	//	if (!vd || !vd->GetDisp())
-	//		continue;
-	//	if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
-	//		cnt_mask++;
-	//}
-
-	//if (mask && cnt_mask == 0)
-	//	return;
-
 	//draw each volume to fbo
 	for (auto it = list.begin(); it != list.end(); ++it)
 	{
 		auto vd = it->lock();
 		if (!vd || !vd->GetDisp())
 			continue;
-		//if (mask)
-		//{
-		//	//drawlabel
-		//	if (vd->GetLabelMode() &&
-		//		vd->GetMask(false) &&
-		//		vd->GetLabel(false))
-		//		continue;
 
-		//	if (vd->GetTexture() && vd->GetTexture()->has_comp(flvr::CompType::Mask))
-		//	{
-		//		vd->SetMaskMode(1);
-		//		ChannelMixModeGuard cmg(*this);
-		//		m_channel_mix_mode = ChannelMixMode::CompositeAdd;
-		//		if (vd->GetRenderMode() == flvr::RenderMode::Mip)
-		//			DrawVolumeCompMip(vd, peel);
-		//		else
-		//			DrawVolumeCompStandard(vd, mask, peel);
-		//		vd->SetMaskMode(0);
-		//	}
-		//}
-		//else
+		if (vd->GetChannelMixMode() != ChannelMixMode::Depth)
 		{
-			if (vd->GetChannelMixMode() != ChannelMixMode::Depth)
-			{
-				//drawlabel
-				//if (vd->GetLabelMode() &&
-				//	vd->GetMask(false) &&
-				//	vd->GetLabel(false))
-				//	vd->SetMaskMode(4);
-
-				if (vd->GetRenderMode() == flvr::RenderMode::Mip)
-					DrawVolumeCompMip(vd, peel);
-				else
-					DrawVolumeCompStandard(vd, peel);
-			}
+			if (vd->GetRenderMode() == flvr::RenderMode::Mip)
+				DrawVolumeCompMip(vd, peel);
+			else
+				DrawVolumeCompStandard(vd, peel);
 		}
 	}
 }
@@ -6566,16 +6522,9 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		//if (mask)
-		//{
-		//	if (vr->get_done_loop(4))
-		//		do_over = false;
-		//}
-		//else
-		{
-			if (vr->get_done_loop(0))
-				do_over = false;
-		}
+
+		if (vr->get_done_loop(0))
+			do_over = false;
 	}
 
 	auto data_buffer = glbin_framebuffer_manager.current();
@@ -6658,6 +6607,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 
 	//bind fbo for final composition
 	glbin_framebuffer_manager.bind(data_buffer);
+	flvr::FramebufferStateGuard fbg(*data_buffer);
 
 	if (glbin_settings.m_mem_swap)
 	{
@@ -6686,6 +6636,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
 	chan_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 
+	data_buffer->set_color_mask(1, false, false, false, false);//prevent overriding depth for mesh
 	data_buffer->set_blend_enabled(0, true);
 	data_buffer->set_blend_equation(0, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 	flvr::BlendFactor dst_factor =
