@@ -528,7 +528,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					false,
 					vr_list_[tn]->shading_,
 					use_fog,
-					vr_list_[tn]->depth_peel_,
+					depth_peel_,
 					true,
 					grad,
 					has_mask,
