@@ -46,10 +46,6 @@ void CurrentObjects::SetRenderView(const std::shared_ptr<RenderView>& view)
 	vol_data.reset();
 	mesh_data.reset();
 	ann_data.reset();
-	if (auto view_ptr = render_view.lock())
-	{
-		view_ptr->m_cur_vol.reset();
-	}
 }
 
 void CurrentObjects::SetVolumeGroup(const std::shared_ptr<VolumeGroup>& g)
@@ -85,8 +81,6 @@ void CurrentObjects::SetVolumeGroup(const std::shared_ptr<VolumeGroup>& g)
 	vol_data.reset();
 	mesh_data .reset();
 	ann_data.reset();
-	if (auto view_ptr = render_view.lock())
-		view_ptr->m_cur_vol.reset();
 }
 
 void CurrentObjects::SetMeshGroup(const std::shared_ptr<MeshGroup>& g)
@@ -122,8 +116,6 @@ void CurrentObjects::SetMeshGroup(const std::shared_ptr<MeshGroup>& g)
 	vol_data.reset();
 	mesh_data.reset();
 	ann_data.reset();
-	if (auto view_ptr = render_view.lock())
-		view_ptr->m_cur_vol.reset();
 }
 
 void CurrentObjects::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
@@ -226,8 +218,6 @@ void CurrentObjects::SetMeshData(const std::shared_ptr<MeshData>& md)
 	vol_group.reset();
 	vol_data.reset();
 	ann_data.reset();
-	if (auto view_ptr = render_view.lock())
-		view_ptr->m_cur_vol.reset();
 }
 
 void CurrentObjects::SetAnnotData(const std::shared_ptr<AnnotData>& ann)
@@ -263,8 +253,6 @@ void CurrentObjects::SetAnnotData(const std::shared_ptr<AnnotData>& ann)
 	mesh_group.reset();
 	vol_data.reset();
 	mesh_data.reset();
-	if (auto view_ptr = render_view.lock())
-		view_ptr->m_cur_vol.reset();
 }
 
 void CurrentObjects::SetSel(const std::wstring& str)

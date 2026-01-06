@@ -5953,7 +5953,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	fluo::Color vol_color, mask_color;
 	double alpha = 0.0, alpha_power = 1.0, luminance = 0.0;
 	fluo::Color gamma, brightness, hdr;
-	auto cur_vd = glbin_current.vol_data.lock();
+	auto cur_vd = m_cur_vol.lock();
 	if (cur_vd)
 	{
 		//colormap and single color modes can't be mixed together in mip depth mode
@@ -6095,11 +6095,8 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	DrawOverlayOutlineVolume(list);
 
 	//bind fbo for final composition
-	//data_buffer->set_blend_enabled(true);
-	//data_buffer->set_blend_func(flvr::BlendFactor::One,
-	//	m_vol_method == VOL_METHOD_COMP ? flvr::BlendFactor::One :flvr::BlendFactor::OneMinusSrcAlpha);
-	//data_buffer->set_depth_test_enabled(false);
-	//data_buffer->set_blend_func(flvr::BlendFactor::One, flvr::BlendFactor::OneMinusSrcAlpha);
+	flvr::FramebufferStateGuard fbg(*data_buffer);
+	data_buffer->set_color_mask(1, false, false, false, false);//prevent overriding depth for mesh
 	glbin_framebuffer_manager.bind(data_buffer);
 	//build mipmap
 	chan_buffer->generate_mipmap(flvr::AttachmentPoint::Color(0));
@@ -6361,6 +6358,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	//bind fbo for final composition
 	//need alpha blending if colormap is on
 	flvr::FramebufferStateGuard fbg(*data_buffer);
+	data_buffer->set_color_mask(1, false, false, false, false);//prevent overriding depth for mesh
 	glbin_framebuffer_manager.bind(data_buffer);
 
 	if (glbin_settings.m_mem_swap)
