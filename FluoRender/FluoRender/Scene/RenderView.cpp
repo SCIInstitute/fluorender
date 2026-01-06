@@ -233,31 +233,6 @@ RenderView::RenderView() :
 	m_value_6(1.0),
 	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
 	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
-	//selection
-	m_pick(false),
-	m_clear_mask(false),
-	m_save_mask(false),
-	//move view
-	m_move_left(false),
-	m_move_right(false),
-	m_move_up(false),
-	m_move_down(false),
-	//move time
-	m_tseq_forward(false),
-	m_tseq_backward(false),
-	//move clip
-	m_clip_up(false),
-	m_clip_down(false),
-	//full cell
-	m_cell_full(false),
-	//link cells
-	m_cell_link(false),
-	//new cell id
-	m_cell_new_id(false),
-	//comp include
-	m_comp_include(false),
-	//comp exclude
-	m_comp_exclude(false),
 	//nodraw count
 	m_nodraw_count(0),
 	//pin rotation center
@@ -432,31 +407,6 @@ RenderView::RenderView(RenderView& copy):
 	m_value_6(1.0),
 	m_color_6(fluo::Color(1.0, 0.0, 0.0)),
 	m_color_7(fluo::Color(1.0, 0.0, 0.0)),
-	//selection
-	m_pick(false),
-	m_clear_mask(false),
-	m_save_mask(false),
-	//move view
-	m_move_left(false),
-	m_move_right(false),
-	m_move_up(false),
-	m_move_down(false),
-	//move time
-	m_tseq_forward(false),
-	m_tseq_backward(false),
-	//move clip
-	m_clip_up(false),
-	m_clip_down(false),
-	//full cell
-	m_cell_full(false),
-	//link cells
-	m_cell_link(false),
-	//new cell id
-	m_cell_new_id(false),
-	//comp include
-	m_comp_include(false),
-	//comp exclude
-	m_comp_exclude(false),
 	//nodraw count
 	m_nodraw_count(0),
 	//pin rotation center
@@ -4169,9 +4119,9 @@ void RenderView::StartLoopUpdate()
 					if (vd->GetShadowEnable())
 						total_num++;
 					//mask
-					if (vd->GetTexture() &&
-						vd->GetTexture()->has_comp(flvr::CompType::Mask))
-						total_num++;
+					//if (vd->GetTexture() &&
+					//	vd->GetTexture()->has_comp(flvr::CompType::Mask))
+					//	total_num++;
 				}
 			}
 			vd->SetBrickNum(num_chan);
@@ -5751,9 +5701,6 @@ void RenderView::DrawVolumes(int peel)
 					DrawVolumesMipDepth(vd_list, peel);
 				else
 					DrawVolumesStandardDepth(vd_list, peel);
-				//draw masks
-				//if (m_draw_mask)
-				//	DrawVolumesComp(m_vd_pop_list, peel);
 			}
 		}
 		else
@@ -5788,9 +5735,6 @@ void RenderView::DrawVolumes(int peel)
 					if (!list.empty())
 					{
 						DrawVolumesComp(list, peel);
-						//draw masks
-						//if (m_draw_mask)
-						//	DrawVolumesComp(list, peel);
 						list.clear();
 					}
 					auto group = std::dynamic_pointer_cast<VolumeGroup>(*it);
@@ -5826,9 +5770,6 @@ void RenderView::DrawVolumes(int peel)
 						}
 						else
 							DrawVolumesComp(list, peel);
-						//draw masks
-						//if (m_draw_mask)
-						//	DrawVolumesComp(list, peel);
 						list.clear();
 					}
 				}
@@ -5895,11 +5836,6 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 			flvr::VolumeRenderer* vr = vd->GetVR();
 			if (vr)
 			{
-				//drawlabel
-				//if (vd->GetLabelMode() &&
-				//	vd->GetMask(false) &&
-				//	vd->GetLabel(false))
-				//	vd->SetMaskMode(4);
 				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
@@ -6011,11 +5947,11 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	m_mvr->clear_vr();
 	//set up guard
 	std::list<flvr::RenderModeGuard> guards;
-	flvr::ColorMode main_mode, mask_mode;
+	flvr::ColorMode main_mode = flvr::ColorMode::None, mask_mode = flvr::ColorMode::None;
 	int colormap = 0;
-	double colormap_low, colormap_hi, colormap_inv;
+	double colormap_low = 0.0, colormap_hi = 1.0, colormap_inv = 0.0;
 	fluo::Color vol_color, mask_color;
-	double alpha, alpha_power, luminance;
+	double alpha = 0.0, alpha_power = 1.0, luminance = 0.0;
 	fluo::Color gamma, brightness, hdr;
 	auto cur_vd = glbin_current.vol_data.lock();
 	if (cur_vd)
@@ -6582,10 +6518,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 
 		vr->set_depth_peel(peel);
 		vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
-		//if (mask)
-		//	vd->SetStreamMode(4);
-		//else
-			vd->SetStreamMode(0);
+		vd->SetStreamMode(0);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		vd->SetViewport(vp);
@@ -9883,20 +9816,38 @@ void RenderView::ProcessIdle(IdleState& state)
 
 			UpdateBrushState(state);
 
-			//draw_mask
-			//if (state.m_key_mask && m_draw_mask)
-			//{
-			//	m_draw_mask = false;
-			//	state.m_refresh = true;
-			//	state.m_looking_glass_changed = true;
-			//	state.m_set_focus = true;
-			//}
-			//if (!state.m_key_mask && !m_draw_mask)
-			//{
-			//	m_draw_mask = true;
-			//	state.m_refresh = true;
-			//	state.m_looking_glass_changed = true;
-			//}
+			//main color mode
+			if (state.m_key_main_mode && !m_main_mode_flag)
+			{
+				m_main_mode_flag = true;
+				auto vd = m_cur_vol.lock();
+				if (vd)
+				{
+					vd->IncMainMaskMode();
+					state.m_value_collection.insert({ gstMainMode });
+				}
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (!state.m_key_main_mode && m_main_mode_flag)
+				m_main_mode_flag = false;
+			//mask color mode
+			if (state.m_key_mask_mode && !m_mask_mode_flag)
+			{
+				m_mask_mode_flag = true;
+				auto vd = m_cur_vol.lock();
+				if (vd)
+				{
+					vd->IncMaskMode();
+					state.m_value_collection.insert({ gstMaskMode });
+				}
+				state.m_refresh = true;
+				state.m_looking_glass_changed = true;
+				state.m_set_focus = true;
+			}
+			if (!state.m_key_mask_mode && m_mask_mode_flag)
+				m_mask_mode_flag = false;
 
 			//move view
 			//left

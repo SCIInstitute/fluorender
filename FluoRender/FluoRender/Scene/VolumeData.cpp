@@ -1693,6 +1693,15 @@ void VolumeData::SetMainMaskMode(flvr::ColorMode mode)
 		m_vr->set_main_mode(mode);
 }
 
+void VolumeData::IncMainMaskMode()
+{
+	int ival = static_cast<int>(m_main_mode);
+	ival++;
+	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
+		static_cast<int>(flvr::ColorMode::None) : ival;
+	SetMainMaskMode(static_cast<flvr::ColorMode>(ival));
+}
+
 void VolumeData::SetMaskMode(flvr::ColorMode mode)
 {
 	m_mask_mode = mode;
@@ -1700,17 +1709,14 @@ void VolumeData::SetMaskMode(flvr::ColorMode mode)
 		m_vr->set_mask_mode(mode);
 }
 
-//void VolumeData::SetMaskMode(int mode)
-//{
-//	m_mask_mode = mode;
-//	if (m_vr)
-//		m_vr->set_ml_mode(mode);
-//}
-//
-//int VolumeData::GetMaskColorMode()
-//{
-//	return m_mask_mode;
-//}
+void VolumeData::IncMaskMode()
+{
+	int ival = static_cast<int>(m_mask_mode);
+	ival++;
+	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
+		static_cast<int>(flvr::ColorMode::None) : ival;
+	SetMaskMode(static_cast<flvr::ColorMode>(ival));
+}
 
 //noise reduction
 void VolumeData::SetNR(bool val)

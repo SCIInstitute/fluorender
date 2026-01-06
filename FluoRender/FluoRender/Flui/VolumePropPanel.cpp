@@ -2987,18 +2987,12 @@ void VolumePropPanel::OnMainColorMode(wxCommandEvent& event)
 	if (!m_vd)
 		return;
 
-	auto mode = m_vd->GetMainColorMode();
-	int ival = static_cast<int>(mode);
-	ival++;
-	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
-		static_cast<int>(flvr::ColorMode::None) : ival;
-	mode = static_cast<flvr::ColorMode>(ival);
 	if (m_sync_group && m_group)
-		m_group->SetMainMaskMode(mode);
+		m_group->IncMainMaskMode();
 	else
-		m_vd->SetMainMaskMode(mode);
+		m_vd->IncMainMaskMode();
 
-	FluoRefresh(0, { gstMainMode, gstMaskMode, gstColormap }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstMainMode, gstColormap }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::OnMainColorChange(wxColor c)
@@ -3028,18 +3022,12 @@ void VolumePropPanel::OnAltColorMode(wxCommandEvent& event)
 	if (!m_vd)
 		return;
 
-	auto mode = m_vd->GetMaskColorMode();
-	int ival = static_cast<int>(mode);
-	ival++;
-	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
-		static_cast<int>(flvr::ColorMode::None) : ival;
-	mode = static_cast<flvr::ColorMode>(ival);
 	if (m_sync_group && m_group)
-		m_group->SetMaskMode(mode);
+		m_group->IncMaskMode();
 	else
-		m_vd->SetMaskMode(mode);
+		m_vd->IncMaskMode();
 
-	FluoRefresh(0, { gstMainMode, gstMaskMode, gstColormap }, { glbin_current.GetViewId() });
+	FluoRefresh(0, { gstMaskMode, gstColormap }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::OnAltColorChange(wxColor c)

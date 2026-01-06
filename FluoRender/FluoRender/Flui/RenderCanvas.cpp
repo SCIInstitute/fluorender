@@ -400,7 +400,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	state.m_key_diff = wxGetKeyState(wxKeyCode('z'));
 	state.m_key_ctrl = wxGetKeyState(WXK_CONTROL);
 	state.m_key_refresh = wxGetKeyState(WXK_F5);
-	state.m_key_mask = wxGetKeyState(wxKeyCode('v'));
+	state.m_key_main_mode = wxGetKeyState(wxKeyCode('v'));
+	state.m_key_mask_mode = wxGetKeyState(wxKeyCode('b'));
 	state.m_key_left = wxGetKeyState(WXK_LEFT);
 	state.m_key_right = wxGetKeyState(WXK_RIGHT);
 	state.m_key_up = wxGetKeyState(WXK_UP);

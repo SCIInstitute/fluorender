@@ -96,7 +96,8 @@ public:
 	bool m_key_erase = false;//x
 	bool m_key_diff = false;//z
 	bool m_key_refresh = false;//f5
-	bool m_key_mask = false;//v
+	bool m_key_main_mode = false;//v
+	bool m_key_mask_mode = false;//b
 	bool m_key_left = false;//left
 	bool m_key_right = false;//right
 	bool m_key_up = false;//up

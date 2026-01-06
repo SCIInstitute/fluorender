@@ -734,35 +734,37 @@ private:
 	fluo::Color m_color_7;
 
 	//for selection
-	bool m_pick;
+	bool m_pick = false;
 
-	//draw mask
-	bool m_clear_mask;
-	bool m_save_mask;
+	//mask
+	bool m_main_mode_flag = false;
+	bool m_mask_mode_flag = false;
+	bool m_clear_mask = false;
+	bool m_save_mask = false;
 
 	//move view
-	bool m_move_left;
-	bool m_move_right;
-	bool m_move_up;
-	bool m_move_down;
+	bool m_move_left = false;
+	bool m_move_right = false;
+	bool m_move_up = false;
+	bool m_move_down = false;
 	//move time
-	bool m_tseq_forward;
-	bool m_tseq_backward;
+	bool m_tseq_forward = false;
+	bool m_tseq_backward = false;
 	//move clip
-	bool m_clip_up;
-	bool m_clip_down;
+	bool m_clip_up = false;
+	bool m_clip_down = false;
 	//full cell
-	bool m_cell_full;
+	bool m_cell_full = false;
 	//link cell
-	bool m_cell_link;
+	bool m_cell_link = false;
 	//new cell id
-	bool m_cell_new_id;
+	bool m_cell_new_id = false;
 	//comp include
-	bool m_comp_include;
+	bool m_comp_include = false;
 	//comp exclude
-	bool m_comp_exclude;
+	bool m_comp_exclude = false;
 	//relax ruler
-	bool m_ruler_relax;
+	bool m_ruler_relax = false;
 
 	//predraw in streaming mode
 	bool m_pre_draw;

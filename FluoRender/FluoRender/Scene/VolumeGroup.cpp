@@ -577,12 +577,30 @@ void VolumeGroup::SetMainMaskMode(flvr::ColorMode val)
 	}
 }
 
+void VolumeGroup::IncMainMaskMode()
+{
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->IncMainMaskMode();
+	}
+}
+
 void VolumeGroup::SetMaskMode(flvr::ColorMode val)
 {
 	for (auto& it : m_vd_list)
 	{
 		if (it)
 			it->SetMaskMode(val);
+	}
+}
+
+void VolumeGroup::IncMaskMode()
+{
+	for (auto& it : m_vd_list)
+	{
+		if (it)
+			it->IncMaskMode();
 	}
 }
 

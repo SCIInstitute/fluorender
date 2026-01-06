@@ -372,8 +372,10 @@ public:
 	//mask mode
 	void SetMainMaskMode(flvr::ColorMode mode);
 	flvr::ColorMode GetMainColorMode() { return m_main_mode; }
+	void IncMainMaskMode();
 	void SetMaskMode(flvr::ColorMode mode);
 	flvr::ColorMode GetMaskColorMode() { return m_mask_mode; }
+	void IncMaskMode();
 
 	//noise reduction
 	void SetNR(bool val);

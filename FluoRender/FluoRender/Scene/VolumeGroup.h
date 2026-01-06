@@ -183,7 +183,9 @@ public:
 
 	//mask mode
 	void SetMainMaskMode(flvr::ColorMode mode);
+	void IncMainMaskMode();
 	void SetMaskMode(flvr::ColorMode mode);
+	void IncMaskMode();
 
 	//use ml
 	void ApplyMlVolProp();
