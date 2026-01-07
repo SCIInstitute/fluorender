@@ -10414,7 +10414,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				m_int_mode = InteractiveMode::CropFrame;
 			}
 		}
-		else
+		
+		if (!m_crop_type)
 		{
 			state.m_reset_focus_slider = true;
 
