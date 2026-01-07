@@ -111,7 +111,19 @@ public:
 	//randomize color
 	void RandomizeColor();
 
+	//properties
 	virtual void SetOutline(bool val) override;
+	void SetColor(const fluo::Color& color);
+	void SetAlphaEnable(bool val);
+	void SetAlpha(double val);
+	void SetShading(bool val);
+	void SetShadingStrength(double val);
+	void SetShadingShine(double val);
+	void SetShadowEnable(bool val);
+	void SetShadowIntensity(double val);
+	void SetScalingEnable(bool val);
+	void SetScaling(const fluo::Vector& val);
+	void SetLegend(bool val);
 
 private:
 	static int m_num;

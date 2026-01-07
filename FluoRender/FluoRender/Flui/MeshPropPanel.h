@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class RenderView;
 class MeshData;
 class MeshGroup;
 class wxSingleSlider;
@@ -58,9 +57,10 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void SetView(RenderView* view);
 	void SetMeshData(MeshData* md);
 	MeshData* GetMeshData();
+	void SetMeshGroup(MeshGroup* mg);
+	MeshGroup* GetMeshGroup();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
@@ -68,7 +68,6 @@ public:
 	void SetShadowDir(double, bool);
 
 private:
-	RenderView* m_view;
 	MeshGroup* m_group;
 	MeshData* m_md;
 	bool m_sync_group;

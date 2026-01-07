@@ -87,6 +87,7 @@ class RenderView;
 class VolumeGroup;
 class VolumeData;
 class MeshData;
+class MeshGroup;
 class AnnotData;
 class PropPanel;
 class PropertyPanel;
@@ -247,6 +248,7 @@ public:
 		VolumeGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
+		MeshGroup* mg = 0,
 		AnnotData* ann = 0);
 	void DeleteProps(int type, const wxString& name);
 	void ShowPropPage(int type,
@@ -254,6 +256,7 @@ public:
 		VolumeGroup* group = 0,
 		VolumeData* vd = 0,
 		MeshData* md = 0,
+		MeshGroup* mg = 0,
 		AnnotData* ann = 0,
 		bool show = true);
 	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, wxWindow* panel = 0);

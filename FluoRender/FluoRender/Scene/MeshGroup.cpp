@@ -65,3 +65,102 @@ void MeshGroup::SetOutline(bool val)
 			it->SetOutline(val);
 	}
 }
+
+void MeshGroup::SetColor(const fluo::Color& color)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetColor(color);
+	}
+}
+
+void MeshGroup::SetAlphaEnable(bool val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetAlphaEnable(val);
+	}
+}
+
+void MeshGroup::SetAlpha(double val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetAlpha(val);
+	}
+}
+
+void MeshGroup::SetShading(bool val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetShading(val);
+	}
+}
+
+void MeshGroup::SetShadingStrength(double val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetShadingStrength(val);
+	}
+}
+
+void MeshGroup::SetShadingShine(double val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetShadingShine(val);
+	}
+}
+
+void MeshGroup::SetShadowEnable(bool val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetShadowEnable(val);
+	}
+}
+
+void MeshGroup::SetShadowIntensity(double val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetShadowIntensity(val);
+	}
+}
+
+void MeshGroup::SetScalingEnable(bool val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetScalingEnable(val);
+	}
+}
+
+void MeshGroup::SetScaling(const fluo::Vector& val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetScaling(val);
+	}
+}
+
+void MeshGroup::SetLegend(bool val)
+{
+	for (auto& it : m_md_list)
+	{
+		if (it)
+			it->SetLegend(val);
+	}
+}

@@ -501,6 +501,17 @@
         <vol_mesh_simplify>0.1</vol_mesh_simplify>
         <vol_mesh_smooth_n>0.1</vol_mesh_smooth_n>
         <vol_mesh_smooth_t>0.1</vol_mesh_smooth_t>
+        <mesh_outline>0</mesh_outline>
+        <mesh_legend>0</mesh_legend>
+        <mesh_alpha_enable>1</mesh_alpha_enable>
+        <mesh_alpha>0.7</mesh_alpha>
+        <mesh_shading>1</mesh_shading>
+        <mesh_shading_strength>1</mesh_shading_strength>
+        <mesh_shading_shine>1</mesh_shading_shine>
+        <mesh_shadow_enable>1</mesh_shadow_enable>
+        <mesh_shadow_intensity>0.6</mesh_shadow_intensity>
+        <mesh_scaling_enable>0</mesh_scaling_enable>
+        <mesh_scale>[1,1,1]</mesh_scale>
     </mesh_default>
     <movie_default>
         <view_idx>0</view_idx>

@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MESHDEFAULT_H_
 #define _MESHDEFAULT_H_
 
+#include <Vector.h>
+
 class MeshData;
 class MeshGroup;
 namespace flrd
@@ -60,6 +62,18 @@ public:
 	double m_simplify = 0.1; // Simplification factor
 	double m_smooth_strength = 0.1; // Smoothing factor in normal direction
 	double m_smooth_scale = 0.1; // smoothing factor in tangential direction
+	//mesh properties
+	bool m_outline = false;
+	bool m_legend = false;
+	bool m_alpha_enable = true;
+	double m_alpha = 0.7;
+	bool m_shading = true;
+	double m_shading_strength = 1.0;
+	double m_shading_shine = 1.0;
+	bool m_shadow_enable = true;
+	double m_shadow_intensity = 0.6;
+	bool m_scaling_enable = false;
+	fluo::Vector m_scale = fluo::Vector(1.0);
 };
 
 #endif//_MESHDEFAULT_H_

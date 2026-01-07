@@ -51,7 +51,6 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	const wxString& name) :
 	PropPanel(frame, parent, pos, size,style, name),
 	m_md(0),
-	m_view(0),
 	m_group(0),
 	m_sync_group(false)
 {
@@ -259,8 +258,15 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 				wxGetBitmap(outline_off));
 	}
 
+	//legend
+	if (update_all || FOUND_VALUE(gstLegend))
+	{
+		bval = m_md->GetLegend();
+		m_options_toolbar->ToggleTool(ID_LegendChk, bval);
+	}
+
 	//color
-	if (update_all)
+	if (update_all || FOUND_VALUE(gstMeshColor))
 	{
 		cval = m_md->GetDataColor();
 		wxColor wxc(cval.r() * 255, cval.g() * 255, cval.b() * 255);
@@ -270,8 +276,12 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//alpha
-	if (update_all)
+	if (update_all || FOUND_VALUE(gstMeshAlpha))
 	{
+		bval = m_md->GetAlphaEnable();
+		m_alpha_chk->SetValue(bval);
+		m_alpha_sldr->Enable(bval);
+		m_alpha_text->Enable(bval);
 		dval = m_md->GetAlpha();
 		m_alpha_sldr->ChangeValue(std::round(dval * 255.0));
 		str = wxString::Format("%.2f", dval);
@@ -279,10 +289,14 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//shading
-	if (update_all)
+	if (update_all || FOUND_VALUE(gstMeshShading))
 	{
 		bval = m_md->GetShading();
 		m_shading_chk->SetValue(bval);
+		m_shading_sldr->Enable(bval);
+		m_shading_text->Enable(bval);
+		m_shine_sldr->Enable(bval);
+		m_shine_text->Enable(bval);
 		dval = m_md->GetShadingStrength();
 		m_shading_sldr->ChangeValue(std::round(dval * 255.0));
 		str = wxString::Format("%.2f", dval);
@@ -295,10 +309,12 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//shadow
-	if (update_all)
+	if (update_all || FOUND_VALUE(gstMeshShadow))
 	{
 		bval = m_md->GetShadowEnable();
 		m_shadow_chk->SetValue(bval);
+		m_shadow_sldr->Enable(bval);
+		m_shadow_text->Enable(bval);
 		dval = m_md->GetShadowIntensity();
 		m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
 		str = wxString::Format("%.2f", dval);
@@ -322,19 +338,18 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//scaling
-	if (update_all)
+	if (update_all || FOUND_VALUE(gstMeshScale))
 	{
+		bval = m_md->GetScalingEnable();
+		m_scale_chk->SetValue(bval);
+		m_scale_sldr->Enable(bval);
+		m_scale_text->Enable(bval);
 		auto vval = m_md->GetScaling();
 		dval = vval.x();
 		m_scale_sldr->ChangeValue(std::round(dval * 100.0));
 		str = wxString::Format("%.2f", dval);
 		m_scale_text->ChangeValue(str);
 	}
-}
-
-void MeshPropPanel::SetView(RenderView* view)
-{
-	m_view = view;
 }
 
 void MeshPropPanel::SetMeshData(MeshData* md)
@@ -346,6 +361,16 @@ void MeshPropPanel::SetMeshData(MeshData* md)
 MeshData* MeshPropPanel::GetMeshData()
 {
 	return m_md;
+}
+
+void MeshPropPanel::SetMeshGroup(MeshGroup* mg)
+{
+	m_group = mg;
+}
+
+MeshGroup* MeshPropPanel::GetMeshGroup()
+{
+	return m_group;
 }
 
 void MeshPropPanel::EnableShadowDir(bool bval)
@@ -404,21 +429,34 @@ void MeshPropPanel::SetOutline()
 void MeshPropPanel::SetSyncGroup()
 {
 	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
-	//if (m_group)
-	//	m_group->SetVolumeSyncProp(m_sync_group);
 
-	//if (m_sync_group && m_group && m_md && m_view)
-	//{
-	//}
+	if (m_sync_group && m_group && m_md)
+	{
+		//outline
+		m_group->SetOutline(m_md->GetOutline());
+		//alpha
+		m_group->SetAlphaEnable(m_md->GetAlphaEnable());
+		m_group->SetAlpha(m_md->GetAlpha());
+		//shading
+		m_group->SetShading(m_md->GetShading());
+		m_group->SetShadingStrength(m_md->GetShadingStrength());
+		m_group->SetShadingShine(m_md->GetShadingShine());
+		//shadow
+		m_group->SetShadowEnable(m_md->GetShadowEnable());
+		m_group->SetShadowIntensity(m_md->GetShadowIntensity());
+		//scaling
+		m_group->SetScalingEnable(m_md->GetScalingEnable());
+		m_group->SetScaling(m_md->GetScaling());
+	}
 }
 
 void MeshPropPanel::SetLegend()
 {
 	bool bval = m_options_toolbar->GetToolState(ID_LegendChk);
-	//if (m_sync_group && m_group)
-	//	m_group->SetLegendEnable(bval);
-	//else if (m_md)
-	//	m_md->SetLegendEnable(bval);
+	if (m_sync_group && m_group)
+		m_group->SetLegend(bval);
+	else if (m_md)
+		m_md->SetLegend(bval);
 	FluoRefresh(0, { gstLegend }, { glbin_current.GetViewId() });
 }
 
@@ -469,7 +507,7 @@ void MeshPropPanel::OnColorChange(const wxColor& c)
 	{
 		fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
 		m_md->SetColor(color);
-		FluoRefresh(1, { gstTreeColors });
+		FluoRefresh(1, { gstMeshColor, gstTreeColors });
 	}
 }
 
@@ -479,12 +517,6 @@ void MeshPropPanel::OnColorTextChange(wxCommandEvent& event)
 	wxColor wxc;
 	if (GetColorString(str, wxc) == 3)
 	{
-		wxString new_str = wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue());
-		if (str != new_str)
-			m_color_text->ChangeValue(new_str);
-		m_color_btn->SetValue(wxc);
-
 		OnColorChange(wxc);
 	}
 }
@@ -503,11 +535,15 @@ void MeshPropPanel::OnColorBtn(wxColourPickerEvent& event)
 void MeshPropPanel::OnShadingCheck(wxCommandEvent& event)
 {
 	bool val = m_shading_chk->GetValue();
-	if (m_md)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetShading(val);
+	}
+	else if (m_md)
 	{
 		m_md->SetShading(val);
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshShading });
 }
 
 void MeshPropPanel::OnShadingChange(wxScrollEvent & event)
@@ -525,11 +561,15 @@ void MeshPropPanel::OnShadingText(wxCommandEvent& event)
 	str.ToDouble(&dval);
 	m_shading_sldr->ChangeValue(std::round(dval * 255.0));
 
-	if (m_md)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetShadingStrength(dval);
+	}
+	else if (m_md)
 	{
 		m_md->SetShadingStrength(dval);
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshShading });
 }
 
 void MeshPropPanel::OnShineChange(wxScrollEvent & event)
@@ -547,21 +587,29 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 	str.ToDouble(&shine);
 	m_shine_sldr->ChangeValue(std::round(shine * 255.0));
 
-	if (m_md)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetShadingShine(shine);
+	}
+	else if (m_md)
 	{
 		m_md->SetShadingShine(shine);
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshShading });
 }
 
 void MeshPropPanel::OnAlphaCheck(wxCommandEvent& event)
 {
 	bool val = m_alpha_chk->GetValue();
-	if (m_md)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetAlphaEnable(val);
+	}
+	else if (m_md)
 	{
 		m_md->SetAlphaEnable(val);
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshAlpha });
 }
 
 void MeshPropPanel::OnAlphaChange(wxScrollEvent & event)
@@ -579,21 +627,30 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 	str.ToDouble(&alpha);
 	m_alpha_sldr->ChangeValue(std::round(alpha*255.0));
 
-	if (m_md)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetAlpha(alpha);
+	}
+	else if (m_md)
 	{
 		m_md->SetAlpha(alpha);
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshAlpha });
 }
 
 void MeshPropPanel::OnScaleCheck(wxCommandEvent& event)
 {
 	bool val = m_scale_chk->GetValue();
-	if (m_md)
+
+	if (m_sync_group && m_group)
+	{
+		m_group->SetScalingEnable(val);
+	}
+	else if (m_md)
 	{
 		m_md->SetScalingEnable(val);
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshScale });
 }
 
 void MeshPropPanel::OnScaleChange(wxScrollEvent & event)
@@ -611,28 +668,31 @@ void MeshPropPanel::OnScaleText(wxCommandEvent& event)
 	str.ToDouble(&dval);
 	m_scale_sldr->ChangeValue(std::round(dval*100.0));
 
-	if (m_md)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetScaling(fluo::Vector(dval, dval, dval));
+	}
+	else if (m_md)
 	{
 		m_md->SetScaling(fluo::Vector(dval, dval, dval));
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshScale });
 }
 
 //shadow
 void MeshPropPanel::OnShadowCheck(wxCommandEvent& event)
 {
-	if (m_md && m_view)
+	bool val = m_shadow_chk->GetValue();
+
+	if (m_sync_group && m_group)
 	{
-		bool val = m_shadow_chk->GetValue();
-		m_md->SetShadowEnable(val);
-		for (int i=0; i< m_view->GetMeshNum(); i++)
-		{
-			auto md = m_view->GetMeshData(i);
-			if (md)
-				md->SetShadowEnable(val);
-		}
-		FluoRefresh(0, { gstMeshProps });
+		m_group->SetShadowEnable(val);
 	}
+	else if (m_md)
+	{
+		m_md->SetShadowEnable(val);
+	}
+	FluoRefresh(0, { gstMeshShadow });
 }
 
 void MeshPropPanel::OnShadowChange(wxScrollEvent& event)
@@ -650,17 +710,15 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 	str.ToDouble(&dval);
 	m_shadow_sldr->ChangeValue(std::round(dval*100.0));
 
-	if (m_md && m_view)
+	if (m_sync_group && m_group)
+	{
+		m_group->SetShadowIntensity(dval);
+	}
+	else if (m_md)
 	{
 		m_md->SetShadowIntensity(dval);
-		for (int i=0; i< m_view->GetMeshNum(); i++)
-		{
-			auto md = m_view->GetMeshData(i);
-			if (md)
-				md->SetShadowIntensity(dval);
-		}
-		FluoRefresh(0, { gstMeshProps });
 	}
+	FluoRefresh(0, { gstMeshShadow });
 }
 
 void MeshPropPanel::OnShadowDirCheck(wxCommandEvent& event)

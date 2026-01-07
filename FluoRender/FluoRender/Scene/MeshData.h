@@ -115,13 +115,16 @@ public:
 	void DrawBounds();
 	void DrawInt(unsigned int name);
 
-	//lighting
-	void SetShading(bool bVal);
-	bool GetShading();
 	void SetFlatShading(bool bval);
 	bool GetFlatShading();
 	void SetVertexColor(bool val);
 	bool GetVertexColor();
+
+	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
+	void SetFogColor(const fluo::Color& color);
+	bool GetFog();
+
+	//properties
 	void SetColor(const fluo::Color &color);
 	virtual fluo::Color GetColor() override;
 	fluo::Color GetDataColor();
@@ -129,24 +132,26 @@ public:
 	{
 		m_alpha_enable = bVal;
 		if (!bVal)
-			m_alpha = 1.0;
+			SetAlpha(1.0);
 	}
 	bool GetAlphaEnable() { return m_alpha_enable; }
 	void SetAlpha(double val);
 	double GetAlpha();
 	bool GetTransparent();
+	void SetShading(bool bVal);
+	bool GetShading();
 	void SetShadingStrength(double val);
 	double GetShadingStrength();
 	void SetShadingShine(double val);
 	double GetShadingShine();
-	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
-	void SetFogColor(const fluo::Color& color);
-	bool GetFog();
 	//shadow
 	void SetShadowEnable(bool bVal);
 	bool GetShadowEnable();
 	void SetShadowIntensity(double val);
 	double GetShadowIntensity();
+	//legend
+	void SetLegend(bool val) { m_legend = val; }
+	bool GetLegend() { return m_legend; }
 
 	void SetTranslation(const fluo::Vector& val) { m_trans = val; SetTransformation(); }
 	fluo::Vector GetTranslation() { return m_trans; }
@@ -156,8 +161,7 @@ public:
 	{
 		m_scaling_enable = val;
 		if (!val)
-			m_scale = fluo::Vector(1.0);
-		SetTransformation();
+			SetScaling(fluo::Vector(1.0));
 	}
 	bool GetScalingEnable() { return m_scaling_enable; }
 	void SetScaling(const fluo::Vector& val) { m_scale = val; SetTransformation(); }
@@ -183,10 +187,6 @@ public:
 	//randomize color
 	void RandomizeColor();
 
-	//shown in legend
-	void SetLegend(bool val);
-	bool GetLegend();
-
 	//time sequence
 	void SetCurTime(int time) { m_time = time; }
 	int GetCurTime() { return m_time; }
@@ -208,13 +208,13 @@ private:
 	bool m_disp;
 	bool m_draw_bounds;
 
-	//lighting
-	bool m_shading;
-	bool m_flat_shading;
-	bool m_vertex_color;
+	//properties
 	fluo::Color m_color;
 	bool m_alpha_enable;
 	double m_alpha;
+	bool m_shading;
+	bool m_flat_shading;
+	bool m_vertex_color;
 	double m_shading_strength;
 	double m_shading_shine;
 	//fog
@@ -230,7 +230,7 @@ private:
 	fluo::Point m_trans_center;
 
 	//legend
-	bool m_legend;
+	bool m_legend = true;
 
 private:
 	void BuildMesh();

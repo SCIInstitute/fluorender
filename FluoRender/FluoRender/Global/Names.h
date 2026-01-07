@@ -365,8 +365,19 @@ DEALINGS IN THE SOFTWARE.
 #define gstMeshProps "mesh props"
 #define gstBoundsTf "bounds tf"//bounding box after transformation
 #define gstCenter "center"
-#define gstLimitEnable "limit enable"//size limiter
-#define gstLimit "limit"
+//properties
+#define gstMeshOutline "mesh outline"
+#define gstMeshLegend "mesh legend"
+#define gstMeshColor "mesh color"
+#define gstMeshAlphaEnable "mesh alpha enable"
+#define gstMeshAlpha "mesh alpha"
+#define gstMeshShading "mesh shading"
+#define gstMeshShadingStrength "mesh shading strength"
+#define gstMeshShadingShine "mesh shading shine"
+#define gstMeshShadow "mesh shadow"
+#define gstMeshShadowEnable "mesh shadow enable"
+#define gstMeshShadowIntensity "mesh shadow intensity"
+#define gstMeshScalingEnable "mesh scaling enable"
 //transformation
 #define gstMeshTranslation "mesh translation"
 #define gstTransX "trans x"

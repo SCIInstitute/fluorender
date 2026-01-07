@@ -1059,6 +1059,7 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 		glbin_current.vol_group.lock().get(),
 		glbin_current.vol_data.lock().get(),
 		glbin_current.mesh_data.lock().get(),
+		glbin_current.mesh_group.lock().get(),
 		glbin_current.ann_data.lock().get());
 
 	//clear mesh bounds
@@ -1141,6 +1142,7 @@ wxWindow* MainFrame::AddProps(int type,
 	VolumeGroup* group,
 	VolumeData* vd,
 	MeshData* md,
+	MeshGroup* mg,
 	AnnotData* ann)
 {
 	//wxString str;
@@ -1167,8 +1169,7 @@ wxWindow* MainFrame::AddProps(int type,
 		{
 			MeshPropPanel* pane = new MeshPropPanel(this, m_prop_panel);
 			pane->SetMeshData(md);
-			//pane->SetMGroup(group);
-			pane->SetView(view);
+			pane->SetMeshGroup(mg);
 			pane->SetName(md->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);
@@ -1241,6 +1242,7 @@ void MainFrame::ShowPropPage(int type,
 	VolumeGroup* group,
 	VolumeData* vd,
 	MeshData* md,
+	MeshGroup* mg,
 	AnnotData* ann,
 	bool show )
 {
@@ -1293,7 +1295,7 @@ void MainFrame::ShowPropPage(int type,
 	}
 	if (!page)
 	{
-		page = AddProps(type, view, group, vd, md, ann);
+		page = AddProps(type, view, group, vd, md, mg, ann);
 		if (!page)
 			return;
 	}

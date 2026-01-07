@@ -63,8 +63,6 @@ MeshData::MeshData() :
 	val = 1.0;
 	m_color = fluo::Color(fluo::HSVColor(hue, sat, val));
 
-	m_legend = true;
-
 	m_mr = std::make_unique<flvr::MeshRenderer>();
 	m_mr->set_shading(m_shading);
 	m_mr->set_flat_shading(m_flat_shading);
@@ -1020,17 +1018,6 @@ void MeshData::RandomizeColor()
 	double hue = (double)std::rand()/(RAND_MAX) * 360.0;
 	fluo::Color color(fluo::HSVColor(hue, 1.0, 1.0));
 	SetColor(color);
-}
-
-//shown in legend
-void MeshData::SetLegend(bool val)
-{
-	m_legend = val;
-}
-
-bool MeshData::GetLegend()
-{
-	return m_legend;
 }
 
 void MeshData::BuildMesh()
