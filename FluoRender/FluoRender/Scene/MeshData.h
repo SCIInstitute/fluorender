@@ -125,6 +125,13 @@ public:
 	void SetColor(const fluo::Color &color);
 	virtual fluo::Color GetColor() override;
 	fluo::Color GetDataColor();
+	void SetAlphaEnable(bool bVal)
+	{
+		m_alpha_enable = bVal;
+		if (!bVal)
+			m_alpha = 1.0;
+	}
+	bool GetAlphaEnable() { return m_alpha_enable; }
 	void SetAlpha(double val);
 	double GetAlpha();
 	bool GetTransparent();
@@ -145,6 +152,14 @@ public:
 	fluo::Vector GetTranslation() { return m_trans; }
 	void SetRotation(const fluo::Vector& val) { m_rot = val; SetTransformation(); }
 	fluo::Vector GetRotation() { return m_rot; }
+	void SetScalingEnable(bool val)
+	{
+		m_scaling_enable = val;
+		if (!val)
+			m_scale = fluo::Vector(1.0);
+		SetTransformation();
+	}
+	bool GetScalingEnable() { return m_scaling_enable; }
 	void SetScaling(const fluo::Vector& val) { m_scale = val; SetTransformation(); }
 	fluo::Vector GetScaling() { return m_scale; }
 
@@ -198,6 +213,7 @@ private:
 	bool m_flat_shading;
 	bool m_vertex_color;
 	fluo::Color m_color;
+	bool m_alpha_enable;
 	double m_alpha;
 	double m_shading_strength;
 	double m_shading_shine;
@@ -207,6 +223,7 @@ private:
 	bool m_shadow_enable;
 	double m_shadow_intensity;
 
+	bool m_scaling_enable;
 	fluo::Vector m_trans;
 	fluo::Vector m_rot;
 	fluo::Vector m_scale = fluo::Vector(1.0);

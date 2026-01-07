@@ -120,13 +120,17 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxBoldText(this, 0, "Alpha:",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
+	m_alpha_chk = new wxCheckBox(this, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize);
 	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255, 
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "0.50",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
+	m_alpha_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnAlphaCheck, this);
 	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnAlphaChange, this);
 	m_alpha_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnAlphaText, this);
 	sizer_2->Add(st, 0, wxALIGN_CENTER);
+	sizer_2->Add(m_alpha_chk, 0, wxALIGN_CENTER);
 	sizer_2->Add(5, 5);
 	sizer_2->Add(m_alpha_sldr, 1, wxALIGN_CENTER);
 	sizer_2->Add(m_alpha_text, 0, wxALIGN_CENTER);
@@ -154,7 +158,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_shading_sldr, 1, wxALIGN_CENTER);
 	sizer_3->Add(m_shading_text, 0, wxALIGN_CENTER);
-	sizer_3->Add(5, 5);
+	sizer_3->Add(tts1.x, 5);
 	sizer_3->Add(m_shine_sldr, 1, wxALIGN_CENTER);
 	sizer_3->Add(m_shine_text, 0, wxALIGN_CENTER);
 
@@ -166,14 +170,14 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 60, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.60",
-		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_shadow_dir_chk = new wxCheckBox(this, wxID_ANY, "D:",
-		wxDefaultPosition, wxDefaultSize);
+		wxDefaultPosition, tts1);
 	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
 	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(50, 20)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_shadow_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnShadowCheck, this);
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadowChange, this);
 	m_shadow_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShadowText, this);
@@ -192,13 +196,17 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxBoldText(this, 0, " Size:",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
+	m_scale_chk = new wxCheckBox(this, wxID_ANY, "",
+		wxDefaultPosition, wxDefaultSize);
 	m_scale_sldr = new wxSingleSlider(this, wxID_ANY, 100, 50, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
+	m_scale_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnScaleCheck, this);
 	m_scale_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnScaleChange, this);
 	m_scale_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnScaleText, this);
 	sizer_5->Add(st, 0, wxALIGN_CENTER);
+	sizer_5->Add(m_scale_chk, 0, wxALIGN_CENTER);
 	sizer_5->Add(5, 5);
 	sizer_5->Add(m_scale_sldr, 1, wxALIGN_CENTER);
 	sizer_5->Add(m_scale_text, 0, wxALIGN_CENTER);
@@ -210,7 +218,11 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	sizer_v->Add(sizer_4, 1, wxEXPAND);
 	sizer_v->Add(sizer_5, 1, wxEXPAND);
 
-	SetSizer(sizer_v);
+	wxBoxSizer* sizer_main = new wxBoxSizer(wxHORIZONTAL);
+	sizer_main->Add(sizer_v, 1, wxEXPAND | wxALL, 5);
+	sizer_main->AddStretchSpacer(1);
+
+	SetSizer(sizer_main);
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
@@ -542,6 +554,16 @@ void MeshPropPanel::OnShineText(wxCommandEvent& event)
 	}
 }
 
+void MeshPropPanel::OnAlphaCheck(wxCommandEvent& event)
+{
+	bool val = m_alpha_chk->GetValue();
+	if (m_md)
+	{
+		m_md->SetAlphaEnable(val);
+		FluoRefresh(0, { gstMeshProps });
+	}
+}
+
 void MeshPropPanel::OnAlphaChange(wxScrollEvent & event)
 {
 	double val = m_alpha_sldr->GetValue() / 255.0;
@@ -560,6 +582,16 @@ void MeshPropPanel::OnAlphaText(wxCommandEvent& event)
 	if (m_md)
 	{
 		m_md->SetAlpha(alpha);
+		FluoRefresh(0, { gstMeshProps });
+	}
+}
+
+void MeshPropPanel::OnScaleCheck(wxCommandEvent& event)
+{
+	bool val = m_scale_chk->GetValue();
+	if (m_md)
+	{
+		m_md->SetScalingEnable(val);
 		FluoRefresh(0, { gstMeshProps });
 	}
 }

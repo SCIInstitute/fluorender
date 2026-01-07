@@ -78,6 +78,7 @@ private:
 	wxTextCtrl *m_color_text;
 	wxUndoableColorPicker* m_color_btn;
 
+	wxCheckBox* m_alpha_chk;
 	wxSingleSlider *m_alpha_sldr;
 	wxTextCtrl* m_alpha_text;
 
@@ -94,6 +95,7 @@ private:
 	wxSingleSlider* m_shadow_dir_sldr;
 	wxTextCtrl* m_shadow_dir_text;
 
+	wxCheckBox* m_scale_chk;
 	wxSingleSlider *m_scale_sldr;
 	wxTextCtrl* m_scale_text;
 
@@ -111,6 +113,7 @@ private:
 	void OnColorTextFocus(wxMouseEvent& event);
 	void OnColorBtn(wxColourPickerEvent& event);
 
+	void OnAlphaCheck(wxCommandEvent& event);
 	void OnAlphaChange(wxScrollEvent & event);
 	void OnAlphaText(wxCommandEvent& event);
 
@@ -128,6 +131,7 @@ private:
 	void OnShadowDirChange(wxScrollEvent& event);
 	void OnShadowDirText(wxCommandEvent& event);
 
+	void OnScaleCheck(wxCommandEvent& event);
 	void OnScaleChange(wxScrollEvent & event);
 	void OnScaleText(wxCommandEvent& event);
 };
