@@ -54,16 +54,15 @@ namespace flrd
 			double mx, double my,//mouse coord on screen
 			int mode, bool use_transf, double thresh,//params
 			fluo::Point &mp, fluo::Point &ip);
-		double GetPointVolumeBox(
+		double GetPointVolumeBoxOnePoint(
 			double mx, double my,//mouse coord on screen
-			bool calc_mats,
 			fluo::Point &mp);
-		double GetPointVolumeBox2(
+		double GetPointVolumeBoxTwoPoint(
 			double mx, double my,//mouse coord on screen
 			fluo::Point &p1, fluo::Point &p2);
 		double GetPointPlane(
 			double mx, double my,//mouse coord on screen
-			fluo::Point* planep, bool calc_mats,
+			fluo::Point* planep,
 			fluo::Point &mp);
 
 	private:

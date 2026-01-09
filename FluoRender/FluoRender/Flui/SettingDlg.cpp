@@ -130,6 +130,14 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_config_file_type_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnConfigFileTypeComb, this);
 	gridSizer->Add(st, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 	gridSizer->Add(m_config_file_type_comb, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	st = new wxStaticText(page, 0, "Initial orientation:");
+	m_y_dir_comb = new wxComboBox(page, wxID_ANY, "",
+		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
+	std::vector<wxString> items3 = { "Y down", "Y up" };
+	m_y_dir_comb->Append(items3);
+	m_y_dir_comb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnYDirComb, this);
+	gridSizer->Add(st, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+	gridSizer->Add(m_y_dir_comb, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 	group1->Add(10, 5);
 	group1->Add(m_prj_save_chk);
 	group1->Add(10, 5);
@@ -170,8 +178,8 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	st = new wxStaticText(page, 0, "Color:");
 	m_text_color_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(100, -1)), 0, NULL, wxCB_READONLY);
-	std::vector<wxString> items3 = { "BG inverted", "Background", "Vol sec color" };
-	m_text_color_cmb->Append(items3);
+	std::vector<wxString> items4 = { "BG inverted", "Background", "Vol sec color" };
+	m_text_color_cmb->Append(items4);
 	m_text_color_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnTextColorChange, this);
 	sizer2_1->Add(st);
 	sizer2_1->Add(10, 10);
@@ -188,39 +196,46 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group2->Add(sizer2_2, 0, wxEXPAND);
 	group2->Add(10, 5);
 
-	//line width
-	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Line Width");
-	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_line_width_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 10,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_line_width_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLineWidthSldr, this);
-	m_line_width_text = new wxTextCtrl(page, wxID_ANY, "3",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
-	m_line_width_text->Bind(wxEVT_TEXT, &SettingDlg::OnLineWidthText, this);
-	sizer3_1->Add(m_line_width_sldr, 1, wxEXPAND);
-	sizer3_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
-	group3->Add(10, 5);
-	group3->Add(sizer3_1, 0, wxEXPAND);
-	group3->Add(10, 5);
-
 	//paint history depth
-	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Paint History");
-	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_paint_hist_depth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_paint_hist_depth_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPaintHistDepthChange, this);
 	m_paint_hist_depth_text = new wxTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_paint_hist_depth_text->Bind(wxEVT_TEXT, &SettingDlg::OnPaintHistDepthEdit, this);
-	sizer4_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
-	sizer4_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer3_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
+	sizer3_1->Add(m_paint_hist_depth_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer3_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
 		"The number of undo steps for paint brush selection. " \
 		"Set the value to 0 to disable history. " \
 		"A value greater than 0 slows down speed and increases memory usage.");
+	st->Wrap(FromDIP(450));
+	sizer3_2->Add(st, 1, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer3_2, 0, wxEXPAND);
+	group3->Add(10, 5);
+
+	//pencil distance
+	wxStaticBoxSizer* group4 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Ruler Point Distance");
+	wxBoxSizer* sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_pencil_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 100,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_pencil_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPencilDistChange, this);
+	m_pencil_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
+		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
+	m_pencil_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnPencilDistEdit, this);
+	sizer4_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
+	sizer4_1->Add(m_pencil_dist_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer4_2 = new wxBoxSizer(wxHORIZONTAL);
+	st = new wxStaticText(page, 0,
+		"The pixel distance between two ruler points for pencil and magnet.");
 	st->Wrap(FromDIP(450));
 	sizer4_2->Add(st, 1, wxEXPAND);
 	group4->Add(10, 5);
@@ -229,46 +244,23 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	group4->Add(sizer4_2, 0, wxEXPAND);
 	group4->Add(10, 5);
 
-	//pencil distance
-	wxStaticBoxSizer* group5 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Ruler Point Distance");
-	wxBoxSizer* sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_pencil_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 100,
-		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_pencil_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPencilDistChange, this);
-	m_pencil_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
-		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	m_pencil_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnPencilDistEdit, this);
-	sizer5_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
-	sizer5_1->Add(m_pencil_dist_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer5_2 = new wxBoxSizer(wxHORIZONTAL);
-	st = new wxStaticText(page, 0,
-		"The pixel distance between two ruler points for pencil and magnet.");
-	st->Wrap(FromDIP(450));
-	sizer5_2->Add(st, 1, wxEXPAND);
-	group5->Add(10, 5);
-	group5->Add(sizer5_1, 0, wxEXPAND);
-	group5->Add(10, 5);
-	group5->Add(sizer5_2, 0, wxEXPAND);
-	group5->Add(10, 5);
-
 	//reset
-	wxStaticBoxSizer* group6 = new wxStaticBoxSizer(
+	wxStaticBoxSizer* group5 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Reset Settings");
-	wxBoxSizer* sizer6_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer5_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Reset to:");
 	m_recommended_btn = new wxButton(page, wxID_ANY, "Recommended");
 	m_recommended_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnRecommendedBtn, this);
 	m_reset_btn = new wxButton(page, wxID_ANY, "Factory Default");
 	m_reset_btn->Bind(wxEVT_BUTTON, &SettingDlg::OnResetBtn, this);
-	sizer6_1->Add(st, 0, wxALIGN_CENTER);
-	sizer6_1->AddStretchSpacer();
-	sizer6_1->Add(m_recommended_btn, 0, wxALIGN_CENTER);
-	sizer6_1->Add(m_reset_btn, 0, wxALIGN_CENTER);
-	sizer6_1->Add(10, 10);
-	group6->Add(10, 5);
-	group6->Add(sizer6_1, 0, wxEXPAND);
-	group6->Add(10, 5);
+	sizer5_1->Add(st, 0, wxALIGN_CENTER);
+	sizer5_1->AddStretchSpacer();
+	sizer5_1->Add(m_recommended_btn, 0, wxALIGN_CENTER);
+	sizer5_1->Add(m_reset_btn, 0, wxALIGN_CENTER);
+	sizer5_1->Add(10, 10);
+	group5->Add(10, 5);
+	group5->Add(sizer5_1, 0, wxEXPAND);
+	group5->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
@@ -282,7 +274,6 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	sizerV->Add(10, 10);
 	sizerV->Add(group5, 0, wxEXPAND);
 	sizerV->Add(10, 10);
-	sizerV->Add(group6, 0, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	page->SetAutoLayout(true);
@@ -399,33 +390,49 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	group1->Add(sizer1_1, 0, wxEXPAND);
 	group1->Add(10, 5);
 
-	//depth peeling
+	//line width
 	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Mesh Transparency Quality");
+		wxVERTICAL, page, "Line Width");
 	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	m_line_width_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 10,
+		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	m_line_width_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLineWidthSldr, this);
+	m_line_width_text = new wxTextCtrl(page, wxID_ANY, "3",
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
+	m_line_width_text->Bind(wxEVT_TEXT, &SettingDlg::OnLineWidthText, this);
+	sizer2_1->Add(m_line_width_sldr, 1, wxEXPAND);
+	sizer2_1->Add(m_line_width_text, 0, wxALIGN_CENTER);
+	group2->Add(10, 5);
+	group2->Add(sizer2_1, 0, wxEXPAND);
+	group2->Add(10, 5);
+
+	//depth peeling
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
+		wxVERTICAL, page, "Mesh Transparency Quality");
+	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_peeling_layers_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_peeling_layers_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPeelingLayersChange, this);
 	m_peeling_layers_text = new wxTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_peeling_layers_text->Bind(wxEVT_TEXT, &SettingDlg::OnPeelingLayersEdit, this);
-	sizer2_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
-	sizer2_1->Add(m_peeling_layers_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer3_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
+	sizer3_1->Add(m_peeling_layers_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer3_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
 		"The number of depth peeling layers for rendering transparent mesh objects. "\
 		"Set higher numbers only for complex geometries. "\
 		"It slows down the rendering speed.");
 	st->Wrap(FromDIP(450));
-	sizer2_2->Add(st, 1, wxEXPAND);
-	group2->Add(10, 5);
-	group2->Add(sizer2_1, 0, wxEXPAND);
-	group2->Add(10, 5);
-	group2->Add(sizer2_2, 0, wxEXPAND);
-	group2->Add(10, 5);
+	sizer3_2->Add(st, 1, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer3_2, 0, wxEXPAND);
+	group3->Add(10, 5);
 
 	//rotations
-	wxStaticBoxSizer* group3 = new wxStaticBoxSizer(
+	wxStaticBoxSizer* group4 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Rotations");
 	wxBoxSizer *sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "RC Anchor Start");
@@ -443,14 +450,14 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		"Link All Rendering Views' Rotations.");
 	m_rot_link_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnRotLink, this);
 	sizer4_2->Add(m_rot_link_chk, 0, wxALIGN_CENTER);
-	group3->Add(10, 5);
-	group3->Add(sizer4_1, 0, wxEXPAND);
-	group3->Add(10, 5);
-	group3->Add(sizer4_2, 0, wxEXPAND);
-	group3->Add(10, 5);
+	group4->Add(10, 5);
+	group4->Add(sizer4_1, 0, wxEXPAND);
+	group4->Add(10, 5);
+	group4->Add(sizer4_2, 0, wxEXPAND);
+	group4->Add(10, 5);
 
 	//background
-	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+	wxStaticBoxSizer *group5 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Background");
 	m_grad_bg_chk = new wxCheckBox(page, wxID_ANY,
 		"Enable Gradient Background");
@@ -458,11 +465,11 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 		"Match Attenuation and Transparency to Render View Background Color");
 	m_grad_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnGradBgCheck, this);
 	m_clear_color_bg_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnClearColorBgCheck, this);
-	group4->Add(10, 5);
-	group4->Add(m_grad_bg_chk);
-	group4->Add(10, 5);
-	group4->Add(m_clear_color_bg_chk);
-	group4->Add(10, 5);
+	group5->Add(10, 5);
+	group5->Add(m_grad_bg_chk);
+	group5->Add(10, 5);
+	group5->Add(m_clear_color_bg_chk);
+	group5->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 
@@ -474,6 +481,8 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	sizerV->Add(group3, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group4, 0, wxEXPAND);
+	sizerV->Add(10, 10);
+	sizerV->Add(group5, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 
 	page->SetSizer(sizerV);
@@ -1109,6 +1118,8 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_mul_func_btn_comb->Select(glbin_settings.m_mulfunc);
 		//config file type
 		m_config_file_type_comb->Select(glbin_settings.m_config_file_type);
+		//y dir
+		m_y_dir_comb->Select(glbin_settings.m_y_dir);
 	}
 
 	//font
@@ -1453,6 +1464,11 @@ void SettingDlg::OnMulFuncBtnComb(wxCommandEvent& event)
 void SettingDlg::OnConfigFileTypeComb(wxCommandEvent& event)
 {
 	glbin_settings.m_config_file_type = m_config_file_type_comb->GetCurrentSelection();
+}
+
+void SettingDlg::OnYDirComb(wxCommandEvent& event)
+{
+	glbin_settings.m_y_dir = m_y_dir_comb->GetCurrentSelection();
 }
 
 void SettingDlg::OnMouseIntComb(wxCommandEvent& event)

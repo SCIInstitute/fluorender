@@ -98,6 +98,7 @@ public:
 	int m_last_open_type;	//0:vol; 1:mesh; 2:imagej
 	int m_last_tool;		//last tool
 	int m_config_file_type;	//0:ini, 1:xml, 2:json, 3: pole
+	int m_y_dir;			//y direction of volume data
 	double m_capture_scale;	//capture scale factor to improve quality
 	double m_int_scale;		//interactive scale factor to reduce quality
 	double m_large_scale;	//large data scale factor

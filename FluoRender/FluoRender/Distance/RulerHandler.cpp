@@ -785,7 +785,7 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 		ruler->Group(m_group);
 		ruler->SetRulerMode(m_mode);
 		glbin_volume_point.SetVolumeData(glbin_current.vol_data.lock());
-		glbin_volume_point.GetPointVolumeBox2(mx, my, p1, p2);
+		glbin_volume_point.GetPointVolumeBoxTwoPoint(mx, my, p1, p2);
 		ruler->AddPoint(p1);
 		ruler->AddPoint(p2);
 		list->push_back(ruler);
@@ -826,14 +826,14 @@ void RulerHandler::AddRulerPoint(int mx, int my, int branch)
 				p, ip);
 			if (t <= 0.0)
 			{
-				t = glbin_volume_point.GetPointPlane(mx, my, pplanep, true, p);
+				t = glbin_volume_point.GetPointPlane(mx, my, pplanep, p);
 				if (t <= 0.0)
 					return;
 			}
 		}
 		else
 		{
-			double t = glbin_volume_point.GetPointPlane(mx, my, pplanep, true, p);
+			double t = glbin_volume_point.GetPointPlane(mx, my, pplanep, p);
 			if (t <= 0.0)
 				return;
 		}
@@ -955,7 +955,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 		if (t <= 0.0)
 		{
 			tmp = m_point->GetPoint(rwt, interp);
-			t = glbin_volume_point.GetPointPlane(mx, my, &tmp, true, point);
+			t = glbin_volume_point.GetPointPlane(mx, my, &tmp, point);
 		}
 		if (t <= 0.0)
 			return false;
@@ -963,7 +963,7 @@ bool RulerHandler::MoveRuler(int mx, int my)
 	else
 	{
 		tmp = m_point->GetPoint(rwt, interp);
-		double t = glbin_volume_point.GetPointPlane(mx, my, &tmp, true, point);
+		double t = glbin_volume_point.GetPointPlane(mx, my, &tmp, point);
 		if (t <= 0.0)
 			return false;
 	}
@@ -1000,7 +1000,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 		if (t <= 0.0)
 		{
 			tmp = m_point->GetPoint(rwt, interp);
-			t = glbin_volume_point.GetPointPlane(mx, my, &tmp, true, point);
+			t = glbin_volume_point.GetPointPlane(mx, my, &tmp, point);
 		}
 		if (t <= 0.0)
 			return false;
@@ -1008,7 +1008,7 @@ bool RulerHandler::EditPoint(int mx, int my, bool alt)
 	else
 	{
 		tmp = m_point->GetPoint(rwt, interp);
-		double t = glbin_volume_point.GetPointPlane(mx, my, &tmp, true, point);
+		double t = glbin_volume_point.GetPointPlane(mx, my, &tmp, point);
 		if (t <= 0.0)
 			return false;
 	}
@@ -1380,14 +1380,14 @@ void RulerHandler::AddMagStrokePoint(int mx, int my)
 			0.5, p, ip);
 		if (t <= 0.0)
 		{
-			t = glbin_volume_point.GetPointPlane(mx, my, pplanep, true, p);
+			t = glbin_volume_point.GetPointPlane(mx, my, pplanep, p);
 			if (t <= 0.0)
 				return;
 		}
 	}
 	else
 	{
-		double t = glbin_volume_point.GetPointPlane(mx, my, pplanep, true, p);
+		double t = glbin_volume_point.GetPointPlane(mx, my, pplanep, p);
 		if (t <= 0.0)
 			return;
 	}

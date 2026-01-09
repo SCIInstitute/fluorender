@@ -235,9 +235,8 @@ double VolumePoint::GetPointVolume(
 		return -1.0;
 }
 
-double VolumePoint::GetPointVolumeBox(
+double VolumePoint::GetPointVolumeBoxOnePoint(
 	double mx, double my,//mouse coord on screen
-	bool calc_mats,
 	fluo::Point &mp)
 {
 	auto view = glbin_current.render_view.lock();
@@ -251,24 +250,10 @@ double VolumePoint::GetPointVolumeBox(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	fluo::Transform mv;
-	fluo::Transform p;
-	glm::mat4 mv_temp;
+	glm::mat4 mv_temp = view->GetModelView();
 	fluo::Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
-
-	if (calc_mats)
-	{
-		//projection
-		//HandleProjection(nx, ny);
-		//Transformation
-		//HandleCamera();
-		mv_temp = view->GetObjectMat();
-	}
-	else
-		mv_temp = view->GetModelView();//m_mv_mat;
-
 	glm::mat4 mv_mat2 = glm::mat4(
 		mvmat[0], mvmat[4], mvmat[8], mvmat[12],
 		mvmat[1], mvmat[5], mvmat[9], mvmat[13],
@@ -276,6 +261,8 @@ double VolumePoint::GetPointVolumeBox(
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	mv_temp = mv_temp * mv_mat2;
 	glm::mat4 prj_mat = view->GetProjection();
+	fluo::Transform mv;
+	fluo::Transform p;
 	mv.set(glm::value_ptr(mv_temp));
 	p.set(glm::value_ptr(prj_mat));
 
@@ -299,7 +286,7 @@ double VolumePoint::GetPointVolumeBox(
 	fluo::Point pp;//a point on plane
 
 	auto cb = vd->GetClippingBox();
-	auto planes = cb.GetPlanesWorld();
+	auto planes = cb.GetPlanesUnit();
 	//for each plane, calculate the intersection point
 	for (int i = 0; i < 6; i++)
 	{
@@ -311,7 +298,7 @@ double VolumePoint::GetPointVolumeBox(
 			pp = ray.parameter(t);
 
 			//determine if the point is inside the box
-			if (cb.ContainsWorld(pp))
+			if (cb.ContainsUnit(pp))
 			{
 				if (t > mint)
 				{
@@ -327,7 +314,7 @@ double VolumePoint::GetPointVolumeBox(
 	return mint;
 }
 
-double VolumePoint::GetPointVolumeBox2(
+double VolumePoint::GetPointVolumeBoxTwoPoint(
 	double mx, double my,//mouse coord on screen
 	fluo::Point &p1, fluo::Point &p2)
 {
@@ -342,11 +329,7 @@ double VolumePoint::GetPointVolumeBox2(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	//projection
-	//HandleProjection(nx, ny);
-	//Transformation
-	//HandleCamera();
-	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 mv_temp = view->GetModelView();
 	fluo::Transform *tform = vd->GetTexture()->transform();
 	double mvmat[16];
 	tform->get_trans(mvmat);
@@ -383,7 +366,7 @@ double VolumePoint::GetPointVolumeBox2(
 	fluo::Point pp;//a point on plane
 
 	auto cb = vd->GetClippingBox();
-	auto planes = cb.GetPlanesWorld();
+	auto planes = cb.GetPlanesUnit();
 	//for each plane, calculate the intersection point
 	for (int i = 0; i < 6; i++)
 	{
@@ -394,7 +377,7 @@ double VolumePoint::GetPointVolumeBox2(
 		{
 			pp = ray.parameter(t);
 
-			if (cb.ContainsWorld(pp))
+			if (cb.ContainsUnit(pp))
 			{
 				if (t > mint)
 				{
@@ -418,7 +401,7 @@ double VolumePoint::GetPointVolumeBox2(
 
 double VolumePoint::GetPointPlane(
 	double mx, double my,//mouse coord on screen
-	fluo::Point* planep, bool calc_mats,
+	fluo::Point* planep,
 	fluo::Point &mp)
 {
 	auto view = glbin_current.render_view.lock();
@@ -432,19 +415,7 @@ double VolumePoint::GetPointPlane(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	glm::mat4 mv_temp;
-
-	if (calc_mats)
-	{
-		//projection
-		view->HandleProjection(nx, ny);
-		//Transformation
-		view->HandleCamera();
-		mv_temp = view->GetObjectMat();
-	}
-	else
-		mv_temp = view->GetModelView();//m_mv_mat;
-
+	glm::mat4 mv_temp = view->GetModelView();
 	glm::mat4 prj_mat = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform p;

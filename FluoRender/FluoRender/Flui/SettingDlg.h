@@ -55,6 +55,8 @@ private:
 	wxComboBox* m_mul_func_btn_comb;
 	//project format
 	wxComboBox* m_config_file_type_comb;
+	//y direction
+	wxComboBox* m_y_dir_comb;
 	//mouse interations
 	wxComboBox* m_mouse_int_comb;
 	//depth peeling
@@ -168,6 +170,7 @@ private:
 	void OnInverseSliderCheck(wxCommandEvent& event);
 	void OnMulFuncBtnComb(wxCommandEvent& event);
 	void OnConfigFileTypeComb(wxCommandEvent& event);
+	void OnYDirComb(wxCommandEvent& event);
 	//mouse interaction
 	void OnMouseIntComb(wxCommandEvent& event);
 	//peeling

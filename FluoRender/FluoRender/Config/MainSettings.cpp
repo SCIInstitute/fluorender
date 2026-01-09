@@ -48,6 +48,7 @@ MainSettings::MainSettings()
 	m_last_open_type = 0;
 	m_last_tool = 0;
 	m_config_file_type = 1;
+	m_y_dir = 0;
 	m_capture_scale = 2.0;
 	m_int_scale = 0.5;
 	m_large_scale = 0.5;
@@ -248,7 +249,8 @@ void MainSettings::Read(const std::string& filename)
 		fconfig->Read("override vox", &m_override_vox, true);
 		fconfig->Read("last open type", &m_last_open_type, 0);
 		fconfig->Read("last tool", &m_last_tool, 0);
-		fconfig->Read("config file type", &m_config_file_type, 0);
+		fconfig->Read("config file type", &m_config_file_type, 1);
+		fconfig->Read("y dir", &m_y_dir, 0);
 		fconfig->Read("capture scale", &m_capture_scale, 2.0);
 		fconfig->Read("int scale", &m_int_scale, 0.5);
 		fconfig->Read("large scale", &m_large_scale, 0.5);
@@ -528,6 +530,7 @@ void MainSettings::Save()
 	fconfig->Write("last open type", m_last_open_type);
 	fconfig->Write("last tool", m_last_tool);
 	fconfig->Write("config file type", m_config_file_type);
+	fconfig->Write("y dir", m_y_dir);
 	fconfig->Write("capture scale", m_capture_scale);
 	fconfig->Write("int scale", m_int_scale);
 	fconfig->Write("large scale", m_large_scale);

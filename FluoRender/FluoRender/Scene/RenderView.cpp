@@ -263,6 +263,17 @@ RenderView::RenderView() :
 	m_cell_list = std::make_unique<flrd::CelpList>();
 	m_text_renderer = std::make_unique<flvr::TextRenderer>();
 
+	//initial orientation
+	switch (glbin_settings.m_y_dir)
+	{
+	case 0://y down
+		SetObjRot(fluo::Vector(180.0, 0.0, 0.0));
+		break;
+	case 1://y up
+		SetObjRot(fluo::Vector(0.0));
+		break;
+	}
+
 	//xbox controller
 #if defined(_WIN32) && defined(USE_XINPUT)
 	m_controller = std::make_unique<XboxController>(1);
@@ -5681,8 +5692,8 @@ void RenderView::DrawVolumes(int peel)
 				if (!vd && !m_vd_pop_list.empty())
 						vd = m_vd_pop_list[0].lock();
 				fluo::Point p;
-				if (glbin_volume_point.GetPointVolumeBox(nx / 2.0, ny / 2.0, false, p) > 0.0 ||
-					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, false, p) > 0.0))
+				if (glbin_volume_point.GetPointVolumeBoxOnePoint(nx / 2.0, ny / 2.0, p) > 0.0 ||
+					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, p) > 0.0))
 				{
 					auto res = vd->GetResolution();
 					auto scaling = vd->GetScaling();
@@ -8847,8 +8858,8 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 	{
 		fluo::Point p;
 		glbin_volume_point.SetVolumeData(cur_vd);
-		if ((glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p )>0.0) ||
-			glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p)>0.0)
+		if ((glbin_volume_point.GetPointVolumeBoxOnePoint(m_mouse_x, m_mouse_y, p )>0.0) ||
+			glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, p)>0.0)
 		{
 			tos << L"T: " << m_tseq_cur_num
 				<< L", X: " << std::fixed << std::setprecision(2) << p.x()
@@ -9790,9 +9801,7 @@ void RenderView::ProcessIdle(IdleState& state)
 		double dist = glbin_volume_point.GetPointVolume(nx / 2.0, ny / 2.0,
 			mode, true, m_pin_pick_thresh, p, ip);
 		if (dist <= 0.0)
-			dist = glbin_volume_point.GetPointVolumeBox(
-				nx / 2.0, ny / 2.0,
-				true, p);
+			dist = glbin_volume_point.GetPointVolumeBoxOnePoint(nx / 2.0, ny / 2.0, p);
 		if (dist > 0.0)
 		{
 			m_pin_ctr = p;
@@ -10509,8 +10518,8 @@ void RenderView::ProcessMouse(MouseState& state)
 				fluo::Point p, ip;
 				glbin_volume_point.SetVolumeData(cur_vd);
 				if (glbin_volume_point.GetPointVolume(m_mouse_x, m_mouse_y, 2, true, m_pin_pick_thresh, p, ip) > 0.0 ||
-					glbin_volume_point.GetPointVolumeBox(m_mouse_x, m_mouse_y, true, p) > 0.0 ||
-					glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, true, p) > 0.0)
+					glbin_volume_point.GetPointVolumeBoxOnePoint(m_mouse_x, m_mouse_y, p) > 0.0 ||
+					glbin_volume_point.GetPointPlane(m_mouse_x, m_mouse_y, 0, p) > 0.0)
 				{
 					//center view on point
 					p -= m_obj_ctr + m_obj_ctr_off;
