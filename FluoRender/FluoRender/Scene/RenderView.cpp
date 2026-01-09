@@ -4946,11 +4946,23 @@ void RenderView::RotateClips()
 	q.FromEuler(m_obj_rot);
 	q *= -m_cam_q;
 
-	auto vd = glbin_current.vol_data.lock();
-
-	if (vd)
+	int type = glbin_current.GetType();
+	switch (type)
 	{
-		vd->SetClipRotation(q);
+	case 2://volume
+	{
+		auto vd = glbin_current.vol_data.lock();
+		if (vd)
+			vd->SetClipRotation(q);
+	}
+		break;
+	case 3://mesh
+	{
+		auto md = glbin_current.mesh_data.lock();
+		if (md)
+			md->SetClipRotation(q);
+	}
+		break;
 	}
 }
 
@@ -9220,7 +9232,7 @@ void RenderView::Pick(BaseState& state)
 	}
 	else if (mesh_sel)
 	{
-		glbin_refresh_scheduler_manager.requestDraw(DrawRequest("Refresh mesh selection", { static_cast<int>(m_id) }));
+		vc.insert({ gstMeshPropPanel });
 	}
 	else
 	{

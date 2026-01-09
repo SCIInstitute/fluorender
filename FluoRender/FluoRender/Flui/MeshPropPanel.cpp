@@ -217,11 +217,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	sizer_v->Add(sizer_4, 1, wxEXPAND);
 	sizer_v->Add(sizer_5, 1, wxEXPAND);
 
-	wxBoxSizer* sizer_main = new wxBoxSizer(wxHORIZONTAL);
-	sizer_main->Add(sizer_v, 1, wxEXPAND | wxALL, 5);
-	sizer_main->AddStretchSpacer(1);
-
-	SetSizer(sizer_main);
+	SetSizer(sizer_v);
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
