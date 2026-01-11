@@ -415,7 +415,7 @@ double VolumePoint::GetPointPlane(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	glm::mat4 mv_temp = view->GetModelView();
+	glm::mat4 mv_temp = view->GetObjectMat();
 	glm::mat4 prj_mat = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform p;
