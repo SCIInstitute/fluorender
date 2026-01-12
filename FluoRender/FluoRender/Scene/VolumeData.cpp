@@ -884,6 +884,9 @@ void VolumeData::LoadLabel(Nrrd* label)
 		//nrrdNuke(label);
 		//label = sampler.GetResult();
 	}
+
+	if (m_tex->has_comp(flvr::CompType::Mask))
+		SetMaskMode(flvr::ColorMode::Component);
 }
 
 void VolumeData::SetOrderedID(unsigned int* val)
@@ -1119,6 +1122,10 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 			break;
 		}
 	}
+
+	//set color mode
+	if (m_tex->has_comp(flvr::CompType::Mask))
+		SetMaskMode(flvr::ColorMode::Component);
 }
 
 bool VolumeData::SearchLabel(unsigned int label)

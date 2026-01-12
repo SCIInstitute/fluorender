@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotData.h>
 #include <VolCache4D.h>
 #include <VolumeRenderer.h>
+#include <ShaderProgram.h>
 #include <RefreshScheduler.h>
 #include <base_vol_reader.h>
 #include <imageJ_reader.h>
@@ -648,6 +649,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		vd->SetCompression(glbin_settings.m_realtime_compress);
 
 		bool valid_spc = reader->IsSpcInfoValid();
+		bool loaded_label = false;
 		if (vd->Load(data, name, pathname))
 		{
 			if (glbin_settings.m_load_mask)
@@ -665,7 +667,10 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				lbl_reader.SetFile(str);
 				Nrrd* label = lbl_reader.Convert(0, 0, true);
 				if (label)
+				{
 					vd->LoadLabel(label);
+					loaded_label = true;
+				}
 			}
 			if (type == LOAD_TYPE_BRKXML)
 			{
@@ -736,6 +741,9 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 		}
 		if (type == LOAD_TYPE_MPG)
 			vd->SetAlphaEnable(false);
+		//mask mode
+		if (loaded_label)
+			vd->SetMaskMode(flvr::ColorMode::Component);
 
 		SetProgress(std::round(100.0 * (i + 1) / chan), "NOT_SET");
 	}

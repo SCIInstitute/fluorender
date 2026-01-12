@@ -2014,8 +2014,8 @@ void ComponentDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 	if (glbin_comp_generator.GetAutoThreshold())
 		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 	glbin_comp_generator.GenerateComp();
-	vc.insert(gstCompGenOutput);
-	FluoRefresh(2, vc);
+	vc.insert({ gstCompGenOutput, gstMaskMode });
+	FluoRefresh(0, vc);
 }
 
 //clustering page
@@ -2430,8 +2430,8 @@ void ComponentDlg::OnGenerate(wxCommandEvent& event)
 	if (glbin_comp_generator.GetAutoThreshold())
 		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
 	glbin_comp_generator.Compute();
-	vc.insert({ gstCompGenOutput, gstRecordCmd });
-	FluoRefresh(2, vc);
+	vc.insert({ gstCompGenOutput, gstRecordCmd, gstMaskMode });
+	FluoRefresh(0, vc);
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent& event)
