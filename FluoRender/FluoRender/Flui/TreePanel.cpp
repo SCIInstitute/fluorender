@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <Colocalize.h>
 #include <Ruler.h>
+#include <BaseConvVolMesh.h>
 //resources
 #include <png_resource.h>
 #include <tick.xpm>
@@ -331,6 +332,11 @@ TreePanel::TreePanel(MainFrame* frame,
 		"Delete current selection");
 	m_toolbar->SetToolLongHelp(ID_RemoveData, "Delete current selection");
 	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmap(locator);
+	m_toolbar->AddCheckTool(ID_RulerLocator, "Locator",
+		bitmap, wxNullBitmap,
+		"Add locators by clicking on data",
+		"Add locators by clicking on data");
 	bitmap = wxGetBitmap(two_point);
 	m_toolbar->AddCheckTool(ID_RulerLine, "Line",
 		bitmap, wxNullBitmap,
@@ -385,6 +391,10 @@ TreePanel::TreePanel(MainFrame* frame,
 		"Remove the highlights by painting (hold X)",
 		"Remove the highlights by painting (hold X)");
 	m_toolbar2->AddSeparator();
+	bitmap = wxGetBitmap(mesh_convert);
+	m_toolbar2->AddTool(ID_MeshConvert, "Convert",
+		bitmap, "Convert volume to mesh");
+	m_toolbar2->SetToolLongHelp(ID_MeshConvert, "Convert volume to mesh");
 	bitmap = wxGetBitmap(brush_locator);
 	m_toolbar2->AddCheckTool(ID_BrushRuler, "Centroid",
 		bitmap, wxNullBitmap,
@@ -468,6 +478,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 
+		m_toolbar->ToggleTool(ID_RulerLocator, rul_mode == flrd::RulerMode::Locator);
 		m_toolbar->ToggleTool(ID_RulerLine, rul_mode == flrd::RulerMode::Line);
 		bval = rul_mode == flrd::RulerMode::Polyline &&
 			(int_mode == InteractiveMode::Ruler ||
@@ -629,6 +640,12 @@ void TreePanel::RemoveData()
 	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect });
 }
 
+void TreePanel::RulerLocator()
+{
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
+	FluoRefresh(0, { gstFreehandToolState }, {-1});
+}
+
 void TreePanel::RulerLine()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
@@ -712,6 +729,30 @@ void TreePanel::BrushDelete()
 {
 	glbin_vol_selector.Erase();
 	FluoRefresh(3, { gstNull });
+}
+
+void TreePanel::MeshConvert()
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	glbin_conv_vol_mesh->SetVolumeData(vd);
+	glbin_conv_vol_mesh->Convert();
+	auto md = glbin_conv_vol_mesh->GetMeshData();
+	if (md)
+	{
+		glbin_data_manager.AddMeshData(md);
+		auto view = glbin_current.render_view.lock();
+		if (view)
+			view->AddMeshData(md);
+		//glbin_current.SetMeshData(md);
+	}
+	if (!glbin_conv_vol_mesh->GetMerged())
+		glbin_conv_vol_mesh->MergeVertices(false);
+	glbin_conv_vol_mesh->Smooth(true);
+
+	FluoRefresh(0, { gstVolMeshInfo, gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
+		{ glbin_current.GetViewId() });
 }
 
 void TreePanel::UpdateTree()
@@ -1672,6 +1713,9 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 	case ID_RemoveData:
 		RemoveData();
 		break;
+	case ID_RulerLocator:
+		RulerLocator();
+		break;
 	case ID_RulerLine:
 		RulerLine();
 		break;
@@ -1695,6 +1739,9 @@ void TreePanel::OnToolbar(wxCommandEvent& event)
 		break;
 	case ID_BrushAppend:
 		BrushAppend();
+		break;
+	case ID_MeshConvert:
+		MeshConvert();
 		break;
 	case ID_BrushComp:
 		BrushComp();

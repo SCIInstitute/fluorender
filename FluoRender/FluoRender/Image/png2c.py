@@ -1,15 +1,7 @@
-﻿#!/usr/bin/python
-
-# This script is a slightly modified version of the original found at
-#
-#       http://wiki.wxwidgets.org/Embedding_PNG_Images-Bin2c_In_Python
-#
-# without any copyright attribution so it is assumed it can be used under
-# wxWindows licence as the rest of the wiki material.
+#!/usr/bin/env python3
 
 import sys
 import os
-import os.path
 import re
 import array
 
@@ -20,75 +12,57 @@ in C code (like XPM but with full alpha channel support).
   -s    embed the image size in the image names in generated code."""
 
 if len(sys.argv) < 2:
-        print USAGE
-        sys.exit(1)
+    print(USAGE)
+    sys.exit(1)
 
-r = re.compile("^([a-zA-Z._][a-zA-Z._0-9]*)[.][pP][nN][gG]$")
+r = re.compile(r"^([a-zA-Z._][a-zA-Z._0-9]*)[.][pP][nN][gG]$")
 
-with_size = 0
+with_size = False
 size_suffix = ''
 for path in sys.argv[1:]:
-        if path == '-s':
-            with_size = 1
-            continue
+    if path == '-s':
+        with_size = True
+        continue
 
-        filename = os.path.basename(path).replace('-','_')
-        m = r.match(filename)
+    filename = os.path.basename(path).replace('-', '_')
+    m = r.match(filename)
 
-        # Allow only filenames that make sense as C variable names
-        if not(m):
-                print "Skipped file (unsuitable filename): " + filename
-                continue
+    if not m:
+        print(f"Skipped file (unsuitable filename): {filename}")
+        continue
 
-        # Read PNG file as character array
-        bytes = array.array('B', open(path, "rb").read())
-        count = len(bytes)
+    try:
+        with open(path, "rb") as f:
+            bytes_arr = array.array('B', f.read())
+    except Exception as e:
+        print(f"Failed to read file {path}: {e}")
+        continue
 
-        # Check that it's actually a PNG to avoid problems when loading it
-        # later.
-        #
-        # Each PNG file starts with a 8 byte signature that should be followed
-        # by IHDR chunk which is always 13 bytes in length so the first 16
-        # bytes are fixed (or at least we expect them to be).
-        if bytes[0:16].tostring() != '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR':
-                print '"%s" doesn\'t seem to be a valid PNG file.' % filename
-                continue
+    count = len(bytes_arr)
 
-        # Try to naively get its size if necessary
-        if with_size:
-                def getInt(start):
-                        """ Convert 4 bytes in network byte order to an integer. """
-                        return 16777216*bytes[start]   + \
-                                  65536*bytes[start+1] + \
-                                    256*bytes[start+2] + \
-                                        bytes[start+3];
+    # Check PNG signature
+    if bytes_arr[:16].tobytes() != b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR':
+        print(f'"{filename}" doesn\'t seem to be a valid PNG file.')
+        continue
 
-                size_suffix = "_%dx%d" % (getInt(16), getInt(20))
+    if with_size:
+        def getInt(start):
+            return (bytes_arr[start] << 24) + (bytes_arr[start+1] << 16) + \
+                   (bytes_arr[start+2] << 8) + bytes_arr[start+3]
 
-        # Create the C header
-        text = "/* %s - %d bytes */\n" \
-               "static const unsigned char %s%s_png[] = {\n" % (
-                    filename, count, m.group(1), size_suffix)
+        size_suffix = f"_{getInt(16)}x{getInt(20)}"
 
-        # Iterate the characters, we want
-        # lines like:
-        #   0x01, 0x02, .... (8 values per line maximum)
-        i = 0
-        count = len(bytes)
-        for byte in bytes:
-                # Every new line starts with two whitespaces
-                if (i % 8) == 0:
-                        text += "  "
-                # Then the hex data (up to 8 values per line)
-                text += "0x%02x" % (byte)
-                # Separate all but the last values
-                if (i % 8) == 7:
-                        text += ',\n'
-                elif (i + 1) < count:
-                        text += ", "
-                i += 1
+    text = f"/* {filename} - {count} bytes */\n"
+    text += f"static const unsigned char {m.group(1)}{size_suffix}_png[] = {{\n"
 
-        # Now conclude the C source
-        text += "};\n\n"
+    for i, byte in enumerate(bytes_arr):
+        if i % 8 == 0:
+            text += "  "
+        text += f"0x{byte:02x}"
+        if i < count - 1:
+            text += ", "
+        if i % 8 == 7:
+            text += "\n"
 
-        print text
+    text += "\n};\n\n"
+    print(text)

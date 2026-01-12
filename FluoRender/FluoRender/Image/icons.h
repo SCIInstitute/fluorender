@@ -453,6 +453,19 @@ public:
 	/* auto_link_on.png - 1081 bytes */
 	const static unsigned char auto_link_on_png[1081];
 
+	//mesh icons
+	/* mesh_convert.png - 1506 bytes */
+	const static unsigned char mesh_convert_png[1506];
+	/* mesh_simplify.png - 1028 bytes */
+	const static unsigned char mesh_simplify_png[1028];
+	/* mesh_smooth.png - 1078 bytes */
+	const static unsigned char mesh_smooth_png[1078];
+	/* mesh_update.png - 1505 bytes */
+	const static unsigned char mesh_update_png[1505];
+	/* mesh_weld.png - 1049 bytes */
+	const static unsigned char mesh_weld_png[1049];
+
+
 	//small buttons
 	/* brush_small.png - 992 bytes */
 	const static unsigned char brush_small_png[992];

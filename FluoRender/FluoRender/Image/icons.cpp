@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <icons_playback.h>
 #include <icons_volume_props.h>
 #include <icons_track_diag.h>
+#include <icons_mesh.h>
 #include <icons_small_buttons.h>
 
 //common icons

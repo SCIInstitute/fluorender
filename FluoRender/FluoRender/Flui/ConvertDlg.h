@@ -44,22 +44,35 @@ class wxSingleSlider;
 class ConvertDlg : public TabbedPanel
 {
 public:
+	enum
+	{
+		//mesh tools
+		ID_MeshConvert = 0,
+		ID_MeshUpdate,
+		ID_MeshWeldVertices,
+		ID_MeshColor,
+		ID_MeshSimplify,
+		ID_MeshSmooth
+	};
+
 	ConvertDlg(MainFrame* frame);
 	~ConvertDlg();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
+	//toolbar
+	void MeshConvert();
+	void MeshUpdate();
+	void MeshWeldVertices();
+	void MeshColor();
+	void MeshSimplify();
+	void MeshSmooth();
+
 private:
 	//output
 	bool m_hold_history;
 
-	//convert from volume to polygon mesh
-	wxButton* m_cnv_vol_mesh_convert_btn;
-	wxButton* m_cnv_vol_mesh_update_btn;
-	wxButton* m_cnv_vol_mesh_weld_btn;
-	wxButton* m_cnv_vol_mesh_color_btn;
-	wxButton* m_cnv_vol_mesh_simplify_btn;
-	wxButton* m_cnv_vol_mesh_smooth_btn;
+	wxToolBar* m_toolbar;
 
 	wxCheckBox* m_cnv_vol_mesh_selected_chk;
 	wxCheckBox* m_cnv_vol_mesh_usetransf_chk;
@@ -95,12 +108,7 @@ private:
 	void CopyData();
 	void PasteData();
 
-	void OnCnvVolMeshConvert(wxCommandEvent& event);
-	void OnCnvVolMeshUpdate(wxCommandEvent& event);
-	void OnCnvVolMeshWeldVertices(wxCommandEvent& event);
-	void OnCnvVolMeshColor(wxCommandEvent& event);
-	void OnCnvVolMeshSimplify(wxCommandEvent& event);
-	void OnCnvVolMeshSmooth(wxCommandEvent& event);
+	void OnToolBar(wxCommandEvent& event);
 
 	void OnCnvVolMeshUseSelCheck(wxCommandEvent& event);
 	void OnCnvVolMeshUseTransfCheck(wxCommandEvent& event);

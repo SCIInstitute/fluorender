@@ -41,6 +41,9 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
+//resources
+#include <png_resource.h>
+#include <icons.h>
 
 ConvertDlg::ConvertDlg(MainFrame *frame) :
 	TabbedPanel(frame, frame,
@@ -90,32 +93,44 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 
 	wxStaticText* st = 0;
 
-	//button
-	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_cnv_vol_mesh_convert_btn = new wxButton(page, wxID_ANY, "Convert",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_update_btn = new wxButton(page, wxID_ANY, "Update",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_weld_btn = new wxButton(page, wxID_ANY, "Weld",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_color_btn = new wxButton(page, wxID_ANY, "Color",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_simplify_btn = new wxButton(page, wxID_ANY, "Simplify",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_smooth_btn = new wxButton(page, wxID_ANY, "Smooth",
-		wxDefaultPosition, FromDIP(wxSize(-1, 23)));
-	m_cnv_vol_mesh_convert_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshConvert, this);
-	m_cnv_vol_mesh_update_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshUpdate, this);
-	m_cnv_vol_mesh_weld_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshWeldVertices, this);
-	m_cnv_vol_mesh_color_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshColor, this);
-	m_cnv_vol_mesh_simplify_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshSimplify, this);
-	m_cnv_vol_mesh_smooth_btn->Bind(wxEVT_BUTTON, &ConvertDlg::OnCnvVolMeshSmooth, this);
-	sizer_1->Add(m_cnv_vol_mesh_convert_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_cnv_vol_mesh_update_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_cnv_vol_mesh_weld_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_cnv_vol_mesh_color_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_cnv_vol_mesh_simplify_btn, 0, wxALIGN_CENTER);
-	sizer_1->Add(m_cnv_vol_mesh_smooth_btn, 0, wxALIGN_CENTER);
+	//toolbar
+	m_toolbar = new wxToolBar(page, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER | wxTB_TEXT);
+	wxBitmapBundle bitmap;
+	bitmap = wxGetBitmap(mesh_convert);
+	m_toolbar->AddTool(
+		ID_MeshConvert, "Convert", bitmap,
+		"Convert volume data to mesh");
+	m_toolbar->SetToolLongHelp(ID_MeshConvert, "Convert volume data to mesh");
+	bitmap = wxGetBitmap(mesh_update);
+	m_toolbar->AddTool(
+		ID_MeshUpdate, "Update", bitmap,
+		"Update mesh after setting change");
+	m_toolbar->SetToolLongHelp(ID_MeshUpdate, "Update mesh after setting change");
+	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmap(mesh_weld);
+	m_toolbar->AddTool(
+		ID_MeshWeldVertices, "Weld", bitmap,
+		"Weld mesh vertices to remove duplications");
+	m_toolbar->SetToolLongHelp(ID_MeshWeldVertices, "Weld mesh vertices to remove duplications");
+	bitmap = wxGetBitmap(palette);
+	m_toolbar->AddTool(
+		ID_MeshColor, "Color", bitmap,
+		"Transfer voxel colors to mesh");
+	m_toolbar->SetToolLongHelp(ID_MeshColor, "Transfer voxel colors to mesh");
+	m_toolbar->AddSeparator();
+	bitmap = wxGetBitmap(mesh_simplify);
+	m_toolbar->AddTool(
+		ID_MeshSimplify, "Simplify", bitmap,
+		"Simplify mesh by merging nearby vertices");
+	m_toolbar->SetToolLongHelp(ID_MeshSimplify, "Simplify mesh by merging nearby vertices");
+	bitmap = wxGetBitmap(mesh_smooth);
+	m_toolbar->AddTool(
+		ID_MeshSmooth, "Smooth", bitmap,
+		"Move mesh vetices to reduce noise");
+	m_toolbar->SetToolLongHelp(ID_MeshSmooth, "Move mesh vetices to reduce noise");
+	m_toolbar->Bind(wxEVT_TOOL, &ConvertDlg::OnToolBar, this);
+	m_toolbar->Realize();
 
 	//sizer_2
 	//convert from volume to mesh
@@ -249,7 +264,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 	//all controls
 	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
-	sizerV->Add(sizer_1, 0, wxEXPAND);
+	sizerV->Add(m_toolbar, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -581,7 +596,34 @@ void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
 	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
-void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
+void ConvertDlg::OnToolBar(wxCommandEvent& event)
+{
+	int id = event.GetId();
+
+	switch (id)
+	{
+	case ID_MeshConvert:
+		MeshConvert();
+		break;
+	case ID_MeshUpdate:
+		MeshUpdate();
+		break;
+	case ID_MeshWeldVertices:
+		MeshWeldVertices();
+		break;
+	case ID_MeshColor:
+		MeshColor();
+		break;
+	case ID_MeshSimplify:
+		MeshSimplify();
+		break;
+	case ID_MeshSmooth:
+		MeshSmooth();
+		break;
+	}
+}
+
+void ConvertDlg::MeshConvert()
 {
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
@@ -602,7 +644,7 @@ void ConvertDlg::OnCnvVolMeshConvert(wxCommandEvent& event)
 		{ glbin_current.GetViewId() });
 }
 
-void ConvertDlg::OnCnvVolMeshUpdate(wxCommandEvent& event)
+void ConvertDlg::MeshUpdate()
 {
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
@@ -627,7 +669,7 @@ void ConvertDlg::OnCnvVolMeshUpdate(wxCommandEvent& event)
 		{ glbin_current.GetViewId() });
 }
 
-void ConvertDlg::OnCnvVolMeshWeldVertices(wxCommandEvent& event)
+void ConvertDlg::MeshWeldVertices()
 {
 	//bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
 	//glbin_conv_vol_mesh->SetVertexMerge(bval);
@@ -639,7 +681,7 @@ void ConvertDlg::OnCnvVolMeshWeldVertices(wxCommandEvent& event)
 		{ glbin_current.GetViewId() });
 }
 
-void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
+void ConvertDlg::MeshColor()
 {
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
@@ -669,7 +711,7 @@ void ConvertDlg::OnCnvVolMeshColor(wxCommandEvent& event)
 		{ glbin_current.GetViewId() });
 }
 
-void ConvertDlg::OnCnvVolMeshSimplify(wxCommandEvent& event)
+void ConvertDlg::MeshSimplify()
 {
 	if (!glbin_conv_vol_mesh->GetMerged())
 		glbin_conv_vol_mesh->MergeVertices(false);
@@ -678,7 +720,7 @@ void ConvertDlg::OnCnvVolMeshSimplify(wxCommandEvent& event)
 		{ glbin_current.GetViewId() });
 }
 
-void ConvertDlg::OnCnvVolMeshSmooth(wxCommandEvent& event)
+void ConvertDlg::MeshSmooth()
 {
 	if (!glbin_conv_vol_mesh->GetMerged())
 		glbin_conv_vol_mesh->MergeVertices(false);

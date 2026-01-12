@@ -11,6 +11,7 @@
         <last_open_type>0</last_open_type>
         <last_tool>1</last_tool>
         <config_file_type>1</config_file_type>
+        <y_dir>0</y_dir>
         <capture_scale>2</capture_scale>
         <int_scale>0.5</int_scale>
         <large_scale>0.5</large_scale>
@@ -141,12 +142,12 @@
     &lt;notebook name="ConvertDlg"&gt;
       &lt;tab&gt;
         &lt;pages&gt;0&lt;/pages&gt;
-        &lt;size&gt;18&lt;/size&gt;
+        &lt;size&gt;13&lt;/size&gt;
         &lt;direction&gt;5&lt;/direction&gt;
       &lt;/tab&gt;
       &lt;tab&gt;
         &lt;pages&gt;1&lt;/pages&gt;
-        &lt;size&gt;451&lt;/size&gt;
+        &lt;size&gt;330&lt;/size&gt;
         &lt;row&gt;1&lt;/row&gt;
         &lt;direction&gt;3&lt;/direction&gt;
       &lt;/tab&gt;

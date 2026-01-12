@@ -129,6 +129,7 @@ public:
 		ID_AddMeshGroup,
 		ID_RemoveData,
 		//rulers
+		ID_RulerLocator,
 		ID_RulerLine,
 		ID_RulerPolyline,
 		ID_RulerPencil,
@@ -136,13 +137,14 @@ public:
 		ID_RulerEdit,
 		ID_RulerDeletePoint,
 		//brush
-		ID_BrushRuler,
-		//separator
 		ID_BrushGrow,
 		ID_BrushAppend,
-		ID_BrushComp,
 		ID_BrushDiffuse,
 		ID_BrushUnselect,
+		//separator
+		ID_MeshConvert,
+		ID_BrushRuler,
+		ID_BrushComp,
 		//separator
 		ID_BrushClear,
 		ID_BrushExtract,
@@ -196,6 +198,7 @@ public:
 	void AddVolGroup();
 	void AddMeshGroup();
 	void RemoveData();
+	void RulerLocator();
 	void RulerLine();
 	void RulerPolyline();
 	void RulerPencil();
@@ -210,6 +213,7 @@ public:
 	void BrushClear();
 	void BrushExtract();
 	void BrushDelete();
+	void MeshConvert();
 
 	//delete all
 	void DeleteSelection();

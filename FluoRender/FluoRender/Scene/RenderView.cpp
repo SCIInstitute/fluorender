@@ -2713,6 +2713,7 @@ void RenderView::SetLockCenterSel()
 	if (!cur_vd_ptr)
 		return;
 	flrd::Cov cover(cur_vd_ptr.get());
+	cover.SetUseMask(true);
 	cover.Compute(1);
 	m_lock_center = cover.GetCenter();
 }

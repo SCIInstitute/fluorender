@@ -882,6 +882,7 @@ void RulerHandler::AddPaintRulerPoint()
 		return;
 
 	flrd::Cov cover(vd.get());
+	cover.SetUseMask(true);
 	cover.Compute(1);
 	flrd::CountVoxels counter;
 	counter.SetVolumeData(vd);
@@ -1762,7 +1763,7 @@ int RulerHandler::Roi(Ruler* ruler)
 	if (!valid()) return 0;
 
 	//get transform
-	glm::mat4 mv = view->GetModelView();
+	glm::mat4 mv = view->GetObjectMat();
 	glm::mat4 prj = view->GetProjection();
 	glm::mat4 mvprj = prj * mv;
 	tf.set(glm::value_ptr(mvprj));
