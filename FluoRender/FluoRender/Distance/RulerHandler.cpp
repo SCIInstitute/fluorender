@@ -245,7 +245,7 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 mv_temp = view->GetModelView();
 	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
@@ -314,7 +314,7 @@ bool RulerHandler::FindClosestRulerPoint(double mx, double my)
 	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 mv_temp = view->GetModelView();
 	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
@@ -389,7 +389,7 @@ bool RulerHandler::FindClosestRulerBranch(double mx, double my)
 	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 mv_temp = view->GetModelView();
 	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
@@ -471,7 +471,7 @@ bool RulerHandler::FindClosestRulerBranchPoint(double mx, double my)
 	bool persp = view->GetPersp();
 
 	//get transform
-	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 mv_temp = view->GetModelView();
 	glm::mat4 prj_temp = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform prj;
@@ -1762,7 +1762,7 @@ int RulerHandler::Roi(Ruler* ruler)
 	if (!valid()) return 0;
 
 	//get transform
-	glm::mat4 mv = view->GetObjectMat();
+	glm::mat4 mv = view->GetModelView();
 	glm::mat4 prj = view->GetProjection();
 	glm::mat4 mvprj = prj * mv;
 	tf.set(glm::value_ptr(mvprj));
