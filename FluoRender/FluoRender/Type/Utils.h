@@ -344,6 +344,31 @@ inline double CleanZero(double v)
 	return v == 0.0 ? 0.0 : v;
 }
 
+
+inline void SplitString(const std::string& input, std::vector<std::string>& tokens)
+{
+	tokens.clear();
+	const char* p = input.c_str();
+
+	auto is_ws = [](unsigned char c) -> bool {
+		return std::isspace(c) != 0;
+	};
+
+	while (*p)
+	{
+		// Skip leading whitespace
+		while (*p && is_ws(static_cast<unsigned char>(*p))) ++p;
+		if (!*p) break;
+
+		const char* start = p;
+
+		// Consume non-whitespace
+		while (*p && !is_ws(static_cast<unsigned char>(*p))) ++p;
+
+		tokens.emplace_back(start, static_cast<size_t>(p - start));
+	}
+}
+
 } // namespace fluo
 
 #endif//_FLTYPEUTILS_H_

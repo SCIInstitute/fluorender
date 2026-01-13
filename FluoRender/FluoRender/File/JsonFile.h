@@ -70,11 +70,11 @@ public:
 	int LoadFile(const std::wstring& filename) override
 	{
 #ifdef _WIN32
-        std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-        std::ifstream file(long_name);
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+		std::ifstream file(long_name);
 #else
-        std::wstring long_name = filename;
-        std::ifstream file(ws2s(long_name));
+		std::wstring long_name = filename;
+		std::ifstream file(ws2s(long_name));
 #endif
 		std::stringstream buffer;
 		buffer << file.rdbuf();
@@ -142,11 +142,11 @@ public:
 		}
 
 #ifdef _WIN32
-        std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-        std::ofstream file(long_name);
+		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+		std::ofstream file(long_name);
 #else
-        std::wstring long_name = filename;
-        std::ofstream file(ws2s(long_name));
+		std::wstring long_name = filename;
+		std::ofstream file(ws2s(long_name));
 #endif
 		if (!file.is_open()) {
 			return 6; // Error: Unable to open file
@@ -700,6 +700,65 @@ protected:
 		return false;
 	}
 
+	inline std::string JsonEscape(const std::string& in, bool escape_line_separators = false)
+	{
+		std::string out;
+		out.reserve(in.size() + in.size() / 8); // heuristic headroom
+
+		auto hex4 = [](unsigned char c)->std::string {
+			static const char* digits = "0123456789ABCDEF";
+			std::string s = "\\u00";
+			s.push_back(digits[(c >> 4) & 0xF]);
+			s.push_back(digits[c & 0xF]);
+			return s;
+		};
+
+		for (size_t i = 0; i < in.size(); ++i)
+		{
+			unsigned char c = static_cast<unsigned char>(in[i]);
+			switch (c)
+			{
+			case '\"': out += "\\\""; break;
+			case '\\': out += "\\\\"; break;
+			case '\b': out += "\\b";  break;
+			case '\f': out += "\\f";  break;
+			case '\n': out += "\\n";  break;
+			case '\r': out += "\\r";  break;
+			case '\t': out += "\\t";  break;
+
+			default:
+				if (c < 0x20) {
+					// Other control chars: \u00XX
+					out += hex4(c);
+				}
+				else if (escape_line_separators) {
+					// Optionally escape U+2028/U+2029 if your environment needs it.
+					// We don’t decode UTF-8 here; quick scan for those exact UTF-8 sequences:
+					// U+2028 = E2 80 A8, U+2029 = E2 80 A9
+					if (c == 0xE2 && i + 2 < in.size()) {
+						unsigned char c1 = static_cast<unsigned char>(in[i + 1]);
+						unsigned char c2 = static_cast<unsigned char>(in[i + 2]);
+						if (c1 == 0x80 && (c2 == 0xA8 || c2 == 0xA9)) {
+							out += (c2 == 0xA8) ? "\\u2028" : "\\u2029";
+							i += 2;
+						}
+						else {
+							out.push_back(static_cast<char>(c));
+						}
+					}
+					else {
+						out.push_back(static_cast<char>(c));
+					}
+				}
+				else {
+					out.push_back(static_cast<char>(c));
+				}
+				break;
+			}
+		}
+		return out;
+	}
+
 	// Implement type-specific write methods
 	bool WriteString(const std::string& key, const std::string& value) override
 	{
@@ -723,7 +782,9 @@ protected:
 				return false;
 			}
 		}
-		AssignValue(item, value.c_str());
+
+		const std::string escaped = JsonEscape(value);
+		AssignValue(item, escaped.c_str());
 		return true;
 	}
 

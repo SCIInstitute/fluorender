@@ -979,7 +979,10 @@ void Project::Open(const std::wstring& filename)
 				ReadRulerList(gstProjectFile, i);
 			}
 		}
-		glbin_current.render_view = root->GetView(cur_canvas);
+		if (cur_canvas.empty())
+			glbin_current.render_view = root->GetLastView();
+		else
+			glbin_current.render_view = root->GetView(cur_canvas);
 	}
 
 	//clipping planes
@@ -2209,7 +2212,9 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 			{
 				//if points
 				std::string path_nobr = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/points" + std::to_string(j);
-				std::string path_br = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches" + std::to_string(j);
+				std::string path_br;
+				std::string path_br_xml = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches" + std::to_string(j);
+				std::string path_br_ini = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i) + "/branches/" + std::to_string(j);//old style
 				if (fconfig->Exists(path_nobr))
 				{
 					fconfig->SetPath(path_nobr);
@@ -2217,8 +2222,19 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 						ruler->AddPoint(pval);
 				}
 				//if branch
-				else if (fconfig->Exists(path_br))
+				else
 				{
+					if (fconfig->Exists(path_br_xml))
+						path_br = path_br_xml;
+					else if (fconfig->Exists(path_br_ini))
+					{
+						path_br = path_br_ini;
+						//change ruler type
+						int rtype = static_cast<int>(ruler->GetRulerMode()) + 1;
+						ruler->SetRulerMode(static_cast<flrd::RulerMode>(rtype));
+					}
+					else
+						continue;
 					fconfig->SetPath(path_br);
 					size_t branch_point_num = 0;
 					if (fconfig->Read("num", &branch_point_num))
@@ -2239,16 +2255,40 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 								size_t t;
 								for (size_t tpi = 0; tpi < tnum; ++tpi)
 								{
+									bool valid_point = false;
 									std::string tpn = "tp" + std::to_string(tpi);
 									if (fconfig->Read(tpn + "_time", &t) &&
 										fconfig->Read(tpn + "_pos", &pval))
+										valid_point = true;
+									else
+									{
+										//old style
+										if (fconfig->Read(tpn, &sval))
+										{
+											std::vector<std::string> tokens;
+											fluo::SplitString(sval, tokens);
+											if (tokens.size() >= 4)
+											{
+												t = std::stoul(tokens[0]);
+												double x = std::stod(tokens[1]);
+												double y = std::stod(tokens[2]);
+												double z = std::stod(tokens[3]);
+												pval = fluo::Point(x, y, z);
+												valid_point = true;
+											}
+										}
+									}
+									if (valid_point)
 									{
 										ruler->SetWorkTime(t);
 										if (j > 0 && k == 0)
 										{
 											flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);
-											pp->SetLocked(locked);
-											ruler->AddBranch(pp);
+											if (pp)
+											{
+												pp->SetLocked(locked);
+												ruler->AddBranch(pp);
+											}
 										}
 										else
 										{
@@ -2256,7 +2296,8 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 											{
 												ruler->AddPoint(pval);
 												flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);
-												pp->SetLocked(locked);
+												if (pp)
+													pp->SetLocked(locked);
 											}
 											else
 											{

@@ -737,15 +737,18 @@ void TreePanel::MeshConvert()
 	if (!vd)
 		return;
 	glbin_conv_vol_mesh->SetVolumeData(vd);
-	glbin_conv_vol_mesh->Convert();
+	glbin_conv_vol_mesh->Update(true);
 	auto md = glbin_conv_vol_mesh->GetMeshData();
 	if (md)
 	{
-		glbin_data_manager.AddMeshData(md);
-		auto view = glbin_current.render_view.lock();
-		if (view)
-			view->AddMeshData(md);
-		//glbin_current.SetMeshData(md);
+		auto temp = glbin_data_manager.GetMeshData(md->GetName());
+		if (!temp)
+		{
+			glbin_data_manager.AddMeshData(md);
+			auto view = glbin_current.render_view.lock();
+			if (view)
+				view->AddMeshData(md);
+		}
 	}
 	if (!glbin_conv_vol_mesh->GetMerged())
 		glbin_conv_vol_mesh->MergeVertices(false);
