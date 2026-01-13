@@ -47,6 +47,7 @@ Source: "..\..\build\bin\Release\Scripts\*"; DestDir: "{app}\Scripts"; Flags: ig
 Source: "..\..\build\bin\Release\Templates\*"; DestDir: "{app}\Templates"; Flags: ignoreversion  
 ; SETTINGS ITEMS
 Source: "..\..\Settings\fluorender.xml"; DestDir: "{app}"; Flags: onlyifdoesntexist; Permissions: users-full
+Source: "..\..\build\bin\Release\fluorender_default.xml"; DestDir: "{app}"; Flags: ignoreversion
 ; Benchmark
 Source: "..\..\build\bin\Release\FluoRender_benchmark.bat"; DestDir: "{app}"; Flags: ignoreversion      
 Source: "..\..\build\bin\Release\FluoRender_benchmark.command"; DestDir: "{app}"; Flags: ignoreversion      
