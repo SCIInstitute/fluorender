@@ -107,8 +107,28 @@ void CamCenterRenderer::drawJack(const std::shared_ptr<flvr::VertexArray>& va, c
 	if (!view)
 		return;
 	glm::mat4 viewRot = glm::mat4(glm::mat3(view->GetModelView()));
-	glm::mat4 matrix = view->GetProjection() * viewRot;
-	shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	if (view->GetPersp())
+	{
+		//glm::mat4 proj_mat = glm::ortho(
+		//	view->m_ortho_left,
+		//	view->m_ortho_right,
+		//	view->m_ortho_bottom,
+		//	view->m_ortho_top,
+		//	-view->GetFarClip() / 100.0,
+		//	view->GetFarClip());
+		//glm::mat4 matrix = proj_mat * viewRot;
+		glm::vec3 eye, center, up;
+		view->GetCameraSettings(eye, center, up);
+		float dist = glm::length(center - eye);
+		glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -dist));
+		glm::mat4 matrix = view->GetProjection() * trans * viewRot;
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	}
+	else
+	{
+		glm::mat4 matrix = view->GetProjection() * viewRot;
+		shader->setLocalParamMatrix(0, glm::value_ptr(matrix));
+	}
 	shader->setLocalParam(0, 1.0, 0.0, 0.0, 1.0);
 	va->draw_cam_jack(0);
 	shader->setLocalParam(0, 0.0, 1.0, 0.0, 1.0);

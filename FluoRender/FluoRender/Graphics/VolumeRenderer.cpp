@@ -589,9 +589,9 @@ void VolumeRenderer::draw_volume(
 	//DBGPRINT(wstr.c_str());
 	//DBGPRINT(L"done_current_chan_:%d\tclear_chan_buffer_:%d\tsave_final_buffer_:%d\tdone_loop_[%d]:%d\tcur_chan_brick_num_:%d\tcur_brick_num_:%d\tfinished_bricks_:%d\tbrick_size:%d\ttotal_brick_num_:%d\n",
 	//	done_current_chan_, clear_chan_buffer_, save_final_buffer_, mode, done_loop_[mode], cur_chan_brick_num_, cur_brick_num_, finished_bricks_, (*bricks).size(), total_brick_num_);
+	//DBGPRINT(L"cur_brick_num_:%d\ttotal_brick_num_:%d\n",
+	//	cur_brick_num_, total_brick_num_);
 
-	DBGPRINT(L"cur_brick_num_:%d\ttotal_brick_num_:%d\n",
-		cur_brick_num_, total_brick_num_);
 	if (glbin_settings.m_mem_swap &&
 		cur_brick_num_ >= total_brick_num_)
 	{

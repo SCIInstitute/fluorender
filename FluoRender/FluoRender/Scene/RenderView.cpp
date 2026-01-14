@@ -5144,7 +5144,7 @@ void RenderView::DrawHologramFramebuffer()
 	base_buffer->set_viewport({ 0, 0, gl_x, vp_y });
 	base_buffer->set_blend_enabled_all(false);
 	base_buffer->set_depth_test_enabled(false);
-	base_buffer->apply_state();
+	glbin_framebuffer_manager.bind(base_buffer);
 
 	//draw in fluorender
 	auto img_shader = glbin_shader_manager.shader(gstImgShader,
@@ -7852,7 +7852,7 @@ void RenderView::GenerateBrushStrokes()
 	if (m_clear_paint)
 	{
 		paint_buffer->clear_base(true, false);
-		DBGPRINT(L"Paint cleared\n");
+		//DBGPRINT(L"Paint cleared\n");
 		m_clear_paint = false;
 	}
 
