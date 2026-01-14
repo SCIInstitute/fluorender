@@ -53,11 +53,11 @@ void MeshDefault::Read()
 	if (f->Exists("/mesh default"))
 		f->SetPath("/mesh default");
 
-	f->Read(gstUseTransferFunc, &m_use_transfer, false);
+	f->Read(gstUseTransferFunc, &m_use_transfer, true);
 	f->Read(gstUseSelection, &m_use_mask, true);
 	f->Read(gstVolMeshThresh, &m_iso, 0.5);
-	f->Read(gstVolMeshDownXY, &m_downsample, 1);
-	f->Read(gstVolMeshDownZ, &m_downsample_z, 1);
+	f->Read(gstVolMeshDownXY, &m_downsample, 3);
+	f->Read(gstVolMeshDownZ, &m_downsample_z, 2);
 	f->Read(gstVolMeshSimplify, &m_simplify, 0.1);
 	f->Read(gstVolMeshSmoothN, &m_smooth_strength, 0.1);
 	f->Read(gstVolMeshSmoothT, &m_smooth_scale, 0.1);
