@@ -4128,12 +4128,6 @@ void RenderView::StartLoopUpdate()
 					if (vd->GetRenderMode() == flvr::RenderMode::Mip &&
 						vd->GetShadingEnable())
 						total_num++;
-					if (vd->GetShadowEnable())
-						total_num++;
-					//mask
-					//if (vd->GetTexture() &&
-					//	vd->GetTexture()->has_comp(flvr::CompType::Mask))
-					//	total_num++;
 				}
 			}
 			vd->SetBrickNum(num_chan);
