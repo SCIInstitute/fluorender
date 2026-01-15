@@ -616,7 +616,7 @@ void TreePanel::AddVolGroup()
 	auto group = view->GetGroup(name);
 	glbin_current.SetVolumeGroup(group);
 
-	FluoRefresh(0, { gstNull }, {-1});
+	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect }, {-1});
 }
 
 void TreePanel::AddMeshGroup()
@@ -629,7 +629,7 @@ void TreePanel::AddMeshGroup()
 	auto group = view->GetMGroup(name);
 	glbin_current.SetMeshGroup(group);
 
-	FluoRefresh(0, { gstNull }, {-1});
+	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect }, {-1});
 }
 
 void TreePanel::RemoveData()
@@ -722,13 +722,13 @@ void TreePanel::BrushClear()
 void TreePanel::BrushExtract()
 {
 	glbin_vol_selector.Extract();
-	FluoRefresh(3, { gstNull });
+	FluoRefresh(0, { gstTreeCtrl, gstTreeSelection });
 }
 
 void TreePanel::BrushDelete()
 {
 	glbin_vol_selector.Erase();
-	FluoRefresh(3, { gstNull });
+	FluoRefresh(3, { gstTreeCtrl, gstTreeSelection });
 }
 
 void TreePanel::MeshConvert()
@@ -1276,16 +1276,21 @@ void TreePanel::DeleteSelection()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
 
 	switch (type)
 	{
 	case 1://view
 	{
+		std::wstring view0_name = root->GetView(0)->GetName();
 		std::wstring name = view->GetName();
-		m_frame->DeleteRenderViewPanel(name);
-		Root* root = glbin_data_manager.GetRoot();
-		if (root)
+		if (name != view0_name)
+		{
+			m_frame->DeleteRenderViewPanel(name);
 			root->DeleteView(name);
+		}
 	}
 		break;
 	case 2://volume

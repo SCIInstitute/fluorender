@@ -201,6 +201,53 @@ namespace fluo
 			b_ = color.b();
 		}
 
+		inline Color ShiftDesaturate(double amount = 0.5,
+			double min_comp = 0.0,
+			bool renormalize = true) const
+		{
+			// Local lambdas for aux operations
+			auto clamp01 = [](auto x) { return std::max(0.0, std::min(1.0, x)); };
+			auto lerp = [](auto a, auto b, auto t) { return a + (b - a) * t; };
+
+			amount = clamp01(amount);
+			min_comp = std::max(0.0, min_comp);
+
+			// --- Choose gray target ---
+			const double gray = (r_ + g_ + b_) / 3.0;           // average gray
+			// const double gray = 0.2126*r_ + 0.7152*g_ + 0.0722*b_; // luminance (optional)
+
+			// --- Desaturate by blending toward gray ---
+			Color out;
+			out.r_ = lerp(r_, gray, amount);
+			out.g_ = lerp(g_, gray, amount);
+			out.b_ = lerp(b_, gray, amount);
+
+			// --- Enforce minimum component (avoid exact zeros) ---
+			if (min_comp > 0.0) {
+				out.r_ = std::max(out.r_, min_comp);
+				out.g_ = std::max(out.g_, min_comp);
+				out.b_ = std::max(out.b_, min_comp);
+			}
+
+			// Clamp to [0,1]
+			out.r_ = clamp01(out.r_);
+			out.g_ = clamp01(out.g_);
+			out.b_ = clamp01(out.b_);
+
+			// Optional: re-normalize so that the maximum equals 1
+			if (renormalize) {
+				const double maxc = std::max({ out.r_, out.g_, out.b_ });
+				if (maxc > 0.0) {
+					out.r_ /= maxc;
+					out.g_ /= maxc;
+					out.b_ /= maxc;
+				}
+			}
+
+			return out;
+		}
+
+
 		inline std::string to_string() const
 		{
 			std::ostringstream oss;
