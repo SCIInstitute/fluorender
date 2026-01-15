@@ -71,6 +71,7 @@ VolumeRenderer::VolumeRenderer()
 	mask_color_set_(false),
 	mask_thresh_(0.0),
 	alpha_(1.0),
+	luminance_(1.0),
 	//outline
 	outline_(false),
 	//shading
@@ -130,6 +131,7 @@ VolumeRenderer::VolumeRenderer(const VolumeRenderer& copy)
 	mask_color_set_(copy.mask_color_set_),
 	mask_thresh_(0.0),
 	alpha_(copy.alpha_),
+	luminance_(copy.luminance_),
 	//outline
 	outline_(copy.outline_),
 	//shading
