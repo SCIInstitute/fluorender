@@ -4974,7 +4974,26 @@ void RenderView::RotateClips()
 
 void RenderView::BindViewBaseFramebuffer()
 {
-	if (glbin_settings.m_hologram_mode == 1)
+	//find render view buffer, resize if necessary
+	auto size = GetCanvasSize();
+	auto base_buffer = glbin_framebuffer_manager.framebuffer(
+			flvr::FBRole::RenderColor, size.w(), size.h(), gstRBViewBase);
+	assert(base_buffer);
+	base_buffer->set_blend_enabled_all(true);
+	base_buffer->set_blend_func_all(
+		flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha,
+		flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
+	base_buffer->set_clear_color({
+		static_cast<GLfloat>(m_bg_color.r()),
+		static_cast<GLfloat>(m_bg_color.g()),
+		static_cast<GLfloat>(m_bg_color.b()),
+		1.0f });
+
+	if (glbin_settings.m_hologram_mode == 0)
+	{
+		glbin_framebuffer_manager.bind(base_buffer);
+	}
+	else if (glbin_settings.m_hologram_mode == 1)
 	{
 		std::string vr_buf_name;
 		if (m_vr_eye_idx)
@@ -4991,24 +5010,6 @@ void RenderView::BindViewBaseFramebuffer()
 		int nx, ny;
 		GetRenderSize(nx, ny);
 		glbin_lg_renderer.BindViewBaseFramebuffer(nx, ny);
-	}
-	else
-	{
-		//find render view buffer, resize if necessary
-		auto size = GetCanvasSize();
-		auto base_buffer = glbin_framebuffer_manager.framebuffer(
-				flvr::FBRole::RenderColor, size.w(), size.h(), gstRBViewBase);
-		assert(base_buffer);
-		base_buffer->set_blend_enabled_all(true);
-		base_buffer->set_blend_func_all(
-			flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha,
-			flvr::BlendFactor::SrcAlpha, flvr::BlendFactor::OneMinusSrcAlpha);
-		base_buffer->set_clear_color({
-			static_cast<GLfloat>(m_bg_color.r()),
-			static_cast<GLfloat>(m_bg_color.g()),
-			static_cast<GLfloat>(m_bg_color.b()),
-			1.0f });
-		glbin_framebuffer_manager.bind(base_buffer);
 	}
 }
 
