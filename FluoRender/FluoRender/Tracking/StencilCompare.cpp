@@ -817,60 +817,68 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	size_t buf_size = m_s1->bits == 8 ?
 		sizeof(unsigned char) : sizeof(unsigned short);
 	buf_size *= nx * ny * nz;
-	//DBMIUINT8 mi(m_s1->nx, m_s1->ny, 1);
+	//DBMIUINT16 mi(m_s1->nx, m_s1->ny, 1);
 
 	//set up kernel
 	m_prog->beginArgs(kernel_index);
 	if (m_s1->fsize < 1)
-		m_img1 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
+		m_img1 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img1", buf_size, (void*)(m_s1->data)).lock();
 	else
 	{
-		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s1->data));
-		img[1] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
+		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img1_0", buf_size, (void*)(m_s1->data));
+		img[1] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "img1_1", buf_size, NULL);
 		m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
 		m_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		//local ptrs for src and dst
+		auto src = img[0];
+		auto dst = img[1];
 		//filter s1
 		for (int i = 0; i < m_s1->fsize; ++i)
 		{
-			if (i)
-			{
-				//swap images
-				m_prog->beginArgs(kernel_index);
-				m_prog->bindArg(img[i%2]);
-				m_prog->bindArg(img[(i+1)%2]);
-			}
+			// Rebind arguments every iteration
+			m_prog->beginArgs(kernel_index);
+			m_prog->bindArg(src); // input
+			m_prog->bindArg(dst); // output
+
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
+
+			// Swap roles
+			std::swap(src, dst);
 		}
-		m_img1 = img[m_s1->fsize % 2];
-		m_prog->releaseArg(img[(m_s1->fsize+1)%2]);
+		m_img1 = src.lock();
+		m_prog->releaseArg(dst);
 	}
 
 	//set up kernel
 	m_prog->beginArgs(kernel_index);
 	if (m_s2->fsize < 1)
-		m_img2 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
+		m_img2 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img2", buf_size, (void*)(m_s2->data)).lock();
 	else
 	{
-		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", buf_size, (void*)(m_s2->data));
-		img[1] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "", buf_size, NULL);
+		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img2_0", buf_size, (void*)(m_s2->data));
+		img[1] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "img2_1", buf_size, NULL);
 		m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
 		m_prog->setConst(sizeof(unsigned int), (void*)(&nz));
+		//local ptrs for src and dst
+		auto src = img[0];
+		auto dst = img[1];
 		//filter s2
 		for (int i = 0; i < m_s2->fsize; ++i)
 		{
-			if (i)
-			{
-				//swap images
-				m_prog->beginArgs(kernel_index);
-				m_prog->bindArg(img[i % 2]);
-				m_prog->bindArg(img[(i + 1) % 2]);
-			}
+			// Rebind arguments every iteration
+			m_prog->beginArgs(kernel_index);
+			m_prog->bindArg(src); // input
+			m_prog->bindArg(dst); // output
+
 			m_prog->executeKernel(kernel_index, 3, global_size, local_size);
+
+			// Swap roles
+			std::swap(src, dst);
 		}
-		m_img2 = img[m_s2->fsize % 2];
-		m_prog->releaseArg(img[(m_s2->fsize + 1) % 2]);
+		m_img2 = src.lock();
+		m_prog->releaseArg(dst);
 	}
 	//m_prog->readBuffer(m_img1, (void*)(mi.data));
 	//m_prog->readBuffer(m_img2, (void*)(mi.data));
@@ -890,8 +898,8 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 		m_prog->beginArgs(kernel_index, 1);
 		m_mask1 =
 			m_prog->setBufNew(
-			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "",
-			buf_size, m_s1->mask);
+			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "mask",
+			buf_size, m_s1->mask).lock();
 	}
 }
 
