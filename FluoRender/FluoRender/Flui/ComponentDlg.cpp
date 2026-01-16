@@ -2005,8 +2005,6 @@ void ComponentDlg::LaunchAutoUpdateTimer()
 
 void ComponentDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 {
-	if (glbin_comp_generator.IsBusy())
-		return;
 	m_auto_update_timer.Stop();
 	fluo::ValueCollection vc;
 	bool bval = m_use_sel_gen_chk->GetValue();

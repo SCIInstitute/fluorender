@@ -166,6 +166,9 @@ private:
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
 
+	//auto update
+	wxTimer m_auto_update_timer;
+
 private:
 	//output
 	void SetOutput(const BrushGridData& data, const wxString& unit);
@@ -223,6 +226,9 @@ private:
 	void OnSelectCell(wxGridEvent& event);
 	//resize
 	void OnSize(wxSizeEvent& event);
+	//auto update
+	void LaunchAutoUpdateTimer();
+	void OnAutoUpdateTimer(wxTimerEvent& event);
 };
 
 #endif//_BRUSHTOOLDLG_H_

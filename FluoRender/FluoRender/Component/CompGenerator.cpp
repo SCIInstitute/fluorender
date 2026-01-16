@@ -119,6 +119,9 @@ void ComponentGenerator::Compute()
 
 void ComponentGenerator::GenerateComp(bool command)
 {
+	if (m_busy)
+		return;
+	DBGPRINT(L"hit comp gen\n");
 	auto vd = m_vd.lock();
 	if (!vd)
 		return;

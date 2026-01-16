@@ -443,8 +443,7 @@ void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
 			return;
 		if (brush_update && !glbin_conv_vol_mesh->GetUseMask())
 			return;
-		if (glbin_conv_vol_mesh->GetAutoUpdate() &&
-			!glbin_conv_vol_mesh->IsBusy())
+		if (glbin_conv_vol_mesh->GetAutoUpdate())
 			glbin_conv_vol_mesh->Update(false);
 	}
 }

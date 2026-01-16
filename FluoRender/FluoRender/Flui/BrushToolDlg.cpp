@@ -60,7 +60,8 @@ BrushToolDlg::BrushToolDlg(
 	frame->FromDIP(wxSize(500, 620)),
 	0, "BrushToolDlg"),
 	m_max_value(255.0),
-	m_hold_history(false)
+	m_hold_history(false),
+	m_auto_update_timer(this)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -77,6 +78,7 @@ BrushToolDlg::BrushToolDlg(
 	m_notebook->AddPage(CreateAlignPage(m_notebook), "Align");
 
 	Bind(wxEVT_SIZE, &BrushToolDlg::OnSize, this);
+	Bind(wxEVT_TIMER, &BrushToolDlg::OnAutoUpdateTimer, this);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -910,12 +912,7 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 	//set translate
 	glbin_vol_selector.SetBrushSclTranslate(val / m_max_value);
 
-	if (!glbin_vol_selector.GetThUpdate())
-		return;
-
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
+	LaunchAutoUpdateTimer();
 }
 
 //gm falloff
@@ -938,12 +935,7 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 	//set gm falloff
 	glbin_vol_selector.SetBrushGmFalloff(GM_2_ESTR(val));
 
-	if (!glbin_vol_selector.GetThUpdate())
-		return;
-
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
+	LaunchAutoUpdateTimer();
 }
 
 //2d influence
@@ -966,12 +958,7 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 	//set 2d weight
 	glbin_vol_selector.SetW2d(val);
 
-	if (!glbin_vol_selector.GetThUpdate())
-		return;
-
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
+	LaunchAutoUpdateTimer();
 }
 
 //edge detect
@@ -985,12 +972,7 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 	//set edge detect
 	glbin_vol_selector.SetEdgeDetect(bval);
 
-	if (!glbin_vol_selector.GetThUpdate())
-		return;
-
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
+	LaunchAutoUpdateTimer();
 }
 
 //hidden removal
@@ -1010,12 +992,7 @@ void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 	//set select group
 	glbin_vol_selector.SetSelectGroup(select_group);
 
-	if (!glbin_vol_selector.GetThUpdate())
-		return;
-
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
+	LaunchAutoUpdateTimer();
 }
 
 //estimate threshold
@@ -1111,12 +1088,7 @@ void BrushToolDlg::OnBrushIterText(wxCommandEvent& event)
 
 	glbin_vol_selector.SetBrushIteration(val);
 
-	if (!glbin_vol_selector.GetThUpdate())
-		return;
-
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, { gstSelUndo, gstBrushThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate}, { glbin_current.GetViewId() });
+	LaunchAutoUpdateTimer();
 }
 
 //brush size relation
@@ -1228,6 +1200,24 @@ void BrushToolDlg::OnSize(wxSizeEvent& event)
 		size.y = height;
 	size.x -= 15;
 	m_output_grid->SetMaxSize(size);
+}
+
+//auto update
+void BrushToolDlg::LaunchAutoUpdateTimer()
+{
+	m_auto_update_timer.Start(100);
+}
+
+void BrushToolDlg::OnAutoUpdateTimer(wxTimerEvent& event)
+{
+	m_auto_update_timer.Stop();
+
+	fluo::ValueCollection vc = { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate };
+	if (glbin_vol_selector.GetThUpdate())
+		vc.insert(gstBrushThreshold);
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
 
 void BrushToolDlg::CopyData()

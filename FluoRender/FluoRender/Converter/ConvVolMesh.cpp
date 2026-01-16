@@ -80,6 +80,8 @@ bool ConvVolMesh::GetInfo(
 
 void ConvVolMesh::Convert()
 {
+	if (m_busy)
+		return;
 	auto vd = m_volume.lock();
 	if (!vd)
 		return;
@@ -104,6 +106,8 @@ void ConvVolMesh::Convert()
 
 void ConvVolMesh::Update(bool create_mesh)
 {
+	if (m_busy)
+		return;
 	auto vd = m_volume.lock();
 	if (!vd)
 		return;

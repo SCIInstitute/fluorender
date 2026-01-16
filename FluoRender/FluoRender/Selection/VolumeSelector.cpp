@@ -168,18 +168,19 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 
 	m_vd->ResetMaskCount();
 
-	if (m_mode == SelectMode::Segment &&
-		!glbin_comp_generator.IsBusy())
+	if (m_mode == SelectMode::Segment)
 	{
 		//generate components
-		bool bval = glbin_comp_generator.GetUseSel();
-		glbin_comp_generator.SetUseSel(true);
-		glbin_comp_generator.GenerateComp();
-		glbin_comp_generator.SetUseSel(bval);
+		if (m_vd->IsValidMask())
+		{
+			bool bval = glbin_comp_generator.GetUseSel();
+			glbin_comp_generator.SetUseSel(true);
+			glbin_comp_generator.GenerateComp();
+			glbin_comp_generator.SetUseSel(bval);
+		}
 	}
 
-	if (m_mode == SelectMode::Mesh &&
-		!glbin_conv_vol_mesh->IsBusy())
+	if (m_mode == SelectMode::Mesh)
 	{
 		//generate mesh
 		glbin_conv_vol_mesh->SetVolumeData(m_vd);
