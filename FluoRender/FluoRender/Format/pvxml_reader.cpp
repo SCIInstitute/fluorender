@@ -72,19 +72,6 @@ PVXMLReader::~PVXMLReader()
 {
 }
 
-//void PVXMLReader::SetFile(const std::string& file)
-//{
-//	if (!file.empty())
-//	{
-//		if (!m_path_name.empty())
-//			m_path_name.clear();
-//		m_path_name.assign(file.length(), L' ');
-//		copy(file.begin(), file.end(), m_path_name.begin());
-//		m_data_name = GET_STEM(m_path_name);
-//	}
-//	m_id_string = m_path_name;
-//}
-
 void PVXMLReader::SetFile(const std::wstring& file)
 {
 	m_path_name = file;
@@ -217,14 +204,12 @@ int PVXMLReader::Preprocess()
 	if (m_spacing.z() == 0.0 || m_spacing.z() == std::numeric_limits<double>::max())
 		m_spacing.z(1.0);
 
+	m_size.x(std::round((m_x_max - m_x_min) / m_spacing.x()));
+	m_size.y(std::round((m_y_max - m_y_min) / m_spacing.y()));
 	if (m_z_max == std::numeric_limits<double>::max()) m_z_max = m_seq_slice_num;
 	double dt = m_z_max - m_z_min;
 	if (std::abs(dt) > fluo::Epsilon(10))
-		dt /= m_spacing.z();
-	m_size = fluo::Vector(
-		(m_x_max - m_x_min) / m_spacing.x(),
-		(m_y_max - m_y_min) / m_spacing.y(),
-		dt);
+		m_size.z(std::round(dt / m_spacing.z()));
 
 	if (m_user_flip_y == 1 ||
 		m_user_flip_y == 0)
