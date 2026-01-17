@@ -183,7 +183,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Size2D& size) {
-		os << "[" << size.width << "," << size.height << "]";
+		os << "[" << size.width << ";" << size.height << "]";
 		return os;
 	}
 	friend std::istream& operator>>(std::istream& is, Size2D& size) {
@@ -372,7 +372,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Size3D& size) {
-		os << "[" << size.width << "," << size.height << "," << size.depth << ']';
+		os << "[" << size.width << ";" << size.height << ";" << size.depth << ']';
 		return os;
 	}
 	friend std::istream& operator>>(std::istream& is, Size3D& size) {

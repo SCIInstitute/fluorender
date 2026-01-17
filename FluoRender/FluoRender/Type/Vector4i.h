@@ -62,7 +62,7 @@ namespace fluo
 		friend std::ostream& operator<<(std::ostream& os, const Vector4i& v)
 		{
 			//avoid using spaces so that it can be read correctly using >>
-			os << '[' << v[0] << ',' << v[1] << ',' << v[2] << ',' << v[3] << ']';
+			os << '[' << v[0] << ';' << v[1] << ';' << v[2] << ';' << v[3] << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Vector4i& v)

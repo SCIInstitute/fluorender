@@ -217,7 +217,7 @@ namespace fluo
 		{
 			//avoid using spaces so that it can be read correctly using >>
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
-			os << '[' << v.x() << ',' << v.y() << ',' << v.z() << ']';
+			os << '[' << v.x() << ';' << v.y() << ';' << v.z() << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Vector& v)

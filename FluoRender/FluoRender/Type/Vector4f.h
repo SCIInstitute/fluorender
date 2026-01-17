@@ -64,7 +64,7 @@ namespace fluo
 		{
 			//avoid using spaces so that it can be read correctly using >>
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
-			os << '[' << v[0] << ',' << v[1] << ',' << v[2] << ',' << v[3] << ']';
+			os << '[' << v[0] << ';' << v[1] << ';' << v[2] << ';' << v[3] << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Vector4f& v)

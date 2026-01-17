@@ -385,7 +385,7 @@ namespace fluo
 		friend std::ostream& operator<<(std::ostream& os, const BBox& b)
 		{
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
-			os << '[' << b.cmin_ << ',' << b.cmax_ << ']';
+			os << '[' << b.cmin_ << ';' << b.cmax_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, BBox& b)

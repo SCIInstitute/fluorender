@@ -95,7 +95,7 @@ namespace fluo
 		friend std::ostream& operator<<(std::ostream& os, const Plane& p)
 		{
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
-			os << "[[" << p.n_.x() << ',' << p.n_.y() << ',' << p.n_.z() << "]," << p.d_ << ']';
+			os << "[[" << p.n_.x() << ';' << p.n_.y() << ';' << p.n_.z() << "];" << p.d_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Plane& p)
@@ -182,7 +182,7 @@ namespace fluo
 			{
 				os << ps.planes_[i];
 				if (i < ps.planes_.size() - 1)
-					os << ',';
+					os << ';';
 			}
 			return os;
 		}

@@ -426,7 +426,7 @@
     </outadj_default>
     <view_default>
         <channel_mix_mode>3</channel_mix_mode>
-        <bg_color>[0,0,0]</bg_color>
+        <bg_color>[0;0;0]</bg_color>
         <draw_camctr>0</draw_camctr>
         <camctr_size>2</camctr_size>
         <draw_info>250</draw_info>
@@ -441,14 +441,14 @@
         <persp>0</persp>
         <aov>10</aov>
         <cam_mode>0</cam_mode>
-        <center>[0,0,0]</center>
+        <center>[0;0;0]</center>
         <rot_lock>0</rot_lock>
         <pin_rot_center>0</pin_rot_center>
         <scale_mode>1</scale_mode>
         <scale_factor>1.3</scale_factor>
         <use_fog>0</use_fog>
         <fog_intensity>0.5</fog_intensity>
-        <rot>[0,0,0]</rot>
+        <rot>[0;0;0]</rot>
         <rot_slider>1</rot_slider>
     </view_default>
     <volume_default>
@@ -476,7 +476,7 @@
         <shadow_int>0.5</shadow_int>
         <sample_rate_enable>1</sample_rate_enable>
         <sample_rate>2</sample_rate>
-        <spacing>[1,1,3]</spacing>
+        <spacing>[1;1;3]</spacing>
         <colormap_disp>0</colormap_disp>
         <colormap_low>0</colormap_low>
         <colormap_high>1</colormap_high>
@@ -512,7 +512,7 @@
         <mesh_shadow_enable>1</mesh_shadow_enable>
         <mesh_shadow_intensity>0.6</mesh_shadow_intensity>
         <mesh_scaling_enable>0</mesh_scaling_enable>
-        <mesh_scale>[1,1,1]</mesh_scale>
+        <mesh_scale>[1;1;1]</mesh_scale>
     </mesh_default>
     <movie_default>
         <view_idx>0</view_idx>

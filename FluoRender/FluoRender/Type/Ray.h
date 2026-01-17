@@ -84,7 +84,7 @@ namespace fluo
 
 		friend std::ostream& operator<<(std::ostream& os, const Ray& r)
 		{
-			os << '[' << r.o_ << ',' << r.d_ << ']';
+			os << '[' << r.o_ << ';' << r.d_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Ray& r)

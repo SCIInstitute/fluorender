@@ -103,7 +103,7 @@ namespace fluo
 		friend std::ostream& operator<<(std::ostream& os, const HSVColor& c)
 		{
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
-			os << '[' << c.hue_ << ',' << c.sat_ << ',' << c.val_ << ']';
+			os << '[' << c.hue_ << ';' << c.sat_ << ';' << c.val_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, HSVColor& c)
@@ -265,7 +265,7 @@ namespace fluo
 		friend std::ostream& operator<<(std::ostream& os, const Color& c)
 		{
 			os << std::defaultfloat << std::setprecision(std::numeric_limits<double>::max_digits10);
-			os << '[' << c.r_ << ',' << c.g_ << ',' << c.b_ << ']';
+			os << '[' << c.r_ << ';' << c.g_ << ';' << c.b_ << ']';
 			return os;
 		}
 		friend std::istream& operator >> (std::istream& is, Color& c)
