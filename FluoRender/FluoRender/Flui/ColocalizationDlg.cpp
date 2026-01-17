@@ -206,10 +206,8 @@ void ColocalizationDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if (auto_update)
 			colocal_update = glbin_colocalizer.GetAutoColocalize();
-		else
-			colocal_result = true;
 	}
-	if (colocal_result)
+	if (colocal_result || colocal_update)
 	{
 		glbin_colocalizer.Compute();
 		SetOutput();

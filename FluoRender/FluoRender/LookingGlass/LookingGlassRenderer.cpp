@@ -227,7 +227,7 @@ void LookingGlassRenderer::Draw()
 	shader->bind();
 	//bind texture
 	auto view_buffer =
-		glbin_framebuffer_manager.framebuffer(gstRBQuiltView);
+		glbin_framebuffer_manager.framebuffer(gstRBViewBase);
 	assert(view_buffer);
 	view_buffer->bind_texture(flvr::AttachmentPoint::Color(0), 0);
 	auto quad_va =
@@ -333,18 +333,6 @@ double LookingGlassRenderer::GetOffset()
 
 	double len = double(m_lg_data->vx * m_lg_data->vy - 1) / 2;
 	return (m_cur_view - len) / len;
-}
-
-void LookingGlassRenderer::BindViewBaseFramebuffer(int nx, int ny)
-{
-	if (!m_initialized)
-		return;
-
-	auto buffer =
-		glbin_framebuffer_manager.framebuffer(
-			flvr::FBRole::RenderColor, nx, ny, gstRBQuiltView);
-	assert(buffer);
-	glbin_framebuffer_manager.bind(buffer);
 }
 
 Size2D LookingGlassRenderer::GetViewSize() const

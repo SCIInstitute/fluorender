@@ -3919,9 +3919,7 @@ bool RenderView::Draw()
 	PreDraw();
 
 	if (glbin_settings.m_hologram_mode == 1)
-	{
-		PrepareHologramFramebuffer();
-	}
+		PrepareStereoFramebuffer();
 	BindViewBaseFramebuffer();
 	ClearViewBaseFramebuffer();
 
@@ -5007,14 +5005,17 @@ void RenderView::BindViewBaseFramebuffer()
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
 	{
-		int nx, ny;
-		GetRenderSize(nx, ny);
-		glbin_lg_renderer.BindViewBaseFramebuffer(nx, ny);
+		glbin_framebuffer_manager.bind(base_buffer);
 	}
 }
 
 void RenderView::ClearViewBaseFramebuffer()
 {
+	//find render view buffer, resize if necessary
+	auto base_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewBase);
+	assert(base_buffer);
+	base_buffer->clear_base(true, true);
+
 	if (glbin_settings.m_hologram_mode == 1)
 	{
 		std::string vr_buf_name;
@@ -5029,13 +5030,6 @@ void RenderView::ClearViewBaseFramebuffer()
 	}
 	else if (glbin_settings.m_hologram_mode == 2)
 	{
-	}
-	else
-	{
-		//find render view buffer, resize if necessary
-		auto base_buffer = glbin_framebuffer_manager.framebuffer(gstRBViewBase);
-		assert(base_buffer);
-		base_buffer->clear_base(true, true);
 	}
 }
 
@@ -5106,7 +5100,7 @@ void RenderView::DrawDataFramebuffer()
 
 }
 
-void RenderView::PrepareHologramFramebuffer()
+void RenderView::PrepareStereoFramebuffer()
 {
 	if (m_use_openxr)
 	{

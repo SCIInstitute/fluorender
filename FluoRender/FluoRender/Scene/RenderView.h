@@ -818,7 +818,7 @@ private:
 	std::shared_ptr<flvr::Framebuffer> GetDataFramebuffer();
 	void DrawDataFramebuffer();
 	//vr buffers
-	void PrepareHologramFramebuffer();
+	void PrepareStereoFramebuffer();
 	void DrawHologramFramebuffer();
 	//pre draw and post draw actions
 	void PreDraw();
