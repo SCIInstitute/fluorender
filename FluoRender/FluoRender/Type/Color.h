@@ -203,7 +203,7 @@ namespace fluo
 
 		inline Color ShiftDesaturate(double amount = 0.5,
 			double min_comp = 0.0,
-			bool renormalize = true) const
+			bool renormalize = false) const
 		{
 			// Local lambdas for aux operations
 			auto clamp01 = [](auto x) { return std::max(0.0, std::min(1.0, x)); };

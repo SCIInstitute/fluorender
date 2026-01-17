@@ -1199,7 +1199,7 @@ void MeasureDlg::SetCurrentRuler()
 	}
 	if (m_ruler_list->m_color_set)
 		ruler->SetColor(m_ruler_list->m_color);
-	FluoRefresh(2, { gstRulerListCur },
+	FluoRefresh(0, { gstRulerListCur },
 		{ glbin_current.GetViewId() });
 }
 

@@ -1186,7 +1186,9 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 
 	//colormap
-	if (update_colormap || FOUND_VALUE(gstRulerList))
+	if (update_colormap ||
+		FOUND_VALUE(gstRulerList) ||
+		FOUND_VALUE(gstRulerListCur))
 	{
 		auto proj = m_vd->GetColormapProj();
 		if (proj == flvr::ColormapProj::Radial ||
