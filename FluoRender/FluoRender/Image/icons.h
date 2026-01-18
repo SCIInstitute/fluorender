@@ -442,6 +442,10 @@ public:
 	const static unsigned char outline_off_png[1085];
 	/* palette.png - 1202 bytes */
 	const static unsigned char palette_png[1202];
+	/* compass.png - 1316 bytes */
+	const static unsigned char compass_png[1316];
+	/* sun.png - 945 bytes */
+	const static unsigned char sun_png[945];
 
 	//tracking dialog icons
 	/* auto_assign_off.png - 2258 bytes */

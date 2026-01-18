@@ -333,8 +333,12 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 		wxDefaultPosition, bts);
 	m_shading_shine_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+	bitmap = wxGetBitmap(sun);
+	wxStaticBitmap* shine_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap,
+		wxDefaultPosition, tts4);
+	shine_bitmap->SetToolTip("Set the shininess/spread of highlights");
 	m_shading_shine_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, tts3, wxTE_RIGHT, vald_fp2);
+		wxDefaultPosition, tts4, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shade_st->SetFontBold();
 	m_shade_st->SetTintColor(wxColor(150, 180, 255));
@@ -352,6 +356,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m3->Add(m_shade_chk, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shading_strength_text, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shading_strength_sldr, 1, wxEXPAND);
+	sizer_m3->Add(shine_bitmap, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shading_shine_text, 0, wxALIGN_CENTER);
 	sizer_m3->Add(m_shading_shine_sldr, 1, wxEXPAND);
 	//shadow
@@ -362,8 +367,13 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	m_shadow_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
-	m_shadow_dir_chk = new wxUndoableCheckBox(this, wxID_ANY, "D:",
-		wxDefaultPosition, tts4);
+	m_shadow_dir_chk = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, tts4, wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(compass);
+	m_shadow_dir_chk->AddCheckTool(0, "",
+		bitmap, wxNullBitmap,
+		"Enable shading and shadow direction setting",
+		"Enable shading and shadow direction setting");
 	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
@@ -377,7 +387,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadowChange, this);
 	m_shadow_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadowText, this);
 	m_shadow_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadowChk, this);
-	m_shadow_dir_chk->Bind(wxEVT_CHECKBOX, &VolumePropPanel::OnShadowDirCheck, this);
+	m_shadow_dir_chk->Bind(wxEVT_TOOL, &VolumePropPanel::OnShadowDirCheck, this);
 	m_shadow_dir_sldr->Bind(wxEVT_SCROLL_CHANGED, &VolumePropPanel::OnShadowDirChange, this);
 	m_shadow_dir_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnShadowDirEdit, this);
 	//add to sizer
@@ -389,6 +399,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	sizer_m4->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_shadow_dir_text, 0, wxALIGN_CENTER);
 	sizer_m4->Add(m_shadow_dir_sldr, 1, wxEXPAND);
+	m_shadow_dir_chk->Realize();
 	//colormap
 	m_colormap_st = new wxFadeButton(this, wxID_ANY, "Colormap",
 		wxDefaultPosition, bts);
@@ -1125,7 +1136,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstShadowDir))
 	{
 		bool bval = glbin_settings.m_shadow_dir;
-		m_shadow_dir_chk->SetValue(bval);
+		m_shadow_dir_chk->ToggleTool(0, bval);
 		m_shadow_dir_sldr->Enable(bval);
 		m_shadow_dir_text->Enable(bval);
 		double dirx = glbin_settings.m_shadow_dir_x;
@@ -2736,7 +2747,7 @@ void VolumePropPanel::OnShadowText(wxCommandEvent& event)
 //shadow direction
 void VolumePropPanel::OnShadowDirCheck(wxCommandEvent& event)
 {
-	bool bval = m_shadow_dir_chk->GetValue();
+	bool bval = m_shadow_dir_chk->GetToolState(0);
 	EnableShadowDir(bval);
 }
 

@@ -90,7 +90,7 @@ private:
 	wxCheckBox* m_shadow_chk;
 	wxSingleSlider* m_shadow_sldr;
 	wxTextCtrl* m_shadow_text;
-	wxCheckBox* m_shadow_dir_chk;
+	wxUndoableToolbar* m_shadow_dir_chk;
 	wxSingleSlider* m_shadow_dir_sldr;
 	wxTextCtrl* m_shadow_dir_text;
 

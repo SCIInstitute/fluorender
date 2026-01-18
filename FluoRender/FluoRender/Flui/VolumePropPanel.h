@@ -157,7 +157,7 @@ private:
 	wxUndoableCheckBox* m_shadow_chk;
 	wxSingleSlider* m_shadow_dir_sldr;
 	wxTextCtrl* m_shadow_dir_text;
-	wxUndoableCheckBox* m_shadow_dir_chk;
+	wxUndoableToolbar* m_shadow_dir_chk;
 	//colormap
 	wxFadeButton* m_colormap_st;
 	wxMapDoubleSlider *m_colormap_sldr;

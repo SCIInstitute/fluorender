@@ -143,7 +143,11 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shading_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
-	m_shine_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255, 
+	bitmap = wxGetBitmap(sun);
+	wxStaticBitmap* shine_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap,
+		wxDefaultPosition, tts1);
+	shine_bitmap->SetToolTip("Set the shininess/spread of highlights");
+	m_shine_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shine_text = new wxTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
@@ -157,7 +161,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	sizer_3->Add(5, 5);
 	sizer_3->Add(m_shading_sldr, 1, wxALIGN_CENTER);
 	sizer_3->Add(m_shading_text, 0, wxALIGN_CENTER);
-	sizer_3->Add(tts1.x, 5);
+	sizer_3->Add(shine_bitmap, 0, wxALIGN_CENTER);
 	sizer_3->Add(m_shine_sldr, 1, wxALIGN_CENTER);
 	sizer_3->Add(m_shine_text, 0, wxALIGN_CENTER);
 
@@ -170,8 +174,13 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.60",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
-	m_shadow_dir_chk = new wxCheckBox(this, wxID_ANY, "D:",
-		wxDefaultPosition, tts1);
+	m_shadow_dir_chk = new wxUndoableToolbar(this, wxID_ANY,
+		wxDefaultPosition, tts1, wxTB_NODIVIDER);
+	bitmap = wxGetBitmap(compass);
+	m_shadow_dir_chk->AddCheckTool(0, "",
+		bitmap, wxNullBitmap,
+		"Enable shading and shadow direction setting",
+		"Enable shading and shadow direction setting");
 	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
@@ -180,7 +189,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	m_shadow_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnShadowCheck, this);
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadowChange, this);
 	m_shadow_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShadowText, this);
-	m_shadow_dir_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnShadowDirCheck, this);
+	m_shadow_dir_chk->Bind(wxEVT_TOOL, &MeshPropPanel::OnShadowDirCheck, this);
 	m_shadow_dir_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadowDirChange, this);
 	m_shadow_dir_text->Bind(wxEVT_TEXT, &MeshPropPanel::OnShadowDirText, this);
 	sizer_4->Add(st, 0, wxALIGN_CENTER);
@@ -191,6 +200,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	sizer_4->Add(m_shadow_dir_chk, 0, wxALIGN_CENTER, 0);
 	sizer_4->Add(m_shadow_dir_sldr, 1, wxALIGN_CENTER, 0);
 	sizer_4->Add(m_shadow_dir_text, 0, wxALIGN_CENTER, 0);
+	m_shadow_dir_chk->Realize();
 
 	wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxBoldText(this, 0, " Size:",
@@ -320,7 +330,7 @@ void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstShadowDir))
 	{
 		bval = glbin_settings.m_shadow_dir;
-		m_shadow_dir_chk->SetValue(bval);
+		m_shadow_dir_chk->ToggleTool(0, bval);
 		m_shadow_dir_sldr->Enable(bval);
 		m_shadow_dir_text->Enable(bval);
 		double dirx = glbin_settings.m_shadow_dir_x;
@@ -719,7 +729,7 @@ void MeshPropPanel::OnShadowText(wxCommandEvent& event)
 
 void MeshPropPanel::OnShadowDirCheck(wxCommandEvent& event)
 {
-	bool bval = m_shadow_dir_chk->GetValue();
+	bool bval = m_shadow_dir_chk->GetToolState(0);
 	EnableShadowDir(bval);
 }
 
