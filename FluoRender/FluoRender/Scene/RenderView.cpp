@@ -5610,8 +5610,7 @@ void RenderView::DrawVolumes(int peel)
 				//calculate quota
 				unsigned long total_bricks = flvr::TextureRenderer::get_total_brick_num();
 				unsigned long quota_bricks = 1;// total_bricks / 2;
-				unsigned long last_bricks = flvr::TextureRenderer::
-					get_est_bricks(3);
+				unsigned long last_bricks = flvr::TextureRenderer::get_est_bricks(3);
 				int adj_bricks = 0;
 				unsigned long up_time = flvr::TextureRenderer::get_cor_up_time();
 				unsigned long consumed_time = flvr::TextureRenderer::get_consumed_time();
@@ -8798,14 +8797,16 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 				<< L", Act: " << (intactive ? L"Yes" : L"No")
 				<< L", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
 				<< L", Quota: " << flvr::TextureRenderer::get_quota_bricks()
-				<< L", Time: " << flvr::TextureRenderer::get_cor_up_time()
+				<< L", Consumed Time: " << flvr::TextureRenderer::get_consumed_time()
+				<< L", Mouse Time: " << flvr::TextureRenderer::get_cor_up_time()
 				<< L", Pressure: " << std::fixed << std::setprecision(2) << glbin_vol_selector.GetPressure();
 		else
 			tos << L"FPS: " << std::fixed << std::setprecision(2) << fps
 				<< L", Act: " << (intactive ? L"Yes" : L"No")
 				<< L", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
 				<< L", Quota: " << flvr::TextureRenderer::get_quota_bricks()
-				<< L", Time: " << flvr::TextureRenderer::get_cor_up_time();
+				<< L", Consumed Time: " << flvr::TextureRenderer::get_consumed_time()
+				<< L", Mouse Time: " << flvr::TextureRenderer::get_cor_up_time();
 		
 		////budget_test
 		//if (m_interactive)
@@ -9699,7 +9700,6 @@ void RenderView::ProcessIdle(IdleState& state)
 
 	m_interactive = false;
 	state.m_start_loop = true;
-	m_retain_finalbuffer = false;
 	bool forced_refresh = false;
 
 	if (glbin_settings.m_hologram_mode == 2)
@@ -9763,7 +9763,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		state.m_request_more = true;
 		state.m_refresh = true;
 		state.m_looking_glass_changed = true;
-		//m_retain_finalbuffer = true;
 	}
 
 	if (glbin_states.m_benchmark)

@@ -64,58 +64,104 @@ namespace flvr
 	class TextureBrick;
 	enum class RenderMode : int;
 	enum class CompType : int;
-	//a simple fixed-length fifo sequence
+	/// Fixed-length FIFO queue for integer samples with O(1) moving average.
+	/// Indexing:
+	///   - Get(0) returns the oldest sample (if any).
+	///   - GetLast() returns the most recent sample (if any).
 	class BrickQueue
 	{
 	public:
-		BrickQueue(int limit) :
-			m_queue(0),
-			m_limit(limit),
-			m_pos(0)
+		explicit BrickQueue(std::size_t limit)
+			: buf_(limit ? limit : 0, 0),
+			cap_(limit),
+			start_(0),
+			size_(0),
+			sum_(0)
 		{
-			if (m_limit >= 0)
-				m_queue = new int[m_limit]();
-		}
-		~BrickQueue()
-		{
-			if (m_queue)
-				delete[]m_queue;
 		}
 
-		int GetLimit()
+		// Number of slots the queue can hold (the original "limit")
+		std::size_t GetLimit() const noexcept { return cap_; }
+
+		// Push a value. Returns 1 on success, 0 if capacity is 0 (preserves your API style).
+		int Push(int value) noexcept
 		{
-			return m_limit;
-		}
-		int Push(int value)
-		{
-			if (m_queue)
+			if (cap_ == 0) return 0;
+
+			if (size_ < cap_)
 			{
-				m_queue[m_pos] = value;
-				if (m_pos < m_limit - 1)
-					m_pos++;
-				else
-					m_pos = 0;
-				return 1;
+				// Append after the current last element
+				std::size_t idx = (start_ + size_) % cap_;
+				buf_[idx] = value;
+				sum_ += static_cast<std::int64_t>(value);
+				++size_;
 			}
 			else
-				return 0;
+			{
+				// Overwrite the oldest
+				sum_ += static_cast<std::int64_t>(value) - static_cast<std::int64_t>(buf_[start_]);
+				buf_[start_] = value;
+				start_ = (start_ + 1) % cap_;
+			}
+			return 1;
 		}
-		int Get(int index)
+
+		// Chronological access: index 0 = oldest, Size()-1 = newest.
+		// Returns 0 if out of range (preserves "safe default" behavior of your original).
+		int Get(std::size_t index) const noexcept
 		{
-			if (index >= 0 && index < m_limit)
-				return m_queue[m_pos + index < m_limit ? m_pos + index : m_pos + index - m_limit];
-			else
-				return 0;
+			if (index >= size_) return 0;
+			std::size_t idx = (start_ + index) % cap_;
+			return buf_[idx];
 		}
-		int GetLast()
+
+		// The most recent sample; returns 0 if empty.
+		int GetLast() const noexcept
 		{
-			return m_queue[m_pos == 0 ? m_limit - 1 : m_pos - 1];
+			if (size_ == 0) return 0;
+			std::size_t idx = (start_ + size_ - 1) % cap_;
+			return buf_[idx];
+		}
+
+		// Number of valid samples currently stored (<= GetLimit()).
+		std::size_t Size() const noexcept { return size_; }
+
+		bool Empty() const noexcept { return size_ == 0; }
+		bool Full()  const noexcept { return size_ == cap_; }
+
+		// Clear contents; keeps capacity intact.
+		void Clear() noexcept
+		{
+			std::fill(buf_.begin(), buf_.end(), 0);
+			start_ = 0;
+			size_ = 0;
+			sum_ = 0;
+		}
+
+		// O(1) moving average of the valid samples.
+		double Average() const noexcept
+		{
+			if (size_ == 0) return 0.0;
+			return static_cast<double>(sum_) / static_cast<double>(size_);
+		}
+
+		// Sum of valid samples (64-bit to avoid overflow).
+		std::int64_t Sum() const noexcept { return sum_; }
+
+		// Newest-first accessor: GetRecent(0) == GetLast(), GetRecent(1) is previous, etc.
+		int GetRecent(std::size_t k) const noexcept
+		{
+			if (k >= size_) return 0;
+			std::size_t idx = (start_ + size_ - 1 - k) % cap_;
+			return buf_[idx];
 		}
 
 	private:
-		int *m_queue;
-		int m_limit;
-		int m_pos;
+		std::vector<int>   buf_;    // storage
+		std::size_t        cap_;    // capacity (fixed)
+		std::size_t        start_;  // index of the oldest element
+		std::size_t        size_;   // number of valid elements
+		std::int64_t       sum_;    // running sum of valid elements
 	};
 
 	class ShaderProgram;
