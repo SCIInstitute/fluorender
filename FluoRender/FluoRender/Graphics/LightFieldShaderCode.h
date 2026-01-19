@@ -33,8 +33,8 @@ inline constexpr const char* LIGHT_FIELD_SHADER_VERTEX = R"GLSHDR(
 //LIGHT_FIELD_SHADER_VERTEX
 layout(location = 0) in vec3 InVertex;
 layout(location = 1) in vec3 InTexCoord;
-out vec3 OutVertex;
-out vec3 OutTexCoord;
+layout(location = 0) out vec3 OutVertex;
+layout(location = 1) out vec3 OutTexCoord;
 
 void main()
 {
@@ -46,9 +46,9 @@ void main()
 
 inline constexpr const char* LIGHT_FIELD_SHADER_FRAG = R"GLSHDR(
 //LIGHT_FIELD_SHADER_FRAG
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 fragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 fragColor;
 
 uniform vec4 loc0;//pitch, tilt, center, subp {246.87834, -0.18404308, 0.24427177, 0.00021701389}
 uniform vec4 loc1;//viewPortion, displayAspect, quiltAspect {0.99975586, 0.99975586, 0.75, 0.75}

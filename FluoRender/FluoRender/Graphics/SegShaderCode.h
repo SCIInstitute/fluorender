@@ -31,15 +31,15 @@
 
 inline constexpr const char* SEG_OUTPUTS = R"GLSHDR(
 //SEG_OUTPUTS
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 )GLSHDR";
 
 inline constexpr const char* SEG_VERTEX_CODE = R"GLSHDR(
 //SEG_VERTEX_CODE
 layout(location = 0) in vec3 InVertex;
 layout(location = 1) in vec3 InTexture;
-out vec3 OutVertex;
-out vec3 OutTexture;
+layout(location = 0) out vec3 OutVertex;
+layout(location = 1) out vec3 OutTexture;
 	
 void main()
 {
@@ -74,7 +74,7 @@ uniform mat4 matrix4;//projection matrix inverse
 
 inline constexpr const char* SEG_UNIFORMS_LABEL_OUTPUT = R"GLSHDR(
 //SEG_UNIFORMS_LABEL_OUTPUT
-out uint FragUint;
+layout(location = 0) out uint FragUint;
 )GLSHDR";
 
 inline constexpr const char* SEG_UNIFORMS_PARAMS = R"GLSHDR(

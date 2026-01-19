@@ -33,8 +33,8 @@ inline constexpr const char* IMG_VERTEX_CODE = R"GLSHDR(
 //IMG_VERTEX_CODE
 layout(location = 0) in vec3 InVertex;
 layout(location = 1) in vec3 InTexCoord;
-out vec3 OutVertex;
-out vec3 OutTexCoord;
+layout(location = 0) out vec3 OutVertex;
+layout(location = 1) out vec3 OutTexCoord;
 	
 void main()
 {
@@ -58,7 +58,7 @@ void main()
 inline constexpr const char* IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI
 layout(location = 0) in vec3 InVertex;
-out vec3 OutColor;
+layout(location = 0) out vec3 OutColor;
 uniform mat4 matrix0;//transformation
 uniform vec4 loc1; //(color, 1.0)
 	
@@ -72,9 +72,9 @@ void main()
 inline constexpr const char* IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES
 layout(location = 0) in vec3 InVertex;
-out vec3 OutColor;
-out vec3 OutEyePos;
-out vec4 OutClipPos;
+layout(location = 0) out vec3 OutColor;
+layout(location = 1) out vec3 OutEyePos;
+layout(location = 2) out vec4 OutClipPos;
 uniform mat4 matrix0;//model view
 uniform mat4 matrix1;//projection
 uniform vec4 loc1; //(color, alpha)
@@ -93,7 +93,7 @@ inline constexpr const char* IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3 = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3
 layout(location = 0) in vec3 InVertex;
 layout(location = 1) in vec3 InColor;
-out vec3 OutColor;
+layout(location = 0) out vec3 OutColor;
 uniform mat4 matrix0;//transformation
 	
 void main()
@@ -107,7 +107,7 @@ inline constexpr const char* IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4 = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_GEOMETRY_COLOR4
 layout(location = 0) in vec3 InVertex;
 layout(location = 1) in vec4 InColor;
-out vec4 OutColor;
+layout(location = 0) out vec4 OutColor;
 uniform mat4 matrix0;//transformation
 	
 void main()
@@ -120,7 +120,7 @@ void main()
 inline constexpr const char* IMG_VTX_CODE_DRAW_TEXT = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_TEXT
 layout(location = 0) in vec4 coord;
-out vec2 texcoord;
+layout(location = 0) out vec2 texcoord;
 uniform mat4 matrix0;//transformation
 	
 void main(void)
@@ -132,7 +132,7 @@ void main(void)
 
 inline constexpr const char* IMG_FRG_CODE_DRAW_GEOMETRY = R"GLSHDR(
 //IMG_FRG_CODE_DRAW_GEOMETRY
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 uniform vec4 loc0;
 	
 void main()
@@ -143,8 +143,8 @@ void main()
 
 inline constexpr const char* IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3 = R"GLSHDR(
 //IMG_FRG_CODE_DRAW_GEOMETRY_COLOR3
-in vec3 OutColor;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutColor;
+layout(location = 0) out vec4 FragColor;
 	
 void main()
 {
@@ -154,8 +154,8 @@ void main()
 
 inline constexpr const char* IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4 = R"GLSHDR(
 //IMG_FRG_CODE_DRAW_GEOMETRY_COLOR4
-in vec4 OutColor;
-out vec4 FragColor;
+layout(location = 0) in vec4 OutColor;
+layout(location = 0) out vec4 FragColor;
 	
 void main()
 {
@@ -165,8 +165,8 @@ void main()
 
 inline constexpr const char* IMG_FRG_CODE_DRAW_TEXT = R"GLSHDR(
 //IMG_FRG_CODE_DRAW_TEXT
-in vec2 texcoord;
-out vec4 FragColor;
+layout(location = 0) in vec2 texcoord;
+layout(location = 0) out vec4 FragColor;
 uniform sampler2D tex0;
 uniform vec4 loc0;//color
 	
@@ -178,9 +178,9 @@ void main(void)
 
 inline constexpr const char* IMG_SHADER_CODE_TEXTURE_LOOKUP = R"GLSHDR(
 //IMG_SHADER_CODE_TEXTURE_LOOKUP
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_TEXTURE_LOOKUP
 uniform sampler2D tex0;
@@ -195,9 +195,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_TEXTURE_FLIP = R"GLSHDR(
 //IMG_SHADER_CODE_TEXTURE_FLIP
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_TEXTURE_FLIP
 uniform sampler2D tex0;
@@ -212,9 +212,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_TEXTURE_EX_ALPHA = R"GLSHDR(
 //IMG_SHADER_CODE_TEXTURE_EX_ALPHA
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_TEXTURE_EX_ALPHA
 uniform sampler2D tex0;
@@ -229,9 +229,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_BRIGHTNESS_CONTRAST = R"GLSHDR(
 //IMG_SHADER_CODE_BRIGHTNESS_CONTRAST
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_BRIGHTNESS_CONTRAST
 uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)
@@ -252,9 +252,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR = R"GLSHDR(
 //IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_BRIGHTNESS_CONTRAST_HDR
 uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)
@@ -291,9 +291,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_MAP = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_MAP
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_GRADIENT_MAP
 uniform vec4 loc0; //(lo, hi, hi-lo, alpha) 
@@ -319,9 +319,9 @@ inline constexpr const char* IMG_SHADER_CODE_GRADIENT_MAP_RESULT = R"GLSHDR(
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_MAP
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_GRADIENT_MAP
 uniform vec4 loc6; //(lo, hi, hi-lo, inv)
@@ -351,9 +351,9 @@ inline constexpr const char* IMG_SHADER_CODE_GRADIENT_PROJ_MAP_RESULT = R"GLSHDR
 
 inline constexpr const char* IMG_SHADER_CODE_FILTER_MIN = R"GLSHDR(
 //IMG_SHADER_CODE_FILTER_MIN
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_FILTER_MIN
 uniform vec4 loc0; //(width, height, thresh, 0.0)
@@ -390,9 +390,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_FILTER_MAX = R"GLSHDR(
 //IMG_SHADER_CODE_FILTER_MAX
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_FILTER_MAX
 uniform vec4 loc0; //(width, height, scale, 0.0)
@@ -425,9 +425,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_FILTER_BLUR = R"GLSHDR(
 //IMG_SHADER_CODE_FILTER_BLUR
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_FILTER_BLUR
 uniform vec4 loc0; //(width, height, dx, dy)
@@ -452,9 +452,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_FILTER_SHARPEN = R"GLSHDR(
 //IMG_SHADER_CODE_FILTER_SHARPEN
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_FILTER_SHARPEN
 uniform vec4 loc0; //(width, height, 0.0, 0.0)
@@ -479,9 +479,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_OUTLINES = R"GLSHDR(
 //IMG_SHADER_CODE_DEPTH_TO_OUTLINES
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 
 //IMG_SHADER_CODE_DEPTH_TO_OUTLINES
 uniform vec4 loc0; //(width, height, low, high)
@@ -519,9 +519,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_GRADIENT = R"GLSHDR(
 //IMG_SHADER_CODE_DEPTH_TO_GRADIENT
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 //IMG_SHADER_CODE_DEPTH_TO_GRADIENT
 uniform vec4 loc0; //(width, height, scale, 0.0)
@@ -561,9 +561,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT = R"GLSHDR(
 //IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 //IMG_SHADER_CODE_DEPTH_TO_GRADIENT
 uniform vec4 loc0; //(width, height, scale, 0.0)
@@ -613,9 +613,9 @@ void main()
 
 //inline constexpr const char* IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT = R"GLSHDR(
 ////IMG_SHADER_CODE_DEPTH_ACC_TO_GRADIENT
-//in vec3 OutVertex;
-//in vec3 OutTexCoord;
-//out vec4 FragColor;
+//layout(location = 0) in vec3 OutVertex;
+//layout(location = 1) in vec3 OutTexCoord;
+//layout(location = 0) out vec4 FragColor;
 //	
 ////IMG_SHADER_CODE_DEPTH_TO_GRADIENT
 //uniform vec4 loc0; //(width, height, scale, 0.0)
@@ -641,9 +641,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_DEPTH_TO_SCATTERING = R"GLSHDR(
 //IMG_SHADER_CODE_DEPTH_TO_SCATTERING
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 
 uniform vec4 loc0; //(texelx, texely, lod1, lod2)
 uniform vec4 loc1; //(glowContrast, glowScale, scatterContrast, scatterScale)
@@ -684,9 +684,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_DEPTH_ACC_TO_DEPTH = R"GLSHDR(
 //IMG_SHADER_CODE_DEPTH_ACC_TO_DEPTH
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 
 uniform sampler2D tex0;
 
@@ -702,9 +702,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_INPUT = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_TO_SHADOW
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 //IMG_SHADER_CODE_GRADIENT_TO_SHADOW
 uniform vec4 loc0; //(1/width, 1/height, zoom, 0.0)
@@ -786,9 +786,9 @@ inline constexpr const char* IMG_SHADER_CODE_GRAD2SHADOW_BODY = R"GLSHDR(
 
 inline constexpr const char* IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND = R"GLSHDR(
 //IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND
 uniform sampler2D tex0;
@@ -806,9 +806,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR = R"GLSHDR(
 //IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // IMG_SHADER_CODE_BLEND_BRIGHT_BACKGROUND_HDR
 uniform vec4 loc0; //(r_gamma, g_gamma, b_gamma, 1.0)
@@ -836,9 +836,9 @@ void main()
 
 inline constexpr const char* PAINT_SHADER_CODE = R"GLSHDR(
 //PAINT_SHADER_CODE
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 // PAINT_SHADER_CODE
 uniform vec4 loc0; //(mouse_x, mouse_y, radius1, radius2)
@@ -858,9 +858,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_GRADIENT_BACKGROUND = R"GLSHDR(
 //IMG_SHADER_CODE_GRADIENT_BACKGROUND
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 uniform vec4 loc0; //bg color
 uniform vec4 loc1; //color1
 uniform vec4 loc2; //color2
@@ -892,9 +892,9 @@ void main()
 
 inline constexpr const char* IMG_SHADER_CODE_FILTER_LANCZOS_BICUBIC = R"GLSHDR(
 //IMG_SHADER_CODE_FILTER_LANCZOS_BICUBIC
-in vec3 OutVertex;
-in vec3 OutTexCoord;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutVertex;
+layout(location = 1) in vec3 OutTexCoord;
+layout(location = 0) out vec4 FragColor;
 	
 uniform sampler2D tex0;
 uniform vec4 loc0; //(zoom/w, zoom/h, zoom, 0)
@@ -1007,8 +1007,8 @@ inline constexpr const char* IMG_SHDR_CODE_DRAW_THICK_LINES = R"GLSHDR(
 uniform vec4 loc0; //(vp0, vp1, thickness, 0.0)
 layout(lines) in;
 layout(triangle_strip, max_vertices = 4) out;
-in vec3 OutColor[];
-out vec3 OutColor2;
+layout(location = 0) in vec3 OutColor[];
+layout(location = 0) out vec3 OutColor2;
 vec2 toScreenSpace(vec4 vertex)
 {
 	return vec2(vertex.xy / vertex.w) * loc0.xy;
@@ -1055,10 +1055,10 @@ uniform vec4 loc0;   // (viewportWidth, viewportHeight, thickness, cull mode)
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 24) out;
 
-in vec3 OutColor[];
-in vec3 OutEyePos[];
-in vec4 OutClipPos[];
-out vec3 OutColor2;
+layout(location = 0) in vec3 OutColor[];
+layout(location = 1) in vec3 OutEyePos[];
+layout(location = 2) in vec4 OutClipPos[];
+layout(location = 0) out vec3 OutColor2;
 
 vec2 toScreen(vec4 clip) {
 	return (clip.xy / clip.w) * loc0.xy; // NDC -> screen
@@ -1130,8 +1130,8 @@ void main()
 
 inline constexpr const char* IMG_FRG_CODE_DRAW_THICKLINES = R"GLSHDR(
 //IMG_FRG_CODE_DRAW_THICKLINES
-in vec3 OutColor2;
-out vec4 FragColor;
+layout(location = 0) in vec3 OutColor2;
+layout(location = 0) out vec4 FragColor;
 	
 void main()
 {
