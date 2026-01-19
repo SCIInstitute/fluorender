@@ -825,6 +825,12 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 	assert(seg_shader);
 	seg_shader->bind();
 
+	//set the light
+	fluo::Vector light = compute_view().direction();
+	light.safe_normalize();
+	seg_shader->setLocalParam(0,
+		light.x(), light.y(), light.z(), 0.0);
+
 	//spacings
 	auto spcing = tex->get_spacing();
 	seg_shader->setLocalParam(5, spcing.x(), spcing.y(), spcing.z(), shuffle_);
