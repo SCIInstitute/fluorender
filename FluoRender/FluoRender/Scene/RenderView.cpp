@@ -5683,7 +5683,7 @@ void RenderView::DrawVolumes(int peel)
 						vd = m_vd_pop_list[0].lock();
 				fluo::Point p;
 				if (glbin_volume_point.GetPointVolumeBoxOnePoint(nx / 2.0, ny / 2.0, p) > 0.0 ||
-					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, p) > 0.0))
+					(vd && glbin_volume_point.GetPointPlane(nx / 2.0, ny / 2.0, 0, p, false) > 0.0))
 				{
 					auto res = vd->GetResolution();
 					auto scaling = vd->GetScaling();

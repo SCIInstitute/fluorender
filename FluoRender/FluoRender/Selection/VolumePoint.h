@@ -63,7 +63,8 @@ namespace flrd
 		double GetPointPlane(
 			double mx, double my,//mouse coord on screen
 			fluo::Point* planep,
-			fluo::Point &mp);
+			fluo::Point &mp,
+			bool calc_cam = true);
 
 	private:
 		std::weak_ptr<VolumeData> m_vd;

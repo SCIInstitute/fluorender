@@ -402,7 +402,8 @@ double VolumePoint::GetPointVolumeBoxTwoPoint(
 double VolumePoint::GetPointPlane(
 	double mx, double my,//mouse coord on screen
 	fluo::Point* planep,
-	fluo::Point &mp)
+	fluo::Point &mp,
+	bool calc_cam)
 {
 	auto view = glbin_current.render_view.lock();
 	auto vd = m_vd.lock();
@@ -415,7 +416,17 @@ double VolumePoint::GetPointPlane(
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
 
-	glm::mat4 mv_temp = view->GetObjectMat();
+	glm::mat4 mv_temp;
+	if (calc_cam)
+	{
+		//projection
+		view->HandleProjection(nx, ny);
+		//Transformation
+		view->HandleCamera();
+		mv_temp = view->GetObjectMat();
+	}
+	else
+		mv_temp = view->GetModelView();//m_mv_mat;
 	glm::mat4 prj_mat = view->GetProjection();
 	fluo::Transform mv;
 	fluo::Transform p;
