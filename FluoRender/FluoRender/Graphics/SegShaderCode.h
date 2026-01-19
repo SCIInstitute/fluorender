@@ -180,30 +180,65 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_ORTHO = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_HR_ORTHO
 	if (c.x <= loc20.x)
 		discard;
+
+	// Compute parallel ray step from inverse modelview (direction vector: w=0)
 	vec4 cv = matrix3 * vec4(0.0, 0.0, 1.0, 0.0);
 	vec3 step = cv.xyz;
-	step = normalize(step);
-	step = step * length(step * loc4.xyz);
+
+	// --- Robust step normalization and voxel-scaled length ---
+	float stepLen = length(step);
+	if (stepLen <= 1e-6)
+		discard; // degenerate direction; nothing reliable to march along
+	step /= stepLen;
+
+	// scale step to approximately 1 voxel in the dominant axis
+	float voxelStep = length(step * loc4.xyz);
+	voxelStep = max(voxelStep, 1e-4);
+	step *= voxelStep;
+
 	vec3 ray = texCoord;
 	vec4 cray;
 	bool flag = false;
-	float th = loc20.x<0.01?0.01:loc20.x;
-	while (true)
+	bool discardFrag = false;
+
+	// Threshold clamp to a sane minimum
+	float th = loc20.x < 0.01 ? 0.01 : loc20.x;
+
+	// --- Bounded loop for cross-vendor portability ---
+	const int MAX_STEPS = 256;
+	for (int i = 0; i < MAX_STEPS; ++i)
 	{
 		ray += step;
-		if (any(greaterThan(ray, vec3(1.0))) ||
-				any(lessThan(ray, vec3(0.0))))
+
+		// bounds / clip tests
+		if (any(greaterThan(ray, vec3(1.0))) || any(lessThan(ray, vec3(0.0))))
 			break;
 		if (vol_clip_func(vec4(ray, 1.0)))
 			break;
-		v.x = texture(tex0, ray).x;
-		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);
+
+		// Sample (clamped to avoid precision drift outside [0,1])
+		vec3 samplePos = clamp(ray, vec3(0.0), vec3(1.0));
+		v.x = texture(tex0, samplePos).x;
+		v.y = length(vol_grad_func(vec4(samplePos, 1.0), loc4).xyz);
+
 		cray = vol_trans_sin_color_l(v);
+
+		// Defer discard out of the loop for portability
 		if (cray.x > th && flag)
-			discard;
+		{
+			discardFrag = true;
+			break;
+		}
 		if (cray.x <= th)
 			flag = true;
 	}
+
+	if (discardFrag)
+	{
+		discard;
+		return;
+	}
+
 	FragColor = vec4(1.0);
 )GLSHDR";
 
@@ -211,34 +246,61 @@ inline constexpr const char* SEG_BODY_INIT_BLEND_HR_PERSP = R"GLSHDR(
 	//SEG_BODY_INIT_BLEND_HR_PERSP
 	if (c.x <= loc20.x)
 		discard;
+
+	// Compute ray direction towards the camera position in object/texture space
 	vec4 cv = matrix3 * vec4(0.0, 0.0, 0.0, 1.0);
-	cv = cv / cv.w;
-	vec3 step = cv.xyz - texCoord;
-	step = normalize(step);
-	step = step * length(step * loc4.xyz);
+	cv = cv / cv.w; // robust divide
+
+	vec3 step = cv.xyz - texCoord; // direction from current sample to camera
+
+	// --- Robust step normalization and voxel-scaled length ---
+	float stepLen = length(step);
+	if (stepLen <= 1e-6)
+		discard; // degenerate (camera coincides with texCoord)
+	step /= stepLen;
+
+	float voxelStep = length(step * loc4.xyz);
+	voxelStep = max(voxelStep, 1e-4);
+	step *= voxelStep;
+
 	vec3 ray = texCoord;
 	vec4 cray;
 	bool flag = false;
-	float th = loc20.x<0.01?0.01:loc20.x;
-	while (true)
+	bool discardFrag = false;
+
+	float th = loc20.x < 0.01 ? 0.01 : loc20.x;
+
+	const int MAX_STEPS = 256;
+	for (int i = 0; i < MAX_STEPS; ++i)
 	{
 		ray += step;
-		if (any(greaterThan(ray, vec3(1.0))) ||
-				any(lessThan(ray, vec3(0.0))))
+
+		if (any(greaterThan(ray, vec3(1.0))) || any(lessThan(ray, vec3(0.0))))
 			break;
 		if (vol_clip_func(vec4(ray, 1.0)))
 			break;
-		v.x = texture(tex0, ray).x;
-		v.y = length(vol_grad_func(vec4(ray, 1.0), loc4).xyz);
+
+		vec3 samplePos = clamp(ray, vec3(0.0), vec3(1.0));
+		v.x = texture(tex0, samplePos).x;
+		v.y = length(vol_grad_func(vec4(samplePos, 1.0), loc4).xyz);
+
 		cray = vol_trans_sin_color_l(v);
+
 		if (cray.x > th && flag)
 		{
-			FragColor = vec4(0.0);
-			return;
+			discardFrag = true;
+			break;
 		}
 		if (cray.x <= th)
 			flag = true;
 	}
+
+	if (discardFrag)
+	{
+		discard;
+		return;
+	}
+
 	FragColor = vec4(1.0);
 )GLSHDR";
 
