@@ -949,8 +949,8 @@ void Project::Open(const std::wstring& filename)
 					view->SetSync(2, bval);
 
 				//clipping plane rotations
-				if (fconfig->Read("clip_mode", &ival))
-					view->SetClipMode(ival);
+				if (fconfig->Read("clip_rot_mode", &ival))
+					view->SetClipRotMode(ival);
 
 				//painting parameters
 				if (fconfig->Read("brush_use_pres", &dval))
@@ -1729,7 +1729,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("sync_b", view->GetSync(2));
 
 			//clipping plane rotations
-			fconfig->Write("clip_mode", view->GetClipMode());
+			fconfig->Write("clip_rot_mode", view->GetClipRotMode());
 
 			//painting parameters
 			fconfig->Write("brush_use_pres", glbin_vol_selector.GetBrushUsePres());

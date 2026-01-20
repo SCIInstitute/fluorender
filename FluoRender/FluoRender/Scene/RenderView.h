@@ -372,8 +372,8 @@ public:
 	void ChangeBrushSize(int value, bool ctrl);
 
 	//set clip mode
-	void SetClipMode(int mode);
-	int GetClipMode() { return m_clip_mode; }
+	void SetClipRotMode(int mode);
+	int GetClipRotMode() { return m_clip_rot_mode; }
 
 	void ResetAllClipValues();
 	//sync
@@ -553,7 +553,7 @@ public:
 	std::weak_ptr<VolumeData> m_cur_vol;
 	std::weak_ptr<VolumeData> m_cur_vol_save;
 	//clipping settings
-	int m_clip_mode;//0-normal; 1-ortho planes; 2-rot difference
+	int m_clip_rot_mode;//0-normal; 1-ortho planes; 2-rot difference
 	//scale bar
 	int m_scalebar_disp;//0-no display; 1-length; 2-with text
 	double m_sb_length;

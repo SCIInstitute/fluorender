@@ -1321,7 +1321,7 @@ void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent& event)
 	if (!view)
 		return;
 
-	view->SetClipMode(2);
+	view->SetClipRotMode(1);
 	FluoRefresh(0, { gstClipRotX, gstClipRotY, gstClipRotZ, gstConvVolMeshUpdateTransf },
 		{ glbin_current.GetViewId() });
 }

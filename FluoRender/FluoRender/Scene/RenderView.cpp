@@ -132,7 +132,7 @@ RenderView::RenderView() :
 	m_colormap_disp(0),
 	m_mouse_focus(false),
 	//clipping settings
-	m_clip_mode(2),
+	m_clip_rot_mode(0),
 	//scale bar
 	m_scalebar_disp(0),
 	m_sb_length(50),
@@ -318,19 +318,19 @@ RenderView::RenderView(RenderView& copy):
 	m_colormap_disp(copy.m_colormap_disp),
 	m_mouse_focus(copy.m_mouse_focus),
 	//clipping settings
-	m_clip_mode(2), //copy m_clip_mode,
+	m_clip_rot_mode(0),
 	//scale bar
-	m_scalebar_disp(copy.m_scalebar_disp), //copy m_scalebar_disp,
-	m_sb_length(50), //copy m_sb_length,
-	m_sb_unit(1), //copy m_sb_unit,
+	m_scalebar_disp(copy.m_scalebar_disp),
+	m_sb_length(50),
+	m_sb_unit(1),
 	m_sb_height(0.0),
 	//ortho size
-	m_ortho_left(0.0), //copy m_ortho_left,
-	m_ortho_right(1.0), //copy m_ortho_right,
-	m_ortho_bottom(0.0), //copy m_ortho_bottom,
-	m_ortho_top(1.0), //copy m_ortho_top,
+	m_ortho_left(0.0),
+	m_ortho_right(1.0),
+	m_ortho_bottom(0.0),
+	m_ortho_top(1.0),
 	//scale factor
-	m_scale_factor(1.0), //copy m_scale_factor,
+	m_scale_factor(1.0),
 	//scale mode
 	m_scale_mode(0),
 	//populated lists of data
@@ -2484,7 +2484,7 @@ void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 	fluo::Quaternion up2 = (-m_cam_q) * up * m_cam_q;
 	m_cam_up = fluo::Vector(up2.x, up2.y, up2.z);
 
-	if (m_clip_mode)
+	if (m_clip_rot_mode)
 		RotateClips();
 
 	if (notify && m_render_view_panel)
@@ -3739,31 +3739,24 @@ void RenderView::ChangeBrushSize(int value, bool ctrl)
 		m_render_view_panel->FluoRefresh(0, { gstBrushSize1, gstBrushSize2 }, {-1});
 }
 
-void RenderView::SetClipMode(int mode)
+void RenderView::SetClipRotMode(int mode)
 {
 	switch (mode)
 	{
 	case 0:
-		m_clip_mode = 0;
-		//RestorePlanes();
-		//m_rot_cl = fluo::Vector(0, 0, 0);
+		m_clip_rot_mode = 0;
 		break;
 	case 1:
-		m_clip_mode = 1;
+	{
+		int clip_mode = m_clip_rot_mode;
+		m_clip_rot_mode = 1;
 		SetRotations(m_cam_rot, true);
+		m_clip_rot_mode = clip_mode;
+	}
 		break;
 	case 2:
 	{
-		m_clip_mode = 2;
-		//{
-		//	fluo::Vector euler = m_cam_q.ToEuler();
-		//	euler.y(-euler.y());
-		//	euler.z(-euler.z());
-		//	m_q_cl_zero.FromEuler(euler);
-		//}
-		//m_q_cl = m_q_cl_zero;
-		//m_rot_cl = m_q_cl.ToEuler();
-		//m_rot_cl.normalize_euler_signed();
+		m_clip_rot_mode = 2;
 		SetRotations(m_cam_rot, true);
 	}
 		break;
@@ -9079,7 +9072,7 @@ void RenderView::Q2A()
 	m_cam_rot = q.ToEuler();
 	m_cam_rot.normalize_euler_unsigned();
 
-	if (m_clip_mode == 1)
+	if (m_clip_rot_mode == 1)
 		RotateClips();
 }
 
