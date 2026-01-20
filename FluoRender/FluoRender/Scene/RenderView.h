@@ -415,7 +415,6 @@ public:
 	flrd::RulerList* GetRulerList();
 	void SetCurRuler(flrd::Ruler* ruler);
 	flrd::Ruler* GetCurRuler();
-	flrd::Ruler* GetRuler(unsigned int id);
 
 	//traces
 	//track map file

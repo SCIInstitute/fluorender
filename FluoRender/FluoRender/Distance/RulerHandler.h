@@ -53,8 +53,10 @@ namespace flrd
 		~RulerHandler();
 
 		//set selected ruler list
-		void SetSelRulers(const std::set<int>& sel_list) { m_sel_list = sel_list; }
-		std::set<int> GetSelRulers() { return m_sel_list; }
+		void SetEditingRuler(int index);
+		int GetEditingRuler() { return m_editing_ruler_index; }
+		void SetSelectedRulers(const std::set<int>& list) { m_selected_ruler_indices = list; }
+		std::set<int> GetSelectedRulers() { return m_selected_ruler_indices; }
 		//handle group
 		void NewGroup();
 		void SetGroup(unsigned int group) { m_group = group; }
@@ -176,7 +178,8 @@ namespace flrd
 		std::pair<bool, std::pair<fluo::Plane, fluo::Plane>> GetLinearPlanes();
 
 	private:
-		std::set<int> m_sel_list;
+		int m_editing_ruler_index;
+		std::set<int> m_selected_ruler_indices;
 		unsigned int m_group;
 		Ruler* m_mag_ruler;
 		size_t m_mag_branch;

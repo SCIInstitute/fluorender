@@ -73,6 +73,18 @@ RulerHandler::~RulerHandler()
 
 }
 
+void RulerHandler::SetEditingRuler(int index)
+{
+	Ruler* ruler = GetRuler(index);
+	if (ruler)
+	{
+		m_editing_ruler_index = index;
+		auto view = glbin_current.render_view.lock();
+		if (view)
+			view->SetCurRuler(ruler);
+	}
+}
+
 void RulerHandler::NewGroup()
 {
 	RulerList* list = glbin_current.GetRulerList();

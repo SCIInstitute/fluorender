@@ -218,6 +218,14 @@ void RulerListCtrl::SetText(long item, int col, const wxString& str)
 	SetItem(info);
 }
 
+int RulerListCtrl::GetFocusedItem()
+{
+	return GetNextItem(
+		-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_FOCUSED);
+}
+
 bool RulerListCtrl::GetCurrSelection(std::set<int> &sel)
 {
 	long item = -1;
@@ -1188,6 +1196,10 @@ void MeasureDlg::ToggleDisplay()
 void MeasureDlg::SetCurrentRuler()
 {
 	flrd::Ruler* ruler = glbin_current.GetRuler();
+	int focus = glbin_ruler_handler.GetEditingRuler();
+	auto editing_ruler = glbin_ruler_handler.GetRuler(focus);
+	if (ruler != editing_ruler)
+		return;
 	auto view = glbin_current.render_view.lock();
 	if (!ruler || !view)
 		return;
@@ -1776,36 +1788,32 @@ void MeasureDlg::OnSelection(wxListEvent& event)
 	if (m_ruler_list->m_silent_select)
 		return;
 
-	auto view = glbin_current.render_view.lock();
-	if (!view)
+	long focus = m_ruler_list->GetFocusedItem();
+	if (focus == -1)
 		return;
+	glbin_ruler_handler.SetEditingRuler(focus);
+	std::set<int> sel;
+	m_ruler_list->GetCurrSelection(sel);
+	glbin_ruler_handler.SetSelectedRulers(sel);
 
-	long ival = event.GetIndex();
-
-	flrd::Ruler* ruler = view->GetRuler(
-		m_ruler_list->GetItemData(ival));
-	if (!ruler || !ruler->GetDisp())
+	auto ruler = glbin_current.GetRuler();
+	if (!ruler)
 		return;
-
 	flrd::RulerMode rul_mode = ruler->GetRulerMode();
 	bool use_color = ruler->GetUseColor();
 	fluo::Color color = ruler->GetColor();
 	m_ruler_list->StartEdit(static_cast<int>(rul_mode), use_color, color);
 	
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetSelRulers(sel);
-
-	FluoRefresh(2, { gstRulerTransient, gstRulerInterpolation, gstRulerDisp },
+	FluoRefresh(0, { gstRulerTransient, gstRulerInterpolation, gstRulerDisp, gstColormap },
 		{ glbin_current.GetViewId() });
 }
 
 void MeasureDlg::OnEndSelection(wxListEvent& event)
 {
 	m_ruler_list->EndEdit();
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetSelRulers(sel);
+	//std::set<int> sel;
+	//m_ruler_list->GetCurrSelection(sel);
+	//glbin_ruler_handler.SetSelRulers(sel);
 	SetCurrentRuler();
 }
 

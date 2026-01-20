@@ -126,7 +126,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 	glm::mat4 proj_mat = view->GetProjection();
 	p.set(glm::value_ptr(proj_mat));
 
-	std::set<int> sel_list = glbin_ruler_handler.GetSelRulers();
+	std::set<int> sel_list = glbin_ruler_handler.GetSelectedRulers();
 	//estimate
 	int vert_num = 0;
 	for (size_t i = 0; i < m_ruler_list->size(); ++i)

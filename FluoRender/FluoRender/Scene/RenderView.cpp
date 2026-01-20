@@ -4492,42 +4492,10 @@ flrd::RulerList* RenderView::GetRulerList()
 void RenderView::SetCurRuler(flrd::Ruler* ruler)
 {
 	m_cur_ruler = ruler;
-	//update handler index
-	std::set<int> sel_list;
-	for (size_t i = 0; i < m_ruler_list->size(); ++i)
-	{
-		flrd::Ruler* r = (*m_ruler_list)[i];
-		if (r && r == ruler)
-		{
-			sel_list.insert(i);
-			break;
-		}
-	}
-	if (!sel_list.empty())
-		glbin_ruler_handler.SetSelRulers(sel_list);
 }
 
 flrd::Ruler* RenderView::GetCurRuler()
 {
-	return m_cur_ruler;
-}
-
-flrd::Ruler* RenderView::GetRuler(unsigned int id)
-{
-	m_cur_ruler = 0;
-	//update handler index
-	std::set<int> sel_list;
-	for (size_t i = 0; i < m_ruler_list->size(); ++i)
-	{
-		if ((*m_ruler_list)[i] && (*m_ruler_list)[i]->Id() == id)
-		{
-			m_cur_ruler = (*m_ruler_list)[i];
-			sel_list.insert(i);
-			break;
-		}
-	}
-	if (!sel_list.empty())
-		glbin_ruler_handler.SetSelRulers(sel_list);
 	return m_cur_ruler;
 }
 

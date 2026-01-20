@@ -86,6 +86,7 @@ public:
 
 	wxString GetText(long item, int col);
 	void SetText(long item, int col, const wxString &str);
+	int GetFocusedItem();
 	bool GetCurrSelection(std::set<int> &sel);
 	void ClearSelection();
 	void StartEdit(int type, bool use_color, const fluo::Color& color);
