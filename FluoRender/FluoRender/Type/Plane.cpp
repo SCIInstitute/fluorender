@@ -331,5 +331,32 @@ namespace fluo
 		return Plane(pT, nT);
 	}
 
+	double PlaneSet::pairRange(int i0, int i1)
+	{
+		if (planes_.size() < 6)
+			return 0.0;
+
+		const Vector n0 = planes_[i0].n();
+		const Vector n1 = planes_[i1].n();
+		const double l0 = n0.length();
+		const double l1 = n1.length();
+		// Expect normalized normals; handle gracefully if not
+		const Vector nn0 = (l0 > 0.0) ? n0 / l0 : n0;
+		const Vector nn1 = (l1 > 0.0) ? n1 / l1 : n1;
+
+		// Align n1 to n0
+		const double align = Dot(nn0, nn1);
+		double d0 = planes_[i0].d();
+		double d1 = planes_[i1].d();
+		if (align < 0.0) {
+			// Flip plane 1 to match orientation of plane 0
+			d1 = -d1;
+			// nn1 = -nn1; (not needed further since we only use d's after alignment)
+		}
+
+		// If normals weren’t unit, scale distance by n0 length
+		const double denom = (l0 > 0.0) ? l0 : 1.0;
+		return std::fabs(d1 - d0) / denom;
+	}
 } // End namespace fluo
 

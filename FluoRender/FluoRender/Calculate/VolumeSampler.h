@@ -61,7 +61,8 @@ namespace flrd
 		void SetFilterSize(const fluo::Vector& size);
 		void SetCrop(bool crop);
 		void SetNegMask(bool bval);
-		void SetClipRotation(const fluo::Quaternion &q);
+		void SetUseClipbox(bool bval);
+		void SetRotation(const fluo::Quaternion &q);
 		void SetCenter(const fluo::Point &p);
 		void SetTranslate(const fluo::Vector &t);
 		void Resize(SampDataType type, bool replace);
@@ -86,15 +87,10 @@ namespace flrd
 		//crop size (of new size)
 		fluo::Point m_crop_origin;
 		fluo::Vector m_crop_size;
-		//int m_ox;
-		//int m_oy;
-		//int m_oz;
-		//int m_lx;
-		//int m_ly;
-		//int m_lz;
 		//transform
 		bool m_neg_mask;//use negative transformation for mask
-		fluo::Quaternion m_q_cl;//rotation
+		bool m_use_clipbox;//use transformation from volume clipping box
+		fluo::Quaternion m_q;//rotation
 		fluo::Point m_center;//rotation center
 		fluo::Vector m_trans;//translate
 
@@ -118,9 +114,6 @@ namespace flrd
 		double SampleBiLinear(const fluo::Point& coord);
 		double SampleTriLinear(const fluo::Point& coord);
 		double SampleBox(const fluo::Point& coord);
-		int rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
-			fluo::Vector &vsize, fluo::Vector &vspc);
-		int consv_volume(fluo::Vector &vec, fluo::Vector &vec_in);
 		bool normalize_ijk(fluo::Point& ijk);
 		fluo::Point xyz2ijk(const fluo::Point& coord);
 		std::pair<fluo::Point, fluo::Vector> xyz2ijkt(const fluo::Point& coord);

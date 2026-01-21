@@ -46,6 +46,7 @@ VolumeSampler::VolumeSampler() :
 	m_neg_mask(false),
 	m_crop_origin(0.0),
 	m_crop_size(0.0),
+	m_use_clipbox(false),
 	m_filter(0),
 	m_filter_size(0.0),
 	m_border(0)
@@ -101,9 +102,14 @@ void VolumeSampler::SetNegMask(bool bval)
 	m_neg_mask = bval;
 }
 
-void VolumeSampler::SetClipRotation(const fluo::Quaternion &q)
+void VolumeSampler::SetUseClipbox(bool bval)
 {
-	m_q_cl = q;
+	m_use_clipbox = bval;
+}
+
+void VolumeSampler::SetRotation(const fluo::Quaternion &q)
+{
+	m_q = q;
 }
 
 void VolumeSampler::SetCenter(const fluo::Point &p)
@@ -162,7 +168,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	if (m_size_out.any_le_zero() || m_fix_size)
 		m_size_out = m_size_in;
 	//check rotation & translation
-	bool rot = !m_q_cl.IsIdentity();
+	auto& cb = input->GetClippingBox();
+	fluo::Quaternion q_rot;
+	if (m_use_clipbox)
+		q_rot = cb.GetRotation();
+	else
+		q_rot = m_q;
+	bool rot = !q_rot.IsIdentity();
 	bool trans = m_trans != fluo::Vector();
 	fluo::Vector size = m_size_out - fluo::Vector(0.5);
 	fluo::Vector size_in = m_size_in - fluo::Vector(0.5);
@@ -175,15 +187,16 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		if (!m_fix_size && rot &&
 			m_size_out.all_non_zero())
 		{
-			rotate_scale(size_in, spc_in, size, spc);
-			m_size_out = size + fluo::Vector(0.5);
+			size = cb.GetPlaneSizeIndex();
+			m_size_out = size;
 			m_size_out.normalize_at_least_one();
+			size -= fluo::Vector(0.5);
+			spc = cb.GetPlaneSizeWorld() / cb.GetPlaneSizeIndex();
 		}
 
 		//recalculate range
-		auto& cb = input->GetClippingBox();
-		m_crop_origin = cb.GetBBoxIndex().Min();
-		m_crop_size = cb.GetBBoxIndex().diagonal();
+		m_crop_origin = cb.GetClipsUnit().Min() * m_size_out;
+		m_crop_size = cb.GetClipSizeIndex();
 	}
 	else
 	{
@@ -197,7 +210,6 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		ncenter = fluo::Vector(0.5);
 	else
 		ncenter = fluo::Vector(m_center) / m_size_out;
-	fluo::Quaternion q_cl = m_q_cl;
 	bool neg = m_neg_mask && (type == SDT_Mask || type == SDT_Label);
 	if (neg)
 	{
@@ -246,7 +258,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			vec -= ncenter;//center
 			vec *= spcsize;//scale
 			fluo::Quaternion qvec(vec);
-			qvec = (-q_cl) * qvec * (q_cl);//rotate
+			qvec = (-q_rot) * qvec * (q_rot);//rotate
 			vec = qvec.GetVector();
 			vec /= spcsize_in;//normalize
 			vec += ncenter;//translate
@@ -491,100 +503,6 @@ std::pair<fluo::Point, fluo::Vector> VolumeSampler::xyz2ijkt(const fluo::Point& 
 	ijk.z(d.z() >= 0.0 ? d.intz() : d.intz() - 1);
 	fluo::Vector t = d - ijk;
 	return { ijk, t };
-}
-
-int VolumeSampler::rotate_scale(fluo::Vector &vsize_in, fluo::Vector &vspc_in,
-	fluo::Vector &vsize, fluo::Vector &vspc)
-{
-	fluo::Vector rsf = vsize / vsize_in;//rescale factor
-	std::vector<fluo::Quaternion> qs;
-	std::vector<fluo::Vector> vs;
-	std::vector<fluo::Vector> vs2;
-	qs.push_back(fluo::Quaternion(1, 0, 0, 0));
-	qs.push_back(fluo::Quaternion(0, 1, 0, 0));
-	qs.push_back(fluo::Quaternion(0, 0, 1, 0));
-	fluo::Vector vec_in = vsize_in * vspc_in;
-	for (auto &q : qs)
-	{
-		q = (-m_q_cl) * q * (m_q_cl);
-		vs.push_back(q.GetVector() * vec_in);
-		vs2.push_back(q.GetVector() * vspc_in);
-	}
-	fluo::Vector rv;
-	int i = 0;
-	for (auto &v : vs)
-		if (i < 3) rv[i++] = v.length();
-	i = 0;
-	for (auto &v : vs2)
-		if (i < 3) vspc[i++] = v.length();
-	if (vspc.x() == 0.0 ||
-		vspc.y() == 0.0 ||
-		vspc.z() == 0.0)
-		return 0;//invalid
-	//rescale spcs to maintain sample size
-	consv_volume(vspc, vspc_in);
-	if (m_crop)
-	{
-		vspc /= rsf;
-		vsize = rv / vspc;
-	}
-	else
-	{
-		vsize = rv * rsf / vspc;
-	}
-	return 1;
-}
-
-int VolumeSampler::consv_volume(fluo::Vector &vec, fluo::Vector &vec_in)
-{
-	double vol = vec.volume();
-	double vol_in = vec_in.volume();
-	if (vol == 0.0 || vol_in == 0.0)
-		return 0;
-	//conserve volume
-	if (std::abs(vol - vol_in) >
-		fluo::Epsilon(3) * vec_in[vec_in.max()])
-	{
-		//diff array
-		double dif[9] = {
-			vec[0] - vec_in[0], vec[0] - vec_in[1], vec[0] - vec_in[2],
-			vec[1] - vec_in[0], vec[1] - vec_in[1], vec[1] - vec_in[2],
-			vec[2] - vec_in[0], vec[2] - vec_in[1], vec[2] - vec_in[2] };
-		int ind_min;
-		double val_min, val;
-		for (int i = 0; i < 9; ++i)
-		{
-			val = std::abs(dif[i]);
-			if (i == 0)
-			{
-				val_min = val;
-				ind_min = i;
-			}
-			else
-			{
-				if (val < val_min)
-				{
-					val_min = val;
-					ind_min = i;
-				}
-			}
-		}
-		int ind = ind_min / 3;
-		int ind_in = ind_min % 3;
-		//align min dif
-		double f = std::sqrt(vol_in*vec[ind]/vol/vec_in[ind_in]);
-		vec[ind] = vec_in[ind_in];
-		//the remaining 2
-		for (int i = 0; i < 3; ++i)
-		{
-			if (i == ind)
-				continue;
-			vec[i] *= f;
-		}
-
-		return 1;
-	}
-	return 0;
 }
 
 double VolumeSampler::SampleNearestNeighbor(const fluo::Point& coord)

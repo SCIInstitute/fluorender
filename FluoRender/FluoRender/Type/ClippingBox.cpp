@@ -197,6 +197,8 @@ void ClippingBox::SyncWorld(const ClippingBox& src)
 
 void ClippingBox::Update(bool update_euler)
 {
+	plane_size_valid_ = false;
+
 	planes_world_.resize(6);
 	planes_index_.resize(6);
 	planes_unit_.resize(6);
@@ -252,33 +254,13 @@ void ClippingBox::Update(bool update_euler)
 		planes_unit_[k].ChangeD(-sMin);
 	}
 
+	//save rotated unit planes before cropping
+	planes_unit_nocrop_ = planes_unit_;
+
 	// Compute ranges between opposite plane pairs (normals are normalized)
-	auto pairRange = [&](int i0, int i1) {
-		const Vector n0 = planes_unit_[i0].n();
-		const Vector n1 = planes_unit_[i1].n();
-		const double l0 = n0.length();
-		const double l1 = n1.length();
-		// Expect normalized normals; handle gracefully if not
-		const Vector nn0 = (l0 > 0.0) ? n0 / l0 : n0;
-		const Vector nn1 = (l1 > 0.0) ? n1 / l1 : n1;
-
-		// Align n1 to n0
-		const double align = Dot(nn0, nn1);
-		double d0 = planes_unit_[i0].d();
-		double d1 = planes_unit_[i1].d();
-		if (align < 0.0) {
-			// Flip plane 1 to match orientation of plane 0
-			d1 = -d1;
-			// nn1 = -nn1; (not needed further since we only use d's after alignment)
-		}
-
-		// If normals weren’t unit, scale distance by n0 length
-		const double denom = (l0 > 0.0) ? l0 : 1.0;
-		return std::fabs(d1 - d0) / denom;
-		};
-	const double rangeX = pairRange(0, 1);
-	const double rangeY = pairRange(2, 3);
-	const double rangeZ = pairRange(4, 5);
+	const double rangeX = planes_unit_.pairRange(0, 1);
+	const double rangeY = planes_unit_.pairRange(2, 3);
+	const double rangeZ = planes_unit_.pairRange(4, 5);
 
 	// Apply unit-space clipping fractions
 	const Point uMin = clips_unit_.Min();
@@ -309,6 +291,71 @@ void ClippingBox::Update(bool update_euler)
 	// Sync Euler angles
 	if (update_euler)
 		euler_ = q_.ToEuler();
+}
+
+void ClippingBox::UpdatePlaneBox()
+{
+	BBox unitBox; unitBox.unit();
+	// Unit -> Index / World affine parameters
+	const Vector S_UI = unitBox.scale_to(bbox_index_);
+	const Vector t_UI = Vector(bbox_index_.Min());
+	const Vector S_UW = unitBox.scale_to(bbox_world_);
+	const Vector t_UW = Vector(bbox_world_.Min());
+
+	// Generate INDEX and WORLD clipped planes from UNIT planes
+	PlaneSet planes_index(6);
+	PlaneSet planes_world(6);
+	for (int k = 0; k < 6; ++k) {
+		planes_index[k] = TransformPlaneAffine(planes_unit_nocrop_[k], S_UI, t_UI);
+		planes_world[k] = TransformPlaneAffine(planes_unit_nocrop_[k], S_UW, t_UW);
+	}
+
+	// Compute ranges between opposite plane pairs (normals are normalized)
+	plane_size_index_ = fluo::Vector(
+		planes_index.pairRange(0, 1),
+		planes_index.pairRange(2, 3),
+		planes_index.pairRange(4, 5));
+	plane_size_world_ = fluo::Vector(
+		planes_world.pairRange(0, 1),
+		planes_world.pairRange(2, 3),
+		planes_world.pairRange(4, 5));
+	clip_size_index_ = fluo::Vector(
+		planes_index_.pairRange(0, 1),
+		planes_index_.pairRange(2, 3),
+		planes_index_.pairRange(4, 5));
+	clip_size_world_ = fluo::Vector(
+		planes_world_.pairRange(0, 1),
+		planes_world_.pairRange(2, 3),
+		planes_world_.pairRange(4, 5));
+	plane_size_valid_ = true;
+}
+
+const Vector& ClippingBox::GetPlaneSizeWorld()
+{
+	if (!plane_size_valid_)
+		UpdatePlaneBox();
+	return plane_size_world_;
+}
+
+const Vector& ClippingBox::GetPlaneSizeIndex()
+{
+	if (!plane_size_valid_)
+		UpdatePlaneBox();
+	return plane_size_index_;
+}
+
+const Vector& ClippingBox::GetClipSizeWorld()
+{
+	if (!plane_size_valid_)
+		UpdatePlaneBox();
+	return clip_size_world_;
+}
+
+const Vector& ClippingBox::GetClipSizeIndex()
+{
+	if (!plane_size_valid_)
+		UpdatePlaneBox();
+	return clip_size_index_;
 }
 
 void ClippingBox::SetLink(ClipPlane plane, bool link)

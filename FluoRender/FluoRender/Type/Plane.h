@@ -176,6 +176,8 @@ namespace fluo
 		auto begin() const { return planes_.begin(); }
 		auto end() const { return planes_.end(); }
 
+		double pairRange(int i0, int i1);//only for 6 planes
+
 		friend std::ostream& operator<<(std::ostream& os, const PlaneSet& ps)
 		{
 			for (size_t i=0; i<ps.planes_.size(); ++i)

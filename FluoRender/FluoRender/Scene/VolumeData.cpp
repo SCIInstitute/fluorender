@@ -1436,6 +1436,7 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 	int mask, bool neg_mask,
 	bool crop, int filter,
 	bool bake, bool compress,
+	bool use_clipbox,
 	const fluo::Point &c,//rotation center
 	const fluo::Quaternion &q,//rotation
 	const fluo::Vector &t,//translate
@@ -1463,7 +1464,8 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 		sampler.SetFilterSize(fluo::Vector(1.0));
 		sampler.SetCrop(crop);
 		sampler.SetCenter(c);
-		sampler.SetClipRotation(q);
+		sampler.SetUseClipbox(use_clipbox);
+		sampler.SetRotation(q);
 		sampler.SetTranslate(t);
 		sampler.SetNegMask(neg_mask);
 		bool replace = temp ? true : false;

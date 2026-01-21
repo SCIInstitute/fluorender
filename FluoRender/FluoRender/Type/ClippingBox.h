@@ -67,6 +67,12 @@ namespace fluo
 		const PlaneSet& GetPlanesIndex() const { return planes_index_; }
 		const PlaneSet& GetPlanesUnit()  const { return planes_unit_; }
 
+		//sizes from planes (before and after clipping)
+		const Vector& GetPlaneSizeWorld();
+		const Vector& GetPlaneSizeIndex();
+		const Vector& GetClipSizeWorld();
+		const Vector& GetClipSizeIndex();
+
 		// --- Bounding boxes (dataset initialization) ---
 		const BBox& GetBBoxWorld() const { return bbox_world_; }
 		void SetBBoxes(const BBox& box_world, const BBox& box_index) { bbox_world_ = box_world; bbox_index_ = box_index; ResetClips(); }
@@ -80,9 +86,7 @@ namespace fluo
 		// --- Clip boxes (UI input) ---
 		const BBox& GetClipsWorld() const { return clips_world_; }
 		const BBox& GetClipsIndex() const { return clips_index_; }
-
-		Vector GetClipWorldSize() const { return clips_world_.diagonal(); }
-		Vector GetClipIndexSize() const { return clips_index_.diagonal(); }
+		const BBox& GetClipsUnit() const { return clips_unit_; }
 
 		// --- Linking controls ---
 		void SetLink(ClipPlane plane, bool link);
@@ -149,6 +153,14 @@ namespace fluo
 		PlaneSet planes_index_;   // planes in voxel index space
 		PlaneSet planes_unit_;    // planes in normalized coordinates
 
+		//bbox from planes(can be distorted after rotation)
+		bool plane_size_valid_ = false;
+		PlaneSet planes_unit_nocrop_;
+		Vector plane_size_world_;
+		Vector plane_size_index_;
+		Vector clip_size_world_;
+		Vector clip_size_index_;
+
 		// --- Bounding boxes (dataset initialization) ---
 		BBox bbox_world_;         // finite bounding box in world coordinates
 		BBox bbox_index_;         // bounding box in voxel index space
@@ -170,6 +182,7 @@ namespace fluo
 
 	protected:
 		void Update(bool update_euler);
+		void UpdatePlaneBox();
 
 		// Convert a distance in world space to index space
 		double WorldToIndexDist(int axis, double dist) const {

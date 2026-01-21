@@ -64,6 +64,7 @@ namespace fluo {
 		inline Point operator-(const Vector&) const;
 		inline Point operator*(double) const;
 		inline Point& operator*=(const double);
+		inline Point operator*(const Vector&) const;
 		inline Point& operator+=(const Vector&);
 		inline Point& operator-=(const Vector&);
 		inline Point& operator+=(const Point&);
@@ -335,6 +336,11 @@ namespace fluo
 	inline Point Point::operator*(double d) const
 	{
 		return Point(x_*d, y_*d, z_*d);
+	}
+
+	inline Point Point::operator*(const Vector& v) const
+	{
+		return Point(x_ * v.x_, y_ * v.y_, z_ * v.z_);
 	}
 
 	inline Point Point::operator/(const double d) const

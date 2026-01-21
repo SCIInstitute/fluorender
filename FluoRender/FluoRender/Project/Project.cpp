@@ -1338,9 +1338,13 @@ void Project::Save(const std::wstring& filename, bool inc)
 				MkDirW(new_folder);
 				std::filesystem::path p(new_folder);
 				p /= vd->GetName() + L".tif";
-				vd->Save(p.wstring(), 0, 3, false,
-					false, 0, false, glbin_settings.m_save_compress,
-					fluo::Point(), fluo::Quaternion(), fluo::Vector(), false);
+				vd->Save(p.wstring(), 0,
+					3, false,
+					false, 0,
+					false, glbin_settings.m_save_compress,
+					false,
+					fluo::Point(), fluo::Quaternion(), fluo::Vector(),
+					false);
 				fconfig->Write("path", p.wstring());
 				new_chan = true;
 			}

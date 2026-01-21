@@ -511,6 +511,7 @@ void ListPanel::SaveSelection()
 			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
 				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 				false, glbin_settings.m_save_compress,
+				glbin_settings.m_save_crop,
 				fluo::Point(), q, fluo::Vector(), false);
 			std::wstring str = vd->GetPath();
 			m_datalist->SetText(item, 2, str);
@@ -593,6 +594,7 @@ void ListPanel::BakeSelection()
 		vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
 			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
 			true, glbin_settings.m_save_compress,
+			glbin_settings.m_save_crop,
 			fluo::Point(), q, fluo::Vector(), false);
 		std::wstring str = vd->GetPath();
 		m_datalist->SetText(item, 2, str);

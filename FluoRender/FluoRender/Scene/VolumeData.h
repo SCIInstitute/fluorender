@@ -137,6 +137,7 @@ public:
 		int mask, bool neg_mask,
 		bool crop, int filter,
 		bool bake, bool compress,
+		bool use_clipbox,
 		const fluo::Point &c,
 		const fluo::Quaternion &q,
 		const fluo::Vector &t,

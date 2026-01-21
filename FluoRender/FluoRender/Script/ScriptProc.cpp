@@ -1108,6 +1108,7 @@ void ScriptProc::RunSaveVolume()
 			mask, neg_mask,
 			crop, filter,
 			bake, compression,
+			false,
 			center, rot, transl,
 			fix_size);
 	}
