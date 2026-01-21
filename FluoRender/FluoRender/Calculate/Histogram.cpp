@@ -162,6 +162,7 @@ void Histogram::Compute()
 		GLint mid = 0;
 		if (m_use_mask)
 			mid = m_vd->GetVR()->load_brick_mask(b);
+		std::weak_ptr<flvr::Argument> arg_tid, arg_mid;
 
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
@@ -169,7 +170,7 @@ void Histogram::Compute()
 		unsigned int bin = m_bins;
 
 		kernel_prog->beginArgs(kernel_index);
-		kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
+		arg_tid = kernel_prog->setTex3D(CL_MEM_READ_ONLY, tid);
 		kernel_prog->setConst(sizeof(float), (void*)(&minv));
 		kernel_prog->setConst(sizeof(float), (void*)(&maxv));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&bin));
@@ -180,19 +181,23 @@ void Histogram::Compute()
 		else
 			kernel_prog->bindArg(arg_sh);
 		if (m_use_mask)
-			kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
+			arg_mid = kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
 
 		//execute
 		kernel_prog->executeKernel(kernel_index, 3, global_size, local_size);
 		//read back
 		kernel_prog->readBuffer(arg_sh, (void*)(m_histogram.data()));
-
-		kernel_prog->releaseAllArgs();
+		//release texture
+		kernel_prog->releaseArg(arg_tid);
+		if (m_use_mask)
+			kernel_prog->releaseArg(arg_mid);
 
 		SetProgress(100 * count / brick_num,
 			"Computing histogram.");
 		count++;
 	}
+
+	kernel_prog->releaseAllArgs();
 
 	SetProgress(0, "");
 
