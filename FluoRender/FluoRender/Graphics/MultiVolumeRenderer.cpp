@@ -373,8 +373,10 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	std::shared_ptr<ShaderProgram> img_shader;
 
 	std::shared_ptr<Framebuffer> filter_buffer;
-	if (noise_red_ &&
-		render_mode != RenderMode::Overlay)
+	bool apply_filter = noise_red_ &&
+		render_mode != RenderMode::Overlay &&
+		glbin_settings.m_hologram_mode == 0;
+	if (apply_filter)
 	{
 		//FILTERING
 		filter_buffer = glbin_framebuffer_manager.framebuffer(
@@ -406,8 +408,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 	cur_buffer->set_viewport({ viewport_[0], viewport_[1], viewport_[2], viewport_[3] });
 	glbin_framebuffer_manager.bind(cur_buffer);
 
-	if (noise_red_ &&
-		render_mode != RenderMode::Overlay)
+	if (apply_filter)
 		filter_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 	else
 		blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
@@ -421,8 +422,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 
 	img_shader->unbind();
 
-	if (noise_red_ &&
-		render_mode != RenderMode::Overlay)
+	if (apply_filter)
 		filter_buffer->unbind_texture(AttachmentPoint::Color(0));
 	else
 		blend_buffer->unbind_texture(AttachmentPoint::Color(0));
