@@ -284,7 +284,7 @@ public:
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
 	//force clear
-	void SetForceClear(bool val) { m_force_clear = val; }
+	void SetForceClear(bool val) { m_force_clear = val; m_retain_finalbuffer = !val; }
 	bool GetForceClear() { return m_force_clear; }
 	//interactive
 	void SetInteractive(bool val = false) { m_interactive = val; }
@@ -580,7 +580,6 @@ private:
 	void* m_hWnd;
 	RenderViewPanel* m_render_view_panel;
 	bool m_drawing;
-	bool m_refresh;//own refresh command
 	Size2D m_canvas_size;//size from wxwidgets window
 	Size2D m_size;//size with dpi factor
 	Size2D m_gl_size;//actual render size

@@ -241,7 +241,6 @@ RenderView::RenderView() :
 	m_pin_pick_thresh(0.6),
 	m_res_mode(1),
 	m_drawing(false),
-	m_refresh(false),
 	m_keep_enlarge(false),
 	m_enlarge(false),
 	m_enlarge_scale(1.0),
@@ -426,7 +425,6 @@ RenderView::RenderView(RenderView& copy):
 	m_pin_pick_thresh(0.6),
 	m_res_mode(1),
 	m_drawing(false),
-	m_refresh(false),
 	m_keep_enlarge(false),
 	m_enlarge(false),
 	m_enlarge_scale(1.0),
@@ -3873,12 +3871,6 @@ flvr::TextRenderer* RenderView::GetTextRenderer()
 bool RenderView::Draw()
 {
 	m_updating = true;
-	m_refresh = true;
-
-	if (!m_refresh)
-		m_retain_finalbuffer = true;
-	else
-		m_refresh = false;
 
 	bool swap = false;
 
@@ -5766,7 +5758,9 @@ void RenderView::DrawVolumes(int peel)
 	if (glbin_settings.m_mem_swap)
 	{
 		flvr::TextureRenderer::set_consumed_time(static_cast<unsigned long>(GET_TICK_COUNT() - flvr::TextureRenderer::get_st_time()));
-		if (flvr::TextureRenderer::get_start_update_loop() &&
+		if (m_retain_finalbuffer)
+			flvr::TextureRenderer::reset_update_loop();
+		else if (flvr::TextureRenderer::get_start_update_loop() &&
 			flvr::TextureRenderer::get_done_update_loop())
 			flvr::TextureRenderer::reset_update_loop();
 	}
@@ -10332,6 +10326,9 @@ void RenderView::ProcessIdle(IdleState& state)
 		}
 	}
 #endif
+
+	DBGPRINT(L"forced_refresh: %d, m_refresh: %d, m_inf_loop: %d\n",
+		forced_refresh, state.m_refresh, glbin_settings.m_inf_loop);
 
 	if (forced_refresh)
 	{

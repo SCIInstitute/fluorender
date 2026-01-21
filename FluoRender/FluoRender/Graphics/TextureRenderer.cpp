@@ -451,7 +451,7 @@ namespace flvr
 			delete[]sorted_queue;
 		}
 
-		return int(result);
+		return static_cast<int>(std::ceil(result));//encourage increase by float ceil
 	}
 
 	fluo::Ray TextureRenderer::compute_view()
