@@ -8745,46 +8745,18 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 	fluo::Color text_color = GetTextColor();
 	std::wstring str;
 	std::wostringstream tos;
+
+	tos << L"FPS: " << std::fixed << std::setprecision(2) << fps;
 	if (glbin_settings.m_mem_swap)
 	{
-		if (glbin_vol_selector.GetBrushUsePres())
-			tos << L"FPS: " << std::fixed << std::setprecision(2) << fps
-				<< L", Act: " << (intactive ? L"Yes" : L"No")
-				<< L", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
-				<< L", Quota: " << flvr::TextureRenderer::get_quota_bricks()
-				<< L", Consumed Time: " << flvr::TextureRenderer::get_consumed_time()
-				<< L", Mouse Time: " << flvr::TextureRenderer::get_cor_up_time()
-				<< L", Pressure: " << std::fixed << std::setprecision(2) << glbin_vol_selector.GetPressure();
-		else
-			tos << L"FPS: " << std::fixed << std::setprecision(2) << fps
-				<< L", Act: " << (intactive ? L"Yes" : L"No")
-				<< L", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
-				<< L", Quota: " << flvr::TextureRenderer::get_quota_bricks()
-				<< L", Consumed Time: " << flvr::TextureRenderer::get_consumed_time()
-				<< L", Mouse Time: " << flvr::TextureRenderer::get_cor_up_time();
-		
-		////budget_test
-		//if (m_interactive)
-		//  tos <<
-		//  flvr::TextureRenderer::get_quota_bricks()
-		//  << "\t" <<
-		//  flvr::TextureRenderer::get_finished_bricks()
-		//  << "\t" <<
-		//  flvr::TextureRenderer::get_queue_last()
-		//  << "\t" <<
-		//  int(flvr::TextureRenderer::get_finished_bricks()*
-		//    flvr::TextureRenderer::get_up_time()/
-		//    flvr::TextureRenderer::get_consumed_time())
-		//  << "\n";
+		tos << L", Interact: " << (intactive ? L"Yes" : L"No")
+			<< L", Bricks: " << flvr::TextureRenderer::get_finished_bricks()
+			<< L", Quota: " << flvr::TextureRenderer::get_quota_bricks()
+			<< L", Update Time: " << flvr::TextureRenderer::get_cor_up_time();
 	}
-	else
-	{
-		if (glbin_vol_selector.GetBrushUsePres())
-			tos << L"FPS: " << std::fixed << std::setprecision(2) << fps
-				<< L", Pressure: " << std::fixed << std::setprecision(2) << glbin_vol_selector.GetPressure();
-		else
-			tos << L"FPS: " << std::fixed << std::setprecision(2) << fps;
-	}
+	if (glbin_vol_selector.GetBrushUsePres())
+		tos << L", Pressure: " << std::fixed << std::setprecision(2) << glbin_vol_selector.GetPressure();
+
 	str = tos.str();
 	px = static_cast<float>(gapw - nx / 2.0);
 	py = static_cast<float>(ny / 2.0 - gaph / 2.0);
