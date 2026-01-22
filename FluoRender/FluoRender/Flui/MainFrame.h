@@ -3,7 +3,7 @@ For more information, please see: http://software.sci.utah.edu
 
 The MIT License
 
-Copyright (c) 2025 Scientific Computing and Imaging Institute,
+Copyright (c) 2026 Scientific Computing and Imaging Institute,
 University of Utah.
 
 
@@ -39,8 +39,10 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 
 #define VERSION_CONTACT "https://sciinstitute.github.io/fluorender/"
-#define VERSION_AUTHORS "YONG WAN\t\tHIDEO OTSUNA\nCHUCK HANSEN\tCHI-BIN CHIEN\n"\
-						"BRIG BAGLEY\t\tTAKASHI KAWASE\nKEI ITO\t\tREMALDEEP SINGH\n"\
+#define VERSION_AUTHORS "YONG WAN       \tHIDEO OTSUNA   \n"\
+						"CHUCK HANSEN   \tCHI-BIN CHIEN  \n"\
+						"BRIG BAGLEY    \tTAKASHI KAWASE \n"\
+						"REMALDEEP SINGH\tKEI ITO        \n"\
 						"HOLLY A. HOLMAN\n"
 #define VERSION_UPDATES "https://sciinstitute.github.io/fluorender/Releases/fluorender_v" \
 				   VERSION_MAJOR_TAG \

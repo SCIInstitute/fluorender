@@ -3,7 +3,7 @@
 # 
 # The MIT License
 # 
-# Copyright (c) 2025 Scientific Computing and Imaging Institute,
+# Copyright (c) 2026 Scientific Computing and Imaging Institute,
 # University of Utah.
 # 
 # 
@@ -126,7 +126,7 @@ add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Dat
 add_definitions(-DVERSION_MINOR=34)						# 
 add_definitions(-DVERSION_MAJOR_TAG="2")				# 
 add_definitions(-DVERSION_MINOR_TAG="34")				# 
-add_definitions(-DVERSION_COPYRIGHT="September 2025")	# Up to here!
+add_definitions(-DVERSION_COPYRIGHT="January 2026")		# Up to here!
 
 #windows
 if(WIN32)
