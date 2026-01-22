@@ -1435,15 +1435,13 @@ void MovieMaker::MakeKeysClipZ(int type)
 	if (n <= 0)
 		return;
 
-	int nz = 0;
-	double dz = 1.0;
+	double nz = 0;
 	for (int i = 0; i < n; ++i)
 	{
 		auto vd = view->GetAllVolumeData(i);
 		if (!vd)
 			continue;
-		nz = std::max(vd->GetResolution().intz(), nz);
-		dz = 1 / vd->GetResolution().z();
+		nz = std::max(vd->GetResolution().z(), nz);
 	}
 	if (nz <= 1)
 		return;
@@ -1481,7 +1479,7 @@ void MovieMaker::MakeKeysClipZ(int type)
 		keycode2.l1 = 2;
 		keycode2.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode2,
-			type ? dz : 1);
+			type ? 1 : nz + 1);
 		glbin_interpolator.AddKey(flkey);
 	}
 	glbin_interpolator.End();
@@ -1497,11 +1495,11 @@ void MovieMaker::MakeKeysClipZ(int type)
 			continue;
 		keycode1.l1 = 2;
 		keycode1.l1_name = ws2s(vd->GetName());
-		flkey = new FlKeyDouble(keycode1, 1 - dz);
+		flkey = new FlKeyDouble(keycode1, nz);
 		glbin_interpolator.AddKey(flkey);
 		keycode2.l1 = 2;
 		keycode2.l1_name = ws2s(vd->GetName());
-		flkey = new FlKeyDouble(keycode2, 1);
+		flkey = new FlKeyDouble(keycode2, nz + 1);
 		glbin_interpolator.AddKey(flkey);
 	}
 	glbin_interpolator.End();
@@ -1522,7 +1520,7 @@ void MovieMaker::MakeKeysClipZ(int type)
 		keycode2.l1 = 2;
 		keycode2.l1_name = ws2s(vd->GetName());
 		flkey = new FlKeyDouble(keycode2,
-			type ? dz : 1);
+			type ? 1 : nz + 1);
 		glbin_interpolator.AddKey(flkey);
 	}
 	glbin_interpolator.End();
