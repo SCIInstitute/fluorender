@@ -30,9 +30,9 @@ Name: "{app}\Database"; Permissions: users-full
 ; BINARY ITEMS
 Source: "..\..\build\bin\Release\FluoRender.exe"; DestDir: "{app}"; Flags: ignoreversion      
 ; OPEN CL items
-Source: "..\..\build\bin\Release\CL_code\*"; DestDir: "{app}\CL_code"; Flags: ignoreversion
+Source: "..\..\build\bin\Release\CL_code\*"; DestDir: "{app}\CL_code"; Flags: ignoreversion; Permissions: users-full
 ; Command items
-Source: "..\..\build\bin\Release\Commands\*"; DestDir: "{app}\Commands"; Flags: ignoreversion     
+Source: "..\..\build\bin\Release\Commands\*"; DestDir: "{app}\Commands"; Flags: ignoreversion; Permissions: users-full     
 ; Data
 Source: "..\..\build\bin\Release\Data\*"; DestDir: "{app}\Data"; Flags: ignoreversion
 ; Database
@@ -42,17 +42,20 @@ Source: "..\..\build\bin\Release\Fonts\*"; DestDir: "{app}\Fonts"; Flags: ignore
 ; Java
 Source: "..\..\build\bin\Release\Java_Code\*"; DestDir: "{app}\Java_Code"; Flags: ignoreversion  
 ; Scripts directory
-Source: "..\..\build\bin\Release\Scripts\*"; DestDir: "{app}\Scripts"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Scripts\*"; DestDir: "{app}\Scripts"; Flags: ignoreversion; Permissions: users-full  
 ; Template directory
-Source: "..\..\build\bin\Release\Templates\*"; DestDir: "{app}\Templates"; Flags: ignoreversion  
+Source: "..\..\build\bin\Release\Templates\*"; DestDir: "{app}\Templates"; Flags: ignoreversion; Permissions: users-full  
 ; SETTINGS ITEMS
-Source: "..\..\Settings\fluorender.xml"; DestDir: "{app}"; Flags: onlyifdoesntexist; Permissions: users-full
+Source: "..\..\Settings\fluorender.xml"; DestDir: "{app}"; Flags: ignoreversion; Permissions: users-full
 Source: "..\..\build\bin\Release\fluorender_default.xml"; DestDir: "{app}"; Flags: ignoreversion
 ; Benchmark
 Source: "..\..\build\bin\Release\FluoRender_benchmark.bat"; DestDir: "{app}"; Flags: ignoreversion      
 Source: "..\..\build\bin\Release\FluoRender_benchmark.command"; DestDir: "{app}"; Flags: ignoreversion      
 Source: "..\..\build\bin\Release\FluoRender_benchmark_fullscreen.bat"; DestDir: "{app}"; Flags: ignoreversion      
 Source: "..\..\build\bin\Release\FluoRender_benchmark_fullscreen.command"; DestDir: "{app}"; Flags: ignoreversion      
+; Reset
+Source: "..\..\build\bin\Release\FluoRender_factory_reset.bat"; DestDir: "{app}"; Flags: ignoreversion      
+Source: "..\..\build\bin\Release\FluoRender_factory_reset.command"; DestDir: "{app}"; Flags: ignoreversion      
 ; OpenVR      
 Source: "..\..\build\bin\Release\openvr_api.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; Hololens
