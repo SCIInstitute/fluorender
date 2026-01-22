@@ -52,6 +52,7 @@ public:
 	bool ToggleIntMode(InteractiveMode mode);
 	bool ToggleMagnet(bool redist);
 	bool QueryShowBrush();
+	bool QuerySelection();
 
 public:
 	bool m_mouse_in_clip_plane_panel = false;

@@ -247,3 +247,16 @@ bool GlobalStates::QueryShowBrush()
 		sel_mode == flrd::SelectMode::Segment ||
 		sel_mode == flrd::SelectMode::Mesh;
 }
+
+bool GlobalStates::QuerySelection()
+{
+	flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
+	return sel_mode == flrd::SelectMode::SingleSelect ||
+		sel_mode == flrd::SelectMode::Append ||
+		sel_mode == flrd::SelectMode::Eraser ||
+		sel_mode == flrd::SelectMode::Diffuse ||
+		sel_mode == flrd::SelectMode::Solid ||
+		sel_mode == flrd::SelectMode::Grow ||
+		sel_mode == flrd::SelectMode::Segment ||
+		sel_mode == flrd::SelectMode::Mesh;
+}

@@ -3895,7 +3895,9 @@ bool RenderView::Draw()
 	GetRenderSize(nx, ny);
 
 	PopMeshList();
-	if (m_md_pop_list.size()>0)
+	if (glbin_states.QuerySelection())
+		m_draw_type = 1;
+	else if (m_md_pop_list.size()>0)
 		m_draw_type = 2;
 	else
 		m_draw_type = 1;
@@ -5242,6 +5244,7 @@ void RenderView::DrawData()
 
 	//draw the volumes
 	DrawVolumes();
+	DrawMesh(0);
 
 	if (glbin_settings.m_test_wiref)
 		DrawBounds();
@@ -10298,9 +10301,6 @@ void RenderView::ProcessIdle(IdleState& state)
 		}
 	}
 #endif
-
-	DBGPRINT(L"forced_refresh: %d, m_refresh: %d, m_inf_loop: %d\n",
-		forced_refresh, state.m_refresh, glbin_settings.m_inf_loop);
 
 	if (forced_refresh)
 	{
