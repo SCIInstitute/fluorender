@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -231,8 +231,6 @@ void MeshStat::Run()
 	m_area = std::reduce(
 #ifdef _WIN32
 		std::execution::par_unseq,
-#else
-		std::execution::seq,
 #endif
 		area.begin(),
 		area.end(),
@@ -257,8 +255,6 @@ void MeshStat::Run()
 	m_volume = std::reduce(
 #ifdef _WIN32
 		std::execution::par_unseq,
-#else
-		std::execution::seq,
 #endif
 		volume.begin(),
 		volume.end(),
