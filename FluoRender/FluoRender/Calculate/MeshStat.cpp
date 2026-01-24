@@ -229,7 +229,11 @@ void MeshStat::Run()
 
 	//compute area
 	m_area = std::reduce(
+#ifdef _WIN32
 		std::execution::par_unseq,
+#else
+		std::execution::seq,
+#endif
 		area.begin(),
 		area.end(),
 		0.0f
@@ -251,7 +255,11 @@ void MeshStat::Run()
 
 	//compute area
 	m_volume = std::reduce(
+#ifdef _WIN32
 		std::execution::par_unseq,
+#else
+		std::execution::seq,
+#endif
 		volume.begin(),
 		volume.end(),
 		0.0f
