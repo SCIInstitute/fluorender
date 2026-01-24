@@ -46,7 +46,7 @@ void File::beginWrite(const std::wstring& filename)
 #ifdef _WIN32
 	ofs_ = std::ofstream(filename, std::ios::out | std::ios::binary);
 #else
-    ofs_ = std::ofstream(ws2s(filename), std::ios::out | std::ios::binary);
+	ofs_ = std::ofstream(ws2s(filename), std::ios::out | std::ios::binary);
 #endif
 	if (ofs_.bad()) return;
 	mode_ = 1;
@@ -63,7 +63,7 @@ void File::beginRead(const std::wstring& filename)
 #ifdef _WIN32
 	ifs_ = std::ifstream(filename, std::ios::out | std::ios::binary);
 #else
-    ifs_ = std::ifstream(ws2s(filename), std::ios::out | std::ios::binary);
+	ifs_ = std::ifstream(ws2s(filename), std::ios::out | std::ios::binary);
 #endif
 	if (ifs_.bad()) return;
 	mode_ = 2;

@@ -350,7 +350,11 @@ bool DCMReader::GetFileInfo(const std::wstring& filename)
 	if (m_valid_info)
 		return true;
 
+#ifdef _WIN32
 	std::ifstream file(filename, std::ios::binary);
+#else
+	std::ifstream file(ws2s(filename), std::ios::binary);
+#endif
 	if (!file.is_open())
 		return false;
 
@@ -697,7 +701,11 @@ bool DCMReader::ReadSingleDcm(void* val, const std::wstring& filename, int c)
 	if (c < 0 || c >= m_chan_num)
 		return false; // Invalid channel index
 
+#ifdef _WIN32
 	std::ifstream file(filename, std::ios::binary);
+#else
+	std::ifstream file(ws2s(filename), std::ios::binary);
+#endif
 	if (!file.is_open())
 		return false;
 
