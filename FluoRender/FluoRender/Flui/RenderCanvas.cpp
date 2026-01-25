@@ -352,28 +352,36 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 }
 #endif
 
+
 void RenderCanvas::OnResize(wxSizeEvent& event)
 {
-	double dval = 1;
 #ifdef _DARWIN
-	dval = GetDPIScaleFactor();
+	const double dpi_scale = GetDPIScaleFactor(); // Logical->physical scale
+#else
+	const double dpi_scale = 1.0;
 #endif
 
 	if (auto view_ptr = m_renderview.lock())
 	{
-		view_ptr->SetDpiFactor(dval);
+		// Tell the renderer about DPI so it can set GL viewport in physical pixels
+		view_ptr->SetDpiFactor(dpi_scale);
 
-		wxSize size = GetSize();
-		view_ptr->SetSize(size.x, size.y);
-
-		wxRect rect = GetClientRect();
-		view_ptr->SetClient(rect.x, rect.y, rect.width, rect.height);
+		// Use the client area (logical units) for layout
+		int cw, ch;
+		GetClientSize(&cw, &ch);
+		// Avoid SetSize() here—let sizers manage this control
+		view_ptr->SetSize(cw, ch);           // logical width/height for UI logic
+		view_ptr->SetClient(0, 0, cw, ch);   // origin is typically 0,0 for client
 
 		glbin_refresh_scheduler_manager.requestDraw(
 			DrawRequest("Resize refresh", { static_cast<int>(view_ptr->Id()) }));
 	}
 
+	// Make sure this doesn't call SetSize() or change min/best size in a DPI-dependent way.
 	m_renderview_panel->FluoUpdate({ gstScaleFactor });
+
+	// Always process the event so the framework can continue its layout pass.
+	event.Skip();
 }
 
 void RenderCanvas::OnMove(wxMoveEvent& event)
