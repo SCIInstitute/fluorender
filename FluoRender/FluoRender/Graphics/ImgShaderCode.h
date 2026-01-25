@@ -58,23 +58,23 @@ void main()
 inline constexpr const char* IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_GEOMETRY_COLOR_UNI
 layout(location = 0) in vec3 InVertex;
-layout(location = 0) out vec3 OutColor;
+layout(location = 0) out vec3 Color;
 uniform mat4 matrix0;//transformation
 uniform vec4 loc1; //(color, 1.0)
 	
 void main()
 {
 	gl_Position = matrix0 * vec4(InVertex, 1.0);
-	OutColor = loc1.xyz;
+	Color = loc1.xyz;
 }
 )GLSHDR";
 
 inline constexpr const char* IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_CLIPPING_BOX_LINES
 layout(location = 0) in vec3 InVertex;
-layout(location = 0) out vec3 OutColor;
-layout(location = 1) out vec3 OutEyePos;
-layout(location = 2) out vec4 OutClipPos;
+layout(location = 0) out vec3 Color;
+layout(location = 1) out vec3 EyePos;
+layout(location = 2) out vec4 ClipPos;
 uniform mat4 matrix0;//model view
 uniform mat4 matrix1;//projection
 uniform vec4 loc1; //(color, alpha)
@@ -83,9 +83,9 @@ void main()
 {
 	vec4 eyePos = matrix0 * vec4(InVertex, 1.0);
 	gl_Position = matrix1 * eyePos;
-	OutEyePos = eyePos.xyz;
-	OutClipPos = gl_Position;
-	OutColor = loc1.rgb;
+	EyePos = eyePos.xyz;
+	ClipPos = gl_Position;
+	Color = loc1.rgb;
 }
 )GLSHDR";
 
@@ -93,13 +93,13 @@ inline constexpr const char* IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3 = R"GLSHDR(
 //IMG_VTX_CODE_DRAW_GEOMETRY_COLOR3
 layout(location = 0) in vec3 InVertex;
 layout(location = 1) in vec3 InColor;
-layout(location = 0) out vec3 OutColor;
+layout(location = 0) out vec3 Color;
 uniform mat4 matrix0;//transformation
 	
 void main()
 {
 	gl_Position = matrix0 * vec4(InVertex, 1.0);
-	OutColor = InColor;
+	Color = InColor;
 }
 )GLSHDR";
 
@@ -1007,8 +1007,8 @@ inline constexpr const char* IMG_SHDR_CODE_DRAW_THICK_LINES = R"GLSHDR(
 uniform vec4 loc0; //(vp0, vp1, thickness, 0.0)
 layout(lines) in;
 layout(triangle_strip, max_vertices = 4) out;
-layout(location = 0) in vec3 OutColor[];
-layout(location = 0) out vec3 OutColor2;
+layout(location = 0) in vec3 Color[];
+layout(location = 0) out vec3 OutColor;
 vec2 toScreenSpace(vec4 vertex)
 {
 	return vec2(vertex.xy / vertex.w) * loc0.xy;
@@ -1018,7 +1018,7 @@ float toZValue(vec4 vertex)
 	return (vertex.z / vertex.w);
 }
 void main() {
-	OutColor2 = OutColor[0];
+	OutColor = Color[0];
 	vec4 pps[2];
 	pps[0] = gl_in[0].gl_Position;
 	pps[1] = gl_in[1].gl_Position;
@@ -1055,10 +1055,10 @@ uniform vec4 loc0;   // (viewportWidth, viewportHeight, thickness, cull mode)
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 24) out;
 
-layout(location = 0) in vec3 OutColor[];
-layout(location = 1) in vec3 OutEyePos[];
-layout(location = 2) in vec4 OutClipPos[];
-layout(location = 0) out vec3 OutColor2;
+layout(location = 0) in vec3 Color[];
+layout(location = 1) in vec3 EyePos[];
+layout(location = 2) in vec4 ClipPos[];
+layout(location = 0) out vec3 OutColor;
 
 vec2 toScreen(vec4 clip) {
 	return (clip.xy / clip.w) * loc0.xy; // NDC -> screen
@@ -1096,12 +1096,12 @@ void emitThickEdge(vec4 aClip, vec4 bClip, vec3 aEye, vec3 bEye)
 
 void main()
 {
-	OutColor2 = OutColor[0];
+	OutColor = Color[0];
 
 	// Clip-space vertices of current triangle
-	vec4 c0 = OutClipPos[0];
-	vec4 c1 = OutClipPos[1];
-	vec4 c2 = OutClipPos[2];
+	vec4 c0 = ClipPos[0];
+	vec4 c1 = ClipPos[1];
+	vec4 c2 = ClipPos[2];
 
 	// Signed area for winding in NDC
 	vec2 p0 = c0.xy / c0.w;
@@ -1118,24 +1118,24 @@ void main()
 	// Emit only boundary edges, skip the shared diagonal
 	if (gl_PrimitiveIDIn % 2 == 0) {
 		// Triangle (v0, v1, v2): emit (v0,v1) and (v0,v2)
-		emitThickEdge(c0, c1, OutEyePos[0], OutEyePos[1]);
-		emitThickEdge(c0, c2, OutEyePos[0], OutEyePos[2]);
+		emitThickEdge(c0, c1, EyePos[0], EyePos[1]);
+		emitThickEdge(c0, c2, EyePos[0], EyePos[2]);
 	} else {
 		// Triangle (v2, v1, v3): emit (v1,v3) and (v2,v3)
-		emitThickEdge(c1, c2, OutEyePos[1], OutEyePos[2]);
-		emitThickEdge(c0, c2, OutEyePos[0], OutEyePos[2]);
+		emitThickEdge(c1, c2, EyePos[1], EyePos[2]);
+		emitThickEdge(c0, c2, EyePos[0], EyePos[2]);
 	}
 }
 )GLSHDR";
 
 inline constexpr const char* IMG_FRG_CODE_DRAW_THICKLINES = R"GLSHDR(
 //IMG_FRG_CODE_DRAW_THICKLINES
-layout(location = 0) in vec3 OutColor2;
+layout(location = 0) in vec3 OutColor;
 layout(location = 0) out vec4 FragColor;
 	
 void main()
 {
-	FragColor = vec4(OutColor2, 1.0);
+	FragColor = vec4(OutColor, 1.0);
 }
 )GLSHDR";
 

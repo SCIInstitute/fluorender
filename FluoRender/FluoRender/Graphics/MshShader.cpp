@@ -66,6 +66,8 @@ std::shared_ptr<ShaderProgram> MeshShaderFactory::shader(const ShaderParams& par
 
 bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 {
+	bool use_geom_shader = p.normal;
+
 	std::ostringstream z;
 
 	z << ShaderProgram::glsl_version_;
@@ -85,11 +87,22 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 			z << MSH_VERTEX_INPUTS_C;
 		if (p.shading)
 			z << MSH_VERTEX_OUTPUTS_N;
-		if (p.tex)
-			z << MSH_VERTEX_OUTPUTS_T;
-		if (p.color)
-			z << MSH_VERTEX_OUTPUTS_C;
-		z << MSH_VERTEX_OUTPUTS_FOG;
+		if (use_geom_shader)
+		{
+			if (p.tex)
+				z << MSH_VERTEX_OUTPUTS_T_GEOM;
+			if (p.color)
+				z << MSH_VERTEX_OUTPUTS_C_GEOM;
+			z << MSH_VERTEX_OUTPUTS_FOG_GEOM;
+		}
+		else
+		{
+			if (p.tex)
+				z << MSH_VERTEX_OUTPUTS_T;
+			if (p.color)
+				z << MSH_VERTEX_OUTPUTS_C;
+			z << MSH_VERTEX_OUTPUTS_FOG;
+		}
 		if (p.shading)
 			z << MSH_VERTEX_UNIFORM_MATRIX_NORMAL;
 	}
@@ -105,11 +118,22 @@ bool MeshShaderFactory::emit_v(const ShaderParams& p, std::string& s)
 	{
 		if (p.shading)
 			z << MSH_VERTEX_BODY_NORMAL;
-		if (p.tex)
-			z << MSH_VERTEX_BODY_TEX;
-		if (p.color)
-			z << MSH_VERTEX_BODY_COLOR;
-		z << MSH_VERTEX_BODY_FOG;
+		if (use_geom_shader)
+		{
+			if (p.tex)
+				z << MSH_VERTEX_BODY_TEX_GEOM;
+			if (p.color)
+				z << MSH_VERTEX_BODY_COLOR_GEOM;
+			z << MSH_VERTEX_BODY_FOG_GEOM;
+		}
+		else
+		{
+			if (p.tex)
+				z << MSH_VERTEX_BODY_TEX;
+			if (p.color)
+				z << MSH_VERTEX_BODY_COLOR;
+			z << MSH_VERTEX_BODY_FOG;
+		}
 	}
 
 	z << MSH_TAIL;
