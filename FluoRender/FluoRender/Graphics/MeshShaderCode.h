@@ -51,12 +51,22 @@ layout(location = 3) in vec4 InColor;
 
 inline constexpr const char* MSH_VERTEX_OUTPUTS_VPOS = R"GLSHDR(
 //MSH_VERTEX_OUTPUTS_VPOS
+layout(location = 0) out vec3 OutVertexPos;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_OUTPUTS_VPOS_GEOM = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_VPOS_GEOM
 layout(location = 0) out vec3 VertexPos;
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_OUTPUTS_N = R"GLSHDR(
 //MSH_VERTEX_OUTPUTS_N
 layout(location = 1) out vec3 OutNormal;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_OUTPUTS_N_GEOM = R"GLSHDR(
+//MSH_VERTEX_OUTPUTS_N_GEOM
+layout(location = 1) out vec3 Normal;
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_OUTPUTS_T = R"GLSHDR(
@@ -106,19 +116,29 @@ void main()
 {
 )GLSHDR";
 
-inline constexpr const char* MSH_VERTEX_BODY_VPOS = R"GLSHDR(
-	//MSH_VERTEX_BODY_VPOS
-	VertexPos = InVertex;
-)GLSHDR";
-
 inline constexpr const char* MSH_VERTEX_BODY_POS = R"GLSHDR(
 	//MSH_VERTEX_BODY_POS
 	gl_Position = matrix0 * matrix1 * vec4(InVertex, 1.0);
 )GLSHDR";
 
+inline constexpr const char* MSH_VERTEX_BODY_VPOS = R"GLSHDR(
+	//MSH_VERTEX_BODY_VPOS
+	OutVertexPos = InVertex;
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_BODY_VPOS_GEOM = R"GLSHDR(
+	//MSH_VERTEX_BODY_VPOS_GEOM
+	VertexPos = InVertex;
+)GLSHDR";
+
 inline constexpr const char* MSH_VERTEX_BODY_NORMAL = R"GLSHDR(
 	//MSH_VERTEX_BODY_NORMAL
 	OutNormal = normalize((matrix2 * vec4(InNormal, 0.0)).xyz);
+)GLSHDR";
+
+inline constexpr const char* MSH_VERTEX_BODY_NORMAL_GEOM = R"GLSHDR(
+	//MSH_VERTEX_BODY_NORMAL_GEOM
+	Normal = normalize((matrix2 * vec4(InNormal, 0.0)).xyz);
 )GLSHDR";
 
 inline constexpr const char* MSH_VERTEX_BODY_TEX = R"GLSHDR(
@@ -168,7 +188,7 @@ layout(location = 0) out uint FragUint;
 
 inline constexpr const char* MSH_FRAG_INPUTS_VPO = R"GLSHDR(
 //MSH_FRAG_INPUTS_VPO
-layout(location = 0) in vec3 VertexPos;
+layout(location = 0) in vec3 OutVertexPos;
 )GLSHDR";
 
 inline constexpr const char* MSH_FRAG_INPUTS_N = R"GLSHDR(
@@ -285,7 +305,7 @@ inline constexpr const char* MSH_FRAG_BODY_DP_5 = R"GLSHDR(
 
 inline constexpr const char* MSH_FRAG_HEAD_CLIP_FUNC = R"GLSHDR(
 	//MSH_FRAG_HEAD_CLIP_FUNC
-	if (mesh_clip_func(vec4(VertexPos, 1.0)))
+	if (mesh_clip_func(vec4(OutVertexPos, 1.0)))
 	{
 		discard;
 		return;
