@@ -106,7 +106,7 @@ inline constexpr const char* str_cl_color_mesh_body_comp = R"CLKER(
 	if (lbl > 0)
 	{
 		uint cv = lbl % 253;
-		cv = (cv << si) & 0xff | (cv >> (8 - si)) & 0xff;
+		cv = (cv << si) & uint(0xff) | (cv >> (uint(8) - si)) & uint(0xff);
 		float hue = (float)cv / 45.0f;
 		float p2 = 1.0f - hue + floor(hue);
 		float p3 = hue - floor(hue);

@@ -469,7 +469,7 @@ inline constexpr const char* VOL_OUT_COLOR_COMPONENT = R"GLSHDR(
 	{
 		uint cv = comp % uint(0xfd);
 		uint si = uint(loc5.w);
-		cv = (cv << si) & 0xff | (cv >> (8 - si));
+		cv = (cv << si) & uint(0xff) | (cv >> (uint(8) - si));
 		hue = float(cv)/45.0;
 		p2 = 1.0 - hue + floor(hue);
 		p3 = hue - floor(hue);
