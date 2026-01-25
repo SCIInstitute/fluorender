@@ -4032,7 +4032,9 @@ bool RenderView::Draw()
 void RenderView::DrawDefault()
 {
 	auto default_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
+		flvr::FBRole::Canvas,
+		static_cast<int>(std::round(m_canvas_size.w() * m_dpi_factor)),
+		static_cast<int>(std::round(m_canvas_size.h() * m_dpi_factor)),
 		gstRBCanvasDefault);
 	assert(default_buffer);
 	glbin_framebuffer_manager.bind(default_buffer);
