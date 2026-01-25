@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -196,7 +196,9 @@ MainFrame::MainFrame(
 		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
 	m_main_tb->SetExtraStyle(m_main_tb->GetExtraStyle() | wxWS_EX_PROCESS_UI_UPDATES);
 	m_main_tb->SetName("Toolbar");
+#ifdef _WIN32
 	m_main_tb->SetArtProvider(new wxToolbarArt());
+#endif
 
 	//add tools
 	bool jvm_valid = glbin_jvm_instance->IsValid();
