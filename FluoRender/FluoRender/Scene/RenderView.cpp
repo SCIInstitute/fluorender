@@ -10155,7 +10155,9 @@ void RenderView::ProcessIdle(IdleState& state)
 				glbin_vol_selector.SetInitMask(2);
 				if (glbin_vol_selector.GetAutoThreshold())
 					state.m_value_collection.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-				glbin_vol_selector.Segment(false, true, m_mouse_x, m_mouse_y);
+				glbin_vol_selector.Segment(false, true,
+					static_cast<int>(std::round(m_mouse_x * m_dpi_factor)),
+					static_cast<int>(std::round(m_mouse_y * m_dpi_factor)));
 				glbin_vol_selector.SetInitMask(3);
 				if (m_int_mode == InteractiveMode::GrowRuler)
 				{
@@ -10417,7 +10419,9 @@ void RenderView::ProcessMouse(MouseState& state)
 				glbin_vol_selector.SetInitMask(1);
 				if (glbin_vol_selector.GetAutoThreshold())
 					glbin_current.mainframe->UpdateProps({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-				glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
+				glbin_vol_selector.Segment(true, true,
+					static_cast<int>(std::round(m_mouse_x * m_dpi_factor)),
+					static_cast<int>(std::round(m_mouse_y * m_dpi_factor)));
 				glbin_vol_selector.SetInitMask(3);
 				if (m_int_mode == InteractiveMode::GrowRuler && cur_vd)
 					cur_vd->AddEmptyLabel(0, false);
@@ -10493,7 +10497,9 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_paint_enable = true;
 			if (glbin_vol_selector.GetAutoThreshold())
 				vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
+			glbin_vol_selector.Segment(true, true,
+				static_cast<int>(std::round(m_mouse_x* m_dpi_factor)),
+				static_cast<int>(std::round(m_mouse_y* m_dpi_factor)));
 			if (glbin_vol_selector.GetSelectMode() == flrd::SelectMode::Mesh)
 			{
 				auto md = glbin_conv_vol_mesh->GetMeshData();
@@ -10535,7 +10541,9 @@ void RenderView::ProcessMouse(MouseState& state)
 			m_paint_enable = true;
 			if (glbin_vol_selector.GetAutoThreshold())
 				vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-			glbin_vol_selector.Segment(true, true, m_mouse_x, m_mouse_y);
+			glbin_vol_selector.Segment(true, true,
+				static_cast<int>(std::round(m_mouse_x* m_dpi_factor)),
+				static_cast<int>(std::round(m_mouse_y* m_dpi_factor)));
 			if (glbin_ruler_handler.GetRulerMode() == flrd::RulerMode::Probe)
 				glbin_ruler_handler.AddRulerPoint(static_cast<int>(std::round(mp.x())), static_cast<int>(std::round(mp.y())), 0);
 			else
