@@ -1163,15 +1163,28 @@ ENDIF()
 
 # Platform-specific rules
 if(APPLE)
-  # Set macOS deployment target and standard flags
+  # Minimum macOS version your binary will run on
   set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3")
+  
+  # C++ standard settings
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  
+  # Compiler flags
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -DWX_PRECOMP")
-  #set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
-  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep --timestamp --options runtime")
-  #set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "")
-  #set(CMAKE_XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES")
+  
+  # --- IMPORTANT: Disable all Xcode signing behavior ---
+  # Do NOT let Xcode sign anything. We sign manually after build.
+  
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Manual")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+  set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "")
+  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "")
+  
+  # Hardened Runtime, entitlements, and signing flags are NOT set here.
+  # They will be applied manually during the final codesign step.
 
   # Add macOS frameworks
   set(MACOS_FRAMEWORKS

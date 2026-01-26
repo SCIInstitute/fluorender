@@ -1,0 +1,13 @@
+codesign --force --timestamp --options runtime \
+--entitlements ../../../entitlements.plist \
+--sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+FluoRender.app/Contents/MacOS/FluoRender
+
+codesign --force --timestamp --options runtime \
+--entitlements ../../../entitlements.plist \
+--sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+FluoRender.app
+
+codesign --verify --strict --verbose=4 FluoRender.app
+
+codesign --remove-signature FluoRender.app
