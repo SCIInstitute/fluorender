@@ -850,7 +850,7 @@ MainFrame::MainFrame(
 	flrd::PyBase::SetHighVer(glbin_settings.m_python_ver);
 	//font
 	std::wstring font_file = glbin_settings.m_font_file;
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	p /= "Fonts";
 	if (font_file != L"")
 		p /= font_file;

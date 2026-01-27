@@ -2249,7 +2249,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 	if (item != -1)
 	{
 		wxString file = m_script_list->GetItemText(item, 1);
-		std::filesystem::path p = std::filesystem::current_path();
+		std::filesystem::path p = GetDataRoot();
 		p = p / "Scripts" / (file.ToStdString() + ".txt");
 		std::wstring filename = p.wstring();
 		m_script_file_text->ChangeValue(filename);
@@ -2259,7 +2259,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 
 size_t MoviePanel::GetScriptFiles(std::vector<std::wstring>& list)
 {
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	p /=  "Scripts";
 	// Iterate over the files in the "Scripts" directory
 	for (const auto& entry : std::filesystem::directory_iterator(p))

@@ -761,6 +761,36 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 	});
 }
 
+inline std::filesystem::path GetDataRoot()
+{
+#ifdef __APPLE__
+	// macOS: Resources directory inside the bundle
+	CFBundleRef mainBundle = CFBundleGetMainBundle();
+	if (mainBundle)
+	{
+		CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+		if (resourcesURL)
+		{
+			char path[PATH_MAX];
+			if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
+				(UInt8*)path, PATH_MAX))
+			{
+				CFRelease(resourcesURL);
+				return std::filesystem::path(path);
+			}
+			CFRelease(resourcesURL);
+		}
+	}
+
+	// fallback: current directory
+	return std::filesystem::current_path();
+
+#else
+	// Windows + Linux: use the executable directory
+	return std::filesystem::current_path();
+#endif
+}
+
 #ifdef _WIN32 //WINDOWS ONLY
 
 #include <cstdlib>

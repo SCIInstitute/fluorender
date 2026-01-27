@@ -225,7 +225,7 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 
 	JavaVMOption* options = new JavaVMOption[3];
 	//Geting absolute path to class file.
-	std::filesystem::path currentPath = std::filesystem::current_path();
+	std::filesystem::path currentPath = GetDataRoot();
 	std::string exePath = currentPath.string();
 	std::string imageJPath = "-Djava.class.path=";
 	p = exePath; p /= "Java_Code"; p /= "";

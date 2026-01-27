@@ -1317,69 +1317,80 @@ if(BUILD_TESTER)
       )
 endif()
 
+# Compute platform‑correct asset destination
+if(APPLE)
+    # macOS bundle Resources directory
+    set(FLUORENDER_ASSET_DIR
+        "$<TARGET_BUNDLE_CONTENT_DIR:FluoRender>/Resources")
+else()
+    # Windows/Linux: next to the executable
+    set(FLUORENDER_ASSET_DIR
+        "$<TARGET_FILE_DIR:FluoRender>")
+endif()
+
 # copy Java code dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
-  "$<TARGET_FILE_DIR:FluoRender>/Java_Code")
+  "${FLUORENDER_ASSET_DIR}/Java_Code")
   
 # copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/CL_code"
-  "$<TARGET_FILE_DIR:FluoRender>/CL_code")
+  "${FLUORENDER_ASSET_DIR}/CL_code")
 
 # copy database dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Database"
-  "$<TARGET_FILE_DIR:FluoRender>/Database")
+  "${FLUORENDER_ASSET_DIR}/Database")
 
 # copy font dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Fonts"
-  "$<TARGET_FILE_DIR:FluoRender>/Fonts")
+  "${FLUORENDER_ASSET_DIR}/Fonts")
 
 # copy script dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Scripts"
-  "$<TARGET_FILE_DIR:FluoRender>/Scripts")
+  "${FLUORENDER_ASSET_DIR}/Scripts")
 
 # copy template dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Templates"
-  "$<TARGET_FILE_DIR:FluoRender>/Templates")
+  "${FLUORENDER_ASSET_DIR}/Templates")
 
 # copy command dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Commands"
-  "$<TARGET_FILE_DIR:FluoRender>/Commands")
+  "${FLUORENDER_ASSET_DIR}/Commands")
 
 # settings files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
     "${FluoRender_SOURCE_DIR}/Settings/fluorender.xml"
-    "$<TARGET_FILE_DIR:FluoRender>/fluorender.xml"
+    "${FLUORENDER_ASSET_DIR}/fluorender.xml"
   COMMAND ${CMAKE_COMMAND} -E copy
     "${FluoRender_SOURCE_DIR}/Settings/fluorender.xml"
-    "$<TARGET_FILE_DIR:FluoRender>/fluorender_default.xml"
+    "${FLUORENDER_ASSET_DIR}/fluorender_default.xml"
 )
 
 # copy data dir to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Data"
-  "$<TARGET_FILE_DIR:FluoRender>/Data")
+  "${FLUORENDER_ASSET_DIR}/Data")
 
 # benchmark files
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Benchmark"
-  "$<TARGET_FILE_DIR:FluoRender>")
+  "${FLUORENDER_ASSET_DIR}")
 
 # hololens
 if(WIN32)
@@ -1387,7 +1398,7 @@ if(WIN32)
     add_custom_command(TARGET FluoRender POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${HOLOLENS_FILES}
-        "$<TARGET_FILE_DIR:FluoRender>"
+        "${FLUORENDER_ASSET_DIR}"
     )
 endif()
 
@@ -1396,7 +1407,7 @@ if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
 	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
-    "$<TARGET_FILE_DIR:FluoRender>")
+    "${FLUORENDER_ASSET_DIR}")
 endif()
 
 if(APPLE)

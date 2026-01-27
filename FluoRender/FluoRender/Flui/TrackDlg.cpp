@@ -1147,7 +1147,7 @@ void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
 	glbin_trackmap_proc.GenMap();
 	//enable script
 	glbin_settings.m_run_script = true;
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	p = p / "Scripts" / "track_selected_results.txt";
 	glbin_settings.m_script_file = p.wstring();
 	m_frame->UpdateProps({ gstMovPlay, gstRunScript, gstScriptFile, gstScriptSelect });

@@ -1126,7 +1126,7 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFontFile))
 	{
 		//populate fonts
-		std::filesystem::path p = std::filesystem::current_path();
+		std::filesystem::path p = GetDataRoot();
 		p /= "Fonts";
 		std::vector<std::string> list;
 		for (const auto& entry : std::filesystem::directory_iterator(p))
@@ -1852,7 +1852,7 @@ void SettingDlg::OnFontChange(wxCommandEvent& event)
 		return;
 
 	glbin_settings.m_font_file = str + L".ttf";
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	p = p / "Fonts" / (str + L".ttf");
 	glbin_text_tex_manager.load_face(p.wstring());
 	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);

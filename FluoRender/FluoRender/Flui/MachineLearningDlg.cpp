@@ -102,7 +102,7 @@ MachineLearningPanel::MachineLearningPanel(
 		0, "MachineLearningPanel"),
 	m_record(false)
 {
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	m_exepath = p.wstring();
 }
 

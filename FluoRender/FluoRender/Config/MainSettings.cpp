@@ -206,7 +206,7 @@ MainSettings::~MainSettings()
 
 void MainSettings::Read(const std::string& filename)
 {
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	std::wstring fbase = L"fluorender";
 	if (!filename.empty())
 	{
@@ -750,7 +750,7 @@ void MainSettings::Save()
 	m_movie_def.Save();
 	m_colocal_def.Save();
 
-	std::filesystem::path p = std::filesystem::current_path();
+	std::filesystem::path p = GetDataRoot();
 	p /= "fluorender";
 	switch (m_config_file_type)
 	{
