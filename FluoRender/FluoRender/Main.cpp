@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -89,7 +89,7 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetBreakAlloc(1107);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
+    InitializeUserSettings();
 	SetAppearance(Appearance::System);
 
 	std::wstring path = getExecutablePath();

@@ -769,30 +769,111 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 inline std::filesystem::path GetDataRoot()
 {
 #ifdef __APPLE__
-	// macOS: Resources directory inside the bundle
-	CFBundleRef mainBundle = CFBundleGetMainBundle();
-	if (mainBundle)
-	{
-		CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
-		if (resourcesURL)
-		{
-			char path[PATH_MAX];
-			if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
-				(UInt8*)path, PATH_MAX))
-			{
-				CFRelease(resourcesURL);
-				return std::filesystem::path(path);
-			}
-			CFRelease(resourcesURL);
-		}
-	}
-
-	// fallback: current directory
-	return std::filesystem::current_path();
-
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    if (mainBundle)
+    {
+        CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+        if (resourcesURL)
+        {
+            char path[PATH_MAX];
+            if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
+                (UInt8*)path, PATH_MAX))
+            {
+                CFRelease(resourcesURL);
+                return std::filesystem::path(path);
+            }
+            CFRelease(resourcesURL);
+        }
+    }
+    return std::filesystem::current_path();
 #else
-	// Windows + Linux: use the executable directory
-	return std::filesystem::current_path();
+    return std::filesystem::current_path();
+#endif
+}
+
+inline std::filesystem::path GetUserSettingsRoot()
+{
+#ifdef __APPLE__
+    const char* home = std::getenv("HOME");
+    if (home)
+    {
+        std::filesystem::path p = home;
+        p /= "Library/Application Support/FluoRender";
+        return p;
+    }
+    return std::filesystem::current_path();
+#else
+    return std::filesystem::current_path();
+#endif
+}
+
+inline bool IsFirstLaunch()
+{
+#ifdef __APPLE__
+    auto userDir = GetUserSettingsRoot();
+    return !std::filesystem::exists(userDir);
+#else
+    return false;
+#endif
+}
+
+inline void InitializeUserSettings()
+{
+#ifdef __APPLE__
+    if (!IsFirstLaunch())
+        return;
+
+    auto srcRoot = GetDataRoot();
+    auto dstRoot = GetUserSettingsRoot();
+
+    // Create the root directory now (first launch only)
+    std::filesystem::create_directories(dstRoot);
+
+    // Directories to copy
+    std::vector<std::string> dirsToCopy = {
+        "CL_Code",
+        "Commands",
+        "Database",
+        "Scripts",
+        "Templates"
+    };
+
+    for (const auto& dir : dirsToCopy)
+    {
+        auto src = srcRoot / dir;
+        auto dst = dstRoot / dir;
+
+        if (std::filesystem::exists(src))
+        {
+            std::filesystem::create_directories(dst);
+            std::filesystem::copy(
+                src,
+                dst,
+                std::filesystem::copy_options::recursive |
+                std::filesystem::copy_options::overwrite_existing
+            );
+        }
+    }
+
+    std::vector<std::string> filesToCopy = {
+        "fluorender.xml",
+        "fluorender_default.xml"
+    };
+
+    for (const auto& file : filesToCopy)
+    {
+        auto src = srcRoot / file;
+        auto dst = dstRoot / file;
+
+        if (std::filesystem::exists(src))
+        {
+            std::filesystem::copy_file(
+                src,
+                dst,
+                std::filesystem::copy_options::overwrite_existing
+            );
+        }
+    }
 #endif
 }
 

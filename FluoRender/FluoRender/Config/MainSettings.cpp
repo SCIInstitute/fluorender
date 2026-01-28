@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -206,7 +206,7 @@ MainSettings::~MainSettings()
 
 void MainSettings::Read(const std::string& filename)
 {
-	std::filesystem::path p = GetDataRoot();
+	std::filesystem::path p = GetUserSettingsRoot();
 	std::wstring fbase = L"fluorender";
 	if (!filename.empty())
 	{
@@ -750,7 +750,7 @@ void MainSettings::Save()
 	m_movie_def.Save();
 	m_colocal_def.Save();
 
-	std::filesystem::path p = GetDataRoot();
+	std::filesystem::path p = GetUserSettingsRoot();
 	p /= "fluorender";
 	switch (m_config_file_type)
 	{

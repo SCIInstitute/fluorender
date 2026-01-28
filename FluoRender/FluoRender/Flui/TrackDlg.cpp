@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -1147,7 +1147,7 @@ void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
 	glbin_trackmap_proc.GenMap();
 	//enable script
 	glbin_settings.m_run_script = true;
-	std::filesystem::path p = GetDataRoot();
+	std::filesystem::path p = GetUserSettingsRoot();
 	p = p / "Scripts" / "track_selected_results.txt";
 	glbin_settings.m_script_file = p.wstring();
 	m_frame->UpdateProps({ gstMovPlay, gstRunScript, gstScriptFile, gstScriptSelect });

@@ -397,7 +397,7 @@ std::wstring ScriptProc::GetInputFile(const std::wstring& str, const std::wstrin
 	{
 		//find in default folder
 		std::wstring name = GET_NAME(result);
-		std::filesystem::path p = GetDataRoot();
+		std::filesystem::path p = GetUserSettingsRoot();
 		if (subd.empty())
 			p = p / name;
 		else
@@ -2598,7 +2598,7 @@ void ScriptProc::ExportTemplate()
 		{
 			//source
 			ofs << "    <script src=\"";
-			std::filesystem::path p = GetDataRoot();
+			std::filesystem::path p = GetUserSettingsRoot();
 			ofs << p.string();
 			ofs << "/Templates/d3.v4.min.js\"></script>" << std::endl;
 			continue;

@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -102,7 +102,7 @@ MachineLearningPanel::MachineLearningPanel(
 		0, "MachineLearningPanel"),
 	m_record(false)
 {
-	std::filesystem::path p = GetDataRoot();
+	std::filesystem::path p = GetUserSettingsRoot();
 	m_exepath = p.wstring();
 }
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -214,7 +214,7 @@ void OclDlg::FluoUpdate(const fluo::ValueCollection& vc)
 void OclDlg::UpdateKernelList()
 {
 	m_kernel_list->DeleteAllItems();
-	std::filesystem::path p = GetDataRoot();
+	std::filesystem::path p = GetUserSettingsRoot();
 	p /= "CL_code";
 	std::vector<std::string> list;
 	// Iterate over the files in the "Scripts" directory
@@ -343,7 +343,7 @@ void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 			m_kernel_file_txt->ChangeValue(filename);
 			std::filesystem::path p(filename.ToStdString());
 			std::string fn = p.filename().string();
-			p = GetDataRoot();
+			p = GetUserSettingsRoot();
 			p = p / "CL_code" / fn;
 			fn = p.string();
 			m_kernel_edit_stc->SaveFile(fn);
@@ -390,7 +390,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 	if (item != -1)
 	{
 		wxString file = m_kernel_list->GetItemText(item, 1);
-		std::filesystem::path p = GetDataRoot();
+		std::filesystem::path p = GetUserSettingsRoot();
 		p = p / "CL_code" / (file.ToStdString() + ".cl");
 		file = p.string();
 		m_kernel_edit_stc->LoadFile(file);
