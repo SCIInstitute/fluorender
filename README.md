@@ -114,7 +114,7 @@ This is especially true after recent reoganization of FluoRender source code, as
  - JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
    - Needs installation
  - OpenBLAS for linear algebra computations
- - - https://github.com/OpenMathLib/OpenBLAS.git
+   - https://github.com/OpenMathLib/OpenBLAS.git
    - Needs building before FluoRender
  - OpenCL SDK for cross-platform GPU computing
    - There are multiple providers. On Windows, I use NVIDIA CUDA Toolkit:
