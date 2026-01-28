@@ -172,6 +172,20 @@ find_package(GLEW REQUIRED)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
+# zlib
+file(GLOB ZLIB_DIRS "${PARENT_DIR}/zlib*")
+list(GET ZLIB_DIRS 0 ZLIB_DIR)
+set(ZLIB_INCLUDE_DIR "${ZLIB_DIR}")
+# Windows static library name
+if(WIN32)
+    file(GLOB ZLIB_RELEASE_LIBRARIES ${ZLIB_DIR}/build/Release/*.lib)
+    file(GLOB ZLIB_DEBUG_LIBRARIES ${ZLIB_DIR}/build/Debug/*.lib)
+    set(ZLIB_LIBRARY $<$<CONFIG:Release>:${ZLIB_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${ZLIB_DEBUG_LIBRARIES}>)
+else()
+    set(ZLIB_LIBRARY "${ZLIB_DIR}/libz.a")   # macOS/Linux
+endif()
+message(STATUS "Using standalone zlib at: ${ZLIB_DIR}")
+
 # wxWidgets
 file(GLOB WXWIDGETS_DIRS "${PARENT_DIR}/wxWidgets*")
 list(GET WXWIDGETS_DIRS 0 WXWIDGETS_DIR)  # Get the first match
@@ -529,22 +543,6 @@ else()
     add_definitions(-DXR_USE_PLATFORM_XLIB)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 endif()
-
-# zlib
-file(GLOB ZLIB_DIRS "${PARENT_DIR}/zlib*")
-list(GET ZLIB_DIRS 0 ZLIB_DIR)
-
-set(ZLIB_INCLUDE_DIR "${ZLIB_DIR}")
-set(ZLIB_LIBRARY "${ZLIB_DIR}/libz.a")   # macOS/Linux
-set(ZLIB_LIBRARY_DEBUG "${ZLIB_DIR}/libz.a")
-
-# Windows static library name
-if(WIN32)
-    set(ZLIB_LIBRARY "${ZLIB_DIR}/zlibstatic.lib")
-    set(ZLIB_LIBRARY_DEBUG "${ZLIB_DIR}/zlibstaticd.lib")
-endif()
-
-message(STATUS "Using standalone zlib at: ${ZLIB_DIR}")
 
 # teem
 file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
