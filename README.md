@@ -40,7 +40,7 @@ FluoRender’s new release comes from a year of rethinking the project’s purpo
 - **Color Mapping Enhancements**
   - Two new color maps: radial and linear.
   - Color maps now align with data, not just axes (PCA based by default).
-  - Color gradients can follow viewing direction using any measurement tool.
+  - Color gradients can follow any measurement tool or viewing direction using the probe tool.
 
 - **System & Performance Upgrades**
   - Major framebuffer redesign for more predictable rendering and faster effects.
