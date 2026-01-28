@@ -807,26 +807,47 @@ inline std::filesystem::path GetUserSettingsRoot()
 #endif
 }
 
-inline bool IsFirstLaunch()
+inline bool NeedsUserDataUpdate()
 {
-#ifdef __APPLE__
     auto userDir = GetUserSettingsRoot();
-    return !std::filesystem::exists(userDir);
-#else
+    auto versionFile = userDir / "version.txt";
+
+    // First launch: no directory or no version file
+    if (!std::filesystem::exists(userDir))
+        return true;
+
+    if (!std::filesystem::exists(versionFile))
+        return true;
+
+    // Read stored version
+    int storedMajor = 0;
+    int storedMinor = 0;
+
+    {
+        std::ifstream in(versionFile);
+        in >> storedMajor >> storedMinor;
+    }
+
+    // Compare major/minor
+    if (storedMajor < VERSION_MAJOR)
+        return true;
+
+    if (storedMajor == VERSION_MAJOR &&
+        storedMinor < VERSION_MINOR)
+        return true;
+
     return false;
-#endif
 }
 
 inline void InitializeUserSettings()
 {
 #ifdef __APPLE__
-    if (!IsFirstLaunch())
+    if (!NeedsUserDataUpdate())
         return;
 
     auto srcRoot = GetDataRoot();
     auto dstRoot = GetUserSettingsRoot();
 
-    // Create the root directory now (first launch only)
     std::filesystem::create_directories(dstRoot);
 
     // Directories to copy
@@ -855,6 +876,7 @@ inline void InitializeUserSettings()
         }
     }
 
+    // Files to copy
     std::vector<std::string> filesToCopy = {
         "fluorender.xml",
         "fluorender_default.xml"
@@ -873,6 +895,12 @@ inline void InitializeUserSettings()
                 std::filesystem::copy_options::overwrite_existing
             );
         }
+    }
+
+    // Write version file
+    {
+        std::ofstream out(dstRoot / "version.txt");
+        out << VERSION_MAJOR << " " << VERSION_MINOR;
     }
 #endif
 }
