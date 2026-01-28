@@ -761,6 +761,11 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 	});
 }
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#include <unistd.h>     // for PATH_MAX
+#endif
+
 inline std::filesystem::path GetDataRoot()
 {
 #ifdef __APPLE__

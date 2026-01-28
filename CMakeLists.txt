@@ -221,18 +221,14 @@ if(WIN32)
     set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
     set(PNG_PNG_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/png)
     set(JPEG_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/jpeg)
-    set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
     set(TIFF_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxtiff.lib)
     set(TIFF_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxtiffd.lib)
     set(PNG_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxpng.lib)
     set(PNG_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxpngd.lib)
-    set(ZLIB_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxzlib.lib)
-    set(ZLIB_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxzlibd.lib)
 elseif(APPLE)
     set(TIFF_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/tiff/libtiff")
     set(PNG_PNG_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/png")
     set(JPEG_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/jpeg")
-    set(ZLIB_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/zlib")
     # TIFF
     file(GLOB TIFF_LIBRARIES "${wxWidgets_LIB_DIR}/libwxtiff-*.a")
     list(GET TIFF_LIBRARIES 0 TIFF_LIBRARY)
@@ -243,19 +239,11 @@ elseif(APPLE)
     list(GET PNG_LIBRARIES 0 PNG_LIBRARY)
     set(PNG_LIBRARY_RELEASE "${PNG_LIBRARY}")
     set(PNG_LIBRARY_DEBUG "${PNG_LIBRARY}")
-    # ZLIB
-    file(GLOB ZLIB_LIBRARIES "${wxWidgets_LIB_DIR}/libwxzlib-*.a")
-    list(GET ZLIB_LIBRARIES 0 ZLIB_LIBRARY)
-    set(ZLIB_LIBRARY_RELEASE "${ZLIB_LIBRARY}")
-    set(ZLIB_LIBRARY_DEBUG "${ZLIB_LIBRARY}")
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
-#find_package(JPEG REQUIRED)
-#find_package(ZLIB REQUIRED)
 if(WIN32)
     set(Tiff_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
-    set(ZLIB_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/zlib)
     set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 endif()
 message(STATUS "wxWidgets_LIB_DIR: ${wxWidgets_LIB_DIR}")
@@ -541,6 +529,22 @@ else()
     add_definitions(-DXR_USE_PLATFORM_XLIB)
     add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
 endif()
+
+# zlib
+file(GLOB ZLIB_DIRS "${PARENT_DIR}/zlib*")
+list(GET ZLIB_DIRS 0 ZLIB_DIR)
+
+set(ZLIB_INCLUDE_DIR "${ZLIB_DIR}")
+set(ZLIB_LIBRARY "${ZLIB_DIR}/libz.a")   # macOS/Linux
+set(ZLIB_LIBRARY_DEBUG "${ZLIB_DIR}/libz.a")
+
+# Windows static library name
+if(WIN32)
+    set(ZLIB_LIBRARY "${ZLIB_DIR}/zlibstatic.lib")
+    set(ZLIB_LIBRARY_DEBUG "${ZLIB_DIR}/zlibstaticd.lib")
+endif()
+
+message(STATUS "Using standalone zlib at: ${ZLIB_DIR}")
 
 # teem
 file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
@@ -999,6 +1003,7 @@ target_link_libraries(FORMAT_LIB PRIVATE
   ${PNG_LIBRARIES}
   ${TEEM_LIBRARIES}
   ${TIFF_LIBRARIES}
+  ${ZLIB_LIBRARY}
 )
 
 # Global

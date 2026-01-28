@@ -15,3 +15,11 @@ FluoRender.app
 ditto -c -k --keepParent FluoRender.app FluoRender.zip
 
 xcrun notarytool submit FluoRender.zip --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password zhlv-tzpv-sgzq-wvle --wait
+
+xcrun stapler staple FluoRender.app
+
+productsign --sign WG354P62PL FluoRender2.34_mac64.pkg FluoRender2.34_mac64_signed.pkg
+
+xcrun notarytool submit FluoRender2.34_mac64_signed.pkg --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz --wait
+
+xcrun stapler staple FluoRender2.34_mac64_signed.pkg

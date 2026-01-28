@@ -63,7 +63,7 @@ pkgbuild \
     --install-location /Applications \
     --scripts scripts \
     --identifier edu.utah.sci.fluorender \
-    --version 2.33 \
+    --version 2.34 \
     --output FluoRender.pkg
 
 # Build final installer package
@@ -73,6 +73,6 @@ productbuild \
     --resources resources \
     --package-path . \
     --scripts scripts \
-    --output FluoRender2.33_mac64.pkg
+    --output FluoRender2.34_mac64.pkg
 
-echo "✅ Installer package created: FluoRender2.33_mac64.pkg"
+echo "✅ Installer package created: FluoRender2.34_mac64.pkg"
