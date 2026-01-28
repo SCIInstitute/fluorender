@@ -2,10 +2,6 @@
 
 echo "🚀 Post installation process started"
 
-# 🔧 Adjust permissions
-echo "🔒 Changing permissions in product home..."
-chmod -R a+rwx "/Applications/FluoRender.app/Contents/MacOS"
-
 # 🐍 Function to download and install Python 3.13
 install_python() {
     echo "📦 Downloading Python 3.13 installer..."
