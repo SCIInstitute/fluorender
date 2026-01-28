@@ -138,7 +138,7 @@ This is especially true after recent reoganization of FluoRender source code, as
    - Needs building before FluoRender
    - I maintain a repo here: https://github.com/basisunus/teem.git
  - wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
-   - I made some changes to the wxWidgets code. Use my branch: https://github.com/basisunus/wxWidgets/tree/wxWidgets-v3.2.8
+   - I made some changes to the wxWidgets code. Use [my custom branch](https://github.com/basisunus/wxWidgets/tree/Branch_v3.3.0)
    - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, etc.
    - Needs building before FluoRender
  - Zlib (https://github.com/madler/zlib.git) for reading compressed data formats
