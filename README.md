@@ -6,83 +6,49 @@ This is the open-source repository for FluoRender, an interactive tool for fluor
 
 Download the installer package for your operating system (OS).
 
-| 🖥️ Windows (10 and 11, 64-bit, x86_64 CPUs) | 🍎 Mac OS (13.3+, Intel CPUs) | 🍎 Mac OS (13.3+, M1, M2, etc. CPUs) | 🐧 Linux |
+| 🖥️ Windows (10 and 11, 64-bit, x86_64 CPUs) | 🍎 Mac OS (13.3+, M1, M2, etc. CPUs)| 🍎 Mac OS (13.3+, Intel CPUs)  | 🐧 Linux |
 |------------|-----------|----------|----------|
-| [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_win64.exe) | [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_x86_64.pkg) | [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_mac64_arm64.pkg) | [Email me](mailto:yong.wan@utah.edu) |
+| [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_win64.exe) | [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_mac64_arm64.pkg)| [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_mac64_x86_64.pkg)  | [Email me](mailto:yong.wan@utah.edu) |
 
 Support the maintenance and bug fixes by donnation: [https://paypal.me/fluorender](https://paypal.me/fluorender)
 
-<h1 id="features">Release Highlights for Version 2.33</h1>
-This release marks a major leap forward in both functionality and usability. With a focus on clarity, speed, and intuitive interaction, FluoRender now offers a richer toolkit for analyzing volume data from fluorescence microscopy. Users can dive into tasks like painting, filtering, and color mapping with minimal setup — or no manual fine-tuning at all — and still achieve precise, insightful results.
-Key updates streamline workflows, reduce the learning curve, and make advanced features more accessible. Whether you're visualizing time-dependent properties, customizing your color map, or leveraging smart automation, FluoRender adapts to your data and goals with surprising agility.
-The goal remains constant: to empower researchers with interactive tools that feel natural to use, yet remain powerful under the hood.
+<h1 id="features">Release Highlights for Version 2.34</h1>
+FluoRender’s new release comes from a year of rethinking the project’s purpose and focusing entirely on what biologists actually need, leading to major upgrades in mesh speed, rendering quality, and overall usability. A new GPU‑based mesh generator, modernized lighting, a rebuilt framebuffer system, smarter multichannel intermixing, cleaner color‑mapping, clipping boxes for meshes, and a suite of new analysis tools all grew naturally from that shift in direction. The release also introduces a brand‑new DICOM reader, rounding out a version shaped by experimentation, refinement, and a renewed sense of why FluoRender exists in the first place.
 
 - **Looking Glass Support**
-
-  FluoRender now seamlessly supports the latest [Looking Glass holographic displays](https://lookingglassfactory.com/displays-overview), expanding your visualization toolkit with intuitive controls and immersive clarity.
-
-  The 16" Looking Glass displays can be purchased here: [https://lookingglassfactory.com/looking-glass-16-lightfield](https://lookingglassfactory.com/looking-glass-16-lightfield)
+  - FluoRender now supports both volume data and mesh objects on the latest [Looking Glass holographic displays](https://lookingglassfactory.com/displays-overview), expanding your visualization toolkit with intuitive controls and immersive clarity.
+  - The 16" Looking Glass displays can be purchased here: [https://lookingglassfactory.com/looking-glass-16-lightfield](https://lookingglassfactory.com/looking-glass-16-lightfield)
+  - The 27" Looking Glass displays can be purchased here: [https://lookingglassfactory.com/looking-glass-27](https://lookingglassfactory.com/looking-glass-27)
+  - And a portable holographic display, the Looking Glass Go can be purchased here: [https://lookingglassfactory.com/lkg-go](https://lookingglassfactory.com/lkg-go)
   
-  The 27" Looking Glass displays can be purchased here: [https://lookingglassfactory.com/looking-glass-27](https://lookingglassfactory.com/looking-glass-27)
+- **Mesh & Surface Improvements**
+  - Much faster mesh generation using a new GPU based method.
+  - Cleaner, more modern mesh appearance with updated lighting and shadows.
+  - Clipping boxes now work for meshes, with options to sync across objects.
+  - New mesh analysis tools: volume, surface area, smoothing, simplification, welding.
+  - 4D mesh generation and playback for time series data.
+  - Real time mesh creation with paint and grow brushes.
+  - Color transfer from components to meshes for easier segmentation workflows.
 
-  And a portable holographic display, the Looking Glass Go can be purchased here: [https://lookingglassfactory.com/lkg-go](https://lookingglassfactory.com/lkg-go)
-   - **Hologram Modes:** Choose from three distinct modes to configure camera and lens shifts—whether for depth emphasis, parallax refinement, or artistic rotation.
-   - **Projection Flexibility:** Easily toggle between orthographic and perspective projections to match your analytical or illustrative needs.
-   - **Camera Control Options:** Navigate with precision using either Globe Mode for orbital rotation or Flight Mode for dynamic pathing.
-   - **Auto Focusing:** Automatically focus on the scene’s center or snap to a user-specified point with a simple click.
-   - **Hologram Snapshot:** Capture and share high-resolution holographic snapshots—perfect for documentation, collaboration, or presentation.
- - **Visualization & Volume Properties**
-    - Overhauled **volume property settings**, with reordered layout
-    - New UI displays:
-      - **Intensity distribution**
-      - **Color map range**
-    - Updated **multi-function buttons** and introduced **min–max/boundary high controls**
-    - Filter updates: **Lanczos-bicubic** scaling with zoom-aware window sizing
-    - Added **4D color maps** featuring time, intensity delta, and speed options
-    - Keyframe animation:
-      - Now supports **volume property changes**
-      - Enabled only when keyframes are present
-  - **Interactive Tools & Painting**
-    - New brush tools: **Segment** and **Isolate**
-    - Brushes support **fine-grained grow rate**
-    - Automatic **threshold estimation** for paint and component generation
-    - Isolate brush works with ruler tools to locate **center points**
-  - **Automation & Scripting**
-    - OpenCL filter script now runs **last-used parameters** from UI when left empty
-    - Added `script stop` command for one-time scripts
-    - Introduced **automation options** in configuration dialog, supporting:
-      - Histogram generation
-      - Paint selected size computing
-      - Component generation
-      - Colocalization
-      - Ruler relaxation
-  - **Volume Filtering**
-    - OpenCL editor renamed to **Volume Filter**
-    - Added **deconvolution filters**, including Richardson-Lucy and Wiener filters
-    - Updated **Gaussian** filters for smoother results
-    - Added other commonly used filters
-  - **UI & Usability Enhancements**
-    - Refreshed **icons and text** throughout UI
-    - Adopted **notebook-style tabs** for improved dialog navigation
-    - **Dialog layouts** can now be saved and restored
-    - Added **dark mode** support on Windows
-    - Reordered settings to prioritize frequent tasks
-    - Frequently used interactive tools now available in the **workspace panel**
-    - Added dialog buttons to the **project panel**
-    - Interactive tool states now **sync across dialogs**
-  - **File & Data Management**
-      - Added support for **INI**, **XML**, and **JSON** config file formats
-      - Refactored memory handling using **smart pointers**
-      - Updated **volume cache** system for time-sequenced data
-      - Introduced **movie playback caching** for smoother experience
-      - Enhanced capture capabilities: Support for **JPEG** and **PNG**
-      - Ability to read **JPEG/PNG sequences**
-  - **Core System & Build Improvements**
-      - Reorganized **CMake** structure and third-party libraries
-      - Switched from `wxString` and legacy path utilities to **`std::string`** and **`std::filesystem`**
-      - Resolved **type cast warnings**
-      - Updated **FFmpeg** integration to use current API
-      - Forward-declared third-party types for cleaner compilation
+- **Volume Rendering & Visualization**
+  - Updated lighting for volumes (softer shadows, clearer structure).
+  - More reliable multichannel intermixing — all combinations now behave sensibly.
+  - Brush selected and unselected regions can use different color modes.
+  - New “no display” mode for hiding unselected regions.
+  - MIP now works with color maps and depth mixing.
+
+- **Color Mapping Enhancements**
+  - Two new color maps: radial and linear.
+  - Color maps now align with data, not just axes (PCA based by default).
+  - Color gradients can follow any measurement tool or viewing direction using the probe tool.
+
+- **System & Performance Upgrades**
+  - Major framebuffer redesign for more predictable rendering and faster effects.
+  - More intuitive shader system for both volumes and meshes.
+  - Smoother interaction when mixing render modes, effects, and color maps.
+
+- **New Data Format Support**
+  - DICOM reader.
 
 <h1 id="documentation">Documentation</h1>
 
@@ -148,7 +114,7 @@ This is especially true after recent reoganization of FluoRender source code, as
  - JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
    - Needs installation
  - OpenBLAS for linear algebra computations
- - - https://github.com/OpenMathLib/OpenBLAS.git
+   - https://github.com/OpenMathLib/OpenBLAS.git
    - Needs building before FluoRender
  - OpenCL SDK for cross-platform GPU computing
    - There are multiple providers. On Windows, I use NVIDIA CUDA Toolkit:
@@ -172,8 +138,10 @@ This is especially true after recent reoganization of FluoRender source code, as
    - Needs building before FluoRender
    - I maintain a repo here: https://github.com/basisunus/teem.git
  - wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
-   - I made some changes to the wxWidgets code. Use my branch: https://github.com/basisunus/wxWidgets/tree/wxWidgets-v3.2.8
-   - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, and Zlib
+   - I made some changes to the wxWidgets code. Use [my custom branch](https://github.com/basisunus/wxWidgets/tree/Branch_v3.3.0)
+   - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, etc.
+   - Needs building before FluoRender
+ - Zlib (https://github.com/madler/zlib.git) for reading compressed data formats
    - Needs building before FluoRender
 
 Libraries that need building before FluoRender or included as head-only are placed at the same level of the FluoRender source code path so that they can be automatically found. See FluoRender's CMake file for more details. I usually prefer the source code of a released version instead of the master head.
