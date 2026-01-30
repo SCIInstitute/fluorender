@@ -195,7 +195,7 @@ Libraries that need building before FluoRender or included as head-only are plac
    
    * <code>cd mybuild</code>
    
-   * <code>../configure --disable-shared --with-cocoa --with-opengl --disable-mediactrl  --with-macosx-version-min=13.3 --enable-cxx11 --enable-stl --enable-std_containers --enable-std_iostreams --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin --with-zlib=builtin</code>
+   * <code>../configure --disable-shared --enable-monolithic --with-cocoa --with-opengl --disable-mediactrl  --disable-webview --without-subdirs --with-macosx-version-min=13.3 --enable-cxx11 --enable-stl --enable-std_containers --enable-std_iostreams --with-libpng=builtin --with-libtiff=builtin --with-libjpeg=builtin</code>
    
    * <code>make</code>
 

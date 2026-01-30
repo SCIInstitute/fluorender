@@ -1409,3 +1409,8 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
     "${FLUORENDER_ASSET_DIR}")
 endif()
+
+set_target_properties(FluoRender PROPERTIES
+    BUILD_RPATH ""
+    INSTALL_RPATH "@executable_path/../Frameworks"
+)
