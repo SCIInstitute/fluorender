@@ -1,0 +1,44 @@
+mkdir -p FluoRender.app/Contents/Frameworks/Python.framework/Versions
+
+cp -R /Library/Frameworks/Python.framework/Versions/3.13 \
+      FluoRender.app/Contents/Frameworks/Python.framework/Versions/
+
+cd FluoRender.app/Contents/Frameworks/Python.framework
+
+ln -s Versions/3.13 Current
+ln -s Versions/3.13/Headers Headers
+ln -s Versions/3.13/Resources Resources
+
+cp Versions/3.13/Python Python
+cp Versions/3.13/Resources/Info.plist Info.plist
+
+find Versions/3.13 -type f -exec \
+    lipo -thin x86_64 {} -output {} \;
+
+cd fluorender/build/bin/Release
+
+install_name_tool -change \
+  /Library/Frameworks/Python.framework/Versions/3.13/Python \
+  @rpath/Python.framework/Python \
+  FluoRender.app/Contents/MacOS/FluoRender
+
+codesign --force --timestamp --options runtime \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app/Contents/Frameworks/Python.framework/Versions/3.13/Python
+
+codesign --force --timestamp --options runtime \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app/Contents/Frameworks/Python.framework
+
+codesign --force --timestamp --options runtime \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app/Contents/MacOS/FluoRender
+
+codesign --force --timestamp --options runtime --deep \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app
+

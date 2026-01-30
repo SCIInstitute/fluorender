@@ -12,6 +12,6 @@ xcrun notarytool submit FluoRender2.34_mac64_signed.pkg --apple-id "yong.wan@uta
 
 xcrun stapler staple FluoRender2.34_mac64_signed.pkg
 
-xcrun notarytool log 2c8be73d-772b-462a-abd1-189316dc0ec6 --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz
+xcrun notarytool log abf625e3-719d-4e3b-9eaf-8fa38dfaff50 --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz
 
 pkgutil --check-signature FluoRender2.34_mac64.pkg

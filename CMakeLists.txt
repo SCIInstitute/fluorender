@@ -1409,27 +1409,3 @@ add_custom_command(TARGET FluoRender POST_BUILD
 	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
     "${FLUORENDER_ASSET_DIR}")
 endif()
-
-# ---------------------------------------------------------
-# macOS: Minimal settings for embedded Python.framework
-# ---------------------------------------------------------
-if(APPLE)
-
-    # Ensure FluoRender looks inside Contents/Frameworks
-    set_target_properties(FluoRender PROPERTIES
-        BUILD_RPATH "@executable_path/../Frameworks"
-        INSTALL_RPATH "@executable_path/../Frameworks"
-        MACOSX_BUNDLE TRUE
-    )
-
-    # Rewrite Python path to use @rpath instead of system path
-    add_custom_command(
-        TARGET FluoRender
-        POST_BUILD
-        COMMAND install_name_tool -change
-                /Library/Frameworks/Python.framework/Python
-                @rpath/Python.framework/Python
-                $<TARGET_FILE:FluoRender>
-    )
-
-endif()
