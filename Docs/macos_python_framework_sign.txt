@@ -1,0 +1,31 @@
+//from fluorender/build/bin/Release
+
+mkdir -p FluoRender.app/Contents/Frameworks
+
+cp -R /Library/Frameworks/Python.framework \
+      FluoRender.app/Contents/Frameworks/
+
+install_name_tool -change \
+  /Library/Frameworks/Python.framework/Versions/3.13/Python \
+  @rpath/Python.framework/Python \
+  FluoRender.app/Contents/MacOS/FluoRender
+
+codesign --force --timestamp --options runtime \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app/Contents/Frameworks/Python.framework/Versions/3.13/Python
+
+codesign --force --timestamp --options runtime \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app/Contents/Frameworks/Python.framework
+
+codesign --force --timestamp --options runtime \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app/Contents/MacOS/FluoRender
+
+codesign --force --timestamp --options runtime --deep \
+  --entitlements ../../../entitlements.plist \
+  --sign "Developer ID Application: SCIENTIFIC COMPUTING AND IMAGING INSTITUTE (SCI INSTITUTE) (WG354P62PL)" \
+  FluoRender.app
