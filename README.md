@@ -52,9 +52,9 @@ FluoRender’s new release comes from a year of rethinking the project’s purpo
 
 <h1 id="documentation">Documentation</h1>
 
-**User Manual:** [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_Manual.pdf)
+**User Manual:** [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_Manual.pdf)
 
-**Tutorials:** [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.33/FluoRender2.33_Tutorials.pdf)
+**Tutorials:** [Version 2.33](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_Tutorials.pdf)
 
 **Video Tutorials:** [YouTube Playlist](https://youtu.be/zq41x-Q7LU0?feature=shared)
 
