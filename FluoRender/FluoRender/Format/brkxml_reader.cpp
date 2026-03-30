@@ -843,9 +843,9 @@ double BRKXMLReader::GetExcitationWavelength(int chan)
 }
 
 //This function does not load image data into Nrrd.
-Nrrd* BRKXMLReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> BRKXMLReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd* data = 0;
+	std::shared_ptr<fluo::RawData> data = nullptr;
 
 	//if (m_max_value > 0.0)
 	//	m_scalar_scale = 65535.0 / m_max_value;
@@ -868,17 +868,27 @@ Nrrd* BRKXMLReader::Convert(int t, int c, bool get_max)
 		c >= 0 && c < m_chan_num &&
 		!m_size.any_le_zero())
 	{
-		char dummy = 0;
-		data = nrrdNew();
-		if (m_pyramid[m_cur_level].bit_depth == 8)nrrdWrap_va(data, &dummy, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		else if (m_pyramid[m_cur_level].bit_depth == 16)nrrdWrap_va(data, &dummy, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		else if (m_pyramid[m_cur_level].bit_depth == 32)nrrdWrap_va(data, &dummy, nrrdTypeFloat, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-		auto max_size = m_spacing * m_size;
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		data->data = NULL;//dangerous//
+		fluo::RawData::Size3 size = {
+			static_cast<size_t>(m_size.intx()),
+			static_cast<size_t>(m_size.inty()),
+			static_cast<size_t>(m_size.intz())
+		};
+		fluo::DataFormat format = fluo::DataFormat::Unknown;
+		if (m_pyramid[m_cur_level].bit_depth == 8)
+			format = fluo::DataFormat::UInt8;
+		else if (m_pyramid[m_cur_level].bit_depth == 16)
+			format = fluo::DataFormat::UInt16;
+		else if (m_pyramid[m_cur_level].bit_depth == 32)
+			format = fluo::DataFormat::Float32;
+
+		data = std::make_shared<fluo::RawData>(
+			size,
+			format,
+			1,
+			1,
+			m_cur_level,
+			0
+		);
 
 		m_cur_chan = c;
 		m_cur_time = t;
@@ -1131,7 +1141,7 @@ void BRKXMLReader::build_pyramid(std::vector<flvr::Pyramid_Level>& pyramid, std:
 	{
 		for (int i = 0; i < pyramid.size(); i++)
 		{
-			if (pyramid[i].data) nrrdNix(pyramid[i].data);
+			if (pyramid[i].data) pyramid[i].data.reset();
 			for (int j = 0; j < pyramid[i].bricks.size(); j++)
 				if (pyramid[i].bricks[j]) delete pyramid[i].bricks[j];
 		}

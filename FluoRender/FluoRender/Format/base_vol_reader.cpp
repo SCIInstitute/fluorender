@@ -452,9 +452,9 @@ void BaseVolReader::DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride)
 	}
 }
 
-Nrrd* BaseVolReader::Convert(bool get_max) { return Convert(0, get_max); }
+std::shared_ptr<fluo::RawData> BaseVolReader::Convert(bool get_max) { return Convert(0, get_max); }
 
-Nrrd* BaseVolReader::Convert(int c, bool get_max) { return Convert(0, c, get_max); }
+std::shared_ptr<fluo::RawData> BaseVolReader::Convert(int c, bool get_max) { return Convert(0, c, get_max); }
 
 int BaseVolReader::get_number(const std::string &str, int64_t pos)
 {

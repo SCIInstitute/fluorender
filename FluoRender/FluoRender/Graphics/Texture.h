@@ -29,7 +29,7 @@
 #ifndef Texture_h
 #define Texture_h
 
-#include <nrrd.h>
+#include <RawData.h>
 #include <BBox.h>
 #include <Transform.h>
 #include <Point.h>
@@ -64,7 +64,7 @@ namespace flvr
 	{
 		CompType type;
 		int bytes;
-		Nrrd* data;
+		std::shared_ptr<fluo::RawData> data;
 	};
 	class Texture 
 	{
@@ -75,7 +75,7 @@ namespace flvr
 
 		int get_build_max_tex_size() { return build_max_tex_size_; }
 		void set_brick_planned_size(int size) { brick_planned_size_ = size; }
-		bool build(Nrrd* val,
+		bool build(const std::shared_ptr<fluo::RawData>& raw,
 			double vmn, double vmx,
 			std::vector<flvr::TextureBrick*>* brks = NULL);
 
@@ -168,9 +168,9 @@ namespace flvr
 		void set_spacing_scale(const fluo::Vector& scl) { spacing_scale_ = scl; }
 		fluo::Vector get_spacing_scale() { return spacing_scale_; }
 
-		// Creator of the brick owns the nrrd memory.
-		void set_nrrd(CompType type, TexComp comp);
-		TexComp get_nrrd(CompType type);
+		// Creator of the brick owns the raw memory.
+		void set_raw(CompType type, TexComp comp);
+		TexComp get_raw(CompType type);
 		bool trim_mask_undos_head();
 		bool trim_mask_undos_tail();
 		bool get_undo();

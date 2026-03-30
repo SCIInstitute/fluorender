@@ -143,18 +143,15 @@ void CQCallback::FreeVolCache(VolCache4D& vol_cache)
 	}
 	if (vol_cache.own_data && vol_cache.m_data)
 	{
-		nrrdNuke((Nrrd*)vol_cache.m_data);
-		vol_cache.m_data = 0;
+		vol_cache.m_data.reset();
 	}
 	if (vol_cache.own_mask && vol_cache.m_mask)
 	{
-		nrrdNuke((Nrrd*)vol_cache.m_mask);
-		vol_cache.m_mask = 0;
+		vol_cache.m_mask.reset();
 	}
 	if (vol_cache.own_label && vol_cache.m_label)
 	{
-		nrrdNuke((Nrrd*)vol_cache.m_label);
-		vol_cache.m_label = 0;
+		vol_cache.m_label.reset();
 	}
 	vol_cache.m_valid = false;
 }

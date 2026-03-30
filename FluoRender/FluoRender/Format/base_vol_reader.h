@@ -29,8 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #define _BASE_VOL_READER_H_
 
 #include <base_reader.h>
+#include <RawData.h>
 #include <string>
-#include <nrrd.h>
 #include <sstream>
 #include <deque>
 #include <set>
@@ -61,11 +61,11 @@ public:
 	//read the acutual volume data from file and convert it to a nrrd
 	//if get_max is true, it will find the maximum value within the volume
 	//the max value is used to change the silder range in UI
-	virtual Nrrd* Convert(bool get_max);
+	virtual std::shared_ptr<fluo::RawData> Convert(bool get_max);
 	//c is the channel index to load
-	virtual Nrrd* Convert(int c, bool get_max);
+	virtual std::shared_ptr<fluo::RawData> Convert(int c, bool get_max);
 	//t is the time point value to load
-	virtual Nrrd* Convert(int t, int c, bool get_max) = 0;
+	virtual std::shared_ptr<fluo::RawData> Convert(int t, int c, bool get_max) = 0;
 
 	//for a time sequence, get the file name for specified time and channel
 	virtual std::wstring GetCurDataName(int t, int c) = 0;

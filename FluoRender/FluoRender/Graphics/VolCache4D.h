@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_VolCache_h
 #define FL_VolCache_h
 
-#include <nrrd.h>
+#include <RawData.h>
 #include <deque>
 #include <functional>
 #include <memory>
@@ -69,12 +69,12 @@ namespace flvr
 			build_tex(false),
 			time_cond0(false) {}
 
-		Nrrd* GetNrrdData() { return m_data; }
-		Nrrd* GetNrrdMask() { return m_mask; }
-		Nrrd* GetNrrdLabel() { return m_label; }
-		void* GetRawData() { if (m_data) return m_data->data; return 0; }
-		void* GetRawMask() { if (m_mask) return m_mask->data; return 0; }
-		void* GetRawLabel() { if (m_label) return m_label->data; return 0; }
+		std::shared_ptr<fluo::RawData> GetRawDataData() { return m_data; }
+		std::shared_ptr<fluo::RawData> GetRawDataMask() { return m_mask; }
+		std::shared_ptr<fluo::RawData> GetRawDataLabel() { return m_label; }
+		//void* GetRawPointerData() { if (m_data) return m_data->data; return 0; }
+		//void* GetRawPointerMask() { if (m_mask) return m_mask->data; return 0; }
+		//void* GetRawPointerLabel() { if (m_label) return m_label->data; return 0; }
 		size_t GetTime() { return m_tnum; }
 
 		void SetHandleFlags(int flags);
@@ -127,9 +127,9 @@ namespace flvr
 
 	private:
 		std::weak_ptr<VolumeData> m_vd;
-		Nrrd* m_data;
-		Nrrd* m_mask;
-		Nrrd* m_label;
+		std::shared_ptr<fluo::RawData> m_data;
+		std::shared_ptr<fluo::RawData> m_mask;
+		std::shared_ptr<fluo::RawData> m_label;
 
 		size_t m_tnum;//current time point number
 		bool m_valid;

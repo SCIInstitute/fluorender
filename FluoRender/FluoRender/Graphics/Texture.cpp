@@ -87,20 +87,21 @@ namespace flvr
 		//release other data
 		for (auto& it : data_)
 		{
-			Nrrd* nrrd = it.second.data;
+			auto raw = it.second.data;
 			auto type = it.second.type;
-			if (nrrd)
+			if (raw)
 			{
 				bool existInPyramid = false;
 				for (int j = 0; j < pyramid_.size(); j++)
-					if (pyramid_[j].data == nrrd) existInPyramid = true;
+					if (pyramid_[j].data == raw) existInPyramid = true;
 
 				if (!existInPyramid)
 				{
-					if (type == CompType::Mask && mask_undo_num_)
-						nrrdNix(nrrd);
-					else
-						nrrdNuke(nrrd);
+					raw.reset();
+					//if (type == CompType::Mask && mask_undo_num_)
+					//	nrrdNix(nrrd);
+					//else
+					//	nrrdNuke(nrrd);
 				}
 			}
 		}
@@ -325,24 +326,20 @@ namespace flvr
 
 	fluo::Vector Texture::get_spacing(int lv)
 	{
-		if (!brkxml_)
-		{
-			return spacing_;
-		}
-		else if (lv < 0 || lv >= pyramid_lv_num_ || pyramid_.empty())
+		if (brkxml_)
 		{
 			return spacing_ * spacing_scale_;
 		}
-		else if (pyramid_[lv].data)
-		{
-			int offset = 0;
-			if (pyramid_[lv].data->dim > 3) offset = 1;
-			fluo::Vector spc(
-				pyramid_[lv].data->axis[offset + 0].spacing,
-				pyramid_[lv].data->axis[offset + 1].spacing,
-				pyramid_[lv].data->axis[offset + 2].spacing);
-			return spc * spacing_scale_;
-		}
+		//else if (pyramid_[lv].data)
+		//{
+		//	int offset = 0;
+		//	if (pyramid_[lv].data->dim > 3) offset = 1;
+		//	fluo::Vector spc(
+		//		pyramid_[lv].data->axis[offset + 0].spacing,
+		//		pyramid_[lv].data->axis[offset + 1].spacing,
+		//		pyramid_[lv].data->axis[offset + 2].spacing);
+		//	return spc * spacing_scale_;
+		//}
 		return spacing_;
 	}
 
@@ -369,11 +366,12 @@ namespace flvr
 		set_transform(tform);
 	}
 
-	bool Texture::build(Nrrd* nv_nrrd,
+	bool Texture::build(
+		const std::shared_ptr<fluo::RawData>& raw,
 		double vmn, double vmx,
 		std::vector<flvr::TextureBrick*>* brks)
 	{
-		if (!nv_nrrd)
+		if (!raw)
 			return false;
 
 		int bytes = 0;

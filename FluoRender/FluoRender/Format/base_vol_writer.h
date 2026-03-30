@@ -28,8 +28,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BASE_VOL_WRITER_H_
 #define _BASE_VOL_WRITER_H_
 
+#include <RawData.h>
 #include <string>
-#include <nrrd.h>
 
 namespace fluo
 {
@@ -41,7 +41,7 @@ public:
 	//BaseVolWriter();
 	virtual ~BaseVolWriter() {};
 
-	virtual void SetData(Nrrd* data) = 0;
+	virtual void SetData(const std::shared_ptr<fluo::RawData>& data) = 0;
 	virtual void SetSpacing(const fluo::Vector& spc) = 0;
 	virtual void SetCompression(bool value) = 0;
 	virtual void Save(const std::wstring& filename, int mode) = 0;

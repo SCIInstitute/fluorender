@@ -778,6 +778,13 @@ file(GLOB pyth_src FluoRender/FluoRender/Python/*.cpp)
 add_library(PYTHON_LIB STATIC
   ${pyth_hdr} ${pyth_src})
 
+# Raw
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Raw)
+file(GLOB raw_hdr FluoRender/FluoRender/Raw/*.h)
+file(GLOB raw_src FluoRender/FluoRender/Raw/*.cpp)
+add_library(RAW_LIB STATIC
+  ${raw_hdr} ${raw_src})
+
 # Renderer
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Renderer)
 file(GLOB renderer_hdr FluoRender/FluoRender/Renderer/*.h)
@@ -1083,6 +1090,8 @@ endif()
 target_link_libraries(PYTHON_LIB PRIVATE
   ${HDF5_LIBRARIES})
 
+# Raw
+
 # Renderer
 target_include_directories(RENDERER_LIB PRIVATE
   ${GLM_DIRS})
@@ -1298,6 +1307,7 @@ target_link_libraries(FluoRender PRIVATE
     PROGRESS_LIB
     PROJECT_LIB
     PYTHON_LIB
+    RAW_LIB
     RENDERER_LIB
     SCENE_LIB
     SCRIPT_LIB

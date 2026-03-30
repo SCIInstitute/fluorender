@@ -29,6 +29,7 @@
 #ifndef TextureBrick_h
 #define TextureBrick_h
 
+#include <RawData.h>
 #include <Ray.h>
 #include <Texture.h>
 #include <stdint.h>
@@ -295,14 +296,14 @@ namespace flvr
 			(unsigned long long)(stride.intx()) +
 			(unsigned long long)(off_size_.intx() + ijk.intx());
 		int bytes = nb(CompType::Data);
-		Nrrd* nrrd = data_[CompType::Data].data;
-		if (!nrrd)
+		auto rawd = data_[CompType::Data].data;
+		if (!rawd)
 			return 0.0;
 		switch (bytes)
 		{
 		case 1:
 		{
-			unsigned char* ptr = (unsigned char*)(nrrd->data);
+			unsigned char* ptr = rawd->DataAs<unsigned char>();
 			return ptr[offset] / 255.0;
 		}
 			break;
@@ -325,7 +326,7 @@ namespace flvr
 	struct Pyramid_Level {
 		std::vector<FileLocInfo *> *filenames;
 		int filetype;
-		Nrrd* data;
+		std::shared_ptr<fluo::RawData> data;
 		std::vector<TextureBrick *> bricks;
 		//some information
 		//total size
