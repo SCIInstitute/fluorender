@@ -234,8 +234,14 @@ NRRDReader::Convert(int t, int c, bool get_max)
 	// ---- Allocate raw buffer ---------------------------------------------
 	const size_t bytes_per_elem = nrrdElementSize(nrrd);
 	const size_t total_bytes = voxel_count * bytes_per_elem;
+	auto raw = std::make_shared<fluo::RawData>(
+		fluo::RawData::Size3{ nx, ny, nz },
+		FromNrrdScalar(nrrd->type),
+		1, 1, 0, 0);
+	if (!raw->Allocate())
+		return nullptr;
 
-	auto* buffer = new unsigned char[total_bytes];
+	fluo::Byte* buffer = raw->GetData();
 	nrrd->data = buffer;
 
 	if (nrrdRead(nrrd, nrrd_file, nullptr))
@@ -317,18 +323,6 @@ NRRDReader::Convert(int t, int c, bool get_max)
 
 		m_scalar_scale = (m_max_value > 0.0) ? 65535.0 / m_max_value : 1.0;
 	}
-
-	// ---- Create RawData (adopt buffer) ------------------------------------
-	auto raw = std::make_shared<fluo::RawData>(
-		fluo::RawData::Size3{ nx, ny, nz },
-		FromNrrdScalar(nrrd->type),
-		1, 1, 0, 0,
-		reinterpret_cast<fluo::Byte*>(buffer),
-		[](fluo::Byte* p)
-		{
-			delete[] reinterpret_cast<unsigned char*>(p);
-		}
-	);
 
 	nrrd->data = nullptr;
 	nrrdNuke(nrrd);

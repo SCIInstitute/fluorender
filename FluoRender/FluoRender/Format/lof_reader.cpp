@@ -202,36 +202,17 @@ std::shared_ptr<fluo::RawData> LOFReader::Convert(int t, int c, bool get_max)
 		//allocate memory
 		bool show_progress = false;
 		size_t blk_num = tinfo->blocks.size();
-		unsigned long long mem_size = m_size.get_size_xyz();
-		void* val = 0;
-		switch (m_datatype)
-		{
-		case 1://8-bit
-			val = new (std::nothrow) unsigned char[mem_size];
-			show_progress = mem_size > glbin_settings.m_prg_size;
-			break;
-		case 2://16-bit
-			val = new (std::nothrow) unsigned short[mem_size];
-			show_progress = mem_size * 2 > glbin_settings.m_prg_size;
-			break;
-		}
-
-		for (size_t i = 0; i < blk_num; i++)
-		{
-			SubBlockInfo* sbi = &(tinfo->blocks[i]);
-			ReadMemoryBlock(pfile, sbi, val);
-			if (show_progress && m_time_num == 1)
-				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
-		}
-		//assign externally allocated memory to be managed by raw data
 		fluo::DataFormat format = fluo::DataFormat::Unknown;
+		unsigned long long mem_size = m_size.get_size_xyz();
 		switch (m_datatype)
 		{
 		case 1:
 			format = fluo::DataFormat::UInt8;
+			show_progress = mem_size > glbin_settings.m_prg_size;
 			break;
 		case 2:
 			format = fluo::DataFormat::UInt16;
+			show_progress = mem_size * 2 > glbin_settings.m_prg_size;
 			break;
 		}
 		fluo::RawData::Size3 size =
@@ -246,13 +227,19 @@ std::shared_ptr<fluo::RawData> LOFReader::Convert(int t, int c, bool get_max)
 			/* channels */ 1,
 			/* time_steps */ 1,
 			/* resolution_level */ 0,
-			/* brick_index */ 0,
-			static_cast<fluo::Byte*>(val),
-			[](fluo::Byte* p)
-			{
-				delete[] p;
-			}
+			/* brick_index */ 0
 		);
+		if (!data->Allocate())
+			return nullptr;
+		fluo::Byte* buffer = data->GetData();
+
+		for (size_t i = 0; i < blk_num; i++)
+		{
+			SubBlockInfo* sbi = &(tinfo->blocks[i]);
+			ReadMemoryBlock(pfile, sbi, buffer);
+			if (show_progress && m_time_num == 1)
+				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
+		}
 	}
 
 	fclose(pfile);

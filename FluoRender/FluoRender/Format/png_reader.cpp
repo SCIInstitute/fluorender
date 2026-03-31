@@ -323,32 +323,6 @@ std::shared_ptr<fluo::RawData> PNGReader::ReadPng(const std::vector<SliceInfo>& 
 
 	bool eight_bit = m_bits == 8;
 
-	unsigned long long total_size = m_size.get_size_xyz();
-	void* val = eight_bit ? (void*)(new unsigned char[total_size]) :
-		(void*)(new unsigned short[total_size]);
-	if (!val)
-		return nullptr;
-
-	bool show_progress = total_size > glbin_settings.m_prg_size;
-
-	uint8_t* val_ptr = static_cast<uint8_t*>(val);
-	size_t for_size = filelist.size();
-	for (size_t i = 0; i < for_size; i++)
-	{
-		const SliceInfo& slice_info = filelist[i];
-		if (slice_info.slice.empty())
-			continue;
-		if (!ReadSinglePng(static_cast<void*>(val_ptr), slice_info.slice, c))
-		{
-			delete[] static_cast<unsigned char*>(val);
-			return nullptr;
-		}
-		if (show_progress)
-			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr += m_size.get_size_xy() * (m_bits / 8);
-	}
-
-	//assign externally allocated memory to be managed by raw data
 	fluo::DataFormat format = fluo::DataFormat::Unknown;
 	if (eight_bit)
 		format = fluo::DataFormat::UInt8;
@@ -366,13 +340,30 @@ std::shared_ptr<fluo::RawData> PNGReader::ReadPng(const std::vector<SliceInfo>& 
 		/* channels */ 1,
 		/* time_steps */ 1,
 		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		static_cast<fluo::Byte*>(val),
-		[](fluo::Byte* p)
-		{
-			delete[] p;
-		}
+		/* brick_index */ 0
 	);
+	if (!data->Allocate())
+		return nullptr;
+
+	unsigned long long total_size = m_size.get_size_xyz();
+	bool show_progress = total_size > glbin_settings.m_prg_size;
+
+	fluo::Byte* buffer = data->GetData();
+	uint8_t* val_ptr = static_cast<uint8_t*>(buffer);
+	size_t for_size = filelist.size();
+	for (size_t i = 0; i < for_size; i++)
+	{
+		const SliceInfo& slice_info = filelist[i];
+		if (slice_info.slice.empty())
+			continue;
+		if (!ReadSinglePng(static_cast<void*>(val_ptr), slice_info.slice, c))
+		{
+			return nullptr;
+		}
+		if (show_progress)
+			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
+		val_ptr += m_size.get_size_xy() * (m_bits / 8);
+	}
 
 	if (!eight_bit)
 	{

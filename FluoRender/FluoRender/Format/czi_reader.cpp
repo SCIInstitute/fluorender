@@ -188,61 +188,83 @@ std::shared_ptr<fluo::RawData> CZIReader::Convert(int t, int c, bool get_max)
 			fclose(pfile);
 			return 0;
 		}
-		//allocate memory
+
 		bool show_progress = false;
 		size_t blk_num = cinfo->blocks.size();
 		unsigned long long mem_size = m_size.get_size_xyz();
-		void* val = 0;
-		switch (m_datatype)
-		{
-		case 1://8-bit
-			val = new (std::nothrow) unsigned char[mem_size];
-			show_progress = mem_size > glbin_settings.m_prg_size;
-			break;
-		case 2://16-bit
-			val = new (std::nothrow) unsigned short[mem_size];
-			show_progress = mem_size * 2 > glbin_settings.m_prg_size;
-			break;
-		}
 
-		for (size_t i = 0; i < blk_num; i++)
-		{
-			SubBlockInfo* sbi = &(cinfo->blocks[i]);
-			ReadSegSubBlock(pfile, sbi, val);
-			if (show_progress && m_time_num == 1)
-				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
-		}
-
-		//assign externally allocated memory to be managed by raw data
+		//--------------------------------------------------
+		// Determine data format
+		//--------------------------------------------------
 		fluo::DataFormat format = fluo::DataFormat::Unknown;
+		size_t bytes_per_voxel = 0;
+
 		switch (m_datatype)
 		{
-		case 1:
+		case 1: // 8-bit
 			format = fluo::DataFormat::UInt8;
+			bytes_per_voxel = 1;
 			break;
-		case 2:
+		case 2: // 16-bit
 			format = fluo::DataFormat::UInt16;
+			bytes_per_voxel = 2;
 			break;
+		default:
+			fclose(pfile);
+			return 0;
 		}
+
+		show_progress = mem_size * bytes_per_voxel > glbin_settings.m_prg_size;
+
+		//--------------------------------------------------
+		// Create RawData (RawData allocates its own memory)
+		//--------------------------------------------------
 		fluo::RawData::Size3 size =
 		{
 			static_cast<size_t>(m_size.intx()),
 			static_cast<size_t>(m_size.inty()),
 			static_cast<size_t>(m_size.intz())
 		};
+
 		data = std::make_shared<fluo::RawData>(
 			size,
 			format,
 			/* channels */ 1,
 			/* time_steps */ 1,
 			/* resolution_level */ 0,
-			/* brick_index */ 0,
-			static_cast<fluo::Byte*>(val),
-			[](fluo::Byte* p)
-			{
-				delete[] p;
-			}
+			/* brick_index */ 0
 		);
+		if (!data->Allocate())
+			return nullptr;
+
+		//--------------------------------------------------
+		// Get writable pointer from RawData
+		//--------------------------------------------------
+		fluo::Byte* buffer = data->GetData();
+		if (!buffer)
+		{
+			fclose(pfile);
+			return nullptr;
+		}
+
+		//--------------------------------------------------
+		// Read blocks directly into RawData memory
+		//--------------------------------------------------
+		for (size_t i = 0; i < blk_num; i++)
+		{
+			SubBlockInfo* sbi = &(cinfo->blocks[i]);
+
+			// ReadSegSubBlock now writes into RawData-owned memory
+			ReadSegSubBlock(pfile, sbi, buffer);
+
+			if (show_progress && m_time_num == 1)
+			{
+				SetProgress(
+					static_cast<int>(std::round(100.0 * (i + 1) / blk_num)),
+					"NOT_SET"
+				);
+			}
+		}
 	}
 
 	m_scalar_scale = 65535.0 / m_max_value;

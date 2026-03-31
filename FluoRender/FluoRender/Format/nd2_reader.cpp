@@ -174,33 +174,18 @@ ND2Reader::Convert(int t, int c, bool get_max)
 	{
 	case 8:
 	{
-		auto* buffer = new (std::nothrow) unsigned char[voxel_count];
-		if (!buffer)
-		{
-			Lim_FileClose(h);
-			return nullptr;
-		}
-
-		ReadChannel(h, t, c, buffer);
-
 		raw = std::make_shared<fluo::RawData>(
 			size,
 			fluo::DataFormat::UInt8,
 			/* channels */ 1,
 			/* time_steps */ 1,
 			/* resolution_level */ 0,
-			/* brick_index */ 0,
-			reinterpret_cast<fluo::Byte*>(buffer),
-			[](fluo::Byte* p)
-			{
-				delete[] reinterpret_cast<unsigned char*>(p);
-			}
+			/* brick_index */ 0
 		);
-		break;
-	}
-	case 16:
-	{
-		auto* buffer = new (std::nothrow) unsigned short[voxel_count];
+		if (!raw->Allocate())
+			return nullptr;
+
+		fluo::Byte* buffer = raw->GetData();
 		if (!buffer)
 		{
 			Lim_FileClose(h);
@@ -209,19 +194,30 @@ ND2Reader::Convert(int t, int c, bool get_max)
 
 		ReadChannel(h, t, c, buffer);
 
+		break;
+	}
+	case 16:
+	{
 		raw = std::make_shared<fluo::RawData>(
 			size,
 			fluo::DataFormat::UInt16,
 			/* channels */ 1,
 			/* time_steps */ 1,
 			/* resolution_level */ 0,
-			/* brick_index */ 0,
-			reinterpret_cast<fluo::Byte*>(buffer),
-			[](fluo::Byte* p)
-			{
-				delete[] reinterpret_cast<unsigned short*>(p);
-			}
+			/* brick_index */ 0
 		);
+		if (!raw->Allocate())
+			return nullptr;
+
+		fluo::Byte* buffer = raw->GetData();
+		if (!buffer)
+		{
+			Lim_FileClose(h);
+			return nullptr;
+		}
+
+		ReadChannel(h, t, c, buffer);
+
 		break;
 	}
 	default:

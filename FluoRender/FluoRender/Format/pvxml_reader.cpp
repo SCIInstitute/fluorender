@@ -860,47 +860,39 @@ std::shared_ptr<fluo::RawData> PVXMLReader::Convert(int t, int c, bool get_max)
 		!m_size.any_le_zero())
 	{
 		//allocate memory
+		fluo::DataFormat format = fluo::DataFormat::UInt16;
+		fluo::RawData::Size3 size =
+		{
+			static_cast<size_t>(m_size.intx()),
+			static_cast<size_t>(m_size.inty()),
+			static_cast<size_t>(m_size.intz())
+		};
+		data = std::make_shared<fluo::RawData>(
+			size,
+			format,
+			/* channels */ 1,
+			/* time_steps */ 1,
+			/* resolution_level */ 0,
+			/* brick_index */ 0
+		);
+		if (!data->Allocate())
+			return nullptr;
+
+		unsigned short* buffer = data->DataAs<unsigned short>();
 		unsigned long long mem_size = (unsigned long long)m_size.get_size_xyz();
-		unsigned short* val = new (std::nothrow) unsigned short[mem_size]();
-		if (!val) return 0;
 
 		TimeDataInfo* time_data_info = &(m_pvxml_info[t]);
 
 		if (m_sep_seq)
-			ConvertS(c, time_data_info, val);
+			ConvertS(c, time_data_info, buffer);
 		else
-			ConvertN(c, time_data_info, val);
+			ConvertN(c, time_data_info, buffer);
 
-		if (val)
+		if (get_max)
 		{
-			//assign externally allocated memory to be managed by raw data
-			fluo::DataFormat format = fluo::DataFormat::UInt16;
-			fluo::RawData::Size3 size =
-			{
-				static_cast<size_t>(m_size.intx()),
-				static_cast<size_t>(m_size.inty()),
-				static_cast<size_t>(m_size.intz())
-			};
-			data = std::make_shared<fluo::RawData>(
-				size,
-				format,
-				/* channels */ 1,
-				/* time_steps */ 1,
-				/* resolution_level */ 0,
-				/* brick_index */ 0,
-				reinterpret_cast<fluo::Byte*>(val),
-				[](fluo::Byte* p)
-				{
-					delete[] reinterpret_cast<unsigned short*>(p);
-				}
-			);
-
-			if (get_max)
-			{
-				auto [minv, maxv] = data->ComputeMinMax<uint16_t>();
-				m_min_value = minv;
-				m_max_value = maxv;
-			}
+			auto [minv, maxv] = data->ComputeMinMax<uint16_t>();
+			m_min_value = minv;
+			m_max_value = maxv;
 		}
 	}
 

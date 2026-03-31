@@ -374,13 +374,6 @@ MPGReader::FrameInfo MPGReader::get_frame_info(int64_t dts, int64_t pts)
 std::shared_ptr<fluo::RawData> MPGReader::get_raw(AVFrame* frame, int c)
 {
 	//extract channel
-	unsigned long long total_size = m_size.get_size_xy();
-	uint8_t* val = new unsigned char[total_size];
-	unsigned long long index;
-	for (index = 0; index < total_size; ++index)
-		val[index] = *(frame->data[0] + index * 3 + c);
-
-	//assign externally allocated memory to be managed by raw data
 	fluo::DataFormat format = fluo::DataFormat::UInt8;
 	fluo::RawData::Size3 size =
 	{
@@ -394,13 +387,16 @@ std::shared_ptr<fluo::RawData> MPGReader::get_raw(AVFrame* frame, int c)
 		/* channels */ 1,
 		/* time_steps */ 1,
 		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		static_cast<fluo::Byte*>(val),
-		[](fluo::Byte* p)
-		{
-			delete[] p;
-		}
+		/* brick_index */ 0
 	);
+	if (!data->Allocate())
+		return nullptr;
+	fluo::Byte* buffer = data->GetData();
+
+	unsigned long long total_size = m_size.get_size_xy();
+	unsigned long long index;
+	for (index = 0; index < total_size; ++index)
+		buffer[index] = *(frame->data[0] + index * 3 + c);
 
 	return data;
 }

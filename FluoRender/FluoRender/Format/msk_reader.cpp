@@ -92,6 +92,7 @@ std::shared_ptr<fluo::RawData> MSKReader::Convert(int t, int c, bool get_max)
 	}
 	nio = nrrdIoStateNix(nio);
 	rewind(msk_file);
+
 	if (output->dim != 3 ||
 		(output->type != nrrdTypeChar &&
 		output->type != nrrdTypeUChar))
@@ -100,16 +101,29 @@ std::shared_ptr<fluo::RawData> MSKReader::Convert(int t, int c, bool get_max)
 		fclose(msk_file);
 		return nullptr;
 	}
+
 	const size_t x = output->axis[0].size;
 	const size_t y = output->axis[1].size;
 	const size_t z = output->axis[2].size;
-	const size_t voxel_count = x * y * z;
-	unsigned char* buffer = new unsigned char[voxel_count];
+	fluo::RawData::Size3 size = { x, y, z };
+
+	auto raw = std::make_shared<fluo::RawData>(
+		size,
+		fluo::DataFormat::UInt32,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0
+	);
+	if (!raw->Allocate())
+		return nullptr;
+
+	fluo::Byte* buffer = raw->GetData();
 	output->data = buffer;
 
-	if (nrrdRead(output, msk_file, NULL))
+	if (nrrdRead(output, msk_file, nullptr))
 	{
-		delete[] buffer;
+		output->data = nullptr;
 		nrrdNuke(output);
 		fclose(msk_file);
 		return nullptr;
@@ -117,25 +131,8 @@ std::shared_ptr<fluo::RawData> MSKReader::Convert(int t, int c, bool get_max)
 
 	fclose(msk_file);
 
-	// --- Create RawData and ADOPT the buffer ---
-	fluo::RawData::Size3 size = { x, y, z };
-
-	auto raw = std::make_shared<fluo::RawData>(
-		size,
-		fluo::DataFormat::UInt8,
-		/* channels */ 1,
-		/* time_steps */ 1,
-		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		reinterpret_cast<fluo::Byte*>(buffer),
-		[](fluo::Byte* p)
-		{
-			delete[] reinterpret_cast<unsigned char*>(p);
-		}
-	);
-
 	// --- NRRD no longer needed ---
-	output->data = nullptr;   // prevent accidental delete
+	output->data = nullptr;
 	nrrdNuke(output);
 
 	return raw;

@@ -290,142 +290,131 @@ std::shared_ptr<fluo::RawData> ImageJReader::Convert(int t, int c, bool get_max)
 	return ReadFromImageJ(t, c, get_max);
 }
 
-std::shared_ptr<fluo::RawData> ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
-	// ImageJ code to read the data.
+std::shared_ptr<fluo::RawData>
+ImageJReader::ReadFromImageJ(int t, int c, bool get_max)
+{
 	std::string path_name = ws2s(m_path_name);
 
-	jmethodID method_id = NULL;
-	if (m_eight_bit == true){
-		method_id = glbin_jvm_instance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getByteData2D", "([Ljava/lang/String;II)[[B");
-	}
-	else {
-		method_id = glbin_jvm_instance->m_pEnv->GetStaticMethodID(m_imageJ_cls, "getIntData2D", "([Ljava/lang/String;II)[[S");
-	}
-	
-	void* t_data = NULL;
-	if (method_id == nullptr) {
-		std::cerr << "ERROR: method void mymain() not found !" << std::endl;
-		return NULL;
-	}
-	else if (m_eight_bit == true){
-		jobjectArray arr = glbin_jvm_instance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
-			glbin_jvm_instance->m_pEnv->FindClass("java/lang/String"),    // Strings
-			glbin_jvm_instance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-		glbin_jvm_instance->m_pEnv->SetObjectArrayElement(arr, 0, glbin_jvm_instance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
-
-		jobjectArray  val = (jobjectArray)(glbin_jvm_instance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
-		//jboolean flag = glbin_jvm_instance->m_pEnv->ExceptionCheck();
-		//if (flag) {
-		//	glbin_jvm_instance->m_pEnv->ExceptionClear();
-		//	//TODO: code to handle exception.
-		//}
-
-		jsize len = glbin_jvm_instance->m_pEnv->GetArrayLength(val);
-		if (len >= 1)
-		{
-			unsigned long long offset = 0;			
-			for (unsigned long long i = 0; i < len; i++) {
-				jbyteArray inner_data = static_cast<jbyteArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
-				jsize len2 = glbin_jvm_instance->m_pEnv->GetArrayLength(inner_data);				
-				offset = i*len2;
-				if (t_data == NULL)
-					t_data = new unsigned char[(unsigned long long)len*len2];
-
-				jbyte* body = (jbyte*)(glbin_jvm_instance->m_pEnv->GetByteArrayElements(inner_data, 0));
-				for (unsigned long long j = 0; j < len2; ++j) {
-					int test = *(body + j);					
-					((unsigned char*)t_data)[offset + j] = test;
-				}
-				glbin_jvm_instance->m_pEnv->ReleaseByteArrayElements(inner_data, body, JNI_ABORT);						
-			}			
-		}
-		else {
-			jshortArray inner_data = static_cast<jshortArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, 0));
-			jshort* body = (jshort*)(glbin_jvm_instance->m_pEnv->GetShortArrayElements(inner_data, 0));
-			int test = *(body);
-			std::cout << "Error";
-		}
-		glbin_jvm_instance->m_pEnv->DeleteLocalRef(arr);
-		glbin_jvm_instance->m_pEnv->DeleteLocalRef(val);
-	}
-	else if (m_eight_bit == false)
-	{
-		//glbin_jvm_instance->m_pEnv->PushLocalFrame(1000);
-		jobjectArray arr = glbin_jvm_instance->m_pEnv->NewObjectArray(2,      // constructs java array of 3
-			glbin_jvm_instance->m_pEnv->FindClass("java/lang/String"),    // Strings
-			glbin_jvm_instance->m_pEnv->NewStringUTF("str"));   // each initialized with value "str"
-		glbin_jvm_instance->m_pEnv->SetObjectArrayElement(arr, 0, glbin_jvm_instance->m_pEnv->NewStringUTF(const_cast<char*>(path_name.c_str())));  // change an element		
-		jobjectArray val = (jobjectArray)(glbin_jvm_instance->m_pEnv->CallStaticObjectMethod(m_imageJ_cls, method_id, arr, (jint)t, (jint)c));   // call the method with the arr as argument.
-		jsize len = glbin_jvm_instance->m_pEnv->GetArrayLength(val);
-
-		if (len >= 1)
-		{
-			unsigned long long offset = 0;
-			for (unsigned long long i = 0; i < len; i++) {
-				jshortArray inner_data = static_cast<jshortArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, (jsize)i));
-				jsize len2 = glbin_jvm_instance->m_pEnv->GetArrayLength(inner_data);
-				offset = i*len2;
-				if (t_data == NULL)
-					t_data = t_data = new unsigned short int[(unsigned long long)len*len2];
-
-				jshort* body = (jshort*)(glbin_jvm_instance->m_pEnv->GetShortArrayElements(inner_data, 0));
-				for (unsigned long long j = 0; j < len2; ++j) {
-					int test = *(body + j);
-					*((unsigned short int*)t_data + offset + j) = test;
-				}
-				glbin_jvm_instance->m_pEnv->ReleaseShortArrayElements(inner_data, body, JNI_ABORT);
-			}
-			/*
-			jshort* body = glbin_jvm_instance->m_pEnv->GetShortArrayElements(val, 0);
-			unsigned short int* dummy = reinterpret_cast<unsigned short int*>(body);
-			t_data = new unsigned short int[len];
-			for (int i = 0; i < len; i++) {
-				int test = *(body + i);
-				*((unsigned short int*)t_data + i) = test;
-			}
-			glbin_jvm_instance->m_pEnv->ReleaseShortArrayElements(val, body, JNI_ABORT);
-			*/
-		}
-		else {
-			jshortArray inner_data = static_cast<jshortArray>(glbin_jvm_instance->m_pEnv->GetObjectArrayElement(val, 0));
-			jshort* body = (jshort*)(glbin_jvm_instance->m_pEnv->GetShortArrayElements(inner_data, 0));
-			int test = *(body);
-			std::cout << "Error";
-		}
-		unsigned short int test = ((unsigned short int *)(t_data))[10*488 + 10];
-		glbin_jvm_instance->m_pEnv->DeleteLocalRef(arr);
-		glbin_jvm_instance->m_pEnv->DeleteLocalRef(val);
-	}
-
-	if (!t_data)
-		return nullptr;
-	
-	//assign externally allocated memory to be managed by raw data
-	fluo::DataFormat format = fluo::DataFormat::Unknown;
+	// ------------------------------------------------------------
+	// 1. Resolve Java method
+	// ------------------------------------------------------------
+	jmethodID method_id = nullptr;
 	if (m_eight_bit)
-		format = fluo::DataFormat::UInt8;
+	{
+		method_id = glbin_jvm_instance->m_pEnv->GetStaticMethodID(
+			m_imageJ_cls,
+			"getByteData2D",
+			"([Ljava/lang/String;II)[[B");
+	}
 	else
-		format = fluo::DataFormat::UInt16;
+	{
+		method_id = glbin_jvm_instance->m_pEnv->GetStaticMethodID(
+			m_imageJ_cls,
+			"getIntData2D",
+			"([Ljava/lang/String;II)[[S");
+	}
+
+	if (!method_id)
+	{
+		std::cerr << "ERROR: ImageJ method not found!" << std::endl;
+		return nullptr;
+	}
+
+	// ------------------------------------------------------------
+	// 2. Determine RawData format and allocate up front
+	// ------------------------------------------------------------
+	fluo::DataFormat format =
+		m_eight_bit ? fluo::DataFormat::UInt8
+		: fluo::DataFormat::UInt16;
+
 	fluo::RawData::Size3 size =
 	{
 		static_cast<size_t>(m_size.intx()),
 		static_cast<size_t>(m_size.inty()),
 		static_cast<size_t>(m_size.intz())
 	};
+
 	auto data = std::make_shared<fluo::RawData>(
 		size,
 		format,
 		/* channels */ 1,
 		/* time_steps */ 1,
 		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		static_cast<fluo::Byte*>(t_data),
-		[](fluo::Byte* p)
-		{
-			delete[] p;
-		}
+		/* brick_index */ 0
 	);
 
+	if (!data->Allocate())
+		return nullptr;
+
+	// Typed pointer into RawData memory
+	uint8_t* dst8 = m_eight_bit ? data->DataAs<uint8_t>() : nullptr;
+	uint16_t* dst16 = m_eight_bit ? nullptr : data->DataAs<uint16_t>();
+
+	// ------------------------------------------------------------
+	// 3. Prepare Java string array argument
+	// ------------------------------------------------------------
+	JNIEnv* env = glbin_jvm_instance->m_pEnv;
+
+	jobjectArray arr = env->NewObjectArray(
+		2,
+		env->FindClass("java/lang/String"),
+		env->NewStringUTF("str"));
+
+	env->SetObjectArrayElement(
+		arr,
+		0,
+		env->NewStringUTF(path_name.c_str()));
+
+	jobjectArray val = static_cast<jobjectArray>(
+		env->CallStaticObjectMethod(
+			m_imageJ_cls, method_id, arr, (jint)t, (jint)c));
+
+	env->DeleteLocalRef(arr);
+
+	if (!val)
+		return nullptr;
+
+	// ------------------------------------------------------------
+	// 4. Copy Java data into RawData buffer
+	// ------------------------------------------------------------
+	jsize rows = env->GetArrayLength(val);
+
+	for (jsize i = 0; i < rows; ++i)
+	{
+		if (m_eight_bit)
+		{
+			jbyteArray inner =
+				static_cast<jbyteArray>(env->GetObjectArrayElement(val, i));
+			jsize cols = env->GetArrayLength(inner);
+
+			jbyte* body = env->GetByteArrayElements(inner, nullptr);
+
+			std::memcpy(dst8 + i * cols, body, cols);
+
+			env->ReleaseByteArrayElements(inner, body, JNI_ABORT);
+			env->DeleteLocalRef(inner);
+		}
+		else
+		{
+			jshortArray inner =
+				static_cast<jshortArray>(env->GetObjectArrayElement(val, i));
+			jsize cols = env->GetArrayLength(inner);
+
+			jshort* body = env->GetShortArrayElements(inner, nullptr);
+
+			for (jsize j = 0; j < cols; ++j)
+				dst16[i * cols + j] = static_cast<uint16_t>(body[j]);
+
+			env->ReleaseShortArrayElements(inner, body, JNI_ABORT);
+			env->DeleteLocalRef(inner);
+		}
+	}
+
+	env->DeleteLocalRef(val);
+
+	// ------------------------------------------------------------
+	// 5. Post‑processing (unchanged logic)
+	// ------------------------------------------------------------
 	if (!m_eight_bit)
 	{
 		if (get_max)
@@ -434,13 +423,15 @@ std::shared_ptr<fluo::RawData> ImageJReader::ReadFromImageJ(int t, int c, bool g
 			m_min_value = minv;
 			m_max_value = maxv;
 		}
-		if (m_max_value > 0.0)
-			m_scalar_scale = 65535.0 / m_max_value;
-		else 
-			m_scalar_scale = 1.0;		
+
+		m_scalar_scale =
+			(m_max_value > 0.0) ? (65535.0 / m_max_value) : 1.0;
 	}
-	else 
+	else
+	{
 		m_max_value = 255.0;
+		m_scalar_scale = 1.0;
+	}
 
 	return data;
 }

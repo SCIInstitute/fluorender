@@ -118,24 +118,6 @@ LBLReader::Convert(int t, int c, bool get_max)
 	const size_t x = output->axis[0].size;
 	const size_t y = output->axis[1].size;
 	const size_t z = output->axis[2].size;
-	const size_t voxel_count = x * y * z;
-
-	// --- Allocate buffer ourselves (as before) ---
-	unsigned int* buffer = new unsigned int[voxel_count];
-
-	output->data = buffer;
-
-	if (nrrdRead(output, lbl_file, nullptr))
-	{
-		delete[] buffer;
-		nrrdNuke(output);
-		fclose(lbl_file);
-		return nullptr;
-	}
-
-	fclose(lbl_file);
-
-	// --- Create RawData and ADOPT the buffer ---
 	fluo::RawData::Size3 size = { x, y, z };
 
 	auto raw = std::make_shared<fluo::RawData>(
@@ -144,16 +126,26 @@ LBLReader::Convert(int t, int c, bool get_max)
 		/* channels */ 1,
 		/* time_steps */ 1,
 		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		reinterpret_cast<fluo::Byte*>(buffer),
-		[](fluo::Byte* p)
-		{
-			delete[] reinterpret_cast<unsigned int*>(p);
-		}
+		/* brick_index */ 0
 	);
+	if (!raw->Allocate())
+		return nullptr;
+
+	fluo::Byte* buffer = raw->GetData();
+	output->data = buffer;
+
+	if (nrrdRead(output, lbl_file, nullptr))
+	{
+		output->data = nullptr;
+		nrrdNuke(output);
+		fclose(lbl_file);
+		return nullptr;
+	}
+
+	fclose(lbl_file);
 
 	// --- NRRD no longer needed ---
-	output->data = nullptr;   // prevent accidental delete
+	output->data = nullptr;
 	nrrdNuke(output);
 
 	return raw;

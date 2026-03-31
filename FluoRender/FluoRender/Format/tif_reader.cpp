@@ -1754,15 +1754,31 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 	std::shared_ptr<fluo::RawData> data = nullptr;
 
 	//allocate memory
-	void *val = 0;
 	bool eight_bit = bits == 8;
+	fluo::DataFormat format = fluo::DataFormat::Unknown;
+	if (eight_bit)
+		format = fluo::DataFormat::UInt8;
+	else
+		format = fluo::DataFormat::UInt16;
+	fluo::RawData::Size3 size =
+	{
+		static_cast<size_t>(m_size.intx()),
+		static_cast<size_t>(m_size.inty()),
+		static_cast<size_t>(m_size.intz())
+	};
+	data = std::make_shared<fluo::RawData>(
+		size,
+		format,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0
+	);
+	if (!data->Allocate())
+		return nullptr;
 
+	fluo::Byte* buffer = data->GetData();
 	unsigned long long total_size = m_size.get_size_xyz();
-	val = eight_bit ? (void*)(new unsigned char[total_size]) :
-		(void*)(new unsigned short[total_size]);
-	if (!val)
-		return NULL;
-
 	bool show_progress = total_size > glbin_settings.m_prg_size;
 
 	int min_value = 0;
@@ -1827,10 +1843,10 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 
 				if (eight_bit)
 					GetTiffStrip(pageindex, strip,
-					(uint8_t*)val + valindex, strip_size);
+					(uint8_t*)buffer + valindex, strip_size);
 				else
 					GetTiffStrip(pageindex, strip,
-					(uint16_t*)val + valindex, strip_size);
+					(uint16_t*)buffer + valindex, strip_size);
 			}
 			pageindex += m_chan_num;
 			//if (!imagej_raw_)
@@ -1927,11 +1943,11 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 							}
 							if (indexinpage >= pagepixels) break;
 							if (eight_bit)
-								memcpy((uint8_t*)val + valindex,
+								memcpy((uint8_t*)buffer + valindex,
 								(uint8_t*)buf + samples*i + c,
 									sizeof(uint8_t));
 							else
-								memcpy((uint16_t*)val + valindex,
+								memcpy((uint16_t*)buffer + valindex,
 								(uint16_t*)buf + samples*i + c,
 									sizeof(uint16_t));
 							indexinpage++;
@@ -1953,22 +1969,22 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 							if (tx < x_tile_num-1)
 							{
 								if (eight_bit)
-									memcpy((uint8_t*)val + valindex,
+									memcpy((uint8_t*)buffer + valindex,
 									(uint8_t*)buf + i*tile_w,
 										sizeof(uint8_t)*tile_w);
 								else
-									memcpy((uint16_t*)val + valindex,
+									memcpy((uint16_t*)buffer + valindex,
 									(uint16_t*)buf + i*tile_w,
 										sizeof(uint16_t)*tile_w);
 							}
 							else
 							{
 								if (eight_bit)
-									memcpy((uint8_t*)val + valindex,
+									memcpy((uint8_t*)buffer + valindex,
 									(uint8_t*)buf + i*tile_w,
 										sizeof(uint8_t)*tile_w_last);
 								else
-									memcpy((uint16_t*)val + valindex,
+									memcpy((uint16_t*)buffer + valindex,
 									(uint16_t*)buf + i*tile_w,
 										sizeof(uint16_t)*tile_w_last);
 							}
@@ -2001,17 +2017,17 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 						{
 							if (indexinpage++ >= pagepixels) break;
 							if (eight_bit)
-								memcpy((uint8_t*)val + valindex,
+								memcpy((uint8_t*)buffer + valindex,
 									(uint8_t*)buf + samples*i + c, sizeof(uint8_t));
 							else
-								memcpy((uint16_t*)val + valindex,
+								memcpy((uint16_t*)buffer + valindex,
 									(uint16_t*)buf + samples*i + c, sizeof(uint16_t));
 							if (!eight_bit && get_max)
 							{
-								if (min_value == 0 || *((uint16_t*)val + valindex) < min_value)
-									min_value = *((uint16_t*)val + valindex);
-								if (*((uint16_t*)val + valindex) > max_value)
-									max_value = *((uint16_t*)val + valindex);
+								if (min_value == 0 || *((uint16_t*)buffer + valindex) < min_value)
+									min_value = *((uint16_t*)buffer + valindex);
+								if (*((uint16_t*)buffer + valindex) > max_value)
+									max_value = *((uint16_t*)buffer + valindex);
 							}
 							valindex++;
 						}
@@ -2027,10 +2043,10 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 						{
 							if (eight_bit)
 								GetTiffStrip(sequence ? 0 : val_pageindex, strip,
-									(uint8_t*)val + valindex, strip_size_used);
+									(uint8_t*)buffer + valindex, strip_size_used);
 							else
 								GetTiffStrip(sequence ? 0 : val_pageindex, strip,
-									(uint16_t*)val + valindex, strip_size_used);
+									(uint16_t*)buffer + valindex, strip_size_used);
 						}
 					}
 				}
@@ -2049,32 +2065,6 @@ std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filel
 	if (buf)
 		free(buf);
 	if (!sequence || isHyperstack_) CloseTiff();
-
-	//assign externally allocated memory to be managed by raw data
-	fluo::DataFormat format = fluo::DataFormat::Unknown;
-	if (eight_bit)
-		format = fluo::DataFormat::UInt8;
-	else
-		format = fluo::DataFormat::UInt16;
-	fluo::RawData::Size3 size =
-	{
-		static_cast<size_t>(m_size.intx()),
-		static_cast<size_t>(m_size.inty()),
-		static_cast<size_t>(m_size.intz())
-	};
-	data = std::make_shared<fluo::RawData>(
-		size,
-		format,
-		/* channels */ 1,
-		/* time_steps */ 1,
-		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		static_cast<fluo::Byte*>(val),
-		[](fluo::Byte* p)
-		{
-			delete[] p;
-		}
-	);
 
 	if (!eight_bit) {
 		if (get_max) {

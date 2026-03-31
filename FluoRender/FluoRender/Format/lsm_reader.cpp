@@ -668,19 +668,35 @@ std::shared_ptr<fluo::RawData> LSMReader::Convert(int t, int c, bool get_max)
 		ChannelInfo *cinfo = &m_lsm_info[t][c];
 		size_t blk_num = cinfo->size();
 		unsigned long long mem_size = m_size.get_size_xyz();
-		void* val = 0;
+		fluo::DataFormat format = fluo::DataFormat::Unknown;
 		switch (m_datatype)
 		{
-		case 1://8-bit
-			val = new (std::nothrow) unsigned char[mem_size];
+		case 1:
+			format = fluo::DataFormat::UInt8;
 			show_progress = mem_size > glbin_settings.m_prg_size;
 			break;
-		case 2://16-bit
-		case 3:
-			val = new (std::nothrow) unsigned short[mem_size];
+		case 2:
+			format = fluo::DataFormat::UInt16;
 			show_progress = mem_size * 2 > glbin_settings.m_prg_size;
 			break;
 		}
+		fluo::RawData::Size3 size =
+		{
+			static_cast<size_t>(m_size.intx()),
+			static_cast<size_t>(m_size.inty()),
+			static_cast<size_t>(m_size.intz())
+		};
+		data = std::make_shared<fluo::RawData>(
+			size,
+			format,
+			/* channels */ 1,
+			/* time_steps */ 1,
+			/* resolution_level */ 0,
+			/* brick_index */ 0
+		);
+		if (!data->Allocate())
+			return nullptr;
+		fluo::Byte* buffer = data->GetData();
 
 		for (size_t i = 0; i < blk_num; i++)
 		{
@@ -702,23 +718,23 @@ std::shared_ptr<fluo::RawData> LSMReader::Convert(int t, int c, bool get_max)
 
 				if (m_compression == 1)
 				{
-					fread(tidata_t(val) + val_pos, sizeof(uint8_t), (*cinfo)[i].size, pfile);
+					fread(tidata_t(buffer) + val_pos, sizeof(uint8_t), (*cinfo)[i].size, pfile);
 				}
 				else if (m_compression == 5)
 				{
 					unsigned char* tif = new (std::nothrow) unsigned char[(*cinfo)[i].size];
 					fread(tif, sizeof(unsigned char), (*cinfo)[i].size, pfile);
-					LZWDecode(tif, tidata_t(val) + val_pos, (*cinfo)[i].size);
+					LZWDecode(tif, tidata_t(buffer) + val_pos, (*cinfo)[i].size);
 					for (size_t j = 0; j < m_size.inty(); j++)
 					{
 						switch (m_datatype)
 						{
 						case 1:
-							DecodeAcc8(tidata_t(val) + val_pos + j * m_size.intx(), m_size.intx(), 1);
+							DecodeAcc8(tidata_t(buffer) + val_pos + j * m_size.intx(), m_size.intx(), 1);
 							break;
 						case 2:
 						case 3:
-							DecodeAcc16(tidata_t(val) + val_pos + j * m_size.intx() * 2, m_size.intx(), 1);
+							DecodeAcc16(tidata_t(buffer) + val_pos + j * m_size.intx() * 2, m_size.intx(), 1);
 							break;
 						}
 					}
@@ -729,36 +745,6 @@ std::shared_ptr<fluo::RawData> LSMReader::Convert(int t, int c, bool get_max)
 					SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
 			}
 		}
-		//assign externally allocated memory to be managed by raw data
-		fluo::DataFormat format = fluo::DataFormat::Unknown;
-		switch (m_datatype)
-		{
-		case 1:
-			format = fluo::DataFormat::UInt8;
-			break;
-		case 2:
-			format = fluo::DataFormat::UInt16;
-			break;
-		}
-		fluo::RawData::Size3 size =
-		{
-			static_cast<size_t>(m_size.intx()),
-			static_cast<size_t>(m_size.inty()),
-			static_cast<size_t>(m_size.intz())
-		};
-		data = std::make_shared<fluo::RawData>(
-			size,
-			format,
-			/* channels */ 1,
-			/* time_steps */ 1,
-			/* resolution_level */ 0,
-			/* brick_index */ 0,
-			static_cast<fluo::Byte*>(val),
-			[](fluo::Byte* p)
-			{
-				delete[] p;
-			}
-		);
 	}
 
 	fclose(pfile);

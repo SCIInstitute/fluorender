@@ -298,31 +298,6 @@ std::shared_ptr<fluo::RawData> JP2Reader::ReadJp2(const std::vector<SliceInfo>& 
 	if (filelist.empty())
 		return nullptr;
 
-	unsigned long long total_size = m_size.get_size_xyz();
-	void* val = (void*)(new unsigned char[total_size]);
-	if (!val)
-		return nullptr;
-
-	bool show_progress = total_size > glbin_settings.m_prg_size;
-
-	uint8_t* val_ptr = static_cast<uint8_t*>(val);
-	size_t for_size = filelist.size();
-	for (size_t i = 0; i < for_size; i++)
-	{
-		const SliceInfo& slice_info = filelist[i];
-		if (slice_info.slice.empty())
-			continue;
-		if (!ReadSingleJp2(static_cast<void*>(val_ptr), slice_info.slice, c))
-		{
-			delete[] static_cast<unsigned char*>(val);
-			return nullptr;
-		}
-		if (show_progress)
-			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
-		val_ptr += m_size.get_size_xy();
-	}
-
-	//assign externally allocated memory to be managed by raw data
 	fluo::DataFormat format = fluo::DataFormat::UInt8;
 	fluo::RawData::Size3 size =
 	{
@@ -336,13 +311,30 @@ std::shared_ptr<fluo::RawData> JP2Reader::ReadJp2(const std::vector<SliceInfo>& 
 		/* channels */ 1,
 		/* time_steps */ 1,
 		/* resolution_level */ 0,
-		/* brick_index */ 0,
-		static_cast<fluo::Byte*>(val),
-		[](fluo::Byte* p)
-		{
-			delete[] p;
-		}
+		/* brick_index */ 0
 	);
+	if (!data->Allocate())
+		return nullptr;
+
+	unsigned long long total_size = m_size.get_size_xyz();
+	bool show_progress = total_size > glbin_settings.m_prg_size;
+
+	fluo::Byte* buffer = data->GetData();
+	uint8_t* val_ptr = static_cast<uint8_t*>(buffer);
+	size_t for_size = filelist.size();
+	for (size_t i = 0; i < for_size; i++)
+	{
+		const SliceInfo& slice_info = filelist[i];
+		if (slice_info.slice.empty())
+			continue;
+		if (!ReadSingleJp2(static_cast<void*>(val_ptr), slice_info.slice, c))
+		{
+			return nullptr;
+		}
+		if (show_progress)
+			SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / for_size)), "NOT_SET");
+		val_ptr += m_size.get_size_xy();
+	}
 
 	return data;
 }

@@ -200,6 +200,14 @@ namespace fluo
 		std::unique_ptr<Byte, DeleterFn> m_external{ nullptr, nullptr };
 	};
 
+	inline RawData::DeleterFn MakeNewArrayDeleter(DataFormat /*format*/)
+	{
+		// All external allocations use new[]
+		return [](Byte* p)
+			{
+				delete[] p;
+			};
+	}
 } // namespace fluo
 
 #endif//_RAW_DATA_H_

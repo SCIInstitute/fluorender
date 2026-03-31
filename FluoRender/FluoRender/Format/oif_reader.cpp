@@ -565,8 +565,26 @@ std::shared_ptr<fluo::RawData> OIFReader::Convert(int t, int c, bool get_max)
 		!m_size.any_le_zero())
 	{
 		//allocate memory
+		fluo::DataFormat format = fluo::DataFormat::UInt16;
+		fluo::RawData::Size3 size =
+		{
+			static_cast<size_t>(m_size.intx()),
+			static_cast<size_t>(m_size.inty()),
+			static_cast<size_t>(m_size.intz())
+		};
+		data = std::make_shared<fluo::RawData>(
+			size,
+			format,
+			/* channels */ 1,
+			/* time_steps */ 1,
+			/* resolution_level */ 0,
+			/* brick_index */ 0
+		);
+		if (!data->Allocate())
+			return nullptr;
+
+		unsigned short* buffer = data->DataAs<unsigned short>();
 		unsigned long long mem_size = m_size.get_size_xyz();
-		unsigned short *val = new (std::nothrow) unsigned short[mem_size];
 		bool show_progress = mem_size > glbin_settings.m_prg_size;
 
 		//read the channel
@@ -594,7 +612,7 @@ std::shared_ptr<fluo::RawData> OIFReader::Convert(int t, int c, bool get_max)
 				is.close();
 
 				//read
-				ReadTiff(pbyData, val, static_cast<int>(i));
+				ReadTiff(pbyData, buffer, static_cast<int>(i));
 
 				//increase
 				sl_num++;
@@ -605,38 +623,6 @@ std::shared_ptr<fluo::RawData> OIFReader::Convert(int t, int c, bool get_max)
 
 			if (show_progress && m_time_num == 1)
 				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / num)), "NOT_SET");
-		}
-
-		//create raw
-		if (val && sl_num == m_size.intz())
-		{
-			//assign externally allocated memory to be managed by raw data
-			fluo::DataFormat format = fluo::DataFormat::UInt16;
-			fluo::RawData::Size3 size =
-			{
-				static_cast<size_t>(m_size.intx()),
-				static_cast<size_t>(m_size.inty()),
-				static_cast<size_t>(m_size.intz())
-			};
-			data = std::make_shared<fluo::RawData>(
-				size,
-				format,
-				/* channels */ 1,
-				/* time_steps */ 1,
-				/* resolution_level */ 0,
-				/* brick_index */ 0,
-				reinterpret_cast<fluo::Byte*>(val),
-				[](fluo::Byte* p)
-				{
-					delete[] reinterpret_cast<unsigned short*>(p);
-				}
-			);
-		}
-		else
-		{
-			//something is wrong
-			if (val)
-				delete[]val;
 		}
 	}
 
