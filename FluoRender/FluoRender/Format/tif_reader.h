@@ -136,7 +136,7 @@ public:
 	uint64_t GetNumTiffPages();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	Nrrd* Convert(int t, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> Convert(int t, int c, bool get_max);
 	std::wstring GetCurDataName(int t, int c);
 	std::wstring GetCurMaskName(int t, int c);
 	std::wstring GetCurLabelName(int t, int c);
@@ -367,7 +367,7 @@ private:
 	static bool tif_sort(const TimeDataInfo& info1, const TimeDataInfo& info2);
 	static bool tif_slice_sort(const SliceInfo& info1, const SliceInfo& info2);
 	//read tiff
-	Nrrd* ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> ReadTiff(std::vector<SliceInfo> &filelist, int c, bool get_max);
 
 	//invalidate page info
 	bool TagInInfo(uint16_t tag);

@@ -51,7 +51,7 @@ public:
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	Nrrd* Convert(int t, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> Convert(int t, int c, bool get_max);
 	std::wstring GetCurDataName(int t, int c);
 	std::wstring GetCurMaskName(int t, int c);
 	std::wstring GetCurLabelName(int t, int c);
@@ -107,7 +107,7 @@ private:
 
 private:
 	FrameInfo get_frame_info(int64_t dts, int64_t pts);
-	Nrrd* get_nrrd(AVFrame* frame, int c);
+	std::shared_ptr<fluo::RawData> get_raw(AVFrame* frame, int c);
 	void add_cache(int t, AVFrame* frame);
 	void invalidate_cache();
 	void release_cache();

@@ -850,16 +850,16 @@ bool PVXMLReader::ConvertS(int c, TimeDataInfo* time_data_info, unsigned short* 
 	return true;
 }
 
-Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> PVXMLReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd* data = 0;
+	std::shared_ptr<fluo::RawData> data = nullptr;
 
 	int chan_num = m_sep_seq ? m_group_num : m_chan_num;
 	if (t >= 0 && t < m_time_num &&
 		c >= 0 && c < chan_num &&
 		!m_size.any_le_zero())
 	{
-		//allocate memory for nrrd
+		//allocate memory
 		unsigned long long mem_size = (unsigned long long)m_size.get_size_xyz();
 		unsigned short* val = new (std::nothrow) unsigned short[mem_size]();
 		if (!val) return 0;
@@ -873,28 +873,33 @@ Nrrd* PVXMLReader::Convert(int t, int c, bool get_max)
 
 		if (val)
 		{
-			//ok
-			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUShort,
-				3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-			auto max_size = m_size * m_spacing;
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(),
-				max_size.y(), max_size.z());
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(),
-				(size_t)m_size.inty(), (size_t)m_size.intz());
+			//assign externally allocated memory to be managed by raw data
+			fluo::DataFormat format = fluo::DataFormat::UInt16;
+			fluo::RawData::Size3 size =
+			{
+				static_cast<size_t>(m_size.intx()),
+				static_cast<size_t>(m_size.inty()),
+				static_cast<size_t>(m_size.intz())
+			};
+			data = std::make_shared<fluo::RawData>(
+				size,
+				format,
+				/* channels */ 1,
+				/* time_steps */ 1,
+				/* resolution_level */ 0,
+				/* brick_index */ 0,
+				reinterpret_cast<fluo::Byte*>(val),
+				[](fluo::Byte* p)
+				{
+					delete[] reinterpret_cast<unsigned short*>(p);
+				}
+			);
 
 			if (get_max)
 			{
-				double value;
-				unsigned long long totali = (unsigned long long)m_size.get_size_xyz();
-				for (unsigned long long i = 0; i < totali; ++i)
-				{
-					value = val[i];
-					m_min_value = i == 0 ? value : (value < m_min_value ? value : m_min_value);
-					m_max_value = value > m_max_value ? value : m_max_value;
-				}
+				auto [minv, maxv] = data->ComputeMinMax<uint16_t>();
+				m_min_value = minv;
+				m_max_value = maxv;
 			}
 		}
 	}

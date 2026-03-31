@@ -188,7 +188,7 @@ std::shared_ptr<fluo::RawData> CZIReader::Convert(int t, int c, bool get_max)
 			fclose(pfile);
 			return 0;
 		}
-		//allocate memory for nrrd
+		//allocate memory
 		bool show_progress = false;
 		size_t blk_num = cinfo->blocks.size();
 		unsigned long long mem_size = m_size.get_size_xyz();
@@ -240,7 +240,7 @@ std::shared_ptr<fluo::RawData> CZIReader::Convert(int t, int c, bool get_max)
 			static_cast<fluo::Byte*>(val),
 			[](fluo::Byte* p)
 			{
-				std::free(p);   // or delete[] p if that’s how it was allocated
+				delete[] p;
 			}
 		);
 	}

@@ -182,6 +182,9 @@ namespace fluo
 			return reinterpret_cast<const T*>(GetData());
 		}
 
+		template <typename T>
+		std::pair<double, double> ComputeMinMax() const;
+
 	private:
 		Size3 m_size = { 0, 0, 0 };
 

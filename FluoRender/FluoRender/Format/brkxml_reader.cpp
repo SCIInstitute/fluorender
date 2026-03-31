@@ -842,7 +842,7 @@ double BRKXMLReader::GetExcitationWavelength(int chan)
 	return 0.0;
 }
 
-//This function does not load image data into Nrrd.
+//This function does not load image data into raw.
 std::shared_ptr<fluo::RawData> BRKXMLReader::Convert(int t, int c, bool get_max)
 {
 	std::shared_ptr<fluo::RawData> data = nullptr;
@@ -1119,7 +1119,6 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 
 		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
-		//numc? gm_nrrd?
 		flvr::TextureBrick* b = new flvr::TextureBrick(0,
 			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size), numb,
 			fluo::Vector((*bite)->x_start, (*bite)->y_start, (*bite)->z_start),

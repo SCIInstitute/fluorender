@@ -37,13 +37,13 @@ public:
 	NRRDWriter();
 	~NRRDWriter();
 
-	void SetData(Nrrd* data);
+	void SetData(const std::shared_ptr<fluo::RawData>& data);
 	void SetSpacing(const fluo::Vector& spc);
 	void SetCompression(bool value);
 	void Save(const std::wstring& filename, int mode);
 
 private:
-	Nrrd* m_data;
+	std::shared_ptr<fluo::RawData> m_data;
 	fluo::Vector m_spc;
 	bool m_use_spacings;
 };

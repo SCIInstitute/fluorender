@@ -143,61 +143,113 @@ double ND2Reader::GetExcitationWavelength(int chan)
 	return 0.0;
 }
 
-Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData>
+ND2Reader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
-
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
-	if (h == nullptr)
+	if (!h)
+		return nullptr;
+
+	// Validate indices and dimensions
+	if (t < 0 || t >= m_time_num ||
+		c < 0 || c >= m_chan_num ||
+		m_size.any_le_zero())
 	{
 		Lim_FileClose(h);
-		return 0;
+		return nullptr;
 	}
 
-	if (t >= 0 && t < m_time_num &&
-		c >= 0 && c < m_chan_num &&
-		!m_size.any_le_zero())
+	const size_t voxel_count = m_size.get_size_xyz();
+	const fluo::RawData::Size3 size =
 	{
-		switch (m_bits)
+		static_cast<size_t>(m_size.intx()),
+		static_cast<size_t>(m_size.inty()),
+		static_cast<size_t>(m_size.intz())
+	};
+
+	std::shared_ptr<fluo::RawData> raw;
+
+	switch (m_bits)
+	{
+	case 8:
+	{
+		auto* buffer = new (std::nothrow) unsigned char[voxel_count];
+		if (!buffer)
 		{
-		case 8:
-		{
-			unsigned long long mem_size = m_size.get_size_xyz();
-			unsigned char *val = new (std::nothrow) unsigned char[mem_size];
-			ReadChannel(h, t, c, val);
-			//create nrrd
-			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-			auto max_size = m_spacing * m_size;
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			Lim_FileClose(h);
+			return nullptr;
 		}
+
+		ReadChannel(h, t, c, buffer);
+
+		raw = std::make_shared<fluo::RawData>(
+			size,
+			fluo::DataFormat::UInt8,
+			/* channels */ 1,
+			/* time_steps */ 1,
+			/* resolution_level */ 0,
+			/* brick_index */ 0,
+			reinterpret_cast<fluo::Byte*>(buffer),
+			[](fluo::Byte* p)
+			{
+				delete[] reinterpret_cast<unsigned char*>(p);
+			}
+		);
 		break;
-		case 16:
+	}
+	case 16:
+	{
+		auto* buffer = new (std::nothrow) unsigned short[voxel_count];
+		if (!buffer)
 		{
-			unsigned long long mem_size = m_size.get_size_xyz();
-			unsigned short *val = new (std::nothrow) unsigned short[mem_size];
-			ReadChannel(h, t, c, val);
-			//create nrrd
-			data = nrrdNew();
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-			auto max_size = m_spacing * m_size;
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-			nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			Lim_FileClose(h);
+			return nullptr;
 		}
+
+		ReadChannel(h, t, c, buffer);
+
+		raw = std::make_shared<fluo::RawData>(
+			size,
+			fluo::DataFormat::UInt16,
+			/* channels */ 1,
+			/* time_steps */ 1,
+			/* resolution_level */ 0,
+			/* brick_index */ 0,
+			reinterpret_cast<fluo::Byte*>(buffer),
+			[](fluo::Byte* p)
+			{
+				delete[] reinterpret_cast<unsigned short*>(p);
+			}
+		);
 		break;
-		}
+	}
+	default:
+		Lim_FileClose(h);
+		return nullptr;
 	}
 
 	Lim_FileClose(h);
 	m_cur_time = t;
 
-	return data;
+	// Optional derived-data computation
+	if (get_max && raw && raw->IsAllocated())
+	{
+		if (raw->GetFormat() == fluo::DataFormat::UInt16)
+		{
+			auto [minv, maxv] = raw->ComputeMinMax<uint16_t>();
+			m_min_value = minv;
+			m_max_value = maxv;
+		}
+		else if (raw->GetFormat() == fluo::DataFormat::UInt8)
+		{
+			auto [minv, maxv] = raw->ComputeMinMax<uint8_t>();
+			m_min_value = minv;
+			m_max_value = maxv;
+		}
+	}
+
+	return raw;
 }
 
 std::wstring ND2Reader::GetCurDataName(int t, int c)

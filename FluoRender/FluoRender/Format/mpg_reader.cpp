@@ -235,9 +235,9 @@ double MPGReader::GetExcitationWavelength(int chan)
 	return 0.0;
 }
 
-Nrrd* MPGReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> MPGReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
+	std::shared_ptr<fluo::RawData> data = nullptr;
 	if (m_mpg_info.empty() ||
 		m_stream_index == -1 ||
 		!m_av_format_context||
@@ -257,7 +257,7 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 		m_cache_order.push_front(t);
 
 		AVFrame* cached_frame = it->second;
-		data = get_nrrd(cached_frame, c);
+		data = get_raw(cached_frame, c);
 		m_cur_time = t;
 
 		return data;
@@ -265,7 +265,7 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 
 	if (t == m_cur_time && m_frame_rgb)
 	{
-		return get_nrrd(m_frame_rgb, c);
+		return get_raw(m_frame_rgb, c);
 	}
 	m_cur_time = t;
 
@@ -320,7 +320,7 @@ Nrrd* MPGReader::Convert(int t, int c, bool get_max)
 						m_frame_yuv->linesize, 0, m_av_codec_context->height,
 						m_frame_rgb->data, m_frame_rgb->linesize);
 
-					data = get_nrrd(m_frame_rgb, c);
+					data = get_raw(m_frame_rgb, c);
 
 					// Add the decoded frame to the cache
 					add_cache(t, m_frame_rgb);
@@ -371,7 +371,7 @@ MPGReader::FrameInfo MPGReader::get_frame_info(int64_t dts, int64_t pts)
 	return info;
 }
 
-Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
+std::shared_ptr<fluo::RawData> MPGReader::get_raw(AVFrame* frame, int c)
 {
 	//extract channel
 	unsigned long long total_size = m_size.get_size_xy();
@@ -380,15 +380,27 @@ Nrrd* MPGReader::get_nrrd(AVFrame* frame, int c)
 	for (index = 0; index < total_size; ++index)
 		val[index] = *(frame->data[0] + index * 3 + c);
 
-	//create nrrd
-	Nrrd* data = nrrdNew();
-	nrrdWrap_va(data, (uint8_t*)val, nrrdTypeUChar,
-		3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-	auto max_size = m_spacing * m_size;
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+	//assign externally allocated memory to be managed by raw data
+	fluo::DataFormat format = fluo::DataFormat::UInt8;
+	fluo::RawData::Size3 size =
+	{
+		static_cast<size_t>(m_size.intx()),
+		static_cast<size_t>(m_size.inty()),
+		static_cast<size_t>(m_size.intz())
+	};
+	auto data = std::make_shared<fluo::RawData>(
+		size,
+		format,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0,
+		static_cast<fluo::Byte*>(val),
+		[](fluo::Byte* p)
+		{
+			delete[] p;
+		}
+	);
 
 	return data;
 }

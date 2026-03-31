@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <msk_writer.h>
+#include <nrrd_utility.h>
 #include <sstream>
 #include <inttypes.h>
 
@@ -41,7 +42,7 @@ MSKWriter::~MSKWriter()
 {
 }
 
-void MSKWriter::SetData(Nrrd *data)
+void MSKWriter::SetData(const std::shared_ptr<fluo::RawData>& data)
 {
 	m_data = data;
 }
@@ -58,37 +59,70 @@ void MSKWriter::SetCompression(bool value)
 
 void MSKWriter::Save(const std::wstring& filename, int mode)
 {
-	if (!m_data)
+	if (!m_data || !m_data->IsAllocated())
 		return;
 
-	//int64_t pos = filename.find_last_of(L'.');
-	//if (pos == -1)
-	//	return;
-	//wstring str_name = filename.substr(0, pos);
-	//wostringstream strs;
-	//if (mode == 0)
-	//	strs << str_name /*<< "_t" << m_time << "_c" << m_channel*/ << ".msk";
-	//else if (mode == 1)
-	//	strs << str_name /*<< "_t" << m_time << "_c" << m_channel*/ << ".lbl";
-	//str_name = strs.str();
+	// Convert filename to UTF-8 / narrow string
+	std::string path(filename.begin(), filename.end());
 
-	if (m_use_spacings &&
-		m_data->dim == 3)
+	// --- Create a TEMPORARY NRRD ---
+	Nrrd* nrrd = nrrdNew();
+
+	const auto& size = m_data->GetSize();
+
+	int nrrd_type = ToNrrdType(m_data->GetFormat());
+	if (nrrd_type == nrrdTypeUnknown)
 	{
-		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoSpacing, m_spc.x(), m_spc.y(), m_spc.z());
-		nrrdAxisInfoSet_va(m_data, nrrdAxisInfoMax,
-			m_spc.x()*m_data->axis[0].size,
-			m_spc.y()*m_data->axis[1].size,
-			m_spc.z()*m_data->axis[2].size);
+		nrrdNuke(nrrd);
+		return;
 	}
 
-	std::string str;
-	str.assign(filename.length(), 0);
-	for (int i=0; i<(int)filename.length(); i++)
-		str[i] = (char)filename[i];
-	nrrdSave(str.c_str(), m_data, NULL);
-}
+	// Wrap RawData memory (NRRD DOES NOT OWN IT)
+	nrrdWrap_va(
+		nrrd,
+		const_cast<void*>(static_cast<const void*>(m_data->GetData())),
+		nrrd_type,
+		3,
+		size[0],
+		size[1],
+		size[2]
+	);
 
+	// Explicitly tell NRRD it does NOT own the memory
+	//nrrd->dataOwn = nrrdDataOwnNone;
+
+	// --- Axis / spacing info (interpretation layer) ---
+	if (m_use_spacings)
+	{
+		nrrdAxisInfoSet_va(
+			nrrd,
+			nrrdAxisInfoSpacing,
+			m_spc.x(),
+			m_spc.y(),
+			m_spc.z()
+		);
+
+		nrrdAxisInfoSet_va(
+			nrrd,
+			nrrdAxisInfoMin,
+			0.0, 0.0, 0.0
+		);
+
+		nrrdAxisInfoSet_va(
+			nrrd,
+			nrrdAxisInfoMax,
+			m_spc.x() * size[0],
+			m_spc.y() * size[1],
+			m_spc.z() * size[2]
+		);
+	}
+
+	// --- Save ---
+	nrrdSave(path.c_str(), nrrd, nullptr);
+
+	// --- Destroy temporary NRRD ---
+	nrrdNuke(nrrd);
+}
 void MSKWriter::SetTC(int t, int c)
 {
 	m_time = t;

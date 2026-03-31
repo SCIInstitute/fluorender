@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <msk_reader.h>
 #include <compatibility.h>
+#include <nrrd.h>
 #include <sstream>
 #include <inttypes.h>
 
@@ -74,19 +75,20 @@ int MSKReader::LoadBatch(int index)
 	return 0;
 }
 
-Nrrd* MSKReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> MSKReader::Convert(int t, int c, bool get_max)
 {
 	FILE* msk_file = 0;
 	if (!WFOPEN(&msk_file, m_path_name, L"rb"))
-		return 0;
+		return nullptr;
 
 	Nrrd *output = nrrdNew();
 	NrrdIoState *nio = nrrdIoStateNew();
 	nrrdIoStateSet(nio, nrrdIoStateSkipData, AIR_TRUE);
 	if (nrrdRead(output, msk_file, nio))
 	{
+		nrrdNuke(output);
 		fclose(msk_file);
-		return 0;
+		return nullptr;
 	}
 	nio = nrrdIoStateNix(nio);
 	rewind(msk_file);
@@ -96,29 +98,47 @@ Nrrd* MSKReader::Convert(int t, int c, bool get_max)
 	{
 		nrrdNuke(output);
 		fclose(msk_file);
-		return 0;
+		return nullptr;
 	}
-	int slice_num = int(output->axis[2].size);
-	int x_size = int(output->axis[0].size);
-	int y_size = int(output->axis[1].size);
-	unsigned long long data_size = (unsigned long long)slice_num * x_size * y_size;
-	output->data = new unsigned char[data_size];
-	if (!output->data)
-	{
-		nrrdNuke(output);
-		fclose(msk_file);
-		return 0;
-	}
+	const size_t x = output->axis[0].size;
+	const size_t y = output->axis[1].size;
+	const size_t z = output->axis[2].size;
+	const size_t voxel_count = x * y * z;
+	unsigned char* buffer = new unsigned char[voxel_count];
+	output->data = buffer;
 
 	if (nrrdRead(output, msk_file, NULL))
 	{
+		delete[] buffer;
 		nrrdNuke(output);
 		fclose(msk_file);
-		return 0;
+		return nullptr;
 	}
 
 	fclose(msk_file);
-	return output;
+
+	// --- Create RawData and ADOPT the buffer ---
+	fluo::RawData::Size3 size = { x, y, z };
+
+	auto raw = std::make_shared<fluo::RawData>(
+		size,
+		fluo::DataFormat::UInt8,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0,
+		reinterpret_cast<fluo::Byte*>(buffer),
+		[](fluo::Byte* p)
+		{
+			delete[] reinterpret_cast<unsigned char*>(p);
+		}
+	);
+
+	// --- NRRD no longer needed ---
+	output->data = nullptr;   // prevent accidental delete
+	nrrdNuke(output);
+
+	return raw;
 }
 
 std::wstring MSKReader::GetCurDataName(int t, int c)

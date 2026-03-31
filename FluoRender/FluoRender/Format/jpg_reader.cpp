@@ -247,7 +247,7 @@ int JPGReader::LoadBatch(int index)
 	return result;
 }
 
-Nrrd* JPGReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> JPGReader::Convert(int t, int c, bool get_max)
 {
 	if (t < 0 || c < 0)
 	{
@@ -266,20 +266,16 @@ Nrrd* JPGReader::Convert(int t, int c, bool get_max)
 			return 0;
 	}
 
-	Nrrd* data = nullptr;
 	TimeDataInfo chan_info = m_4d_seq[t];
 	m_data_name = GET_STEM(chan_info.slices[0].slice);
-	data = ReadJpg(chan_info.slices, c, get_max);
 	m_cur_time = t;
-	return data;
+	return ReadJpg(chan_info.slices, c, get_max);
 }
 
-Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get_max)
+std::shared_ptr<fluo::RawData> JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get_max)
 {
 	if (filelist.empty())
 		return nullptr;
-
-	Nrrd* nrrdout = nrrdNew();
 
 	unsigned long long total_size = m_size.get_size_xyz();
 	void* val = (void*)(new unsigned char[total_size]);
@@ -305,18 +301,29 @@ Nrrd* JPGReader::ReadJpg(const std::vector<SliceInfo>& filelist, int c, bool get
 		val_ptr += m_size.get_size_xy();
 	}
 
-	//write to nrrd
-	nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-		3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-	auto max_size = m_size * m_spacing;
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(),
-		max_size.y(), max_size.z());
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(),
-		(size_t)m_size.inty(), (size_t)m_size.intz());
+	//assign externally allocated memory to be managed by raw data
+	fluo::DataFormat format = fluo::DataFormat::UInt8;
+	fluo::RawData::Size3 size =
+	{
+		static_cast<size_t>(m_size.intx()),
+		static_cast<size_t>(m_size.inty()),
+		static_cast<size_t>(m_size.intz())
+	};
+	auto data = std::make_shared<fluo::RawData>(
+		size,
+		format,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0,
+		static_cast<fluo::Byte*>(val),
+		[](fluo::Byte* p)
+		{
+			delete[] p;
+		}
+	);
 
-	return nrrdout;
+	return data;
 }
 
 bool JPGReader::ReadSingleJpg(void* val, const std::wstring& filename, int c)

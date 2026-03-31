@@ -281,26 +281,16 @@ int ImageJReader::LoadBatch(int index)
 	return result;
 }
 
-Nrrd* ImageJReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> ImageJReader::Convert(int t, int c, bool get_max)
 {	
 	if (t < 0 || t >= m_time_num || c < 0 || c >= m_chan_num)
 		return 0;
 
-	//if (isHyperstack_ && m_max_value)
-	//	get_max = false;
-
-	Nrrd* data = 0;
-	//TODO: Fix the m_data_name.
-	//TimeDataInfo chan_info = m_4d_seq[t];
-	//if (!isHyperstack_ || isHsTimeSeq_)
-		//m_data_name = GET_STEM(chan_info.slices[0].slice);
-	
-	data = ReadFromImageJ(t, c, get_max);
 	m_cur_time = t;
-	return data;
+	return ReadFromImageJ(t, c, get_max);
 }
 
-Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {	
+std::shared_ptr<fluo::RawData> ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 	// ImageJ code to read the data.
 	std::string path_name = ws2s(m_path_name);
 
@@ -407,35 +397,44 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 		glbin_jvm_instance->m_pEnv->DeleteLocalRef(val);
 	}
 
-	// Creating Nrrd out of the data.
-	Nrrd *nrrdout = nrrdNew();
-	
-	unsigned long long total_size = m_size.get_size_xyz();
 	if (!t_data)
-		return NULL;
+		return nullptr;
 	
+	//assign externally allocated memory to be managed by raw data
+	fluo::DataFormat format = fluo::DataFormat::Unknown;
 	if (m_eight_bit)
-		nrrdWrap_va(nrrdout, (uint8_t*)t_data, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		format = fluo::DataFormat::UInt8;
 	else
-		nrrdWrap_va(nrrdout, (uint16_t*)t_data, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-	auto max_size = m_size * m_spacing;
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-
-	if (!m_eight_bit) {
-		if (get_max) {
-			double value;
-			unsigned long long totali = m_size.get_size_xyz();
-			for (unsigned long long i = 0; i < totali; ++i)
-			{
-				value = ((unsigned short*)nrrdout->data)[i];
-				m_min_value = i == 0 ? value : (value < m_min_value ? value : m_min_value);
-				m_max_value = value > m_max_value ? value : m_max_value;
-			}			
+		format = fluo::DataFormat::UInt16;
+	fluo::RawData::Size3 size =
+	{
+		static_cast<size_t>(m_size.intx()),
+		static_cast<size_t>(m_size.inty()),
+		static_cast<size_t>(m_size.intz())
+	};
+	auto data = std::make_shared<fluo::RawData>(
+		size,
+		format,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0,
+		static_cast<fluo::Byte*>(t_data),
+		[](fluo::Byte* p)
+		{
+			delete[] p;
 		}
-		if (m_max_value > 0.0) 
+	);
+
+	if (!m_eight_bit)
+	{
+		if (get_max)
+		{
+			auto [minv, maxv] = data->ComputeMinMax<uint16_t>();
+			m_min_value = minv;
+			m_max_value = maxv;
+		}
+		if (m_max_value > 0.0)
 			m_scalar_scale = 65535.0 / m_max_value;
 		else 
 			m_scalar_scale = 1.0;		
@@ -443,5 +442,5 @@ Nrrd* ImageJReader::ReadFromImageJ(int t, int c, bool get_max) {
 	else 
 		m_max_value = 255.0;
 
-	return nrrdout;
+	return data;
 }

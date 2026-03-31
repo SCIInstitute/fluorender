@@ -1193,7 +1193,7 @@ int TIFReader::LoadBatch(int index)
 	return result;
 }
 
-Nrrd* TIFReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> TIFReader::Convert(int t, int c, bool get_max)
 {
 	if (t < 0 || c < 0)
 	{
@@ -1215,13 +1215,11 @@ Nrrd* TIFReader::Convert(int t, int c, bool get_max)
 	if (isHyperstack_ && m_max_value)
 		get_max = false;
 
-	Nrrd* data = 0;
 	TimeDataInfo chan_info = m_4d_seq[t];
 	if (!isHyperstack_ || isHsTimeSeq_)
 		m_data_name = GET_STEM(chan_info.slices[0].slice);
-	data = ReadTiff(chan_info.slices, c, get_max);
 	m_cur_time = t;
-	return data;
+	return ReadTiff(chan_info.slices, c, get_max);
 }
 
 std::wstring TIFReader::GetCurDataName(int t, int c)
@@ -1657,7 +1655,7 @@ void TIFReader::CloseTiff()
 		tiff_stream.close();
 }
 
-Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
+std::shared_ptr<fluo::RawData> TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	int c, bool get_max)
 {
 	if (filelist.empty())
@@ -1753,7 +1751,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 
 	if (sequence && !isHyperstack_) CloseTiff();
 
-	Nrrd *nrrdout = nrrdNew();
+	std::shared_ptr<fluo::RawData> data = nullptr;
 
 	//allocate memory
 	void *val = 0;
@@ -2052,18 +2050,31 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 		free(buf);
 	if (!sequence || isHyperstack_) CloseTiff();
 
-	//write to nrrd
+	//assign externally allocated memory to be managed by raw data
+	fluo::DataFormat format = fluo::DataFormat::Unknown;
 	if (eight_bit)
-		nrrdWrap_va(nrrdout, (uint8_t*)val, nrrdTypeUChar,
-			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		format = fluo::DataFormat::UInt8;
 	else
-		nrrdWrap_va(nrrdout, (uint16_t*)val, nrrdTypeUShort,
-			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-	auto max_size = m_spacing * m_size;
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrdout, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		format = fluo::DataFormat::UInt16;
+	fluo::RawData::Size3 size =
+	{
+		static_cast<size_t>(m_size.intx()),
+		static_cast<size_t>(m_size.inty()),
+		static_cast<size_t>(m_size.intz())
+	};
+	data = std::make_shared<fluo::RawData>(
+		size,
+		format,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0,
+		static_cast<fluo::Byte*>(val),
+		[](fluo::Byte* p)
+		{
+			delete[] p;
+		}
+	);
 
 	if (!eight_bit) {
 		if (get_max) {
@@ -2072,15 +2083,11 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 				m_min_value = min_value;
 				m_max_value = max_value;
 			}
-			else {
-				double value;
-				unsigned long long totali = (unsigned long long)m_size.get_size_xyz();
-				for (unsigned long long i = 0; i < totali; ++i)
-				{
-					value = ((unsigned short*)nrrdout->data)[i];
-					m_min_value = m_min_value == 0.0 ? value : (value < m_min_value ? value : m_min_value);
-					m_max_value = value > m_max_value ? value : m_max_value;
-				}
+			else
+			{
+				auto [minv, maxv] = data->ComputeMinMax<uint16_t>();
+				m_min_value = minv;
+				m_max_value = maxv;
 			}
 		}
 		if (m_max_value > 0.0) m_scalar_scale = 65535.0 / m_max_value;
@@ -2088,7 +2095,7 @@ Nrrd* TIFReader::ReadTiff(std::vector<SliceInfo> &filelist,
 	}
 	else m_max_value = 255.0;
 
-	return nrrdout;
+	return data;
 }
 
 bool TIFReader::GetTagMinMax()

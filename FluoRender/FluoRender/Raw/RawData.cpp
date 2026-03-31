@@ -142,4 +142,26 @@ namespace fluo
 		return m_external ? m_external.get() : m_data.data();
 	}
 
+	template <typename T>
+	std::pair<double, double> RawData::ComputeMinMax() const
+	{
+		if (!IsAllocated())
+			return { 0.0, 0.0 };
+
+		const T* ptr = DataAs<T>();
+
+		const size_t count = GetVoxelCount() * m_channels * m_time_steps;
+
+		double minv = std::numeric_limits<double>::max();
+		double maxv = std::numeric_limits<double>::lowest();
+
+		for (size_t i = 0; i < count; ++i)
+		{
+			double v = static_cast<double>(ptr[i]);
+			minv = (v < minv) ? v : minv;
+			maxv = (v > maxv) ? v : maxv;
+		}
+
+		return { minv, maxv };
+	}
 } // namespace fluo

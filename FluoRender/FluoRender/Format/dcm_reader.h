@@ -53,7 +53,7 @@ public:
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	Nrrd* Convert(int t, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> Convert(int t, int c, bool get_max);
 	std::wstring GetCurDataName(int t, int c);
 	std::wstring GetCurMaskName(int t, int c);
 	std::wstring GetCurLabelName(int t, int c);
@@ -118,7 +118,7 @@ private:
 	DCMCompression m_compression;
 
 	bool GetFileInfo(const std::wstring& filename);
-	Nrrd* ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> ReadDcm(const std::vector<SliceInfo>& filelist, int c, bool get_max);
 	bool ReadSingleDcm(void* val, const std::wstring& filename, int c);
 	bool CleanPixelData(std::vector<char>& pixel_data);
 	bool Decompress(std::vector<char>& pixel_data, std::vector<uint8_t>& decompressed, int c);

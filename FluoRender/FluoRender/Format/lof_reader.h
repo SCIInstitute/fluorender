@@ -57,7 +57,7 @@ public:
 	int Preprocess();
 	void SetBatch(bool batch);
 	int LoadBatch(int index);
-	Nrrd* Convert(int t, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> Convert(int t, int c, bool get_max);
 	std::wstring GetCurDataName(int t, int c);
 	std::wstring GetCurMaskName(int t, int c);
 	std::wstring GetCurLabelName(int t, int c);

@@ -27,10 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <nrrd_reader.h>
 #include <compatibility.h>
+#include <nrrd_utility.h>
 #include <algorithm>
 #include <sstream>
 
-NRRDReader::NRRDReader():
+NRRDReader::NRRDReader() :
 	BaseVolReader()
 {
 	m_time_num = 0;
@@ -70,7 +71,7 @@ NRRDReader::~NRRDReader()
 //	m_id_string = m_path_name;
 //}
 
-void NRRDReader::SetFile(const std::wstring &file)
+void NRRDReader::SetFile(const std::wstring& file)
 {
 	m_path_name = file;
 	m_id_string = m_path_name;
@@ -100,7 +101,7 @@ int NRRDReader::Preprocess()
 	{
 		int64_t begin = m_path_name.find(m_time_id);
 		size_t id_len = m_time_id.length();
-		for(size_t i = 0; i < list.size(); i++) {
+		for (size_t i = 0; i < list.size(); i++) {
 			TimeDataInfo info;
 			std::wstring str = list.at(i);
 			std::wstring t_num;
@@ -122,7 +123,7 @@ int NRRDReader::Preprocess()
 	if (m_4d_seq.size() > 0)
 	{
 		//std::sort(m_4d_seq.begin(), m_4d_seq.end(), NRRDReader::nrrd_sort);
-		for (int t=0; t<(int)m_4d_seq.size(); t++)
+		for (int t = 0; t < (int)m_4d_seq.size(); t++)
 		{
 			if (m_4d_seq[t].filename == m_path_name)
 			{
@@ -148,7 +149,7 @@ void NRRDReader::SetBatch(bool batch)
 	{
 		//read the directory info
 		std::wstring search_path = GET_PATH(m_path_name);
-		FIND_FILES_BATCH(search_path,ESCAPE_REGEX(L".nrrd"),m_batch_list,m_cur_batch);
+		FIND_FILES_BATCH(search_path, ESCAPE_REGEX(L".nrrd"), m_batch_list, m_cur_batch);
 		m_batch = true;
 	}
 	else
@@ -158,7 +159,7 @@ void NRRDReader::SetBatch(bool batch)
 int NRRDReader::LoadBatch(int index)
 {
 	int result = -1;
-	if (index>=0 && index<(int)m_batch_list.size())
+	if (index >= 0 && index < (int)m_batch_list.size())
 	{
 		m_path_name = m_batch_list[index];
 		Preprocess();
@@ -171,55 +172,57 @@ int NRRDReader::LoadBatch(int index)
 	return result;
 }
 
-Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData>
+NRRDReader::Convert(int t, int c, bool get_max)
 {
-	if (t < 0 || c < 0)
-	{
-		t = 0;
-		c = 0;
-	}
-	else if (t >= m_time_num || c >= m_chan_num)
-	{
-		if (m_time_num > 0)
-			t = m_time_num - 1;
-		else
-			return 0;
-		if (m_chan_num > 0)
-			c = m_chan_num - 1;
-		else
-			return 0;
-	}
+	// ---- Clamp indices ---------------------------------------------------
+	if (t < 0) t = 0;
+	if (c < 0) c = 0;
+	if (t >= m_time_num) t = m_time_num > 0 ? m_time_num - 1 : 0;
+	if (c >= m_chan_num) c = m_chan_num > 0 ? m_chan_num - 1 : 0;
 
-	std::wstring str_name = m_4d_seq[t].filename;
-	m_data_name = GET_STEM(str_name);
-	FILE* nrrd_file = 0;
-	if (!WFOPEN(&nrrd_file, str_name, L"rb"))
-		return 0;
+	const std::wstring filename = m_4d_seq[t].filename;
+	m_data_name = GET_STEM(filename);
 
-	Nrrd *output = nrrdNew();
-	NrrdIoState *nio = nrrdIoStateNew();
+	FILE* nrrd_file = nullptr;
+	if (!WFOPEN(&nrrd_file, filename, L"rb"))
+		return nullptr;
+
+	// ---- Read header only -------------------------------------------------
+	Nrrd* nrrd = nrrdNew();
+	NrrdIoState* nio = nrrdIoStateNew();
 	nrrdIoStateSet(nio, nrrdIoStateSkipData, AIR_TRUE);
-	if (nrrdRead(output, nrrd_file, nio))
+
+	if (nrrdRead(nrrd, nrrd_file, nio))
 	{
+		nrrdNuke(nrrd);
 		fclose(nrrd_file);
-		return 0;
+		return nullptr;
 	}
-	nio = nrrdIoStateNix(nio);
+
+	nrrdIoStateNix(nio);
 	rewind(nrrd_file);
-	if (output->dim != 3)
+
+	if (nrrd->dim != 3)
 	{
-		nrrdNuke(output);
+		nrrdNuke(nrrd);
 		fclose(nrrd_file);
-		return 0;
+		return nullptr;
 	}
-	m_size = fluo::Vector(
-		output->axis[0].size,
-		output->axis[1].size,
-		output->axis[2].size);
+
+	// ---- Size & spacing ---------------------------------------------------
+	const size_t nx = nrrd->axis[0].size;
+	const size_t ny = nrrd->axis[1].size;
+	const size_t nz = nrrd->axis[2].size;
+	const size_t voxel_count = nx * ny * nz;
+
+	m_size = fluo::Vector(nx, ny, nz);
 	m_spacing = fluo::Vector(
-		output->axis[0].spacing,
-		output->axis[1].spacing,
-		output->axis[2].spacing);
+		nrrd->axis[0].spacing,
+		nrrd->axis[1].spacing,
+		nrrd->axis[2].spacing
+	);
+
 	if (!m_spacing.any_le_zero())
 		m_valid_spc = true;
 	else
@@ -228,131 +231,110 @@ Nrrd* NRRDReader::Convert(int t, int c, bool get_max)
 		m_spacing = fluo::Vector(1.0);
 	}
 
-	unsigned long long data_size = (unsigned long long)m_size.get_size_xyz();
-	unsigned long long nsize = data_size;
-	if (output->type == nrrdTypeUShort || output->type == nrrdTypeShort)
-		data_size *= 2;
-	else if (output->type == nrrdTypeInt ||
-		output->type == nrrdTypeUInt)
-		data_size *= 4;
-	output->data = new unsigned char[data_size];
+	// ---- Allocate raw buffer ---------------------------------------------
+	const size_t bytes_per_elem = nrrdElementSize(nrrd);
+	const size_t total_bytes = voxel_count * bytes_per_elem;
 
-	if (nrrdRead(output, nrrd_file, NULL))
+	auto* buffer = new unsigned char[total_bytes];
+	nrrd->data = buffer;
+
+	if (nrrdRead(nrrd, nrrd_file, nullptr))
 	{
-		nrrdNuke(output);
+		delete[] buffer;
+		nrrdNuke(nrrd);
 		fclose(nrrd_file);
-		return 0;
+		return nullptr;
 	}
 
+	fclose(nrrd_file);
+
+	// ---- Normalize / convert signed & large types -------------------------
+	unsigned short min_value = 0;
+	m_min_value = 0.0;
 	m_max_value = 0.0;
-	// turn signed into unsigned
-	if (output->type == nrrdTypeChar)
+
+	const int nrrd_type = nrrd->type;
+
+	if (nrrd_type == nrrdTypeChar)
 	{
-		for (unsigned long long idx=0; idx < nsize; ++idx)
-		{
-			char val = ((char*)output->data)[idx];
-			unsigned char n = val + 128;
-			((unsigned char*)output->data)[idx] = n;
-		}
-		output->type = nrrdTypeUChar;
+		for (size_t i = 0; i < voxel_count; ++i)
+			buffer[i] = static_cast<unsigned char>(
+				static_cast<int8_t*>(nrrd->data)[i] + 128);
+
+		nrrd->type = nrrdTypeUChar;
 	}
-	// turn signed into unsigned
-	unsigned short min_value, n;
-	if (output->type == nrrdTypeShort)
+	else if (nrrd_type == nrrdTypeShort)
 	{
-		min_value = 32768;
-		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		min_value = 65535;
+		auto* src = reinterpret_cast<int16_t*>(buffer);
+		auto* dst = reinterpret_cast<uint16_t*>(buffer);
+
+		for (size_t i = 0; i < voxel_count; ++i)
 		{
-			short val = ((short*)output->data)[idx];
-			n = val + 32768;
-			((unsigned short*)output->data)[idx] = n;
-			min_value = (n < min_value) ? n : min_value;
+			uint16_t v = static_cast<uint16_t>(src[i] + 32768);
+			dst[i] = v;
+			min_value = std::min(min_value, v);
 			if (get_max)
 			{
-				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
-				m_max_value = (n > m_max_value) ? n : m_max_value;
+				m_min_value = (m_min_value == 0.0) ? v : std::min(m_min_value, (double)v);
+				m_max_value = std::max(m_max_value, (double)v);
 			}
 		}
-		output->type = nrrdTypeUShort;
+
+		nrrd->type = nrrdTypeUShort;
 	}
-	else if (output->type == nrrdTypeUShort)
+	else if (nrrd_type == nrrdTypeInt || nrrd_type == nrrdTypeUInt)
 	{
-		min_value = 0;
-		for (unsigned long long idx = 0; idx < nsize; ++idx)
+		auto* src = reinterpret_cast<uint32_t*>(buffer);
+		auto* dst = reinterpret_cast<uint16_t*>(buffer);
+
+		for (size_t i = 0; i < voxel_count; ++i)
 		{
-			n =  ((unsigned short*)output->data)[idx];
+			uint16_t v = static_cast<uint16_t>(src[i] >> 8);
+			dst[i] = v;
 			if (get_max)
 			{
-				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
-				m_max_value = (n > m_max_value) ? n : m_max_value;
+				m_min_value = (m_min_value == 0.0) ? v : std::min(m_min_value, (double)v);
+				m_max_value = std::max(m_max_value, (double)v);
 			}
 		}
+
+		nrrd->type = nrrdTypeUShort;
 	}
-	//compress int
-	if (output->type == nrrdTypeInt)
+
+	// ---- Final scaling ----------------------------------------------------
+	if (nrrd->type == nrrdTypeUChar)
 	{
-		min_value = 32768;
-		for (unsigned long long idx = 0; idx < nsize; ++idx)
-		{
-			int val = ((int*)output->data)[idx];
-			val += 0x80000000;
-			n = (unsigned short)(val >> 8);
-			((unsigned short*)output->data)[idx] = n;
-			min_value = (n < min_value) ? n : min_value;
-			if (get_max)
-			{
-				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
-				m_max_value = (n > m_max_value) ? n : m_max_value;
-			}
-		}
-		output->type = nrrdTypeUShort;
-	}
-	else if (output->type == nrrdTypeUInt)
-	{
-		min_value = 0;
-		for (unsigned long long idx = 0; idx < nsize; ++idx)
-		{
-			int val = ((unsigned int*)output->data)[idx];
-			n = (unsigned short)(val >> 8);
-			((unsigned short*)output->data)[idx] = n;
-			if (get_max)
-			{
-				m_min_value = m_min_value == 0.0 ? n : (n < m_min_value ? n : m_min_value);
-				m_max_value = (n > m_max_value) ? n : m_max_value;
-			}
-		}
-		output->type = nrrdTypeUShort;
-	}
-	//find max value
-	if (output->type == nrrdTypeUChar)
-	{
-		//8 bit
 		m_max_value = 255.0;
 		m_scalar_scale = 1.0;
 	}
-	else if (output->type == nrrdTypeUShort)
+	else if (nrrd->type == nrrdTypeUShort)
 	{
-		//16 bit
 		m_max_value -= min_value;
-		for (unsigned long long idx=0; idx < nsize; ++idx) {
-			((unsigned short*)output->data)[idx] =
-				((unsigned short*)output->data)[idx] - min_value;
-		}
-		if (m_max_value > 0.0)
-			m_scalar_scale = 65535.0 / m_max_value;
-		else
-			m_scalar_scale = 1.0;
-	}
-	else
-	{
-		nrrdNuke(output);
-		fclose(nrrd_file);
-		return 0;
+		auto* d = reinterpret_cast<uint16_t*>(buffer);
+		for (size_t i = 0; i < voxel_count; ++i)
+			d[i] -= min_value;
+
+		m_scalar_scale = (m_max_value > 0.0) ? 65535.0 / m_max_value : 1.0;
 	}
 
+	// ---- Create RawData (adopt buffer) ------------------------------------
+	auto raw = std::make_shared<fluo::RawData>(
+		fluo::RawData::Size3{ nx, ny, nz },
+		FromNrrdScalar(nrrd->type),
+		1, 1, 0, 0,
+		reinterpret_cast<fluo::Byte*>(buffer),
+		[](fluo::Byte* p)
+		{
+			delete[] reinterpret_cast<unsigned char*>(p);
+		}
+	);
+
+	nrrd->data = nullptr;
+	nrrdNuke(nrrd);
+
 	m_cur_time = t;
-	fclose(nrrd_file);
-	return output;
+	return raw;
 }
 
 bool NRRDReader::nrrd_sort(const TimeDataInfo& info1, const TimeDataInfo& info2)

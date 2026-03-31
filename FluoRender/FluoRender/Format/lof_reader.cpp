@@ -183,9 +183,9 @@ double LOFReader::GetExcitationWavelength(int chan)
 	return 0.0;
 }
 
-Nrrd* LOFReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData> LOFReader::Convert(int t, int c, bool get_max)
 {
-	Nrrd *data = 0;
+	std::shared_ptr<fluo::RawData> data = nullptr;
 	FILE* pfile = 0;
 	if (!WFOPEN(&pfile, m_path_name, L"rb"))
 		return 0;
@@ -199,7 +199,7 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 		{
 			return 0;
 		}
-		//allocate memory for nrrd
+		//allocate memory
 		bool show_progress = false;
 		size_t blk_num = tinfo->blocks.size();
 		unsigned long long mem_size = m_size.get_size_xyz();
@@ -223,22 +223,36 @@ Nrrd* LOFReader::Convert(int t, int c, bool get_max)
 			if (show_progress && m_time_num == 1)
 				SetProgress(static_cast<int>(std::round(100.0 * (i + 1) / blk_num)), "NOT_SET");
 		}
-		//create nrrd
-		data = nrrdNew();
+		//assign externally allocated memory to be managed by raw data
+		fluo::DataFormat format = fluo::DataFormat::Unknown;
 		switch (m_datatype)
 		{
 		case 1:
-			nrrdWrap_va(data, val, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			format = fluo::DataFormat::UInt8;
 			break;
 		case 2:
-			nrrdWrap_va(data, val, nrrdTypeUShort, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+			format = fluo::DataFormat::UInt16;
 			break;
 		}
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSpacing, m_spacing.x(), m_spacing.y(), m_spacing.z());
-		auto max_size = m_spacing * m_size;
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		nrrdAxisInfoSet_va(data, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
+		fluo::RawData::Size3 size =
+		{
+			static_cast<size_t>(m_size.intx()),
+			static_cast<size_t>(m_size.inty()),
+			static_cast<size_t>(m_size.intz())
+		};
+		data = std::make_shared<fluo::RawData>(
+			size,
+			format,
+			/* channels */ 1,
+			/* time_steps */ 1,
+			/* resolution_level */ 0,
+			/* brick_index */ 0,
+			static_cast<fluo::Byte*>(val),
+			[](fluo::Byte* p)
+			{
+				delete[] p;
+			}
+		);
 	}
 
 	fclose(pfile);

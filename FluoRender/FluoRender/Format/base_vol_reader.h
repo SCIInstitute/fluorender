@@ -58,7 +58,7 @@ public:
 	virtual void SetDigitOrder(int order) { m_digit_order = order; }
 	virtual int GetDigitOrder() { return m_digit_order; }
 
-	//read the acutual volume data from file and convert it to a nrrd
+	//read the acutual volume data from file and convert it to a raw data obj
 	//if get_max is true, it will find the maximum value within the volume
 	//the max value is used to change the silder range in UI
 	virtual std::shared_ptr<fluo::RawData> Convert(bool get_max);

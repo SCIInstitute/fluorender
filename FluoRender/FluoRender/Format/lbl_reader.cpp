@@ -27,10 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <lbl_reader.h>
 #include <compatibility.h>
+#include <nrrd.h>
 #include <sstream>
 #include <inttypes.h>
 
-LBLReader::LBLReader():
+LBLReader::LBLReader() :
 	BaseVolReader()
 {
 	m_fp_convert = false;
@@ -55,7 +56,7 @@ LBLReader::~LBLReader()
 //	}
 //}
 
-void LBLReader::SetFile(const std::wstring &file)
+void LBLReader::SetFile(const std::wstring& file)
 {
 	m_path_name = file;
 }
@@ -74,52 +75,88 @@ int LBLReader::LoadBatch(int index)
 	return 0;
 }
 
-Nrrd* LBLReader::Convert(int t, int c, bool get_max)
+std::shared_ptr<fluo::RawData>
+LBLReader::Convert(int t, int c, bool get_max)
 {
 	int64_t pos = m_path_name.find_last_of(L'.');
 	if (pos == -1)
-		return 0;
+		return nullptr;
+
 	std::wstring str_name = m_path_name.substr(0, pos);
 	std::wostringstream strs;
-	strs << str_name /*<< "_t" << t << "_c" << c*/ << L".lbl";
+	strs << str_name << L".lbl";
 	str_name = strs.str();
-	FILE* lbl_file = 0;
-	if (!WFOPEN(&lbl_file, str_name, L"rb"))
-		return 0;
 
-	Nrrd *output = nrrdNew();
-	NrrdIoState *nio = nrrdIoStateNew();
+	FILE* lbl_file = nullptr;
+	if (!WFOPEN(&lbl_file, str_name, L"rb"))
+		return nullptr;
+
+	// --- Use NRRD as a temporary reader ---
+	Nrrd* output = nrrdNew();
+	NrrdIoState* nio = nrrdIoStateNew();
 	nrrdIoStateSet(nio, nrrdIoStateSkipData, AIR_TRUE);
+
 	if (nrrdRead(output, lbl_file, nio))
 	{
+		nrrdNuke(output);
 		fclose(lbl_file);
-		return 0;
+		return nullptr;
 	}
-	nio = nrrdIoStateNix(nio);
+
+	nrrdIoStateNix(nio);
 	rewind(lbl_file);
+
 	if (output->dim != 3 ||
 		(output->type != nrrdTypeInt &&
-		output->type != nrrdTypeUInt))
+			output->type != nrrdTypeUInt))
 	{
 		nrrdNuke(output);
 		fclose(lbl_file);
-		return 0;
+		return nullptr;
 	}
-	int slice_num = int(output->axis[2].size);
-	int x_size = int(output->axis[0].size);
-	int y_size = int(output->axis[1].size);
-	int data_size = slice_num * x_size * y_size;
-	output->data = new unsigned int[data_size];
 
-	if (nrrdRead(output, lbl_file, NULL))
+	const size_t x = output->axis[0].size;
+	const size_t y = output->axis[1].size;
+	const size_t z = output->axis[2].size;
+	const size_t voxel_count = x * y * z;
+
+	// --- Allocate buffer ourselves (as before) ---
+	unsigned int* buffer = new unsigned int[voxel_count];
+
+	output->data = buffer;
+
+	if (nrrdRead(output, lbl_file, nullptr))
 	{
+		delete[] buffer;
 		nrrdNuke(output);
 		fclose(lbl_file);
-		return 0;
+		return nullptr;
 	}
 
 	fclose(lbl_file);
-	return output;
+
+	// --- Create RawData and ADOPT the buffer ---
+	fluo::RawData::Size3 size = { x, y, z };
+
+	auto raw = std::make_shared<fluo::RawData>(
+		size,
+		fluo::DataFormat::UInt32,
+		/* channels */ 1,
+		/* time_steps */ 1,
+		/* resolution_level */ 0,
+		/* brick_index */ 0,
+		reinterpret_cast<fluo::Byte*>(buffer),
+		[](fluo::Byte* p)
+		{
+			delete[] reinterpret_cast<unsigned int*>(p);
+		}
+	);
+
+	// --- NRRD no longer needed ---
+	output->data = nullptr;   // prevent accidental delete
+	nrrdNuke(output);
+
+	return raw;
 }
 
 std::wstring LBLReader::GetCurDataName(int t, int c)

@@ -37,7 +37,7 @@ public:
 	MSKWriter();
 	~MSKWriter();
 
-	void SetData(Nrrd* data);
+	void SetData(const std::shared_ptr<fluo::RawData>& data);
 	void SetSpacing(const fluo::Vector& spc);
 	void SetCompression(bool value);
 	void Save(const std::wstring& filename, int mode);//mode: 0-normal mask; 1-label mask
@@ -45,7 +45,7 @@ public:
 	void SetTC(int t, int c);
 
 private:
-	Nrrd* m_data;
+	std::shared_ptr<fluo::RawData> m_data;
 	fluo::Vector m_spc;
 	bool m_use_spacings;
 

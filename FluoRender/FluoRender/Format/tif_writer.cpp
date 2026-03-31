@@ -41,7 +41,7 @@ TIFWriter::~TIFWriter()
 {
 }
 
-void TIFWriter::SetData(Nrrd *data)
+void TIFWriter::SetData(const std::shared_ptr<fluo::RawData>& data)
 {
 	m_data = data;
 }
@@ -72,186 +72,196 @@ void TIFWriter::Save(const std::wstring& filename, int mode)
 
 void TIFWriter::SaveSingleFile(const std::wstring& filename)
 {
-	if (!m_data || !m_data->data || m_data->dim!=3)
+	if (!m_data || !m_data->IsAllocated())
 		return;
 
-	int numPages = int(m_data->axis[2].size);
-	int width = int(m_data->axis[0].size);
-	int height = int(m_data->axis[1].size);
-	int samples = 1;
-	int bits = m_data->type==nrrdTypeUShort?16:8;
-	float x_res;
-	float y_res;
+	const auto& size = m_data->GetSize();
+	if (size[2] == 0)
+		return;
+
+	const int bits = GetTiffBits(*m_data);
+	if (bits == 0)
+		return; // unsupported format for TIFF
+
+	const int numPages = int(size[2]);
+	const int width = int(size[0]);
+	const int height = int(size[1]);
+	const int samples = 1;
+
+	// Resolution
+	float x_res, y_res;
 	double z_res;
 	if (m_use_spacings)
 	{
-		x_res = float(m_spc.x()>0.0 ? 1.0 / m_spc.x() : 1.0);
-		y_res = float(m_spc.y()>0.0 ? 1.0 / m_spc.y() : 1.0);
+		x_res = float(m_spc.x() > 0.0 ? 1.0 / m_spc.x() : 1.0);
+		y_res = float(m_spc.y() > 0.0 ? 1.0 / m_spc.y() : 1.0);
 		z_res = m_spc.z();
 	}
 	else
 	{
-		x_res = float(m_data->axis[0].spacing>0.0?1.0/m_data->axis[0].spacing:1.0);
-		y_res = float(m_data->axis[1].spacing>0.0?1.0/m_data->axis[1].spacing:1.0);
-		z_res = m_data->axis[2].spacing;
+		x_res = y_res = 1.0f;
+		z_res = 1.0;
 	}
 
-	//buffers
-	uint16_t *buf16 = 0;
-	uint8_t *buf8 = 0;
-	if (bits == 16)
-	{
-		buf16 = (uint16_t*)_TIFFmalloc(width*sizeof(uint16_t)*samples);
-	}
+	// Line buffer
+	std::vector<uint8_t> line8;
+	std::vector<uint16_t> line16;
+	if (bits == 8)
+		line8.resize(width * samples);
 	else
-	{
-		buf8 = (uint8_t*)_TIFFmalloc(width*sizeof(uint8_t)*samples);
-	}
+		line16.resize(width * samples);
 
-	TIFF* outfile = TIFFOpenW(filename, "wb");
-	for (int i=0; i<numPages; i++)
+	TIFF* tif = TIFFOpenW(filename.c_str(), "wb");
+	if (!tif)
+		return;
+
+	for (int z = 0; z < numPages; ++z)
 	{
-		TIFFSetField(outfile, TIFFTAG_IMAGEWIDTH, width);
-		TIFFSetField(outfile, TIFFTAG_IMAGELENGTH, height);
-		TIFFSetField(outfile, TIFFTAG_BITSPERSAMPLE, bits);
-		TIFFSetField(outfile, TIFFTAG_SAMPLESPERPIXEL, samples);
-		TIFFSetField(outfile, TIFFTAG_XRESOLUTION, x_res);
-		TIFFSetField(outfile, TIFFTAG_YRESOLUTION, y_res);
-		TIFFSetField(outfile, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-		TIFFSetField(outfile, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(outfile, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-		TIFFSetField(outfile, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
-		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, i);
-		//TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
+		TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
+		TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
+		TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bits);
+		TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, samples);
+		TIFFSetField(tif, TIFFTAG_XRESOLUTION, x_res);
+		TIFFSetField(tif, TIFFTAG_YRESOLUTION, y_res);
+		TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+		TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+		TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+		TIFFSetField(tif, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
+		TIFFSetField(tif, TIFFTAG_PAGENUMBER, z, numPages);
+
 		if (m_compression)
-			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
-		std::ostringstream strs;
-		strs << "ImageJ=1.52a\n";
-		strs << "spacing=" << z_res << "\n";
-		strs << "images=" << numPages << "\n";
-		strs << "slices=" << numPages << "\n";
-		strs << "loop=false";
-		std::string desc = strs.str();
-		TIFFSetField(outfile, TIFFTAG_IMAGEDESCRIPTION, desc.c_str());
+			TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 
-		for (int j=0; j<height; j++)
+		std::ostringstream desc;
+		desc << "ImageJ=1.52a\n";
+		desc << "spacing=" << z_res << "\n";
+		desc << "images=" << numPages << "\n";
+		desc << "slices=" << numPages << "\n";
+		desc << "loop=false";
+
+		TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, desc.str().c_str());
+
+		for (int y = 0; y < height; ++y)
 		{
-			int lineindex = (width*height*i + width*j)*samples;
-			if (bits == 16)
+			const size_t index =
+				(size_t(z) * width * height) + size_t(y) * width;
+
+			if (bits == 8)
 			{
-				memcpy(buf16, ((uint16_t*)m_data->data)+lineindex, width*sizeof(uint16_t)*samples);
-				TIFFWriteScanline(outfile, buf16, j, 0);
+				auto* src = m_data->DataAs<uint8_t>() + index;
+				memcpy(line8.data(), src, width);
+				TIFFWriteScanline(tif, line8.data(), y, 0);
 			}
 			else
 			{
-				memcpy(buf8, ((uint8_t*)m_data->data)+lineindex, width*sizeof(uint8_t)*samples);
-				TIFFWriteScanline(outfile, buf8, j, 0);
+				auto* src = m_data->DataAs<uint16_t>() + index;
+				memcpy(line16.data(), src, width * sizeof(uint16_t));
+				TIFFWriteScanline(tif, line16.data(), y, 0);
 			}
 		}
 
-		TIFFWriteDirectory(outfile);
+		TIFFWriteDirectory(tif);
 	}
-	TIFFClose(outfile);
-	if (buf16)
-		_TIFFfree(buf16);
-	if (buf8)
-		_TIFFfree(buf8);
+
+	TIFFClose(tif);
 }
 
 void TIFWriter::SaveSequence(const std::wstring& filename)
 {
-	if (!m_data || !m_data->data || m_data->dim!=3)
+	if (!m_data || !m_data->IsAllocated())
 		return;
 
-	std::wstring str_fn = filename;
-	size_t pos = str_fn.find_last_of(L'.');
-	if (pos != std::wstring::npos)
-		str_fn = str_fn.substr(0, pos);
+	const auto& size = m_data->GetSize();
+	if (size[2] == 0)
+		return;
 
-	int numPages = int(m_data->axis[2].size);
-	int width = int(m_data->axis[0].size);
-	int height = int(m_data->axis[1].size);
-	int samples = 1;
-	int bits = m_data->type==nrrdTypeUShort?16:8;
-	float x_res;
-	float y_res;
-	double z_res;
+	const int bits = GetTiffBits(*m_data);
+	if (bits == 0)
+		return;
+
+	const int width = int(size[0]);
+	const int height = int(size[1]);
+	const int slices = int(size[2]);
+	const int samples = 1;
+
+	std::wstring base = filename;
+	const size_t dot = base.find_last_of(L'.');
+	if (dot != std::wstring::npos)
+		base = base.substr(0, dot);
+
+	float x_res = 1.0f, y_res = 1.0f;
+	double z_res = 1.0;
 	if (m_use_spacings)
 	{
-		x_res = float(m_spc.x()>0.0?1.0/m_spc.x():1.0);
-		y_res = float(m_spc.y()>0.0?1.0/m_spc.y():1.0);
+		x_res = float(m_spc.x() > 0.0 ? 1.0 / m_spc.x() : 1.0);
+		y_res = float(m_spc.y() > 0.0 ? 1.0 / m_spc.y() : 1.0);
 		z_res = m_spc.z();
 	}
+
+	std::vector<uint8_t> line8;
+	std::vector<uint16_t> line16;
+	if (bits == 8)
+		line8.resize(width);
 	else
-	{
-		x_res = float(m_data->axis[0].spacing>0.0?1.0/m_data->axis[0].spacing:1.0);
-		y_res = float(m_data->axis[1].spacing>0.0?1.0/m_data->axis[1].spacing:1.0);
-		z_res = m_data->axis[2].spacing;
-	}
+		line16.resize(width);
 
-	//buffers
-	uint16_t *buf16 = 0;
-	uint8_t *buf8 = 0;
-	if (bits == 16)
-	{
-		buf16 = (uint16_t*)_TIFFmalloc(width*sizeof(uint16_t)*samples);
-	}
-	else
-	{
-		buf8 = (uint8_t*)_TIFFmalloc(width*sizeof(uint8_t)*samples);
-	}
+	const int ndigit = int(std::log10(double(slices))) + 1;
+	wchar_t fmt[16];
+	swprintf_s(fmt, L"%%0%dd", ndigit);
 
-	for (int i=0; i<numPages; i++)
+	for (int z = 0; z < slices; ++z)
 	{
-		wchar_t fileindex[32];
-		wchar_t format[32];
-		int ndigit = int(log10(double(numPages))) + 1;
-		swprintf_s(format, 32, L"%%0%dd", ndigit);
-		swprintf_s(fileindex, 32, format, i+1);
-		std::wstring pagefilename = str_fn + fileindex + L".tif";
-		TIFF* outfile = TIFFOpenW(pagefilename, "wb");
+		wchar_t index[16];
+		swprintf_s(index, fmt, z + 1);
+		std::wstring outname = base + index + L".tif";
 
-		TIFFSetField(outfile, TIFFTAG_IMAGEWIDTH, width);
-		TIFFSetField(outfile, TIFFTAG_IMAGELENGTH, height);
-		TIFFSetField(outfile, TIFFTAG_BITSPERSAMPLE, bits);
-		TIFFSetField(outfile, TIFFTAG_SAMPLESPERPIXEL, samples);
-		TIFFSetField(outfile, TIFFTAG_XRESOLUTION, x_res);
-		TIFFSetField(outfile, TIFFTAG_YRESOLUTION, y_res);
-		TIFFSetField(outfile, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-		TIFFSetField(outfile, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-		TIFFSetField(outfile, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-		TIFFSetField(outfile, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
-		TIFFSetField(outfile, TIFFTAG_PAGENUMBER, 0);
-		//TIFFSetField(outfile, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(outfile, 0));
-		std::ostringstream strs;
-		strs << "ImageJ=1.52a\n";
-		strs << "spacing=" << z_res << "\n";
-		strs << "images=" << 1 << "\n";
-		strs << "slices=" << 1 << "\n";
-		strs << "loop=false";
-		std::string desc = strs.str();
-		TIFFSetField(outfile, TIFFTAG_IMAGEDESCRIPTION, desc.c_str());
+		TIFF* tif = TIFFOpenW(outname.c_str(), "wb");
+		if (!tif)
+			continue;
+
+		TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
+		TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
+		TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bits);
+		TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, samples);
+		TIFFSetField(tif, TIFFTAG_XRESOLUTION, x_res);
+		TIFFSetField(tif, TIFFTAG_YRESOLUTION, y_res);
+		TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+		TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+		TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+
 		if (m_compression)
-			TIFFSetField(outfile, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+			TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 
-		for (int j=0; j<height; j++)
+		std::ostringstream desc;
+		desc << "ImageJ=1.52a\n";
+		desc << "spacing=" << z_res << "\n";
+		desc << "images=1\n";
+		desc << "slices=1\n";
+		desc << "loop=false";
+
+		TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, desc.str().c_str());
+
+		for (int y = 0; y < height; ++y)
 		{
-			int lineindex = (width*height*i + width*j)*samples;
-			if (bits == 16)
+			const size_t index =
+				(size_t(z) * width * height) + size_t(y) * width;
+
+			if (bits == 8)
 			{
-				memcpy(buf16, ((uint16_t*)m_data->data)+lineindex, width*sizeof(uint16_t)*samples);
-				TIFFWriteScanline(outfile, buf16, j, 0);
+				memcpy(line8.data(),
+					m_data->DataAs<uint8_t>() + index,
+					width);
+				TIFFWriteScanline(tif, line8.data(), y, 0);
 			}
 			else
 			{
-				memcpy(buf8, ((uint8_t*)m_data->data)+lineindex, width*sizeof(uint8_t)*samples);
-				TIFFWriteScanline(outfile, buf8, j, 0);
+				memcpy(line16.data(),
+					m_data->DataAs<uint16_t>() + index,
+					width * sizeof(uint16_t));
+				TIFFWriteScanline(tif, line16.data(), y, 0);
 			}
 		}
-		TIFFClose(outfile);
+
+		TIFFClose(tif);
 	}
-	if (buf16)
-		_TIFFfree(buf16);
-	if (buf8)
-		_TIFFfree(buf8);
 }

@@ -31,20 +31,37 @@ DEALINGS IN THE SOFTWARE.
 #include <base_vol_writer.h>
 #include <Vector.h>
 
+static int GetTiffBits(const fluo::RawData& raw)
+{
+	switch (raw.GetFormat())
+	{
+	case fluo::DataFormat::UInt8:
+	case fluo::DataFormat::Int8:
+		return 8;
+
+	case fluo::DataFormat::UInt16:
+	case fluo::DataFormat::Int16:
+		return 16;
+
+	default:
+		return 0; // unsupported
+	}
+}
+
 class TIFWriter : public BaseVolWriter
 {
 public:
 	TIFWriter();
 	~TIFWriter();
 
-	void SetData(Nrrd* data);
+	void SetData(const std::shared_ptr<fluo::RawData>& data);
 	void SetSpacing(const fluo::Vector& spc);
 	void SetCompression(bool value);
 	void Save(const std::wstring& filename, int mode);	//mode: 0-single file
 											//1-file sequence
 
 private:
-	Nrrd* m_data;
+	std::shared_ptr<fluo::RawData> m_data;
 	fluo::Vector m_spc;
 	bool m_use_spacings;
 	bool m_compression;

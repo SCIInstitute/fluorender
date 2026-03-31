@@ -44,7 +44,7 @@ public:
 	virtual int Preprocess();
 	virtual void SetBatch(bool batch);
 	virtual int LoadBatch(int index);
-	virtual Nrrd* Convert(int t, int c, bool get_max);
+	virtual std::shared_ptr<fluo::RawData> Convert(int t, int c, bool get_max);
 	virtual std::wstring GetCurDataName(int t, int c);
 	virtual std::wstring GetCurMaskName(int t, int c);
 	virtual std::wstring GetCurLabelName(int t, int c);
@@ -94,7 +94,7 @@ private:
 	double m_scalar_scale;
 
 	void GetFileInfo(const std::wstring& filename);
-	Nrrd* ReadJp2(const std::vector<SliceInfo>& filelist, int c, bool get_max);
+	std::shared_ptr<fluo::RawData> ReadJp2(const std::vector<SliceInfo>& filelist, int c, bool get_max);
 	bool ReadSingleJp2(void* val, const std::wstring& filename, int c);
 };
 
