@@ -120,14 +120,7 @@ LBLReader::Convert(int t, int c, bool get_max)
 	const size_t z = output->axis[2].size;
 	fluo::RawData::Size3 size = { x, y, z };
 
-	auto raw = std::make_shared<fluo::RawData>(
-		size,
-		fluo::DataFormat::UInt32,
-		/* channels */ 1,
-		/* time_steps */ 1,
-		/* resolution_level */ 0,
-		/* brick_index */ 0
-	);
+	auto raw = std::make_shared<fluo::RawData>(size, fluo::DataFormat::UInt32);
 	if (!raw->Allocate())
 		return nullptr;
 

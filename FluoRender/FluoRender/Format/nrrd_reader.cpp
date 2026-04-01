@@ -236,8 +236,7 @@ NRRDReader::Convert(int t, int c, bool get_max)
 	const size_t total_bytes = voxel_count * bytes_per_elem;
 	auto raw = std::make_shared<fluo::RawData>(
 		fluo::RawData::Size3{ nx, ny, nz },
-		FromNrrdScalar(nrrd->type),
-		1, 1, 0, 0);
+		FromNrrdScalar(nrrd->type));
 	if (!raw->Allocate())
 		return nullptr;
 

@@ -728,6 +728,13 @@ file(GLOB graphics_hdr FluoRender/FluoRender/Graphics/*.h)
 add_library(GRAPHICS_LIB STATIC
   ${graphics_src} ${graphics_hdr})
 
+# OpenGL backend
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Graphics/OpenGL)
+file(GLOB graphics_gl_src FluoRender/FluoRender/Graphics/OpenGL/*.cpp)
+file(GLOB graphics_gl_hdr FluoRender/FluoRender/Graphics/OpenGL/*.h)
+add_library(GRAPHICS_GL_LIB STATIC
+    ${graphics_gl_src} ${graphics_gl_hdr})
+
 # Image
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Image)
 file(GLOB img_hdr FluoRender/FluoRender/Image/*.h)
@@ -1046,6 +1053,11 @@ target_link_libraries(GRAPHICS_LIB PRIVATE
   ${TEEM_LIBRARIES}
 )
 
+# OpenGL backend
+target_include_directories(GRAPHICS_GL_LIB PUBLIC
+  ${GLEW_INCLUDE_DIR}
+)
+
 # Image
 
 # LookingGlass
@@ -1300,6 +1312,7 @@ target_link_libraries(FluoRender PRIVATE
     FORMAT_LIB
     GLOBAL_LIB
     GRAPHICS_LIB
+    GRAPHICS_GL_LIB
     IMAGE_LIB
     LOOKINGGLASS_LIB
     OBJECT_LIB

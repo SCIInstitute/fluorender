@@ -96,7 +96,7 @@ namespace flvr
 	{
 	public:
 		// Creator of the brick owns the nrrd memory.
-		TextureBrick(Nrrd* n0,
+		TextureBrick(const std::shared_ptr<fluo::RawData>& rd,
 			const fluo::Vector& size, int byte,
 			const fluo::Vector& off_size,
 			const fluo::Vector& msize,
@@ -169,7 +169,7 @@ namespace flvr
 
 		GLenum tex_type(CompType type);
 		void* tex_data(CompType type);
-		void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick
+		//void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick
 		void* tex_data_brk(CompType type, const FileLocInfo* finfo);
 
 		void compute_polygons(fluo::Ray& view, double tmin, double tmax, double dt,
@@ -232,7 +232,6 @@ namespace flvr
 		void compute_edge_rays(fluo::BBox &bbox);
 		void compute_edge_rays_tex(fluo::BBox &bbox);
 		size_t tex_type_size(GLenum t);
-		GLenum tex_type_aux(Nrrd* n);
 
 		bool raw_brick_reader(char* data, size_t size, const FileLocInfo* finfo);
 
@@ -287,40 +286,15 @@ namespace flvr
 
 	inline double TextureBrick::get_data(const fluo::Point& ijk)
 	{
-		auto stride = get_stride();
-		unsigned long long offset =
-			(unsigned long long)(off_size_.intz() + ijk.intz()) *
-			(unsigned long long)(stride.intx()) *
-			(unsigned long long)(stride.inty()) +
-			(unsigned long long)(off_size_.inty() + ijk.inty()) *
-			(unsigned long long)(stride.intx()) +
-			(unsigned long long)(off_size_.intx() + ijk.intx());
-		int bytes = nb(CompType::Data);
 		auto rawd = data_[CompType::Data].data;
 		if (!rawd)
 			return 0.0;
-		switch (bytes)
-		{
-		case 1:
-		{
-			unsigned char* ptr = rawd->DataAs<unsigned char>();
-			return ptr[offset] / 255.0;
-		}
-			break;
-		case 2:
-		{
-			unsigned short* ptr = (unsigned short*)(nrrd->data);
-			return ptr[offset] / 65535.0;
-		}
-			break;
-		case 4:
-		{
-			unsigned int* ptr = (unsigned int*)(nrrd->data);
-			return ptr[offset] / 4294967295.0;
-		}
-			break;
-		}
-		return 0.0;
+
+		const size_t x = off_size_.intx() + ijk.intx();
+		const size_t y = off_size_.inty() + ijk.inty();
+		const size_t z = off_size_.intz() + ijk.intz();
+
+		return rawd->GetVoxelValue(x, y, z);
 	}
 
 	struct Pyramid_Level {

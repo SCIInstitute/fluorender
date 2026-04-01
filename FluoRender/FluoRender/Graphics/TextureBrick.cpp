@@ -27,6 +27,7 @@
 //
 
 #include <GL/glew.h>
+#include <GLPixelFormat.h>
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <TextureRenderer.h>
@@ -44,7 +45,8 @@ namespace flvr
 {
 	std::map<std::wstring, std::wstring> TextureBrick::cache_table_ = std::map<std::wstring, std::wstring>();
 
-	TextureBrick::TextureBrick(Nrrd* n0,
+	TextureBrick::TextureBrick(
+		const std::shared_ptr<fluo::RawData>& rd,
 		const fluo::Vector& size, int byte,
 		const fluo::Vector& off_size,
 		const fluo::Vector& msize,
@@ -72,7 +74,7 @@ namespace flvr
 		compute_edge_rays(bbox_);
 		compute_edge_rays_tex(tbox_);
 
-		TexComp comp = { CompType::Data, byte, n0 };
+		TexComp comp = { CompType::Data, byte, rd };
 		set_nrrd(CompType::Data, comp);
 
 		//if it's been drawn in a full update loop
@@ -342,19 +344,6 @@ namespace flvr
 		}
 	}
 
-	GLenum TextureBrick::tex_type_aux(Nrrd* n)
-	{
-		// GL_BITMAP!?
-		if (n->type == nrrdTypeChar)   return GL_BYTE;
-		if (n->type == nrrdTypeUChar)  return GL_UNSIGNED_BYTE;
-		if (n->type == nrrdTypeShort)  return GL_SHORT;
-		if (n->type == nrrdTypeUShort) return GL_UNSIGNED_SHORT;
-		if (n->type == nrrdTypeInt)    return GL_INT;
-		if (n->type == nrrdTypeUInt)   return GL_UNSIGNED_INT;
-		if (n->type == nrrdTypeFloat)  return GL_FLOAT;
-		return GL_NONE;
-	}
-
 	size_t TextureBrick::tex_type_size(GLenum t)
 	{
 		if (t == GL_BYTE) { return sizeof(GLbyte); }
@@ -373,54 +362,26 @@ namespace flvr
 		if (c == data_.end())
 			return GL_NONE;
 
-		Nrrd* nrrd = c->second.data;
-		if (!nrrd)
+		auto rd = c->second.data;
+		if (!rd)
 			return GL_NONE;
-		return tex_type_aux(nrrd);
+		return fluo::gl::ToGLType(rd->GetPixelFormat());
 	}
 
-	void *TextureBrick::tex_data(CompType type)
+	void* TextureBrick::tex_data(CompType type)
 	{
-		auto c = data_.find(type);
-		if (c == data_.end())
-			return nullptr;
-		Nrrd* nrrd = c->second.data;
-		if (!nrrd)
+		auto it = data_.find(type);
+		if (it == data_.end())
 			return nullptr;
 
-		int bytes = c->second.bytes;
-		auto stride = get_stride();
-		unsigned char *ptr = (unsigned char *)(nrrd->data);
-		unsigned long long offset =
-			(unsigned long long)(off_size_.intz()) *
-			(unsigned long long)(stride.intx()) *
-			(unsigned long long)(stride.inty()) +
-			(unsigned long long)(off_size_.inty()) *
-			(unsigned long long)(stride.intx()) +
-			(unsigned long long)(off_size_.intx());
-		return ptr + offset * bytes;
-	}
-
-	void* TextureBrick::tex_data(CompType type, void* raw_data)
-	{
-		auto c = data_.find(type);
-		if (c == data_.end())
-			return nullptr;
-		Nrrd* nrrd = c->second.data;
-		if (!nrrd)
+		auto rawd = it->second.data;
+		if (!rawd)
 			return nullptr;
 
-		int bytes = c->second.bytes;
-		auto stride = get_stride();
-		unsigned char *ptr = (unsigned char *)(raw_data);
-		unsigned long long offset =
-			(unsigned long long)(off_size_.intz()) *
-			(unsigned long long)(stride.intx()) *
-			(unsigned long long)(stride.inty()) +
-			(unsigned long long)(off_size_.inty()) *
-			(unsigned long long)(stride.intx()) +
-			(unsigned long long)(off_size_.intx());
-		return ptr + offset * bytes;
+		return rawd->ElementPtr(
+			off_size_.intx(),
+			off_size_.inty(),
+			off_size_.intz());
 	}
 
 	void *TextureBrick::tex_data_brk(CompType type, const FileLocInfo* finfo)
@@ -449,84 +410,15 @@ namespace flvr
 
 	void TextureBrick::set_priority()
 	{
-		CompType type = CompType::Data;
-		auto c = data_.find(type);
-		if (c == data_.end())
-			return;
-		Nrrd* nrrd = c->second.data;
-		if (!nrrd)
+		auto it = data_.find(CompType::Data);
+		if (it == data_.end() || !it->second.data)
 		{
 			priority_ = 0;
 			return;
 		}
 
-		int bytes = c->second.bytes;
-		switch (bytes)
-		{
-		case 1:
-		{
-			unsigned char max = 0;
-			unsigned char *ptr = (unsigned char *)(nrrd->data);
-			for (int i = 0; i < size_.intx(); ++i) for (int j = 0; j < size_.inty(); ++j) for (int k = 0; k < size_.intz(); ++k)
-			{
-				unsigned long long index =
-					(unsigned long long)(size_.intx()) *
-					(unsigned long long)(size_.inty()) *
-					(unsigned long long)(off_size_.intz() + k) +
-					(unsigned long long)(size_.intx()) *
-					(unsigned long long)(off_size_.inty() + j) +
-					(unsigned long long)(off_size_.intx() + i);
-				max = ptr[index] > max ? ptr[index] : max;
-			}
-			if (max == 0)
-				priority_ = 1;
-			else
-				priority_ = 0;
-		}
-			break;
-		case 2:
-		{
-			unsigned short max = 0;
-			unsigned short *ptr = (unsigned short *)(nrrd->data);
-			for (int i = 0; i < size_.intx(); ++i) for (int j = 0; j < size_.inty(); ++j) for (int k = 0; k < size_.intz(); ++k)
-			{
-				unsigned long long index =
-					(unsigned long long)(size_.intx()) *
-					(unsigned long long)(size_.inty()) *
-					(unsigned long long)(off_size_.intz() + k) +
-					(unsigned long long)(size_.intx()) *
-					(unsigned long long)(off_size_.inty() + j) +
-					(unsigned long long)(off_size_.intx() + i);
-				max = ptr[index] > max ? ptr[index] : max;
-			}
-			if (max == 0)
-				priority_ = 1;
-			else
-				priority_ = 0;
-		}
-			break;
-		case 4:
-		{
-			unsigned int max = 0;
-			unsigned int *ptr = (unsigned int *)(nrrd->data);
-			for (int i = 0; i < size_.intx(); ++i) for (int j = 0; j < size_.inty(); ++j) for (int k = 0; k < size_.intz(); ++k)
-			{
-				unsigned long long index =
-					(unsigned long long)(size_.intx()) *
-					(unsigned long long)(size_.inty()) *
-					(unsigned long long)(off_size_.intz() + k) +
-					(unsigned long long)(size_.intx()) *
-					(unsigned long long)(off_size_.inty() + j) +
-					(unsigned long long)(off_size_.intx() + i);
-				max = ptr[index] > max ? ptr[index] : max;
-			}
-			if (max == 0)
-				priority_ = 1;
-			else
-				priority_ = 0;
-		}
-			break;
-		}
+		const auto [minv, maxv] = it->second.data->GetMinMax();
+		priority_ = (maxv == 0.0) ? 1 : 0;
 	}
 
 	void TextureBrick::freeBrkData()

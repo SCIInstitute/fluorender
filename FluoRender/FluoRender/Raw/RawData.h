@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RAW_DATA_H_
 #define _RAW_DATA_H_
 
+#include <PixelFormat.h>
 #include <Utils.h>
 #include <array>
 #include <cstddef>
@@ -110,19 +111,11 @@ namespace fluo
 		RawData() = default;
 
 		RawData(const Size3& size,
-			DataFormat format,
-			size_t channels = 1,
-			size_t time_steps = 1,
-			size_t resolution_level = 0,
-			size_t brick_index = 0);
+			DataFormat format);
 
 		//adoption constructor
 		RawData(const Size3& size,
 			DataFormat format,
-			size_t channels,
-			size_t time_steps,
-			size_t resolution_level,
-			size_t brick_index,
 			Byte* external_buffer,
 			DeleterFn deleter);
 
@@ -154,22 +147,31 @@ namespace fluo
 		size_t GetBitsPerElement() const noexcept;
 		size_t GetBytesPerElement() const noexcept;
 
-		size_t GetChannelCount() const noexcept { return m_channels; }
-		size_t GetTimeSteps() const noexcept { return m_time_steps; }
+		PixelFormat GetPixelFormat() const noexcept;
 
-		size_t GetResolutionLevel() const noexcept { return m_resolution_level; }
-		size_t GetBrickIndex() const noexcept { return m_brick_index; }
+		//size_t GetChannelCount() const noexcept { return m_channels; }
+		//size_t GetTimeSteps() const noexcept { return m_time_steps; }
+
+		//size_t GetResolutionLevel() const noexcept { return m_resolution_level; }
+		//size_t GetBrickIndex() const noexcept { return m_brick_index; }
 
 		size_t GetVoxelCount() const noexcept;
 		size_t GetElementCount() const noexcept;
 		size_t GetTotalBytes() const noexcept;
 
+		double GetVoxelValue(
+			size_t x, size_t y, size_t z) const noexcept;
 		// --- Raw memory access -------------------------------------------------
 
-		const fluo::Byte* GetData() const noexcept;
+		/// Canonical raw byte access
 		fluo::Byte* GetData() noexcept;
+		const fluo::Byte* GetData() const noexcept;
 
-		/// Typed access (caller responsible for matching format)
+		/// Untyped access (graphics / IO / memcpy)
+		void* GetDataVoid() noexcept;
+		const void* GetDataVoid() const noexcept;
+
+		/// Typed access to entire buffer (caller must match format)
 		template <typename T>
 		T* DataAs() noexcept
 		{
@@ -182,22 +184,50 @@ namespace fluo
 			return reinterpret_cast<const T*>(GetData());
 		}
 
+		/// Pointer to element at voxel coordinate (untyped)
+		void* ElementPtr(size_t x, size_t y, size_t z) noexcept;
+
+		const void* ElementPtr(size_t x, size_t y, size_t z) const noexcept;
+
+		/// Pointer to element at voxel coordinate (typed)
 		template <typename T>
-		std::pair<double, double> ComputeMinMax() const;
+		T* ElementAs(size_t x, size_t y, size_t z) noexcept
+		{
+			return reinterpret_cast<T*>(
+				ElementPtr(x, y, z));
+		}
+
+		template <typename T>
+		const T* ElementAs(size_t x, size_t y, size_t z) const noexcept
+		{
+			return reinterpret_cast<const T*>(
+				ElementPtr(x, y, z));
+		}
+
+		std::pair<double, double> GetMinMax() const;
 
 	private:
 		Size3 m_size = { 0, 0, 0 };
 
 		DataFormat m_format = DataFormat::Unknown;
-		size_t m_channels = 1;
-		size_t m_time_steps = 1;
+		//size_t m_channels = 1;
+		//size_t m_time_steps = 1;
 
-		size_t m_resolution_level = 0;
-		size_t m_brick_index = 0;
+		//size_t m_resolution_level = 0;
+		//size_t m_brick_index = 0;
 
 		std::vector<fluo::Byte> m_data;
 
 		std::unique_ptr<Byte, DeleterFn> m_external{ nullptr, nullptr };
+
+		mutable bool m_minmax_valid = false;
+		mutable std::pair<double, double> m_minmax_cache;
+
+	private:
+		template <typename T>
+		std::pair<double, double> ComputeMinMaxT() const;
+
+		std::pair<double, double> ComputeMinMaxInternal() const;
 	};
 
 	inline RawData::DeleterFn MakeNewArrayDeleter(DataFormat /*format*/)

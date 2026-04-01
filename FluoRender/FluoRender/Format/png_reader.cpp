@@ -334,14 +334,7 @@ std::shared_ptr<fluo::RawData> PNGReader::ReadPng(const std::vector<SliceInfo>& 
 		static_cast<size_t>(m_size.inty()),
 		static_cast<size_t>(m_size.intz())
 	};
-	auto data = std::make_shared<fluo::RawData>(
-		size,
-		format,
-		/* channels */ 1,
-		/* time_steps */ 1,
-		/* resolution_level */ 0,
-		/* brick_index */ 0
-	);
+	auto data = std::make_shared<fluo::RawData>(size, format);
 	if (!data->Allocate())
 		return nullptr;
 
@@ -369,7 +362,7 @@ std::shared_ptr<fluo::RawData> PNGReader::ReadPng(const std::vector<SliceInfo>& 
 	{
 		if (get_max)
 		{
-			auto [minv, maxv] = data->ComputeMinMax<uint16_t>();
+			auto [minv, maxv] = data->GetMinMax();
 			m_min_value = minv;
 			m_max_value = maxv;
 		}

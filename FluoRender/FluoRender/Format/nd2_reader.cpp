@@ -174,14 +174,7 @@ ND2Reader::Convert(int t, int c, bool get_max)
 	{
 	case 8:
 	{
-		raw = std::make_shared<fluo::RawData>(
-			size,
-			fluo::DataFormat::UInt8,
-			/* channels */ 1,
-			/* time_steps */ 1,
-			/* resolution_level */ 0,
-			/* brick_index */ 0
-		);
+		raw = std::make_shared<fluo::RawData>(size, fluo::DataFormat::UInt8);
 		if (!raw->Allocate())
 			return nullptr;
 
@@ -198,14 +191,7 @@ ND2Reader::Convert(int t, int c, bool get_max)
 	}
 	case 16:
 	{
-		raw = std::make_shared<fluo::RawData>(
-			size,
-			fluo::DataFormat::UInt16,
-			/* channels */ 1,
-			/* time_steps */ 1,
-			/* resolution_level */ 0,
-			/* brick_index */ 0
-		);
+		raw = std::make_shared<fluo::RawData>(size, fluo::DataFormat::UInt16);
 		if (!raw->Allocate())
 			return nullptr;
 
@@ -233,13 +219,13 @@ ND2Reader::Convert(int t, int c, bool get_max)
 	{
 		if (raw->GetFormat() == fluo::DataFormat::UInt16)
 		{
-			auto [minv, maxv] = raw->ComputeMinMax<uint16_t>();
+			auto [minv, maxv] = raw->GetMinMax();
 			m_min_value = minv;
 			m_max_value = maxv;
 		}
 		else if (raw->GetFormat() == fluo::DataFormat::UInt8)
 		{
-			auto [minv, maxv] = raw->ComputeMinMax<uint8_t>();
+			auto [minv, maxv] = raw->GetMinMax();
 			m_min_value = minv;
 			m_max_value = maxv;
 		}

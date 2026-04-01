@@ -686,14 +686,7 @@ std::shared_ptr<fluo::RawData> LSMReader::Convert(int t, int c, bool get_max)
 			static_cast<size_t>(m_size.inty()),
 			static_cast<size_t>(m_size.intz())
 		};
-		data = std::make_shared<fluo::RawData>(
-			size,
-			format,
-			/* channels */ 1,
-			/* time_steps */ 1,
-			/* resolution_level */ 0,
-			/* brick_index */ 0
-		);
+		data = std::make_shared<fluo::RawData>(size, format);
 		if (!data->Allocate())
 			return nullptr;
 		fluo::Byte* buffer = data->GetData();

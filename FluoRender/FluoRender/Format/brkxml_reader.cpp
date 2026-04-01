@@ -881,14 +881,7 @@ std::shared_ptr<fluo::RawData> BRKXMLReader::Convert(int t, int c, bool get_max)
 		else if (m_pyramid[m_cur_level].bit_depth == 32)
 			format = fluo::DataFormat::Float32;
 
-		data = std::make_shared<fluo::RawData>(
-			size,
-			format,
-			1,
-			1,
-			m_cur_level,
-			0
-		);
+		data = std::make_shared<fluo::RawData>(size, format);
 
 		m_cur_chan = c;
 		m_cur_time = t;
