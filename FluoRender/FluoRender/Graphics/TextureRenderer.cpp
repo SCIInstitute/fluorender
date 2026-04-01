@@ -711,19 +711,19 @@ namespace flvr
 
 		GLint result = -1;
 		int tn = 0;
-		void* raw_data = 0;
+		std::shared_ptr<fluo::RawData> raw_data = nullptr;
 		//get raw data from cache
 		if (auto cq = cache_queue_.lock())
 		{
 			VolCache4D* vol_cache = cq->get_offset(toffset);
 			if (vol_cache)
 			{
-				raw_data = vol_cache->GetRawData();
+				raw_data = vol_cache->GetRawDataData();
 				tn = static_cast<int>(vol_cache->GetTime());
 			}
 		}
 		else
-			raw_data = brick->tex_data(CompType::Data);
+			raw_data = brick->get_raw_data(CompType::Data);
 
 		if (!tex->isBrxml() &&
 			(!brick || !raw_data))
@@ -869,7 +869,7 @@ namespace flvr
 						}
 
 						FileLocInfo* finfo = tex->GetFileName(brick->getID());
-						void* texdata = brick->tex_data_brk(CompType::Data, finfo);
+						void* texdata = brick->get_raw_data_lod(CompType::Data, finfo)->GetDataVoid();
 						if (texdata)
 						{
 							glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(CompType::Data), 0);
@@ -917,7 +917,7 @@ namespace flvr
 						if (brick->isLoaded())
 						{
 							bool brkerror = false;
-							void* texdata = brick->tex_data_brk(CompType::Data, NULL);
+							void* texdata = brick->get_raw_data_lod(CompType::Data, NULL)->GetDataVoid();
 							if (texdata)
 							{
 								glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(CompType::Data), 0);
@@ -946,7 +946,7 @@ namespace flvr
 							if (brick->isLoaded())
 							{
 								bool brkerror = false;
-								void* texdata = brick->tex_data_brk(CompType::Data, NULL);
+								void* texdata = brick->get_raw_data_lod(CompType::Data, NULL)->GetDataVoid();
 								if (texdata)
 								{
 									glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format, brick->tex_type(CompType::Data), 0);
@@ -979,7 +979,7 @@ namespace flvr
 				{
 					glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 						brick->tex_type(CompType::Data), 0);
-					load_texture(brick->tex_data(CompType::Data, raw_data),
+					load_texture(raw_data->GetDataVoid(),
 						nx, ny, nz, nb,
 						stride.intx(), stride.inty(),
 						brick->tex_type(CompType::Data), format);
@@ -1101,7 +1101,7 @@ namespace flvr
 				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 					brick->tex_type(CompType::Mask), 0);
 
-				load_texture(brick->tex_data(CompType::Mask),
+				load_texture(brick->get_raw_data(CompType::Mask)->GetDataVoid(),
 					nx, ny, nz, nb,
 					stride.intx(), stride.inty(),
 					brick->tex_type(CompType::Mask), format);
@@ -1203,7 +1203,7 @@ namespace flvr
 				glTexImage3D(GL_TEXTURE_3D, 0, internal_format, nx, ny, nz, 0, format,
 					brick->tex_type(CompType::Label), NULL);
 
-				load_texture(brick->tex_data(CompType::Label),
+				load_texture(brick->get_raw_data(CompType::Label)->GetDataVoid(),
 					nx, ny, nz, nb,
 					stride.intx(), stride.inty(),
 					brick->tex_type(CompType::Label), format);

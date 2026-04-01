@@ -1054,7 +1054,7 @@ target_link_libraries(GRAPHICS_LIB PRIVATE
 )
 
 # OpenGL backend
-target_include_directories(GRAPHICS_GL_LIB PUBLIC
+target_include_directories(GRAPHICS_GL_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
 )
 

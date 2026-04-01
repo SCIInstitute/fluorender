@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BBox.h>
 #include <Vector4i.h>
 #include <Vector4f.h>
-#include <nrrd.h>
+#include <RawData.h>
 #include <glm/glm.hpp>
 #include <array>
 
@@ -95,27 +95,27 @@ public:
 	bool GetSkipBrick();
 	//load
 	void ResetVolume();
-	int Load(Nrrd* data, const std::wstring &name, const std::wstring &path);
-	int Replace(Nrrd* data, bool del_tex);
+	int Load(const std::shared_ptr<fluo::RawData>& data, const std::wstring &name, const std::wstring &path);
+	int Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex);
 	int Replace(VolumeData* data);
-	Nrrd* GetVolume(bool ret);
+	std::shared_ptr<fluo::RawData> GetVolume(bool ret);
 	//empty data
 	void AddEmptyData(int bits,
 		const fluo::Vector& res,
 		const fluo::Vector& spc,
 		int brick_size = 0);
 	//load mask
-	void LoadMask(Nrrd* mask);
-	Nrrd* GetMask(bool ret);
+	void LoadMask(const std::shared_ptr<fluo::RawData>& mask);
+	std::shared_ptr<fluo::RawData> GetMask(bool ret);
 	bool IsValidMask();//check if mask doesn't exist or it's empty
 	//empty mask
 	//mode: 0-zeros; 1-255; 2-leave as is
 	void AddEmptyMask(int mode, bool change=true);
-	void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
-	void AddMask16(Nrrd* mask, int op, double scale);//16-bit data
+	void AddMask(const std::shared_ptr<fluo::RawData>& mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
+	void AddMask16(const std::shared_ptr<fluo::RawData>& mask, int op, double scale);//16-bit data
 	//load label
-	void LoadLabel(Nrrd* label);
-	Nrrd* GetLabel(bool ret);
+	void LoadLabel(const std::shared_ptr<fluo::RawData>& label);
+	std::shared_ptr<fluo::RawData> GetLabel(bool ret);
 	//empty label
 	//mode: 0-zeros;1-ordered; 2-shuffled
 	//change: whether changes label when it already exists

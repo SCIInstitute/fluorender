@@ -1257,9 +1257,8 @@ void VolumeRenderer::return_volume()
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 		GLenum type = b->tex_type(CompType::Data);
-		void* data = b->tex_data(CompType::Data);
 		glGetTexImage(GL_TEXTURE_3D, 0, format,
-			type, data);
+			type, b->get_raw_data(CompType::Data)->GetDataVoid());
 
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
@@ -1305,9 +1304,8 @@ void VolumeRenderer::return_mask(int order)
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 		GLenum type = b->tex_type(CompType::Mask);
-		void* data = b->tex_data(CompType::Mask);
 		glGetTexImage(GL_TEXTURE_3D, 0, GL_RED,
-			type, data);
+			type, b->get_raw_data(CompType::Mask)->GetDataVoid());
 
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
@@ -1346,7 +1344,7 @@ void VolumeRenderer::return_label()
 
 		glGetTexImage(GL_TEXTURE_3D, 0, GL_RED_INTEGER,
 			b->tex_type(CompType::Label),
-			b->tex_data(CompType::Label));
+			b->get_raw_data(CompType::Label)->GetDataVoid());
 
 		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
 		glPixelStorei(GL_PACK_IMAGE_HEIGHT, 0);

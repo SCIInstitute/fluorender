@@ -169,8 +169,7 @@ bool CQCallback::HandleData(VolCache4D& vol_cache)
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	int chan = vd->GetCurChannel();
 
-	Nrrd* data = 0;
-	data = reader->Convert(frame, chan, true);
+	auto data = reader->Convert(frame, chan, true);
 	vol_cache.m_data = data;
 	vol_cache.m_valid &= (data != 0);
 	vol_cache.own_data = vol_cache.m_valid;
@@ -193,21 +192,17 @@ bool CQCallback::HandleMask(VolCache4D& vol_cache)
 	MSKReader msk_reader;
 	std::wstring mskname = reader->GetCurMaskName(frame, chan);
 	msk_reader.SetFile(mskname);
-	Nrrd* mask = msk_reader.Convert(frame, chan, true);
+	auto mask = msk_reader.Convert(frame, chan, true);
 	if (!mask)
 	{
 		auto res = vd->GetResolution();
 		auto spc = vd->GetSpacing();
-		mask = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)res.intx() *
-			(unsigned long long)res.inty() * (unsigned long long)res.intz();
-		uint8_t* val8 = new (std::nothrow) uint8_t[mem_size]();
-		nrrdWrap_va(mask, val8, nrrdTypeUChar, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		auto max_size = spc * res;
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-		nrrdAxisInfoSet_va(mask, nrrdAxisInfoSize, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
+		mask = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3{
+				(size_t)res.intx(),
+				(size_t)res.inty(),
+				(size_t)res.intz() },
+			fluo::DataFormat::UInt8);
 	}
 	vol_cache.m_mask = mask;
 	vol_cache.m_valid &= (mask != 0);
@@ -231,21 +226,17 @@ bool CQCallback::HandleLabel(VolCache4D& vol_cache)
 	LBLReader lbl_reader;
 	std::wstring lblname = reader->GetCurLabelName(frame, chan);
 	lbl_reader.SetFile(lblname);
-	Nrrd* label = lbl_reader.Convert(frame, chan, true);
+	auto label = lbl_reader.Convert(frame, chan, true);
 	if (!label)
 	{
 		auto res = vd->GetResolution();
 		auto spc = vd->GetSpacing();
-		label = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)res.intx() *
-			(unsigned long long)res.inty() * (unsigned long long)res.intz();
-		unsigned int* val32 = new (std::nothrow) unsigned int[mem_size]();
-		nrrdWrap_va(label, val32, nrrdTypeUInt, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		auto max_size = spc * res;
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-		nrrdAxisInfoSet_va(label, nrrdAxisInfoSize, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
+		label = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3{
+				(size_t)res.intx(),
+				(size_t)res.inty(),
+				(size_t)res.intz() },
+			fluo::DataFormat::UInt32);
 	}
 	vol_cache.m_label = label;
 	vol_cache.m_valid &= (label != 0);
@@ -259,7 +250,7 @@ bool CQCallback::AccessData(VolCache4D& vol_cache)
 	if (!vd)
 		return false;
 
-	Nrrd* data = vd->GetVolume(vol_cache.return_data);
+	auto data = vd->GetVolume(vol_cache.return_data);
 	vol_cache.m_data = data;
 	vol_cache.m_valid &= (data != 0);
 	return data != 0;
@@ -271,7 +262,7 @@ bool CQCallback::AccessMask(VolCache4D& vol_cache)
 	if (!vd)
 		return false;
 
-	Nrrd* mask = vd->GetMask(vol_cache.return_mask);
+	auto mask = vd->GetMask(vol_cache.return_mask);
 	vol_cache.m_mask = mask;
 	vol_cache.m_valid &= (mask != 0);
 	return mask != 0;
@@ -283,7 +274,7 @@ bool CQCallback::AccessLabel(VolCache4D& vol_cache)
 	if (!vd)
 		return false;
 
-	Nrrd* label = vd->GetLabel(vol_cache.return_label);
+	auto label = vd->GetLabel(vol_cache.return_label);
 	vol_cache.m_label = label;
 	vol_cache.m_valid &= (label != 0);
 	return label != 0;
@@ -309,7 +300,7 @@ bool CQCallback::SaveMask(VolCache4D& vol_cache)
 	int chan = vd->GetCurChannel();
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
-	msk_writer.SetData((Nrrd*)vol_cache.GetNrrdMask());
+	msk_writer.SetData(vol_cache.GetRawDataMask());
 	msk_writer.SetSpacing(vd->GetSpacing());
 	std::wstring filename = reader->GetCurMaskName(frame, chan);
 	msk_writer.Save(filename, 0);
@@ -331,7 +322,7 @@ bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 	int chan = vd->GetCurChannel();
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
-	msk_writer.SetData((Nrrd*)vol_cache.GetNrrdLabel());
+	msk_writer.SetData(vol_cache.GetRawDataLabel());
 	msk_writer.SetSpacing(vd->GetSpacing());
 	std::wstring filename = reader->GetCurLabelName(frame, chan);
 	msk_writer.Save(filename, 1);

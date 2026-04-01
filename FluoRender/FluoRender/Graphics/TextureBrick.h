@@ -168,9 +168,10 @@ namespace flvr
 		inline int get_priority() {return priority_;}
 
 		GLenum tex_type(CompType type);
-		void* tex_data(CompType type);
+		std::shared_ptr<fluo::RawData> get_raw_data(CompType type);
+		std::shared_ptr<fluo::RawData> get_raw_data_lod(CompType type, const FileLocInfo* finfo);
 		//void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick
-		void* tex_data_brk(CompType type, const FileLocInfo* finfo);
+		//void* tex_data_brk(CompType type, const FileLocInfo* finfo);
 
 		void compute_polygons(fluo::Ray& view, double tmin, double tmax, double dt,
 			std::vector<float>& vertex, std::vector<uint32_t>& index, std::vector<uint32_t>& size);
@@ -200,7 +201,7 @@ namespace flvr
 		double get_data(const fluo::Point& ijk);
 
 		void freeBrkData();
-		bool read_brick(char* data, size_t size, const FileLocInfo* finfo);
+		bool read_brick(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo);
 		bool isLoaded() { return brkdata_ ? true : false; };
 		bool isLoading() { return loading_; }
 		void set_loading_state(bool val) { loading_ = val; }
@@ -208,8 +209,8 @@ namespace flvr
 		int get_id_in_loadedbrks() { return id_in_loadedbrks; }
 		int getID() { return findex_; }
 
-		void set_brkdata(char *brkdata) { brkdata_ = brkdata; }
-		const char *getBrickData() { return brkdata_; }
+		void set_rawdata_lod(const std::shared_ptr<fluo::RawData>& data) { brkdata_ = data; }
+		std::shared_ptr<fluo::RawData> get_raw_data_lod() { return brkdata_; }
 		static bool read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, void *th = NULL);
 
 		void set_disp(bool disp) { disp_ = disp; }
@@ -233,7 +234,7 @@ namespace flvr
 		void compute_edge_rays_tex(fluo::BBox &bbox);
 		size_t tex_type_size(GLenum t);
 
-		bool raw_brick_reader(char* data, size_t size, const FileLocInfo* finfo);
+		bool raw_brick_reader(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo);
 
 		//! bbox edges
 		fluo::Ray edge_[12];
@@ -276,7 +277,7 @@ namespace flvr
 		int findex_;
 		long long offset_;
 		long long fsize_;
-		char *brkdata_;
+		std::shared_ptr<fluo::RawData> brkdata_;
 		bool loading_;
 		int id_in_loadedbrks;
 		bool disp_;

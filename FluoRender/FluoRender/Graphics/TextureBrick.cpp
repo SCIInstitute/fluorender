@@ -85,7 +85,6 @@ namespace flvr
 		priority_ = 0;
 
 		//brkxml
-		brkdata_ = NULL;
 		id_in_loadedbrks = -1;
 		loading_ = false;
 		disp_ = true;
@@ -94,38 +93,37 @@ namespace flvr
 
 	TextureBrick::~TextureBrick()
 	{
-		if (brkdata_) delete[] brkdata_;
 	}
 
 	/* The cube is numbered in the following way
 
- Corners:
+	Corners:
 
- 2________6        y
- /|        |        |
- / |       /|        |
- /  |      / |        |
- /   0_____/__4        |
- 3---------7   /        |_________ x
- |  /      |  /         /
- | /       | /         /
- |/        |/         /
- 1_________5         /
- z
+	     2________6        y
+	    /|        |        |
+	   / |       /|        |
+	  /  |      / |        |
+	 /   0_____/__4        |
+	3---------7   /        |_________ x
+	|  /      |  /         /
+	| /       | /         /
+	|/        |/         /
+	1_________5         /
+	z
 
- Edges:
+	Edges:
 
- ,____1___,        y
- /|        |        |
- / 0       /|        |
- 9  |     10 2        |
- /   |__3__/__|        |
- /_____5___/   /        |_________ x
- |  /      | 11         /
- 4 8       6 /         /
- |/        |/         /
- |____7____/         /
- z
+	      ,____1___,        y
+	     /|        |        |
+	    / 0       /|        |
+	   9  |     10 2        |
+	  /   |__3__/__|        |
+	 /_____5___/   /        |_________ x
+	|  /      | 11         /
+	4 8       6 /         /
+	|/        |/         /
+	|____7____/         /
+	z
 	 */
 
 	void TextureBrick::compute_edge_rays(fluo::BBox &bbox)
@@ -368,42 +366,35 @@ namespace flvr
 		return fluo::gl::ToGLType(rd->GetPixelFormat());
 	}
 
-	void* TextureBrick::tex_data(CompType type)
+	std::shared_ptr<fluo::RawData> TextureBrick::get_raw_data(CompType type)
 	{
 		auto it = data_.find(type);
 		if (it == data_.end())
 			return nullptr;
 
-		auto rawd = it->second.data;
-		if (!rawd)
-			return nullptr;
-
-		return rawd->ElementPtr(
-			off_size_.intx(),
-			off_size_.inty(),
-			off_size_.intz());
+		return it->second.data;
 	}
 
-	void *TextureBrick::tex_data_brk(CompType type, const FileLocInfo* finfo)
+	std::shared_ptr<fluo::RawData> TextureBrick::get_raw_data_lod(CompType type, const FileLocInfo* finfo)
 	{
 		auto c = data_.find(type);
 		if (c == data_.end())
 			return nullptr;
 		int bytes = c->second.bytes;
 
-		unsigned char *ptr = nullptr;
+		std::shared_ptr<fluo::RawData> ptr = nullptr;
 		if (brkdata_)
-			ptr = (unsigned char *)(brkdata_);
+			ptr = brkdata_;
 		else
 		{
-			size_t mem_size = (size_t)size_.intx() * (size_t)size_.inty() * (size_t)size_.intz() * bytes;
-			ptr = new unsigned char[mem_size];
-			if (!read_brick((char *)ptr, mem_size, finfo))
+			ptr = std::make_shared<fluo::RawData>(
+				fluo::RawData::Size3{ (size_t)size_.intx(), (size_t)size_.inty(), (size_t)size_.intz() },
+				c->second.data->GetFormat());
+			if (!read_brick(ptr, finfo))
 			{
-				delete[] ptr;
 				return nullptr;
 			}
-			brkdata_ = (char*)ptr;
+			brkdata_ = ptr;
 		}
 		return ptr;
 	}
@@ -423,11 +414,10 @@ namespace flvr
 
 	void TextureBrick::freeBrkData()
 	{
-		if (brkdata_) delete[] brkdata_;
-		brkdata_ = NULL;
+		brkdata_.reset();
 	}
 
-	bool TextureBrick::read_brick(char* data, size_t size, const FileLocInfo* finfo)
+	bool TextureBrick::read_brick(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo)
 	{
 		if (!finfo) return false;
 
@@ -439,7 +429,7 @@ namespace flvr
 		//}
 		//else
 		//{
-			if (finfo->type == BRICK_FILE_TYPE_RAW)  return raw_brick_reader(data, size, finfo);
+			if (finfo->type == BRICK_FILE_TYPE_RAW)  return raw_brick_reader(data, finfo);
 		//	if (finfo->type == BRICK_FILE_TYPE_JPEG) return jpeg_brick_reader(data, size, finfo);
 		//	if (finfo->type == BRICK_FILE_TYPE_ZLIB) return zlib_brick_reader(data, size, finfo);
 		//}
@@ -447,17 +437,19 @@ namespace flvr
 		return false;
 	}
 
-	bool TextureBrick::raw_brick_reader(char* data, size_t size, const FileLocInfo* finfo)
+	bool TextureBrick::raw_brick_reader(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo)
 	{
 		try
 		{
+			size_t size = data->GetTotalBytes();
 			std::ifstream ifs;
 			ifs.open(ws2s(finfo->filename), std::ios::binary);
 			if (!ifs) return false;
 			if (finfo->datasize > 0 && size != finfo->datasize) return false;
 			size_t read_size = finfo->datasize > 0 ? finfo->datasize : size;
 			ifs.seekg(finfo->offset, std::ios_base::beg);
-			ifs.read(data, read_size);
+			char* data_ptr = data->DataAs<char>();
+			ifs.read(data_ptr, read_size);
 			if (ifs) ifs.close();
 			/*
 			FILE* fp = fopen(ws2s(finfo->filename).c_str(), "rb");
