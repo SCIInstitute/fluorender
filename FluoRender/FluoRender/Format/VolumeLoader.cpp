@@ -104,7 +104,10 @@ bool VolumeLoader::Run()
 			else
 				continue;
 			auto ptr = std::make_shared<fluo::RawData>(
-				fluo::RawData::Size3(res.intx(), res.inty(), res.intz()),
+				fluo::RawData::Size3{
+					static_cast<size_t>(res.intx()),
+					static_cast<size_t>(res.inty()),
+					static_cast<size_t>(res.intz()) },
 					format);
 			if (!ptr) continue;
 			ptr->Allocate();

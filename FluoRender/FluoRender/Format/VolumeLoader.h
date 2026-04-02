@@ -31,6 +31,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 class VolumeLoader;
 class VolumeData;

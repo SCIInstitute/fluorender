@@ -84,7 +84,7 @@ public:
 	std::wstring GetExMetadataURL() {return m_ex_metadata_url;}
 	void SetInfo();
 
-	flvr::FileLocInfo* GetBrickFilePath(int fr, int ch, int id, int lv = -1);
+	std::shared_ptr<flvr::FileLocInfo> GetBrickFilePath(int fr, int ch, int id, int lv = -1);
 	std::wstring GetBrickFileName(int fr, int ch, int id, int lv = -1);
 	int GetFileType(int lv = -1);
 
@@ -92,9 +92,10 @@ public:
 	void SetLevel(int lv);
 	int GetCopyableLevel() {return m_copy_lv;}
 
-	void build_bricks(std::vector<flvr::TextureBrick*> &tbrks, int lv = -1);
+	void build_bricks(std::vector<std::shared_ptr<flvr::TextureBrick>> &tbrks, int lv = -1);
 	void build_pyramid(std::vector<flvr::Pyramid_Level> &pyramid,
-		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo *>>>> &filenames, int t, int c);
+		std::vector<std::vector<std::vector<std::vector<
+		std::shared_ptr<flvr::FileLocInfo>>>>> &filenames, int t, int c);
 	void OutputInfo();
 
 	void GetLandmark(int index, std::wstring &name, double &x, double &y, double &z, double &spcx, double &spcy, double &spcz);
@@ -151,8 +152,8 @@ private:
 		int brick_baseD;
 		int bit_depth;
 		int file_type;
-		std::vector<std::vector<std::vector<flvr::FileLocInfo *>>> filename;//Frame->Channel->BrickID->Filename
-		std::vector<BrickInfo *> bricks;
+		std::vector<std::vector<std::vector<std::shared_ptr<flvr::FileLocInfo>>>> filename;//Frame->Channel->BrickID->Filename
+		std::vector<std::shared_ptr<BrickInfo>> bricks;
 	};
 	std::vector<LevelInfo> m_pyramid;
 
@@ -205,11 +206,12 @@ private:
 
 private:
 	ImageInfo ReadImageInfo(tinyxml2::XMLElement *seqNode);
-	void ReadBrick(tinyxml2::XMLElement *brickNode, BrickInfo &binfo);
+	void ReadBrick(tinyxml2::XMLElement *brickNode, std::shared_ptr<BrickInfo> &binfo);
 	void ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo &lvinfo);
 	void ReadFilenames(tinyxml2::XMLElement* fileRootNode,
-		std::vector<std::vector<std::vector<flvr::FileLocInfo *>>> &filename);
-	void ReadPackedBricks(tinyxml2::XMLElement* packNode, std::vector<BrickInfo *> &brks);
+		std::vector<std::vector<std::vector<
+		std::shared_ptr<flvr::FileLocInfo>>>> &filename);
+	void ReadPackedBricks(tinyxml2::XMLElement* packNode, std::vector<std::shared_ptr<BrickInfo>> &brks);
 	void Readbox(tinyxml2::XMLElement *boxNode, double &x0, double &y0, double &z0, double &x1, double &y1, double &z1);
 	void ReadPyramid(tinyxml2::XMLElement *lvRootNode, std::vector<LevelInfo> &pylamid);
 

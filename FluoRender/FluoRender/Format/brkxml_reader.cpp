@@ -40,21 +40,6 @@ DEALINGS IN THE SOFTWARE.
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
-template <typename _T> void clear2DVector(std::vector<std::vector<_T>>& vec2d)
-{
-	if (vec2d.empty())return;
-	for (int i = 0; i < vec2d.size(); i++)std::vector<_T>().swap(vec2d[i]);
-	std::vector<std::vector<_T>>().swap(vec2d);
-}
-
-template <typename _T> inline void SafeDelete(_T*& p)
-{
-	if (p != NULL) {
-		delete (p);
-		(p) = NULL;
-	}
-}
-
 BRKXMLReader::BRKXMLReader() :
 	BaseVolReader()
 {
@@ -100,31 +85,8 @@ BRKXMLReader::~BRKXMLReader()
 
 void BRKXMLReader::Clear()
 {
-	if (m_pyramid.empty()) return;
-	for (int i = 0; i < m_pyramid.size(); i++) {
-		if (!m_pyramid[i].bricks.empty()) {
-			for (int j = 0; j < m_pyramid[i].bricks.size(); j++) SafeDelete(m_pyramid[i].bricks[j]);
-			std::vector<BrickInfo*>().swap(m_pyramid[i].bricks);
-		}
-		if (!m_pyramid[i].filename.empty()) {
-			for (int j = 0; j < m_pyramid[i].filename.size(); j++) {
-				if (!m_pyramid[i].filename[j].empty()) {
-					for (int k = 0; k < m_pyramid[i].filename[j].size(); k++) {
-						if (!m_pyramid[i].filename[j][k].empty()) {
-							for (int m = 0; m < m_pyramid[i].filename[j][k].size(); m++)
-								SafeDelete(m_pyramid[i].filename[j][k][m]);
-							std::vector<flvr::FileLocInfo*>().swap(m_pyramid[i].filename[j][k]);
-						}
-					}
-					std::vector<std::vector<flvr::FileLocInfo*>>().swap(m_pyramid[i].filename[j]);
-				}
-			}
-			std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>().swap(m_pyramid[i].filename);
-		}
-	}
-	std::vector<LevelInfo>().swap(m_pyramid);
-
-	std::vector<Landmark>().swap(m_landmarks);
+	m_pyramid.clear();
+	m_landmarks.clear();
 }
 
 //Use Before Preprocess()
@@ -387,7 +349,9 @@ void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo& lvinfo)
 	}
 }
 
-void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, std::vector<BrickInfo*>& brks)
+void BRKXMLReader::ReadPackedBricks(
+	tinyxml2::XMLElement* packNode,
+	std::vector<std::shared_ptr<BrickInfo>>& brks)
 {
 	int id;
 
@@ -403,33 +367,35 @@ void BRKXMLReader::ReadPackedBricks(tinyxml2::XMLElement* packNode, std::vector<
 				if (id + 1 > brks.size())
 					brks.resize(id + 1, NULL);
 
-				if (!brks[id]) brks[id] = new BrickInfo();
-				ReadBrick(child, *brks[id]);
+				if (!brks[id]) brks[id] = std::make_shared<BrickInfo>();
+				ReadBrick(child, brks[id]);
 			}
 		}
 		child = child->NextSiblingElement();
 	}
 }
 
-void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo& binfo)
+void BRKXMLReader::ReadBrick(
+	tinyxml2::XMLElement* brickNode,
+	std::shared_ptr<BrickInfo>& binfo)
 {
-	binfo.id = STOI(brickNode->Attribute("id"));
+	binfo->id = STOI(brickNode->Attribute("id"));
 
-	binfo.x_size = STOI(brickNode->Attribute("width"));
+	binfo->x_size = STOI(brickNode->Attribute("width"));
 
-	binfo.y_size = STOI(brickNode->Attribute("height"));
+	binfo->y_size = STOI(brickNode->Attribute("height"));
 
-	binfo.z_size = STOI(brickNode->Attribute("depth"));
+	binfo->z_size = STOI(brickNode->Attribute("depth"));
 
-	binfo.x_start = STOI(brickNode->Attribute("st_x"));
+	binfo->x_start = STOI(brickNode->Attribute("st_x"));
 
-	binfo.y_start = STOI(brickNode->Attribute("st_y"));
+	binfo->y_start = STOI(brickNode->Attribute("st_y"));
 
-	binfo.z_start = STOI(brickNode->Attribute("st_z"));
+	binfo->z_start = STOI(brickNode->Attribute("st_z"));
 
-	binfo.offset = STOI(brickNode->Attribute("offset"));
+	binfo->offset = STOI(brickNode->Attribute("offset"));
 
-	binfo.fsize = STOI(brickNode->Attribute("size"));
+	binfo->fsize = STOI(brickNode->Attribute("size"));
 
 	tinyxml2::XMLElement* child = brickNode->FirstChildElement();
 	while (child)
@@ -438,11 +404,11 @@ void BRKXMLReader::ReadBrick(tinyxml2::XMLElement* brickNode, BrickInfo& binfo)
 		{
 			if (strcmp(child->Name(), "tbox") == 0)
 			{
-				Readbox(child, binfo.tx0, binfo.ty0, binfo.tz0, binfo.tx1, binfo.ty1, binfo.tz1);
+				Readbox(child, binfo->tx0, binfo->ty0, binfo->tz0, binfo->tx1, binfo->ty1, binfo->tz1);
 			}
 			else if (strcmp(child->Name(), "bbox") == 0)
 			{
-				Readbox(child, binfo.bx0, binfo.by0, binfo.bz0, binfo.bx1, binfo.by1, binfo.bz1);
+				Readbox(child, binfo->bx0, binfo->by0, binfo->bz0, binfo->bx1, binfo->by1, binfo->bz1);
 			}
 		}
 		child = child->NextSiblingElement();
@@ -464,7 +430,10 @@ void BRKXMLReader::Readbox(tinyxml2::XMLElement* boxNode, double& x0, double& y0
 	z1 = STOD(boxNode->Attribute("z1"));
 }
 
-void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>& filename)
+void BRKXMLReader::ReadFilenames(
+	tinyxml2::XMLElement* fileRootNode,
+	std::vector<std::vector<std::vector<
+	std::shared_ptr<flvr::FileLocInfo>>>>& filename)
 {
 	std::string str;
 	int frame, channel, id;
@@ -490,7 +459,7 @@ void BRKXMLReader::ReadFilenames(tinyxml2::XMLElement* fileRootNode, std::vector
 					filename[frame][channel].resize(id + 1, NULL);
 
 				if (!filename[frame][channel][id])
-					filename[frame][channel][id] = new flvr::FileLocInfo();
+					filename[frame][channel][id] = std::make_shared<flvr::FileLocInfo>();
 
 				if (HasAttribute(child, "filename")) //this option will be deprecated
 					str = child->Attribute("filename");
@@ -924,7 +893,7 @@ std::wstring BRKXMLReader::GetCurLabelName(int t, int c)
 	return label_name;
 }
 
-flvr::FileLocInfo* BRKXMLReader::GetBrickFilePath(int fr, int ch, int id, int lv)
+std::shared_ptr<flvr::FileLocInfo> BRKXMLReader::GetBrickFilePath(int fr, int ch, int id, int lv)
 {
 	int level = lv;
 	int frame = fr;
@@ -1043,7 +1012,8 @@ void BRKXMLReader::OutputInfo()
 	ofs.close();
 }
 
-void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
+void BRKXMLReader::build_bricks(
+	std::vector<std::shared_ptr<flvr::TextureBrick>>& tbrks, int lv)
 {
 	int lev;
 
@@ -1089,14 +1059,9 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 
 	if (!tbrks.empty())
 	{
-		for (int i = 0; i < tbrks.size(); i++)
-		{
-			tbrks[i]->freeBrkData();
-			delete tbrks[i];
-		}
 		tbrks.clear();
 	}
-	std::vector<BrickInfo*>::iterator bite = m_pyramid[lev].bricks.begin();
+	std::vector<std::shared_ptr<BrickInfo>>::iterator bite = m_pyramid[lev].bricks.begin();
 	while (bite != m_pyramid[lev].bricks.end())
 	{
 		fluo::BBox tbox(fluo::Point((*bite)->tx0, (*bite)->ty0, (*bite)->tz0), fluo::Point((*bite)->tx1, (*bite)->ty1, (*bite)->tz1));
@@ -1112,7 +1077,7 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 
 		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
-		flvr::TextureBrick* b = new flvr::TextureBrick(0,
+		auto b = std::make_shared<flvr::TextureBrick>(nullptr,
 			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size), numb,
 			fluo::Vector((*bite)->x_start, (*bite)->y_start, (*bite)->z_start),
 			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size),
@@ -1127,53 +1092,59 @@ void BRKXMLReader::build_bricks(std::vector<flvr::TextureBrick*>& tbrks, int lv)
 	return;
 }
 
-void BRKXMLReader::build_pyramid(std::vector<flvr::Pyramid_Level>& pyramid, std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>>& filenames, int t, int c)
+void BRKXMLReader::build_pyramid(
+	std::vector<flvr::Pyramid_Level>& pyramid,
+	std::vector<std::vector<std::vector<std::vector<
+	std::shared_ptr<flvr::FileLocInfo>>>>>& filenames, int t, int c)
 {
-	if (!pyramid.empty())
-	{
-		for (int i = 0; i < pyramid.size(); i++)
-		{
-			if (pyramid[i].data) pyramid[i].data.reset();
-			for (int j = 0; j < pyramid[i].bricks.size(); j++)
-				if (pyramid[i].bricks[j]) delete pyramid[i].bricks[j];
-		}
-		std::vector<flvr::Pyramid_Level>().swap(pyramid);
-	}
-
-	if (!filenames.empty())
-	{
-		for (int i = 0; i < filenames.size(); i++)
-			for (int j = 0; j < filenames[i].size(); j++)
-				for (int k = 0; k < filenames[i][j].size(); k++)
-					for (int n = 0; n < filenames[i][j][k].size(); n++)
-						if (filenames[i][j][k][n]) delete filenames[i][j][k][n];
-		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>>().swap(filenames);
-	}
+	pyramid.clear();
+	filenames.clear();
 
 	pyramid.resize(m_pyramid.size());
 
-	for (int i = 0; i < m_pyramid.size(); i++)
+	for (size_t i = 0; i < m_pyramid.size(); ++i)
 	{
 		SetLevel(i);
-		pyramid[i].data = Convert(t, c, false);
-		build_bricks(pyramid[i].bricks);
-		pyramid[i].filenames = &m_pyramid[i].filename[t][c];
-		pyramid[i].filetype = GetFileType();
-		pyramid[i].szx = m_pyramid[i].imageW;
-		pyramid[i].szy = m_pyramid[i].imageH;
-		pyramid[i].szz = m_pyramid[i].imageD;
-		pyramid[i].bszx = m_pyramid[i].brick_baseW;
-		pyramid[i].bszy = m_pyramid[i].brick_baseH;
-		pyramid[i].bszz = m_pyramid[i].brick_baseD;
-		pyramid[i].bnx = pyramid[i].bszx > 1 ?
-			((pyramid[i].szx - 1) / (pyramid[i].bszx - 1) +
-				(((pyramid[i].szx - 1) % (pyramid[i].bszx - 1)) ? 1 : 0)) : 1;
-		pyramid[i].bny = pyramid[i].bszy > 1 ?
-			((pyramid[i].szy - 1) / (pyramid[i].bszy - 1) +
-				(((pyramid[i].szy - 1) % (pyramid[i].bszy - 1)) ? 1 : 0)) : 1;
-		pyramid[i].bnz = pyramid[i].bszz > 1 ?
-			((pyramid[i].szz - 1) / (pyramid[i].bszz - 1) +
-				(((pyramid[i].szz - 1) % (pyramid[i].bszz - 1)) ? 1 : 0)) : 1;
+
+		auto& level = pyramid[i];
+
+		// data & file info
+		level.data = Convert(t, c, false);
+		build_bricks(level.bricks);
+		level.filenames = m_pyramid[i].filename[t][c];
+		level.filetype = GetFileType();
+
+		// ----- total size -----
+		level.size.x(m_pyramid[i].imageW);
+		level.size.y(m_pyramid[i].imageH);
+		level.size.z(m_pyramid[i].imageD);
+
+		// ----- typical brick size -----
+		level.bsize.x(m_pyramid[i].brick_baseW);
+		level.bsize.y(m_pyramid[i].brick_baseH);
+		level.bsize.z(m_pyramid[i].brick_baseD);
+
+		// ----- number of bricks along each axis -----
+		level.bnum.x(
+			level.bsize.intx() > 1 ?
+			((level.size.intx() - 1) / (level.bsize.intx() - 1) +
+				(((level.size.intx() - 1) % (level.bsize.intx() - 1)) ? 1 : 0)) :
+			1
+		);
+
+		level.bnum.y(
+			level.bsize.inty() > 1 ?
+			((level.size.inty() - 1) / (level.bsize.inty() - 1) +
+				(((level.size.inty() - 1) % (level.bsize.inty() - 1)) ? 1 : 0)) :
+			1
+		);
+
+		level.bnum.z(
+			level.bsize.intz() > 1 ?
+			((level.size.intz() - 1) / (level.bsize.intz() - 1) +
+				(((level.size.intz() - 1) % (level.bsize.intz() - 1)) ? 1 : 0)) :
+			1
+		);
 	}
 
 	filenames.resize(m_pyramid.size());
@@ -1188,7 +1159,8 @@ void BRKXMLReader::build_pyramid(std::vector<flvr::Pyramid_Level>& pyramid, std:
 				filenames[i][j][k].resize(m_pyramid[i].filename[j][k].size());
 				for (int n = 0; n < filenames[i][j][k].size(); n++)
 				{
-					filenames[i][j][k][n] = new flvr::FileLocInfo(*m_pyramid[i].filename[j][k][n]);
+					filenames[i][j][k][n] =
+						std::make_shared<flvr::FileLocInfo>(*m_pyramid[i].filename[j][k][n]);
 				}
 			}
 		}

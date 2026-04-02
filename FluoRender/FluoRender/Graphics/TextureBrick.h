@@ -95,7 +95,7 @@ namespace flvr
 	class TextureBrick
 	{
 	public:
-		TextureBrick(const std::shared_ptr<fluo::RawData>& rd,
+		TextureBrick(std::shared_ptr<fluo::RawData> rd,
 			const fluo::Vector& size, int byte,
 			const fluo::Vector& off_size,
 			const fluo::Vector& msize,

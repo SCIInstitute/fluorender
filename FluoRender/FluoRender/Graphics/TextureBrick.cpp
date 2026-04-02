@@ -46,7 +46,7 @@ namespace flvr
 	std::map<std::wstring, std::wstring> TextureBrick::cache_table_ = std::map<std::wstring, std::wstring>();
 
 	TextureBrick::TextureBrick(
-		const std::shared_ptr<fluo::RawData>& rd,
+		std::shared_ptr<fluo::RawData> rd,
 		const fluo::Vector& size, int byte,
 		const fluo::Vector& off_size,
 		const fluo::Vector& msize,
