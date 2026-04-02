@@ -136,6 +136,20 @@ namespace fluo
 
 		bool IsAllocated() const noexcept;
 
+		// --- Cloning -----------------------------------------------------------
+		std::shared_ptr<RawData> Clone() const
+		{
+			auto copy = std::make_shared<RawData>(m_size, m_format);
+			copy->Allocate();
+
+			std::memcpy(
+				copy->GetData(),
+				GetData(),
+				GetTotalBytes());
+
+			return copy;
+		}
+
 		// --- Properties --------------------------------------------------------
 
 		const Size3& GetSize() const noexcept { return m_size; }

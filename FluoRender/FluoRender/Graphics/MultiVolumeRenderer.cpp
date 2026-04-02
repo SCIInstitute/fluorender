@@ -250,7 +250,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		blend_buffer->clear_attachment(AttachmentPoint::Color(1), std::array<float, 2>{ 0.0f, 0.0f }.data());
 
 	int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
-	std::vector<TextureBrick*>* bs = 0;
+	std::vector<std::shared_ptr<TextureBrick>> bs;
 	fluo::Point pt = TextureRenderer::quota_center_;
 	if (glbin_settings.m_mem_swap &&
 		TextureRenderer::interactive_)
@@ -268,12 +268,13 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				view_ray, orthographic_p);
 	}
 
-	if (bs)
+	if (!bs.empty())
 	{
 		num_slices_ = 0;
-		bool multibricks = bs->size() > 1;
+		bool multibricks = bs.size() > 1;
 		bool drawn_once = false;
-		for (unsigned int i = 0; i < bs->size(); i++)
+		size_t i = 0;
+		for (auto bbs : bs)
 		{
 			if (glbin_settings.m_mem_swap && drawn_once)
 			{
@@ -282,16 +283,15 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 					break;
 			}
 
-			TextureBrick* b = (*bs)[i];
 			if (glbin_settings.m_mem_swap &&
 				TextureRenderer::start_update_loop_ &&
 				!TextureRenderer::done_update_loop_)
 			{
-				if (b->drawn(0))
+				if (bbs->drawn(0))
 					continue;
 			}
 
-			if (!vr_list_[0]->test_against_view(b->bbox(), !orthographic_p))// Clip against view
+			if (!vr_list_[0]->test_against_view(bbs->bbox(), !orthographic_p))// Clip against view
 			{
 				if (glbin_settings.m_mem_swap &&
 					TextureRenderer::start_update_loop_ &&
@@ -299,7 +299,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				{
 					for (unsigned int j = 0; j < vr_list_.size(); j++)
 					{
-						std::vector<TextureBrick*>* bs_tmp = 0;
+						std::vector<std::shared_ptr<TextureBrick>> bs_tmp;
 						auto tex = vr_list_[j]->tex_.lock();
 						if (tex)
 						{
@@ -313,9 +313,9 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 								bs_tmp = tex->get_sorted_bricks(
 									view_ray, orthographic_p);
 						}
-						if (!(*bs_tmp)[i]->drawn(0))
+						if (!bs_tmp[i]->drawn(0))
 						{
-							(*bs_tmp)[i]->set_drawn(0, true);
+							bs_tmp[i]->set_drawn(0, true);
 							TextureRenderer::cur_chan_brick_num_++;
 						}
 					}
@@ -325,25 +325,26 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 			vertex.clear();
 			index.clear();
 			size.clear();
-			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
+			bbs->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 
 			num_slices_ += size.size();
 
 			if (vertex.size() == 0) { continue; }
 
-			draw_polygons_vol(b, rate, vertex, index, size, view_ray,
+			draw_polygons_vol(bbs, rate, vertex, index, size, view_ray,
 				i, orthographic_p, w2, h2, intp, quota_bricks_chan);
 
 			int vrn = (int)(vr_list_.size());
-			if (glbin_settings.m_mem_swap && !b->drawn(0))
+			if (glbin_settings.m_mem_swap && !bbs->drawn(0))
 			{
-				b->set_drawn(0, true);
+				bbs->set_drawn(0, true);
 				TextureRenderer::cur_brick_num_ += vrn;
 				TextureRenderer::cur_chan_brick_num_ += vrn;
 			}
 			if (glbin_settings.m_mem_swap)
 				TextureRenderer::finished_bricks_ += vrn;
 			drawn_once = true;
+			++i;
 		}
 	}
 
@@ -360,7 +361,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		{
 			auto tex = vr_list_[i]->tex_.lock();
 			if (tex)
-				num += tex->get_bricks()->size();
+				num += tex->get_bricks().size();
 		}
 		if (TextureRenderer::cur_chan_brick_num_ >= static_cast<int>(num))
 		{
@@ -429,7 +430,8 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 }
 
 void MultiVolumeRenderer::draw_polygons_vol(
-	TextureBrick* b, double rate,
+	const std::shared_ptr<TextureBrick>& b,
+	double rate,
 	std::vector<float>& vertex,
 	std::vector<uint32_t>& index,
 	std::vector<uint32_t>& size,
@@ -650,7 +652,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			//if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
 			//	blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
-			std::vector<TextureBrick*>* bs2 = 0;
+			std::vector<std::shared_ptr<TextureBrick>> bs2;
 			if (tex)
 			{
 				if (glbin_settings.m_mem_swap &&
@@ -664,13 +666,15 @@ void MultiVolumeRenderer::draw_polygons_vol(
 					bs2 = tex->get_sorted_bricks(
 						view_ray, orthographic_p);
 			}
-			if (!bs2) break;
-			if (bi >= (int)bs2->size()) break;
+			if (bs2.empty())
+				break;
+			if (bi >= int(bs2.size()))
+				break;
 
-			TextureBrick* b2 = (*bs2)[bi];
+			auto bbs2 = bs2[bi];
 			//if (glbin_settings.m_mem_swap && !b2->drawn(0))
 			//	b2->set_drawn(0, true);
-			if (b2->get_priority() > 0)
+			if (bbs2->get_priority() > 0)
 				continue;
 
 			GLint filter;
@@ -678,11 +682,11 @@ void MultiVolumeRenderer::draw_polygons_vol(
 				filter = GL_LINEAR;
 			else
 				filter = GL_NEAREST;
-			vr_list_[tn]->load_brick(b2, filter, vr_list_[tn]->compression_);
+			vr_list_[tn]->load_brick(bbs2, filter, vr_list_[tn]->compression_);
 			if (has_mask)
-				vr_list_[tn]->load_brick_mask(b2, filter);
+				vr_list_[tn]->load_brick_mask(bbs2, filter);
 			if (has_label)
-				vr_list_[tn]->load_brick_label(b2);
+				vr_list_[tn]->load_brick_label(bbs2);
 
 			idx_num = (size[i] - 2) * 3;
 			if (va_slices_)
@@ -738,22 +742,23 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	//  TextureRenderer::finished_bricks_ += (int)vr_list_.size();
 }
 
-std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
+std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bricks(
 	fluo::Point& center, fluo::Ray& view, bool is_orthographic)
 {
+	std::vector<std::shared_ptr<TextureBrick>> cbricks;
 	if (!vr_list_.size())
-		return 0;
+		return cbricks;
 
 	auto tex0 = vr_list_[0]->tex_.lock();
 	if (!tex0)
-		return 0;
+		return cbricks;
 	if (!tex0->get_sort_bricks())
 		return tex0->get_quota_bricks();
 
 	size_t i, j, k;
-	std::vector<TextureBrick*>* bs;
-	std::vector<TextureBrick*>* bs0;
-	std::vector<TextureBrick*>* result;
+	std::vector<std::shared_ptr<TextureBrick>> bs;
+	std::vector<std::shared_ptr<TextureBrick>> bs0;
+	std::vector<std::shared_ptr<TextureBrick>> result;
 	fluo::Point brick_center;
 	double d;
 
@@ -764,23 +769,23 @@ std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
 			continue;
 		//sort each brick list based on distance to center
 		bs = tex->get_bricks();
-		for (j = 0; j < bs->size(); j++)
+		for (auto bbs : bs)
 		{
-			brick_center = (*bs)[j]->bbox().center();
+			brick_center = bbs->bbox().center();
 			d = (brick_center - center).length();
-			(*bs)[j]->set_d(d);
+			bbs->set_d(d);
 		}
-		std::sort((*bs).begin(), (*bs).end(), TextureBrick::sort_dsc);
+		std::sort(bs.begin(), bs.end(), TextureBrick::sort_dsc);
 
 		//assign indecis so that bricks can be selected later
-		for (j = 0; j < bs->size(); j++)
-			(*bs)[j]->set_ind(j);
+		for (auto bbs : bs)
+			bbs->set_ind(j);
 	}
 
 	//generate quota brick list for vr0
 	bs0 = tex0->get_bricks();
 	result = tex0->get_quota_bricks();
-	result->clear();
+	result.clear();
 	int quota = 0;
 	int count;
 	TextureBrick* pb;
@@ -796,16 +801,15 @@ std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
 		quota = vr_list_[i]->get_quota_bricks_chan();
 		//quota = quota/2+1;
 		count = 0;
-		for (j = 0; j < bs->size(); j++)
+		for (auto bbs : bs)
 		{
-			pb = (*bs)[j];
-			if (pb->get_priority() > 0)
+			if (bbs->get_priority() > 0)
 				continue;
-			ind = pb->get_ind();
+			ind = bbs->get_ind();
 			found = false;
-			for (k = 0; k < result->size(); k++)
+			for (auto bresult : result)
 			{
-				if (ind == (*result)[k]->get_ind())
+				if (ind == bresult->get_ind())
 				{
 					found = true;
 					break;
@@ -813,7 +817,7 @@ std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
 			}
 			if (!found)
 			{
-				result->push_back((*bs0)[ind]);
+				result.push_back(bs0[ind]);
 				count++;
 				if (count == quota)
 					break;
@@ -821,11 +825,11 @@ std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
 		}
 	}
 	//reorder result
-	for (i = 0; i < result->size(); i++)
+	for (auto bresult : result)
 	{
-		fluo::Point minp((*result)[i]->bbox().Min());
-		fluo::Point maxp((*result)[i]->bbox().Max());
-		fluo::Vector diag((*result)[i]->bbox().diagonal());
+		fluo::Point minp(bresult->bbox().Min());
+		fluo::Point maxp(bresult->bbox().Max());
+		fluo::Vector diag(bresult->bbox().diagonal());
 		minp += diag / 1000.;
 		maxp -= diag / 1000.;
 		fluo::Point corner[8];
@@ -853,12 +857,12 @@ std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
 			}
 			if (c == 0 || dd < d) d = dd;
 		}
-		(*result)[i]->set_d(d);
+		bresult->set_d(d);
 	}
 	if (glbin_settings.m_update_order == 0)
-		std::sort((*result).begin(), (*result).end(), TextureBrick::sort_asc);
+		std::sort(result.begin(), result.end(), TextureBrick::sort_asc);
 	else if (glbin_settings.m_update_order == 1)
-		std::sort((*result).begin(), (*result).end(), TextureBrick::sort_dsc);
+		std::sort(result.begin(), result.end(), TextureBrick::sort_dsc);
 	tex0->reset_sort_bricks();
 
 	//duplicate result into other quota-bricks
@@ -869,12 +873,12 @@ std::vector<TextureBrick*>* MultiVolumeRenderer::get_combined_bricks(
 			continue;
 		bs0 = tex->get_bricks();
 		bs = tex->get_quota_bricks();
-		bs->clear();
+		bs.clear();
 
-		for (j = 0; j < result->size(); j++)
+		for (auto bresult : result)
 		{
-			ind = (*result)[j]->get_ind();
-			bs->push_back((*bs0)[ind]);
+			ind = bresult->get_ind();
+			bs.push_back(bs0[ind]);
 		}
 		tex->reset_sort_bricks();
 	}
@@ -945,24 +949,23 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 	shader->setLocalParam(0, vr_list_[0]->color_.r(), vr_list_[0]->color_.g(), vr_list_[0]->color_.b(), 1.0);
 
-	std::vector<TextureBrick*>* bs;
+	std::vector<std::shared_ptr<TextureBrick>> bs;
 	auto tex0 = vr_list_[0]->tex_.lock();
 	if (tex0)
 		bs = tex0->get_sorted_bricks(view_ray, orthographic_p);
 
-	if (bs)
+	if (!bs.empty())
 	{
-		bool multibricks = bs->size() > 1;
-		for (unsigned int i = 0; i < bs->size(); i++)
+		bool multibricks = bs.size() > 1;
+		for (auto bbs : bs)
 		{
-			TextureBrick* b = (*bs)[i];
-			if (!vr_list_[0]->test_against_view(b->bbox(), !orthographic_p)) continue; // Clip against view.
+			if (!vr_list_[0]->test_against_view(bbs->bbox(), !orthographic_p)) continue; // Clip against view.
 
 			vertex.clear();
 			index.clear();
 			size.clear();
 
-			b->compute_polygons(snapview, dt, vertex, index, size, multibricks);
+			bbs->compute_polygons(snapview, dt, vertex, index, size, multibricks);
 			vr_list_[0]->draw_polygons_wireframe(vertex, index, size);
 		}
 	}

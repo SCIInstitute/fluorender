@@ -95,7 +95,6 @@ namespace flvr
 	class TextureBrick
 	{
 	public:
-		// Creator of the brick owns the nrrd memory.
 		TextureBrick(const std::shared_ptr<fluo::RawData>& rd,
 			const fluo::Vector& size, int byte,
 			const fluo::Vector& off_size,
@@ -152,9 +151,8 @@ namespace flvr
 		inline bool drawn(int mode)
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) return drawn_[mode]; else return false;}
 
-		// Creator of the brick owns the nrrd memory.
-		void set_nrrd(CompType type, TexComp comp) { data_[type] = comp;}
-		TexComp get_nrrd(CompType type)
+		void set_raw(CompType type, TexComp comp) { data_[type] = comp;}
+		TexComp get_raw(CompType type)
 		{
 			auto c = data_.find(type);
 			if (c == data_.end())
@@ -299,23 +297,28 @@ namespace flvr
 	}
 
 	struct Pyramid_Level {
-		std::vector<FileLocInfo *> *filenames;
+		std::vector<std::shared_ptr<FileLocInfo>> filenames;
 		int filetype;
 		std::shared_ptr<fluo::RawData> data;
-		std::vector<TextureBrick *> bricks;
-		//some information
+		std::vector<std::shared_ptr<TextureBrick>> bricks;
+		//information
 		//total size
-		int szx;
-		int szy;
-		int szz;
+		fluo::Vector size;
+		//int szx;
+		//int szy;
+		//int szz;
 		//typical brick size
-		int bszx;
-		int bszy;
-		int bszz;
+		fluo::Vector bsize;
+		//int bszx;
+		//int bszy;
+		//int bszz;
 		//brick num along axes
-		int bnx;
-		int bny;
-		int bnz;
+		fluo::Vector bnum;
+		//int bnx;
+		//int bny;
+		//int bnz;
+		//spacing
+		fluo::Vector spacing;
 	};
 } // namespace flvr
 

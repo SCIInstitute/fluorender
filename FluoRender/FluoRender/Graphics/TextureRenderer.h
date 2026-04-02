@@ -30,6 +30,7 @@
 #define TextureRenderer_h
 
 #include <Point.h>
+#include <RawData.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
 #include <memory>
@@ -179,7 +180,7 @@ namespace flvr
 	{
 		int nx, ny, nz, nb;
 		unsigned int id;
-		TextureBrick *brick;
+		std::shared_ptr<TextureBrick> brick;
 		CompType comp_type;
 		int time;
 		GLenum textype;
@@ -190,7 +191,7 @@ namespace flvr
 			GLenum f,
 			unsigned int i);
 
-		bool Match(TextureBrick* bk,
+		bool Match(const std::shared_ptr<TextureBrick>& bk,
 			CompType c, int t, int x, int y, int z, int b, GLenum f);
 	};
 
@@ -302,7 +303,7 @@ namespace flvr
 		struct BrickDist
 		{
 			unsigned int index;    //index of the brick in current tex pool
-			TextureBrick* brick;  //a brick
+			std::shared_ptr<TextureBrick> brick;  //a brick
 			double dist;      //distance to another brick
 		};
 		std::weak_ptr<Texture> tex_;
@@ -354,7 +355,7 @@ namespace flvr
 		static bool load_on_main_thread_;
 		struct LoadedBrick {
 			bool swapped;
-			TextureBrick *brk;
+			std::shared_ptr<TextureBrick> brk;
 			double size;
 		};
 		static std::vector<LoadedBrick> loadedbrks;
@@ -385,15 +386,15 @@ namespace flvr
 		//brick distance sort
 		static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);
 		//check and swap memory
-		void check_swap_memory(TextureBrick* brick, CompType c);
+		void check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c);
 		//load texture bricks for drawing
 		//unit:assigned unit, c:channel
-		GLint load_brick(TextureBrick* brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0);
+		GLint load_brick(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0);
 		//load the texture for volume mask into texture pool
-		GLint load_brick_mask(TextureBrick* brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
+		GLint load_brick_mask(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
 		//load the texture for volume labeling into texture pool
-		GLint load_brick_label(TextureBrick* brick);
-		void load_texture(void* tex_data,
+		GLint load_brick_label(const std::shared_ptr<TextureBrick>& brick);
+		void load_texture(const std::shared_ptr<fluo::RawData>& tex_data,
 			unsigned int nx, unsigned int ny,
 			unsigned int nz, unsigned int nb,
 			unsigned int sx, unsigned int sy,

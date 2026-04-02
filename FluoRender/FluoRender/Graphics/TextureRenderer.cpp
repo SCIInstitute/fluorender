@@ -100,7 +100,7 @@ namespace flvr
 	{
 	}
 
-	bool TexParam::Match(TextureBrick* bk,
+	bool TexParam::Match(const std::shared_ptr<TextureBrick>& bk,
 		CompType c, int t, int x, int y, int z, int b, GLenum f)
 	{
 		return id != 0 &&

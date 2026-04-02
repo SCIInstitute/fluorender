@@ -77,7 +77,7 @@ namespace flvr
 		void set_brick_planned_size(int size) { brick_planned_size_ = size; }
 		bool build(const std::shared_ptr<fluo::RawData>& raw,
 			double vmn, double vmx,
-			std::vector<flvr::TextureBrick*>* brks = NULL);
+			const std::vector<std::shared_ptr<TextureBrick>>& brks);
 
 		fluo::Vector get_res() { return res_; }
 		fluo::Vector get_brick_res() { return brick_res_; }
@@ -92,7 +92,7 @@ namespace flvr
 		unsigned int poszid(unsigned int id);
 		//get brick id by voxel index
 		unsigned int get_brick_id(unsigned long long index);
-		TextureBrick* get_brick(unsigned int bid);
+		std::shared_ptr<TextureBrick> get_brick(unsigned int bid);
 
 		int nc() { return data_.size(); }
 		int nb(CompType type)
@@ -131,10 +131,10 @@ namespace flvr
 		void set_transform(fluo::Transform tform) { transform_ = tform; }
 
 		// get sorted bricks
-		std::vector<TextureBrick*>* get_sorted_bricks(
+		std::vector<std::shared_ptr<TextureBrick>> get_sorted_bricks(
 			fluo::Ray& view, bool is_orthographic = false);
 		//get closest bricks
-		std::vector<TextureBrick*>* get_closest_bricks(
+		std::vector<std::shared_ptr<TextureBrick>> get_closest_bricks(
 			fluo::Point& center, int quota, bool skip,
 			fluo::Ray& view, bool is_orthographic = false);
 		//set sort bricks
@@ -142,20 +142,18 @@ namespace flvr
 		void reset_sort_bricks() {sort_bricks_ = false;}
 		bool get_sort_bricks() {return sort_bricks_;}
 		// load the bricks independent of the view
-		std::vector<TextureBrick*>* get_bricks();
+		std::vector<std::shared_ptr<TextureBrick>> get_bricks();
 		//get bricks sorted by id
-		std::vector<TextureBrick*>* get_bricks_id();
-		size_t get_brick_list_size() {return (*bricks_).size();}
+		std::vector<std::shared_ptr<TextureBrick>> get_bricks_id();
+		size_t get_brick_list_size() {return bricks_.size();}
 		//quota bricks
-		std::vector<TextureBrick*>* get_quota_bricks();
+		std::vector<std::shared_ptr<TextureBrick>> get_quota_bricks();
 
 		// Tests the bounding box against the current MODELVIEW and
 		// PROJECTION matrices to determine if it is within the viewport.
 		// Returns true if it is visible.
 		void set_matrices(glm::mat4 &mv_mat2, glm::mat4 &proj_mat);
 		bool test_against_view(const fluo::BBox &bbox, bool persp = false);
-
-		int nlevels(){ return int((*bricks_).size()); }
 
 		double vmin() const { return vmin_; }
 		double vmax() const { return vmax_; }
@@ -175,7 +173,7 @@ namespace flvr
 		bool trim_mask_undos_tail();
 		bool get_undo();
 		bool get_redo();
-		void set_mask(void* mask_data);
+		void set_mask(const std::shared_ptr<fluo::RawData>& mask_raw);
 		void push_mask();
 		void pop_mask();
 		void mask_undos_forward();
@@ -199,23 +197,24 @@ namespace flvr
 		//get priority brick number
 		void set_use_priority(bool value) {use_priority_ = value;}
 		bool get_use_priority() {return use_priority_;}
-		int get_n_p0()
-		{if (use_priority_) return n_p0_; else return int((*bricks_).size());}
 
 		//for brkxml file
 		int GetCurLevel() { return pyramid_cur_lv_; }
 		int GetLevelNum();
 		void SetCopyableLevel(int lv) { pyramid_copy_lv_ = lv; }
 		int GetCopyableLevel() { return pyramid_copy_lv_; }
-		bool buildPyramid(std::vector<Pyramid_Level> &pyramid, std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>> &filenames, bool useURL = false);
+		bool buildPyramid(const std::vector<Pyramid_Level> &pyramid,
+			const std::vector<std::vector<std::vector<std::vector<
+			std::shared_ptr<FileLocInfo>>>>> &filenames,
+			bool useURL = false);
 		void setLevel(int lv);
-		void set_data_file(std::vector<FileLocInfo *> *fname, int type);
+		void set_data_file(const std::vector<std::shared_ptr<FileLocInfo>>& filenames, int type);
 		bool isBrxml() { return brkxml_; }
-		FileLocInfo *GetFileName(int id);
+		std::shared_ptr<FileLocInfo> GetFileName(int id);
 		void set_FrameAndChannel(int fr, int ch);
 
 	protected:
-		void build_bricks(std::vector<TextureBrick*> &bricks,
+		void build_bricks(std::vector<std::shared_ptr<TextureBrick>> &bricks,
 			const fluo::Vector& size, int bytes);
 
 		//remember the brick size, as it may change
@@ -223,9 +222,9 @@ namespace flvr
 		//expected brick size, 0: ignored
 		int brick_planned_size_;
 		//! data carved up to texture memory sized chunks.
-		std::vector<TextureBrick*>						*bricks_;
+		std::vector<std::shared_ptr<TextureBrick>>	bricks_;
 		//for limited number of bricks during interactions
-		std::vector<TextureBrick*>						quota_bricks_;
+		std::vector<std::shared_ptr<TextureBrick>>	quota_bricks_;
 		//sort texture brick
 		bool sort_bricks_;
 		//! data size
@@ -253,7 +252,7 @@ namespace flvr
 		std::unordered_map<CompType, TexComp> data_;
 
 		//undos for mask
-		std::vector<void*> mask_undos_;
+		std::vector<std::shared_ptr<fluo::RawData>> mask_undos_;
 		int mask_undo_pointer_;
 
 		//for brkxml
@@ -267,13 +266,13 @@ namespace flvr
 		int filetype_;
 
 		std::vector<Pyramid_Level> pyramid_;
-		std::vector<std::vector<std::vector<std::vector<FileLocInfo *>>>> filenames_;
+		std::vector<std::vector<std::vector<std::vector<std::shared_ptr<FileLocInfo>>>>> filenames_;
 
-		std::vector<FileLocInfo *> *filename_;
+		std::vector<std::shared_ptr<FileLocInfo>> filename_;
 		void clearPyramid();
 
 		//used when brkxml_ is not equal to false.
-		std::vector<TextureBrick*> default_vec_;
+		std::vector<std::shared_ptr<TextureBrick>> default_vec_;
 
 		//for view testing
 		fluo::Transform mv_;

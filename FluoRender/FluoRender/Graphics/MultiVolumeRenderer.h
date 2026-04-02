@@ -127,7 +127,8 @@ namespace flvr
 		//vertex array for rendering slices
 		std::shared_ptr<VertexArray> va_slices_;
 		void draw_polygons_vol(
-			TextureBrick* b, double rate,
+			const std::shared_ptr<TextureBrick>& b,
+			double rate,
 			std::vector<float>& vertex,
 			std::vector<uint32_t>& index,
 			std::vector<uint32_t>& size,
@@ -137,7 +138,7 @@ namespace flvr
 			int quota_bricks_chan);
 
 		//find out combined bricks in interactive mode
-		std::vector<TextureBrick*> *get_combined_bricks(
+		std::vector<std::shared_ptr<TextureBrick>> get_combined_bricks(
 			fluo::Point& center, fluo::Ray& view, bool is_orthographic = false);
 	};
 
