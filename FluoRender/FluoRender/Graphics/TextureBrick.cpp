@@ -375,7 +375,8 @@ namespace flvr
 		return it->second.data;
 	}
 
-	std::shared_ptr<fluo::RawData> TextureBrick::get_raw_data_lod(CompType type, const FileLocInfo* finfo)
+	std::shared_ptr<fluo::RawData> TextureBrick::get_raw_data_lod(
+		CompType type, const std::shared_ptr<FileLocInfo>& finfo)
 	{
 		auto c = data_.find(type);
 		if (c == data_.end())
@@ -417,7 +418,9 @@ namespace flvr
 		brkdata_.reset();
 	}
 
-	bool TextureBrick::read_brick(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo)
+	bool TextureBrick::read_brick(
+		std::shared_ptr<fluo::RawData>& data,
+		const std::shared_ptr<FileLocInfo>& finfo)
 	{
 		if (!finfo) return false;
 
@@ -437,7 +440,9 @@ namespace flvr
 		return false;
 	}
 
-	bool TextureBrick::raw_brick_reader(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo)
+	bool TextureBrick::raw_brick_reader(
+		std::shared_ptr<fluo::RawData>& data,
+		const std::shared_ptr<FileLocInfo>& finfo)
 	{
 		try
 		{
@@ -479,7 +484,9 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, void *th)
+	bool TextureBrick::read_brick_without_decomp(
+		std::shared_ptr<fluo::RawData>& data, size_t& readsize,
+		std::shared_ptr<FileLocInfo> finfo)
 	{
 		readsize = -1;
 
@@ -522,22 +529,21 @@ namespace flvr
 		if (!ifs) return false;
 		size_t zsize = finfo->datasize;
 		if (zsize <= 0) zsize = (size_t)ifs.seekg(0, std::ios::end).tellg();
-		char *zdata = new char[zsize];
+		char *zdata = data->DataAs<char>();
 		ifs.seekg(finfo->offset, std::ios_base::beg);
 		ifs.read((char*)zdata, zsize);
 		if (ifs) ifs.close();
-		data = zdata;
 		readsize = zsize;
 
 		return true;
 	}
 
-	bool TextureBrick::is_nbmask_valid(Texture* tex)
+	bool TextureBrick::is_nbmask_valid(const std::shared_ptr<Texture>& tex)
 	{
 		if (mask_valid_) return true;
 		//check neighbors
 		unsigned int nid;
-		TextureBrick* nb;
+		std::shared_ptr<TextureBrick> nb;
 		nid = tex->negxid(id_);
 		//negx
 		if (nid != id_)

@@ -167,7 +167,7 @@ namespace flvr
 
 		GLenum tex_type(CompType type);
 		std::shared_ptr<fluo::RawData> get_raw_data(CompType type);
-		std::shared_ptr<fluo::RawData> get_raw_data_lod(CompType type, const FileLocInfo* finfo);
+		std::shared_ptr<fluo::RawData> get_raw_data_lod(CompType type, const std::shared_ptr<FileLocInfo>& finfo);
 		//void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick
 		//void* tex_data_brk(CompType type, const FileLocInfo* finfo);
 
@@ -181,11 +181,11 @@ namespace flvr
 		void set_d(double d) { d_ = d; }
 		double get_d() { return d_; }
 		//sorting function
-		static bool sort_asc(const TextureBrick* b1, const TextureBrick* b2)
+		static bool sort_asc(const std::shared_ptr<TextureBrick>& b1, const std::shared_ptr<TextureBrick>& b2)
 		{ return b1->d_ > b2->d_; }
-		static bool sort_dsc(const TextureBrick* b1, const TextureBrick* b2)
+		static bool sort_dsc(const std::shared_ptr<TextureBrick>& b1, const std::shared_ptr<TextureBrick>& b2)
 		{ return b2->d_ > b1->d_; }
-		static bool sort_id(const TextureBrick* b1, const TextureBrick* b2)
+		static bool sort_id(const std::shared_ptr<TextureBrick>& b1, const std::shared_ptr<TextureBrick>& b2)
 		{ return b1->id_ < b2->id_; }
 
 		//current index
@@ -199,7 +199,7 @@ namespace flvr
 		double get_data(const fluo::Point& ijk);
 
 		void freeBrkData();
-		bool read_brick(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo);
+		bool read_brick(std::shared_ptr<fluo::RawData>& data, const std::shared_ptr<FileLocInfo>& finfo);
 		bool isLoaded() { return brkdata_ ? true : false; };
 		bool isLoading() { return loading_; }
 		void set_loading_state(bool val) { loading_ = val; }
@@ -209,7 +209,7 @@ namespace flvr
 
 		void set_rawdata_lod(const std::shared_ptr<fluo::RawData>& data) { brkdata_ = data; }
 		std::shared_ptr<fluo::RawData> get_raw_data_lod() { return brkdata_; }
-		static bool read_brick_without_decomp(char* &data, size_t &readsize, FileLocInfo* finfo, void *th = NULL);
+		static bool read_brick_without_decomp(std::shared_ptr<fluo::RawData>& data, size_t &readsize, std::shared_ptr<FileLocInfo> finfo);
 
 		void set_disp(bool disp) { disp_ = disp; }
 		bool get_disp() { return disp_; }
@@ -218,7 +218,7 @@ namespace flvr
 		void valid_mask(bool val=true) { mask_valid_ = val; }
 		void invalid_mask() { mask_valid_ = false; }
 		bool is_mask_valid() { return mask_valid_; }
-		bool is_nbmask_valid(Texture* tex);//check 6 neighbors
+		bool is_nbmask_valid(const std::shared_ptr<Texture>& tex);//check 6 neighbors
 		//activate/deactivate mask painting
 		void act_mask(bool val = true) { mask_act_ = val; }
 		void deact_mask() { mask_act_ = false; }
@@ -232,7 +232,7 @@ namespace flvr
 		void compute_edge_rays_tex(fluo::BBox &bbox);
 		size_t tex_type_size(GLenum t);
 
-		bool raw_brick_reader(std::shared_ptr<fluo::RawData>& data, const FileLocInfo* finfo);
+		bool raw_brick_reader(std::shared_ptr<fluo::RawData>& data, const std::shared_ptr<FileLocInfo>& finfo);
 
 		//! bbox edges
 		fluo::Ray edge_[12];

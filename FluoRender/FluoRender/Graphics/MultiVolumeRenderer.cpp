@@ -755,14 +755,13 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 	if (!tex0->get_sort_bricks())
 		return tex0->get_quota_bricks();
 
-	size_t i, j, k;
 	std::vector<std::shared_ptr<TextureBrick>> bs;
 	std::vector<std::shared_ptr<TextureBrick>> bs0;
 	std::vector<std::shared_ptr<TextureBrick>> result;
 	fluo::Point brick_center;
 	double d;
 
-	for (i = 0; i < vr_list_.size(); i++)
+	for (size_t i = 0; i < vr_list_.size(); i++)
 	{
 		auto tex = vr_list_[i]->tex_.lock();
 		if (!tex)
@@ -778,8 +777,9 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 		std::sort(bs.begin(), bs.end(), TextureBrick::sort_dsc);
 
 		//assign indecis so that bricks can be selected later
+		size_t j = 0;
 		for (auto bbs : bs)
-			bbs->set_ind(j);
+			bbs->set_ind(j++);
 	}
 
 	//generate quota brick list for vr0
@@ -791,7 +791,7 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 	TextureBrick* pb;
 	size_t ind;
 	bool found;
-	for (i = 0; i < vr_list_.size(); i++)
+	for (size_t i = 0; i < vr_list_.size(); i++)
 	{
 		auto tex = vr_list_[i]->tex_.lock();
 		if (!tex)
@@ -866,7 +866,7 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 	tex0->reset_sort_bricks();
 
 	//duplicate result into other quota-bricks
-	for (i = 1; i < vr_list_.size(); i++)
+	for (size_t i = 1; i < vr_list_.size(); i++)
 	{
 		auto tex = vr_list_[i]->tex_.lock();
 		if (!tex)

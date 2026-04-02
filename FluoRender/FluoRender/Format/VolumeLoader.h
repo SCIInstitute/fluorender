@@ -42,9 +42,9 @@ namespace flvr
 
 struct VolumeLoaderData
 {
-	flvr::FileLocInfo *finfo;
-	flvr::TextureBrick *brick;
-	VolumeData *vd;
+	std::shared_ptr<flvr::FileLocInfo> finfo;
+	std::shared_ptr<flvr::TextureBrick> brick;
+	std::shared_ptr<VolumeData> vd;
 	unsigned long long datasize;
 	int mode;
 };
@@ -61,7 +61,7 @@ public:
 	void SetMemoryLimitByte(long long limit) { m_memory_limit = limit; }
 	void CleanupLoadedBrick();
 	void RemoveAllLoadedBrick();
-	void RemoveBrickVD(VolumeData *vd);
+	void RemoveBrickVD(const std::shared_ptr<VolumeData>& vd);
 
 	static bool sort_data_dsc(const VolumeLoaderData b1, const VolumeLoaderData b2);
 	static bool sort_data_asc(const VolumeLoaderData b1, const VolumeLoaderData b2);
@@ -69,7 +69,7 @@ public:
 protected:
 	std::vector<VolumeLoaderData> m_queues;
 	std::vector<VolumeLoaderData> m_queued;
-	std::unordered_map<flvr::TextureBrick*, VolumeLoaderData> m_loaded;
+	std::unordered_map<std::shared_ptr<flvr::TextureBrick>, VolumeLoaderData> m_loaded;
 	bool m_valid;
 
 	long long m_memory_limit;

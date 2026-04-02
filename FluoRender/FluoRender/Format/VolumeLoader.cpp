@@ -92,14 +92,28 @@ bool VolumeLoader::Run()
 				}
 			}
 
-			char *ptr = NULL;
-			size_t readsize;
-			flvr::TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo, (void*)this);
+			auto res = b.brick->get_size();
+			int nb = b.brick->nb(flvr::CompType::Data);
+			fluo::DataFormat format;
+			if (nb == 1)
+				format = fluo::DataFormat::UInt8;
+			else if (nb == 2)
+				format = fluo::DataFormat::UInt16;
+			else if (nb == 4)
+				format = fluo::DataFormat::Float32;
+			else
+				continue;
+			auto ptr = std::make_shared<fluo::RawData>(
+				fluo::RawData::Size3(res.intx(), res.inty(), res.intz()),
+					format);
 			if (!ptr) continue;
+			ptr->Allocate();
+			size_t readsize;
+			flvr::TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo);
 
 			if (b.finfo->type == BRICK_FILE_TYPE_RAW)
 			{
-				b.brick->set_brkdata(ptr);
+				b.brick->set_rawdata_lod(ptr);
 				b.datasize = readsize;
 				AddLoadedBrick(b);
 			}
@@ -125,7 +139,7 @@ void VolumeLoader::CleanupLoadedBrick()
 
 	for (size_t i = 0; i < m_queues.size(); i++)
 	{
-		flvr::TextureBrick *b = m_queues[i].brick;
+		auto b = m_queues[i].brick;
 		if (!m_queues[i].brick->isLoaded())
 		{
 			auto res = b->get_size();
@@ -192,7 +206,7 @@ void VolumeLoader::CleanupLoadedBrick()
 	{
 		for (size_t i = m_queues.size(); i > 0; i--)
 		{
-			flvr::TextureBrick *b = m_queues[i-1].brick;
+			auto b = m_queues[i-1].brick;
 			if (b->isLoaded() && m_loaded.find(b) != m_loaded.end())
 			{
 				bool skip = false;
@@ -232,7 +246,7 @@ void VolumeLoader::RemoveAllLoadedBrick()
 	m_loaded.clear();
 }
 
-void VolumeLoader::RemoveBrickVD(VolumeData *vd)
+void VolumeLoader::RemoveBrickVD(const std::shared_ptr<VolumeData>& vd)
 {
 	auto ite = m_loaded.begin();
 	while (ite != m_loaded.end())
