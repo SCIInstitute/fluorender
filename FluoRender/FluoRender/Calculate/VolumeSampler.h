@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMESAMPLER_H_
 
 #include <Quaternion.h>
-#include <nrrd.h>
+#include <RawData.h>
 #include <memory>
 
 class VolumeData;
@@ -72,8 +72,8 @@ namespace flrd
 	private:
 		std::weak_ptr<VolumeData> m_input;	//input
 		std::shared_ptr<VolumeData> m_result;	//result
-		void* m_raw_input;		//
-		void* m_raw_result;		//
+		std::shared_ptr<fluo::RawData> m_raw_input;		//
+		std::shared_ptr<fluo::RawData> m_raw_result;		//
 
 		//input size
 		fluo::Vector m_size_in;
@@ -108,8 +108,7 @@ namespace flrd
 						//2:mirror
 
 	private:
-		Nrrd* GetNrrd(VolumeData* vd, SampDataType type);
-		void* GetRaw(VolumeData* vd, SampDataType type);
+		std::shared_ptr<fluo::RawData> GetRaw(const std::shared_ptr<VolumeData>& vd, SampDataType type);
 		double SampleNearestNeighbor(const fluo::Point& coord);
 		double SampleBiLinear(const fluo::Point& coord);
 		double SampleTriLinear(const fluo::Point& coord);

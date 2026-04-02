@@ -618,7 +618,7 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 			continue;
 
 		vd->SetSkipBrick(glbin_settings.m_skip_brick);
-		Nrrd* data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
+		auto data = reader->Convert(t_num>=0?t_num:reader->GetCurTime(), i, true);
 		if (!data)
 			continue;
 
@@ -658,14 +658,14 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				MSKReader msk_reader;
 				std::wstring str = reader->GetCurMaskName(t_num >= 0 ? t_num : reader->GetCurTime(), i);
 				msk_reader.SetFile(str);
-				Nrrd* mask = msk_reader.Convert(0, 0, true);
+				auto mask = msk_reader.Convert(0, 0, true);
 				if (mask)
 					vd->LoadMask(mask);
 				//label mask
 				LBLReader lbl_reader;
 				str = reader->GetCurLabelName(t_num >= 0 ? t_num : reader->GetCurTime(), i);
 				lbl_reader.SetFile(str);
-				Nrrd* label = lbl_reader.Convert(0, 0, true);
+				auto label = lbl_reader.Convert(0, 0, true);
 				if (label)
 				{
 					vd->LoadLabel(label);

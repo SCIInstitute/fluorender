@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Utils.h>
 #include <compatibility.h>
 #include <glm.h>
-#include <nrrd.h>
+#include <RawData.h>
 #include <vector>
 
 using namespace flrd;
@@ -142,19 +142,17 @@ bool ConvVolMeshSw::Compute(void* m)
 		return false;
 
 	VolumeData* vol_data = vd.get();
-	Nrrd* nrrd_data = nullptr;
+	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 	if (m_use_mask)
-		nrrd_data = vd->GetMask(true);
+		raw_data = vd->GetMask(true);
 	else
-		nrrd_data = vd->GetVolume(false);
-	if (!nrrd_data)
+		raw_data = vd->GetVolume(false);
+	if (!raw_data)
 	{
 		SetProgress(0, "FluoRender failed to get volume data.");
 		return false;
 	}
 
-	if (nrrd_data->dim!=3)
-		return false;
 	if (m_downsample <= 0)
 		m_downsample = 1;
 	if (m_downsample_z <= 0)
@@ -174,9 +172,10 @@ bool ConvVolMeshSw::Compute(void* m)
 	model->numgroups = 1;
 
 	//get volume info
-	int nx = int(nrrd_data->axis[0].size);
-	int ny = int(nrrd_data->axis[1].size);
-	int nz = int(nrrd_data->axis[2].size);
+	auto size = raw_data->GetSize();
+	int nx = int(size[0]);
+	int ny = int(size[1]);
+	int nz = int(size[2]);
 
 	int v1, v2, range;
 	v1 = GetMin();

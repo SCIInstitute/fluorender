@@ -1392,7 +1392,7 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_p
 				if (auto cur_vd_ptr = m_cur_vol.lock())
 					if (cur_vd_ptr == vd)
 						m_cur_vol = dst;
-				glbin_vol_loader.RemoveBrickVD(vd.get());
+				glbin_vol_loader.RemoveBrickVD(vd);
 				vd->GetVR()->clear_tex_current();
 				it = dst;
 				m_vd_pop_dirty = true;
@@ -1413,7 +1413,7 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_p
 				if (auto cur_vd_ptr = m_cur_vol.lock())
 					if (cur_vd_ptr == vd)
 						m_cur_vol = dst;
-					glbin_vol_loader.RemoveBrickVD(vd.get());
+					glbin_vol_loader.RemoveBrickVD(vd);
 					vd->GetVR()->clear_tex_current();
 					tmpgroup->ReplaceVolumeData(j, dst);
 					m_vd_pop_dirty = true;
@@ -3330,7 +3330,7 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 	{
 		auto spc = vd->GetSpacing();
 
-		Nrrd* data = reader->Convert(frame, vd->GetCurChannel(), false);
+		auto data = reader->Convert(frame, vd->GetCurChannel(), false);
 		if (!vd->Replace(data, false))
 			return;
 
@@ -3434,7 +3434,7 @@ void RenderView::ReloadVolumeData(int frame)
 
 				auto spc = vd->GetSpacing();
 
-				Nrrd* data = reader->Convert(0, vd->GetCurChannel(), true);
+				auto data = reader->Convert(0, vd->GetCurChannel(), true);
 				if (vd->Replace(data, true))
 					vd->SetDisp(true);
 				else
@@ -4095,21 +4095,20 @@ void RenderView::StartLoopUpdate()
 			if (tex)
 			{
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
-				std::vector<flvr::TextureBrick*> *bricks = 0;
-				bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-				if (!bricks || bricks->size() == 0)
+				auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+				if (bricks.empty())
 					continue;
-				for (size_t j = 0; j<bricks->size(); j++)
+				for (auto bbs : bricks)
 				{
-					(*bricks)[j]->set_drawn(false);
-					if ((*bricks)[j]->get_priority() > 0 ||
-						!vd->GetVR()->test_against_view((*bricks)[j]->bbox(), m_persp))
+					bbs->set_drawn(false);
+					if (bbs->get_priority() > 0 ||
+						!vd->GetVR()->test_against_view(bbs->bbox(), m_persp))
 					{
-						(*bricks)[j]->set_disp(false);
+						bbs->set_disp(false);
 						continue;
 					}
 					else
-						(*bricks)[j]->set_disp(true);
+						bbs->set_disp(true);
 					total_num++;
 					num_chan++;
 					if (vd->GetRenderMode() == flvr::RenderMode::Mip &&
@@ -4134,8 +4133,8 @@ void RenderView::StartLoopUpdate()
 				flvr::Texture* tex = vd->GetTexture();
 				if (!tex)
 					continue;
-				std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
-				if (!bricks || bricks->size() == 0)
+				auto bricks = tex->get_bricks();
+				if (bricks.empty())
 					continue;
 				list.push_back(vd);
 			}
@@ -4146,30 +4145,29 @@ void RenderView::StartLoopUpdate()
 			{
 				flvr::Texture* tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
-				std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+				auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShadingEnable());
 				bool shadow = vd->GetShadowEnable();
-				for (size_t j = 0; j < bricks->size(); ++j)
+				for (auto bbs : bricks)
 				{
 					VolumeLoaderData d = {};
-					flvr::TextureBrick* b = (*bricks)[j];
-					if (b->get_disp())
+					if (bbs->get_disp())
 					{
-						d.brick = b;
-						d.finfo = tex->GetFileName(b->getID());
-						d.vd = vd.get();
-						if (!b->drawn(mode))
+						d.brick = bbs;
+						d.finfo = tex->GetFileName(bbs->getID());
+						d.vd = vd;
+						if (!bbs->drawn(mode))
 						{
 							d.mode = mode;
 							queues.push_back(d);
 						}
-						if (shade && !b->drawn(2))
+						if (shade && !bbs->drawn(2))
 						{
 							d.mode = 2;
 							tmp_shade.push_back(d);
 						}
-						if (shadow && !b->drawn(3))
+						if (shadow && !bbs->drawn(3))
 						{
 							d.mode = 3;
 							tmp_shadow.push_back(d);
@@ -4230,32 +4228,31 @@ void RenderView::StartLoopUpdate()
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
-						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-						if (!bricks || bricks->size() == 0)
+						auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						if (bricks.empty())
 							continue;
 						int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 						bool shade = (mode == 1 && vd->GetShadingEnable());
 						bool shadow = vd->GetShadowEnable();
-						for (size_t j = 0; j<bricks->size(); j++)
+						for (auto bbs : bricks)
 						{
 							VolumeLoaderData d = {};
-							flvr::TextureBrick* b = (*bricks)[j];
-							if (b->get_disp())
+							if (bbs->get_disp())
 							{
-								d.brick = b;
-								d.finfo = tex->GetFileName(b->getID());
-								d.vd = vd.get();
-								if (!b->drawn(mode))
+								d.brick = bbs;
+								d.finfo = tex->GetFileName(bbs->getID());
+								d.vd = vd;
+								if (!bbs->drawn(mode))
 								{
 									d.mode = mode;
 									queues.push_back(d);
 								}
-								if (shade && !b->drawn(2))
+								if (shade && !bbs->drawn(2))
 								{
 									d.mode = 2;
 									tmp_shade.push_back(d);
 								}
-								if (shadow && !b->drawn(3))
+								if (shadow && !bbs->drawn(3))
 								{
 									d.mode = 3;
 									tmp_shadow.push_back(d);
@@ -4296,8 +4293,8 @@ void RenderView::StartLoopUpdate()
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
-						std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
-						if (!bricks || bricks->size() == 0)
+						auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+						if (bricks.empty())
 							continue;
 						list.push_back(vd);
 					}
@@ -4314,30 +4311,29 @@ void RenderView::StartLoopUpdate()
 							auto vd = list[k];
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
-							std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
 							bool shadow = vd->GetShadowEnable();
-							for (size_t j = 0; j < bricks->size(); j++)
+							for (auto bbs : bricks)
 							{
 								VolumeLoaderData d = {};
-								flvr::TextureBrick* b = (*bricks)[j];
-								if (b->get_disp())
+								if (bbs->get_disp())
 								{
-									d.brick = b;
-									d.finfo = tex->GetFileName(b->getID());
-									d.vd = vd.get();
-									if (!b->drawn(mode))
+									d.brick = bbs;
+									d.finfo = tex->GetFileName(bbs->getID());
+									d.vd = vd;
+									if (!bbs->drawn(mode))
 									{
 										d.mode = mode;
 										tmp_q.push_back(d);
 									}
-									if (shade && !b->drawn(2))
+									if (shade && !bbs->drawn(2))
 									{
 										d.mode = 2;
 										tmp_shade.push_back(d);
 									}
-									if (shadow && !b->drawn(3))
+									if (shadow && !bbs->drawn(3))
 									{
 										d.mode = 3;
 										tmp_shadow.push_back(d);
@@ -4389,30 +4385,29 @@ void RenderView::StartLoopUpdate()
 							auto vd = list[j];
 							flvr::Texture* tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
-							std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray, !m_persp);
+							auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
 							bool shadow = vd->GetShadowEnable();
-							for (size_t k = 0; k<bricks->size(); k++)
+							for (auto bbs : bricks)
 							{
 								VolumeLoaderData d = {};
-								flvr::TextureBrick* b = (*bricks)[k];
-								if (b->get_disp())
+								if (bbs->get_disp())
 								{
-									d.brick = b;
-									d.finfo = tex->GetFileName(b->getID());
-									d.vd = vd.get();
-									if (!b->drawn(mode))
+									d.brick = bbs;
+									d.finfo = tex->GetFileName(bbs->getID());
+									d.vd = vd;
+									if (!bbs->drawn(mode))
 									{
 										d.mode = mode;
 										queues.push_back(d);
 									}
-									if (shade && !b->drawn(2))
+									if (shade && !bbs->drawn(2))
 									{
 										d.mode = 2;
 										tmp_shade.push_back(d);
 									}
-									if (shadow && !b->drawn(3))
+									if (shadow && !bbs->drawn(3))
 									{
 										d.mode = 3;
 										tmp_shadow.push_back(d);
@@ -4559,13 +4554,13 @@ void RenderView::GetTraces(bool update)
 	cur_vd->GetVR()->return_mask();
 	auto res = cur_vd->GetResolution();
 	//find labels in the old that are selected by the current mask
-	Nrrd* mask_nrrd = cur_vd->GetMask(true);
-	if (!mask_nrrd) return;
-	Nrrd* label_nrrd = cur_vd->GetLabel(true);
-	if (!label_nrrd) return;
-	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
+	auto mask_raw = cur_vd->GetMask(true);
+	if (!mask_raw) return;
+	auto label_raw = cur_vd->GetLabel(true);
+	if (!label_raw) return;
+	unsigned char* mask_data = mask_raw->DataAs<unsigned char>();
 	if (!mask_data) return;
-	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
+	unsigned int* label_data = label_raw->DataAs<unsigned int>();
 	if (!label_data) return;
 	flrd::CelpList sel_labels;
 	flrd::CelpListIter label_iter;
@@ -9540,12 +9535,9 @@ void RenderView::switchLevel(VolumeData *vd)
 		}
 		if (prev_lv != new_lv)
 		{
-			std::vector<flvr::TextureBrick*> *bricks = vtex->get_bricks();
-			if (bricks)
-			{
-				for (int i = 0; i < bricks->size(); i++)
-					(*bricks)[i]->set_disp(false);
-			}
+			auto bricks = vtex->get_bricks();
+			for (auto bbs : bricks)
+				bbs->set_disp(false);
 			vd->SetLevel(new_lv);
 			vtex->set_sort_bricks();
 		}

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUME_GROUP_H_
 
 #include <TreeLayer.h>
-#include <nrrd.h>
+#include <RawData.h>
 #include <vector>
 #include <memory>
 
@@ -203,7 +203,7 @@ public:
 	//randomize color
 	void RandomizeColor();
 
-	void AddMask(Nrrd* mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
+	void AddMask(const std::shared_ptr<fluo::RawData>& mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
 
 	virtual void SetOutline(bool outline) override;
 

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEBAKER_H_
 
 #include <Vector.h>
-#include <nrrd.h>
+#include <RawData.h>
 #include <memory>
 
 class VolumeData;
@@ -49,8 +49,8 @@ namespace flrd
 	private:
 		std::weak_ptr<VolumeData> m_input;	//input
 		std::shared_ptr<VolumeData> m_result;	//result
-		void* m_raw_input;		//
-		void* m_raw_result;		//
+		std::shared_ptr<fluo::RawData> m_raw_input;		//
+		std::shared_ptr<fluo::RawData> m_raw_result;		//
 
 		//size
 		fluo::Vector m_size;
@@ -58,8 +58,7 @@ namespace flrd
 		int m_bits;
 
 	private:
-		Nrrd* GetNrrd(VolumeData* vd);
-		void* GetRaw(VolumeData* vd);
+		std::shared_ptr<fluo::RawData> GetRaw(const std::shared_ptr<VolumeData>& vd);
 	};
 }
 #endif//_VOLUMEBAKER_H_

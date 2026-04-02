@@ -385,20 +385,19 @@ bool VolumeData::GetSkipBrick()
 	return m_skip_brick;
 }
 
-int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &path)
+int VolumeData::Load(const std::shared_ptr<fluo::RawData>& data, const std::wstring &name, const std::wstring &path)
 {
-	if (!data || data->dim!=3)
+	if (!data)
 		return 0;
 
 	m_tex_path = path;
 	m_name = name;
 
-	Nrrd *nv = data;
-	Nrrd *gm = 0;
+	auto size = data->GetSize();
 	m_size = fluo::Vector(
-		nv->axis[0].size,
-		nv->axis[1].size,
-		nv->axis[2].size);
+		size[0],
+		size[1],
+		size[2]);
 
 	m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(m_size * m_spacing));
 	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
@@ -410,7 +409,8 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	{
 		auto breader = std::dynamic_pointer_cast<BRKXMLReader>(reader);
 		std::vector<flvr::Pyramid_Level> pyramid;
-		std::vector<std::vector<std::vector<std::vector<flvr::FileLocInfo*>>>> fnames;
+		std::vector<std::vector<std::vector<std::vector<
+			std::shared_ptr<flvr::FileLocInfo>>>>> fnames;
 		int ftype = BRICK_FILE_TYPE_NONE;
 
 		breader->build_pyramid(pyramid, fnames, 0, breader->GetCurChan());
@@ -429,7 +429,8 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	}
 	else
 	{
-		if (!m_tex->build(nv, 0, 256))
+		std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+		if (!m_tex->build(data, 0, 256, bricks))
 			return 0;
 	}
 
@@ -461,28 +462,29 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 	return 1;
 }
 
-int VolumeData::Replace(Nrrd* data, bool del_tex)
+int VolumeData::Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex)
 {
-	if (!data || data->dim!=3)
+	if (!data)
 		return 0;
 	if (del_tex)
 	{
-		Nrrd *nv = data;
+		auto size = data->GetSize();
 		m_size = fluo::Vector(
-			nv->axis[0].size,
-			nv->axis[1].size,
-			nv->axis[2].size);
+			size[0],
+			size[1],
+			size[2]);
 
 		m_tex = std::make_shared<flvr::Texture>();
 		m_tex->set_use_priority(m_skip_brick);
-		m_tex->build(nv, m_min_value, m_max_value);
+		std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+		m_tex->build(data, m_min_value, m_max_value, bricks);
 	}
 	else
 	{
 		//set new
 		int bytes = GetBits() / 8;
 		flvr::TexComp comp = { flvr::CompType::Data, bytes, data};
-		m_tex->set_nrrd(flvr::CompType::Data, comp);
+		m_tex->set_raw(flvr::CompType::Data, comp);
 	}
 
 	if (m_vr)
@@ -540,42 +542,23 @@ void VolumeData::AddEmptyData(int bits,
 	if (bits!=8 && bits!=16)
 		return;
 
-	Nrrd *nv = nrrdNew();
+	fluo::DataFormat format = fluo::DataFormat::Unknown;
 	if (bits == 8)
-	{
-		unsigned long long mem_size = (unsigned long long)res.intx()*
-			(unsigned long long)res.inty()*(unsigned long long)res.intz();
-		uint8_t *val8 = new (std::nothrow) uint8_t[mem_size]();
-		if (!val8)
-		{
-			//SetProgress("Not enough memory. Please save project and restart.");
-			return;
-		}
-		nrrdWrap_va(nv, val8, nrrdTypeUChar, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
-	}
+		format = fluo::DataFormat::UInt8;
 	else if (bits == 16)
+		format = fluo::DataFormat::UInt16;
+	fluo::RawData::Size3 size =
 	{
-		unsigned long long mem_size = (unsigned long long)res.intx()*
-			(unsigned long long)res.inty() * (unsigned long long)res.intz();
-		uint16_t *val16 = new (std::nothrow) uint16_t[mem_size]();
-		if (!val16)
-		{
-			//SetProgress("Not enough memory. Please save project and restart.");
-			return;
-		}
-		nrrdWrap_va(nv, val16, nrrdTypeUShort, 3, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
-	}
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-	auto max_size = res * spc;
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nv, nrrdAxisInfoSize, (size_t)res.intx(), (size_t)res.inty(), (size_t)res.intz());
+		static_cast<size_t>(res.intx()),
+		static_cast<size_t>(res.inty()),
+		static_cast<size_t>(res.intz())
+	};
+	auto raw_data = std::make_shared<fluo::RawData>(size, format);
+	if (!raw_data->Allocate())
+		return;
 
 	//resolution
-	m_size = fluo::Vector(
-		nv->axis[0].size,
-		nv->axis[1].size,
-		nv->axis[2].size);
+	m_size = res;
 
 	//bounding box
 	m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(m_size * m_spacing));
@@ -585,7 +568,8 @@ void VolumeData::AddEmptyData(int bits,
 	m_tex = std::make_shared<flvr::Texture>();
 	m_tex->set_use_priority(false);
 	m_tex->set_brick_planned_size(brick_size);
-	m_tex->build(nv, 0, 256, 0);
+	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+	m_tex->build(raw_data, 0, 256, bricks);
 	m_tex->set_spacing(spc);
 
 	//create volume renderer
@@ -615,7 +599,7 @@ void VolumeData::AddEmptyData(int bits,
 }
 
 //volume mask
-void VolumeData::LoadMask(Nrrd* mask)
+void VolumeData::LoadMask(const std::shared_ptr<fluo::RawData>& mask)
 {
 	if (!mask || !m_tex || !m_vr)
 		return;

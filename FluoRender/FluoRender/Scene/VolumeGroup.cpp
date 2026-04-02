@@ -628,7 +628,7 @@ void VolumeGroup::RandomizeColor()
 	}
 }
 
-void VolumeGroup::AddMask(Nrrd* mask, int op)
+void VolumeGroup::AddMask(const std::shared_ptr<fluo::RawData>& mask, int op)
 {
 	for (auto& it : m_vd_list)
 	{
