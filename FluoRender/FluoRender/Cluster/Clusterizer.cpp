@@ -67,30 +67,27 @@ void Clusterizer::Compute()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
-	if (!comp_data.data)
-		return;
 	int bits = vd->GetBits();
-	void* data_data = comp_data.data->data;
+	auto raw_data = vd->GetVolume(false);
+	if (!raw_data)
+		return;
+	void* data_data = raw_data->GetDataVoid();
 	if (!data_data)
 		return;
 	//get mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
+	unsigned char* data_mask = raw_mask->DataAs<unsigned char>();
 	if (!data_mask)
 		return;
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
+	auto raw_label = vd->GetLabel(false);
+	if (!raw_label)
 	{
 		vd->AddEmptyLabel();
-		comp_label = tex->get_nrrd(flvr::CompType::Label);
+		raw_label = vd->GetLabel(false);
 	}
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
+	unsigned int* data_label = raw_label->DataAs<unsigned int>();
 	if (!data_label)
 		return;
 

@@ -167,8 +167,8 @@ namespace flvr
 		fluo::Vector get_spacing_scale() { return spacing_scale_; }
 
 		// Creator of the brick owns the raw memory.
-		void set_raw(CompType type, TexComp comp);
-		TexComp get_raw(CompType type);
+		void set_tex_comp(CompType type, TexComp comp);
+		TexComp get_tex_comp(CompType type);
 		bool trim_mask_undos_head();
 		bool trim_mask_undos_tail();
 		bool get_undo();

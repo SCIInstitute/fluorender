@@ -484,7 +484,7 @@ int VolumeData::Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex
 		//set new
 		int bytes = GetBits() / 8;
 		flvr::TexComp comp = { flvr::CompType::Data, bytes, data};
-		m_tex->set_raw(flvr::CompType::Data, comp);
+		m_tex->set_tex_comp(flvr::CompType::Data, comp);
 	}
 
 	if (m_vr)

@@ -1557,12 +1557,12 @@ int RulerHandler::Profile(Ruler* ruler)
 	vd->GetVR()->return_mask();
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return 0;
-	auto comp_data = tex->get_raw(flvr::CompType::Data);
+	auto comp_data = tex->get_tex_comp(flvr::CompType::Data);
 	if (!comp_data.data) return 0;
 	void* data = comp_data.data->GetDataVoid();
 	if (!data) return 0;
 	//mask
-	auto comp_mask = tex->get_raw(flvr::CompType::Mask);
+	auto comp_mask = tex->get_tex_comp(flvr::CompType::Mask);
 	void* mask = 0;
 	if (comp_mask.data)
 		mask = comp_mask.data->GetDataVoid();
@@ -1756,12 +1756,12 @@ int RulerHandler::Roi(Ruler* ruler)
 	vd->GetVR()->return_mask();
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return 0;
-	auto comp_data = tex->get_raw(flvr::CompType::Data);
+	auto comp_data = tex->get_tex_comp(flvr::CompType::Data);
 	if (!comp_data.data) return 0;
 	void* data = comp_data.data->GetDataVoid();
 	if (!data) return 0;
 	//mask
-	auto comp_mask = tex->get_raw(flvr::CompType::Mask);
+	auto comp_mask = tex->get_tex_comp(flvr::CompType::Mask);
 	void* mask = 0;
 	if (comp_mask.data)
 		mask = comp_mask.data->GetDataVoid();

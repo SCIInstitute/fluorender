@@ -151,8 +151,8 @@ namespace flvr
 		inline bool drawn(int mode)
 		{ if (mode>=0 && mode<TEXTURE_RENDER_MODES) return drawn_[mode]; else return false;}
 
-		void set_raw(CompType type, TexComp comp) { data_[type] = comp;}
-		TexComp get_raw(CompType type)
+		void set_tex_comp(CompType type, TexComp comp) { data_[type] = comp;}
+		TexComp get_tex_comp(CompType type)
 		{
 			auto c = data_.find(type);
 			if (c == data_.end())

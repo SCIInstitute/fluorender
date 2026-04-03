@@ -75,7 +75,7 @@ namespace flvr
 		compute_edge_rays_tex(tbox_);
 
 		TexComp comp = { CompType::Data, byte, rd };
-		set_raw(CompType::Data, comp);
+		set_tex_comp(CompType::Data, comp);
 
 		//if it's been drawn in a full update loop
 		for (int i = 0; i < TEXTURE_RENDER_MODES; i++)

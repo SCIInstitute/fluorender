@@ -371,7 +371,7 @@ namespace flvr
 		auto size_vec = fluo::Vector(size[0], size[1], size[2]);
 
 		TexComp comp = { CompType::Data, bytes, raw };
-		set_raw(CompType::Data, comp);
+		set_tex_comp(CompType::Data, comp);
 
 		if (brks.empty())
 		{
@@ -407,7 +407,7 @@ namespace flvr
 		{
 			for (auto b : bricks_)
 			{
-				b->set_raw(CompType::Data, comp);
+				b->set_tex_comp(CompType::Data, comp);
 				b->set_stride(size_vec);
 				if (use_priority_ && !brkxml_)
 				{
@@ -601,7 +601,7 @@ namespace flvr
 		data_[CompType::Mask] = comp;
 		for (auto b : bricks_)
 		{
-			b->set_raw(CompType::Mask, comp);
+			b->set_tex_comp(CompType::Mask, comp);
 		}
 		return true;
 	}
@@ -616,7 +616,7 @@ namespace flvr
 		data_[CompType::Label] = comp;
 		for (auto b : bricks_)
 		{
-			b->set_raw(CompType::Label, comp);
+			b->set_tex_comp(CompType::Label, comp);
 		}
 		return true;
 	}
@@ -690,7 +690,7 @@ namespace flvr
 			TexComp comp = { CompType::Data, bytes, pl.data };
 			for (auto b : pl.bricks)
 			{
-				b->set_raw(CompType::Data, comp);
+				b->set_tex_comp(CompType::Data, comp);
 			}
 		}
 		setLevel(pyramid_lv_num_ - 1);
@@ -763,7 +763,7 @@ namespace flvr
 	}
 
 	//set nrrd
-	void Texture::set_raw(CompType type, TexComp comp)
+	void Texture::set_tex_comp(CompType type, TexComp comp)
 	{
 		auto raw = comp.data;
 		if (!raw)
@@ -785,7 +785,7 @@ namespace flvr
 		if (!existInPyramid)
 		{
 			for (auto b : bricks_)
-				b->set_raw(type, comp);
+				b->set_tex_comp(type, comp);
 
 			//add to undo list
 			if (type == CompType::Mask)
@@ -793,7 +793,7 @@ namespace flvr
 		}
 	}
 
-	TexComp Texture::get_raw(CompType type)
+	TexComp Texture::get_tex_comp(CompType type)
 	{
 		auto c = data_.find(type);
 		if (c == data_.end())

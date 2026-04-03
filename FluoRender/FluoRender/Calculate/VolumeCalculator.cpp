@@ -376,7 +376,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	flvr::Texture* tex_a = vd_a->GetTexture();
 	if (!tex_a)
 		return;
-	auto comp_a = tex_a->get_raw(flvr::CompType::Data);
+	auto comp_a = tex_a->get_tex_comp(flvr::CompType::Data);
 	if (!comp_a.data)
 		return;
 	void* data_a = comp_a.data->GetDataVoid();
@@ -387,7 +387,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	flvr::Texture* tex_r = vd->GetTexture();
 	if (!tex_r)
 		return;
-	auto comp_r = tex_r->get_raw(flvr::CompType::Data);
+	auto comp_r = tex_r->get_tex_comp(flvr::CompType::Data);
 	if (!comp_r.data)
 		return;
 	void* data_r = comp_r.data->GetDataVoid();
