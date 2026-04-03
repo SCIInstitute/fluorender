@@ -59,7 +59,7 @@ namespace flrd
 		float m_wsum;
 
 		bool CheckBricks();
-		bool GetInfo(flvr::TextureBrick* b,
+		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			unsigned int &bits, unsigned int &nx, unsigned int &ny, unsigned int &nz);
 	};
 

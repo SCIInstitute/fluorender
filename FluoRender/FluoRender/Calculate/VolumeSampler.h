@@ -108,7 +108,6 @@ namespace flrd
 						//2:mirror
 
 	private:
-		std::shared_ptr<fluo::RawData> GetRaw(const std::shared_ptr<VolumeData>& vd, SampDataType type);
 		double SampleNearestNeighbor(const fluo::Point& coord);
 		double SampleBiLinear(const fluo::Point& coord);
 		double SampleTriLinear(const fluo::Point& coord);

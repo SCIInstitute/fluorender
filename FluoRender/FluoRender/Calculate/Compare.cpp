@@ -558,7 +558,8 @@ bool ChannelCompare::CheckBricks()
 }
 
 bool ChannelCompare::GetInfo(
-	flvr::TextureBrick* b1, flvr::TextureBrick* b2,
+	const std::shared_ptr<flvr::TextureBrick>& b1,
+	const std::shared_ptr<flvr::TextureBrick>& b2,
 	long &bits1, long &bits2,
 	long &nx, long &ny, long &nz)
 {
@@ -588,7 +589,7 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	unsigned long long mem_size = (unsigned long long)res.get_size_xyz()*(unsigned long long)nb;
 	unsigned char* temp = new unsigned char[mem_size];
 	unsigned char* tempp = temp;
-	unsigned char* tp = (unsigned char*)(b->tex_data(c));
+	unsigned char* tp = b->get_raw_data(c)->DataAs<unsigned char>();
 	unsigned char* tp2;
 	for (size_t k = 0; k < res.intz(); ++k)
 	{
@@ -606,14 +607,14 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 
 void* ChannelCompare::GetVolData(VolumeData* vd)
 {
-	Nrrd* nrrd_data = 0;
+	std::shared_ptr<fluo::RawData> nrrd_data = nullptr;
 	if (m_use_mask)
 		nrrd_data = vd->GetMask(false);
 	if (!nrrd_data)
 		nrrd_data = vd->GetVolume(false);
 	if (!nrrd_data)
 		return 0;
-	return nrrd_data->data;
+	return nrrd_data->GetDataVoid();
 }
 
 void ChannelCompare::Product()
@@ -653,15 +654,15 @@ void ChannelCompare::Product()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	auto bricks1 = m_vd1->GetTexture()->get_bricks();
+	auto bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		flvr::TextureBrick* b1 = (*bricks1)[i];
-		flvr::TextureBrick* b2 = (*bricks2)[i];
+		auto b1 = bricks1[i];
+		auto b2 = bricks2[i];
 		if (m_use_mask)
 		{
 			if (!b1->is_mask_valid() ||
@@ -766,15 +767,15 @@ void ChannelCompare::MinValue()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	auto bricks1 = m_vd1->GetTexture()->get_bricks();
+	auto bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
-		flvr::TextureBrick* b1 = (*bricks1)[i];
-		flvr::TextureBrick* b2 = (*bricks2)[i];
+		auto b1 = bricks1[i];
+		auto b2 = bricks2[i];
 		if (m_use_mask)
 		{
 			if (!b1->is_mask_valid() ||
@@ -879,8 +880,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	auto bricks1 = m_vd1->GetTexture()->get_bricks();
+	auto bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
@@ -888,8 +889,8 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	{
 		if (prework) prework("");
 
-		flvr::TextureBrick* b1 = (*bricks1)[i];
-		flvr::TextureBrick* b2 = (*bricks2)[i];
+		auto b1 = bricks1[i];
+		auto b2 = bricks2[i];
 		if (m_use_mask)
 		{
 			if (!b1->is_mask_valid() ||
@@ -984,8 +985,8 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks1 = m_vd1->GetTexture()->get_bricks();
-	std::vector<flvr::TextureBrick*> *bricks2 = m_vd2->GetTexture()->get_bricks();
+	auto bricks1 = m_vd1->GetTexture()->get_bricks();
+	auto bricks2 = m_vd2->GetTexture()->get_bricks();
 	float ss1 = (float)(m_vd1->GetScalarScale());
 	float ss2 = (float)(m_vd2->GetScalarScale());
 
@@ -993,8 +994,8 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 	{
 		if (prework) prework("");
 
-		flvr::TextureBrick* b1 = (*bricks1)[i];
-		flvr::TextureBrick* b2 = (*bricks2)[i];
+		auto b1 = bricks1[i];
+		auto b2 = bricks2[i];
 		if (m_use_mask)
 		{
 			if (!b1->is_mask_valid() ||

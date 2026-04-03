@@ -66,38 +66,24 @@ void VolumeBaker::Bake(bool replace)
 	auto input = m_input.lock();
 	if (!input)
 		return;
-	m_raw_input = GetRaw(input.get());
-	Nrrd* input_nrrd = GetNrrd(input.get());
-	if (!input_nrrd)
+	m_raw_input = input->GetVolume(false);
+	if (!m_raw_input)
 		return;
 
 	//input size
+	auto size = m_raw_input->GetSize();
 	m_size = fluo::Vector(
-		input_nrrd->axis[0].size,
-		input_nrrd->axis[1].size,
-		input_nrrd->axis[2].size);
-	//bits
-	switch (input_nrrd->type)
-	{
-	case nrrdTypeChar:
-	case nrrdTypeUChar:
-		m_bits = 8;
-		break;
-	case nrrdTypeShort:
-	case nrrdTypeUShort:
-		m_bits = 16;
-		break;
-	case nrrdTypeInt:
-	case nrrdTypeUInt:
-		m_bits = 32;
-		break;
-	}
+		size[0],
+		size[1],
+		size[2]);
+	m_bits = m_raw_input->GetBitsPerElement();
 
 	//output raw
-	unsigned long long total_size = (unsigned long long)m_size.get_size_xyz();
-	m_raw_result = (void*)(new unsigned char[total_size * (m_bits / 8)]);
+	m_raw_result = std::make_shared<fluo::RawData>(size, m_raw_input->GetFormat());
 	if (!m_raw_result)
 		return;
+	//pointer to raw data
+	void* raw_ptr = m_raw_result->GetDataVoid();
 
 	//transfer function
 	unsigned long long index;
@@ -111,33 +97,16 @@ void VolumeBaker::Bake(bool replace)
 		p /= m_size;
 		double new_value = input->GetTransferedValue(fluo::Point(p));
 		if (m_bits == 8)
-			((unsigned char*)m_raw_result)[index] = uint8_t(new_value*255.0);
+			((unsigned char*)raw_ptr)[index] = uint8_t(new_value*255.0);
 		else if (m_bits == 16)
-			((unsigned short*)m_raw_result)[index] = uint16_t(new_value*65535.0);
+			((unsigned short*)raw_ptr)[index] = uint16_t(new_value*65535.0);
 	}
 
-	//write to nrrd
-	Nrrd* nrrd_result = nrrdNew();
-	if (m_bits == 8)
-		nrrdWrap_va(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
-			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-	else if (m_bits == 16)
-		nrrdWrap_va(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
-			3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-
-	//spacing
 	auto spc = input->GetSpacing();
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-	auto max_size = spc * m_size;
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, max_size.x(),
-		max_size.y(), max_size.z());
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSize, (size_t)m_size.intx(),
-		(size_t)m_size.inty(), (size_t)m_size.intz());
 
 	if (replace)
 	{
-		input->Replace(nrrd_result, true);
+		input->Replace(m_raw_result, true);
 	}
 	else
 	{
@@ -145,30 +114,12 @@ void VolumeBaker::Bake(bool replace)
 		{
 			m_result = std::make_shared<VolumeData>();
 			std::wstring name, path;
-			m_result->Load(nrrd_result, name, path);
+			m_result->Load(m_raw_result, name, path);
 		}
 		else
-			m_result->Replace(nrrd_result, false);
+			m_result->Replace(m_raw_result, false);
 		m_result->SetSpacing(spc);
 		m_result->SetBaseSpacing(spc);
 	}
-}
-
-Nrrd* VolumeBaker::GetNrrd(VolumeData* vd)
-{
-	if (!vd || !vd->GetTexture())
-		return nullptr;
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return nullptr;
-	return tex->get_nrrd(flvr::CompType::Data).data;
-}
-
-void* VolumeBaker::GetRaw(VolumeData* vd)
-{
-	Nrrd* nrrd = GetNrrd(vd);
-	if (nrrd)
-		return nrrd->data;
-	return 0;
 }
 

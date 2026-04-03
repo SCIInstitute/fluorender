@@ -93,23 +93,23 @@ int CombineList::Execute()
 	//red volume
 	flvr::Texture* tex_vd_r = vd_r->GetTexture();
 	if (!tex_vd_r) return 0;
-	auto comp_vd_r = tex_vd_r->get_nrrd(flvr::CompType::Data);
+	auto comp_vd_r = tex_vd_r->get_raw(flvr::CompType::Data);
 	if (!comp_vd_r.data) return 0;
-	void* data_vd_r = comp_vd_r.data->data;
+	void* data_vd_r = comp_vd_r.data->GetDataVoid();
 	if (!data_vd_r) return 0;
 	//green volume
 	flvr::Texture* tex_vd_g = vd_g->GetTexture();
 	if (!tex_vd_g) return 0;
-	auto comp_vd_g = tex_vd_g->get_nrrd(flvr::CompType::Data);
+	auto comp_vd_g = tex_vd_g->get_raw(flvr::CompType::Data);
 	if (!comp_vd_g.data) return 0;
-	void* data_vd_g = comp_vd_g.data->data;
+	void* data_vd_g = comp_vd_g.data->GetDataVoid();
 	if (!data_vd_g) return 0;
 	//blue volume
 	flvr::Texture* tex_vd_b = vd_b->GetTexture();
 	if (!tex_vd_b) return 0;
-	auto comp_vd_b = tex_vd_b->get_nrrd(flvr::CompType::Data);
+	auto comp_vd_b = tex_vd_b->get_raw(flvr::CompType::Data);
 	if (!comp_vd_b.data) return 0;
-	void* data_vd_b = comp_vd_b.data->data;
+	void* data_vd_b = comp_vd_b.data->GetDataVoid();
 	if (!data_vd_b) return 0;
 
 	unsigned long long for_size = m_size.get_size_xyz();
@@ -122,10 +122,10 @@ int CombineList::Execute()
 		if (vd->GetResolution() != m_size)
 			continue;
 		fluo::Color color = vd->GetColor();
-		Nrrd* nrrd_iter = vd->GetVolume(false);
-		if (!nrrd_iter)
+		auto raw_iter = vd->GetVolume(false);
+		if (!raw_iter)
 			continue;
-		void* data_iter = nrrd_iter->data;
+		void* data_iter = raw_iter->GetDataVoid();
 		if (!data_iter)
 			continue;
 		for (index = 0; index < for_size; ++index)

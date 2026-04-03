@@ -112,7 +112,7 @@ bool Histogram::CheckBricks()
 }
 
 bool Histogram::GetInfo(
-	flvr::TextureBrick* b,
+	const std::shared_ptr<flvr::TextureBrick>& b,
 	long &bits, long &nx, long &ny, long &nz)
 {
 	bits = b->nb(flvr::CompType::Data) * 8;
@@ -145,23 +145,22 @@ void Histogram::Compute()
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = m_vd->GetTexture()->get_bricks();
 
 	//sum histogram
 	m_histogram.resize(m_bins + 1, 0);
 	std::weak_ptr<flvr::Argument> arg_sh;
 
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz;
-		if (!GetInfo(b, bits, nx, ny, nz))
+		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
+		GLint tid = m_vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(b);
+			mid = m_vd->GetVR()->load_brick_mask(bbs);
 		std::weak_ptr<flvr::Argument> arg_tid, arg_mid;
 
 		size_t local_size[3] = { 1, 1, 1 };
@@ -174,7 +173,7 @@ void Histogram::Compute()
 		kernel_prog->setConst(sizeof(float), (void*)(&minv));
 		kernel_prog->setConst(sizeof(float), (void*)(&maxv));
 		kernel_prog->setConst(sizeof(unsigned int), (void*)(&bin));
-		if (i == 0)
+		if (count == 0)
 			arg_sh = kernel_prog->setBufNew(
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "",
 				sizeof(unsigned int)*(bin + 1), (void*)(m_histogram.data()));

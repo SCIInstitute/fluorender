@@ -76,7 +76,8 @@ namespace flrd
 		double m_result;
 
 		bool CheckBricks();
-		bool GetInfo(flvr::TextureBrick* b1, flvr::TextureBrick* b2,
+		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b1,
+			const std::shared_ptr<flvr::TextureBrick>& b2,
 			long &bits, long &bits2,
 			long &nx, long &ny, long &nz);
 		void* GetVolDataBrick(flvr::TextureBrick* b);

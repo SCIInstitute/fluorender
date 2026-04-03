@@ -56,9 +56,6 @@ namespace flrd
 		fluo::Vector m_size;
 		//input bits
 		int m_bits;
-
-	private:
-		std::shared_ptr<fluo::RawData> GetRaw(const std::shared_ptr<VolumeData>& vd);
 	};
 }
 #endif//_VOLUMEBAKER_H_

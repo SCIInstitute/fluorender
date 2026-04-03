@@ -376,20 +376,21 @@ void VolumeCalculator::FillHoles(double thresh)
 	flvr::Texture* tex_a = vd_a->GetTexture();
 	if (!tex_a)
 		return;
-	auto comp_a = tex_a->get_nrrd(flvr::CompType::Data);
+	auto comp_a = tex_a->get_raw(flvr::CompType::Data);
 	if (!comp_a.data)
 		return;
-	void* data_a = comp_a.data->data;
+	void* data_a = comp_a.data->GetDataVoid();
 	if (!data_a)
 		return;
+	size_t bits = comp_a.data->GetBitsPerElement();
 
 	flvr::Texture* tex_r = vd->GetTexture();
 	if (!tex_r)
 		return;
-	auto comp_r = tex_r->get_nrrd(flvr::CompType::Data);
+	auto comp_r = tex_r->get_raw(flvr::CompType::Data);
 	if (!comp_r.data)
 		return;
-	void* data_r = comp_r.data->data;
+	void* data_r = comp_r.data->GetDataVoid();
 	if (!data_r)
 		return;
 
@@ -409,9 +410,9 @@ void VolumeCalculator::FillHoles(double thresh)
 		{
 			int index = res.get_size_xy()*k + res.intx()*j + i;
 			unsigned char value_a = 0;
-			if (comp_a.data->type == nrrdTypeUChar)
+			if (bits == 8)
 				value_a = ((unsigned char*)data_a)[index];
-			else if (comp_a.data->type == nrrdTypeUShort)
+			else if (bits == 16)
 				value_a = (unsigned char)((double)(((unsigned short*)data_a)[index])*vd_a->GetScalarScale() / 257.0);
 			if (value_a > thresh * 255)
 			{

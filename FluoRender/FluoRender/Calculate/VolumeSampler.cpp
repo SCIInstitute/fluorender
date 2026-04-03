@@ -135,34 +135,18 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	auto input = m_input.lock();
 	if (!input)
 		return;
-	Nrrd* input_nrrd = GetNrrd(input.get(), type);
-	if (!input_nrrd)
-		return;
-	m_raw_input = input_nrrd->data;
+	m_raw_input = input->GetVolume(false);
 	if (!m_raw_input)
 		return;
 
 	//input size
+	auto raw_size = m_raw_input->GetSize();
 	m_size_in = fluo::Vector(
-		input_nrrd->axis[0].size,
-		input_nrrd->axis[1].size,
-		input_nrrd->axis[2].size);
+		raw_size[0],
+		raw_size[1],
+		raw_size[2]);
 	//bits
-	switch (input_nrrd->type)
-	{
-	case nrrdTypeChar:
-	case nrrdTypeUChar:
-		m_bits = 8;
-		break;
-	case nrrdTypeShort:
-	case nrrdTypeUShort:
-		m_bits = 16;
-		break;
-	case nrrdTypeInt:
-	case nrrdTypeUInt:
-		m_bits = 32;
-		break;
-	}
+	m_bits = m_raw_input->GetBitsPerElement();
 
 	//use input size if no resizing
 	if (m_size_out.any_le_zero() || m_fix_size)
@@ -227,10 +211,12 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 	lx = m_crop_size.intx();
 	ly = m_crop_size.inty();
 	lz = m_crop_size.intz();
-	unsigned long long total_size = (unsigned long long)lx*(unsigned long long)ly*(unsigned long long)lz;
-	m_raw_result = (void*)(new unsigned char[total_size * (m_bits /8)]);
+	fluo::RawData::Size3 size_out = { (size_t)lx, (size_t)ly, (size_t)lz };
+	m_raw_result = std::make_shared<fluo::RawData>(size_out, m_raw_input->GetFormat());
 	if (!m_raw_result)
 		return;
+	//pointer to raw data
+	void* raw_ptr = m_raw_result->GetDataVoid();
 
 	unsigned long long index;
 	int i, j, k;
@@ -270,46 +256,29 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		}
 
 		if (m_bits == 32)
-			((unsigned int*)m_raw_result)[index] = SampleInt(xyz);
+			((unsigned int*)raw_ptr)[index] = SampleInt(xyz);
 		else
 		{
 			value = Sample(xyz);
 			if (m_bits == 8)
-				((unsigned char*)m_raw_result)[index] = (unsigned char)(value * 255);
+				((unsigned char*)raw_ptr)[index] = (unsigned char)(value * 255);
 			else if (m_bits == 16)
-				((unsigned short*)m_raw_result)[index] = (unsigned short)(value * 65535);
+				((unsigned short*)raw_ptr)[index] = (unsigned short)(value * 65535);
 		}
 	}
-
-	//write to nrrd
-	Nrrd* nrrd_result = nrrdNew();
-	if (m_bits == 8)
-		nrrdWrap_va(nrrd_result, (uint8_t*)m_raw_result, nrrdTypeUChar,
-			3, (size_t)lx, (size_t)ly, (size_t)lz);
-	else if (m_bits == 16)
-		nrrdWrap_va(nrrd_result, (uint16_t*)m_raw_result, nrrdTypeUShort,
-			3, (size_t)lx, (size_t)ly, (size_t)lz);
-	else if (m_bits == 32)
-		nrrdWrap_va(nrrd_result, (uint32_t*)m_raw_result, nrrdTypeUInt,
-			3, (size_t)lx, (size_t)ly, (size_t)lz);
-
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMax, spc.x()*lx, spc.y()*ly, spc.z()*lz);
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-	nrrdAxisInfoSet_va(nrrd_result, nrrdAxisInfoSize, (size_t)lx, (size_t)ly, (size_t)lz);
 
 	if (replace)
 	{
 		switch (type)
 		{
 		case SDT_Data:
-			input->Replace(nrrd_result, true);
+			input->Replace(m_raw_result, true);
 			break;
 		case SDT_Mask:
-			input->LoadMask(nrrd_result);
+			input->LoadMask(m_raw_result);
 			break;
 		case SDT_Label:
-			input->LoadLabel(nrrd_result);
+			input->LoadLabel(m_raw_result);
 			break;
 		}
 	}
@@ -321,12 +290,12 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			m_result = std::make_shared<VolumeData>();
 			std::wstring name, path;
 			if (type == SDT_Data)
-				m_result->Load(nrrd_result, name, path);
+				m_result->Load(m_raw_result, name, path);
 		}
 		else
 		{
 			if (type == SDT_Data)
-				m_result->Replace(nrrd_result, false);
+				m_result->Replace(m_raw_result, false);
 		}
 		switch (type)
 		{
@@ -334,40 +303,13 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 			//m_result->Replace(nrrd_result, false);
 			break;
 		case SDT_Mask:
-			m_result->LoadMask(nrrd_result);
+			m_result->LoadMask(m_raw_result);
 			break;
 		case SDT_Label:
-			m_result->LoadLabel(nrrd_result);
+			m_result->LoadLabel(m_raw_result);
 			break;
 		}
 	}
-}
-
-Nrrd* VolumeSampler::GetNrrd(VolumeData* vd, SampDataType type)
-{
-	if (!vd || !vd->GetTexture())
-		return nullptr;
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return nullptr;
-	switch (type)
-	{
-	case SDT_Data:
-		return tex->get_nrrd(flvr::CompType::Data).data;
-	case SDT_Mask:
-		return tex->get_nrrd(flvr::CompType::Mask).data;
-	case SDT_Label:
-		return tex->get_nrrd(flvr::CompType::Label).data;
-	}
-	return nullptr;
-}
-
-void* VolumeSampler::GetRaw(VolumeData* vd, SampDataType type)
-{
-	Nrrd* nrrd = GetNrrd(vd, type);
-	if (nrrd)
-		return nrrd->data;
-	return 0;
 }
 
 double VolumeSampler::Sample(const fluo::Point& coord)
@@ -393,6 +335,9 @@ unsigned int VolumeSampler::SampleInt(const fluo::Point& coord)
 		return 0;
 	if (!m_raw_input)
 		return 0;
+	//pointer to raw data
+	void* raw_ptr = m_raw_input->GetDataVoid();
+
 	fluo::Point ijk = xyz2ijk(coord);
 	if (!normalize_ijk(ijk))
 		return 0;
@@ -400,7 +345,7 @@ unsigned int VolumeSampler::SampleInt(const fluo::Point& coord)
 	unsigned long long index = (unsigned long long)size.intx()*(unsigned long long)size.inty()*
 		(unsigned long long)ijk.intz() + (unsigned long long)size.intx() *
 		(unsigned long long)ijk.inty() + (unsigned long long)ijk.intx();
-	return ((unsigned int*)m_raw_input)[index];
+	return ((unsigned int*)raw_ptr)[index];
 }
 
 bool VolumeSampler::normalize_ijk(fluo::Point& ijk)
@@ -510,13 +455,15 @@ double VolumeSampler::SampleNearestNeighbor(const fluo::Point& coord)
 	auto ijk = xyz2ijk(coord);
 	if (!normalize_ijk(ijk))
 		return 0.0;
+	//pointer to raw data
+	void* raw_ptr = m_raw_input->GetDataVoid();
 	unsigned long long index = (unsigned long long)m_size_in.intx()*(unsigned long long)m_size_in.inty()*
 		(unsigned long long)ijk.intz() + (unsigned long long)m_size_in.intx() *
 		(unsigned long long)ijk.inty() + (unsigned long long)ijk.intx();
 	if (m_bits == 8)
-		return double(((unsigned char*)m_raw_input)[index]) / 255.0;
+		return double(((unsigned char*)raw_ptr)[index]) / 255.0;
 	else if (m_bits == 16)
-		return double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+		return double(((unsigned short*)raw_ptr)[index]) / 65535.0;
 	return 0.0;
 }
 
@@ -526,6 +473,8 @@ double VolumeSampler::SampleBiLinear(const fluo::Point& coord)
 	double q[4] = { 0 };
 	int count = 0;
 	unsigned long long index;
+	//pointer to raw data
+	void* raw_ptr = m_raw_input->GetDataVoid();
 	for (int ii = 0; ii < 2; ++ii)
 	for (int jj = 0; jj < 2; ++jj)
 	{
@@ -537,9 +486,9 @@ double VolumeSampler::SampleBiLinear(const fluo::Point& coord)
 				(unsigned long long)nijk.intz() + (unsigned long long)m_size_in.intx() *
 				(unsigned long long)nijk.inty() + (unsigned long long)nijk.intx();
 			if (m_bits == 8)
-				q[count] = double(((unsigned char*)m_raw_input)[index]) / 255.0;
+				q[count] = double(((unsigned char*)raw_ptr)[index]) / 255.0;
 			else if (m_bits == 16)
-				q[count] = double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+				q[count] = double(((unsigned short*)raw_ptr)[index]) / 65535.0;
 		}
 		count++;
 	}
@@ -554,6 +503,8 @@ double VolumeSampler::SampleTriLinear(const fluo::Point& coord)
 	double q[8] = { 0 };
 	int count = 0;
 	unsigned long long index;
+	//pointer to raw data
+	void* raw_ptr = m_raw_input->GetDataVoid();
 	for (int ii = 0; ii < 2; ++ii)
 	for (int jj = 0; jj < 2; ++jj)
 	for (int kk = 0; kk < 2; ++kk)
@@ -565,9 +516,9 @@ double VolumeSampler::SampleTriLinear(const fluo::Point& coord)
 				(unsigned long long)nijk.intz() + (unsigned long long)m_size_in.intx() *
 				(unsigned long long)nijk.inty() + (unsigned long long)nijk.intx();
 			if (m_bits == 8)
-				q[count] = double(((unsigned char*)m_raw_input)[index]) / 255.0;
+				q[count] = double(((unsigned char*)raw_ptr)[index]) / 255.0;
 			else if (m_bits == 16)
-				q[count] = double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+				q[count] = double(((unsigned short*)raw_ptr)[index]) / 65535.0;
 		}
 		count++;
 	}
@@ -583,6 +534,8 @@ double VolumeSampler::SampleBox(const fluo::Point& coord)
 	double sum = 0.0;
 	int count = 0;
 	unsigned long long index;
+	//pointer to raw data
+	void* raw_ptr = m_raw_input->GetDataVoid();
 	for (int kk = ijk.intz() - m_filter_size.intz(); kk <= ijk.intz() + m_filter_size.intz(); ++kk)
 	for (int jj = ijk.inty() - m_filter_size.inty(); jj <= ijk.inty() + m_filter_size.inty(); ++jj)
 	for (int ii = ijk.intx() - m_filter_size.intx(); ii <= ijk.intx() + m_filter_size.intx(); ++ii)
@@ -594,9 +547,9 @@ double VolumeSampler::SampleBox(const fluo::Point& coord)
 				(unsigned long long)iijjkk.intz() + (unsigned long long)m_size_in.intx() *
 				(unsigned long long)iijjkk.inty() + (unsigned long long)iijjkk.intx();
 			if (m_bits == 8)
-				sum += double(((unsigned char*)m_raw_input)[index]) / 255.0;
+				sum += double(((unsigned char*)raw_ptr)[index]) / 255.0;
 			else if (m_bits == 16)
-				sum += double(((unsigned short*)m_raw_input)[index]) / 65535.0;
+				sum += double(((unsigned short*)raw_ptr)[index]) / 65535.0;
 		}
 		count++;
 	}

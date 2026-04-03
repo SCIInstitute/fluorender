@@ -129,7 +129,7 @@ bool VolumeRoi::CheckBricks()
 }
 
 bool VolumeRoi::GetInfo(
-	flvr::TextureBrick* b,
+	const std::shared_ptr<flvr::TextureBrick>& b,
 	long& bits, long& nx, long& ny, long& nz)
 {
 	bits = b->nb(flvr::CompType::Data) * 8;
@@ -158,7 +158,7 @@ void VolumeRoi::Run()
 	kernel_index0 = kernel_prog->createKernel("kernel_0");
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*>* bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = m_vd->GetTexture()->get_bricks();
 
 	//init
 	m_sum = 0;
@@ -210,17 +210,16 @@ void VolumeRoi::Run()
 		cl_float((p0 - pc).y())};
 
 	//go through bricks
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz;
-		if (!GetInfo(b, bits, nx, ny, nz))
+		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(b);
+		GLint tid = m_vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(b);
+			mid = m_vd->GetVR()->load_brick_mask(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

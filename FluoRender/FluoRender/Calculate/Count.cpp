@@ -109,7 +109,7 @@ bool CountVoxels::CheckBricks()
 }
 
 bool CountVoxels::GetInfo(
-	flvr::TextureBrick* b,
+	const std::shared_ptr<flvr::TextureBrick>& b,
 	unsigned int &bits, unsigned int &nx, unsigned int &ny, unsigned int &nz)
 {
 	bits = static_cast<unsigned int>(b->nb(flvr::CompType::Data)*8);
@@ -148,18 +148,17 @@ void CountVoxels::Count()
 		kernel_index = kernel_prog->createKernel(name);
 
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	m_sum = 0; m_wsum = 0.0;
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		unsigned int nx, ny, nz, bits;
-		if (!GetInfo(b, bits, nx, ny, nz))
+		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(b);
-		GLint mid = vd->GetVR()->load_brick_mask(b);
+		GLint tid = vd->GetVR()->load_brick(bbs);
+		GLint mid = vd->GetVR()->load_brick_mask(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
