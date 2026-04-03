@@ -102,8 +102,8 @@ bool ComponentGenerator::CheckBricks()
 	auto vd = m_vd.lock();
 	if (!vd || !vd->GetTexture())
 		return false;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = vd->GetTexture()->get_bricks();
+	if (bricks.empty())
 		return false;
 	return true;
 }
@@ -363,8 +363,8 @@ void ComponentGenerator::ShuffleID()
 
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
@@ -373,22 +373,21 @@ void ComponentGenerator::ShuffleID()
 			"Shuffling IDs.");
 		count++;
 
-		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_sel)
 		{
-			if (!b->is_mask_valid())
+			if (!bbs->is_mask_valid())
 				continue;
 		}
 		else
-			b->valid_mask();
+			bbs->valid_mask();
 
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
-		GLint did = vd->GetVR()->load_brick(b);
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(res.intx()), size_t(res.inty()), size_t(res.intz()) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -411,7 +410,7 @@ void ComponentGenerator::ShuffleID()
 		//set
 		size_t region[3] = { size_t(res.intx()), size_t(res.inty()), size_t(res.intz()) };
 		//brick matrix
-		fluo::BBox bbx = b->dbox();
+		fluo::BBox bbx = bbs->dbox();
 		cl_float3 scl = {
 			float(bbx.Max().x() - bbx.Min().x()),
 			float(bbx.Max().y() - bbx.Min().y()),
@@ -492,8 +491,8 @@ void ComponentGenerator::SetIDBit(int psize)
 
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
@@ -502,24 +501,23 @@ void ComponentGenerator::SetIDBit(int psize)
 			"Setting ID bits.");
 		count++;
 
-		flvr::TextureBrick* b = (*bricks)[i];
 		if (m_use_sel)
 		{
-			if (!b->is_mask_valid())
+			if (!bbs->is_mask_valid())
 				continue;
 		}
 		else
-			b->valid_mask();
+			bbs->valid_mask();
 
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -629,25 +627,24 @@ void ComponentGenerator::Grow()
 	size_t ticks = brick_num * m_iter;
 	size_t count = 0;
 
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		//auto iter
 		int biter = m_iter;
@@ -744,25 +741,24 @@ void ComponentGenerator::DensityField()
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t ticks = (4 + m_iter) * brick_num;
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		//divide
 		unsigned int gsx, gsy, gsz;//pixel number in group
@@ -975,25 +971,24 @@ void ComponentGenerator::DistGrow()
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t ticks = (1 + m_max_dist + m_iter) * brick_num;
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1159,25 +1154,24 @@ void ComponentGenerator::DistDensityField()
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t ticks = (5 + m_max_dist + m_iter) * brick_num;
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		//divide
 		unsigned int gsx, gsy, gsz;//pixel number in group
@@ -1446,25 +1440,24 @@ void ComponentGenerator::CleanNoise()
 	size_t ticks = brick_num * m_clean_iter;
 	size_t count = 0;
 
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1583,24 +1576,23 @@ void ComponentGenerator::ClearBorders()
 
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1658,25 +1650,24 @@ void ComponentGenerator::FillBorders()
 
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks_id();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks_id();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		if (m_use_sel && !b->is_mask_valid())
+		if (m_use_sel && !bbs->is_mask_valid())
 			continue;
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1808,20 +1799,19 @@ void ComponentGenerator::GenerateDB()
 	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t ticks = (4 + max_dist + iter + cleanb ? clean_iter : 0) * brick_num;
 	size_t count = 0;
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
 		if (prework)
 			prework("");
 
-		flvr::TextureBrick* b = (*bricks)[i];
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(b);
-		GLint lid = vd->GetVR()->load_brick_label(b);
+		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		//precalculate
 		unsigned int nxy, nxyz;

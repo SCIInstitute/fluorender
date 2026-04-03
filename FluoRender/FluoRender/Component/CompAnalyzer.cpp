@@ -152,7 +152,7 @@ int ComponentAnalyzer::GetColocalization(
 			sumd.push_back(0.0);
 			continue;
 		}
-		flvr::TextureBrick* b = tex->get_brick(static_cast<unsigned int>(bid));
+		auto b = tex->get_brick(static_cast<unsigned int>(bid));
 		if (!b)
 		{
 			sumi.push_back(0);
@@ -201,10 +201,11 @@ void ComponentAnalyzer::Analyze()
 	SetProgress(static_cast<int>(prog), "Analyzing components.");
 
 	auto spc = vd->GetSpacing();
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = vd->GetTexture()->get_bricks();
+	int bits = vd->GetBits();
+	if (bricks.empty())
 		return;
-	size_t bn = bricks->size();
+	size_t bn = bricks.size();
 
 	//comp list
 	CelpList &comps = m_compgroup->celps;
@@ -234,25 +235,23 @@ void ComponentAnalyzer::Analyze()
 		size_limit = std::max(m_min_num, size_limit);
 
 	//progress range is 10 - 90
-	int bits;
-	for (size_t bi = 0; bi < bn; ++bi)
+	size_t bi = 0;
+	for (auto bbs : bricks)
 	{
-		void* data_data = 0;
-		unsigned char* data_mask = 0;
-		unsigned int* data_label = 0;
+		void* data_ptr = 0;
+		unsigned char* mask_ptr = 0;
+		unsigned int* label_ptr = 0;
 		fluo::Vector res;
-		flvr::TextureBrick* b = (*bricks)[bi];
 		int nb = 1;
 		if (bn > 1)
 		{
-			if (use_sel && !b->is_mask_valid())
+			if (use_sel && !bbs->is_mask_valid())
 				continue;
 			// get brick if ther are more than one brick
-			nb = b->nb(flvr::CompType::Data);
-			bits = nb==1? nrrdTypeUChar: nrrdTypeUShort;
-			auto res_b = b->get_size();
+			nb = bbs->nb(flvr::CompType::Data);
+			auto res_b = bbs->get_size();
 			res = res_b - fluo::Vector(1);
-			auto stride = b->get_stride();
+			auto stride = bbs->get_stride();
 			int cnt = (res.intx()>0 ? 1 : 0) + (res.inty()>0 ? 1 : 0) + (res.intz()>0 ? 1 : 0);
 			if (cnt < 2) continue;
 
@@ -263,7 +262,7 @@ void ComponentAnalyzer::Analyze()
 			//data
 			unsigned char* temp = new unsigned char[mem_size];
 			unsigned char* tempp = temp;
-			unsigned char* tp = (unsigned char*)(b->tex_data(flvr::CompType::Data));
+			unsigned char* tp = bbs->get_raw_data(flvr::CompType::Data)->DataAs<unsigned char>();
 			unsigned char* tp2;
 			unsigned int kn = res.intz() ? res.intz() : 1;
 			for (unsigned int k = 0; k < kn; ++k)
@@ -277,16 +276,16 @@ void ComponentAnalyzer::Analyze()
 				}
 				tp += stride.get_size_xy()*nb;
 			}
-			data_data = (void*)temp;
+			data_ptr = (void*)temp;
 			//mask
 			if (use_sel)
 			{
-				nb = b->nb(flvr::CompType::Mask);
+				nb = bbs->nb(flvr::CompType::Mask);
 				mem_size = res.intz() ? ((unsigned long long)res.get_size_xyz() * nb) :
 					((unsigned long long)res.get_size_xy() * nb);
 				temp = new unsigned char[mem_size];
 				tempp = temp;
-				tp = (unsigned char*)(b->tex_data(flvr::CompType::Mask));
+				tp = bbs->get_raw_data(flvr::CompType::Mask)->DataAs<unsigned char>();
 				for (unsigned int k = 0; k < kn; ++k)
 				{
 					tp2 = tp;
@@ -298,15 +297,15 @@ void ComponentAnalyzer::Analyze()
 					}
 					tp += stride.get_size_xy() * nb;
 				}
-				data_mask = temp;
+				mask_ptr = temp;
 			}
 			//label
-			nb = b->nb(flvr::CompType::Label);
+			nb = bbs->nb(flvr::CompType::Label);
 			mem_size = res.intz() ? ((unsigned long long)res.get_size_xyz() * nb) :
 				((unsigned long long)res.get_size_xy() * nb);
 			temp = new unsigned char[mem_size];
 			tempp = temp;
-			tp = (unsigned char*)(b->tex_data(flvr::CompType::Label));
+			tp = bbs->get_raw_data(flvr::CompType::Label)->DataAs<unsigned char>();
 			for (unsigned int k = 0; k < kn; ++k)
 			{
 				tp2 = tp;
@@ -318,25 +317,22 @@ void ComponentAnalyzer::Analyze()
 				}
 				tp += stride.get_size_xy() *nb;
 			}
-			data_label = (unsigned int*)temp;
+			label_ptr = (unsigned int*)temp;
 		}
 		else
 		{
 			// get data if there is only one brick
 			res = vd->GetResolution();
-			Nrrd* nrrd_data = vd->GetVolume(false);
-			if (nrrd_data)
-			{
-				bits = nrrd_data->type;
-				data_data = nrrd_data->data;
-			}
-			Nrrd* nrrd_mask = vd->GetMask(false);
-			if (nrrd_mask)
-				data_mask = (unsigned char*)(nrrd_mask->data);
-			Nrrd* nrrd_label = vd->GetLabel(false);
-			if (nrrd_label)
-				data_label = (unsigned int*)(nrrd_label->data);
-			if (!data_data || (use_sel && !data_mask) || !data_label)
+			auto raw_data = vd->GetVolume(false);
+			if (raw_data)
+				data_ptr = raw_data->GetDataVoid();
+			auto raw_mask = vd->GetMask(false);
+			if (raw_mask)
+				mask_ptr = raw_mask->DataAs<unsigned char>();
+			auto raw_label = vd->GetLabel(false);
+			if (raw_label)
+				label_ptr = raw_label->DataAs<unsigned int>();
+			if (!data_ptr || (use_sel && !mask_ptr) || !label_ptr)
 				return;
 		}
 
@@ -344,7 +340,7 @@ void ComponentAnalyzer::Analyze()
 		SetProgress(static_cast<int>(prog), "Analyzing components.");
 
 		unsigned int id = 0;
-		unsigned int brick_id = b->get_id();
+		unsigned int brick_id = bbs->get_id();
 		double value;
 		double scale;
 		double ext;
@@ -368,23 +364,23 @@ void ComponentAnalyzer::Analyze()
 			value = 0.0;
 			if (use_sel)
 			{
-				if (data_mask && !data_mask[index])
+				if (mask_ptr && !mask_ptr[index])
 					continue;
 			}
-			if (data_label && !data_label[index])
+			if (label_ptr && !label_ptr[index])
 				continue;
 
-			if (data_label)
-				id = data_label[index];
+			if (label_ptr)
+				id = label_ptr[index];
 
-			if (bits == nrrdTypeUChar)
+			if (bits == 8)
 			{
-				value = ((unsigned char*)data_data)[index] / 255.0;
+				value = ((unsigned char*)data_ptr)[index] / 255.0;
 				scale = 255.0;
 			}
-			else if (bits == nrrdTypeUShort)
+			else if (bits == 16)
 			{
-				value = ((unsigned short*)data_data)[index] / 65535.0;
+				value = ((unsigned short*)data_ptr)[index] / 65535.0;
 				scale = 65535.0;
 			}
 
@@ -400,7 +396,7 @@ void ComponentAnalyzer::Analyze()
 				res.intx() ? res.intx() : 1,
 				res.inty() ? res.inty() : 1,
 				res.intz() ? res.intz() : 1);
-			ext = GetExt(data_label, index, id, res2, p);
+			ext = GetExt(label_ptr, index, id, res2, p);
 			//ext = 0.0;
 
 			//colocalization
@@ -418,14 +414,14 @@ void ComponentAnalyzer::Analyze()
 				{
 					info = new Cell(id, brick_id,
 						1, value, static_cast<unsigned int>(std::round(ext)),
-						p + b->get_off_size(),
+						p + bbs->get_off_size(),
 						spc,
 						sumi, sumd);
 				}
 				else
 					info = new Cell(id, brick_id,
 						1, value, static_cast<unsigned int>(std::round(ext)),
-						p + b->get_off_size(),
+						p + bbs->get_off_size(),
 						spc);
 					comp_list_brick.insert(std::pair<unsigned int, Celp>
 						(id, Celp(info)));
@@ -434,12 +430,12 @@ void ComponentAnalyzer::Analyze()
 			{
 				if (m_colocal)
 					iter->second->Inc(1, value, static_cast<unsigned int>(std::round(ext)),
-						p + b->get_off_size(),
+						p + bbs->get_off_size(),
 						spc,
 						sumi, sumd);
 				else
 					iter->second->Inc(1, value, static_cast<unsigned int>(std::round(ext)),
-						p + b->get_off_size(),
+						p + bbs->get_off_size(),
 						spc);
 			}
 		}
@@ -476,10 +472,11 @@ void ComponentAnalyzer::Analyze()
 
 		if (bn > 1)
 		{
-			if (data_data) delete[] (unsigned char*)data_data;
-			if (data_mask) delete[] (unsigned char*)data_mask;
-			if (data_label) delete[] (unsigned int*)data_label;
+			if (data_ptr) delete[] (unsigned char*)data_ptr;
+			if (mask_ptr) delete[] (unsigned char*)mask_ptr;
+			if (label_ptr) delete[] (unsigned int*)label_ptr;
 		}
+		++bi;
 	}
 
 	prog = 90;
@@ -510,8 +507,8 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
-	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks_id();
-	if (!bricks || bricks->size() <= 1)
+	auto bricks = tex->get_bricks_id();
+	if (bricks.size() <= 1)
 		return;
 	//comp list
 	CelpList &comps = m_compgroup->celps;
@@ -519,27 +516,26 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	CellGraph &graph = m_compgroup->graph;
 
 	int bits;
-	size_t bn = bricks->size();
-	for (size_t bi = 0; bi < bn; ++bi)
+	size_t bn = bricks.size();
+	for (auto bbs : bricks)
 	{
 		//get one brick
-		flvr::TextureBrick* b = (*bricks)[bi];
-		if (sel && !b->is_mask_valid())
+		if (sel && !bbs->is_mask_valid())
 			continue;
 		void* data_data = 0;
 		unsigned char* data_mask = 0;
 		unsigned int* data_label = 0;
 		int nb = 1;
-		auto res = b->get_size();
-		auto stride = b->get_stride();
-		nb = b->nb(flvr::CompType::Data);
+		auto res = bbs->get_size();
+		auto stride = bbs->get_stride();
+		nb = bbs->nb(flvr::CompType::Data);
 		bits = nb * 8;
 		//label
-		nb = b->nb(flvr::CompType::Label);
+		nb = bbs->nb(flvr::CompType::Label);
 		unsigned long long mem_size = (unsigned long long)res.get_size_xyz()*nb;
 		unsigned char* temp = new unsigned char[mem_size];
 		unsigned char* tempp = temp;
-		unsigned char* tp = (unsigned char*)(b->tex_data(flvr::CompType::Label));
+		unsigned char* tp = bbs->get_raw_data(flvr::CompType::Label)->DataAs<unsigned char>();
 		unsigned char* tp2;
 		for (int k = 0; k < res.intz(); ++k)
 		{
@@ -568,7 +564,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				l2 = data_label[index];
 				if (!l2) continue;
 				//get brick ids
-				b2 = b->get_id();
+				b2 = bbs->get_id();
 				b1 = tex->poszid(b2);
 				if (b1 == b2) continue;
 				//if l1 and l2 are different and already in the comp list
@@ -593,7 +589,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				l2 = data_label[index];
 				if (!l2) continue;
 				//get brick ids
-				b2 = b->get_id();
+				b2 = bbs->get_id();
 				b1 = tex->posyid(b2);
 				if (b1 == b2) continue;
 				//if l1 and l2 are different and already in the comp list
@@ -617,7 +613,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 				l2 = data_label[index];
 				if (!l2) continue;
 				//get brick ids
-				b2 = b->get_id();
+				b2 = bbs->get_id();
 				b1 = tex->posxid(b2);
 				if (b1 == b2) continue;
 				//if l1 and l2 are different and already in the comp list
@@ -681,8 +677,8 @@ void ComponentAnalyzer::MakeColorConsistent()
 	if (!vd || !vd->GetTexture())
 		return;
 	flvr::Texture* tex = vd->GetTexture();
-	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
-	if (!bricks || bricks->size() <= 1)
+	auto bricks = tex->get_bricks();
+	if (bricks.size() <= 1)
 		return;
 	//comp list
 	CelpList &comps = m_compgroup->celps;
@@ -821,11 +817,11 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 		return;
 
 	//get label data
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 	auto res = vd->GetResolution();
 	int ix = static_cast<int>(std::round(p.x()));
@@ -837,7 +833,7 @@ void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long lon
 		return;
 	unsigned long long index = (unsigned long long)res.get_size_xy() * iz +
 		(unsigned long long)res.intx() * iy + ix;
-	unsigned int id = data_label[index];
+	unsigned int id = label_ptr[index];
 	if (!id)
 		return;
 	int bn = vd->GetBrickNum();
@@ -1159,18 +1155,9 @@ bool ComponentAnalyzer::OutputAnnotData()
 	if (!vd)
 		return false;
 
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return false;
-	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
-	if (!comp_data.data)
-		return false;
-	int bits = comp_data.data->type;
-	double scale;
-	if (bits == nrrdTypeUChar)
-		scale = 255.0;
-	else if (bits == nrrdTypeUShort)
-		scale = 65535.0;
+	auto raw_data = vd->GetVolume(false);
+	int bits = raw_data->GetBitsPerElement();
+	double scale = std::pow(2.0, bits);
 	auto spc = vd->GetSpacing();
 	auto res = vd->GetResolution();
 
@@ -1302,23 +1289,19 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
-	if (!comp_data.data)
+	auto raw_data = vd->GetVolume(false);
+	if (!raw_data)
 		return false;
-	int bits = 8;
-	if (comp_data.data->type == nrrdTypeUChar)
-		bits = 8;
-	else if (comp_data.data->type == nrrdTypeUShort)
-		bits = 16;
-	void* data_data = comp_data.data->data;
-	if (!data_data)
+	int bits = raw_data->GetBitsPerElement();
+	void* data_ptr = raw_data->GetDataVoid();
+	if (!data_ptr)
 		return false;
 	//get label
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
+	auto raw_label = vd->GetLabel(false);
+	if (!raw_label)
 		return false;
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return false;
 	auto spc = vd->GetSpacing();
 	auto res = vd->GetResolution();
@@ -1356,11 +1339,14 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 		//populate the volume
 		//the actual data
 		flvr::Texture* tex_vd = vdn->GetTexture();
-		if (!tex_vd) continue;
-		auto comp_vd = tex_vd->get_nrrd(flvr::CompType::Data);
-		if (!comp_vd.data) continue;
-		void* data_vd = comp_vd.data->data;
-		if (!data_vd) continue;
+		if (!tex_vd)
+			continue;
+		auto raw_vdn = vdn->GetVolume(false);
+		if (!raw_vdn)
+			continue;
+		void* vdn_ptr = raw_vdn->GetDataVoid();
+		if (!vdn_ptr)
+			continue;
 
 		if (bn > 1)
 		{
@@ -1374,8 +1360,8 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 			for (auto iter = list.begin();
 				iter != list.end(); ++iter)
 			{
-				flvr::TextureBrick* b_orig = tex->get_brick(iter->second->BrickId());
-				flvr::TextureBrick* b_new = tex_vd->get_brick(iter->second->BrickId());
+				auto b_orig = tex->get_brick(iter->second->BrickId());
+				auto b_new = tex_vd->get_brick(iter->second->BrickId());
 				auto res_bo = b_orig->get_size();
 				auto res_bn = b_new->get_size();
 				auto stride_bo = b_orig->get_stride();
@@ -1383,9 +1369,9 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 				int nx2 = res_bo.intx();
 				int ny2 = res_bo.inty();
 				int nz2 = res_bo.intz();
-				unsigned int* data_label_old = (unsigned int*)(b_orig->tex_data(flvr::CompType::Label));
-				unsigned char* data_data_old = (unsigned char*)(b_orig->tex_data(flvr::CompType::Data));
-				unsigned char* data_data_new = (unsigned char*)(b_new->tex_data(flvr::CompType::Data));
+				unsigned int* data_label_old = b_orig->get_raw_data(flvr::CompType::Label)->DataAs<unsigned int>();
+				unsigned char* data_data_old = b_orig->get_raw_data(flvr::CompType::Data)->DataAs<unsigned char>();
+				unsigned char* data_data_new = b_new->get_raw_data(flvr::CompType::Data)->DataAs<unsigned char>();
 
 				unsigned int *tp, *tp2;
 				unsigned char *tp_old, *tp2_old;
@@ -1443,13 +1429,13 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 		{
 			for (index = 0; index < for_size; ++index)
 			{
-				value_label = data_label[index];
+				value_label = label_ptr[index];
 				if (value_label == i->second->Id())
 				{
 					if (bits == 8)
-						((unsigned char*)data_vd)[index] = ((unsigned char*)data_data)[index];
+						((unsigned char*)vdn_ptr)[index] = ((unsigned char*)data_ptr)[index];
 					else
-						((unsigned short*)data_vd)[index] = ((unsigned short*)data_data)[index];
+						((unsigned short*)vdn_ptr)[index] = ((unsigned short*)data_ptr)[index];
 				}
 			}
 		}
@@ -1480,26 +1466,22 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 		m_compgroup->dirty)
 		Analyze();
 
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return false;
-	auto comp_data = tex->get_nrrd(flvr::CompType::Data);
-	if (!comp_data.data)
+	auto raw_data = vd->GetVolume(false);
+	if (!raw_data)
 		return false;
-	int bits = 8;
-	if (comp_data.data->type == nrrdTypeUChar)
-		bits = 8;
-	else if (comp_data.data->type == nrrdTypeUShort)
-		bits = 16;
-	void* data_data = comp_data.data->data;
-	if (!data_data)
+	int bits = raw_data->GetBitsPerElement();
+	void* data_ptr = raw_data->GetDataVoid();
+	if (!data_ptr)
 		return false;
 	//get label
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
+	auto raw_label = vd->GetLabel(false);
+	if (!raw_label)
 		return false;
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return false;
 	auto spc = vd->GetSpacing();
 	auto res = vd->GetResolution();
@@ -1532,26 +1514,26 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 
 	//get new data
 	//red volume
-	flvr::Texture* tex_vd_r = vd_r->GetTexture();
-	if (!tex_vd_r) return false;
-	auto comp_vd_r = tex_vd_r->get_nrrd(flvr::CompType::Data);
-	if (!comp_vd_r.data) return false;
-	void* data_vd_r = comp_vd_r.data->data;
-	if (!data_vd_r) return false;
+	auto raw_vd_r = vd_r->GetVolume(false);
+	if (!raw_vd_r)
+		return false;
+	void* data_vd_r_ptr = raw_vd_r->GetDataVoid();
+	if (!data_vd_r_ptr)
+		return false;
 	//green volume
-	flvr::Texture* tex_vd_g = vd_g->GetTexture();
-	if (!tex_vd_g) return false;
-	auto comp_vd_g = tex_vd_g->get_nrrd(flvr::CompType::Data);
-	if (!comp_vd_g.data) return false;
-	void* data_vd_g = comp_vd_g.data->data;
-	if (!data_vd_g) return false;
+	auto raw_vd_g = vd_g->GetVolume(false);
+	if (!raw_vd_g)
+		return false;
+	void* data_vd_g_ptr = raw_vd_g->GetDataVoid();
+	if (!data_vd_g_ptr)
+		return false;
 	//blue volume
-	flvr::Texture* tex_vd_b = vd_b->GetTexture();
-	if (!tex_vd_b) return false;
-	auto comp_vd_b = tex_vd_b->get_nrrd(flvr::CompType::Data);
-	if (!comp_vd_b.data) return false;
-	void* data_vd_b = comp_vd_b.data->data;
-	if (!data_vd_b) return false;
+	auto raw_vd_b = vd_b->GetVolume(false);
+	if (!raw_vd_b)
+		return false;
+	void* data_vd_b_ptr = raw_vd_b->GetDataVoid();
+	if (!data_vd_b_ptr)
+		return false;
 
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	unsigned long long index;
@@ -1560,18 +1542,18 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 	double max_value = vd->GetMaxValue();
 	for (index = 0; index < for_size; ++index)
 	{
-		value_label = data_label[index];
+		value_label = label_ptr[index];
 		if (GetColor(value_label, tex->get_brick_id(index), vd.get(), color))
 		{
 			//assign colors
 			double value;//0-255
 			if (bits == 8)
-				value = ((unsigned char*)data_data)[index];
+				value = ((unsigned char*)data_ptr)[index];
 			else
-				value = ((unsigned short*)data_data)[index] * 255.0 / max_value;
-			((unsigned char*)data_vd_r)[index] = (unsigned char)(color.r()*value);
-			((unsigned char*)data_vd_g)[index] = (unsigned char)(color.g()*value);
-			((unsigned char*)data_vd_b)[index] = (unsigned char)(color.b()*value);
+				value = ((unsigned short*)data_ptr)[index] * 255.0 / max_value;
+			((unsigned char*)data_vd_r_ptr)[index] = (unsigned char)(color.r()*value);
+			((unsigned char*)data_vd_g_ptr)[index] = (unsigned char)(color.g()*value);
+			((unsigned char*)data_vd_b_ptr)[index] = (unsigned char)(color.b()*value);
 		}
 	}
 
@@ -2014,10 +1996,10 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 	unsigned int new_id = base_id;
 
 	//get brick label data
-	flvr::TextureBrick* b = tex->get_brick(brick_id);
+	auto b = tex->get_brick(brick_id);
 	auto res = b->get_size();
 	auto stride = b->get_stride();
-	unsigned int* data_label = (unsigned int*)(b->tex_data(flvr::CompType::Label));
+	unsigned int* data_label = b->get_raw_data(flvr::CompType::Label)->DataAs<unsigned int>();
 
 	//get nonconflict id
 	new_id = GetNonconflictId(new_id, res, b, data_label);
@@ -2050,7 +2032,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 unsigned int ComponentAnalyzer::GetNonconflictId(
 	unsigned int id,
 	const fluo::Vector& size,
-	flvr::TextureBrick* b,
+	const std::shared_ptr<flvr::TextureBrick>& b,
 	unsigned int* data)
 {
 	unsigned int result = 0;

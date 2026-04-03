@@ -217,7 +217,7 @@ namespace flrd
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
 			const fluo::Vector& size,
-			flvr::TextureBrick* b,
+			const std::shared_ptr<flvr::TextureBrick>& b,
 			unsigned int* data);
 
 		//comp groups

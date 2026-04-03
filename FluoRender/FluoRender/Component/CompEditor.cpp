@@ -96,18 +96,18 @@ void ComponentEditor::Clean(int mode)
 	if (!vd)
 		return;
 
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 
 	auto res = vd->GetResolution();
@@ -119,12 +119,12 @@ void ComponentEditor::Clean(int mode)
 		{
 		case 0:
 		default:
-			if (!data_mask[index])
-				data_label[index] = 0;
+			if (!mask_ptr[index])
+				label_ptr[index] = 0;
 			break;
 		case 1:
-			if (data_mask[index])
-				data_label[index] = 0;
+			if (mask_ptr[index])
+				label_ptr[index] = 0;
 			break;
 		}
 	}
@@ -148,30 +148,27 @@ void ComponentEditor::NewId(bool append, bool track)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	Nrrd* nrrd_mask = 0;
+	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 	//get current mask
-	nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 	{
 		vd->AddEmptyMask(0);
-		nrrd_mask = vd->GetMask(false);
+		raw_mask = vd->GetMask(false);
 	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 
 	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
-		return;
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
+	auto raw_label = vd->GetLabel(false);
+	if (!raw_label)
 	{
 		vd->AddEmptyLabel();
-		comp_label = tex->get_nrrd(flvr::CompType::Label);
+		raw_label = vd->GetLabel(false);
 	}
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 
 	auto res = vd->GetResolution();
@@ -184,10 +181,10 @@ void ComponentEditor::NewId(bool append, bool track)
 	{
 		for (index = 0; index < for_size; ++index)
 		{
-			if (data_mask[index] &&
-				data_label[index])
+			if (mask_ptr[index] &&
+				label_ptr[index])
 			{
-				id_vol = data_label[index];
+				id_vol = label_ptr[index];
 				break;
 			}
 		}
@@ -245,11 +242,11 @@ void ComponentEditor::NewId(bool append, bool track)
 	for (i = 0; i < res.intx(); ++i) for (j = 0; j < res.inty(); ++j) for (k = 0; k < res.intz(); ++k)
 	{
 		index = res.get_size_xy()*k + res.intx() * j + i;
-		if (data_mask[index])
+		if (mask_ptr[index])
 		{
-			if (append && data_label[index])
+			if (append && label_ptr[index])
 				continue;
-			data_label[index] = new_id;
+			label_ptr[index] = new_id;
 			if (new_id)
 				cell->Inc(fluo::Point(i, j, k), 1.0f);
 		}
@@ -291,21 +288,18 @@ void ComponentEditor::ReplaceId()
 
 	int cur_time = view->m_tseq_cur_num;
 	//get current mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
-		return;
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 
 	unsigned int old_id;
@@ -314,13 +308,13 @@ void ComponentEditor::ReplaceId()
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
-		old_id = data_label[index];
-		if (!data_mask[index] ||
+		old_id = label_ptr[index];
+		if (!mask_ptr[index] ||
 			!old_id ||
 			old_id == m_id)
 			continue;
 
-		data_label[index] = m_id;
+		label_ptr[index] = m_id;
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();
@@ -350,21 +344,18 @@ void ComponentEditor::ReplaceList()
 	int cur_time = view->m_tseq_cur_num;
 
 	//get current mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
-		return;
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 
 	//replace ID
@@ -377,8 +368,8 @@ void ComponentEditor::ReplaceList()
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
-		old_id = data_label[index];
-		if (!data_mask[index] ||
+		old_id = label_ptr[index];
+		if (!mask_ptr[index] ||
 			!old_id ||
 			old_id == m_id)
 			continue;
@@ -386,7 +377,7 @@ void ComponentEditor::ReplaceList()
 		list_rep_iter = list_rep.find(old_id);
 		if (list_rep_iter != list_rep.end())
 		{
-			data_label[index] = list_rep_iter->second;
+			label_ptr[index] = list_rep_iter->second;
 			continue;
 		}
 
@@ -401,7 +392,7 @@ void ComponentEditor::ReplaceList()
 				(old_id, new_id));
 			glbin_trackmap_proc.ReplaceCellID(old_id, new_id,
 					cur_time);
-			data_label[index] = new_id;
+			label_ptr[index] = new_id;
 		}
 	}
 	//invalidate label mask in gpu
@@ -421,21 +412,18 @@ void ComponentEditor::CombineId()
 
 	int cur_time = view->m_tseq_cur_num;
 	//get current mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
-		return;
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 
 	//combine IDs
@@ -445,13 +433,13 @@ void ComponentEditor::CombineId()
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
-		if (!data_mask[index] ||
-			!data_label[index])
+		if (!mask_ptr[index] ||
+			!label_ptr[index])
 			continue;
 		if (!id)
-			id = data_label[index];
-		if (data_label[index] != id)
-			data_label[index] = id;
+			id = label_ptr[index];
+		if (label_ptr[index] != id)
+			label_ptr[index] = id;
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();
@@ -496,34 +484,32 @@ void ComponentEditor::CombineList()
 		return;
 
 	//get current mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	auto comp_label = tex->get_nrrd(flvr::CompType::Label);
-	if (!comp_label.data)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
-	unsigned int* data_label = (unsigned int*)(comp_label.data->data);
-	if (!data_label)
-		return;
+
 	//combine IDs
 	auto res = vd->GetResolution();
 	unsigned long long index;
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
-		if (!data_mask[index] ||
-			!data_label[index])
+		if (!mask_ptr[index] ||
+			!label_ptr[index])
 			continue;
-		cell_iter = m_list->find(data_label[index]);
+		cell_iter = m_list->find(label_ptr[index]);
 		if (cell_iter != m_list->end())
-			data_label[index] = cell->Id();
+			label_ptr[index] = cell->Id();
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_current();

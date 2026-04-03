@@ -145,23 +145,23 @@ void ComponentSelector::CompFull()
 		tex->push_mask();
 
 	//get current mask
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
-	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = tex->get_bricks();
+	if (bricks.empty())
 		return;
-	size_t bn = bricks->size();
+	size_t bn = bricks.size();
 
 	//get selected IDs
 	int i, j, k;
@@ -172,25 +172,24 @@ void ComponentSelector::CompFull()
 	CelpListIter label_iter;
 	auto res = vd->GetResolution();
 
-	for (size_t bi = 0; bi < bn; ++bi)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->is_mask_valid())
+		if (!bbs->is_mask_valid())
 			continue;
 
-		brick_id = b->get_id();
-		auto res_b = b->get_size();
-		auto off_size = b->get_off_size();
+		brick_id = bbs->get_id();
+		auto res_b = bbs->get_size();
+		auto off_size = bbs->get_off_size();
 		for (i = 0; i < res_b.intx(); ++i)
 		for (j = 0; j < res_b.inty(); ++j)
 		for (k = 0; k < res_b.intz(); ++k)
 		{
 			index = (unsigned long long)res.get_size_xy()*(unsigned long long)(k + off_size.intz()) +
 				(unsigned long long)res.intx()*(unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
-			if (data_mask[index] &&
-				data_label[index])
+			if (mask_ptr[index] &&
+				label_ptr[index])
 			{
-				label_value = data_label[index];
+				label_value = label_ptr[index];
 				label_iter = sel_labels.find(Cell::GetKey(label_value, brick_id));
 				if (label_iter == sel_labels.end())
 				{
@@ -211,25 +210,24 @@ void ComponentSelector::CompFull()
 
 	//reselect
 	unsigned int size;
-	for (size_t bi = 0; bi < bn; ++bi)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		brick_id = b->get_id();
-		if (!b->is_mask_valid() &&
+		brick_id = bbs->get_id();
+		if (!bbs->is_mask_valid() &&
 			!comp_list->FindBrick(brick_id))
 			continue;
 		
-		auto res_b = b->get_size();
-		auto off_size = b->get_off_size();
+		auto res_b = bbs->get_size();
+		auto off_size = bbs->get_off_size();
 		for (i = 0; i < res_b.intx(); ++i)
 		for (j = 0; j < res_b.inty(); ++j)
 		for (k = 0; k < res_b.intz(); ++k)
 		{
 			index = (unsigned long long)res.get_size_xy()*(unsigned long long)(k + off_size.intz()) +
 				(unsigned long long)res.intx()*(unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
-			if (data_label[index])
+			if (label_ptr[index])
 			{
-				label_value = data_label[index];
+				label_value = label_ptr[index];
 				label_iter = comp_list->find(Cell::GetKey(label_value, brick_id));
 				if (label_iter != comp_list->end())
 				{
@@ -237,18 +235,18 @@ void ComponentSelector::CompFull()
 					{
 						size = label_iter->second->GetSizeUi();
 						if (CompareSize(size))
-							SelectMask(data_mask, index, 255, tex);
+							SelectMask(mask_ptr, index, 255, tex);
 						else
-							data_mask[index] = 0;
+							mask_ptr[index] = 0;
 					}
 					else
-						SelectMask(data_mask, index, 255, tex);
+						SelectMask(mask_ptr, index, 255, tex);
 				}
 				else
-					data_mask[index] = 0;
+					mask_ptr[index] = 0;
 			}
 		}
-		b->valid_mask();
+		bbs->valid_mask();
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_mask();
@@ -266,21 +264,21 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (flvr::Texture::mask_undo_num_>0)
 		tex->push_mask();
 
-	Nrrd* nrrd_mask = vd->GetMask(rmask);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(rmask);
+	if (!raw_mask)
 	{
 		vd->AddEmptyMask(0);
-		nrrd_mask = vd->GetMask(false);
+		raw_mask = vd->GetMask(false);
 	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 
 	int bn = vd->GetBrickNum();
@@ -314,9 +312,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 		{
 			for (index = 0; index < for_size; ++index)
 			{
-				if (data_label[index])
+				if (label_ptr[index])
 				{
-					label_value = data_label[index];
+					label_value = label_ptr[index];
 					bid = tex->get_brick_id(index);
 					label_iter = sel_labels.find(Cell::GetKey(label_value, bid));
 					if (label_iter == sel_labels.end())
@@ -336,9 +334,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 		//reselect
 		for (index = 0; index < for_size; ++index)
 		{
-			if (data_label[index])
+			if (label_ptr[index])
 			{
-				label_value = data_label[index];
+				label_value = label_ptr[index];
 				bid = tex->get_brick_id(index);
 				label_iter = comp_list->find(Cell::GetKey(label_value, bid));
 				if (label_iter != comp_list->end())
@@ -347,19 +345,19 @@ void ComponentSelector::Select(bool all, bool rmask)
 					{
 						size = label_iter->second->GetSizeUi();
 						if (CompareSize(size))
-							//data_mask[index] = 255;
-							SelectMask(data_mask, index, 255, tex);
+							//mask_ptr[index] = 255;
+							SelectMask(mask_ptr, index, 255, tex);
 						else
-							data_mask[index] = 0;
+							mask_ptr[index] = 0;
 					}
 					else
-						SelectMask(data_mask, index, 255, tex);
+						SelectMask(mask_ptr, index, 255, tex);
 				}
 				else if (!m_use_min && m_use_max)
 					//analyzer filters small comps, make sure they are also selected here
-					SelectMask(data_mask, index, 255, tex);
+					SelectMask(mask_ptr, index, 255, tex);
 				else
-					data_mask[index] = 0;
+					mask_ptr[index] = 0;
 			}
 		}
 	}
@@ -380,9 +378,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 			{
 				for (index = 0; index < for_size; ++index)
 				{
-					if (data_label[index])
+					if (label_ptr[index])
 					{
-						label_value = data_label[index];
+						label_value = label_ptr[index];
 						bid = tex->get_brick_id(index);
 						label_iter = comp_list.find(Cell::GetKey(label_value, bid));
 						if (label_iter != comp_list.end())
@@ -391,12 +389,12 @@ void ComponentSelector::Select(bool all, bool rmask)
 							{
 								size = label_iter->second->GetSizeUi();
 								if (CompareSize(size))
-									SelectMask(data_mask, index, 255, tex);
+									SelectMask(mask_ptr, index, 255, tex);
 								else
-									data_mask[index] = 0;
+									mask_ptr[index] = 0;
 							}
 							else
-								SelectMask(data_mask, index, 255, tex);
+								SelectMask(mask_ptr, index, 255, tex);
 						}
 					}
 				}
@@ -413,7 +411,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 				for (index = 0; index < for_size; ++index)
 				{
 					bid = tex->get_brick_id(index);
-					if (data_label[index] == idsel &&
+					if (label_ptr[index] == idsel &&
 						bid == bidsel)
 						acc_size++;
 				}
@@ -424,9 +422,9 @@ void ComponentSelector::Select(bool all, bool rmask)
 					for (index = 0; index < for_size; ++index)
 					{
 						bid = tex->get_brick_id(index);
-						if (data_label[index] == idsel &&
+						if (label_ptr[index] == idsel &&
 							bid == bidsel)
-							SelectMask(data_mask, index, 255, tex);
+							SelectMask(mask_ptr, index, 255, tex);
 					}
 				}
 			}
@@ -434,7 +432,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 			{
 				for (index = 0; index < for_size; ++index)
 				{
-					if (data_label[index] == idsel)
+					if (label_ptr[index] == idsel)
 						acc_size++;
 				}
 				if (((m_use_min || m_use_max) &&
@@ -443,8 +441,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 				{
 					for (index = 0; index < for_size; ++index)
 					{
-						if (data_label[index] == idsel)
-							SelectMask(data_mask, index, 255, tex);
+						if (label_ptr[index] == idsel)
+							SelectMask(mask_ptr, index, 255, tex);
 					}
 				}
 			}
@@ -471,20 +469,20 @@ void ComponentSelector::All()
 		vd->GetTexture())
 		vd->GetTexture()->push_mask();
 
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 	{
 		vd->AddEmptyMask(0);
-		nrrd_mask = vd->GetMask(false);
+		raw_mask = vd->GetMask(false);
 	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 
 	//select append
 	auto res = vd->GetResolution();
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
-	std::memset(data_mask, 255, for_size);
+	std::memset(mask_ptr, 255, for_size);
 	vd->GetTexture()->valid_all_mask();
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_mask();
@@ -501,17 +499,17 @@ void ComponentSelector::Clear(bool invalidate)
 		vd->GetTexture())
 		vd->GetTexture()->push_mask();
 
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 
 	//select append
 	auto res = vd->GetResolution();
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
-	std::memset(data_mask, 0, for_size);
+	std::memset(mask_ptr, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
 		vd->GetVR()->clear_tex_mask();
@@ -527,18 +525,18 @@ void ComponentSelector::Delete()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 	//select append
 	auto res = vd->GetResolution();
@@ -546,10 +544,10 @@ void ComponentSelector::Delete()
 	unsigned long long for_size = (unsigned long long)res.get_size_xyz();
 	for (index = 0; index < for_size; ++index)
 	{
-		if (m_id == data_label[index])
-			SelectMask(data_mask, index, 255, tex);
+		if (m_id == label_ptr[index])
+			SelectMask(mask_ptr, index, 255, tex);
 		else
-			data_mask[index] = 0;
+			mask_ptr[index] = 0;
 	}
 	//invalidate label mask in gpu
 	vd->GetVR()->clear_tex_mask();
@@ -570,18 +568,18 @@ void ComponentSelector::DeleteList()
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex)
 		return;
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 		return;
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
 	//select append
 	auto res = vd->GetResolution();
@@ -592,21 +590,21 @@ void ComponentSelector::DeleteList()
 	for (index = 0; index < for_size; ++index)
 	{
 		if (clear_all)
-			data_mask[index] = 0;
+			mask_ptr[index] = 0;
 		else
 		{
 			if (bn > 1)
 				key = flrd::Cell::GetKey(
-					data_label[index],
+					label_ptr[index],
 					vd->GetTexture()->
 					get_brick_id(index));
 			else
-				key = data_label[index];
+				key = label_ptr[index];
 			if (find(ids.begin(), ids.end(), key)
 				!= ids.end())
-				SelectMask(data_mask, index, 255, tex);
+				SelectMask(mask_ptr, index, 255, tex);
 			else
-				data_mask[index] = 0;
+				mask_ptr[index] = 0;
 		}
 	}
 	//invalidate label mask in gpu
@@ -627,26 +625,26 @@ void ComponentSelector::SelectList()
 	if (flvr::Texture::mask_undo_num_ > 0)
 		tex->push_mask();
 
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 	{
 		vd->AddEmptyMask(0);
-		nrrd_mask = vd->GetMask(false);
+		raw_mask = vd->GetMask(false);
 	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
-	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = tex->get_bricks();
+	if (bricks.empty())
 		return;
-	size_t bn = bricks->size();
+	size_t bn = bricks.size();
 
 	//select append
 	unsigned int brick_id;
@@ -654,12 +652,11 @@ void ComponentSelector::SelectList()
 	unsigned long long key;
 	int i, j, k;
 	auto res = vd->GetResolution();
-	for (size_t bi = 0; bi < bn; ++bi)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		brick_id = b->get_id();
-		auto res_b = b->get_size();
-		auto off_size = b->get_off_size();
+		brick_id = bbs->get_id();
+		auto res_b = bbs->get_size();
+		auto off_size = bbs->get_off_size();
 		for (i = 0; i < res_b.intx(); ++i)
 		for (j = 0; j < res_b.inty(); ++j)
 		for (k = 0; k < res_b.intz(); ++k)
@@ -667,11 +664,11 @@ void ComponentSelector::SelectList()
 			index = (unsigned long long)res.get_size_xy() * (unsigned long long)(k + off_size.intz()) +
 				(unsigned long long)res.intx() * (unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
 			key = brick_id;
-			key = (key << 32) | data_label[index];
+			key = (key << 32) | label_ptr[index];
 			if (m_list->find(key) != m_list->end())
-				SelectMask(data_mask, index, 255, tex);
+				SelectMask(mask_ptr, index, 255, tex);
 			else
-				data_mask[index] = 0;
+				mask_ptr[index] = 0;
 		}
 	}
 
@@ -681,10 +678,10 @@ void ComponentSelector::SelectList()
 	//for (index = 0;
 	//	index < for_size; ++index)
 	//{
-	//	if (list.find(data_label[index]) != list.end())
-	//		data_mask[index] = 255;
+	//	if (list.find(label_ptr[index]) != list.end())
+	//		mask_ptr[index] = 255;
 	//	else
-	//		data_mask[index] = 0;
+	//		mask_ptr[index] = 0;
 	//}
 
 	//invalidate label mask in gpu
@@ -703,26 +700,26 @@ void ComponentSelector::EraseList()
 	if (flvr::Texture::mask_undo_num_ > 0)
 		tex->push_mask();
 
-	Nrrd* nrrd_mask = vd->GetMask(true);
-	if (!nrrd_mask)
+	auto raw_mask = vd->GetMask(true);
+	if (!raw_mask)
 	{
 		vd->AddEmptyMask(0);
-		nrrd_mask = vd->GetMask(false);
+		raw_mask = vd->GetMask(false);
 	}
-	unsigned char* data_mask = (unsigned char*)(nrrd_mask->data);
-	if (!data_mask)
+	unsigned char* mask_ptr = raw_mask->DataAs<unsigned char>();
+	if (!mask_ptr)
 		return;
 	//get current label
-	Nrrd* nrrd_label = vd->GetLabel(true);
-	if (!nrrd_label)
+	auto raw_label = vd->GetLabel(true);
+	if (!raw_label)
 		return;
-	unsigned int* data_label = (unsigned int*)(nrrd_label->data);
-	if (!data_label)
+	unsigned int* label_ptr = raw_label->DataAs<unsigned int>();
+	if (!label_ptr)
 		return;
-	std::vector<flvr::TextureBrick*>* bricks = tex->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = tex->get_bricks();
+	if (bricks.empty())
 		return;
-	size_t bn = bricks->size();
+	size_t bn = bricks.size();
 
 	//select append
 	unsigned int brick_id;
@@ -730,12 +727,11 @@ void ComponentSelector::EraseList()
 	unsigned long long key;
 	int i, j, k;
 	auto res = vd->GetResolution();
-	for (size_t bi = 0; bi < bn; ++bi)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		brick_id = b->get_id();
-		auto res_b = b->get_size();
-		auto off_size = b->get_off_size();
+		brick_id = bbs->get_id();
+		auto res_b = bbs->get_size();
+		auto off_size = bbs->get_off_size();
 		for (i = 0; i < res_b.intx(); ++i)
 		for (j = 0; j < res_b.inty(); ++j)
 		for (k = 0; k < res_b.intz(); ++k)
@@ -743,11 +739,11 @@ void ComponentSelector::EraseList()
 			index = (unsigned long long)res.get_size_xy() * (unsigned long long)(k + off_size.intz()) +
 				(unsigned long long)res.intx() * (unsigned long long)(j + off_size.inty()) + (unsigned long long)(i + off_size.intx());
 			key = brick_id;
-			key = (key << 32) | data_label[index];
+			key = (key << 32) | label_ptr[index];
 			if (m_list->find(key) != m_list->end())
-				SelectMask(data_mask, index, 0, tex);
+				SelectMask(mask_ptr, index, 0, tex);
 			else
-				data_mask[index] = 0;
+				mask_ptr[index] = 0;
 		}
 	}
 
@@ -757,10 +753,10 @@ void ComponentSelector::EraseList()
 	//for (index = 0;
 	//	index < for_size; ++index)
 	//{
-	//	if (list.find(data_label[index]) != list.end())
-	//		data_mask[index] = 255;
+	//	if (list.find(label_ptr[index]) != list.end())
+	//		mask_ptr[index] = 255;
 	//	else
-	//		data_mask[index] = 0;
+	//		mask_ptr[index] = 0;
 	//}
 
 	//invalidate label mask in gpu
@@ -804,7 +800,7 @@ void ComponentSelector::SelectMask(unsigned char* mask,
 	mask[idx] = v;
 	if (tex)
 	{
-		flvr::TextureBrick* b = tex->get_brick(
+		auto b = tex->get_brick(
 			tex->get_brick_id(idx));
 		if (b)
 			b->valid_mask();
