@@ -70,7 +70,7 @@ namespace flrd
 		bool ComputeCenter();
 		bool ComputeCov();
 		bool CheckBricks();
-		bool GetInfo(flvr::TextureBrick* b,
+		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long &bits, long &nx, long &ny, long &nz);
 	};
 

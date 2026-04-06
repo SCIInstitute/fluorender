@@ -237,13 +237,11 @@ bool Relax::Compute()
 		return false;
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	for (size_t bi = 0; bi < brick_num; ++bi)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		auto res = b->get_size();
-		auto off_size = b->get_off_size();
+		auto res = bbs->get_size();
+		auto off_size = bbs->get_off_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
@@ -253,9 +251,9 @@ bool Relax::Compute()
 		cl_float3 org = { (float)ox, (float)oy, (float)oz };
 		GLint tid;
 		if (m_use_mask)
-			tid = m_vd->GetVR()->load_brick_mask(b);
+			tid = m_vd->GetVR()->load_brick_mask(bbs);
 		else
-			tid = m_vd->GetVR()->load_brick(b);
+			tid = m_vd->GetVR()->load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

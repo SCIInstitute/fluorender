@@ -612,8 +612,8 @@ bool SegGrow::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	if (bricks.empty())
 		return false;
 	return true;
 }
@@ -652,21 +652,19 @@ void SegGrow::Compute()
 	int kernel_6 = kernel_prog->createKernel("kernel_7");//get shape
 
 	int bnum = 0;
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	for (size_t bi = 0; bi < brick_num; ++bi)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->is_mask_act())
+		if (!bbs->is_mask_act())
 			continue;
 		//clear new grown flag
-		b->set_new_grown(false);
-		auto res = b->get_size();
+		bbs->set_new_grown(false);
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
-		GLint lid = m_vd->GetVR()->load_brick_label(b);
+		GLint mid = m_vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = m_vd->GetVR()->load_brick_label(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -761,7 +759,7 @@ void SegGrow::Compute()
 		size_t total = uniqids.size();
 		if (total)
 		{
-			b->set_new_grown(true);//new ids exist in brick, will be considered for merging
+			bbs->set_new_grown(true);//new ids exist in brick, will be considered for merging
 			ids.clear();
 			for (auto it = uniqids.begin();
 				it != uniqids.end(); ++it)
@@ -916,7 +914,7 @@ void SegGrow::Compute()
 			kernel_prog->readBuffer(arg_pcsum, pcsum);
 
 			int ox, oy, oz, nc;
-			auto off_size = b->get_off_size();
+			auto off_size = bbs->get_off_size();
 			ox = off_size.intx();
 			oy = off_size.inty();
 			oz = off_size.intz();
@@ -989,23 +987,22 @@ void SegGrow::Compute()
 			it != m_list.end(); ++it)
 			ids.push_back(it->second.id);
 
-		for (size_t bi = 0; bi < brick_num; ++bi)
+		for (auto bbs : bricks)
 		{
-			flvr::TextureBrick* b = (*bricks)[bi];
-			if (!b->get_new_grown())
+			if (!bbs->get_new_grown())
 				continue;
-			auto res = b->get_size();
+			auto res = bbs->get_size();
 			int nx = res.intx();
 			int ny = res.inty();
 			int nz = res.intz();
-			GLint lid = m_vd->GetVR()->load_brick_label(b);
+			GLint lid = m_vd->GetVR()->load_brick_label(bbs);
 			unsigned bid;
-			bid = b->get_id();
+			bid = bbs->get_id();
 			kernel_prog->beginArgs(kernel_0);
 			auto arg_tex =
 				kernel_prog->setTex3D(CL_MEM_READ_ONLY, lid);
 
-			flvr::TextureBrick* nb;
+			std::shared_ptr<flvr::TextureBrick> nb;
 			unsigned int nid;
 			//+x
 			nid = tex->posxid(bid);
@@ -1093,16 +1090,15 @@ void SegGrow::Compute()
 	if (!kernel_prog)
 		return;
 	int kernel_7 = kernel_prog->createKernel("kernel_8");//finalize
-	for (size_t bi = 0; bi < brick_num; ++bi)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[bi];
-		if (!b->is_mask_act())
+		if (!bbs->is_mask_act())
 			continue;
-		auto res = b->get_size();
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint lid = m_vd->GetVR()->load_brick_label(b);
+		GLint lid = m_vd->GetVR()->load_brick_label(bbs);
 		//compute workload
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1248,7 +1244,7 @@ void SegGrow::MergeIds(std::vector<std::set<unsigned int>> &merge_list)
 
 void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	std::vector<unsigned int> &ids,
-	flvr::TextureBrick* nb,
+	const std::shared_ptr<flvr::TextureBrick>& nb,
 	flvr::KernelProgram *kernel_prog, int kernel,
 	std::weak_ptr<flvr::Argument> arg_tex,
 	std::vector<std::set<unsigned int>> &brick_pairs,

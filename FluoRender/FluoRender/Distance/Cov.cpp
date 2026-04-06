@@ -146,7 +146,7 @@ bool Cov::CheckBricks()
 }
 
 bool Cov::GetInfo(
-	flvr::TextureBrick* b,
+	const std::shared_ptr<flvr::TextureBrick>& b,
 	long &bits, long &nx, long &ny, long &nz)
 {
 	bits = b->nb(flvr::CompType::Data) * 8;
@@ -179,24 +179,22 @@ bool Cov::ComputeCenter()
 	std::string name = "kernel_0";
 	int kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = m_vd->GetTexture()->get_bricks();
 
 	//get center
 	std::memset(m_center, 0, sizeof(float) * 3);
 	unsigned long long sum = 0;
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz, bits;
-		if (!GetInfo(b, bits, nx, ny, nz))
+		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
 		GLint mid = 0;
 		if (use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(b);
+			mid = m_vd->GetVR()->load_brick_mask(bbs);
 		else
-			mid = m_vd->GetVR()->load_brick(b);
+			mid = m_vd->GetVR()->load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -228,7 +226,7 @@ bool Cov::ComputeCenter()
 		kernel_prog->readBuffer(arg_csum, csum);
 
 		int ox, oy, oz, nc;
-		auto off_size = b->get_off_size();
+		auto off_size = bbs->get_off_size();
 		ox = off_size.intx();
 		oy = off_size.inty();
 		oz = off_size.intz();
@@ -279,22 +277,20 @@ bool Cov::ComputeCov()
 	std::string name = "kernel_1";
 	int kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = m_vd->GetTexture()->get_bricks();
 
 	//get cov
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz, bits;
-		if (!GetInfo(b, bits, nx, ny, nz))
+		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
 		GLint mid = 0;
 		if (use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(b);
+			mid = m_vd->GetVR()->load_brick_mask(bbs);
 		else
-			mid = m_vd->GetVR()->load_brick(b);
+			mid = m_vd->GetVR()->load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -307,7 +303,7 @@ bool Cov::ComputeCov()
 		//set
 		unsigned int* count = new unsigned int[gsize.gsxyz];
 		float *cov = new float[gsize.gsxyz * 6];
-		auto off_size = b->get_off_size();
+		auto off_size = bbs->get_off_size();
 		float orig[3] = { float(off_size.x()), float(off_size.y()), float(off_size.z()) };
 		kernel_prog->beginArgs(kernel_index);
 		kernel_prog->setTex3D(CL_MEM_READ_ONLY, mid);
