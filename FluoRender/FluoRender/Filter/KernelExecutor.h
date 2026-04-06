@@ -38,6 +38,10 @@ namespace flvr
 	class KernelProgram;
 	class TextureBrick;
 }
+namespace fluo
+{
+	class RawData;
+}
 class KernelExecutor : public Progress
 {
 public:
@@ -75,7 +79,7 @@ private:
 
 	bool ExecuteKernel(VolumeData* vd, VolumeData* vd_r);
 	bool ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
-		unsigned int data_id, void* result,
+		unsigned int data_id, std::shared_ptr<fluo::RawData>& result,
 		size_t brick_x, size_t brick_y,
 		size_t brick_z, int chars);
 

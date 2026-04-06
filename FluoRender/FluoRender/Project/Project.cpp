@@ -477,9 +477,9 @@ void Project::Open(const std::wstring& filename)
 							MSKReader msk_reader;
 							msk_reader.SetFile(wsval);
 							BaseVolReader* br = &msk_reader;
-							Nrrd* mask = br->Convert(true);
-							if (mask)
-								vd->LoadMask(mask);
+							auto raw_mask = br->Convert(true);
+							if (raw_mask)
+								vd->LoadMask(raw_mask);
 						}
 					}
 				}

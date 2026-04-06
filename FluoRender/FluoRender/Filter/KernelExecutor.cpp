@@ -150,8 +150,8 @@ bool KernelExecutor::Execute()
 	//get bricks
 	fluo::Ray view_ray(fluo::Point(0.802, 0.267, 0.534), fluo::Vector(0.802, 0.267, 0.534));
 	tex->set_sort_bricks();
-	std::vector<flvr::TextureBrick*> *bricks = tex->get_sorted_bricks(view_ray);
-	if (!bricks || bricks->size() == 0)
+	auto bricks = tex->get_sorted_bricks(view_ray);
+	if (bricks.empty())
 	{
 		m_message = L"Volume empty.\n";
 		return false;
@@ -159,7 +159,7 @@ bool KernelExecutor::Execute()
 
 	m_message = L"";
 	//execute for each brick
-	std::vector<flvr::TextureBrick*> *bricks_r;
+	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks_r;
 	auto vd_r = std::make_shared<VolumeData>();
 
 	SetProgress(0, "Running OpenCL kernel.");
@@ -181,7 +181,7 @@ bool KernelExecutor::Execute()
 
 		tex_r->set_sort_bricks();
 		bricks_r = tex_r->get_sorted_bricks(view_ray);
-		if (!bricks_r || bricks_r->size() == 0)
+		if (bricks_r.empty())
 			return false;
 
 		glbin_vol_def.Copy(vd_r.get(), vd.get());
@@ -233,31 +233,31 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		m_message = L"Volume corrupted.\n";
 		return false;
 	}
-	std::vector<flvr::TextureBrick*> *bricks = tex->get_bricks();
-	if (!bricks)
+	auto bricks = tex->get_bricks();
+	if (bricks.empty())
 		return false;
 
 	flvr::Texture* tex_r = vd_r->GetTexture();
 	if (!tex_r)
 		return false;
-	std::vector<flvr::TextureBrick*> *bricks_r = tex_r->get_bricks();
-	if (!bricks_r)
+	auto bricks_r = tex_r->get_bricks();
+	if (bricks_r.empty())
 		return false;
-	void* result = vd_r->GetVolume(false)->data;
+	auto raw_result = vd_r->GetVolume(false);
 
-	size_t brick_num = bricks->size();
+	size_t brick_num = bricks.size();
 	int bits = vd->GetBits();
 	int chars = bits / 8;
 	auto res = vd->GetResolution();
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
-	flvr::TextureBrick *b, *b_r;
+	std::shared_ptr<flvr::TextureBrick> b, b_r;
 	for (size_t i = 0; i<brick_num; ++i)
 	{
 		SetProgress(static_cast<int>(100.0 * i / brick_num), "Running OpenCL kernel.");
 
-		b = (*bricks)[i];
-		b_r = (*bricks_r)[i];
+		b = bricks[i];
+		b_r = bricks_r[i];
 		GLint data_id = vr->load_brick(b);
 		flvr::KernelProgram* kernel_prog =
 			glbin_kernel_factory.
@@ -266,18 +266,23 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		{
 			m_message += L"OpenCL kernel created.\n";
 			if (brick_num == 1)
-				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, result, res.intx(), res.inty(), res.intz(), chars);
+				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, raw_result, res.intx(), res.inty(), res.intz(), chars);
 			else
 			{
 				auto res_b = b->get_size();
-				void* bresult = (void*)(new unsigned char[res_b.get_size_xyz()*chars]);
+				fluo::RawData::Size3 size = {
+					static_cast<size_t>(res_b.intx()),
+					static_cast<size_t>(res_b.inty()),
+					static_cast<size_t>(res_b.intz())
+				};
+				auto bresult = std::make_shared<fluo::RawData>(size, fluo::DataFormat::UInt8);
+				bresult->Allocate();
 				kernel_exe = ExecuteKernelBrick(kernel_prog, data_id, bresult, res_b.intx(), res_b.inty(), res_b.intz(), chars);
 				if (!kernel_exe)
 					break;
 				//copy data back
-				unsigned char* ptr_br = (unsigned char*)bresult;
-				unsigned char* ptr_z;
-				ptr_z = (unsigned char*)(b_r->tex_data(flvr::CompType::Data));
+				unsigned char* ptr_br = bresult->GetData();
+				unsigned char* ptr_z = b_r->get_raw_data(flvr::CompType::Data)->DataAs<unsigned char>();
 				unsigned char* ptr_y;
 				for (int bk = 0; bk < res_b.intz(); ++bk)
 				{
@@ -290,7 +295,6 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 					}
 					ptr_z += res.get_size_xy()*chars;
 				}
-				delete[] bresult;
 			}
 		}
 		else
@@ -309,7 +313,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 }
 
 bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
-	unsigned int data_id, void* result,
+	unsigned int data_id, std::shared_ptr<fluo::RawData>& result,
 	size_t brick_x, size_t brick_y,
 	size_t brick_z, int chars)
 {
@@ -323,7 +327,7 @@ bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 	kernel_prog->beginArgs(kernel_index);
 	kernel_prog->setTex3D(CL_MEM_READ_ONLY, data_id);
 	auto arg_result =
-		kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", result_size, result);
+		kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "", result_size, result->GetDataVoid());
 	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_x));
 	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_y));
 	kernel_prog->setConst(sizeof(unsigned int), (void*)(&brick_z));
@@ -340,7 +344,7 @@ bool KernelExecutor::ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 	m_message += L": ";
 	m_message += stime;
 	m_message += L" sec.\n";
-	kernel_prog->readBuffer(arg_result, result);
+	kernel_prog->readBuffer(arg_result, result->GetDataVoid());
 
 	//release buffer
 	kernel_prog->releaseAllArgs();
