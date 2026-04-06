@@ -112,7 +112,7 @@ public:
 	//mode: 0-zeros; 1-255; 2-leave as is
 	void AddEmptyMask(int mode, bool change=true);
 	void AddMask(const std::shared_ptr<fluo::RawData>& mask, int op);//op: 0-replace; 1-union; 2-exclude; 3-intersect
-	void AddMask16(const std::shared_ptr<fluo::RawData>& mask, int op, double scale);//16-bit data
+	void AddMaskConvert(const std::shared_ptr<fluo::RawData>& mask, int op, double scale);//16-bit data
 	//load label
 	void LoadLabel(const std::shared_ptr<fluo::RawData>& label);
 	std::shared_ptr<fluo::RawData> GetLabel(bool ret);

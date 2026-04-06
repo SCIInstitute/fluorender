@@ -330,4 +330,227 @@ namespace fluo
 		return { static_cast<double>(minv),
 				 static_cast<double>(maxv) };
 	}
+
+	void RawData::FillZero()
+	{
+		if (!IsAllocated())
+			return;
+
+		std::memset(GetData(), 0, GetTotalBytes());
+
+		m_minmax_valid = false;
+	}
+
+	template <typename Fn>
+	void DispatchByFormat(Fn&& fn)
+	{
+		switch (m_format)
+		{
+		case DataFormat::UInt8:   ForEachElementT<uint8_t>(fn); break;
+		case DataFormat::UInt16:  ForEachElementT<uint16_t>(fn); break;
+		case DataFormat::UInt32:  ForEachElementT<uint32_t>(fn); break;
+
+		case DataFormat::Int8:    ForEachElementT<int8_t>(fn); break;
+		case DataFormat::Int16:   ForEachElementT<int16_t>(fn); break;
+		case DataFormat::Int32:   ForEachElementT<int32_t>(fn); break;
+
+		case DataFormat::Float16: ForEachElementT<Half>(fn); break; // assuming Half type
+		case DataFormat::Float32: ForEachElementT<float>(fn); break;
+		case DataFormat::Float64: ForEachElementT<double>(fn); break;
+
+		default:
+			break;
+		}
+	}
+
+	void RawData::FillConstant(double value)
+	{
+		if (!IsAllocated())
+			return;
+
+		DispatchByFormat([&](auto& elem, size_t)
+			{
+				using T = std::decay_t<decltype(elem)>;
+				elem = static_cast<T>(value);
+			});
+
+		m_minmax_valid = false;
+	}
+
+	void RawData::FillSequence()
+	{
+		if (!IsAllocated())
+			return;
+	}
+
+	template <typename T, typename Fn>
+	void RawData::ForEachBinaryT(
+		RawData& dst,
+		const RawData& rhs,
+		Fn&& fn)
+	{
+		T* d = dst.DataAs<T>();
+		const T* r = rhs.DataAs<T>();
+
+		const size_t n = dst.GetElementCount();
+		for (size_t i = 0; i < n; ++i)
+			d[i] = fn(d[i], r[i]);
+	}
+
+	template <typename DstT, typename SrcT, typename Fn>
+	void RawData::ForEachBinaryConvertT(
+		RawData& dst,
+		const RawData& src,
+		Fn&& fn)
+	{
+		DstT* d = dst.DataAs<DstT>();
+		const SrcT* s = src.DataAs<SrcT>();
+
+		const size_t n = dst.GetElementCount();
+		for (size_t i = 0; i < n; ++i)
+			d[i] = fn(d[i], s[i]);
+	}
+	
+	template <typename Fn>
+	void RawData::DispatchBinary(
+		RawData& dst,
+		const RawData& rhs,
+		Fn&& fn)
+	{
+		// Strong sanity checks (you may relax or remove in release builds)
+		if (dst.GetFormat() != rhs.GetFormat())
+			throw std::runtime_error("DispatchBinary: format mismatch");
+
+		if (dst.GetElementCount() != rhs.GetElementCount())
+			throw std::runtime_error("DispatchBinary: size mismatch");
+
+		switch (dst.GetFormat())
+		{
+		case DataFormat::UInt8:
+			ForEachBinaryT<uint8_t>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::UInt16:
+			ForEachBinaryT<uint16_t>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::UInt32:
+			ForEachBinaryT<uint32_t>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::Int8:
+			ForEachBinaryT<int8_t>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::Int16:
+			ForEachBinaryT<int16_t>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::Int32:
+			ForEachBinaryT<int32_t>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::Float16:
+			ForEachBinaryT<Half>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::Float32:
+			ForEachBinaryT<float>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		case DataFormat::Float64:
+			ForEachBinaryT<double>(dst, rhs, std::forward<Fn>(fn));
+			break;
+
+		default:
+			throw std::runtime_error("DispatchBinary: unsupported DataFormat");
+		}
+	}
+
+	template <typename Fn>
+	void RawData::DispatchBinaryConvert(
+		RawData& dst,
+		const RawData& src,
+		Fn&& fn)
+	{
+		if (dst.GetElementCount() != src.GetElementCount())
+			throw std::runtime_error("DispatchBinaryConvert: size mismatch");
+
+		switch (dst.GetFormat())
+		{
+			// ============================================================
+			// DESTINATION: UInt8 (most common for masks)
+			// ============================================================
+		case DataFormat::UInt8:
+			switch (src.GetFormat())
+			{
+			case DataFormat::UInt8:
+				ForEachBinaryConvertT<uint8_t, uint8_t>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::UInt16:
+				ForEachBinaryConvertT<uint8_t, uint16_t>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::UInt32:
+				ForEachBinaryConvertT<uint8_t, uint32_t>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::Float32:
+				ForEachBinaryConvertT<uint8_t, float>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::Float64:
+				ForEachBinaryConvertT<uint8_t, double>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			default:
+				throw std::runtime_error(
+					"DispatchBinaryConvert: unsupported src → UInt8");
+			}
+			break;
+
+			// ============================================================
+			// DESTINATION: Float32 (normalized volumes, weighting, etc.)
+			// ============================================================
+		case DataFormat::Float32:
+			switch (src.GetFormat())
+			{
+			case DataFormat::UInt8:
+				ForEachBinaryConvertT<float, uint8_t>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::UInt16:
+				ForEachBinaryConvertT<float, uint16_t>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::Float32:
+				ForEachBinaryConvertT<float, float>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			case DataFormat::Float64:
+				ForEachBinaryConvertT<float, double>(
+					dst, src, std::forward<Fn>(fn));
+				break;
+
+			default:
+				throw std::runtime_error(
+					"DispatchBinaryConvert: unsupported src → Float32");
+			}
+			break;
+
+		default:
+			throw std::runtime_error(
+				"DispatchBinaryConvert: unsupported destination format");
+		}
+	}
+
 } // namespace fluo

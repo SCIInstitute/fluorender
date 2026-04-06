@@ -607,12 +607,13 @@ void VolumeData::LoadMask(const std::shared_ptr<fluo::RawData>& mask)
 	//prepare the texture bricks for the mask
 	m_tex->add_empty_mask();
 	flvr::TexComp comp = { flvr::CompType::Mask, 1, mask };
-	m_tex->set_nrrd(flvr::CompType::Mask, comp);
+	m_tex->set_tex_comp(flvr::CompType::Mask, comp);
 
+	auto size = mask->GetSize();
 	fluo::Vector mask_size(
-		mask->axis[0].size,
-		mask->axis[1].size,
-		mask->axis[2].size);
+		size[0],
+		size[1],
+		size[2]);
 	if (m_size != mask_size)
 	{
 		flrd::VolumeSampler sampler;
@@ -629,243 +630,210 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	if (!m_tex || !m_vr)
 		return;
 
-	Nrrd *nrrd_mask = 0;
-	uint8_t *val8 = 0;
-	unsigned long long mem_size = (unsigned long long)m_size.intx()*
-		(unsigned long long)m_size.inty()*(unsigned long long)m_size.intz();
+	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 	//prepare the texture bricks for the mask
 	bool empty = m_tex->add_empty_mask();
 	if (empty)
 	{
-		//add the nrrd data for mask
-		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8_t[mem_size];
-		if (!val8)
-		{
-			//SetProgress("Not enough memory. Please save project and restart.");
-			return;
-		}
-		auto spc = m_tex->get_spacing();
-		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		auto max_size = spc * m_size;
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
+		raw_mask = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3(
+				(size_t)m_size.intx(),
+				(size_t)m_size.inty(),
+				(size_t)m_size.intz()),
+			fluo::DataFormat::UInt8);
+		raw_mask->Allocate();
 
-		flvr::TexComp comp = { flvr::CompType::Mask, 1, nrrd_mask };
-		m_tex->set_nrrd(comp.type, comp);
+		flvr::TexComp comp = { flvr::CompType::Mask, 1, raw_mask };
+		m_tex->set_tex_comp(comp.type, comp);
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
-		val8 = (uint8_t*)comp.data->data;
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Mask);
+		raw_mask = comp.data;
 	}
 
 	if (empty || change)
 	{
 		if (mode == 0 || mode == 1)
 		{
-			if (val8)
-				std::memset((void*)val8, mode ?
-					255 : 0, mem_size * sizeof(uint8_t));
+			if (raw_mask)
+				raw_mask->FillZero();
 		}
 	}
 }
 
-void VolumeData::AddMask(Nrrd* mask, int op)
+void VolumeData::AddMask(const std::shared_ptr<fluo::RawData>& mask, int op)
 {
-	if (!mask || !mask->data || !m_tex || !m_vr)
+	if (!mask  || !m_tex || !m_vr)
 		return;
-	if (mask->dim != 3 ||
-		mask->axis[0].size != m_size.intx() ||
-		mask->axis[1].size != m_size.inty() ||
-		mask->axis[2].size != m_size.intz())
+	auto size = mask->GetSize();
+	if (size[0] != m_size.intx() ||
+		size[1] != m_size.inty() ||
+		size[2] != m_size.intz())
 		return;
 
-	Nrrd *nrrd_mask = 0;
-	uint8_t *val8 = 0;
-	unsigned long long mem_size = (unsigned long long)m_size.intx()*
-		(unsigned long long)m_size.inty()*(unsigned long long)m_size.intz();
+	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 	//prepare the texture bricks for the mask
 	bool empty = m_tex->add_empty_mask();
 	if (empty)
 	{
-		//add the nrrd data for mask
-		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8_t[mem_size];
-		if (!val8)
-		{
-			//SetProgress("Not enough memory. Please save project and restart.");
-			return;
-		}
-		auto spc = m_tex->get_spacing();
-		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		auto max_size = spc * m_size;
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
+		raw_mask = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3(
+				(size_t)m_size.intx(),
+				(size_t)m_size.inty(),
+				(size_t)m_size.intz()),
+			fluo::DataFormat::UInt8);
+		raw_mask->Allocate();
 
-		flvr::TexComp comp = { flvr::CompType::Mask, 1, nrrd_mask };
-		m_tex->set_nrrd(comp.type, comp);
+		flvr::TexComp comp = { flvr::CompType::Mask, 1, raw_mask };
+		m_tex->set_tex_comp(comp.type, comp);
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
-		val8 = (uint8_t*)comp.data->data;
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Mask);
+		raw_mask = comp.data;
 	}
 
-	if (val8)
+	if (raw_mask)
 	{
 		if (op > 0 && !empty)
 		{
-			switch (op)
-			{
-			case 1://union
-				for (unsigned long long index = 0;
-					index < mem_size; ++index)
+			// Normalize to references (important!)
+			fluo::RawData& dst = *raw_mask;
+			const fluo::RawData& src = *mask;
+			// --- Union / Exclude / Intersect -----------------------------------
+			fluo::RawData::DispatchBinary(
+				dst,
+				src,
+				[&](uint8_t a, uint8_t b) -> uint8_t
 				{
-					val8[index] = std::max(val8[index],
-						((uint8_t*)(mask->data))[index]);
-				}
-				break;
-			case 2://exclude
-				for (unsigned long long index = 0;
-					index < mem_size; ++index)
-				{
-					if (std::min(val8[index],
-						((uint8_t*)(mask->data))[index]) > 0)
-						val8[index] = 0;
-				}
-				break;
-			case 3://intersect
-				for (unsigned long long index = 0;
-					index < mem_size; ++index)
-				{
-					val8[index] = std::min(val8[index],
-						((uint8_t*)(mask->data))[index]);
-				}
-				break;
-			}
+					switch (op)
+					{
+					case 1:
+						// val8 = max(val8, mask)
+						return std::max(a, b);
+
+					case 2:
+						// if min(val8, mask) > 0 -> 0
+						return (std::min(a, b) > 0) ? 0 : a;
+
+					case 3:
+						// val8 = min(val8, mask)
+						return std::min(a, b);
+
+					default:
+						return a;
+					}
+				});
 		}
 		else//replace
 		{
-			memcpy(val8, mask->data, mem_size * sizeof(uint8_t));
+			std::memcpy(
+				raw_mask->GetData(),
+				mask->GetData(),
+				mask->GetTotalBytes());
 		}
 		m_vr->clear_tex_mask(false);
 	}
 }
 
-void VolumeData::AddMask16(Nrrd* mask, int op, double scale)
+void VolumeData::AddMaskConvert(const std::shared_ptr<fluo::RawData>& mask, int op, double scale)
 {
-	if (!mask || !mask->data || !m_tex || !m_vr)
+	if (!mask || !m_tex || !m_vr)
 		return;
-	if (mask->dim != 3 ||
-		mask->axis[0].size != m_size.intx() ||
-		mask->axis[1].size != m_size.inty() ||
-		mask->axis[2].size != m_size.intz())
+	auto size = mask->GetSize();
+	if (size[0] != m_size.intx() ||
+		size[1] != m_size.inty() ||
+		size[2] != m_size.intz())
 		return;
 
-	Nrrd *nrrd_mask = 0;
-	uint8_t *val8 = 0;
-	unsigned long long mem_size = (unsigned long long)m_size.intx()*
-		(unsigned long long)m_size.inty()*(unsigned long long)m_size.intz();
+	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 	//prepare the texture bricks for the mask
 	bool empty = m_tex->add_empty_mask();
 	if (empty)
 	{
-		//add the nrrd data for mask
-		nrrd_mask = nrrdNew();
-		val8 = new (std::nothrow) uint8_t[mem_size];
-		if (!val8)
-		{
-			//SetProgress("Not enough memory. Please save project and restart.");
-			return;
-		}
-		auto spc = m_tex->get_spacing();
-		nrrdWrap_va(nrrd_mask, val8, nrrdTypeUChar, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		auto max_size = spc * m_size;
-		nrrdAxisInfoSet_va(nrrd_mask, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
+		raw_mask = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3(
+				(size_t)m_size.intx(),
+				(size_t)m_size.inty(),
+				(size_t)m_size.intz()),
+			fluo::DataFormat::UInt8);
+		raw_mask->Allocate();
 
-		flvr::TexComp comp = { flvr::CompType::Mask, 1, nrrd_mask };
-		m_tex->set_nrrd(comp.type, comp);
+		flvr::TexComp comp = { flvr::CompType::Mask, 1, raw_mask };
+		m_tex->set_tex_comp(comp.type, comp);
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
-		val8 = (uint8_t*)comp.data->data;
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Mask);
+		raw_mask = comp.data;
 	}
 
-	if (val8)
+	if (raw_mask)
 	{
+		fluo::RawData& dst = *raw_mask;
+		const fluo::RawData& src = *mask;
+
 		if (op > 0 && !empty)
 		{
-			switch (op)
-			{
-			case 1://union
-				for (unsigned long long index = 0;
-					index < mem_size; ++index)
+			fluo::RawData::DispatchBinaryConvert(
+				dst,
+				src,
+				[op, scale](uint8_t dst_val, auto src_val) -> uint8_t
 				{
-					val8[index] = std::max(val8[index],
-						uint8_t(scale*((uint16_t*)(mask->data))[index]));
-				}
-				break;
-			case 2://exclude
-				for (unsigned long long index = 0;
-					index < mem_size; ++index)
-				{
-					if (std::min(val8[index],
-						uint8_t(scale*((uint16_t*)(mask->data))[index])) > 0)
-						val8[index] = 0;
-				}
-				break;
-			case 3://intersect
-				for (unsigned long long index = 0;
-					index < mem_size; ++index)
-				{
-					val8[index] = std::min(val8[index],
-						uint8_t(scale*((uint16_t*)(mask->data))[index]));
-				}
-				break;
-			}
+					const uint8_t src8 = ScaleToU8(src_val, scale);
+
+					switch (op)
+					{
+					case 1: // union
+						return std::max(dst_val, src8);
+
+					case 2: // exclude
+						return (std::min(dst_val, src8) > 0) ? 0 : dst_val;
+
+					case 3: // intersect
+						return std::min(dst_val, src8);
+
+					default:
+						return dst_val;
+					}
+				});
 		}
 		else//replace
 		{
-			for (unsigned long long index = 0;
-				index < mem_size; ++index)
-			{
-				val8[index] = uint8_t(scale*((uint16_t*)(mask->data))[index]);
-			}
+			fluo::RawData::DispatchBinaryConvert(
+				dst,
+				src,
+				[scale](uint8_t /*dst*/, auto src_val) -> uint8_t
+				{
+					return ScaleToU8(src_val, scale);
+				});
 		}
 		m_vr->clear_tex_mask(false);
 	}
 }
 
 //volume label
-void VolumeData::LoadLabel(Nrrd* label)
+void VolumeData::LoadLabel(const std::shared_ptr<fluo::RawData>& label)
 {
 	if (!label || !m_tex || !m_vr)
 		return;
 
 	m_tex->add_empty_label();
 	flvr::TexComp comp = { flvr::CompType::Label, 4, label };
-	m_tex->set_nrrd(flvr::CompType::Label, comp);
+	m_tex->set_tex_comp(flvr::CompType::Label, comp);
 
+	auto size = label->GetSize();
 	fluo::Vector size2(
-		label->axis[0].size,
-		label->axis[1].size,
-		label->axis[2].size);
+		size[0],
+		size[1],
+		size[2]);
 	if (m_size != size2)
 	{
 		flrd::VolumeSampler sampler;
 		sampler.SetInput(shared_from_this());
 		sampler.SetSize(m_size);
 		sampler.Resize(flrd::SDT_Label, true);
-		//nrrdNuke(label);
 		//label = sampler.GetResult();
 	}
 

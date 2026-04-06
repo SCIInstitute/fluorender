@@ -220,6 +220,27 @@ namespace fluo
 
 		std::pair<double, double> GetMinMax() const;
 
+		// --- Data population -------------------------------------------------
+		/// Set all elements to zero (type-correct zero)
+		void FillZero();
+
+		/// Fill with a constant value (double used as universal input)
+		void FillConstant(double value);
+
+		/// Fill with ordered sequence: start, step
+		void FillSequence();
+
+		template <typename Fn>
+		static void DispatchBinary(RawData& dst,
+			const RawData& rhs,
+			Fn&& fn);
+
+		template <typename Fn>
+		static void DispatchBinaryConvert(
+			RawData& dst,
+			const RawData& src,
+			Fn&& fn);
+
 	private:
 		Size3 m_size = { 0, 0, 0 };
 
@@ -242,6 +263,27 @@ namespace fluo
 		std::pair<double, double> ComputeMinMaxT() const;
 
 		std::pair<double, double> ComputeMinMaxInternal() const;
+
+		template <typename T, typename Fn>
+		void ForEachElementT(Fn&& fn)
+		{
+			T* data = DataAs<T>();
+			const size_t n = GetElementCount();
+
+			for (size_t i = 0; i < n; ++i)
+				fn(data[i], i);
+		}
+
+		template <typename T, typename Fn>
+		static void ForEachBinaryT(RawData& dst,
+			const RawData& rhs,
+			Fn&& fn);
+
+		template <typename DstT, typename SrcT, typename Fn>
+		static void ForEachBinaryConvertT(
+			RawData& dst,
+			const RawData& src,
+			Fn&& fn)
 	};
 
 	inline RawData::DeleterFn MakeNewArrayDeleter(DataFormat /*format*/)

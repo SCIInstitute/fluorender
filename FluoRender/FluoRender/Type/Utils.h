@@ -372,6 +372,14 @@ inline void SplitString(const std::string& input, std::vector<std::string>& toke
 	}
 }
 
+template <typename SrcT>
+static inline uint8_t ScaleToU8(SrcT v, double scale)
+{
+	double x = scale * static_cast<double>(v);
+	x = std::clamp(x, 0.0, 255.0);
+	return static_cast<uint8_t>(x);
+}
+
 } // namespace fluo
 
 #endif//_FLTYPEUTILS_H_
