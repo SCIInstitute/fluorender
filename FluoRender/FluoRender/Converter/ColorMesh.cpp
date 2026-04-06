@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 bool ColorMesh::GetInfo(
-	flvr::TextureBrick* b, long& bits,
+	const std::shared_ptr<flvr::TextureBrick>& b, long& bits,
 	long& nx, long& ny, long& nz,
 	long& ox, long& oy, long& oz)
 {
@@ -101,28 +101,27 @@ void ColorMesh::Update()
 		return;
 
 	int brick_num = vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*>* bricks = vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	//compute workload
 	size_t local_size[1] = { 1 };
 	size_t global_size[1] = { size_t(vertex_count) };
 
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz, ox, oy, oz;
-		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
+		if (!GetInfo(bbs, bits, nx, ny, nz, ox, oy, oz))
 			continue;
 
 		//get tex ids
 		GLint tid = 0;
 		if (m_use_sel)
-			tid = vd->GetVR()->load_brick_mask(b);
+			tid = vd->GetVR()->load_brick_mask(bbs);
 		else
-			tid = vd->GetVR()->load_brick(b);
+			tid = vd->GetVR()->load_brick(bbs);
 		GLint lid = 0;
 		if (m_use_comp)
-			lid = vd->GetVR()->load_brick_label(b);
+			lid = vd->GetVR()->load_brick_label(bbs);
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		cl_int3 voxel_cnt = { cl_int(nx), cl_int(ny), cl_int(nz) };
 		cl_int3 vol_org = { cl_int(ox), cl_int(oy), cl_int(oz) };

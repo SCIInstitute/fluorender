@@ -64,7 +64,7 @@ namespace flrd
 	protected:
 		std::string GetKernelStrColorMesh(int mode);//0: vol; 1: mask; 2: label
 
-		bool GetInfo(flvr::TextureBrick* b,
+		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long& bits, long& nx, long& ny, long& nz,
 			long& ox, long& oy, long& oz);
 

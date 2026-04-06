@@ -68,7 +68,7 @@ namespace flrd
 		std::string GetKernelStrSimplifyMesh();
 		std::string GetKernelStrSmoothMesh();
 
-		bool GetInfo(flvr::TextureBrick* b,
+		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long &bits, long &nx, long &ny, long &nz,
 			long &ox, long &oy, long &oz);
 

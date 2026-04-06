@@ -62,7 +62,7 @@ ConvVolMesh::~ConvVolMesh()
 }
 
 bool ConvVolMesh::GetInfo(
-	flvr::TextureBrick* b, long &bits,
+	const std::shared_ptr<flvr::TextureBrick>& b, long &bits,
 	long &nx, long &ny, long &nz,
 	long &ox, long &oy, long &oz)
 {
@@ -300,7 +300,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		return;
 	}
 
-	std::vector<flvr::TextureBrick*> *bricks = vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 	//estimate the buffer size
 	int vsize = 0;
 	std::weak_ptr<flvr::Argument> arg_vsize;
@@ -338,11 +338,10 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		hi_offset = static_cast<float>(vd->GetHighOffset());
 		sw = static_cast<float>(vd->GetSoftThreshold());
 	}
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz, ox, oy, oz;
-		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
+		if (!GetInfo(bbs, bits, nx, ny, nz, ox, oy, oz))
 			continue;
 
 		int xy_factor = clamp_factor(std::min(nx, ny), m_downsample);
@@ -352,10 +351,10 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		int ds_nz = nz / z_factor;
 
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(b);
+		GLint tid = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 
 		//compute workload
 		size_t local_size[3] = { 1, 1, 1 };
@@ -380,7 +379,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 			cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
 			cl_float4 loc3 = { 1.0f / gamma3d, lo_offset, hi_offset, sw };
 			cl_float4 loc17 = { gm_low, gm_high, gm_max, 0.0f };
-			fluo::BBox bbx = b->dbox();
+			fluo::BBox bbx = bbs->dbox();
 			cl_float3 scl = {
 				float(bbx.Max().x() - bbx.Min().x()),
 				float(bbx.Max().y() - bbx.Min().y()),
@@ -431,11 +430,10 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 	std::weak_ptr<flvr::Argument> arg_vertex_size;
 
 	//marching cubes
-	for (size_t i = 0; i < brick_num; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
 		long nx, ny, nz, ox, oy, oz;
-		if (!GetInfo(b, bits, nx, ny, nz, ox, oy, oz))
+		if (!GetInfo(bbs, bits, nx, ny, nz, ox, oy, oz))
 			continue;
 
 		int xy_factor = clamp_factor(std::min(nx, ny), m_downsample);
@@ -445,10 +443,10 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 		int ds_nz = nz / z_factor;
 
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(b);
+		GLint tid = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(b);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 
 		//compute workload
 		size_t local_size[3] = { 1, 1, 1 };
@@ -482,7 +480,7 @@ void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
 			cl_float4 loc2 = { inv ? -scalar_scale : scalar_scale, gm_scale, lo_thresh, hi_thresh };
 			cl_float4 loc3 = { 1.0f / gamma3d, lo_offset, hi_offset, sw };
 			cl_float4 loc17 = { gm_low, gm_high, gm_max, 0.0f };
-			fluo::BBox bbx = b->dbox();
+			fluo::BBox bbx = bbs->dbox();
 			cl_float3 scl = {
 				float(bbx.Max().x() - bbx.Min().x()),
 				float(bbx.Max().y() - bbx.Min().y()),
