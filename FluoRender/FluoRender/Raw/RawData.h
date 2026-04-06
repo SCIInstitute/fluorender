@@ -223,12 +223,15 @@ namespace fluo
 		// --- Data population -------------------------------------------------
 		/// Set all elements to zero (type-correct zero)
 		void FillZero();
-
 		/// Fill with a constant value (double used as universal input)
 		void FillConstant(double value);
-
 		/// Fill with ordered sequence: start, step
 		void FillSequence();
+
+		// ID layout generators
+		void FillOrderedID();
+		void FillReverseID();
+		void FillShuffledID();
 
 		template <typename Fn>
 		static void DispatchBinary(RawData& dst,
@@ -240,6 +243,13 @@ namespace fluo
 			RawData& dst,
 			const RawData& src,
 			Fn&& fn);
+
+		//search functions
+		template <typename Pred>
+		bool AnyOf(Pred&& pred) const;
+		bool ContainsUInt32(uint32_t value) const;
+		bool ContainsNonZero() const;
+		bool ContainsValue(double value) const;
 
 	private:
 		Size3 m_size = { 0, 0, 0 };
@@ -283,7 +293,10 @@ namespace fluo
 		static void ForEachBinaryConvertT(
 			RawData& dst,
 			const RawData& src,
-			Fn&& fn)
+			Fn&& fn);
+
+		template <typename T, typename Pred>
+		bool AnyOfT(Pred&& pred) const;
 	};
 
 	inline RawData::DeleterFn MakeNewArrayDeleter(DataFormat /*format*/)

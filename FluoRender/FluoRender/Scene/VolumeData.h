@@ -658,11 +658,6 @@ private:
 	float m_mask_wsum;
 
 private:
-	//label functions
-	void SetOrderedID(unsigned int* val);
-	void SetReverseID(unsigned int* val);
-	void SetShuffledID(unsigned int* val);
-
 	//update colormap range
 	void UpdateColormapRange();
 	bool UpdateGradientRuler();

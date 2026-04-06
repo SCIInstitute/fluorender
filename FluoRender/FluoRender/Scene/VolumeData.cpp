@@ -54,7 +54,6 @@ DEALINGS IN THE SOFTWARE.
 #include <tif_writer.h>
 #include <nrrd_writer.h>
 #include <msk_writer.h>
-#include <compatibility.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 VolumeData::VolumeData()
@@ -841,64 +840,6 @@ void VolumeData::LoadLabel(const std::shared_ptr<fluo::RawData>& label)
 		SetMaskMode(flvr::ColorMode::Component);
 }
 
-void VolumeData::SetOrderedID(unsigned int* val)
-{
-	int res_x, res_y, res_z;
-	res_x = m_size.intx();
-	res_y = m_size.inty();
-	res_z = m_size.intz();
-	for (int i=0; i<res_x; i++) for (int j=0; j<res_y; j++) for (int k=0; k<res_z; k++)
-	{
-		unsigned int index = res_y*res_z*i + res_z*j + k;
-		val[index] = index+1;
-	}
-}
-
-void VolumeData::SetReverseID(unsigned int* val)
-{
-	int res_x, res_y, res_z;
-	res_x = m_size.intx();
-	res_y = m_size.inty();
-	res_z = m_size.intz();
-	for (int i = 0; i < res_x; i++) for (int j = 0; j < res_y; j++) for (int k = 0; k < res_z; k++)
-	{
-		unsigned int index = res_y*res_z*i + res_z*j + k;
-		val[index] = res_x*res_y*res_z - index;
-	}
-}
-
-void VolumeData::SetShuffledID(unsigned int* val)
-{
-	int res_x, res_y, res_z;
-	res_x = m_size.intx();
-	res_y = m_size.inty();
-	res_z = m_size.intz();
-	unsigned int x, y, z;
-	unsigned int res;
-	unsigned int len = 0;
-	unsigned int r = std::max(res_x, std::max(res_y, res_z));
-	while (r > 0)
-	{
-		r /= 2;
-		len++;
-	}
-	for (int i = 0; i < res_x; i++) for (int j = 0; j < res_y; j++) for (int k = 0; k < res_z; k++)
-	{
-		x = reverse_bit(i, len);
-		y = reverse_bit(j, len);
-		z = reverse_bit(k, len);
-		res = 0;
-		for (unsigned int ii=0; ii<len; ii++)
-		{
-			res |= (1<<ii & x)<<(2*ii);
-			res |= (1<<ii & y)<<(2*ii+1);
-			res |= (1<<ii & z)<<(2*ii+2);
-		}
-		unsigned int index = res_x*res_y*k + res_x*j + i;
-		val[index] = res_x*res_y*res_z - res;
-	}
-}
-
 void VolumeData::UpdateColormapRange()
 {
 	switch (m_colormap_proj)
@@ -1023,38 +964,31 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 	if (!m_tex || !m_vr)
 		return;
 
-	Nrrd *nrrd_label = 0;
-	unsigned int *val32 = 0;
+	std::shared_ptr<fluo::RawData> raw_label = nullptr;
 	bool exist = false;
 	//prepare the texture bricks for the labeling mask
 	if (m_tex->add_empty_label())
 	{
-		//add the nrrd data for the labeling mask
-		nrrd_label = nrrdNew();
-		unsigned long long mem_size = (unsigned long long)m_size.intx() *
-			(unsigned long long)m_size.inty() * (unsigned long long)m_size.intz();
-		val32 = new (std::nothrow) unsigned int[mem_size];
-		if (!val32)
+		raw_label = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3(
+				(size_t)m_size.intx(),
+				(size_t)m_size.inty(),
+				(size_t)m_size.intz()),
+			fluo::DataFormat::UInt32);
+		raw_label->Allocate();
+		if (!raw_label)
 		{
 			//SetProgress("Not enough memory. Please save project and restart.");
 			return;
 		}
 
-		auto spc = m_tex->get_spacing();
-		nrrdWrap_va(nrrd_label, val32, nrrdTypeUInt, 3, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSize, (size_t)m_size.intx(), (size_t)m_size.inty(), (size_t)m_size.intz());
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoSpacing, spc.x(), spc.y(), spc.z());
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMin, 0.0, 0.0, 0.0);
-		auto max_size = spc * m_size;
-		nrrdAxisInfoSet_va(nrrd_label, nrrdAxisInfoMax, max_size.x(), max_size.y(), max_size.z());
-
-		flvr::TexComp comp = { flvr::CompType::Label, 1, nrrd_label };
-		m_tex->set_nrrd(comp.type, comp);
+		flvr::TexComp comp = { flvr::CompType::Label, 1, raw_label };
+		m_tex->set_tex_comp(comp.type, comp);
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Label);
-		val32 = (unsigned int*)comp.data->data;
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Label);
+		raw_label = comp.data;
 		exist = true;
 	}
 
@@ -1064,13 +998,13 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 		switch (mode)
 		{
 		case 0://zeros
-			std::memset(val32, 0, sizeof(unsigned int)*GetVoxelCount());
+			raw_label->FillZero();
 			break;
 		case 1://ordered
-			SetOrderedID(val32);
+			raw_label->FillOrderedID();
 			break;
 		case 2://shuffled
-			SetShuffledID(val32);
+			raw_label->FillShuffledID();
 			break;
 		}
 	}
@@ -1085,40 +1019,34 @@ bool VolumeData::SearchLabel(unsigned int label)
 	if (!m_tex)
 		return false;
 
-	auto comp = m_tex->get_nrrd(flvr::CompType::Label);
-	if (!comp.data)
-		return false;
-	unsigned int* data_label = (unsigned int*)(comp.data->data);
-	if (!data_label)
+	auto comp = m_tex->get_tex_comp(flvr::CompType::Label);
+	auto raw_label = comp.data;
+	if (!raw_label)
 		return false;
 
-	unsigned long long for_size = GetVoxelCount();
-	for (unsigned long long index = 0; index < for_size; ++index)
-		if (data_label[index] == label)
-			return true;
-	return false;
+	return raw_label->ContainsUInt32(label);
 }
 
-Nrrd* VolumeData::GetVolume(bool ret)
+std::shared_ptr<fluo::RawData> VolumeData::GetVolume(bool ret)
 {
 	if (m_vr && m_tex)
 	{
 		if (ret) m_vr->return_volume();
-		return m_tex->get_nrrd(flvr::CompType::Data).data;
+		return m_tex->get_tex_comp(flvr::CompType::Data).data;
 	}
 
-	return 0;
+	return nullptr;
 }
 
-Nrrd* VolumeData::GetMask(bool ret)
+std::shared_ptr<fluo::RawData> VolumeData::GetMask(bool ret)
 {
 	if (m_vr && m_tex && m_tex->has_comp(flvr::CompType::Mask))
 	{
 		if (ret) m_vr->return_mask();
-		return m_tex->get_nrrd(flvr::CompType::Mask).data;
+		return m_tex->get_tex_comp(flvr::CompType::Mask).data;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 bool VolumeData::IsValidMask()
@@ -1139,68 +1067,40 @@ bool VolumeData::IsValidMask()
 	return m_mask_sum;
 }
 
-Nrrd* VolumeData::GetLabel(bool ret)
+std::shared_ptr<fluo::RawData> VolumeData::GetLabel(bool ret)
 {
 	if (m_vr && m_tex && m_tex->has_comp(flvr::CompType::Label))
 	{
 		if (ret) m_vr->return_label();
-		return m_tex->get_nrrd(flvr::CompType::Label).data;
+		return m_tex->get_tex_comp(flvr::CompType::Label).data;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 double VolumeData::GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b)
 {
-	void *data_data = 0;
-	int bits = 8;
-	int64_t nx, ny, nz;
+	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 
 	if (isBrxml())
 	{
 		if (!b || !b->isLoaded()) return 0.0;
-		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
-		data_data = b->tex_data_brk(flvr::CompType::Data, finfo);
-		if (!data_data) return 0.0;
-		bits = b->nb(flvr::CompType::Data) * 8;
-		auto res_b = b->get_size();
-		nx = res_b.intx();
-		ny = res_b.inty();
-		nz = res_b.intz();
+		auto finfo = m_tex->GetFileName(b->getID());
+		raw_data = b->get_raw_data_lod(flvr::CompType::Data, finfo);
+		if (!raw_data) return 0.0;
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Data);
-		if (!comp.data || !comp.data->data) return 0.0;
-		data_data = comp.data->data;
-		if (comp.data->type == nrrdTypeUChar)
-			bits = 8;
-		else if (comp.data->type == nrrdTypeUShort)
-			bits = 16;
-		nx = (int64_t)(comp.data->axis[0].size);
-		ny = (int64_t)(comp.data->axis[1].size);
-		nz = (int64_t)(comp.data->axis[2].size);
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Data);
+		raw_data = comp.data;
+		if (!raw_data) return 0.0;
 	}
 
 	fluo::Vector pv(p);
 	if (pv.any_l_zero() || pv.any_ge(m_size))
 		return 0.0;
-	uint64_t ii = p.intx(), jj = p.inty(), kk = p.intz();
 
-	if (bits == 8)
-	{
-		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint8_t old_value = ((uint8_t*)(data_data))[index];
-		return double(old_value)/255.0;
-	}
-	else if (bits == 16)
-	{
-		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint16_t old_value = ((uint16_t*)(data_data))[index];
-		return double(old_value)*m_scalar_scale/65535.0;
-	}
-
-	return 0.0;
+	return raw_data->GetVoxelValue(p.intx(), p.inty(), p.intz());
 }
 
 double VolumeData::GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b)

@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <RawData.h>
+#include <compatibility.h>
 #include <cstring>
 #include <Debug.h>
 
@@ -383,6 +384,99 @@ namespace fluo
 			return;
 	}
 
+	void RawData::FillOrderedID()
+	{
+		if (m_format != DataFormat::UInt32)
+			throw std::runtime_error("FillOrderedID requires UInt32 format");
+
+		uint32_t* val = DataAs<uint32_t>();
+
+		const size_t res_x = m_size[0];
+		const size_t res_y = m_size[1];
+		const size_t res_z = m_size[2];
+
+		for (size_t i = 0; i < res_x; ++i)
+		for (size_t j = 0; j < res_y; ++j)
+		for (size_t k = 0; k < res_z; ++k)
+		{
+			size_t index = res_y * res_z * i +
+				res_z * j + k;
+
+			val[index] = static_cast<uint32_t>(index + 1);
+		}
+	}
+
+	void RawData::FillReverseID()
+	{
+		if (m_format != DataFormat::UInt32)
+			throw std::runtime_error("FillReverseID requires UInt32 format");
+
+		uint32_t* val = DataAs<uint32_t>();
+
+		const size_t res_x = m_size[0];
+		const size_t res_y = m_size[1];
+		const size_t res_z = m_size[2];
+		const uint32_t total =
+			static_cast<uint32_t>(res_x * res_y * res_z);
+
+		for (size_t i = 0; i < res_x; ++i)
+		for (size_t j = 0; j < res_y; ++j)
+		for (size_t k = 0; k < res_z; ++k)
+		{
+			size_t index = res_y * res_z * i +
+				res_z * j + k;
+
+			val[index] = total - static_cast<uint32_t>(index);
+		}
+	}
+
+	void RawData::FillShuffledID()
+	{
+		if (m_format != DataFormat::UInt32)
+			throw std::runtime_error("FillShuffledID requires UInt32 format");
+
+		uint32_t* val = DataAs<uint32_t>();
+
+		const size_t res_x = m_size[0];
+		const size_t res_y = m_size[1];
+		const size_t res_z = m_size[2];
+		const uint32_t total =
+			static_cast<uint32_t>(res_x * res_y * res_z);
+
+		// Compute bit length
+		unsigned int r = static_cast<unsigned int>(
+			std::max(res_x, std::max(res_y, res_z)));
+
+		unsigned int len = 0;
+		while (r > 0)
+		{
+			r >>= 1;
+			++len;
+		}
+
+		for (size_t i = 0; i < res_x; ++i)
+		for (size_t j = 0; j < res_y; ++j)
+		for (size_t k = 0; k < res_z; ++k)
+		{
+			unsigned int x = reverse_bit(static_cast<unsigned int>(i), len);
+			unsigned int y = reverse_bit(static_cast<unsigned int>(j), len);
+			unsigned int z = reverse_bit(static_cast<unsigned int>(k), len);
+
+			unsigned int res = 0;
+			for (unsigned int ii = 0; ii < len; ++ii)
+			{
+				res |= ((x >> ii) & 1u) << (3 * ii);
+				res |= ((y >> ii) & 1u) << (3 * ii + 1);
+				res |= ((z >> ii) & 1u) << (3 * ii + 2);
+			}
+
+			size_t index = res_x * res_y * k +
+				res_x * j + i;
+
+			val[index] = total - res;
+		}
+	}
+
 	template <typename T, typename Fn>
 	void RawData::ForEachBinaryT(
 		RawData& dst,
@@ -551,6 +645,98 @@ namespace fluo
 			throw std::runtime_error(
 				"DispatchBinaryConvert: unsupported destination format");
 		}
+	}
+
+	template <typename T, typename Pred>
+	bool RawData::AnyOfT(Pred&& pred) const
+	{
+		const T* data = DataAs<T>();
+		const size_t n = GetElementCount();
+
+		for (size_t i = 0; i < n; ++i)
+		{
+			if (pred(data[i]))
+				return true;
+		}
+		return false;
+	}
+
+	template <typename Pred>
+	bool RawData::AnyOf(Pred&& pred) const
+	{
+		if (!IsAllocated())
+			return false;
+
+		switch (m_format)
+		{
+		case DataFormat::UInt8:
+			return AnyOfT<uint8_t>(pred);
+		case DataFormat::UInt16:
+			return AnyOfT<uint16_t>(pred);
+		case DataFormat::UInt32:
+			return AnyOfT<uint32_t>(pred);
+		case DataFormat::Int8:
+			return AnyOfT<int8_t>(pred);
+		case DataFormat::Int16:
+			return AnyOfT<int16_t>(pred);
+		case DataFormat::Int32:
+			return AnyOfT<int32_t>(pred);
+		case DataFormat::Float32:
+			return AnyOfT<float>(pred);
+		case DataFormat::Float64:
+			return AnyOfT<double>(pred);
+		default:
+			return false;
+		}
+	}
+
+	bool RawData::ContainsUInt32(uint32_t value) const
+	{
+		if (m_format != DataFormat::UInt32)
+			throw std::runtime_error("ContainsUInt32 requires UInt32 format");
+
+		return AnyOf([value](uint32_t v)
+			{
+				return v == value;
+			});
+	}
+
+	bool RawData::ContainsNonZero() const noexcept
+	{
+		if (!IsAllocated())
+			return false;
+
+		return AnyOf([](auto v)
+			{
+				using T = std::decay_t<decltype(v)>;
+
+				if constexpr (std::is_floating_point_v<T>)
+					return v != static_cast<T>(0);
+				else
+					return v != 0;
+			});
+	}
+
+	bool RawData::ContainsValue(double value) const noexcept
+	{
+		if (!IsAllocated())
+			return false;
+
+		return AnyOf([value](auto v)
+			{
+				using T = std::decay_t<decltype(v)>;
+
+				if constexpr (std::is_floating_point_v<T>)
+				{
+					// Exact comparison by design
+					return static_cast<double>(v) == value;
+				}
+				else
+				{
+					// Integer comparison after conversion
+					return static_cast<double>(v) == value;
+				}
+			});
 	}
 
 } // namespace fluo
