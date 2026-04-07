@@ -699,39 +699,48 @@ void ScriptProc::RunPostTracking()
 		glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 	}
 
-	Nrrd* mask_nrrd = cur_vol->GetMask(false);
-	Nrrd* label_nrrd = cur_vol->GetLabel(false);
-	if (!mask_nrrd || !label_nrrd)
+	auto raw_mask = cur_vol->GetMask(false);
+	auto raw_label = cur_vol->GetLabel(false);
+
+	if (!raw_mask || !raw_label)
 	{
 		UpdateTraceDlg();
 		return;
 	}
-	unsigned char* mask_data = (unsigned char*)(mask_nrrd->data);
-	unsigned int* label_data = (unsigned int*)(label_nrrd->data);
-	if (!mask_data || !label_data)
+
+	// --- sanity checks ----------------------------------------------------
+	if (raw_mask->GetFormat() != fluo::DataFormat::UInt8 ||
+		raw_label->GetFormat() != fluo::DataFormat::UInt32 ||
+		raw_mask->GetElementCount() != raw_label->GetElementCount())
 	{
-		UpdateTraceDlg();
 		return;
 	}
-	auto res = cur_vol->GetResolution();
-	//update the mask according to the new label
-	unsigned long long for_size = res.get_size_xyz();
-	std::memset((void*)mask_data, 0, sizeof(uint8_t) * for_size);
-	for (unsigned long long idx = 0;
-		idx < for_size; ++idx)
-	{
-		unsigned int label_value = label_data[idx];
-		if (tg->GetTrackMap()->GetFrameNum())
+
+	// --- clear mask -------------------------------------------------------
+	raw_mask->FillZero();
+
+	// --- build selection predicate ---------------------------------------
+	const bool use_tracking =
+		tg->GetTrackMap()->GetFrameNum() != 0;
+
+	// --- update mask from label ------------------------------------------
+	fluo::RawData::DispatchBinaryConvert(
+		*raw_mask,
+		*raw_label,
+		[this, use_tracking, tg](uint8_t /*mask*/, uint32_t label_value) -> uint8_t
 		{
-			if (tg->FindCell(label_value))
-				mask_data[idx] = 255;
-		}
-		else
-		{
-			if (m_sel_labels->find(label_value) != m_sel_labels->end())
-				mask_data[idx] = 255;
-		}
-	}
+			if (use_tracking)
+			{
+				return tg->FindCell(label_value) ? 255 : 0;
+			}
+			else
+			{
+				return (m_sel_labels->find(label_value) !=
+						m_sel_labels->end())
+						   ? 255
+						   : 0;
+			}
+		});
 	UpdateTraceDlg();
 }
 
@@ -938,9 +947,9 @@ void ScriptProc::RunFetchMask()
 			MSKReader msk_reader;
 			std::wstring mskname = reader->GetCurMaskName(curf, it->GetCurChannel());
 			msk_reader.SetFile(mskname);
-			Nrrd* mask_nrrd_new = msk_reader.Convert(curf, it->GetCurChannel(), true);
-			if (mask_nrrd_new)
-				it->LoadMask(mask_nrrd_new);
+			auto raw_mask_new = msk_reader.Convert(curf, it->GetCurChannel(), true);
+			if (raw_mask_new)
+				it->LoadMask(raw_mask_new);
 			//else
 			//	it->AddEmptyMask(0, true);
 		}
@@ -950,9 +959,9 @@ void ScriptProc::RunFetchMask()
 			LBLReader lbl_reader;
 			std::wstring lblname = reader->GetCurLabelName(curf, it->GetCurChannel());
 			lbl_reader.SetFile(lblname);
-			Nrrd* label_nrrd_new = lbl_reader.Convert(curf, it->GetCurChannel(), true);
-			if (label_nrrd_new)
-				it->LoadLabel(label_nrrd_new);
+			auto raw_label_new = lbl_reader.Convert(curf, it->GetCurChannel(), true);
+			if (raw_label_new)
+				it->LoadLabel(raw_label_new);
 			//else
 			//	it->AddEmptyLabel(0, true);
 		}
@@ -2447,13 +2456,13 @@ void ScriptProc::RunDlcLabel()
 		char* image = new char[res.get_size_xy() * 3]();
 		char* datar = 0;
 		if (vd_rgb[0])
-			datar = (char*)(vd_rgb[0]->GetTexture()->get_nrrd(flvr::CompType::Data).data->data);
+			datar = vd_rgb[0]->GetTexture()->get_tex_comp(flvr::CompType::Data).data->DataAs<char>();
 		char* datag = 0;
 		if (vd_rgb[1])
-			datag = (char*)(vd_rgb[1]->GetTexture()->get_nrrd(flvr::CompType::Data).data->data);
+			datag = vd_rgb[1]->GetTexture()->get_tex_comp(flvr::CompType::Data).data->DataAs<char>();
 		char* datab = 0;
 		if (vd_rgb[2])
-			datab = (char*)(vd_rgb[2]->GetTexture()->get_nrrd(flvr::CompType::Data).data->data);
+			datab = vd_rgb[2]->GetTexture()->get_tex_comp(flvr::CompType::Data).data->DataAs<char>();
 		for (int i = 0; i < isize; ++i)
 		{
 			if (datar)
