@@ -175,6 +175,13 @@ namespace fluo
 
 		double GetVoxelValue(
 			size_t x, size_t y, size_t z) const noexcept;
+		double GetNormalizedValue(
+			size_t x, size_t y, size_t z,
+			double scalar_scale = 1.0) const noexcept;
+		double GetGradientMagnitude(
+			size_t x, size_t y, size_t z,
+			double scalar_scale = 1.0) const noexcept;
+
 		// --- Raw memory access -------------------------------------------------
 
 		/// Canonical raw byte access
@@ -300,6 +307,11 @@ namespace fluo
 
 		template <typename T, typename Pred>
 		bool AnyOfT(Pred&& pred) const;
+
+		template <typename T>
+		double GradientMagnitudeT(
+			size_t x, size_t y, size_t z,
+			double scalar_scale) const noexcept;
 	};
 
 	inline RawData::DeleterFn MakeNewArrayDeleter(DataFormat /*format*/)

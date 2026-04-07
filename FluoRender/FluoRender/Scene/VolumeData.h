@@ -457,7 +457,7 @@ public:
 	//save label
 	void PushLabel(bool ret);
 	void PopLabel();
-	void LoadLabel2();
+	void LoadLabelFromSave();
 
 	//backgeound intensity
 	bool GetBackgroundValid()
@@ -497,7 +497,7 @@ private:
 	fluo::BBox m_bounds;
 
 	//save label
-	void* m_label_save;
+	std::shared_ptr<fluo::RawData> m_label_snapshot;
 
 	int m_chan;	//channel index of the original file
 	int m_time;	//time index of the original file

@@ -153,7 +153,7 @@ void ComponentGenerator::GenerateComp(bool command)
 	vd->AddEmptyMask(1, !m_use_sel);//select all if no mask, otherwise keep
 	if (m_fixate && vd->GetLabel(false))
 	{
-		vd->LoadLabel2();
+		vd->LoadLabelFromSave();
 		SetIDBit(m_fix_size);
 	}
 	else

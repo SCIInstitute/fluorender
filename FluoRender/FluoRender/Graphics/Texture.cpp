@@ -88,10 +88,6 @@ namespace flvr
 				if (!existInPyramid)
 				{
 					raw.reset();
-					//if (type == CompType::Mask && mask_undo_num_)
-					//	nrrdNix(nrrd);
-					//else
-					//	nrrdNuke(nrrd);
 				}
 			}
 		}
@@ -762,7 +758,6 @@ namespace flvr
 
 	}
 
-	//set nrrd
 	void Texture::set_tex_comp(CompType type, TexComp comp)
 	{
 		auto raw = comp.data;

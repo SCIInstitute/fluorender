@@ -169,9 +169,6 @@ VolumeData::VolumeData()
 	//valid brick number
 	m_brick_num = 0;
 
-	//save label
-	m_label_save = 0;
-
 	//background intensity
 	m_bg_valid = false;
 	m_bg_int = 0;
@@ -319,9 +316,6 @@ VolumeData::VolumeData(VolumeData &copy)
 	//valid brick number
 	m_brick_num = 0;
 
-	//save label
-	m_label_save = 0;
-
 	//background intensity
 	m_bg_valid = false;
 	m_bg_int = 0;
@@ -341,8 +335,6 @@ VolumeData::VolumeData(VolumeData &copy)
 
 VolumeData::~VolumeData()
 {
-	if (m_label_save)
-		delete[] m_label_save;
 }
 
 //set viewport
@@ -1105,182 +1097,113 @@ double VolumeData::GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b)
 
 double VolumeData::GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b)
 {
-	void *data_data = 0;
-	int bits = 8;
-	int64_t nx, ny, nz;
+	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 
 	if (isBrxml())
 	{
 		if (!b || !b->isLoaded()) return 0.0;
-		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
-		data_data = b->tex_data_brk(flvr::CompType::Mask, finfo);
-		if (!data_data) return 0.0;
-		bits = b->nb(flvr::CompType::Mask) * 8;
-		auto res_b = b->get_size();
-		nx = res_b.intx();
-		ny = res_b.inty();
-		nz = res_b.intz();
+		auto finfo = m_tex->GetFileName(b->getID());
+		raw_mask = b->get_raw_data_lod(flvr::CompType::Mask, finfo);
+		if (!raw_mask) return 0.0;
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Mask);
-		if (!comp.data || !comp.data->data) return 0.0;
-		data_data = comp.data->data;
-		if (comp.data->type == nrrdTypeUChar)
-			bits = 8;
-		else if (comp.data->type == nrrdTypeUShort)
-			bits = 16;
-		nx = (int64_t)(comp.data->axis[0].size);
-		ny = (int64_t)(comp.data->axis[1].size);
-		nz = (int64_t)(comp.data->axis[2].size);
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Mask);
+		raw_mask = comp.data;
+		if (!raw_mask) return 0.0;
 	}
 
 	fluo::Vector pv(p);
 	if (pv.any_l_zero() || pv.any_ge(m_size))
 		return 0.0;
-	uint64_t ii = p.intx(), jj = p.inty(), kk = p.intz();
 
-	if (bits == 8)
-	{
-		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint8_t old_value = ((uint8_t*)(data_data))[index];
-		return double(old_value)/255.0;
-	}
-	else if (bits == 16)
-	{
-		uint64_t index = (nx)*(ny)*(kk) + (nx)*(jj) + (ii);
-		uint16_t old_value = ((uint16_t*)(data_data))[index];
-		return double(old_value)*m_scalar_scale/65535.0;
-	}
-
-	return 0.0;
+	return raw_mask->GetVoxelValue(p.intx(), p.inty(), p.intz());
 }
 
-double VolumeData::GetTransferedValue(const fluo::Point& p, flvr::TextureBrick* b)
+double VolumeData::GetTransferedValue(
+	const fluo::Point& p,
+	flvr::TextureBrick* b)
 {
-	void *data_data = 0;
-	int bits = 8;
-	int64_t nx, ny, nz;
+	std::shared_ptr<fluo::RawData> raw_data;
 
+	// --- resolve raw data (unchanged logic) -----------------------------
 	if (isBrxml())
 	{
-		if (!b || !b->isLoaded()) return 0.0;
-		flvr::FileLocInfo *finfo = m_tex->GetFileName(b->getID());
-		data_data = b->tex_data_brk(flvr::CompType::Data, finfo);
-		if (!data_data) return 0.0;
-		bits = b->nb(flvr::CompType::Data) * 8;
-		auto res_b = b->get_size();
-		nx = res_b.intx();
-		ny = res_b.inty();
-		nz = res_b.intz();
+		if (!b || !b->isLoaded())
+			return 0.0;
+
+		auto finfo = m_tex->GetFileName(b->getID());
+		raw_data = b->get_raw_data_lod(flvr::CompType::Data, finfo);
 	}
 	else
 	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Data);
-		if (!comp.data || !comp.data->data) return 0.0;
-		data_data = comp.data->data;
-		if (comp.data->type == nrrdTypeUChar)
-			bits = 8;
-		else if (comp.data->type == nrrdTypeUShort)
-			bits = 16;
-		nx = (int64_t)(comp.data->axis[0].size);
-		ny = (int64_t)(comp.data->axis[1].size);
-		nz = (int64_t)(comp.data->axis[2].size);
+		auto comp = m_tex->get_tex_comp(flvr::CompType::Data);
+		raw_data = comp.data;
 	}
 
+	if (!raw_data)
+		return 0.0;
+
+	// --- bounds check ---------------------------------------------------
 	fluo::Vector pv(p);
 	if (pv.any_l_zero() || pv.any_ge(m_size))
 		return 0.0;
-	uint64_t ii = p.intx(), jj = p.inty(), kk = p.intz();
 
-	if (bits == 8)
+	const size_t x = p.intx();
+	const size_t y = p.inty();
+	const size_t z = p.intz();
+
+	// --- sample raw data (NEW, via RawData) -----------------------------
+	double value = raw_data->GetNormalizedValue(
+		x, y, z, m_scalar_scale);
+
+	double gm = raw_data->GetGradientMagnitude(
+		x, y, z, m_scalar_scale);
+
+	// --- inversion ------------------------------------------------------
+	if (m_vr->get_inversion())
+		value = 1.0 - value;
+
+	// --- transfer function (UNCHANGED SEMANTICS) ------------------------
+	if (value < m_lo_thresh - m_sw ||
+		value > m_hi_thresh + m_sw)
 	{
-		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint8_t old_value = ((uint8_t*)(data_data))[index];
-		double gm = 0.0;
-		double new_value = double(old_value)/255.0;
-		if (m_vr->get_inversion())
-			new_value = 1.0-new_value;
-		if (ii > 0 && ii < nx - 1 &&
-			jj>0 && jj < ny - 1 &&
-			kk>0 && kk < nz - 1)
-		{
-			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8_t*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8_t*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
-			double normal_x, normal_y, normal_z;
-			normal_x = (v2 - v1) / 255.0;
-			normal_y = (v4 - v3) / 255.0;
-			normal_z = (v6 - v5) / 255.0;
-			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
-		}
-		if (new_value<m_lo_thresh-m_sw ||
-			new_value>m_hi_thresh+m_sw)
-			new_value = 0.0;
-		else
-		{
-			double gamma = 1.0 / m_gamma;
-			new_value = (new_value<m_lo_thresh?
-				(m_sw-m_lo_thresh+new_value)/m_sw:
-			(new_value>m_hi_thresh?
-				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
-				*new_value;
-			double gmf = 5.0 * (gm - m_boundary_low) * (m_boundary_max - m_boundary_high) / m_boundary_max / (m_boundary_high - m_boundary_low);
-			new_value *= gm < m_boundary_low ? gm / m_boundary_low : 1.0 + gmf * gmf;
-			new_value = pow(fluo::Clamp((new_value-m_lo_offset)/(m_hi_offset-m_lo_offset),
-				gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
-			new_value *= m_alpha;
-		}
-		return new_value;
-	}
-	else if (bits == 16)
-	{
-		uint64_t index = nx*ny*kk + nx*jj + ii;
-		uint16_t old_value = ((uint16_t*)(data_data))[index];
-		double gm = 0.0;
-		double new_value = double(old_value)*m_scalar_scale/65535.0;
-		if (m_vr->get_inversion())
-			new_value = 1.0-new_value;
-		if (ii>0 && ii<nx-1 &&
-			jj>0 && jj<ny-1 &&
-			kk>0 && kk<nz-1)
-		{
-			double v1 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii-1];
-			double v2 = ((uint8_t*)(data_data))[nx*ny*kk + nx*jj + ii+1];
-			double v3 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj-1) + ii];
-			double v4 = ((uint8_t*)(data_data))[nx*ny*kk + nx*(jj+1) + ii];
-			double v5 = ((uint8_t*)(data_data))[nx*ny*(kk-1) + nx*jj + ii];
-			double v6 = ((uint8_t*)(data_data))[nx*ny*(kk+1) + nx*jj + ii];
-			double normal_x, normal_y, normal_z;
-			normal_x = (v2 - v1)*m_scalar_scale/65535.0;
-			normal_y = (v4 - v3)*m_scalar_scale/65535.0;
-			normal_z = (v6 - v5)*m_scalar_scale/65535.0;
-			gm = sqrt(normal_x*normal_x + normal_y*normal_y + normal_z*normal_z)*0.53;
-		}
-		if (new_value<m_lo_thresh-m_sw ||
-			new_value>m_hi_thresh+m_sw)
-			new_value = 0.0;
-		else
-		{
-			double gamma = 1.0 / m_gamma;
-			new_value = (new_value<m_lo_thresh?
-				(m_sw-m_lo_thresh+new_value)/m_sw:
-			(new_value>m_hi_thresh?
-				(m_sw-new_value+m_hi_thresh)/m_sw:1.0))
-				*new_value;
-			double gmf = 5.0 * (gm - m_boundary_low) * (m_boundary_max - m_boundary_high) / m_boundary_max / (m_boundary_high - m_boundary_low);
-			new_value *= gm < m_boundary_low ? gm / m_boundary_low : 1.0 + gmf * gmf;
-			new_value = pow(fluo::Clamp((new_value-m_lo_offset)/(m_hi_offset-m_lo_offset),
-				gamma<1.0?-(gamma-1.0)*0.00001:0.0, 1.0), gamma);
-			new_value *= m_alpha;
-		}
-		return new_value;
+		return 0.0;
 	}
 
-	return 0.0;
+	const double gamma = 1.0 / m_gamma;
+
+	// soft thresholding
+	value = (value < m_lo_thresh ?
+		(m_sw - m_lo_thresh + value) / m_sw :
+		(value > m_hi_thresh ?
+			(m_sw - value + m_hi_thresh) / m_sw : 1.0))
+		* value;
+
+	// boundary enhancement
+	double gmf = 5.0 *
+		(gm - m_boundary_low) *
+		(m_boundary_max - m_boundary_high) /
+		m_boundary_max /
+		(m_boundary_high - m_boundary_low);
+
+	value *= (gm < m_boundary_low)
+		? gm / m_boundary_low
+		: 1.0 + gmf * gmf;
+
+	// gamma + offset
+	value = std::pow(
+		fluo::Clamp(
+			(value - m_lo_offset) /
+			(m_hi_offset - m_lo_offset),
+			gamma < 1.0 ? -(gamma - 1.0) * 0.00001 : 0.0,
+			1.0),
+		gamma);
+
+	// alpha
+	value *= m_alpha;
+
+	return value;
 }
 
 //save
@@ -1345,18 +1268,15 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 	if (temp)
 	{
 		if (temp->m_tex)
-			comp = temp->m_tex->get_nrrd(flvr::CompType::Data);
+			comp = temp->m_tex->get_tex_comp(flvr::CompType::Data);
 	}
 	else
 	{
-		comp = m_tex->get_nrrd(flvr::CompType::Data);
+		comp = m_tex->get_tex_comp(flvr::CompType::Data);
 	}
 	if (comp.data)
 	{
-		auto spc = fluo::Vector(
-			comp.data->axis[0].spacing,
-			comp.data->axis[1].spacing,
-			comp.data->axis[2].spacing);
+		auto spc = GetSpacing();
 		writer->SetData(comp.data);
 		writer->SetSpacing(spc);
 		writer->SetCompression(compress);
@@ -1388,16 +1308,15 @@ void VolumeData::SaveMask(bool use_reader, int t, int c)
 	if (!m_vr || !m_tex)
 		return;
 
-	Nrrd* data = 0;
 	auto spc = GetSpacing();
 
 	//save mask
-	data = GetMask(true);
-	if (!data)
+	auto raw_mask = GetMask(true);
+	if (!raw_mask)
 		return;
 
 	MSKWriter msk_writer;
-	msk_writer.SetData(data);
+	msk_writer.SetData(raw_mask);
 	msk_writer.SetSpacing(spc);
 	std::wstring filename;
 	if (use_reader)
@@ -1415,16 +1334,15 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 	if (!m_vr || !m_tex)
 		return;
 
-	Nrrd* data = 0;
 	auto spc = GetSpacing();
 
 	//save label
-	data = GetLabel(true);
-	if (!data)
+	auto raw_label = GetLabel(true);
+	if (!raw_label)
 		return;
 
 	MSKWriter msk_writer;
-	msk_writer.SetData(data);
+	msk_writer.SetData(raw_label);
 	msk_writer.SetSpacing(spc);
 	std::wstring filename;
 	if (use_reader)
@@ -2711,14 +2629,10 @@ int VolumeData::GetBits()
 {
 	if (!m_tex)
 		return 0;
-	auto comp = m_tex->get_nrrd(flvr::CompType::Data);
+	auto comp = m_tex->get_tex_comp(flvr::CompType::Data);
 	if (!comp.data)
 		return 0;
-	if (comp.data->type == nrrdTypeUChar)
-		return 8;
-	else if (comp.data->type == nrrdTypeUShort)
-		return 16;
-	return 0;
+	return static_cast<int>(comp.data->GetBitsPerElement());
 }
 
 //display controls
@@ -2943,38 +2857,43 @@ void VolumeData::PushLabel(bool ret)
 {
 	if (ret && m_vr)
 		m_vr->return_label();
-	if (!m_tex)
-		return;
-	if (!m_tex->has_comp(flvr::CompType::Label))
+
+	if (!m_tex || !m_tex->has_comp(flvr::CompType::Label))
 		return;
 
-	auto comp = m_tex->get_nrrd(flvr::CompType::Label);
-	if (!comp.data || !comp.data->data)
+	auto comp = m_tex->get_tex_comp(flvr::CompType::Label);
+	if (!comp.data)
 		return;
-	unsigned long long size = GetVoxelCount();
-	if (!m_label_save)
-		m_label_save = new unsigned int[size];
-	memcpy(m_label_save, comp.data->data, size * sizeof(unsigned int));
+
+	// Snapshot using RawData clone
+	m_label_snapshot = comp.data->Clone();
 }
 
 void VolumeData::PopLabel()
 {
-	delete[] m_label_save;
-	m_label_save = 0;
+	m_label_snapshot.reset();
 }
 
-void VolumeData::LoadLabel2()
+void VolumeData::LoadLabelFromSave()
 {
-	if (m_label_save && m_vr)
-	{
-		auto comp = m_tex->get_nrrd(flvr::CompType::Label);
-		if (!comp.data || !comp.data->data)
-			return;
-		int nx, ny, nz;
-		unsigned long long size = GetVoxelCount();
-		memcpy(comp.data->data, m_label_save, size * sizeof(unsigned int));
-		m_vr->clear_tex_current();
-	}
+	if (!m_label_snapshot || !m_vr || !m_tex)
+		return;
+
+	auto comp = m_tex->get_tex_comp(flvr::CompType::Label);
+	if (!comp.data)
+		return;
+
+	// Safety checks (strongly recommended)
+	if (comp.data->GetFormat() != m_label_snapshot->GetFormat() ||
+		comp.data->GetElementCount() != m_label_snapshot->GetElementCount())
+		return;
+
+	std::memcpy(
+		comp.data->GetData(),
+		m_label_snapshot->GetData(),
+		comp.data->GetTotalBytes());
+
+	m_vr->clear_tex_current();
 }
 
 void VolumeData::GetMlParams()

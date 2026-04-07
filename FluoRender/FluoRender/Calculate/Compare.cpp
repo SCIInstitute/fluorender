@@ -607,14 +607,14 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 
 void* ChannelCompare::GetVolData(VolumeData* vd)
 {
-	std::shared_ptr<fluo::RawData> nrrd_data = nullptr;
+	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 	if (m_use_mask)
-		nrrd_data = vd->GetMask(false);
-	if (!nrrd_data)
-		nrrd_data = vd->GetVolume(false);
-	if (!nrrd_data)
+		raw_data = vd->GetMask(false);
+	if (!raw_data)
+		raw_data = vd->GetVolume(false);
+	if (!raw_data)
 		return 0;
-	return nrrd_data->GetDataVoid();
+	return raw_data->GetDataVoid();
 }
 
 void ChannelCompare::Product()

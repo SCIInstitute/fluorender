@@ -207,6 +207,66 @@ namespace fluo
 		}
 	}
 
+	double RawData::GetNormalizedValue(
+		size_t x, size_t y, size_t z,
+		double scalar_scale) const noexcept
+	{
+		double v = GetVoxelValue(x, y, z);
+
+		switch (m_format)
+		{
+		case DataFormat::UInt8:
+			return v / 255.0;
+
+		case DataFormat::UInt16:
+			return v * scalar_scale / 65535.0;
+
+		case DataFormat::Float32:
+		case DataFormat::Float64:
+			return v; // already normalized by definition
+
+		default:
+			return 0.0;
+		}
+	}
+
+	double RawData::GetGradientMagnitude(
+		size_t x, size_t y, size_t z,
+		double scalar_scale) const noexcept
+	{
+		// Must be interior voxel: matches old behavior
+		if (x == 0 || y == 0 || z == 0 ||
+			x + 1 >= m_size[0] ||
+			y + 1 >= m_size[1] ||
+			z + 1 >= m_size[2])
+			return 0.0;
+
+		if (!IsAllocated())
+			return 0.0;
+
+		switch (m_format)
+		{
+		case DataFormat::UInt8:
+			return GradientMagnitudeT<uint8_t>(
+				x, y, z, /*scalar_scale=*/1.0);
+
+		case DataFormat::UInt16:
+			return GradientMagnitudeT<uint16_t>(
+				x, y, z, scalar_scale);
+
+		case DataFormat::Float32:
+			return GradientMagnitudeT<float>(
+				x, y, z, 1.0);
+
+		case DataFormat::Float64:
+			return GradientMagnitudeT<double>(
+				x, y, z, 1.0);
+
+		default:
+			return 0.0;
+		}
+	}
+
 	// --- Raw memory access -------------------------------------------------
 
 	fluo::Byte* RawData::GetData() noexcept
@@ -690,6 +750,57 @@ namespace fluo
 		}
 	}
 
+	template <typename T>
+	double RawData::GradientMagnitudeT(
+		size_t x, size_t y, size_t z,
+		double scalar_scale) const noexcept
+	{
+		const size_t nx = m_size[0];
+		const size_t ny = m_size[1];
+		const size_t nz = m_size[2];
+
+		const size_t idx = nx * ny * z +
+			nx * y + x;
+
+		const T* data = DataAs<T>();
+
+		auto sample = [&](size_t xi, size_t yi, size_t zi) -> double
+			{
+				const size_t i = nx * ny * zi +
+					nx * yi + xi;
+
+				if constexpr (std::is_same_v<T, uint8_t>)
+				{
+					return static_cast<double>(data[i]) / 255.0;
+				}
+				else if constexpr (std::is_same_v<T, uint16_t>)
+				{
+					return static_cast<double>(data[i]) *
+						scalar_scale / 65535.0;
+				}
+				else
+				{
+					// float / double assumed already normalized
+					return static_cast<double>(data[i]);
+				}
+			};
+
+		// Central differences (6-neighbor stencil)
+		const double v_xm = sample(x - 1, y, z);
+		const double v_xp = sample(x + 1, y, z);
+		const double v_ym = sample(x, y - 1, z);
+		const double v_yp = sample(x, y + 1, z);
+		const double v_zm = sample(x, y, z - 1);
+		const double v_zp = sample(x, y, z + 1);
+
+		const double gx = v_xp - v_xm;
+		const double gy = v_yp - v_ym;
+		const double gz = v_zp - v_zm;
+
+		// Match original implementation exactly
+		return std::sqrt(gx * gx + gy * gy + gz * gz) * 0.53;
+	}
+	
 	bool RawData::ContainsUInt32(uint32_t value) const
 	{
 		if (m_format != DataFormat::UInt32)

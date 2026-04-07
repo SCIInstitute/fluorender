@@ -300,7 +300,7 @@ void VolumeSampler::Resize(SampDataType type, bool replace)
 		switch (type)
 		{
 		case SDT_Data:
-			//m_result->Replace(nrrd_result, false);
+			//m_result->Replace(m_raw_result, false);
 			break;
 		case SDT_Mask:
 			m_result->LoadMask(m_raw_result);
