@@ -300,7 +300,7 @@ bool CQCallback::SaveMask(VolCache4D& vol_cache)
 	int chan = vd->GetCurChannel();
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
-	msk_writer.SetData(vol_cache.GetRawDataMask());
+	msk_writer.SetData(vol_cache.GetRawMask());
 	msk_writer.SetSpacing(vd->GetSpacing());
 	std::wstring filename = reader->GetCurMaskName(frame, chan);
 	msk_writer.Save(filename, 0);
@@ -322,7 +322,7 @@ bool CQCallback::SaveLabel(VolCache4D& vol_cache)
 	int chan = vd->GetCurChannel();
 	int frame = static_cast<int>(vol_cache.m_tnum);
 	MSKWriter msk_writer;
-	msk_writer.SetData(vol_cache.GetRawDataLabel());
+	msk_writer.SetData(vol_cache.GetRawLabel());
 	msk_writer.SetSpacing(vd->GetSpacing());
 	std::wstring filename = reader->GetCurLabelName(frame, chan);
 	msk_writer.Save(filename, 1);

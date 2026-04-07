@@ -31,11 +31,13 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _DEBUG
 #include <Debug.h>
 #endif
+#include <RawData.h>
 #include <BBox.h>
 #include <Point.h>
 #include <Vector.h>
 #include <Transform.h>
 #include <unordered_map>
+#include <memory>
 
 namespace flrd
 {
@@ -81,15 +83,10 @@ namespace flrd
 			fluo::Point tfp;
 			if (!valid(p, tfp))
 				return 0.0f;
-			unsigned long long index =
-				(unsigned long long)nx*ny*tfp.intz() +
-				(unsigned long long)nx*tfp.inty() +
-				(unsigned long long)tfp.intx();
-			if (bits == 8)
-				return ((unsigned char*)data)[index] / 255.0f;
-			else
-				return ((unsigned short*)data)[index] * scale / 65535.0f;
+			double v = data->GetNormalizedValue(tfp.intx(), tfp.inty(), tfp.intz(), scale);
+			return static_cast<float>(v);
 		}
+
 		float getfilter(const fluo::Point &p) const
 		{
 			if (!data)
@@ -131,11 +128,8 @@ namespace flrd
 			fluo::Point tfp;
 			if (!valid(p, tfp))
 				return 0.0f;
-			unsigned long long index =
-				(unsigned long long)nx*ny*tfp.intz() +
-				(unsigned long long)nx*tfp.inty() +
-				(unsigned long long)tfp.intx();
-			return ((unsigned char*)mask)[index] / 255.0f;
+			double v = mask->GetNormalizedValue(tfp.intx(), tfp.inty(), tfp.intz(), 1.0f);
+			return static_cast<float>(v);
 		}
 		unsigned int getlabel(const fluo::Point &p) const
 		{
@@ -144,11 +138,7 @@ namespace flrd
 			fluo::Point tfp;
 			if (!valid(p, tfp))
 				return 0;
-			unsigned long long index =
-				(unsigned long long)nx*ny*tfp.intz() +
-				(unsigned long long)nx*tfp.inty() +
-				(unsigned long long)tfp.intx();
-			return ((unsigned int*)label)[index];
+			return label->GetValue<unsigned int>(tfp.intx(), tfp.inty(), tfp.intz());
 		}
 		void setlabel(const fluo::Point &p, unsigned int l)
 		{
@@ -157,26 +147,13 @@ namespace flrd
 			fluo::Point tfp;
 			if (!valid(p, tfp))
 				return;
-			unsigned long long index =
-				(unsigned long long)nx*ny*tfp.intz() +
-				(unsigned long long)nx*tfp.inty() +
-				(unsigned long long)tfp.intx();
-			((unsigned int*)label)[index] = l;
+			label->SetValue<unsigned int>(tfp.intx(), tfp.inty(), tfp.intz(), l);
 		}
 		unsigned int lookuplabel(const fluo::Point &p, Stencil &s)
 		{
 			fluo::Point tfp;
 			s.tf.unproject(p, tfp);
-			int x = tfp.intx(), y = tfp.inty(), z = tfp.intz();
-			if (x < 0 || x >= nx ||
-				y < 0 || y >= ny ||
-				z < 0 || z >= nz)
-				return 0;
-			unsigned long long index =
-				(unsigned long long)nx*ny*z +
-				(unsigned long long)nx*y +
-				(unsigned long long)x;
-			return ((unsigned int*)label)[index];
+			return label->GetValue<unsigned int>(tfp.intx(), tfp.inty(), tfp.intz());
 		}
 
 		//transformation
@@ -199,9 +176,9 @@ namespace flrd
 		}
 
 		//pointer to the entire data
-		void* data;
-		void* mask;
-		void* label;
+		std::shared_ptr<fluo::RawData> data;
+		std::shared_ptr<fluo::RawData> mask;
+		std::shared_ptr<fluo::RawData> label;
 		unsigned int id;
 		size_t nx;
 		size_t ny;

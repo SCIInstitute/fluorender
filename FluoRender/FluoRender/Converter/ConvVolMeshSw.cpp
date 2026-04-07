@@ -313,21 +313,21 @@ double ConvVolMeshSw::GetValue(VolumeData* vd, int x, int y, int z)
 		return 0.0;
 	if (m_use_mask)
 	{
-		double v = vd->GetMaskValue(fluo::Point(x, y, z));
+		double v = vd->GetMaskValue(fluo::Point(x, y, z), nullptr);
 		if (v > 0.0)
 		{
 			if (m_use_transfer)
-				return vd->GetTransferedValue(fluo::Point(x, y, z));
+				return vd->GetTransferedValue(fluo::Point(x, y, z), nullptr);
 			else
-				return vd->GetOriginalValue(fluo::Point(x, y, z));
+				return vd->GetOriginalValue(fluo::Point(x, y, z), nullptr);
 		}
 	}
 	else
 	{
 		if (m_use_transfer)
-			return vd->GetTransferedValue(fluo::Point(x, y, z));
+			return vd->GetTransferedValue(fluo::Point(x, y, z), nullptr);
 		else
-			return vd->GetOriginalValue(fluo::Point(x, y, z));
+			return vd->GetOriginalValue(fluo::Point(x, y, z), nullptr);
 	}
 	return 0.0;
 }

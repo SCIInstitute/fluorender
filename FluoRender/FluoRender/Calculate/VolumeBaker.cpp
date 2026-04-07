@@ -95,7 +95,7 @@ void VolumeBaker::Bake(bool replace)
 			(unsigned long long)m_size.intx() * j + i;
 		fluo::Vector p(i, j, k);
 		p /= m_size;
-		double new_value = input->GetTransferedValue(fluo::Point(p));
+		double new_value = input->GetTransferedValue(fluo::Point(p), nullptr);
 		if (m_bits == 8)
 			((unsigned char*)raw_ptr)[index] = uint8_t(new_value*255.0);
 		else if (m_bits == 16)

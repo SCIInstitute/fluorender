@@ -163,21 +163,18 @@ namespace fluo
 
 		PixelFormat GetPixelFormat() const noexcept;
 
-		//size_t GetChannelCount() const noexcept { return m_channels; }
-		//size_t GetTimeSteps() const noexcept { return m_time_steps; }
-
-		//size_t GetResolutionLevel() const noexcept { return m_resolution_level; }
-		//size_t GetBrickIndex() const noexcept { return m_brick_index; }
-
 		size_t GetVoxelCount() const noexcept;
 		size_t GetElementCount() const noexcept;
 		size_t GetTotalBytes() const noexcept;
 
 		double GetVoxelValue(
 			size_t x, size_t y, size_t z) const noexcept;
+		double GetVoxelValue(
+			size_t index) const noexcept;
 		double GetNormalizedValue(
 			size_t x, size_t y, size_t z,
 			double scalar_scale = 1.0) const noexcept;
+		double GetNormalizedValue(size_t index, double scale = 1.0) const noexcept;
 		double GetGradientMagnitude(
 			size_t x, size_t y, size_t z,
 			double scalar_scale = 1.0) const noexcept;
@@ -210,6 +207,10 @@ namespace fluo
 
 		const void* ElementPtr(size_t x, size_t y, size_t z) const noexcept;
 
+		void* ElementPtr(size_t index) noexcept;
+
+		const void* ElementPtr(size_t index) const noexcept;
+
 		/// Pointer to element at voxel coordinate (typed)
 		template <typename T>
 		T* ElementAs(size_t x, size_t y, size_t z) noexcept
@@ -223,6 +224,149 @@ namespace fluo
 		{
 			return reinterpret_cast<const T*>(
 				ElementPtr(x, y, z));
+		}
+
+		template <typename T>
+		T* ElementAs(size_t index) noexcept
+		{
+			return reinterpret_cast<T*>(
+				ElementPtr(index));
+		}
+
+		template <typename T>
+		const T* ElementAs(size_t index) const noexcept
+		{
+			return reinterpret_cast<const T*>(
+				ElementPtr(index));
+		}
+
+		template <typename T>
+		T GetValue(size_t x, size_t y, size_t z) const noexcept
+		{
+			if (!IsAllocated() ||
+				x >= m_size[0] ||
+				y >= m_size[1] ||
+				z >= m_size[2])
+				return T{};
+
+			// assert(m_format matches T);
+
+			return *ElementAs<T>(x, y, z);
+		}
+
+		template <typename T>
+		T GetValue(size_t index) const noexcept
+		{
+			if (!IsAllocated() ||
+				index >= GetElementCount())
+				return T{};
+
+			// assert(m_format matches T);
+
+			return *ElementAs<T>(index);
+		}
+
+		template <typename T>
+		void SetValue(
+			size_t x, size_t y, size_t z, T value) noexcept
+		{
+			if (!IsAllocated() ||
+				x >= m_size[0] ||
+				y >= m_size[1] ||
+				z >= m_size[2])
+				return;
+
+			// assert(FormatMatches<T>());
+
+			* ElementAs<T>(x, y, z) = value;
+
+			// Invalidate cached min/max if you have one
+			m_minmax_valid = false;
+		}
+
+		template <typename T>
+		void SetValue(
+			size_t index, T value) noexcept
+		{
+			if (!IsAllocated() ||
+				index >= GetElementCount())
+				return;
+
+			// assert(FormatMatches<T>());
+
+			*ElementAs<T>(index) = value;
+
+			// Invalidate cached min/max if you have one
+			m_minmax_valid = false;
+		}
+
+		template <typename Fn>
+		void ForEachElement(Fn&& fn)
+		{
+			switch (m_format)
+			{
+			case DataFormat::UInt8:
+				ForEachElementT<uint8_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::UInt16:
+				ForEachElementT<uint16_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::UInt32:
+				ForEachElementT<uint32_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Int8:
+				ForEachElementT<int8_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Int16:
+				ForEachElementT<int16_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Int32:
+				ForEachElementT<int32_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Float32:
+				ForEachElementT<float>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Float64:
+				ForEachElementT<double>(std::forward<Fn>(fn));
+				break;
+			default:
+				// Unknown / unsupported → no-op or assert
+				break;
+			}
+		}
+
+		template <typename Fn>
+		void ForEachElementIndexed(Fn&& fn)
+		{
+			switch (m_format)
+			{
+			case DataFormat::UInt8:
+				ForEachElementT<uint8_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::UInt16:
+				ForEachElementT<uint16_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::UInt32:
+				ForEachElementT<uint32_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Int8:
+				ForEachElementT<int8_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Int16:
+				ForEachElementT<int16_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Int32:
+				ForEachElementT<int32_t>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Float32:
+				ForEachElementT<float>(std::forward<Fn>(fn));
+				break;
+			case DataFormat::Float64:
+				ForEachElementT<double>(std::forward<Fn>(fn));
+				break;
+			default:
+				break;
+			}
 		}
 
 		std::pair<double, double> GetMinMax() const;
@@ -524,6 +668,21 @@ namespace fluo
 				delete[] p;
 			};
 	}
+
+	template <typename Fn>
+	inline void ForEach6Neighbor(
+		size_t x, size_t y, size_t z,
+		size_t nx, size_t ny, size_t nz,
+		Fn&& fn)
+	{
+		if (x > 0)         fn(x - 1, y, z);
+		if (x + 1 < nx)    fn(x + 1, y, z);
+		if (y > 0)         fn(x, y - 1, z);
+		if (y + 1 < ny)    fn(x, y + 1, z);
+		if (z > 0)         fn(x, y, z - 1);
+		if (z + 1 < nz)    fn(x, y, z + 1);
+	}
+
 } // namespace fluo
 
 #endif//_RAW_DATA_H_

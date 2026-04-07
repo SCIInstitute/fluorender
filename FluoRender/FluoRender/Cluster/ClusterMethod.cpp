@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ClusterMethod.h>
 #include <Cell.h>
+#include <RawData.h>
 #include <boost/qvm/vec_access.hpp>
 
 using namespace flrd;
@@ -56,7 +57,8 @@ void ClusterMethod::AddClusterPoint(const EmVec &p, const float value, int cid)
 		m_use_init_cluster = true;
 }
 
-void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
+void ClusterMethod::GenerateNewIDs(unsigned int id,
+	std::shared_ptr<fluo::RawData>& label,
 	const fluo::Vector& size,
 	bool out_cells, unsigned int inc)
 {
@@ -103,7 +105,7 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 			if (k < 0 || k > size.intz() - 1)
 				continue;
 			index = size.get_size_xy()*k + size.intx()*j + i;
-			((unsigned int*)label)[index] = id2;
+			label->SetValue(index, id2);
 
 			if (out_cells)
 				cell->Inc(fluo::Point(i, j, k), (*iter)->intensity);
@@ -122,17 +124,19 @@ void ClusterMethod::GenerateNewIDs(unsigned int id, void* label,
 	}
 }
 
-bool ClusterMethod::FindId(void* label, unsigned int id,
-	const fluo::Vector& size)
+bool ClusterMethod::FindId(
+	const std::shared_ptr<fluo::RawData>& label,
+	unsigned int id,
+	const fluo::Vector& /*size*/)
 {
-	unsigned long long for_size = (unsigned long long)size.get_size_xyz();
-	unsigned long long index;
-	for (index = 0; index < for_size; ++index)
-	{
-		if (((unsigned int*)label)[index] == id)
-			return true;
-	}
-	return false;
+	if (!label)
+		return false;
+
+	return label->AnyOf(
+		[id](uint32_t value)
+		{
+			return value == id;
+		});
 }
 
 void ClusterMethod::AddIDsToData()

@@ -38,6 +38,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Progress.h>
 #include <memory>
 
+namespace fluo
+{
+	class RawData;
+}
 namespace flrd
 {
 	class CelpList;
@@ -158,10 +162,10 @@ namespace flrd
 		void SetSpacing(const fluo::Vector& spc)
 		{ m_spc = {spc.x(), spc.y(), spc.z()}; }
 		void AddClusterPoint(const EmVec &p, const float value, int cid=-1);
-		void GenerateNewIDs(unsigned int id, void* label,
+		void GenerateNewIDs(unsigned int id, std::shared_ptr<fluo::RawData>& label,
 			const fluo::Vector& size,
 			bool out_cells = false, unsigned int inc = 42);
-		bool FindId(void* label, unsigned int id,
+		bool FindId(const std::shared_ptr<fluo::RawData>& label, unsigned int id,
 			const fluo::Vector& size);
 		std::vector<unsigned int> &GetNewIDs()
 		{ return m_id_list; }

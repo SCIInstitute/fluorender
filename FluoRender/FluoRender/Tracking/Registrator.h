@@ -34,6 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <BBox.h>
 
 class VolumeData;
+namespace fluo
+{
+	class RawData;
+}
 namespace flrd
 {
 	class Registrator
@@ -130,7 +134,7 @@ namespace flrd
 		fluo::Transform m_tf;
 
 	private:
-		fluo::BBox GetExtent(void* mask, const fluo::Vector& res);
+		fluo::BBox GetExtent(const std::shared_ptr<fluo::RawData>& mask, const fluo::Vector& res);
 	};
 }
 #endif//REGISTRATOR_H

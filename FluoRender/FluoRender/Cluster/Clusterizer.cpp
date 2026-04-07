@@ -256,7 +256,7 @@ void Clusterizer::Compute()
 	if (method->Execute())
 	{
 		method->SetRange(90, 100);
-		method->GenerateNewIDs(0, (void*)data_label, res, true);
+		method->GenerateNewIDs(0, raw_label, res, true);
 		m_out_cells = std::make_unique<CelpList>(method->GetCellList());
 		vd->GetVR()->clear_tex_label();
 		//m_view->RefreshGL(39);//refresh needs to be performed by caller

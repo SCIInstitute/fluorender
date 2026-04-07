@@ -352,8 +352,8 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
-	void* data = cache->GetRawData();
-	void* label = cache->GetRawLabel();
+	auto data = cache->GetRawData();
+	auto label = cache->GetRawLabel();
 	if (!data || !label)
 		return false;
 
@@ -377,16 +377,12 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 	for (j = 0; j < ny; ++j)
 	for (k = 0; k < nz; ++k)
 	{
-		index = nx*ny*k + nx*j + i;
-		label_value = ((unsigned int*)label)[index];
+		label_value = label->GetValue<unsigned int>(i, j, k);
 
 		if (!label_value)
 			continue;
 
-		if (m_map->m_data_bits == 8)
-			data_value = ((unsigned char*)data)[index] / 255.0f;
-		else if (m_map->m_data_bits == 16)
-			data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+		data_value = data->GetNormalizedValue(i, j, k, m_map->m_scale);
 
 		iter = cell_list.find(label_value);
 		if (iter != cell_list.end())
@@ -412,35 +408,41 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 			++celli;
 	}
 	//prune data
-	size_t tsize = nx * ny * nz;
-	for (index = 0; index < tsize; ++index)
-	{
-		label_value = ((unsigned int*)label)[index];
-		if (label_value &&
-			cell_list.find(label_value) ==
-			cell_list.end())
-			((unsigned int*)label)[index] = 0;
-	}
+	label->ForEachElement(
+		[&cell_list](uint32_t& label_value)
+		{
+			if (label_value != 0 &&
+				cell_list.find(label_value) == cell_list.end())
+			{
+				label_value = 0;
+			}
+		});
 	//label modified, save before delete
 	cache_queue->set_modified(frame);
 
 	//build intra graph
-	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		label_value = ((unsigned int*)label)[index];
-		if (!label_value)
-			continue;
-
-		iter = cell_list.find(label_value);
-		if (iter != cell_list.end())
+	label->ForEachElementIndexed(
+		[this, &cell_list, nx, ny, data, label](uint32_t label_value, size_t index)
 		{
-			CheckCellContact(iter->second, data, label,
+			if (label_value == 0)
+				return;
+
+			auto it = cell_list.find(label_value);
+			if (it == cell_list.end())
+				return;
+
+			// reconstruct coordinates
+			const size_t k = index / (nx * ny);
+			const size_t rem = index % (nx * ny);
+			const size_t j = rem / nx;
+			const size_t i = rem % nx;
+
+			CheckCellContact(
+				it->second,
+				data,
+				label,
 				i, j, k);
-		}
-	}
+		});
 
 	//build vertex list
 	m_map->m_vertices_list.push_back(VertexList());
@@ -464,29 +466,10 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 	return true;
 }
 
-#define ADD_CONTACT \
-	idn = ((unsigned int*)label)[indexn]; \
-	if (!idn) \
-		ec++; \
-		else if (idn != id) \
-	{ \
-		ec++; \
-		if (data_bits == 8) \
-			valuen = ((unsigned char*)data)[indexn] / 255.0f; \
-		else if (data_bits == 16) \
-			valuen = ((unsigned short*)data)[indexn] * scale / 65535.0f; \
-		contact_value = std::min(value, valuen); \
-		if (contact_value > m_contact_thresh) \
-		{ \
-			cc++; \
-			iter = cell_list.find(idn); \
-			if (iter != cell_list.end()) \
-				AddContact(intra_graph, celp, iter->second, contact_value); \
-		} \
-	}
-
 bool TrackMapProcessor::CheckCellContact(
-	Celp &celp, void *data, void *label,
+	Celp &celp,
+	const std::shared_ptr<fluo::RawData>& data,
+	const std::shared_ptr<fluo::RawData>& label,
 	size_t ci, size_t cj, size_t ck)
 {
 	int ec = 0;//external count
@@ -494,65 +477,37 @@ bool TrackMapProcessor::CheckCellContact(
 	size_t nx = m_map->m_size.intx();
 	size_t ny = m_map->m_size.inty();
 	size_t nz = m_map->m_size.intz();
-	size_t indexn;//neighbor index
-	unsigned int idn;//neighbor id
-	float valuen;//neighbor vlaue
-	size_t index = nx*ny*ck + nx*cj + ci;
 	unsigned int id = celp->Id();
-	float value;
-	size_t data_bits = m_map->m_data_bits;
 	float scale = m_map->m_scale;
-	if (data_bits == 8)
-		value = ((unsigned char*)data)[index] / 255.0f;
-	else if (data_bits == 16)
-		value = ((unsigned short*)data)[index] * scale / 65535.0f;
-	float contact_value;
+	float value = static_cast<float>(data->GetNormalizedValue(ci, cj, ck, scale));
 	CellGraph &intra_graph = m_map->m_intra_graph_list.back();
 	CelpList &cell_list = m_map->m_celp_list.back();
-	CelpListIter iter;
 
-	if (ci == 0)
-		ec++;
-	else
-	{
-		indexn = index - 1;
-		ADD_CONTACT;
-	}
-	if (ci >= nx - 1)
-		ec++;
-	else
-	{
-		indexn = index + 1;
-		ADD_CONTACT;
-	}
-	if (cj == 0)
-		ec++;
-	else
-	{
-		indexn = index - nx;
-		ADD_CONTACT;
-	}
-	if (cj >= ny - 1)
-		ec++;
-	else
-	{
-		indexn = index + nx;
-		ADD_CONTACT;
-	}
-	if (ck == 0)
-		ec++;
-	else
-	{
-		indexn = index - nx*ny;
-		ADD_CONTACT;
-	}
-	if (ck >= nz - 1)
-		ec++;
-	else
-	{
-		indexn = index + nx*ny;
-		ADD_CONTACT;
-	}
+	fluo::ForEach6Neighbor(ci, cj, ck, nx, ny, nz,
+		[&](size_t ni, size_t nj, size_t nk)
+		{
+			unsigned int idn = label->GetValue<uint32_t>(ni, nj, nk);
+			if (!idn)
+			{
+				++ec;
+				return;
+			}
+			if (idn == id)
+				return;
+
+			++ec;
+
+			float valuen = data->GetNormalizedValue(ni, nj, nk, scale);
+			float contact_value = std::min(value, valuen);
+
+			if (contact_value > m_contact_thresh)
+			{
+				++cc;
+				auto it = cell_list.find(idn);
+				if (it != cell_list.end())
+					AddContact(intra_graph, celp, it->second, contact_value);
+			}
+		});
 
 	if (ec)
 	{
@@ -567,7 +522,9 @@ bool TrackMapProcessor::CheckCellContact(
 }
 
 bool TrackMapProcessor::CheckCellDist(
-	Celp &celp, void *label, size_t ci, size_t cj, size_t ck)
+	Celp &celp,
+	const std::shared_ptr<fluo::RawData>& label,
+	size_t ci, size_t cj, size_t ck)
 {
 	size_t nx = m_map->m_size.intx();
 	size_t ny = m_map->m_size.inty();
@@ -593,7 +550,7 @@ bool TrackMapProcessor::CheckCellDist(
 			(int)ci + i < 0 || ci + i >= nx)
 			continue;
 		indexn = nx*ny*(ck + k) + nx*(cj + j) + ci + i;
-		idn = ((unsigned int*)label)[indexn];
+		idn = label->GetValue<unsigned int>(ci, cj, ck);
 		if (!idn || idn == id)
 			continue;
 		iter = cell_list.find(idn);
@@ -711,15 +668,15 @@ bool TrackMapProcessor::LinkFrames(
 	flvr::VolCache4D* cache = cache_queue->get(f1);
 	if (!cache)
 		return false;
-	void* data1 = cache->GetRawData();
-	void* label1 = cache->GetRawLabel();
+	auto data1 = cache->GetRawData();
+	auto label1 = cache->GetRawLabel();
 	if (!data1 || !label1)
 		return false;
 	cache = cache_queue->get(f2);
 	if (!cache)
 		return false;
-	void* data2 = cache->GetRawData();
-	void* label2 = cache->GetRawLabel();
+	auto data2 = cache->GetRawData();
+	auto label2 = cache->GetRawLabel();
 	if (!data2 || !label2)
 		return false;
 	cache_queue->protect(f1);
@@ -739,43 +696,45 @@ bool TrackMapProcessor::LinkFrames(
 	Verp v1, v2;
 	Celp cl1, cl2;
 
-	for (i = 0; i < nx; ++i)
-	for (j = 0; j < ny; ++j)
-	for (k = 0; k < nz; ++k)
-	{
-		index = nx*ny*k + nx*j + i;
-		label_value1 = ((unsigned int*)label1)[index];
-		label_value2 = ((unsigned int*)label2)[index];
-
-		if (!label_value1 || !label_value2)
-			continue;
-
-		if (m_map->m_data_bits == 8)
+	label1->ForEachElementIndexed(
+		[this, label1, label2, data1, data2, &inter_graph, f1, f2]
+		(uint32_t lbl1, size_t index)
 		{
-			data_value1 = ((unsigned char*)data1)[index] / 255.0f;
-			data_value2 = ((unsigned char*)data2)[index] / 255.0f;
-		}
-		else if (m_map->m_data_bits == 16)
-		{
-			data_value1 = ((unsigned short*)data1)[index] * m_map->m_scale / 65535.0f;
-			data_value2 = ((unsigned short*)data2)[index] * m_map->m_scale / 65535.0f;
-		}
+			if (lbl1 == 0)
+				return;
 
-		cl1 = GetCell(f1, label_value1);
-		cl2 = GetCell(f2, label_value2);
-		v1 = GetVertex(cl1);
-		v2 = GetVertex(cl2);
-		if (!v1 || !v2)
-			continue;
+			const uint32_t lbl2 =
+				label2->GetValue<uint32_t>(index);
 
-		if (v1->GetSizeUi() < m_size_thresh ||
-			v2->GetSizeUi() < m_size_thresh)
-			continue;
+			if (lbl2 == 0)
+				return;
 
-		LinkVertices(inter_graph,
-			v1, v2, f1, f2,
-			std::min(data_value1, data_value2));
-	}
+			// --- normalize data values ------------------------------------
+			double val1 = data1->GetNormalizedValue(index, m_map->m_scale);
+			double val2 = data2->GetNormalizedValue(index, m_map->m_scale);
+
+			// --- semantic lookup ------------------------------------------
+			auto cl1 = GetCell(f1, lbl1);
+			auto cl2 = GetCell(f2, lbl2);
+			if (!cl1 || !cl2)
+				return;
+
+			auto v1 = GetVertex(cl1);
+			auto v2 = GetVertex(cl2);
+			if (!v1 || !v2)
+				return;
+
+			if (v1->GetSizeUi() < m_size_thresh ||
+				v2->GetSizeUi() < m_size_thresh)
+				return;
+
+			// --- link graph -----------------------------------------------
+			LinkVertices(
+				inter_graph,
+				v1, v2,
+				f1, f2,
+				std::min(val1, val2));
+		});
 
 	cache_queue->unprotect(f1);
 
@@ -1159,47 +1118,43 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 	flvr::VolCache4D* cache = cache_queue->get(f);
 	if (!cache)
 		return false;
-	unsigned int* label = (unsigned int*)(cache->GetRawLabel());
+	auto label = cache->GetRawLabel();
 	if (!label)
 		return false;
-	//size
-	size_t nx = m_map->m_size.intx();
-	size_t ny = m_map->m_size.inty();
-	size_t nz = m_map->m_size.intz();
-	unsigned long long size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
 
 	CellIDMap id_map;
-	//scan label for cell ids
-	unsigned int lv;
-	for (index = 0; index < size; ++index)
-	{
-		lv = label[index];
-		if (!lv)
-			continue;
-		//find in id map
-		auto it = id_map.find(lv);
-		if (it != id_map.end())
+
+	label->ForEachElementIndexed(
+		[this, &id_map, f](uint32_t& lv, size_t index)
 		{
-			//already processed
-			label[index] = it->second;
-		}
-		else
-		{
-			unsigned int id0 = GetUniCellID(f, lv);
-			if (id0 != lv)
+			if (lv == 0)
+				return;
+
+			// Already remapped?
+			auto it = id_map.find(lv);
+			if (it != id_map.end())
 			{
-				unsigned int newid = GetNewCellID(f, id0, true);//inc because its the same frame
-				if (!newid)
-					continue;
-				ReplaceCellID(lv, newid, f);
-				label[index] = newid;
-				id_map.insert(std::pair<unsigned int,
-					unsigned int>(lv, newid));
+				lv = it->second;
+				return;
 			}
-		}
-	}
+
+			// Find unified ID
+			const uint32_t id0 = GetUniCellID(f, lv);
+			if (id0 == lv)
+				return;
+
+			// Generate new ID (same frame => inc flag stays true)
+			const uint32_t newid = GetNewCellID(f, id0, true);
+			if (newid == 0)
+				return;
+
+			// Replace globally and locally
+			ReplaceCellID(lv, newid, f);
+			lv = newid;
+
+			// Cache mapping
+			id_map.emplace(id0, newid);
+		});
 
 	cache_queue->set_modified(f);
 	return true;
@@ -1222,58 +1177,51 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 	flvr::VolCache4D* cache = cache_queue->get(f2);
 	if (!cache)
 		return false;
-	unsigned int* label = (unsigned int*)(cache->GetRawLabel());
+	auto label = cache->GetRawLabel();
 	if (!label)
 		return false;
-	//size
-	size_t nx = m_map->m_size.intx();
-	size_t ny = m_map->m_size.inty();
-	size_t nz = m_map->m_size.intz();
-	unsigned long long size = (unsigned long long)nx *
-		(unsigned long long)ny * (unsigned long long)nz;
-	unsigned long long index;
 
-	//InterGraph &inter_graph = m_map->m_inter_graph_list.at(
-	//	f1 > f2 ? f2 : f1);
 	CellIDMap id_map;
-	//scan label for cell ids
-	unsigned int lv;
-	for (index = 0; index < size; ++index)
-	{
-		lv = label[index];
-		if (!lv)
-			continue;
-		//find in id map
-		auto it = id_map.find(lv);
-		if (it != id_map.end() &&
-			lv != it->second)
+
+	label->ForEachElementIndexed(
+		[this, &id_map, f1, f2](uint32_t& lv, size_t index)
 		{
-			//already processed
-			label[index] = it->second;
-		}
-		else
-		{
-			unsigned int id0 = GetTrackedID(f2, f1, lv);//track back
+			if (lv == 0)
+				return;
+
+			// Check cached mapping first
+			auto it = id_map.find(lv);
+			if (it != id_map.end() && lv != it->second)
+			{
+				// Already processed
+				lv = it->second;
+				return;
+			}
+
+			// Track back to previous frame
+			const uint32_t id0 = GetTrackedID(f2, f1, lv);
+
 			if (id0 == lv)
 			{
-				id_map.insert(std::pair<unsigned int,
-					unsigned int>(lv, id0));
+				// Identity mapping (track-back unchanged)
+				id_map.emplace(lv, id0);
+				return;
 			}
-			else
+
+			// Generate a new ID based on tracked ID
+			const uint32_t newid = GetNewCellID(f2, id0);
+			if (newid == 0)
+				return;
+
+			if (newid != lv)
 			{
-				unsigned int newid = GetNewCellID(f2, id0);
-				if (!newid)
-					continue;
-				if (newid != lv)
-				{
-					ReplaceCellID(lv, newid, f2);
-					label[index] = newid;
-				}
-				id_map.insert(std::pair<unsigned int,
-					unsigned int>(lv, newid));
+				ReplaceCellID(lv, newid, f2);
+				lv = newid;
 			}
-		}
-	}
+
+			// Cache the mapping
+			id_map.emplace(id0, newid);
+		});
 
 	cache_queue->set_modified(f2);
 
@@ -3823,13 +3771,13 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 	flvr::VolCache4D* cache = cache_queue->get(f1);
 	if (!cache)
 		return false;
-	void* data1 = cache->GetRawData();
-	void* label1 = cache->GetRawLabel();
+	auto data1 = cache->GetRawData();
+	auto label1 = cache->GetRawLabel();
 	if (!data1 || !label1)
 		return false;
 	cache = cache_queue->get(f2);
-	void* data2 = cache->GetRawData();
-	void* label2 = cache->GetRawLabel();
+	auto data2 = cache->GetRawData();
+	auto label2 = cache->GetRawLabel();
 	if (!data2 || !label2)
 		return false;
 	cache_queue->protect(f1);
@@ -3866,24 +3814,15 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 		for (k = minz; k <= maxz; ++k)
 		{
 			index = nx*ny*k + nx*j + i;
-			label_value1 = ((unsigned int*)label1)[index];
-			label_value2 = ((unsigned int*)label2)[index];
+			label_value1 = label1->GetValue<unsigned int>(index);
+			label_value2 = label2->GetValue<unsigned int>(index);
 
 			if (label_value1 != cid ||
 				!label_value2)
 				continue;
 
-			if (m_map->m_data_bits == 8)
-			{
-				data_value1 = ((unsigned char*)data1)[index] / 255.0f;
-				data_value2 = ((unsigned char*)data2)[index] / 255.0f;
-			}
-			else if (m_map->m_data_bits == 16)
-			{
-				data_value1 = ((unsigned short*)data1)[index] * m_map->m_scale / 65535.0f;
-				data_value2 = ((unsigned short*)data2)[index] * m_map->m_scale / 65535.0f;
-			}
-
+			data_value1 = data1->GetNormalizedValue(index, m_map->m_scale);
+			data_value2 = data2->GetNormalizedValue(index, m_map->m_scale);
 			
 			cl1 = GetCell(f1, label_value1);
 			cl2 = GetCell(f2, label_value2);
@@ -4094,8 +4033,8 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
-	void* data = cache->GetRawData();
-	void* label = cache->GetRawLabel();
+	auto data = cache->GetRawData();
+	auto label = cache->GetRawLabel();
 	if (!data || !label)
 		return false;
 
@@ -4131,13 +4070,10 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 		for (k = minz; k <= maxz; ++k)
 		{
 			index = nx*ny*k + nx*j + i;
-			label_value = ((unsigned int*)label)[index];
+			label_value = label->GetValue<unsigned int>(index);
 			if (label_value == cid)
 			{
-				if (m_map->m_data_bits == 8)
-					data_value = ((unsigned char*)data)[index] / 255.0f;
-				else if (m_map->m_data_bits == 16)
-					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				data_value = data->GetNormalizedValue(index, m_map->m_scale);
 				EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_processor.AddClusterPoint(
 					pnt, data_value);
@@ -4173,8 +4109,8 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
-	void* data = cache->GetRawData();
-	void* label = cache->GetRawLabel();
+	auto data = cache->GetRawData();
+	auto label = cache->GetRawLabel();
 	if (!data || !label)
 		return false;
 
@@ -4214,13 +4150,10 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 		for (k = minz; k <= maxz; ++k)
 		{
 			index = nx*ny*k + nx*j + i;
-			label_value = ((unsigned int*)label)[index];
+			label_value = label->GetValue<unsigned int>(index);
 			if (label_value == cid)
 			{
-				if (m_map->m_data_bits == 8)
-					data_value = ((unsigned char*)data)[index] / 255.0f;
-				else if (m_map->m_data_bits == 16)
-					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				data_value = data->GetNormalizedValue(index, m_map->m_scale);
 				EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
@@ -4328,8 +4261,8 @@ bool TrackMapProcessor::SegmentCells()
 	flvr::VolCache4D* cache = cache_queue->get(frame);
 	if (cache)
 		return false;
-	void* data = cache->GetRawData();
-	void* label = cache->GetRawLabel();
+	auto data = cache->GetRawData();
+	auto label = cache->GetRawLabel();
 	if (!data || !label)
 		return false;
 
@@ -4357,13 +4290,10 @@ bool TrackMapProcessor::SegmentCells()
 		for (k = 0; k < nz; ++k)
 		{
 			index = nx*ny*k + nx*j + i;
-			label_value = ((unsigned int*)label)[index];
+			label_value = label->GetValue<unsigned int>(index);
 			if (label_value == cid)
 			{
-				if (m_map->m_data_bits == 8)
-					data_value = ((unsigned char*)data)[index] / 255.0f;
-				else if (m_map->m_data_bits == 16)
-					data_value = ((unsigned short*)data)[index] * m_map->m_scale / 65535.0f;
+				data_value = data->GetNormalizedValue(index, m_map->m_scale);
 				EmVec pnt = { static_cast<double>(i), static_cast<double>(j), static_cast<double>(k) };
 				cs_proc_km.AddClusterPoint(
 					pnt, data_value);
@@ -5081,15 +5011,15 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	flvr::VolCache4D* cache = cache_queue->get(f0);
 	if (!cache)
 		return false;
-	void* data1 = cache->GetRawData();
-	void* label1 = cache->GetRawLabel();
+	auto data1 = cache->GetRawData();
+	auto label1 = cache->GetRawLabel();
 	if (!data1 || !label1)
 		return false;
 	cache = cache_queue->get(f2);
 	if (!cache)
 		return false;
-	void* data2 = cache->GetRawData();
-	void* label2 = cache->GetRawLabel();
+	auto data2 = cache->GetRawData();
+	auto label2 = cache->GetRawLabel();
 	if (!data2 || !label2)
 		return false;
 	cache_queue->protect(f0);
@@ -5105,9 +5035,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	unsigned int label_value;
 
 	//clear label2
-	unsigned long long clear_size = (unsigned long long)nx *
-		ny * nz * sizeof(unsigned int);
-	std::memset(label2, 0, clear_size);
+	label2->FillZero();
 
 	//get all stencils from frame1
 	StencilList stencil_list;
@@ -5117,7 +5045,7 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	for (k = 0; k < nz; ++k)
 	{
 		index = nx*ny*k + nx*j + i;
-		label_value = ((unsigned int*)label1)[index];
+		label_value = label1->GetValue<unsigned int>(index);
 
 		if (!label_value)
 			continue;

@@ -63,18 +63,17 @@ bool Registrator::Run(size_t f1, size_t f2,
 	//get data
 	size_t f0 = mode == 1 ? start : f1;
 	//size_t f0 = start;
-	void *data1 = 0, *data2 = 0, *mask1 = 0;
 	cache_queue->set_max_size(2);
 	flvr::VolCache4D* cache = cache_queue->get(f0);
 	if (!cache)
 		return false;
-	data1 = cache->GetRawData();
+	auto data1 = cache->GetRawData();
 	if (!data1)
 		return false;
-	if (m_use_mask && cache->GetRawMask())
-		mask1 = cache->GetRawMask();
+	//if (m_use_mask && cache->GetRawMask())
+	auto mask1 = cache->GetRawMask();
 	cache = cache_queue->get(f2);
-	data2 = cache->GetRawData();
+	auto data2 = cache->GetRawData();
 	if (!data2)
 		return false;
 	cache_queue->protect(f0);
@@ -124,10 +123,10 @@ bool Registrator::Run(size_t f1, size_t f2,
 		//get transformation
 		//if (mode == 1)
 		//{
-			m_translate = compare.GetTranslate();
-			m_center = compare.GetCenter();
-			m_euler = compare.GetEuler();
-			m_tf = s2.tf;
+		m_translate = compare.GetTranslate();
+		m_center = compare.GetCenter();
+		m_euler = compare.GetEuler();
+		m_tf = s2.tf;
 		//}
 		//else
 		//{
@@ -162,17 +161,38 @@ fluo::Point Registrator::GetCenterVol()
 	return result;
 }
 
-fluo::BBox Registrator::GetExtent(void* mask, const fluo::Vector& res)
+fluo::BBox Registrator::GetExtent(
+	const std::shared_ptr<fluo::RawData>& mask,
+	const fluo::Vector& res)
 {
 	fluo::BBox result;
-	unsigned long long index;
-	unsigned char* data = (unsigned char*)mask;
-	for (int k = 0; k < res.intz(); ++k) for (int j = 0; j < res.inty(); ++j) for (int i = 0; i < res.intx(); ++i)
-	{
-		index = (unsigned long long)res.get_size_xy() * k +
-			(unsigned long long)res.intx() * j + (unsigned long long)i;
-		if (data[index])
-			result.extend(fluo::Point(i, j, k));
-	}
+
+	if (!mask)
+		return result;
+
+	const size_t nx = static_cast<size_t>(res.intx());
+	const size_t ny = static_cast<size_t>(res.inty());
+	const size_t nz = static_cast<size_t>(res.intz());
+	const size_t nxy = nx * ny;
+
+	mask->ForEachElementIndexed(
+		[&result, nx, ny, nxy](uint8_t value, size_t index)
+		{
+			if (!value)
+				return;
+
+			// index → (i, j, k)
+			const size_t k = index / nxy;
+			const size_t rem = index % nxy;
+			const size_t j = rem / nx;
+			const size_t i = rem % nx;
+
+			result.extend(
+				fluo::Point(
+					static_cast<int>(i),
+					static_cast<int>(j),
+					static_cast<int>(k)));
+		});
+
 	return result;
 }

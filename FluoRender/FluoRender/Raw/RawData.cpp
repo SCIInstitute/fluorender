@@ -207,6 +207,62 @@ namespace fluo
 		}
 	}
 
+	double RawData::GetVoxelValue(
+		size_t index) const noexcept
+	{
+		if (!IsAllocated())
+			return 0.0;
+		if (index >= GetElementCount())
+			return 0.0;
+		switch (m_format)
+		{
+		case DataFormat::UInt8:
+		{
+			const auto* p = DataAs<uint8_t>();
+			return p[index] / 255.0;
+		}
+		case DataFormat::UInt16:
+		{
+			const auto* p = DataAs<uint16_t>();
+			return p[index] / 65535.0;
+		}
+		case DataFormat::UInt32:
+		{
+			const auto* p = DataAs<uint32_t>();
+			return p[index] / 4294967295.0;
+		}
+		case DataFormat::Int8:
+		{
+			const auto* p = DataAs<int8_t>();
+			return (double(p[index]) + 128.0) / 255.0;
+		}
+		case DataFormat::Int16:
+		{
+			const auto* p = DataAs<int16_t>();
+			return (double(p[index]) + 32768.0) / 65535.0;
+		}
+		case DataFormat::Int32:
+		{
+			const auto* p = DataAs<int32_t>();
+			return (double(p[index]) + 2147483648.0)
+				/ 4294967295.0;
+		}
+		case DataFormat::Float16:
+		case DataFormat::Float32:
+		{
+			const auto* p = DataAs<float>();
+			return double(p[index]); // assumed already normalized
+		}
+		case DataFormat::Float64:
+		{
+			const auto* p = DataAs<double>();
+			return p[index];
+		}
+		default:
+			return 0.0;
+		}
+	}
+
 	double RawData::GetNormalizedValue(
 		size_t x, size_t y, size_t z,
 		double scalar_scale) const noexcept
@@ -227,6 +283,19 @@ namespace fluo
 
 		default:
 			return 0.0;
+		}
+	}
+
+	double RawData::GetNormalizedValue(size_t index, double scale) const noexcept
+	{
+		switch (m_format)
+		{
+		case DataFormat::UInt8:
+			return DataAs<uint8_t>()[index] / 255.0;
+		case DataFormat::UInt16:
+			return DataAs<uint16_t>()[index] * scale / 65535.0;
+		default:
+			return GetVoxelValue(index); // fallback
 		}
 	}
 
@@ -325,6 +394,29 @@ namespace fluo
 	{
 		return const_cast<RawData*>(this)->
 			ElementPtr(x, y, z);
+	}
+
+	void* RawData::ElementPtr(size_t index) noexcept
+	{
+		fluo::Byte* data = GetData();
+		if (!data)
+			return nullptr;
+
+		// Bounds check at element granularity
+		if (index >= GetElementCount())
+			return nullptr;
+
+		const size_t byte_offset =
+			index * GetBytesPerElement();
+
+		return static_cast<void*>(data + byte_offset);
+	}
+
+	const void* RawData::ElementPtr(
+		size_t index) const noexcept
+	{
+		return const_cast<RawData*>(this)->
+			ElementPtr(index);
 	}
 
 	std::pair<double, double> RawData::GetMinMax() const

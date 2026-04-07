@@ -69,9 +69,9 @@ namespace flvr
 			build_tex(false),
 			time_cond0(false) {}
 
-		std::shared_ptr<fluo::RawData> GetRawDataData() { return m_data; }
-		std::shared_ptr<fluo::RawData> GetRawDataMask() { return m_mask; }
-		std::shared_ptr<fluo::RawData> GetRawDataLabel() { return m_label; }
+		std::shared_ptr<fluo::RawData> GetRawData() { return m_data; }
+		std::shared_ptr<fluo::RawData> GetRawMask() { return m_mask; }
+		std::shared_ptr<fluo::RawData> GetRawLabel() { return m_label; }
 		//void* GetRawPointerData() { if (m_data) return m_data->data; return 0; }
 		//void* GetRawPointerMask() { if (m_mask) return m_mask->data; return 0; }
 		//void* GetRawPointerLabel() { if (m_label) return m_label->data; return 0; }

@@ -49,6 +49,10 @@ DEALINGS IN THE SOFTWARE.
 #define TAG_VER220		9	//new values added in v2.20
 #define TAG_VER221		10	//new values added in v2.21
 
+namespace fluo
+{
+	class RawData;
+}
 namespace flrd
 {
 	class TrackMap;
@@ -216,12 +220,15 @@ namespace flrd
 
 	private:
 		//modification
-		bool CheckCellContact(Celp &celp, void *data, void *label,
+		bool CheckCellContact(Celp &celp,
+			const std::shared_ptr<fluo::RawData>& data,
+			const std::shared_ptr<fluo::RawData>& label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddContact(CellGraph& graph,
 			Celp &celp1, Celp &celp2,
 			float contact_value);
-		bool CheckCellDist(Celp &celp, void *label,
+		bool CheckCellDist(Celp &celp,
+			const std::shared_ptr<fluo::RawData>& label,
 			size_t ci, size_t cj, size_t ck);
 		bool AddNeighbor(CellGraph& graph,
 			Celp &celp1, Celp &celp2,

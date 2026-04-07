@@ -713,7 +713,7 @@ namespace flvr
 			VolCache4D* vol_cache = cq->get_offset(toffset);
 			if (vol_cache)
 			{
-				raw_data = vol_cache->GetRawDataData();
+				raw_data = vol_cache->GetRawData();
 				tn = static_cast<int>(vol_cache->GetTime());
 			}
 		}
