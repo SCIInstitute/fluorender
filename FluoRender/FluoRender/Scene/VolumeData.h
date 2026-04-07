@@ -125,9 +125,9 @@ public:
 	bool GetMaskClear() { return m_mask_clear; }
 
 	//save
-	double GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b = 0);
-	double GetTransferedValue(const fluo::Point& p, flvr::TextureBrick* b=0);
-	double GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b = 0);
+	double GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b);
+	double GetTransferedValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b);
+	double GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b);
 	void SetResample(bool resample) { m_resample = resample; }
 	void SetResampledSize(const fluo::Vector& size) { m_resampled_size = size; }
 	bool GetResample() { return m_resample; }

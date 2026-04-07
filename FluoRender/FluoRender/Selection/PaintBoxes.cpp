@@ -182,18 +182,17 @@ void PaintBoxes::Compute()
 
 bool PaintBoxes::GetBrickBoxes(std::vector<BrickBox> &bbs)
 {
-	if (!m_bricks)
+	if (m_bricks.empty())
 		return false;
 
-	for (int i = 0; i < m_bricks->size(); ++i)
+	for (auto bmbs : m_bricks)
 	{
-		flvr::TextureBrick* b = (*m_bricks)[i];
-		fluo::BBox bbox = b->bbox();
+		fluo::BBox bbox = bmbs->bbox();
 		if (test_against_view(bbox))
 		{
 			BrickBox brick_box;
 			brick_box.bbox = bbox;
-			brick_box.brick = b;
+			brick_box.brick = bmbs;
 			bbs.push_back(brick_box);
 		}
 	}
@@ -202,24 +201,23 @@ bool PaintBoxes::GetBrickBoxes(std::vector<BrickBox> &bbs)
 
 void PaintBoxes::BrickViewInt()
 {
-	if (!m_bricks)
+	if (m_bricks.empty())
 		return;
 
-	for (int i = 0; i < m_bricks->size(); ++i)
+	for (auto bmbs : m_bricks)
 	{
-		flvr::TextureBrick* b = (*m_bricks)[i];
-		fluo::BBox bbox = b->bbox();
+		fluo::BBox bbox = bmbs->bbox();
 		if (test_against_view(bbox))
 		{
-			b->act_mask();
-			b->valid_mask();
+			bmbs->act_mask();
+			bmbs->valid_mask();
 		}
 	}
 }
 
 void PaintBoxes::BrickRayInt()
 {
-	if (!m_bricks)
+	if (m_bricks.empty())
 		return;
 
 	//get ray
@@ -235,14 +233,13 @@ void PaintBoxes::BrickRayInt()
 
 	//test ray-box
 	fluo::Point hit;
-	for (int i = 0; i < m_bricks->size(); ++i)
+	for (auto bmbs : m_bricks)
 	{
-		flvr::TextureBrick* b = (*m_bricks)[i];
-		fluo::BBox bbox = b->bbox();
+		fluo::BBox bbox = bmbs->bbox();
 		if (bbox.intersect(mp1, dir, hit))
 		{
-			b->act_mask();
-			b->valid_mask();
+			bmbs->act_mask();
+			bmbs->valid_mask();
 		}
 	}
 }

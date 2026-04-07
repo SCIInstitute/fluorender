@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Diffusion_h
 
 #include <stddef.h>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -55,8 +56,8 @@ namespace flrd
 
 	private:
 		bool CheckBricks();
-		void GetMask(size_t brick_num, flvr::TextureBrick* b, void** val);
-		void ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b);
+		void GetMask(size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b, void** val);
+		void ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b);
 	};
 
 }

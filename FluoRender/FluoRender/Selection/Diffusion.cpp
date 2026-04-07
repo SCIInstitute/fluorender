@@ -194,18 +194,18 @@ bool Diffusion::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	if (bricks.empty())
 		return false;
 	return true;
 }
 
-void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
+void Diffusion::GetMask(size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b, void** val)
 {
 	if (!b)
 		return;
 
-	Nrrd* nrrd_mask = m_vd->GetMask(true);
+	auto raw_mask = m_vd->GetMask(true);
 	if (brick_num > 1)
 	{
 		int nb = b->nb(flvr::CompType::Mask);
@@ -218,7 +218,7 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
 		unsigned char* temp = new unsigned char[mem_size];
 		unsigned char* tempp = temp;
-		unsigned char* tp = (unsigned char*)(b->tex_data(flvr::CompType::Mask));
+		unsigned char* tp = b->get_raw_data(flvr::CompType::Mask)->DataAs<unsigned char>();
 		unsigned char* tp2;
 		for (size_t k = 0; k < nz; ++k)
 		{
@@ -235,13 +235,13 @@ void Diffusion::GetMask(size_t brick_num, flvr::TextureBrick* b, void** val)
 	}
 	else
 	{
-		if (!nrrd_mask)
+		if (!raw_mask)
 			return;
-		*val = (void*)(nrrd_mask->data);
+		*val = raw_mask->GetDataVoid();
 	}
 }
 
-void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
+void Diffusion::ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b)
 {
 	if (!val || brick_num <= 1)
 		return;
@@ -253,7 +253,7 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, flvr::TextureBrick* b)
 	int nx = res.intx();
 	int ny = res.inty();
 	int nz = res.intz();
-	unsigned char* tp = (unsigned char*)(b->tex_data(flvr::CompType::Mask));
+	unsigned char* tp = b->get_raw_data(flvr::CompType::Mask)->DataAs<unsigned char>();
 	unsigned char* tp2;
 	for (size_t k = 0; k < nz; ++k)
 	{
@@ -303,25 +303,24 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	}
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = m_vd->GetVR()->load_brick(b);
+		GLint did = m_vd->GetVR()->load_brick(bbs);
 		void* val = 0;
-		GetMask(brick_num, b, &val);
+		GetMask(brick_num, bbs, &val);
 
 		size_t global_size[3] = { 1, 1, 1 };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
 		//brick matrix
-		fluo::BBox bbx = b->dbox();
+		fluo::BBox bbx = bbs->dbox();
 		cl_float3 scl = {
 			float(bbx.Max().x() - bbx.Min().x()),
 			float(bbx.Max().y() - bbx.Min().y()),
@@ -358,7 +357,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
-		ReleaseMask(val, brick_num, b);
+		ReleaseMask(val, brick_num, bbs);
 	}
 
 	glbin_kernel_factory.clear(kernel_prog);
@@ -409,25 +408,24 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	sw = static_cast<float>(m_vd->GetSoftThreshold());
 
 	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	for (size_t i = 0; i < brick_num; ++i)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = (*bricks)[i];
-		int bits = b->nb(flvr::CompType::Data) * 8;
-		auto res = b->get_size();
+		int bits = bbs->nb(flvr::CompType::Data) * 8;
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = m_vd->GetVR()->load_brick(b);
+		GLint did = m_vd->GetVR()->load_brick(bbs);
 		void* val = 0;
-		GetMask(brick_num, b, &val);
+		GetMask(brick_num, bbs, &val);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
 
 		//set
 		//brick matrix
-		fluo::BBox bbx = b->dbox();
+		fluo::BBox bbx = bbs->dbox();
 		cl_float3 scl = {
 			float(bbx.Max().x() - bbx.Min().x()),
 			float(bbx.Max().y() - bbx.Min().y()),
@@ -465,7 +463,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
-		ReleaseMask(val, brick_num, b);
+		ReleaseMask(val, brick_num, bbs);
 	}
 	glbin_kernel_factory.clear(kernel_prog);
 }

@@ -344,7 +344,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		m_vd->DrawMask(0, 6, 0, ini_thresh, gm_falloff, scl_falloff, m_scl_translate, m_w2d, 0.0, 0);
 
 	//set up paint mask flags
-	std::vector<flvr::TextureBrick*>* bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = m_vd->GetTexture()->get_bricks();
 	if (m_mode == SelectMode::SingleSelect ||
 		m_mode == SelectMode::Append ||
 		m_mode == SelectMode::Eraser ||
@@ -354,7 +354,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		m_mode == SelectMode::Segment ||
 		m_mode == SelectMode::Mesh)
 	{
-		if (bricks->size() > 1)
+		if (bricks.size() > 1)
 		{
 			flrd::PaintBoxes pb;
 			pb.SetBricks(bricks);
@@ -528,17 +528,15 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		m_vd->GetVR()->return_mask();
 
 	//get all the data from original volume
-	flvr::Texture* tex_mvd = m_vd->GetTexture();
-	if (!tex_mvd) return;
-	auto comp_mvd = tex_mvd->get_nrrd(flvr::CompType::Data);
-	if (!comp_mvd.data) return;
-	auto comp_mvd_mask = tex_mvd->get_nrrd(flvr::CompType::Mask);
-	if (select && !comp_mvd_mask.data) return;
-	auto comp_mvd_label = tex_mvd->get_nrrd(flvr::CompType::Label);
-	if (!comp_mvd_label.data) return;
-	void* data_mvd = comp_mvd.data->data;
-	unsigned char* data_mvd_mask = select ? (unsigned char*)comp_mvd_mask.data->data : 0;
-	unsigned int* data_mvd_label = (unsigned int*)comp_mvd_label.data->data;
+	auto raw_data = m_vd->GetVolume(false);
+	if (!raw_data) return;
+	auto raw_mask = m_vd->GetMask(false);
+	if (select && !raw_mask) return;
+	auto raw_label = m_vd->GetLabel(false);
+	if (!raw_label) return;
+	void* data_mvd = raw_data->GetDataVoid();
+	unsigned char* data_mvd_mask = select ? raw_mask->GetData() : 0;
+	unsigned int* data_mvd_label = raw_label->DataAs<unsigned int>();
 	if (!data_mvd || (select && !data_mvd_mask) || !data_mvd_label) return;
 
 	//create new volumes
@@ -584,70 +582,97 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 
 	//get new data
 	//red volume
-	flvr::Texture* tex_vd_r = vd_r->GetTexture();
-	if (!tex_vd_r) return;
-	auto comp_vd_r = tex_vd_r->get_nrrd(flvr::CompType::Data);
-	if (!comp_vd_r.data) return;
-	unsigned char* data_vd_r = (unsigned char*)comp_vd_r.data->data;
-	if (!data_vd_r) return;
+	auto raw_vd_r = vd_r->GetVolume(false);
+	if (!raw_vd_r) return;
 	//green volume
-	flvr::Texture* tex_vd_g = vd_g->GetTexture();
-	if (!tex_vd_g) return;
-	auto comp_vd_g = tex_vd_g->get_nrrd(flvr::CompType::Data);
-	if (!comp_vd_g.data) return;
-	unsigned char* data_vd_g = (unsigned char*)comp_vd_g.data->data;
-	if (!data_vd_g) return;
+	auto raw_vd_g = vd_g->GetVolume(false);
+	if (!raw_vd_g) return;
 	//blue volume
-	flvr::Texture* tex_vd_b = vd_b->GetTexture();
-	if (!tex_vd_b) return;
-	auto comp_vd_b = tex_vd_b->get_nrrd(flvr::CompType::Data);
-	if (!comp_vd_b.data) return;
-	unsigned char* data_vd_b = (unsigned char*)comp_vd_b.data->data;
-	if (!data_vd_b) return;
+	auto raw_vd_b = vd_b->GetVolume(false);
+	if (!raw_vd_b) return;
 
 	if (hide)
 		m_randv = int((double)std::rand() / (RAND_MAX) * 900 + 100);
-	//populate the data
-	unsigned long long idx;
-	for (idx = 0; idx < for_size; ++idx)
-	{
-		unsigned int value_label = data_mvd_label[idx];
-		if (value_label > 0)
+
+	const double scalar_scale = m_vd->GetScalarScale();
+
+	auto colorize = [this, select, scalar_scale, hmode](uint32_t label_value,
+		auto intensity_value,
+		uint8_t mask_value,
+		uint8_t& out_r,
+		uint8_t& out_g,
+		uint8_t& out_b)
 		{
-			//intensity value
+			if (label_value == 0)
+				return;
+
+			// ----- normalize intensity (exact old behavior) -----
 			double value = 0.0;
-			if (comp_mvd.data->type == nrrdTypeUChar)
+
+			using IT = std::decay_t<decltype(intensity_value)>;
+
+			if constexpr (std::is_same_v<IT, uint8_t>)
 			{
-				if (select)
-					value = double(((unsigned char*)data_mvd)[idx]) *
-					double(data_mvd_mask[idx]) / 65025.0;
-				else
-					value = double(((unsigned char*)data_mvd)[idx]) / 255.0;
+				value = select
+					? (double(intensity_value) * double(mask_value)) / 65025.0
+					: double(intensity_value) / 255.0;
 			}
-			else if (comp_mvd.data->type == nrrdTypeUShort)
+			else if constexpr (std::is_same_v<IT, uint16_t>)
 			{
-				if (select)
-					value = double(((unsigned short*)data_mvd)[idx]) *
-					m_vd->GetScalarScale() *
-					double(data_mvd_mask[idx]) / 16581375.0;
-				else
-					value = double(((unsigned short*)data_mvd)[idx]) *
-					m_vd->GetScalarScale() / 65535.0;
+				value = select
+					? (double(intensity_value) * scalar_scale *
+						double(mask_value)) / 16581375.0
+					: (double(intensity_value) * scalar_scale) / 65535.0;
 			}
+
+			value = std::min(value, 1.0);
+
+			// ----- label → color -----
 			fluo::Color color;
 			if (hmode == 0)
-				color = fluo::Color(value_label, m_vd->GetShuffle());
+			{
+				color = fluo::Color(label_value, m_vd->GetShuffle());
+			}
 			else
 			{
-				double hue = HueCalculation(hmode, value_label);
+				double hue = HueCalculation(hmode, label_value);
 				color = fluo::Color(fluo::HSVColor(hue, 1.0, 1.0));
 			}
-			//color
-			value = value > 1.0 ? 1.0 : value;
-			data_vd_r[idx] = (unsigned char)(color.r() * 255.0 * value);
-			data_vd_g[idx] = (unsigned char)(color.g() * 255.0 * value);
-			data_vd_b[idx] = (unsigned char)(color.b() * 255.0 * value);
-		}
+
+			// ----- write outputs -----
+			out_r = static_cast<uint8_t>(color.r() * 255.0 * value);
+			out_g = static_cast<uint8_t>(color.g() * 255.0 * value);
+			out_b = static_cast<uint8_t>(color.b() * 255.0 * value);
+		};
+	//populate the data
+	const size_t N = raw_label->GetElementCount();
+
+	auto* lbl = raw_label->DataAs<uint32_t>();
+	auto* dat = raw_data->GetDataVoid();     // type-dispatched below
+	auto* msk = raw_mask ? raw_mask->DataAs<uint8_t>() : nullptr;
+
+	auto* r = raw_vd_r->DataAs<uint8_t>();
+	auto* g = raw_vd_g->DataAs<uint8_t>();
+	auto* b = raw_vd_b->DataAs<uint8_t>();
+
+	switch (raw_data->GetFormat())
+	{
+	case fluo::DataFormat::UInt8:
+	{
+		auto* d = raw_data->DataAs<uint8_t>();
+		for (size_t i = 0; i < N; ++i)
+			colorize(lbl[i], d[i], msk ? msk[i] : 255, r[i], g[i], b[i]);
+		break;
+	}
+	case fluo::DataFormat::UInt16:
+	{
+		auto* d = raw_data->DataAs<uint16_t>();
+		for (size_t i = 0; i < N; ++i)
+			colorize(lbl[i], d[i], msk ? msk[i] : 255, r[i], g[i], b[i]);
+		break;
+	}
+	default:
+		break;
 	}
 
 	glbin_vol_def.Copy(vd_r.get(), m_vd.get());
@@ -890,11 +915,11 @@ void VolumeSelector::PasteMask(int op)
 			m_vd->GetTexture()->push_mask();
 		if (m_copy_data)
 		{
-			Nrrd* data = m_vd_copy->GetVolume(false);
+			auto raw_data = m_vd_copy->GetVolume(false);
 			if (m_vd_copy->GetBits() == 16)
-				m_vd->AddMask16(data, op, m_vd_copy->GetScalarScale());
+				m_vd->AddMaskConvert(raw_data, op, m_vd_copy->GetScalarScale());
 			else
-				m_vd->AddMask(data, op);
+				m_vd->AddMask(raw_data, op);
 		}
 		else
 			m_vd->AddMask(m_vd_copy->GetMask(false), op);
@@ -902,9 +927,9 @@ void VolumeSelector::PasteMask(int op)
 		if (m_select_multi)
 		{
 			auto group = glbin_current.vol_group.lock();
-			Nrrd* data = m_vd->GetMask(false);
-			if (group && data)
-				group->AddMask(data, 0);
+			auto raw_mask = m_vd->GetMask(false);
+			if (group && raw_mask)
+				group->AddMask(raw_mask, 0);
 		}
 	}
 	m_vd->ResetMaskCount();

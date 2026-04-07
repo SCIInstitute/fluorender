@@ -54,13 +54,13 @@ double VolumePoint::GetPointVolume(
 	int ny = view->GetCanvasSize().h();
 	if (nx <= 0 || ny <= 0)
 		return -1.0;
-
+	if (vd->GetAllBrickNum() < 1)
+		return -1.0;
+	auto raw_data = vd->GetVolume(false);
+	if (!raw_data)
+		return -1.0;
 	flvr::Texture* tex = vd->GetTexture();
 	if (!tex) return -1.0;
-	auto comp = tex->get_nrrd(flvr::CompType::Data);
-	if (!comp.data) return -1.0;
-	void* data = comp.data->data;
-	if (!data && vd->GetAllBrickNum() < 1) return -1.0;
 
 	//projection
 	view->HandleProjection(nx, ny);
@@ -110,7 +110,7 @@ double VolumePoint::GetPointVolume(
 	if (bbox.intersect(mp1, vv, hit))
 	{
 		int brick_id = -1;
-		flvr::TextureBrick* hit_brick = 0;
+		std::shared_ptr<flvr::TextureBrick> hit_brick = nullptr;
 		unsigned long long vindex;
 		fluo::Vector data_res;
 		if (vd->isBrxml())
@@ -175,9 +175,9 @@ double VolumePoint::GetPointVolume(
 				else
 				{
 					if (use_transf)
-						value = vd->GetTransferedValue(fluo::Point(xx, yy, zz));
+						value = vd->GetTransferedValue(fluo::Point(xx, yy, zz), nullptr);
 					else
-						value = vd->GetOriginalValue(fluo::Point(xx, yy, zz));
+						value = vd->GetOriginalValue(fluo::Point(xx, yy, zz), nullptr);
 				}
 
 				if (mode == 1)

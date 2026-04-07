@@ -772,7 +772,7 @@ void VolumeData::AddMaskConvert(const std::shared_ptr<fluo::RawData>& mask, int 
 				src,
 				[op, scale](uint8_t dst_val, auto src_val) -> uint8_t
 				{
-					const uint8_t src8 = ScaleToU8(src_val, scale);
+					const uint8_t src8 = fluo::ScaleToU8(src_val, scale);
 
 					switch (op)
 					{
@@ -797,7 +797,7 @@ void VolumeData::AddMaskConvert(const std::shared_ptr<fluo::RawData>& mask, int 
 				src,
 				[scale](uint8_t /*dst*/, auto src_val) -> uint8_t
 				{
-					return ScaleToU8(src_val, scale);
+					return fluo::ScaleToU8(src_val, scale);
 				});
 		}
 		m_vr->clear_tex_mask(false);
@@ -1070,7 +1070,7 @@ std::shared_ptr<fluo::RawData> VolumeData::GetLabel(bool ret)
 	return nullptr;
 }
 
-double VolumeData::GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b)
+double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b)
 {
 	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 
@@ -1095,7 +1095,7 @@ double VolumeData::GetOriginalValue(const fluo::Point& p, flvr::TextureBrick* b)
 	return raw_data->GetVoxelValue(p.intx(), p.inty(), p.intz());
 }
 
-double VolumeData::GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b)
+double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b)
 {
 	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 
@@ -1122,7 +1122,7 @@ double VolumeData::GetMaskValue(const fluo::Point& p, flvr::TextureBrick* b)
 
 double VolumeData::GetTransferedValue(
 	const fluo::Point& p,
-	flvr::TextureBrick* b)
+	const std::shared_ptr<flvr::TextureBrick>& b)
 {
 	std::shared_ptr<fluo::RawData> raw_data;
 

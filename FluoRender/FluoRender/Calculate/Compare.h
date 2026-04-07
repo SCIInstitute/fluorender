@@ -80,8 +80,6 @@ namespace flrd
 			const std::shared_ptr<flvr::TextureBrick>& b2,
 			long &bits, long &bits2,
 			long &nx, long &ny, long &nz);
-		void* GetVolDataBrick(flvr::TextureBrick* b);
-		void* GetVolData(VolumeData* vd);
 	};
 
 }

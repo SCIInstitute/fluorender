@@ -573,50 +573,6 @@ bool ChannelCompare::GetInfo(
 	return true;
 }
 
-void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
-{
-	if (!b)
-		return 0;
-
-	int bits = 8;
-	int nb = 1;
-
-	flvr::CompType c = m_use_mask ? flvr::CompType::Data : flvr::CompType::None;
-	nb = b->nb(c);
-	auto res = b->get_size();
-	auto stride = b->get_stride();
-	bits = nb * 8;
-	unsigned long long mem_size = (unsigned long long)res.get_size_xyz()*(unsigned long long)nb;
-	unsigned char* temp = new unsigned char[mem_size];
-	unsigned char* tempp = temp;
-	unsigned char* tp = b->get_raw_data(c)->DataAs<unsigned char>();
-	unsigned char* tp2;
-	for (size_t k = 0; k < res.intz(); ++k)
-	{
-		tp2 = tp;
-		for (size_t j = 0; j < res.inty(); ++j)
-		{
-			memcpy(tempp, tp2, res.intx()*nb);
-			tempp += res.intx() * nb;
-			tp2 += stride.intx()*nb;
-		}
-		tp += stride.get_size_xy()*nb;
-	}
-	return (void*)temp;
-}
-
-void* ChannelCompare::GetVolData(VolumeData* vd)
-{
-	std::shared_ptr<fluo::RawData> raw_data = nullptr;
-	if (m_use_mask)
-		raw_data = vd->GetMask(false);
-	if (!raw_data)
-		raw_data = vd->GetVolume(false);
-	if (!raw_data)
-		return 0;
-	return raw_data->GetDataVoid();
-}
-
 void ChannelCompare::Product()
 {
 	m_result = 0.0;

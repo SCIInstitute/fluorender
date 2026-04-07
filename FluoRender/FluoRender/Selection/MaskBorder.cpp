@@ -93,8 +93,8 @@ bool MaskBorder::CheckBricks()
 {
 	if (!m_vd || !m_vd->GetTexture())
 		return false;
-	std::vector<flvr::TextureBrick*> *bricks = m_vd->GetTexture()->get_bricks();
-	if (!bricks || bricks->size() == 0)
+	auto bricks = m_vd->GetTexture()->get_bricks();
+	if (bricks.empty())
 		return false;
 	return true;
 }
@@ -110,16 +110,16 @@ void MaskBorder::Compute(int order)
 		return;
 
 	size_t idx, bn;
-	std::vector<flvr::TextureBrick*> *all_bricks = m_vd->GetTexture()->get_bricks();
-	bn = all_bricks->size();
+	auto all_bricks = m_vd->GetTexture()->get_bricks();
+	bn = all_bricks.size();
 	if (bn < 2)
 		return;
 	//get bricks with paint mask flag
-	std::vector<flvr::TextureBrick*> bricks;
-	for (size_t i = 0; i < bn; ++i)
+	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+	for (auto babs : all_bricks)
 	{
-		if ((*all_bricks)[i]->is_mask_act())
-			bricks.push_back((*all_bricks)[i]);
+		if (babs && babs->is_mask_act())
+			bricks.push_back(babs);
 	}
 	bn = bricks.size();
 	long bits = m_vd->GetBits();
@@ -133,18 +133,17 @@ void MaskBorder::Compute(int order)
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	flvr::TextureBrick* nb;//neighbor brick
+	std::shared_ptr<flvr::TextureBrick> nb;//neighbor brick
 	unsigned int nid;//neighbor id
 	unsigned int bid;
-	for (size_t i = 0; i < bn; ++i)
+	for (auto bbs : bricks)
 	{
-		flvr::TextureBrick* b = bricks[i];
-		bid = b->get_id();
-		auto res = b->get_size();
+		bid = bbs->get_id();
+		auto res = bbs->get_size();
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint mid = m_vd->GetVR()->load_brick_mask(b);
+		GLint mid = m_vd->GetVR()->load_brick_mask(bbs);
 
 		size_t global_size[2] = { 1, 1 };
 		size_t local_size[2] = { 1, 1 };

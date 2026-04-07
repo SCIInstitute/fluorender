@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BBox.h>
 #include <Transform.h>
 #include <vector>
+#include <memory>
 
 namespace flvr
 {
@@ -46,7 +47,7 @@ namespace flrd
 			m_view_only(false), m_mouse_pos(false) {}
 		~PaintBoxes() {}
 
-		void SetBricks(std::vector<flvr::TextureBrick*> *bricks)
+		void SetBricks(const std::vector<std::shared_ptr<flvr::TextureBrick>>& bricks)
 		{
 			m_bricks = bricks;
 		}
@@ -94,7 +95,7 @@ namespace flrd
 		void Compute();
 
 	private:
-		std::vector<flvr::TextureBrick*> *m_bricks;
+		std::vector<std::shared_ptr<flvr::TextureBrick>> m_bricks;
 		int m_paint_tex;//2d tex of paint strokes
 		int m_ptx, m_pty;//tex size
 		bool m_view_only;//only test for view intersection
@@ -112,7 +113,7 @@ namespace flrd
 		struct BrickBox
 		{
 			fluo::BBox bbox;
-			flvr::TextureBrick* brick;
+			std::shared_ptr<flvr::TextureBrick> brick;
 		};
 
 	private:
