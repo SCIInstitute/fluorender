@@ -635,10 +635,10 @@ void VolumeData::AddEmptyMask(int mode, bool change)
 	if (empty)
 	{
 		raw_mask = std::make_shared<fluo::RawData>(
-			fluo::RawData::Size3(
+			fluo::RawData::Size3{
 				(size_t)m_size.intx(),
 				(size_t)m_size.inty(),
-				(size_t)m_size.intz()),
+				(size_t)m_size.intz()},
 			fluo::DataFormat::UInt8);
 		raw_mask->Allocate();
 
@@ -677,10 +677,10 @@ void VolumeData::AddMask(const std::shared_ptr<fluo::RawData>& mask, int op)
 	if (empty)
 	{
 		raw_mask = std::make_shared<fluo::RawData>(
-			fluo::RawData::Size3(
+			fluo::RawData::Size3{
 				(size_t)m_size.intx(),
 				(size_t)m_size.inty(),
-				(size_t)m_size.intz()),
+				(size_t)m_size.intz()},
 			fluo::DataFormat::UInt8);
 		raw_mask->Allocate();
 
@@ -752,10 +752,10 @@ void VolumeData::AddMaskConvert(const std::shared_ptr<fluo::RawData>& mask, int 
 	if (empty)
 	{
 		raw_mask = std::make_shared<fluo::RawData>(
-			fluo::RawData::Size3(
+			fluo::RawData::Size3{
 				(size_t)m_size.intx(),
 				(size_t)m_size.inty(),
-				(size_t)m_size.intz()),
+				(size_t)m_size.intz()},
 			fluo::DataFormat::UInt8);
 		raw_mask->Allocate();
 
@@ -970,10 +970,10 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 	if (m_tex->add_empty_label())
 	{
 		raw_label = std::make_shared<fluo::RawData>(
-			fluo::RawData::Size3(
+			fluo::RawData::Size3{
 				(size_t)m_size.intx(),
 				(size_t)m_size.inty(),
-				(size_t)m_size.intz()),
+				(size_t)m_size.intz()},
 			fluo::DataFormat::UInt32);
 		raw_label->Allocate();
 		if (!raw_label)

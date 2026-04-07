@@ -343,7 +343,7 @@ namespace fluo
 	}
 
 	template <typename Fn>
-	void DispatchByFormat(Fn&& fn)
+	void RawData::DispatchByFormat(Fn&& fn)
 	{
 		switch (m_format)
 		{
@@ -355,7 +355,7 @@ namespace fluo
 		case DataFormat::Int16:   ForEachElementT<int16_t>(fn); break;
 		case DataFormat::Int32:   ForEachElementT<int32_t>(fn); break;
 
-		case DataFormat::Float16: ForEachElementT<Half>(fn); break; // assuming Half type
+		//case DataFormat::Float16: ForEachElementT<Half>(fn); break; // assuming Half type
 		case DataFormat::Float32: ForEachElementT<float>(fn); break;
 		case DataFormat::Float64: ForEachElementT<double>(fn); break;
 
@@ -544,9 +544,9 @@ namespace fluo
 			ForEachBinaryT<int32_t>(dst, rhs, std::forward<Fn>(fn));
 			break;
 
-		case DataFormat::Float16:
-			ForEachBinaryT<Half>(dst, rhs, std::forward<Fn>(fn));
-			break;
+		//case DataFormat::Float16:
+		//	ForEachBinaryT<Half>(dst, rhs, std::forward<Fn>(fn));
+		//	break;
 
 		case DataFormat::Float32:
 			ForEachBinaryT<float>(dst, rhs, std::forward<Fn>(fn));
@@ -701,7 +701,7 @@ namespace fluo
 			});
 	}
 
-	bool RawData::ContainsNonZero() const noexcept
+	bool RawData::ContainsNonZero() const
 	{
 		if (!IsAllocated())
 			return false;
@@ -717,7 +717,7 @@ namespace fluo
 			});
 	}
 
-	bool RawData::ContainsValue(double value) const noexcept
+	bool RawData::ContainsValue(double value) const
 	{
 		if (!IsAllocated())
 			return false;

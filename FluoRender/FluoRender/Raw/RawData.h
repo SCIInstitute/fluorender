@@ -234,6 +234,9 @@ namespace fluo
 		void FillShuffledID();
 
 		template <typename Fn>
+		void DispatchByFormat(Fn&& fn);
+
+		template <typename Fn>
 		static void DispatchBinary(RawData& dst,
 			const RawData& rhs,
 			Fn&& fn);
