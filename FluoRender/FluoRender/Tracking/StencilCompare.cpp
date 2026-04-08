@@ -822,10 +822,10 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	//set up kernel
 	m_prog->beginArgs(kernel_index);
 	if (m_s1->fsize < 1)
-		m_img1 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img1", buf_size, (void*)(m_s1->data)).lock();
+		m_img1 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img1", buf_size, m_s1->data->GetDataVoid()).lock();
 	else
 	{
-		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img1_0", buf_size, (void*)(m_s1->data));
+		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img1_0", buf_size, m_s1->data->GetDataVoid());
 		img[1] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "img1_1", buf_size, NULL);
 		m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
@@ -853,10 +853,10 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 	//set up kernel
 	m_prog->beginArgs(kernel_index);
 	if (m_s2->fsize < 1)
-		m_img2 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img2", buf_size, (void*)(m_s2->data)).lock();
+		m_img2 = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img2", buf_size, m_s2->data->GetDataVoid()).lock();
 	else
 	{
-		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img2_0", buf_size, (void*)(m_s2->data));
+		img[0] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "img2_0", buf_size, m_s2->data->GetDataVoid());
 		img[1] = m_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY, "img2_1", buf_size, NULL);
 		m_prog->setConst(sizeof(unsigned int), (void*)(&nx));
 		m_prog->setConst(sizeof(unsigned int), (void*)(&ny));
@@ -899,7 +899,7 @@ void StencilCompare::Prepare(const std::string& cmp_name)
 		m_mask1 =
 			m_prog->setBufNew(
 			CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, "mask",
-			buf_size, m_s1->mask).lock();
+			buf_size, m_s1->mask->GetDataVoid()).lock();
 	}
 }
 
@@ -1141,7 +1141,7 @@ void StencilCompare::Lookup()
 				(unsigned long long)m_s2->nx*m_s2->ny*i.intz() +
 				(unsigned long long)m_s2->nx*i.inty() +
 				(unsigned long long)i.intx();
-			((unsigned int*)m_s2->label)[index] = l;
+			m_s2->label->SetValue<unsigned int>(index, l);
 		}
 	}
 }

@@ -584,11 +584,6 @@ namespace fluo
 		Size3 m_size = { 0, 0, 0 };
 
 		DataFormat m_format = DataFormat::Unknown;
-		//size_t m_channels = 1;
-		//size_t m_time_steps = 1;
-
-		//size_t m_resolution_level = 0;
-		//size_t m_brick_index = 0;
 
 		std::vector<fluo::Byte> m_data;
 

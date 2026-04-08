@@ -409,7 +409,7 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 	}
 	//prune data
 	label->ForEachElement(
-		[&cell_list](uint32_t& label_value)
+		[&cell_list](auto& label_value, size_t index)
 		{
 			if (label_value != 0 &&
 				cell_list.find(label_value) == cell_list.end())
@@ -1125,7 +1125,7 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 	CellIDMap id_map;
 
 	label->ForEachElementIndexed(
-		[this, &id_map, f](uint32_t& lv, size_t index)
+		[this, &id_map, f](auto& lv, size_t index)
 		{
 			if (lv == 0)
 				return;
@@ -1184,7 +1184,7 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 	CellIDMap id_map;
 
 	label->ForEachElementIndexed(
-		[this, &id_map, f1, f2](uint32_t& lv, size_t index)
+		[this, &id_map, f1, f2](auto& lv, size_t index)
 		{
 			if (lv == 0)
 				return;
