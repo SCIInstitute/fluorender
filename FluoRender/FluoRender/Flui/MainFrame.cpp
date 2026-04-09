@@ -1059,12 +1059,12 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 	else if (FOUND_VALUE(gstAnnotatPropPanel))
 		type = 4;
 	ShowPropPage(type,
-		glbin_current.render_view.lock().get(),
-		glbin_current.vol_group.lock().get(),
-		glbin_current.vol_data.lock().get(),
-		glbin_current.mesh_data.lock().get(),
-		glbin_current.mesh_group.lock().get(),
-		glbin_current.ann_data.lock().get());
+		glbin_current.render_view.lock(),
+		glbin_current.vol_group.lock(),
+		glbin_current.vol_data.lock(),
+		glbin_current.mesh_data.lock(),
+		glbin_current.mesh_group.lock(),
+		glbin_current.ann_data.lock());
 
 	//clear mesh bounds
 	//glbin_data_manager.ClearMeshSelection();
@@ -1142,12 +1142,12 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 }
 
 wxWindow* MainFrame::AddProps(int type,
-	RenderView* view,
-	VolumeGroup* group,
-	VolumeData* vd,
-	MeshData* md,
-	MeshGroup* mg,
-	AnnotData* ann)
+	const std::shared_ptr<RenderView>& view,
+	const std::shared_ptr<VolumeGroup>& group,
+	const std::shared_ptr<VolumeData>& vd,
+	const std::shared_ptr<MeshData>& md,
+	const std::shared_ptr<MeshGroup>& mg,
+	const std::shared_ptr<AnnotData>& ann)
 {
 	//wxString str;
 	//if (canvas)

@@ -526,7 +526,9 @@ __kernel void kernel_1(
 };
 )CLKER";
 
-ChannelCompare::ChannelCompare(VolumeData* vd1, VolumeData* vd2)
+ChannelCompare::ChannelCompare(
+	const std::shared_ptr<VolumeData>& vd1,
+	const std::shared_ptr<VolumeData>& vd2)
 	: m_vd1(vd1), m_vd2(vd2),
 	m_use_mask(false),
 	m_int_weighted(false),
@@ -540,21 +542,23 @@ ChannelCompare::~ChannelCompare()
 {
 }
 
-bool ChannelCompare::CheckBricks()
+std::pair<std::shared_ptr<VolumeData>, std::shared_ptr<VolumeData>> ChannelCompare::CheckBricks()
 {
-	if (!m_vd1)
-		return false;
-	if (!m_vd2)
-		return false;
-	if (!m_vd1->GetTexture())
-		return false;
-	if (!m_vd2->GetTexture())
-		return false;
-	auto brick_num1 = m_vd1->GetTexture()->get_brick_list_size();
-	auto brick_num2 = m_vd2->GetTexture()->get_brick_list_size();
+	auto vd1 = m_vd1.lock();
+	if (!vd1)
+		return { nullptr, nullptr };
+	auto vd2 = m_vd2.lock();
+	if (!vd2)
+		return{ nullptr, nullptr };
+	if (!vd1->GetTexture())
+		return { nullptr, nullptr };
+	if (!vd2->GetTexture())
+		return { nullptr, nullptr };
+	auto brick_num1 = vd1->GetTexture()->get_brick_list_size();
+	auto brick_num2 = vd2->GetTexture()->get_brick_list_size();
 	if (!brick_num1 || !brick_num2 || brick_num1 != brick_num2)
-		return false;
-	return true;
+		return { nullptr, nullptr };
+	return { vd1, vd2 };
 }
 
 bool ChannelCompare::GetInfo(
@@ -577,10 +581,11 @@ void ChannelCompare::Product()
 {
 	m_result = 0.0;
 
-	if (!CheckBricks())
+	auto [vd1, vd2] = CheckBricks();
+	if (!vd1 || !vd2)
 		return;
-	long bits = m_vd1->GetBits();
-	float max_int = static_cast<float>(m_vd1->GetMaxValue());
+	long bits = vd1->GetBits();
+	float max_int = static_cast<float>(vd1->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_dotprod, bits, max_int);
@@ -609,11 +614,11 @@ void ChannelCompare::Product()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	auto bricks1 = m_vd1->GetTexture()->get_bricks();
-	auto bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	size_t brick_num = vd1->GetTexture()->get_brick_list_size();
+	auto bricks1 = vd1->GetTexture()->get_bricks();
+	auto bricks2 = vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(vd1->GetScalarScale());
+	float ss2 = (float)(vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -629,13 +634,13 @@ void ChannelCompare::Product()
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = vd1->GetVR()->load_brick(b1);
+		GLint tid2 = vd2->GetVR()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
-			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
+			mid1 = vd1->GetVR()->load_brick_mask(b1);
+			mid2 = vd2->GetVR()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -690,10 +695,11 @@ void ChannelCompare::MinValue()
 {
 	m_result = 0.0;
 
-	if (!CheckBricks())
+	auto [vd1, vd2] = CheckBricks();
+	if (!vd1 || !vd2)
 		return;
-	long bits = m_vd1->GetBits();
-	float max_int = static_cast<float>(m_vd1->GetMaxValue());
+	long bits = vd1->GetBits();
+	float max_int = static_cast<float>(vd1->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_minvalue, bits, max_int);
@@ -722,11 +728,11 @@ void ChannelCompare::MinValue()
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	auto bricks1 = m_vd1->GetTexture()->get_bricks();
-	auto bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	size_t brick_num = vd1->GetTexture()->get_brick_list_size();
+	auto bricks1 = vd1->GetTexture()->get_bricks();
+	auto bricks2 = vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(vd1->GetScalarScale());
+	float ss2 = (float)(vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -742,13 +748,13 @@ void ChannelCompare::MinValue()
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = vd1->GetVR()->load_brick(b1);
+		GLint tid2 = vd2->GetVR()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
-			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
+			mid1 = vd1->GetVR()->load_brick_mask(b1);
+			mid2 = vd2->GetVR()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -803,10 +809,11 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 {
 	m_result = 0.0;
 
-	if (!CheckBricks())
+	auto [vd1, vd2] = CheckBricks();
+	if (!vd1 || !vd2)
 		return;
-	long bits = m_vd1->GetBits();
-	float max_int = static_cast<float>(m_vd1->GetMaxValue());
+	long bits = vd1->GetBits();
+	float max_int = static_cast<float>(vd1->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_threshold, bits, max_int);
@@ -835,11 +842,11 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	auto bricks1 = m_vd1->GetTexture()->get_bricks();
-	auto bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	size_t brick_num = vd1->GetTexture()->get_brick_list_size();
+	auto bricks1 = vd1->GetTexture()->get_bricks();
+	auto bricks2 = vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(vd1->GetScalarScale());
+	float ss2 = (float)(vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -857,13 +864,13 @@ void ChannelCompare::Threshold(float th1, float th2, float th3, float th4)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = vd1->GetVR()->load_brick(b1);
+		GLint tid2 = vd2->GetVR()->load_brick(b2);
 		GLint mid1, mid2;
 		if (m_use_mask)
 		{
-			mid1 = m_vd1->GetVR()->load_brick_mask(b1);
-			mid2 = m_vd2->GetVR()->load_brick_mask(b2);
+			mid1 = vd1->GetVR()->load_brick_mask(b1);
+			mid2 = vd2->GetVR()->load_brick_mask(b2);
 			if (mid1 < 0 || mid2 < 0)
 				continue;
 		}
@@ -922,10 +929,11 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 {
 	m_result = 0.0;
 
-	if (!CheckBricks())
+	auto [vd1, vd2] = CheckBricks();
+	if (!vd1 || !vd2)
 		return;
-	long bits = m_vd1->GetBits();
-	float max_int = static_cast<float>(m_vd1->GetMaxValue());
+	long bits = vd1->GetBits();
+	float max_int = static_cast<float>(vd1->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_chann_sum, bits, max_int);
@@ -940,11 +948,11 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 	else
 		kernel_index = kernel_prog->createKernel(name);
 
-	size_t brick_num = m_vd1->GetTexture()->get_brick_list_size();
-	auto bricks1 = m_vd1->GetTexture()->get_bricks();
-	auto bricks2 = m_vd2->GetTexture()->get_bricks();
-	float ss1 = (float)(m_vd1->GetScalarScale());
-	float ss2 = (float)(m_vd2->GetScalarScale());
+	size_t brick_num = vd1->GetTexture()->get_brick_list_size();
+	auto bricks1 = vd1->GetTexture()->get_bricks();
+	auto bricks2 = vd2->GetTexture()->get_bricks();
+	float ss1 = (float)(vd1->GetScalarScale());
+	float ss2 = (float)(vd2->GetScalarScale());
 
 	for (size_t i = 0; i < brick_num; ++i)
 	{
@@ -962,8 +970,8 @@ void ChannelCompare::Average(float weight, std::weak_ptr<flvr::Argument> avg)
 		if (!GetInfo(b1, b2, bits1, bits2, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid1 = m_vd1->GetVR()->load_brick(b1);
-		GLint tid2 = m_vd2->GetVR()->load_brick(b2);
+		GLint tid1 = vd1->GetVR()->load_brick(b1);
+		GLint tid2 = vd2->GetVR()->load_brick(b2);
 
 		size_t local_size[3] = { 1, 1, 1 };
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };

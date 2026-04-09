@@ -77,7 +77,7 @@ private:
 	std::wstring m_file;//current file
 	int m_file_index;//index of current file in the kernel list
 
-	bool ExecuteKernel(VolumeData* vd, VolumeData* vd_r);
+	bool ExecuteKernel(const std::shared_ptr<VolumeData>& vd, const std::shared_ptr<VolumeData>& vd_r);
 	bool ExecuteKernelBrick(flvr::KernelProgram* kernel_prog,
 		unsigned int data_id, std::shared_ptr<fluo::RawData>& result,
 		size_t brick_x, size_t brick_y,

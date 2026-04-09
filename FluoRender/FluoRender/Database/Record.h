@@ -29,8 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #define _RECORD_H_
 
 #include <Entry.h>
-#include <fstream>
 #include <Params.h>
+#include <fstream>
+#include <memory>
 
 namespace flrd
 {
@@ -43,15 +44,15 @@ namespace flrd
 			Record(const Record& rec);
 			virtual ~Record();
 
-			virtual void assign(Record* rec);
+			virtual void assign(const std::shared_ptr<RecordHistParams>& rec);
 
 			virtual RecordHistParams* asRecordHistParams() { return 0; }
 			virtual const RecordHistParams* asRecordHistParams() const { return 0; }
 
-			virtual Entry* getInput() = 0;
-			virtual void setInput(Entry* entry) = 0;
-			virtual Entry* getOutput() = 0;
-			virtual void setOutput(Entry* entry) = 0;
+			virtual std::shared_ptr<Entry> getInput() = 0;
+			virtual void setInput(const std::shared_ptr<Entry>& entry) = 0;
+			virtual std::shared_ptr<Entry> getOutput() = 0;
+			virtual void setOutput(const std::shared_ptr<Entry>& entry) = 0;
 
 			virtual void open(File& file);
 			virtual void save(File& file);
@@ -59,8 +60,8 @@ namespace flrd
 			virtual size_t getInputSize() = 0;
 			virtual size_t getOutputSize() = 0;
 
-			virtual void getInputData(float* data) = 0;
-			virtual void getOutputData(float* data) = 0;
+			virtual std::vector<float> getInputData() = 0;
+			virtual std::vector<float> getOutputData() = 0;
 
 			virtual void getInputData(std::vector<float>& data) = 0;
 			virtual void getOutputData(std::vector<float>& data) = 0;
@@ -68,12 +69,12 @@ namespace flrd
 			virtual bool compare(Record* rec);
 			virtual float compare(Entry* ent);
 
-			void setParams(Params* params) { m_params = params; }
+			void setParams(const std::shared_ptr<Params>& params) { m_params = params; }
 
 	protected:
-			Params* m_params;//type of params
-			Entry* m_input;
-			Entry* m_output;
+			std::weak_ptr<Params> m_params;//type of params
+			std::shared_ptr<Entry> m_input;
+			std::shared_ptr<Entry> m_output;
 	};
 }
 

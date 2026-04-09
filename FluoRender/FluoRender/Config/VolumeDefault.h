@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEDEFAULT_H_
 
 #include <Vector.h>
+#include <memory>
 
 class VolumeData;
 class VolumeGroup;
@@ -45,12 +46,16 @@ public:
 	VolumeDataDefault();
 	~VolumeDataDefault();
 
+	//from or to file
 	void Read();
 	void Save();
-	void Set(VolumeData* vd);
-	void Apply(VolumeData* vd);
-	void Copy(VolumeData* v1, VolumeData* v2);//v2 to v1
-	void Apply(VolumeGroup* g);
+
+	//set: save settings to this
+	void Set(const std::shared_ptr<VolumeData>& vd);
+	//apply: restore settings to vd
+	void Apply(const std::shared_ptr<VolumeData>& vd);
+	void Copy(const std::shared_ptr<VolumeData>& v1, const std::shared_ptr<VolumeData>& v2);//v2 to v1
+	void Apply(const std::shared_ptr<VolumeGroup>& g);
 
 public:
 	//default values

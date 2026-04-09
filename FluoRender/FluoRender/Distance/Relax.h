@@ -28,8 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef FL_Relax_h
 #define FL_Relax_h
 
-#include <vector>
 #include <Vector.h>
+#include <vector>
+#include <memory>
 
 class VolumeData;
 namespace flrd
@@ -49,9 +50,9 @@ namespace flrd
 		{
 			return m_use_mask;
 		}
-		void SetVolume(VolumeData* vd);
-		void SetRuler(Ruler* ruler);
-		Ruler* GetRuler();
+		void SetVolume(const std::shared_ptr<VolumeData>& vd);
+		void SetRuler(const std::shared_ptr<Ruler>& ruler);
+		std::shared_ptr<Ruler> GetRuler();
 		void SetRestDist(float d)
 		{
 			m_rest = d;
@@ -67,9 +68,9 @@ namespace flrd
 
 	private:
 		bool m_use_mask;//use mask instead of data
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		//Ruler
-		Ruler *m_ruler;
+		std::weak_ptr<Ruler> m_ruler;
 		//spring
 		unsigned int m_snum;//total point number
 		float m_rest;//rest dist

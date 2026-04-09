@@ -65,7 +65,7 @@ namespace flrd
 	class RulerPoint;
 	typedef std::shared_ptr<RulerPoint> pRulerPoint;
 	typedef std::vector<pRulerPoint> RulerBranch;
-	typedef std::map<size_t, fluo::Point> TimePoint;
+	typedef std::map<size_t, std::shared_ptr<fluo::Point>> TimePoint;
 	typedef TimePoint::iterator TimePointIter;
 	//typedef std::map<size_t, size_t> TimePointIndex;
 	//typedef TimePointIndex::iterator TimePointIndexIter;
@@ -122,7 +122,7 @@ namespace flrd
 				if (c == i)
 				{
 					t = it.first;
-					p = it.second;
+					p = *(it.second);
 					return true;
 				}
 				c++;
@@ -131,18 +131,17 @@ namespace flrd
 		}
 		void SetPoint(const fluo::Point& p, size_t t)
 		{
-			fluo::Point* op = get_point(t);
+			auto op = get_point(t);
 			if (op)
 				*op = p;
 			else
-				m_tp.insert(std::make_pair(t, p));
+				m_tp.insert(std::make_pair(t, std::make_shared<fluo::Point>(p)));
 		}
-		fluo::Point GetPoint(size_t t, int interp)//interp:0-step; 1-linear; 2-smooth
+		std::shared_ptr<fluo::Point> GetPoint(size_t t, int interp)//interp:0-step; 1-linear; 2-smooth
 		{
-			fluo::Point* op = get_point(t);
+			auto op = get_point(t);
 			if (op)
-				return* op;
-
+				return op;
 			//not found
 			switch (interp)
 			{
@@ -160,16 +159,16 @@ namespace flrd
 		{
 			//scale all points
 			for (auto &i : m_tp)
-				i.second.scale(scale);
+				i.second->scale(scale);
 		}
 		void DisplacePoint(fluo::Vector& dp, size_t t, int interp)
 		{
-			fluo::Point* op = get_point(t);
+			auto op = get_point(t);
 			if (op)
 				*op += dp;
 			else
 			{
-				fluo::Point np = GetPoint(t, interp) + dp;
+				auto np = *GetPoint(t, interp) + dp;
 				SetPoint(np, t);
 			}
 		}
@@ -185,9 +184,9 @@ namespace flrd
 		{
 			if (m_tp.size() == 1)
 				return;
-			fluo::Point p = GetPoint(t, interp);
+			auto p = GetPoint(t, interp);
 			m_tp.clear();
-			SetPoint(p, 0);
+			SetPoint(*p, 0);
 		}
 
 		void SetLocked(bool locked = true)
@@ -236,15 +235,15 @@ namespace flrd
 		std::set<unsigned int> m_bid;//merged ids from multiple bricks
 
 		//no interpolation
-		fluo::Point* get_point(size_t t)
+		std::shared_ptr<fluo::Point> get_point(size_t t)
 		{
 			auto i = m_tp.find(t);
 			if (i == m_tp.end())
-				return 0;
-			return &(i->second);
+				return nullptr;
+			return i->second;
 		}
 		//interpolated point
-		fluo::Point get_point_step(size_t t)
+		std::shared_ptr<fluo::Point> get_point_step(size_t t)
 		{
 			size_t pt, nt;
 			int r = get_nb(t, pt, nt);
@@ -252,7 +251,7 @@ namespace flrd
 			{
 			case 0:
 			default:
-				return fluo::Point();
+				return std::make_shared<fluo::Point>();
 			case 1:
 			case 3:
 				t = pt;
@@ -261,12 +260,12 @@ namespace flrd
 				t = nt;
 				break;
 			}
-			fluo::Point* op = get_point(t);
+			auto op = get_point(t);
 			if (op)
-				return *op;
-			return fluo::Point();
+				return op;
+			return std::make_shared<fluo::Point>();
 		}
-		fluo::Point get_point_linear(size_t t)
+		std::shared_ptr<fluo::Point> get_point_linear(size_t t)
 		{
 			size_t pt, nt;
 			int r = get_nb(t, pt, nt);
@@ -274,7 +273,7 @@ namespace flrd
 			{
 			case 0:
 			default:
-				return fluo::Point();
+				return std::make_shared<fluo::Point>();
 			case 1:
 				t = pt;
 				break;
@@ -283,25 +282,25 @@ namespace flrd
 				break;
 			case 3:
 			{
-				fluo::Point* p0 = get_point(pt);
-				fluo::Point* p1 = get_point(nt);
+				auto p0 = get_point(pt);
+				auto p1 = get_point(nt);
 				if (!p0 || !p1)
-					return fluo::Point();
+					return std::make_shared<fluo::Point>();
 				double d = static_cast<double>(nt - pt);
 				if (d == 0.0)
-					return fluo::Point();
+					return std::make_shared<fluo::Point>();
 				double w0, w1;
 				w0 = (nt - t) / d;
 				w1 = (t - pt) / d;
-				return fluo::Point(w0 * (*p0) + w1 * (*p1));
+				return std::make_shared<fluo::Point>(w0 * (*p0) + w1 * (*p1));
 			}
 			}
-			fluo::Point* op = get_point(t);
+			auto op = get_point(t);
 			if (op)
-				return *op;
-			return fluo::Point();
+				return op;
+			return std::make_shared<fluo::Point>();
 		}
-		fluo::Point get_point_smooth(size_t t)
+		std::shared_ptr<fluo::Point> get_point_smooth(size_t t)
 		{
 			size_t pt, nt;
 			int r = get_nb(t, pt, nt);
@@ -309,7 +308,7 @@ namespace flrd
 			{
 			case 0:
 			default:
-				return fluo::Point();
+				return std::make_shared<fluo::Point>();
 			case 1:
 				t = pt;
 				break;
@@ -318,23 +317,23 @@ namespace flrd
 				break;
 			case 3:
 			{
-				fluo::Point* p0 = get_point(pt);
-				fluo::Point* p1 = get_point(nt);
+				auto p0 = get_point(pt);
+				auto p1 = get_point(nt);
 				if (!p0 || !p1)
-					return fluo::Point();
+					return std::make_shared<fluo::Point>();
 				double d = static_cast<double>(nt - pt);
 				if (d == 0.0)
-					return fluo::Point();
+					return std::make_shared<fluo::Point>();
 				double w0, w1;
 				w1 = (t - pt) / d;
 				w0 = -2.0 * w1 * w1 * w1 + 3.0 * w1 * w1;
-				return fluo::Point((*p0) + w0 * ((*p1) - (*p0)));
+				return std::make_shared<fluo::Point>((*p0) + w0 * ((*p1) - (*p0)));
 			}
 			}
-			fluo::Point* op = get_point(t);
+			auto op = get_point(t);
 			if (op)
-				return *op;
-			return fluo::Point();
+				return op;
+			return std::make_shared<fluo::Point>();
 		}
 
 		//return 0-not found (can't be); 1-found prt; 2-found nxt; 3-found both;
@@ -413,27 +412,25 @@ namespace flrd
 		int GetNumBranch();
 		int GetNumPoint();
 		int GetNumBranchPoint(int nbranch);
-		RulerPoint* GetRulerPoint(int index);
-		RulerPoint* GetLastRulerPoint();
-		pRulerPoint GetPRulerPoint(int index);
-		RulerPoint* GetRulerPoint(int nbranch, int index);
-		pRulerPoint GetPRulerPoint(int nbranch, int index);
-		pRulerPoint FindPRulerPoint(fluo::Point& point);
-		pRulerPoint FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t &rj);
-		pRulerPoint FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t& rj);
+		pRulerPoint GetLastRulerPoint();
+		pRulerPoint GetRulerPoint(int index);
+		pRulerPoint GetRulerPoint(int nbranch, int index);
+		pRulerPoint FindRulerPoint(fluo::Point& point);
+		pRulerPoint FindNearestRulerPoint(fluo::Point& point, size_t &ri, size_t &rj);
+		pRulerPoint FindBranchRulerPoint(fluo::Point& point, size_t& ri, size_t& rj);
 		fluo::Point GetPoint(int index)
 		{
-			RulerPoint* p = GetRulerPoint(index);
+			auto p = GetRulerPoint(index);
 			if (p)
-				return p->GetPoint(m_work_time, m_interp);
+				return *(p->GetPoint(m_work_time, m_interp));
 			return fluo::Point();
 		}
 		bool GetPoint(int index, fluo::Point& point)
 		{
-			RulerPoint* p = GetRulerPoint(index);
+			auto p = GetRulerPoint(index);
 			if (p)
 			{
-				point = p->GetPoint(m_work_time, m_interp);
+				point = *(p->GetPoint(m_work_time, m_interp));
 				return true;
 			}
 			return false;
@@ -447,14 +444,14 @@ namespace flrd
 		}
 		fluo::Point GetPoint(int nbranch, int index)
 		{
-			RulerPoint* p = GetRulerPoint(nbranch, index);
+			auto p = GetRulerPoint(nbranch, index);
 			if (p)
-				return p->GetPoint(m_work_time, m_interp);
+				return *(p->GetPoint(m_work_time, m_interp));
 			return fluo::Point();
 		}
 		void SetPoint(int index, const fluo::Point& point)
 		{
-			RulerPoint* p = GetRulerPoint(index);
+			auto p = GetRulerPoint(index);
 			if (p)
 				p->SetPoint(point, m_work_time);
 		}
@@ -572,9 +569,9 @@ namespace flrd
 		{
 			return m_info_profile;
 		}
-		std::vector<ProfileBin> *GetProfile()
+		std::vector<ProfileBin> GetProfile()
 		{
-			return &m_profile;
+			return m_profile;
 		}
 		void SaveProfile(const std::string &filename);
 		double GetProfileMaxValue();
@@ -638,7 +635,7 @@ namespace flrd
 		{
 			for (size_t i = 0; i < GetNumPoint(); ++i)
 			{
-				RulerPoint* p = GetRulerPoint(static_cast<int>(i));
+				auto p = GetRulerPoint(static_cast<int>(i));
 				if (!p)
 					continue;
 				p->DeletePoint(m_work_time);
@@ -648,7 +645,7 @@ namespace flrd
 		{
 			for (size_t i = 0; i < GetNumPoint(); ++i)
 			{
-				RulerPoint* p = GetRulerPoint(static_cast<int>(i));
+				auto p = GetRulerPoint(static_cast<int>(i));
 				if (!p)
 					continue;
 				p->DeleteAllPoint(m_work_time, m_interp);

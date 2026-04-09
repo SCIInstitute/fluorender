@@ -241,7 +241,7 @@ void VolumeDataDefault::Save()
 	f->Write(gstMaskMode, static_cast<int>(m_mask_mode));
 }
 
-void VolumeDataDefault::Set(VolumeData* vd)
+void VolumeDataDefault::Set(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return;
@@ -300,7 +300,7 @@ void VolumeDataDefault::Set(VolumeData* vd)
 	m_mask_mode = vd->GetMaskColorMode();
 }
 
-void VolumeDataDefault::Apply(VolumeData* vd)
+void VolumeDataDefault::Apply(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return;
@@ -367,7 +367,9 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetMaskMode(m_mask_mode);
 }
 
-void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
+void VolumeDataDefault::Copy(
+	const std::shared_ptr<VolumeData>& v1,
+	const std::shared_ptr<VolumeData>& v2)//v2 to v1
 {
 	if (!v1 || !v2)
 		return;
@@ -437,7 +439,7 @@ void VolumeDataDefault::Copy(VolumeData* v1, VolumeData* v2)//v2 to v1
 	v1->SetMinMaxValue(v2->GetMinValue(), v2->GetMaxValue());
 }
 
-void VolumeDataDefault::Apply(VolumeGroup* g)
+void VolumeDataDefault::Apply(const std::shared_ptr<VolumeGroup>& g)
 {
 	if (!g)
 		return;

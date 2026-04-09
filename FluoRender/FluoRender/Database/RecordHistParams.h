@@ -46,22 +46,36 @@ namespace flrd
 		virtual RecordHistParams* asRecordHistParams() { return this; }
 		virtual const RecordHistParams* asRecordHistParams() const { return this; }
 
-		virtual EntryHist* getInput()
+		virtual std::shared_ptr<Entry> getInput()
 		{
-			return dynamic_cast<EntryHist*>(m_input);
+			return m_input;
 		}
 
-		virtual void setInput(Entry* entry)
+		std::shared_ptr<EntryHist> getInputAsEntryHist()
+		{
+			if (!m_input)
+				return nullptr;
+			return std::static_pointer_cast<EntryHist>(m_input);
+		}
+
+		virtual void setInput(const std::shared_ptr<Entry>& entry)
 		{
 			m_input = entry;
 		}
 			
-		virtual EntryParams* getOutput()
+		virtual std::shared_ptr<Entry> getOutput()
 		{
-			return dynamic_cast<EntryParams*>(m_output);
+			return m_output;
 		}
 
-		virtual void setOutput(Entry* entry)
+		std::shared_ptr<EntryParams> getOutputAsEntryParams()
+		{
+			if (!m_output)
+				return nullptr;
+			return std::static_pointer_cast<EntryParams>(m_output);
+		}
+
+		virtual void setOutput(const std::shared_ptr<Entry>& entry)
 		{
 			m_output = entry;
 		}
@@ -71,9 +85,6 @@ namespace flrd
 
 		virtual size_t getInputSize();
 		virtual size_t getOutputSize();
-
-		virtual void getInputData(float* data);
-		virtual void getOutputData(float* data);
 
 		virtual void getInputData(std::vector<float>& data);
 		virtual void getOutputData(std::vector<float>& data);

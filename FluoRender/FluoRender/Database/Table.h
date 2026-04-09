@@ -63,18 +63,18 @@ namespace flrd
 			virtual ~Table();
 
 			virtual void clear();
-			virtual void addRecord(Record* rec);
-			virtual void readRecord(Record* rec);
+			virtual void addRecord(const std::shared_ptr<Record>& rec);
+			virtual void readRecord(const std::shared_ptr<Record>& rec);
 			virtual void delRecord(size_t i);
 			virtual void delRecords(std::vector<size_t>& vi);
 			virtual void setCreateTime(const std::time_t& t);
-			virtual std::time_t* getCreateTime()
+			virtual std::time_t getCreateTime()
 			{
-				return &m_create_time;
+				return m_create_time;
 			}
-			virtual std::time_t* getModifyTime()
+			virtual std::time_t getModifyTime()
 			{
-				return &m_modify_time;
+				return m_modify_time;
 			}
 			virtual void setNotes(const std::wstring& text)
 			{
@@ -117,14 +117,18 @@ namespace flrd
 			{
 				return m_recnum;
 			}
-			virtual void getRecInput(float* data)
+			virtual std::vector<float> getRecInput() const
 			{
-				float* p = data;
-				for (auto i : m_data)
+				std::vector<float> result(getTotalInputSize());
+
+				float* p = result.data();
+				for (const auto& e : m_data)
 				{
-					i->getInputData(p);
-					p += i->getInputSize();
+					e->getInputData(p);
+					p += e->getInputSize();
 				}
+
+				return result;
 			}
 			virtual void getRecOutput(float* data)
 			{
@@ -151,9 +155,25 @@ namespace flrd
 				m_update_func = func;
 			}
 
-			void setParams(Params* params)
+			void setParams(const std::shared_ptr<Params>& params)
 			{
 				m_params = params;
+			}
+
+			size_t getTotalInputSize() const
+			{
+				size_t total = 0;
+				for (const auto& e : m_data)
+					total += e->getInputSize();
+				return total;
+			}
+
+			size_t getTotalOutputSize() const
+			{
+				size_t total = 0;
+				for (const auto& e : m_data)
+					total += e->getOutputSize();
+				return total;
 			}
 
 		protected:
@@ -163,8 +183,8 @@ namespace flrd
 			std::wstring m_name;
 			std::wstring m_notes;
 			size_t m_recnum;
-			std::vector<Record*> m_data;
-			Params* m_params;//type of records
+			std::vector<std::shared_ptr<Record>> m_data;
+			std::weak_ptr<Params> m_params;//type of records
 			//trainer
 			size_t m_trained_rec_num;
 

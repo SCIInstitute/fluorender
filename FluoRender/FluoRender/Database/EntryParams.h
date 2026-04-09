@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Entry.h>
 #include <Params.h>
+#include <memory>
 
 namespace flrd
 {
@@ -43,7 +44,7 @@ namespace flrd
 		virtual EntryParams* asEntryParams() { return this; }
 		virtual const EntryParams* asEntryParams() const { return this; }
 
-		void setParams(Params* params);
+		void setParams(const std::shared_ptr<Params>& params);
 
 		template <typename T>
 		void setParam(const std::string& name, T value)
@@ -58,10 +59,11 @@ namespace flrd
 
 		float getParam(const std::string& name)
 		{
-			if (!m_params)
+			auto p = m_params.lock();
+			if (!p)
 				return 0;
 			size_t i;
-			if (m_params->getNameIndex(name, i))
+			if (p->getNameIndex(name, i))
 				return m_data[i];
 			return 0;
 		}
@@ -73,7 +75,7 @@ namespace flrd
 
 	private:
 		bool m_valid;
-		Params* m_params;
+		std::weak_ptr<Params> m_params;
 	};
 }
 

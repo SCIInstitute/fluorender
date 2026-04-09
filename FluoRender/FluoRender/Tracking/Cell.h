@@ -52,13 +52,11 @@ namespace flrd
 		unsigned int min;
 		unsigned int max;
 		//spatial scale
-		double sx;
-		double sy;
-		double sz;
+		fluo::Vector scale;
 
 		CelpList():
 			min(0), max(0),
-			sx(1), sy(1), sz(1)
+			scale(1)
 		{}
 
 		bool FindBrick(unsigned int id)

@@ -1442,7 +1442,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 
 		//settings
 		fluo::Color c;
-		if (GetColor(i->second->Id(), i->second->BrickId(), vd.get(), c))
+		if (GetColor(i->second->Id(), i->second->BrickId(), vd, c))
 		{
 			glbin_vol_def.Copy(vdn.get(), vd.get());
 			vdn->SetColor(c);
@@ -1543,7 +1543,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 	for (index = 0; index < for_size; ++index)
 	{
 		value_label = label_ptr[index];
-		if (GetColor(value_label, tex->get_brick_id(index), vd.get(), color))
+		if (GetColor(value_label, tex->get_brick_id(index), vd, color))
 		{
 			//assign colors
 			double value;//0-255
@@ -1928,7 +1928,7 @@ bool ComponentAnalyzer::GetCelpFromIds(CelpList& cl, const std::vector<unsigned 
 bool ComponentAnalyzer::GetColor(
 	unsigned int id,
 	int brick_id,
-	VolumeData* vd,
+	const std::shared_ptr<VolumeData>& vd,
 	fluo::Color &color)
 {
 	if (!m_compgroup)

@@ -222,7 +222,7 @@ __kernel void kernel_5(
 };
 )CLKER";
 
-BasicStat::BasicStat(VolumeData* vd)
+BasicStat::BasicStat(const std::shared_ptr<VolumeData>& vd)
 	: m_vd(vd),
 	m_use_mask(false),
 	m_type(0),
@@ -239,16 +239,17 @@ BasicStat::~BasicStat()
 {
 }
 
-bool BasicStat::CheckBricks()
+std::shared_ptr<VolumeData> BasicStat::CheckBricks()
 {
-	if (!m_vd)
-		return false;
-	if (!m_vd->GetTexture())
-		return false;
-	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
+	auto vd = m_vd.lock();
+	if (!vd)
+		return nullptr;
+	if (!vd->GetTexture())
+		return nullptr;
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
 bool BasicStat::GetInfo(
@@ -265,11 +266,12 @@ bool BasicStat::GetInfo(
 
 void BasicStat::Run()
 {
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return;
-	long bits = m_vd->GetBits();
+	long bits = vd->GetBits();
 	int chars = bits / 8;
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_basic_stat, bits, max_int);
@@ -307,8 +309,8 @@ void BasicStat::Run()
 		break;
 	}
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	size_t brick_num = vd->GetTexture()->get_brick_list_size();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	m_sum = 0;
 	m_wsum = 0.0;
@@ -324,10 +326,10 @@ void BasicStat::Run()
 		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(bbs);
+		GLint tid = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

@@ -101,7 +101,7 @@ void ConvVolMesh::Convert()
 	m_mesh->SetColor(vd->GetColor().ShiftDesaturate());
 	GetAutoThreshold();
 
-	MarchingCubes(vd.get(), m_mesh.get());
+	MarchingCubes(vd, m_mesh);
 }
 
 void ConvVolMesh::Update(bool create_mesh)
@@ -134,7 +134,7 @@ void ConvVolMesh::Update(bool create_mesh)
 	else
 		m_mesh->ClearData();
 
-	MarchingCubes(vd.get(), m_mesh.get());
+	MarchingCubes(vd, m_mesh);
 }
 
 bool ConvVolMesh::GetAutoUpdate()
@@ -262,7 +262,9 @@ std::string ConvVolMesh::GetKernelStrSmoothMesh()
 	return z.str();
 }
 
-void ConvVolMesh::MarchingCubes(VolumeData* vd, MeshData* md)
+void ConvVolMesh::MarchingCubes(
+	const std::shared_ptr<VolumeData>& vd,
+	const std::shared_ptr<MeshData>& md)
 {
 	m_busy = true;
 

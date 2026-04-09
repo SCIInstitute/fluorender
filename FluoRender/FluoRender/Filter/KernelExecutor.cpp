@@ -136,7 +136,7 @@ bool KernelExecutor::Execute()
 		m_message = L"No volume selected. Select a volume first.\n";
 		return false;
 	}
-	flvr::Texture* tex =vd->GetTexture();
+	auto tex =vd->GetTexture();
 	if (!tex)
 	{
 		m_message = L"Volume corrupted.\n";
@@ -175,7 +175,7 @@ bool KernelExecutor::Execute()
 			brick_size);
 		vd_r->SetSpcFromFile(true);
 		vd_r->SetName(vd->GetName() + L"_CL");
-		flvr::Texture* tex_r = vd_r->GetTexture();
+		auto tex_r = vd_r->GetTexture();
 		if (!tex_r)
 			return false;
 
@@ -184,18 +184,18 @@ bool KernelExecutor::Execute()
 		if (bricks_r.empty())
 			return false;
 
-		glbin_vol_def.Copy(vd_r.get(), vd.get());
+		glbin_vol_def.Copy(vd_r, vd);
 	}
 	else
 		vd_r = vd;
 
-	bool kernel_exe = ExecuteKernel(vd.get(), vd_r.get());
+	bool kernel_exe = ExecuteKernel(vd, vd_r);
 	for (int i = 0; i < m_repeat; ++i)
 	{
 		int prg = static_cast<int>((i + 1) * 100.0 / m_repeat);
 		SetProgress(0, "Running OpenCL kernel.");
 		SetRange(static_cast<int>((i + 1) * 100.0 / m_repeat), static_cast<int>((i + 2) * 100.0 / m_repeat));
-		kernel_exe &= ExecuteKernel(vd_r.get(), vd_r.get());
+		kernel_exe &= ExecuteKernel(vd_r, vd_r);
 	}
 
 	if (!kernel_exe)
@@ -217,7 +217,9 @@ bool KernelExecutor::Execute()
 	return true;
 }
 
-bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
+bool KernelExecutor::ExecuteKernel(
+	const std::shared_ptr<VolumeData>& vd,
+	const std::shared_ptr<VolumeData>& vd_r)
 {
 	bool kernel_exe = true;
 
@@ -227,7 +229,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 		m_message = L"Volume corrupted.\n";
 		return false;
 	}
-	flvr::Texture* tex =vd->GetTexture();
+	auto tex =vd->GetTexture();
 	if (!tex)
 	{
 		m_message = L"Volume corrupted.\n";
@@ -237,7 +239,7 @@ bool KernelExecutor::ExecuteKernel(VolumeData* vd, VolumeData* vd_r)
 	if (bricks.empty())
 		return false;
 
-	flvr::Texture* tex_r = vd_r->GetTexture();
+	auto tex_r = vd_r->GetTexture();
 	if (!tex_r)
 		return false;
 	auto bricks_r = tex_r->get_bricks();

@@ -63,7 +63,7 @@ namespace flrd
 		fluo::Vector m_spacing = fluo::Vector(1.0);
 
 		bool Compute(void* model);
-		double GetValue(VolumeData* vd, int x, int y, int z);
+		double GetValue(const std::shared_ptr<VolumeData>& vd, int x, int y, int z);
 		double GetMaxNeighbor(double neighbors[3][3][3],
 			int xx, int yy, int zz);
 		fluo::Vector Intersect(double verts[8], int v1, int v2,

@@ -1510,18 +1510,6 @@ bool VolumeData::GetNR()
 	return m_noise_rd;
 }
 
-//volumerenderer
-flvr::VolumeRenderer *VolumeData::GetVR()
-{
-	return m_vr.get();
-}
-
-//texture
-flvr::Texture* VolumeData::GetTexture()
-{
-	return m_tex.get();
-}
-
 void VolumeData::ResetVolume()
 {
 	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(this);

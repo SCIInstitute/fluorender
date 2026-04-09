@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _TABLEHISTPARAMS_H_
 
 #include <Table.h>
+#include <memory>
 
 namespace flrd
 {

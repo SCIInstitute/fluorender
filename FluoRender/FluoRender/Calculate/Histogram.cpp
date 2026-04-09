@@ -84,7 +84,7 @@ __kernel void kernel_1(
 }
 )CLKER";
 
-Histogram::Histogram(VolumeData* vd) :
+Histogram::Histogram(const std::shared_ptr<VolumeData>& vd) :
 	m_vd(vd),
 	m_use_mask(true),
 	m_bins(EntryHist::m_bins),
@@ -97,18 +97,19 @@ Histogram::~Histogram()
 
 }
 
-bool Histogram::CheckBricks()
+std::shared_ptr<VolumeData> Histogram::CheckBricks()
 {
-	if (!m_vd)
-		return false;
-	if (m_use_mask && !m_vd->GetMask(false))
-		return false;
-	if (!m_vd->GetTexture())
-		return false;
-	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
+	auto vd = m_vd.lock();
+	if (!vd)
+		return nullptr;
+	if (m_use_mask && !vd->GetMask(false))
+		return nullptr;
+	if (!vd->GetTexture())
+		return nullptr;
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
 bool Histogram::GetInfo(
@@ -125,13 +126,14 @@ bool Histogram::GetInfo(
 
 void Histogram::Compute()
 {
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return;
-	long bits = m_vd->GetBits();
+	long bits = vd->GetBits();
 	float minv = 0;
 	float maxv = 1;
-	if (bits > 8) maxv = float(1.0 / m_vd->GetScalarScale());
-	float max_int = m_vd->GetMaxValue();
+	if (bits > 8) maxv = float(1.0 / vd->GetScalarScale());
+	float max_int = vd->GetMaxValue();
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_histogram, bits, max_int);
@@ -143,9 +145,9 @@ void Histogram::Compute()
 	else
 		kernel_index = kernel_prog->createKernel("kernel_1");
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
+	size_t brick_num = vd->GetTexture()->get_brick_list_size();
 	size_t count = 0;
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	//sum histogram
 	m_histogram.resize(m_bins + 1, 0);
@@ -157,10 +159,10 @@ void Histogram::Compute()
 		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(bbs);
+		GLint tid = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 		std::weak_ptr<flvr::Argument> arg_tid, arg_mid;
 
 		size_t local_size[3] = { 1, 1, 1 };
@@ -203,15 +205,15 @@ void Histogram::Compute()
 	glbin_kernel_factory.clear(kernel_prog);
 }
 
-EntryHist* Histogram::GetEntryHist()
+std::shared_ptr<EntryHist> Histogram::GetEntryHist()
 {
-	EntryHist* hist = 0;
+	std::shared_ptr<EntryHist> hist = nullptr;
 	Compute();
 	if (m_histogram.size() != m_bins + 1)
 		return hist;
 	if (m_histogram[m_bins])
 	{
-		hist = new flrd::EntryHist();
+		hist = std::make_shared<EntryHist>();
 		hist->setRange(0, 1);
 		hist->setPopulation(m_histogram[m_bins]);
 		hist->setData(m_histogram.data());

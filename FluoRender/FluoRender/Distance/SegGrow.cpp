@@ -586,7 +586,6 @@ __kernel void kernel_2(
 )CLKER";
 
 SegGrow::SegGrow():
-	m_vd(0),
 	m_branches(10),
 	m_iter(0),
 	m_sz_thresh(10)
@@ -598,24 +597,20 @@ SegGrow::~SegGrow()
 
 }
 
-void SegGrow::SetVolumeData(VolumeData* vd)
+void SegGrow::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd = vd;
 }
 
-void SegGrow::SetRulerHandler(RulerHandler* handler)
+std::shared_ptr<VolumeData> SegGrow::CheckBricks()
 {
-	m_handler = handler;
-}
-
-bool SegGrow::CheckBricks()
-{
-	if (!m_vd || !m_vd->GetTexture())
-		return false;
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto vd = m_vd.lock();
+	if (!vd || !vd->GetTexture())
+		return nullptr;
+	auto bricks = vd->GetTexture()->get_bricks();
 	if (bricks.empty())
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
 void SegGrow::Compute()
@@ -626,16 +621,15 @@ void SegGrow::Compute()
 	std::ofstream ofs;
 #endif
 
-	if (!m_handler)
-		return;
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return;
 
 	m_list.clear();
-	bool clear_label = m_vd->GetMaskClear();
-	m_vd->SetMaskClear(false);
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	bool clear_label = vd->GetMaskClear();
+	vd->SetMaskClear(false);
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_segrow, bits, max_int);
@@ -652,7 +646,7 @@ void SegGrow::Compute()
 	int kernel_6 = kernel_prog->createKernel("kernel_7");//get shape
 
 	int bnum = 0;
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 	for (auto bbs : bricks)
 	{
 		if (!bbs->is_mask_act())
@@ -663,8 +657,8 @@ void SegGrow::Compute()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint mid = m_vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = m_vd->GetVR()->load_brick_label(bbs);
+		GLint mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -972,7 +966,7 @@ void SegGrow::Compute()
 	std::vector<std::set<unsigned int>> brick_pairs;//pairs processed don't need to process again
 	while (bnum > 1 && idnum > 1)
 	{
-		flvr::Texture* tex = m_vd->GetTexture();
+		flvr::Texture* tex = vd->GetTexture();
 		if (!tex)
 			break;
 		kernel_prog = glbin_kernel_factory.program(str_cl_sg_check_borders, bits, max_int);
@@ -995,7 +989,7 @@ void SegGrow::Compute()
 			int nx = res.intx();
 			int ny = res.inty();
 			int nz = res.intz();
-			GLint lid = m_vd->GetVR()->load_brick_label(bbs);
+			GLint lid = vd->GetVR()->load_brick_label(bbs);
 			unsigned bid;
 			bid = bbs->get_id();
 			kernel_prog->beginArgs(kernel_0);
@@ -1098,7 +1092,7 @@ void SegGrow::Compute()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint lid = m_vd->GetVR()->load_brick_label(bbs);
+		GLint lid = vd->GetVR()->load_brick_label(bbs);
 		//compute workload
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1126,7 +1120,7 @@ void SegGrow::Compute()
 	MergeIds(merge_list);
 
 	//add ruler points
-	auto spc = m_vd->GetSpacing();
+	auto spc = vd->GetSpacing();
 	for (auto it = m_list.begin();
 		it != m_list.end(); ++it)
 	{
@@ -1135,7 +1129,7 @@ void SegGrow::Compute()
 			continue;
 		it->second.ctr = it->second.ctr / it->second.sum;
 		it->second.ctr.scale(spc);
-		m_handler->AddRulerPointAfterId(
+		glbin_ruler_handler.AddRulerPointAfterId(
 			it->second.ctr,
 			it->second.id,
 			it->second.cid,
@@ -1254,7 +1248,10 @@ void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	size_t global_size[2] = { 1, 1 };
 	size_t local_size[2] = { 1, 1 };
 
-	nlid = m_vd->GetVR()->load_brick_label(nb);
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	nlid = vd->GetVR()->load_brick_label(nb);
 	//set
 	//unsigned int d0 = nx - 1;
 	//unsigned int d1 = 0;

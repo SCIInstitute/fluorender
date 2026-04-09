@@ -100,8 +100,6 @@ __kernel void kernel_0(
 )CLKER";
 
 Relax::Relax() :
-	m_ruler(0),
-	m_vd(0),
 	m_snum(0),
 	m_use_mask(true),
 	m_rest(0.0f),
@@ -113,33 +111,34 @@ Relax::~Relax()
 {
 }
 
-void Relax::SetVolume(VolumeData* vd)
+void Relax::SetVolume(const std::shared_ptr<VolumeData>& vd)
 {
 	m_vd = vd;
 }
 
-void Relax::SetRuler(Ruler* ruler)
+void Relax::SetRuler(const std::shared_ptr<Ruler>& ruler)
 {
-	if (ruler != m_ruler)
+	if (ruler && ruler != m_ruler.lock())
 	{
 		m_ruler = ruler;
 	}
 }
 
-Ruler* Relax::GetRuler()
+std::shared_ptr<Ruler> Relax::GetRuler()
 {
-	return m_ruler;
+	return m_ruler.lock();
 }
 
 void Relax::BuildSpring()
 {
-	if (!m_ruler)
+	auto ruler = m_ruler.lock();
+	if (!ruler)
 		return;
-	int rn = m_ruler->GetNumPoint();
+	int rn = ruler->GetNumPoint();
 	if (rn < 1)
 		return;
-	size_t rwt = m_ruler->GetWorkTime();
-	int interp = m_ruler->GetInterp();
+	size_t rwt = ruler->GetWorkTime();
+	int interp = ruler->GetInterp();
 
 	if (!m_spoints.empty())
 		m_spoints.clear();
@@ -149,26 +148,24 @@ void Relax::BuildSpring()
 
 	//build a spring form the ruler
 	double dist;
-	RulerPoint *p;
-	fluo::Point pp, pp1;
 	bool locked;
-	int bn = m_ruler->GetNumBranch();
+	int bn = ruler->GetNumBranch();
 	for (int bi = 0; bi < bn; ++bi)
 	{
-		rn = m_ruler->GetNumBranchPoint(bi);
+		rn = ruler->GetNumBranchPoint(bi);
 		int n = rn == 1 ? 1 : rn - 1;
 		for (int i = 0; i < n; ++i)
 		{
 			if (i == 0)
 			{
-				p = m_ruler->GetRulerPoint(bi, i);
+				auto p = ruler->GetRulerPoint(bi, i);
 				if (p)
 				{
-					pp = p->GetPoint(rwt, interp);
+					auto pp = p->GetPoint(rwt, interp);
 					locked = p->GetLocked();
-					m_spoints.push_back(float(pp.x()));
-					m_spoints.push_back(float(pp.y()));
-					m_spoints.push_back(float(pp.z()));
+					m_spoints.push_back(float(pp->x()));
+					m_spoints.push_back(float(pp->y()));
+					m_spoints.push_back(float(pp->z()));
 					m_slock.push_back(locked);
 					m_snum++;
 				}
@@ -176,19 +173,19 @@ void Relax::BuildSpring()
 
 			if (rn > 1)
 			{
-				p = m_ruler->GetRulerPoint(bi, i + 1);
+				auto p = ruler->GetRulerPoint(bi, i + 1);
 				if (p)
 				{
-					pp = p->GetPoint(rwt, interp);
+					auto pp = p->GetPoint(rwt, interp);
 					locked = p->GetLocked();
-					pp1 = fluo::Point(
+					auto pp1 = fluo::Point(
 						m_spoints.end()[-3],
 						m_spoints.end()[-2],
 						m_spoints.end()[-1]);
-					dist = (pp - pp1).length();
-					m_spoints.push_back(float(pp.x()));
-					m_spoints.push_back(float(pp.y()));
-					m_spoints.push_back(float(pp.z()));
+					dist = (*pp - pp1).length();
+					m_spoints.push_back(float(pp->x()));
+					m_spoints.push_back(float(pp->y()));
+					m_spoints.push_back(float(pp->z()));
 					m_slock.push_back(locked);
 					m_snum++;
 				}
@@ -217,19 +214,21 @@ fluo::Vector Relax::GetDisplacement(int idx)
 
 bool Relax::Compute()
 {
-	if (!m_vd || !m_ruler)
+	auto vd = m_vd.lock();
+	auto ruler = m_ruler.lock();
+	if (!vd || !ruler)
 		return false;
 
 	BuildSpring();
 
-	auto spc = m_vd->GetSpacing();
+	auto spc = vd->GetSpacing();
 	cl_float3 scl = { (float)spc.x(), (float)spc.y(), (float)spc.z()};
 
 	m_dsp.assign(m_snum * 3, 0.0);
 	m_wsum.assign(m_snum, 0.0);
 
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_relax, bits, max_int);
@@ -237,7 +236,7 @@ bool Relax::Compute()
 		return false;
 	int kernel_0 = kernel_prog->createKernel("kernel_0");//init ordered
 
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 	for (auto bbs : bricks)
 	{
 		auto res = bbs->get_size();
@@ -251,9 +250,9 @@ bool Relax::Compute()
 		cl_float3 org = { (float)ox, (float)oy, (float)oz };
 		GLint tid;
 		if (m_use_mask)
-			tid = m_vd->GetVR()->load_brick_mask(bbs);
+			tid = vd->GetVR()->load_brick_mask(bbs);
 		else
-			tid = m_vd->GetVR()->load_brick(bbs);
+			tid = vd->GetVR()->load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

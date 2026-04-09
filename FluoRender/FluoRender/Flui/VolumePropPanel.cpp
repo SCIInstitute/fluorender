@@ -73,10 +73,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	long style,
 	const wxString& name) :
 	PropPanel(frame, parent, pos, size, style, name),
-	m_vd(0),
 	m_sync_group(false),
-	m_group(0),
-	m_view(0),
 	m_max_val(255.0)
 {
 	// temporarily block events during constructor:
@@ -736,7 +733,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 	if (FOUND_VALUE(gstNull))
 		return;
-	if (!m_vd)
+	auto vd = m_vd.lock();
+	if (!vd)
 		return;
 
 	//std::chrono::time_point t = std::chrono::high_resolution_clock::now();
@@ -748,7 +746,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	fluo::Color cval;
 
 	//maximum value
-	m_max_val = m_vd->GetMaxValue();
+	m_max_val = vd->GetMaxValue();
 	m_max_val = std::max(255.0, m_max_val);
 
 	//set range
@@ -857,10 +855,10 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_histogram)
 	{
 		std::vector<unsigned char> hist_data;
-		if (m_vd->GetHistogram(hist_data))
+		if (vd->GetHistogram(hist_data))
 		{
 			wxColour lc = wxColour(0, 0, 0);
-			cval = m_vd->GetColor();
+			cval = vd->GetColor();
 			wxColour hc = wxColor((unsigned char)(cval.r() *255 + 0.5),
 				(unsigned char)(cval.g() * 255 + 0.5),
 				(unsigned char)(cval.b() * 255 + 0.5));
@@ -875,8 +873,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
 			vald_fp->SetRange(0.0, 10.0);
-		dval = m_vd->GetGamma();
-		bval = m_vd->GetGammaEnable();
+		dval = vd->GetGamma();
+		bval = vd->GetGammaEnable();
 		str = wxString::Format("%.2f", dval);
 		m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
 		m_gamma_text->ChangeValue(str);
@@ -889,25 +887,25 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_gamma || update_tips)
 	{
-		bval = m_vd->GetGammaEnable() || mf_enable;
+		bval = vd->GetGammaEnable() || mf_enable;
 		if (m_gamma_st->IsEnabled() != bval)
 			m_gamma_st->Enable(bval);
 	}
 	//boundary
 	if (update_boundary)
 	{
-		double gmf = 1000 / m_vd->GetBoundaryMax();
+		double gmf = 1000 / vd->GetBoundaryMax();
 		//low
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_low_text->GetValidator()))
 			vald_fp->SetMin(0.0);
-		dval = m_vd->GetBoundaryLow();
+		dval = vd->GetBoundaryLow();
 		m_boundary_sldr->ChangeLowValue(std::round(dval * gmf));
 		str = wxString::Format("%.4f", dval);
 		m_boundary_low_text->ChangeValue(str);
 		//high
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_high_text->GetValidator()))
 			vald_fp->SetMin(0.0);
-		dval = m_vd->GetBoundaryHigh();
+		dval = vd->GetBoundaryHigh();
 		m_boundary_sldr->ChangeHighValue(std::round(dval * gmf));
 		str = wxString::Format("%.4f", dval);
 		m_boundary_high_text->ChangeValue(str);
@@ -924,7 +922,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		//enable
-		bval = m_vd->GetBoundaryEnable();
+		bval = vd->GetBoundaryEnable();
 		m_boundary_chk->SetValue(bval);
 		if (m_boundary_sldr->IsEnabled() != bval)
 		{
@@ -936,7 +934,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_boundary || update_tips)
 	{
-		bval = m_vd->GetBoundaryEnable() || mf_enable;
+		bval = vd->GetBoundaryEnable() || mf_enable;
 		if (m_boundary_st->IsEnabled() != bval)
 			m_boundary_st->Enable(bval);
 	}
@@ -945,9 +943,9 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_low_offset_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetLowOffset();
+		dval = vd->GetLowOffset();
 		ival = std::round(dval * m_max_val);
-		if (m_vd->GetAlphaPower() > 1.1)
+		if (vd->GetAlphaPower() > 1.1)
 			m_minmax_sldr->SetRange(0, std::round(m_max_val * 2));
 		else
 			m_minmax_sldr->SetRange(0, std::round(m_max_val));
@@ -957,7 +955,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		//high offset
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_high_offset_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetHighOffset();
+		dval = vd->GetHighOffset();
 		ival = std::round(dval * m_max_val);
 		str = wxString::Format("%d", ival);
 		m_minmax_sldr->ChangeHighValue(ival);
@@ -973,7 +971,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 				bitmap = wxGetBitmap(unlink);
 			m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
-		bval = m_vd->GetMinMaxEnable();
+		bval = vd->GetMinMaxEnable();
 		m_minmax_chk->SetValue(bval);
 		if (m_minmax_sldr->IsEnabled() != bval)
 		{
@@ -985,7 +983,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_minmax || update_tips)
 	{
-		bval = m_vd->GetMinMaxEnable() || mf_enable;
+		bval = vd->GetMinMaxEnable() || mf_enable;
 		if (m_minmax_st->IsEnabled() != bval)
 			m_minmax_st->Enable(bval);
 	}
@@ -994,7 +992,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetLeftThresh();
+		dval = vd->GetLeftThresh();
 		ival = std::round(dval * m_max_val);
 		m_thresh_sldr->SetRange(0, std::round(m_max_val));
 		str = wxString::Format("%d", ival);
@@ -1003,7 +1001,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		//right threshold
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetRightThresh();
+		dval = vd->GetRightThresh();
 		ival = std::round(dval * m_max_val);
 		str = wxString::Format("%d", ival);
 		m_thresh_sldr->ChangeHighValue(ival);
@@ -1019,7 +1017,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 				bitmap = wxGetBitmap(unlink);
 			m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
-		bval = m_vd->GetThreshEnable();
+		bval = vd->GetThreshEnable();
 		m_thresh_chk->SetValue(bval);
 		if (m_thresh_sldr->IsEnabled() != bval)
 		{
@@ -1031,7 +1029,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_threshold || update_tips)
 	{
-		bval = m_vd->GetThreshEnable() || mf_enable;
+		bval = vd->GetThreshEnable() || mf_enable;
 		if (m_thresh_st->IsEnabled() != bval)
 			m_thresh_st->Enable(bval);
 	}
@@ -1040,13 +1038,13 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetAlpha();
+		dval = vd->GetAlpha();
 		ival = std::round(dval * m_max_val);
 		m_alpha_sldr->SetRange(0, std::round(m_max_val));
 		str = wxString::Format("%d", ival);
 		m_alpha_sldr->ChangeValue(ival);
 		m_alpha_text->ChangeValue(str);
-		bval = m_vd->GetAlphaEnable();
+		bval = vd->GetAlphaEnable();
 		m_alpha_chk->SetValue(bval);
 		if (m_alpha_sldr->IsEnabled() != bval)
 		{
@@ -1056,7 +1054,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_alpha || update_tips)
 	{
-		bval = m_vd->GetAlphaEnable() || mf_enable;
+		bval = vd->GetAlphaEnable() || mf_enable;
 		if (m_alpha_st->IsEnabled() != bval)
 			m_alpha_st->Enable(bval);
 	}
@@ -1065,8 +1063,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
 			vald_i->SetMin(0);
-		dval = m_vd->GetLuminance();
-		bval = m_vd->GetLuminanceEnable();
+		dval = vd->GetLuminance();
+		bval = vd->GetLuminanceEnable();
 		ival = std::round(dval * m_max_val);
 		m_luminance_sldr->SetRange(0, std::round(m_max_val*2));
 		str = wxString::Format("%d", ival);
@@ -1081,7 +1079,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_luminance || update_tips)
 	{
-		bval = m_vd->GetLuminanceEnable() || mf_enable;
+		bval = vd->GetLuminanceEnable() || mf_enable;
 		if (m_luminance_st->IsEnabled() != bval)
 			m_luminance_st->Enable(bval);
 	}
@@ -1092,15 +1090,15 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			vald_fp->SetRange(0.0, 10.0);
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_shine_text->GetValidator()))
 			vald_fp->SetRange(0.0, 100.0);
-		dval = m_vd->GetShadingStrength();
+		dval = vd->GetShadingStrength();
 		str = wxString::Format("%.2f", dval);
 		m_shading_strength_sldr->ChangeValue(dval * 100.0);
 		m_shading_strength_text->ChangeValue(str);
-		dval = m_vd->GetShadingShine();
+		dval = vd->GetShadingShine();
 		str = wxString::Format("%.2f", dval);
 		m_shading_shine_sldr->ChangeValue(dval * 100.0);
 		m_shading_shine_text->ChangeValue(str);
-		bval = m_vd->GetShadingEnable();
+		bval = vd->GetShadingEnable();
 		m_shade_chk->SetValue(bval);
 		if (m_shading_strength_sldr->IsEnabled() != bval)
 		{
@@ -1112,7 +1110,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_shading || update_tips)
 	{
-		bval = m_vd->GetShadingEnable() || mf_enable;
+		bval = vd->GetShadingEnable() || mf_enable;
 		if (m_shade_st->IsEnabled() != bval)
 			m_shade_st->Enable(bval);
 	}
@@ -1121,8 +1119,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		//if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
 		//	vald_fp->SetRange(0.0, 1.0);
-		bval = m_vd->GetShadowEnable();
-		dval = m_vd->GetShadowIntensity();
+		bval = vd->GetShadowEnable();
+		dval = vd->GetShadowIntensity();
 		str = wxString::Format("%.2f", dval);
 		m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
 		m_shadow_text->ChangeValue(str);
@@ -1150,7 +1148,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_shadow || update_tips)
 	{
-		bval = m_vd->GetShadowEnable() || mf_enable;
+		bval = vd->GetShadowEnable() || mf_enable;
 		if (m_shadow_st->IsEnabled() != bval)
 			m_shadow_st->Enable(bval);
 	}
@@ -1159,8 +1157,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	{
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
 			vald_fp->SetRange(0.0, 100.0);
-		bval = m_vd->GetSampleRateEnable();
-		dval = m_vd->GetSampleRate();
+		bval = vd->GetSampleRateEnable();
+		dval = vd->GetSampleRate();
 		str = wxString::Format("%.1f", dval);
 		m_sample_sldr->ChangeValue(dval * 10.0);
 		m_sample_text->ChangeValue(str);
@@ -1173,7 +1171,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_sample || update_tips)
 	{
-		bval = m_vd->GetSampleRateEnable() || mf_enable;
+		bval = vd->GetSampleRateEnable() || mf_enable;
 		if (m_sample_st->IsEnabled() != bval)
 			m_sample_st->Enable(bval);
 	}
@@ -1181,7 +1179,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//spacings
 	if (update_all || FOUND_VALUE(gstSpacing))
 	{
-		auto spc = m_vd->GetBaseSpacing();
+		auto spc = vd->GetBaseSpacing();
 		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
 			vald_fp->SetMin(0.0);
 		str = wxString::Format("%.3f", spc.x());
@@ -1201,11 +1199,11 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		FOUND_VALUE(gstRulerList) ||
 		FOUND_VALUE(gstRulerListCur))
 	{
-		auto proj = m_vd->GetColormapProj();
+		auto proj = vd->GetColormapProj();
 		if (proj == flvr::ColormapProj::Radial ||
 			proj == flvr::ColormapProj::Linear)
 		{
-			m_vd->UpdateGradient();
+			vd->UpdateGradient();
 		}
 	}
 
@@ -1214,7 +1212,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		//slider
 		m_colormap_sldr->SetRange(0, std::round(m_max_val));
 		double low, high;
-		m_vd->GetColormapValues(low, high);
+		vd->GetColormapValues(low, high);
 		//low
 		ival = std::round(low * m_max_val);
 		m_colormap_sldr->ChangeLowValue(ival);
@@ -1223,9 +1221,9 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		m_colormap_sldr->ChangeHighValue(ival);
 
 		//text
-		m_vd->GetColormapDispValues(low, high);
+		vd->GetColormapDispValues(low, high);
 		double minv, maxv;
-		m_vd->GetColormapRange(minv, maxv);
+		vd->GetColormapRange(minv, maxv);
 		bool int_validator = (maxv - minv) > 10.0;
 		if (int_validator)
 		{
@@ -1258,8 +1256,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
 		}
 		//mode
-		bval = m_vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
-			m_vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
+		bval = vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
+			vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
 		m_colormap_chk->SetValue(bval);
 		if (m_colormap_sldr->IsEnabled() != bval)
 		{
@@ -1269,7 +1267,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 			m_colormap_link_tb->Enable(bval);
 		}
 		//colormap
-		bval = m_vd->GetColormapInv() > 0.0 ? false : true;
+		bval = vd->GetColormapInv() > 0.0 ? false : true;
 		if (bval != m_colormap_inv_btn->GetToolState(0))
 		{
 			m_colormap_inv_btn->ToggleTool(0, bval);
@@ -1280,22 +1278,22 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 				m_colormap_inv_btn->SetToolNormalBitmap(0,
 					wxGetBitmap(invert_off));
 		}
-		m_colormap_combo->SetSelection(m_vd->GetColormap());
-		flvr::ColormapProj colormap_proj = m_vd->GetColormapProj();
+		m_colormap_combo->SetSelection(vd->GetColormap());
+		flvr::ColormapProj colormap_proj = vd->GetColormapProj();
 		ival = 0;
 		if (flvr::ShaderParams::ValidColormapProj(colormap_proj))
 			ival = static_cast<int>(colormap_proj) - 1;
 		m_colormap_proj_combo->SetSelection(ival);
 		//show colormap on slider
 		std::vector<unsigned char> colormap_data;
-		if (m_vd->GetColormapData(colormap_data))
+		if (vd->GetColormapData(colormap_data))
 		{
 			wxColor lc, hc;
-			cval = m_vd->GetColorFromColormap(0, true);
+			cval = vd->GetColorFromColormap(0, true);
 			lc = wxColor((unsigned char)(cval.r() *255 + 0.5),
 				(unsigned char)(cval.g() * 255 + 0.5),
 				(unsigned char)(cval.b() * 255 + 0.5));
-			cval = m_vd->GetColorFromColormap(1, true);
+			cval = vd->GetColorFromColormap(1, true);
 			hc = wxColor((unsigned char)(cval.r() *255 + 0.5),
 				(unsigned char)(cval.g() * 255 + 0.5),
 				(unsigned char)(cval.b() * 255 + 0.5));
@@ -1306,8 +1304,8 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_colormap || update_tips)
 	{
 		bval = mf_enable ||
-			m_vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
-			m_vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
+			vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
+			vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
 		if (m_colormap_st->IsEnabled() != bval)
 			m_colormap_st->Enable(bval);
 	}
@@ -1315,14 +1313,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//color
 	if (update_color)
 	{
-		cval = m_vd->GetColor();
+		cval = vd->GetColor();
 		wxColor wxc((unsigned char)(cval.r() * 255 + 0.5),
 			(unsigned char)(cval.g() * 255 + 0.5),
 			(unsigned char)(cval.b() * 255 + 0.5));
 		m_main_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 			wxc.Red(), wxc.Green(), wxc.Blue()));
 		m_main_color_btn->SetValue(wxc);
-		cval = m_vd->GetMaskColor();
+		cval = vd->GetMaskColor();
 		wxc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
 			(unsigned char)(cval.g() * 255 + 0.5),
 			(unsigned char)(cval.b() * 255 + 0.5));
@@ -1334,7 +1332,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//mask mode
 	if (update_all || FOUND_VALUE(gstMainMode))
 	{
-		auto main_mode = m_vd->GetMainColorMode();
+		auto main_mode = vd->GetMainColorMode();
 		switch (main_mode)
 		{
 		case flvr::ColorMode::None:
@@ -1358,7 +1356,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstMaskMode))
 	{
-		auto mask_mode = m_vd->GetMaskColorMode();
+		auto mask_mode = vd->GetMaskColorMode();
 		switch (mask_mode)
 		{
 		case flvr::ColorMode::None:
@@ -1383,7 +1381,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//inversion
 	if (update_all || FOUND_VALUE(gstInvert))
 	{
-		bool inv = m_vd->GetInvert();
+		bool inv = vd->GetInvert();
 		m_options_toolbar->ToggleTool(ID_InvChk, inv);
 		if (inv)
 			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
@@ -1396,14 +1394,14 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//MIP
 	if (update_all || FOUND_VALUE(gstRenderMode))
 	{
-		bool mip = m_vd->GetRenderMode() == flvr::RenderMode::Mip;
+		bool mip = vd->GetRenderMode() == flvr::RenderMode::Mip;
 		m_options_toolbar->ToggleTool(ID_MipChk, mip);
 	}
 
 	//transparency
 	if (update_all || FOUND_VALUE(gstTransparent))
 	{
-		double alpha_power = m_vd->GetAlphaPower();
+		double alpha_power = vd->GetAlphaPower();
 		if (alpha_power > 1.1)
 		{
 			m_options_toolbar->ToggleTool(ID_TranspChk, true);
@@ -1420,12 +1418,12 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	//legend
 	if (update_all || FOUND_VALUE(gstLegend))
-		m_options_toolbar->ToggleTool(ID_LegendChk, m_vd->GetLegend());
+		m_options_toolbar->ToggleTool(ID_LegendChk, vd->GetLegend());
 
 	//outline
 	if (update_all || FOUND_VALUE(gstOutline))
 	{
-		bval = m_vd->GetOutline();
+		bval = vd->GetOutline();
 		m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
 		if (bval)
 			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
@@ -1438,7 +1436,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//interpolate
 	if (update_all || FOUND_VALUE(gstInterpolate))
 	{
-		bool interp = m_vd->GetInterpolate();
+		bool interp = vd->GetInterpolate();
 		m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
 		if (interp)
 			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
@@ -1451,15 +1449,16 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//sync group
 	if (update_all || FOUND_VALUE(gstSyncGroup))
 	{
-		if (m_group)
-			m_sync_group = m_group->GetVolumeSyncProp();
+		auto group = m_group.lock();
+		if (group)
+		m_sync_group = group->GetVolumeSyncProp();
 		m_options_toolbar->ToggleTool(ID_SyncGroupChk, m_sync_group);
 	}
 
 	//noise reduction
 	if (update_all || FOUND_VALUE(gstNoiseRedct))
 	{
-		bool nr = m_vd->GetNR();
+		bool nr = vd->GetNR();
 		m_options_toolbar->ToggleTool(ID_NoiseReductChk, nr);
 		if (nr)
 			m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
@@ -1472,7 +1471,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//blend mode
 	if (update_all || FOUND_VALUE(gstChannelMixMode))
 	{
-		auto channel_mix_mode = m_vd->GetChannelMixMode();
+		auto channel_mix_mode = vd->GetChannelMixMode();
 		if (channel_mix_mode == ChannelMixMode::Depth)
 		{
 			m_options_toolbar->ToggleTool(ID_ChannelMixDepthChk, true);
@@ -1491,18 +1490,13 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	//return;
 }
 
-void VolumePropPanel::SetVolumeData(VolumeData* vd)
+void VolumePropPanel::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 {
-	if (m_vd != vd)
+	if (vd && m_vd.lock() != vd)
 		ClearUndo();
 
 	m_vd = vd;
 	FluoUpdate();
-}
-
-VolumeData* VolumePropPanel::GetVolumeData()
-{
-	return m_vd;
 }
 
 void VolumePropPanel::InitViews(unsigned int type)
@@ -1521,76 +1515,72 @@ void VolumePropPanel::InitViews(unsigned int type)
 	}
 }
 
-void VolumePropPanel::SetGroup(VolumeGroup* group)
+void VolumePropPanel::SetGroup(const std::shared_ptr<VolumeGroup>& group)
 {
 	m_group = group;
-	if (m_group)
+	if (group)
 	{
-		m_sync_group = m_group->GetVolumeSyncProp();
+		m_sync_group = group->GetVolumeSyncProp();
 		m_options_toolbar->ToggleTool(ID_SyncGroupChk,m_sync_group);
 	}
 }
 
-VolumeGroup* VolumePropPanel::GetGroup()
-{
-	return m_group;
-}
-
-void VolumePropPanel::SetView(RenderView *view)
+void VolumePropPanel::SetView(const std::shared_ptr<RenderView>& view)
 {
 	m_view = view;
 }
 
-RenderView* VolumePropPanel::GetView()
-{
-	return m_view;
-}
-
 void VolumePropPanel::ApplyMl()
 {
-	if (m_sync_group && m_group)
-		m_group->ApplyMlVolProp();
-	else if (m_vd)
-		m_vd->ApplyMlVolProp();
+	auto group = m_group.lock();
+	auto vd = m_vd.lock();
+	if (m_sync_group && group)
+		group->ApplyMlVolProp();
+	else if (vd)
+		vd->ApplyMlVolProp();
 	FluoRefresh(0, { gstVolumeProps, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
 }
 
 void VolumePropPanel::SaveMl()
 {
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+
 	std::vector<float> val;
-	val.push_back(float(m_vd->GetBoundaryLow()));
-	val.push_back(float(m_vd->GetGamma()));
-	val.push_back(float(m_vd->GetLowOffset()));
-	val.push_back(float(m_vd->GetHighOffset()));
-	val.push_back(float(m_vd->GetLeftThresh()));
-	val.push_back(float(m_vd->GetRightThresh()));
-	val.push_back(float(m_vd->GetShadingStrength()));
-	val.push_back(float(m_vd->GetShadingShine()));
-	val.push_back(float(m_vd->GetAlpha()));
-	val.push_back(float(m_vd->GetSampleRate()));
-	val.push_back(float(m_vd->GetLuminance()));
-	val.push_back(float(m_vd->GetMainColorMode() == flvr::ColorMode::Colormap));
-	val.push_back(float(m_vd->GetColormapInv()));
-	val.push_back(float(m_vd->GetColormap()));
-	val.push_back(float(m_vd->GetColormapProj()));
-	val.push_back(float(m_vd->GetColormapLow()));
-	val.push_back(float(m_vd->GetColormapHigh()));
-	val.push_back(float(m_vd->GetAlphaEnable()));
-	val.push_back(float(m_vd->GetShadingEnable()));
-	val.push_back(float(m_vd->GetInterpolate()));
-	val.push_back(float(m_vd->GetInvert()));
-	val.push_back(float(m_vd->GetRenderMode() == flvr::RenderMode::Mip));
-	val.push_back(float(m_vd->GetTransparent()));
-	val.push_back(float(m_vd->GetNR()));
-	val.push_back(float(m_vd->GetShadowEnable()));
-	val.push_back(float(m_vd->GetShadowIntensity()));
+	val.push_back(float(vd->GetBoundaryLow()));
+	val.push_back(float(vd->GetGamma()));
+	val.push_back(float(vd->GetLowOffset()));
+	val.push_back(float(vd->GetHighOffset()));
+	val.push_back(float(vd->GetLeftThresh()));
+	val.push_back(float(vd->GetRightThresh()));
+	val.push_back(float(vd->GetShadingStrength()));
+	val.push_back(float(vd->GetShadingShine()));
+	val.push_back(float(vd->GetAlpha()));
+	val.push_back(float(vd->GetSampleRate()));
+	val.push_back(float(vd->GetLuminance()));
+	val.push_back(float(vd->GetMainColorMode() == flvr::ColorMode::Colormap));
+	val.push_back(float(vd->GetColormapInv()));
+	val.push_back(float(vd->GetColormap()));
+	val.push_back(float(vd->GetColormapProj()));
+	val.push_back(float(vd->GetColormapLow()));
+	val.push_back(float(vd->GetColormapHigh()));
+	val.push_back(float(vd->GetAlphaEnable()));
+	val.push_back(float(vd->GetShadingEnable()));
+	val.push_back(float(vd->GetInterpolate()));
+	val.push_back(float(vd->GetInvert()));
+	val.push_back(float(vd->GetRenderMode() == flvr::RenderMode::Mip));
+	val.push_back(float(vd->GetTransparent()));
+	val.push_back(float(vd->GetNR()));
+	val.push_back(float(vd->GetShadowEnable()));
+	val.push_back(float(vd->GetShadowIntensity()));
 	flrd::EntryParams* ep = flrd::Reshape::get_entry_params("vol_prop", &val[0]);
 
 	//histogram
-	flrd::Histogram histogram(m_vd);
+	flrd::Histogram histogram(vd);
 	histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 	histogram.SetUseMask(false);
-	flrd::EntryHist* eh = histogram.GetEntryHist();
+	auto eh = histogram.GetEntryHist();
 
 	if (eh)
 	{

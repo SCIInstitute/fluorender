@@ -104,7 +104,7 @@ __kernel void kernel_0(
 }
 )CLKER";
 
-VolumeRoi::VolumeRoi(VolumeData* vd):
+VolumeRoi::VolumeRoi(const std::shared_ptr<VolumeData>& vd):
 	m_vd(vd),
 	m_use_mask(false),
 	m_ruler(0),
@@ -114,18 +114,19 @@ VolumeRoi::VolumeRoi(VolumeData* vd):
 VolumeRoi::~VolumeRoi()
 {}
 
-bool VolumeRoi::CheckBricks()
+std::shared_ptr<VolumeData> VolumeRoi::CheckBricks()
 {
-	if (!m_vd)
-		return false;
-	if (m_use_mask && !m_vd->GetMask(false))
-		return false;
-	if (!m_vd->GetTexture())
-		return false;
-	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
+	auto vd = m_vd.lock();
+	if (!vd)
+		return nullptr;
+	if (m_use_mask && !vd->GetMask(false))
+		return nullptr;
+	if (!vd->GetTexture())
+		return nullptr;
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
 bool VolumeRoi::GetInfo(
@@ -145,10 +146,11 @@ void VolumeRoi::Run()
 	if (!m_ruler ||
 		m_ruler->GetRulerMode() != RulerMode::Ellipse)//only ellipse ruler is supported
 		return;
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return;
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_volume_roi_ellipse, bits, max_int);
@@ -157,13 +159,13 @@ void VolumeRoi::Run()
 	int kernel_index0;
 	kernel_index0 = kernel_prog->createKernel("kernel_0");
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	size_t brick_num = vd->GetTexture()->get_brick_list_size();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	//init
 	m_sum = 0;
 	m_wsum = 0.0;
-	auto spc = m_vd->GetSpacing();
+	auto spc = vd->GetSpacing();
 	cl_float4 spaces = { cl_float(spc.x()), cl_float(spc.y()), cl_float(spc.z()), cl_float(1) };
 	cl_float4 tf0 = {
 		float(m_tf.get_mat_val(0, 0)),
@@ -216,10 +218,10 @@ void VolumeRoi::Run()
 		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = m_vd->GetVR()->load_brick(bbs);
+		GLint tid = vd->GetVR()->load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -280,12 +282,13 @@ void VolumeRoi::Run()
 
 double VolumeRoi::GetResult()
 {
-	if (!m_vd)
+	auto vd = m_vd.lock();
+	if (!vd)
 		return 0;
 	if (m_sum == 0)
 		return 0;
 	double result = m_wsum;
-	int bits = m_vd->GetBits();
+	int bits = vd->GetBits();
 	switch (bits)
 	{
 	case 8:

@@ -367,9 +367,9 @@ void VolumeCalculator::FillHoles(double thresh)
 	auto vd_a = m_vd_a.lock();
 	if (!vd_a)
 		return;
-	VolumeData* vd = 0;
+	std::shared_ptr<VolumeData> vd = nullptr;
 	if (!m_vd_r.empty())
-		vd = m_vd_r.back().get();
+		vd = m_vd_r.back();
 	if (!vd)
 		return;
 

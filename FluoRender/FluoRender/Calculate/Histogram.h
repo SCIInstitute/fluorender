@@ -42,7 +42,7 @@ namespace flrd
 	class Histogram : public Progress
 	{
 	public:
-		Histogram(VolumeData* vd);
+		Histogram(const std::shared_ptr<VolumeData>& vd);
 		~Histogram();
 
 		void SetUseMask(bool use_mask)
@@ -60,15 +60,15 @@ namespace flrd
 		{
 			return m_histogram;
 		}
-		EntryHist* GetEntryHist();
+		std::shared_ptr<EntryHist> GetEntryHist();
 
 	private:
-		VolumeData* m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		bool m_use_mask;//compute histogram on selected area
 		unsigned int m_bins;
 		std::vector<unsigned int> m_histogram;
 
-		bool CheckBricks();
+		std::shared_ptr<VolumeData> CheckBricks();
 		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long &bits, long &nx, long &ny, long &nz);
 	};

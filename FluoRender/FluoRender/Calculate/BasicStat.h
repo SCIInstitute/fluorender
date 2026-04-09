@@ -42,7 +42,7 @@ namespace flrd
 	class BasicStat
 	{
 	public:
-		BasicStat(VolumeData* vd);
+		BasicStat(const std::shared_ptr<VolumeData>& vd);
 		~BasicStat();
 
 		void SetUseMask(bool use_mask)
@@ -123,7 +123,7 @@ namespace flrd
 		}
 
 	private:
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		bool m_use_mask;//use mask instead of data
 		int m_type;//0-mean; 1-minmax; 2-median
 		//result
@@ -136,7 +136,7 @@ namespace flrd
 		std::map<unsigned int, unsigned int> m_hist;
 		std::vector<unsigned int> m_hist_acc;
 
-		bool CheckBricks();
+		std::shared_ptr<VolumeData> CheckBricks();
 		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long &bits, long &nx, long &ny, long &nz);
 	};

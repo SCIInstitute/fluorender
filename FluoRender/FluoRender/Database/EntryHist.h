@@ -60,12 +60,12 @@ namespace flrd
 				return m_population;
 			}
 
-			void setData(float* d)
+			void setData(const std::vector<float>& d)
 			{
-				m_data.assign(d, d + m_bins);
+				m_data.assign(d.begin(), d.begin() + m_bins);
 			}
 
-			void setData(unsigned int* d)
+			void setData(const std::vector<unsigned int>& d)
 			{
 				//need normalization
 				if (!m_population)
@@ -74,11 +74,9 @@ namespace flrd
 					m_data[i] = float(d[i]) / float(m_population);
 			}
 
-			float* getData()
+			std::vector<float> getData()
 			{
-				if (m_data.empty())
-					return 0;
-				return &(m_data[0]);
+				return m_data;
 			}
 
 			virtual void open(File& file);
@@ -90,7 +88,6 @@ namespace flrd
 			float m_min;//min value
 			float m_max;//max value
 			unsigned int m_population;//sample size
-			//std::vector<float> m_data;//histogram, normalized
 	};
 }
 

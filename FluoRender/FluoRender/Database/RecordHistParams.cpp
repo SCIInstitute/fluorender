@@ -53,7 +53,7 @@ RecordHistParams::~RecordHistParams()
 {
 }
 
-void RecordHistParams::assign(RecordHistParams* rec)
+void RecordHistParams::assign(const std::shared_ptr<RecordHistParams>& rec)
 {
 	Record::assign(rec);
 	EntryHist* input = rec->m_input->asEntryHist();

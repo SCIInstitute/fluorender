@@ -44,11 +44,11 @@ namespace flrd
 		DistCalculator();
 		~DistCalculator();
 
-		void SetRuler(Ruler* ruler);
-		Ruler* GetRuler();
-		void SetCelpList(CelpList* list);
-		CelpList* GetCelpList();
-		void SetVolume(VolumeData* vd);
+		void SetRuler(const std::shared_ptr<Ruler>& ruler);
+		std::shared_ptr<Ruler> GetRuler();
+		void SetCelpList(const std::shared_ptr<CelpList>& list);
+		std::shared_ptr<CelpList> GetCelpList();
+		void SetVolume(const std::shared_ptr<VolumeData>& vd);
 
 		void SetF1(double val) { m_f1 = val; }
 		void SetInfr(double val) { m_infr = val; }
@@ -60,11 +60,11 @@ namespace flrd
 		int m_type;//0:no data; 1:volume; 2:mask; 3:comps
 		bool m_init;
 		//components
-		CelpList *m_celps;
+		std::weak_ptr<CelpList> m_celps;
 		//volume
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		//Ruler
-		Ruler *m_ruler;
+		std::weak_ptr<Ruler> m_ruler;
 		//spring properties
 		double m_rest;
 		double m_f1;
@@ -74,7 +74,7 @@ namespace flrd
 
 		struct SpringNode
 		{
-			RulerPoint *p;
+			std::weak_ptr<RulerPoint> p;
 			double prevd;
 			double nextd;
 			double dist;//total distance

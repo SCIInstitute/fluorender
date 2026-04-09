@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 namespace flrd
 {
@@ -82,13 +83,13 @@ namespace flrd
 				return m_data;
 			}
 
-			virtual bool compare(Entry* ent)
+			virtual bool compare(const std::shared_ptr<Entry>& ent)
 			{
 				if (!ent) return false;
 				return std::equal(m_data.begin(), m_data.end(), ent->m_data.begin());
 			}
 
-			virtual float distance(Entry* ent)
+			virtual float distance(const std::shared_ptr<Entry>& ent)
 			{
 				float d = std::numeric_limits<float>::max();
 				if (!ent)

@@ -121,7 +121,7 @@ __kernel void kernel_1(
 }
 )CLKER";
 
-Cov::Cov(VolumeData* vd)
+Cov::Cov(const std::shared_ptr<VolumeData>& vd)
 	: m_vd(vd),
 	m_use_mask(false)
 {
@@ -133,16 +133,17 @@ Cov::~Cov()
 {
 }
 
-bool Cov::CheckBricks()
+std::shared_ptr<VolumeData> Cov::CheckBricks()
 {
-	if (!m_vd)
-		return false;
-	if (!m_vd->GetTexture())
-		return false;
-	auto brick_num = m_vd->GetTexture()->get_brick_list_size();
+	auto vd = m_vd.lock();
+	if (!vd)
+		return nullptr;
+	if (!vd->GetTexture())
+		return nullptr;
+	auto brick_num = vd->GetTexture()->get_brick_list_size();
 	if (!brick_num)
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
 bool Cov::GetInfo(
@@ -159,13 +160,14 @@ bool Cov::GetInfo(
 
 bool Cov::ComputeCenter()
 {
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return false;
 	bool use_mask = m_use_mask;
-	if (!m_vd->GetMask(false))
+	if (!vd->GetMask(false))
 		use_mask = false;
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 	if (use_mask)
 	{
 		bits = 8;
@@ -179,7 +181,7 @@ bool Cov::ComputeCenter()
 	std::string name = "kernel_0";
 	int kernel_index = kernel_prog->createKernel(name);
 
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	//get center
 	std::memset(m_center, 0, sizeof(float) * 3);
@@ -192,9 +194,9 @@ bool Cov::ComputeCenter()
 		//get tex ids
 		GLint mid = 0;
 		if (use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 		else
-			mid = m_vd->GetVR()->load_brick(bbs);
+			mid = vd->GetVR()->load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -257,13 +259,14 @@ bool Cov::ComputeCenter()
 
 bool Cov::ComputeCov()
 {
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return false;
 	bool use_mask = m_use_mask;
-	if (!m_vd->GetMask(false))
+	if (!vd->GetMask(false))
 		use_mask = false;
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 	if (use_mask)
 	{
 		bits = 8;
@@ -277,7 +280,7 @@ bool Cov::ComputeCov()
 	std::string name = "kernel_1";
 	int kernel_index = kernel_prog->createKernel(name);
 
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto bricks = vd->GetTexture()->get_bricks();
 
 	//get cov
 	for (auto bbs : bricks)
@@ -288,9 +291,9 @@ bool Cov::ComputeCov()
 		//get tex ids
 		GLint mid = 0;
 		if (use_mask)
-			mid = m_vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVR()->load_brick_mask(bbs);
 		else
-			mid = m_vd->GetVR()->load_brick(bbs);
+			mid = vd->GetVR()->load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -353,10 +356,11 @@ bool Cov::Compute(int type)
 
 std::vector<double> Cov::GetCov()
 {
-	if (m_vd)
+	auto vd = m_vd.lock();
+	if (vd)
 	{
 		//set to correct spacings
-		auto spc = m_vd->GetSpacing();
+		auto spc = vd->GetSpacing();
 		m_cov[0] *= static_cast<float>(spc.x() * spc.x());
 		m_cov[1] *= static_cast<float>(spc.x() * spc.y());
 		m_cov[2] *= static_cast<float>(spc.x() * spc.z());
@@ -373,10 +377,11 @@ std::vector<double> Cov::GetCov()
 
 fluo::Point Cov::GetCenter()
 {
-	if (m_vd)
+	auto vd = m_vd.lock();
+	if (vd)
 	{
 		//set to correct spacings
-		auto spc = m_vd->GetSpacing();
+		auto spc = vd->GetSpacing();
 		m_center[0] *= static_cast<float>(spc.x());
 		m_center[1] *= static_cast<float>(spc.y());
 		m_center[2] *= static_cast<float>(spc.z());

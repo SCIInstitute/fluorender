@@ -141,7 +141,6 @@ bool ConvVolMeshSw::Compute(void* m)
 	if (!model)
 		return false;
 
-	VolumeData* vol_data = vd.get();
 	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 	if (m_use_mask)
 		raw_data = vd->GetMask(true);
@@ -202,7 +201,7 @@ bool ConvVolMeshSw::Compute(void* m)
 				for (jj = 0; jj < 3; jj++)
 					for (kk = 0; kk < 3; kk++)
 						neighbors[ii][jj][kk] =
-						GetValue(vol_data, i + (ii - 1) * m_downsample,
+						GetValue(vd, i + (ii - 1) * m_downsample,
 							j + (jj - 1) * m_downsample, k + (kk - 1) * m_downsample_z);
 			//8 vertices
 			double verts[8];
@@ -307,7 +306,7 @@ bool ConvVolMeshSw::Compute(void* m)
 	return true;
 }
 
-double ConvVolMeshSw::GetValue(VolumeData* vd, int x, int y, int z)
+double ConvVolMeshSw::GetValue(const std::shared_ptr<VolumeData>& vd, int x, int y, int z)
 {
 	if (!vd)
 		return 0.0;

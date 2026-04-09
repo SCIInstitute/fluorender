@@ -42,7 +42,6 @@ namespace flvr
 }
 namespace flrd
 {
-	class RulerHandler;
 	struct BranchPoint
 	{
 		unsigned int id;
@@ -58,22 +57,20 @@ namespace flrd
 		SegGrow();
 		~SegGrow();
 
-		void SetVolumeData(VolumeData* vd);
+		void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
 		void SetBranches(int val) { m_branches = val; }
 		void SetIter(int val) { m_iter = val; }
 		void SetSizeThresh(int size) { m_sz_thresh = size; }
-		void SetRulerHandler(RulerHandler* handler);
 		void Compute();
 
 	private:
-		VolumeData *m_vd;
-		RulerHandler *m_handler;
+		std::weak_ptr<VolumeData> m_vd;
 		int m_branches;//max number of branches to detect
 		int m_iter;//iterations
 		int m_sz_thresh;//threshold for exclude small comps
 		std::unordered_map<unsigned int, BranchPoint> m_list;
 
-		bool CheckBricks();
+		std::shared_ptr<VolumeData> CheckBricks();
 		bool CheckBrickPair(unsigned int id1, unsigned int id2,
 			std::vector<std::set<unsigned int>> &pairs);
 		void CollectIds(std::vector<unsigned int> &ids,

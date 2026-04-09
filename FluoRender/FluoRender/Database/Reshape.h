@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryParams.h>
 #include <unordered_map>
 #include <string>
+#include <memory>
 
 namespace flrd
 {
@@ -42,14 +43,14 @@ namespace flrd
 		Reshape() {}
 		~Reshape() {}
 
-		static Params* get_params(const std::string& name);
-		static EntryParams* get_entry_params(const std::string& name, float* val);
+		static std::shared_ptr<Params> get_params(const std::string& name);
+		static std::shared_ptr<EntryParams> get_entry_params(const std::string& name, const std::vector<float>& values);
 		static size_t get_param_size(const std::string& name);
 		static void clear();
 
 	private:
 		static std::unordered_map<std::string, flrd::Params> params_list_;//available params
-		static EntryParams* result_;
+		static std::shared_ptr<EntryParams> result_;
 	};
 }
 

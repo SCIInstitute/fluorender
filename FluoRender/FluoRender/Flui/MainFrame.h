@@ -246,27 +246,27 @@ public:
 
 	//prop panels
 	wxWindow* AddProps(int type,//follow above
-		RenderView* view = 0,
-		VolumeGroup* group = 0,
-		VolumeData* vd = 0,
-		MeshData* md = 0,
-		MeshGroup* mg = 0,
-		AnnotData* ann = 0);
+		const std::shared_ptr<RenderView>& view = nullptr,
+		const std::shared_ptr<VolumeGroup>& group = nullptr,
+		const std::shared_ptr<VolumeData>& vd = nullptr,
+		const std::shared_ptr<MeshData>& md = nullptr,
+		const std::shared_ptr<MeshGroup>& mg = nullptr,
+		const std::shared_ptr<AnnotData>& ann = nullptr);
 	void DeleteProps(int type, const wxString& name);
 	void ShowPropPage(int type,
-		RenderView* view = 0,
-		VolumeGroup* group = 0,
-		VolumeData* vd = 0,
-		MeshData* md = 0,
-		MeshGroup* mg = 0,
-		AnnotData* ann = 0,
+		const std::shared_ptr<RenderView>& view = nullptr,
+		const std::shared_ptr<VolumeGroup>& group = nullptr,
+		const std::shared_ptr<VolumeData>& vd = nullptr,
+		const std::shared_ptr<MeshData>& md = nullptr,
+		const std::shared_ptr<MeshGroup>& mg = nullptr,
+		const std::shared_ptr<AnnotData>& ann = nullptr,
 		bool show = true);
 	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, wxWindow* panel = 0);
 	void FluoUpdate(const fluo::ValueCollection& vc);
-	VolumePropPanel* FindVolumeProps(VolumeData* vd);
-	MeshPropPanel* FindMeshProps(MeshData* md);
-	AnnotatPropPanel* FindAnnotProps(AnnotData* ad);
-	ManipPropPanel* FindMeshManip(MeshData* md);
+	VolumePropPanel* FindVolumeProps(const std::shared_ptr<VolumeData>& vd);
+	MeshPropPanel* FindMeshProps(const std::shared_ptr<MeshData>& md);
+	AnnotatPropPanel* FindAnnotProps(const std::shared_ptr<AnnotData>& ad);
+	ManipPropPanel* FindMeshManip(const std::shared_ptr<MeshData>& md);
 	VolumePropPanel* FindVolumeProps(const wxString& str);
 	MeshPropPanel* FindMeshProps(const wxString& str);
 	AnnotatPropPanel* FindAnnotProps(const wxString& str);

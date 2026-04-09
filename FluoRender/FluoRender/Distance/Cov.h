@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Point.h>
 #include <vector>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -41,7 +42,7 @@ namespace flrd
 	class Cov
 	{
 	public:
-		Cov(VolumeData* vd);
+		Cov(const std::shared_ptr<VolumeData>& vd);
 		~Cov();
 
 		void SetUseMask(bool use_mask)
@@ -60,7 +61,7 @@ namespace flrd
 		fluo::Point GetCenter();
 
 	private:
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		bool m_use_mask;//use mask instead of data
 		bool m_use_int;//use intensity values as weights
 		//result
@@ -69,7 +70,7 @@ namespace flrd
 
 		bool ComputeCenter();
 		bool ComputeCov();
-		bool CheckBricks();
+		std::shared_ptr<VolumeData> CheckBricks();
 		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long &bits, long &nx, long &ny, long &nz);
 	};

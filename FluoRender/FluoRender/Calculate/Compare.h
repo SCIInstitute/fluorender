@@ -45,7 +45,8 @@ namespace flrd
 	class ChannelCompare
 	{
 	public:
-		ChannelCompare(VolumeData* vd1, VolumeData* vd2);
+		ChannelCompare(const std::shared_ptr<VolumeData>& vd1,
+			const std::shared_ptr<VolumeData>& vd2);
 		~ChannelCompare();
 
 		void SetUseMask(bool use_mask)
@@ -69,13 +70,13 @@ namespace flrd
 		ChannelCompareFunc postwork;
 
 	private:
-		VolumeData *m_vd1, *m_vd2;
+		std::weak_ptr<VolumeData> m_vd1, m_vd2;
 		bool m_use_mask;//use mask instead of data
 		bool m_int_weighted;//sum of intensity instead of voxel count
 		bool m_init;
 		double m_result;
 
-		bool CheckBricks();
+		std::pair<std::shared_ptr<VolumeData>, std::shared_ptr<VolumeData>> CheckBricks();
 		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b1,
 			const std::shared_ptr<flvr::TextureBrick>& b2,
 			long &bits, long &bits2,

@@ -205,7 +205,7 @@ namespace flrd
 
 		bool GetColor(unsigned int id,
 			int brick_id,
-			VolumeData* vd,
+			const std::shared_ptr<VolumeData>& vd,
 			fluo::Color &color);
 		int GetColocalization(size_t bid,
 			const fluo::Point& p,

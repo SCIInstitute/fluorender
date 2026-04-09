@@ -74,17 +74,14 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	void SetVolumeData(VolumeData* vd);
-	VolumeData* GetVolumeData();
+	void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
 	void InitViews(unsigned int type);
 
 	//sync group
-	void SetGroup(VolumeGroup* group);
-	VolumeGroup* GetGroup();
+	void SetGroup(const std::shared_ptr<VolumeGroup>& group);
 
 	//sync view in depth mode
-	void SetView(RenderView* view);
-	RenderView* GetView();
+	void SetView(const std::shared_ptr<RenderView>& view);
 
 	void ApplyMl();
 	void SaveMl();
@@ -92,11 +89,11 @@ public:
 	void ClearUndo();
 
 private:
-	VolumeData* m_vd;
+	std::weak_ptr<VolumeData> m_vd;
+	std::weak_ptr < VolumeGroup> m_group;
+	std::weak_ptr < RenderView> m_view;
 
 	bool m_sync_group;
-	VolumeGroup* m_group;
-	RenderView* m_view;
 	double m_max_val;
 
 	//1

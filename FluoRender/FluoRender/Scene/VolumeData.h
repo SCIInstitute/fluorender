@@ -146,9 +146,9 @@ public:
 	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
-	flvr::VolumeRenderer *GetVR();
+	flvr::VolumeRenderer* GetVR() { return m_vr.get(); }
 	//texture
-	flvr::Texture* GetTexture();
+	std::shared_ptr<flvr::Texture> GetTexture() { return m_tex; }
 
 	//bounding box
 	fluo::BBox GetBounds();

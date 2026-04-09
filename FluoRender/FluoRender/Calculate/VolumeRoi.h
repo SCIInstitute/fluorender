@@ -41,7 +41,7 @@ namespace flrd
 	class VolumeRoi
 	{
 	public:
-		VolumeRoi(VolumeData* vd);
+		VolumeRoi(const std::shared_ptr<VolumeData>& vd);
 		~VolumeRoi();
 
 		void SetUseMask(bool use_mask)
@@ -88,7 +88,7 @@ namespace flrd
 		}
 
 	private:
-		VolumeData* m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 		bool m_use_mask;//use mask instead of data
 		fluo::Transform m_tf;//view transform
 		Ruler* m_ruler;//a closed ruler for roi
@@ -98,7 +98,7 @@ namespace flrd
 		unsigned int m_sum;
 		float m_wsum;
 
-		bool CheckBricks();
+		std::shared_ptr<VolumeData> CheckBricks();
 		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
 			long& bits, long& nx, long& ny, long& nz);
 	};

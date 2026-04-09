@@ -37,10 +37,7 @@ using namespace flrd;
 
 DistCalculator::DistCalculator() :
 	m_type(0),
-	m_init(false),
-	m_vd(0),
-	m_celps(0),
-	m_ruler(0)
+	m_init(false)
 {
 	m_f1 = 1;
 	m_f2 = 2;
@@ -54,9 +51,9 @@ DistCalculator::~DistCalculator()
 {
 }
 
-void DistCalculator::SetRuler(Ruler* ruler)
+void DistCalculator::SetRuler(const std::shared_ptr<Ruler>& ruler)
 {
-	if (ruler != m_ruler)
+	if (ruler && ruler != m_ruler.lock())
 	{
 		m_ruler = ruler;
 		m_init = false;
@@ -64,28 +61,32 @@ void DistCalculator::SetRuler(Ruler* ruler)
 	m_relax->SetRuler(ruler);
 }
 
-Ruler* DistCalculator::GetRuler()
+std::shared_ptr<Ruler> DistCalculator::GetRuler()
 {
-	return m_ruler;
+	return m_ruler.lock();
 }
 
-void DistCalculator::SetCelpList(CelpList* list)
+void DistCalculator::SetCelpList(const std::shared_ptr<CelpList>& list)
 {
-	if (list != m_celps)
+	if (list && list != m_celps.lock())
 	{
 		m_celps = list;
 		m_init = false;
 	}
 }
 
-CelpList* DistCalculator::GetCelpList()
+std::shared_ptr<CelpList> DistCalculator::GetCelpList()
 {
-	return m_celps;
+	return m_celps.lock();
 }
 
-void DistCalculator::SetVolume(VolumeData* vd)
+void DistCalculator::SetVolume(const std::shared_ptr<VolumeData>& vd)
 {
-	m_vd = vd;
+	if (vd && vd != m_vd.lock())
+	{
+		m_vd = vd;
+		m_init = false;
+	}
 	m_relax->SetVolume(vd);
 }
 
@@ -122,7 +123,8 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 
 void DistCalculator::Project()
 {
-	if (!m_celps)
+	auto celp_list = m_celps.lock();
+	if (!celp_list)
 		return;
 	if (!m_init)
 		BuildSpring();
@@ -131,14 +133,11 @@ void DistCalculator::Project()
 	if (m_spring.empty())
 		return;
 
-	fluo::Vector scale(
-		m_celps->sx,
-		m_celps->sy,
-		m_celps->sz);
+	fluo::Vector scale = celp_list->scale;
 
 	fluo::Point p0, pp;
-	for (auto it = m_celps->begin();
-		it != m_celps->end(); ++it)
+	for (auto it = celp_list->begin();
+		it != celp_list->end(); ++it)
 	{
 		p0 = it->second->GetCenter(scale);
 		SpringProject(p0, pp);
@@ -148,11 +147,12 @@ void DistCalculator::Project()
 
 void DistCalculator::BuildSpring()
 {
-	if (!m_ruler)
+	auto ruler = m_ruler.lock();
+	if (!ruler)
 		return;
-	size_t rwt = m_ruler->GetWorkTime();
-	int interp = m_ruler->GetInterp();
-	int rn = m_ruler->GetNumPoint();
+	size_t rwt = ruler->GetWorkTime();
+	int interp = ruler->GetInterp();
+	int rn = ruler->GetNumPoint();
 	if (rn < 1)
 		return;
 
@@ -161,17 +161,17 @@ void DistCalculator::BuildSpring()
 
 	//build a spring form the ruler
 	double dist;
-	int bn = m_ruler->GetNumBranch();
+	int bn = ruler->GetNumBranch();
 	for (int bi = 0; bi < bn; ++bi)
 	{
-		rn = m_ruler->GetNumBranchPoint(bi);
+		rn = ruler->GetNumBranchPoint(bi);
 		int n = rn == 1 ? 1 : rn - 1;
 		for (int i = 0; i < n; ++i)
 		{
 			if (i == 0)
 			{
 				SpringNode node;
-				node.p = m_ruler->GetRulerPoint(bi, i);
+				node.p = ruler->GetRulerPoint(bi, i);
 				node.prevd = 0.0;
 				node.nextd = 0.0;
 				node.dist = 0.0;
@@ -182,9 +182,13 @@ void DistCalculator::BuildSpring()
 			{
 				SpringNode &node1 = m_spring.back();
 				SpringNode node2;
-				node2.p = m_ruler->GetRulerPoint(bi, i + 1);
-				dist = (node2.p->GetPoint(rwt, interp) -
-					node1.p->GetPoint(rwt, interp)).length();
+				node2.p = ruler->GetRulerPoint(bi, i + 1);
+				auto n1p = node1.p.lock();
+				auto n2p = node2.p.lock();
+				if (!n1p || !n2p)
+					continue;
+				dist = (*(n2p->GetPoint(rwt, interp)) -
+					*(n1p->GetPoint(rwt, interp))).length();
 				node1.nextd = dist;
 				node2.prevd = dist;
 				node2.nextd = 0.0;

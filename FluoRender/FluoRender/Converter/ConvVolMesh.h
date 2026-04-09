@@ -72,7 +72,8 @@ namespace flrd
 			long &bits, long &nx, long &ny, long &nz,
 			long &ox, long &oy, long &oz);
 
-		void MarchingCubes(VolumeData* vd, MeshData* md);
+		void MarchingCubes(const std::shared_ptr<VolumeData>& vd,
+			const std::shared_ptr<MeshData>& md);
 
 		void AverageNormals(std::weak_ptr<flvr::Argument> vbo, std::weak_ptr<flvr::Argument> ibo,
 			int vertex_count, int idx_count);
