@@ -1367,27 +1367,6 @@ void MovieMaker::MakeKeysTimeColormap()
 	double t = glbin_interpolator.GetLastT();
 	if (t > 0.0) t += m_key_duration;
 
-	////for the view
-	//keycode.l0 = 1;
-	//keycode.l0_name = ws2s(m_view->GetName());
-	////time point
-	//keycode.l2 = 0;
-	//keycode.l2_name = "frame";
-
-	////initial
-	//glbin_interpolator.Begin(t, m_seq_all_num);
-	//for (int i = 0; i < m_view->GetAllVolumeNum(); ++i)
-	//{
-	//	VolumeData* vd = m_view->GetAllVolumeData(i);
-	//	if (!vd)
-	//		continue;
-	//	keycode.l1 = 2;
-	//	keycode.l1_name = vd->GetName();
-	//	flkey = new FlKeyDouble(keycode, 0);
-	//	glbin_interpolator.AddKey(flkey);
-	//}
-	//glbin_interpolator.End();
-
 	//for the view
 	keycode.l0 = 1;
 	keycode.l0_name = ws2s(view->GetName());
