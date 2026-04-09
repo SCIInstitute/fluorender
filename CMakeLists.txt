@@ -860,27 +860,25 @@ add_library(UTILITY_LIB STATIC
 # Main
 target_include_directories(MAIN_LIB PRIVATE
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 target_link_libraries(MAIN_LIB PRIVATE
-  ${wxWidgets_LIBRARIES})
+  ${wxWidgets_LIBRARIES}
+)
 
 # Agent
 target_include_directories(AGENT_LIB PRIVATE
-  #${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  #${OpenCL_INCLUDE_DIRS}
-  #${TEEM_INCLUDE_DIRS}
 )
 if (WIN32)
   target_include_directories(AGENT_LIB PRIVATE
-    ${WACOM_PATHS})
+    ${WACOM_PATHS}
+  )
 endif()
 
 # Animator
 target_include_directories(ANIMATOR_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR})
 if (APPLE)
     target_link_libraries(ANIMATOR_LIB PRIVATE
@@ -891,20 +889,20 @@ endif()
 target_include_directories(CALCULATE_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Component
 target_include_directories(COMPONENT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Compute
 target_include_directories(COMPUTE_LIB PRIVATE
@@ -919,7 +917,7 @@ target_link_libraries(COMPUTE_LIB PRIVATE
 target_include_directories(CONFIG_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Control
 
@@ -927,7 +925,7 @@ target_include_directories(CONFIG_LIB PRIVATE
 target_include_directories(CONVERTER_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Database
 target_include_directories(DATABASE_LIB PRIVATE
@@ -940,7 +938,7 @@ target_include_directories(DISTANCE_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 target_link_libraries(DISTANCE_LIB PRIVATE
   ${OpenCV_LIBS})
 
@@ -953,7 +951,7 @@ target_include_directories(FILTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Flui
 target_include_directories(FLUI_LIB PRIVATE
@@ -962,29 +960,35 @@ target_include_directories(FLUI_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
   ${Python3_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 if (WIN32)
   target_include_directories(FLUI_LIB PRIVATE
-    ${WACOM_PATHS})
+    ${WACOM_PATHS}
+  )
 endif()
 if (WIN32 OR APPLE)
   target_include_directories(FLUI_LIB PRIVATE
-    ${JNI_INCLUDE_DIRS})
+    ${JNI_INCLUDE_DIRS}
+  )
 else()
   target_include_directories(FLUI_LIB PRIVATE
     ${JNI_INCLUDE_DIRS}
     ${JAVA_INCLUDE_PATH}
-    ${JAVA_INCLUDE_PATH2})
+    ${JAVA_INCLUDE_PATH2}
+  )
 endif()
 target_link_libraries(FLUI_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES})
+  ${GLEW_STATIC_LIBRARIES}
+)
 if(WIN32)
     target_link_libraries(FLUI_LIB PRIVATE
-      WACOMUTILS_LIB)
+      WACOMUTILS_LIB
+    )
 endif()
 if (WIN32 AND USE_XINPUT)
     target_link_libraries(FLUI_LIB PRIVATE
-      XINPUT_LIB)
+      XINPUT_LIB
+    )
 endif()
 
 # Format
@@ -998,15 +1002,18 @@ target_include_directories(FORMAT_LIB PRIVATE
   ${PNG_PNG_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR}
-  ${ZLIB_INCLUDE_DIR})
+  ${ZLIB_INCLUDE_DIR}
+)
 if (WIN32 OR APPLE)
   target_include_directories(FORMAT_LIB PRIVATE
-    ${JNI_INCLUDE_DIRS})
+    ${JNI_INCLUDE_DIRS}
+  )
 else()
   target_include_directories(FORMAT_LIB PRIVATE
     ${JNI_INCLUDE_DIRS}
     ${JAVA_INCLUDE_PATH}
-    ${JAVA_INCLUDE_PATH2})
+    ${JAVA_INCLUDE_PATH2}
+  )
 endif()
 if (APPLE)
     target_link_libraries(FORMAT_LIB PRIVATE
@@ -1028,15 +1035,17 @@ target_include_directories(GLOBAL_LIB PRIVATE
   ${GLM_DIRS}
   ${OPENXR_PATHS}
   ${Python3_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 if (WIN32 OR APPLE)
   target_include_directories(GLOBAL_LIB PRIVATE
-    ${JNI_INCLUDE_DIRS})
+    ${JNI_INCLUDE_DIRS}
+  )
 else()
   target_include_directories(GLOBAL_LIB PRIVATE
     ${JNI_INCLUDE_DIRS}
     ${JAVA_INCLUDE_PATH}
-    ${JAVA_INCLUDE_PATH2})
+    ${JAVA_INCLUDE_PATH2}
+  )
 endif()
 
 # Graphics
@@ -1045,12 +1054,11 @@ target_include_directories(GRAPHICS_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 target_link_libraries(GRAPHICS_LIB PRIVATE
   ${FREETYPE_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES}
   ${OPENGL_LIBRARIES}
-  ${TEEM_LIBRARIES}
 )
 
 # OpenGL backend
@@ -1063,111 +1071,125 @@ target_include_directories(GRAPHICS_GL_LIB PRIVATE
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
   ${GLM_DIRS}
-  ${BRIDGE_RUNTIME_PATHS})
+  ${BRIDGE_RUNTIME_PATHS}
+)
 
 # Object
 target_include_directories(OBJECT_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+)
 
 # OpenXR
 target_include_directories(OPENXR_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OPENVR_PATHS}
-  ${OPENXR_PATHS})
+  ${OPENXR_PATHS}
+)
 target_link_libraries(OPENXR_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
   ${OpenVR_LIBRARIES}
-  ${OpenXR_LIBRARIES})
+  ${OpenXR_LIBRARIES}
+)
 
 # Progress
 target_include_directories(PROGRESS_LIB PRIVATE
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Project
 target_include_directories(PROJECT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Python
 target_include_directories(PYTHON_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${Python3_INCLUDE_DIRS})
+  ${Python3_INCLUDE_DIRS}
+)
 if (WIN32 OR APPLE)
   target_include_directories(PYTHON_LIB PRIVATE
-    ${HDF5_INCLUDE_PATHS})
+    ${HDF5_INCLUDE_PATHS}
+  )
 endif()
 target_link_libraries(PYTHON_LIB PRIVATE
-  ${HDF5_LIBRARIES})
+  ${HDF5_LIBRARIES}
+)
 
 # Raw
 
 # Renderer
 target_include_directories(RENDERER_LIB PRIVATE
-  ${GLM_DIRS})
+  ${GLM_DIRS}
+)
 
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 if (WIN32)
   target_include_directories(SCENE_LIB PRIVATE
-    ${WACOM_PATHS})
+    ${WACOM_PATHS}
+  )
 endif()
 if (WIN32 OR APPLE)
   target_include_directories(SCENE_LIB PRIVATE
-    ${JNI_INCLUDE_DIRS})
+    ${JNI_INCLUDE_DIRS}
+  )
 else()
   target_include_directories(SCENE_LIB PRIVATE
     ${JNI_INCLUDE_DIRS}
     ${JAVA_INCLUDE_PATH}
-    ${JAVA_INCLUDE_PATH2})
+    ${JAVA_INCLUDE_PATH2}
+  )
 endif()
 if (APPLE)
     target_link_libraries(SCENE_LIB PRIVATE
-      ${BZIP2_LIBRARY})
+      ${BZIP2_LIBRARY}
+    )
 endif()
-target_link_libraries(SCENE_LIB PRIVATE
-  ${TEEM_LIBRARIES})
 
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${Python3_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 if (APPLE)
     target_link_libraries(SCRIPT_LIB PRIVATE
-      ${BZIP2_LIBRARY})
+      ${BZIP2_LIBRARY}
+    )
 endif()
 target_link_libraries(SCRIPT_LIB PRIVATE
-  ${Python3_LIBRARIES})
+  ${Python3_LIBRARIES}
+)
 
 # Selection
 target_include_directories(SELECTION_LIB PRIVATE
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Timer
 target_include_directories(TIMER_LIB PRIVATE
-  ${Boost_INCLUDE_DIR})
+  ${Boost_INCLUDE_DIR}
+)
 
 # Tracking
 target_include_directories(TRACKING_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+)
 
 # Trainer
 target_link_libraries(TRAINER_LIB PRIVATE
   ${Python3_LIBRARIES}
-  dlib::dlib)
+  dlib::dlib
+)
 
 # Type
 
@@ -1281,7 +1303,6 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 target_include_directories(FluoRender PRIVATE
   ${GLM_DIRS}
-  ${TEEM_INCLUDE_DIRS})
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender PRIVATE
