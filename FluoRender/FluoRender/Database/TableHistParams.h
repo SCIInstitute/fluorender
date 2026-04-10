@@ -42,9 +42,9 @@ namespace flrd
 		virtual ~TableHistParams();
 
 		//query funcs
-		EntryParams* infer(EntryHist* input);
+		std::shared_ptr<EntryParams> infer(const std::shared_ptr<EntryHist>& input);
 
-		virtual void addRecord(Record* rec);
+		virtual void addRecord(const std::shared_ptr<Record>& rec);
 
 		virtual void open(const std::wstring& filename);
 
@@ -86,16 +86,16 @@ namespace flrd
 		Trainer* m_dnn;
 
 	private:
-		void compute(Record* rec = 0);
-		void computeHistSize(Record* rec = 0);
-		void getParams(Record* rec);
-		void computeParamIter(Record* rec = 0);
+		void compute(const std::shared_ptr<Record>& rec = nullptr);
+		void computeHistSize(const std::shared_ptr<Record>& rec = nullptr);
+		void getParams(const std::shared_ptr<Record>& rec);
+		void computeParamIter(const std::shared_ptr<Record>& rec = nullptr);
 		void create_dnn();
-		void dnn_add(Record*);
+		void dnn_add(const std::shared_ptr<Record>& rec);
 
 		//models for inference
-		EntryParams* nearest_neighbor(EntryHist* input);
-		EntryParams* dnn(EntryHist* input);
+		std::shared_ptr<EntryParams> nearest_neighbor(const std::shared_ptr<EntryHist>& input);
+		std::shared_ptr<EntryParams> dnn(const std::shared_ptr<EntryHist>& input);
 	};
 }
 

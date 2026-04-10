@@ -38,6 +38,7 @@ namespace flrd
 	class Params
 	{
 	public:
+		Params() {};
 		Params(
 			std::vector<std::string>& names,
 			std::unordered_map<std::string, size_t>& index,
@@ -48,7 +49,7 @@ namespace flrd
 		{};
 		~Params() {};
 
-		size_t size() { return m_names.size(); }
+		size_t size() const { return m_names.size(); }
 
 		bool getNameIndex(const std::string& name, size_t& i)
 		{

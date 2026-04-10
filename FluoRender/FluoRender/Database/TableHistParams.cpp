@@ -64,14 +64,14 @@ TableHistParams::~TableHistParams()
 		delete m_dnn;
 }
 
-EntryParams* TableHistParams::infer(EntryHist* input)
+std::shared_ptr<EntryParams> TableHistParams::infer(const std::shared_ptr<EntryHist>& input)
 {
 	if (m_dnn && m_dnn->is_valid())
 		return dnn(input);
 	return nearest_neighbor(input);
 }
 
-void TableHistParams::addRecord(Record* rec)
+void TableHistParams::addRecord(const std::shared_ptr<Record>& rec)
 {
 	Table::addRecord(rec);
 	compute(rec);
@@ -109,14 +109,14 @@ void TableHistParams::addUntrainedRecord()
 		dnn_add(m_data[i]);
 }
 
-void TableHistParams::compute(Record* rec)
+void TableHistParams::compute(const std::shared_ptr<Record>& rec)
 {
 	computeHistSize(rec);
 	computeParamIter(rec);
 	create_dnn();
 }
 
-void TableHistParams::computeHistSize(Record* rec)
+void TableHistParams::computeHistSize(const std::shared_ptr<Record>& rec)
 {
 	double sum = 0;
 	if (m_data.empty())
@@ -127,7 +127,7 @@ void TableHistParams::computeHistSize(Record* rec)
 
 	if (rec)
 	{
-		RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+		auto r = std::dynamic_pointer_cast<RecordHistParams>(rec);
 		if (r)
 		{
 			m_hist_popl *= m_data.size() - 1;
@@ -139,7 +139,7 @@ void TableHistParams::computeHistSize(Record* rec)
 
 	for (auto i : m_data)
 	{
-		RecordHistParams* r = dynamic_cast<RecordHistParams*>(i);
+		auto r = std::dynamic_pointer_cast<RecordHistParams>(i);
 		if (r)
 			sum += r->getHistPopl();
 	}
@@ -147,9 +147,9 @@ void TableHistParams::computeHistSize(Record* rec)
 	m_hist_popl = (float)(sum / m_data.size());
 }
 
-void TableHistParams::getParams(Record* rec)
+void TableHistParams::getParams(const std::shared_ptr<Record>& rec)
 {
-	RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+	auto r = std::dynamic_pointer_cast<RecordHistParams>(rec);
 	if (r)
 	{
 		m_param_iter = std::max(m_param_iter, r->getParamIter());
@@ -159,7 +159,7 @@ void TableHistParams::getParams(Record* rec)
 	}
 }
 
-void TableHistParams::computeParamIter(Record* rec)
+void TableHistParams::computeParamIter(const std::shared_ptr<Record>& rec)
 {
 	if (m_data.empty())
 	{
@@ -188,7 +188,7 @@ void TableHistParams::create_dnn()
 	if (m_data.empty())
 		return;
 
-	Record* rec = m_data[0];
+	auto rec = m_data[0];
 	if (!rec)
 		return;
 	size_t si, so;
@@ -202,28 +202,28 @@ void TableHistParams::create_dnn()
 	}
 }
 
-void TableHistParams::dnn_add(Record* rec)
+void TableHistParams::dnn_add(const std::shared_ptr<Record>& rec)
 {
 	if (!m_dnn)
 		return;
 
-	RecordHistParams* r = dynamic_cast<RecordHistParams*>(rec);
+	auto r = std::dynamic_pointer_cast<RecordHistParams>(rec);
 	if (!r)
 		return;
 
 	std::vector<float> in = r->getInput()->getStdData();
 	std::vector<float> out = r->getOutput()->getStdData();
 
-	m_dnn->add(&in[0], &out[0]);
+	m_dnn->add(in, out);
 
 	m_trained_rec_num = m_dnn->get_trained_rec_num();
 	setModified();
 }
 
 //models for inference
-EntryParams* TableHistParams::nearest_neighbor(EntryHist* input)
+std::shared_ptr<EntryParams> TableHistParams::nearest_neighbor(const std::shared_ptr<EntryHist>& input)
 {
-	Record* result = 0;
+	std::shared_ptr<Record> result = nullptr;
 	float vmin = std::numeric_limits<float>::max();
 	for (auto i : m_data)
 	{
@@ -235,16 +235,16 @@ EntryParams* TableHistParams::nearest_neighbor(EntryHist* input)
 		}
 	}
 	if (result)
-		return dynamic_cast<EntryParams*>(result->getOutput());
-	return 0;
+		return std::dynamic_pointer_cast<EntryParams>(result->getOutput());
+	return nullptr;
 }
 
-EntryParams* TableHistParams::dnn(EntryHist* input)
+std::shared_ptr<EntryParams> TableHistParams::dnn(const std::shared_ptr<EntryHist>& input)
 {
 	if (!m_dnn)
-		return 0;
+		return nullptr;
 
-	std::vector<float> in = input->getStdData();
-	float* pout = m_dnn->infer(&in[0]);
-	return Reshape::get_entry_params("vol_prop", pout);
+	auto in = input->getStdData();
+	auto out = m_dnn->infer(in);
+	return Reshape::get_entry_params("vol_prop", out);
 }

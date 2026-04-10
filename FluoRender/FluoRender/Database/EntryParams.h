@@ -44,26 +44,25 @@ namespace flrd
 		virtual EntryParams* asEntryParams() { return this; }
 		virtual const EntryParams* asEntryParams() const { return this; }
 
-		void setParams(const std::shared_ptr<Params>& params);
+		void setParams(const Params& params);
 
 		template <typename T>
 		void setParam(const std::string& name, T value)
 		{
-			if (!m_params)
+			if (!m_params.size())
 				return;
 			size_t i;
-			if (m_params->getNameIndex(name, i))
+			if (m_params.getNameIndex(name, i))
 				m_data[i] = float(value);
 			m_valid = true;
 		}
 
 		float getParam(const std::string& name)
 		{
-			auto p = m_params.lock();
-			if (!p)
+			if (!m_params.size())
 				return 0;
 			size_t i;
-			if (p->getNameIndex(name, i))
+			if (m_params.getNameIndex(name, i))
 				return m_data[i];
 			return 0;
 		}
@@ -75,7 +74,7 @@ namespace flrd
 
 	private:
 		bool m_valid;
-		std::weak_ptr<Params> m_params;
+		Params m_params;
 	};
 }
 

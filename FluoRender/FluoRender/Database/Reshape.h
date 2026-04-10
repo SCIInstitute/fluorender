@@ -43,7 +43,7 @@ namespace flrd
 		Reshape() {}
 		~Reshape() {}
 
-		static std::shared_ptr<Params> get_params(const std::string& name);
+		static Params get_params(const std::string& name);
 		static std::shared_ptr<EntryParams> get_entry_params(const std::string& name, const std::vector<float>& values);
 		static size_t get_param_size(const std::string& name);
 		static void clear();

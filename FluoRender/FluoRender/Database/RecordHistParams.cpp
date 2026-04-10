@@ -43,10 +43,10 @@ RecordHistParams::RecordHistParams(const RecordHistParams& rec) :
 {
 	EntryHist* input = rec.m_input->asEntryHist();
 	if (input)
-		m_input = new EntryHist(*input);
+		m_input = std::make_shared<EntryHist>(*input);
 	EntryParams* output = rec.m_output->asEntryParams();
 	if (output)
-		m_output = new EntryParams(*output);
+		m_output = std::make_shared<EntryParams>(*output);
 }
 
 RecordHistParams::~RecordHistParams()
@@ -58,10 +58,10 @@ void RecordHistParams::assign(const std::shared_ptr<RecordHistParams>& rec)
 	Record::assign(rec);
 	EntryHist* input = rec->m_input->asEntryHist();
 	if (input)
-		m_input = new EntryHist(*input);
+		m_input = std::make_shared<EntryHist>(*input);
 	EntryParams* output = rec->m_output->asEntryParams();
 	if (output)
-		m_output = new EntryParams(*output);
+		m_output = std::make_shared<EntryParams>(*output);
 }
 
 void RecordHistParams::open(File& file)
@@ -70,7 +70,7 @@ void RecordHistParams::open(File& file)
 	{
 		if (file.check(Table::TAG_TABLE_ENT_HIST))
 		{
-			EntryHist* ent = new EntryHist();
+			auto ent = std::make_shared<EntryHist>();
 			if (ent)
 			{
 				ent->open(file);
@@ -83,7 +83,7 @@ void RecordHistParams::open(File& file)
 	{
 		if (file.check(Table::TAG_TABLE_ENT_PARAMS))
 		{
-			EntryParams* ent = new EntryParams();// glbin.get_params("comp_gen"));
+			auto ent = std::make_shared<EntryParams>();// glbin.get_params("comp_gen"));
 			if (ent)
 			{
 				ent->setParams(m_params);
@@ -108,38 +108,22 @@ size_t RecordHistParams::getInputSize()
 
 size_t RecordHistParams::getOutputSize()
 {
-	if (m_params)
-		return m_params->size();
-	return 0;
+	return m_params.size();
 }
 
-void RecordHistParams::getInputData(float* data)
+std::vector<float> RecordHistParams::getInputData()
 {
-	if (m_input)
-		std::memcpy(data, &(m_input->m_data[0]), sizeof(float)*getInputSize());
+	return m_input->getStdData();
 }
 
-void RecordHistParams::getOutputData(float* data)
+std::vector<float> RecordHistParams::getOutputData()
 {
-	if (m_output)
-		std::memcpy(data, &(m_output->m_data[0]), sizeof(float)*getOutputSize());
-}
-
-void RecordHistParams::getInputData(std::vector<float>& data)
-{
-	if (m_input)
-		data = m_input->getStdData();
-}
-
-void RecordHistParams::getOutputData(std::vector<float>& data)
-{
-	if (m_output)
-		data = m_output->getStdData();
+	return m_output->getStdData();
 }
 
 float RecordHistParams::getHistPopl()
 {
-	EntryHist* e = dynamic_cast<EntryHist*>(m_input);
+	auto e = std::dynamic_pointer_cast<EntryHist>(m_input);
 	if (!e)
 		return 0;
 	return static_cast<float>(e->getPopulation());
@@ -147,7 +131,7 @@ float RecordHistParams::getHistPopl()
 
 float RecordHistParams::getParamIter()
 {
-	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	auto e = std::dynamic_pointer_cast<EntryParams>(m_output);
 	if (!e)
 		return 0;
 	return e->getParam("iter");
@@ -155,7 +139,7 @@ float RecordHistParams::getParamIter()
 
 float RecordHistParams::getParamMxdist()
 {
-	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	auto e = std::dynamic_pointer_cast<EntryParams>(m_output);
 	if (!e)
 		return 0;
 	return e->getParam("max_dist");
@@ -163,7 +147,7 @@ float RecordHistParams::getParamMxdist()
 
 float RecordHistParams::getParamCleanb()
 {
-	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	auto e = std::dynamic_pointer_cast<EntryParams>(m_output);
 	if (!e)
 		return 0;
 	return e->getParam("cleanb");
@@ -171,7 +155,7 @@ float RecordHistParams::getParamCleanb()
 
 float RecordHistParams::getParamCleanIter()
 {
-	EntryParams* e = dynamic_cast<EntryParams*>(m_output);
+	auto e = std::dynamic_pointer_cast<EntryParams>(m_output);
 	if (!e)
 		return 0;
 	return e->getParam("clean_iter");

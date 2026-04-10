@@ -1303,6 +1303,7 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 target_include_directories(FluoRender PRIVATE
   ${GLM_DIRS}
+)
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender PRIVATE

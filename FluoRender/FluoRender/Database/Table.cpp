@@ -39,7 +39,6 @@ Table::Table():
 	m_recnum(0),
 	m_modified(false),
 	m_update_func(nullptr),
-	m_params(0),
 	m_trained_rec_num(0)
 {
 	m_modify_time = m_create_time = std::time(0);
@@ -64,12 +63,7 @@ Table::Table(const Table& table) :
 	m_modify_time = m_create_time = std::time(0);
 	for (auto i : table.m_data)
 	{
-		Record* rec = 0;
-		RecordHistParams* temp = i->asRecordHistParams();
-		if (temp)
-			rec = new RecordHistParams(*temp);
-		if (rec)
-			m_data.push_back(rec);
+		m_data.push_back(i);
 	}
 }
 
@@ -80,10 +74,6 @@ Table::~Table()
 
 void Table::clear()
 {
-	for (auto i : m_data)
-	{
-		delete i;
-	}
 	m_data.clear();
 	m_modified = false;
 	m_name = L"";
@@ -91,7 +81,7 @@ void Table::clear()
 	m_recnum = 0;
 }
 
-void Table::addRecord(Record* rec)
+void Table::addRecord(const std::shared_ptr<Record>& rec)
 {
 	if (!rec)
 		return;
@@ -102,7 +92,6 @@ void Table::addRecord(Record* rec)
 		if ((*i)->compare(rec))
 		{
 			//overwrite
-			delete (*i);
 			m_data.erase(i);
 			break;
 		}
@@ -113,7 +102,7 @@ void Table::addRecord(Record* rec)
 	setModified();
 }
 
-void Table::readRecord(Record* rec)
+void Table::readRecord(const std::shared_ptr<Record>& rec)
 {
 	if (!rec)
 		return;
@@ -231,11 +220,11 @@ void Table::open(const std::wstring& filename, bool info)
 	for (size_t i = 0; i < m_recnum; ++i)
 	{
 		file.readValue(t);
-		Record* rec = 0;
+		std::shared_ptr<Record> rec = nullptr;
 		switch (t)
 		{
 		case TAG_TABLE_REC_HISTPARAM:
-			rec = new RecordHistParams();
+			rec = std::make_shared<RecordHistParams>();
 			break;
 		default:
 			file.setPos();

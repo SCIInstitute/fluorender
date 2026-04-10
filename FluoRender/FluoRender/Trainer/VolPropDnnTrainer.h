@@ -48,9 +48,9 @@ namespace flrd
 		VolPropDnnTrainer();
 		~VolPropDnnTrainer();
 
-		virtual void add(float*, float*);
+		virtual void add(const std::vector<float>& in, const std::vector<float>& out);
 		virtual void train();
-		virtual float* infer(float*);
+		virtual std::vector<float> infer(const std::vector<float>& in);
 		virtual double get_rate();
 		virtual void set_model_file(const std::wstring& file);
 

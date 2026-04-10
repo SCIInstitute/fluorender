@@ -45,10 +45,10 @@ namespace flrd
 		}
 		virtual size_t get_trained_rec_num() { return m_trained_rec_num; }
 
-		virtual void add(float*, float*) = 0;
+		virtual void add(const std::vector<float>& in, const std::vector<float>& out) = 0;
 
 		virtual void train() = 0;
-		virtual float* infer(float*) = 0;
+		virtual std::vector<float> infer(const std::vector<float>& in) = 0;
 
 		virtual double get_rate() = 0;
 		bool is_valid() { return m_valid; }

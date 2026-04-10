@@ -44,7 +44,7 @@ namespace flrd
 			Record(const Record& rec);
 			virtual ~Record();
 
-			virtual void assign(const std::shared_ptr<RecordHistParams>& rec);
+			virtual void assign(const std::shared_ptr<Record>& rec);
 
 			virtual RecordHistParams* asRecordHistParams() { return 0; }
 			virtual const RecordHistParams* asRecordHistParams() const { return 0; }
@@ -63,16 +63,13 @@ namespace flrd
 			virtual std::vector<float> getInputData() = 0;
 			virtual std::vector<float> getOutputData() = 0;
 
-			virtual void getInputData(std::vector<float>& data) = 0;
-			virtual void getOutputData(std::vector<float>& data) = 0;
+			virtual bool compare(const std::shared_ptr<Record>& rec);
+			virtual float compare(const std::shared_ptr<Entry>& ent);
 
-			virtual bool compare(Record* rec);
-			virtual float compare(Entry* ent);
-
-			void setParams(const std::shared_ptr<Params>& params) { m_params = params; }
+			void setParams(const Params& params) { m_params = params; }
 
 	protected:
-			std::weak_ptr<Params> m_params;//type of params
+			Params m_params;//type of params
 			std::shared_ptr<Entry> m_input;
 			std::shared_ptr<Entry> m_output;
 	};

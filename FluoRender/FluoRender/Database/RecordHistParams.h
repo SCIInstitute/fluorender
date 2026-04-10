@@ -41,7 +41,7 @@ namespace flrd
 		RecordHistParams(const RecordHistParams& rec);
 		virtual ~RecordHistParams();
 
-		virtual void assign(RecordHistParams* rec);
+		virtual void assign(const std::shared_ptr<RecordHistParams>& rec);
 
 		virtual RecordHistParams* asRecordHistParams() { return this; }
 		virtual const RecordHistParams* asRecordHistParams() const { return this; }
@@ -86,8 +86,8 @@ namespace flrd
 		virtual size_t getInputSize();
 		virtual size_t getOutputSize();
 
-		virtual void getInputData(std::vector<float>& data);
-		virtual void getOutputData(std::vector<float>& data);
+		virtual std::vector<float> getInputData();
+		virtual std::vector<float> getOutputData();
 
 		float getHistPopl();
 		float getParamIter();

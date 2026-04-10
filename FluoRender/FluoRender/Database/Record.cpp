@@ -31,9 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-Record::Record() :
-	m_input(0),
-	m_output(0)
+Record::Record()
 {
 }
 
@@ -44,8 +42,6 @@ Record::Record(const Record& rec) :
 
 Record::~Record()
 {
-	if (m_input) delete m_input;
-	if (m_output) delete m_output;
 }
 
 void Record::open(File& file)
@@ -53,7 +49,7 @@ void Record::open(File& file)
 
 }
 
-void Record::assign(Record* rec)
+void Record::assign(const std::shared_ptr<Record>& rec)
 {
 	m_params = rec->m_params;
 }
@@ -72,14 +68,14 @@ void Record::save(File& file)
 	}
 }
 
-bool Record::compare(Record* rec)
+bool Record::compare(const std::shared_ptr<Record>& rec)
 {
 	if (!m_input || !rec || !rec->m_input)
 		return false;
 	return m_input->compare(rec->m_input);
 }
 
-float Record::compare(Entry* ent)
+float Record::compare(const std::shared_ptr<Entry>& ent)
 {
 	if (!m_input || !m_output)
 		return std::numeric_limits<float>::max();

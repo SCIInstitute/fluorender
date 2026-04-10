@@ -45,7 +45,7 @@ VolPropDnnTrainer::~VolPropDnnTrainer()
 	m_trainer.get_net().clean();
 }
 
-void VolPropDnnTrainer::add(float* in, float* out)
+void VolPropDnnTrainer::add(const std::vector<float>& in, const std::vector<float>& out)
 {
 	dlib::matrix<float> tii(gno_vp_input_size, 1);
 	dlib::matrix<float> toi(gno_vp_output_size, 1);
@@ -83,10 +83,10 @@ void VolPropDnnTrainer::train()
 	m_trained_rec_num += bs;
 }
 
-float* VolPropDnnTrainer::infer(float* in)
+std::vector<float> VolPropDnnTrainer::infer(const std::vector<float>& in)
 {
 	if (!m_valid)
-		return 0;
+		return {};
 
 	dlib::matrix<float> tii(gno_vp_input_size, 1);
 	for (int i = 0; i < gno_vp_input_size; ++i)
@@ -94,7 +94,10 @@ float* VolPropDnnTrainer::infer(float* in)
 
 	m_result = m_net(tii);
 
-	return &m_result(0, 0);
+	return std::vector<float>(
+		m_result.begin(),
+		m_result.end()
+	);
 }
 
 double VolPropDnnTrainer::get_rate()

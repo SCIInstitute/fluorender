@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 using namespace flrd;
 
 EntryParams::EntryParams() :
-	m_params(nullptr),
 	m_valid(false)
 {}
 
@@ -47,28 +46,27 @@ EntryParams::~EntryParams()
 {
 }
 
-void EntryParams::setParams(Params* params)
+void EntryParams::setParams(const Params& params)
 {
 	m_valid = false;
-	if (!params)
+	size_t size = params.size();
+	if (!size)
 		return;
 	m_params = params;
-	size_t size = params->size();
 	//fixed size
-	if (size)
-		m_data.assign(size, 0);
+	m_data.assign(size, 0);
 }
 
 void EntryParams::open(File& file)
 {
-	if (!m_params)
+	if (!m_params.size())
 		return;
 	//size
 	if (file.check(TAG_ENT_SIZE))
 	{
 		unsigned int size;
 		file.readValue(size);
-		if (size != m_params->size())
+		if (size != m_params.size())
 			return;
 	}
 
@@ -81,14 +79,14 @@ void EntryParams::open(File& file)
 
 void EntryParams::save(File& file)
 {
-	if (!m_params)
+	if (!m_params.size())
 		return;
 	//type
 	file.writeValue(Table::TAG_TABLE_ENT_PARAMS);
 
 	//size
 	file.writeValue(TAG_ENT_SIZE);
-	unsigned int size = static_cast<unsigned int>(m_params->size());
+	unsigned int size = static_cast<unsigned int>(m_params.size());
 	file.writeValue(size);
 
 	//data

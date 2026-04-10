@@ -119,35 +119,40 @@ namespace flrd
 			}
 			virtual std::vector<float> getRecInput() const
 			{
-				std::vector<float> result(getTotalInputSize());
+				std::vector<float> result;
+				result.reserve(getTotalInputSize());
 
-				float* p = result.data();
 				for (const auto& e : m_data)
 				{
-					e->getInputData(p);
-					p += e->getInputSize();
+					auto input = e->getInputData();
+					result.insert(result.end(), input.begin(), input.end());
 				}
 
 				return result;
 			}
-			virtual void getRecOutput(float* data)
+			virtual std::vector<float> getRecOutput() const
 			{
-				float* p = data;
-				for (auto i : m_data)
+				std::vector<float> result;
+				result.reserve(getTotalOutputSize());
+
+				for (const auto& e : m_data)
 				{
-					i->getOutputData(p);
-					p += i->getOutputSize();
+					auto output = e->getOutputData();
+					result.insert(result.end(), output.begin(), output.end());
 				}
+				return result;
 			}
-			virtual void getOneInput(size_t i, std::vector<float>& data)
+			virtual std::vector<float> getOneInput(size_t i)
 			{
 				if (i < m_data.size())
-					m_data[i]->getInputData(data);
+					return m_data[i]->getInputData();
+				return std::vector<float>();
 			}
-			virtual void getOneOutput(size_t i, std::vector<float>& data)
+			virtual std::vector<float> getOneOutput(size_t i)
 			{
 				if (i < m_data.size())
-					m_data[i]->getOutputData(data);
+					return m_data[i]->getOutputData();
+				return std::vector<float>();
 			}
 
 			void setUpdateFunc(TableUpdateFunc func)
@@ -155,7 +160,7 @@ namespace flrd
 				m_update_func = func;
 			}
 
-			void setParams(const std::shared_ptr<Params>& params)
+			void setParams(const Params& params)
 			{
 				m_params = params;
 			}
@@ -184,7 +189,7 @@ namespace flrd
 			std::wstring m_notes;
 			size_t m_recnum;
 			std::vector<std::shared_ptr<Record>> m_data;
-			std::weak_ptr<Params> m_params;//type of records
+			Params m_params;//type of records
 			//trainer
 			size_t m_trained_rec_num;
 

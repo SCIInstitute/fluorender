@@ -30,55 +30,57 @@ DEALINGS IN THE SOFTWARE.
 
 using namespace flrd;
 
-Params* Reshape::get_params(const std::string& name)
+Params Reshape::get_params(const std::string& name)
 {
 	auto it = params_list_.find(name);
 	if (it == params_list_.end())
-		return 0;
-	return &(it->second);
+		return Params();
+	return it->second;
 }
 
-EntryParams* Reshape::get_entry_params(const std::string& name, float* val)
+std::shared_ptr<EntryParams> Reshape::get_entry_params(
+	const std::string& name,
+	const std::vector<float>& values)
 {
 	auto it = params_list_.find(name);
 	if (it == params_list_.end())
-		return 0;
-	Params* p = &(it->second);
-	result_ = new EntryParams();
+		return nullptr;
+	Params p = it->second;
+	result_ = std::make_shared<EntryParams>();
 	std::string str;
 
 	result_->setParams(p);
-	for (size_t i = 0; i < p->size(); ++i)
+	for (size_t i = 0; i < p.size(); ++i)
 	{
-		str = p->getName(i);
-		switch (p->getType(i))
+		str = p.getName(i);
+		switch (p.getType(i))
 		{
 		case Entry::IPT_BOOL:
-			result_->setParam(str, bool(val[i] > 0.5));
+			result_->setParam(str, bool(values[i] > 0.5));
 			break;
 		case Entry::IPT_CHAR:
-			result_->setParam(str, char(std::round(val[i])));
+			result_->setParam(str, char(std::round(values[i])));
 			break;
 		case Entry::IPT_UCHAR:
-			result_->setParam(str, (unsigned char)(std::round(val[i])));
+			result_->setParam(str, (unsigned char)(std::round(values[i])));
 			break;
 		case Entry::IPT_SHORT:
-			result_->setParam(str, short(std::round(val[i])));
+			result_->setParam(str, short(std::round(values[i])));
 			break;
 		case Entry::IPT_USHORT:
-			result_->setParam(str, (unsigned short)(std::round(val[i])));
+			result_->setParam(str, (unsigned short)(std::round(values[i])));
 			break;
 		case Entry::IPT_INT:
-			result_->setParam(str, int(std::round(val[i])));
+			result_->setParam(str, int(std::round(values[i])));
 			break;
 		case Entry::IPT_UINT:
-			result_->setParam(str, (unsigned int)(std::round(val[i])));
+			result_->setParam(str, (unsigned int)(std::round(values[i])));
 			break;
 		case Entry::IPT_FLOAT:
-			result_->setParam(str, val[i]);
+			result_->setParam(str, values[i]);
 			break;
 		case Entry::IPT_DOUBLE:
-			result_->setParam(str, double(val[i]));
+			result_->setParam(str, double(values[i]));
 			break;
 		}
 	}
@@ -99,7 +101,6 @@ void Reshape::clear()
 {
 	if (result_)
 	{
-		delete result_;
-		result_ = 0;
+		result_.reset();
 	}
 }
