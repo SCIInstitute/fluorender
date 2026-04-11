@@ -137,7 +137,7 @@ void Colocalize::Compute()
 					!vd2->GetDisp())
 					continue;
 
-				flrd::ChannelCompare compare(vd1.get(), vd2.get());
+				flrd::ChannelCompare compare(vd1, vd2);
 				compare.SetUseMask(glbin_colocal_def.m_use_mask);
 				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
 				compare.prework = std::bind(
@@ -183,7 +183,7 @@ void Colocalize::Compute()
 					!vd2->GetDisp())
 					continue;
 
-				flrd::ChannelCompare compare(vd1.get(), vd2.get());
+				flrd::ChannelCompare compare(vd1, vd2);
 				compare.SetUseMask(glbin_colocal_def.m_use_mask);
 				compare.SetIntWeighted(glbin_colocal_def.m_int_weighted);
 				compare.prework = std::bind(

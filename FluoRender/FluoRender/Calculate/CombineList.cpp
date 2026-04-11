@@ -91,25 +91,13 @@ int CombineList::Execute()
 
 	//get new data
 	//red volume
-	flvr::Texture* tex_vd_r = vd_r->GetTexture();
-	if (!tex_vd_r) return 0;
-	auto comp_vd_r = tex_vd_r->get_tex_comp(flvr::CompType::Data);
-	if (!comp_vd_r.data) return 0;
-	void* data_vd_r = comp_vd_r.data->GetDataVoid();
+	void* data_vd_r = vd_r->GetVolume(false)->GetDataVoid();
 	if (!data_vd_r) return 0;
 	//green volume
-	flvr::Texture* tex_vd_g = vd_g->GetTexture();
-	if (!tex_vd_g) return 0;
-	auto comp_vd_g = tex_vd_g->get_tex_comp(flvr::CompType::Data);
-	if (!comp_vd_g.data) return 0;
-	void* data_vd_g = comp_vd_g.data->GetDataVoid();
+	void* data_vd_g = vd_g->GetVolume(false)->GetDataVoid();
 	if (!data_vd_g) return 0;
 	//blue volume
-	flvr::Texture* tex_vd_b = vd_b->GetTexture();
-	if (!tex_vd_b) return 0;
-	auto comp_vd_b = tex_vd_b->get_tex_comp(flvr::CompType::Data);
-	if (!comp_vd_b.data) return 0;
-	void* data_vd_b = comp_vd_b.data->GetDataVoid();
+	void* data_vd_b = vd_b->GetVolume(false)->GetDataVoid();
 	if (!data_vd_b) return 0;
 
 	unsigned long long for_size = m_size.get_size_xyz();
@@ -160,9 +148,9 @@ int CombineList::Execute()
 
 	if (volume)
 	{
-		glbin_vol_def.Copy(vd_r.get(), volume.get());
-		glbin_vol_def.Copy(vd_g.get(), volume.get());
-		glbin_vol_def.Copy(vd_b.get(), volume.get());
+		glbin_vol_def.Copy(vd_r, volume);
+		glbin_vol_def.Copy(vd_g, volume);
+		glbin_vol_def.Copy(vd_b, volume);
 	}
 	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
 	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);
