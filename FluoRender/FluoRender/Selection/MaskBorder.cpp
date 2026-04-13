@@ -80,7 +80,7 @@ __kernel void kernel_2(
 }
 )CLKER";
 
-MaskBorder::MaskBorder(VolumeData* vd)
+MaskBorder::MaskBorder(const std::shared_ptr<VolumeData>& vd)
 	: m_vd(vd)
 {
 }
@@ -89,28 +89,32 @@ MaskBorder::~MaskBorder()
 {
 }
 
-bool MaskBorder::CheckBricks()
+std::shared_ptr<VolumeData> MaskBorder::CheckBricks()
 {
-	if (!m_vd || !m_vd->GetTexture())
-		return false;
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto vd = m_vd.lock();
+	if (!vd || !vd->GetTexture())
+		return nullptr;
+	auto bricks = vd->GetTexture()->get_bricks();
 	if (bricks.empty())
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
 void MaskBorder::Compute(int order)
 {
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
 	if (!order)
 		return;
 	if (!CheckBricks())
 		return;
-	flvr::Texture* tex = m_vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 
 	size_t idx, bn;
-	auto all_bricks = m_vd->GetTexture()->get_bricks();
+	auto all_bricks = vd->GetTexture()->get_bricks();
 	bn = all_bricks.size();
 	if (bn < 2)
 		return;
@@ -122,8 +126,8 @@ void MaskBorder::Compute(int order)
 			bricks.push_back(babs);
 	}
 	bn = bricks.size();
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_check_box_borders, bits, max_int);
@@ -143,7 +147,7 @@ void MaskBorder::Compute(int order)
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint mid = m_vd->GetVR()->load_brick_mask(bbs);
+		GLint mid = vd->GetVR()->load_brick_mask(bbs);
 
 		size_t global_size[2] = { 1, 1 };
 		size_t local_size[2] = { 1, 1 };

@@ -39,24 +39,25 @@ namespace flvr
 namespace fluo
 {
 	class Point;
+	class RawData;
 }
 namespace flrd
 {
 	class Diffusion
 	{
 	public:
-		Diffusion(VolumeData* vd);
+		Diffusion(const std::shared_ptr<VolumeData>& vd);
 		~Diffusion();
 
 		void Init(fluo::Point& ip, double ini_thresh);
 		void Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate);
 
 	private:
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 
 	private:
-		bool CheckBricks();
-		void GetMask(size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b, void** val);
+		std::shared_ptr<VolumeData> CheckBricks();
+		std::shared_ptr<fluo::RawData> GetMask(size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b);
 		void ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b);
 	};
 

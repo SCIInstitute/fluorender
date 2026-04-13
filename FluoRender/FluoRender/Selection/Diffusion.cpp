@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelFactory.h>
 #include <VolumeRenderer.h>
 #include <Plane.h>
+#include <DataBrick.h>
 #include <vector>
 
 using namespace flrd;
@@ -181,7 +182,7 @@ __kernel void kernel_1(
 }
 )CLKER";
 
-Diffusion::Diffusion(VolumeData* vd)
+Diffusion::Diffusion(const std::shared_ptr<VolumeData>& vd)
 	: m_vd(vd)
 {
 }
@@ -190,55 +191,63 @@ Diffusion::~Diffusion()
 {
 }
 
-bool Diffusion::CheckBricks()
+std::shared_ptr<VolumeData> Diffusion::CheckBricks()
 {
-	if (!m_vd || !m_vd->GetTexture())
-		return false;
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	auto vd = m_vd.lock();
+	if (!vd || !vd->GetTexture())
+		return nullptr;
+	auto bricks = vd->GetTexture()->get_bricks();
 	if (bricks.empty())
-		return false;
-	return true;
+		return nullptr;
+	return vd;
 }
 
-void Diffusion::GetMask(size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b, void** val)
+std::shared_ptr<fluo::RawData> Diffusion::GetMask(
+	size_t brick_num,
+	const std::shared_ptr<flvr::TextureBrick>& b)
 {
 	if (!b)
-		return;
+		return nullptr;
 
-	auto raw_mask = m_vd->GetMask(true);
+	auto vd = m_vd.lock();
+	if (!vd)
+		return nullptr;
 	if (brick_num > 1)
 	{
-		int nb = b->nb(flvr::CompType::Mask);
+		auto offset = fluo::Brick::Offset3();
 		auto res = b->get_size();
+		auto size = fluo::Brick::Size3(
+			res.intx(), res.inty(), res.intz());
 		auto stride = b->get_stride();
-		int nx = res.intx();
-		int ny = res.inty();
-		int nz = res.intz();
-		unsigned long long mem_size = (unsigned long long)nx*
-			(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
-		unsigned char* temp = new unsigned char[mem_size];
-		unsigned char* tempp = temp;
-		unsigned char* tp = b->get_raw_data(flvr::CompType::Mask)->DataAs<unsigned char>();
-		unsigned char* tp2;
-		for (size_t k = 0; k < nz; ++k)
-		{
-			tp2 = tp;
-			for (size_t j = 0; j < ny; ++j)
-			{
-				memcpy(tempp, tp2, nx*nb);
-				tempp += nx * nb;
-				tp2 += stride.intx()*nb;
-			}
-				tp += stride.get_size_xy()*nb;
-		}
-		*val = (void*)temp;
+		auto stride3 = fluo::Brick::Size3(
+			stride.intx(), stride.inty(), stride.intz());
+		auto raw_mask = vd->GetMask(true);
+		fluo::DataBrick mask_brick(offset, size, *raw_mask, stride3);
+		return mask_brick.Extract();
+		//int nb = b->nb(flvr::CompType::Mask);
+		//int nx = res.intx();
+		//int ny = res.inty();
+		//int nz = res.intz();
+		//unsigned long long mem_size = (unsigned long long)nx*
+		//	(unsigned long long)ny*(unsigned long long)nz*(unsigned long long)nb;
+		//unsigned char* temp = new unsigned char[mem_size];
+		//unsigned char* tempp = temp;
+		//unsigned char* tp = b->get_raw_data(flvr::CompType::Mask)->DataAs<unsigned char>();
+		//unsigned char* tp2;
+		//for (size_t k = 0; k < nz; ++k)
+		//{
+		//	tp2 = tp;
+		//	for (size_t j = 0; j < ny; ++j)
+		//	{
+		//		memcpy(tempp, tp2, nx*nb);
+		//		tempp += nx * nb;
+		//		tp2 += stride.intx()*nb;
+		//	}
+		//		tp += stride.get_size_xy()*nb;
+		//}
+		//*val = (void*)temp;
 	}
-	else
-	{
-		if (!raw_mask)
-			return;
-		*val = raw_mask->GetDataVoid();
-	}
+	return vd->GetMask(true);
 }
 
 void Diffusion::ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b)
@@ -271,17 +280,18 @@ void Diffusion::ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<f
 
 void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 {
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return;
 
 	//add empty mask if there is no mask
 	//then, push the mask for undos
-	m_vd->AddEmptyMask(0, false);
+	vd->AddEmptyMask(0, false);
 	if (flvr::Texture::mask_undo_num_ > 0 &&
-		m_vd->GetTexture())
-		m_vd->GetTexture()->push_mask();
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+		vd->GetTexture())
+		vd->GetTexture()->push_mask();
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_diffusion, bits, max_int);
@@ -291,7 +301,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 	//clipping planes
 	cl_float4 p[6];
-	auto planes = m_vd->GetClippingBox().GetPlanesUnit();
+	auto planes = vd->GetClippingBox().GetPlanesUnit();
 	double abcd[4];
 	for (size_t i = 0; i < 6; ++i)
 	{
@@ -302,8 +312,8 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 			float(abcd[3]) };
 	}
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	size_t brick_num = vd->GetTexture()->get_brick_list_size();
+	auto bricks = vd->GetTexture()->get_bricks();
 	for (auto bbs : bricks)
 	{
 		int bits = bbs->nb(flvr::CompType::Data) * 8;
@@ -311,9 +321,9 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = m_vd->GetVR()->load_brick(bbs);
-		void* val = 0;
-		GetMask(brick_num, bbs, &val);
+		GLint did = vd->GetVR()->load_brick(bbs);
+		auto raw_data = GetMask(brick_num, bbs);
+		void* val = raw_data ? raw_data->GetDataVoid() : nullptr;
 
 		size_t global_size[3] = { 1, 1, 1 };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -365,11 +375,12 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 
 void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_falloff, double scl_translate)
 {
-	if (!CheckBricks())
+	auto vd = CheckBricks();
+	if (!vd)
 		return;
 
-	long bits = m_vd->GetBits();
-	float max_int = static_cast<float>(m_vd->GetMaxValue());
+	long bits = vd->GetBits();
+	float max_int = static_cast<float>(vd->GetMaxValue());
 
 	//create program and kernels
 	flvr::KernelProgram* kernel_prog = glbin_kernel_factory.program(str_cl_diffusion, bits, max_int);
@@ -383,7 +394,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 	float scalar_scale, lo_thresh, hi_thresh, gamma3d,
 		gm_scale, gm_low, gm_high, gm_max,
 		lo_offset, hi_offset, sw;
-	auto planes = m_vd->GetClippingBox().GetPlanesUnit();
+	auto planes = vd->GetClippingBox().GetPlanesUnit();
 	double abcd[4];
 	for (size_t i = 0; i < 6; ++i)
 	{
@@ -394,21 +405,21 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 			float(abcd[3]) };
 	}
 	//params
-	inv = m_vd->GetInvert();
-	scalar_scale = static_cast<float>(m_vd->GetScalarScale());
-	lo_thresh = static_cast<float>(m_vd->GetLeftThresh());
-	hi_thresh = static_cast<float>(m_vd->GetRightThresh());
-	gamma3d = static_cast<float>(m_vd->GetGamma());
-	gm_scale = static_cast<float>(m_vd->GetGMScale());
-	gm_low = static_cast<float>(m_vd->GetBoundaryLow());
-	gm_high = static_cast<float>(m_vd->GetBoundaryHigh());
-	gm_max = static_cast<float>(m_vd->GetBoundaryMax());
-	lo_offset = static_cast<float>(m_vd->GetLowOffset());
-	hi_offset = static_cast<float>(m_vd->GetHighOffset());
-	sw = static_cast<float>(m_vd->GetSoftThreshold());
+	inv = vd->GetInvert();
+	scalar_scale = static_cast<float>(vd->GetScalarScale());
+	lo_thresh = static_cast<float>(vd->GetLeftThresh());
+	hi_thresh = static_cast<float>(vd->GetRightThresh());
+	gamma3d = static_cast<float>(vd->GetGamma());
+	gm_scale = static_cast<float>(vd->GetGMScale());
+	gm_low = static_cast<float>(vd->GetBoundaryLow());
+	gm_high = static_cast<float>(vd->GetBoundaryHigh());
+	gm_max = static_cast<float>(vd->GetBoundaryMax());
+	lo_offset = static_cast<float>(vd->GetLowOffset());
+	hi_offset = static_cast<float>(vd->GetHighOffset());
+	sw = static_cast<float>(vd->GetSoftThreshold());
 
-	size_t brick_num = m_vd->GetTexture()->get_brick_list_size();
-	auto bricks = m_vd->GetTexture()->get_bricks();
+	size_t brick_num = vd->GetTexture()->get_brick_list_size();
+	auto bricks = vd->GetTexture()->get_bricks();
 	for (auto bbs : bricks)
 	{
 		int bits = bbs->nb(flvr::CompType::Data) * 8;
@@ -416,9 +427,9 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = m_vd->GetVR()->load_brick(bbs);
-		void* val = 0;
-		GetMask(brick_num, bbs, &val);
+		GLint did = vd->GetVR()->load_brick(bbs);
+		auto raw_data = GetMask(brick_num, bbs);
+		void* val = raw_data ? raw_data->GetDataVoid() : nullptr;
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };

@@ -134,7 +134,7 @@ public:
 	fluo::Color GetColor(int);
 
 	//get vol cache queue
-	flvr::CacheQueue* GetCacheQueue(VolumeData* vd);
+	std::shared_ptr<flvr::CacheQueue> GetCacheQueue(const std::shared_ptr<VolumeData>& vd);
 
 	//update stream rendering mode
 	void UpdateStreamMode(double data_size);//input is a newly loaded data size in mb

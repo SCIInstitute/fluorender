@@ -42,13 +42,13 @@ public:
 		const wxString& name = "AnnotatPropPanel");
 	~AnnotatPropPanel();
 
-	void SetAnnotData(AnnotData* ann);
-	AnnotData* GetAnnotData();
+	void SetAnnotData(const std::shared_ptr<AnnotData>& ann);
+	std::shared_ptr<AnnotData> GetAnnotData();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 private:
-	AnnotData* m_ann;
+	std::weak_ptr<AnnotData> m_ann;
 
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

@@ -1242,13 +1242,13 @@ void MainFrame::DeleteProps(int type, const wxString& name)
 }
 
 void MainFrame::ShowPropPage(int type,
-	RenderView* view,
-	VolumeGroup* group,
-	VolumeData* vd,
-	MeshData* md,
-	MeshGroup* mg,
-	AnnotData* ann,
-	bool show )
+	const std::shared_ptr<RenderView>& view,
+	const std::shared_ptr<VolumeGroup>& group,
+	const std::shared_ptr<VolumeData>& vd,
+	const std::shared_ptr<MeshData>& md,
+	const std::shared_ptr<MeshGroup>& mg,
+	const std::shared_ptr<AnnotData>& ann,
+	bool show)
 {
 	if (!type)
 	{
@@ -1408,7 +1408,7 @@ VolumePropPanel* MainFrame::FindVolumeProps(const wxString& name)
 	return 0;
 }
 
-VolumePropPanel* MainFrame::FindVolumeProps(VolumeData* vd)
+VolumePropPanel* MainFrame::FindVolumeProps(const std::shared_ptr<VolumeData>& vd)
 {
 	if (vd)
 		return FindVolumeProps(vd->GetName());
@@ -1430,7 +1430,7 @@ MeshPropPanel* MainFrame::FindMeshProps(const wxString& name)
 	return 0;
 }
 
-MeshPropPanel* MainFrame::FindMeshProps(MeshData* md)
+MeshPropPanel* MainFrame::FindMeshProps(const std::shared_ptr<MeshData>& md)
 {
 	if (md)
 		return FindMeshProps(md->GetName());
@@ -1452,7 +1452,7 @@ AnnotatPropPanel* MainFrame::FindAnnotProps(const wxString& name)
 	return 0;
 }
 
-AnnotatPropPanel* MainFrame::FindAnnotProps(AnnotData* ad)
+AnnotatPropPanel* MainFrame::FindAnnotProps(const std::shared_ptr<AnnotData>& ad)
 {
 	if (ad)
 		return FindAnnotProps(ad->GetName());
@@ -1474,7 +1474,7 @@ ManipPropPanel* MainFrame::FindMeshManip(const wxString& name)
 	return 0;
 }
 
-ManipPropPanel* MainFrame::FindMeshManip(MeshData* md)
+ManipPropPanel* MainFrame::FindMeshManip(const std::shared_ptr<MeshData>& md)
 {
 	if (md)
 		return FindMeshManip(md->GetName());

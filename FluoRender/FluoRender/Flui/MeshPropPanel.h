@@ -57,10 +57,10 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void SetMeshData(MeshData* md);
-	MeshData* GetMeshData();
-	void SetMeshGroup(MeshGroup* mg);
-	MeshGroup* GetMeshGroup();
+	void SetMeshData(const std::shared_ptr<MeshData>& md);
+	std::shared_ptr<MeshData> GetMeshData();
+	void SetMeshGroup(const std::shared_ptr<MeshGroup>& mg);
+	std::shared_ptr<MeshGroup> GetMeshGroup();
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
@@ -68,8 +68,8 @@ public:
 	void SetShadowDir(double, bool);
 
 private:
-	MeshGroup* m_group;
-	MeshData* m_md;
+	std::weak_ptr<MeshGroup> m_group;
+	std::weak_ptr<MeshData> m_md;
 	bool m_sync_group;
 
 	wxUndoableToolbar* m_options_toolbar;

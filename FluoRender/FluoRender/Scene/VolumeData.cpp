@@ -496,7 +496,7 @@ int VolumeData::Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex
 	return 1;
 }
 
-int VolumeData::Replace(VolumeData* data)
+int VolumeData::Replace(const std::shared_ptr<VolumeData>& data)
 {
 	if (!data ||
 		m_size != data->m_size)
@@ -1573,7 +1573,9 @@ void VolumeData::DrawMask(int type, int paint_mode, int hr_mode,
 }
 
 //calculation
-void VolumeData::Calculate(int type, VolumeData *vd_a, VolumeData *vd_b)
+void VolumeData::Calculate(int type,
+	const std::shared_ptr<VolumeData>& vd_a,
+	const std::shared_ptr<VolumeData>& vd_b)
 {
 	if (m_vr)
 	{

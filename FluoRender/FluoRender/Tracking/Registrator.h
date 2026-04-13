@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Transform.h>
 #include <BBox.h>
+#include <memory>
 
 class VolumeData;
 namespace fluo
@@ -72,7 +73,7 @@ namespace flrd
 		{
 			m_fsize = fsize;
 		}
-		void SetVolumeData(VolumeData* vd)
+		void SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 		{
 			m_vd = vd;
 		}
@@ -125,7 +126,7 @@ namespace flrd
 		int m_conv_num;//max convergence for step size shrink
 		int m_method;//compare method
 		int m_fsize;//filter size
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 
 		//output
 		fluo::Vector m_translate;//translate

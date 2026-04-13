@@ -113,7 +113,7 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 	}
 	else
 	{
-		glbin_vol_def.Apply(vd.get());
+		glbin_vol_def.Apply(vd);
 	}
 	//disable alpha for z = 1
 	auto res = vd->GetResolution();
@@ -1287,13 +1287,13 @@ fluo::Color DataManager::GetWavelengthColor(double wavelength)
 		return fluo::Color(1.0, 1.0, 1.0);
 }
 
-flvr::CacheQueue* DataManager::GetCacheQueue(VolumeData* vd)
+std::shared_ptr<flvr::CacheQueue> DataManager::GetCacheQueue(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd)
 		return nullptr;
-	auto it = m_vd_cache_queue.find(vd);
+	auto it = m_vd_cache_queue.find(vd.get());
 	if (it != m_vd_cache_queue.end() && it->second)
-		return it->second.get();
+		return it->second;
 	return nullptr;
 }
 

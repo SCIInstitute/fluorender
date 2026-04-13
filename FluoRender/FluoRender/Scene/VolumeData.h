@@ -97,7 +97,7 @@ public:
 	void ResetVolume();
 	int Load(const std::shared_ptr<fluo::RawData>& data, const std::wstring &name, const std::wstring &path);
 	int Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex);
-	int Replace(VolumeData* data);
+	int Replace(const std::shared_ptr<VolumeData>& data);
 	std::shared_ptr<fluo::RawData> GetVolume(bool ret);
 	//empty data
 	void AddEmptyData(int bits,
@@ -177,7 +177,7 @@ public:
 		double w2d, double bins, int order, bool ortho=false, bool estimate=false);
 
 	//calculation
-	void Calculate(int type, VolumeData* vd_a, VolumeData* vd_b);
+	void Calculate(int type, const std::shared_ptr<VolumeData>& vd_a, const std::shared_ptr<VolumeData>& vd_b);
 
 	//set 2d mask for segmentation
 	void Set2dMask(unsigned int mask);

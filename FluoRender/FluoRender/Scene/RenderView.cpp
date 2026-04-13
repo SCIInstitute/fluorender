@@ -1164,17 +1164,6 @@ std::shared_ptr<VolumeGroup> RenderView::AddVolumeData(const std::shared_ptr<Vol
 			return nullptr;
 	}
 
-	/*for (i=0; i<1; i++)
-	{
-	VolumeData* vol_data = group->GetVolumeData(i);
-	if (vol_data)
-	{
-	double spcx, spcy, spcz;
-	vol_data->GetSpacing(spcx, spcy, spcz);
-	vd->SetSpacing(spcx, spcy, spcz);
-	}
-	}*/
-
 	group->InsertVolumeData(group->GetVolumeNum() - 1, vd);
 
 	if (group && vd)
@@ -9461,7 +9450,7 @@ void RenderView::ChangeCropFrame(fluo::Point& mp)
 	glbin_moviemaker.SetCropH(static_cast<int>(std::round(h)));
 }
 
-void RenderView::switchLevel(VolumeData *vd)
+void RenderView::switchLevel(const std::shared_ptr<VolumeData>& vd)
 {
 	if (!vd) return;
 
@@ -9473,7 +9462,7 @@ void RenderView::switchLevel(VolumeData *vd)
 		ny = static_cast<int>(std::round(ny * m_enlarge_scale));
 	}
 
-	flvr::Texture *vtex = vd->GetTexture();
+	auto vtex = vd->GetTexture();
 	if (vtex && vtex->isBrxml())
 	{
 		int prev_lv = vd->GetLevel();

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_MaskBorder_h
 
 #include <vector>
+#include <memory>
 
 class VolumeData;
 namespace flrd
@@ -36,16 +37,16 @@ namespace flrd
 	class MaskBorder
 	{
 	public:
-		MaskBorder(VolumeData* vd);
+		MaskBorder(const std::shared_ptr<VolumeData>& vd);
 		~MaskBorder();
 
 		void Compute(int order);
 
 	private:
-		VolumeData *m_vd;
+		std::weak_ptr<VolumeData> m_vd;
 
 	private:
-		bool CheckBricks();
+		std::shared_ptr<VolumeData> CheckBricks();
 	};
 
 }

@@ -929,7 +929,7 @@ private:
 	int HitCropFrame(fluo::Point& mp);
 	void ChangeCropFrame(fluo::Point& mp);
 
-	void switchLevel(VolumeData *vd);
+	void switchLevel(const std::shared_ptr<VolumeData>& vd);
 
 	//controller interactions
 	void ControllerMoveHorizontal(double dval, int nx, int ny);
