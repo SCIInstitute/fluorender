@@ -216,7 +216,7 @@ std::shared_ptr<EntryHist> Histogram::GetEntryHist()
 		hist = std::make_shared<EntryHist>();
 		hist->setRange(0, 1);
 		hist->setPopulation(m_histogram[m_bins]);
-		hist->setData(m_histogram.data());
+		hist->setData(m_histogram);
 	}
 
 	return hist;

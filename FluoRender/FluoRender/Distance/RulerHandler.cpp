@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <Global.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -45,7 +46,6 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <VolumeRenderer.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <RawData.h>
 #include <Debug.h>
 
 using namespace flrd;
@@ -75,7 +75,7 @@ RulerHandler::~RulerHandler()
 
 void RulerHandler::SetEditingRuler(int index)
 {
-	Ruler* ruler = GetRuler(index);
+	auto ruler = GetRuler(index);
 	if (ruler)
 	{
 		m_editing_ruler_index = index;
@@ -87,13 +87,12 @@ void RulerHandler::SetEditingRuler(int index)
 
 void RulerHandler::NewGroup()
 {
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
+	auto& list = glbin_current.GetRulerList();
+	if (list.IsEmpty())
 		return;
 
-	std::vector<unsigned int> groups;
-	int num = list->GetGroupNum(groups);
-	if (num)
+	auto groups = list.Groups();
+	if (!groups.empty())
 	{
 		auto it = std::max_element(groups.begin(), groups.end());
 		if (it != groups.end())
@@ -103,17 +102,18 @@ void RulerHandler::NewGroup()
 
 void RulerHandler::GroupRulers(const std::set<int>& rulers)
 {
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
+	auto& list = glbin_current.GetRulerList();
+	if (list.IsEmpty())
 		return;
 
 	bool update_all = rulers.empty();
 
 	size_t c = 0;
-	for (auto i : *list)
+	auto ruler_list = list.All();
+	for (auto ruler : ruler_list)
 	{
 		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
-			i->Group(m_group);
+			ruler->Group(m_group);
 		c++;
 	}
 }
@@ -126,54 +126,52 @@ double RulerHandler::GetVolumeBgInt()
 	return vd->GetBackgroundInt();
 }
 
-Ruler* RulerHandler::GetRuler(const std::wstring& name)
+std::shared_ptr<Ruler> RulerHandler::GetRuler(const std::wstring& name)
 {
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
-		return 0;
-	for (auto ruler : *list)
-	{
-		if (ruler->GetName() == name)
-			return ruler;
-	}
-	return 0;
+	auto& list = glbin_current.GetRulerList();
+	if (list.IsEmpty())
+		return nullptr;
+	return list.FindByName(name);
 }
 
-Ruler* RulerHandler::GetRuler(size_t i)
+std::shared_ptr<Ruler> RulerHandler::GetRuler(size_t i)
 {
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
-		return 0;
-	if (i < list->size())
-		return (*list)[i];
-	return 0;
+	auto& list = glbin_current.GetRulerList();
+	if (list.IsEmpty())
+		return nullptr;
+	auto rulers = list.All();
+	if (i >= rulers.size())
+		return nullptr;
+	return rulers[i];
 }
 
 int RulerHandler::GetRulerIndex()
 {
-	Ruler* ruler = glbin_current.GetRuler();
-	RulerList* list = glbin_current.GetRulerList();
-	if (!ruler || !list)
+	auto ruler = glbin_current.GetRuler();
+	auto& list = glbin_current.GetRulerList();
+	if (!ruler || list.IsEmpty())
 		return -1;
-	for (int i = 0; i < list->size(); ++i)
-		if ((*list)[i] == ruler)
+	auto rulers = list.All();
+	for (int i = 0; i < rulers.size(); ++i)
+		if (rulers[i] == ruler)
 			return i;
 	return -1;
 }
 
 void RulerHandler::GetRulerList(const std::set<int>& rulers, flrd::RulerList& out_list)
 {
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
+	auto& list = glbin_current.GetRulerList();
+	if (list.IsEmpty())
 		return;
 
 	bool update_all = rulers.empty();
 
 	size_t c = 0;
-	for (auto i : *list)
+	auto ruler_list = list.All();
+	for (auto i : ruler_list)
 	{
 		if (update_all || rulers.find(static_cast<int>(c)) != rulers.end())
-			out_list.push_back(i);
+			out_list.Add(i);
 		c++;
 	}
 }
@@ -235,8 +233,8 @@ void RulerHandler::ToggleGroupDisp()
 bool RulerHandler::FindEditingRuler(double mx, double my)
 {
 	auto view = glbin_current.render_view.lock();
-	RulerList* list = glbin_current.GetRulerList();
-	if (!view || !list)
+	auto& list = glbin_current.GetRulerList();
+	if (!view || list.IsEmpty())
 		return false;
 	size_t rwt = view->m_tseq_cur_num;
 
@@ -264,20 +262,19 @@ bool RulerHandler::FindEditingRuler(double mx, double my)
 	mv.set(glm::value_ptr(mv_temp));
 	prj.set(glm::value_ptr(prj_temp));
 
-	pRulerPoint point;
-	int i, j, k;
+	std::shared_ptr<RulerPoint> point;
 	fluo::Point ptemp;
-	for (i = 0; i < (int)list->size(); i++)
+	auto rulers = list.All();
+	for (auto ruler : rulers)
 	{
-		Ruler* ruler = (*list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		int interp = ruler->GetInterp();
 
-		for (j = 0; j < ruler->GetNumBranch(); j++)
-		for (k = 0; k < ruler->GetNumBranchPoint(j); ++k)
+		for (int j = 0; j < ruler->GetNumBranch(); j++)
+		for (int k = 0; k < ruler->GetNumBranchPoint(j); ++k)
 		{
-			point = ruler->GetPRulerPoint(j, k);
+			point = ruler->GetRulerPoint(j, k);
 			if (!point) continue;
 			ptemp = point->GetPoint(rwt, interp);
 			ptemp = mv.transform(ptemp);

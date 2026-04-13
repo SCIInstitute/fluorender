@@ -102,8 +102,8 @@ struct CurrentObjects
 	int GetViewId();
 	int GetDrawingViewId();
 
-	flrd::RulerList* GetRulerList();
-	flrd::Ruler* GetRuler();
+	flrd::RulerList& GetRulerList();
+	std::shared_ptr<flrd::Ruler> GetRuler();
 	TrackGroup* GetTrackGroup();
 
 	//clipping box

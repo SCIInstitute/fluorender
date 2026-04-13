@@ -145,7 +145,7 @@ int ComponentAnalyzer::GetColocalization(
 			sumd.push_back(0.0);
 			continue;
 		}
-		flvr::Texture* tex = vd->GetTexture();
+		auto tex = vd->GetTexture();
 		if (!tex)
 		{
 			sumi.push_back(0);
@@ -213,9 +213,7 @@ void ComponentAnalyzer::Analyze()
 	comps.clear();
 	comps.min = std::numeric_limits<unsigned int>::max();
 	comps.max = 0;
-	comps.sx = spc.x();
-	comps.sy = spc.y();
-	comps.sz = spc.z();
+	comps.scale = spc;
 	//graph for linking multiple bricks
 	CellGraph &graph = m_compgroup->graph;
 	graph.clear();
@@ -506,7 +504,7 @@ void ComponentAnalyzer::MatchBricks(bool sel)
 	auto vd = m_compgroup->vd.lock();
 	if (!vd || !vd->GetTexture())
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	auto bricks = tex->get_bricks_id();
 	if (bricks.size() <= 1)
 		return;
@@ -676,7 +674,7 @@ void ComponentAnalyzer::MakeColorConsistent()
 	auto vd = m_compgroup->vd.lock();
 	if (!vd || !vd->GetTexture())
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	auto bricks = tex->get_bricks();
 	if (bricks.size() <= 1)
 		return;
@@ -926,10 +924,8 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << header;
 	}
 
-	double sx = comps.sx;
-	double sy = comps.sy;
-	double sz = comps.sz;
-	double size_scale = sx * sy * sz;
+	auto scale = comps.scale;
+	double size_scale = scale.x() * scale.y() * scale.z();
 	double maxscale = vd->GetMaxScale();
 	double scalarscale = vd->GetScalarScale();
 	fluo::Vector lens;
@@ -975,7 +971,7 @@ void ComponentAnalyzer::OutputCompListStream(std::ostream &stream, int verbose, 
 		stream << ids.front() << "\t";
 		if (m_bn > 1)
 			stream << brick_ids.front() << "\t";
-		fluo::Point center = i->second->GetCenter(fluo::Vector(sx, sy, sz));
+		fluo::Point center = i->second->GetCenter(scale);
 		stream << center.x() << "\t";
 		stream << center.y() << "\t";
 		stream << center.z() << "\t";
@@ -1286,7 +1282,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 		m_compgroup->dirty)
 		Analyze();
 
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return false;
 	auto raw_data = vd->GetVolume(false);
@@ -1338,7 +1334,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 
 		//populate the volume
 		//the actual data
-		flvr::Texture* tex_vd = vdn->GetTexture();
+		auto tex_vd = vdn->GetTexture();
 		if (!tex_vd)
 			continue;
 		auto raw_vdn = vdn->GetVolume(false);
@@ -1444,7 +1440,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 		fluo::Color c;
 		if (GetColor(i->second->Id(), i->second->BrickId(), vd, c))
 		{
-			glbin_vol_def.Copy(vdn.get(), vd.get());
+			glbin_vol_def.Copy(vdn, vd);
 			vdn->SetColor(c);
 			channs.push_back(vdn);
 		}
@@ -1557,9 +1553,9 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 		}
 	}
 
-	glbin_vol_def.Copy(vd_r.get(), vd.get());
-	glbin_vol_def.Copy(vd_g.get(), vd.get());
-	glbin_vol_def.Copy(vd_b.get(), vd.get());
+	glbin_vol_def.Copy(vd_r, vd);
+	glbin_vol_def.Copy(vd_g, vd);
+	glbin_vol_def.Copy(vd_b, vd);
 
 	fluo::Color red(1.0, 0.0, 0.0);
 	fluo::Color green(0.0, 1.0, 0.0);
@@ -1601,7 +1597,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 	}
 
 	//compute
-	double sx, sy, sz;
+	fluo::Vector scale;
 	std::vector<fluo::Point> pos;
 	pos.reserve(num);
 	int num2 = 0;//actual number
@@ -1611,9 +1607,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 		{
 			flrd::CellGraph& graph = m_comp_groups[i].graph;
 			flrd::CelpList* list = &(m_comp_groups[i].celps);
-			sx = list->sx;
-			sy = list->sy;
-			sz = list->sz;
+			scale = list->scale;
 			if (m_bn > 1)
 				graph.ClearVisited();
 
@@ -1628,7 +1622,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 					graph.GetLinkedComps(it->second, links, m_slimit);
 				}
 
-				pos.push_back(it->second->GetCenter(fluo::Vector(sx, sy, sz)));
+				pos.push_back(it->second->GetCenter(scale));
 				str = std::to_string(i + 1);
 				str += ":";
 				str += std::to_string(it->second->Id());
@@ -1644,9 +1638,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 			return;
 		flrd::CellGraph& graph = m_comp_groups[0].graph;
 		flrd::CelpList* list = &(m_compgroup->celps);
-		sx = list->sx;
-		sy = list->sy;
-		sz = list->sz;
+		scale = list->scale;
 		if (m_bn > 1)
 			graph.ClearVisited();
 
@@ -1661,7 +1653,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 				graph.GetLinkedComps(it->second, links, m_slimit);
 			}
 
-			pos.push_back(it->second->GetCenter(fluo::Vector(sx, sy, sz)));
+			pos.push_back(it->second->GetCenter(scale));
 			str = std::to_string(it->second->Id());
 			nl.push_back(str);
 			num2++;
@@ -1815,16 +1807,14 @@ bool ComponentAnalyzer::GetRulerListFromCelp(RulerList& rulerlist)
 	if (!list || list->size() < 3)
 		return false;
 
-	double sx = list->sx;
-	double sy = list->sy;
-	double sz = list->sz;
+	auto scale = list->scale;
 	Ruler ruler;
 	ruler.SetRulerMode(RulerMode::Polyline);
 	fluo::Point pt;
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
-		pt = it->second->GetCenter(fluo::Vector(sx, sy, sz));
+		pt = it->second->GetCenter(scale);
 		ruler.AddPoint(pt);
 	}
 	ruler.SetFinished();
@@ -1851,9 +1841,7 @@ bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links)
 
 	cl.min = list->min;
 	cl.max = list->max;
-	cl.sx = list->sx;
-	cl.sy = list->sy;
-	cl.sz = list->sz;
+	cl.scale = list->scale;
 
 	int bn = glbin_comp_analyzer.GetBrickNum();
 	for (size_t i = 0; i < m_sel_ids.size(); ++i)
@@ -1886,9 +1874,7 @@ bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links)
 
 	cl.min = list->min;
 	cl.max = list->max;
-	cl.sx = list->sx;
-	cl.sy = list->sy;
-	cl.sz = list->sz;
+	cl.scale = list->scale;
 
 	for (auto it = list->begin(); it != list->end(); ++it)
 		FindCelps(cl, it, links);
@@ -1908,9 +1894,7 @@ bool ComponentAnalyzer::GetCelpFromIds(CelpList& cl, const std::vector<unsigned 
 
 	cl.min = list->min;
 	cl.max = list->max;
-	cl.sx = list->sx;
-	cl.sy = list->sy;
-	cl.sz = list->sz;
+	cl.scale = list->scale;
 
 	for (size_t i = 0; i < ids.size(); ++i)
 	{
@@ -1989,7 +1973,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 	auto vd = m_compgroup->vd.lock();
 	if (!vd || !vd->GetTexture())
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 
 	unsigned int brick_id = info->BrickId();
 	unsigned int rep_id = info->Id();

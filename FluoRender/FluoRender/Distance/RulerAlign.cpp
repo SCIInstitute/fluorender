@@ -33,12 +33,13 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <Pca.h>
 #include <Cov.h>
 
 using namespace flrd;
 
-void RulerAlign::AddRuler(Ruler* ruler)
+void RulerAlign::AddRuler(const std::shared_ptr<Ruler>& ruler)
 {
 	m_view = glbin_current.render_view;
 	auto view = m_view.lock();
@@ -54,12 +55,13 @@ void RulerAlign::AddRuler(Ruler* ruler)
 	}
 }
 
-void RulerAlign::SetRulerList(RulerList* list)
+void RulerAlign::SetRulerList(const RulerList& list)
 {
 	Clear();
-	for (size_t i = 0; i < list->size(); ++i)
+	auto rulers = list.All();
+	for (size_t i = 0; i < rulers.size(); ++i)
 	{
-		Ruler* ruler = (*list)[i];
+		auto ruler = rulers[i];
 		if (!ruler)
 			continue;
 		AddRuler(ruler);
@@ -155,7 +157,7 @@ void RulerAlign::AlignPca(bool rulers)
 	}
 	else
 	{
-		Cov cover(m_vd.lock().get());
+		Cov cover(m_vd.lock());
 		if (cover.Compute(0))
 		{
 			std::vector<double> cov = cover.GetCov();

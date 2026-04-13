@@ -1827,15 +1827,14 @@ void ComponentGenerator::GenerateDB()
 			kernel_prog->setTex3D(CL_MEM_READ_ONLY, did);
 		//rechist
 		size_t fsize = bin * rec;
-		float* rechist = new float[fsize]();
-		table.getRecInput(rechist);
+		auto rechist = table.getRecInput();
 		//debug
 //#ifdef _DEBUG
 //		DBMIFLOAT32 histmi2;
 //		histmi2.nx = bin; histmi2.ny = rec; histmi2.nc = 1; histmi2.nt = bin * 4; histmi2.data = rechist;
 //#endif
 		auto arg_rechist =
-			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * fsize, (void*)(rechist));
+			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, "", sizeof(float) * fsize, (void*)(rechist.data()));
 		fsize = nx * ny * nz;
 		cl_uchar* lut = new cl_uchar[fsize]();
 		auto arg_lut =
@@ -1870,7 +1869,6 @@ void ComponentGenerator::GenerateDB()
 //#endif
 		//release
 		kernel_prog->releaseArg(arg_rechist);
-		delete[] rechist;
 		delete[] lut;
 
 		//generate distance field arg_distf
@@ -1882,11 +1880,10 @@ void ComponentGenerator::GenerateDB()
 		kernel_prog->bindArg(arg_lut);
 		//params
 		fsize = par * rec;
-		float* params = new float[fsize]();
-		table.getRecOutput(params);
+		auto params = table.getRecOutput();
 		auto arg_params =
 			kernel_prog->setBufNew(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			"", sizeof(float) * fsize, (void*)(params));
+			"", sizeof(float) * fsize, (void*)(params.data()));
 		auto arg_distf =
 			kernel_prog->setBufNew(CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
 			"arg_distf", sizeof(unsigned char) * nxyz, nullptr);
@@ -2084,7 +2081,6 @@ void ComponentGenerator::GenerateDB()
 
 		//release buffer
 		kernel_prog->releaseAllArgs();
-		delete[] params;
 
 		if (postwork)
 			postwork(__FUNCTION__);

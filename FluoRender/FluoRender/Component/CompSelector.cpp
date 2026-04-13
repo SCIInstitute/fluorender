@@ -138,7 +138,7 @@ void ComponentSelector::CompFull()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_>0)
@@ -235,12 +235,12 @@ void ComponentSelector::CompFull()
 					{
 						size = label_iter->second->GetSizeUi();
 						if (CompareSize(size))
-							SelectMask(mask_ptr, index, 255, tex);
+							SelectMask(raw_mask, index, 255, tex);
 						else
 							mask_ptr[index] = 0;
 					}
 					else
-						SelectMask(mask_ptr, index, 255, tex);
+						SelectMask(raw_mask, index, 255, tex);
 				}
 				else
 					mask_ptr[index] = 0;
@@ -258,7 +258,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_>0)
@@ -346,16 +346,16 @@ void ComponentSelector::Select(bool all, bool rmask)
 						size = label_iter->second->GetSizeUi();
 						if (CompareSize(size))
 							//mask_ptr[index] = 255;
-							SelectMask(mask_ptr, index, 255, tex);
+							SelectMask(raw_mask, index, 255, tex);
 						else
 							mask_ptr[index] = 0;
 					}
 					else
-						SelectMask(mask_ptr, index, 255, tex);
+						SelectMask(raw_mask, index, 255, tex);
 				}
 				else if (!m_use_min && m_use_max)
 					//analyzer filters small comps, make sure they are also selected here
-					SelectMask(mask_ptr, index, 255, tex);
+					SelectMask(raw_mask, index, 255, tex);
 				else
 					mask_ptr[index] = 0;
 			}
@@ -389,12 +389,12 @@ void ComponentSelector::Select(bool all, bool rmask)
 							{
 								size = label_iter->second->GetSizeUi();
 								if (CompareSize(size))
-									SelectMask(mask_ptr, index, 255, tex);
+									SelectMask(raw_mask, index, 255, tex);
 								else
 									mask_ptr[index] = 0;
 							}
 							else
-								SelectMask(mask_ptr, index, 255, tex);
+								SelectMask(raw_mask, index, 255, tex);
 						}
 					}
 				}
@@ -424,7 +424,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 						bid = tex->get_brick_id(index);
 						if (label_ptr[index] == idsel &&
 							bid == bidsel)
-							SelectMask(mask_ptr, index, 255, tex);
+							SelectMask(raw_mask, index, 255, tex);
 					}
 				}
 			}
@@ -442,7 +442,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 					for (index = 0; index < for_size; ++index)
 					{
 						if (label_ptr[index] == idsel)
-							SelectMask(mask_ptr, index, 255, tex);
+							SelectMask(raw_mask, index, 255, tex);
 					}
 				}
 			}
@@ -522,7 +522,7 @@ void ComponentSelector::Delete()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 	auto raw_mask = vd->GetMask(true);
@@ -545,7 +545,7 @@ void ComponentSelector::Delete()
 	for (index = 0; index < for_size; ++index)
 	{
 		if (m_id == label_ptr[index])
-			SelectMask(mask_ptr, index, 255, tex);
+			SelectMask(raw_mask, index, 255, tex);
 		else
 			mask_ptr[index] = 0;
 	}
@@ -565,7 +565,7 @@ void ComponentSelector::DeleteList()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 	auto raw_mask = vd->GetMask(true);
@@ -602,7 +602,7 @@ void ComponentSelector::DeleteList()
 				key = label_ptr[index];
 			if (find(ids.begin(), ids.end(), key)
 				!= ids.end())
-				SelectMask(mask_ptr, index, 255, tex);
+				SelectMask(raw_mask, index, 255, tex);
 			else
 				mask_ptr[index] = 0;
 		}
@@ -619,7 +619,7 @@ void ComponentSelector::SelectList()
 	if (!vd)
 		return;
 
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_ > 0)
@@ -666,7 +666,7 @@ void ComponentSelector::SelectList()
 			key = brick_id;
 			key = (key << 32) | label_ptr[index];
 			if (m_list->find(key) != m_list->end())
-				SelectMask(mask_ptr, index, 255, tex);
+				SelectMask(raw_mask, index, 255, tex);
 			else
 				mask_ptr[index] = 0;
 		}
@@ -694,7 +694,7 @@ void ComponentSelector::EraseList()
 	if (!vd)
 		return;
 
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
 	if (flvr::Texture::mask_undo_num_ > 0)
@@ -741,7 +741,7 @@ void ComponentSelector::EraseList()
 			key = brick_id;
 			key = (key << 32) | label_ptr[index];
 			if (m_list->find(key) != m_list->end())
-				SelectMask(mask_ptr, index, 0, tex);
+				SelectMask(raw_mask, index, 0, tex);
 			else
 				mask_ptr[index] = 0;
 		}
@@ -794,10 +794,13 @@ inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpL
 	return 0;
 }
 
-void ComponentSelector::SelectMask(unsigned char* mask,
-	unsigned long long idx, unsigned char v, flvr::Texture* tex)
+void ComponentSelector::SelectMask(
+	const std::shared_ptr<fluo::RawData>& mask,
+	unsigned long long idx, unsigned char v,
+	const std::shared_ptr<flvr::Texture>& tex)
 {
-	mask[idx] = v;
+	auto mask_ptr = mask->DataAs<unsigned char>();
+	mask_ptr[idx] = v;
 	if (tex)
 	{
 		auto b = tex->get_brick(

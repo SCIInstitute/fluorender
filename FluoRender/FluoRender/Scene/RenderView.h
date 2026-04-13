@@ -412,9 +412,9 @@ public:
 	void SetSortBricks();
 
 	//rulers
-	flrd::RulerList* GetRulerList();
-	void SetCurRuler(flrd::Ruler* ruler);
-	flrd::Ruler* GetCurRuler();
+	flrd::RulerList& GetRulerList();
+	void SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler);
+	std::shared_ptr<flrd::Ruler> GetCurRuler();
 
 	//traces
 	//track map file
@@ -597,7 +597,7 @@ private:
 	std::vector<std::shared_ptr<TreeLayer>> m_layer_list;
 	//ruler list
 	std::unique_ptr<flrd::RulerList> m_ruler_list;
-	flrd::Ruler* m_cur_ruler;
+	std::shared_ptr<flrd::Ruler> m_cur_ruler;
 	//traces
 	std::unique_ptr<TrackGroup> m_track_group;
 	//multivolume

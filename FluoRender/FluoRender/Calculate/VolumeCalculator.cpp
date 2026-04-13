@@ -99,7 +99,7 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 		//clipping planes
 		vd->SetClippingBox(vd_a->GetClippingBox());
 		//transfer function
-		glbin_vol_def.Copy(vd.get(), vd_a.get());
+		glbin_vol_def.Copy(vd, vd_a);
 
 		if (type == 1 ||
 			type == 2 ||
@@ -139,9 +139,9 @@ void VolumeCalculator::CalculateSingle(int type, const std::wstring& prev_group,
 		}
 		else if (type == 7)
 		{
-			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd.get());
-			vd_a->Replace(vd.get());
-			page->SetVolumeData(vd_a.get());
+			VolumePropPanel* page = glbin_current.mainframe->FindVolumeProps(vd);
+			vd_a->Replace(vd);
+			page->SetVolumeData(vd_a);
 		}
 		refresh = true;
 	}
@@ -236,7 +236,7 @@ void VolumeCalculator::Calculate(int type)
 		if (m_vd_r.empty())
 			return;
 		if (auto vd = m_vd_r.back())
-			vd->Calculate(m_type, m_vd_a.lock().get(), m_vd_b.lock().get());
+			vd->Calculate(m_type, m_vd_a.lock(), m_vd_b.lock());
 		return;
 	}
 	case 5:
@@ -250,7 +250,7 @@ void VolumeCalculator::Calculate(int type)
 		if (m_vd_r.empty())
 			return;
 		if (auto vd = m_vd_r.back())
-			vd->Calculate(m_type, vd_a.get(), 0);
+			vd->Calculate(m_type, vd_a, 0);
 		return;
 	}
 	case 9:
@@ -373,7 +373,7 @@ void VolumeCalculator::FillHoles(double thresh)
 	if (!vd)
 		return;
 
-	flvr::Texture* tex_a = vd_a->GetTexture();
+	auto tex_a = vd_a->GetTexture();
 	if (!tex_a)
 		return;
 	auto comp_a = tex_a->get_tex_comp(flvr::CompType::Data);
@@ -384,7 +384,7 @@ void VolumeCalculator::FillHoles(double thresh)
 		return;
 	size_t bits = comp_a.data->GetBitsPerElement();
 
-	flvr::Texture* tex_r = vd->GetTexture();
+	auto tex_r = vd->GetTexture();
 	if (!tex_r)
 		return;
 	auto comp_r = tex_r->get_tex_comp(flvr::CompType::Data);

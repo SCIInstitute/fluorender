@@ -37,6 +37,10 @@ namespace flvr
 {
 	class Texture;
 }
+namespace fluo
+{
+	class RawData;
+}
 namespace flrd
 {
 	class CelpList;
@@ -101,8 +105,9 @@ namespace flrd
 	private:
 		bool CompareSize(unsigned int size);
 		CelpList* GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
-		void SelectMask(unsigned char* mask,
-			unsigned long long idx, unsigned char v, flvr::Texture* tex);
+		void SelectMask(const std::shared_ptr<fluo::RawData>& raw_mask,
+			unsigned long long idx, unsigned char v,
+			const std::shared_ptr<flvr::Texture>& tex);
 	};
 
 	inline bool ComponentSelector::CompareSize(

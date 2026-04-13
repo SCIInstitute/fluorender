@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Point.h>
 #include <Plane.h>
+#include <RawData.h>
 #include <string>
 #include <algorithm>
 #include <set>
@@ -66,9 +67,9 @@ namespace flrd
 
 		double GetVolumeBgInt();
 
-		Ruler* GetRuler(const std::wstring& name);
+		std::shared_ptr<Ruler> GetRuler(const std::wstring& name);
 
-		Ruler* GetRuler(size_t i);
+		std::shared_ptr<Ruler> GetRuler(size_t i);
 
 		int GetRulerIndex();
 
@@ -95,16 +96,16 @@ namespace flrd
 		bool FindClosestRulerBranchPoint(double mx, double my);
 
 		void SetPoint(const std::shared_ptr<RulerPoint>& point) { m_point = point; }
-		RulerPoint* GetPoint() { return m_point.get(); }
+		std::shared_ptr<RulerPoint> GetPoint() { return m_point; }
 		void DeletePoint();
 
-		RulerPoint* GetEllipsePoint(int index);
+		std::shared_ptr<RulerPoint> GetEllipsePoint(int index);
 		bool CompleteEllipse(int mode);
 
 		void FinishRuler();
 		bool GetRulerFinished();
 
-		Ruler* AddRuler(fluo::Point& p, size_t t);
+		std::shared_ptr<Ruler> AddRuler(fluo::Point& p, size_t t);
 		void AddRulerPoint(fluo::Point &p);
 		void AddRulerPointAfterId(fluo::Point &p, unsigned int id, std::set<unsigned int> &cid, std::set<unsigned int> &bid);
 		bool GetMouseDist(int mx, int my, double dist);
@@ -120,7 +121,7 @@ namespace flrd
 		void Prune(const std::set<int>& rulers);
 		void Prune(int idx, int len);
 		void Profile(const std::set<int>& rulers);
-		int Profile(Ruler* ruler);
+		int Profile(const std::shared_ptr<Ruler>& ruler);
 		int Profile(int index);
 		int ProfileAll();
 		void Distance(const std::set<int>& rulers, const std::wstring& filename);
@@ -134,7 +135,7 @@ namespace flrd
 		void DeleteKey(const std::set<int>& rulers);
 		void DeleteAllKeys(const std::set<int>& rulers);
 
-		int Roi(Ruler* ruler);
+		int Roi(const std::shared_ptr<Ruler>& ruler);
 		int Roi(int index);
 		int RoiAll();
 
@@ -181,7 +182,7 @@ namespace flrd
 		int m_editing_ruler_index;
 		std::set<int> m_selected_ruler_indices;
 		unsigned int m_group;
-		Ruler* m_mag_ruler;
+		std::shared_ptr<Ruler> m_mag_ruler;
 		size_t m_mag_branch;
 		size_t m_mag_branch_point;
 		bool m_redist_len;
@@ -204,12 +205,13 @@ namespace flrd
 		//simple data sampler
 		int m_sample_type;//0-nn; 1-bilinear
 		double m_step_length;//for sampling along a ruler
-		void* m_data;
+		std::weak_ptr<fluo::RawData> m_data;
 		size_t m_nx, m_ny, m_nz, m_bits, m_fsize;//box filter
 		double m_scale;
 		bool valid()
 		{
-			if (!m_data) return false;
+			auto data = m_data.lock();
+			if (!data) return false;
 			if (!m_nx || !m_ny || !m_nz) return false;
 			return true;
 		}
@@ -245,10 +247,9 @@ namespace flrd
 				static_cast<unsigned long long>(z) * m_nx * m_ny +
 				static_cast<unsigned long long>(y) * m_nx +
 				static_cast<unsigned long long>(x);
-			if (m_bits == 8)
-				return double(((unsigned char*)m_data)[index]) / 255.0;
-			else
-				return double(((unsigned short*)m_data)[index]) / 65535.0;
+			auto data = m_data.lock();
+			if (!data) return 0;
+			return data->GetNormalizedValue(index);
 		}
 		void xyz2ijkt(
 			double x, double y, double z,
@@ -288,6 +289,8 @@ namespace flrd
 		}
 		double get_data_bl(double x, double y, double z)
 		{
+			auto data = m_data.lock();
+			if (!data) return 0;
 			//clampxyz(x, y, z);
 			if (!excldxyz(x, y, z))
 				return 0;
@@ -308,10 +311,7 @@ namespace flrd
 					index = (unsigned long long)m_nx*m_ny*k +
 						(unsigned long long)m_nx*jn +
 						(unsigned long long)in;
-					if (m_bits == 8)
-						q[count] = double(((unsigned char*)m_data)[index]) / 255.0;
-					else
-						q[count] = double(((unsigned short*)m_data)[index]) / 65535.0;
+					q[count] = data->GetNormalizedValue(index);
 				}
 				count++;
 			}

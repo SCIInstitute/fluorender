@@ -276,7 +276,7 @@ void Camera2Ruler::Run()
 					}
 					else
 					{
-						pRulerPoint pp = r0->GetPRulerPoint(i);
+						auto pp = r0->GetRulerPoint(i);
 						pp->SetPoint(p, t);
 					}
 					c++;

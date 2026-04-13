@@ -187,8 +187,8 @@ void DistCalculator::BuildSpring()
 				auto n2p = node2.p.lock();
 				if (!n1p || !n2p)
 					continue;
-				dist = (*(n2p->GetPoint(rwt, interp)) -
-					*(n1p->GetPoint(rwt, interp))).length();
+				dist = (n2p->GetPoint(rwt, interp) -
+					n1p->GetPoint(rwt, interp)).length();
 				node1.nextd = dist;
 				node2.prevd = dist;
 				node2.nextd = 0.0;
@@ -201,21 +201,19 @@ void DistCalculator::BuildSpring()
 
 void DistCalculator::BuildCloud()
 {
-	if (!m_celps)
+	auto celps = m_celps.lock();
+	if (!celps)
 		return;
-	if (m_celps->empty())
+	if (celps->empty())
 		return;
 	if (!m_cloud.empty())
 		m_cloud.clear();
 
-	fluo::Vector scale(
-		m_celps->sx,
-		m_celps->sy,
-		m_celps->sz);
+	auto scale(celps->scale);
 
 	fluo::Point p;
-	for (auto it = m_celps->begin();
-		it != m_celps->end(); ++it)
+	for (auto it = celps->begin();
+		it != celps->end(); ++it)
 	{
 		p = it->second->GetCenter(scale);
 		m_cloud.push_back(p);
@@ -250,18 +248,20 @@ double DistCalculator::GetRestDist()
 
 void DistCalculator::UpdateSpringNode(int idx)
 {
-	if (!m_ruler)
+	auto ruler = m_ruler.lock();
+	if (!ruler)
 		return;
-	size_t rwt = m_ruler->GetWorkTime();
-	int interp = m_ruler->GetInterp();
+	size_t rwt = ruler->GetWorkTime();
+	int interp = ruler->GetInterp();
 	size_t sz = m_spring.size();
 	size_t cz = m_cloud.size();
 	if (idx < 0 || idx >= static_cast<int>(sz))
 		return;
 	SpringNode& node = m_spring.at(idx);
-	if (node.p->GetLocked())
+	auto node_p = node.p.lock();
+	if (!node_p || node_p->GetLocked())
 		return;
-	fluo::Point pos = node.p->GetPoint(rwt, interp);
+	auto pos = node_p->GetPoint(rwt, interp);
 	fluo::Vector force, f1, f2, f3;
 
 	double dist, ang;
@@ -300,7 +300,10 @@ void DistCalculator::UpdateSpringNode(int idx)
 	if (idx > 0 && node.prevd > 0.0)
 	{
 		SpringNode& prev = m_spring.at(idx - 1);
-		dir = prev.p->GetPoint(rwt, interp) - pos;
+		auto prev_p = prev.p.lock();
+		if (!prev_p)
+			return;
+		dir = prev_p->GetPoint(rwt, interp) - pos;
 		dist = dir.length();
 		dir.normalize();
 		if (node.nextd == 0.0)
@@ -311,7 +314,10 @@ void DistCalculator::UpdateSpringNode(int idx)
 	if (idx < sz - 1 && node.nextd > 0.0)
 	{
 		SpringNode& next = m_spring.at(idx + 1);
-		dir = next.p->GetPoint(rwt, interp) - pos;
+		auto next_p = next.p.lock();
+		if (!next_p)
+			return;
+		dir = next_p->GetPoint(rwt, interp) - pos;
 		dist = dir.length();
 		dir.normalize();
 		if (node.prevd == 0.0)
@@ -324,9 +330,15 @@ void DistCalculator::UpdateSpringNode(int idx)
 		node.prevd > 0.0 && node.nextd > 0.0)
 	{
 		SpringNode& prev = m_spring.at(idx - 1);
-		dir = prev.p->GetPoint(rwt, interp) - pos;
+		auto prev_p = prev.p.lock();
+		if (!prev_p)
+			return;
+		dir = prev_p->GetPoint(rwt, interp) - pos;
 		SpringNode& next = m_spring.at(idx + 1);
-		dir2 = next.p->GetPoint(rwt, interp) - pos;
+		auto next_p = next.p.lock();
+		if (!next_p)
+			return;
+		dir2 = next_p->GetPoint(rwt, interp) - pos;
 		dir.normalize();
 		dir2.normalize();
 		ang = Dot(dir, dir2)+1.0;
@@ -358,17 +370,18 @@ void DistCalculator::UpdateSpringNode(int idx)
 	//f3.normalize();
 	//f3 *= norm;
 	force = ff1 * f1 + ff2 * f2;
-	node.p->DisplacePoint(force, rwt, interp);
+	node_p->DisplacePoint(force, rwt, interp);
 }
 
 void DistCalculator::UpdateSpringDist()
 {
 	if (m_spring.empty())
 		return;
-	if (!m_ruler)
+	auto ruler = m_ruler.lock();
+	if (!ruler)
 		return;
-	size_t rwt = m_ruler->GetWorkTime();
-	int interp = m_ruler->GetInterp();
+	size_t rwt = ruler->GetWorkTime();
+	int interp = ruler->GetInterp();
 
 	double dist;
 	fluo::Vector dir;
@@ -378,8 +391,12 @@ void DistCalculator::UpdateSpringDist()
 		if (node.prevd > 0.0)
 		{
 			SpringNode& prev = m_spring.at(i - 1);
-			dir = node.p->GetPoint(rwt, interp) -
-				prev.p->GetPoint(rwt, interp);
+			auto node_p = node.p.lock();
+			auto prev_p = prev.p.lock();
+			if (!node_p || !prev_p)
+				continue;
+			dir = node_p->GetPoint(rwt, interp) -
+				prev_p->GetPoint(rwt, interp);
 			dist = dir.length();
 			node.dist = prev.dist + dist;
 		}
@@ -390,15 +407,19 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 {
 	if (m_spring.empty())
 		return;
-	if (!m_ruler)
+	auto ruler = m_ruler.lock();
+	if (!ruler)
 		return;
-	size_t rwt = m_ruler->GetWorkTime();
-	int interp = m_ruler->GetInterp();
+	size_t rwt = ruler->GetWorkTime();
+	int interp = ruler->GetInterp();
 	size_t sz = m_spring.size();
 	if (sz < 2)
 	{
+		auto p = m_spring[0].p.lock();
+		if (!p)
+			return;
 		pp = fluo::Point(p0 -
-			m_spring[0].p->GetPoint(rwt, interp));
+			p->GetPoint(rwt, interp));
 		return;
 	}
 
@@ -411,8 +432,12 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 	{
 		SpringNode &node1 = m_spring.at(i);
 		SpringNode &node2 = m_spring.at(i + 1);
-		mp = fluo::Point((node1.p->GetPoint(rwt, interp) +
-			node2.p->GetPoint(rwt, interp)) / 2.0);
+		auto p1 = node1.p.lock();
+		auto p2 = node2.p.lock();
+		if (!p1 || !p2)
+			continue;
+		mp = fluo::Point((p1->GetPoint(rwt, interp) +
+			p2->GetPoint(rwt, interp)) / 2.0);
 		dist = (mp - p0).length2();
 		if (dist < mind)
 		{
@@ -425,8 +450,12 @@ void DistCalculator::SpringProject(fluo::Point &p0, fluo::Point &pp)
 		return;
 
 	//project
-	fluo::Point p1 = m_spring[minidx].p->GetPoint(rwt, interp);
-	fluo::Point p2 = m_spring[minidx + 1].p->GetPoint(rwt, interp);
+	auto sp1 = m_spring[minidx].p.lock();
+	auto sp2 = m_spring[minidx + 1].p.lock();
+	if (!sp1 || !sp2)
+		return;
+	fluo::Point p1 = sp1->GetPoint(rwt, interp);
+	fluo::Point p2 = sp2->GetPoint(rwt, interp);
 	fluo::Vector axis = p2 - p1;
 	axis.normalize();
 	fluo::Vector vp0 = p0 - p1;

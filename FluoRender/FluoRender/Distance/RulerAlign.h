@@ -55,16 +55,16 @@ namespace flrd
 			m_vd = vd;
 		}
 
-		void AddRuler(Ruler* ruler);
+		void AddRuler(const std::shared_ptr<Ruler>& ruler);
 
-		void SetRulerList(RulerList* list);
+		void SetRulerList(const RulerList& list);
 
 		void Clear()
 		{
 			m_point_list.clear();
 		}
 
-		void SetRuler(Ruler* ruler)
+		void SetRuler(const std::shared_ptr<Ruler>& ruler)
 		{
 			Clear();
 			AddRuler(ruler);

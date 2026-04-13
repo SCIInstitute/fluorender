@@ -118,47 +118,10 @@ int Ruler::GetNumBranchPoint(int nb)
 	return static_cast<int>(m_ruler.at(nb).size());
 }
 
-RulerPoint *Ruler::GetRulerPoint(int index)
+std::shared_ptr<RulerPoint> Ruler::GetRulerPoint(int index)
 {
 	if (index < 0)
-		return 0;
-	int count = 0;
-	int size, seq, inc;
-	bool first = true;
-	for (auto it = m_ruler.begin();
-		it != m_ruler.end(); ++it)
-	{
-		size = static_cast<int>(it->size());
-		inc = first ? size : size - 1;;
-		if (index >= count && index < count + inc)
-		{
-			seq = index - count;
-			if (!first && size > seq + 1)
-				seq++;
-			return (*it)[seq].get();
-		}
-		count += inc;
-		first = false;
-	}
-	return 0;
-}
-
-RulerPoint* Ruler::GetLastRulerPoint()
-{
-	for (auto it = m_ruler.rbegin();
-		it != m_ruler.rend(); ++it)
-	{
-		if (it->empty())
-			continue;
-		return it->back().get();
-	}
-	return 0;
-}
-
-pRulerPoint Ruler::GetPRulerPoint(int index)
-{
-	if (index < 0)
-		return 0;
+		return nullptr;
 	int count = 0;
 	int size, seq, inc;
 	bool first = true;
@@ -177,32 +140,33 @@ pRulerPoint Ruler::GetPRulerPoint(int index)
 		count += inc;
 		first = false;
 	}
-	return 0;
+	return nullptr;
 }
 
-RulerPoint* Ruler::GetRulerPoint(int nb, int index)
+std::shared_ptr<RulerPoint> Ruler::GetLastRulerPoint()
+{
+	for (auto it = m_ruler.rbegin();
+		it != m_ruler.rend(); ++it)
+	{
+		if (it->empty())
+			continue;
+		return it->back();
+	}
+	return nullptr;
+}
+
+std::shared_ptr<RulerPoint> Ruler::GetRulerPoint(int nb, int index)
 {
 	int branch_num = GetNumBranch();
 	if (nb < 0 || nb >= branch_num)
-		return 0;
+		return nullptr;
 	RulerBranch &branch = m_ruler.at(nb);
 	if (index < 0 || index >= branch.size())
-		return 0;
-	return branch[index].get();
-}
-
-pRulerPoint Ruler::GetPRulerPoint(int nb, int index)
-{
-	int branch_num = GetNumBranch();
-	if (nb < 0 || nb >= branch_num)
-		return 0;
-	RulerBranch &branch = m_ruler.at(nb);
-	if (index < 0 || index >= branch.size())
-		return 0;
+		return nullptr;
 	return branch[index];
 }
 
-pRulerPoint Ruler::FindPRulerPoint(fluo::Point& point)
+std::shared_ptr<RulerPoint> Ruler::FindRulerPoint(fluo::Point& point)
 {
 	bool first = true;
 	for (size_t i = 0; i < m_ruler.size(); ++i)
@@ -219,7 +183,7 @@ pRulerPoint Ruler::FindPRulerPoint(fluo::Point& point)
 	return nullptr;
 }
 
-pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t &rj)
+std::shared_ptr<RulerPoint> Ruler::FindNearestRulerPoint(fluo::Point& point, size_t &ri, size_t &rj)
 {
 	bool first = true, found = false;
 	double dist, min_dist;
@@ -248,7 +212,7 @@ pRulerPoint Ruler::FindNearestPRulerPoint(fluo::Point& point, size_t &ri, size_t
 	return nullptr;
 }
 
-pRulerPoint Ruler::FindBranchPRulerPoint(fluo::Point& point, size_t& ri, size_t& rj)
+std::shared_ptr<RulerPoint> Ruler::FindBranchRulerPoint(fluo::Point& point, size_t& ri, size_t& rj)
 {
 	bool found = false;
 	double dist;
@@ -461,7 +425,7 @@ bool Ruler::AddPointAfterId(
 	//search for nearest point
 	if (!found)
 	{
-		if (FindNearestPRulerPoint(point, ri, rj))
+		if (FindNearestRulerPoint(point, ri, rj))
 			found = true;
 	}
 
@@ -492,7 +456,7 @@ fluo::Transform Ruler::GetTransform()
 	return m_tform;
 }
 
-bool Ruler::AddBranch(pRulerPoint point)
+bool Ruler::AddBranch(const std::shared_ptr<RulerPoint>& point)
 {
 	if (!point ||
 		m_ruler.empty() ||
@@ -505,7 +469,7 @@ bool Ruler::AddBranch(pRulerPoint point)
 	return true;
 }
 
-void Ruler::DeletePoint(pRulerPoint &point)
+void Ruler::DeletePoint(const std::shared_ptr<RulerPoint>& point)
 {
 	if (!point)
 		return;
@@ -543,7 +507,7 @@ void Ruler::Prune(int len)
 		{
 			found = false;
 			//find the starting point of the branch
-			pRulerPoint pp = m_ruler[i-1][0];
+			auto pp = m_ruler[i-1][0];
 			for (size_t ii = 0; ii < m_ruler.size(); ++ii)
 			{
 				for (size_t jj = 0; jj < m_ruler[ii].size(); ++jj)

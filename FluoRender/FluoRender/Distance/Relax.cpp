@@ -163,9 +163,9 @@ void Relax::BuildSpring()
 				{
 					auto pp = p->GetPoint(rwt, interp);
 					locked = p->GetLocked();
-					m_spoints.push_back(float(pp->x()));
-					m_spoints.push_back(float(pp->y()));
-					m_spoints.push_back(float(pp->z()));
+					m_spoints.push_back(float(pp.x()));
+					m_spoints.push_back(float(pp.y()));
+					m_spoints.push_back(float(pp.z()));
 					m_slock.push_back(locked);
 					m_snum++;
 				}
@@ -182,10 +182,10 @@ void Relax::BuildSpring()
 						m_spoints.end()[-3],
 						m_spoints.end()[-2],
 						m_spoints.end()[-1]);
-					dist = (*pp - pp1).length();
-					m_spoints.push_back(float(pp->x()));
-					m_spoints.push_back(float(pp->y()));
-					m_spoints.push_back(float(pp->z()));
+					dist = (pp - pp1).length();
+					m_spoints.push_back(float(pp.x()));
+					m_spoints.push_back(float(pp.y()));
+					m_spoints.push_back(float(pp.z()));
 					m_slock.push_back(locked);
 					m_snum++;
 				}

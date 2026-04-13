@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -25,42 +25,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _TRAINER_H_
-#define _TRAINER_H_
+#ifndef RulerList_h
+#define RulerList_h
 
-#include <string>
-#include <vector>
+#include <Ruler.h>
+#include <unordered_map>
 
 namespace flrd
 {
-	class Trainer
+
+	class RulerList
 	{
 	public:
-		Trainer();
-		virtual ~Trainer();
+		void Clear();
 
-		virtual void set_trained_rec_num(size_t val)
-		{
-			m_trained_rec_num = val;
-			m_valid = m_trained_rec_num > 0;
-		}
-		virtual size_t get_trained_rec_num() { return m_trained_rec_num; }
+		bool IsEmpty() const { return rulers_.empty(); }
 
-		virtual void add(const std::vector<float>& in, const std::vector<float>& out) = 0;
+		void Add(std::shared_ptr<Ruler> ruler);
+		bool RemoveByName(const std::wstring& name);
+		std::shared_ptr<Ruler> FindByName(const std::wstring& name) const;
 
-		virtual void train() = 0;
-		virtual std::vector<float> infer(const std::vector<float>& in) = 0;
+		std::unordered_map<unsigned int, int> GroupCounts() const;
+		std::vector<unsigned int> Groups() const;
 
-		virtual double get_rate() = 0;
-		bool is_valid() { return m_valid; }
+		const std::vector<std::shared_ptr<Ruler>>& All() const;
 
-		virtual void set_model_file(const std::wstring& file) { m_model_file = file; }
-		virtual std::wstring get_model_file() { return m_model_file; }
-
-	protected:
-		bool m_valid;
-		size_t m_trained_rec_num;
-		std::wstring m_model_file;
+	private:
+		std::vector<std::shared_ptr<Ruler>> rulers_;
+		std::unordered_map<std::wstring, std::shared_ptr<Ruler>> byName_;
 	};
 }
-#endif//_TRAINER_H_
+
+#endif//RulerList_h

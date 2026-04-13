@@ -52,6 +52,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FlKey.h>
 #include <Interpolator.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <RulerHandler.h>
 #include <ScriptProc.h>
 #include <VolumeCalculator.h>
@@ -522,7 +523,7 @@ RenderView::~RenderView()
 
 	//delete rulers
 	if (m_ruler_list)
-		m_ruler_list->DeleteRulers();
+		m_ruler_list->Clear();
 }
 
 std::string RenderView::GetBufferName(const std::string& base, int sn)
@@ -795,8 +796,8 @@ void RenderView::ClearAll()
 	m_cur_vol.reset();
 	m_cur_vol_save.reset();
 	if (m_ruler_list)
-		m_ruler_list->clear();
-	m_cur_ruler = 0;
+		m_ruler_list->Clear();
+	m_cur_ruler.reset();
 	if (m_track_group)
 		m_track_group->Clear();
 	m_cell_list->clear();
@@ -1422,7 +1423,7 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_p
 		glbin_current.vol_data = dst;
 		VolumePropPanel* vprop_view = glbin_current.mainframe->FindVolumeProps(name);
 		if (vprop_view)
-			vprop_view->SetVolumeData(dst.get());
+			vprop_view->SetVolumeData(dst);
 	}
 }
 
@@ -2699,7 +2700,7 @@ void RenderView::SetLockCenterSel()
 	auto cur_vd_ptr = m_cur_vol.lock();
 	if (!cur_vd_ptr)
 		return;
-	flrd::Cov cover(cur_vd_ptr.get());
+	flrd::Cov cover(cur_vd_ptr);
 	cover.SetUseMask(true);
 	cover.Compute(1);
 	m_lock_center = cover.GetCenter();
@@ -3297,7 +3298,7 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 
 	bool clear_pool = false;
 
-	flvr::Texture *tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (tex && tex->isBrxml())
 	{
 		auto br = std::dynamic_pointer_cast<BRKXMLReader>(reader);
@@ -3368,7 +3369,7 @@ void RenderView::ReloadVolumeData(int frame)
 			glbin_current.mainframe->DeleteProps(2, vd->GetName());
 		if (vd && vd->GetReader())
 		{
-			flvr::Texture *tex = vd->GetTexture();
+			auto tex = vd->GetTexture();
 			auto reader = vd->GetReader();
 			if (tex && tex->isBrxml())
 			{
@@ -4076,11 +4077,11 @@ void RenderView::StartLoopUpdate()
 			if (!vd)
 				continue;
 
-			switchLevel(vd.get());
+			switchLevel(vd);
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 
 			num_chan = 0;
-			flvr::Texture* tex = vd->GetTexture();
+			auto tex = vd->GetTexture();
 			if (tex)
 			{
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
@@ -4119,7 +4120,7 @@ void RenderView::StartLoopUpdate()
 				auto vd = it->lock();
 				if (!vd || !vd->GetDisp() || !vd->isBrxml())
 					continue;
-				flvr::Texture* tex = vd->GetTexture();
+				auto tex = vd->GetTexture();
 				if (!tex)
 					continue;
 				auto bricks = tex->get_bricks();
@@ -4132,7 +4133,7 @@ void RenderView::StartLoopUpdate()
 			std::vector<VolumeLoaderData> tmp_shadow;
 			for (auto& vd : list)
 			{
-				flvr::Texture* tex = vd->GetTexture();
+				auto tex = vd->GetTexture();
 				fluo::Ray view_ray = vd->GetVR()->compute_view();
 				auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
@@ -4213,7 +4214,7 @@ void RenderView::StartLoopUpdate()
 					std::vector<VolumeLoaderData> tmp_shadow;
 					if (vd && vd->GetDisp() && vd->isBrxml())
 					{
-						flvr::Texture* tex = vd->GetTexture();
+						auto tex = vd->GetTexture();
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
@@ -4278,7 +4279,7 @@ void RenderView::StartLoopUpdate()
 						auto vd = group->GetVolumeData(j - 1);
 						if (!vd || !vd->GetDisp() || !vd->isBrxml())
 							continue;
-						flvr::Texture* tex = vd->GetTexture();
+						auto tex = vd->GetTexture();
 						if (!tex)
 							continue;
 						fluo::Ray view_ray = vd->GetVR()->compute_view();
@@ -4298,7 +4299,7 @@ void RenderView::StartLoopUpdate()
 						for (size_t k = 0; k < list.size(); k++)
 						{
 							auto vd = list[k];
-							flvr::Texture* tex = vd->GetTexture();
+							auto tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
@@ -4372,7 +4373,7 @@ void RenderView::StartLoopUpdate()
 						for (size_t j = 0; j < list.size(); j++)
 						{
 							auto vd = list[j];
-							flvr::Texture* tex = vd->GetTexture();
+							auto tex = vd->GetTexture();
 							fluo::Ray view_ray = vd->GetVR()->compute_view();
 							auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
@@ -4457,17 +4458,17 @@ void RenderView::HaltLoopUpdate()
 	}
 }
 
-flrd::RulerList* RenderView::GetRulerList()
+flrd::RulerList& RenderView::GetRulerList()
 {
-	return m_ruler_list.get();
+	return *m_ruler_list;
 }
 
-void RenderView::SetCurRuler(flrd::Ruler* ruler)
+void RenderView::SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler)
 {
 	m_cur_ruler = ruler;
 }
 
-flrd::Ruler* RenderView::GetCurRuler()
+std::shared_ptr<flrd::Ruler> RenderView::GetCurRuler()
 {
 	return m_cur_ruler;
 }
