@@ -125,7 +125,7 @@ namespace flrd
 				}
 				c++;
 			}
-			return {0, fluo::Point()};
+			return {-1, fluo::Point()};
 		}
 		void SetPoint(const fluo::Point& p, size_t t)
 		{

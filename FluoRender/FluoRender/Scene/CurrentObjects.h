@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <optional>
+#include <functional>
 
 namespace flrd
 {
@@ -102,12 +104,14 @@ struct CurrentObjects
 	int GetViewId();
 	int GetDrawingViewId();
 
-	flrd::RulerList& GetRulerList();
+	std::optional<std::reference_wrapper<flrd::RulerList>>
+		GetRulerList();
 	std::shared_ptr<flrd::Ruler> GetRuler();
-	TrackGroup* GetTrackGroup();
+	std::optional<std::reference_wrapper<TrackGroup>> GetTrackGroup();
 
 	//clipping box
-	fluo::ClippingBox* GetClippingBox();
+	std::optional<std::reference_wrapper<fluo::ClippingBox>>
+		GetClippingBox();
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	std::weak_ptr<RenderView> render_view;//currently selected render view

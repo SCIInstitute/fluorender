@@ -35,6 +35,8 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
+#include <optional>
+#include <functional>
 
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
@@ -166,7 +168,7 @@ public:
 	std::shared_ptr<VolumeData> GetDispVolumeData(int index);
 	std::shared_ptr<MeshData> GetMeshData(int index);
 	std::shared_ptr<TreeLayer> GetLayer(int index);
-	flvr::MultiVolumeRenderer* GetMultiVolumeData() { return m_mvr.get(); };
+	std::optional<std::reference_wrapper<flvr::MultiVolumeRenderer>> GetMultiVolumeData();
 	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name);
 	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);
 	std::shared_ptr<AnnotData> GetAnnotData(const std::wstring &name);
@@ -412,14 +414,14 @@ public:
 	void SetSortBricks();
 
 	//rulers
-	flrd::RulerList& GetRulerList();
+	std::optional<std::reference_wrapper<flrd::RulerList>> GetRulerList();
 	void SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler);
 	std::shared_ptr<flrd::Ruler> GetCurRuler();
 
 	//traces
 	//track map file
 	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
-	TrackGroup* GetTrackGroup();
+	std::optional<std::reference_wrapper<TrackGroup>> GetTrackGroup();
 	std::wstring GetTrackGroupFile();
 	void CreateTrackGroup();
 	int LoadTrackGroup(const std::wstring& filename);

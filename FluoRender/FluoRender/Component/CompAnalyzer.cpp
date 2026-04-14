@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -1808,18 +1809,18 @@ bool ComponentAnalyzer::GetRulerListFromCelp(RulerList& rulerlist)
 		return false;
 
 	auto scale = list->scale;
-	Ruler ruler;
-	ruler.SetRulerMode(RulerMode::Polyline);
+	auto ruler = std::make_shared<Ruler>();
+	ruler->SetRulerMode(RulerMode::Polyline);
 	fluo::Point pt;
 	for (auto it = list->begin();
 		it != list->end(); ++it)
 	{
 		pt = it->second->GetCenter(scale);
-		ruler.AddPoint(pt);
+		ruler->AddPoint(pt);
 	}
-	ruler.SetFinished();
+	ruler->SetFinished();
 
-	rulerlist.push_back(&ruler);
+	rulerlist.Add(ruler);
 
 	return true;
 }

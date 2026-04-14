@@ -28,9 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CAMERA2RULER_H_
 #define _CAMERA2RULER_H_
 
+#include <RulerList.h>
 #include <string>
 #include <vector>
-#include <memory.h>
+#include <memory>
 
 namespace cv
 {
@@ -56,7 +57,7 @@ namespace flrd
 		Camera2Ruler();
 		~Camera2Ruler();
 
-		void SetList(int i, RulerList* list);
+		void SetList(int i, const RulerList& list);
 		void SetList(int i, int startf, int endf);//read list from a project
 		void SetRange(int i, size_t start, size_t end)
 		{
@@ -101,7 +102,7 @@ namespace flrd
 
 		void Correct();
 
-		RulerList* GetResult()
+		RulerList& GetResult()
 		{
 			return m_list_out;
 		}
@@ -115,9 +116,9 @@ namespace flrd
 		size_t m_end_list2;
 		bool m_del_list1;
 		bool m_del_list2;
-		RulerList* m_list1;
-		RulerList* m_list2;
-		RulerList* m_list_out;
+		RulerList m_list1;
+		RulerList m_list2;
+		RulerList m_list_out;
 		double m_slope;
 		std::vector<std::wstring> m_names;
 		bool m_persp;

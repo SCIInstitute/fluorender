@@ -977,6 +977,15 @@ std::shared_ptr<TreeLayer> RenderView::GetLayer(int index)
 		return nullptr;
 }
 
+std::optional<std::reference_wrapper<flvr::MultiVolumeRenderer>>
+RenderView::GetMultiVolumeData()
+{
+	if (m_mvr)
+		return *m_mvr;
+	else
+		return std::nullopt;
+}
+
 std::shared_ptr<VolumeData> RenderView::GetVolumeData(const std::wstring &name)
 {
 	for (auto& it : m_layer_list)
@@ -4458,9 +4467,11 @@ void RenderView::HaltLoopUpdate()
 	}
 }
 
-flrd::RulerList& RenderView::GetRulerList()
+std::optional<std::reference_wrapper<flrd::RulerList>> RenderView::GetRulerList()
 {
-	return *m_ruler_list;
+	if (m_ruler_list)
+		return *m_ruler_list;
+	return std::nullopt;
 }
 
 void RenderView::SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler)
@@ -4493,9 +4504,11 @@ int RenderView::GetTrackFileExist(bool save)
 		return 1;
 }
 
-TrackGroup* RenderView::GetTrackGroup()
+std::optional<std::reference_wrapper<TrackGroup>> RenderView::GetTrackGroup()
 {
-	return m_track_group.get();
+	if (m_track_group)
+		return *m_track_group;
+	return std::nullopt;
 }
 
 std::wstring RenderView::GetTrackGroupFile()
@@ -5515,7 +5528,7 @@ void RenderView::DrawVolumes(int peel)
 	int nx, ny;
 	GetRenderSize(nx, ny);
 
-	flrd::RulerPoint *p0 = glbin_ruler_handler.GetPoint();
+	auto p0 = glbin_ruler_handler.GetPoint();
 
 	//draw
 	if (m_load_update ||
@@ -7309,7 +7322,7 @@ void RenderView::DrawAnnots()
 
 void RenderView::DrawRulers()
 {
-	if (m_ruler_list->empty())
+	if (m_ruler_list->IsEmpty())
 		return;
 	double width = glbin_settings.m_line_width;
 	auto base = glbin_renderer_factory.getOrCreate(gstRulerRenderer);
@@ -7414,10 +7427,7 @@ unsigned int RenderView::GenerateCellVerts(std::vector<float>& verts)
 	unsigned int num = 0;
 	fluo::Point p1, p2, p3, p4;
 	fluo::Color c = GetTextColor();
-	fluo::Vector scale(
-		m_cell_list->sx,
-		m_cell_list->sy,
-		m_cell_list->sz);
+	auto scale = m_cell_list->scale;
 	for (auto it = m_cell_list->begin();
 		it != m_cell_list->end(); ++it)
 	{
@@ -9954,7 +9964,7 @@ void RenderView::ProcessIdle(IdleState& state)
 					{
 						auto cb = glbin_current.GetClippingBox();
 						if (cb)
-							cb->IncLLinkedPairIndex(-1);
+							cb->get().IncLLinkedPairIndex(-1);
 						state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 					}
 				}
@@ -9991,7 +10001,7 @@ void RenderView::ProcessIdle(IdleState& state)
 					{
 						auto cb = glbin_current.GetClippingBox();
 						if (cb)
-							cb->IncLLinkedPairIndex(1);
+							cb->get().IncLLinkedPairIndex(1);
 						state.m_value_collection.insert({ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2 });
 					}
 				}
@@ -10143,7 +10153,7 @@ void RenderView::ProcessIdle(IdleState& state)
 				glbin_vol_selector.SetInitMask(3);
 				if (m_int_mode == InteractiveMode::GrowRuler)
 				{
-					glbin_seg_grow.SetVolumeData(cur_vd.get());
+					glbin_seg_grow.SetVolumeData(cur_vd);
 					glbin_seg_grow.SetIter(glbin_vol_selector.GetIter() * 3);
 					glbin_seg_grow.SetSizeThresh(sz);
 					glbin_seg_grow.Compute();
@@ -10358,7 +10368,7 @@ void RenderView::ProcessMouse(MouseState& state)
 			{
 				if (m_int_mode == InteractiveMode::RulerLockPoint)
 				{
-					flrd::RulerPoint* p = glbin_ruler_handler.GetPoint();
+					auto p = glbin_ruler_handler.GetPoint();
 					if (p) p->ToggleLocked();
 				}
 				if (m_int_mode == InteractiveMode::RulerDelPoint)
@@ -10618,7 +10628,7 @@ void RenderView::ProcessMouse(MouseState& state)
 						double(old_mouse_Y - mp.y()) *
 						double(old_mouse_Y - mp.y())))));
 
-			flrd::RulerPoint* p0 = glbin_ruler_handler.GetPoint();
+			auto p0 = glbin_ruler_handler.GetPoint();
 			bool hold_old = false;
 			if (m_int_mode == InteractiveMode::Viewport ||
 				((m_int_mode == InteractiveMode::Ruler ||

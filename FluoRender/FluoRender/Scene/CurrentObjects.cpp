@@ -349,28 +349,31 @@ int CurrentObjects::GetDrawingViewId()
 	return 0;
 }
 
-flrd::RulerList* CurrentObjects::GetRulerList()
+std::optional<std::reference_wrapper<flrd::RulerList>>
+CurrentObjects::GetRulerList()
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetRulerList();
-	return nullptr;
+	return std::nullopt;
 }
 
-flrd::Ruler* CurrentObjects::GetRuler()
+std::shared_ptr<flrd::Ruler> CurrentObjects::GetRuler()
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetCurRuler();
 	return nullptr;
 }
 
-TrackGroup* CurrentObjects::GetTrackGroup()
+std::optional<std::reference_wrapper<TrackGroup>>
+CurrentObjects::GetTrackGroup()
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetTrackGroup();
-	return nullptr;
+	return std::nullopt;
 }
 
-fluo::ClippingBox* CurrentObjects::GetClippingBox()
+std::optional<std::reference_wrapper<fluo::ClippingBox>>
+CurrentObjects::GetClippingBox()
 {
 	switch (GetType())
 	{
@@ -378,23 +381,23 @@ fluo::ClippingBox* CurrentObjects::GetClippingBox()
 	{
 		auto view = render_view.lock();
 		if (view)
-			return &view->GetClippingBox();
+			return view->GetClippingBox();
 	}
 	break;
 	case 2://volume
 	{
 		auto vd = vol_data.lock();
 		if (vd)
-			return &vd->GetClippingBox();
+			return vd->GetClippingBox();
 	}
 	break;
 	case 3://mesh
 	{
 		auto md = mesh_data.lock();
 		if (md)
-			return &md->GetClippingBox();
+			return md->GetClippingBox();
 	}
 	break;
 	}
-	return nullptr;
+	return std::nullopt;
 }

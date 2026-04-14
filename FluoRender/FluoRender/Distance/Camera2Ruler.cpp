@@ -47,9 +47,6 @@ Camera2Ruler::Camera2Ruler() :
 	m_end_list2(0),
 	m_del_list1(false),
 	m_del_list2(false),
-	m_list1(0),
-	m_list2(0),
-	m_list_out(0),
 	m_slope(0),
 	m_persp(true),
 	m_affine(false),
@@ -61,18 +58,12 @@ Camera2Ruler::Camera2Ruler() :
 Camera2Ruler::~Camera2Ruler()
 {
 	if (m_del_list1)
-	{
-		m_list1->DeleteRulers();
-		delete m_list1;
-	}
+		m_list1.Clear();
 	if (m_del_list2)
-	{
-		m_list2->DeleteRulers();
-		delete m_list2;
-	}
+		m_list2.Clear();
 }
 
-void Camera2Ruler::SetList(int i, RulerList* list)
+void Camera2Ruler::SetList(int i, const RulerList& list)
 {
 	if (i == 1)
 		m_list1 = list;
@@ -82,14 +73,17 @@ void Camera2Ruler::SetList(int i, RulerList* list)
 
 void Camera2Ruler::SetList(int i, int startf, int endf)
 {
-	RulerList* list = glbin_current.GetRulerList();
-	if (!list)
+	auto opt_list = glbin_current.GetRulerList();
+	if (!opt_list)
+		return;
+	auto list = opt_list->get();
+	if (list.IsEmpty())
 		return;
 
 	if (i == 1)
 	{
 		if (m_del_list1)
-			delete m_list1;
+			m_list1.Clear();
 		m_list1 = list;
 		m_del_list1 = true;
 		m_start_list1 = std::max(int(m_start_list1), startf);
@@ -98,7 +92,7 @@ void Camera2Ruler::SetList(int i, int startf, int endf)
 	else if (i == 2)
 	{
 		if (m_del_list2)
-			delete m_list2;
+			m_list2.Clear();
 		m_list2 = list;
 		m_del_list2 = true;
 		m_start_list2 = std::max(int(m_start_list2), startf);
@@ -108,13 +102,11 @@ void Camera2Ruler::SetList(int i, int startf, int endf)
 
 void Camera2Ruler::Run()
 {
-	if (!m_list1 || !m_list2)
-		return;
-
 	std::vector<cv::Point2f> pp1, pp2;
 
 	//connvert ruler points
-	for (auto ruler : *m_list1)
+	auto list1 = m_list1.All();
+	for (auto ruler : list1)
 	{
 		if (!ruler)
 			continue;
@@ -128,7 +120,8 @@ void Camera2Ruler::Run()
 			pp1.push_back(normalize(p));
 		}
 	}
-	for (auto ruler : *m_list2)
+	auto list2 = m_list2.All();
+	for (auto ruler : list2)
 	{
 		if (!ruler)
 			continue;
@@ -171,7 +164,7 @@ void Camera2Ruler::Run()
 	//rebuild points
 	pp1.clear();
 	pp2.clear();
-	for (auto ruler : *m_list1)
+	for (auto ruler : list1)
 	{
 		if (!ruler)
 			continue;
@@ -198,7 +191,7 @@ void Camera2Ruler::Run()
 			}
 		}
 	}
-	for (auto ruler : *m_list2)
+	for (auto ruler : list2)
 	{
 		if (!ruler)
 			continue;
@@ -235,15 +228,10 @@ void Camera2Ruler::Run()
 		points3D.push_back(X);
 	}
 
-	if (m_list_out)
-	{
-		m_list_out->DeleteRulers();
-		delete m_list_out;
-	}
-	m_list_out = new RulerList;
+	m_list_out.Clear();
 	//add 3d points
 	size_t c = 0;
-	for (auto ruler : *m_list1)
+	for (auto ruler : list1)
 	{
 		if (!ruler)
 			continue;
@@ -251,7 +239,7 @@ void Camera2Ruler::Run()
 		if (std::find(m_names.begin(), m_names.end(),
 			ruler->GetName()) != m_names.end())
 			use_t = false;
-		Ruler* r0 = new Ruler;
+		auto r0 = std::make_shared<Ruler>();
 		r0->SetName(ruler->GetName());
 		r0->SetColor(ruler->GetColor());
 		int rn = ruler->GetNumPoint();
@@ -293,15 +281,12 @@ void Camera2Ruler::Run()
 				c++;
 			}
 		}
-		m_list_out->push_back(r0);
+		m_list_out.Add(r0);
 	}
 }
 
 void Camera2Ruler::Correct()
 {
-	if (!m_list_out)
-		return;
-
 	size_t n = m_names.size();
 	if (n > 5)
 	{
@@ -318,12 +303,10 @@ bool Camera2Ruler::get_affine(const cv::Mat& p1, const cv::Mat& p2)
 	//each pointing to the axis direction from p0 to p1
 	if (m_names.size() < 6)
 		return false;
-	if (!m_list1 || !m_list2)
-		return false;
-	if (m_list1->empty() || m_list2->empty())
+	if (m_list1.IsEmpty() || m_list2.IsEmpty())
 		return false;
 
-	std::vector<Ruler*> rulers;//6
+	std::vector<std::shared_ptr<Ruler>> rulers;//6
 	//reused for img1 and img2
 	std::vector<cv::Point3f> pp;//12
 	std::vector<cv::Point3f> lines;//6
@@ -337,7 +320,7 @@ bool Camera2Ruler::get_affine(const cv::Mat& p1, const cv::Mat& p2)
 	//get rulers
 	for (size_t i = 0; i < 6; ++i)
 	{
-		rulers.push_back(m_list1->GetRuler(m_names[i]));
+		rulers.push_back(m_list1.FindByName(m_names[i]));
 		if (!rulers[i])
 			return false;
 		if (rulers[i]->GetNumPoint() < 2)
@@ -370,7 +353,7 @@ bool Camera2Ruler::get_affine(const cv::Mat& p1, const cv::Mat& p2)
 	//get rulers
 	for (size_t i = 0; i < 6; ++i)
 	{
-		rulers.push_back(m_list2->GetRuler(m_names[i]));
+		rulers.push_back(m_list2.FindByName(m_names[i]));
 		if (!rulers[i])
 			return false;
 		if (rulers[i]->GetNumPoint() < 2)
@@ -429,13 +412,11 @@ cv::Vec3d Camera2Ruler::calib_affine(const cv::Vec3d& pp)
 
 bool Camera2Ruler::calib_persp()
 {
-	if (!m_list_out)
-		return false;
-	if (m_list_out->empty())
+	if (m_list_out.IsEmpty())
 		return false;
 
-	Ruler* r1 = m_list_out->GetRuler(m_names[0]);
-	Ruler* r2 = m_list_out->GetRuler(m_names[1]);
+	auto r1 = m_list_out.FindByName(m_names[0]);
+	auto r2 = m_list_out.FindByName(m_names[1]);
 	if (!r1 || !r2)
 		return false;
 	if (r1->GetNumPoint() < 2 ||
@@ -453,20 +434,20 @@ bool Camera2Ruler::calib_persp()
 	l0 = (p1 - p0).length();
 
 	//scale based on v0 and s in cylindrical system
-	for (auto r : *m_list_out)
+	auto list_out = m_list_out.All();
+	for (auto r : list_out)
 	{
 		if (!r)
 			continue;
 		for (int i = 0; i < r->GetNumPoint(); ++i)
 		{
-			RulerPoint* rp = r->GetRulerPoint(i);
+			auto rp = r->GetRulerPoint(i);
 			if (!rp)
 				continue;
 			for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
 			{
-				size_t t = 0;
-				fluo::Point p;
-				if (rp->GetTimeAndPoint(tpi, t, p))
+				auto [t, p] = rp->GetTimeAndPoint(tpi);
+				if (t != -1)
 				{
 					double l = ray.length(p);
 					double s = s0 * l / l0 + 1;
@@ -486,25 +467,21 @@ bool Camera2Ruler::calib_metric()
 	//each pointing to the axis direction from p0 to p1
 	if (m_names.size() < 6)
 		return false;
-	if (!m_list1)
+	if (m_list1.IsEmpty())
 		return false;
-	if (m_list_out->empty())
-		return false;
-	if (!m_list_out)
-		return false;
-	if (m_list_out->empty())
+	if (m_list_out.IsEmpty())
 		return false;
 
 	//find scale from first ruler in names
-	Ruler* r1 = m_list1->GetRuler(m_names[0]);
-	Ruler* ro = m_list_out->GetRuler(m_names[0]);
+	auto r1 = m_list1.FindByName(m_names[0]);
+	auto ro = m_list_out.FindByName(m_names[0]);
 	double length = r1->GetLength();
 	double scale = length / ro->GetLength();
 
-	std::vector<Ruler*> rulers;
+	std::vector<std::shared_ptr<Ruler>> rulers;
 	for (size_t i = 0; i < 6; ++i)
 	{
-		rulers.push_back(m_list_out->GetRuler(m_names[i]));
+		rulers.push_back(m_list_out.FindByName(m_names[i]));
 		if (!rulers[i])
 			return false;
 		if (rulers[i]->GetNumPoint() < 2)
@@ -557,20 +534,20 @@ bool Camera2Ruler::calib_metric()
 	tf2.post_scale(fluo::Vector(scale));
 
 	//correct points
-	for (auto r : *m_list_out)
+	auto list_out = m_list_out.All();
+	for (auto r : list_out)
 	{
 		if (!r)
 			continue;
 		for (int i = 0; i < r->GetNumPoint(); ++i)
 		{
-			RulerPoint* rp = r->GetRulerPoint(i);
+			auto rp = r->GetRulerPoint(i);
 			if (!rp)
 				continue;
 			for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
 			{
-				size_t t = 0;
-				fluo::Point p;
-				if (rp->GetTimeAndPoint(tpi, t, p))
+				auto [t, p] = rp->GetTimeAndPoint(tpi);
+				if (t != -1)
 				{
 					tf.unproject_inplace(p);
 					tf2.project_inplace(p);
