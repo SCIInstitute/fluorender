@@ -44,6 +44,10 @@ namespace flrd
 		void Add(std::shared_ptr<Ruler> ruler);
 		bool RemoveByName(const std::wstring& name);
 		std::shared_ptr<Ruler> FindByName(const std::wstring& name) const;
+		std::shared_ptr<Ruler> FindById(unsigned int id) const;
+		std::shared_ptr<Ruler> GetRuler(size_t index) const;
+
+		size_t size() const { return rulers_.size(); }
 
 		std::unordered_map<unsigned int, int> GroupCounts() const;
 		std::vector<unsigned int> Groups() const;

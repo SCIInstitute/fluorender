@@ -66,18 +66,18 @@ std::shared_ptr<Ruler> DistCalculator::GetRuler()
 	return m_ruler.lock();
 }
 
-void DistCalculator::SetCelpList(const std::shared_ptr<CelpList>& list)
+void DistCalculator::SetCelpList(const std::optional<std::reference_wrapper<CelpList>>& list)
 {
-	if (list && list != m_celps.lock())
+	//if (list && list != m_celps)
 	{
 		m_celps = list;
 		m_init = false;
 	}
 }
 
-std::shared_ptr<CelpList> DistCalculator::GetCelpList()
+std::optional<std::reference_wrapper<CelpList>> DistCalculator::GetCelpList()
 {
-	return m_celps.lock();
+	return m_celps;
 }
 
 void DistCalculator::SetVolume(const std::shared_ptr<VolumeData>& vd)
@@ -123,9 +123,9 @@ void DistCalculator::CenterRuler(int type, bool init, int iter)
 
 void DistCalculator::Project()
 {
-	auto celp_list = m_celps.lock();
-	if (!celp_list)
+	if (!m_celps)
 		return;
+	auto& celp_list = m_celps->get();
 	if (!m_init)
 		BuildSpring();
 	else
@@ -133,11 +133,11 @@ void DistCalculator::Project()
 	if (m_spring.empty())
 		return;
 
-	fluo::Vector scale = celp_list->scale;
+	fluo::Vector scale = celp_list.scale;
 
 	fluo::Point p0, pp;
-	for (auto it = celp_list->begin();
-		it != celp_list->end(); ++it)
+	for (auto it = celp_list.begin();
+		it != celp_list.end(); ++it)
 	{
 		p0 = it->second->GetCenter(scale);
 		SpringProject(p0, pp);
@@ -201,19 +201,19 @@ void DistCalculator::BuildSpring()
 
 void DistCalculator::BuildCloud()
 {
-	auto celps = m_celps.lock();
-	if (!celps)
+	if (!m_celps)
 		return;
-	if (celps->empty())
+	auto& celp_list = m_celps->get();
+	if (celp_list.empty())
 		return;
 	if (!m_cloud.empty())
 		m_cloud.clear();
 
-	auto scale(celps->scale);
+	auto scale(celp_list.scale);
 
 	fluo::Point p;
-	for (auto it = celps->begin();
-		it != celps->end(); ++it)
+	for (auto it = celp_list.begin();
+		it != celp_list.end(); ++it)
 	{
 		p = it->second->GetCenter(scale);
 		m_cloud.push_back(p);

@@ -966,7 +966,7 @@ void SegGrow::Compute()
 	std::vector<std::set<unsigned int>> brick_pairs;//pairs processed don't need to process again
 	while (bnum > 1 && idnum > 1)
 	{
-		flvr::Texture* tex = vd->GetTexture();
+		auto tex = vd->GetTexture();
 		if (!tex)
 			break;
 		kernel_prog = glbin_kernel_factory.program(str_cl_sg_check_borders, bits, max_int);

@@ -26,6 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <PyDlc.h>
+#include <Global.h>
+#include <Names.h>
 #include <Ruler.h>
 #include <RulerHandler.h>
 #include <compatibility.h>
@@ -118,10 +120,8 @@ int PyDlc::GetDecodeErrorCount()
 	return c;
 }
 
-bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
+bool PyDlc::AddRulers(size_t toff)
 {
-	if (!rhdl)
-		return false;
 #ifdef _WIN32
 	std::ifstream f(m_result_file);
 #else
@@ -136,7 +136,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 	std::vector<std::string> props;
 	std::vector<std::string> names;
 	std::vector<int> sn;
-	std::vector<Ruler*> rlist;
+	std::vector<std::shared_ptr<Ruler>> rlist;
 	int ln = 0;
 	while (std::getline(f, line))
 	{
@@ -153,6 +153,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 			continue;
 		}
 
+		std::shared_ptr<Ruler> r;
 		bool all_float = true;
 		for (auto& i : entry)
 			all_float = all_float && isFloat(i);
@@ -166,7 +167,6 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 				getPoints(entry, props, points);
 				size_t t = STOI(entry[0]) + toff;
 				size_t c = 0;
-				Ruler* r = 0;
 				int rst;
 				for (auto& i : points)
 				{
@@ -175,7 +175,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 						rst = sn[c];
 					if (rst < 1)
 					{
-						r = rhdl->AddRuler(i, t);
+						r = glbin_ruler_handler.AddRuler(i, t);
 						if (c < names.size())
 							r->SetName(s2ws(names[c]));
 						r->SetRulerMode(rst == -2 ? flrd::RulerMode::Locator : flrd::RulerMode::Polyline);
@@ -205,7 +205,7 @@ bool PyDlc::AddRulers(RulerHandler* rhdl, size_t toff)
 				getPoints(entry, props, points);
 				size_t t = STOI(entry[0]) + toff;
 				size_t c = 0, ri = 0, rpi = 0;
-				Ruler* r = 0;
+				std::shared_ptr<Ruler> r;
 				int rst;
 				for (auto& i : points)
 				{
@@ -314,8 +314,7 @@ void PyDlc::Train(int maxiters)
 
 void PyDlc::CreateConfigFile(
 	const std::wstring& prj_name,
-	const std::wstring& usr_name,
-	RulerHandler* rhdl)
+	const std::wstring& usr_name)
 {
 	std::filesystem::path p = m_config_file;
 	p = p.parent_path();
@@ -356,32 +355,23 @@ void PyDlc::CreateConfigFile(
 	cf << "  " << ws2s(m_video_file) << ":" << std::endl;
 	cf << "    crop: 0, " << m_nx << ", 0, " << m_ny << std::endl;
 	cf << "bodyparts:" << std::endl;
-	if (rhdl)
-	{
-		std::string str = ws2s(rhdl->PrintRulers(false));
-		cf << str;
-	}
+	std::string str = ws2s(glbin_ruler_handler.PrintRulers(false));
+	cf << str;
 	cf << std::endl;
 	cf << "    # Fraction of video to start/stop when extracting frames for labeling/refinement" << std::endl;
 	cf << "start: " << double(m_start_fn) / double(m_frame_num - 1) << std::endl;
 	cf << "stop: " << double(m_end_fn) / double(m_frame_num - 1) << std::endl;
 	int key_num = 20;
-	if (rhdl)
-	{
-		std::set<size_t> keys;
-		if (!rhdl->GetKeyFrames(keys))
-			return;
-		key_num = static_cast<int>(keys.size());
-	}
+	std::set<size_t> keys;
+	if (!glbin_ruler_handler.GetKeyFrames(keys))
+		return;
+	key_num = static_cast<int>(keys.size());
 	cf << "numframes2pick: " << key_num << std::endl;
 	cf << std::endl;
 	cf << "    # Plotting configuration" << std::endl;
 	cf << "skeleton:" << std::endl;
-	if (rhdl)
-	{
-		std::string str = ws2s(rhdl->PrintRulers(true));
-		cf << str;
-	}
+	str = ws2s(glbin_ruler_handler.PrintRulers(true));
+	cf << str;
 	cf << "skeleton_color: black" << std::endl;
 	cf << "pcutoff: 0.6" << std::endl;
 	cf << "dotsize: 12" << std::endl;
@@ -433,21 +423,19 @@ void PyDlc::CreateConfigFile(
 }
 
 #if defined(_WIN32) || defined(_DARWIN)
-void PyDlc::WriteHDF(RulerHandler* rhdl)
+void PyDlc::WriteHDF()
 {
-	if (!rhdl)
-		return;
 	if (m_label_path.empty() ||
 		m_usr_name.empty() ||
 		m_prj_name.empty())
 		return;
 	//get keyframes
 	std::set<size_t> keys;
-	if (!rhdl->GetKeyFrames(keys))
+	if (!glbin_ruler_handler.GetKeyFrames(keys))
 		return;
 	size_t kn = keys.size();
 	//get ruler point num
-	size_t rpn = rhdl->GetRulerPointNum();
+	size_t rpn = glbin_ruler_handler.GetRulerPointNum();
 	size_t rpn2 = rpn * 2;
 
 	//array data
@@ -520,7 +508,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	hdf_write_array_str(group_id, "axis0_level0",
 		"axis0_namescorer", u8"scorer", strs);
 	//level1
-	rhdl->GetRulerPointNames(strs);
+	glbin_ruler_handler.GetRulerPointNames(strs);
 	hdf_write_array_str(group_id, "axis0_level1",
 		"axis0_namebodyparts", u8"bodyparts", strs);
 	//level2
@@ -576,7 +564,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	hdf_write_array_str(group_id, "block0_items_level0",
 		"block0_items_namescorer", u8"scorer", strs);
 	//level1
-	rhdl->GetRulerPointNames(strs);
+	glbin_ruler_handler.GetRulerPointNames(strs);
 	hdf_write_array_str(group_id, "block0_items_level1",
 		"block0_items_namebodyparts", u8"bodyparts", strs);
 	//level2
@@ -584,7 +572,7 @@ void PyDlc::WriteHDF(RulerHandler* rhdl)
 	hdf_write_array_str(group_id, "block0_items_level2",
 		"block0_items_namecoords", u8"coords", strs);
 	//values
-	rhdl->GetRulerPointCoords(coords);
+	glbin_ruler_handler.GetRulerPointCoords(coords);
 	hdf_write_array2_double(group_id, "block0_values",
 		static_cast<int>(kn), static_cast<int>(rpn2), coords);
 

@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flrd
 {
-	class RulerHandler;
 	class PyDlc : public PyBase
 	{
 	public:
@@ -99,14 +98,13 @@ namespace flrd
 		std::string GetTrainCmd(int maxiters);
 		void Train(int maxiters);
 		void CreateConfigFile(const std::wstring& prj_name,
-			const std::wstring& usr_name,
-			RulerHandler* rhdl);
-		void WriteHDF(RulerHandler* rhdl);
+			const std::wstring& usr_name);
+		void WriteHDF();
 		//analysis
 		void AnalyzeVideo();
 		bool GetResultFile();
 		int GetDecodeErrorCount();
-		bool AddRulers(RulerHandler* rhdl, size_t toff);//time offset: dlc may have decoding error causing the offset
+		bool AddRulers(size_t toff);//time offset: dlc may have decoding error causing the offset
 
 	protected:
 		std::wstring m_config_file;

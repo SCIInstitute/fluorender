@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Point.h>
 #include <memory>
+#include <optional>
+#include <functional>
 
 class VolumeData;
 namespace flrd
@@ -46,8 +48,8 @@ namespace flrd
 
 		void SetRuler(const std::shared_ptr<Ruler>& ruler);
 		std::shared_ptr<Ruler> GetRuler();
-		void SetCelpList(const std::shared_ptr<CelpList>& list);
-		std::shared_ptr<CelpList> GetCelpList();
+		void SetCelpList(const std::optional<std::reference_wrapper<CelpList>>& list);
+		std::optional<std::reference_wrapper<CelpList>> GetCelpList();
 		void SetVolume(const std::shared_ptr<VolumeData>& vd);
 
 		void SetF1(double val) { m_f1 = val; }
@@ -60,7 +62,7 @@ namespace flrd
 		int m_type;//0:no data; 1:volume; 2:mask; 3:comps
 		bool m_init;
 		//components
-		std::weak_ptr<CelpList> m_celps;
+		std::optional<std::reference_wrapper<CelpList>> m_celps;
 		//volume
 		std::weak_ptr<VolumeData> m_vd;
 		//Ruler

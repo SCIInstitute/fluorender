@@ -97,18 +97,18 @@ void ComponentAnalyzer::ClearCoVolumes()
 	m_vd_list.clear();
 }
 
-CelpList* ComponentAnalyzer::GetCelpList()
+std::optional<std::reference_wrapper<CelpList>> ComponentAnalyzer::GetCelpList()
 {
 	if (m_compgroup)
-		return &(m_compgroup->celps);
-	return 0;
+		return m_compgroup->celps;
+	return std::nullopt;
 }
 
-CellGraph* ComponentAnalyzer::GetCellGraph()
+std::optional<std::reference_wrapper<CellGraph>> ComponentAnalyzer::GetCellGraph()
 {
 	if (m_compgroup)
-		return &(m_compgroup->graph);
-	return 0;
+		return m_compgroup->graph;
+	return std::nullopt;
 }
 
 int ComponentAnalyzer::GetCompGroupSize()
@@ -116,11 +116,11 @@ int ComponentAnalyzer::GetCompGroupSize()
 	return static_cast<int>(m_comp_groups.size());
 }
 
-CompGroup* ComponentAnalyzer::GetCompGroup(int i)
+std::optional<std::reference_wrapper<CompGroup>> ComponentAnalyzer::GetCompGroup(int i)
 {
 	if (i >= 0 && i < m_comp_groups.size())
-		return &(m_comp_groups[i]);
-	return 0;
+		return m_comp_groups[i];
+	return std::nullopt;
 }
 
 int ComponentAnalyzer::GetBrickNum()
@@ -736,12 +736,12 @@ void ComponentAnalyzer::Count()
 	m_vox = 0;
 	m_size = 0;
 
-	flrd::CelpList* list = GetCelpList();
-	if (!list || list->empty())
+	auto list = GetCelpList();
+	if (!list || list->get().empty())
 		return;
 
-	for (auto it = list->begin();
-		it != list->end(); ++it)
+	for (auto it = list->get().begin();
+		it != list->get().end(); ++it)
 	{
 		unsigned int sumi = it->second->GetSizeUi();
 		if (sumi > m_min_num &&
@@ -2090,10 +2090,10 @@ void ComponentAnalyzer::FindCelps(CelpList& list,
 
 	if (links)
 	{
-		flrd::CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
-		graph->ClearVisited();
+		auto graph = glbin_comp_analyzer.GetCellGraph();
+		graph->get().ClearVisited();
 		flrd::CelpList links;
-		if (graph->GetLinkedComps(it->second, links,
+		if (graph->get().GetLinkedComps(it->second, links,
 			glbin_comp_analyzer.GetSizeLimit()))
 		{
 			for (auto it2 = links.begin();

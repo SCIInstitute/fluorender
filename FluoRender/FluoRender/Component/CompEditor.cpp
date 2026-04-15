@@ -138,7 +138,7 @@ void ComponentEditor::NewId(bool append, bool track)
 		return;
 
 	//trace group
-	TrackGroup *trkg = view->GetTrackGroup();
+	auto trkg = view->GetTrackGroup();
 	if (!trkg)
 	{
 		view->CreateTrackGroup();
@@ -262,7 +262,7 @@ void ComponentEditor::NewId(bool append, bool track)
 	if (new_id && track)
 	{
 		//trkg->AddCell(cell, m_cur_time);
-		pTrackMap track_map = trkg->GetTrackMap();
+		pTrackMap track_map = trkg->get().GetTrackMap();
 		glbin_trackmap_proc.SetTrackMap(track_map);
 		auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 		if (cache_queue)
@@ -334,13 +334,12 @@ void ComponentEditor::ReplaceList()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	TrackGroup *trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 
 	//trace group
-	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
-	bool track_map = trkg && trkg->GetTrackMap()->GetFrameNum();
+	glbin_trackmap_proc.SetTrackMap(trkg->get().GetTrackMap());
 	int cur_time = view->m_tseq_cur_num;
 
 	//get current mask
@@ -459,10 +458,10 @@ void ComponentEditor::CombineList()
 	if (m_list->size() <= 1)
 		return;//nothing to combine
 	//trace group
-	TrackGroup *trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
+	glbin_trackmap_proc.SetTrackMap(trkg->get().GetTrackMap());
 	int cur_time = view->m_tseq_cur_num;
 
 	//find the largest cell in the list

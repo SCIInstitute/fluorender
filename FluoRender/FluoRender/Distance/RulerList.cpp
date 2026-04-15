@@ -77,6 +77,23 @@ RulerList::FindByName(const std::wstring& name) const
 	return it != byName_.end() ? it->second : nullptr;
 }
 
+std::shared_ptr<Ruler> RulerList::FindById(unsigned int id) const
+{
+	for (const auto& r : rulers_)
+	{
+		if (r->Id() == id)
+			return r;
+	}
+	return nullptr;
+}
+
+std::shared_ptr<Ruler> RulerList::GetRuler(size_t index) const
+{
+	if (index >= rulers_.size())
+		return nullptr;
+	return rulers_[index];
+}
+
 std::vector<unsigned int> RulerList::Groups() const
 {
 	std::unordered_set<unsigned int> unique;

@@ -206,7 +206,9 @@ void ComponentSelector::CompFull()
 	}
 
 	CelpList list_out;
-	CelpList* comp_list = GetListFromAnalyzer(sel_labels, list_out);
+	auto comp_list = GetListFromAnalyzer(sel_labels, list_out);
+	if (!comp_list)
+		return;
 
 	//reselect
 	unsigned int size;
@@ -214,7 +216,7 @@ void ComponentSelector::CompFull()
 	{
 		brick_id = bbs->get_id();
 		if (!bbs->is_mask_valid() &&
-			!comp_list->FindBrick(brick_id))
+			!comp_list->get().FindBrick(brick_id))
 			continue;
 		
 		auto res_b = bbs->get_size();
@@ -228,8 +230,8 @@ void ComponentSelector::CompFull()
 			if (label_ptr[index])
 			{
 				label_value = label_ptr[index];
-				label_iter = comp_list->find(Cell::GetKey(label_value, brick_id));
-				if (label_iter != comp_list->end())
+				label_iter = comp_list->get().find(Cell::GetKey(label_value, brick_id));
+				if (label_iter != comp_list->get().end())
 				{
 					if (m_use_min || m_use_max)
 					{
@@ -305,7 +307,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	if (all)
 	{
 		CelpList sel_labels;
-		CelpList* comp_list = 0;
+		std::optional<std::reference_wrapper<CelpList>> comp_list = std::nullopt;
 		if (glbin_comp_analyzer.GetAnalyzed())
 			comp_list = glbin_comp_analyzer.GetCelpList();
 		else
@@ -319,16 +321,16 @@ void ComponentSelector::Select(bool all, bool rmask)
 					label_iter = sel_labels.find(Cell::GetKey(label_value, bid));
 					if (label_iter == sel_labels.end())
 					{
-						Cell* info = new Cell(label_value, bid);
+						auto info = std::make_shared<Cell>(label_value, bid);
 						info->SetSizeUi(1);
 						sel_labels.insert(std::pair<unsigned long long, Celp>
-							(info->GetEId(), Celp(info)));
+							(info->GetEId(), info));
 					}
 					else
 						label_iter->second->Inc();
 				}
 			}
-			comp_list = &sel_labels;
+			comp_list = sel_labels;
 		}
 
 		//reselect
@@ -338,8 +340,8 @@ void ComponentSelector::Select(bool all, bool rmask)
 			{
 				label_value = label_ptr[index];
 				bid = tex->get_brick_id(index);
-				label_iter = comp_list->find(Cell::GetKey(label_value, bid));
-				if (label_iter != comp_list->end())
+				label_iter = comp_list->get().find(Cell::GetKey(label_value, bid));
+				if (label_iter != comp_list->get().end())
 				{
 					if (m_use_min || m_use_max)
 					{
@@ -365,15 +367,15 @@ void ComponentSelector::Select(bool all, bool rmask)
 	{
 		bool simple_select = true;
 		simple_select = false;
-		CelpList* analyzer_list = glbin_comp_analyzer.GetCelpList();
-		auto iter = analyzer_list->find(m_id);
-		if (iter == analyzer_list->end())
+		auto analyzer_list = glbin_comp_analyzer.GetCelpList();
+		auto iter = analyzer_list->get().find(m_id);
+		if (iter == analyzer_list->get().end())
 			simple_select = true;
 		else
 		{
-			glbin_comp_analyzer.GetCellGraph()->ClearVisited();
+			glbin_comp_analyzer.GetCellGraph()->get().ClearVisited();
 			CelpList comp_list;
-			if (glbin_comp_analyzer.GetCellGraph()->
+			if (glbin_comp_analyzer.GetCellGraph()->get().
 				GetLinkedComps(iter->second, comp_list))
 			{
 				for (index = 0; index < for_size; ++index)
@@ -763,16 +765,16 @@ void ComponentSelector::EraseList()
 	vd->GetVR()->clear_tex_mask();
 }
 
-inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)
+inline std::optional<std::reference_wrapper<CelpList>> ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)
 {
 	if (glbin_comp_analyzer.GetAnalyzed())
 	{
 		//assign graph node identifier for sel_labels
-		CelpList* analyzer_list = glbin_comp_analyzer.GetCelpList();
+		auto analyzer_list = glbin_comp_analyzer.GetCelpList();
 		for (auto iter = list_in.begin(); iter != list_in.end(); )
 		{
-			auto iter2 = analyzer_list->find(iter->first);
-			if (iter2 == analyzer_list->end())
+			auto iter2 = analyzer_list->get().find(iter->first);
+			if (iter2 == analyzer_list->get().end())
 			{
 				//remove
 				iter = list_in.erase(iter);
@@ -782,16 +784,16 @@ inline CelpList* ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpL
 			iter->second->SetSizeUi(iter2->second->GetSizeUi());
 			++iter;
 		}
-		if (glbin_comp_analyzer.GetCellGraph()->
+		if (glbin_comp_analyzer.GetCellGraph()->get().
 			GetLinkedComps(list_in, list_out,
 				glbin_comp_analyzer.GetSizeLimit()))
-			return &list_out;
+			return list_out;
 		else
-			return &list_in;
+			return list_in;
 	}
 	else
-		return &list_in;
-	return 0;
+		return list_in;
+	return std::nullopt;
 }
 
 void ComponentSelector::SelectMask(

@@ -103,10 +103,10 @@ namespace flrd
 		void SetCoVolumes(const std::vector<std::weak_ptr<VolumeData>>& list);
 		void AddCoVolume(const std::shared_ptr<VolumeData>& vd);
 		void ClearCoVolumes();
-		CelpList* GetCelpList();
-		CellGraph* GetCellGraph();
+		std::optional<std::reference_wrapper<CelpList>> GetCelpList();
+		std::optional<std::reference_wrapper<CellGraph>> GetCellGraph();
 		int GetCompGroupSize();
-		CompGroup* GetCompGroup(int i);
+		std::optional<std::reference_wrapper <CompGroup>> GetCompGroup(int i);
 		int GetBrickNum();
 		//count
 		void SetUseMin(bool val) { m_use_min = val; }

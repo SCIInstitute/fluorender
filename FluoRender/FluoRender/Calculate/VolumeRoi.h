@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FL_Volume_Roi_h
 
 #include <Transform.h>
+#include <memory>
 
 class VolumeData;
 namespace flvr
@@ -60,13 +61,13 @@ namespace flrd
 		{
 			return m_tf;
 		}
-		void SetRoi(Ruler* ruler)
+		void SetRoi(const std::shared_ptr<Ruler>& ruler)
 		{
 			m_ruler = ruler;
 		}
-		Ruler* GetRoi()
+		std::shared_ptr<Ruler> GetRoi()
 		{
-			return m_ruler;
+			return m_ruler.lock();
 		}
 		void SetAspect(int nx, int ny)
 		{
@@ -91,7 +92,7 @@ namespace flrd
 		std::weak_ptr<VolumeData> m_vd;
 		bool m_use_mask;//use mask instead of data
 		fluo::Transform m_tf;//view transform
-		Ruler* m_ruler;//a closed ruler for roi
+		std::weak_ptr<Ruler> m_ruler;//a closed ruler for roi
 		double m_aspect;//nx/ny of render view
 
 		//result

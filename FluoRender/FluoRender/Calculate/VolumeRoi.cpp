@@ -107,7 +107,6 @@ __kernel void kernel_0(
 VolumeRoi::VolumeRoi(const std::shared_ptr<VolumeData>& vd):
 	m_vd(vd),
 	m_use_mask(false),
-	m_ruler(0),
 	m_aspect(1)
 {}
 
@@ -143,8 +142,9 @@ bool VolumeRoi::GetInfo(
 
 void VolumeRoi::Run()
 {
-	if (!m_ruler ||
-		m_ruler->GetRulerMode() != RulerMode::Ellipse)//only ellipse ruler is supported
+	auto ruler = m_ruler.lock();
+	if (!ruler ||
+		ruler->GetRulerMode() != RulerMode::Ellipse)//only ellipse ruler is supported
 		return;
 	auto vd = CheckBricks();
 	if (!vd)
@@ -187,10 +187,10 @@ void VolumeRoi::Run()
 		float(m_tf.get_mat_val(1, 3)),
 		float(m_tf.get_mat_val(2, 3)),
 		float(m_tf.get_mat_val(3, 3)) };
-	fluo::Point p0 = m_ruler->GetPoint(0);
-	fluo::Point p1 = m_ruler->GetPoint(1);
-	fluo::Point p2 = m_ruler->GetPoint(2);
-	fluo::Point p3 = m_ruler->GetPoint(3);
+	fluo::Point p0 = ruler->GetPoint(0);
+	fluo::Point p1 = ruler->GetPoint(1);
+	fluo::Point p2 = ruler->GetPoint(2);
+	fluo::Point p3 = ruler->GetPoint(3);
 	p0 = m_tf.transform(p0); p0.z(0);
 	p1 = m_tf.transform(p1); p1.z(0);
 	p2 = m_tf.transform(p2); p2.z(0);

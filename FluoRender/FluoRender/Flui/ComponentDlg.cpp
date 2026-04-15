@@ -43,6 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseConvVolMesh.h>
 #include <ColorMesh.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <RulerAlign.h>
 #include <VolumeData.h>
 #include <RenderView.h>

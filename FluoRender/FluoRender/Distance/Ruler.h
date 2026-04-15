@@ -549,7 +549,7 @@ namespace flrd
 		{
 			return m_info_profile;
 		}
-		std::vector<ProfileBin> GetProfile()
+		std::vector<ProfileBin>& GetProfile()
 		{
 			return m_profile;
 		}

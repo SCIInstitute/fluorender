@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/scrolwin.h>
 #include <wx/spinbutt.h>
+#include <memory>
 
 class MeshData;
 class ManipPropPanel: public PropPanel
@@ -68,12 +69,12 @@ public:
 
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
-	void SetMeshData(MeshData* md);
-	MeshData* GetMeshData();
+	void SetMeshData(const std::shared_ptr<MeshData>& md);
+	std::shared_ptr<MeshData> GetMeshData();
 	void UpdateMeshData();
 
 private:
-	MeshData* m_md;
+	std::weak_ptr<MeshData> m_md;
 
 	wxStaticText* m_trans_st;
 	wxStaticText* m_x_trans_st;

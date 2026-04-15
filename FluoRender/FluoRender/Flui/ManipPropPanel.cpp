@@ -38,8 +38,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size, style, name),
-	m_md(0)
+	PropPanel(frame, parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -179,7 +178,8 @@ ManipPropPanel::~ManipPropPanel()
 
 void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	if (!m_md)
+	auto md = m_md.lock();
+	if (!md)
 		return;
 
 	//update user interface
@@ -192,7 +192,7 @@ void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstMeshTranslation))
 	{
-		vval = m_md->GetTranslation();
+		vval = md->GetTranslation();
 		str = wxString::Format("%.2f", vval.x());
 		m_x_trans_text->ChangeValue(str);
 		str = wxString::Format("%.2f", vval.y());
@@ -202,7 +202,7 @@ void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_all || FOUND_VALUE(gstMeshRotation))
 	{
-		vval = m_md->GetRotation();
+		vval = md->GetRotation();
 		str = wxString::Format("%.2f", vval.x());
 		m_x_rot_text->ChangeValue(str);
 		str = wxString::Format("%.2f", vval.y());
@@ -212,7 +212,7 @@ void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 	if (update_all || FOUND_VALUE(gstMeshScale))
 	{
-		vval = m_md->GetScaling();
+		vval = md->GetScaling();
 		str = wxString::Format("%.2f", vval.x());
 		m_x_scl_text->ChangeValue(str);
 		str = wxString::Format("%.2f", vval.y());
@@ -222,14 +222,14 @@ void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 	}
 }
 
-void ManipPropPanel::SetMeshData(MeshData* md)
+void ManipPropPanel::SetMeshData(const std::shared_ptr<MeshData>& md)
 {
 	m_md = md;
 }
 
-MeshData* ManipPropPanel::GetMeshData()
+std::shared_ptr<MeshData> ManipPropPanel::GetMeshData()
 {
-	return m_md;
+	return m_md.lock();
 }
 
 void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
@@ -326,7 +326,8 @@ void ManipPropPanel::OnSpinDown(wxSpinEvent& event)
 
 void ManipPropPanel::UpdateMeshData()
 {
-	if (!m_md)
+	auto md = m_md.lock();
+	if (!md)
 		return;
 
 	double x, y, z;
@@ -336,7 +337,7 @@ void ManipPropPanel::UpdateMeshData()
 	str.ToDouble(&y);
 	str = m_z_trans_text->GetValue();
 	str.ToDouble(&z);
-	m_md->SetTranslation(fluo::Vector(x, y, z));
+	md->SetTranslation(fluo::Vector(x, y, z));
 
 	str = m_x_rot_text->GetValue();
 	str.ToDouble(&x);
@@ -344,7 +345,7 @@ void ManipPropPanel::UpdateMeshData()
 	str.ToDouble(&y);
 	str = m_z_rot_text->GetValue();
 	str.ToDouble(&z);
-	m_md->SetRotation(fluo::Vector(x, y, z));
+	md->SetRotation(fluo::Vector(x, y, z));
 
 	str = m_x_scl_text->GetValue();
 	str.ToDouble(&x);
@@ -352,7 +353,7 @@ void ManipPropPanel::UpdateMeshData()
 	str.ToDouble(&y);
 	str = m_z_scl_text->GetValue();
 	str.ToDouble(&z);
-	m_md->SetScaling(fluo::Vector(x, y, z));
+	md->SetScaling(fluo::Vector(x, y, z));
 
 	FluoRefresh(1, { gstNull });
 }

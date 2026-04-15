@@ -36,8 +36,7 @@ AnnotatPropPanel::AnnotatPropPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size, style, name),
-	m_ann(0)
+	PropPanel(frame, parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -80,12 +79,13 @@ AnnotatPropPanel::~AnnotatPropPanel()
 
 void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 {
-	if (!m_ann)
+	auto ann = m_ann.lock();
+	if (!ann)
 		return;
 
-	wxString memo = m_ann->GetMemo();
+	wxString memo = ann->GetMemo();
 	m_memo_text->ChangeValue(memo);
-	if (m_ann->GetMemoRO())
+	if (ann->GetMemoRO())
 	{
 		m_memo_text->SetEditable(false);
 		m_memo_update_btn->Disable();
@@ -97,24 +97,25 @@ void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 	}
 }
 
-void AnnotatPropPanel::SetAnnotData(AnnotData* ann)
+void AnnotatPropPanel::SetAnnotData(const std::shared_ptr<AnnotData>& ann)
 {
 	m_ann = ann;
 
 	FluoUpdate();
 }
 
-AnnotData* AnnotatPropPanel::GetAnnotData()
+std::shared_ptr<AnnotData> AnnotatPropPanel::GetAnnotData()
 {
-	return m_ann;
+	return m_ann.lock();
 }
 
 void AnnotatPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 {
-	if (m_ann)
+	auto ann = m_ann.lock();
+	if (ann)
 	{
 		wxString memo = m_memo_text->GetValue();
 		std::wstring str = memo.ToStdWstring();
-		m_ann->SetMemo(str);
+		ann->SetMemo(str);
 	}
 }

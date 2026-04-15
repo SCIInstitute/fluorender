@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <set>
 #include <string>
 #include <memory>
+#include <optional>
+#include <functional>
 
 namespace flvr
 {
@@ -104,7 +106,7 @@ namespace flrd
 
 	private:
 		bool CompareSize(unsigned int size);
-		CelpList* GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
+		std::optional<std::reference_wrapper<CelpList>> GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
 		void SelectMask(const std::shared_ptr<fluo::RawData>& raw_mask,
 			unsigned long long idx, unsigned char v,
 			const std::shared_ptr<flvr::Texture>& tex);
