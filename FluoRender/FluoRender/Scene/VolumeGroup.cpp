@@ -71,7 +71,7 @@ void VolumeGroup::SetChannelMixMode(ChannelMixMode mode)
 	}
 }
 
-ChannelMixMode VolumeGroup::GetChannelMixMode()
+ChannelMixMode VolumeGroup::GetChannelMixMode() const
 {
 	if (!m_vd_list.empty())
 		return m_vd_list[0]->GetChannelMixMode();
@@ -175,7 +175,7 @@ void VolumeGroup::SetGamma(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetGamma()
+double VolumeGroup::GetGamma() const
 {
 	return m_gamma;
 }
@@ -199,7 +199,7 @@ void VolumeGroup::SetBoundaryLow(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetBoundaryLow()
+double VolumeGroup::GetBoundaryLow() const
 {
 	return m_boundary_low;
 }
@@ -214,7 +214,7 @@ void VolumeGroup::SetBoundaryHigh(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetBoundaryHigh()
+double VolumeGroup::GetBoundaryHigh() const
 {
 	return m_boundary_high;
 }
@@ -229,7 +229,7 @@ void VolumeGroup::SetBoundaryMax(double val)
 	}
 }
 
-double VolumeGroup::GetBoundaryMax()
+double VolumeGroup::GetBoundaryMax() const
 {
 	return m_boundary_max;
 }
@@ -253,7 +253,7 @@ void VolumeGroup::SetLowOffset(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetLowOffset()
+double VolumeGroup::GetLowOffset() const
 {
 	return m_lo_offset;
 }
@@ -268,7 +268,7 @@ void VolumeGroup::SetHighOffset(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetHighOffset()
+double VolumeGroup::GetHighOffset() const
 {
 	return m_hi_offset;
 }
@@ -292,7 +292,7 @@ void VolumeGroup::SetLeftThresh(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetLeftThresh()
+double VolumeGroup::GetLeftThresh() const
 {
 	return m_lo_thresh;
 }
@@ -307,12 +307,12 @@ void VolumeGroup::SetRightThresh(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetRightThresh()
+double VolumeGroup::GetRightThresh() const
 {
 	return m_hi_thresh;
 }
 
-double VolumeGroup::GetSoftThreshold()
+double VolumeGroup::GetSoftThreshold() const
 {
 	return m_sw;
 }
@@ -336,7 +336,7 @@ void VolumeGroup::SetLuminance(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetLuminance()
+double VolumeGroup::GetLuminance() const
 {
 	return m_luminance;
 }
@@ -360,7 +360,7 @@ void VolumeGroup::SetAlpha(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetAlpha()
+double VolumeGroup::GetAlpha() const
 {
 	return m_alpha;
 }
@@ -384,7 +384,7 @@ void VolumeGroup::SetShadingStrength(double val)
 	}
 }
 
-double VolumeGroup::GetShadingStrength()
+double VolumeGroup::GetShadingStrength() const
 {
 	return m_shading_strength;
 }
@@ -399,7 +399,7 @@ void VolumeGroup::SetShadingShine(double val)
 	}
 }
 
-double VolumeGroup::GetShadingShine()
+double VolumeGroup::GetShadingShine() const
 {
 	return m_shading_shine;
 }
@@ -423,7 +423,7 @@ void VolumeGroup::SetShadowIntensity(double val)
 	}
 }
 
-double VolumeGroup::GetShadowIntensity()
+double VolumeGroup::GetShadowIntensity() const
 {
 	return m_shadow_intensity;
 }
@@ -447,7 +447,7 @@ void VolumeGroup::SetSampleRate(double val, bool set_this)
 	}
 }
 
-double VolumeGroup::GetSampleRate()
+double VolumeGroup::GetSampleRate() const
 {
 	return m_sample_rate;
 }
@@ -476,12 +476,12 @@ void VolumeGroup::SetColormapValues(double low, double high)
 	}
 }
 
-double VolumeGroup::GetColormapLow()
+double VolumeGroup::GetColormapLow() const
 {
 	return m_colormap_low;
 }
 
-double VolumeGroup::GetColormapHigh()
+double VolumeGroup::GetColormapHigh() const
 {
 	return m_colormap_high;
 }

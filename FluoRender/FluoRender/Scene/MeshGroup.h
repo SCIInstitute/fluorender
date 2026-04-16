@@ -48,13 +48,13 @@ public:
 	{
 		m_num = id;
 	}
-	static int GetID()
+	static int GetIdCount()
 	{
 		return m_num;
 	}
 
 	//data
-	int GetMeshNum()
+	int GetMeshNum() const
 	{
 		return (int)m_md_list.size();
 	}

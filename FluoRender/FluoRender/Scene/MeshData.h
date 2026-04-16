@@ -62,21 +62,21 @@ public:
 
 	//path
 	void SetPath(const std::wstring& path) { m_data_path = path; }
-	std::wstring GetPath() { return m_data_path; }
+	std::wstring GetPath() const { return m_data_path; }
 	fluo::BBox GetBounds();
-	GLMmodel* GetMesh();
+	GLMmodel* GetMesh() const;
 	void SetDisp(bool disp);
 	void ToggleDisp();
-	bool GetDisp();
+	bool GetDisp() const;
 	void SetDrawBounds(bool draw);
 	void ToggleDrawBounds();
-	bool GetDrawBounds();
+	bool GetDrawBounds() const;
 
 	//data management
 	int Load(GLMmodel* mesh, const std::wstring& name, const std::wstring& path);
 	void Save(const std::wstring &filename);
 	void SetReader(const std::shared_ptr<BaseMeshReader>& reader);
-	std::shared_ptr<BaseMeshReader> GetReader() { return m_reader.lock(); }
+	std::shared_ptr<BaseMeshReader> GetReader() const { return m_reader.lock(); }
 
 	//data synchronization
 	void SetTransformation();
@@ -91,23 +91,23 @@ public:
 	//allocate vbo
 	GLuint AddCoordVBO(int vertex_size);
 	void UpdateCoordVBO(const std::vector<float>& vbo, const std::vector<int>& idx);
-	GLuint GetCoordVBO();
+	GLuint GetCoordVBO() const;
 	GLuint AddIndexVBO(size_t vsize);//convert to vbo and index list
-	GLuint GetIndexVBO();
+	GLuint GetIndexVBO() const;
 	void UpdateNormalVBO(const std::vector<float>& vbo);
 	void DeleteNormalVBO();
-	GLuint GetNormalVBO();
+	GLuint GetNormalVBO() const;
 	GLuint AddColorVBO(int vertex_size);
 	void DeleteColorVBO();
-	GLuint GetColorVBO();
+	GLuint GetColorVBO() const;
 
 	void SetVertexNum(unsigned int num);
-	unsigned int GetVertexNum();
+	unsigned int GetVertexNum() const;
 	void SetTriangleNum(unsigned int num);
-	unsigned int GetTriangleNum();
+	unsigned int GetTriangleNum() const;
 
 	//MR
-	flvr::MeshRenderer* GetMR();
+	flvr::MeshRenderer* GetMR() const;
 
 	//draw
 	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat);
@@ -116,56 +116,56 @@ public:
 	void DrawInt(unsigned int name);
 
 	void SetFlatShading(bool bval);
-	bool GetFlatShading();
+	bool GetFlatShading() const;
 	void SetVertexColor(bool val);
-	bool GetVertexColor();
+	bool GetVertexColor() const;
 
 	void SetFog(bool bVal, double fog_intensity, double fog_start, double fog_end);
 	void SetFogColor(const fluo::Color& color);
-	bool GetFog();
+	bool GetFog() const;
 
 	//properties
 	void SetColor(const fluo::Color &color);
-	virtual fluo::Color GetColor() override;
-	fluo::Color GetDataColor();
+	virtual fluo::Color GetColor() const override;
+	fluo::Color GetDataColor() const;
 	void SetAlphaEnable(bool bVal)
 	{
 		m_alpha_enable = bVal;
 		if (!bVal)
 			SetAlpha(1.0);
 	}
-	bool GetAlphaEnable() { return m_alpha_enable; }
+	bool GetAlphaEnable() const { return m_alpha_enable; }
 	void SetAlpha(double val);
-	double GetAlpha();
-	bool GetTransparent();
+	double GetAlpha() const;
+	bool GetTransparent() const;
 	void SetShading(bool bVal);
-	bool GetShading();
+	bool GetShading() const;
 	void SetShadingStrength(double val);
-	double GetShadingStrength();
+	double GetShadingStrength() const;
 	void SetShadingShine(double val);
-	double GetShadingShine();
+	double GetShadingShine() const;
 	//shadow
 	void SetShadowEnable(bool bVal);
-	bool GetShadowEnable();
+	bool GetShadowEnable() const;
 	void SetShadowIntensity(double val);
-	double GetShadowIntensity();
+	double GetShadowIntensity() const;
 	//legend
 	void SetLegend(bool val) { m_legend = val; }
-	bool GetLegend() { return m_legend; }
+	bool GetLegend() const { return m_legend; }
 
 	void SetTranslation(const fluo::Vector& val) { m_trans = val; SetTransformation(); }
-	fluo::Vector GetTranslation() { return m_trans; }
+	fluo::Vector GetTranslation() const { return m_trans; }
 	void SetRotation(const fluo::Vector& val) { m_rot = val; SetTransformation(); }
-	fluo::Vector GetRotation() { return m_rot; }
+	fluo::Vector GetRotation() const { return m_rot; }
 	void SetScalingEnable(bool val)
 	{
 		m_scaling_enable = val;
 		if (!val)
 			SetScaling(fluo::Vector(1.0));
 	}
-	bool GetScalingEnable() { return m_scaling_enable; }
+	bool GetScalingEnable() const { return m_scaling_enable; }
 	void SetScaling(const fluo::Vector& val) { m_scale = val; SetTransformation(); }
-	fluo::Vector GetScaling() { return m_scale; }
+	fluo::Vector GetScaling() const { return m_scale; }
 
 	virtual void SetClippingBox(const fluo::ClippingBox& box) override;
 	virtual fluo::ClippingBox& GetClippingBox() override;
@@ -189,7 +189,7 @@ public:
 
 	//time sequence
 	void SetCurTime(int time) { m_time = time; }
-	int GetCurTime() { return m_time; }
+	int GetCurTime() const { return m_time; }
 
 private:
 	std::wstring m_data_path;

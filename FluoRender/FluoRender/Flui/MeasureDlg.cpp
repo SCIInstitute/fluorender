@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VertexArray.h>
 #include <VolumeRenderer.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <RulerHandler.h>
 #include <RulerAlign.h>
 #include <RulerRenderer.h>
@@ -918,7 +919,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		wxColour c;
 		for (int i = 0; i < m_ruler_list->GetItemCount(); ++i)
 		{
-			flrd::Ruler* ruler = glbin_ruler_handler.GetRuler(i);
+			auto ruler = glbin_ruler_handler.GetRuler(i);
 			if (!ruler)
 				continue;
 			bval = ruler->GetDisp();
@@ -953,7 +954,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstRulerTransient))
 	{
-		flrd::Ruler* ruler = glbin_current.GetRuler();
+		auto ruler = glbin_current.GetRuler();
 		if(ruler)
 		{
 			bval = ruler->GetTransient();
@@ -968,7 +969,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstRulerDisp))
 	{
-		flrd::Ruler* ruler = glbin_current.GetRuler();
+		auto ruler = glbin_current.GetRuler();
 		if (ruler)
 		{
 			if (ruler->GetDisp())
@@ -1003,7 +1004,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstRulerInterpolation))
 	{
-		flrd::Ruler* ruler = glbin_current.GetRuler();
+		auto ruler = glbin_current.GetRuler();
 		if (ruler)
 		{
 			ival = ruler->GetInterp();
@@ -1026,16 +1027,15 @@ void MeasureDlg::UpdateRulerList()
 	m_ruler_list->m_color_picker->Hide();
 
 	auto view = glbin_current.render_view.lock();
-	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
+	auto ruler_list = glbin_current.GetRulerList();
 	if (!ruler_list)
 		return;
 
 	std::set<int> sel;
 	m_ruler_list->GetCurrSelection(sel);
 
-	std::vector<unsigned int> groups;
-	int group_num = ruler_list->GetGroupNum(groups);
-	std::vector<int> group_count(group_num, 0);
+	auto groups = ruler_list->get().Groups();
+	std::vector<int> group_count(groups.size(), 0);
 
 	m_ruler_list->DeleteAllItems();
 
@@ -1047,9 +1047,9 @@ void MeasureDlg::UpdateRulerList()
 		t = view->m_param_cur_num;
 	else
 		t = view->m_tseq_cur_num;
-	for (int i = 0; i < (int)ruler_list->size(); i++)
+	for (int i = 0; i < (int)ruler_list->get().size(); i++)
 	{
-		flrd::Ruler* ruler = (*ruler_list)[i];
+		auto ruler = ruler_list->get().GetRuler(i);
 		if (!ruler) continue;
 		ruler->SetWorkTime(t);
 		if (ruler->GetTransient() &&
@@ -1142,7 +1142,7 @@ void MeasureDlg::UpdateRulerList()
 
 void MeasureDlg::UpdateRulerListCur()
 {
-	flrd::Ruler* ruler = glbin_current.GetRuler();
+	auto ruler = glbin_current.GetRuler();
 	int item = glbin_ruler_handler.GetRulerIndex();
 	if (!ruler)
 		return;
@@ -1170,14 +1170,14 @@ void MeasureDlg::UpdateRulerListCur()
 void MeasureDlg::UpdateGroupSel()
 {
 	m_ruler_list->ClearSelection();
-	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
+	auto ruler_list = glbin_current.GetRulerList();
 	if (!ruler_list)
 		return;
 
 	size_t gi = glbin_ruler_handler.GetGroup();
-	for (size_t i = 0; i < ruler_list->size(); ++i)
+	for (size_t i = 0; i < ruler_list->get().size(); ++i)
 	{
-		flrd::Ruler* ruler = (*ruler_list)[i];
+		auto ruler = ruler_list->get().GetRuler(i);
 		if (!ruler) continue;
 		if (ruler->Group() == gi)
 			m_ruler_list->SelectItemSilently(i);
@@ -1195,7 +1195,7 @@ void MeasureDlg::ToggleDisplay()
 
 void MeasureDlg::SetCurrentRuler()
 {
-	flrd::Ruler* ruler = glbin_current.GetRuler();
+	auto ruler = glbin_current.GetRuler();
 	int focus = glbin_ruler_handler.GetEditingRuler();
 	auto editing_ruler = glbin_ruler_handler.GetRuler(focus);
 	if (ruler != editing_ruler)
@@ -1220,7 +1220,7 @@ void MeasureDlg::UpdateProfile()
 	wxString str;
 	for (int i = 0; i < m_ruler_list->GetItemCount(); ++i)
 	{
-		flrd::Ruler* ruler = glbin_ruler_handler.GetRuler(i);
+		auto ruler = glbin_ruler_handler.GetRuler(i);
 		if (!ruler)
 			continue;
 
@@ -1687,7 +1687,7 @@ void MeasureDlg::OnAlignCenterChk(wxCommandEvent& event)
 
 void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
-	flrd::Ruler* ruler = glbin_current.GetRuler();
+	auto ruler = glbin_current.GetRuler();
 	if (!ruler)
 		return;
 
@@ -1704,7 +1704,7 @@ void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 	std::set<int> sel;
 	m_ruler_list->GetCurrSelection(sel);
 	glbin_ruler_handler.GetRulerList(sel, list);
-	glbin_aligner.SetRulerList(&list);
+	glbin_aligner.SetRulerList(list);
 	glbin_aligner.SetAxisType(event.GetId());
 	glbin_aligner.AlignPca(true);
 	FluoRefresh(3, { gstNull },
@@ -1724,7 +1724,7 @@ void MeasureDlg::OnKeyDown(wxKeyEvent& event)
 			wxLIST_STATE_SELECTED);
 		if (item != -1)
 		{
-			flrd::Ruler* ruler = glbin_current.GetRuler();
+			auto ruler = glbin_current.GetRuler();
 			if (ruler)
 			{
 				fluo::Point cp = ruler->GetCenter();

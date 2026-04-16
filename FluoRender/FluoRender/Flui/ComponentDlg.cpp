@@ -2608,7 +2608,7 @@ void ComponentDlg::AlignPca(int axis_type)
 {
 	flrd::RulerList list;
 	glbin_comp_analyzer.GetRulerListFromCelp(list);
-	glbin_aligner.SetRulerList(&list);
+	glbin_aligner.SetRulerList(list);
 	glbin_aligner.SetAxisType(axis_type);
 	glbin_aligner.SetView(glbin_current.render_view.lock());
 	glbin_aligner.AlignPca(true);

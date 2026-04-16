@@ -377,7 +377,7 @@ void ClippingBox::SetLink(ClipPlane plane, bool link)
 	}
 }
 
-bool ClippingBox::GetLink(ClipPlane plane)
+bool ClippingBox::GetLink(ClipPlane plane) const
 {
 	switch (plane)
 	{
@@ -420,7 +420,7 @@ void ClippingBox::SetLinkedDistWorld(ClipPlane plane, double dist)
 	linked_ds_unit_[axis] = IndexToUnitDist(axis, linked_ds_index_[axis]);
 }
 
-double ClippingBox::GetLinkedDistWorld(ClipPlane plane)
+double ClippingBox::GetLinkedDistWorld(ClipPlane plane) const
 {
 	int axis = (plane == ClipPlane::XNeg || plane == ClipPlane::XPos) ? 0 :
 		(plane == ClipPlane::YNeg || plane == ClipPlane::YPos) ? 1 : 2;
@@ -437,7 +437,7 @@ void ClippingBox::SetLinkedDistIndex(ClipPlane plane, double dist)
 	linked_ds_unit_[axis] = IndexToUnitDist(axis, dist);
 }
 
-double ClippingBox::GetLinkedDistIndex(ClipPlane plane)
+double ClippingBox::GetLinkedDistIndex(ClipPlane plane) const
 {
 	int axis = (plane == ClipPlane::XNeg || plane == ClipPlane::XPos) ? 0 :
 		(plane == ClipPlane::YNeg || plane == ClipPlane::YPos) ? 1 : 2;

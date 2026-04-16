@@ -38,11 +38,11 @@ public:
 	TreeLayer();
 	~TreeLayer();
 
-	int IsA()
+	int IsA() const
 	{
 		return type;
 	}
-	std::wstring GetName()
+	std::wstring GetName() const
 	{
 		return m_name;
 	}
@@ -50,7 +50,7 @@ public:
 	{
 		m_name = name;
 	}
-	unsigned int Id()
+	unsigned int Id() const
 	{
 		return m_id;
 	}
@@ -59,25 +59,25 @@ public:
 		m_id = id;
 	}
 
-	virtual fluo::Color GetColor() { return fluo::Color(1.0); }
+	virtual fluo::Color GetColor() const { return fluo::Color(1.0); }
 	//layer adjustment
 	//gamma
-	const fluo::Color GetGammaColor()
+	const fluo::Color GetGammaColor() const
 	{return m_gamma;}
 	void SetGammaColor(const fluo::Color &gamma)
 	{m_gamma = gamma;}
 	//brightness
-	const fluo::Color GetBrightness()
+	const fluo::Color GetBrightness() const
 	{return m_brightness;}
 	void SetBrightness(const fluo::Color &brightness)
 	{m_brightness = brightness;}
 	//hdr settings
-	const fluo::Color GetHdr()
+	const fluo::Color GetHdr() const
 	{return m_hdr;}
 	void SetHdr(const fluo::Color &hdr)
 	{m_hdr = hdr;}
 	//sync values
-	bool GetSync(int i) { if (i >= 0 && i < 3) return m_sync[i]; else return false; }
+	bool GetSync(int i) const { if (i >= 0 && i < 3) return m_sync[i]; else return false; }
 	void SetSync(int i, bool val) { if (i >= 0 && i < 3) m_sync[i] = val; }
 
 	//randomize color
@@ -111,16 +111,16 @@ public:
 	virtual void SetClipRotation(const fluo::Quaternion& q) { m_clipping_box.Rotate(q); }
 	//clip distance
 	virtual void SetLink(fluo::ClipPlane i, bool link) { m_clipping_box.SetLink(i, link); }
-	virtual bool GetLink(fluo::ClipPlane i) { return m_clipping_box.GetLink(i); }
+	virtual bool GetLink(fluo::ClipPlane i) const { return m_clipping_box.GetLink(i); }
 	virtual void ResetLink() { m_clipping_box.ResetLink(); }
 	virtual void SetLinkedDist(fluo::ClipPlane i, int val) { m_clipping_box.SetLinkedDistIndex(i, val); }
-	virtual int GetLinkedDist(fluo::ClipPlane i) { return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i))); }
+	virtual int GetLinkedDist(fluo::ClipPlane i) const { return static_cast<int>(std::round(m_clipping_box.GetLinkedDistIndex(i))); }
 
 	virtual void SetOutline(bool outline)
 	{
 		m_outline = outline;
 	}
-	virtual bool GetOutline()
+	virtual bool GetOutline() const
 	{
 		return m_outline;
 	}

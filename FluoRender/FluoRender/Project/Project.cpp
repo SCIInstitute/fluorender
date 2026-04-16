@@ -1620,7 +1620,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 					fconfig->Write("type", 5);
 					fconfig->Write("name", layer->GetName());
-					fconfig->Write("id", VolumeGroup::GetID());
+					fconfig->Write("id", VolumeGroup::GetIdCount());
 					//dispaly
 					fconfig->Write("display", group->GetDisp());
 					//2d adjustment
@@ -1650,7 +1650,7 @@ void Project::Save(const std::wstring& filename, bool inc)
 
 					fconfig->Write("type", 6);
 					fconfig->Write("name", layer->GetName());
-					fconfig->Write("id", MeshGroup::GetID());
+					fconfig->Write("id", MeshGroup::GetIdCount());
 					//display
 					fconfig->Write("display", group->GetDisp());
 					//sync mesh properties

@@ -335,14 +335,14 @@ void CurrentObjects::SetSel(const std::wstring& str)
 	}
 }
 
-int CurrentObjects::GetViewId()
+int CurrentObjects::GetViewId() const
 {
 	if (auto vptr = render_view.lock())
 		return vptr->Id();
 	return 0;
 }
 
-int CurrentObjects::GetDrawingViewId()
+int CurrentObjects::GetDrawingViewId() const
 {
 	if (auto vptr = render_view_drawing.lock())
 		return vptr->Id();
@@ -350,14 +350,14 @@ int CurrentObjects::GetDrawingViewId()
 }
 
 std::optional<std::reference_wrapper<flrd::RulerList>>
-CurrentObjects::GetRulerList()
+CurrentObjects::GetRulerList() const
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetRulerList();
 	return std::nullopt;
 }
 
-std::shared_ptr<flrd::Ruler> CurrentObjects::GetRuler()
+std::shared_ptr<flrd::Ruler> CurrentObjects::GetRuler() const
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetCurRuler();
@@ -365,7 +365,7 @@ std::shared_ptr<flrd::Ruler> CurrentObjects::GetRuler()
 }
 
 std::optional<std::reference_wrapper<TrackGroup>>
-CurrentObjects::GetTrackGroup()
+CurrentObjects::GetTrackGroup() const
 {
 	if (auto vptr = render_view.lock())
 		return vptr->GetTrackGroup();
@@ -373,7 +373,7 @@ CurrentObjects::GetTrackGroup()
 }
 
 std::optional<std::reference_wrapper<fluo::ClippingBox>>
-CurrentObjects::GetClippingBox()
+CurrentObjects::GetClippingBox() const
 {
 	switch (GetType())
 	{

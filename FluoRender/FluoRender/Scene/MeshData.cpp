@@ -529,7 +529,7 @@ GLuint MeshData::AddIndexVBO(size_t vsize)
 	return static_cast<GLuint>(va_model->id_buffer(flvr::VABufferType::VABuf_Index));
 }
 
-GLuint MeshData::GetIndexVBO()
+GLuint MeshData::GetIndexVBO() const
 {
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
@@ -558,7 +558,7 @@ void MeshData::UpdateCoordVBO(const std::vector<float>& vbo_data, const std::vec
 	}
 }
 
-GLuint MeshData::GetCoordVBO()
+GLuint MeshData::GetCoordVBO() const
 {
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
@@ -600,7 +600,7 @@ void MeshData::DeleteNormalVBO()
 	}
 }
 
-GLuint MeshData::GetNormalVBO()
+GLuint MeshData::GetNormalVBO() const
 {
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
@@ -642,7 +642,7 @@ void MeshData::DeleteColorVBO()
 	}
 }
 
-GLuint MeshData::GetColorVBO()
+GLuint MeshData::GetColorVBO() const
 {
 	auto va_model = m_mr->GetVertexArray();
 	if (!va_model)
@@ -657,7 +657,7 @@ void MeshData::SetVertexNum(unsigned int num)
 	m_data->numvertices = static_cast<GLuint>(num);
 }
 
-unsigned int MeshData::GetVertexNum()
+unsigned int MeshData::GetVertexNum() const
 {
 	if (!m_data)
 		return 0;
@@ -674,7 +674,7 @@ void MeshData::SetTriangleNum(unsigned int num)
 	}
 }
 
-unsigned int MeshData::GetTriangleNum()
+unsigned int MeshData::GetTriangleNum() const
 {
 	if (!m_data)
 		return 0;
@@ -682,7 +682,7 @@ unsigned int MeshData::GetTriangleNum()
 }
 
 //MR
-flvr::MeshRenderer* MeshData::GetMR()
+flvr::MeshRenderer* MeshData::GetMR() const
 {
 	return m_mr.get();
 }
@@ -750,7 +750,7 @@ void MeshData::SetShading(bool bVal)
 		m_mr->set_shading(m_shading);
 }
 
-bool MeshData::GetShading()
+bool MeshData::GetShading() const
 {
 	return m_shading;
 }
@@ -762,7 +762,7 @@ void MeshData::SetFlatShading(bool bval)
 		m_mr->set_flat_shading(bval);
 }
 
-bool MeshData::GetFlatShading()
+bool MeshData::GetFlatShading() const
 {
 	return m_flat_shading;
 }
@@ -774,7 +774,7 @@ void MeshData::SetVertexColor(bool val)
 		m_mr->set_vertex_color(val);
 }
 
-bool MeshData::GetVertexColor()
+bool MeshData::GetVertexColor() const
 {
 	return m_vertex_color;
 }
@@ -794,7 +794,7 @@ void MeshData::SetFogColor(const fluo::Color &color)
 		m_mr->set_fog_color(color);
 }
 
-bool MeshData::GetFog()
+bool MeshData::GetFog() const
 {
 	return m_fog;
 }
@@ -806,12 +806,12 @@ void MeshData::SetColor(const fluo::Color &color)
 		m_mr->set_color(color);
 }
 
-fluo::Color MeshData::GetColor()
+fluo::Color MeshData::GetColor() const
 {
 	return m_color;
 }
 
-fluo::Color MeshData::GetDataColor()
+fluo::Color MeshData::GetDataColor() const
 {
 	if (m_mr)
 		return m_mr->get_color();
@@ -825,7 +825,7 @@ void MeshData::SetAlpha(double alpha)
 		m_mr->set_alpha(alpha);
 }
 
-double MeshData::GetAlpha()
+double MeshData::GetAlpha() const
 {
 	return m_alpha;
 }
@@ -837,7 +837,7 @@ void MeshData::SetShadingStrength(double val)
 		m_mr->set_shading_strength(val);
 }
 
-double MeshData::GetShadingStrength()
+double MeshData::GetShadingStrength() const
 {
 	return m_shading_strength;
 }
@@ -849,12 +849,12 @@ void MeshData::SetShadingShine(double val)
 		m_mr->set_shading_shine(val);
 }
 
-double MeshData::GetShadingShine()
+double MeshData::GetShadingShine() const
 {
 	return m_shading_shine;
 }
 
-bool MeshData::GetTransparent()
+bool MeshData::GetTransparent() const
 {
 	if (m_alpha < 1.0)
 		return true;
@@ -867,7 +867,7 @@ void MeshData::SetShadowEnable(bool bVal)
 	m_shadow_enable= bVal;
 }
 
-bool MeshData::GetShadowEnable()
+bool MeshData::GetShadowEnable() const
 {
 	return m_shadow_enable;
 }
@@ -877,7 +877,7 @@ void MeshData::SetShadowIntensity(double val)
 	m_shadow_intensity = val;
 }
 
-double MeshData::GetShadowIntensity()
+double MeshData::GetShadowIntensity() const
 {
 	return m_shadow_intensity;
 }
@@ -894,7 +894,7 @@ fluo::BBox MeshData::GetBounds()
 	return m_bounds;
 }
 
-GLMmodel* MeshData::GetMesh()
+GLMmodel* MeshData::GetMesh() const
 {
 	return m_data.get();
 }
@@ -909,7 +909,7 @@ void MeshData::ToggleDisp()
 	m_disp = !m_disp;
 }
 
-bool MeshData::GetDisp()
+bool MeshData::GetDisp() const
 {
 	return m_disp;
 }
@@ -924,7 +924,7 @@ void MeshData::ToggleDrawBounds()
 	m_draw_bounds = !m_draw_bounds;
 }
 
-bool MeshData::GetDrawBounds()
+bool MeshData::GetDrawBounds() const
 {
 	return m_draw_bounds;
 }

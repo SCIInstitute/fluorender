@@ -90,15 +90,15 @@ namespace fluo
 
 		// --- Linking controls ---
 		void SetLink(ClipPlane plane, bool link);
-		bool GetLink(ClipPlane plane);
+		bool GetLink(ClipPlane plane) const;
 		void ResetLink();
 		void ResetLinkedDist();
 
 		void SetLinkedDistWorld(ClipPlane plane, double dist);
-		double GetLinkedDistWorld(ClipPlane plane);
+		double GetLinkedDistWorld(ClipPlane plane) const;
 
 		void SetLinkedDistIndex(ClipPlane plane, double dist);
-		double GetLinkedDistIndex(ClipPlane plane);
+		double GetLinkedDistIndex(ClipPlane plane) const;
 
 		// --- Reset helpers ---
 		void ResetClips();

@@ -40,8 +40,8 @@ public:
 	AText(const std::wstring &str, const fluo::Point &pos);
 	~AText();
 
-	std::wstring GetText();
-	fluo::Point GetPos();
+	std::wstring GetText() const;
+	fluo::Point GetPos() const;
 	void SetText(const std::wstring& str);
 	void SetPos(fluo::Point pos);
 	void SetInfo(const std::wstring& str);
@@ -69,20 +69,20 @@ public:
 	{
 		m_num = id;
 	}
-	static int GetID()
+	static int GetIdCount()
 	{
 		return m_num;
 	}
 
-	int GetTextNum();
-	std::wstring GetTextText(int index);
-	fluo::Point GetTextPos(int index);
-	fluo::Point GetTextTransformedPos(int index);
-	std::wstring GetTextInfo(int index);
+	int GetTextNum() const;
+	std::wstring GetTextText(int index) const;
+	fluo::Point GetTextPos(int index) const;
+	fluo::Point GetTextTransformedPos(int index) const;
+	std::wstring GetTextInfo(int index) const;
 	void AddText(const std::wstring& str, fluo::Point pos, const std::wstring& info);
 	void SetTransform(fluo::Transform *tform);
 	void SetVolume(const std::shared_ptr<VolumeData>& vd);
-	std::shared_ptr<VolumeData> GetVolume();
+	std::shared_ptr<VolumeData> GetVolume() const;
 
 	void Clear();
 
@@ -95,24 +95,24 @@ public:
 	{
 		m_disp = !m_disp;
 	}
-	bool GetDisp()
+	bool GetDisp() const
 	{
 		return m_disp;
 	}
 
 	//memo
 	void SetMemo(const std::wstring &memo);
-	std::wstring GetMemo();
+	std::wstring GetMemo() const;
 	void SetMemoRO(bool ro);
-	bool GetMemoRO();
+	bool GetMemoRO() const;
 
 	//save/load
-	std::wstring GetPath();
+	std::wstring GetPath() const;
 	int Load(const std::wstring &filename);
 	void Save(const std::wstring &filename);
 
 	//info meaning
-	std::wstring GetInfoMeaning();
+	std::wstring GetInfoMeaning() const;
 	void SetInfoMeaning(const std::wstring &str);
 
 	bool InsideClippingPlanes(fluo::Point &pos);
@@ -136,7 +136,7 @@ private:
 	std::wstring m_info_meaning;
 
 private:
-	std::shared_ptr<AText> GetAText(const std::wstring& str);
+	std::shared_ptr<AText> GetAText(const std::wstring& str) const;
 };
 
 

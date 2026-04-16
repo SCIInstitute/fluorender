@@ -258,7 +258,7 @@ namespace fluo
 		flrd::Clusterizer& get_clusterizer();
 
 		//mesh converter
-		flrd::BaseConvVolMesh* get_conv_vol_mesh();
+		flrd::BaseConvVolMesh& get_conv_vol_mesh();
 		//color mesh
 		flrd::ColorMesh& get_color_mesh();
 

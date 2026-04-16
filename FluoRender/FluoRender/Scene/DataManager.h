@@ -81,10 +81,10 @@ public:
 	//if data's directory doesn't exist
 	void SetProjectPath(const std::wstring& path);
 	std::wstring SearchProjectPath(const std::wstring &filename);
-	std::wstring GetProjectFile();
+	std::wstring GetProjectFile() const;
 
 	//root
-	Root* GetRoot()
+	Root* GetRoot() const
 	{
 		return m_root.get();
 	}
@@ -99,21 +99,21 @@ public:
 	std::shared_ptr<VolumeData> DuplicateVolumeData(const std::shared_ptr<VolumeData>& vd);
 	void RemoveVolumeData(size_t index);
 	void RemoveVolumeData(const std::wstring &name);
-	size_t GetVolumeNum();
-	std::shared_ptr<VolumeData> GetVolumeData(size_t index);
-	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name);
-	size_t GetVolumeIndex(const std::wstring &name);
-	std::shared_ptr<VolumeData> GetLastVolumeData();
+	size_t GetVolumeNum() const;
+	std::shared_ptr<VolumeData> GetVolumeData(size_t index) const;
+	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name) const;
+	size_t GetVolumeIndex(const std::wstring &name) const;
+	std::shared_ptr<VolumeData> GetLastVolumeData() const;
 
 	//load mesh
 	void LoadMeshFiles(const std::vector<std::wstring>& files);
 	bool LoadMeshData(const std::wstring &filename);
 	bool AddMeshData(const std::shared_ptr<MeshData>& md);
-	size_t GetMeshNum();
-	std::shared_ptr<MeshData> GetMeshData(size_t index);
-	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);
-	size_t GetMeshIndex(const std::wstring &name);
-	std::shared_ptr<MeshData> GetLastMeshData();
+	size_t GetMeshNum() const;
+	std::shared_ptr<MeshData> GetMeshData(size_t index) const;
+	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name) const;
+	size_t GetMeshIndex(const std::wstring &name) const;
+	std::shared_ptr<MeshData> GetLastMeshData() const;
 	void RemoveMeshData(size_t index);
 	void ClearMeshSelection();
 
@@ -121,21 +121,19 @@ public:
 	bool LoadAnnotData(const std::wstring &filename);
 	void AddAnnotData(const std::shared_ptr<AnnotData>& ann);
 	void RemoveAnnotData(size_t index);
-	size_t GetAnnotNum();
-	std::shared_ptr<AnnotData> GetAnnotData(size_t index);
-	std::shared_ptr<AnnotData> GetAnnotData(const std::wstring &name);
-	size_t GetAnnotIndex(const std::wstring &name);
-	std::shared_ptr<AnnotData> GetLastAnnotData();
-
+	size_t GetAnnotNum() const;
+	std::shared_ptr<AnnotData> GetAnnotData(size_t index) const;
+	std::shared_ptr<AnnotData> GetAnnotData(const std::wstring &name) const;
+	size_t GetAnnotIndex(const std::wstring &name) const;
+	std::shared_ptr<AnnotData> GetLastAnnotData() const;
 	bool CheckNames(const std::wstring &str);
 
 	//wavelength to color
-	fluo::Color GetWavelengthColor(double wavelength);
-	fluo::Color GetColor(int);
+	fluo::Color GetWavelengthColor(double wavelength) const;
+	fluo::Color GetColor(int) const;
 
 	//get vol cache queue
-	std::shared_ptr<flvr::CacheQueue> GetCacheQueue(const std::shared_ptr<VolumeData>& vd);
-
+	std::shared_ptr<flvr::CacheQueue> GetCacheQueue(const std::shared_ptr<VolumeData>& vd) const;
 	//update stream rendering mode
 	void UpdateStreamMode(double data_size);//input is a newly loaded data size in mb
 

@@ -56,16 +56,16 @@ public:
 	{
 		m_num = id;
 	}
-	static int GetID()
+	static int GetIdCount()
 	{
 		return m_num;
 	}
 
-	int GetVolumeNum()
+	int GetVolumeNum() const
 	{
 		return static_cast<int>(m_vd_list.size());
 	}
-	std::shared_ptr<VolumeData> GetVolumeData(int index)
+	std::shared_ptr<VolumeData> GetVolumeData(int index) const
 	{
 		if (index>=0 && index<(int)m_vd_list.size())
 			return m_vd_list[index];
@@ -107,14 +107,14 @@ public:
 	{
 		m_disp = !m_disp;
 	}
-	bool GetDisp()
+	bool GetDisp() const
 	{
 		return m_disp;
 	}
 
 	//group blend mode
 	void SetChannelMixMode(ChannelMixMode mode);
-	ChannelMixMode GetChannelMixMode();
+	ChannelMixMode GetChannelMixMode() const;
 
 	//set gamma to all
 	void SetGammaAll(const fluo::Color &gamma);
@@ -130,47 +130,47 @@ public:
 	//volume properties
 	void SetGammaEnable(bool);
 	void SetGamma(double val, bool set_this = true);
-	double GetGamma();
+	double GetGamma() const;
 	void SetBoundaryEnable(bool);
 	void SetBoundaryLow(double, bool set_this = true);
-	double GetBoundaryLow();
+	double GetBoundaryLow() const;
 	void SetBoundaryHigh(double, bool set_this = true);
-	double GetBoundaryHigh();
+	double GetBoundaryHigh() const;
 	void SetBoundaryMax(double val);
-	double GetBoundaryMax();
+	double GetBoundaryMax() const;
 	void SetMinMaxEnable(bool);
 	void SetLowOffset(double, bool set_this = true);
-	double GetLowOffset();
+	double GetLowOffset() const;
 	void SetHighOffset(double, bool set_this = true);
-	double GetHighOffset();
+	double GetHighOffset() const;
 	void SetThreshEnable(bool);
 	void SetLeftThresh(double, bool set_this = true);
-	double GetLeftThresh();
+	double GetLeftThresh() const;
 	void SetRightThresh(double, bool set_this = true);
-	double GetRightThresh();
-	double GetSoftThreshold();
+	double GetRightThresh() const;
+	double GetSoftThreshold() const;
 	void SetLuminanceEnable(bool);
 	void SetLuminance(double, bool set_this = true);
-	double GetLuminance();
+	double GetLuminance() const;
 	void SetAlphaEnable(bool);
 	void SetAlpha(double, bool set_this = true);
-	double GetAlpha();
+	double GetAlpha() const;
 	void SetShadingEnable(bool);
 	void SetShadingStrength(double);
 	void SetShadingShine(double);
-	double GetShadingStrength();
-	double GetShadingShine();
+	double GetShadingStrength() const;
+	double GetShadingShine() const;
 	void SetShadowEnable(bool);
 	void SetShadowIntensity(double);
-	double GetShadowIntensity();
+	double GetShadowIntensity() const;
 	void SetSampleRateEnable(bool);
 	void SetSampleRate(double, bool set_this = true);
-	double GetSampleRate();
+	double GetSampleRate() const;
 
 	void SetColormapDisp(bool disp);
 	void SetColormapValues(double low, double high);
-	double GetColormapLow();
-	double GetColormapHigh();
+	double GetColormapLow() const;
+	double GetColormapHigh() const;
 	void SetColormapInv(double val);
 	void SetColormap(int value);
 	void SetColormapProj(flvr::ColormapProj value);
@@ -195,7 +195,7 @@ public:
 	{
 		m_sync_volume_prop = bVal;
 	}
-	bool GetVolumeSyncProp()
+	bool GetVolumeSyncProp() const
 	{
 		return m_sync_volume_prop;
 	}

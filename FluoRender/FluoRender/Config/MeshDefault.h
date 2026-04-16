@@ -45,12 +45,12 @@ public:
 	void Read();
 	void Save();
 
-	void Set(MeshData* md);
-	void Set(flrd::BaseConvVolMesh* cvm);
-	void Apply(MeshData* md);
-	void Copy(MeshData* m1, MeshData* m2);//m2 to m1
-	void Apply(MeshGroup* g);
-	void Apply(flrd::BaseConvVolMesh* cvm);
+	void Set(const MeshData& md);
+	void Set(const flrd::BaseConvVolMesh& cvm);
+	void Apply(MeshData& md);
+	void Copy(MeshData& m1, const MeshData& m2);//m2 to m1
+	void Apply(MeshGroup& g);
+	void Apply(flrd::BaseConvVolMesh& cvm);
 
 public:
 	//mesh conversion settings

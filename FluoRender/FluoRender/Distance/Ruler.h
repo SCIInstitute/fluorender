@@ -354,7 +354,7 @@ namespace flrd
 		{
 			m_num = id;
 		}
-		static int GetID()
+		static int GetIdCount()
 		{
 			return m_num;
 		}

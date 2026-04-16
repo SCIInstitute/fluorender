@@ -123,7 +123,7 @@ public:
 	RenderView(RenderView& copy);
 	virtual ~RenderView();
 
-	std::string GetBufferName(const std::string& base, int sn = -1);
+	std::string GetBufferName(const std::string& base, int sn = -1) const;
 	//handle
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
 	//set render view panel
@@ -131,14 +131,13 @@ public:
 
 	//size
 	void SetSize(int x, int y);
-	Size2D GetSize() { return m_size; }
+	Size2D GetSize() const { return m_size; }
 	void ResetSize();
-	Size2D GetCanvasSize();
-	void GetRenderSize(int& nx, int& ny);
+	Size2D GetCanvasSize() const;
+	void GetRenderSize(int& nx, int& ny) const;
 	void SetClient(int x, int y, int w, int h) { m_client_x = x; m_client_y = y; m_client_w = w; m_client_h = h; }
 	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
-	std::string GetOGLVersion();
-
+	std::string GetOGLVersion() const;
 	//initialization
 	void Init();
 
@@ -153,29 +152,29 @@ public:
 	void ClearVolList();
 	void ClearMeshList();
 
-	ChannelMixMode GetChannelMixMode() { return m_channel_mix_mode; }
+	ChannelMixMode GetChannelMixMode() const { return m_channel_mix_mode; }
 	void SetChannelMixMode(ChannelMixMode mode) { m_channel_mix_mode = mode; }
 	void UpdateChannelMixMode(ChannelMixMode mode, fluo::ValueCollection& vc);
 
 	//data management
 	int GetAny();
 	int GetDispVolumeNum();
-	int GetAllVolumeNum();
+	int GetAllVolumeNum() const;
 	int GetMeshNum();
-	int GetGroupNum();
-	int GetLayerNum();
-	std::shared_ptr<VolumeData> GetAllVolumeData(int index);
+	int GetGroupNum() const;
+	int GetLayerNum() const;
+	std::shared_ptr<VolumeData> GetAllVolumeData(int index) const;
 	std::shared_ptr<VolumeData> GetDispVolumeData(int index);
 	std::shared_ptr<MeshData> GetMeshData(int index);
-	std::shared_ptr<TreeLayer> GetLayer(int index);
-	std::optional<std::reference_wrapper<flvr::MultiVolumeRenderer>> GetMultiVolumeData();
-	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name);
-	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name);
-	std::shared_ptr<AnnotData> GetAnnotData(const std::wstring &name);
-	std::shared_ptr<VolumeGroup> GetGroup(const std::wstring &name);
-	std::shared_ptr<VolumeGroup> GetGroup(int index);
-	std::shared_ptr<VolumeGroup> GetGroup(const std::shared_ptr<VolumeData>& vd);
-	std::shared_ptr<MeshGroup> GetMGroup(const std::wstring &str);
+	std::shared_ptr<TreeLayer> GetLayer(int index) const;
+	std::optional<std::reference_wrapper<flvr::MultiVolumeRenderer>> GetMultiVolumeData() const;
+	std::shared_ptr<VolumeData> GetVolumeData(const std::wstring &name) const;
+	std::shared_ptr<MeshData> GetMeshData(const std::wstring &name) const;
+	std::shared_ptr<AnnotData> GetAnnotData(const std::wstring &name) const;
+	std::shared_ptr<VolumeGroup> GetGroup(const std::wstring &name) const;
+	std::shared_ptr<VolumeGroup> GetGroup(int index) const;
+	std::shared_ptr<VolumeGroup> GetGroup(const std::shared_ptr<VolumeData>& vd) const;
+	std::shared_ptr<MeshGroup> GetMGroup(const std::wstring &str) const;
 	//add
 	std::shared_ptr<VolumeGroup> AddVolumeData(const std::shared_ptr<VolumeData>& vd, const std::wstring &group_name = L"");
 	void AddMeshData(const std::shared_ptr<MeshData>& md);
@@ -216,93 +215,92 @@ public:
 	//toggle hiding/displaying
 	void SetDraw(bool draw) { m_draw_all = draw; }
 	void ToggleDraw() { m_draw_all = !m_draw_all; }
-	bool GetDraw() { return m_draw_all; }
+	bool GetDraw() const { return m_draw_all; }
 
 	//handle camera
 	void HandleProjection(int nx, int ny, bool vr = false);
 	void GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3& up);
-	void GetCameraSettingsOrthoFligt(glm::vec3& eye, glm::vec3& center, float& dist);
+	void GetCameraSettingsOrthoFligt(glm::vec3& eye, glm::vec3& center, float& dist) const;
 	void HandleCamera(bool vr = false);
-	float GetDistancePerspFlight();
+	float GetDistancePerspFlight() const;
 	//camera operations
-	fluo::Vector GetTranslations();
+	fluo::Vector GetTranslations() const;
 	void SetTranslations(const fluo::Vector& val);
-	fluo::Quaternion GetZeroQuat() { return m_cam_zero_q; }
+	fluo::Quaternion GetZeroQuat() const { return m_cam_zero_q; }
 	void SetZeroQuat(const fluo::Quaternion& val) { m_cam_zero_q = val; }
-	fluo::Quaternion GetRotQuat() { return m_cam_q; }
-	fluo::Vector GetRotations();
+	fluo::Quaternion GetRotQuat() const { return m_cam_q; }
+	fluo::Vector GetRotations() const;
 	void SetRotations(const fluo::Vector& val, bool notify);
-	int GetOrientation();//same as the indices in the view panel
+	int GetOrientation() const;//same as the indices in the view panel
 	void SetZeroRotations() { m_cam_zero_q = m_cam_q; }
 	fluo::Vector ResetZeroRotations();
-	fluo::Point GetCenters();
+	fluo::Point GetCenters() const;
 	void SetCenters(const fluo::Point& val);
-	double GetCenterEyeDist() { return m_distance; }
+	double GetCenterEyeDist() const { return m_distance; }
 	void SetCenterEyeDist(double dist) { m_distance = dist; }
-	double GetInitDist() { return m_init_dist; }
+	double GetInitDist() const { return m_init_dist; }
 	void SetInitDist(double dist) { m_init_dist = dist; }
-	double GetRadius() { return m_radius; }
+	double GetRadius() const { return m_radius; }
 	void SetRadius(double r) { m_radius = r; }
 	void SetCenter();
-	double Get121ScaleFactor();
+	double Get121ScaleFactor() const;
 	void SetScale121();
 	void SetPinRotCenter(bool, bool);
 
 	//object operations
-	fluo::Point GetObjCenters();
+	fluo::Point GetObjCenters() const;
 	void SetObjCenters(const fluo::Point& val);
-	fluo::Vector GetObjRot();
+	fluo::Vector GetObjRot() const;
 	void SetObjRot(const fluo::Vector& val);
 	void SetOffset();
-	fluo::Vector GetObjCtrOff();
+	fluo::Vector GetObjCtrOff() const;
 	void SetObjCtrOff(const fluo::Vector& val);
-	fluo::Vector GetObjRotCtrOff();
+	fluo::Vector GetObjRotCtrOff() const;
 	void SetObjRotCtrOff(const fluo::Vector& val);
-	fluo::Vector GetObjRotOff();
+	fluo::Vector GetObjRotOff() const;
 	void SetObjRotOff(const fluo::Vector& val);
 	void SetOffsetTransform(const fluo::Transform& tf);
-	fluo::Vector GetObjTrans();
+	fluo::Vector GetObjTrans() const;
 	void SetObjTrans(const fluo::Vector& val);
 	void SetRotLock(bool mode) { m_rot_lock = mode; }
-	bool GetRotLock() { return m_rot_lock; }
+	bool GetRotLock() const { return m_rot_lock; }
 	//lock cam center
 	void SetLockCamObject(bool bval) { m_lock_cam_object = bval; }
-	bool GetLockCamObject() { return m_lock_cam_object; }
+	bool GetLockCamObject() const { return m_lock_cam_object; }
 	void SetLockCenter();
 	void SetLockCenterVol();
 	void SetLockCenterRuler();
 	void SetLockCenterSel();
 
 	//camera properties
-	bool GetPersp() { return m_persp; }
+	bool GetPersp() const { return m_persp; }
 	void SetPersp(bool persp) { m_persp = persp; }
-	int GetCamMode() { return m_cam_mode; }
+	int GetCamMode() const { return m_cam_mode; }
 	void SetCamMode(int mode);
-	double GetAov() { return m_aov; }
+	double GetAov() const { return m_aov; }
 	void SetAov(double aov) { m_aov = aov; }
-	double GetNearClip() { return m_near_clip; }
+	double GetNearClip() const { return m_near_clip; }
 	void SetNearClip(double nc) { m_near_clip = nc; }
-	double GetFarClip() { return m_far_clip; }
+	double GetFarClip() const { return m_far_clip; }
 	void SetFarClip(double fc) { m_far_clip = fc; }
 
 	//force clear
 	void SetForceClear(bool val) { m_force_clear = val; m_retain_finalbuffer = !val; }
-	bool GetForceClear() { return m_force_clear; }
+	bool GetForceClear() const { return m_force_clear; }
 	//interactive
 	void SetInteractive(bool val = false) { m_interactive = val; }
 
 	//background color
-	fluo::Color GetBackgroundColor() { return m_bg_color; }
-	fluo::Color GetTextColor();
+	fluo::Color GetBackgroundColor() const { return m_bg_color; }
+	fluo::Color GetTextColor() const;
 	void SetBackgroundColor(fluo::Color &color);
 
 	//disply modes
-	int GetDrawType() { return m_draw_type; }
+	int GetDrawType() const { return m_draw_type; }
 	void SetFog(bool b = true) { m_use_fog = b; }
-	bool GetFog() { return m_use_fog; }
+	bool GetFog() const { return m_use_fog; }
 	void SetFogIntensity(double i) { m_fog_intensity = i; }
-	double GetFogIntensity() { return m_fog_intensity; }
-
+	double GetFogIntensity() const { return m_fog_intensity; }
 	//movie capture
 	void Set3DRotCapture(double start_angle,
 		double end_angle,
@@ -344,16 +342,16 @@ public:
 	void SetSBText(const std::wstring text) { m_sb_text = text; }
 
 	//gamma settings
-	fluo::Color GetGammaColor() { return m_gamma; }
+	fluo::Color GetGammaColor() const { return m_gamma; }
 	void SetGammaColor(fluo::Color gamma) { m_gamma = gamma; }
 	//brightness adjustment
-	fluo::Color GetBrightness() { return m_brightness; }
+	fluo::Color GetBrightness() const { return m_brightness; }
 	void SetBrightness(fluo::Color brightness) { m_brightness = brightness; }
 	//hdr settings
-	fluo::Color GetHdr() { return m_hdr; }
+	fluo::Color GetHdr() const { return m_hdr; }
 	void SetHdr(fluo::Color hdr) { m_hdr = hdr; }
 	//sync values
-	bool GetSync(int i) { if (i >= 0 && i < 3) return m_sync[i]; else return false; }
+	bool GetSync(int i) const { if (i >= 0 && i < 3) return m_sync[i]; else return false; }
 	void SetSync(int i, bool val) { if (i >= 0 && i < 3) m_sync[i] = val; }
 
 	//reload volume list
@@ -362,12 +360,12 @@ public:
 	void SetMeshPopDirty() { m_md_pop_dirty = true; }
 
 	//inteactive mode selection
-	InteractiveMode GetIntMode() { return m_int_mode; }
+	InteractiveMode GetIntMode() const { return m_int_mode; }
 	void SetIntMode(InteractiveMode val);
 
 	//set use 2d rendering results
 	void SetPaintUse2d(bool use2d);
-	bool GetPaintUse2d();
+	bool GetPaintUse2d() const;
 
 	//brush properties
 	//change display
@@ -375,7 +373,7 @@ public:
 
 	//set clip mode
 	void SetClipRotMode(int mode);
-	int GetClipRotMode() { return m_clip_rot_mode; }
+	int GetClipRotMode() const { return m_clip_rot_mode; }
 
 	void ResetAllClipValues();
 	//sync
@@ -397,10 +395,10 @@ public:
 
 	//interpolation
 	void SetIntp(bool mode) { m_intp = mode; }
-	bool GetIntp() { return m_intp; }
+	bool GetIntp() const { return m_intp; }
 
 	//text renderer
-	flvr::TextRenderer* GetTextRenderer();
+	flvr::TextRenderer* GetTextRenderer() const;
 
 	//entry point for drawing the view
 	bool Draw();			//return if swap buffers
@@ -414,27 +412,27 @@ public:
 	void SetSortBricks();
 
 	//rulers
-	std::optional<std::reference_wrapper<flrd::RulerList>> GetRulerList();
+	std::optional<std::reference_wrapper<flrd::RulerList>> GetRulerList() const;
 	void SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler);
-	std::shared_ptr<flrd::Ruler> GetCurRuler();
+	std::shared_ptr<flrd::Ruler> GetCurRuler() const;
 
 	//traces
 	//track map file
 	int GetTrackFileExist(bool save);//0:no trace group; 1:trace groups exists not saved; 2:saved
-	std::optional<std::reference_wrapper<TrackGroup>> GetTrackGroup();
-	std::wstring GetTrackGroupFile();
+	std::optional<std::reference_wrapper<TrackGroup>> GetTrackGroup() const;
+	std::wstring GetTrackGroupFile() const;
 	void CreateTrackGroup();
 	int LoadTrackGroup(const std::wstring& filename);
 	int SaveTrackGroup(const std::wstring& filename);
 	void ExportTrackGroup(const std::wstring& filename, unsigned int id);
-	void GetTraces(bool update = false);
+	void GetTraces(bool update = false) const;
 
 	//enlarge output image
 	void SetKeepEnlarge(bool value) { m_keep_enlarge = value; }
 	void SetEnlarge(bool value);
 	void SetEnlargeScale(double value);
-	bool GetEnlarge() { return m_enlarge; }
-	double GetEnlargeScale() { return m_enlarge_scale; }
+	bool GetEnlarge() const { return m_enlarge; }
+	double GetEnlargeScale() const { return m_enlarge_scale; }
 
 	//read pixels
 	void ReadPixels(
@@ -449,14 +447,14 @@ public:
 	//set cell list
 	void SetCellList(flrd::CelpList& list);
 
-	glm::mat4 GetModelView() { return m_mv_mat; }
-	glm::mat4 GetProjection() { return m_proj_mat; }
-	glm::mat4 GetObjectMat();
-	glm::mat4 GetDrawMat();
-	glm::mat4 GetInvtMat();
-	glm::mat4 GetDrawWorldMat();
-	fluo::Transform GetInvOffsetMat();
-	fluo::Vector GetSide();
+	glm::mat4 GetModelView() const { return m_mv_mat; }
+	glm::mat4 GetProjection() const { return m_proj_mat; }
+	glm::mat4 GetObjectMat() const;
+	glm::mat4 GetDrawMat() const;
+	glm::mat4 GetInvtMat() const;
+	glm::mat4 GetDrawWorldMat() const;
+	fluo::Transform GetInvOffsetMat() const;
+	fluo::Vector GetSide() const;
 
 	void RotateClips();
 
@@ -469,10 +467,10 @@ public:
 	void ProcessMouse(MouseState& state);
 
 	//pop list
-	bool GetVolPopListEmpty() { return m_vd_pop_list.empty(); }
-	std::shared_ptr<VolumeData> GetVolPopList(int index) { return m_vd_pop_list[index].lock(); }
-	bool GetMeshPopListEmpty() { return m_md_pop_list.empty(); }
-	std::shared_ptr<MeshData> GetMeshPopList(int index) { return m_md_pop_list[index].lock(); }
+	bool GetVolPopListEmpty() const { return m_vd_pop_list.empty(); }
+	std::shared_ptr<VolumeData> GetVolPopList(int index) const { return m_vd_pop_list[index].lock(); }
+	bool GetMeshPopListEmpty() const { return m_md_pop_list.empty(); }
+	std::shared_ptr<MeshData> GetMeshPopList(int index) const { return m_md_pop_list[index].lock(); }
 
 	//volume properties
 	void SetGammaEnable(bool);
@@ -815,7 +813,7 @@ private:
 	void ClearViewBaseFramebuffer();
 	//draw out the framebuffer after composition
 	std::shared_ptr<flvr::Framebuffer> PrepareDataFramebuffer(int nx, int ny);
-	std::shared_ptr<flvr::Framebuffer> GetDataFramebuffer();
+	std::shared_ptr<flvr::Framebuffer> GetDataFramebuffer() const;
 	void DrawDataFramebuffer();
 	//vr buffers
 	void PrepareStereoFramebuffer();
@@ -871,7 +869,7 @@ private:
 	//draw highlighted comps
 	void GetCellPoints(fluo::BBox& box,
 		fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
-		fluo::Transform& mv, fluo::Transform& p);
+		fluo::Transform& mv, fluo::Transform& p) const;
 	unsigned int GenerateCellVerts(std::vector<float>& verts);
 	//tracks
 	void DrawTracks();

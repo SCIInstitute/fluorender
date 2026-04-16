@@ -40,12 +40,12 @@ public:
 	~Root();
 
 	//view functions
-	int GetViewNum();
-	std::shared_ptr<RenderView> GetView(int i);
-	std::shared_ptr<RenderView> GetViewById(int id);
-	std::shared_ptr<RenderView> GetView(const std::wstring& name);
-	int GetView(RenderView* view);
-	std::shared_ptr<RenderView> GetLastView();
+	int GetViewNum() const;
+	std::shared_ptr<RenderView> GetView(int i) const;
+	std::shared_ptr<RenderView> GetViewById(int id) const;
+	std::shared_ptr<RenderView> GetView(const std::wstring& name) const;
+	int GetView(RenderView* view) const;
+	std::shared_ptr<RenderView> GetLastView() const;
 	void AddView(const std::shared_ptr<RenderView>& view);
 	void DeleteView(int i);
 	void DeleteView(RenderView* view);

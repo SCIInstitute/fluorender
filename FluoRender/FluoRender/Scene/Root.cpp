@@ -45,19 +45,19 @@ Root::~Root()
 	m_views.clear();
 }
 
-int Root::GetViewNum()
+int Root::GetViewNum() const
 {
 	return static_cast<int>(m_views.size());
 }
 
-std::shared_ptr<RenderView> Root::GetView(int i)
+std::shared_ptr<RenderView> Root::GetView(int i) const
 {
 	if (i >= 0 && i < (int)m_views.size())
 		return m_views[i];
 	else return nullptr;
 }
 
-std::shared_ptr<RenderView> Root::GetViewById(int id)
+std::shared_ptr<RenderView> Root::GetViewById(int id) const
 {
 	for (auto& view : m_views)
 	{
@@ -67,7 +67,7 @@ std::shared_ptr<RenderView> Root::GetViewById(int id)
 	return nullptr;
 }
 
-std::shared_ptr<RenderView> Root::GetView(const std::wstring& name)
+std::shared_ptr<RenderView> Root::GetView(const std::wstring& name) const
 {
 	for (auto& view : m_views)
 	{
@@ -77,7 +77,7 @@ std::shared_ptr<RenderView> Root::GetView(const std::wstring& name)
 	return nullptr;
 }
 
-int Root::GetView(RenderView* view)
+int Root::GetView(RenderView* view) const
 {
 	if (view)
 	{
@@ -90,7 +90,7 @@ int Root::GetView(RenderView* view)
 	return -1;
 }
 
-std::shared_ptr<RenderView> Root::GetLastView()
+std::shared_ptr<RenderView> Root::GetLastView() const
 {
 	if (m_views.size())
 		return m_views.back();

@@ -60,17 +60,17 @@ public:
 	{
 		m_num = id;
 	}
-	static int GetID()
+	static int GetIdCount()
 	{
 		return m_num;
 	}
 
-	flrd::pTrackMap GetTrackMap()
+	flrd::pTrackMap GetTrackMap() const
 	{
 		return m_track_map;
 	}
 
-	std::wstring GetPath() {return m_data_path;}
+	std::wstring GetPath() const {return m_data_path;}
 	void SetCurTime(int time);
 	int GetCurTime();
 	void SetPrvTime(int time);

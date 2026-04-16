@@ -50,12 +50,12 @@ AText::~AText()
 {
 }
 
-std::wstring AText::GetText()
+std::wstring AText::GetText() const
 {
 	return m_txt;
 }
 
-fluo::Point AText::GetPos()
+fluo::Point AText::GetPos() const
 {
 	return m_pos;
 }
@@ -92,12 +92,12 @@ AnnotData::~AnnotData()
 	Clear();
 }
 
-int AnnotData::GetTextNum()
+int AnnotData::GetTextNum() const
 {
 	return (int)m_alist.size();
 }
 
-std::wstring AnnotData::GetTextText(int index)
+std::wstring AnnotData::GetTextText(int index) const
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
@@ -108,7 +108,7 @@ std::wstring AnnotData::GetTextText(int index)
 	return L"";
 }
 
-fluo::Point AnnotData::GetTextPos(int index)
+fluo::Point AnnotData::GetTextPos(int index) const
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
@@ -119,7 +119,7 @@ fluo::Point AnnotData::GetTextPos(int index)
 	return fluo::Point(fluo::Vector(0.0));
 }
 
-fluo::Point AnnotData::GetTextTransformedPos(int index)
+fluo::Point AnnotData::GetTextTransformedPos(int index) const
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
@@ -130,7 +130,7 @@ fluo::Point AnnotData::GetTextTransformedPos(int index)
 	return fluo::Point(fluo::Vector(0.0));
 }
 
-std::wstring AnnotData::GetTextInfo(int index)
+std::wstring AnnotData::GetTextInfo(int index) const
 {
 	if (index>=0 && index<(int)m_alist.size())
 	{
@@ -160,7 +160,7 @@ void AnnotData::SetVolume(const std::shared_ptr<VolumeData>& vd)
 		m_name += L"_FROM_" + vd->GetName();
 }
 
-std::shared_ptr<VolumeData> AnnotData::GetVolume()
+std::shared_ptr<VolumeData> AnnotData::GetVolume() const
 {
 	return m_vd.lock();
 }
@@ -176,7 +176,7 @@ void AnnotData::SetMemo(const std::wstring &memo)
 	m_memo = memo;
 }
 
-std::wstring AnnotData::GetMemo()
+std::wstring AnnotData::GetMemo() const
 {
 	return m_memo;
 }
@@ -186,13 +186,13 @@ void AnnotData::SetMemoRO(bool ro)
 	m_memo_ro = ro;
 }
 
-bool AnnotData::GetMemoRO()
+bool AnnotData::GetMemoRO() const
 {
 	return m_memo_ro;
 }
 
 //save/load
-std::wstring AnnotData::GetPath()
+std::wstring AnnotData::GetPath() const
 {
 	return m_data_path;
 }
@@ -335,7 +335,7 @@ void AnnotData::Save(const std::wstring &filename)
 	m_data_path = filename;
 }
 
-std::wstring AnnotData::GetInfoMeaning()
+std::wstring AnnotData::GetInfoMeaning() const
 {
 	return m_info_meaning;
 }
@@ -356,7 +356,7 @@ bool AnnotData::InsideClippingPlanes(fluo::Point &pos)
 	return cb.ContainsWorld(pos);
 }
 
-std::shared_ptr<AText> AnnotData::GetAText(const std::wstring& str)
+std::shared_ptr<AText> AnnotData::GetAText(const std::wstring& str) const
 {
 	std::wstring sID;
 	std::wstring sX;

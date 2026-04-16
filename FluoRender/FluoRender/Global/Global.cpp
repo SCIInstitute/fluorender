@@ -676,10 +676,10 @@ flrd::Clusterizer& Global::get_clusterizer()
 	return *m_clusterizer;
 }
 
-flrd::BaseConvVolMesh* Global::get_conv_vol_mesh()
+flrd::BaseConvVolMesh& Global::get_conv_vol_mesh()
 {
 	if (m_conv_vol_mesh)
-		return m_conv_vol_mesh.get();
+		return *m_conv_vol_mesh;
 	//create
 	switch (glbin_settings.m_vol_mesh_conv_mode)
 	{
@@ -692,10 +692,9 @@ flrd::BaseConvVolMesh* Global::get_conv_vol_mesh()
 		break;
 	}
 	m_conv_vol_mesh->SetProgressFunc(project_->GetProgressFunc());
-	flrd::BaseConvVolMesh* cvm = m_conv_vol_mesh.get();
-	glbin_mesh_def.Apply(cvm);
+	glbin_mesh_def.Apply(*m_conv_vol_mesh);
 
-	return cvm;
+	return *m_conv_vol_mesh;
 }
 
 flrd::ColorMesh& Global::get_color_mesh()

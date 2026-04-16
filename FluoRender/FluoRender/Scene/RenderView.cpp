@@ -526,7 +526,7 @@ RenderView::~RenderView()
 		m_ruler_list->Clear();
 }
 
-std::string RenderView::GetBufferName(const std::string& base, int sn)
+std::string RenderView::GetBufferName(const std::string& base, int sn) const
 {
 	if (sn >= 0)
 		return base + "_" + std::to_string(sn);
@@ -563,7 +563,7 @@ void RenderView::ResetSize()
 	SetSize(m_canvas_size.w(), m_canvas_size.h());
 }
 
-Size2D RenderView::GetCanvasSize()
+Size2D RenderView::GetCanvasSize() const
 {
 	if (glbin_settings.m_hologram_mode == 2)
 	{
@@ -573,7 +573,7 @@ Size2D RenderView::GetCanvasSize()
 }
 
 //vr buffers
-void RenderView::GetRenderSize(int &nx, int &ny)
+void RenderView::GetRenderSize(int &nx, int &ny) const
 {
 	if (m_use_openxr)
 	{
@@ -590,7 +590,7 @@ void RenderView::GetRenderSize(int &nx, int &ny)
 	}
 }
 
-std::string RenderView::GetOGLVersion()
+std::string RenderView::GetOGLVersion() const
 {
 	return m_GLversion;
 }
@@ -864,7 +864,7 @@ int RenderView::GetDispVolumeNum()
 	return m_vd_pop_list.size();
 }
 
-int RenderView::GetAllVolumeNum()
+int RenderView::GetAllVolumeNum() const
 {
 	int num = 0;
 	for (auto& it : m_layer_list)
@@ -893,7 +893,7 @@ int RenderView::GetMeshNum()
 	return m_md_pop_list.size();
 }
 
-int RenderView::GetGroupNum()
+int RenderView::GetGroupNum() const
 {
 	int group_num = 0;
 
@@ -905,12 +905,12 @@ int RenderView::GetGroupNum()
 	return group_num;
 }
 
-int RenderView::GetLayerNum()
+int RenderView::GetLayerNum() const
 {
 	return m_layer_list.size();
 }
 
-std::shared_ptr<VolumeData> RenderView::GetAllVolumeData(int index)
+std::shared_ptr<VolumeData> RenderView::GetAllVolumeData(int index) const
 {
 	int cnt = 0;
 	for (auto& it : m_layer_list)
@@ -969,7 +969,7 @@ std::shared_ptr<MeshData> RenderView::GetMeshData(int index)
 		return nullptr;
 }
 
-std::shared_ptr<TreeLayer> RenderView::GetLayer(int index)
+std::shared_ptr<TreeLayer> RenderView::GetLayer(int index) const
 {
 	if (index >= 0 && index<(int)m_layer_list.size())
 		return m_layer_list[index];
@@ -978,7 +978,7 @@ std::shared_ptr<TreeLayer> RenderView::GetLayer(int index)
 }
 
 std::optional<std::reference_wrapper<flvr::MultiVolumeRenderer>>
-RenderView::GetMultiVolumeData()
+RenderView::GetMultiVolumeData() const
 {
 	if (m_mvr)
 		return *m_mvr;
@@ -986,7 +986,7 @@ RenderView::GetMultiVolumeData()
 		return std::nullopt;
 }
 
-std::shared_ptr<VolumeData> RenderView::GetVolumeData(const std::wstring &name)
+std::shared_ptr<VolumeData> RenderView::GetVolumeData(const std::wstring &name) const
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1020,7 +1020,7 @@ std::shared_ptr<VolumeData> RenderView::GetVolumeData(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<MeshData> RenderView::GetMeshData(const std::wstring &name)
+std::shared_ptr<MeshData> RenderView::GetMeshData(const std::wstring &name) const
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1053,7 +1053,7 @@ std::shared_ptr<MeshData> RenderView::GetMeshData(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<AnnotData> RenderView::GetAnnotData(const std::wstring &name)
+std::shared_ptr<AnnotData> RenderView::GetAnnotData(const std::wstring &name) const
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1069,7 +1069,7 @@ std::shared_ptr<AnnotData> RenderView::GetAnnotData(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::wstring &name)
+std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::wstring &name) const
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1085,7 +1085,7 @@ std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<VolumeGroup> RenderView::GetGroup(int index)
+std::shared_ptr<VolumeGroup> RenderView::GetGroup(int index) const
 {
 	int count = 0;
 
@@ -1106,7 +1106,7 @@ std::shared_ptr<VolumeGroup> RenderView::GetGroup(int index)
 	return nullptr;
 }
 
-std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::shared_ptr<VolumeData>& vd)
+std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::shared_ptr<VolumeData>& vd) const
 {
 	for (auto& it : m_layer_list)
 	{
@@ -1126,7 +1126,7 @@ std::shared_ptr<VolumeGroup> RenderView::GetGroup(const std::shared_ptr<VolumeDa
 	return nullptr;
 }
 
-std::shared_ptr<MeshGroup> RenderView::GetMGroup(const std::wstring& str)
+std::shared_ptr<MeshGroup> RenderView::GetMGroup(const std::wstring& str) const
 {
 	for (auto& it : m_layer_list)
 	{
@@ -2347,7 +2347,7 @@ void RenderView::GetCameraSettings(glm::vec3& eye, glm::vec3& center, glm::vec3&
 	}
 }
 
-void RenderView::GetCameraSettingsOrthoFligt(glm::vec3& eye, glm::vec3& center, float& dist)
+void RenderView::GetCameraSettingsOrthoFligt(glm::vec3& eye, glm::vec3& center, float& dist) const
 {
 	dist = m_radius / tan(d2r(m_aov / 2.0)) / m_scale_factor;
 	glm::vec3 dir(m_cam_trans.x(), m_cam_trans.y(), m_cam_trans.z());
@@ -2434,7 +2434,7 @@ void RenderView::HandleCamera(bool vr)
 	}
 }
 
-float RenderView::GetDistancePerspFlight()
+float RenderView::GetDistancePerspFlight() const
 {
 	auto cur_vd = m_cur_vol.lock();
 	fluo::Point p, ip;
@@ -2450,7 +2450,7 @@ float RenderView::GetDistancePerspFlight()
 }
 
 //camera operations
-fluo::Vector RenderView::GetTranslations()
+fluo::Vector RenderView::GetTranslations() const
 {
 	return m_cam_trans;
 }
@@ -2461,7 +2461,7 @@ void RenderView::SetTranslations(const fluo::Vector& val)
 	m_distance = m_cam_trans.length();
 }
 
-fluo::Vector RenderView::GetRotations()
+fluo::Vector RenderView::GetRotations() const
 {
 	return m_cam_rot;
 }
@@ -2488,7 +2488,7 @@ void RenderView::SetRotations(const fluo::Vector& val, bool notify)
 		m_render_view_panel->FluoUpdate({ gstCamRotation });
 }
 
-int RenderView::GetOrientation()
+int RenderView::GetOrientation() const
 {
 	//update ortho rotation
 	if (m_cam_q.AlmostEqual(fluo::Quaternion(0, 0, 0, 1)))
@@ -2515,7 +2515,7 @@ fluo::Vector RenderView::ResetZeroRotations()
 	return result;
 }
 
-fluo::Point RenderView::GetCenters()
+fluo::Point RenderView::GetCenters() const
 {
 	return m_cam_ctr;
 }
@@ -2532,7 +2532,7 @@ void RenderView::SetCenter()
 	m_obj_ctr = m_bounds.center();
 }
 
-double RenderView::Get121ScaleFactor()
+double RenderView::Get121ScaleFactor() const
 {
 	double result = 1.0;
 
@@ -2591,7 +2591,7 @@ void RenderView::SetPinRotCenter(bool pin, bool update)
 }
 
 //object operations
-fluo::Point RenderView::GetObjCenters()
+fluo::Point RenderView::GetObjCenters() const
 {
 	return m_obj_ctr;
 }
@@ -2601,7 +2601,7 @@ void RenderView::SetObjCenters(const fluo::Point& val)
 	m_obj_ctr = val;
 }
 
-fluo::Vector RenderView::GetObjRot()
+fluo::Vector RenderView::GetObjRot() const
 {
 	return m_obj_rot;
 }
@@ -2619,7 +2619,7 @@ void RenderView::SetOffset()
 		m_obj_rot_off.any_non_zero();
 }
 
-fluo::Vector RenderView::GetObjCtrOff()
+fluo::Vector RenderView::GetObjCtrOff() const
 {
 	return m_obj_ctr_off;
 }
@@ -2630,7 +2630,7 @@ void RenderView::SetObjCtrOff(const fluo::Vector& val)
 	SetOffset();
 }
 
-fluo::Vector RenderView::GetObjRotCtrOff()
+fluo::Vector RenderView::GetObjRotCtrOff() const
 {
 	return m_obj_rot_ctr_off;
 }
@@ -2641,7 +2641,7 @@ void RenderView::SetObjRotCtrOff(const fluo::Vector& val)
 	SetOffset();
 }
 
-fluo::Vector RenderView::GetObjRotOff()
+fluo::Vector RenderView::GetObjRotOff() const
 {
 	return m_obj_rot_off;
 }
@@ -2657,7 +2657,7 @@ void RenderView::SetOffsetTransform(const fluo::Transform &tf)
 	m_offset_tf = tf;
 }
 
-fluo::Vector RenderView::GetObjTrans()
+fluo::Vector RenderView::GetObjTrans() const
 {
 	return m_obj_trans;
 }
@@ -2742,7 +2742,7 @@ void RenderView::SetCamMode(int mode)
 	}
 }
 
-fluo::Color RenderView::GetTextColor()
+fluo::Color RenderView::GetTextColor() const
 {
 	switch (glbin_settings.m_text_color)
 	{
@@ -3723,7 +3723,7 @@ void RenderView::SetPaintUse2d(bool use2d)
 	glbin_vol_selector.SetPaintUse2d(use2d);
 }
 
-bool RenderView::GetPaintUse2d()
+bool RenderView::GetPaintUse2d() const
 {
 	return glbin_vol_selector.GetPaintUse2d();
 }
@@ -3862,7 +3862,7 @@ void RenderView::SetLinkedDist(fluo::ClipPlane i, int val)
 	SyncClippingBoxes(m_clipping_box);
 }
 
-flvr::TextRenderer* RenderView::GetTextRenderer()
+flvr::TextRenderer* RenderView::GetTextRenderer() const
 {
 	return m_text_renderer.get();
 }
@@ -4467,7 +4467,7 @@ void RenderView::HaltLoopUpdate()
 	}
 }
 
-std::optional<std::reference_wrapper<flrd::RulerList>> RenderView::GetRulerList()
+std::optional<std::reference_wrapper<flrd::RulerList>> RenderView::GetRulerList() const
 {
 	if (m_ruler_list)
 		return *m_ruler_list;
@@ -4479,7 +4479,7 @@ void RenderView::SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler)
 	m_cur_ruler = ruler;
 }
 
-std::shared_ptr<flrd::Ruler> RenderView::GetCurRuler()
+std::shared_ptr<flrd::Ruler> RenderView::GetCurRuler() const
 {
 	return m_cur_ruler;
 }
@@ -4504,14 +4504,14 @@ int RenderView::GetTrackFileExist(bool save)
 		return 1;
 }
 
-std::optional<std::reference_wrapper<TrackGroup>> RenderView::GetTrackGroup()
+std::optional<std::reference_wrapper<TrackGroup>> RenderView::GetTrackGroup() const
 {
 	if (m_track_group)
 		return *m_track_group;
 	return std::nullopt;
 }
 
-std::wstring RenderView::GetTrackGroupFile()
+std::wstring RenderView::GetTrackGroupFile() const
 {
 	std::wstring str;
 	if (m_track_group)
@@ -4544,7 +4544,7 @@ void RenderView::ExportTrackGroup(const std::wstring& filename, unsigned int id)
 		return;
 }
 
-void RenderView::GetTraces(bool update)
+void RenderView::GetTraces(bool update) const
 {
 	auto cur_vd = m_cur_vol.lock();
 	if (!cur_vd)
@@ -4735,7 +4735,7 @@ void RenderView::SetCellList(flrd::CelpList& list)
 	*m_cell_list = list;
 }
 
-glm::mat4 RenderView::GetObjectMat()
+glm::mat4 RenderView::GetObjectMat() const
 {
 	glm::mat4 obj_mat = m_mv_mat;
 	//translate object
@@ -4778,7 +4778,7 @@ glm::mat4 RenderView::GetObjectMat()
 	return obj_mat;
 }
 
-glm::mat4 RenderView::GetDrawMat()
+glm::mat4 RenderView::GetDrawMat() const
 {
 	glm::mat4 drw_mat = m_mv_mat;
 	//translate object
@@ -4821,7 +4821,7 @@ glm::mat4 RenderView::GetDrawMat()
 	return drw_mat;
 }
 
-glm::mat4 RenderView::GetInvtMat()
+glm::mat4 RenderView::GetInvtMat() const
 {
 	glm::mat4 inv_mat = m_mv_mat;
 	//translate object
@@ -4864,7 +4864,7 @@ glm::mat4 RenderView::GetInvtMat()
 	return inv_mat;
 }
 
-glm::mat4 RenderView::GetDrawWorldMat()
+glm::mat4 RenderView::GetDrawWorldMat() const
 {
 	glm::mat4 drw_mat = m_mv_mat;
 	//translate object
@@ -4886,12 +4886,12 @@ glm::mat4 RenderView::GetDrawWorldMat()
 	return drw_mat;
 }
 
-fluo::Transform RenderView::GetInvOffsetMat()
+fluo::Transform RenderView::GetInvOffsetMat() const
 {
 	return m_offset_tf;
 }
 
-fluo::Vector RenderView::GetSide()
+fluo::Vector RenderView::GetSide() const
 {
 	m_cam_head = -m_cam_trans;
 	m_cam_head.normalize();
@@ -5008,7 +5008,7 @@ std::shared_ptr<flvr::Framebuffer> RenderView::PrepareDataFramebuffer(int nx, in
 		role, nx, ny, name);
 }
 
-std::shared_ptr<flvr::Framebuffer> RenderView::GetDataFramebuffer()
+std::shared_ptr<flvr::Framebuffer> RenderView::GetDataFramebuffer() const
 {
 	std::string name;
 	switch (m_draw_type)
@@ -7374,7 +7374,7 @@ void RenderView::DrawCells()
 
 void RenderView::GetCellPoints(fluo::BBox& box,
 	fluo::Point& p1, fluo::Point& p2, fluo::Point& p3, fluo::Point& p4,
-	fluo::Transform& mv, fluo::Transform& p)
+	fluo::Transform& mv, fluo::Transform& p) const
 {
 	//get 6 points of the jack of bbox
 	fluo::Point pp[6];

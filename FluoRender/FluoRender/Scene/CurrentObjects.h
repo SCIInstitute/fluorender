@@ -67,7 +67,7 @@ struct CurrentObjects
 	{}
 
 	//0:root, 1:view, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
-	int GetType()
+	int GetType() const
 	{
 		if (vol_data.lock())
 			return 2;
@@ -101,17 +101,17 @@ struct CurrentObjects
 
 	void SetSel(const std::wstring& str);
 
-	int GetViewId();
-	int GetDrawingViewId();
+	int GetViewId() const;
+	int GetDrawingViewId() const;
 
 	std::optional<std::reference_wrapper<flrd::RulerList>>
-		GetRulerList();
-	std::shared_ptr<flrd::Ruler> GetRuler();
-	std::optional<std::reference_wrapper<TrackGroup>> GetTrackGroup();
+		GetRulerList() const;
+	std::shared_ptr<flrd::Ruler> GetRuler() const;
+	std::optional<std::reference_wrapper<TrackGroup>> GetTrackGroup() const;
 
 	//clipping box
 	std::optional<std::reference_wrapper<fluo::ClippingBox>>
-		GetClippingBox();
+		GetClippingBox() const;
 
 	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	std::weak_ptr<RenderView> render_view;//currently selected render view

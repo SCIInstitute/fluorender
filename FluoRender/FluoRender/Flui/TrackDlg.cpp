@@ -772,7 +772,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	bool update_all = vc.empty();
 
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 
@@ -784,7 +784,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstTrackFile))
 	{
 		//track file
-		str = trkg->GetPath();
+		str = trkg->get().GetPath();
 		if (str.IsEmpty())
 			m_load_trace_text->ChangeValue("No track map or track map not saved");
 		else
@@ -844,7 +844,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 	if (update_all || FOUND_VALUE(gstTrackUncertainLow))
 	{
-		ival = trkg->GetUncertainLow();
+		ival = trkg->get().GetUncertainLow();
 		m_comp_uncertain_low_sldr->ChangeValue(ival);
 		m_cell_size_text->ChangeValue(wxString::Format("%d", ival));
 	}
@@ -880,15 +880,15 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	//lists
 	if (update_all || FOUND_VALUE(gstGhostNum))
 	{
-		ival = trkg->GetGhostNum();
+		ival = trkg->get().GetGhostNum();
 		m_ghost_num_sldr->ChangeValue(ival);
 		m_ghost_num_text->ChangeValue(wxString::Format("%d", ival));
 	}
 
 	if (update_all || FOUND_VALUE(gstGhostEnable))
 	{
-		m_ghost_show_tail_chk->SetValue(trkg->GetDrawTail());
-		m_ghost_show_lead_chk->SetValue(trkg->GetDrawLead());
+		m_ghost_show_tail_chk->SetValue(trkg->get().GetDrawTail());
+		m_ghost_show_lead_chk->SetValue(trkg->get().GetDrawLead());
 	}
 
 	if (update_all || FOUND_VALUE(gstTrackList))
@@ -901,7 +901,7 @@ void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
 
 void TrackDlg::UpdateTrackList()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 	auto vd = glbin_current.vol_data.lock();
@@ -909,8 +909,8 @@ void TrackDlg::UpdateTrackList()
 		return;
 
 	int shuffle = vd->GetShuffle();
-	int cur_time = trkg->GetCurTime();
-	int prv_time = trkg->GetPrvTime();
+	int cur_time = trkg->get().GetCurTime();
+	int prv_time = trkg->get().GetPrvTime();
 	wxString item_gtype;
 	wxString item_id;
 	wxString item_size;
@@ -966,7 +966,7 @@ void TrackDlg::UpdateTrackList()
 
 void TrackDlg::UpdateTracks()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 	auto vd = glbin_current.vol_data.lock();
@@ -977,7 +977,7 @@ void TrackDlg::UpdateTracks()
 
 	m_trace_list_curr->DeleteAllItems();
 
-	flrd::CelpList sel_cells = trkg->GetCellList();
+	flrd::CelpList sel_cells = trkg->get().GetCellList();
 	std::vector<flrd::Celp> cells;
 	for (auto siter = sel_cells.begin();
 		siter != sel_cells.end(); ++siter)
@@ -1062,10 +1062,10 @@ bool TrackDlg::SaveTrackFile()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
-	std::wstring str = trkg->GetPath();
+	std::wstring str = trkg->get().GetPath();
 	if (std::filesystem::exists(str))
 		return view->SaveTrackGroup(str);
 	return false;
@@ -1110,9 +1110,9 @@ void TrackDlg::WriteInfo(const std::wstring& str)
 
 void TrackDlg::OnClearTrace(wxCommandEvent& event)
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (trkg)
-		trkg->Clear();
+		trkg->get().Clear();
 	FluoUpdate({ gstTrackFile });
 }
 
@@ -1317,9 +1317,9 @@ void TrackDlg::OnCellSizeText(wxCommandEvent& event)
 	{
 		glbin_comp_selector.SetUseMin(true);
 		glbin_comp_selector.SetMinNum(ival);
-		TrackGroup* trkg = glbin_current.GetTrackGroup();
+		auto trkg = glbin_current.GetTrackGroup();
 		if (trkg)
-			trkg->SetCellSize(ival);
+			trkg->get().SetCellSize(ival);
 	}
 	else
 		glbin_comp_selector.SetUseMin(false);
@@ -1592,11 +1592,11 @@ void TrackDlg::OnGhostNumText(wxCommandEvent& event)
 	str.ToLong(&ival);
 	m_ghost_num_sldr->ChangeValue(ival);
 
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 
-	trkg->SetGhostNum(ival);
+	trkg->get().SetGhostNum(ival);
 	FluoRefresh(3, { gstNull },
 		{ glbin_current.GetViewId() });
 }
@@ -1605,11 +1605,11 @@ void TrackDlg::OnGhostShowTail(wxCommandEvent& event)
 {
 	bool bval = m_ghost_show_tail_chk->GetValue();
 
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 
-	trkg->SetDrawTail(bval);
+	trkg->get().SetDrawTail(bval);
 	FluoRefresh(3, { gstNull },
 		{ glbin_current.GetViewId() });
 }
@@ -1618,11 +1618,11 @@ void TrackDlg::OnGhostShowLead(wxCommandEvent& event)
 {
 	bool bval = m_ghost_show_lead_chk->GetValue();
 
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 
-	trkg->SetDrawLead(bval);
+	trkg->get().SetDrawLead(bval);
 	FluoRefresh(3, { gstNull },
 		{ glbin_current.GetViewId() });
 }

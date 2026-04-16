@@ -167,7 +167,7 @@ std::wstring DataManager::SearchProjectPath(const std::wstring& filename)
 	return L"";
 }
 
-std::wstring DataManager::GetProjectFile()
+std::wstring DataManager::GetProjectFile() const
 {
 	return m_prj_file;
 }
@@ -930,7 +930,7 @@ bool DataManager::AddMeshData(const std::shared_ptr<MeshData>& md)
 	return true;
 }
 
-std::shared_ptr<VolumeData> DataManager::GetVolumeData(size_t index)
+std::shared_ptr<VolumeData> DataManager::GetVolumeData(size_t index) const
 {
 	if (index<m_vd_list.size())
 		return m_vd_list[index];
@@ -938,7 +938,7 @@ std::shared_ptr<VolumeData> DataManager::GetVolumeData(size_t index)
 		return nullptr;
 }
 
-std::shared_ptr<MeshData> DataManager::GetMeshData(size_t index)
+std::shared_ptr<MeshData> DataManager::GetMeshData(size_t index) const
 {
 	if (index<m_md_list.size())
 		return m_md_list[index];
@@ -946,7 +946,7 @@ std::shared_ptr<MeshData> DataManager::GetMeshData(size_t index)
 		return nullptr;
 }
 
-std::shared_ptr<VolumeData> DataManager::GetVolumeData(const std::wstring &name)
+std::shared_ptr<VolumeData> DataManager::GetVolumeData(const std::wstring &name) const
 {
 	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
@@ -958,7 +958,7 @@ std::shared_ptr<VolumeData> DataManager::GetVolumeData(const std::wstring &name)
 	return nullptr;
 }
 
-std::shared_ptr<MeshData> DataManager::GetMeshData(const std::wstring &name)
+std::shared_ptr<MeshData> DataManager::GetMeshData(const std::wstring &name) const
 {
 	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
@@ -970,7 +970,7 @@ std::shared_ptr<MeshData> DataManager::GetMeshData(const std::wstring &name)
 	return nullptr;
 }
 
-size_t DataManager::GetVolumeIndex(const std::wstring &name)
+size_t DataManager::GetVolumeIndex(const std::wstring &name) const
 {
 	for (size_t i=0 ; i<m_vd_list.size() ; i++)
 	{
@@ -984,7 +984,7 @@ size_t DataManager::GetVolumeIndex(const std::wstring &name)
 	return -1;
 }
 
-std::shared_ptr<VolumeData> DataManager::GetLastVolumeData()
+std::shared_ptr<VolumeData> DataManager::GetLastVolumeData() const
 {
 	size_t num = m_vd_list.size();
 	if (num)
@@ -993,7 +993,7 @@ std::shared_ptr<VolumeData> DataManager::GetLastVolumeData()
 		return nullptr;
 }
 
-size_t DataManager::GetMeshIndex(const std::wstring &name)
+size_t DataManager::GetMeshIndex(const std::wstring &name) const
 {
 	for (size_t i=0 ; i<m_md_list.size() ; i++)
 	{
@@ -1005,7 +1005,7 @@ size_t DataManager::GetMeshIndex(const std::wstring &name)
 	return -1;
 }
 
-std::shared_ptr<MeshData> DataManager::GetLastMeshData()
+std::shared_ptr<MeshData> DataManager::GetLastMeshData() const
 {
 	size_t num = m_md_list.size();
 	if (num)
@@ -1053,12 +1053,12 @@ void DataManager::ClearMeshSelection()
 	}
 }
 
-size_t DataManager::GetVolumeNum()
+size_t DataManager::GetVolumeNum() const
 {
 	return m_vd_list.size();
 }
 
-size_t DataManager::GetMeshNum()
+size_t DataManager::GetMeshNum() const
 {
 	return m_md_list.size();
 }
@@ -1158,12 +1158,12 @@ void DataManager::RemoveAnnotData(size_t index)
 	}
 }
 
-size_t DataManager::GetAnnotNum()
+size_t DataManager::GetAnnotNum() const
 {
 	return m_ad_list.size();
 }
 
-std::shared_ptr<AnnotData> DataManager::GetAnnotData(size_t index)
+std::shared_ptr<AnnotData> DataManager::GetAnnotData(size_t index) const
 {
 	if (index<m_ad_list.size())
 		return m_ad_list[index];
@@ -1171,7 +1171,7 @@ std::shared_ptr<AnnotData> DataManager::GetAnnotData(size_t index)
 		return nullptr;
 }
 
-std::shared_ptr<AnnotData> DataManager::GetAnnotData(const std::wstring &name)
+std::shared_ptr<AnnotData> DataManager::GetAnnotData(const std::wstring &name) const
 {
 	for (size_t i=0; i<m_ad_list.size(); i++)
 	{
@@ -1181,7 +1181,7 @@ std::shared_ptr<AnnotData> DataManager::GetAnnotData(const std::wstring &name)
 	return nullptr;
 }
 
-size_t DataManager::GetAnnotIndex(const std::wstring &name)
+size_t DataManager::GetAnnotIndex(const std::wstring &name) const
 {
 	for (size_t i=0; i<m_ad_list.size(); i++)
 	{
@@ -1193,7 +1193,7 @@ size_t DataManager::GetAnnotIndex(const std::wstring &name)
 	return -1;
 }
 
-std::shared_ptr<AnnotData> DataManager::GetLastAnnotData()
+std::shared_ptr<AnnotData> DataManager::GetLastAnnotData() const
 {
 	size_t num = m_ad_list.size();
 	if (num)
@@ -1238,7 +1238,7 @@ bool DataManager::CheckNames(const std::wstring &str)
 	return result;
 }
 
-fluo::Color DataManager::GetColor(int c)
+fluo::Color DataManager::GetColor(int c) const
 {
 	fluo::Color result(1.0, 1.0, 1.0);
 	switch (c)
@@ -1271,7 +1271,7 @@ fluo::Color DataManager::GetColor(int c)
 	return result;
 }
 
-fluo::Color DataManager::GetWavelengthColor(double wavelength)
+fluo::Color DataManager::GetWavelengthColor(double wavelength) const
 {
 	if (wavelength < 340.0)
 		return fluo::Color(1.0, 1.0, 1.0);
@@ -1287,7 +1287,7 @@ fluo::Color DataManager::GetWavelengthColor(double wavelength)
 		return fluo::Color(1.0, 1.0, 1.0);
 }
 
-std::shared_ptr<flvr::CacheQueue> DataManager::GetCacheQueue(const std::shared_ptr<VolumeData>& vd)
+std::shared_ptr<flvr::CacheQueue> DataManager::GetCacheQueue(const std::shared_ptr<VolumeData>& vd) const
 {
 	if (!vd)
 		return nullptr;
