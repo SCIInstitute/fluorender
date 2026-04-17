@@ -214,10 +214,10 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	if (m_mode == SelectMode::Grow)
 	{
 		GLint mp[2] = { mx, my };
-		m_vd->GetVR().set_mouse_position(mp);
+		m_vd->GetVolumeRenderer().set_mouse_position(mp);
 		valid_mvec = GetMouseVec(mx, my, mvec);
 	}
-	m_vd->GetVR().set_mouse_vec(mvec);
+	m_vd->GetVolumeRenderer().set_mouse_vec(mvec);
 
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(gstRBPaintBrush);
 	if (paint_buffer)//paint buffer can be empty for grow tool
@@ -441,7 +441,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 	}
 
 	if (flvr::Texture::mask_undo_num_ > 0)
-		m_vd->GetVR().return_mask();
+		m_vd->GetVolumeRenderer().return_mask();
 
 	if (m_mode == SelectMode::Clear)
 	{
@@ -524,7 +524,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		return;
 
 	if (select)
-		m_vd->GetVR().return_mask();
+		m_vd->GetVolumeRenderer().return_mask();
 
 	//get all the data from original volume
 	auto raw_data = m_vd->GetVolume(false);
@@ -860,7 +860,7 @@ void VolumeSelector::PopMask()
 		return;
 
 	m_vd->GetTexture()->pop_mask();
-	m_vd->GetVR().clear_tex_mask();
+	m_vd->GetVolumeRenderer().clear_tex_mask();
 	m_vd->ResetMaskCount();
 }
 
@@ -872,7 +872,7 @@ void VolumeSelector::UndoMask()
 		return;
 
 	m_vd->GetTexture()->mask_undos_backward();
-	m_vd->GetVR().clear_tex_mask();
+	m_vd->GetVolumeRenderer().clear_tex_mask();
 	m_vd->ResetMaskCount();
 }
 
@@ -884,7 +884,7 @@ void VolumeSelector::RedoMask()
 		return;
 
 	m_vd->GetTexture()->mask_undos_forward();
-	m_vd->GetVR().clear_tex_mask();
+	m_vd->GetVolumeRenderer().clear_tex_mask();
 	m_vd->ResetMaskCount();
 }
 

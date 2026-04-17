@@ -147,7 +147,7 @@ void MaskBorder::Compute(int order)
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 
 		size_t global_size[2] = { 1, 1 };
 		size_t local_size[2] = { 1, 1 };

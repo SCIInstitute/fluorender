@@ -396,7 +396,7 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 	IdleState state;
 	auto view_ptr = m_renderview.lock();
 
-	state.m_movie_maker_render_canvas = view_ptr && (glbin_moviemaker.GetView() == view_ptr.get());
+	state.m_movie_maker_render_canvas = view_ptr && (glbin_moviemaker.GetView() == view_ptr);
 	//mouse state
 	wxPoint mps = wxGetMousePosition();
 	state.m_mouse_over = wxFindWindowAtPoint(mps) == this &&

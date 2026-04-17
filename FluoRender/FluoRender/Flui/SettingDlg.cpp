@@ -2092,13 +2092,13 @@ void SettingDlg::OnResetBtn(wxCommandEvent& event)
 {
 	glbin_settings.Reset();
 	glbin.apply_processor_settings();
-	glbin_comp_def.Apply(&glbin_clusterizer);
-	glbin_comp_def.Apply(&glbin_comp_analyzer);
-	glbin_comp_def.Apply(&glbin_comp_generator);
-	glbin_comp_def.Apply(&glbin_comp_selector);
-	glbin_brush_def.Apply(&glbin_vol_selector);
+	glbin_comp_def.Apply(glbin_clusterizer);
+	glbin_comp_def.Apply(glbin_comp_analyzer);
+	glbin_comp_def.Apply(glbin_comp_generator);
+	glbin_comp_def.Apply(glbin_comp_selector);
+	glbin_brush_def.Apply(glbin_vol_selector);
 	glbin_mesh_def.Apply(glbin_conv_vol_mesh);
-	glbin_mov_def.Apply(&glbin_moviemaker);
+	glbin_mov_def.Apply(glbin_moviemaker);
 	glbin_data_manager.UpdateStreamMode(-1.0);
 	FluoRefresh(0);
 }
@@ -2107,13 +2107,13 @@ void SettingDlg::OnRecommendedBtn(wxCommandEvent& event)
 {
 	glbin_settings.Read("fluorender_default");
 	glbin.apply_processor_settings();
-	glbin_comp_def.Apply(&glbin_clusterizer);
-	glbin_comp_def.Apply(&glbin_comp_analyzer);
-	glbin_comp_def.Apply(&glbin_comp_generator);
-	glbin_comp_def.Apply(&glbin_comp_selector);
-	glbin_brush_def.Apply(&glbin_vol_selector);
+	glbin_comp_def.Apply(glbin_clusterizer);
+	glbin_comp_def.Apply(glbin_comp_analyzer);
+	glbin_comp_def.Apply(glbin_comp_generator);
+	glbin_comp_def.Apply(glbin_comp_selector);
+	glbin_brush_def.Apply(glbin_vol_selector);
 	glbin_mesh_def.Apply(glbin_conv_vol_mesh);
-	glbin_mov_def.Apply(&glbin_moviemaker);
+	glbin_mov_def.Apply(glbin_moviemaker);
 	glbin_data_manager.UpdateStreamMode(-1.0);
 	FluoRefresh(0);
 }

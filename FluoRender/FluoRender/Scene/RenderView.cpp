@@ -1392,7 +1392,7 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_p
 					if (cur_vd_ptr == vd)
 						m_cur_vol = dst;
 				glbin_vol_loader.RemoveBrickVD(vd);
-				vd->GetVR()->clear_tex_current();
+				vd->GetVolumeRenderer().clear_tex_current();
 				it = dst;
 				m_vd_pop_dirty = true;
 				found = true;
@@ -1413,7 +1413,7 @@ void RenderView::ReplaceVolumeData(const std::wstring &name, const std::shared_p
 					if (cur_vd_ptr == vd)
 						m_cur_vol = dst;
 					glbin_vol_loader.RemoveBrickVD(vd);
-					vd->GetVR()->clear_tex_current();
+					vd->GetVolumeRenderer().clear_tex_current();
 					tmpgroup->ReplaceVolumeData(j, dst);
 					m_vd_pop_dirty = true;
 					found = true;
@@ -3318,7 +3318,7 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 			for (int j = 0; j < br->GetLevelNum(); j++)
 			{
 				tex->setLevel(j);
-				if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+				vd->GetVolumeRenderer().clear_brick_buf();
 			}
 			tex->setLevel(curlv);
 			tex->set_FrameAndChannel(frame, vd->GetCurChannel());
@@ -3341,8 +3341,8 @@ void RenderView::UpdateVolumeData(int frame, const std::shared_ptr<VolumeData>& 
 
 	glbin_current.mainframe->UpdateProps({ gstRulerList });
 
-	if (clear_pool && vd->GetVR())
-		vd->GetVR()->clear_tex_pool();
+	if (clear_pool)
+		vd->GetVolumeRenderer().clear_tex_pool();
 }
 
 void RenderView::UpdateMeshData(int frame, const std::shared_ptr<MeshData>& md)
@@ -3388,7 +3388,7 @@ void RenderView::ReloadVolumeData(int frame)
 					for (int j = 0; j < br->GetLevelNum(); j++)
 					{
 						tex->setLevel(j);
-						if (vd->GetVR()) vd->GetVR()->clear_brick_buf();
+						vd->GetVolumeRenderer().clear_brick_buf();
 					}
 				}
 				int curlv = tex->GetCurLevel();
@@ -3466,8 +3466,7 @@ void RenderView::ReloadVolumeData(int frame)
 					vd->SetSpacing(spc);
 				else
 					vd->SetSpacing(reader->GetSpacing());
-				if (vd->GetVR())
-					vd->GetVR()->clear_tex_pool();
+				vd->GetVolumeRenderer().clear_tex_pool();
 			}
 		}
 	}
@@ -3785,7 +3784,7 @@ void RenderView::SyncClippingBoxes(const fluo::ClippingBox& cb)
 		auto vd = GetAllVolumeData(i);
 		if (!vd)
 			continue;
-		vd->GetVR()->sync_clipping_box(cb);
+		vd->GetVolumeRenderer().sync_clipping_box(cb);
 	}
 	for (int i = 0; i < GetMeshNum(); ++i)
 	{
@@ -4093,7 +4092,7 @@ void RenderView::StartLoopUpdate()
 			auto tex = vd->GetTexture();
 			if (tex)
 			{
-				fluo::Ray view_ray = vd->GetVR()->compute_view();
+				fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 				auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				if (bricks.empty())
 					continue;
@@ -4101,7 +4100,7 @@ void RenderView::StartLoopUpdate()
 				{
 					bbs->set_drawn(false);
 					if (bbs->get_priority() > 0 ||
-						!vd->GetVR()->test_against_view(bbs->bbox(), m_persp))
+						!vd->GetVolumeRenderer().test_against_view(bbs->bbox(), m_persp))
 					{
 						bbs->set_disp(false);
 						continue;
@@ -4116,8 +4115,7 @@ void RenderView::StartLoopUpdate()
 				}
 			}
 			vd->SetBrickNum(num_chan);
-			if (vd->GetVR())
-				vd->GetVR()->set_done_loop(false);
+			vd->GetVolumeRenderer().set_done_loop(false);
 		}
 
 		std::vector<VolumeLoaderData> queues;
@@ -4143,7 +4141,7 @@ void RenderView::StartLoopUpdate()
 			for (auto& vd : list)
 			{
 				auto tex = vd->GetTexture();
-				fluo::Ray view_ray = vd->GetVR()->compute_view();
+				fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 				auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 				int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 				bool shade = (mode == 1 && vd->GetShadingEnable());
@@ -4195,7 +4193,7 @@ void RenderView::StartLoopUpdate()
 					glbin_settings.m_update_order = 0;
 					for (size_t i = 0; i < list.size(); i++)
 					{
-						fluo::Ray view_ray = list[i]->GetVR()->compute_view();
+						fluo::Ray view_ray = list[i]->GetVolumeRenderer().compute_view();
 						list[i]->GetTexture()->set_sort_bricks();
 						list[i]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 						list[i]->GetTexture()->set_sort_bricks();
@@ -4226,7 +4224,7 @@ void RenderView::StartLoopUpdate()
 						auto tex = vd->GetTexture();
 						if (!tex)
 							continue;
-						fluo::Ray view_ray = vd->GetVR()->compute_view();
+						fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 						auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (bricks.empty())
 							continue;
@@ -4265,7 +4263,7 @@ void RenderView::StartLoopUpdate()
 							{
 								int order = glbin_settings.m_update_order;
 								glbin_settings.m_update_order = 0;
-								fluo::Ray view_ray = vd->GetVR()->compute_view();
+								fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 								tex->set_sort_bricks();
 								tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 								tex->set_sort_bricks();
@@ -4291,7 +4289,7 @@ void RenderView::StartLoopUpdate()
 						auto tex = vd->GetTexture();
 						if (!tex)
 							continue;
-						fluo::Ray view_ray = vd->GetVR()->compute_view();
+						fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 						auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 						if (bricks.empty())
 							continue;
@@ -4309,7 +4307,7 @@ void RenderView::StartLoopUpdate()
 						{
 							auto vd = list[k];
 							auto tex = vd->GetTexture();
-							fluo::Ray view_ray = vd->GetVR()->compute_view();
+							fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 							auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
@@ -4364,7 +4362,7 @@ void RenderView::StartLoopUpdate()
 								glbin_settings.m_update_order = 0;
 								for (size_t k = 0; k < list.size(); k++)
 								{
-									fluo::Ray view_ray = list[k]->GetVR()->compute_view();
+									fluo::Ray view_ray = list[k]->GetVolumeRenderer().compute_view();
 									list[k]->GetTexture()->set_sort_bricks();
 									list[k]->GetTexture()->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									list[k]->GetTexture()->set_sort_bricks();
@@ -4383,7 +4381,7 @@ void RenderView::StartLoopUpdate()
 						{
 							auto vd = list[j];
 							auto tex = vd->GetTexture();
-							fluo::Ray view_ray = vd->GetVR()->compute_view();
+							fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 							auto bricks = tex->get_sorted_bricks(view_ray, !m_persp);
 							int mode = vd->GetRenderMode() == flvr::RenderMode::Mip ? 1 : 0;
 							bool shade = (mode == 1 && vd->GetShadingEnable());
@@ -4420,7 +4418,7 @@ void RenderView::StartLoopUpdate()
 								{
 									int order = glbin_settings.m_update_order;
 									glbin_settings.m_update_order = 0;
-									fluo::Ray view_ray = vd->GetVR()->compute_view();
+									fluo::Ray view_ray = vd->GetVolumeRenderer().compute_view();
 									tex->set_sort_bricks();
 									tex->get_sorted_bricks(view_ray, !m_persp); //recalculate brick.d_
 									tex->set_sort_bricks();
@@ -4554,7 +4552,7 @@ void RenderView::GetTraces(bool update) const
 
 	int ii, jj, kk;
 	//return current mask (into system memory)
-	cur_vd->GetVR()->return_mask();
+	cur_vd->GetVolumeRenderer().return_mask();
 	auto res = cur_vd->GetResolution();
 	//find labels in the old that are selected by the current mask
 	auto mask_raw = cur_vd->GetMask(true);
@@ -5599,7 +5597,7 @@ void RenderView::DrawVolumes(int peel)
 						quota_vd_list.push_back(vd);
 						unsigned long count_bricks = vd->GetBrickNum();
 						quota_bricks_chan = std::min(count_bricks, quota_bricks);
-						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+						vd->GetVolumeRenderer().set_quota_bricks_chan(quota_bricks_chan);
 						unsigned long count = 0;
 						while (count_bricks < quota_bricks &&
 							quota_vd_list.size() < m_vd_pop_list.size())
@@ -5619,7 +5617,7 @@ void RenderView::DrawVolumes(int peel)
 								quota_bricks_chan = quota_bricks - count_bricks;
 							else
 								quota_bricks_chan = brick_num;
-							vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+							vd->GetVolumeRenderer().set_quota_bricks_chan(quota_bricks_chan);
 							count_bricks += quota_bricks_chan;
 						}
 					}
@@ -5629,7 +5627,7 @@ void RenderView::DrawVolumes(int peel)
 					quota_bricks_chan = quota_bricks;
 					auto vd = m_vd_pop_list[0].lock();
 					if (vd)
-						vd->GetVR()->set_quota_bricks_chan(quota_bricks_chan);
+						vd->GetVolumeRenderer().set_quota_bricks_chan(quota_bricks_chan);
 				}
 
 				//get and set center point
@@ -5803,16 +5801,13 @@ void RenderView::DrawVolumesStandardDepth(const std::vector<std::weak_ptr<Volume
 		auto vd = it->lock();
 		if (vd && vd->GetDisp())
 		{
-			flvr::VolumeRenderer* vr = vd->GetVR();
-			if (vr)
-			{
-				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
-				vr->set_zoom(zoom, sf121);
-				m_mvr->add_vr(vr);
-				m_mvr->SetNoiseRed(vr->GetNoiseRed());
-			}
+			auto& vr = vd->GetVolumeRenderer();
+			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			vr.set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
+			vr.set_zoom(zoom, sf121);
+			m_mvr->add_vr(&vr);
+			m_mvr->SetNoiseRed(vr.GetNoiseRed());
 		}
 	}
 
@@ -5947,29 +5942,26 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 		auto vd = it->lock();
 		if (vd && vd->GetDisp())
 		{
-			flvr::VolumeRenderer* vr = vd->GetVR();
-			if (vr)
+			auto& vr = vd->GetVolumeRenderer();
+			guards.emplace_back(vr);
+			//turn off colormap proj
+			if (main_mode == flvr::ColorMode::SingleColor)
 			{
-				guards.emplace_back(*vr);
-				//turn off colormap proj
-				if (main_mode == flvr::ColorMode::SingleColor)
-				{
-					//normal mip
-					vr->set_colormap_proj(flvr::ColormapProj::Disabled);
-					vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-				}
-				else
-				{
-					//white mip
-					vr->set_color(fluo::Color(1.0));
-					vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
-				}
-				vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
-				vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
-				vr->set_zoom(zoom, sf121);
-				m_mvr->add_vr(vr);
-				m_mvr->SetNoiseRed(vr->GetNoiseRed());
+				//normal mip
+				vr.set_colormap_proj(flvr::ColormapProj::Disabled);
+				vr.set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 			}
+			else
+			{
+				//white mip
+				vr.set_color(fluo::Color(1.0));
+				vr.set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
+			}
+			vr.set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
+			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
+			vr.set_zoom(zoom, sf121);
+			m_mvr->add_vr(&vr);
+			m_mvr->SetNoiseRed(vr.GetNoiseRed());
 		}
 	}
 
@@ -6129,9 +6121,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 	auto vd = vd_ptr.lock();
 	if (!vd)
 		return;
-	flvr::VolumeRenderer* vr = vd->GetVR();
-	if (!vr)
-		return;
+	auto& vr = vd->GetVolumeRenderer();
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6147,11 +6137,11 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		if (rn_time - flvr::TextureRenderer::get_st_time() >
 			flvr::TextureRenderer::get_up_time())
 			return;
-		if (vr->get_done_loop(1))
+		if (vr.get_done_loop(1))
 			do_mip = false;
 	}
 
-	bool shading = vr->get_shading();
+	bool shading = vr.get_shading();
 	bool shadow = vd->GetShadowEnable();
 	bool outline = vd->GetOutline();
 	auto main_mode = vd->GetMainColorMode();
@@ -6220,25 +6210,25 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		overlay_buffer->clear_base(true, false);
 		//flvr::TextureRenderer::reset_clear_chan_buffer();
 
-		flvr::RenderModeGuard rmg(*vr);
-		vr->set_depth_peel(peel);
-		vr->set_shading(false);
+		flvr::RenderModeGuard rmg(vr);
+		vr.set_depth_peel(peel);
+		vr.set_shading(false);
 		//turn off colormap proj
 		if (main_mode == flvr::ColorMode::Colormap ||
 			mask_mode == flvr::ColorMode::Colormap)
 		{
 			//white mip
-			vr->set_color(fluo::Color(1.0));
-			vr->set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
+			vr.set_color(fluo::Color(1.0));
+			vr.set_fog(false, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 		else
 		{
 			//normal mip
-			vr->set_colormap_proj(flvr::ColormapProj::Disabled);
-			vr->set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
+			vr.set_colormap_proj(flvr::ColormapProj::Disabled);
+			vr.set_fog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
 		}
 
-		vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
+		vr.set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 		//draw
 		vd->SetStreamMode(1);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -6251,7 +6241,7 @@ void RenderView::DrawVolumeCompMip(const std::weak_ptr<VolumeData>& vd_ptr, int 
 		//	(glbin_settings.m_mem_swap && flvr::TextureRenderer::get_clear_chan_buffer());
 
 		//flvr::FramebufferStateGuard fbg(*chan_buffer);
-		//bool not_done_loop = glbin_settings.m_mem_swap && !vr->get_done_loop(0);
+		//bool not_done_loop = glbin_settings.m_mem_swap && !vr.get_done_loop(0);
 		//chan_buffer->set_blend_enabled(true);
 		//chan_buffer->set_blend_equation(not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add,
 		//	not_done_loop ? flvr::BlendEquation::Max : flvr::BlendEquation::Add);
@@ -6399,9 +6389,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 	auto vd = vd_ptr.lock();
 	if (!vd)
 		return;
-	flvr::VolumeRenderer* vr = vd->GetVR();
-	if (!vr)
-		return;
+	auto& vr = vd->GetVolumeRenderer();
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -6427,7 +6415,7 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 			flvr::TextureRenderer::get_up_time())
 			return;
 
-		if (vr->get_done_loop(0))
+		if (vr.get_done_loop(0))
 			do_over = false;
 	}
 
@@ -6484,8 +6472,8 @@ void RenderView::DrawVolumeCompStandard(const std::weak_ptr<VolumeData>& vd_ptr,
 			flvr::TextureRenderer::reset_clear_chan_buffer();
 		}
 
-		vr->set_depth_peel(peel);
-		vr->set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
+		vr.set_depth_peel(peel);
+		vr.set_fog_color(glbin_settings.m_clear_color_bg ? m_bg_color : fluo::Color(0.0));
 		vd->SetStreamMode(0);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 		vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
@@ -6606,7 +6594,7 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 	//	if (rn_time - flvr::TextureRenderer::get_st_time() >
 	//		flvr::TextureRenderer::get_up_time())
 	//		return;
-	//	if (vd->GetVR()->get_done_loop(2))
+	//	if (vd->GetVolumeRenderer().get_done_loop(2))
 	//		return;
 	//}
 
@@ -6630,17 +6618,16 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 	{
 		auto vd = local_list[0].lock();
 		assert(vd);
-		auto vr = vd->GetVR();
-		assert(vr);
+		auto& vr = vd->GetVolumeRenderer();
 
 		//save
-		flvr::RenderModeGuard rmg(*vr);
+		flvr::RenderModeGuard rmg(vr);
 		//set to draw white shading
-		vr->set_shading(true);
-		vr->set_solid(false);
-		vr->set_mode(flvr::RenderMode::Overlay);
-		vr->set_main_mode(flvr::ColorMode::SingleColor);
-		vr->set_color(fluo::Color(1.0));
+		vr.set_shading(true);
+		vr.set_solid(false);
+		vr.set_mode(flvr::RenderMode::Overlay);
+		vr.set_main_mode(flvr::ColorMode::SingleColor);
+		vr.set_color(fluo::Color(1.0));
 		//draw
 		vd->SetStreamMode(2);
 		vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
@@ -6660,21 +6647,20 @@ void RenderView::DrawOverlayShadingVolume(const std::vector<std::weak_ptr<Volume
 			auto vd = it->lock();
 			if (!vd)
 				continue;
-			auto vr = vd->GetVR();
-			assert(vr);
+			auto& vr = vd->GetVolumeRenderer();
 
 			//save
-			guards.emplace_back(*vr);
-			vr->set_shading(true);
-			vr->set_solid(false);
-			vr->set_mode(flvr::RenderMode::Overlay);
-			vr->set_main_mode(flvr::ColorMode::SingleColor);
-			vr->set_color(fluo::Color(1.0));
+			guards.emplace_back(vr);
+			vr.set_shading(true);
+			vr.set_solid(false);
+			vr.set_mode(flvr::RenderMode::Overlay);
+			vr.set_main_mode(flvr::ColorMode::SingleColor);
+			vr.set_color(fluo::Color(1.0));
 			vd->SetStreamMode(2);
 			vd->SetMatrices(m_mv_mat, m_proj_mat, m_tex_mat);
 			vd->SetFog(m_use_fog, m_fog_intensity, m_fog_start, m_fog_end);
-			m_mvr->add_vr(vr);
-			m_mvr->SetNoiseRed(vr->GetNoiseRed());
+			m_mvr->add_vr(&vr);
+			m_mvr->SetNoiseRed(vr.GetNoiseRed());
 		}
 		//draw
 		m_mvr->set_viewport(vp);
@@ -6744,9 +6730,8 @@ void RenderView::DrawOverlayScatteringVolume(const std::vector<std::weak_ptr<Vol
 	{
 		auto vd = local_list[0].lock();
 		assert(vd);
-		auto vr = vd->GetVR();
-		assert(vr);
-		buf_name = vr->get_buffer_name();
+		auto& vr = vd->GetVolumeRenderer();
+		buf_name = vr.get_buffer_name();
 	}
 	if (buf_name.empty())
 		return;
@@ -6846,9 +6831,8 @@ void RenderView::DrawOverlayShadowVolume(const std::vector<std::weak_ptr<VolumeD
 		auto vd = local_list[0].lock();
 		assert(vd);
 		shadow_darkness = vd->GetShadowIntensity();
-		auto vr = vd->GetVR();
-		assert(vr);
-		buf_name = vr->get_buffer_name();
+		auto& vr = vd->GetVolumeRenderer();
+		buf_name = vr.get_buffer_name();
 	}
 	if (buf_name.empty())
 		return;
@@ -6954,9 +6938,8 @@ void RenderView::DrawOverlayOutlineVolume(const std::vector<std::weak_ptr<Volume
 	{
 		auto vd = local_list[0].lock();
 		assert(vd);
-		auto vr = vd->GetVR();
-		assert(vr);
-		buf_name = vr->get_buffer_name();
+		auto& vr = vd->GetVolumeRenderer();
+		buf_name = vr.get_buffer_name();
 	}
 	if (buf_name.empty())
 		return;
@@ -8831,10 +8814,10 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			for (auto it = m_vd_pop_list.begin(); it != m_vd_pop_list.end(); ++it)
 			{
 				auto vd = it->lock();
-				if (vd && vd->GetVR())
+				if (vd)
 				{
 					auto index = std::distance(m_vd_pop_list.begin(), it);
-					str = L"SLICES_" + std::to_wstring(index + 1) + L": " + std::to_wstring(vd->GetVR()->get_slice_num());
+					str = L"SLICES_" + std::to_wstring(index + 1) + L": " + std::to_wstring(vd->GetVolumeRenderer().get_slice_num());
 					px = static_cast<float>(gapw - nx / 2.0);
 					py = static_cast<float>(ny / 2.0 - gaph*(3 + index) / 2);
 					m_text_renderer->RenderText(
@@ -10494,7 +10477,7 @@ void RenderView::ProcessMouse(MouseState& state)
 				static_cast<int>(std::round(m_mouse_y* m_dpi_factor)));
 			if (glbin_vol_selector.GetSelectMode() == flrd::SelectMode::Mesh)
 			{
-				auto md = glbin_conv_vol_mesh->GetMeshData();
+				auto md = glbin_conv_vol_mesh.GetMeshData();
 				if (md)
 				{
 					auto find_md = glbin_data_manager.GetMeshData(md->GetName());

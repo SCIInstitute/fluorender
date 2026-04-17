@@ -3426,7 +3426,7 @@ void VolumePropPanel::SaveDefault()
 	if (use_ml)
 		SaveMl();
 	else
-		glbin_vol_def.Set(vd);
+		glbin_vol_def.Set(*vd);
 }
 
 void VolumePropPanel::ResetDefault()
@@ -3440,9 +3440,9 @@ void VolumePropPanel::ResetDefault()
 
 	auto group = m_group.lock();
 	if (m_sync_group && group)
-		glbin_vol_def.Apply(group);
+		glbin_vol_def.Apply(*group);
 	else
-		glbin_vol_def.Apply(vd);
+		glbin_vol_def.Apply(*vd);
 
 	FluoRefresh(0, { gstVolumeProps, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
 }

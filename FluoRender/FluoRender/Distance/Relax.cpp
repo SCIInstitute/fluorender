@@ -250,9 +250,9 @@ bool Relax::Compute()
 		cl_float3 org = { (float)ox, (float)oy, (float)oz };
 		GLint tid;
 		if (m_use_mask)
-			tid = vd->GetVR()->load_brick_mask(bbs);
+			tid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 		else
-			tid = vd->GetVR()->load_brick(bbs);
+			tid = vd->GetVolumeRenderer().load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

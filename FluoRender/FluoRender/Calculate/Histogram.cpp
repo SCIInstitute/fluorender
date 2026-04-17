@@ -168,10 +168,10 @@ void Histogram::Compute()
 		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(bbs);
+		GLint tid = vd->GetVolumeRenderer().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_mask)
-			mid = vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 		std::weak_ptr<flvr::Argument> arg_tid, arg_mid;
 
 		size_t local_size[3] = { 1, 1, 1 };

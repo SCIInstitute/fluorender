@@ -988,7 +988,7 @@ void ScriptProc::RunClearMask()
 		//clear the label
 		if (blabel)
 			it->AddEmptyLabel(0, true);
-		it->GetVR()->clear_tex_current();
+		it->GetVolumeRenderer().clear_tex_current();
 	}
 }
 
@@ -1229,7 +1229,7 @@ void ScriptProc::RunOpenCL()
 
 	for (auto& it : vlist)
 	{
-		it->GetVR()->clear_tex_current();
+		it->GetVolumeRenderer().clear_tex_current();
 		glbin_kernel_executor.SetVolume(it);
 		glbin_kernel_executor.Execute();
 	}

@@ -157,8 +157,8 @@ void CountVoxels::Count()
 		if (!GetInfo(bbs, bits, nx, ny, nz))
 			continue;
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(bbs);
-		GLint mid = vd->GetVR()->load_brick_mask(bbs);
+		GLint tid = vd->GetVolumeRenderer().load_brick(bbs);
+		GLint mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

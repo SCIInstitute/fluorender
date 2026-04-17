@@ -148,9 +148,9 @@ int CombineList::Execute()
 
 	if (volume)
 	{
-		glbin_vol_def.Copy(vd_r, volume);
-		glbin_vol_def.Copy(vd_g, volume);
-		glbin_vol_def.Copy(vd_b, volume);
+		glbin_vol_def.Copy(*vd_r, *volume);
+		glbin_vol_def.Copy(*vd_g, *volume);
+		glbin_vol_def.Copy(*vd_b, *volume);
 	}
 	fluo::Color red = fluo::Color(1.0, 0.0, 0.0);
 	fluo::Color green = fluo::Color(0.0, 1.0, 0.0);

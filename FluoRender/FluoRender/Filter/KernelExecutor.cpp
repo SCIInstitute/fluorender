@@ -184,7 +184,7 @@ bool KernelExecutor::Execute()
 		if (bricks_r.empty())
 			return false;
 
-		glbin_vol_def.Copy(vd_r, vd);
+		glbin_vol_def.Copy(*vd_r, *vd);
 	}
 	else
 		vd_r = vd;
@@ -208,7 +208,7 @@ bool KernelExecutor::Execute()
 	if (!m_duplicate)
 	{
 		//clear gpu texture because the kernel updates the data in main memory after read back
-		vd->GetVR()->clear_tex_current();
+		vd->GetVolumeRenderer().clear_tex_current();
 	}
 
 	SetRange(0, 100);
@@ -223,12 +223,7 @@ bool KernelExecutor::ExecuteKernel(
 {
 	bool kernel_exe = true;
 
-	flvr::VolumeRenderer* vr = vd->GetVR();
-	if (!vr)
-	{
-		m_message = L"Volume corrupted.\n";
-		return false;
-	}
+	auto& vr = vd->GetVolumeRenderer();
 	auto tex =vd->GetTexture();
 	if (!tex)
 	{
@@ -260,7 +255,7 @@ bool KernelExecutor::ExecuteKernel(
 
 		b = bricks[i];
 		b_r = bricks_r[i];
-		GLint data_id = vr->load_brick(b);
+		GLint data_id = vr.load_brick(b);
 		flvr::KernelProgram* kernel_prog =
 			glbin_kernel_factory.
 			program(m_code, bits, max_int);
@@ -309,7 +304,7 @@ bool KernelExecutor::ExecuteKernel(
 
 	//clear gpu texture because the kernel updates the data in main memory after read back
 	if (vd == vd_r)
-		vd->GetVR()->clear_tex_current();
+		vd->GetVolumeRenderer().clear_tex_current();
 
 	return kernel_exe;
 }

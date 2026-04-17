@@ -1581,7 +1581,7 @@ void VolumeData::Calculate(int type,
 	{
 		if (type==6 || type==7)
 			m_vr->set_hi_thresh(vd_a->GetRightThresh());
-		m_vr->calculate(type, vd_a->GetVR(), vd_b->GetVR());
+		m_vr->calculate(type, vd_a->GetVolumeRenderer(), vd_b->GetVolumeRenderer());
 		m_vr->return_volume();
 	}
 }

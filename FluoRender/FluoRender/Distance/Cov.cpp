@@ -194,9 +194,9 @@ bool Cov::ComputeCenter()
 		//get tex ids
 		GLint mid = 0;
 		if (use_mask)
-			mid = vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 		else
-			mid = vd->GetVR()->load_brick(bbs);
+			mid = vd->GetVolumeRenderer().load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -291,9 +291,9 @@ bool Cov::ComputeCov()
 		//get tex ids
 		GLint mid = 0;
 		if (use_mask)
-			mid = vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 		else
-			mid = vd->GetVR()->load_brick(bbs);
+			mid = vd->GetVolumeRenderer().load_brick(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;

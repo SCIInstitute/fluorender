@@ -263,7 +263,6 @@ std::unordered_map<std::string, flrd::Params> gen_list()
 }
 
 std::unordered_map<std::string, flrd::Params> flrd::Reshape::params_list_ = gen_list();
-flrd::EntryParams* flrd::Reshape::result_ = 0;
 std::string IniFile::path_sep_s_ = "";
 
 Global Global::instance_;
@@ -573,7 +572,6 @@ GlobalStates& Global::get_states()
 void Global::apply_processor_settings()
 {
 	m_script_proc->SetBreak(glbin_settings.m_script_break);
-	m_seg_grow->SetRulerHandler(m_ruler_handler.get());
 }
 
 flrd::ComponentGenerator& Global::get_comp_generator()

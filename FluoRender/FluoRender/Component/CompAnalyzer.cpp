@@ -220,10 +220,10 @@ void ComponentAnalyzer::Analyze()
 	graph.clear();
 	m_analyzed = false;
 
-	vd->GetVR().return_label();
+	vd->GetVolumeRenderer().return_label();
 	bool use_sel = m_use_sel;//need to check if mask is valid
 	if (use_sel)
-		vd->GetVR().return_mask();
+		vd->GetVolumeRenderer().return_mask();
 
 	unsigned int size_limit;
 	if (bn > 1)
@@ -486,7 +486,7 @@ void ComponentAnalyzer::Analyze()
 	if (m_consistent)
 	{
 		MakeColorConsistent();
-		vd->GetVR().clear_tex_label();
+		vd->GetVolumeRenderer().clear_tex_label();
 	}
 
 	m_compgroup->dirty = false;
@@ -1441,7 +1441,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 		fluo::Color c;
 		if (GetColor(i->second->Id(), i->second->BrickId(), vd, c))
 		{
-			glbin_vol_def.Copy(vdn, vd);
+			glbin_vol_def.Copy(*vdn, *vd);
 			vdn->SetColor(c);
 			channs.push_back(vdn);
 		}
@@ -1554,9 +1554,9 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 		}
 	}
 
-	glbin_vol_def.Copy(vd_r, vd);
-	glbin_vol_def.Copy(vd_g, vd);
-	glbin_vol_def.Copy(vd_b, vd);
+	glbin_vol_def.Copy(*vd_r, *vd);
+	glbin_vol_def.Copy(*vd_g, *vd);
+	glbin_vol_def.Copy(*vd_b, *vd);
 
 	fluo::Color red(1.0, 0.0, 0.0);
 	fluo::Color green(0.0, 1.0, 0.0);

@@ -4328,7 +4328,7 @@ bool TrackMapProcessor::SegmentCells()
 	LinkAddedCells(out_cells, frame, frame + 1);
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 
 	RefineMap(static_cast<int>(frame));
 

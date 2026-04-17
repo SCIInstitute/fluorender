@@ -1282,8 +1282,8 @@ void MeasureDlg::Grow()
 		auto vd = glbin_current.vol_data.lock();
 		if (vd)
 		{
-			vd->GetVR()->clear_tex_mask();
-			vd->GetVR()->clear_tex_label();
+			vd->GetVolumeRenderer().clear_tex_mask();
+			vd->GetVolumeRenderer().clear_tex_label();
 			vd->AddEmptyMask(0, true);
 			vd->AddEmptyLabel(0, true);
 		}

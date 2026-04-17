@@ -146,7 +146,7 @@ public:
 	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
-	flvr::VolumeRenderer& GetVR() const { return *m_vr; }
+	flvr::VolumeRenderer& GetVolumeRenderer() const { return *m_vr; }
 	//texture
 	std::shared_ptr<flvr::Texture> GetTexture() const { return m_tex; }
 

@@ -2149,7 +2149,7 @@ void RenderViewPanel::SaveDefault(unsigned int mask)
 
 void RenderViewPanel::LoadSettings()
 {
-	glbin_view_def.Apply(m_renderview);
+	glbin_view_def.Apply(*m_renderview);
 	m_rot_slider = glbin_view_def.m_rot_slider;
 
 	FluoRefresh(2, {}, { GetViewId() });

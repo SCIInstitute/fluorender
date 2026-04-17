@@ -477,7 +477,7 @@ void MeshPropPanel::SaveDefault()
 	auto md = m_md.lock();
 	if (md)
 	{
-		glbin_mesh_def.Set(md);
+		glbin_mesh_def.Set(*md);
 	}
 }
 
@@ -486,7 +486,7 @@ void MeshPropPanel::ResetDefault()
 	auto md = m_md.lock();
 	if (md)
 	{
-		glbin_mesh_def.Apply(md);
+		glbin_mesh_def.Apply(*md);
 		FluoRefresh(0, { gstMeshProps }, { glbin_current.GetViewId() });
 	}
 }

@@ -65,6 +65,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <RefreshScheduler.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <format>
 
 Project::Project() :
@@ -1886,7 +1887,7 @@ void Project::Reset()
 	glbin_current.SetRoot();
 	glbin_moviemaker.Stop();
 	glbin_moviemaker.SetView(root->GetView(0));
-	glbin_mov_def.Apply(&glbin_moviemaker);
+	glbin_mov_def.Apply(glbin_moviemaker);
 	glbin_interpolator.Clear();
 	glbin_volume_point.SetVolumeData(0);
 	glbin_comp_analyzer.ClearCompGroup();
@@ -1894,7 +1895,7 @@ void Project::Reset()
 
 void Project::ExportRulerList(const std::wstring& filename)
 {
-	flrd::RulerList* list = glbin_current.GetRulerList();
+	auto list = glbin_current.GetRulerList();
 	auto view = glbin_current.render_view.lock();
 	if (!list || !view)
 	{
@@ -1923,10 +1924,10 @@ void Project::ExportRulerList(const std::wstring& filename)
 		break;
 	}
 
-	int ruler_num = list->size();
+	int ruler_num = list->get().size();
 	std::vector<unsigned int> groups;
 	std::vector<int> counts;
-	int group_num = list->GetGroupNumAndCount(groups, counts);
+	size_t group_num = list->get().GroupCounts().size();
 	std::vector<int> group_count(group_num, 0);
 
 	if (ruler_num > 1)
@@ -1957,10 +1958,10 @@ void Project::ExportRulerList(const std::wstring& filename)
 
 	double f = 0.0;
 	fluo::Color color;
-	for (size_t i = 0; i < list->size(); i++)
+	auto ruler_list = list->get().All();
+	for (auto ruler : ruler_list)
 	{
 		//for each ruler
-		ruler = (*list)[i];
 		if (!ruler)
 			continue;
 		ruler->SetWorkTime(view->m_tseq_cur_num);
@@ -2037,22 +2038,22 @@ void Project::ExportRulerList(const std::wstring& filename)
 		}
 
 		//export profile
-		std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
-		if (profile && profile->size())
+		auto profile = ruler->GetProfile();
+		if (!profile.empty())
 		{
 			double sumd = 0.0;
 			unsigned long long sumull = 0;
 			os << s2ws(ruler->GetInfoProfile()) << "\n";
-			for (size_t j = 0; j < profile->size(); ++j)
+			for (size_t j = 0; j < profile.size(); ++j)
 			{
 				//for each profile
-				int pixels = (*profile)[j].m_pixels;
+				int pixels = profile[j].m_pixels;
 				if (pixels <= 0)
 					os << "0.0\t";
 				else
 				{
-					os << (*profile)[j].m_accum / pixels << "\t";
-					sumd += (*profile)[j].m_accum;
+					os << profile[j].m_accum / pixels << "\t";
+					sumd += profile[j].m_accum;
 					sumull += pixels;
 				}
 			}
@@ -2084,8 +2085,8 @@ void Project::ExportRulerList(const std::wstring& filename)
 
 void Project::SaveRulerList(const std::string &gst_name, int view_index)
 {
-	flrd::RulerList* list = glbin_current.GetRulerList();
-	if (!list || list->empty())
+	auto list = glbin_current.GetRulerList();
+	if (!list || list->get().IsEmpty())
 		return;
 
 	std::shared_ptr<BaseTreeFile> fconfig = glbin_tree_file_factory.getTreeFile(gst_name);
@@ -2093,11 +2094,12 @@ void Project::SaveRulerList(const std::string &gst_name, int view_index)
 		return;
 
 	std::string path;
-	size_t num = list->size();
+	auto ruler_list = list->get().All();
+	size_t num = ruler_list.size();
 	fconfig->Write("num", num);
-	for (size_t i = 0; i < num; ++i)
+	size_t i = 0;
+	for (auto ruler : ruler_list)
 	{
-		flrd::Ruler* ruler = (*list)[i];
 		if (!ruler) continue;
 		path = "/views/" + std::to_string(view_index) + "/rulers/" + std::to_string(i);
 		fconfig->SetPath(path);
@@ -2126,7 +2128,7 @@ void Project::SaveRulerList(const std::string &gst_name, int view_index)
 			fconfig->Write("time_point", true);
 			for (size_t k = 0; k < branch_point_num; ++k)
 			{
-				flrd::RulerPoint* rp = ruler->GetRulerPoint(j, k);
+				auto rp = ruler->GetRulerPoint(j, k);
 				if (!rp) continue;
 				std::string path2 = path_br + "/point" + std::to_string(k);
 				fconfig->SetPath(path2);
@@ -2136,22 +2138,19 @@ void Project::SaveRulerList(const std::string &gst_name, int view_index)
 				for (size_t tpi = 0; tpi < rp->GetTimeNum(); ++tpi)
 				{
 					std::string tpn = "tp" + std::to_string(tpi);
-					size_t t = 0;
-					fluo::Point p;
-					if (rp->GetTimeAndPoint(tpi, t, p))
-					{
-						fconfig->Write(tpn + "_time", t);
-						fconfig->Write(tpn + "_pos", p);
-					}
+					auto [t, p] = rp->GetTimeAndPoint(tpi);
+					fconfig->Write(tpn + "_time", t);
+					fconfig->Write(tpn + "_pos", p);
 				}
 			}
 		}
+		i++;
 	}
 }
 
 void Project::ReadRulerList(const std::string &gst_name, int view_index)
 {
-	flrd::RulerList* list = glbin_current.GetRulerList();
+	auto list = glbin_current.GetRulerList();
 	if (!list)
 	{
 		Root* root = glbin_data_manager.GetRoot();
@@ -2176,7 +2175,7 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 	fluo::Color cval;
 	fluo::Point pval;
 
-	list->clear();
+	list->get().Clear();
 	size_t ruler_num = 0;
 	fconfig->Read("num", &ruler_num);
 	for (size_t i = 0; i < ruler_num; ++i)
@@ -2185,7 +2184,7 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 		if (fconfig->Exists(path))
 		{
 			fconfig->SetPath(path);
-			flrd::Ruler* ruler = new flrd::Ruler();
+			auto ruler = std::make_shared<flrd::Ruler>();
 			if (fconfig->Read("name", &wsval))
 				ruler->SetName(wsval);
 			if (fconfig->Read("group", &ival))
@@ -2287,7 +2286,7 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 										ruler->SetWorkTime(t);
 										if (j > 0 && k == 0)
 										{
-											flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);
+											auto pp = ruler->FindRulerPoint(pval);
 											if (pp)
 											{
 												pp->SetLocked(locked);
@@ -2299,13 +2298,13 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 											if (tpi == 0)
 											{
 												ruler->AddPoint(pval);
-												flrd::pRulerPoint pp = ruler->FindPRulerPoint(pval);
+												auto pp = ruler->FindRulerPoint(pval);
 												if (pp)
 													pp->SetLocked(locked);
 											}
 											else
 											{
-												flrd::pRulerPoint pp = ruler->GetPRulerPoint(k);
+												auto pp = ruler->GetRulerPoint(k);
 												if (pp)
 												{
 													pp->SetPoint(pval, t);
@@ -2321,7 +2320,7 @@ void Project::ReadRulerList(const std::string &gst_name, int view_index)
 				}
 			}
 			ruler->SetFinished();
-			list->push_back(ruler);
+			list->get().Add(ruler);
 		}
 	}
 }

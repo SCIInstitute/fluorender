@@ -653,7 +653,7 @@ private:
 	fluo::Quaternion m_cam_q;
 	fluo::Quaternion m_cam_zero_q;//zero rotation
 	fluo::Vector m_cam_up;
-	fluo::Vector m_cam_head;
+	mutable fluo::Vector m_cam_head;
 
 	//object center
 	fluo::Point m_obj_ctr;

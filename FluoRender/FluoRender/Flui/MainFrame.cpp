@@ -159,13 +159,13 @@ MainFrame::MainFrame(
 	else if (reset == 2)
 		glbin_settings.Read("fluorender_default");
 	glbin.apply_processor_settings();
-	glbin_comp_def.Apply(&glbin_clusterizer);
-	glbin_comp_def.Apply(&glbin_comp_analyzer);
-	glbin_comp_def.Apply(&glbin_comp_generator);
-	glbin_comp_def.Apply(&glbin_comp_selector);
-	glbin_brush_def.Apply(&glbin_vol_selector);
+	glbin_comp_def.Apply(glbin_clusterizer);
+	glbin_comp_def.Apply(glbin_comp_analyzer);
+	glbin_comp_def.Apply(glbin_comp_generator);
+	glbin_comp_def.Apply(glbin_comp_selector);
+	glbin_brush_def.Apply(glbin_vol_selector);
 	glbin_mesh_def.Apply(glbin_conv_vol_mesh);
-	glbin_mov_def.Apply(&glbin_moviemaker);
+	glbin_mov_def.Apply(glbin_moviemaker);
 	glbin_data_manager.UpdateStreamMode(-1.0);
 
 	//set frame
@@ -893,7 +893,7 @@ MainFrame::MainFrame(
 	m_convert_dlg->LoadPerspective(glbin_settings.m_layout_convert);
 	glbin_moviemaker.SetMainFrame(this);
 	glbin_moviemaker.SetView(view);
-	glbin_mov_def.Apply(&glbin_moviemaker);
+	glbin_mov_def.Apply(glbin_moviemaker);
 
 	m_waker.Start(100);
 
@@ -908,12 +908,12 @@ MainFrame::~MainFrame()
 	glbin_text_tex_manager.clear();
 	flvr::KernelProgram::release_context();
 
-	glbin_brush_def.Set(&glbin_vol_selector);
-	glbin_comp_def.Set(&glbin_comp_generator);
-	glbin_comp_def.Set(&glbin_clusterizer);
-	glbin_comp_def.Set(&glbin_comp_selector);
-	glbin_comp_def.Set(&glbin_comp_analyzer);
-	glbin_mov_def.Set(&glbin_moviemaker);
+	glbin_brush_def.Set(glbin_vol_selector);
+	glbin_comp_def.Set(glbin_comp_generator);
+	glbin_comp_def.Set(glbin_clusterizer);
+	glbin_comp_def.Set(glbin_comp_selector);
+	glbin_comp_def.Set(glbin_comp_analyzer);
+	glbin_mov_def.Set(glbin_moviemaker);
 	glbin_mesh_def.Set(glbin_conv_vol_mesh);
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	//frame layout

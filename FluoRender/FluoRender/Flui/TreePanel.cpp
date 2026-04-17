@@ -736,9 +736,9 @@ void TreePanel::MeshConvert()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	glbin_conv_vol_mesh->SetVolumeData(vd);
-	glbin_conv_vol_mesh->Update(true);
-	auto md = glbin_conv_vol_mesh->GetMeshData();
+	glbin_conv_vol_mesh.SetVolumeData(vd);
+	glbin_conv_vol_mesh.Update(true);
+	auto md = glbin_conv_vol_mesh.GetMeshData();
 	if (md)
 	{
 		auto temp = glbin_data_manager.GetMeshData(md->GetName());
@@ -750,9 +750,9 @@ void TreePanel::MeshConvert()
 				view->AddMeshData(md);
 		}
 	}
-	if (!glbin_conv_vol_mesh->GetMerged())
-		glbin_conv_vol_mesh->MergeVertices(false);
-	glbin_conv_vol_mesh->Smooth(true);
+	if (!glbin_conv_vol_mesh.GetMerged())
+		glbin_conv_vol_mesh.MergeVertices(false);
+	glbin_conv_vol_mesh.Smooth(true);
 
 	FluoRefresh(0, { gstVolMeshInfo, gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
 		{ glbin_current.GetViewId() });

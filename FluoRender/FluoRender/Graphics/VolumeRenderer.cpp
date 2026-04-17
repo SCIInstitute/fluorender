@@ -198,7 +198,7 @@ void VolumeRenderer::set_mask_color(const fluo::Color& color, bool set)
 	mask_color_set_ = set;
 }
 
-std::string VolumeRenderer::get_buffer_name()
+std::string VolumeRenderer::get_buffer_name() const
 {
 	bool adaptive = get_adaptive();
 	if (interactive_mode_ && adaptive ||

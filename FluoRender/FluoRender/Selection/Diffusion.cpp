@@ -321,7 +321,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVolumeRenderer().load_brick(bbs);
 		auto raw_data = GetMask(brick_num, bbs);
 		void* val = raw_data ? raw_data->GetDataVoid() : nullptr;
 
@@ -427,7 +427,7 @@ void Diffusion::Grow(int iter, double ini_thresh, double gm_falloff, double scl_
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVolumeRenderer().load_brick(bbs);
 		auto raw_data = GetMask(brick_num, bbs);
 		void* val = raw_data ? raw_data->GetDataVoid() : nullptr;
 

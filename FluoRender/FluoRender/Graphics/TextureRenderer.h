@@ -238,13 +238,13 @@ namespace flvr
 
 		//interactive modes
 		void set_interactive_mode(bool mode) { interactive_mode_ = mode; }
-		bool get_adaptive();
-		double get_data_size();//size in mb
-		int get_size_type();//0:normal; 1:small; 2:large
+		bool get_adaptive() const;
+		double get_data_size() const;//size in mb
+		int get_size_type() const;//0:normal; 1:small; 2:large
 
 		//sample rate
 		void set_sample_rate(double rate) { sample_rate_ = rate; }
-		double get_sample_rate();
+		double get_sample_rate() const;
 
 		//main(cpu) memory limit
 		static void set_mainmem_buf_size(double val) { mainmem_buf_size_ = val; }
@@ -291,7 +291,7 @@ namespace flvr
 		static int get_quota_bricks() {return quota_bricks_;}
 		//current channel
 		void set_quota_bricks_chan(int quota) {quota_bricks_chan_ = quota;}
-		int get_quota_bricks_chan() {return quota_bricks_chan_;}
+		int get_quota_bricks_chan() const {return quota_bricks_chan_;}
 		//quota center
 		static void set_qutoa_center(fluo::Point &point) {quota_center_ = point;}
 		static fluo::Point& get_quota_center() { return quota_center_; }

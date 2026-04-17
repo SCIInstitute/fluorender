@@ -1970,7 +1970,7 @@ void MoviePanel::OnAct(wxListEvent& event)
 	double time = glbin_interpolator.GetKeyTime(index);
 	glbin_moviemaker.SetCurrentFrame(time);
 
-	RenderView* view = glbin_moviemaker.GetView();
+	auto view = glbin_moviemaker.GetView();
 	if (view)
 		view->SetParams(time);
 	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect},

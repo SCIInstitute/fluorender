@@ -174,8 +174,8 @@ void TesterDlg::OnP1Change(wxScrollEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->sfactor_ = val;
-		vd->GetVR()->resize();
+		vd->GetVolumeRenderer().sfactor_ = val;
+		vd->GetVolumeRenderer().resize();
 		m_frame->RefreshVRenderViews();
 		m_p1 = val;
 	}
@@ -192,7 +192,7 @@ void TesterDlg::OnP2Change(wxScrollEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->filter_size_min_ = val;
+		vd->GetVolumeRenderer().filter_size_min_ = val;
 		m_frame->RefreshVRenderViews();
 		m_p2 = val;//
 	}
@@ -209,7 +209,7 @@ void TesterDlg::OnP3Change(wxScrollEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->filter_size_max_ = val;
+		vd->GetVolumeRenderer().filter_size_max_ = val;
 		m_frame->RefreshVRenderViews();
 		m_p3 = val;
 	}
@@ -226,7 +226,7 @@ void TesterDlg::OnP4Change(wxScrollEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->filter_size_shp_ = val;
+		vd->GetVolumeRenderer().filter_size_shp_ = val;
 		m_frame->RefreshVRenderViews();
 		m_p4 = val;
 	}
@@ -247,8 +247,8 @@ void TesterDlg::OnP1Check(wxCommandEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->sfactor_ = val;
-		vd->GetVR()->resize();
+		vd->GetVolumeRenderer().sfactor_ = val;
+		vd->GetVolumeRenderer().resize();
 		m_frame->RefreshVRenderViews();
 	}
 
@@ -268,7 +268,7 @@ void TesterDlg::OnP2Check(wxCommandEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->filter_size_min_ = val;
+		vd->GetVolumeRenderer().filter_size_min_ = val;
 		m_frame->RefreshVRenderViews();
 	}
 
@@ -288,7 +288,7 @@ void TesterDlg::OnP3Check(wxCommandEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->filter_size_max_ = val;
+		vd->GetVolumeRenderer().filter_size_max_ = val;
 		m_frame->RefreshVRenderViews();
 	}
 
@@ -308,7 +308,7 @@ void TesterDlg::OnP4Check(wxCommandEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->filter_size_shp_ = val;
+		vd->GetVolumeRenderer().filter_size_shp_ = val;
 		m_frame->RefreshVRenderViews();
 	}
 
@@ -341,11 +341,11 @@ void TesterDlg::OnAllCheck(wxCommandEvent& event)
 	VolumeData* vd = m_frame->GetDataManager()->GetVolumeData(0);
 	if (vd)
 	{
-		vd->GetVR()->sfactor_ = val1;
-		vd->GetVR()->filter_size_min_ = val2;
-		vd->GetVR()->filter_size_max_ = val3;
-		vd->GetVR()->filter_size_shp_ = val4;
-		vd->GetVR()->resize();
+		vd->GetVolumeRenderer().sfactor_ = val1;
+		vd->GetVolumeRenderer().filter_size_min_ = val2;
+		vd->GetVolumeRenderer().filter_size_max_ = val3;
+		vd->GetVolumeRenderer().filter_size_shp_ = val4;
+		vd->GetVolumeRenderer().resize();
 		m_frame->RefreshVRenderViews();
 	}
 */

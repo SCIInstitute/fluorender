@@ -116,12 +116,12 @@ void ColorMesh::Update()
 		//get tex ids
 		GLint tid = 0;
 		if (m_use_sel)
-			tid = vd->GetVR()->load_brick_mask(bbs);
+			tid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 		else
-			tid = vd->GetVR()->load_brick(bbs);
+			tid = vd->GetVolumeRenderer().load_brick(bbs);
 		GLint lid = 0;
 		if (m_use_comp)
-			lid = vd->GetVR()->load_brick_label(bbs);
+			lid = vd->GetVolumeRenderer().load_brick_label(bbs);
 		size_t region[3] = { (size_t)nx, (size_t)ny, (size_t)nz };
 		cl_int3 voxel_cnt = { cl_int(nx), cl_int(ny), cl_int(nz) };
 		cl_int3 vol_org = { cl_int(ox), cl_int(oy), cl_int(oz) };

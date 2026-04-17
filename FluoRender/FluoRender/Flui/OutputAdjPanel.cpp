@@ -1097,13 +1097,13 @@ void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 	case 1://view
 	case 3://mesh
 	case 6://mesh group
-		glbin_outadj_def.Set(glbin_current.render_view.lock().get());
+		glbin_outadj_def.Set(*glbin_current.render_view.lock());
 		break;
 	case 2://volume data
-		glbin_outadj_def.Set(glbin_current.vol_data.lock().get());
+		glbin_outadj_def.Set(*glbin_current.vol_data.lock());
 		break;
 	case 5://group
-		glbin_outadj_def.Set(glbin_current.vol_group.lock().get());
+		glbin_outadj_def.Set(*glbin_current.vol_group.lock());
 		break;
 	}
 }

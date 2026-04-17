@@ -128,7 +128,7 @@ void ComponentEditor::Clean(int mode)
 			break;
 		}
 	}
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 }
 
 void ComponentEditor::NewId(bool append, bool track)
@@ -253,7 +253,7 @@ void ComponentEditor::NewId(bool append, bool track)
 	}
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 
 	//save label mask to disk
 	int cur_time = view->m_tseq_cur_num;
@@ -317,7 +317,7 @@ void ComponentEditor::ReplaceId()
 		label_ptr[index] = m_id;
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 	//save label mask to disk
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
@@ -395,7 +395,7 @@ void ComponentEditor::ReplaceList()
 		}
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 	//save label mask to disk
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
@@ -441,7 +441,7 @@ void ComponentEditor::CombineId()
 			label_ptr[index] = id;
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 	//save label mask to disk
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 }
@@ -511,7 +511,7 @@ void ComponentEditor::CombineList()
 			label_ptr[index] = cell->Id();
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_current();
+	vd->GetVolumeRenderer().clear_tex_current();
 	//save label mask to disk
 	vd->SaveLabel(true, cur_time, vd->GetCurChannel());
 

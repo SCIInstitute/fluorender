@@ -636,7 +636,7 @@ namespace flvr
 		return !(overx || overy || overz || underx || undery || underz);
 	}
 
-	bool TextureRenderer::get_adaptive()
+	bool TextureRenderer::get_adaptive() const
 	{
 		int interactive_quality = glbin_settings.m_interactive_quality;
 		switch (interactive_quality)
@@ -658,7 +658,7 @@ namespace flvr
 		return false;
 	}
 
-	double TextureRenderer::get_data_size()
+	double TextureRenderer::get_data_size() const
 	{
 		auto tex = tex_.lock();
 		if (!tex)
@@ -667,7 +667,7 @@ namespace flvr
 		return res.intx() * res.inty() * res.intz() / 1.04e6;
 	}
 
-	int TextureRenderer::get_size_type()
+	int TextureRenderer::get_size_type() const
 	{
 		double data_size = get_data_size();
 		if (data_size < glbin_settings.m_small_data_size)
@@ -678,7 +678,7 @@ namespace flvr
 			return 2; //large
 	}
 
-	double TextureRenderer::get_sample_rate()
+	double TextureRenderer::get_sample_rate() const
 	{
 		if (render_mode_ == RenderMode::Overlay)
 			return sample_rate_;

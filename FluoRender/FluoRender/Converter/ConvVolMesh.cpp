@@ -353,10 +353,10 @@ void ConvVolMesh::MarchingCubes(
 		int ds_nz = nz / z_factor;
 
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(bbs);
+		GLint tid = vd->GetVolumeRenderer().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 
 		//compute workload
 		size_t local_size[3] = { 1, 1, 1 };
@@ -445,10 +445,10 @@ void ConvVolMesh::MarchingCubes(
 		int ds_nz = nz / z_factor;
 
 		//get tex ids
-		GLint tid = vd->GetVR()->load_brick(bbs);
+		GLint tid = vd->GetVolumeRenderer().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
+			mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
 
 		//compute workload
 		size_t local_size[3] = { 1, 1, 1 };

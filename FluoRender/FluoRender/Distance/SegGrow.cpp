@@ -657,8 +657,8 @@ void SegGrow::Compute()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+		GLint mid = vd->GetVolumeRenderer().load_brick_mask(bbs);
+		GLint lid = vd->GetVolumeRenderer().load_brick_label(bbs);
 
 		//compute workload
 		flvr::GroupSize gsize;
@@ -989,7 +989,7 @@ void SegGrow::Compute()
 			int nx = res.intx();
 			int ny = res.inty();
 			int nz = res.intz();
-			GLint lid = vd->GetVR()->load_brick_label(bbs);
+			GLint lid = vd->GetVolumeRenderer().load_brick_label(bbs);
 			unsigned bid;
 			bid = bbs->get_id();
 			kernel_prog->beginArgs(kernel_0);
@@ -1092,7 +1092,7 @@ void SegGrow::Compute()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+		GLint lid = vd->GetVolumeRenderer().load_brick_label(bbs);
 		//compute workload
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1251,7 +1251,7 @@ void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	auto vd = m_vd.lock();
 	if (!vd)
 		return;
-	nlid = vd->GetVR()->load_brick_label(nb);
+	nlid = vd->GetVolumeRenderer().load_brick_label(nb);
 	//set
 	//unsigned int d0 = nx - 1;
 	//unsigned int d1 = 0;

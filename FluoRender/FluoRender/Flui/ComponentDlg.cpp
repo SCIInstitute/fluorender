@@ -2318,10 +2318,10 @@ void ComponentDlg::OnOutputAnnotData(wxCommandEvent& event)
 void ComponentDlg::OnOutputMeshData(wxCommandEvent& event)
 {
 	auto vd = glbin_current.vol_data.lock();
-	glbin_conv_vol_mesh->SetVolumeData(vd);
-	glbin_conv_vol_mesh->Update(true);
-	glbin_conv_vol_mesh->MergeVertices(true);
-	auto md = glbin_conv_vol_mesh->GetMeshData();
+	glbin_conv_vol_mesh.SetVolumeData(vd);
+	glbin_conv_vol_mesh.Update(true);
+	glbin_conv_vol_mesh.MergeVertices(true);
+	auto md = glbin_conv_vol_mesh.GetMeshData();
 	glbin_color_mesh.SetVolumeData(vd);
 	glbin_color_mesh.SetMeshData(md);
 	glbin_color_mesh.SetUseSel(true);

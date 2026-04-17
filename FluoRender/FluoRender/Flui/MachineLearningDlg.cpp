@@ -278,10 +278,12 @@ void MachineLearningPanel::PopTopList()
 		m_top_grid->SetCellValue(i, 2, table.getNotes());
 		char b[32];
 		std::tm* ptm;
-		ptm = std::localtime(table.getCreateTime());
+		std::time_t createTime = table.getCreateTime();
+		ptm = std::localtime(&createTime);
 		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
 		m_top_grid->SetCellValue(i, 4, std::string(b));
-		ptm = std::localtime(table.getModifyTime());
+		std::time_t modifyTime = table.getModifyTime();
+		ptm = std::localtime(&modifyTime);
 		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
 		m_top_grid->SetCellValue(i, 3, std::string(b));
 		i++;
@@ -319,10 +321,12 @@ void MachineLearningPanel::UpdateTopList()
 			m_top_grid->SetCellValue(i, 2, table.getNotes());
 			char b[32];
 			std::tm* ptm;
-			ptm = std::localtime(table.getCreateTime());
+			std::time_t createTime = table.getCreateTime();
+			ptm = std::localtime(&createTime);
 			std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
 			m_top_grid->SetCellValue(i, 4, std::string(b));
-			ptm = std::localtime(table.getModifyTime());
+			std::time_t modifyTime = table.getModifyTime();
+			ptm = std::localtime(&modifyTime);
 			std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
 			m_top_grid->SetCellValue(i, 3, std::string(b));
 			break;
@@ -651,7 +655,7 @@ void MLCompGenPanel::UpdateBotList()
 		m_bot_grid->InsertRows(0);
 
 		str_in.clear();
-		table.getOneInput(i, data_in);
+		data_in = table.getOneInput(i);
 		size_t len = data_in.size();
 		if (len)
 		{
@@ -668,7 +672,7 @@ void MLCompGenPanel::UpdateBotList()
 		m_bot_grid->SetCellValue(0, 0, str_in);
 
 		str_out.clear();
-		table.getOneOutput(i, data_out);
+		data_out = table.getOneOutput(i);
 		len = data_out.size();
 		if (len)
 		{
@@ -1022,7 +1026,7 @@ void MLVolPropPanel::UpdateBotList()
 		m_bot_grid->InsertRows(0);
 
 		str_in.clear();
-		table.getOneInput(i, data_in);
+		data_in = table.getOneInput(i);
 		size_t len = data_in.size();
 		if (len)
 		{
@@ -1039,7 +1043,7 @@ void MLVolPropPanel::UpdateBotList()
 		m_bot_grid->SetCellValue(0, 0, str_in);
 
 		str_out.clear();
-		table.getOneOutput(i, data_out);
+		data_out = table.getOneOutput(i);
 		len = data_out.size();
 		if (len)
 		{
