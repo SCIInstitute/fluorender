@@ -233,60 +233,54 @@ void BrushDefault::Save()
 	f->Write("size_data", m_brush_size_data);
 }
 
-void BrushDefault::Set(flrd::VolumeSelector* vs)
+void BrushDefault::Set(const flrd::VolumeSelector& vs)
 {
-	if (!vs)
-		return;
+	m_iter_num = vs.GetBrushIteration();
 
-	m_iter_num = vs->GetBrushIteration();
+	m_ini_thresh = vs.GetBrushIniThresh();
+	m_estimate_threshold = vs.GetEstimateThreshold();
+	m_gm_falloff = vs.GetBrushGmFalloff();
+	m_scl_falloff = vs.GetBrushSclFalloff();
+	m_scl_translate = vs.GetBrushSclTranslate();
 
-	m_ini_thresh = vs->GetBrushIniThresh();
-	m_estimate_threshold = vs->GetEstimateThreshold();
-	m_gm_falloff = vs->GetBrushGmFalloff();
-	m_scl_falloff = vs->GetBrushSclFalloff();
-	m_scl_translate = vs->GetBrushSclTranslate();
+	m_select_multi = vs.GetSelectGroup();
+	m_edge_detect = vs.GetEdgeDetect();
+	m_hidden_removal = vs.GetHiddenRemoval();
+	m_ortho = vs.GetOrthographic();
+	m_update_order = vs.GetUpdateOrder();
 
-	m_select_multi = vs->GetSelectGroup();
-	m_edge_detect = vs->GetEdgeDetect();
-	m_hidden_removal = vs->GetHiddenRemoval();
-	m_ortho = vs->GetOrthographic();
-	m_update_order = vs->GetUpdateOrder();
+	m_w2d = vs.GetW2d();
+	m_brush_radius1 = vs.GetBrushSize1();
+	m_brush_radius2 = vs.GetBrushSize2();
+	m_use_brush_radius2 = vs.GetUseBrushSize2();
+	vs.GetBrushRadiusSet(m_brush_radius_sets);
 
-	m_w2d = vs->GetW2d();
-	m_brush_radius1 = vs->GetBrushSize1();
-	m_brush_radius2 = vs->GetBrushSize2();
-	m_use_brush_radius2 = vs->GetUseBrushSize2();
-	vs->GetBrushRadiusSet(m_brush_radius_sets);
-
-	m_brush_spacing = vs->GetBrushSpacing();
-	m_brush_size_data = vs->GetBrushSizeData();
+	m_brush_spacing = vs.GetBrushSpacing();
+	m_brush_size_data = vs.GetBrushSizeData();
 }
 
-void BrushDefault::Apply(flrd::VolumeSelector* vs)
+void BrushDefault::Apply(flrd::VolumeSelector& vs) const
 {
-	if (!vs)
-		return;
+	vs.SetBrushIteration(m_iter_num);
 
-	vs->SetBrushIteration(m_iter_num);
+	vs.SetBrushIniThresh(m_ini_thresh);
+	vs.SetEstimateThreshold(m_estimate_threshold);
+	vs.SetBrushGmFalloff(m_gm_falloff);
+	vs.SetBrushSclFalloff(m_scl_falloff);
+	vs.SetBrushSclTranslate(m_scl_translate);
 
-	vs->SetBrushIniThresh(m_ini_thresh);
-	vs->SetEstimateThreshold(m_estimate_threshold);
-	vs->SetBrushGmFalloff(m_gm_falloff);
-	vs->SetBrushSclFalloff(m_scl_falloff);
-	vs->SetBrushSclTranslate(m_scl_translate);
+	vs.SetSelectGroup(m_select_multi);
+	vs.SetEdgeDetect(m_edge_detect);
+	vs.SetHiddenRemoval(m_hidden_removal);
+	vs.SetOrthographic(m_ortho);
+	vs.SetUpdateOrder(m_update_order);
 
-	vs->SetSelectGroup(m_select_multi);
-	vs->SetEdgeDetect(m_edge_detect);
-	vs->SetHiddenRemoval(m_hidden_removal);
-	vs->SetOrthographic(m_ortho);
-	vs->SetUpdateOrder(m_update_order);
+	vs.SetW2d(m_w2d);
+	vs.SetBrushSize(m_brush_radius1, m_brush_radius2);
+	vs.SetUseBrushSize2(m_use_brush_radius2);
+	vs.SetBrushRadiusSet(m_brush_radius_sets);
 
-	vs->SetW2d(m_w2d);
-	vs->SetBrushSize(m_brush_radius1, m_brush_radius2);
-	vs->SetUseBrushSize2(m_use_brush_radius2);
-	vs->SetBrushRadiusSet(m_brush_radius_sets);
-
-	vs->SetBrushSpacing(m_brush_spacing);
-	vs->SetBrushSizeData(m_brush_size_data);
+	vs.SetBrushSpacing(m_brush_spacing);
+	vs.SetBrushSizeData(m_brush_size_data);
 
 }

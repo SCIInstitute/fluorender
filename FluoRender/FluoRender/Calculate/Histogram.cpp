@@ -92,6 +92,15 @@ Histogram::Histogram(const std::shared_ptr<VolumeData>& vd) :
 {
 }
 
+Histogram::Histogram(std::shared_ptr<const VolumeData> vd) :
+	m_vd(std::const_pointer_cast<VolumeData>(vd)),
+	m_use_mask(true),
+	m_bins(EntryHist::m_bins),
+	Progress()
+{
+
+}
+
 Histogram::~Histogram()
 {
 

@@ -43,20 +43,20 @@ namespace flrd
 		void Compute();
 
 		void SetMethod(int val) { m_method = val; }
-		int GetMethod() { return m_method; }
+		int GetMethod() const { return m_method; }
 		void SetNum(int val) { m_num = val; }
-		int GetNum() { return m_num; }
+		int GetNum() const { return m_num; }
 		void SetMaxIter(int val) { m_maxiter = val; }
-		int GetMaxIter() { return m_maxiter; }
+		int GetMaxIter() const { return m_maxiter; }
 		void SetTol(float val) { m_tol = val; }
-		float GetTol() { return m_tol; }
+		float GetTol() const { return m_tol; }
 		void SetSize(int val) { m_size = val; }
-		int GetSize() { return m_size; }
+		int GetSize() const { return m_size; }
 		void SetEps(double val) { m_eps = val; }
-		double GetEps() { return m_eps; }
+		double GetEps() const { return m_eps; }
 		//in and out cell lists
-		CelpList& GetInCells();
-		CelpList& GetOutCells();
+		CelpList& GetInCells() const;
+		CelpList& GetOutCells() const;
 
 	protected:
 		//settings

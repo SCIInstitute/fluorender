@@ -47,70 +47,70 @@ namespace flrd
 		ComponentGenerator();
 		~ComponentGenerator();
 
-		bool GetAutoCompGen();
+		bool GetAutoCompGen() const;
 
 		void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
-		std::shared_ptr<VolumeData> GetVolumeData();
+		std::shared_ptr<VolumeData> GetVolumeData() const;
 
 		void SetUseSel(bool val) { m_use_sel = val; }
-		bool GetUseSel() { return m_use_sel; }
+		bool GetUseSel() const { return m_use_sel; }
 		void SetUseMl(bool val) { m_use_ml = val; }
-		bool GetUseMl() { return m_use_ml; }
+		bool GetUseMl() const { return m_use_ml; }
 		void SetIter(int val) { m_iter = val; }
-		int GetIter() { return m_iter; }
+		int GetIter() const { return m_iter; }
 		void SetThresh(double val) { m_thresh = val; }
-		double GetThresh() { return m_thresh; }
+		double GetThresh() const { return m_thresh; }
 		void SetTFactor(double val) { m_tfactor = val; }
-		double GetTFactor() { return m_tfactor; }
+		double GetTFactor() const { return m_tfactor; }
 		//distance
 		void SetUseDistField(bool val) { m_use_dist_field = val; }
-		bool GetUseDistField() { return m_use_dist_field; }
+		bool GetUseDistField() const { return m_use_dist_field; }
 		void SetDistStrength(double val) { m_dist_strength = val; }
-		double GetDistStrength() { return m_dist_strength; }
+		double GetDistStrength() const { return m_dist_strength; }
 		void SetDistFilterSize(int val) { m_dist_filter_size = val; }
-		int GetDistFilterSize() { return m_dist_filter_size; }
+		int GetDistFilterSize() const { return m_dist_filter_size; }
 		void SetMaxDist(int val) { m_max_dist = val; }
-		int GetMaxDist() { return m_max_dist; }
+		int GetMaxDist() const { return m_max_dist; }
 		void SetDistThresh(double val) { m_dist_thresh = val; }
-		double GetDistThresh() { return m_dist_thresh; }
+		double GetDistThresh() const { return m_dist_thresh; }
 		//diffusion
 		void SetDiffusion(bool val) { m_diff = val; }
-		bool GetDiffusion() { return m_diff; }
+		bool GetDiffusion() const { return m_diff; }
 		void SetFalloff(double val) { m_falloff = val; }
-		double GetFalloff() { return m_falloff; }
+		double GetFalloff() const { return m_falloff; }
 		//size
 		void SetSize(bool val) { m_size = val; }
-		bool GetSize() { return m_size; }
+		bool GetSize() const { return m_size; }
 		void SetSizeLimit(int val) { m_size_lm = val; }
-		int GetSizeLimit() { return m_size_lm; }
+		int GetSizeLimit() const { return m_size_lm; }
 		//density
 		void SetDensity(bool val) { m_density = val; }
-		bool GetDensity() { return m_density; }
+		bool GetDensity() const { return m_density; }
 		void SetDensityThresh(double val) { m_density_thresh = val; }
-		double GetDensityThresh() { return m_density_thresh; }
+		double GetDensityThresh() const { return m_density_thresh; }
 		void SetVarThresh(double val) { m_varth = val; }
-		double GetVarThresh() { return m_varth; }
+		double GetVarThresh() const { return m_varth; }
 		void SetDensityWinSize(int val) { m_density_window_size = val; }
-		int GetDensityWinSize() { return m_density_window_size; }
+		int GetDensityWinSize() const { return m_density_window_size; }
 		void SetDensityStatSize(int val) { m_density_stats_size = val; }
-		int GetDensityStatSize() { return m_density_stats_size; }
+		int GetDensityStatSize() const { return m_density_stats_size; }
 		//fixate
 		void SetFixate(bool val) { m_fixate = val; }
-		bool GetFixate() { return m_fixate; }
+		bool GetFixate() const { return m_fixate; }
 		void SetFixSize(int val) { m_fix_size = val; }
-		int GetFixSize() { return m_fix_size; }
+		int GetFixSize() const { return m_fix_size; }
 		void SetGrowFixed(int val) { m_grow_fixed = val; }
-		int GetGrowFixed() { return m_grow_fixed; }
+		int GetGrowFixed() const { return m_grow_fixed; }
 		//clean
 		void SetClean(bool val) { m_clean = val; }
-		bool GetClean() { return m_clean; }
+		bool GetClean() const { return m_clean; }
 		void SetCleanIter(int val) { m_clean_iter = val; }
-		int GetCleanIter() { return m_clean_iter; }
+		int GetCleanIter() const { return m_clean_iter; }
 		void SetCleanSize(int val) { m_clean_size_vl = val; }
-		int GetCleanSize() { return m_clean_size_vl; }
+		int GetCleanSize() const { return m_clean_size_vl; }
 		//fill border
 		void SetFillBorder(double val) { m_fill_border = val; }
-		double GetFillBorder() { return m_fill_border; }
+		double GetFillBorder() const { return m_fill_border; }
 
 		//high-level functions
 		void Compute();
@@ -144,11 +144,11 @@ namespace flrd
 		void ResetCmd();
 		void PlayCmd(double tfactor);
 		void SetRecordCmd(bool val);
-		bool GetRecordCmd();
-		size_t GetCmdNum();
+		bool GetRecordCmd() const;
+		size_t GetCmdNum() const;
 
 		//if auto threshold is calculated
-		bool GetAutoThreshold();
+		bool GetAutoThreshold() const;
 
 		//unused
 		//void OrderID_2D();
@@ -162,8 +162,8 @@ namespace flrd
 		//void DistField(int iter, float th, int dsize, float sscale);
 
 		//output
-		std::wstring GetTitles() { return m_titles; }
-		std::wstring GetValues() { return m_values; }
+		std::wstring GetTitles() const { return m_titles; }
+		std::wstring GetValues() const { return m_values; }
 
 		//update progress
 		CompGenFunc prework;
@@ -175,7 +175,7 @@ namespace flrd
 		bool m_use_sel = true;//use mask instead of data
 		bool m_use_ml = false;//use machine learning
 		int m_iter = 30;//iteration
-		double m_thresh = 0.5;
+		mutable double m_thresh = 0.5;
 		double m_tfactor = 1.0;
 		//distance field
 		bool m_use_dist_field = false;

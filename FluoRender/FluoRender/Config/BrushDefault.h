@@ -52,8 +52,8 @@ public:
 
 	void Read();
 	void Save();
-	void Set(flrd::VolumeSelector* vs);
-	void Apply(flrd::VolumeSelector* vs);
+	void Set(const flrd::VolumeSelector& vs);
+	void Apply(flrd::VolumeSelector& vs) const;
 
 public:
 	//default values

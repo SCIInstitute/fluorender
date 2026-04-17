@@ -75,7 +75,7 @@ void ComponentAnalyzer::SetVolume(const std::shared_ptr<VolumeData>& vd)
 	m_compgroup = compgroup;
 }
 
-std::shared_ptr<VolumeData> ComponentAnalyzer::GetVolume()
+std::shared_ptr<VolumeData> ComponentAnalyzer::GetVolume() const
 {
 	if (m_compgroup)
 		return m_compgroup->vd.lock();
@@ -97,33 +97,33 @@ void ComponentAnalyzer::ClearCoVolumes()
 	m_vd_list.clear();
 }
 
-std::optional<std::reference_wrapper<CelpList>> ComponentAnalyzer::GetCelpList()
+std::optional<std::reference_wrapper<CelpList>> ComponentAnalyzer::GetCelpList() const
 {
 	if (m_compgroup)
 		return m_compgroup->celps;
 	return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<CellGraph>> ComponentAnalyzer::GetCellGraph()
+std::optional<std::reference_wrapper<CellGraph>> ComponentAnalyzer::GetCellGraph() const
 {
 	if (m_compgroup)
 		return m_compgroup->graph;
 	return std::nullopt;
 }
 
-int ComponentAnalyzer::GetCompGroupSize()
+int ComponentAnalyzer::GetCompGroupSize() const
 {
 	return static_cast<int>(m_comp_groups.size());
 }
 
-std::optional<std::reference_wrapper<CompGroup>> ComponentAnalyzer::GetCompGroup(int i)
+std::optional<std::reference_wrapper<const CompGroup>> ComponentAnalyzer::GetCompGroup(int i) const
 {
 	if (i >= 0 && i < m_comp_groups.size())
 		return m_comp_groups[i];
 	return std::nullopt;
 }
 
-int ComponentAnalyzer::GetBrickNum()
+int ComponentAnalyzer::GetBrickNum() const
 {
 	return m_bn;
 }
@@ -132,7 +132,7 @@ int ComponentAnalyzer::GetColocalization(
 	size_t bid,
 	const fluo::Point& p,
 	std::vector<unsigned int> &sumi,
-	std::vector<double> &sumd)
+	std::vector<double> &sumd) const
 {
 	int num = 0;
 
@@ -220,10 +220,10 @@ void ComponentAnalyzer::Analyze()
 	graph.clear();
 	m_analyzed = false;
 
-	vd->GetVR()->return_label();
+	vd->GetVR().return_label();
 	bool use_sel = m_use_sel;//need to check if mask is valid
 	if (use_sel)
-		vd->GetVR()->return_mask();
+		vd->GetVR().return_mask();
 
 	unsigned int size_limit;
 	if (bn > 1)
@@ -486,7 +486,7 @@ void ComponentAnalyzer::Analyze()
 	if (m_consistent)
 	{
 		MakeColorConsistent();
-		vd->GetVR()->clear_tex_label();
+		vd->GetVR().clear_tex_label();
 	}
 
 	m_compgroup->dirty = false;
@@ -769,14 +769,14 @@ void ComponentAnalyzer::ClearCompGroup()
 	m_compgroup->vd.reset();
 }
 
-size_t ComponentAnalyzer::GetListSize()
+size_t ComponentAnalyzer::GetListSize() const
 {
 	if (!m_compgroup)
 		return 0;
 	return m_compgroup->celps.size();
 }
 
-size_t ComponentAnalyzer::GetCompSize()
+size_t ComponentAnalyzer::GetCompSize() const
 {
 	if (!m_compgroup)
 		return 0;
@@ -807,7 +807,7 @@ size_t ComponentAnalyzer::GetCompSize()
 	return list_size - graph_size + cc_size;
 }
 
-void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long long> &ids)
+void ComponentAnalyzer::GetCompsPoint(fluo::Point& p, std::set<unsigned long long> &ids) const
 {
 	if (!m_compgroup)
 		return;
@@ -1017,7 +1017,7 @@ unsigned int ComponentAnalyzer::GetExt(unsigned int* data_label,
 	unsigned long long index,
 	unsigned int id,
 	const fluo::Vector& size,
-	const fluo::Point& p)
+	const fluo::Point& p) const
 {
 	if (!data_label)
 		return 0;
@@ -1779,7 +1779,7 @@ void ComponentAnalyzer::OutputDistance(std::ostream& stream)
 	}
 }
 
-size_t ComponentAnalyzer::GetDistMatSize()
+size_t ComponentAnalyzer::GetDistMatSize() const
 {
 	size_t gsize = m_comp_groups.size();
 	if (m_use_dist_allchan && gsize > 1)
@@ -1799,7 +1799,7 @@ size_t ComponentAnalyzer::GetDistMatSize()
 	}
 }
 
-bool ComponentAnalyzer::GetRulerListFromCelp(RulerList& rulerlist)
+bool ComponentAnalyzer::GetRulerListFromCelp(RulerList& rulerlist) const
 {
 	if (!m_compgroup)
 		return false;
@@ -1832,7 +1832,7 @@ void ComponentAnalyzer::SetSelectedIds(const std::vector<unsigned int>& ids,
 	m_sel_bids = bids;
 }
 
-bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links)
+bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links) const
 {
 	if (!m_compgroup)
 		return false;
@@ -1865,7 +1865,7 @@ bool ComponentAnalyzer::GetSelectedCelp(CelpList& cl, bool links)
 	return true;
 }
 
-bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links)
+bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links) const
 {
 	if (!m_compgroup)
 		return false;
@@ -1885,7 +1885,7 @@ bool ComponentAnalyzer::GetAllCelp(CelpList& cl, bool links)
 	return true;
 }
 
-bool ComponentAnalyzer::GetCelpFromIds(CelpList& cl, const std::vector<unsigned long long>& ids, bool links)
+bool ComponentAnalyzer::GetCelpFromIds(CelpList& cl, const std::vector<unsigned long long>& ids, bool links) const
 {
 	if (!m_compgroup)
 		return false;
@@ -1914,7 +1914,7 @@ bool ComponentAnalyzer::GetColor(
 	unsigned int id,
 	int brick_id,
 	const std::shared_ptr<VolumeData>& vd,
-	fluo::Color &color)
+	fluo::Color &color) const
 {
 	if (!m_compgroup)
 		return false;
@@ -2018,7 +2018,7 @@ unsigned int ComponentAnalyzer::GetNonconflictId(
 	unsigned int id,
 	const fluo::Vector& size,
 	const std::shared_ptr<flvr::TextureBrick>& b,
-	unsigned int* data)
+	unsigned int* data) const
 {
 	unsigned int result = 0;
 	unsigned int iid = id;
@@ -2083,7 +2083,7 @@ CompGroup* ComponentAnalyzer::AddCompGroup(const std::shared_ptr<VolumeData>& vd
 }
 
 void ComponentAnalyzer::FindCelps(CelpList& list,
-	CelpListIter& it, bool links)
+	CelpListIter& it, bool links) const
 {
 	list.insert(std::pair<unsigned long long, flrd::Celp>
 		(it->second->GetEId(), it->second));

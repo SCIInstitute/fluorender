@@ -69,7 +69,7 @@ ComponentGenerator::~ComponentGenerator()
 {
 }
 
-bool ComponentGenerator::GetAutoCompGen()
+bool ComponentGenerator::GetAutoCompGen() const
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -92,7 +92,7 @@ void ComponentGenerator::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 	m_vd = vd;
 }
 
-std::shared_ptr<VolumeData> ComponentGenerator::GetVolumeData()
+std::shared_ptr<VolumeData> ComponentGenerator::GetVolumeData() const
 {
 	return m_vd.lock();
 }
@@ -383,11 +383,11 @@ void ComponentGenerator::ShuffleID()
 
 		int bits = bbs->nb(flvr::CompType::Data) * 8;
 		auto res = bbs->get_size();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(res.intx()), size_t(res.inty()), size_t(res.intz()) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -516,8 +516,8 @@ void ComponentGenerator::SetIDBit(int psize)
 		int nz = res.intz();
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -640,11 +640,11 @@ void ComponentGenerator::Grow()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		//auto iter
 		int biter = m_iter;
@@ -754,11 +754,11 @@ void ComponentGenerator::DensityField()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		//divide
 		unsigned int gsx, gsy, gsz;//pixel number in group
@@ -984,11 +984,11 @@ void ComponentGenerator::DistGrow()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1167,11 +1167,11 @@ void ComponentGenerator::DistDensityField()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		//divide
 		unsigned int gsx, gsy, gsz;//pixel number in group
@@ -1453,11 +1453,11 @@ void ComponentGenerator::CleanNoise()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1591,8 +1591,8 @@ void ComponentGenerator::ClearBorders()
 		int nz = res.intz();
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1663,11 +1663,11 @@ void ComponentGenerator::FillBorders()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
 		GLint mid = 0;
 		if (m_use_sel)
-			mid = vd->GetVR()->load_brick_mask(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+			mid = vd->GetVR().load_brick_mask(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		size_t global_size[3] = { size_t(nx), size_t(ny), size_t(nz) };
 		size_t local_size[3] = { 1, 1, 1 };
@@ -1810,8 +1810,8 @@ void ComponentGenerator::GenerateDB()
 		int nx = res.intx();
 		int ny = res.inty();
 		int nz = res.intz();
-		GLint did = vd->GetVR()->load_brick(bbs);
-		GLint lid = vd->GetVR()->load_brick_label(bbs);
+		GLint did = vd->GetVR().load_brick(bbs);
+		GLint lid = vd->GetVR().load_brick_label(bbs);
 
 		//precalculate
 		unsigned int nxy, nxyz;
@@ -2444,17 +2444,17 @@ void ComponentGenerator::SetRecordCmd(bool val)
 	m_record_cmd = val;
 }
 
-bool ComponentGenerator::GetRecordCmd()
+bool ComponentGenerator::GetRecordCmd() const
 {
 	return m_record_cmd;
 }
 
-size_t ComponentGenerator::GetCmdNum()
+size_t ComponentGenerator::GetCmdNum() const
 {
 	return m_command.size();
 }
 
-bool ComponentGenerator::GetAutoThreshold()
+bool ComponentGenerator::GetAutoThreshold() const
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -2466,7 +2466,7 @@ bool ComponentGenerator::GetAutoThreshold()
 	{
 		m_thresh = threshold;
 		glbin_vol_selector.SetBrushSclTranslate(m_thresh);
-		glbin_conv_vol_mesh->SetIsoValue(m_thresh);
+		glbin_conv_vol_mesh.SetIsoValue(m_thresh);
 		return true;
 	}
 	return false;

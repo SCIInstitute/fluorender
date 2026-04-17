@@ -38,10 +38,10 @@ public:
 
 	void Read();
 	void Save();
-	void Set(RenderView* view);
-	void Apply(RenderView* view);
-	void Set(TreeLayer* layer);
-	void Apply(TreeLayer* layer);
+	void Set(const RenderView& view);
+	void Apply(RenderView& view) const;
+	void Set(const TreeLayer& layer);
+	void Apply(TreeLayer& layer) const;
 
 public:
 	//default values

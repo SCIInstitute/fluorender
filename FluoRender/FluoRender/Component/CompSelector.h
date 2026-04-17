@@ -54,32 +54,32 @@ namespace flrd
 
 		void SetSelAll(bool value)
 		{ m_sel_all = value; }
-		bool GetSelAll()
+		bool GetSelAll() const
 		{ return m_sel_all; }
 		void SetId(unsigned long long id, bool empty)
 		{
 			m_id = id; m_id_empty = empty;
 		}
 		void SetId(const std::string& str);
-		unsigned long long GetId() { return m_id; }
+		unsigned long long GetId() const { return m_id; }
 		void SetList(const CelpList& list);
-		CelpList& GetList();
-		bool GetIdEmpty() { return m_id_empty; }
+		CelpList& GetList() const;
+		bool GetIdEmpty() const { return m_id_empty; }
 		void SetUseMin(bool val) { m_use_min = val; }
 		void SetUseMax(bool val) { m_use_max = val; }
-		bool GetUseMin() { return m_use_min; }
-		bool GetUseMax() { return m_use_max; }
+		bool GetUseMin() const { return m_use_min; }
+		bool GetUseMax() const { return m_use_max; }
 		void SetMinNum(unsigned int num) { m_min_num = num; }
 		void SetMaxNum(unsigned int num) { m_max_num = num; }
-		int GetMinNum() { return m_min_num; }
-		int GetMaxNum() { return m_max_num; }
+		int GetMinNum() const { return m_min_num; }
+		int GetMaxNum() const { return m_max_num; }
 
 		//high-level functions
 		void SelectFullComp();
 		void SelectCompsCanvas(const std::vector<unsigned long long>& ids, bool sel_all);
 		void SetSelectedCompIds(const std::set<unsigned long long>& ids, int mode);
-		void GetSelectedCompIds(std::set<unsigned long long>& ids) { ids = m_sel_ids; }
-		int GetSelCompIdsMode() { return m_sel_mode; }
+		void GetSelectedCompIds(std::set<unsigned long long>& ids) const { ids = m_sel_ids; }
+		int GetSelCompIdsMode() const { return m_sel_mode; }
 
 		//select functions
 		void CompFull();
@@ -106,7 +106,7 @@ namespace flrd
 
 	private:
 		bool CompareSize(unsigned int size);
-		std::optional<std::reference_wrapper<CelpList>> GetListFromAnalyzer(CelpList &list_in, CelpList &list_out);
+		std::optional<std::reference_wrapper<CelpList>> GetListFromAnalyzer(CelpList &list_in, CelpList &list_out) const;
 		void SelectMask(const std::shared_ptr<fluo::RawData>& raw_mask,
 			unsigned long long idx, unsigned char v,
 			const std::shared_ptr<flvr::Texture>& tex);

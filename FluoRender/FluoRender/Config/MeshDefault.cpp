@@ -133,7 +133,7 @@ void MeshDefault::Set(const flrd::BaseConvVolMesh& cvm)
 	m_smooth_scale = cvm.GetSmoothScale();
 }
 
-void MeshDefault::Apply(MeshData& md)
+void MeshDefault::Apply(MeshData& md) const
 {
 	md.SetOutline(m_outline);
 	md.SetLegend(m_legend);
@@ -148,7 +148,7 @@ void MeshDefault::Apply(MeshData& md)
 	md.SetScaling(m_scale);
 }
 
-void MeshDefault::Copy(MeshData& m1, const MeshData& m2)//m2 to m1
+void MeshDefault::Copy(MeshData& m1, const MeshData& m2) const//m2 to m1
 {
 	m1.SetOutline(m2.GetOutline());
 	m1.SetLegend(m2.GetLegend());
@@ -163,7 +163,7 @@ void MeshDefault::Copy(MeshData& m1, const MeshData& m2)//m2 to m1
 	m1.SetScaling(m2.GetScaling());
 }
 
-void MeshDefault::Apply(MeshGroup& g)
+void MeshDefault::Apply(MeshGroup& g) const
 {
 	g.SetOutline(m_outline);
 	g.SetLegend(m_legend);
@@ -178,7 +178,7 @@ void MeshDefault::Apply(MeshGroup& g)
 	g.SetScaling(m_scale);
 }
 
-void MeshDefault::Apply(flrd::BaseConvVolMesh& cvm)
+void MeshDefault::Apply(flrd::BaseConvVolMesh& cvm) const
 {
 	cvm.SetUseTransfer(m_use_transfer);
 	cvm.SetUseMask(m_use_mask);

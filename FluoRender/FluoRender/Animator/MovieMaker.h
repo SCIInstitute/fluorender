@@ -81,33 +81,33 @@ public:
 	//settings
 	void SetMainFrame(MainFrame* frame);
 	void SetView(const std::shared_ptr<RenderView>& view);
-	RenderView* GetView();
-	int GetViewIndex();
+	std::shared_ptr<RenderView> GetView() const;
+	int GetViewIndex() const;
 	void SetFileName(const std::wstring& filename) { m_filename = filename; }
 	void SetLoop(bool val) { m_loop = val; }
-	bool GetLoop() { return m_loop; }
+	bool GetLoop() const { return m_loop; }
 
 	void SetKeyframeEnable(bool val, bool update);
-	bool GetKeyframeEnable() { return m_keyframe_enable; }
+	bool GetKeyframeEnable() const { return m_keyframe_enable; }
 	void SetRotateEnable(bool val);
-	bool GetRotateEnable() { return m_rotate; }
+	bool GetRotateEnable() const { return m_rotate; }
 	void SetRotateAxis(int val);
-	int GetRotateAxis() { return m_rot_axis; }
+	int GetRotateAxis() const { return m_rot_axis; }
 	void SetRotateDeg(int val);
-	int GetRotateDeg() { return m_rot_deg; }
+	int GetRotateDeg() const { return m_rot_deg; }
 	void SetInterpolation(int val)
 	{
 		if (val > -1 && val < 2)
 			m_interpolation = val;
 	}
-	int GetInterpolation() { return m_interpolation; }
+	int GetInterpolation() const { return m_interpolation; }
 	void SetSeqMode(int val);
-	int GetSeqMode() { return m_seq_mode; }
+	int GetSeqMode() const { return m_seq_mode; }
 	void SetSeqCurNum(int val);
-	int GetSeqCurNum() { return m_seq_cur_num; }
-	int GetSeqAllNum() { return m_seq_all_num; }
+	int GetSeqCurNum() const { return m_seq_cur_num; }
+	int GetSeqAllNum() const { return m_seq_all_num; }
 	void SetFullFrameNum(int val);
-	int GetFullFrameNum()
+	int GetFullFrameNum() const
 	{
 		return m_full_frame_num;
 	}
@@ -117,60 +117,60 @@ public:
 		if (val > 0)
 			m_fps = m_clip_frame_num / m_movie_len;
 	}
-	double GetMovieLength() { return m_movie_len; }
+	double GetMovieLength() const { return m_movie_len; }
 	void SetFps(double val)
 	{
 		m_fps = val;
 		if (val > 0)
 			m_movie_len = m_clip_frame_num / m_fps;
 	}
-	double GetFps() { return m_fps; }
+	double GetFps() const { return m_fps; }
 	void SetClipStartEndFrames(int val1, int val2);
 	void SetClipStartFrame(int val);
-	int GetClipStartFrame() { return m_clip_start_frame; }
+	int GetClipStartFrame() const { return m_clip_start_frame; }
 	void SetClipEndFrame(int val);
-	int GetClipEndFrame() { return m_clip_end_frame; }
+	int GetClipEndFrame() const { return m_clip_end_frame; }
 	void SetCurrentFrame(int val, bool upd_seq = true);
 	void SetCurrentFrameSilently(int val, bool upd_seq);
-	int GetCurrentFrame() { return m_cur_frame; }
+	int GetCurrentFrame() const { return m_cur_frame; }
 	void SetCurrentTime(double val);
-	double GetCurProg()
+	double GetCurProg() const
 	{
 		if (m_keyframe_enable)
 			return m_cur_frame;
 		else
 			return double(m_cur_frame) / m_full_frame_num;
 	}
-	double GetCurrentTime() { return m_cur_time; }
-	int GetScrollThumbSize() { return m_scroll_thumb_size; }
+	double GetCurrentTime() const { return m_cur_time; }
+	int GetScrollThumbSize() const { return m_scroll_thumb_size; }
 
 	//crop
 	void SetCropEnable(bool val);
-	bool GetCropEnable() { return m_crop; }
+	bool GetCropEnable() const { return m_crop; }
 	void SetCropValues(int, int, int, int);
 	void SetCropX(int val);
-	int GetCropX() { return m_crop_x; }
+	int GetCropX() const { return m_crop_x; }
 	void SetCropY(int val);
-	int GetCropY() { return m_crop_y; }
+	int GetCropY() const { return m_crop_y; }
 	void SetCropW(int val);
-	int GetCropW() { return m_crop_w; }
+	int GetCropW() const { return m_crop_w; }
 	void SetCropH(int val);
-	int GetCropH() { return m_crop_h; }
+	int GetCropH() const { return m_crop_h; }
 	//scalebar
 	void SetScalebarPos(int val) { m_sb_pos = val; }
-	int GetScalebarPos() { return m_sb_pos; }
+	int GetScalebarPos() const { return m_sb_pos; }
 	void SetScalebarDist(int x, int y) { m_sb_x = x; m_sb_y = y; }
 	void SetScalebarX(int x) { m_sb_x = x; }
 	void SetScalebarY(int y) { m_sb_y = y; }
-	int GetScalebarX() { return m_sb_x; }
-	int GetScalebarY() { return m_sb_y; }
+	int GetScalebarX() const { return m_sb_x; }
+	int GetScalebarY() const { return m_sb_y; }
 
 	//keys
 	void InsertKey(int index);
 	void SetKeyDuration(double val) { m_key_duration = val; }
-	double GetKeyDuration() { return m_key_duration; }
+	double GetKeyDuration() const { return m_key_duration; }
 	void SetCamLock(bool val) { m_cam_lock = val; }
-	bool GetCamLock() { return m_cam_lock; }
+	bool GetCamLock() const { return m_cam_lock; }
 	void SetCamLockType(int val)
 	{
 		if (val > 0 && val < 5)
@@ -178,11 +178,11 @@ public:
 		else
 			m_cam_lock_type = 0;
 	}
-	int GetCamLockType() { return m_cam_lock_type; }
+	int GetCamLockType() const { return m_cam_lock_type; }
 
 	//autokey functions
 	void MakeKeys(int type);
-	std::vector<std::string> GetAutoKeyTypes();
+	std::vector<std::string> GetAutoKeyTypes() const;
 	void MakeKeysCameraTumble();
 	void MakeKeysCameraZoom();
 	void MakeKeysTimeSequence();
@@ -192,8 +192,8 @@ public:
 	void AddChannToView();
 	void KeyChannComb();
 	void MakeKeysChannComb(int comb);
-	bool MoveOne(std::vector<bool>& chan_mask, int lv);
-	bool GetMask(std::vector<bool>& chan_mask);
+	bool MoveOne(std::vector<bool>& chan_mask, int lv) const;
+	bool GetMask(std::vector<bool>& chan_mask) const;
 	void MakeKeysLookingGlass(int val);
 
 private:

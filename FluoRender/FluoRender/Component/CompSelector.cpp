@@ -99,7 +99,7 @@ void ComponentSelector::SetList(const CelpList& list)
 	m_list = std::make_unique<CelpList>(list);
 }
 
-CelpList& ComponentSelector::GetList()
+CelpList& ComponentSelector::GetList() const
 {
 	return *m_list;
 }
@@ -251,7 +251,7 @@ void ComponentSelector::CompFull()
 		bbs->valid_mask();
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask();
+	vd->GetVR().clear_tex_mask();
 }
 
 void ComponentSelector::Select(bool all, bool rmask)
@@ -451,7 +451,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 		}
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask(false);
+	vd->GetVR().clear_tex_mask(false);
 }
 
 void ComponentSelector::Exclusive()
@@ -487,7 +487,7 @@ void ComponentSelector::All()
 	std::memset(mask_ptr, 255, for_size);
 	vd->GetTexture()->valid_all_mask();
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask();
+	vd->GetVR().clear_tex_mask();
 }
 
 void ComponentSelector::Clear(bool invalidate)
@@ -514,7 +514,7 @@ void ComponentSelector::Clear(bool invalidate)
 	std::memset(mask_ptr, 0, for_size);
 	//invalidate label mask in gpu
 	if (invalidate)
-		vd->GetVR()->clear_tex_mask();
+		vd->GetVR().clear_tex_mask();
 	vd->GetTexture()->invalid_all_mask();
 }
 
@@ -552,7 +552,7 @@ void ComponentSelector::Delete()
 			mask_ptr[index] = 0;
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask();
+	vd->GetVR().clear_tex_mask();
 }
 
 void ComponentSelector::DeleteList()
@@ -610,7 +610,7 @@ void ComponentSelector::DeleteList()
 		}
 	}
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask();
+	vd->GetVR().clear_tex_mask();
 	if (clear_all)
 		tex->invalid_all_mask();
 }
@@ -687,7 +687,7 @@ void ComponentSelector::SelectList()
 	//}
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask();
+	vd->GetVR().clear_tex_mask();
 }
 
 void ComponentSelector::EraseList()
@@ -762,10 +762,10 @@ void ComponentSelector::EraseList()
 	//}
 
 	//invalidate label mask in gpu
-	vd->GetVR()->clear_tex_mask();
+	vd->GetVR().clear_tex_mask();
 }
 
-inline std::optional<std::reference_wrapper<CelpList>> ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out)
+inline std::optional<std::reference_wrapper<CelpList>> ComponentSelector::GetListFromAnalyzer(CelpList &list_in, CelpList &list_out) const
 {
 	if (glbin_comp_analyzer.GetAnalyzed())
 	{

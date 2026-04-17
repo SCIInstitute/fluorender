@@ -1108,7 +1108,7 @@ void VolumeRenderer::copy_mask_border(GLint btex, const std::shared_ptr<TextureB
 }
 
 //calculation
-void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b)
+void VolumeRenderer::calculate(int type, const VolumeRenderer& vr_a, const VolumeRenderer& vr_b)
 {
 	auto tex = tex_.lock();
 	if (!tex)
@@ -1124,24 +1124,18 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 	std::vector<std::shared_ptr<TextureBrick>> bricks_b;
 
 	std::shared_ptr<Texture> tex_a, tex_b;
-	if (vr_a)
+	tex_a = vr_a.tex_.lock();
+	if (tex_a)
 	{
-		tex_a = vr_a->tex_.lock();
-		if (tex_a)
-		{
-			bricks_a = tex_a->get_bricks();
-			tex_a->set_sort_bricks();
-			bricks_a = tex_a->get_sorted_bricks(view_ray);
-		}
+		bricks_a = tex_a->get_bricks();
+		tex_a->set_sort_bricks();
+		bricks_a = tex_a->get_sorted_bricks(view_ray);
 	}
-	if (vr_b)
+	tex_b = vr_b.tex_.lock();
+	if (tex_b)
 	{
-		tex_b = vr_b->tex_.lock();
-		if (tex_b)
-		{
-			tex_b->set_sort_bricks();
-			bricks_b = tex_b->get_sorted_bricks(view_ray);
-		}
+		tex_b->set_sort_bricks();
+		bricks_b = tex_b->get_sorted_bricks(view_ray);
 	}
 
 	//mask frame buffer object
@@ -1163,21 +1157,21 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 		type == 2 ||
 		type == 3 ||
 		type == 8)
-		cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
-			vr_b ? vr_b->get_scalar_scale() : 1.0,
-			(vr_a && tex_a && tex_a->has_comp(CompType::Mask)) ? 1.0 : 0.0,
-			(vr_b && tex_b && tex_b->has_comp(CompType::Mask)) ? 1.0 : 0.0);
+		cal_shader->setLocalParam(0, vr_a.get_scalar_scale(),
+			vr_b.get_scalar_scale(),
+			(tex_a && tex_a->has_comp(CompType::Mask)) ? 1.0 : 0.0,
+			(tex_b && tex_b->has_comp(CompType::Mask)) ? 1.0 : 0.0);
 	else if (type == 4 ||
 		type == 5 ||
 		type == 6 ||
 		type == 7)
 		cal_shader->setLocalParam(0, 1.0, 1.0, 0.0, 0.0);
 	else
-		cal_shader->setLocalParam(0, vr_a ? vr_a->get_scalar_scale() : 1.0,
-			vr_b ? vr_b->get_scalar_scale() : 1.0,
-			(vr_a && vr_a->get_inversion()) ? -1.0 : 0.0,
-			(vr_b && vr_b->get_inversion()) ? -1.0 : 0.0);
-	if (vr_a && (type == 6 || type == 7))
+		cal_shader->setLocalParam(0, vr_a.get_scalar_scale(),
+			vr_b.get_scalar_scale(),
+			(vr_a.get_inversion()) ? -1.0 : 0.0,
+			(vr_b.get_inversion()) ? -1.0 : 0.0);
+	if (type == 6 || type == 7)
 	{
 		cal_shader->setLocalParam(2, inv_ ? -scalar_scale_ : scalar_scale_, gm_scale_, lo_thresh_, hi_thresh_);
 		cal_shader->setLocalParam(3, 1.0 / gamma3d_, lo_offset_, hi_offset_, sw_);
@@ -1194,13 +1188,13 @@ void VolumeRenderer::calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* v
 
 		//load the texture
 		GLuint tex_id = load_brick(bbs, GL_NEAREST);
-		vr_a->load_brick(bricks_a[i], GL_NEAREST, false, 1);
-		vr_b->load_brick(bricks_b[i], GL_NEAREST, false, 2);
-		if ((type == 5 || type == 6 || type == 7)) vr_a->load_brick_mask(bricks_a[i]);
+		vr_a.load_brick(bricks_a[i], GL_NEAREST, false, 1);
+		vr_b.load_brick(bricks_b[i], GL_NEAREST, false, 2);
+		if ((type == 5 || type == 6 || type == 7)) vr_a.load_brick_mask(bricks_a[i]);
 		if (type == 8)
 		{
-			vr_a->load_brick_mask(bricks_a[i], GL_NEAREST, false, 3);
-			vr_b->load_brick_mask(bricks_b[i], GL_NEAREST, false, 4);
+			vr_a.load_brick_mask(bricks_a[i], GL_NEAREST, false, 3);
+			vr_b.load_brick_mask(bricks_b[i], GL_NEAREST, false, 4);
 		}
 		//draw each slice
 		for (int z = 0; z < res_b.intz(); z++)

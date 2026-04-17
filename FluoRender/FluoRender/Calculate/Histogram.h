@@ -43,6 +43,7 @@ namespace flrd
 	{
 	public:
 		Histogram(const std::shared_ptr<VolumeData>& vd);
+		Histogram(std::shared_ptr<const VolumeData> vd);
 		~Histogram();
 
 		void SetUseMask(bool use_mask)

@@ -408,12 +408,12 @@ void MovieMaker::SetView(const std::shared_ptr<RenderView>& view)
 	m_view = view;
 }
 
-RenderView* MovieMaker::GetView()
+std::shared_ptr<RenderView> MovieMaker::GetView() const
 {
-	return m_view.lock().get();
+	return m_view.lock();
 }
 
-int MovieMaker::GetViewIndex()
+int MovieMaker::GetViewIndex() const
 {
 	return glbin_current.GetViewId();
 }
@@ -1087,7 +1087,7 @@ void MovieMaker::MakeKeys(int type)
 	}
 }
 
-std::vector<std::string> MovieMaker::GetAutoKeyTypes()
+std::vector<std::string> MovieMaker::GetAutoKeyTypes() const
 {
 	std::vector<std::string> result;
 	//0
@@ -1698,7 +1698,7 @@ void MovieMaker::MakeKeysChannComb(int comb)
 	SetFullFrameNum(std::round(glbin_interpolator.GetLastT()) + m_key_duration);
 }
 
-bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)
+bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv) const
 {
 	int i;
 	int cur_lv = 0;
@@ -1740,7 +1740,7 @@ bool MovieMaker::MoveOne(std::vector<bool>& chan_mask, int lv)
 	else return false;
 }
 
-bool MovieMaker::GetMask(std::vector<bool>& chan_mask)
+bool MovieMaker::GetMask(std::vector<bool>& chan_mask) const
 {
 	return MoveOne(chan_mask, 1);
 }

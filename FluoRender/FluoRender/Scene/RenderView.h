@@ -293,7 +293,7 @@ public:
 	//background color
 	fluo::Color GetBackgroundColor() const { return m_bg_color; }
 	fluo::Color GetTextColor() const;
-	void SetBackgroundColor(fluo::Color &color);
+	void SetBackgroundColor(const fluo::Color &color);
 
 	//disply modes
 	int GetDrawType() const { return m_draw_type; }

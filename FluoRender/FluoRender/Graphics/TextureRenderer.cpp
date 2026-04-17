@@ -698,7 +698,7 @@ namespace flvr
 	}
 
 	GLint TextureRenderer::load_brick(const std::shared_ptr<TextureBrick>& brick,
-		GLint filter, bool compression, int unit, int mode, int toffset)
+		GLint filter, bool compression, int unit, int mode, int toffset) const
 	{
 		auto tex = tex_.lock();
 		if (!tex)
@@ -1016,7 +1016,7 @@ namespace flvr
 	//search for or create the mask texture in the texture pool
 	GLint TextureRenderer::load_brick_mask(
 		const std::shared_ptr<TextureBrick>& brick,
-		GLint filter, bool compression, int unit)
+		GLint filter, bool compression, int unit) const
 	{
 		GLint result = -1;
 		if (!brick)
@@ -1119,7 +1119,7 @@ namespace flvr
 	}
 
 	//search for or create the label texture in the texture pool
-	GLint TextureRenderer::load_brick_label(const std::shared_ptr<TextureBrick>& brick)
+	GLint TextureRenderer::load_brick_label(const std::shared_ptr<TextureBrick>& brick) const
 	{
 		GLint result = -1;
 		if (!brick)
@@ -1223,7 +1223,7 @@ namespace flvr
 		return bd1.dist > bd2.dist;
 	}
 
-	void TextureRenderer::check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c)
+	void TextureRenderer::check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c) const
 	{
 		unsigned int i;
 		auto res = brick->get_size();
@@ -1434,7 +1434,7 @@ namespace flvr
 		unsigned int sx,
 		unsigned int sy,
 		GLenum tex_type,
-		GLenum format)
+		GLenum format) const
 	{
 		auto tex = tex_.lock();
 		if (!tex)
@@ -1477,7 +1477,7 @@ namespace flvr
 	}
 
 	//release texture
-	void TextureRenderer::release_texture(int unit, GLenum taget)
+	void TextureRenderer::release_texture(int unit, GLenum taget) const
 	{
 		glActiveTexture(GL_TEXTURE0 + unit);
 		glBindTexture(taget, 0);

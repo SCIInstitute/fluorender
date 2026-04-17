@@ -258,7 +258,7 @@ void Clusterizer::Compute()
 		method->SetRange(90, 100);
 		method->GenerateNewIDs(0, raw_label, res, true);
 		m_out_cells = std::make_unique<CelpList>(method->GetCellList());
-		vd->GetVR()->clear_tex_label();
+		vd->GetVR().clear_tex_label();
 		//m_view->RefreshGL(39);//refresh needs to be performed by caller
 	}
 
@@ -269,11 +269,11 @@ void Clusterizer::Compute()
 }
 
 //in and out cell lists
-CelpList& Clusterizer::GetInCells()
+CelpList& Clusterizer::GetInCells() const
 {
 	return *m_in_cells;
 }
-CelpList& Clusterizer::GetOutCells()
+CelpList& Clusterizer::GetOutCells() const
 {
 	return *m_out_cells;
 }

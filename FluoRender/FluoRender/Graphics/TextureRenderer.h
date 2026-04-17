@@ -386,20 +386,20 @@ namespace flvr
 		//brick distance sort
 		static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);
 		//check and swap memory
-		void check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c);
+		void check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c) const;
 		//load texture bricks for drawing
 		//unit:assigned unit, c:channel
-		GLint load_brick(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0);
+		GLint load_brick(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0) const;
 		//load the texture for volume mask into texture pool
-		GLint load_brick_mask(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0);
+		GLint load_brick_mask(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0) const;
 		//load the texture for volume labeling into texture pool
-		GLint load_brick_label(const std::shared_ptr<TextureBrick>& brick);
+		GLint load_brick_label(const std::shared_ptr<TextureBrick>& brick) const;
 		void load_texture(const std::shared_ptr<fluo::RawData>& tex_data,
 			unsigned int nx, unsigned int ny,
 			unsigned int nz, unsigned int nb,
 			unsigned int sx, unsigned int sy,
-			GLenum tex_type, GLenum format);
-		void release_texture(int unit, GLenum target);
+			GLenum tex_type, GLenum format) const;
+		void release_texture(int unit, GLenum target) const;
 
 		//draw slices of the volume
 		void draw_view_quad(double d=0.0);

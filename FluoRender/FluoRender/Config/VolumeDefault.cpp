@@ -241,263 +241,250 @@ void VolumeDataDefault::Save()
 	f->Write(gstMaskMode, static_cast<int>(m_mask_mode));
 }
 
-void VolumeDataDefault::Set(const std::shared_ptr<VolumeData>& vd)
+void VolumeDataDefault::Set(const VolumeData& vd)
 {
-	if (!vd)
-		return;
+	m_gamma_enable = vd.GetGammaEnable();
+	m_gamma = vd.GetGamma();
 
-	m_gamma_enable = vd->GetGammaEnable();
-	m_gamma = vd->GetGamma();
+	m_boundary_enable = vd.GetBoundaryEnable();
+	m_boundary_low = vd.GetBoundaryLow();
+	m_boundary_high = vd.GetBoundaryHigh();
+	m_boundary_max = vd.GetBoundaryMax();
 
-	m_boundary_enable = vd->GetBoundaryEnable();
-	m_boundary_low = vd->GetBoundaryLow();
-	m_boundary_high = vd->GetBoundaryHigh();
-	m_boundary_max = vd->GetBoundaryMax();
+	m_minmax_enable = vd.GetMinMaxEnable();
+	m_lo_offset = vd.GetLowOffset();
+	m_hi_offset = vd.GetHighOffset();
 
-	m_minmax_enable = vd->GetMinMaxEnable();
-	m_lo_offset = vd->GetLowOffset();
-	m_hi_offset = vd->GetHighOffset();
+	m_thresh_enable = vd.GetThreshEnable();
+	m_lo_thresh = vd.GetLeftThresh();
+	m_hi_thresh = vd.GetRightThresh();
+	m_sw = vd.GetSoftThreshold();
 
-	m_thresh_enable = vd->GetThreshEnable();
-	m_lo_thresh = vd->GetLeftThresh();
-	m_hi_thresh = vd->GetRightThresh();
-	m_sw = vd->GetSoftThreshold();
+	m_luminance_enable = vd.GetLuminanceEnable();
+	m_luminance = vd.GetLuminance();
 
-	m_luminance_enable = vd->GetLuminanceEnable();
-	m_luminance = vd->GetLuminance();
+	m_alpha_enable = vd.GetAlphaEnable();
+	m_alpha = vd.GetAlpha();
 
-	m_alpha_enable = vd->GetAlphaEnable();
-	m_alpha = vd->GetAlpha();
+	m_shading_enable = vd.GetShadingEnable();
+	m_shading_strength = vd.GetShadingStrength();
+	m_shading_shine = vd.GetShadingShine();
 
-	m_shading_enable = vd->GetShadingEnable();
-	m_shading_strength = vd->GetShadingStrength();
-	m_shading_shine = vd->GetShadingShine();
+	m_shadow_enable = vd.GetShadingEnable();
+	m_shadow_intensity = vd.GetShadowIntensity();
 
-	m_shadow_enable = vd->GetShadingEnable();
-	m_shadow_intensity = vd->GetShadowIntensity();
+	m_sample_rate_enable = vd.GetSampleRateEnable();
+	m_sample_rate = vd.GetSampleRate();
 
-	m_sample_rate_enable = vd->GetSampleRateEnable();
-	m_sample_rate = vd->GetSampleRate();
+	m_spacing = vd.GetSpacing();
 
-	m_spacing = vd->GetSpacing();
+	m_colormap_disp = vd.GetColormapDisp();
+	m_colormap_low_value = vd.GetColormapLow();
+	m_colormap_hi_value = vd.GetColormapHigh();
+	m_colormap_inv = vd.GetColormapInv();
+	m_colormap_type = vd.GetColormap();
+	m_colormap_proj = vd.GetColormapProj();
 
-	m_colormap_disp = vd->GetColormapDisp();
-	m_colormap_low_value = vd->GetColormapLow();
-	m_colormap_hi_value = vd->GetColormapHigh();
-	m_colormap_inv = vd->GetColormapInv();
-	m_colormap_type = vd->GetColormap();
-	m_colormap_proj = vd->GetColormapProj();
+	m_noise_rd = vd.GetNR();
+	m_interpolate = vd.GetInterpolate();
+	m_inverted = vd.GetInvert();
+	m_render_mode = vd.GetRenderMode();
+	m_transparent = vd.GetTransparent();
 
-	m_noise_rd = vd->GetNR();
-	m_interpolate = vd->GetInterpolate();
-	m_inverted = vd->GetInvert();
-	m_render_mode = vd->GetRenderMode();
-	m_transparent = vd->GetTransparent();
-
-	m_channel_mix_mode = vd->GetChannelMixMode();
-	m_legend = vd->GetLegend();
-	m_main_mode = vd->GetMainColorMode();
-	m_mask_mode = vd->GetMaskColorMode();
+	m_channel_mix_mode = vd.GetChannelMixMode();
+	m_legend = vd.GetLegend();
+	m_main_mode = vd.GetMainColorMode();
+	m_mask_mode = vd.GetMaskColorMode();
 }
 
-void VolumeDataDefault::Apply(const std::shared_ptr<VolumeData>& vd)
+void VolumeDataDefault::Apply(VolumeData& vd) const
 {
-	if (!vd)
-		return;
+	auto res = vd.GetResolution();
 
-	auto res = vd->GetResolution();
+	vd.SetGammaEnable(m_gamma_enable);
+	vd.SetGamma(m_gamma);
 
-	vd->SetGammaEnable(m_gamma_enable);
-	vd->SetGamma(m_gamma);
+	vd.SetBoundaryEnable(m_boundary_enable);
+	vd.SetBoundaryLow(m_boundary_low);
+	vd.SetBoundaryHigh(m_boundary_high);
+	vd.SetBoundaryMax(m_boundary_max);
 
-	vd->SetBoundaryEnable(m_boundary_enable);
-	vd->SetBoundaryLow(m_boundary_low);
-	vd->SetBoundaryHigh(m_boundary_high);
-	vd->SetBoundaryMax(m_boundary_max);
+	vd.SetMinMaxEnable(m_minmax_enable);
+	vd.SetLowOffset(vd.GetMinValueScale());
+	vd.SetHighOffset(m_hi_offset);
 
-	vd->SetMinMaxEnable(m_minmax_enable);
-	vd->SetLowOffset(vd->GetMinValueScale());
-	vd->SetHighOffset(m_hi_offset);
+	vd.SetThreshEnable(m_thresh_enable);
+	vd.SetLeftThresh(m_lo_thresh);
+	vd.SetRightThresh(m_hi_thresh);
+	vd.SetSoftThreshold(m_sw);
 
-	vd->SetThreshEnable(m_thresh_enable);
-	vd->SetLeftThresh(m_lo_thresh);
-	vd->SetRightThresh(m_hi_thresh);
-	vd->SetSoftThreshold(m_sw);
+	vd.SetLuminanceEnable(m_luminance_enable);
+	vd.SetLuminance(m_luminance);
 
-	vd->SetLuminanceEnable(m_luminance_enable);
-	vd->SetLuminance(m_luminance);
-
-	vd->SetAlphaEnable(m_alpha_enable);
-	vd->SetAlpha(m_alpha);
+	vd.SetAlphaEnable(m_alpha_enable);
+	vd.SetAlpha(m_alpha);
 
 	if (res.intz() > 1)
-		vd->SetShadingEnable(m_shading_enable);
+		vd.SetShadingEnable(m_shading_enable);
 	else
-		vd->SetShadingEnable(false);
-	vd->SetShadingStrength(m_shading_strength);
-	vd->SetShadingShine(m_shading_shine);
+		vd.SetShadingEnable(false);
+	vd.SetShadingStrength(m_shading_strength);
+	vd.SetShadingShine(m_shading_shine);
 
 	if (res.intz() > 1)
-		vd->SetShadowEnable(m_shadow_enable);
+		vd.SetShadowEnable(m_shadow_enable);
 	else
-		vd->SetShadingEnable(false);
-	vd->SetShadowIntensity(m_shadow_intensity);
+		vd.SetShadingEnable(false);
+	vd.SetShadowIntensity(m_shadow_intensity);
 
-	vd->SetSampleRateEnable(m_sample_rate_enable);
-	vd->SetSampleRate(m_sample_rate);
+	vd.SetSampleRateEnable(m_sample_rate_enable);
+	vd.SetSampleRate(m_sample_rate);
 
-	if (!vd->GetSpcFromFile())
-		vd->SetBaseSpacing(m_spacing);
+	if (!vd.GetSpcFromFile())
+		vd.SetBaseSpacing(m_spacing);
 
-	vd->SetColormapDisp(m_colormap_disp);
-	vd->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
-	vd->SetColormapInv(m_colormap_inv);
-	vd->SetColormap(m_colormap_type);
-	vd->SetColormapProj(m_colormap_proj);
+	vd.SetColormapDisp(m_colormap_disp);
+	vd.SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
+	vd.SetColormapInv(m_colormap_inv);
+	vd.SetColormap(m_colormap_type);
+	vd.SetColormapProj(m_colormap_proj);
 
-	vd->SetNR(m_noise_rd);
-	vd->SetInterpolate(m_interpolate);
-	vd->SetInvert(m_inverted);
-	vd->SetRenderMode(m_render_mode);
-	vd->SetTransparent(m_transparent);
+	vd.SetNR(m_noise_rd);
+	vd.SetInterpolate(m_interpolate);
+	vd.SetInvert(m_inverted);
+	vd.SetRenderMode(m_render_mode);
+	vd.SetTransparent(m_transparent);
 
-	vd->SetChannelMixMode(m_channel_mix_mode);
-	vd->SetLegend(m_legend);
-	vd->SetMainMaskMode(m_main_mode);
-	vd->SetMaskMode(m_mask_mode);
+	vd.SetChannelMixMode(m_channel_mix_mode);
+	vd.SetLegend(m_legend);
+	vd.SetMainMaskMode(m_main_mode);
+	vd.SetMaskMode(m_mask_mode);
 }
 
 void VolumeDataDefault::Copy(
-	const std::shared_ptr<VolumeData>& v1,
-	const std::shared_ptr<VolumeData>& v2)//v2 to v1
+	VolumeData& v1, const VolumeData& v2) const//v2 to v1
 {
-	if (!v1 || !v2)
-		return;
+	v1.SetGammaEnable(v2.GetGammaEnable());
+	v1.SetGamma(v2.GetGamma());
 
-	v1->SetGammaEnable(v2->GetGammaEnable());
-	v1->SetGamma(v2->GetGamma());
+	v1.SetBoundaryEnable(v2.GetBoundaryEnable());
+	v1.SetBoundaryLow(v2.GetBoundaryLow());
+	v1.SetBoundaryHigh(v2.GetBoundaryHigh());
+	v1.SetBoundaryMax(v2.GetBoundaryMax());
 
-	v1->SetBoundaryEnable(v2->GetBoundaryEnable());
-	v1->SetBoundaryLow(v2->GetBoundaryLow());
-	v1->SetBoundaryHigh(v2->GetBoundaryHigh());
-	v1->SetBoundaryMax(v2->GetBoundaryMax());
+	v1.SetMinMaxEnable(v2.GetMinMaxEnable());
+	v1.SetLowOffset(v2.GetLowOffset());
+	v1.SetHighOffset(v2.GetHighOffset());
 
-	v1->SetMinMaxEnable(v2->GetMinMaxEnable());
-	v1->SetLowOffset(v2->GetLowOffset());
-	v1->SetHighOffset(v2->GetHighOffset());
+	v1.SetThreshEnable(v2.GetThreshEnable());
+	v1.SetLeftThresh(v2.GetLeftThresh());
+	v1.SetRightThresh(v2.GetRightThresh());
+	v1.SetSoftThreshold(v2.GetSoftThreshold());
 
-	v1->SetThreshEnable(v2->GetThreshEnable());
-	v1->SetLeftThresh(v2->GetLeftThresh());
-	v1->SetRightThresh(v2->GetRightThresh());
-	v1->SetSoftThreshold(v2->GetSoftThreshold());
+	v1.SetLuminanceEnable(v2.GetLuminanceEnable());
+	v1.SetLuminance(v2.GetLuminance());
 
-	v1->SetLuminanceEnable(v2->GetLuminanceEnable());
-	v1->SetLuminance(v2->GetLuminance());
+	v1.SetAlphaEnable(v2.GetAlphaEnable());
+	v1.SetAlpha(v2.GetAlpha());
 
-	v1->SetAlphaEnable(v2->GetAlphaEnable());
-	v1->SetAlpha(v2->GetAlpha());
+	v1.SetShadingEnable(v2.GetShadingEnable());
+	v1.SetShadingStrength(v2.GetShadingStrength());
+	v1.SetShadingShine(v2.GetShadingShine());
 
-	v1->SetShadingEnable(v2->GetShadingEnable());
-	v1->SetShadingStrength(v2->GetShadingStrength());
-	v1->SetShadingShine(v2->GetShadingShine());
+	v1.SetShadowEnable(v2.GetShadowEnable());
+	v1.SetShadowIntensity(v2.GetShadowIntensity());
 
-	v1->SetShadowEnable(v2->GetShadowEnable());
-	v1->SetShadowIntensity(v2->GetShadowIntensity());
+	v1.SetSampleRateEnable(v2.GetSampleRateEnable());
+	v1.SetSampleRate(v2.GetSampleRate());
 
-	v1->SetSampleRateEnable(v2->GetSampleRateEnable());
-	v1->SetSampleRate(v2->GetSampleRate());
+	v1.SetBaseSpacing(v2.GetSpacing());
 
-	v1->SetBaseSpacing(v2->GetSpacing());
+	v1.SetColormapDisp(v2.GetColormapDisp());
+	v1.SetColormapValues(v2.GetColormapLow(), v2.GetColormapHigh());
+	v1.SetColormapInv(v2.GetColormapInv());
+	v1.SetColormap(v2.GetColormap());
+	v1.SetColormapProj(v2.GetColormapProj());
 
-	v1->SetColormapDisp(v2->GetColormapDisp());
-	v1->SetColormapValues(v2->GetColormapLow(), v2->GetColormapHigh());
-	v1->SetColormapInv(v2->GetColormapInv());
-	v1->SetColormap(v2->GetColormap());
-	v1->SetColormapProj(v2->GetColormapProj());
+	v1.SetNR(v2.GetNR());
+	v1.SetInterpolate(v2.GetInterpolate());
+	v1.SetInvert(v2.GetInvert());
+	v1.SetRenderMode(v2.GetRenderMode());
+	v1.SetTransparent(v2.GetTransparent());
 
-	v1->SetNR(v2->GetNR());
-	v1->SetInterpolate(v2->GetInterpolate());
-	v1->SetInvert(v2->GetInvert());
-	v1->SetRenderMode(v2->GetRenderMode());
-	v1->SetTransparent(v2->GetTransparent());
+	v1.SetChannelMixMode(v2.GetChannelMixMode());
+	v1.SetLegend(v2.GetLegend());
+	v1.SetMainMaskMode(v2.GetMainColorMode());
+	v1.SetMaskMode(v2.GetMaskColorMode());
 
-	v1->SetChannelMixMode(v2->GetChannelMixMode());
-	v1->SetLegend(v2->GetLegend());
-	v1->SetMainMaskMode(v2->GetMainColorMode());
-	v1->SetMaskMode(v2->GetMaskColorMode());
+	v1.SetColor(v2.GetColor());
 
-	v1->SetColor(v2->GetColor());
-
-	v1->SetGammaColor(v2->GetGammaColor());
-	v1->SetBrightness(v2->GetBrightness());
-	v1->SetHdr(v2->GetHdr());
+	v1.SetGammaColor(v2.GetGammaColor());
+	v1.SetBrightness(v2.GetBrightness());
+	v1.SetHdr(v2.GetHdr());
 	for (int i : { 0, 1, 2})
-		v1->SetSync(i, v2->GetSync(i));
+		v1.SetSync(i, v2.GetSync(i));
 
-	v1->SetScalarScale(v2->GetScalarScale());
-	v1->SetGMScale(v2->GetGMScale());
-	v1->SetMinMaxValue(v2->GetMinValue(), v2->GetMaxValue());
+	v1.SetScalarScale(v2.GetScalarScale());
+	v1.SetGMScale(v2.GetGMScale());
+	v1.SetMinMaxValue(v2.GetMinValue(), v2.GetMaxValue());
 }
 
-void VolumeDataDefault::Apply(const std::shared_ptr<VolumeGroup>& g)
+void VolumeDataDefault::Apply(VolumeGroup& g) const
 {
-	if (!g)
-		return;
-
 	//int resx, resy, resz;
-	//g->GetResolution(resx, resy, resz);
+	//g.GetResolution(resx, resy, resz);
 
-	g->SetGammaEnable(m_gamma_enable);
-	g->SetGamma(m_gamma);
+	g.SetGammaEnable(m_gamma_enable);
+	g.SetGamma(m_gamma);
 
-	g->SetBoundaryEnable(m_boundary_enable);
-	g->SetBoundaryLow(m_boundary_low);
-	g->SetBoundaryHigh(m_boundary_high);
-	g->SetBoundaryMax(m_boundary_max);
+	g.SetBoundaryEnable(m_boundary_enable);
+	g.SetBoundaryLow(m_boundary_low);
+	g.SetBoundaryHigh(m_boundary_high);
+	g.SetBoundaryMax(m_boundary_max);
 
-	g->SetMinMaxEnable(m_minmax_enable);
-	g->SetLowOffset(m_lo_offset);
-	g->SetHighOffset(m_hi_offset);
+	g.SetMinMaxEnable(m_minmax_enable);
+	g.SetLowOffset(m_lo_offset);
+	g.SetHighOffset(m_hi_offset);
 
-	g->SetThreshEnable(m_thresh_enable);
-	g->SetLeftThresh(m_lo_thresh);
-	g->SetRightThresh(m_hi_thresh);
-	//g->SetSoftThreshold(m_sw);
+	g.SetThreshEnable(m_thresh_enable);
+	g.SetLeftThresh(m_lo_thresh);
+	g.SetRightThresh(m_hi_thresh);
+	//g.SetSoftThreshold(m_sw);
 
-	g->SetLuminanceEnable(m_luminance_enable);
-	g->SetLuminance(m_luminance);
+	g.SetLuminanceEnable(m_luminance_enable);
+	g.SetLuminance(m_luminance);
 
-	g->SetAlphaEnable(m_alpha_enable);
-	g->SetAlpha(m_alpha);
+	g.SetAlphaEnable(m_alpha_enable);
+	g.SetAlpha(m_alpha);
 
-	g->SetShadingEnable(m_shading_enable);
-	g->SetShadingStrength(m_shading_strength);
-	g->SetShadingShine(m_shading_shine);
+	g.SetShadingEnable(m_shading_enable);
+	g.SetShadingStrength(m_shading_strength);
+	g.SetShadingShine(m_shading_shine);
 
-	g->SetShadowEnable(m_shadow_enable);
-	g->SetShadowIntensity(m_shadow_intensity);
+	g.SetShadowEnable(m_shadow_enable);
+	g.SetShadowIntensity(m_shadow_intensity);
 
-	g->SetSampleRateEnable(m_sample_rate_enable);
-	g->SetSampleRate(m_sample_rate);
+	g.SetSampleRateEnable(m_sample_rate_enable);
+	g.SetSampleRate(m_sample_rate);
 
-	//if (!g->GetSpcFromFile())
-	//	g->SetBaseSpacings(m_spcx, m_spcy, m_spcz);
+	//if (!g.GetSpcFromFile())
+	//	g.SetBaseSpacings(m_spcx, m_spcy, m_spcz);
 
-	g->SetColormapDisp(m_colormap_disp);
-	g->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
-	g->SetColormapInv(m_colormap_inv);
-	g->SetColormap(m_colormap_type);
-	g->SetColormapProj(m_colormap_proj);
+	g.SetColormapDisp(m_colormap_disp);
+	g.SetColormapValues(m_colormap_low_value, m_colormap_hi_value);
+	g.SetColormapInv(m_colormap_inv);
+	g.SetColormap(m_colormap_type);
+	g.SetColormapProj(m_colormap_proj);
 
-	g->SetNR(m_noise_rd);
-	g->SetInterpolate(m_interpolate);
-	g->SetInvert(m_inverted);
-	g->SetRenderMode(m_render_mode);
-	g->SetTransparent(m_transparent);
+	g.SetNR(m_noise_rd);
+	g.SetInterpolate(m_interpolate);
+	g.SetInvert(m_inverted);
+	g.SetRenderMode(m_render_mode);
+	g.SetTransparent(m_transparent);
 
-	g->SetChannelMixMode(m_channel_mix_mode);
-	//g->SetLegend(m_legend);
+	g.SetChannelMixMode(m_channel_mix_mode);
+	//g.SetLegend(m_legend);
 
-	g->SetMainMaskMode(m_main_mode);
-	g->SetMaskMode(m_mask_mode);
+	g.SetMainMaskMode(m_main_mode);
+	g.SetMaskMode(m_mask_mode);
 }

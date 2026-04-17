@@ -51,11 +51,11 @@ public:
 	void Save();
 
 	//set: save settings to this
-	void Set(const std::shared_ptr<VolumeData>& vd);
+	void Set(const VolumeData& vd);
 	//apply: restore settings to vd
-	void Apply(const std::shared_ptr<VolumeData>& vd);
-	void Copy(const std::shared_ptr<VolumeData>& v1, const std::shared_ptr<VolumeData>& v2);//v2 to v1
-	void Apply(const std::shared_ptr<VolumeGroup>& g);
+	void Apply(VolumeData& vd) const;
+	void Copy(VolumeData& v1, const VolumeData& v2) const;//v2 to v1
+	void Apply(VolumeGroup& g) const;
 
 public:
 	//default values

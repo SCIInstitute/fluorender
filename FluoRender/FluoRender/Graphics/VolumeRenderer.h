@@ -60,7 +60,7 @@ namespace flvr
 		VolumeRenderer(const VolumeRenderer&);
 		virtual ~VolumeRenderer();
 
-		std::string get_buffer_name();
+		std::string get_buffer_name() const;
 
 		//set viewport
 		void set_viewport(const fluo::Vector4i& vp) { viewport_ = vp; }
@@ -77,62 +77,60 @@ namespace flvr
 
 		//range and scale
 		void set_scalar_scale(double val) { scalar_scale_ = val; }
-		double get_scalar_scale() { return scalar_scale_; }
+		double get_scalar_scale() const { return scalar_scale_; }
 		void set_gm_scale(double val) { gm_scale_ = val; }
 		//transfer function properties
 		void set_gamma3d(double gamma) { gamma3d_ = gamma; }
-		double get_gamma3d() { return gamma3d_; }
+		double get_gamma3d() const { return gamma3d_; }
 		void set_gm_low(double val) { gm_low_ = val; }
-		double get_gm_low() { return gm_low_; }
+		double get_gm_low() const { return gm_low_; }
 		void set_gm_high(double val) { gm_high_ = val; }
-		double get_gm_high() { return gm_high_; }
+		double get_gm_high() const { return gm_high_; }
 		void set_gm_max(double val) { gm_max_ = val; }
-		double get_gm_max() { return gm_max_; }
+		double get_gm_max() const { return gm_max_; }
 		void set_lo_offset(double val) { lo_offset_ = val; }
-		double get_lo_offset() { return lo_offset_; }
+		double get_lo_offset() const { return lo_offset_; }
 		void set_hi_offset(double val) { hi_offset_ = val; }
-		double get_hi_offset() { return hi_offset_; }
+		double get_hi_offset() const { return hi_offset_; }
 		void set_lo_thresh(double thresh) { lo_thresh_ = thresh; }
-		double get_lo_thresh() { return lo_thresh_; }
+		double get_lo_thresh() const { return lo_thresh_; }
 		void set_hi_thresh(double thresh) { hi_thresh_ = thresh; }
-		double get_hi_thresh() { return hi_thresh_; }
+		double get_hi_thresh() const { return hi_thresh_; }
 		void set_soft_thresh(double val) { sw_ = val; }
-		double get_soft_thresh() { return sw_; }
+		double get_soft_thresh() const { return sw_; }
 		void set_color(const fluo::Color& color);
-		fluo::Color get_color() { return color_; }
+		fluo::Color get_color() const { return color_; }
 		void set_mask_color(const fluo::Color& color, bool set=true);
-		fluo::Color get_mask_color() { return mask_color_; }
-		bool get_mask_color_set() {return mask_color_set_; }
+		fluo::Color get_mask_color() const { return mask_color_; }
+		bool get_mask_color_set() const {return mask_color_set_; }
 		void reset_mask_color_set() {mask_color_set_ = false;}
 		void set_mask_thresh(double thresh) { mask_thresh_ = thresh; }
-		double get_mask_thresh() { return mask_thresh_; }
+		double get_mask_thresh() const { return mask_thresh_; }
 		void set_alpha(double alpha) { alpha_ = alpha; }
-		double get_alpha() { return alpha_; }
+		double get_alpha() const { return alpha_; }
 		void set_alpha_power(double val) { alpha_power_ = val; }
-		double get_alpha_power() { return alpha_power_; }
+		double get_alpha_power() const { return alpha_power_; }
 		void set_luminance(double luminance) { luminance_ = luminance; }
-		double get_luminance() { return luminance_; }
-
+		double get_luminance() const { return luminance_; }
 		//outline
 		void set_outline(bool outline) { outline_ = outline; }
-		bool get_outline() { return outline_; }
+		bool get_outline() const { return outline_; }
 
 		//shading
 		void set_shading(bool shading) { shading_ = shading; }
-		bool get_shading() { return shading_; }
+		bool get_shading() const { return shading_; }
 		void set_shading_strength(double val) { shading_strength_ = val; }
-		double get_shading_strength() { return shading_strength_; }
+		double get_shading_strength() const { return shading_strength_; }
 		void set_shading_shine(double val) { shading_shine_ = val; }
-		double get_shading_shine() { return shading_shine_; }
-
+		double get_shading_shine() const { return shading_shine_; }
 		//colormap mode
 		void set_colormap_inv(double val) { colormap_inv_ = val; }
-		double get_colormap_inv() { return colormap_inv_; }
+		double get_colormap_inv() const { return colormap_inv_; }
 		void set_colormap_values(double low, double hi) { colormap_low_value_ = low; colormap_hi_value_ = hi; }
-		double get_colormap_low() { return colormap_low_value_; }
-		double get_colormap_high() { return colormap_hi_value_; }
+		double get_colormap_low() const { return colormap_low_value_; }
+		double get_colormap_high() const { return colormap_hi_value_; }
 		void set_colormap(int value) { colormap_ = value; }
-		int get_colormap() { return colormap_; }
+		int get_colormap() const { return colormap_; }
 		void set_colormap_proj(ColormapProj value) { colormap_proj_ = value; }
 		//gradient
 		void set_radial_center(const fluo::Point& p) { radial_center_ = p; }
@@ -141,31 +139,29 @@ namespace flvr
 
 		//label color shuffling
 		void set_shuffle(int val) { shuffle_ = val; }
-		int get_shuffle() { return shuffle_; }
+		int get_shuffle() const { return shuffle_; }
 
 		//solid
 		void set_solid(bool mode) { solid_ = mode; }
-		bool get_solid() { return solid_; }
-
+		bool get_solid() const { return solid_; }
 		//slice number
-		int get_slice_num() { return static_cast<int>(num_slices_); }
+		int get_slice_num() const { return static_cast<int>(num_slices_); }
 
 		//clipping planes
 		void set_clipping_box(const fluo::ClippingBox& box) { clipping_box_ = box; }
 		void sync_clipping_box(const fluo::ClippingBox& box) { clipping_box_.SyncWorld(box); }
 
 		//interpolation
-		bool get_interpolate() {return interpolate_; }
+		bool get_interpolate() const {return interpolate_; }
 		void set_interpolate(bool b) { interpolate_ = b;}
 
 		//depth peel
 		void set_depth_peel(int dp) {depth_peel_ = dp;}
-		int get_depth_peel() {return depth_peel_;}
+		int get_depth_peel() const {return depth_peel_;}
 
 		//depth output
 		void set_depth(bool depth) { depth_ = depth; }
-		bool get_depth() { return depth_; }
-
+		bool get_depth() const { return depth_; }
 		//draw
 		//mode: 0-normal; 1-MIP; 2-shading; 3-shadow, 4-mask
 		virtual void draw(bool draw_wireframe_p,
@@ -190,7 +186,7 @@ namespace flvr
 		void copy_mask_border(GLint btex, const std::shared_ptr<TextureBrick>& b, int order);
 
 		//calculation
-		void calculate(int type, VolumeRenderer* vr_a, VolumeRenderer* vr_b);
+		void calculate(int type, const VolumeRenderer& vr_a, const VolumeRenderer& vr_b);
 
 		//return
 		void return_volume();//return the data volume
@@ -198,34 +194,32 @@ namespace flvr
 		void return_label(); //return the label volume
 
 		//mask mode
-		ColorMode get_main_mode() { return main_mode_; }
+		ColorMode get_main_mode() const { return main_mode_; }
 		void set_main_mode(ColorMode mode) { main_mode_ = mode; }
-		ColorMode get_mask_mode() { return mask_mode_; }
+		ColorMode get_mask_mode() const { return mask_mode_; }
 		void set_mask_mode(ColorMode mode) { mask_mode_ = mode; }
 
 		//set noise reduction
 		void SetNoiseRed(bool nd) { noise_red_ = nd; }
-		bool GetNoiseRed() { return noise_red_; }
+		bool GetNoiseRed() const { return noise_red_; }
 
 		//inversion
 		void set_inversion(bool mode) { inv_ = mode; }
-		bool get_inversion() { return inv_; }
-
+		bool get_inversion() const { return inv_; }
 		//compression
 		void set_compression(bool compression) { compression_ = compression; }
 
 		//done loop
-		bool get_done_loop(int mode) { if (mode>=0 && mode<TEXTURE_RENDER_MODES) return done_loop_[mode]; else return false; }
+		bool get_done_loop(int mode) const { if (mode>=0 && mode<TEXTURE_RENDER_MODES) return done_loop_[mode]; else return false; }
 		void set_done_loop(bool done) { for (int i=0; i<TEXTURE_RENDER_MODES; i++) done_loop_[i] = done; }
 
 		//estimated threshold
-		double get_estimated_thresh() { return est_thresh_; }
-
+		double get_estimated_thresh() const { return est_thresh_; }
 		//set matrices
 		void set_matrices(glm::mat4& mv_mat, glm::mat4& proj_mat, glm::mat4& tex_mat);
 		void update_mv_tex_scl_mat();
-		glm::mat4 get_mv_tex_scl_mat() { return m_mv_tex_scl_mat; }
-		glm::mat4 get_proj_mat() { return m_proj_mat; }
+		glm::mat4 get_mv_tex_scl_mat() const { return m_mv_tex_scl_mat; }
+		glm::mat4 get_proj_mat() const { return m_proj_mat; }
 
 		//fog
 		void set_fog(bool use_fog, double fog_intensity, double fog_start, double fog_end) { m_use_fog = use_fog; m_fog_intensity = fog_intensity; m_fog_start = fog_start; m_fog_end = fog_end; }

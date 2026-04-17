@@ -39,8 +39,8 @@ public:
 
 	void Read();
 	void Save();
-	void Set(MovieMaker* mm);
-	void Apply(MovieMaker* mm);
+	void Set(const MovieMaker& mm);
+	void Apply(MovieMaker& mm) const;
 
 public:
 	//default values

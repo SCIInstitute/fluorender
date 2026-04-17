@@ -360,7 +360,7 @@ void VolumeData::SetCompression(bool compression)
 		m_vr->set_compression(compression);
 }
 
-bool VolumeData::GetCompression()
+bool VolumeData::GetCompression() const
 {
 	return m_compression;
 }
@@ -371,7 +371,7 @@ void VolumeData::SetSkipBrick(bool skip)
 	m_skip_brick = skip;
 }
 
-bool VolumeData::GetSkipBrick()
+bool VolumeData::GetSkipBrick() const
 {
 	return m_skip_brick;
 }
@@ -924,7 +924,7 @@ bool VolumeData::UpdateGradientVolume()
 	}
 	else if (m_colormap_proj == flvr::ColormapProj::Linear)
 	{
-		flrd::Cov cover(this);
+		flrd::Cov cover(shared_from_this());
 		if (!cover.Compute(0))
 			return false;
 
@@ -1006,7 +1006,7 @@ void VolumeData::AddEmptyLabel(int mode, bool change)
 		SetMaskMode(flvr::ColorMode::Component);
 }
 
-bool VolumeData::SearchLabel(unsigned int label)
+bool VolumeData::SearchLabel(unsigned int label) const
 {
 	if (!m_tex)
 		return false;
@@ -1019,7 +1019,7 @@ bool VolumeData::SearchLabel(unsigned int label)
 	return raw_label->ContainsUInt32(label);
 }
 
-std::shared_ptr<fluo::RawData> VolumeData::GetVolume(bool ret)
+std::shared_ptr<fluo::RawData> VolumeData::GetVolume(bool ret) const
 {
 	if (m_vr && m_tex)
 	{
@@ -1030,7 +1030,7 @@ std::shared_ptr<fluo::RawData> VolumeData::GetVolume(bool ret)
 	return nullptr;
 }
 
-std::shared_ptr<fluo::RawData> VolumeData::GetMask(bool ret)
+std::shared_ptr<fluo::RawData> VolumeData::GetMask(bool ret) const
 {
 	if (m_vr && m_tex && m_tex->has_comp(flvr::CompType::Mask))
 	{
@@ -1059,7 +1059,7 @@ bool VolumeData::IsValidMask()
 	return m_mask_sum;
 }
 
-std::shared_ptr<fluo::RawData> VolumeData::GetLabel(bool ret)
+std::shared_ptr<fluo::RawData> VolumeData::GetLabel(bool ret) const
 {
 	if (m_vr && m_tex && m_tex->has_comp(flvr::CompType::Label))
 	{
@@ -1070,7 +1070,7 @@ std::shared_ptr<fluo::RawData> VolumeData::GetLabel(bool ret)
 	return nullptr;
 }
 
-double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b)
+double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const
 {
 	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 
@@ -1095,7 +1095,7 @@ double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<
 	return raw_data->GetVoxelValue(p.intx(), p.inty(), p.intz());
 }
 
-double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b)
+double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const
 {
 	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 
@@ -1122,7 +1122,7 @@ double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr
 
 double VolumeData::GetTransferedValue(
 	const fluo::Point& p,
-	const std::shared_ptr<flvr::TextureBrick>& b)
+	const std::shared_ptr<flvr::TextureBrick>& b) const
 {
 	std::shared_ptr<fluo::RawData> raw_data;
 
@@ -1356,12 +1356,12 @@ void VolumeData::SaveLabel(bool use_reader, int t, int c)
 }
 
 //bounding box
-fluo::BBox VolumeData::GetBounds()
+fluo::BBox VolumeData::GetBounds() const
 {
 	return m_bounds;
 }
 
-fluo::BBox VolumeData::GetClippedBounds()
+fluo::BBox VolumeData::GetClippedBounds() const
 {
 	return m_clipping_box.GetBBoxWorld();
 }
@@ -1372,7 +1372,7 @@ void VolumeData::SetPath(const std::wstring& path)
 	m_tex_path = path;
 }
 
-std::wstring VolumeData::GetPath()
+std::wstring VolumeData::GetPath() const
 {
 	return m_tex_path;
 }
@@ -1383,7 +1383,7 @@ void VolumeData::SetCurChannel(int chan)
 	m_chan = chan;
 }
 
-int VolumeData::GetCurChannel()
+int VolumeData::GetCurChannel() const
 {
 	return m_chan;
 }
@@ -1395,7 +1395,7 @@ void VolumeData::SetCurTime(int time)
 	SetMlCompGenApplied(false);
 }
 
-int VolumeData::GetCurTime()
+int VolumeData::GetCurTime() const
 {
 	return m_time;
 }
@@ -1440,7 +1440,7 @@ void VolumeData::SetAlphaPower(double val)
 		m_vr->set_alpha_power(val);
 }
 
-double VolumeData::GetAlphaPower()
+double VolumeData::GetAlphaPower() const
 {
 	if (m_vr)
 		return m_vr->get_alpha_power();
@@ -1456,7 +1456,7 @@ void VolumeData::SetInvert(bool val)
 		m_vr->set_inversion(val);
 }
 
-bool VolumeData::GetInvert()
+bool VolumeData::GetInvert() const
 {
 	if (m_vr)
 		return m_vr->get_inversion();
@@ -1505,14 +1505,14 @@ void VolumeData::SetNR(bool val)
 		m_vr->SetNoiseRed(val);
 }
 
-bool VolumeData::GetNR()
+bool VolumeData::GetNR() const
 {
 	return m_noise_rd;
 }
 
 void VolumeData::ResetVolume()
 {
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(this);
+	auto cache_queue = glbin_data_manager.GetCacheQueue(shared_from_this());
 	if (cache_queue)
 		cache_queue->reset(m_time);
 	m_ep.reset();
@@ -1581,7 +1581,7 @@ void VolumeData::Calculate(int type,
 	{
 		if (type==6 || type==7)
 			m_vr->set_hi_thresh(vd_a->GetRightThresh());
-		m_vr->calculate(type, vd_a?vd_a->GetVR():0, vd_b?vd_b->GetVR():0);
+		m_vr->calculate(type, vd_a->GetVR(), vd_b->GetVR());
 		m_vr->return_volume();
 	}
 }
@@ -1617,7 +1617,7 @@ void VolumeData::SetGammaEnable(bool bval)
 		SetGamma(1.0, false);
 }
 
-bool VolumeData::GetGammaEnable()
+bool VolumeData::GetGammaEnable() const
 {
 	return m_gamma_enable;
 }
@@ -1630,12 +1630,12 @@ void VolumeData::SetGamma(double val, bool set_this)
 		m_vr->set_gamma3d(val);
 }
 
-double VolumeData::GetGamma()
+double VolumeData::GetGamma() const
 {
 	return m_gamma;
 }
 
-double VolumeData::GetMlGamma()
+double VolumeData::GetMlGamma() const
 {
 	GetMlParams();
 
@@ -1660,7 +1660,7 @@ void VolumeData::SetBoundaryEnable(bool bval)
 	}
 }
 
-bool VolumeData::GetBoundaryEnable()
+bool VolumeData::GetBoundaryEnable() const
 {
 	return m_boundary_enable;
 }
@@ -1673,12 +1673,12 @@ void VolumeData::SetBoundaryLow(double val, bool set_this)
 		m_vr->set_gm_low(val);
 }
 
-double VolumeData::GetBoundaryLow()
+double VolumeData::GetBoundaryLow() const
 {
 	return m_boundary_low;
 }
 
-double VolumeData::GetMlBoundaryLow()
+double VolumeData::GetMlBoundaryLow() const
 {
 	GetMlParams();
 
@@ -1696,12 +1696,12 @@ void VolumeData::SetBoundaryHigh(double val, bool set_this)
 		m_vr->set_gm_high(val);
 }
 
-double VolumeData::GetBoundaryHigh()
+double VolumeData::GetBoundaryHigh() const
 {
 	return m_boundary_high;
 }
 
-double VolumeData::GetMlBoundaryHigh()
+double VolumeData::GetMlBoundaryHigh() const
 {
 	return glbin_vol_def.m_boundary_high;
 }
@@ -1711,7 +1711,7 @@ void VolumeData::SetBoundaryMax(double val)
 	m_boundary_max = val;
 }
 
-double VolumeData::GetBoundaryMax()
+double VolumeData::GetBoundaryMax() const
 {
 	return m_boundary_max;
 }
@@ -1731,7 +1731,7 @@ void VolumeData::SetMinMaxEnable(bool bval)
 	}
 }
 
-bool VolumeData::GetMinMaxEnable()
+bool VolumeData::GetMinMaxEnable() const
 {
 	return m_minmax_enable;
 }
@@ -1744,12 +1744,12 @@ void VolumeData::SetLowOffset(double val, bool set_this)
 		m_vr->set_lo_offset(val);
 }
 
-double VolumeData::GetLowOffset()
+double VolumeData::GetLowOffset() const
 {
 	return m_lo_offset;
 }
 
-double VolumeData::GetMlLowOffset()
+double VolumeData::GetMlLowOffset() const
 {
 	GetMlParams();
 
@@ -1767,12 +1767,12 @@ void VolumeData::SetHighOffset(double val, bool set_this)
 		m_vr->set_hi_offset(val);
 }
 
-double VolumeData::GetHighOffset()
+double VolumeData::GetHighOffset() const
 {
 	return m_hi_offset;
 }
 
-double VolumeData::GetMlHighOffset()
+double VolumeData::GetMlHighOffset() const
 {
 	GetMlParams();
 
@@ -1797,7 +1797,7 @@ void VolumeData::SetThreshEnable(bool bval)
 	}
 }
 
-bool VolumeData::GetThreshEnable()
+bool VolumeData::GetThreshEnable() const
 {
 	return m_thresh_enable;
 }
@@ -1810,12 +1810,12 @@ void VolumeData::SetLeftThresh(double val, bool set_this)
 		m_vr->set_lo_thresh(val);
 }
 
-double VolumeData::GetLeftThresh()
+double VolumeData::GetLeftThresh() const
 {
 	return m_lo_thresh;
 }
 
-double VolumeData::GetMlLeftThresh()
+double VolumeData::GetMlLeftThresh() const
 {
 	GetMlParams();
 
@@ -1833,7 +1833,7 @@ void VolumeData::SetRightThresh(double val, bool set_this)
 		m_vr->set_hi_thresh(val);
 }
 
-double VolumeData::GetRightThresh()
+double VolumeData::GetRightThresh() const
 {
 	return m_hi_thresh;
 }
@@ -1845,12 +1845,12 @@ void VolumeData::SetSoftThreshold(double val)
 		m_vr->set_soft_thresh(val);
 }
 
-double VolumeData::GetSoftThreshold()
+double VolumeData::GetSoftThreshold() const
 {
 	return m_sw;
 }
 
-double VolumeData::GetMlRightThresh()
+double VolumeData::GetMlRightThresh() const
 {
 	GetMlParams();
 
@@ -1869,7 +1869,7 @@ void VolumeData::SetLuminanceEnable(bool bval)
 		SetLuminance(1.0, false);
 }
 
-bool VolumeData::GetLuminanceEnable()
+bool VolumeData::GetLuminanceEnable() const
 {
 	return m_luminance_enable;
 }
@@ -1882,12 +1882,12 @@ void VolumeData::SetLuminance(double val, bool set_this)
 		m_vr->set_luminance(m_luminance);
 }
 
-double VolumeData::GetLuminance()
+double VolumeData::GetLuminance() const
 {
 	return m_luminance;
 }
 
-double VolumeData::GetMlLuminance()
+double VolumeData::GetMlLuminance() const
 {
 	GetMlParams();
 
@@ -1910,7 +1910,7 @@ void VolumeData::SetAlphaEnable(bool bval)
 	}
 }
 
-bool VolumeData::GetAlphaEnable()
+bool VolumeData::GetAlphaEnable() const
 {
 	return m_alpha_enable;
 }
@@ -1923,12 +1923,12 @@ void VolumeData::SetAlpha(double val, bool set_this)
 		m_vr->set_alpha(val);
 }
 
-double VolumeData::GetAlpha()
+double VolumeData::GetAlpha() const
 {
 	return m_alpha;
 }
 
-double VolumeData::GetMlAlpha()
+double VolumeData::GetMlAlpha() const
 {
 	GetMlParams();
 
@@ -1946,7 +1946,7 @@ void VolumeData::SetShadingEnable(bool bVal)
 		m_vr->set_shading(bVal);
 }
 
-bool VolumeData::GetShadingEnable()
+bool VolumeData::GetShadingEnable() const
 {
 	return m_shading_enable;
 }
@@ -1958,12 +1958,12 @@ void VolumeData::SetShadingStrength(double val)
 		m_vr->set_shading_strength(val);
 }
 
-double VolumeData::GetShadingStrength()
+double VolumeData::GetShadingStrength() const
 {
 	return m_shading_strength;
 }
 
-double VolumeData::GetMlShadingStrength()
+double VolumeData::GetMlShadingStrength() const
 {
 	GetMlParams();
 
@@ -1980,12 +1980,12 @@ void VolumeData::SetShadingShine(double val)
 		m_vr->set_shading_shine(val);
 }
 
-double VolumeData::GetShadingShine()
+double VolumeData::GetShadingShine() const
 {
 	return m_shading_shine;
 }
 
-double VolumeData::GetMlShadingShine()
+double VolumeData::GetMlShadingShine() const
 {
 	GetMlParams();
 
@@ -2003,7 +2003,7 @@ void VolumeData::SetShadowEnable(bool bVal)
 		m_vr->set_depth(bVal);
 }
 
-bool VolumeData::GetShadowEnable()
+bool VolumeData::GetShadowEnable() const
 {
 	return m_shadow_enable;
 }
@@ -2013,12 +2013,12 @@ void VolumeData::SetShadowIntensity(double val)
 	m_shadow_intensity = val;
 }
 
-double VolumeData::GetShadowIntensity()
+double VolumeData::GetShadowIntensity() const
 {
 	return m_shadow_intensity;
 }
 
-double VolumeData::GetMlShadowIntensity()
+double VolumeData::GetMlShadowIntensity() const
 {
 	GetMlParams();
 
@@ -2038,7 +2038,7 @@ void VolumeData::SetSampleRateEnable(bool bval)
 		SetSampleRate(2.0, false);
 }
 
-bool VolumeData::GetSampleRateEnable()
+bool VolumeData::GetSampleRateEnable() const
 {
 	return m_sample_rate_enable;
 }
@@ -2051,12 +2051,12 @@ void VolumeData::SetSampleRate(double val, bool set_this)
 		m_vr->set_sample_rate(val);
 }
 
-double VolumeData::GetSampleRate()
+double VolumeData::GetSampleRate() const
 {
 	return m_sample_rate;
 }
 
-double VolumeData::GetMlSampleRate()
+double VolumeData::GetMlSampleRate() const
 {
 	GetMlParams();
 
@@ -2074,7 +2074,7 @@ void VolumeData::SetColor(const fluo::Color &color, bool set_this)
 		m_vr->set_color(color);
 }
 
-fluo::Color VolumeData::GetColor()
+fluo::Color VolumeData::GetColor() const
 {
 	return m_color;
 }
@@ -2084,7 +2084,7 @@ void VolumeData::SetWlColor(bool bval)
 	m_wl_color = bval;
 }
 
-bool VolumeData::GetWlColor()
+bool VolumeData::GetWlColor() const
 {
 	return m_wl_color;
 }
@@ -2095,7 +2095,7 @@ void VolumeData::SetMaskColor(const fluo::Color &color, bool set)
 		m_vr->set_mask_color(color, set);
 }
 
-fluo::Color VolumeData::GetMaskColor()
+fluo::Color VolumeData::GetMaskColor() const
 {
 	fluo::Color result;
 	if (m_vr)
@@ -2103,7 +2103,7 @@ fluo::Color VolumeData::GetMaskColor()
 	return result;
 }
 
-bool VolumeData::GetMaskColorSet()
+bool VolumeData::GetMaskColorSet() const
 {
 	if (m_vr)
 		return m_vr->get_mask_color_set();
@@ -2137,7 +2137,7 @@ void VolumeData::SetColormapDisp(bool disp)
 	m_colormap_disp = disp;
 }
 
-bool VolumeData::GetColormapDisp()
+bool VolumeData::GetColormapDisp() const
 {
 	return m_colormap_disp;
 }
@@ -2167,40 +2167,40 @@ void VolumeData::SetColormapHigh(double val)
 			m_colormap_low_value, m_colormap_hi_value);
 }
 
-void VolumeData::GetColormapRange(double& v1, double& v2)
+void VolumeData::GetColormapRange(double& v1, double& v2) const
 {
 	v1 = m_colormap_min_value;
 	v2 = m_colormap_max_value;
 }
 
-double VolumeData::GetColormapMin()
+double VolumeData::GetColormapMin() const
 {
 	return m_colormap_min_value;
 }
 
-double VolumeData::GetColormapMax()
+double VolumeData::GetColormapMax() const
 {
 	return m_colormap_max_value;
 }
 
-void VolumeData::GetColormapValues(double &low, double &high)
+void VolumeData::GetColormapValues(double &low, double &high) const
 {
 	low = m_colormap_low_value;
 	high = m_colormap_hi_value;
 }
 
-void VolumeData::GetColormapDispValues(double& low, double& high)
+void VolumeData::GetColormapDispValues(double& low, double& high) const
 {
 	low = m_colormap_low_value * (m_colormap_max_value - m_colormap_min_value) + m_colormap_min_value;
 	high = m_colormap_hi_value * (m_colormap_max_value - m_colormap_min_value) + m_colormap_min_value;
 }
 
-double VolumeData::GetColormapLow()
+double VolumeData::GetColormapLow() const
 {
 	return m_colormap_low_value;
 }
 
-double VolumeData::GetMlColormapLow()
+double VolumeData::GetMlColormapLow() const
 {
 	GetMlParams();
 
@@ -2210,12 +2210,12 @@ double VolumeData::GetMlColormapLow()
 		return glbin_vol_def.m_colormap_low_value;
 }
 
-double VolumeData::GetColormapHigh()
+double VolumeData::GetColormapHigh() const
 {
 	return m_colormap_hi_value;
 }
 
-double VolumeData::GetMlColormapHigh()
+double VolumeData::GetMlColormapHigh() const
 {
 	GetMlParams();
 
@@ -2232,7 +2232,7 @@ void VolumeData::SetColormapInv(double val)
 		m_vr->set_colormap_inv(val);
 }
 
-double VolumeData::GetColormapInv()
+double VolumeData::GetColormapInv() const
 {
 	return m_colormap_inv;
 }
@@ -2257,17 +2257,17 @@ void VolumeData::SetColormapProj(flvr::ColormapProj value)
 	UpdateColormapRange();
 }
 
-int VolumeData::GetColormap()
+int VolumeData::GetColormap() const
 {
 	return m_colormap;
 }
 
-flvr::ColormapProj VolumeData::GetColormapProj()
+flvr::ColormapProj VolumeData::GetColormapProj() const
 {
 	return m_colormap_proj;
 }
 
-fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
+fluo::Color VolumeData::GetColorFromColormap(double value, bool raw) const
 {
 	fluo::Color rb;
 	double v = value;
@@ -2335,7 +2335,7 @@ fluo::Color VolumeData::GetColorFromColormap(double value, bool raw)
 	return rb;
 }
 
-bool VolumeData::GetColormapData(std::vector<unsigned char>& data)
+bool VolumeData::GetColormapData(std::vector<unsigned char>& data) const
 {
 	data.resize(32 * 3, 0);
 	for (int i = 0; i < 32; ++i)
@@ -2362,7 +2362,7 @@ void VolumeData::SetRadialCenter(const fluo::Point& p)
 		m_vr->set_radial_center(p);
 }
 
-fluo::Point VolumeData::GetRadialCenter()
+fluo::Point VolumeData::GetRadialCenter() const
 {
 	return m_radial_center;
 }
@@ -2374,7 +2374,7 @@ void VolumeData::SetRadialRadius(double r)
 		m_vr->set_radial_radius(r);
 }
 
-double VolumeData::GetRadialRadius()
+double VolumeData::GetRadialRadius() const
 {
 	return m_radial_radius;
 }
@@ -2387,7 +2387,7 @@ void VolumeData::SetLinearPlanes(const fluo::Plane& p0, const fluo::Plane& p1)
 		m_vr->set_linear_planes(p0, p1);
 }
 
-std::pair<fluo::Plane, fluo::Plane> VolumeData::GetLinearPlanes()
+std::pair<fluo::Plane, fluo::Plane> VolumeData::GetLinearPlanes() const
 {
 	return { m_linear_p0, m_linear_p1 };
 }
@@ -2408,7 +2408,7 @@ void VolumeData::ComputeHistogram(bool set_prog_func)
 	if (m_hist_dirty)
 	{
 		int bins = 128;
-		flrd::Histogram histogram(this);
+		flrd::Histogram histogram(shared_from_this());
 		if (set_prog_func)
 			histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(false);
@@ -2506,7 +2506,7 @@ void VolumeData::SetShuffle(int val)
 		m_vr->set_shuffle(val);
 }
 
-int VolumeData::GetShuffle()
+int VolumeData::GetShuffle() const
 {
 	if (m_vr)
 		return m_vr->get_shuffle();
@@ -2525,7 +2525,7 @@ void VolumeData::IncShuffle()
 }
 
 //resolution  scaling and spacing
-fluo::Vector VolumeData::GetResolution(int lv)
+fluo::Vector VolumeData::GetResolution(int lv) const
 {
 	if (lv >= 0 && isBrxml() && m_tex)
 	{
@@ -2542,7 +2542,7 @@ void VolumeData::SetScaling(const fluo::Vector& scaling)
 	m_scaling = scaling;
 }
 
-fluo::Vector VolumeData::GetScaling()
+fluo::Vector VolumeData::GetScaling() const
 {
 	return m_scaling;
 }
@@ -2556,7 +2556,7 @@ void VolumeData::SetSpacing(const fluo::Vector& spacing)
 	m_clipping_box.UpdateBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 }
 
-fluo::Vector VolumeData::GetSpacing(int lv)
+fluo::Vector VolumeData::GetSpacing(int lv) const
 {
 	return m_tex->get_spacing(lv);
 }
@@ -2567,7 +2567,7 @@ void VolumeData::SetBaseSpacing(const fluo::Vector& spacing)
 	SetSpacing(spacing);
 }
 
-fluo::Vector VolumeData::GetBaseSpacing()
+fluo::Vector VolumeData::GetBaseSpacing() const
 {
 	return GetSpacing();
 }
@@ -2583,7 +2583,7 @@ void VolumeData::SetSpacingScale(const fluo::Vector& scaling)
 	}
 }
 
-fluo::Vector VolumeData::GetSpacingScale()
+fluo::Vector VolumeData::GetSpacingScale() const
 {
 	return m_tex->get_spacing_scale();
 }
@@ -2598,7 +2598,7 @@ void VolumeData::SetLevel(int lv)
 	}
 }
 
-int VolumeData::GetLevel()
+int VolumeData::GetLevel() const
 {
 	if (m_tex && isBrxml())
 		return m_tex->GetCurLevel();
@@ -2606,7 +2606,7 @@ int VolumeData::GetLevel()
 		return -1;
 }
 
-int VolumeData::GetLevelNum()
+int VolumeData::GetLevelNum() const
 {
 	if (m_tex && isBrxml())
 		return m_tex->GetLevelNum();
@@ -2615,7 +2615,7 @@ int VolumeData::GetLevelNum()
 }
 
 //bits
-int VolumeData::GetBits()
+int VolumeData::GetBits() const
 {
 	if (!m_tex)
 		return 0;
@@ -2632,7 +2632,7 @@ void VolumeData::SetDisp(bool disp)
 	m_tex->set_sort_bricks();
 }
 
-bool VolumeData::GetDisp()
+bool VolumeData::GetDisp() const
 {
 	return m_disp;
 }
@@ -2649,7 +2649,7 @@ void VolumeData::SetDrawBounds(bool draw)
 	m_draw_bounds = draw;
 }
 
-bool VolumeData::GetDrawBounds()
+bool VolumeData::GetDrawBounds() const
 {
 	return m_draw_bounds;
 }
@@ -2675,7 +2675,7 @@ void VolumeData::SetTransparent(bool val)
 		SetAlphaPower(1);
 }
 
-bool VolumeData::GetTransparent()
+bool VolumeData::GetTransparent() const
 {
 	return m_transparent;
 }
@@ -2803,7 +2803,7 @@ void VolumeData::SetLegend(bool val)
 	m_legend = val;
 }
 
-bool VolumeData::GetLegend()
+bool VolumeData::GetLegend() const
 {
 	return m_legend;
 }
@@ -2816,7 +2816,7 @@ void VolumeData::SetInterpolate(bool val)
 	m_interpolate = val;
 }
 
-bool VolumeData::GetInterpolate()
+bool VolumeData::GetInterpolate() const
 {
 	return m_interpolate;
 }
@@ -2828,14 +2828,14 @@ void VolumeData::SetFog(bool use_fog,
 		m_vr->set_fog(use_fog, fog_intensity, fog_start, fog_end);
 }
 
-int VolumeData::GetAllBrickNum()
+int VolumeData::GetAllBrickNum() const
 {
 	if (!m_tex)
 		return 0;
 	return m_tex->get_brick_list_size();
 }
 
-bool VolumeData::isBrxml()
+bool VolumeData::isBrxml() const
 {
 	if (!m_tex) return false;
 
@@ -2886,20 +2886,19 @@ void VolumeData::LoadLabelFromSave()
 	m_vr->clear_tex_current();
 }
 
-void VolumeData::GetMlParams()
+void VolumeData::GetMlParams() const
 {
 	if (!m_ep || !m_ep->getValid())
 	{
-		flrd::Histogram histogram(this);
+		flrd::Histogram histogram(shared_from_this());
 		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(false);
-		flrd::EntryHist* eh = histogram.GetEntryHist();
+		auto eh = histogram.GetEntryHist();
 		if (!eh)
 			return;
 		//get entry from table
 		flrd::TableHistParams& table = glbin.get_vp_table();
-		m_ep = std::make_unique<flrd::EntryParams>(*table.infer(eh));
-		delete eh;
+		m_ep = table.infer(eh);
 		flrd::Reshape::clear();
 	}
 }

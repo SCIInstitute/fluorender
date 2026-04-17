@@ -143,63 +143,56 @@ void ViewDefault::Save()
 	f->Write("rot slider", m_rot_slider);
 }
 
-void ViewDefault::Set(RenderView* view)
+void ViewDefault::Set(const RenderView& view)
 {
-	if (!view)
-		return;
-
-	m_channel_mix_mode = view->GetChannelMixMode();
-	m_bg_color = view->GetBackgroundColor();
-	m_draw_camctr = view->m_draw_camctr;
-	m_camctr_size = view->m_camctr_size;
-	m_draw_info = view->m_draw_info;
-	m_draw_legend = view->m_draw_legend;
-	m_colormap_disp = view->m_colormap_disp;
-	m_mouse_focus = view->m_mouse_focus;
-	m_scalebar_disp = view->m_scalebar_disp;
-	m_scalebar_len = view->m_sb_length;
-	m_scalebar_text = view->m_sb_text;
-	m_scalebar_num = view->m_sb_num;
-	m_scalebar_unit = view->m_sb_unit;
-	m_persp = view->GetPersp();
-	m_aov = view->GetAov();
-	m_cam_mode = view->GetCamMode();
-	m_center = view->GetCenters();
-	m_rot_lock = view->GetRotLock();
-	m_pin_rot_center = view->m_pin_rot_ctr;
-	m_scale_mode = view->m_scale_mode;
-	m_scale_factor = view->m_scale_factor;
-	m_use_fog = view->GetFog();
-	m_fog_intensity = view->GetFogIntensity();
+	m_bg_color = view.GetBackgroundColor();
+	m_draw_camctr = view.m_draw_camctr;
+	m_camctr_size = view.m_camctr_size;
+	m_draw_info = view.m_draw_info;
+	m_draw_legend = view.m_draw_legend;
+	m_colormap_disp = view.m_colormap_disp;
+	m_mouse_focus = view.m_mouse_focus;
+	m_scalebar_disp = view.m_scalebar_disp;
+	m_scalebar_len = view.m_sb_length;
+	m_scalebar_text = view.m_sb_text;
+	m_scalebar_num = view.m_sb_num;
+	m_scalebar_unit = view.m_sb_unit;
+	m_persp = view.GetPersp();
+	m_aov = view.GetAov();
+	m_cam_mode = view.GetCamMode();
+	m_center = view.GetCenters();
+	m_rot_lock = view.GetRotLock();
+	m_pin_rot_center = view.m_pin_rot_ctr;
+	m_scale_mode = view.m_scale_mode;
+	m_scale_factor = view.m_scale_factor;
+	m_use_fog = view.GetFog();
+	m_fog_intensity = view.GetFogIntensity();
 }
 
-void ViewDefault::Apply(RenderView* view)
+void ViewDefault::Apply(RenderView& view) const
 {
-	if (!view)
-		return;
-
-	view->SetChannelMixMode(m_channel_mix_mode);
-	view->SetBackgroundColor(m_bg_color);
-	view->m_draw_camctr = m_draw_camctr;
-	view->m_camctr_size = m_camctr_size;
-	view->m_draw_info = m_draw_info;
-	view->m_draw_legend = m_draw_legend;
-	view->m_colormap_disp = m_colormap_disp;
-	view->m_scalebar_disp = m_scalebar_disp;
-	view->m_sb_length = m_scalebar_len;
-	view->m_sb_text = m_scalebar_text;
-	view->m_sb_num = m_scalebar_num;
-	view->m_sb_unit = m_scalebar_unit;
-	view->m_mouse_focus = m_mouse_focus;
-	view->SetPersp(m_persp);
-	view->SetAov(m_aov);
-	view->SetCamMode(m_cam_mode);
-	view->SetCenters(m_center);
-	view->SetRotLock(m_rot_lock);
-	view->SetPinRotCenter(m_pin_rot_center, false);
-	view->m_scale_mode = m_scale_mode;
-	view->m_scale_factor = m_scale_factor;
-	view->SetFog(m_use_fog);
-	view->SetFogIntensity(m_fog_intensity);
+	view.SetChannelMixMode(m_channel_mix_mode);
+	view.SetBackgroundColor(m_bg_color);
+	view.m_draw_camctr = m_draw_camctr;
+	view.m_camctr_size = m_camctr_size;
+	view.m_draw_info = m_draw_info;
+	view.m_draw_legend = m_draw_legend;
+	view.m_colormap_disp = m_colormap_disp;
+	view.m_scalebar_disp = m_scalebar_disp;
+	view.m_sb_length = m_scalebar_len;
+	view.m_sb_text = m_scalebar_text;
+	view.m_sb_num = m_scalebar_num;
+	view.m_sb_unit = m_scalebar_unit;
+	view.m_mouse_focus = m_mouse_focus;
+	view.SetPersp(m_persp);
+	view.SetAov(m_aov);
+	view.SetCamMode(m_cam_mode);
+	view.SetCenters(m_center);
+	view.SetRotLock(m_rot_lock);
+	view.SetPinRotCenter(m_pin_rot_center, false);
+	view.m_scale_mode = m_scale_mode;
+	view.m_scale_factor = m_scale_factor;
+	view.SetFog(m_use_fog);
+	view.SetFogIntensity(m_fog_intensity);
 }
 

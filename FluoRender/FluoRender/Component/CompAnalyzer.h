@@ -73,53 +73,53 @@ namespace flrd
 		ComponentAnalyzer();
 		~ComponentAnalyzer();
 
-		bool GetAnalyzed()
+		bool GetAnalyzed() const
 		{ return m_analyzed; }
 
 		void SetUseSel(bool val) { m_use_sel = val; }
-		bool GetUseSel() { return m_use_sel; }
-		unsigned int GetSizeLimit() { return m_slimit; }
+		bool GetUseSel() const { return m_use_sel; }
+		unsigned int GetSizeLimit() const { return m_slimit; }
 		void SetSizeLimit(unsigned int size) { m_slimit = size; }
 		void SetColocal(bool val) { m_colocal = val; }
-		bool GetColocal() { return m_colocal; }
+		bool GetColocal() const { return m_colocal; }
 		void SetConsistent(bool val) { m_consistent = val; }
-		bool GetConsistent() { return m_consistent; }
+		bool GetConsistent() const { return m_consistent; }
 		void SetColorType(int val) { m_color_type = val; }
-		int GetColorType() { return m_color_type; }
+		int GetColorType() const { return m_color_type; }
 		void SetChannelType(int val) { m_channel_type = val; }
-		int GetChannelType() { return m_channel_type; }
+		int GetChannelType() const { return m_channel_type; }
 		void SetAnnotType(int val) { m_annot_type = val; }
-		int GetAnnotType() { return m_annot_type; }
+		int GetAnnotType() const { return m_annot_type; }
 		void SetUseDistNeighbor(bool val) { m_use_dist_neighbor = val; }
-		bool GetUseDistNeighbor() { return m_use_dist_neighbor; }
+		bool GetUseDistNeighbor() const { return m_use_dist_neighbor; }
 		void SetDistNeighborNum(int val) { m_dist_neighbor_num = val; }
-		int GetDistNeighborNum() { return m_dist_neighbor_num; }
+		int GetDistNeighborNum() const { return m_dist_neighbor_num; }
 		void SetUseDistAllchan(bool val) { m_use_dist_allchan = val; }
-		bool GetUseDistAllchan() { return m_use_dist_allchan; }
+		bool GetUseDistAllchan() const { return m_use_dist_allchan; }
 
 		void SetVolume(const std::shared_ptr<VolumeData>& vd);
-		std::shared_ptr<VolumeData> GetVolume();
+		std::shared_ptr<VolumeData> GetVolume() const;
 
 		void SetCoVolumes(const std::vector<std::weak_ptr<VolumeData>>& list);
 		void AddCoVolume(const std::shared_ptr<VolumeData>& vd);
 		void ClearCoVolumes();
-		std::optional<std::reference_wrapper<CelpList>> GetCelpList();
-		std::optional<std::reference_wrapper<CellGraph>> GetCellGraph();
-		int GetCompGroupSize();
-		std::optional<std::reference_wrapper <CompGroup>> GetCompGroup(int i);
-		int GetBrickNum();
+		std::optional<std::reference_wrapper<CelpList>> GetCelpList() const;
+		std::optional<std::reference_wrapper<CellGraph>> GetCellGraph() const;
+		int GetCompGroupSize() const;
+		std::optional<std::reference_wrapper <const CompGroup>> GetCompGroup(int i) const;
+		int GetBrickNum() const;
 		//count
 		void SetUseMin(bool val) { m_use_min = val; }
 		void SetUseMax(bool val) { m_use_max = val; }
-		bool GetUseMin() { return m_use_min; }
-		bool GetUseMax() { return m_use_max; }
+		bool GetUseMin() const { return m_use_min; }
+		bool GetUseMax() const { return m_use_max; }
 		void SetMinNum(unsigned int num) { m_min_num = num; }
 		void SetMaxNum(unsigned int num) { m_max_num = num; }
-		int GetMinNum() { return m_min_num; }
-		int GetMaxNum() { return m_max_num; }
-		size_t GetCount() { return m_count; }
-		size_t GetVox() { return m_vox; }
-		double GetSize() { return m_size; }
+		int GetMinNum() const { return m_min_num; }
+		int GetMaxNum() const { return m_max_num; }
+		size_t GetCount() const { return m_count; }
+		size_t GetVox() const { return m_vox; }
+		double GetSize() const { return m_size; }
 
 		void Analyze();
 		void MatchBricks(bool sel);
@@ -128,9 +128,9 @@ namespace flrd
 		void Count();
 		void ClearCompGroup();
 
-		size_t GetCompSize();
-		size_t GetListSize();
-		void GetCompsPoint(fluo::Point& p, std::set<unsigned long long> &ids);
+		size_t GetCompSize() const;
+		size_t GetListSize() const;
+		void GetCompsPoint(fluo::Point& p, std::set<unsigned long long> &ids) const;
 
 		void OutputFormHeader(std::string &str);
 		//print out results
@@ -146,17 +146,17 @@ namespace flrd
 
 		//distance
 		void OutputDistance(std::ostream &stream);
-		size_t GetDistMatSize();
+		size_t GetDistMatSize() const;
 
 		//align
-		bool GetRulerListFromCelp(RulerList& list);
+		bool GetRulerListFromCelp(RulerList& list) const;
 
 		//list
 		void SetSelectedIds(const std::vector<unsigned int>& ids,
 			const std::vector<unsigned int>& bids);
-		bool GetSelectedCelp(CelpList& cl, bool links = false);
-		bool GetAllCelp(CelpList& cl, bool links = false);
-		bool GetCelpFromIds(CelpList& cl, const std::vector<unsigned long long>& ids, bool links = false);
+		bool GetSelectedCelp(CelpList& cl, bool links = false) const;
+		bool GetAllCelp(CelpList& cl, bool links = false) const;
+		bool GetCelpFromIds(CelpList& cl, const std::vector<unsigned long long>& ids, bool links = false) const;
 
 		//update progress
 		CompAnalyzerFunc m_sig_progress;
@@ -201,16 +201,16 @@ namespace flrd
 			unsigned long long index,
 			unsigned int id,
 			const fluo::Vector& size,
-			const fluo::Point& p);
+			const fluo::Point& p) const;
 
 		bool GetColor(unsigned int id,
 			int brick_id,
 			const std::shared_ptr<VolumeData>& vd,
-			fluo::Color &color);
+			fluo::Color &color) const;
 		int GetColocalization(size_t bid,
 			const fluo::Point& p,
 			std::vector<unsigned int> &sumi,
-			std::vector<double> &sumd);
+			std::vector<double> &sumd) const;
 
 		//replace id to make color consistent
 		void ReplaceId(unsigned int base_id, Celp &info);
@@ -218,7 +218,7 @@ namespace flrd
 		unsigned int GetNonconflictId(unsigned int id,
 			const fluo::Vector& size,
 			const std::shared_ptr<flvr::TextureBrick>& b,
-			unsigned int* data);
+			unsigned int* data) const;
 
 		//comp groups
 		CompGroup* FindCompGroup(const std::shared_ptr<VolumeData>& vd);
@@ -226,7 +226,7 @@ namespace flrd
 
 		//get list
 		void FindCelps(CelpList& list,
-			CelpListIter& it, bool links = false);
+			CelpListIter& it, bool links = false) const;
 	};
 
 }

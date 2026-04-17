@@ -158,69 +158,63 @@ void MovieDefault::Save()
 	f->Write("cam lock type", m_cam_lock_type);
 }
 
-void MovieDefault::Set(MovieMaker* mm)
+void MovieDefault::Set(const MovieMaker& mm)
 {
-	if (!mm)
-		return;
+	m_keyframe_enable = mm.GetKeyframeEnable();
+	m_rotate = mm.GetRotateEnable();
+	m_rot_axis = mm.GetRotateAxis();
+	m_rot_deg = mm.GetRotateDeg();
+	m_interpolation = mm.GetInterpolation();
+	m_seq_mode = mm.GetSeqMode();
 
-	m_keyframe_enable = mm->GetKeyframeEnable();
-	m_rotate = mm->GetRotateEnable();
-	m_rot_axis = mm->GetRotateAxis();
-	m_rot_deg = mm->GetRotateDeg();
-	m_interpolation = mm->GetInterpolation();
-	m_seq_mode = mm->GetSeqMode();
+	m_full_frame_num = mm.GetFullFrameNum();
+	m_movie_len = mm.GetMovieLength();
+	m_fps = mm.GetFps();
+	m_clip_start_frame = mm.GetClipStartFrame();
+	m_clip_end_frame = mm.GetClipEndFrame();
+	m_cur_frame = mm.GetCurrentFrame();
+	m_cur_time = mm.GetCurrentTime();
 
-	m_full_frame_num = mm->GetFullFrameNum();
-	m_movie_len = mm->GetMovieLength();
-	m_fps = mm->GetFps();
-	m_clip_start_frame = mm->GetClipStartFrame();
-	m_clip_end_frame = mm->GetClipEndFrame();
-	m_cur_frame = mm->GetCurrentFrame();
-	m_cur_time = mm->GetCurrentTime();
+	m_crop = mm.GetCropEnable();
+	m_crop_x = mm.GetCropX();
+	m_crop_y = mm.GetCropY();
+	m_crop_w = mm.GetCropW();
+	m_crop_h = mm.GetCropH();
+	m_sb_pos = mm.GetScalebarPos();
+	m_sb_x = mm.GetScalebarX();
+	m_sb_y = mm.GetScalebarY();
 
-	m_crop = mm->GetCropEnable();
-	m_crop_x = mm->GetCropX();
-	m_crop_y = mm->GetCropY();
-	m_crop_w = mm->GetCropW();
-	m_crop_h = mm->GetCropH();
-	m_sb_pos = mm->GetScalebarPos();
-	m_sb_x = mm->GetScalebarX();
-	m_sb_y = mm->GetScalebarY();
-
-	m_key_duration = mm->GetKeyDuration();
-	m_cam_lock = mm->GetCamLock();
-	m_cam_lock_type = mm->GetCamLockType();
+	m_key_duration = mm.GetKeyDuration();
+	m_cam_lock = mm.GetCamLock();
+	m_cam_lock_type = mm.GetCamLockType();
 }
 
-void MovieDefault::Apply(MovieMaker* mm)
+void MovieDefault::Apply(MovieMaker& mm) const
 {
-	if (!mm)
-		return;
+	mm.SetKeyframeEnable(m_keyframe_enable, true);
+	mm.SetRotateEnable(m_rotate);
+	mm.SetRotateAxis(m_rot_axis);
+	mm.SetRotateDeg(m_rot_deg);
+	mm.SetInterpolation(m_interpolation);
+	//mm.SetSeqMode(m_seq_mode);
 
-	mm->SetKeyframeEnable(m_keyframe_enable, true);
-	mm->SetRotateEnable(m_rotate);
-	mm->SetRotateAxis(m_rot_axis);
-	mm->SetRotateDeg(m_rot_deg);
-	mm->SetInterpolation(m_interpolation);
-	//mm->SetSeqMode(m_seq_mode);
+	//mm.SetFullFrameNum(m_full_frame_num);
+	//mm.SetMovieLength(m_movie_len);
+	mm.SetFps(m_fps);
+	//mm.SetClipStartEndFrames(m_clip_start_frame, m_clip_end_frame);
+	//mm.SetCurrentFrame(m_cur_frame);
+	//mm.SetCurrentTime(m_cur_time);
 
-	//mm->SetFullFrameNum(m_full_frame_num);
-	//mm->SetMovieLength(m_movie_len);
-	mm->SetFps(m_fps);
-	//mm->SetClipStartEndFrames(m_clip_start_frame, m_clip_end_frame);
-	//mm->SetCurrentFrame(m_cur_frame);
-	//mm->SetCurrentTime(m_cur_time);
+	mm.SetCropEnable(m_crop);
+	mm.SetCropX(m_crop_x);
+	mm.SetCropY(m_crop_y);
+	mm.SetCropW(m_crop_w);
+	mm.SetCropH(m_crop_h);
+	mm.SetScalebarPos(m_sb_pos);
+	mm.SetScalebarDist(m_sb_x, m_sb_y);
 
-	mm->SetCropEnable(m_crop);
-	mm->SetCropX(m_crop_x);
-	mm->SetCropY(m_crop_y);
-	mm->SetCropW(m_crop_w);
-	mm->SetCropH(m_crop_h);
-	mm->SetScalebarPos(m_sb_pos);
-	mm->SetScalebarDist(m_sb_x, m_sb_y);
-
-	mm->SetKeyDuration(m_key_duration);
-	mm->SetCamLock(m_cam_lock);
-	mm->SetCamLockType(m_cam_lock_type);
+	mm.SetKeyDuration(m_key_duration);
+	mm.SetCamLock(m_cam_lock);
+	mm.SetCamLockType(m_cam_lock_type);
 }
 

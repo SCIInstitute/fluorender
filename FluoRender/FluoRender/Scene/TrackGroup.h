@@ -72,38 +72,38 @@ public:
 
 	std::wstring GetPath() const {return m_data_path;}
 	void SetCurTime(int time);
-	int GetCurTime();
+	int GetCurTime() const;
 	void SetPrvTime(int time);
-	int GetPrvTime();
+	int GetPrvTime() const;
 	//ghost num
 	void SetGhostNum(int num);
-	int GetGhostNum() {return m_ghost_num;}
+	int GetGhostNum() const {return m_ghost_num;}
 	void SetDrawTail(bool draw);
-	bool GetDrawTail() {return m_draw_tail;}
+	bool GetDrawTail() const {return m_draw_tail;}
 	void SetDrawLead(bool draw);
-	bool GetDrawLead() {return m_draw_lead;}
+	bool GetDrawLead() const {return m_draw_lead;}
 	//cells size filter
 	void SetCellSize(int size) {m_cell_size = size;}
-	int GetSizeSize() {return m_cell_size;}
+	int GetCellSize() const {return m_cell_size;}
 	//uncertainty filter
 	void SetUncertainLow(int value) { m_uncertain_low = value; }
-	int GetUncertainLow() { return m_uncertain_low; }
+	int GetUncertainLow() const { return m_uncertain_low; }
 
 	//get information
 	void GetLinkLists(size_t frame,
 		flrd::VertexList &in_orphan_list,
 		flrd::VertexList &out_orphan_list,
 		flrd::VertexList &in_multi_list,
-		flrd::VertexList &out_multi_list);
+		flrd::VertexList &out_multi_list) const;
 
 	//for selective drawing
 	void ClearCellList();
 	void UpdateCellList(flrd::CelpList &cur_sel_list);
-	flrd::CelpList &GetCellList();
-	bool FindCell(unsigned int id);
+	flrd::CelpList &GetCellList() const;
+	bool FindCell(unsigned int id) const;
 
 	//rulers
-	bool GetMappedRulers(flrd::RulerList &rulers);
+	bool GetMappedRulers(flrd::RulerList &rulers) const;
 
 	//i/o
 	void Clear();

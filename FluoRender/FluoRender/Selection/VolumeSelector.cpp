@@ -101,7 +101,7 @@ VolumeSelector::~VolumeSelector()
 {
 }
 
-bool VolumeSelector::GetAutoPaintSize()
+bool VolumeSelector::GetAutoPaintSize() const
 {
 	if (!m_vd)
 		return false;
@@ -138,17 +138,17 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 		m_vd)
 	{
 		//histogram
-		flrd::Histogram histogram(m_vd.get());
+		flrd::Histogram histogram(m_vd);
 		histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
 		histogram.SetUseMask(true);
-		flrd::EntryHist* eh = histogram.GetEntryHist();
+		auto eh = histogram.GetEntryHist();
 
 		if (eh)
 		{
 			//record
-			flrd::RecordHistParams* rec = new flrd::RecordHistParams();
+			auto rec = std::make_shared<flrd::RecordHistParams>();
 			rec->setInput(eh);
-			flrd::EntryParams* ep = new flrd::EntryParams(glbin.get_cg_entry());
+			auto ep = std::make_shared<flrd::EntryParams>(glbin.get_cg_entry());
 			rec->setOutput(ep);
 
 			//table
@@ -183,9 +183,9 @@ void VolumeSelector::Segment(bool push_mask, bool est_th, int mx, int my)
 	if (m_mode == SelectMode::Mesh)
 	{
 		//generate mesh
-		glbin_conv_vol_mesh->SetVolumeData(m_vd);
-		glbin_conv_vol_mesh->SetUseMask(true);
-		glbin_conv_vol_mesh->Update(true);
+		glbin_conv_vol_mesh.SetVolumeData(m_vd);
+		glbin_conv_vol_mesh.SetUseMask(true);
+		glbin_conv_vol_mesh.Update(true);
 	}
 }
 
@@ -214,10 +214,10 @@ void VolumeSelector::segment(bool push_mask, bool est_th, int mx, int my)
 	if (m_mode == SelectMode::Grow)
 	{
 		GLint mp[2] = { mx, my };
-		m_vd->GetVR()->set_mouse_position(mp);
+		m_vd->GetVR().set_mouse_position(mp);
 		valid_mvec = GetMouseVec(mx, my, mvec);
 	}
-	m_vd->GetVR()->set_mouse_vec(mvec);
+	m_vd->GetVR().set_mouse_vec(mvec);
 
 	auto paint_buffer = glbin_framebuffer_manager.framebuffer(gstRBPaintBrush);
 	if (paint_buffer)//paint buffer can be empty for grow tool
@@ -421,7 +421,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 			m_iter = m_iter_num * (radius / 200.0 > 1.0 ? radius / 200.0 : 1.0);
 			int div = 3;
 			int order;
-			flrd::MaskBorder mb(m_vd.get());
+			flrd::MaskBorder mb(m_vd);
 			for (int i = 0; i < m_iter; i++)
 			{
 				order = m_update_order ? (i % div) : 0;
@@ -440,9 +440,8 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		}
 	}
 
-	if (flvr::Texture::mask_undo_num_ > 0 &&
-		m_vd->GetVR())
-		m_vd->GetVR()->return_mask();
+	if (flvr::Texture::mask_undo_num_ > 0)
+		m_vd->GetVR().return_mask();
 
 	if (m_mode == SelectMode::Clear)
 	{
@@ -525,7 +524,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		return;
 
 	if (select)
-		m_vd->GetVR()->return_mask();
+		m_vd->GetVR().return_mask();
 
 	//get all the data from original volume
 	auto raw_data = m_vd->GetVolume(false);
@@ -675,9 +674,9 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		break;
 	}
 
-	glbin_vol_def.Copy(vd_r.get(), m_vd.get());
-	glbin_vol_def.Copy(vd_g.get(), m_vd.get());
-	glbin_vol_def.Copy(vd_b.get(), m_vd.get());
+	glbin_vol_def.Copy(*vd_r, *m_vd);
+	glbin_vol_def.Copy(*vd_g, *m_vd);
+	glbin_vol_def.Copy(*vd_b, *m_vd);
 
 	fluo::Color red(1.0, 0.0, 0.0);
 	fluo::Color green(0.0, 1.0, 0.0);
@@ -698,7 +697,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		m_vd->SetDisp(false);
 }
 
-std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop)
+std::shared_ptr<VolumeData> VolumeSelector::GetResult(bool pop) const
 {
 	std::shared_ptr<VolumeData> vd;
 	if (!m_result_vols.empty())
@@ -742,11 +741,13 @@ void VolumeSelector::ChangeBrushSize(int value, bool ctrl)
 
 	UpdateBrushRadiusSet();
 }
+
 //brush sets
-void VolumeSelector::GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets)
+void VolumeSelector::GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets) const
 {
 	sets.assign(m_brush_radius_sets.begin(), m_brush_radius_sets.end());
 }
+
 void VolumeSelector::SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
 {
 	m_brush_radius_sets.assign(sets.begin(), sets.end());
@@ -761,6 +762,7 @@ void VolumeSelector::SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets)
 		m_iter_num = radius_set.iter_num;
 	}
 }
+
 void VolumeSelector::UpdateBrushRadiusSet()
 {
 	SelectMode mode = m_mode;
@@ -804,7 +806,7 @@ void VolumeSelector::ChangeBrushSetsIndex()
 }
 
 //th udpate
-bool VolumeSelector::GetThUpdate()
+bool VolumeSelector::GetThUpdate() const
 {
 	auto view = glbin_current.render_view.lock();
 	if (!view ||
@@ -821,7 +823,7 @@ bool VolumeSelector::GetThUpdate()
 		return false;
 }
 
-bool VolumeSelector::GetAutoThreshold()
+bool VolumeSelector::GetAutoThreshold() const
 {
 	if (!m_vd)
 		m_vd = glbin_current.vol_data.lock();
@@ -834,7 +836,7 @@ bool VolumeSelector::GetAutoThreshold()
 	{
 		m_scl_translate = threshold;
 		glbin_comp_generator.SetThresh(m_scl_translate);
-		glbin_conv_vol_mesh->SetIsoValue(m_scl_translate);
+		glbin_conv_vol_mesh.SetIsoValue(m_scl_translate);
 		return true;
 	}
 	return false;
@@ -858,7 +860,7 @@ void VolumeSelector::PopMask()
 		return;
 
 	m_vd->GetTexture()->pop_mask();
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetVR().clear_tex_mask();
 	m_vd->ResetMaskCount();
 }
 
@@ -870,7 +872,7 @@ void VolumeSelector::UndoMask()
 		return;
 
 	m_vd->GetTexture()->mask_undos_backward();
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetVR().clear_tex_mask();
 	m_vd->ResetMaskCount();
 }
 
@@ -882,7 +884,7 @@ void VolumeSelector::RedoMask()
 		return;
 
 	m_vd->GetTexture()->mask_undos_forward();
-	m_vd->GetVR()->clear_tex_mask();
+	m_vd->GetVR().clear_tex_mask();
 	m_vd->ResetMaskCount();
 }
 
@@ -935,7 +937,7 @@ void VolumeSelector::PasteMask(int op)
 	m_vd->ResetMaskCount();
 }
 
-bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector& mvec)
+bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector& mvec) const
 {
 	//DBGPRINT(L"mx: %d\tmy: %d\n", mx, my);
 	auto view = glbin_current.render_view.lock();
@@ -974,9 +976,10 @@ bool VolumeSelector::GetMouseVec(int mx, int my, fluo::Vector& mvec)
 		mvmat[3], mvmat[7], mvmat[11], mvmat[15]);
 	glm::mat4 mv_mat = view->GetDrawMat();
 	mv_mat = mv_mat * mv_mat2;
+	glm::mat4 prj_mat = m_prj_mat;
 	fluo::Transform mv, pr;
 	mv.set(glm::value_ptr(mv_mat));
-	pr.set(glm::value_ptr(m_prj_mat));
+	pr.set(glm::value_ptr(prj_mat));
 	mv.invert();
 	pr.invert();
 	fluo::Vector v;

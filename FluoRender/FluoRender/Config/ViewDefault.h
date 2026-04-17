@@ -42,8 +42,8 @@ public:
 
 	void Read();
 	void Save();
-	void Set(RenderView* view);
-	void Apply(RenderView* view);
+	void Set(const RenderView& view);
+	void Apply(RenderView& view) const;
 
 public:
 	//default values

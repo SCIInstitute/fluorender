@@ -2759,7 +2759,7 @@ fluo::Color RenderView::GetTextColor() const
 	return m_bg_color_inv;
 }
 
-void RenderView::SetBackgroundColor(fluo::Color &color)
+void RenderView::SetBackgroundColor(const fluo::Color &color)
 {
 	m_bg_color = color;
 	fluo::HSVColor bg_color(m_bg_color);

@@ -86,19 +86,19 @@ public:
 	//data related
 	//reader
 	void SetReader(const std::shared_ptr<BaseVolReader>& reader) {m_reader = reader;}
-	std::shared_ptr<BaseVolReader> GetReader() {return m_reader.lock();}
+	std::shared_ptr<BaseVolReader> GetReader() const {return m_reader.lock();}
 	//compression
 	void SetCompression(bool compression);
-	bool GetCompression();
+	bool GetCompression() const;
 	//skip brick
 	void SetSkipBrick(bool skip);
-	bool GetSkipBrick();
+	bool GetSkipBrick() const;
 	//load
 	void ResetVolume();
 	int Load(const std::shared_ptr<fluo::RawData>& data, const std::wstring &name, const std::wstring &path);
 	int Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex);
 	int Replace(const std::shared_ptr<VolumeData>& data);
-	std::shared_ptr<fluo::RawData> GetVolume(bool ret);
+	std::shared_ptr<fluo::RawData> GetVolume(bool ret) const;
 	//empty data
 	void AddEmptyData(int bits,
 		const fluo::Vector& res,
@@ -106,7 +106,7 @@ public:
 		int brick_size = 0);
 	//load mask
 	void LoadMask(const std::shared_ptr<fluo::RawData>& mask);
-	std::shared_ptr<fluo::RawData> GetMask(bool ret);
+	std::shared_ptr<fluo::RawData> GetMask(bool ret) const;
 	bool IsValidMask();//check if mask doesn't exist or it's empty
 	//empty mask
 	//mode: 0-zeros; 1-255; 2-leave as is
@@ -115,23 +115,23 @@ public:
 	void AddMaskConvert(const std::shared_ptr<fluo::RawData>& mask, int op, double scale);//16-bit data
 	//load label
 	void LoadLabel(const std::shared_ptr<fluo::RawData>& label);
-	std::shared_ptr<fluo::RawData> GetLabel(bool ret);
+	std::shared_ptr<fluo::RawData> GetLabel(bool ret) const;
 	//empty label
 	//mode: 0-zeros;1-ordered; 2-shuffled
 	//change: whether changes label when it already exists
 	void AddEmptyLabel(int mode=0, bool change=true);
-	bool SearchLabel(unsigned int label);
+	bool SearchLabel(unsigned int label) const;
 	void SetMaskClear(bool bval = true) { m_mask_clear = bval; }
-	bool GetMaskClear() { return m_mask_clear; }
+	bool GetMaskClear() const { return m_mask_clear; }
 
 	//save
-	double GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b);
-	double GetTransferedValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b);
-	double GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b);
+	double GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const;
+	double GetTransferedValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const;
+	double GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const;
 	void SetResample(bool resample) { m_resample = resample; }
 	void SetResampledSize(const fluo::Vector& size) { m_resampled_size = size; }
-	bool GetResample() { return m_resample; }
-	fluo::Vector GetResampledSize() { return m_resampled_size; }
+	bool GetResample() const { return m_resample; }
+	fluo::Vector GetResampledSize() const { return m_resampled_size; }
 	//mask: 0-save none; 1-save mask; 2-save label; 3-save mask and label...
 	void Save(const std::wstring &filename, int mode,
 		int mask, bool neg_mask,
@@ -146,22 +146,22 @@ public:
 	void SaveLabel(bool use_reader, int t, int c);
 
 	//volumerenderer
-	flvr::VolumeRenderer* GetVR() { return m_vr.get(); }
+	flvr::VolumeRenderer& GetVR() const { return *m_vr; }
 	//texture
-	std::shared_ptr<flvr::Texture> GetTexture() { return m_tex; }
+	std::shared_ptr<flvr::Texture> GetTexture() const { return m_tex; }
 
 	//bounding box
-	fluo::BBox GetBounds();
-	fluo::BBox GetClippedBounds();
+	fluo::BBox GetBounds() const;
+	fluo::BBox GetClippedBounds() const;
 	//path
 	void SetPath(const std::wstring& path);
-	std::wstring GetPath();
+	std::wstring GetPath() const;
 	//multi-channel
 	void SetCurChannel(int chan);
-	int GetCurChannel();
+	int GetCurChannel() const;
 	//time sequence
 	void SetCurTime(int time);
-	int GetCurTime();
+	int GetCurTime() const;
 
 	//draw volume
 	void SetMatrices(glm::mat4 &mv_mat, glm::mat4 &proj_mat, glm::mat4 &tex_mat);
@@ -189,87 +189,87 @@ public:
 	//properties
 	//transfer function
 	void SetGammaEnable(bool);
-	bool GetGammaEnable();
+	bool GetGammaEnable() const;
 	void SetGamma(double val, bool set_this = true);
-	double GetGamma();
-	double GetMlGamma();
+	double GetGamma() const;
+	double GetMlGamma() const;
 
 	void SetBoundaryEnable(bool);
-	bool GetBoundaryEnable();
+	bool GetBoundaryEnable() const;
 	void SetBoundaryLow(double val, bool set_this = true);
-	double GetBoundaryLow();
-	double GetMlBoundaryLow();
+	double GetBoundaryLow() const;
+	double GetMlBoundaryLow() const;
 	void SetBoundaryHigh(double val, bool set_this = true);
-	double GetBoundaryHigh();
-	double GetMlBoundaryHigh();
+	double GetBoundaryHigh() const;
+	double GetMlBoundaryHigh() const;
 	void SetBoundaryMax(double val);
-	double GetBoundaryMax();
+	double GetBoundaryMax() const;
 
 	void SetMinMaxEnable(bool);
-	bool GetMinMaxEnable();
+	bool GetMinMaxEnable() const;
 	void SetLowOffset(double val, bool set_this = true);
-	double GetLowOffset();
-	double GetMlLowOffset();
+	double GetLowOffset() const;
+	double GetMlLowOffset() const;
 	void SetHighOffset(double val, bool set_this = true);
-	double GetHighOffset();
-	double GetMlHighOffset();
+	double GetHighOffset() const;
+	double GetMlHighOffset() const;
 
 	void SetThreshEnable(bool);
-	bool GetThreshEnable();
+	bool GetThreshEnable() const;
 	void SetLeftThresh(double val, bool set_this = true);
-	double GetLeftThresh();
-	double GetMlLeftThresh();
+	double GetLeftThresh() const;
+	double GetMlLeftThresh() const;
 	void SetRightThresh(double val, bool set_this = true);
-	double GetRightThresh();
-	double GetMlRightThresh();
+	double GetRightThresh() const;
+	double GetMlRightThresh() const;
 	//soft threshold
 	void SetSoftThreshold(double val);
-	double GetSoftThreshold();
+	double GetSoftThreshold() const;
 
 	void SetLuminanceEnable(bool);
-	bool GetLuminanceEnable();
+	bool GetLuminanceEnable() const;
 	void SetLuminance(double val, bool set_this = true);
-	double GetLuminance();
-	double GetMlLuminance();
+	double GetLuminance() const;
+	double GetMlLuminance() const;
 
 	void SetAlphaEnable(bool mode);
-	bool GetAlphaEnable();
+	bool GetAlphaEnable() const;
 	void SetAlpha(double val, bool set_this = true);
-	double GetAlpha();
-	double GetMlAlpha();
+	double GetAlpha() const;
+	double GetMlAlpha() const;
 
 	//shading
 	void SetShadingEnable(bool bVal);
-	bool GetShadingEnable();
+	bool GetShadingEnable() const;
 	void SetShadingStrength(double val);
-	double GetShadingStrength();
-	double GetMlShadingStrength();
+	double GetShadingStrength() const;
+	double GetMlShadingStrength() const;
 	void SetShadingShine(double val);
-	double GetShadingShine();
-	double GetMlShadingShine();
+	double GetShadingShine() const;
+	double GetMlShadingShine() const;
 
 	//shadow
 	void SetShadowEnable(bool bVal);
-	bool GetShadowEnable();
+	bool GetShadowEnable() const;
 	void SetShadowIntensity(double val);
-	double GetShadowIntensity();
-	double GetMlShadowIntensity();
+	double GetShadowIntensity() const;
+	double GetMlShadowIntensity() const;
 
 	//sample rate
 	void SetSampleRateEnable(bool bval);
-	bool GetSampleRateEnable();
+	bool GetSampleRateEnable() const;
 	void SetSampleRate(double val, bool set_this = true);
-	double GetSampleRate();
-	double GetMlSampleRate();
+	double GetSampleRate() const;
+	double GetMlSampleRate() const;
 
 	//colors
 	void SetColor(const fluo::Color &color, bool set_this = true);
-	virtual fluo::Color GetColor() override;
+	virtual fluo::Color GetColor() const override;
 	void SetWlColor(bool bval = true);
-	bool GetWlColor();
+	bool GetWlColor() const;
 	void SetMaskColor(const fluo::Color &color, bool set=true);
-	fluo::Color GetMaskColor();
-	bool GetMaskColorSet();
+	fluo::Color GetMaskColor() const;
+	bool GetMaskColorSet() const;
 	void ResetMaskColorSet();
 
 	//mask threshold
@@ -278,37 +278,37 @@ public:
 
 	//colormap mode
 	void SetColormapDisp(bool disp);
-	bool GetColormapDisp();
+	bool GetColormapDisp() const;
 	void SetColormapValues(double low, double high);
 	void SetColormapLow(double val);
 	void SetColormapHigh(double val);
-	void GetColormapRange(double& v1, double& v2);
-	double GetColormapMin();
-	double GetColormapMax();
-	void GetColormapValues(double &low, double &high);
-	void GetColormapDispValues(double& low, double& high);
-	double GetColormapLow();
-	double GetMlColormapLow();
-	double GetColormapHigh();
-	double GetMlColormapHigh();
+	void GetColormapRange(double& v1, double& v2) const;
+	double GetColormapMin() const;
+	double GetColormapMax() const;
+	void GetColormapValues(double &low, double &high) const;
+	void GetColormapDispValues(double& low, double& high) const;
+	double GetColormapLow() const;
+	double GetMlColormapLow() const;
+	double GetColormapHigh() const;
+	double GetMlColormapHigh() const;
 	void SetColormapInv(double val);
-	double GetColormapInv();
+	double GetColormapInv() const;
 	void SetColormap(int value);
-	int GetColormap();
+	int GetColormap() const;
 	void SetColormapProj(flvr::ColormapProj);
-	flvr::ColormapProj GetColormapProj();
-	fluo::Color GetColorFromColormap(double value, bool raw = false);
-	bool GetColormapData(std::vector<unsigned char>& data);
+	flvr::ColormapProj GetColormapProj() const;
+	fluo::Color GetColorFromColormap(double value, bool raw = false) const;
+	bool GetColormapData(std::vector<unsigned char>& data) const;
 	//gradient
 	void UpdateGradient();
 	void SetRadialCenter(const fluo::Point& p);
-	fluo::Point GetRadialCenter();
+	fluo::Point GetRadialCenter() const;
 	void SetRadialRadius(double r);
-	double GetRadialRadius();
+	double GetRadialRadius() const;
 	void SetLinearPlanes(const fluo::Plane& p0, const fluo::Plane& p1);
-	std::pair<fluo::Plane, fluo::Plane> GetLinearPlanes();
+	std::pair<fluo::Plane, fluo::Plane> GetLinearPlanes() const;
 	//see if need update histogram
-	bool GetHistogramDirty() { return m_hist_dirty; }
+	bool GetHistogramDirty() const { return m_hist_dirty; }
 	void ComputeHistogram(bool set_prog_func);
 	bool GetHistogram(std::vector<unsigned char>& data);
 	//get auto threshold from histogram
@@ -317,81 +317,81 @@ public:
 
 	//shuffle
 	void SetShuffle(int val);
-	int GetShuffle();
+	int GetShuffle() const;
 	void IncShuffle();
 
 	//resolution  scaling and spacing
-	fluo::Vector GetResolution(int lv = -1);
+	fluo::Vector GetResolution(int lv = -1) const;
 	void SetScaling(const fluo::Vector& scaling);
-	fluo::Vector GetScaling();
+	fluo::Vector GetScaling() const;
 	void SetSpacing(const fluo::Vector& spacing);
-	fluo::Vector GetSpacing(int lv = -1);
+	fluo::Vector GetSpacing(int lv = -1) const;
 	//read resolutions from file
 	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
-	bool GetSpcFromFile() {return m_spc_from_file;}
+	bool GetSpcFromFile() const {return m_spc_from_file;}
 
 	//brkxml
 	void SetBaseSpacing(const fluo::Vector& spacing);
-	fluo::Vector GetBaseSpacing();
+	fluo::Vector GetBaseSpacing() const;
 	void SetSpacingScale(const fluo::Vector& scaling);
-	fluo::Vector GetSpacingScale();
+	fluo::Vector GetSpacingScale() const;
 
 	void SetLevel(int lv);
-	int GetLevel();
-	int GetLevelNum();
+	int GetLevel() const;
+	int GetLevelNum() const;
 
 	//bits
-	int GetBits();
+	int GetBits() const;
 	//voxel count
-	uint64_t GetVoxelCount() { return m_size.get_size_xyz(); }
+	uint64_t GetVoxelCount() const { return m_size.get_size_xyz(); }
 
 	//display controls
 	void SetDisp(bool disp);
-	bool GetDisp();
+	bool GetDisp() const;
 	void ToggleDisp();
 	//bounding box
 	void SetDrawBounds(bool draw);
-	bool GetDrawBounds();
+	bool GetDrawBounds() const;
 	void ToggleDrawBounds();
 	//wirefraem mode
 	void SetWireframe(bool val);
 
 	//MIP & normal modes
 	void SetRenderMode(flvr::RenderMode mode);
-	flvr::RenderMode GetRenderMode() { return m_render_mode; }
+	flvr::RenderMode GetRenderMode() const { return m_render_mode; }
 	//transparency
 	void SetAlphaPower(double val);
-	double GetAlphaPower();
+	double GetAlphaPower() const;
 	//stream modes
 	void SetStreamMode(int mode) {m_stream_mode = mode;}
-	int GetStreamMode() {return m_stream_mode;}
+	int GetStreamMode() const {return m_stream_mode;}
 
 	//invert
 	void SetInvert(bool mode);
-	bool GetInvert();
+	bool GetInvert() const;
 
 	//mask mode
 	void SetMainMaskMode(flvr::ColorMode mode);
-	flvr::ColorMode GetMainColorMode() { return m_main_mode; }
+	flvr::ColorMode GetMainColorMode() const { return m_main_mode; }
 	void IncMainMaskMode();
 	void SetMaskMode(flvr::ColorMode mode);
-	flvr::ColorMode GetMaskColorMode() { return m_mask_mode; }
+	flvr::ColorMode GetMaskColorMode() const { return m_mask_mode; }
 	void IncMaskMode();
 
 	//noise reduction
 	void SetNR(bool val);
-	bool GetNR();
+	bool GetNR() const;
 
 	//blend mode
 	void SetChannelMixMode(ChannelMixMode mode) { m_channel_mix_mode = mode; }
-	ChannelMixMode GetChannelMixMode() { return m_channel_mix_mode; }
+	ChannelMixMode GetChannelMixMode() const { return m_channel_mix_mode; }
 
 	//transparent
 	void SetTransparent(bool val);
-	bool GetTransparent();
+	bool GetTransparent() const;
 
 	//scalar value info
-	double GetMaxScale()
+	double GetMaxScale() const
 	{
 		int bits = GetBits();
 		switch (bits)
@@ -403,12 +403,12 @@ public:
 			return 65535;
 		}
 	}
-	double GetScalarScale() {return m_scalar_scale;}
+	double GetScalarScale() const {return m_scalar_scale;}
 	void SetScalarScale(double val);
-	double GetGMScale() {return m_gm_scale;}
+	double GetGMScale() const {return m_gm_scale;}
 	void SetGMScale(double val);
-	double GetMinValue() {return m_min_value;}
-	double GetMaxValue() {return m_max_value;}
+	double GetMinValue() const {return m_min_value;}
+	double GetMaxValue() const {return m_max_value;}
 	double GetMinValueScale();
 	void SetMinMaxValue(double val1, double val2) { m_min_value = val1; m_max_value = val2; }
 
@@ -435,24 +435,24 @@ public:
 	void RandomizeColor();
 	//legend
 	void SetLegend(bool val);
-	bool GetLegend();
+	bool GetLegend() const;
 	//interpolate
 	void SetInterpolate(bool val);
-	bool GetInterpolate();
+	bool GetInterpolate() const;
 
 	//number of all bricks
-	int GetAllBrickNum();
+	int GetAllBrickNum() const;
 	//number of valid bricks
 	void SetBrickNum(int num) {m_brick_num = num;}
-	int GetBrickNum() {return m_brick_num;}
+	int GetBrickNum() const {return m_brick_num;}
 
 	//estimated threshold
-	double GetEstThresh() {return m_est_thresh;}
+	double GetEstThresh() const {return m_est_thresh;}
 
 	//fog
 	void SetFog(bool use_fog, double fog_intensity, double fog_start, double fog_end);
 
-	bool isBrxml();
+	bool isBrxml() const;
 
 	//save label
 	void PushLabel(bool ret);
@@ -460,7 +460,7 @@ public:
 	void LoadLabelFromSave();
 
 	//backgeound intensity
-	bool GetBackgroundValid()
+	bool GetBackgroundValid() const
 	{
 		return m_bg_valid;
 	}
@@ -469,7 +469,7 @@ public:
 		m_bg_int = dval;
 		m_bg_valid = true;
 	}
-	double GetBackgroundInt()
+	double GetBackgroundInt() const
 	{
 		if (m_bg_valid)
 			return m_bg_int;
@@ -478,18 +478,18 @@ public:
 	}
 
 	//machine learning for comp gen applied
-	bool GetMlCompGenApplied() { return m_ml_comp_gen_applied; }
+	bool GetMlCompGenApplied() const { return m_ml_comp_gen_applied; }
 	void SetMlCompGenApplied(bool bval) { m_ml_comp_gen_applied = bval; }
 
 	//apply volume properties form machine learning
-	void GetMlParams();
+	void GetMlParams() const;
 	void ApplyMlVolProp();
 
 	void SetMaskCount(unsigned int sum, float wsum);
 	void ResetMaskCount() { m_mask_count_dirty = true; }
 
 private:
-	std::unique_ptr<flrd::EntryParams> m_ep;
+	mutable std::shared_ptr<flrd::EntryParams> m_ep;
 	std::unique_ptr<flvr::VolumeRenderer> m_vr;
 	std::shared_ptr<flvr::Texture> m_tex;
 

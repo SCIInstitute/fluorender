@@ -282,155 +282,131 @@ void ComponentDefault::Save(const std::string& gst_file)
 	f->Write("record_cmd", m_record_cmd);
 }
 
-void ComponentDefault::Set(flrd::ComponentGenerator* cg)
+void ComponentDefault::Set(const flrd::ComponentGenerator& cg)
 {
-	if (!cg)
-		return;
-
-	m_use_sel_cg = cg->GetUseSel();
-	m_use_ml = cg->GetUseMl();
-	m_iter = cg->GetIter();
-	m_thresh = cg->GetThresh();
-	m_tfactor = cg->GetTFactor();
-	m_use_dist_field = cg->GetUseDistField();
-	m_dist_strength = cg->GetDistStrength();
-	m_dist_filter_size = cg->GetDistFilterSize();
-	m_max_dist = cg->GetMaxDist();
-	m_dist_thresh = cg->GetDistThresh();
-	m_diff = cg->GetDiffusion();
-	m_falloff = cg->GetFalloff();
-	m_size = cg->GetSize();
-	m_size_lm = cg->GetSizeLimit();
-	m_density = cg->GetDensity();
-	m_density_thresh = cg->GetDensityThresh();
-	m_varth = cg->GetVarThresh();
-	m_density_window_size = cg->GetDensityWinSize();
-	m_density_stats_size = cg->GetDensityStatSize();
-	m_fixate = cg->GetFixate();
-	m_fix_size = cg->GetFixSize();
-	m_grow_fixed = cg->GetGrowFixed();
-	m_clean = cg->GetClean();
-	m_clean_iter = cg->GetCleanIter();
-	m_clean_size_vl = cg->GetCleanSize();
-	m_fill_border = cg->GetFillBorder();
+	m_use_sel_cg = cg.GetUseSel();
+	m_use_ml = cg.GetUseMl();
+	m_iter = cg.GetIter();
+	m_thresh = cg.GetThresh();
+	m_tfactor = cg.GetTFactor();
+	m_use_dist_field = cg.GetUseDistField();
+	m_dist_strength = cg.GetDistStrength();
+	m_dist_filter_size = cg.GetDistFilterSize();
+	m_max_dist = cg.GetMaxDist();
+	m_dist_thresh = cg.GetDistThresh();
+	m_diff = cg.GetDiffusion();
+	m_falloff = cg.GetFalloff();
+	m_size = cg.GetSize();
+	m_size_lm = cg.GetSizeLimit();
+	m_density = cg.GetDensity();
+	m_density_thresh = cg.GetDensityThresh();
+	m_varth = cg.GetVarThresh();
+	m_density_window_size = cg.GetDensityWinSize();
+	m_density_stats_size = cg.GetDensityStatSize();
+	m_fixate = cg.GetFixate();
+	m_fix_size = cg.GetFixSize();
+	m_grow_fixed = cg.GetGrowFixed();
+	m_clean = cg.GetClean();
+	m_clean_iter = cg.GetCleanIter();
+	m_clean_size_vl = cg.GetCleanSize();
+	m_fill_border = cg.GetFillBorder();
 }
 
-void ComponentDefault::Apply(flrd::ComponentGenerator* cg)
+void ComponentDefault::Apply(flrd::ComponentGenerator& cg) const
 {
-	if (!cg)
-		return;
-
-	cg->SetUseSel(m_use_sel_cg);
-	cg->SetUseMl(m_use_ml);
-	cg->SetIter(m_iter);
-	cg->SetThresh(m_thresh);
-	cg->SetTFactor(m_tfactor);
-	cg->SetUseDistField(m_use_dist_field);
-	cg->SetDistStrength(m_dist_strength);
-	cg->SetDistFilterSize(m_dist_filter_size);
-	cg->SetMaxDist(m_max_dist);
-	cg->SetDistThresh(m_dist_thresh);
-	cg->SetDiffusion(m_diff);
-	cg->SetFalloff(m_falloff);
-	cg->SetSize(m_size);
-	cg->SetSizeLimit(m_size_lm);
-	cg->SetDensity(m_density);
-	cg->SetDensityThresh(m_density_thresh);
-	cg->SetVarThresh(m_varth);
-	cg->SetDensityWinSize(m_density_window_size);
-	cg->SetDensityStatSize(m_density_stats_size);
-	cg->SetFixate(m_fixate);
-	cg->SetFixSize(m_fix_size);
-	cg->SetGrowFixed(m_grow_fixed);
-	cg->SetClean(m_clean);
-	cg->SetCleanIter(m_clean_iter);
-	cg->SetCleanSize(m_clean_size_vl);
-	cg->SetFillBorder(m_fill_border);
+	cg.SetUseSel(m_use_sel_cg);
+	cg.SetUseMl(m_use_ml);
+	cg.SetIter(m_iter);
+	cg.SetThresh(m_thresh);
+	cg.SetTFactor(m_tfactor);
+	cg.SetUseDistField(m_use_dist_field);
+	cg.SetDistStrength(m_dist_strength);
+	cg.SetDistFilterSize(m_dist_filter_size);
+	cg.SetMaxDist(m_max_dist);
+	cg.SetDistThresh(m_dist_thresh);
+	cg.SetDiffusion(m_diff);
+	cg.SetFalloff(m_falloff);
+	cg.SetSize(m_size);
+	cg.SetSizeLimit(m_size_lm);
+	cg.SetDensity(m_density);
+	cg.SetDensityThresh(m_density_thresh);
+	cg.SetVarThresh(m_varth);
+	cg.SetDensityWinSize(m_density_window_size);
+	cg.SetDensityStatSize(m_density_stats_size);
+	cg.SetFixate(m_fixate);
+	cg.SetFixSize(m_fix_size);
+	cg.SetGrowFixed(m_grow_fixed);
+	cg.SetClean(m_clean);
+	cg.SetCleanIter(m_clean_iter);
+	cg.SetCleanSize(m_clean_size_vl);
+	cg.SetFillBorder(m_fill_border);
 }
 
-void ComponentDefault::Set(flrd::Clusterizer* cl)
+void ComponentDefault::Set(const flrd::Clusterizer& cl)
 {
-	if (!cl)
-		return;
-
-	m_cluster_method = cl->GetMethod();
-	m_cluster_clnum = cl->GetNum();
-	m_cluster_maxiter = cl->GetMaxIter();
-	m_cluster_tol = cl->GetTol();
-	m_cluster_size = cl->GetSize();
-	m_cluster_eps = cl->GetEps();
+	m_cluster_method = cl.GetMethod();
+	m_cluster_clnum = cl.GetNum();
+	m_cluster_maxiter = cl.GetMaxIter();
+	m_cluster_tol = cl.GetTol();
+	m_cluster_size = cl.GetSize();
+	m_cluster_eps = cl.GetEps();
 }
 
-void ComponentDefault::Apply(flrd::Clusterizer* cl)
+void ComponentDefault::Apply(flrd::Clusterizer& cl) const
 {
-	if (!cl)
-		return;
-
-	cl->SetMethod(m_cluster_method);
-	cl->SetNum(m_cluster_clnum);
-	cl->SetMaxIter(m_cluster_maxiter);
-	cl->SetTol(m_cluster_tol);
-	cl->SetSize(m_cluster_size);
-	cl->SetEps(m_cluster_eps);
+	cl.SetMethod(m_cluster_method);
+	cl.SetNum(m_cluster_clnum);
+	cl.SetMaxIter(m_cluster_maxiter);
+	cl.SetTol(m_cluster_tol);
+	cl.SetSize(m_cluster_size);
+	cl.SetEps(m_cluster_eps);
 }
 
-void ComponentDefault::Set(flrd::ComponentSelector* cs)
+void ComponentDefault::Set(const flrd::ComponentSelector& cs)
 {
-	if (!cs)
-		return;
-
-	m_use_min = cs->GetUseMin();
-	m_min_num = cs->GetMinNum();
-	m_use_max = cs->GetUseMax();
-	m_max_num = cs->GetMaxNum();
+	m_use_min = cs.GetUseMin();
+	m_min_num = cs.GetMinNum();
+	m_use_max = cs.GetUseMax();
+	m_max_num = cs.GetMaxNum();
 }
 
-void ComponentDefault::Apply(flrd::ComponentSelector* cs)
+void ComponentDefault::Apply(flrd::ComponentSelector& cs) const
 {
-	if (!cs)
-		return;
-
-	cs->SetUseMin(m_use_min);
-	cs->SetUseMax(m_use_max);
-	cs->SetMinNum(m_min_num);
-	cs->SetMaxNum(m_max_num);
+	cs.SetUseMin(m_use_min);
+	cs.SetUseMax(m_use_max);
+	cs.SetMinNum(m_min_num);
+	cs.SetMaxNum(m_max_num);
 }
 
-void ComponentDefault::Set(flrd::ComponentAnalyzer* ca)
+void ComponentDefault::Set(const flrd::ComponentAnalyzer& ca)
 {
-	if (!ca)
-		return;
-
-	m_use_sel_ca = ca->GetUseSel();
-	m_slimit = ca->GetSizeLimit();
-	m_colocal = ca->GetColocal();
-	m_consistent = ca->GetConsistent();
-	m_channel_type = ca->GetChannelType();
-	m_color_type = ca->GetColorType();
-	m_annot_type = ca->GetAnnotType();
-	m_use_dist_neighbor = ca->GetUseDistNeighbor();
-	m_dist_neighbor_num = ca->GetDistNeighborNum();
-	m_use_dist_allchan = ca->GetUseDistAllchan();
+	m_use_sel_ca = ca.GetUseSel();
+	m_slimit = ca.GetSizeLimit();
+	m_colocal = ca.GetColocal();
+	m_consistent = ca.GetConsistent();
+	m_channel_type = ca.GetChannelType();
+	m_color_type = ca.GetColorType();
+	m_annot_type = ca.GetAnnotType();
+	m_use_dist_neighbor = ca.GetUseDistNeighbor();
+	m_dist_neighbor_num = ca.GetDistNeighborNum();
+	m_use_dist_allchan = ca.GetUseDistAllchan();
 }
 
-void ComponentDefault::Apply(flrd::ComponentAnalyzer* ca)
+void ComponentDefault::Apply(flrd::ComponentAnalyzer& ca) const
 {
-	if (!ca)
-		return;
+	ca.SetUseSel(m_use_sel_ca);
+	ca.SetSizeLimit(static_cast<unsigned int>(m_slimit));
+	ca.SetColocal(m_colocal);
+	ca.SetConsistent(m_consistent);
+	ca.SetChannelType(m_channel_type);
+	ca.SetColorType(m_color_type);
+	ca.SetAnnotType(m_annot_type);
+	ca.SetUseDistNeighbor(m_use_dist_neighbor);
+	ca.SetDistNeighborNum(m_dist_neighbor_num);
+	ca.SetUseDistAllchan(m_use_dist_allchan);
 
-	ca->SetUseSel(m_use_sel_ca);
-	ca->SetSizeLimit(static_cast<unsigned int>(m_slimit));
-	ca->SetColocal(m_colocal);
-	ca->SetConsistent(m_consistent);
-	ca->SetChannelType(m_channel_type);
-	ca->SetColorType(m_color_type);
-	ca->SetAnnotType(m_annot_type);
-	ca->SetUseDistNeighbor(m_use_dist_neighbor);
-	ca->SetDistNeighborNum(m_dist_neighbor_num);
-	ca->SetUseDistAllchan(m_use_dist_allchan);
-
-	ca->SetUseMin(m_use_min);
-	ca->SetUseMax(m_use_max);
-	ca->SetMinNum(m_min_num);
-	ca->SetMaxNum(m_max_num);
+	ca.SetUseMin(m_use_min);
+	ca.SetUseMax(m_use_max);
+	ca.SetMinNum(m_min_num);
+	ca.SetMaxNum(m_max_num);
 }

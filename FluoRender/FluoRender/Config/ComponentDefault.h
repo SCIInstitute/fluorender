@@ -47,14 +47,14 @@ public:
 	void Save(const std::wstring& filename);
 	void Read(const std::string& gst_file);
 	void Save(const std::string& gst_file);
-	void Set(flrd::ComponentGenerator* cg);
-	void Apply(flrd::ComponentGenerator* cg);
-	void Set(flrd::Clusterizer* cl);
-	void Apply(flrd::Clusterizer* cl);
-	void Set(flrd::ComponentSelector* cs);
-	void Apply(flrd::ComponentSelector* cs);
-	void Set(flrd::ComponentAnalyzer* ca);
-	void Apply(flrd::ComponentAnalyzer* ca);
+	void Set(const flrd::ComponentGenerator& cg);
+	void Apply(flrd::ComponentGenerator& cg) const;
+	void Set(const flrd::Clusterizer& cl);
+	void Apply(flrd::Clusterizer& cl) const;
+	void Set(const flrd::ComponentSelector& cs);
+	void Apply(flrd::ComponentSelector& cs) const;
+	void Set(const flrd::ComponentAnalyzer& ca);
+	void Apply(flrd::ComponentAnalyzer& ca) const;
 
 public:
 	//generate settings

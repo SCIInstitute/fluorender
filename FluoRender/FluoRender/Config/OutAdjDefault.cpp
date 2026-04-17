@@ -113,85 +113,73 @@ void OutAdjDefault::Save()
 	f->Write("hdr_b", m_hdr_b);
 }
 
-void OutAdjDefault::Set(RenderView* view)
+void OutAdjDefault::Set(const RenderView& view)
 {
-	if (!view)
-		return;
-
-	m_sync_r = view->GetSync(0);
-	m_sync_g = view->GetSync(1);
-	m_sync_b = view->GetSync(2);
+	m_sync_r = view.GetSync(0);
+	m_sync_g = view.GetSync(1);
+	m_sync_b = view.GetSync(2);
 
 	fluo::Color c;
 
-	c = view->GetGammaColor();
+	c = view.GetGammaColor();
 	m_gamma_r = c.r();
 	m_gamma_g = c.g();
 	m_gamma_b = c.b();
 
-	c = view->GetBrightness();
+	c = view.GetBrightness();
 	m_brightness_r = c.r();
 	m_brightness_g = c.g();
 	m_brightness_b = c.b();
 
-	c = view->GetHdr();
+	c = view.GetHdr();
 	m_hdr_r = c.r();
 	m_hdr_g = c.g();
 	m_hdr_b = c.b();
 }
 
-void OutAdjDefault::Apply(RenderView* view)
+void OutAdjDefault::Apply(RenderView& view) const
 {
-	if (!view)
-		return;
+	view.SetSync(0, true);
+	view.SetSync(1, true);
+	view.SetSync(2, true);
 
-	view->SetSync(0, true);
-	view->SetSync(1, true);
-	view->SetSync(2, true);
-
-	view->SetGammaColor(fluo::Color(1, 1, 1));
-	view->SetBrightness(fluo::Color(1, 1, 1));
-	view->SetHdr(fluo::Color(0, 0, 0));
+	view.SetGammaColor(fluo::Color(1, 1, 1));
+	view.SetBrightness(fluo::Color(1, 1, 1));
+	view.SetHdr(fluo::Color(0, 0, 0));
 }
 
-void OutAdjDefault::Set(TreeLayer* layer)
+void OutAdjDefault::Set(const TreeLayer& layer)
 {
-	if (!layer)
-		return;
-
-	m_sync_r = layer->GetSync(0);
-	m_sync_g = layer->GetSync(1);
-	m_sync_b = layer->GetSync(2);
+	m_sync_r = layer.GetSync(0);
+	m_sync_g = layer.GetSync(1);
+	m_sync_b = layer.GetSync(2);
 
 	fluo::Color c;
 
-	c = layer->GetGammaColor();
+	c = layer.GetGammaColor();
 	m_gamma_r = c.r();
 	m_gamma_g = c.g();
 	m_gamma_b = c.b();
 
-	c = layer->GetBrightness();
+	c = layer.GetBrightness();
 	m_brightness_r = c.r();
 	m_brightness_g = c.g();
 	m_brightness_b = c.b();
 
-	c = layer->GetHdr();
+	c = layer.GetHdr();
 	m_hdr_r = c.r();
 	m_hdr_g = c.g();
 	m_hdr_b = c.b();
 }
 
-void OutAdjDefault::Apply(TreeLayer* layer)
+void OutAdjDefault::Apply(TreeLayer& layer) const
 {
-	if (!layer)
-		return;
+	layer.SetSync(0, m_sync_r);
+	layer.SetSync(1, m_sync_g);
+	layer.SetSync(2, m_sync_b);
 
-	layer->SetSync(0, m_sync_r);
-	layer->SetSync(1, m_sync_g);
-	layer->SetSync(2, m_sync_b);
-
-	layer->SetGammaColor(fluo::Color(m_gamma_r, m_gamma_g, m_gamma_b));
-	layer->SetBrightness(fluo::Color(m_brightness_r, m_brightness_g, m_brightness_b));
-	layer->SetHdr(fluo::Color(m_hdr_r, m_hdr_g, m_hdr_b));
+	layer.SetGammaColor(fluo::Color(m_gamma_r, m_gamma_g, m_gamma_b));
+	layer.SetBrightness(fluo::Color(m_brightness_r, m_brightness_g, m_brightness_b));
+	layer.SetHdr(fluo::Color(m_hdr_r, m_hdr_g, m_hdr_b));
 }
 

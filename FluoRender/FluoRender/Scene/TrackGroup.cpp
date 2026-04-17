@@ -58,7 +58,7 @@ void TrackGroup::SetCurTime(int time)
 	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
-int TrackGroup::GetCurTime()
+int TrackGroup::GetCurTime() const
 {
 	return m_cur_time;
 }
@@ -67,7 +67,7 @@ void TrackGroup::SetPrvTime(int time)
 	m_prv_time = time;
 }
 
-int TrackGroup::GetPrvTime()
+int TrackGroup::GetPrvTime() const
 {
 	return m_prv_time;
 }
@@ -95,7 +95,7 @@ void TrackGroup::GetLinkLists(size_t frame,
 	flrd::VertexList &in_orphan_list,
 	flrd::VertexList &out_orphan_list,
 	flrd::VertexList &in_multi_list,
-	flrd::VertexList &out_multi_list)
+	flrd::VertexList &out_multi_list) const
 {
 	if (in_orphan_list.size())
 		in_orphan_list.clear();
@@ -158,17 +158,17 @@ void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 }
 
-flrd::CelpList &TrackGroup::GetCellList()
+flrd::CelpList &TrackGroup::GetCellList() const
 {
 	return *m_cell_list;
 }
 
-bool TrackGroup::FindCell(unsigned int id)
+bool TrackGroup::FindCell(unsigned int id) const
 {
 	return m_cell_list->find(id) != m_cell_list->end();
 }
 
-bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers)
+bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers) const
 {
 	size_t frame_num = m_track_map->GetFrameNum();
 	if (m_ghost_num <= 0 ||

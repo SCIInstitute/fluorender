@@ -62,15 +62,15 @@ namespace flrd
 		VolumeSelector();
 		~VolumeSelector();
 
-		bool GetAutoPaintSize();
+		bool GetAutoPaintSize() const;
 
 		void SetVolume(const std::shared_ptr<VolumeData>& vd) { m_vd = vd; }
 		//modes
 		void SetSelectMode(SelectMode mode);
-		SelectMode GetSelectMode() { return m_mode; }
+		SelectMode GetSelectMode() const { return m_mode; }
 		//init mask
 		void SetInitMask(int val) { m_init_mask = val; }
-		int GetInitMask() { return m_init_mask; }
+		int GetInitMask() const { return m_init_mask; }
 		//
 		void Set2DMask(unsigned int mask) { m_2d_mask = mask; }
 		void Set2DWeight(unsigned int weight1, unsigned int weight2)
@@ -88,46 +88,46 @@ namespace flrd
 			m_iter_num = num;
 			UpdateBrushRadiusSet();
 		}
-		int GetBrushIteration() { return m_iter_num; }
+		int GetBrushIteration() const { return m_iter_num; }
 		//set/get brush properties
 		void SetBrushIniThresh(double val) { m_ini_thresh = val; }
-		double GetBrushIniThresh() { return m_ini_thresh; }
+		double GetBrushIniThresh() const { return m_ini_thresh; }
 		void SetBrushGmFalloff(double val) { m_gm_falloff = val; }
-		double GetBrushGmFalloff() { return m_gm_falloff; }
+		double GetBrushGmFalloff() const { return m_gm_falloff; }
 		void SetBrushSclFalloff(double val) { m_scl_falloff = val; }
-		double GetBrushSclFalloff() { return m_scl_falloff; }
+		double GetBrushSclFalloff() const { return m_scl_falloff; }
 		void SetBrushSclTranslate(double val) { m_scl_translate = val; }
-		double GetBrushSclTranslate() { return m_scl_translate; }
+		double GetBrushSclTranslate() const { return m_scl_translate; }
 		//w2d
 		void SetW2d(double val) { m_w2d = val; }
-		double GetW2d() { return m_w2d; }
+		double GetW2d() const { return m_w2d; }
 		//edge detect
 		void SetEdgeDetect(bool val) { m_edge_detect = val; }
-		bool GetEdgeDetect() { return m_edge_detect; }
+		bool GetEdgeDetect() const { return m_edge_detect; }
 		//hidden removal
 		void SetHiddenRemoval(bool val) { m_hidden_removal = val; }
-		bool GetHiddenRemoval() { return m_hidden_removal; }
+		bool GetHiddenRemoval() const { return m_hidden_removal; }
 		//ortho
 		void SetOrthographic(bool val) { m_ortho = val; }
-		bool GetOrthographic() { return m_ortho; }
+		bool GetOrthographic() const { return m_ortho; }
 		//select group
 		void SetSelectGroup(bool value) { m_select_multi = value; }
-		bool GetSelectGroup() { return m_select_multi; }
+		bool GetSelectGroup() const { return m_select_multi; }
 		//iteration number
-		int GetIter() { return m_iter; }
+		int GetIter() const { return m_iter; }
 		//update order
 		void SetUpdateOrder(bool bval) { m_update_order = bval; }
-		bool GetUpdateOrder() { return m_update_order; }
+		bool GetUpdateOrder() const { return m_update_order; }
 		//brush properties
 		//use pressure
 		void SetBrushUsePres(bool pres) { m_use_press = pres; }
-		bool GetBrushUsePres() { return m_use_press; }
+		bool GetBrushUsePres() const { return m_use_press; }
 		void SetBrushPressPeak(double val) { m_press_peak = val; }
-		double GetBrushPressPeak() { return m_press_peak; }
+		double GetBrushPressPeak() const { return m_press_peak; }
 		void SetBrushPnMax(double val) { m_press_nmax = val; }
-		double GetBrushPnMax() { return m_press_nmax; }
+		double GetBrushPnMax() const { return m_press_nmax; }
 		void SetBrushPtMax(double val) { m_press_tmax = val; }
-		double GetBrushPtMax() { return m_press_tmax; }
+		double GetBrushPtMax() const { return m_press_tmax; }
 		void SetPressure(int np, int tp)
 		{
 			//compute pressure, normalized to [0, 1]
@@ -139,8 +139,8 @@ namespace flrd
 			if (m_press_tmax > 1.0)
 				m_air_press = tp / m_press_tmax;
 		}
-		double GetPressure() { return m_pressure; }
-		double GetNormPress()
+		double GetPressure() const { return m_pressure; }
+		double GetNormPress() const
 		{
 			double np = m_use_press && m_pressure > 0.0 ?
 				1.0 + (m_pressure - 0.5)*0.4 : 1.0;
@@ -154,7 +154,7 @@ namespace flrd
 			m_use_brush_radius2 = val;
 			if (!val) m_brush_radius2 = m_brush_radius1;
 		}
-		bool GetUseBrushSize2() { return m_use_brush_radius2; }
+		bool GetUseBrushSize2() const { return m_use_brush_radius2; }
 		void SetBrushSize(double size1, double size2)
 		{
 			if (size1 > 0.0)
@@ -164,36 +164,35 @@ namespace flrd
 			if (!m_use_brush_radius2)
 				m_brush_radius2 = m_brush_radius1;
 		}
-		double GetBrushSize1() { return m_brush_radius1; }
-		double GetBrushSize2() { return m_brush_radius2; }
+		double GetBrushSize1() const { return m_brush_radius1; }
+		double GetBrushSize2() const { return m_brush_radius2; }
 		//set brush spacing
 		void SetBrushSpacing(double spacing)
 		{
 			if (spacing > 0.0)
 				m_brush_spacing = spacing;
 		}
-		double GetBrushSpacing() { return m_brush_spacing; }
+		double GetBrushSpacing() const { return m_brush_spacing; }
 		//set brush size relation
 		void SetBrushSizeData(bool val) { m_brush_size_data = val; }
-		bool GetBrushSizeData() { return m_brush_size_data; }
+		bool GetBrushSizeData() const { return m_brush_size_data; }
 		//change display
 		void ChangeBrushSize(int value, bool ctrl);
 		//brush sets
-		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets);
+		void GetBrushRadiusSet(std::vector<BrushRadiusSet>& sets) const;
 		void SetBrushRadiusSet(const std::vector<BrushRadiusSet>& sets);
 		void UpdateBrushRadiusSet();
 		void ChangeBrushSetsIndex();
 		//set use 2d rendering results
 		void SetPaintUse2d(bool use2d) { m_use2d = use2d; }
-		bool GetPaintUse2d() { return m_use2d; }
+		bool GetPaintUse2d() const { return m_use2d; }
 		//estimate threshold
 		void SetEstimateThreshold(bool value) { m_estimate_threshold = value; }
-		bool GetEstimateThreshold() { return m_estimate_threshold; }
+		bool GetEstimateThreshold() const { return m_estimate_threshold; }
 		//th udpate
-		bool GetThUpdate();
+		bool GetThUpdate() const;
 		//if auto threshold is calculated
-		bool GetAutoThreshold();
-
+		bool GetAutoThreshold() const;
 		//segment volumes in current view
 		void Segment(bool push_mask, bool est_th = true, int mx = 0, int my = 0);
 		void Select(bool push_mask, bool est_th, double radius);
@@ -205,7 +204,7 @@ namespace flrd
 			std::shared_ptr<VolumeData>& vd_g,
 			std::shared_ptr<VolumeData>& vd_b,
 			bool select, bool hide);
-		std::shared_ptr<VolumeData> GetResult(bool pop);
+		std::shared_ptr<VolumeData> GetResult(bool pop) const;
 
 		void PushMask();
 		void PopMask();
@@ -214,7 +213,7 @@ namespace flrd
 		//mask operations
 		void CopyMask(bool copy_data);
 		void SetCopyMaskVolume(const std::shared_ptr<VolumeData>& vd) { m_vd_copy = vd; }
-		std::shared_ptr<VolumeData> GetCopyMaskVolume() { return m_vd_copy; }
+		std::shared_ptr<VolumeData> GetCopyMaskVolume() const { return m_vd_copy; }
 		void PasteMask(int op);
 
 		//mouse position
@@ -222,14 +221,14 @@ namespace flrd
 		{
 			m_mx = m_my = m_mx0 = m_my0 = -1;
 		}
-		bool GetMouseVec(int mx, int my, fluo::Vector &mvec);
+		bool GetMouseVec(int mx, int my, fluo::Vector &mvec) const;
 
 		//speed test
 		bool m_test_speed;
-		double GetSpanSec() { return m_span_sec; }
+		double GetSpanSec() const { return m_span_sec; }
 
 	private:
-		std::shared_ptr<VolumeData> m_vd;	//volume data for segmentation
+		mutable std::shared_ptr<VolumeData> m_vd;	//volume data for segmentation
 		std::shared_ptr<VolumeData> m_vd_copy;//for copying mask source
 		bool m_copy_data;//copy data or mask
 
@@ -250,7 +249,7 @@ namespace flrd
 		double m_ini_thresh;
 		double m_gm_falloff;
 		double m_scl_falloff;
-		double m_scl_translate;
+		mutable double m_scl_translate;
 		bool m_select_multi;	//0-only current; 1-select group;
 		bool m_edge_detect;
 		bool m_hidden_removal;
@@ -279,7 +278,7 @@ namespace flrd
 		bool m_brush_size_data;
 
 		//exported volumes
-		std::vector<std::shared_ptr<VolumeData>> m_result_vols;
+		mutable std::vector<std::shared_ptr<VolumeData>> m_result_vols;
 
 		//a random variable
 		int m_randv;
@@ -289,8 +288,8 @@ namespace flrd
 		glm::mat4 m_mv_mat;
 		glm::mat4 m_prj_mat;
 
-		int m_mx, m_my, m_mx0, m_my0;
-		fluo::Vector m_mvec;
+		mutable int m_mx, m_my, m_mx0, m_my0;
+		mutable fluo::Vector m_mvec;
 
 		std::chrono::high_resolution_clock::time_point m_t1, m_t2;
 		double m_span_sec;
