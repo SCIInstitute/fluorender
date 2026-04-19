@@ -36,6 +36,7 @@
 #include <Vector4f.h>
 #include <ClippingBox.h>
 #include <vector>
+#include <cstring>
 
 #ifndef TextureBrick_h
 #define TEXTURE_RENDER_MODES	5
@@ -66,7 +67,7 @@ namespace flvr
 		void set_viewport(const fluo::Vector4i& vp) { viewport_ = vp; }
 
 		//mouse position in viewport
-		void set_mouse_position(int mp[2]) { memcpy(mp_, mp, sizeof(int) * 2); }
+		void set_mouse_position(int mp[2]) { std::memcpy(mp_, mp, sizeof(int) * 2); }
 		//mouse direction
 		void set_mouse_vec(fluo::Vector &mvec) { mvec_ = mvec; }
 		//set scale/zoom factor for 2d

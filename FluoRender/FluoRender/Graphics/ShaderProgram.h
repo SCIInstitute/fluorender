@@ -38,6 +38,16 @@
 #include <iostream>
 #include <unordered_set>
 
+#ifdef XValue
+#undef XValue
+#endif
+#ifdef YValue
+#undef YValue
+#endif
+#ifdef None
+#undef None
+#endif
+
 namespace flvr
 {
 	class ShaderProgram

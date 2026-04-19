@@ -29,6 +29,7 @@
 #define VolShader_h
 
 #include <ShaderProgram.h>
+#include <memory>
 
 namespace flvr
 {

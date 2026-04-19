@@ -1307,7 +1307,7 @@ target_include_directories(FORMAT_LIB PRIVATE
   ${GLM_DIRS}
   ${JPEG_INCLUDE_DIR}
   ${ND2_PATHS}
-  ${OPENJPEG_PATHS}
+  ${OPENJPEG_INCLUDE_DIRS}
   ${PNG_PNG_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR}
@@ -1339,7 +1339,7 @@ target_link_libraries(FORMAT_LIB PRIVATE
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${OPENXR_PATHS}
+  ${OPENXR_INCLUDE_DIR}
   ${Python3_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 if (WIN32 OR APPLE)
@@ -1381,8 +1381,8 @@ target_include_directories(OBJECT_LIB PRIVATE
 target_include_directories(OPENXR_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
-  ${OPENVR_PATHS}
-  ${OPENXR_PATHS})
+  ${OPENVR_INCLUDE_DIR}
+  ${OPENXR_INCLUDE_DIR})
 target_link_libraries(OPENXR_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
   ${OpenVR_LIBRARIES}
