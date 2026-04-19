@@ -36,6 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <memory>
 
+#ifdef None
+#undef None
+#endif
+
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
 #define INIT_TRANSL  4

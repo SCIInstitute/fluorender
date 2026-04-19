@@ -65,7 +65,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <RefreshScheduler.h>
 #include <Ruler.h>
-#include <format>
+//#include <format>
 
 Project::Project() :
 	Progress()

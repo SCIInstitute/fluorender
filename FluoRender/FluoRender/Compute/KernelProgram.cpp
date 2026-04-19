@@ -42,6 +42,7 @@
 #include <cmath>
 #include <sstream>
 #include <string>
+#include <cstring>
 
 namespace flvr
 {
@@ -554,14 +555,14 @@ namespace flvr
 		// Attempt to lock the weak_ptr
 		auto shared_arg = arg.lock();
 		if (!shared_arg) {
-			// Argument has expired — return empty weak_ptr
+			// Argument has expired ï¿½ return empty weak_ptr
 			return false;
 		}
 
 		// Check if the argument is already in the program's list
 		auto it = arg_list_.find(shared_arg);
 		if (it == arg_list_.end()) {
-			// Not found — insert into the list
+			// Not found ï¿½ insert into the list
 			arg_list_.insert(shared_arg);
 		}
 
@@ -603,7 +604,7 @@ namespace flvr
 		if (!existing_arg) {
 			existing_arg = Argument::createFromPointer(context_, flags, name, size, data);
 			if (!existing_arg || !existing_arg->valid_) {
-				// Failed to create buffer — return empty weak_ptr
+				// Failed to create buffer ï¿½ return empty weak_ptr
 				return std::weak_ptr<Argument>();
 			}
 
@@ -670,7 +671,7 @@ namespace flvr
 			return false;
 		}
 
-		// Case 1: Size fits — just write new data
+		// Case 1: Size fits ï¿½ just write new data
 		if (new_size <= shared_arg->size_) {
 			cl_int err = clEnqueueWriteBuffer(
 				queue_,
@@ -684,7 +685,7 @@ namespace flvr
 			return err == CL_SUCCESS;
 		}
 
-		// Case 2: Size too large — destroy and reallocate
+		// Case 2: Size too large ï¿½ destroy and reallocate
 		shared_arg->release(); // safely releases cl_mem if not protected
 
 		cl_int err = CL_SUCCESS;

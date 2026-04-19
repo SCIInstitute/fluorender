@@ -32,6 +32,10 @@
 #include <Vector4i.h>
 #include <unordered_map>
 
+#ifdef Always
+#undef Always
+#endif
+
 namespace flvr
 {
 	enum class BlendFactor : int

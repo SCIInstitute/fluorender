@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BBox.h>
 #include <Vector.h>
 #include <glm/glm.hpp>
+#include <memory>
 
 #ifndef __glew_h__
 typedef unsigned int GLuint;

@@ -996,6 +996,7 @@ inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 #include <dirent.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <cstdarg>
 
 #define FSEEK64     fseek
 

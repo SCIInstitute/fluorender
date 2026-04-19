@@ -36,6 +36,10 @@ DEALINGS IN THE SOFTWARE.
 #include <cstring>
 #include <memory>
 
+#ifdef None
+#undef None
+#endif
+
 class VolumeData;
 struct BrushRadiusSet;
 namespace flrd

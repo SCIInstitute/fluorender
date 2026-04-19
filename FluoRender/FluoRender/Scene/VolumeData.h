@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <nrrd.h>
 #include <glm/glm.hpp>
 #include <array>
+#include <memory>
 
 namespace flvr
 {

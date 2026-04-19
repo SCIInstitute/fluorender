@@ -34,6 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <Names.h>
 
+#ifdef None
+#undef None
+#endif
+
 namespace flvr
 {
 	class VertexArray;

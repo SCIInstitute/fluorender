@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _SIZE_H_
 
 #include <iostream>
+#include <cmath>
 
 // Class for managing 2D size
 class Size2D {

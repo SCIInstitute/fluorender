@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/gtc/matrix_transform.hpp>
 #include <filesystem>
 #include <unordered_map>
+#include <memory>
 
 MeshData::MeshData() :
 	m_data(nullptr, glmDelete),
