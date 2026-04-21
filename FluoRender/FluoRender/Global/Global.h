@@ -209,8 +209,8 @@ namespace fluo
 		flrd::TableHistParams& get_vp_table();
 
 		//python
-		flrd::PyBase* get_add_pybase(const std::string& name);
-		flrd::PyDlc* get_add_pydlc(const std::string& name);
+		flrd::PyBase& get_add_pybase(const std::string& name);
+		flrd::PyDlc& get_add_pydlc(const std::string& name);
 		void clear_python();
 
 		//undo sliders
@@ -319,7 +319,7 @@ namespace fluo
 		std::unique_ptr<flrd::TableHistParams> vol_prop_table_;//records for learning vol props
 
 		//python
-		using PyList = std::unordered_map<std::string, flrd::PyBase*>;//python list
+		using PyList = std::unordered_map<std::string, std::shared_ptr<flrd::PyBase>>;//python list
 		PyList python_list_;
 
 		//controls for undo and redo

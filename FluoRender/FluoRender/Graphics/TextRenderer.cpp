@@ -116,9 +116,7 @@ namespace flvr
 
 	TextTextureManager::~TextTextureManager()
 	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-			delete it->second;
+		tex_list_.clear();
 		if (m_init && m_valid)
 			FT_Done_Face(m_face);
 		if (m_init)
@@ -173,23 +171,20 @@ namespace flvr
 
 	void TextTextureManager::clear()
 	{
-		for (auto it = tex_list_.begin();
-			it != tex_list_.end(); ++it)
-			delete it->second;
 		tex_list_.clear();
 	}
 
-	TextTexture* TextTextureManager::text_texture(wchar_t p)
+	std::shared_ptr<TextTexture> TextTextureManager::text_texture(wchar_t p)
 	{
-		TextTexture* result = 0;
+		std::shared_ptr<TextTexture> result = nullptr;
 		auto it = tex_list_.find(p);
 		if (it != tex_list_.end())
 			result = it->second;
 		else
 		{
-			result = new TextTexture(p);
+			result = std::make_shared<TextTexture>(p);
 			result->create(m_face);
-			tex_list_.insert(std::pair<wchar_t, TextTexture*>(
+			tex_list_.insert(std::pair<wchar_t, std::shared_ptr<TextTexture>>(
 				p, result));
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
@@ -228,7 +223,7 @@ namespace flvr
 		const wchar_t *p;
 		for (p = text.c_str(); *p; p++)
 		{
-			TextTexture* tex_p =
+			auto tex_p =
 				glbin_text_tex_manager.text_texture(*p);
 			if (tex_p)
 			{
@@ -265,7 +260,7 @@ namespace flvr
 		const wchar_t *p;
 		for (p = text.c_str(); *p; p++)
 		{
-			TextTexture* tex_p =
+			auto tex_p =
 				glbin_text_tex_manager.text_texture(*p);
 			if (tex_p)
 				len += (tex_p->ax_ >> 6);

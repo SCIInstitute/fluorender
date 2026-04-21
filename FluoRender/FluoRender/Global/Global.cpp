@@ -407,32 +407,32 @@ flrd::TableHistParams& Global::get_vp_table()
 }
 
 //python
-flrd::PyBase* Global::get_add_pybase(const std::string& name)
+flrd::PyBase& Global::get_add_pybase(const std::string& name)
 {
 	auto it = python_list_.find(name);
 	if (it == python_list_.end())
 	{
-		flrd::PyBase* pybase = new flrd::PyBase();
-		python_list_.insert(std::pair<std::string, flrd::PyBase*>(
+		auto pybase = std::make_shared<flrd::PyBase>();
+		python_list_.insert(std::pair<std::string, std::shared_ptr<flrd::PyBase>>(
 			name, pybase));
-		return pybase;
+		return *pybase;
 	}
 	else
-		return it->second;
+		return *(it->second);
 }
 
-flrd::PyDlc* Global::get_add_pydlc(const std::string& name)
+flrd::PyDlc& Global::get_add_pydlc(const std::string& name)
 {
 	auto it = python_list_.find(name);
 	if (it == python_list_.end())
 	{
-		flrd::PyDlc* pydlc = new flrd::PyDlc();
-		python_list_.insert(std::pair<std::string, flrd::PyBase*>(
+		auto pydlc = std::make_shared<flrd::PyDlc>();
+		python_list_.insert(std::pair<std::string, std::shared_ptr<flrd::PyBase>>(
 			name, pydlc));
-		return pydlc;
+		return *pydlc;
 	}
 	else
-		return dynamic_cast<flrd::PyDlc*>(it->second);
+		return *(std::dynamic_pointer_cast<flrd::PyDlc>(it->second));
 }
 
 void Global::clear_python()
@@ -440,8 +440,8 @@ void Global::clear_python()
 	for (auto i : python_list_)
 	{
 		i.second->Exit();
-		delete i.second;
 	}
+	python_list_.clear();
 	flrd::PyBase::Free();
 }
 

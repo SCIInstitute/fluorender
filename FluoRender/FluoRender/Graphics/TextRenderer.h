@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <map>
+#include <memory>
 
 // Forward declarations for FreeType2 types
 struct FT_FaceRec_;
@@ -98,10 +99,10 @@ namespace flvr
 		void SetEnlargeScale(double dval);
 
 		void clear();
-		TextTexture* text_texture(wchar_t p);
+		std::shared_ptr<TextTexture> text_texture(wchar_t p);
 
 	private:
-		std::map<wchar_t, TextTexture*> tex_list_;
+		std::map<wchar_t, std::shared_ptr<TextTexture>> tex_list_;
 
 		FT_Library m_ft;
 		bool m_init;

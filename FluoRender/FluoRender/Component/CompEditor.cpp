@@ -236,9 +236,9 @@ void ComponentEditor::NewId(bool append, bool track)
 
 	//update label volume, set mask region to the new ID
 	int i, j, k;
-	Celp cell;
+	std::shared_ptr<Cell> cell;
 	if (new_id)
-		cell = Celp(new Cell(new_id));
+		cell = std::make_shared<Cell>(new_id);
 	for (i = 0; i < res.intx(); ++i) for (j = 0; j < res.inty(); ++j) for (k = 0; k < res.intz(); ++k)
 	{
 		index = res.get_size_xy()*k + res.intx() * j + i;

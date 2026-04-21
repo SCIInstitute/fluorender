@@ -408,22 +408,22 @@ void ComponentAnalyzer::Analyze()
 			if (iter == comp_list_brick.end())
 			{
 				//not found
-				Cell* info = 0;
+				std::shared_ptr<Cell> info;
 				if (m_colocal)
 				{
-					info = new Cell(id, brick_id,
+					info = std::make_shared<Cell>(id, brick_id,
 						1, value, static_cast<unsigned int>(std::round(ext)),
 						p + bbs->get_off_size(),
 						spc,
 						sumi, sumd);
 				}
 				else
-					info = new Cell(id, brick_id,
+					info = std::make_shared<Cell>(id, brick_id,
 						1, value, static_cast<unsigned int>(std::round(ext)),
 						p + bbs->get_off_size(),
 						spc);
-					comp_list_brick.insert(std::pair<unsigned int, Celp>
-						(id, Celp(info)));
+					comp_list_brick.insert(std::pair<unsigned int, std::shared_ptr<Cell>>
+						(id, info));
 			}
 			else
 			{

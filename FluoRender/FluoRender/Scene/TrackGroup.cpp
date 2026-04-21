@@ -45,7 +45,7 @@ TrackGroup::TrackGroup()
 	m_draw_lead = false;
 	m_cell_size = 20;
 	m_uncertain_low = 0;
-	m_track_map = flrd::pTrackMap(new flrd::TrackMap());
+	m_track_map = std::make_shared<flrd::TrackMap>();
 	m_cell_list = std::make_unique<flrd::CelpList>();
 }
 

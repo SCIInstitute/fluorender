@@ -4576,7 +4576,7 @@ void RenderView::GetTraces(bool update) const
 			label_iter = sel_labels.find(label_value);
 			if (label_iter == sel_labels.end())
 			{
-				flrd::Celp cell(new flrd::Cell(label_value));
+				auto cell = std::make_shared<flrd::Cell>(label_value);
 				cell->Inc(fluo::Point(ii, jj, kk), 1.0f);
 				sel_labels.insert(std::pair<unsigned int, flrd::Celp>
 					(label_value, cell));

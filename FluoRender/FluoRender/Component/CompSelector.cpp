@@ -193,11 +193,11 @@ void ComponentSelector::CompFull()
 				label_iter = sel_labels.find(Cell::GetKey(label_value, brick_id));
 				if (label_iter == sel_labels.end())
 				{
-					Cell* info = new Cell(label_value, brick_id);
+					std::shared_ptr<Cell> info = std::make_shared<Cell>(label_value, brick_id);
 					if (!glbin_comp_analyzer.GetAnalyzed())
 						info->SetSizeUi(1);
-					sel_labels.insert(std::pair<unsigned long long, Celp>
-						(info->GetEId(), Celp(info)));
+					sel_labels.insert(std::pair<unsigned long long, std::shared_ptr<Cell>>
+						(info->GetEId(), info));
 				}
 				else if (!glbin_comp_analyzer.GetAnalyzed())
 					label_iter->second->Inc();

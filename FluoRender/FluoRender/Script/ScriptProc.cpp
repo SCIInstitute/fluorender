@@ -2300,12 +2300,10 @@ void ScriptProc::RunPython()
 	m_fconfig->Read("command", &cmd);
 	if (cmd.empty())
 		return;
-	flrd::PyBase* python = glbin.get_add_pybase("python");
-	if (!python)
-		return;
-	python->Init();
-	python->Run(flrd::PyBase::ot_Run_SimpleString, cmd);
-	python->Exit();
+	auto& python = glbin.get_add_pybase("python");
+	python.Init();
+	python.Run(flrd::PyBase::ot_Run_SimpleString, cmd);
+	python.Exit();
 }
 
 void ScriptProc::RunDlcVideoAnalyze()
@@ -2316,10 +2314,8 @@ void ScriptProc::RunDlcVideoAnalyze()
 	auto cur_vol = glbin_current.vol_data.lock();
 	if (!cur_vol) return;
 
-	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
-	if (!dlc)
-		return;
-	if (dlc->GetState() == 2)
+	auto& dlc = glbin.get_add_pydlc("dlc");
+	if (dlc.GetState() == 2)
 		return;//busy, already created
 
 	std::wstring filename;
@@ -2334,11 +2330,11 @@ void ScriptProc::RunDlcVideoAnalyze()
 	dlcg->addSetValue(ws2s(fn), false);
 
 	//run dlc
-	dlc->Init();
-	dlc->LoadDlc();
-	dlc->SetConfigFile(cfg);
-	dlc->SetVideoFile(fn);
-	dlc->AnalyzeVideo();
+	dlc.Init();
+	dlc.LoadDlc();
+	dlc.SetConfigFile(cfg);
+	dlc.SetVideoFile(fn);
+	dlc.AnalyzeVideo();
 }
 
 void ScriptProc::RunDlcGetRulers()
@@ -2362,10 +2358,8 @@ void ScriptProc::RunDlcGetRulers()
 	if (analyzed)
 		return;
 
-	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
-	if (!dlc)
-		return;
-	if (!dlc->GetResultFile())
+	auto& dlc = glbin.get_add_pydlc("dlc");
+	if (!dlc.GetResultFile())
 	{
 		//busy
 		if (view->m_tseq_cur_num == view->m_end_frame)
@@ -2377,9 +2371,9 @@ void ScriptProc::RunDlcGetRulers()
 	//if (p.extension().string() != ".m4v")//dlc may have problem decoding m4v files
 	//	toff = 0;
 
-	int errs = dlc->GetDecodeErrorCount();
-	dlc->AddRulers(toff + errs);
-	dlc->Exit();
+	int errs = dlc.GetDecodeErrorCount();
+	dlc.AddRulers(toff + errs);
+	dlc.Exit();
 	dlcg->addSetValue(ws2s(fn), true);
 }
 
@@ -2394,35 +2388,31 @@ void ScriptProc::RunDlcCreateProj()
 	auto cur_vol = glbin_current.vol_data.lock();
 	if (!cur_vol) return;
 
-	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
-	if (!dlc)
-		return;
+	auto& dlc = glbin.get_add_pydlc("dlc");
 
 	//resoultion
 	auto res = cur_vol->GetResolution();
-	dlc->SetFrameSize(res.intx(), res.inty());
+	dlc.SetFrameSize(res.intx(), res.inty());
 	//range
-	dlc->SetFrameNumber(view->m_end_all_frame);
-	dlc->SetFrameRange(view->m_begin_frame, view->m_end_frame);
+	dlc.SetFrameNumber(view->m_end_all_frame);
+	dlc.SetFrameRange(view->m_begin_frame, view->m_end_frame);
 
 	std::wstring filename;
 	m_fconfig->Read("config", &filename);
 	filename = GetConfigFile(filename, L"yaml", L"Config", 1);
-	dlc->SetConfigFile(filename);
+	dlc.SetConfigFile(filename);
 	std::wstring stdstr = cur_vol->GetPath();
-	dlc->SetVideoFile(stdstr);
+	dlc.SetVideoFile(stdstr);
 	std::filesystem::path p(stdstr);
 	stdstr = p.stem().wstring();
-	dlc->CreateConfigFile(stdstr, L"FluoRender");
+	dlc.CreateConfigFile(stdstr, L"FluoRender");
 }
 
 void ScriptProc::RunDlcLabel()
 {
 	if (!TimeCondition())
 		return;
-	flrd::PyDlc* dlc = glbin.get_add_pydlc("dlc");
-	if (!dlc)
-		return;
+	auto& dlc = glbin.get_add_pydlc("dlc");
 	auto view = m_view.lock();
 	if (!view)
 		return;
@@ -2471,7 +2461,7 @@ void ScriptProc::RunDlcLabel()
 		}
 
 		//get path
-		std::wstring filename = dlc->GetLabelPath();
+		std::wstring filename = dlc.GetLabelPath();
 		std::wostringstream oss;
 		oss << std::setw(fn_len) << std::setfill(L'0') << curf;
 		std::filesystem::path p(filename);
@@ -2497,8 +2487,8 @@ void ScriptProc::RunDlcLabel()
 	if (curf == endf)
 	{
 		//write hdf
-		dlc->SetFrameNumber(fn);
-		dlc->WriteHDF();
+		dlc.SetFrameNumber(fn);
+		dlc.WriteHDF();
 		int maxiters = 100;
 		m_fconfig->Read("maxiters", &maxiters, 100);
 
@@ -2507,7 +2497,7 @@ void ScriptProc::RunDlcLabel()
 		dlc->LoadDlc();
 		dlc->Train(maxiters);
 #else
-		std::string cmd = dlc->GetTrainCmd(maxiters);
+		std::string cmd = dlc.GetTrainCmd(maxiters);
 		glbin_moviemaker.Hold();
 		std::thread([&cmd]{
 		std::system(cmd.c_str());

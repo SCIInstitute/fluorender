@@ -1249,17 +1249,17 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 			temp = sampler.GetResult();
 	}
 
-	BaseVolWriter *writer = 0;
+	std::shared_ptr<BaseVolWriter> writer = nullptr;
 	switch (mode)
 	{
 	case 0://multi-page tiff
-		writer = new TIFWriter();
+		writer = std::make_shared<TIFWriter>();
 		break;
 	case 1://single-page tiff sequence
-		writer = new TIFWriter();
+		writer = std::make_shared<TIFWriter>();
 		break;
 	case 2://nrrd
-		writer = new NRRDWriter();
+		writer = std::make_shared<NRRDWriter>();
 		break;
 	}
 
@@ -1282,7 +1282,6 @@ void VolumeData::Save(const std::wstring &filename, int mode,
 		writer->SetCompression(compress);
 		writer->Save(filename, mode);
 	}
-	delete writer;
 
 	if (m_resample || crop)
 	{
