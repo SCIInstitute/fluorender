@@ -147,8 +147,8 @@ private:
 	bool GetMappedRulers(
 		flrd::CelpList &sel_list1, flrd::CelpList &sel_list2,
 		flrd::RulerList &rulers,
-		size_t frame1, size_t frame2);
-	flrd::RulerListIter FindRulerFromList(unsigned int id, flrd::RulerList &list);
+		size_t frame1, size_t frame2) const;
+	std::shared_ptr<flrd::Ruler> FindRulerFromList(unsigned int id, flrd::RulerList &list) const;
 };
 
 

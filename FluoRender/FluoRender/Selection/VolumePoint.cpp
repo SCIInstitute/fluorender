@@ -59,7 +59,7 @@ double VolumePoint::GetPointVolume(
 	auto raw_data = vd->GetVolume(false);
 	if (!raw_data)
 		return -1.0;
-	flvr::Texture* tex = vd->GetTexture();
+	auto tex = vd->GetTexture();
 	if (!tex) return -1.0;
 
 	//projection

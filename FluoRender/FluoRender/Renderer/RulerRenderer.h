@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <BaseRenderer.h>
 #include <Names.h>
+#include <RulerList.h>
 #include <vector>
 #include <set>
 
@@ -43,7 +44,6 @@ namespace fluo
 }
 namespace flrd
 {
-	class RulerList;
 	struct RulerSettings : public RendererSettings
 	{
 		std::weak_ptr<RenderView> view;
@@ -55,10 +55,9 @@ namespace flrd
 	{
 	public:
 		RulerRenderer() :
-			m_ruler_list(nullptr),
 			settings_(std::make_shared<RulerSettings>()) {}
 
-		void setData(flrd::RulerList* ruler_list)
+		void setData(const flrd::RulerList& ruler_list)
 		{
 			m_ruler_list = ruler_list;
 		}
@@ -79,7 +78,7 @@ namespace flrd
 		}
 
 	private:
-		RulerList* m_ruler_list;
+		RulerList m_ruler_list;
 		std::shared_ptr<RulerSettings> settings_;
 
 	private:

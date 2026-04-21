@@ -43,10 +43,10 @@ DEALINGS IN THE SOFTWARE.
 #include <base_vol_reader.h>
 #include <lbl_reader.h>
 #include <msk_writer.h>
-#include <Texture.h>
 #include <VolumeRenderer.h>
 #include <VertexArray.h>
 #include <Ruler.h>
+#include <RulerList.h>
 #include <VolCache4D.h>
 #include <functional>
 #include <algorithm>
@@ -77,7 +77,7 @@ void TrackMapProcessor::GenMap()
 		return;
 	//get trace group
 	view->CreateTrackGroup();
-	TrackGroup* trkg = view->GetTrackGroup();
+	auto trkg = view->GetTrackGroup();
 	if (!trkg)
 		return;
 	auto vd = glbin_current.vol_data.lock();
@@ -86,7 +86,7 @@ void TrackMapProcessor::GenMap()
 	auto reader = vd->GetReader();
 	if (!reader)
 		return;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return;
 
@@ -100,7 +100,7 @@ void TrackMapProcessor::GenMap()
 	SetProgress(0, info_str);
 
 	//get and set parameters
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	auto track_map = trkg->get().GetTrackMap();
 	SetTrackMap(track_map);
 	auto res = vd->GetResolution();
 	auto spc = vd->GetSpacing();
@@ -207,10 +207,10 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return;
-	TrackGroup* trkg = view->GetTrackGroup();
+	auto trkg = view->GetTrackGroup();
 	if (!trkg)
 		return;
 	if (t < 0)
@@ -220,7 +220,7 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 
 	//start progress
 	bool clear_counters = false;
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	auto track_map = trkg->get().GetTrackMap();
 	int start_frame, end_frame;
 	if (t < 0)
 	{
@@ -300,9 +300,9 @@ void TrackMapProcessor::RefineMap(int t, bool erase_v)
 void TrackMapProcessor::SetUncertainLow(unsigned int value)
 {
 	m_uncertain_low = value;
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (trkg)
-		trkg->SetUncertainLow(value);
+		trkg->get().SetUncertainLow(value);
 }
 
 void TrackMapProcessor::SetTrackMap(const pTrackMap& map)
@@ -346,10 +346,10 @@ bool TrackMapProcessor::InitializeFrame(size_t frame)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
-	flvr::VolCache4D* cache = cache_queue->get(frame);
+	auto cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
 	auto data = cache->GetRawData();
@@ -661,11 +661,11 @@ bool TrackMapProcessor::LinkFrames(
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
-	flvr::VolCache4D* cache = cache_queue->get(f1);
+	auto cache = cache_queue->get(f1);
 	if (!cache)
 		return false;
 	auto data1 = cache->GetRawData();
@@ -1111,11 +1111,11 @@ bool TrackMapProcessor::MakeConsistent(size_t f)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get label
-	flvr::VolCache4D* cache = cache_queue->get(f);
+	auto cache = cache_queue->get(f);
 	if (!cache)
 		return false;
 	auto label = cache->GetRawLabel();
@@ -1170,11 +1170,11 @@ bool TrackMapProcessor::MakeConsistent(size_t f1, size_t f2)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get label
-	flvr::VolCache4D* cache = cache_queue->get(f2);
+	auto cache = cache_queue->get(f2);
 	if (!cache)
 		return false;
 	auto label = cache->GetRawLabel();
@@ -3447,17 +3447,17 @@ bool TrackMapProcessor::LinkAllCells()
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 
-	SetTrackMap(trkg->GetTrackMap());
+	SetTrackMap(trkg->get().GetTrackMap());
 	cache_queue->SetHandleFlags(
 		flvr::CQCallback::HDL_DATA |
 		flvr::CQCallback::HDL_LABEL |
@@ -3757,7 +3757,7 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	cache_queue->SetHandleFlags(
@@ -3768,7 +3768,7 @@ bool TrackMapProcessor::LinkAddedCells(CelpList &list, size_t f1, size_t f2)
 	cache_queue->set_max_size(3);
 
 	//get data and label
-	flvr::VolCache4D* cache = cache_queue->get(f1);
+	auto cache = cache_queue->get(f1);
 	if (!cache)
 		return false;
 	auto data1 = cache->GetRawData();
@@ -3913,10 +3913,10 @@ bool TrackMapProcessor::CombineCells(
 
 bool TrackMapProcessor::DivideCells()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
-	SetTrackMap(trkg->GetTrackMap());
+	SetTrackMap(trkg->get().GetTrackMap());
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;
@@ -4026,11 +4026,11 @@ bool TrackMapProcessor::ClusterCellsMerge(CelpList &list, size_t frame)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
-	flvr::VolCache4D* cache = cache_queue->get(frame);
+	auto cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
 	auto data = cache->GetRawData();
@@ -4102,11 +4102,11 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
-	flvr::VolCache4D* cache = cache_queue->get(frame);
+	auto cache = cache_queue->get(frame);
 	if (!cache)
 		return false;
 	auto data = cache->GetRawData();
@@ -4225,10 +4225,10 @@ bool TrackMapProcessor::ClusterCellsSplit(CelpList &list, size_t frame,
 
 bool TrackMapProcessor::SegmentCells()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return false;
-	SetTrackMap(trkg->GetTrackMap());
+	SetTrackMap(trkg->get().GetTrackMap());
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return false;
@@ -4236,11 +4236,8 @@ bool TrackMapProcessor::SegmentCells()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
-		return false;
-	flvr::Texture* tex = vd->GetTexture();
-	if (!tex)
 		return false;
 	auto res = vd->GetResolution();
 	SetBits(vd->GetBits());
@@ -4258,7 +4255,7 @@ bool TrackMapProcessor::SegmentCells()
 		return false;
 
 	//get label and data from cache
-	flvr::VolCache4D* cache = cache_queue->get(frame);
+	auto cache = cache_queue->get(frame);
 	if (cache)
 		return false;
 	auto data = cache->GetRawData();
@@ -4340,10 +4337,10 @@ void TrackMapProcessor::RelinkCells(CelpList &in, CelpList& out, size_t frame)
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return;
-	flvr::VolCache4D* cache = cache_queue->get(frame);
+	auto cache = cache_queue->get(frame);
 	bool result = false;
 	result |= RemoveCells(in, frame);
 	result |= AddCells(out, frame);
@@ -4420,10 +4417,10 @@ CelpList& TrackMapProcessor::GetListOut()
 
 void TrackMapProcessor::AnalyzeLink()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	SetTrackMap(trkg->GetTrackMap());
+	SetTrackMap(trkg->get().GetTrackMap());
 	size_t frames = m_map->GetFrameNum();
 	if (frames == 0)
 		WriteInfo(L"ERROR! Generate a track map first.\n");
@@ -4544,10 +4541,10 @@ void TrackMapProcessor::GetLinkLists(
 
 void TrackMapProcessor::AnalyzeUncertainty()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	glbin_trackmap_proc.SetTrackMap(trkg->GetTrackMap());
+	glbin_trackmap_proc.SetTrackMap(trkg->get().GetTrackMap());
 
 	bool sel = !m_list_in.empty();
 
@@ -4562,12 +4559,12 @@ void TrackMapProcessor::GetCellsByUncertainty(bool filter_in_list)
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	if (!trkg->GetTrackMap()->GetFrameNum())
+	if (!trkg->get().GetTrackMap()->GetFrameNum())
 		return;
-	SetTrackMap(trkg->GetTrackMap());
+	SetTrackMap(trkg->get().GetTrackMap());
 	size_t frame = view->m_tseq_cur_num;
 	if (frame >= m_map->m_frame_num)
 		return;
@@ -4915,10 +4912,10 @@ void TrackMapProcessor::AnalyzePath()
 {
 	auto view = glbin_current.render_view.lock();
 	size_t frame = view->m_tseq_cur_num;
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
-	SetTrackMap(trkg->GetTrackMap());
+	SetTrackMap(trkg->get().GetTrackMap());
 	if (m_list_in.empty())
 		return;
 
@@ -5002,13 +4999,13 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 	//get data and label
 	size_t f0 = mode == 1?start:f1;
 	cache_queue->set_max_size(2);
-	flvr::VolCache4D* cache = cache_queue->get(f0);
+	auto cache = cache_queue->get(f0);
 	if (!cache)
 		return false;
 	auto data1 = cache->GetRawData();
@@ -5152,25 +5149,24 @@ bool TrackMapProcessor::TrackStencils(size_t f1, size_t f2,
 //conversion
 void TrackMapProcessor::ConvertRulers()
 {
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 	auto spc = vd->GetSpacing();
-	flrd::RulerList* ruler_list = glbin_current.GetRulerList();
+	auto ruler_list = glbin_current.GetRulerList();
 	if (!ruler_list)
 		return;
 
 	//get rulers
 	flrd::RulerList rulers;
-	trkg->GetMappedRulers(rulers);
-	for (auto iter = rulers.begin();
-		iter != rulers.end(); ++iter)
+	trkg->get().GetMappedRulers(rulers);
+	for (auto ruler : rulers.All())
 	{
-		(*iter)->Scale(spc);
-		ruler_list->push_back(*iter);
+		ruler->Scale(spc);
+		ruler_list->get().Add(ruler);
 	}
 	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Rulers);
 }
@@ -5180,13 +5176,13 @@ void TrackMapProcessor::ConvertConsistent()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	TrackGroup* trkg = glbin_current.GetTrackGroup();
+	auto trkg = glbin_current.GetTrackGroup();
 	if (!trkg)
 		return;
 
 	WriteInfo(L"Generating consistent IDs in");
 
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	auto track_map = trkg->get().GetTrackMap();
 	SetTrackMap(track_map);
 	auto res = vd->GetResolution();
 	auto spc = vd->GetSpacing();
@@ -5194,7 +5190,7 @@ void TrackMapProcessor::ConvertConsistent()
 	SetScale(vd->GetScalarScale());
 	SetSizes(res);
 	SetSpacing(spc);
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(vd.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (cache_queue)
 	{
 		cache_queue->SetHandleFlags(

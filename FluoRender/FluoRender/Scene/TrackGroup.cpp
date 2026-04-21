@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackMap.h>
 #include <VertexArray.h>
 #include <Ruler.h>
+#include <RulerList.h>
 
 int TrackGroup::m_num = 0;
 TrackGroup::TrackGroup()
@@ -204,9 +205,9 @@ bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers) const
 	}
 
 	//clear ruler id??
-	for (auto iter = rulers.begin();
-	iter != rulers.end(); ++iter)
-		(*iter)->Id(0);
+	auto ruler_list = rulers.All();
+	for (auto ruler : ruler_list)
+		ruler->Id(0);
 
 	if (m_draw_tail)
 	{
@@ -317,7 +318,7 @@ unsigned int TrackGroup::GetMappedEdges(
 bool TrackGroup::GetMappedRulers(
 	flrd::CelpList& sel_list1, flrd::CelpList &sel_list2,
 	flrd::RulerList& rulers,
-	size_t frame1, size_t frame2)
+	size_t frame1, size_t frame2) const
 {
 	size_t frame_num = m_track_map->GetFrameNum();
 	if (frame1 >= frame_num ||
@@ -337,7 +338,6 @@ bool TrackGroup::GetMappedRulers(
 	flrd::CellBinIter pwcell_iter;
 	fluo::Color c;
 	std::pair<flrd::Edge, bool> inter_edge;
-	flrd::RulerListIter ruler_iter;
 
 	for (sel_iter = sel_list1.begin();
 		sel_iter != sel_list1.end();
@@ -379,22 +379,21 @@ bool TrackGroup::GetMappedRulers(
 				sel_list2.insert(std::pair<unsigned int, flrd::Celp>
 					(cell->Id(), cell));
 				//save to rulers
-				ruler_iter = FindRulerFromList(vertex1->Id(), rulers);
-				if (ruler_iter == rulers.end())
+				auto old_ruler = FindRulerFromList(vertex1->Id(), rulers);
+				if (!old_ruler)
 				{
-					flrd::Ruler* ruler = new flrd::Ruler();
+					auto ruler = std::make_shared<flrd::Ruler>();
 					ruler->SetRulerMode(flrd::RulerMode::Polyline);//multi-point
 					ruler->AddPoint(vertex1->GetCenter());
 					ruler->AddPoint(vertex2->GetCenter());
 					ruler->SetTransient(false);
 					ruler->Id(vertex2->Id());
-					rulers.push_back(ruler);
+					rulers.Add(ruler);
 				}
 				else
 				{
-					flrd::Ruler* ruler = *ruler_iter;
-					ruler->AddPoint(vertex2->GetCenter());
-					ruler->Id(vertex2->Id());
+					old_ruler->AddPoint(vertex2->GetCenter());
+					old_ruler->Id(vertex2->Id());
 				}
 			}
 		}
@@ -403,16 +402,15 @@ bool TrackGroup::GetMappedRulers(
 	return true;
 }
 
-flrd::RulerListIter TrackGroup::FindRulerFromList(unsigned int id, flrd::RulerList &list)
+std::shared_ptr<flrd::Ruler> TrackGroup::FindRulerFromList(unsigned int id, flrd::RulerList &list) const
 {
-	auto iter = list.begin();
-	while (iter != list.end())
+	auto ruler_list = list.All();
+	for (auto ruler : ruler_list)
 	{
-		if ((*iter)->Id() == id)
-			return iter;
-		++iter;
+		if (ruler->Id() == id)
+			return ruler;
 	}
-	return iter;
+	return nullptr;
 }
 
 void TrackGroup::Clear()

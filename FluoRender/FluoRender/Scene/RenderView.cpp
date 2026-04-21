@@ -7316,7 +7316,7 @@ void RenderView::DrawRulers()
 		settings->line_size = width;
 		settings->sel_line_size = width * 1.5;
 		settings->view = glbin_current.render_view.lock();
-		renderer->setData(m_ruler_list.get());
+		renderer->setData(*m_ruler_list);
 		renderer->render();
 	}
 }

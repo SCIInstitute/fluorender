@@ -43,15 +43,16 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <Transform.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <array>
 
 using namespace flrd;
 
 void RulerRenderer::render()
 {
 	auto view = settings_->view.lock();
-	if (!view || !m_ruler_list)
+	if (!view)
 		return;
-	if (m_ruler_list->empty())
+	if (m_ruler_list.IsEmpty())
 		return;
 
 	int nx = view->GetCanvasSize().w();
@@ -104,7 +105,7 @@ void RulerRenderer::render()
 unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 {
 	auto view = settings_->view.lock();
-	if (!view || !m_ruler_list)
+	if (!view)
 		return 0;
 
 	verts.clear();
@@ -129,46 +130,48 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 	std::set<int> sel_list = glbin_ruler_handler.GetSelectedRulers();
 	//estimate
 	int vert_num = 0;
-	for (size_t i = 0; i < m_ruler_list->size(); ++i)
+	auto ruler_list = m_ruler_list.All();
+	size_t i = 0;
+	for (auto ruler : ruler_list)
 	{
-		Ruler* ruler = (*m_ruler_list)[i];
+		size_t idx = i++;
 		if (!ruler || !ruler->GetDisp())
 			continue;
 		//check condition
 		if (sel_mode == 1)
 		{
-			if (sel_list.find(static_cast<int>(i)) == sel_list.end())
+			if (sel_list.find(static_cast<int>(idx)) == sel_list.end())
 				continue;
 		}
 		else if (sel_mode == 2)
 		{
-			if (sel_list.find(static_cast<int>(i)) != sel_list.end())
+			if (sel_list.find(static_cast<int>(idx)) != sel_list.end())
 				continue;
 		}
 
-		vert_num += (*m_ruler_list)[i]->GetNumPoint();
+		vert_num += ruler->GetNumPoint();
 	}
 	verts.reserve(vert_num * 10 * 3 * 2);
 
 	unsigned int num = 0;
 	fluo::Point p1, p2;
-	RulerPoint *rp1, *rp2;
 	fluo::Color c;
 	fluo::Color text_color = view->GetTextColor();
 	size_t rwt = tseq_cur_num;
-	for (size_t i = 0; i < m_ruler_list->size(); i++)
+	i = 0;
+	for (auto ruler : ruler_list)
 	{
-		Ruler* ruler = (*m_ruler_list)[i];
+		size_t idx = i++;
 		if (!ruler) continue;
 		//check condition
 		if (sel_mode == 1)
 		{
-			if (sel_list.find(static_cast<int>(i)) == sel_list.end())
+			if (sel_list.find(static_cast<int>(idx)) == sel_list.end())
 				continue;
 		}
 		else if (sel_mode == 2)
 		{
-			if (sel_list.find(static_cast<int>(i)) != sel_list.end())
+			if (sel_list.find(static_cast<int>(idx)) != sel_list.end())
 				continue;
 		}
 
@@ -192,15 +195,15 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 				if (np == 1 && draw_square)
 				{
 					//draw square
-					rp1 = ruler->GetRulerPoint(0);
+					auto rp1 = ruler->GetRulerPoint(0);
 					p1 = rp1->GetPoint(rwt, interp);
 					p1 = mv.transform(p1);
 					p1 = p.transform(p1);
 					if ((persp && (p1.z() <= 0.0 || p1.z() >= 1.0)) ||
 						(!persp && (p1.z() >= 0.0 || p1.z() <= -1.0)))
 						continue;
-					px = static_cast<float>((p1.x() + 1.0)*nx / 2.0);
-					py = static_cast<float>((p1.y() + 1.0)*ny / 2.0);
+					px = static_cast<float>((p1.x() + 1.0) * nx / 2.0);
+					py = static_cast<float>((p1.y() + 1.0) * ny / 2.0);
 					if (rp1->GetLocked())
 						DrawPoint(verts, 1, px, py, w, c);
 					else
@@ -210,16 +213,20 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 				else if (np == 4)
 				{
 					//draw ellipse
-					RulerPoint* rps[4];
-					rps[0] = ruler->GetRulerPoint(0);
-					rps[1] = ruler->GetRulerPoint(1);
-					rps[2] = ruler->GetRulerPoint(2);
-					rps[3] = ruler->GetRulerPoint(3);
-					fluo::Point pps[4];
-					pps[0] = rps[0]->GetPoint(rwt, interp);
-					pps[1] = rps[1]->GetPoint(rwt, interp);
-					pps[2] = rps[2]->GetPoint(rwt, interp);
-					pps[3] = rps[3]->GetPoint(rwt, interp);
+					auto rps = std::array<std::shared_ptr<RulerPoint>, 4>
+					{
+						ruler->GetRulerPoint(0),
+						ruler->GetRulerPoint(1),
+						ruler->GetRulerPoint(2),
+						ruler->GetRulerPoint(3)
+					};
+					auto pps = std::array<fluo::Point, 4>
+					{
+						rps[0]->GetPoint(rwt, interp),
+						rps[1]->GetPoint(rwt, interp),
+						rps[2]->GetPoint(rwt, interp),
+						rps[3]->GetPoint(rwt, interp)
+					};
 					fluo::Point ppc = ruler->GetCenter();
 					double ra, rb;
 					ra = (pps[0] - pps[1]).length() / 2.0;
@@ -276,7 +283,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 				for (int bi = 0; bi < ruler->GetNumBranch(); ++bi)
 					for (size_t j = 0; j < ruler->GetNumBranchPoint(bi); ++j)
 					{
-						rp2 = ruler->GetRulerPoint(bi, static_cast<int>(j));
+						auto rp2 = ruler->GetRulerPoint(bi, static_cast<int>(j));
 						p2 = rp2->GetPoint(rwt, interp);
 						p2 = mv.transform(p2);
 						p2 = p.transform(p2);
@@ -326,7 +333,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 			{
 				for (size_t j = 0; j < ruler->GetNumPoint(); ++j)
 				{
-					rp2 = ruler->GetRulerPoint(static_cast<int>(j));
+					auto rp2 = ruler->GetRulerPoint(static_cast<int>(j));
 					p2 = rp2->GetPoint(rwt, interp);
 					p2 = mv.transform(p2);
 					p2 = p.transform(p2);
@@ -572,9 +579,9 @@ void RulerRenderer::DrawTextAt(int nx, int ny)
 	if (!text_renderer)
 		return;
 	size_t rwt = tseq_cur_num;
-	for (size_t i = 0; i < m_ruler_list->size(); i++)
+	auto ruler_list = m_ruler_list.All();
+	for (auto ruler : ruler_list)
 	{
-		Ruler* ruler = (*m_ruler_list)[i];
 		if (!ruler) continue;
 		ruler->SetWorkTime(rwt);
 		if (!ruler->GetDisp()) continue;

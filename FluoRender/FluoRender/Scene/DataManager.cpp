@@ -113,7 +113,7 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 	}
 	else
 	{
-		glbin_vol_def.Apply(vd);
+		glbin_vol_def.Apply(*vd);
 	}
 	//disable alpha for z = 1
 	auto res = vd->GetResolution();

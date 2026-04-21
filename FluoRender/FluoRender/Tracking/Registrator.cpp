@@ -54,9 +54,10 @@ Registrator::~Registrator()
 bool Registrator::Run(size_t f1, size_t f2,
 	int mode, size_t start)
 {
-	if (!m_vd)
+	auto vd = m_vd.lock();
+	if (!vd)
 		return false;
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(m_vd);
+	auto cache_queue = glbin_data_manager.GetCacheQueue(vd);
 	if (!cache_queue)
 		return false;
 
@@ -78,7 +79,7 @@ bool Registrator::Run(size_t f1, size_t f2,
 		return false;
 	cache_queue->protect(f0);
 
-	auto res = m_vd->GetResolution();
+	auto res = vd->GetResolution();
 	Stencil s1, s2;
 	s1.data = data1;
 	s1.mask = mask1;
@@ -86,10 +87,10 @@ bool Registrator::Run(size_t f1, size_t f2,
 	s1.nx = s2.nx = res.intx();
 	s1.ny = s2.ny = res.inty();
 	s1.nz = s2.nz = res.intz();
-	int bits = m_vd->GetBits();
+	int bits = vd->GetBits();
 	s1.bits = s2.bits = bits;
-	s1.scale = s2.scale = static_cast<float>(m_vd->GetScalarScale());
-	s1.max_int = s2.max_int = static_cast<float>(m_vd->GetMaxValue());
+	s1.scale = s2.scale = static_cast<float>(vd->GetScalarScale());
+	s1.max_int = s2.max_int = static_cast<float>(vd->GetMaxValue());
 	s1.fsize = s2.fsize = m_fsize;
 	fluo::BBox extent(fluo::Point(0), fluo::Point(res));
 	if (m_use_mask)
@@ -145,8 +146,9 @@ fluo::Vector Registrator::GetTranslateVol()
 {
 	fluo::Vector result = m_translate;
 	fluo::Vector spc = fluo::Vector(1.0);
-	if (m_vd)
-		spc = m_vd->GetSpacing();
+	auto vd = m_vd.lock();
+	if (vd)
+		spc = vd->GetSpacing();
 	result *= spc;
 	return result;
 }
@@ -155,8 +157,9 @@ fluo::Point Registrator::GetCenterVol()
 {
 	fluo::Point result = m_center;
 	fluo::Vector spc = fluo::Vector(1.0);
-	if (m_vd)
-		spc = m_vd->GetSpacing();
+	auto vd = m_vd.lock();
+	if (vd)
+		spc = vd->GetSpacing();
 	result.scale(spc);
 	return result;
 }

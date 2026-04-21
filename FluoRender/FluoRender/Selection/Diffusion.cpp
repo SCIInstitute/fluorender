@@ -216,11 +216,11 @@ std::shared_ptr<fluo::RawData> Diffusion::GetMask(
 	{
 		auto offset = fluo::Brick::Offset3();
 		auto res = b->get_size();
-		auto size = fluo::Brick::Size3(
-			res.intx(), res.inty(), res.intz());
+		fluo::Brick::Size3 size{
+			res.intx(), res.inty(), res.intz() };
 		auto stride = b->get_stride();
-		auto stride3 = fluo::Brick::Size3(
-			stride.intx(), stride.inty(), stride.intz());
+		fluo::Brick::Size3 stride3{
+			stride.intx(), stride.inty(), stride.intz() };
 		auto raw_mask = vd->GetMask(true);
 		fluo::DataBrick mask_brick(offset, size, *raw_mask, stride3);
 		return mask_brick.Extract();

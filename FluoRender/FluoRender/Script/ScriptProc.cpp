@@ -654,21 +654,22 @@ void ScriptProc::RunPreTracking()
 	//before updating volume
 	glbin_comp_analyzer.SetVolume(cur_vol);
 	glbin_comp_analyzer.Analyze();
-	flrd::CelpList* list = glbin_comp_analyzer.GetCelpList();
+	auto list = glbin_comp_analyzer.GetCelpList();
+	if (!list)
+		return;
 	m_sel_labels->clear();
-	for (auto it = list->begin();
-		it != list->end(); ++it)
+	for (auto it : list->get())
 	{
-		if (it->second->GetSize() > slimit)
+		if (it.second->GetSize() > slimit)
 		{
-			flrd::Celp celp(new flrd::Cell(it->second->Id()));
-			celp->Copy(it->second, true);
+			auto celp = std::make_shared<flrd::Cell>(it.second->Id());
+			celp->Copy(it.second, true);
 			//celp->SetSizeUi(it->second->sumi);
 			//celp->SetSizeD(it->second->sumd);
 			//celp->SetCenter(it->second->pos);
 			//celp->SetBox(it->second->box);
 			m_sel_labels->insert(std::pair<unsigned int, flrd::Celp>
-				(it->second->Id(), celp));
+				(it.second->Id(), celp));
 		}
 	}
 }
@@ -686,16 +687,16 @@ void ScriptProc::RunPostTracking()
 	if (!view)
 		return;
 
-	TrackGroup* tg = view->GetTrackGroup();
+	auto tg = view->GetTrackGroup();
 	if (!tg) return;
 
 	//after updating volume
-	if (tg->GetTrackMap()->GetFrameNum())
+	if (tg->get().GetTrackMap()->GetFrameNum())
 	{
 		//create new id list
-		tg->SetCurTime(view->m_tseq_cur_num);
-		tg->SetPrvTime(view->m_tseq_prv_num);
-		tg->UpdateCellList(*m_sel_labels);
+		tg->get().SetCurTime(view->m_tseq_cur_num);
+		tg->get().SetPrvTime(view->m_tseq_prv_num);
+		tg->get().UpdateCellList(*m_sel_labels);
 		glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Traces);
 	}
 
@@ -721,7 +722,7 @@ void ScriptProc::RunPostTracking()
 
 	// --- build selection predicate ---------------------------------------
 	const bool use_tracking =
-		tg->GetTrackMap()->GetFrameNum() != 0;
+		tg->get().GetTrackMap()->GetFrameNum() != 0;
 
 	// --- update mask from label ------------------------------------------
 	fluo::RawData::DispatchBinaryConvert(
@@ -731,7 +732,7 @@ void ScriptProc::RunPostTracking()
 		{
 			if (use_tracking)
 			{
-				return tg->FindCell(label_value) ? 255 : 0;
+				return tg->get().FindCell(label_value) ? 255 : 0;
 			}
 			else
 			{
@@ -755,7 +756,7 @@ void ScriptProc::RunMaskTracking()
 	auto view = m_view.lock();
 	if (!view)
 		return;
-	TrackGroup* tg = view->GetTrackGroup();
+	auto tg = view->GetTrackGroup();
 	if (!tg)
 	{
 		view->CreateTrackGroup();
@@ -792,7 +793,7 @@ void ScriptProc::RunMaskTracking()
 	int sim;
 	m_fconfig->Read("sim", &sim, 0);
 
-	flrd::pTrackMap track_map = tg->GetTrackMap();
+	auto track_map = tg->get().GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	auto res = cur_vol->GetResolution();
 	auto spc = cur_vol->GetSpacing();
@@ -805,7 +806,7 @@ void ScriptProc::RunMaskTracking()
 	glbin_trackmap_proc.SetFilterSize(fsize);
 	glbin_trackmap_proc.SetStencilThresh(fluo::Point(stsize));
 	//register file reading and deleteing functions
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(cur_vol.get());
+	auto cache_queue = glbin_data_manager.GetCacheQueue(cur_vol);
 	if (cache_queue)
 		cache_queue->SetHandleFlags(
 			flvr::CQCallback::HDL_DATA |
@@ -1292,19 +1293,15 @@ void ScriptProc::RunCompAnalysis()
 		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
 		cmdg->addSetValue("type", m_type);
 
-		CelpList* celp_list = glbin_comp_analyzer.GetCelpList();
-		CellGraph* graph = glbin_comp_analyzer.GetCellGraph();
+		auto celp_list = glbin_comp_analyzer.GetCelpList();
+		auto graph = glbin_comp_analyzer.GetCellGraph();
 		if (!celp_list || !graph)
 			continue;
-		fluo::Vector scale(
-			celp_list->sx,
-			celp_list->sy,
-			celp_list->sz);
+		auto scale = celp_list->get().scale;
 		double size_scale = scale.x() * scale.y() * scale.z();
 		double maxscale = (*itvol)->GetMaxScale();
 		double scalarscale = (*itvol)->GetScalarScale();
-		for (auto itc = celp_list->begin();
-			itc != celp_list->end(); ++itc)
+		for (auto itc : celp_list->get())
 		{
 			std::list<unsigned int> ids;
 			std::list<unsigned int> brick_ids;
@@ -1312,11 +1309,11 @@ void ScriptProc::RunCompAnalysis()
 
 			if (bn > 1)
 			{
-				if (graph->Visited(itc->second))
+				if (graph->get().Visited(itc.second))
 					continue;
 
 				CelpList list;
-				if (graph->GetLinkedComps(itc->second, list, slimit))
+				if (graph->get().GetLinkedComps(itc.second, list, slimit))
 				{
 					for (auto iter = list.begin();
 						iter != list.end(); ++iter)
@@ -1329,31 +1326,31 @@ void ScriptProc::RunCompAnalysis()
 			}
 			if (!added)
 			{
-				ids.push_back(itc->second->Id());
-				brick_ids.push_back(itc->second->BrickId());
+				ids.push_back(itc.second->Id());
+				brick_ids.push_back(itc.second->BrickId());
 			}
 
 			//pca
-			itc->second->GetPca().Compute();
-			lens = itc->second->GetPca().GetLengths();
+			itc.second->GetPca().Compute();
+			lens = itc.second->GetPca().GetLengths();
 
 			unsigned long id = ids.front();
 
 			//result node
 			fluo::Node* node = cmdg->getOrAddNode(std::to_string(id));
 			node->addSetValue("type", std::string("comp"));
-			node->addSetValue("comp_center", itc->second->GetCenter(scale));
-			node->addSetValue("comp_size_ui", (unsigned long)(itc->second->GetSizeUi()));
-			node->addSetValue("comp_size_d", itc->second->GetSizeD(scalarscale));
-			node->addSetValue("comp_phys_size_ui", size_scale * itc->second->GetSizeUi());
-			node->addSetValue("comp_phys_size_d", itc->second->GetSizeD(size_scale * scalarscale));
-			node->addSetValue("comp_ext_size_ui", (unsigned long)(itc->second->GetExtUi()));
-			node->addSetValue("comp_ext_size_d", itc->second->GetExtD(scalarscale));
-			node->addSetValue("comp_mean", itc->second->GetMean(maxscale));
-			node->addSetValue("comp_stdev", itc->second->GetStd(maxscale));
-			node->addSetValue("comp_min", itc->second->GetMin(maxscale));
-			node->addSetValue("comp_max", itc->second->GetMax(maxscale));
-			node->addSetValue("comp_distp", itc->second->GetDistp());
+			node->addSetValue("comp_center", itc.second->GetCenter(scale));
+			node->addSetValue("comp_size_ui", (unsigned long)(itc.second->GetSizeUi()));
+			node->addSetValue("comp_size_d", itc.second->GetSizeD(scalarscale));
+			node->addSetValue("comp_phys_size_ui", size_scale * itc.second->GetSizeUi());
+			node->addSetValue("comp_phys_size_d", itc.second->GetSizeD(size_scale * scalarscale));
+			node->addSetValue("comp_ext_size_ui", (unsigned long)(itc.second->GetExtUi()));
+			node->addSetValue("comp_ext_size_d", itc.second->GetExtD(scalarscale));
+			node->addSetValue("comp_mean", itc.second->GetMean(maxscale));
+			node->addSetValue("comp_stdev", itc.second->GetStd(maxscale));
+			node->addSetValue("comp_min", itc.second->GetMin(maxscale));
+			node->addSetValue("comp_max", itc.second->GetMax(maxscale));
+			node->addSetValue("comp_distp", itc.second->GetDistp());
 			node->addSetValue("comp_pca_lens", lens.x());
 		}
 	}
@@ -1372,8 +1369,8 @@ void ScriptProc::RunCompRuler()
 	auto view = m_view.lock();
 	if (!view)
 		return;
-	RulerList* ruler_list = view->GetRulerList();
-	if (!ruler_list || ruler_list->empty())
+	auto ruler_list = view->GetRulerList();
+	if (!ruler_list || ruler_list->get().IsEmpty())
 		return;
 
 	int dim;
@@ -1382,7 +1379,7 @@ void ScriptProc::RunCompRuler()
 	m_fconfig->Read("name", &name);
 	double len;
 	m_fconfig->Read("length", &len);//physical length
-	flrd::Ruler* ruler = ruler_list->GetRuler(name);
+	auto ruler = ruler_list->get().FindByName(name);
 	if (!ruler)
 		return;
 	if (ruler->GetNumPoint() < 2)
@@ -1505,8 +1502,8 @@ void ScriptProc::RunRulerProfile()
 	if (!view)
 		return;
 
-	RulerList* ruler_list = view->GetRulerList();
-	if (!ruler_list || ruler_list->empty()) return;
+	auto ruler_list = view->GetRulerList();
+	if (!ruler_list || ruler_list->get().IsEmpty()) return;
 
 	int ival;
 	double dval;
@@ -1541,18 +1538,18 @@ void ScriptProc::RunRulerProfile()
 		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
 		cmdg->addSetValue("type", m_type);
 
-		for (size_t i = 0; i < ruler_list->size(); ++i)
+		auto rulers = ruler_list->get().All();
+		for (auto ruler : rulers)
 		{
 			//for each ruler
-			flrd::Ruler* ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
 			ruler->SetWorkTime(curf);
 			fluo::Node* ruler_node = cmdg->getOrAddNode(std::to_string(ruler->Id() + 1));
 			ruler_node->addSetValue("type", std::string("ruler"));
 
-			std::vector<flrd::ProfileBin>* profile = ruler->GetProfile();
-			if (profile && profile->size())
+			auto profile = ruler->GetProfile();
+			if (!profile.empty())
 			{
 				double dval, dist;
 				//max intensity
@@ -1561,16 +1558,16 @@ void ScriptProc::RunRulerProfile()
 				ruler_node->addSetValue("max_dist", dist);
 				double sumd = 0.0;
 				unsigned long long sumull = 0;
-				for (size_t j = 0; j < profile->size(); ++j)
+				for (size_t j = 0; j < profile.size(); ++j)
 				{
 					//for each profile
-					int pixels = (*profile)[j].m_pixels;
+					int pixels = profile[j].m_pixels;
 					if (pixels <= 0)
 						dval = 0;
 					else
 					{
-						dval = (*profile)[j].m_accum / pixels;
-						sumd += (*profile)[j].m_accum;
+						dval = profile[j].m_accum / pixels;
+						sumd += profile[j].m_accum;
 						sumull += pixels;
 					}
 					ruler_node->addSetValue(std::to_string(j), dval);
@@ -1591,8 +1588,8 @@ void ScriptProc::RunRoi()
 	if (!view)
 		return;
 
-	RulerList* ruler_list = view->GetRulerList();
-	if (!ruler_list || ruler_list->empty()) return;
+	auto ruler_list = view->GetRulerList();
+	if (!ruler_list || ruler_list->get().IsEmpty()) return;
 
 	int curf = view->m_tseq_cur_num;
 	int chan_num = vlist.size();
@@ -1617,10 +1614,10 @@ void ScriptProc::RunRoi()
 		fluo::Group* cmdg = chg->getOrAddGroup(m_type);
 		cmdg->addSetValue("type", m_type);
 
-		for (size_t i = 0; i < ruler_list->size(); ++i)
+		auto rulers = ruler_list->get().All();
+		for (auto ruler : rulers)
 		{
 			//for each ruler
-			flrd::Ruler* ruler = (*ruler_list)[i];
 			if (!ruler) continue;
 			if (!ruler->GetDisp()) continue;
 			ruler->SetWorkTime(curf);
@@ -1668,14 +1665,14 @@ void ScriptProc::RunAddCells()
 	auto view = m_view.lock();
 	if (!view)
 		return;
-	TrackGroup* tg = view->GetTrackGroup();
+	auto tg = view->GetTrackGroup();
 	if (!tg)
 	{
 		view->CreateTrackGroup();
 		tg = view->GetTrackGroup();
 	}
 
-	flrd::pTrackMap track_map = tg->GetTrackMap();
+	auto track_map = tg->get().GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
 	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
@@ -1695,11 +1692,11 @@ void ScriptProc::RunLinkCells()
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
-	TrackGroup* trkg = view->GetTrackGroup();
+	auto trkg = view->GetTrackGroup();
 	if (!trkg)
 		return;
 
-	flrd::pTrackMap track_map = trkg->GetTrackMap();
+	auto track_map = trkg->get().GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	glbin_trackmap_proc.SetBits(vd->GetBits());
 	glbin_trackmap_proc.SetScale(vd->GetScalarScale());
@@ -1721,11 +1718,11 @@ void ScriptProc::RunUnlinkCells()
 	auto cur_vol = glbin_current.vol_data.lock();
 	if (!cur_vol)
 		return;
-	TrackGroup* tg = view->GetTrackGroup();
+	auto tg = view->GetTrackGroup();
 	if (!tg)
 		return;
 
-	flrd::pTrackMap track_map = tg->GetTrackMap();
+	auto track_map = tg->get().GetTrackMap();
 	glbin_trackmap_proc.SetTrackMap(track_map);
 	glbin_trackmap_proc.SetBits(cur_vol->GetBits());
 	glbin_trackmap_proc.SetScale(cur_vol->GetScalarScale());
@@ -1754,7 +1751,7 @@ void ScriptProc::RunBackgroundStat()
 		itvol != vlist.end(); ++itvol, ++ch)
 	{
 
-		flrd::BackgStat bgs(itvol->get());
+		flrd::BackgStat bgs(*itvol);
 		bool bval;
 		m_fconfig->Read("use_mask", &bval, false);
 		bgs.SetUseMask(bval);
@@ -1878,8 +1875,8 @@ void ScriptProc::RunRegistration()
 	registrator.SetConvNum(plevel);
 	registrator.SetFilterSize(fsize);
 	registrator.SetMethod(sim);
-	registrator.SetVolumeData(cur_vol.get());
-	flvr::CacheQueue* cache_queue = glbin_data_manager.GetCacheQueue(cur_vol.get());
+	registrator.SetVolumeData(cur_vol);
+	auto cache_queue = glbin_data_manager.GetCacheQueue(cur_vol);
 	if (cache_queue)
 	{
 		if (use_mask)
@@ -1991,8 +1988,8 @@ void ScriptProc::RunCameraPoints()
 	bool metric;
 	m_fconfig->Read("metric", &metric, true);
 
-	RulerList* ruler_list = view->GetRulerList();
-	if (!ruler_list || ruler_list->empty()) return;
+	auto ruler_list = view->GetRulerList();
+	if (!ruler_list || ruler_list->get().IsEmpty()) return;
 	auto cur_vol = glbin_current.vol_data.lock();
 	if (!cur_vol)
 		return;
@@ -2000,7 +1997,7 @@ void ScriptProc::RunCameraPoints()
 
 	Camera2Ruler c2r;
 	c2r.SetImageSize(res.intx(), res.inty());
-	c2r.SetList(1, ruler_list);
+	c2r.SetList(1, ruler_list->get());
 	c2r.SetRange(1, view->m_begin_frame, view->m_end_frame);
 	int startf, endf;
 	GetRulers(prj2, startf, endf);
@@ -2013,12 +2010,12 @@ void ScriptProc::RunCameraPoints()
 	c2r.SetSlope(slope);
 	c2r.Correct();
 
-	RulerList* result_list = c2r.GetResult();
-	if (result_list && !result_list->empty())
+	auto& result_rulers = c2r.GetResult();
+	if (!result_rulers.IsEmpty())
 	{
-		ruler_list->DeleteRulers();
-		ruler_list->assign(result_list->begin(), result_list->end());
-		delete result_list;
+		result_rulers.Clear();
+		result_rulers = ruler_list->get();
+		ruler_list->get().Clear();
 	}
 
 	//turn off all channels
@@ -2044,8 +2041,8 @@ void ScriptProc::RunRulerInfo()
 	auto view = m_view.lock();
 	if (!view)
 		return;
-	RulerList* ruler_list = view->GetRulerList();
-	if (!ruler_list || ruler_list->empty())
+	auto ruler_list = view->GetRulerList();
+	if (!ruler_list || ruler_list->get().IsEmpty())
 		return;
 
 	int curf = view->m_tseq_cur_num;
@@ -2055,10 +2052,10 @@ void ScriptProc::RunRulerInfo()
 	fluo::Group* cmdg = m_output->getOrAddGroup(m_type);
 	cmdg->addSetValue("type", m_type);
 
-	for (size_t i = 0; i < ruler_list->size(); ++i)
+	auto rulers = ruler_list->get().All();
+	for (auto ruler : rulers)
 	{
 		//for each ruler
-		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
@@ -2081,8 +2078,8 @@ void ScriptProc::RunRulerTransform()
 	auto view = m_view.lock();
 	if (!view)
 		return;
-	RulerList* ruler_list = view->GetRulerList();
-	if (!ruler_list || ruler_list->empty())
+	auto ruler_list = view->GetRulerList();
+	if (!ruler_list || ruler_list->get().IsEmpty())
 		return;
 
 	int dim;
@@ -2091,7 +2088,7 @@ void ScriptProc::RunRulerTransform()
 	m_fconfig->Read("name", &name);
 	double len;
 	m_fconfig->Read("length", &len);//physical length
-	flrd::Ruler* ruler = ruler_list->GetRuler(name);
+	auto ruler = ruler_list->get().FindByName(name);
 	if (!ruler)
 		return;
 	if (ruler->GetNumPoint() < 2)
@@ -2134,10 +2131,10 @@ void ScriptProc::RunRulerTransform()
 	cmdg->addSetValue("type", m_type);//ruler_transform
 	cmdg->addSetValue("dim", (long)dim);
 
-	for (size_t i = 0; i < ruler_list->size(); ++i)
+	auto rulers = ruler_list->get().All();
+	for (auto ruler : rulers)
 	{
 		//for each ruler
-		flrd::Ruler* ruler = (*ruler_list)[i];
 		if (!ruler) continue;
 		if (!ruler->GetDisp()) continue;
 		fluo::Group* ruler_group = cmdg->getOrAddGroup(std::to_string(ruler->Id() + 1));
@@ -2263,10 +2260,10 @@ void ScriptProc::RunConvertMesh()
 	{
 		if (!it)
 			continue;
-		glbin_conv_vol_mesh->SetVolumeData(it);
-		glbin_conv_vol_mesh->Update(true);
-		glbin_conv_vol_mesh->MergeVertices(true);
-		auto md = glbin_conv_vol_mesh->GetMeshData();
+		glbin_conv_vol_mesh.SetVolumeData(it);
+		glbin_conv_vol_mesh.Update(true);
+		glbin_conv_vol_mesh.MergeVertices(true);
+		auto md = glbin_conv_vol_mesh.GetMeshData();
 		if (it->GetLabel(false))
 		{
 			glbin_color_mesh.SetUseSel(true);
@@ -2381,7 +2378,7 @@ void ScriptProc::RunDlcGetRulers()
 	//	toff = 0;
 
 	int errs = dlc->GetDecodeErrorCount();
-	dlc->AddRulers(&glbin_ruler_handler, toff + errs);
+	dlc->AddRulers(toff + errs);
 	dlc->Exit();
 	dlcg->addSetValue(ws2s(fn), true);
 }
@@ -2416,7 +2413,7 @@ void ScriptProc::RunDlcCreateProj()
 	dlc->SetVideoFile(stdstr);
 	std::filesystem::path p(stdstr);
 	stdstr = p.stem().wstring();
-	dlc->CreateConfigFile(stdstr, L"FluoRender", &glbin_ruler_handler);
+	dlc->CreateConfigFile(stdstr, L"FluoRender");
 }
 
 void ScriptProc::RunDlcLabel()
@@ -2501,7 +2498,7 @@ void ScriptProc::RunDlcLabel()
 	{
 		//write hdf
 		dlc->SetFrameNumber(fn);
-		dlc->WriteHDF(&glbin_ruler_handler);
+		dlc->WriteHDF();
 		int maxiters = 100;
 		m_fconfig->Read("maxiters", &maxiters, 100);
 
