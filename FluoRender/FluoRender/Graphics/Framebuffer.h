@@ -29,6 +29,7 @@
 #define Framebuffer_h
 
 #include <FramebufferState.h>
+#include <FramebufferTexture.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -43,78 +44,8 @@ typedef float GLfloat;
 
 namespace flvr
 {
-	enum class FBTexType : int
-	{
-		Render_RGBA,
-		UChar_RGBA,
-		Render_Int32,
-		Render_Float,
-		Render_FloatRG,//two channel
-		Depth_Float,
-		Ext_3D
-	};
-	enum class TexFilter : int {
-		Nearest,
-		Linear,
-		LinearMipmapLinear,
-		// Add more as needed
-	};
-	enum class TexWrap : int {
-		ClampToEdge,
-		Repeat,
-		MirroredRepeat,
-		// Add more as needed
-	};
-	struct FBTexConfig {
-		FBTexType type;
-		bool useMipmap = false;
-		TexFilter minFilter = TexFilter::Nearest;
-		TexFilter magFilter = TexFilter::Nearest;
-		TexWrap wrapS = TexWrap::ClampToEdge;
-		TexWrap wrapT = TexWrap::ClampToEdge;
-	};
-	inline bool operator==(const FBTexConfig& a, const FBTexConfig& b)
-	{
-		return a.type == b.type &&
-				a.useMipmap == b.useMipmap &&
-				a.minFilter == b.minFilter &&
-				a.magFilter == b.magFilter &&
-				a.wrapS == b.wrapS &&
-				a.wrapT == b.wrapT;
-	}
-	inline bool operator!=(const FBTexConfig& a, const FBTexConfig& b)
-	{
-		return !(a == b);
-	}
-	class Framebuffer;
 	class FramebufferFactory;
 	class FramebufferStateGuard;
-	class FramebufferTexture
-	{
-	public:
-		FramebufferTexture(const FBTexConfig& config, int nx, int ny);
-		~FramebufferTexture();
-
-		void create();
-		void destroy();
-		bool bind(int tex_unit);
-		void unbind();
-		bool valid() { return valid_; }
-		unsigned int id() { return id_; }
-		void resize(int nx, int ny);
-		bool match_config(const FBTexConfig& config) { return config == config_; }
-		bool match_size(int nx, int ny) { return nx == nx_ && ny == ny_; }
-
-	private:
-		unsigned int id_ = 0;
-		FBTexConfig config_;
-		int nx_ = 0;
-		int ny_ = 0;
-		bool valid_ = false;
-		int tex_unit_ = -1;
-
-		friend class Framebuffer;
-	};
 
 	enum class FBRole : int
 	{
