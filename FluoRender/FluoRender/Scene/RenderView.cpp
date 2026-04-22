@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LookingGlassRenderer.h>
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <MultiVolumeRenderer.h>
 #include <TextRenderer.h>
@@ -612,7 +612,7 @@ void RenderView::Init()
 		flvr::TextureRenderer::gl_context_ = ctx;
 #endif
 	glbin_settings.GetGraphicsInfo();
-	flvr::Texture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
+	flvr::VolumeTexture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
 
 	//canvas buffer for default fbo
 	auto default_buffer = glbin_framebuffer_manager.framebuffer(

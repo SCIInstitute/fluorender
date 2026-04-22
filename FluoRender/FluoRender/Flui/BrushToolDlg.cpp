@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <VolumeData.h>
 #include <Count.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <VolumeSelector.h>
 #include <Colocalize.h>
 #include <Ruler.h>

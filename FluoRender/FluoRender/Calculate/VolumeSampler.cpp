@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <Vector.h>
 #include <Plane.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <VolumeRenderer.h>
 #include <stdexcept>
 

@@ -61,7 +61,7 @@ namespace fluo
 namespace flvr
 {
 	class CacheQueue;
-	class Texture;
+	class VolumeTexture;
 	class TextureBrick;
 	enum class RenderMode : int;
 	enum class CompType : int;
@@ -211,7 +211,7 @@ namespace flvr
 		void set_mode(RenderMode mode) { render_mode_ = mode; }
 
 		//set the texture for rendering
-		void set_texture(const std::shared_ptr<Texture>& tex);
+		void set_texture(const std::shared_ptr<VolumeTexture>& tex);
 		void reset_texture();
 
 		//clear the opengl textures from the texture pool
@@ -306,7 +306,7 @@ namespace flvr
 			std::shared_ptr<TextureBrick> brick;  //a brick
 			double dist;      //distance to another brick
 		};
-		std::weak_ptr<Texture> tex_;
+		std::weak_ptr<VolumeTexture> tex_;
 		RenderMode render_mode_;
 		double sample_rate_;
 		size_t num_slices_;

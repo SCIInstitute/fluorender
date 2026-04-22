@@ -29,7 +29,7 @@
 #include <GL/glew.h>
 #include <GLPixelFormat.h>
 #include <TextureBrick.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureRenderer.h>
 #include <Global.h>
 #include <MainSettings.h>
@@ -538,7 +538,7 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::is_nbmask_valid(const std::shared_ptr<Texture>& tex)
+	bool TextureBrick::is_nbmask_valid(const std::shared_ptr<VolumeTexture>& tex)
 	{
 		if (mask_valid_) return true;
 		//check neighbors

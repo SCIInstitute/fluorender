@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <RenderView.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 #include <Point.h>

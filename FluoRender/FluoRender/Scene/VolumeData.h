@@ -42,7 +42,7 @@ namespace flvr
 {
 	class VolumeRenderer;
 	class TextureBrick;
-	class Texture;
+	class VolumeTexture;
 	enum class RenderMode : int;
 	enum class ColormapProj : int;
 	enum class ColorMode : int;
@@ -148,7 +148,7 @@ public:
 	//volumerenderer
 	flvr::VolumeRenderer& GetVolumeRenderer() const { return *m_vr; }
 	//texture
-	std::shared_ptr<flvr::Texture> GetTexture() const { return m_tex; }
+	std::shared_ptr<flvr::VolumeTexture> GetTexture() const { return m_tex; }
 
 	//bounding box
 	fluo::BBox GetBounds() const;
@@ -491,7 +491,7 @@ public:
 private:
 	mutable std::shared_ptr<flrd::EntryParams> m_ep;
 	std::unique_ptr<flvr::VolumeRenderer> m_vr;
-	std::shared_ptr<flvr::Texture> m_tex;
+	std::shared_ptr<flvr::VolumeTexture> m_tex;
 
 	std::wstring m_tex_path;
 	fluo::BBox m_bounds;

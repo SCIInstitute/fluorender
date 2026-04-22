@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <KernelProgram.h>
 #include <KernelFactory.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 

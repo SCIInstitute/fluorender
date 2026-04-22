@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolCache4D.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <Global.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>

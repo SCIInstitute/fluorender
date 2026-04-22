@@ -60,7 +60,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <VertexArray.h>
 #include <VolumeRenderer.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <KernelExecutor.h>
 #include <TrackMap.h>
 #include <Ruler.h>

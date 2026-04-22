@@ -48,7 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <VolumeRenderer.h>
 #include <Framebuffer.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <VolumeCalculator.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -440,7 +440,7 @@ void VolumeSelector::Select(bool push_mask, bool est_th, double radius)
 		}
 	}
 
-	if (flvr::Texture::mask_undo_num_ > 0)
+	if (flvr::VolumeTexture::mask_undo_num_ > 0)
 		m_vd->GetVolumeRenderer().return_mask();
 
 	if (m_mode == SelectMode::Clear)
@@ -848,7 +848,7 @@ void VolumeSelector::PushMask()
 		m_vd = glbin_current.vol_data.lock();
 	if (!m_vd || !m_vd->GetTexture())
 		return;
-	if (flvr::Texture::mask_undo_num_ > 0)
+	if (flvr::VolumeTexture::mask_undo_num_ > 0)
 		m_vd->GetTexture()->push_mask();
 }
 
@@ -912,7 +912,7 @@ void VolumeSelector::PasteMask(int op)
 			return;
 
 		//undo/redo
-		if (flvr::Texture::mask_undo_num_ > 0 &&
+		if (flvr::VolumeTexture::mask_undo_num_ > 0 &&
 			m_vd->GetTexture())
 			m_vd->GetTexture()->push_mask();
 		if (m_copy_data)

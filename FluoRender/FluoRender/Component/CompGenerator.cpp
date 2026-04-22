@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <EntryParams.h>
 #include <Reshape.h>
 #include <VolumeData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <KernelFactory.h>
 #include <VolumeRenderer.h>

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <VolumeDefault.h>
 #include <CurrentObjects.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 #include <Ruler.h>

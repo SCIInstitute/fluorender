@@ -32,7 +32,7 @@
 #include <Names.h>
 #include <MainSettings.h>
 #include <Plane.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <Framebuffer.h>
 #include <VolShader.h>
 #include <ImgShader.h>
@@ -1123,7 +1123,7 @@ void VolumeRenderer::calculate(int type, const VolumeRenderer& vr_a, const Volum
 	std::vector<std::shared_ptr<TextureBrick>> bricks_a;
 	std::vector<std::shared_ptr<TextureBrick>> bricks_b;
 
-	std::shared_ptr<Texture> tex_a, tex_b;
+	std::shared_ptr<VolumeTexture> tex_a, tex_b;
 	tex_a = vr_a.tex_.lock();
 	if (tex_a)
 	{

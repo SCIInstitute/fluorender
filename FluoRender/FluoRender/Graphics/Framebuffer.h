@@ -83,14 +83,14 @@ namespace flvr
 	struct AttachmentSpec
 	{
 		AttachmentPoint point;
-		FBTexConfig config;
+		TextureDesc config;
 	};
 
 	struct AttachmentRecord
 	{
 		AttachmentPoint point;                       // where it attaches
 		std::shared_ptr<FramebufferTexture> texture; // the texture object
-		FBTexConfig config;                          // how it was created
+		TextureDesc config;                          // how it was created
 	};
 
 	class Framebuffer

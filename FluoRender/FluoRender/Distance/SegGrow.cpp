@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <KernelFactory.h>
 #include <RulerHandler.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 #include <algorithm>

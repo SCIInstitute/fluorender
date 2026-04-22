@@ -26,11 +26,11 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <FramebufferTexture.h>
+#include <ImageTexture.h>
 
 using namespace flvr;
 
-FramebufferTexture::FramebufferTexture(const TextureDesc& desc) :
+ImageTexture::ImageTexture(const TextureDesc& desc) :
 	Texture(desc)
 {
 }

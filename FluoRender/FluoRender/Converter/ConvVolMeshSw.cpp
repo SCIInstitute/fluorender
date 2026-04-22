@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <RenderView.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <VolumeRenderer.h>
 #include <MCTable.h>
 #include <Utils.h>

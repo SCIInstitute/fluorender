@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <MeshData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VertexArray.h>
 #include <VolumeRenderer.h>

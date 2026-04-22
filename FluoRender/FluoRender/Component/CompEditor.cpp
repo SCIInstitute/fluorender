@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackGroup.h>
 #include <DataManager.h>
 #include <MovieMaker.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <VolumeRenderer.h>
 #include <TrackMap.h>
 #include <Cell.h>

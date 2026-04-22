@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 #include <Cell.h>
@@ -141,7 +141,7 @@ void ComponentSelector::CompFull()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	if (flvr::Texture::mask_undo_num_>0)
+	if (flvr::VolumeTexture::mask_undo_num_>0)
 		tex->push_mask();
 
 	//get current mask
@@ -263,7 +263,7 @@ void ComponentSelector::Select(bool all, bool rmask)
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	if (flvr::Texture::mask_undo_num_>0)
+	if (flvr::VolumeTexture::mask_undo_num_>0)
 		tex->push_mask();
 
 	auto raw_mask = vd->GetMask(rmask);
@@ -467,7 +467,7 @@ void ComponentSelector::All()
 	if (!vd)
 		return;
 
-	if (flvr::Texture::mask_undo_num_>0 &&
+	if (flvr::VolumeTexture::mask_undo_num_>0 &&
 		vd->GetTexture())
 		vd->GetTexture()->push_mask();
 
@@ -497,7 +497,7 @@ void ComponentSelector::Clear(bool invalidate)
 	if (!vd)
 		return;
 
-	if (flvr::Texture::mask_undo_num_>0 &&
+	if (flvr::VolumeTexture::mask_undo_num_>0 &&
 		vd->GetTexture())
 		vd->GetTexture()->push_mask();
 
@@ -624,7 +624,7 @@ void ComponentSelector::SelectList()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	if (flvr::Texture::mask_undo_num_ > 0)
+	if (flvr::VolumeTexture::mask_undo_num_ > 0)
 		tex->push_mask();
 
 	auto raw_mask = vd->GetMask(true);
@@ -699,7 +699,7 @@ void ComponentSelector::EraseList()
 	auto tex = vd->GetTexture();
 	if (!tex)
 		return;
-	if (flvr::Texture::mask_undo_num_ > 0)
+	if (flvr::VolumeTexture::mask_undo_num_ > 0)
 		tex->push_mask();
 
 	auto raw_mask = vd->GetMask(true);
@@ -799,7 +799,7 @@ inline std::optional<std::reference_wrapper<CelpList>> ComponentSelector::GetLis
 void ComponentSelector::SelectMask(
 	const std::shared_ptr<fluo::RawData>& mask,
 	unsigned long long idx, unsigned char v,
-	const std::shared_ptr<flvr::Texture>& tex)
+	const std::shared_ptr<flvr::VolumeTexture>& tex)
 {
 	auto mask_ptr = mask->DataAs<unsigned char>();
 	mask_ptr[idx] = v;

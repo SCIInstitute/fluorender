@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Count.h>
 #include <VolCache4D.h>
 #include <ShaderProgram.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <Plane.h>
 #include <EntryParams.h>
@@ -393,7 +393,7 @@ int VolumeData::Load(const std::shared_ptr<fluo::RawData>& data, const std::wstr
 	m_bounds = fluo::BBox(fluo::Point(0.0), fluo::Point(m_size * m_spacing));
 	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 
-	m_tex = std::make_shared<flvr::Texture>();
+	m_tex = std::make_shared<flvr::VolumeTexture>();
 	m_tex->set_use_priority(m_skip_brick);
 	auto reader = m_reader.lock();
 	if (reader && reader->GetType() == READER_BRKXML_TYPE)
@@ -465,7 +465,7 @@ int VolumeData::Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex
 			size[1],
 			size[2]);
 
-		m_tex = std::make_shared<flvr::Texture>();
+		m_tex = std::make_shared<flvr::VolumeTexture>();
 		m_tex->set_use_priority(m_skip_brick);
 		std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
 		m_tex->build(data, m_min_value, m_max_value, bricks);
@@ -556,7 +556,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_clipping_box.SetBBoxes(m_bounds, fluo::BBox(fluo::Point(0.0), fluo::Point(m_size)));
 
 	//create texture
-	m_tex = std::make_shared<flvr::Texture>();
+	m_tex = std::make_shared<flvr::VolumeTexture>();
 	m_tex->set_use_priority(false);
 	m_tex->set_brick_planned_size(brick_size);
 	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;

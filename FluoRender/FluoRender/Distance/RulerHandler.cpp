@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <Cov.h>
 #include <WalkCycle.h>
 #include <Count.h>

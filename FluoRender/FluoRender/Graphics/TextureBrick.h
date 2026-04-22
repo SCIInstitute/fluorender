@@ -31,7 +31,7 @@
 
 #include <RawData.h>
 #include <Ray.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <stdint.h>
 #include <map>
 
@@ -218,7 +218,7 @@ namespace flvr
 		void valid_mask(bool val=true) { mask_valid_ = val; }
 		void invalid_mask() { mask_valid_ = false; }
 		bool is_mask_valid() { return mask_valid_; }
-		bool is_nbmask_valid(const std::shared_ptr<Texture>& tex);//check 6 neighbors
+		bool is_nbmask_valid(const std::shared_ptr<VolumeTexture>& tex);//check 6 neighbors
 		//activate/deactivate mask painting
 		void act_mask(bool val = true) { mask_act_ = val; }
 		void deact_mask() { mask_act_ = false; }

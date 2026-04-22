@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeDefault.h>
 #include <KernelFactory.h>
 #include <VolumeData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <VolumeRenderer.h>
 #include <Ray.h>

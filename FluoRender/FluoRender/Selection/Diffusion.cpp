@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <KernelProgram.h>
 #include <VolumeData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <TextureBrick.h>
 #include <KernelFactory.h>
 #include <VolumeRenderer.h>
@@ -287,7 +287,7 @@ void Diffusion::Init(fluo::Point &ip, double ini_thresh)
 	//add empty mask if there is no mask
 	//then, push the mask for undos
 	vd->AddEmptyMask(0, false);
-	if (flvr::Texture::mask_undo_num_ > 0 &&
+	if (flvr::VolumeTexture::mask_undo_num_ > 0 &&
 		vd->GetTexture())
 		vd->GetTexture()->push_mask();
 	long bits = vd->GetBits();

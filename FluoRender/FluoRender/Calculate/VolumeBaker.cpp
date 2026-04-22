@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeBaker.h>
 #include <VolumeData.h>
-#include <Texture.h>
+#include <VolumeTexture.h>
 #include <stdexcept>
 
 using namespace flrd;
