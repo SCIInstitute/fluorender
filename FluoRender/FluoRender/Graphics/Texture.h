@@ -83,16 +83,16 @@ namespace flvr
 				format == other.format;
 		}
 
-		bool same_size(const TextureDesc& other) const
+		bool same_size(int w, int h, int d) const
 		{
-			return width == other.width &&
-				height == other.height &&
-				depth == other.depth;
+			return width == w &&
+				height == h &&
+				depth == d;
 		}
 
 		bool same_storage(const TextureDesc& other) const
 		{
-			return same_format(other) && same_size(other);
+			return same_format(other) && same_size(other.width, other.height, other.depth);
 		}
 
 		bool framebuffer_compatible(const TextureDesc& other) const
@@ -143,6 +143,8 @@ namespace flvr
 		void resize(int w, int h, int d = 1);
 
 		uint32_t id() const { return id_; }
+
+		const TextureDesc& desc() const { return desc_; }
 
 		int width() const { return desc_.width; }
 		int height() const { return desc_.height; }

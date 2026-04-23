@@ -451,10 +451,10 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 		[&](const AttachmentRecord& rec) { return rec.point == ap; });
 	if (it != attachments_.end()) {
 		it->texture = tex;
-		it->config = tex->config_;
+		it->config = tex->desc_;
 	}
 	else {
-		attachments_.push_back({ ap, tex, tex->config_ });
+		attachments_.push_back({ ap, tex, tex->desc_ });
 	}
 
 	// Sync state: mark enabled
@@ -666,11 +666,11 @@ unsigned int Framebuffer::read_pick(int px, int py)
 	GLint prevFramebuffer = 0;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFramebuffer);
 
-	// Find the first attachment with Render_Int32 type
+	// Find the first attachment with R32UI format
 	for (const auto& rec : attachments_) {
 		if (rec.texture &&
 			rec.texture->valid() &&
-			rec.texture->config_.type == FBTexType::Render_Int32)
+			rec.texture->desc_.format == TextureFormat::R32UI)
 		{
 			// Bind this framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
@@ -811,14 +811,55 @@ using AttachmentLayout = std::vector<AttachmentSpec>;
 
 static const AttachmentLayout& layout_for(FBRole role)
 {
-	static const FBTexConfig RGBA{ FBTexType::Render_RGBA };
-	static const FBTexConfig RGBAFilter{ FBTexType::Render_RGBA, false, TexFilter::Linear, TexFilter::Linear };
-	static const FBTexConfig Float{ FBTexType::Render_Float };
-	static const FBTexConfig FloatRG{ FBTexType::Render_FloatRG };
-	static const FBTexConfig DepthFloat{ FBTexType::Depth_Float };
-	static const FBTexConfig UChar{ FBTexType::UChar_RGBA };
-	static const FBTexConfig RGBAMipmap{ FBTexType::Render_RGBA, true, TexFilter::LinearMipmapLinear, TexFilter::Linear };
-	static const FBTexConfig Int32{ FBTexType::Render_Int32 };
+	using AttachmentLayout = std::vector<AttachmentSpec>;
+
+	static const TextureDesc RGBA{
+		TextureType::Tex2D,
+		TextureFormat::RGBA32F
+	};
+
+	static const TextureDesc RGBAFilter{
+		TextureType::Tex2D,
+		TextureFormat::RGBA32F,
+		0, 0, 1,
+		false,
+		TexFilter::Linear,
+		TexFilter::Linear
+	};
+
+	static const TextureDesc Float{
+		TextureType::Tex2D,
+		TextureFormat::R32F
+	};
+
+	static const TextureDesc FloatRG{
+		TextureType::Tex2D,
+		TextureFormat::RG32F
+	};
+
+	static const TextureDesc DepthFloat{
+		TextureType::Tex2D,
+		TextureFormat::Depth32F
+	};
+
+	static const TextureDesc UChar{
+		TextureType::Tex2D,
+		TextureFormat::RGBA8
+	};
+
+	static const TextureDesc RGBAMipmap{
+		TextureType::Tex2D,
+		TextureFormat::RGBA32F,
+		0, 0, 1,
+		true,
+		TexFilter::LinearMipmapLinear,
+		TexFilter::Linear
+	};
+
+	static const TextureDesc Int32{
+		TextureType::Tex2D,
+		TextureFormat::R32UI
+	};
 
 	switch (role) {
 	case FBRole::RenderColor:
@@ -992,17 +1033,17 @@ void FramebufferFactory::ensure_layout(std::shared_ptr<Framebuffer>& fb,
 
 	for (const auto& spec : layout) {
 		auto existing = fb->get_texture(spec.point);
-		if (!existing || !existing->match_config(spec.config)) {
+		if (!existing || !existing->desc().same_format(spec.config)) {
 			// detach old if present
 			if (existing) fb->detach_texture(spec.point);
 
 			// create new
-			auto tex = std::make_shared<FramebufferTexture>(spec.config, nx, ny);
+			auto tex = std::make_shared<FramebufferTexture>(spec.config);
 			tex->create();
 			fb->attach_texture(spec.point, tex);
 			tex_list_.push_back(tex);
 		}
-		else if (!existing->match_size(nx, ny)) {
+		else if (!existing->desc().same_size(nx, ny, 1)) {
 			existing->resize(nx, ny);
 		}
 	}
