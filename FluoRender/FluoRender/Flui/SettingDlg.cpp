@@ -1855,7 +1855,7 @@ void SettingDlg::OnFontChange(wxCommandEvent& event)
 	std::filesystem::path p = GetDataRoot();
 	p = p / "Fonts" / (str + L".ttf");
 	glbin_text_tex_manager.load_face(p.wstring());
-	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
+	glbin_text_tex_manager.set_size(glbin_settings.m_text_size);
 	FluoRefresh(3, { gstNull });
 }
 
@@ -1867,7 +1867,7 @@ void SettingDlg::OnFontSizeChange(wxCommandEvent& event)
 		return;
 
 	glbin_settings.m_text_size = size;
-	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
+	glbin_text_tex_manager.set_size(glbin_settings.m_text_size);
 	FluoRefresh(3, { gstNull });
 }
 

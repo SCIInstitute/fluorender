@@ -4598,7 +4598,7 @@ void RenderView::GetTraces(bool update) const
 void RenderView::SetEnlarge(bool value)
 {
 	if (m_enlarge && !value)
-		glbin_text_tex_manager.SetEnlargeScale(1);
+		glbin_text_tex_manager.set_enlarge_scale(1);
 	m_enlarge = value;
 	if (m_enlarge)
 	{
@@ -4614,7 +4614,7 @@ void RenderView::SetEnlargeScale(double value)
 	m_enlarge_scale = value;
 	if (m_enlarge)
 	{
-		glbin_text_tex_manager.SetEnlargeScale(m_enlarge_scale);
+		glbin_text_tex_manager.set_enlarge_scale(m_enlarge_scale);
 		m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
 			static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));
 	}
@@ -7293,7 +7293,7 @@ void RenderView::DrawAnnots()
 							continue;
 						px = static_cast<float>(pos.x()*nx / 2.0);
 						py = static_cast<float>(pos.y()*ny / 2.0);
-						m_text_renderer->RenderText(
+						m_text_renderer->render_text(
 							wstr, text_color,
 							px*sx, py*sy, sx, sy);
 					}
@@ -7395,7 +7395,7 @@ void RenderView::GetCellPoints(fluo::BBox& box,
 
 unsigned int RenderView::GenerateCellVerts(std::vector<float>& verts)
 {
-	float w = glbin_text_tex_manager.GetSize() / 4.0f;
+	float w = glbin_text_tex_manager.get_size() / 4.0f;
 	float px = 0, py = 0;
 
 	fluo::Transform mv;
@@ -7758,7 +7758,7 @@ void RenderView::DrawBrushOutlines()
 		wstr = L"*";
 		break;
 	}
-	m_text_renderer->RenderText(wstr, text_color, px*sx, py*sy, sx, sy);
+	m_text_renderer->render_text(wstr, text_color, px*sx, py*sy, sx, sy);
 }
 
 //paint strokes on the paint fbo
@@ -7918,11 +7918,11 @@ void RenderView::DrawScaleBar()
 	float len = static_cast<float>(m_sb_length / (m_ortho_right - m_ortho_left));
 	sb_w = len * nx;
 	sb_h = static_cast<float>(glbin_settings.m_line_width * 3);
-	float textlen = m_text_renderer->RenderTextLen(m_sb_text);
+	float textlen = m_text_renderer->render_text_length(m_sb_text);
 	fluo::Color text_color = GetTextColor();
 	float font_height = 0;
 	if (draw_text)
-		font_height = static_cast<float>(glbin_text_tex_manager.GetSize() + 3.0);
+		font_height = static_cast<float>(glbin_text_tex_manager.get_size() + 3.0);
 
 	std::vector<std::pair<unsigned int, double>> params;
 	if (m_draw_frame)
@@ -7978,7 +7978,7 @@ void RenderView::DrawScaleBar()
 	{
 		px = sb_x - 0.5f * (sb_w + textlen + nx);
 		py = sb_y + 0.5f * font_height - ny / 2.0f;
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			m_sb_text, text_color,
 			px * sx, py * sy, sx, sy);
 	}
@@ -8001,7 +8001,7 @@ void RenderView::DrawScaleBar()
 void RenderView::DrawLegend()
 {
 	float font_height =
-		glbin_text_tex_manager.GetSize() + 3.0f;
+		glbin_text_tex_manager.get_size() + 3.0f;
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8030,7 +8030,7 @@ void RenderView::DrawLegend()
 		if (vd && vd->GetLegend())
 		{
 			std::wstring vd_name = vd->GetName();
-			name_len = m_text_renderer->RenderTextLen(vd_name) + font_height;
+			name_len = m_text_renderer->render_text_length(vd_name) + font_height;
 			length += name_len;
 			if (length < float(m_draw_frame ? w : nx) - gap_width)
 			{
@@ -8049,7 +8049,7 @@ void RenderView::DrawLegend()
 		if (md && md->GetLegend())
 		{
 			std::wstring md_name = md->GetName();
-			name_len = m_text_renderer->RenderTextLen(md_name) + font_height;
+			name_len = m_text_renderer->render_text_length(md_name) + font_height;
 			length += name_len;
 			if (length < float(m_draw_frame ? w : nx) - gap_width)
 			{
@@ -8074,7 +8074,7 @@ void RenderView::DrawLegend()
 		{
 			std::wstring vd_name = vd->GetName();
 			xpos = length;
-			name_len = m_text_renderer->RenderTextLen(vd_name) + font_height;
+			name_len = m_text_renderer->render_text_length(vd_name) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? w : nx) - gap_width)
 			{
@@ -8106,7 +8106,7 @@ void RenderView::DrawLegend()
 		{
 			std::wstring md_name = md->GetName();
 			xpos = length;
-			name_len = m_text_renderer->RenderTextLen(md_name) + font_height;
+			name_len = m_text_renderer->render_text_length(md_name) + font_height;
 			length += name_len;
 			if (length < double(m_draw_frame ? w : nx) - gap_width)
 			{
@@ -8183,14 +8183,14 @@ void RenderView::DrawText(
 
 	float px1 = static_cast<float>(x + font_height - nx / 2.0);
 	float py1 = static_cast<float>(ny / 2.0 - y + 0.25 * font_height);
-	m_text_renderer->RenderText(
+	m_text_renderer->render_text(
 		name, text_color,
 		px1*sx, py1*sy, sx, sy);
 	if (highlighted)
 	{
 		px1 -= 0.5;
 		py1 += 0.5;
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			name, color,
 			px1*sx, py1*sy, sx, sy);
 	}
@@ -8443,7 +8443,7 @@ void RenderView::DrawColormap()
 
 	float offset = 0;
 	if (m_draw_legend)
-		offset = static_cast<float>(glbin_text_tex_manager.GetSize() + 3.0);
+		offset = static_cast<float>(glbin_text_tex_manager.get_size() + 3.0);
 
 	int nx, ny;
 	GetRenderSize(nx, ny);
@@ -8474,7 +8474,7 @@ void RenderView::DrawColormap()
 		}
 		wstr = std::to_wstring(88);
 		float textlen =
-			m_text_renderer->RenderTextLen(wstr);
+			m_text_renderer->render_text_length(wstr);
 
 		switch (glbin_moviemaker.GetScalebarPos())
 		{
@@ -8523,31 +8523,31 @@ void RenderView::DrawColormap()
 		//value 1
 		py = static_cast<float>(txy - ny / 2.0);
 		wstr = to_wstring(minv, pres);
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 2
 		py = static_cast<float>(txy + cmh * m_value_2 - ny / 2.0);
 		wstr = to_wstring(m_value_2 * (maxv - minv) + minv, pres);
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 4
 		py = static_cast<float>(txy + cmh * m_value_4 - ny / 2.0);
 		wstr = to_wstring(m_value_4 * (maxv - minv) + minv, pres);
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 6
 		py = static_cast<float>(txy + cmh * m_value_6 - ny / 2.0);
 		wstr = to_wstring(m_value_6 * (maxv - minv) + minv, pres);
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 		//value 7
 		py = static_cast<float>(txy + cmh - ny / 2.0);
 		wstr = to_wstring(maxv, pres);
-		m_text_renderer->RenderText(
+		m_text_renderer->render_text(
 			wstr, text_color,
 			px * sx, py * sy, sx, sy);
 	}
@@ -8720,7 +8720,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 	sx = static_cast<float>(2.0 / nx);
 	sy = static_cast<float>(2.0 / ny);
 	float px, py;
-	float gapw = static_cast<float>(glbin_text_tex_manager.GetSize());
+	float gapw = static_cast<float>(glbin_text_tex_manager.get_size());
 	float gaph = gapw * 2.0f;
 
 	double fps = 1.0 / glbin.getStopWatch(gstStopWatch)->average();
@@ -8743,7 +8743,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 	str = tos.str();
 	px = static_cast<float>(gapw - nx / 2.0);
 	py = static_cast<float>(ny / 2.0 - gaph / 2.0);
-	m_text_renderer->RenderText(
+	m_text_renderer->render_text(
 		str, text_color,
 		px*sx, py*sy, sx, sy);
 
@@ -8769,7 +8769,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			str = tos.str();
 			px = static_cast<float>(gapw - nx / 2.0);
 			py = static_cast<float>(ny / 2.0 - gaph);
-			m_text_renderer->RenderText(
+			m_text_renderer->render_text(
 				str, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -8792,7 +8792,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 				px = static_cast<float>(0.01*nx - nx / 2.0);
 				py = static_cast<float>(0.04*ny - ny / 2.0);
 			}
-			m_text_renderer->RenderText(
+			m_text_renderer->render_text(
 				str, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -8805,7 +8805,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 			str = L"SLICES: " + std::to_wstring(m_mvr->get_slice_num());
 			px = static_cast<float>(gapw - nx / 2.0);
 			py = static_cast<float>(ny / 2.0 - gaph*1.5);
-			m_text_renderer->RenderText(
+			m_text_renderer->render_text(
 				str, text_color,
 				px*sx, py*sy, sx, sy);
 		}
@@ -8820,7 +8820,7 @@ void RenderView::DrawInfo(int nx, int ny, bool intactive)
 					str = L"SLICES_" + std::to_wstring(index + 1) + L": " + std::to_wstring(vd->GetVolumeRenderer().get_slice_num());
 					px = static_cast<float>(gapw - nx / 2.0);
 					py = static_cast<float>(ny / 2.0 - gaph*(3 + index) / 2);
-					m_text_renderer->RenderText(
+					m_text_renderer->render_text(
 						str, text_color,
 						px*sx, py*sy, sx, sy);
 				}
@@ -8876,7 +8876,7 @@ void RenderView::ResetEnlarge()
 	if (m_keep_enlarge)
 		return;
 	m_enlarge = false;
-	glbin_text_tex_manager.SetEnlargeScale(1);
+	glbin_text_tex_manager.set_enlarge_scale(1);
 	if (m_enlarge)
 		m_gl_size = Size2D(static_cast<int>(std::round(m_size.w() * m_enlarge_scale)),
 			static_cast<int>(std::round(m_size.h() * m_enlarge_scale)));

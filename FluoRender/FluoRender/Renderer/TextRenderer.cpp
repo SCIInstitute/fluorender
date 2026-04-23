@@ -26,13 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
 #include <TextRenderer.h>
 #include <Global.h>
 #include <Names.h>
 #include <ShaderProgram.h>
 #include <Framebuffer.h>
 #include <FramebufferStateTracker.h>
+#include <ImageTexture.h>
 #include <Color.h>
 #include <ImgShader.h>
 #include <VertexArray.h>
@@ -42,152 +42,143 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flvr
 {
-	TextTexture::TextTexture(wchar_t p) :
-		id_(0), p_(p), valid_(false)
+	FontGlyph::FontGlyph(wchar_t p) :
+		ch_(p)
 	{
 	}
 
-	TextTexture::~TextTexture()
-	{
-		destroy();
-	}
-
-	void TextTexture::create(FT_Face face)
+	void FontGlyph::create(FT_Face face)
 	{
 		if (!face)
 			return;
-		glGenTextures(1, &id_);
-		glBindTexture(GL_TEXTURE_2D, id_);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		if (FT_Load_Char(face, p_, FT_LOAD_RENDER))
+
+		// Load glyph bitmap via FreeType
+		if (FT_Load_Char(face, ch_, FT_LOAD_RENDER))
 			return;
+
 		FT_GlyphSlot g = face->glyph;
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
+
+		// Create texture description for glyph bitmap
+		TextureDesc desc;
+		desc.type = TextureType::Tex2D;
+		desc.format = TextureFormat::R8; // or R8_UNORM, depending on your enum
+		desc.width = g->bitmap.width;
+		desc.height = g->bitmap.rows;
+		desc.useMipmap = false;
+		desc.minFilter = TexFilter::Linear;
+		desc.magFilter = TexFilter::Linear;
+		desc.wrapS = TexWrap::ClampToEdge;
+		desc.wrapT = TexWrap::ClampToEdge;
+
+		// Allocate ImageTexture
+		texture_ = std::make_shared<ImageTexture>(desc);
+		texture_->create();
+
+		// Upload bitmap data (1 byte per pixel)
+		texture_->upload_2d(
+			g->bitmap.buffer,
 			g->bitmap.width,
-			g->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			g->bitmap.buffer
+			g->bitmap.rows
 		);
+
+		// Cache glyph metrics
 		left_ = g->bitmap_left;
 		top_ = g->bitmap_top;
 		width_ = g->bitmap.width;
 		rows_ = g->bitmap.rows;
-		ax_ = g->advance.x;
-		ay_ = g->advance.y;
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		ax_ = static_cast<unsigned int>(g->advance.x);
+		ay_ = static_cast<unsigned int>(g->advance.y);
+
 		valid_ = true;
 	}
 
-	void TextTexture::destroy()
+	void FontGlyph::destroy()
 	{
-		glDeleteTextures(1, &id_);
-		id_ = 0;
+		texture_.reset();
 		valid_ = false;
 	}
 
-	inline void TextTexture::bind()
-	{
-		if (valid_)
-			glBindTexture(GL_TEXTURE_2D, id_);
-	}
-
-	inline void TextTexture::unbind()
-	{
-		if (valid_)
-			glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	TextTextureManager::TextTextureManager():
-		m_init(false),
-		m_valid(false),
-		m_size(14),
-		m_enlarge_scale(1)
+	FontGlyphManager::FontGlyphManager()
 	{
 	}
 
-	TextTextureManager::~TextTextureManager()
+	FontGlyphManager::~FontGlyphManager()
 	{
-		tex_list_.clear();
-		if (m_init && m_valid)
-			FT_Done_Face(m_face);
-		if (m_init)
-			FT_Done_FreeType(m_ft);
+		glyphs_.clear();
+		if (initialized_ && valid_)
+			FT_Done_Face(face_);
+		if (initialized_)
+			FT_Done_FreeType(ft_lib_);
 	}
 
-	void TextTextureManager::load_face(const std::wstring &lib_name)
+	void FontGlyphManager::load_face(const std::wstring &lib_name)
 	{
 		FT_Error err;
-		if (!m_init)
+		if (!initialized_)
 		{
-			err = FT_Init_FreeType(&m_ft);
+			err = FT_Init_FreeType(&ft_lib_);
 			if (!err)
-				m_init = true;
+				initialized_ = true;
 		}
 
-		if (!m_init) return;
+		if (!initialized_) return;
 
-		if (m_valid)
+		if (valid_)
 		{
-			FT_Done_Face(m_face);
-			m_valid = false;
+			FT_Done_Face(face_);
+			valid_ = false;
 		}
 
 		std::string str = ws2s(lib_name);
-		err = FT_New_Face(m_ft, str.c_str(), 0, &m_face);
+		err = FT_New_Face(ft_lib_, str.c_str(), 0, &face_);
 		if (!err)
-			m_valid = true;
+			valid_ = true;
 
-		if (m_valid)
+		if (valid_)
 		{
-			err = FT_Select_Charmap(m_face, FT_ENCODING_UNICODE);
-			err = FT_Set_Pixel_Sizes(m_face, 0, FT_UInt(m_size * m_enlarge_scale + 0.5));
+			err = FT_Select_Charmap(face_, FT_ENCODING_UNICODE);
+			err = FT_Set_Pixel_Sizes(face_, 0,
+				static_cast<FT_UInt>(std::round(size_ * enlarge_scale_)));
 		}
 		clear();
 	}
 
-	void TextTextureManager::SetSize(unsigned int size)
+	void FontGlyphManager::set_size(unsigned int size)
 	{
-		if (!m_valid)
+		if (!valid_)
 			return;
-		m_size = size;
-		FT_Set_Pixel_Sizes(m_face, 0, FT_UInt(m_size * m_enlarge_scale + 0.5));
+		size_ = size;
+		FT_Set_Pixel_Sizes(face_, 0,
+			static_cast<FT_UInt>(std::round(size_ * enlarge_scale_)));
 		clear();
 	}
 
-	void TextTextureManager::SetEnlargeScale(double dval)
+	unsigned int FontGlyphManager::get_size() const
 	{
-		m_enlarge_scale = dval;
-		SetSize(m_size);
+		return size_;
 	}
 
-	void TextTextureManager::clear()
+	void FontGlyphManager::set_enlarge_scale(double dval)
 	{
-		tex_list_.clear();
+		enlarge_scale_ = dval;
+		set_size(size_);
 	}
 
-	std::shared_ptr<TextTexture> TextTextureManager::text_texture(wchar_t p)
+	void FontGlyphManager::clear()
 	{
-		std::shared_ptr<TextTexture> result = nullptr;
-		auto it = tex_list_.find(p);
-		if (it != tex_list_.end())
-			result = it->second;
-		else
-		{
-			result = std::make_shared<TextTexture>(p);
-			result->create(m_face);
-			tex_list_.insert(std::pair<wchar_t, std::shared_ptr<TextTexture>>(
-				p, result));
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+		glyphs_.clear();
+	}
+
+	std::shared_ptr<FontGlyph> FontGlyphManager::glyph(wchar_t ch)
+	{
+		auto it = glyphs_.find(ch);
+		if (it != glyphs_.end())
+			return it->second;
+
+		auto result = std::make_shared<FontGlyph>(ch);
+		result->create(face_);
+		glyphs_.emplace(ch, result);
+
 		return result;
 	}
 
@@ -199,8 +190,11 @@ namespace flvr
 	{
 	}
 
-	void TextRenderer::RenderText(const std::wstring& text, const fluo::Color &color,
-		float x, float y, float sx, float sy)
+	void TextRenderer::render_text(
+		const std::wstring& text,
+		const fluo::Color &color,
+		float x, float y,
+		float sx, float sy)
 	{
 		auto cur_buffer = glbin_framebuffer_manager.current();
 		assert(cur_buffer);
@@ -224,10 +218,10 @@ namespace flvr
 		for (p = text.c_str(); *p; p++)
 		{
 			auto tex_p =
-				glbin_text_tex_manager.text_texture(*p);
+				glbin_text_tex_manager.glyph(*p);
 			if (tex_p)
 			{
-				tex_p->bind();
+				tex_p->texture().bind(0);
 				float x2 = x + tex_p->left_ * sx;
 				float y2 = -y - tex_p->top_ * sy;
 				float w = tex_p->width_ * sx;
@@ -249,11 +243,10 @@ namespace flvr
 		}
 		va_text->draw_end();
 
-		glBindTexture(GL_TEXTURE_2D, 0);
 		shader->unbind();
 	}
 
-	float TextRenderer::RenderTextLen(std::wstring& text)
+	float TextRenderer::render_text_length(const std::wstring& text)
 	{
 		float len = 0.0f;
 
@@ -261,7 +254,7 @@ namespace flvr
 		for (p = text.c_str(); *p; p++)
 		{
 			auto tex_p =
-				glbin_text_tex_manager.text_texture(*p);
+				glbin_text_tex_manager.glyph(*p);
 			if (tex_p)
 				len += (tex_p->ax_ >> 6);
 		}

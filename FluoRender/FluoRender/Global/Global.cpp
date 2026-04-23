@@ -304,7 +304,7 @@ Global::Global() :
 	kernel_factory_(std::make_unique<flvr::KernelFactory>()),
 	framebuffer_manager_(std::make_unique<flvr::FramebufferManager>()),
 	vertex_array_manager_(std::make_unique<flvr::VertexArrayManager>()),
-	text_texture_manager_(std::make_unique<flvr::TextTextureManager>()),
+	text_texture_manager_(std::make_unique<flvr::FontGlyphManager>()),
 	shader_manager_(std::make_unique<flvr::ShaderProgramManager>()),
 	fb_state_tracker_(std::make_unique<flvr::FramebufferStateTracker>()),
 	refresh_scheduler_manager_(std::make_unique<RefreshSchedulerManager>()),
@@ -788,7 +788,7 @@ flvr::VertexArrayManager& Global::get_vertex_array_manager()
 	return *vertex_array_manager_;
 }
 
-flvr::TextTextureManager& Global::get_text_tex_manager()
+flvr::FontGlyphManager& Global::get_text_tex_manager()
 {
 	return *text_texture_manager_;
 }

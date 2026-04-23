@@ -118,7 +118,7 @@ unsigned int RulerRenderer::DrawVerts(std::vector<float> &verts, int sel_mode)
 	bool persp = view->GetPersp();
 	int nx = view->GetCanvasSize().w();
 	int ny = view->GetCanvasSize().h();
-	float w = glbin_text_tex_manager.GetSize() / 4.0f;
+	float w = glbin_text_tex_manager.get_size() / 4.0f;
 	float px, py;
 
 	fluo::Transform mv, p;
@@ -562,7 +562,7 @@ void RulerRenderer::DrawTextAt(int nx, int ny)
 		tseq_cur_num = view->m_param_cur_num;
 	else
 		tseq_cur_num = view->m_tseq_cur_num;
-	float w = glbin_text_tex_manager.GetSize() / 4.0f;
+	float w = glbin_text_tex_manager.get_size() / 4.0f;
 	float sx, sy;
 	sx = static_cast<float>(2.0 / nx);
 	sy = static_cast<float>(2.0 / ny);
@@ -600,7 +600,7 @@ void RulerRenderer::DrawTextAt(int nx, int ny)
 			p2 = p.transform(p2);
 			p2x = static_cast<float>(p2.x()*nx / 2.0);
 			p2y = static_cast<float>(p2.y()*ny / 2.0);
-			text_renderer->RenderText(
+			text_renderer->render_text(
 				ruler->GetName(),
 				c,
 				(p2x + w)*sx, (p2y + w)*sy, sx, sy);

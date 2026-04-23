@@ -1050,13 +1050,11 @@ endif()
 
 # Graphics
 target_include_directories(GRAPHICS_LIB PRIVATE
-  ${FREETYPE_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIR}
   ${GLM_DIRS}
   ${OpenCL_INCLUDE_DIRS}
 )
 target_link_libraries(GRAPHICS_LIB PRIVATE
-  ${FREETYPE_LIBRARIES}
   ${GLEW_STATIC_LIBRARIES}
   ${OPENGL_LIBRARIES}
 )
@@ -1121,7 +1119,11 @@ target_link_libraries(PYTHON_LIB PRIVATE
 
 # Renderer
 target_include_directories(RENDERER_LIB PRIVATE
+  ${FREETYPE_INCLUDE_DIRS}
   ${GLM_DIRS}
+)
+target_link_libraries(RENDERER_LIB PRIVATE
+  ${FREETYPE_LIBRARIES}
 )
 
 # Scene

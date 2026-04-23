@@ -97,7 +97,7 @@ namespace flvr
 	class KernelFactory;
 	class FramebufferManager;
 	class VertexArrayManager;
-	class TextTextureManager;
+	class FontGlyphManager;
 	class ShaderProgramManager;
 	class FramebufferStateTracker;
 }
@@ -282,7 +282,7 @@ namespace fluo
 		flvr::KernelFactory& get_kernel_factory();
 		flvr::FramebufferManager& get_framebuffer_manager();
 		flvr::VertexArrayManager& get_vertex_array_manager();
-		flvr::TextTextureManager& get_text_tex_manager();
+		flvr::FontGlyphManager& get_text_tex_manager();
 		flvr::ShaderProgramManager& get_shader_manager();
 		flvr::FramebufferStateTracker& get_framebuffer_state_tracker();
 
@@ -377,7 +377,7 @@ namespace fluo
 		//vertex arrays
 		std::unique_ptr<flvr::VertexArrayManager> vertex_array_manager_;
 		//text texture
-		std::unique_ptr<flvr::TextTextureManager> text_texture_manager_;
+		std::unique_ptr<flvr::FontGlyphManager> text_texture_manager_;
 		//shader manager
 		std::unique_ptr<flvr::ShaderProgramManager> shader_manager_;
 		//fb state tracker

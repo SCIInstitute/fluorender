@@ -41,6 +41,8 @@ namespace flvr
 
 	enum class TextureFormat
 	{
+		R8,
+		R8_UNORM,
 		RGBA8,
 		RGBA32F,
 		R32F,
@@ -149,6 +151,11 @@ namespace flvr
 		int width() const { return desc_.width; }
 		int height() const { return desc_.height; }
 		int depth() const { return desc_.depth; }
+
+		void upload_2d(const void* data);
+		void upload_2d(const void* data, int width, int height, int level = 0);
+		void upload_2d_subimage(const void* data,
+			int x, int y, int width, int height, int level = 0);
 
 	protected:
 		// API-specific helpers (GL for now)

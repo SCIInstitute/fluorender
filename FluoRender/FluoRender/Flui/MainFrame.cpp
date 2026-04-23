@@ -858,7 +858,7 @@ MainFrame::MainFrame(
 		p /= "FreeSans.ttf";
 	font_file = p.wstring();
 	glbin_text_tex_manager.load_face(font_file);
-	glbin_text_tex_manager.SetSize(glbin_settings.m_text_size);
+	glbin_text_tex_manager.set_size(glbin_settings.m_text_size);
 
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[5];

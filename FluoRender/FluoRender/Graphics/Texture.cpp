@@ -57,6 +57,9 @@ static void toGLFormat(TextureFormat fmt,
 	GLint& internal, GLenum& format, GLenum& type)
 {
 	switch (fmt) {
+	case TextureFormat::R8:
+	case TextureFormat::R8_UNORM:
+		internal = GL_R8; format = GL_RED; type = GL_UNSIGNED_BYTE; break;
 	case TextureFormat::RGBA8:
 		internal = GL_RGBA8; format = GL_RGBA; type = GL_UNSIGNED_BYTE; break;
 	case TextureFormat::RGBA32F:
@@ -177,6 +180,71 @@ void Texture::resize(int w, int h, int d)
 
 	if (desc_.useMipmap)
 		glGenerateMipmap(glTarget());
+}
+
+void Texture::upload_2d(const void* data)
+{
+	upload_2d(data, desc_.width, desc_.height, 0);
+}
+
+void Texture::upload_2d(const void* data, int width, int height, int level)
+{
+	if (!valid_ || desc_.type != TextureType::Tex2D || !data)
+		return;
+
+	GLint internal;
+	GLenum format, type;
+	toGLFormat(desc_.format, internal, format, type);
+
+	glBindTexture(glTarget(), id_);
+
+	// Ensure correct unpack for tightly packed glyphs, images, etc.
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glTexSubImage2D(
+		GL_TEXTURE_2D,
+		level,
+		0, 0,
+		width, height,
+		format,
+		type,
+		data
+	);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+	if (desc_.useMipmap && level == 0)
+		glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Texture::upload_2d_subimage(const void* data,
+	int x, int y, int width, int height, int level)
+{
+	if (!valid_ || desc_.type != TextureType::Tex2D || !data)
+		return;
+
+	GLint internal;
+	GLenum format, type;
+	toGLFormat(desc_.format, internal, format, type);
+
+	glBindTexture(glTarget(), id_);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glTexSubImage2D(
+		GL_TEXTURE_2D,
+		level,
+		x, y,
+		width, height,
+		format,
+		type,
+		data
+	);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+	if (desc_.useMipmap && level == 0)
+		glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 GLenum Texture::glTarget() const
