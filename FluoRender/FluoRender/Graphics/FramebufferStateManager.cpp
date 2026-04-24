@@ -324,8 +324,8 @@ GLenum FramebufferStateManager::toGLBlendEquation(BlendEquation eq)
 	case BlendEquation::Add: return GL_FUNC_ADD;
 	case BlendEquation::Subtract: return GL_FUNC_SUBTRACT;
 	case BlendEquation::ReverseSubtract: return GL_FUNC_REVERSE_SUBTRACT;
-	case BlendEquation::Min: return GL_MIN;
-	case BlendEquation::Max: return GL_MAX;
+	case BlendEquation::Minimum: return GL_MIN;
+	case BlendEquation::Maximum: return GL_MAX;
 	default: return GL_FUNC_ADD;
 	}
 }
@@ -334,14 +334,14 @@ GLenum FramebufferStateManager::toGLDepthFunc(DepthFunc func)
 {
 	switch (func)
 	{
-	case DepthFunc::Never: return GL_NEVER;
+	case DepthFunc::NeverTest: return GL_NEVER;
 	case DepthFunc::Less: return GL_LESS;
 	case DepthFunc::Equal: return GL_EQUAL;
-	case DepthFunc::Lequal: return GL_LEQUAL;
+	case DepthFunc::LessEqual: return GL_LEQUAL;
 	case DepthFunc::Greater: return GL_GREATER;
-	case DepthFunc::Notequal: return GL_NOTEQUAL;
-	case DepthFunc::Gequal: return GL_GEQUAL;
-	case DepthFunc::Always: return GL_ALWAYS;
+	case DepthFunc::NotEqual: return GL_NOTEQUAL;
+	case DepthFunc::GreaterEqual: return GL_GEQUAL;
+	case DepthFunc::AlwaysPass: return GL_ALWAYS;
 	default: return GL_LESS;
 	}
 }
@@ -350,8 +350,8 @@ GLenum FramebufferStateManager::toGLCullFace(CullFace face)
 {
 	switch (face)
 	{
-	case CullFace::Front: return GL_FRONT;
-	case CullFace::Back: return GL_BACK;
+	case CullFace::FrontFace: return GL_FRONT;
+	case CullFace::BackFace: return GL_BACK;
 	case CullFace::FrontAndBack: return GL_FRONT_AND_BACK;
 	default: return GL_BACK;
 	}

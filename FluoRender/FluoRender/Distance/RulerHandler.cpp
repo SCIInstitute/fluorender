@@ -63,7 +63,7 @@ RulerHandler::RulerHandler() :
 	m_sample_type(1),
 	m_step_length(1),
 	m_edited(false),
-	m_mode(RulerMode::None)
+	m_mode(RulerMode::Disabled)
 {
 
 }

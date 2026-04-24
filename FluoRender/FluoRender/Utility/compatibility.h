@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef __COMPATIBILITY_H__
 #define __COMPATIBILITY_H__
 
+#include <Version.h>
 #include <string>
 #include <cstring>
 #include <cwchar>
@@ -838,11 +839,11 @@ inline bool NeedsUserDataUpdate()
     }
 
     // Compare major/minor
-    if (storedMajor < VERSION_MAJOR)
+    if (storedMajor < flvr::VersionMajor)
         return true;
 
-    if (storedMajor == VERSION_MAJOR &&
-        storedMinor < VERSION_MINOR)
+    if (storedMajor == flvr::VersionMajor &&
+        storedMinor < flvr::VersionMinor)
         return true;
 
     return false;
@@ -909,7 +910,7 @@ inline void InitializeUserSettings()
     // Write version file
     {
         std::ofstream out(dstRoot / "version.txt");
-        out << VERSION_MAJOR << " " << VERSION_MINOR;
+        out << flvr::VersionMajor << " " << flvr::VersionMinor;
     }
 #endif
 }

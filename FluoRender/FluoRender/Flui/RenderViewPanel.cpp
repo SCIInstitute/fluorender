@@ -1476,8 +1476,8 @@ void RenderViewPanel::OnViewManipBtn(wxCommandEvent& event)
 {
 	if (m_renderview)
 		m_renderview->SetIntMode(InteractiveMode::Viewport);
-	glbin_vol_selector.SetSelectMode(flrd::SelectMode::None);
-	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+	glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
+	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 	FluoRefresh(0, { gstFreehandToolState }, { -1 });
 }
 

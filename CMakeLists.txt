@@ -30,6 +30,19 @@
 
 cmake_minimum_required(VERSION 3.10)
 
+# Version info (UI only)
+set(FLUORENDER_VERSION_MAJOR 2)
+set(FLUORENDER_VERSION_MINOR 34)
+set(FLUORENDER_VERSION_STRING "2.34")
+set(FLUORENDER_COPYRIGHT "January 2026")
+set(FLUORENDER_TITLE "FluoRender")
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Generated/Version.h
+    @ONLY
+)
+
 # option to build with multithreading
 SET(USE_MP_COMPILE "0" CACHE STRING "Number of parallel jobs for building")
 # Convert the string to a number
@@ -103,12 +116,6 @@ elseif(WIN32)
   endif()
 endif()
 
-if(${ARCHITECTURE} MATCHES "64")
-  add_definitions(-DFLUORENDER_ARCH="64bit")
-else()
-  add_definitions(-DFLUORENDER_ARCH="32bit")
-endif()
-
 #if (WIN32 OR APPLE)
 #else()
 #  set(CMAKE_C_COMPILER "gcc-12")
@@ -119,14 +126,6 @@ endif()
 #  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
 #  set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
 #endif()
-
-add_definitions(-DFLUORENDER_TITLE="FluoRender")
-
-add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=34)						# 
-add_definitions(-DVERSION_MAJOR_TAG="2")				# 
-add_definitions(-DVERSION_MINOR_TAG="34")				# 
-add_definitions(-DVERSION_COPYRIGHT="January 2026")		# Up to here!
 
 #windows
 if(WIN32)
@@ -145,8 +144,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
 
 # static compile
-add_definitions(-DSTATIC_COMPILE)
-add_definitions(-DLX_STATIC_LINKING)
+add_compile_definitions(STATIC_COMPILE)
+add_compile_definitions(LX_STATIC_LINKING)
 
 # Set the GLEW directory
 if(WIN32 OR APPLE)
@@ -921,6 +920,9 @@ if(WIN32 AND USE_XINPUT)
         XInput.lib)
 endif()
 
+include_directories(
+    ${CMAKE_CURRENT_BINARY_DIR}/Generated
+)
 # Main
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 file(GLOB src FluoRender/FluoRender/*.cpp)
@@ -1166,7 +1168,7 @@ add_library(UTILITY_LIB STATIC
 # include and link
 # Main
 target_include_directories(MAIN_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
 target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
@@ -1174,7 +1176,7 @@ target_link_libraries(MAIN_LIB PRIVATE
 # Agent
 target_include_directories(AGENT_LIB PRIVATE
   #${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   #${OpenCL_INCLUDE_DIRS}
   #${TEEM_INCLUDE_DIRS}
 )
@@ -1186,7 +1188,7 @@ endif()
 # Animator
 target_include_directories(ANIMATOR_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR})
 if (APPLE)
@@ -1196,20 +1198,20 @@ endif()
 
 # Calculate
 target_include_directories(CALCULATE_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
 
 # Component
 target_include_directories(COMPONENT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
@@ -1225,14 +1227,14 @@ target_link_libraries(COMPUTE_LIB PRIVATE
 # Config
 target_include_directories(CONFIG_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
 
 # Control
 
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
@@ -1244,7 +1246,7 @@ target_include_directories(DATABASE_LIB PRIVATE
 # Distance
 target_include_directories(DISTANCE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
@@ -1258,7 +1260,7 @@ target_include_directories(FILE_LIB PRIVATE
 # Filter
 target_include_directories(FILTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
@@ -1266,7 +1268,7 @@ target_include_directories(FILTER_LIB PRIVATE
 target_include_directories(FLUI_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${Python3_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
@@ -1298,7 +1300,7 @@ endif()
 target_include_directories(FORMAT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${FFMPEG_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${JPEG_INCLUDE_DIR}
   ${ND2_PATHS}
   ${OPENJPEG_INCLUDE_DIRS}
@@ -1332,7 +1334,7 @@ target_link_libraries(FORMAT_LIB PRIVATE
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OPENXR_INCLUDE_DIR}
   ${Python3_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
@@ -1350,7 +1352,7 @@ endif()
 target_include_directories(GRAPHICS_LIB PRIVATE
   ${FREETYPE_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 target_link_libraries(GRAPHICS_LIB PRIVATE
@@ -1364,7 +1366,7 @@ target_link_libraries(GRAPHICS_LIB PRIVATE
 
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${BRIDGE_RUNTIME_PATHS})
 
 # Object
@@ -1374,7 +1376,7 @@ target_include_directories(OBJECT_LIB PRIVATE
 # OpenXR
 target_include_directories(OPENXR_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OPENVR_INCLUDE_DIR}
   ${OPENXR_INCLUDE_DIR})
 target_link_libraries(OPENXR_LIB PRIVATE
@@ -1384,13 +1386,13 @@ target_link_libraries(OPENXR_LIB PRIVATE
 
 # Progress
 target_include_directories(PROGRESS_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
 
 # Project
 target_include_directories(PROJECT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
 
 # Python
@@ -1406,12 +1408,12 @@ target_link_libraries(PYTHON_LIB PRIVATE
 
 # Renderer
 target_include_directories(RENDERER_LIB PRIVATE
-  ${GLM_DIRS})
+  ${GLM_INCLUDE_DIR})
 
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 if (WIN32)
@@ -1437,7 +1439,7 @@ target_link_libraries(SCENE_LIB PRIVATE
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${Python3_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 if (APPLE)
@@ -1449,7 +1451,7 @@ target_link_libraries(SCRIPT_LIB PRIVATE
 
 # Selection
 target_include_directories(SELECTION_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
@@ -1460,14 +1462,17 @@ target_include_directories(TIMER_LIB PRIVATE
 # Tracking
 target_include_directories(TRACKING_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 
 # Trainer
-target_link_libraries(TRAINER_LIB PRIVATE
-  ${Python3_LIBRARIES}
-  dlib::dlib)
+target_link_libraries(TRAINER_LIB
+  PUBLIC
+    dlib::dlib
+  PRIVATE
+    ${Python3_LIBRARIES}
+)
 
 # Type
 
@@ -1485,7 +1490,7 @@ ELSEIF(WIN32)
   SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/FluoRender.rc")
   SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/fluorenderIcon.ico")
   SET(manifest_file "${CMAKE_CURRENT_SOURCE_DIR}/Manifest/fluorender.manifest")
-  ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
+  #ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
   SET(src ${src} ${icon_rc} ${manifest_file})
 ENDIF()
 
@@ -1499,7 +1504,7 @@ if(APPLE)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   
   # Compiler flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -DWX_PRECOMP")
+  add_compile_options(-DWX_PRECOMP)
   
   # --- IMPORTANT: Disable all Xcode signing behavior ---
   # Do NOT let Xcode sign anything. We sign manually after build.
@@ -1556,7 +1561,7 @@ elseif(WIN32)
       "/wd4273"
       -D_XKEYCHECK_H
     )
-    set(CMAKE_CXX_FLAGS "/EHsc")
+    add_compile_options(/EHsc)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:REF /OPT:ICF")
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG /INCREMENTAL /OPT:NOREF")
   endif()
@@ -1580,7 +1585,7 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 target_include_directories(FluoRender PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
 # link the libraries
 if(WIN32)

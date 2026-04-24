@@ -175,7 +175,7 @@ namespace flvr
 		static bool IsTimeProj(ColormapProj p)
 		{
 			static const std::unordered_set<ColormapProj> time_modes = {
-				ColormapProj::IntDelta,
+				ColormapProj::IntensityDelta,
 				ColormapProj::Speed
 			};
 			return time_modes.count(p) > 0;

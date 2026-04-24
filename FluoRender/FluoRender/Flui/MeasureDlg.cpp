@@ -878,7 +878,7 @@ void MeasureDlg::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
-		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::None;
+		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 		//toolbar1
 		m_toolbar1->ToggleTool(ID_RulerLocator, rul_mode == flrd::RulerMode::Locator);

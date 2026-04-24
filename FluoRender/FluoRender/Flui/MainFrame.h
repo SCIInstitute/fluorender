@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _MAINFRAME_H_
 
 #include <Value.hpp>
+#include <Version.h>
 #include <wx/wx.h>
 #include <wx/menu.h>
 #include <wx/aui/aui.h>
@@ -45,27 +46,19 @@ DEALINGS IN THE SOFTWARE.
 						"REMALDEEP SINGH\tKEI ITO        \n"\
 						"HOLLY A. HOLMAN\n"
 #define VERSION_UPDATES "https://sciinstitute.github.io/fluorender/Releases/fluorender_v" \
-				   VERSION_MAJOR_TAG \
-				   "." \
-				   VERSION_MINOR_TAG \
+				   flvr::VersionString \
 				   "/"
 #define HELP_MANUAL "https://github.com/SCIInstitute/fluorender/releases/download/v"\
-				   VERSION_MAJOR_TAG \
-				   "." \
-				   VERSION_MINOR_TAG \
+				   flvr::VersionString \
 				   "/FluoRender" \
-				   VERSION_MAJOR_TAG \
-				   "." \
-				   VERSION_MINOR_TAG \
+				   flvr::VersionString \
 				   "_Manual.pdf"
 #define HELP_TUTORIAL "https://github.com/SCIInstitute/fluorender/releases/download/v"\
-				   VERSION_MAJOR_TAG \
-				   "." \
-				   VERSION_MINOR_TAG \
+				   flvr::VersionString \
 				   "/FluoRender" \
-				   VERSION_MAJOR_TAG \
-				   "." \
-				   VERSION_MINOR_TAG \
+				   flvr::VersionString \
+				   "/FluoRender" \
+				   flvr::VersionString \
 				   "_Tutorials.pdf"
 #define YOUTUBE_URL "https://www.youtube.com/playlist?list=PLSBz7un7RyZhO51UWhmGiusaJebmaWPbc"
 #define TWITTER_URL "https://twitter.com/FluoRender"

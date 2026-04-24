@@ -956,19 +956,19 @@ void VolumeData::UpdateColormapRange()
 		m_colormap_min_value = m_min_value;
 		m_colormap_max_value = m_max_value;
 		break;
-	case flvr::ColormapProj::ZValue://z-value
+	case flvr::ColormapProj::ZCoord://z-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_size.z() * m_spacing.z();
 		break;
-	case flvr::ColormapProj::YValue://y-value
+	case flvr::ColormapProj::YCoord://y-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_size.y() * m_spacing.y();
 		break;
-	case flvr::ColormapProj::XValue://x-value
+	case flvr::ColormapProj::XCoord://x-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_size.x() * m_spacing.x();
 		break;
-	case flvr::ColormapProj::TValue://t-value
+	case flvr::ColormapProj::TCoord://t-value
 		m_colormap_min_value = 0;
 		if (auto reader = m_reader.lock())
 			m_colormap_max_value = reader->GetTimeNum();
@@ -986,7 +986,7 @@ void VolumeData::UpdateColormapRange()
 		m_colormap_min_value = 0;
 		m_colormap_max_value = 1;
 		break;
-	case flvr::ColormapProj::IntDelta://intensity delta
+	case flvr::ColormapProj::IntensityDelta://intensity delta
 		m_colormap_min_value = -m_max_value;
 		m_colormap_max_value = m_max_value;
 		break;

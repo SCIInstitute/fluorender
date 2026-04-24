@@ -341,7 +341,7 @@ void VolumeRenderer::draw_volume(
 				BlendFactor::OneMinusDstAlpha, BlendFactor::One);
 		break;
 	case RenderMode::Mip:
-		blend_buffer->set_blend_equation(0, BlendEquation::Max, BlendEquation::Max);
+		blend_buffer->set_blend_equation(0, BlendEquation::Maximum, BlendEquation::Maximum);
 		blend_buffer->set_blend_func(0,
 			BlendFactor::One, BlendFactor::One,
 			BlendFactor::One, BlendFactor::One);
@@ -430,7 +430,7 @@ void VolumeRenderer::draw_volume(
 	shader->setLocalParam(19, fog_color_.r(), fog_color_.g(), fog_color_.b(), 0.0);
 
 	double abcd[4];
-	if (colormap_proj_ == ColormapProj::TValue)
+	if (colormap_proj_ == ColormapProj::TCoord)
 	{
 		shader->setLocalParamUInt(0, static_cast<unsigned int>(glbin_moviemaker.GetSeqCurNum()));
 		shader->setLocalParamUInt(1, static_cast<unsigned int>(glbin_moviemaker.GetSeqAllNum()));

@@ -580,7 +580,7 @@ void* ChannelCompare::GetVolDataBrick(flvr::TextureBrick* b)
 	int bits = 8;
 	int nb = 1;
 
-	flvr::CompType c = m_use_mask ? flvr::CompType::Data : flvr::CompType::None;
+	flvr::CompType c = m_use_mask ? flvr::CompType::Data : flvr::CompType::Invalid;
 	nb = b->nb(c);
 	auto res = b->get_size();
 	auto stride = b->get_stride();

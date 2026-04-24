@@ -181,7 +181,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	z << VOL_UNIFORMS_COMMON;
 
 	//time for 4d colormap
-	if (p.colormap_proj == ColormapProj::TValue)
+	if (p.colormap_proj == ColormapProj::TCoord)
 		z << VOL_UNIFROMS_4D_COLORMAP;
 	//radial gradient
 	else if (p.colormap_proj == ColormapProj::Radial)
@@ -257,7 +257,7 @@ bool VolShaderFactory::emit_f(const ShaderParams& p, std::string& s)
 	if (p.shading)
 		z << VOL_BODY_SHADING;
 
-	if (p.colormap_proj == ColormapProj::IntDelta)
+	if (p.colormap_proj == ColormapProj::IntensityDelta)
 		z << VOL_DATA_4D_INTENSITY_DELTA;
 	else if (p.colormap_proj == ColormapProj::Speed)
 		z << VOL_DATA_4D_SPEED;

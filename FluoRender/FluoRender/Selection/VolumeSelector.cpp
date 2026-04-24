@@ -62,7 +62,7 @@ VolumeSelector::VolumeSelector() :
 	m_2d_weight1(0),
 	m_2d_weight2(0),
 	m_iter_num(20),
-	m_mode(SelectMode::None),
+	m_mode(SelectMode::Disabled),
 	m_init_mask(3),
 	m_use2d(false),
 	m_update_order(true),

@@ -113,10 +113,10 @@ void Project::Open(const std::wstring& filename)
 		l_major = STOL(ver_major);
 		d_minor = STOD(ver_minor);
 
-		if (l_major > VERSION_MAJOR)
+		if (l_major > flvr::VersionMajor)
 			SetProgress(0, "The project file is saved by a newer version of FluoRender.\n" \
 				"Please check update and download the new version.");
-		else if (d_minor > VERSION_MINOR)
+		else if (d_minor > flvr::VersionMinor)
 			SetProgress(0, "The project file is saved by a newer version of FluoRender.\n" \
 				"Please check update and download the new version.");
 	}

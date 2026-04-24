@@ -1890,7 +1890,7 @@ void MainFrame::ShowInfo()
 	txt->SetFont(font);
 	right->Add(txt, 0, wxEXPAND);
 	txt = new wxStaticText(d, wxID_ANY, "Version: " +
-		std::format("{}.{}", VERSION_MAJOR, std::format("{:.1f}", float(VERSION_MINOR)))),
+		std::format("{}.{}", flvr::VersionMajor, std::format("{:.1f}", float(flvr::VersionMinor)))),
 		wxDefaultPosition, FromDIP(wxSize(50, -1));
 	font = wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	txt->SetFont(font);

@@ -5326,7 +5326,7 @@ void RenderView::DrawDataPeel()
 
 	//change data buffer state
 	data_buffer->set_depth_test_enabled(true);
-	data_buffer->set_depth_func(flvr::DepthFunc::Lequal);
+	data_buffer->set_depth_func(flvr::DepthFunc::LessEqual);
 	data_buffer->set_blend_enabled(0, true);
 	data_buffer->set_blend_equation(0, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 	data_buffer->set_blend_func(0,
@@ -7797,7 +7797,7 @@ void RenderView::GenerateBrushStrokes()
 		flvr::FBRole::RenderColor, nx, ny, gstRBPaintBrush);
 	assert(paint_buffer);
 	paint_buffer->set_blend_enabled_all(true);
-	paint_buffer->set_blend_equation_all(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
+	paint_buffer->set_blend_equation_all(flvr::BlendEquation::Maximum, flvr::BlendEquation::Maximum);
 	paint_buffer->set_blend_func_all(
 		flvr::BlendFactor::One, flvr::BlendFactor::One,
 		flvr::BlendFactor::One, flvr::BlendFactor::One);
@@ -9076,7 +9076,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	if (state.m_key_paint)
 	{
 		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Append);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9091,7 +9091,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	else if (state.m_key_erase)
 	{
 		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Eraser);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9106,7 +9106,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	else if (state.m_key_diff)
 	{
 		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Diffuse);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9122,8 +9122,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	{
 		if (glbin_states.m_freehand_tool_from_kb)
 		{
-			glbin_vol_selector.SetSelectMode(flrd::SelectMode::None);
-			glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+			glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
+			glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 			m_int_mode = InteractiveMode::Viewport;
 			glbin_states.m_freehand_tool_from_kb = false;
 
@@ -9201,7 +9201,7 @@ bool RenderView::PickMesh(BaseState& state)
 	pick_buffer->set_scissor_test_enabled(true);
 	pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
 	pick_buffer->set_depth_test_enabled(true);
-	pick_buffer->set_depth_func(flvr::DepthFunc::Lequal);
+	pick_buffer->set_depth_func(flvr::DepthFunc::LessEqual);
 	auto guard = glbin_framebuffer_manager.bind_scoped(pick_buffer);
 	pick_buffer->clear_base(true, true);
 

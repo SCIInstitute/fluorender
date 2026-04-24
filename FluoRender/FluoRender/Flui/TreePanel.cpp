@@ -474,7 +474,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
-		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::None;
+		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;
 		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 

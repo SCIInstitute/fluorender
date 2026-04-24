@@ -516,7 +516,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
 		switch (mode)
 		{
-		case flrd::ClippingRenderMode::None:
+		case flrd::ClippingRenderMode::Disabled:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_none));
 			break;
@@ -804,7 +804,7 @@ void ClipPlanePanel::SetPlaneMode()
 	int ival = glbin_settings.m_clip_mode;
 	ival++;
 	ival = ival > static_cast<int>(flrd::ClippingRenderMode::TransBack) ?
-		static_cast<int>(flrd::ClippingRenderMode::None) : ival;
+		static_cast<int>(flrd::ClippingRenderMode::Disabled) : ival;
 	glbin_settings.m_clip_mode = ival;
 	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
 	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);

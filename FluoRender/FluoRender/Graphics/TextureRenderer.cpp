@@ -83,7 +83,7 @@ namespace flvr
 
 	TexParam::TexParam() :
 		nx(0), ny(0), nz(0), nb(0),
-		id(0), brick(0), comp_type(CompType::None), time(0),
+		id(0), brick(0), comp_type(CompType::Invalid), time(0),
 		textype(GL_UNSIGNED_BYTE),
 		delayed_del(false)
 	{
