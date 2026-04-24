@@ -43,6 +43,10 @@ configure_file(
     @ONLY
 )
 
+if (MSVC)
+  add_compile_definitions(CMAKE_INTDIR=.)
+endif()
+
 # option to build with multithreading
 SET(USE_MP_COMPILE "0" CACHE STRING "Number of parallel jobs for building")
 # Convert the string to a number
