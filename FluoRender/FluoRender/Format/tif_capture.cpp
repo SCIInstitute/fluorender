@@ -32,58 +32,58 @@ DEALINGS IN THE SOFTWARE.
 
 struct TifCapture::Impl
 {
-    TIFF* out = nullptr;
-    void* buf = nullptr;
-    int w, h, chann;
-    bool fp32;
-    float dpi;
-    bool compress;
+	TIFF* out = nullptr;
+	void* buf = nullptr;
+	int w, h, chann;
+	bool fp32;
+	float dpi;
+	bool compress;
 
-    Impl(const std::wstring& filename, int width, int height, int channels, bool isFloat, float dpiVal, bool useCompress)
-        : w(width), h(height), chann(channels), fp32(isFloat), dpi(dpiVal), compress(useCompress)
-    {
-        out = TIFFOpenW(filename.c_str(), "wb");
-    }
+	Impl(const std::wstring& filename, int width, int height, int channels, bool isFloat, float dpiVal, bool useCompress)
+		: w(width), h(height), chann(channels), fp32(isFloat), dpi(dpiVal), compress(useCompress)
+	{
+		out = TIFFOpenW(filename.c_str(), "wb");
+	}
 
-    ~Impl() {
-        if (out) TIFFClose(out);
-        if (buf) _TIFFfree(buf);
-    }
+	~Impl() {
+		if (out) TIFFClose(out);
+		if (buf) _TIFFfree(buf);
+	}
 
-    bool isOpen() const { return out != nullptr; }
+	bool isOpen() const { return out != nullptr; }
 
-    bool write(const void* image, bool flipVertically)
-    {
-        if (!out) return false;
+	bool write(const void* image, bool flipVertically)
+	{
+		if (!out) return false;
 
-        TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
-        TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
-        TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
-        TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, fp32 ? 32 : 8);
-        TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, fp32 ? SAMPLEFORMAT_IEEEFP : SAMPLEFORMAT_UINT);
-        TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-        TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-        TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-        TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
-        TIFFSetField(out, TIFFTAG_YRESOLUTION, dpi);
-        TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
-        if (compress)
-            TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+		TIFFSetField(out, TIFFTAG_IMAGEWIDTH, w);
+		TIFFSetField(out, TIFFTAG_IMAGELENGTH, h);
+		TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, chann);
+		TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, fp32 ? 32 : 8);
+		TIFFSetField(out, TIFFTAG_SAMPLEFORMAT, fp32 ? SAMPLEFORMAT_IEEEFP : SAMPLEFORMAT_UINT);
+		TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+		TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+		TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		TIFFSetField(out, TIFFTAG_XRESOLUTION, dpi);
+		TIFFSetField(out, TIFFTAG_YRESOLUTION, dpi);
+		TIFFSetField(out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
+		if (compress)
+			TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 
-        tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
-        if (!buf) buf = _TIFFmalloc(linebytes);
-        if (!buf) return false;
+		tsize_t linebytes = chann * w * (fp32 ? 4 : 1);
+		if (!buf) buf = _TIFFmalloc(linebytes);
+		if (!buf) return false;
 
-        for (uint32_t row = 0; row < (uint32_t)h; ++row) {
-            uint32_t srcRow = flipVertically ? (h - row - 1) : row;
-            const void* srcLine = static_cast<const uint8_t*>(image) + srcRow * linebytes;
-            std::memcpy(buf, srcLine, linebytes);
-            if (TIFFWriteScanline(out, buf, row, 0) < 0)
-                return false;
-        }
+		for (uint32_t row = 0; row < (uint32_t)h; ++row) {
+			uint32_t srcRow = flipVertically ? (h - row - 1) : row;
+			const void* srcLine = static_cast<const uint8_t*>(image) + srcRow * linebytes;
+			std::memcpy(buf, srcLine, linebytes);
+			if (TIFFWriteScanline(out, buf, row, 0) < 0)
+				return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 };
 
 TifCapture::~TifCapture() { delete impl; }
@@ -91,5 +91,5 @@ TifCapture::~TifCapture() { delete impl; }
 bool TifCapture::Write()
 {
 	impl = new Impl(m_filename, m_width, m_height, m_channels, m_is_float, m_dpi_val, m_use_compression);
-    return impl->write(m_data, m_flipVertically);
+	return impl->write(m_data, m_flipVertically);
 }

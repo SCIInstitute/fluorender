@@ -452,9 +452,50 @@ void BaseVolReader::DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride)
 	}
 }
 
-Nrrd* BaseVolReader::Convert(bool get_max) { return Convert(0, get_max); }
+void BaseVolReader::ApplySwapAndPredictor(
+	void* data,
+	uint64_t row_count,
+	uint64_t row_width_pixels,
+	uint64_t bits,
+	uint64_t samples,
+	uint64_t planar,
+	uint64_t predictor,
+	bool swap_)
+{
+	bool eight_bits = (bits == 8);
+	uint64_t bytes_per_sample = bits / 8;
+	tsize_t stride = (planar == 2) ? 1 : samples;
 
-Nrrd* BaseVolReader::Convert(int c, bool get_max) { return Convert(0, c, get_max); }
+	// ---- Endian fix MUST happen before predictor ----
+	if (!eight_bits && swap_)
+	{
+		SwapBuffer16(data,
+			row_count * row_width_pixels * samples * bytes_per_sample);
+	}
+
+	if (predictor != 2)
+		return;
+
+	for (uint64_t j = 0; j < row_count; j++)
+	{
+		size_t row_bytes =
+			(planar == 2)
+			? row_width_pixels * bytes_per_sample
+			: row_width_pixels * samples * bytes_per_sample;
+
+		uint8_t* row =
+			static_cast<uint8_t*>(data) + j * row_bytes;
+
+		if (eight_bits)
+			DecodeAcc8(row, row_bytes, stride);
+		else
+			DecodeAcc16(row, row_bytes, stride);
+	}
+}
+
+std::shared_ptr<fluo::RawData> BaseVolReader::Convert(bool get_max) { return Convert(0, get_max); }
+
+std::shared_ptr<fluo::RawData> BaseVolReader::Convert(int c, bool get_max) { return Convert(0, c, get_max); }
 
 int BaseVolReader::get_number(const std::string &str, int64_t pos)
 {
