@@ -55,6 +55,15 @@ inline uint16_t SwapShort(uint16_t num) {
 	return ((num & 0x00FF) << 8) | ((num & 0xFF00) >> 8);
 }
 
+inline void SwapBuffer16(void* data, size_t byteCount)
+{
+	uint16_t* p = static_cast<uint16_t*>(data);
+	size_t count = byteCount / sizeof(uint16_t);
+
+	for (size_t i = 0; i < count; ++i)
+		p[i] = SwapShort(p[i]);
+}
+
 /**
 	* This method swaps the byte order of a word.
 	* @param num The word to swap byte order.
