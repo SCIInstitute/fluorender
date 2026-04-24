@@ -1354,32 +1354,59 @@ void TIFReader::GetTiffStrip(uint64_t page, uint64_t strip,
 		imagej_raw_ = true;
 	}
 	//actually read the data now
-	char *temp = new char[byte_count];
-	//unsigned long long pos = tiff_stream.tellg();
-	tiff_stream.read((char*)temp, byte_count);
-	int bits = static_cast<int>(GetTiffField(kBitsPerSampleTag));
-	bool eight_bits = 8 == bits;
-	//get compression tag, decompress if necessary
-	uint64_t tmp = GetTiffField(kCompressionTag);
-	uint64_t prediction = GetTiffField(kPredictionTag);
+	char* temp = new char[byte_count];
+	tiff_stream.read(temp, byte_count);
+
+	int bits = GetTiffField(kBitsPerSampleTag);
+	bool eight_bits = (bits == 8);
+	uint64_t bytes_per_sample = bits / 8;
+
+	uint64_t compression = GetTiffField(kCompressionTag);
+	uint64_t predictor = GetTiffField(kPredictionTag);
 	uint64_t samples = GetTiffField(kSamplesPerPixelTag);
-	samples = samples == 0 ? 1 : samples;
-	tsize_t stride = static_cast<tsize_t>((GetTiffField(kPlanarConfigurationTag) == 2) ? 1 : samples);
-	//uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag,NULL,0);
-	uint64_t rows_per_strip = strip_size /
-		GetTiffField(kImageWidthTag) /
-		samples;
-	bool isCompressed = tmp == 5;
-	if (isCompressed)
+	if (samples == 0) samples = 1;
+
+	uint64_t planar = GetTiffField(kPlanarConfigurationTag);
+	tsize_t stride = (planar == 2) ? 1 : samples;
+
+	uint64_t rows_per_strip = GetTiffField(kRowsPerStripTag);
+	uint64_t image_height = GetTiffField(kImageLengthTag);
+	uint64_t strip_start_row = strip * rows_per_strip;
+	uint64_t rows_in_this_strip =
+		std::min(rows_per_strip,
+			image_height - strip_start_row);
+
+	if (compression == 5)
 	{
+		// LZW
 		LZWDecode((tidata_t)temp, (tidata_t)data, static_cast<tsize_t>(strip_size));
-		if (prediction == 2)
+
+		//Ensure endian correction happens here for 16-bit
+		if (!eight_bits && swap_)
 		{
-			for (size_t j = 0; j < rows_per_strip; j++)
+			SwapBuffer16(data, strip_size);
+		}
+
+		if (predictor == 2) {
+			for (size_t j = 0; j < rows_in_this_strip; j++) {
+
+				size_t row_bytes =
+					(planar == 2)
+					? m_size.intx() * bytes_per_sample
+					: m_size.intx() * samples * bytes_per_sample;
+
+				uint8_t* row =
+					(uint8_t*)data + j * row_bytes;
+
 				if (eight_bits)
-					DecodeAcc8((tidata_t)data + j*m_size.intx()*samples, static_cast<tsize_t>(m_size.intx()*samples), stride);
+					DecodeAcc8(row,
+						row_bytes,
+						stride);
 				else
-					DecodeAcc16((tidata_t)data + j*m_size.intx()*samples * 2, static_cast<tsize_t>(m_size.intx()*samples * 2), stride);
+					DecodeAcc16(row,
+						row_bytes,
+						stride);
+			}
 		}
 	}
 	else
