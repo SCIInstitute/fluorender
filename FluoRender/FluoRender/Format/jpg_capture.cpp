@@ -46,8 +46,8 @@ struct JpgCapture::Impl
 
 	bool write(const void* image, bool flipVertically)
 	{
-        FILE* fp = 0;
- 		if (!WFOPEN(&fp, filename, L"wb")) return false;
+		FILE* fp = 0;
+		if (!WFOPEN(&fp, filename, L"wb")) return false;
 
 		jpeg_compress_struct cinfo;
 		jpeg_error_mgr jerr;

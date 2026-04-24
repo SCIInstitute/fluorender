@@ -249,6 +249,15 @@ protected:
 	int LZWDecode(tidata_t tif, tidata_t op0, tsize_t occ0);
 	void DecodeAcc8(tidata_t cp0, tsize_t cc, tsize_t stride);
 	void DecodeAcc16(tidata_t cp0, tsize_t cc, tsize_t stride);
+	void ApplySwapAndPredictor(
+		void* data,
+		uint64_t row_count,
+		uint64_t row_width_pixels,
+		uint64_t bits,
+		uint64_t samples,
+		uint64_t planar,
+		uint64_t predictor,
+		bool swap_);
 
 	//read number after a position in a string
 	int get_number(const std::string &str, int64_t pos);
