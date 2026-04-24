@@ -36,10 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <memory>
 
-#ifdef None
-#undef None
-#endif
-
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
 #define INIT_TRANSL  4
@@ -99,7 +95,7 @@ enum class ChannelMixMode : int
 
 enum class InteractiveMode : int
 {
-	None,
+	Disabled,
 	Viewport,			//1-normal viewing
 	BrushSelect,		//2-painting
 	BrushSelectUpdate,	//4-one-time rendering update in painting mode

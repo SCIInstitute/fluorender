@@ -32,10 +32,6 @@
 #include <Vector4i.h>
 #include <unordered_map>
 
-#ifdef Always
-#undef Always
-#endif
-
 namespace flvr
 {
 	enum class BlendFactor : int
@@ -62,26 +58,26 @@ namespace flvr
 		Add,
 		Subtract,
 		ReverseSubtract,
-		Min,
-		Max
+		Minimum,
+		Maximum
 	};
 
 	enum class DepthFunc : int
 	{
-		Never,
+		NeverTest,
 		Less,
 		Equal,
-		Lequal,
+		LessEqual,
 		Greater,
-		Notequal,
-		Gequal,
-		Always
+		NotEqual,
+		GreaterEqual,
+		AlwaysPass
 	};
 
 	enum class CullFace : int
 	{
-		Front,
-		Back,
+		FrontFace,
+		BackFace,
 		FrontAndBack
 	};
 
@@ -145,13 +141,13 @@ namespace flvr
 
 		// Depth settings
 		bool enableDepthTest = false;
-		DepthFunc depthFunc = DepthFunc::Lequal;
+		DepthFunc depthFunc = DepthFunc::LessEqual;
 		float clearDepth = 1.0f;
 
 		// Cull settings
 		bool enableCullFace = false;
 		FaceWinding faceWinding = FaceWinding::Off;
-		CullFace cullFace = CullFace::Back;
+		CullFace cullFace = CullFace::BackFace;
 
 		// Viewport rectangle
 		fluo::Vector4i viewport = { 0, 0, 0, 0 };

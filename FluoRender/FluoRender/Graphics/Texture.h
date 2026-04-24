@@ -38,10 +38,6 @@
 #include <vector>
 #include <unordered_map>
 
-#ifdef None
-#undef None
-#endif
-
 #ifndef TextureBrick_h
 #define TEXTURE_MAX_COMPONENTS	4
 #endif
@@ -57,7 +53,7 @@ namespace flvr
 	class FileLocInfo;
 	enum class CompType : int
 	{
-		None,
+		Invalid,
 		Data,
 		Gradient,
 		GradientMagnitude,

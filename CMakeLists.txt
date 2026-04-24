@@ -761,12 +761,10 @@ if(OPENXR_DIR_CANDIDATES)
             $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>
         )
 
-        target_compile_definitions(fluorender PRIVATE
-            XR_USE_PLATFORM_WIN32
-            XR_USE_GRAPHICS_API_OPENGL
-            XR_USE_GRAPHICS_API_D3D11
-            XR_EXTENSION_PROTOTYPES
-        )
+        add_definitions(-DXR_USE_PLATFORM_WIN32)
+        add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+        add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
+        add_definitions(-DXR_EXTENSION_PROTOTYPES)
 
         # ---- NuGet (unchanged, Windows only) ----
         get_filename_component(ABS_NUGET_EXECUTABLE
@@ -792,22 +790,18 @@ if(OPENXR_DIR_CANDIDATES)
         set(OpenXR_LIBRARIES
             ${OPENXR_ROOT}/build/src/loader/libopenxr_loader.a)
 
-        target_compile_definitions(fluorender PRIVATE
-            XR_USE_PLATFORM_MACOS
-            XR_USE_GRAPHICS_API_OPENGL
-            XR_EXTENSION_PROTOTYPES
-        )
+        add_definitions(-DXR_USE_PLATFORM_MACOS)
+        add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+        add_definitions(-DXR_EXTENSION_PROTOTYPES)
 
     else()
         # Linux using standalone SDK (rare, but allowed)
         set(OpenXR_LIBRARIES
             ${OPENXR_ROOT}/build/src/loader/libopenxr_loader.a)
 
-        target_compile_definitions(fluorender PRIVATE
-            XR_USE_PLATFORM_XLIB
-            XR_USE_GRAPHICS_API_OPENGL
-            XR_EXTENSION_PROTOTYPES
-        )
+        add_definitions(-DXR_USE_PLATFORM_XLIB)
+        add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+        add_definitions(-DXR_EXTENSION_PROTOTYPES)
     endif()
 
     set(OPENXR_FOUND TRUE)

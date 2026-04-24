@@ -38,16 +38,6 @@
 #include <iostream>
 #include <unordered_set>
 
-#ifdef XValue
-#undef XValue
-#endif
-#ifdef YValue
-#undef YValue
-#endif
-#ifdef None
-#undef None
-#endif
-
 namespace flvr
 {
 	class ShaderProgram
@@ -130,15 +120,15 @@ namespace flvr
 	{
 		Disabled,//0: new
 		Intensity,//previously 0
-		ZValue,
-		YValue,
-		XValue,
-		TValue,
+		ZCoord,
+		YCoord,
+		XCoord,
+		TCoord,
 		Radial,
 		Linear,
 		Gradient,
 		Normal,
-		IntDelta,//10, previously 7
+		IntensityDelta,//10, previously 7
 		Speed
 	};
 
