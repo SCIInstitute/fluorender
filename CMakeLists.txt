@@ -1237,7 +1237,7 @@ target_include_directories(CONVERTER_LIB PRIVATE
 
 # Database
 target_include_directories(DATABASE_LIB PRIVATE
-  ${DLIB_DIRS}
+  ${DLIB_DIR}
   ${Boost_INCLUDE_DIR})
 
 # Distance
@@ -1467,10 +1467,8 @@ target_include_directories(TRACKING_LIB PRIVATE
 
 # Trainer
 target_link_libraries(TRAINER_LIB
-  PUBLIC
-    dlib::dlib
-  PRIVATE
-    ${Python3_LIBRARIES}
+  dlib::dlib
+  ${Python3_LIBRARIES}
 )
 
 # Type
@@ -1489,7 +1487,7 @@ ELSEIF(WIN32)
   SET(icon_rc "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/FluoRender.rc")
   SET(icns "${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Image/fluorenderIcon.ico")
   SET(manifest_file "${CMAKE_CURRENT_SOURCE_DIR}/Manifest/fluorender.manifest")
-  #ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
+  ADD_DEFINITIONS(-DICON_RC_FILE="${icns}")
   SET(src ${src} ${icon_rc} ${manifest_file})
 ENDIF()
 
