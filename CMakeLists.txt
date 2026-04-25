@@ -749,46 +749,39 @@ if(OPENXR_DIR_CANDIDATES)
     message(STATUS "Using standalone OpenXR SDK at: ${OPENXR_ROOT}")
 
     if(WIN32)
-        # Windows + HoloLens remoting
-        set(OPENXR_INCLUDE_DIR
-            "${OPENXR_INCLUDE_DIR};
-             ${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include")
-
-        file(GLOB OpenXR_RELEASE_LIBRARIES
-            ${OPENXR_ROOT}/build/src/loader/Release/*.lib)
-        file(GLOB OpenXR_DEBUG_LIBRARIES
-            ${OPENXR_ROOT}/build/src/loader/Debug/*.lib)
-
-        set(OpenXR_LIBRARIES
-            $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib>
-            $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>
-        )
-
+        #d3d11 dependencies
+        set(OPENXR_INCLUDE_DIR "${OPENXR_INCLUDE_DIR};${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include")
+        file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_ROOT}/build/src/loader/Release/*.lib)
+        file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_ROOT}/build/src/loader/Debug/*.lib)
+        set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>)
         add_definitions(-DXR_USE_PLATFORM_WIN32)
         add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
         add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
         add_definitions(-DXR_EXTENSION_PROTOTYPES)
 
-        # ---- NuGet (unchanged, Windows only) ----
-        get_filename_component(ABS_NUGET_EXECUTABLE
-            "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" ABSOLUTE)
-        set(NUGET_EXECUTABLE ${ABS_NUGET_EXECUTABLE})
-
+        # nuget
+	    # Convert to absolute path
+	    get_filename_component(ABS_NUGET_EXECUTABLE "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" ABSOLUTE)
+	    set(NUGET_EXECUTABLE ${ABS_NUGET_EXECUTABLE})
+	    message(STATUS "NuGet executable path: ${NUGET_EXECUTABLE}")
+	
+        # Find the NuGet executable
         find_program(NUGET_COMMAND NAMES nuget PATHS "${FluoRender_SOURCE_DIR}/NuGet")
+
+        # Ensure the NuGet executable was found
         if(NOT NUGET_COMMAND)
-            message(FATAL_ERROR "NuGet executable not found.")
+            message(FATAL_ERROR "NuGet executable not found. Please specify the correct path.")
         endif()
 
+        # Specify the NuGet package and version
         set(NUGET_PACKAGE Microsoft.Holographic.Remoting.OpenXr)
         set(NUGET_VERSION 2.9.4)
 
+        # Download and install the NuGet package
         execute_process(
-            COMMAND ${NUGET_COMMAND} install ${NUGET_PACKAGE}
-                    -Version ${NUGET_VERSION}
-                    -OutputDirectory ${CMAKE_BINARY_DIR}/packages
+            COMMAND ${NUGET_COMMAND} install ${NUGET_PACKAGE} -Version ${NUGET_VERSION} -OutputDirectory ${CMAKE_BINARY_DIR}/packages
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         )
-
     elseif(APPLE)
         set(OpenXR_LIBRARIES
             ${OPENXR_ROOT}/build/src/loader/libopenxr_loader.a)
@@ -1341,7 +1334,8 @@ target_include_directories(GLOBAL_LIB PRIVATE
   ${GLM_INCLUDE_DIR}
   ${OPENXR_INCLUDE_DIR}
   ${Python3_INCLUDE_DIRS}
-  ${TEEM_INCLUDE_DIRS})
+  ${TEEM_INCLUDE_DIRS}
+)
 if (WIN32 OR APPLE)
   target_include_directories(GLOBAL_LIB PRIVATE
     ${JNI_INCLUDE_DIRS})
@@ -1382,7 +1376,8 @@ target_include_directories(OPENXR_LIB PRIVATE
   ${GLEW_INCLUDE_DIR}
   ${GLM_INCLUDE_DIR}
   ${OPENVR_INCLUDE_DIR}
-  ${OPENXR_INCLUDE_DIR})
+  ${OPENXR_INCLUDE_DIR}
+)
 target_link_libraries(OPENXR_LIB PRIVATE
   ${GLEW_STATIC_LIBRARIES}
   ${OpenVR_LIBRARIES}
