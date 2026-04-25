@@ -113,10 +113,10 @@ void Project::Open(const std::wstring& filename)
 		l_major = STOL(ver_major);
 		d_minor = STOD(ver_minor);
 
-		if (l_major > flvr::VersionMajor)
+		if (l_major > fluo::VersionMajor)
 			SetProgress(0, "The project file is saved by a newer version of FluoRender.\n" \
 				"Please check update and download the new version.");
-		else if (d_minor > flvr::VersionMinor)
+		else if (d_minor > fluo::VersionMinor)
 			SetProgress(0, "The project file is saved by a newer version of FluoRender.\n" \
 				"Please check update and download the new version.");
 	}
@@ -1258,8 +1258,9 @@ void Project::Save(const std::wstring& filename, bool inc)
 	if (!fconfig)
 		return;
 
-	fconfig->Write("ver_major", std::string(VERSION_MAJOR_TAG));
-	fconfig->Write("ver_minor", std::string(VERSION_MINOR_TAG));
+	fconfig->Write("ver_major", std::to_string(fluo::VersionMajor));
+	fconfig->Write("ver_minor", std::to_string(fluo::VersionMinor));
+	fconfig->Write("ver_patch", std::to_string(fluo::VersionPatch));
 
 	int ticks = glbin_data_manager.GetVolumeNum() + glbin_data_manager.GetMeshNum();
 	ticks = ticks ? ticks : 1;

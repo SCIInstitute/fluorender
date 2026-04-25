@@ -39,40 +39,59 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <memory>
 
-#define VERSION_CONTACT "https://sciinstitute.github.io/fluorender/"
-#define VERSION_AUTHORS "YONG WAN       \tHIDEO OTSUNA   \n"\
-						"CHUCK HANSEN   \tCHI-BIN CHIEN  \n"\
-						"BRIG BAGLEY    \tTAKASHI KAWASE \n"\
-						"REMALDEEP SINGH\tKEI ITO        \n"\
-						"HOLLY A. HOLMAN\n"
-#define VERSION_UPDATES "https://sciinstitute.github.io/fluorender/Releases/fluorender_v" \
-				   flvr::VersionString \
-				   "/"
-#define HELP_MANUAL "https://github.com/SCIInstitute/fluorender/releases/download/v"\
-				   flvr::VersionString \
-				   "/FluoRender" \
-				   flvr::VersionString \
-				   "_Manual.pdf"
-#define HELP_TUTORIAL "https://github.com/SCIInstitute/fluorender/releases/download/v"\
-				   flvr::VersionString \
-				   "/FluoRender" \
-				   flvr::VersionString \
-				   "/FluoRender" \
-				   flvr::VersionString \
-				   "_Tutorials.pdf"
-#define YOUTUBE_URL "https://www.youtube.com/playlist?list=PLSBz7un7RyZhO51UWhmGiusaJebmaWPbc"
-#define TWITTER_URL "https://twitter.com/FluoRender"
-#define FACEBOOK_URL "https://www.facebook.com/fluorender"
-#define BATCH_INFO HELP_MANUAL
-#define HELP_PAINT HELP_MANUAL
+inline const std::string VERSION_CONTACT =
+"https://sciinstitute.github.io/fluorender/";
 
-#define UITEXT_PROJECT		"Project"
-#define UITEXT_DATAVIEW		"Data Sets"
-#define UITEXT_TREEVIEW		"Workspace"
-#define UITEXT_MAKEMOVIE	"Movie Making"
-#define UITEXT_ADJUST		"Output Adjustments"
-#define UITEXT_CLIPPING		"Clipping Planes"
-#define UITEXT_PROPERTIES	"Properties"
+inline const std::string VERSION_AUTHORS =
+"YONG WAN       \tHIDEO OTSUNA   \n"
+"CHUCK HANSEN   \tCHI-BIN CHIEN  \n"
+"BRIG BAGLEY    \tTAKASHI KAWASE \n"
+"REMALDEEP SINGH\tKEI ITO        \n"
+"HOLLY A. HOLMAN\n";
+
+inline const std::string VERSION_UPDATES =
+"https://sciinstitute.github.io/fluorender/Releases/fluorender_v" +
+std::string(fluo::VersionString) +
+"/";
+
+inline const std::string HELP_MANUAL =
+"https://github.com/SCIInstitute/fluorender/releases/download/v" +
+std::string(fluo::VersionString) +
+"/FluoRender" +
+std::string(fluo::VersionString) +
+"_Manual.pdf";
+
+inline const std::string HELP_TUTORIAL =
+"https://github.com/SCIInstitute/fluorender/releases/download/v" +
+std::string(fluo::VersionString) +
+"/FluoRender" +
+std::string(fluo::VersionString) +
+"/FluoRender" +
+std::string(fluo::VersionString) +
+"_Tutorials.pdf";
+
+inline const std::string YOUTUBE_URL =
+"https://www.youtube.com/playlist?list=PLSBz7un7RyZhO51UWhmGiusaJebmaWPbc";
+
+inline const std::string TWITTER_URL =
+"https://twitter.com/FluoRender";
+
+inline const std::string FACEBOOK_URL =
+"https://www.facebook.com/fluorender";
+
+// Aliases
+inline const std::string& BATCH_INFO = HELP_MANUAL;
+inline const std::string& HELP_PAINT = HELP_MANUAL;
+
+// -------------------- UI Text --------------------
+
+inline const std::string UITEXT_PROJECT = "Project";
+inline const std::string UITEXT_DATAVIEW = "Data Sets";
+inline const std::string UITEXT_TREEVIEW = "Workspace";
+inline const std::string UITEXT_MAKEMOVIE = "Movie Making";
+inline const std::string UITEXT_ADJUST = "Output Adjustments";
+inline const std::string UITEXT_CLIPPING = "Clipping Planes";
+inline const std::string UITEXT_PROPERTIES = "Properties";
 
 class ProjectPanel;
 class TreePanel;
@@ -112,7 +131,7 @@ class FpRangeDlg;
 class wxGaugeStatusbar;
 class wxBasisSlider;
 
-class MainFrame: public wxFrame
+class MainFrame : public wxFrame
 {
 	enum
 	{
@@ -254,7 +273,7 @@ public:
 		MeshGroup* mg = 0,
 		AnnotData* ann = 0,
 		bool show = true);
-	void UpdateProps(const fluo::ValueCollection &vc, int excl_self = 1, wxWindow* panel = 0);
+	void UpdateProps(const fluo::ValueCollection& vc, int excl_self = 1, wxWindow* panel = 0);
 	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);
 	MeshPropPanel* FindMeshProps(MeshData* md);
@@ -370,13 +389,13 @@ private:
 	wxMenu* m_top_help = 0;
 
 	ProjectPanel* m_proj_panel;
-	TreePanel *m_tree_panel;
-	ListPanel *m_list_panel;
+	TreePanel* m_tree_panel;
+	ListPanel* m_list_panel;
 	std::vector<RenderViewPanel*> m_renderview_panels;
-	PropertyPanel *m_prop_panel;
+	PropertyPanel* m_prop_panel;
 	//prop panel children
 	std::vector<PropPanel*> m_prop_pages;
-	ClipPlanePanel *m_clip_plane_panel;
+	ClipPlanePanel* m_clip_plane_panel;
 	OutputAdjPanel* m_output_adj_panel;
 	MoviePanel* m_movie_panel;
 	SettingDlg* m_setting_dlg;
@@ -413,7 +432,7 @@ private:
 	//panes
 	void OnPaneClose(wxAuiManagerEvent& event);
 	//close
-	void OnClose(wxCloseEvent &event);
+	void OnClose(wxCloseEvent& event);
 
 	//extra controls in dialogs
 	static wxWindow* CreateExtraControlVolume(wxWindow* parent);

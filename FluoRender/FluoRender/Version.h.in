@@ -1,9 +1,10 @@
 #pragma once
 
-namespace flvr
+namespace fluo
 {
     inline constexpr int VersionMajor = @FLUORENDER_VERSION_MAJOR@;
     inline constexpr int VersionMinor = @FLUORENDER_VERSION_MINOR@;
+    inline constexpr int VersionPatch = @FLUORENDER_VERSION_PATCH@;
 
     inline constexpr const char* VersionString = "@FLUORENDER_VERSION_STRING@";
     inline constexpr const char* Copyright     = "@FLUORENDER_COPYRIGHT@";

@@ -47,11 +47,11 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 #include <chrono>
 
-/**
-	* This method swaps the byte order of a short.
-	* @param num The short to swap byte order.
-	* @return The short with bytes swapped.
-	*/
+ /**
+	 * This method swaps the byte order of a short.
+	 * @param num The short to swap byte order.
+	 * @return The short with bytes swapped.
+	 */
 inline uint16_t SwapShort(uint16_t num) {
 	return ((num & 0x00FF) << 8) | ((num & 0xFF00) >> 8);
 }
@@ -766,9 +766,9 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 {
 	return std::find_if(vec.begin(), vec.end(),
 		[&target](const std::weak_ptr<T>& wp) {
-		auto sp = wp.lock();
-		return sp && sp == target;
-	});
+			auto sp = wp.lock();
+			return sp && sp == target;
+		});
 }
 
 #ifdef __APPLE__
@@ -779,139 +779,139 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 inline std::filesystem::path GetDataRoot()
 {
 #ifdef __APPLE__
-    CFBundleRef mainBundle = CFBundleGetMainBundle();
-    if (mainBundle)
-    {
-        CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
-        if (resourcesURL)
-        {
-            char path[PATH_MAX];
-            if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
-                (UInt8*)path, PATH_MAX))
-            {
-                CFRelease(resourcesURL);
-                return std::filesystem::path(path);
-            }
-            CFRelease(resourcesURL);
-        }
-    }
-    return std::filesystem::current_path();
+	CFBundleRef mainBundle = CFBundleGetMainBundle();
+	if (mainBundle)
+	{
+		CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+		if (resourcesURL)
+		{
+			char path[PATH_MAX];
+			if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
+				(UInt8*)path, PATH_MAX))
+			{
+				CFRelease(resourcesURL);
+				return std::filesystem::path(path);
+			}
+			CFRelease(resourcesURL);
+		}
+	}
+	return std::filesystem::current_path();
 #else
-    return std::filesystem::current_path();
+	return std::filesystem::current_path();
 #endif
 }
 
 inline std::filesystem::path GetUserSettingsRoot()
 {
 #ifdef __APPLE__
-    const char* home = std::getenv("HOME");
-    if (home)
-    {
-        std::filesystem::path p = home;
-        p /= "Library/Application Support/FluoRender";
-        return p;
-    }
-    return std::filesystem::current_path();
+	const char* home = std::getenv("HOME");
+	if (home)
+	{
+		std::filesystem::path p = home;
+		p /= "Library/Application Support/FluoRender";
+		return p;
+	}
+	return std::filesystem::current_path();
 #else
-    return std::filesystem::current_path();
+	return std::filesystem::current_path();
 #endif
 }
 
 inline bool NeedsUserDataUpdate()
 {
-    auto userDir = GetUserSettingsRoot();
-    auto versionFile = userDir / "version.txt";
+	auto userDir = GetUserSettingsRoot();
+	auto versionFile = userDir / "version.txt";
 
-    // First launch: no directory or no version file
-    if (!std::filesystem::exists(userDir))
-        return true;
+	// First launch: no directory or no version file
+	if (!std::filesystem::exists(userDir))
+		return true;
 
-    if (!std::filesystem::exists(versionFile))
-        return true;
+	if (!std::filesystem::exists(versionFile))
+		return true;
 
-    // Read stored version
-    int storedMajor = 0;
-    int storedMinor = 0;
+	// Read stored version
+	int storedMajor = 0;
+	int storedMinor = 0;
 
-    {
-        std::ifstream in(versionFile);
-        in >> storedMajor >> storedMinor;
-    }
+	{
+		std::ifstream in(versionFile);
+		in >> storedMajor >> storedMinor;
+	}
 
-    // Compare major/minor
-    if (storedMajor < flvr::VersionMajor)
-        return true;
+	// Compare major/minor
+	if (storedMajor < fluo::VersionMajor)
+		return true;
 
-    if (storedMajor == flvr::VersionMajor &&
-        storedMinor < flvr::VersionMinor)
-        return true;
+	if (storedMajor == fluo::VersionMajor &&
+		storedMinor < fluo::VersionMinor)
+		return true;
 
-    return false;
+	return false;
 }
 
 inline void InitializeUserSettings()
 {
 #ifdef __APPLE__
-    if (!NeedsUserDataUpdate())
-        return;
+	if (!NeedsUserDataUpdate())
+		return;
 
-    auto srcRoot = GetDataRoot();
-    auto dstRoot = GetUserSettingsRoot();
+	auto srcRoot = GetDataRoot();
+	auto dstRoot = GetUserSettingsRoot();
 
-    std::filesystem::create_directories(dstRoot);
+	std::filesystem::create_directories(dstRoot);
 
-    // Directories to copy
-    std::vector<std::string> dirsToCopy = {
-        "CL_Code",
-        "Commands",
-        "Database",
-        "Scripts",
-        "Templates"
-    };
+	// Directories to copy
+	std::vector<std::string> dirsToCopy = {
+		"CL_Code",
+		"Commands",
+		"Database",
+		"Scripts",
+		"Templates"
+	};
 
-    for (const auto& dir : dirsToCopy)
-    {
-        auto src = srcRoot / dir;
-        auto dst = dstRoot / dir;
+	for (const auto& dir : dirsToCopy)
+	{
+		auto src = srcRoot / dir;
+		auto dst = dstRoot / dir;
 
-        if (std::filesystem::exists(src))
-        {
-            std::filesystem::create_directories(dst);
-            std::filesystem::copy(
-                src,
-                dst,
-                std::filesystem::copy_options::recursive |
-                std::filesystem::copy_options::overwrite_existing
-            );
-        }
-    }
+		if (std::filesystem::exists(src))
+		{
+			std::filesystem::create_directories(dst);
+			std::filesystem::copy(
+				src,
+				dst,
+				std::filesystem::copy_options::recursive |
+				std::filesystem::copy_options::overwrite_existing
+			);
+		}
+	}
 
-    // Files to copy
-    std::vector<std::string> filesToCopy = {
-        "fluorender.xml",
-        "fluorender_default.xml"
-    };
+	// Files to copy
+	std::vector<std::string> filesToCopy = {
+		"fluorender.xml",
+		"fluorender_default.xml"
+	};
 
-    for (const auto& file : filesToCopy)
-    {
-        auto src = srcRoot / file;
-        auto dst = dstRoot / file;
+	for (const auto& file : filesToCopy)
+	{
+		auto src = srcRoot / file;
+		auto dst = dstRoot / file;
 
-        if (std::filesystem::exists(src))
-        {
-            std::filesystem::copy_file(
-                src,
-                dst,
-                std::filesystem::copy_options::overwrite_existing
-            );
-        }
-    }
+		if (std::filesystem::exists(src))
+		{
+			std::filesystem::copy_file(
+				src,
+				dst,
+				std::filesystem::copy_options::overwrite_existing
+			);
+		}
+	}
 
-    // Write version file
-    {
-        std::ofstream out(dstRoot / "version.txt");
-        out << flvr::VersionMajor << " " << flvr::VersionMinor;
-    }
+	// Write version file
+	{
+		std::ofstream out(dstRoot / "version.txt");
+		out << fluo::VersionMajor << " " << fluo::VersionMinor;
+	}
 #endif
 }
 
@@ -929,8 +929,8 @@ inline void InitializeUserSettings()
 #define SSCANF    sscanf
 
 extern "C" {
-    typedef struct tiff TIFF;
-    TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
+	typedef struct tiff TIFF;
+	TIFF* TIFFOpenW(const wchar_t* name, const char* mode);
 }
 
 inline wchar_t GETSLASHALT() { return L'/'; }
@@ -1011,8 +1011,8 @@ inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 #define FSEEK64     fseek
 
 extern "C" {
-    typedef struct tiff TIFF;
-    TIFF* TIFFOpen(const char* name, const char* mode);
+	typedef struct tiff TIFF;
+	TIFF* TIFFOpen(const char* name, const char* mode);
 }
 
 inline bool str_mat(std::wstring& s1, size_t p1, std::wstring& s2, size_t p2)
@@ -1071,7 +1071,7 @@ inline char* STRCAT(char* d, size_t n, const char* s) {
 inline char* STRDUP(const char* s) { return strdup(s); }
 
 inline TIFF* TIFFOpenW(const std::wstring fname, const char* opt) {
-    std::string str = ws2s(fname);
+	std::string str = ws2s(fname);
 	return TIFFOpen(str.c_str(), opt);
 }
 

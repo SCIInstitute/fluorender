@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GraphicsQuery.h>
 #include <ClippingBoxRenderer.h>
 #include <compatibility.h>
+#include <Version.h>
 #include <filesystem>
 
 MainSettings::MainSettings()
@@ -517,8 +518,10 @@ void MainSettings::Save()
 	if (!fconfig)
 		return;
 
-	fconfig->Write("ver_major", std::string(VERSION_MAJOR_TAG));
-	fconfig->Write("ver_minor", std::string(VERSION_MINOR_TAG));
+	fconfig->Write("ver_major", std::to_string(fluo::VersionMajor));
+	fconfig->Write("ver_minor", std::to_string(fluo::VersionMinor));
+	if (fluo::VersionPatch > 0)
+		fconfig->Write("ver_patch", std::to_string(fluo::VersionPatch));
 
 	//project
 	fconfig->SetPath("/project");

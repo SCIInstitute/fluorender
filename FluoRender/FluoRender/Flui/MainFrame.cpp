@@ -899,7 +899,7 @@ MainFrame::MainFrame(
 
 	m_aui_mgr.Update();
 
-	glbin_states.m_status_str = std::string(FLUORENDER_TITLE) + " started normally.";
+	glbin_states.m_status_str = std::string(fluo::AppTitle) + " started normally.";
 }
 
 MainFrame::~MainFrame()
@@ -1884,18 +1884,35 @@ void MainFrame::ShowInfo()
 	logo->Realize();
 	left->Add(logo, 0, wxEXPAND);
 	//right
-	wxStaticText* txt = new wxStaticText(d, wxID_ANY, FLUORENDER_TITLE,
+	wxStaticText* txt = new wxStaticText(d, wxID_ANY, fluo::AppTitle,
 		wxDefaultPosition, FromDIP(wxSize(-1, -1)));
 	wxFont font = wxFont(15, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	txt->SetFont(font);
 	right->Add(txt, 0, wxEXPAND);
-	txt = new wxStaticText(d, wxID_ANY, "Version: " +
-		std::format("{}.{}", flvr::VersionMajor, std::format("{:.1f}", float(flvr::VersionMinor)))),
-		wxDefaultPosition, FromDIP(wxSize(50, -1));
+	wxString version;
+	if (fluo::VersionPatch == 0)
+	{
+		version = wxString::Format("Version: %d.%d",
+			fluo::VersionMajor,
+			fluo::VersionMinor);
+	}
+	else
+	{
+		version = wxString::Format("Version: %d.%d.%d",
+			fluo::VersionMajor,
+			fluo::VersionMinor,
+			fluo::VersionPatch);
+	}
+	txt = new wxStaticText(
+		d,
+		wxID_ANY,
+		version,
+		wxDefaultPosition,
+		FromDIP(wxSize(50, -1)));
 	font = wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	txt->SetFont(font);
 	right->Add(txt, 0, wxEXPAND);
-	txt = new wxStaticText(d, wxID_ANY, wxString("Copyright (c) ") + VERSION_COPYRIGHT,
+	txt = new wxStaticText(d, wxID_ANY, wxString("Copyright (c) ") + fluo::Copyright,
 		wxDefaultPosition, FromDIP(wxSize(-1, -1)));
 	font = wxFont(11, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
 	txt->SetFont(font);

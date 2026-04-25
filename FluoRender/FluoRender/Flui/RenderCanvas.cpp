@@ -455,9 +455,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		SetFocus();
 	if (glbin_states.m_benchmark)
 	{
-		wxString title = wxString(FLUORENDER_TITLE) +
-			" " + wxString(VERSION_MAJOR_TAG) +
-			"." + wxString(VERSION_MINOR_TAG) +
+		wxString title = wxString(fluo::AppTitle) +
+			" " + wxString(fluo::VersionString) +
 			" Benchmarking... FPS = " +
 			wxString::Format("%.2f", state.m_benchmark_fps);
 		m_frame->SetTitle(title);

@@ -5752,7 +5752,6 @@ void RenderView::DrawVolumes(int peel)
 	//compute the threshold value for picking volume
 	if (m_update_rot_ctr)
 	{
-		unsigned char pixel[4];
 		int nx, ny;
 		GetRenderSize(nx, ny);
 		if (auto data_buffer = glbin_framebuffer_manager.current())

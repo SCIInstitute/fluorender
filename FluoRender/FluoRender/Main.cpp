@@ -103,8 +103,8 @@ bool FluoRenderApp::OnInit()
 	srand((unsigned int)TIME());
 
 	//the frame
-	std::string title = std::string(flvr::AppTitle) + std::string(" ") +
-		std::string(flvr::VersionString);
+	std::string title = std::string(fluo::AppTitle) + std::string(" ") +
+		std::string(fluo::VersionString);
 	MainFrame* frame = new MainFrame(
 		(wxFrame*)NULL,
 		wxString(title),

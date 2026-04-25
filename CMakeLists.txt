@@ -33,8 +33,9 @@ cmake_minimum_required(VERSION 3.10)
 # Version info (UI only)
 set(FLUORENDER_VERSION_MAJOR 2)
 set(FLUORENDER_VERSION_MINOR 34)
-set(FLUORENDER_VERSION_STRING "2.34")
-set(FLUORENDER_COPYRIGHT "January 2026")
+set(FLUORENDER_VERSION_PATCH 1)
+set(FLUORENDER_VERSION_STRING "2.34.1")
+set(FLUORENDER_COPYRIGHT "April 2026")
 set(FLUORENDER_TITLE "FluoRender")
 
 configure_file(
@@ -580,7 +581,8 @@ if(FREETYPE_DIR_CANDIDATES)
         set(FREETYPE_LIBRARY_DEBUG   "${FREETYPE_ROOT}/build/libfreetype.a")
     endif()
 
-    set(FREETYPE_FOUND TRUE)
+    find_package(Freetype REQUIRED)
+    #set(FREETYPE_FOUND TRUE)
 
 else()
     # Linux fallback: system FreeType
