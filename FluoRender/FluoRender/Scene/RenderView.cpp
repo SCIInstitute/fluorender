@@ -5918,7 +5918,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	m_mvr->clear_vr();
 	//set up guard
 	std::list<flvr::RenderModeGuard> guards;
-	flvr::ColorMode main_mode = flvr::ColorMode::None, mask_mode = flvr::ColorMode::None;
+	flvr::ColorMode main_mode = flvr::ColorMode::Disabled, mask_mode = flvr::ColorMode::Disabled;
 	int colormap = 0;
 	double colormap_low = 0.0, colormap_hi = 1.0, colormap_inv = 0.0;
 	fluo::Color vol_color, mask_color;

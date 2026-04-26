@@ -134,7 +134,7 @@ namespace flvr
 
 	enum class ColorMode : int
 	{
-		None = 0,
+		Disabled = 0,
 		SingleColor,
 		Colormap,
 		Component

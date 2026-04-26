@@ -1883,7 +1883,7 @@ void RulerHandler::Project(const std::set<int>& rulers, const std::wstring& file
 
 	std::wstring str = filename;
 	std::ofstream ofs;
-	ofs.open(str, std::ofstream::out);
+	ofs.open(std::filesystem::path(str), std::ofstream::out);
 
 	size_t c = 0;
 	for (auto i : *list)

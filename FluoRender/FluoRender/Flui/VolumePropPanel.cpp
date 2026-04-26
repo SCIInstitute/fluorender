@@ -1337,7 +1337,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto main_mode = m_vd->GetMainColorMode();
 		switch (main_mode)
 		{
-		case flvr::ColorMode::None:
+		case flvr::ColorMode::Disabled:
 			m_main_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(clip_none));
 			break;
@@ -1361,7 +1361,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto mask_mode = m_vd->GetMaskColorMode();
 		switch (mask_mode)
 		{
-		case flvr::ColorMode::None:
+		case flvr::ColorMode::Disabled:
 			m_alt_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(clip_none));
 			break;

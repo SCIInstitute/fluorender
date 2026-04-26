@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
+#include <array>
 
 #define INIT_BOUNDS  1
 #define INIT_CENTER  2
@@ -713,7 +714,7 @@ private:
 	fluo::Color m_gamma;
 	fluo::Color m_brightness;
 	fluo::Color m_hdr;
-	bool m_sync[3];//for rgb
+	std::array<bool, 3> m_sync;//for rgb
 
 	//volume color map
 	//double m_value_1;

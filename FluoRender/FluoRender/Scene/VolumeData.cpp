@@ -1707,7 +1707,7 @@ void VolumeData::IncMainMaskMode()
 	int ival = static_cast<int>(m_main_mode);
 	ival++;
 	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
-		static_cast<int>(flvr::ColorMode::None) : ival;
+		static_cast<int>(flvr::ColorMode::Disabled) : ival;
 	SetMainMaskMode(static_cast<flvr::ColorMode>(ival));
 }
 
@@ -1723,7 +1723,7 @@ void VolumeData::IncMaskMode()
 	int ival = static_cast<int>(m_mask_mode);
 	ival++;
 	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
-		static_cast<int>(flvr::ColorMode::None) : ival;
+		static_cast<int>(flvr::ColorMode::Disabled) : ival;
 	SetMaskMode(static_cast<flvr::ColorMode>(ival));
 }
 

@@ -1015,7 +1015,7 @@ void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, const s
 void ComponentAnalyzer::OutputCompListFile(const std::wstring &filename, int verbose, const std::string& comp_header)
 {
 	std::ofstream ofs;
-	ofs.open(filename, std::ofstream::out);
+	ofs.open(std::filesystem::path(filename));
 	OutputCompListStream(ofs, verbose, comp_header);
 	ofs.close();
 }

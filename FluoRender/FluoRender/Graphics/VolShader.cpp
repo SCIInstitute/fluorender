@@ -70,7 +70,7 @@ std::string VolShaderFactory::get_color_mode_code(const ShaderParams& p, int mod
 
 	switch (cm)
 	{
-	case ColorMode::None:
+	case ColorMode::Disabled:
 		z << VOL_COLOR_NONE;
 		break;
 	case ColorMode::SingleColor:
