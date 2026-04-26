@@ -1731,7 +1731,7 @@ endif()
 if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
-	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
+	"${OPENVR_ROOT}/bin/win64/openvr_api.dll"
     "${FLUORENDER_ASSET_DIR}")
 endif()
 
