@@ -150,6 +150,8 @@ private:
 		return 0;
 	}
 
+#if defined(_WIN32) || defined(__APPLE__)
+
 	typedef void* LIMFILEHANDLE;
 	typedef char* LIMSTR;
 	void ReadSequences(LIMFILEHANDLE h);
@@ -158,6 +160,7 @@ private:
 	void ReadMetadata(LIMFILEHANDLE h);
 	void GetFramePos(LIMSTR fmd, FrameInfo& frame);
 	bool ReadChannel(LIMFILEHANDLE h, int t, int c, void* val);
+#endif
 };
 
 #endif//_ND2_READER_H_

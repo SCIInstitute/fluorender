@@ -29,8 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainSettings.h>
 #include <compatibility.h>
+#if defined(_WIN32) || defined(__APPLE__)
 #include <Nd2ReadSdk.h>
 #include <json.hpp>
+#endif
 
 ND2Reader::ND2Reader():
 	BaseVolReader()
@@ -84,6 +86,7 @@ void ND2Reader::SetFile(const std::wstring &file)
 
 int ND2Reader::Preprocess()
 {
+#if defined(_WIN32) || defined(__APPLE__)
 	LIMCWSTR filename = m_path_name.c_str();
 	LIMFILEHANDLE h = Lim_FileOpenForRead(filename);
 	if (h == nullptr)
@@ -103,6 +106,9 @@ int ND2Reader::Preprocess()
 
 	Lim_FileClose(h);
 	return READER_OK;
+#else
+	return READER_OPEN_FAIL;
+#endif
 }
 
 void ND2Reader::SetBatch(bool batch)
@@ -145,6 +151,8 @@ double ND2Reader::GetExcitationWavelength(int chan)
 
 Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 {
+#if defined(_WIN32) || defined(__APPLE__)
+
 	Nrrd *data = 0;
 
 	LIMCWSTR filename = m_path_name.c_str();
@@ -198,6 +206,9 @@ Nrrd* ND2Reader::Convert(int t, int c, bool get_max)
 	m_cur_time = t;
 
 	return data;
+#else
+	return nullptr;
+#endif
 }
 
 std::wstring ND2Reader::GetCurDataName(int t, int c)
@@ -255,6 +266,8 @@ void ND2Reader::AddFrameInfo(FrameInfo &frame)
 
 	chaninfo->chann.push_back(frame);
 }
+
+#if defined(_WIN32) || defined(__APPLE__)
 
 bool ND2Reader::ReadChannel(LIMFILEHANDLE h, int t, int c, void* val)
 {
@@ -620,3 +633,5 @@ void ND2Reader::GetFramePos(LIMSTR fmd, FrameInfo& frame)
 		frame.ysize = stoi(y);
 	}
 }
+
+#endif
