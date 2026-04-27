@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <cstdint>
 
 namespace fluo
 {

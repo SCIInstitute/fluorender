@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <deque>
 #include <set>
+#include <cstdint>
 
 namespace fluo
 {
