@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <iomanip>
 #include <limits>
+#include <algorithm>
 
 namespace fluo
 {
