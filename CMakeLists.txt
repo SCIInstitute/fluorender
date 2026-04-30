@@ -716,10 +716,12 @@ if(OPENJPEG_DIR_CANDIDATES)
             $<$<CONFIG:Debug>:${OPENJPEG_DEBUG_LIBRARIES}>
             $<$<NOT:$<CONFIG:Debug>>:${OPENJPEG_RELEASE_LIBRARIES}>
         )
-    else()
-        # macOS / Linux legacy static build
+    elseif(APPLE)
         file(GLOB OpenJpeg_LIBRARIES
             "${OPENJPEG_ROOT}/build/lib/*.a")
+    else()
+        file(GLOB OpenJpeg_LIBRARIES
+            "${OPENJPEG_ROOT}/build/bin/*.a")
     endif()
 
     set(OPENJPEG_INCLUDE_DIRS
@@ -761,7 +763,7 @@ if(OPENVR_DIR_CANDIDATES)
     else()
         # Linux: SDK static lib, runtime comes from SteamVR
         file(GLOB OpenVR_LIBRARIES
-            ${OPENVR_ROOT}/lib/linux64/libopenvr_api.a)
+            ${OPENVR_ROOT}/bin/linux64/libopenvr_api.a)
     endif()
 
     set(OPENVR_INCLUDE_DIR "${OPENVR_ROOT}/headers")
@@ -1286,6 +1288,9 @@ target_include_directories(DISTANCE_LIB PRIVATE
   ${TEEM_INCLUDE_DIRS})
 target_link_libraries(DISTANCE_LIB PRIVATE
   ${OpenCV_LIBS})
+target_link_libraries(DISTANCE_LIB PUBLIC
+    CALCULATE_LIB
+)
 
 # File
 target_include_directories(FILE_LIB PRIVATE
