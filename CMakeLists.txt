@@ -1,22 +1,22 @@
 # /*
 # For more information, please see: http://software.sci.utah.edu
-# 
+#
 # The MIT License
-# 
+#
 # Copyright (c) 2026 Scientific Computing and Imaging Institute,
 # University of Utah.
-# 
-# 
+#
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included
 # in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -657,7 +657,7 @@ if(WIN32)
   set(ND2_PATHS "${FluoRender_SOURCE_DIR}/FluoRender/nd2/Win64/include")
   # Define the base path to your ND2 SDK libs
   set(ND2_LIB_DIR "${FluoRender_SOURCE_DIR}/FluoRender/nd2/Win64/lib")
-  
+
   # Create a variable that resolves to the correct .lib file based on configuration
   set(ND2_LIBRARIES
       $<$<CONFIG:Debug>:
@@ -796,7 +796,7 @@ if(OPENXR_DIR_CANDIDATES)
 	    get_filename_component(ABS_NUGET_EXECUTABLE "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" ABSOLUTE)
 	    set(NUGET_EXECUTABLE ${ABS_NUGET_EXECUTABLE})
 	    message(STATUS "NuGet executable path: ${NUGET_EXECUTABLE}")
-	
+
         # Find the NuGet executable
         find_program(NUGET_COMMAND NAMES nuget PATHS "${FluoRender_SOURCE_DIR}/NuGet")
 
@@ -1271,6 +1271,9 @@ target_include_directories(CONVERTER_LIB PRIVATE
 target_include_directories(DATABASE_LIB PRIVATE
   ${DLIB_DIR}
   ${Boost_INCLUDE_DIR})
+target_link_libraries(DATABASE_LIB PUBLIC
+    TRAINER_LIB
+)
 
 # Distance
 target_include_directories(DISTANCE_LIB PRIVATE
@@ -1324,6 +1327,21 @@ if (WIN32 AND USE_XINPUT)
     target_link_libraries(FLUI_LIB PRIVATE
       XINPUT_LIB)
 endif()
+target_link_libraries(FLUI_LIB PUBLIC
+    ANIMATOR_LIB
+    CONTROL_LIB
+    AGENT_LIB
+    COMPUTE_LIB
+    CONFIG_LIB
+    DISTANCE_LIB
+    COMPONENT_LIB
+    FILTER_LIB
+    DATABASE_LIB
+    CALCULATE_LIB
+    CONVERTER_LIB
+    CLUSTER_LIB
+    FORMAT_LIB
+)
 
 # Format
 target_include_directories(FORMAT_LIB PRIVATE
@@ -1352,6 +1370,7 @@ if (APPLE)
 endif()
 target_link_libraries(FORMAT_LIB PRIVATE
   ${FFMPEG_LIBRARIES}
+  ${JPEG_LIBRARIES}
   ${ND2_LIBRARIES}
   ${OpenJpeg_LIBRARIES}
   ${PNG_LIBRARIES}
@@ -1377,6 +1396,9 @@ else()
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2})
 endif()
+target_link_libraries(GLOBAL_LIB PUBLIC
+    FORMAT_LIB
+)
 
 # Graphics
 target_include_directories(GRAPHICS_LIB PRIVATE
@@ -1425,6 +1447,9 @@ target_include_directories(PROJECT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${GLM_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS})
+target_link_libraries(PROJECT_LIB PUBLIC
+    FILE_LIB
+)
 
 # Python
 target_include_directories(PYTHON_LIB PRIVATE
@@ -1466,6 +1491,9 @@ if (APPLE)
 endif()
 target_link_libraries(SCENE_LIB PRIVATE
   ${TEEM_LIBRARIES})
+target_link_libraries(SCENE_LIB PUBLIC
+    GRAPHICS_LIB
+)
 
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
@@ -1479,6 +1507,10 @@ if (APPLE)
 endif()
 target_link_libraries(SCRIPT_LIB PRIVATE
   ${Python3_LIBRARIES})
+target_link_libraries(SCRIPT_LIB PUBLIC
+    OBJECT_LIB
+    SCENE_LIB
+)
 
 # Selection
 target_include_directories(SELECTION_LIB PRIVATE
@@ -1527,24 +1559,24 @@ ENDIF()
 if(APPLE)
   # Minimum macOS version your binary will run on
   set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3")
-  
+
   # C++ standard settings
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  
+
   # Compiler flags
   add_compile_options(-DWX_PRECOMP)
-  
+
   # --- IMPORTANT: Disable all Xcode signing behavior ---
   # Do NOT let Xcode sign anything. We sign manually after build.
-  
+
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Manual")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
   set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "")
   set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "")
-  
+
   # Hardened Runtime, entitlements, and signing flags are NOT set here.
   # They will be applied manually during the final codesign step.
 
@@ -1688,7 +1720,7 @@ add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${FluoRender_SOURCE_DIR}/Java_Code/ImageJ_Reader/target/classes"
   "${FLUORENDER_ASSET_DIR}/Java_Code")
-  
+
 # copy openCL examples to the binary directory
 add_custom_command(TARGET FluoRender POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
