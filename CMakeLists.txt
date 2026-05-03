@@ -473,7 +473,8 @@ endif()
 # ------------------------------------------------------------
 
 # Allow user override
-set(JAVA_HOME "" CACHE PATH "Path to Java installation (JDK root)")
+set(JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64)
+#set(JAVA_HOME "" CACHE PATH "Path to Java installation (JDK root)")
 
 # Require at least Java 17
 set(_JAVA_MIN_VERSION 17)
@@ -1264,6 +1265,9 @@ target_include_directories(CONFIG_LIB PRIVATE
   ${TEEM_INCLUDE_DIRS})
 
 # Control
+target_link_libraries(CONTROL_LIB PRIVATE
+  ${wxWidgets_LIBRARIES}
+)
 
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
