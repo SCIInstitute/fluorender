@@ -229,9 +229,9 @@ else()
     set(wxWidgets_LIB_DIR ${WXWIDGETS_DIR}/mybuild/lib)
 endif()
 #set(wxWidgets_USE_REL_AND_DBG ON)
+set(wxWidgets_USE_STATIC ON)
 find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
-set(wxWidgets_USE_STATIC ON)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
 # solution for wxWidgets linking "ambiguous" errors
@@ -1203,7 +1203,8 @@ add_library(UTILITY_LIB STATIC
 # Main
 target_include_directories(MAIN_LIB PRIVATE
   ${GLM_INCLUDE_DIR}
-  ${TEEM_INCLUDE_DIRS})
+  ${TEEM_INCLUDE_DIRS}
+)
 target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES})
 
@@ -1658,7 +1659,8 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 target_include_directories(FluoRender PRIVATE
   ${GLM_INCLUDE_DIR}
-  ${TEEM_INCLUDE_DIRS})
+  ${TEEM_INCLUDE_DIRS}
+)
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender PRIVATE

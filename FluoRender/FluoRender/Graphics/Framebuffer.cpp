@@ -481,7 +481,9 @@ void Framebuffer::bind()
 	if (valid_)
 	{
 		//DBGPRINT(L"Binding framebuffer: %d, %s\n", id_, s2ws(name_).c_str());
-
+		if (!glGetString(GL_VERSION)) {
+    		fprintf(stderr, "NO CURRENT GL CONTEXT\n");
+}
 		glBindFramebuffer(GL_FRAMEBUFFER, id_);
 		apply_state();
 	}
