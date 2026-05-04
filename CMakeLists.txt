@@ -412,13 +412,13 @@ if(OPENCV_DIR_CANDIDATES)
 
     message(STATUS "Using standalone OpenCV at: ${OPENCV_ROOT}")
 
-    find_package(OpenCV REQUIRED)
+    find_package(OpenCV REQUIRED COMPONENTS core calib3d)
 
 else()
     # Linux fallback: system OpenCV
     if(UNIX AND NOT APPLE)
         message(STATUS "Using system OpenCV (Linux fallback)")
-        find_package(OpenCV REQUIRED)
+        find_package(OpenCV REQUIRED COMPONENTS core calib3d)
     else()
         message(FATAL_ERROR "Standalone OpenCV not found and no system fallback enabled on this platform")
     endif()
@@ -1292,7 +1292,8 @@ target_include_directories(DISTANCE_LIB PRIVATE
   ${OpenCV_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
 target_link_libraries(DISTANCE_LIB PRIVATE
-  ${OpenCV_LIBS})
+  ${OpenCV_LIBS}
+)
 target_link_libraries(DISTANCE_LIB PUBLIC
     CALCULATE_LIB
 )
