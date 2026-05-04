@@ -403,6 +403,23 @@ else()
 endif()
 
 #opencv
+#depends on eigen
+file(GLOB EIGEN_DIR_CANDIDATES "${PARENT_DIR}/eigen*")
+if(EIGEN_DIR_CANDIDATES)
+    list(GET EIGEN_DIR_CANDIDATES 0 EIGEN_ROOT)
+    set(EIGEN_INCLUDE_DIR "${EIGEN_ROOT}")
+    message(STATUS "Using standalone Eigen at: ${EIGEN_ROOT}")
+    find_package(Eigen3 REQUIRED)
+else()
+    # Linux fallback: system Eigen
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system Eigen (Linux fallback)")
+        find_package(Eigen3 REQUIRED)
+    else()
+        message(FATAL_ERROR "Standalone Eigen not found and no system fallback enabled on this platform")
+    endif()
+endif()
+
 # Try legacy standalone OpenCV first
 file(GLOB OPENCV_DIR_CANDIDATES "${PARENT_DIR}/opencv*")
 
