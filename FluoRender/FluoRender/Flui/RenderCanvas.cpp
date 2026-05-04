@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RenderCanvas.h>
+#include <GLAttribProvider.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
@@ -65,12 +66,11 @@ wxDEFINE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
 
 RenderCanvas::RenderCanvas(MainFrame* frame,
 	RenderViewPanel* parent,
-	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
+	wxGLCanvas(parent, GLAttribProvider::CanvasAttribs(), wxID_ANY, pos, size, style),
 	m_frame(frame),
 	m_renderview_panel(parent),
 	//previous focus
@@ -83,8 +83,67 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_full_screen(false),
 	m_focused_slider(0)
 {
-	m_glRC = sharedContext;
-	m_sharedRC = m_glRC ? true : false;
+	m_sharedRC = (sharedContext != nullptr);
+
+	if (m_sharedRC)
+	{
+		m_glRC = sharedContext;
+	}
+	else
+	{
+		wxGLContextAttrs ctxAttrs = GLAttribProvider::MakeContextAttrs();
+		m_glRC = new wxGLContext(this, nullptr, &ctxAttrs);
+
+		if (!m_glRC->IsOK())
+		{
+			ctxAttrs.Reset();
+			ctxAttrs.PlatformDefaults().EndList();
+			m_glRC = new wxGLContext(this, nullptr, &ctxAttrs);
+		}
+
+		if (!m_glRC->IsOK())
+		{
+			wxMessageBox(
+				"FluoRender needs an OpenGL 3.3 capable driver.\n"
+				"Please update your graphics card driver or upgrade "
+				"your graphics card.",
+				"Graphics card error",
+				wxOK | wxICON_ERROR,
+				this);
+
+			delete m_glRC;
+			m_glRC = nullptr;
+			return;
+		}
+	}
+	SetCurrent(*m_glRC);
+
+#ifdef _DEBUG
+	//example Pixel format descriptor detailing each part
+	//PIXELFORMATDESCRIPTOR pfd = {
+	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
+	// 1,                     // version number
+	// PFD_DRAW_TO_WINDOW |   // support window
+	// PFD_SUPPORT_OPENGL |   // support OpenGL
+	// PFD_DOUBLEBUFFER,      // double buffered
+	// PFD_TYPE_RGBA,         // RGBA type
+	// 24,                    // 24-bit color depth
+	// 0, 0, 0, 0, 0, 0,      // color bits ignored
+	// 0,                     // no alpha buffer
+	// 0,                     // shift bit ignored
+	// 0,                     // no accumulation buffer
+	// 0, 0, 0, 0,            // accum bits ignored
+	// 32,                    // 32-bit z-buffer
+	// 0,                     // no stencil buffer
+	// 0,                     // no auxiliary buffer
+	// PFD_MAIN_PLANE,        // main layer
+	// 0,                     // reserved
+	// 0, 0, 0                // layer masks ignored
+	// };
+	PIXELFORMATDESCRIPTOR  pfd;
+	//check ret. this is an error code when the pixel format is invalid.
+	int ret = GetPixelFormat(&pfd);
+#endif
 
 	auto view = std::make_shared<RenderView>();
 	glbin_current.render_view_drawing = view;

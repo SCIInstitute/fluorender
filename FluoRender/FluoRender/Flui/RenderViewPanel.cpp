@@ -26,15 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
-#ifdef _WIN32
-    #include <GL/wglew.h>
-#elif defined(__APPLE__)
-    #include <OpenGL/OpenGL.h>
-    #include <OpenGL/gl3.h>  // For modern OpenGL (3.2+)
-#elif defined(__linux__)
-    #include <GL/glx.h>
-#endif
 #include <RenderViewPanel.h>
 #include <Global.h>
 #include <Names.h>
@@ -99,158 +90,10 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 
 	m_id = m_max_id;
 	SetName(wxString::Format("Render View:%d", m_max_id++));
-	// this list takes care of both pixel and context attributes (no custom edits of wx is preferred)
-	//render view/////////////////////////////////////////////////
-	int red_bit = glbin_settings.m_red_bit;
-	int green_bit = glbin_settings.m_green_bit;
-	int blue_bit = glbin_settings.m_blue_bit;
-	int alpha_bit = glbin_settings.m_alpha_bit;
-	int depth_bit = glbin_settings.m_depth_bit;
-	int samples = glbin_settings.m_samples;
-	int gl_major_ver = glbin_settings.m_gl_major_ver;
-	int gl_minor_ver = glbin_settings.m_gl_minor_ver;
-	int gl_profile_mask = glbin_settings.m_gl_profile_mask;
-	int api_type = glbin_settings.m_api_type;
-
-	wxGLAttributes attriblist;
-#ifdef _WIN32
-	if (red_bit >= 16 || green_bit >= 16 || blue_bit >= 16)
-	{
-		attriblist.AddAttribute(WGL_SUPPORT_OPENGL_ARB);
-		attriblist.AddAttribute(GL_TRUE);
-		attriblist.AddAttribute(WGL_ACCELERATION_ARB);
-		attriblist.AddAttribute(WGL_FULL_ACCELERATION_ARB);
-		if (api_type == 2)
-		{
-			attriblist.AddAttribute(WGL_FLOAT_COMPONENTS_NV);
-			attriblist.AddAttribute(GL_TRUE);
-		}
-		else
-		{
-			attriblist.AddAttribute(WGL_PIXEL_TYPE_ARB);
-			attriblist.AddAttribute(WGL_TYPE_RGBA_FLOAT_ARB);
-			//attriblist.AddAttribute(WGL_TYPE_RGBA_ARB);
-		}
-		attriblist.AddAttribute(WGL_COLOR_BITS_ARB);
-		attriblist.AddAttribute(red_bit+green_bit+blue_bit+alpha_bit);
-		attriblist.AddAttribute(WGL_RED_BITS_ARB);
-		attriblist.AddAttribute(red_bit);
-		attriblist.AddAttribute(WGL_GREEN_BITS_ARB);
-		attriblist.AddAttribute(green_bit);
-		attriblist.AddAttribute(WGL_BLUE_BITS_ARB);
-		attriblist.AddAttribute(blue_bit);
-		attriblist.AddAttribute(WGL_ALPHA_BITS_ARB);
-		attriblist.AddAttribute(alpha_bit);
-		attriblist.AddAttribute(WGL_DEPTH_BITS_ARB);
-		attriblist.AddAttribute(depth_bit);
-		attriblist.AddAttribute(WGL_STENCIL_BITS_ARB);
-		attriblist.AddAttribute(8);
-	}
-	else
-	{
-		attriblist.PlatformDefaults();
-		attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
-		attriblist.Depth(depth_bit);
-		attriblist.SampleBuffers(0);
-		//attriblist.Samplers(samples);
-	}
-#else
-	attriblist.PlatformDefaults();
-	attriblist.MinRGBA(red_bit, green_bit, blue_bit, alpha_bit);
-	attriblist.Depth(depth_bit);
-	attriblist.SampleBuffers(0);
-	//attriblist.Samplers(samples);
-#ifdef _DARWIN
-	if (gl_major_ver == 3)
-	{
-		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
-		attriblist.AddAttribute(kCGLOGLPVersion_GL3_Core);
-	}
-	else if (gl_major_ver == 4)
-	{
-		attriblist.AddAttribute(kCGLPFAOpenGLProfile);
-		attriblist.AddAttribute(kCGLOGLPVersion_GL4_Core);
-	}
-#endif
-#endif
-	attriblist.DoubleBuffer();
-	attriblist.EndList();
-	m_canvas = new RenderCanvas(frame, this, attriblist, sharedContext);
+	m_canvas = new RenderCanvas(frame, this, sharedContext);
 	m_renderview = m_canvas->GetRenderView();
-	if (!sharedContext)
-	{
-		wxGLContextAttrs contextAttrs;
-		switch (gl_profile_mask)
-		{
-		case 1:
-			contextAttrs.CoreProfile().EndList();
-			break;
-		case 2:
-			contextAttrs.CompatibilityProfile().EndList();
-			break;
-		}
-		contextAttrs.
-			MajorVersion(gl_major_ver).
-			MinorVersion(gl_minor_ver).
-			Robust().
-			ResetIsolation().
-			EndList();
-		sharedContext = new wxGLContext(m_canvas, NULL, &contextAttrs);
-		if (!sharedContext->IsOK())
-		{
-			contextAttrs.Reset();
-			contextAttrs.PlatformDefaults().EndList();
-			sharedContext = new wxGLContext(m_canvas, NULL, &contextAttrs);
-		}
-		if (!sharedContext->IsOK())
-		{
-			wxMessageBox("FluoRender needs an OpenGL 3.3 capable driver.\n" \
-				"Please update your graphics card driver or upgrade your graphics card.\n",
-				"Graphics card error", wxOK | wxICON_ERROR, this);
-			delete sharedContext;
-			sharedContext = 0;
-			glbin_settings.m_red_bit = 8;
-			glbin_settings.m_green_bit = 8;
-			glbin_settings.m_blue_bit = 8;
-			glbin_settings.m_alpha_bit = 8;
-			glbin_settings.Save();
-		}
-		if (sharedContext)
-		{
-			//sharedContext->SetCurrent(*m_canvas);
-			m_canvas->SetCurrent(*sharedContext);
-			m_canvas->m_glRC = sharedContext;
-		}
-	}
 	m_canvas->SetCanFocus(false);
 	m_view_sizer->Add(m_canvas, 1, wxEXPAND);
-#ifdef _DEBUG
-	//example Pixel format descriptor detailing each part
-	//PIXELFORMATDESCRIPTOR pfd = {
-	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
-	// 1,                     // version number
-	// PFD_DRAW_TO_WINDOW |   // support window
-	// PFD_SUPPORT_OPENGL |   // support OpenGL
-	// PFD_DOUBLEBUFFER,      // double buffered
-	// PFD_TYPE_RGBA,         // RGBA type
-	// 24,                    // 24-bit color depth
-	// 0, 0, 0, 0, 0, 0,      // color bits ignored
-	// 0,                     // no alpha buffer
-	// 0,                     // shift bit ignored
-	// 0,                     // no accumulation buffer
-	// 0, 0, 0, 0,            // accum bits ignored
-	// 32,                    // 32-bit z-buffer
-	// 0,                     // no stencil buffer
-	// 0,                     // no auxiliary buffer
-	// PFD_MAIN_PLANE,        // main layer
-	// 0,                     // reserved
-	// 0, 0, 0                // layer masks ignored
-	// };
-	PIXELFORMATDESCRIPTOR  pfd;
-	//check ret. this is an error code when the pixel format is invalid.
-	int ret = m_canvas->GetPixelFormat(&pfd);
-#endif
-
 	CreateBar();
 
 	//add controls
