@@ -302,6 +302,7 @@ void RenderCanvas::Draw()
 
 	auto view = m_renderview.lock();
 	assert(view);
+	view->Init();
 	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(view->Id());
 	assert(scheduler);
 	scheduler->performDraw();

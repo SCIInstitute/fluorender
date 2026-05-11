@@ -443,7 +443,6 @@ MainFrame::MainFrame(
 		view = root->GetLastView();
 		if (view)
 		{
-			view->Init();
 			view->InitView();
 		}
 	}
