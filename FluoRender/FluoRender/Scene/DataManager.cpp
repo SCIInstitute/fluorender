@@ -382,10 +382,6 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 
 void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_mov, bool with_imagej)
 {
-	auto view = glbin_current.render_view.lock();
-	if (view)
-		view->Init();
-
 	if (!files.empty())
 	{
 		std::wstring filename = files[0];
