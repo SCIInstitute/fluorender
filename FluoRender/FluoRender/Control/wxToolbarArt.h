@@ -38,11 +38,17 @@ public:
 
 	void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect) override
 	{
-		wxPaintDC* paintDC = dynamic_cast<wxPaintDC*>(&dc);
-		if (!paintDC)
-			return;
+		std::unique_ptr<wxGraphicsContext> gc;
 
-		std::unique_ptr<wxGraphicsContext> gc(wxGraphicsContext::Create(*paintDC));
+		if (auto* memdc = dynamic_cast<wxMemoryDC*>(&dc))
+			gc.reset(wxGraphicsContext::Create(*memdc));
+		else if (auto* wnddc = dynamic_cast<wxWindowDC*>(&dc))
+			gc.reset(wxGraphicsContext::Create(*wnddc));
+		else if (auto* clidc = dynamic_cast<wxClientDC*>(&dc))
+			gc.reset(wxGraphicsContext::Create(*clidc));
+		else if (auto* paintdc = dynamic_cast<wxPaintDC*>(&dc))
+			gc.reset(wxGraphicsContext::Create(*paintdc));
+
 		if (!gc)
 			return;
 
