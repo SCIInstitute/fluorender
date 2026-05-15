@@ -216,34 +216,41 @@ MainFrame::MainFrame(
 			wxGetBitmap(icon_open_volume));
 		m_main_tb->SetToolLabel(ID_LastOpen, "Open Volume");
 		m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
+		m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
 		break;
 	case 1://mesh
 		m_main_tb->SetToolBitmap(ID_LastOpen,
 			wxGetBitmap(icon_open_mesh));
 		m_main_tb->SetToolLabel(ID_LastOpen, "Open Mesh");
 		m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
+		m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
 		break;
 	case 2://imagej
 		m_main_tb->SetToolBitmap(ID_LastOpen,
 			wxGetBitmap(icon_import));
 		m_main_tb->SetToolLabel(ID_LastOpen, "Import Volume");
 		m_main_tb->SetToolShortHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
+		m_main_tb->SetToolLongHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
 		break;
 	}
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmap(icon_open_project);
 	m_main_tb->AddTool(ID_OpenProject, "Open Project", bitmap,
 		"Open a saved project");
+	m_main_tb->SetToolLongHelp(ID_OpenProject, "Open a saved project (will close current project if there is one)");
 	bitmap = wxGetBitmap(icon_save_project);
 	m_main_tb->AddTool(ID_SaveProject, "Save Project", bitmap,
 		"Save current work as a project");
+	m_main_tb->SetToolLongHelp(ID_SaveProject, "Save current work as a project (will save all opened data and current settings)");
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmap(icon_new_view);
 	m_main_tb->AddTool(ID_ViewNew, "New View", bitmap,
 		"Create a new render viewport");
+	m_main_tb->SetToolLongHelp(ID_ViewNew, "Create a new render viewport (will create a new view with the same settings as current view)");
 	bitmap = wxGetBitmap(icon_show_hide_ui);
 	m_main_tb->AddTool(ID_Panels, "Show/Hide UI", bitmap,
 		"Show or hide all control panels");
+	m_main_tb->SetToolLongHelp(ID_Panels, "Show or hide all control panels");
 	m_main_tb->SetToolDropDown(ID_Panels, true);
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmap(icon_paint_brush);
@@ -257,60 +264,74 @@ MainFrame::MainFrame(
 	default:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_paint_brush));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Paint Brush: Use brush to select voxels in the volume for further analysis");
 		break;
 	case TOOL_MEASUREMENT:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_measurement));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Measurement: Measure distances, angles, and intensity in the volume");
 		break;
 	case TOOL_TRACKING:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_tracking));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Tracking: Track objects or features in the volume");
 		break;
 	case TOOL_NOISE_REDUCTION:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_noise_reduc));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Noise Reduction: Reduce noise in the volume data");
 		break;
 	case TOOL_VOLUME_SIZE:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_volume_size));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Size: Analyze the size of the volume data");
 		break;
 	case TOOL_COLOCALIZATION:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_colocalization));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Colocalization: Analyze the colocalization of different channels in the volume");
 		break;
 	case TOOL_CONVERT:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_convert));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Convert: Convert volume data to mesh objects");
 		break;
 	case TOOL_OPENCL:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(tb_volume_filter));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Filter: Edit and apply volume filters using OpenCL");
 		break;
 	case TOOL_COMPONENT:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_components));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Component Analyzer: Segment structures into components and perform analysis");
 		break;
 	case TOOL_CALCULATIONS:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_calculations));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Calculations: Perform calculations on the volume data");
 		break;
 	case TOOL_MACHINE_LEARNING:
 		m_main_tb->SetToolBitmap(ID_LastTool,
 			wxGetBitmap(icon_machine_learning));
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Machine Learning: Use machine learning algorithms to analyze the volume data");
 		break;
 	}
 	m_main_tb->AddSeparator();
 	bitmap = wxGetBitmap(icon_undo);
 	m_main_tb->AddTool(ID_Undo, "Undo", bitmap,
 		"Undo");
+	m_main_tb->SetToolLongHelp(ID_Undo, "Undo the last action");
 	bitmap = wxGetBitmap(icon_redo);
 	m_main_tb->AddTool(ID_Redo, "Redo", bitmap,
 		"Redo");
+	m_main_tb->SetToolLongHelp(ID_Redo, "Redo the last undone action");
 	//right-side items
 	m_main_tb->AddStretchSpacer();
 	bitmap = wxGetBitmap(icon_settings);
 	m_main_tb->AddTool(ID_Settings, "Configurations", bitmap,
 		"Settings of FluoRender");
+	m_main_tb->SetToolLongHelp(ID_Settings, "Settings of FluoRender (will open the settings dialog)");
 	m_main_tb->AddSeparator();
 	int num = std::rand() % 4;
 	wxString str1, str2, str3;
@@ -347,7 +368,8 @@ MainFrame::MainFrame(
 		item_id = ID_Info;
 		break;
 	}
-	m_main_tb->AddTool(item_id, str1, bitmap, str3);
+	m_main_tb->AddTool(item_id, str1, bitmap, str2);
+	m_main_tb->SetToolLongHelp(item_id, str3);
 	m_main_tb->SetToolDropDown(item_id, true);
 	m_main_tb->SetCustomOverflowItems(prepend_items, append_items);
 	m_main_tb->Bind(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, &MainFrame::OnToolbarMenu, this);
@@ -1751,6 +1773,8 @@ void MainFrame::ShowBrushDlg()
 	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_paint_brush));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Paint Brush");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Paint Brush: Use brush to select voxels in the volume for further analysis");
 	m_aui_mgr.Update();
 }
 
@@ -1760,6 +1784,8 @@ void MainFrame::ShowMeasureDlg()
 	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_measurement));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Measurement");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Measurement: Measure distance, angle, and intensity in the volume");
 	m_aui_mgr.Update();
 }
 
@@ -1769,6 +1795,8 @@ void MainFrame::ShowTrackDlg()
 	glbin_settings.m_last_tool = TOOL_TRACKING;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_tracking));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Tracking");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Tracking: Track objects or features in the volume");
 	m_aui_mgr.Update();
 }
 
@@ -1778,6 +1806,8 @@ void MainFrame::ShowNoiseCancellingDlg()
 	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_noise_reduc));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Noise Reduction");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Noise Reduction: Reduce noise in the volume data");
 	m_aui_mgr.Update();
 }
 
@@ -1787,6 +1817,8 @@ void MainFrame::ShowCountingDlg()
 	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_volume_size));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Volume Size");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Size: Analyze the size of the volume data");
 	m_aui_mgr.Update();
 }
 
@@ -1796,6 +1828,8 @@ void MainFrame::ShowColocalizationDlg()
 	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_colocalization));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Colocalization");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Colocalization: Analyze the colocalization of different channels in the volume");
 	m_aui_mgr.Update();
 }
 
@@ -1805,6 +1839,8 @@ void MainFrame::ShowConvertDlg()
 	glbin_settings.m_last_tool = TOOL_CONVERT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_convert));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Convert");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Convert: Convert volume data to mesh objects");
 	m_aui_mgr.Update();
 }
 
@@ -1814,6 +1850,8 @@ void MainFrame::ShowOclDlg()
 	glbin_settings.m_last_tool = TOOL_OPENCL;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(tb_volume_filter));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Volume Filter");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Filter: Edit and apply volume filters using OpenCL");
 	m_aui_mgr.Update();
 }
 
@@ -1823,6 +1861,8 @@ void MainFrame::ShowComponentDlg()
 	glbin_settings.m_last_tool = TOOL_COMPONENT;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_components));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Component Analyzer");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Component Analyzer: Segment structures into components and perform analysis");
 	m_aui_mgr.Update();
 }
 
@@ -1832,6 +1872,8 @@ void MainFrame::ShowCalculationDlg()
 	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_calculations));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Calculations");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Calculations: Perform calculations on the volume data");
 	m_aui_mgr.Update();
 }
 
@@ -1841,6 +1883,8 @@ void MainFrame::ShowMachineLearningDlg()
 	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
 	m_main_tb->SetToolBitmap(ID_LastTool,
 		wxGetBitmap(icon_machine_learning));
+	m_main_tb->SetToolShortHelp(ID_LastTool, "Machine Learning");
+	m_main_tb->SetToolLongHelp(ID_LastTool, "Machine Learning: Use machine learning algorithms to analyze the volume data");
 	m_aui_mgr.Update();
 }
 
@@ -2226,6 +2270,7 @@ void MainFrame::OpenVolume()
 		wxGetBitmap(icon_open_volume));
 	m_main_tb->SetToolLabel(ID_LastOpen, "Open Volume");
 	m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
+	m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
 }
 
 void MainFrame::ImportVolume()
@@ -2253,6 +2298,7 @@ void MainFrame::ImportVolume()
 		wxGetBitmap(icon_import));
 	m_main_tb->SetToolLabel(ID_LastOpen, "Import Volume");
 	m_main_tb->SetToolShortHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
+	m_main_tb->SetToolLongHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
 }
 
 void MainFrame::OpenMesh()
@@ -2279,6 +2325,7 @@ void MainFrame::OpenMesh()
 		wxGetBitmap(icon_open_mesh));
 	m_main_tb->SetToolLabel(ID_LastOpen, "Open Mesh");
 	m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
+	m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
 }
 
 void MainFrame::NewProject()
