@@ -3397,7 +3397,7 @@ bool VolumePropPanel::SetSpacing()
 		return false;
 
 	fluo::Vector spc(spcx, spcy, spcz);
-	if ((m_sync_group || glbin_settings.m_override_vox) && m_group)
+	if (m_sync_group && m_group)
 	{
 		for (int i = 0; i < m_group->GetVolumeNum(); i++)
 		{

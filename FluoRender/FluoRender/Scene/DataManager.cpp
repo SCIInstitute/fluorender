@@ -1074,16 +1074,16 @@ void DataManager::AddVolumeData(const std::shared_ptr<VolumeData>& vd)
 	if (i>1)
 		vd->SetName(new_name);
 
-	if (glbin_settings.m_override_vox)
-	{
-		if (m_vd_list.size() > 0)
-		{
-			auto spc = m_vd_list[0]->GetBaseSpacing();
-			vd->SetSpacing(spc);
-			vd->SetBaseSpacing(spc);
-			//vd->SetSpcFromFile(true);
-		}
-	}
+	//if (glbin_settings.m_override_vox)
+	//{
+	//	if (m_vd_list.size() > 0)
+	//	{
+	//		auto spc = m_vd_list[0]->GetBaseSpacing();
+	//		vd->SetSpacing(spc);
+	//		vd->SetBaseSpacing(spc);
+	//		//vd->SetSpcFromFile(true);
+	//	}
+	//}
 	m_vd_list.push_back(vd);
 	auto vol_cache_queue = std::make_shared<flvr::CacheQueue>(vd);
 	vol_cache_queue->RegisterCacheQueueFuncs(flvr::CQCallback::ReadVolCache, flvr::CQCallback::FreeVolCache);

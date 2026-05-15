@@ -94,7 +94,6 @@ public:
 	bool m_prj_save_inc;	//save project incrementally
 	std::wstring m_time_id;		//identfier for time sequence
 	bool m_save_compress;	//save tif compressed
-	bool m_override_vox;
 	int m_last_open_type;	//0:vol; 1:mesh; 2:imagej
 	int m_last_tool;		//last tool
 	int m_config_file_type;	//0:ini, 1:xml, 2:json, 3: pole

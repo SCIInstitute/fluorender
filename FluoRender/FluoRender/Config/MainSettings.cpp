@@ -45,7 +45,6 @@ MainSettings::MainSettings()
 	m_prj_save_inc = false;
 	m_time_id = L"_T";
 	m_save_compress = false;
-	m_override_vox = true;
 	m_last_open_type = 0;
 	m_last_tool = 0;
 	m_config_file_type = 1;
@@ -247,7 +246,6 @@ void MainSettings::Read(const std::string& filename)
 		fconfig->Read("inc save", &m_prj_save_inc, false);
 		fconfig->Read("time id", &m_time_id, std::wstring(L"_T"));
 		fconfig->Read("save compress", &m_save_compress, false);
-		fconfig->Read("override vox", &m_override_vox, true);
 		fconfig->Read("last open type", &m_last_open_type, 0);
 		fconfig->Read("last tool", &m_last_tool, 0);
 		fconfig->Read("config file type", &m_config_file_type, 1);
@@ -529,7 +527,6 @@ void MainSettings::Save()
 	fconfig->Write("inc save", m_prj_save_inc);
 	fconfig->Write("time id", m_time_id);
 	fconfig->Write("save compress", m_save_compress);
-	fconfig->Write("override vox", m_override_vox);
 	fconfig->Write("last open type", m_last_open_type);
 	fconfig->Write("last tool", m_last_tool);
 	fconfig->Write("config file type", m_config_file_type);
