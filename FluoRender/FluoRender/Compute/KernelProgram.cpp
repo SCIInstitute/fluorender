@@ -1,22 +1,22 @@
-//  
+//
 //  For more information, please see: http://software.sci.utah.edu
-//  
+//
 //  The MIT License
-//  
+//
 //  Copyright (c) 2026 Scientific Computing and Imaging Institute,
 //  University of Utah.
-//  
-//  
+//
+//
 //  Permission is hereby granted, free of charge, to any person obtaining a
 //  copy of this software and associated documentation files (the "Software"),
 //  to deal in the Software without restriction, including without limitation
 //  the rights to use, copy, modify, merge, publish, distribute, sublicense,
 //  and/or sell copies of the Software, and to permit persons to whom the
 //  Software is furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included
 //  in all copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 //  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -24,7 +24,7 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 //  DEALINGS IN THE SOFTWARE.
-//  
+//
 
 #include <GL/glew.h>
 #ifdef _WIN32
@@ -118,153 +118,210 @@ namespace flvr
 		destroy();
 	}
 
-	void KernelProgram::init_kernels_supported()
-	{
-		if (init_)
-			return;
+    void KernelProgram::init_kernels_supported()
+    {
+        if (init_)
+            return;
 
-		device_list_.clear();
-		cl_int err;
-		cl_uint platform_num;
-		cl_platform_id* platforms;
+        device_list_.clear();
+        cl_int err;
+        cl_uint platform_num;
 
-		//get platform number
-		err = clGetPlatformIDs(0, NULL, &platform_num);
-		if (err != CL_SUCCESS)
-			return;
-		if (platform_num == 0)
-			return;
-		platforms = new cl_platform_id[platform_num];
-		err = clGetPlatformIDs(platform_num, platforms, NULL);
-		if (err != CL_SUCCESS)
-		{
-			delete[] platforms;
-			return;
-		}
+        // --- Get platforms ---
+        err = clGetPlatformIDs(0, NULL, &platform_num);
+        if (err != CL_SUCCESS || platform_num == 0)
+            return;
 
-		//go through each platform
-		size_t info_size;
-		for (cl_uint i = 0; i < platform_num; ++i)
-		{
-			device_list_.push_back(CLPlatform());
-			CLPlatform* platform = &(device_list_.back());
-			//id
-			platform->id = platforms[i];
-			//get vendor name
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
-			platform->vendor.resize(info_size, 0);
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &(platform->vendor[0]), NULL);
-			//get platform name
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
-			platform->name.resize(info_size, 0);
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &(platform->name[0]), NULL);
+        std::vector<cl_platform_id> platforms(platform_num);
+        err = clGetPlatformIDs(platform_num, platforms.data(), NULL);
+        if (err != CL_SUCCESS)
+            return;
 
-			cl_device_id *devices;
-			cl_uint device_num;
-			//get gpu devices
-			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
-			if (err != CL_SUCCESS || device_num == 0)
-				continue;
-			devices = new cl_device_id[device_num];
-			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices, NULL);
-			if (err != CL_SUCCESS)
-			{
-				delete[] devices;
-				continue;
-			}
+        // --- Enumerate platforms/devices ---
+        size_t info_size;
+        for (cl_uint i = 0; i < platform_num; ++i)
+        {
+            device_list_.push_back(CLPlatform());
+            CLPlatform* platform = &(device_list_.back());
+            platform->id = platforms[i];
 
-			//go through each device
-			for (cl_uint j = 0; j < device_num; ++j)
-			{
-				platform->devices.push_back(CLDevice());
-				CLDevice* device = &(platform->devices.back());
-				//id
-				device->id = devices[j];
-				//get vendor name
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
-				device->vendor.resize(info_size, 0);
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &(device->vendor[0]), NULL);
-				if (!device->vendor.empty() && device->vendor.back() == '\0')
-					device->vendor.pop_back();
-				//get device name
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
-				device->name.resize(info_size, 0);
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &(device->name[0]), NULL);
-				if (!device->name.empty() && device->name.back() == '\0')
-					device->name.pop_back();
-				//get device version
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
-				device->version.resize(info_size, 0);
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &(device->version[0]), NULL);
-				if (!device->version.empty() && device->version.back() == '\0')
-					device->version.pop_back();
-			}
-			delete[] devices;
-		}
-		delete[] platforms;
+            // platform vendor
+            clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
+            platform->vendor.resize(info_size);
+            clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &platform->vendor[0], NULL);
 
-		if (device_list_.empty())
-			return;
-#ifdef _WIN32
-		cl_context_properties properties[] =
-		{
-			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
-			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
-			0
-		};
-#else
-		cl_context_properties properties[] =
-		{
-			#if defined(_DARWIN) 
-			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
-			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-			#elif defined(__linux__)
-			// https://www.codeproject.com/Articles/685281/OpenGL-OpenCL-Interoperability-A-Case-Study-Using
-			CL_GL_CONTEXT_KHR , (cl_context_properties)glXGetCurrentContext() ,
-			CL_GLX_DISPLAY_KHR , (cl_context_properties)glXGetCurrentDisplay() ,
-			#endif
-			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
-			0
-		};
-#endif
-		if (platform_id_ < 0 || platform_id_ >= device_list_.size())
-			platform_id_ = 0;
-		CLPlatform* platform = &(device_list_[platform_id_]);
-		if (!platform)
-			return;
-		if (platform->devices.empty())
-			return;
-#ifdef _WIN32
-		properties[5] = (cl_context_properties)(platform->id);
-#else
-		properties[3] = (cl_context_properties)(platform->id);
-#endif
-		CLDevice* device = 0;
-		if (device_id_ < 0 || device_id_ >= platform->devices.size())
-			device = &(platform->devices[0]);
-		else
-			device = &(platform->devices[device_id_]);
-		if (!device)
-			return;
-		device_ = device->id;
-		device_name_ = platform->name;
-		device_name_.back() = ';';
-		device_name_ += " " + device->name;
+            // platform name
+            clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
+            platform->name.resize(info_size);
+            clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &platform->name[0], NULL);
 
-		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
-		if (err == CL_SUCCESS)
-			init_ = true;
+            // --- Devices ---
+            cl_uint device_num = 0;
+            err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
+            if (err != CL_SUCCESS || device_num == 0)
+                continue;
 
-		//check features
-		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
-		std::string extensions(info_size, '\0');
-		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
-		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
+            std::vector<cl_device_id> devices(device_num);
+            err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices.data(), NULL);
+            if (err != CL_SUCCESS)
+                continue;
 
-		//check if needs clear
-		need_clear_ = get_need_clear(device);
-	}
+            for (cl_uint j = 0; j < device_num; ++j)
+            {
+                platform->devices.push_back(CLDevice());
+                CLDevice* device = &(platform->devices.back());
+                device->id = devices[j];
+
+                // vendor
+                clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
+                device->vendor.resize(info_size);
+                clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &device->vendor[0], NULL);
+                if (!device->vendor.empty() && device->vendor.back() == '\0')
+                    device->vendor.pop_back();
+
+                // name
+                clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
+                device->name.resize(info_size);
+                clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &device->name[0], NULL);
+                if (!device->name.empty() && device->name.back() == '\0')
+                    device->name.pop_back();
+
+                // version
+                clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
+                device->version.resize(info_size);
+                clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &device->version[0], NULL);
+                if (!device->version.empty() && device->version.back() == '\0')
+                    device->version.pop_back();
+            }
+        }
+
+        if (device_list_.empty())
+            return;
+
+        // --- Select platform ---
+        if (platform_id_ < 0 || platform_id_ >= (int)device_list_.size())
+            platform_id_ = 0;
+
+        CLPlatform* platform = &(device_list_[platform_id_]);
+        if (!platform || platform->devices.empty())
+            return;
+
+        // --- Select device ---
+        CLDevice* device = nullptr;
+        if (device_id_ < 0 || device_id_ >= (int)platform->devices.size())
+            device = &(platform->devices[0]);
+        else
+            device = &(platform->devices[device_id_]);
+
+        if (!device)
+            return;
+
+        device_ = device->id;
+
+        // --- Device name ---
+        device_name_ = platform->name;
+        if (!device_name_.empty())
+            device_name_.back() = ';';
+        device_name_ += " " + device->name;
+
+        // --- Build GL-CL interop properties (robust, no index hacks) ---
+        cl_context_properties properties[7];
+        int p = 0;
+
+    #ifdef _WIN32
+
+        HGLRC gl_ctx = wglGetCurrentContext();
+        HDC   hdc    = wglGetCurrentDC();
+        if (!gl_ctx || !hdc)
+            return;
+
+        properties[p++] = CL_GL_CONTEXT_KHR;
+        properties[p++] = (cl_context_properties)gl_ctx;
+        properties[p++] = CL_WGL_HDC_KHR;
+        properties[p++] = (cl_context_properties)hdc;
+
+        properties[p++] = CL_CONTEXT_PLATFORM;
+        properties[p++] = (cl_context_properties)platform->id;
+
+    #elif defined(__APPLE__)
+
+        CGLContextObj ctx = CGLGetCurrentContext();
+        if (!ctx)
+            return;
+
+        CGLShareGroupObj share = CGLGetShareGroup(ctx);
+
+        properties[p++] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
+        properties[p++] = (cl_context_properties)share;
+
+        // Optional (safe on newer systems)
+        properties[p++] = CL_CONTEXT_PLATFORM;
+        properties[p++] = (cl_context_properties)platform->id;
+
+    #elif defined(__linux__)
+
+        GLXContext ctx = glXGetCurrentContext();
+        Display* display = glXGetCurrentDisplay();
+        if (!ctx || !display)
+            return;
+
+        properties[p++] = CL_GL_CONTEXT_KHR;
+        properties[p++] = (cl_context_properties)ctx;
+        properties[p++] = CL_GLX_DISPLAY_KHR;
+        properties[p++] = (cl_context_properties)display;
+
+        properties[p++] = CL_CONTEXT_PLATFORM;
+        properties[p++] = (cl_context_properties)platform->id;
+
+    #endif
+
+        properties[p++] = 0; // terminator
+
+        // --- Linux: ensure device matches GL context ---
+    #ifdef __linux__
+        typedef cl_int (*clGetGLContextInfoKHR_fn)(
+            const cl_context_properties*,
+            cl_gl_context_info,
+            size_t,
+            void*,
+            size_t*);
+
+        auto clGetGLContextInfoKHR =
+            (clGetGLContextInfoKHR_fn)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
+
+        if (clGetGLContextInfoKHR)
+        {
+            cl_device_id gl_device = nullptr;
+
+            clGetGLContextInfoKHR(
+                properties,
+                CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
+                sizeof(cl_device_id),
+                &gl_device,
+                nullptr);
+
+            if (gl_device)
+                device_ = gl_device;
+        }
+    #endif
+
+        // --- Create context ---
+        context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+        if (err != CL_SUCCESS)
+            return;
+
+        init_ = true;
+
+        // --- Extensions ---
+        clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
+        std::string extensions(info_size, '\0');
+        clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
+
+        float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
+
+        // --- Other flags ---
+        need_clear_ = get_need_clear(device);
+    }
 
 	bool KernelProgram::init()
 	{

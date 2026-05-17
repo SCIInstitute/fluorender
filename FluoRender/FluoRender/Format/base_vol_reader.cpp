@@ -222,7 +222,8 @@ int BaseVolReader::GetPatternNumber(std::wstring &path_name, int mode, bool coun
 		else
 			break;
 	}
-	number = WSTOI(str);
+	if (!str.empty())
+        number = WSTOI(str);
 
 	if (count)
 	{
