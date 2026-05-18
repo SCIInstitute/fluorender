@@ -159,6 +159,8 @@ add_library(glad STATIC
 target_include_directories(glad PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/include
 )
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Glad/include)
+
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
