@@ -29,9 +29,9 @@
 #ifndef TextureBrick_h
 #define TextureBrick_h
 
-#include <glad/gl.h>
 #include <Ray.h>
 #include <Texture.h>
+#include <gl_types.h>
 #include <stdint.h>
 #include <map>
 

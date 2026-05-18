@@ -28,8 +28,8 @@
 #ifndef Framebuffer_h
 #define Framebuffer_h
 
-#include <glad/gl.h>
 #include <FramebufferState.h>
+#include <gl_types.h>
 #include <string>
 #include <vector>
 #include <map>

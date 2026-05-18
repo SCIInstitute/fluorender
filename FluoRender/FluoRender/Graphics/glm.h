@@ -10,9 +10,10 @@ preservation of edges, welding redundant vertices & texture
 coordinate generation (spheremap and planar projections) + more.
 
 */
-#include <glad/gl.h>
 #if !defined(glm_h)
 #define glm_h
+
+#include <gl_types.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265f

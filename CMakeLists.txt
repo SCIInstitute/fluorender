@@ -155,6 +155,7 @@ add_compile_definitions(LX_STATIC_LINKING)
 # GLAD
 add_library(glad STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/src/gl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/src/wgl.c
 )
 target_include_directories(glad PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/include
@@ -1092,6 +1093,13 @@ file(GLOB graphics_hdr FluoRender/FluoRender/Graphics/*.h)
 add_library(GRAPHICS_LIB STATIC
   ${graphics_src} ${graphics_hdr})
 
+# OpenGL backend
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Graphics/GL)
+#file(GLOB graphics_gl_src FluoRender/FluoRender/Graphics/GL/*.cpp)
+#file(GLOB graphics_gl_hdr FluoRender/FluoRender/Graphics/GL/*.h)
+#add_library(GRAPHICS_GL_LIB STATIC
+#    ${graphics_gl_src} ${graphics_gl_hdr})
+
 # Image
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Image)
 file(GLOB img_hdr FluoRender/FluoRender/Image/*.h)
@@ -1437,6 +1445,8 @@ target_link_libraries(GRAPHICS_LIB PRIVATE
   ${TEEM_LIBRARIES}
 )
 
+# OpenGL backend
+
 # Image
 
 # LookingGlass
@@ -1703,6 +1713,7 @@ target_link_libraries(FluoRender PRIVATE
     FORMAT_LIB
     GLOBAL_LIB
     GRAPHICS_LIB
+    #GRAPHICS_GL_LIB
     IMAGE_LIB
     LOOKINGGLASS_LIB
     OBJECT_LIB

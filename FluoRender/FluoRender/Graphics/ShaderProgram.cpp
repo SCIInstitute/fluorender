@@ -123,7 +123,7 @@ bool ShaderProgram::init()
 
 void ShaderProgram::init_shaders_supported()
 {
-	if (!init_ && gladLoadGL())
+	if (!init_)
 	{
 		//get gl version
 		glGetIntegerv(GL_MAJOR_VERSION, &v_major_);

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef VECTOR4I_HPP
 #define VECTOR4I_HPP
 
-#include <glad/gl.h>
+#include <gl_types.h>
 #include <string>
 #include <iosfwd>
 #include <iostream>

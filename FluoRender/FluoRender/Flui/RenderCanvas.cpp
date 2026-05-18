@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <glad/gl.h>
 #include <RenderCanvas.h>
 #include <GLAttribProvider.h>
 #include <Global.h>
@@ -63,6 +64,13 @@ LOGCONTEXTA RenderCanvas::m_lc;
 #endif
 
 wxDEFINE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
+
+static GLADapiproc WXGetProcAddress(const char* name)
+{
+	return reinterpret_cast<GLADapiproc>(
+		wxGLContext::GetProcAddress(name)
+		);
+}
 
 RenderCanvas::RenderCanvas(MainFrame* frame,
 	RenderViewPanel* parent,
@@ -117,6 +125,8 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 		}
 	}
 	SetCurrent(*m_glRC);
+
+	gladLoadGL(WXGetProcAddress);
 
 #ifdef _DEBUG
 	//example Pixel format descriptor detailing each part

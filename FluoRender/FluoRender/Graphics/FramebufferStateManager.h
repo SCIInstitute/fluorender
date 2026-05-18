@@ -28,7 +28,7 @@
 #ifndef FramebufferStateManager_h
 #define FramebufferStateManager_h
 
-#include <glad/gl.h>
+#include <gl_types.h>
 #include <FramebufferState.h>
 
 namespace flvr

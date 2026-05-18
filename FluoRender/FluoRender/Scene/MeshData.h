@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MESH_DATA_H_
 #define _MESH_DATA_H_
 
-#include <glad/gl.h>
 #include <TreeLayer.h>
 #include <BBox.h>
 #include <Vector.h>
+#include <gl_types.h>
 #include <glm/glm.hpp>
 #include <memory>
 

@@ -29,13 +29,13 @@
 #ifndef MeshRenderer_h
 #define MeshRenderer_h
 
-#include <glad/gl.h>
 #include <Color.h>
 #include <ClippingBox.h>
+#include <gl_types.h>
+#include <glm/glm.hpp>
 #include <vector>
 #include <cstring>
 #include <memory>
-#include <glm/glm.hpp>
 
 typedef struct _GLMmodel GLMmodel;
 

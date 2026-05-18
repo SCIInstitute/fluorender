@@ -810,7 +810,7 @@ namespace flvr
 			GLint internal_format;
 			if (nb < 3)
 			{
-				if (compression && GLEW_ARB_texture_compression_rgtc)
+				if (compression)
 					internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				else
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
@@ -820,7 +820,7 @@ namespace flvr
 			}
 			else
 			{
-				if (compression && GLEW_ARB_texture_compression_rgtc)
+				if (compression)
 					internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				else
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||

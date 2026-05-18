@@ -29,8 +29,8 @@
 #ifndef TextureRenderer_h
 #define TextureRenderer_h
 
-#include <glad/gl.h>
 #include <Point.h>
+#include <gl_types.h>
 #include <stdint.h>
 #include <glm/glm.hpp>
 #include <memory>

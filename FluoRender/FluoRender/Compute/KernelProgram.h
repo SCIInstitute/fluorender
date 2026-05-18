@@ -29,7 +29,7 @@
 #ifndef KernelProgram_h
 #define KernelProgram_h
 
-#include <glad/gl.h>
+#include <gl_types.h>
 #if defined(__linux__)
 #include <GL/glx.h>
 #endif
