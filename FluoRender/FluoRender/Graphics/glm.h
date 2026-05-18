@@ -10,17 +10,9 @@ preservation of edges, welding redundant vertices & texture
 coordinate generation (spheremap and planar projections) + more.
 
 */
+#include <glad/gl.h>
 #if !defined(glm_h)
 #define glm_h
-
-#ifndef __glew_h__
-typedef unsigned char GLubyte;
-typedef float GLfloat;
-typedef int GLint;
-typedef unsigned int GLuint;
-typedef unsigned char GLboolean;
-typedef void GLvoid;
-#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265f

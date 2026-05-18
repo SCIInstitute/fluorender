@@ -29,6 +29,7 @@
 #ifndef KernelProgram_h
 #define KernelProgram_h
 
+#include <glad/gl.h>
 #if defined(__linux__)
 #include <GL/glx.h>
 #endif
@@ -49,10 +50,6 @@
 #include <unordered_set>
 #include <memory>
 #include <unordered_map>
-
-#ifndef __glew_h__
-typedef unsigned int GLuint;
-#endif
 
 namespace flvr
 {

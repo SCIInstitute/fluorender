@@ -28,6 +28,7 @@
 #ifndef Framebuffer_h
 #define Framebuffer_h
 
+#include <glad/gl.h>
 #include <FramebufferState.h>
 #include <string>
 #include <vector>
@@ -35,11 +36,6 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_map>
-
-#ifndef __glew_h__
-typedef unsigned int GLenum;
-typedef float GLfloat;
-#endif
 
 namespace flvr
 {

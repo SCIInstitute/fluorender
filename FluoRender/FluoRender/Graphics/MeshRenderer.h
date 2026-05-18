@@ -29,6 +29,7 @@
 #ifndef MeshRenderer_h
 #define MeshRenderer_h
 
+#include <glad/gl.h>
 #include <Color.h>
 #include <ClippingBox.h>
 #include <vector>
@@ -37,10 +38,6 @@
 #include <glm/glm.hpp>
 
 typedef struct _GLMmodel GLMmodel;
-
-#ifndef __glew_h__
-typedef int GLint;
-#endif
 
 namespace fluo
 {

@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <VertexArray.h>
 #include <Point.h>
 #include <compatibility.h>

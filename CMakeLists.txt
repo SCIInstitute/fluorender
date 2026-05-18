@@ -152,26 +152,13 @@ cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
 add_compile_definitions(STATIC_COMPILE)
 add_compile_definitions(LX_STATIC_LINKING)
 
-# Set the GLEW directory
-if(WIN32 OR APPLE)
-    file(GLOB GLEW_DIRS "${PARENT_DIR}/glew*")
-    list(GET GLEW_DIRS 0 GLEW_DIR)  # Get the first match
-    set(GLEW_INCLUDE_DIR "${GLEW_DIR}/include")
-endif()
-if(WIN32)
-    set(GLEW_SHARED_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32d.lib")
-    set(GLEW_SHARED_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32.lib")
-    set(GLEW_STATIC_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32sd.lib")
-    set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32s.lib")
-elseif(APPLE)
-    set(GLEW_SHARED_LIBRARY_DEBUG "${GLEW_DIR}/lib/libGLEW.dylib")
-    set(GLEW_SHARED_LIBRARY_RELEASE "${GLEW_DIR}/lib/libGLEW.dylib")
-    set(GLEW_STATIC_LIBRARY_DEBUG "${GLEW_DIR}/lib/libGLEW.a")
-    set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/libGLEW.a")
-endif()
-add_definitions(-DGLEW_STATIC)
-set(GLEW_USE_STATIC_LIBS TRUE)
-find_package(GLEW REQUIRED)
+# GLAD
+add_library(glad STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/src/gl.c
+)
+target_include_directories(glad PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/include
+)
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
@@ -1270,8 +1257,10 @@ target_include_directories(COMPONENT_LIB PRIVATE
 
 # Compute
 target_include_directories(COMPUTE_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
+)
+target_link_libraries(COMPUTE_LIB PUBLIC
+  glad
 )
 target_link_libraries(COMPUTE_LIB PRIVATE
   ${OpenCL_LIBRARIES}
@@ -1330,7 +1319,6 @@ target_include_directories(FILTER_LIB PRIVATE
 # Flui
 target_include_directories(FLUI_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
   ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${Python3_INCLUDE_DIRS}
@@ -1348,8 +1336,9 @@ else()
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2})
 endif()
-target_link_libraries(FLUI_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES})
+target_link_libraries(FLUI_LIB PUBLIC
+  glad
+)
 if(WIN32)
     target_link_libraries(FLUI_LIB PRIVATE
       WACOMUTILS_LIB)
@@ -1434,13 +1423,14 @@ target_link_libraries(GLOBAL_LIB PUBLIC
 # Graphics
 target_include_directories(GRAPHICS_LIB PRIVATE
   ${FREETYPE_INCLUDE_DIRS}
-  ${GLEW_INCLUDE_DIR}
   ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${TEEM_INCLUDE_DIRS})
+target_link_libraries(GRAPHICS_LIB PUBLIC
+  glad
+)
 target_link_libraries(GRAPHICS_LIB PRIVATE
   ${FREETYPE_LIBRARIES}
-  ${GLEW_STATIC_LIBRARIES}
   ${OPENGL_LIBRARIES}
   ${TEEM_LIBRARIES}
 )
@@ -1458,13 +1448,14 @@ target_include_directories(OBJECT_LIB PRIVATE
 
 # OpenXR
 target_include_directories(OPENXR_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
   ${GLM_INCLUDE_DIR}
   ${OPENVR_INCLUDE_DIR}
   ${OPENXR_INCLUDE_DIR}
 )
+target_link_libraries(OPENXR_LIB PUBLIC
+  glad
+)
 target_link_libraries(OPENXR_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
   ${OpenVR_LIBRARIES}
   ${OpenXR_LIBRARIES})
 

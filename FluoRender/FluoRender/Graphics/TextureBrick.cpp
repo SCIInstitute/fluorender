@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <TextureBrick.h>
 #include <Texture.h>
 #include <TextureRenderer.h>

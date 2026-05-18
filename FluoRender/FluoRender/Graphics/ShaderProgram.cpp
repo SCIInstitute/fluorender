@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <ShaderProgram.h>
 #include <Utils.h>
 #include <compatibility.h>
@@ -123,8 +123,7 @@ bool ShaderProgram::init()
 
 void ShaderProgram::init_shaders_supported()
 {
-	glewExperimental = GL_TRUE;
-	if (!init_ && glewInit() == GLEW_OK)
+	if (!init_ && gladLoadGL())
 	{
 		//get gl version
 		glGetIntegerv(GL_MAJOR_VERSION, &v_major_);

@@ -26,10 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <GL/glew.h>
-#ifdef _WIN32
-#include <GL/wglew.h>
-#endif
+#include <glad/gl.h>
 #include <WmrRenderer.h>
 #include <Framebuffer.h>
 #include <Global.h>

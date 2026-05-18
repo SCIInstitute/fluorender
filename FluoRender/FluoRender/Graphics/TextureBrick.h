@@ -29,6 +29,7 @@
 #ifndef TextureBrick_h
 #define TextureBrick_h
 
+#include <glad/gl.h>
 #include <Ray.h>
 #include <Texture.h>
 #include <stdint.h>
@@ -41,10 +42,6 @@
 #define BRICK_FILE_TYPE_RAW		1
 #define BRICK_FILE_TYPE_JPEG	2
 #define BRICK_FILE_TYPE_ZLIB	3
-
-#ifndef __glew_h__
-typedef unsigned int GLenum;
-#endif
 
 namespace flvr
 {

@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <Framebuffer.h>
 #include <Global.h>
 #include <CurrentObjects.h>

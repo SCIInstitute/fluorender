@@ -28,11 +28,8 @@
 #ifndef FramebufferStateManager_h
 #define FramebufferStateManager_h
 
+#include <glad/gl.h>
 #include <FramebufferState.h>
-
-#ifndef __glew_h__
-typedef unsigned int GLenum;
-#endif
 
 namespace flvr
 {

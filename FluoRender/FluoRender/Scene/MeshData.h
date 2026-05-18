@@ -28,16 +28,12 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MESH_DATA_H_
 #define _MESH_DATA_H_
 
+#include <glad/gl.h>
 #include <TreeLayer.h>
 #include <BBox.h>
 #include <Vector.h>
 #include <glm/glm.hpp>
 #include <memory>
-
-#ifndef __glew_h__
-typedef unsigned int GLuint;
-typedef int GLint;
-#endif // !__glew_h__
 
 struct _GLMmodel;
 typedef struct _GLMmodel GLMmodel;
