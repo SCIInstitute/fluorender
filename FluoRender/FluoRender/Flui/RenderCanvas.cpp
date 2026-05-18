@@ -65,12 +65,33 @@ LOGCONTEXTA RenderCanvas::m_lc;
 
 wxDEFINE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
 
-static GLADapiproc WXGetProcAddress(const char* name)
-{
-	return reinterpret_cast<GLADapiproc>(
-		wxGLContext::GetProcAddress(name)
-		);
+#if defined(__WXMSW__) // Windows
+#include <wx/msw/wrapwin.h>
+
+GLADapiproc MyGLGetProcAddress(const char* name) {
+	// 1. Try to load modern/extension functions first
+	void* p = (void*)wglGetProcAddress(name);
+
+	// 2. If wglGetProcAddress returns an invalid pointer, fallback to the DLL
+	if (p == 0 || (p == (void*)0x1) || (p == (void*)0x2) || (p == (void*)0x3) || (p == (void*)-1)) {
+		static HMODULE openGLModule = LoadLibraryA("opengl32.dll");
+		p = (void*)GetProcAddress(openGLModule, name);
+	}
+	return (GLADapiproc)p;
 }
+
+#elif defined(__WXGTK__) // Linux
+#include <GL/glx.h>
+GLADapiproc MyGLGetProcAddress(const char* name) {
+	return (GLADapiproc)glXGetProcAddressARB((const GLubyte*)name);
+}
+
+#elif defined(__WXMAC__) // macOS
+#include <dlfcn.h>
+GLADapiproc MyGLGetProcAddress(const char* name) {
+	return (GLADapiproc)dlsym(RTLD_DEFAULT, name);
+}
+#endif
 
 RenderCanvas::RenderCanvas(MainFrame* frame,
 	RenderViewPanel* parent,
@@ -126,7 +147,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	}
 	SetCurrent(*m_glRC);
 
-	gladLoadGL(WXGetProcAddress);
+	gladLoadGL(MyGLGetProcAddress);
 
 #ifdef _DEBUG
 	//example Pixel format descriptor detailing each part
