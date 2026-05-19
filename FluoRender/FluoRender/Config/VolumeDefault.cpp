@@ -346,8 +346,11 @@ void VolumeDataDefault::Apply(VolumeData* vd)
 	vd->SetSampleRateEnable(m_sample_rate_enable);
 	vd->SetSampleRate(m_sample_rate);
 
-	if (!vd->GetSpcFromFile())
+	if (vd->GetSpacingSource() == SpacingSource::NotAvailable)
+	{
 		vd->SetBaseSpacing(m_spacing);
+		vd->SetSpacingSource(SpacingSource::FromDefault);
+	}
 
 	vd->SetColormapDisp(m_colormap_disp);
 	vd->SetColormapValues(m_colormap_low_value, m_colormap_hi_value);

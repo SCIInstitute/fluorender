@@ -3401,12 +3401,19 @@ bool VolumePropPanel::SetSpacing()
 	{
 		for (int i = 0; i < m_group->GetVolumeNum(); i++)
 		{
-			m_group->GetVolumeData(i)->SetSpacing(spc);
-			m_group->GetVolumeData(i)->SetBaseSpacing(spc);
+			auto vd = m_group->GetVolumeData(i);
+			if (vd &&
+				vd->GetSpacingSource() != SpacingSource::FromFile)
+			{
+				vd->SetSpacingSource(SpacingSource::FromUser);
+				vd->SetSpacing(spc);
+				vd->SetBaseSpacing(spc);
+			}
 		}
 	}
 	else if (m_vd)
 	{
+		m_vd->SetSpacingSource(SpacingSource::FromUser);
 		m_vd->SetSpacing(spc);
 		m_vd->SetBaseSpacing(spc);
 	}

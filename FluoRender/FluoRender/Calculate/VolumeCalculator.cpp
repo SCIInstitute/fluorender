@@ -287,7 +287,7 @@ void VolumeCalculator::CreateVolumeResult1()
 		res,
 		spc,
 		brick_size);
-	vd->SetSpcFromFile(true);
+	vd->SetSpacingSource(vd_a->GetSpacingSource());
 	//vd->SetCurChannel(m_vd_a->GetCurChannel());
 	m_vd_r.push_back(vd);
 
@@ -331,7 +331,7 @@ void VolumeCalculator::CreateVolumeResult2()
 		res_max,
 		spc_max,
 		brick_size);
-	vd->SetSpcFromFile(true);
+	vd->SetSpacingSource(vd_a->GetSpacingSource());
 	m_vd_r.push_back(vd);
 
 	std::wstring name_a = vd_a->GetName();

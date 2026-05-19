@@ -142,7 +142,7 @@ VolumeData::VolumeData()
 	m_size = fluo::Vector(0.0);
 	m_scaling = fluo::Vector(1.0);
 	m_spacing = fluo::Vector(1.0);
-	m_spc_from_file = false;
+	m_spc_source = SpacingSource::NotAvailable;
 	m_resample = false;
 	m_resampled_size = fluo::Vector(0.0);
 
@@ -291,7 +291,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_size = copy.m_size;
 	m_scaling = copy.m_scaling;
 	m_spacing = copy.m_spacing;
-	m_spc_from_file = copy.m_spc_from_file;
+	m_spc_source = copy.m_spc_source;
 	m_resample = copy.m_resample;
 	m_resampled_size = copy.m_resampled_size;
 

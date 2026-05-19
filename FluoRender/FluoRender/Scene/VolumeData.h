@@ -71,6 +71,15 @@ struct VD_Landmark
 	double spcz = 0;
 };
 
+enum class SpacingSource : int
+{
+	NotAvailable = 0,
+	FromFile = 1,
+	FromDefault = 2,
+	FromUser = 3,
+	FromCode = 4
+};
+
 class VolumeData : public TreeLayer, public std::enable_shared_from_this<VolumeData>
 {
 public:
@@ -328,8 +337,8 @@ public:
 	void SetSpacing(const fluo::Vector& spacing);
 	fluo::Vector GetSpacing(int lv = -1);
 	//read resolutions from file
-	void SetSpcFromFile(bool val=true) {m_spc_from_file = val;}
-	bool GetSpcFromFile() {return m_spc_from_file;}
+	void SetSpacingSource(SpacingSource source) {m_spc_source = source;}
+	SpacingSource GetSpacingSource() {return m_spc_source;}
 
 	//brkxml
 	void SetBaseSpacing(const fluo::Vector& spacing);
@@ -572,7 +581,7 @@ private:
 	fluo::Vector m_size;
 	fluo::Vector m_scaling;
 	fluo::Vector m_spacing;
-	bool m_spc_from_file;
+	SpacingSource m_spc_source;
 	//resample
 	bool m_resample;
 	fluo::Vector m_resampled_size;

@@ -106,8 +106,11 @@ void DataManager::SetVolumeDefault(const std::shared_ptr<VolumeData>& vd)
 		vd->ApplyMlVolProp();
 		//props not managed by ml
 		vd->SetSampleRate(glbin_vol_def.m_sample_rate);
-		if (!vd->GetSpcFromFile())
+		if (vd->GetSpacingSource() == SpacingSource::NotAvailable)
+		{
 			vd->SetBaseSpacing(glbin_vol_def.m_spacing);
+			vd->SetSpacingSource(SpacingSource::FromDefault);
+		}
 		vd->SetMainMaskMode(glbin_vol_def.m_main_mode);
 		vd->SetMaskMode(glbin_vol_def.m_mask_mode);
 	}
@@ -683,7 +686,10 @@ size_t DataManager::LoadVolumeData(const std::wstring &filename, int type, bool 
 				vd->SetBaseSpacing(reader->GetSpacing() * fluo::Vector(1.0, 1.0, zspcfac));
 			else
 				vd->SetBaseSpacing(reader->GetSpacing());
-			vd->SetSpcFromFile(valid_spc);
+			if (valid_spc)
+				vd->SetSpacingSource(SpacingSource::FromFile);
+			else
+				vd->SetSpacingSource(SpacingSource::FromCode);
 			vd->SetScalarScale(reader->GetScalarScale());
 			vd->SetMinMaxValue(reader->GetMinValue(), reader->GetMaxValue());
 			vd->SetCurTime(reader->GetCurTime());

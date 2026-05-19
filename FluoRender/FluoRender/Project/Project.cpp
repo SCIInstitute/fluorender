@@ -362,20 +362,29 @@ void Project::Open(const std::wstring& filename)
 								vd->SetSampleRate(dval);
 						}
 
-						//spacings and scales
-						if (!vd->isBrxml())
+						//spacings
+						SpacingSource ss = SpacingSource::NotAvailable;
+						if (fconfig->Read("spacing_source", &ival))
+							ss = static_cast<SpacingSource>(ival);
+						if (ss != SpacingSource::FromFile)
 						{
-							if (fconfig->Read("res", &vval))
-								vd->SetBaseSpacing(vval);
+							vd->SetSpacingSource(ss);
+							if (!vd->isBrxml())
+							{
+								if (fconfig->Read("res", &vval))
+									vd->SetBaseSpacing(vval);
+							}
+							else
+							{
+								if (fconfig->Read("b_res", &vval))
+									vd->SetBaseSpacing(vval);
+								if (fconfig->Read("s_res", &vval))
+									vd->SetSpacingScale(vval);
+							}
 						}
-						else
-						{
-							if (fconfig->Read("b_res", &vval))
-								vd->SetBaseSpacing(vval);
-							if (fconfig->Read("s_res", &vval))
-								vd->SetSpacingScale(vval);
-						}
-						if (fconfig->Read("scl", &vval))
+
+						//scaling
+						if (fconfig->Read("scaling", &vval))
 							vd->SetScaling(vval);
 
 						//clip values
@@ -1402,11 +1411,14 @@ void Project::Save(const std::wstring& filename, bool inc)
 			fconfig->Write("shading_shine", vd->GetShadingShine());
 			fconfig->Write("samplerate", vd->GetSampleRate());
 
-			//resolution scale
-			fconfig->Write("res", vd->GetSpacing());
-			fconfig->Write("b_res", vd->GetBaseSpacing());
-			fconfig->Write("s_res", vd->GetSpacingScale());
-			fconfig->Write("scl", vd->GetScaling());
+			//spacing
+			fconfig->Write("spacing_source", static_cast<int>(vd->GetSpacingSource()));
+			fconfig->Write("spacing", vd->GetSpacing());
+			fconfig->Write("base_spacing", vd->GetBaseSpacing());
+			fconfig->Write("spacing_scale", vd->GetSpacingScale());
+			
+			//scaling
+			fconfig->Write("scaling", vd->GetScaling());
 
 			auto& cb = vd->GetClippingBox();
 			//clip values
