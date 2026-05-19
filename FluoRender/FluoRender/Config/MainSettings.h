@@ -75,7 +75,11 @@ public:
 	ColocalDefault m_colocal_def;
 
 public:
-	//default values
+	int m_mainframe_disp_id;	//display id of the main frame
+	int m_mainframe_x;		//main frame position
+	int m_mainframe_y;
+	int m_mainframe_w;		//main frame size
+	int m_mainframe_h;
 	double m_dpi_scale_factor;//dpi scale factor
 	std::string m_layout;	//layout of the main frame
 	std::string m_layout_clip;		//layout of the clip plane panel

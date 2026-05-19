@@ -104,6 +104,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aboutdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/accel.h>
+#include <wx/display.h>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -697,7 +698,7 @@ MainFrame::MainFrame(
 	SetMinSize(FromDIP(wxSize(800,600)));
 
 	if (!windowed)
-		Maximize();
+		StartupMaximize();
 
 	//drop target
 	SetDropTarget(new DnDFile(this));
@@ -936,6 +937,10 @@ MainFrame::~MainFrame()
 	glbin_comp_def.Set(&glbin_comp_analyzer);
 	glbin_mov_def.Set(&glbin_moviemaker);
 	glbin_mesh_def.Set(glbin_conv_vol_mesh);
+	//ui settings
+	//mainframe layout
+	SavePlacement();
+	//dpi scale factor
 	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
 	//frame layout
 	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
@@ -957,6 +962,36 @@ MainFrame::~MainFrame()
 	m_aui_mgr.UnInit();
 
 	m_waker.Stop();
+}
+
+void MainFrame::SavePlacement()
+{
+	glbin_settings.m_mainframe_disp_id = wxDisplay::GetFromWindow(this);
+	//glbin_settings.m_mainframe_maximized = IsMaximized();
+
+#ifdef __WXMSW__
+	HWND hwnd = (HWND)GetHandle();
+
+	WINDOWPLACEMENT wp;
+	wp.length = sizeof(WINDOWPLACEMENT);
+
+	if (GetWindowPlacement(hwnd, &wp))
+	{
+		RECT r = wp.rcNormalPosition;
+
+		glbin_settings.m_mainframe_x = r.left;
+		glbin_settings.m_mainframe_y = r.top;
+		glbin_settings.m_mainframe_w = r.right - r.left;
+		glbin_settings.m_mainframe_h = r.bottom - r.top;
+	}
+#else
+	// fallback (non-Windows)
+	wxRect r = GetScreenRect();
+	glbin_settings.m_mainframe_x = r.x;
+	glbin_settings.m_mainframe_y = r.y;
+	glbin_settings.m_mainframe_w = r.width;
+	glbin_settings.m_mainframe_h = r.height;
+#endif
 }
 
 wxString MainFrame::CreateRenderViewPanel(int row)
@@ -2218,6 +2253,110 @@ void MainFrame::FullScreen()
 		if (m)
 			m->SetBitmap(wxGetBitmap(full_screen_back_menu));
 	}
+}
+
+void MainFrame::StartupMaximize()
+{
+	const auto& s = glbin_settings;
+
+	int chosenDisplay = wxNOT_FOUND;
+
+	// ----------------------------
+	// 1. Try using saved rect first
+	// ----------------------------
+	if (s.m_mainframe_w > 0 && s.m_mainframe_h > 0)
+	{
+		wxPoint pt(s.m_mainframe_x, s.m_mainframe_y);
+
+		int disp = wxDisplay::GetFromPoint(pt);
+		if (disp != wxNOT_FOUND)
+		{
+			chosenDisplay = disp;
+
+			// Restore position/size first
+			SetSize(s.m_mainframe_x,
+				s.m_mainframe_y,
+				s.m_mainframe_w,
+				s.m_mainframe_h);
+		}
+	}
+
+	// -----------------------------------
+	// 2. Fallback to saved display ID
+	// -----------------------------------
+	if (chosenDisplay == wxNOT_FOUND)
+	{
+		if (s.m_mainframe_disp_id >= 0 &&
+			s.m_mainframe_disp_id < wxDisplay::GetCount())
+		{
+			chosenDisplay = s.m_mainframe_disp_id;
+		}
+	}
+
+	// -----------------------------------
+	// 3. Intelligent fallback selection
+	// -----------------------------------
+	if (chosenDisplay == wxNOT_FOUND)
+	{
+		int bestDisplay = wxNOT_FOUND;
+		int bestX = INT_MAX;
+
+		for (int i = 0; i < wxDisplay::GetCount(); ++i)
+		{
+			wxDisplay d(i);
+			wxRect r = d.GetClientArea();
+
+			// Prefer landscape first
+			if (r.width < r.height)
+				continue;
+
+			// Find left-most (smallest x)
+			if (r.x < bestX)
+			{
+				bestX = r.x;
+				bestDisplay = i;
+			}
+		}
+
+		// If no landscape found, just pick left-most
+		if (bestDisplay == wxNOT_FOUND)
+		{
+			for (int i = 0; i < wxDisplay::GetCount(); ++i)
+			{
+				wxDisplay d(i);
+				wxRect r = d.GetClientArea();
+
+				if (r.x < bestX)
+				{
+					bestX = r.x;
+					bestDisplay = i;
+				}
+			}
+		}
+
+		chosenDisplay = (bestDisplay != wxNOT_FOUND) ? bestDisplay : 0;
+	}
+
+	// -----------------------------------
+	// 4. Apply display placement if needed
+	// -----------------------------------
+	if (chosenDisplay != wxNOT_FOUND)
+	{
+		wxDisplay d(chosenDisplay);
+		wxRect rect = d.GetClientArea();
+
+		// Only override position if we didn't already restore from rect
+		if (!(s.m_mainframe_w > 0 && s.m_mainframe_h > 0))
+		{
+			SetPosition(rect.GetTopLeft());
+			SetSize(rect.GetSize());
+		}
+	}
+
+	// -----------------------------------
+	// 5. Maximize last (important)
+	// -----------------------------------
+	Maximize();
 }
 
 void MainFrame::SetProgress(int val, const std::string& str)

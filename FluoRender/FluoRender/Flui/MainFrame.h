@@ -325,6 +325,8 @@ public:
 	MachineLearningDlg* GetMachineLearningDlg();
 
 	//views
+	void SavePlacement();
+
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
 	void DeleteRenderViewPanel(const std::wstring& name);
@@ -367,6 +369,8 @@ public:
 	void ResetLayout();
 	//fullscreen
 	void FullScreen();
+	//startup maximize
+	void StartupMaximize();
 
 	//set status bar callback
 	void SetProgress(int val, const std::string& str);

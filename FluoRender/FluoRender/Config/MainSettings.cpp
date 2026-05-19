@@ -39,6 +39,12 @@ DEALINGS IN THE SOFTWARE.
 
 MainSettings::MainSettings()
 {
+	m_mainframe_disp_id = 0;
+	m_mainframe_x = 0;
+	m_mainframe_y = 0;
+	m_mainframe_w = 1280;
+	m_mainframe_h = 720;
+
 	m_dpi_scale_factor = 0.0;
 
 	m_prj_save = false;
@@ -291,6 +297,11 @@ void MainSettings::Read(const std::string& filename)
 	if (fconfig->Exists("/ui"))
 	{
 		fconfig->SetPath("/ui");
+		fconfig->Read("mainframe disp id", &m_mainframe_disp_id, 0);
+		fconfig->Read("mainframe x", &m_mainframe_x, 0);
+		fconfig->Read("mainframe y", &m_mainframe_y, 0);
+		fconfig->Read("mainframe w", &m_mainframe_w, 1280);
+		fconfig->Read("mainframe h", &m_mainframe_h, 720);
 		fconfig->Read("dpi scale factor", &m_dpi_scale_factor, 0.0);
 		fconfig->Read("layout", &m_layout);
 		std::string str;
@@ -566,6 +577,11 @@ void MainSettings::Save()
 
 	//ui
 	fconfig->SetPath("/ui");
+	fconfig->Write("mainframe disp id", m_mainframe_disp_id);
+	fconfig->Write("mainframe x", m_mainframe_x);
+	fconfig->Write("mainframe y", m_mainframe_y);
+	fconfig->Write("mainframe w", m_mainframe_w);
+	fconfig->Write("mainframe h", m_mainframe_h);
 	fconfig->Write("dpi scale factor", m_dpi_scale_factor);
 	fconfig->Write("layout", m_layout);
 	std::string str;
