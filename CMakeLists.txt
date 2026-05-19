@@ -152,15 +152,30 @@ cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
 add_compile_definitions(STATIC_COMPILE)
 add_compile_definitions(LX_STATIC_LINKING)
 
-# GLAD
-add_library(glad STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/src/gl.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/src/wgl.c
+# ---- GLAD setup ----
+set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad)
+# Core GLAD source (always required)
+set(GLAD_SOURCES
+    ${GLAD_DIR}/src/gl.c
 )
+# Platform-specific additions
+if (WIN32)
+    list(APPEND GLAD_SOURCES
+        ${GLAD_DIR}/src/wgl.c
+    )
+endif()
+# Create library
+add_library(glad STATIC ${GLAD_SOURCES})
+# Include directories
 target_include_directories(glad PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad/include
+    ${GLAD_DIR}/include
 )
-include_directories(${FluoRender_SOURCE_DIR}/FluoRender/Glad/include)
+# Optional: make intent explicit
+target_compile_definitions(glad PRIVATE
+    $<$<PLATFORM_ID:Windows>:GLAD_PLATFORM_WIN32>
+    $<$<PLATFORM_ID:Linux>:GLAD_PLATFORM_LINUX>
+    $<$<PLATFORM_ID:Darwin>:GLAD_PLATFORM_MACOS>
+)
 
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
