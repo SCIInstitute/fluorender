@@ -521,12 +521,14 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	sizer6->Add(m_bat_chk, 0, wxALIGN_CENTER);
 
 	//sequence number
-	wxSize bs = FromDIP(wxSize(26, 26));
 	wxBoxSizer* sizer7 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, wxID_ANY, "T: ");
-	m_seq_dec_btn = new wxButton(page, wxID_ANY, "",
-		wxDefaultPosition, bs);
+	m_seq_dec_btn = new wxButton(page, wxID_ANY);
 	m_seq_dec_btn->SetBitmap(wxGetBitmap(minus));
+	wxSize bs = m_seq_dec_btn->GetBestSize();
+	int h = bs.GetHeight();
+	m_seq_dec_btn->SetMinSize(wxSize(h, h));
+	m_seq_dec_btn->SetMaxSize(wxSize(h, h));
 	m_seq_dec_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqDecBtn, this);
 	m_seq_dec_btn->SetToolTip("Decrease the time point number by 1");
 	m_seq_num_text = new wxTextCtrl(page, wxID_ANY, "0",
@@ -535,6 +537,8 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_seq_inc_btn = new wxButton(page, wxID_ANY, "",
 		wxDefaultPosition, bs);
 	m_seq_inc_btn->SetBitmap(wxGetBitmap(plus));
+	m_seq_inc_btn->SetMinSize(wxSize(h, h));
+	m_seq_inc_btn->SetMaxSize(wxSize(h, h));
 	m_seq_inc_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqIncBtn, this);
 	m_seq_inc_btn->SetToolTip("Increase the time point number by 1");
 	st2 = new wxStaticText(page, wxID_ANY, "of: ");
@@ -1064,118 +1068,153 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer2->Add(m_progress_sldr, 1, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
 
-	//controls
-	wxSize bs = FromDIP(wxSize(26, 26));
-	wxSize ts = FromDIP(wxSize(50, -1));
-	wxFont f;
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	m_start_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_start_btn->SetBitmap(wxGetBitmap(start));
-	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
-	m_start_btn->SetToolTip("Set the start frame number of a clip to current frame");
-	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
-		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
-	f = m_start_frame_text->GetFont();
-	f.MakeLarger();
-	m_start_frame_text->SetFont(f);
-	m_start_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnStartFrameText, this);
-	m_start_frame_text->SetToolTip("Set the start frame number of a clip");
-	m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
-		wxDefaultPosition, FromDIP(wxSize(39, -1)), wxTE_RIGHT, vald_int);
-	m_end_frame_text->SetFont(f);
-	m_end_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnEndFrameText, this);
-	m_end_frame_text->SetToolTip("Set the end frame number of a clip");
-	m_end_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_end_btn->SetBitmap(wxGetBitmap(end));
-	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
-	m_end_btn->SetToolTip("Set the end frame number of a clip to current frame");
-	m_dec_time_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_dec_time_btn->SetBitmap(wxGetBitmap(step_back));
-	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
-	m_dec_time_btn->SetToolTip("Step back one frame");
-	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
-	m_cur_frame_text->SetFont(f);
-	m_cur_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurFrameText, this);
-	m_cur_frame_text->SetToolTip("Set current frame number");
-	m_inc_time_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_inc_time_btn->SetBitmap(wxGetBitmap(step_forward));
-	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
-	m_inc_time_btn->SetToolTip("Step forward one frame");
-	m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
-	m_full_frame_text->SetFont(f);
-	m_full_frame_text->Bind(wxEVT_TEXT, &MoviePanel::OnFullFrameText, this);
-	m_full_frame_text->SetToolTip("Set the end frame number of the entire movie");
-	sizer3->AddStretchSpacer(2);
-	sizer3->Add(m_start_btn, 0, wxALIGN_CENTER);
-	sizer3->Add(m_start_frame_text, 0, wxALIGN_CENTER);
-	sizer3->Add(m_end_frame_text, 0, wxALIGN_CENTER);
-	sizer3->Add(m_end_btn, 0, wxALIGN_CENTER);
-	sizer3->AddStretchSpacer(1);
-	sizer3->Add(m_dec_time_btn, 0, wxALIGN_CENTER);
-	sizer3->Add(m_cur_frame_text, 0, wxALIGN_CENTER);
-	sizer3->Add(m_inc_time_btn, 0, wxALIGN_CENTER);
-	sizer3->AddStretchSpacer(2);
-	sizer3->Add(m_full_frame_text, 0, wxALIGN_CENTER);
-	sizer3->Add(5, 5);
+    wxSize ts = FromDIP(wxSize(50, -1));
+    wxFont f;
 
-	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-	m_rewind_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_rewind_btn->SetBitmap(wxGetBitmap(rewind));
-	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
-	m_rewind_btn->SetToolTip("Rewind to the start frame of a clip");
-	m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
-	m_play_inv_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlayInv, this);
-	m_play_inv_btn->SetToolTip("Play a clip backward");
-	m_play_btn = new wxToggleButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_play_btn->SetBitmap(wxGetBitmap(play));
-	m_play_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlay, this);
-	m_play_btn->SetToolTip("Play a clip");
-	m_forward_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_forward_btn->SetBitmap(wxGetBitmap(forward));
-	m_forward_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnForward, this);
-	m_forward_btn->SetToolTip("Proceed forward to the end of a clip");
-	m_loop_btn = new wxToggleButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_loop_btn->SetBitmap(wxGetBitmap(loop));
-	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
-	m_loop_btn->SetToolTip("Enable clip playback in a loop");
-	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-		wxDefaultPosition, ts, wxTE_RIGHT);
-	m_progress_text->SetFont(f);
-	m_progress_text->Bind(wxEVT_TEXT, &MoviePanel::OnCurTimeText, this);
-	m_progress_text->SetToolTip("Set current time (in seconds) within a clip");
-	st = new wxStaticText(this, wxID_ANY, "Sec.",
-		wxDefaultPosition, FromDIP(wxSize(26, -1)));
-	m_save_btn = new wxButton(this, wxID_ANY, "",
-		wxDefaultPosition, bs);
-	m_save_btn->SetBitmap(wxGetBitmap(save));
-	m_save_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSave, this);
-	m_save_btn->SetToolTip("Export a movie clip");
-	sizer4->AddStretchSpacer(2);
-	sizer4->Add(m_rewind_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(m_play_inv_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(m_play_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(m_forward_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(m_loop_btn, 0, wxALIGN_CENTER);
-	sizer4->AddStretchSpacer(1);
-	sizer4->Add(bs.x, bs.y);
-	sizer4->Add(m_progress_text, 0, wxALIGN_CENTER);
-	sizer4->Add(st, 0, wxALIGN_CENTER);
-	sizer4->AddStretchSpacer(2);
-	sizer4->Add(ts.x - bs.x, ts.y);
-	sizer4->Add(m_save_btn, 0, wxALIGN_CENTER);
-	sizer4->Add(5, 5);
+    // =====================
+    // Create controls
+    // =====================
+
+    // --- buttons (create first so we can size them consistently)
+    m_start_btn = new wxButton(this, wxID_ANY);
+    m_start_btn->SetBitmap(wxGetBitmap(start));
+
+    wxSize best = m_start_btn->GetBestSize();
+    int h = best.GetHeight();
+
+    // helper lambda to enforce square buttons
+    auto MakeSquare = [&](wxWindow* w)
+    {
+        w->SetMinSize(wxSize(h, h));
+        w->SetMaxSize(wxSize(h, h));
+    };
+
+    MakeSquare(m_start_btn);
+
+    // --- text controls
+    m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
+        wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
+
+    f = m_start_frame_text->GetFont();
+    f.MakeLarger();
+    m_start_frame_text->SetFont(f);
+
+    m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
+        wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
+    m_end_frame_text->SetFont(f);
+
+    m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+        wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
+    m_cur_frame_text->SetFont(f);
+
+    m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+        wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
+    m_full_frame_text->SetFont(f);
+
+    // --- remaining buttons
+    m_end_btn = new wxButton(this, wxID_ANY);
+    m_end_btn->SetBitmap(wxGetBitmap(end));
+    MakeSquare(m_end_btn);
+
+    m_dec_time_btn = new wxButton(this, wxID_ANY);
+    m_dec_time_btn->SetBitmap(wxGetBitmap(step_back));
+    MakeSquare(m_dec_time_btn);
+
+    m_inc_time_btn = new wxButton(this, wxID_ANY);
+    m_inc_time_btn->SetBitmap(wxGetBitmap(step_forward));
+    MakeSquare(m_inc_time_btn);
+
+    // --- playback controls
+    m_rewind_btn = new wxButton(this, wxID_ANY);
+    m_rewind_btn->SetBitmap(wxGetBitmap(rewind));
+    MakeSquare(m_rewind_btn);
+
+    m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "");
+    m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
+    MakeSquare(m_play_inv_btn);
+
+    m_play_btn = new wxToggleButton(this, wxID_ANY, "");
+    m_play_btn->SetBitmap(wxGetBitmap(play));
+    MakeSquare(m_play_btn);
+
+    m_forward_btn = new wxButton(this, wxID_ANY);
+    m_forward_btn->SetBitmap(wxGetBitmap(forward));
+    MakeSquare(m_forward_btn);
+
+    m_loop_btn = new wxToggleButton(this, wxID_ANY, "");
+    m_loop_btn->SetBitmap(wxGetBitmap(loop));
+    MakeSquare(m_loop_btn);
+
+    // --- right-side controls
+    m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+        wxDefaultPosition, ts, wxTE_RIGHT);
+    m_progress_text->SetFont(f);
+
+    st = new wxStaticText(this, wxID_ANY, "Sec.",
+        wxDefaultPosition);
+
+    m_save_btn = new wxButton(this, wxID_ANY);
+    m_save_btn->SetBitmap(wxGetBitmap(save));
+    MakeSquare(m_save_btn);
+
+    // =====================
+    // Sizer flags (consistent spacing)
+    // =====================
+    wxSizerFlags center = wxSizerFlags(0)
+        .Align(wxALIGN_CENTER_VERTICAL)
+        .Border(wxRIGHT, FromDIP(3));
+
+    // =====================
+    // Row 1 (time range)
+    // =====================
+    wxBoxSizer* group1 = new wxBoxSizer(wxHORIZONTAL);
+    group1->Add(m_start_btn, center);
+    group1->Add(m_start_frame_text, center);
+    group1->Add(m_end_frame_text, center);
+    group1->Add(m_end_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+
+    wxBoxSizer* group2 = new wxBoxSizer(wxHORIZONTAL);
+    group2->Add(m_dec_time_btn, center);
+    group2->Add(m_cur_frame_text, center);
+    group2->Add(m_inc_time_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+
+    wxBoxSizer* group3 = new wxBoxSizer(wxHORIZONTAL);
+    group3->Add(m_full_frame_text, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+
+    wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+    sizer3->AddStretchSpacer(2);
+    sizer3->Add(group1, 0, wxALIGN_CENTER_VERTICAL);
+    sizer3->AddStretchSpacer(1);
+    sizer3->Add(group2, 0, wxALIGN_CENTER_VERTICAL);
+    sizer3->AddStretchSpacer(2);
+    sizer3->Add(group3, 0, wxALIGN_CENTER_VERTICAL);
+    sizer3->AddSpacer(FromDIP(5));
+
+    // =====================
+    // Row 2 (playback)
+    // =====================
+    wxBoxSizer* playback = new wxBoxSizer(wxHORIZONTAL);
+    playback->Add(m_rewind_btn, center);
+    playback->Add(m_play_inv_btn, center);
+    playback->Add(m_play_btn, center);
+    playback->Add(m_forward_btn, center);
+    playback->Add(m_loop_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+
+    wxBoxSizer* timegroup = new wxBoxSizer(wxHORIZONTAL);
+    timegroup->Add(m_progress_text, center);
+    timegroup->Add(st, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+
+    wxBoxSizer* savegroup = new wxBoxSizer(wxHORIZONTAL);
+    savegroup->Add(m_save_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+
+    wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
+    sizer4->AddStretchSpacer(2);
+    sizer4->Add(playback, 0, wxALIGN_CENTER_VERTICAL);
+    sizer4->AddStretchSpacer(1);
+    sizer4->Add(timegroup, 0, wxALIGN_CENTER_VERTICAL);
+    sizer4->AddStretchSpacer(2);
+    sizer4->Add(savegroup, 0, wxALIGN_CENTER_VERTICAL);
+    sizer4->AddSpacer(FromDIP(5));
 
 	//sizer
 	wxBoxSizer *sizerv = new wxBoxSizer(wxVERTICAL);
