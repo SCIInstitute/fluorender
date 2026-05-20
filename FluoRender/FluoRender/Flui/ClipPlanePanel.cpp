@@ -132,7 +132,7 @@ ClipPlanePanel::~ClipPlanePanel()
 	glbin.del_undo_control(m_z_rot_sldr);
 	glbin.del_undo_control(m_toolbar);
 
-	m_frame->SetFocusVRenderViews(0);
+	//m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
@@ -146,7 +146,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	//sliders for clipping planes
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	
+
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//x
 	m_clip_x_st = new wxFadeButton(page, wxID_ANY, "X",
@@ -339,7 +339,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	//rotations
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	//sliders for rotating clipping planes 
+	//sliders for rotating clipping planes
 	//x
 	m_rot_x_st = new wxFadeButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
