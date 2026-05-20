@@ -6,7 +6,7 @@ This is the open-source repository for FluoRender, an interactive tool for fluor
 
 Download the installer package for your operating system (OS).
 
-| 🖥️ Windows (10 and 11, 64-bit, x86_64 CPUs) | 🍎 Mac OS (13.3+, M1, M2, etc. CPUs)| 🍎 Mac OS (13.3+, Intel CPUs)  | 🐧 Linux |
+| 🖥️ Windows (10 and 11, 64-bit, x86_64 CPUs) | 🍎 Mac OS (13.3+, M1, M2, etc. CPUs)| 🍎 Mac OS (13.3+, Intel CPUs)  | 🐧 Ubuntu (22+, amd64 CPUs) |
 |------------|-----------|----------|----------|
 | [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_win64.exe) | [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_mac64_arm64.pkg)| [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_mac64_x86_64.pkg)  | [Version 2.34.1](https://github.com/SCIInstitute/fluorender/releases/download/v2.34.1/FluoRender2.34.1_ubuntu22.04_amd64.deb) |
 
