@@ -166,7 +166,7 @@ void RenderViewPanel::CreateBar()
 	m_mix_mode_tb = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	m_mix_mode_tb->SetDoubleBuffered(true);
-	wxSize tbs = m_mix_mode_tb->GetSize();
+	wxSize tbs = m_mix_mode_tb->GetBestSize();
 
 	//blend mode
 	bitmap = wxGetBitmap(layers);
@@ -239,9 +239,9 @@ void RenderViewPanel::CreateBar()
 	sizer_h_1->Add(m_hud_tb, 0, wxALIGN_CENTER);
 
 	m_scale_text = new wxTextCtrl(this, wxID_ANY, "50",
-		wxDefaultPosition, FromDIP(wxSize(35, tbs.y-3)), wxTE_RIGHT, vald_int);
+		wxDefaultPosition, FromDIP(wxSize(35, 20)), wxTE_RIGHT, vald_int);
 	m_scale_cmb = new wxComboBox(this, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(50, tbs.y)), 0, NULL, wxCB_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(100, 20)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> scale_list = { "nm", L"\u03BCm", "mm" };
 	m_scale_cmb->Append(scale_list);
 	m_scale_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnScaleText, this);
