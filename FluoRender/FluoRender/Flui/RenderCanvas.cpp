@@ -82,8 +82,10 @@ GLADapiproc MyGLGetProcAddress(const char* name) {
 
 #elif defined(__WXGTK__) // Linux
 #include <GL/glx.h>
-GLADapiproc MyGLGetProcAddress(const char* name) {
-	return (GLADapiproc)glXGetProcAddressARB((const GLubyte*)name);
+
+GLADapiproc MyGLGetProcAddress(const char* name)
+{
+    return (GLADapiproc)glXGetProcAddress((const GLubyte*)name);
 }
 
 #elif defined(__WXMAC__) // macOS
@@ -145,9 +147,7 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 			return;
 		}
 	}
-	SetCurrent(*m_glRC);
-
-	gladLoadGL(MyGLGetProcAddress);
+	//SetCurrent(*m_glRC);
 
 #ifdef _DEBUG
 	//example Pixel format descriptor detailing each part
@@ -327,9 +327,15 @@ void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
 
 void RenderCanvas::Draw()
 {
+	wxPaintDC dc(this);
 	SetCurrent(*m_glRC);
 
-	wxPaintDC dc(this);
+    static bool glad_init = false;
+    if (!glad_init)
+    {
+        int result = gladLoadGL(MyGLGetProcAddress);
+        glad_init = true;
+    }
 
 	auto view = m_renderview.lock();
 	assert(view);
