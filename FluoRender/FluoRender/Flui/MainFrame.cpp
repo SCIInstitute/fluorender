@@ -2260,6 +2260,7 @@ void MainFrame::StartupMaximize()
 	const auto& s = glbin_settings;
 
 	int chosenDisplay = wxNOT_FOUND;
+	bool chosenLandscape = true;
 
 	// ----------------------------
 	// 1. Try using saved rect first
@@ -2279,24 +2280,40 @@ void MainFrame::StartupMaximize()
 				s.m_mainframe_w,
 				s.m_mainframe_h);
 		}
+		if (chosenDisplay != wxNOT_FOUND)
+		{
+			wxDisplay d(chosenDisplay);
+			wxRect r = d.GetClientArea();
+			chosenDisplay = wxDisplay::GetFromRect(r);
+			chosenLandscape = r.width >= r.height;
+		}
 	}
 
 	// -----------------------------------
 	// 2. Fallback to saved display ID
 	// -----------------------------------
-	if (chosenDisplay == wxNOT_FOUND)
+	if (chosenDisplay == wxNOT_FOUND ||
+		!chosenLandscape)
 	{
 		if (s.m_mainframe_disp_id >= 0 &&
 			s.m_mainframe_disp_id < wxDisplay::GetCount())
 		{
 			chosenDisplay = s.m_mainframe_disp_id;
 		}
+		if (chosenDisplay != wxNOT_FOUND)
+		{
+			wxDisplay d(chosenDisplay);
+			wxRect r = d.GetClientArea();
+			chosenDisplay = wxDisplay::GetFromRect(r);
+			chosenLandscape = r.width >= r.height;
+		}
 	}
 
 	// -----------------------------------
 	// 3. Intelligent fallback selection
 	// -----------------------------------
-	if (chosenDisplay == wxNOT_FOUND)
+	if (chosenDisplay == wxNOT_FOUND ||
+		!chosenLandscape)
 	{
 		int bestDisplay = wxNOT_FOUND;
 		int bestX = INT_MAX;
@@ -2345,12 +2362,8 @@ void MainFrame::StartupMaximize()
 		wxDisplay d(chosenDisplay);
 		wxRect rect = d.GetClientArea();
 
-		// Only override position if we didn't already restore from rect
-		if (!(s.m_mainframe_w > 0 && s.m_mainframe_h > 0))
-		{
-			SetPosition(rect.GetTopLeft());
-			SetSize(rect.GetSize());
-		}
+		SetPosition(rect.GetTopLeft());
+		SetSize(rect.GetSize());
 	}
 
 	// -----------------------------------
