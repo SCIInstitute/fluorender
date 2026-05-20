@@ -35,6 +35,9 @@
 #define WINDOWS_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
+#ifdef __linux__
+#include <EGL/egl.h>
+#endif
 #include <algorithm>
 #include <cmath>
 #include <sstream>
@@ -92,6 +95,7 @@ namespace flvr
 	}
 
 	bool KernelProgram::init_ = false;
+	bool KernelProgram::interop_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
 	cl_command_queue KernelProgram::queue_ = 0;
@@ -257,18 +261,54 @@ namespace flvr
 
     #elif defined(__linux__)
 
-        GLXContext ctx = glXGetCurrentContext();
+        bool interop_ok = false;
+
+        // ---------- Try GLX ----------
+        GLXContext glx_ctx = glXGetCurrentContext();
         Display* display = glXGetCurrentDisplay();
-        if (!ctx || !display)
-            return;
 
-        properties[p++] = CL_GL_CONTEXT_KHR;
-        properties[p++] = (cl_context_properties)ctx;
-        properties[p++] = CL_GLX_DISPLAY_KHR;
-        properties[p++] = (cl_context_properties)display;
+        if (glx_ctx && display)
+        {
+            properties[p++] = CL_GL_CONTEXT_KHR;
+            properties[p++] = (cl_context_properties)glx_ctx;
 
-        properties[p++] = CL_CONTEXT_PLATFORM;
-        properties[p++] = (cl_context_properties)platform->id;
+            properties[p++] = CL_GLX_DISPLAY_KHR;
+            properties[p++] = (cl_context_properties)display;
+
+            properties[p++] = CL_CONTEXT_PLATFORM;
+            properties[p++] = (cl_context_properties)platform->id;
+
+            interop_ok = true;
+        }
+
+        // ---------- Try EGL (fallback) ----------
+        if (!interop_ok)
+        {
+            EGLContext egl_ctx = eglGetCurrentContext();
+            EGLDisplay egl_dpy = eglGetCurrentDisplay();
+
+            if (egl_ctx && egl_dpy)
+            {
+                properties[p++] = CL_GL_CONTEXT_KHR;
+                properties[p++] = (cl_context_properties)egl_ctx;
+
+                properties[p++] = CL_EGL_DISPLAY_KHR;
+                properties[p++] = (cl_context_properties)egl_dpy;
+
+                properties[p++] = CL_CONTEXT_PLATFORM;
+                properties[p++] = (cl_context_properties)platform->id;
+
+                interop_ok = true;
+            }
+        }
+
+        // ---------- No interop available ----------
+        if (!interop_ok)
+        {
+            // Fallback: pure OpenCL (no GL sharing)
+            properties[p++] = CL_CONTEXT_PLATFORM;
+            properties[p++] = (cl_context_properties)platform->id;
+        }
 
     #endif
 
@@ -304,8 +344,29 @@ namespace flvr
 
         // --- Create context ---
         context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+
         if (err != CL_SUCCESS)
+        {
+            // ---- Fallback: no GL interop ----
+            //cl_context_properties fallback_props[] = {
+            //    CL_CONTEXT_PLATFORM,
+            //    (cl_context_properties)platform->id,
+            //    0
+            //};
+
+            //context_ = clCreateContext(fallback_props, 1, &device_, NULL, NULL, &err);
+
+            //if (err != CL_SUCCESS)
+            //    return;
+
+            // Mark: no interop
+            interop_ = false;
             return;
+        }
+        else
+        {
+            interop_ = true;
+        }
 
         init_ = true;
 
