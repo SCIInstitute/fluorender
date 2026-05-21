@@ -821,7 +821,7 @@ namespace flvr
 			else
 			{
 				if (compression)
-					internal_format = GL_COMPRESSED_RGBA_BPTC_UNORM;
+					internal_format = GL_COMPRESSED_RED_RGTC1;
 				else
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
 						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?

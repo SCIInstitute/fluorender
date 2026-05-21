@@ -989,10 +989,9 @@ void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 	if (!tex)
 		return;
 
-#ifdef _DARWIN
+#ifdef __APPLE__
 	return;
-#endif
-
+#else
 	if (!b || !btex || !order)
 		return;
 
@@ -1110,6 +1109,7 @@ void VolumeRenderer::copy_mask_border(GLint btex, TextureBrick* b, int order)
 			}
 		}
 	}
+#endif
 }
 
 //calculation
