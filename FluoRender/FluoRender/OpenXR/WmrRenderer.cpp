@@ -27,7 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <glad/gl.h>
+#ifdef _WIN32
 #include <glad/wgl.h>
+#endif
 #include <WmrRenderer.h>
 #include <Framebuffer.h>
 #include <Global.h>
