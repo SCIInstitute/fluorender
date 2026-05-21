@@ -345,12 +345,12 @@ if(NOT WIN32)
 
         find_path(BZIP2_INCLUDE_DIR
             bzlib.h
-            PATHS "${BZIP2_ROOT}/include"
+            PATHS "${BZIP2_ROOT}"
             NO_DEFAULT_PATH)
 
         find_library(BZIP2_LIBRARY
-            bz2
-            PATHS "${BZIP2_ROOT}/lib"
+            libbz2_static.a
+            PATHS "${BZIP2_ROOT}/build"
             NO_DEFAULT_PATH)
 
         if(BZIP2_INCLUDE_DIR AND BZIP2_LIBRARY)
