@@ -594,10 +594,10 @@ std::string RenderView::GetOGLVersion()
 	return m_GLversion;
 }
 
-void RenderView::Init()
+bool RenderView::Init()
 {
 	if (m_initialized)
-		return;
+		return false;
 
 	flvr::ShaderProgram::init_shaders_supported();
 	flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
@@ -623,6 +623,8 @@ void RenderView::Init()
 	m_initialized = true;
 
 	glbin.getStopWatch(gstStopWatch)->start();
+
+	return true;
 }
 
 void RenderView::InitOpenXR()

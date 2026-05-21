@@ -109,8 +109,8 @@ namespace flvr
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
-	source_(source), program_(0),
-	kernel_idx_(-1), arg_idx_(-1)
+		source_(source), program_(0),
+		kernel_idx_(-1), arg_idx_(-1)
 	{
 	}
 
@@ -119,267 +119,267 @@ namespace flvr
 		destroy();
 	}
 
-    void KernelProgram::init_kernels_supported()
-    {
-        if (init_)
-            return;
+	void KernelProgram::init_kernels_supported()
+	{
+		if (init_)
+			return;
 
-        device_list_.clear();
-        cl_int err;
-        cl_uint platform_num;
+		device_list_.clear();
+		cl_int err;
+		cl_uint platform_num;
 
-        // --- Get platforms ---
-        err = clGetPlatformIDs(0, NULL, &platform_num);
-        if (err != CL_SUCCESS || platform_num == 0)
-            return;
+		// --- Get platforms ---
+		err = clGetPlatformIDs(0, NULL, &platform_num);
+		if (err != CL_SUCCESS || platform_num == 0)
+			return;
 
-        std::vector<cl_platform_id> platforms(platform_num);
-        err = clGetPlatformIDs(platform_num, platforms.data(), NULL);
-        if (err != CL_SUCCESS)
-            return;
+		std::vector<cl_platform_id> platforms(platform_num);
+		err = clGetPlatformIDs(platform_num, platforms.data(), NULL);
+		if (err != CL_SUCCESS)
+			return;
 
-        // --- Enumerate platforms/devices ---
-        size_t info_size;
-        for (cl_uint i = 0; i < platform_num; ++i)
-        {
-            device_list_.push_back(CLPlatform());
-            CLPlatform* platform = &(device_list_.back());
-            platform->id = platforms[i];
+		// --- Enumerate platforms/devices ---
+		size_t info_size;
+		for (cl_uint i = 0; i < platform_num; ++i)
+		{
+			device_list_.push_back(CLPlatform());
+			CLPlatform* platform = &(device_list_.back());
+			platform->id = platforms[i];
 
-            // platform vendor
-            clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
-            platform->vendor.resize(info_size);
-            clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &platform->vendor[0], NULL);
+			// platform vendor
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
+			platform->vendor.resize(info_size);
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &platform->vendor[0], NULL);
 
-            // platform name
-            clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
-            platform->name.resize(info_size);
-            clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &platform->name[0], NULL);
+			// platform name
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
+			platform->name.resize(info_size);
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &platform->name[0], NULL);
 
-            // --- Devices ---
-            cl_uint device_num = 0;
-            err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
-            if (err != CL_SUCCESS || device_num == 0)
-                continue;
+			// --- Devices ---
+			cl_uint device_num = 0;
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
+			if (err != CL_SUCCESS || device_num == 0)
+				continue;
 
-            std::vector<cl_device_id> devices(device_num);
-            err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices.data(), NULL);
-            if (err != CL_SUCCESS)
-                continue;
+			std::vector<cl_device_id> devices(device_num);
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices.data(), NULL);
+			if (err != CL_SUCCESS)
+				continue;
 
-            for (cl_uint j = 0; j < device_num; ++j)
-            {
-                platform->devices.push_back(CLDevice());
-                CLDevice* device = &(platform->devices.back());
-                device->id = devices[j];
+			for (cl_uint j = 0; j < device_num; ++j)
+			{
+				platform->devices.push_back(CLDevice());
+				CLDevice* device = &(platform->devices.back());
+				device->id = devices[j];
 
-                // vendor
-                clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
-                device->vendor.resize(info_size);
-                clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &device->vendor[0], NULL);
-                if (!device->vendor.empty() && device->vendor.back() == '\0')
-                    device->vendor.pop_back();
+				// vendor
+				clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
+				device->vendor.resize(info_size);
+				clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &device->vendor[0], NULL);
+				if (!device->vendor.empty() && device->vendor.back() == '\0')
+					device->vendor.pop_back();
 
-                // name
-                clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
-                device->name.resize(info_size);
-                clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &device->name[0], NULL);
-                if (!device->name.empty() && device->name.back() == '\0')
-                    device->name.pop_back();
+				// name
+				clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
+				device->name.resize(info_size);
+				clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &device->name[0], NULL);
+				if (!device->name.empty() && device->name.back() == '\0')
+					device->name.pop_back();
 
-                // version
-                clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
-                device->version.resize(info_size);
-                clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &device->version[0], NULL);
-                if (!device->version.empty() && device->version.back() == '\0')
-                    device->version.pop_back();
-            }
-        }
+				// version
+				clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
+				device->version.resize(info_size);
+				clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &device->version[0], NULL);
+				if (!device->version.empty() && device->version.back() == '\0')
+					device->version.pop_back();
+			}
+		}
 
-        if (device_list_.empty())
-            return;
+		if (device_list_.empty())
+			return;
 
-        // --- Select platform ---
-        if (platform_id_ < 0 || platform_id_ >= (int)device_list_.size())
-            platform_id_ = 0;
+		// --- Select platform ---
+		if (platform_id_ < 0 || platform_id_ >= (int)device_list_.size())
+			platform_id_ = 0;
 
-        CLPlatform* platform = &(device_list_[platform_id_]);
-        if (!platform || platform->devices.empty())
-            return;
+		CLPlatform* platform = &(device_list_[platform_id_]);
+		if (!platform || platform->devices.empty())
+			return;
 
-        // --- Select device ---
-        CLDevice* device = nullptr;
-        if (device_id_ < 0 || device_id_ >= (int)platform->devices.size())
-            device = &(platform->devices[0]);
-        else
-            device = &(platform->devices[device_id_]);
+		// --- Select device ---
+		CLDevice* device = nullptr;
+		if (device_id_ < 0 || device_id_ >= (int)platform->devices.size())
+			device = &(platform->devices[0]);
+		else
+			device = &(platform->devices[device_id_]);
 
-        if (!device)
-            return;
+		if (!device)
+			return;
 
-        device_ = device->id;
+		device_ = device->id;
 
-        // --- Device name ---
-        device_name_ = platform->name;
-        if (!device_name_.empty())
-            device_name_.back() = ';';
-        device_name_ += " " + device->name;
+		// --- Device name ---
+		device_name_ = platform->name;
+		if (!device_name_.empty())
+			device_name_.back() = ';';
+		device_name_ += " " + device->name;
 
-        // --- Build GL-CL interop properties (robust, no index hacks) ---
-        cl_context_properties properties[7];
-        int p = 0;
+		// --- Build GL-CL interop properties (robust, no index hacks) ---
+		cl_context_properties properties[7];
+		int p = 0;
 
-    #ifdef _WIN32
+#ifdef _WIN32
 
-        HGLRC gl_ctx = wglGetCurrentContext();
-        HDC   hdc    = wglGetCurrentDC();
-        if (!gl_ctx || !hdc)
-            return;
+		HGLRC gl_ctx = wglGetCurrentContext();
+		HDC   hdc = wglGetCurrentDC();
+		if (!gl_ctx || !hdc)
+			return;
 
-        properties[p++] = CL_GL_CONTEXT_KHR;
-        properties[p++] = (cl_context_properties)gl_ctx;
-        properties[p++] = CL_WGL_HDC_KHR;
-        properties[p++] = (cl_context_properties)hdc;
+		properties[p++] = CL_GL_CONTEXT_KHR;
+		properties[p++] = (cl_context_properties)gl_ctx;
+		properties[p++] = CL_WGL_HDC_KHR;
+		properties[p++] = (cl_context_properties)hdc;
 
-        properties[p++] = CL_CONTEXT_PLATFORM;
-        properties[p++] = (cl_context_properties)platform->id;
+		properties[p++] = CL_CONTEXT_PLATFORM;
+		properties[p++] = (cl_context_properties)platform->id;
 
-    #elif defined(__APPLE__)
+#elif defined(__APPLE__)
 
-        CGLContextObj ctx = CGLGetCurrentContext();
-        if (!ctx)
-            return;
+		CGLContextObj ctx = CGLGetCurrentContext();
+		if (!ctx)
+			return;
 
-        CGLShareGroupObj share = CGLGetShareGroup(ctx);
+		CGLShareGroupObj share = CGLGetShareGroup(ctx);
 
-        properties[p++] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
-        properties[p++] = (cl_context_properties)share;
+		properties[p++] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
+		properties[p++] = (cl_context_properties)share;
 
-        // Optional (safe on newer systems)
-        properties[p++] = CL_CONTEXT_PLATFORM;
-        properties[p++] = (cl_context_properties)platform->id;
+		// Optional (safe on newer systems)
+		properties[p++] = CL_CONTEXT_PLATFORM;
+		properties[p++] = (cl_context_properties)platform->id;
 
-    #elif defined(__linux__)
+#elif defined(__linux__)
 
-        bool interop_ok = false;
+		bool interop_ok = false;
 
-        // ---------- Try GLX ----------
-        GLXContext glx_ctx = glXGetCurrentContext();
-        Display* display = glXGetCurrentDisplay();
+		// ---------- Try GLX ----------
+		GLXContext glx_ctx = glXGetCurrentContext();
+		Display* display = glXGetCurrentDisplay();
 
-        if (glx_ctx && display)
-        {
-            properties[p++] = CL_GL_CONTEXT_KHR;
-            properties[p++] = (cl_context_properties)glx_ctx;
+		if (glx_ctx && display)
+		{
+			properties[p++] = CL_GL_CONTEXT_KHR;
+			properties[p++] = (cl_context_properties)glx_ctx;
 
-            properties[p++] = CL_GLX_DISPLAY_KHR;
-            properties[p++] = (cl_context_properties)display;
+			properties[p++] = CL_GLX_DISPLAY_KHR;
+			properties[p++] = (cl_context_properties)display;
 
-            properties[p++] = CL_CONTEXT_PLATFORM;
-            properties[p++] = (cl_context_properties)platform->id;
+			properties[p++] = CL_CONTEXT_PLATFORM;
+			properties[p++] = (cl_context_properties)platform->id;
 
-            interop_ok = true;
-        }
+			interop_ok = true;
+		}
 
-        // ---------- Try EGL (fallback) ----------
-        if (!interop_ok)
-        {
-            EGLContext egl_ctx = eglGetCurrentContext();
-            EGLDisplay egl_dpy = eglGetCurrentDisplay();
+		// ---------- Try EGL (fallback) ----------
+		if (!interop_ok)
+		{
+			EGLContext egl_ctx = eglGetCurrentContext();
+			EGLDisplay egl_dpy = eglGetCurrentDisplay();
 
-            if (egl_ctx && egl_dpy)
-            {
-                properties[p++] = CL_GL_CONTEXT_KHR;
-                properties[p++] = (cl_context_properties)egl_ctx;
+			if (egl_ctx && egl_dpy)
+			{
+				properties[p++] = CL_GL_CONTEXT_KHR;
+				properties[p++] = (cl_context_properties)egl_ctx;
 
-                properties[p++] = CL_EGL_DISPLAY_KHR;
-                properties[p++] = (cl_context_properties)egl_dpy;
+				properties[p++] = CL_EGL_DISPLAY_KHR;
+				properties[p++] = (cl_context_properties)egl_dpy;
 
-                properties[p++] = CL_CONTEXT_PLATFORM;
-                properties[p++] = (cl_context_properties)platform->id;
+				properties[p++] = CL_CONTEXT_PLATFORM;
+				properties[p++] = (cl_context_properties)platform->id;
 
-                interop_ok = true;
-            }
-        }
+				interop_ok = true;
+			}
+		}
 
-        // ---------- No interop available ----------
-        if (!interop_ok)
-        {
-            // Fallback: pure OpenCL (no GL sharing)
-            properties[p++] = CL_CONTEXT_PLATFORM;
-            properties[p++] = (cl_context_properties)platform->id;
-        }
+		// ---------- No interop available ----------
+		if (!interop_ok)
+		{
+			// Fallback: pure OpenCL (no GL sharing)
+			properties[p++] = CL_CONTEXT_PLATFORM;
+			properties[p++] = (cl_context_properties)platform->id;
+		}
 
-    #endif
+#endif
 
-        properties[p++] = 0; // terminator
+		properties[p++] = 0; // terminator
 
-        // --- Linux: ensure device matches GL context ---
-    #ifdef __linux__
-        typedef cl_int (*clGetGLContextInfoKHR_fn)(
-            const cl_context_properties*,
-            cl_gl_context_info,
-            size_t,
-            void*,
-            size_t*);
+		// --- Linux: ensure device matches GL context ---
+#ifdef __linux__
+		typedef cl_int(*clGetGLContextInfoKHR_fn)(
+			const cl_context_properties*,
+			cl_gl_context_info,
+			size_t,
+			void*,
+			size_t*);
 
-        auto clGetGLContextInfoKHR =
-            (clGetGLContextInfoKHR_fn)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
+		auto clGetGLContextInfoKHR =
+			(clGetGLContextInfoKHR_fn)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
 
-        if (clGetGLContextInfoKHR)
-        {
-            cl_device_id gl_device = nullptr;
+		if (clGetGLContextInfoKHR)
+		{
+			cl_device_id gl_device = nullptr;
 
-            clGetGLContextInfoKHR(
-                properties,
-                CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
-                sizeof(cl_device_id),
-                &gl_device,
-                nullptr);
+			clGetGLContextInfoKHR(
+				properties,
+				CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
+				sizeof(cl_device_id),
+				&gl_device,
+				nullptr);
 
-            if (gl_device)
-                device_ = gl_device;
-        }
-    #endif
+			if (gl_device)
+				device_ = gl_device;
+		}
+#endif
 
-        // --- Create context ---
-        context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+		// --- Create context ---
+		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
 
-        if (err != CL_SUCCESS)
-        {
-            // ---- Fallback: no GL interop ----
-            //cl_context_properties fallback_props[] = {
-            //    CL_CONTEXT_PLATFORM,
-            //    (cl_context_properties)platform->id,
-            //    0
-            //};
+		if (err != CL_SUCCESS)
+		{
+			// ---- Fallback: no GL interop ----
+			//cl_context_properties fallback_props[] = {
+			//    CL_CONTEXT_PLATFORM,
+			//    (cl_context_properties)platform->id,
+			//    0
+			//};
 
-            //context_ = clCreateContext(fallback_props, 1, &device_, NULL, NULL, &err);
+			//context_ = clCreateContext(fallback_props, 1, &device_, NULL, NULL, &err);
 
-            //if (err != CL_SUCCESS)
-            //    return;
+			//if (err != CL_SUCCESS)
+			//    return;
 
-            // Mark: no interop
-            interop_ = false;
-            return;
-        }
-        else
-        {
-            interop_ = true;
-        }
+			// Mark: no interop
+			interop_ = false;
+			return;
+		}
+		else
+		{
+			interop_ = true;
+		}
 
-        init_ = true;
+		init_ = true;
 
-        // --- Extensions ---
-        clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
-        std::string extensions(info_size, '\0');
-        clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
+		// --- Extensions ---
+		clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
+		std::string extensions(info_size, '\0');
+		clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
 
-        float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
+		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
 
-        // --- Other flags ---
-        need_clear_ = get_need_clear(device);
-    }
+		// --- Other flags ---
+		need_clear_ = get_need_clear(device);
+	}
 
 	bool KernelProgram::init()
 	{
@@ -461,14 +461,14 @@ namespace flvr
 
 	//create a kernel in the program
 	//return kernel index; -1 unsuccessful
-	int KernelProgram::createKernel(const std::string &name)
+	int KernelProgram::createKernel(const std::string& name)
 	{
 		cl_int err;
 
 		//build program
 		if (!program_)
 		{
-			const char *c_source[1];
+			const char* c_source[1];
 			c_source[0] = source_.c_str();
 			size_t program_size = source_.size();
 			program_ = clCreateProgramWithSource(context_, 1,
@@ -480,14 +480,14 @@ namespace flvr
 			info_.clear();
 			if (err != CL_SUCCESS)
 			{
-				char *program_log;
+				char* program_log;
 				size_t log_size;
 				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
 					0, NULL, &log_size);
-				program_log = new char[log_size+1];
+				program_log = new char[log_size + 1];
 				program_log[log_size] = '\0';
 				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
-					log_size+1, program_log, NULL);
+					log_size + 1, program_log, NULL);
 				info_ = program_log;
 				//DBGPRINT(L"clBuildProgram error:\t%d\n", err);
 				delete[] program_log;
@@ -526,7 +526,7 @@ namespace flvr
 		return result;
 	}
 
-	int KernelProgram::findKernel(const std::string &name)
+	int KernelProgram::findKernel(const std::string& name)
 	{
 		for (size_t i = 0; i < kernels_.size(); ++i)
 		{
@@ -618,7 +618,7 @@ namespace flvr
 		return result;
 	}
 
-	bool KernelProgram::executeKernel(std::string &name, cl_uint dim, size_t *global_size, size_t *local_size)
+	bool KernelProgram::executeKernel(std::string& name, cl_uint dim, size_t* global_size, size_t* local_size)
 	{
 		int index = findKernel(name);
 		return executeKernel(index, dim, global_size, local_size);
@@ -1201,7 +1201,7 @@ namespace flvr
 
 	bool KernelProgram::get_group_size(int index,
 		unsigned int nx, unsigned int ny, unsigned int nz,
-		GroupSize &ksize)
+		GroupSize& ksize)
 	{
 		size_t ng;
 		if (!getWorkGroupSize(index, &ng))
@@ -1235,9 +1235,9 @@ namespace flvr
 		ksize.ngx = optimize_group_size_xy(nx, targetx);
 		ksize.ngy = optimize_group_size_xy(ny, targety);
 
-		ksize.gsx = nx / ksize.ngx + (nx%ksize.ngx ? 1 : 0);
-		ksize.gsy = ny / ksize.ngy + (ny%ksize.ngy ? 1 : 0);
-		ksize.gsz = nz / ksize.ngz + (nz%ksize.ngz ? 1 : 0);
+		ksize.gsx = nx / ksize.ngx + (nx % ksize.ngx ? 1 : 0);
+		ksize.gsy = ny / ksize.ngy + (ny % ksize.ngy ? 1 : 0);
+		ksize.gsz = nz / ksize.ngz + (nz % ksize.ngz ? 1 : 0);
 		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
 		ksize.gsxy = ksize.gsx * ksize.gsy;
 
@@ -1246,7 +1246,7 @@ namespace flvr
 
 	bool KernelProgram::get_group_size2(int index,
 		unsigned int nx, unsigned int ny, unsigned int nz,
-		GroupSize &ksize)
+		GroupSize& ksize)
 	{
 		size_t ng;
 		if (!getWorkGroupSize(index, &ng))
@@ -1265,9 +1265,9 @@ namespace flvr
 		ksize.ngx = optimize_group_size_xy(nx, targetx);
 		ksize.ngy = optimize_group_size_xy(ny, targety);
 
-		ksize.gsx = nx / ksize.ngx + (nx%ksize.ngx ? 1 : 0);
-		ksize.gsy = ny / ksize.ngy + (ny%ksize.ngy ? 1 : 0);
-		ksize.gsz = nz / ksize.ngz + (nz%ksize.ngz ? 1 : 0);
+		ksize.gsx = nx / ksize.ngx + (nx % ksize.ngx ? 1 : 0);
+		ksize.gsy = ny / ksize.ngy + (ny % ksize.ngy ? 1 : 0);
+		ksize.gsz = nz / ksize.ngz + (nz % ksize.ngz ? 1 : 0);
 		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
 		ksize.gsxy = ksize.gsx * ksize.gsy;
 

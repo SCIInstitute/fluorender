@@ -85,7 +85,7 @@ GLADapiproc MyGLGetProcAddress(const char* name) {
 
 GLADapiproc MyGLGetProcAddress(const char* name)
 {
-    return (GLADapiproc)glXGetProcAddress((const GLubyte*)name);
+	return (GLADapiproc)glXGetProcAddress((const GLubyte*)name);
 }
 
 #elif defined(__WXMAC__) // macOS
@@ -330,19 +330,22 @@ void RenderCanvas::Draw()
 	wxPaintDC dc(this);
 	SetCurrent(*m_glRC);
 
-    static bool glad_init = false;
-    if (!glad_init)
-    {
-        int result = gladLoadGL(MyGLGetProcAddress);
-        glad_init = true;
-    }
+	static bool glad_init = false;
+	if (!glad_init)
+	{
+		int result = gladLoadGL(MyGLGetProcAddress);
+		glad_init = true;
+	}
 
 	auto view = m_renderview.lock();
 	assert(view);
-	view->Init();
+	bool initialized = view->Init();
 	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(view->Id());
 	assert(scheduler);
 	scheduler->performDraw();
+
+	if (initialized)
+		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
 }
 
 void RenderCanvas::Init()

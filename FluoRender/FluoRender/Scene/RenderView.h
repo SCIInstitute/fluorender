@@ -139,7 +139,7 @@ public:
 	std::string GetOGLVersion();
 
 	//initialization
-	void Init();
+	bool Init();
 
 	void InitOpenXR();
 	void InitLookingGlass();

@@ -444,14 +444,14 @@ void KeyListCtrl::OnMouseScroll(wxMouseEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
+wxWindow* MoviePanel::CreateSimplePage(wxWindow* parent)
 {
-	wxScrolledWindow *page = new wxScrolledWindow(parent);
+	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
-	wxStaticText *st = 0, *st2 = 0;
+	wxStaticText* st = 0, * st2 = 0;
 	//sizers
 
 	//rotations
@@ -543,7 +543,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	m_seq_inc_btn->SetToolTip("Increase the time point number by 1");
 	st2 = new wxStaticText(page, wxID_ANY, "of: ");
 	m_seq_total_text = new wxTextCtrl(page, wxID_ANY, "0",
-		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT|wxTE_READONLY);
+		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT | wxTE_READONLY);
 	sizer7->Add(20, 20);
 	sizer7->Add(st, 0, wxALIGN_CENTER);
 	sizer7->Add(10, 10);
@@ -577,7 +577,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow *parent)
 	return page;
 }
 
-wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
+wxWindow* MoviePanel::CreateKeyframePage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
@@ -686,11 +686,11 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow *parent)
 	return page;
 }
 
-wxWindow* MoviePanel::CreateTemplatePage(wxWindow *parent)
+wxWindow* MoviePanel::CreateTemplatePage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
-	wxStaticText * st = new wxStaticText(page, 0, "Double-click a preset to generate keyframes");
+	wxStaticText* st = new wxStaticText(page, 0, "Double-click a preset to generate keyframes");
 
 	//list of options
 	m_auto_key_list = new wxListCtrl(page, wxID_ANY,
@@ -710,7 +710,7 @@ wxWindow* MoviePanel::CreateTemplatePage(wxWindow *parent)
 	{
 		i++;
 		str = wxString::Format("%d", i);
-		tmp = m_auto_key_list->InsertItem(i-1, str, 0);
+		tmp = m_auto_key_list->InsertItem(i - 1, str, 0);
 		m_auto_key_list->SetItem(tmp, 1, it);
 	}
 	m_auto_key_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
@@ -738,13 +738,13 @@ wxWindow* MoviePanel::CreateTemplatePage(wxWindow *parent)
 
 }
 
-wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateCropPage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
-	wxStaticText *st = 0;
+	wxStaticText* st = 0;
 
 	//check
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
@@ -918,7 +918,7 @@ wxWindow* MoviePanel::CreateCropPage(wxWindow *parent)
 
 }
 
-wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
+wxWindow* MoviePanel::CreateScriptPage(wxWindow* parent)
 {
 	wxScrolledWindow* page = new wxScrolledWindow(parent);
 	//script
@@ -933,7 +933,7 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 	sizer_v->Add(5, 5);
 
 	//browse button
-	wxBoxSizer *sizer_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Script File:",
 		wxDefaultPosition, FromDIP(wxSize(80, -1)));
 	m_script_file_btn = new wxButton(page, wxID_ANY, "Browse...",
@@ -944,7 +944,7 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow *parent)
 	sizer_1->Add(m_script_file_btn, 0, wxALIGN_CENTER);
 
 	//file name
-	wxBoxSizer *sizer_2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_script_file_text = new wxTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
 	m_script_clear_btn = new wxButton(page, wxID_ANY, "X",
@@ -1012,7 +1012,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_notebook->AddPage(CreateScriptPage(m_notebook), UITEXT_NBPG4_0);
 	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MoviePanel::OnNotebookPage, this);
 
-	wxStaticText* st = 0, *st2 = 0;
+	wxStaticText* st = 0, * st2 = 0;
 	//common settings
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	//FPS
@@ -1068,156 +1068,156 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	sizer2->Add(m_progress_sldr, 1, wxALIGN_CENTER);
 	sizer2->Add(5, 5);
 
-    wxSize ts = FromDIP(wxSize(50, -1));
-    wxFont f;
+	wxSize ts = FromDIP(wxSize(50, -1));
+	wxFont f;
 
-    // =====================
-    // Create controls
-    // =====================
+	// =====================
+	// Create controls
+	// =====================
 
-    // --- buttons (create first so we can size them consistently)
-    m_start_btn = new wxButton(this, wxID_ANY);
-    m_start_btn->SetBitmap(wxGetBitmap(start));
+	// --- buttons (create first so we can size them consistently)
+	m_start_btn = new wxButton(this, wxID_ANY);
+	m_start_btn->SetBitmap(wxGetBitmap(start));
 
-    wxSize best = m_start_btn->GetBestSize();
-    int h = best.GetHeight();
+	wxSize best = m_start_btn->GetBestSize();
+	int h = best.GetHeight();
 
-    // helper lambda to enforce square buttons
-    auto MakeSquare = [&](wxWindow* w)
-    {
-        w->SetMinSize(wxSize(h, h));
-        w->SetMaxSize(wxSize(h, h));
-    };
+	// helper lambda to enforce square buttons
+	auto MakeSquare = [&](wxWindow* w)
+		{
+			w->SetMinSize(wxSize(h, h));
+			w->SetMaxSize(wxSize(h, h));
+		};
 
-    MakeSquare(m_start_btn);
+	MakeSquare(m_start_btn);
 
-    // --- text controls
-    m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
-        wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
+	// --- text controls
+	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
+		wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
 
-    f = m_start_frame_text->GetFont();
-    f.MakeLarger();
-    m_start_frame_text->SetFont(f);
+	f = m_start_frame_text->GetFont();
+	f.MakeLarger();
+	m_start_frame_text->SetFont(f);
 
-    m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
-        wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
-    m_end_frame_text->SetFont(f);
+	m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
+		wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
+	m_end_frame_text->SetFont(f);
 
-    m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-        wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
-    m_cur_frame_text->SetFont(f);
+	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
+	m_cur_frame_text->SetFont(f);
 
-    m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
-        wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
-    m_full_frame_text->SetFont(f);
+	m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
+	m_full_frame_text->SetFont(f);
 
-    // --- remaining buttons
-    m_end_btn = new wxButton(this, wxID_ANY);
-    m_end_btn->SetBitmap(wxGetBitmap(end));
-    MakeSquare(m_end_btn);
+	// --- remaining buttons
+	m_end_btn = new wxButton(this, wxID_ANY);
+	m_end_btn->SetBitmap(wxGetBitmap(end));
+	MakeSquare(m_end_btn);
 
-    m_dec_time_btn = new wxButton(this, wxID_ANY);
-    m_dec_time_btn->SetBitmap(wxGetBitmap(step_back));
-    MakeSquare(m_dec_time_btn);
+	m_dec_time_btn = new wxButton(this, wxID_ANY);
+	m_dec_time_btn->SetBitmap(wxGetBitmap(step_back));
+	MakeSquare(m_dec_time_btn);
 
-    m_inc_time_btn = new wxButton(this, wxID_ANY);
-    m_inc_time_btn->SetBitmap(wxGetBitmap(step_forward));
-    MakeSquare(m_inc_time_btn);
+	m_inc_time_btn = new wxButton(this, wxID_ANY);
+	m_inc_time_btn->SetBitmap(wxGetBitmap(step_forward));
+	MakeSquare(m_inc_time_btn);
 
-    // --- playback controls
-    m_rewind_btn = new wxButton(this, wxID_ANY);
-    m_rewind_btn->SetBitmap(wxGetBitmap(rewind));
-    MakeSquare(m_rewind_btn);
+	// --- playback controls
+	m_rewind_btn = new wxButton(this, wxID_ANY);
+	m_rewind_btn->SetBitmap(wxGetBitmap(rewind));
+	MakeSquare(m_rewind_btn);
 
-    m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "");
-    m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
-    MakeSquare(m_play_inv_btn);
+	m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "");
+	m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
+	MakeSquare(m_play_inv_btn);
 
-    m_play_btn = new wxToggleButton(this, wxID_ANY, "");
-    m_play_btn->SetBitmap(wxGetBitmap(play));
-    MakeSquare(m_play_btn);
+	m_play_btn = new wxToggleButton(this, wxID_ANY, "");
+	m_play_btn->SetBitmap(wxGetBitmap(play));
+	MakeSquare(m_play_btn);
 
-    m_forward_btn = new wxButton(this, wxID_ANY);
-    m_forward_btn->SetBitmap(wxGetBitmap(forward));
-    MakeSquare(m_forward_btn);
+	m_forward_btn = new wxButton(this, wxID_ANY);
+	m_forward_btn->SetBitmap(wxGetBitmap(forward));
+	MakeSquare(m_forward_btn);
 
-    m_loop_btn = new wxToggleButton(this, wxID_ANY, "");
-    m_loop_btn->SetBitmap(wxGetBitmap(loop));
-    MakeSquare(m_loop_btn);
+	m_loop_btn = new wxToggleButton(this, wxID_ANY, "");
+	m_loop_btn->SetBitmap(wxGetBitmap(loop));
+	MakeSquare(m_loop_btn);
 
-    // --- right-side controls
-    m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
-        wxDefaultPosition, ts, wxTE_RIGHT);
-    m_progress_text->SetFont(f);
+	// --- right-side controls
+	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+		wxDefaultPosition, ts, wxTE_RIGHT);
+	m_progress_text->SetFont(f);
 
-    st = new wxStaticText(this, wxID_ANY, "Sec.",
-        wxDefaultPosition);
+	st = new wxStaticText(this, wxID_ANY, "Sec.",
+		wxDefaultPosition);
 
-    m_save_btn = new wxButton(this, wxID_ANY);
-    m_save_btn->SetBitmap(wxGetBitmap(save));
-    MakeSquare(m_save_btn);
+	m_save_btn = new wxButton(this, wxID_ANY);
+	m_save_btn->SetBitmap(wxGetBitmap(save));
+	MakeSquare(m_save_btn);
 
-    // =====================
-    // Sizer flags (consistent spacing)
-    // =====================
-    wxSizerFlags center = wxSizerFlags(0)
-        .Align(wxALIGN_CENTER_VERTICAL)
-        .Border(wxRIGHT, FromDIP(3));
+	// =====================
+	// Sizer flags (consistent spacing)
+	// =====================
+	wxSizerFlags center = wxSizerFlags(0)
+		.Align(wxALIGN_CENTER_VERTICAL)
+		.Border(wxRIGHT, FromDIP(3));
 
-    // =====================
-    // Row 1 (time range)
-    // =====================
-    wxBoxSizer* group1 = new wxBoxSizer(wxHORIZONTAL);
-    group1->Add(m_start_btn, center);
-    group1->Add(m_start_frame_text, center);
-    group1->Add(m_end_frame_text, center);
-    group1->Add(m_end_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+	// =====================
+	// Row 1 (time range)
+	// =====================
+	wxBoxSizer* group1 = new wxBoxSizer(wxHORIZONTAL);
+	group1->Add(m_start_btn, center);
+	group1->Add(m_start_frame_text, center);
+	group1->Add(m_end_frame_text, center);
+	group1->Add(m_end_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
 
-    wxBoxSizer* group2 = new wxBoxSizer(wxHORIZONTAL);
-    group2->Add(m_dec_time_btn, center);
-    group2->Add(m_cur_frame_text, center);
-    group2->Add(m_inc_time_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+	wxBoxSizer* group2 = new wxBoxSizer(wxHORIZONTAL);
+	group2->Add(m_dec_time_btn, center);
+	group2->Add(m_cur_frame_text, center);
+	group2->Add(m_inc_time_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
 
-    wxBoxSizer* group3 = new wxBoxSizer(wxHORIZONTAL);
-    group3->Add(m_full_frame_text, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+	wxBoxSizer* group3 = new wxBoxSizer(wxHORIZONTAL);
+	group3->Add(m_full_frame_text, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
 
-    wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-    sizer3->AddStretchSpacer(2);
-    sizer3->Add(group1, 0, wxALIGN_CENTER_VERTICAL);
-    sizer3->AddStretchSpacer(1);
-    sizer3->Add(group2, 0, wxALIGN_CENTER_VERTICAL);
-    sizer3->AddStretchSpacer(2);
-    sizer3->Add(group3, 0, wxALIGN_CENTER_VERTICAL);
-    sizer3->AddSpacer(FromDIP(5));
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	sizer3->AddStretchSpacer(2);
+	sizer3->Add(group1, 0, wxALIGN_CENTER_VERTICAL);
+	sizer3->AddStretchSpacer(1);
+	sizer3->Add(group2, 0, wxALIGN_CENTER_VERTICAL);
+	sizer3->AddStretchSpacer(2);
+	sizer3->Add(group3, 0, wxALIGN_CENTER_VERTICAL);
+	sizer3->AddSpacer(FromDIP(5));
 
-    // =====================
-    // Row 2 (playback)
-    // =====================
-    wxBoxSizer* playback = new wxBoxSizer(wxHORIZONTAL);
-    playback->Add(m_rewind_btn, center);
-    playback->Add(m_play_inv_btn, center);
-    playback->Add(m_play_btn, center);
-    playback->Add(m_forward_btn, center);
-    playback->Add(m_loop_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+	// =====================
+	// Row 2 (playback)
+	// =====================
+	wxBoxSizer* playback = new wxBoxSizer(wxHORIZONTAL);
+	playback->Add(m_rewind_btn, center);
+	playback->Add(m_play_inv_btn, center);
+	playback->Add(m_play_btn, center);
+	playback->Add(m_forward_btn, center);
+	playback->Add(m_loop_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
 
-    wxBoxSizer* timegroup = new wxBoxSizer(wxHORIZONTAL);
-    timegroup->Add(m_progress_text, center);
-    timegroup->Add(st, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+	wxBoxSizer* timegroup = new wxBoxSizer(wxHORIZONTAL);
+	timegroup->Add(m_progress_text, center);
+	timegroup->Add(st, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
 
-    wxBoxSizer* savegroup = new wxBoxSizer(wxHORIZONTAL);
-    savegroup->Add(m_save_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
+	wxBoxSizer* savegroup = new wxBoxSizer(wxHORIZONTAL);
+	savegroup->Add(m_save_btn, wxSizerFlags(0).Align(wxALIGN_CENTER_VERTICAL));
 
-    wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
-    sizer4->AddStretchSpacer(2);
-    sizer4->Add(playback, 0, wxALIGN_CENTER_VERTICAL);
-    sizer4->AddStretchSpacer(1);
-    sizer4->Add(timegroup, 0, wxALIGN_CENTER_VERTICAL);
-    sizer4->AddStretchSpacer(2);
-    sizer4->Add(savegroup, 0, wxALIGN_CENTER_VERTICAL);
-    sizer4->AddSpacer(FromDIP(5));
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	sizer4->AddStretchSpacer(2);
+	sizer4->Add(playback, 0, wxALIGN_CENTER_VERTICAL);
+	sizer4->AddStretchSpacer(1);
+	sizer4->Add(timegroup, 0, wxALIGN_CENTER_VERTICAL);
+	sizer4->AddStretchSpacer(2);
+	sizer4->Add(savegroup, 0, wxALIGN_CENTER_VERTICAL);
+	sizer4->AddSpacer(FromDIP(5));
 
 	//sizer
-	wxBoxSizer *sizerv = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 	sizerv->Add(sizer1, 0, wxEXPAND);
 	sizerv->Add(5, 5);
@@ -2012,7 +2012,7 @@ void MoviePanel::OnAct(wxListEvent& event)
 	RenderView* view = glbin_moviemaker.GetView();
 	if (view)
 		view->SetParams(time);
-	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect},
+	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect },
 		{ glbin_current.GetViewId() });
 }
 
@@ -2299,7 +2299,7 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 size_t MoviePanel::GetScriptFiles(std::vector<std::wstring>& list)
 {
 	std::filesystem::path p = GetUserSettingsRoot();
-	p /=  "Scripts";
+	p /= "Scripts";
 	// Iterate over the files in the "Scripts" directory
 	for (const auto& entry : std::filesystem::directory_iterator(p))
 	{
@@ -2486,9 +2486,9 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 #ifdef _DARWIN
 	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
 #elifdef __linux__
-    panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
+	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
-	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
+	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
 		wxVERTICAL, panel, "Additional Options");
 
 	wxStaticText* mov_note = new wxStaticText(panel, wxID_ANY,
@@ -2510,7 +2510,7 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	}
 
 	//dpi
-	wxBoxSizer *line1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* line1 = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText* st = new wxStaticText(panel, wxID_ANY, "DPI: ",
 		wxDefaultPosition, wxDefaultSize);
 	wxIntegerValidator<unsigned int> vald_int;
@@ -2552,21 +2552,21 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 
 	//compressed TIFF
 	wxBoxSizer* line2 = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *tiffopts = new wxStaticText(panel, wxID_ANY, "Image Sequence Options:",
+	wxStaticText* tiffopts = new wxStaticText(panel, wxID_ANY, "Image Sequence Options:",
 		wxDefaultPosition, wxDefaultSize);
-	wxCheckBox *ch1 = new wxCheckBox(panel, wxID_ANY,
+	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_ANY,
 		"Compress to save space");
 	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
 	if (ch1)
 		ch1->SetValue(glbin_settings.m_save_compress);
-	wxCheckBox *ch2 = new wxCheckBox(panel, wxID_ANY,
+	wxCheckBox* ch2 = new wxCheckBox(panel, wxID_ANY,
 		"Save alpha");
 	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
 	if (ch2)
 		ch2->SetValue(glbin_settings.m_save_alpha);
-	wxCheckBox *ch3 = new wxCheckBox(panel, wxID_ANY,
+	wxCheckBox* ch3 = new wxCheckBox(panel, wxID_ANY,
 		"Save float channel");
 	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
 		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
@@ -2583,17 +2583,17 @@ wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
 	// movie quality
 	wxBoxSizer* line3 = new wxBoxSizer(wxHORIZONTAL);
 	//bitrate
-	wxStaticText *MOVopts = new wxStaticText(panel, wxID_ANY, "Movie Options:",
+	wxStaticText* MOVopts = new wxStaticText(panel, wxID_ANY, "Movie Options:",
 		wxDefaultPosition, wxDefaultSize);
-	wxTextCtrl *bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
+	wxTextCtrl* bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
 		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
 	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
 		wxCommandEventHandler(MoviePanel::OnMovieQuality), NULL, panel);
 	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
 		wxDefaultPosition, wxDefaultSize);
-	wxStaticText *st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
+	wxStaticText* st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
 		wxDefaultPosition, wxDefaultSize);
-	wxStaticText *st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
+	wxStaticText* st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
 		wxDefaultPosition, wxDefaultSize);
 	wxTextCtrl* tx_estimate = new wxTextCtrl(panel, ID_MOV_ESTIMATE_TEXT, "2.5",
 		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
