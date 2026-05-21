@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <glad/gl.h>
+#include <fl_gl.h>
 #include <TextureRenderer.h>
 #include <Global.h>
 #include <GlobalStates.h>

@@ -26,7 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <glad/gl.h>
+#include <fl_gl.h>
 #include <RenderCanvas.h>
 #include <GLAttribProvider.h>
 #include <Global.h>
@@ -89,10 +89,10 @@ GLADapiproc MyGLGetProcAddress(const char* name)
 }
 
 #elif defined(__WXMAC__) // macOS
-#include <dlfcn.h>
-GLADapiproc MyGLGetProcAddress(const char* name) {
-	return (GLADapiproc)dlsym(RTLD_DEFAULT, name);
-}
+//#include <dlfcn.h>
+//GLADapiproc MyGLGetProcAddress(const char* name) {
+//	return (GLADapiproc)dlsym(RTLD_DEFAULT, name);
+//}
 #endif
 
 RenderCanvas::RenderCanvas(MainFrame* frame,
@@ -330,12 +330,16 @@ void RenderCanvas::Draw()
 	wxPaintDC dc(this);
 	SetCurrent(*m_glRC);
 
+#ifdef __APPLE__
+
+#else
 	static bool glad_init = false;
 	if (!glad_init)
 	{
 		int result = gladLoadGL(MyGLGetProcAddress);
-		glad_init = true;
+		glad_init = result > 0;
 	}
+#endif
 
 	auto view = m_renderview.lock();
 	assert(view);

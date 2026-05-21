@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <glad/gl.h>
+#include <fl_gl.h>
 #include <VolumeRenderer.h>
 #include <Global.h>
 #include <Names.h>

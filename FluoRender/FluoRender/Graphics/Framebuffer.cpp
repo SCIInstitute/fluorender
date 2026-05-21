@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <glad/gl.h>
+#include <fl_gl.h>
 #include <Framebuffer.h>
 #include <Global.h>
 #include <CurrentObjects.h>

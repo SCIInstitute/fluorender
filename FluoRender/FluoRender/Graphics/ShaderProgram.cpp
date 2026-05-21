@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <glad/gl.h>
+#include <fl_gl.h>
 #include <ShaderProgram.h>
 #include <Utils.h>
 #include <compatibility.h>
