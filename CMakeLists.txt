@@ -344,12 +344,13 @@ if(NOT WIN32)
         list(GET BZIP2_DIR_CANDIDATES 0 BZIP2_ROOT)
 
         find_path(BZIP2_INCLUDE_DIR
-            bzlib.h
+            NAMES bzlib.h
             PATHS "${BZIP2_ROOT}"
+            PATH_SUFFIXES include
             NO_DEFAULT_PATH)
 
         find_library(BZIP2_LIBRARY
-            libbz2_static.a
+            NAMES bz2 bz2_static
             PATHS "${BZIP2_ROOT}/build"
             NO_DEFAULT_PATH)
 
@@ -360,7 +361,7 @@ if(NOT WIN32)
     endif()
 
     # Linux fallback: system bzip2
-    if(NOT BZIP2_FOUND AND UNIX AND NOT APPLE)
+    if(NOT BZIP2_FOUND)
         find_package(BZip2 REQUIRED)
         message(STATUS "Using system bzip2 (Linux fallback)")
     endif()
