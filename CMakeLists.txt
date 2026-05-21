@@ -743,7 +743,7 @@ if(OPENJPEG_DIR_CANDIDATES)
         )
     elseif(APPLE)
         file(GLOB OpenJpeg_LIBRARIES
-            "${OPENJPEG_ROOT}/build/lib/*.a")
+            "${OPENJPEG_ROOT}/build/bin/*.a")
     else()
         file(GLOB OpenJpeg_LIBRARIES
             "${OPENJPEG_ROOT}/build/bin/*.a")
