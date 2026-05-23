@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -217,10 +217,10 @@ std::shared_ptr<fluo::RawData> Diffusion::GetMask(
 		auto offset = fluo::Brick::Offset3();
 		auto res = b->get_size();
 		fluo::Brick::Size3 size{
-			res.intx(), res.inty(), res.intz() };
+			size_t(res.intx()), size_t(res.inty()), size_t(res.intz()) };
 		auto stride = b->get_stride();
 		fluo::Brick::Size3 stride3{
-			stride.intx(), stride.inty(), stride.intz() };
+			size_t(stride.intx()), size_t(stride.inty()), size_t(stride.intz()) };
 		auto raw_mask = vd->GetMask(true);
 		fluo::DataBrick mask_brick(offset, size, *raw_mask, stride3);
 		return mask_brick.Extract();

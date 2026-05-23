@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -207,12 +207,12 @@ void TIFWriter::SaveSequence(const std::wstring& filename)
 
 	const int ndigit = int(std::log10(double(slices))) + 1;
 	wchar_t fmt[16];
-	swprintf_s(fmt, L"%%0%dd", ndigit);
+	swprintf_s(fmt, 32, L"%%0%dd", ndigit);
 
 	for (int z = 0; z < slices; ++z)
 	{
 		wchar_t index[16];
-		swprintf_s(index, fmt, z + 1);
+		swprintf_s(index, 32, fmt, z + 1);
 		std::wstring outname = base + index + L".tif";
 
 		TIFF* tif = TIFFOpenW(outname.c_str(), "wb");

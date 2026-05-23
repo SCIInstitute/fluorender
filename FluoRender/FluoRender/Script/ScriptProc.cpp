@@ -2493,9 +2493,9 @@ void ScriptProc::RunDlcLabel()
 		m_fconfig->Read("maxiters", &maxiters, 100);
 
 #ifdef _DARWIN
-		dlc->Init();
-		dlc->LoadDlc();
-		dlc->Train(maxiters);
+		dlc.Init();
+		dlc.LoadDlc();
+		dlc.Train(maxiters);
 #else
 		std::string cmd = dlc.GetTrainCmd(maxiters);
 		glbin_moviemaker.Hold();

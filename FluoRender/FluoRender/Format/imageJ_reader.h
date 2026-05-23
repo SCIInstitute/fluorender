@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -72,7 +72,7 @@ public:
 	bool GetBatch() {return m_batch;}
 	int GetBatchNum() {return (int)m_batch_list.size();}
 	int GetCurBatch() {return m_cur_batch;}
-	bool double_equals(double a, double b) { return std::abs(a - b) < DBL_EPSILON; }
+	bool double_equals(double a, double b) { return std::abs(a - b) < 1e-6; }
 
 private:
 	// ImageJ related variables.
