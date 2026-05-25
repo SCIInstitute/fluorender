@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -147,7 +147,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 			return;
 		}
 	}
-	//SetCurrent(*m_glRC);
 
 #ifdef _DEBUG
 	//example Pixel format descriptor detailing each part

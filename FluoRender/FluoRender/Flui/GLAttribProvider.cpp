@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -39,15 +39,6 @@ const wxGLAttributes& GLAttribProvider::CanvasAttribs()
 	{
 		initialized = true;
 
-		int red_bit = glbin_settings.m_red_bit;
-		int green_bit = glbin_settings.m_green_bit;
-		int blue_bit = glbin_settings.m_blue_bit;
-		int alpha_bit = glbin_settings.m_alpha_bit;
-		int depth_bit = glbin_settings.m_depth_bit;
-		int samples = glbin_settings.m_samples;
-		int api_type = glbin_settings.m_api_type;
-		int gl_major = glbin_settings.m_gl_major_ver;
-
 		attribs.PlatformDefaults();
 
 		// Request high‑precision presentation
@@ -81,19 +72,31 @@ const wxGLAttributes& GLAttribProvider::CanvasAttribs()
 
 wxGLContextAttrs GLAttribProvider::MakeContextAttrs()
 {
-	wxGLContextAttrs ctx;
+    wxGLContextAttrs ctx;
 
-	switch (glbin_settings.m_gl_profile_mask)
-	{
-	case 1: ctx.CoreProfile(); break;
-	case 2: ctx.CompatibilityProfile(); break;
-	}
+#ifdef __APPLE__
+    // macOS: only valid modern profile is 3.2 core
+    ctx.PlatformDefaults()
+       .CoreProfile()
+       .MajorVersion(3)
+       .MinorVersion(2)
+       .Robust()
+       .ResetIsolation()
+       .EndList();
+#else
+    // Windows / Linux: use your config
+    switch (glbin_settings.m_gl_profile_mask)
+    {
+        case 1: ctx.CoreProfile(); break;
+        case 2: ctx.CompatibilityProfile(); break;
+    }
 
-	ctx.MajorVersion(glbin_settings.m_gl_major_ver)
-		.MinorVersion(glbin_settings.m_gl_minor_ver)
-		.Robust()
-		.ResetIsolation()
-		.EndList();
+    ctx.MajorVersion(glbin_settings.m_gl_major_ver)
+       .MinorVersion(glbin_settings.m_gl_minor_ver)
+       .Robust()
+       .ResetIsolation()
+       .EndList();
+#endif
 
-	return ctx;
+    return ctx;
 }
