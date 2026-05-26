@@ -810,9 +810,11 @@ namespace flvr
 			GLint internal_format;
 			if (nb < 3)
 			{
+#ifndef __APPLE__
 				if (compression)
-					internal_format = GL_COMPRESSED_RED_RGTC1;
+					internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				else
+#endif
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
 						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?
 					GL_R16 : GL_R8;
@@ -820,9 +822,11 @@ namespace flvr
 			}
 			else
 			{
+#ifndef __APPLE__
 				if (compression)
-					internal_format = GL_COMPRESSED_RED_RGTC1;
+					internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				else
+#endif
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
 						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?
 					GL_RGBA16UI : GL_RGBA8UI;

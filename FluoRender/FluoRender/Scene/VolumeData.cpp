@@ -445,6 +445,7 @@ int VolumeData::Load(Nrrd* data, const std::wstring &name, const std::wstring &p
 		m_vr->set_gm_scale(m_scalar_scale);
 		m_vr->set_mode(m_render_mode);
 		m_vr->set_clipping_box(m_clipping_box);
+		m_vr->set_compression(m_compression);
 	}
 
 	//clip distance
@@ -599,6 +600,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_gm_scale(m_scalar_scale);
 	m_vr->set_mode(m_render_mode);
 	m_vr->set_clipping_box(m_clipping_box);
+	m_vr->set_compression(m_compression);
 
 	//SetMode(m_mode);
 	m_bg_valid = false;
