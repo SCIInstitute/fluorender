@@ -1,4 +1,4 @@
-[![logo_crop_03-01](https://github.com/user-attachments/assets/ecc3051b-d977-4fd6-a0e1-32637a0c7e59)](https://github.com/SCIInstitute/fluorender)
+﻿[![logo_crop_03-01](https://github.com/user-attachments/assets/ecc3051b-d977-4fd6-a0e1-32637a0c7e59)](https://github.com/SCIInstitute/fluorender)
 
 This is the open-source repository for FluoRender, an interactive tool for fluorescence microscopy data visualization and analysis.
 
@@ -93,6 +93,9 @@ This is especially true after recent reoganization of FluoRender source code, as
    - Needs building before FluoRender
  - Dlib (http://dlib.net) for deep neural network calculations
    - No need to build before FluoRender for the template library
+ - Eigen needed by OpenCV libs
+   - https://github.com/PX4/eigen
+   - Needs configuration so that OpenCV can find it
  - FFmpeg for reading and writing video files
    - https://github.com/FFmpeg/FFmpeg.git
    - x264 codec (https://code.videolan.org/videolan/x264.git)
@@ -102,9 +105,6 @@ This is especially true after recent reoganization of FluoRender source code, as
  - FreeType for managing type fonts
    - https://github.com/freetype/freetype.git
    - Needs building before FluoRender
- - GLEW (https://glew.sourceforge.net) for OpenGL extension management
-   - https://github.com/nigels-com/glew/releases/tag/glew-2.2.0
-   - Needs building before FluoRender
  - GLM for mathematics like vectors, matrices, and quaternions
    - https://github.com/g-truc/glm.git
    - No need to build for header-only library
@@ -113,7 +113,7 @@ This is especially true after recent reoganization of FluoRender source code, as
    - Needs building before FluoRender
  - JDK (https://www.oracle.com/java/technologies/downloads/) for linking to ImageJ functions
    - Needs installation
- - OpenBLAS for linear algebra computations
+ - OpenBLAS for linear algebra computations needed by Dlib
    - https://github.com/OpenMathLib/OpenBLAS.git
    - Needs building before FluoRender
  - OpenCL SDK for cross-platform GPU computing
@@ -138,7 +138,7 @@ This is especially true after recent reoganization of FluoRender source code, as
    - Needs building before FluoRender
    - I maintain a repo here: https://github.com/basisunus/teem.git
  - wxWidgets (https://github.com/wxWidgets/wxWidgets) for user-interface library
-   - I made some changes to the wxWidgets code. Use [my custom branch](https://github.com/basisunus/wxWidgets/tree/Branch_v3.3.0)
+   - I made some changes to the wxWidgets code. Use [my custom branch](https://github.com/basisunus/wxWidgets/tree/upstream-updated)
    - I generally use the built-in libs in wxWidgets, including Jpeg, Png, Tiff, etc.
    - Needs building before FluoRender
  - Zlib (https://github.com/madler/zlib.git) for reading compressed data formats
