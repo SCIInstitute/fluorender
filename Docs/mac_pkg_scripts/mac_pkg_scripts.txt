@@ -1,0 +1,2 @@
+cd fluorender/Install/Mac
+../../Docs/mac_pkg_scripts/build_installer_package.sh

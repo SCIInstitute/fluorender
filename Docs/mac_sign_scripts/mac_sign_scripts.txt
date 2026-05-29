@@ -1,0 +1,8 @@
+cd fluorender/build/bin/Release
+ARCH=x86_64 ../../../Docs/mac_sign_scripts/bundle_python.sh
+../../../Docs/mac_sign_scripts/rpath_verify.sh
+../../../Docs/mac_sign_scripts/sign_fluorender.sh
+
+ARCH=arm64 ../../../Docs/mac_sign_scripts/bundle_python.sh
+../../../Docs/mac_sign_scripts/rpath_verify.sh
+../../../Docs/mac_sign_scripts/sign_fluorender.sh

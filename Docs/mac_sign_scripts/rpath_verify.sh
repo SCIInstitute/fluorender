@@ -44,4 +44,4 @@ if ! otool -l "$BIN" | grep -A2 LC_RPATH | grep -q "@executable_path/../Framewor
 fi
 
 echo
-echo "✅ All checks passed — safe to bundle Python and sign."
+echo "✅ All checks passed — safe to sign."
