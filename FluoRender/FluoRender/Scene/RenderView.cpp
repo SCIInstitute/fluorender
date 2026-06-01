@@ -595,10 +595,10 @@ std::string RenderView::GetOGLVersion() const
 	return m_GLversion;
 }
 
-void RenderView::Init()
+bool RenderView::Init()
 {
 	if (m_initialized)
-		return;
+		return false;
 
 	flvr::ShaderProgram::init_shaders_supported();
 	flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
@@ -624,6 +624,8 @@ void RenderView::Init()
 	m_initialized = true;
 
 	glbin.getStopWatch(gstStopWatch)->start();
+
+	return true;
 }
 
 void RenderView::InitOpenXR()
@@ -5322,7 +5324,7 @@ void RenderView::DrawDataPeel()
 
 	//change data buffer state
 	data_buffer->set_depth_test_enabled(true);
-	data_buffer->set_depth_func(flvr::DepthFunc::Lequal);
+	data_buffer->set_depth_func(flvr::DepthFunc::LessEqual);
 	data_buffer->set_blend_enabled(0, true);
 	data_buffer->set_blend_equation(0, flvr::BlendEquation::Add, flvr::BlendEquation::Add);
 	data_buffer->set_blend_func(0,
@@ -5748,7 +5750,6 @@ void RenderView::DrawVolumes(int peel)
 	//compute the threshold value for picking volume
 	if (m_update_rot_ctr)
 	{
-		unsigned char pixel[4];
 		int nx, ny;
 		GetRenderSize(nx, ny);
 		if (auto data_buffer = glbin_framebuffer_manager.current())
@@ -5912,7 +5913,7 @@ void RenderView::DrawVolumesMipDepth(const std::vector<std::weak_ptr<VolumeData>
 	m_mvr->clear_vr();
 	//set up guard
 	std::list<flvr::RenderModeGuard> guards;
-	flvr::ColorMode main_mode = flvr::ColorMode::None, mask_mode = flvr::ColorMode::None;
+	flvr::ColorMode main_mode = flvr::ColorMode::Disabled, mask_mode = flvr::ColorMode::Disabled;
 	int colormap = 0;
 	double colormap_low = 0.0, colormap_hi = 1.0, colormap_inv = 0.0;
 	fluo::Color vol_color, mask_color;
@@ -7775,7 +7776,7 @@ void RenderView::GenerateBrushStrokes()
 		flvr::FBRole::RenderColor, nx, ny, gstRBPaintBrush);
 	assert(paint_buffer);
 	paint_buffer->set_blend_enabled_all(true);
-	paint_buffer->set_blend_equation_all(flvr::BlendEquation::Max, flvr::BlendEquation::Max);
+	paint_buffer->set_blend_equation_all(flvr::BlendEquation::Maximum, flvr::BlendEquation::Maximum);
 	paint_buffer->set_blend_func_all(
 		flvr::BlendFactor::One, flvr::BlendFactor::One,
 		flvr::BlendFactor::One, flvr::BlendFactor::One);
@@ -9054,7 +9055,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	if (state.m_key_paint)
 	{
 		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Append);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9069,7 +9070,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	else if (state.m_key_erase)
 	{
 		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Eraser);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9084,7 +9085,7 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	else if (state.m_key_diff)
 	{
 		glbin_vol_selector.SetSelectMode(flrd::SelectMode::Diffuse);
-		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+		glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 		m_int_mode = InteractiveMode::BrushSelect;
 		m_paint_display = true;
 		m_draw_brush = true;
@@ -9100,8 +9101,8 @@ bool RenderView::UpdateBrushState(IdleState& state)
 	{
 		if (glbin_states.m_freehand_tool_from_kb)
 		{
-			glbin_vol_selector.SetSelectMode(flrd::SelectMode::None);
-			glbin_ruler_handler.SetRulerMode(flrd::RulerMode::None);
+			glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
+			glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
 			m_int_mode = InteractiveMode::Viewport;
 			glbin_states.m_freehand_tool_from_kb = false;
 
@@ -9179,7 +9180,7 @@ bool RenderView::PickMesh(BaseState& state)
 	pick_buffer->set_scissor_test_enabled(true);
 	pick_buffer->set_scissor_rect({ m_mouse_x, ny - m_mouse_y, 1, 1 });
 	pick_buffer->set_depth_test_enabled(true);
-	pick_buffer->set_depth_func(flvr::DepthFunc::Lequal);
+	pick_buffer->set_depth_func(flvr::DepthFunc::LessEqual);
 	auto guard = glbin_framebuffer_manager.bind_scoped(pick_buffer);
 	pick_buffer->clear_base(true, true);
 

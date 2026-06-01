@@ -141,7 +141,7 @@ VolumeData::VolumeData()
 	m_size = fluo::Vector(0.0);
 	m_scaling = fluo::Vector(1.0);
 	m_spacing = fluo::Vector(1.0);
-	m_spc_from_file = false;
+	m_spc_source = SpacingSource::NotAvailable;
 	m_resample = false;
 	m_resampled_size = fluo::Vector(0.0);
 
@@ -287,7 +287,7 @@ VolumeData::VolumeData(VolumeData &copy)
 	m_size = copy.m_size;
 	m_scaling = copy.m_scaling;
 	m_spacing = copy.m_spacing;
-	m_spc_from_file = copy.m_spc_from_file;
+	m_spc_source = copy.m_spc_source;
 	m_resample = copy.m_resample;
 	m_resampled_size = copy.m_resampled_size;
 
@@ -437,6 +437,7 @@ int VolumeData::Load(const std::shared_ptr<fluo::RawData>& data, const std::wstr
 		m_vr->set_gm_scale(m_scalar_scale);
 		m_vr->set_mode(m_render_mode);
 		m_vr->set_clipping_box(m_clipping_box);
+		m_vr->set_compression(m_compression);
 	}
 
 	//clip distance
@@ -574,6 +575,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_vr->set_gm_scale(m_scalar_scale);
 	m_vr->set_mode(m_render_mode);
 	m_vr->set_clipping_box(m_clipping_box);
+	m_vr->set_compression(m_compression);
 
 	//SetMode(m_mode);
 	m_bg_valid = false;
@@ -841,19 +843,19 @@ void VolumeData::UpdateColormapRange()
 		m_colormap_min_value = m_min_value;
 		m_colormap_max_value = m_max_value;
 		break;
-	case flvr::ColormapProj::ZValue://z-value
+	case flvr::ColormapProj::ZCoord://z-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_size.z() * m_spacing.z();
 		break;
-	case flvr::ColormapProj::YValue://y-value
+	case flvr::ColormapProj::YCoord://y-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_size.y() * m_spacing.y();
 		break;
-	case flvr::ColormapProj::XValue://x-value
+	case flvr::ColormapProj::XCoord://x-value
 		m_colormap_min_value = 0;
 		m_colormap_max_value = m_size.x() * m_spacing.x();
 		break;
-	case flvr::ColormapProj::TValue://t-value
+	case flvr::ColormapProj::TCoord://t-value
 		m_colormap_min_value = 0;
 		if (auto reader = m_reader.lock())
 			m_colormap_max_value = reader->GetTimeNum();
@@ -871,7 +873,7 @@ void VolumeData::UpdateColormapRange()
 		m_colormap_min_value = 0;
 		m_colormap_max_value = 1;
 		break;
-	case flvr::ColormapProj::IntDelta://intensity delta
+	case flvr::ColormapProj::IntensityDelta://intensity delta
 		m_colormap_min_value = -m_max_value;
 		m_colormap_max_value = m_max_value;
 		break;
@@ -1476,7 +1478,7 @@ void VolumeData::IncMainMaskMode()
 	int ival = static_cast<int>(m_main_mode);
 	ival++;
 	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
-		static_cast<int>(flvr::ColorMode::None) : ival;
+		static_cast<int>(flvr::ColorMode::Disabled) : ival;
 	SetMainMaskMode(static_cast<flvr::ColorMode>(ival));
 }
 
@@ -1492,7 +1494,7 @@ void VolumeData::IncMaskMode()
 	int ival = static_cast<int>(m_mask_mode);
 	ival++;
 	ival = ival > static_cast<int>(flvr::ColorMode::Component) ?
-		static_cast<int>(flvr::ColorMode::None) : ival;
+		static_cast<int>(flvr::ColorMode::Disabled) : ival;
 	SetMaskMode(static_cast<flvr::ColorMode>(ival));
 }
 

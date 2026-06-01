@@ -42,7 +42,7 @@ namespace flrd
 {
 	enum class RulerMode : int
 	{
-		None,
+		Disabled,
 		Line,		//0: 2 point
 		Polyline,	//1: multi point
 		Locator,	//2: locator

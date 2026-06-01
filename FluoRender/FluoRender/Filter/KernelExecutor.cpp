@@ -173,7 +173,7 @@ bool KernelExecutor::Execute()
 			res,
 			spc,
 			brick_size);
-		vd_r->SetSpcFromFile(true);
+		vd_r->SetSpacingSource(vd->GetSpacingSource());
 		vd_r->SetName(vd->GetName() + L"_CL");
 		auto tex_r = vd_r->GetTexture();
 		if (!tex_r)

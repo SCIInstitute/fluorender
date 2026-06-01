@@ -1008,7 +1008,7 @@ void ComponentAnalyzer::OutputCompListStr(std::string &str, int verbose, const s
 void ComponentAnalyzer::OutputCompListFile(const std::wstring &filename, int verbose, const std::string& comp_header)
 {
 	std::ofstream ofs;
-	ofs.open(filename, std::ofstream::out);
+	ofs.open(std::filesystem::path(filename));
 	OutputCompListStream(ofs, verbose, comp_header);
 	ofs.close();
 }
@@ -1328,7 +1328,7 @@ bool ComponentAnalyzer::OutputMultiChannels(std::vector<std::shared_ptr<VolumeDa
 			res,
 			spc,
 			brick_size);
-		vdn->SetSpcFromFile(true);
+		vdn->SetSpacingSource(vd->GetSpacingSource());
 		vdn->SetName(vd->GetName() +
 			L"_COMP" + std::to_wstring(count++) +
 			L"_SIZE" + std::to_wstring(i->second->GetSizeUi()));
@@ -1490,7 +1490,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 		res,
 		spc,
 		brick_size);
-	vd_r->SetSpcFromFile(true);
+	vd_r->SetSpacingSource(vd->GetSpacingSource());
 	vd_r->SetName(vd->GetName() + L"_CH_R");
 	//green volume
 	auto vd_g = std::make_shared<VolumeData>();
@@ -1498,7 +1498,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 		res,
 		spc,
 		brick_size);
-	vd_g->SetSpcFromFile(true);
+	vd_g->SetSpacingSource(vd->GetSpacingSource());
 	vd_g->SetName(vd->GetName() + L"_CH_G");
 	//blue volume
 	auto vd_b = std::make_shared<VolumeData>();
@@ -1506,7 +1506,7 @@ bool ComponentAnalyzer::OutputRgbChannels(std::vector<std::shared_ptr<VolumeData
 		res,
 		spc,
 		brick_size);
-	vd_b->SetSpcFromFile(true);
+	vd_b->SetSpacingSource(vd->GetSpacingSource());
 	vd_b->SetName(vd->GetName() + L"_CH_B");
 
 	//get new data

@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <Directory.h>
-#include <Main.h>
+#include "Directory.h"
+#include "Main.h"
 #include <Global.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
@@ -103,9 +103,8 @@ bool FluoRenderApp::OnInit()
 	srand((unsigned int)TIME());
 
 	//the frame
-	std::string title = std::string(FLUORENDER_TITLE) + std::string(" ") +
-		std::string(VERSION_MAJOR_TAG) + std::string(".") +
-		std::string(VERSION_MINOR_TAG);
+	std::string title = std::string(fluo::AppTitle) + std::string(" ") +
+		std::string(fluo::VersionString);
 	MainFrame* frame = new MainFrame(
 		(wxFrame*)NULL,
 		wxString(title),

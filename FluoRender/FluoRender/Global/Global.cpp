@@ -85,6 +85,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshDefault.h>
 #include <FramebufferStateTracker.h>
 #include <RefreshScheduler.h>
+#include <ShaderProgram.h>
 //renderers
 #include <RendererFactory.h>
 #include <ClippingBoxRenderer.h>

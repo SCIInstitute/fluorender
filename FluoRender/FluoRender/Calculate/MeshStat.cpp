@@ -31,7 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData.h>
 #include <KernelFactory.h>
 #include <numeric>
+#ifdef _WIN32
 #include <execution>
+#endif
 
 using namespace flrd;
 
@@ -228,14 +230,20 @@ void MeshStat::Run()
 	kernel_prog->readBuffer(arg_area, area.data());
 
 	//compute area
-	m_area = std::reduce(
 #ifdef _WIN32
-		std::execution::par_unseq,
+    m_area = std::reduce(
+        std::execution::par_unseq,
+        area.begin(),
+        area.end(),
+        0.0f
+    );
+#else
+    m_area = std::accumulate(
+        area.begin(),
+        area.end(),
+        0.0f
+    );
 #endif
-		area.begin(),
-		area.end(),
-		0.0f
-	);
 
 	//compute volume
 	kernel_prog->beginArgs(kernel_idx1);
@@ -251,15 +259,21 @@ void MeshStat::Run()
 	std::vector<float> volume(tri_num);
 	kernel_prog->readBuffer(arg_volume, volume.data());
 
-	//compute area
-	m_volume = std::reduce(
+	//compute volume
 #ifdef _WIN32
-		std::execution::par_unseq,
+    m_volume = std::reduce(
+        std::execution::par_unseq,
+        volume.begin(),
+        volume.end(),
+        0.0f
+    );
+#else
+    m_volume = std::accumulate(
+        volume.begin(),
+        volume.end(),
+        0.0f
+    );
 #endif
-		volume.begin(),
-		volume.end(),
-		0.0f
-	);
 
 	kernel_prog->releaseAllArgs();
 	m_busy = false;

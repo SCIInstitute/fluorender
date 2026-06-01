@@ -50,7 +50,6 @@ class RenderCanvas : public wxGLCanvas
 public:
 	RenderCanvas(MainFrame* frame,
 		RenderViewPanel* parent,
-		const wxGLAttributes& attriblist,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

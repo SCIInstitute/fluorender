@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iomanip>
 #include <ctime>
 #include <algorithm>
+#include <iterator>
 #if defined(_WIN32) || defined (_DARWIN)
 #include <hdf5.h>
 #endif

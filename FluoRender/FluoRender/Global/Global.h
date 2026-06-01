@@ -360,14 +360,14 @@ namespace fluo
 
 		//xr renderer
 		std::unique_ptr<LookingGlassRenderer> m_lg_renderer;
-		std::unique_ptr<BaseXrRenderer> m_xr_renderer = nullptr;
+		std::unique_ptr<BaseXrRenderer> m_xr_renderer;
 
 		//time
-		std::unique_ptr<fluo::AsyncTimerFactory> m_atmf = nullptr;
-		std::unique_ptr<fluo::StopWatchFactory> m_swhf = nullptr;
+		std::unique_ptr<fluo::AsyncTimerFactory> m_atmf;
+		std::unique_ptr<fluo::StopWatchFactory> m_swhf;
 
 		//jvm
-		std::unique_ptr<JVMInitializer> m_pJVMInstance = nullptr;
+		std::unique_ptr<JVMInitializer> m_pJVMInstance;
 
 		//graphics resources
 		//kernel for calculation

@@ -32,6 +32,7 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <limits>
 
 namespace fluo
 {

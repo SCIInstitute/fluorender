@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 
 namespace fluo {
 	using std::string;

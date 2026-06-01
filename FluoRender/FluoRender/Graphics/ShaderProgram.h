@@ -120,21 +120,21 @@ namespace flvr
 	{
 		Disabled,//0: new
 		Intensity,//previously 0
-		ZValue,
-		YValue,
-		XValue,
-		TValue,
+		ZCoord,
+		YCoord,
+		XCoord,
+		TCoord,
 		Radial,
 		Linear,
 		Gradient,
 		Normal,
-		IntDelta,//10, previously 7
+		IntensityDelta,//10, previously 7
 		Speed
 	};
 
 	enum class ColorMode : int
 	{
-		None = 0,
+		Disabled = 0,
 		SingleColor,
 		Colormap,
 		Component
@@ -175,7 +175,7 @@ namespace flvr
 		static bool IsTimeProj(ColormapProj p)
 		{
 			static const std::unordered_set<ColormapProj> time_modes = {
-				ColormapProj::IntDelta,
+				ColormapProj::IntensityDelta,
 				ColormapProj::Speed
 			};
 			return time_modes.count(p) > 0;

@@ -75,7 +75,11 @@ public:
 	ColocalDefault m_colocal_def;
 
 public:
-	//default values
+	int m_mainframe_disp_id;	//display id of the main frame
+	int m_mainframe_x;		//main frame position
+	int m_mainframe_y;
+	int m_mainframe_w;		//main frame size
+	int m_mainframe_h;
 	double m_dpi_scale_factor;//dpi scale factor
 	std::string m_layout;	//layout of the main frame
 	std::string m_layout_clip;		//layout of the clip plane panel
@@ -94,7 +98,6 @@ public:
 	bool m_prj_save_inc;	//save project incrementally
 	std::wstring m_time_id;		//identfier for time sequence
 	bool m_save_compress;	//save tif compressed
-	bool m_override_vox;
 	int m_last_open_type;	//0:vol; 1:mesh; 2:imagej
 	int m_last_tool;		//last tool
 	int m_config_file_type;	//0:ini, 1:xml, 2:json, 3: pole

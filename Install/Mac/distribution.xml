@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
     <title>FluoRender Installer</title>
+
     <background file="background.png" alignment="bottomleft" scaling="proportional"/>
     <welcome file="welcome.txt"/>
     <license file="license.txt"/>
+
     <choices-outline>
         <line choice="default">
             <line choice="FluoRender"/>
         </line>
     </choices-outline>
+
     <choice id="default"/>
+
     <choice id="FluoRender" title="FluoRender" description="Install FluoRender">
-        <pkg-ref id="edu.utah.sci.fluorender.pkg"/>
+        <pkg-ref id="edu.utah.sci.fluorender"/>
     </choice>
-    <pkg-ref id="edu.utah.sci.fluorender.pkg" installKBytes="88888" version="2.34" auth="Root">#FluoRender.pkg</pkg-ref>
+
+    <!-- IMPORTANT: This must match the actual pkgbuild output filename -->
+    <pkg-ref id="edu.utah.sci.fluorender"
+             installKBytes="88888"
+             version="2.34.1"
+             auth="Root">
+        #FluoRender_2.34.1_x86_64.pkg
+    </pkg-ref>
+
 </installer-gui-script>

@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TreeLayer.h>
 #include <Point.h>
+#include <memory>
 
 class VolumeData;
 class AnnotData;

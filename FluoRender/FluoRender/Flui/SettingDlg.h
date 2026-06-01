@@ -89,8 +89,6 @@ private:
 	wxComboBox* m_disp_id_comb;
 	//color depth
 	wxComboBox* m_color_depth_comb;
-	//override vox
-	wxCheckBox* m_override_vox_chk;
 	//wavelength to color
 	wxComboBox* m_wav_color1_cmb;
 	wxComboBox* m_wav_color2_cmb;
@@ -203,8 +201,6 @@ private:
 	void OnDispIdComb(wxCommandEvent& event);
 	//color depth
 	void OnColorDepthComb(wxCommandEvent& event);
-	//override vox
-	void OnOverrideVoxCheck(wxCommandEvent& event);
 	//wavelength color
 	void OnWavColor1Change(wxCommandEvent& event);
 	void OnWavColor2Change(wxCommandEvent& event);

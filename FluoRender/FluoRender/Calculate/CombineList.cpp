@@ -70,7 +70,7 @@ int CombineList::Execute()
 		m_size,
 		m_spacing,
 		brick_size);
-	vd_r->SetSpcFromFile(true);
+	vd_r->SetSpacingSource(vd0->GetSpacingSource());
 	vd_r->SetName(m_name + L"_CH_R");
 	//green volume
 	auto vd_g = std::make_shared<VolumeData>();
@@ -78,7 +78,7 @@ int CombineList::Execute()
 		m_size,
 		m_spacing,
 		brick_size);
-	vd_g->SetSpcFromFile(true);
+	vd_g->SetSpacingSource(vd0->GetSpacingSource());
 	vd_g->SetName(m_name + L"_CH_G");
 	//blue volume
 	auto vd_b = std::make_shared<VolumeData>();
@@ -86,7 +86,7 @@ int CombineList::Execute()
 		m_size,
 		m_spacing,
 		brick_size);
-	vd_b->SetSpcFromFile(true);
+	vd_b->SetSpacingSource(vd0->GetSpacingSource());
 	vd_b->SetName(m_name + L"_CH_B");
 
 	//get new data

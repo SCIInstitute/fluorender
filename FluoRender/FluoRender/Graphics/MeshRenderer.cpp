@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <GL/glew.h>
+#include <fl_gl.h>
 #include <MeshRenderer.h>
 #include <TextureRenderer.h>
 #include <VertexArray.h>

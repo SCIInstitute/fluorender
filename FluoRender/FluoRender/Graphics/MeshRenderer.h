@@ -31,16 +31,13 @@
 
 #include <Color.h>
 #include <ClippingBox.h>
+#include <gl_types.h>
+#include <glm/glm.hpp>
 #include <vector>
 #include <cstring>
 #include <memory>
-#include <glm/glm.hpp>
 
 typedef struct _GLMmodel GLMmodel;
-
-#ifndef __glew_h__
-typedef int GLint;
-#endif
 
 namespace fluo
 {

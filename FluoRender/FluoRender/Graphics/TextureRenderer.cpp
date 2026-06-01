@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <GL/glew.h>
+#include <fl_gl.h>
 #include <TextureRenderer.h>
 #include <Global.h>
 #include <GlobalStates.h>
@@ -83,7 +83,7 @@ namespace flvr
 
 	TexParam::TexParam() :
 		nx(0), ny(0), nz(0), nb(0),
-		id(0), brick(0), comp_type(CompType::None), time(0),
+		id(0), brick(0), comp_type(CompType::Invalid), time(0),
 		textype(GL_UNSIGNED_BYTE),
 		delayed_del(false)
 	{
@@ -805,9 +805,11 @@ namespace flvr
 			GLint internal_format;
 			if (nb < 3)
 			{
-				if (compression && GLEW_ARB_texture_compression_rgtc)
+#ifndef __APPLE__
+				if (compression)
 					internal_format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				else
+#endif
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
 						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?
 					GL_R16 : GL_R8;
@@ -815,9 +817,11 @@ namespace flvr
 			}
 			else
 			{
-				if (compression && GLEW_ARB_texture_compression_rgtc)
+#ifndef __APPLE__
+				if (compression)
 					internal_format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				else
+#endif
 					internal_format = (brick->tex_type(CompType::Data) == GL_SHORT ||
 						brick->tex_type(CompType::Data) == GL_UNSIGNED_SHORT) ?
 					GL_RGBA16UI : GL_RGBA8UI;

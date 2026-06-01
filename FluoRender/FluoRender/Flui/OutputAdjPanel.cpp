@@ -119,7 +119,7 @@ OutputAdjPanel::~OutputAdjPanel()
 	glbin.del_undo_control(m_b_brightness_sldr);
 	glbin.del_undo_control(m_b_hdr_sldr);
 
-	m_frame->SetFocusVRenderViews(0);
+	//m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)

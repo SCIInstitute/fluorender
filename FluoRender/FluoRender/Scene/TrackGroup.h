@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeLayer.h>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 namespace flrd
 {

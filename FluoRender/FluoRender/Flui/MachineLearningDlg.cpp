@@ -38,10 +38,9 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
-#include <format>
 #include <filesystem>
 
-MachineLearningDlg::MachineLearningDlg(MainFrame *frame) :
+MachineLearningDlg::MachineLearningDlg(MainFrame* frame) :
 	TabbedPanel(frame, frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(500, 620)),
@@ -117,7 +116,7 @@ void MachineLearningPanel::Create()
 	SetDoubleBuffered(true);
 	wxStaticText* st = 0;
 
-	wxBoxSizer *mainsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* mainsizer = new wxBoxSizer(wxHORIZONTAL);
 	m_splitter = new wxSplitterWindow(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxSP_THIN_SASH | wxSP_BORDER | wxSP_LIVE_UPDATE);
 	m_splitter->SetMinimumPaneSize(160);
@@ -204,7 +203,7 @@ void MachineLearningPanel::Create()
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_del_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDelRec, this);
 	m_apply_rec_btn = new wxButton(m_panel_bot, wxID_ANY, "Apply",
-		wxDefaultPosition,wxDefaultSize, wxALIGN_LEFT);
+		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_apply_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnApplyRec, this);
 	m_sizer2->Add(5, 5);
 	m_sizer2->Add(m_bot_table_name, 0, wxALIGN_CENTER);
@@ -297,7 +296,7 @@ void MachineLearningPanel::PopTopList()
 	m_top_grid->GetPosition(&x, &y);
 	y += s0 + row * s1 + 50;
 	GetSize(&w, &h);
-	y = std::min(y, h/2);
+	y = std::min(y, h / 2);
 	m_splitter->SetSashPosition(y);
 }
 
@@ -659,15 +658,9 @@ void MLCompGenPanel::UpdateBotList()
 		size_t len = data_in.size();
 		if (len)
 		{
-#ifdef _WIN32
 			for (size_t j = 0; j < data_in.size() - 1; ++j)
-				str_in += std::format("{:.2f}", data_in[j]) + ", ";
-			str_in += std::format("{:.2f}", data_in[len - 1]);
-#else
-            for (size_t j = 0; j < data_in.size() - 1; ++j)
-                str_in += wxString::Format("%.2f", data_in[j]).ToStdString() + ", ";
-            str_in += wxString::Format("%.2f", data_in[len - 1]).ToStdString();
-#endif
+				str_in += wxString::Format("%.2f", data_in[j]).ToStdString() + ", ";
+			str_in += wxString::Format("%.2f", data_in[len - 1]).ToStdString();
 		}
 		m_bot_grid->SetCellValue(0, 0, str_in);
 
@@ -676,15 +669,9 @@ void MLCompGenPanel::UpdateBotList()
 		len = data_out.size();
 		if (len)
 		{
-#ifdef _WIN32
-			for (size_t j = 0; j < data_out.size() - 1; ++j)
-				str_out += std::format("{:.2f}", data_out[j]) + ", ";
-			str_out += std::format("{:.2f}", data_out[len - 1]);
-#else
 			for (size_t j = 0; j < data_out.size() - 1; ++j)
 				str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
 			str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
-#endif
 		}
 		m_bot_grid->SetCellValue(0, 1, str_out);
 	}
@@ -1030,15 +1017,9 @@ void MLVolPropPanel::UpdateBotList()
 		size_t len = data_in.size();
 		if (len)
 		{
-#ifdef _WIN32
-			for (size_t j = 0; j < data_in.size() - 1; ++j)
-				str_in += std::format("{:.2f}", data_in[j]) + ", ";
-			str_in += std::format("{:.2f}", data_in[len - 1]);
-#else
 			for (size_t j = 0; j < data_in.size() - 1; ++j)
 				str_in += wxString::Format("%.2f", data_in[j]).ToStdString() + ", ";
 			str_in += wxString::Format("%.2f", data_in[len - 1]).ToStdString();
-#endif
 		}
 		m_bot_grid->SetCellValue(0, 0, str_in);
 
@@ -1047,15 +1028,9 @@ void MLVolPropPanel::UpdateBotList()
 		len = data_out.size();
 		if (len)
 		{
-#ifdef _WIN32
-			for (size_t j = 0; j < data_out.size() - 1; ++j)
-				str_out += std::format("{:.2f}", data_out[j]) + ", ";
-			str_out += std::format("{:.2f}", data_out[len - 1]);
-#else
 			for (size_t j = 0; j < data_out.size() - 1; ++j)
 				str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
 			str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
-#endif
 		}
 		m_bot_grid->SetCellValue(0, 1, str_out);
 	}

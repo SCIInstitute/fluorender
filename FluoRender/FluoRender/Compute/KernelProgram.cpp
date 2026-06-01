@@ -1,22 +1,22 @@
-//  
+//
 //  For more information, please see: http://software.sci.utah.edu
-//  
+//
 //  The MIT License
-//  
+//
 //  Copyright (c) 2026 Scientific Computing and Imaging Institute,
 //  University of Utah.
-//  
-//  
+//
+//
 //  Permission is hereby granted, free of charge, to any person obtaining a
 //  copy of this software and associated documentation files (the "Software"),
 //  to deal in the Software without restriction, including without limitation
 //  the rights to use, copy, modify, merge, publish, distribute, sublicense,
 //  and/or sell copies of the Software, and to permit persons to whom the
 //  Software is furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included
 //  in all copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 //  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -24,12 +24,9 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 //  DEALINGS IN THE SOFTWARE.
-//  
+//
 
-#include <GL/glew.h>
-#ifdef _WIN32
-#include <GL/wglew.h>
-#endif
+#include <fl_gl.h>
 #include <Global.h>
 #include <MainSettings.h>
 #include <KernelProgram.h>
@@ -38,10 +35,14 @@
 #define WINDOWS_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
+#ifdef __linux__
+#include <EGL/egl.h>
+#endif
 #include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <string>
+#include <cstring>
 
 namespace flvr
 {
@@ -94,6 +95,7 @@ namespace flvr
 	}
 
 	bool KernelProgram::init_ = false;
+	bool KernelProgram::interop_ = false;
 	cl_device_id KernelProgram::device_ = 0;
 	cl_context KernelProgram::context_ = 0;
 	cl_command_queue KernelProgram::queue_ = 0;
@@ -107,8 +109,8 @@ namespace flvr
 	CGLContextObj KernelProgram::gl_context_ = 0;
 #endif
 	KernelProgram::KernelProgram(const std::string& source) :
-	source_(source), program_(0),
-	kernel_idx_(-1), arg_idx_(-1)
+		source_(source), program_(0),
+		kernel_idx_(-1), arg_idx_(-1)
 	{
 	}
 
@@ -125,143 +127,257 @@ namespace flvr
 		device_list_.clear();
 		cl_int err;
 		cl_uint platform_num;
-		cl_platform_id* platforms;
 
-		//get platform number
+		// --- Get platforms ---
 		err = clGetPlatformIDs(0, NULL, &platform_num);
-		if (err != CL_SUCCESS)
+		if (err != CL_SUCCESS || platform_num == 0)
 			return;
-		if (platform_num == 0)
-			return;
-		platforms = new cl_platform_id[platform_num];
-		err = clGetPlatformIDs(platform_num, platforms, NULL);
-		if (err != CL_SUCCESS)
-		{
-			delete[] platforms;
-			return;
-		}
 
-		//go through each platform
+		std::vector<cl_platform_id> platforms(platform_num);
+		err = clGetPlatformIDs(platform_num, platforms.data(), NULL);
+		if (err != CL_SUCCESS)
+			return;
+
+		// --- Enumerate platforms/devices ---
 		size_t info_size;
 		for (cl_uint i = 0; i < platform_num; ++i)
 		{
 			device_list_.push_back(CLPlatform());
 			CLPlatform* platform = &(device_list_.back());
-			//id
 			platform->id = platforms[i];
-			//get vendor name
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
-			platform->vendor.resize(info_size, 0);
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &(platform->vendor[0]), NULL);
-			//get platform name
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
-			platform->name.resize(info_size, 0);
-			err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &(platform->name[0]), NULL);
 
-			cl_device_id *devices;
-			cl_uint device_num;
-			//get gpu devices
+			// platform vendor
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, 0, NULL, &info_size);
+			platform->vendor.resize(info_size);
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &platform->vendor[0], NULL);
+
+			// platform name
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
+			platform->name.resize(info_size);
+			clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &platform->name[0], NULL);
+
+			// --- Devices ---
+			cl_uint device_num = 0;
 			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
 			if (err != CL_SUCCESS || device_num == 0)
 				continue;
-			devices = new cl_device_id[device_num];
-			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices, NULL);
-			if (err != CL_SUCCESS)
-			{
-				delete[] devices;
-				continue;
-			}
 
-			//go through each device
+			std::vector<cl_device_id> devices(device_num);
+			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices.data(), NULL);
+			if (err != CL_SUCCESS)
+				continue;
+
 			for (cl_uint j = 0; j < device_num; ++j)
 			{
 				platform->devices.push_back(CLDevice());
 				CLDevice* device = &(platform->devices.back());
-				//id
 				device->id = devices[j];
-				//get vendor name
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
-				device->vendor.resize(info_size, 0);
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &(device->vendor[0]), NULL);
+
+				// vendor
+				clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, NULL, &info_size);
+				device->vendor.resize(info_size);
+				clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, info_size, &device->vendor[0], NULL);
 				if (!device->vendor.empty() && device->vendor.back() == '\0')
 					device->vendor.pop_back();
-				//get device name
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
-				device->name.resize(info_size, 0);
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &(device->name[0]), NULL);
+
+				// name
+				clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
+				device->name.resize(info_size);
+				clGetDeviceInfo(devices[j], CL_DEVICE_NAME, info_size, &device->name[0], NULL);
 				if (!device->name.empty() && device->name.back() == '\0')
 					device->name.pop_back();
-				//get device version
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
-				device->version.resize(info_size, 0);
-				err = clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &(device->version[0]), NULL);
+
+				// version
+				clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
+				device->version.resize(info_size);
+				clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &device->version[0], NULL);
 				if (!device->version.empty() && device->version.back() == '\0')
 					device->version.pop_back();
 			}
-			delete[] devices;
 		}
-		delete[] platforms;
 
 		if (device_list_.empty())
 			return;
-#ifdef _WIN32
-		cl_context_properties properties[] =
-		{
-			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
-			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
-			0
-		};
-#else
-		cl_context_properties properties[] =
-		{
-			#if defined(_DARWIN) 
-			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE,
-			(cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-			#elif defined(__linux__)
-			// https://www.codeproject.com/Articles/685281/OpenGL-OpenCL-Interoperability-A-Case-Study-Using
-			CL_GL_CONTEXT_KHR , (cl_context_properties)glXGetCurrentContext() ,
-			CL_GLX_DISPLAY_KHR , (cl_context_properties)glXGetCurrentDisplay() ,
-			#endif
-			CL_CONTEXT_PLATFORM, (cl_context_properties)0,
-			0
-		};
-#endif
-		if (platform_id_ < 0 || platform_id_ >= device_list_.size())
+
+		// --- Select platform ---
+		if (platform_id_ < 0 || platform_id_ >= (int)device_list_.size())
 			platform_id_ = 0;
+
 		CLPlatform* platform = &(device_list_[platform_id_]);
-		if (!platform)
+		if (!platform || platform->devices.empty())
 			return;
-		if (platform->devices.empty())
-			return;
-#ifdef _WIN32
-		properties[5] = (cl_context_properties)(platform->id);
-#else
-		properties[3] = (cl_context_properties)(platform->id);
-#endif
-		CLDevice* device = 0;
-		if (device_id_ < 0 || device_id_ >= platform->devices.size())
+
+		// --- Select device ---
+		CLDevice* device = nullptr;
+		if (device_id_ < 0 || device_id_ >= (int)platform->devices.size())
 			device = &(platform->devices[0]);
 		else
 			device = &(platform->devices[device_id_]);
+
 		if (!device)
 			return;
+
 		device_ = device->id;
+
+		// --- Device name ---
 		device_name_ = platform->name;
-		device_name_.back() = ';';
+		if (!device_name_.empty())
+			device_name_.back() = ';';
 		device_name_ += " " + device->name;
 
-		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
-		if (err == CL_SUCCESS)
-			init_ = true;
+		// --- Build GL-CL interop properties (robust, no index hacks) ---
+		cl_context_properties properties[7];
+		int p = 0;
 
-		//check features
-		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
+#ifdef _WIN32
+
+		HGLRC gl_ctx = wglGetCurrentContext();
+		HDC   hdc = wglGetCurrentDC();
+		if (!gl_ctx || !hdc)
+			return;
+
+		properties[p++] = CL_GL_CONTEXT_KHR;
+		properties[p++] = (cl_context_properties)gl_ctx;
+		properties[p++] = CL_WGL_HDC_KHR;
+		properties[p++] = (cl_context_properties)hdc;
+
+		properties[p++] = CL_CONTEXT_PLATFORM;
+		properties[p++] = (cl_context_properties)platform->id;
+
+#elif defined(__APPLE__)
+
+		CGLContextObj ctx = CGLGetCurrentContext();
+		if (!ctx)
+			return;
+
+		CGLShareGroupObj share = CGLGetShareGroup(ctx);
+
+		properties[p++] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
+		properties[p++] = (cl_context_properties)share;
+
+		// Optional (safe on newer systems)
+		properties[p++] = CL_CONTEXT_PLATFORM;
+		properties[p++] = (cl_context_properties)platform->id;
+
+#elif defined(__linux__)
+
+		bool interop_ok = false;
+
+		// ---------- Try GLX ----------
+		GLXContext glx_ctx = glXGetCurrentContext();
+		Display* display = glXGetCurrentDisplay();
+
+		if (glx_ctx && display)
+		{
+			properties[p++] = CL_GL_CONTEXT_KHR;
+			properties[p++] = (cl_context_properties)glx_ctx;
+
+			properties[p++] = CL_GLX_DISPLAY_KHR;
+			properties[p++] = (cl_context_properties)display;
+
+			properties[p++] = CL_CONTEXT_PLATFORM;
+			properties[p++] = (cl_context_properties)platform->id;
+
+			interop_ok = true;
+		}
+
+		// ---------- Try EGL (fallback) ----------
+		if (!interop_ok)
+		{
+			EGLContext egl_ctx = eglGetCurrentContext();
+			EGLDisplay egl_dpy = eglGetCurrentDisplay();
+
+			if (egl_ctx && egl_dpy)
+			{
+				properties[p++] = CL_GL_CONTEXT_KHR;
+				properties[p++] = (cl_context_properties)egl_ctx;
+
+				properties[p++] = CL_EGL_DISPLAY_KHR;
+				properties[p++] = (cl_context_properties)egl_dpy;
+
+				properties[p++] = CL_CONTEXT_PLATFORM;
+				properties[p++] = (cl_context_properties)platform->id;
+
+				interop_ok = true;
+			}
+		}
+
+		// ---------- No interop available ----------
+		if (!interop_ok)
+		{
+			// Fallback: pure OpenCL (no GL sharing)
+			properties[p++] = CL_CONTEXT_PLATFORM;
+			properties[p++] = (cl_context_properties)platform->id;
+		}
+
+#endif
+
+		properties[p++] = 0; // terminator
+
+		// --- Linux: ensure device matches GL context ---
+#ifdef __linux__
+		typedef cl_int(*clGetGLContextInfoKHR_fn)(
+			const cl_context_properties*,
+			cl_gl_context_info,
+			size_t,
+			void*,
+			size_t*);
+
+		auto clGetGLContextInfoKHR =
+			(clGetGLContextInfoKHR_fn)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
+
+		if (clGetGLContextInfoKHR)
+		{
+			cl_device_id gl_device = nullptr;
+
+			clGetGLContextInfoKHR(
+				properties,
+				CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
+				sizeof(cl_device_id),
+				&gl_device,
+				nullptr);
+
+			if (gl_device)
+				device_ = gl_device;
+		}
+#endif
+
+		// --- Create context ---
+		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
+
+		if (err != CL_SUCCESS)
+		{
+			// ---- Fallback: no GL interop ----
+			//cl_context_properties fallback_props[] = {
+			//    CL_CONTEXT_PLATFORM,
+			//    (cl_context_properties)platform->id,
+			//    0
+			//};
+
+			//context_ = clCreateContext(fallback_props, 1, &device_, NULL, NULL, &err);
+
+			//if (err != CL_SUCCESS)
+			//    return;
+
+			// Mark: no interop
+			interop_ = false;
+			return;
+		}
+		else
+		{
+			interop_ = true;
+		}
+
+		init_ = true;
+
+		// --- Extensions ---
+		clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, 0, NULL, &info_size);
 		std::string extensions(info_size, '\0');
-		err = clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
+		clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
+
 		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
 
-		//check if needs clear
+		// --- Other flags ---
 		need_clear_ = get_need_clear(device);
 	}
 
@@ -345,14 +461,14 @@ namespace flvr
 
 	//create a kernel in the program
 	//return kernel index; -1 unsuccessful
-	int KernelProgram::createKernel(const std::string &name)
+	int KernelProgram::createKernel(const std::string& name)
 	{
 		cl_int err;
 
 		//build program
 		if (!program_)
 		{
-			const char *c_source[1];
+			const char* c_source[1];
 			c_source[0] = source_.c_str();
 			size_t program_size = source_.size();
 			program_ = clCreateProgramWithSource(context_, 1,
@@ -364,14 +480,14 @@ namespace flvr
 			info_.clear();
 			if (err != CL_SUCCESS)
 			{
-				char *program_log;
+				char* program_log;
 				size_t log_size;
 				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
 					0, NULL, &log_size);
-				program_log = new char[log_size+1];
+				program_log = new char[log_size + 1];
 				program_log[log_size] = '\0';
 				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
-					log_size+1, program_log, NULL);
+					log_size + 1, program_log, NULL);
 				info_ = program_log;
 				//DBGPRINT(L"clBuildProgram error:\t%d\n", err);
 				delete[] program_log;
@@ -410,7 +526,7 @@ namespace flvr
 		return result;
 	}
 
-	int KernelProgram::findKernel(const std::string &name)
+	int KernelProgram::findKernel(const std::string& name)
 	{
 		for (size_t i = 0; i < kernels_.size(); ++i)
 		{
@@ -502,7 +618,7 @@ namespace flvr
 		return result;
 	}
 
-	bool KernelProgram::executeKernel(std::string &name, cl_uint dim, size_t *global_size, size_t *local_size)
+	bool KernelProgram::executeKernel(std::string& name, cl_uint dim, size_t* global_size, size_t* local_size)
 	{
 		int index = findKernel(name);
 		return executeKernel(index, dim, global_size, local_size);
@@ -554,14 +670,14 @@ namespace flvr
 		// Attempt to lock the weak_ptr
 		auto shared_arg = arg.lock();
 		if (!shared_arg) {
-			// Argument has expired — return empty weak_ptr
+			// Argument has expired ï¿½ return empty weak_ptr
 			return false;
 		}
 
 		// Check if the argument is already in the program's list
 		auto it = arg_list_.find(shared_arg);
 		if (it == arg_list_.end()) {
-			// Not found — insert into the list
+			// Not found ï¿½ insert into the list
 			arg_list_.insert(shared_arg);
 		}
 
@@ -603,7 +719,7 @@ namespace flvr
 		if (!existing_arg) {
 			existing_arg = Argument::createFromPointer(context_, flags, name, size, data);
 			if (!existing_arg || !existing_arg->valid_) {
-				// Failed to create buffer — return empty weak_ptr
+				// Failed to create buffer ï¿½ return empty weak_ptr
 				return std::weak_ptr<Argument>();
 			}
 
@@ -670,7 +786,7 @@ namespace flvr
 			return false;
 		}
 
-		// Case 1: Size fits — just write new data
+		// Case 1: Size fits ï¿½ just write new data
 		if (new_size <= shared_arg->size_) {
 			cl_int err = clEnqueueWriteBuffer(
 				queue_,
@@ -684,7 +800,7 @@ namespace flvr
 			return err == CL_SUCCESS;
 		}
 
-		// Case 2: Size too large — destroy and reallocate
+		// Case 2: Size too large ï¿½ destroy and reallocate
 		shared_arg->release(); // safely releases cl_mem if not protected
 
 		cl_int err = CL_SUCCESS;
@@ -1085,7 +1201,7 @@ namespace flvr
 
 	bool KernelProgram::get_group_size(int index,
 		unsigned int nx, unsigned int ny, unsigned int nz,
-		GroupSize &ksize)
+		GroupSize& ksize)
 	{
 		size_t ng;
 		if (!getWorkGroupSize(index, &ng))
@@ -1119,9 +1235,9 @@ namespace flvr
 		ksize.ngx = optimize_group_size_xy(nx, targetx);
 		ksize.ngy = optimize_group_size_xy(ny, targety);
 
-		ksize.gsx = nx / ksize.ngx + (nx%ksize.ngx ? 1 : 0);
-		ksize.gsy = ny / ksize.ngy + (ny%ksize.ngy ? 1 : 0);
-		ksize.gsz = nz / ksize.ngz + (nz%ksize.ngz ? 1 : 0);
+		ksize.gsx = nx / ksize.ngx + (nx % ksize.ngx ? 1 : 0);
+		ksize.gsy = ny / ksize.ngy + (ny % ksize.ngy ? 1 : 0);
+		ksize.gsz = nz / ksize.ngz + (nz % ksize.ngz ? 1 : 0);
 		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
 		ksize.gsxy = ksize.gsx * ksize.gsy;
 
@@ -1130,7 +1246,7 @@ namespace flvr
 
 	bool KernelProgram::get_group_size2(int index,
 		unsigned int nx, unsigned int ny, unsigned int nz,
-		GroupSize &ksize)
+		GroupSize& ksize)
 	{
 		size_t ng;
 		if (!getWorkGroupSize(index, &ng))
@@ -1149,9 +1265,9 @@ namespace flvr
 		ksize.ngx = optimize_group_size_xy(nx, targetx);
 		ksize.ngy = optimize_group_size_xy(ny, targety);
 
-		ksize.gsx = nx / ksize.ngx + (nx%ksize.ngx ? 1 : 0);
-		ksize.gsy = ny / ksize.ngy + (ny%ksize.ngy ? 1 : 0);
-		ksize.gsz = nz / ksize.ngz + (nz%ksize.ngz ? 1 : 0);
+		ksize.gsx = nx / ksize.ngx + (nx % ksize.ngx ? 1 : 0);
+		ksize.gsy = ny / ksize.ngy + (ny % ksize.ngy ? 1 : 0);
+		ksize.gsz = nz / ksize.ngz + (nz % ksize.ngz ? 1 : 0);
 		ksize.gsxyz = ksize.gsx * ksize.gsy * ksize.gsz;
 		ksize.gsxy = ksize.gsx * ksize.gsy;
 

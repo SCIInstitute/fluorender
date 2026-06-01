@@ -1,4 +1,4 @@
-# /*
+﻿# /*
 # For more information, please see: http://software.sci.utah.edu
 # 
 # The MIT License
@@ -29,6 +29,24 @@
 # This is an CMake configuration file for FluoRender
 
 cmake_minimum_required(VERSION 3.10)
+
+# Version info (UI only)
+set(FLUORENDER_VERSION_MAJOR 2)
+set(FLUORENDER_VERSION_MINOR 34)
+set(FLUORENDER_VERSION_PATCH 1)
+set(FLUORENDER_VERSION_STRING "2.34.1")
+set(FLUORENDER_COPYRIGHT "April 2026")
+set(FLUORENDER_TITLE "FluoRender")
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/FluoRender/Version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Generated/Version.h
+    @ONLY
+)
+
+if (MSVC)
+  add_compile_definitions(CMAKE_INTDIR=.)
+endif()
 
 # option to build with multithreading
 SET(USE_MP_COMPILE "0" CACHE STRING "Number of parallel jobs for building")
@@ -103,31 +121,6 @@ elseif(WIN32)
   endif()
 endif()
 
-if(${ARCHITECTURE} MATCHES "64")
-  add_definitions(-DFLUORENDER_ARCH="64bit")
-else()
-  add_definitions(-DFLUORENDER_ARCH="32bit")
-endif()
-
-#if (WIN32 OR APPLE)
-#else()
-#  set(CMAKE_C_COMPILER "gcc-12")
-#  set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")
-#endif()
-
-#if(UNIX)
-#  set(RELEASE_FLAGS ${RELEASE_FLAGS} -O3 -march=corei7-avx)
-#  set(DEBUG_FLAGS ${DEBUG_FLAGS} -O0 -march=corei7-avx -ggdb)
-#endif()
-
-add_definitions(-DFLUORENDER_TITLE="FluoRender")
-
-add_definitions(-DVERSION_MAJOR=2)						# Be sure to update the Versions and Date for each release!!!!
-add_definitions(-DVERSION_MINOR=34)						# 
-add_definitions(-DVERSION_MAJOR_TAG="2")				# 
-add_definitions(-DVERSION_MINOR_TAG="34")				# 
-add_definitions(-DVERSION_COPYRIGHT="January 2026")		# Up to here!
-
 #windows
 if(WIN32)
 add_definitions(-D_WIN32_WINNT=0x0602)
@@ -145,46 +138,70 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 cmake_path(GET FluoRender_SOURCE_DIR PARENT_PATH PARENT_DIR)
 
 # static compile
-add_definitions(-DSTATIC_COMPILE)
-add_definitions(-DLX_STATIC_LINKING)
+add_compile_definitions(STATIC_COMPILE)
+add_compile_definitions(LX_STATIC_LINKING)
 
-# Set the GLEW directory
-if(WIN32 OR APPLE)
-    file(GLOB GLEW_DIRS "${PARENT_DIR}/glew*")
-    list(GET GLEW_DIRS 0 GLEW_DIR)  # Get the first match
-    set(GLEW_INCLUDE_DIR "${GLEW_DIR}/include")
+# ---- GLAD setup ----
+set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FluoRender/Glad)
+# Core GLAD source (always required)
+set(GLAD_SOURCES
+    ${GLAD_DIR}/src/gl.c
+)
+# Platform-specific additions
+if (WIN32)
+    list(APPEND GLAD_SOURCES
+        ${GLAD_DIR}/src/wgl.c
+    )
 endif()
-if(WIN32)
-    set(GLEW_SHARED_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32d.lib")
-    set(GLEW_SHARED_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32.lib")
-    set(GLEW_STATIC_LIBRARY_DEBUG "${GLEW_DIR}/lib/Debug/x64/glew32sd.lib")
-    set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/Release/x64/glew32s.lib")
-elseif(APPLE)
-    set(GLEW_SHARED_LIBRARY_DEBUG "${GLEW_DIR}/lib/libGLEW.dylib")
-    set(GLEW_SHARED_LIBRARY_RELEASE "${GLEW_DIR}/lib/libGLEW.dylib")
-    set(GLEW_STATIC_LIBRARY_DEBUG "${GLEW_DIR}/lib/libGLEW.a")
-    set(GLEW_STATIC_LIBRARY_RELEASE "${GLEW_DIR}/lib/libGLEW.a")
-endif()
-add_definitions(-DGLEW_STATIC)
-set(GLEW_USE_STATIC_LIBS TRUE)
-find_package(GLEW REQUIRED)
+# Create library
+add_library(glad STATIC ${GLAD_SOURCES})
+# Include directories
+target_include_directories(glad PUBLIC
+    ${GLAD_DIR}/include
+)
+# Optional: make intent explicit
+target_compile_definitions(glad PRIVATE
+    $<$<PLATFORM_ID:Windows>:GLAD_PLATFORM_WIN32>
+    $<$<PLATFORM_ID:Linux>:GLAD_PLATFORM_LINUX>
+    $<$<PLATFORM_ID:Darwin>:GLAD_PLATFORM_MACOS>
+)
+
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
 # zlib
+# Try legacy standalone zlib first (all platforms)
 file(GLOB ZLIB_DIRS "${PARENT_DIR}/zlib*")
-list(GET ZLIB_DIRS 0 ZLIB_DIR)
-set(ZLIB_INCLUDE_DIR "${ZLIB_DIR}")
-# Windows static library name
-if(WIN32)
-    file(GLOB ZLIB_RELEASE_LIBRARIES ${ZLIB_DIR}/build/Release/*.lib)
-    file(GLOB ZLIB_DEBUG_LIBRARIES ${ZLIB_DIR}/build/Debug/*.lib)
-    set(ZLIB_LIBRARY $<$<CONFIG:Release>:${ZLIB_RELEASE_LIBRARIES}> $<$<CONFIG:Debug>:${ZLIB_DEBUG_LIBRARIES}>)
+
+if(ZLIB_DIRS)
+    list(GET ZLIB_DIRS 0 ZLIB_DIR)
+    set(ZLIB_INCLUDE_DIR "${ZLIB_DIR}")
+
+    if(WIN32)
+        file(GLOB ZLIB_RELEASE_LIBRARIES ${ZLIB_DIR}/build/Release/*.lib)
+        file(GLOB ZLIB_DEBUG_LIBRARIES   ${ZLIB_DIR}/build/Debug/*.lib)
+        set(ZLIB_LIBRARY
+            $<$<CONFIG:Release>:${ZLIB_RELEASE_LIBRARIES}>
+            $<$<CONFIG:Debug>:${ZLIB_DEBUG_LIBRARIES}>)
+    else()
+        # macOS / Linux legacy static build
+        set(ZLIB_LIBRARY "${ZLIB_DIR}/libz.a")
+    endif()
+
+    set(ZLIB_FOUND TRUE)
+    message(STATUS "Using standalone zlib at: ${ZLIB_DIR}")
+
 else()
-    set(ZLIB_LIBRARY "${ZLIB_DIR}/libz.a")   # macOS/Linux
+    # No local zlib found
+    if(UNIX AND NOT APPLE)
+        # Linux fallback: system zlib
+        find_package(ZLIB REQUIRED)
+        message(STATUS "Using system zlib (Linux): ${ZLIB_VERSION}")
+    else()
+        message(FATAL_ERROR "Standalone zlib not found and no system fallback enabled on this platform")
+    endif()
 endif()
-message(STATUS "Using standalone zlib at: ${ZLIB_DIR}")
 
 # wxWidgets
 file(GLOB WXWIDGETS_DIRS "${PARENT_DIR}/wxWidgets*")
@@ -206,9 +223,9 @@ else()
     set(wxWidgets_LIB_DIR ${WXWIDGETS_DIR}/mybuild/lib)
 endif()
 #set(wxWidgets_USE_REL_AND_DBG ON)
+set(wxWidgets_USE_STATIC ON)
 find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
-set(wxWidgets_USE_STATIC ON)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
 # solution for wxWidgets linking "ambiguous" errors
@@ -239,6 +256,8 @@ if(WIN32)
     set(TIFF_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxtiffd.lib)
     set(PNG_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxpng.lib)
     set(PNG_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxpngd.lib)
+    set(JPEG_LIBRARY_RELEASE ${wxWidgets_LIB_DIR}/wxjpeg.lib)
+    set(JPEG_LIBRARY_DEBUG ${wxWidgets_LIB_DIR}/wxjpegd.lib)
 elseif(APPLE)
     set(TIFF_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/tiff/libtiff")
     set(PNG_PNG_INCLUDE_DIR "${wxWidgets_ROOT_DIR}/src/png")
@@ -253,170 +272,392 @@ elseif(APPLE)
     list(GET PNG_LIBRARIES 0 PNG_LIBRARY)
     set(PNG_LIBRARY_RELEASE "${PNG_LIBRARY}")
     set(PNG_LIBRARY_DEBUG "${PNG_LIBRARY}")
+    # JPEG
+    file(GLOB JPEG_LIBRARIES "${wxWidgets_LIB_DIR}/libwxjpeg-*.a")
+    list(GET JPEG_LIBRARIES 0 JPEG_LIBRARY)
+    set(JPEG_LIBRARY_RELEASE "${JPEG_LIBRARY}")
+    set(JPEG_LIBRARY_DEBUG "${JPEG_LIBRARY}")
 endif()
 find_package(TIFF REQUIRED)
 find_package(PNG REQUIRED)
-message(STATUS "PNG_INCLUDE_DIRS = ${PNG_INCLUDE_DIRS}")
-message(STATUS "PNG_LIBRARIES    = ${PNG_LIBRARIES}")
-message(STATUS "PNG_LIBRARY      = ${PNG_LIBRARY}")
-message(STATUS "PNG_PNG_INCLUDE_DIR = ${PNG_PNG_INCLUDE_DIR}")
+find_package(JPEG REQUIRED)
 if(WIN32)
     set(Tiff_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
     set(TIFF_INCLUDE_DIR ${wxWidgets_ROOT_DIR}/src/tiff/libtiff)
 endif()
-message(STATUS "wxWidgets_LIB_DIR: ${wxWidgets_LIB_DIR}")
-message(STATUS "wxWidgets_LIBRARIES: ${wxWidgets_LIBRARIES}")
 
 # Boost
-file(GLOB BOOST_DIRS "${PARENT_DIR}/boost*")
-list(GET BOOST_DIRS 0 BOOST_DIRS)  # Get the first match
-set(Boost_INCLUDE_DIR "${BOOST_DIRS}")
-# only find static libs:
-set(Boost_USE_STATIC_LIBS        ON)
-set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    OFF)
-find_package(Boost COMPONENTS filesystem locale graph REQUIRED)
+# Try legacy standalone Boost first
+file(GLOB BOOST_DIR_CANDIDATES "${PARENT_DIR}/boost*")
+
+if(BOOST_DIR_CANDIDATES)
+    list(GET BOOST_DIR_CANDIDATES 0 BOOST_DIR)
+    set(Boost_INCLUDE_DIR "${BOOST_DIR}")
+
+    message(STATUS "Using standalone Boost at: ${BOOST_DIR}")
+
+    # Legacy behavior: static Boost
+    set(Boost_USE_STATIC_LIBS       ON)
+    set(Boost_USE_MULTITHREADED     ON)
+    set(Boost_USE_STATIC_RUNTIME    OFF)
+
+    # Help CMake find the locally built Boost libraries
+    set(BOOST_ROOT "${BOOST_DIR}")
+    set(BOOST_INCLUDEDIR "${BOOST_DIR}")
+    set(BOOST_LIBRARYDIR "${BOOST_DIR}/stage/lib")
+
+    find_package(Boost REQUIRED COMPONENTS filesystem locale graph)
+
+else()
+    # No local Boost found
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system Boost (Linux fallback)")
+
+        # On Linux, system Boost is almost always shared
+        set(Boost_USE_STATIC_LIBS       OFF)
+        set(Boost_USE_MULTITHREADED     ON)
+        set(Boost_USE_STATIC_RUNTIME    OFF)
+
+        find_package(Boost REQUIRED COMPONENTS filesystem locale graph)
+    else()
+        message(FATAL_ERROR "Standalone Boost not found and no system fallback enabled on this platform")
+    endif()
+endif()
 
 # bzip2
-if (NOT WIN32)
-file(GLOB BZIP2_DIRS "${PARENT_DIR}/bzip2*")
-list(GET BZIP2_DIRS 0 BZIP2_DIRS)  # Get the first match
-set(BZIP2_ROOT "${BZIP2_DIRS}")
-find_path(BZIP2_INCLUDE_DIR bzlib.h PATHS "${BZIP2_ROOT}/include")
-find_library(BZIP2_LIBRARY bz2 PATHS "${BZIP2_ROOT}/lib")
+if(NOT WIN32)
+    # Try legacy standalone bzip2 first
+    file(GLOB BZIP2_DIR_CANDIDATES "${PARENT_DIR}/bzip2*")
+
+    if(BZIP2_DIR_CANDIDATES)
+        list(GET BZIP2_DIR_CANDIDATES 0 BZIP2_ROOT)
+
+        find_path(BZIP2_INCLUDE_DIR
+            NAMES bzlib.h
+            PATHS "${BZIP2_ROOT}"
+            PATH_SUFFIXES include
+            NO_DEFAULT_PATH)
+
+        find_library(BZIP2_LIBRARY
+            NAMES bz2 bz2_static
+            PATHS "${BZIP2_ROOT}/build"
+            NO_DEFAULT_PATH)
+
+        if(BZIP2_INCLUDE_DIR AND BZIP2_LIBRARY)
+            set(BZIP2_FOUND TRUE)
+            message(STATUS "Using standalone bzip2 at: ${BZIP2_ROOT}")
+        endif()
+    endif()
+
+    # Linux fallback: system bzip2
+    if(NOT BZIP2_FOUND)
+        find_package(BZip2 REQUIRED)
+        message(STATUS "Using system bzip2 (Linux fallback)")
+    endif()
 endif()
 
 # dlib
+# Windows-specific BLAS / CUDA setup
 if(WIN32)
     file(GLOB BLAS_DIRS "${PARENT_DIR}/OpenBLAS*")
-    list(GET BLAS_DIRS 0 BLAS_DIRS)  # Get the first match
+    list(GET BLAS_DIRS 0 BLAS_DIRS)
     set(OpenBLAS_DIR "${BLAS_DIRS}/build")
     set(OpenBLAS_LIB_DIR "${BLAS_DIRS}/build/lib")
     set(BLAS_openblas_LIBRARY "${BLAS_DIRS}/build/lib/RELEASE/openblas.lib")
+
     set(CUDNN_ROOT_DIR $ENV{CUDNN_PATH})
-    message (STATUS "CUDNN_ROOT_DIR=${CUDNN_ROOT_DIR}")
+    message(STATUS "CUDNN_ROOT_DIR=${CUDNN_ROOT_DIR}")
+
     set(cudnn "${CUDNN_ROOT_DIR}/lib/12.5/x64/cudnn.lib")
-    message (STATUS cudnn "cudnn=${cudnn}")
     set(cudnn_include "${CUDNN_ROOT_DIR}/include/12.5/")
-    message (STATUS cudnn_include "cudnn_include=${cudnn_include}")
 endif()
-file(GLOB DLIB_DIRS "${PARENT_DIR}/dlib*")
-list(GET DLIB_DIRS 0 DLIB_DIRS)  # Get the first match
-add_subdirectory(${DLIB_DIRS} dlib_build)
-set(DLIB_USE_BLAS ON)
-set(DLIB_USE_CUDA ON)
+
+# Try legacy standalone dlib first
+file(GLOB DLIB_DIR_CANDIDATES "${PARENT_DIR}/dlib*")
+
+if(DLIB_DIR_CANDIDATES)
+    list(GET DLIB_DIR_CANDIDATES 0 DLIB_DIR)
+
+    message(STATUS "Using standalone dlib at: ${DLIB_DIR}")
+
+    set(DLIB_USE_BLAS ON)
+    set(DLIB_USE_CUDA OFF)
+
+    add_subdirectory(${DLIB_DIR} dlib_build)
+
+    set(DLIB_FOUND TRUE)
+
+else()
+    # Linux fallback: system dlib
+    if(UNIX AND NOT APPLE)
+        find_package(dlib REQUIRED)
+        message(STATUS "Using system dlib (Linux fallback)")
+    else()
+        message(FATAL_ERROR "Standalone dlib not found and no system fallback enabled on this platform")
+    endif()
+endif()
 
 #opencv
-file(GLOB OPENCV_DIRS "${PARENT_DIR}/opencv*")
-list(GET OPENCV_DIRS 0 OPENCV_DIRS)  # Get the first match
-set(OpenCV_DIR "${OPENCV_DIRS}/build")
-find_package(OpenCV REQUIRED)
-if (OPENCV_FOUND)
-  message (STATUS "OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
+#depends on eigen
+file(GLOB EIGEN_DIR_CANDIDATES "${PARENT_DIR}/eigen*")
+if(EIGEN_DIR_CANDIDATES)
+    list(GET EIGEN_DIR_CANDIDATES 0 EIGEN_ROOT)
+    set(EIGEN_INCLUDE_DIR "${EIGEN_ROOT}")
+    message(STATUS "Using standalone Eigen at: ${EIGEN_ROOT}")
+    add_library(Eigen3::Eigen INTERFACE IMPORTED)
+    target_include_directories(Eigen3::Eigen INTERFACE "${EIGEN_ROOT}")
+else()
+    # Linux fallback: system Eigen
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system Eigen (Linux fallback)")
+        find_package(Eigen3 REQUIRED)
+    else()
+        message(FATAL_ERROR "Standalone Eigen not found and no system fallback enabled on this platform")
+    endif()
+endif()
+
+# Try legacy standalone OpenCV first
+file(GLOB OPENCV_DIR_CANDIDATES "${PARENT_DIR}/opencv*")
+
+if(OPENCV_DIR_CANDIDATES)
+    list(GET OPENCV_DIR_CANDIDATES 0 OPENCV_ROOT)
+    set(OpenCV_DIR "${OPENCV_ROOT}/build")
+
+    message(STATUS "Using standalone OpenCV at: ${OPENCV_ROOT}")
+
+    find_package(OpenCV REQUIRED COMPONENTS core calib3d)
+
+else()
+    # Linux fallback: system OpenCV
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system OpenCV (Linux fallback)")
+        find_package(OpenCV REQUIRED COMPONENTS core calib3d)
+    else()
+        message(FATAL_ERROR "Standalone OpenCV not found and no system fallback enabled on this platform")
+    endif()
+endif()
+
+if(OpenCV_FOUND)
+    message(STATUS "OpenCV version: ${OpenCV_VERSION}")
+    message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
 endif()
 
 #python
-#set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 if (PYTHON3_FOUND)
   message (STATUS "Python3_INCLUDE_DIRS=${Python3_INCLUDE_DIRS}")
 endif()
 
 #hdf5
-if (WIN32 OR APPLE)
-  file(GLOB HDF5_DIRS "${PARENT_DIR}/hdf5*")
-  list(GET HDF5_DIRS 0 HDF5_DIRS)  # Get the first match
-  set(HDF5_USE_STATIC_LIBRARIES ON)
-  set(HDF5_INCLUDE_DIRS "${HDF5_DIRS}/src")
-  set(HDF5_C_INCLUDE_DIR "${HDF5_DIRS}/build/src")
-  if(WIN32)
-    set(HDF5_hdf5_LIBRARY_DEBUG "${HDF5_DIRS}/build/bin/Debug/libhdf5_D.lib")
-    set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_DIRS}/build/bin/Release/libhdf5.lib")
-  else()
-    set(HDF5_hdf5_LIBRARY_DEBUG "${HDF5_DIRS}/build/bin/libhdf5.a")
-    set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_DIRS}/build/bin/libhdf5.a")
-  endif()
-  find_package(HDF5 REQUIRED)
-  if (HDF5_FOUND)
-    message(STATUS "HDF5 include directories: ${HDF5_INCLUDE_DIRS}")
-    message(STATUS "HDF5 libraries: ${HDF5_LIBRARIES}")
-  endif()
-  set(HDF5_INCLUDE_PATHS
-    ${HDF5_INCLUDE_DIRS}
-    "${HDF5_DIRS}/src/H5FDsubfiling"
-    ${HDF5_C_INCLUDE_DIR}
-)
+# Try standalone HDF5 first (Windows / macOS)
+file(GLOB HDF5_DIR_CANDIDATES "${PARENT_DIR}/hdf5*")
+if(HDF5_DIR_CANDIDATES)
+    list(GET HDF5_DIR_CANDIDATES 0 HDF5_ROOT)
+
+    set(HDF5_USE_STATIC_LIBRARIES ON)
+    set(HDF5_INCLUDE_DIRS "${HDF5_ROOT}/src")
+    set(HDF5_C_INCLUDE_DIR "${HDF5_ROOT}/build/src")
+
+    if(WIN32)
+        set(HDF5_hdf5_LIBRARY_DEBUG   "${HDF5_ROOT}/build/bin/Debug/libhdf5_D.lib")
+        set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_ROOT}/build/bin/Release/libhdf5.lib")
+    else()
+        set(HDF5_hdf5_LIBRARY_DEBUG   "${HDF5_ROOT}/build/bin/libhdf5.a")
+        set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_ROOT}/build/bin/libhdf5.a")
+    endif()
+
+    find_package(HDF5 REQUIRED)
+
+    set(HDF5_INCLUDE_PATHS
+        ${HDF5_INCLUDE_DIRS}
+        "${HDF5_ROOT}/src/H5FDsubfiling"
+        ${HDF5_C_INCLUDE_DIR}
+    )
+
+else()
+    # Linux fallback: system HDF5
+    message(STATUS "Using system HDF5 (Linux fallback)")
+    find_package(HDF5 REQUIRED COMPONENTS C CXX)
 endif()
 
-# JNI includes
-if (WIN32 OR APPLE)
-  find_package(Java REQUIRED)
-  find_package(JNI REQUIRED)
+# JNI
+# Allow user override
+set(JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64)
+#set(JAVA_HOME "" CACHE PATH "Path to Java installation (JDK root)")
+
+# Require at least Java 17
+set(_JAVA_MIN_VERSION 17)
+
+# Step 1: If JAVA_HOME is provided, use it
+if(JAVA_HOME)
+  set(ENV{JAVA_HOME} "${JAVA_HOME}")
+  message(STATUS "Using user-provided JAVA_HOME: ${JAVA_HOME}")
+
+  # Help CMake find Java/JNI under this prefix
+  list(PREPEND CMAKE_PREFIX_PATH "${JAVA_HOME}")
+
+endif()
+
+# Step 2: Find Java
+find_package(Java ${_JAVA_MIN_VERSION} REQUIRED COMPONENTS Runtime Development)
+
+# Export detected JAVA_HOME if not provided
+if(NOT JAVA_HOME)
+  set(JAVA_HOME "${Java_JAVA_HOME}" CACHE PATH "Path to Java installation" FORCE)
+  set(ENV{JAVA_HOME} "${JAVA_HOME}")
+  message(STATUS "Detected JAVA_HOME: ${JAVA_HOME}")
+endif()
+
+# Step 3: Find JNI (depends on Java)
+find_package(JNI REQUIRED)
+
+# Step 4: Diagnostics
+message(STATUS "Java executable: ${Java_JAVA_EXECUTABLE}")
+message(STATUS "Java version: ${Java_VERSION_STRING}")
+message(STATUS "JAVA_HOME: ${JAVA_HOME}")
+
+if(JNI_FOUND)
+  message(STATUS "JNI include dirs: ${JNI_INCLUDE_DIRS}")
+  message(STATUS "JNI libraries: ${JNI_LIBRARIES}")
 else()
-  set(JAVA_HOME /usr/lib/jvm/jdk-19)
-  set(JAVA_AWT_LIBRARY ${JAVA_HOME}/lib/libjawt.so)
-  set(JAVA_JVM_LIBRARY ${JAVA_HOME}/lib/server/libjvm.so)
-  set(JAVA_INCLUDE_PATH ${JAVA_HOME}/include)
-  set(JAVA_INCLUDE_PATH2 ${JAVA_HOME}/include/linux)
-  set(JAVA_AWT_INCLUDE_PATH ${JAVA_HOME}/include)
-  find_package(Java REQUIRED)
-  find_package(JNI REQUIRED)
+  message(FATAL_ERROR "JNI not found but required")
 endif()
 
 # ffmpeg
-file(GLOB FFMPEG_DIRS "${PARENT_DIR}/FFmpeg*")
-list(GET FFMPEG_DIRS 0 FFMPEG_DIRS)  # Get the first match
-set(FFMPEG_INCLUDE_DIR "${FFMPEG_DIRS}")
-find_library(AVCODEC_LIBRARY avcodec HINTS "${FFMPEG_DIRS}/libavcodec")
-find_library(AVFORMAT_LIBRARY avformat HINTS "${FFMPEG_DIRS}/libavformat")
-find_library(AVUTIL_LIBRARY avutil HINTS "${FFMPEG_DIRS}/libavutil")
-find_library(SWSCALE_LIBRARY swscale HINTS "${FFMPEG_DIRS}/libswscale")
-find_library(SWRESAMPLE_LIBRARY swresample HINTS "${FFMPEG_DIRS}/libswresample")
-set(FFMPEG_LIBRARIES
-    ${AVCODEC_LIBRARY}
-    ${AVFORMAT_LIBRARY}
-    ${AVUTIL_LIBRARY}
-    ${SWSCALE_LIBRARY}
-    ${SWRESAMPLE_LIBRARY})
-if(WIN32)
-set(X26x_RELEASE_LIBRARIES
-    ${FFMPEG_DIRS}/depends/lib/libx264.lib
-    ${FFMPEG_DIRS}/depends/lib/libx265.lib)
-set(X26x_DEBUG_LIBRARIES
-    ${FFMPEG_DIRS}/depends/lib/libx264.lib
-    ${FFMPEG_DIRS}/depends/lib/libx265d.lib)
-list(APPEND FFMPEG_LIBRARIES
-    $<$<CONFIG:Debug>:${X26x_DEBUG_LIBRARIES}>
-    $<$<CONFIG:Release>:${X26x_RELEASE_LIBRARIES}>
-    mfplat.lib
-    mfuuid.lib
-    strmiids.lib
-    bcrypt.lib
-)
-elseif(APPLE)
-    find_library(X264_LIBRARY x264 HINTS "${FFMPEG_DIRS}/depends/lib")
-    find_library(X265_LIBRARY x265 HINTS "${FFMPEG_DIRS}/depends/lib")
-    list(APPEND FFMPEG_LIBRARIES
-        ${X264_LIBRARY}
-        ${X265_LIBRARY})
+# Try legacy standalone FFmpeg first
+file(GLOB FFMPEG_DIR_CANDIDATES "${PARENT_DIR}/FFmpeg*")
+
+if(FFMPEG_DIR_CANDIDATES)
+    list(GET FFMPEG_DIR_CANDIDATES 0 FFMPEG_ROOT)
+    set(FFMPEG_INCLUDE_DIR "${FFMPEG_ROOT}")
+
+    message(STATUS "Using standalone FFmpeg at: ${FFMPEG_ROOT}")
+
+    find_library(AVCODEC_LIBRARY avcodec HINTS "${FFMPEG_ROOT}/libavcodec")
+    find_library(AVFORMAT_LIBRARY avformat HINTS "${FFMPEG_ROOT}/libavformat")
+    find_library(AVUTIL_LIBRARY   avutil   HINTS "${FFMPEG_ROOT}/libavutil")
+    find_library(SWSCALE_LIBRARY  swscale  HINTS "${FFMPEG_ROOT}/libswscale")
+    find_library(SWRESAMPLE_LIBRARY swresample HINTS "${FFMPEG_ROOT}/libswresample")
+
+    set(FFMPEG_LIBRARIES
+        ${AVCODEC_LIBRARY}
+        ${AVFORMAT_LIBRARY}
+        ${AVUTIL_LIBRARY}
+        ${SWSCALE_LIBRARY}
+        ${SWRESAMPLE_LIBRARY})
+
+    if(WIN32)
+        set(X26x_RELEASE_LIBRARIES
+            ${FFMPEG_ROOT}/depends/lib/libx264.lib
+            ${FFMPEG_ROOT}/depends/lib/libx265.lib)
+        set(X26x_DEBUG_LIBRARIES
+            ${FFMPEG_ROOT}/depends/lib/libx264.lib
+            ${FFMPEG_ROOT}/depends/lib/libx265d.lib)
+
+        list(APPEND FFMPEG_LIBRARIES
+            $<$<CONFIG:Debug>:${X26x_DEBUG_LIBRARIES}>
+            $<$<CONFIG:Release>:${X26x_RELEASE_LIBRARIES}>
+            mfplat.lib
+            mfuuid.lib
+            strmiids.lib
+            bcrypt.lib
+        )
+    elseif(APPLE)
+        find_library(X264_LIBRARY x264 HINTS "${FFMPEG_ROOT}/depends/lib")
+        find_library(X265_LIBRARY x265 HINTS "${FFMPEG_ROOT}/depends/lib")
+        list(APPEND FFMPEG_LIBRARIES ${X264_LIBRARY} ${X265_LIBRARY})
+    endif()
+
+    set(FFMPEG_FOUND TRUE)
+
+else()
+    # Linux fallback: system FFmpeg via pkg-config
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system FFmpeg (Linux fallback)")
+
+        find_package(PkgConfig REQUIRED)
+
+        pkg_check_modules(AVCODEC     REQUIRED libavcodec)
+        pkg_check_modules(AVFORMAT    REQUIRED libavformat)
+        pkg_check_modules(AVUTIL      REQUIRED libavutil)
+        pkg_check_modules(SWSCALE     REQUIRED libswscale)
+        pkg_check_modules(SWRESAMPLE  REQUIRED libswresample)
+
+        set(FFMPEG_INCLUDE_DIR
+            ${AVCODEC_INCLUDE_DIRS}
+            ${AVFORMAT_INCLUDE_DIRS}
+            ${AVUTIL_INCLUDE_DIRS}
+            ${SWSCALE_INCLUDE_DIRS}
+            ${SWRESAMPLE_INCLUDE_DIRS})
+
+        set(FFMPEG_LIBRARIES
+            ${AVCODEC_LIBRARIES}
+            ${AVFORMAT_LIBRARIES}
+            ${AVUTIL_LIBRARIES}
+            ${SWSCALE_LIBRARIES}
+            ${SWRESAMPLE_LIBRARIES})
+
+        set(FFMPEG_FOUND TRUE)
+    else()
+        message(FATAL_ERROR "Standalone FFmpeg not found and no system fallback enabled on this platform")
+    endif()
 endif()
 
 # freetype
-file(GLOB FREETYPE_DIRS "${PARENT_DIR}/freetype*")
-list(GET FREETYPE_DIRS 0 FREETYPE_DIRS)  # Get the first match
-set(FREETYPE_INCLUDE_DIRS "${FREETYPE_DIRS}/include")
-if(WIN32)
-    set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/Release/freetype.lib")
-    set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/Debug/freetyped.lib")
+# Try legacy standalone FreeType first
+file(GLOB FREETYPE_DIR_CANDIDATES "${PARENT_DIR}/freetype*")
+
+if(FREETYPE_DIR_CANDIDATES)
+    list(GET FREETYPE_DIR_CANDIDATES 0 FREETYPE_ROOT)
+
+    message(STATUS "Using standalone FreeType at: ${FREETYPE_ROOT}")
+
+    set(FREETYPE_INCLUDE_DIRS "${FREETYPE_ROOT}/include")
+
+    if(WIN32)
+        set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_ROOT}/build/Release/freetype.lib")
+        set(FREETYPE_LIBRARY_DEBUG   "${FREETYPE_ROOT}/build/Debug/freetyped.lib")
+    else()
+        # macOS / Linux legacy static build
+        set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_ROOT}/build/libfreetype.a")
+        set(FREETYPE_LIBRARY_DEBUG   "${FREETYPE_ROOT}/build/libfreetype.a")
+    endif()
+
+    find_package(Freetype REQUIRED)
+    #set(FREETYPE_FOUND TRUE)
+
 else()
-    set(FREETYPE_LIBRARY_RELEASE "${FREETYPE_DIRS}/build/libfreetype.a")
-    set(FREETYPE_LIBRARY_DEBUG "${FREETYPE_DIRS}/build/libfreetype.a")
+    # Linux fallback: system FreeType
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system FreeType (Linux fallback)")
+        find_package(Freetype REQUIRED)
+    else()
+        message(FATAL_ERROR "Standalone FreeType not found and no system fallback enabled on this platform")
+    endif()
 endif()
-find_package(Freetype REQUIRED)
 
 # glm
-file(GLOB GLM_DIRS "${PARENT_DIR}/glm*")
-list(GET GLM_DIRS 0 GLM_DIRS)  # Get the first match
+# Try legacy standalone GLM first (header-only)
+file(GLOB GLM_DIR_CANDIDATES "${PARENT_DIR}/glm*")
+
+if(GLM_DIR_CANDIDATES)
+    list(GET GLM_DIR_CANDIDATES 0 GLM_ROOT)
+
+    message(STATUS "Using standalone GLM at: ${GLM_ROOT}")
+
+    set(GLM_INCLUDE_DIR "${GLM_ROOT}")
+    set(GLM_FOUND TRUE)
+
+else()
+    # Linux fallback: system GLM
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system GLM (Linux fallback)")
+        find_package(glm REQUIRED)
+        set(GLM_FOUND TRUE)
+    else()
+        message(FATAL_ERROR "Standalone GLM not found and no system fallback enabled on this platform")
+    endif()
+endif()
 add_definitions(-DGLM_FORCE_RADIANS=1)
 
 # BridgeRuntime
@@ -467,107 +708,229 @@ endif()
 add_definitions(-DCL_TARGET_OPENCL_VERSION=300)
 
 # OpenJpeg
-file(GLOB OPENJPEG_DIRS "${PARENT_DIR}/openjpeg*")
-list(GET OPENJPEG_DIRS 0 OPENJPEG_DIRS)  # Get the first match
-if(WIN32)
-  file(GLOB OPENJPEG_RELEASE_LIBRARIES ${OPENJPEG_DIRS}/build/bin/Release/*.lib)
-  file(GLOB OPENJPEG_DEBUG_LIBRARIES ${OPENJPEG_DIRS}/build/bin/Debug/*.lib)
-  set(OpenJpeg_LIBRARIES
-    $<$<CONFIG:Debug>:
-      ${OPENJPEG_DEBUG_LIBRARIES}
-    >
-    $<$<NOT:$<CONFIG:Debug>>:
-      ${OPENJPEG_RELEASE_LIBRARIES}
-    >
-  )
-else()
-  file(GLOB OpenJpeg_LIBRARIES "${OPENJPEG_DIRS}/build/lib/*.a")
-endif()
-set(OPENJPEG_PATHS
-  "${OPENJPEG_DIRS}/src/lib/openjp2"
-  "${OPENJPEG_DIRS}/build/src/lib/openjp2")
-add_definitions(-DOPJ_STATIC)
+# Try legacy standalone OpenJPEG first
+file(GLOB OPENJPEG_DIR_CANDIDATES "${PARENT_DIR}/openjpeg*")
 
-# OpenVR
-file(GLOB OPENVR_DIRS "${PARENT_DIR}/openvr*")
-list(GET OPENVR_DIRS 0 OPENVR_DIRS)  # Get the first match
-if(WIN32)
-    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/win64/openvr_api.lib)
-elseif(APPLE)
-    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/bin/osx64/libopenvr_api.a)
-else()
-    file(GLOB OpenVR_LIBRARIES ${OPENVR_DIRS}/lib/linux64/libopenvr_api.a)
-endif()
-set(OPENVR_PATHS "${OPENVR_DIRS}/headers")
+if(OPENJPEG_DIR_CANDIDATES)
+    list(GET OPENJPEG_DIR_CANDIDATES 0 OPENJPEG_ROOT)
 
-# OpenXR
-file(GLOB OPENXR_DIRS "${PARENT_DIR}/OpenXR-SDK*")
-list(GET OPENXR_DIRS 0 OPENXR_DIRS)  # Get the first match
-set(OPENXR_PATHS "${OPENXR_DIRS}/include")
-if(WIN32)
-    #d3d11 dependencies
-    set(OPENXR_PATHS "${OPENXR_PATHS};${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include")
-    file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Release/*.lib)
-    file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_DIRS}/build/src/loader/Debug/*.lib)
-    set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>)
-    add_definitions(-DXR_USE_PLATFORM_WIN32)
-    add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
-    add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
-    add_definitions(-DXR_EXTENSION_PROTOTYPES)
+    message(STATUS "Using standalone OpenJPEG at: ${OPENJPEG_ROOT}")
 
-    # nuget
-	# Convert to absolute path
-	get_filename_component(ABS_NUGET_EXECUTABLE "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" ABSOLUTE)
-	set(NUGET_EXECUTABLE ${ABS_NUGET_EXECUTABLE})
-	message(STATUS "NuGet executable path: ${NUGET_EXECUTABLE}")
-	
-    # Find the NuGet executable
-    find_program(NUGET_COMMAND NAMES nuget PATHS "${FluoRender_SOURCE_DIR}/NuGet")
+    if(WIN32)
+        file(GLOB OPENJPEG_RELEASE_LIBRARIES
+            ${OPENJPEG_ROOT}/build/bin/Release/*.lib)
+        file(GLOB OPENJPEG_DEBUG_LIBRARIES
+            ${OPENJPEG_ROOT}/build/bin/Debug/*.lib)
 
-    # Ensure the NuGet executable was found
-    if(NOT NUGET_COMMAND)
-        message(FATAL_ERROR "NuGet executable not found. Please specify the correct path.")
+        set(OpenJpeg_LIBRARIES
+            $<$<CONFIG:Debug>:${OPENJPEG_DEBUG_LIBRARIES}>
+            $<$<NOT:$<CONFIG:Debug>>:${OPENJPEG_RELEASE_LIBRARIES}>
+        )
+    elseif(APPLE)
+        file(GLOB OpenJpeg_LIBRARIES
+            "${OPENJPEG_ROOT}/build/bin/*.a")
+    else()
+        file(GLOB OpenJpeg_LIBRARIES
+            "${OPENJPEG_ROOT}/build/bin/*.a")
     endif()
 
-    # Specify the NuGet package and version
-    set(NUGET_PACKAGE Microsoft.Holographic.Remoting.OpenXr)
-    set(NUGET_VERSION 2.9.4)
+    set(OPENJPEG_INCLUDE_DIRS
+        "${OPENJPEG_ROOT}/src/lib/openjp2"
+        "${OPENJPEG_ROOT}/build/src/lib/openjp2")
 
-    # Download and install the NuGet package
-    execute_process(
-        COMMAND ${NUGET_COMMAND} install ${NUGET_PACKAGE} -Version ${NUGET_VERSION} -OutputDirectory ${CMAKE_BINARY_DIR}/packages
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-elseif(APPLE)
-    set(OpenXR_LIBRARIES ${OPENXR_DIRS}/build/src/loader/libopenxr_loader.a)
-    add_definitions(-DXR_USE_PLATFORM_MACOS)
-    add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+    add_definitions(-DOPJ_STATIC)
+    set(OPENJPEG_FOUND TRUE)
+
 else()
-    set(OpenXR_LIBRARIES ${OPENXR_DIRS}/build/src/loader/libopenxr_loader.a)
-    add_definitions(-DXR_USE_PLATFORM_XLIB)
-    add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+    # Linux fallback: system OpenJPEG
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system OpenJPEG (Linux fallback)")
+
+        find_package(OpenJPEG REQUIRED)
+
+        # Imported target provided by Ubuntu
+        set(OPENJPEG_FOUND TRUE)
+    else()
+        message(FATAL_ERROR "Standalone OpenJPEG not found and no system fallback enabled on this platform")
+    endif()
+endif()
+
+# OpenVR
+# Try standalone OpenVR SDK (required for build)
+file(GLOB OPENVR_DIR_CANDIDATES "${PARENT_DIR}/openvr*")
+
+if(OPENVR_DIR_CANDIDATES)
+    list(GET OPENVR_DIR_CANDIDATES 0 OPENVR_ROOT)
+
+    message(STATUS "Using OpenVR SDK at: ${OPENVR_ROOT}")
+
+    if(WIN32)
+        file(GLOB OpenVR_LIBRARIES
+            ${OPENVR_ROOT}/lib/win64/openvr_api.lib)
+    elseif(APPLE)
+        file(GLOB OpenVR_LIBRARIES
+            ${OPENVR_ROOT}/bin/osx64/libopenvr_api.a)
+    else()
+        # Linux: SDK static lib, runtime comes from SteamVR
+        file(GLOB OpenVR_LIBRARIES
+            ${OPENVR_ROOT}/bin/linux64/libopenvr_api.a)
+    endif()
+
+    set(OPENVR_INCLUDE_DIR "${OPENVR_ROOT}/headers")
+    set(OPENVR_FOUND TRUE)
+
+else()
+    message(STATUS "OpenVR SDK not found; OpenVR support disabled")
+    set(OPENVR_FOUND FALSE)
+endif()
+
+# OpenXR
+# Try standalone OpenXR SDK first
+file(GLOB OPENXR_DIR_CANDIDATES "${PARENT_DIR}/OpenXR-SDK*")
+
+if(OPENXR_DIR_CANDIDATES)
+    list(GET OPENXR_DIR_CANDIDATES 0 OPENXR_ROOT)
+    set(OPENXR_INCLUDE_DIR "${OPENXR_ROOT}/include")
+
+    message(STATUS "Using standalone OpenXR SDK at: ${OPENXR_ROOT}")
+
+    if(WIN32)
+        #d3d11 dependencies
+        set(OPENXR_INCLUDE_DIR "${OPENXR_INCLUDE_DIR};${CMAKE_BINARY_DIR}/packages/Microsoft.Holographic.Remoting.OpenXr.2.9.4/build/native/include")
+        file(GLOB OpenXR_RELEASE_LIBRARIES ${OPENXR_ROOT}/build/src/loader/Release/*.lib)
+        file(GLOB OpenXR_DEBUG_LIBRARIES ${OPENXR_ROOT}/build/src/loader/Debug/*.lib)
+        set(OpenXR_LIBRARIES $<$<CONFIG:Release>:${OpenXR_RELEASE_LIBRARIES} d3d11.lib dxgi.lib> $<$<CONFIG:Debug>:${OpenXR_DEBUG_LIBRARIES} d3d11.lib dxgi.lib>)
+        add_definitions(-DXR_USE_PLATFORM_WIN32)
+        add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+        add_definitions(-DXR_USE_GRAPHICS_API_D3D11)
+        add_definitions(-DXR_EXTENSION_PROTOTYPES)
+
+        # nuget
+	    # Convert to absolute path
+	    get_filename_component(ABS_NUGET_EXECUTABLE "${FluoRender_SOURCE_DIR}/NuGet/nuget.exe" ABSOLUTE)
+	    set(NUGET_EXECUTABLE ${ABS_NUGET_EXECUTABLE})
+	    message(STATUS "NuGet executable path: ${NUGET_EXECUTABLE}")
+
+        # Find the NuGet executable
+        find_program(NUGET_COMMAND NAMES nuget PATHS "${FluoRender_SOURCE_DIR}/NuGet")
+
+        # Ensure the NuGet executable was found
+        if(NOT NUGET_COMMAND)
+            message(FATAL_ERROR "NuGet executable not found. Please specify the correct path.")
+        endif()
+
+        # Specify the NuGet package and version
+        set(NUGET_PACKAGE Microsoft.Holographic.Remoting.OpenXr)
+        set(NUGET_VERSION 2.9.4)
+
+        # Download and install the NuGet package
+        execute_process(
+            COMMAND ${NUGET_COMMAND} install ${NUGET_PACKAGE} -Version ${NUGET_VERSION} -OutputDirectory ${CMAKE_BINARY_DIR}/packages
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
+    elseif(APPLE)
+        set(OpenXR_LIBRARIES
+            ${OPENXR_ROOT}/build/src/loader/libopenxr_loader.a)
+
+        add_definitions(-DXR_USE_PLATFORM_MACOS)
+        add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+        add_definitions(-DXR_EXTENSION_PROTOTYPES)
+
+    else()
+        # Linux using standalone SDK (rare, but allowed)
+        set(OpenXR_LIBRARIES
+            ${OPENXR_ROOT}/build/src/loader/libopenxr_loader.a)
+
+        add_definitions(-DXR_USE_PLATFORM_XLIB)
+        add_definitions(-DXR_USE_GRAPHICS_API_OPENGL)
+        add_definitions(-DXR_EXTENSION_PROTOTYPES)
+    endif()
+
+    set(OPENXR_FOUND TRUE)
+
+else()
+    # Linux fallback: system OpenXR
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system OpenXR (Linux fallback)")
+
+        find_package(OpenXR REQUIRED)
+
+        set(OPENXR_FOUND TRUE)
+    else()
+        message(STATUS "OpenXR SDK not found; OpenXR support disabled")
+        set(OPENXR_FOUND FALSE)
+    endif()
 endif()
 
 # teem
-file(GLOB TEEM_DIRS "${PARENT_DIR}/teem*")
-list(GET TEEM_DIRS 0 TEEM_DIRS)
-# Point to the build tree where TeemConfig.cmake was generated
-set(Teem_DIR "${TEEM_DIRS}/build")  # or wherever TeemConfig.cmake lives
-find_package(Teem REQUIRED CONFIG)
-set(TEEM_LIBRARIES Teem::teem)
-set(TEEM_INCLUDE_DIRS
-  "${TEEM_DIRS}/src"
-  "${TEEM_DIRS}/src/nrrd"
-  "${TEEM_DIRS}/src/teem"
-  "${Teem_DIR}/include"
-)
-#message(STATUS "TEEM_INCLUDE_DIRS = ${TEEM_INCLUDE_DIRS}")
-add_definitions(-DTEEM_STATIC=1)
-add_definitions(-DTEEM_DIO=0)
-add_definitions(-DTEEM_ENDIAN=1234)
-add_definitions(-DTEEM_QNANHIBIT=1)
-add_definitions(-DTEEM_ZLIB=1)
-add_definitions(-DTEEM_32BIT=0)
+# Try legacy standalone Teem first
+file(GLOB TEEM_DIR_CANDIDATES "${PARENT_DIR}/teem*")
+
+if(TEEM_DIR_CANDIDATES)
+    list(GET TEEM_DIR_CANDIDATES 0 TEEM_ROOT)
+
+    message(STATUS "Using standalone Teem at: ${TEEM_ROOT}")
+
+    # Point to the build tree where TeemConfig.cmake was generated
+    set(Teem_DIR "${TEEM_ROOT}/build")
+    find_package(Teem REQUIRED CONFIG)
+
+    set(TEEM_LIBRARIES Teem::teem)
+
+    set(TEEM_INCLUDE_DIRS
+        "${TEEM_ROOT}/src"
+        "${TEEM_ROOT}/src/nrrd"
+        "${TEEM_ROOT}/src/teem"
+        "${Teem_DIR}/include"
+    )
+
+    add_definitions(-DTEEM_STATIC=1)
+    add_definitions(-DTEEM_DIO=0)
+    add_definitions(-DTEEM_ENDIAN=1234)
+    add_definitions(-DTEEM_QNANHIBIT=1)
+    add_definitions(-DTEEM_ZLIB=1)
+    add_definitions(-DTEEM_32BIT=0)
+
+    set(TEEM_FOUND TRUE)
+
+else()
+    # Linux fallback: system Teem
+    if(UNIX AND NOT APPLE)
+        message(STATUS "Using system Teem (Linux fallback)")
+
+        # Try to load TeemConfig.cmake if it exists
+        find_package(Teem QUIET CONFIG)
+
+        # --- Robust Linux include detection ---
+        # Find nrrd.h manually because TeemConfig.cmake is unreliable on Linux
+        find_path(TEEM_INCLUDE_DIR
+            NAMES nrrd.h
+            PATH_SUFFIXES teem
+            PATHS /usr/include /usr/local/include
+        )
+
+        if(NOT TEEM_INCLUDE_DIR)
+            message(FATAL_ERROR "Could not find Teem headers (nrrd.h). Install libteem-dev.")
+        endif()
+
+        # Find the Teem library
+        find_library(TEEM_LIBRARY
+            NAMES teem
+            PATHS /usr/lib /usr/local/lib
+        )
+
+        if(NOT TEEM_LIBRARY)
+            message(FATAL_ERROR "Could not find Teem library (libteem). Install libteem-dev.")
+        endif()
+
+        set(TEEM_INCLUDE_DIRS ${TEEM_INCLUDE_DIR})
+        set(TEEM_LIBRARIES ${TEEM_LIBRARY})
+        set(TEEM_FOUND TRUE)
+
+    else()
+        message(FATAL_ERROR "Standalone Teem not found and no system fallback enabled on this platform")
+    endif()
+endif()
 
 # Tester
 if(BUILD_TESTER)
@@ -600,6 +963,9 @@ if(WIN32 AND USE_XINPUT)
         XInput.lib)
 endif()
 
+include_directories(
+    ${CMAKE_CURRENT_BINARY_DIR}/Generated
+)
 # Main
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender)
 file(GLOB src FluoRender/FluoRender/*.cpp)
@@ -859,7 +1225,7 @@ add_library(UTILITY_LIB STATIC
 # include and link
 # Main
 target_include_directories(MAIN_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 target_link_libraries(MAIN_LIB PRIVATE
   ${wxWidgets_LIBRARIES}
@@ -867,7 +1233,7 @@ target_link_libraries(MAIN_LIB PRIVATE
 
 # Agent
 target_include_directories(AGENT_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 if (WIN32)
   target_include_directories(AGENT_LIB PRIVATE
@@ -878,7 +1244,7 @@ endif()
 # Animator
 target_include_directories(ANIMATOR_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${TIFF_INCLUDE_DIR})
 if (APPLE)
     target_link_libraries(ANIMATOR_LIB PRIVATE
@@ -887,27 +1253,29 @@ endif()
 
 # Calculate
 target_include_directories(CALCULATE_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 
 # Cluster
 target_include_directories(CLUSTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 
 # Component
 target_include_directories(COMPONENT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 
 # Compute
 target_include_directories(COMPUTE_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
+)
+target_link_libraries(COMPUTE_LIB PUBLIC
+  glad
 )
 target_link_libraries(COMPUTE_LIB PRIVATE
   ${OpenCL_LIBRARIES}
@@ -916,31 +1284,41 @@ target_link_libraries(COMPUTE_LIB PRIVATE
 # Config
 target_include_directories(CONFIG_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 
 # Control
+target_link_libraries(CONTROL_LIB PRIVATE
+  ${wxWidgets_LIBRARIES}
+)
 
 # Converter
 target_include_directories(CONVERTER_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 
 # Database
 target_include_directories(DATABASE_LIB PRIVATE
-  ${DLIB_DIRS}
+  ${DLIB_DIR}
   ${Boost_INCLUDE_DIR})
+target_link_libraries(DATABASE_LIB PUBLIC
+    TRAINER_LIB
+)
 
 # Distance
 target_include_directories(DISTANCE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 target_link_libraries(DISTANCE_LIB PRIVATE
-  ${OpenCV_LIBS})
+  ${OpenCV_LIBS}
+)
+target_link_libraries(DISTANCE_LIB PUBLIC
+    CALCULATE_LIB
+)
 
 # File
 target_include_directories(FILE_LIB PRIVATE
@@ -949,15 +1327,14 @@ target_include_directories(FILE_LIB PRIVATE
 # Filter
 target_include_directories(FILTER_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 
 # Flui
 target_include_directories(FLUI_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
   ${Python3_INCLUDE_DIRS}
 )
@@ -977,8 +1354,8 @@ else()
     ${JAVA_INCLUDE_PATH2}
   )
 endif()
-target_link_libraries(FLUI_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
+target_link_libraries(FLUI_LIB PUBLIC
+  glad
 )
 if(WIN32)
     target_link_libraries(FLUI_LIB PRIVATE
@@ -990,15 +1367,30 @@ if (WIN32 AND USE_XINPUT)
       XINPUT_LIB
     )
 endif()
+target_link_libraries(FLUI_LIB PUBLIC
+    ANIMATOR_LIB
+    CONTROL_LIB
+    AGENT_LIB
+    COMPUTE_LIB
+    CONFIG_LIB
+    DISTANCE_LIB
+    COMPONENT_LIB
+    FILTER_LIB
+    DATABASE_LIB
+    CALCULATE_LIB
+    CONVERTER_LIB
+    CLUSTER_LIB
+    FORMAT_LIB
+)
 
 # Format
 target_include_directories(FORMAT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
   ${FFMPEG_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${JPEG_INCLUDE_DIR}
   ${ND2_PATHS}
-  ${OPENJPEG_PATHS}
+  ${OPENJPEG_INCLUDE_DIRS}
   ${PNG_PNG_INCLUDE_DIR}
   ${TEEM_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR}
@@ -1021,6 +1413,7 @@ if (APPLE)
 endif()
 target_link_libraries(FORMAT_LIB PRIVATE
   ${FFMPEG_LIBRARIES}
+  ${JPEG_LIBRARIES}
   ${ND2_LIBRARIES}
   ${OpenJpeg_LIBRARIES}
   ${PNG_LIBRARIES}
@@ -1032,8 +1425,8 @@ target_link_libraries(FORMAT_LIB PRIVATE
 # Global
 target_include_directories(GLOBAL_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
-  ${OPENXR_PATHS}
+  ${GLM_INCLUDE_DIR}
+  ${OPENXR_INCLUDE_DIR}
   ${Python3_INCLUDE_DIRS}
 )
 if (WIN32 OR APPLE)
@@ -1047,28 +1440,29 @@ else()
     ${JAVA_INCLUDE_PATH2}
   )
 endif()
+target_link_libraries(GLOBAL_LIB PUBLIC
+    FORMAT_LIB
+)
 
 # Graphics
 target_include_directories(GRAPHICS_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
+target_link_libraries(GRAPHICS_LIB PUBLIC
+  glad
+)
 target_link_libraries(GRAPHICS_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
   ${OPENGL_LIBRARIES}
 )
 
 # OpenGL backend
-target_include_directories(GRAPHICS_GL_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
-)
 
 # Image
 
 # LookingGlass
 target_include_directories(LOOKINGGLASS_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${BRIDGE_RUNTIME_PATHS}
 )
 
@@ -1079,26 +1473,30 @@ target_include_directories(OBJECT_LIB PRIVATE
 
 # OpenXR
 target_include_directories(OPENXR_LIB PRIVATE
-  ${GLEW_INCLUDE_DIR}
-  ${GLM_DIRS}
-  ${OPENVR_PATHS}
-  ${OPENXR_PATHS}
+  ${GLM_INCLUDE_DIR}
+  ${OPENVR_INCLUDE_DIR}
+  ${OPENXR_INCLUDE_DIR}
+)
+target_link_libraries(OPENXR_LIB PUBLIC
+  glad
 )
 target_link_libraries(OPENXR_LIB PRIVATE
-  ${GLEW_STATIC_LIBRARIES}
   ${OpenVR_LIBRARIES}
   ${OpenXR_LIBRARIES}
 )
 
 # Progress
 target_include_directories(PROGRESS_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 
 # Project
 target_include_directories(PROJECT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
+)
+target_link_libraries(PROJECT_LIB PUBLIC
+    FILE_LIB
 )
 
 # Python
@@ -1120,7 +1518,7 @@ target_link_libraries(PYTHON_LIB PRIVATE
 # Renderer
 target_include_directories(RENDERER_LIB PRIVATE
   ${FREETYPE_INCLUDE_DIRS}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 target_link_libraries(RENDERER_LIB PRIVATE
   ${FREETYPE_LIBRARIES}
@@ -1129,7 +1527,7 @@ target_link_libraries(RENDERER_LIB PRIVATE
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 if (WIN32)
@@ -1153,11 +1551,14 @@ if (APPLE)
       ${BZIP2_LIBRARY}
     )
 endif()
+target_link_libraries(SCENE_LIB PUBLIC
+    GRAPHICS_LIB
+)
 
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${Python3_INCLUDE_DIRS}
 )
 if (APPLE)
@@ -1168,10 +1569,14 @@ endif()
 target_link_libraries(SCRIPT_LIB PRIVATE
   ${Python3_LIBRARIES}
 )
+target_link_libraries(SCRIPT_LIB PUBLIC
+    OBJECT_LIB
+    SCENE_LIB
+)
 
 # Selection
 target_include_directories(SELECTION_LIB PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 
@@ -1183,14 +1588,14 @@ target_include_directories(TIMER_LIB PRIVATE
 # Tracking
 target_include_directories(TRACKING_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
   ${OpenCL_INCLUDE_DIRS}
 )
 
 # Trainer
 target_link_libraries(TRAINER_LIB PRIVATE
-  ${Python3_LIBRARIES}
   dlib::dlib
+  ${Python3_LIBRARIES}
 )
 
 # Type
@@ -1223,7 +1628,7 @@ if(APPLE)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   
   # Compiler flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -DWX_PRECOMP")
+  add_compile_options(-DWX_PRECOMP)
   
   # --- IMPORTANT: Disable all Xcode signing behavior ---
   # Do NOT let Xcode sign anything. We sign manually after build.
@@ -1280,7 +1685,7 @@ elseif(WIN32)
       "/wd4273"
       -D_XKEYCHECK_H
     )
-    set(CMAKE_CXX_FLAGS "/EHsc")
+    add_compile_options(/EHsc)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /OPT:REF /OPT:ICF")
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG /INCREMENTAL /OPT:NOREF")
   endif()
@@ -1304,7 +1709,7 @@ target_compile_options(FluoRender PRIVATE "$<$<CONFIG:RELEASE>:${RELEASE_FLAGS}>
 target_compile_options(FluoRender PRIVATE "$<$<CONFIG:DEBUG>:${DEBUG_FLAGS}>")
 
 target_include_directories(FluoRender PRIVATE
-  ${GLM_DIRS}
+  ${GLM_INCLUDE_DIR}
 )
 # link the libraries
 if(WIN32)
@@ -1453,7 +1858,7 @@ endif()
 if(WIN32)
 add_custom_command(TARGET FluoRender POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
-	"${OPENVR_DIRS}/bin/win64/openvr_api.dll"
+	"${OPENVR_ROOT}/bin/win64/openvr_api.dll"
     "${FLUORENDER_ASSET_DIR}")
 endif()
 

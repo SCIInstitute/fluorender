@@ -52,7 +52,7 @@ namespace flrd
 
 	enum class ClippingRenderMode : int
 	{
-		None = 0,
+		Disabled = 0,
 		ColoredFront,
 		ColoredBack,
 		FrameAll,

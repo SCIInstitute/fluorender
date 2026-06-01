@@ -42,7 +42,7 @@ namespace flrd
 {
 	enum class SelectMode : int
 	{
-		None,			//0-no selection
+		Disabled,		//0-no selection
 		SingleSelect,	//1-select;
 		Append,			//2-append;
 		Eraser,			//3-unselect;

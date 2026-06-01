@@ -46,7 +46,7 @@ void ClippingBoxRenderer::render()
 	bool all_planes = (settings_->plane_mask & 0x3F) == 0x3F;
 	switch (mode)
 	{
-		case ClippingRenderMode::None:
+		case ClippingRenderMode::Disabled:
 			return;
 		case ClippingRenderMode::ColoredFront:
 		case ClippingRenderMode::FrameFront:
@@ -138,13 +138,13 @@ void ClippingBoxRenderer::render()
 	{
 		data_buffer->set_cull_face_enabled(true);
 		data_buffer->set_face_winding(flvr::FaceWinding::Front);
-		data_buffer->set_cull_face(flvr::CullFace::Front);
+		data_buffer->set_cull_face(flvr::CullFace::FrontFace);
 	}
 	else if (settings_->winding == flrd::FaceWinding::Back)
 	{
 		data_buffer->set_cull_face_enabled(true);
 		data_buffer->set_face_winding(flvr::FaceWinding::Back);
-		data_buffer->set_cull_face(flvr::CullFace::Front);
+		data_buffer->set_cull_face(flvr::CullFace::FrontFace);
 	}
 	else if (settings_->winding == flrd::FaceWinding::Off)
 	{

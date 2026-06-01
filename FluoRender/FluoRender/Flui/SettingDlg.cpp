@@ -858,23 +858,12 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	//float 2
 	wxFloatingPointValidator<double> vald_fp1(2);
 	wxStaticText* st;
-	//override vox
-	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
-		wxVERTICAL, page, "Override Voxel Size");
-	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
-	m_override_vox_chk = new wxCheckBox(page, wxID_ANY,
-		"Get voxel size info from the first opened data set.");
-	m_override_vox_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnOverrideVoxCheck, this);
-	sizer1_1->Add(m_override_vox_chk, 0, wxALIGN_CENTER);
-	group1->Add(10, 5);
-	group1->Add(sizer1_1, 0, wxEXPAND);
-	group1->Add(10, 5);
 
 	//wavelength to color
-	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
+	wxStaticBoxSizer *group1 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Default Colors for Excitation Wavelengths (nm) (for raw microscopy formats)");
 	//combo box line
-	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer1_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_wav_color1_cmb = new wxComboBox(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)), 0, NULL, wxCB_READONLY);
 	m_wav_color2_cmb = new wxComboBox(page, wxID_ANY, "",
@@ -892,95 +881,95 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	m_wav_color2_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor2Change, this);
 	m_wav_color3_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor3Change, this);
 	m_wav_color4_cmb->Bind(wxEVT_COMBOBOX, &SettingDlg::OnWavColor4Change, this);
-	sizer2_1->Add(35, 20);
-	sizer2_1->Add(m_wav_color1_cmb);
-	sizer2_1->Add(25, 20);
-	sizer2_1->Add(m_wav_color2_cmb);
-	sizer2_1->Add(25, 20);
-	sizer2_1->Add(m_wav_color3_cmb);
-	sizer2_1->Add(25, 20);
-	sizer2_1->Add(m_wav_color4_cmb);
-	sizer2_1->Add(30, 20);
+	sizer1_1->Add(35, 20);
+	sizer1_1->Add(m_wav_color1_cmb);
+	sizer1_1->Add(25, 20);
+	sizer1_1->Add(m_wav_color2_cmb);
+	sizer1_1->Add(25, 20);
+	sizer1_1->Add(m_wav_color3_cmb);
+	sizer1_1->Add(25, 20);
+	sizer1_1->Add(m_wav_color4_cmb);
+	sizer1_1->Add(30, 20);
 	//static text line
-	wxBoxSizer *sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
-	sizer2_2->Add(10, 20);
+	wxBoxSizer *sizer1_2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer1_2->Add(10, 20);
 	st = new wxStaticText(page, 0, "350", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "450\n480\n488", wxDefaultPosition, FromDIP(wxSize(30, 50)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "543\n568", wxDefaultPosition, FromDIP(wxSize(30, 35)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "633", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "--", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	sizer2_2->Add(20, 20);
+	sizer1_2->Add(st);
+	sizer1_2->Add(20, 20);
 	st = new wxStaticText(page, 0, "700", wxDefaultPosition, FromDIP(wxSize(30, 20)));
-	sizer2_2->Add(st);
-	group2->Add(10, 5);
-	group2->Add(sizer2_1, 0);
-	group2->Add(10, 5);
-	group2->Add(sizer2_2, 0);
-	group2->Add(10, 5);
+	sizer1_2->Add(st);
+	group1->Add(10, 5);
+	group1->Add(sizer1_1, 0);
+	group1->Add(10, 5);
+	group1->Add(sizer1_2, 0);
+	group1->Add(10, 5);
 
 	//max texture size
-	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
+	wxStaticBoxSizer *group2 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "Max Texture Size");
-	wxBoxSizer *sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_max_texture_size_chk = new wxCheckBox(page, wxID_ANY,
 		"Set Max Texture Size");
 	m_max_texture_size_chk->Bind(wxEVT_CHECKBOX, &SettingDlg::OnMaxTextureSizeChk, this);
 	m_max_texture_size_text = new wxTextCtrl(page, wxID_ANY, "2048",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_max_texture_size_text->Bind(wxEVT_TEXT, &SettingDlg::OnMaxTextureSizeEdit, this);
-	sizer3_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
-	sizer3_1->Add(10, 10);
-	sizer3_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);
-	wxBoxSizer* sizer3_2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer2_1->Add(m_max_texture_size_chk, 0, wxALIGN_CENTER);
+	sizer2_1->Add(10, 10);
+	sizer2_1->Add(m_max_texture_size_text, 0, wxALIGN_CENTER);
+	wxBoxSizer* sizer2_2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
 		"Set a texture size smaller than 1024 to correctly perform component analysis. "\
 		"When both the max texture size and data streaming are set, the smaller number "\
 		"is used to divide a large data set into bricks. "\
 		"Restart FluoRender after setting this value.");
 	st->Wrap(FromDIP(450));
-	sizer3_2->Add(st, 1, wxEXPAND);
-	group3->Add(10, 5);
-	group3->Add(sizer3_1, 0);
-	group3->Add(10, 5);
-	group3->Add(sizer3_2, 0);
-	group3->Add(10, 5);
+	sizer2_2->Add(st, 1, wxEXPAND);
+	group2->Add(10, 5);
+	group2->Add(sizer2_1, 0);
+	group2->Add(10, 5);
+	group2->Add(sizer2_2, 0);
+	group2->Add(10, 5);
 
 	//cl devices
-	wxStaticBoxSizer *group4 = new wxStaticBoxSizer(
+	wxStaticBoxSizer *group3 = new wxStaticBoxSizer(
 		wxVERTICAL, page, "OpenCL Devices");
 	m_device_tree = new wxTreeCtrl(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize,
 		wxTR_FULL_ROW_HIGHLIGHT);
 	m_device_tree->Bind(wxEVT_TREE_SEL_CHANGED, &SettingDlg::OnSelChanged, this);
-	wxBoxSizer* sizer4_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer3_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0,
 		"Select an OpenCL device that is also the rendering GPU. "\
 		"Restart FluoRender after changing OpenCL devices.");
 	st->Wrap(FromDIP(450));
-	sizer4_1->Add(st, 1, wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(m_device_tree, 1, wxEXPAND);
-	group4->Add(10, 5);
-	group4->Add(sizer4_1, 0, wxEXPAND);
-	group4->Add(10, 5);
+	sizer3_1->Add(st, 1, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(m_device_tree, 1, wxEXPAND);
+	group3->Add(10, 5);
+	group3->Add(sizer3_1, 0, wxEXPAND);
+	group3->Add(10, 5);
 
 	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
@@ -989,8 +978,6 @@ wxWindow* SettingDlg::CreateFormatPage(wxWindow *parent)
 	sizerV->Add(group2, 0, wxEXPAND);
 	sizerV->Add(10, 10);
 	sizerV->Add(group3, 0, wxEXPAND);
-	sizerV->Add(10, 10);
-	sizerV->Add(group4, 1, wxEXPAND);
 
 	page->SetSizer(sizerV);
 	page->SetAutoLayout(true);
@@ -1344,10 +1331,6 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		m_color_depth_comb->Select(glbin_settings.m_color_depth);
 
 	//format page
-	//override vox
-	if (update_all || FOUND_VALUE(gstOverrideVoxSpc))
-		m_override_vox_chk->SetValue(glbin_settings.m_override_vox);
-
 	//wavelength to color
 	if (update_all || FOUND_VALUE(gstWavelengthColors))
 	{
@@ -1672,12 +1655,6 @@ void SettingDlg::OnColorDepthComb(wxCommandEvent& event)
 		glbin_settings.m_alpha_bit = 16;
 		break;
 	}
-}
-
-//override vox
-void SettingDlg::OnOverrideVoxCheck(wxCommandEvent& event)
-{
-	glbin_settings.m_override_vox = m_override_vox_chk->GetValue();
 }
 
 void SettingDlg::OnWavColor1Change(wxCommandEvent& event)

@@ -43,7 +43,7 @@ Ruler::Ruler()
 	m_name = L"Ruler " + std::to_wstring(m_num);
 	m_disp = true;
 	m_tform.load_identity();
-	m_mode = RulerMode::None;
+	m_mode = RulerMode::Disabled;
 	m_finished = false;
 	m_use_color = false;
 

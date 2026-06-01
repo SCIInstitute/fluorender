@@ -62,7 +62,7 @@ VolumeSelector::VolumeSelector() :
 	m_2d_weight1(0),
 	m_2d_weight2(0),
 	m_iter_num(20),
-	m_mode(SelectMode::None),
+	m_mode(SelectMode::Disabled),
 	m_init_mask(3),
 	m_use2d(false),
 	m_update_order(true),
@@ -555,7 +555,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		res,
 		spc,
 		brick_size);
-	vd_r->SetSpcFromFile(true);
+	vd_r->SetSpacingSource(m_vd->GetSpacingSource());
 	vd_r->SetName(m_vd->GetName() + L"_COMP1");
 	vd_r->SetCurChannel(0);
 	//green volume
@@ -565,7 +565,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		res,
 		spc,
 		brick_size);
-	vd_g->SetSpcFromFile(true);
+	vd_g->SetSpacingSource(m_vd->GetSpacingSource());
 	vd_g->SetName(m_vd->GetName() + L"_COMP2");
 	vd_g->SetCurChannel(1);
 	//blue volume
@@ -575,7 +575,7 @@ void VolumeSelector::CompExportRandomColor(int hmode,
 		res,
 		spc,
 		brick_size);
-	vd_b->SetSpcFromFile(true);
+	vd_b->SetSpacingSource(m_vd->GetSpacingSource());
 	vd_b->SetName(m_vd->GetName() + L"_COMP3");
 	vd_b->SetCurChannel(2);
 

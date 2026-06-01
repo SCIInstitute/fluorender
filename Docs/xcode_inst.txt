@@ -1,7 +1,0 @@
-FluoRender/Resources/Info.plist: NSHighResolutionCapable YES
-Code Signing Identity: Developer ID Application...
-Codesign options --deep --timestamp --options runtime
-Code signing inject base entitlements No
-Enable Hardened runtime Yes
-Targets/FluoRender/Signing & Capabilities/Hardened Runtime/Runtime Exceptions/Disable Library Validation Yes
-

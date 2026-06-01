@@ -132,7 +132,7 @@ ClipPlanePanel::~ClipPlanePanel()
 	glbin.del_undo_control(m_z_rot_sldr);
 	glbin.del_undo_control(m_toolbar);
 
-	m_frame->SetFocusVRenderViews(0);
+	//m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
@@ -146,7 +146,7 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 	//sliders for clipping planes
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	
+
 	wxGridBagSizer* sizer_v = new wxGridBagSizer(5, 0);
 	//x
 	m_clip_x_st = new wxFadeButton(page, wxID_ANY, "X",
@@ -339,7 +339,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	//rotations
 	bool inverse_slider = glbin_settings.m_inverse_slider;
 	long ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
-	//sliders for rotating clipping planes 
+	//sliders for rotating clipping planes
 	//x
 	m_rot_x_st = new wxFadeButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)));
@@ -516,7 +516,7 @@ void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
 		switch (mode)
 		{
-		case flrd::ClippingRenderMode::None:
+		case flrd::ClippingRenderMode::Disabled:
 			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
 				wxGetBitmap(clip_none));
 			break;
@@ -804,7 +804,7 @@ void ClipPlanePanel::SetPlaneMode()
 	int ival = glbin_settings.m_clip_mode;
 	ival++;
 	ival = ival > static_cast<int>(flrd::ClippingRenderMode::TransBack) ?
-		static_cast<int>(flrd::ClippingRenderMode::None) : ival;
+		static_cast<int>(flrd::ClippingRenderMode::Disabled) : ival;
 	glbin_settings.m_clip_mode = ival;
 	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
 	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);

@@ -1,4 +1,4 @@
-﻿/*
+/*
 For more information, please see: http://software.sci.utah.edu
 
 The MIT License
@@ -26,7 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+#include <fl_gl.h>
 #include <RenderCanvas.h>
+#include <GLAttribProvider.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
@@ -63,14 +65,43 @@ LOGCONTEXTA RenderCanvas::m_lc;
 
 wxDEFINE_EVENT(EVT_RENDER_SCHEDULER_DRAW, wxCommandEvent);
 
+#if defined(__WXMSW__) // Windows
+#include <wx/msw/wrapwin.h>
+
+GLADapiproc MyGLGetProcAddress(const char* name) {
+	// 1. Try to load modern/extension functions first
+	void* p = (void*)wglGetProcAddress(name);
+
+	// 2. If wglGetProcAddress returns an invalid pointer, fallback to the DLL
+	if (p == 0 || (p == (void*)0x1) || (p == (void*)0x2) || (p == (void*)0x3) || (p == (void*)-1)) {
+		static HMODULE openGLModule = LoadLibraryA("opengl32.dll");
+		p = (void*)GetProcAddress(openGLModule, name);
+	}
+	return (GLADapiproc)p;
+}
+
+#elif defined(__WXGTK__) // Linux
+#include <GL/glx.h>
+
+GLADapiproc MyGLGetProcAddress(const char* name)
+{
+	return (GLADapiproc)glXGetProcAddress((const GLubyte*)name);
+}
+
+#elif defined(__WXMAC__) // macOS
+//#include <dlfcn.h>
+//GLADapiproc MyGLGetProcAddress(const char* name) {
+//	return (GLADapiproc)dlsym(RTLD_DEFAULT, name);
+//}
+#endif
+
 RenderCanvas::RenderCanvas(MainFrame* frame,
 	RenderViewPanel* parent,
-	const wxGLAttributes& attriblist,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-	wxGLCanvas(parent, attriblist, wxID_ANY, pos, size, style),
+	wxGLCanvas(parent, GLAttribProvider::CanvasAttribs(), wxID_ANY, pos, size, style),
 	m_frame(frame),
 	m_renderview_panel(parent),
 	//previous focus
@@ -83,8 +114,66 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	m_full_screen(false),
 	m_focused_slider(0)
 {
-	m_glRC = sharedContext;
-	m_sharedRC = m_glRC ? true : false;
+	m_sharedRC = (sharedContext != nullptr);
+
+	if (m_sharedRC)
+	{
+		m_glRC = sharedContext;
+	}
+	else
+	{
+		wxGLContextAttrs ctxAttrs = GLAttribProvider::MakeContextAttrs();
+		m_glRC = new wxGLContext(this, nullptr, &ctxAttrs);
+
+		if (!m_glRC->IsOK())
+		{
+			ctxAttrs.Reset();
+			ctxAttrs.PlatformDefaults().EndList();
+			m_glRC = new wxGLContext(this, nullptr, &ctxAttrs);
+		}
+
+		if (!m_glRC->IsOK())
+		{
+			wxMessageBox(
+				"FluoRender needs an OpenGL 3.3 capable driver.\n"
+				"Please update your graphics card driver or upgrade "
+				"your graphics card.",
+				"Graphics card error",
+				wxOK | wxICON_ERROR,
+				this);
+
+			delete m_glRC;
+			m_glRC = nullptr;
+			return;
+		}
+	}
+
+#ifdef _DEBUG
+	//example Pixel format descriptor detailing each part
+	//PIXELFORMATDESCRIPTOR pfd = {
+	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
+	// 1,                     // version number
+	// PFD_DRAW_TO_WINDOW |   // support window
+	// PFD_SUPPORT_OPENGL |   // support OpenGL
+	// PFD_DOUBLEBUFFER,      // double buffered
+	// PFD_TYPE_RGBA,         // RGBA type
+	// 24,                    // 24-bit color depth
+	// 0, 0, 0, 0, 0, 0,      // color bits ignored
+	// 0,                     // no alpha buffer
+	// 0,                     // shift bit ignored
+	// 0,                     // no accumulation buffer
+	// 0, 0, 0, 0,            // accum bits ignored
+	// 32,                    // 32-bit z-buffer
+	// 0,                     // no stencil buffer
+	// 0,                     // no auxiliary buffer
+	// PFD_MAIN_PLANE,        // main layer
+	// 0,                     // reserved
+	// 0, 0, 0                // layer masks ignored
+	// };
+	PIXELFORMATDESCRIPTOR  pfd;
+	//check ret. this is an error code when the pixel format is invalid.
+	int ret = GetPixelFormat(&pfd);
+#endif
 
 	auto view = std::make_shared<RenderView>();
 	glbin_current.render_view_drawing = view;
@@ -237,15 +326,29 @@ void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
 
 void RenderCanvas::Draw()
 {
+	wxPaintDC dc(this);
 	SetCurrent(*m_glRC);
 
-	wxPaintDC dc(this);
+#ifdef __APPLE__
+
+#else
+	static bool glad_init = false;
+	if (!glad_init)
+	{
+		int result = gladLoadGL(MyGLGetProcAddress);
+		glad_init = result > 0;
+	}
+#endif
 
 	auto view = m_renderview.lock();
 	assert(view);
+	bool initialized = view->Init();
 	auto scheduler = glbin_refresh_scheduler_manager.getScheduler(view->Id());
 	assert(scheduler);
 	scheduler->performDraw();
+
+	if (initialized)
+		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
 }
 
 void RenderCanvas::Init()
@@ -455,9 +558,8 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 		SetFocus();
 	if (glbin_states.m_benchmark)
 	{
-		wxString title = wxString(FLUORENDER_TITLE) +
-			" " + wxString(VERSION_MAJOR_TAG) +
-			"." + wxString(VERSION_MINOR_TAG) +
+		wxString title = wxString(fluo::AppTitle) +
+			" " + wxString(fluo::VersionString) +
 			" Benchmarking... FPS = " +
 			wxString::Format("%.2f", state.m_benchmark_fps);
 		m_frame->SetTitle(title);

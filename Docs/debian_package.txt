@@ -1,18 +1,21 @@
 In fluorender_install, create:
-fluorender
-	usr/local/bin
-	DEBIAN
-Copy fluorender/build/bin to usr/local/bin
+fluorender/
+├── DEBIAN/
+│   └── control
+├── usr/
+│   ├── bin/
+│   │   └── fluorender
+│   └── share/
+│       ├── applications/
+│       │   └── fluorender.desktop
+│       └── icons/
+│           └── hicolor/256x256/apps/fluorender.png
+
+Copy fluorender/build/bin to usr/bin
 Add control file to DEBIAN
-Build with:
+
+
+chmod -R 755 fluorender/usr
+chmod 644 fluorender/DEBIAN/control
+
 dpkg-deb --build fluorender
-Install with:
-sudo dpkg -i fluorender.deb
-
-control
-
-Package: fluorender
-Version: 2.30
-Maintainer: Yong Wan
-Architecture: amd64
-Description: fluorender

@@ -34,17 +34,23 @@ DEALINGS IN THE SOFTWARE.
 #include <GraphicsQuery.h>
 #include <ClippingBoxRenderer.h>
 #include <compatibility.h>
+#include <Version.h>
 #include <filesystem>
 
 MainSettings::MainSettings()
 {
+	m_mainframe_disp_id = 0;
+	m_mainframe_x = 0;
+	m_mainframe_y = 0;
+	m_mainframe_w = 1280;
+	m_mainframe_h = 720;
+
 	m_dpi_scale_factor = 0.0;
 
 	m_prj_save = false;
 	m_prj_save_inc = false;
 	m_time_id = L"_T";
 	m_save_compress = false;
-	m_override_vox = true;
 	m_last_open_type = 0;
 	m_last_tool = 0;
 	m_config_file_type = 1;
@@ -246,7 +252,6 @@ void MainSettings::Read(const std::string& filename)
 		fconfig->Read("inc save", &m_prj_save_inc, false);
 		fconfig->Read("time id", &m_time_id, std::wstring(L"_T"));
 		fconfig->Read("save compress", &m_save_compress, false);
-		fconfig->Read("override vox", &m_override_vox, true);
 		fconfig->Read("last open type", &m_last_open_type, 0);
 		fconfig->Read("last tool", &m_last_tool, 0);
 		fconfig->Read("config file type", &m_config_file_type, 1);
@@ -292,6 +297,11 @@ void MainSettings::Read(const std::string& filename)
 	if (fconfig->Exists("/ui"))
 	{
 		fconfig->SetPath("/ui");
+		fconfig->Read("mainframe disp id", &m_mainframe_disp_id, 0);
+		fconfig->Read("mainframe x", &m_mainframe_x, 0);
+		fconfig->Read("mainframe y", &m_mainframe_y, 0);
+		fconfig->Read("mainframe w", &m_mainframe_w, 1280);
+		fconfig->Read("mainframe h", &m_mainframe_h, 720);
 		fconfig->Read("dpi scale factor", &m_dpi_scale_factor, 0.0);
 		fconfig->Read("layout", &m_layout);
 		std::string str;
@@ -517,8 +527,10 @@ void MainSettings::Save()
 	if (!fconfig)
 		return;
 
-	fconfig->Write("ver_major", std::string(VERSION_MAJOR_TAG));
-	fconfig->Write("ver_minor", std::string(VERSION_MINOR_TAG));
+	fconfig->Write("ver_major", std::to_string(fluo::VersionMajor));
+	fconfig->Write("ver_minor", std::to_string(fluo::VersionMinor));
+	if (fluo::VersionPatch > 0)
+		fconfig->Write("ver_patch", std::to_string(fluo::VersionPatch));
 
 	//project
 	fconfig->SetPath("/project");
@@ -526,7 +538,6 @@ void MainSettings::Save()
 	fconfig->Write("inc save", m_prj_save_inc);
 	fconfig->Write("time id", m_time_id);
 	fconfig->Write("save compress", m_save_compress);
-	fconfig->Write("override vox", m_override_vox);
 	fconfig->Write("last open type", m_last_open_type);
 	fconfig->Write("last tool", m_last_tool);
 	fconfig->Write("config file type", m_config_file_type);
@@ -566,6 +577,11 @@ void MainSettings::Save()
 
 	//ui
 	fconfig->SetPath("/ui");
+	fconfig->Write("mainframe disp id", m_mainframe_disp_id);
+	fconfig->Write("mainframe x", m_mainframe_x);
+	fconfig->Write("mainframe y", m_mainframe_y);
+	fconfig->Write("mainframe w", m_mainframe_w);
+	fconfig->Write("mainframe h", m_mainframe_h);
 	fconfig->Write("dpi scale factor", m_dpi_scale_factor);
 	fconfig->Write("layout", m_layout);
 	std::string str;

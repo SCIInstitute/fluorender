@@ -31,12 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeLayer.h>
 #include <BBox.h>
 #include <Vector.h>
+#include <gl_types.h>
 #include <glm/glm.hpp>
-
-#ifndef __glew_h__
-typedef unsigned int GLuint;
-typedef int GLint;
-#endif // !__glew_h__
+#include <memory>
 
 struct _GLMmodel;
 typedef struct _GLMmodel GLMmodel;

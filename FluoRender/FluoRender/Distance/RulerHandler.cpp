@@ -63,7 +63,7 @@ RulerHandler::RulerHandler() :
 	m_sample_type(1),
 	m_step_length(1),
 	m_edited(false),
-	m_mode(RulerMode::None)
+	m_mode(RulerMode::Disabled)
 {
 
 }
@@ -1867,7 +1867,7 @@ void RulerHandler::Project(const std::set<int>& rulers, const std::wstring& file
 
 	std::wstring str = filename;
 	std::ofstream ofs;
-	ofs.open(str, std::ofstream::out);
+	ofs.open(std::filesystem::path(str), std::ofstream::out);
 
 	size_t c = 0;
 	auto ruler_list = list->get().All();

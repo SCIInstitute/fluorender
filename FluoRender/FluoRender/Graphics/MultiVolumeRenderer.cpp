@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //
 
-#include <GL/glew.h>
+#include <fl_gl.h>
 #include <MultiVolumeRenderer.h>
 #include <Global.h>
 #include <Names.h>
@@ -224,7 +224,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				flvr::BlendFactor::OneMinusDstAlpha, flvr::BlendFactor::One);
 		break;
 	case RenderMode::Mip:
-		blend_buffer->set_blend_equation(0, flvr::BlendEquation::Max, flvr::BlendEquation::Max);
+		blend_buffer->set_blend_equation(0, flvr::BlendEquation::Maximum, flvr::BlendEquation::Maximum);
 		blend_buffer->set_blend_func(0,
 			flvr::BlendFactor::One, flvr::BlendFactor::One,
 			flvr::BlendFactor::One, flvr::BlendFactor::One);
@@ -500,7 +500,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			//blend: (add, max)(1, 1)
 			micro_blend_buffer->set_clear_color({ clear_color_[0], clear_color_[1], clear_color_[2], clear_color_[3] });
 			micro_blend_buffer->set_blend_enabled_all(true);
-			micro_blend_buffer->set_blend_equation_all(flvr::BlendEquation::Add, flvr::BlendEquation::Max);
+			micro_blend_buffer->set_blend_equation_all(flvr::BlendEquation::Add, flvr::BlendEquation::Maximum);
 			micro_blend_buffer->set_blend_func_all(flvr::BlendFactor::One, flvr::BlendFactor::One, flvr::BlendFactor::One, flvr::BlendFactor::One);
 			glbin_framebuffer_manager.bind(micro_blend_buffer);
 			micro_blend_buffer->clear_base(true, false);

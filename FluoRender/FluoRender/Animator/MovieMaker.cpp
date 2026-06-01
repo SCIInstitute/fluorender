@@ -708,7 +708,6 @@ void MovieMaker::InsertKey(int index)
 	double t = glbin_interpolator.GetLastT();
 	int kn = glbin_interpolator.GetKeyNum();
 	t = kn == 0 ? t : t + m_key_duration;
-	bool bval;
 
 	glbin_interpolator.Begin(t, m_key_duration);
 

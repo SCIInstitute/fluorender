@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
+#include <cstring>
 
 template <typename T>
 inline bool BitwiseCheck(const T& value, const T& checkValue) {
@@ -45,7 +46,7 @@ inline bool IsStringInVector(
 	bool found = false;
 	for (auto& item : list)
 	{
-		if (strcmp(name, item) == 0)
+		if (std::strcmp(name, item) == 0)
 		{
 			found = true;
 			break;
