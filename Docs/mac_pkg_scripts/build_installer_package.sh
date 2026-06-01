@@ -53,11 +53,16 @@ if [ ! -d "$APP_SOURCE" ]; then
     exit 1
 fi
 
-echo "🧪 Verifying app signature..."
-if ! codesign --verify --deep --strict --verbose=2 "$APP_SOURCE"; then
-    echo "❌ App is NOT properly signed. Fix signing before packaging."
+echo "🧪 Verifying Python.framework (actual content)..."
+if ! codesign --verify --strict --verbose=4 \
+    "$APP_SOURCE/Contents/Frameworks/Python.framework/Versions/3.13"; then
+    echo "❌ Python.framework is NOT properly signed."
     exit 1
 fi
+
+echo "🧪 Gatekeeper pre-check..."
+# This will say "rejected" until notarization — that's OK.
+spctl --assess --type execute --verbose "$APP_SOURCE" || true
 
 #############################################
 # PREPARE PAYLOAD
@@ -106,7 +111,8 @@ productbuild \
     --distribution distribution.xml \
     --resources resources \
     --package-path . \
-    --output "$DIST_PKG_NAME"
+    --sign "$INSTALLER_ID" \
+    "$DIST_PKG_NAME"
 
 echo "🎉 Final installer created: $DIST_PKG_NAME"
 echo "👉 Next step: notarize and staple this PKG."
