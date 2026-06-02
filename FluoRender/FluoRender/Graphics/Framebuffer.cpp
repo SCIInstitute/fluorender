@@ -449,10 +449,10 @@ bool Framebuffer::attach_texture(const AttachmentPoint& ap,
 		[&](const AttachmentRecord& rec) { return rec.point == ap; });
 	if (it != attachments_.end()) {
 		it->texture = tex;
-		it->config = tex->desc_;
+		//it->config = tex->desc_;
 	}
 	else {
-		attachments_.push_back({ ap, tex, tex->desc_ });
+		attachments_.push_back({ ap, tex });
 	}
 
 	// Sync state: mark enabled
@@ -668,7 +668,7 @@ unsigned int Framebuffer::read_pick(int px, int py)
 	for (const auto& rec : attachments_) {
 		if (rec.texture &&
 			rec.texture->valid() &&
-			rec.texture->desc_.format == TextureFormat::R32UI)
+			rec.texture->spec().format == TextureFormat::R32UI)
 		{
 			// Bind this framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
@@ -811,50 +811,48 @@ static const AttachmentLayout& layout_for(FBRole role)
 {
 	using AttachmentLayout = std::vector<AttachmentSpec>;
 
-	static const TextureDesc RGBA{
+	static const TextureSpec RGBA{
 		TextureType::Tex2D,
 		TextureFormat::RGBA32F
 	};
 
-	static const TextureDesc RGBAFilter{
+	static const TextureSpec RGBAFilter{
 		TextureType::Tex2D,
 		TextureFormat::RGBA32F,
-		0, 0, 1,
 		false,
 		TexFilter::Linear,
 		TexFilter::Linear
 	};
 
-	static const TextureDesc Float{
+	static const TextureSpec Float{
 		TextureType::Tex2D,
 		TextureFormat::R32F
 	};
 
-	static const TextureDesc FloatRG{
+	static const TextureSpec FloatRG{
 		TextureType::Tex2D,
 		TextureFormat::RG32F
 	};
 
-	static const TextureDesc DepthFloat{
+	static const TextureSpec DepthFloat{
 		TextureType::Tex2D,
 		TextureFormat::Depth32F
 	};
 
-	static const TextureDesc UChar{
+	static const TextureSpec UChar{
 		TextureType::Tex2D,
 		TextureFormat::RGBA8
 	};
 
-	static const TextureDesc RGBAMipmap{
+	static const TextureSpec RGBAMipmap{
 		TextureType::Tex2D,
 		TextureFormat::RGBA32F,
-		0, 0, 1,
 		true,
 		TexFilter::LinearMipmapLinear,
 		TexFilter::Linear
 	};
 
-	static const TextureDesc Int32{
+	static const TextureSpec Int32{
 		TextureType::Tex2D,
 		TextureFormat::R32UI
 	};
@@ -1029,28 +1027,60 @@ void FramebufferFactory::ensure_layout(std::shared_ptr<Framebuffer>& fb,
 {
 	const auto& layout = layout_for(role);
 
-	for (const auto& spec : layout) {
-		auto existing = fb->get_texture(spec.point);
-		if (!existing || !existing->desc().same_format(spec.config)) {
-			// detach old if present
-			if (existing) fb->detach_texture(spec.point);
+	TextureSize target_size{ nx, ny, 1 };
 
-			// create new
-			auto tex = std::make_shared<FramebufferTexture>(spec.config);
-			tex->create();
+	for (const auto& spec : layout)
+	{
+		auto existing = fb->get_texture(spec.point);
+
+		bool need_create = false;
+
+		if (!existing)
+		{
+			need_create = true;
+		}
+		else
+		{
+			const auto& desc = existing->desc();
+
+			// Check spec (format/type/mipmap/etc)
+			if (desc.spec != spec.config)
+			{
+				fb->detach_texture(spec.point);
+				need_create = true;
+			}
+			// Check size separately
+			else if (desc.size != target_size)
+			{
+				existing->resize(nx, ny);
+			}
+		}
+
+		if (need_create)
+		{
+			// Build a runtime descriptor (THIS is where size is set)
+			TextureDesc desc;
+			desc.spec = spec.config;
+			desc.size = target_size;
+
+			auto tex = std::make_shared<FramebufferTexture>(desc);
+			tex->create();   // must assume size is already valid
+
 			fb->attach_texture(spec.point, tex);
 			tex_list_.push_back(tex);
 		}
-		else if (!existing->desc().same_size(nx, ny, 1)) {
-			existing->resize(nx, ny);
-		}
 	}
 
-	// detach anything not in layout
-	for (auto& att : fb->attachments()) {
+	// Detach anything not in layout
+	for (auto& att : fb->attachments())
+	{
 		bool keep = std::any_of(layout.begin(), layout.end(),
-			[&](const AttachmentSpec& s) { return s.point == att.point; });
-		if (!keep) fb->detach_texture(att.point);
+			[&](const AttachmentSpec& s) {
+				return s.point == att.point;
+			});
+
+		if (!keep)
+			fb->detach_texture(att.point);
 	}
 
 	fb->set_role(role);

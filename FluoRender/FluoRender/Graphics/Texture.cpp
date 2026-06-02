@@ -129,7 +129,7 @@ bool Texture::create()
 	apply_parameters();
 	allocate_storage();
 
-	if (desc_.useMipmap)
+	if (desc_.spec.useMipmap)
 		glGenerateMipmap(glTarget());
 
 	valid_ = true;
@@ -170,31 +170,31 @@ void Texture::unbind() const
 
 void Texture::resize(int w, int h, int d)
 {
-	desc_.width = w;
-	desc_.height = h;
-	desc_.depth = d;
+	desc_.size.width = w;
+	desc_.size.height = h;
+	desc_.size.depth = d;
 
 	glBindTexture(glTarget(), id_);
 	apply_parameters();
 	allocate_storage();
 
-	if (desc_.useMipmap)
+	if (desc_.spec.useMipmap)
 		glGenerateMipmap(glTarget());
 }
 
 void Texture::upload_2d(const void* data)
 {
-	upload_2d(data, desc_.width, desc_.height, 0);
+	upload_2d(data, desc_.size.width, desc_.size.height, 0);
 }
 
 void Texture::upload_2d(const void* data, int width, int height, int level)
 {
-	if (!valid_ || desc_.type != TextureType::Tex2D || !data)
+	if (!valid_ || desc_.spec.type != TextureType::Tex2D || !data)
 		return;
 
 	GLint internal;
 	GLenum format, type;
-	toGLFormat(desc_.format, internal, format, type);
+	toGLFormat(desc_.spec.format, internal, format, type);
 
 	glBindTexture(glTarget(), id_);
 
@@ -213,19 +213,19 @@ void Texture::upload_2d(const void* data, int width, int height, int level)
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-	if (desc_.useMipmap && level == 0)
+	if (desc_.spec.useMipmap && level == 0)
 		glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Texture::upload_2d_subimage(const void* data,
 	int x, int y, int width, int height, int level)
 {
-	if (!valid_ || desc_.type != TextureType::Tex2D || !data)
+	if (!valid_ || desc_.spec.type != TextureType::Tex2D || !data)
 		return;
 
 	GLint internal;
 	GLenum format, type;
-	toGLFormat(desc_.format, internal, format, type);
+	toGLFormat(desc_.spec.format, internal, format, type);
 
 	glBindTexture(glTarget(), id_);
 
@@ -243,43 +243,43 @@ void Texture::upload_2d_subimage(const void* data,
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-	if (desc_.useMipmap && level == 0)
+	if (desc_.spec.useMipmap && level == 0)
 		glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 GLenum Texture::glTarget() const
 {
-	return desc_.type == TextureType::Tex3D ?
+	return desc_.spec.type == TextureType::Tex3D ?
 		GL_TEXTURE_3D : GL_TEXTURE_2D;
 }
 
 void Texture::apply_parameters() const
 {
-	glTexParameteri(glTarget(), GL_TEXTURE_MIN_FILTER, toGLFilter(desc_.minFilter));
-	glTexParameteri(glTarget(), GL_TEXTURE_MAG_FILTER, toGLFilter(desc_.magFilter));
-	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_S, toGLWrap(desc_.wrapS));
-	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_T, toGLWrap(desc_.wrapT));
+	glTexParameteri(glTarget(), GL_TEXTURE_MIN_FILTER, toGLFilter(desc_.spec.minFilter));
+	glTexParameteri(glTarget(), GL_TEXTURE_MAG_FILTER, toGLFilter(desc_.spec.magFilter));
+	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_S, toGLWrap(desc_.spec.wrapS));
+	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_T, toGLWrap(desc_.spec.wrapT));
 
-	if (desc_.type == TextureType::Tex3D)
-		glTexParameteri(glTarget(), GL_TEXTURE_WRAP_R, toGLWrap(desc_.wrapR));
+	if (desc_.spec.type == TextureType::Tex3D)
+		glTexParameteri(glTarget(), GL_TEXTURE_WRAP_R, toGLWrap(desc_.spec.wrapR));
 }
 
 void Texture::allocate_storage() const
 {
 	GLint internal;
 	GLenum format, type;
-	toGLFormat(desc_.format, internal, format, type);
+	toGLFormat(desc_.spec.format, internal, format, type);
 
-	if (desc_.type == TextureType::Tex3D)
+	if (desc_.spec.type == TextureType::Tex3D)
 	{
 		glTexImage3D(glTarget(), 0, internal,
-			desc_.width, desc_.height, desc_.depth,
+			desc_.size.width, desc_.size.height, desc_.size.depth,
 			0, format, type, nullptr);
 	}
 	else
 	{
 		glTexImage2D(glTarget(), 0, internal,
-			desc_.width, desc_.height,
+			desc_.size.width, desc_.size.height,
 			0, format, type, nullptr);
 	}
 }

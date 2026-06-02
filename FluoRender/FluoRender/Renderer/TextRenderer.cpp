@@ -60,15 +60,16 @@ namespace flvr
 
 		// Create texture description for glyph bitmap
 		TextureDesc desc;
-		desc.type = TextureType::Tex2D;
-		desc.format = TextureFormat::R8; // or R8_UNORM, depending on your enum
-		desc.width = g->bitmap.width;
-		desc.height = g->bitmap.rows;
-		desc.useMipmap = false;
-		desc.minFilter = TexFilter::Linear;
-		desc.magFilter = TexFilter::Linear;
-		desc.wrapS = TexWrap::ClampToEdge;
-		desc.wrapT = TexWrap::ClampToEdge;
+		desc.spec.type = TextureType::Tex2D;
+		desc.spec.format = TextureFormat::R8; // or R8_UNORM, depending on your enum
+		desc.spec.useMipmap = false;
+		desc.spec.minFilter = TexFilter::Linear;
+		desc.spec.magFilter = TexFilter::Linear;
+		desc.spec.wrapS = TexWrap::ClampToEdge;
+		desc.spec.wrapT = TexWrap::ClampToEdge;
+		desc.size.width = g->bitmap.width;
+		desc.size.height = g->bitmap.rows;
+		desc.size.depth = 1;
 
 		// Allocate ImageTexture
 		texture_ = std::make_shared<ImageTexture>(desc);

@@ -65,63 +65,96 @@ namespace flvr
 		// Add more as needed
 	};
 
-	struct TextureDesc
+	struct TextureSpec
 	{
 		TextureType type;
 		TextureFormat format;
-		int width = 0;
-		int height = 0;
-		int depth = 1;            // depth >1 → 3D texture
+
 		bool useMipmap = false;
+
 		TexFilter minFilter = TexFilter::Nearest;
 		TexFilter magFilter = TexFilter::Nearest;
+
 		TexWrap wrapS = TexWrap::ClampToEdge;
 		TexWrap wrapT = TexWrap::ClampToEdge;
 		TexWrap wrapR = TexWrap::ClampToEdge;
 
-		bool same_format(const TextureDesc& other) const
+		bool operator==(const TextureSpec& o) const
 		{
-			return type == other.type &&
-				format == other.format;
+			return type == o.type &&
+				format == o.format &&
+				useMipmap == o.useMipmap &&
+				minFilter == o.minFilter &&
+				magFilter == o.magFilter &&
+				wrapS == o.wrapS &&
+				wrapT == o.wrapT &&
+				wrapR == o.wrapR;
+		}
+
+		bool operator!=(const TextureSpec& o) const { return !(*this == o); }
+
+		// For framebuffer compatibility (ignore sampling state)
+		bool same_storage(const TextureSpec& o) const
+		{
+			return type == o.type &&
+				format == o.format &&
+				useMipmap == o.useMipmap;
+		}
+	};
+
+	struct TextureSize
+	{
+		int width = 0;
+		int height = 0;
+		int depth = 1;
+
+		bool operator==(const TextureSize& o) const
+		{
+			return width == o.width &&
+				height == o.height &&
+				depth == o.depth;
+		}
+
+		bool operator!=(const TextureSize& o) const { return !(*this == o); }
+
+		bool valid() const
+		{
+			return width > 0 && height > 0 && depth > 0;
+		}
+	};
+
+	struct TextureDesc
+	{
+		TextureSpec spec;
+		TextureSize size;
+
+		bool operator==(const TextureDesc& o) const
+		{
+			return spec == o.spec && size == o.size;
+		}
+
+		bool operator!=(const TextureDesc& o) const
+		{
+			return !(*this == o);
+		}
+
+		bool same_format(const TextureSpec& s) const
+		{
+			return spec.same_storage(s);
 		}
 
 		bool same_size(int w, int h, int d) const
 		{
-			return width == w &&
-				height == h &&
-				depth == d;
+			return size.width == w &&
+				size.height == h &&
+				size.depth == d;
 		}
 
-		bool same_storage(const TextureDesc& other) const
+		bool framebuffer_compatible(const TextureSpec& s, const TextureSize& sz) const
 		{
-			return same_format(other) && same_size(other.width, other.height, other.depth);
-		}
-
-		bool framebuffer_compatible(const TextureDesc& other) const
-		{
-			// Intentionally ignore filter/wrap
-			return same_storage(other) &&
-				useMipmap == other.useMipmap;
+			return spec.same_storage(s) && size == sz;
 		}
 	};
-	inline bool operator==(const TextureDesc& a, const TextureDesc& b)
-	{
-		return a.type == b.type &&
-			a.format == b.format &&
-			a.width == b.width &&
-			a.height == b.height &&
-			a.depth == b.depth &&
-			a.useMipmap == b.useMipmap &&
-			a.minFilter == b.minFilter &&
-			a.magFilter == b.magFilter &&
-			a.wrapS == b.wrapS &&
-			a.wrapT == b.wrapT &&
-			a.wrapR == b.wrapR;
-	}
-	inline bool operator!=(const TextureDesc& a, const TextureDesc& b)
-	{
-		return !(a == b);
-	}
 
 	class Texture
 	{
@@ -147,10 +180,11 @@ namespace flvr
 		uint32_t id() const { return id_; }
 
 		const TextureDesc& desc() const { return desc_; }
+		const TextureSpec& spec() const { return desc_.spec; }
 
-		int width() const { return desc_.width; }
-		int height() const { return desc_.height; }
-		int depth() const { return desc_.depth; }
+		int width() const { return desc_.size.width; }
+		int height() const { return desc_.size.height; }
+		int depth() const { return desc_.size.depth; }
 
 		void upload_2d(const void* data);
 		void upload_2d(const void* data, int width, int height, int level = 0);
