@@ -36,24 +36,28 @@ ln -s Versions/3.13/Resources "$PYFW/Resources"
 cp "$PYVER/Python" "$PYFW/Python"
 cp "$PYVER/Resources/Info.plist" "$PYFW/Info.plist"
 
-if [ "$ARCH" = "x86_64" ]; then
-    echo "🏋️ Thinning Mach-O binaries in Python.framework to x86_64"
-    find "$PYVER" -type f -print0 | while IFS= read -r -d '' f; do
-        if file "$f" | grep -q "Mach-O"; then
-            lipo -thin x86_64 "$f" -output "$f"
+#############################################
+# SAFE THINNING / REMOVAL LOGIC
+#############################################
+
+echo "🏋️ Processing Mach-O binaries for ARCH=$ARCH"
+
+find "$PYVER" -type f -print0 | while IFS= read -r -d '' f; do
+    # Only process Mach-O files
+    if file "$f" | grep -q "Mach-O"; then
+        
+        # Does this file contain the target architecture?
+        if lipo -info "$f" 2>/dev/null | grep -q "$ARCH"; then
+            echo "  ✔ Thinning to $ARCH: $f"
+            lipo -thin "$ARCH" "$f" -output "$f"
+        else
+            echo "  ❌ Removing non-$ARCH binary: $f"
+            rm -f "$f"
         fi
-    done
-elif [ "$ARCH" = "arm64" ]; then
-    echo "🏋️ Thinning Mach-O binaries in Python.framework to arm64"
-    find "$PYVER" -type f -print0 | while IFS= read -r -d '' f; do
-        if file "$f" | grep -q "Mach-O"; then
-            lipo -thin arm64 "$f" -output "$f"
-        fi
-    done
-else
-    echo "❌ Unsupported ARCH: $ARCH (use x86_64 or arm64)"
-    exit 1
-fi
+    fi
+done
+
+#############################################
 
 echo "🔧 Fixing install_name for FluoRender"
 install_name_tool -change \

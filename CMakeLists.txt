@@ -237,6 +237,11 @@ endif()
 set(wxWidgets_USE_STATIC ON)
 find_package(wxWidgets COMPONENTS core base aui html xml adv gl stc scintilla REQUIRED)
 include(${wxWidgets_USE_FILE})
+# Prevent wxWidgets from injecting its library directory as an rpath
+set(CMAKE_INSTALL_RPATH "")
+set(CMAKE_BUILD_RPATH "")
+set(CMAKE_SKIP_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
 # solution for wxWidgets linking "ambiguous" errors

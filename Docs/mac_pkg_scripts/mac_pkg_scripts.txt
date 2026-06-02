@@ -1,5 +1,5 @@
 cd fluorender/Install/Mac
-../../Docs/mac_pkg_scripts/build_installer_package.sh
+ARCH=arm64 ../../Docs/mac_pkg_scripts/build_installer_package.sh
 
 xcrun notarytool submit FluoRender_2.34.1_x86_64_installer.pkg --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz --wait
 
@@ -8,3 +8,8 @@ xcrun stapler staple FluoRender_2.34.1_x86_64_installer.pkg
 xcrun notarytool log c96cf339-e9cd-4b1b-880f-c42de8409e28 --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz
 
 pkgutil --check-signature FluoRender_2.34.1_x86_64_installer.pkg
+
+xcrun notarytool submit FluoRender_2.34.1_arm64_installer.pkg --apple-id "yong.wan@utah.edu" --team-id WG354P62PL --password yghf-hwoq-qhif-nsmz --wait
+
+xcrun stapler staple FluoRender_2.34.1_arm64_installer.pkg
+

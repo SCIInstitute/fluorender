@@ -12,22 +12,40 @@ PYVER="$PYFW/Versions/3.13"
 BIN="$APP/Contents/MacOS/FluoRender"
 ENTITLEMENTS="../../../entitlements.plist"
 
-# Developer ID Application certificate (HASH)
-SIGN_ID="7F222AFF9F45C2309180D8EDB2AB278F1121F7AD"
-echo "SIGN_ID is: '$SIGN_ID'"
+#############################################
+# AUTO-DETECT SIGNING IDENTITY
+#############################################
+
+# Prefer Developer ID Application certificate
+SIGN_ID=$(security find-identity -p codesigning -v \
+    | grep "Developer ID Application" \
+    | head -n 1 \
+    | sed -E 's/^[[:space:]]*[0-9]+\) ([A-F0-9]+) .*/\1/')
+
+if [ -z "$SIGN_ID" ]; then
+    echo "❌ ERROR: No 'Developer ID Application' certificate found in keychain."
+    echo "Install it or run: security find-identity -p codesigning -v"
+    exit 1
+fi
+
+echo "🔐 Using Developer ID Application identity: $SIGN_ID"
 
 #############################################
-# RPATH CLEANUP (SAFE)
+# RPATH CLEANUP (SAFE + TOLERANT)
 #############################################
 
 echo "🧹 Ensuring correct rpaths on FluoRender binary"
 
-# Remove old wxWidgets rpath if present
+# Remove ANY wxWidgets rpath (Intel or ARM)
 install_name_tool -delete_rpath \
   /Users/fluorender/Documents/FLUORENDER/wxWidgets/mybuild/lib \
   "$BIN" || true
 
-# Ensure correct rpath exists
+install_name_tool -delete_rpath \
+  /Users/basisunus/Documents/PROJECTS/FLUORENDER/wxWidgets/mybuild/lib \
+  "$BIN" || true
+
+# Ensure correct bundle rpath exists
 install_name_tool -add_rpath \
   @executable_path/../Frameworks \
   "$BIN" || true
@@ -51,16 +69,12 @@ codesign --force --timestamp --options runtime --sign "$SIGN_ID" \
   "$PYVER/Frameworks/Tk.framework/Versions/8.6/Tk"
 
 #############################################
-# SIGN PYTHON BINARY
+# SIGN PYTHON BINARY + FRAMEWORK
 #############################################
 
 echo "🔏 Signing Python binary"
 codesign --force --timestamp --options runtime --sign "$SIGN_ID" \
   "$PYVER/Python"
-
-#############################################
-# SIGN PYTHON FRAMEWORK WRAPPER
-#############################################
 
 echo "🔏 Signing Python.framework wrapper"
 codesign --force --timestamp --options runtime --sign "$SIGN_ID" \
@@ -83,17 +97,13 @@ codesign --force --timestamp --options runtime \
   "$APP"
 
 #############################################
-# VERIFICATION (REALISTIC + RELIABLE)
+# VERIFICATION
 #############################################
 
-echo "🧪 Verifying Python.framework (actual content)"
-codesign --verify --strict --verbose=4 \
-  "$PYVER"
+echo "🧪 Verifying Python.framework"
+codesign --verify --strict --verbose=4 "$PYVER"
 
 echo "🧪 Verifying full app bundle"
-# NOTE: macOS sometimes prints a bogus “No such file or directory”
-# for wrapper frameworks even when everything is valid.
-# The deep verify is still useful, but not authoritative.
 codesign --verify --deep --strict --verbose=4 "$APP" || true
 
 echo "🧪 Gatekeeper assessment"
