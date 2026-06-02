@@ -1462,6 +1462,9 @@ target_link_libraries(GRAPHICS_LIB PRIVATE
 )
 
 # OpenGL backend
+target_link_libraries(GRAPHICS_GL_LIB PUBLIC
+  glad
+)
 
 # Image
 

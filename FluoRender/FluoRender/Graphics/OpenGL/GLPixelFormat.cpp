@@ -26,6 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
+#include <glad/gl.h>
 #include <GLPixelFormat.h>
 
 namespace fluo::gl

@@ -30,7 +30,7 @@
 #define GLPixelFormat_h
 
 #include <PixelFormat.h>
-#include <GL/glew.h>
+#include <gl_types.h>
 
 namespace fluo::gl
 {

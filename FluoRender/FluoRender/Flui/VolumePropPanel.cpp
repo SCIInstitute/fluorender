@@ -1335,7 +1335,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto main_mode = vd->GetMainColorMode();
 		switch (main_mode)
 		{
-		case flvr::ColorMode::None:
+		case flvr::ColorMode::Disabled:
 			m_main_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(clip_none));
 			break;
@@ -1359,7 +1359,7 @@ void VolumePropPanel::FluoUpdate(const fluo::ValueCollection& vc)
 		auto mask_mode = vd->GetMaskColorMode();
 		switch (mask_mode)
 		{
-		case flvr::ColorMode::None:
+		case flvr::ColorMode::Disabled:
 			m_alt_color_mode_tb->SetToolNormalBitmap(0,
 				wxGetBitmap(clip_none));
 			break;
@@ -3475,16 +3475,23 @@ bool VolumePropPanel::SetSpacing()
 	fluo::Vector spc(spcx, spcy, spcz);
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
-	if ((m_sync_group || glbin_settings.m_override_vox) && group)
+	if (m_sync_group && group)
 	{
 		for (int i = 0; i < group->GetVolumeNum(); i++)
 		{
-			group->GetVolumeData(i)->SetSpacing(spc);
-			group->GetVolumeData(i)->SetBaseSpacing(spc);
+			auto gvd = group->GetVolumeData(i);
+			if (gvd &&
+				gvd->GetSpacingSource() != SpacingSource::FromFile)
+			{
+				gvd->SetSpacingSource(SpacingSource::FromUser);
+				gvd->SetSpacing(spc);
+				gvd->SetBaseSpacing(spc);
+			}
 		}
 	}
 	else if (vd)
 	{
+		vd->SetSpacingSource(SpacingSource::FromUser);
 		vd->SetSpacing(spc);
 		vd->SetBaseSpacing(spc);
 	}

@@ -53,7 +53,7 @@ namespace flvr
 	class FileLocInfo;
 	enum class CompType : int
 	{
-		None,
+		Invalid,
 		Data,
 		Gradient,
 		GradientMagnitude,

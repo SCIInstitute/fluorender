@@ -97,7 +97,7 @@ enum class ChannelMixMode : int
 
 enum class InteractiveMode : int
 {
-	None,
+	Disabled,
 	Viewport,			//1-normal viewing
 	BrushSelect,		//2-painting
 	BrushSelectUpdate,	//4-one-time rendering update in painting mode
@@ -139,7 +139,7 @@ public:
 	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
 	std::string GetOGLVersion() const;
 	//initialization
-	void Init();
+	bool Init();
 
 	void InitOpenXR();
 	void InitLookingGlass();
