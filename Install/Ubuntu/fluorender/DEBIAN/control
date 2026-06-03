@@ -4,6 +4,6 @@ Section: graphics
 Priority: optional
 Architecture: amd64
 Maintainer: Yong Wan
-Depends: libc6 (>= 2.31), libstdc++6, libgl1, libegl1, libx11-6
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Fluorender volumetric visualization tool
  High-performance tool for volume rendering and analysis.

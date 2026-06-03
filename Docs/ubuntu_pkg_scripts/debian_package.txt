@@ -1,7 +1,12 @@
-In fluorender_install, create:
+﻿In fluorender_install, create:
 fluorender/
 ├── DEBIAN/
 │   └── control
+│   ├── rules
+│   ├── compat
+│   └── install
+├── build/   (your compiled output)
+
 ├── usr/
 │   ├── bin/
 │   │   └── fluorender
@@ -17,5 +22,6 @@ Add control file to DEBIAN
 
 chmod -R 755 fluorender/usr
 chmod 644 fluorender/DEBIAN/control
+chmod +x debian/rules
 
 dpkg-deb --build fluorender
