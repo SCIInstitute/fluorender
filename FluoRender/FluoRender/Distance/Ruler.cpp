@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Quaternion.h>
 #include <Utils.h>
 #include <fstream>
+#include <algorithm>
 
 using namespace flrd;
 
@@ -302,37 +303,81 @@ double Ruler::GetLengthObject(const fluo::Vector& scale)
 double Ruler::GetAngle()
 {
 	double angle = 0.0;
+	const double eps = 1e-10;
 
 	if (m_ruler.empty())
 		return angle;
 
+	// -----------------------------
+	// Line / Probe mode
+	// -----------------------------
 	if (m_mode == RulerMode::Line ||
 		m_mode == RulerMode::Probe)
 	{
 		if (m_ruler[0].size() >= 2)
 		{
-			fluo::Vector v = m_ruler[0][1]->GetPoint(m_work_time, m_interp) -
-				m_ruler[0][0]->GetPoint(m_work_time, m_interp);
-			v.normalize();
-			angle = atan2(-v.y(), (v.x() > 0.0 ? 1.0 : -1.0)*
-				sqrt(v.x()*v.x() + v.z()*v.z()));
-			angle = fluo::r2d(angle);
-			angle = angle < 0.0 ? angle + 180.0 : angle;
+			fluo::Point p0 = m_ruler[0][0]->GetPoint(m_work_time, m_interp);
+			fluo::Point p1 = m_ruler[0][1]->GetPoint(m_work_time, m_interp);
+
+			fluo::Vector v = p1 - p0;
+			double len = v.length();
+
+			if (len > eps)
+			{
+				v /= len; // normalize safely
+
+				// angle relative to XZ plane ("ground")
+				// i.e., elevation angle from horizontal plane
+
+				double horiz = sqrt(v.x() * v.x() + v.z() * v.z());
+
+				// atan2 handles all quadrants robustly
+				angle = atan2(-v.y(), horiz);  // negative keeps your convention
+
+				angle = fluo::r2d(angle);
+
+				// map to [0, 180]
+				if (angle < 0.0)
+					angle += 180.0;
+			}
 		}
 	}
+
+	// -----------------------------
+	// Protractor mode (3-point angle)
+	// -----------------------------
 	else if (m_mode == RulerMode::Protractor)
 	{
 		if (m_ruler[0].size() >= 3)
 		{
-			fluo::Vector v1, v2;
-			v1 = m_ruler[0][0]->GetPoint(m_work_time, m_interp) -
-				m_ruler[0][1]->GetPoint(m_work_time, m_interp);
-			v1.normalize();
-			v2 = m_ruler[0][2]->GetPoint(m_work_time, m_interp) -
-				m_ruler[0][1]->GetPoint(m_work_time, m_interp);
-			v2.normalize();
-			angle = acos(Dot(v1, v2));
-			angle = fluo::r2d(angle);
+			fluo::Point p0 = m_ruler[0][0]->GetPoint(m_work_time, m_interp);
+			fluo::Point p1 = m_ruler[0][1]->GetPoint(m_work_time, m_interp);
+			fluo::Point p2 = m_ruler[0][2]->GetPoint(m_work_time, m_interp);
+
+			fluo::Vector v1 = p0 - p1;
+			fluo::Vector v2 = p2 - p1;
+
+			double len1 = v1.length();
+			double len2 = v2.length();
+
+			if (len1 > eps && len2 > eps)
+			{
+				v1 /= len1;
+				v2 /= len2;
+
+				double d = Dot(v1, v2);
+
+				// clamp to avoid NaNs / sign flips near 90°
+				d = std::max(-1.0, std::min(1.0, d));
+
+				angle = acos(d);
+
+				// OPTIONAL: always return smaller angle
+				// (prevents 30° becoming 150° due to orientation)
+				//angle = std::min(angle, fluo::Pi() - angle);
+
+				angle = fluo::r2d(angle);
+			}
 		}
 	}
 
