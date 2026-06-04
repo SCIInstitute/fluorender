@@ -70,21 +70,35 @@ public:
 	int LoadFile(const std::wstring& filename) override
 	{
 #ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-		std::ifstream file(long_name);
+		std::wstring path = MakeLongPath(filename);
+		FILE* fp = _wfopen(path.c_str(), L"rb");
 #else
-		std::wstring long_name = filename;
-		std::ifstream file(ws2s(long_name));
+		FILE* fp = fopen(ws2s(filename).c_str(), "rb");
 #endif
-		std::stringstream buffer;
-		buffer << file.rdbuf();
-		std::string str = buffer.str();
 
-		int result = LoadStringConf(str);
+		if (!fp)
+			return 1;
 
-		file.close();
+		fseek(fp, 0, SEEK_END);
+		long size = ftell(fp);
+		rewind(fp);
 
-		return result;
+		if (size <= 0)
+		{
+			fclose(fp);
+			return 1;
+		}
+
+		std::string buffer;
+		buffer.resize(size);
+
+		size_t read = fread(&buffer[0], 1, size, fp);
+		fclose(fp);
+
+		if (read != (size_t)size)
+			return 1;
+
+		return LoadStringConf(buffer);
 	}
 
 	int LoadStringConf(const std::string& ini_string) override
@@ -137,26 +151,25 @@ public:
 
 	int SaveFile(const std::wstring& filename) override
 	{
-		if (json_ == nullptr) {
-			return 1; // Error: No JSON data to save
-		}
-
-#ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-		std::ofstream file(long_name);
-#else
-		std::wstring long_name = filename;
-		std::ofstream file(ws2s(long_name));
-#endif
-		if (!file.is_open()) {
-			return 6; // Error: Unable to open file
-		}
+		if (json_ == nullptr)
+			return 1;
 
 		std::string jsonString = json_stringify(json_);
-		file << jsonString;
-		file.close();
 
-		return 0; // Success
+#ifdef _WIN32
+		std::wstring path = MakeLongPath(filename);
+		FILE* fp = _wfopen(path.c_str(), L"wb");
+#else
+		FILE* fp = fopen(ws2s(filename).c_str(), "wb");
+#endif
+
+		if (!fp)
+			return 6;
+
+		size_t written = fwrite(jsonString.c_str(), 1, jsonString.size(), fp);
+		fclose(fp);
+
+		return (written == jsonString.size()) ? 0 : 1;
 	}
 
 	int SaveString(std::string& str) override

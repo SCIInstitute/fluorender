@@ -1,0 +1,3 @@
+build/bin/fluorender usr/bin/
+fluorender.desktop usr/share/applications/
+fluorender.png usr/share/icons/hicolor/256x256/apps/

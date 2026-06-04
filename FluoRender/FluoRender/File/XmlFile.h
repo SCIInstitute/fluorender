@@ -54,14 +54,41 @@ public:
 	int LoadFile(const std::wstring& filename) override
 	{
 #ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+		std::wstring path = MakeLongPath(filename);
+		FILE* fp = _wfopen(path.c_str(), L"rb");
 #else
-		std::wstring long_name = filename;
+		FILE* fp = fopen(ws2s(filename).c_str(), "rb");
 #endif
-		std::string str = ws2s(long_name);
-		doc_.LoadFile(str.c_str());
+
+		if (!fp)
+			return 1;
+
+		fseek(fp, 0, SEEK_END);
+		long size = ftell(fp);
+		rewind(fp);
+
+		if (size <= 0)
+		{
+			fclose(fp);
+			return 1;
+		}
+
+		std::string buffer;
+		buffer.resize(size);
+
+		size_t read = fread(&buffer[0], 1, size, fp);
+		fclose(fp);
+
+		if (read != (size_t)size)
+			return 1;
+
+		tinyxml2::XMLError err = doc_.Parse(buffer.c_str(), buffer.size());
+		if (err != tinyxml2::XML_SUCCESS)
+			return 1;
+
 		cur_element_ = doc_.RootElement();
 		cur_path_ = path_sep_;
+
 		return 0;
 	}
 
@@ -128,22 +155,36 @@ public:
 
 	int SaveFile(const std::wstring& filename) override
 	{
-#ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-#else
-		std::wstring long_name = filename;
-#endif
-		std::string str = ws2s(long_name);
-
-		// Add XML header
-		tinyxml2::XMLDeclaration* decl = doc_.NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
-		doc_.InsertFirstChild(decl);
-
-		if (doc_.SaveFile(str.c_str()) == tinyxml2::XML_SUCCESS)
+		// Ensure XML declaration exists
+		tinyxml2::XMLNode* first = doc_.FirstChild();
+		if (!first || !first->ToDeclaration())
 		{
-			return 0;
+			tinyxml2::XMLDeclaration* decl =
+				doc_.NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
+			doc_.InsertFirstChild(decl);
 		}
-		return 1; // Return an error code if saving fails
+
+		// serialize XML to memory
+		tinyxml2::XMLPrinter printer;
+		doc_.Print(&printer);
+
+#ifdef _WIN32
+		std::wstring path = MakeLongPath(filename);
+		FILE* fp = _wfopen(path.c_str(), L"wb");
+#else
+		FILE* fp = fopen(ws2s(filename).c_str(), "wb");
+#endif
+
+		if (!fp)
+			return 1;
+
+		const char* data = printer.CStr();
+		size_t size = printer.CStrSize() - 1;
+
+		size_t written = fwrite(data, 1, size, fp);
+		fclose(fp);
+
+		return (written == size) ? 0 : 1;
 	}
 
 	int SaveString(std::string& str) override
