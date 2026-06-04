@@ -71,13 +71,26 @@ public:
 		dictionary_.clear();
 		cur_path_ = "";
 		_format_ = __INI_MAP_DEFAULT_FORMAT__;
+
 #ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
+		std::wstring path = MakeLongPath(filename);
+		FILE* fp = _wfopen(path.c_str(), L"rb");
 #else
-		std::wstring long_name = filename;
+		FILE* fp = fopen(ws2s(filename).c_str(), "rb");
 #endif
-		std::string str = ws2s(long_name);
-		return load_ini_path(str.c_str(), __INI_MAP_DEFAULT_FORMAT__, NULL, _push_dispatch_, &dictionary_);
+
+		if (!fp)
+			return CONFINI_EIO;
+
+		int ret = load_ini_file(
+			fp,
+			__INI_MAP_DEFAULT_FORMAT__,
+			NULL,
+			_push_dispatch_,
+			&dictionary_);
+
+		fclose(fp);
+		return ret;
 	}
 
 	int LoadStringConf(const std::string& ini_string) override
@@ -107,41 +120,44 @@ public:
 	int SaveFile(const std::wstring& filename) override
 	{
 #ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-        std::ofstream file(long_name);
+		std::wstring path = MakeLongPath(filename);
+		FILE* fp = _wfopen(path.c_str(), L"wb");
 #else
-		std::wstring long_name = filename;
-        std::ofstream file(ws2s(long_name));
+		FILE* fp = fopen(ws2s(filename).c_str(), "wb");
 #endif
-		if (!file.is_open()) {
+
+		if (!fp)
 			return CONFINI_EIO;
-		}
 
 		auto sorted_dict = SortingUtility::getSortedMap(dictionary_);
 
 		std::string current_section;
-		for (const auto& pair : sorted_dict) {
+
+		for (const auto& pair : sorted_dict)
+		{
 			std::string full_key = pair.first;
 			size_t pos = 0;
 			std::string section;
 			std::string key = full_key;
 
 			// Determine the section and key
-			while ((pos = key.find(path_sep_)) != std::string::npos) {
+			while ((pos = key.find(path_sep_)) != std::string::npos)
+			{
 				section += (section.empty() ? "" : path_sep_) + key.substr(0, pos);
 				key = key.substr(pos + 1);
 			}
 
-			// Print the section if it's different from the current section
-			if (section != current_section) {
+			// Print section header if changed
+			if (section != current_section)
+			{
 				current_section = section;
-				file << "[" << current_section << "]\n";
+				fprintf(fp, "[%s]\n", current_section.c_str());
 			}
 
-			file << key << " = " << pair.second << "\n";
+			fprintf(fp, "%s = %s\n", key.c_str(), pair.second.c_str());
 		}
 
-		file.close();
+		fclose(fp);
 		return CONFINI_SUCCESS;
 	}
 

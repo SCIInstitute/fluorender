@@ -1000,6 +1000,22 @@ inline int SPRINTF(char* buf, size_t n, const char* fmt, ...) {
 	return r;
 }
 
+static std::wstring MakeLongPath(const std::wstring& path)
+{
+	if (path.empty())
+		return path;
+
+	// already long path?
+	if (path.rfind(L"\\\\?\\", 0) == 0)
+		return path;
+
+	// UNC path (\\server\share → \\?\UNC\server\share)
+	if (path.rfind(L"\\\\", 0) == 0)
+		return L"\\\\?\\UNC\\" + path.substr(2);
+
+	return L"\\\\?\\" + path;
+}
+
 #else // MAC OSX or LINUX
 
 #include <unistd.h>

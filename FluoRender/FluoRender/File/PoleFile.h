@@ -55,19 +55,23 @@ public:
 
 	int LoadFile(const std::wstring& filename) override
 	{
-#ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-#else
-		std::wstring long_name = filename;
-#endif
-		std::string str = ws2s(long_name);
+		// POLE does not support \\?\ or wide paths reliably
+		// Use normal UTF-8 conversion (best effort)
+		std::string str = ws2s(filename);
+
 		storage_ = new POLE::Storage(str.c_str());
-		if (storage_)
+
+		if (!storage_)
+			return 1;
+
+		if (!storage_->open())
 		{
-			storage_->open();
-			return 0;
+			delete storage_;
+			storage_ = nullptr;
+			return 1;
 		}
-		return 1;
+
+		return 0;
 	}
 
 	int LoadStringConf(const std::string& ini_string) override
@@ -89,19 +93,22 @@ public:
 
 	int SaveFile(const std::wstring& filename) override
 	{
-#ifdef _WIN32
-		std::wstring long_name = L"\x5c\x5c\x3f\x5c" + filename;
-#else
-		std::wstring long_name = filename;
-#endif
-		std::string str = ws2s(long_name);
+		// POLE does not support \\?\ or wide paths reliably
+		std::string str = ws2s(filename);
+
 		storage_ = new POLE::Storage(str.c_str());
-		if (storage_)
+
+		if (!storage_)
+			return 1;
+
+		if (!storage_->open(true, true))
 		{
-			storage_->open(true, true);
-			return 0;
+			delete storage_;
+			storage_ = nullptr;
+			return 1;
 		}
-		return 1;
+
+		return 0;
 	}
 
 	int SaveString(std::string& str) override
