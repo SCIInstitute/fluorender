@@ -501,44 +501,66 @@ endif()
 # Java / JNI configuration (Linux, macOS, Windows)
 # ------------------------------------------------------------
 
-# Allow user override
-set(JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64)
-#set(JAVA_HOME "" CACHE PATH "Path to Java installation (JDK root)")
+# User override (visible in CMake GUI)
+set(JAVA_HOME "" CACHE PATH "Path to Java JDK root (optional override)")
 
 # Require at least Java 17
 set(_JAVA_MIN_VERSION 17)
 
-# Step 1: If JAVA_HOME is provided, use it
-if(JAVA_HOME)
-  set(ENV{JAVA_HOME} "${JAVA_HOME}")
-  message(STATUS "Using user-provided JAVA_HOME: ${JAVA_HOME}")
+# ------------------------------------------------------------
+# Step 1: Respect user or environment
+# ------------------------------------------------------------
 
-  # Help CMake find Java/JNI under this prefix
-  list(PREPEND CMAKE_PREFIX_PATH "${JAVA_HOME}")
-
+# If user didn't set JAVA_HOME, try environment
+if(NOT JAVA_HOME AND DEFINED ENV{JAVA_HOME})
+  set(JAVA_HOME "$ENV{JAVA_HOME}")
 endif()
 
-# Step 2: Find Java
+# If JAVA_HOME exists, help CMake
+if(JAVA_HOME)
+  message(STATUS "Using JAVA_HOME: ${JAVA_HOME}")
+  list(PREPEND CMAKE_PREFIX_PATH "${JAVA_HOME}")
+  set(ENV{JAVA_HOME} "${JAVA_HOME}")
+endif()
+
+# ------------------------------------------------------------
+# Step 2: Find Java (auto-detect preferred JDK)
+# ------------------------------------------------------------
+
 find_package(Java ${_JAVA_MIN_VERSION} REQUIRED COMPONENTS Runtime Development)
 
-# Export detected JAVA_HOME if not provided
+# If JAVA_HOME was not provided, infer it from detected Java
 if(NOT JAVA_HOME)
-  set(JAVA_HOME "${Java_JAVA_HOME}" CACHE PATH "Path to Java installation" FORCE)
-  set(ENV{JAVA_HOME} "${JAVA_HOME}")
-  message(STATUS "Detected JAVA_HOME: ${JAVA_HOME}")
+  if(Java_JAVA_EXECUTABLE)
+    get_filename_component(_JAVA_BIN_DIR "${Java_JAVA_EXECUTABLE}" DIRECTORY)
+    get_filename_component(_JAVA_HOME_AUTO "${_JAVA_BIN_DIR}/.." ABSOLUTE)
+
+    set(JAVA_HOME "${_JAVA_HOME_AUTO}" CACHE PATH "Path to Java JDK root" FORCE)
+    set(ENV{JAVA_HOME} "${JAVA_HOME}")
+
+    message(STATUS "Auto-detected JAVA_HOME: ${JAVA_HOME}")
+  else()
+    message(FATAL_ERROR "Java found but JAVA_HOME could not be inferred")
+  endif()
 endif()
 
+# ------------------------------------------------------------
 # Step 3: Find JNI (depends on Java)
+# ------------------------------------------------------------
+
 find_package(JNI REQUIRED)
 
+# ------------------------------------------------------------
 # Step 4: Diagnostics
-message(STATUS "Java executable: ${Java_JAVA_EXECUTABLE}")
-message(STATUS "Java version: ${Java_VERSION_STRING}")
-message(STATUS "JAVA_HOME: ${JAVA_HOME}")
+# ------------------------------------------------------------
+
+message(STATUS "Java executable : ${Java_JAVA_EXECUTABLE}")
+message(STATUS "Java version    : ${Java_VERSION}")
+message(STATUS "JAVA_HOME       : ${JAVA_HOME}")
 
 if(JNI_FOUND)
   message(STATUS "JNI include dirs: ${JNI_INCLUDE_DIRS}")
-  message(STATUS "JNI libraries: ${JNI_LIBRARIES}")
+  message(STATUS "JNI libraries   : ${JNI_LIBRARIES}")
 else()
   message(FATAL_ERROR "JNI not found but required")
 endif()

@@ -1,27 +1,17 @@
-﻿In fluorender_install, create:
+﻿In fluorender/Install/Ubuntu, create:
 fluorender/
-├── DEBIAN/
+├── debian/
 │   └── control
 │   ├── rules
 │   ├── compat
 │   └── install
-├── build/   (your compiled output)
+├── build/
+│   └── bin/fluorender
 
-├── usr/
-│   ├── bin/
-│   │   └── fluorender
-│   └── share/
-│       ├── applications/
-│       │   └── fluorender.desktop
-│       └── icons/
-│           └── hicolor/256x256/apps/fluorender.png
+Copy fluorender/build/bin to build/bin
 
-Copy fluorender/build/bin to usr/bin
-Add control file to DEBIAN
+chmod +x fluorender/debian/rules
+chmod 755 fluorender/build/bin/FluoRender
 
-
-chmod -R 755 fluorender/usr
-chmod 644 fluorender/DEBIAN/control
-chmod +x debian/rules
-
-dpkg-deb --build fluorender
+cd fluorender/Install/Ubuntu/fluorender
+./build_and_test.sh

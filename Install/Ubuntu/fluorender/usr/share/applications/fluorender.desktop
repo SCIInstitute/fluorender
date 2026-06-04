@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=FluoRender
-Comment=FluoRender
-Exec=/usr/bin/FluoRender
-Icon=fluorender
-Categories=Graphics;
