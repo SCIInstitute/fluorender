@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=FluoRender
+Comment=Volumetric visualization and analysis tool
+Exec=FluoRender
+Icon=fluorender
+Categories=Graphics;
+Terminal=false
+StartupNotify=true
