@@ -4,6 +4,15 @@ set -e
 PKG_NAME="fluorender"
 DIST="ubuntu:22.04"
 
+echo "=== Cleaning previous host install ==="
+sudo apt remove --purge -y fluorender 2>/dev/null || true
+sudo apt autoremove -y 2>/dev/null || true
+
+# remove leftovers (safe)
+sudo rm -f /usr/bin/FluoRender || true
+sudo rm -f /usr/share/applications/fluorender.desktop || true
+sudo rm -rf /usr/share/icons/hicolor/*/apps/fluorender.png || true
+
 echo "=== Cleaning old builds ==="
 [ -d build-area ] && sudo rm -rf build-area
 mkdir build-area
@@ -95,7 +104,11 @@ docker run --rm -it \
 
         echo \"Found package: \$DEB\"
 
-        echo '=== Install package ==='
+	echo '=== Clean previous install ==='
+	apt remove --purge -y fluorender || true
+	apt autoremove -y || true
+
+       echo '=== Install package ==='
         apt install -y ./\$DEB || apt -f install -y
 
         echo '=== Verify binary installed ==='

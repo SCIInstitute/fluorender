@@ -37,20 +37,31 @@ fluorender/
 │   ├── rules
 │   └── install
 ├── build/
-│   └── bin/FluoRender
+│   └── bin/
 ├── assets/
 │   ├── fluorender.desktop
-│   ├── fluorender_48.png
-│   └── fluorender_128.png
+│   └── icons/
+│       └── hicolor/
+│           ├── 48x48/apps/fluorender.png
+│           └── 128x128/apps/fluorender.png
 ├── build_and_test.sh
+
+NOTES:
+- Icons MUST be named exactly: fluorender.png
+- Do NOT use filenames like fluorender_48.png
 
 
 ------------------------------------------------------------
-3. Copy build output
+3. Copy build output (binary + resources)
 ------------------------------------------------------------
 
 mkdir -p fluorender/build/bin
-cp ../../build/bin/FluoRender fluorender/build/bin/
+rm -rf fluorender/build/bin/*
+cp -r ../../build/bin/* fluorender/build/bin/
+
+IMPORTANT:
+- Copy EVERYTHING under build/bin (not just FluoRender)
+- Required for Scripts, CL_code, Templates, etc.
 
 
 ------------------------------------------------------------
@@ -62,7 +73,25 @@ chmod 755 fluorender/build/bin/FluoRender
 
 
 ------------------------------------------------------------
-5. Build and test package (Docker)
+5. Configure debian/install (CRITICAL)
+------------------------------------------------------------
+
+Use EXACTLY:
+
+build/bin/FluoRender usr/bin/
+build/bin/* usr/lib/fluorender/
+
+assets/icons/hicolor/* usr/share/icons/hicolor/
+assets/fluorender.desktop usr/share/applications/
+
+
+IMPORTANT:
+- Use "hicolor/*", NOT "hicolor/" (avoids nested folders)
+- Do NOT rename files during install
+
+
+------------------------------------------------------------
+6. Build and test package (Docker)
 ------------------------------------------------------------
 
 cd fluorender/Install/Ubuntu/fluorender
@@ -70,17 +99,31 @@ cd fluorender/Install/Ubuntu/fluorender
 
 This script will:
 
-- Build the .deb package
-- Install it in a clean Ubuntu Docker container
-- Check for missing shared libraries (.so)
-- Validate dependencies automatically
+- Use a clean Ubuntu container each run
+- Install dependencies
+- Build the package
+- Install and test the package
+- Validate shared library dependencies
+
+Docker ensures reproducible results (no leftover system state).
 
 
 ------------------------------------------------------------
-6. Locate generated package
+7. Clean local system before testing (IMPORTANT)
 ------------------------------------------------------------
 
-After successful run:
+sudo apt remove --purge -y fluorender || true
+
+sudo rm -rf /usr/share/icons/hicolor/*/apps/fluorender*
+sudo rm -f /usr/share/applications/fluorender.desktop
+
+# optional (recommended for debugging)
+rm -rf ~/.config/FluoRender
+
+
+------------------------------------------------------------
+8. Locate generated package
+------------------------------------------------------------
 
 ls build-area/*.deb
 
@@ -91,30 +134,61 @@ fluorender-dbgsym_<version>*.ddeb  ← debug package (ignore)
 
 
 ------------------------------------------------------------
-7. Fix file ownership (remove lock icon)
+9. Fix file ownership (remove lock icon)
 ------------------------------------------------------------
-
-Docker creates files as root. Fix permissions:
 
 sudo chown -R $USER:$USER build-area
 
-This removes the lock icon and allows normal file use.
-
 
 ------------------------------------------------------------
-8. Test installation locally
+10. Install locally
 ------------------------------------------------------------
 
 sudo apt install ./build-area/fluorender_*.deb
 
 
 ------------------------------------------------------------
-9. Release on GitHub
+11. Verify installation (recommended)
+------------------------------------------------------------
+
+# Check icons
+ls /usr/share/icons/hicolor/*/apps/fluorender.png
+
+# Check desktop entry
+ls /usr/share/applications/fluorender.desktop
+
+# Check resources
+ls /usr/lib/fluorender
+
+
+------------------------------------------------------------
+12. Refresh desktop environment
+------------------------------------------------------------
+
+gtk-update-icon-cache /usr/share/icons/hicolor
+update-desktop-database
+
+# Then log out and log back in
+
+
+------------------------------------------------------------
+13. Run application
+------------------------------------------------------------
+
+FluoRender
+
+or:
+
+gtk-launch fluorender
+
+
+------------------------------------------------------------
+14. Release on GitHub
 ------------------------------------------------------------
 
 Use GitHub Releases (NOT git commit):
 
-1. Go to repository → Releases → "Draft a new release"
+1. Repository → Releases → "Draft a new release"
 2. Set version tag (e.g., v2.34.1)
 3. Upload:
 
@@ -126,15 +200,27 @@ Do NOT upload:
 
 
 ------------------------------------------------------------
-10. Notes
+15. Notes (Important)
 ------------------------------------------------------------
 
-- Package size (~7 MB) is expected because system libraries
-  (OpenCV, GTK, FFmpeg, etc.) are installed via apt.
+- Package size (~5–50 MB) is normal:
+  system libraries are installed separately via apt.
 
-- The package currently targets Ubuntu 22.04.
+- Target:
+  Ubuntu 22.04 (Jammy)
 
-- Dependencies are automatically handled during install.
+- Icons REQUIRE:
+  correct filename (fluorender.png)
+  correct directory (hicolor/*/apps)
+
+- Resource handling:
+  Use GetResourcePath() in code for fallback logic
+
+- User config:
+  Stored in ~/.config/FluoRender
+
+- Common failure cause:
+  leftover files from previous installs
 
 ------------------------------------------------------------
 END
