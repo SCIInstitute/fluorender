@@ -1,3 +1,4 @@
-build/bin/fluorender usr/bin/
-fluorender.desktop usr/share/applications/
-fluorender.png usr/share/icons/hicolor/256x256/apps/
+build/bin/FluoRender usr/bin/
+assets/fluorender.desktop usr/share/applications/
+assets/fluorender_48.png usr/share/icons/hicolor/48x48/apps/fluorender.png
+assets/fluorender_128.png usr/share/icons/hicolor/128x128/apps/fluorender.png

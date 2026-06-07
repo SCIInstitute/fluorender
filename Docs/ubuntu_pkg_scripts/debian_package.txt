@@ -1,17 +1,141 @@
-﻿In fluorender/Install/Ubuntu, create:
+FluoRender Debian Packaging Instructions (Ubuntu)
+
+------------------------------------------------------------
+1. Install Docker (one-time setup)
+------------------------------------------------------------
+
+sudo apt update
+sudo apt install -y docker.io
+
+Enable and start Docker:
+
+sudo systemctl enable docker
+sudo systemctl start docker
+
+Allow running Docker without sudo:
+
+sudo usermod -aG docker $USER
+
+Apply group change:
+
+newgrp docker
+
+Test Docker:
+
+docker run hello-world
+
+
+------------------------------------------------------------
+2. Prepare packaging directory
+------------------------------------------------------------
+
+Inside fluorender/Install/Ubuntu, create:
+
 fluorender/
 ├── debian/
-│   └── control
+│   ├── control
 │   ├── rules
-│   ├── compat
 │   └── install
 ├── build/
-│   └── bin/fluorender
+│   └── bin/FluoRender
+├── assets/
+│   ├── fluorender.desktop
+│   ├── fluorender_48.png
+│   └── fluorender_128.png
+├── build_and_test.sh
 
-Copy fluorender/build/bin to build/bin
+
+------------------------------------------------------------
+3. Copy build output
+------------------------------------------------------------
+
+mkdir -p fluorender/build/bin
+cp ../../build/bin/FluoRender fluorender/build/bin/
+
+
+------------------------------------------------------------
+4. Set permissions
+------------------------------------------------------------
 
 chmod +x fluorender/debian/rules
 chmod 755 fluorender/build/bin/FluoRender
 
+
+------------------------------------------------------------
+5. Build and test package (Docker)
+------------------------------------------------------------
+
 cd fluorender/Install/Ubuntu/fluorender
 ./build_and_test.sh
+
+This script will:
+
+- Build the .deb package
+- Install it in a clean Ubuntu Docker container
+- Check for missing shared libraries (.so)
+- Validate dependencies automatically
+
+
+------------------------------------------------------------
+6. Locate generated package
+------------------------------------------------------------
+
+After successful run:
+
+ls build-area/*.deb
+
+You will see:
+
+fluorender_<version>_amd64.deb      ← main package (use this)
+fluorender-dbgsym_<version>*.ddeb  ← debug package (ignore)
+
+
+------------------------------------------------------------
+7. Fix file ownership (remove lock icon)
+------------------------------------------------------------
+
+Docker creates files as root. Fix permissions:
+
+sudo chown -R $USER:$USER build-area
+
+This removes the lock icon and allows normal file use.
+
+
+------------------------------------------------------------
+8. Test installation locally
+------------------------------------------------------------
+
+sudo apt install ./build-area/fluorender_*.deb
+
+
+------------------------------------------------------------
+9. Release on GitHub
+------------------------------------------------------------
+
+Use GitHub Releases (NOT git commit):
+
+1. Go to repository → Releases → "Draft a new release"
+2. Set version tag (e.g., v2.34.1)
+3. Upload:
+
+   fluorender_<version>_amd64.deb
+
+Do NOT upload:
+
+   *.ddeb
+
+
+------------------------------------------------------------
+10. Notes
+------------------------------------------------------------
+
+- Package size (~7 MB) is expected because system libraries
+  (OpenCV, GTK, FFmpeg, etc.) are installed via apt.
+
+- The package currently targets Ubuntu 22.04.
+
+- Dependencies are automatically handled during install.
+
+------------------------------------------------------------
+END
+------------------------------------------------------------
