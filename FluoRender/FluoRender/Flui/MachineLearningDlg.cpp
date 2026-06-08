@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
+#include <Directory.h>
 #include <filesystem>
 
 MachineLearningDlg::MachineLearningDlg(MainFrame* frame) :
@@ -261,6 +262,8 @@ void MachineLearningPanel::PopTopList()
 	std::wstring path = p.wstring();
 	std::wstring name, ext, filename;
 	int i = 0;
+	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(path))
 	{
 		ext = entry.path().extension().wstring();
@@ -336,6 +339,8 @@ bool MachineLearningPanel::MatchTableName(std::wstring& name)
 	p /= m_dir;
 	std::wstring path = p.wstring();
 	std::wstring stem, ext;
+	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
+		return modified;
 	while (true)
 	{
 		bool found_same = false;

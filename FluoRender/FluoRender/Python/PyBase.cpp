@@ -238,21 +238,24 @@ std::string PyBase::GetPythonPath()
 		std::filesystem::path path(str);
 		str += "*.dll";
 		std::regex rgx = REGEX(str);
-		for (auto& it : std::filesystem::directory_iterator(path))
+		if (std::filesystem::exists(path) && std::filesystem::is_directory(path))
 		{
-			if (!std::filesystem::is_regular_file(it))
-				continue;
-			const std::string st = it.path().string();
-			if (std::regex_match(st, rgx))
+			for (auto& it : std::filesystem::directory_iterator(path))
 			{
-				//check pattern
-				size_t pos = st.rfind("3");
-				if (pos == std::string::npos)
+				if (!std::filesystem::is_regular_file(it))
 					continue;
-				if (std::isdigit(st[pos + 1]))
+				const std::string st = it.path().string();
+				if (std::regex_match(st, rgx))
 				{
-					result = st;
-					break;
+					//check pattern
+					size_t pos = st.rfind("3");
+					if (pos == std::string::npos)
+						continue;
+					if (std::isdigit(st[pos + 1]))
+					{
+						result = st;
+						break;
+					}
 				}
 			}
 		}
@@ -264,28 +267,31 @@ std::string PyBase::GetPythonPath()
 	std::string par_path("/Library/Frameworks/Python.framework/Versions/");
 	std::filesystem::path env_path;
 	double max_ver = 0, dval = 0;
-	for (auto& it1 : std::filesystem::directory_iterator(par_path))
+	if (std::filesystem::exists(par_path) && std::filesystem::is_directory(par_path))
 	{
-		if (!std::filesystem::is_directory(it1))
-			continue;
-		std::string strv = it1.path().filename().string();
-		bool flag = true;
-		for (auto c : strv)
+		for (auto& it1 : std::filesystem::directory_iterator(par_path))
 		{
-			if (!std::isdigit(c) && c != '.')
+			if (!std::filesystem::is_directory(it1))
+				continue;
+			std::string strv = it1.path().filename().string();
+			bool flag = true;
+			for (auto c : strv)
 			{
-				flag = false;
-				break;
+				if (!std::isdigit(c) && c != '.')
+				{
+					flag = false;
+					break;
+				}
 			}
-		}
-		if (!flag)
-			continue;
-		try { dval = std::stod(strv); }
-		catch (...) { continue; }
-		if (dval > max_ver)
-		{
-			max_ver = dval;
-			env_path = it1.path();
+			if (!flag)
+				continue;
+			try { dval = std::stod(strv); }
+			catch (...) { continue; }
+			if (dval > max_ver)
+			{
+				max_ver = dval;
+				env_path = it1.path();
+			}
 		}
 	}
 	if (std::filesystem::exists(env_path))
@@ -296,21 +302,24 @@ std::string PyBase::GetPythonPath()
 		std::filesystem::path path(str);
 		str += "*.dylib";
 		std::regex rgx = REGEX(str);
-		for (auto& it : std::filesystem::directory_iterator(path))
+		if (std::filesystem::exists(path) && std::filesystem::is_directory(path))
 		{
-			if (!std::filesystem::is_regular_file(it))
-				continue;
-			const std::string st = it.path().string();
-			if (std::regex_match(st, rgx))
+			for (auto& it : std::filesystem::directory_iterator(path))
 			{
-				//check pattern
-				size_t pos = st.rfind("python3.");
-				if (pos == std::string::npos)
+				if (!std::filesystem::is_regular_file(it))
 					continue;
-				if (std::isdigit(st[pos + 8]))
+				const std::string st = it.path().string();
+				if (std::regex_match(st, rgx))
 				{
-					result = st;
-					break;
+					//check pattern
+					size_t pos = st.rfind("python3.");
+					if (pos == std::string::npos)
+						continue;
+					if (std::isdigit(st[pos + 8]))
+					{
+						result = st;
+						break;
+					}
 				}
 			}
 		}

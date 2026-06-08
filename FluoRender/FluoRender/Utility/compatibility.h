@@ -448,6 +448,8 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	std::vector<std::pair<int, std::wstring>> indexed_files;
 	int input_index = std::stoi(index_digits);
 
+	if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir))
+		return false;
 	for (const auto& entry : std::filesystem::directory_iterator(dir))
 	{
 		if (!entry.is_regular_file())
@@ -493,6 +495,8 @@ inline void FIND_FILES_BATCH(const std::wstring& path_name,
 	batch_list.clear();
 	int cnt = 0;
 
+	if (!std::filesystem::exists(search_path) || !std::filesystem::is_directory(search_path))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
 		if (!entry.is_regular_file())
@@ -522,6 +526,8 @@ inline void FIND_FILES(const std::wstring& path_name,
 	batch_list.clear();
 	int cnt = 0;
 
+	if (!std::filesystem::exists(search_path) || !std::filesystem::is_directory(search_path))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
 		if (!entry.is_regular_file())
@@ -771,271 +777,6 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 		});
 }
 
-#ifdef __APPLE__
-#include <CoreFoundation/CoreFoundation.h>
-#include <unistd.h>     // for PATH_MAX
-#endif
-
-inline std::filesystem::path GetExecutableDir()
-{
-#ifdef _WIN32
-    char path[MAX_PATH];
-    GetModuleFileNameA(NULL, path, MAX_PATH);
-    return std::filesystem::path(path).parent_path();
-
-#elif defined(__APPLE__)
-    char path[PATH_MAX];
-    uint32_t size = sizeof(path);
-    if (_NSGetExecutablePath(path, &size) == 0)
-        return std::filesystem::path(path).parent_path();
-    return std::filesystem::current_path();
-
-#else // Linux
-    char path[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
-    if (len != -1)
-    {
-        path[len] = '\0';
-        return std::filesystem::path(path).parent_path();
-    }
-    return std::filesystem::current_path();
-#endif
-}
-
-inline std::filesystem::path GetDataRoot()
-{
-#ifdef __APPLE__
-    // macOS stays unchanged
-    CFBundleRef mainBundle = CFBundleGetMainBundle();
-    if (mainBundle)
-    {
-        CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
-        if (resourcesURL)
-        {
-            char path[PATH_MAX];
-            if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
-                (UInt8*)path, PATH_MAX))
-            {
-                CFRelease(resourcesURL);
-                return std::filesystem::path(path);
-            }
-            CFRelease(resourcesURL);
-        }
-    }
-    return std::filesystem::current_path();
-
-#else
-    // 1. Environment override (VERY useful)
-    if (const char* env = std::getenv("FLUORENDER_DATA_PATH"))
-    {
-        std::filesystem::path p(env);
-        if (std::filesystem::exists(p))
-            return p;
-    }
-
-    // 2. Development directory (check local build/bin)
-    auto exeDir = GetExecutableDir();
-
-    std::vector<std::filesystem::path> devCandidates = {
-        exeDir,                // build/bin
-        std::filesystem::current_path()
-    };
-
-    for (const auto& p : devCandidates)
-    {
-        if (std::filesystem::exists(p / "Scripts"))
-            return std::filesystem::canonical(p);
-    }
-
-    // 3. Installed system location
-    std::vector<std::filesystem::path> installCandidates = {
-        "/usr/lib/fluorender",
-        exeDir / "../lib/fluorender"
-    };
-
-    for (const auto& p : installCandidates)
-    {
-        if (std::filesystem::exists(p / "Scripts"))
-            return std::filesystem::canonical(p);
-    }
-
-    // fallback (safe)
-    return exeDir;
-#endif
-}
-
-inline std::filesystem::path GetUserSettingsRoot()
-{
-#ifdef __APPLE__
-    const char* home = std::getenv("HOME");
-    if (home)
-    {
-        std::filesystem::path p = home;
-        p /= "Library/Application Support/FluoRender";
-        return p;
-    }
-
-#elif defined(__linux__)
-    const char* home = std::getenv("HOME");
-    if (home)
-    {
-        std::filesystem::path p = home;
-
-        // follow XDG spec if available
-        const char* xdg = std::getenv("XDG_CONFIG_HOME");
-        if (xdg)
-            p = xdg;
-        else
-            p /= ".config";
-
-        p /= "FluoRender";
-        return p;
-    }
-#endif
-
-    return std::filesystem::current_path();
-}
-
-inline bool NeedsUserDataUpdate()
-{
-	auto userDir = GetUserSettingsRoot();
-	auto versionFile = userDir / "version.txt";
-
-	// First launch: no directory or no version file
-	if (!std::filesystem::exists(userDir))
-		return true;
-
-	if (!std::filesystem::exists(versionFile))
-		return true;
-
-	// Read stored version
-	int storedMajor = 0;
-	int storedMinor = 0;
-
-	{
-		std::ifstream in(versionFile);
-		in >> storedMajor >> storedMinor;
-	}
-
-	// Compare major/minor
-	if (storedMajor < fluo::VersionMajor)
-		return true;
-
-	if (storedMajor == fluo::VersionMajor &&
-		storedMinor < fluo::VersionMinor)
-		return true;
-
-	return false;
-}
-
-inline void InitializeUserSettings()
-{
-#if defined(__APPLE__) || defined(__linux__)
-
-    auto srcRoot = GetDataRoot();
-    auto dstRoot = GetUserSettingsRoot();
-
-    // ALWAYS ensure base directory exists
-    std::filesystem::create_directories(dstRoot);
-
-    // Skip if already up-to-date
-    if (!NeedsUserDataUpdate())
-        return;
-
-    // Directories to copy (must match EXACT names in your data)
-    std::vector<std::string> dirsToCopy = {
-        "CL_code",
-        "Commands",
-        "Database",
-        "Scripts",
-        "Templates"
-    };
-
-    for (const auto& dir : dirsToCopy)
-    {
-        auto src = srcRoot / dir;
-        auto dst = dstRoot / dir;
-
-        // ALWAYS create destination directory
-        std::filesystem::create_directories(dst);
-
-        // Copy only if source exists
-        if (std::filesystem::exists(src))
-        {
-            try
-            {
-                std::filesystem::copy(
-                    src,
-                    dst,
-                    std::filesystem::copy_options::recursive |
-                    std::filesystem::copy_options::overwrite_existing
-                );
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << "Error copying directory " << dir
-                          << ": " << e.what() << std::endl;
-            }
-        }
-        else
-        {
-            std::cerr << "Warning: source directory missing: "
-                      << src << std::endl;
-        }
-    }
-
-    // Files to copy
-    std::vector<std::string> filesToCopy = {
-        "fluorender.xml",
-        "fluorender_default.xml"
-    };
-
-    for (const auto& file : filesToCopy)
-    {
-        auto src = srcRoot / file;
-        auto dst = dstRoot / file;
-
-        if (std::filesystem::exists(src))
-        {
-            try
-            {
-                std::filesystem::copy_file(
-                    src,
-                    dst,
-                    std::filesystem::copy_options::overwrite_existing
-                );
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << "Error copying file " << file
-                          << ": " << e.what() << std::endl;
-            }
-        }
-        else
-        {
-            std::cerr << "Warning: source file missing: "
-                      << src << std::endl;
-        }
-    }
-
-    // Write version file
-    try
-    {
-        std::ofstream out(dstRoot / "version.txt");
-        out << fluo::VersionMajor << " "
-            << fluo::VersionMinor;
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error writing version file: "
-                  << e.what() << std::endl;
-    }
-
-    std::cout << "User settings initialized at: "
-              << dstRoot << std::endl;
-
-#endif
-}
 
 #ifdef _WIN32 //WINDOWS ONLY
 

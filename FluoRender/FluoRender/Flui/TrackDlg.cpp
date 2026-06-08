@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <TrackDlg.h>
+#include <Directory.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>

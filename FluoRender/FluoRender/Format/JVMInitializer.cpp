@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <windows.h>
 #endif
 #include <JVMInitializer.h>
+#include <Directory.h>
 #include <compatibility.h>
 #include <Debug.h>
 #include <sys/stat.h>
@@ -97,51 +98,60 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 			{
 				m_with_fiji = true;
 				std::string filename;
-				for (const auto& entry : std::filesystem::directory_iterator(name))
+				if (std::filesystem::exists(p) && std::filesystem::is_directory(p))
 				{
-					std::string filename = entry.path().filename().string();
-					if (filename.find("formats-") != std::string::npos || filename.find("turbojpeg-") != std::string::npos ||
-						filename.find("ome-xml") != std::string::npos || filename.find("ome-codecs") != std::string::npos ||
-						filename.find("ome-common") != std::string::npos) {
-						if (jvm_bioformats_path.empty())
-							jvm_bioformats_path = (p / filename).string();
-						else
-							jvm_bioformats_path += getPathSeparator() + (p / filename).string();
+					for (const auto& entry : std::filesystem::directory_iterator(name))
+					{
+						std::string filename = entry.path().filename().string();
+						if (filename.find("formats-") != std::string::npos || filename.find("turbojpeg-") != std::string::npos ||
+							filename.find("ome-xml") != std::string::npos || filename.find("ome-codecs") != std::string::npos ||
+							filename.find("ome-common") != std::string::npos) {
+							if (jvm_bioformats_path.empty())
+								jvm_bioformats_path = (p / filename).string();
+							else
+								jvm_bioformats_path += getPathSeparator() + (p / filename).string();
+						}
 					}
 				}
 
 				p = std::filesystem::path(ij_path) / "jars";
 				name = p.string();
-				for (const auto& entry : std::filesystem::directory_iterator(name)) {
-					std::string filename = entry.path().filename().string();
-					if (filename.find("commons-collections-") != std::string::npos || filename.find("commons-lang-") != std::string::npos ||
-						filename.find("commons-logging-") != std::string::npos || filename.find("guava-") != std::string::npos ||
-						filename.find("jcommander-") != std::string::npos || filename.find("jgoodies-common-") != std::string::npos ||
-						filename.find("jgoodies-forms-") != std::string::npos || filename.find("jhdf5-") != std::string::npos ||
-						filename.find("joda-time-") != std::string::npos || filename.find("kryo-") != std::string::npos ||
-						filename.find("log4j-") != std::string::npos || filename.find("logback-classic") != std::string::npos ||
-						filename.find("logback-core") != std::string::npos || filename.find("metadata-extractor-") != std::string::npos ||
-						filename.find("minlog-") != std::string::npos || filename.find("native-lib-loader-") != std::string::npos ||
-						filename.find("netcdf-") != std::string::npos || filename.find("objenesis-") != std::string::npos ||
-						filename.find("perf4j-") != std::string::npos || filename.find("slf4j-api-") != std::string::npos ||
-						filename.find("snakeyaml-") != std::string::npos || filename.find("xercesImpl-") != std::string::npos ||
-						filename.find("xml-apis-ext-") != std::string::npos || filename.find("xmpcore-") != std::string::npos) {
-						if (jvm_bioformats_path.empty())
-							jvm_bioformats_path = (p / filename).string();
-						else
-							jvm_bioformats_path += getPathSeparator() + (p / filename).string();
-					}
-					else if (filename.find("ij-") != std::string::npos) {
-						jvm_ij_path = (p / filename).string();
+				if (std::filesystem::exists(p) && std::filesystem::is_directory(p))
+				{
+					for (const auto& entry : std::filesystem::directory_iterator(name)) {
+						std::string filename = entry.path().filename().string();
+						if (filename.find("commons-collections-") != std::string::npos || filename.find("commons-lang-") != std::string::npos ||
+							filename.find("commons-logging-") != std::string::npos || filename.find("guava-") != std::string::npos ||
+							filename.find("jcommander-") != std::string::npos || filename.find("jgoodies-common-") != std::string::npos ||
+							filename.find("jgoodies-forms-") != std::string::npos || filename.find("jhdf5-") != std::string::npos ||
+							filename.find("joda-time-") != std::string::npos || filename.find("kryo-") != std::string::npos ||
+							filename.find("log4j-") != std::string::npos || filename.find("logback-classic") != std::string::npos ||
+							filename.find("logback-core") != std::string::npos || filename.find("metadata-extractor-") != std::string::npos ||
+							filename.find("minlog-") != std::string::npos || filename.find("native-lib-loader-") != std::string::npos ||
+							filename.find("netcdf-") != std::string::npos || filename.find("objenesis-") != std::string::npos ||
+							filename.find("perf4j-") != std::string::npos || filename.find("slf4j-api-") != std::string::npos ||
+							filename.find("snakeyaml-") != std::string::npos || filename.find("xercesImpl-") != std::string::npos ||
+							filename.find("xml-apis-ext-") != std::string::npos || filename.find("xmpcore-") != std::string::npos) {
+							if (jvm_bioformats_path.empty())
+								jvm_bioformats_path = (p / filename).string();
+							else
+								jvm_bioformats_path += getPathSeparator() + (p / filename).string();
+						}
+						else if (filename.find("ij-") != std::string::npos) {
+							jvm_ij_path = (p / filename).string();
+						}
 					}
 				}
 
 				p = std::filesystem::path(ij_path) / "plugins";
 				name = p.string();
-				for (const auto& entry : std::filesystem::directory_iterator(name)) {
-					std::string filename = entry.path().filename().string();
-					if (filename.find("bio-formats_plugins-") != std::string::npos) {
-						jvm_bioformats_path += getPathSeparator() + (p / filename).string();
+				if (std::filesystem::exists(p) && std::filesystem::is_directory(p))
+				{
+					for (const auto& entry : std::filesystem::directory_iterator(name)) {
+						std::string filename = entry.path().filename().string();
+						if (filename.find("bio-formats_plugins-") != std::string::npos) {
+							jvm_bioformats_path += getPathSeparator() + (p / filename).string();
+						}
 					}
 				}
 
@@ -155,11 +165,14 @@ bool JVMInitializer::create_JVM(const std::vector<std::string>& args)
 					p /= "win64";
 #endif
 					jvm_path = p.string();
-					for (const auto& entry : std::filesystem::directory_iterator(jvm_path)) {
-						std::string filename = entry.path().filename().string();
-						if (filename.find("jdk") != std::string::npos) {
-							p = entry.path();
-							jvm_path = p.string();
+					if (std::filesystem::exists(p) && std::filesystem::is_directory(p))
+					{
+						for (const auto& entry : std::filesystem::directory_iterator(jvm_path)) {
+							std::string filename = entry.path().filename().string();
+							if (filename.find("jdk") != std::string::npos) {
+								p = entry.path();
+								jvm_path = p.string();
+							}
 						}
 					}
 

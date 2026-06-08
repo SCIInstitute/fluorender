@@ -77,7 +77,7 @@ DEALINGS IN THE SOFTWARE.
 #include <PyDlc.h>
 #include <VolCache4D.h>
 #include <Cell.h>
-#include <compatibility.h>
+#include <Directory.h>
 #include <iostream>
 #include <string> 
 #include <sstream>
