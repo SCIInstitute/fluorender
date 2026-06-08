@@ -303,9 +303,9 @@ static const unsigned char BitReverseTable256[] =
 
 inline unsigned int bit_reverse(unsigned int v)
 {
-	unsigned int c; // reverse 32-bit value, 8 bits at time 
+	unsigned int c; // reverse 32-bit value, 8 bits at time
 
-	// Option 1: 
+	// Option 1:
 	c = (BitReverseTable256[v & 0xff] << 24) |
 		(BitReverseTable256[(v >> 8) & 0xff] << 16) |
 		(BitReverseTable256[(v >> 16) & 0xff] << 8) |
@@ -448,6 +448,8 @@ inline bool FIND_FILES_4D(const std::wstring& path_name, const std::wstring& id,
 	std::vector<std::pair<int, std::wstring>> indexed_files;
 	int input_index = std::stoi(index_digits);
 
+	if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir))
+		return false;
 	for (const auto& entry : std::filesystem::directory_iterator(dir))
 	{
 		if (!entry.is_regular_file())
@@ -493,6 +495,8 @@ inline void FIND_FILES_BATCH(const std::wstring& path_name,
 	batch_list.clear();
 	int cnt = 0;
 
+	if (!std::filesystem::exists(search_path) || !std::filesystem::is_directory(search_path))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
 		if (!entry.is_regular_file())
@@ -522,6 +526,8 @@ inline void FIND_FILES(const std::wstring& path_name,
 	batch_list.clear();
 	int cnt = 0;
 
+	if (!std::filesystem::exists(search_path) || !std::filesystem::is_directory(search_path))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(search_path))
 	{
 		if (!entry.is_regular_file())
@@ -771,149 +777,6 @@ typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(
 		});
 }
 
-#ifdef __APPLE__
-#include <CoreFoundation/CoreFoundation.h>
-#include <unistd.h>     // for PATH_MAX
-#endif
-
-inline std::filesystem::path GetDataRoot()
-{
-#ifdef __APPLE__
-	CFBundleRef mainBundle = CFBundleGetMainBundle();
-	if (mainBundle)
-	{
-		CFURLRef resourcesURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
-		if (resourcesURL)
-		{
-			char path[PATH_MAX];
-			if (CFURLGetFileSystemRepresentation(resourcesURL, TRUE,
-				(UInt8*)path, PATH_MAX))
-			{
-				CFRelease(resourcesURL);
-				return std::filesystem::path(path);
-			}
-			CFRelease(resourcesURL);
-		}
-	}
-	return std::filesystem::current_path();
-#else
-	return std::filesystem::current_path();
-#endif
-}
-
-inline std::filesystem::path GetUserSettingsRoot()
-{
-#ifdef __APPLE__
-	const char* home = std::getenv("HOME");
-	if (home)
-	{
-		std::filesystem::path p = home;
-		p /= "Library/Application Support/FluoRender";
-		return p;
-	}
-	return std::filesystem::current_path();
-#else
-	return std::filesystem::current_path();
-#endif
-}
-
-inline bool NeedsUserDataUpdate()
-{
-	auto userDir = GetUserSettingsRoot();
-	auto versionFile = userDir / "version.txt";
-
-	// First launch: no directory or no version file
-	if (!std::filesystem::exists(userDir))
-		return true;
-
-	if (!std::filesystem::exists(versionFile))
-		return true;
-
-	// Read stored version
-	int storedMajor = 0;
-	int storedMinor = 0;
-
-	{
-		std::ifstream in(versionFile);
-		in >> storedMajor >> storedMinor;
-	}
-
-	// Compare major/minor
-	if (storedMajor < fluo::VersionMajor)
-		return true;
-
-	if (storedMajor == fluo::VersionMajor &&
-		storedMinor < fluo::VersionMinor)
-		return true;
-
-	return false;
-}
-
-inline void InitializeUserSettings()
-{
-#ifdef __APPLE__
-	if (!NeedsUserDataUpdate())
-		return;
-
-	auto srcRoot = GetDataRoot();
-	auto dstRoot = GetUserSettingsRoot();
-
-	std::filesystem::create_directories(dstRoot);
-
-	// Directories to copy
-	std::vector<std::string> dirsToCopy = {
-		"CL_Code",
-		"Commands",
-		"Database",
-		"Scripts",
-		"Templates"
-	};
-
-	for (const auto& dir : dirsToCopy)
-	{
-		auto src = srcRoot / dir;
-		auto dst = dstRoot / dir;
-
-		if (std::filesystem::exists(src))
-		{
-			std::filesystem::create_directories(dst);
-			std::filesystem::copy(
-				src,
-				dst,
-				std::filesystem::copy_options::recursive |
-				std::filesystem::copy_options::overwrite_existing
-			);
-		}
-	}
-
-	// Files to copy
-	std::vector<std::string> filesToCopy = {
-		"fluorender.xml",
-		"fluorender_default.xml"
-	};
-
-	for (const auto& file : filesToCopy)
-	{
-		auto src = srcRoot / file;
-		auto dst = dstRoot / file;
-
-		if (std::filesystem::exists(src))
-		{
-			std::filesystem::copy_file(
-				src,
-				dst,
-				std::filesystem::copy_options::overwrite_existing
-			);
-		}
-	}
-
-	// Write version file
-	{
-		std::ofstream out(dstRoot / "version.txt");
-		out << fluo::VersionMajor << " " << fluo::VersionMinor;
-	}
-#endif
-}
 
 #ifdef _WIN32 //WINDOWS ONLY
 
@@ -1037,20 +900,20 @@ inline bool str_mat(std::wstring& s1, size_t p1, std::wstring& s2, size_t p2)
 	if (s1[p1] == L'\0' && s2[p2] == L'\0')
 		return true;
 
-	// Make sure that the characters after '*' are present 
-	// in second string. This function assumes that the first 
-	// string will not contain two consecutive '*' 
+	// Make sure that the characters after '*' are present
+	// in second string. This function assumes that the first
+	// string will not contain two consecutive '*'
 	if (s1[p1] == L'*' && s1[p1 + 1] != L'\0' && s2[p2] == L'\0')
 		return false;
 
-	// If the first string contains '?', or current characters 
-	// of both strings match 
+	// If the first string contains '?', or current characters
+	// of both strings match
 	if (s1[p1] == L'?' || s1[p1] == s2[p2])
 		return str_mat(s1, p1 + 1, s2, p2 + 1);
 
-	// If there is *, then there are two possibilities 
-	// a) We consider current character of second string 
-	// b) We ignore current character of second string. 
+	// If there is *, then there are two possibilities
+	// a) We consider current character of second string
+	// b) We ignore current character of second string.
 	if (s1[p1] == L'*')
 		return str_mat(s1, p1 + 1, s2, p2) || str_mat(s1, p1, s2, p2 + 1);
 	return false;

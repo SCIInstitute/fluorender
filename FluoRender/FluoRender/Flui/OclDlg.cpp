@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <OclDlg.h>
+#include <Directory.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
@@ -36,7 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <KernelExecutor.h>
 #include <wxSingleSlider.h>
-#include <compatibility.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/valnum.h>
@@ -218,6 +218,8 @@ void OclDlg::UpdateKernelList()
 	p /= "CL_code";
 	std::vector<std::string> list;
 	// Iterate over the files in the "Scripts" directory
+	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(p))
 	{
 		if (entry.is_regular_file() && entry.path().extension() == ".cl")

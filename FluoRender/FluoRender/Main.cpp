@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include "Directory.h"
-#include "Main.h"
+#include <Main.h>
+#include <Directory.h>
 #include <Global.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
@@ -89,10 +89,10 @@ bool FluoRenderApp::OnInit()
 	//_CrtSetBreakAlloc(1107);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-    InitializeUserSettings();
+	InitializeUserSettings();
 	SetAppearance(Appearance::System);
 
-	std::wstring path = getExecutablePath();
+	std::wstring path = GetExecutableDir();
 	std::filesystem::current_path(path);
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())

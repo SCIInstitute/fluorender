@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <SettingDlg.h>
+#include <Directory.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
@@ -1116,13 +1117,17 @@ void SettingDlg::FluoUpdate(const fluo::ValueCollection& vc)
 		std::filesystem::path p = GetDataRoot();
 		p /= "Fonts";
 		std::vector<std::string> list;
-		for (const auto& entry : std::filesystem::directory_iterator(p))
+		if (std::filesystem::exists(p) && std::filesystem::is_directory(p))
 		{
-			if (entry.is_regular_file() && entry.path().extension() == ".ttf")
+			for (const auto& entry : std::filesystem::directory_iterator(p))
 			{
-				list.push_back(entry.path().stem().string());
+				if (entry.is_regular_file() && entry.path().extension() == ".ttf")
+				{
+					list.push_back(entry.path().stem().string());
+				}
 			}
 		}
+
 		std::sort(list.begin(), list.end());
 
 		for (size_t i = 0; i < list.size(); ++i)

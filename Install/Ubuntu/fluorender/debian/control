@@ -1,9 +1,13 @@
-Package: fluorender
-Version: 2.34.1
+Source: fluorender
 Section: graphics
 Priority: optional
-Architecture: amd64
 Maintainer: Yong Wan
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.5.0
+
+Package: fluorender
+Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Fluorender volumetric visualization tool
  High-performance tool for volume rendering and analysis.
+

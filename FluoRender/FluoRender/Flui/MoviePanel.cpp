@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MoviePanel.h>
+#include <Directory.h>
 #include <Global.h>
 #include <GlobalStates.h>
 #include <Names.h>
@@ -2301,6 +2302,8 @@ size_t MoviePanel::GetScriptFiles(std::vector<std::wstring>& list)
 	std::filesystem::path p = GetUserSettingsRoot();
 	p /= "Scripts";
 	// Iterate over the files in the "Scripts" directory
+	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
+		return 0;
 	for (const auto& entry : std::filesystem::directory_iterator(p))
 	{
 		if (entry.is_regular_file() && entry.path().extension() == ".txt")

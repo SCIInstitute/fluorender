@@ -90,15 +90,18 @@ bool PyDlc::GetResultFile()
 		return false;//doesn't exist
 	m_result_file += L"*.csv";
 	std::wregex rgx = REGEX(m_result_file);
-	for (auto& it : std::filesystem::directory_iterator(path))
+	if (std::filesystem::exists(path) && std::filesystem::is_directory(path))
 	{
-		if (!std::filesystem::is_regular_file(it))
-			continue;
-		const std::wstring str = it.path().wstring();
-		if (std::regex_match(str, rgx))
+		for (auto& it : std::filesystem::directory_iterator(path))
 		{
-			m_result_file = str;
-			break;
+			if (!std::filesystem::is_regular_file(it))
+				continue;
+			const std::wstring str = it.path().wstring();
+			if (std::regex_match(str, rgx))
+			{
+				m_result_file = str;
+				break;
+			}
 		}
 	}
 	return std::filesystem::exists(m_result_file);

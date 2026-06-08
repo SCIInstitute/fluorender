@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
-#include <compatibility.h>
+#include <Directory.h>
 #include <DragDrop.h>
 #include <PropPanel.h>
 #include <ProjectPanel.h>

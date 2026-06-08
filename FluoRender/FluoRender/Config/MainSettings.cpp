@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeFileFactory.h>
 #include <GraphicsQuery.h>
 #include <ClippingBoxRenderer.h>
-#include <compatibility.h>
+#include <Directory.h>
 #include <Version.h>
 #include <filesystem>
 
@@ -220,6 +220,8 @@ void MainSettings::Read(const std::string& filename)
 	}
 	std::wstring dft;
 	//search for the file
+	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
+		return;
 	for (const auto& entry : std::filesystem::directory_iterator(p))
 	{
 		if (entry.is_regular_file())
