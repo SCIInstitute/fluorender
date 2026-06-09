@@ -92,7 +92,7 @@ bool FluoRenderApp::OnInit()
 	InitializeUserSettings();
 	SetAppearance(Appearance::System);
 
-	std::wstring path = GetExecutableDir();
+	std::wstring path = GetExecutableDir().wstring();
 	std::filesystem::current_path(path);
 	// call default behaviour (mandatory)
 	if (!wxApp::OnInit())
