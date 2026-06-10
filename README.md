@@ -50,6 +50,38 @@ FluoRender’s new release comes from a year of rethinking the project’s purpo
 - **New Data Format Support**
   - DICOM reader.
 
+<h1 id="features">Release Highlights for Version 2.34.1</h1>
+FluoRender 2.34.1 is a maintenance-focused update that improves stability across platforms—especially on Ubuntu—while tightening up several long‑standing edge cases in file handling, UI behavior, and project metadata. This release builds on the major 2.34 feature update by ensuring the new systems behave consistently across all supported environments.
+
+- **Platform & Build System Fixes (Ubuntu)**
+  - Resolved CMake configuration issues that prevented external libraries from being located and internal libraries from linking correctly. 
+  
+  - Fixed definition conflicts between FluoRender headers and Linux system headers. 
+  
+  - Replaced GLEW with GLAD, enabling compatibility with both EGL and GLX contexts. 
+  
+  - Corrected UI widget sizing problems on Linux desktops. 
+
+  - Updated the Ubuntu packaging script with corrected paths and dependency handling. 
+
+- **File I/O Improvements**
+  - Fixed a bug that prevented proper reading of LZW‑compressed TIFF files. 
+  
+  - Improved handling of long file paths on Windows when reading and writing project data.
+
+- **Voxel Size & Project Metadata**
+  - Removed the deprecated voxel size override option to prevent inconsistent metadata states. 
+  
+  - Updated the logic for saving voxel size information within project files to ensure consistency across sessions and platforms. 
+
+- **User Interface & Interaction Fixes**
+  - Fixed an issue where main toolbar tooltips were not appearing in the status bar. 
+  
+  - Improved the angle calculation used by ruler tools for more accurate measurements.
+
+- **Other Stability & Usability Fixes**
+  - General cleanup and refinement of internal logic to support the broader architectural changes introduced in version 2.34.
+
 <h1 id="documentation">Documentation</h1>
 
 **User Manual:** [Version 2.34](https://github.com/SCIInstitute/fluorender/releases/download/v2.34/FluoRender2.34_Manual.pdf)
