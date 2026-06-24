@@ -102,6 +102,9 @@ public:
 	bool DeleteAllPages();
 	int SetSelection(size_t page);
 
+	bool SetPageName(size_t page, const wxString& name);
+	bool SetPageName(const wxWindow* page, const wxString& name);
+
 protected:
 	wxAuiNotebook* m_notebook = nullptr;
 };

@@ -57,16 +57,19 @@ public:
 	void SetText(long item, int col, const wxString &str);
 	wxString GetText(long item, int col);
 	void StartEdit();
-	wxString EndEdit();
+	void EndEdit();
 
 	friend class ListPanel;
 
 private:
 	wxTextCtrl *m_rename_text;
+	wxString m_rename;
 	long m_selected;
 	bool m_silent_select = false;
 
 private:
+	void OnTextFocus(wxMouseEvent& event);
+	void OnNameText(wxCommandEvent& event);
 	void OnSelectionChanged(wxListEvent& event);
 };
 
@@ -135,7 +138,7 @@ private:
 	void OnKeyDown(wxKeyEvent& event);
 	void OnKeyUp(wxKeyEvent& event);
 	void OnMouse(wxMouseEvent& event);
-	void OnEndEditName(wxCommandEvent& event);
+	void OnEndEditName(wxListEvent& event);
 	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScroll(wxMouseEvent& event);
 

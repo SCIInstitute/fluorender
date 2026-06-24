@@ -69,6 +69,8 @@ DataListCtrl::DataListCtrl(
 
 	m_rename_text = new wxTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	m_rename_text->Bind(wxEVT_LEFT_DCLICK, &DataListCtrl::OnTextFocus, this);
+	m_rename_text->Bind(wxEVT_TEXT, &DataListCtrl::OnNameText, this);
 	m_rename_text->Hide();
 
 	Bind(wxEVT_LIST_ITEM_SELECTED, &DataListCtrl::OnSelectionChanged, this);
@@ -131,15 +133,28 @@ void DataListCtrl::StartEdit()
 	}
 }
 
-wxString DataListCtrl::EndEdit()
+void DataListCtrl::EndEdit()
 {
-	wxString str;
-	if (!m_rename_text->IsShown())
-		return str;
+	if (m_rename_text->IsShown())
+	{
+		m_rename_text->Hide();
+	}
+}
 
-	str = m_rename_text->GetValue();
-	m_rename_text->Hide();
-	return str;
+void DataListCtrl::OnTextFocus(wxMouseEvent& event)
+{
+	wxTextCtrl* object = dynamic_cast<wxTextCtrl*>(event.GetEventObject());
+	if (object)
+		object->SetSelection(0, -1);
+}
+
+void DataListCtrl::OnNameText(wxCommandEvent& event)
+{
+	m_rename = m_rename_text->GetValue();
+	wxWindow* par = GetParent();
+	ListPanel* lp = dynamic_cast<ListPanel*>(par);
+	if (lp)
+		lp->RenameSelection(m_rename.ToStdWstring());
 }
 
 void DataListCtrl::OnSelectionChanged(wxListEvent& event)
@@ -232,6 +247,7 @@ ListPanel::ListPanel(MainFrame* frame,
 	Layout();
 
 	//events
+	m_datalist->Bind(wxEVT_LIST_ITEM_DESELECTED, &ListPanel::OnEndEditName, this);
 	Bind(wxEVT_CONTEXT_MENU, &ListPanel::OnContextMenu, this);
 	Bind(wxEVT_MENU, &ListPanel::OnMenu, this);
 	Bind(wxEVT_LIST_ITEM_SELECTED, &ListPanel::OnSelect, this);
@@ -254,7 +270,7 @@ void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)
 
 	bool update_all = vc.empty();
 
-	if (update_all || FOUND_VALUE(gstListCtrl))
+	if (update_all || FOUND_VALUE(gstListCtrl) || FOUND_VALUE(gstTreeLayerName))
 		UpdateList();
 
 	if (update_all || FOUND_VALUE(gstCurrentSelect))
@@ -475,7 +491,7 @@ void ListPanel::RenameSelection(const std::wstring& name)
 	}
 		break;
 	}
-	FluoRefresh(2, { gstTreeCtrl });
+	FluoRefresh(0, { gstTreeLayerName });
 }
 
 void ListPanel::SaveSelection()
@@ -914,10 +930,9 @@ void ListPanel::OnMouse(wxMouseEvent& event)
 		m_datalist->EndEdit();
 }
 
-void ListPanel::OnEndEditName(wxCommandEvent& event)
+void ListPanel::OnEndEditName(wxListEvent& event)
 {
-	std::wstring str = m_datalist->EndEdit().ToStdWstring();
-	RenameSelection(str);
+	m_datalist->EndEdit();
 }
 
 void ListPanel::OnScrollWin(wxScrollWinEvent& event)

@@ -273,6 +273,7 @@ public:
 		MeshGroup* mg = 0,
 		AnnotData* ann = 0,
 		bool show = true);
+	void UpdatePropName();
 	void UpdateProps(const fluo::ValueCollection& vc, int excl_self = 1, wxWindow* panel = 0);
 	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(VolumeData* vd);

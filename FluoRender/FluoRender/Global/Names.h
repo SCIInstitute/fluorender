@@ -161,6 +161,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstRBBlendQuality "rb blend quality"
 #define gstRBPick "rb pick"
 
+//name of an item
+#define gstTreeLayerName "tree layer name"
 //properties
 #define gstMultiFuncTips "multi func tips"
 //list panel
