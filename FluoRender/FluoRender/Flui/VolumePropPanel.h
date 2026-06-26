@@ -75,6 +75,7 @@ public:
 	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
+	std::shared_ptr<VolumeData> GetVolumeData();
 	void InitViews(unsigned int type);
 
 	//sync group

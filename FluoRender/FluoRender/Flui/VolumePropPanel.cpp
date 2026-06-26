@@ -1499,6 +1499,11 @@ void VolumePropPanel::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 	FluoUpdate();
 }
 
+std::shared_ptr<VolumeData> VolumePropPanel::GetVolumeData()
+{
+	return m_vd.lock();
+}
+
 void VolumePropPanel::InitViews(unsigned int type)
 {
 	Root* root = glbin_data_manager.GetRoot();

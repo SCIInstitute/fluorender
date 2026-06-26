@@ -78,21 +78,7 @@ namespace flvr
 
 		void protect() { protect_ = true; }
 		void unprotect() { protect_ = false; }
-		void destroy()
-		{
-			if (valid_)
-			{
-				cl_int err = clReleaseMemObject(buffer_);
-				type_ = ArgType_Unknown;
-				name_ = "";
-				protect_ = false;
-				size_ = 0;
-				tex_ = 0;
-				vbo_ = 0;
-				buffer_ = 0;
-				pointer_ = 0;
-			}
-		}
+		void destroy();
 		void release()
 		{
 			if (valid_ && !protect_)
@@ -121,43 +107,10 @@ namespace flvr
 				vbo_ == vbo_id;
 		}
 
-		static std::shared_ptr<Argument> createFromPointer(cl_context context, cl_mem_flags flags, const std::string& name, size_t size, void* data)
-		{
-			cl_int err = CL_SUCCESS;
-			cl_mem buf = clCreateBuffer(context, flags, size, data, &err);
-			if (err != CL_SUCCESS || !buf) {
-				return nullptr;
-			}
-
-			auto arg = std::make_shared<Argument>();
-			arg->type_ = ArgType_Pointer;
-			arg->name_ = name;
-			arg->buffer_ = buf;
-			arg->size_ = size;
-			arg->pointer_ = data;
-			arg->valid_ = true;
-			return arg;
-		}
-
+		static std::shared_ptr<Argument> createFromPointer(cl_context context, cl_mem_flags flags, const std::string& name, size_t size, void* data);
 		static std::shared_ptr<Argument> createFromTexture2D(cl_context context, cl_mem_flags flags, GLuint tex_id);
 		static std::shared_ptr<Argument> createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id);
-
-		static std::shared_ptr<Argument> createFromVBO(cl_context context, cl_mem_flags flags, GLuint vbo_id, size_t size)
-		{
-			cl_int err = CL_SUCCESS;
-			cl_mem buf = clCreateFromGLBuffer(context, flags, vbo_id, &err);
-			if (err != CL_SUCCESS || !buf) {
-				return nullptr;
-			}
-
-			auto arg = std::make_shared<Argument>();
-			arg->type_ = ArgType_VBO;
-			arg->buffer_ = buf;
-			arg->vbo_ = vbo_id;
-			arg->size_ = size;
-			arg->valid_ = true;
-			return arg;
-		}
+		static std::shared_ptr<Argument> createFromVBO(cl_context context, cl_mem_flags flags, GLuint vbo_id, size_t size);
 
 		Argument() :
 			valid_(false),

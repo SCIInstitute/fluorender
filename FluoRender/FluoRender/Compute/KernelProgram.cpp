@@ -46,19 +46,123 @@
 
 namespace flvr
 {
-	std::shared_ptr<Argument> Argument::createFromTexture2D(cl_context context, cl_mem_flags flags, GLuint tex_id)
+	void Argument::destroy()
 	{
+		DBGPRINT(L"Argument::destroy() called: ptr=%p buffer=%p valid=%d\n",
+			this, buffer_, valid_);
+
+		if (valid_)
+		{
+			if (buffer_)
+			{
+				cl_int err = clReleaseMemObject(buffer_);
+				DBGPRINT(L"clReleaseMemObject err=%d\n", err);
+
+				if (err != CL_SUCCESS)
+				{
+					DBGPRINT(L"WARNING: clReleaseMemObject failed\n");
+				}
+			}
+			else
+			{
+				DBGPRINT(L"WARNING: buffer_ already null\n");
+			}
+
+			type_ = ArgType_Unknown;
+			name_.clear();
+			protect_ = false;
+			size_ = 0;
+			tex_ = 0;
+			vbo_ = 0;
+			buffer_ = 0;
+			pointer_ = nullptr;
+			valid_ = false;
+
+			DBGPRINT(L"Argument destroyed successfully\n");
+		}
+		else
+		{
+			DBGPRINT(L"Argument already invalid\n");
+		}
+	}
+
+	std::shared_ptr<Argument> Argument::createFromPointer(
+		cl_context context,
+		cl_mem_flags flags,
+		const std::string& name,
+		size_t size,
+		void* data)
+	{
+		DBGPRINT(L"createFromPointer(): name=%S size=%zu flags=0x%X data=%p\n",
+			name.c_str(), size, (unsigned int)flags, data);
+
+		if (!context)
+		{
+			DBGPRINT(L"ERROR: context is null\n");
+			return nullptr;
+		}
+
 		cl_int err = CL_SUCCESS;
+
+		cl_mem buf = clCreateBuffer(context, flags, size, data, &err);
+
+		DBGPRINT(L"clCreateBuffer err=%d buffer=%p\n", err, buf);
+
+		if (err != CL_SUCCESS || !buf)
+		{
+			DBGPRINT(L"ERROR: Failed to create buffer\n");
+			return nullptr;
+		}
+
+		auto arg = std::make_shared<Argument>();
+		arg->type_ = ArgType_Pointer;
+		arg->name_ = name;
+		arg->buffer_ = buf;
+		arg->size_ = size;
+		arg->pointer_ = data;
+		arg->valid_ = true;
+
+		DBGPRINT(L"createFromPointer success: arg=%p\n", arg.get());
+
+		return arg;
+	}
+
+	std::shared_ptr<Argument> Argument::createFromTexture2D(
+		cl_context context,
+		cl_mem_flags flags,
+		GLuint tex_id)
+	{
+		DBGPRINT(L"createFromTexture2D(): tex_id=%u flags=0x%X\n",
+			tex_id, (unsigned int)flags);
+
+		if (!context)
+		{
+			DBGPRINT(L"ERROR: context is null\n");
+			return nullptr;
+		}
+
+		if (!glIsTexture(tex_id))
+		{
+			DBGPRINT(L"ERROR: invalid GL texture %u\n", tex_id);
+			return nullptr;
+		}
+
+		cl_int err = CL_SUCCESS;
+
 		cl_mem buf = clCreateFromGLTexture(
 			context,
 			flags,
 			GL_TEXTURE_2D,
-			0,          // mip level
+			0,
 			tex_id,
 			&err
 		);
 
-		if (err != CL_SUCCESS || !buf) {
+		DBGPRINT(L"clCreateFromGLTexture(2D) err=%d buffer=%p\n", err, buf);
+
+		if (err != CL_SUCCESS || !buf)
+		{
+			DBGPRINT(L"ERROR: Failed to create CL texture\n");
 			return nullptr;
 		}
 
@@ -67,22 +171,48 @@ namespace flvr
 		arg->buffer_ = buf;
 		arg->tex_ = tex_id;
 		arg->valid_ = true;
+
+		DBGPRINT(L"createFromTexture2D success: arg=%p\n", arg.get());
+
 		return arg;
 	}
 
-	std::shared_ptr<Argument> Argument::createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id)
+	std::shared_ptr<Argument> Argument::createFromTexture3D(
+		cl_context context,
+		cl_mem_flags flags,
+		GLuint tex_id)
 	{
+		DBGPRINT(L"createFromTexture3D(): tex_id=%u flags=0x%X\n",
+			tex_id, (unsigned int)flags);
+
+		if (!context)
+		{
+			DBGPRINT(L"ERROR: context is null\n");
+			return nullptr;
+		}
+
+		if (!glIsTexture(tex_id))
+		{
+			DBGPRINT(L"ERROR: invalid GL texture %u\n", tex_id);
+			return nullptr;
+		}
+
 		cl_int err = CL_SUCCESS;
+
 		cl_mem buf = clCreateFromGLTexture(
 			context,
 			flags,
 			GL_TEXTURE_3D,
-			0,          // mip level
+			0,
 			tex_id,
 			&err
 		);
 
-		if (err != CL_SUCCESS || !buf) {
+		DBGPRINT(L"clCreateFromGLTexture(3D) err=%d buffer=%p\n", err, buf);
+
+		if (err != CL_SUCCESS || !buf)
+		{
+			DBGPRINT(L"ERROR: Failed to create CL 3D texture\n");
 			return nullptr;
 		}
 
@@ -91,6 +221,54 @@ namespace flvr
 		arg->buffer_ = buf;
 		arg->tex_ = tex_id;
 		arg->valid_ = true;
+
+		DBGPRINT(L"createFromTexture3D success: arg=%p\n", arg.get());
+
+		return arg;
+	}
+
+	std::shared_ptr<Argument> Argument::createFromVBO(
+		cl_context context,
+		cl_mem_flags flags,
+		GLuint vbo_id,
+		size_t size)
+	{
+		DBGPRINT(L"createFromVBO(): vbo_id=%u size=%zu flags=0x%X\n",
+			vbo_id, size, (unsigned int)flags);
+
+		if (!context)
+		{
+			DBGPRINT(L"ERROR: context is null\n");
+			return nullptr;
+		}
+
+		if (!glIsBuffer(vbo_id))
+		{
+			DBGPRINT(L"ERROR: invalid GL buffer %u\n", vbo_id);
+			return nullptr;
+		}
+
+		cl_int err = CL_SUCCESS;
+
+		cl_mem buf = clCreateFromGLBuffer(context, flags, vbo_id, &err);
+
+		DBGPRINT(L"clCreateFromGLBuffer err=%d buffer=%p\n", err, buf);
+
+		if (err != CL_SUCCESS || !buf)
+		{
+			DBGPRINT(L"ERROR: Failed to create CL buffer from VBO\n");
+			return nullptr;
+		}
+
+		auto arg = std::make_shared<Argument>();
+		arg->type_ = ArgType_VBO;
+		arg->buffer_ = buf;
+		arg->vbo_ = vbo_id;
+		arg->size_ = size;
+		arg->valid_ = true;
+
+		DBGPRINT(L"createFromVBO success: arg=%p\n", arg.get());
+
 		return arg;
 	}
 
@@ -121,27 +299,44 @@ namespace flvr
 
 	void KernelProgram::init_kernels_supported()
 	{
+		DBGPRINT(L"init_kernels_supported() entered\n");
+
 		if (init_)
+		{
+			DBGPRINT(L"Already initialized, skipping\n");
 			return;
+		}
 
 		device_list_.clear();
+
 		cl_int err;
-		cl_uint platform_num;
+		cl_uint platform_num = 0;
 
 		// --- Get platforms ---
 		err = clGetPlatformIDs(0, NULL, &platform_num);
+		DBGPRINT(L"clGetPlatformIDs(count) err=%d, platform_num=%u\n", err, platform_num);
+
 		if (err != CL_SUCCESS || platform_num == 0)
+		{
+			DBGPRINT(L"No platforms found or error occurred\n");
 			return;
+		}
 
 		std::vector<cl_platform_id> platforms(platform_num);
+
 		err = clGetPlatformIDs(platform_num, platforms.data(), NULL);
+		DBGPRINT(L"clGetPlatformIDs(list) err=%d\n", err);
+
 		if (err != CL_SUCCESS)
 			return;
 
 		// --- Enumerate platforms/devices ---
-		size_t info_size;
+		size_t info_size = 0;
+
 		for (cl_uint i = 0; i < platform_num; ++i)
 		{
+			DBGPRINT(L"Inspecting platform %u\n", i);
+
 			device_list_.push_back(CLPlatform());
 			CLPlatform* platform = &(device_list_.back());
 			platform->id = platforms[i];
@@ -151,24 +346,39 @@ namespace flvr
 			platform->vendor.resize(info_size);
 			clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, info_size, &platform->vendor[0], NULL);
 
+			DBGPRINT(L"Platform vendor: %S\n", platform->vendor.c_str());
+
 			// platform name
 			clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &info_size);
 			platform->name.resize(info_size);
 			clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, info_size, &platform->name[0], NULL);
 
+			DBGPRINT(L"Platform name: %S\n", platform->name.c_str());
+
 			// --- Devices ---
 			cl_uint device_num = 0;
+
 			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, NULL, &device_num);
+			DBGPRINT(L"clGetDeviceIDs(count) err=%d, devices=%u\n", err, device_num);
+
 			if (err != CL_SUCCESS || device_num == 0)
+			{
+				DBGPRINT(L"No GPU devices found on this platform\n");
 				continue;
+			}
 
 			std::vector<cl_device_id> devices(device_num);
+
 			err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, device_num, devices.data(), NULL);
+			DBGPRINT(L"clGetDeviceIDs(list) err=%d\n", err);
+
 			if (err != CL_SUCCESS)
 				continue;
 
 			for (cl_uint j = 0; j < device_num; ++j)
 			{
+				DBGPRINT(L"Inspecting device %u\n", j);
+
 				platform->devices.push_back(CLDevice());
 				CLDevice* device = &(platform->devices.back());
 				device->id = devices[j];
@@ -180,6 +390,8 @@ namespace flvr
 				if (!device->vendor.empty() && device->vendor.back() == '\0')
 					device->vendor.pop_back();
 
+				DBGPRINT(L"Device vendor: %S\n", device->vendor.c_str());
+
 				// name
 				clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 0, NULL, &info_size);
 				device->name.resize(info_size);
@@ -187,37 +399,64 @@ namespace flvr
 				if (!device->name.empty() && device->name.back() == '\0')
 					device->name.pop_back();
 
+				DBGPRINT(L"Device name: %S\n", device->name.c_str());
+
 				// version
 				clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &info_size);
 				device->version.resize(info_size);
 				clGetDeviceInfo(devices[j], CL_DEVICE_OPENCL_C_VERSION, info_size, &device->version[0], NULL);
 				if (!device->version.empty() && device->version.back() == '\0')
 					device->version.pop_back();
+
+				DBGPRINT(L"Device OpenCL C version: %S\n", device->version.c_str());
 			}
 		}
 
 		if (device_list_.empty())
+		{
+			DBGPRINT(L"No usable platforms/devices found\n");
 			return;
+		}
 
 		// --- Select platform ---
 		if (platform_id_ < 0 || platform_id_ >= (int)device_list_.size())
+		{
+			DBGPRINT(L"Invalid platform_id_=%d, defaulting to 0\n", platform_id_);
 			platform_id_ = 0;
+		}
 
 		CLPlatform* platform = &(device_list_[platform_id_]);
+
 		if (!platform || platform->devices.empty())
+		{
+			DBGPRINT(L"Selected platform has no devices\n");
 			return;
+		}
 
 		// --- Select device ---
 		CLDevice* device = nullptr;
+
 		if (device_id_ < 0 || device_id_ >= (int)platform->devices.size())
+		{
+			DBGPRINT(L"Invalid device_id_=%d, defaulting to 0\n", device_id_);
 			device = &(platform->devices[0]);
+		}
 		else
+		{
 			device = &(platform->devices[device_id_]);
+		}
 
 		if (!device)
+		{
+			DBGPRINT(L"Device selection failed\n");
 			return;
+		}
 
 		device_ = device->id;
+
+		DBGPRINT(L"Selected device: %S | %S\n",
+			platform->name.c_str(),
+			device->name.c_str());
 
 		// --- Device name ---
 		device_name_ = platform->name;
@@ -225,7 +464,9 @@ namespace flvr
 			device_name_.back() = ';';
 		device_name_ += " " + device->name;
 
-		// --- Build GL-CL interop properties (robust, no index hacks) ---
+		DBGPRINT(L"Device name string: %S\n", device_name_.c_str());
+
+		// --- GL-CL interop setup ---
 		cl_context_properties properties[7];
 		int p = 0;
 
@@ -233,8 +474,14 @@ namespace flvr
 
 		HGLRC gl_ctx = wglGetCurrentContext();
 		HDC   hdc = wglGetCurrentDC();
+
+		DBGPRINT(L"WGL context=%p, DC=%p\n", gl_ctx, hdc);
+
 		if (!gl_ctx || !hdc)
+		{
+			DBGPRINT(L"No valid GL context\n");
 			return;
+		}
 
 		properties[p++] = CL_GL_CONTEXT_KHR;
 		properties[p++] = (cl_context_properties)gl_ctx;
@@ -244,127 +491,24 @@ namespace flvr
 		properties[p++] = CL_CONTEXT_PLATFORM;
 		properties[p++] = (cl_context_properties)platform->id;
 
-#elif defined(__APPLE__)
-
-		CGLContextObj ctx = CGLGetCurrentContext();
-		if (!ctx)
-			return;
-
-		CGLShareGroupObj share = CGLGetShareGroup(ctx);
-
-		properties[p++] = CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE;
-		properties[p++] = (cl_context_properties)share;
-
-		// Optional (safe on newer systems)
-		properties[p++] = CL_CONTEXT_PLATFORM;
-		properties[p++] = (cl_context_properties)platform->id;
-
-#elif defined(__linux__)
-
-		bool interop_ok = false;
-
-		// ---------- Try GLX ----------
-		GLXContext glx_ctx = glXGetCurrentContext();
-		Display* display = glXGetCurrentDisplay();
-
-		if (glx_ctx && display)
-		{
-			properties[p++] = CL_GL_CONTEXT_KHR;
-			properties[p++] = (cl_context_properties)glx_ctx;
-
-			properties[p++] = CL_GLX_DISPLAY_KHR;
-			properties[p++] = (cl_context_properties)display;
-
-			properties[p++] = CL_CONTEXT_PLATFORM;
-			properties[p++] = (cl_context_properties)platform->id;
-
-			interop_ok = true;
-		}
-
-		// ---------- Try EGL (fallback) ----------
-		if (!interop_ok)
-		{
-			EGLContext egl_ctx = eglGetCurrentContext();
-			EGLDisplay egl_dpy = eglGetCurrentDisplay();
-
-			if (egl_ctx && egl_dpy)
-			{
-				properties[p++] = CL_GL_CONTEXT_KHR;
-				properties[p++] = (cl_context_properties)egl_ctx;
-
-				properties[p++] = CL_EGL_DISPLAY_KHR;
-				properties[p++] = (cl_context_properties)egl_dpy;
-
-				properties[p++] = CL_CONTEXT_PLATFORM;
-				properties[p++] = (cl_context_properties)platform->id;
-
-				interop_ok = true;
-			}
-		}
-
-		// ---------- No interop available ----------
-		if (!interop_ok)
-		{
-			// Fallback: pure OpenCL (no GL sharing)
-			properties[p++] = CL_CONTEXT_PLATFORM;
-			properties[p++] = (cl_context_properties)platform->id;
-		}
-
 #endif
 
-		properties[p++] = 0; // terminator
-
-		// --- Linux: ensure device matches GL context ---
-#ifdef __linux__
-		typedef cl_int(*clGetGLContextInfoKHR_fn)(
-			const cl_context_properties*,
-			cl_gl_context_info,
-			size_t,
-			void*,
-			size_t*);
-
-		auto clGetGLContextInfoKHR =
-			(clGetGLContextInfoKHR_fn)clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
-
-		if (clGetGLContextInfoKHR)
-		{
-			cl_device_id gl_device = nullptr;
-
-			clGetGLContextInfoKHR(
-				properties,
-				CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR,
-				sizeof(cl_device_id),
-				&gl_device,
-				nullptr);
-
-			if (gl_device)
-				device_ = gl_device;
-		}
-#endif
+		properties[p++] = 0;
 
 		// --- Create context ---
 		context_ = clCreateContext(properties, 1, &device_, NULL, NULL, &err);
 
+		DBGPRINT(L"clCreateContext err=%d, context=%p\n", err, context_);
+
 		if (err != CL_SUCCESS)
 		{
-			// ---- Fallback: no GL interop ----
-			//cl_context_properties fallback_props[] = {
-			//    CL_CONTEXT_PLATFORM,
-			//    (cl_context_properties)platform->id,
-			//    0
-			//};
-
-			//context_ = clCreateContext(fallback_props, 1, &device_, NULL, NULL, &err);
-
-			//if (err != CL_SUCCESS)
-			//    return;
-
-			// Mark: no interop
+			DBGPRINT(L"Context creation failed, disabling interop\n");
 			interop_ = false;
 			return;
 		}
 		else
 		{
+			DBGPRINT(L"Context creation succeeded (interop enabled)\n");
 			interop_ = true;
 		}
 
@@ -375,10 +519,19 @@ namespace flvr
 		std::string extensions(info_size, '\0');
 		clGetDeviceInfo(device_, CL_DEVICE_EXTENSIONS, info_size, &extensions[0], NULL);
 
-		float_atomics_ = extensions.find("cl_khr_global_float_atomics") != std::string::npos;
+		DBGPRINT(L"Extensions: %S\n", extensions.c_str());
+
+		float_atomics_ =
+			(extensions.find("cl_khr_global_float_atomics") != std::string::npos);
+
+		DBGPRINT(L"float_atomics_=%d\n", float_atomics_);
 
 		// --- Other flags ---
 		need_clear_ = get_need_clear(device);
+
+		DBGPRINT(L"need_clear_=%d\n", need_clear_);
+
+		DBGPRINT(L"init_kernels_supported() completed successfully\n");
 	}
 
 	bool KernelProgram::init()
@@ -388,8 +541,28 @@ namespace flvr
 
 	void KernelProgram::clear()
 	{
-		clReleaseContext(context_);
+		DBGPRINT(L"clear() called\n");
+
+		if (!context_)
+		{
+			DBGPRINT(L"Context already null, nothing to release\n");
+		}
+		else
+		{
+			cl_int err = clReleaseContext(context_);
+			DBGPRINT(L"clReleaseContext err=%d, context=%p\n", err, context_);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"WARNING: clReleaseContext failed\n");
+			}
+
+			context_ = nullptr;
+		}
+
 		init_ = false;
+
+		DBGPRINT(L"clear() completed, init_=false\n");
 	}
 
 	void KernelProgram::set_platform_id(int id)
@@ -419,10 +592,45 @@ namespace flvr
 
 	void KernelProgram::release_context()
 	{
+		DBGPRINT(L"release_context() called\n");
+
+		// --- Release queue ---
 		if (queue_)
-			clReleaseCommandQueue(queue_);
+		{
+			cl_int err = clReleaseCommandQueue(queue_);
+			DBGPRINT(L"clReleaseCommandQueue err=%d, queue=%p\n", err, queue_);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"WARNING: clReleaseCommandQueue failed\n");
+			}
+
+			queue_ = nullptr;
+		}
+		else
+		{
+			DBGPRINT(L"No command queue to release\n");
+		}
+
+		// --- Release context ---
 		if (context_)
-			clReleaseContext(context_);
+		{
+			cl_int err = clReleaseContext(context_);
+			DBGPRINT(L"clReleaseContext err=%d, context=%p\n", err, context_);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"WARNING: clReleaseContext failed\n");
+			}
+
+			context_ = nullptr;
+		}
+		else
+		{
+			DBGPRINT(L"No context to release\n");
+		}
+
+		DBGPRINT(L"release_context() completed\n");
 	}
 
 	std::vector<CLPlatform>* KernelProgram::GetDeviceList()
@@ -455,75 +663,187 @@ namespace flvr
 	//finish
 	void KernelProgram::finish()
 	{
-		clFlush(queue_);
-		clFinish(queue_);
+		DBGPRINT(L"finish() called\n");
+
+		if (!queue_)
+		{
+			DBGPRINT(L"WARNING: queue_ is null, cannot flush/finish\n");
+			return;
+		}
+
+		// --- Flush ---
+		cl_int err = clFlush(queue_);
+		DBGPRINT(L"clFlush err=%d, queue=%p\n", err, queue_);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"WARNING: clFlush failed\n");
+		}
+
+		// --- Finish ---
+		err = clFinish(queue_);
+		DBGPRINT(L"clFinish err=%d, queue=%p\n", err, queue_);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"WARNING: clFinish failed\n");
+		}
+
+		DBGPRINT(L"finish() completed\n");
 	}
 
 	//create a kernel in the program
 	//return kernel index; -1 unsuccessful
 	int KernelProgram::createKernel(const std::string& name)
 	{
+		DBGPRINT(L"createKernel() called, name=%S\n", name.c_str());
+
 		cl_int err;
 
-		//build program
+		// --- Build program ---
 		if (!program_)
 		{
+			DBGPRINT(L"Creating OpenCL program from source\n");
+
 			const char* c_source[1];
 			c_source[0] = source_.c_str();
 			size_t program_size = source_.size();
-			program_ = clCreateProgramWithSource(context_, 1,
-				c_source, &program_size, &err);
-			if (err != CL_SUCCESS)
-				return -1;
 
-			err = clBuildProgram(program_, 0, NULL, NULL, NULL, NULL);
-			info_.clear();
+			program_ = clCreateProgramWithSource(
+				context_,
+				1,
+				c_source,
+				&program_size,
+				&err);
+
+			DBGPRINT(L"clCreateProgramWithSource err=%d, program=%p\n", err, program_);
+
 			if (err != CL_SUCCESS)
 			{
-				char* program_log;
-				size_t log_size;
-				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
-					0, NULL, &log_size);
-				program_log = new char[log_size + 1];
-				program_log[log_size] = '\0';
-				clGetProgramBuildInfo(program_, device_, CL_PROGRAM_BUILD_LOG,
-					log_size + 1, program_log, NULL);
-				info_ = program_log;
-				//DBGPRINT(L"clBuildProgram error:\t%d\n", err);
-				delete[] program_log;
+				DBGPRINT(L"ERROR: Failed to create program\n");
 				return -1;
 			}
+
+			// --- Build program ---
+			DBGPRINT(L"Building OpenCL program...\n");
+
+			err = clBuildProgram(program_, 0, NULL, NULL, NULL, NULL);
+
+			DBGPRINT(L"clBuildProgram err=%d\n", err);
+
+			info_.clear();
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"ERROR: clBuildProgram failed\n");
+
+				size_t log_size = 0;
+
+				clGetProgramBuildInfo(
+					program_,
+					device_,
+					CL_PROGRAM_BUILD_LOG,
+					0,
+					NULL,
+					&log_size);
+
+				DBGPRINT(L"Build log size=%zu\n", log_size);
+
+				if (log_size > 1)
+				{
+					char* program_log = new char[log_size + 1];
+					program_log[log_size] = '\0';
+
+					clGetProgramBuildInfo(
+						program_,
+						device_,
+						CL_PROGRAM_BUILD_LOG,
+						log_size + 1,
+						program_log,
+						NULL);
+
+					info_ = program_log;
+
+					DBGPRINT(L"==== OpenCL Build Log Start ====\n");
+					DBGPRINT(L"%S\n", program_log);
+					DBGPRINT(L"==== OpenCL Build Log End ====\n");
+
+					delete[] program_log;
+				}
+				else
+				{
+					DBGPRINT(L"No build log available\n");
+				}
+
+				return -1;
+			}
+
+			DBGPRINT(L"Program build succeeded\n");
+		}
+		else
+		{
+			DBGPRINT(L"Program already exists, skipping build\n");
 		}
 
+		// --- Create command queue ---
 		if (!queue_)
 		{
+			DBGPRINT(L"Creating command queue\n");
+
 #if defined(__APPLE__)
 			queue_ = clCreateCommandQueue(context_, device_, 0, &err);
 #else
 			queue_ = clCreateCommandQueueWithProperties(context_, device_, nullptr, &err);
 #endif
-			if (err != CL_SUCCESS)
-				return -1;
-		}
 
-		int result = findKernel(name);
-		if (result == -1)
-		{
-			cl_kernel kernel = clCreateKernel(program_, name.c_str(), &err);
+			DBGPRINT(L"Command queue created, err=%d, queue=%p\n", err, queue_);
+
 			if (err != CL_SUCCESS)
-				return -1;
-			else
 			{
-				Kernel s_kernel;
-				s_kernel.kernel = kernel;
-				s_kernel.name = name;
-				s_kernel.external = false;
-				kernels_.push_back(s_kernel);
-				return static_cast<int>(kernels_.size() - 1);
+				DBGPRINT(L"ERROR: Failed to create command queue\n");
+				return -1;
 			}
 		}
+		else
+		{
+			DBGPRINT(L"Command queue already exists\n");
+		}
 
-		return result;
+		// --- Check existing kernel ---
+		int result = findKernel(name);
+
+		if (result != -1)
+		{
+			DBGPRINT(L"Kernel '%S' already exists, index=%d\n", name.c_str(), result);
+			return result;
+		}
+
+		DBGPRINT(L"Creating new kernel '%S'\n", name.c_str());
+
+		// --- Create kernel ---
+		cl_kernel kernel = clCreateKernel(program_, name.c_str(), &err);
+
+		DBGPRINT(L"clCreateKernel err=%d, kernel=%p\n", err, kernel);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to create kernel '%S'\n", name.c_str());
+			return -1;
+		}
+
+		// --- Store kernel ---
+		Kernel s_kernel;
+		s_kernel.kernel = kernel;
+		s_kernel.name = name;
+		s_kernel.external = false;
+
+		kernels_.push_back(s_kernel);
+
+		int index = static_cast<int>(kernels_.size() - 1);
+
+		DBGPRINT(L"Kernel '%S' created successfully, index=%d\n", name.c_str(), index);
+
+		return index;
 	}
 
 	int KernelProgram::findKernel(const std::string& name)
@@ -544,10 +864,72 @@ namespace flvr
 
 	void KernelProgram::destroy()
 	{
+		DBGPRINT(L"destroy() called\n");
+
+		// --- Release kernels ---
+		DBGPRINT(L"Releasing %zu kernels\n", kernels_.size());
+
 		for (size_t i = 0; i < kernels_.size(); ++i)
+		{
 			if (!kernels_[i].external)
-				clReleaseKernel(kernels_[i].kernel);
-		clReleaseProgram(program_);
+			{
+				DBGPRINT(L"Releasing kernel[%zu]: name=%S, handle=%p\n",
+					i,
+					kernels_[i].name.c_str(),
+					kernels_[i].kernel);
+
+				if (kernels_[i].kernel)
+				{
+					cl_int err = clReleaseKernel(kernels_[i].kernel);
+
+					DBGPRINT(L"clReleaseKernel err=%d\n", err);
+
+					if (err != CL_SUCCESS)
+					{
+						DBGPRINT(L"WARNING: clReleaseKernel failed for '%S'\n",
+							kernels_[i].name.c_str());
+					}
+
+					kernels_[i].kernel = nullptr;
+				}
+				else
+				{
+					DBGPRINT(L"Kernel handle already null\n");
+				}
+			}
+			else
+			{
+				DBGPRINT(L"Skipping external kernel[%zu]: name=%S\n",
+					i,
+					kernels_[i].name.c_str());
+			}
+		}
+
+		// --- Release program ---
+		if (program_)
+		{
+			DBGPRINT(L"Releasing program: %p\n", program_);
+
+			cl_int err = clReleaseProgram(program_);
+
+			DBGPRINT(L"clReleaseProgram err=%d\n", err);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"WARNING: clReleaseProgram failed\n");
+			}
+
+			program_ = nullptr;
+		}
+		else
+		{
+			DBGPRINT(L"No program to release\n");
+		}
+
+		// Optional but very helpful
+		kernels_.clear();
+
+		DBGPRINT(L"destroy() completed\n");
 	}
 
 	bool KernelProgram::matches(const std::string& s)
@@ -555,34 +937,128 @@ namespace flvr
 		return source_ == s;
 	}
 
-	bool KernelProgram::executeKernel(int index, cl_uint dim, size_t* global_size, size_t* local_size)
+	bool KernelProgram::executeKernel(int index,
+		cl_uint dim,
+		size_t* global_size,
+		size_t* local_size)
 	{
-		if (!valid() || index < 0 || index >= kernels_.size()) {
+		DBGPRINT(L"executeKernel() called: index=%d, dim=%u\n", index, dim);
+
+		if (!valid())
+		{
+			DBGPRINT(L"ERROR: KernelProgram not valid\n");
 			return false;
+		}
+
+		if (index < 0 || index >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				index, kernels_.size());
+			return false;
+		}
+
+		if (!queue_)
+		{
+			DBGPRINT(L"ERROR: queue_ is null\n");
+			return false;
+		}
+
+		DBGPRINT(L"Executing kernel: %S\n", kernels_[index].name.c_str());
+
+		// --- Log sizes ---
+		if (global_size)
+		{
+			DBGPRINT(L"Global size: ");
+			for (cl_uint i = 0; i < dim; i++)
+				DBGPRINT(L"%zu ", global_size[i]);
+			DBGPRINT(L"\n");
+		}
+
+		if (local_size)
+		{
+			DBGPRINT(L"Local size: ");
+			for (cl_uint i = 0; i < dim; i++)
+				DBGPRINT(L"%zu ", local_size[i]);
+			DBGPRINT(L"\n");
+
+			// Optional sanity check
+			if (global_size)
+			{
+				for (cl_uint i = 0; i < dim; i++)
+				{
+					if (local_size[i] > 0 && global_size[i] % local_size[i] != 0)
+					{
+						DBGPRINT(L"WARNING: global_size[%u]=%zu not divisible by local_size[%u]=%zu\n",
+							i, global_size[i], i, local_size[i]);
+					}
+				}
+			}
+		}
+		else
+		{
+			DBGPRINT(L"Local size: NULL (auto)\n");
 		}
 
 		bool result = true;
 		cl_int err = CL_SUCCESS;
 
-		glFinish(); // Ensure GL state is settled before acquiring
+		// --- GL sync ---
+		DBGPRINT(L"Calling glFinish()\n");
+		glFinish();
 
-		// Step 1: Acquire GL objects used by this kernel
 		auto& args = arg_map_[index];
-		for (const auto& weak_arg : args) {
-			auto arg = weak_arg.lock();
-			if (!arg || !arg->valid_ || !arg->buffer_) continue;
 
-			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0) {
+		DBGPRINT(L"Acquiring GL objects (arg count=%zu)\n", args.size());
+
+		// ---------- Acquire ----------
+		size_t arg_index = 0;
+
+		for (const auto& weak_arg : args)
+		{
+			auto arg = weak_arg.lock();
+
+			if (!arg)
+			{
+				DBGPRINT(L"Arg[%zu]: expired weak_ptr\n", arg_index++);
+				continue;
+			}
+
+			if (!arg->valid_ || !arg->buffer_)
+			{
+				DBGPRINT(L"Arg[%zu]: invalid or missing buffer\n", arg_index++);
+				continue;
+			}
+
+			DBGPRINT(L"Arg[%zu]: ptr=%p tex=%u vbo=%u buf=%p\n",
+				arg_index,
+				arg.get(),
+				arg->tex_,
+				arg->vbo_,
+				arg->buffer_);
+
+			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0)
+			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+
+				DBGPRINT(L"Arg[%zu]: acquire texture err=%d\n", arg_index, err);
+
 				if (err != CL_SUCCESS) result = false;
 			}
-			else if (arg->vbo_ && glIsBuffer(arg->vbo_)) {
+			else if (arg->vbo_ && glIsBuffer(arg->vbo_))
+			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+
+				DBGPRINT(L"Arg[%zu]: acquire VBO err=%d\n", arg_index, err);
+
 				if (err != CL_SUCCESS) result = false;
 			}
+
+			arg_index++;
 		}
 
-		// Step 2: Execute kernel
+		// ---------- Execute kernel ----------
+		DBGPRINT(L"Enqueue kernel execution\n");
+
 		err = clEnqueueNDRangeKernel(
 			queue_,
 			kernels_[index].kernel,
@@ -594,27 +1070,64 @@ namespace flvr
 			nullptr,
 			nullptr
 		);
-		if (err != CL_SUCCESS) {
+
+		DBGPRINT(L"clEnqueueNDRangeKernel err=%d, kernel=%p\n",
+			err, kernels_[index].kernel);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Kernel execution failed\n");
 			result = false;
 		}
 
-		// Step 3: Release GL objects
-		for (const auto& weak_arg : args) {
-			auto arg = weak_arg.lock();
-			if (!arg || !arg->valid_ || !arg->buffer_) continue;
+		// ---------- Release ----------
+		DBGPRINT(L"Releasing GL objects\n");
 
-			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0) {
+		arg_index = 0;
+
+		for (const auto& weak_arg : args)
+		{
+			auto arg = weak_arg.lock();
+
+			if (!arg || !arg->valid_ || !arg->buffer_)
+			{
+				arg_index++;
+				continue;
+			}
+
+			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0)
+			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+
+				DBGPRINT(L"Arg[%zu]: release texture err=%d\n", arg_index, err);
+
 				if (err != CL_SUCCESS) result = false;
 			}
-			else if (arg->vbo_ && glIsBuffer(arg->vbo_)) {
+			else if (arg->vbo_ && glIsBuffer(arg->vbo_))
+			{
 				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+
+				DBGPRINT(L"Arg[%zu]: release VBO err=%d\n", arg_index, err);
+
 				if (err != CL_SUCCESS) result = false;
 			}
+
+			arg_index++;
 		}
 
-		clFlush(queue_);
-		clFinish(queue_);
+		// ---------- Final sync ----------
+		DBGPRINT(L"Flushing + finishing queue\n");
+
+		err = clFlush(queue_);
+		DBGPRINT(L"clFlush err=%d\n", err);
+		if (err != CL_SUCCESS) result = false;
+
+		err = clFinish(queue_);
+		DBGPRINT(L"clFinish err=%d\n", err);
+		if (err != CL_SUCCESS) result = false;
+
+		DBGPRINT(L"executeKernel() completed, result=%d\n", result);
+
 		return result;
 	}
 
@@ -626,65 +1139,202 @@ namespace flvr
 
 	bool KernelProgram::getWorkGroupSize(int index, size_t* wgsize)
 	{
-		if (!valid())
-			return false;
-		if (index < 0 || index >= kernels_.size())
-			return false;
+		DBGPRINT(L"getWorkGroupSize() called: index=%d\n", index);
 
-		cl_int err;
-		err = clGetKernelWorkGroupInfo(kernels_[index].kernel,
-			device_, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t),
-			wgsize, NULL);
-		if (err != CL_SUCCESS)
+		if (!valid())
+		{
+			DBGPRINT(L"ERROR: KernelProgram not valid\n");
 			return false;
+		}
+
+		if (index < 0 || index >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				index, kernels_.size());
+			return false;
+		}
+
+		if (!wgsize)
+		{
+			DBGPRINT(L"ERROR: wgsize pointer is null\n");
+			return false;
+		}
+
+		cl_int err = clGetKernelWorkGroupInfo(
+			kernels_[index].kernel,
+			device_,
+			CL_KERNEL_WORK_GROUP_SIZE,
+			sizeof(size_t),
+			wgsize,
+			NULL
+		);
+
+		DBGPRINT(L"clGetKernelWorkGroupInfo err=%d, kernel=%p\n",
+			err, kernels_[index].kernel);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to query work group size\n");
+			return false;
+		}
+
+		DBGPRINT(L"Max work group size = %zu\n", *wgsize);
+
 		return true;
 	}
 
 	bool KernelProgram::setConst(size_t size, void* data)
 	{
-		cl_int err;
+		DBGPRINT(L"setConst() called: kernel_idx_=%d, arg_idx_=%d, size=%zu\n",
+			kernel_idx_, arg_idx_, size);
 
 		if (!data)
+		{
+			DBGPRINT(L"ERROR: data pointer is null\n");
 			return false;
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size())
-			return false;
+		}
 
-		err = clSetKernelArg(kernels_[kernel_idx_].kernel, arg_idx_++, size, data);
-		if (err != CL_SUCCESS)
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
 			return false;
+		}
+
+		DBGPRINT(L"Setting arg for kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
+		// Optional: show raw pointer value (helps debugging invalid host memory)
+		DBGPRINT(L"Arg ptr=%p\n", data);
+
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			size,
+			data
+		);
+
+		DBGPRINT(L"clSetKernelArg(index=%d) err=%d\n", arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: clSetKernelArg failed (index=%d, size=%zu)\n",
+				arg_idx_, size);
+			return false;
+		}
+
+		// Increment only AFTER success (important fix!)
+		arg_idx_++;
+
 		return true;
 	}
 
 	bool KernelProgram::setLocal(size_t size)
 	{
+		DBGPRINT(L"setLocal() called: kernel_idx_=%d, arg_idx_=%d, size=%zu\n",
+			kernel_idx_, arg_idx_, size);
+
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return false;
+		}
+
+		if (size == 0)
+		{
+			DBGPRINT(L"WARNING: Local memory size is 0\n");
+			// Not necessarily fatal — allow it, but log it
+		}
+
+		DBGPRINT(L"Setting local arg for kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
-			arg_idx_++, size, NULL);
+			arg_idx_,
+			size,
+			NULL   // local memory
+		);
+
+		DBGPRINT(L"clSetKernelArg (local) index=%d, size=%zu, err=%d\n",
+			arg_idx_, size, err);
+
 		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: clSetKernelArg (local) failed\n");
 			return false;
+		}
+
+		// Increment ONLY on success (same fix as setConst)
+		arg_idx_++;
+
 		return true;
 	}
 
 	bool KernelProgram::bindArg(std::weak_ptr<Argument> arg)
 	{
-		// Attempt to lock the weak_ptr
-		auto shared_arg = arg.lock();
-		if (!shared_arg) {
-			// Argument has expired � return empty weak_ptr
+		DBGPRINT(L"bindArg() called: kernel_idx_=%d, arg_idx_=%d\n",
+			kernel_idx_, arg_idx_);
+
+		// --- Validate kernel index ---
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
 			return false;
 		}
 
-		// Check if the argument is already in the program's list
-		auto it = arg_list_.find(shared_arg);
-		if (it == arg_list_.end()) {
-			// Not found � insert into the list
-			arg_list_.insert(shared_arg);
+		// --- Lock weak_ptr ---
+		auto shared_arg = arg.lock();
+
+		if (!shared_arg)
+		{
+			DBGPRINT(L"ERROR: Argument weak_ptr expired\n");
+			return false;
 		}
 
-		// Update the kernel-to-argument map
+		// --- Validate argument ---
+		if (!shared_arg->valid_)
+		{
+			DBGPRINT(L"ERROR: Argument marked invalid\n");
+			return false;
+		}
+
+		if (!shared_arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: Argument buffer is null\n");
+			return false;
+		}
+
+		DBGPRINT(L"Binding arg ptr=%p, buffer=%p, tex=%u, vbo=%u\n",
+			shared_arg.get(),
+			shared_arg->buffer_,
+			shared_arg->tex_,
+			shared_arg->vbo_);
+
+		DBGPRINT(L"Kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
+		// --- Track argument in list ---
+		auto it = arg_list_.find(shared_arg);
+
+		if (it == arg_list_.end())
+		{
+			DBGPRINT(L"Adding argument to arg_list_\n");
+			arg_list_.insert(shared_arg);
+		}
+		else
+		{
+			DBGPRINT(L"Argument already in arg_list_\n");
+		}
+
+		// --- Map argument to kernel ---
 		arg_map_[kernel_idx_].insert(shared_arg);
 
-		// Call clSetKernelArg
+		DBGPRINT(L"Mapped argument to kernel index=%d\n", kernel_idx_);
+
+		// --- Bind OpenCL buffer ---
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
@@ -692,102 +1342,306 @@ namespace flvr
 			&(shared_arg->buffer_)
 		);
 
-		if (err != CL_SUCCESS) {
-			// Optionally log or handle error
-			return false; // return empty on failure
+		DBGPRINT(L"clSetKernelArg(buffer) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind buffer argument\n");
+			return false;
 		}
 
-		// Increment internal argument index
+		// increment ONLY on success
 		++arg_idx_;
 
-		// Return the original weak_ptr
+		DBGPRINT(L"bindArg() success, next arg_idx_=%d\n", arg_idx_);
+
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setBufNew(cl_mem_flags flags, const std::string& name, size_t size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setBufNew(
+		cl_mem_flags flags,
+		const std::string& name,
+		size_t size,
+		void* data)
 	{
-		// Step 1: Check if an Argument already exists for this raw pointer
+		DBGPRINT(L"setBufNew() called: kernel_idx_=%d, arg_idx_=%d\n",
+			kernel_idx_, arg_idx_);
+
+		DBGPRINT(L"Buffer request: name=%S, size=%zu, flags=0x%X, data=%p\n",
+			name.c_str(), size, (unsigned int)flags, data);
+
+		// --- Validate kernel index ---
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!context_)
+		{
+			DBGPRINT(L"ERROR: context_ is null\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		// --- Step 1: Try to reuse existing argument ---
 		std::shared_ptr<Argument> existing_arg;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesPointer(name, size, data)) {
+
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesPointer(name, size, data))
+			{
 				existing_arg = arg;
+				DBGPRINT(L"Reusing existing buffer: ptr=%p, buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		// Step 2: If not found, create a new Argument
-		if (!existing_arg) {
-			existing_arg = Argument::createFromPointer(context_, flags, name, size, data);
-			if (!existing_arg || !existing_arg->valid_) {
-				// Failed to create buffer � return empty weak_ptr
+		// --- Step 2: Create new if needed ---
+		if (!existing_arg)
+		{
+			DBGPRINT(L"Creating new buffer\n");
+
+			existing_arg = Argument::createFromPointer(
+				context_, flags, name, size, data);
+
+			if (!existing_arg)
+			{
+				DBGPRINT(L"ERROR: Argument::createFromPointer returned null\n");
 				return std::weak_ptr<Argument>();
 			}
 
-			// Add to program's argument list
+			if (!existing_arg->valid_)
+			{
+				DBGPRINT(L"ERROR: Created argument is invalid\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			DBGPRINT(L"New buffer created: ptr=%p, buffer=%p\n",
+				existing_arg.get(), existing_arg->buffer_);
+
+			// Track in program
 			arg_list_.insert(existing_arg);
 		}
 
-		// Step 3: Set as kernel argument
+		// --- Validate buffer ---
+		if (!existing_arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: buffer_ is null\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		DBGPRINT(L"Binding buffer to kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
+		// --- Step 3: Bind to kernel ---
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer_
+			&(existing_arg->buffer_)
 		);
 
-		if (err != CL_SUCCESS) {
-			// Optionally log error
+		DBGPRINT(L"clSetKernelArg(buffer) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind buffer argument\n");
 			return std::weak_ptr<Argument>();
 		}
 
-		// Step 4: Track usage for this kernel
+		// --- Step 4: Track per-kernel usage ---
 		arg_map_[kernel_idx_].insert(existing_arg);
 
-		// Step 5: Increment internal argument index
+		DBGPRINT(L"Buffer mapped to kernel index=%d\n", kernel_idx_);
+
+		// increment only after success
 		++arg_idx_;
 
-		// Step 6: Return weak_ptr for external use
+		DBGPRINT(L"setBufNew() success, next arg_idx_=%d\n", arg_idx_);
+
+		// --- Step 5: return weak_ptr ---
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setBufNewOrUpdate(cl_mem_flags flags, const std::string& name, size_t size, void* data)
+	std::weak_ptr<Argument> KernelProgram::setBufNewOrUpdate(
+		cl_mem_flags flags,
+		const std::string& name,
+		size_t size,
+		void* data)
 	{
+		DBGPRINT(L"setBufNewOrUpdate() called: kernel_idx_=%d, arg_idx_=%d\n",
+			kernel_idx_, arg_idx_);
+
+		DBGPRINT(L"Buffer request: name=%S, size=%zu, flags=0x%X, data=%p\n",
+			name.c_str(), size, (unsigned int)flags, data);
+
+		// --- Validate kernel ---
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!context_)
+		{
+			DBGPRINT(L"ERROR: context_ is null\n");
+			return std::weak_ptr<Argument>();
+		}
+
 		std::shared_ptr<Argument> arg;
-		for (const auto& existing : arg_list_) {
-			if (existing->matchesPointer(name, size, data)) {
+
+		// ---------- Try to find existing ----------
+		for (const auto& existing : arg_list_)
+		{
+			if (existing->matchesPointer(name, size, data))
+			{
 				arg = existing;
+				DBGPRINT(L"Found existing buffer: ptr=%p, buffer=%p\n",
+					existing.get(), existing->buffer_);
 				break;
 			}
 		}
 
-		if (!arg) {
+		// ---------- Create new ----------
+		if (!arg)
+		{
+			DBGPRINT(L"No existing buffer found, creating new one\n");
+
 			arg = Argument::createFromPointer(context_, flags, name, size, data);
-			if (!arg || !arg->valid_) return std::weak_ptr<Argument>();
-			arg_list_.insert(arg);
-		}
-		else {
-			if (!updateBuf(arg, flags, size, data)) {
+
+			if (!arg)
+			{
+				DBGPRINT(L"ERROR: Argument::createFromPointer returned null\n");
 				return std::weak_ptr<Argument>();
 			}
+
+			if (!arg->valid_)
+			{
+				DBGPRINT(L"ERROR: New argument invalid\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			DBGPRINT(L"New buffer created: ptr=%p, buffer=%p\n",
+				arg.get(), arg->buffer_);
+
+			arg_list_.insert(arg);
+		}
+		else
+		{
+			// ---------- Update existing ----------
+			DBGPRINT(L"Updating existing buffer\n");
+
+			if (!updateBuf(arg, flags, size, data))
+			{
+				DBGPRINT(L"ERROR: updateBuf failed\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			DBGPRINT(L"Buffer updated successfully\n");
 		}
 
-		cl_int err = clSetKernelArg(kernels_[kernel_idx_].kernel, arg_idx_, sizeof(cl_mem), &arg->buffer_);
-		if (err != CL_SUCCESS) return std::weak_ptr<Argument>();
+		// ---------- Validate buffer ----------
+		if (!arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: buffer_ is null after create/update\n");
+			return std::weak_ptr<Argument>();
+		}
 
+		// ---------- Bind to kernel ----------
+		DBGPRINT(L"Binding buffer to kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
+		cl_int err = clSetKernelArg(
+			kernels_[kernel_idx_].kernel,
+			arg_idx_,
+			sizeof(cl_mem),
+			&(arg->buffer_)
+		);
+
+		DBGPRINT(L"clSetKernelArg(buffer) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind buffer argument\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		// ---------- Track usage ----------
 		arg_map_[kernel_idx_].insert(arg);
+
+		DBGPRINT(L"Buffer mapped to kernel index=%d\n", kernel_idx_);
+
+		// Increment ONLY on success
 		++arg_idx_;
+
+		DBGPRINT(L"setBufNewOrUpdate() success, next arg_idx_=%d\n", arg_idx_);
+
 		return std::weak_ptr<Argument>(arg);
 	}
 
-	bool KernelProgram::updateBuf(std::weak_ptr<Argument> arg, cl_mem_flags flags, size_t new_size, void* data)
+	bool KernelProgram::updateBuf(std::weak_ptr<Argument> arg,
+		cl_mem_flags flags,
+		size_t new_size,
+		void* data)
 	{
+		DBGPRINT(L"updateBuf() called: new_size=%zu, flags=0x%X, data=%p\n",
+			new_size, (unsigned int)flags, data);
+
+		// --- Lock argument ---
 		auto shared_arg = arg.lock();
-		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer_) {
+
+		if (!shared_arg)
+		{
+			DBGPRINT(L"ERROR: weak_ptr expired\n");
 			return false;
 		}
 
-		// Case 1: Size fits � just write new data
-		if (new_size <= shared_arg->size_) {
+		if (!shared_arg->valid_)
+		{
+			DBGPRINT(L"ERROR: Argument invalid\n");
+			return false;
+		}
+
+		if (!shared_arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: buffer_ is null\n");
+			return false;
+		}
+
+		if (!context_)
+		{
+			DBGPRINT(L"ERROR: context_ is null\n");
+			return false;
+		}
+
+		DBGPRINT(L"Existing buffer: ptr=%p, buffer=%p, size=%zu\n",
+			shared_arg.get(),
+			shared_arg->buffer_,
+			shared_arg->size_);
+
+		// ---------- Case 1: Update in-place ----------
+		if (new_size <= shared_arg->size_)
+		{
+			DBGPRINT(L"Updating buffer in-place (write only)\n");
+
+			if (!queue_)
+			{
+				DBGPRINT(L"ERROR: queue_ is null\n");
+				return false;
+			}
+
+			if (!data)
+			{
+				DBGPRINT(L"WARNING: data is null, writing nothing\n");
+				return true; // allowed — nothing to write
+			}
+
 			cl_int err = clEnqueueWriteBuffer(
 				queue_,
 				shared_arg->buffer_,
@@ -797,101 +1651,288 @@ namespace flvr
 				data,
 				0, nullptr, nullptr
 			);
-			return err == CL_SUCCESS;
+
+			DBGPRINT(L"clEnqueueWriteBuffer size=%zu err=%d\n", new_size, err);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"ERROR: clEnqueueWriteBuffer failed\n");
+				return false;
+			}
+
+			return true;
 		}
 
-		// Case 2: Size too large � destroy and reallocate
-		shared_arg->release(); // safely releases cl_mem if not protected
+		// ---------- Case 2: Reallocate ----------
+		DBGPRINT(L"Reallocating buffer (old size=%zu, new size=%zu)\n",
+			shared_arg->size_, new_size);
+
+		// Release old buffer
+		shared_arg->release();
 
 		cl_int err = CL_SUCCESS;
-		cl_mem new_buf = clCreateBuffer(context_, flags, new_size, data, &err);
-		if (err != CL_SUCCESS || !new_buf) {
+
+		cl_mem new_buf = clCreateBuffer(
+			context_,
+			flags,
+			new_size,
+			data,
+			&err
+		);
+
+		DBGPRINT(L"clCreateBuffer err=%d, new_buf=%p\n", err, new_buf);
+
+		if (err != CL_SUCCESS || !new_buf)
+		{
+			DBGPRINT(L"ERROR: Failed to create new buffer\n");
 			return false;
 		}
 
-		// Update shared Argument in-place
+		// Update Argument in-place
 		shared_arg->buffer_ = new_buf;
 		shared_arg->size_ = new_size;
 		shared_arg->pointer_ = data;
 		shared_arg->valid_ = true;
 
+		DBGPRINT(L"Buffer reallocated successfully: buffer=%p size=%zu\n",
+			new_buf, new_size);
+
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setTex2D(cl_mem_flags flags, GLuint tex_id)
+	std::weak_ptr<Argument> KernelProgram::setTex2D(
+		cl_mem_flags flags,
+		GLuint tex_id)
 	{
-		// Step 1: Check if texture already wrapped
+		DBGPRINT(L"setTex2D() called: kernel_idx_=%d, arg_idx_=%d, tex_id=%u\n",
+			kernel_idx_, arg_idx_, tex_id);
+
+		// --- Validate kernel ---
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!context_)
+		{
+			DBGPRINT(L"ERROR: context_ is null\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!tex_id)
+		{
+			DBGPRINT(L"ERROR: tex_id is 0\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!glIsTexture(tex_id))
+		{
+			DBGPRINT(L"ERROR: tex_id=%u is not a valid GL texture\n", tex_id);
+			return std::weak_ptr<Argument>();
+		}
+
+		DBGPRINT(L"GL texture validated: %u\n", tex_id);
+
 		std::shared_ptr<Argument> existing_arg;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesTexture(tex_id)) {
+
+		// ---------- Step 1: reuse existing ----------
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesTexture(tex_id))
+			{
 				existing_arg = arg;
+				DBGPRINT(L"Reusing existing texture arg: ptr=%p, buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		// Step 2: Create new Argument if not found
-		if (!existing_arg) {
+		// ---------- Step 2: create new ----------
+		if (!existing_arg)
+		{
+			DBGPRINT(L"Creating new texture argument\n");
+
 			existing_arg = Argument::createFromTexture2D(context_, flags, tex_id);
-			if (!existing_arg || !existing_arg->valid_) {
+
+			if (!existing_arg)
+			{
+				DBGPRINT(L"ERROR: createFromTexture2D returned null\n");
 				return std::weak_ptr<Argument>();
 			}
+
+			if (!existing_arg->valid_)
+			{
+				DBGPRINT(L"ERROR: created texture argument invalid\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			if (!existing_arg->buffer_)
+			{
+				DBGPRINT(L"ERROR: created buffer_ is null\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			DBGPRINT(L"New texture buffer created: ptr=%p, buffer=%p\n",
+				existing_arg.get(), existing_arg->buffer_);
+
 			arg_list_.insert(existing_arg);
 		}
 
-		// Step 3: Set kernel argument
+		// ---------- Step 3: bind to kernel ----------
+		DBGPRINT(L"Binding texture to kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer_
+			&(existing_arg->buffer_)
 		);
 
-		if (err != CL_SUCCESS) {
+		DBGPRINT(L"clSetKernelArg(texture) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind texture argument\n");
 			return std::weak_ptr<Argument>();
 		}
 
-		// Step 4: Track usage
+		// ---------- Step 4: track usage ----------
 		arg_map_[kernel_idx_].insert(existing_arg);
+
+		DBGPRINT(L"Texture mapped to kernel index=%d\n", kernel_idx_);
+
+		// increment only after success
 		++arg_idx_;
+
+		DBGPRINT(L"setTex2D() success, next arg_idx_=%d\n", arg_idx_);
 
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
-	std::weak_ptr<Argument> KernelProgram::setTex3D(cl_mem_flags flags, GLuint tex_id)
+	std::weak_ptr<Argument> KernelProgram::setTex3D(
+		cl_mem_flags flags,
+		GLuint tex_id)
 	{
-		// Step 1: Check if texture already wrapped
+		DBGPRINT(L"setTex3D() called: kernel_idx_=%d, arg_idx_=%d, tex_id=%u\n",
+			kernel_idx_, arg_idx_, tex_id);
+
+		// --- Validate kernel ---
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!context_)
+		{
+			DBGPRINT(L"ERROR: context_ is null\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!tex_id)
+		{
+			DBGPRINT(L"ERROR: tex_id is 0\n");
+			return std::weak_ptr<Argument>();
+		}
+
+		if (!glIsTexture(tex_id))
+		{
+			DBGPRINT(L"ERROR: tex_id=%u is not a valid GL texture\n", tex_id);
+			return std::weak_ptr<Argument>();
+		}
+
+		DBGPRINT(L"GL 3D texture validated: %u\n", tex_id);
+
 		std::shared_ptr<Argument> existing_arg;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesTexture(tex_id)) {
+
+		// ---------- Step 1: reuse existing ----------
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesTexture(tex_id))
+			{
 				existing_arg = arg;
+				DBGPRINT(L"Reusing existing 3D texture arg: ptr=%p, buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		// Step 2: Create new Argument if not found
-		if (!existing_arg) {
+		// ---------- Step 2: create new ----------
+		if (!existing_arg)
+		{
+			DBGPRINT(L"Creating new 3D texture argument\n");
+
 			existing_arg = Argument::createFromTexture3D(context_, flags, tex_id);
-			if (!existing_arg || !existing_arg->valid_) {
+
+			if (!existing_arg)
+			{
+				DBGPRINT(L"ERROR: createFromTexture3D returned null\n");
 				return std::weak_ptr<Argument>();
 			}
+
+			if (!existing_arg->valid_)
+			{
+				DBGPRINT(L"ERROR: created 3D texture argument invalid\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			if (!existing_arg->buffer_)
+			{
+				DBGPRINT(L"ERROR: created buffer_ is null\n");
+				return std::weak_ptr<Argument>();
+			}
+
+			DBGPRINT(L"New 3D texture buffer created: ptr=%p, buffer=%p\n",
+				existing_arg.get(), existing_arg->buffer_);
+
 			arg_list_.insert(existing_arg);
 		}
 
-		// Step 3: Set kernel argument
+		// ---------- Optional: log texture dimensions ----------
+#ifdef GL_TEXTURE_3D
+		GLint width = 0, height = 0, depth = 0;
+		glBindTexture(GL_TEXTURE_3D, tex_id);
+		glGetTexLevelParameteriv(GL_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width);
+		glGetTexLevelParameteriv(GL_TEXTURE_3D, 0, GL_TEXTURE_HEIGHT, &height);
+		glGetTexLevelParameteriv(GL_TEXTURE_3D, 0, GL_TEXTURE_DEPTH, &depth);
+
+		DBGPRINT(L"3D Texture size: %d x %d x %d\n", width, height, depth);
+#endif
+
+		// ---------- Step 3: bind to kernel ----------
+		DBGPRINT(L"Binding 3D texture to kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer_
+			&(existing_arg->buffer_)
 		);
 
-		if (err != CL_SUCCESS) {
+		DBGPRINT(L"clSetKernelArg(3D texture) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind 3D texture argument\n");
 			return std::weak_ptr<Argument>();
 		}
 
-		// Step 4: Track usage
+		// ---------- Step 4: track usage ----------
 		arg_map_[kernel_idx_].insert(existing_arg);
+
+		DBGPRINT(L"3D texture mapped to kernel index=%d\n", kernel_idx_);
+
+		// increment only after success
 		++arg_idx_;
+
+		DBGPRINT(L"setTex3D() success, next arg_idx_=%d\n", arg_idx_);
 
 		return std::weak_ptr<Argument>(existing_arg);
 	}
@@ -901,52 +1942,124 @@ namespace flvr
 		const std::string& name,
 		size_t buffer_size, size_t* region)
 	{
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size()) {
-			return std::weak_ptr<Argument>();
+		DBGPRINT(L"copyTex3DToBuf() called: kernel_idx_=%d, arg_idx_=%d\n",
+			kernel_idx_, arg_idx_);
+
+		DBGPRINT(L"Texture=%u, buffer_name=%S, buffer_size=%zu\n",
+			texture_id, name.c_str(), buffer_size);
+
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return {};
 		}
 
-		// Step 1: Find or create the texture wrapper
+		if (!context_ || !queue_)
+		{
+			DBGPRINT(L"ERROR: context_ or queue_ is null\n");
+			return {};
+		}
+
+		if (!region)
+		{
+			DBGPRINT(L"ERROR: region is null\n");
+			return {};
+		}
+
+		DBGPRINT(L"Copy region: %zu x %zu x %zu\n",
+			region[0], region[1], region[2]);
+
+		// ---------- Step 1: Texture wrapper ----------
 		std::shared_ptr<Argument> tex_arg;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesTexture(texture_id)) {
+
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesTexture(texture_id))
+			{
 				tex_arg = arg;
+				DBGPRINT(L"Reusing texture arg: ptr=%p buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		if (!tex_arg) {
-			tex_arg = Argument::createFromTexture3D(context_, CL_MEM_READ_WRITE, texture_id);
-			if (!tex_arg || !tex_arg->valid_) {
-				return std::weak_ptr<Argument>();
+		if (!tex_arg)
+		{
+			DBGPRINT(L"Creating texture wrapper\n");
+
+			tex_arg = Argument::createFromTexture3D(
+				context_, CL_MEM_READ_WRITE, texture_id);
+
+			if (!tex_arg || !tex_arg->valid_)
+			{
+				DBGPRINT(L"ERROR: Failed to create texture argument\n");
+				return {};
 			}
+
 			arg_list_.insert(tex_arg);
+
+			DBGPRINT(L"Texture wrapper created: buffer=%p\n", tex_arg->buffer_);
 		}
 
-		// Step 2: Find or create the buffer to hold copied texture data
+		// ---------- Step 2: Buffer ----------
 		std::shared_ptr<Argument> buf_arg;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesPointer(name, buffer_size, nullptr)) {
+
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesPointer(name, buffer_size, nullptr))
+			{
 				buf_arg = arg;
+				DBGPRINT(L"Reusing buffer arg: ptr=%p buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		if (!buf_arg) {
-			buf_arg = Argument::createFromPointer(context_, flags, name, buffer_size, nullptr);
-			if (!buf_arg || !buf_arg->valid_) {
-				return std::weak_ptr<Argument>();
+		if (!buf_arg)
+		{
+			DBGPRINT(L"Creating buffer for texture copy\n");
+
+			buf_arg = Argument::createFromPointer(
+				context_, flags, name, buffer_size, nullptr);
+
+			if (!buf_arg || !buf_arg->valid_)
+			{
+				DBGPRINT(L"ERROR: Failed to create buffer argument\n");
+				return {};
 			}
+
 			arg_list_.insert(buf_arg);
+
+			DBGPRINT(L"Buffer created: buffer=%p size=%zu\n",
+				buf_arg->buffer_, buffer_size);
 		}
 
-		// Step 3: Acquire GL texture for OpenCL access
-		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
-		if (err != CL_SUCCESS) {
-			return std::weak_ptr<Argument>();
+		if (!tex_arg->buffer_ || !buf_arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: Invalid CL buffers\n");
+			return {};
 		}
 
-		// Step 4: Copy texture to buffer
+		// ---------- Step 3: Acquire GL ----------
+		DBGPRINT(L"Acquiring GL texture\n");
+
+		cl_int err = clEnqueueAcquireGLObjects(
+			queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
+
+		DBGPRINT(L"clEnqueueAcquireGLObjects err=%d\n", err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to acquire GL object\n");
+			return {};
+		}
+
+		// ---------- Step 4: Copy ----------
 		size_t origin[3] = { 0, 0, 0 };
+
+		DBGPRINT(L"Copying image to buffer\n");
+
 		err = clEnqueueCopyImageToBuffer(
 			queue_,
 			tex_arg->buffer_,
@@ -956,67 +2069,168 @@ namespace flvr
 			0,
 			0, nullptr, nullptr
 		);
-		if (err != CL_SUCCESS) {
-			clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
-			return std::weak_ptr<Argument>();
+
+		DBGPRINT(L"clEnqueueCopyImageToBuffer err=%d\n", err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Copy failed, releasing GL object\n");
+
+			clEnqueueReleaseGLObjects(
+				queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
+
+			return {};
 		}
 
-		// Step 5: Release GL texture
-		err = clEnqueueReleaseGLObjects(queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
-		if (err != CL_SUCCESS) {
-			return std::weak_ptr<Argument>();
+		// ---------- Step 5: Release GL ----------
+		DBGPRINT(L"Releasing GL texture\n");
+
+		err = clEnqueueReleaseGLObjects(
+			queue_, 1, &tex_arg->buffer_, 0, nullptr, nullptr);
+
+		DBGPRINT(L"clEnqueueReleaseGLObjects err=%d\n", err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to release GL object\n");
+			return {};
 		}
 
-		// Step 6: Set buffer_ as kernel argument
+		// ---------- Step 6: Bind buffer ----------
+		DBGPRINT(L"Binding output buffer to kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
 		err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
 			&buf_arg->buffer_
 		);
-		if (err != CL_SUCCESS) {
-			return std::weak_ptr<Argument>();
+
+		DBGPRINT(L"clSetKernelArg(buffer copy) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind buffer argument\n");
+			return {};
 		}
 
-		// Step 7: Track usage
+		// ---------- Step 7: Track ----------
 		arg_map_[kernel_idx_].insert(buf_arg);
 		++arg_idx_;
 
-		// Step 8: Flush and finish
-		clFlush(queue_);
-		clFinish(queue_);
+		DBGPRINT(L"Buffer mapped to kernel, new arg_idx_=%d\n", arg_idx_);
+
+		// ---------- Step 8: Sync ----------
+		DBGPRINT(L"Flushing + finishing queue\n");
+
+		err = clFlush(queue_);
+		DBGPRINT(L"clFlush err=%d\n", err);
+
+		err = clFinish(queue_);
+		DBGPRINT(L"clFinish err=%d\n", err);
+
+		DBGPRINT(L"copyTex3DToBuf() completed successfully\n");
 
 		return std::weak_ptr<Argument>(buf_arg);
 	}
 
-	bool KernelProgram::copyBufToTex3D(std::weak_ptr<Argument> buf_arg, GLuint texture_id, size_t size, size_t* region)
+	bool KernelProgram::copyBufToTex3D(
+		std::weak_ptr<Argument> buf_arg,
+		GLuint texture_id,
+		size_t size,
+		size_t* region)
 	{
-		auto buffer = buf_arg.lock();
-		if (!buffer || !buffer->valid_ || !buffer->buffer_) {
+		DBGPRINT(L"copyBufToTex3D() called: texture=%u, size=%zu\n",
+			texture_id, size);
+
+		if (!queue_ || !context_)
+		{
+			DBGPRINT(L"ERROR: queue_ or context_ is null\n");
 			return false;
 		}
 
-		// Step 1: Find the texture Argument
+		if (!region)
+		{
+			DBGPRINT(L"ERROR: region is null\n");
+			return false;
+		}
+
+		DBGPRINT(L"Region: %zu x %zu x %zu\n",
+			region[0], region[1], region[2]);
+
+		// ---------- Lock buffer ----------
+		auto buffer = buf_arg.lock();
+
+		if (!buffer)
+		{
+			DBGPRINT(L"ERROR: buffer weak_ptr expired\n");
+			return false;
+		}
+
+		if (!buffer->valid_ || !buffer->buffer_)
+		{
+			DBGPRINT(L"ERROR: buffer invalid or null\n");
+			return false;
+		}
+
+		DBGPRINT(L"Source buffer: ptr=%p buffer=%p size=%zu\n",
+			buffer.get(),
+			buffer->buffer_,
+			buffer->size_);
+
+		if (size > buffer->size_)
+		{
+			DBGPRINT(L"WARNING: requested copy size (%zu) > buffer size (%zu)\n",
+				size, buffer->size_);
+		}
+
+		// ---------- Find texture ----------
 		std::shared_ptr<Argument> texture;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesTexture(texture_id)) {
+
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesTexture(texture_id))
+			{
 				texture = arg;
+				DBGPRINT(L"Found texture arg: ptr=%p buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		if (!texture || !texture->valid_ || !texture->buffer_) {
+		if (!texture)
+		{
+			DBGPRINT(L"ERROR: texture not found in arg_list_\n");
 			return false;
 		}
 
-		// Step 2: Acquire GL texture
-		cl_int err = clEnqueueAcquireGLObjects(queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
-		if (err != CL_SUCCESS) {
+		if (!texture->valid_ || !texture->buffer_)
+		{
+			DBGPRINT(L"ERROR: texture invalid or buffer null\n");
 			return false;
 		}
 
-		// Step 3: Copy buffer to texture
+		// ---------- Acquire GL ----------
+		DBGPRINT(L"Acquiring GL texture\n");
+
+		cl_int err = clEnqueueAcquireGLObjects(
+			queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
+
+		DBGPRINT(L"clEnqueueAcquireGLObjects err=%d\n", err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to acquire GL object\n");
+			return false;
+		}
+
+		// ---------- Copy ----------
 		size_t origin[3] = { 0, 0, 0 };
+
+		DBGPRINT(L"Copying buffer to 3D texture\n");
+
 		err = clEnqueueCopyBufferToImage(
 			queue_,
 			buffer->buffer_,
@@ -1026,88 +2240,238 @@ namespace flvr
 			region,
 			0, nullptr, nullptr
 		);
-		if (err != CL_SUCCESS) {
-			clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
+
+		DBGPRINT(L"clEnqueueCopyBufferToImage err=%d\n", err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Copy failed, releasing GL object\n");
+
+			clEnqueueReleaseGLObjects(
+				queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
+
 			return false;
 		}
 
-		// Step 4: Release GL texture
-		err = clEnqueueReleaseGLObjects(queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
-		if (err != CL_SUCCESS) {
+		// ---------- Release GL ----------
+		DBGPRINT(L"Releasing GL texture\n");
+
+		err = clEnqueueReleaseGLObjects(
+			queue_, 1, &texture->buffer_, 0, nullptr, nullptr);
+
+		DBGPRINT(L"clEnqueueReleaseGLObjects err=%d\n", err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to release GL object\n");
 			return false;
 		}
 
-		// Step 5: Finalize
-		clFlush(queue_);
-		clFinish(queue_);
+		// ---------- Sync ----------
+		DBGPRINT(L"Flushing + finishing queue\n");
+
+		err = clFlush(queue_);
+		DBGPRINT(L"clFlush err=%d\n", err);
+
+		err = clFinish(queue_);
+		DBGPRINT(L"clFinish err=%d\n", err);
+
+		DBGPRINT(L"copyBufToTex3D() completed successfully\n");
 
 		return true;
 	}
 
-	std::weak_ptr<Argument> KernelProgram::bindVeretxBuf(cl_mem_flags flags, GLuint vbo_id, size_t size)
+	std::weak_ptr<Argument> KernelProgram::bindVeretxBuf(
+		cl_mem_flags flags,
+		GLuint vbo_id,
+		size_t size)
 	{
-		if (kernel_idx_ < 0 || kernel_idx_ >= kernels_.size()) {
-			return std::weak_ptr<Argument>();
+		DBGPRINT(L"bindVeretxBuf() called: kernel_idx_=%d, arg_idx_=%d, vbo_id=%u, size=%zu\n",
+			kernel_idx_, arg_idx_, vbo_id, size);
+
+		// --- Validate kernel ---
+		if (kernel_idx_ < 0 || kernel_idx_ >= (int)kernels_.size())
+		{
+			DBGPRINT(L"ERROR: Invalid kernel index=%d (size=%zu)\n",
+				kernel_idx_, kernels_.size());
+			return {};
 		}
 
-		// Step 1: Check if VBO is already wrapped
+		if (!context_)
+		{
+			DBGPRINT(L"ERROR: context_ is null\n");
+			return {};
+		}
+
+		if (!vbo_id)
+		{
+			DBGPRINT(L"ERROR: vbo_id is 0\n");
+			return {};
+		}
+
+		if (!glIsBuffer(vbo_id))
+		{
+			DBGPRINT(L"ERROR: vbo_id=%u is not a valid GL buffer\n", vbo_id);
+			return {};
+		}
+
+		DBGPRINT(L"GL VBO validated: %u\n", vbo_id);
+
 		std::shared_ptr<Argument> existing_arg;
-		for (const auto& arg : arg_list_) {
-			if (arg->matchesVBO(vbo_id)) {
+
+		// ---------- Step 1: reuse ----------
+		for (const auto& arg : arg_list_)
+		{
+			if (arg->matchesVBO(vbo_id))
+			{
 				existing_arg = arg;
+				DBGPRINT(L"Reusing existing VBO arg: ptr=%p, buffer=%p\n",
+					arg.get(), arg->buffer_);
 				break;
 			}
 		}
 
-		// Step 2: Create new Argument if not found
-		if (!existing_arg) {
-			existing_arg = Argument::createFromVBO(context_, flags, vbo_id, size);
-			if (!existing_arg || !existing_arg->valid_) {
-				return std::weak_ptr<Argument>();
+		// ---------- Step 2: create ----------
+		if (!existing_arg)
+		{
+			DBGPRINT(L"Creating new VBO argument\n");
+
+			existing_arg = Argument::createFromVBO(
+				context_, flags, vbo_id, size);
+
+			if (!existing_arg)
+			{
+				DBGPRINT(L"ERROR: createFromVBO returned null\n");
+				return {};
 			}
+
+			if (!existing_arg->valid_)
+			{
+				DBGPRINT(L"ERROR: created VBO argument invalid\n");
+				return {};
+			}
+
+			if (!existing_arg->buffer_)
+			{
+				DBGPRINT(L"ERROR: created buffer_ is null\n");
+				return {};
+			}
+
+			DBGPRINT(L"New VBO buffer created: ptr=%p, buffer=%p\n",
+				existing_arg.get(), existing_arg->buffer_);
+
 			arg_list_.insert(existing_arg);
 		}
 
-		// Step 3: Set kernel argument
+		// ---------- Validate buffer ----------
+		if (!existing_arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: buffer_ is null\n");
+			return {};
+		}
+
+		// ---------- Step 3: bind ----------
+		DBGPRINT(L"Binding VBO to kernel: %S\n",
+			kernels_[kernel_idx_].name.c_str());
+
 		cl_int err = clSetKernelArg(
 			kernels_[kernel_idx_].kernel,
 			arg_idx_,
 			sizeof(cl_mem),
-			&existing_arg->buffer_
+			&(existing_arg->buffer_)
 		);
 
-		if (err != CL_SUCCESS) {
-			return std::weak_ptr<Argument>();
+		DBGPRINT(L"clSetKernelArg(VBO) index=%d err=%d\n",
+			arg_idx_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: Failed to bind VBO argument\n");
+			return {};
 		}
 
-		// Step 4: Track usage
+		// ---------- Step 4: track ----------
 		arg_map_[kernel_idx_].insert(existing_arg);
+
+		DBGPRINT(L"VBO mapped to kernel index=%d\n", kernel_idx_);
+
+		// increment only after success
 		++arg_idx_;
+
+		DBGPRINT(L"bindVeretxBuf() success, next arg_idx_=%d\n", arg_idx_);
 
 		return std::weak_ptr<Argument>(existing_arg);
 	}
 
 	bool KernelProgram::readBuffer(const std::weak_ptr<Argument> arg, void* data)
 	{
-		auto shared_arg = arg.lock();
-		if (!shared_arg || !shared_arg->valid_ || !shared_arg->buffer_) {
+		DBGPRINT(L"readBuffer() called\n");
+
+		if (!queue_)
+		{
+			DBGPRINT(L"ERROR: queue_ is null\n");
 			return false;
 		}
 
+		if (!data)
+		{
+			DBGPRINT(L"ERROR: output data pointer is null\n");
+			return false;
+		}
+
+		// ---------- Lock argument ----------
+		auto shared_arg = arg.lock();
+
+		if (!shared_arg)
+		{
+			DBGPRINT(L"ERROR: Argument weak_ptr expired\n");
+			return false;
+		}
+
+		if (!shared_arg->valid_ || !shared_arg->buffer_)
+		{
+			DBGPRINT(L"ERROR: Argument invalid or buffer null\n");
+			return false;
+		}
+
+		DBGPRINT(L"Reading buffer: ptr=%p buffer=%p size=%zu\n",
+			shared_arg.get(),
+			shared_arg->buffer_,
+			shared_arg->size_);
+
 		cl_int err = CL_SUCCESS;
+		bool needs_acquire = false;
 
-		// Acquire GL texture if applicable
-		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_) && shared_arg->size_ == 0) {
-			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
-			if (err != CL_SUCCESS) return false;
+		// ---------- Determine interop ----------
+		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_) && shared_arg->size_ == 0)
+		{
+			DBGPRINT(L"Argument is GL texture, acquiring\n");
+			needs_acquire = true;
 		}
-		// Acquire VBO if applicable
-		else if (shared_arg->vbo_ && glIsBuffer(shared_arg->vbo_)) {
-			err = clEnqueueAcquireGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
-			if (err != CL_SUCCESS) return false;
+		else if (shared_arg->vbo_ && glIsBuffer(shared_arg->vbo_))
+		{
+			DBGPRINT(L"Argument is GL VBO, acquiring\n");
+			needs_acquire = true;
 		}
 
-		// Read buffer contents
+		// ---------- Acquire ----------
+		if (needs_acquire)
+		{
+			err = clEnqueueAcquireGLObjects(
+				queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
+
+			DBGPRINT(L"clEnqueueAcquireGLObjects err=%d\n", err);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"ERROR: Failed to acquire GL object\n");
+				return false;
+			}
+		}
+
+		// ---------- Read ----------
+		DBGPRINT(L"Reading buffer data\n");
+
 		err = clEnqueueReadBuffer(
 			queue_,
 			shared_arg->buffer_,
@@ -1117,21 +2481,52 @@ namespace flvr
 			data,
 			0, nullptr, nullptr
 		);
-		if (err != CL_SUCCESS) return false;
 
-		// Release GL texture if applicable
-		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_) && shared_arg->size_ == 0) {
-			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
-			if (err != CL_SUCCESS) return false;
-		}
-		// Release VBO if applicable
-		else if (shared_arg->vbo_ && glIsBuffer(shared_arg->vbo_)) {
-			err = clEnqueueReleaseGLObjects(queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
-			if (err != CL_SUCCESS) return false;
+		DBGPRINT(L"clEnqueueReadBuffer size=%zu err=%d\n",
+			shared_arg->size_, err);
+
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: clEnqueueReadBuffer failed\n");
+
+			if (needs_acquire)
+			{
+				DBGPRINT(L"Releasing GL object after read failure\n");
+				clEnqueueReleaseGLObjects(
+					queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
+			}
+
+			return false;
 		}
 
-		clFlush(queue_);
-		clFinish(queue_);
+		// ---------- Release ----------
+		if (needs_acquire)
+		{
+			DBGPRINT(L"Releasing GL object\n");
+
+			err = clEnqueueReleaseGLObjects(
+				queue_, 1, &shared_arg->buffer_, 0, nullptr, nullptr);
+
+			DBGPRINT(L"clEnqueueReleaseGLObjects err=%d\n", err);
+
+			if (err != CL_SUCCESS)
+			{
+				DBGPRINT(L"ERROR: Failed to release GL object\n");
+				return false;
+			}
+		}
+
+		// ---------- Sync ----------
+		DBGPRINT(L"Flushing + finishing queue\n");
+
+		err = clFlush(queue_);
+		DBGPRINT(L"clFlush err=%d\n", err);
+
+		err = clFinish(queue_);
+		DBGPRINT(L"clFinish err=%d\n", err);
+
+		DBGPRINT(L"readBuffer() completed successfully\n");
+
 		return true;
 	}
 

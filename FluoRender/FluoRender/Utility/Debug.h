@@ -16,12 +16,14 @@
 #include <Windows.h>
 
 #ifdef _DEBUG
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-// allocations to be of _CLIENT_BLOCK type
-#define DBGPRINT(kwszDebugFormatString, ...) _DBGPRINT(__FUNCTIONW__, __LINE__, kwszDebugFormatString, __VA_ARGS__)
 
-VOID _DBGPRINT(LPCWSTR kwszFunction, INT iLineNumber, LPCWSTR kwszDebugFormatString, ...);
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#define DBGPRINT(fmt, ...) _DBGPRINT(__FUNCTIONW__, __LINE__, fmt, __VA_ARGS__)
+
+BOOL DBGLOG_Init();          // auto path
+void DBGLOG_Shutdown();
+
+VOID _DBGPRINT(LPCWSTR func, INT line, LPCWSTR fmt, ...);
 
 //visualizer structures
 struct DBMIUINT8
@@ -257,15 +259,26 @@ struct DBMIFLOAT64
 
 #else//_DEBUG
 #define DBG_NEW new
-#define DBGPRINT( kwszDebugFormatString, ... ) ((void)0)
+#define DBGPRINT(...) ((void)0)
 #endif//_DEBUG
 
 #else//_WIN32
 
 #include <cstdarg>
 #include <wchar.h>
-void DBGPRINT(const wchar_t* format, ...);
-//{}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	bool DBGLOG_Init();          // auto path
+	void DBGLOG_Shutdown();
+
+	void DBGPRINT(const wchar_t* format, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif//_WIN32
 
