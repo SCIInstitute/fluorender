@@ -110,8 +110,11 @@ private:
 private:
 	void OnTextFocus(wxMouseEvent& event);
 	void OnNameText(wxCommandEvent& event);
+	void OnNameEnter(wxCommandEvent& event);
 	void OnCenterText(wxCommandEvent& event);
+	void OnCenterEnter(wxCommandEvent& event);
 	void OnColorChange(wxColourPickerEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
 
 private:
 	fluo::Point GetPointFromString(const wxString& str);
@@ -315,6 +318,7 @@ private:
 	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScrollMouse(wxMouseEvent& event);
 	void OnAct(wxListEvent& event);
+	//void OnKillFocus(wxFocusEvent& event);
 	//edit
 	//void OnNameChange(wxCommandEvent& event);
 	//void OnCenterChange(wxCommandEvent& event);

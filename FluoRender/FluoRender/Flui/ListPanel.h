@@ -70,7 +70,9 @@ private:
 private:
 	void OnTextFocus(wxMouseEvent& event);
 	void OnNameText(wxCommandEvent& event);
+	void OnNameEnter(wxCommandEvent& event);
 	void OnSelectionChanged(wxListEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,6 +143,7 @@ private:
 	void OnEndEditName(wxListEvent& event);
 	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScroll(wxMouseEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
 
 	void OnCropCheck(wxCommandEvent& event);
 	void OnCompCheck(wxCommandEvent& event);

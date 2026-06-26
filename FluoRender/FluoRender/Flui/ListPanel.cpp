@@ -71,6 +71,8 @@ DataListCtrl::DataListCtrl(
 		wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_rename_text->Bind(wxEVT_LEFT_DCLICK, &DataListCtrl::OnTextFocus, this);
 	m_rename_text->Bind(wxEVT_TEXT, &DataListCtrl::OnNameText, this);
+	m_rename_text->Bind(wxEVT_TEXT_ENTER, &DataListCtrl::OnNameEnter, this);
+	m_rename_text->Bind(wxEVT_KILL_FOCUS, &DataListCtrl::OnKillFocus, this);
 	m_rename_text->Hide();
 
 	Bind(wxEVT_LIST_ITEM_SELECTED, &DataListCtrl::OnSelectionChanged, this);
@@ -157,6 +159,11 @@ void DataListCtrl::OnNameText(wxCommandEvent& event)
 		lp->RenameSelection(m_rename.ToStdWstring());
 }
 
+void DataListCtrl::OnNameEnter(wxCommandEvent& event)
+{
+	EndEdit();
+}
+
 void DataListCtrl::OnSelectionChanged(wxListEvent& event)
 {
 	if (m_silent_select)
@@ -178,6 +185,12 @@ void DataListCtrl::OnSelectionChanged(wxListEvent& event)
 		font.SetWeight(wxFONTWEIGHT_BOLD);
 		SetItemFont(m_selected, font);
 	}
+	event.Skip();
+}
+
+void DataListCtrl::OnKillFocus(wxFocusEvent& event)
+{
+	EndEdit();
 	event.Skip();
 }
 
@@ -248,6 +261,7 @@ ListPanel::ListPanel(MainFrame* frame,
 
 	//events
 	m_datalist->Bind(wxEVT_LIST_ITEM_DESELECTED, &ListPanel::OnEndEditName, this);
+	m_datalist->Bind(wxEVT_KILL_FOCUS, &ListPanel::OnKillFocus, this);
 	Bind(wxEVT_CONTEXT_MENU, &ListPanel::OnContextMenu, this);
 	Bind(wxEVT_MENU, &ListPanel::OnMenu, this);
 	Bind(wxEVT_LIST_ITEM_SELECTED, &ListPanel::OnSelect, this);
@@ -942,6 +956,12 @@ void ListPanel::OnScrollWin(wxScrollWinEvent& event)
 }
 
 void ListPanel::OnScroll(wxMouseEvent& event)
+{
+	m_datalist->EndEdit();
+	event.Skip();
+}
+
+void ListPanel::OnKillFocus(wxFocusEvent& event)
 {
 	m_datalist->EndEdit();
 	event.Skip();

@@ -115,14 +115,18 @@ RulerListCtrl::RulerListCtrl(
 
 	//frame edit
 	m_name_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, wxDefaultSize);
+		wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_name_text->Bind(wxEVT_LEFT_DCLICK, &RulerListCtrl::OnTextFocus, this);
 	m_name_text->Bind(wxEVT_TEXT, &RulerListCtrl::OnNameText, this);
+	m_name_text->Bind(wxEVT_TEXT_ENTER, &RulerListCtrl::OnNameEnter, this);
+	m_name_text->Bind(wxEVT_KILL_FOCUS, &RulerListCtrl::OnKillFocus, this);
 	m_name_text->Hide();
 	m_center_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, wxDefaultSize);
+		wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_center_text->Bind(wxEVT_LEFT_DCLICK, &RulerListCtrl::OnTextFocus, this);
 	m_center_text->Bind(wxEVT_TEXT, &RulerListCtrl::OnCenterText, this);
+	m_center_text->Bind(wxEVT_TEXT_ENTER, &RulerListCtrl::OnCenterEnter, this);
+	m_center_text->Bind(wxEVT_KILL_FOCUS, &RulerListCtrl::OnKillFocus, this);
 	m_center_text->Hide();
 	m_color_picker = new wxColourPickerCtrl(this, wxID_ANY);
 	m_color_picker->Bind(wxEVT_COLOURPICKER_CHANGED, &RulerListCtrl::OnColorChange, this);
@@ -328,6 +332,11 @@ void RulerListCtrl::OnNameText(wxCommandEvent& event)
 		md->SetCurrentRuler();
 }
 
+void RulerListCtrl::OnNameEnter(wxCommandEvent& event)
+{
+	EndEdit();
+}
+
 void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 {
 	wxString str = m_center_text->GetValue();
@@ -341,6 +350,11 @@ void RulerListCtrl::OnCenterText(wxCommandEvent& event)
 	MeasureDlg* md = dynamic_cast<MeasureDlg*>(par);
 	if (md)
 		md->SetCurrentRuler();
+}
+
+void RulerListCtrl::OnCenterEnter(wxCommandEvent& event)
+{
+	EndEdit();
 }
 
 void RulerListCtrl::OnColorChange(wxColourPickerEvent& event)
@@ -389,6 +403,12 @@ fluo::Point RulerListCtrl::GetPointFromString(const wxString& str)
 	}
 	result = fluo::Point(x, y, z);
 	return result;
+}
+
+void RulerListCtrl::OnKillFocus(wxFocusEvent& event)
+{
+	EndEdit();
+	event.Skip();
 }
 
 fluo::Color RulerListCtrl::GetColorFromWxColor(const wxColor& c)
@@ -765,6 +785,7 @@ wxWindow* MeasureDlg::CreateListPage(wxWindow* parent)
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_SELECTED, &MeasureDlg::OnSelection, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_DESELECTED, &MeasureDlg::OnEndSelection, this);
 	m_ruler_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MeasureDlg::OnAct, this);
+	//m_ruler_list->Bind(wxEVT_KILL_FOCUS, &MeasureDlg::OnKillFocus, this);
 
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(5, 5);
@@ -1835,6 +1856,13 @@ void MeasureDlg::OnAct(wxListEvent& event)
 {
 	ToggleDisplay();
 }
+
+//void MeasureDlg::OnKillFocus(wxFocusEvent& event)
+//{
+//	m_ruler_list->EndEdit();
+//	SetCurrentRuler();
+//	event.Skip();
+//}
 
 //edit
 //void MeasureDlg::OnNameChange(wxCommandEvent& event)
