@@ -51,6 +51,7 @@ class RulerListCtrl : public wxListCtrl
 {
 public:
 	RulerListCtrl(
+		MeasureDlg* md,
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -95,6 +96,7 @@ public:
 	friend class MeasureDlg;
 
 private:
+	MeasureDlg* m_mdlg;
 	wxImageList *m_images;
 	wxTextCtrl *m_name_text;
 	wxTextCtrl *m_center_text;
@@ -318,11 +320,6 @@ private:
 	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScrollMouse(wxMouseEvent& event);
 	void OnAct(wxListEvent& event);
-	//void OnKillFocus(wxFocusEvent& event);
-	//edit
-	//void OnNameChange(wxCommandEvent& event);
-	//void OnCenterChange(wxCommandEvent& event);
-	//void OnColorChange(wxColourPickerEvent& event);
 };
 
 #endif//_MEASUREDLG_H_
