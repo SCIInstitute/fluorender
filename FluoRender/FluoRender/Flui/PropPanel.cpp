@@ -164,3 +164,23 @@ int TabbedPanel::SetSelection(size_t page)
 		return -1;
 	return m_notebook->SetSelection(page);
 }
+
+bool TabbedPanel::SetPageName(size_t page, const wxString& name)
+{
+	if (!m_notebook || page >= m_notebook->GetPageCount())
+		return false;
+
+	return m_notebook->SetPageText(page, name);
+}
+
+bool TabbedPanel::SetPageName(const wxWindow* page, const wxString& name)
+{
+	if (!m_notebook || !page)
+		return false;
+
+	int idx = m_notebook->FindPage(const_cast<wxWindow*>(page));
+	if (idx == wxNOT_FOUND)
+		return false;
+
+	return m_notebook->SetPageText(idx, name);
+}

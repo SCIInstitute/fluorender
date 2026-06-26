@@ -273,6 +273,7 @@ public:
 		const std::shared_ptr<MeshGroup>& mg = nullptr,
 		const std::shared_ptr<AnnotData>& ann = nullptr,
 		bool show = true);
+	void UpdatePropName();
 	void UpdateProps(const fluo::ValueCollection& vc, int excl_self = 1, wxWindow* panel = 0);
 	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(const std::shared_ptr<VolumeData>& vd);

@@ -456,7 +456,7 @@ void TreePanel::FluoUpdate(const fluo::ValueCollection& vc)
 	bool bval;
 
 	//update icons only
-	if (update_all || FOUND_VALUE(gstTreeCtrl))
+	if (update_all || FOUND_VALUE(gstTreeCtrl) || FOUND_VALUE(gstTreeLayerName))
 		UpdateTree();
 	else
 	{

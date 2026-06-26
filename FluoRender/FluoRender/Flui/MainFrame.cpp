@@ -1152,6 +1152,10 @@ void MainFrame::FluoUpdate(const fluo::ValueCollection& vc)
 		m_tb_menu_ui->Check(ID_PropPanel, bval);
 		m_top_window->Check(ID_PropPanelMenu, bval);
 	}
+	if (FOUND_VALUE(gstTreeLayerName))
+	{
+		UpdatePropName();
+	}
 	if (update_all || FOUND_VALUE(gstOutAdjPanel))
 	{
 		//adjust panel
@@ -1373,6 +1377,44 @@ void MainFrame::ShowPropPage(int type,
 	{
 		page->Hide();
 		m_prop_panel->DeletePage(page_no);
+	}
+}
+
+void MainFrame::UpdatePropName()
+{
+	//update prop panel page names
+	for (auto i : m_prop_pages)
+	{
+		if (!i)
+			continue;
+		std::wstring name;
+		VolumePropPanel* vpp = dynamic_cast<VolumePropPanel*>(i);
+		if (vpp)
+		{
+			auto vd = vpp->GetVolumeData();
+			if (vd)
+				name = vd->GetName();
+			m_prop_panel->SetPageName(vpp, name);
+			continue;
+		}
+		MeshPropPanel* mpp = dynamic_cast<MeshPropPanel*>(i);
+		if (mpp)
+		{
+			auto md = mpp->GetMeshData();
+			if (md)
+				name = md->GetName();
+			m_prop_panel->SetPageName(mpp, name);
+			continue;
+		}
+		AnnotatPropPanel* app = dynamic_cast<AnnotatPropPanel*>(i);
+		if (app)
+		{
+			auto ad = app->GetAnnotData();
+			if (ad)
+				name = ad->GetName();
+			m_prop_panel->SetPageName(app, name);
+			continue;
+		}
 	}
 }
 
