@@ -1091,6 +1091,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 		};
 
 	MakeSquare(m_start_btn);
+	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
 
 	// --- text controls
 	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
@@ -1116,35 +1117,43 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_end_btn = new wxButton(this, wxID_ANY);
 	m_end_btn->SetBitmap(wxGetBitmap(end));
 	MakeSquare(m_end_btn);
+	m_end_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnEndFrameBtn, this);
 
 	m_dec_time_btn = new wxButton(this, wxID_ANY);
 	m_dec_time_btn->SetBitmap(wxGetBitmap(step_back));
 	MakeSquare(m_dec_time_btn);
+	m_dec_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnDecFrame, this);
 
 	m_inc_time_btn = new wxButton(this, wxID_ANY);
 	m_inc_time_btn->SetBitmap(wxGetBitmap(step_forward));
 	MakeSquare(m_inc_time_btn);
+	m_inc_time_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnIncFrame, this);
 
 	// --- playback controls
 	m_rewind_btn = new wxButton(this, wxID_ANY);
 	m_rewind_btn->SetBitmap(wxGetBitmap(rewind));
 	MakeSquare(m_rewind_btn);
+	m_rewind_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnRewind, this);
 
 	m_play_inv_btn = new wxToggleButton(this, wxID_ANY, "");
 	m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
 	MakeSquare(m_play_inv_btn);
+	m_play_inv_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlayInv, this);
 
 	m_play_btn = new wxToggleButton(this, wxID_ANY, "");
 	m_play_btn->SetBitmap(wxGetBitmap(play));
 	MakeSquare(m_play_btn);
+	m_play_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnPlay, this);
 
 	m_forward_btn = new wxButton(this, wxID_ANY);
 	m_forward_btn->SetBitmap(wxGetBitmap(forward));
 	MakeSquare(m_forward_btn);
+	m_forward_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnForward, this);
 
 	m_loop_btn = new wxToggleButton(this, wxID_ANY, "");
 	m_loop_btn->SetBitmap(wxGetBitmap(loop));
 	MakeSquare(m_loop_btn);
+	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
 
 	// --- right-side controls
 	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
@@ -1157,6 +1166,7 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	m_save_btn = new wxButton(this, wxID_ANY);
 	m_save_btn->SetBitmap(wxGetBitmap(save));
 	MakeSquare(m_save_btn);
+	m_save_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSave, this);
 
 	// =====================
 	// Sizer flags (consistent spacing)
