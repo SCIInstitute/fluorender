@@ -1036,7 +1036,7 @@ namespace flvr
 				arg->vbo_,
 				arg->buffer_);
 
-			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0)
+			if (arg->tex_ && glIsTexture(arg->tex_))
 			{
 				err = clEnqueueAcquireGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
 
@@ -1095,21 +1095,54 @@ namespace flvr
 				continue;
 			}
 
-			if (arg->tex_ && glIsTexture(arg->tex_) && arg->size_ == 0)
+			DBGPRINT(
+				L"Before release: tex=%u vbo=%u size=%zu buf=%p valid=%d\n",
+				arg->tex_,
+				arg->vbo_,
+				arg->size_,
+				arg->buffer_,
+				arg->valid_);
+
+			if (arg->tex_)
 			{
-				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+				DBGPRINT(L"Calling glIsTexture(%u)\n", arg->tex_);
 
-				DBGPRINT(L"Arg[%zu]: release texture err=%d\n", arg_index, err);
+				BOOL texok = glIsTexture(arg->tex_);
 
-				if (err != CL_SUCCESS) result = false;
+				DBGPRINT(L"glIsTexture(%u)=%d\n", arg->tex_, texok);
+
+				GLenum glerr = glGetError();
+				DBGPRINT(L"glGetError()=0x%04X\n", glerr);
+
+				if (texok)
+				{
+					DBGPRINT(L"Calling clEnqueueReleaseGLObjects\n");
+
+					err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+
+					DBGPRINT(L"Arg[%zu]: release texture err=%d\n", arg_index, err);
+
+					if (err != CL_SUCCESS) result = false;
+				}
 			}
-			else if (arg->vbo_ && glIsBuffer(arg->vbo_))
+			else if (arg->vbo_)
 			{
-				err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+				DBGPRINT(L"Calling glIsBuffer(%u)\n", arg->vbo_);
 
-				DBGPRINT(L"Arg[%zu]: release VBO err=%d\n", arg_index, err);
+				BOOL vbook = glIsBuffer(arg->vbo_);
 
-				if (err != CL_SUCCESS) result = false;
+				DBGPRINT(L"glIsBuffer(%u)=%d\n", arg->vbo_, vbook);
+				GLenum glerr = glGetError();
+				DBGPRINT(L"glGetError()=0x%04X\n", glerr);
+
+				if (vbook)
+				{
+					err = clEnqueueReleaseGLObjects(queue_, 1, &arg->buffer_, 0, nullptr, nullptr);
+
+					DBGPRINT(L"Arg[%zu]: release VBO err=%d\n", arg_index, err);
+
+					if (err != CL_SUCCESS) result = false;
+				}
 			}
 
 			arg_index++;
@@ -2443,7 +2476,7 @@ namespace flvr
 		bool needs_acquire = false;
 
 		// ---------- Determine interop ----------
-		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_) && shared_arg->size_ == 0)
+		if (shared_arg->tex_ && glIsTexture(shared_arg->tex_))
 		{
 			DBGPRINT(L"Argument is GL texture, acquiring\n");
 			needs_acquire = true;
