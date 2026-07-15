@@ -66,15 +66,18 @@ namespace flvr
 		};
 
 	public:
-		bool protect_;
-		bool valid_;//buffer valid
-		ArgType type_;
-		std::string name_;//id
-		GLuint tex_;
-		GLuint vbo_;
-		void* pointer_;
-		cl_mem buffer_;
-		size_t size_;
+		bool protect_ = false;
+		bool valid_ = false; // buffer valid
+		ArgType type_ = ArgType_Unknown;
+		std::string name_; // id
+
+		GLuint tex_ = 0;
+		GLuint vbo_ = 0;
+
+		void* pointer_ = nullptr;
+		cl_mem buffer_ = nullptr;
+
+		size_t size_ = 0;
 
 		void protect() { protect_ = true; }
 		void unprotect() { protect_ = false; }
@@ -112,15 +115,7 @@ namespace flvr
 		static std::shared_ptr<Argument> createFromTexture3D(cl_context context, cl_mem_flags flags, GLuint tex_id);
 		static std::shared_ptr<Argument> createFromVBO(cl_context context, cl_mem_flags flags, GLuint vbo_id, size_t size);
 
-		Argument() :
-			valid_(false),
-			type_(ArgType_Unknown),
-			protect_(false),
-			size_(0),
-			tex_(0),
-			vbo_(0),
-			buffer_(0),
-			pointer_(0) {}
+		Argument() = default;
 		~Argument()
 		{
 			destroy();
@@ -142,14 +137,14 @@ namespace flvr
 
 	struct CLDevice
 	{
-		cl_device_id id;
+		cl_device_id id = nullptr;
 		std::string vendor;
 		std::string name;
 		std::string version;
 	};
 	struct CLPlatform
 	{
-		cl_platform_id id;
+		cl_platform_id id = nullptr;
 		std::string vendor;
 		std::string name;
 		std::vector<CLDevice> devices;
@@ -244,21 +239,21 @@ namespace flvr
 #endif
 	protected:
 		std::string source_;
-		cl_program program_;
+		cl_program program_ = nullptr;
 
 		//there can be multiple kernels in one program
-		typedef struct
+		struct Kernel
 		{
-			cl_kernel kernel;
+			cl_kernel kernel = nullptr;
 			std::string name;
-			bool external;
-		} Kernel;
+			bool external = false;
+		};
 		std::vector<Kernel> kernels_;
 
 		std::string info_;
 
-		int kernel_idx_;
-		int arg_idx_;
+		int kernel_idx_ = -1;
+		int arg_idx_ = 0;
 
 		//a list of arguments to keep track of cl mem objs
 		std::set<std::shared_ptr<Argument>> arg_list_;
