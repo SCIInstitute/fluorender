@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef TextureBrick_h
-#define TextureBrick_h
+#ifndef Brick_h
+#define Brick_h
 
 #include <RawData.h>
 #include <Ray.h>
@@ -92,10 +92,10 @@ namespace flvr
 		std::wstring cache_filename;
 	};
 
-	class TextureBrick
+	class Brick
 	{
 	public:
-		TextureBrick(std::shared_ptr<fluo::RawData> rd,
+		Brick(std::shared_ptr<fluo::RawData> rd,
 			const fluo::Vector& size, int byte,
 			const fluo::Vector& off_size,
 			const fluo::Vector& msize,
@@ -106,7 +106,7 @@ namespace flvr
 			int findex = 0,
 			long long offset = 0LL,
 			long long fsize = 0LL);
-		virtual ~TextureBrick();
+		virtual ~Brick();
 
 		inline fluo::BBox &bbox() { return bbox_; }
 		inline fluo::BBox &tbox() { return tbox_; }
@@ -181,11 +181,11 @@ namespace flvr
 		void set_d(double d) { d_ = d; }
 		double get_d() { return d_; }
 		//sorting function
-		static bool sort_asc(const std::shared_ptr<TextureBrick>& b1, const std::shared_ptr<TextureBrick>& b2)
+		static bool sort_asc(const std::shared_ptr<Brick>& b1, const std::shared_ptr<Brick>& b2)
 		{ return b1->d_ > b2->d_; }
-		static bool sort_dsc(const std::shared_ptr<TextureBrick>& b1, const std::shared_ptr<TextureBrick>& b2)
+		static bool sort_dsc(const std::shared_ptr<Brick>& b1, const std::shared_ptr<Brick>& b2)
 		{ return b2->d_ > b1->d_; }
-		static bool sort_id(const std::shared_ptr<TextureBrick>& b1, const std::shared_ptr<TextureBrick>& b2)
+		static bool sort_id(const std::shared_ptr<Brick>& b1, const std::shared_ptr<Brick>& b2)
 		{ return b1->id_ < b2->id_; }
 
 		//current index
@@ -283,7 +283,7 @@ namespace flvr
 		static std::map<std::wstring, std::wstring> cache_table_;
 	};
 
-	inline double TextureBrick::get_data(const fluo::Point& ijk)
+	inline double Brick::get_data(const fluo::Point& ijk)
 	{
 		auto rawd = data_[CompType::Data].data;
 		if (!rawd)
@@ -300,7 +300,7 @@ namespace flvr
 		std::vector<std::shared_ptr<FileLocInfo>> filenames;
 		int filetype;
 		std::shared_ptr<fluo::RawData> data;
-		std::vector<std::shared_ptr<TextureBrick>> bricks;
+		std::vector<std::shared_ptr<Brick>> bricks;
 		//information
 		//total size
 		fluo::Vector size;
@@ -322,4 +322,4 @@ namespace flvr
 	};
 } // namespace flvr
 
-#endif // Volume_TextureBrick_h
+#endif // Volume_Brick_h

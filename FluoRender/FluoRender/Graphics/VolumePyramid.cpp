@@ -26,7 +26,7 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <VolumeTexture.h>
+#include <VolumePyramid.h>
 #include <TextureBrick.h>
 #include <ShaderProgram.h>
 #include <TextureRenderer.h>
@@ -42,8 +42,8 @@
 
 namespace flvr
 {
-	size_t VolumeTexture::mask_undo_num_ = 0;
-	VolumeTexture::VolumeTexture() :
+	size_t VolumePyramid::mask_undo_num_ = 0;
+	VolumePyramid::VolumePyramid() :
 		build_max_tex_size_(0),
 		brick_planned_size_(0),
 		sort_bricks_(true),
@@ -70,7 +70,7 @@ namespace flvr
 		bricks_ = default_vec_;
 	}
 
-	VolumeTexture::~VolumeTexture()
+	VolumePyramid::~VolumePyramid()
 	{
 		clear_undos();
 
@@ -95,7 +95,7 @@ namespace flvr
 		clearPyramid();
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumeTexture::get_sorted_bricks(
+	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_sorted_bricks(
 		fluo::Ray& view, bool is_orthographic)
 	{
 		if (sort_bricks_)
@@ -144,7 +144,7 @@ namespace flvr
 		return bricks_;
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumeTexture::get_closest_bricks(
+	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_closest_bricks(
 		fluo::Point& center, int quota, bool skip,
 		fluo::Ray& view, bool is_orthographic)
 	{
@@ -225,7 +225,7 @@ namespace flvr
 		return quota_bricks_;
 	}
 
-	void VolumeTexture::set_matrices(glm::mat4& mv_mat2, glm::mat4& proj_mat)
+	void VolumePyramid::set_matrices(glm::mat4& mv_mat2, glm::mat4& proj_mat)
 	{
 		float mvmat_[16];
 		float prmat_[16];
@@ -235,7 +235,7 @@ namespace flvr
 		pr_.set_trans(prmat_);
 	}
 
-	bool VolumeTexture::test_against_view(const fluo::BBox& bbox, bool persp)
+	bool VolumePyramid::test_against_view(const fluo::BBox& bbox, bool persp)
 	{
 		if (persp)
 		{
@@ -271,24 +271,24 @@ namespace flvr
 		return !(overx || overy || overz || underx || undery || underz);
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumeTexture::get_bricks()
+	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_bricks()
 	{
 		return bricks_;
 	}
 
 	//get bricks sorted by id
-	std::vector<std::shared_ptr<TextureBrick>> VolumeTexture::get_bricks_id()
+	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_bricks_id()
 	{
 		std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_id);
 		return bricks_;
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumeTexture::get_quota_bricks()
+	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_quota_bricks()
 	{
 		return quota_bricks_;
 	}
 
-	void VolumeTexture::set_spacing(const fluo::Vector& spc)
+	void VolumePyramid::set_spacing(const fluo::Vector& spc)
 	{
 		if (!brkxml_)
 		{
@@ -310,7 +310,7 @@ namespace flvr
 		}
 	}
 
-	fluo::Vector VolumeTexture::get_spacing(int lv)
+	fluo::Vector VolumePyramid::get_spacing(int lv)
 	{
 		if (brkxml_)
 		{
@@ -329,7 +329,7 @@ namespace flvr
 		return spacing_;
 	}
 
-	void VolumeTexture::set_base_spacing(const fluo::Vector& spc)
+	void VolumePyramid::set_base_spacing(const fluo::Vector& spc)
 	{
 		base_spacing_ = spacing_ = spc;
 
@@ -349,7 +349,7 @@ namespace flvr
 		set_transform(tform);
 	}
 
-	bool VolumeTexture::build(
+	bool VolumePyramid::build(
 		const std::shared_ptr<fluo::RawData>& raw,
 		double vmn, double vmx,
 		const std::vector<std::shared_ptr<TextureBrick>>& brks)
@@ -421,7 +421,7 @@ namespace flvr
 		return true;
 	}
 
-	void VolumeTexture::build_bricks(
+	void VolumePyramid::build_bricks(
 		std::vector<std::shared_ptr<TextureBrick>>& bricks,
 		const fluo::Vector& size, int bytes)
 	{
@@ -510,7 +510,7 @@ namespace flvr
 						mxyz2 = fluo::Pow2(mxyz);
 					}
 
-					// Compute VolumeTexture Box.
+					// Compute VolumePyramid Box.
 					t0 = fluo::Point((mxyz2 - mxyz + fluo::Vector(0.5)) / mxyz2);
 					if (i == 0) t0.x(0.0);
 					if (j == 0) t0.y(0.0);
@@ -567,7 +567,7 @@ namespace flvr
 	}
 
 	//! Interface that does not expose flvr::BBox.
-	void VolumeTexture::get_bounds(double& xmin, double& ymin, double& zmin,
+	void VolumePyramid::get_bounds(double& xmin, double& ymin, double& zmin,
 		double& xmax, double& ymax, double& zmax) const
 	{
 		fluo::BBox b;
@@ -581,14 +581,14 @@ namespace flvr
 		zmax = b.Max().z();
 	}
 
-	void VolumeTexture::get_bounds(fluo::BBox& b) const
+	void VolumePyramid::get_bounds(fluo::BBox& b) const
 	{
 		b.extend(transform_.project(bbox_.Min()));
 		b.extend(transform_.project(bbox_.Max()));
 	}
 
 	//add one more texture component as the volume mask
-	bool VolumeTexture::add_empty_mask()
+	bool VolumePyramid::add_empty_mask()
 	{
 		auto c = data_.find(CompType::Mask);
 		if (c != data_.end())
@@ -603,7 +603,7 @@ namespace flvr
 	}
 
 	//add one more texture component as the labeling volume
-	bool VolumeTexture::add_empty_label()
+	bool VolumePyramid::add_empty_label()
 	{
 		auto c = data_.find(CompType::Label);
 		if (c != data_.end())
@@ -617,36 +617,36 @@ namespace flvr
 		return true;
 	}
 
-	void VolumeTexture::deact_all_mask()
+	void VolumePyramid::deact_all_mask()
 	{
 		for (auto b : bricks_)
 			b->deact_mask();
 	}
 
-	void VolumeTexture::act_all_mask()
+	void VolumePyramid::act_all_mask()
 	{
 		for (auto b : bricks_)
 			b->act_mask();
 	}
 
-	void VolumeTexture::invalid_all_mask()
+	void VolumePyramid::invalid_all_mask()
 	{
 		for (auto b : bricks_)
 			b->invalid_mask();
 	}
 
-	void VolumeTexture::valid_all_mask()
+	void VolumePyramid::valid_all_mask()
 	{
 		for (auto b : bricks_)
 			b->valid_mask();
 	}
 
-	int VolumeTexture::GetLevelNum()
+	int VolumePyramid::GetLevelNum()
 	{
 		return static_cast<int>(pyramid_.size());
 	}
 
-	std::shared_ptr<TextureBrick> VolumeTexture::get_brick(unsigned int bid)
+	std::shared_ptr<TextureBrick> VolumePyramid::get_brick(unsigned int bid)
 	{
 		for (auto b : bricks_)
 		{
@@ -656,7 +656,7 @@ namespace flvr
 		return nullptr;
 	}
 
-	bool VolumeTexture::buildPyramid(
+	bool VolumePyramid::buildPyramid(
 		const std::vector<Pyramid_Level>& pyramid,
 		const std::vector<std::vector<std::vector<std::vector<
 		std::shared_ptr<FileLocInfo>>>>>& filenames,
@@ -695,7 +695,7 @@ namespace flvr
 		return true;
 	}
 
-	void VolumeTexture::clearPyramid()
+	void VolumePyramid::clearPyramid()
 	{
 		if (!brkxml_)
 			return;
@@ -707,7 +707,7 @@ namespace flvr
 		pyramid_cur_lv_ = -1;
 	}
 
-	void VolumeTexture::setLevel(int lv)
+	void VolumePyramid::setLevel(int lv)
 	{
 		if (lv < 0 || lv >= pyramid_lv_num_ || !brkxml_ || pyramid_cur_lv_ == lv) return;
 		pyramid_cur_lv_ = lv;
@@ -726,20 +726,20 @@ namespace flvr
 		brick_num_ = pyramid_[lv].bnum;
 	}
 
-	void VolumeTexture::set_data_file(
+	void VolumePyramid::set_data_file(
 		const std::vector<std::shared_ptr<FileLocInfo>>& filenames, int type)
 	{
 		filename_ = filenames;
 		filetype_ = type;
 	}
 
-	std::shared_ptr<FileLocInfo> VolumeTexture::GetFileName(int id)
+	std::shared_ptr<FileLocInfo> VolumePyramid::GetFileName(int id)
 	{
 		if (id < 0 || id >= filename_.size()) return nullptr;
 		return filename_[id];
 	}
 
-	void VolumeTexture::set_FrameAndChannel(int fr, int ch)
+	void VolumePyramid::set_FrameAndChannel(int fr, int ch)
 	{
 		if (!brkxml_) return;
 
@@ -758,7 +758,7 @@ namespace flvr
 
 	}
 
-	void VolumeTexture::set_tex_comp(CompType type, TexComp comp)
+	void VolumePyramid::set_tex_comp(CompType type, TexComp comp)
 	{
 		auto raw = comp.data;
 		if (!raw)
@@ -788,7 +788,7 @@ namespace flvr
 		}
 	}
 
-	TexComp VolumeTexture::get_tex_comp(CompType type)
+	TexComp VolumePyramid::get_tex_comp(CompType type)
 	{
 		auto c = data_.find(type);
 		if (c == data_.end())
@@ -797,7 +797,7 @@ namespace flvr
 	}
 
 	//mask undo management
-	bool VolumeTexture::trim_mask_undos_head()
+	bool VolumePyramid::trim_mask_undos_head()
 	{
 		if (mask_undo_num_ == 0)
 			return true;
@@ -815,7 +815,7 @@ namespace flvr
 		return true;
 	}
 
-	bool VolumeTexture::trim_mask_undos_tail()
+	bool VolumePyramid::trim_mask_undos_tail()
 	{
 		if (mask_undo_num_ == 0)
 			return true;
@@ -832,7 +832,7 @@ namespace flvr
 		return true;
 	}
 
-	bool VolumeTexture::get_undo()
+	bool VolumePyramid::get_undo()
 	{
 		if (mask_undo_num_ == 0)
 			return false;
@@ -841,7 +841,7 @@ namespace flvr
 		return true;
 	}
 
-	bool VolumeTexture::get_redo()
+	bool VolumePyramid::get_redo()
 	{
 		if (mask_undo_num_ == 0)
 			return false;
@@ -850,7 +850,7 @@ namespace flvr
 		return true;
 	}
 
-	void VolumeTexture::set_mask(const std::shared_ptr<fluo::RawData>& mask_raw)
+	void VolumePyramid::set_mask(const std::shared_ptr<fluo::RawData>& mask_raw)
 	{
 		if (mask_undo_num_ == 0)
 			return;
@@ -873,7 +873,7 @@ namespace flvr
 		}
 	}
 
-	void VolumeTexture::push_mask()
+	void VolumePyramid::push_mask()
 	{
 		if (mask_undo_num_ == 0)
 			return;
@@ -917,7 +917,7 @@ namespace flvr
 		c->second.data = mask_undos_[mask_undo_pointer_];
 	}
 
-	void VolumeTexture::pop_mask()
+	void VolumePyramid::pop_mask()
 	{
 		if (mask_undo_num_ == 0)
 			return;
@@ -936,7 +936,7 @@ namespace flvr
 		c->second.data = mask_undos_[mask_undo_pointer_];
 	}
 
-	void VolumeTexture::mask_undos_backward()
+	void VolumePyramid::mask_undos_backward()
 	{
 		if (mask_undo_num_ == 0)
 			return;
@@ -955,7 +955,7 @@ namespace flvr
 		c->second.data = mask_undos_[mask_undo_pointer_];
 	}
 
-	void VolumeTexture::mask_undos_forward()
+	void VolumePyramid::mask_undos_forward()
 	{
 		if (mask_undo_num_ == 0)
 			return;
@@ -974,13 +974,13 @@ namespace flvr
 		c->second.data = mask_undos_[mask_undo_pointer_];
 	}
 
-	void VolumeTexture::clear_undos()
+	void VolumePyramid::clear_undos()
 	{
 		mask_undos_.clear();
 		mask_undo_pointer_ = -1;
 	}
 
-	unsigned int VolumeTexture::negxid(unsigned int id)
+	unsigned int VolumePyramid::negxid(unsigned int id)
 	{
 		int bnx, bny, bnz;
 		bnx = brick_num_.intx();
@@ -998,7 +998,7 @@ namespace flvr
 			return r;
 	}
 
-	unsigned int VolumeTexture::negyid(unsigned int id)
+	unsigned int VolumePyramid::negyid(unsigned int id)
 	{
 		int bnx, bny, bnz;
 		bnx = brick_num_.intx();
@@ -1016,7 +1016,7 @@ namespace flvr
 			return r;
 	}
 
-	unsigned int VolumeTexture::negzid(unsigned int id)
+	unsigned int VolumePyramid::negzid(unsigned int id)
 	{
 		int bnx, bny, bnz;
 		bnx = brick_num_.intx();
@@ -1034,7 +1034,7 @@ namespace flvr
 			return r;
 	}
 
-	unsigned int VolumeTexture::posxid(unsigned int id)
+	unsigned int VolumePyramid::posxid(unsigned int id)
 	{
 		int bnx, bny, bnz;
 		bnx = brick_num_.intx();
@@ -1052,7 +1052,7 @@ namespace flvr
 			return r;
 	}
 
-	unsigned int VolumeTexture::posyid(unsigned int id)
+	unsigned int VolumePyramid::posyid(unsigned int id)
 	{
 		int bnx, bny, bnz;
 		bnx = brick_num_.intx();
@@ -1070,7 +1070,7 @@ namespace flvr
 			return r;
 	}
 
-	unsigned int VolumeTexture::poszid(unsigned int id)
+	unsigned int VolumePyramid::poszid(unsigned int id)
 	{
 		int bnx, bny, bnz;
 		bnx = brick_num_.intx();
@@ -1088,7 +1088,7 @@ namespace flvr
 			return r;
 	}
 
-	unsigned int VolumeTexture::get_brick_id(unsigned long long index)
+	unsigned int VolumePyramid::get_brick_id(unsigned long long index)
 	{
 		int nx, ny;
 		nx = res_.intx();

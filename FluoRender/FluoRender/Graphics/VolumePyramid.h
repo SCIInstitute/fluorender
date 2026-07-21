@@ -26,8 +26,8 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#ifndef VolumeTexture_h
-#define VolumeTexture_h
+#ifndef VolumePyramid_h
+#define VolumePyramid_h
 
 #include <RawData.h>
 #include <BBox.h>
@@ -66,12 +66,12 @@ namespace flvr
 		int bytes;
 		std::shared_ptr<fluo::RawData> data;
 	};
-	class VolumeTexture
+	class VolumePyramid
 	{
 	public:
 		static size_t mask_undo_num_;
-		VolumeTexture();
-		virtual ~VolumeTexture();
+		VolumePyramid();
+		virtual ~VolumePyramid();
 
 		int get_build_max_tex_size() { return build_max_tex_size_; }
 		void set_brick_planned_size(int size) { brick_planned_size_ = size; }
@@ -281,4 +281,4 @@ namespace flvr
 
 } // namespace flvr
 
-#endif // VolumeTexture_h
+#endif // VolumePyramid_h

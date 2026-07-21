@@ -28,8 +28,8 @@
 
 #include <glad/gl.h>
 #include <GLPixelFormat.h>
-#include <TextureBrick.h>
-#include <VolumeTexture.h>
+#include <Brick.h>
+#include <VolumePyramid.h>
 #include <TextureRenderer.h>
 #include <Global.h>
 #include <MainSettings.h>
@@ -43,9 +43,9 @@
 
 namespace flvr
 {
-	std::map<std::wstring, std::wstring> TextureBrick::cache_table_ = std::map<std::wstring, std::wstring>();
+	std::map<std::wstring, std::wstring> Brick::cache_table_ = std::map<std::wstring, std::wstring>();
 
-	TextureBrick::TextureBrick(
+	Brick::Brick(
 		std::shared_ptr<fluo::RawData> rd,
 		const fluo::Vector& size, int byte,
 		const fluo::Vector& off_size,
@@ -91,7 +91,7 @@ namespace flvr
 		//prevent_tex_deletion_ = false;
 	}
 
-	TextureBrick::~TextureBrick()
+	Brick::~Brick()
 	{
 	}
 
@@ -126,7 +126,7 @@ namespace flvr
 	z
 	 */
 
-	void TextureBrick::compute_edge_rays(fluo::BBox &bbox)
+	void Brick::compute_edge_rays(fluo::BBox &bbox)
 	{
 		// set up vertices
 		fluo::Point corner[8];
@@ -154,7 +154,7 @@ namespace flvr
 		edge_[11] = fluo::Ray(corner[4], corner[5] - corner[4]);
 	}
 
-	void TextureBrick::compute_edge_rays_tex(fluo::BBox &bbox)
+	void Brick::compute_edge_rays_tex(fluo::BBox &bbox)
 	{
 		// set up vertices
 		fluo::Point corner[8];
@@ -183,7 +183,7 @@ namespace flvr
 	}
 
 	// compute polygon of edge plane intersections
-	void TextureBrick::compute_polygons(fluo::Ray& view, double dt,
+	void Brick::compute_polygons(fluo::Ray& view, double dt,
 		std::vector<float>& vertex, std::vector<uint32_t>& index,
 		std::vector<uint32_t>& size, bool bricks)
 	{
@@ -231,7 +231,7 @@ namespace flvr
 	//
 	// The representation returned is not efficient, but it appears a
 	// typical rendering only contains about 1k triangles.
-	void TextureBrick::compute_polygons(fluo::Ray& view,
+	void Brick::compute_polygons(fluo::Ray& view,
 		double tmin, double tmax, double dt,
 		std::vector<float>& vertex, std::vector<uint32_t>& index,
 		std::vector<uint32_t>& size)
@@ -342,7 +342,7 @@ namespace flvr
 		}
 	}
 
-	size_t TextureBrick::tex_type_size(GLenum t)
+	size_t Brick::tex_type_size(GLenum t)
 	{
 		if (t == GL_BYTE) { return sizeof(GLbyte); }
 		if (t == GL_UNSIGNED_BYTE) { return sizeof(GLubyte); }
@@ -354,7 +354,7 @@ namespace flvr
 		return 0;
 	}
 
-	GLenum TextureBrick::tex_type(CompType type)
+	GLenum Brick::tex_type(CompType type)
 	{
 		auto c = data_.find(type);
 		if (c == data_.end())
@@ -366,7 +366,7 @@ namespace flvr
 		return fluo::gl::ToGLType(rd->GetPixelFormat());
 	}
 
-	std::shared_ptr<fluo::RawData> TextureBrick::get_raw_data(CompType type)
+	std::shared_ptr<fluo::RawData> Brick::get_raw_data(CompType type)
 	{
 		auto it = data_.find(type);
 		if (it == data_.end())
@@ -375,7 +375,7 @@ namespace flvr
 		return it->second.data;
 	}
 
-	std::shared_ptr<fluo::RawData> TextureBrick::get_raw_data_lod(
+	std::shared_ptr<fluo::RawData> Brick::get_raw_data_lod(
 		CompType type, const std::shared_ptr<FileLocInfo>& finfo)
 	{
 		auto c = data_.find(type);
@@ -400,7 +400,7 @@ namespace flvr
 		return ptr;
 	}
 
-	void TextureBrick::set_priority()
+	void Brick::set_priority()
 	{
 		auto it = data_.find(CompType::Data);
 		if (it == data_.end() || !it->second.data)
@@ -413,12 +413,12 @@ namespace flvr
 		priority_ = (maxv == 0.0) ? 1 : 0;
 	}
 
-	void TextureBrick::freeBrkData()
+	void Brick::freeBrkData()
 	{
 		brkdata_.reset();
 	}
 
-	bool TextureBrick::read_brick(
+	bool Brick::read_brick(
 		std::shared_ptr<fluo::RawData>& data,
 		const std::shared_ptr<FileLocInfo>& finfo)
 	{
@@ -440,7 +440,7 @@ namespace flvr
 		return false;
 	}
 
-	bool TextureBrick::raw_brick_reader(
+	bool Brick::raw_brick_reader(
 		std::shared_ptr<fluo::RawData>& data,
 		const std::shared_ptr<FileLocInfo>& finfo)
 	{
@@ -484,7 +484,7 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::read_brick_without_decomp(
+	bool Brick::read_brick_without_decomp(
 		std::shared_ptr<fluo::RawData>& data, size_t& readsize,
 		std::shared_ptr<FileLocInfo> finfo)
 	{
@@ -538,12 +538,12 @@ namespace flvr
 		return true;
 	}
 
-	bool TextureBrick::is_nbmask_valid(const std::shared_ptr<VolumeTexture>& tex)
+	bool Brick::is_nbmask_valid(const std::shared_ptr<VolumePyramid>& tex)
 	{
 		if (mask_valid_) return true;
 		//check neighbors
 		unsigned int nid;
-		std::shared_ptr<TextureBrick> nb;
+		std::shared_ptr<Brick> nb;
 		nid = tex->negxid(id_);
 		//negx
 		if (nid != id_)
