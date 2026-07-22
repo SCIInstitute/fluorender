@@ -1,0 +1,17 @@
+VolumeScheduler
+    decides what
+
+VolumeSelector
+    decides where
+
+BrickLoader
+    gets data
+
+BrickTextureManager
+    manages GPU residency
+
+VolumeSliceGenerator
+    builds geometry
+
+SliceRenderer
+    draws

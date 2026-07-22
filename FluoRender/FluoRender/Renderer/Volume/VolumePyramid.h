@@ -51,15 +51,6 @@ namespace flvr
 	class TextureBrick;
 	struct Pyramid_Level;
 	class FileLocInfo;
-	enum class CompType : int
-	{
-		Invalid,
-		Data,
-		Gradient,
-		GradientMagnitude,
-		Mask,
-		Label
-	};
 	struct TexComp
 	{
 		CompType type;

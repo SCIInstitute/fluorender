@@ -29,12 +29,22 @@
 #ifndef BrickTexture_h
 #define BrickTexture_h
 
+#include <Texture.h>
 #include <memory>
 
 namespace flvr
 {
+	enum class CompType : int
+	{
+		Invalid,
+		Data,
+		Gradient,
+		GradientMagnitude,
+		Mask,
+		Label
+	};
+
 	class Brick;
-	class Texture;
 
 	class BrickTexture : public Texture
 	{

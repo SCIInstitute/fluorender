@@ -1195,6 +1195,20 @@ file(GLOB renderer_src FluoRender/FluoRender/Renderer/*.cpp)
 add_library(RENDERER_LIB STATIC
   ${renderer_hdr} ${renderer_src})
 
+# Renderer_Mesh
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Renderer/Mesh)
+file(GLOB mesh_renderer_hdr FluoRender/FluoRender/Renderer/Mesh/*.h)
+file(GLOB mesh_renderer_src FluoRender/FluoRender/Renderer/Mesh/*.cpp)
+add_library(RENDERER_MESH_LIB STATIC
+  ${mesh_renderer_hdr} ${mesh_renderer_src})
+
+# Renderer_Volume
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Renderer/Volume)
+file(GLOB volume_renderer_hdr FluoRender/FluoRender/Renderer/Volume/*.h)
+file(GLOB volume_renderer_src FluoRender/FluoRender/Renderer/Volume/*.cpp)
+add_library(RENDERER_VOLUME_LIB STATIC
+  ${volume_renderer_hdr} ${volume_renderer_src})
+
 # Scene
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Scene)
 file(GLOB scn_src FluoRender/FluoRender/Scene/*.cpp)
@@ -1784,6 +1798,8 @@ target_link_libraries(FluoRender PRIVATE
     PYTHON_LIB
     RAW_LIB
     RENDERER_LIB
+    RENDERER_MESH_LIB
+    RENDERER_VOLUME_LIB
     SCENE_LIB
     SCRIPT_LIB
     SELECTION_LIB
