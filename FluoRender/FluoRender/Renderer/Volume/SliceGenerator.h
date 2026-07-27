@@ -26,8 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VolumeSliceGenerator_h
-#define VolumeSliceGenerator_h
+#ifndef SliceGenerator_h
+#define SliceGenerator_h
 
 #include <vector>
 
@@ -44,7 +44,7 @@ namespace flvr
 		std::vector<uint32_t> polygon_sizes;
 	};
 
-	class VolumeSliceGenerator
+	class SliceGenerator
 	{
 	public:
 		bool generate(
