@@ -1059,6 +1059,7 @@ namespace flvr
 		// ---------- Execute kernel ----------
 		DBGPRINT(L"Enqueue kernel execution\n");
 
+		cl_event kernel_event = nullptr;
 		err = clEnqueueNDRangeKernel(
 			queue_,
 			kernels_[index].kernel,
@@ -1068,7 +1069,7 @@ namespace flvr
 			local_size,
 			0,
 			nullptr,
-			nullptr
+			&kernel_event
 		);
 
 		DBGPRINT(L"clEnqueueNDRangeKernel err=%d, kernel=%p\n",
@@ -1077,6 +1078,20 @@ namespace flvr
 		if (err != CL_SUCCESS)
 		{
 			DBGPRINT(L"ERROR: Kernel execution failed\n");
+			result = false;
+		}
+
+		//wait for kernel to finish
+		err = clWaitForEvents(1, &kernel_event);
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: clWaitForEvents failed, err=%d\n", err);
+			result = false;
+		}
+		err = clReleaseEvent(kernel_event);
+		if (err != CL_SUCCESS)
+		{
+			DBGPRINT(L"ERROR: clReleaseEvent failed, err=%d\n", err);
 			result = false;
 		}
 
