@@ -8,7 +8,7 @@ Lauch MSYS2 from msvc cmd
 	msys2_shell.cmd -mingw64 -full-path
 Install dependencies on mingw. May need to check if there is anything missing when running config or building.
 	(not needed for using visual studio)//pacman -S mingw-w64-x86_64-toolchain base-devel git yasm pkg-config mingw-w64-x86_64-x264 libiconv
-	pacman -S yasm libiconv nasm make pkgconf
+	pacman -S yasm libiconv nasm make pkgconf diffutils
 Configure path. Change paths for future msvc versions
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64:$PATH"
 	export PATH="/c/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin:$PATH"
@@ -20,7 +20,7 @@ Configure x264
 Use x265's script to generate vc projects
 Copy built results to FFmpeg/depends/
 	In include/ x264.h x264_config.h x265.h x265_config.h
-	In lib/ libx264.lib libx265.lib libx265d.h
+	In lib/ libx264.lib libx265.lib libx265d.lib
 configure file of ffmpeg may need some changes to disable testing
 	line starting with enabled libx264 libx265
 Configure FFMpeg

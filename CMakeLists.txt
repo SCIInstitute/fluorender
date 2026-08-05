@@ -413,13 +413,15 @@ else()
     endif()
 endif()
 
-#opencv
-#depends on eigen
+# OpenCV
+# Depends on Eigen
 file(GLOB EIGEN_DIR_CANDIDATES "${PARENT_DIR}/eigen*")
+
 if(EIGEN_DIR_CANDIDATES)
     list(GET EIGEN_DIR_CANDIDATES 0 EIGEN_ROOT)
     set(EIGEN_INCLUDE_DIR "${EIGEN_ROOT}")
     message(STATUS "Using standalone Eigen at: ${EIGEN_ROOT}")
+
     add_library(Eigen3::Eigen INTERFACE IMPORTED)
     target_include_directories(Eigen3::Eigen INTERFACE "${EIGEN_ROOT}")
 else()
@@ -428,35 +430,68 @@ else()
         message(STATUS "Using system Eigen (Linux fallback)")
         find_package(Eigen3 REQUIRED)
     else()
-        message(FATAL_ERROR "Standalone Eigen not found and no system fallback enabled on this platform")
+        message(FATAL_ERROR
+            "Standalone Eigen not found and no system fallback enabled on this platform")
     endif()
 endif()
 
-# Try legacy standalone OpenCV first
+# -------------------------------
+# OpenCV
+# -------------------------------
+
 file(GLOB OPENCV_DIR_CANDIDATES "${PARENT_DIR}/opencv*")
 
 if(OPENCV_DIR_CANDIDATES)
+
     list(GET OPENCV_DIR_CANDIDATES 0 OPENCV_ROOT)
     set(OpenCV_DIR "${OPENCV_ROOT}/build")
 
     message(STATUS "Using standalone OpenCV at: ${OPENCV_ROOT}")
 
-    find_package(OpenCV REQUIRED COMPONENTS core calib3d)
+    # Find OpenCV first without components
+    find_package(OpenCV REQUIRED)
 
 else()
-    # Linux fallback: system OpenCV
+
     if(UNIX AND NOT APPLE)
         message(STATUS "Using system OpenCV (Linux fallback)")
-        find_package(OpenCV REQUIRED COMPONENTS core calib3d)
+
+        find_package(OpenCV REQUIRED)
+
     else()
-        message(FATAL_ERROR "Standalone OpenCV not found and no system fallback enabled on this platform")
+        message(FATAL_ERROR
+            "Standalone OpenCV not found and no system fallback enabled on this platform")
     endif()
+
+endif()
+
+# OpenCV 4.x vs 5.x
+if(OpenCV_VERSION VERSION_LESS 5.0)
+
+    message(STATUS "Configuring for OpenCV 4.x")
+
+    find_package(OpenCV REQUIRED COMPONENTS
+        core
+        calib3d
+    )
+
+else()
+
+    message(STATUS "Configuring for OpenCV 5.x")
+
+    find_package(OpenCV REQUIRED COMPONENTS
+        core
+        calib
+        geometry
+    )
+
 endif()
 
 if(OpenCV_FOUND)
     message(STATUS "OpenCV version: ${OpenCV_VERSION}")
     message(STATUS "OpenCV include dirs: ${OpenCV_INCLUDE_DIRS}")
 endif()
+
 
 #python
 #set(Python_ADDITIONAL_VERSIONS 3.10 3.9 3.8 3.7)
@@ -476,7 +511,7 @@ if(HDF5_DIR_CANDIDATES)
     set(HDF5_C_INCLUDE_DIR "${HDF5_ROOT}/build/src")
 
     if(WIN32)
-        set(HDF5_hdf5_LIBRARY_DEBUG   "${HDF5_ROOT}/build/bin/Debug/libhdf5_D.lib")
+        set(HDF5_hdf5_LIBRARY_DEBUG   "${HDF5_ROOT}/build/bin/Debug/libhdf5.lib")
         set(HDF5_hdf5_LIBRARY_RELEASE "${HDF5_ROOT}/build/bin/Release/libhdf5.lib")
     else()
         set(HDF5_hdf5_LIBRARY_DEBUG   "${HDF5_ROOT}/build/bin/libhdf5.a")
@@ -1729,7 +1764,9 @@ target_include_directories(FluoRender PRIVATE
 # link the libraries
 if(WIN32)
   target_link_libraries(FluoRender PRIVATE
-    secur32.lib
+    secur32
+    crypt32
+    ncrypt
   )
 elseif(UNIX AND NOT APPLE)
   target_link_libraries(FluoRender PRIVATE
