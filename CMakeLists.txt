@@ -1571,6 +1571,11 @@ target_link_libraries(RENDERER_LIB PRIVATE
   ${FREETYPE_LIBRARIES}
 )
 
+# Renderer Volume
+target_include_directories(RENDERER_VOLUME_LIB PRIVATE
+  ${GLM_INCLUDE_DIR}
+)
+
 # Scene
 target_include_directories(SCENE_LIB PRIVATE
   ${Boost_INCLUDE_DIR}

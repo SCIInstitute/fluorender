@@ -51,12 +51,8 @@ namespace flvr
 	class DataBrick;
 	struct Pyramid_Level;
 	class FileLocInfo;
-	struct TexComp
-	{
-		CompType type;
-		int bytes;
-		std::shared_ptr<fluo::RawData> data;
-	};
+	struct TexComp;
+
 	class VolumePyramid
 	{
 	public:

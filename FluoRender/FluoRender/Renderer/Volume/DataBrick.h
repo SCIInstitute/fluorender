@@ -33,9 +33,11 @@
 #include <RawData.h>
 #include <Ray.h>
 #include <BrickTexture.h>
+#include <BBox.h>
 #include <stdint.h>
 #include <map>
 #include <memory>
+#include <unordered_map>
 
 //these are the render modes used to determine if each mode is drawn
 #define TEXTURE_RENDER_MODES	5
@@ -51,6 +53,14 @@ typedef unsigned int GLenum;
 
 namespace flvr
 {
+	enum class CompType : int;
+	struct TexComp
+	{
+		CompType type;
+		int bytes;
+		std::shared_ptr<fluo::RawData> data;
+	};
+
 	class FileLocInfo
 	{
 	public:
@@ -191,11 +201,11 @@ namespace flvr
 		void set_d(double d) { d_ = d; }
 		double get_d() { return d_; }
 		//sorting function
-		static bool sort_asc(const std::shared_ptr<Brick>& b1, const std::shared_ptr<Brick>& b2)
+		static bool sort_asc(const std::shared_ptr<DataBrick>& b1, const std::shared_ptr<DataBrick>& b2)
 		{ return b1->d_ > b2->d_; }
-		static bool sort_dsc(const std::shared_ptr<Brick>& b1, const std::shared_ptr<Brick>& b2)
+		static bool sort_dsc(const std::shared_ptr<DataBrick>& b1, const std::shared_ptr<DataBrick>& b2)
 		{ return b2->d_ > b1->d_; }
-		static bool sort_id(const std::shared_ptr<Brick>& b1, const std::shared_ptr<Brick>& b2)
+		static bool sort_id(const std::shared_ptr<DataBrick>& b1, const std::shared_ptr<DataBrick>& b2)
 		{ return b1->id_ < b2->id_; }
 
 		//current index
