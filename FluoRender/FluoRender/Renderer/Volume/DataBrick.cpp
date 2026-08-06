@@ -1,0 +1,659 @@
+﻿//
+//  For more information, please see: http://software.sci.utah.edu
+//
+//  The MIT License
+//
+//  Copyright (c) 2026 Scientific Computing and Imaging Institute,
+//  University of Utah.
+//
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a
+//  copy of this software and associated documentation files (the "Software"),
+//  to deal in the Software without restriction, including without limitation
+//  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+//  and/or sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included
+//  in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+//  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//  DEALINGS IN THE SOFTWARE.
+//
+
+//#include <glad/gl.h>
+//#include <GLPixelFormat.h>
+#include <DataBrick.h>
+#include <VolumePyramid.h>
+#include <TextureRenderer.h>
+#include <Global.h>
+#include <MainSettings.h>
+#include <Utils.h>
+#include <compatibility.h>
+#include <math.h>
+#include <utility>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+
+using namespace flvr;
+
+std::map<std::wstring, std::wstring> DataBrick::cache_table_ = std::map<std::wstring, std::wstring>();
+
+DataBrick::DataBrick(const Offset3& offset,
+	const Size3& size,
+	const fluo::RawData& source,
+	const Size3& stride)
+	: Brick(offset, size),
+	m_source(source),
+	m_stride(stride)
+{
+}
+
+DataBrick::DataBrick(
+	std::shared_ptr<fluo::RawData> rd,
+	const fluo::Vector& size, int byte,
+	const fluo::Vector& off_size,
+	const fluo::Vector& msize,
+	const fluo::BBox& bbox,
+	const fluo::BBox& tbox,
+	const fluo::BBox& dbox,
+	unsigned int id,
+	int findex,
+	long long offset,
+	long long fsize)
+	: size_(size),
+	off_size_(off_size),
+	msize_(msize),
+	bbox_(bbox),
+	tbox_(tbox),
+	dbox_(dbox),
+	id_(id),
+	findex_(findex),
+	offset_(offset),
+	fsize_(fsize),
+	mask_valid_(false),
+	mask_act_(false),
+	new_grown_(false)
+{
+	compute_edge_rays(bbox_);
+	compute_edge_rays_tex(tbox_);
+
+	TexComp comp = { CompType::Data, byte, rd };
+	set_tex_comp(CompType::Data, comp);
+
+	//if it's been drawn in a full update loop
+	for (int i = 0; i < TEXTURE_RENDER_MODES; i++)
+		drawn_[i] = false;
+
+	//priority
+	priority_ = 0;
+
+	//brkxml
+	id_in_loadedbrks = -1;
+	loading_ = false;
+	disp_ = true;
+	//prevent_tex_deletion_ = false;
+}
+
+DataBrick::~DataBrick()
+{
+}
+
+std::shared_ptr<RawData>
+DataBrick::Extract() const
+{
+	DataFormat format = m_source.GetFormat();
+
+	auto rd = std::make_shared<RawData>(m_size, format);
+	rd->Allocate();
+
+	const size_t bpe = rd->GetBytesPerElement();
+
+	const size_t src_x = m_offset[0];
+	const size_t src_y = m_offset[1];
+	const size_t src_z = m_offset[2];
+
+	const fluo::Byte* src =
+		static_cast<const fluo::Byte*>(
+			m_source.ElementPtr(src_x, src_y, src_z));
+
+	CopyPacked(
+		rd->GetData(),
+		src,
+		bpe,
+		m_size,
+		m_stride
+	);
+
+	return rd;
+}
+
+/* The cube is numbered in the following way
+
+Corners:
+
+	 2________6        y
+	/|        |        |
+   / |       /|        |
+  /  |      / |        |
+ /   0_____/__4        |
+3---------7   /        |_________ x
+|  /      |  /         /
+| /       | /         /
+|/        |/         /
+1_________5         /
+z
+
+Edges:
+
+	  ,____1___,        y
+	 /|        |        |
+	/ 0       /|        |
+   9  |     10 2        |
+  /   |__3__/__|        |
+ /_____5___/   /        |_________ x
+|  /      | 11         /
+4 8       6 /         /
+|/        |/         /
+|____7____/         /
+z
+ */
+
+void DataBrick::compute_edge_rays(fluo::BBox& bbox)
+{
+	// set up vertices
+	fluo::Point corner[8];
+	corner[0] = bbox.Min();
+	corner[1] = fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z());
+	corner[2] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z());
+	corner[3] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z());
+	corner[4] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z());
+	corner[5] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z());
+	corner[6] = fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z());
+	corner[7] = bbox.Max();
+
+	// set up edges
+	edge_[0] = fluo::Ray(corner[0], corner[2] - corner[0]);
+	edge_[1] = fluo::Ray(corner[2], corner[6] - corner[2]);
+	edge_[2] = fluo::Ray(corner[4], corner[6] - corner[4]);
+	edge_[3] = fluo::Ray(corner[0], corner[4] - corner[0]);
+	edge_[4] = fluo::Ray(corner[1], corner[3] - corner[1]);
+	edge_[5] = fluo::Ray(corner[3], corner[7] - corner[3]);
+	edge_[6] = fluo::Ray(corner[5], corner[7] - corner[5]);
+	edge_[7] = fluo::Ray(corner[1], corner[5] - corner[1]);
+	edge_[8] = fluo::Ray(corner[0], corner[1] - corner[0]);
+	edge_[9] = fluo::Ray(corner[2], corner[3] - corner[2]);
+	edge_[10] = fluo::Ray(corner[6], corner[7] - corner[6]);
+	edge_[11] = fluo::Ray(corner[4], corner[5] - corner[4]);
+}
+
+void DataBrick::compute_edge_rays_tex(fluo::BBox& bbox)
+{
+	// set up vertices
+	fluo::Point corner[8];
+	corner[0] = bbox.Min();
+	corner[1] = fluo::Point(bbox.Min().x(), bbox.Min().y(), bbox.Max().z());
+	corner[2] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Min().z());
+	corner[3] = fluo::Point(bbox.Min().x(), bbox.Max().y(), bbox.Max().z());
+	corner[4] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Min().z());
+	corner[5] = fluo::Point(bbox.Max().x(), bbox.Min().y(), bbox.Max().z());
+	corner[6] = fluo::Point(bbox.Max().x(), bbox.Max().y(), bbox.Min().z());
+	corner[7] = bbox.Max();
+
+	// set up edges
+	tex_edge_[0] = fluo::Ray(corner[0], corner[2] - corner[0]);
+	tex_edge_[1] = fluo::Ray(corner[2], corner[6] - corner[2]);
+	tex_edge_[2] = fluo::Ray(corner[4], corner[6] - corner[4]);
+	tex_edge_[3] = fluo::Ray(corner[0], corner[4] - corner[0]);
+	tex_edge_[4] = fluo::Ray(corner[1], corner[3] - corner[1]);
+	tex_edge_[5] = fluo::Ray(corner[3], corner[7] - corner[3]);
+	tex_edge_[6] = fluo::Ray(corner[5], corner[7] - corner[5]);
+	tex_edge_[7] = fluo::Ray(corner[1], corner[5] - corner[1]);
+	tex_edge_[8] = fluo::Ray(corner[0], corner[1] - corner[0]);
+	tex_edge_[9] = fluo::Ray(corner[2], corner[3] - corner[2]);
+	tex_edge_[10] = fluo::Ray(corner[6], corner[7] - corner[6]);
+	tex_edge_[11] = fluo::Ray(corner[4], corner[5] - corner[4]);
+}
+
+// compute polygon of edge plane intersections
+void DataBrick::compute_polygons(fluo::Ray& view, double dt,
+	std::vector<float>& vertex, std::vector<uint32_t>& index,
+	std::vector<uint32_t>& size, bool bricks)
+{
+	if (dt <= 0.0)
+		return;
+
+	fluo::Point corner[8];
+	corner[0] = bbox_.Min();
+	corner[1] = fluo::Point(bbox_.Min().x(), bbox_.Min().y(), bbox_.Max().z());
+	corner[2] = fluo::Point(bbox_.Min().x(), bbox_.Max().y(), bbox_.Min().z());
+	corner[3] = fluo::Point(bbox_.Min().x(), bbox_.Max().y(), bbox_.Max().z());
+	corner[4] = fluo::Point(bbox_.Max().x(), bbox_.Min().y(), bbox_.Min().z());
+	corner[5] = fluo::Point(bbox_.Max().x(), bbox_.Min().y(), bbox_.Max().z());
+	corner[6] = fluo::Point(bbox_.Max().x(), bbox_.Max().y(), bbox_.Min().z());
+	corner[7] = bbox_.Max();
+
+	double tmin = fluo::Dot(corner[0] - view.origin(), view.direction());
+	double tmax = tmin;
+	uint32_t maxi = 0;
+	double t;
+	for (uint32_t i = 1; i < 8; i++)
+	{
+		t = fluo::Dot(corner[i] - view.origin(), view.direction());
+		tmin = std::min(t, tmin);
+		if (t > tmax) { maxi = i; tmax = t; }
+	}
+
+	// Make all of the slices consistent by offsetting them to a fixed
+	// position in space (the origin).  This way they are consistent
+	// between bricks and don't change with camera zoom.
+	if (bricks)
+	{
+		double tanchor = Dot(corner[maxi], view.direction());
+		double tanchor0 = floor(tanchor / dt) * dt;
+		double tanchordiff = tanchor - tanchor0;
+		tmax -= tanchordiff;
+	}
+
+	compute_polygons(view, tmin, tmax, dt, vertex, index, size);
+}
+
+// compute polygon list of edge plane intersections
+//
+// This is never called externally and could be private.
+//
+// The representation returned is not efficient, but it appears a
+// typical rendering only contains about 1k triangles.
+void DataBrick::compute_polygons(fluo::Ray& view,
+	double tmin, double tmax, double dt,
+	std::vector<float>& vertex, std::vector<uint32_t>& index,
+	std::vector<uint32_t>& size)
+{
+	if (dt <= 0.0)
+		return;
+
+	fluo::Vector vv[12], tt[12]; // temp storage for vertices and texcoords
+
+	uint32_t degree = 0;
+
+	// find up and right vectors
+	fluo::Vector vdir = view.direction();
+	view_vector_ = vdir;
+	fluo::Vector up;
+	fluo::Vector right;
+	switch (fluo::MinIndex(fabs(vdir.x()),
+		fabs(vdir.y()),
+		fabs(vdir.z())))
+	{
+	case 0:
+		up.x(0.0); up.y(-vdir.z()); up.z(vdir.y());
+		break;
+	case 1:
+		up.x(-vdir.z()); up.y(0.0); up.z(vdir.x());
+		break;
+	case 2:
+		up.x(-vdir.y()); up.y(vdir.x()); up.z(0.0);
+		break;
+	}
+	up.normalize();
+	right = Cross(vdir, up);
+	bool order = glbin_settings.m_update_order;
+	size_t vert_count = 0;
+	for (double t = order ? tmin : tmax;
+		order ? (t < tmax) : (t > tmin);
+		t += order ? dt : -dt)
+	{
+		// we compute polys back to front
+		// find intersections
+		degree = 0;
+		for (size_t j = 0; j < 12; j++)
+		{
+			double u;
+
+			fluo::Vector vec = -view.direction();
+			fluo::Point pnt = view.parameter(t);
+			bool intersects = edge_[j].planeIntersectParameter
+			(vec, pnt, u);
+			if (intersects && u >= 0.0 && u <= 1.0)
+			{
+				fluo::Point p;
+				p = edge_[j].parameter(u);
+				vv[degree] = (fluo::Vector)p;
+				p = tex_edge_[j].parameter(u);
+				tt[degree] = (fluo::Vector)p;
+				degree++;
+			}
+		}
+
+		if (degree < 3 || degree >6) continue;
+		bool sorted = degree > 3;
+		uint32_t idx[6];
+		if (sorted) {
+			// compute centroids
+			fluo::Vector vc(0.0, 0.0, 0.0), tc(0.0, 0.0, 0.0);
+			for (size_t j = 0; j < degree; j++)
+			{
+				vc += vv[j]; tc += tt[j];
+			}
+			vc /= (double)degree; tc /= (double)degree;
+
+			// sort vertices
+			double pa[6];
+			for (uint32_t i = 0; i < degree; i++)
+			{
+				double vx = Dot(vv[i] - vc, right);
+				double vy = Dot(vv[i] - vc, up);
+
+				// compute pseudo-angle
+				pa[i] = vy / (fabs(vx) + fabs(vy));
+				if (vx < 0.0) pa[i] = 2.0 - pa[i];
+				else if (vy < 0.0) pa[i] = 4.0 + pa[i];
+				// init idx
+				idx[i] = i;
+			}
+			fluo::Sort(pa, idx, degree);
+		}
+		// save all of the indices
+		for (uint32_t j = 1; j < degree - 1; j++) {
+			index.push_back(static_cast<unsigned int>(vert_count));
+			index.push_back(static_cast<unsigned int>(vert_count + j));
+			index.push_back(static_cast<unsigned int>(vert_count + j + 1));
+		}
+		// save all of the verts
+		for (uint32_t j = 0; j < degree; j++)
+		{
+			vertex.push_back(static_cast<float>((sorted ? vv[idx[j]] : vv[j]).x()));
+			vertex.push_back(static_cast<float>((sorted ? vv[idx[j]] : vv[j]).y()));
+			vertex.push_back(static_cast<float>((sorted ? vv[idx[j]] : vv[j]).z()));
+			vertex.push_back(static_cast<float>((sorted ? tt[idx[j]] : tt[j]).x()));
+			vertex.push_back(static_cast<float>((sorted ? tt[idx[j]] : tt[j]).y()));
+			vertex.push_back(static_cast<float>((sorted ? tt[idx[j]] : tt[j]).z()));
+			vert_count++;
+		}
+
+		size.push_back(degree);
+	}
+}
+
+size_t DataBrick::tex_type_size(GLenum t)
+{
+	if (t == GL_BYTE) { return sizeof(GLbyte); }
+	if (t == GL_UNSIGNED_BYTE) { return sizeof(GLubyte); }
+	if (t == GL_SHORT) { return sizeof(GLshort); }
+	if (t == GL_UNSIGNED_SHORT) { return sizeof(GLushort); }
+	if (t == GL_INT) { return sizeof(GLint); }
+	if (t == GL_UNSIGNED_INT) { return sizeof(GLuint); }
+	if (t == GL_FLOAT) { return sizeof(GLfloat); }
+	return 0;
+}
+
+GLenum DataBrick::tex_type(CompType type)
+{
+	auto c = data_.find(type);
+	if (c == data_.end())
+		return GL_NONE;
+
+	auto rd = c->second.data;
+	if (!rd)
+		return GL_NONE;
+	return fluo::gl::ToGLType(rd->GetPixelFormat());
+}
+
+std::shared_ptr<fluo::RawData> DataBrick::get_raw_data(CompType type)
+{
+	auto it = data_.find(type);
+	if (it == data_.end())
+		return nullptr;
+
+	return it->second.data;
+}
+
+std::shared_ptr<fluo::RawData> DataBrick::get_raw_data_lod(
+	CompType type, const std::shared_ptr<FileLocInfo>& finfo)
+{
+	auto c = data_.find(type);
+	if (c == data_.end())
+		return nullptr;
+	int bytes = c->second.bytes;
+
+	std::shared_ptr<fluo::RawData> ptr = nullptr;
+	if (brkdata_)
+		ptr = brkdata_;
+	else
+	{
+		ptr = std::make_shared<fluo::RawData>(
+			fluo::RawData::Size3{ (size_t)size_.intx(), (size_t)size_.inty(), (size_t)size_.intz() },
+			c->second.data->GetFormat());
+		if (!read_brick(ptr, finfo))
+		{
+			return nullptr;
+		}
+		brkdata_ = ptr;
+	}
+	return ptr;
+}
+
+void DataBrick::set_priority()
+{
+	auto it = data_.find(CompType::Data);
+	if (it == data_.end() || !it->second.data)
+	{
+		priority_ = 0;
+		return;
+	}
+
+	const auto [minv, maxv] = it->second.data->GetMinMax();
+	priority_ = (maxv == 0.0) ? 1 : 0;
+}
+
+void DataBrick::freeBrkData()
+{
+	brkdata_.reset();
+}
+
+bool DataBrick::read_brick(
+	std::shared_ptr<fluo::RawData>& data,
+	const std::shared_ptr<FileLocInfo>& finfo)
+{
+	if (!finfo) return false;
+
+	//if (finfo->isurl)
+	//{
+	//	if (finfo->type == BRICK_FILE_TYPE_RAW)  return raw_brick_reader_url(data, size, finfo);
+	//	if (finfo->type == BRICK_FILE_TYPE_JPEG) return jpeg_brick_reader_url(data, size, finfo);
+	//	if (finfo->type == BRICK_FILE_TYPE_ZLIB) return zlib_brick_reader_url(data, size, finfo);
+	//}
+	//else
+	//{
+	if (finfo->type == BRICK_FILE_TYPE_RAW)  return raw_brick_reader(data, finfo);
+	//	if (finfo->type == BRICK_FILE_TYPE_JPEG) return jpeg_brick_reader(data, size, finfo);
+	//	if (finfo->type == BRICK_FILE_TYPE_ZLIB) return zlib_brick_reader(data, size, finfo);
+	//}
+
+	return false;
+}
+
+bool DataBrick::raw_brick_reader(
+	std::shared_ptr<fluo::RawData>& data,
+	const std::shared_ptr<FileLocInfo>& finfo)
+{
+	try
+	{
+		size_t size = data->GetTotalBytes();
+		std::ifstream ifs;
+		ifs.open(ws2s(finfo->filename), std::ios::binary);
+		if (!ifs) return false;
+		if (finfo->datasize > 0 && size != finfo->datasize) return false;
+		size_t read_size = finfo->datasize > 0 ? finfo->datasize : size;
+		ifs.seekg(finfo->offset, std::ios_base::beg);
+		char* data_ptr = data->DataAs<char>();
+		ifs.read(data_ptr, read_size);
+		if (ifs) ifs.close();
+		/*
+		FILE* fp = fopen(ws2s(finfo->filename).c_str(), "rb");
+		if (!fp) return false;
+		if (finfo->datasize > 0 && size != finfo->datasize) return false;
+		size_t read_size = finfo->datasize > 0 ? finfo->datasize : size;
+		setvbuf(fp, NULL, _IONBF, 0);
+		fseek(fp, finfo->offset, SEEK_SET);
+		fread(data, 0x1, read_size, fp);
+		if (fp) fclose(fp);
+		*//*
+		ofstream ofs1;
+		wstring str = *fname + wstring(L".txt");
+		ofs1.open(str);
+		for(int i=0; i < size/2; i++){
+		ofs1 << ((unsigned short *)data)[i] << "\n";
+		}
+		ofs1.close();
+		*/
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << typeid(e).name() << "\n" << e.what() << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool DataBrick::read_brick_without_decomp(
+	std::shared_ptr<fluo::RawData>& data, size_t& readsize,
+	std::shared_ptr<FileLocInfo> finfo)
+{
+	readsize = -1;
+
+	if (!finfo) return false;
+
+	if (finfo->isurl)
+	{
+		bool found_cache = false;
+		std::wstring cfname = finfo->cache_filename;
+		if (finfo->cached && std::filesystem::exists(cfname))
+			found_cache = true;
+		else
+		{
+			std::wstring fcname;
+
+			auto itr = cache_table_.find(fcname);
+			if (itr != cache_table_.end())
+			{
+				cfname = itr->second;
+				if (std::filesystem::exists(cfname))
+					found_cache = true;
+			}
+
+			if (found_cache)
+			{
+				finfo->cached = true;
+				finfo->cache_filename = fcname;
+			}
+		}
+
+		if (!found_cache)
+		{
+			//network
+		}
+	}
+
+	std::ifstream ifs;
+	std::wstring fn = finfo->cached ? finfo->cache_filename : finfo->filename;
+	ifs.open(ws2s(fn), std::ios::binary);
+	if (!ifs) return false;
+	size_t zsize = finfo->datasize;
+	if (zsize <= 0) zsize = (size_t)ifs.seekg(0, std::ios::end).tellg();
+	char* zdata = data->DataAs<char>();
+	ifs.seekg(finfo->offset, std::ios_base::beg);
+	ifs.read((char*)zdata, zsize);
+	if (ifs) ifs.close();
+	readsize = zsize;
+
+	return true;
+}
+
+bool DataBrick::is_nbmask_valid(const std::shared_ptr<VolumePyramid>& tex)
+{
+	if (mask_valid_) return true;
+	//check neighbors
+	unsigned int nid;
+	std::shared_ptr<Brick> nb;
+	nid = tex->negxid(id_);
+	//negx
+	if (nid != id_)
+	{
+		nb = tex->get_brick(nid);
+		if (nb && nb->mask_valid_)
+			return true;
+	}
+	//negy
+	nid = tex->negyid(id_);
+	if (nid != id_)
+	{
+		nb = tex->get_brick(nid);
+		if (nb && nb->mask_valid_)
+			return true;
+	}
+	//negz
+	nid = tex->negzid(id_);
+	if (nid != id_)
+	{
+		nb = tex->get_brick(nid);
+		if (nb && nb->mask_valid_)
+			return true;
+	}
+	//posx
+	nid = tex->posxid(id_);
+	if (nid != id_)
+	{
+		nb = tex->get_brick(nid);
+		if (nb && nb->mask_valid_)
+			return true;
+	}
+	//posy
+	nid = tex->posyid(id_);
+	if (nid != id_)
+	{
+		nb = tex->get_brick(nid);
+		if (nb && nb->mask_valid_)
+			return true;
+	}
+	//posz
+	nid = tex->poszid(id_);
+	if (nid != id_)
+	{
+		nb = tex->get_brick(nid);
+		if (nb && nb->mask_valid_)
+			return true;
+	}
+	return false;
+}
+
+void DataBrick::CopyPacked(
+	fluo::Byte* dst,
+	const fluo::Byte* src,
+	size_t            bytes_per_voxel,
+	const Size3& size,
+	const Size3& stride)
+{
+	const size_t row_bytes = size[0] * bytes_per_voxel;
+	const size_t padded_row_bytes = stride[0] * bytes_per_voxel;
+
+	for (size_t z = 0; z < size[2]; ++z)
+	{
+		const fluo::Byte* src_z =
+			src + z * stride[0] * stride[1] * bytes_per_voxel;
+
+		for (size_t y = 0; y < size[1]; ++y)
+		{
+			std::memcpy(dst, src_z, row_bytes);
+			dst += row_bytes;
+			src_z += padded_row_bytes;
+		}
+	}
+}
