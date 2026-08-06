@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flvr
 {
-	class VolumeTexture;
+	class BrickTexture;
 }
 namespace fluo
 {
@@ -109,7 +109,7 @@ namespace flrd
 		std::optional<std::reference_wrapper<CelpList>> GetListFromAnalyzer(CelpList &list_in, CelpList &list_out) const;
 		void SelectMask(const std::shared_ptr<fluo::RawData>& raw_mask,
 			unsigned long long idx, unsigned char v,
-			const std::shared_ptr<flvr::VolumeTexture>& tex);
+			const std::shared_ptr<flvr::BrickTexture>& tex);
 	};
 
 	inline bool ComponentSelector::CompareSize(

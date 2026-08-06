@@ -32,7 +32,7 @@
 #include <GlobalStates.h>
 #include <MainSettings.h>
 #include <TextureBrick.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 #include <ShaderProgram.h>
 #include <VertexArray.h>
 #include <GraphicsQuery.h>
@@ -160,7 +160,7 @@ namespace flvr
 	}
 
 	//set the texture for rendering
-	void TextureRenderer::set_texture(const std::shared_ptr<VolumeTexture>& tex)
+	void TextureRenderer::set_texture(const std::shared_ptr<BrickTexture>& tex)
 	{
 		auto old_tex = tex_.lock();
 		if (old_tex != tex)

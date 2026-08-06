@@ -33,7 +33,7 @@
 #include <MainSettings.h>
 #include <VolumeRenderer.h>
 #include <ShaderProgram.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 #include <TextureBrick.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>

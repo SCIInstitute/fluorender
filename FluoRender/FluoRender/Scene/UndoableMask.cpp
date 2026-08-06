@@ -30,7 +30,7 @@
 #include <Global.h>
 #include <BrushDefault.h>
 #include <VolumeData.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 
 bool UndoableMask::trim_mask_undos_head()
 {

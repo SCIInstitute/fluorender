@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	class VolumeTexture;
+	class BrickTexture;
 	class CacheQueue;
 	class CQCallback;
 	class VolCache4D

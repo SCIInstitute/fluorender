@@ -49,7 +49,7 @@ namespace fluo
 namespace flvr
 {
 	class MultiVolumeRenderer;
-	class VolumeTexture;
+	class BrickTexture;
 	class RenderModeGuard;
 	enum class ColormapProj : int;
 	enum class ColorMode : int;

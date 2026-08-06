@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <exmax.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 #include <VolumeRenderer.h>
 #include <Cell.h>
 

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 #include <TextRenderer.h>
 #include <wxSingleSlider.h>
 #include <ModalDlg.h>
@@ -1897,7 +1897,7 @@ void SettingDlg::OnPaintHistDepthEdit(wxCommandEvent& event)
 		return;
 	m_paint_hist_depth_sldr->ChangeValue(ival);
 	glbin_brush_def.m_paint_hist_depth = ival;
-	flvr::VolumeTexture::mask_undo_num_ = (size_t)(ival);
+	flvr::BrickTexture::mask_undo_num_ = (size_t)(ival);
 }
 
 //pencil distance

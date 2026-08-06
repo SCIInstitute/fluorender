@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <VolumeData.h>
 #include <VolumeDefault.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 
 using namespace flrd;
 

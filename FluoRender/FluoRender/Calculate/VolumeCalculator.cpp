@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeDefault.h>
 #include <Global.h>
 #include <Names.h>
-#include <VolumeTexture.h>
+#include <BrickTexture.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
 #include <RefreshScheduler.h>
