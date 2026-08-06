@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Point.h>
 #include <KernelProgram.h>
 #include <KernelFactory.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 
 using namespace flrd;
 

@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <KernelFactory.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 
 using namespace flrd;
@@ -119,7 +119,7 @@ void MaskBorder::Compute(int order)
 	if (bn < 2)
 		return;
 	//get bricks with paint mask flag
-	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+	std::vector<std::shared_ptr<flvr::DataBrick>> bricks;
 	for (auto babs : all_bricks)
 	{
 		if (babs && babs->is_mask_act())
@@ -137,7 +137,7 @@ void MaskBorder::Compute(int order)
 	int kernel_index1 = kernel_prog->createKernel("kernel_1");
 	int kernel_index2 = kernel_prog->createKernel("kernel_2");
 
-	std::shared_ptr<flvr::TextureBrick> nb;//neighbor brick
+	std::shared_ptr<flvr::DataBrick> nb;//neighbor brick
 	unsigned int nid;//neighbor id
 	unsigned int bid;
 	for (auto bbs : bricks)

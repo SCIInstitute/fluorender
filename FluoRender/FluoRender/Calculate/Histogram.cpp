@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <VolumeRenderer.h>
 #include <KernelProgram.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <BrickTexture.h>
 #include <KernelFactory.h>
 #include <EntryHist.h>
@@ -122,7 +122,7 @@ std::shared_ptr<VolumeData> Histogram::CheckBricks()
 }
 
 bool Histogram::GetInfo(
-	const std::shared_ptr<flvr::TextureBrick>& b,
+	const std::shared_ptr<flvr::DataBrick>& b,
 	long &bits, long &nx, long &ny, long &nz)
 {
 	bits = b->nb(flvr::CompType::Data) * 8;

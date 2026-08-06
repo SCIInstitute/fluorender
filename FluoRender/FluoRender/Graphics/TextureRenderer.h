@@ -62,7 +62,7 @@ namespace flvr
 {
 	class CacheQueue;
 	class BrickTexture;
-	class TextureBrick;
+	class DataBrick;
 	enum class RenderMode : int;
 	enum class CompType : int;
 	/// Fixed-length FIFO queue for integer samples with O(1) moving average.
@@ -180,7 +180,7 @@ namespace flvr
 	{
 		int nx, ny, nz, nb;
 		unsigned int id;
-		std::shared_ptr<TextureBrick> brick;
+		std::shared_ptr<DataBrick> brick;
 		CompType comp_type;
 		int time;
 		GLenum textype;
@@ -191,7 +191,7 @@ namespace flvr
 			GLenum f,
 			unsigned int i);
 
-		bool Match(const std::shared_ptr<TextureBrick>& bk,
+		bool Match(const std::shared_ptr<DataBrick>& bk,
 			CompType c, int t, int x, int y, int z, int b, GLenum f);
 	};
 
@@ -303,7 +303,7 @@ namespace flvr
 		struct BrickDist
 		{
 			unsigned int index;    //index of the brick in current tex pool
-			std::shared_ptr<TextureBrick> brick;  //a brick
+			std::shared_ptr<DataBrick> brick;  //a brick
 			double dist;      //distance to another brick
 		};
 		std::weak_ptr<BrickTexture> tex_;
@@ -355,7 +355,7 @@ namespace flvr
 		static bool load_on_main_thread_;
 		struct LoadedBrick {
 			bool swapped;
-			std::shared_ptr<TextureBrick> brk;
+			std::shared_ptr<DataBrick> brk;
 			double size;
 		};
 		static std::vector<LoadedBrick> loadedbrks;
@@ -386,14 +386,14 @@ namespace flvr
 		//brick distance sort
 		static bool brick_sort(const BrickDist& bd1, const BrickDist& bd2);
 		//check and swap memory
-		void check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c) const;
+		void check_swap_memory(const std::shared_ptr<DataBrick>& brick, CompType c) const;
 		//load texture bricks for drawing
 		//unit:assigned unit, c:channel
-		GLint load_brick(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0) const;
+		GLint load_brick(const std::shared_ptr<DataBrick>& brick, GLint filter=GL_LINEAR, bool compression=false, int unit=0, int mode=0, int toffset = 0) const;
 		//load the texture for volume mask into texture pool
-		GLint load_brick_mask(const std::shared_ptr<TextureBrick>& brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0) const;
+		GLint load_brick_mask(const std::shared_ptr<DataBrick>& brick, GLint filter=GL_NEAREST, bool compression=false, int unit=0) const;
 		//load the texture for volume labeling into texture pool
-		GLint load_brick_label(const std::shared_ptr<TextureBrick>& brick) const;
+		GLint load_brick_label(const std::shared_ptr<DataBrick>& brick) const;
 		void load_texture(const std::shared_ptr<fluo::RawData>& tex_data,
 			unsigned int nx, unsigned int ny,
 			unsigned int nz, unsigned int nb,

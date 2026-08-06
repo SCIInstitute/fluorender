@@ -38,13 +38,13 @@ class VolumeData;
 namespace flvr
 {
 	class FileLocInfo;
-	class TextureBrick;
+	class DataBrick;
 }
 
 struct VolumeLoaderData
 {
 	std::shared_ptr<flvr::FileLocInfo> finfo;
-	std::shared_ptr<flvr::TextureBrick> brick;
+	std::shared_ptr<flvr::DataBrick> brick;
 	std::shared_ptr<VolumeData> vd;
 	unsigned long long datasize;
 	int mode;
@@ -70,7 +70,7 @@ public:
 protected:
 	std::vector<VolumeLoaderData> m_queues;
 	std::vector<VolumeLoaderData> m_queued;
-	std::unordered_map<std::shared_ptr<flvr::TextureBrick>, VolumeLoaderData> m_loaded;
+	std::unordered_map<std::shared_ptr<flvr::DataBrick>, VolumeLoaderData> m_loaded;
 	bool m_valid;
 
 	long long m_memory_limit;

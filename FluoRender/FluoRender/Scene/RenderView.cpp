@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <KernelProgram.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <MultiVolumeRenderer.h>
 #include <TextRenderer.h>
 #include <StopWatch.hpp>

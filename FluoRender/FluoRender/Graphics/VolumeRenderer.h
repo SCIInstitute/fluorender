@@ -184,7 +184,7 @@ namespace flvr
 			double scl_translate, double w2d, double bins, int order,
 			bool ortho, bool estimate);
 		//for multibrick, copy border to continue diffusion
-		void copy_mask_border(GLint btex, const std::shared_ptr<TextureBrick>& b, int order);
+		void copy_mask_border(GLint btex, const std::shared_ptr<DataBrick>& b, int order);
 
 		//calculation
 		void calculate(int type, const VolumeRenderer& vr_a, const VolumeRenderer& vr_b);

@@ -33,14 +33,14 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelFactory.h>
 #include <Global.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 #include <glm.h>
 
 using namespace flrd;
 
 bool ColorMesh::GetInfo(
-	const std::shared_ptr<flvr::TextureBrick>& b, long& bits,
+	const std::shared_ptr<flvr::DataBrick>& b, long& bits,
 	long& nx, long& ny, long& nz,
 	long& ox, long& oy, long& oz)
 {

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Reshape.h>
 #include <VolumeData.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <KernelFactory.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 namespace flvr
 {
 	class FileLocInfo;
-	class TextureBrick;
+	class DataBrick;
 	struct Pyramid_Level;
 }
 class BRKXMLReader : public BaseVolReader
@@ -92,7 +92,7 @@ public:
 	void SetLevel(int lv);
 	int GetCopyableLevel() {return m_copy_lv;}
 
-	void build_bricks(std::vector<std::shared_ptr<flvr::TextureBrick>> &tbrks, int lv = -1);
+	void build_bricks(std::vector<std::shared_ptr<flvr::DataBrick>> &tbrks, int lv = -1);
 	void build_pyramid(std::vector<flvr::Pyramid_Level> &pyramid,
 		std::vector<std::vector<std::vector<std::vector<
 		std::shared_ptr<flvr::FileLocInfo>>>>> &filenames, int t, int c);

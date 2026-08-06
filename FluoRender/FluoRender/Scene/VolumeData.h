@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 namespace flvr
 {
 	class VolumeRenderer;
-	class TextureBrick;
+	class DataBrick;
 	class BrickTexture;
 	enum class RenderMode : int;
 	enum class ColormapProj : int;
@@ -134,9 +134,9 @@ public:
 	bool GetMaskClear() const { return m_mask_clear; }
 
 	//save
-	double GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const;
-	double GetTransferedValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const;
-	double GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const;
+	double GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::DataBrick>& b) const;
+	double GetTransferedValue(const fluo::Point& p, const std::shared_ptr<flvr::DataBrick>& b) const;
+	double GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::DataBrick>& b) const;
 	void SetResample(bool resample) { m_resample = resample; }
 	void SetResampledSize(const fluo::Vector& size) { m_resampled_size = size; }
 	bool GetResample() const { return m_resample; }

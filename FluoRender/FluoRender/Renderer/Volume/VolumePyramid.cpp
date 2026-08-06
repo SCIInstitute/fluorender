@@ -27,7 +27,7 @@
 //  
 
 #include <VolumePyramid.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <ShaderProgram.h>
 #include <TextureRenderer.h>
 #include <Global.h>
@@ -95,7 +95,7 @@ namespace flvr
 		clearPyramid();
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_sorted_bricks(
+	std::vector<std::shared_ptr<DataBrick>> VolumePyramid::get_sorted_bricks(
 		fluo::Ray& view, bool is_orthographic)
 	{
 		if (sort_bricks_)
@@ -135,16 +135,16 @@ namespace flvr
 				b->set_d(d);
 			}
 			if (glbin_settings.m_update_order == 0)
-				std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_asc);
+				std::sort(bricks_.begin(), bricks_.end(), DataBrick::sort_asc);
 			else if (glbin_settings.m_update_order == 1)
-				std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_dsc);
+				std::sort(bricks_.begin(), bricks_.end(), DataBrick::sort_dsc);
 
 			sort_bricks_ = false;
 		}
 		return bricks_;
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_closest_bricks(
+	std::vector<std::shared_ptr<DataBrick>> VolumePyramid::get_closest_bricks(
 		fluo::Point& center, int quota, bool skip,
 		fluo::Ray& view, bool is_orthographic)
 	{
@@ -162,7 +162,7 @@ namespace flvr
 					double d = (brick_center - center).length();
 					b->set_d(d);
 				}
-				std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_dsc);
+				std::sort(bricks_.begin(), bricks_.end(), DataBrick::sort_dsc);
 			}
 
 			for (auto b : bricks_)
@@ -215,9 +215,9 @@ namespace flvr
 				qb->set_d(d);
 			}
 			if (glbin_settings.m_update_order == 0)
-				std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_asc);
+				std::sort(quota_bricks_.begin(), quota_bricks_.end(), DataBrick::sort_asc);
 			else if (glbin_settings.m_update_order == 1)
-				std::sort(quota_bricks_.begin(), quota_bricks_.end(), TextureBrick::sort_dsc);
+				std::sort(quota_bricks_.begin(), quota_bricks_.end(), DataBrick::sort_dsc);
 
 			sort_bricks_ = false;
 		}
@@ -271,19 +271,19 @@ namespace flvr
 		return !(overx || overy || overz || underx || undery || underz);
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_bricks()
+	std::vector<std::shared_ptr<DataBrick>> VolumePyramid::get_bricks()
 	{
 		return bricks_;
 	}
 
 	//get bricks sorted by id
-	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_bricks_id()
+	std::vector<std::shared_ptr<DataBrick>> VolumePyramid::get_bricks_id()
 	{
-		std::sort(bricks_.begin(), bricks_.end(), TextureBrick::sort_id);
+		std::sort(bricks_.begin(), bricks_.end(), DataBrick::sort_id);
 		return bricks_;
 	}
 
-	std::vector<std::shared_ptr<TextureBrick>> VolumePyramid::get_quota_bricks()
+	std::vector<std::shared_ptr<DataBrick>> VolumePyramid::get_quota_bricks()
 	{
 		return quota_bricks_;
 	}
@@ -352,7 +352,7 @@ namespace flvr
 	bool VolumePyramid::build(
 		const std::shared_ptr<fluo::RawData>& raw,
 		double vmn, double vmx,
-		const std::vector<std::shared_ptr<TextureBrick>>& brks)
+		const std::vector<std::shared_ptr<DataBrick>>& brks)
 	{
 		if (!raw)
 			return false;
@@ -422,7 +422,7 @@ namespace flvr
 	}
 
 	void VolumePyramid::build_bricks(
-		std::vector<std::shared_ptr<TextureBrick>>& bricks,
+		std::vector<std::shared_ptr<DataBrick>>& bricks,
 		const fluo::Vector& size, int bytes)
 	{
 		bool force_pow2 = false;
@@ -552,7 +552,7 @@ namespace flvr
 					d1 = fluo::Point((off_size + mxyz2) / size);
 
 					fluo::BBox dbox(d0, d1);
-					auto b = std::make_shared<TextureBrick>(nullptr,
+					auto b = std::make_shared<DataBrick>(nullptr,
 						mxyz2, bytes,
 						off_size,
 						mxyz2,
@@ -646,7 +646,7 @@ namespace flvr
 		return static_cast<int>(pyramid_.size());
 	}
 
-	std::shared_ptr<TextureBrick> VolumePyramid::get_brick(unsigned int bid)
+	std::shared_ptr<DataBrick> VolumePyramid::get_brick(unsigned int bid)
 	{
 		for (auto b : bricks_)
 		{

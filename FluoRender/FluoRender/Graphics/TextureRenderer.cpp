@@ -31,7 +31,7 @@
 #include <Global.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <BrickTexture.h>
 #include <ShaderProgram.h>
 #include <VertexArray.h>
@@ -100,7 +100,7 @@ namespace flvr
 	{
 	}
 
-	bool TexParam::Match(const std::shared_ptr<TextureBrick>& bk,
+	bool TexParam::Match(const std::shared_ptr<DataBrick>& bk,
 		CompType c, int t, int x, int y, int z, int b, GLenum f)
 	{
 		return id != 0 &&
@@ -202,7 +202,7 @@ namespace flvr
 			return;
 
 		auto bricks = tex->get_bricks();
-		TextureBrick* brick = 0;
+		DataBrick* brick = 0;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
 			for (auto bb : bricks)
@@ -232,7 +232,7 @@ namespace flvr
 			return;
 
 		auto bricks = tex->get_bricks();
-		std::shared_ptr<TextureBrick> bpool = nullptr;
+		std::shared_ptr<DataBrick> bpool = nullptr;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
 			bpool = tex_pool_[i - 1].brick;
@@ -266,7 +266,7 @@ namespace flvr
 			return;
 
 		auto bricks = tex->get_bricks();
-		std::shared_ptr<TextureBrick> bpool = nullptr;
+		std::shared_ptr<DataBrick> bpool = nullptr;
 		for (size_t i = tex_pool_.size(); i > 0; --i)
 		{
 			bpool = tex_pool_[i - 1].brick;
@@ -697,7 +697,7 @@ namespace flvr
 		return rate;
 	}
 
-	GLint TextureRenderer::load_brick(const std::shared_ptr<TextureBrick>& brick,
+	GLint TextureRenderer::load_brick(const std::shared_ptr<DataBrick>& brick,
 		GLint filter, bool compression, int unit, int mode, int toffset) const
 	{
 		auto tex = tex_.lock();
@@ -1019,7 +1019,7 @@ namespace flvr
 
 	//search for or create the mask texture in the texture pool
 	GLint TextureRenderer::load_brick_mask(
-		const std::shared_ptr<TextureBrick>& brick,
+		const std::shared_ptr<DataBrick>& brick,
 		GLint filter, bool compression, int unit) const
 	{
 		GLint result = -1;
@@ -1123,7 +1123,7 @@ namespace flvr
 	}
 
 	//search for or create the label texture in the texture pool
-	GLint TextureRenderer::load_brick_label(const std::shared_ptr<TextureBrick>& brick) const
+	GLint TextureRenderer::load_brick_label(const std::shared_ptr<DataBrick>& brick) const
 	{
 		GLint result = -1;
 		if (!brick)
@@ -1227,7 +1227,7 @@ namespace flvr
 		return bd1.dist > bd2.dist;
 	}
 
-	void TextureRenderer::check_swap_memory(const std::shared_ptr<TextureBrick>& brick, CompType c) const
+	void TextureRenderer::check_swap_memory(const std::shared_ptr<DataBrick>& brick, CompType c) const
 	{
 		unsigned int i;
 		auto res = brick->get_size();

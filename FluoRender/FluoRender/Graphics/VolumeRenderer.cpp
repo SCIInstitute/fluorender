@@ -38,7 +38,7 @@
 #include <ImgShader.h>
 #include <SegShader.h>
 #include <ShaderProgram.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolCalShader.h>
 #include <MovieMaker.h>
 #include <VolCache4D.h>
@@ -270,7 +270,7 @@ void VolumeRenderer::draw_volume(
 	else
 		zoom_data_clamp = std::clamp(static_cast<float>(zoom_data_clamp), 1.0f, 10.0f);
 
-	std::vector<std::shared_ptr<TextureBrick>> bricks;
+	std::vector<std::shared_ptr<DataBrick>> bricks;
 	tex->set_matrices(m_mv_tex_scl_mat, m_proj_mat);
 	if (glbin_settings.m_mem_swap && interactive_)
 		bricks = tex->get_closest_bricks(
@@ -978,7 +978,7 @@ void VolumeRenderer::draw_mask(int type, int paint_mode, int hr_mode,
 }
 
 //for multibrick, copy border to continue diffusion
-void VolumeRenderer::copy_mask_border(GLint btex, const std::shared_ptr<TextureBrick>& b, int order)
+void VolumeRenderer::copy_mask_border(GLint btex, const std::shared_ptr<DataBrick>& b, int order)
 {
 	auto tex = tex_.lock();
 	if (!tex)
@@ -990,7 +990,7 @@ void VolumeRenderer::copy_mask_border(GLint btex, const std::shared_ptr<TextureB
 	if (!b || !btex || !order)
 		return;
 
-	std::shared_ptr<TextureBrick> nb;//neighbor brick
+	std::shared_ptr<DataBrick> nb;//neighbor brick
 	unsigned int nid;//neighbor id
 	unsigned int bid = b->get_id();
 	GLint nbtex;//tex name of neighbor
@@ -1120,8 +1120,8 @@ void VolumeRenderer::calculate(int type, const VolumeRenderer& vr_a, const Volum
 	auto bricks = tex->get_sorted_bricks(view_ray);
 	if (bricks.empty())
 		return;
-	std::vector<std::shared_ptr<TextureBrick>> bricks_a;
-	std::vector<std::shared_ptr<TextureBrick>> bricks_b;
+	std::vector<std::shared_ptr<DataBrick>> bricks_a;
+	std::vector<std::shared_ptr<DataBrick>> bricks_b;
 
 	std::shared_ptr<BrickTexture> tex_a, tex_b;
 	tex_a = vr_a.tex_.lock();

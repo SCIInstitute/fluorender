@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelFactory.h>
 #include <VolumeData.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 #include <Ray.h>
 #include <compatibility.h>
@@ -159,7 +159,7 @@ bool KernelExecutor::Execute()
 
 	m_message = L"";
 	//execute for each brick
-	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks_r;
+	std::vector<std::shared_ptr<flvr::DataBrick>> bricks_r;
 	auto vd_r = std::make_shared<VolumeData>();
 
 	SetProgress(0, "Running OpenCL kernel.");
@@ -248,7 +248,7 @@ bool KernelExecutor::ExecuteKernel(
 	auto res = vd->GetResolution();
 	float max_int = static_cast<float>(vd->GetMaxValue());
 
-	std::shared_ptr<flvr::TextureBrick> b, b_r;
+	std::shared_ptr<flvr::DataBrick> b, b_r;
 	for (size_t i = 0; i<brick_num; ++i)
 	{
 		SetProgress(static_cast<int>(100.0 * i / brick_num), "Running OpenCL kernel.");

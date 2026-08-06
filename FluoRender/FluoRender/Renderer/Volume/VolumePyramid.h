@@ -48,7 +48,7 @@ namespace fluo
 }
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 	struct Pyramid_Level;
 	class FileLocInfo;
 	struct TexComp
@@ -68,7 +68,7 @@ namespace flvr
 		void set_brick_planned_size(int size) { brick_planned_size_ = size; }
 		bool build(const std::shared_ptr<fluo::RawData>& raw,
 			double vmn, double vmx,
-			const std::vector<std::shared_ptr<TextureBrick>>& brks);
+			const std::vector<std::shared_ptr<DataBrick>>& brks);
 
 		fluo::Vector get_res() { return res_; }
 		fluo::Vector get_brick_res() { return brick_res_; }
@@ -83,7 +83,7 @@ namespace flvr
 		unsigned int poszid(unsigned int id);
 		//get brick id by voxel index
 		unsigned int get_brick_id(unsigned long long index);
-		std::shared_ptr<TextureBrick> get_brick(unsigned int bid);
+		std::shared_ptr<DataBrick> get_brick(unsigned int bid);
 
 		int nc() { return data_.size(); }
 		int nb(CompType type)
@@ -122,10 +122,10 @@ namespace flvr
 		void set_transform(fluo::Transform tform) { transform_ = tform; }
 
 		// get sorted bricks
-		std::vector<std::shared_ptr<TextureBrick>> get_sorted_bricks(
+		std::vector<std::shared_ptr<DataBrick>> get_sorted_bricks(
 			fluo::Ray& view, bool is_orthographic = false);
 		//get closest bricks
-		std::vector<std::shared_ptr<TextureBrick>> get_closest_bricks(
+		std::vector<std::shared_ptr<DataBrick>> get_closest_bricks(
 			fluo::Point& center, int quota, bool skip,
 			fluo::Ray& view, bool is_orthographic = false);
 		//set sort bricks
@@ -133,12 +133,12 @@ namespace flvr
 		void reset_sort_bricks() {sort_bricks_ = false;}
 		bool get_sort_bricks() {return sort_bricks_;}
 		// load the bricks independent of the view
-		std::vector<std::shared_ptr<TextureBrick>> get_bricks();
+		std::vector<std::shared_ptr<DataBrick>> get_bricks();
 		//get bricks sorted by id
-		std::vector<std::shared_ptr<TextureBrick>> get_bricks_id();
+		std::vector<std::shared_ptr<DataBrick>> get_bricks_id();
 		size_t get_brick_list_size() {return bricks_.size();}
 		//quota bricks
-		std::vector<std::shared_ptr<TextureBrick>> get_quota_bricks();
+		std::vector<std::shared_ptr<DataBrick>> get_quota_bricks();
 
 		// Tests the bounding box against the current MODELVIEW and
 		// PROJECTION matrices to determine if it is within the viewport.
@@ -205,7 +205,7 @@ namespace flvr
 		void set_FrameAndChannel(int fr, int ch);
 
 	protected:
-		void build_bricks(std::vector<std::shared_ptr<TextureBrick>> &bricks,
+		void build_bricks(std::vector<std::shared_ptr<DataBrick>> &bricks,
 			const fluo::Vector& size, int bytes);
 
 		//remember the brick size, as it may change
@@ -213,9 +213,9 @@ namespace flvr
 		//expected brick size, 0: ignored
 		int brick_planned_size_;
 		//! data carved up to texture memory sized chunks.
-		std::vector<std::shared_ptr<TextureBrick>>	bricks_;
+		std::vector<std::shared_ptr<DataBrick>>	bricks_;
 		//for limited number of bricks during interactions
-		std::vector<std::shared_ptr<TextureBrick>>	quota_bricks_;
+		std::vector<std::shared_ptr<DataBrick>>	quota_bricks_;
 		//sort texture brick
 		bool sort_bricks_;
 		//! data size
@@ -263,7 +263,7 @@ namespace flvr
 		void clearPyramid();
 
 		//used when brkxml_ is not equal to false.
-		std::vector<std::shared_ptr<TextureBrick>> default_vec_;
+		std::vector<std::shared_ptr<DataBrick>> default_vec_;
 
 		//for view testing
 		fluo::Transform mv_;

@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeDefault.h>
 #include <CurrentObjects.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 #include <Ruler.h>
 #include <RulerList.h>
@@ -2017,7 +2017,7 @@ void ComponentAnalyzer::ReplaceId(unsigned int base_id, Celp &info)
 unsigned int ComponentAnalyzer::GetNonconflictId(
 	unsigned int id,
 	const fluo::Vector& size,
-	const std::shared_ptr<flvr::TextureBrick>& b,
+	const std::shared_ptr<flvr::DataBrick>& b,
 	unsigned int* data) const
 {
 	unsigned int result = 0;

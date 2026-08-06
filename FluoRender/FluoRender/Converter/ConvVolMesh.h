@@ -35,7 +35,7 @@ class VolumeData;
 class MeshData;
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 	class Argument;
 }
 namespace flrd
@@ -68,7 +68,7 @@ namespace flrd
 		std::string GetKernelStrSimplifyMesh();
 		std::string GetKernelStrSmoothMesh();
 
-		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
+		bool GetInfo(const std::shared_ptr<flvr::DataBrick>& b,
 			long &bits, long &nx, long &ny, long &nz,
 			long &ox, long &oy, long &oz);
 

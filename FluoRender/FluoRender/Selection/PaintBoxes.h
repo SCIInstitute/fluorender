@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 }
 namespace flrd
 {
@@ -47,7 +47,7 @@ namespace flrd
 			m_view_only(false), m_mouse_pos(false) {}
 		~PaintBoxes() {}
 
-		void SetBricks(const std::vector<std::shared_ptr<flvr::TextureBrick>>& bricks)
+		void SetBricks(const std::vector<std::shared_ptr<flvr::DataBrick>>& bricks)
 		{
 			m_bricks = bricks;
 		}
@@ -95,7 +95,7 @@ namespace flrd
 		void Compute();
 
 	private:
-		std::vector<std::shared_ptr<flvr::TextureBrick>> m_bricks;
+		std::vector<std::shared_ptr<flvr::DataBrick>> m_bricks;
 		int m_paint_tex;//2d tex of paint strokes
 		int m_ptx, m_pty;//tex size
 		bool m_view_only;//only test for view intersection
@@ -113,7 +113,7 @@ namespace flrd
 		struct BrickBox
 		{
 			fluo::BBox bbox;
-			std::shared_ptr<flvr::TextureBrick> brick;
+			std::shared_ptr<flvr::DataBrick> brick;
 		};
 
 	private:

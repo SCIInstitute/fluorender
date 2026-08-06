@@ -36,7 +36,7 @@ class VolumeData;
 namespace flvr
 {
 	class KernelProgram;
-	class TextureBrick;
+	class DataBrick;
 }
 namespace fluo
 {

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <VolumeRenderer.h>
 #include <VolumeData.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <BrickTexture.h>
 #include <KernelFactory.h>
 #include <algorithm>
@@ -253,7 +253,7 @@ std::shared_ptr<VolumeData> BasicStat::CheckBricks()
 }
 
 bool BasicStat::GetInfo(
-	const std::shared_ptr<flvr::TextureBrick>& b,
+	const std::shared_ptr<flvr::DataBrick>& b,
 	long &bits, long &nx, long &ny, long &nz)
 {
 	bits = b->nb(flvr::CompType::Data) * 8;

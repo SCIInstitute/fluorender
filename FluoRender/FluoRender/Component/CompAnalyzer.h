@@ -41,7 +41,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 }
 namespace flrd
 {
@@ -217,7 +217,7 @@ namespace flrd
 		//get nonconflict color
 		unsigned int GetNonconflictId(unsigned int id,
 			const fluo::Vector& size,
-			const std::shared_ptr<flvr::TextureBrick>& b,
+			const std::shared_ptr<flvr::DataBrick>& b,
 			unsigned int* data) const;
 
 		//comp groups

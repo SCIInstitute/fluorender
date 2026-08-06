@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <brkxml_reader.h>
 #include <TextureRenderer.h>
 #include <ShaderProgram.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <Utils.h>
 #include <Vector.h>
 #include <compatibility.h>
@@ -1013,7 +1013,7 @@ void BRKXMLReader::OutputInfo()
 }
 
 void BRKXMLReader::build_bricks(
-	std::vector<std::shared_ptr<flvr::TextureBrick>>& tbrks, int lv)
+	std::vector<std::shared_ptr<flvr::DataBrick>>& tbrks, int lv)
 {
 	int lev;
 
@@ -1077,7 +1077,7 @@ void BRKXMLReader::build_bricks(
 
 		fluo::BBox dbox = fluo::BBox(fluo::Point(dx0, dy0, dz0), fluo::Point(dx1, dy1, dz1));
 
-		auto b = std::make_shared<flvr::TextureBrick>(nullptr,
+		auto b = std::make_shared<flvr::DataBrick>(nullptr,
 			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size), numb,
 			fluo::Vector((*bite)->x_start, (*bite)->y_start, (*bite)->z_start),
 			fluo::Vector((*bite)->x_size, (*bite)->y_size, (*bite)->z_size),

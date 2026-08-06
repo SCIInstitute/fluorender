@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelFactory.h>
 #include <RulerHandler.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 #include <algorithm>
 #include <fstream>
@@ -996,7 +996,7 @@ void SegGrow::Compute()
 			auto arg_tex =
 				kernel_prog->setTex3D(CL_MEM_READ_ONLY, lid);
 
-			std::shared_ptr<flvr::TextureBrick> nb;
+			std::shared_ptr<flvr::DataBrick> nb;
 			unsigned int nid;
 			//+x
 			nid = tex->posxid(bid);
@@ -1238,7 +1238,7 @@ void SegGrow::MergeIds(std::vector<std::set<unsigned int>> &merge_list)
 
 void SegGrow::CheckBorders(int d0, int d1, int n0, int n1,
 	std::vector<unsigned int> &ids,
-	const std::shared_ptr<flvr::TextureBrick>& nb,
+	const std::shared_ptr<flvr::DataBrick>& nb,
 	flvr::KernelProgram *kernel_prog, int kernel,
 	std::weak_ptr<flvr::Argument> arg_tex,
 	std::vector<std::set<unsigned int>> &brick_pairs,

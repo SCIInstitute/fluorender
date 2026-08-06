@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeRenderer.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <BrickTexture.h>
 #include <KernelFactory.h>
 #include <VolumeData.h>
@@ -562,8 +562,8 @@ std::pair<std::shared_ptr<VolumeData>, std::shared_ptr<VolumeData>> ChannelCompa
 }
 
 bool ChannelCompare::GetInfo(
-	const std::shared_ptr<flvr::TextureBrick>& b1,
-	const std::shared_ptr<flvr::TextureBrick>& b2,
+	const std::shared_ptr<flvr::DataBrick>& b1,
+	const std::shared_ptr<flvr::DataBrick>& b2,
 	long &bits1, long &bits2,
 	long &nx, long &ny, long &nz)
 {

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 }
 namespace flrd
 {
@@ -100,7 +100,7 @@ namespace flrd
 		float m_wsum;
 
 		std::shared_ptr<VolumeData> CheckBricks();
-		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b,
+		bool GetInfo(const std::shared_ptr<flvr::DataBrick>& b,
 			long& bits, long& nx, long& ny, long& nz);
 	};
 }

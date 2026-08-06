@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 	class KernelProgram;
 	class Argument;
 }
@@ -79,7 +79,7 @@ namespace flrd
 		void MergeIds(std::vector<std::set<unsigned int>> &merge_list);
 		void CheckBorders(int d0, int d1, int n0, int n1,
 			std::vector<unsigned int> &ids,
-			const std::shared_ptr<flvr::TextureBrick>& nb,
+			const std::shared_ptr<flvr::DataBrick>& nb,
 			flvr::KernelProgram *kernel_prog, int kernel,
 			std::weak_ptr<flvr::Argument> arg_tex,
 			std::vector<std::set<unsigned int>> &brick_pairs,

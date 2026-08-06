@@ -34,7 +34,7 @@
 #include <VolumeRenderer.h>
 #include <ShaderProgram.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <Framebuffer.h>
 #include <VertexArray.h>
 #include <ImgShader.h>
@@ -250,7 +250,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 		blend_buffer->clear_attachment(AttachmentPoint::Color(1), std::array<float, 2>{ 0.0f, 0.0f }.data());
 
 	int quota_bricks_chan = vr_list_[0]->get_quota_bricks_chan();
-	std::vector<std::shared_ptr<TextureBrick>> bs;
+	std::vector<std::shared_ptr<DataBrick>> bs;
 	fluo::Point pt = TextureRenderer::quota_center_;
 	if (glbin_settings.m_mem_swap &&
 		TextureRenderer::interactive_)
@@ -299,7 +299,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 				{
 					for (unsigned int j = 0; j < vr_list_.size(); j++)
 					{
-						std::vector<std::shared_ptr<TextureBrick>> bs_tmp;
+						std::vector<std::shared_ptr<DataBrick>> bs_tmp;
 						auto tex = vr_list_[j]->tex_.lock();
 						if (tex)
 						{
@@ -430,7 +430,7 @@ void MultiVolumeRenderer::draw_volume(bool adaptive, bool interactive_mode_p, bo
 }
 
 void MultiVolumeRenderer::draw_polygons_vol(
-	const std::shared_ptr<TextureBrick>& b,
+	const std::shared_ptr<DataBrick>& b,
 	double rate,
 	std::vector<float>& vertex,
 	std::vector<uint32_t>& index,
@@ -652,7 +652,7 @@ void MultiVolumeRenderer::draw_polygons_vol(
 			//if (vr_list_[tn]->color_mode_ == ColorMode::Depth && blend_buffer)
 			//	blend_buffer->bind_texture(AttachmentPoint::Color(0), 0);
 
-			std::vector<std::shared_ptr<TextureBrick>> bs2;
+			std::vector<std::shared_ptr<DataBrick>> bs2;
 			if (tex)
 			{
 				if (glbin_settings.m_mem_swap &&
@@ -742,10 +742,10 @@ void MultiVolumeRenderer::draw_polygons_vol(
 	//  TextureRenderer::finished_bricks_ += (int)vr_list_.size();
 }
 
-std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bricks(
+std::vector<std::shared_ptr<DataBrick>> MultiVolumeRenderer::get_combined_bricks(
 	fluo::Point& center, fluo::Ray& view, bool is_orthographic)
 {
-	std::vector<std::shared_ptr<TextureBrick>> cbricks;
+	std::vector<std::shared_ptr<DataBrick>> cbricks;
 	if (!vr_list_.size())
 		return cbricks;
 
@@ -755,9 +755,9 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 	if (!tex0->get_sort_bricks())
 		return tex0->get_quota_bricks();
 
-	std::vector<std::shared_ptr<TextureBrick>> bs;
-	std::vector<std::shared_ptr<TextureBrick>> bs0;
-	std::vector<std::shared_ptr<TextureBrick>> result;
+	std::vector<std::shared_ptr<DataBrick>> bs;
+	std::vector<std::shared_ptr<DataBrick>> bs0;
+	std::vector<std::shared_ptr<DataBrick>> result;
 	fluo::Point brick_center;
 	double d;
 
@@ -774,7 +774,7 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 			d = (brick_center - center).length();
 			bbs->set_d(d);
 		}
-		std::sort(bs.begin(), bs.end(), TextureBrick::sort_dsc);
+		std::sort(bs.begin(), bs.end(), DataBrick::sort_dsc);
 
 		//assign indecis so that bricks can be selected later
 		size_t j = 0;
@@ -788,7 +788,7 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 	result.clear();
 	int quota = 0;
 	int count;
-	TextureBrick* pb;
+	DataBrick* pb;
 	size_t ind;
 	bool found;
 	for (size_t i = 0; i < vr_list_.size(); i++)
@@ -860,9 +860,9 @@ std::vector<std::shared_ptr<TextureBrick>> MultiVolumeRenderer::get_combined_bri
 		bresult->set_d(d);
 	}
 	if (glbin_settings.m_update_order == 0)
-		std::sort(result.begin(), result.end(), TextureBrick::sort_asc);
+		std::sort(result.begin(), result.end(), DataBrick::sort_asc);
 	else if (glbin_settings.m_update_order == 1)
-		std::sort(result.begin(), result.end(), TextureBrick::sort_dsc);
+		std::sort(result.begin(), result.end(), DataBrick::sort_dsc);
 	tex0->reset_sort_bricks();
 
 	//duplicate result into other quota-bricks
@@ -949,7 +949,7 @@ void MultiVolumeRenderer::draw_wireframe(bool adaptive, bool orthographic_p)
 	//shader->setLocalParamMatrix(5, glm::value_ptr(tex_mat_));
 	shader->setLocalParam(0, vr_list_[0]->color_.r(), vr_list_[0]->color_.g(), vr_list_[0]->color_.b(), 1.0);
 
-	std::vector<std::shared_ptr<TextureBrick>> bs;
+	std::vector<std::shared_ptr<DataBrick>> bs;
 	auto tex0 = vr_list_[0]->tex_.lock();
 	if (tex0)
 		bs = tex0->get_sorted_bricks(view_ray, orthographic_p);

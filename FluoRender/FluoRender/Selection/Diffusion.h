@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 }
 namespace fluo
 {
@@ -57,8 +57,8 @@ namespace flrd
 
 	private:
 		std::shared_ptr<VolumeData> CheckBricks();
-		std::shared_ptr<fluo::RawData> GetMask(size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b);
-		void ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b);
+		std::shared_ptr<fluo::RawData> GetMask(size_t brick_num, const std::shared_ptr<flvr::DataBrick>& b);
+		void ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::DataBrick>& b);
 	};
 
 }

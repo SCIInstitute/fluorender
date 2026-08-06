@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <Global.h>
 #include <VolumeRenderer.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <BrickTexture.h>
 #include <KernelFactory.h>
 #include <VolumeData.h>
@@ -109,7 +109,7 @@ bool CountVoxels::CheckBricks()
 }
 
 bool CountVoxels::GetInfo(
-	const std::shared_ptr<flvr::TextureBrick>& b,
+	const std::shared_ptr<flvr::DataBrick>& b,
 	unsigned int &bits, unsigned int &nx, unsigned int &ny, unsigned int &nz)
 {
 	bits = static_cast<unsigned int>(b->nb(flvr::CompType::Data)*8);

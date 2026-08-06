@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VertexArray.h>
 #include <VolumeRenderer.h>
 #include <MeshRenderer.h>
@@ -62,7 +62,7 @@ ConvVolMesh::~ConvVolMesh()
 }
 
 bool ConvVolMesh::GetInfo(
-	const std::shared_ptr<flvr::TextureBrick>& b, long &bits,
+	const std::shared_ptr<flvr::DataBrick>& b, long &bits,
 	long &nx, long &ny, long &nz,
 	long &ox, long &oy, long &oz)
 {

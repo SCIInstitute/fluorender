@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolCache4D.h>
 #include <ShaderProgram.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <Plane.h>
 #include <EntryParams.h>
 #include <Histogram.h>
@@ -420,7 +420,7 @@ int VolumeData::Load(const std::shared_ptr<fluo::RawData>& data, const std::wstr
 	}
 	else
 	{
-		std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+		std::vector<std::shared_ptr<flvr::DataBrick>> bricks;
 		if (!m_tex->build(data, 0, 256, bricks))
 			return 0;
 	}
@@ -468,7 +468,7 @@ int VolumeData::Replace(const std::shared_ptr<fluo::RawData>& data, bool del_tex
 
 		m_tex = std::make_shared<flvr::BrickTexture>();
 		m_tex->set_use_priority(m_skip_brick);
-		std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+		std::vector<std::shared_ptr<flvr::DataBrick>> bricks;
 		m_tex->build(data, m_min_value, m_max_value, bricks);
 	}
 	else
@@ -560,7 +560,7 @@ void VolumeData::AddEmptyData(int bits,
 	m_tex = std::make_shared<flvr::BrickTexture>();
 	m_tex->set_use_priority(false);
 	m_tex->set_brick_planned_size(brick_size);
-	std::vector<std::shared_ptr<flvr::TextureBrick>> bricks;
+	std::vector<std::shared_ptr<flvr::DataBrick>> bricks;
 	m_tex->build(raw_data, 0, 256, bricks);
 	m_tex->set_spacing(spc);
 
@@ -1072,7 +1072,7 @@ std::shared_ptr<fluo::RawData> VolumeData::GetLabel(bool ret) const
 	return nullptr;
 }
 
-double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const
+double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<flvr::DataBrick>& b) const
 {
 	std::shared_ptr<fluo::RawData> raw_data = nullptr;
 
@@ -1097,7 +1097,7 @@ double VolumeData::GetOriginalValue(const fluo::Point& p, const std::shared_ptr<
 	return raw_data->GetVoxelValue(p.intx(), p.inty(), p.intz());
 }
 
-double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::TextureBrick>& b) const
+double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr::DataBrick>& b) const
 {
 	std::shared_ptr<fluo::RawData> raw_mask = nullptr;
 
@@ -1124,7 +1124,7 @@ double VolumeData::GetMaskValue(const fluo::Point& p, const std::shared_ptr<flvr
 
 double VolumeData::GetTransferedValue(
 	const fluo::Point& p,
-	const std::shared_ptr<flvr::TextureBrick>& b) const
+	const std::shared_ptr<flvr::DataBrick>& b) const
 {
 	std::shared_ptr<fluo::RawData> raw_data;
 

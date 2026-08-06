@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <RenderView.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 #include <Point.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -110,7 +110,7 @@ double VolumePoint::GetPointVolume(
 	if (bbox.intersect(mp1, vv, hit))
 	{
 		int brick_id = -1;
-		std::shared_ptr<flvr::TextureBrick> hit_brick = nullptr;
+		std::shared_ptr<flvr::DataBrick> hit_brick = nullptr;
 		unsigned long long vindex;
 		fluo::Vector data_res;
 		if (vd->isBrxml())

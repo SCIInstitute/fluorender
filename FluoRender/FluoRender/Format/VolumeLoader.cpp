@@ -27,7 +27,7 @@
 //  
 
 #include <VolumeLoader.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeData.h>
 
 VolumeLoader::VolumeLoader()
@@ -112,7 +112,7 @@ bool VolumeLoader::Run()
 			if (!ptr) continue;
 			ptr->Allocate();
 			size_t readsize;
-			flvr::TextureBrick::read_brick_without_decomp(ptr, readsize, b.finfo);
+			flvr::DataBrick::read_brick_without_decomp(ptr, readsize, b.finfo);
 
 			if (b.finfo->type == BRICK_FILE_TYPE_RAW)
 			{

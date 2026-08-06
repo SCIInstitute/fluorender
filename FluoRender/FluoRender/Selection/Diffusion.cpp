@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <VolumeData.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <KernelFactory.h>
 #include <VolumeRenderer.h>
 #include <Plane.h>
@@ -204,7 +204,7 @@ std::shared_ptr<VolumeData> Diffusion::CheckBricks()
 
 std::shared_ptr<fluo::RawData> Diffusion::GetMask(
 	size_t brick_num,
-	const std::shared_ptr<flvr::TextureBrick>& b)
+	const std::shared_ptr<flvr::DataBrick>& b)
 {
 	if (!b)
 		return nullptr;
@@ -250,7 +250,7 @@ std::shared_ptr<fluo::RawData> Diffusion::GetMask(
 	return vd->GetMask(true);
 }
 
-void Diffusion::ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::TextureBrick>& b)
+void Diffusion::ReleaseMask(void* val, size_t brick_num, const std::shared_ptr<flvr::DataBrick>& b)
 {
 	if (!val || brick_num <= 1)
 		return;

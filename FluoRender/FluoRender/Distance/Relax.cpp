@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Ruler.h>
 #include <VolumeData.h>
 #include <BrickTexture.h>
-#include <TextureBrick.h>
+#include <DataBrick.h>
 #include <VolumeRenderer.h>
 #include <KernelFactory.h>
 

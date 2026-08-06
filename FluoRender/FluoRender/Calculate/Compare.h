@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 class VolumeData;
 namespace flvr
 {
-	class TextureBrick;
+	class DataBrick;
 	class Argument;
 }
 namespace flrd
@@ -77,8 +77,8 @@ namespace flrd
 		double m_result;
 
 		std::pair<std::shared_ptr<VolumeData>, std::shared_ptr<VolumeData>> CheckBricks();
-		bool GetInfo(const std::shared_ptr<flvr::TextureBrick>& b1,
-			const std::shared_ptr<flvr::TextureBrick>& b2,
+		bool GetInfo(const std::shared_ptr<flvr::DataBrick>& b1,
+			const std::shared_ptr<flvr::DataBrick>& b2,
 			long &bits, long &bits2,
 			long &nx, long &ny, long &nz);
 	};
