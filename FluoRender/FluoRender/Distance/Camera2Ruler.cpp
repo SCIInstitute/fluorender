@@ -26,7 +26,15 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+
+#if CV_VERSION_MAJOR >= 5
+#include <opencv2/geometry.hpp>
+#include <opencv2/calib.hpp>
+#else
+#include <opencv2/calib3d.hpp>
+#endif
+
 #include <Camera2Ruler.h>
 #include <Global.h>
 #include <CurrentObjects.h>

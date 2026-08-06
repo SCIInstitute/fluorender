@@ -1,2 +1,26 @@
 BUILD_SHARED_LIBS=OFF
 BUILD_WITH_STATIC_CRT=OFF
+
+Click Add Entry.
+
+Add:
+
+Name: CPU_DISPATCH
+Type: STRING
+Value:
+SSE4_1;SSE4_2;AVX;AVX2
+
+(leave out any AVX512 options)
+
+Add:
+
+Name: CPU_BASELINE
+Type: STRING
+Value:
+SSE3
+
+BLAS_LIBRARIES
+D:/FLUORENDER/OpenBLAS/build/lib/RELEASE/openblas.lib
+
+LAPACK_LIBRARIES
+D:/FLUORENDER/OpenBLAS/build/lib/RELEASE/openblas.lib
