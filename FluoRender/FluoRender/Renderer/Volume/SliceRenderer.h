@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace flvr
 {
-
+	enum class RenderMode : int;
 	class VolumePyramid;
 	class Brick;
 	class BrickTextureManager;
