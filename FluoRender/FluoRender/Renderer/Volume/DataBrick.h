@@ -34,6 +34,7 @@
 #include <Ray.h>
 #include <BrickTexture.h>
 #include <BBox.h>
+#include <PixelFormat.h>
 #include <stdint.h>
 #include <map>
 #include <memory>
@@ -103,6 +104,8 @@ namespace flvr
 		bool cached;
 		std::wstring cache_filename;
 	};
+
+	class VolumePyramid;
 
 	class DataBrick : public Brick
 	{
@@ -185,7 +188,7 @@ namespace flvr
 		void set_priority();
 		inline int get_priority() {return priority_;}
 
-		GLenum tex_type(CompType type);
+		fluo::PixelFormat tex_type(CompType type);
 		std::shared_ptr<fluo::RawData> get_raw_data(CompType type);
 		std::shared_ptr<fluo::RawData> get_raw_data_lod(CompType type, const std::shared_ptr<FileLocInfo>& finfo);
 		//void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick
@@ -238,7 +241,7 @@ namespace flvr
 		void valid_mask(bool val=true) { mask_valid_ = val; }
 		void invalid_mask() { mask_valid_ = false; }
 		bool is_mask_valid() { return mask_valid_; }
-		bool is_nbmask_valid(const std::shared_ptr<BrickTexture>& tex);//check 6 neighbors
+		bool is_nbmask_valid(const std::shared_ptr<VolumePyramid>& tex);//check 6 neighbors
 		//activate/deactivate mask painting
 		void act_mask(bool val = true) { mask_act_ = val; }
 		void deact_mask() { mask_act_ = false; }
@@ -250,7 +253,7 @@ namespace flvr
 	private:
 		void compute_edge_rays(fluo::BBox &bbox);
 		void compute_edge_rays_tex(fluo::BBox &bbox);
-		size_t tex_type_size(GLenum t);
+		//size_t tex_type_size(GLenum t);
 
 		bool raw_brick_reader(std::shared_ptr<fluo::RawData>& data, const std::shared_ptr<FileLocInfo>& finfo);
 
@@ -331,7 +334,7 @@ namespace flvr
 		std::vector<std::shared_ptr<FileLocInfo>> filenames;
 		int filetype;
 		std::shared_ptr<fluo::RawData> data;
-		std::vector<std::shared_ptr<Brick>> bricks;
+		std::vector<std::shared_ptr<DataBrick>> bricks;
 		//information
 		//total size
 		fluo::Vector size;

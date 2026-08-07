@@ -27,12 +27,13 @@
 //  
 
 #include <BrickTextureManager.h>
+#include <DataBrick.h>
 
 using namespace flvr;
 
 std::shared_ptr<BrickTexture>
 BrickTextureManager::acquire(
-	const std::shared_ptr<Brick>& brick,
+	const std::shared_ptr<DataBrick>& brick,
 	CompType comp)
 {
 	BrickTextureKey key{

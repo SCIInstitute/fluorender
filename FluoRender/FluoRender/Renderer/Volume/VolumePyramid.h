@@ -38,10 +38,6 @@
 #include <vector>
 #include <unordered_map>
 
-#ifndef TextureBrick_h
-#define TEXTURE_MAX_COMPONENTS	4
-#endif
-
 namespace fluo
 {
 	class Ray;
@@ -52,6 +48,7 @@ namespace flvr
 	struct Pyramid_Level;
 	class FileLocInfo;
 	struct TexComp;
+	enum class CompType : int;
 
 	class VolumePyramid
 	{
@@ -82,24 +79,9 @@ namespace flvr
 		std::shared_ptr<DataBrick> get_brick(unsigned int bid);
 
 		int nc() { return data_.size(); }
-		int nb(CompType type)
-		{
-			auto c = data_.find(type);
-			if (c != data_.end())
-				return c->second.bytes;
-			return 0;
-		}
-		void nb(CompType type, int bytes)
-		{
-			auto c = data_.find(type);
-			if (c != data_.end())
-				c->second.bytes = bytes;
-		}
-		bool has_comp(CompType type)
-		{
-			auto c = data_.find(type);
-			return c != data_.end();
-		}
+		int nb(CompType type);
+		void nb(CompType type, int bytes);
+		bool has_comp(CompType type);
 
 		void set_res(const fluo::Vector& res) 
 		{

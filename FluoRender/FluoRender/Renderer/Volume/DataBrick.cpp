@@ -67,7 +67,8 @@ DataBrick::DataBrick(
 	int findex,
 	long long offset,
 	long long fsize)
-	: size_(size),
+	: m_source(*rd),
+	size_(size),
 	off_size_(off_size),
 	msize_(msize),
 	bbox_(bbox),
@@ -105,12 +106,12 @@ DataBrick::~DataBrick()
 {
 }
 
-std::shared_ptr<RawData>
+std::shared_ptr<fluo::RawData>
 DataBrick::Extract() const
 {
-	DataFormat format = m_source.GetFormat();
+	fluo::DataFormat format = m_source.GetFormat();
 
-	auto rd = std::make_shared<RawData>(m_size, format);
+	auto rd = std::make_shared<fluo::RawData>(m_size, format);
 	rd->Allocate();
 
 	const size_t bpe = rd->GetBytesPerElement();
@@ -381,28 +382,28 @@ void DataBrick::compute_polygons(fluo::Ray& view,
 	}
 }
 
-size_t DataBrick::tex_type_size(GLenum t)
-{
-	if (t == GL_BYTE) { return sizeof(GLbyte); }
-	if (t == GL_UNSIGNED_BYTE) { return sizeof(GLubyte); }
-	if (t == GL_SHORT) { return sizeof(GLshort); }
-	if (t == GL_UNSIGNED_SHORT) { return sizeof(GLushort); }
-	if (t == GL_INT) { return sizeof(GLint); }
-	if (t == GL_UNSIGNED_INT) { return sizeof(GLuint); }
-	if (t == GL_FLOAT) { return sizeof(GLfloat); }
-	return 0;
-}
+//size_t DataBrick::tex_type_size(GLenum t)
+//{
+//	if (t == GL_BYTE) { return sizeof(GLbyte); }
+//	if (t == GL_UNSIGNED_BYTE) { return sizeof(GLubyte); }
+//	if (t == GL_SHORT) { return sizeof(GLshort); }
+//	if (t == GL_UNSIGNED_SHORT) { return sizeof(GLushort); }
+//	if (t == GL_INT) { return sizeof(GLint); }
+//	if (t == GL_UNSIGNED_INT) { return sizeof(GLuint); }
+//	if (t == GL_FLOAT) { return sizeof(GLfloat); }
+//	return 0;
+//}
 
-GLenum DataBrick::tex_type(CompType type)
+fluo::PixelFormat DataBrick::tex_type(CompType type)
 {
 	auto c = data_.find(type);
 	if (c == data_.end())
-		return GL_NONE;
+		return fluo::PixelFormat::Undefined;
 
 	auto rd = c->second.data;
 	if (!rd)
-		return GL_NONE;
-	return fluo::gl::ToGLType(rd->GetPixelFormat());
+		return fluo::PixelFormat::Undefined;
+	return rd->GetPixelFormat();
 }
 
 std::shared_ptr<fluo::RawData> DataBrick::get_raw_data(CompType type)
@@ -582,7 +583,7 @@ bool DataBrick::is_nbmask_valid(const std::shared_ptr<VolumePyramid>& tex)
 	if (mask_valid_) return true;
 	//check neighbors
 	unsigned int nid;
-	std::shared_ptr<Brick> nb;
+	std::shared_ptr<DataBrick> nb;
 	nid = tex->negxid(id_);
 	//negx
 	if (nid != id_)

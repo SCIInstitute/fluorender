@@ -34,8 +34,9 @@
 
 namespace flvr
 {
-	class Brick;
+	class DataBrick;
 	class BrickTexture;
+	enum class CompType : int;
 
 	struct BrickTextureKey
 	{
@@ -72,7 +73,7 @@ namespace flvr
 
 		std::shared_ptr<BrickTexture>
 			acquire(
-				const std::shared_ptr<Brick>& brick,
+				const std::shared_ptr<DataBrick>& brick,
 				CompType comp);
 
 		void release(
