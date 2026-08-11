@@ -28,6 +28,7 @@
 
 #include <BrickTextureManager.h>
 #include <DataBrick.h>
+#include <BrickTexture.h>
 
 using namespace flvr;
 
@@ -37,7 +38,7 @@ BrickTextureManager::acquire(
 	CompType comp)
 {
 	BrickTextureKey key{
-		brick->id(),
+		brick->get_id(),
 		comp
 	};
 
@@ -55,4 +56,22 @@ BrickTextureManager::acquire(
 	textures_[key] = texture;
 
 	return texture;
+}
+
+TextureDesc BrickTextureManager::build_desc(
+	const std::shared_ptr<DataBrick>& brick,
+	CompType comp)
+{
+	TextureDesc desc;
+	desc.spec.type = TextureType::Tex3D;
+	desc.size.width = static_cast<int>(brick->GetWidth());
+	desc.size.height = static_cast<int>(brick->GetHeight());
+	desc.size.depth = static_cast<int>(brick->GetDepth());
+	desc.spec.format = brick->tex_type(comp);
+	desc.spec.min_filter = TexFilter::LinearMipmapLinear;
+	desc.spec.mag_filter = TexFilter::Linear;
+	desc.spec.wrap_s = TexWrap::ClampToEdge;
+	desc.spec.wrap_t = TexWrap::ClampToEdge;
+	desc.spec.wrap_r = TexWrap::ClampToEdge;
+	return desc;
 }

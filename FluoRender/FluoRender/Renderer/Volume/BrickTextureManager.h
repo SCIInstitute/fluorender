@@ -36,6 +36,7 @@ namespace flvr
 {
 	class DataBrick;
 	class BrickTexture;
+	struct TextureDesc;
 	enum class CompType : int;
 
 	struct BrickTextureKey
@@ -89,6 +90,10 @@ namespace flvr
 
 	private:
 		BrickTextureManager() = default;
+
+		TextureDesc build_desc(
+			const std::shared_ptr<DataBrick>& brick,
+			CompType comp);
 
 	private:
 		std::unordered_map<
