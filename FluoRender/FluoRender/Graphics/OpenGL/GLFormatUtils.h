@@ -26,28 +26,26 @@
 //  DEALINGS IN THE SOFTWARE.
 //  
 
-#include <glad/gl.h>
-#include <GLPixelFormat.h>
+#ifndef GLPixelFormat_h
+#define GLPixelFormat_h
+
+#include <gl_types.h>
+
+namespace flvr
+{
+	struct TextureFormat;
+}
 
 namespace fluo::gl
 {
-	GLenum ToGLType(PixelFormat fmt) noexcept
-	{
-		switch (fmt)
-		{
-		case PixelFormat::R8_UNorm:   return GL_UNSIGNED_BYTE;
-		case PixelFormat::R16_UNorm:  return GL_UNSIGNED_SHORT;
-		case PixelFormat::R32_UNorm:  return GL_UNSIGNED_INT;
+	GLenum GetInternalFormat(
+		const flvr::TextureFormat& format);
 
-		case PixelFormat::R8_SNorm:   return GL_BYTE;
-		case PixelFormat::R16_SNorm:  return GL_SHORT;
-		case PixelFormat::R32_SNorm:  return GL_INT;
+	GLenum GetExternalFormat(
+		const flvr::TextureFormat& format);
 
-		case PixelFormat::R32_Float:  return GL_FLOAT;
-		case PixelFormat::R64_Float:  return GL_DOUBLE;
-
-		default:
-			return GL_NONE;
-		}
-	}
+	GLenum GetDataType(
+		const flvr::TextureFormat& format);
 }
+
+#endif//GLPixelFormat_h

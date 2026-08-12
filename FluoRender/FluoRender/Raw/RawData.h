@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RAW_DATA_H_
 #define _RAW_DATA_H_
 
-#include <PixelFormat.h>
 #include <Utils.h>
 #include <array>
 #include <cstddef>

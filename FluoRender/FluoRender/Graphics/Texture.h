@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef Texture_h
 #define Texture_h
 
+#include <RawData.h>
 #include <cstdint>
 
 namespace flvr
@@ -39,16 +40,32 @@ namespace flvr
 		Tex3D
 	};
 
-	enum class TextureFormat
+	enum class ChannelLayout
 	{
-		R8,
-		R8_UNORM,
-		RGBA8,
-		RGBA32F,
-		R32F,
-		RG32F,
-		R32UI,
-		Depth32F
+		R,
+		RG,
+		RGB,
+		RGBA,
+		Depth
+	};
+
+	enum class ValueInterpretation
+	{
+		UNorm,
+		SNorm,
+		UInt,
+		SInt,
+		Float
+	};
+
+	struct TextureFormat
+	{
+		ChannelLayout layout = ChannelLayout::R;
+		fluo::DataFormat component_type = fluo::DataFormat::Unknown;
+		ValueInterpretation interpretation =
+			ValueInterpretation::UNorm;
+
+		bool operator==(const TextureFormat&) const = default;
 	};
 
 	enum class TexFilter : int {

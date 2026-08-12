@@ -27,7 +27,7 @@
 //
 
 //#include <glad/gl.h>
-//#include <GLPixelFormat.h>
+//#include <GLFormatUtils.h>
 #include <DataBrick.h>
 #include <VolumePyramid.h>
 #include <TextureRenderer.h>

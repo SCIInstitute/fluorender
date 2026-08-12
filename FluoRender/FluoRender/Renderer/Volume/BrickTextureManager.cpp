@@ -68,10 +68,10 @@ TextureDesc BrickTextureManager::build_desc(
 	desc.size.height = static_cast<int>(brick->GetHeight());
 	desc.size.depth = static_cast<int>(brick->GetDepth());
 	desc.spec.format = brick->tex_type(comp);
-	desc.spec.min_filter = TexFilter::LinearMipmapLinear;
-	desc.spec.mag_filter = TexFilter::Linear;
-	desc.spec.wrap_s = TexWrap::ClampToEdge;
-	desc.spec.wrap_t = TexWrap::ClampToEdge;
-	desc.spec.wrap_r = TexWrap::ClampToEdge;
+	desc.spec.minFilter = TexFilter::LinearMipmapLinear;
+	desc.spec.magFilter = TexFilter::Linear;
+	desc.spec.wrapS = TexWrap::ClampToEdge;
+	desc.spec.wrapT = TexWrap::ClampToEdge;
+	desc.spec.wrapR = TexWrap::ClampToEdge;
 	return desc;
 }
