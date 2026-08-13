@@ -31,6 +31,7 @@
 #include <Global.h>
 #include <CurrentObjects.h>
 #include <FramebufferStateTracker.h>
+#include <TextureFormats.h>
 #include <algorithm>
 #include <compatibility.h>
 #include <Debug.h>
@@ -668,7 +669,7 @@ unsigned int Framebuffer::read_pick(int px, int py)
 	for (const auto& rec : attachments_) {
 		if (rec.texture &&
 			rec.texture->valid() &&
-			rec.texture->spec().format == TextureFormat::R32UI)
+			rec.texture->spec().format == R32UI)
 		{
 			// Bind this framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, id_);
@@ -813,12 +814,12 @@ static const AttachmentLayout& layout_for(FBRole role)
 
 	static const TextureSpec RGBA{
 		TextureType::Tex2D,
-		TextureFormat::RGBA32F
+		RGBA32F
 	};
 
 	static const TextureSpec RGBAFilter{
 		TextureType::Tex2D,
-		TextureFormat::RGBA32F,
+		RGBA32F,
 		false,
 		TexFilter::Linear,
 		TexFilter::Linear
@@ -826,27 +827,27 @@ static const AttachmentLayout& layout_for(FBRole role)
 
 	static const TextureSpec Float{
 		TextureType::Tex2D,
-		TextureFormat::R32F
+		R32F
 	};
 
 	static const TextureSpec FloatRG{
 		TextureType::Tex2D,
-		TextureFormat::RG32F
+		RG32F
 	};
 
 	static const TextureSpec DepthFloat{
 		TextureType::Tex2D,
-		TextureFormat::Depth32F
+		Depth32F
 	};
 
 	static const TextureSpec UChar{
 		TextureType::Tex2D,
-		TextureFormat::RGBA8
+		RGBA8
 	};
 
 	static const TextureSpec RGBAMipmap{
 		TextureType::Tex2D,
-		TextureFormat::RGBA32F,
+		RGBA32F,
 		true,
 		TexFilter::LinearMipmapLinear,
 		TexFilter::Linear
@@ -854,7 +855,7 @@ static const AttachmentLayout& layout_for(FBRole role)
 
 	static const TextureSpec Int32{
 		TextureType::Tex2D,
-		TextureFormat::R32UI
+		R32UI
 	};
 
 	switch (role) {

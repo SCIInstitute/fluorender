@@ -27,7 +27,7 @@
 //
 
 //#include <glad/gl.h>
-//#include <GLFormatUtils.h>
+//#include <GLTextureUtils.h>
 #include <DataBrick.h>
 #include <VolumePyramid.h>
 #include <TextureRenderer.h>
@@ -382,28 +382,16 @@ void DataBrick::compute_polygons(fluo::Ray& view,
 	}
 }
 
-//size_t DataBrick::tex_type_size(GLenum t)
-//{
-//	if (t == GL_BYTE) { return sizeof(GLbyte); }
-//	if (t == GL_UNSIGNED_BYTE) { return sizeof(GLubyte); }
-//	if (t == GL_SHORT) { return sizeof(GLshort); }
-//	if (t == GL_UNSIGNED_SHORT) { return sizeof(GLushort); }
-//	if (t == GL_INT) { return sizeof(GLint); }
-//	if (t == GL_UNSIGNED_INT) { return sizeof(GLuint); }
-//	if (t == GL_FLOAT) { return sizeof(GLfloat); }
-//	return 0;
-//}
-
-fluo::PixelFormat DataBrick::tex_type(CompType type)
+TextureFormat DataBrick::tex_type(CompType type)
 {
 	auto c = data_.find(type);
 	if (c == data_.end())
-		return fluo::PixelFormat::Undefined;
+		return TextureFormat();
 
 	auto rd = c->second.data;
 	if (!rd)
-		return fluo::PixelFormat::Undefined;
-	return rd->GetPixelFormat();
+		return TextureFormat();
+	return rd->GetTextureFormat();
 }
 
 std::shared_ptr<fluo::RawData> DataBrick::get_raw_data(CompType type)

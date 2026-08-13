@@ -34,10 +34,16 @@
 namespace flvr
 {
 	struct TextureFormat;
+	enum class TexFilter;
+	enum class TexWrap;
 }
 
 namespace fluo::gl
 {
+	GLenum ToGLFilter(flvr::TexFilter f);
+
+	GLenum ToGLWrap(flvr::TexWrap w);
+
 	GLenum GetInternalFormat(
 		const flvr::TextureFormat& format);
 

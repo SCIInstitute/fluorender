@@ -34,7 +34,6 @@
 #include <Ray.h>
 #include <BrickTexture.h>
 #include <BBox.h>
-#include <PixelFormat.h>
 #include <stdint.h>
 #include <map>
 #include <memory>
@@ -188,7 +187,7 @@ namespace flvr
 		void set_priority();
 		inline int get_priority() {return priority_;}
 
-		fluo::PixelFormat tex_type(CompType type);
+		TextureFormat tex_type(CompType type);
 		std::shared_ptr<fluo::RawData> get_raw_data(CompType type);
 		std::shared_ptr<fluo::RawData> get_raw_data_lod(CompType type, const std::shared_ptr<FileLocInfo>& finfo);
 		//void* tex_data(CompType type, void* raw_data);//given external raw data, using the same address in brick

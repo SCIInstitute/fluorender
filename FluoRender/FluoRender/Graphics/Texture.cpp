@@ -28,52 +28,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <glad/gl.h>
 #include <Texture.h>
+#include <GLTextureUtils.h>
 #include <utility>
 
 using namespace flvr;
-
-// Enum translation helpers (internal only)
-static GLenum toGLFilter(TexFilter f)
-{
-	switch (f) {
-	case TexFilter::Nearest: return GL_NEAREST;
-	case TexFilter::Linear: return GL_LINEAR;
-	case TexFilter::LinearMipmapLinear: return GL_LINEAR_MIPMAP_LINEAR;
-	default: return GL_LINEAR;
-	}
-}
-
-static GLenum toGLWrap(TexWrap w)
-{
-	switch (w) {
-	case TexWrap::ClampToEdge: return GL_CLAMP_TO_EDGE;
-	case TexWrap::Repeat: return GL_REPEAT;
-	case TexWrap::MirroredRepeat: return GL_MIRRORED_REPEAT;
-	default: return GL_CLAMP_TO_EDGE;
-	}
-}
-
-static void toGLFormat(TextureFormat fmt,
-	GLint& internal, GLenum& format, GLenum& type)
-{
-	switch (fmt) {
-	case TextureFormat::R8:
-	case TextureFormat::R8_UNORM:
-		internal = GL_R8; format = GL_RED; type = GL_UNSIGNED_BYTE; break;
-	case TextureFormat::RGBA8:
-		internal = GL_RGBA8; format = GL_RGBA; type = GL_UNSIGNED_BYTE; break;
-	case TextureFormat::RGBA32F:
-		internal = GL_RGBA32F; format = GL_RGBA; type = GL_FLOAT; break;
-	case TextureFormat::R32F:
-		internal = GL_R32F; format = GL_RED; type = GL_FLOAT; break;
-	case TextureFormat::RG32F:
-		internal = GL_RG32F; format = GL_RG; type = GL_FLOAT; break;
-	case TextureFormat::R32UI:
-		internal = GL_R32UI; format = GL_RED_INTEGER; type = GL_UNSIGNED_INT; break;
-	case TextureFormat::Depth32F:
-		internal = GL_DEPTH_COMPONENT32F; format = GL_DEPTH_COMPONENT; type = GL_FLOAT; break;
-	}
-}
 
 Texture::Texture(const TextureDesc& desc)
 	: desc_(desc)
@@ -192,9 +150,8 @@ void Texture::upload_2d(const void* data, int width, int height, int level)
 	if (!valid_ || desc_.spec.type != TextureType::Tex2D || !data)
 		return;
 
-	GLint internal;
-	GLenum format, type;
-	toGLFormat(desc_.spec.format, internal, format, type);
+	GLenum format = fluo::gl::GetExternalFormat(desc_.spec.format);
+	GLenum type = fluo::gl::GetDataType(desc_.spec.format);
 
 	glBindTexture(glTarget(), id_);
 
@@ -223,9 +180,8 @@ void Texture::upload_2d_subimage(const void* data,
 	if (!valid_ || desc_.spec.type != TextureType::Tex2D || !data)
 		return;
 
-	GLint internal;
-	GLenum format, type;
-	toGLFormat(desc_.spec.format, internal, format, type);
+	GLenum format = fluo::gl::GetExternalFormat(desc_.spec.format);
+	GLenum type = fluo::gl::GetDataType(desc_.spec.format);
 
 	glBindTexture(glTarget(), id_);
 
@@ -255,30 +211,30 @@ GLenum Texture::glTarget() const
 
 void Texture::apply_parameters() const
 {
-	glTexParameteri(glTarget(), GL_TEXTURE_MIN_FILTER, toGLFilter(desc_.spec.minFilter));
-	glTexParameteri(glTarget(), GL_TEXTURE_MAG_FILTER, toGLFilter(desc_.spec.magFilter));
-	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_S, toGLWrap(desc_.spec.wrapS));
-	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_T, toGLWrap(desc_.spec.wrapT));
+	glTexParameteri(glTarget(), GL_TEXTURE_MIN_FILTER, fluo::gl::ToGLFilter(desc_.spec.minFilter));
+	glTexParameteri(glTarget(), GL_TEXTURE_MAG_FILTER, fluo::gl::ToGLFilter(desc_.spec.magFilter));
+	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_S, fluo::gl::ToGLWrap(desc_.spec.wrapS));
+	glTexParameteri(glTarget(), GL_TEXTURE_WRAP_T, fluo::gl::ToGLWrap(desc_.spec.wrapT));
 
 	if (desc_.spec.type == TextureType::Tex3D)
-		glTexParameteri(glTarget(), GL_TEXTURE_WRAP_R, toGLWrap(desc_.spec.wrapR));
+		glTexParameteri(glTarget(), GL_TEXTURE_WRAP_R, fluo::gl::ToGLWrap(desc_.spec.wrapR));
 }
 
 void Texture::allocate_storage() const
 {
-	GLint internal;
-	GLenum format, type;
-	toGLFormat(desc_.spec.format, internal, format, type);
+	GLenum internal = fluo::gl::GetInternalFormat(desc_.spec.format);
+	GLenum format = fluo::gl::GetExternalFormat(desc_.spec.format);
+	GLenum type = fluo::gl::GetDataType(desc_.spec.format);
 
 	if (desc_.spec.type == TextureType::Tex3D)
 	{
-		glTexImage3D(glTarget(), 0, internal,
+		glTexImage3D(glTarget(), 0, static_cast<GLint>(internal),
 			desc_.size.width, desc_.size.height, desc_.size.depth,
 			0, format, type, nullptr);
 	}
 	else
 	{
-		glTexImage2D(glTarget(), 0, internal,
+		glTexImage2D(glTarget(), 0, static_cast<GLint>(internal),
 			desc_.size.width, desc_.size.height,
 			0, format, type, nullptr);
 	}
