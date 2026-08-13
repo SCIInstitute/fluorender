@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Framebuffer.h>
 #include <FramebufferStateTracker.h>
 #include <ImageTexture.h>
+#include <TextureFormats.h>
 #include <Color.h>
 #include <ImgShader.h>
 #include <VertexArray.h>
@@ -61,7 +62,7 @@ namespace flvr
 		// Create texture description for glyph bitmap
 		TextureDesc desc;
 		desc.spec.type = TextureType::Tex2D;
-		desc.spec.format = TextureFormat::R8; // or R8_UNORM, depending on your enum
+		desc.spec.format = R8_UNorm;
 		desc.spec.useMipmap = false;
 		desc.spec.minFilter = TexFilter::Linear;
 		desc.spec.magFilter = TexFilter::Linear;
