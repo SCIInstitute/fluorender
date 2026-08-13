@@ -35,6 +35,11 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <vector>
 
+namespace flvr
+{
+	struct TextureFormat;
+}
+
 namespace fluo
 {
 
@@ -160,7 +165,7 @@ namespace fluo
 		size_t GetBitsPerElement() const noexcept;
 		size_t GetBytesPerElement() const noexcept;
 
-		PixelFormat GetPixelFormat() const noexcept;
+		flvr::TextureFormat GetTextureFormat() const noexcept;
 
 		size_t GetVoxelCount() const noexcept;
 		size_t GetElementCount() const noexcept;

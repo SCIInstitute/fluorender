@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <RawData.h>
+#include <Texture.h>
 #include <compatibility.h>
 #include <cstring>
 #include <Debug.h>
@@ -101,23 +102,77 @@ namespace fluo
 		return GetBitsPerElement() / 8;
 	}
 
-	PixelFormat RawData::GetPixelFormat() const noexcept
+	flvr::TextureFormat RawData::GetTextureFormat() const noexcept
 	{
+		using namespace flvr;
+
 		switch (m_format)
 		{
-		case DataFormat::UInt8:   return PixelFormat::R8_UNorm;
-		case DataFormat::UInt16:  return PixelFormat::R16_UNorm;
-		case DataFormat::UInt32:  return PixelFormat::R32_UNorm;
+		case DataFormat::UInt8:
+			return {
+				ChannelLayout::R,
+				DataFormat::UInt8,
+				ValueInterpretation::UNorm
+			};
 
-		case DataFormat::Int8:    return PixelFormat::R8_SNorm;
-		case DataFormat::Int16:   return PixelFormat::R16_SNorm;
-		case DataFormat::Int32:   return PixelFormat::R32_SNorm;
+		case DataFormat::UInt16:
+			return {
+				ChannelLayout::R,
+				DataFormat::UInt16,
+				ValueInterpretation::UNorm
+			};
 
-		case DataFormat::Float32: return PixelFormat::R32_Float;
-		case DataFormat::Float64: return PixelFormat::R64_Float;
+		case DataFormat::UInt32:
+			return {
+				ChannelLayout::R,
+				DataFormat::UInt32,
+				ValueInterpretation::UInt
+			};
+
+		case DataFormat::Int8:
+			return {
+				ChannelLayout::R,
+				DataFormat::Int8,
+				ValueInterpretation::SNorm
+			};
+
+		case DataFormat::Int16:
+			return {
+				ChannelLayout::R,
+				DataFormat::Int16,
+				ValueInterpretation::SNorm
+			};
+
+		case DataFormat::Int32:
+			return {
+				ChannelLayout::R,
+				DataFormat::Int32,
+				ValueInterpretation::SInt
+			};
+
+		case DataFormat::Float16:
+			return {
+				ChannelLayout::R,
+				DataFormat::Float16,
+				ValueInterpretation::Float
+			};
+
+		case DataFormat::Float32:
+			return {
+				ChannelLayout::R,
+				DataFormat::Float32,
+				ValueInterpretation::Float
+			};
+
+		case DataFormat::Float64:
+			return {
+				ChannelLayout::R,
+				DataFormat::Float64,
+				ValueInterpretation::Float
+			};
 
 		default:
-			return PixelFormat::Undefined;
+			return {};
 		}
 	}
 
