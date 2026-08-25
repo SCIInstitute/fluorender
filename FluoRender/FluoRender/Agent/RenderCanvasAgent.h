@@ -29,61 +29,58 @@ DEALINGS IN THE SOFTWARE.
 #define RenderCanvasAgent_h
 
 #include <Agent.h>
+
 #include <memory>
-#include <string>
-#include <set>
 
 class RenderCanvas;
 class RenderView;
 
-struct DrawRequest
-{
-	DrawRequest(const std::string& r = "Refresh request",
-		const std::set<int>& ids = {},
-		bool cf = true,
-		bool lu = false,
-		bool rl = true,
-		bool ia = false,
-		bool lc = true,
-		int id = 0) :
-		reason(r),
-		view_ids(ids),
-		clearFramebuffer(cf),
-		loadUpdate(lu),
-		restartLoop(rl),
-		interactive(ia),
-		lgChanged(lc),
-		view_origin_id(id)
-	{}
-
-	std::string reason;
-	std::set<int> view_ids;//-1: none; empty: all
-	int view_origin_id = 0;//prevent loop
-	bool clearFramebuffer = true;//from m_retain_finalbuffer in renderview
-	bool loadUpdate = false;//from m_load_update in renderview
-	bool restartLoop = true;
-	bool interactive = false;
-	bool lgChanged = true;
-};
+struct UpdateRequest;
 
 class RenderCanvasAgent : public Agent
 {
 public:
 	RenderCanvasAgent(
 		RenderCanvas* canvas,
-		std::shared_ptr<RenderView>& view);
+		const std::shared_ptr<RenderView>& view);
 
-	void requestDraw(const DrawRequest& request); // Called by canvas, view
-	void performDraw();                          // Called by canvas during paint event
+	virtual ~RenderCanvasAgent() = default;
 
-	RenderCanvas* getCanvas() const { return canvas_; }
-	std::shared_ptr<RenderView> getView() const { return view_.lock(); }
+	// Agent interface
+	virtual bool Accept(
+		const UpdateRequest& request) const override;
+
+	virtual void Update(
+		const UpdateRequest& request) override;
+
+	void RequestDraw();
+
+	void PerformDraw();
+
+	RenderCanvas* GetCanvas() const
+	{
+		return static_cast<RenderCanvas*>(GetWindow());
+	}
+
+	std::shared_ptr<RenderView> GetView() const
+	{
+		return view_.lock();
+	}
 
 private:
-	RenderCanvas* canvas_ = nullptr;
+	RenderCanvasAgent* GetRenderSender(
+		const UpdateRequest& request) const;
+
+	void SyncRotations(
+		RenderCanvasAgent* sender);
+
+	void SyncCamera(
+		RenderCanvasAgent* sender);
+
+private:
 	std::weak_ptr<RenderView> view_;
+
 	bool draw_pending_ = false;
-	DrawRequest last_request_;
 };
 
-#endif//RenderCanvasAgent_h
+#endif // RenderCanvasAgent_h

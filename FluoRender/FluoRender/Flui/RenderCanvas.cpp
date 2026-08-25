@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LookingGlassRenderer.h>
 #include <FramebufferStateTracker.h>
 #include <RenderCanvasAgent.h>
+#include <Coordinator.h>
 #include <Debug.h>
 #ifdef _WIN32
 //wacom support
@@ -175,17 +176,6 @@ RenderCanvas::RenderCanvas(MainFrame* frame,
 	int ret = GetPixelFormat(&pfd);
 #endif
 
-	auto view = std::make_shared<RenderView>();
-	glbin_current.render_view_drawing = view;
-	Root* root = glbin_data_manager.GetRoot();
-	view->SetRenderViewPanel(m_renderview_panel);
-#ifdef _WIN32
-	view->SetHandle((void*)GetHWND());
-#endif
-	view->SetSize(size.x, size.y);
-	root->AddView(view);
-	m_agent = std::make_unique<RenderCanvasAgent>(this, view);
-	auto render_scheduler = std::make_shared<RenderCanvasAgent>(this, view);
 
 #ifdef _WIN32
 	//tablet initialization
@@ -284,6 +274,7 @@ RenderCanvas::~RenderCanvas()
 	if (!m_sharedRC)
 		delete m_glRC;
 
+	glbin_coordinator.Unregister(m_agent.get());
 }
 
 #ifdef _WIN32
@@ -299,7 +290,7 @@ int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd) {
 std::shared_ptr<RenderView> RenderCanvas::GetRenderView()
 {
 	if (m_agent)
-		return m_agent->getView();
+		return m_agent->GetView();
 	return nullptr;
 }
 
@@ -347,7 +338,7 @@ void RenderCanvas::Draw()
 	auto view = GetRenderView();
 	assert(view);
 	bool initialized = view->Init();
-	m_agent->performDraw();
+	m_agent->PerformDraw();
 
 	if (initialized)
 		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
@@ -478,8 +469,7 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 		view->SetSize(cw, ch);           // logical width/height for UI logic
 		view->SetClient(0, 0, cw, ch);   // origin is typically 0,0 for client
 
-		m_agent->requestDraw(
-			DrawRequest("Resize refresh", { static_cast<int>(view->Id()) }));
+		m_agent->RequestDraw();
 	}
 
 	// Make sure this doesn't call SetSize() or change min/best size in a DPI-dependent way.
@@ -612,8 +602,7 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Show();
 		}
 		if (auto view = GetRenderView())
-			m_agent->requestDraw(
-				DrawRequest("Quit fullscreen refresh", { static_cast<int>(view->Id()) }));
+			m_agent->RequestDraw();
 	}
 }
 

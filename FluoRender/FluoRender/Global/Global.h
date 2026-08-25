@@ -59,6 +59,7 @@ struct CurrentObjects;
 class Project;
 class RenderView;
 class Coordinator;
+class FluiBuilder;
 
 namespace fluo
 {
@@ -158,6 +159,7 @@ namespace flvr
 #define glbin_fb_state_tracker fluo::Global::instance().get_framebuffer_state_tracker()
 //agents
 #define glbin_coordinator fluo::Global::instance().get_coordinator()
+#define glbin_flui_builder fluo::Global::instance().get_flui_builder()
 
 //time
 #define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
@@ -289,6 +291,7 @@ namespace fluo
 
 		//agents
 		Coordinator& get_coordinator();
+		FluiBuilder& get_flui_builder();
 
 		//current selection
 		CurrentObjects& get_current_objects();
@@ -386,6 +389,7 @@ namespace fluo
 
 		//agents
 		std::unique_ptr<Coordinator> coordinator_;
+		std::unique_ptr<FluiBuilder> flui_builder_;
 
 		//current selection
 		std::unique_ptr<CurrentObjects> current_objects_;

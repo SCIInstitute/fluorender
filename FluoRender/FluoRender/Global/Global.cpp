@@ -85,6 +85,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshDefault.h>
 #include <FramebufferStateTracker.h>
 #include <Coordinator.h>
+#include <FluiBuilder.h>
 #include <ShaderProgram.h>
 //renderers
 #include <RendererFactory.h>
@@ -309,6 +310,7 @@ Global::Global() :
 	shader_manager_(std::make_unique<flvr::ShaderProgramManager>()),
 	fb_state_tracker_(std::make_unique<flvr::FramebufferStateTracker>()),
 	coordinator_(std::make_unique<Coordinator>()),
+	flui_builder_(std::make_unique<FluiBuilder>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
 	project_(std::make_unique<Project>()),
 	m_linked_rot(false)
@@ -807,6 +809,11 @@ flvr::FramebufferStateTracker& Global::get_framebuffer_state_tracker()
 Coordinator& Global::get_coordinator()
 {
 	return *coordinator_;
+}
+
+FluiBuilder& Global::get_flui_builder()
+{
+	return *flui_builder_;
 }
 
 //current selection

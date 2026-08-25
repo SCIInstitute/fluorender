@@ -29,34 +29,119 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderView.h>
 #include <Global.h>
-#include <CurrentObjects.h>
+#include <Names.h>
 #include <FramebufferStateTracker.h>
 #include <LookingGlassRenderer.h>
-//#include <Debug.h>
+#include <Value.hpp>
 
-RenderCanvasAgent::RenderCanvasAgent(RenderCanvas* canvas, std::shared_ptr<RenderView>& view)
-	: canvas_(canvas), view_(view)
+RenderCanvasAgent::RenderCanvasAgent(
+	RenderCanvas* canvas,
+	const std::shared_ptr<RenderView>& view) :
+	Agent(canvas),
+	view_(view)
 {
 }
 
-void RenderCanvasAgent::requestDraw(const DrawRequest& request)
+bool RenderCanvasAgent::Accept(
+	const UpdateRequest& request) const
+{
+	return
+		FOUND_VALUE(gstRotations) ||
+		FOUND_VALUE(gstCamera) ||
+		FOUND_VALUE(gstRenderView) ||
+		FOUND_VALUE(gstInteractive) ||
+		FOUND_VALUE(gstBrushSize) ||
+		FOUND_VALUE(gstVolumeProps);
+}
+
+RenderCanvasAgent*
+RenderCanvasAgent::GetRenderSender(
+	const UpdateRequest& request) const
+{
+	return dynamic_cast<RenderCanvasAgent*>(
+		request.sender);
+}
+
+void RenderCanvasAgent::SyncRotations(
+	RenderCanvasAgent* sender)
+{
+	if (!sender)
+		return;
+
+	auto src_view = sender->GetView();
+	auto dst_view = GetView();
+
+	if (!src_view || !dst_view)
+		return;
+
+	if (src_view == dst_view)
+		return;
+
+	dst_view->SetRotations(
+		src_view->GetRotations(),
+		true);
+}
+
+void RenderCanvasAgent::SyncCamera(
+	RenderCanvasAgent* sender)
+{
+	if (!sender)
+		return;
+
+	auto src_view = sender->GetView();
+	auto dst_view = GetView();
+
+	if (!src_view || !dst_view)
+		return;
+
+	if (src_view == dst_view)
+		return;
+
+	dst_view->CopyCamera(*src_view);
+}
+
+void RenderCanvasAgent::Update(
+	const UpdateRequest& request)
+{
+	auto view = view_.lock();
+	if (!view)
+		return;
+
+	auto sender = GetRenderSender(request);
+
+	// linked rotation
+	if (glbin_linked_rot &&
+		FOUND_VALUE(gstRotations))
+	{
+		SyncRotations(sender);
+	}
+
+	// future camera sync
+	if (FOUND_VALUE(gstCamera))
+	{
+		SyncCamera(sender);
+	}
+
+	RequestDraw();
+}
+
+void RenderCanvasAgent::RequestDraw()
 {
 	if (draw_pending_)
 		return;
 
 	draw_pending_ = true;
-	last_request_ = request;
 
-	if (canvas_)
+	if (auto canvas = GetCanvas())
 	{
-		canvas_->Refresh(false);
+		canvas->Refresh(false);
 
 		if (glbin_linked_rot)
-			canvas_->Update();
+			canvas->Update();
 	}
 }
 
-void RenderCanvasAgent::performDraw()
+void RenderCanvasAgent::PerformDraw()
 {
 	draw_pending_ = false;
 
@@ -68,19 +153,8 @@ void RenderCanvasAgent::performDraw()
 
 	glbin_fb_state_tracker.sync();
 
-	view->SetForceClear(
-		last_request_.clearFramebuffer);
-
-	view->SetInteractive(
-		last_request_.interactive);
-
-	if (last_request_.restartLoop)
-		view->StartLoopUpdate();
-
-	view->SetSortBricks();
-
 	glbin_lg_renderer.SetUpdating(
-		last_request_.lgChanged);
+		view->GetLgChanged());
 
 	bool success = view->Draw();
 

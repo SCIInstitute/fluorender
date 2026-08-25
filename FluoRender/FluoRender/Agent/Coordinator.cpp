@@ -48,7 +48,7 @@ void Coordinator::Unregister(Agent* agent)
 void Coordinator::Dispatch(
 	const UpdateRequest& request)
 {
-	if (request.exclude_mode == 3)
+	if (request.mode == UpdateMode::None)
 		return;
 
 	for (auto agent : agents_)
@@ -56,19 +56,19 @@ void Coordinator::Dispatch(
 		if (!agent)
 			continue;
 
-		switch (request.exclude_mode)
+		switch (request.mode)
 		{
-		case 0:
+		case UpdateMode::All:
 			// update all
 			break;
 
-		case 1:
+		case UpdateMode::ExcludeSender:
 			// exclude sender
 			if (agent == request.sender)
 				continue;
 			break;
 
-		case 2:
+		case UpdateMode::SenderOnly:
 			// sender only
 			if (agent != request.sender)
 				continue;

@@ -25,31 +25,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ANNOTATPROPPANEL_H_
-#define _ANNOTATPROPPANEL_H_
 
-#include <PropPanel.h>
+#ifndef FluiBuilder_h
+#define FluiBuilder_h
+
 #include <memory>
 
-class AnnotatPropPanelAgent;
-class AnnotatPropPanel : public PropPanel
+class wxWindow;
+
+class MainFrame;
+class RenderViewPanel;
+class wxGLContext;
+class RenderCanvas;
+
+class AnnotatPropPanel;
+class AnnotData;
+
+class VolumePropPanel;
+class VolumeData;
+
+class MeshPropPanel;
+class MeshData;
+
+class FluiBuilder
 {
 public:
-	AnnotatPropPanel(
+	static RenderCanvas* BuildRenderCanvas(
+		MainFrame* frame,
+		RenderViewPanel* parent,
+		wxGLContext* sharedContext
+	);
+
+	static AnnotatPropPanel* BuildAnnotatPropPanel(
 		wxWindow* parent,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = "AnnotatPropPanel");
-	~AnnotatPropPanel();
+		const std::shared_ptr<AnnotData>& ann);
 
-private:
-	wxTextCtrl* m_memo_text;
-	wxButton* m_memo_update_btn;
+	static VolumePropPanel* BuildVolumePanel(
+		wxWindow* parent,
+		const std::shared_ptr<VolumeData>& vd);
 
-private:
-	//memo
-	void OnMemoUpdateBtn(wxCommandEvent& event);
+	static MeshPropPanel* BuildMeshPanel(
+		wxWindow* parent,
+		const std::shared_ptr<MeshData>& md);
 };
 
-#endif//_ANNOTATPROPPANEL_H_
+#endif // FluiBuilder_h

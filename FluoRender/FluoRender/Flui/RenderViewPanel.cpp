@@ -43,6 +43,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Ruler.h>
 #include <RulerHandler.h>
 #include <RenderCanvasAgent.h>
+#include <FluiBuilder.h>
+
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
@@ -90,8 +92,8 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 
 	m_id = m_max_id;
 	SetName(wxString::Format("Render View:%d", m_max_id++));
-	m_canvas = new RenderCanvas(frame, this, sharedContext);
-	m_renderview = m_canvas->GetRenderView();
+	m_canvas = glbin_flui_builder.BuildRenderCanvas(frame, this, sharedContext);
+	m_renderview = m_canvas->GetAgent()->GetView();
 	m_canvas->SetCanFocus(false);
 	m_view_sizer->Add(m_canvas, 1, wxEXPAND);
 	CreateBar();

@@ -25,31 +25,42 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ANNOTATPROPPANEL_H_
-#define _ANNOTATPROPPANEL_H_
 
-#include <PropPanel.h>
-#include <memory>
+#include <AnnotatPropPanelAgent.h>
+#include <AnnotatPropPanel.h>
+#include <AnnotData.h>
 
-class AnnotatPropPanelAgent;
-class AnnotatPropPanel : public PropPanel
+AnnotatPropPanelAgent::AnnotatPropPanelAgent(
+	AnnotatPropPanel* panel) :
+	Agent(panel)
 {
-public:
-	AnnotatPropPanel(
-		wxWindow* parent,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = "AnnotatPropPanel");
-	~AnnotatPropPanel();
 
-private:
-	wxTextCtrl* m_memo_text;
-	wxButton* m_memo_update_btn;
+}
 
-private:
-	//memo
-	void OnMemoUpdateBtn(wxCommandEvent& event);
-};
+bool AnnotatPropPanelAgent::Accept(
+	const UpdateRequest& request) const
+{
+	return
+		FOUND_VALUE(gstAnnotData) ||
+		FOUND_VALUE(gstAnnotProps);
+}
 
-#endif//_ANNOTATPROPPANEL_H_
+void AnnotatPropPanelAgent::Update(
+	const UpdateRequest& request)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	if (FOUND_VALUE(gstAnnotData))
+	{
+		auto ann = glbin_current.GetAnnotData();
+		m_ann = ann;
+		panel->SetData(ann);
+	}
+	if (FOUND_VALUE(gstAnnotProps))
+	{
+		auto ann = GetData();
+		if (ann)
+			panel->UpdateProps(ann);
+	}
+}

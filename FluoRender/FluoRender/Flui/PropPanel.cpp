@@ -37,27 +37,27 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvasAgent.h>
 #include <wxNotebookSerializer.h>
 
-PropBase::PropBase(MainFrame* frame):
-	m_frame(frame)
-{
-}
-
-void PropBase::FluoRefresh(int excl_self,
-	const fluo::ValueCollection& vc, const std::set<int>& views)
-{
-	if (!m_frame)
-		return;
-	int view_excl = 0;
-	if (dynamic_cast<RenderViewPanel*>(this))
-		view_excl = excl_self;
-	int origin_id = 0;
-	if (vc.find(gstCamRotation) != vc.end())
-		origin_id = *views.begin();
-	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("PropBase refresh", views,
-		true, false, true, false, true, origin_id));
-	wxWindow* win = dynamic_cast<wxWindow*>(this);
-	m_frame->UpdateProps(vc, excl_self, win);//update ui but exclude this
-}
+//PropBase::PropBase(MainFrame* frame):
+//	m_frame(frame)
+//{
+//}
+//
+//void PropBase::FluoRefresh(int excl_self,
+//	const fluo::ValueCollection& vc, const std::set<int>& views)
+//{
+//	if (!m_frame)
+//		return;
+//	int view_excl = 0;
+//	if (dynamic_cast<RenderViewPanel*>(this))
+//		view_excl = excl_self;
+//	int origin_id = 0;
+//	if (vc.find(gstCamRotation) != vc.end())
+//		origin_id = *views.begin();
+//	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("PropBase refresh", views,
+//		true, false, true, false, true, origin_id));
+//	wxWindow* win = dynamic_cast<wxWindow*>(this);
+//	m_frame->UpdateProps(vc, excl_self, win);//update ui but exclude this
+//}
 
 double PropBase::getDpiScaleFactor()
 {
@@ -71,37 +71,35 @@ double PropBase::getDpiScaleFactor()
 	return 1;
 }
 
-PropPanel::PropPanel(MainFrame* frame,
+PropPanel::PropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropBase(frame),
 	wxScrolledWindow(parent, wxID_ANY, pos, size, style, name)
 {
 
 }
 
-PropDialog::PropDialog(MainFrame* frame,
+PropDialog::PropDialog(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropBase(frame),
 	wxDialog(parent, wxID_ANY, name, pos, size, style)
 {
 
 }
 
-TabbedPanel::TabbedPanel(MainFrame* frame,
+TabbedPanel::TabbedPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size, style, name)
+	PropPanel(parent, pos, size, style, name)
 {
 }
 

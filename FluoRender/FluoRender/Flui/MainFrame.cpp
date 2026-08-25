@@ -96,6 +96,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
 #include <RenderCanvasAgent.h>
+#include <FluiBuilder.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <wxBasisSlider.h>
@@ -1243,8 +1244,7 @@ wxWindow* MainFrame::AddProps(int type,
 	case 4://annotations
 		if (ann)
 		{
-			AnnotatPropPanel* pane = new AnnotatPropPanel(this, m_prop_panel);
-			pane->SetAnnotData(ann);
+			AnnotatPropPanel* pane = glbin_flui_builder.BuildAnnotatPropPanel(m_prop_panel, ann);
 			pane->SetName(ann->GetName());
 			pane->Hide();
 			m_prop_pages.push_back(pane);

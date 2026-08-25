@@ -25,31 +25,42 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _ANNOTATPROPPANEL_H_
-#define _ANNOTATPROPPANEL_H_
+#ifndef AnnotatPropPanelAgent_h
+#define AnnotatPropPanelAgent_h
 
-#include <PropPanel.h>
+#include <Agent.h>
 #include <memory>
 
-class AnnotatPropPanelAgent;
-class AnnotatPropPanel : public PropPanel
+class AnnotatPropPanel;
+class AnnotData;
+
+class AnnotatPropPanelAgent : public Agent
 {
 public:
-	AnnotatPropPanel(
-		wxWindow* parent,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = "AnnotatPropPanel");
-	~AnnotatPropPanel();
+	AnnotatPropPanelAgent(
+		AnnotatPropPanel* panel);
+
+	virtual ~AnnotatPropPanelAgent() = default;
+
+	// Agent interface
+	virtual bool Accept(
+		const UpdateRequest& request) const override;
+
+	virtual void Update(
+		const UpdateRequest& request) override;
+
+	AnnotatPropPanel* GetPanel() const
+	{
+		return static_cast<AnnotatPropPanel*>(GetWindow());
+	}
+
+	std::shared_ptr<AnnotData> GetData() const
+	{
+		return m_ann.lock();
+	}
 
 private:
-	wxTextCtrl* m_memo_text;
-	wxButton* m_memo_update_btn;
-
-private:
-	//memo
-	void OnMemoUpdateBtn(wxCommandEvent& event);
+	std::weak_ptr<AnnotData> m_ann;
 };
 
-#endif//_ANNOTATPROPPANEL_H_
+#endif // AnnotatPropPanelAgent_h

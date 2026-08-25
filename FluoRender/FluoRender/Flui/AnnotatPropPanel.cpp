@@ -30,13 +30,13 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotData.h>
 #include <wx/valnum.h>
 
-AnnotatPropPanel::AnnotatPropPanel(MainFrame* frame,
+AnnotatPropPanel::AnnotatPropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size, style, name)
+	PropPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -95,18 +95,6 @@ void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
 		m_memo_text->SetEditable(true);
 		m_memo_update_btn->Enable();
 	}
-}
-
-void AnnotatPropPanel::SetAnnotData(const std::shared_ptr<AnnotData>& ann)
-{
-	m_ann = ann;
-
-	FluoUpdate();
-}
-
-std::shared_ptr<AnnotData> AnnotatPropPanel::GetAnnotData()
-{
-	return m_ann.lock();
 }
 
 void AnnotatPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)

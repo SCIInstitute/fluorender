@@ -46,7 +46,7 @@ class MainFrame;
 class RenderViewPanel;
 class RenderView;
 class RenderCanvasAgent;
-class RenderCanvas : public wxGLCanvas
+class RenderCanvas : public PropBase, public wxGLCanvas
 {
 public:
 	RenderCanvas(MainFrame* frame,
@@ -62,9 +62,9 @@ public:
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
 
-	RenderCanvasAgent* GetAgent()
+	RenderCanvasAgent* GetRenderCanvasAgent()
 	{
-		return m_agent.get();
+		return static_cast<RenderCanvasAgent*>(m_agent.get());
 	}
 
 	std::shared_ptr<RenderView> GetRenderView();
@@ -81,9 +81,6 @@ public:
 	RenderViewPanel* m_renderview_panel;
 
 private:
-	//agent
-	std::unique_ptr<RenderCanvasAgent> m_agent;
-
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	MainFrame* m_frame;

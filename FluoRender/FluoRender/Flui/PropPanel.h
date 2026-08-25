@@ -33,24 +33,20 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibook.h>
 #include <string>
 
-#define FOUND_VALUE(v) vc.find(v) != vc.end()
+class Agent;
 
-class MainFrame;
-class wxBasisSlider;
 class PropBase
 {
 public:
-	PropBase(MainFrame* frame);
+	PropBase() {};
 	~PropBase() {};
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {}) = 0;
-	//excl_self: 0 - update all; 1 - exclude this; 2 - only this; 3 - update none
-	virtual void FluoRefresh(int excl_self = 1,
-		const fluo::ValueCollection& vc = {},
-		const std::set<int>& views = {});
+	Agent* GetAgent() const { return m_agent.get(); }
+
+	void SetAgent(std::unique_ptr<Agent> agent) { m_agent = std::move(agent); }
 
 protected:
-	MainFrame* m_frame;
+	std::unique_ptr<Agent> m_agent;
 
 	virtual double getDpiScaleFactor();
 };
@@ -58,8 +54,7 @@ protected:
 class PropPanel : public PropBase, public wxScrolledWindow
 {
 public:
-	PropPanel(MainFrame* frame,
-		wxWindow* parent,
+	PropPanel(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -72,8 +67,7 @@ protected:
 class PropDialog : public PropBase, public wxDialog
 {
 public:
-	PropDialog(MainFrame* frame,
-		wxWindow* parent,
+	PropDialog(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
@@ -86,7 +80,7 @@ protected:
 class TabbedPanel : public PropPanel
 {
 public:
-	TabbedPanel(MainFrame* frame,
+	TabbedPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

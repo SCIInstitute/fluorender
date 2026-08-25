@@ -35,6 +35,8 @@ DEALINGS IN THE SOFTWARE.
 class wxWindow;
 class Agent;
 
+#define FOUND_VALUE(v) vc.find(v) != vc.end()
+
 enum class UpdateMode : int
 {
 	All,
