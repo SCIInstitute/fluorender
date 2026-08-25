@@ -25,13 +25,83 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef Agent_h
+#define Agent_h
 
-#include <RenderViewAgent.h>
-#include <RenderView.h>
-#include <RenderCanvas.h>
-#include <Global.h>
+#include <Value.hpp>
+#include <set>
+#include <string>
 
-RenderViewAgent::RenderViewAgent()
+class wxWindow;
+class Agent;
+
+enum class UpdateMode : int
 {
+	All,
+	ExcludeSender,
+	SenderOnly,
+	None
+};
 
-}
+struct UpdateRequest
+{
+	UpdateRequest(
+		const fluo::ValueCollection& vals = {},
+		Agent* snd = nullptr,
+		UpdateMode md = UpdateMode::ExcludeSender,
+		const std::set<int>& views = {},
+		const std::string& r = "")
+		:
+		values(vals),
+		sender(snd),
+		mode(md),
+		target_views(views),
+		reason(r)
+	{
+	}
+
+	// what changed
+	fluo::ValueCollection values;
+
+	// source agent
+	Agent* sender = nullptr;
+
+	UpdateMode mode = UpdateMode::ExcludeSender;
+
+	// empty = all views
+	std::set<int> target_views;
+
+	// optional debug string
+	std::string reason;
+};
+
+class Agent
+{
+public:
+	explicit Agent(wxWindow* window) :
+		window_(window)
+	{
+	}
+
+	virtual ~Agent() = default;
+
+	wxWindow* GetWindow() const
+	{
+		return window_;
+	}
+
+	virtual bool Accept(const UpdateRequest& request) const
+	{
+		return true;
+	}
+
+	virtual void Update(const UpdateRequest& request) = 0;
+
+protected:
+	void Notify(const UpdateRequest& request);
+
+private:
+	wxWindow* window_ = nullptr;
+};
+
+#endif//Agent_h

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <Root.h>
 #include <DataManager.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 #include <wxNotebookSerializer.h>
 
 PropBase::PropBase(MainFrame* frame):

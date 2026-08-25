@@ -63,7 +63,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Interpolator.h>
 #include <VolumePoint.h>
 #include <CompAnalyzer.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 #include <Ruler.h>
 #include <RulerList.h>
 #include <format>

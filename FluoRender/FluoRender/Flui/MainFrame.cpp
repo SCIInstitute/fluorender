@@ -95,7 +95,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ImgShader.h>
 #include <LightFieldShader.h>
 #include <TextRenderer.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <wxBasisSlider.h>

@@ -40,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolCache4D.h>
 #include <VolumeRenderer.h>
 #include <ShaderProgram.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 #include <base_vol_reader.h>
 #include <imageJ_reader.h>
 #include <tif_reader.h>

@@ -58,7 +58,8 @@ class JVMInitializer;
 struct CurrentObjects;
 class Project;
 class RenderView;
-class RefreshSchedulerManager;
+class Coordinator;
+
 namespace fluo
 {
 	class AsyncTimer;
@@ -156,7 +157,7 @@ namespace flvr
 #define glbin_shader_manager fluo::Global::instance().get_shader_manager()
 #define glbin_fb_state_tracker fluo::Global::instance().get_framebuffer_state_tracker()
 //agents
-#define glbin_refresh_scheduler_manager fluo::Global::instance().get_refresh_scheduler_manager()
+#define glbin_coordinator fluo::Global::instance().get_coordinator()
 
 //time
 #define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
@@ -287,7 +288,7 @@ namespace fluo
 		flvr::FramebufferStateTracker& get_framebuffer_state_tracker();
 
 		//agents
-		RefreshSchedulerManager& get_refresh_scheduler_manager();
+		Coordinator& get_coordinator();
 
 		//current selection
 		CurrentObjects& get_current_objects();
@@ -384,7 +385,7 @@ namespace fluo
 		std::unique_ptr<flvr::FramebufferStateTracker> fb_state_tracker_;
 
 		//agents
-		std::unique_ptr<RefreshSchedulerManager> refresh_scheduler_manager_;
+		std::unique_ptr<Coordinator> coordinator_;
 
 		//current selection
 		std::unique_ptr<CurrentObjects> current_objects_;

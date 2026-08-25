@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 class MainFrame;
 class RenderViewPanel;
 class RenderView;
+class RenderCanvasAgent;
 class RenderCanvas : public wxGLCanvas
 {
 public:
@@ -61,12 +62,12 @@ public:
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
 
-	RenderView* GetRenderView()
+	RenderCanvasAgent* GetAgent()
 	{
-		if (auto view_ptr = m_renderview.lock())
-			return view_ptr.get();
-		return 0;
+		return m_agent.get();
 	}
+
+	std::shared_ptr<RenderView> GetRenderView();
 
 	//get view info for external ops
 	//get size, considering enlargement
@@ -80,13 +81,14 @@ public:
 	RenderViewPanel* m_renderview_panel;
 
 private:
+	//agent
+	std::unique_ptr<RenderCanvasAgent> m_agent;
+
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
 	MainFrame* m_frame;
 	//previous focus before brush
 	wxWindow* m_prev_focus;
-	//render view
-	std::weak_ptr<RenderView> m_renderview;
 
 	//timer for exit full screen
 	wxTimer m_exit_fscreen_trigger;

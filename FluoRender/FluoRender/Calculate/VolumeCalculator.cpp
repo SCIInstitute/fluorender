@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BrickTexture.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 
 using namespace flrd;
 

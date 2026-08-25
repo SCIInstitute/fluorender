@@ -86,7 +86,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GlobalStates.h>
 #include <State.h>
 #include <image_capture_factory.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 #include <ClippingBoxRenderer.h>
 #include <CamCenterRenderer.h>
 #include <RendererFactory.h>

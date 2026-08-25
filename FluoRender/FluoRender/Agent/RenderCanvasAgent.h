@@ -25,12 +25,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef RefreshScheduler_h
-#define RefreshScheduler_h
+#ifndef RenderCanvasAgent_h
+#define RenderCanvasAgent_h
 
+#include <Agent.h>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <set>
 
 class RenderCanvas;
@@ -66,17 +66,12 @@ struct DrawRequest
 	bool lgChanged = true;
 };
 
-class RefreshSchedulerManager;
-class RefreshScheduler
+class RenderCanvasAgent : public Agent
 {
 public:
-	RefreshScheduler(RenderCanvas* canvas, std::shared_ptr<RenderView>& view);
-
-private:
-	RenderCanvas* canvas_;
-	std::weak_ptr<RenderView> view_;
-	bool draw_pending_;
-	DrawRequest last_request_;
+	RenderCanvasAgent(
+		RenderCanvas* canvas,
+		std::shared_ptr<RenderView>& view);
 
 	void requestDraw(const DrawRequest& request); // Called by canvas, view
 	void performDraw();                          // Called by canvas during paint event
@@ -84,21 +79,11 @@ private:
 	RenderCanvas* getCanvas() const { return canvas_; }
 	std::shared_ptr<RenderView> getView() const { return view_.lock(); }
 
-	friend class RenderCanvas;
-	friend class RefreshSchedulerManager;
-};
-
-class RefreshSchedulerManager
-{
-public:
-	void registerScheduler(std::shared_ptr<RefreshScheduler> scheduler);
-	std::shared_ptr<RefreshScheduler> getScheduler(int view_id);
-	void removeScheduler(int view_id);
-
-	void requestDraw(const DrawRequest& request);
-
 private:
-	std::unordered_map<int, std::shared_ptr<RefreshScheduler>> schedulers_;
+	RenderCanvas* canvas_ = nullptr;
+	std::weak_ptr<RenderView> view_;
+	bool draw_pending_ = false;
+	DrawRequest last_request_;
 };
 
-#endif//RefreshScheduler_h
+#endif//RenderCanvasAgent_h

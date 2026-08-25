@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <Ruler.h>
 #include <RulerHandler.h>
-#include <RefreshScheduler.h>
+#include <RenderCanvasAgent.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>

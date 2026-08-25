@@ -26,22 +26,25 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef RenderViewAgent_h
-#define RenderViewAgent_h
+#ifndef Coordinator_h
+#define Coordinator_h
 
-#include <memory>
+#include <set>
 
-class RenderCanvas;
-class RenderView;
+class Agent;
+struct UpdateRequest;
 
-class RenderViewAgent
+class Coordinator
 {
 public:
-	RenderViewAgent() {}
+	void Register(Agent* agent);
+	void Unregister(Agent* agent);
+
+	void Dispatch(
+		const UpdateRequest& request);
 
 private:
-	RenderCanvas* canvas_{nullptr};
-	std::weak_ptr<RenderView> view_;
+	std::set<Agent*> agents_;
 };
 
-#endif//RenderViewAgent_h
+#endif//Coordinator_h

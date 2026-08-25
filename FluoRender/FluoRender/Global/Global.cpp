@@ -84,7 +84,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Project.h>
 #include <MeshDefault.h>
 #include <FramebufferStateTracker.h>
-#include <RefreshScheduler.h>
+#include <Coordinator.h>
 #include <ShaderProgram.h>
 //renderers
 #include <RendererFactory.h>
@@ -308,7 +308,7 @@ Global::Global() :
 	text_texture_manager_(std::make_unique<flvr::FontGlyphManager>()),
 	shader_manager_(std::make_unique<flvr::ShaderProgramManager>()),
 	fb_state_tracker_(std::make_unique<flvr::FramebufferStateTracker>()),
-	refresh_scheduler_manager_(std::make_unique<RefreshSchedulerManager>()),
+	coordinator_(std::make_unique<Coordinator>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
 	project_(std::make_unique<Project>()),
 	m_linked_rot(false)
@@ -804,9 +804,9 @@ flvr::FramebufferStateTracker& Global::get_framebuffer_state_tracker()
 	return *fb_state_tracker_;
 }
 
-RefreshSchedulerManager& Global::get_refresh_scheduler_manager()
+Coordinator& Global::get_coordinator()
 {
-	return *refresh_scheduler_manager_;
+	return *coordinator_;
 }
 
 //current selection
