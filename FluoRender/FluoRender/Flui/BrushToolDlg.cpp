@@ -55,7 +55,7 @@ DEALINGS IN THE SOFTWARE.
 
 BrushToolDlg::BrushToolDlg(
 	MainFrame *frame):
-	TabbedPanel(frame, frame,
+	TabbedPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 620)),
 	0, "BrushToolDlg"),

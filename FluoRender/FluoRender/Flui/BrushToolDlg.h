@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 
+class MainFrame;
 class wxSingleSlider;
 struct BrushGridData
 {
@@ -83,8 +84,6 @@ public:
 
 	BrushToolDlg(MainFrame* frame);
 	~BrushToolDlg();
-
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//toolbar1
 	void BrushUndo();
