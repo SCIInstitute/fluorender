@@ -48,7 +48,7 @@ public:
 
 	virtual void Update(
 		const UpdateRequest& request) override;
-
+	
 	AnnotatPropPanel* GetPanel() const
 	{
 		return static_cast<AnnotatPropPanel*>(GetWindow());

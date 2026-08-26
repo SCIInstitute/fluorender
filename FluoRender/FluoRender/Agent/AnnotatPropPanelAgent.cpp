@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotatPropPanelAgent.h>
 #include <AnnotatPropPanel.h>
 #include <AnnotData.h>
+#include <Names.h>
 
 AnnotatPropPanelAgent::AnnotatPropPanelAgent(
 	AnnotatPropPanel* panel) :
@@ -41,8 +42,8 @@ bool AnnotatPropPanelAgent::Accept(
 	const UpdateRequest& request) const
 {
 	return
-		FOUND_VALUE(gstAnnotData) ||
-		FOUND_VALUE(gstAnnotProps);
+		FOUND_VALUE(gstAnnotMemoText) ||
+		FOUND_VALUE(gstAnnotMemoReadOnly);
 }
 
 void AnnotatPropPanelAgent::Update(
@@ -51,16 +52,30 @@ void AnnotatPropPanelAgent::Update(
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	if (FOUND_VALUE(gstAnnotData))
+	auto ann = GetData();
+	if (!ann)
+		return;
+
+	if (request.dir == UpdateDir::DataToUI)
 	{
-		auto ann = glbin_current.GetAnnotData();
-		m_ann = ann;
-		panel->SetData(ann);
+		if (FOUND_VALUE(gstAnnotMemoText))
+		{
+			std::wstring str = ann->GetMemo();
+			panel->SetMemoText(str);
+		}
+		if (FOUND_VALUE(gstAnnotMemoReadOnly))
+		{
+			bool bval = ann->GetMemoRO();
+			panel->SetMemoReadOnly(bval);
+		}
+
 	}
-	if (FOUND_VALUE(gstAnnotProps))
+	else if (request.dir == UpdateDir::UItoData)
 	{
-		auto ann = GetData();
-		if (ann)
-			panel->UpdateProps(ann);
+		if (FOUND_VALUE(gstAnnotMemoText))
+		{
+			std::wstring str = panel->GetMemoText();
+			ann->SetMemo(str);
+		}
 	}
 }

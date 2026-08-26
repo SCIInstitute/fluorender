@@ -1053,4 +1053,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolumeA "volume a"
 #define gstVolumeB "volume b"
 
+//annotation panel agent
+#define gstAnnotMemoText "annot memo text"
+#define gstAnnotMemoReadOnly "annot memo read only"
+
 #endif//NAMES_HPP

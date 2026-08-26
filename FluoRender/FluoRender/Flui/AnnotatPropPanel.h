@@ -43,6 +43,13 @@ public:
 		const wxString& name = "AnnotatPropPanel");
 	~AnnotatPropPanel();
 
+	// ui update methods
+	void SetMemoText(const std::wstring& text);
+	void SetMemoReadOnly(bool read_only);
+
+	// data update methods
+	std::wstring GetMemoText() const;
+
 private:
 	wxTextCtrl* m_memo_text;
 	wxButton* m_memo_update_btn;

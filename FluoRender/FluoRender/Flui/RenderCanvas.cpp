@@ -289,8 +289,9 @@ int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd) {
 
 std::shared_ptr<RenderView> RenderCanvas::GetRenderView()
 {
-	if (m_agent)
-		return m_agent->GetView();
+	auto agent = GetRenderCanvasAgent();
+	if (agent)
+		return agent->GetView();
 	return nullptr;
 }
 
@@ -338,7 +339,9 @@ void RenderCanvas::Draw()
 	auto view = GetRenderView();
 	assert(view);
 	bool initialized = view->Init();
-	m_agent->PerformDraw();
+	auto agent = GetRenderCanvasAgent();
+	if (agent)
+		agent->PerformDraw();
 
 	if (initialized)
 		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
@@ -469,7 +472,9 @@ void RenderCanvas::OnResize(wxSizeEvent& event)
 		view->SetSize(cw, ch);           // logical width/height for UI logic
 		view->SetClient(0, 0, cw, ch);   // origin is typically 0,0 for client
 
-		m_agent->RequestDraw();
+		auto agent = GetRenderCanvasAgent();
+		if (agent)
+			agent->RequestDraw();
 	}
 
 	// Make sure this doesn't call SetSize() or change min/best size in a DPI-dependent way.
@@ -602,7 +607,8 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 			m_frame->Show();
 		}
 		if (auto view = GetRenderView())
-			m_agent->RequestDraw();
+			if (auto agent = GetRenderCanvasAgent())
+				agent->RequestDraw();
 	}
 }
 

@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 class wxWindow;
 class Agent;
 
-#define FOUND_VALUE(v) vc.find(v) != vc.end()
+#define FOUND_VALUE(v) request.values.find(v) != request.values.end()
 
 enum class UpdateMode : int
 {
@@ -45,19 +45,24 @@ enum class UpdateMode : int
 	None
 };
 
+enum class UpdateDir : int
+{
+	UItoData,
+	DataToUI,
+	Any
+};
+
 struct UpdateRequest
 {
 	UpdateRequest(
 		const fluo::ValueCollection& vals = {},
 		Agent* snd = nullptr,
 		UpdateMode md = UpdateMode::ExcludeSender,
-		const std::set<int>& views = {},
 		const std::string& r = "")
 		:
 		values(vals),
 		sender(snd),
 		mode(md),
-		target_views(views),
 		reason(r)
 	{
 	}
@@ -70,11 +75,50 @@ struct UpdateRequest
 
 	UpdateMode mode = UpdateMode::ExcludeSender;
 
+	UpdateDir dir = UpdateDir::Any;
+
 	// empty = all views
-	std::set<int> target_views;
+	//std::set<int> target_views;
 
 	// optional debug string
 	std::string reason;
+
+	static UpdateRequest UIToData(
+		const fluo::ValueCollection& vals,
+		Agent* sender = nullptr,
+		const std::string& reason = "")
+	{
+		UpdateRequest r(vals, sender,
+			UpdateMode::SenderOnly,
+			reason);
+		r.dir = UpdateDir::UItoData;
+		return r;
+	}
+
+	static UpdateRequest DataToUI(
+		const fluo::ValueCollection& vals,
+		Agent* sender = nullptr,
+		UpdateMode mode = UpdateMode::ExcludeSender,
+		const std::string& reason = "")
+	{
+		UpdateRequest r(vals, sender,
+			mode,
+			reason);
+		r.dir = UpdateDir::DataToUI;
+		return r;
+	}
+
+	static UpdateRequest ViewUpdate(
+		const fluo::ValueCollection& vals,
+		Agent* sender = nullptr,
+		const std::string& reason = "")
+	{
+		UpdateRequest r(vals, sender,
+			UpdateMode::ExcludeSender,
+			reason);
+		r.dir = UpdateDir::DataToUI;
+		return r;
+	}
 };
 
 class Agent
@@ -98,6 +142,18 @@ public:
 	}
 
 	virtual void Update(const UpdateRequest& request) = 0;
+
+	template<class T>
+	T* As()
+	{
+		return dynamic_cast<T*>(this);
+	}
+
+	template<class T>
+	const T* As() const
+	{
+		return dynamic_cast<const T*>(this);
+	}
 
 protected:
 	void Notify(const UpdateRequest& request);

@@ -26,9 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <AnnotatPropPanel.h>
-#include <MainFrame.h>
-#include <AnnotData.h>
-#include <wx/valnum.h>
+#include <AnnotatPropPanelAgent.h>
+#include <Names.h>
 
 AnnotatPropPanel::AnnotatPropPanel(
 	wxWindow* parent,
@@ -77,33 +76,34 @@ AnnotatPropPanel::~AnnotatPropPanel()
 {
 }
 
-void AnnotatPropPanel::FluoUpdate(const fluo::ValueCollection& values)
+// ui update methods
+void AnnotatPropPanel::SetMemoText(const std::wstring& text)
 {
-	auto ann = m_ann.lock();
-	if (!ann)
-		return;
+	m_memo_text->ChangeValue(text);
+}
 
-	wxString memo = ann->GetMemo();
-	m_memo_text->ChangeValue(memo);
-	if (ann->GetMemoRO())
-	{
-		m_memo_text->SetEditable(false);
+void AnnotatPropPanel::SetMemoReadOnly(bool read_only)
+{
+	m_memo_text->SetEditable(!read_only);
+	if (read_only)
 		m_memo_update_btn->Disable();
-	}
 	else
-	{
-		m_memo_text->SetEditable(true);
 		m_memo_update_btn->Enable();
-	}
+}
+
+// data update methods
+std::wstring AnnotatPropPanel::GetMemoText() const
+{
+	wxString str = m_memo_text->GetValue();
+	return str.ToStdWstring();
 }
 
 void AnnotatPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 {
-	auto ann = m_ann.lock();
-	if (ann)
+	auto agent = m_agent->As<AnnotatPropPanelAgent>();
+	if (agent)
 	{
-		wxString memo = m_memo_text->GetValue();
-		std::wstring str = memo.ToStdWstring();
-		ann->SetMemo(str);
+		agent->Update(
+			UpdateRequest::UIToData( { gstAnnotMemoText } ));
 	}
 }

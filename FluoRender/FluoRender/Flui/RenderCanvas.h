@@ -64,7 +64,7 @@ public:
 
 	RenderCanvasAgent* GetRenderCanvasAgent()
 	{
-		return static_cast<RenderCanvasAgent*>(m_agent.get());
+		return dynamic_cast<RenderCanvasAgent*>(m_agent.get());
 	}
 
 	std::shared_ptr<RenderView> GetRenderView();
