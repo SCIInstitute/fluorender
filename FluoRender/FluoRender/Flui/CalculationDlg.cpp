@@ -38,7 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeCalculator.h>
 
 CalculationDlg::CalculationDlg(MainFrame *frame)
-	: PropPanel(frame, frame,
+	: PropPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 350)),
 	0, "CalculationDlg")
@@ -128,33 +128,15 @@ CalculationDlg::~CalculationDlg()
 
 }
 
-void CalculationDlg::FluoUpdate(const fluo::ValueCollection& vc)
+//update
+void CalculationDlg::UpdateVolumeA(const std::wstring& str)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
+	m_calc_a_text->ChangeValue(str);
+}
 
-	std::wstring str;
-	if (update_all || FOUND_VALUE(gstVolumeA))
-	{
-		auto vd = glbin_vol_calculator.GetVolumeA();
-		if (vd)
-		{
-			str = vd->GetName();
-			m_calc_a_text->ChangeValue(str);
-		}
-	}
-
-	if (update_all || FOUND_VALUE(gstVolumeB))
-	{
-		auto vd = glbin_vol_calculator.GetVolumeB();
-		if (vd)
-		{
-			str = vd->GetName();
-			m_calc_b_text->ChangeValue(str);
-		}
-	}
+void CalculationDlg::UpdateVolumeB(const std::wstring& str)
+{
+	m_calc_b_text->ChangeValue(str);
 }
 
 //calculations

@@ -25,51 +25,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _CALCULATIONDLG_H_
-#define _CALCULATIONDLG_H_
+#ifndef CalculationDlgAgent_h
+#define CalculationDlgAgent_h
 
-#include <PropPanel.h>
+#include <Agent.h>
 
-class MainFrame;
-class CalculationDlg : public PropPanel
+class CalculationDlg;
+
+class CalculationDlgAgent : public Agent
 {
 public:
-	CalculationDlg(MainFrame* frame);
-	~CalculationDlg();
+	CalculationDlgAgent(
+		CalculationDlg* dlg);
 
-	//update
-	void UpdateVolumeA(const std::wstring& str);
-	void UpdateVolumeB(const std::wstring& str);
+	virtual ~CalculationDlgAgent() = default;
 
-private:
-	//calculations
-	//operands
-	wxButton *m_calc_load_a_btn;
-	wxTextCtrl *m_calc_a_text;
-	wxButton *m_calc_load_b_btn;
-	wxTextCtrl *m_calc_b_text;
-	//two-operators
-	wxButton *m_calc_sub_btn;
-	wxButton *m_calc_add_btn;
-	wxButton *m_calc_div_btn;
-	wxButton *m_calc_isc_btn;
-	//one-operators
-	wxButton *m_calc_fill_btn;
-	wxButton *m_calc_combine_btn;
+	// Agent interface
+	virtual bool Accept(
+		const UpdateRequest& request) const override;
+
+	virtual void Update(
+		const UpdateRequest& request) override;
+
+	CalculationDlg* GetDialog() const;
 
 private:
-	//calculations
-	//operands
-	void OnLoadA(wxCommandEvent& event);
-	void OnLoadB(wxCommandEvent& event);
-	//operators
-	void OnCalcSub(wxCommandEvent& event);
-	void OnCalcAdd(wxCommandEvent& event);
-	void OnCalcDiv(wxCommandEvent& event);
-	void OnCalcIsc(wxCommandEvent& event);
-	//one-operators
-	void OnCalcFill(wxCommandEvent& event);
-	void OnCalcCombine(wxCommandEvent& event);
+	void UpdateUI(const UpdateRequest& request);
+
+	void UpdateData(const UpdateRequest& request);
 };
 
-#endif//_CALCULATIONDLG_H_
+#endif // CalculationDlgAgent_h

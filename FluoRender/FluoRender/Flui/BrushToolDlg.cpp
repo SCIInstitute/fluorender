@@ -51,15 +51,12 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <icons.h>
 
-#define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
-
 BrushToolDlg::BrushToolDlg(
 	MainFrame *frame):
 	TabbedPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 620)),
 	0, "BrushToolDlg"),
-	m_max_value(255.0),
 	m_hold_history(false),
 	m_auto_update_timer(this)
 {
@@ -494,219 +491,131 @@ wxWindow* BrushToolDlg::CreateAlignPage(wxWindow* parent)
 	return page;
 }
 
-void BrushToolDlg::FluoUpdate(const fluo::ValueCollection& vc)
+void BrushToolDlg::EnableUndo(bool bval1, bool bval2)
 {
-	auto sel_vol = glbin_current.vol_data.lock();
+	m_toolbar->EnableTool(ID_BrushUndo, bval1);
+	m_toolbar->EnableTool(ID_BrushRedo, bval2);
+}
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty() || FOUND_VALUE(gstCurrentSelect);
+void BrushToolDlg::ToggleBrushes(InteractiveMode int_mode, flrd::SelectMode sel_mode)
+{
+	m_toolbar->ToggleTool(ID_BrushGrow, int_mode == InteractiveMode::Grow);
+	m_toolbar->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
+	m_toolbar->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
+	m_toolbar->ToggleTool(ID_BrushMesh, sel_mode == flrd::SelectMode::Mesh);
+	m_toolbar->ToggleTool(ID_BrushSingle, sel_mode == flrd::SelectMode::SingleSelect);
+	m_toolbar->ToggleTool(ID_BrushDiffuse, sel_mode == flrd::SelectMode::Diffuse);
+	m_toolbar->ToggleTool(ID_BrushSolid, sel_mode == flrd::SelectMode::Solid);
+	m_toolbar->ToggleTool(ID_BrushUnsel, sel_mode == flrd::SelectMode::Eraser);
+}
 
-	double dval = 0.0;
-	int ival = 0;
-	bool bval = false;
-	//threshold range
-	if (sel_vol)
-		m_max_value = sel_vol->GetMaxValue();
+void BrushToolDlg::EnableMask(bool bval)
+{
+	m_toolbar2->EnableTool(ID_MaskPaste, bval);
+	m_toolbar2->EnableTool(ID_MaskMerge, bval);
+	m_toolbar2->EnableTool(ID_MaskExclude, bval);
+	m_toolbar2->EnableTool(ID_MaskIntersect, bval);
+}
 
-	if (update_all || FOUND_VALUE(gstSelUndo) || FOUND_VALUE(gstCurrentSelect))
+void BrushToolDlg::UpdateEdgeDetect(bool bval)
+{
+	m_edge_detect_chk->SetValue(bval);
+	m_brush_gm_falloff_sldr->Enable(bval);
+	m_brush_gm_falloff_text->Enable(bval);
+}
+
+void BrushToolDlg::UpdateHiddenRemoval(bool bval)
+{
+	m_hidden_removal_chk->SetValue(bval);
+}
+
+void BrushToolDlg::UpdateSelectGroup(bool bval)
+{
+	m_select_group_chk->SetValue(bval);
+}
+
+void BrushToolDlg::UpdateUpdateOrder(bool bval)
+{
+	m_accurate_bricks_chk->SetValue(bval);
+}
+
+void BrushToolDlg::UpdateBrushThreshold(double dval, double range)
+{
+	m_brush_scl_translate_sldr->SetRange(0, std::round(range * 10.0));
+	m_brush_scl_translate_sldr->ChangeValue(std::round(dval * range * 10.0));
+	m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", dval * range));
+}
+
+void BrushToolDlg::UpdateBrushGmFalloff(double dval)
+{
+	m_brush_gm_falloff_sldr->ChangeValue(std::round(dval * 1000.0));
+	m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", dval));
+}
+
+void BrushToolDlg::UpdateBrush2dInf(double dval)
+{
+	m_brush_2dinfl_sldr->ChangeValue(std::round(dval * 100.0));
+	m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
+}
+
+void BrushToolDlg::UpdateBrushSize1(double dval)
+{
+	m_brush_size1_sldr->ChangeValue(std::round(dval));
+	m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
+}
+
+void BrushToolDlg::UpdateBrushSize2(bool bval, double dval)
+{
+	m_brush_size2_chk->SetValue(bval);
+	m_brush_size2_sldr->Enable(bval);
+	m_brush_size2_text->Enable(bval);
+	m_brush_size2_sldr->ChangeValue(std::round(dval));
+	m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
+}
+
+void BrushToolDlg::UpdateBrushIter(int ival)
+{
+	m_brush_iter_sldr->ChangeValue(ival);
+	m_brush_iter_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void BrushToolDlg::UpdateBrushSizeRel(bool bval)
+{
+	m_brush_size_data_rb->SetValue(bval);
+	m_brush_size_screen_rb->SetValue(!bval);
+}
+
+void BrushToolDlg::UpdateAlignCenter(bool bval)
+{
+	m_align_center_chk->SetValue(bval);
+}
+
+void BrushToolDlg::UpdateBrushHistoryEnable()
+{
+	m_history_chk->SetValue(m_hold_history);
+}
+
+//output
+void BrushToolDlg::SetOutput(const BrushGridData& data, const std::wstring& unit)
+{
+	if (m_output_grid->GetNumberRows() == 0 ||
+		m_hold_history)
 	{
-		if (sel_vol && sel_vol->GetTexture())
-		{
-			m_toolbar->EnableTool(ID_BrushUndo,
-				sel_vol->GetTexture()->get_undo());
-			m_toolbar->EnableTool(ID_BrushRedo,
-				sel_vol->GetTexture()->get_redo());
-		}
-		else
-		{
-			m_toolbar->EnableTool(ID_BrushUndo, false);
-			m_toolbar->EnableTool(ID_BrushRedo, false);
-		}
+		m_output_grid->InsertRows();
 	}
-
-	if (update_all || FOUND_VALUE(gstFreehandToolState))
-	{
-		auto view = glbin_current.render_view.lock();
-		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;
-		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
-		m_toolbar->ToggleTool(ID_BrushGrow, int_mode == InteractiveMode::Grow);
-		m_toolbar->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
-		m_toolbar->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
-		m_toolbar->ToggleTool(ID_BrushMesh, sel_mode == flrd::SelectMode::Mesh);
-		m_toolbar->ToggleTool(ID_BrushSingle, sel_mode == flrd::SelectMode::SingleSelect);
-		m_toolbar->ToggleTool(ID_BrushDiffuse, sel_mode == flrd::SelectMode::Diffuse);
-		m_toolbar->ToggleTool(ID_BrushSolid, sel_mode == flrd::SelectMode::Solid);
-		m_toolbar->ToggleTool(ID_BrushUnsel, sel_mode == flrd::SelectMode::Eraser);
-	}
-
-	if (update_all || FOUND_VALUE(gstSelMask) || FOUND_VALUE(gstCurrentSelect))
-	{
-		bval = glbin_vol_selector.GetCopyMaskVolume() != 0;
-		m_toolbar2->EnableTool(ID_MaskPaste, bval);
-		m_toolbar2->EnableTool(ID_MaskMerge, bval);
-		m_toolbar2->EnableTool(ID_MaskExclude, bval);
-		m_toolbar2->EnableTool(ID_MaskIntersect, bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstSelOptions))
-	{
-		//edge detect
-		bval = glbin_vol_selector.GetEdgeDetect();
-		m_edge_detect_chk->SetValue(bval);
-		m_brush_gm_falloff_sldr->Enable(bval);
-		m_brush_gm_falloff_text->Enable(bval);
-		//hidden removal
-		bval = glbin_vol_selector.GetHiddenRemoval();
-		m_hidden_removal_chk->SetValue(bval);
-		//select group
-		bval = glbin_vol_selector.GetSelectGroup();
-		m_select_group_chk->SetValue(bval);
-		//brick acuracy
-		bval = glbin_vol_selector.GetUpdateOrder();
-		m_accurate_bricks_chk->SetValue(bval);
-	}
-
-	//selection strength
-	if (update_all || FOUND_VALUE(gstBrushThreshold))
-	{
-		m_brush_scl_translate_sldr->SetRange(0, std::round(m_max_value * 10.0));
-		flrd::VolumeSelector* vs = &glbin_vol_selector;
-		dval = glbin_vol_selector.GetBrushSclTranslate();
-		m_brush_scl_translate_sldr->ChangeValue(std::round(dval * m_max_value * 10.0));
-		m_brush_scl_translate_text->ChangeValue(wxString::Format("%.1f", dval * m_max_value));
-	}
-
-	//gm falloff
-	if (update_all || FOUND_VALUE(gstBrushGmFalloff))
-	{
-		dval = glbin_vol_selector.GetBrushGmFalloff();
-		m_brush_gm_falloff_sldr->ChangeValue(std::round(GM_2_ESTR(dval) * 1000.0));
-		m_brush_gm_falloff_text->ChangeValue(wxString::Format("%.3f", GM_2_ESTR(dval)));
-	}
-
-	//2d influence
-	if (update_all || FOUND_VALUE(gstBrush2dInf))
-	{
-		dval = glbin_vol_selector.GetW2d();
-		m_brush_2dinfl_sldr->ChangeValue(std::round(dval * 100.0));
-		m_brush_2dinfl_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	//size1
-	if (update_all || FOUND_VALUE(gstBrushSize1))
-	{
-		dval = glbin_vol_selector.GetBrushSize1();
-		m_brush_size1_sldr->ChangeValue(std::round(dval));
-		m_brush_size1_text->ChangeValue(wxString::Format("%.0f", dval));
-	}
-
-	//size2
-	if (update_all || FOUND_VALUE(gstBrushSize2))
-	{
-		bval = glbin_vol_selector.GetUseBrushSize2();
-		m_brush_size2_chk->SetValue(bval);
-		m_brush_size2_sldr->Enable(bval);
-		m_brush_size2_text->Enable(bval);
-		dval = glbin_vol_selector.GetBrushSize2();
-		m_brush_size2_sldr->ChangeValue(std::round(dval));
-		m_brush_size2_text->ChangeValue(wxString::Format("%.0f", dval));
-	}
-
-	//iteration number
-	if (update_all || FOUND_VALUE(gstBrushIter))
-	{
-		ival = glbin_vol_selector.GetBrushIteration();
-		m_brush_iter_sldr->ChangeValue(ival);
-		m_brush_iter_text->ChangeValue(wxString::Format("%d", ival));
-	}
-
-	//brush size relation
-	if (update_all || FOUND_VALUE(gstBrushSizeRel))
-	{
-		bval = glbin_vol_selector.GetBrushSizeData();
-		m_brush_size_data_rb->SetValue(bval);
-		m_brush_size_screen_rb->SetValue(!bval);
-	}
-
-	//align center
-	if (update_all || FOUND_VALUE(gstAlignCenter))
-	{
-		bval = glbin_aligner.GetAlignCenter();
-		m_align_center_chk->SetValue(bval);
-	}
-
-	//output
-	if (update_all || FOUND_VALUE(gstBrushHistoryEnable))
-		m_history_chk->SetValue(m_hold_history);
-
-	bool count_result = FOUND_VALUE(gstBrushCountResult);
-	bool auto_update = FOUND_VALUE(gstBrushCountAutoUpdate);
-	bool count_update = false;
-	if (sel_vol &&
-		(count_result ||
-			auto_update))
-	{
-		if (auto_update)
-			count_update = glbin_vol_selector.GetAutoPaintSize();
-		else
-			count_update = true;
-	}
-	if (count_update)
-	{
-		BrushGridData data;
-		flrd::CountVoxels counter;
-		counter.SetVolumeData(sel_vol);
-		counter.Count();
-		data.voxel_sum = counter.GetSum();
-		double scale = sel_vol->GetScalarScale();
-		data.voxel_wsum = counter.GetWeightedSum() * scale;
-		if (data.voxel_sum)
-		{
-			data.avg_int = data.voxel_wsum / data.voxel_sum;
-			if (sel_vol->GetBits() == 8)
-				data.avg_int *= 255.0;
-			else if (sel_vol->GetBits() == 16)
-				data.avg_int *= sel_vol->GetMaxValue();
-		}
-		auto spc = sel_vol->GetSpacing();
-		double vvol = spc.x() * spc.y() * spc.z();
-		vvol = vvol == 0.0 ? 1.0 : vvol;
-		data.size = data.voxel_sum * vvol;
-		data.wsize = data.voxel_wsum * vvol;
-		wxString unit;
-		auto view = glbin_current.render_view.lock();
-		if (view)
-		{
-			switch (view->m_sb_unit)
-			{
-			case 0:
-				unit = L"nm\u00B3";
-				break;
-			case 1:
-			default:
-				unit = L"\u03BCm\u00B3";
-				break;
-			case 2:
-				unit = L"mm\u00B3";
-				break;
-			}
-		}
-		SetOutput(data, unit);
-	}
-
-	if (FOUND_VALUE(gstBrushSpeedResult))
-	{
-		if (glbin_vol_selector.m_test_speed)
-		{
-			BrushGridData data;
-			data.size = glbin_vol_selector.GetSpanSec();
-			data.wsize = data.size;
-			wxString unit = "Sec.";
-			SetOutput(data, unit);
-		}
-	}
+	m_output_grid->SetCellValue(0, 0,
+		wxString::Format("%d", data.voxel_sum));
+	m_output_grid->SetCellValue(0, 1,
+		wxString::Format("%f", data.voxel_wsum));
+	m_output_grid->SetCellValue(0, 2,
+		wxString::Format("%f", data.avg_int));
+	m_output_grid->SetCellValue(0, 3,
+		wxString::Format("%f", data.size) + unit);
+	m_output_grid->SetCellValue(0, 4,
+		wxString::Format("%f", data.wsize) + unit);
+	//m_output_grid->Fit();
+	//m_output_grid->AutoSizeColumns();
+	m_output_grid->ClearSelection();
 }
 
 void BrushToolDlg::BrushUndo()
@@ -1122,29 +1031,6 @@ void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 	glbin_aligner.SetView(glbin_current.render_view.lock());
 	glbin_aligner.AlignPca(false);
 	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId()});
-}
-
-//output
-void BrushToolDlg::SetOutput(const BrushGridData &data, const wxString &unit)
-{
-	if (m_output_grid->GetNumberRows()==0 ||
-		m_hold_history)
-	{
-		m_output_grid->InsertRows();
-	}
-	m_output_grid->SetCellValue(0, 0,
-		wxString::Format("%d", data.voxel_sum));
-	m_output_grid->SetCellValue(0, 1,
-		wxString::Format("%f", data.voxel_wsum));
-	m_output_grid->SetCellValue(0, 2,
-		wxString::Format("%f", data.avg_int));
-	m_output_grid->SetCellValue(0, 3,
-		wxString::Format("%f", data.size) + unit);
-	m_output_grid->SetCellValue(0, 4,
-		wxString::Format("%f", data.wsize) + unit);
-	//m_output_grid->Fit();
-	//m_output_grid->AutoSizeColumns();
-	m_output_grid->ClearSelection();
 }
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)

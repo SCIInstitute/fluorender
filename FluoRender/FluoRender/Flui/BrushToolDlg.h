@@ -42,7 +42,11 @@ struct BrushGridData
 	double size = 0;
 	double wsize = 0;
 };
-
+enum class InteractiveMode : int;
+namespace flrd
+{
+	enum class SelectMode : int;
+}
 class BrushToolDlg : public TabbedPanel
 {
 public:
@@ -85,6 +89,29 @@ public:
 	BrushToolDlg(MainFrame* frame);
 	~BrushToolDlg();
 
+	//update
+	void EnableUndo(bool bval1, bool bval2);
+	void ToggleBrushes(InteractiveMode int_mode, flrd::SelectMode sel_mode);
+	void EnableMask(bool bval);
+
+	void UpdateEdgeDetect(bool bval);
+	void UpdateHiddenRemoval(bool bval);
+	void UpdateSelectGroup(bool bval);
+	void UpdateUpdateOrder(bool bval);
+
+	void UpdateBrushThreshold(double dval, double range = 255.0);
+	void UpdateBrushGmFalloff(double dval);
+	void UpdateBrush2dInf(double dval);
+	void UpdateBrushSize1(double dval);
+	void UpdateBrushSize2(bool bval, double dval);
+	void UpdateBrushIter(int ival);
+	void UpdateBrushSizeRel(bool bval);
+	void UpdateAlignCenter(bool bval);
+	void UpdateBrushHistoryEnable();
+
+	//output
+	void SetOutput(const BrushGridData& data, const std::wstring& unit);
+
 	//toolbar1
 	void BrushUndo();
 	void BrushRedo();
@@ -108,8 +135,6 @@ public:
 	void MaskIntersect();
 
 private:
-	//max volume value
-	double m_max_value;
 	//output
 	bool m_hold_history;
 
@@ -169,8 +194,6 @@ private:
 	wxTimer m_auto_update_timer;
 
 private:
-	//output
-	void SetOutput(const BrushGridData& data, const wxString& unit);
 	void CopyData();
 	void PasteData();
 

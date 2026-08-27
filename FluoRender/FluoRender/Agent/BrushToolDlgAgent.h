@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #define BrushToolDlgAgent_h
 
 #include <Agent.h>
-#include <memory>
 
 class BrushToolDlg;
 
@@ -48,12 +47,15 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	BrushToolDlg* GetDialog() const
-	{
-		return static_cast<BrushToolDlg*>(GetWindow());
-	}
+	BrushToolDlg* GetDialog() const;
 
 private:
+	//max volume value
+	double m_max_value{ 255.0 };
+
+	void UpdateUI(const UpdateRequest& request);
+
+	void UpdateData(const UpdateRequest& request);
 };
 
 #endif // BrushToolDlgAgent_h

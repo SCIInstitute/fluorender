@@ -25,51 +25,74 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _CALCULATIONDLG_H_
-#define _CALCULATIONDLG_H_
 
-#include <PropPanel.h>
+#include <CalculationDlgAgent.h>
+#include <CalculationDlg.h>
+#include <Global.h>
+#include <Names.h>
+#include <VolumeCalculator.h>
+#include <VolumeData.h>
 
-class MainFrame;
-class CalculationDlg : public PropPanel
+CalculationDlgAgent::CalculationDlgAgent(
+	CalculationDlg* dlg) :
+	Agent(dlg)
 {
-public:
-	CalculationDlg(MainFrame* frame);
-	~CalculationDlg();
 
-	//update
-	void UpdateVolumeA(const std::wstring& str);
-	void UpdateVolumeB(const std::wstring& str);
+}
 
-private:
-	//calculations
-	//operands
-	wxButton *m_calc_load_a_btn;
-	wxTextCtrl *m_calc_a_text;
-	wxButton *m_calc_load_b_btn;
-	wxTextCtrl *m_calc_b_text;
-	//two-operators
-	wxButton *m_calc_sub_btn;
-	wxButton *m_calc_add_btn;
-	wxButton *m_calc_div_btn;
-	wxButton *m_calc_isc_btn;
-	//one-operators
-	wxButton *m_calc_fill_btn;
-	wxButton *m_calc_combine_btn;
+bool CalculationDlgAgent::Accept(
+	const UpdateRequest& request) const
+{
+	return true;
+}
 
-private:
-	//calculations
-	//operands
-	void OnLoadA(wxCommandEvent& event);
-	void OnLoadB(wxCommandEvent& event);
-	//operators
-	void OnCalcSub(wxCommandEvent& event);
-	void OnCalcAdd(wxCommandEvent& event);
-	void OnCalcDiv(wxCommandEvent& event);
-	void OnCalcIsc(wxCommandEvent& event);
-	//one-operators
-	void OnCalcFill(wxCommandEvent& event);
-	void OnCalcCombine(wxCommandEvent& event);
-};
+void CalculationDlgAgent::Update(
+	const UpdateRequest& request)
+{
+	if (request.dir == UpdateDir::DataToUI)
+	{
+		UpdateUI(request);
+	}
+	else if (request.dir == UpdateDir::UItoData)
+	{
+		UpdateData(request);
+	}
+}
 
-#endif//_CALCULATIONDLG_H_
+void CalculationDlgAgent::UpdateUI(const UpdateRequest& request)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = request.values.empty();
+
+	std::wstring str;
+	if (update_all || FOUND_VALUE(gstVolumeA))
+	{
+		auto vd = glbin_vol_calculator.GetVolumeA();
+		if (vd)
+		{
+			str = vd->GetName();
+			dlg->UpdateVolumeA(str);
+		}
+	}
+
+	if (update_all || FOUND_VALUE(gstVolumeB))
+	{
+		auto vd = glbin_vol_calculator.GetVolumeB();
+		if (vd)
+		{
+			str = vd->GetName();
+			dlg->UpdateVolumeB(str);
+		}
+	}
+}
+
+void CalculationDlgAgent::UpdateData(const UpdateRequest& request)
+{
+
+}
