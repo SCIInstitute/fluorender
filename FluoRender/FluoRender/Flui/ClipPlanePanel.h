@@ -30,16 +30,29 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <wx/spinbutt.h>
+#include <string>
 
 namespace fluo
 {
 	enum class ClipPlane : int;
+	class BBox;
 }
 class wxFadeButton;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableToolbar;
 class TreeLayer;
+
+struct ClipPlaneToolTips
+{
+	std::string clip_x;
+	std::string clip_y;
+	std::string clip_z;
+	std::string rot_x;
+	std::string rot_y;
+	std::string rot_z;
+};
+
 class ClipPlanePanel: public TabbedPanel
 {
 	enum
@@ -57,7 +70,16 @@ public:
 		const wxString& name="ClipPlanePanel");
 	~ClipPlanePanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void EnableAll(bool val);
+
+	void UpdateToolTips(const ClipPlaneToolTips& tips);
+	void ToggleClipLinkChan(bool bval);
+	void ToggleClipHold(bool bval);
+	void UpdateClipPlaneMode(const wxBitmapBundle& bitmap);
+	void UpdateClipPlaneRanges(const fluo::BBox& bbox);
+	void UpdateClipPlaneRangeColor(const wxColor& c);
+	void UpdateClipDist(int dx, int dy, int dz);
 
 	bool GetXLink();
 	bool GetYLink();
@@ -137,10 +159,6 @@ private:
 private:
 	wxWindow* CreateTranslatePage(wxWindow* parent);
 	wxWindow* CreateRotatePage(wxWindow* parent);
-
-	void EnableAll(bool val);
-
-	std::shared_ptr<TreeLayer> GetObject();
 
 	void OnIdle(wxIdleEvent &event);
 

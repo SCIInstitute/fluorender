@@ -25,19 +25,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef CalculationDlgAgent_h
-#define CalculationDlgAgent_h
+#ifndef ClipPlanePanelAgent_h
+#define ClipPlanePanelAgent_h
 
 #include <Agent.h>
+#include <memory>
 
-class CalculationDlg;
-class CalculationDlgAgent : public Agent
+class ClipPlanePanel;
+class TreeLayer;
+class ClipPlanePanelAgent : public Agent
 {
 public:
-	CalculationDlgAgent(
-		CalculationDlg* dlg);
+	ClipPlanePanelAgent(
+		ClipPlanePanel* dlg);
 
-	virtual ~CalculationDlgAgent() = default;
+	virtual ~ClipPlanePanelAgent() = default;
 
 	// Agent interface
 	virtual bool Accept(
@@ -46,12 +48,14 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	CalculationDlg* GetDialog() const;
+	ClipPlanePanel* GetPanel() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
+
+	std::shared_ptr<TreeLayer> GetObject();
 };
 
-#endif // CalculationDlgAgent_h
+#endif // ClipPlanePanelAgent_h

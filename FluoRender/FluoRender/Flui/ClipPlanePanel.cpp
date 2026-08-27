@@ -57,7 +57,7 @@ ClipPlanePanel::ClipPlanePanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, frame, pos, size, style, name),
+	TabbedPanel(frame, pos, size, style, name),
 m_enable_all(true)
 {
 	// temporarily block events during constructor:
@@ -432,306 +432,56 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	return page;
 }
 
-void ClipPlanePanel::FluoUpdate(const fluo::ValueCollection& vc)
+void ClipPlanePanel::UpdateToolTips(const ClipPlaneToolTips& tips)
 {
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty() || FOUND_VALUE(gstCurrentSelect);
+	m_clip_x_st->SetToolTip(tips.clip_x);
+	m_clip_y_st->SetToolTip(tips.clip_y);
+	m_clip_z_st->SetToolTip(tips.clip_z);
+	m_rot_x_st->SetToolTip(tips.rot_x);
+	m_rot_y_st->SetToolTip(tips.rot_y);
+	m_rot_z_st->SetToolTip(tips.rot_z);
+}
 
-	auto obj = GetObject();
-	if (!obj)
-	{
-		EnableAll(false);
-		return;
-	}
-	auto& cb = obj->GetClippingBox();
-	auto fc = obj->GetColor();
+void ClipPlanePanel::ToggleClipLinkChan(bool bval)
+{
+	m_toolbar->ToggleTool(ID_LinkChannelsBtn, bval);
+}
 
-	//mf button tips
-	if (update_all || FOUND_VALUE(gstMultiFuncTips))
-	{
-		switch (glbin_settings.m_mulfunc)
-		{
-		case 0:
-			m_clip_x_st->SetToolTip("Synchronize the X clipping values for channels in render view");
-			m_clip_y_st->SetToolTip("Synchronize the Y clipping values for channels in render view");
-			m_clip_z_st->SetToolTip("Synchronize the Z clipping values for channels in render view");
-			m_rot_x_st->SetToolTip("Synchronize the X rotation values for channels in render view");
-			m_rot_y_st->SetToolTip("Synchronize the Y rotation values for channels in render view");
-			m_rot_z_st->SetToolTip("Synchronize the Z rotation values for channels in render view");
-			break;
-		case 1:
-			m_clip_x_st->SetToolTip("Move mouse cursor in render view and change X clipping using the mouse wheel");
-			m_clip_y_st->SetToolTip("Move mouse cursor in render view and change Y clipping using the mouse wheel");
-			m_clip_z_st->SetToolTip("Move mouse cursor in render view and change Z clipping using the mouse wheel");
-			m_rot_x_st->SetToolTip("Move mouse cursor in render view and change X rotation using the mouse wheel");
-			m_rot_y_st->SetToolTip("Move mouse cursor in render view and change Y rotation using the mouse wheel");
-			m_rot_z_st->SetToolTip("Move mouse cursor in render view and change Z rotation using the mouse wheel");
-			break;
-		case 2:
-			m_clip_x_st->SetToolTip("Reset X clipping values");
-			m_clip_y_st->SetToolTip("Reset Y clipping values");
-			m_clip_z_st->SetToolTip("Reset Z clipping values");
-			m_rot_x_st->SetToolTip("Reset X rotation values");
-			m_rot_y_st->SetToolTip("Reset Y rotation values");
-			m_rot_z_st->SetToolTip("Reset Z rotation values");
-			break;
-		case 4:
-			m_clip_x_st->SetToolTip("Undo X clipping value changes");
-			m_clip_y_st->SetToolTip("Undo Y clipping value changes");
-			m_clip_z_st->SetToolTip("Undo Z clipping value changes");
-			m_rot_x_st->SetToolTip("Undo X rotation value changes");
-			m_rot_y_st->SetToolTip("Undo Y rotation value changes");
-			m_rot_z_st->SetToolTip("Undo Z rotation value changes");
-			break;
-		case 3:
-		case 5:
-			m_clip_x_st->SetToolTip("No function assigned");
-			m_clip_y_st->SetToolTip("No function assigned");
-			m_clip_z_st->SetToolTip("No function assigned");
-			m_rot_x_st->SetToolTip("No function assigned");
-			m_rot_y_st->SetToolTip("No function assigned");
-			m_rot_z_st->SetToolTip("No function assigned");
-			break;
-		}
-	}
+void ClipPlanePanel::ToggleClipHold(bool bval)
+{
+	m_toolbar->ToggleTool(ID_HoldPlanesBtn, bval);
+}
 
-	//link channels in view
-	if (update_all || FOUND_VALUE(gstClipLinkChan))
-	{
-		m_toolbar->ToggleTool(ID_LinkChannelsBtn,
-			glbin_settings.m_clip_link);
-	}
+void ClipPlanePanel::UpdateClipPlaneMode(const wxBitmapBundle& bitmap)
+{
+	m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn, bitmap);
+}
 
-	//hold clipping planes
-	if (update_all || FOUND_VALUE(gstClipHold))
-	{
-		m_toolbar->ToggleTool(ID_HoldPlanesBtn,
-			glbin_settings.m_clip_hold);
-	}
+void ClipPlanePanel::UpdateClipPlaneRanges(const fluo::BBox& bbox)
+{
+	m_clipx_sldr->SetRange(bbox.minintx(), bbox.maxintx());
+	m_clipy_sldr->SetRange(bbox.mininty(), bbox.maxinty());
+	m_clipz_sldr->SetRange(bbox.minintz(), bbox.maxintz());
+}
 
-	//modes
-	if (update_all || FOUND_VALUE(gstClipPlaneMode))
-	{
-		auto mode = static_cast<flrd::ClippingRenderMode>(glbin_settings.m_clip_mode);
-		switch (mode)
-		{
-		case flrd::ClippingRenderMode::Disabled:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_none));
-			break;
-		case flrd::ClippingRenderMode::ColoredFront:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_normal));
-			break;
-		case flrd::ClippingRenderMode::ColoredBack:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_normal_back));
-			break;
-		case flrd::ClippingRenderMode::FrameAll:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_frame6));
-			break;
-		case flrd::ClippingRenderMode::FrameFront:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_frame3));
-			break;
-		case flrd::ClippingRenderMode::FrameBack:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_frame_back));
-			break;
-		case flrd::ClippingRenderMode::TransFront:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_low));
-			break;
-		case flrd::ClippingRenderMode::TransBack:
-			m_toolbar->SetToolNormalBitmap(ID_PlaneModesBtn,
-				wxGetBitmap(clip_low_back));
-			break;
-		}
-	}
+void ClipPlanePanel::UpdateClipPlaneRangeColor(const wxColor& c)
+{
+	m_clipx_sldr->SetRangeColor(c);
+	m_clipy_sldr->SetRangeColor(c);
+	m_clipz_sldr->SetRangeColor(c);
+	m_clipx_sldr->Refresh();
+	m_clipy_sldr->Refresh();
+	m_clipz_sldr->Refresh();
+}
 
-	wxColor c(fc.r() * 255, fc.g() * 255, fc.b() * 255);
-
-	if (update_all || FOUND_VALUE(gstClipPlaneRanges))
-	{
-		//slider range
-		auto bbox = cb.GetBBoxIndex();
-		m_clipx_sldr->SetRange(bbox.minintx(), bbox.maxintx());
-		m_clipy_sldr->SetRange(bbox.mininty(), bbox.maxinty());
-		m_clipz_sldr->SetRange(bbox.minintz(), bbox.maxintz());
-	}
-
-	if (update_all || FOUND_VALUE(gstClipPlaneRangeColor))
-	{
-		m_clipx_sldr->SetRangeColor(c);
-		m_clipy_sldr->SetRangeColor(c);
-		m_clipz_sldr->SetRangeColor(c);
-		m_clipx_sldr->Refresh();
-		m_clipy_sldr->Refresh();
-		m_clipz_sldr->Refresh();
-	}
-
-	//clip distance
-	if (update_all || FOUND_VALUE(gstClipDist))
-	{
-		int dx = 1, dy = 1, dz = 1;
-		dx = cb.GetLinkedDistIndex(fluo::ClipPlane::XNeg);
-		dy = cb.GetLinkedDistIndex(fluo::ClipPlane::YNeg);
-		dz = cb.GetLinkedDistIndex(fluo::ClipPlane::ZNeg);
-		m_yz_dist_text->ChangeValue(
-			wxString::Format("%d", dx));
-		m_xz_dist_text->ChangeValue(
-			wxString::Format("%d", dy));
-		m_xy_dist_text->ChangeValue(
-			wxString::Format("%d", dz));
-	}
-
-	bool bval;
-	double dval;
-	int ival;
-	wxString str;
-
-	bool linkx = m_clipx_sldr->GetLink();
-	bool linky = m_clipy_sldr->GetLink();
-	bool linkz = m_clipz_sldr->GetLink();
-	m_clipx_sldr->SetLink(false);
-	m_clipy_sldr->SetLink(false);
-	m_clipz_sldr->SetLink(false);
-	//x1
-	if (update_all || FOUND_VALUE(gstClipX1))
-	{
-		dval = cb.GetClipIndex(fluo::ClipPlane::XNeg);
-		ival = static_cast<int>(std::round(dval));
-		m_clipx_sldr->ChangeLowValue(ival);
-		str = wxString::Format("%d", ival);
-		m_x1_clip_text->ChangeValue(str);
-		m_x1_clip_text->Update();
-	}
-	//x2
-	if (update_all || FOUND_VALUE(gstClipX2))
-	{
-		dval = cb.GetClipIndex(fluo::ClipPlane::XPos);
-		ival = static_cast<int>(std::round(dval));
-		m_clipx_sldr->ChangeHighValue(ival);
-		str = wxString::Format("%d", ival);
-		m_x2_clip_text->ChangeValue(str);
-		m_x2_clip_text->Update();
-	}
-	//y1
-	if (update_all || FOUND_VALUE(gstClipY1))
-	{
-		dval = cb.GetClipIndex(fluo::ClipPlane::YNeg);
-		ival = static_cast<int>(std::round(dval));
-		m_clipy_sldr->ChangeLowValue(ival);
-		str = wxString::Format("%d", ival);
-		m_y1_clip_text->ChangeValue(str);
-		m_y1_clip_text->Update();
-	}
-	//y2
-	if (update_all || FOUND_VALUE(gstClipY2))
-	{
-		dval = cb.GetClipIndex(fluo::ClipPlane::YPos);
-		ival = static_cast<int>(std::round(dval));
-		m_clipy_sldr->ChangeHighValue(ival);
-		str = wxString::Format("%d", ival);
-		m_y2_clip_text->ChangeValue(str);
-		m_y2_clip_text->Update();
-	}
-	//z1
-	if (update_all || FOUND_VALUE(gstClipZ1))
-	{
-		dval = cb.GetClipIndex(fluo::ClipPlane::ZNeg);
-		ival = static_cast<int>(std::round(dval));
-		m_clipz_sldr->ChangeLowValue(ival);
-		str = wxString::Format("%d", ival);
-		m_z1_clip_text->ChangeValue(str);
-		m_z1_clip_text->Update();
-	}
-	//z2
-	if (update_all || FOUND_VALUE(gstClipZ2))
-	{
-		dval = cb.GetClipIndex(fluo::ClipPlane::ZPos);
-		ival = static_cast<int>(std::round(dval));
-		m_clipz_sldr->ChangeHighValue(ival);
-		str = wxString::Format("%d", ival);
-		m_z2_clip_text->ChangeValue(str);
-		m_z2_clip_text->Update();
-	}
-	m_clipx_sldr->SetLink(linkx);
-	m_clipy_sldr->SetLink(linky);
-	m_clipz_sldr->SetLink(linkz);
-
-	//link
-	if (update_all || FOUND_VALUE(gstClipLinkX))
-	{
-		bval = m_clipx_sldr->GetLink();
-		if (bval != m_linkx_tb->GetToolState(0))
-		{
-			m_linkx_tb->ToggleTool(0, bval);
-			if (bval)
-				m_linkx_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(link));
-			else
-				m_linkx_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(unlink));
-		}
-	}
-	if (update_all || FOUND_VALUE(gstClipLinkY))
-	{
-		bval = m_clipy_sldr->GetLink();
-		if (bval != m_linky_tb->GetToolState(0))
-		{
-			m_linky_tb->ToggleTool(0, bval);
-			if (bval)
-				m_linky_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(link));
-			else
-				m_linky_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(unlink));
-		}
-	}
-	if (update_all || FOUND_VALUE(gstClipLinkZ))
-	{
-		bval = m_clipz_sldr->GetLink();
-		if (bval != m_linkz_tb->GetToolState(0))
-		{
-			m_linkz_tb->ToggleTool(0, bval);
-			if (bval)
-				m_linkz_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(link));
-			else
-				m_linkz_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(unlink));
-		}
-	}
-
-	//rotations
-	fluo::Vector rot = cb.GetEuler();
-	//x
-	if (update_all || FOUND_VALUE(gstClipRotX))
-	{
-		m_x_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.x())));
-		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rot.x()));
-		m_x_rot_text->Update();
-	}
-	//y
-	if (update_all || FOUND_VALUE(gstClipRotY))
-	{
-		m_y_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.y())));
-		m_y_rot_text->ChangeValue(wxString::Format("%.1f", rot.y()));
-		m_y_rot_text->Update();
-	}
-	//z
-	if (update_all || FOUND_VALUE(gstClipRotZ))
-	{
-		m_z_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.z())));
-		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rot.z()));
-		m_z_rot_text->Update();
-	}
-
-	EnableAll(true);
-
+void ClipPlanePanel::UpdateClipDist(int dx, int dy, int dz)
+{
+	m_yz_dist_text->ChangeValue(
+		wxString::Format("%d", dx));
+	m_xz_dist_text->ChangeValue(
+		wxString::Format("%d", dy));
+	m_xy_dist_text->ChangeValue(
+		wxString::Format("%d", dz));
 }
 
 void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
@@ -1872,26 +1622,3 @@ void ClipPlanePanel::EnableAll(bool val)
 	m_xy_dist_text->Enable(val);
 }
 
-std::shared_ptr<TreeLayer> ClipPlanePanel::GetObject()
-{
-	int type = glbin_current.GetType();
-	if (type != 1 && type != 2 && type != 3)
-	{
-		return nullptr;
-	}
-	auto vd = glbin_current.vol_data.lock();
-	auto md = glbin_current.mesh_data.lock();
-	auto view = glbin_current.render_view.lock();
-
-	switch (type)
-	{
-	case 1:	//render view
-		return view;
-	case 2:	//volume
-		return vd;
-	case 3:	//mesh
-		return md;
-	}
-
-	return nullptr;
-}
