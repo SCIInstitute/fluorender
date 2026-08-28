@@ -25,19 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef ComponentDlgAgent_h
-#define ComponentDlgAgent_h
+#ifndef ConvertDlgAgent_h
+#define ConvertDlgAgent_h
 
 #include <Agent.h>
 
-class ComponentDlg;
-class ComponentDlgAgent : public Agent
+class ConvertDlg;
+class ConvertDlgAgent : public Agent
 {
 public:
-	ComponentDlgAgent(
-		ComponentDlg* dlg);
+	ConvertDlgAgent(
+		ConvertDlg* dlg);
 
-	virtual ~ComponentDlgAgent() = default;
+	virtual ~ConvertDlgAgent() = default;
 
 	// Agent interface
 	virtual bool Accept(
@@ -46,16 +46,12 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	ComponentDlg* GetDialog() const;
+	ConvertDlg* GetDialog() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
-
-private:
-	int m_max_lines = 1000;
-
 };
 
-#endif // ComponentDlgAgent_h
+#endif // ConvertDlgAgent_h

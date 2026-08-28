@@ -67,8 +67,7 @@ ComponentDlg::ComponentDlg(MainFrame *frame)
 		frame->FromDIP(wxSize(500, 620)),
 		0, "ComponentDlg"),
 	m_hold_history(false),
-	m_auto_update_timer(this),
-	m_max_lines(1000)
+	m_auto_update_timer(this)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -1277,6 +1276,54 @@ void ComponentDlg::UpdateMaxValue(int ival)
 	m_analysis_max_spin->SetValue(ival);
 }
 
+void ComponentDlg::UpdateCompConsistent(bool bval)
+{
+	m_consistent_check->SetValue(bval);
+}
+
+void ComponentDlg::UpdateCompColocal(bool bval)
+{
+	m_colocal_check->SetValue(bval);
+}
+
+void ComponentDlg::UpdateCompOutputType(int ival)
+{
+	m_output_multi_rb->SetValue(ival == 1);
+	m_output_rgb_rb->SetValue(ival == 2);
+}
+
+void ComponentDlg::UpdateDistNeighbor(bool bval)
+{
+	m_dist_neighbor_check->SetValue(bval);
+	m_dist_neighbor_sldr->Enable(bval);
+	m_dist_neighbor_text->Enable(bval);
+}
+
+void ComponentDlg::UpdateDistNeighborValue(int ival)
+{
+	m_dist_neighbor_sldr->ChangeValue(ival);
+	m_dist_neighbor_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void ComponentDlg::UpdateDistAllChan(bool bval)
+{
+	m_dist_all_chan_check->SetValue(bval);
+}
+
+void ComponentDlg::UpdateAlignCenter(bool bval)
+{
+	m_align_center_chk->SetValue(bval);
+}
+
+void ComponentDlg::UpdateGrid(const std::string& str1, const std::string& str2)
+{
+	DeleteGridRows();
+	wxString titles, values;
+	titles = str1;
+	values = str2;
+	OutputAnalysis(titles, values);
+}
+
 void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 {
 	wxString copy_data;
@@ -1284,6 +1331,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	wxString cur_line;
 	int i, k;
 	int id_idx = -1;
+	int max_lines = 1000;
 
 	m_supress_select = true;
 	m_output_grid->BeginBatch();
@@ -1316,7 +1364,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	do
 	{
 		if (i % 10 == 0)
-			prg.SetProgress(100.0 * i / m_max_lines, "Updating component list.");
+			prg.SetProgress(100.0 * i / max_lines, "Updating component list.");
 
 		k = 0;
 		cur_line = copy_data.BeforeFirst('\n');
@@ -1344,8 +1392,7 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 		} while (cur_line.IsEmpty() == false);
 		++i;
 
-	} while (copy_data.IsEmpty() == false &&
-		i < m_max_lines);
+	} while (copy_data.IsEmpty() == false);
 
 	//delete columns and rows if the old has more
 	if (!m_hold_history)

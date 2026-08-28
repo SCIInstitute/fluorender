@@ -58,7 +58,15 @@ public:
 	ConvertDlg(MainFrame* frame);
 	~ConvertDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateVolMeshThresh(double dval);
+	void UpdateVolMeshDownXY(int ival);
+	void UpdateVolMeshDownZ(int ival);
+	void UpdateUseTransferFunc(bool bval);
+	void UpdateUseSelection(bool bval);
+	void UpdateVolMeshSimplify(double dval);
+	void UpdateVolMeshSmoothN(double dval);
+	void UpdateVolMeshSmoothT(double dval);
 
 	//toolbar
 	void MeshConvert();

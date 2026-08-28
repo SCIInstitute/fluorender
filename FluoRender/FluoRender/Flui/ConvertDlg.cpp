@@ -46,7 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <icons.h>
 
 ConvertDlg::ConvertDlg(MainFrame *frame) :
-	TabbedPanel(frame, frame,
+	TabbedPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(500, 620)),
 	0, "ConvertDlg"),
@@ -323,130 +323,14 @@ wxWindow* ConvertDlg::CreateInfoPage(wxWindow* parent)
 	return page;
 }
 
-void ConvertDlg::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	double dval;
-	int ival;
-	bool bval;
-
-	if (update_all || FOUND_VALUE(gstVolMeshThresh))
-	{
-		dval = glbin_conv_vol_mesh.GetIsoValue();
-		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_thresh_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	if (update_all || FOUND_VALUE(gstVolMeshDownXY))
-	{
-		ival = glbin_conv_vol_mesh.GetDownsample();
-		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		m_cnv_vol_mesh_downsample_text->ChangeValue(wxString::Format("%d", ival));
-	}
-
-	if (update_all || FOUND_VALUE(gstVolMeshDownZ))
-	{
-		ival = glbin_conv_vol_mesh.GetDownsampleZ();
-		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		m_cnv_vol_mesh_downsample_z_text->ChangeValue(wxString::Format("%d", ival));
-	}
-
-	if (update_all || FOUND_VALUE(gstUseTransferFunc))
-	{
-		bval = glbin_conv_vol_mesh.GetUseTransfer();
-		m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstUseSelection))
-	{
-		bval = glbin_conv_vol_mesh.GetUseMask();
-		m_cnv_vol_mesh_selected_chk->SetValue(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstVolMeshSimplify))
-	{
-		//settings
-		dval = glbin_conv_vol_mesh.GetSimplify();
-		m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_simplify_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	if (update_all || FOUND_VALUE(gstVolMeshSmoothN))
-	{
-		//settings
-		dval = glbin_conv_vol_mesh.GetSmoothStrength();
-		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_smooth_n_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	if (update_all || FOUND_VALUE(gstVolMeshSmoothT))
-	{
-		//settings
-		dval = glbin_conv_vol_mesh.GetSmoothScale();
-		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_smooth_t_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	if (FOUND_VALUE(gstVolMeshInfo))
-	{
-		auto md = glbin_conv_vol_mesh.GetMeshData();
-		if (md)
-		{
-			flrd::MeshStat stat(md.get());
-			stat.Run();
-			ConvertGridData data;
-			data.area = stat.GetArea();
-			data.volume = stat.GetVolume();
-			data.vertex_count = stat.GetVertexNum();
-			data.triangle_count = stat.GetTriangleNum();
-			data.normal_count = stat.GetNormalNum();
-			wxString unit_area, unit_vol;
-			auto view = glbin_current.render_view.lock();
-			if (view)
-			{
-				switch (view->m_sb_unit)
-				{
-				case 0:
-					unit_area = L"nm\u00B2";
-					unit_vol = L"nm\u00B3";
-					break;
-				case 1:
-				default:
-					unit_area = L"\u03BCm\u00B2";
-					unit_vol = L"\u03BCm\u00B3";
-					break;
-				case 2:
-					unit_area = L"mm\u00B2";
-					unit_vol = L"mm\u00B3";
-					break;
-				}
-			}
-			SetOutput(data, unit_area, unit_vol);
-		}
-	}
-
-	bool brush_update = FOUND_VALUE(gstBrushCountAutoUpdate);
-	bool transf_update = FOUND_VALUE(gstConvVolMeshUpdateTransf);
-	if (FOUND_VALUE(gstConvVolMeshUpdate) ||
-		transf_update ||
-		brush_update)
-	{
-		auto mode = glbin_vol_selector.GetSelectMode();
-		if (mode == flrd::SelectMode::Segment ||
-			mode == flrd::SelectMode::Mesh)
-			return;
-		if (transf_update && !glbin_conv_vol_mesh.GetUseTransfer())
-			return;
-		if (brush_update && !glbin_conv_vol_mesh.GetUseMask())
-			return;
-		if (glbin_conv_vol_mesh.GetAutoUpdate())
-			glbin_conv_vol_mesh.Update(false);
-	}
-}
+void ConvertDlg::UpdateVolMeshThresh(double dval);
+void ConvertDlg::UpdateVolMeshDownXY(int ival);
+void ConvertDlg::UpdateVolMeshDownZ(int ival);
+void ConvertDlg::UpdateUseTransferFunc(bool bval);
+void ConvertDlg::UpdateUseSelection(bool bval);
+void ConvertDlg::UpdateVolMeshSimplify(double dval);
+void ConvertDlg::UpdateVolMeshSmoothN(double dval);
+void ConvertDlg::UpdateVolMeshSmoothT(double dval);
 
 //threshold
 void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent& event)

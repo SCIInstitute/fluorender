@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Clusterizer.h>
 #include <CompEditor.h>
 #include <CompSelector.h>
+#include <RulerAlign.h>
+#include <ModalDlg.h>
 
 ComponentDlgAgent::ComponentDlgAgent(
 	ComponentDlg* dlg) :
@@ -294,67 +296,61 @@ void ComponentDlgAgent::UpdateUI(const UpdateRequest& request)
 	if (update_all || FOUND_VALUE(gstCompConsistent))
 	{
 		bval = glbin_comp_analyzer.GetConsistent();
-		m_consistent_check->SetValue(bval);
+		dlg->UpdateCompConsistent(bval);
 	}
 	if (update_all || FOUND_VALUE(gstCompColocal))
 	{
 		bval = glbin_comp_analyzer.GetColocal();
-		m_colocal_check->SetValue(bval);
+		dlg->UpdateCompColocal(bval);
 	}
 
 	//output type
 	if (update_all || FOUND_VALUE(gstCompOutputType))
 	{
 		ival = glbin_comp_analyzer.GetColorType();
-		m_output_multi_rb->SetValue(ival == 1);
-		m_output_rgb_rb->SetValue(ival == 2);
+		dlg->UpdateCompOutputType(ival);
 	}
 
 	//Distances
 	if (update_all || FOUND_VALUE(gstDistNeighbor))
 	{
 		bval = glbin_comp_analyzer.GetUseDistNeighbor();
-		m_dist_neighbor_check->SetValue(bval);
-		m_dist_neighbor_sldr->Enable(bval);
-		m_dist_neighbor_text->Enable(bval);
+		dlg->UpdateDistNeighbor(bval);
 	}
 	if (update_all || FOUND_VALUE(gstDistNeighborValue))
 	{
 		ival = glbin_comp_analyzer.GetDistNeighborNum();
-		m_dist_neighbor_sldr->ChangeValue(ival);
-		m_dist_neighbor_text->ChangeValue(wxString::Format("%d", ival));
+		dlg->UpdateDistNeighborValue(ival);
 	}
 	if (update_all || FOUND_VALUE(gstDistAllChan))
 	{
 		bval = glbin_comp_analyzer.GetUseDistAllchan();
-		m_dist_all_chan_check->SetValue(bval);
+		dlg->UpdateDistAllChan(bval);
 	}
 
 	//align center
 	if (update_all || FOUND_VALUE(gstAlignCenter))
 	{
 		bval = glbin_aligner.GetAlignCenter();
-		m_align_center_chk->SetValue(bval);
+		dlg->UpdateAlignCenter(bval);
 	}
 
 	//output
 	if (FOUND_VALUE(gstCompGenOutput))
 	{
-		DeleteGridRows();
-		wxString str1, str2;
-		str1 = glbin_comp_generator.GetTitles();
-		str2 = glbin_comp_generator.GetValues();
-		OutputAnalysis(str1, str2);
+		std::string str1, str2;
+		str1 = ws2s(glbin_comp_generator.GetTitles());
+		str2 = ws2s(glbin_comp_generator.GetValues());
+		dlg->UpdateGrid(str1, str2);
 	}
 
 	if (FOUND_VALUE(gstCompAnalysisResult))
 	{
-		DeleteGridRows();
 		size_t size = glbin_comp_analyzer.GetListSize();
 		bool saved = false;
 		if (size > m_max_lines)
 		{
-			ModalDlg fopendlg(this,
+			ModalDlg fopendlg(dlg,
 				wxString::Format("Component count is over %d. Save in a file?", m_max_lines),
 				"", "", "Text file (*.txt)|*.txt",
 				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -372,13 +368,12 @@ void ComponentDlgAgent::UpdateUI(const UpdateRequest& request)
 			std::string titles, values;
 			glbin_comp_analyzer.OutputFormHeader(titles);
 			glbin_comp_analyzer.OutputCompListStr(values, 0);
-			wxString str1(titles), str2(values);
-			OutputAnalysis(str1, str2);
+			dlg->UpdateGrid(titles, values);
 		}
 	}
 
 	if (FOUND_VALUE(gstCompListSelection))
-		UpdateCompSelection();
+		dlg->UpdateCompSelection();
 }
 
 void ComponentDlgAgent::UpdateData(const UpdateRequest& request)

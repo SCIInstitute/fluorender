@@ -111,6 +111,13 @@ public:
 	void UpdateMinValue(int ival);
 	void UpdateUseMax(bool bval);
 	void UpdateMaxValue(int ival);
+	void UpdateCompConsistent(bool bval);
+	void UpdateCompColocal(bool bval);
+	void UpdateCompOutputType(int ival);
+	void UpdateDistNeighbor(bool bval);
+	void UpdateDistNeighborValue(int ival);
+	void UpdateDistAllChan(bool bval);
+	void UpdateAlignCenter(bool bval);
 
 	//auto update
 	void LaunchAutoUpdateTimer();
@@ -119,6 +126,8 @@ public:
 	void CopyData();
 	void PasteData();
 
+	//output
+	void UpdateGrid(const std::string& str1, const std::string& str2);
 	void OutputAnalysis(wxString &titles, wxString &values);
 	void OutputDistance();
 	void AlignPca(int axis_type);
@@ -147,8 +156,6 @@ public:
 	void SetCleanLimit(int val);
 
 private:
-	int m_max_lines;
-
 	//selected rows of output grid
 	std::set<size_t> m_sel;
 	bool m_supress_select = false;
