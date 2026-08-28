@@ -72,7 +72,48 @@ public:
 	ComponentDlg(MainFrame* frame);
 	~ComponentDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateUseSelection(bool bval1, bool bval2);
+	void UpdateUseMachineLearning(bool bval);
+
+	//comp generate
+	void UpdateIteration(int ival);
+	void UpdateCompThreshold(double dval);
+	void UpdateDiffusion(bool bval);
+	void UpdateDiffusionFalloff(double dval);
+	void UpdateUseDensityField(bool bval);
+	void UpdateDensityFieldThresh(double dval);
+	void UpdateDensityVarThresh(double dval);
+	void UpdateDensityWindowSize(int ival);
+	void UpdateDensityStatsSize(int ival);
+	void UpdateUseDistField(bool bval);
+	void UpdateDistFieldStrength(double dval);
+	void UpdateDistFieldFilterSize(int ival);
+	void UpdateMaxDist(int ival);
+	void UpdateDistFieldThresh(double dval);
+	void UpdateFixateEnable(bool bval);
+	void UpdateGrowFixed(bool bval);
+	void UpdateFixateSize(int ival);
+	void UpdateCleanEnable(bool bval);
+	void UpdateCleanIteration(int ival);
+	void UpdateCleanSize(int ival);
+	void UpdateRecordCmd(int ival, bool bval);
+	//cluster
+	void UpdateClusterMethod(int ival);
+	void UpdateClusterNum(int ival);
+	void UpdateClusterMaxIter(int ival);
+	void UpdateClusterTol(double dval);
+	void UpdateClusterSize(int ival);
+	void UpdateClusterEps(double dval);
+	//analysis
+	void UpdateCompIdColor(const fluo::Color& cval);
+	void UpdateUseMin(bool bval);
+	void UpdateMinValue(int ival);
+	void UpdateUseMax(bool bval);
+	void UpdateMaxValue(int ival);
+
+	//auto update
+	void LaunchAutoUpdateTimer();
 
 	//output
 	void CopyData();
@@ -341,7 +382,6 @@ private:
 	void OnLoadCmd(wxCommandEvent& event);
 	void OnSaveCmd(wxCommandEvent& event);
 	//auto update
-	void LaunchAutoUpdateTimer();
 	void OnAutoUpdateTimer(wxTimerEvent& event);
 
 	//clustering page
