@@ -39,7 +39,14 @@ public:
 	ColocalizationDlg(MainFrame* frame);
 	~ColocalizationDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateColocalMethod(int ival);
+	void UpdateIntWeighted(bool bval);
+	void UpdateGetRatio(bool bval);
+	void UpdatePhysicalSize(bool bval);
+	void UpdateColocalColormap(bool bval);
+	void UpdateUseSelection(bool bval);
+
 	void SetOutput();
 
 	void CopyData();

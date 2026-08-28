@@ -81,6 +81,21 @@ public:
 	void UpdateClipPlaneRangeColor(const wxColor& c);
 	void UpdateClipDist(int dx, int dy, int dz);
 
+	void UpdateClipX1(double dval);
+	void UpdateClipX2(double dval);
+	void UpdateClipY1(double dval);
+	void UpdateClipY2(double dval);
+	void UpdateClipZ1(double dval);
+	void UpdateClipZ2(double dval);
+
+	void UpdateClipLinkX();
+	void UpdateClipLinkY();
+	void UpdateClipLinkZ();
+
+	void UpdateClipRotX(double dval);
+	void UpdateClipRotY(double dval);
+	void UpdateClipRotZ(double dval);
+
 	bool GetXLink();
 	bool GetYLink();
 	bool GetZLink();

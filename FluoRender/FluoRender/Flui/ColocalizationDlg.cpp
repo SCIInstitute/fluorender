@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 
 ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
-	PropPanel(frame, frame,
+	PropPanel(frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(500, 500)),
 		0, "ColocalizationDlg"),
@@ -159,59 +159,36 @@ ColocalizationDlg::~ColocalizationDlg()
 {
 }
 
-void ColocalizationDlg::FluoUpdate(const fluo::ValueCollection& vc)
+void ColocalizationDlg::UpdateColocalMethod(int ival)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
+	m_product_rdb->SetValue(ival == 0);
+	m_min_value_rdb->SetValue(ival == 1);
+	m_logical_and_rdb->SetValue(ival == 2);
+}
 
-	//settings
-	if (update_all || FOUND_VALUE(gstColocalMethod))
-	{
-		m_product_rdb->SetValue(glbin_colocal_def.m_method == 0);
-		m_min_value_rdb->SetValue(glbin_colocal_def.m_method == 1);
-		m_logical_and_rdb->SetValue(glbin_colocal_def.m_method == 2);
-	}
+void ColocalizationDlg::UpdateIntWeighted(bool bval)
+{
+	m_int_weight_btn->SetValue(bval);
+}
 
-	if (update_all || FOUND_VALUE(gstIntWeighted))
-	{
-		m_int_weight_btn->SetValue(glbin_colocal_def.m_int_weighted);
-	}
+void ColocalizationDlg::UpdateGetRatio(bool bval)
+{
+	m_ratio_btn->SetValue(bval);
+}
 
-	if (update_all || FOUND_VALUE(gstGetRatio))
-	{
-		m_ratio_btn->SetValue(glbin_colocal_def.m_get_ratio);
-	}
+void ColocalizationDlg::UpdatePhysicalSize(bool bval)
+{
+	m_physical_btn->SetValue(bval);
+}
 
-	if (update_all || FOUND_VALUE(gstPhysSize))
-	{
-		m_physical_btn->SetValue(glbin_colocal_def.m_physical_size);
-	}
+void ColocalizationDlg::UpdateColocalColormap(bool bval)
+{
+	m_colormap_btn->SetValue(bval);
+}
 
-	if (update_all || FOUND_VALUE(gstColocalColormap))
-	{
-		m_colormap_btn->SetValue(glbin_colocal_def.m_colormap);
-	}
-
-	if (update_all || FOUND_VALUE(gstUseSelection))
-	{
-		m_use_sel_chk->SetValue(glbin_colocal_def.m_use_mask);
-	}
-
-	bool colocal_update = false;
-	bool colocal_result = FOUND_VALUE(gstColocalResult);
-	bool auto_update = FOUND_VALUE(gstColocalAutoUpdate);
-	if (update_all || auto_update)
-	{
-		if (auto_update)
-			colocal_update = glbin_colocalizer.GetAutoColocalize();
-	}
-	if (colocal_result || colocal_update)
-	{
-		glbin_colocalizer.Compute();
-		SetOutput();
-	}
+void ColocalizationDlg::UpdateUseSelection(bool bval)
+{
+	m_use_sel_chk->SetValue(bval);
 }
 
 void ColocalizationDlg::SetOutput()

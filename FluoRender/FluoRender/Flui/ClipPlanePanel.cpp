@@ -484,6 +484,144 @@ void ClipPlanePanel::UpdateClipDist(int dx, int dy, int dz)
 		wxString::Format("%d", dz));
 }
 
+void ClipPlanePanel::UpdateClipX1(double dval)
+{
+	bool link = m_clipx_sldr->GetLink();
+	m_clipx_sldr->SetLink(false);
+	int ival = static_cast<int>(std::round(dval));
+	m_clipx_sldr->ChangeLowValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	m_x1_clip_text->ChangeValue(str);
+	m_x1_clip_text->Update();
+	m_clipx_sldr->SetLink(link);
+}
+
+void ClipPlanePanel::UpdateClipX2(double dval)
+{
+	bool link = m_clipx_sldr->GetLink();
+	m_clipx_sldr->SetLink(false);
+	int ival = static_cast<int>(std::round(dval));
+	m_clipx_sldr->ChangeHighValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	m_x2_clip_text->ChangeValue(str);
+	m_x2_clip_text->Update();
+	m_clipx_sldr->SetLink(link);
+}
+
+void ClipPlanePanel::UpdateClipY1(double dval)
+{
+	bool link = m_clipy_sldr->GetLink();
+	m_clipy_sldr->SetLink(false);
+	int ival = static_cast<int>(std::round(dval));
+	m_clipy_sldr->ChangeLowValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	m_y1_clip_text->ChangeValue(str);
+	m_y1_clip_text->Update();
+	m_clipy_sldr->SetLink(link);
+}
+
+void ClipPlanePanel::UpdateClipY2(double dval)
+{
+	bool link = m_clipy_sldr->GetLink();
+	m_clipy_sldr->SetLink(false);
+	int ival = static_cast<int>(std::round(dval));
+	m_clipy_sldr->ChangeHighValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	m_y2_clip_text->ChangeValue(str);
+	m_y2_clip_text->Update();
+	m_clipy_sldr->SetLink(link);
+}
+
+void ClipPlanePanel::UpdateClipZ1(double dval)
+{
+	bool link = m_clipz_sldr->GetLink();
+	m_clipz_sldr->SetLink(false);
+	int ival = static_cast<int>(std::round(dval));
+	m_clipz_sldr->ChangeLowValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	m_z1_clip_text->ChangeValue(str);
+	m_z1_clip_text->Update();
+	m_clipz_sldr->SetLink(link);
+}
+
+void ClipPlanePanel::UpdateClipZ2(double dval)
+{
+	bool link = m_clipz_sldr->GetLink();
+	m_clipz_sldr->SetLink(false);
+	int ival = static_cast<int>(std::round(dval));
+	m_clipz_sldr->ChangeHighValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	m_z2_clip_text->ChangeValue(str);
+	m_z2_clip_text->Update();
+	m_clipz_sldr->SetLink(link);
+}
+
+void ClipPlanePanel::UpdateClipLinkX()
+{
+	bool bval = m_clipx_sldr->GetLink();
+	if (bval != m_linkx_tb->GetToolState(0))
+	{
+		m_linkx_tb->ToggleTool(0, bval);
+		if (bval)
+			m_linkx_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(link));
+		else
+			m_linkx_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(unlink));
+	}
+}
+
+void ClipPlanePanel::UpdateClipLinkY()
+{
+	bool bval = m_clipy_sldr->GetLink();
+	if (bval != m_linky_tb->GetToolState(0))
+	{
+		m_linky_tb->ToggleTool(0, bval);
+		if (bval)
+			m_linky_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(link));
+		else
+			m_linky_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(unlink));
+	}
+}
+
+void ClipPlanePanel::UpdateClipLinkZ()
+{
+	bool bval = m_clipz_sldr->GetLink();
+	if (bval != m_linkz_tb->GetToolState(0))
+	{
+		m_linkz_tb->ToggleTool(0, bval);
+		if (bval)
+			m_linkz_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(link));
+		else
+			m_linkz_tb->SetToolNormalBitmap(0,
+				wxGetBitmap(unlink));
+	}
+}
+
+void ClipPlanePanel::UpdateClipRotX(double dval)
+{
+	m_x_rot_sldr->ChangeValue(static_cast<int>(std::round(dval)));
+	m_x_rot_text->ChangeValue(wxString::Format("%.1f", dval));
+	m_x_rot_text->Update();
+}
+
+void ClipPlanePanel::UpdateClipRotY(double dval)
+{
+	m_y_rot_sldr->ChangeValue(static_cast<int>(std::round(dval)));
+	m_y_rot_text->ChangeValue(wxString::Format("%.1f", dval));
+	m_y_rot_text->Update();
+}
+
+void ClipPlanePanel::UpdateClipRotZ(double dval)
+{
+	m_z_rot_sldr->ChangeValue(static_cast<int>(std::round(dval)));
+	m_z_rot_text->ChangeValue(wxString::Format("%.1f", dval));
+	m_z_rot_text->Update();
+}
+
 void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 {
 	int id = event.GetId();

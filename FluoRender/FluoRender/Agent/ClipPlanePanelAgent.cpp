@@ -212,118 +212,55 @@ void ClipPlanePanelAgent::UpdateUI(const UpdateRequest& request)
 	int ival;
 	wxString str;
 
-	bool linkx = m_clipx_sldr->GetLink();
-	bool linky = m_clipy_sldr->GetLink();
-	bool linkz = m_clipz_sldr->GetLink();
-	m_clipx_sldr->SetLink(false);
-	m_clipy_sldr->SetLink(false);
-	m_clipz_sldr->SetLink(false);
 	//x1
 	if (update_all || FOUND_VALUE(gstClipX1))
 	{
 		dval = cb.GetClipIndex(fluo::ClipPlane::XNeg);
-		ival = static_cast<int>(std::round(dval));
-		m_clipx_sldr->ChangeLowValue(ival);
-		str = wxString::Format("%d", ival);
-		m_x1_clip_text->ChangeValue(str);
-		m_x1_clip_text->Update();
+		panel->UpdateClipX1(dval);
 	}
 	//x2
 	if (update_all || FOUND_VALUE(gstClipX2))
 	{
 		dval = cb.GetClipIndex(fluo::ClipPlane::XPos);
-		ival = static_cast<int>(std::round(dval));
-		m_clipx_sldr->ChangeHighValue(ival);
-		str = wxString::Format("%d", ival);
-		m_x2_clip_text->ChangeValue(str);
-		m_x2_clip_text->Update();
+		panel->UpdateClipX2(dval);
 	}
 	//y1
 	if (update_all || FOUND_VALUE(gstClipY1))
 	{
 		dval = cb.GetClipIndex(fluo::ClipPlane::YNeg);
-		ival = static_cast<int>(std::round(dval));
-		m_clipy_sldr->ChangeLowValue(ival);
-		str = wxString::Format("%d", ival);
-		m_y1_clip_text->ChangeValue(str);
-		m_y1_clip_text->Update();
+		panel->UpdateClipY1(dval);
 	}
 	//y2
 	if (update_all || FOUND_VALUE(gstClipY2))
 	{
 		dval = cb.GetClipIndex(fluo::ClipPlane::YPos);
-		ival = static_cast<int>(std::round(dval));
-		m_clipy_sldr->ChangeHighValue(ival);
-		str = wxString::Format("%d", ival);
-		m_y2_clip_text->ChangeValue(str);
-		m_y2_clip_text->Update();
+		panel->UpdateClipY2(dval);
 	}
 	//z1
 	if (update_all || FOUND_VALUE(gstClipZ1))
 	{
 		dval = cb.GetClipIndex(fluo::ClipPlane::ZNeg);
-		ival = static_cast<int>(std::round(dval));
-		m_clipz_sldr->ChangeLowValue(ival);
-		str = wxString::Format("%d", ival);
-		m_z1_clip_text->ChangeValue(str);
-		m_z1_clip_text->Update();
+		panel->UpdateClipZ1(dval);
 	}
 	//z2
 	if (update_all || FOUND_VALUE(gstClipZ2))
 	{
 		dval = cb.GetClipIndex(fluo::ClipPlane::ZPos);
-		ival = static_cast<int>(std::round(dval));
-		m_clipz_sldr->ChangeHighValue(ival);
-		str = wxString::Format("%d", ival);
-		m_z2_clip_text->ChangeValue(str);
-		m_z2_clip_text->Update();
+		panel->UpdateClipZ2(dval);
 	}
-	m_clipx_sldr->SetLink(linkx);
-	m_clipy_sldr->SetLink(linky);
-	m_clipz_sldr->SetLink(linkz);
 
 	//link
 	if (update_all || FOUND_VALUE(gstClipLinkX))
 	{
-		bval = m_clipx_sldr->GetLink();
-		if (bval != m_linkx_tb->GetToolState(0))
-		{
-			m_linkx_tb->ToggleTool(0, bval);
-			if (bval)
-				m_linkx_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(link));
-			else
-				m_linkx_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(unlink));
-		}
+		panel->UpdateClipLinkX();
 	}
 	if (update_all || FOUND_VALUE(gstClipLinkY))
 	{
-		bval = m_clipy_sldr->GetLink();
-		if (bval != m_linky_tb->GetToolState(0))
-		{
-			m_linky_tb->ToggleTool(0, bval);
-			if (bval)
-				m_linky_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(link));
-			else
-				m_linky_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(unlink));
-		}
+		panel->UpdateClipLinkY();
 	}
 	if (update_all || FOUND_VALUE(gstClipLinkZ))
 	{
-		bval = m_clipz_sldr->GetLink();
-		if (bval != m_linkz_tb->GetToolState(0))
-		{
-			m_linkz_tb->ToggleTool(0, bval);
-			if (bval)
-				m_linkz_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(link));
-			else
-				m_linkz_tb->SetToolNormalBitmap(0,
-					wxGetBitmap(unlink));
-		}
+		panel->UpdateClipLinkZ();
 	}
 
 	//rotations
@@ -331,26 +268,20 @@ void ClipPlanePanelAgent::UpdateUI(const UpdateRequest& request)
 	//x
 	if (update_all || FOUND_VALUE(gstClipRotX))
 	{
-		m_x_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.x())));
-		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rot.x()));
-		m_x_rot_text->Update();
+		panel->UpdateClipRotX(rot.x());
 	}
 	//y
 	if (update_all || FOUND_VALUE(gstClipRotY))
 	{
-		m_y_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.y())));
-		m_y_rot_text->ChangeValue(wxString::Format("%.1f", rot.y()));
-		m_y_rot_text->Update();
+		panel->UpdateClipRotY(rot.y());
 	}
 	//z
 	if (update_all || FOUND_VALUE(gstClipRotZ))
 	{
-		m_z_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.z())));
-		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rot.z()));
-		m_z_rot_text->Update();
+		panel->UpdateClipRotZ(rot.z());
 	}
 
-	EnableAll(true);
+	panel->EnableAll(true);
 }
 
 void ClipPlanePanelAgent::UpdateData(const UpdateRequest& request)
