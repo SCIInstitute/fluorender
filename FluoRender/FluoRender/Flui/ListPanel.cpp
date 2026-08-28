@@ -201,7 +201,7 @@ ListPanel::ListPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size, style, name)
+	PropPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -279,16 +279,6 @@ ListPanel::~ListPanel()
 
 void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
-	if (FOUND_VALUE(gstNull))
-		return;
-
-	bool update_all = vc.empty();
-
-	if (update_all || FOUND_VALUE(gstListCtrl) || FOUND_VALUE(gstTreeLayerName))
-		UpdateList();
-
-	if (update_all || FOUND_VALUE(gstCurrentSelect))
-		UpdateSelection();
 }
 
 void ListPanel::UpdateList()

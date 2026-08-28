@@ -25,47 +25,70 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef AnnotatPropPanelAgent_h
-#define AnnotatPropPanelAgent_h
 
-#include <Agent.h>
-#include <memory>
+#include <FpRangeDlgAgent.h>
+#include <FpRangeDlg.h>
+#include <Global.h>
+#include <Names.h>
+#include <MainSettings.h>
 
-class AnnotatPropPanel;
-class AnnotData;
-
-class AnnotatPropPanelAgent : public Agent
+FpRangeDlgAgent::FpRangeDlgAgent(
+	FpRangeDlg* dlg) :
+	Agent(dlg)
 {
-public:
-	AnnotatPropPanelAgent(
-		AnnotatPropPanel* panel);
 
-	virtual ~AnnotatPropPanelAgent() = default;
+}
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
+bool FpRangeDlgAgent::Accept(
+	const UpdateRequest& request) const
+{
+	return true;
+}
 
-	virtual void Update(
-		const UpdateRequest& request) override;
-	
-	AnnotatPropPanel* GetPanel() const
+void FpRangeDlgAgent::Update(
+	const UpdateRequest& request)
+{
+	if (request.dir == UpdateDir::DataToUI)
 	{
-		return static_cast<AnnotatPropPanel*>(GetWindow());
+		UpdateUI(request);
 	}
-
-	std::shared_ptr<AnnotData> GetData() const
+	else if (request.dir == UpdateDir::UItoData)
 	{
-		return m_ann.lock();
+		UpdateData(request);
 	}
+}
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+void FpRangeDlgAgent::UpdateUI(const UpdateRequest& request)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
 
-	void UpdateData(const UpdateRequest& request);
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = request.values.empty();
 
-private:
-	std::weak_ptr<AnnotData> m_ann;
-};
+	double dval;
 
-#endif // AnnotatPropPanelAgent_h
+	if (update_all || FOUND_VALUE(gstFpRangeMin))
+	{
+		dval = glbin_settings.m_fp_min;
+		dlg->UpdateFpRangeMin(dval);
+	}
+	if (update_all || FOUND_VALUE(gstFpRangeMax))
+	{
+		dval = glbin_settings.m_fp_max;
+		dlg->UpdateFpRangeMax(dval);
+	}
+}
+
+void FpRangeDlgAgent::UpdateData(const UpdateRequest& request)
+{
+
+}
+
+FpRangeDlg* FpRangeDlgAgent::GetDialog() const
+{
+	return static_cast<FpRangeDlg*>(GetWindow());
+}

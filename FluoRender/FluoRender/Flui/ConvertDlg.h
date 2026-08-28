@@ -68,6 +68,9 @@ public:
 	void UpdateVolMeshSmoothN(double dval);
 	void UpdateVolMeshSmoothT(double dval);
 
+	//output
+	void SetOutput(const ConvertGridData& data, const std::wstring& unit_area, const std::wstring& unit_vol);
+
 	//toolbar
 	void MeshConvert();
 	void MeshUpdate();
@@ -111,8 +114,6 @@ private:
 	wxWindow* CreateSettingPage(wxWindow* parent);
 	wxWindow* CreateInfoPage(wxWindow* parent);
 
-	//output
-	void SetOutput(const ConvertGridData& data, const wxString& unit_area, const wxString& unit_vol);
 	void CopyData();
 	void PasteData();
 

@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 //END_EVENT_TABLE()
 
 FpRangeDlg::FpRangeDlg(MainFrame *frame)
-: PropDialog(frame, frame,
+: PropDialog(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(400, 200)),
 	wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER |
@@ -114,27 +114,16 @@ FpRangeDlg::~FpRangeDlg()
 {
 }
 
-void FpRangeDlg::FluoUpdate(const fluo::ValueCollection& vc)
+void FpRangeDlg::UpdateFpRangeMin(double dval)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
+	auto str = wxString::Format("%.2f", dval);
+	m_min_text->ChangeValue(str);
+}
 
-	wxString str;
-
-	if (update_all || FOUND_VALUE(gstFpRangeMin))
-	{
-		m_fp_min = glbin_settings.m_fp_min;
-		str = wxString::Format("%.2f", m_fp_min);
-		m_min_text->ChangeValue(str);
-	}
-	if (update_all || FOUND_VALUE(gstFpRangeMax))
-	{
-		m_fp_max = glbin_settings.m_fp_max;
-		str = wxString::Format("%.2f", m_fp_max);
-		m_max_text->ChangeValue(str);
-	}
+void FpRangeDlg::UpdateFpRangeMax(double dval)
+{
+	auto str = wxString::Format("%.2f", dval);
+	m_max_text->ChangeValue(str);
 }
 
 void FpRangeDlg::OnMinText(wxCommandEvent& event)

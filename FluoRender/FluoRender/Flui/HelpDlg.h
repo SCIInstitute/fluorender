@@ -37,8 +37,6 @@ public:
 	HelpDlg(MainFrame* frame);
 	~HelpDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-
 private:
 	wxHtmlWindow *m_html;
 	wxString m_name;

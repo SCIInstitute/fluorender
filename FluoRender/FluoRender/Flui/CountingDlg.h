@@ -30,19 +30,22 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
+class MainFrame;
 class CountingDlg : public PropPanel
 {
 public:
 	CountingDlg(MainFrame* frame);
 	~CountingDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateUseSelection(bool bval);
+	void UpdateCountMinValue(int ival);
+	void UpdateCountMaxValue(int ival);
+	void UpdateCountUseMax(bool bval);
+
 	void OutputSize();
 
 private:
-	//max volume value
-	double m_max_value;
-
 	//component analyzer
 	wxCheckBox *m_ca_select_only_chk;
 	wxTextCtrl *m_ca_min_text;

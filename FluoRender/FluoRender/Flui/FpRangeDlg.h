@@ -30,18 +30,18 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
+class MainFrame;
 class FpRangeDlg : public PropDialog
 {
 public:
 	FpRangeDlg(MainFrame* frame);
 	~FpRangeDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateFpRangeMin(double dval);
+	void UpdateFpRangeMax(double dval);
 
 private:
-	double m_fp_min;
-	double m_fp_max;
-
 	//text boxes
 	wxTextCtrl* m_min_text;
 	wxTextCtrl* m_max_text;

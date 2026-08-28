@@ -25,22 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef AnnotatPropPanelAgent_h
-#define AnnotatPropPanelAgent_h
+#ifndef CountingDlgAgent_h
+#define CountingDlgAgent_h
 
 #include <Agent.h>
-#include <memory>
 
-class AnnotatPropPanel;
-class AnnotData;
-
-class AnnotatPropPanelAgent : public Agent
+class CountingDlg;
+class CountingDlgAgent : public Agent
 {
 public:
-	AnnotatPropPanelAgent(
-		AnnotatPropPanel* panel);
+	CountingDlgAgent(
+		CountingDlg* dlg);
 
-	virtual ~AnnotatPropPanelAgent() = default;
+	virtual ~CountingDlgAgent() = default;
 
 	// Agent interface
 	virtual bool Accept(
@@ -48,16 +45,8 @@ public:
 
 	virtual void Update(
 		const UpdateRequest& request) override;
-	
-	AnnotatPropPanel* GetPanel() const
-	{
-		return static_cast<AnnotatPropPanel*>(GetWindow());
-	}
 
-	std::shared_ptr<AnnotData> GetData() const
-	{
-		return m_ann.lock();
-	}
+	CountingDlg* GetDialog() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);
@@ -65,7 +54,9 @@ private:
 	void UpdateData(const UpdateRequest& request);
 
 private:
-	std::weak_ptr<AnnotData> m_ann;
+	//max volume value
+	double m_max_value;
+
 };
 
-#endif // AnnotatPropPanelAgent_h
+#endif // CountingDlgAgent_h

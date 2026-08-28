@@ -323,14 +323,51 @@ wxWindow* ConvertDlg::CreateInfoPage(wxWindow* parent)
 	return page;
 }
 
-void ConvertDlg::UpdateVolMeshThresh(double dval);
-void ConvertDlg::UpdateVolMeshDownXY(int ival);
-void ConvertDlg::UpdateVolMeshDownZ(int ival);
-void ConvertDlg::UpdateUseTransferFunc(bool bval);
-void ConvertDlg::UpdateUseSelection(bool bval);
-void ConvertDlg::UpdateVolMeshSimplify(double dval);
-void ConvertDlg::UpdateVolMeshSmoothN(double dval);
-void ConvertDlg::UpdateVolMeshSmoothT(double dval);
+void ConvertDlg::UpdateVolMeshThresh(double dval)
+{
+	m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
+	m_cnv_vol_mesh_thresh_text->ChangeValue(wxString::Format("%.2f", dval));
+}
+
+void ConvertDlg::UpdateVolMeshDownXY(int ival)
+{
+	m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
+	m_cnv_vol_mesh_downsample_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void ConvertDlg::UpdateVolMeshDownZ(int ival)
+{
+	m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
+	m_cnv_vol_mesh_downsample_z_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void ConvertDlg::UpdateUseTransferFunc(bool bval)
+{
+	m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
+}
+
+void ConvertDlg::UpdateUseSelection(bool bval)
+{
+	m_cnv_vol_mesh_selected_chk->SetValue(bval);
+}
+
+void ConvertDlg::UpdateVolMeshSimplify(double dval)
+{
+	m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(dval * 100.0));
+	m_cnv_vol_mesh_simplify_text->ChangeValue(wxString::Format("%.2f", dval));
+}
+
+void ConvertDlg::UpdateVolMeshSmoothN(double dval)
+{
+	m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
+	m_cnv_vol_mesh_smooth_n_text->ChangeValue(wxString::Format("%.2f", dval));
+}
+
+void ConvertDlg::UpdateVolMeshSmoothT(double dval)
+{
+	m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
+	m_cnv_vol_mesh_smooth_t_text->ChangeValue(wxString::Format("%.2f", dval));
+}
 
 //threshold
 void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent& event)
@@ -613,7 +650,7 @@ void ConvertDlg::MeshSmooth()
 }
 
 //output
-void ConvertDlg::SetOutput(const ConvertGridData& data, const wxString& unit_area, const wxString& unit_vol)
+void ConvertDlg::SetOutput(const ConvertGridData& data, const std::wstring& unit_area, const std::wstring& unit_vol)
 {
 	if (m_output_grid->GetNumberRows() == 0 ||
 		m_hold_history)

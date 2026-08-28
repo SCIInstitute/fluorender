@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 
 CountingDlg::CountingDlg(MainFrame *frame)
-: PropPanel(frame, frame,
+: PropPanel(frame,
 wxDefaultPosition,
 frame->FromDIP(wxSize(400, 150)),
 0, "CountingDlg"),
@@ -131,52 +131,27 @@ CountingDlg::~CountingDlg()
 {
 }
 
-void CountingDlg::FluoUpdate(const fluo::ValueCollection& vc)
+void CountingDlg::UpdateUseSelection(bool bval)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
+	m_ca_select_only_chk->SetValue(bval);
+}
 
-	bool update_all = vc.empty();
-	m_max_value = vd->GetMaxValue();
+void CountingDlg::UpdateCountMinValue(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_ca_min_text->ChangeValue(str);
+}
 
-	bool bval;
-	int ival;
-	wxString str;
+void CountingDlg::UpdateCountMaxValue(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_ca_max_text->ChangeValue(str);
+}
 
-	//selected only
-	if (update_all || FOUND_VALUE(gstUseSelection))
-	{
-		bval = glbin_comp_generator.GetUseSel();
-		m_ca_select_only_chk->SetValue(bval);
-	}
-	//min voxel
-	if (update_all || FOUND_VALUE(gstCountMinValue))
-	{
-		ival = glbin_comp_analyzer.GetMinNum();
-		str = wxString::Format("%d", ival);
-		m_ca_min_text->ChangeValue(str);
-	}
-	//max voxel
-	if (update_all || FOUND_VALUE(gstCountMaxValue))
-	{
-		ival = glbin_comp_analyzer.GetMaxNum();
-		str = wxString::Format("%d", ival);
-		m_ca_max_text->ChangeValue(str);
-	}
-	//ignore max
-	if (update_all || FOUND_VALUE(gstCountUseMax))
-	{
-		bval = !glbin_comp_analyzer.GetUseMax();
-		m_ca_ignore_max_chk->SetValue(bval);
-		m_ca_max_text->Enable(bval);
-	}
-	//result
-	if (FOUND_VALUE(gstCountResult))
-		OutputSize();
+void CountingDlg::UpdateCountUseMax(bool bval)
+{
+	m_ca_ignore_max_chk->SetValue(bval);
+	m_ca_max_text->Enable(bval);
 }
 
 void CountingDlg::OutputSize()

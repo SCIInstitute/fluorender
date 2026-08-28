@@ -25,22 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef AnnotatPropPanelAgent_h
-#define AnnotatPropPanelAgent_h
+#ifndef ListPanelAgent_h
+#define ListPanelAgent_h
 
 #include <Agent.h>
-#include <memory>
 
-class AnnotatPropPanel;
-class AnnotData;
-
-class AnnotatPropPanelAgent : public Agent
+class ListPanel;
+class ListPanelAgent : public Agent
 {
 public:
-	AnnotatPropPanelAgent(
-		AnnotatPropPanel* panel);
+	ListPanelAgent(
+		ListPanel* panel);
 
-	virtual ~AnnotatPropPanelAgent() = default;
+	virtual ~ListPanelAgent() = default;
 
 	// Agent interface
 	virtual bool Accept(
@@ -48,24 +45,16 @@ public:
 
 	virtual void Update(
 		const UpdateRequest& request) override;
-	
-	AnnotatPropPanel* GetPanel() const
-	{
-		return static_cast<AnnotatPropPanel*>(GetWindow());
-	}
 
-	std::shared_ptr<AnnotData> GetData() const
+	ListPanel* GetPanel() const
 	{
-		return m_ann.lock();
+		return static_cast<ListPanel*>(GetWindow());
 	}
 
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
-
-private:
-	std::weak_ptr<AnnotData> m_ann;
 };
 
-#endif // AnnotatPropPanelAgent_h
+#endif // ListPanelAgent_h

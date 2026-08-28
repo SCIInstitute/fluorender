@@ -25,22 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef AnnotatPropPanelAgent_h
-#define AnnotatPropPanelAgent_h
+#ifndef FpRangeDlgAgent_h
+#define FpRangeDlgAgent_h
 
 #include <Agent.h>
-#include <memory>
 
-class AnnotatPropPanel;
-class AnnotData;
-
-class AnnotatPropPanelAgent : public Agent
+class FpRangeDlg;
+class FpRangeDlgAgent : public Agent
 {
 public:
-	AnnotatPropPanelAgent(
-		AnnotatPropPanel* panel);
+	FpRangeDlgAgent(
+		FpRangeDlg* dlg);
 
-	virtual ~AnnotatPropPanelAgent() = default;
+	virtual ~FpRangeDlgAgent() = default;
 
 	// Agent interface
 	virtual bool Accept(
@@ -48,24 +45,13 @@ public:
 
 	virtual void Update(
 		const UpdateRequest& request) override;
-	
-	AnnotatPropPanel* GetPanel() const
-	{
-		return static_cast<AnnotatPropPanel*>(GetWindow());
-	}
 
-	std::shared_ptr<AnnotData> GetData() const
-	{
-		return m_ann.lock();
-	}
+	FpRangeDlg* GetDialog() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
-
-private:
-	std::weak_ptr<AnnotData> m_ann;
 };
 
-#endif // AnnotatPropPanelAgent_h
+#endif // FpRangeDlgAgent_h

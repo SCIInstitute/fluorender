@@ -25,47 +25,57 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef AnnotatPropPanelAgent_h
-#define AnnotatPropPanelAgent_h
 
-#include <Agent.h>
-#include <memory>
+#include <ListPanelAgent.h>
+#include <ListPanel.h>
+#include <Global.h>
+#include <Names.h>
 
-class AnnotatPropPanel;
-class AnnotData;
-
-class AnnotatPropPanelAgent : public Agent
+ListPanelAgent::ListPanelAgent(
+	ListPanel* panel) :
+	Agent(panel)
 {
-public:
-	AnnotatPropPanelAgent(
-		AnnotatPropPanel* panel);
 
-	virtual ~AnnotatPropPanelAgent() = default;
+}
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
+bool ListPanelAgent::Accept(
+	const UpdateRequest& request) const
+{
+	return true;
+}
 
-	virtual void Update(
-		const UpdateRequest& request) override;
-	
-	AnnotatPropPanel* GetPanel() const
+void ListPanelAgent::Update(
+	const UpdateRequest& request)
+{
+	if (request.dir == UpdateDir::DataToUI)
 	{
-		return static_cast<AnnotatPropPanel*>(GetWindow());
+		UpdateUI(request);
 	}
-
-	std::shared_ptr<AnnotData> GetData() const
+	else if (request.dir == UpdateDir::UItoData)
 	{
-		return m_ann.lock();
+		UpdateData(request);
 	}
+}
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+void ListPanelAgent::UpdateUI(const UpdateRequest& request)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
-	void UpdateData(const UpdateRequest& request);
+	if (FOUND_VALUE(gstNull))
+		return;
 
-private:
-	std::weak_ptr<AnnotData> m_ann;
-};
+	bool update_all = request.values.empty();
 
-#endif // AnnotatPropPanelAgent_h
+	if (update_all || FOUND_VALUE(gstListCtrl) || FOUND_VALUE(gstTreeLayerName))
+		panel->UpdateList();
+
+	if (update_all || FOUND_VALUE(gstCurrentSelect))
+		panel->UpdateSelection();
+}
+
+void ListPanelAgent::UpdateData(const UpdateRequest& request)
+{
+
+}

@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 
 HelpDlg::HelpDlg(MainFrame *frame) :
-	PropPanel(frame, frame,
+	PropPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(600, 600)),
 	0, "HelpDlg"),
@@ -52,13 +52,3 @@ HelpDlg::~HelpDlg()
 {
 }
 
-void HelpDlg::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	//if (update_all || FOUND_VALUE(gstHelpUrl))
-	//	m_html->LoadPage(glbin_help_url);
-}

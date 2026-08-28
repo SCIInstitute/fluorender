@@ -30,6 +30,11 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvertDlg.h>
 #include <Global.h>
 #include <Names.h>
+#include <ConvVolMesh.h>
+#include <MeshStat.h>
+#include <CurrentObjects.h>
+#include <RenderView.h>
+#include <VolumeSelector.h>
 
 ConvertDlgAgent::ConvertDlgAgent(
 	ConvertDlg* dlg) :
@@ -75,58 +80,52 @@ void ConvertDlgAgent::UpdateUI(const UpdateRequest& request)
 	if (update_all || FOUND_VALUE(gstVolMeshThresh))
 	{
 		dval = glbin_conv_vol_mesh.GetIsoValue();
-		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_thresh_text->ChangeValue(wxString::Format("%.2f", dval));
+		dlg->UpdateVolMeshThresh(dval);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownXY))
 	{
 		ival = glbin_conv_vol_mesh.GetDownsample();
-		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		m_cnv_vol_mesh_downsample_text->ChangeValue(wxString::Format("%d", ival));
+		dlg->UpdateVolMeshDownXY(ival);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshDownZ))
 	{
 		ival = glbin_conv_vol_mesh.GetDownsampleZ();
-		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		m_cnv_vol_mesh_downsample_z_text->ChangeValue(wxString::Format("%d", ival));
+		dlg->UpdateVolMeshDownZ(ival);
 	}
 
 	if (update_all || FOUND_VALUE(gstUseTransferFunc))
 	{
 		bval = glbin_conv_vol_mesh.GetUseTransfer();
-		m_cnv_vol_mesh_usetransf_chk->SetValue(bval);
+		dlg->UpdateUseTransferFunc(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstUseSelection))
 	{
 		bval = glbin_conv_vol_mesh.GetUseMask();
-		m_cnv_vol_mesh_selected_chk->SetValue(bval);
+		dlg->UpdateUseSelection(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshSimplify))
 	{
 		//settings
 		dval = glbin_conv_vol_mesh.GetSimplify();
-		m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_simplify_text->ChangeValue(wxString::Format("%.2f", dval));
+		dlg->UpdateVolMeshSimplify(dval);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshSmoothN))
 	{
 		//settings
 		dval = glbin_conv_vol_mesh.GetSmoothStrength();
-		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_smooth_n_text->ChangeValue(wxString::Format("%.2f", dval));
+		dlg->UpdateVolMeshSmoothN(dval);
 	}
 
 	if (update_all || FOUND_VALUE(gstVolMeshSmoothT))
 	{
 		//settings
 		dval = glbin_conv_vol_mesh.GetSmoothScale();
-		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
-		m_cnv_vol_mesh_smooth_t_text->ChangeValue(wxString::Format("%.2f", dval));
+		dlg->UpdateVolMeshSmoothT(dval);
 	}
 
 	if (FOUND_VALUE(gstVolMeshInfo))
@@ -142,7 +141,7 @@ void ConvertDlgAgent::UpdateUI(const UpdateRequest& request)
 			data.vertex_count = stat.GetVertexNum();
 			data.triangle_count = stat.GetTriangleNum();
 			data.normal_count = stat.GetNormalNum();
-			wxString unit_area, unit_vol;
+			std::wstring unit_area, unit_vol;
 			auto view = glbin_current.render_view.lock();
 			if (view)
 			{
@@ -163,7 +162,7 @@ void ConvertDlgAgent::UpdateUI(const UpdateRequest& request)
 					break;
 				}
 			}
-			SetOutput(data, unit_area, unit_vol);
+			dlg->SetOutput(data, unit_area, unit_vol);
 		}
 	}
 

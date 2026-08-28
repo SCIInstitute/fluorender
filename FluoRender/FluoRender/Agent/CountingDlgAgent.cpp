@@ -26,27 +26,29 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
+#include <CountingDlgAgent.h>
+#include <CountingDlg.h>
+#include <Global.h>
 #include <Names.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <CompGenerator.h>
+#include <CompAnalyzer.h>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel) :
-	Agent(panel)
+CountingDlgAgent::CountingDlgAgent(
+	CountingDlg* dlg) :
+	Agent(dlg)
 {
 
 }
 
-bool AnnotatPropPanelAgent::Accept(
+bool CountingDlgAgent::Accept(
 	const UpdateRequest& request) const
 {
-	return
-		FOUND_VALUE(gstAnnotMemoText) ||
-		FOUND_VALUE(gstAnnotMemoReadOnly);
+	return true;
 }
 
-void AnnotatPropPanelAgent::Update(
+void CountingDlgAgent::Update(
 	const UpdateRequest& request)
 {
 	if (request.dir == UpdateDir::DataToUI)
@@ -59,40 +61,60 @@ void AnnotatPropPanelAgent::Update(
 	}
 }
 
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
+void CountingDlgAgent::UpdateUI(const UpdateRequest& request)
 {
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
+	auto dlg = GetDialog();
+	if (!dlg)
 		return;
 
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		if (FOUND_VALUE(gstAnnotMemoText))
-		{
-			std::wstring str = ann->GetMemo();
-			panel->SetMemoText(str);
-		}
-		if (FOUND_VALUE(gstAnnotMemoReadOnly))
-		{
-			bool bval = ann->GetMemoRO();
-			panel->SetMemoReadOnly(bval);
-		}
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
 
-	}
-	else if (request.dir == UpdateDir::UItoData)
+	bool update_all = request.values.empty();
+	m_max_value = vd->GetMaxValue();
+
+	bool bval;
+	int ival;
+
+	//selected only
+	if (update_all || FOUND_VALUE(gstUseSelection))
 	{
-		if (FOUND_VALUE(gstAnnotMemoText))
-		{
-			std::wstring str = panel->GetMemoText();
-			ann->SetMemo(str);
-		}
+		bval = glbin_comp_generator.GetUseSel();
+		dlg->UpdateUseSelection(bval);
 	}
+	//min voxel
+	if (update_all || FOUND_VALUE(gstCountMinValue))
+	{
+		ival = glbin_comp_analyzer.GetMinNum();
+		dlg->UpdateCountMinValue(ival);
+	}
+	//max voxel
+	if (update_all || FOUND_VALUE(gstCountMaxValue))
+	{
+		ival = glbin_comp_analyzer.GetMaxNum();
+		dlg->UpdateCountMaxValue(ival);
+	}
+	//ignore max
+	if (update_all || FOUND_VALUE(gstCountUseMax))
+	{
+		bval = !glbin_comp_analyzer.GetUseMax();
+		dlg->UpdateCountUseMax(bval);
+	}
+	//result
+	if (FOUND_VALUE(gstCountResult))
+		dlg->OutputSize();
 }
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
+void CountingDlgAgent::UpdateData(const UpdateRequest& request)
 {
 
+}
+
+CountingDlg* CountingDlgAgent::GetDialog() const
+{
+	return static_cast<CountingDlg*>(GetWindow());
 }
