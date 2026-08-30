@@ -38,7 +38,7 @@ ManipPropPanel::ManipPropPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size, style, name)
+	PropPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -176,60 +176,37 @@ ManipPropPanel::~ManipPropPanel()
 {
 }
 
-void ManipPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
+void ManipPropPanel::UpdateMeshTranslation(const fluo::Vector& vval)
 {
-	auto md = m_md.lock();
-	if (!md)
-		return;
-
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
 	wxString str;
-	fluo::Vector vval;
-
-	if (update_all || FOUND_VALUE(gstMeshTranslation))
-	{
-		vval = md->GetTranslation();
-		str = wxString::Format("%.2f", vval.x());
-		m_x_trans_text->ChangeValue(str);
-		str = wxString::Format("%.2f", vval.y());
-		m_y_trans_text->ChangeValue(str);
-		str = wxString::Format("%.2f", vval.z());
-		m_z_trans_text->ChangeValue(str);
-	}
-	if (update_all || FOUND_VALUE(gstMeshRotation))
-	{
-		vval = md->GetRotation();
-		str = wxString::Format("%.2f", vval.x());
-		m_x_rot_text->ChangeValue(str);
-		str = wxString::Format("%.2f", vval.y());
-		m_y_rot_text->ChangeValue(str);
-		str = wxString::Format("%.2f", vval.z());
-		m_z_rot_text->ChangeValue(str);
-	}
-	if (update_all || FOUND_VALUE(gstMeshScale))
-	{
-		vval = md->GetScaling();
-		str = wxString::Format("%.2f", vval.x());
-		m_x_scl_text->ChangeValue(str);
-		str = wxString::Format("%.2f", vval.y());
-		m_y_scl_text->ChangeValue(str);
-		str = wxString::Format("%.2f", vval.z());
-		m_z_scl_text->ChangeValue(str);
-	}
+	str = wxString::Format("%.2f", vval.x());
+	m_x_trans_text->ChangeValue(str);
+	str = wxString::Format("%.2f", vval.y());
+	m_y_trans_text->ChangeValue(str);
+	str = wxString::Format("%.2f", vval.z());
+	m_z_trans_text->ChangeValue(str);
 }
 
-void ManipPropPanel::SetMeshData(const std::shared_ptr<MeshData>& md)
+void ManipPropPanel::UpdateMeshRotation(const fluo::Vector& vval)
 {
-	m_md = md;
+	wxString str;
+	str = wxString::Format("%.2f", vval.x());
+	m_x_rot_text->ChangeValue(str);
+	str = wxString::Format("%.2f", vval.y());
+	m_y_rot_text->ChangeValue(str);
+	str = wxString::Format("%.2f", vval.z());
+	m_z_rot_text->ChangeValue(str);
 }
 
-std::shared_ptr<MeshData> ManipPropPanel::GetMeshData()
+void ManipPropPanel::UpdateMeshScale(const fluo::Vector& vval)
 {
-	return m_md.lock();
+	wxString str;
+	str = wxString::Format("%.2f", vval.x());
+	m_x_scl_text->ChangeValue(str);
+	str = wxString::Format("%.2f", vval.y());
+	m_y_scl_text->ChangeValue(str);
+	str = wxString::Format("%.2f", vval.z());
+	m_z_scl_text->ChangeValue(str);
 }
 
 void ManipPropPanel::OnSpinUp(wxSpinEvent& event)

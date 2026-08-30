@@ -131,6 +131,8 @@ public:
 	virtual void SaveTable(const std::wstring& filename);
 	virtual void SetAutoStart(bool bval);
 
+	void UpdateAutoStart(bool bval);
+
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);
 	virtual void OnLoadTable(wxCommandEvent& event);
@@ -163,6 +165,9 @@ public:
 	virtual void LoadTable(const std::wstring& filename);
 	virtual void SaveTable(const std::wstring& filename);
 	virtual void SetAutoStart(bool bval);
+
+	void UpdateAutoStart(bool bval);
+	void UpdateAutoApply(bool bval);
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);

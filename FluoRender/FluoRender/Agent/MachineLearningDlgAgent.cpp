@@ -66,7 +66,7 @@ void MachineLearningDlgAgent::UpdateUI(const UpdateRequest& request)
 	bool update_all = request.values.empty();
 
 	//request panels to update
-	auto sub_request(request.values, this, request.mode, request.reason);
+	UpdateRequest sub_request(request.values, this, request.mode, request.reason);
 	Notify(sub_request);
 }
 
@@ -175,7 +175,7 @@ void MLCompGenPanelAgent::UpdateUI(const UpdateRequest& request)
 		FOUND_VALUE(gstMlCgAutoStart))
 	{
 		bval = glbin_settings.m_cg_auto_start;
-		m_auto_start_check->SetValue(bval);
+		panel->SetAutoStart(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
@@ -236,13 +236,13 @@ void MLVolPropPanelAgent::UpdateUI(const UpdateRequest& request)
 		FOUND_VALUE(gstMlVpAutoStart))
 	{
 		bval = glbin_settings.m_vp_auto_start;
-		m_auto_start_check->SetValue(bval);
+		panel->UpdateAutoStart(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstMlVpAutoApply))
 	{
 		bval = glbin_settings.m_vp_auto_apply;
-		m_auto_apply_chk->SetValue(bval);
+		panel->UpdateAutoApply(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))

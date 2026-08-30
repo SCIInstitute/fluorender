@@ -695,6 +695,11 @@ void MLCompGenPanel::SetAutoStart(bool bval)
 	glbin_settings.m_cg_auto_start = bval;
 }
 
+void MLCompGenPanel::UpdateAutoStart(bool bval)
+{
+	m_auto_start_check->SetValue(bval);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLVolPropPanel::MLVolPropPanel(
 	MainFrame* frame, wxWindow* parent) :
@@ -1030,3 +1035,14 @@ void MLVolPropPanel::OnAutoApply(wxCommandEvent& event)
 {
 	glbin_settings.m_vp_auto_apply = m_auto_apply_chk->GetValue();
 }
+
+void MLVolPropPanel::UpdateAutoStart(bool bval)
+{
+	m_auto_start_check->SetValue(bval);
+}
+
+void MLVolPropPanel::UpdateAutoApply(bool bval)
+{
+	m_auto_apply_chk->SetValue(bval);
+}
+

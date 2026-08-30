@@ -26,27 +26,25 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
+#include <ManipPropPanelAgent.h>
+#include <ManipPropPanel.h>
+#include <MeshData.h>
 #include <Names.h>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel) :
+ManipPropPanelAgent::ManipPropPanelAgent(
+	ManipPropPanel* panel) :
 	Agent(panel)
 {
 
 }
 
-bool AnnotatPropPanelAgent::Accept(
+bool ManipPropPanelAgent::Accept(
 	const UpdateRequest& request) const
 {
-	return
-		FOUND_VALUE(gstAnnotMemoText) ||
-		FOUND_VALUE(gstAnnotMemoReadOnly);
+	return true;
 }
 
-void AnnotatPropPanelAgent::Update(
+void ManipPropPanelAgent::Update(
 	const UpdateRequest& request)
 {
 	if (request.dir == UpdateDir::DataToUI)
@@ -59,39 +57,40 @@ void AnnotatPropPanelAgent::Update(
 	}
 }
 
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
+void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto ann = GetData();
-	if (!ann)
+	auto md = GetData();
+	if (!md)
 		return;
 
-	if (FOUND_VALUE(gstAnnotMemoText))
+	//update user interface
+	if (FOUND_VALUE(gstNull))
+		return;
+	bool update_all = request.values.empty();
+
+	fluo::Vector vval;
+
+	if (update_all || FOUND_VALUE(gstMeshTranslation))
 	{
-		std::wstring str = ann->GetMemo();
-		panel->SetMemoText(str);
+		vval = md->GetTranslation();
+		panel->UpdateMeshTranslation(vval);
 	}
-	if (FOUND_VALUE(gstAnnotMemoReadOnly))
+	if (update_all || FOUND_VALUE(gstMeshRotation))
 	{
-		bool bval = ann->GetMemoRO();
-		panel->SetMemoReadOnly(bval);
+		vval = md->GetRotation();
+		panel->UpdateMeshRotation(vval);
+	}
+	if (update_all || FOUND_VALUE(gstMeshScale))
+	{
+		vval = md->GetScaling();
+		panel->UpdateMeshScale(vval);
 	}
 }
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
+void ManipPropPanelAgent::UpdateData(const UpdateRequest& request)
 {
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
 
-	if (FOUND_VALUE(gstAnnotMemoText))
-	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
 }

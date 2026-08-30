@@ -25,73 +25,47 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef ManipPropPanelAgent_h
+#define ManipPropPanelAgent_h
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
-#include <Names.h>
+#include <Agent.h>
+#include <memory>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel) :
-	Agent(panel)
+class ManipPropPanel;
+class MeshData;
+
+class ManipPropPanelAgent : public Agent
 {
+public:
+	ManipPropPanelAgent(
+		ManipPropPanel* panel);
 
-}
+	virtual ~ManipPropPanelAgent() = default;
 
-bool AnnotatPropPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return
-		FOUND_VALUE(gstAnnotMemoText) ||
-		FOUND_VALUE(gstAnnotMemoReadOnly);
-}
+	// Agent interface
+	virtual bool Accept(
+		const UpdateRequest& request) const override;
 
-void AnnotatPropPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
+	virtual void Update(
+		const UpdateRequest& request) override;
+
+	ManipPropPanel* GetPanel() const
 	{
-		UpdateUI(request);
+		return static_cast<ManipPropPanel*>(GetWindow());
 	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
 
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
-
-	if (FOUND_VALUE(gstAnnotMemoText))
+	std::shared_ptr<MeshData> GetData() const
 	{
-		std::wstring str = ann->GetMemo();
-		panel->SetMemoText(str);
+		return m_md.lock();
 	}
-	if (FOUND_VALUE(gstAnnotMemoReadOnly))
-	{
-		bool bval = ann->GetMemoRO();
-		panel->SetMemoReadOnly(bval);
-	}
-}
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
+private:
+	void UpdateUI(const UpdateRequest& request);
 
-	if (FOUND_VALUE(gstAnnotMemoText))
-	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
-}
+	void UpdateData(const UpdateRequest& request);
+
+private:
+	std::weak_ptr<MeshData> m_md;
+};
+
+#endif // ManipPropPanelAgent_h

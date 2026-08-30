@@ -67,15 +67,14 @@ public:
 		const wxString& name = "ManipPropPanel");
 	~ManipPropPanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateMeshTranslation(const fluo::Vector& vval);
+	void UpdateMeshRotation(const fluo::Vector& vval);
+	void UpdateMeshScale(const fluo::Vector& vval);
 
-	void SetMeshData(const std::shared_ptr<MeshData>& md);
-	std::shared_ptr<MeshData> GetMeshData();
 	void UpdateMeshData();
 
 private:
-	std::weak_ptr<MeshData> m_md;
-
 	wxStaticText* m_trans_st;
 	wxStaticText* m_x_trans_st;
 	wxTextCtrl* m_x_trans_text;

@@ -191,7 +191,6 @@ public:
 	MeasureDlg(MainFrame* frame);
 	~MeasureDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateRulerList();
 	void UpdateRulerListCur();
 	void ToggleDisplay();

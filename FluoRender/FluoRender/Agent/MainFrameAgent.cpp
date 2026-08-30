@@ -26,27 +26,25 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
+#include <MainFrameAgent.h>
+#include <MainFrame.h>
+#include <Global.h>
 #include <Names.h>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel) :
-	Agent(panel)
+MainFrameAgent::MainFrameAgent(
+	MainFrame* frame) :
+	Agent(frame)
 {
 
 }
 
-bool AnnotatPropPanelAgent::Accept(
+bool MainFrameAgent::Accept(
 	const UpdateRequest& request) const
 {
-	return
-		FOUND_VALUE(gstAnnotMemoText) ||
-		FOUND_VALUE(gstAnnotMemoReadOnly);
+	return true;
 }
 
-void AnnotatPropPanelAgent::Update(
+void MainFrameAgent::Update(
 	const UpdateRequest& request)
 {
 	if (request.dir == UpdateDir::DataToUI)
@@ -59,39 +57,16 @@ void AnnotatPropPanelAgent::Update(
 	}
 }
 
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
+void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 {
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
-
-	if (FOUND_VALUE(gstAnnotMemoText))
-	{
-		std::wstring str = ann->GetMemo();
-		panel->SetMemoText(str);
-	}
-	if (FOUND_VALUE(gstAnnotMemoReadOnly))
-	{
-		bool bval = ann->GetMemoRO();
-		panel->SetMemoReadOnly(bval);
-	}
 }
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
+void MainFrameAgent::UpdateData(const UpdateRequest& request)
 {
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
 
-	if (FOUND_VALUE(gstAnnotMemoText))
-	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
+}
+
+MainFrame* MainFrameAgent::GetMainFrame() const
+{
+	return static_cast<MainFrame*>(GetWindow());
 }
