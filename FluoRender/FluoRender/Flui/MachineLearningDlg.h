@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
+class MainFrame;
 class MachineLearningPanel;
 class MachineLearningDlg : public TabbedPanel
 {
@@ -43,10 +44,7 @@ public:
 	MachineLearningDlg(MainFrame* frame);
 	~MachineLearningDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-
 private:
-	//wxCheckBox* m_auto_start_all;
 	std::vector<MachineLearningPanel*> m_panels;
 };
 
@@ -59,7 +57,6 @@ public:
 	~MachineLearningPanel();
 
 	void Create();
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void PopTopList();
 	virtual void UpdateList(int index);
 	virtual void UpdateTopList();
@@ -128,7 +125,6 @@ public:
 		wxWindow* parent);
 	~MLCompGenPanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::wstring& filename);
@@ -162,7 +158,6 @@ public:
 		wxWindow* parent);
 	~MLVolPropPanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::wstring& filename);

@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 
 MachineLearningDlg::MachineLearningDlg(MainFrame* frame) :
-	TabbedPanel(frame, frame,
+	TabbedPanel(frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningDlg")
@@ -79,24 +79,10 @@ MachineLearningDlg::~MachineLearningDlg()
 {
 }
 
-void MachineLearningDlg::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	for (auto it : m_panels)
-	{
-		if (it)
-			it->FluoUpdate(vc);
-	}
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanel::MachineLearningPanel(
 	MainFrame* frame, wxWindow* parent) :
-	PropPanel(frame, parent,
+	PropPanel(parent,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningPanel"),
@@ -238,17 +224,6 @@ void MachineLearningPanel::Create()
 	SetSizer(mainsizer);
 	m_panel_top->Layout();
 	m_panel_bot->Layout();
-}
-
-void MachineLearningPanel::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	if (update_all || FOUND_VALUE(gstMlTopList))
-		PopTopList();
 }
 
 void MachineLearningPanel::PopTopList()
@@ -431,29 +406,6 @@ MLCompGenPanel::~MLCompGenPanel()
 	}
 }
 
-void MLCompGenPanel::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	MachineLearningPanel::FluoUpdate(vc);
-
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	bool bval;
-
-	if (update_all ||
-		FOUND_VALUE(gstMlAutoStart) ||
-		FOUND_VALUE(gstMlCgAutoStart))
-	{
-		bval = glbin_settings.m_cg_auto_start;
-		m_auto_start_check->SetValue(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
-		AutoLoadTable();
-}
-
 void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
 {
 	m_top_grid->InsertRows(0);
@@ -572,8 +524,6 @@ void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 
 void MLCompGenPanel::OnApplyRec(wxCommandEvent& event)
 {
-	if (!m_frame)
-		return;
 	glbin_comp_generator.ApplyRecord();
 }
 
@@ -782,35 +732,6 @@ MLVolPropPanel::~MLVolPropPanel()
 		std::wstring filename = p.wstring();
 		table.save(filename);
 	}
-}
-
-void MLVolPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	MachineLearningPanel::FluoUpdate(vc);
-
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	bool bval;
-
-	if (update_all ||
-		FOUND_VALUE(gstMlAutoStart) ||
-		FOUND_VALUE(gstMlVpAutoStart))
-	{
-		bval = glbin_settings.m_vp_auto_start;
-		m_auto_start_check->SetValue(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstMlVpAutoApply))
-	{
-		bval = glbin_settings.m_vp_auto_apply;
-		m_auto_apply_chk->SetValue(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
-		AutoLoadTable();
 }
 
 void MLVolPropPanel::OnNewTable(wxCommandEvent& event)
