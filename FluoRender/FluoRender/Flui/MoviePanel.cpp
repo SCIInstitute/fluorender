@@ -52,12 +52,10 @@ DEALINGS IN THE SOFTWARE.
 
 KeyListCtrl::KeyListCtrl(
 	wxWindow* parent,
-	MainFrame* frame,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
 	wxListCtrl(parent, wxID_ANY, pos, size, style),
-	m_frame(frame),
 	m_editing_item(-1),
 	m_dragging_to_item(-1)
 {
@@ -615,7 +613,7 @@ wxWindow* MoviePanel::CreateKeyframePage(wxWindow* parent)
 	sizer2->Add(m_interpolation_cmb, 0, wxALIGN_CENTER);
 
 	//list
-	m_keylist = new KeyListCtrl(page, m_frame,
+	m_keylist = new KeyListCtrl(page,
 		wxDefaultPosition, FromDIP(wxSize(200, 200)), wxLC_REPORT);
 	m_keylist->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnAct, this);
 
@@ -987,18 +985,17 @@ MoviePanel::MoviePanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, frame, pos, size, style, name)
+	TabbedPanel(frame, pos, size, style, name)
 {
-	m_running = true;
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
 	//SetDoubleBuffered(true);
 	wxIntegerValidator<unsigned int> vald_int;
 
-	Root* root = glbin_data_manager.GetRoot();
-	if (root)
-		m_view = root->GetView(glbin_mov_def.m_view_idx).get();
+	//Root* root = glbin_data_manager.GetRoot();
+	//if (root)
+	//	m_view = root->GetView(glbin_mov_def.m_view_idx).get();
 
 	//notebook
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
@@ -1247,338 +1244,205 @@ MoviePanel::~MoviePanel()
 {
 }
 
-void MoviePanel::FluoUpdate(const fluo::ValueCollection& vc)
+void MoviePanel::UpdateMovFps(double dval)
 {
-	if (FOUND_VALUE(gstNull))
-		return;
+	auto str = wxString::Format("%.0f", dval);
+	m_fps_text->ChangeValue(str);
+}
 
-	bool update_all = vc.empty() || FOUND_VALUE(gstMovieAgent);
-	bool bval;
-	int ival;
+void MoviePanel::UpdateMovLength(double dval)
+{
+	auto str = wxString::Format("%.2f", dval);
+	m_movie_len_text->ChangeValue(str);
+}
 
-	//modes
-	if (update_all || FOUND_VALUE(gstMovFps))
-		m_fps_text->ChangeValue(wxString::Format("%.0f", glbin_moviemaker.GetFps()));
-
-	if (update_all || FOUND_VALUE(gstMovLength))
-		m_movie_len_text->ChangeValue(wxString::Format("%.2f", glbin_moviemaker.GetMovieLength()));
-
-	if (update_all || FOUND_VALUE(gstMovViewList))
+void MoviePanel::UpdateMovViewList(const MovViewListInfo& info)
+{
+	m_views_cmb->Clear();
+	for (auto& view : info.views)
 	{
-		m_views_cmb->Clear();
-		Root* root = glbin_data_manager.GetRoot();
-		if (root)
+		m_views_cmb->Append(view);
+	}
+}
+
+void MoviePanel::UpdateMovViewIndex(int ival)
+{
+	m_views_cmb->Select(ival);
+}
+
+void MoviePanel::UpdateMovSliderStyle(bool bval)
+{
+	m_progress_sldr->SetMode(bval ? 1 : 0);
+	if (bval)
+		m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(jog));
+	else
+		m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider));
+}
+
+void MoviePanel::UpdateMovProgSlider(int cf, int ts, int sf, int ef)
+{
+	m_progress_sldr->SetScrollbar2(cf, ts, sf, ef, 1);
+	m_progress_sldr->ChangeValue(cf);
+}
+
+void MoviePanel::UpdateBeginFrame(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_start_frame_text->ChangeValue(str);
+}
+
+void MoviePanel::UpdateEndFrame(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_end_frame_text->ChangeValue(str);
+}
+
+void MoviePanel::UpdateCurrentFrame(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_cur_frame_text->ChangeValue(str);
+	m_cur_frame_text->Update();
+}
+
+void MoviePanel::UpdateTotalFrames(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_full_frame_text->ChangeValue(str);
+}
+
+void MoviePanel::UpdateMovCurTime(double dval)
+{
+	auto str = wxString::Format("%.2f", dval);
+	m_progress_text->ChangeValue(str);
+	m_progress_text->Update();
+}
+
+void MoviePanel::UpdateMovPlay(bool running, bool reverse, bool script)
+{
+	if (running)
+	{
+		if (reverse)
 		{
-			for (int i = 0; i < root->GetViewNum(); i++)
-			{
-				auto view = root->GetView(i);
-				if (view && m_views_cmb)
-					m_views_cmb->Append(view->GetName());
-			}
-		}
-	}
-	if (update_all || FOUND_VALUE(gstMovViewIndex))
-		m_views_cmb->Select(glbin_mov_def.m_view_idx);
+			m_play_btn->SetBitmap(wxGetBitmap(play));
+			m_play_btn->SetValue(false);
 
-	if (update_all || FOUND_VALUE(gstMovSliderStyle))
-	{
-		bval = glbin_mov_def.m_slider_style;
-		m_progress_sldr->SetMode(bval ? 1 : 0);
-		if (bval)
-			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(jog));
-		else
-			m_slider_btn->SetToolNormalBitmap(0, wxGetBitmap(slider));
-	}
-
-	if (update_all || FOUND_VALUE(gstMovProgSlider))
-	{
-		m_progress_sldr->SetScrollbar2(
-			glbin_moviemaker.GetCurrentFrame(),
-			glbin_moviemaker.GetScrollThumbSize(),
-			glbin_moviemaker.GetClipStartFrame(),
-			glbin_moviemaker.GetClipEndFrame(), 1);
-		m_progress_sldr->ChangeValue(glbin_moviemaker.GetCurrentFrame());
-	}
-
-	if (update_all || FOUND_VALUE(gstBeginFrame))
-		m_start_frame_text->ChangeValue(wxString::Format("%d",
-			glbin_moviemaker.GetClipStartFrame()));
-
-	if (update_all || FOUND_VALUE(gstEndFrame))
-		m_end_frame_text->ChangeValue(wxString::Format("%d",
-			glbin_moviemaker.GetClipEndFrame()));
-
-	if (update_all || FOUND_VALUE(gstCurrentFrame))
-	{
-		m_cur_frame_text->ChangeValue(wxString::Format("%d",
-			glbin_moviemaker.GetCurrentFrame()));
-		m_cur_frame_text->Update();
-	}
-
-	if (update_all || FOUND_VALUE(gstTotalFrames))
-		m_full_frame_text->ChangeValue(wxString::Format("%d",
-			glbin_moviemaker.GetFullFrameNum()));
-
-	if (update_all || FOUND_VALUE(gstMovCurTime))
-	{
-		m_progress_text->ChangeValue(wxString::Format("%.2f",
-			glbin_moviemaker.GetCurrentTime()));
-		m_progress_text->Update();
-	}
-
-	if (update_all || FOUND_VALUE(gstMovPlay))
-	{
-		if (glbin_moviemaker.IsRunning())
-		{
-			if (!m_running)
-			{
-				if (glbin_moviemaker.IsReverse())
-				{
-					m_play_btn->SetBitmap(wxGetBitmap(play));
-					m_play_btn->SetValue(false);
-					m_play_inv_btn->SetBitmap(wxGetBitmap(pause));
-					m_play_inv_btn->SetValue(true);
-				}
-				else
-				{
-					m_play_btn->SetBitmap(wxGetBitmap(pause));
-					m_play_btn->SetValue(true);
-					m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
-					m_play_inv_btn->SetValue(false);
-				}
-				m_running = true;
-			}
+			m_play_inv_btn->SetBitmap(wxGetBitmap(pause));
+			m_play_inv_btn->SetValue(true);
 		}
 		else
 		{
-			if (glbin_settings.m_run_script)
-			{
-				m_play_btn->SetBitmap(wxGetBitmap(play_script));
-				m_play_btn->SetValue(false);
-				m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv_script));
-				m_play_inv_btn->SetValue(false);
-			}
-			else
-			{
-				m_play_btn->SetBitmap(wxGetBitmap(play));
-				m_play_btn->SetValue(false);
-				m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
-				m_play_inv_btn->SetValue(false);
-			}
-			m_running = false;
+			m_play_btn->SetBitmap(wxGetBitmap(pause));
+			m_play_btn->SetValue(true);
+
+			m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
+			m_play_inv_btn->SetValue(false);
 		}
 	}
-
-	if (update_all || FOUND_VALUE(gstMovLoop))
-		m_loop_btn->SetValue(glbin_moviemaker.IsLoop());
-
-	if (update_all || FOUND_VALUE(gstMovRotEnable))
+	else
 	{
-		bval = glbin_moviemaker.GetRotateEnable();
-		m_rot_chk->SetValue(bval);
-		m_x_rd->Enable(bval);
-		m_y_rd->Enable(bval);
-		m_z_rd->Enable(bval);
-		m_degree_text->Enable(bval);
-		m_rot_int_cmb->Enable(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstMovRotAxis))
-	{
-		ival = glbin_moviemaker.GetRotateAxis();
-		if (ival == 0)
-			m_x_rd->SetValue(true);
-		else if (ival == 1)
-			m_y_rd->SetValue(true);
-		else if (ival == 2)
-			m_z_rd->SetValue(true);
-	}
-
-	if (update_all || FOUND_VALUE(gstMovRotAng))
-		m_degree_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetRotateDeg()));
-
-	if (update_all || FOUND_VALUE(gstMovIntrpMode))
-	{
-		m_rot_int_cmb->SetSelection(glbin_moviemaker.GetInterpolation());
-		m_interpolation_cmb->SetSelection(glbin_moviemaker.GetInterpolation());
-	}
-
-	if (update_all || FOUND_VALUE(gstMovSeqMode))
-	{
-		ival = glbin_moviemaker.GetSeqMode();
-		switch (ival)
+		if (script)
 		{
-		case 0:
-			m_seq_chk->SetValue(false);
-			m_bat_chk->SetValue(false);
-			break;
-		case 1:
-			m_seq_chk->SetValue(true);
-			m_bat_chk->SetValue(false);
-			break;
-		case 2:
-			m_seq_chk->SetValue(false);
-			m_bat_chk->SetValue(true);
-			break;
+			m_play_btn->SetBitmap(wxGetBitmap(play_script));
+			m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv_script));
 		}
-		bval = ival > 0;
-		m_seq_dec_btn->Enable(bval);
-		m_seq_inc_btn->Enable(bval);
-		m_seq_num_text->Enable(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstMovSeqNum))
-	{
-		m_seq_num_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetSeqCurNum()));
-		m_seq_total_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetSeqAllNum()));
-	}
-
-	if (update_all || FOUND_VALUE(gstCaptureParam))
-		m_keyframe_chk->SetValue(glbin_moviemaker.GetKeyframeEnable());
-
-	if (update_all || FOUND_VALUE(gstParamKeyDuration))
-		m_duration_text->ChangeValue(wxString::Format("%.0f", glbin_moviemaker.GetKeyDuration()));
-
-	if (update_all || FOUND_VALUE(gstParamList))
-		m_keylist->Update();
-
-	if (update_all || FOUND_VALUE(gstParamListSelect))
-	{
-		double t = glbin_moviemaker.GetCurProg();
-		int index = glbin_interpolator.GetKeyIndexFromTime(t);
-		long item = m_keylist->GetNextItem(-1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_SELECTED);
-		if (index != item && index != -1)
-			m_keylist->SelectItemSilently(index);
-	}
-
-	if (update_all || FOUND_VALUE(gstCamLockObjEnable))
-		m_cam_lock_chk->SetValue(glbin_moviemaker.GetCamLock());
-
-	if (update_all || FOUND_VALUE(gstCamLockType))
-		m_cam_lock_cmb->SetSelection(glbin_moviemaker.GetCamLockType() - 1);
-
-	if (update_all || FOUND_VALUE(gstCropEnable))
-	{
-		bval = glbin_moviemaker.GetCropEnable();
-		m_crop_chk->SetValue(bval);
-		m_crop_x_text->Enable(bval);
-		m_crop_y_text->Enable(bval);
-		m_crop_w_text->Enable(bval);
-		m_crop_h_text->Enable(bval);
-
-		m_sb_tl_rb->Enable(bval);
-		m_sb_tr_rb->Enable(bval);
-		m_sb_bl_rb->Enable(bval);
-		m_sb_br_rb->Enable(bval);
-
-		m_sb_dx_text->Enable(bval);
-		m_sb_dx_spin->Enable(bval);
-		m_sb_dy_text->Enable(bval);
-		m_sb_dy_spin->Enable(bval);
-	}
-
-	if (update_all || FOUND_VALUE(gstCropValues))
-	{
-		m_crop_x_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropX()));
-		m_crop_y_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropY()));
-		m_crop_w_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropW()));
-		m_crop_h_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropH()));
-	}
-
-	if (update_all || FOUND_VALUE(gstScalebarPos))
-	{
-		ival = glbin_moviemaker.GetScalebarPos();
-		switch (ival)
-		{
-		case 0:
-			m_sb_tl_rb->SetValue(true);
-			break;
-		case 1:
-			m_sb_tr_rb->SetValue(true);
-			break;
-		case 2:
-			m_sb_bl_rb->SetValue(true);
-			break;
-		case 3:
-		default:
-			m_sb_br_rb->SetValue(true);
-			break;
-		}
-		m_sb_dx_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarX()));
-		m_sb_dy_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarY()));
-	}
-
-	if (update_all || FOUND_VALUE(gstRunScript))
-	{
-		bval = glbin_settings.m_run_script;
-		m_run_script_chk->SetValue(bval);
-		size_t idx = 4;
-		for (size_t i = 0; i < m_notebook->GetPageCount(); ++i)
-		{
-			wxString str = m_notebook->GetPageText(i);
-			if (str.Contains(UITEXT_NBPG4_0))
-			{
-				idx = i;
-				break;
-			}
-		}
-		if (bval)
-			m_notebook->SetPageText(idx, UITEXT_NBPG4_1);
 		else
-			m_notebook->SetPageText(idx, UITEXT_NBPG4_0);
-	}
-
-	if (update_all || FOUND_VALUE(gstScriptFile))
-	{
-		m_script_file_text->ChangeValue(glbin_settings.m_script_file);
-	}
-
-	if (update_all || FOUND_VALUE(gstScriptList))
-	{
-		m_script_list->DeleteAllItems();
-		std::vector<std::wstring> list;
-		std::wstring filename;
-		long tmp;
-		if (GetScriptFiles(list))
 		{
-			for (size_t i = 0; i < list.size(); ++i)
-			{
-				std::filesystem::path p(list[i]);
-				filename = p.stem().wstring();
-				tmp = m_script_list->InsertItem(i, std::to_wstring(i + 1), 0);
-				m_script_list->SetItem(tmp, 1, filename);
-			}
-			m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-			m_script_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
+			m_play_btn->SetBitmap(wxGetBitmap(play));
+			m_play_inv_btn->SetBitmap(wxGetBitmap(play_inv));
 		}
-	}
+		m_play_btn->SetValue(false);
 
-	if (update_all || FOUND_VALUE(gstScriptSelect))
-	{
-		std::vector<std::wstring> list;
-		if (GetScriptFiles(list))
-		{
-			int idx = -1;
-			for (size_t i = 0; i < list.size(); ++i)
-			{
-				if (glbin_settings.m_script_file == list[i])
-				{
-					idx = i;
-					break;
-				}
-			}
-			if (idx >= 0 && idx < m_script_list->GetItemCount())
-			{
-				m_script_list->SetItemState(idx,
-					wxLIST_STATE_SELECTED,
-					wxLIST_STATE_SELECTED);
-				//wxSize ss = m_script_list->GetItemSpacing();
-				//m_script_list->ScrollList(0, ss.y*idx);
-			}
-		}
+		m_play_inv_btn->SetValue(false);
 	}
+}
+
+void MoviePanel::UpdateMovLoop(bool bval)
+{
+	m_loop_btn->SetValue(bval);
+}
+
+void MoviePanel::UpdateMovRotEnable(bool bval)
+{
+	m_rot_chk->SetValue(bval);
+	m_x_rd->Enable(bval);
+	m_y_rd->Enable(bval);
+	m_z_rd->Enable(bval);
+	m_degree_text->Enable(bval);
+	m_rot_int_cmb->Enable(bval);
+}
+
+void MoviePanel::UpdateMovRotAxis(int ival)
+{
+	m_x_rd->SetValue(ival == 0);
+	m_y_rd->SetValue(ival == 1);
+	m_z_rd->SetValue(ival == 2);
+}
+
+void MoviePanel::UpdateMovRotAng(int ival)
+{
+	auto str = wxString::Format("%d", ival);
+	m_degree_text->ChangeValue(str);
+}
+
+void MoviePanel::UpdateMovIntrpMode(int ival)
+{
+	m_rot_int_cmb->SetSelection(ival);
+	m_interpolation_cmb->SetSelection(ival);
+}
+
+void MoviePanel::UpdateMovSeqMode(int ival)
+{
+	switch (ival)
+	{
+	case 0:
+		m_seq_chk->SetValue(false);
+		m_bat_chk->SetValue(false);
+		break;
+	case 1:
+		m_seq_chk->SetValue(true);
+		m_bat_chk->SetValue(false);
+		break;
+	case 2:
+		m_seq_chk->SetValue(false);
+		m_bat_chk->SetValue(true);
+		break;
+	}
+	m_seq_dec_btn->Enable(ival > 0);
+	m_seq_inc_btn->Enable(ival > 0);
+	m_seq_num_text->Enable(ival > 0);
+}
+
+void MoviePanel::UpdateMovSeqNum(int scn, int san)
+{
+	auto str = wxString::Format("%d", scn);
+	m_seq_num_text->ChangeValue(str);
+	str = wxString::Format("%d", san);
+	m_seq_total_text->ChangeValue(str);
+}
+
+void MoviePanel::UpdateCaptureParam(bool bval)
+{
+	m_keyframe_chk->SetValue(bval);
+}
+
+void MoviePanel::UpdateParamKeyDuration(double dval)
+{
+	auto str = wxString::Format("%.0f", dval);
+	m_duration_text->ChangeValue(str);
+}
+
+void MoviePanel::UpdateParamList()
+{
+	m_keylist->Update();
+}
+
+void MoviePanel::UpdateParamListSelect(int ival)
+{
+	long item = m_keylist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (ival != item && ival != -1)
+		m_keylist->SelectItemSilently(ival);
 }
 
 void MoviePanel::SetFps(double val)

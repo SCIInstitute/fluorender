@@ -62,7 +62,15 @@ public:
 	void SetMeshGroup(const std::shared_ptr<MeshGroup>& mg);
 	std::shared_ptr<MeshGroup> GetMeshGroup();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateOutline(bool bval);
+	void UpdateLegend(bool bval);
+	void UpdateMeshColor(const fluo::Color& color);
+	void UpdateMeshAlpha(bool bval, double dval);
+	void UpdateMeshShading(bool bval, double strength, double shine);
+	void UpdateMeshShadow(bool bval, double dval);
+	void UpdateShadowDir(bool bval, double dval);
+	void UpdateMeshScale(bool bval, double dval);
 
 	void EnableShadowDir(bool);
 	void SetShadowDir(double, bool);

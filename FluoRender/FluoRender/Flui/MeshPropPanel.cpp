@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MeshPropPanel.h>
+#include <MeshPropPanelAgent.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
@@ -49,7 +50,7 @@ MeshPropPanel::MeshPropPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, parent, pos, size,style, name),
+	PropPanel(parent, pos, size,style, name),
 	m_sync_group(false)
 {
 	// temporarily block events during constructor:
@@ -235,132 +236,10 @@ MeshPropPanel::~MeshPropPanel()
 {
 }
 
-void MeshPropPanel::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	if (FOUND_VALUE(gstNull))
-		return;
-	auto md = m_md.lock();
-	if (!md)
-		return;
-
-	bool update_all = vc.empty() || FOUND_VALUE(gstMeshProps);
-
-	fluo::Color cval;
-	double dval;
-	wxString str;
-	bool bval;
-
-	//outline
-	if (update_all || FOUND_VALUE(gstOutline))
-	{
-		bval = md->GetOutline();
-		m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
-		if (bval)
-			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
-				wxGetBitmap(outline));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
-				wxGetBitmap(outline_off));
-	}
-
-	//legend
-	if (update_all || FOUND_VALUE(gstLegend))
-	{
-		bval = md->GetLegend();
-		m_options_toolbar->ToggleTool(ID_LegendChk, bval);
-	}
-
-	//color
-	if (update_all || FOUND_VALUE(gstMeshColor))
-	{
-		cval = md->GetDataColor();
-		wxColor wxc(cval.r() * 255, cval.g() * 255, cval.b() * 255);
-		m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_color_btn->SetValue(wxc);
-	}
-
-	//alpha
-	if (update_all || FOUND_VALUE(gstMeshAlpha))
-	{
-		bval = md->GetAlphaEnable();
-		m_alpha_chk->SetValue(bval);
-		m_alpha_sldr->Enable(bval);
-		m_alpha_text->Enable(bval);
-		dval = md->GetAlpha();
-		m_alpha_sldr->ChangeValue(std::round(dval * 255.0));
-		str = wxString::Format("%.2f", dval);
-		m_alpha_text->ChangeValue(str);
-	}
-
-	//shading
-	if (update_all || FOUND_VALUE(gstMeshShading))
-	{
-		bval = md->GetShading();
-		m_shading_chk->SetValue(bval);
-		m_shading_sldr->Enable(bval);
-		m_shading_text->Enable(bval);
-		m_shine_sldr->Enable(bval);
-		m_shine_text->Enable(bval);
-		dval = md->GetShadingStrength();
-		m_shading_sldr->ChangeValue(std::round(dval * 255.0));
-		str = wxString::Format("%.2f", dval);
-		m_shading_text->ChangeValue(str);
-		//shine
-		dval = md->GetShadingShine();
-		m_shine_sldr->ChangeValue(std::round(dval * 255.0));
-		str = wxString::Format("%.2f", dval);
-		m_shine_text->ChangeValue(str);
-	}
-
-	//shadow
-	if (update_all || FOUND_VALUE(gstMeshShadow))
-	{
-		bval = md->GetShadowEnable();
-		m_shadow_chk->SetValue(bval);
-		m_shadow_sldr->Enable(bval);
-		m_shadow_text->Enable(bval);
-		dval = md->GetShadowIntensity();
-		m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
-		str = wxString::Format("%.2f", dval);
-		m_shadow_text->ChangeValue(str);
-	}
-	//dir
-	if (update_all || FOUND_VALUE(gstShadowDir))
-	{
-		bval = glbin_settings.m_shadow_dir;
-		m_shadow_dir_chk->ToggleTool(0, bval);
-		m_shadow_dir_sldr->Enable(bval);
-		m_shadow_dir_text->Enable(bval);
-		double dirx = glbin_settings.m_shadow_dir_x;
-		double diry = glbin_settings.m_shadow_dir_y;
-		if (dirx == 0.0 && diry == 0.0)
-			dval = 0.0;
-		else
-			dval = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x)) + 45.0;
-		m_shadow_dir_sldr->ChangeValue(std::round(dval));
-		m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", dval));
-	}
-
-	//scaling
-	if (update_all || FOUND_VALUE(gstMeshScale))
-	{
-		bval = md->GetScalingEnable();
-		m_scale_chk->SetValue(bval);
-		m_scale_sldr->Enable(bval);
-		m_scale_text->Enable(bval);
-		auto vval = md->GetScaling();
-		dval = vval.x();
-		m_scale_sldr->ChangeValue(std::round(dval * 100.0));
-		str = wxString::Format("%.2f", dval);
-		m_scale_text->ChangeValue(str);
-	}
-}
-
 void MeshPropPanel::SetMeshData(const std::shared_ptr<MeshData>& md)
 {
 	m_md = md;
-	FluoUpdate();
+	m_agent->Update(UpdateRequest::DataToUI({}, m_agent.get(), UpdateMode::SenderOnly, "Set mesh data"));
 }
 
 std::shared_ptr<MeshData> MeshPropPanel::GetMeshData()
@@ -376,6 +255,85 @@ void MeshPropPanel::SetMeshGroup(const std::shared_ptr<MeshGroup>& mg)
 std::shared_ptr<MeshGroup> MeshPropPanel::GetMeshGroup()
 {
 	return m_group.lock();
+}
+
+void MeshPropPanel::UpdateOutline(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+			wxGetBitmap(outline));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+			wxGetBitmap(outline_off));
+}
+
+void MeshPropPanel::UpdateLegend(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_LegendChk, bval);
+}
+
+void MeshPropPanel::UpdateMeshColor(const fluo::Color& color)
+{
+	wxColor wxc(color.r() * 255, color.g() * 255, color.b() * 255);
+	m_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+		wxc.Red(), wxc.Green(), wxc.Blue()));
+	m_color_btn->SetValue(wxc);
+}
+
+void MeshPropPanel::UpdateMeshAlpha(bool bval, double dval)
+{
+	m_alpha_chk->SetValue(bval);
+	m_alpha_sldr->Enable(bval);
+	m_alpha_text->Enable(bval);
+	m_alpha_sldr->ChangeValue(std::round(dval * 255.0));
+	wxString str = wxString::Format("%.2f", dval);
+	m_alpha_text->ChangeValue(str);
+}
+
+void MeshPropPanel::UpdateMeshShading(bool bval, double strength, double shine)
+{
+	m_shading_chk->SetValue(bval);
+	m_shading_sldr->Enable(bval);
+	m_shading_text->Enable(bval);
+	m_shine_sldr->Enable(bval);
+	m_shine_text->Enable(bval);
+	wxString str;
+	m_shading_sldr->ChangeValue(std::round(strength * 255.0));
+	str = wxString::Format("%.2f", strength);
+	m_shading_text->ChangeValue(str);
+	m_shine_sldr->ChangeValue(std::round(shine * 255.0));
+	str = wxString::Format("%.2f", shine);
+	m_shine_text->ChangeValue(str);
+}
+
+void MeshPropPanel::UpdateMeshShadow(bool bval, double dval)
+{
+	m_shadow_chk->SetValue(bval);
+	m_shadow_sldr->Enable(bval);
+	m_shadow_text->Enable(bval);
+	m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
+	wxString str = wxString::Format("%.2f", dval);
+	m_shadow_text->ChangeValue(str);
+}
+
+void MeshPropPanel::UpdateShadowDir(bool bval, double dval)
+{
+	m_shadow_dir_chk->ToggleTool(0, bval);
+	m_shadow_dir_sldr->Enable(bval);
+	m_shadow_dir_text->Enable(bval);
+	m_shadow_dir_sldr->ChangeValue(std::round(dval));
+	m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", dval));
+}
+
+void MeshPropPanel::UpdateMeshScale(bool bval, double dval)
+{
+	m_scale_chk->SetValue(bval);
+	m_scale_sldr->Enable(bval);
+	m_scale_text->Enable(bval);
+	m_scale_sldr->ChangeValue(std::round(dval * 100.0));
+	wxString str = wxString::Format("%.2f", dval);
+	m_scale_text->ChangeValue(str);
 }
 
 void MeshPropPanel::EnableShadowDir(bool bval)

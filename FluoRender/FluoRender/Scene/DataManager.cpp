@@ -358,7 +358,7 @@ void DataManager::LoadVolumes(const std::vector<std::wstring>& files, bool withI
 	{
 		glbin_moviemaker.SetCurrentFrameSilently(view->m_tseq_cur_num, true);
 		glbin_moviemaker.SetSeqMode(1);
-		vc.insert(gstMovieAgent);
+		vc.insert(gstMoviePanelAgent);
 	}
 	view->SetRotLock(enable_rot_lock);
 	vc.insert(gstGearedEnable);
@@ -813,7 +813,7 @@ void DataManager::LoadMeshFiles(const std::vector<std::wstring>& files)
 	{
 		glbin_moviemaker.SetCurrentFrameSilently(view->m_tseq_cur_num, true);
 		glbin_moviemaker.SetSeqMode(1);
-		vc.insert(gstMovieAgent);
+		vc.insert(gstMoviePanelAgent);
 	}
 
 	glbin_refresh_scheduler_manager.requestDraw(

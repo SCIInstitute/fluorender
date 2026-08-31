@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #define UITEXT_NBPG4_0 "Scripts"
 #define UITEXT_NBPG4_1 "Scripts (Enabled)"
 
+class MainFrame;
 class RenderView;
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
@@ -49,7 +50,7 @@ class wxUndoableToolbar;
 class KeyListCtrl : public wxListCtrl
 {
 public:
-	KeyListCtrl(wxWindow* parent, MainFrame* frame,
+	KeyListCtrl(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -87,7 +88,6 @@ public:
 	void UpdateText();
 
 private:
-	MainFrame* m_frame;
 	wxImageList* m_images;
 
 	wxTextCtrl* m_frame_text;
@@ -119,6 +119,11 @@ private:
 	void OnMouseScroll(wxMouseEvent& event);
 };
 
+struct MovViewListInfo
+{
+	std::vector<std::wstring> views;
+};
+
 class MoviePanel : public TabbedPanel
 {
 	enum
@@ -137,7 +142,34 @@ public:
 		const wxString& name = "MoviePanel");
 	~MoviePanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateMovFps(double dval);
+	void UpdateMovLength(double dval);
+	void UpdateMovViewList(const MovViewListInfo& info);
+	void UpdateMovViewIndex(int ival);
+	void UpdateMovSliderStyle(bool bval);
+	void UpdateMovProgSlider(int cf, int ts, int sf, int ef);
+	void UpdateBeginFrame(int ival);
+	void UpdateEndFrame(int ival);
+	void UpdateCurrentFrame(int ival);
+	void UpdateTotalFrames(int ival);
+	void UpdateMovCurTime(double dval);
+
+	void UpdateMovPlay(bool running, bool reverse, bool script);
+	void UpdateMovLoop(bool bval);
+	
+	void UpdateMovRotEnable(bool bval);
+	void UpdateMovRotAxis(int ival);
+	void UpdateMovRotAng(int ival);
+	void UpdateMovIntrpMode(int ival);
+	void UpdateMovSeqMode(int ival);
+	void UpdateMovSeqNum(int scn, int san);
+
+	void UpdateCaptureParam(bool bval);
+	void UpdateParamKeyDuration(double dval);
+
+	void UpdateParamList();
+	void UpdateParamListSelect(int ival);
 
 	//common
 	void SetFps(double val);
@@ -174,9 +206,6 @@ public:
 	void EnableScript(bool val, const std::wstring& filename = L"");
 
 private:
-	bool m_running;
-	RenderView* m_view;
-
 	//common controls
 	wxTextCtrl *m_fps_text;
 	wxTextCtrl *m_movie_len_text;
