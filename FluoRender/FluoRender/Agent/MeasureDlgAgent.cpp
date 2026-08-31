@@ -30,6 +30,13 @@ DEALINGS IN THE SOFTWARE.
 #include <MeasureDlg.h>
 #include <Global.h>
 #include <Names.h>
+#include <CurrentObjects.h>
+#include <RenderView.h>
+#include <RulerHandler.h>
+#include <Ruler.h>
+#include <RulerList.h>
+#include <MainSettings.h>
+#include <RulerAlign.h>
 
 MeasureDlgAgent::MeasureDlgAgent(
 	MeasureDlg* dlg) :
@@ -68,7 +75,6 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	bool update_all = request.values.empty();
 
-	bool bval;
 	int ival;
 
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
@@ -76,75 +82,56 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		auto view = glbin_current.render_view.lock();
 		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-		//toolbar1
-		m_toolbar1->ToggleTool(ID_RulerLocator, rul_mode == flrd::RulerMode::Locator);
-		m_toolbar1->ToggleTool(ID_RulerProbe, rul_mode == flrd::RulerMode::Probe);
-		m_toolbar1->ToggleTool(ID_RulerLine, rul_mode == flrd::RulerMode::Line);
-		m_toolbar1->ToggleTool(ID_RulerAngle, rul_mode == flrd::RulerMode::Protractor);
-		m_toolbar1->ToggleTool(ID_RulerEllipse, rul_mode == flrd::RulerMode::Ellipse);
-		bval = rul_mode == flrd::RulerMode::Polyline &&
-			(int_mode == InteractiveMode::Ruler ||
-				int_mode == InteractiveMode::BrushRuler);
-		m_toolbar1->ToggleTool(ID_RulerPolyline, bval);
-		m_toolbar1->ToggleTool(ID_RulerPencil, int_mode == InteractiveMode::Pencil);
-		m_toolbar1->ToggleTool(ID_RulerGrow, int_mode == InteractiveMode::GrowRuler);
-		//toolbar2
-		m_toolbar2->ToggleTool(ID_RulerMoveBtn, int_mode == InteractiveMode::MoveRuler);
-		m_toolbar2->ToggleTool(ID_RulerMovePointBtn, int_mode == InteractiveMode::EditRulerPoint);
-		bool bval2 = glbin_ruler_handler.GetRedistLength();
-		m_toolbar2->ToggleTool(ID_MagnetBtn, int_mode == InteractiveMode::Magnet && !bval2);
-		m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, int_mode == InteractiveMode::Magnet && bval2);
-		m_toolbar2->ToggleTool(ID_LockBtn, int_mode == InteractiveMode::RulerLockPoint);
-		//toolbar3
-		m_toolbar3->ToggleTool(ID_RulerDelBtn, int_mode == InteractiveMode::RulerDelPoint);
+		dlg->UpdateFreehandToolState(int_mode, rul_mode);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerList))
 	{
-		UpdateRulerList();
+		dlg->UpdateRulerList();
 	}
 
 	if (FOUND_VALUE(gstRulerListCur))
 	{
-		UpdateRulerListCur();
+		dlg->UpdateRulerListCur();
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerListDisp))
 	{
-		wxColour c;
-		for (int i = 0; i < m_ruler_list->GetItemCount(); ++i)
+		RulerListDisplayInfo info;
+		auto list = glbin_current.GetRulerList();
+		auto ruler_list = list->get();
+		if (!ruler_list.IsEmpty())
 		{
-			auto ruler = glbin_ruler_handler.GetRuler(i);
-			if (!ruler)
-				continue;
-			bval = ruler->GetDisp();
-			c = bval ? wxColour(255, 255, 255) : wxColour(200, 200, 200);
-			m_ruler_list->SetItemBackgroundColour(i, c);
+			for (size_t i = 0; i < ruler_list.size(); ++i)
+			{
+				auto ruler = ruler_list.GetRuler(i);
+				info.visible.push_back(ruler && ruler->GetDisp());
+			}
 		}
+
+		dlg->UpdateRulerListDisp(info);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerListSel))
 	{
 		ival = glbin_ruler_handler.GetRulerIndex();
-		m_ruler_list->SelectItemSilently(ival);
+		dlg->UpdateRulerListSel(ival);
 	}
 
 	if (FOUND_VALUE(gstRulerGroupSel))
 	{
-		UpdateGroupSel();
+		dlg->UpdateGroupSel();
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerProfile))
 	{
-		UpdateProfile();
+		dlg->UpdateProfile();
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerMethod))
 	{
 		ival = glbin_settings.m_point_volume_mode;
-		m_view_plane_rd->SetValue(ival == 0);
-		m_max_intensity_rd->SetValue(ival == 1);
-		m_acc_intensity_rd->SetValue(ival == 2);
+		dlg->UpdateRulerMethod(ival);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerTransient))
@@ -152,49 +139,41 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		auto ruler = glbin_current.GetRuler();
 		if (ruler)
 		{
-			bval = ruler->GetTransient();
-			m_transient_chk->SetValue(bval);
+			dlg->UpdateRulerTransient(ruler->GetTransient());
 		}
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerUseTransf))
 	{
-		m_use_transfer_chk->SetValue(glbin_settings.m_ruler_use_transf);
+		dlg->UpdateRulerUseTransf(glbin_settings.m_ruler_use_transf);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerDisp))
 	{
 		auto ruler = glbin_current.GetRuler();
+		bool bval0 = false;
+		bool bval1 = false;
+		bool bval2 = false;
 		if (ruler)
 		{
 			if (ruler->GetDisp())
 			{
-				bval = ruler->GetDisplay(0);
-				m_disp_point_chk->SetValue(bval);
-				bval = ruler->GetDisplay(1);
-				m_disp_line_chk->SetValue(bval);
-				bval = ruler->GetDisplay(2);
-				m_disp_name_chk->SetValue(bval);
-				m_disp_all_chk->SetValue(true);
-			}
-			else
-			{
-				m_disp_all_chk->SetValue(false);
-				m_disp_point_chk->SetValue(false);
-				m_disp_line_chk->SetValue(false);
-				m_disp_name_chk->SetValue(false);
+				bval0 = ruler->GetDisplay(0);
+				bval1 = ruler->GetDisplay(1);
+				bval2 = ruler->GetDisplay(2);
 			}
 		}
+		dlg->UpdateRulerDisp(bval0, bval1, bval2);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerRelaxType))
 	{
-		m_relax_data_cmb->Select(glbin_settings.m_ruler_relax_type);
+		dlg->UpdateRulerRelaxType(glbin_settings.m_ruler_relax_type);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerF1))
 	{
-		m_relax_value_spin->SetValue(glbin_settings.m_ruler_relax_f1);
+		dlg->UpdateRulerF1(glbin_settings.m_ruler_relax_f1);
 	}
 
 	if (update_all || FOUND_VALUE(gstRulerInterpolation))
@@ -203,15 +182,15 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		if (ruler)
 		{
 			ival = ruler->GetInterp();
-			m_interp_cmb->Select(ival);
+			dlg->UpdateRulerInterpolation(ival);
 		}
 	}
 
 	//align center
 	if (update_all || FOUND_VALUE(gstAlignCenter))
 	{
-		bval = glbin_aligner.GetAlignCenter();
-		m_align_center->SetValue(bval);
+		bool bval = glbin_aligner.GetAlignCenter();
+		dlg->UpdateAlignCenter(bval);
 	}
 }
 

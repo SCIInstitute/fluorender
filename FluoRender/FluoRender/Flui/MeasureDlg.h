@@ -41,11 +41,14 @@ DEALINGS IN THE SOFTWARE.
 #define CenterCol 8
 #define PointCol 10
 
+enum class InteractiveMode : int;
+
 class MeasureDlg;
 namespace flrd
 {
 	class Ruler;
 	class RulerList;
+	enum class RulerMode : int;
 }
 class RulerListCtrl : public wxListCtrl
 {
@@ -124,6 +127,12 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+class MainFrame;
+struct RulerListDisplayInfo
+{
+	std::vector<bool> visible;
+};
+
 class MeasureDlg : public TabbedPanel
 {
 public:
@@ -191,12 +200,29 @@ public:
 	MeasureDlg(MainFrame* frame);
 	~MeasureDlg();
 
+	//update
+	void UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMode rul_mode);
+
 	void UpdateRulerList();
 	void UpdateRulerListCur();
+
+	void UpdateRulerListDisp(const RulerListDisplayInfo& info);
+	void UpdateRulerListSel(int ival);
+
+	void UpdateGroupSel();
+	void UpdateProfile();
+
+	void UpdateRulerMethod(int ival);
+	void UpdateRulerTransient(bool bval);
+	void UpdateRulerUseTransf(bool bval);
+	void UpdateRulerDisp(bool bval0, bool bval1, bool bval2);
+	void UpdateRulerRelaxType(int ival);
+	void UpdateRulerF1(double dval);
+	void UpdateRulerInterpolation(int ival);
+	void UpdateAlignCenter(bool bval);
+
 	void ToggleDisplay();
 	void SetCurrentRuler();
-	void UpdateProfile();
-	void UpdateGroupSel();
 
 	//toolbar1
 	void Locator();

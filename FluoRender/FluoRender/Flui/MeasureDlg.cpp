@@ -882,6 +882,33 @@ wxWindow* MeasureDlg::CreateAlignPage(wxWindow* parent)
 	return page;
 }
 
+void MeasureDlg::UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMode rul_mode)
+{
+	bool bval;
+
+	//toolbar1
+	m_toolbar1->ToggleTool(ID_RulerLocator, rul_mode == flrd::RulerMode::Locator);
+	m_toolbar1->ToggleTool(ID_RulerProbe, rul_mode == flrd::RulerMode::Probe);
+	m_toolbar1->ToggleTool(ID_RulerLine, rul_mode == flrd::RulerMode::Line);
+	m_toolbar1->ToggleTool(ID_RulerAngle, rul_mode == flrd::RulerMode::Protractor);
+	m_toolbar1->ToggleTool(ID_RulerEllipse, rul_mode == flrd::RulerMode::Ellipse);
+	bval = rul_mode == flrd::RulerMode::Polyline &&
+		(int_mode == InteractiveMode::Ruler ||
+			int_mode == InteractiveMode::BrushRuler);
+	m_toolbar1->ToggleTool(ID_RulerPolyline, bval);
+	m_toolbar1->ToggleTool(ID_RulerPencil, int_mode == InteractiveMode::Pencil);
+	m_toolbar1->ToggleTool(ID_RulerGrow, int_mode == InteractiveMode::GrowRuler);
+	//toolbar2
+	m_toolbar2->ToggleTool(ID_RulerMoveBtn, int_mode == InteractiveMode::MoveRuler);
+	m_toolbar2->ToggleTool(ID_RulerMovePointBtn, int_mode == InteractiveMode::EditRulerPoint);
+	bool bval2 = glbin_ruler_handler.GetRedistLength();
+	m_toolbar2->ToggleTool(ID_MagnetBtn, int_mode == InteractiveMode::Magnet && !bval2);
+	m_toolbar2->ToggleTool(ID_RulerMovePencilBtn, int_mode == InteractiveMode::Magnet && bval2);
+	m_toolbar2->ToggleTool(ID_LockBtn, int_mode == InteractiveMode::RulerLockPoint);
+	//toolbar3
+	m_toolbar3->ToggleTool(ID_RulerDelBtn, int_mode == InteractiveMode::RulerDelPoint);
+}
+
 void MeasureDlg::UpdateRulerList()
 {
 	m_ruler_list->m_name_text->Hide();
@@ -1029,6 +1056,27 @@ void MeasureDlg::UpdateRulerListCur()
 	m_ruler_list->SetText(item, ColorCol, str);
 }
 
+void MeasureDlg::UpdateRulerListDisp(
+	const RulerListDisplayInfo& info)
+{
+	for (size_t i = 0;
+		i < info.visible.size() &&
+		i < m_ruler_list->GetItemCount();
+		++i)
+	{
+		wxColour c = info.visible[i] ?
+			wxColour(255, 255, 255) :
+			wxColour(200, 200, 200);
+
+		m_ruler_list->SetItemBackgroundColour(i, c);
+	}
+}
+
+void MeasureDlg::UpdateRulerListSel(int ival)
+{
+	m_ruler_list->SelectItemSilently(ival);
+}
+
 void MeasureDlg::UpdateGroupSel()
 {
 	m_ruler_list->ClearSelection();
@@ -1044,6 +1092,51 @@ void MeasureDlg::UpdateGroupSel()
 		if (ruler->Group() == gi)
 			m_ruler_list->SelectItemSilently(i);
 	}
+}
+
+void MeasureDlg::UpdateRulerMethod(int ival)
+{
+	m_view_plane_rd->SetValue(ival == 0);
+	m_max_intensity_rd->SetValue(ival == 1);
+	m_acc_intensity_rd->SetValue(ival == 2);
+}
+
+void MeasureDlg::UpdateRulerTransient(bool bval)
+{
+	m_transient_chk->SetValue(bval);
+}
+
+void MeasureDlg::UpdateRulerUseTransf(bool bval)
+{
+	m_use_transfer_chk->SetValue(bval);
+}
+
+void MeasureDlg::UpdateRulerDisp(bool bval0, bool bval1, bool bval2)
+{
+	m_disp_all_chk->SetValue(bval0);
+	m_disp_point_chk->SetValue(bval1);
+	m_disp_line_chk->SetValue(bval2);
+	m_disp_name_chk->SetValue(bval0 || bval1 || bval2);
+}
+
+void MeasureDlg::UpdateRulerRelaxType(int ival)
+{
+	m_relax_data_cmb->Select(ival);
+}
+
+void MeasureDlg::UpdateRulerF1(double dval)
+{
+	m_relax_value_spin->SetValue(dval);
+}
+
+void MeasureDlg::UpdateRulerInterpolation(int ival)
+{
+	m_interp_cmb->Select(ival);
+}
+
+void MeasureDlg::UpdateAlignCenter(bool bval)
+{
+	m_align_center->SetValue(bval);
 }
 
 void MeasureDlg::ToggleDisplay()
