@@ -1083,6 +1083,133 @@ wxWindow* SettingDlg::CreateJavaPage(wxWindow *parent)
 	return page;
 }
 
+void SettingDlg::UpdateSaveProjectEnable(const SaveProjectInfo& info)
+{
+	m_prj_save_chk->SetValue(info.prj_save);
+	m_prj_save_inc_chk->SetValue(info.prj_save_inc);
+	//realtime compression
+	m_realtime_cmp_chk->SetValue(info.realtime_cmp);
+	//script break
+	m_script_break_chk->SetValue(info.script_break);
+	//inverse slider
+	m_inverse_slider_chk->SetValue(info.inverse_slider);
+	//multifunc button
+	m_mul_func_btn_comb->Select(info.mulfunc);
+	//config file type
+	m_config_file_type_comb->Select(info.config_file_type);
+	//y dir
+	m_y_dir_comb->Select(info.y_dir);
+}
+
+void SettingDlg::UpdateFontFile(const std::vector<std::string>& list)
+{
+	m_font_cmb->Clear();
+	for (size_t i = 0; i < list.size(); ++i)
+		m_font_cmb->Append(list[i]);
+}
+
+void SettingDlg::UpdateSettingsFont(const std::string& str, int text_size, int text_color)
+{
+	int font_sel = m_font_cmb->FindString(str);
+	if (font_sel != wxNOT_FOUND)
+		m_font_cmb->Select(font_sel);
+	m_font_size_cmb->ChangeValue(wxString::Format("%d", text_size));
+	m_text_color_cmb->Select(text_color);
+}
+
+void SettingDlg::UpdateLineWidth(double dval)
+{
+	m_line_width_text->ChangeValue(wxString::Format("%.0f", dval));
+	m_line_width_sldr->ChangeValue(std::round(dval));
+}
+
+void SettingDlg::UpdatePaintHistory(int ival)
+{
+	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", glbin_brush_def.m_paint_hist_depth));
+	m_paint_hist_depth_sldr->ChangeValue(glbin_brush_def.m_paint_hist_depth);
+}
+
+void SettingDlg::UpdatePencilDist(double dval)
+{
+	m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pencil_dist));
+	m_pencil_dist_sldr->ChangeValue(glbin_settings.m_pencil_dist);
+}
+
+void SettingDlg::UpdateMicroBlendEnable(bool bval)
+{
+
+}
+
+void SettingDlg::UpdatePeelNum(int ival)
+{
+
+}
+
+void SettingDlg::UpdateSettingRot(double dval)
+{
+
+}
+
+void SettingDlg::UpdateGradBg(bool bval)
+{
+
+}
+
+void SettingDlg::UpdateClearColorBg(bool bval)
+{
+
+}
+
+void SettingDlg::UpdateMouseInt(int ival)
+{
+
+}
+
+void SettingDlg::UpdateStreamEable(const StreamInfo& info)
+{
+
+}
+
+void SettingDlg::UpdateAutomate(const AutomateInfo& info)
+{
+
+}
+
+void SettingDlg::UpdateHologramMode(const HologramInfo& info)
+{
+
+}
+
+void SettingDlg::UpdateFullscreenDisplay(int ival)
+{
+
+}
+
+void SettingDlg::UpdateDisplayColorDepth(int ival)
+{
+
+}
+
+void SettingDlg::UpdateWavelengthColor(int ival1, int ival2, int ival3, int ival4)
+{
+
+}
+
+void SettingDlg::UpdateMaxTextureSize(bool bval, int ival)
+{
+
+}
+
+void SettingDlg::UpdateDeviceTree(const std::vector<std::vector<std::string>>& tree)
+{
+
+}
+
+void SettingDlg::UpdateSettingsJava(const std::wstring& jvm, const std::wstring& ij, const std::wstring& bioformats, int ival)
+{
+
+}
+
 //events
 void SettingDlg::OnProjectSaveCheck(wxCommandEvent& event)
 {

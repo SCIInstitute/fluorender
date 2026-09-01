@@ -31,9 +31,52 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/treectrl.h>
 #include <vector>
+#include <string>
 
 class wxSingleSlider;
 class MainFrame;
+struct SaveProjectInfo
+{
+	bool prj_save;
+	bool prj_save_inc;
+	bool realtime_cmp;
+	bool script_break;
+	bool inverse_slider;
+	bool mulfunc;
+	bool config_file_type;
+	bool y_dir;
+};
+struct StreamInfo
+{
+	int stream_rendering;
+	int update_order;
+	double graphics_mem;
+	double large_data_size;
+	int force_block_size;
+	int up_time;
+	int detail_level_offset;
+};
+struct AutomateInfo
+{
+	int histogram;
+	int paint_size;
+	int comp_gen;
+	int colocalize;
+	int relax_ruler;
+	int conv_vol_mesh;
+};
+struct HologramInfo
+{
+	int hologram_mode;
+	int xr_api;
+	std::string holo_ip;
+	bool mv_hmd;
+	bool sbs;
+	double eye_dist;
+	double lg_offset;
+	int hologram_debug;
+	int hologram_camera_mode;
+};
 class SettingDlg : public TabbedPanel
 {
 public:
@@ -41,6 +84,27 @@ public:
 	~SettingDlg();
 
 	//update
+	void UpdateSaveProjectEnable(const SaveProjectInfo& info);
+	void UpdateFontFile(const std::vector<std::string>& list);
+	void UpdateSettingsFont(const std::string& str, int text_size, int text_color);
+	void UpdateLineWidth(double dval);
+	void UpdatePaintHistory(int ival);
+	void UpdatePencilDist(double dval);
+	void UpdateMicroBlendEnable(bool bval);
+	void UpdatePeelNum(int ival);
+	void UpdateSettingRot(double dval);
+	void UpdateGradBg(bool bval);
+	void UpdateClearColorBg(bool bval);
+	void UpdateMouseInt(int ival);
+	void UpdateStreamEable(const StreamInfo& info);
+	void UpdateAutomate(const AutomateInfo& info);
+	void UpdateHologramMode(const HologramInfo& info);
+	void UpdateFullscreenDisplay(int ival);
+	void UpdateDisplayColorDepth(int ival);
+	void UpdateWavelengthColor(int ival1, int ival2, int ival3, int ival4);
+	void UpdateMaxTextureSize(bool bval, int ival);
+	void UpdateDeviceTree(const std::vector<std::vector<std::string>>& tree);
+	void UpdateSettingsJava(const std::wstring& jvm, const std::wstring& ij, const std::wstring& bioformats, int ival);
 
 private:
 	//save project
