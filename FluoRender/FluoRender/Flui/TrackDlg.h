@@ -76,7 +76,6 @@ public:
 	TrackDlg(MainFrame* frame);
 	~TrackDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	void UpdateTrackList();
 	void UpdateTracks();
 

@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <RenderView.h>
+#include <MainSettings.h>
+#include <VolumeData.h>
 
 RenderViewPanelAgent::RenderViewPanelAgent(
 	RenderViewPanel* panel) :
@@ -92,92 +94,51 @@ void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)
 	if (update_all || FOUND_VALUE(gstDrawInfo))
 	{
 		bval = view->m_draw_info & 1;
-		m_hud_tb->ToggleTool(ID_InfoChk, bval);
+		panel->UpdateDrawInfo(bval);
 	}
 
 	//cam center
 	if (update_all || FOUND_VALUE(gstDrawCamCtr))
 	{
 		bval = view->m_draw_camctr;
-		m_hud_tb->ToggleTool(ID_CamCtrChk, bval);
+		panel->UpdateDrawCamCtr(bval);
 	}
 
 	//legend
 	if (update_all || FOUND_VALUE(gstDrawLegend))
 	{
 		bval = view->m_draw_legend;
-		m_hud_tb->ToggleTool(ID_LegendChk, bval);
+		panel->UpdateDrawLegend(bval);
 	}
 
 	//colormap
 	if (update_all || FOUND_VALUE(gstDrawColormap))
 	{
 		ival = view->m_colormap_disp;
-		wxBitmapBundle colormap_bmp;
-		switch (ival)
-		{
-		case 0:
-		default:
-			colormap_bmp = wxGetBitmap(colormap_off);
-			break;
-		case 1:
-			colormap_bmp = wxGetBitmap(colormap);
-			break;
-		case 2:
-			colormap_bmp = wxGetBitmap(colormap_text);
-			break;
-		}
-		m_hud_tb->SetToolNormalBitmap(ID_Colormap, colormap_bmp);
+		panel->UpdateDrawColormap(ival);
 	}
 
 	//scale bar
 	if (update_all || FOUND_VALUE(gstDrawScaleBar))
 	{
 		ival = view->m_scalebar_disp;
-		switch (ival)
-		{
-		case 0:
-		default:
-			m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scalebar));
-			m_scale_text->Disable();
-			m_scale_cmb->Disable();
-			break;
-		case 1:
-			m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scale_text_off));
-			m_scale_text->Enable();
-			m_scale_cmb->Disable();
-			break;
-		case 2:
-			m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
-				wxGetBitmap(scale_text));
-			m_scale_text->Enable();
-			m_scale_cmb->Enable();
-			break;
-		}
+		panel->UpdateDrawScalebar(ival);
 	}
 	if (update_all || FOUND_VALUE(gstScaleBarUnit))
-		m_scale_cmb->Select(view->m_sb_unit);
+	{
+		ival = view->m_sb_unit;
+		panel->UpdateScaleBarUnit(ival);
+	}
 
 	//background
 	if (update_all || FOUND_VALUE(gstBgColor))
 	{
 		fluo::Color c = view->GetBackgroundColor();
-		wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
-			(unsigned char)(c.g() * 255 + 0.5),
-			(unsigned char)(c.b() * 255 + 0.5));
-		m_bg_color_picker->SetColour(wxc);
+		panel->UpdateBgColor(c);
 	}
 	if (update_all || FOUND_VALUE(gstBgColorInv))
 	{
-		m_bg_inv_btn->ToggleTool(0, m_bg_color_inv);
-		if (m_bg_color_inv)
-			m_bg_inv_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(invert));
-		else
-			m_bg_inv_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(invert_off));
+		panel->UpdateBgColorInvert(m_bg_color_inv);
 	}
 
 	//angle of view
@@ -185,68 +146,42 @@ void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)
 	{
 		ival = static_cast<int>(std::round(view->GetAov()));
 		bval = view->GetPersp();
-		m_aov_sldr->ChangeValue(bval ? ival : 10);
-		m_aov_text->ChangeValue(bval ? std::to_string(ival) : "Ortho");
-		if (bval)
-			m_cam_op_tb->SetToolNormalBitmap(ID_OrthoPerspBtn,
-				wxGetBitmap(persp));
-		else
-			m_cam_op_tb->SetToolNormalBitmap(ID_OrthoPerspBtn,
-				wxGetBitmap(ortho));
+		panel->UpdateAov(ival, bval);
 	}
 
 	//free fly
 	if (update_all || FOUND_VALUE(gstCamMode))
 	{
 		ival = view->GetCamMode();
-		switch (ival)
-		{
-		case 0:
-			m_cam_op_tb->SetToolNormalBitmap(ID_CamModeBtn,
-				wxGetBitmap(globe));
-			break;
-		case 1:
-			m_cam_op_tb->SetToolNormalBitmap(ID_CamModeBtn,
-				wxGetBitmap(flight));
-			break;
-		}
+		panel->UpdateCamMode(ival);
 	}
 
 	//stereo & holography
 	if (update_all || FOUND_VALUE(gstHologramMode))
 	{
 		ival = glbin_settings.m_hologram_mode;
-		m_full_screen_toolbar->ToggleTool(ID_VrChk, ival == 1);
-		m_full_screen_toolbar->ToggleTool(ID_LookingGlassChk, ival == 2);
+		panel->UpdateHologramMode(ival);
 		if (ival != 2)
 			view->ResetSize();
+	}
+
+	//center click
+	if (update_all || FOUND_VALUE(gstFreehandToolState))
+	{
+		bval = view->GetIntMode() == InteractiveMode::CenterClick;
+		panel->UpdateFreehandToolState(bval);
 	}
 
 	//depthe attenuation
 	if (update_all || FOUND_VALUE(gstDepthAtten))
 	{
 		bval = view->GetFog();
-		m_depth_atten_btn->ToggleTool(0, bval);
-		if (bval)
-			m_depth_atten_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(depth_atten));
-		else
-			m_depth_atten_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(no_depth_atten));
-		m_depth_atten_factor_sldr->Enable(bval);
-		m_depth_atten_factor_text->Enable(bval);
+		panel->UpdateDepthAtten(bval);
 	}
 	if (update_all || FOUND_VALUE(gstDaInt))
 	{
 		dval = view->GetFogIntensity();
-		m_depth_atten_factor_sldr->ChangeValue(std::round(dval * 100));
-		m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", dval));
-	}
-
-	//center click
-	if (update_all || FOUND_VALUE(gstFreehandToolState))
-	{
-		m_center_click_btn->ToggleTool(0, view->GetIntMode() == InteractiveMode::CenterClick);
+		panel->UpdateDepthAttenFactor(dval);
 	}
 
 	//scale factor
@@ -275,9 +210,7 @@ void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)
 		}
 
 		ival = std::round(scale * 100);
-		m_scale_factor_sldr->ChangeValue(ival);
-		m_scale_factor_text->ChangeValue(wxString::Format("%d", ival));
-		m_scale_factor_text->Update();
+		panel->UpdateScaleFactor(ival);
 
 		//check if need update pin rot center
 		m_pin_by_scale = scale > glbin_settings.m_pin_threshold;
@@ -291,102 +224,35 @@ void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)
 	//scale mode
 	if (update_all || FOUND_VALUE(gstScaleMode))
 	{
-		switch (view->m_scale_mode)
-		{
-		case 0:
-			m_scale_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(zoom_view));
-			m_scale_mode_btn->SetToolShortHelp(0,
-				"View-based zoom ratio");
-			m_scale_mode_btn->SetToolLongHelp(0,
-				"View-based zoom ratio (View entire data set at 100%)");
-			break;
-		case 1:
-			m_scale_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(zoom_pixel));
-			m_scale_mode_btn->SetToolShortHelp(0,
-				"Pixel-based zoom ratio");
-			m_scale_mode_btn->SetToolLongHelp(0,
-				"Pixel-based zoom ratio (View 1 data pixel to 1 screen pixel at 100%)");
-			break;
-		case 2:
-			m_scale_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(zoom_data));
-			m_scale_mode_btn->SetToolShortHelp(0,
-				"Data-based zoom ratio");
-			m_scale_mode_btn->SetToolLongHelp(0,
-				"Data-based zoom ratio (View with consistent scale bar sizes)");
-			break;
-		}
+		ival = view->m_scale_mode;
+		panel->UpdateScaleMode(ival);
 	}
 	//pin rotation center
 	if (update_all || update_pin_rot_ctr)
 	{
 		bval = view->m_pin_rot_ctr;
-		m_pin_btn->ToggleTool(0, bval);
-		if (bval)
-			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(pin));
-		else
-			m_pin_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(pin_off));
+		panel->UpdatePinRotCenter(bval);
 	}
 
 	//lock rot
 	if (update_all || FOUND_VALUE(gstGearedEnable))
 	{
 		bval = view->GetRotLock();
-		m_rot_btn->ToggleTool(ID_RotLockChk, bval);
-		if (bval)
-			m_rot_btn->SetToolNormalBitmap(ID_RotLockChk,
-				wxGetBitmap(gear_45));
-		else
-			m_rot_btn->SetToolNormalBitmap(ID_RotLockChk,
-				wxGetBitmap(gear_dark));
+		panel->UpdateGearedEnable(bval);
 	}
 
 	//slider type
 	if (update_all || FOUND_VALUE(gstRotSliderMode))
 	{
-		m_slider_mode_btn->ToggleTool(0, m_rot_slider);
-		if (m_rot_slider)
-		{
-			m_slider_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(jog));
-			if (m_x_rot_sldr->GetMode() != 1)
-			{
-				m_x_rot_sldr->SetMode(1);
-				m_y_rot_sldr->SetMode(1);
-				m_z_rot_sldr->SetMode(1);
-			}
-		}
-		else
-		{
-			m_slider_mode_btn->SetToolNormalBitmap(0,
-				wxGetBitmap(slider));
-			if (m_x_rot_sldr->GetMode() != 0)
-			{
-				m_x_rot_sldr->SetMode(0);
-				m_y_rot_sldr->SetMode(0);
-				m_z_rot_sldr->SetMode(0);
-			}
-		}
+		panel->UpdateRotSliderMode(m_rot_slider);
 	}
 
 	//roatation
 	if (update_all || FOUND_VALUE(gstCamRotation))
 	{
 		fluo::Vector rot = view->GetRotations();
-		m_x_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.x())));
-		m_y_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.y())));
-		m_z_rot_sldr->ChangeValue(static_cast<int>(std::round(rot.z())));
-		m_x_rot_text->ChangeValue(wxString::Format("%.1f", rot.x()));
-		m_y_rot_text->ChangeValue(wxString::Format("%.1f", rot.y()));
-		m_z_rot_text->ChangeValue(wxString::Format("%.1f", rot.z()));
-		m_x_rot_text->Update();
-		m_y_rot_text->Update();
-		m_z_rot_text->Update();
-		m_ortho_view_cmb->Select(view->GetOrientation());
+		ival = view->GetOrientation();
+		panel->UpdateCamRotation(rot, ival);
 	}
 }
 
@@ -399,9 +265,4 @@ void RenderViewPanelAgent::UpdateData(const UpdateRequest& request)
 	if (!ann)
 		return;
 
-	if (FOUND_VALUE(gstAnnotMemoText))
-	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
 }

@@ -158,14 +158,6 @@ TesterDlg::~TesterDlg()
 {
 }
 
-void TesterDlg::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-}
-
 //sliders
 void TesterDlg::OnP1Change(wxScrollEvent& event)
 {

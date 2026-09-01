@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieMaker.h>
 
 ScriptBreakDlg::ScriptBreakDlg(MainFrame* frame) :
-	PropPanel(frame, frame,
+	PropPanel(frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(400, 300)),
 		0, "ScriptBreakDlg")
@@ -81,26 +81,9 @@ ScriptBreakDlg::~ScriptBreakDlg()
 {
 }
 
-void ScriptBreakDlg::FluoUpdate(const fluo::ValueCollection& vc)
+void ScriptBreakDlg::UpdateScriptBreakInfo(const std::string& str)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-
-	bool update_all = vc.empty();
-
-	wxString str;
-	if (update_all || FOUND_VALUE(gstScriptBreakTitle))
-	{
-		str = glbin_script_proc.GetTitle();
-		SetLabel(str);
-	}
-
-	if (update_all || FOUND_VALUE(gstScriptBreakInfo))
-	{
-		str = glbin_script_proc.GetInfo();
-		m_info_text->ChangeValue(str);
-	}
+	m_info_text->ChangeValue(str);
 }
 
 void ScriptBreakDlg::Hold()

@@ -161,7 +161,7 @@ wxString TrackListCtrl::GetText(long item, int col)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 TrackDlg::TrackDlg(MainFrame* frame)
-	: TabbedPanel(frame, frame,
+	: TabbedPanel(frame,
 		wxDefaultPosition,
 		frame->FromDIP(wxSize(500, 620)),
 		0, "TrackDlg")
@@ -764,140 +764,6 @@ wxWindow* TrackDlg::CreateOutputPage(wxWindow* parent)
 	page->SetAutoLayout(true);
 	page->SetScrollRate(10, 10);
 	return page;
-}
-
-void TrackDlg::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	if (FOUND_VALUE(gstNull))
-		return;
-
-	bool update_all = vc.empty();
-
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return;
-
-	wxString str;
-	int ival;
-	double dval;
-
-	//create page
-	if (update_all || FOUND_VALUE(gstTrackFile))
-	{
-		//track file
-		str = trkg->get().GetPath();
-		if (str.IsEmpty())
-			m_load_trace_text->ChangeValue("No track map or track map not saved");
-		else
-			m_load_trace_text->ChangeValue(str);
-	}
-
-	if (update_all || FOUND_VALUE(gstTrackIter))
-		m_map_iter_spin->SetValue(glbin_settings.m_track_iter);
-
-	if (update_all || FOUND_VALUE(gstTrackSize))
-		m_map_size_spin->SetValue(glbin_settings.m_component_size);
-
-	if (update_all || FOUND_VALUE(gstTrackSimilarity))
-		m_map_similar_spin->SetValue(glbin_settings.m_similarity);
-
-	if (update_all || FOUND_VALUE(gstTrackContactFactor))
-		m_map_contact_spin->SetValue(glbin_settings.m_contact_factor);
-
-	if (update_all || FOUND_VALUE(gstTrackConsistent))
-		m_map_consistent_btn->SetValue(glbin_settings.m_consistent_color);
-
-	if (update_all || FOUND_VALUE(gstTrackMerge))
-		m_map_merge_btn->SetValue(glbin_settings.m_try_merge);
-
-	if (update_all || FOUND_VALUE(gstTrackSplit))
-		m_map_split_btn->SetValue(glbin_settings.m_try_split);
-
-	//select page
-	if (update_all || FOUND_VALUE(gstTrackCompId))
-	{
-		m_comp_id_text->ChangeValue(m_comp_id);
-		m_comp_id_text2->ChangeValue(m_comp_id);
-		unsigned long id;
-		wxColor color(255, 255, 255);
-		if (m_comp_id.ToULong(&id))
-		{
-			if (!id)
-				color = wxColor(24, 167, 181);
-			else
-			{
-				auto vd = glbin_current.vol_data.lock();
-				bool shuffle = vd ? vd->GetShuffle() : 0;
-				fluo::Color c(id, shuffle);
-				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-			}
-		}
-		m_comp_id_text->SetBackgroundColour(color);
-		m_comp_id_text2->SetBackgroundColour(color);
-	}
-
-	if (update_all || FOUND_VALUE(gstTrackCellSize))
-	{
-		dval = glbin_settings.m_component_size;
-		m_cell_size_sldr->ChangeValue(int(std::round(dval)));
-		m_cell_size_text->ChangeValue(wxString::Format("%.0f", dval));
-	}
-
-	if (update_all || FOUND_VALUE(gstTrackUncertainLow))
-	{
-		ival = trkg->get().GetUncertainLow();
-		m_comp_uncertain_low_sldr->ChangeValue(ival);
-		m_cell_size_text->ChangeValue(wxString::Format("%d", ival));
-	}
-
-	//modify page
-	if (update_all || FOUND_VALUE(gstTrackNewCompId))
-	{
-		m_cell_new_id_text->ChangeValue(m_comp_id3);
-		unsigned long id;
-		wxColor color(255, 255, 255);
-		if (m_comp_id3.ToULong(&id))
-		{
-			if (!id)
-				color = wxColor(24, 167, 181);
-			else
-			{
-				auto vd = glbin_current.vol_data.lock();
-				bool shuffle = vd ? vd->GetShuffle() : 0;
-				fluo::Color c(id, shuffle);
-				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-			}
-		}
-		m_cell_new_id_text->SetBackgroundColour(color);
-	}
-
-	if (update_all || FOUND_VALUE(gstTrackClusterNum))
-	{
-		ival = glbin_trackmap_proc.GetClusterNum();
-		m_cell_segment_spin->SetValue(wxString::Format("%d", ival));
-	}
-
-	//analysis page (empty)
-	//lists
-	if (update_all || FOUND_VALUE(gstGhostNum))
-	{
-		ival = trkg->get().GetGhostNum();
-		m_ghost_num_sldr->ChangeValue(ival);
-		m_ghost_num_text->ChangeValue(wxString::Format("%d", ival));
-	}
-
-	if (update_all || FOUND_VALUE(gstGhostEnable))
-	{
-		m_ghost_show_tail_chk->SetValue(trkg->get().GetDrawTail());
-		m_ghost_show_lead_chk->SetValue(trkg->get().GetDrawLead());
-	}
-
-	if (update_all || FOUND_VALUE(gstTrackList))
-	{
-		UpdateTrackList();
-		UpdateTracks();
-		//Layout();
-	}
 }
 
 void TrackDlg::UpdateTrackList()

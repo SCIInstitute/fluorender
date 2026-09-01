@@ -33,13 +33,14 @@ DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 class wxSingleSlider;
+class MainFrame;
 class SettingDlg : public TabbedPanel
 {
 public:
 	SettingDlg(MainFrame* frame);
 	~SettingDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
 
 private:
 	//save project

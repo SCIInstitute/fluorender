@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 
 class wxSingleSlider;
+class MainFrame;
 class TesterDlg : public PropPanel
 {
 	//enum
@@ -56,8 +57,6 @@ class TesterDlg : public PropPanel
 public:
 	TesterDlg(MainFrame* frame);
 	~TesterDlg();
-
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	//values
 	double m_p1;

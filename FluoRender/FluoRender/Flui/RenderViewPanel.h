@@ -114,6 +114,29 @@ public:
 
 	//update
 	void UpdateMixMethod(ChannelMixMode mode);
+	void UpdateDrawInfo(bool bval);
+	void UpdateDrawCamCtr(bool bval);
+	void UpdateDrawLegend(bool bval);
+	void UpdateDrawColormap(int ival);
+	void UpdateDrawScalebar(int ival);
+	void UpdateScaleBarUnit(int ival);
+	void UpdateBgColor(const fluo::Color& c);
+	void UpdateBgColorInvert(bool bval);
+	void UpdateAov(int ival, bool bval);
+	void UpdateCamMode(int ival);
+	void UpdateHologramMode(int ival);
+	void UpdateFreehandToolState(bool bval);
+	
+	void UpdateDepthAtten(bool bval);
+	void UpdateDepthAttenFactor(double dval);
+
+	void UpdateScaleFactor(int ival);
+	void UpdateScaleMode(int ival);
+	void UpdatePinRotCenter(bool bval);
+
+	void UpdateGearedEnable(bool bval);
+	void UpdateRotSliderMode(bool bval);
+	void UpdateCamRotation(const fluo::Vector& val, int ival);
 
 	//update
 	void SetChannelMixMode(ChannelMixMode val);
@@ -159,12 +182,7 @@ public:
 private:
 	static int m_max_id;
 	int m_id;
-	bool m_bg_color_inv;
-	//rot slider style
-	bool m_rot_slider;
 	double m_dpi_sf, m_dpi_sf2;
-	int m_pin_by_user;//override pin by scale: 0:by scale; 1:always pin; 2:always not pin
-	bool m_pin_by_scale;
 
 	//trigger for entering full screen
 	wxTimer m_enter_fscreen_trigger;

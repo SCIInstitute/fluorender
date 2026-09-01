@@ -597,6 +597,248 @@ void RenderViewPanel::UpdateMixMethod(ChannelMixMode mode)
 		wxGetBitmap(composite_off));
 }
 
+void RenderViewPanel::UpdateDrawInfo(bool bval)
+{
+	m_hud_tb->ToggleTool(ID_InfoChk, bval);
+}
+
+void RenderViewPanel::UpdateDrawCamCtr(bool bval)
+{
+	m_hud_tb->ToggleTool(ID_CamCtrChk, bval);
+}
+
+void RenderViewPanel::UpdateDrawLegend(bool bval)
+{
+	m_hud_tb->ToggleTool(ID_LegendChk, bval);
+}
+
+void RenderViewPanel::UpdateDrawColormap(int ival)
+{
+	wxBitmapBundle colormap_bmp;
+	switch (ival)
+	{
+	case 0:
+	default:
+		colormap_bmp = wxGetBitmap(colormap_off);
+		break;
+	case 1:
+		colormap_bmp = wxGetBitmap(colormap);
+		break;
+	case 2:
+		colormap_bmp = wxGetBitmap(colormap_text);
+		break;
+	}
+	m_hud_tb->SetToolNormalBitmap(ID_Colormap, colormap_bmp);
+}
+
+void RenderViewPanel::UpdateDrawScalebar(int ival)
+{
+	switch (ival)
+	{
+	case 0:
+	default:
+		m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
+			wxGetBitmap(scalebar));
+		m_scale_text->Disable();
+		m_scale_cmb->Disable();
+		break;
+	case 1:
+		m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
+			wxGetBitmap(scale_text_off));
+		m_scale_text->Enable();
+		m_scale_cmb->Disable();
+		break;
+	case 2:
+		m_hud_tb->SetToolNormalBitmap(ID_ScaleBar,
+			wxGetBitmap(scale_text));
+		m_scale_text->Enable();
+		m_scale_cmb->Enable();
+		break;
+	}
+}
+
+void RenderViewPanel::UpdateScaleBarUnit(int ival)
+{
+	m_scale_cmb->Select(ival);
+}
+
+void RenderViewPanel::UpdateBgColor(const fluo::Color& c)
+{
+	wxColor wxc((unsigned char)(c.r() * 255 + 0.5),
+		(unsigned char)(c.g() * 255 + 0.5),
+		(unsigned char)(c.b() * 255 + 0.5));
+	m_bg_color_picker->SetColour(wxc);
+}
+
+void RenderViewPanel::UpdateBgColorInvert(bool bval)
+{
+	m_bg_inv_btn->ToggleTool(0, bval);
+	if (bval)
+		m_bg_inv_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(invert));
+	else
+		m_bg_inv_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(invert_off));
+}
+
+void RenderViewPanel::UpdateAov(int ival, bool bval)
+{
+	m_aov_sldr->ChangeValue(bval ? ival : 10);
+	m_aov_text->ChangeValue(bval ? std::to_string(ival) : "Ortho");
+	if (bval)
+		m_cam_op_tb->SetToolNormalBitmap(ID_OrthoPerspBtn,
+			wxGetBitmap(persp));
+	else
+		m_cam_op_tb->SetToolNormalBitmap(ID_OrthoPerspBtn,
+			wxGetBitmap(ortho));
+}
+
+void RenderViewPanel::UpdateCamMode(int ival)
+{
+	switch (ival)
+	{
+	case 0:
+		m_cam_op_tb->SetToolNormalBitmap(ID_CamModeBtn,
+			wxGetBitmap(globe));
+		break;
+	case 1:
+		m_cam_op_tb->SetToolNormalBitmap(ID_CamModeBtn,
+			wxGetBitmap(flight));
+		break;
+	}
+}
+
+void RenderViewPanel::UpdateHologramMode(int ival)
+{
+	m_full_screen_toolbar->ToggleTool(ID_VrChk, ival == 1);
+	m_full_screen_toolbar->ToggleTool(ID_LookingGlassChk, ival == 2);
+}
+
+void RenderViewPanel::UpdateFreehandToolState(bool bval)
+{
+	m_center_click_btn->ToggleTool(0, bval);
+}
+
+void RenderViewPanel::UpdateDepthAtten(bool bval)
+{
+	m_depth_atten_btn->ToggleTool(0, bval);
+	if (bval)
+		m_depth_atten_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(depth_atten));
+	else
+		m_depth_atten_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(no_depth_atten));
+	m_depth_atten_factor_sldr->Enable(bval);
+	m_depth_atten_factor_text->Enable(bval);
+}
+
+void RenderViewPanel::UpdateDepthAttenFactor(double dval)
+{
+	m_depth_atten_factor_sldr->ChangeValue(std::round(dval * 100));
+	m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", dval));
+}
+
+void RenderViewPanel::UpdateScaleFactor(int ival)
+{
+	m_scale_factor_sldr->ChangeValue(ival);
+	m_scale_factor_text->ChangeValue(wxString::Format("%d", ival));
+	m_scale_factor_text->Update();
+}
+
+void RenderViewPanel::UpdateScaleMode(int ival)
+{
+	switch (ival)
+	{
+	case 0:
+		m_scale_mode_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(zoom_view));
+		m_scale_mode_btn->SetToolShortHelp(0,
+			"View-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(0,
+			"View-based zoom ratio (View entire data set at 100%)");
+		break;
+	case 1:
+		m_scale_mode_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(zoom_pixel));
+		m_scale_mode_btn->SetToolShortHelp(0,
+			"Pixel-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(0,
+			"Pixel-based zoom ratio (View 1 data pixel to 1 screen pixel at 100%)");
+		break;
+	case 2:
+		m_scale_mode_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(zoom_data));
+		m_scale_mode_btn->SetToolShortHelp(0,
+			"Data-based zoom ratio");
+		m_scale_mode_btn->SetToolLongHelp(0,
+			"Data-based zoom ratio (View with consistent scale bar sizes)");
+		break;
+	}
+}
+
+void RenderViewPanel::UpdatePinRotCenter(bool bval)
+{
+	m_pin_btn->ToggleTool(0, bval);
+	if (bval)
+		m_pin_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(pin));
+	else
+		m_pin_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(pin_off));
+}
+
+void RenderViewPanel::UpdateGearedEnable(bool bval)
+{
+	m_rot_btn->ToggleTool(ID_RotLockChk, bval);
+	if (bval)
+		m_rot_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmap(gear_45));
+	else
+		m_rot_btn->SetToolNormalBitmap(ID_RotLockChk,
+			wxGetBitmap(gear_dark));
+}
+
+void RenderViewPanel::UpdateRotSliderMode(bool bval)
+{
+	m_slider_mode_btn->ToggleTool(0, bval);
+	if (bval)
+	{
+		m_slider_mode_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(jog));
+		if (m_x_rot_sldr->GetMode() != 1)
+		{
+			m_x_rot_sldr->SetMode(1);
+			m_y_rot_sldr->SetMode(1);
+			m_z_rot_sldr->SetMode(1);
+		}
+	}
+	else
+	{
+		m_slider_mode_btn->SetToolNormalBitmap(0,
+			wxGetBitmap(slider));
+		if (m_x_rot_sldr->GetMode() != 0)
+		{
+			m_x_rot_sldr->SetMode(0);
+			m_y_rot_sldr->SetMode(0);
+			m_z_rot_sldr->SetMode(0);
+		}
+	}
+}
+
+void RenderViewPanel::UpdateCamRotation(const fluo::Vector& val, int ival)
+{
+	m_x_rot_sldr->ChangeValue(static_cast<int>(std::round(val.x())));
+	m_y_rot_sldr->ChangeValue(static_cast<int>(std::round(val.y())));
+	m_z_rot_sldr->ChangeValue(static_cast<int>(std::round(val.z())));
+	m_x_rot_text->ChangeValue(wxString::Format("%.1f", val.x()));
+	m_y_rot_text->ChangeValue(wxString::Format("%.1f", val.y()));
+	m_z_rot_text->ChangeValue(wxString::Format("%.1f", val.z()));
+	m_x_rot_text->Update();
+	m_y_rot_text->Update();
+	m_z_rot_text->Update();
+	m_ortho_view_cmb->Select();
+}
+
 void RenderViewPanel::SetChannelMixMode(ChannelMixMode val)
 {
 	fluo::ValueCollection vc;

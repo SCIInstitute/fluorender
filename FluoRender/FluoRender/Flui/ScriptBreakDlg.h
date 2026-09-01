@@ -30,19 +30,15 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
+class MainFrame;
 class ScriptBreakDlg : public PropPanel
 {
 public:
-	//enum
-	//{
-	//	ID_ShownChk = ID_SCRIPT_BREAK,
-	//	ID_StopBtn,
-	//	ID_ContinueBtn
-	//};
 	ScriptBreakDlg(MainFrame* frame);
 	~ScriptBreakDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
+	//update
+	void UpdateScriptBreakInfo(const std::string& str);
 
 	void Hold();
 

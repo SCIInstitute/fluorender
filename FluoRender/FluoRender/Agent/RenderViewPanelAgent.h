@@ -66,6 +66,13 @@ private:
 
 private:
 	std::weak_ptr<RenderView> m_view;
+
+	bool m_bg_color_inv = false;
+	//rot slider style
+	bool m_rot_slider = false;
+	int m_pin_by_user = 0;//override pin by scale: 0:by scale; 1:always pin; 2:always not pin
+	bool m_pin_by_scale = false;
+
 };
 
 #endif // RenderViewPanelAgent_h

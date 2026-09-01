@@ -182,8 +182,6 @@ public:
 		const wxString& name = "TreePanel");
 	~TreePanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-
 	//selection change
 	void Select();
 
