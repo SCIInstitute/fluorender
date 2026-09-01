@@ -25,23 +25,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef MoviePanelAgent_h
-#define MoviePanelAgent_h
+#ifndef OutputAdjPanelAgent_h
+#define OutputAdjPanelAgent_h
 
 #include <Agent.h>
 #include <memory>
-#include <vector>
-#include <string>
 
-class MoviePanel;
-
-class MoviePanelAgent : public Agent
+class OutputAdjPanel;
+class OutputAdjPanelAgent : public Agent
 {
 public:
-	MoviePanelAgent(
-		MoviePanel* panel);
+	OutputAdjPanelAgent(
+		OutputAdjPanel* dlg);
 
-	virtual ~MoviePanelAgent() = default;
+	virtual ~OutputAdjPanelAgent() = default;
 
 	// Agent interface
 	virtual bool Accept(
@@ -50,17 +47,32 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	MoviePanel* GetPanel() const
-	{
-		return static_cast<MoviePanel*>(GetWindow());
-	}
+	OutputAdjPanel* GetPanel() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
 
-	size_t GetScriptFiles(std::vector<std::wstring>& list);
+	void UpdateSync();
+	void SetSync(int i, bool val, bool update = true);
+	void SetGamma(int i, double val, bool update = true);
+	void SetBrightness(int i, double val, bool update = true);
+	void SetHdr(int i, double val, bool update = true);
+
+	void SyncColor(fluo::Color& c, double val);
+	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
+	void SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
+	void SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
+	void SyncGamma(int i);
+	void SyncBrightness(int i);
+	void SyncHdr(int i);
+
+private:
+	bool m_enable_all = true;
+	//sync flags
+	bool m_sync[3] = { true, true, true };//for rgb
+
 };
 
-#endif // MoviePanelAgent_h
+#endif // OutputAdjPanelAgent_h

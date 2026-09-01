@@ -171,6 +171,19 @@ public:
 	void UpdateParamList();
 	void UpdateParamListSelect(int ival);
 
+	void UpdateCamLockObjEnable(bool bval);
+	void UpdateCamLockType(int ival);
+
+	void UpdateCropEnable(bool bval);
+	void UpdateCropValues(int x, int y, int w, int h);
+
+	void UpdateScalebarPos(int ival, int x, int y);
+
+	void UpdateRunScript(bool bval);
+	void UpdateScriptFile(const std::wstring& filename);
+	void UpdateScriptList(const std::vector<std::wstring>& list);
+	void UpdateScriptListSelect(int ival);
+
 	//common
 	void SetFps(double val);
 	void SetMovieLength(double val);
@@ -202,7 +215,6 @@ public:
 	void SetScalebarValues(int x, int y);
 
 	//script
-	size_t GetScriptFiles(std::vector<std::wstring>& list);
 	void EnableScript(bool val, const std::wstring& filename = L"");
 
 private:

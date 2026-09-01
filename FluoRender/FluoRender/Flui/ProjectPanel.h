@@ -54,8 +54,6 @@ public:
 		const wxString& name = "ProjectPanel");
 	~ProjectPanel() {}
 
-	void FluoUpdate(const fluo::ValueCollection& vc) {}
-
 private:
 	wxToolBar* m_toolbar;
 

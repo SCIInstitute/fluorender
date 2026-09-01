@@ -34,15 +34,16 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class wxSingleSlider;
+class MainFrame;
 class OclDlg : public PropPanel
 {
 public:
 	OclDlg(MainFrame* frame);
 	~OclDlg();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-	void UpdateKernelList();
-	void UpdateKernelListSelect();
+	//update
+	void UpdateKernelList(const std::vector<std::wstring>& list);
+	void UpdateKernelListSelect(int ival);
 	void Execute();
 
 private:

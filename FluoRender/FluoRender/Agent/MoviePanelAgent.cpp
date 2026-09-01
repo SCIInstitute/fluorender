@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieDefault.h>
 #include <MainSettings.h>
 #include <Interpolator.h>
+#include <Directory.h>
 
 MoviePanelAgent::MoviePanelAgent(
 	MoviePanel* panel) :
@@ -230,105 +231,57 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	if (update_all || FOUND_VALUE(gstCamLockObjEnable))
-		m_cam_lock_chk->SetValue(glbin_moviemaker.GetCamLock());
+	{
+		bval = glbin_moviemaker.GetCamLock();
+		panel->UpdateCamLockObjEnable(bval);
+	}
 
 	if (update_all || FOUND_VALUE(gstCamLockType))
-		m_cam_lock_cmb->SetSelection(glbin_moviemaker.GetCamLockType() - 1);
+	{
+		ival = glbin_moviemaker.GetCamLockType() - 1;
+		panel->UpdateCamLockType(ival);
+	}
 
 	if (update_all || FOUND_VALUE(gstCropEnable))
 	{
 		bval = glbin_moviemaker.GetCropEnable();
-		m_crop_chk->SetValue(bval);
-		m_crop_x_text->Enable(bval);
-		m_crop_y_text->Enable(bval);
-		m_crop_w_text->Enable(bval);
-		m_crop_h_text->Enable(bval);
-
-		m_sb_tl_rb->Enable(bval);
-		m_sb_tr_rb->Enable(bval);
-		m_sb_bl_rb->Enable(bval);
-		m_sb_br_rb->Enable(bval);
-
-		m_sb_dx_text->Enable(bval);
-		m_sb_dx_spin->Enable(bval);
-		m_sb_dy_text->Enable(bval);
-		m_sb_dy_spin->Enable(bval);
+		panel->UpdateCropEnable(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstCropValues))
 	{
-		m_crop_x_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropX()));
-		m_crop_y_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropY()));
-		m_crop_w_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropW()));
-		m_crop_h_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetCropH()));
+		int x = glbin_moviemaker.GetCropX();
+		int y = glbin_moviemaker.GetCropY();
+		int w = glbin_moviemaker.GetCropW();
+		int h = glbin_moviemaker.GetCropH();
+		panel->UpdateCropValues(x, y, w, h);
 	}
 
 	if (update_all || FOUND_VALUE(gstScalebarPos))
 	{
 		ival = glbin_moviemaker.GetScalebarPos();
-		switch (ival)
-		{
-		case 0:
-			m_sb_tl_rb->SetValue(true);
-			break;
-		case 1:
-			m_sb_tr_rb->SetValue(true);
-			break;
-		case 2:
-			m_sb_bl_rb->SetValue(true);
-			break;
-		case 3:
-		default:
-			m_sb_br_rb->SetValue(true);
-			break;
-		}
-		m_sb_dx_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarX()));
-		m_sb_dy_text->ChangeValue(wxString::Format("%d", glbin_moviemaker.GetScalebarY()));
+		int x = glbin_moviemaker.GetScalebarX();
+		int y = glbin_moviemaker.GetScalebarY();
+		panel->UpdateScalebarPos(ival, x, y);
 	}
 
 	if (update_all || FOUND_VALUE(gstRunScript))
 	{
 		bval = glbin_settings.m_run_script;
-		m_run_script_chk->SetValue(bval);
-		size_t idx = 4;
-		for (size_t i = 0; i < m_notebook->GetPageCount(); ++i)
-		{
-			wxString str = m_notebook->GetPageText(i);
-			if (str.Contains(UITEXT_NBPG4_0))
-			{
-				idx = i;
-				break;
-			}
-		}
-		if (bval)
-			m_notebook->SetPageText(idx, UITEXT_NBPG4_1);
-		else
-			m_notebook->SetPageText(idx, UITEXT_NBPG4_0);
+		panel->UpdateRunScript(bval);
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptFile))
 	{
-		m_script_file_text->ChangeValue(glbin_settings.m_script_file);
+		std::wstring filename = glbin_settings.m_script_file;
+		panel->UpdateScriptFile(filename);
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptList))
 	{
-		m_script_list->DeleteAllItems();
 		std::vector<std::wstring> list;
-		std::wstring filename;
-		long tmp;
 		if (GetScriptFiles(list))
-		{
-			for (size_t i = 0; i < list.size(); ++i)
-			{
-				std::filesystem::path p(list[i]);
-				filename = p.stem().wstring();
-				tmp = m_script_list->InsertItem(i, std::to_wstring(i + 1), 0);
-				m_script_list->SetItem(tmp, 1, filename);
-			}
-			m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-			m_script_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
-		}
+			panel->UpdateScriptList(list);
 	}
 
 	if (update_all || FOUND_VALUE(gstScriptSelect))
@@ -345,14 +298,7 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 					break;
 				}
 			}
-			if (idx >= 0 && idx < m_script_list->GetItemCount())
-			{
-				m_script_list->SetItemState(idx,
-					wxLIST_STATE_SELECTED,
-					wxLIST_STATE_SELECTED);
-				//wxSize ss = m_script_list->GetItemSpacing();
-				//m_script_list->ScrollList(0, ss.y*idx);
-			}
+			panel->UpdateScriptListSelect(idx);
 		}
 	}
 }
@@ -361,3 +307,24 @@ void MoviePanelAgent::UpdateData(const UpdateRequest& request)
 {
 
 }
+
+size_t MoviePanelAgent::GetScriptFiles(std::vector<std::wstring>& list)
+{
+	std::filesystem::path p = GetUserSettingsRoot();
+	p /= "Scripts";
+	// Iterate over the files in the "Scripts" directory
+	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
+		return 0;
+	for (const auto& entry : std::filesystem::directory_iterator(p))
+	{
+		if (entry.is_regular_file() && entry.path().extension() == ".txt")
+		{
+			list.push_back(entry.path().wstring());
+		}
+	}
+
+	// Sort the list of files
+	std::sort(list.begin(), list.end());
+	return list.size();
+}
+

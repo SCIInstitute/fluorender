@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 
 OclDlg::OclDlg(MainFrame* frame) :
-	PropPanel(frame, frame,
+	PropPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(550, 600)),
 	0, "OclDlg")
@@ -197,38 +197,9 @@ OclDlg::~OclDlg()
 {
 }
 
-void OclDlg::FluoUpdate(const fluo::ValueCollection& vc)
-{
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = vc.empty();
-
-	if (update_all || FOUND_VALUE(gstKernelList))
-		UpdateKernelList();
-
-	if (update_all || FOUND_VALUE(gstKernelListSelect))
-		UpdateKernelListSelect();
-}
-
-void OclDlg::UpdateKernelList()
+void OclDlg::UpdateKernelList(const std::vector<std::wstring>& list)
 {
 	m_kernel_list->DeleteAllItems();
-	std::filesystem::path p = GetUserSettingsRoot();
-	p /= "CL_code";
-	std::vector<std::string> list;
-	// Iterate over the files in the "Scripts" directory
-	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
-		return;
-	for (const auto& entry : std::filesystem::directory_iterator(p))
-	{
-		if (entry.is_regular_file() && entry.path().extension() == ".cl")
-		{
-			list.push_back(entry.path().stem().string());
-		}
-	}
-	// Sort the list of files
-	std::sort(list.begin(), list.end());
 
 	int i = 0;
 	wxString str;
@@ -243,11 +214,10 @@ void OclDlg::UpdateKernelList()
 	m_kernel_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 }
 
-void OclDlg::UpdateKernelListSelect()
+void OclDlg::UpdateKernelListSelect(int ival)
 {
-	int idx = glbin_kernel_executor.GetFileIndex();
-	if (idx >= 0 && idx < m_kernel_list->GetItemCount())
-		m_kernel_list->SetItemState(idx,
+	if (ival >= 0 && ival < m_kernel_list->GetItemCount())
+		m_kernel_list->SetItemState(ival,
 			wxLIST_STATE_SELECTED,
 			wxLIST_STATE_SELECTED);
 }

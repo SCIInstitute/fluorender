@@ -25,53 +25,37 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef _NOISECANCELLINGDLG_H_
-#define _NOISECANCELLINGDLG_H_
+#ifndef OclDlgAgent_h
+#define OclDlgAgent_h
 
-#include <PropPanel.h>
+#include <Agent.h>
+#include <vector>
+#include <string>
 
-class wxSingleSlider;
-class MainFrame;
-class NoiseCancellingDlg : public PropPanel
+class OclDlg;
+class OclDlgAgent : public Agent
 {
 public:
-	NoiseCancellingDlg(MainFrame* frame);
-	~NoiseCancellingDlg();
+	OclDlgAgent(
+		OclDlg* dlg);
 
-	//update
-	void UpdateNrThresh(double dval, double max_val);
-	void UpdateNrSize(int ival, int resx);
-	void UpdateUseSelection(bool bval);
-	void UpdateNrPreview(bool bval);
+	virtual ~OclDlgAgent() = default;
 
-	void Preview();
-	void Enhance();
+	// Agent interface
+	virtual bool Accept(
+		const UpdateRequest& request) const override;
 
-private:
-	wxCheckBox *m_ca_select_only_chk;
-	//threshold
-	wxSingleSlider *m_threshold_sldr;
-	wxTextCtrl *m_threshold_text;
-	//voxel size threhsold
-	wxSingleSlider *m_voxel_sldr;
-	wxTextCtrl *m_voxel_text;
-	//preview
-	wxButton *m_preview_btn;
-	//erase
-	wxButton *m_erase_btn;
-	//enhance selection
-	wxCheckBox *m_enhance_sel_chk;
+	virtual void Update(
+		const UpdateRequest& request) override;
+
+	OclDlg* GetDialog() const;
 
 private:
-	//threhsold
-	void OnThresholdChange(wxScrollEvent& event);
-	void OnThresholdText(wxCommandEvent& event);
-	void OnVoxelChange(wxScrollEvent& event);
-	void OnVoxelText(wxCommandEvent& event);
-	void OnSelOnlyChk(wxCommandEvent& event);
-	void OnPreviewBtn(wxCommandEvent& event);
-	void OnEraseBtn(wxCommandEvent& event);
-	void OnEnhanceSelChk(wxCommandEvent& event);
+	void UpdateUI(const UpdateRequest& request);
+
+	void UpdateData(const UpdateRequest& request);
+
+	bool GetKernelList(std::vector<std::wstring>& list);
 };
 
-#endif//_NOISECANCELLINGDLG_H_
+#endif // OclDlgAgent_h

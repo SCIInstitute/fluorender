@@ -1445,6 +1445,117 @@ void MoviePanel::UpdateParamListSelect(int ival)
 		m_keylist->SelectItemSilently(ival);
 }
 
+void MoviePanel::UpdateCamLockObjEnable(bool bval)
+{
+	m_cam_lock_chk->SetValue(bval);
+}
+
+void MoviePanel::UpdateCamLockType(int ival)
+{
+	m_cam_lock_cmb->SetSelection(ival);
+}
+
+void MoviePanel::UpdateCropEnable(bool bval)
+{
+	m_crop_chk->SetValue(bval);
+	m_crop_x_text->Enable(bval);
+	m_crop_y_text->Enable(bval);
+	m_crop_w_text->Enable(bval);
+	m_crop_h_text->Enable(bval);
+
+	m_sb_tl_rb->Enable(bval);
+	m_sb_tr_rb->Enable(bval);
+	m_sb_bl_rb->Enable(bval);
+	m_sb_br_rb->Enable(bval);
+
+	m_sb_dx_text->Enable(bval);
+	m_sb_dx_spin->Enable(bval);
+	m_sb_dy_text->Enable(bval);
+	m_sb_dy_spin->Enable(bval);
+}
+
+void MoviePanel::UpdateCropValues(int x, int y, int w, int h)
+{
+	m_crop_x_text->ChangeValue(wxString::Format("%d", x));
+	m_crop_y_text->ChangeValue(wxString::Format("%d", y));
+	m_crop_w_text->ChangeValue(wxString::Format("%d", w));
+	m_crop_h_text->ChangeValue(wxString::Format("%d", h));
+}
+
+void MoviePanel::UpdateScalebarPos(int ival, int x, int y)
+{
+	switch (ival)
+	{
+	case 0:
+		m_sb_tl_rb->SetValue(true);
+		break;
+	case 1:
+		m_sb_tr_rb->SetValue(true);
+		break;
+	case 2:
+		m_sb_bl_rb->SetValue(true);
+		break;
+	case 3:
+	default:
+		m_sb_br_rb->SetValue(true);
+		break;
+	}
+	m_sb_dx_text->ChangeValue(wxString::Format("%d", x));
+	m_sb_dy_text->ChangeValue(wxString::Format("%d", y));
+}
+
+void MoviePanel::UpdateRunScript(bool bval)
+{
+	m_run_script_chk->SetValue(bval);
+	size_t idx = 4;
+	for (size_t i = 0; i < m_notebook->GetPageCount(); ++i)
+	{
+		wxString str = m_notebook->GetPageText(i);
+		if (str.Contains(UITEXT_NBPG4_0))
+		{
+			idx = i;
+			break;
+		}
+	}
+	if (bval)
+		m_notebook->SetPageText(idx, UITEXT_NBPG4_1);
+	else
+		m_notebook->SetPageText(idx, UITEXT_NBPG4_0);
+}
+
+void MoviePanel::UpdateScriptFile(const std::wstring& filename)
+{
+	m_script_file_text->ChangeValue(filename);
+}
+
+void MoviePanel::UpdateScriptList(const std::vector<std::wstring>& list)
+{
+	m_script_list->DeleteAllItems();
+	std::wstring filename;
+	long tmp;
+	for (size_t i = 0; i < list.size(); ++i)
+	{
+		std::filesystem::path p(list[i]);
+		filename = p.stem().wstring();
+		tmp = m_script_list->InsertItem(i, std::to_wstring(i + 1), 0);
+		m_script_list->SetItem(tmp, 1, filename);
+	}
+	m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_script_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
+}
+
+void MoviePanel::UpdateScriptListSelect(int ival)
+{
+	if (ival >= 0 && ival < m_script_list->GetItemCount())
+	{
+		m_script_list->SetItemState(ival,
+			wxLIST_STATE_SELECTED,
+			wxLIST_STATE_SELECTED);
+		//wxSize ss = m_script_list->GetItemSpacing();
+		//m_script_list->ScrollList(0, ss.y*ival);
+	}
+}
+
 void MoviePanel::SetFps(double val)
 {
 	glbin_moviemaker.SetFps(val);
@@ -2169,26 +2280,6 @@ void MoviePanel::OnScriptListSelected(wxListEvent& event)
 		m_script_file_text->ChangeValue(filename);
 		EnableScript(true, filename);
 	}
-}
-
-size_t MoviePanel::GetScriptFiles(std::vector<std::wstring>& list)
-{
-	std::filesystem::path p = GetUserSettingsRoot();
-	p /= "Scripts";
-	// Iterate over the files in the "Scripts" directory
-	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
-		return 0;
-	for (const auto& entry : std::filesystem::directory_iterator(p))
-	{
-		if (entry.is_regular_file() && entry.path().extension() == ".txt")
-		{
-			list.push_back(entry.path().wstring());
-		}
-	}
-
-	// Sort the list of files
-	std::sort(list.begin(), list.end());
-	return list.size();
 }
 
 void MoviePanel::EnableScript(bool val, const std::wstring& filename)

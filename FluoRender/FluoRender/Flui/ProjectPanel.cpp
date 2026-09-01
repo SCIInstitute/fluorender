@@ -36,7 +36,7 @@ ProjectPanel::ProjectPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, frame, pos, size, style, name)
+	TabbedPanel(frame, pos, size, style, name)
 {
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);

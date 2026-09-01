@@ -102,8 +102,6 @@ public:
 		const wxString& name = "RenderView");
 	~RenderViewPanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
-
 	int GetId() const { return m_id; }
 	//reset counter
 	static void ResetID();
@@ -113,6 +111,9 @@ public:
 	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }
 	wxFrame* GetFullFrame() { return m_full_frame; }
 	wxBoxSizer* GetViewSizer() { return m_view_sizer; }
+
+	//update
+	void UpdateMixMethod(ChannelMixMode mode);
 
 	//update
 	void SetChannelMixMode(ChannelMixMode val);

@@ -40,8 +40,6 @@ public:
 		const wxString& name = "PropertyPanel");
 	~PropertyPanel() {}
 
-	void FluoUpdate(const fluo::ValueCollection& vc) {}
-
 private:
 	//prop pages
 	void OnPropPageClose(wxAuiNotebookEvent& event);

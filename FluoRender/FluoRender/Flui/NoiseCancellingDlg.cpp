@@ -41,11 +41,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 
 NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
-: PropPanel(frame, frame,
+: PropPanel(frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(450, 200)),
-	0, "NoiseCancellingDlg"),
-	m_max_value(255.0)
+	0, "NoiseCancellingDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -139,49 +138,28 @@ NoiseCancellingDlg::~NoiseCancellingDlg()
 {
 }
 
-void NoiseCancellingDlg::FluoUpdate(const fluo::ValueCollection& vc)
+void NoiseCancellingDlg::UpdateNrThresh(double dval, double max_val)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
+	m_threshold_sldr->SetRange(0, std::round(max_val * 10.0));
+	m_threshold_sldr->ChangeValue(std::round(dval * max_val * 10.0));
+	m_threshold_text->ChangeValue(wxString::Format("%.1f", dval * max_val));
+}
 
-	bool update_all = vc.empty();
-	m_max_value = vd->GetMaxValue();
+void NoiseCancellingDlg::UpdateNrSize(int ival, int resx)
+{
+	m_voxel_sldr->SetRange(1, resx);
+	m_voxel_sldr->ChangeValue(std::round(ival));
+	m_voxel_text->ChangeValue(wxString::Format("%d", int(std::round(ival))));
+}
 
-	double dval;
-	int ival;
+void NoiseCancellingDlg::UpdateUseSelection(bool bval)
+{
+	m_ca_select_only_chk->SetValue(bval);
+}
 
-	if (update_all || FOUND_VALUE(gstNrThresh))
-	{
-		//threshold
-		dval = glbin_comp_def.m_nr_thresh;
-		m_threshold_sldr->SetRange(0, std::round(m_max_value*10.0));
-		m_threshold_sldr->ChangeValue(std::round(dval * m_max_value * 10.0));
-		m_threshold_text->ChangeValue(wxString::Format("%.1f", dval * m_max_value));
-	}
-
-	if (update_all || FOUND_VALUE(gstNrSize))
-	{
-		//voxel
-		ival = glbin_comp_def.m_nr_size;
-		auto res = vd->GetResolution();
-		m_voxel_sldr->SetRange(1, res.intx());
-		m_voxel_sldr->ChangeValue(std::round(ival));
-		m_voxel_text->ChangeValue(wxString::Format("%d", int(std::round(ival))));
-	}
-
-	if (update_all || FOUND_VALUE(gstUseSelection))
-	{
-		m_ca_select_only_chk->SetValue(glbin_comp_generator.GetUseSel());
-	}
-
-	if (update_all || FOUND_VALUE(gstNrPreview))
-	{
-		m_enhance_sel_chk->SetValue(glbin_comp_def.m_nr_preview);
-	}
+void NoiseCancellingDlg::UpdateNrPreview(bool bval)
+{
+	m_enhance_sel_chk->SetValue(bval);
 }
 
 void NoiseCancellingDlg::Preview()

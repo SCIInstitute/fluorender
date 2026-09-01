@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class VolumeGroup;
 class wxFadeButton;
 class wxSingleSlider;
 class wxUndoableToolbar;
@@ -38,6 +37,7 @@ namespace fluo
 {
 	class Color;
 }
+class MainFrame;
 class OutputAdjPanel: public TabbedPanel
 {
 public:
@@ -48,27 +48,32 @@ public:
 		const wxString& name="OutputAdjPanel");
 	~OutputAdjPanel();
 
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 	virtual void LoadPerspective(const std::string& str) override;
 
-	void UpdateSync();
+	//update
+	void UpdateMultiFuncTips(int ival);
+
+	void UpdateSyncR(bool bval);
+	void UpdateGammaR(double dval);
+	void UpdateBrightnessR(double dval);
+	void UpdateHdrR(double dval);
+
+	void UpdateSyncG(bool bval);
+	void UpdateGammaG(double dval);
+	void UpdateBrightnessG(double dval);
+	void UpdateHdrG(double dval);
+
+	void UpdateSyncB(bool bval);
+	void UpdateGammaB(double dval);
+	void UpdateBrightnessB(double dval);
+	void UpdateHdrB(double dval);
 
 	//disable/enable
 	void EnableAll(bool val);
 
-	void SetSync(int i, bool val, bool update = true);
-	void SetGamma(int i, double val, bool update = true);
-	void SetBrightness(int i, double val, bool update = true);
-	void SetHdr(int i, double val, bool update = true);
-
-
 	void ClearUndo();
 
 private:
-	bool m_enable_all;
-	//sync flags
-	bool m_sync[3];//for rgb
-
 	//sync red
 	wxUndoableToolbar* m_sync_r_chk;
 	//buttons
@@ -170,13 +175,6 @@ private:
 	//set default
 	void OnSaveDefault(wxCommandEvent& event);
 
-	void SyncColor(fluo::Color& c, double val);
-	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
-	void SyncBrightness(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
-	void SyncHdr(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
-	void SyncGamma(int i);
-	void SyncBrightness(int i);
-	void SyncHdr(int i);
 };
 
 #endif//_ADJUSTVIEW_H_
