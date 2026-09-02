@@ -103,6 +103,8 @@ public:
 	flrd::CelpList &GetCellList() const;
 	bool FindCell(unsigned int id) const;
 
+	flrd::CelpList& GetPrevCellList() const;
+
 	//rulers
 	bool GetMappedRulers(flrd::RulerList &rulers) const;
 
@@ -137,6 +139,7 @@ private:
 
 	flrd::pTrackMap m_track_map;
 	std::unique_ptr<flrd::CelpList> m_cell_list;
+	std::unique_ptr<flrd::CelpList> m_prev_cell_list;
 
 	//edges (in a vector of drawable)
 	unsigned int GetMappedEdges(

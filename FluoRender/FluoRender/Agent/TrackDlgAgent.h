@@ -31,6 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Agent.h>
 
 class TrackDlg;
+namespace flrd
+{
+	class CelpList;
+}
+struct TrackViewData;
 class TrackDlgAgent : public Agent
 {
 public:
@@ -52,6 +57,12 @@ private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
+
+	std::vector<TrackItem> BuildTrackList(
+		const flrd::CelpList& sel_cells,
+		bool shuffle);
+
+	TrackViewData GetTrackViewData();
 
 private:
 	std::string m_comp_id;//select

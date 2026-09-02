@@ -50,7 +50,7 @@ public:
 		long style = wxLC_REPORT);
 	~TrackListCtrl();
 
-	void Append(wxString &gtype, unsigned int id, wxColor color,
+	void Append(const wxString &gtype, unsigned int id, wxColor color,
 		int size, double cx, double cy, double cz);
 	void DeleteSelection();
 	void CopySelection();
@@ -64,6 +64,26 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MainFrame;
+struct TrackItem
+{
+	std::wstring glyph;
+	unsigned int id = 0;
+	fluo::Color color;
+	int size = 0;
+	double x = 0.0;
+	double y = 0.0;
+	double z = 0.0;
+};
+
+struct TrackViewData
+{
+	int cur_time = 0;
+	int prv_time = 0;
+
+	std::vector<TrackItem> current;
+	std::vector<TrackItem> previous;
+};
+
 class TrackDlg : public TabbedPanel
 {
 public:
@@ -97,8 +117,11 @@ public:
 	void UpdateGhostNum(int ival);
 	void UpdateGhostEnable(bool bval1, bool bval2);
 
-	void UpdateTrackList();
-	void UpdateTracks();
+	void PopulateTrackList(
+		TrackListCtrl* list,
+		const std::vector<TrackItem>& items);
+	void UpdateTracks(
+		const TrackViewData& data);
 
 	void LoadTrackFile(const std::wstring &file);
 	bool SaveTrackFile();

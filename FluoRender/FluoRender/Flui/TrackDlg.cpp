@@ -94,7 +94,7 @@ TrackListCtrl::~TrackListCtrl()
 {
 }
 
-void TrackListCtrl::Append(wxString &gtype, unsigned int id, wxColor color,
+void TrackListCtrl::Append(const wxString &gtype, unsigned int id, wxColor color,
 	int size, double cx, double cy, double cz)
 {
 	wxString str = "";
@@ -852,155 +852,62 @@ void TrackDlg::UpdateGhostEnable(bool bval1, bool bval2)
 	m_ghost_show_lead_chk->SetValue(bval2);
 }
 
-void TrackDlg::UpdateTrackList()
+void TrackDlg::PopulateTrackList(
+	TrackListCtrl* list,
+	const std::vector<TrackItem>& items)
 {
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return;
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
+	list->Freeze();
 
-	int shuffle = vd->GetShuffle();
-	int cur_time = trkg->get().GetCurTime();
-	int prv_time = trkg->get().GetPrvTime();
-	wxString item_gtype;
-	wxString item_id;
-	wxString item_size;
-	wxString item_x;
-	wxString item_y;
-	wxString item_z;
-	unsigned long id;
-	long size;
-	double x, y, z;
-	//copy current to previous
-	if (cur_time != prv_time)
+	list->DeleteAllItems();
+
+	for (const auto& item : items)
 	{
-		m_trace_list_prev->Freeze();
-		m_trace_list_prev->DeleteAllItems();
-		long item = -1;
-		for (;;)
-		{
-			item = m_trace_list_curr->GetNextItem(item,
-				wxLIST_NEXT_ALL,
-				wxLIST_STATE_DONTCARE);
-			if (item != -1)
-			{
-				item_gtype = m_trace_list_curr->GetText(item, 0);
-				item_id = m_trace_list_curr->GetText(item, 1);
-				item_size = m_trace_list_curr->GetText(item, 2);
-				item_x = m_trace_list_curr->GetText(item, 3);
-				item_y = m_trace_list_curr->GetText(item, 4);
-				item_z = m_trace_list_curr->GetText(item, 5);
-				item_id.ToULong(&id);
-				fluo::Color c(id, shuffle);
-				wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
-				item_size.ToLong(&size);
-				item_x.ToDouble(&x);
-				item_y.ToDouble(&y);
-				item_z.ToDouble(&z);
-				m_trace_list_prev->Append(item_gtype, id, color, size, x, y, z);
-			}
-			else break;
-		}
-		m_trace_list_prev->Thaw();
+		wxColor color(
+			item.color.r() * 255,
+			item.color.g() * 255,
+			item.color.b() * 255);
 
-		//set tiem text
-		wxString str;
-		str = wxString::Format("\tCurrent T: %d", cur_time);
-		m_cell_time_curr_st->SetLabel(str);
-		if (prv_time != cur_time)
-			m_cell_time_prev_st->SetLabel(
-				wxString::Format("\tPrevious T: %d", prv_time));
-		else
-			m_cell_time_prev_st->SetLabel("\tPrevious T");
+		list->Append(
+			item.glyph,
+			item.id,
+			color,
+			item.size,
+			item.x,
+			item.y,
+			item.z);
 	}
+
+	list->Thaw();
 }
 
-void TrackDlg::UpdateTracks()
+void TrackDlg::UpdateTracks(
+	const TrackViewData& data)
 {
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return;
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
+	PopulateTrackList(
+		m_trace_list_curr,
+		data.current);
 
-	int shuffle = vd->GetShuffle();
+	PopulateTrackList(
+		m_trace_list_prev,
+		data.previous);
 
-	m_trace_list_curr->DeleteAllItems();
+	m_cell_time_curr_st->SetLabel(
+		wxString::Format(
+			"\tCurrent T: %d",
+			data.cur_time));
 
-	flrd::CelpList sel_cells = trkg->get().GetCellList();
-	std::vector<flrd::Celp> cells;
-	for (auto siter = sel_cells.begin();
-		siter != sel_cells.end(); ++siter)
-		cells.push_back(siter->second);
-
-	if (cells.empty())
-		return;
-	else
-		std::sort(cells.begin(), cells.end(),
-			[](const flrd::Celp& c1, const flrd::Celp& c2) -> bool
-			{
-				unsigned int vid1 = c1->GetVertexId();
-				unsigned int vid2 = c2->GetVertexId();
-				if (vid1 == vid2)
-					return c1->GetSizeUi() > c2->GetSizeUi();
-				else
-					return vid1 < vid2;
-			});
-
-	wxString gtype;
-	unsigned int id;
-	unsigned int vid;
-	fluo::Color c;
-	wxColor wxc;
-	int size;
-	fluo::Point center;
-	bool prev, next;
-
-	Freeze();
-	for (size_t i = 0; i < cells.size(); ++i)
+	if (data.cur_time != data.prv_time)
 	{
-		id = cells[i]->Id();
-		vid = cells[i]->GetVertexId();
-		c = fluo::Color(id, shuffle);
-		wxColor color(c.r() * 255, c.g() * 255, c.b() * 255);
-		size = (int)(cells[i]->GetSizeUi());
-		center = cells[i]->GetCenter();
-
-		if (vid == 0)
-			gtype = L"\u25ef";
-		else
-		{
-			if (i == 0)
-				prev = false;
-			else
-				prev = cells[i - 1]->GetVertexId() == vid;
-			if (i == cells.size() - 1)
-				next = false;
-			else
-				next = cells[i + 1]->GetVertexId() == vid;
-			if (prev)
-			{
-				if (next)
-					gtype = L"\u2502";
-				else
-					gtype = L"\u2514";
-			}
-			else
-			{
-				if (next)
-					gtype = L"\u250c";
-				else
-					gtype = L"\u2500";
-			}
-		}
-
-		m_trace_list_curr->Append(gtype, id, color, size,
-			center.x(), center.y(), center.z());
+		m_cell_time_prev_st->SetLabel(
+			wxString::Format(
+				"\tPrevious T: %d",
+				data.prv_time));
 	}
-	Thaw();
+	else
+	{
+		m_cell_time_prev_st->SetLabel(
+			"\tPrevious T");
+	}
 }
 
 void TrackDlg::LoadTrackFile(const std::wstring& file)

@@ -128,6 +128,12 @@ void TrackGroup::ClearCellList()
 //time values are check with frame ids in the frame list
 void TrackGroup::UpdateCellList(flrd::CelpList &cur_sel_list)
 {
+	for (flrd::CelpListIter cell_iter = m_cell_list->begin();
+		cell_iter != m_cell_list->end(); ++cell_iter)
+	{
+		m_prev_cell_list->insert(std::pair<unsigned int, flrd::Celp>
+			(cell_iter->second->Id(), cell_iter->second));
+	}
 	ClearCellList();
 	flrd::CelpListIter cell_iter;
 
@@ -167,6 +173,11 @@ flrd::CelpList &TrackGroup::GetCellList() const
 bool TrackGroup::FindCell(unsigned int id) const
 {
 	return m_cell_list->find(id) != m_cell_list->end();
+}
+
+flrd::CelpList& TrackGroup::GetPrevCellList() const
+{
+	return *m_prev_cell_list;
 }
 
 bool TrackGroup::GetMappedRulers(flrd::RulerList &rulers) const

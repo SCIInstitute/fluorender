@@ -35,6 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackMap.h>
 #include <MainSettings.h>
 #include <VolumeData.h>
+#include <Cell.h>
 #include <compatibility.h>
 
 TrackDlgAgent::TrackDlgAgent(
@@ -193,9 +194,8 @@ void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	if (update_all || FOUND_VALUE(gstTrackList))
 	{
-		UpdateTrackList();
-		UpdateTracks();
-		//Layout();
+		auto data = GetTrackViewData();
+		dlg->UpdateTracks(data);
 	}
 }
 
@@ -209,3 +209,111 @@ TrackDlg* TrackDlgAgent::GetDialog() const
 	return static_cast<TrackDlg*>(GetWindow());
 }
 
+std::vector<TrackItem> TrackDlgAgent::BuildTrackList(
+	const flrd::CelpList& sel_cells,
+	bool shuffle)
+{
+	std::vector<TrackItem> result;
+
+	std::vector<flrd::Celp> cells;
+	for (const auto& item : sel_cells)
+		cells.push_back(item.second);
+
+	if (cells.empty())
+		return result;
+
+	std::sort(cells.begin(), cells.end(),
+		[](const flrd::Celp& c1,
+			const flrd::Celp& c2)
+			{
+				unsigned int vid1 = c1->GetVertexId();
+				unsigned int vid2 = c2->GetVertexId();
+
+				if (vid1 == vid2)
+					return c1->GetSizeUi() >
+						   c2->GetSizeUi();
+
+				return vid1 < vid2;
+			});
+
+	for (size_t i = 0; i < cells.size(); ++i)
+	{
+		TrackItem item;
+
+		auto cell = cells[i];
+
+		item.id = cell->Id();
+		item.color = fluo::Color(item.id, shuffle);
+		item.size = int(cell->GetSizeUi());
+
+		auto center = cell->GetCenter();
+
+		item.x = center.x();
+		item.y = center.y();
+		item.z = center.z();
+
+		unsigned int vid =
+			cell->GetVertexId();
+
+		if (vid == 0)
+		{
+			item.glyph = L"\u25ef";
+		}
+		else
+		{
+			bool prev =
+				i > 0 &&
+				cells[i - 1]->GetVertexId() == vid;
+
+			bool next =
+				i + 1 < cells.size() &&
+				cells[i + 1]->GetVertexId() == vid;
+
+			if (prev)
+				item.glyph =
+				next ? L"\u2502" : L"\u2514";
+			else
+				item.glyph =
+				next ? L"\u250c" : L"\u2500";
+		}
+
+		result.push_back(std::move(item));
+	}
+
+	return result;
+}
+
+TrackViewData TrackDlgAgent::GetTrackViewData()
+{
+	TrackViewData data;
+
+	auto trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return data;
+
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return data;
+
+	bool shuffle = vd->GetShuffle();
+
+	data.cur_time =
+		trkg->get().GetCurTime();
+
+	data.prv_time =
+		trkg->get().GetPrvTime();
+
+	// current selection
+	data.current =
+		BuildTrackList(
+			trkg->get().GetCellList(),
+			shuffle);
+
+	// previous tracked cells
+	data.previous =
+		BuildTrackList(
+			trkg->get().GetPrevCellList(),
+			shuffle);
+
+	return data;
+}
