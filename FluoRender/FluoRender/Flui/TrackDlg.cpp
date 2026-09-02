@@ -766,6 +766,92 @@ wxWindow* TrackDlg::CreateOutputPage(wxWindow* parent)
 	return page;
 }
 
+void TrackDlg::UpdateTrackFile(const std::wstring& str)
+{
+	if (str.empty())
+		m_load_trace_text->ChangeValue("No track map or track map not saved");
+	else
+		m_load_trace_text->ChangeValue(str);
+}
+
+void TrackDlg::UpdateTrackIter(int ival)
+{
+	m_map_iter_spin->SetValue(ival);
+}
+
+void TrackDlg::UpdateTrackSize(double dval)
+{
+	m_map_size_spin->SetValue(dval);
+}
+
+void TrackDlg::UpdateTrackSimilarity(double dval)
+{
+	m_map_similar_spin->SetValue(dval);
+}
+
+void TrackDlg::UpdateTrackContactFactor(double dval)
+{
+	m_map_contact_spin->SetValue(dval);
+}
+
+void TrackDlg::UpdateTrackConsistent(bool bval)
+{
+	m_map_consistent_btn->SetValue(bval);
+}
+
+void TrackDlg::UpdateTrackMerge(bool bval)
+{
+	m_map_merge_btn->SetValue(bval);
+}
+
+void TrackDlg::UpdateTrackSplit(bool bval)
+{
+	m_map_split_btn->SetValue(bval);
+}
+
+void TrackDlg::UpdateTrackCompId(const std::string& str, const fluo::Color& color)
+{
+	m_comp_id_text->ChangeValue(str);
+	m_comp_id_text2->ChangeValue(str);
+	m_comp_id_text->SetBackgroundColour(wxColor(color.r() * 255, color.g() * 255, color.b() * 255));
+	m_comp_id_text2->SetBackgroundColour(wxColor(color.r() * 255, color.g() * 255, color.b() * 255));
+}
+
+void TrackDlg::UpdateTrackCellSize(double dval)
+{
+	m_cell_size_sldr->ChangeValue(int(std::round(dval)));
+	m_cell_size_text->ChangeValue(wxString::Format("%.0f", dval));
+}
+
+void TrackDlg::UpdateTrackUncertainLow(int ival)
+{
+	m_comp_uncertain_low_sldr->ChangeValue(ival);
+	m_cell_size_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void TrackDlg::UpdateTrackNewCompId(const std::string& str, const fluo::Color& color)
+{
+	m_cell_new_id_text->ChangeValue(str);
+	m_cell_new_id_text->SetBackgroundColour(wxColor(color.r() * 255, color.g() * 255, color.b() * 255));
+}
+
+void TrackDlg::UpdateTrackClusterNum(int ival)
+{
+	m_cell_segment_spin->SetValue(wxString::Format("%d", ival));
+}
+
+void TrackDlg::UpdateGhostNum(int ival)
+{
+	m_ghost_num_sldr->ChangeValue(ival);
+	m_ghost_num_text->ChangeValue(wxString::Format("%d", ival));
+}
+
+void TrackDlg::UpdateGhostEnable(bool bval1, bool bval2)
+{
+	m_ghost_show_tail_chk->SetValue(bval1);
+	m_ghost_show_lead_chk->SetValue(bval2);
+}
+
 void TrackDlg::UpdateTrackList()
 {
 	auto trkg = glbin_current.GetTrackGroup();

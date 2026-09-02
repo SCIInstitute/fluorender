@@ -754,17 +754,197 @@ inline std::wstring APPEND_QUILT_INFO(const std::wstring& file, int vx, int vy, 
 inline char GETSLASHA() { return std::filesystem::path::preferred_separator; }
 inline wchar_t GETSLASH() { return static_cast<wchar_t>(GETSLASHA()); }
 
-inline int STOI(const char* s) { return (s ? atoi(s) : 0); }
-inline int STOI(const std::string& s, int def = 0) { try { return std::stoi(s); } catch (...) { return def; } }
-inline double STOD(const char* s) { return (s ? atof(s) : 0.0); }
-inline double STOD(const std::string& s, double def = 0.0) { try { return std::stod(s); } catch (...) { return def; } }
-inline long STOL(const std::string& s, long def = 0) { try { return std::stol(s); } catch (...) { return def; } }
-inline unsigned long STOUL(const std::string& s, unsigned long def = 0) { try { return std::stoul(s); } catch (...) { return def; } }
-inline unsigned long long STOULL(const std::string& s, unsigned long long def = 0) { try { return std::stoull(s); } catch (...) { return def; } }
-inline float STOF(const std::string& s, float def = 0.0f) { try { return std::stof(s); } catch (...) { return def; } }
-inline int WSTOI(const std::wstring& s, int def = 0) { try { return std::stoi(s); } catch (...) { return def; } }
-inline double WSTOD(const std::wstring& s, double def = 0.0) { try { return std::stod(s); } catch (...) { return def; } }
+inline int ToInt(
+	const std::string& s,
+	int def = 0)
+{
+	try
+	{
+		size_t pos = 0;
+		int v = std::stoi(s, &pos);
+		return pos == s.size() ? v : def;
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
 
+inline long ToLong(
+	const std::string& s,
+	long def = 0)
+{
+	try
+	{
+		size_t pos = 0;
+		long v = std::stol(s, &pos);
+		return pos == s.size() ? v : def;
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
+
+inline unsigned long ToULong(
+	const std::string& s,
+	unsigned long def = 0)
+{
+	try
+	{
+		size_t pos = 0;
+		unsigned long v = std::stoul(s, &pos);
+		return pos == s.size() ? v : def;
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
+
+inline unsigned long long ToULLong(
+	const std::string& s,
+	unsigned long long def = 0)
+{
+	try
+	{
+		size_t pos = 0;
+		unsigned long long v = std::stoull(s, &pos);
+		return pos == s.size() ? v : def;
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
+
+inline float ToFloat(
+	const std::string& s,
+	float def = 0.0f)
+{
+	try
+	{
+		size_t pos = 0;
+		float v = std::stof(s, &pos);
+		return pos == s.size() ? v : def;
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
+
+inline double ToDouble(
+	const std::string& s,
+	double def = 0.0)
+{
+	try
+	{
+		size_t pos = 0;
+		double v = std::stod(s, &pos);
+		return pos == s.size() ? v : def;
+	}
+	catch (...)
+	{
+		return def;
+	}
+}
+
+inline bool TryToInt(
+	const std::string& s,
+	int& value)
+{
+	try
+	{
+		size_t pos = 0;
+		value = std::stoi(s, &pos);
+		return pos == s.size();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+inline bool TryToLong(
+	const std::string& s,
+	long& value)
+{
+	try
+	{
+		size_t pos = 0;
+		value = std::stol(s, &pos);
+		return pos == s.size();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+inline bool TryToULong(
+	const std::string& s,
+	unsigned long& value)
+{
+	try
+	{
+		size_t pos = 0;
+		value = std::stoul(s, &pos);
+		return pos == s.size();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+inline bool TryToULLong(
+	const std::string& s,
+	unsigned long long& value)
+{
+	try
+	{
+		size_t pos = 0;
+		value = std::stoull(s, &pos);
+		return pos == s.size();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+inline bool TryToFloat(
+	const std::string& s,
+	float& value)
+{
+	try
+	{
+		size_t pos = 0;
+		value = std::stof(s, &pos);
+		return pos == s.size();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+inline bool TryToDouble(
+	const std::string& s,
+	double& value)
+{
+	try
+	{
+		size_t pos = 0;
+		value = std::stod(s, &pos);
+		return pos == s.size();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
 
 template<typename T>
 typename std::vector<std::weak_ptr<T>>::iterator FIND_PTR(

@@ -77,6 +77,12 @@ struct HologramInfo
 	int hologram_debug;
 	int hologram_camera_mode;
 };
+struct DeviceTreeInfo
+{
+	std::vector<std::vector<std::string>> tree;
+	int platform_id{ -1 };
+	int device_id{ -1 };
+};
 class SettingDlg : public TabbedPanel
 {
 public:
@@ -103,7 +109,7 @@ public:
 	void UpdateDisplayColorDepth(int ival);
 	void UpdateWavelengthColor(int ival1, int ival2, int ival3, int ival4);
 	void UpdateMaxTextureSize(bool bval, int ival);
-	void UpdateDeviceTree(const std::vector<std::vector<std::string>>& tree);
+	void UpdateDeviceTree(const DeviceTreeInfo& info);
 	void UpdateSettingsJava(const std::wstring& jvm, const std::wstring& ij, const std::wstring& bioformats, int ival);
 
 private:

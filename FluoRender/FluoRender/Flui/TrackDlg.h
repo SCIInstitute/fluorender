@@ -63,6 +63,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+class MainFrame;
 class TrackDlg : public TabbedPanel
 {
 public:
@@ -75,6 +76,26 @@ public:
 
 	TrackDlg(MainFrame* frame);
 	~TrackDlg();
+
+	//update
+	void UpdateTrackFile(const std::wstring& str);
+	void UpdateTrackIter(int ival);
+	void UpdateTrackSize(double dval);
+	void UpdateTrackSimilarity(double dval);
+	void UpdateTrackContactFactor(double dval);
+	void UpdateTrackConsistent(bool bval);
+	void UpdateTrackMerge(bool bval);
+	void UpdateTrackSplit(bool bval);
+
+	void UpdateTrackCompId(const std::string& str, const fluo::Color& color);
+	void UpdateTrackCellSize(double dval);
+	void UpdateTrackUncertainLow(int ival);
+
+	void UpdateTrackNewCompId(const std::string& str, const fluo::Color& color);
+	void UpdateTrackClusterNum(int ival);
+	
+	void UpdateGhostNum(int ival);
+	void UpdateGhostEnable(bool bval1, bool bval2);
 
 	void UpdateTrackList();
 	void UpdateTracks();
@@ -96,9 +117,6 @@ private:
 		int surface_num;
 		int contact_num;
 	} comp_info;
-
-	wxString m_comp_id;//select
-	wxString m_comp_id3;//modify / new id
 
 	//map page
 	//load/save trace

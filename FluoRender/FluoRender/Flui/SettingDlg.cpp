@@ -1125,89 +1125,258 @@ void SettingDlg::UpdateLineWidth(double dval)
 
 void SettingDlg::UpdatePaintHistory(int ival)
 {
-	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", glbin_brush_def.m_paint_hist_depth));
-	m_paint_hist_depth_sldr->ChangeValue(glbin_brush_def.m_paint_hist_depth);
+	m_paint_hist_depth_text->ChangeValue(wxString::Format("%d", ival));
+	m_paint_hist_depth_sldr->ChangeValue(ival);
 }
 
 void SettingDlg::UpdatePencilDist(double dval)
 {
-	m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", glbin_settings.m_pencil_dist));
-	m_pencil_dist_sldr->ChangeValue(glbin_settings.m_pencil_dist);
+	m_pencil_dist_text->ChangeValue(wxString::Format("%.0f", dval));
+	m_pencil_dist_sldr->ChangeValue(std::round(dval));
 }
 
 void SettingDlg::UpdateMicroBlendEnable(bool bval)
 {
-
+	m_micro_blend_chk->SetValue(bval);
 }
 
 void SettingDlg::UpdatePeelNum(int ival)
 {
-
+	m_peeling_layers_sldr->ChangeValue(ival);
+	m_peeling_layers_text->ChangeValue(wxString::Format("%d", ival));
 }
 
 void SettingDlg::UpdateSettingRot(double dval)
 {
-
+	//rot center anchor thresh
+	m_pin_threshold_sldr->ChangeValue(std::round(dval * 10.0));
+	m_pin_threshold_text->ChangeValue(wxString::Format("%.0f", dval * 100.0));
 }
 
 void SettingDlg::UpdateGradBg(bool bval)
 {
-
+	m_grad_bg_chk->SetValue(bval);
 }
 
 void SettingDlg::UpdateClearColorBg(bool bval)
 {
-
+	m_clear_color_bg_chk->SetValue(bval);
 }
 
 void SettingDlg::UpdateMouseInt(int ival)
 {
-
+	m_mouse_int_comb->SetSelection(ival);
 }
 
 void SettingDlg::UpdateStreamEable(const StreamInfo& info)
 {
-
+	m_streaming_comb->SetSelection(info.stream_rendering);
+	m_update_order_comb->SetSelection(info.update_order);
+	m_graphics_mem_text->ChangeValue(wxString::Format("%d", int(std::round(info.graphics_mem))));
+	m_graphics_mem_sldr->ChangeValue(std::round(info.graphics_mem / 100.0));
+	m_large_data_text->ChangeValue(wxString::Format("%d", (int)info.large_data_size));
+	m_large_data_sldr->ChangeValue(std::round(info.large_data_size / 10.0));
+	m_block_size_text->ChangeValue(wxString::Format("%d", info.force_block_size));
+	m_block_size_sldr->ChangeValue(std::round(log(info.force_block_size) / log(2.0)));
+	m_response_time_text->ChangeValue(wxString::Format("%d", info.up_time));
+	m_response_time_sldr->ChangeValue(std::round(info.up_time / 10.0));
+	m_detail_level_offset_text->ChangeValue(wxString::Format("%d", -info.detail_level_offset));
+	m_detail_level_offset_sldr->ChangeValue(-info.detail_level_offset);
 }
 
 void SettingDlg::UpdateAutomate(const AutomateInfo& info)
 {
-
+	auto it = m_automate_combo.find("histogram");
+	if (it != m_automate_combo.end())
+	{
+		ComboEntry& entry = it->second;
+		entry.combo->SetSelection(info.histogram);
+	}
+	it = m_automate_combo.find("paint size");
+	if (it != m_automate_combo.end())
+	{
+		ComboEntry& entry = it->second;
+		entry.combo->SetSelection(info.paint_size);
+	}
+	it = m_automate_combo.find("comp gen");
+	if (it != m_automate_combo.end())
+	{
+		ComboEntry& entry = it->second;
+		entry.combo->SetSelection(info.comp_gen);
+	}
+	it = m_automate_combo.find("colocalize");
+	if (it != m_automate_combo.end())
+	{
+		ComboEntry& entry = it->second;
+		entry.combo->SetSelection(info.colocalize);
+	}
+	it = m_automate_combo.find("relax ruler");
+	if (it != m_automate_combo.end())
+	{
+		ComboEntry& entry = it->second;
+		entry.combo->SetSelection(info.relax_ruler);
+	}
+	it = m_automate_combo.find("conv vol mesh");
+	if (it != m_automate_combo.end())
+	{
+		ComboEntry& entry = it->second;
+		entry.combo->SetSelection(info.conv_vol_mesh);
+	}
 }
 
 void SettingDlg::UpdateHologramMode(const HologramInfo& info)
 {
-
+	if (info.hologram_mode == 0)
+	{
+#ifdef _WIN32
+		m_holo_ip_text->Disable();
+#endif
+		m_stereo_chk->SetValue(false);
+		m_xr_api_cmb->Disable();
+		m_mv_hmd_chk->Disable();
+		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
+		m_lg_quilt_cmb->Disable();
+		m_lg_camera_mode_cmb->Disable();
+	}
+	else if (info.hologram_mode == 1)
+	{
+#ifdef _WIN32
+		if (info.xr_api == 4)
+			m_holo_ip_text->Enable();
+		else
+			m_holo_ip_text->Disable();
+#endif
+		m_stereo_chk->SetValue(true);
+		m_xr_api_cmb->Enable();
+		m_mv_hmd_chk->Enable();
+		m_sbs_chk->Enable();
+		m_eye_dist_sldr->Enable();
+		m_eye_dist_text->Enable();
+		m_looking_glass_chk->SetValue(false);
+		m_lg_offset_sldr->Disable();
+		m_lg_offset_text->Disable();
+		m_lg_quilt_cmb->Disable();
+		m_lg_camera_mode_cmb->Disable();
+	}
+	else if (info.hologram_mode == 2)
+	{
+#ifdef _WIN32
+		m_holo_ip_text->Disable();
+#endif
+		m_stereo_chk->SetValue(false);
+		m_xr_api_cmb->Disable();
+		m_mv_hmd_chk->Disable();
+		m_sbs_chk->Disable();
+		m_eye_dist_sldr->Disable();
+		m_eye_dist_text->Disable();
+		m_looking_glass_chk->SetValue(true);
+		m_lg_offset_sldr->Enable();
+		m_lg_offset_text->Enable();
+		m_lg_quilt_cmb->Enable();
+		m_lg_camera_mode_cmb->Enable();
+	}
+#ifdef _WIN32
+	m_holo_ip_text->ChangeValue(wxString(info.holo_ip));
+#endif
+	m_mv_hmd_chk->SetValue(info.mv_hmd);
+	m_xr_api_cmb->Select(info.xr_api);
+	m_sbs_chk->SetValue(info.sbs);
+	m_eye_dist_sldr->ChangeValue(std::round(info.eye_dist * 10.0));
+	m_eye_dist_text->ChangeValue(wxString::Format("%.1f", info.eye_dist));
+	m_lg_offset_sldr->ChangeValue(info.lg_offset);
+	m_lg_offset_text->ChangeValue(wxString::Format("%.0f", info.lg_offset));
+	m_lg_quilt_cmb->Select(info.hologram_debug);
+	m_lg_camera_mode_cmb->Select(info.hologram_camera_mode);
 }
 
 void SettingDlg::UpdateFullscreenDisplay(int ival)
 {
-
+	m_disp_id_comb->Select(ival);
 }
 
 void SettingDlg::UpdateDisplayColorDepth(int ival)
 {
-
+	m_color_depth_comb->Select(ival);
 }
 
 void SettingDlg::UpdateWavelengthColor(int ival1, int ival2, int ival3, int ival4)
 {
-
+	m_wav_color1_cmb->Select(ival1 - 1);
+	m_wav_color2_cmb->Select(ival2 - 1);
+	m_wav_color3_cmb->Select(ival3 - 1);
+	m_wav_color4_cmb->Select(ival4 - 1);
 }
 
 void SettingDlg::UpdateMaxTextureSize(bool bval, int ival)
 {
-
+	m_max_texture_size_chk->SetValue(bval);
+	m_max_texture_size_text->Enable(bval);
+	wxString str = wxString::Format("%d", ival);
+	m_max_texture_size_text->ChangeValue(str);
 }
 
-void SettingDlg::UpdateDeviceTree(const std::vector<std::vector<std::string>>& tree)
+void SettingDlg::UpdateDeviceTree(const DeviceTreeInfo& info)
 {
+	m_device_tree->DeleteAllItems();
 
+	wxTreeItemId root =
+		m_device_tree->AddRoot("Computer");
+
+	for (size_t i = 0; i < info.tree.size(); ++i)
+	{
+		const auto& branch = info.tree[i];
+
+		if (branch.empty())
+			continue;
+
+		wxTreeItemId platform =
+			m_device_tree->AppendItem(
+				root, branch[0]);
+
+		for (size_t j = 1; j < branch.size(); ++j)
+		{
+			wxTreeItemId device =
+				m_device_tree->AppendItem(
+					platform, branch[j]);
+
+			if (static_cast<int>(i) == info.platform_id &&
+				static_cast<int>(j - 1) == info.device_id)
+			{
+				m_device_tree->SelectItem(device);
+			}
+		}
+	}
+
+	m_device_tree->ExpandAll();
 }
 
 void SettingDlg::UpdateSettingsJava(const std::wstring& jvm, const std::wstring& ij, const std::wstring& bioformats, int ival)
 {
-
+	m_java_jvm_text->ChangeValue(jvm);
+	m_java_ij_text->ChangeValue(ij);
+	m_java_bioformats_text->ChangeValue(bioformats);
+	switch (ival)
+	{
+	case 0:
+		mp_radio_button_imagej->SetValue(true);
+		m_java_jvm_text->Enable(true);
+		m_java_bioformats_text->Enable(true);
+		m_browse_jvm_btn->Enable(true);
+		m_browse_bioformats_btn->Enable(true);
+		break;
+	case 1:
+		mp_radio_button_fiji->SetValue(true);
+		m_java_jvm_text->Enable(false);
+		m_java_bioformats_text->Enable(false);
+		m_browse_jvm_btn->Enable(false);
+		m_browse_bioformats_btn->Enable(false);
+		break;
+	}
 }
 
 //events

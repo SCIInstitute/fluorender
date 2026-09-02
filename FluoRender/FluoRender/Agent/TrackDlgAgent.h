@@ -52,6 +52,10 @@ private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
+
+private:
+	std::string m_comp_id;//select
+	std::string m_comp_id3;//modify / new id
 };
 
 #endif // TrackDlgAgent_h
