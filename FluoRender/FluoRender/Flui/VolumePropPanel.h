@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
+class MainFrame;
 class RenderView;
 class VolumeData;
 class VolumeGroup;
@@ -72,8 +73,26 @@ public:
 		const wxString& name = "VolumePropPanel");
 	~VolumePropPanel();
 
-	void SetVolumeData(const std::shared_ptr<VolumeData>& vd);
-	std::shared_ptr<VolumeData> GetVolumeData();
+	//update
+	void UpdateMultiFuncTips(int ival);
+	void UpdateHistogram(
+		const fluo::Color& color, const std::vector<unsigned char>& hist);
+	
+	void UpdateGamma3d(bool bval, double dval);
+	void UpdateGamma3dTips(bool bval);
+	void UpdateBoundary(bool enable, double low, double hi, double gmf);
+	void UpdateBoundaryTips(bool bval);
+	void UpdateMinMax(bool enable, int low, int hi, int max);
+	void UpdateMinMaxTips(bool bval);
+	void UpdateThreshold(bool enable, int low, int hi, int max);
+	void UpdateThresholdTips(bool bval);
+	void UpdateAlpha(bool enable, int ival, int max);
+	void UpdateAlphaTips(bool bval);
+	void UpdateLuminance(bool enable, int ival, int max);
+	void UpdateLuminanceTips(bool bval);
+	void UpdateShading(bool enable, double strength, double shine);
+	void UpdateShadingTips(bool bval);
+
 	void InitViews(unsigned int type);
 
 	//sync group
@@ -88,13 +107,6 @@ public:
 	void ClearUndo();
 
 private:
-	std::weak_ptr<VolumeData> m_vd;
-	std::weak_ptr < VolumeGroup> m_group;
-	std::weak_ptr < RenderView> m_view;
-
-	bool m_sync_group;
-	double m_max_val;
-
 	//1
 	//minmax
 	wxFadeButton *m_minmax_st;

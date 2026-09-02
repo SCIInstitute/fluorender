@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <VolumePropPanelAgent.h>
 #include <VolumePropPanel.h>
-#include <MeshData.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
+#include <VolumeData.h>
 
 VolumePropPanelAgent::VolumePropPanelAgent(
 	VolumePropPanel* panel) :
@@ -73,7 +73,6 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 
 	//std::chrono::time_point t = std::chrono::high_resolution_clock::now();
 
-	wxString str;
 	double dval = 0.0;
 	int ival = 0;
 	bool bval;
@@ -87,7 +86,7 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	wxFloatingPointValidator<double>* vald_fp;
 	wxIntegerValidator<unsigned int>* vald_i;
 
-	bool update_all = vc.empty() || FOUND_VALUE(gstVolumeProps);
+	bool update_all = request.values.empty() || FOUND_VALUE(gstVolumeProps);
 	bool update_tips = update_all || FOUND_VALUE(gstMultiFuncTips);
 	bool update_gamma = update_all || FOUND_VALUE(gstGamma3d);
 	bool update_boundary = update_all || FOUND_VALUE(gstBoundary);
@@ -107,81 +106,7 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	//mf button tips
 	if (update_tips)
 	{
-		switch (glbin_settings.m_mulfunc)
-		{
-		case 0:
-			m_gamma_st->SetToolTip("Synchronize the gamma values of all channels in the group");
-			m_minmax_st->SetToolTip("Synchronize the saturation values of all channels in the group");
-			m_luminance_st->SetToolTip("Synchronize the luminance values of all channels in the group");
-			m_alpha_st->SetToolTip("Synchronize the alpha values of all channels in the group");
-			m_shade_st->SetToolTip("Synchronize the shading values of all channels in the group");
-			m_boundary_st->SetToolTip("Synchronize the boundary values of all channels in the group");
-			m_thresh_st->SetToolTip("Synchronize the threshold values of all channels in the group");
-			m_shadow_st->SetToolTip("Synchronize the shadow values of all channels in the group");
-			m_sample_st->SetToolTip("Synchronize the sampling rate values of all channels in the group");
-			m_colormap_st->SetToolTip("Synchronize the colormap values of all channels in the group");
-			break;
-		case 1:
-			m_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
-			m_minmax_st->SetToolTip("Move the mouse cursor in render view and change the saturation value using the mouse wheel");
-			m_luminance_st->SetToolTip("Move the mouse cursor in render view and change the luminance value using the mouse wheel");
-			m_alpha_st->SetToolTip("Move the mouse cursor in render view and change the alpha value using the mouse wheel");
-			m_shade_st->SetToolTip("Move the mouse cursor in render view and change the shading value using the mouse wheel");
-			m_boundary_st->SetToolTip("Move the mouse cursor in render view and change the boundary value using the mouse wheel");
-			m_thresh_st->SetToolTip("Move the mouse cursor in render view and change the threshold value using the mouse wheel");
-			m_shadow_st->SetToolTip("Move the mouse cursor in render view and change the shadow value using the mouse wheel");
-			m_sample_st->SetToolTip("Move the mouse cursor in render view and change the sampling rate value using the mouse wheel");
-			m_colormap_st->SetToolTip("Move the mouse cursor in render view and change the colormap value using the mouse wheel");
-			break;
-		case 2:
-			m_gamma_st->SetToolTip("Reset the gamma value");
-			m_minmax_st->SetToolTip("Reset the saturation value");
-			m_luminance_st->SetToolTip("Reset the luminance value");
-			m_alpha_st->SetToolTip("Reset the alpha value");
-			m_shade_st->SetToolTip("Reset the shading value");
-			m_boundary_st->SetToolTip("Reset the boundary value");
-			m_thresh_st->SetToolTip("Reset the threshold value");
-			m_shadow_st->SetToolTip("Reset the shadow value");
-			m_sample_st->SetToolTip("Reset the sampling rate value");
-			m_colormap_st->SetToolTip("Reset the colormap value");
-			break;
-		case 3:
-			m_gamma_st->SetToolTip("Set the gamma value from machine learning");
-			m_minmax_st->SetToolTip("Set the saturation value from machine learning");
-			m_luminance_st->SetToolTip("Set the luminance value from machine learning");
-			m_alpha_st->SetToolTip("Set the alpha value from machine learning");
-			m_shade_st->SetToolTip("Set the shading value from machine learning");
-			m_boundary_st->SetToolTip("Set the boundary value from machine learning");
-			m_thresh_st->SetToolTip("Set the threshold value from machine learning");
-			m_shadow_st->SetToolTip("Set the shadow value from machine learning");
-			m_sample_st->SetToolTip("Set the sampling rate value from machine learning");
-			m_colormap_st->SetToolTip("Set the colormap value from machine learning");
-			break;
-		case 4:
-			m_gamma_st->SetToolTip("Undo the gamma value changes");
-			m_minmax_st->SetToolTip("Undo the saturation value changes");
-			m_luminance_st->SetToolTip("Undo the luminance value changes");
-			m_alpha_st->SetToolTip("Undo the alpha value changes");
-			m_shade_st->SetToolTip("Undo the shading value changes");
-			m_boundary_st->SetToolTip("Undo the boundary value changes");
-			m_thresh_st->SetToolTip("Undo the thresh value changes");
-			m_shadow_st->SetToolTip("Undo the shadow value changes");
-			m_sample_st->SetToolTip("Undo the sampling rate value changes");
-			m_colormap_st->SetToolTip("Undo the colormap value changes");
-			break;
-		case 5:
-			m_gamma_st->SetToolTip("Enable/Disable the gamma value");
-			m_minmax_st->SetToolTip("Enable/Disable the saturation value");
-			m_luminance_st->SetToolTip("Enable/Disable the luminance value");
-			m_alpha_st->SetToolTip("Enable/Disable the alpha value");
-			m_shade_st->SetToolTip("Enable/Disable the shading value");
-			m_boundary_st->SetToolTip("Enable/Disable the boundary value");
-			m_thresh_st->SetToolTip("Enable/Disable the thresh value");
-			m_shadow_st->SetToolTip("Enable/Disable the shadow value");
-			m_sample_st->SetToolTip("Enable/Disable the sampling rate value");
-			m_colormap_st->SetToolTip("Enable/Disable the colormap value");
-			break;
-		}
+		panel->UpdateMultiFuncTips(glbin_settings.m_mulfunc);
 	}
 
 	//volume properties
@@ -191,262 +116,113 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 		std::vector<unsigned char> hist_data;
 		if (vd->GetHistogram(hist_data))
 		{
-			wxColour lc = wxColour(0, 0, 0);
 			cval = vd->GetColor();
-			wxColour hc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
-				(unsigned char)(cval.g() * 255 + 0.5),
-				(unsigned char)(cval.b() * 255 + 0.5));
-			m_minmax_sldr->SetColors(lc, hc);
-			m_minmax_sldr->SetMapData(hist_data);
-			m_thresh_sldr->SetMapData(hist_data);
+			panel->UpdateHistogram(cval, hist_data);
 		}
 	}
 	//transfer function
 	//gamma
 	if (update_gamma)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator()))
-			vald_fp->SetRange(0.0, 10.0);
 		dval = vd->GetGamma();
 		bval = vd->GetGammaEnable();
-		str = wxString::Format("%.2f", dval);
-		m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
-		m_gamma_text->ChangeValue(str);
-		m_gamma_chk->SetValue(bval);
-		if (m_gamma_sldr->IsEnabled() != bval)
-		{
-			m_gamma_sldr->Enable(bval);
-			m_gamma_text->Enable(bval);
-		}
+		panel->UpdateGamma3d(bval, dval);
 	}
 	if (update_gamma || update_tips)
 	{
 		bval = vd->GetGammaEnable() || mf_enable;
-		if (m_gamma_st->IsEnabled() != bval)
-			m_gamma_st->Enable(bval);
+		panel->UpdateGamma3dTips(bval);
 	}
 	//boundary
 	if (update_boundary)
 	{
-		double gmf = 1000 / vd->GetBoundaryMax();
-		//low
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_low_text->GetValidator()))
-			vald_fp->SetMin(0.0);
-		dval = vd->GetBoundaryLow();
-		m_boundary_sldr->ChangeLowValue(std::round(dval * gmf));
-		str = wxString::Format("%.4f", dval);
-		m_boundary_low_text->ChangeValue(str);
-		//high
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_high_text->GetValidator()))
-			vald_fp->SetMin(0.0);
-		dval = vd->GetBoundaryHigh();
-		m_boundary_sldr->ChangeHighValue(std::round(dval * gmf));
-		str = wxString::Format("%.4f", dval);
-		m_boundary_high_text->ChangeValue(str);
-		//link
-		bval = m_boundary_sldr->GetLink();
-		if (bval != m_boundary_link_tb->GetToolState(0))
-		{
-			m_boundary_link_tb->ToggleTool(0, bval);
-			wxBitmapBundle bitmap;
-			if (bval)
-				bitmap = wxGetBitmap(link);
-			else
-				bitmap = wxGetBitmap(unlink);
-			m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
-		}
-		//enable
 		bval = vd->GetBoundaryEnable();
-		m_boundary_chk->SetValue(bval);
-		if (m_boundary_sldr->IsEnabled() != bval)
-		{
-			m_boundary_sldr->Enable(bval);
-			m_boundary_low_text->Enable(bval);
-			m_boundary_high_text->Enable(bval);
-			m_boundary_link_tb->Enable(bval);
-		}
+		double gmf = 1000 / vd->GetBoundaryMax();
+		double low = vd->GetBoundaryLow();
+		double hi = vd->GetBoundaryHigh();
+		panel->UpdateBoundary(bval, low, hi, gmf);
 	}
 	if (update_boundary || update_tips)
 	{
 		bval = vd->GetBoundaryEnable() || mf_enable;
-		if (m_boundary_st->IsEnabled() != bval)
-			m_boundary_st->Enable(bval);
+		panel->UpdateBoundaryTips(bval);
 	}
 	//minmax
 	if (update_minmax || FOUND_VALUE(gstTransparent))
 	{
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_low_offset_text->GetValidator()))
-			vald_i->SetMin(0);
 		dval = vd->GetLowOffset();
-		ival = std::round(dval * m_max_val);
+		int low = int(std::round(dval * m_max_val));
+		int max;
 		if (vd->GetAlphaPower() > 1.1)
-			m_minmax_sldr->SetRange(0, std::round(m_max_val * 2));
+			max = int(std::round(m_max_val * 2));
 		else
-			m_minmax_sldr->SetRange(0, std::round(m_max_val));
-		str = wxString::Format("%d", ival);
-		m_minmax_sldr->ChangeLowValue(ival);
-		m_low_offset_text->ChangeValue(str);
-		//high offset
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_high_offset_text->GetValidator()))
-			vald_i->SetMin(0);
+			max = int(std::round(m_max_val));
 		dval = vd->GetHighOffset();
-		ival = std::round(dval * m_max_val);
-		str = wxString::Format("%d", ival);
-		m_minmax_sldr->ChangeHighValue(ival);
-		m_high_offset_text->ChangeValue(str);
-		bval = m_minmax_sldr->GetLink();
-		if (bval != m_minmax_link_tb->GetToolState(0))
-		{
-			m_minmax_link_tb->ToggleTool(0, bval);
-			wxBitmapBundle bitmap;
-			if (bval)
-				bitmap = wxGetBitmap(link);
-			else
-				bitmap = wxGetBitmap(unlink);
-			m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
-		}
+		int hi = int(std::round(dval * m_max_val));
 		bval = vd->GetMinMaxEnable();
-		m_minmax_chk->SetValue(bval);
-		if (m_minmax_sldr->IsEnabled() != bval)
-		{
-			m_minmax_sldr->Enable(bval);
-			m_low_offset_text->Enable(bval);
-			m_high_offset_text->Enable(bval);
-			m_minmax_link_tb->Enable(bval);
-		}
+		panel->UpdateMinMax(bval, low, hi, max);
 	}
 	if (update_minmax || update_tips)
 	{
 		bval = vd->GetMinMaxEnable() || mf_enable;
-		if (m_minmax_st->IsEnabled() != bval)
-			m_minmax_st->Enable(bval);
+		panel->UpdateMinMaxTips(bval);
 	}
 	//threshold
 	if (update_threshold)
 	{
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
-			vald_i->SetMin(0);
 		dval = vd->GetLeftThresh();
-		ival = std::round(dval * m_max_val);
-		m_thresh_sldr->SetRange(0, std::round(m_max_val));
-		str = wxString::Format("%d", ival);
-		m_thresh_sldr->ChangeLowValue(ival);
-		m_left_thresh_text->ChangeValue(str);
-		//right threshold
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
-			vald_i->SetMin(0);
+		int max = int(std::round(m_max_val));
+		int low = int(std::round(dval * m_max_val));
 		dval = vd->GetRightThresh();
-		ival = std::round(dval * m_max_val);
-		str = wxString::Format("%d", ival);
-		m_thresh_sldr->ChangeHighValue(ival);
-		m_right_thresh_text->ChangeValue(str);
-		bval = m_thresh_sldr->GetLink();
-		if (bval != m_thresh_link_tb->GetToolState(0))
-		{
-			m_thresh_link_tb->ToggleTool(0, bval);
-			wxBitmapBundle bitmap;
-			if (bval)
-				bitmap = wxGetBitmap(link);
-			else
-				bitmap = wxGetBitmap(unlink);
-			m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
-		}
+		int hi = int(std::round(dval * m_max_val));
 		bval = vd->GetThreshEnable();
-		m_thresh_chk->SetValue(bval);
-		if (m_thresh_sldr->IsEnabled() != bval)
-		{
-			m_thresh_sldr->Enable(bval);
-			m_left_thresh_text->Enable(bval);
-			m_right_thresh_text->Enable(bval);
-			m_thresh_link_tb->Enable(bval);
-		}
+		panel->UpdateThreshold(bval, low, hi, max);
 	}
 	if (update_threshold || update_tips)
 	{
 		bval = vd->GetThreshEnable() || mf_enable;
-		if (m_thresh_st->IsEnabled() != bval)
-			m_thresh_st->Enable(bval);
+		panel->UpdateThresholdTips(bval);
 	}
 	//alpha
 	if (update_alpha)
 	{
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
-			vald_i->SetMin(0);
 		dval = vd->GetAlpha();
-		ival = std::round(dval * m_max_val);
-		m_alpha_sldr->SetRange(0, std::round(m_max_val));
-		str = wxString::Format("%d", ival);
-		m_alpha_sldr->ChangeValue(ival);
-		m_alpha_text->ChangeValue(str);
+		ival = int(std::round(dval * m_max_val));
+		int max = int(std::round(m_max_val));
 		bval = vd->GetAlphaEnable();
-		m_alpha_chk->SetValue(bval);
-		if (m_alpha_sldr->IsEnabled() != bval)
-		{
-			m_alpha_sldr->Enable(bval);
-			m_alpha_text->Enable(bval);
-		}
+		panel->UpdateAlpha(bval, ival, max);
 	}
 	if (update_alpha || update_tips)
 	{
 		bval = vd->GetAlphaEnable() || mf_enable;
-		if (m_alpha_st->IsEnabled() != bval)
-			m_alpha_st->Enable(bval);
+		panel->UpdateAlphaTips(bval);
 	}
 	//luminance
 	if (update_luminance)
 	{
-		if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
-			vald_i->SetMin(0);
 		dval = vd->GetLuminance();
 		bval = vd->GetLuminanceEnable();
-		ival = std::round(dval * m_max_val);
-		m_luminance_sldr->SetRange(0, std::round(m_max_val * 2));
-		str = wxString::Format("%d", ival);
-		m_luminance_sldr->ChangeValue(ival);
-		m_luminance_text->ChangeValue(str);
-		m_luminance_chk->SetValue(bval);
-		if (m_luminance_sldr->IsEnabled() != bval)
-		{
-			m_luminance_sldr->Enable(bval);
-			m_luminance_text->Enable(bval);
-		}
+		ival = int(std::round(dval * m_max_val));
+		int max = int(std::round(m_max_val * 2));
+		panel->UpdateLuminance(bval, ival, max);
 	}
 	if (update_luminance || update_tips)
 	{
 		bval = vd->GetLuminanceEnable() || mf_enable;
-		if (m_luminance_st->IsEnabled() != bval)
-			m_luminance_st->Enable(bval);
+		panel->UpdateLuminanceTips(bval);
 	}
 	//shadings
 	if (update_shading)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_strength_text->GetValidator()))
-			vald_fp->SetRange(0.0, 10.0);
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_shine_text->GetValidator()))
-			vald_fp->SetRange(0.0, 100.0);
-		dval = vd->GetShadingStrength();
-		str = wxString::Format("%.2f", dval);
-		m_shading_strength_sldr->ChangeValue(dval * 100.0);
-		m_shading_strength_text->ChangeValue(str);
-		dval = vd->GetShadingShine();
-		str = wxString::Format("%.2f", dval);
-		m_shading_shine_sldr->ChangeValue(dval * 100.0);
-		m_shading_shine_text->ChangeValue(str);
+		double strength = vd->GetShadingStrength();
+		double shine = vd->GetShadingShine();
 		bval = vd->GetShadingEnable();
-		m_shade_chk->SetValue(bval);
-		if (m_shading_strength_sldr->IsEnabled() != bval)
-		{
-			m_shading_strength_sldr->Enable(bval);
-			m_shading_strength_text->Enable(bval);
-			m_shading_shine_sldr->Enable(bval);
-			m_shading_shine_text->Enable(bval);
-		}
+		panel->UpdateShading(bval, strength, shine);
 	}
 	if (update_shading || update_tips)
 	{
 		bval = vd->GetShadingEnable() || mf_enable;
-		if (m_shade_st->IsEnabled() != bval)
-			m_shade_st->Enable(bval);
+		panel->UpdateShadingTips(bval);
 	}
 	//shadow
 	if (update_shadow)

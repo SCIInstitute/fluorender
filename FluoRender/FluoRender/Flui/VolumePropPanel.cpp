@@ -72,9 +72,7 @@ VolumePropPanel::VolumePropPanel(MainFrame* frame,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(parent, pos, size, style, name),
-	m_sync_group(false),
-	m_max_val(255.0)
+	PropPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -726,22 +724,340 @@ VolumePropPanel::~VolumePropPanel()
 	glbin.del_undo_control(m_colormap_proj_combo);
 	glbin.del_undo_control(m_options_toolbar);
 
-	m_frame->SetFocusVRenderViews(0);
+	//m_frame->SetFocusVRenderViews(0);
 }
 
-void VolumePropPanel::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
+void VolumePropPanel::UpdateMultiFuncTips(int ival)
 {
-	if (vd && m_vd.lock() != vd)
-		ClearUndo();
-
-	m_vd = vd;
-	FluoUpdate();
+	switch (ival)
+	{
+	case 0:
+		m_gamma_st->SetToolTip("Synchronize the gamma values of all channels in the group");
+		m_minmax_st->SetToolTip("Synchronize the saturation values of all channels in the group");
+		m_luminance_st->SetToolTip("Synchronize the luminance values of all channels in the group");
+		m_alpha_st->SetToolTip("Synchronize the alpha values of all channels in the group");
+		m_shade_st->SetToolTip("Synchronize the shading values of all channels in the group");
+		m_boundary_st->SetToolTip("Synchronize the boundary values of all channels in the group");
+		m_thresh_st->SetToolTip("Synchronize the threshold values of all channels in the group");
+		m_shadow_st->SetToolTip("Synchronize the shadow values of all channels in the group");
+		m_sample_st->SetToolTip("Synchronize the sampling rate values of all channels in the group");
+		m_colormap_st->SetToolTip("Synchronize the colormap values of all channels in the group");
+		break;
+	case 1:
+		m_gamma_st->SetToolTip("Move the mouse cursor in render view and change the gamma value using the mouse wheel");
+		m_minmax_st->SetToolTip("Move the mouse cursor in render view and change the saturation value using the mouse wheel");
+		m_luminance_st->SetToolTip("Move the mouse cursor in render view and change the luminance value using the mouse wheel");
+		m_alpha_st->SetToolTip("Move the mouse cursor in render view and change the alpha value using the mouse wheel");
+		m_shade_st->SetToolTip("Move the mouse cursor in render view and change the shading value using the mouse wheel");
+		m_boundary_st->SetToolTip("Move the mouse cursor in render view and change the boundary value using the mouse wheel");
+		m_thresh_st->SetToolTip("Move the mouse cursor in render view and change the threshold value using the mouse wheel");
+		m_shadow_st->SetToolTip("Move the mouse cursor in render view and change the shadow value using the mouse wheel");
+		m_sample_st->SetToolTip("Move the mouse cursor in render view and change the sampling rate value using the mouse wheel");
+		m_colormap_st->SetToolTip("Move the mouse cursor in render view and change the colormap value using the mouse wheel");
+		break;
+	case 2:
+		m_gamma_st->SetToolTip("Reset the gamma value");
+		m_minmax_st->SetToolTip("Reset the saturation value");
+		m_luminance_st->SetToolTip("Reset the luminance value");
+		m_alpha_st->SetToolTip("Reset the alpha value");
+		m_shade_st->SetToolTip("Reset the shading value");
+		m_boundary_st->SetToolTip("Reset the boundary value");
+		m_thresh_st->SetToolTip("Reset the threshold value");
+		m_shadow_st->SetToolTip("Reset the shadow value");
+		m_sample_st->SetToolTip("Reset the sampling rate value");
+		m_colormap_st->SetToolTip("Reset the colormap value");
+		break;
+	case 3:
+		m_gamma_st->SetToolTip("Set the gamma value from machine learning");
+		m_minmax_st->SetToolTip("Set the saturation value from machine learning");
+		m_luminance_st->SetToolTip("Set the luminance value from machine learning");
+		m_alpha_st->SetToolTip("Set the alpha value from machine learning");
+		m_shade_st->SetToolTip("Set the shading value from machine learning");
+		m_boundary_st->SetToolTip("Set the boundary value from machine learning");
+		m_thresh_st->SetToolTip("Set the threshold value from machine learning");
+		m_shadow_st->SetToolTip("Set the shadow value from machine learning");
+		m_sample_st->SetToolTip("Set the sampling rate value from machine learning");
+		m_colormap_st->SetToolTip("Set the colormap value from machine learning");
+		break;
+	case 4:
+		m_gamma_st->SetToolTip("Undo the gamma value changes");
+		m_minmax_st->SetToolTip("Undo the saturation value changes");
+		m_luminance_st->SetToolTip("Undo the luminance value changes");
+		m_alpha_st->SetToolTip("Undo the alpha value changes");
+		m_shade_st->SetToolTip("Undo the shading value changes");
+		m_boundary_st->SetToolTip("Undo the boundary value changes");
+		m_thresh_st->SetToolTip("Undo the thresh value changes");
+		m_shadow_st->SetToolTip("Undo the shadow value changes");
+		m_sample_st->SetToolTip("Undo the sampling rate value changes");
+		m_colormap_st->SetToolTip("Undo the colormap value changes");
+		break;
+	case 5:
+		m_gamma_st->SetToolTip("Enable/Disable the gamma value");
+		m_minmax_st->SetToolTip("Enable/Disable the saturation value");
+		m_luminance_st->SetToolTip("Enable/Disable the luminance value");
+		m_alpha_st->SetToolTip("Enable/Disable the alpha value");
+		m_shade_st->SetToolTip("Enable/Disable the shading value");
+		m_boundary_st->SetToolTip("Enable/Disable the boundary value");
+		m_thresh_st->SetToolTip("Enable/Disable the thresh value");
+		m_shadow_st->SetToolTip("Enable/Disable the shadow value");
+		m_sample_st->SetToolTip("Enable/Disable the sampling rate value");
+		m_colormap_st->SetToolTip("Enable/Disable the colormap value");
+		break;
+	}
 }
 
-std::shared_ptr<VolumeData> VolumePropPanel::GetVolumeData()
+void VolumePropPanel::UpdateHistogram(
+	const fluo::Color& color, const std::vector<unsigned char>& hist)
 {
-	return m_vd.lock();
+	wxColour lc = wxColour(0, 0, 0);
+	wxColour hc = wxColour(color.r() * 255, color.g() * 255, color.b() * 255);
+	m_minmax_sldr->SetColors(lc, hc);
+	m_minmax_sldr->SetMapData(hist);
+	m_thresh_sldr->SetMapData(hist);
 }
+
+void VolumePropPanel::UpdateGamma3d(bool bval, double dval)
+{
+	wxFloatingPointValidator<double>* vald_fp;
+
+	if (vald_fp = (wxFloatingPointValidator<double>*)m_gamma_text->GetValidator())
+		vald_fp->SetRange(0.0, 10.0);
+	auto str = wxString::Format("%.2f", dval);
+	m_gamma_sldr->ChangeValue(std::round(dval * 100.0));
+	m_gamma_text->ChangeValue(str);
+	m_gamma_chk->SetValue(bval);
+	if (m_gamma_sldr->IsEnabled() != bval)
+	{
+		m_gamma_sldr->Enable(bval);
+		m_gamma_text->Enable(bval);
+	}
+}
+
+void VolumePropPanel::UpdateGamma3dTips(bool bval)
+{
+	if (m_gamma_st->IsEnabled() != bval)
+		m_gamma_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateBoundary(bool enable, double low, double hi, double gmf)
+{
+	wxFloatingPointValidator<double>* vald_fp;
+	wxString str;
+	bool bval;
+	//low
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_low_text->GetValidator()))
+		vald_fp->SetMin(0.0);
+	m_boundary_sldr->ChangeLowValue(std::round(low * gmf));
+	str = wxString::Format("%.4f", low);
+	m_boundary_low_text->ChangeValue(str);
+	//high
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_boundary_high_text->GetValidator()))
+		vald_fp->SetMin(0.0);
+	m_boundary_sldr->ChangeHighValue(std::round(hi * gmf));
+	str = wxString::Format("%.4f", hi);
+	m_boundary_high_text->ChangeValue(str);
+	//link
+	bval = m_boundary_sldr->GetLink();
+	if (bval != m_boundary_link_tb->GetToolState(0))
+	{
+		m_boundary_link_tb->ToggleTool(0, bval);
+		wxBitmapBundle bitmap;
+		if (bval)
+			bitmap = wxGetBitmap(link);
+		else
+			bitmap = wxGetBitmap(unlink);
+		m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
+	}
+	//enable
+	m_boundary_chk->SetValue(enable);
+	if (m_boundary_sldr->IsEnabled() != enable)
+	{
+		m_boundary_sldr->Enable(enable);
+		m_boundary_low_text->Enable(enable);
+		m_boundary_high_text->Enable(enable);
+		m_boundary_link_tb->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateBoundaryTips(bool bval)
+{
+	if (m_boundary_st->IsEnabled() != bval)
+		m_boundary_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateMinMax(bool enable, int low, int hi, int max)
+{
+	wxIntegerValidator<unsigned int>* vald_i;
+	wxString str;
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_low_offset_text->GetValidator()))
+		vald_i->SetMin(0);
+	m_minmax_sldr->SetRange(0, max);
+	str = wxString::Format("%d", low);
+	m_minmax_sldr->ChangeLowValue(low);
+	m_low_offset_text->ChangeValue(str);
+	//high offset
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_high_offset_text->GetValidator()))
+		vald_i->SetMin(0);
+	str = wxString::Format("%d", hi);
+	m_minmax_sldr->ChangeHighValue(hi);
+	m_high_offset_text->ChangeValue(str);
+	bool bval = m_minmax_sldr->GetLink();
+	if (bval != m_minmax_link_tb->GetToolState(0))
+	{
+		m_minmax_link_tb->ToggleTool(0, bval);
+		wxBitmapBundle bitmap;
+		if (bval)
+			bitmap = wxGetBitmap(link);
+		else
+			bitmap = wxGetBitmap(unlink);
+		m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
+	}
+	m_minmax_chk->SetValue(enable);
+	if (m_minmax_sldr->IsEnabled() != enable)
+	{
+		m_minmax_sldr->Enable(enable);
+		m_low_offset_text->Enable(enable);
+		m_high_offset_text->Enable(enable);
+		m_minmax_link_tb->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateMinMaxTips(bool bval)
+{
+	if (m_minmax_st->IsEnabled() != bval)
+		m_minmax_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateThreshold(bool enable, int low, int hi, int max)
+{
+	wxIntegerValidator<unsigned int>* vald_i;
+	wxString str;
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_left_thresh_text->GetValidator()))
+		vald_i->SetMin(0);
+	m_thresh_sldr->SetRange(0, max);
+	str = wxString::Format("%d", low);
+	m_thresh_sldr->ChangeLowValue(low);
+	m_left_thresh_text->ChangeValue(str);
+	//right threshold
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_right_thresh_text->GetValidator()))
+		vald_i->SetMin(0);
+	str = wxString::Format("%d", hi);
+	m_thresh_sldr->ChangeHighValue(hi);
+	m_right_thresh_text->ChangeValue(str);
+	bool bval = m_thresh_sldr->GetLink();
+	if (bval != m_thresh_link_tb->GetToolState(0))
+	{
+		m_thresh_link_tb->ToggleTool(0, bval);
+		wxBitmapBundle bitmap;
+		if (bval)
+			bitmap = wxGetBitmap(link);
+		else
+			bitmap = wxGetBitmap(unlink);
+		m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
+	}
+	m_thresh_chk->SetValue(enable);
+	if (m_thresh_sldr->IsEnabled() != enable)
+	{
+		m_thresh_sldr->Enable(enable);
+		m_left_thresh_text->Enable(enable);
+		m_right_thresh_text->Enable(enable);
+		m_thresh_link_tb->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateThresholdTips(bool bval)
+{
+	if (m_thresh_st->IsEnabled() != bval)
+		m_thresh_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateAlpha(bool enable, int ival, int max)
+{
+	wxIntegerValidator<unsigned int>* vald_i;
+	wxString str;
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_alpha_text->GetValidator()))
+		vald_i->SetMin(0);
+	m_alpha_sldr->SetRange(0, max);
+	str = wxString::Format("%d", ival);
+	m_alpha_sldr->ChangeValue(ival);
+	m_alpha_text->ChangeValue(str);
+	m_alpha_chk->SetValue(enable);
+	if (m_alpha_sldr->IsEnabled() != enable)
+	{
+		m_alpha_sldr->Enable(enable);
+		m_alpha_text->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateAlphaTips(bool bval)
+{
+	if (m_alpha_st->IsEnabled() != bval)
+		m_alpha_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateLuminance(bool enable, int ival, int max)
+{
+	wxIntegerValidator<unsigned int>* vald_i;
+	wxString str;
+	if ((vald_i = (wxIntegerValidator<unsigned int>*)m_luminance_text->GetValidator()))
+		vald_i->SetMin(0);
+	m_luminance_sldr->SetRange(0, max);
+	str = wxString::Format("%d", ival);
+	m_luminance_sldr->ChangeValue(ival);
+	m_luminance_text->ChangeValue(str);
+	m_luminance_chk->SetValue(enable);
+	if (m_luminance_sldr->IsEnabled() != enable)
+	{
+		m_luminance_sldr->Enable(enable);
+		m_luminance_text->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateLuminanceTips(bool bval)
+{
+	if (m_luminance_st->IsEnabled() != bval)
+		m_luminance_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateShading(bool enable, double strength, double shine)
+{
+	wxFloatingPointValidator<double>* vald_fp;
+	wxString str;
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_strength_text->GetValidator()))
+		vald_fp->SetRange(0.0, 10.0);
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_shading_shine_text->GetValidator()))
+		vald_fp->SetRange(0.0, 100.0);
+	str = wxString::Format("%.2f", strength);
+	m_shading_strength_sldr->ChangeValue(strength * 100.0);
+	m_shading_strength_text->ChangeValue(str);
+	str = wxString::Format("%.2f", shine);
+	m_shading_shine_sldr->ChangeValue(shine * 100.0);
+	m_shading_shine_text->ChangeValue(str);
+	
+	m_shade_chk->SetValue(enable);
+	if (m_shading_strength_sldr->IsEnabled() != enable)
+	{
+		m_shading_strength_sldr->Enable(enable);
+		m_shading_strength_text->Enable(enable);
+		m_shading_shine_sldr->Enable(enable);
+		m_shading_shine_text->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateShadingTips(bool bval)
+{
+	if (m_shade_st->IsEnabled() != bval)
+		m_shade_st->Enable(bval);
+}
+
+//void VolumePropPanel::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
+//{
+//	if (vd && m_vd.lock() != vd)
+//		ClearUndo();
+//
+//	m_vd = vd;
+//	FluoUpdate();
+//}
 
 void VolumePropPanel::InitViews(unsigned int type)
 {

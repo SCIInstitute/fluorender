@@ -30,6 +30,11 @@ DEALINGS IN THE SOFTWARE.
 #include <TreePanel.h>
 #include <Global.h>
 #include <Names.h>
+#include <CurrentObjects.h>
+#include <RenderView.h>
+#include <VolumeSelector.h>
+#include <Ruler.h>
+#include <RulerHandler.h>
 
 TreePanelAgent::TreePanelAgent(
 	TreePanel* panel) :
@@ -71,18 +76,18 @@ void TreePanelAgent::UpdateUI(const UpdateRequest& request)
 
 	//update icons only
 	if (update_all || FOUND_VALUE(gstTreeCtrl) || FOUND_VALUE(gstTreeLayerName))
-		UpdateTree();
+		panel->UpdateTree();
 	else
 	{
 		if (update_all || FOUND_VALUE(gstTreeIcons))
-			UpdateTreeIcons();
+			panel->UpdateTreeIcons();
 		if (update_all || FOUND_VALUE(gstTreeColors))
-			UpdateTreeColors();
+			panel->UpdateTreeColors();
 	}
 
 	if (update_all || FOUND_VALUE(gstCurrentSelect))
 	{
-		UpdateTreeSel();
+		panel->UpdateTreeSel();
 	}
 
 	if (update_all || FOUND_VALUE(gstFreehandToolState))
@@ -91,25 +96,7 @@ void TreePanelAgent::UpdateUI(const UpdateRequest& request)
 		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;
 		flrd::SelectMode sel_mode = glbin_vol_selector.GetSelectMode();
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
-
-		m_toolbar->ToggleTool(ID_RulerLocator, rul_mode == flrd::RulerMode::Locator);
-		m_toolbar->ToggleTool(ID_RulerLine, rul_mode == flrd::RulerMode::Line);
-		bval = rul_mode == flrd::RulerMode::Polyline &&
-			(int_mode == InteractiveMode::Ruler ||
-				int_mode == InteractiveMode::BrushRuler);
-		m_toolbar->ToggleTool(ID_RulerPolyline, bval);
-		m_toolbar->ToggleTool(ID_RulerPencil, int_mode == InteractiveMode::Pencil);
-		m_toolbar->ToggleTool(ID_RulerEdit, int_mode == InteractiveMode::EditRulerPoint);
-		m_toolbar->ToggleTool(ID_RulerDeletePoint, int_mode == InteractiveMode::RulerDelPoint);
-
-		bval = rul_mode == flrd::RulerMode::Locator &&
-			sel_mode == flrd::SelectMode::SingleSelect;
-		m_toolbar2->ToggleTool(ID_BrushRuler, bval);
-		m_toolbar2->ToggleTool(ID_BrushGrow, sel_mode == flrd::SelectMode::Grow);
-		m_toolbar2->ToggleTool(ID_BrushAppend, sel_mode == flrd::SelectMode::Append);
-		m_toolbar2->ToggleTool(ID_BrushComp, sel_mode == flrd::SelectMode::Segment);
-		m_toolbar2->ToggleTool(ID_BrushDiffuse, sel_mode == flrd::SelectMode::Diffuse);
-		m_toolbar2->ToggleTool(ID_BrushUnselect, sel_mode == flrd::SelectMode::Eraser);
+		panel->UpdateFreehandToolState(int_mode, sel_mode, rul_mode);
 	}
 }
 

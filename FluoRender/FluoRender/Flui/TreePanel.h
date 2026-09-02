@@ -182,14 +182,16 @@ public:
 		const wxString& name = "TreePanel");
 	~TreePanel();
 
-	//selection change
-	void Select();
-
 	//update
+	void UpdateFreehandToolState(InteractiveMode int_mode,
+		flrd::SelectMode sel_mode, flrd::RulerMode rul_mode);
 	void UpdateTree();
 	void UpdateTreeIcons();
 	void UpdateTreeColors();
 	void UpdateTreeSel();
+
+	//selection change
+	void Select();
 
 	//double click
 	void Action();

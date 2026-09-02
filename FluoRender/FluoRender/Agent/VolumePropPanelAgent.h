@@ -33,6 +33,8 @@ DEALINGS IN THE SOFTWARE.
 
 class VolumePropPanel;
 class VolumeData;
+class VolumeGroup;
+class RenderView;
 
 class VolumePropPanelAgent : public Agent
 {
@@ -66,6 +68,11 @@ private:
 
 private:
 	std::weak_ptr<VolumeData> m_vd;
+	std::weak_ptr<VolumeGroup> m_group;
+	std::weak_ptr<RenderView> m_view;
+
+	bool m_sync_group = false;
+	double m_max_val = 255.0;
 };
 
 #endif // VolumePropPanelAgent_h
