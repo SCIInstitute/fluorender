@@ -30,11 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MainFrame;
 class CalculationDlg : public PropPanel
 {
 public:
-	CalculationDlg(MainFrame* frame);
+	CalculationDlg(wxWindow* parent);
 	~CalculationDlg();
 
 	//update

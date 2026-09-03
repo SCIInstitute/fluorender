@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <GlobalStates.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -52,12 +51,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Debug.h>
 
 ClipPlanePanel::ClipPlanePanel(
-	MainFrame* frame,
+	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, pos, size, style, name),
+	TabbedPanel(parent, pos, size, style, name),
 m_enable_all(true)
 {
 	// temporarily block events during constructor:

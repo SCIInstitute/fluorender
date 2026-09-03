@@ -63,7 +63,7 @@ class ClipPlanePanel: public TabbedPanel
 	};
 
 public:
-	ClipPlanePanel(MainFrame* frame,
+	ClipPlanePanel(wxWindow* parent,
 		const wxPoint& pos=wxDefaultPosition,
 		const wxSize& size=wxDefaultSize,
 		long style=0,

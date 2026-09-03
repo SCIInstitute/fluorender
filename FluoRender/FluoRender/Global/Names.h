@@ -404,6 +404,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstInfo	"info"
 
 //specific to renderview
+#define gstRenderView "render view"
+#define gstCamera "camera"
+#define gstRotations "rotations"
 #define gstFocus "focus"//set focus to panel
 #define gstSizeX "size x"
 #define gstSizeY "size y"

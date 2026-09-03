@@ -41,6 +41,13 @@ class RenderCanvas;
 class AnnotatPropPanel;
 class AnnotData;
 
+class BrushToolDlg;
+
+class CalculationDlg;
+
+class ClipPlanePanel;
+class TreeLayer;
+
 class VolumePropPanel;
 class VolumeData;
 
@@ -50,15 +57,25 @@ class MeshData;
 class FluiBuilder
 {
 public:
-	static RenderCanvas* BuildRenderCanvas(
-		MainFrame* frame,
-		RenderViewPanel* parent,
-		wxGLContext* sharedContext
-	);
-
 	static AnnotatPropPanel* BuildAnnotatPropPanel(
 		wxWindow* parent,
 		const std::shared_ptr<AnnotData>& ann);
+
+	static BrushToolDlg* BuildBrushToolDlg(
+		wxWindow* parent);
+
+	static CalculationDlg* BuildCalculationDlg(
+		wxWindow* parent);
+
+	static ClipPlanePanel* BuildClipPlanePanel(
+		wxWindow* parent,
+		const std::shared_ptr<TreeLayer>& layer);
+
+	static ColocalizationDlg* BuildColocalizationDlg(
+		wxWindow* parent);
+
+
+
 
 	static VolumePropPanel* BuildVolumePanel(
 		wxWindow* parent,
@@ -67,6 +84,12 @@ public:
 	static MeshPropPanel* BuildMeshPanel(
 		wxWindow* parent,
 		const std::shared_ptr<MeshData>& md);
+	static RenderCanvas* BuildRenderCanvas(
+		MainFrame* frame,
+		RenderViewPanel* parent,
+		wxGLContext* sharedContext
+	);
+
 };
 
 #endif // FluiBuilder_h

@@ -273,6 +273,7 @@ public:
 	void SetLockCenterSel();
 
 	//camera properties
+	void CopyCamera(const std::shared_ptr<RenderView>& src);
 	bool GetPersp() const { return m_persp; }
 	void SetPersp(bool persp) { m_persp = persp; }
 	int GetCamMode() const { return m_cam_mode; }

@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <BrushToolDlg.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <NoiseCancellingDlg.h>
 #include <CountingDlg.h>
@@ -52,11 +51,11 @@ DEALINGS IN THE SOFTWARE.
 #include <icons.h>
 
 BrushToolDlg::BrushToolDlg(
-	MainFrame *frame):
-	TabbedPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(500, 620)),
-	0, "BrushToolDlg"),
+	wxWindow *parent):
+	TabbedPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(500, 620)),
+		0, "BrushToolDlg"),
 	m_hold_history(false),
 	m_auto_update_timer(this)
 {

@@ -32,6 +32,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <RenderView.h>
+#include <ShaderProgram.h>
 
 VolumePropPanelAgent::VolumePropPanelAgent(
 	VolumePropPanel* panel) :
@@ -81,10 +84,6 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	//maximum value
 	m_max_val = vd->GetMaxValue();
 	m_max_val = std::max(255.0, m_max_val);
-
-	//set range
-	wxFloatingPointValidator<double>* vald_fp;
-	wxIntegerValidator<unsigned int>* vald_i;
 
 	bool update_all = request.values.empty() || FOUND_VALUE(gstVolumeProps);
 	bool update_tips = update_all || FOUND_VALUE(gstMultiFuncTips);
@@ -227,83 +226,200 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	//shadow
 	if (update_shadow)
 	{
-		//if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
-		//	vald_fp->SetRange(0.0, 1.0);
 		bval = vd->GetShadowEnable();
 		dval = vd->GetShadowIntensity();
-		str = wxString::Format("%.2f", dval);
-		m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
-		m_shadow_text->ChangeValue(str);
-		m_shadow_chk->SetValue(bval);
-		if (m_shadow_sldr->IsEnabled() != bval)
-		{
-			m_shadow_sldr->Enable(bval);
-			m_shadow_text->Enable(bval);
-		}
+		panel->UpdateShadow(bval, dval);
 	}
 	if (update_all || FOUND_VALUE(gstShadowDir))
 	{
-		bool bval = glbin_settings.m_shadow_dir;
-		m_shadow_dir_chk->ToggleTool(0, bval);
-		m_shadow_dir_sldr->Enable(bval);
-		m_shadow_dir_text->Enable(bval);
+		bval = glbin_settings.m_shadow_dir;
 		double dirx = glbin_settings.m_shadow_dir_x;
 		double diry = glbin_settings.m_shadow_dir_y;
 		if (dirx == 0.0 && diry == 0.0)
 			dval = 0.0;
 		else
 			dval = r2d(atan2(glbin_settings.m_shadow_dir_y, glbin_settings.m_shadow_dir_x)) + 45.0;
-		m_shadow_dir_sldr->ChangeValue(std::round(dval));
-		m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", dval));
+		panel->UpdateShadowDir(bval, dval);
 	}
 	if (update_shadow || update_tips)
 	{
 		bval = vd->GetShadowEnable() || mf_enable;
-		if (m_shadow_st->IsEnabled() != bval)
-			m_shadow_st->Enable(bval);
+		panel->UpdateShadowTips(bval);
 	}
 	//smaple rate
 	if (update_sample)
 	{
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
-			vald_fp->SetRange(0.0, 100.0);
 		bval = vd->GetSampleRateEnable();
 		dval = vd->GetSampleRate();
-		str = wxString::Format("%.1f", dval);
-		m_sample_sldr->ChangeValue(dval * 10.0);
-		m_sample_text->ChangeValue(str);
-		m_sample_chk->SetValue(bval);
-		if (m_sample_sldr->IsEnabled() != bval)
-		{
-			m_sample_sldr->Enable(bval);
-			m_sample_text->Enable(bval);
-		}
+		panel->UpdateSampleRate(bval, dval);
 	}
 	if (update_sample || update_tips)
 	{
 		bval = vd->GetSampleRateEnable() || mf_enable;
-		if (m_sample_st->IsEnabled() != bval)
-			m_sample_st->Enable(bval);
+		panel->UpdateSampleRateTips(bval);
 	}
 
 	//spacings
 	if (update_all || FOUND_VALUE(gstSpacing))
 	{
 		auto spc = vd->GetBaseSpacing();
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
-			vald_fp->SetMin(0.0);
-		str = wxString::Format("%.3f", spc.x());
-		m_space_x_text->ChangeValue(str);
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_y_text->GetValidator()))
-			vald_fp->SetMin(0.0);
-		str = wxString::Format("%.3f", spc.y());
-		m_space_y_text->ChangeValue(str);
-		if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_z_text->GetValidator()))
-			vald_fp->SetMin(0.0);
-		str = wxString::Format("%.3f", spc.z());
-		m_space_z_text->ChangeValue(str);
+		panel->UpdateSpacing(spc);
 	}
 
+	//colormap
+	if (update_colormap)
+	{
+		double low, high;
+		vd->GetColormapValues(low, high);
+		int ilow = int(std::round(low * m_max_val));
+		int ihigh = int(std::round(high * m_max_val));
+		int max = int(std::round(m_max_val));
+		bval = vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
+			vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
+		panel->UpdateColormapValues(bval, ilow, ihigh, max);
+
+		//text
+		vd->GetColormapDispValues(low, high);
+		double minv, maxv;
+		vd->GetColormapRange(minv, maxv);
+		bool int_validator = (maxv - minv) > 10.0;
+		panel->UpdateColormapDispValues(low, high, int_validator);
+
+		//colormap
+		bval = vd->GetColormapInv() > 0.0 ? false : true;
+		panel->UpdateColormapInv(bval);
+
+		ival = vd->GetColormap();
+		panel->UpdateColormapType(ival);
+
+		flvr::ColormapProj colormap_proj = vd->GetColormapProj();
+		ival = 0;
+		if (flvr::ShaderParams::ValidColormapProj(colormap_proj))
+			ival = static_cast<int>(colormap_proj) - 1;
+		panel->UpdateColormapProj(ival);
+
+		//show colormap on slider
+		std::vector<unsigned char> colormap_data;
+		if (vd->GetColormapData(colormap_data))
+		{
+			auto lc = vd->GetColorFromColormap(0, true);
+			auto hc = vd->GetColorFromColormap(1, true);
+			panel->UpdateColormapVis(colormap_data, lc, hc);
+		}
+	}
+	if (update_colormap || update_tips)
+	{
+		bval = mf_enable ||
+			vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
+			vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
+		panel->UpdateColormapTips(bval);
+	}
+
+	//color
+	if (update_color)
+	{
+		auto main_color = vd->GetColor();
+		auto alt_color = vd->GetMaskColor();
+		panel->UpdateColor(main_color, alt_color);
+	}
+
+	//mask mode
+	if (update_all || FOUND_VALUE(gstMainMode))
+	{
+		auto main_mode = vd->GetMainColorMode();
+		panel->UpdateMainMode(main_mode);
+	}
+
+	if (update_all || FOUND_VALUE(gstMaskMode))
+	{
+		auto mask_mode = vd->GetMaskColorMode();
+		panel->UpdateMaskMode(mask_mode);
+	}
+
+	//inversion
+	if (update_all || FOUND_VALUE(gstInvert))
+	{
+		bval = vd->GetInvert();
+		panel->UpdateInvert(bval);
+	}
+
+	//MIP
+	if (update_all || FOUND_VALUE(gstRenderMode))
+	{
+		bval = vd->GetRenderMode() == flvr::RenderMode::Mip;
+		panel->UpdateRenderMode(bval);
+	}
+
+	//transparency
+	if (update_all || FOUND_VALUE(gstTransparent))
+	{
+		bval = vd->GetAlphaPower() > 1.1;
+		panel->UpdateTransparent(bval);
+	}
+
+	//legend
+	if (update_all || FOUND_VALUE(gstLegend))
+	{
+		bval = vd->GetLegend();
+		panel->UpdateLegend(bval);
+	}
+
+	//outline
+	if (update_all || FOUND_VALUE(gstOutline))
+	{
+		bval = vd->GetOutline();
+		panel->UpdateOutline(bval);
+	}
+
+	//interpolate
+	if (update_all || FOUND_VALUE(gstInterpolate))
+	{
+		bval = vd->GetInterpolate();
+		panel->UpdateInterpolate(bval);
+	}
+
+	//sync group
+	if (update_all || FOUND_VALUE(gstSyncGroup))
+	{
+		auto group = m_group.lock();
+		if (group)
+			m_sync_group = group->GetVolumeSyncProp();
+		panel->UpdateSyncGroup(m_sync_group);
+	}
+
+	//noise reduction
+	if (update_all || FOUND_VALUE(gstNoiseRedct))
+	{
+		bval = vd->GetNR();
+		panel->UpdateNoiseRedct(bval);
+	}
+
+	//blend mode
+	if (update_all || FOUND_VALUE(gstChannelMixMode))
+	{
+		auto channel_mix_mode = vd->GetChannelMixMode();
+		bval = channel_mix_mode == ChannelMixMode::Depth;
+		panel->UpdateChannelMixMode(bval);
+	}
+
+	//std::chrono::duration<double> ts = std::chrono::duration_cast<std::chrono::duration<double>>(
+	//	std::chrono::high_resolution_clock::now() - t);
+	//DBGPRINT(L"update settings, time: %f\n", ts);
+	//return;
+}
+
+void VolumePropPanelAgent::UpdateData(const UpdateRequest& request)
+{
+	auto vd = GetData();
+	if (!vd)
+		return;
+
+	if (FOUND_VALUE(gstNull))
+		return;
+
+	bool update_all = request.values.empty() || FOUND_VALUE(gstVolumeProps);
+	bool update_colormap = update_all || FOUND_VALUE(gstColormap);
+	
 	//colormap
 	if (update_colormap ||
 		FOUND_VALUE(gstRulerList) ||
@@ -316,291 +432,5 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 			vd->UpdateGradient();
 		}
 	}
-
-	if (update_colormap)
-	{
-		//slider
-		m_colormap_sldr->SetRange(0, std::round(m_max_val));
-		double low, high;
-		vd->GetColormapValues(low, high);
-		//low
-		ival = std::round(low * m_max_val);
-		m_colormap_sldr->ChangeLowValue(ival);
-		//high
-		ival = std::round(high * m_max_val);
-		m_colormap_sldr->ChangeHighValue(ival);
-
-		//text
-		vd->GetColormapDispValues(low, high);
-		double minv, maxv;
-		vd->GetColormapRange(minv, maxv);
-		bool int_validator = (maxv - minv) > 10.0;
-		if (int_validator)
-		{
-			m_colormap_low_text->SetValidator(wxIntegerValidator<int>());
-			str = wxString::Format("%.0f", low);
-			m_colormap_low_text->ChangeValue(str);
-			m_colormap_hi_text->SetValidator(wxIntegerValidator<int>());
-			str = wxString::Format("%.0f", high);
-			m_colormap_hi_text->ChangeValue(str);
-		}
-		else
-		{
-			m_colormap_low_text->SetValidator(wxFloatingPointValidator<double>());
-			str = wxString::Format("%.3f", low);
-			m_colormap_low_text->ChangeValue(str);
-			m_colormap_hi_text->SetValidator(wxFloatingPointValidator<double>());
-			str = wxString::Format("%.3f", high);
-			m_colormap_hi_text->ChangeValue(str);
-		}
-
-		bval = m_colormap_sldr->GetLink();
-		if (bval != m_colormap_link_tb->GetToolState(0))
-		{
-			m_colormap_link_tb->ToggleTool(0, bval);
-			wxBitmapBundle bitmap;
-			if (bval)
-				bitmap = wxGetBitmap(link);
-			else
-				bitmap = wxGetBitmap(unlink);
-			m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
-		}
-		//mode
-		bval = vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
-			vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
-		m_colormap_chk->SetValue(bval);
-		if (m_colormap_sldr->IsEnabled() != bval)
-		{
-			m_colormap_sldr->Enable(bval);
-			m_colormap_low_text->Enable(bval);
-			m_colormap_hi_text->Enable(bval);
-			m_colormap_link_tb->Enable(bval);
-		}
-		//colormap
-		bval = vd->GetColormapInv() > 0.0 ? false : true;
-		if (bval != m_colormap_inv_btn->GetToolState(0))
-		{
-			m_colormap_inv_btn->ToggleTool(0, bval);
-			if (bval)
-				m_colormap_inv_btn->SetToolNormalBitmap(0,
-					wxGetBitmap(invert));
-			else
-				m_colormap_inv_btn->SetToolNormalBitmap(0,
-					wxGetBitmap(invert_off));
-		}
-		m_colormap_combo->SetSelection(vd->GetColormap());
-		flvr::ColormapProj colormap_proj = vd->GetColormapProj();
-		ival = 0;
-		if (flvr::ShaderParams::ValidColormapProj(colormap_proj))
-			ival = static_cast<int>(colormap_proj) - 1;
-		m_colormap_proj_combo->SetSelection(ival);
-		//show colormap on slider
-		std::vector<unsigned char> colormap_data;
-		if (vd->GetColormapData(colormap_data))
-		{
-			wxColor lc, hc;
-			cval = vd->GetColorFromColormap(0, true);
-			lc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
-				(unsigned char)(cval.g() * 255 + 0.5),
-				(unsigned char)(cval.b() * 255 + 0.5));
-			cval = vd->GetColorFromColormap(1, true);
-			hc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
-				(unsigned char)(cval.g() * 255 + 0.5),
-				(unsigned char)(cval.b() * 255 + 0.5));
-			m_colormap_sldr->SetColors(lc, hc);
-			m_colormap_sldr->SetMapData(colormap_data);
-		}
-	}
-	if (update_colormap || update_tips)
-	{
-		bval = mf_enable ||
-			vd->GetMainColorMode() == flvr::ColorMode::Colormap ||
-			vd->GetMaskColorMode() == flvr::ColorMode::Colormap;
-		if (m_colormap_st->IsEnabled() != bval)
-			m_colormap_st->Enable(bval);
-	}
-
-	//color
-	if (update_color)
-	{
-		cval = vd->GetColor();
-		wxColor wxc((unsigned char)(cval.r() * 255 + 0.5),
-			(unsigned char)(cval.g() * 255 + 0.5),
-			(unsigned char)(cval.b() * 255 + 0.5));
-		m_main_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_main_color_btn->SetValue(wxc);
-		cval = vd->GetMaskColor();
-		wxc = wxColor((unsigned char)(cval.r() * 255 + 0.5),
-			(unsigned char)(cval.g() * 255 + 0.5),
-			(unsigned char)(cval.b() * 255 + 0.5));
-		m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue()));
-		m_alt_color_btn->SetValue(wxc);
-	}
-
-	//mask mode
-	if (update_all || FOUND_VALUE(gstMainMode))
-	{
-		auto main_mode = vd->GetMainColorMode();
-		switch (main_mode)
-		{
-		case flvr::ColorMode::Disabled:
-			m_main_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(clip_none));
-			break;
-		case flvr::ColorMode::SingleColor:
-			m_main_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(palette));
-			break;
-		case flvr::ColorMode::Colormap:
-			m_main_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(colormap));
-			break;
-		case flvr::ColorMode::Component:
-			m_main_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(comp));
-			break;
-		}
-	}
-
-	if (update_all || FOUND_VALUE(gstMaskMode))
-	{
-		auto mask_mode = vd->GetMaskColorMode();
-		switch (mask_mode)
-		{
-		case flvr::ColorMode::Disabled:
-			m_alt_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(clip_none));
-			break;
-		case flvr::ColorMode::SingleColor:
-			m_alt_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(palette));
-			break;
-		case flvr::ColorMode::Colormap:
-			m_alt_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(colormap));
-			break;
-		case flvr::ColorMode::Component:
-			m_alt_color_mode_tb->SetToolNormalBitmap(0,
-				wxGetBitmap(comp));
-			break;
-		}
-	}
-
-	//inversion
-	if (update_all || FOUND_VALUE(gstInvert))
-	{
-		bool inv = vd->GetInvert();
-		m_options_toolbar->ToggleTool(ID_InvChk, inv);
-		if (inv)
-			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
-				wxGetBitmap(invert));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
-				wxGetBitmap(invert_off));
-	}
-
-	//MIP
-	if (update_all || FOUND_VALUE(gstRenderMode))
-	{
-		bool mip = vd->GetRenderMode() == flvr::RenderMode::Mip;
-		m_options_toolbar->ToggleTool(ID_MipChk, mip);
-	}
-
-	//transparency
-	if (update_all || FOUND_VALUE(gstTransparent))
-	{
-		double alpha_power = vd->GetAlphaPower();
-		if (alpha_power > 1.1)
-		{
-			m_options_toolbar->ToggleTool(ID_TranspChk, true);
-			m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
-				wxGetBitmap(transphi));
-		}
-		else
-		{
-			m_options_toolbar->ToggleTool(ID_TranspChk, false);
-			m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
-				wxGetBitmap(transplo));
-		}
-	}
-
-	//legend
-	if (update_all || FOUND_VALUE(gstLegend))
-		m_options_toolbar->ToggleTool(ID_LegendChk, vd->GetLegend());
-
-	//outline
-	if (update_all || FOUND_VALUE(gstOutline))
-	{
-		bval = vd->GetOutline();
-		m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
-		if (bval)
-			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
-				wxGetBitmap(outline));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
-				wxGetBitmap(outline_off));
-	}
-
-	//interpolate
-	if (update_all || FOUND_VALUE(gstInterpolate))
-	{
-		bool interp = vd->GetInterpolate();
-		m_options_toolbar->ToggleTool(ID_InterpolateChk, interp);
-		if (interp)
-			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
-				wxGetBitmap(interpolate));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
-				wxGetBitmap(interpolate_off));
-	}
-
-	//sync group
-	if (update_all || FOUND_VALUE(gstSyncGroup))
-	{
-		auto group = m_group.lock();
-		if (group)
-			m_sync_group = group->GetVolumeSyncProp();
-		m_options_toolbar->ToggleTool(ID_SyncGroupChk, m_sync_group);
-	}
-
-	//noise reduction
-	if (update_all || FOUND_VALUE(gstNoiseRedct))
-	{
-		bool nr = vd->GetNR();
-		m_options_toolbar->ToggleTool(ID_NoiseReductChk, nr);
-		if (nr)
-			m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
-				wxGetBitmap(filter));
-		else
-			m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
-				wxGetBitmap(filter_off));
-	}
-
-	//blend mode
-	if (update_all || FOUND_VALUE(gstChannelMixMode))
-	{
-		auto channel_mix_mode = vd->GetChannelMixMode();
-		if (channel_mix_mode == ChannelMixMode::Depth)
-		{
-			m_options_toolbar->ToggleTool(ID_ChannelMixDepthChk, true);
-			m_options_toolbar->SetToolNormalBitmap(ID_ChannelMixDepthChk, wxGetBitmap(depth));
-		}
-		else
-		{
-			m_options_toolbar->ToggleTool(ID_ChannelMixDepthChk, false);
-			m_options_toolbar->SetToolNormalBitmap(ID_ChannelMixDepthChk, wxGetBitmap(depth_off));
-		}
-	}
-
-	//std::chrono::duration<double> ts = std::chrono::duration_cast<std::chrono::duration<double>>(
-	//	std::chrono::high_resolution_clock::now() - t);
-	//DBGPRINT(L"update settings, time: %f\n", ts);
-	//return;
-}
-
-void VolumePropPanelAgent::UpdateData(const UpdateRequest& request)
-{
 
 }

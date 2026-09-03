@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 class ColocalizationDlg : public PropPanel
 {
 public:
-	ColocalizationDlg(MainFrame* frame);
+	ColocalizationDlg(wxWindow* parent);
 	~ColocalizationDlg();
 
 	//update

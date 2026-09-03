@@ -29,19 +29,18 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <ColocalDefault.h>
-#include <MainFrame.h>
 #include <StringConvert.h>
 #include <Colocalize.h>
 #include <CurrentObjects.h>
 #include <VolumeGroup.h>
 #include <VolumeData.h>
 
-ColocalizationDlg::ColocalizationDlg(MainFrame* frame) :
-	PropPanel(frame,
+ColocalizationDlg::ColocalizationDlg(wxWindow* parent) :
+	PropPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(500, 500)),
+		parent->FromDIP(wxSize(500, 500)),
 		0, "ColocalizationDlg"),
-		m_hold_history(false)
+	m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

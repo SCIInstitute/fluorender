@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RENDERCANVAS_H_
 #define _RENDERCANVAS_H_
 
+#include <PropPanel.h>
 #include <Size.h>
 #include <Point.h>
 #include <wxBasisSlider.h>

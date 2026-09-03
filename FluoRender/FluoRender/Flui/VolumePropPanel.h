@@ -92,6 +92,38 @@ public:
 	void UpdateLuminanceTips(bool bval);
 	void UpdateShading(bool enable, double strength, double shine);
 	void UpdateShadingTips(bool bval);
+	void UpdateShadow(bool bval, double dval);
+	void UpdateShadowDir(bool bval, double dval);
+	void UpdateShadowTips(bool bval);
+	void UpdateSampleRate(bool bval, double dval);
+	void UpdateSampleRateTips(bool bval);
+
+	void UpdateSpacing(const fluo::Vector& spc);
+
+	void UpdateColormapValues(bool enable, int low, int high, int max);
+	void UpdateColormapDispValues(double low, double high, bool int_validator);
+	void UpdateColormapVis(const std::vector<unsigned char>& data,
+		const fluo::Color& lc, const fluo::Color& hc);
+	void UpdateColormapInv(bool bval);
+	void UpdateColormapType(int ival);
+	void UpdateColormapProj(int ival);
+	void UpdateColormapTips(bool bval);
+
+	void UpdateColor(const fluo::Color& main_color,
+		const fluo::Color& alt_color);
+
+	void UpdateMainMode(flvr::ColorMode mode);
+	void UpdateMaskMode(flvr::ColorMode mode);
+
+	void UpdateInvert(bool bval);
+	void UpdateRenderMode(bool bval);
+	void UpdateTransparent(bool bval);
+	void UpdateLegend(bool bval);
+	void UpdateOutline(bool bval);
+	void UpdateInterpolate(bool bval);
+	void UpdateSyncGroup(bool bval);
+	void UpdateNoiseRedct(bool bval);
+	void UpdateChannelMixMode(bool bval);
 
 	void InitViews(unsigned int type);
 

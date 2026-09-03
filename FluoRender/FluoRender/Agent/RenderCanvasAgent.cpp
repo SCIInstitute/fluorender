@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FramebufferStateTracker.h>
 #include <LookingGlassRenderer.h>
 #include <Value.hpp>
+#include <CurrentObjects.h>
 
 RenderCanvasAgent::RenderCanvasAgent(
 	RenderCanvas* canvas,
@@ -48,10 +49,7 @@ bool RenderCanvasAgent::Accept(
 	return
 		FOUND_VALUE(gstRotations) ||
 		FOUND_VALUE(gstCamera) ||
-		FOUND_VALUE(gstRenderView) ||
-		FOUND_VALUE(gstInteractive) ||
-		FOUND_VALUE(gstBrushSize) ||
-		FOUND_VALUE(gstVolumeProps);
+		FOUND_VALUE(gstRenderView);
 }
 
 RenderCanvasAgent*
@@ -97,7 +95,7 @@ void RenderCanvasAgent::SyncCamera(
 	if (src_view == dst_view)
 		return;
 
-	dst_view->CopyCamera(*src_view);
+	dst_view->CopyCamera(src_view);
 }
 
 void RenderCanvasAgent::Update(
@@ -153,13 +151,14 @@ void RenderCanvasAgent::PerformDraw()
 
 	glbin_fb_state_tracker.sync();
 
-	glbin_lg_renderer.SetUpdating(
-		view->GetLgChanged());
+	//glbin_lg_renderer.SetUpdating(
+	//	view->GetLgChanged());
 
 	bool success = view->Draw();
 
 	view->DrawDefault();
 
-	if (canvas_ && success)
-		canvas_->SwapBuffers();
+	auto canvas = GetCanvas();
+	if (canvas && success)
+		canvas->SwapBuffers();
 }

@@ -2717,6 +2717,11 @@ void RenderView::SetLockCenterSel()
 	m_lock_center = cover.GetCenter();
 }
 
+void RenderView::CopyCamera(const std::shared_ptr<RenderView>& src)
+{
+
+}
+
 void RenderView::SetCamMode(int mode)
 {
 	if (m_cam_mode == mode)

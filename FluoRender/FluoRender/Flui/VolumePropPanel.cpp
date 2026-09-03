@@ -1050,6 +1050,316 @@ void VolumePropPanel::UpdateShadingTips(bool bval)
 		m_shade_st->Enable(bval);
 }
 
+void VolumePropPanel::UpdateShadow(bool bval, double dval)
+{
+	//if ((vald_fp = (wxFloatingPointValidator<double>*)m_shadow_text->GetValidator()))
+	//	vald_fp->SetRange(0.0, 1.0);
+	auto str = wxString::Format("%.2f", dval);
+	m_shadow_sldr->ChangeValue(std::round(dval * 100.0));
+	m_shadow_text->ChangeValue(str);
+	m_shadow_chk->SetValue(bval);
+	if (m_shadow_sldr->IsEnabled() != bval)
+	{
+		m_shadow_sldr->Enable(bval);
+		m_shadow_text->Enable(bval);
+	}
+}
+
+void VolumePropPanel::UpdateShadowDir(bool bval, double dval)
+{
+	m_shadow_dir_chk->ToggleTool(0, bval);
+	m_shadow_dir_sldr->Enable(bval);
+	m_shadow_dir_text->Enable(bval);
+	m_shadow_dir_sldr->ChangeValue(std::round(dval));
+	m_shadow_dir_text->ChangeValue(wxString::Format("%.0f", dval));
+}
+
+void VolumePropPanel::UpdateShadowTips(bool bval)
+{
+	if (m_shadow_st->IsEnabled() != bval)
+		m_shadow_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateSampleRate(bool bval, double dval)
+{
+	wxFloatingPointValidator<double>* vald_fp;
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_sample_text->GetValidator()))
+		vald_fp->SetRange(0.0, 100.0);
+	auto str = wxString::Format("%.1f", dval);
+	m_sample_sldr->ChangeValue(dval * 10.0);
+	m_sample_text->ChangeValue(str);
+	m_sample_chk->SetValue(bval);
+	if (m_sample_sldr->IsEnabled() != bval)
+	{
+		m_sample_sldr->Enable(bval);
+		m_sample_text->Enable(bval);
+	}
+}
+
+void VolumePropPanel::UpdateSampleRateTips(bool bval)
+{
+	if (m_sample_st->IsEnabled() != bval)
+		m_sample_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateSpacing(const fluo::Vector& spc)
+{
+	wxFloatingPointValidator<double>* vald_fp;
+	wxString str;
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_x_text->GetValidator()))
+		vald_fp->SetMin(0.0);
+	str = wxString::Format("%.3f", spc.x());
+	m_space_x_text->ChangeValue(str);
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_y_text->GetValidator()))
+		vald_fp->SetMin(0.0);
+	str = wxString::Format("%.3f", spc.y());
+	m_space_y_text->ChangeValue(str);
+	if ((vald_fp = (wxFloatingPointValidator<double>*)m_space_z_text->GetValidator()))
+		vald_fp->SetMin(0.0);
+	str = wxString::Format("%.3f", spc.z());
+	m_space_z_text->ChangeValue(str);
+}
+
+void VolumePropPanel::UpdateColormapValues(bool enable, int low, int high, int max)
+{
+	//slider
+	m_colormap_sldr->SetRange(0, max);
+	//low
+	m_colormap_sldr->ChangeLowValue(low);
+	//high
+	m_colormap_sldr->ChangeHighValue(high);
+	//link
+	bool bval = m_colormap_sldr->GetLink();
+	if (bval != m_colormap_link_tb->GetToolState(0))
+	{
+		m_colormap_link_tb->ToggleTool(0, bval);
+		wxBitmapBundle bitmap;
+		if (bval)
+			bitmap = wxGetBitmap(link);
+		else
+			bitmap = wxGetBitmap(unlink);
+		m_colormap_link_tb->SetToolNormalBitmap(0, bitmap);
+	}
+	//mode
+	m_colormap_chk->SetValue(enable);
+	if (m_colormap_sldr->IsEnabled() != enable)
+	{
+		m_colormap_sldr->Enable(enable);
+		m_colormap_low_text->Enable(enable);
+		m_colormap_hi_text->Enable(enable);
+		m_colormap_link_tb->Enable(enable);
+	}
+}
+
+void VolumePropPanel::UpdateColormapDispValues(double low, double high, bool int_validator)
+{
+	wxString str;
+	if (int_validator)
+	{
+		m_colormap_low_text->SetValidator(wxIntegerValidator<int>());
+		str = wxString::Format("%.0f", low);
+		m_colormap_low_text->ChangeValue(str);
+		m_colormap_hi_text->SetValidator(wxIntegerValidator<int>());
+		str = wxString::Format("%.0f", high);
+		m_colormap_hi_text->ChangeValue(str);
+	}
+	else
+	{
+		m_colormap_low_text->SetValidator(wxFloatingPointValidator<double>());
+		str = wxString::Format("%.3f", low);
+		m_colormap_low_text->ChangeValue(str);
+		m_colormap_hi_text->SetValidator(wxFloatingPointValidator<double>());
+		str = wxString::Format("%.3f", high);
+		m_colormap_hi_text->ChangeValue(str);
+	}
+}
+
+void VolumePropPanel::UpdateColormapVis(const std::vector<unsigned char>& data,
+	const fluo::Color& lc, const fluo::Color& hc)
+{
+	wxColor low_color, hi_color;
+	low_color = wxColor((unsigned char)(std::round(lc.r() * 255)),
+		(unsigned char)(std::round(lc.g() * 255)),
+		(unsigned char)(std::round(lc.b() * 255)));
+	hi_color = wxColor((unsigned char)(std::round(hc.r() * 255)),
+		(unsigned char)(std::round(hc.g() * 255)),
+		(unsigned char)(std::round(hc.b() * 255)));
+	m_colormap_sldr->SetColors(low_color, hi_color);
+	m_colormap_sldr->SetMapData(data);
+}
+
+void VolumePropPanel::UpdateColormapInv(bool bval)
+{
+	if (bval != m_colormap_inv_btn->GetToolState(0))
+	{
+		m_colormap_inv_btn->ToggleTool(0, bval);
+		if (bval)
+			m_colormap_inv_btn->SetToolNormalBitmap(0,
+				wxGetBitmap(invert));
+		else
+			m_colormap_inv_btn->SetToolNormalBitmap(0,
+				wxGetBitmap(invert_off));
+	}
+}
+
+void VolumePropPanel::UpdateColormapType(int ival)
+{
+	m_colormap_combo->SetSelection(ival);
+}
+
+void VolumePropPanel::UpdateColormapProj(int ival)
+{
+	m_colormap_proj_combo->SetSelection(ival);
+}
+
+void VolumePropPanel::UpdateColormapTips(bool bval)
+{
+	if (m_colormap_st->IsEnabled() != bval)
+		m_colormap_st->Enable(bval);
+}
+
+void VolumePropPanel::UpdateColor(const fluo::Color& main_color,
+	const fluo::Color& alt_color)
+{
+	wxColor wxc((unsigned char)(std::round(main_color.r() * 255)),
+		(unsigned char)(std::round(main_color.g() * 255)),
+		(unsigned char)(std::round(main_color.b() * 255)));
+	m_main_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+		wxc.Red(), wxc.Green(), wxc.Blue()));
+	m_main_color_btn->SetValue(wxc);
+	wxc = wxColor((unsigned char)(std::round(alt_color.r() * 255)),
+		(unsigned char)(std::round(alt_color.g() * 255)),
+		(unsigned char)(std::round(alt_color.b() * 255)));
+	m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
+		wxc.Red(), wxc.Green(), wxc.Blue()));
+	m_alt_color_btn->SetValue(wxc);
+}
+
+void VolumePropPanel::UpdateMainMode(flvr::ColorMode mode)
+{
+	switch (mode)
+	{
+	case flvr::ColorMode::Disabled:
+		m_main_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(clip_none));
+		break;
+	case flvr::ColorMode::SingleColor:
+		m_main_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(palette));
+		break;
+	case flvr::ColorMode::Colormap:
+		m_main_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(colormap));
+		break;
+	case flvr::ColorMode::Component:
+		m_main_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(comp));
+		break;
+	}
+}
+
+void VolumePropPanel::UpdateMaskMode(flvr::ColorMode mode)
+{
+	switch (mode)
+	{
+	case flvr::ColorMode::Disabled:
+		m_alt_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(clip_none));
+		break;
+	case flvr::ColorMode::SingleColor:
+		m_alt_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(palette));
+		break;
+	case flvr::ColorMode::Colormap:
+		m_alt_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(colormap));
+		break;
+	case flvr::ColorMode::Component:
+		m_alt_color_mode_tb->SetToolNormalBitmap(0,
+			wxGetBitmap(comp));
+		break;
+	}
+}
+
+void VolumePropPanel::UpdateInvert(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_InvChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
+			wxGetBitmap(invert));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_InvChk,
+			wxGetBitmap(invert_off));
+}
+
+void VolumePropPanel::UpdateRenderMode(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_MipChk, bval);
+}
+
+void VolumePropPanel::UpdateTransparent(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_TranspChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
+			wxGetBitmap(transphi));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_TranspChk,
+			wxGetBitmap(transplo));
+}
+
+void VolumePropPanel::UpdateLegend(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_LegendChk, bval);
+}
+
+void VolumePropPanel::UpdateOutline(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_OutlineChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+			wxGetBitmap(outline));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_OutlineChk,
+			wxGetBitmap(outline_off));
+}
+
+void VolumePropPanel::UpdateInterpolate(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_InterpolateChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
+			wxGetBitmap(interpolate));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_InterpolateChk,
+			wxGetBitmap(interpolate_off));
+}
+
+void VolumePropPanel::UpdateSyncGroup(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_SyncGroupChk, bval);
+}
+
+void VolumePropPanel::UpdateNoiseRedct(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_NoiseReductChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
+			wxGetBitmap(filter));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_NoiseReductChk,
+			wxGetBitmap(filter_off));
+}
+
+void VolumePropPanel::UpdateChannelMixMode(bool bval)
+{
+	m_options_toolbar->ToggleTool(ID_ChannelMixDepthChk, bval);
+	if (bval)
+		m_options_toolbar->SetToolNormalBitmap(ID_ChannelMixDepthChk, wxGetBitmap(depth));
+	else
+		m_options_toolbar->SetToolNormalBitmap(ID_ChannelMixDepthChk, wxGetBitmap(depth_off));
+}
+
 //void VolumePropPanel::SetVolumeData(const std::shared_ptr<VolumeData>& vd)
 //{
 //	if (vd && m_vd.lock() != vd)

@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationDlg.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
@@ -37,11 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <CombineList.h>
 #include <VolumeCalculator.h>
 
-CalculationDlg::CalculationDlg(MainFrame *frame)
-	: PropPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(500, 350)),
-	0, "CalculationDlg")
+CalculationDlg::CalculationDlg(wxWindow* parent)
+	: PropPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(500, 350)),
+		0, "CalculationDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
