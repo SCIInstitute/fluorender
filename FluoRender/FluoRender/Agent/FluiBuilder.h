@@ -30,13 +30,9 @@ DEALINGS IN THE SOFTWARE.
 #define FluiBuilder_h
 
 #include <memory>
+#include <string>
 
 class wxWindow;
-
-class MainFrame;
-class RenderViewPanel;
-class wxGLContext;
-class RenderCanvas;
 
 class AnnotatPropPanel;
 class AnnotData;
@@ -48,11 +44,53 @@ class CalculationDlg;
 class ClipPlanePanel;
 class TreeLayer;
 
-class VolumePropPanel;
-class VolumeData;
+class ColocalizationDlg;
+
+class ComponentDlg;
+
+class ConvertDlg;
+
+class CountingDlg;
+
+class FpRangeDlg;
+
+class ListPanel;
+
+class MachineLearningDlg;
+
+class MainFrame;
+
+class ManipPropPanel;
+class MeshData;
+
+class MeasureDlg;
 
 class MeshPropPanel;
-class MeshData;
+
+class MoviePanel;
+
+class NoiseCancellingDlg;
+
+class OclDlg;
+
+class OutputAdjPanel;
+
+class RenderCanvas;
+class wxGLContext;
+class RenderView;
+
+class RenderViewPanel;
+
+class ScriptBreakDlg;
+
+class SettingDlg;
+
+class TrackDlg;
+
+class TreePanel;
+
+class VolumePropPanel;
+class VolumeData;
 
 class FluiBuilder
 {
@@ -74,22 +112,90 @@ public:
 	static ColocalizationDlg* BuildColocalizationDlg(
 		wxWindow* parent);
 
+	static ComponentDlg* BuildComponentDlg(
+		wxWindow* parent);
 
+	static ConvertDlg* BuildConvertDlg(
+		wxWindow* parent);
 
+	static CountingDlg* BuildCountingDlg(
+		wxWindow* parent);
 
-	static VolumePropPanel* BuildVolumePanel(
+	static FpRangeDlg* BuildFpRangeDlg(
+		wxWindow* parent);
+
+	static ListPanel* BuildListPanel(
+		wxWindow* parent);
+
+	static MachineLearningDlg* BuildMachineLearningDlg(
+		wxWindow* parent);
+
+	static MainFrame* BuildMainFrame(
+		const std::string& title,
+		int x, int y,
+		int w, int h,
+		int reset,
+		bool benchmark,
+		bool fullscreen,
+		bool windowed,
+		bool hidepanels);
+
+	static ManipPropPanel* BuildManipPropPanel(
+		wxWindow* parent,
+		const std::shared_ptr<MeshData>& md);
+
+	static MeasureDlg* BuildMeasureDlg(
+		wxWindow* parent);
+
+	static MeshPropPanel* BuildMeshPropPanel(
+		wxWindow* parent,
+		const std::shared_ptr<MeshData>& md);
+
+	static MoviePanel* BuildMoviePanel(
+		wxWindow* parent);
+
+	static NoiseCancellingDlg* BuildNoiseCancellingDlg(
+		wxWindow* parent);
+
+	static OclDlg* BuildOclDlg(
+		wxWindow* parent);
+
+	static OutputAdjPanel* BuildOutputAdjPanel(
+		wxWindow* parent);
+
+	static RenderCanvas* BuildRenderCanvas(
+		wxWindow* parent,
+		wxGLContext* sharedContext,
+		const std::shared_ptr<RenderView>& view
+	);
+
+	static RenderViewPanel* BuildRenderViewPanel(
+		wxWindow* parent,
+		wxGLContext* sharedContext);
+
+	static ScriptBreakDlg* BuildScriptBreakDlg(
+		wxWindow* parent);
+
+	static SettingDlg* BuildSettingDlg(
+		wxWindow* parent);
+
+	static TrackDlg* BuildTrackDlg(
+		wxWindow* parent);
+
+	static TreePanel* BuildTreePanel(
+		wxWindow* parent);
+
+	static VolumePropPanel* BuildVolumePropPanel(
 		wxWindow* parent,
 		const std::shared_ptr<VolumeData>& vd);
 
-	static MeshPropPanel* BuildMeshPanel(
+protected:
+	template<
+		class UiT,
+		class AgentT,
+		class... Args>
+	static UiT* BuildUi(
 		wxWindow* parent,
-		const std::shared_ptr<MeshData>& md);
-	static RenderCanvas* BuildRenderCanvas(
-		MainFrame* frame,
-		RenderViewPanel* parent,
-		wxGLContext* sharedContext
-	);
-
+		Args&&... args);
 };
-
 #endif // FluiBuilder_h

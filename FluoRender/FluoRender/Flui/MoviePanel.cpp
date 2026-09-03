@@ -32,7 +32,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <MovieDefault.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <Root.h>
 #include <DataManager.h>
@@ -980,12 +979,12 @@ wxWindow* MoviePanel::CreateScriptPage(wxWindow* parent)
 	return page;
 }
 
-MoviePanel::MoviePanel(MainFrame* frame,
+MoviePanel::MoviePanel(wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, pos, size, style, name)
+	TabbedPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

@@ -29,19 +29,12 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <wx/valnum.h>
 
-//BEGIN_EVENT_TABLE(FpRangeDlg, wxDialog)
-////text boxes
-//	EVT_TEXT(ID_MinValText, FpRangeDlg::OnMinText)
-//	EVT_TEXT(ID_MaxValText, FpRangeDlg::OnMaxText)
-//END_EVENT_TABLE()
-
-FpRangeDlg::FpRangeDlg(MainFrame *frame)
-: PropDialog(frame,
+FpRangeDlg::FpRangeDlg(wxWindow *parent)
+: PropDialog(parent,
 	wxDefaultPosition,
-	frame->FromDIP(wxSize(400, 200)),
+	parent->FromDIP(wxSize(400, 200)),
 	wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER |
 	wxMAXIMIZE_BOX | wxMINIMIZE_BOX | wxSTAY_ON_TOP,
 	wxString("Data Conversion"))

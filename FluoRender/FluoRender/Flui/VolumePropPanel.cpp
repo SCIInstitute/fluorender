@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <Root.h>
 #include <VolumeData.h>
@@ -66,7 +65,7 @@ DEALINGS IN THE SOFTWARE.
 #include <limits>
 #include <Debug.h>
 
-VolumePropPanel::VolumePropPanel(MainFrame* frame,
+VolumePropPanel::VolumePropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

@@ -38,7 +38,8 @@ class RenderViewPanelAgent : public Agent
 {
 public:
 	RenderViewPanelAgent(
-		RenderViewPanel* panel);
+		RenderViewPanel* panel,
+		const std::shared_ptr<RenderView>& view);
 
 	virtual ~RenderViewPanelAgent() = default;
 
@@ -54,7 +55,12 @@ public:
 		return static_cast<RenderViewPanel*>(GetWindow());
 	}
 
-	std::shared_ptr<RenderView> GetData() const
+	void SetView(const std::shared_ptr<RenderView>& view)
+	{
+		m_view = view;
+	}
+
+	std::shared_ptr<RenderView> GetView() const
 	{
 		return m_view.lock();
 	}

@@ -30,11 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MainFrame;
 class ScriptBreakDlg : public PropPanel
 {
 public:
-	ScriptBreakDlg(MainFrame* frame);
+	ScriptBreakDlg(wxWindow* parent);
 	~ScriptBreakDlg();
 
 	//update
@@ -43,7 +42,6 @@ public:
 	void Hold();
 
 private:
-	MainFrame* m_frame;
 	wxTextCtrl* m_info_text;
 	wxCheckBox* m_shown_chk;
 	wxButton* m_stop_btn;

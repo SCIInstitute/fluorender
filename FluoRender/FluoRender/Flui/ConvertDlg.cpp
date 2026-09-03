@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvertDlg.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <CurrentObjects.h>
 #include <DataManager.h>
 #include <VolumeData.h>
@@ -45,11 +44,11 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <icons.h>
 
-ConvertDlg::ConvertDlg(MainFrame *frame) :
-	TabbedPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(500, 620)),
-	0, "ConvertDlg"),
+ConvertDlg::ConvertDlg(wxWindow *parent) :
+	TabbedPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(500, 620)),
+		0, "ConvertDlg"),
 	m_hold_history(false)
 {
 	// temporarily block events during constructor:

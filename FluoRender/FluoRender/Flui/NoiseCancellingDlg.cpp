@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <ComponentDefault.h>
-#include <MainFrame.h>
 #include <TreePanel.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -40,11 +39,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
-NoiseCancellingDlg::NoiseCancellingDlg(MainFrame *frame)
-: PropPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(450, 200)),
-	0, "NoiseCancellingDlg")
+NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
+	PropPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(450, 200)),
+		0, "NoiseCancellingDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

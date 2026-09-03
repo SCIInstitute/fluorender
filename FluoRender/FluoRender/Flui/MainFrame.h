@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MAINFRAME_H_
 #define _MAINFRAME_H_
 
+#include <PropPanel.h>
 #include <Value.hpp>
 #include <Version.h>
 #include <wx/wx.h>
@@ -131,7 +132,7 @@ class FpRangeDlg;
 class wxGaugeStatusbar;
 class wxBasisSlider;
 
-class MainFrame : public wxFrame
+class MainFrame : public wxFrame, public PropBase
 {
 	enum
 	{
@@ -231,7 +232,7 @@ class MainFrame : public wxFrame
 	};
 
 public:
-	MainFrame(wxFrame* frame,
+	MainFrame(
 		const wxString& title,
 		int x, int y,
 		int w, int h,

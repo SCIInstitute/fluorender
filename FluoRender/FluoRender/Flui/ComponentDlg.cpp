@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlg.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <ComponentDefault.h>
 #include <AutomateDefault.h>
 #include <BrushDefault.h>
@@ -61,10 +60,10 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <Debug.h>
 
-ComponentDlg::ComponentDlg(MainFrame *frame)
-	: TabbedPanel(frame,
+ComponentDlg::ComponentDlg(wxWindow *parent)
+	: TabbedPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(500, 620)),
+		parent->FromDIP(wxSize(500, 620)),
 		0, "ComponentDlg"),
 	m_hold_history(false),
 	m_auto_update_timer(this)

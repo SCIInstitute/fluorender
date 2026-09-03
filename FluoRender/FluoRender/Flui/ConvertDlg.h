@@ -55,7 +55,7 @@ public:
 		ID_MeshSmooth
 	};
 
-	ConvertDlg(MainFrame* frame);
+	ConvertDlg(wxWindow* parent);
 	~ConvertDlg();
 
 	//update

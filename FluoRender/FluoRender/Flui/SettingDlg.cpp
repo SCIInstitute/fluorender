@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <DataManager.h>
 #include <RenderViewPanel.h>
@@ -46,10 +45,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valtext.h>
 #include <wx/regex.h>
 
-SettingDlg::SettingDlg(MainFrame *frame) :
-	TabbedPanel(frame,
+SettingDlg::SettingDlg(wxWindow *parent) :
+	TabbedPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(500, 620)),
+		parent->FromDIP(wxSize(500, 620)),
 		0, "SettingDlg")
 {
 	// temporarily block events during constructor:

@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <CountingDlg.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -36,12 +35,11 @@ DEALINGS IN THE SOFTWARE.
 #include <CompAnalyzer.h>
 #include <wx/valnum.h>
 
-CountingDlg::CountingDlg(MainFrame *frame)
-: PropPanel(frame,
-wxDefaultPosition,
-frame->FromDIP(wxSize(400, 150)),
-0, "CountingDlg"),
-m_max_value(255.0)
+CountingDlg::CountingDlg(wxWindow *parent) :
+	PropPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(400, 150)),
+		0, "CountingDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

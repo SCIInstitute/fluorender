@@ -103,15 +103,13 @@ class ListPanel : public PropPanel
 	};
 
 public:
-	ListPanel(MainFrame* frame,
+	ListPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "ListPanel");
 	~ListPanel();
-
-	virtual void FluoUpdate(const fluo::ValueCollection& vc = {});
 
 	void UpdateList();
 	void UpdateSelection();

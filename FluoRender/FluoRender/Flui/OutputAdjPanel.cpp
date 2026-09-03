@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -44,12 +43,12 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 #include <icons.h>
 
-OutputAdjPanel::OutputAdjPanel(MainFrame* frame,
+OutputAdjPanel::OutputAdjPanel(wxWindow* parent,
 					   const wxPoint& pos,
 					   const wxSize& size,
 					   long style,
 					   const wxString& name) :
-	TabbedPanel(frame, pos, size, style, name)
+	TabbedPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

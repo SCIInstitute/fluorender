@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MainFrame;
 class RenderView;
 class VolumeData;
 class VolumeGroup;
@@ -65,7 +64,7 @@ class VolumePropPanel: public PropPanel
 	};
 
 public:
-	VolumePropPanel(MainFrame* frame,
+	VolumePropPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

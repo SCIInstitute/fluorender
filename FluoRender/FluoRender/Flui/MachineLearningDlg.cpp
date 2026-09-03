@@ -29,8 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
-#include <ComponentDlg.h>
 #include <EntryHist.h>
 #include <Table.h>
 #include <TableHistParams.h>
@@ -41,10 +39,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Directory.h>
 #include <filesystem>
 
-MachineLearningDlg::MachineLearningDlg(MainFrame* frame) :
-	TabbedPanel(frame,
+MachineLearningDlg::MachineLearningDlg(wxWindow* parent) :
+	TabbedPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(500, 620)),
+		parent->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningDlg")
 {
 	// temporarily block events during constructor:
@@ -57,8 +55,8 @@ MachineLearningDlg::MachineLearningDlg(MainFrame* frame) :
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-	MLVolPropPanel* panel1 = new MLVolPropPanel(frame, m_notebook);
-	MLCompGenPanel* panel2 = new MLCompGenPanel(frame, m_notebook);
+	MLVolPropPanel* panel1 = new MLVolPropPanel(m_notebook);
+	MLCompGenPanel* panel2 = new MLCompGenPanel(m_notebook);
 	m_notebook->AddPage(panel1, "Volume Properties", true);
 	m_notebook->AddPage(panel2, "Component Generator");
 	m_panels.push_back(panel1);
@@ -80,11 +78,10 @@ MachineLearningDlg::~MachineLearningDlg()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-MachineLearningPanel::MachineLearningPanel(
-	MainFrame* frame, wxWindow* parent) :
+MachineLearningPanel::MachineLearningPanel(wxWindow* parent) :
 	PropPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(500, 620)),
+		parent->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningPanel"),
 	m_record(false)
 {
@@ -376,9 +373,8 @@ void MachineLearningPanel::OnBotGridCellChanged(wxGridEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-MLCompGenPanel::MLCompGenPanel(
-	MainFrame* frame, wxWindow* parent) :
-	MachineLearningPanel(frame, parent)
+MLCompGenPanel::MLCompGenPanel(wxWindow* parent) :
+	MachineLearningPanel(parent)
 {
 	m_dir = L"Database";
 	m_ext = L".cgtbl";
@@ -701,9 +697,8 @@ void MLCompGenPanel::UpdateAutoStart(bool bval)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-MLVolPropPanel::MLVolPropPanel(
-	MainFrame* frame, wxWindow* parent) :
-	MachineLearningPanel(frame, parent)
+MLVolPropPanel::MLVolPropPanel(wxWindow* parent) :
+	MachineLearningPanel(parent)
 {
 	m_dir = L"Database";
 	m_ext = L".vptbl";

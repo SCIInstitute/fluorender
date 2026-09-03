@@ -96,15 +96,13 @@ GLADapiproc MyGLGetProcAddress(const char* name)
 //}
 #endif
 
-RenderCanvas::RenderCanvas(MainFrame* frame,
-	RenderViewPanel* parent,
+RenderCanvas::RenderCanvas(
+	wxWindow* parent,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
 	wxGLCanvas(parent, GLAttribProvider::CanvasAttribs(), wxID_ANY, pos, size, style),
-	m_frame(frame),
-	m_renderview_panel(parent),
 	//previous focus
 	m_prev_focus(0),
 	//timer for fullscreen
@@ -264,10 +262,13 @@ RenderCanvas::~RenderCanvas()
 	{
 		m_full_screen = false;
 		m_renderview_panel->SetFullFrame(0);
-		if (m_frame)
+		if (auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>())
 		{
-			//m_frame->EraseAllCanvases();
-			m_frame->Close();
+			if (auto frame = frame_agent->GetMainFrame())
+			{
+				//m_frame->EraseAllCanvases();
+				frame->Close();
+			}
 		}
 	}
 
@@ -286,14 +287,6 @@ int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd) {
 	return pixelFormat;
 }
 #endif
-
-std::shared_ptr<RenderView> RenderCanvas::GetRenderView()
-{
-	auto agent = GetRenderCanvasAgent();
-	if (agent)
-		return agent->GetView();
-	return nullptr;
-}
 
 inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
 {

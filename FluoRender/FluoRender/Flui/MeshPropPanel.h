@@ -49,7 +49,7 @@ class MeshPropPanel: public PropPanel
 	};
 
 public:
-	MeshPropPanel(MainFrame* frame,
+	MeshPropPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

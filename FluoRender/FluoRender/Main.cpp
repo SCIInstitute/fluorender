@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Directory.h>
 #include <Global.h>
 #include <MainSettings.h>
+#include <FluiBuilder.h>
 #include <MainFrame.h>
 #include <DataManager.h>
 #include <compatibility.h>
@@ -105,9 +106,8 @@ bool FluoRenderApp::OnInit()
 	//the frame
 	std::string title = std::string(fluo::AppTitle) + std::string(" ") +
 		std::string(fluo::VersionString);
-	MainFrame* frame = new MainFrame(
-		(wxFrame*)NULL,
-		wxString(title),
+	auto frame = glbin_flui_builder.BuildMainFrame(
+		title,
 		-1, -1,
 		m_win_width, m_win_height,
 		m_reset, m_benchmark, m_fullscreen,

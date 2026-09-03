@@ -31,11 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 
 class wxSingleSlider;
-class MainFrame;
 class NoiseCancellingDlg : public PropPanel
 {
 public:
-	NoiseCancellingDlg(MainFrame* frame);
+	NoiseCancellingDlg(wxWindow* parent);
 	~NoiseCancellingDlg();
 
 	//update

@@ -69,7 +69,7 @@ public:
 		ID_AlignZYX,
 	};
 
-	ComponentDlg(MainFrame* frame);
+	ComponentDlg(wxWindow* parent);
 	~ComponentDlg();
 
 	//update

@@ -63,7 +63,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MainFrame;
 struct TrackItem
 {
 	std::wstring glyph;
@@ -94,7 +93,7 @@ public:
 		ID_Delete
 	};
 
-	TrackDlg(MainFrame* frame);
+	TrackDlg(wxWindow* parent);
 	~TrackDlg();
 
 	//update

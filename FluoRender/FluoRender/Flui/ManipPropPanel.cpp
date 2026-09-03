@@ -28,11 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ManipPropPanel.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <MeshData.h>
 #include <compatibility.h>
 
-ManipPropPanel::ManipPropPanel(MainFrame* frame,
+ManipPropPanel::ManipPropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

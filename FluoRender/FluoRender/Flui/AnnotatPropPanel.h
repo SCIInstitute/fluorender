@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <memory>
 
-class AnnotatPropPanelAgent;
 class AnnotatPropPanel : public PropPanel
 {
 public:

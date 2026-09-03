@@ -127,7 +127,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MainFrame;
 struct RulerListDisplayInfo
 {
 	std::vector<bool> visible;
@@ -197,7 +196,7 @@ public:
 		ID_AlignZYX,
 	};
 
-	MeasureDlg(MainFrame* frame);
+	MeasureDlg(wxWindow* parent);
 	~MeasureDlg();
 
 	//update

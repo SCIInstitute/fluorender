@@ -31,11 +31,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <ClipPlanePanel.h>
 #include <ModalDlg.h>
-#include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <Project.h>
@@ -44,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <RenderCanvasAgent.h>
 #include <FluiBuilder.h>
+#include <RenderView.h>
 
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
@@ -63,18 +62,14 @@ int RenderViewPanel::m_max_id = 1;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RenderViewPanel::RenderViewPanel(MainFrame* frame,
+RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	wxGLContext* sharedContext,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(frame, pos, size, style, name),
+	PropPanel(parent, pos, size, style, name),
 	m_default_saved(false),
-	m_bg_color_inv(false),
-	m_rot_slider(true),
-	m_pin_by_user(0),
-	m_pin_by_scale(false),
 	m_enter_fscreen_trigger(this, 0)
 {
 	// temporarily block events during constructor:
@@ -92,9 +87,8 @@ RenderViewPanel::RenderViewPanel(MainFrame* frame,
 
 	m_id = m_max_id;
 	SetName(wxString::Format("Render View:%d", m_max_id++));
-	m_canvas = glbin_flui_builder.BuildRenderCanvas(frame, this, sharedContext);
+	//m_canvas = glbin_flui_builder.BuildRenderCanvas(this, sharedContext);
 	//m_renderview = m_canvas->GetAgent()->GetView();
-	m_canvas->SetCanFocus(false);
 	m_view_sizer->Add(m_canvas, 1, wxEXPAND);
 	CreateBar();
 
@@ -139,9 +133,9 @@ RenderViewPanel::~RenderViewPanel()
 
 int RenderViewPanel::GetViewId()
 {
-	if (!m_renderview)
-		return 0;
-	return m_renderview->Id();
+	//if (!m_renderview)
+	//	return 0;
+	//return m_renderview->Id();
 }
 
 void RenderViewPanel::CreateBar()

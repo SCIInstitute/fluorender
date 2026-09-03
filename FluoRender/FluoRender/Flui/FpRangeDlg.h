@@ -30,11 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MainFrame;
 class FpRangeDlg : public PropDialog
 {
 public:
-	FpRangeDlg(MainFrame* frame);
+	FpRangeDlg(wxWindow* parent);
 	~FpRangeDlg();
 
 	//update

@@ -36,12 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 #include <vector>
 
-class MainFrame;
 class MachineLearningPanel;
 class MachineLearningDlg : public TabbedPanel
 {
 public:
-	MachineLearningDlg(MainFrame* frame);
+	MachineLearningDlg(wxWindow* parent);
 	~MachineLearningDlg();
 
 private:
@@ -52,8 +51,7 @@ private:
 class MachineLearningPanel : public PropPanel
 {
 public:
-	MachineLearningPanel(MainFrame* frame,
-		wxWindow* parent);
+	MachineLearningPanel(wxWindow* parent);
 	~MachineLearningPanel();
 
 	void Create();
@@ -121,8 +119,7 @@ protected:
 class MLCompGenPanel : public MachineLearningPanel
 {
 public:
-	MLCompGenPanel(MainFrame* frame,
-		wxWindow* parent);
+	MLCompGenPanel(wxWindow* parent);
 	~MLCompGenPanel();
 
 	virtual void UpdateBotList();
@@ -156,8 +153,7 @@ private:
 class MLVolPropPanel : public MachineLearningPanel
 {
 public:
-	MLVolPropPanel(MainFrame* frame,
-		wxWindow* parent);
+	MLVolPropPanel(wxWindow* parent);
 	~MLVolPropPanel();
 
 	virtual void UpdateBotList();

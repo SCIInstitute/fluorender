@@ -34,11 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class wxSingleSlider;
-class MainFrame;
 class OclDlg : public PropPanel
 {
 public:
-	OclDlg(MainFrame* frame);
+	OclDlg(wxWindow* parent);
 	~OclDlg();
 
 	//update

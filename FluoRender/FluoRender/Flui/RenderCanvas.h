@@ -43,15 +43,14 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/event.h>
 #include <wx/timer.h>
 
-class MainFrame;
 class RenderViewPanel;
 class RenderView;
 class RenderCanvasAgent;
 class RenderCanvas : public PropBase, public wxGLCanvas
 {
 public:
-	RenderCanvas(MainFrame* frame,
-		RenderViewPanel* parent,
+	RenderCanvas(
+		wxWindow* parent,
 		wxGLContext* sharedContext = 0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -68,8 +67,6 @@ public:
 		return dynamic_cast<RenderCanvasAgent*>(m_agent.get());
 	}
 
-	std::shared_ptr<RenderView> GetRenderView();
-
 	//get view info for external ops
 	//get size, considering enlargement
 	inline fluo::Point GetMousePos(wxMouseEvent& e);
@@ -78,13 +75,9 @@ public:
 
 	void Draw();
 
-public:
-	RenderViewPanel* m_renderview_panel;
-
 private:
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
-	MainFrame* m_frame;
 	//previous focus before brush
 	wxWindow* m_prev_focus;
 

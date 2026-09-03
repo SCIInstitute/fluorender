@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -160,10 +159,10 @@ wxString TrackListCtrl::GetText(long item, int col)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-TrackDlg::TrackDlg(MainFrame* frame)
-	: TabbedPanel(frame,
+TrackDlg::TrackDlg(wxWindow* parent)
+	: TabbedPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(500, 620)),
+		parent->FromDIP(wxSize(500, 620)),
 		0, "TrackDlg")
 {
 	// temporarily block events during constructor:

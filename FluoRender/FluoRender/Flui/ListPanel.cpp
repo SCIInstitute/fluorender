@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
 #include <ModalDlg.h>
 #include <RenderView.h>
 #include <VolumeData.h>
@@ -195,7 +194,7 @@ void DataListCtrl::OnKillFocus(wxFocusEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-ListPanel::ListPanel(MainFrame* frame,
+ListPanel::ListPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -274,10 +273,6 @@ ListPanel::ListPanel(MainFrame* frame,
 }
 
 ListPanel::~ListPanel()
-{
-}
-
-void ListPanel::FluoUpdate(const fluo::ValueCollection& vc)
 {
 }
 

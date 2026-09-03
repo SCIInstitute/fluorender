@@ -35,8 +35,10 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 
 RenderViewPanelAgent::RenderViewPanelAgent(
-	RenderViewPanel* panel) :
-	Agent(panel)
+	RenderViewPanel* panel,
+	const std::shared_ptr<RenderView>& view) :
+	Agent(panel),
+	m_view(view)
 {
 
 }

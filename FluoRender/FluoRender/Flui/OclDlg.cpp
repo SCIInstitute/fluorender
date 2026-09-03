@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Directory.h>
 #include <Global.h>
 #include <Names.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -42,11 +41,11 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 #include <wx/splitter.h>
 
-OclDlg::OclDlg(MainFrame* frame) :
-	PropPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(550, 600)),
-	0, "OclDlg")
+OclDlg::OclDlg(wxWindow* parent) :
+	PropPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(550, 600)),
+		0, "OclDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -253,13 +252,10 @@ void OclDlg::Execute()
 		auto vd_r = glbin_kernel_executor.GetResult(true);
 		if (!vd_r)
 			return;
-		if (m_frame)
-		{
-			glbin_data_manager.AddVolumeData(vd_r);
-			view->AddVolumeData(vd_r);
-			vd->SetDisp(false);
-			glbin_current.SetVolumeData(vd_r);
-		}
+		glbin_data_manager.AddVolumeData(vd_r);
+		view->AddVolumeData(vd_r);
+		vd->SetDisp(false);
+		glbin_current.SetVolumeData(vd_r);
 	}
 
 	fluo::ValueCollection vc;

@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <Project.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
@@ -414,11 +413,11 @@ fluo::Color RulerListCtrl::GetColorFromWxColor(const wxColor& c)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-MeasureDlg::MeasureDlg(MainFrame* frame)
-	: TabbedPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(500, 620)),
-	0, "MeasureDlg")
+MeasureDlg::MeasureDlg(wxWindow* parent) :
+	TabbedPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(500, 620)),
+		0, "MeasureDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

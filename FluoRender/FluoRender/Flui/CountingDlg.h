@@ -30,11 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MainFrame;
 class CountingDlg : public PropPanel
 {
 public:
-	CountingDlg(MainFrame* frame);
+	CountingDlg(wxWindow* parent);
 	~CountingDlg();
 
 	//update

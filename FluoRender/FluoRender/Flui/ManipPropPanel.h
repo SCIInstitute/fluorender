@@ -59,7 +59,7 @@ class ManipPropPanel: public PropPanel
 	};
 
 public:
-	ManipPropPanel(MainFrame* frame,
+	ManipPropPanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

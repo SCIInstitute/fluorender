@@ -174,7 +174,7 @@ public:
 		ID_ManipulateData
 	};
 
-	TreePanel(MainFrame* frame,
+	TreePanel(
 		wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,

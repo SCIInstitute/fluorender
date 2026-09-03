@@ -39,7 +39,6 @@ class wxSingleSlider;
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
 class wxUndoableColorPicker;
-class RenderView;
 enum class ChannelMixMode : int;
 class RenderViewPanel: public PropPanel
 {
@@ -94,7 +93,7 @@ public:
 		ID_EMBED_FILES
 	};
 
-	RenderViewPanel(MainFrame* frame,
+	RenderViewPanel(wxWindow* parent,
 		wxGLContext* sharedContext=0,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -106,7 +105,7 @@ public:
 	//reset counter
 	static void ResetID();
 
-	RenderView* GetRenderView() { return m_renderview; }
+	void SetRenderCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
 	RenderCanvas* GetRenderCanvas() { return m_canvas; }
 	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }
 	wxFrame* GetFullFrame() { return m_full_frame; }
@@ -188,7 +187,6 @@ private:
 	wxTimer m_enter_fscreen_trigger;
 
 	//render view///////////////////////////////////////////////
-	RenderView* m_renderview;
 	RenderCanvas *m_canvas;
 	wxFrame* m_full_frame;
 	wxBoxSizer* m_view_sizer;

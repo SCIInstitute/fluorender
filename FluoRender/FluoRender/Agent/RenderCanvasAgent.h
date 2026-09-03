@@ -62,9 +62,14 @@ public:
 		return static_cast<RenderCanvas*>(GetWindow());
 	}
 
+	void SetView(const std::shared_ptr<RenderView>& view)
+	{
+		m_view = view;
+	}
+
 	std::shared_ptr<RenderView> GetView() const
 	{
-		return view_.lock();
+		return m_view.lock();
 	}
 
 private:
@@ -78,7 +83,7 @@ private:
 		RenderCanvasAgent* sender);
 
 private:
-	std::weak_ptr<RenderView> view_;
+	std::weak_ptr<RenderView> m_view;
 
 	bool draw_pending_ = false;
 };

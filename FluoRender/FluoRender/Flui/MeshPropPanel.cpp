@@ -31,7 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <MainSettings.h>
 #include <CurrentObjects.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <MeshData.h>
 #include <MeshGroup.h>
@@ -44,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 #include <icons.h>
 #include <wx/valnum.h>
 
-MeshPropPanel::MeshPropPanel(MainFrame* frame,
+MeshPropPanel::MeshPropPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

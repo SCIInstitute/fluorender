@@ -39,7 +39,7 @@ RenderCanvasAgent::RenderCanvasAgent(
 	RenderCanvas* canvas,
 	const std::shared_ptr<RenderView>& view) :
 	Agent(canvas),
-	view_(view)
+	m_view(view)
 {
 }
 
@@ -101,7 +101,7 @@ void RenderCanvasAgent::SyncCamera(
 void RenderCanvasAgent::Update(
 	const UpdateRequest& request)
 {
-	auto view = view_.lock();
+	auto view = m_view.lock();
 	if (!view)
 		return;
 
@@ -143,7 +143,7 @@ void RenderCanvasAgent::PerformDraw()
 {
 	draw_pending_ = false;
 
-	auto view = view_.lock();
+	auto view = m_view.lock();
 	if (!view)
 		return;
 

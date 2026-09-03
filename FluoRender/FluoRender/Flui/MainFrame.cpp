@@ -115,7 +115,6 @@ DEALINGS IN THE SOFTWARE.
 #include <png_resource.h>
 
 MainFrame::MainFrame(
-	wxFrame* frame,
 	const wxString& title,
 	int x, int y,
 	int w, int h,
@@ -124,7 +123,7 @@ MainFrame::MainFrame(
 	bool fullscreen,
 	bool windowed,
 	bool hidepanels)
-	: wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+	: wxFrame(0, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
 	m_title(title),
 	m_movie_panel(0),
 	m_tree_panel(0),

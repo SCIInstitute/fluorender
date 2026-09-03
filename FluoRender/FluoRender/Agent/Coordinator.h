@@ -40,11 +40,18 @@ public:
 	void Register(Agent* agent);
 	void Unregister(Agent* agent);
 
-	void Dispatch(
-		const UpdateRequest& request);
+	void Dispatch(const UpdateRequest& request);
+
+	template<class T>
+	T* FindAgent() const
+	{
+		for (auto agent : agents_)
+			if (auto result = dynamic_cast<T*>(agent))
+				return result;
+		return nullptr;
+	}
 
 private:
 	std::set<Agent*> agents_;
 };
-
 #endif//Coordinator_h

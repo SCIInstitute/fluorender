@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class wxSingleSlider;
-class MainFrame;
 struct SaveProjectInfo
 {
 	bool prj_save;
@@ -86,7 +85,7 @@ struct DeviceTreeInfo
 class SettingDlg : public TabbedPanel
 {
 public:
-	SettingDlg(MainFrame* frame);
+	SettingDlg(wxWindow* parent);
 	~SettingDlg();
 
 	//update

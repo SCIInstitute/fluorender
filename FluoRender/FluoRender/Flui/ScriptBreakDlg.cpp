@@ -34,10 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptProc.h>
 #include <MovieMaker.h>
 
-ScriptBreakDlg::ScriptBreakDlg(MainFrame* frame) :
-	PropPanel(frame,
+ScriptBreakDlg::ScriptBreakDlg(wxWindow* parent) :
+	PropPanel(parent,
 		wxDefaultPosition,
-		frame->FromDIP(wxSize(400, 300)),
+		parent->FromDIP(wxSize(400, 300)),
 		0, "ScriptBreakDlg")
 {
 	// temporarily block events during constructor:

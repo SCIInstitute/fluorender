@@ -30,7 +30,6 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <BrushDefault.h>
 #include <GlobalStates.h>
-#include <MainFrame.h>
 #include <RenderView.h>
 #include <compatibility.h>
 #include <CurrentObjects.h>
@@ -298,7 +297,7 @@ void DataTreeCtrl::OnSelectionChanged(wxTreeEvent& event)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-TreePanel::TreePanel(MainFrame* frame,
+TreePanel::TreePanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,

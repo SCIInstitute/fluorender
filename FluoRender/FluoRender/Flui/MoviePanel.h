@@ -42,8 +42,6 @@ DEALINGS IN THE SOFTWARE.
 #define UITEXT_NBPG4_0 "Scripts"
 #define UITEXT_NBPG4_1 "Scripts (Enabled)"
 
-class MainFrame;
-class RenderView;
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
 
@@ -135,7 +133,7 @@ class MoviePanel : public TabbedPanel
 	};
 
 public:
-	MoviePanel(MainFrame* frame,
+	MoviePanel(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
