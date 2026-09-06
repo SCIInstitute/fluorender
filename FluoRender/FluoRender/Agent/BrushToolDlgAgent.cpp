@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <RulerAlign.h>
 #include <Count.h>
+#include <BrickTexture.h>
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 

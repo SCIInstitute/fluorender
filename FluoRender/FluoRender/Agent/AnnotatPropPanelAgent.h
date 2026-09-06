@@ -49,10 +49,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 	
-	AnnotatPropPanel* GetPanel() const
-	{
-		return static_cast<AnnotatPropPanel*>(GetWindow());
-	}
+	AnnotatPropPanel* GetPanel() const;
 
 	std::shared_ptr<AnnotData> GetData() const
 	{

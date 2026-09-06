@@ -59,6 +59,11 @@ void AnnotatPropPanelAgent::Update(
 	}
 }
 
+AnnotatPropPanel* AnnotatPropPanelAgent::GetPanel() const
+{
+	return static_cast<AnnotatPropPanel*>(GetWindow());
+}
+
 void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
