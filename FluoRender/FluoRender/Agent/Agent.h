@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define Agent_h
 
 #include <Value.hpp>
+#include <Names.h>
 #include <set>
 #include <string>
 
@@ -39,17 +40,18 @@ class Agent;
 
 enum class UpdateMode : int
 {
-	All,
-	ExcludeSender,
-	SenderOnly,
+	All,//all views
+	ExcludeSender,//other views
+	SenderOnly,//current view
 	None
 };
 
 enum class UpdateDir : int
 {
+	Any,
 	UItoData,
 	DataToUI,
-	Any
+	View
 };
 
 struct UpdateRequest
@@ -86,11 +88,10 @@ struct UpdateRequest
 	static UpdateRequest UIToData(
 		const fluo::ValueCollection& vals,
 		Agent* sender = nullptr,
+		UpdateMode mode = UpdateMode::SenderOnly,
 		const std::string& reason = "")
 	{
-		UpdateRequest r(vals, sender,
-			UpdateMode::SenderOnly,
-			reason);
+		UpdateRequest r(vals, sender, mode, reason);
 		r.dir = UpdateDir::UItoData;
 		return r;
 	}
@@ -101,9 +102,7 @@ struct UpdateRequest
 		UpdateMode mode = UpdateMode::ExcludeSender,
 		const std::string& reason = "")
 	{
-		UpdateRequest r(vals, sender,
-			mode,
-			reason);
+		UpdateRequest r(vals, sender, mode, reason);
 		r.dir = UpdateDir::DataToUI;
 		return r;
 	}
@@ -111,12 +110,13 @@ struct UpdateRequest
 	static UpdateRequest ViewUpdate(
 		const fluo::ValueCollection& vals,
 		Agent* sender = nullptr,
+		UpdateMode mode = UpdateMode::SenderOnly,
 		const std::string& reason = "")
 	{
-		UpdateRequest r(vals, sender,
-			UpdateMode::ExcludeSender,
-			reason);
-		r.dir = UpdateDir::DataToUI;
+		fluo::ValueCollection view_vals = vals;
+		view_vals.insert(gstRenderView);
+		UpdateRequest r(view_vals, sender, mode, reason);
+		r.dir = UpdateDir::View;
 		return r;
 	}
 };

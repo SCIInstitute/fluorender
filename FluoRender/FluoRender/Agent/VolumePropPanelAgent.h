@@ -40,7 +40,10 @@ class VolumePropPanelAgent : public Agent
 {
 public:
 	VolumePropPanelAgent(
-		VolumePropPanel* panel);
+		VolumePropPanel* panel,
+		const std::shared_ptr<VolumeData>& vd,
+		const std::shared_ptr<VolumeGroup>& group,
+		const std::shared_ptr<RenderView>& view);
 
 	virtual ~VolumePropPanelAgent() = default;
 

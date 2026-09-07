@@ -38,7 +38,8 @@ class AnnotatPropPanelAgent : public Agent
 {
 public:
 	AnnotatPropPanelAgent(
-		AnnotatPropPanel* panel);
+		AnnotatPropPanel* panel,
+		const std::shared_ptr<AnnotData>& ann);
 
 	virtual ~AnnotatPropPanelAgent() = default;
 

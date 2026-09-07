@@ -112,11 +112,10 @@ CalculationDlg* FluiBuilder::BuildCalculationDlg(
 }
 
 ClipPlanePanel* FluiBuilder::BuildClipPlanePanel(
-	wxWindow* parent,
-	const std::shared_ptr<TreeLayer>& layer)
+	wxWindow* parent)
 {
 	return BuildUi<ClipPlanePanel,
-		ClipPlanePanelAgent>(parent, layer);
+		ClipPlanePanelAgent>(parent);
 }
 
 ColocalizationDlg* FluiBuilder::BuildColocalizationDlg(
@@ -190,9 +189,11 @@ MainFrame* FluiBuilder::BuildMainFrame(
 	
 	auto agent = std::make_unique<MainFrameAgent>(frame);
 
+	glbin_coordinator.Register(agent.get());
+
 	frame->SetAgent(std::move(agent));
 
-	glbin_coordinator.Register(agent.get());
+	return frame;
 }
 
 ManipPropPanel* FluiBuilder::BuildManipPropPanel(
@@ -316,10 +317,12 @@ TreePanel* FluiBuilder::BuildTreePanel(
 VolumePropPanel*
 FluiBuilder::BuildVolumePropPanel(
 	wxWindow* parent,
-	const std::shared_ptr<VolumeData>& vd)
+	const std::shared_ptr<VolumeData>& vd,
+	const std::shared_ptr<VolumeGroup>& group,
+	const std::shared_ptr<RenderView>& view)
 {
 	return BuildUi<VolumePropPanel,
-		VolumePropPanelAgent>(parent, vd);
+		VolumePropPanelAgent>(parent, vd, group, view);
 }
 
 template<
@@ -339,9 +342,9 @@ UiT* FluiBuilder::BuildUi(
 
 	auto* agent_ptr = agent.get();
 
-	ui->SetAgent(std::move(agent));
-
 	glbin_coordinator.Register(agent_ptr);
+
+	ui->SetAgent(std::move(agent));
 
 	return ui;
 }

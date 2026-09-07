@@ -46,10 +46,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	ListPanel* GetPanel() const
-	{
-		return static_cast<ListPanel*>(GetWindow());
-	}
+	ListPanel* GetPanel() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);

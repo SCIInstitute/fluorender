@@ -38,7 +38,8 @@ class ManipPropPanelAgent : public Agent
 {
 public:
 	ManipPropPanelAgent(
-		ManipPropPanel* panel);
+		ManipPropPanel* panel,
+		const std::shared_ptr<MeshData>& md);
 
 	virtual ~ManipPropPanelAgent() = default;
 
@@ -49,10 +50,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	ManipPropPanel* GetPanel() const
-	{
-		return static_cast<ManipPropPanel*>(GetWindow());
-	}
+	ManipPropPanel* GetPanel() const;
 
 	std::shared_ptr<MeshData> GetData() const
 	{

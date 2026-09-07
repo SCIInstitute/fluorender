@@ -57,6 +57,11 @@ void ListPanelAgent::Update(
 	}
 }
 
+ListPanel* ListPanelAgent::GetPanel() const
+{
+	return static_cast<ListPanel*>(GetWindow());
+}
+
 void ListPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();

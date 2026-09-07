@@ -30,6 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
+namespace flvr
+{
+	enum class ColorMode : int;
+}
 class RenderView;
 class VolumeData;
 class VolumeGroup;

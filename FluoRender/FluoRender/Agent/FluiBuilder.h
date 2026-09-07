@@ -42,7 +42,6 @@ class BrushToolDlg;
 class CalculationDlg;
 
 class ClipPlanePanel;
-class TreeLayer;
 
 class ColocalizationDlg;
 
@@ -91,6 +90,7 @@ class TreePanel;
 
 class VolumePropPanel;
 class VolumeData;
+class VolumeGroup;
 
 class FluiBuilder
 {
@@ -106,8 +106,7 @@ public:
 		wxWindow* parent);
 
 	static ClipPlanePanel* BuildClipPlanePanel(
-		wxWindow* parent,
-		const std::shared_ptr<TreeLayer>& layer);
+		wxWindow* parent);
 
 	static ColocalizationDlg* BuildColocalizationDlg(
 		wxWindow* parent);
@@ -187,7 +186,9 @@ public:
 
 	static VolumePropPanel* BuildVolumePropPanel(
 		wxWindow* parent,
-		const std::shared_ptr<VolumeData>& vd);
+		const std::shared_ptr<VolumeData>& vd,
+		const std::shared_ptr<VolumeGroup>& group,
+		const std::shared_ptr<RenderView>& view);
 
 protected:
 	template<

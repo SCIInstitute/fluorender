@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <ShaderProgram.h>
 #include <RenderView.h>
+#include <Coordinator.h>
 
 OutputAdjPanelAgent::OutputAdjPanelAgent(
 	OutputAdjPanel* dlg) :
@@ -418,7 +419,7 @@ void OutputAdjPanelAgent::SetSync(int i, bool val, bool update)
 		if (i != 2 && m_sync[2])
 			vc.insert(gstSyncB);
 
-		FluoRefresh(2, vc, { glbin_current.GetViewId() });
+		glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 	}
 }
 
@@ -481,7 +482,7 @@ void OutputAdjPanelAgent::SetGamma(int i, double val, bool notify)
 		break;
 	}
 
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 
 void OutputAdjPanelAgent::SetBrightness(int i, double val, bool notify)
@@ -543,7 +544,7 @@ void OutputAdjPanelAgent::SetBrightness(int i, double val, bool notify)
 		break;
 	}
 
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 
 void OutputAdjPanelAgent::SetHdr(int i, double val, bool notify)
@@ -605,7 +606,7 @@ void OutputAdjPanelAgent::SetHdr(int i, double val, bool notify)
 		break;
 	}
 
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 
 void OutputAdjPanelAgent::SyncColor(fluo::Color& c, double val)
@@ -800,7 +801,8 @@ void OutputAdjPanelAgent::SyncGamma(int i)
 		vc.insert(gstGammaG);
 	if (i != 2)
 		vc.insert(gstGammaB);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+
+	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 
 void OutputAdjPanelAgent::SyncBrightness(int i)
@@ -874,7 +876,8 @@ void OutputAdjPanelAgent::SyncBrightness(int i)
 		vc.insert(gstBrightnessG);
 	if (i != 2)
 		vc.insert(gstBrightnessB);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+
+	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 
 void OutputAdjPanelAgent::SyncHdr(int i)
@@ -948,6 +951,7 @@ void OutputAdjPanelAgent::SyncHdr(int i)
 		vc.insert(gstEqualizeG);
 	if (i != 2)
 		vc.insert(gstEqualizeB);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+
+	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 

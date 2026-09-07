@@ -1312,6 +1312,7 @@ target_link_libraries(MAIN_LIB PRIVATE
 
 # Agent
 target_include_directories(AGENT_LIB PRIVATE
+  ${Boost_INCLUDE_DIR}
   ${GLM_INCLUDE_DIR}
 )
 if (WIN32)

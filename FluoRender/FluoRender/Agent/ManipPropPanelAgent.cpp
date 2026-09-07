@@ -32,8 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 
 ManipPropPanelAgent::ManipPropPanelAgent(
-	ManipPropPanel* panel) :
-	Agent(panel)
+	ManipPropPanel* panel,
+	const std::shared_ptr<MeshData>& md) :
+	Agent(panel),
+	m_md(md)
 {
 
 }
@@ -55,6 +57,11 @@ void ManipPropPanelAgent::Update(
 	{
 		UpdateData(request);
 	}
+}
+
+ManipPropPanel* ManipPropPanelAgent::GetPanel() const
+{
+	return static_cast<ManipPropPanel*>(GetWindow());
 }
 
 void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)

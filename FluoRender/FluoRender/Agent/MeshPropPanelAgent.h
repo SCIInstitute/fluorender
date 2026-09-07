@@ -38,7 +38,8 @@ class MeshPropPanelAgent : public Agent
 {
 public:
 	MeshPropPanelAgent(
-		MeshPropPanel* panel);
+		MeshPropPanel* panel,
+		const std::shared_ptr<MeshData>& md);
 
 	virtual ~MeshPropPanelAgent() = default;
 
@@ -49,10 +50,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	MeshPropPanel* GetPanel() const
-	{
-		return static_cast<MeshPropPanel*>(GetWindow());
-	}
+	MeshPropPanel* GetPanel() const;
 
 	std::shared_ptr<MeshData> GetData() const
 	{

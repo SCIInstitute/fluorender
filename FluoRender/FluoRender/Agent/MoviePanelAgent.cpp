@@ -65,6 +65,11 @@ void MoviePanelAgent::Update(
 	}
 }
 
+MoviePanel* MoviePanelAgent::GetPanel() const
+{
+	return static_cast<MoviePanel*>(GetWindow());
+}
+
 void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();

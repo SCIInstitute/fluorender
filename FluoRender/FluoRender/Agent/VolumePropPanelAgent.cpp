@@ -37,8 +37,14 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 
 VolumePropPanelAgent::VolumePropPanelAgent(
-	VolumePropPanel* panel) :
-	Agent(panel)
+	VolumePropPanel* panel,
+	const std::shared_ptr<VolumeData>& vd,
+	const std::shared_ptr<VolumeGroup>& group,
+	const std::shared_ptr<RenderView>& view) :
+	Agent(panel),
+	m_vd(vd),
+	m_group(group),
+	m_view(view)
 {
 
 }

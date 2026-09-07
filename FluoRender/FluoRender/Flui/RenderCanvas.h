@@ -62,10 +62,7 @@ public:
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);
 #endif
 
-	RenderCanvasAgent* GetRenderCanvasAgent()
-	{
-		return dynamic_cast<RenderCanvasAgent*>(m_agent.get());
-	}
+	RenderCanvasAgent* GetRenderCanvasAgent() const;
 
 	//get view info for external ops
 	//get size, considering enlargement

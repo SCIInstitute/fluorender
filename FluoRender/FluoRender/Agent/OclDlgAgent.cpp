@@ -98,7 +98,7 @@ bool OclDlgAgent::GetKernelList(std::vector<std::wstring>& list)
 {
 	std::filesystem::path p = GetUserSettingsRoot();
 	p /= "CL_code";
-	std::vector<std::string> list;
+
 	// Iterate over the files in the "Scripts" directory
 	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
 		return false;

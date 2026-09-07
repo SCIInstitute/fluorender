@@ -50,10 +50,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	MoviePanel* GetPanel() const
-	{
-		return static_cast<MoviePanel*>(GetWindow());
-	}
+	MoviePanel* GetPanel() const;
 
 private:
 	void UpdateUI(const UpdateRequest& request);

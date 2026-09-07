@@ -32,8 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 
 AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel) :
-	Agent(panel)
+	AnnotatPropPanel* panel,
+	const std::shared_ptr<AnnotData>& ann) :
+	Agent(panel),
+	m_ann(ann)
 {
 
 }

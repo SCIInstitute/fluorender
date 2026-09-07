@@ -288,6 +288,11 @@ int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd) {
 }
 #endif
 
+RenderCanvasAgent* RenderCanvas::GetRenderCanvasAgent() const
+{
+	return dynamic_cast<RenderCanvasAgent*>(m_agent.get());
+}
+
 inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
 {
 	double dval = 1;

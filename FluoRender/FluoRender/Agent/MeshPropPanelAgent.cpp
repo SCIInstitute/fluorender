@@ -34,8 +34,10 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 
 MeshPropPanelAgent::MeshPropPanelAgent(
-	MeshPropPanel* panel) :
-	Agent(panel)
+	MeshPropPanel* panel,
+	const std::shared_ptr<MeshData>& md) :
+	Agent(panel),
+	m_md(md)
 {
 
 }
@@ -59,6 +61,11 @@ void MeshPropPanelAgent::Update(
 	}
 }
 
+MeshPropPanel* MeshPropPanelAgent::GetPanel() const
+{
+	return static_cast<MeshPropPanel*>(GetWindow());
+}
+
 void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
@@ -70,10 +77,6 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 
 	if (FOUND_VALUE(gstNull))
 		return;
-	auto md = m_md.lock();
-	if (!md)
-		return;
-
 	bool update_all = request.values.empty() || FOUND_VALUE(gstMeshProps);
 
 	fluo::Color cval;
