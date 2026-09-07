@@ -50,10 +50,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	RenderViewPanel* GetPanel() const
-	{
-		return static_cast<RenderViewPanel*>(GetWindow());
-	}
+	RenderViewPanel* GetPanel() const;
 
 	void SetView(const std::shared_ptr<RenderView>& view)
 	{

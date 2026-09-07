@@ -62,6 +62,11 @@ void TreePanelAgent::Update(
 	}
 }
 
+TreePanel* TreePanelAgent::GetPanel() const
+{
+	return static_cast<TreePanel*>(GetWindow());
+}
+
 void TreePanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
@@ -72,7 +77,6 @@ void TreePanelAgent::UpdateUI(const UpdateRequest& request)
 		return;
 
 	bool update_all = request.values.empty();
-	bool bval;
 
 	//update icons only
 	if (update_all || FOUND_VALUE(gstTreeCtrl) || FOUND_VALUE(gstTreeLayerName))

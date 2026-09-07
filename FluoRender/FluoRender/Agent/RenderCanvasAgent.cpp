@@ -162,3 +162,8 @@ void RenderCanvasAgent::PerformDraw()
 	if (canvas && success)
 		canvas->SwapBuffers();
 }
+
+RenderCanvas* RenderCanvasAgent::GetCanvas() const
+{
+	return static_cast<RenderCanvas*>(GetWindow());
+}

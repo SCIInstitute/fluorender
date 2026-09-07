@@ -207,10 +207,7 @@ void ClipPlanePanelAgent::UpdateUI(const UpdateRequest& request)
 		panel->UpdateClipDist(dx, dy, dz);
 	}
 
-	bool bval;
 	double dval;
-	int ival;
-	wxString str;
 
 	//x1
 	if (update_all || FOUND_VALUE(gstClipX1))

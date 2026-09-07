@@ -54,10 +54,7 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
-	VolumePropPanel* GetPanel() const
-	{
-		return static_cast<VolumePropPanel*>(GetWindow());
-	}
+	VolumePropPanel* GetPanel() const;
 
 	std::shared_ptr<VolumeData> GetData() const
 	{

@@ -30,11 +30,12 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 
-class TrackDlg;
 namespace flrd
 {
 	class CelpList;
 }
+class TrackDlg;
+struct TrackItem;
 struct TrackViewData;
 class TrackDlgAgent : public Agent
 {

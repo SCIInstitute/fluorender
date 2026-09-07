@@ -118,6 +118,12 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+enum class InteractiveMode : int;
+namespace flrd
+{
+	enum class SelectMode : int;
+	enum class RulerMode : int;
+}
 class TreePanel : public PropPanel
 {
 public:

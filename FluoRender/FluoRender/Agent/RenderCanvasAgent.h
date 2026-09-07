@@ -57,10 +57,7 @@ public:
 
 	void PerformDraw();
 
-	RenderCanvas* GetCanvas() const
-	{
-		return static_cast<RenderCanvas*>(GetWindow());
-	}
+	RenderCanvas* GetCanvas() const;
 
 	void SetView(const std::shared_ptr<RenderView>& view)
 	{

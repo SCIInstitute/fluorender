@@ -68,6 +68,11 @@ void VolumePropPanelAgent::Update(
 	}
 }
 
+VolumePropPanel* VolumePropPanelAgent::GetPanel() const
+{
+	return static_cast<VolumePropPanel*>(GetWindow());
+}
+
 void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();

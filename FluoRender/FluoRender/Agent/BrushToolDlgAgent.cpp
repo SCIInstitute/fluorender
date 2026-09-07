@@ -91,11 +91,12 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	if (update_all || FOUND_VALUE(gstSelUndo) || FOUND_VALUE(gstCurrentSelect))
 	{
-		if (sel_vol && sel_vol->GetTexture())
-			dlg->EnableUndo(
-				sel_vol->GetTexture()->get_undo(),
-				sel_vol->GetTexture()->get_redo());
-		else
+		//need to fix later when pyramid is moved under volumedata
+		//if (sel_vol && sel_vol->GetTexture())
+		//	dlg->EnableUndo(
+		//		sel_vol->GetTexture()->get_undo(),
+		//		sel_vol->GetTexture()->get_redo());
+		//else
 			dlg->EnableUndo(false, false);
 	}
 

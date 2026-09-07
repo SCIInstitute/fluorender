@@ -64,12 +64,17 @@ void RenderViewPanelAgent::Update(
 	}
 }
 
+RenderViewPanel* RenderViewPanelAgent::GetPanel() const
+{
+	return static_cast<RenderViewPanel*>(GetWindow());
+}
+
 void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto view = GetData();
+	auto view = GetView();
 	if (!view)
 		return;
 
@@ -263,8 +268,8 @@ void RenderViewPanelAgent::UpdateData(const UpdateRequest& request)
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto ann = GetData();
-	if (!ann)
+	auto view = GetView();
+	if (!view)
 		return;
 
 }
