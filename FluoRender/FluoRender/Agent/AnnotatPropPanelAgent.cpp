@@ -29,7 +29,6 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotatPropPanelAgent.h>
 #include <AnnotatPropPanel.h>
 #include <AnnotData.h>
-#include <Names.h>
 
 AnnotatPropPanelAgent::AnnotatPropPanelAgent(
 	AnnotatPropPanel* panel,
@@ -38,14 +37,6 @@ AnnotatPropPanelAgent::AnnotatPropPanelAgent(
 	m_ann(ann)
 {
 
-}
-
-bool AnnotatPropPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return
-		FOUND_VALUE(gstAnnotMemoText) ||
-		FOUND_VALUE(gstAnnotMemoReadOnly);
 }
 
 void AnnotatPropPanelAgent::Update(
@@ -75,12 +66,12 @@ void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	if (!ann)
 		return;
 
-	if (FOUND_VALUE(gstAnnotMemoText))
+	if (request.HasValue(gstAnnotMemoText))
 	{
 		std::wstring str = ann->GetMemo();
 		panel->SetMemoText(str);
 	}
-	if (FOUND_VALUE(gstAnnotMemoReadOnly))
+	if (request.HasValue(gstAnnotMemoReadOnly))
 	{
 		bool bval = ann->GetMemoRO();
 		panel->SetMemoReadOnly(bval);
@@ -96,7 +87,7 @@ void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
 	if (!ann)
 		return;
 
-	if (FOUND_VALUE(gstAnnotMemoText))
+	if (request.HasValue(gstAnnotMemoText))
 	{
 		std::wstring str = panel->GetMemoText();
 		ann->SetMemo(str);

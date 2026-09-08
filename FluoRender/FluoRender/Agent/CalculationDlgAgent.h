@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define CalculationDlgAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class CalculationDlg;
 class CalculationDlgAgent : public Agent
@@ -48,10 +49,32 @@ public:
 
 	CalculationDlg* GetDialog() const;
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
+
+	void CombineVolumes();
+
+private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstVolumeA,
+		gstVolumeB,
+		gstCalcSub,
+		gstCalcAdd,
+		gstCalcDiv,
+		gstCalcIsc,
+		gstCalcFill,
+		gstCalcCombine
+	};
 };
 
 #endif // CalculationDlgAgent_h

@@ -26,23 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <BrushToolDlg.h>
-#include <Global.h>
-#include <Names.h>
+#include <BrushToolDlgAgent.h>
 #include <RenderView.h>
-#include <NoiseCancellingDlg.h>
-#include <CountingDlg.h>
-#include <TreePanel.h>
-#include <VolumeData.h>
-#include <Count.h>
-#include <BrickTexture.h>
 #include <VolumeSelector.h>
-#include <Colocalize.h>
-#include <Ruler.h>
-#include <RulerHandler.h>
-#include <RulerAlign.h>
-#include <BrushDefault.h>
-#include <GlobalStates.h>
-#include <CurrentObjects.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
@@ -617,186 +603,76 @@ void BrushToolDlg::SetOutput(const BrushGridData& data, const std::wstring& unit
 	m_output_grid->ClearSelection();
 }
 
-void BrushToolDlg::BrushUndo()
-{
-	glbin_vol_selector.UndoMask();
-	FluoRefresh(2, { gstSelUndo });
-}
-
-void BrushToolDlg::BrushRedo()
-{
-	glbin_vol_selector.RedoMask();
-	FluoRefresh(2, { gstSelUndo });
-}
-
-void BrushToolDlg::BrushGrow()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushAppend()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushComp()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushMesh()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Mesh);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushSingle()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushDiffuse()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushSolid()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Solid);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-void BrushToolDlg::BrushUnsel()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, {-1});
-}
-
-//toolbar2
-void BrushToolDlg::BrushClear()
-{
-	glbin_vol_selector.Clear();
-	FluoRefresh(3, { gstNull });
-}
-
-void BrushToolDlg::BrushExtract()
-{
-	glbin_vol_selector.Extract();
-	FluoRefresh(0, { gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
-}
-
-void BrushToolDlg::BrushDelete()
-{
-	glbin_vol_selector.Erase();
-	FluoRefresh(0, { gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
-}
-
-void BrushToolDlg::MaskCopy()
-{
-	glbin_vol_selector.CopyMask(false);
-	FluoRefresh(2, { gstSelMask });
-}
-
-void BrushToolDlg::MaskCopyData()
-{
-	glbin_vol_selector.CopyMask(true);
-	FluoRefresh(2, { gstSelMask });
-}
-
-void BrushToolDlg::MaskPaste()
-{
-	glbin_vol_selector.PasteMask(0);
-	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-}
-
-void BrushToolDlg::MaskMerge()
-{
-	glbin_vol_selector.PasteMask(1);
-	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-}
-
-void BrushToolDlg::MaskExclude()
-{
-	glbin_vol_selector.PasteMask(2);
-	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-}
-
-void BrushToolDlg::MaskIntersect()
-{
-	glbin_vol_selector.PasteMask(3);
-	FluoRefresh(0, { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-}
-
 //brush commands
 void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (!agent)
+		return;
 	int id = event.GetId();
+	fluo::ValueCollection vc;
 
 	switch (id)
 	{
 	case ID_BrushUndo:
-		BrushUndo();
+		vc.insert(gstSelUndo);
 		break;
 	case ID_BrushRedo:
-		BrushRedo();
+		vc.insert(gstSelRedo);
 		break;
 	case ID_BrushGrow:
-		BrushGrow();
+		vc.insert(gstBrushGrow);
 		break;
 	case ID_BrushAppend:
-		BrushAppend();
+		vc.insert(gstBrushAppend);
 		break;
 	case ID_BrushComp:
-		BrushComp();
+		vc.insert(gstBrushComp);
 		break;
 	case ID_BrushMesh:
-		BrushMesh();
+		vc.insert(gstBrushMesh);
 		break;
 	case ID_BrushSingle:
-		BrushSingle();
+		vc.insert(gstBrushSingle);
 		break;
 	case ID_BrushDiffuse:
-		BrushDiffuse();
+		vc.insert(gstBrushDiffuse);
 		break;
 	case ID_BrushSolid:
-		BrushSolid();
+		vc.insert(gstBrushSolid);
 		break;
 	case ID_BrushUnsel:
-		BrushUnsel();
+		vc.insert(gstBrushUnsel);
 		break;
 	case ID_BrushClear:
-		BrushClear();
+		vc.insert(gstBrushClear);
 		break;
 	case ID_BrushExtract:
-		BrushExtract();
+		vc.insert(gstBrushExtract);
 		break;
 	case ID_BrushDelete:
-		BrushDelete();
+		vc.insert(gstBrushDelete);
 		break;
 	case ID_MaskCopy:
-		MaskCopy();
+		vc.insert(gstMaskCopy);
 		break;
 	case ID_MaskCopyData:
-		MaskCopyData();
+		vc.insert(gstMaskCopyData);
 		break;
 	case ID_MaskPaste:
-		MaskPaste();
+		vc.insert(gstMaskPaste);
 		break;
 	case ID_MaskMerge:
-		MaskMerge();
+		vc.insert(gstMaskMerge);
 		break;
 	case ID_MaskExclude:
-		MaskExclude();
+		vc.insert(gstMaskExclude);
 		break;
 	case ID_MaskIntersect:
-		MaskIntersect();
+		vc.insert(gstMaskIntersect);
 		break;
 	}
+	agent->UpdateUIToData(vc);
 }
 
 //selection adjustment
@@ -817,8 +693,9 @@ void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 	str.ToDouble(&val);
 	m_brush_scl_translate_sldr->ChangeValue(std::round(val*10.0));
 
-	//set translate
-	glbin_vol_selector.SetBrushSclTranslate(val / m_max_value);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushSclTranslate(val);
 
 	LaunchAutoUpdateTimer();
 }
@@ -840,8 +717,9 @@ void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 	str.ToDouble(&val);
 	m_brush_gm_falloff_sldr->ChangeValue(std::round(val*1000.0));
 
-	//set gm falloff
-	glbin_vol_selector.SetBrushGmFalloff(GM_2_ESTR(val));
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushGmFalloff(val);
 
 	LaunchAutoUpdateTimer();
 }
@@ -863,8 +741,9 @@ void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 	str.ToDouble(&val);
 	m_brush_2dinfl_sldr->ChangeValue(std::round(val*100.0));
 
-	//set 2d weight
-	glbin_vol_selector.SetW2d(val);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetW2d(val);
 
 	LaunchAutoUpdateTimer();
 }
@@ -877,8 +756,9 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 	m_brush_gm_falloff_sldr->Enable(bval);
 	m_brush_gm_falloff_text->Enable(bval);
 
-	//set edge detect
-	glbin_vol_selector.SetEdgeDetect(bval);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetEdgeDetect(bval);
 
 	LaunchAutoUpdateTimer();
 }
@@ -886,37 +766,33 @@ void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 //hidden removal
 void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent& event)
 {
-	bool hidden_removal = m_hidden_removal_chk->GetValue();
+	bool bval = m_hidden_removal_chk->GetValue();
 
-	//set hidden removal
-	glbin_vol_selector.SetHiddenRemoval(hidden_removal);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetHiddenRemoval(bval);
 }
 
 //select group
 void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 {
-	bool select_group = m_select_group_chk->GetValue();
+	bool bval = m_select_group_chk->GetValue();
 
-	//set select group
-	glbin_vol_selector.SetSelectGroup(select_group);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetSelectGroup(bval);
 
 	LaunchAutoUpdateTimer();
 }
 
-//estimate threshold
-//void BrushToolDlg::OnEstimateThreshChk(wxCommandEvent& event)
-//{
-//	bool value = m_estimate_thresh_chk->GetValue();
-//
-//	glbin_vol_selector.SetEstimateThreshold(value);
-//}
-
 //brick accuracy
 void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent& event)
 {
-	bool value = m_accurate_bricks_chk->GetValue();
+	bool bval = m_accurate_bricks_chk->GetValue();
 
-	glbin_vol_selector.SetUpdateOrder(value);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetUpdateOrder(bval);
 }
 
 //brush size 1
@@ -931,31 +807,32 @@ void BrushToolDlg::OnBrushSize1Change(wxScrollEvent& event)
 void BrushToolDlg::OnBrushSize1Text(wxCommandEvent& event)
 {
 	wxString str = m_brush_size1_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_brush_size1_sldr->ChangeValue(std::round(val));
+	double dval;
+	str.ToDouble(&dval);
+	m_brush_size1_sldr->ChangeValue(std::round(dval));
 
-	//set size1
-	glbin_vol_selector.SetBrushSize(val, -1.0);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushSize1(dval);
 }
 
 //brush size 2
 void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent& event)
 {
 	wxString str = m_brush_size1_text->GetValue();
-	double val1;
-	str.ToDouble(&val1);
+	double dval1;
+	str.ToDouble(&dval1);
 	str = m_brush_size2_text->GetValue();
-	double val2;
-	str.ToDouble(&val2);
+	double dval2;
+	str.ToDouble(&dval2);
 
 	bool bval = m_brush_size2_chk->GetValue();
 	m_brush_size2_sldr->Enable(bval);
 	m_brush_size2_text->Enable(bval);
-	glbin_vol_selector.SetUseBrushSize2(bval);
-	glbin_vol_selector.SetBrushSize(val1, val2);
-	FluoRefresh(3, { gstNull });
+
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushSize2Enable(bval, dval1, dval2);
 }
 
 void BrushToolDlg::OnBrushSize2Change(wxScrollEvent& event)
@@ -969,13 +846,13 @@ void BrushToolDlg::OnBrushSize2Change(wxScrollEvent& event)
 void BrushToolDlg::OnBrushSize2Text(wxCommandEvent& event)
 {
 	wxString str = m_brush_size2_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_brush_size2_sldr->ChangeValue(std::round(val));
+	double dval;
+	str.ToDouble(&dval);
+	m_brush_size2_sldr->ChangeValue(std::round(dval));
 
-	//set size2
-	glbin_vol_selector.SetBrushSize(-1.0, val);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushSize2(dval);
 }
 
 //brush iterations
@@ -990,11 +867,13 @@ void BrushToolDlg::OnBrushIterChange(wxScrollEvent& event)
 void BrushToolDlg::OnBrushIterText(wxCommandEvent& event)
 {
 	wxString str = m_brush_iter_text->GetValue();
-	long val;
-	str.ToLong(&val);
-	m_brush_iter_sldr->ChangeValue(val);
+	long ival;
+	str.ToLong(&ival);
+	m_brush_iter_sldr->ChangeValue(ival);
 
-	glbin_vol_selector.SetBrushIteration(val);
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushIteration(ival);
 
 	LaunchAutoUpdateTimer();
 }
@@ -1002,39 +881,41 @@ void BrushToolDlg::OnBrushIterText(wxCommandEvent& event)
 //brush size relation
 void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 {
-	if (m_brush_size_data_rb->GetValue())
-	{
-		glbin_vol_selector.SetBrushSizeData(true);
-	}
-	else if (m_brush_size_screen_rb->GetValue())
-	{
-		glbin_vol_selector.SetBrushSizeData(false);
-	}
+	bool bval1 = m_brush_size_data_rb->GetValue();
+	bool bval2 = m_brush_size_screen_rb->GetValue();
+	bool bval = bval1 == bval2 ? true : bval1;
+
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetBrushSizeData(bval);
 }
 
 //align
 void BrushToolDlg::OnAlignCenterCheck(wxCommandEvent& event)
 {
 	bool bval = m_align_center_chk->GetValue();
-	glbin_aligner.SetAlignCenter(bval);
-	FluoRefresh(1, { gstAlignCenter }, { -1 });
+
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->SetAlignCenter(bval);
 }
 
 void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 {
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	glbin_aligner.SetVolumeData(vd);
-	glbin_aligner.SetAxisType(event.GetId());
-	glbin_aligner.SetView(glbin_current.render_view.lock());
-	glbin_aligner.AlignPca(false);
-	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId()});
+	int ival = event.GetId();
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+	{
+		agent->SetAlignAxis(ival);
+		agent->UpdateUIToData({ gstAlignPca });
+	}
 }
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	FluoUpdate({ gstBrushCountResult });
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstBrushCountResult });
 }
 
 void BrushToolDlg::OnHistoryChk(wxCommandEvent& event)
@@ -1097,12 +978,9 @@ void BrushToolDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 {
 	m_auto_update_timer.Stop();
 
-	fluo::ValueCollection vc = { gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate };
-	if (glbin_vol_selector.GetThUpdate())
-		vc.insert(gstBrushThreshold);
-	glbin_vol_selector.PopMask();
-	glbin_vol_selector.Segment(true, false);
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<BrushToolDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTimerSegment });
 }
 
 void BrushToolDlg::CopyData()

@@ -32,11 +32,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <set>
 #include <string>
+#include <string_view>
+#include <span>
 
 class wxWindow;
 class Agent;
-
-#define FOUND_VALUE(v) request.values.find(v) != request.values.end()
 
 enum class UpdateMode : int
 {
@@ -86,6 +86,11 @@ struct UpdateRequest
 	// optional debug string
 	std::string reason;
 
+	bool HasValue(std::string_view value) const
+	{
+		return values.find(std::string(value)) != values.end();
+	}
+
 	static UpdateRequest UIToData(
 		const fluo::ValueCollection& vals,
 		Agent* sender = nullptr,
@@ -126,7 +131,7 @@ struct UpdateRequest
 	//update specific views
 	static UpdateRequest ViewUpdate(
 		const fluo::ValueCollection& vals,
-		Agent* sender = nullptr,
+		Agent* sender,
 		const std::set<Agent*>& targets,
 		const std::string& reason = "")
 	{
@@ -145,8 +150,27 @@ struct UpdateRequest
 	}
 };
 
+bool HasAnyValue(
+	const UpdateRequest& request,
+	std::span<const std::string_view> values)
+{
+	for (auto value : values)
+	{
+		if (request.HasValue(value))
+			return true;
+	}
+	return false;
+}
+
 class Agent
 {
+protected:
+	virtual std::span<const std::string_view>
+		AcceptedValues() const
+	{
+		return {};
+	}
+
 public:
 	explicit Agent(wxWindow* window) :
 		window_(window)
@@ -160,9 +184,12 @@ public:
 		return window_;
 	}
 
-	virtual bool Accept(const UpdateRequest& request) const
+	virtual bool Accept(
+		const UpdateRequest& request) const
 	{
-		return true;
+		if (request.HasValue(gstNull))
+			return false;
+		return HasAnyValue(request, AcceptedValues());
 	}
 
 	virtual void Update(const UpdateRequest& request) = 0;
@@ -179,8 +206,22 @@ public:
 		return dynamic_cast<const T*>(this);
 	}
 
-protected:
-	void Notify(const UpdateRequest& request);
+	void UpdateUIToData(
+		const fluo::ValueCollection& vals,
+		UpdateMode mode = UpdateMode::SenderOnly,
+		const std::string& reason = "")
+	{
+		Update(UpdateRequest::UIToData(
+			vals, this, mode, reason));
+	}
+
+	void UpdateDataToUI(
+		const fluo::ValueCollection& vals,
+		const std::string& reason = "")
+	{
+		Update(UpdateRequest::DataToUI(
+			vals, this, UpdateMode::SenderOnly, reason));
+	}
 
 	void NotifyUIToData(
 		const fluo::ValueCollection& vals,
@@ -217,6 +258,9 @@ protected:
 		Notify(UpdateRequest::ViewUpdate(
 			vals, this, targets, reason));
 	}
+
+protected:
+	void Notify(const UpdateRequest& request);
 
 private:
 	wxWindow* window_ = nullptr;

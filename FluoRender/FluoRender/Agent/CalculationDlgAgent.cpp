@@ -32,6 +32,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <VolumeCalculator.h>
 #include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <RenderView.h>
+#include <DataManager.h>
+#include <CurrentObjects.h>
+#include <CombineList.h>
 
 CalculationDlgAgent::CalculationDlgAgent(
 	CalculationDlg* dlg) :
@@ -66,12 +71,10 @@ void CalculationDlgAgent::UpdateUI(const UpdateRequest& request)
 		return;
 
 	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	std::wstring str;
-	if (update_all || FOUND_VALUE(gstVolumeA))
+	if (update_all || request.HasValue(gstVolumeA))
 	{
 		auto vd = glbin_vol_calculator.GetVolumeA();
 		if (vd)
@@ -81,7 +84,7 @@ void CalculationDlgAgent::UpdateUI(const UpdateRequest& request)
 		}
 	}
 
-	if (update_all || FOUND_VALUE(gstVolumeB))
+	if (update_all || request.HasValue(gstVolumeB))
 	{
 		auto vd = glbin_vol_calculator.GetVolumeB();
 		if (vd)
@@ -94,7 +97,38 @@ void CalculationDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void CalculationDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstLoadVolumeA))
+	{
+		glbin_vol_calculator.SetVolumeA(
+			glbin_current.vol_data.lock());
+	}
+	if (request.HasValue(gstLoadVolumeB))
+	{
+		glbin_vol_calculator.SetVolumeB(
+			glbin_current.vol_data.lock());
+	}
+	if (request.HasValue(gstCalcSub))
+	{
+		glbin_vol_calculator.CalculateGroup(1);
+	}
+	if (request.HasValue(gstCalcAdd))
+	{
+		glbin_vol_calculator.CalculateGroup(2);
+	}
+	if (request.HasValue(gstCalcDiv))
+	{
+		glbin_vol_calculator.CalculateGroup(3);
+	}
+	if (request.HasValue(gstCalcFill))
+	{
+		glbin_vol_calculator.SetVolumeB(0);
+		glbin_vol_calculator.CalculateGroup(9);
+	}
+	if (request.HasValue(gstCalcCombine))
+	{
+		CombineVolumes();
+		NotifyViewUpdate({ gstVolumePropPanel, gstListCtrl, gstTreeCtrl, gstCurrentSelect, gstUpdateSync });
+	}
 }
 
 CalculationDlg* CalculationDlgAgent::GetDialog() const
@@ -102,3 +136,63 @@ CalculationDlg* CalculationDlgAgent::GetDialog() const
 	return static_cast<CalculationDlg*>(GetWindow());
 }
 
+void CalculationDlgAgent::CombineVolumes()
+{
+	auto group = glbin_current.vol_group.lock();
+	if (!group)
+		return;
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+
+	flrd::CombineList Op;
+	std::wstring name = group->GetName() + L"_combined";
+	Op.SetName(name);
+	std::list<std::weak_ptr<VolumeData>> channs;
+	for (int i = 0; i < group->GetVolumeNum(); ++i)
+	{
+		auto vd = group->GetVolumeData(i);
+		if (!vd)
+			continue;
+		channs.push_back(vd);
+	}
+	if (channs.empty())
+		return;
+
+	Op.SetVolumes(channs);
+	if (!Op.Execute())
+		return;
+
+	auto results = Op.GetResults();
+	if (results.empty())
+		return;
+
+	std::wstring group_name = L"";
+	group = 0;
+	std::shared_ptr<VolumeData> volume;
+	for (auto it = results.begin(); it != results.end(); ++it)
+	{
+		auto vd = *it;
+		if (vd)
+		{
+			if (!volume) volume = vd;
+			glbin_data_manager.AddVolumeData(vd);
+			if (it == results.begin())
+			{
+				group_name = view->AddGroup(L"");
+				group = view->GetGroup(group_name);
+			}
+			view->AddVolumeData(vd, group_name);
+		}
+	}
+	if (group && volume)
+	{
+		fluo::Color col = volume->GetGammaColor();
+		group->SetGammaAll(col);
+		col = volume->GetBrightness();
+		group->SetBrightnessAll(col);
+		col = volume->GetHdr();
+		group->SetHdrAll(col);
+	}
+	glbin_current.SetVolumeGroup(group);
+}

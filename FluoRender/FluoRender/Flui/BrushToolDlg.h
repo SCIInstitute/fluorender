@@ -111,28 +111,6 @@ public:
 	//output
 	void SetOutput(const BrushGridData& data, const std::wstring& unit);
 
-	//toolbar1
-	void BrushUndo();
-	void BrushRedo();
-	void BrushGrow();
-	void BrushAppend();
-	void BrushComp();
-	void BrushMesh();
-	void BrushSingle();
-	void BrushDiffuse();
-	void BrushSolid();
-	void BrushUnsel();
-	//toolbar2
-	void BrushClear();
-	void BrushExtract();
-	void BrushDelete();
-	void MaskCopy();
-	void MaskCopyData();
-	void MaskPaste();
-	void MaskMerge();
-	void MaskExclude();
-	void MaskIntersect();
-
 private:
 	//output
 	bool m_hold_history;

@@ -26,15 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <CalculationDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <RenderView.h>
-#include <VolumeData.h>
-#include <VolumeGroup.h>
-#include <CurrentObjects.h>
-#include <DataManager.h>
-#include <CombineList.h>
-#include <VolumeCalculator.h>
+#include <CalculationDlgAgent.h>
 
 CalculationDlg::CalculationDlg(wxWindow* parent)
 	: PropPanel(parent,
@@ -142,109 +134,67 @@ void CalculationDlg::UpdateVolumeB(const std::wstring& str)
 //operands
 void CalculationDlg::OnLoadA(wxCommandEvent& event)
 {
-	glbin_vol_calculator.SetVolumeA(
-		glbin_current.vol_data.lock());
-
-	FluoUpdate({ gstVolumeA });
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+	{
+		agent->UpdateUIToData({ gstLoadVolumeA });
+		agent->UpdateDataToUI({ gstVolumeA });
+	}
 }
 
 void CalculationDlg::OnLoadB(wxCommandEvent& event)
 {
-	glbin_vol_calculator.SetVolumeB(
-		glbin_current.vol_data.lock());
-
-	FluoUpdate({ gstVolumeB });
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+	{
+		agent->UpdateUIToData({ gstLoadVolumeB });
+		agent->UpdateDataToUI({ gstVolumeB });
+	}
 }
 
 //operators
 void CalculationDlg::OnCalcSub(wxCommandEvent& event)
 {
-	glbin_vol_calculator.CalculateGroup(1);
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCalcSub });
 }
 
 void CalculationDlg::OnCalcAdd(wxCommandEvent& event)
 {
-	glbin_vol_calculator.CalculateGroup(2);
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCalcAdd });
 }
 
 void CalculationDlg::OnCalcDiv(wxCommandEvent& event)
 {
-	glbin_vol_calculator.CalculateGroup(3);
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCalcDiv });
 }
 
 void CalculationDlg::OnCalcIsc(wxCommandEvent& event)
 {
-	glbin_vol_calculator.CalculateGroup(4);
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCalcIsc });
 }
 
 //one-operators
 void CalculationDlg::OnCalcFill(wxCommandEvent& event)
 {
-	glbin_vol_calculator.SetVolumeB(0);
-	glbin_vol_calculator.CalculateGroup(9);
-	FluoUpdate({ gstVolumeB });
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+	{
+		agent->UpdateUIToData({ gstCalcFill });
+		agent->UpdateDataToUI({ gstVolumeB });
+	}
 }
 
 void CalculationDlg::OnCalcCombine(wxCommandEvent& event)
 {
-	auto group = glbin_current.vol_group.lock();
-	if (!group)
-		return;
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-
-	flrd::CombineList Op;
-	std::wstring name = group->GetName() + L"_combined";
-	Op.SetName(name);
-	std::list<std::weak_ptr<VolumeData>> channs;
-	for (int i = 0; i < group->GetVolumeNum(); ++i)
-	{
-		auto vd = group->GetVolumeData(i);
-		if (!vd)
-			continue;
-		channs.push_back(vd);
-	}
-	if (channs.empty())
-		return;
-
-	Op.SetVolumes(channs);
-	if (!Op.Execute())
-		return;
-
-	auto results = Op.GetResults();
-	if (results.empty())
-		return;
-
-	std::wstring group_name = L"";
-	group = 0;
-	std::shared_ptr<VolumeData> volume;
-	for (auto it = results.begin(); it != results.end(); ++it)
-	{
-		auto vd = *it;
-		if (vd)
-		{
-			if (!volume) volume = vd;
-			glbin_data_manager.AddVolumeData(vd);
-			if (it == results.begin())
-			{
-				group_name = view->AddGroup(L"");
-				group = view->GetGroup(group_name);
-			}
-			view->AddVolumeData(vd, group_name);
-		}
-	}
-	if (group && volume)
-	{
-		fluo::Color col = volume->GetGammaColor();
-		group->SetGammaAll(col);
-		col = volume->GetBrightness();
-		group->SetBrightnessAll(col);
-		col = volume->GetHdr();
-		group->SetHdrAll(col);
-	}
-	glbin_current.SetVolumeGroup(group);
-
-	FluoRefresh(1, { gstVolumePropPanel, gstListCtrl, gstTreeCtrl, gstCurrentSelect, gstUpdateSync },
-		{ glbin_current.GetViewId()});
+	auto agent = m_agent->As<CalculationDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCalcCombine });
 }

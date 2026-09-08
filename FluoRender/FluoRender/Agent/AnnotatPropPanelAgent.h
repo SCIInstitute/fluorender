@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define AnnotatPropPanelAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 #include <memory>
 
 class AnnotatPropPanel;
@@ -44,9 +45,6 @@ public:
 	virtual ~AnnotatPropPanelAgent() = default;
 
 	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
 	virtual void Update(
 		const UpdateRequest& request) override;
 	
@@ -57,12 +55,25 @@ public:
 		return m_ann.lock();
 	}
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
 private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstAnnotMemoText,
+		gstAnnotMemoReadOnly
+	};
+
 	std::weak_ptr<AnnotData> m_ann;
 };
 

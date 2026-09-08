@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define BrushToolDlgAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class BrushToolDlg;
 
@@ -41,21 +42,87 @@ public:
 	virtual ~BrushToolDlgAgent() = default;
 
 	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
 	virtual void Update(
 		const UpdateRequest& request) override;
 
 	BrushToolDlg* GetDialog() const;
 
-private:
-	//max volume value
-	double m_max_value{ 255.0 };
+	//settings
+	void SetBrushSclTranslate(double dval);
+	void SetBrushGmFalloff(double dval);
+	void SetW2d(double dval);
+	void SetEdgeDetect(bool bval);
+	void SetHiddenRemoval(bool bval);
+	void SetSelectGroup(bool bval);
+	void SetUpdateOrder(bool bval);
+	void SetBrushSize1(double dval);
+	void SetBrushSize2Enable(bool bval, double dval1, double dval2);
+	void SetBrushSize2(double dval);
+	void SetBrushIteration(int ival);
+	void SetBrushSizeData(bool bval);
+	void SetAlignCenter(bool bval);
+	void SetAlignAxis(int ival);
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
+private:
 	void UpdateUI(const UpdateRequest& request);
 
 	void UpdateData(const UpdateRequest& request);
+
+private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		//ui
+		gstCurrentSelect,
+		gstSelUndo,
+		gstSelRedo,
+		gstFreehandToolState,
+		gstSelMask,
+		gstSelOptions,
+		gstBrushThreshold,
+		gstBrushGmFalloff,
+		gstBrush2dInf,
+		gstBrushSize1,
+		gstBrushSize2,
+		gstBrushIter,
+		gstBrushSizeRel,
+		gstAlignCenter,
+		gstBrushHistoryEnable,
+		gstBrushCountResult,
+		gstBrushCountAutoUpdate,
+		gstBrushSpeedResult,
+		//data
+		gstBrushGrow,
+		gstBrushAppend,
+		gstBrushComp,
+		gstBrushMesh,
+		gstBrushSingle,
+		gstBrushDiffuse,
+		gstBrushSolid,
+		gstBrushUnsel,
+		gstBrushClear,
+		gstBrushExtract,
+		gstBrushDelete,
+		gstMaskCopy,
+		gstMaskCopyData,
+		gstMaskPaste,
+		gstMaskMerge,
+		gstMaskExclude,
+		gstMaskIntersect,
+		gstAlignPca,
+		//timer
+		gstTimerSegment
+	};
+
+	//max volume value
+	double m_max_value{ 255.0 };
+
 };
 
 #endif // BrushToolDlgAgent_h

@@ -1060,4 +1060,35 @@ DEALINGS IN THE SOFTWARE.
 #define gstAnnotMemoText "annot memo text"
 #define gstAnnotMemoReadOnly "annot memo read only"
 
+//brush tool dialog agent
+#define gstBrushGrow "brush grow"
+#define gstBrushAppend "brush append"
+#define gstBrushComp "brush comp"
+#define gstBrushMesh "brush mesh"
+#define gstBrushSingle "brush single"
+#define gstBrushDiffuse "brush diffuse"
+#define gstBrushSolid "brush solid"
+#define gstBrushUnsel "brush unsel"
+#define gstBrushClear "brush clear"
+#define gstBrushExtract "brush extract"
+#define gstBrushDelete "brush delete"
+#define gstMaskCopy "mask copy"
+#define gstMaskCopyData "mask copy data"
+#define gstMaskPaste "mask paste"
+#define gstMaskMerge "maske merge"
+#define gstMaskExclude "mask exclude"
+#define gstMaskIntersect "mask intersect"
+#define gstAlignPca "align pca"
+#define gstTimerSegment "timer segment"
+
+//calculation dialog agent
+#define gstLoadVolumeA "load volume a"
+#define gstLoadVolumeB "load volume b"
+#define gstCalcSub "calc sub"
+#define gstCalcAdd "calc add"
+#define gstCalcDiv "calc div"
+#define gstCalcIsc "calc isc"
+#define gstCalcFill "calc fill"
+#define gstCalcCombine "calc combine"
+
 #endif//NAMES_HPP

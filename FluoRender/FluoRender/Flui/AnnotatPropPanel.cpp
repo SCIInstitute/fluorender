@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <AnnotatPropPanel.h>
 #include <AnnotatPropPanelAgent.h>
-#include <Names.h>
 
 AnnotatPropPanel::AnnotatPropPanel(
 	wxWindow* parent,
@@ -103,7 +102,6 @@ void AnnotatPropPanel::OnMemoUpdateBtn(wxCommandEvent& event)
 	auto agent = m_agent->As<AnnotatPropPanelAgent>();
 	if (agent)
 	{
-		agent->Update(
-			UpdateRequest::UIToData( { gstAnnotMemoText } ));
+		agent->UpdateUIToData({ gstAnnotMemoText } );
 	}
 }
