@@ -48,34 +48,47 @@ void Coordinator::Unregister(Agent* agent)
 void Coordinator::Dispatch(
 	const UpdateRequest& request)
 {
-	if (request.mode == UpdateMode::None)
+	// explicit no-op
+	if (request.mode == UpdateMode::None &&
+		request.targets.empty())
+	{
 		return;
+	}
 
 	for (auto agent : agents_)
 	{
 		if (!agent)
 			continue;
 
-		switch (request.mode)
+		// explicit target list overrides UpdateMode
+		if (!request.targets.empty())
 		{
-		case UpdateMode::All:
-			// update all
-			break;
-
-		case UpdateMode::ExcludeSender:
-			// exclude sender
-			if (agent == request.sender)
+			if (request.targets.find(agent) ==
+				request.targets.end())
+			{
 				continue;
-			break;
+			}
+		}
+		else
+		{
+			switch (request.mode)
+			{
+			case UpdateMode::All:
+				break;
 
-		case UpdateMode::SenderOnly:
-			// sender only
-			if (agent != request.sender)
+			case UpdateMode::ExcludeSender:
+				if (agent == request.sender)
+					continue;
+				break;
+
+			case UpdateMode::SenderOnly:
+				if (agent != request.sender)
+					continue;
+				break;
+
+			case UpdateMode::None:
 				continue;
-			break;
-
-		default:
-			break;
+			}
 		}
 
 		if (agent->Accept(request))

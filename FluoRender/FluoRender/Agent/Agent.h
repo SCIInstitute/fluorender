@@ -40,9 +40,9 @@ class Agent;
 
 enum class UpdateMode : int
 {
-	All,//all views
-	ExcludeSender,//other views
-	SenderOnly,//current view
+	All,
+	ExcludeSender,
+	SenderOnly,
 	None
 };
 
@@ -79,8 +79,9 @@ struct UpdateRequest
 
 	UpdateDir dir = UpdateDir::Any;
 
-	// empty = all views
-	//std::set<int> target_views;
+	// empty = use UpdateMode
+	// non-empty = override UpdateMode
+	std::set<Agent*> targets;
 
 	// optional debug string
 	std::string reason;
@@ -107,16 +108,39 @@ struct UpdateRequest
 		return r;
 	}
 
+	//default to update all views
 	static UpdateRequest ViewUpdate(
 		const fluo::ValueCollection& vals,
 		Agent* sender = nullptr,
-		UpdateMode mode = UpdateMode::SenderOnly,
+		UpdateMode mode = UpdateMode::All,
 		const std::string& reason = "")
 	{
 		fluo::ValueCollection view_vals = vals;
 		view_vals.insert(gstRenderView);
+
 		UpdateRequest r(view_vals, sender, mode, reason);
 		r.dir = UpdateDir::View;
+		return r;
+	}
+
+	//update specific views
+	static UpdateRequest ViewUpdate(
+		const fluo::ValueCollection& vals,
+		Agent* sender = nullptr,
+		const std::set<Agent*>& targets,
+		const std::string& reason = "")
+	{
+		fluo::ValueCollection view_vals = vals;
+		view_vals.insert(gstRenderView);
+
+		UpdateRequest r(
+			view_vals,
+			sender,
+			UpdateMode::None,
+			reason);
+
+		r.dir = UpdateDir::View;
+		r.targets = targets;
 		return r;
 	}
 };
@@ -157,6 +181,42 @@ public:
 
 protected:
 	void Notify(const UpdateRequest& request);
+
+	void NotifyUIToData(
+		const fluo::ValueCollection& vals,
+		UpdateMode mode = UpdateMode::SenderOnly,
+		const std::string& reason = "")
+	{
+		Notify(UpdateRequest::UIToData(
+			vals, this, mode, reason));
+	}
+
+	void NotifyDataToUI(
+		const fluo::ValueCollection& vals,
+		UpdateMode mode = UpdateMode::ExcludeSender,
+		const std::string& reason = "")
+	{
+		Notify(UpdateRequest::DataToUI(
+			vals, this, mode, reason));
+	}
+
+	void NotifyViewUpdate(
+		const fluo::ValueCollection& vals,
+		UpdateMode mode = UpdateMode::All,
+		const std::string& reason = "")
+	{
+		Notify(UpdateRequest::ViewUpdate(
+			vals, this, mode, reason));
+	}
+
+	void NotifyViewUpdate(
+		const fluo::ValueCollection& vals,
+		const std::set<Agent*>& targets,
+		const std::string& reason = "")
+	{
+		Notify(UpdateRequest::ViewUpdate(
+			vals, this, targets, reason));
+	}
 
 private:
 	wxWindow* window_ = nullptr;
