@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define OutputAdjPanelAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 #include <memory>
 
 class OutputAdjPanel;
@@ -40,20 +41,20 @@ public:
 
 	virtual ~OutputAdjPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	OutputAdjPanel* GetPanel() const;
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
 private:
-	void UpdateUI(const UpdateRequest& request);
-
-	void UpdateData(const UpdateRequest& request);
-
 	void UpdateSync();
 	void SetSync(int i, bool val, bool update = true);
 	void SetGamma(int i, double val, bool update = true);
@@ -69,6 +70,11 @@ private:
 	void SyncHdr(int i);
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	bool m_enable_all = true;
 	//sync flags
 	bool m_sync[3] = { true, true, true };//for rgb

@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define RenderViewPanelAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 #include <memory>
 
 class RenderViewPanel;
@@ -43,13 +44,6 @@ public:
 
 	virtual ~RenderViewPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	RenderViewPanel* GetPanel() const;
 
 	void SetView(const std::shared_ptr<RenderView>& view)
@@ -62,12 +56,23 @@ public:
 		return m_view.lock();
 	}
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	std::weak_ptr<RenderView> m_view;
 
 	bool m_bg_color_inv = false;

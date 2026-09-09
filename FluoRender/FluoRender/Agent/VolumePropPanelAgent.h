@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define VolumePropPanelAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 #include <memory>
 
 class VolumePropPanel;
@@ -47,13 +48,6 @@ public:
 
 	virtual ~VolumePropPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	VolumePropPanel* GetPanel() const;
 
 	std::shared_ptr<VolumeData> GetData() const
@@ -61,12 +55,23 @@ public:
 		return m_vd.lock();
 	}
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	std::weak_ptr<VolumeData> m_vd;
 	std::weak_ptr<VolumeGroup> m_group;
 	std::weak_ptr<RenderView> m_view;

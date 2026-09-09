@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define MachineLearningDlgAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class MachineLearningDlg;
 class MachineLearningDlgAgent : public Agent
@@ -39,21 +40,25 @@ public:
 
 	virtual ~MachineLearningDlgAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	MachineLearningDlg* GetDialog() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	//max volume value
 	double m_max_value;
 
@@ -68,21 +73,25 @@ public:
 
 	virtual ~MachineLearningPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	MachineLearningPanel* GetPanel() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	//max volume value
 	double m_max_value;
 
@@ -97,21 +106,25 @@ public:
 
 	virtual ~MLCompGenPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	MLCompGenPanel* GetPanel() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	//max volume value
 	double m_max_value;
 
@@ -126,21 +139,25 @@ public:
 
 	virtual ~MLVolPropPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	MLVolPropPanel* GetPanel() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	//max volume value
 	double m_max_value;
 

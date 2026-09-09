@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define SettingDlgAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class SettingDlg;
 class SettingDlgAgent : public Agent
@@ -39,19 +40,24 @@ public:
 
 	virtual ~SettingDlgAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	SettingDlg* GetDialog() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
+private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
 
 	bool GetFontList(std::vector<std::string>& list) const;
 };

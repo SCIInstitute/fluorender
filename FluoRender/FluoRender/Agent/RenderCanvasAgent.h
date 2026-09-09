@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define RenderCanvasAgent_h
 
 #include <Agent.h>
-
+#include <Names.h>
 #include <memory>
 
 class RenderCanvas;
@@ -69,6 +69,13 @@ public:
 		return m_view.lock();
 	}
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
 private:
 	RenderCanvasAgent* GetRenderSender(
 		const UpdateRequest& request) const;
@@ -80,6 +87,11 @@ private:
 		RenderCanvasAgent* sender);
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	std::weak_ptr<RenderView> m_view;
 
 	bool draw_pending_ = false;

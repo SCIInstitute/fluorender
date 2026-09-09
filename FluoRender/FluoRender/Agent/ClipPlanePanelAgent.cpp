@@ -42,6 +42,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ClippingBox.h>
 #include <RendererFactory.h>
 #include <DataManager.h>
+#include <ConvertDlgAgent.h>
 #include <png_resource.h>
 #include <icons.h>
 
@@ -374,8 +375,8 @@ void ClipPlanePanelAgent::SetClipValue(fluo::ClipPlane i, int val, bool link)
 	SetPlaneMask(mask);
 	vc.insert(gstConvVolMeshUpdateTransf);
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(view);
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -412,8 +413,8 @@ void ClipPlanePanelAgent::SetClipValues(fluo::ClipPlane i, int val1, int val2)
 
 	fluo::ValueCollection vc{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(view);
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -433,8 +434,8 @@ void ClipPlanePanelAgent::SetClipValues(const std::array<int, 6>& vals)
 
 	fluo::ValueCollection vc{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(view);
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -466,8 +467,8 @@ void ClipPlanePanelAgent::ResetClipValues()
 		gstClipZ1, gstClipZ2, gstClipLinkZ,
 		gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(view);
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -510,8 +511,8 @@ void ClipPlanePanelAgent::ResetClipValues(fluo::ClipPlane i)
 	}
 
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(view);
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -590,8 +591,8 @@ void ClipPlanePanelAgent::SetClipRotX(double val)
 		view->SyncClippingBoxes(obj->GetClippingBox());
 	fluo::ValueCollection vc{ gstClipRotX, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -609,8 +610,8 @@ void ClipPlanePanelAgent::SetClipRotY(double val)
 		view->SyncClippingBoxes(obj->GetClippingBox());
 	fluo::ValueCollection vc{ gstClipRotY, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -628,8 +629,8 @@ void ClipPlanePanelAgent::SetClipRotZ(double val)
 		view->SyncClippingBoxes(obj->GetClippingBox());
 	fluo::ValueCollection vc{ gstClipRotZ, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -748,8 +749,8 @@ void ClipPlanePanelAgent::SetClipZero()
 	view->SetClipRotMode(1);
 	fluo::ValueCollection vc{ gstClipRotX, gstClipRotY, gstClipRotZ, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -767,8 +768,8 @@ void ClipPlanePanelAgent::RotReset()
 		view->SyncClippingBoxes(obj->GetClippingBox());
 	fluo::ValueCollection vc{ gstClipRotX, gstClipRotY, gstClipRotZ, gstConvVolMeshUpdateTransf };
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 
@@ -798,8 +799,8 @@ void ClipPlanePanelAgent::RotResetAxis(int i)
 		break;
 	}
 	std::set<Agent*> target{ this };
-	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());
-	target.insert(agent);
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
 }
 

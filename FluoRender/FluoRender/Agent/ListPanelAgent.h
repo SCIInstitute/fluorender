@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ListPanelAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class ListPanel;
 class ListPanelAgent : public Agent
@@ -39,19 +40,24 @@ public:
 
 	virtual ~ListPanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	ListPanel* GetPanel() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
+private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
 };
 
 #endif // ListPanelAgent_h

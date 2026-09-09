@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define MoviePanelAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -43,19 +44,24 @@ public:
 
 	virtual ~MoviePanelAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	MoviePanel* GetPanel() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
+private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
 
 	size_t GetScriptFiles(std::vector<std::wstring>& list);
 };

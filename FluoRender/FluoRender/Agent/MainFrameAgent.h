@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define MainFrameAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class MainFrame;
 class wxBasisSlider;
@@ -40,24 +41,26 @@ public:
 
 	virtual ~MainFrameAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	MainFrame* GetMainFrame() const;
 
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
 private:
-	void UpdateUI(const UpdateRequest& request);
-
-	void UpdateData(const UpdateRequest& request);
-
-private:
-
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
 };
 
 #endif // MainFrameAgent_h

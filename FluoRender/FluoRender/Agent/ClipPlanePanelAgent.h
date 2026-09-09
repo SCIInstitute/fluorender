@@ -74,9 +74,9 @@ protected:
 		return kAcceptedValues;
 	}
 
-	void UpdateUI(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
 	static constexpr std::string_view kAcceptedValues[] =

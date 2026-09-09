@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define TrackDlgAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 namespace flrd
 {
@@ -45,20 +46,20 @@ public:
 
 	virtual ~TrackDlgAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	TrackDlg* GetDialog() const;
 
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
+
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
 private:
-	void UpdateUI(const UpdateRequest& request);
-
-	void UpdateData(const UpdateRequest& request);
-
 	std::vector<TrackItem> BuildTrackList(
 		const flrd::CelpList& sel_cells,
 		bool shuffle);
@@ -66,6 +67,11 @@ private:
 	TrackViewData GetTrackViewData();
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	std::string m_comp_id;//select
 	std::string m_comp_id3;//modify / new id
 };

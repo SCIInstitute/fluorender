@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ComponentDlgAgent_h
 
 #include <Agent.h>
+#include <Names.h>
 
 class ComponentDlg;
 class ComponentDlgAgent : public Agent
@@ -39,23 +40,26 @@ public:
 
 	virtual ~ComponentDlgAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	ComponentDlg* GetDialog() const;
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+protected:
+	std::span < const std::string_view>
+		AcceptedValues() const override
+	{
+		return kAcceptedValues;
+	}
 
-	void UpdateData(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
 
 private:
+	static constexpr std::string_view kAcceptedValues[] =
+	{
+		gstCurrentSelect,
+	};
+
 	int m_max_lines = 1000;
-
 };
 
 #endif // ComponentDlgAgent_h
