@@ -192,7 +192,7 @@ public:
 		return HasAnyValue(request, AcceptedValues());
 	}
 
-	virtual void Update(const UpdateRequest& request) = 0;
+	virtual void Update(const UpdateRequest& request);
 
 	template<class T>
 	T* As()
@@ -261,6 +261,8 @@ public:
 
 protected:
 	void Notify(const UpdateRequest& request);
+	virtual void UpdateUI(const UpdateRequest& request) {}
+	virtual void UpdateData(const UpdateRequest& request) {}
 
 private:
 	wxWindow* window_ = nullptr;

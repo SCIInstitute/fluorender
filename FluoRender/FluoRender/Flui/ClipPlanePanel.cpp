@@ -26,20 +26,12 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ClipPlanePanel.h>
-#include <Global.h>
-#include <Names.h>
+#include <ClipPlanePanelAgent.h>
+#include <MainFrameAgent.h>
 #include <MainSettings.h>
-#include <GlobalStates.h>
-#include <RenderView.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <MeshData.h>
-#include <DataManager.h>
-#include <VolumeRenderer.h>
-#include <MeshRenderer.h>
-#include <ClippingBoxRenderer.h>
-#include <RendererFactory.h>
-#include <compatibility.h>
+#include <Global.h>
+#include <Coordinator.h>
+#include <ClippingBox.h>
 #include <png_resource.h>
 #include <icons.h>
 #include <wxFadeButton.h>
@@ -621,129 +613,93 @@ void ClipPlanePanel::UpdateClipRotZ(double dval)
 	m_z_rot_text->Update();
 }
 
+std::array<int, 6> ClipPlanePanel::GetClipValues()
+{
+	wxString str;
+	//x1
+	str = m_x1_clip_text->GetValue();
+	long x1_val = 0;
+	str.ToLong(&x1_val);
+	//x2
+	str = m_x2_clip_text->GetValue();
+	long x2_val = 0;
+	str.ToLong(&x2_val);
+	//y1
+	str = m_y1_clip_text->GetValue();
+	long y1_val = 0;
+	str.ToLong(&y1_val);
+	//y2
+	str = m_y2_clip_text->GetValue();
+	long y2_val = 0;
+	str.ToLong(&y2_val);
+	//z1
+	str = m_z1_clip_text->GetValue();
+	long z1_val = 0;
+	str.ToLong(&z1_val);
+	//z2
+	str = m_z2_clip_text->GetValue();
+	long z2_val = 0;
+	str.ToLong(&z2_val);
+
+	std::array<int, 6> val = { (int)x1_val, (int)x2_val, (int)y1_val, (int)y2_val, (int)z1_val, (int)z2_val };
+	return val;
+}
+
+bool ClipPlanePanel::GetHoldPlanes()
+{
+	return m_toolbar->GetToolState(ID_HoldPlanesBtn);
+}
+
 void ClipPlanePanel::OnToolbar(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 	switch (id)
 	{
 	case ID_LinkChannelsBtn:
-		LinkChannels();
+		vc.insert(gstClipLinkChan);
 		break;
 	case ID_HoldPlanesBtn:
-		HoldPlanes();
+		vc.insert(gstClipHold);
 		break;
 	case ID_PlaneModesBtn:
-		SetPlaneMode();
+		vc.insert(gstClipPlaneMode);
 		break;
 	}
+	agent->UpdateUIToData(vc);
 }
 
-void ClipPlanePanel::LinkChannels()
-{
-	//bool bval = m_toolbar->GetToolState(ID_LinkChannelsBtn);
-	glbin_settings.m_clip_link = !glbin_settings.m_clip_link;
-	bool bval = glbin_settings.m_clip_link;
-	if (bval)
-	{
-		wxString str;
-		//x1
-		str = m_x1_clip_text->GetValue();
-		long x1_val = 0;
-		str.ToLong(&x1_val);
-		//x2
-		str = m_x2_clip_text->GetValue();
-		long x2_val = 0;
-		str.ToLong(&x2_val);
-		//y1
-		str = m_y1_clip_text->GetValue();
-		long y1_val = 0;
-		str.ToLong(&y1_val);
-		//y2
-		str = m_y2_clip_text->GetValue();
-		long y2_val = 0;
-		str.ToLong(&y2_val);
-		//z1
-		str = m_z1_clip_text->GetValue();
-		long z1_val = 0;
-		str.ToLong(&z1_val);
-		//z2
-		str = m_z2_clip_text->GetValue();
-		long z2_val = 0;
-		str.ToLong(&z2_val);
-
-		std::array<int, 6> val = { (int)x1_val, (int)x2_val, (int)y1_val, (int)y2_val, (int)z1_val, (int)z2_val };
-		SetClipValues(val);
-	}
-	FluoUpdate({ gstClipLinkChan });
-}
-
-void ClipPlanePanel::HoldPlanes()
-{
-	glbin_settings.m_clip_hold = m_toolbar->GetToolState(ID_HoldPlanesBtn);
-	glbin_states.ClipDisplayChanged();
-	SetPlaneMask(-1);
-	FluoRefresh(2, { gstClipHold },
-		{ glbin_current.GetViewId() });
-}
-
-void ClipPlanePanel::SetPlaneMode()
-{
-	int ival = glbin_settings.m_clip_mode;
-	ival++;
-	ival = ival > static_cast<int>(flrd::ClippingRenderMode::TransBack) ?
-		static_cast<int>(flrd::ClippingRenderMode::Disabled) : ival;
-	glbin_settings.m_clip_mode = ival;
-	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
-	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
-	if (renderer)
-	{
-		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
-		settings->mode = static_cast<flrd::ClippingRenderMode>(ival);
-	}
-	FluoRefresh(2, { gstClipPlaneMode },
-		{ glbin_current.GetViewId() });
-}
 
 void ClipPlanePanel::OnClipResetBtn(wxCommandEvent& event)
 {
-	ResetClipValues();
-}
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
 
-void ClipPlanePanel::SyncClipValue(int i)
-{
-	int val1, val2;
-	switch (i)
-	{
-	case 0:
-		val1 = m_clipx_sldr->GetLowValue();
-		val2 = m_clipx_sldr->GetHighValue();
-		SetClipValues(fluo::ClipPlane::XNeg, val1, val2);
-		break;
-	case 1:
-		val1 = m_clipy_sldr->GetLowValue();
-		val2 = m_clipy_sldr->GetHighValue();
-		SetClipValues(fluo::ClipPlane::YNeg, val1, val2);
-		break;
-	case 2:
-		val1 = m_clipz_sldr->GetLowValue();
-		val2 = m_clipz_sldr->GetHighValue();
-		SetClipValues(fluo::ClipPlane::ZNeg, val1, val2);
-		break;
-	}
+	agent->ResetClipValues();
 }
 
 void ClipPlanePanel::OnClipXMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncClipValue(0);
+		agent->SyncClipValue(0);
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_clipx_sldr);
+		frame->SetFocusVRenderViews(m_clipx_sldr);
 		break;
 	case 2:
-		ResetClipValues(fluo::ClipPlane::XNeg);
+		agent->ResetClipValues(fluo::ClipPlane::XNeg);
 		break;
 	case 3:
 		break;
@@ -757,16 +713,21 @@ void ClipPlanePanel::OnClipXMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipYMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncClipValue(1);
+		agent->SyncClipValue(1);
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_clipy_sldr);
+		frame->SetFocusVRenderViews(m_clipy_sldr);
 		break;
 	case 2:
-		ResetClipValues(fluo::ClipPlane::YNeg);
+		agent->ResetClipValues(fluo::ClipPlane::YNeg);
 		break;
 	case 3:
 		break;
@@ -780,16 +741,21 @@ void ClipPlanePanel::OnClipYMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipZMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncClipValue(2);
+		agent->SyncClipValue(2);
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_clipz_sldr);
+		frame->SetFocusVRenderViews(m_clipz_sldr);
 		break;
 	case 2:
-		ResetClipValues(fluo::ClipPlane::ZNeg);
+		agent->ResetClipValues(fluo::ClipPlane::ZNeg);
 		break;
 	case 3:
 		break;
@@ -803,352 +769,204 @@ void ClipPlanePanel::OnClipZMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipXChange(wxScrollEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	int ival1 = m_clipx_sldr->GetLowValue();
 	int ival2 = m_clipx_sldr->GetHighValue();
 	wxString str = event.GetString();
 	if (m_clipx_sldr->GetLink())
-		SetClipValues(fluo::ClipPlane::XNeg, ival1, ival2);
+		agent->SetClipValues(fluo::ClipPlane::XNeg, ival1, ival2);
 	else
 	{
 		if (str.Find("low") != wxNOT_FOUND)
-			SetClipValue(fluo::ClipPlane::XNeg, ival1);
+			agent->SetClipValue(fluo::ClipPlane::XNeg, ival1);
 		else if (str.Find("high") != wxNOT_FOUND)
-			SetClipValue(fluo::ClipPlane::XPos, ival2);
+			agent->SetClipValue(fluo::ClipPlane::XPos, ival2);
 	}
 }
 
 void ClipPlanePanel::OnX1ClipEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_x1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	bool link = m_clipx_sldr->GetLink();
-	SetClipValue(fluo::ClipPlane::XNeg, ival, link);
+	agent->SetClipValue(fluo::ClipPlane::XNeg, ival, link);
 }
 
 void ClipPlanePanel::OnX2ClipEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_x2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	bool link = m_clipx_sldr->GetLink();
-	SetClipValue(fluo::ClipPlane::XPos, ival, link);
+	agent->SetClipValue(fluo::ClipPlane::XPos, ival, link);
 }
 
 void ClipPlanePanel::OnClipYChange(wxScrollEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	int ival1 = m_clipy_sldr->GetLowValue();
 	int ival2 = m_clipy_sldr->GetHighValue();
 	wxString str = event.GetString();
 	if (m_clipy_sldr->GetLink())
-		SetClipValues(fluo::ClipPlane::YNeg, ival1, ival2);
+		agent->SetClipValues(fluo::ClipPlane::YNeg, ival1, ival2);
 	else
 	{
 		if (str.Find("low") != wxNOT_FOUND)
-			SetClipValue(fluo::ClipPlane::YNeg, ival1);
+			agent->SetClipValue(fluo::ClipPlane::YNeg, ival1);
 		else if (str.Find("high") != wxNOT_FOUND)
-			SetClipValue(fluo::ClipPlane::YPos, ival2);
+			agent->SetClipValue(fluo::ClipPlane::YPos, ival2);
 	}
 }
 
 void ClipPlanePanel::OnY1ClipEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_y1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	bool link = m_clipy_sldr->GetLink();
-	SetClipValue(fluo::ClipPlane::YNeg, ival, link);
+	agent->SetClipValue(fluo::ClipPlane::YNeg, ival, link);
 }
 
 void ClipPlanePanel::OnY2ClipEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_y2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	bool link = m_clipy_sldr->GetLink();
-	SetClipValue(fluo::ClipPlane::YPos, ival, link);
+	agent->SetClipValue(fluo::ClipPlane::YPos, ival, link);
 }
 
 void ClipPlanePanel::OnClipZChange(wxScrollEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	int ival1 = m_clipz_sldr->GetLowValue();
 	int ival2 = m_clipz_sldr->GetHighValue();
 	wxString str = event.GetString();
 	if (m_clipz_sldr->GetLink())
-		SetClipValues(fluo::ClipPlane::ZNeg, ival1, ival2);
+		agent->SetClipValues(fluo::ClipPlane::ZNeg, ival1, ival2);
 	else
 	{
 		if (str.Find("low") != wxNOT_FOUND)
-			SetClipValue(fluo::ClipPlane::ZNeg, ival1);
+			agent->SetClipValue(fluo::ClipPlane::ZNeg, ival1);
 		else if (str.Find("high") != wxNOT_FOUND)
-			SetClipValue(fluo::ClipPlane::ZPos, ival2);
+			agent->SetClipValue(fluo::ClipPlane::ZPos, ival2);
 	}
 }
 
 void ClipPlanePanel::OnZ1ClipEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_z1_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	bool link = m_clipz_sldr->GetLink();
-	SetClipValue(fluo::ClipPlane::ZNeg, ival, link);
+	agent->SetClipValue(fluo::ClipPlane::ZNeg, ival, link);
 }
 
 void ClipPlanePanel::OnZ2ClipEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_z2_clip_text->GetValue();
 	long ival = 0;
 	str.ToLong(&ival);
 	bool link = m_clipz_sldr->GetLink();
-	SetClipValue(fluo::ClipPlane::ZPos, ival, link);
+	agent->SetClipValue(fluo::ClipPlane::ZPos, ival, link);
 }
 
 void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 {
 	if (!IsShown())
 		return;
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
 
-	if (view->m_capture)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
 	wxPoint pos = wxGetMousePosition();
 	wxRect reg = GetScreenRect();
 	wxWindow *window = wxWindow::FindFocus();
 	bool bval = window && reg.Contains(pos);
-	glbin_states.m_mouse_in_clip_plane_panel = bval;
-	if (glbin_states.ClipDisplayChanged())
-	{
-		SetPlaneMask(-1);
-		FluoRefresh(3, { gstNull },
-			{ glbin_current.GetViewId() });
-	}
+	agent->UpdateClipIdle(bval);
 }
 
 bool ClipPlanePanel::GetXLink()
 {
 	return m_clipx_sldr->GetLink();
 }
+
 bool ClipPlanePanel::GetYLink()
 {
 	return m_clipy_sldr->GetLink();
 }
+
 bool ClipPlanePanel::GetZLink()
 {
 	return m_clipz_sldr->GetLink();
 }
 
+std::array<int, 2> ClipPlanePanel::GetClipX()
+{
+	return { m_clipx_sldr->GetLowValue(),
+		m_clipx_sldr->GetHighValue() };
+}
+
+std::array<int, 2> ClipPlanePanel::GetClipY()
+{
+	return { m_clipy_sldr->GetLowValue(),
+		m_clipy_sldr->GetHighValue() };
+}
+
+std::array<int, 2> ClipPlanePanel::GetClipZ()
+{
+	return { m_clipz_sldr->GetLowValue(),
+		m_clipz_sldr->GetHighValue() };
+}
+
 void ClipPlanePanel::SetXLink(bool val)
 {
 	m_clipx_sldr->SetLink(val);
-	m_linkx_tb->ToggleTool(0, val);
-	if (val)
-		m_linkx_tb->SetToolNormalBitmap(0,
-			wxGetBitmap(link));
-	else
-		m_linkx_tb->SetToolNormalBitmap(0,
-			wxGetBitmap(unlink));
 }
 
 void ClipPlanePanel::SetYLink(bool val)
 {
 	m_clipy_sldr->SetLink(val);
-	m_linky_tb->ToggleTool(0, val);
-	if (val)
-		m_linky_tb->SetToolNormalBitmap(0,
-			wxGetBitmap(link));
-	else
-		m_linky_tb->SetToolNormalBitmap(0,
-			wxGetBitmap(unlink));
 }
 
 void ClipPlanePanel::SetZLink(bool val)
 {
 	m_clipz_sldr->SetLink(val);
-	m_linkz_tb->ToggleTool(0, val);
-	if (val)
-		m_linkz_tb->SetToolNormalBitmap(0,
-			wxGetBitmap(link));
-	else
-		m_linkz_tb->SetToolNormalBitmap(0,
-			wxGetBitmap(unlink));
-}
-
-void ClipPlanePanel::SetClipValue(fluo::ClipPlane i, int val, bool link)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipValue(i, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-
-	int mask = -1;
-	fluo::ValueCollection vc;
-	switch (i)
-	{
-	case fluo::ClipPlane::XNeg:
-		mask = link ? 3 : 1;
-		vc.insert(gstClipX1);
-		if (link)
-			vc.insert(gstClipX2);
-		break;
-	case fluo::ClipPlane::XPos:
-		mask = link ? 3 : 2;
-		vc.insert(gstClipX2);
-		if (link)
-			vc.insert(gstClipX1);
-		break;
-	case fluo::ClipPlane::YNeg:
-		mask = link ? 12 : 4;
-		vc.insert(gstClipY1);
-		if (link)
-			vc.insert(gstClipY2);
-		break;
-	case fluo::ClipPlane::YPos:
-		mask = link ? 12 : 8;
-		vc.insert(gstClipY2);
-		if (link)
-			vc.insert(gstClipY1);
-		break;
-	case fluo::ClipPlane::ZNeg:
-		mask = link ? 48 : 16;
-		vc.insert(gstClipZ1);
-		if (link)
-			vc.insert(gstClipZ2);
-		break;
-	case fluo::ClipPlane::ZPos:
-		mask = link ? 48 : 32;
-		vc.insert(gstClipZ2);
-		if (link)
-			vc.insert(gstClipZ1);
-		break;
-	}
-
-	SetPlaneMask(mask);
-	vc.insert(gstConvVolMeshUpdateTransf);
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
-}
-
-void ClipPlanePanel::SetClipValues(fluo::ClipPlane i, int val1, int val2)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipValues(i, val1, val2);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-
-	int mask = -1;
-	switch (i)
-	{
-	case fluo::ClipPlane::XNeg:
-	case fluo::ClipPlane::XPos:
-		mask = 3;
-		break;
-	case fluo::ClipPlane::YNeg:
-	case fluo::ClipPlane::YPos:
-		mask = 12;
-		break;
-	case fluo::ClipPlane::ZNeg:
-	case fluo::ClipPlane::ZPos:
-		mask = 48;
-		break;
-	}
-	SetPlaneMask(mask);
-
-	FluoRefresh(0, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf },
-		{glbin_current.GetViewId()});
-}
-
-void ClipPlanePanel::SetClipValues(const std::array<int, 6>& vals)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipValues(vals);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	SetPlaneMask(63);
-
-	FluoRefresh(0,
-		{ gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf },
-		{ glbin_current.GetViewId() });
-}
-
-void ClipPlanePanel::ResetClipValues()
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->ResetClipValues();
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->ResetAllClipValues();
-	SetPlaneMask(-1);
-
-	//links
-	SetXLink(false);
-	SetYLink(false);
-	SetZLink(false);
-
-	FluoRefresh(0, { gstClipX1, gstClipX2, gstClipY1, gstClipY2, gstClipZ1, gstClipZ2, gstConvVolMeshUpdateTransf },
-		{ glbin_current.GetViewId() });
-}
-
-void ClipPlanePanel::ResetClipValues(fluo::ClipPlane i)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->ResetClipValues(i);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	SetPlaneMask(-1);
-
-	fluo::ValueCollection vc = { gstConvVolMeshUpdateTransf };
-	//links
-	switch (i)
-	{
-	case fluo::ClipPlane::XNeg:
-	case fluo::ClipPlane::XPos:
-		SetXLink(false);
-		vc.insert({ gstClipX1, gstClipX2 });
-		break;
-	case fluo::ClipPlane::YNeg:
-	case fluo::ClipPlane::YPos:
-		SetYLink(false);
-		vc.insert({ gstClipY1, gstClipY2 });
-		break;
-	case fluo::ClipPlane::ZNeg:
-	case fluo::ClipPlane::ZPos:
-		SetZLink(false);
-		vc.insert({ gstClipZ1, gstClipZ2 });
-		break;
-	}
-
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent& event)
@@ -1171,87 +989,69 @@ void ClipPlanePanel::OnLinkZCheck(wxCommandEvent& event)
 
 void ClipPlanePanel::OnClipDistXEdit(wxCommandEvent& event)
 {
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
+
 	wxString str = m_yz_dist_text->GetValue();
 	long val;
 	if (str.ToLong(&val))
-		obj->SetLinkedDist(fluo::ClipPlane::XNeg, val);
+		agent->SetLinkedDist(fluo::ClipPlane::XNeg, val);
 }
 
 void ClipPlanePanel::OnClipDistYEdit(wxCommandEvent& event)
 {
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
+
 	wxString str = m_yz_dist_text->GetValue();
 	long val;
 	if (str.ToLong(&val))
-		obj->SetLinkedDist(fluo::ClipPlane::YNeg, val);
+		agent->SetLinkedDist(fluo::ClipPlane::YNeg, val);
 }
 
 void ClipPlanePanel::OnClipDistZEdit(wxCommandEvent& event)
 {
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
+
 	wxString str = m_yz_dist_text->GetValue();
 	long val;
 	if (str.ToLong(&val))
-		obj->SetLinkedDist(fluo::ClipPlane::ZNeg, val);
+		agent->SetLinkedDist(fluo::ClipPlane::ZNeg, val);
 }
 
 void ClipPlanePanel::OnSetZeroBtn(wxCommandEvent& event)
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	view->SetClipRotMode(1);
-	FluoRefresh(0, { gstClipRotX, gstClipRotY, gstClipRotZ, gstConvVolMeshUpdateTransf },
-		{ glbin_current.GetViewId() });
+	agent->UpdateUIToData({ gstClipSetZero });
 }
 
 void ClipPlanePanel::OnRotResetBtn(wxCommandEvent& event)
 {
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(fluo::Vector(0));
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotX, gstClipRotY, gstClipRotZ, gstConvVolMeshUpdateTransf },
-		{ glbin_current.GetViewId() });
 }
 
 void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_x_rot_sldr);
+		frame->SetFocusVRenderViews(m_x_rot_sldr);
 		break;
 	case 2:
-	{
-		auto view = glbin_current.render_view.lock();
-		auto obj = GetObject();
-		if (!obj)
-			return;
-		obj->SetClipRotation(0, 0.0);
-		int type = glbin_current.GetType();
-		if (type == 1)
-			view->SyncClippingBoxes(view->GetClippingBox());
-		else if (glbin_settings.m_clip_link)
-			view->SyncClippingBoxes(obj->GetClippingBox());
-		FluoRefresh(0, { gstClipRotX, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
-	}
+		agent->UpdateUIToData({ gstClipRotResetX });
 		break;
 	case 3:
 		break;
@@ -1265,27 +1065,20 @@ void ClipPlanePanel::OnRotXMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnRotYMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_y_rot_sldr);
+		frame->SetFocusVRenderViews(m_y_rot_sldr);
 		break;
 	case 2:
-	{
-		auto view = glbin_current.render_view.lock();
-		auto obj = GetObject();
-		if (!obj)
-			return;
-		obj->SetClipRotation(1, 0.0);
-		int type = glbin_current.GetType();
-		if (type == 1)
-			view->SyncClippingBoxes(view->GetClippingBox());
-		else if (glbin_settings.m_clip_link)
-			view->SyncClippingBoxes(obj->GetClippingBox());
-		FluoRefresh(0, { gstClipRotY, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
-	}
+		agent->UpdateUIToData({ gstClipRotResetY });
 		break;
 	case 3:
 		break;
@@ -1299,27 +1092,20 @@ void ClipPlanePanel::OnRotYMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_z_rot_sldr);
+		frame->SetFocusVRenderViews(m_z_rot_sldr);
 		break;
 	case 2:
-	{
-		auto view = glbin_current.render_view.lock();
-		auto obj = GetObject();
-		if (!obj)
-			return;
-		obj->SetClipRotation(2, 0.0);
-		int type = glbin_current.GetType();
-		if (type == 1)
-			view->SyncClippingBoxes(view->GetClippingBox());
-		else if (glbin_settings.m_clip_link)
-			view->SyncClippingBoxes(obj->GetClippingBox());
-		FluoRefresh(0, { gstClipRotZ, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
-	}
+		agent->UpdateUIToData({ gstClipRotResetZ });
 		break;
 	case 3:
 		break;
@@ -1333,375 +1119,254 @@ void ClipPlanePanel::OnRotZMF(wxCommandEvent& event)
 
 void ClipPlanePanel::OnXRotChange(wxScrollEvent& event)
 {
-	int val = m_x_rot_sldr->GetValue();
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
-	obj->SetClipRotation(0, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotX, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+
+	int val = m_x_rot_sldr->GetValue();
+	agent->SetClipRotX(val);
 }
 
 void ClipPlanePanel::OnXRotEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_x_rot_text->GetValue();
 	double val = 0.0;
 	if (str.ToDouble(&val))
 		m_x_rot_sldr->ChangeValue(std::round(val));
 	else
 		return;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(0, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotX(val);
 }
 
 void ClipPlanePanel::OnYRotChange(wxScrollEvent& event)
 {
-	int val = m_y_rot_sldr->GetValue();
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
-	obj->SetClipRotation(1, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotY, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+
+	int val = m_y_rot_sldr->GetValue();
+	agent->SetClipRotY(val);
 }
 
 void ClipPlanePanel::OnYRotEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_y_rot_text->GetValue();
 	double val = 0.0;
 	if (str.ToDouble(&val))
 		m_y_rot_sldr->ChangeValue(std::round(val));
 	else
 		return;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(1, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotY(val);
 }
 
 void ClipPlanePanel::OnZRotChange(wxScrollEvent& event)
 {
-	int val = m_z_rot_sldr->GetValue();
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
-	obj->SetClipRotation(2, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotZ, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+
+	int val = m_z_rot_sldr->GetValue();
+	agent->SetClipRotZ(val);
 }
 
 void ClipPlanePanel::OnZRotEdit(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str = m_z_rot_text->GetValue();
 	double val = 0.0;
 	if (str.ToDouble(&val))
 		m_z_rot_sldr->ChangeValue(std::round(val));
 	else
 		return;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(2, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstNull, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotZ(val);
 }
 
 void ClipPlanePanel::OnXRotSpinUp(wxSpinEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str_val = m_x_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(0, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotX, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotX(val);
 }
 
 void ClipPlanePanel::OnXRotSpinDown(wxSpinEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str_val = m_x_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(0, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotX, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotX(val);
 }
 
 void ClipPlanePanel::OnYRotSpinUp(wxSpinEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str_val = m_y_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(1, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotY, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotY(val);
 }
 
 void ClipPlanePanel::OnYRotSpinDown(wxSpinEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str_val = m_y_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(1, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotY, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotY(val);
 }
 
 void ClipPlanePanel::OnZRotSpinUp(wxSpinEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str_val = m_z_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
 	val += glbin_settings.m_inverse_slider ? -1 : 1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(2, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotZ, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotZ(val);
 }
 
 void ClipPlanePanel::OnZRotSpinDown(wxSpinEvent& event)
 {
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
+		return;
+
 	wxString str_val = m_z_rot_text->GetValue();
 	double val;
 	str_val.ToDouble(&val);
 	val += glbin_settings.m_inverse_slider ? 1 : -1;
 	if (val > 180.0) val -= 360.0;
 	if (val <-180.0) val += 360.0;
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->SetClipRotation(2, val);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	FluoRefresh(0, { gstClipRotZ, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	agent->SetClipRotZ(val);
 }
 
 void ClipPlanePanel::UpdateSampleRate()
 {
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	//good rate
-	if (vd->GetSampleRate() < 2.0)
-		vd->SetSampleRate(2.0);
-	if (glbin_settings.m_clip_link)
-	{
-		int i;
-		for (i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
-		{
-			auto vd = glbin_data_manager.GetVolumeData(i);
-			if (!vd || vd == vd)
-				continue;
-			if (vd->GetSampleRate() < 2.0)
-				vd->SetSampleRate(2.0);
-		}
-	}
+	agent->UpdateUIToData({ gstVolumeSampleRate });
 }
 
 void ClipPlanePanel::OnClipXRClick(wxMouseEvent& event)
 {
-	int clip = m_clipx_sldr->GetLowValue();
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	obj->ResetClipValues();
+	int clip = m_clipx_sldr->GetLowValue();
+	agent->SetClipDistX(true, clip);
 	SetXLink(true);
 	SetYLink(false);
 	SetZLink(false);
-
-	SetClipValues(fluo::ClipPlane::XNeg, clip, clip + 1);
 }
 
 void ClipPlanePanel::OnClipYRClick(wxMouseEvent& event)
 {
-	int clip = m_clipy_sldr->GetLowValue();
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	obj->ResetClipValues();
+	int clip = m_clipy_sldr->GetLowValue();
+	agent->SetClipDistY(true, clip);
 	SetXLink(false);
 	SetYLink(true);
 	SetZLink(false);
-
-	SetClipValues(fluo::ClipPlane::YNeg, clip, clip + 1);
 }
 
 void ClipPlanePanel::OnClipZRClick(wxMouseEvent& event)
 {
-	int clip = m_clipz_sldr->GetLowValue();
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	obj->ResetClipValues();
+	int clip = m_clipz_sldr->GetLowValue();
+	agent->SetClipDistY(true, clip);
 	SetXLink(false);
 	SetYLink(false);
 	SetZLink(true);
-
-	SetClipValues(fluo::ClipPlane::ZNeg, clip, clip + 1);
 }
 
 void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
 {
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	int dist = obj->GetLinkedDist(fluo::ClipPlane::XNeg);
-	obj->ResetClipValues();
-	//reset yz
+	int clip = m_clipx_sldr->GetLowValue();
+	agent->SetClipDistX();
+	SetXLink(true);
 	SetYLink(false);
 	SetZLink(false);
-	//set x
-	SetXLink(true);
-
-	SetClipValues(fluo::ClipPlane::XNeg, 0, dist);
 }
 
 void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 {
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	int dist = obj->GetLinkedDist(fluo::ClipPlane::YNeg);
-	obj->ResetClipValues();
-	//reset xz
+	int clip = m_clipy_sldr->GetLowValue();
+	agent->SetClipDistY();
 	SetXLink(false);
-	SetZLink(false);
-	//set y
 	SetYLink(true);
-
-	SetClipValues(fluo::ClipPlane::YNeg, 0, dist);
+	SetZLink(false);
 }
 
 void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 {
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (!agent)
 		return;
 
-	int dist = obj->GetLinkedDist(fluo::ClipPlane::ZNeg);
-	obj->ResetClipValues();
-	//reset xy
+	int clip = m_clipz_sldr->GetLowValue();
+	agent->SetClipDistY();
 	SetXLink(false);
 	SetYLink(false);
-	//set z
 	SetZLink(true);
-
-	SetClipValues(fluo::ClipPlane::ZNeg, 0, dist);
-}
-
-void ClipPlanePanel::SetPlaneMask(int val)
-{
-	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
-	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
-	if (renderer)
-	{
-		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
-		settings->plane_mask = val;
-	}
 }
 
 void ClipPlanePanel::ClearUndo()

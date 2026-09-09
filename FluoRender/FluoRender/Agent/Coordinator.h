@@ -30,8 +30,11 @@ DEALINGS IN THE SOFTWARE.
 #define Coordinator_h
 
 #include <set>
+#include <memory>
 
 class Agent;
+class RenderCanvasAgent;
+class RenderView;
 struct UpdateRequest;
 
 class Coordinator
@@ -50,6 +53,8 @@ public:
 				return result;
 		return nullptr;
 	}
+
+	Agent* FindRenderCanvasAgent(const std::shared_ptr<RenderView>& view);
 
 private:
 	std::set<Agent*> agents_;

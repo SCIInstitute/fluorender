@@ -31,6 +31,19 @@ DEALINGS IN THE SOFTWARE.
 #include <Coordinator.h>
 #include <Global.h>
 
+void Agent::Update(
+	const UpdateRequest& request)
+{
+	if (request.dir == UpdateDir::DataToUI)
+	{
+		UpdateUI(request);
+	}
+	else if (request.dir == UpdateDir::UItoData)
+	{
+		UpdateData(request);
+	}
+}
+
 void Agent::Notify(
 	const UpdateRequest& request)
 {

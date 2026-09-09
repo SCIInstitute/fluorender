@@ -1091,4 +1091,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstCalcFill "calc fill"
 #define gstCalcCombine "calc combine"
 
+//clip plane panel agent
+#define gstClipIdle "clip idle"
+#define gstClipSetZero "clip set zero"
+#define gstClipRotReset "clip rot reset"
+#define gstClipRotResetX "clip rot reset x"
+#define gstClipRotResetY "clip rot reset y"
+#define gstClipRotResetZ "clip rot reset z"
+#define gstVolumeSampleRate "volume sample rate"
+
 #endif//NAMES_HPP

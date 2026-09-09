@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Agent.h>
 
 class MainFrame;
+class wxBasisSlider;
 class MainFrameAgent : public Agent
 {
 public:
@@ -47,6 +48,8 @@ public:
 		const UpdateRequest& request) override;
 
 	MainFrame* GetMainFrame() const;
+
+	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 private:
 	void UpdateUI(const UpdateRequest& request);

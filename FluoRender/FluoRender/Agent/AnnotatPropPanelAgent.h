@@ -44,10 +44,6 @@ public:
 
 	virtual ~AnnotatPropPanelAgent() = default;
 
-	// Agent interface
-	virtual void Update(
-		const UpdateRequest& request) override;
-	
 	AnnotatPropPanel* GetPanel() const;
 
 	std::shared_ptr<AnnotData> GetData() const
@@ -62,11 +58,10 @@ protected:
 		return kAcceptedValues;
 	}
 
-private:
-	void UpdateUI(const UpdateRequest& request);
+	void UpdateUI(const UpdateRequest& request) override;
 
-	void UpdateData(const UpdateRequest& request);
-
+	void UpdateData(const UpdateRequest& request) override;
+	
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{

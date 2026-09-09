@@ -332,7 +332,6 @@ public:
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
 	void DeleteRenderViewPanel(const std::wstring& name);
-	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 	//hide/show tools
 	void ToggleAllPanels(bool cur_state);

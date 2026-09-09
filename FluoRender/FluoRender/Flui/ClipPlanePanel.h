@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/spinbutt.h>
 #include <string>
+#include <array>
 
 namespace fluo
 {
@@ -96,22 +97,21 @@ public:
 	void UpdateClipRotY(double dval);
 	void UpdateClipRotZ(double dval);
 
-	bool GetXLink();
-	bool GetYLink();
-	bool GetZLink();
 	void SetXLink(bool val);
 	void SetYLink(bool val);
 	void SetZLink(bool val);
 
-	void SetClipValue(fluo::ClipPlane i, int val, bool link = false);//index: 0~5 = X1~Z2
-	void SetClipValues(fluo::ClipPlane i, int val1, int val2);//index: clip mask
-	void SetClipValues(const std::array<int, 6>& vals);
-	void ResetClipValues();
-	void ResetClipValues(fluo::ClipPlane i);
+	//get values
+	std::array<int, 6> GetClipValues();
+	bool GetHoldPlanes();
 
-	void SyncClipValue(int i);
+	bool GetXLink();
+	bool GetYLink();
+	bool GetZLink();
 
-	void SetPlaneMask(int val);
+	std::array<int, 2> GetClipX();
+	std::array<int, 2> GetClipY();
+	std::array<int, 2> GetClipZ();
 
 	void ClearUndo();
 
@@ -178,9 +178,6 @@ private:
 	void OnIdle(wxIdleEvent &event);
 
 	void OnToolbar(wxCommandEvent& event);
-	void LinkChannels();
-	void HoldPlanes();
-	void SetPlaneMode();
 
 	void OnClipXMF(wxCommandEvent& event);
 	void OnClipYMF(wxCommandEvent& event);

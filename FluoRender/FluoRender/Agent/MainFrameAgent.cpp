@@ -70,3 +70,16 @@ MainFrame* MainFrameAgent::GetMainFrame() const
 {
 	return static_cast<MainFrame*>(GetWindow());
 }
+
+void MainFrameAgent::SetFocusVRenderViews(wxBasisSlider* slider)
+{
+	for (auto& it : m_renderview_panels)
+	{
+		if (!it)
+			continue;
+		RenderCanvas* canvas = it->GetRenderCanvas();
+		if (canvas)
+			canvas->SetFocusedSlider(slider);
+	}
+}
+

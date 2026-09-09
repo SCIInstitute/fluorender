@@ -40,13 +40,6 @@ public:
 
 	virtual ~CalculationDlgAgent() = default;
 
-	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
-	virtual void Update(
-		const UpdateRequest& request) override;
-
 	CalculationDlg* GetDialog() const;
 
 protected:
@@ -56,11 +49,11 @@ protected:
 		return kAcceptedValues;
 	}
 
+	void UpdateUI(const UpdateRequest& request) override;
+
+	void UpdateData(const UpdateRequest& request) override;
+
 private:
-	void UpdateUI(const UpdateRequest& request);
-
-	void UpdateData(const UpdateRequest& request);
-
 	void CombineVolumes();
 
 private:

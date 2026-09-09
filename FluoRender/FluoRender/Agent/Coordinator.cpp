@@ -28,6 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Coordinator.h>
 #include <Agent.h>
+#include <RenderCanvasAgent.h>
+#include <RenderView.h>
 
 void Coordinator::Register(Agent* agent)
 {
@@ -94,4 +96,18 @@ void Coordinator::Dispatch(
 		if (agent->Accept(request))
 			agent->Update(request);
 	}
+}
+
+Agent* Coordinator::FindRenderCanvasAgent(const std::shared_ptr<RenderView>& view)
+{
+	for (auto agent : agents_)
+	{
+		if (auto result = dynamic_cast<RenderCanvasAgent*>(agent))
+		{
+			auto result_view = result->GetView();
+			if (result_view && view == result_view)
+				return result;
+		}
+	}
+	return nullptr;
 }

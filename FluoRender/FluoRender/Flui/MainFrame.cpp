@@ -1719,18 +1719,6 @@ void MainFrame::DeleteRenderViewPanel(const std::wstring &name)
 	}
 }
 
-void MainFrame::SetFocusVRenderViews(wxBasisSlider* slider)
-{
-	for (auto& it : m_renderview_panels)
-	{
-		if (!it)
-			continue;
-		RenderCanvas* canvas = it->GetRenderCanvas();
-		if (canvas)
-			canvas->SetFocusedSlider(slider);
-	}
-}
-
 //hide/show tools
 void MainFrame::ToggleAllPanels(bool cur_state)
 {

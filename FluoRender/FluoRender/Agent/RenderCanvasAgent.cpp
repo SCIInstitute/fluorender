@@ -47,9 +47,9 @@ bool RenderCanvasAgent::Accept(
 	const UpdateRequest& request) const
 {
 	return
-		FOUND_VALUE(gstRotations) ||
-		FOUND_VALUE(gstCamera) ||
-		FOUND_VALUE(gstRenderView);
+		request.HasValue(gstRotations) ||
+		request.HasValue(gstCamera) ||
+		request.HasValue(gstRenderView);
 }
 
 RenderCanvasAgent*
@@ -109,13 +109,13 @@ void RenderCanvasAgent::Update(
 
 	// linked rotation
 	if (glbin_linked_rot &&
-		FOUND_VALUE(gstRotations))
+		request.HasValue(gstRotations))
 	{
 		SyncRotations(sender);
 	}
 
 	// future camera sync
-	if (FOUND_VALUE(gstCamera))
+	if (request.HasValue(gstCamera))
 	{
 		SyncCamera(sender);
 	}
