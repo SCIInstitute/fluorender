@@ -47,19 +47,6 @@ BrushToolDlgAgent::BrushToolDlgAgent(
 
 }
 
-void BrushToolDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();

@@ -39,19 +39,6 @@ AnnotatPropPanelAgent::AnnotatPropPanelAgent(
 
 }
 
-void AnnotatPropPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 AnnotatPropPanel* AnnotatPropPanelAgent::GetPanel() const
 {
 	return static_cast<AnnotatPropPanel*>(GetWindow());

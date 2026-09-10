@@ -40,25 +40,6 @@ ColocalizationDlgAgent::ColocalizationDlgAgent(
 
 }
 
-bool ColocalizationDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void ColocalizationDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void ColocalizationDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
@@ -66,44 +47,42 @@ void ColocalizationDlgAgent::UpdateUI(const UpdateRequest& request)
 		return;
 
 	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	//settings
-	if (update_all || FOUND_VALUE(gstColocalMethod))
+	if (update_all || request.HasValue(gstColocalMethod))
 	{
 		dlg->UpdateColocalMethod(glbin_colocal_def.m_method);
 	}
 
-	if (update_all || FOUND_VALUE(gstIntWeighted))
+	if (update_all || request.HasValue(gstIntWeighted))
 	{
 		dlg->UpdateIntWeighted(glbin_colocal_def.m_int_weighted);
 	}
 
-	if (update_all || FOUND_VALUE(gstGetRatio))
+	if (update_all || request.HasValue(gstGetRatio))
 	{
 		dlg->UpdateGetRatio(glbin_colocal_def.m_get_ratio);
 	}
 
-	if (update_all || FOUND_VALUE(gstPhysSize))
+	if (update_all || request.HasValue(gstPhysSize))
 	{
 		dlg->UpdatePhysicalSize(glbin_colocal_def.m_physical_size);
 	}
 
-	if (update_all || FOUND_VALUE(gstColocalColormap))
+	if (update_all || request.HasValue(gstColocalColormap))
 	{
 		dlg->UpdateColocalColormap(glbin_colocal_def.m_colormap);
 	}
 
-	if (update_all || FOUND_VALUE(gstUseSelection))
+	if (update_all || request.HasValue(gstUseSelection))
 	{
 		dlg->UpdateUseSelection(glbin_colocal_def.m_use_mask);
 	}
 
 	bool colocal_update = false;
-	bool colocal_result = FOUND_VALUE(gstColocalResult);
-	bool auto_update = FOUND_VALUE(gstColocalAutoUpdate);
+	bool colocal_result = request.HasValue(gstColocalResult);
+	bool auto_update = request.HasValue(gstColocalAutoUpdate);
 	if (update_all || auto_update)
 	{
 		if (auto_update)
