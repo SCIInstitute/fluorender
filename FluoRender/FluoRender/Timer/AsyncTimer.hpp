@@ -28,112 +28,72 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ASYNC_TIMER_H_
 #define _ASYNC_TIMER_H_
 
-#include <Node.hpp>
+#include <atomic>              // CHANGE
 #include <chrono>
+#include <condition_variable>  // CHANGE
 #include <functional>
+#include <mutex>               // CHANGE
 #include <thread>
-
-#define gstAsyncTimer "default aync timer"
-#define gstTimerInterval "timer interval"//in millisec
-#define gstTimerRunning "timer running"
 
 namespace fluo
 {
-	/**
-	 *  Create asynchronous timers which execute specified
-	 *  functions in set time interval.
-	 *
-	 *  @param func		Function which sould be executed
-	 *  @param interval	Interval of time in which function will be executed
-	 *					(in milliseconds)
-	 */
-	class AsyncTimer : public Node
+	class AsyncTimer
 	{
 	public:
 		AsyncTimer();
 
-		AsyncTimer(std::function<void(void)> func, const long &interval);
+		AsyncTimer(
+			std::function<void(void)> func,
+			const long& interval);
 
-		AsyncTimer(const AsyncTimer& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
+		~AsyncTimer();
 
-		virtual Object* clone(const CopyOp& copyop) const
+		const char* className() const
 		{
-			return new AsyncTimer(*this, copyop);
+			return "AsyncTimer";
 		}
 
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const AsyncTimer*>(obj) != NULL;
-		}
+		// CHANGE:
+		// starts a periodic timer.
+		void start(long interval);
 
-		virtual const char* className() const { return "AsyncTimer"; }
+		// CHANGE:
+		// safely stops worker thread.
+		void stop();
 
-		virtual AsyncTimer* asAsyncTimer() { return this; }
-		virtual const AsyncTimer* asAsyncTimer() const { return this; }
-
-		/**
-		 * Starting the timer.
-		 */
-		void start(long interval)
-		{
-			run_ = true;
-			interval_ = interval;
-
-			m_thread = std::thread([&]()
-			{
-				while (run_)
-				{
-					auto delta = std::chrono::steady_clock::now() + std::chrono::milliseconds(interval_);
-					m_func();
-					std::this_thread::sleep_until(delta);
-				}
-			});
-			m_thread.detach();
-		}
-
-		/*
-		 *  Stopping the timer and destroys the thread.
-		 */
-		void stop()
-		{
-			run_ = false;
-			m_thread.~thread();
-		}
-
-		/*
-		 *  Restarts the timer. Needed if you set a new
-		 *  timer interval for example.
-		 */
 		void restart(long interval)
 		{
 			stop();
 			start(interval);
 		}
 
-		/*
-		*  Set the method of the timer after
-		*  initializing the timer instance.
-		*
-		*  @returns boolean is running
-		*  @return  Timer reference of this
-		*/
-		AsyncTimer *setFunc(std::function<void(void)> func)
+		AsyncTimer* setFunc(std::function<void(void)> func)
 		{
-			m_func = func;
+			std::lock_guard<std::mutex> lock(m_mutex);
+			m_func = std::move(func);
 			return this;
 		}
 
-	private:
-		virtual ~AsyncTimer();
+		bool isRunning() const
+		{
+			return run_;
+		}
 
-		// Function to be executed fater interval
+	private:
 		std::function<void(void)> m_func;
-		// Thread timer is running into
 		std::thread m_thread;
 
-		bool run_;
-		long interval_;
+		// CHANGE:
+		// thread-safe state.
+		std::atomic<bool> run_{ false };
+
+		long interval_{ 1000 };
+
+		// CHANGE:
+		// allows stop() to wake sleeping thread.
+		mutable std::mutex m_mutex;
+		std::condition_variable m_cv;
 	};
 }
 
-#endif // _ASYNC_TIMER_H_ 
+#endif

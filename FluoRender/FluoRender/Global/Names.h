@@ -1100,4 +1100,29 @@ DEALINGS IN THE SOFTWARE.
 #define gstClipRotResetZ "clip rot reset z"
 #define gstVolumeSampleRate "volume sample rate"
 
+//colocalization dialog agent
+//comp dialog agent
+#define gstCompGenerate "comp generate"
+#define gstCompCluster "comp cluster"
+#define gstCompAnalyze "comp analyze"
+#define gstFixUpdate "fix update"
+#define gstCleanUpdate "clean update"
+#define gstPlayCmd "play cmd"
+#define gstResetCmd "reset cmd"
+#define gstLoadCmd "load cmd"
+#define gstSaveCmd "save cmd"
+#define gstCompFull "comp full"
+#define gstCompExclusive "comp exclusive"
+#define gstCompAppend "comp append"
+#define gstCompAll "comp all"
+#define gstCompClear "comp clear"
+#define gstShuffle "shuffle"
+#define gstCompNew "comp new"
+#define gstCompAdd "comp add"
+#define gstCompReplace "comp replace"
+#define gstCompClearBkg "comp clear bkg"
+#define gstCompCombine "comp combine"
+#define gstCompOutputMesh "comp output mesh"
+#define gstCompOutputDist "comp output dist"
+
 #endif//NAMES_HPP

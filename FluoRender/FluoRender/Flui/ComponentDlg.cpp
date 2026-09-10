@@ -26,28 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ComponentDlg.h>
+#include <ComponentDlgAgent.h>
 #include <Global.h>
 #include <Names.h>
-#include <ComponentDefault.h>
-#include <AutomateDefault.h>
-#include <BrushDefault.h>
-#include <CompEditor.h>
-#include <RecordHistParams.h>
-#include <CompGenerator.h>
-#include <Clusterizer.h>
-#include <CompSelector.h>
-#include <CompAnalyzer.h>
-#include <VolumeSelector.h>
-#include <Colocalize.h>
-#include <BaseConvVolMesh.h>
-#include <ColorMesh.h>
-#include <Ruler.h>
-#include <RulerList.h>
-#include <RulerAlign.h>
-#include <VolumeData.h>
-#include <RenderView.h>
 #include <CurrentObjects.h>
 #include <DataManager.h>
+#include <VolumeData.h>
+#include <Coordinator.h>
 #include <ModalDlg.h>
 #include <wxSingleSlider.h>
 #include <Progress.h>
@@ -65,8 +50,7 @@ ComponentDlg::ComponentDlg(wxWindow *parent)
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 620)),
 		0, "ComponentDlg"),
-	m_hold_history(false),
-	m_auto_update_timer(this)
+	m_hold_history(false)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -84,7 +68,6 @@ ComponentDlg::ComponentDlg(wxWindow *parent)
 	m_notebook->AddPage(CreateOutputPage(m_notebook), "Information");
 
 	Bind(wxEVT_SIZE, &ComponentDlg::OnSize, this);
-	Bind(wxEVT_TIMER, &ComponentDlg::OnAutoUpdateTimer, this);
 
 	wxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(m_notebook, 1, wxEXPAND | wxALL);
@@ -1412,91 +1395,6 @@ void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
 	prg.SetProgress(0, "");
 }
 
-//setting funcs for sliders
-void ComponentDlg::SetIter(int val)
-{
-	glbin_comp_generator.SetIter(val);
-	FluoUpdate({ gstIteration, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetThresh(double val)
-{
-	glbin_comp_generator.SetThresh(val);
-	FluoUpdate({ gstCompThreshold, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetDistStrength(double val)
-{
-	glbin_comp_generator.SetDistStrength(val);
-	FluoUpdate({ gstDistFieldStrength, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetDistFilterSize(int val)
-{
-	glbin_comp_generator.SetDistFilterSize(val);
-	FluoUpdate({ gstDistFieldFilterSize, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetMaxDist(int val)
-{
-	glbin_comp_generator.SetMaxDist(val);
-	FluoUpdate({ gstMaxDist, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetDistThresh(double val)
-{
-	glbin_comp_generator.SetDistThresh(val);
-	FluoUpdate({ gstDistFieldThresh, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetFalloff(double val)
-{
-	glbin_comp_generator.SetFalloff(val);
-	FluoUpdate({ gstDiffusionFalloff, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetDensity(double val)
-{
-	glbin_comp_generator.SetDensityThresh(val);
-	FluoUpdate({ gstDensityFieldThresh, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetVarth(double val)
-{
-	glbin_comp_generator.SetVarThresh(val);
-	FluoUpdate({ gstDensityVarThresh, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetDensityWindowSize(int val)
-{
-	glbin_comp_generator.SetDensityWinSize(val);
-	FluoUpdate({ gstDensityWindowSize, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetDensityStatsSize(int val)
-{
-	glbin_comp_generator.SetDensityStatSize(val);
-	FluoUpdate({ gstDensityStatsSize, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetFixSize(int val)
-{
-	glbin_comp_generator.SetFixSize(val);
-	FluoUpdate({ gstFixateSize, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetCleanIter(int val)
-{
-	glbin_comp_generator.SetCleanIter(val);
-	FluoUpdate({ gstCleanIteration, gstCompAutoUpdate, gstRecordCmd });
-}
-
-void ComponentDlg::SetCleanLimit(int val)
-{
-	glbin_comp_generator.SetCleanSize(val);
-	FluoUpdate({ gstCleanSize, gstCompAutoUpdate, gstRecordCmd });
-}
-
 //comp generate page
 void ComponentDlg::OnIterSldr(wxScrollEvent& event)
 {
@@ -1504,8 +1402,7 @@ void ComponentDlg::OnIterSldr(wxScrollEvent& event)
 	wxString str = wxString::Format("%d", val);
 	if (str != m_iter_text->GetValue())
 	{
-		m_iter_text->ChangeValue(str);
-		SetIter(val);
+		m_iter_text->SetValue(str);
 	}
 }
 
@@ -1514,7 +1411,10 @@ void ComponentDlg::OnIterText(wxCommandEvent& event)
 	long val = 0;
 	m_iter_text->GetValue().ToLong(&val);
 	m_iter_sldr->ChangeValue(val);
-	SetIter(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetIter(val);
 }
 
 void ComponentDlg::OnThreshSldr(wxScrollEvent& event)
@@ -1524,7 +1424,6 @@ void ComponentDlg::OnThreshSldr(wxScrollEvent& event)
 	if (str != m_thresh_text->GetValue())
 	{
 		m_thresh_text->SetValue(str);
-		SetThresh(val);
 	}
 }
 
@@ -1533,7 +1432,10 @@ void ComponentDlg::OnThreshText(wxCommandEvent& event)
 	double val = 0.0;
 	m_thresh_text->GetValue().ToDouble(&val);
 	m_thresh_sldr->ChangeValue(std::round(val * 1000.0));
-	SetThresh(val);
+	
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetThresh(val);
 }
 
 void ComponentDlg::OnDistStrengthSldr(wxScrollEvent& event)
@@ -1543,7 +1445,6 @@ void ComponentDlg::OnDistStrengthSldr(wxScrollEvent& event)
 	if (str != m_dist_strength_text->GetValue())
 	{
 		m_dist_strength_text->SetValue(str);
-		SetDistStrength(val);
 	}
 }
 
@@ -1552,14 +1453,19 @@ void ComponentDlg::OnDistStrengthText(wxCommandEvent& event)
 	double val = 0.0;
 	m_dist_strength_text->GetValue().ToDouble(&val);
 	m_dist_strength_sldr->ChangeValue(std::round(val * 1000.0));
-	SetDistStrength(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDistStrength(val);
 }
 
 void ComponentDlg::OnUseDistFieldCheck(wxCommandEvent& event)
 {
 	bool bval = m_use_dist_field_check->GetValue();
-	glbin_comp_generator.SetUseDistField(bval);
-	FluoUpdate({ gstUseDistField, gstCompAutoUpdate, gstRecordCmd });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseDistField(bval);
 }
 
 void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
@@ -1569,7 +1475,6 @@ void ComponentDlg::OnDistFilterSizeSldr(wxScrollEvent& event)
 	if (str != m_dist_filter_size_text->GetValue())
 	{
 		m_dist_filter_size_text->SetValue(str);
-		SetDistFilterSize(val);
 	}
 }
 
@@ -1578,7 +1483,10 @@ void ComponentDlg::OnDistFilterSizeText(wxCommandEvent& event)
 	long val = 0;
 	m_dist_filter_size_text->GetValue().ToLong(&val);
 	m_dist_filter_size_sldr->ChangeValue(val);
-	SetDistFilterSize(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDistFilterSize(val);
 }
 
 void ComponentDlg::OnMaxDistSldr(wxScrollEvent& event)
@@ -1588,7 +1496,6 @@ void ComponentDlg::OnMaxDistSldr(wxScrollEvent& event)
 	if (str != m_max_dist_text->GetValue())
 	{
 		m_max_dist_text->SetValue(str);
-		SetMaxDist(val);
 	}
 }
 
@@ -1599,7 +1506,10 @@ void ComponentDlg::OnMaxDistText(wxCommandEvent& event)
 	if (val > 255)
 		val = 255;
 	m_max_dist_sldr->ChangeValue(val);
-	SetMaxDist(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetMaxDist(val);
 }
 
 void ComponentDlg::OnDistThreshSldr(wxScrollEvent& event)
@@ -1609,7 +1519,6 @@ void ComponentDlg::OnDistThreshSldr(wxScrollEvent& event)
 	if (str != m_dist_thresh_text->GetValue())
 	{
 		m_dist_thresh_text->SetValue(str);
-		SetDistThresh(val);
 	}
 }
 
@@ -1618,14 +1527,19 @@ void ComponentDlg::OnDistThreshText(wxCommandEvent& event)
 	double val = 0.0;
 	m_dist_thresh_text->GetValue().ToDouble(&val);
 	m_dist_thresh_sldr->ChangeValue(std::round(val * 1000.0));
-	SetDistThresh(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDistThresh(val);
 }
 
 void ComponentDlg::OnDiffCheck(wxCommandEvent& event)
 {
 	bool bval = m_diff_check->GetValue();
-	glbin_comp_generator.SetDiffusion(bval);
-	FluoUpdate({ gstUseDiffusion, gstCompAutoUpdate, gstRecordCmd });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseDiff(bval);
 }
 
 void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
@@ -1635,7 +1549,6 @@ void ComponentDlg::OnFalloffSldr(wxScrollEvent& event)
 	if (str != m_falloff_text->GetValue())
 	{
 		m_falloff_text->SetValue(str);
-		SetFalloff(val);
 	}
 }
 
@@ -1644,14 +1557,19 @@ void ComponentDlg::OnFalloffText(wxCommandEvent& event)
 	double val = 0.0;
 	m_falloff_text->GetValue().ToDouble(&val);
 	m_falloff_sldr->ChangeValue(std::round(val * 1000.0));
-	SetFalloff(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetFalloff(val);
 }
 
 void ComponentDlg::OnDensityCheck(wxCommandEvent& event)
 {
 	bool bval = m_density_check->GetValue();
-	glbin_comp_generator.SetDensity(bval);
-	FluoUpdate({ gstUseDensityField, gstCompAutoUpdate, gstRecordCmd });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseDensity(bval);
 }
 
 void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
@@ -1661,7 +1579,6 @@ void ComponentDlg::OnDensitySldr(wxScrollEvent& event)
 	if (str != m_density_text->GetValue())
 	{
 		m_density_text->SetValue(str);
-		SetDensity(val);
 	}
 }
 
@@ -1670,7 +1587,10 @@ void ComponentDlg::OnDensityText(wxCommandEvent& event)
 	double val = 0.0;
 	m_density_text->GetValue().ToDouble(&val);
 	m_density_sldr->ChangeValue(std::round(val * 1000.0));
-	SetDensity(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDensity(val);
 }
 
 void ComponentDlg::OnVarthSldr(wxScrollEvent& event)
@@ -1680,7 +1600,6 @@ void ComponentDlg::OnVarthSldr(wxScrollEvent& event)
 	if (str != m_varth_text->GetValue())
 	{
 		m_varth_text->SetValue(str);
-		SetVarth(val);
 	}
 }
 
@@ -1689,7 +1608,10 @@ void ComponentDlg::OnVarthText(wxCommandEvent& event)
 	double val = 0.0;
 	m_varth_text->GetValue().ToDouble(&val);
 	m_varth_sldr->ChangeValue(std::round(val * 10000.0));
-	SetVarth(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetVarth(val);
 }
 
 void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent& event)
@@ -1699,7 +1621,6 @@ void ComponentDlg::OnDensityWindowSizeSldr(wxScrollEvent& event)
 	if (str != m_density_window_size_text->GetValue())
 	{
 		m_density_window_size_text->SetValue(str);
-		SetDensityWindowSize(val);
 	}
 }
 
@@ -1708,7 +1629,10 @@ void ComponentDlg::OnDensityWindowSizeText(wxCommandEvent& event)
 	long val = 0;
 	m_density_window_size_text->GetValue().ToLong(&val);
 	m_density_window_size_sldr->ChangeValue(val);
-	SetDensityWindowSize(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDensityWindowSize(val);
 }
 
 void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent& event)
@@ -1718,7 +1642,6 @@ void ComponentDlg::OnDensityStatsSizeSldr(wxScrollEvent& event)
 	if (str != m_density_stats_size_text->GetValue())
 	{
 		m_density_stats_size_text->SetValue(str);
-		SetDensityStatsSize(val);
 	}
 }
 
@@ -1727,59 +1650,31 @@ void ComponentDlg::OnDensityStatsSizeText(wxCommandEvent& event)
 	long val = 0;
 	m_density_stats_size_text->GetValue().ToLong(&val);
 	m_density_stats_size_sldr->ChangeValue(val);
-	SetDensityStatsSize(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDensityStatsSize(val);
 }
 
 void ComponentDlg::OnFixateCheck(wxCommandEvent& event)
 {
 	bool bval = m_fixate_check->GetValue();
-	glbin_comp_generator.SetFixate(bval);
-
-	if (bval)
-		glbin_comp_generator.Fixate();
-
-	if (glbin_comp_generator.GetAutoCompGen())
-	{
-		bval = glbin_comp_generator.GetClean();
-		glbin_comp_generator.SetClean(false);
-		glbin_comp_generator.SetUseSel(m_use_sel_gen_chk->GetValue());
-		glbin_comp_generator.GenerateComp(false);
-		glbin_comp_generator.SetClean(bval);
-		FluoRefresh(2, { gstFixateEnable });
-	}
-	else
-		FluoUpdate({ gstFixateEnable });
 }
 
 void ComponentDlg::OnGrowFixedCheck(wxCommandEvent& event)
 {
 	bool bval = m_grow_fixed_check->GetValue();
-	glbin_comp_generator.SetGrowFixed(bval);
-
-	if (glbin_comp_generator.GetAutoCompGen())
-	{
-		bval = glbin_comp_generator.GetClean();
-		glbin_comp_generator.SetClean(false);
-		glbin_comp_generator.SetUseSel(m_use_sel_gen_chk->GetValue());
-		glbin_comp_generator.GenerateComp(false);
-		glbin_comp_generator.SetClean(bval);
-		FluoRefresh(3, { gstNull });
-	}
+	
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetFixate(bval);
 }
 
 void ComponentDlg::OnFixUpdateBtn(wxCommandEvent& event)
 {
-	glbin_comp_generator.Fixate();
-
-	if (glbin_comp_generator.GetAutoCompGen())
-	{
-		bool bval = glbin_comp_generator.GetClean();
-		glbin_comp_generator.SetClean(false);
-		glbin_comp_generator.SetUseSel(m_use_sel_gen_chk->GetValue());
-		glbin_comp_generator.GenerateComp(false);
-		glbin_comp_generator.SetClean(bval);
-		FluoRefresh(3, { gstNull });
-	}
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstFixUpdate });
 }
 
 void ComponentDlg::OnFixSizeSldr(wxScrollEvent& event)
@@ -1789,7 +1684,6 @@ void ComponentDlg::OnFixSizeSldr(wxScrollEvent& event)
 	if (str != m_fix_size_text->GetValue())
 	{
 		m_fix_size_text->SetValue(str);
-		SetFixSize(val);
 	}
 }
 
@@ -1798,22 +1692,26 @@ void ComponentDlg::OnFixSizeText(wxCommandEvent& event)
 	long val = 0;
 	m_fix_size_text->GetValue().ToLong(&val);
 	m_fix_size_sldr->ChangeValue(val);
-	SetFixSize(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetFixSize(val);
 }
 
 void ComponentDlg::OnCleanCheck(wxCommandEvent& event)
 {
 	bool bval = m_clean_check->GetValue();
-	glbin_comp_generator.SetClean(bval);
-	FluoUpdate({ gstCleanEnable, gstCompAutoUpdate, gstRecordCmd });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClean(bval);
 }
 
 void ComponentDlg::OnCleanBtn(wxCommandEvent& event)
 {
-	bool bval = m_use_sel_gen_chk->GetValue();
-	glbin_comp_generator.SetUseSel(bval);
-	glbin_comp_generator.Clean();
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCleanUpdate });
 }
 
 void ComponentDlg::OnCleanIterSldr(wxScrollEvent& event)
@@ -1823,7 +1721,6 @@ void ComponentDlg::OnCleanIterSldr(wxScrollEvent& event)
 	if (str != m_clean_iter_text->GetValue())
 	{
 		m_clean_iter_text->SetValue(str);
-		SetCleanIter(val);
 	}
 }
 
@@ -1832,7 +1729,10 @@ void ComponentDlg::OnCleanIterText(wxCommandEvent& event)
 	long val = 0;
 	m_clean_iter_text->GetValue().ToLong(&val);
 	m_clean_iter_sldr->ChangeValue(val);
-	SetCleanIter(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetCleanIter(val);
 }
 
 void ComponentDlg::OnCleanLimitSldr(wxScrollEvent& event)
@@ -1842,7 +1742,6 @@ void ComponentDlg::OnCleanLimitSldr(wxScrollEvent& event)
 	if (str != m_clean_limit_text->GetValue())
 	{
 		m_clean_limit_text->SetValue(str);
-		SetCleanLimit(val);
 	}
 }
 
@@ -1851,85 +1750,58 @@ void ComponentDlg::OnCleanLimitText(wxCommandEvent& event)
 	long val = 0;
 	m_clean_limit_text->GetValue().ToLong(&val);
 	m_clean_limit_sldr->ChangeValue(val);
-	SetCleanLimit(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetCleanLimit(val);
 }
 
 //record
 void ComponentDlg::OnRecordCmd(wxCommandEvent& event)
 {
 	bool val = m_record_cmd_btn->GetValue();
-	glbin_comp_generator.SetRecordCmd(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetRecord(val);
 }
 
 void ComponentDlg::OnPlayCmd(wxCommandEvent& event)
 {
-	bool bval = m_use_sel_gen_chk->GetValue();
-	glbin_comp_generator.SetUseSel(bval);
-	glbin_comp_generator.PlayCmd(1.0);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstPlayCmd });
 }
 
 void ComponentDlg::OnResetCmd(wxCommandEvent& event)
 {
-	glbin_comp_generator.ResetCmd();
-	FluoUpdate({ gstRecordCmd });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstResetCmd });
 }
 
 void ComponentDlg::OnLoadCmd(wxCommandEvent& event)
 {
-	ModalDlg fopendlg(
-		m_frame, "Choose a FluoRender component generator macro command",
-		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	int rval = fopendlg.ShowModal();
-	if (rval != wxID_OK)
-		return;
-	std::wstring filename = fopendlg.GetPath().ToStdWstring();
-
-	glbin_comp_generator.LoadCmd(filename);
-	FluoUpdate({ gstRecordCmd });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstLoadCmd });
 }
 
 void ComponentDlg::OnSaveCmd(wxCommandEvent& event)
 {
-	ModalDlg fopendlg(
-		m_frame, "Save a FluoRender component generator macro command",
-		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg.ShowModal();
-	if (rval != wxID_OK)
-		return;
-
-	std::wstring filename = fopendlg.GetPath().ToStdWstring();
-
-	glbin_comp_generator.SaveCmd(filename);
-}
-
-//auto update
-void ComponentDlg::LaunchAutoUpdateTimer()
-{
-	if (!glbin_comp_generator.GetAutoCompGen())
-		return;
-	m_auto_update_timer.Start(100);
-}
-
-void ComponentDlg::OnAutoUpdateTimer(wxTimerEvent& event)
-{
-	m_auto_update_timer.Stop();
-	fluo::ValueCollection vc;
-	bool bval = m_use_sel_gen_chk->GetValue();
-	glbin_comp_generator.SetUseSel(bval);
-	if (glbin_comp_generator.GetAutoThreshold())
-		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-	glbin_comp_generator.GenerateComp();
-	vc.insert({ gstCompGenOutput, gstMaskMode });
-	FluoRefresh(0, vc);
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSaveCmd });
 }
 
 //clustering page
 void ComponentDlg::OnClusterMethodCheck(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	glbin_clusterizer.SetMethod(id);
-	FluoUpdate({ gstClusterMethod });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClusterMethod(id);
 }
 
 //parameters
@@ -1946,7 +1818,10 @@ void ComponentDlg::OnClusterClnumText(wxCommandEvent& event)
 	long val = 0;
 	m_cluster_clnum_text->GetValue().ToLong(&val);
 	m_cluster_clnum_sldr->ChangeValue(val);
-	glbin_clusterizer.SetNum(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClusterClnum(val);
 }
 
 void ComponentDlg::OnClusterMaxiterSldr(wxScrollEvent& event)
@@ -1962,7 +1837,10 @@ void ComponentDlg::OnClusterMaxiterText(wxCommandEvent& event)
 	long val = 0;
 	m_cluster_maxiter_text->GetValue().ToLong(&val);
 	m_cluster_maxiter_sldr->ChangeValue(val);
-	glbin_clusterizer.SetMaxIter(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClusterMaxiter(val);
 }
 
 void ComponentDlg::OnClusterTolSldr(wxScrollEvent& event)
@@ -1978,7 +1856,10 @@ void ComponentDlg::OnClusterTolText(wxCommandEvent& event)
 	double val = 0.9;
 	m_cluster_tol_text->GetValue().ToDouble(&val);
 	m_cluster_tol_sldr->ChangeValue(std::round(val * 100));
-	glbin_clusterizer.SetTol((float)val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClusterTol(val);
 }
 
 void ComponentDlg::OnClusterSizeSldr(wxScrollEvent& event)
@@ -1994,7 +1875,10 @@ void ComponentDlg::OnClusterSizeText(wxCommandEvent& event)
 	long val = 0;
 	m_cluster_size_text->GetValue().ToLong(&val);
 	m_cluster_size_sldr->ChangeValue(val);
-	glbin_clusterizer.SetSize(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClusterSize(val);
 }
 
 void ComponentDlg::OnClusterEpsSldr(wxScrollEvent& event)
@@ -2010,7 +1894,10 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent& event)
 	double val = 0.0;
 	m_cluster_eps_text->GetValue().ToDouble(&val);
 	m_cluster_eps_sldr->ChangeValue(std::round(val * 10.0));
-	glbin_clusterizer.SetEps(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetClustereps(val);
 }
 
 //analysis page
@@ -2018,137 +1905,148 @@ void ComponentDlg::OnCompIdText(wxCommandEvent& event)
 {
 	unsigned long id;
 	wxString str = m_comp_id_text->GetValue();
-	glbin_comp_selector.SetId(str.ToStdString());
-	if (str.ToULong(&id))
-		glbin_comp_editor.SetId(id, false);
-	else
-		glbin_comp_editor.SetId(0, true);
-	FluoUpdate({ gstCompIdColor });
 }
 
 void ComponentDlg::OnCompIdXBtn(wxCommandEvent& event)
 {
 	m_comp_id_text->Clear();
-	FluoUpdate({ gstCompIdColor });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstCompIdColor });
 }
 
 void ComponentDlg::OnAnalysisMinCheck(wxCommandEvent& event)
 {
 	bool bval = m_analysis_min_check->GetValue();
 	m_analysis_min_spin->Enable(bval);
-	glbin_comp_selector.SetUseMin(bval);
-	glbin_comp_analyzer.SetUseMin(bval);
-	FluoUpdate({ gstUseMin });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseMin(bval);
 }
 
 void ComponentDlg::OnAnalysisMinSpin(wxSpinEvent& event)
 {
 	int val = m_analysis_min_spin->GetValue();
-	glbin_comp_selector.SetMinNum(val);
-	glbin_comp_analyzer.SetMinNum(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetMin(val);
 }
 
 void ComponentDlg::OnAnalysisMinText(wxCommandEvent& event)
 {
 	int val = m_analysis_min_spin->GetValue();
-	glbin_comp_selector.SetMinNum(val);
-	glbin_comp_analyzer.SetMinNum(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetMin(val);
 }
 
 void ComponentDlg::OnAnalysisMaxCheck(wxCommandEvent& event)
 {
 	bool bval = m_analysis_max_check->GetValue();
 	m_analysis_max_spin->Enable(bval);
-	glbin_comp_selector.SetUseMax(bval);
-	glbin_comp_analyzer.SetUseMax(bval);
-	FluoUpdate({ gstUseMax });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseMax(bval);
 }
 
 void ComponentDlg::OnAnalysisMaxSpin(wxSpinEvent& event)
 {
 	int val = m_analysis_max_spin->GetValue();
-	glbin_comp_selector.SetMaxNum(val);
-	glbin_comp_analyzer.SetMaxNum(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetMax(val);
 }
 
 void ComponentDlg::OnAnalysisMaxText(wxCommandEvent& event)
 {
 	int val = m_analysis_max_spin->GetValue();
-	glbin_comp_selector.SetMaxNum(val);
-	glbin_comp_analyzer.SetMaxNum(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetMax(val);
 }
 
 void ComponentDlg::OnCompFull(wxCommandEvent& event)
 {
-	glbin_comp_selector.SelectFullComp();
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompFull });
 }
 
 void ComponentDlg::OnCompExclusive(wxCommandEvent& event)
 {
-	glbin_comp_selector.Exclusive();
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompExclusive });
 }
 
 void ComponentDlg::OnCompAppend(wxCommandEvent& event)
 {
-	bool get_all = glbin_comp_selector.GetIdEmpty();
-	glbin_comp_selector.Select(get_all);
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompAppend });
 }
 
 void ComponentDlg::OnCompAll(wxCommandEvent& event)
 {
-	glbin_comp_selector.All();
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompAll });
 }
 
 void ComponentDlg::OnCompClear(wxCommandEvent& event)
 {
-	glbin_vol_selector.Clear();
-	glbin_comp_selector.Clear();
-	FluoRefresh(0, { gstCompAnalysisResult, gstSelUndo });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompClear });
 }
 
 void ComponentDlg::OnShuffle(wxCommandEvent& event)
 {
-	//get current vd
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-
-	vd->IncShuffle();
-	FluoRefresh(2, { gstCompAnalysisResult });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstShuffle });
 }
 
 void ComponentDlg::OnCompNew(wxCommandEvent& event)
 {
-	glbin_comp_editor.NewId(false, false);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompNew });
 }
 
 void ComponentDlg::OnCompAdd(wxCommandEvent& event)
 {
-	glbin_comp_editor.NewId(true, false);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompAdd });
 }
 
 void ComponentDlg::OnCompReplace(wxCommandEvent& event)
 {
-	glbin_comp_editor.ReplaceId();
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompReplace });
 }
 
 void ComponentDlg::OnCompCleanBkg(wxCommandEvent& event)
 {
-	glbin_comp_editor.Clean(0);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompClearBkg });
 }
 
 void ComponentDlg::OnCompCombine(wxCommandEvent& event)
 {
-	glbin_comp_editor.CombineId();
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompExclusive });
 }
 
 void ComponentDlg::OnConSizeSldr(wxScrollEvent& event)
@@ -2164,99 +2062,102 @@ void ComponentDlg::OnConSizeText(wxCommandEvent& event)
 	long val = 0;
 	m_con_size_text->GetValue().ToLong(&val);
 	m_con_size_sldr->ChangeValue(val);
-	glbin_comp_analyzer.SetSizeLimit(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetConSize(val);
 }
 
 void ComponentDlg::OnConsistentCheck(wxCommandEvent& event)
 {
 	bool bval = m_consistent_check->GetValue();
-	glbin_comp_analyzer.SetConsistent(bval);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetConsistent(bval);
 }
 
 void ComponentDlg::OnColocalCheck(wxCommandEvent& event)
 {
 	bool bval = m_colocal_check->GetValue();
-	glbin_comp_analyzer.SetColocal(bval);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetColocal(bval);
 }
 
 //output
 void ComponentDlg::OnOutputTypeRadio(wxCommandEvent& event)
 {
 	int id = event.GetId();
+	int ival = 0;
 	switch (id)
 	{
 	case ID_OutputMultiRb:
-		glbin_comp_analyzer.SetChannelType(1);
+		ival = 1;
 		break;
 	case ID_OutputRgbRb:
-		glbin_comp_analyzer.SetChannelType(2);
+		ival = 2;
 		break;
 	}
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetOutputType(ival);
 }
 
 void ComponentDlg::OnOutputChannels(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int val = 1;
+	int ival = 1;
 	if (id == ID_OutputRandomBtn)
-		val = 1;
+		ival = 1;
 	else if (id == ID_OutputSizeBtn)
-		val = 2;
+		ival = 2;
 
-	glbin_comp_analyzer.SetColorType(val);
-	glbin_comp_analyzer.OutputChannels();
-	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetOutputChannels(ival);
 }
 
 void ComponentDlg::OnOutputAnnotData(wxCommandEvent& event)
 {
 	int id = event.GetId();
-	int val = 0;
+	int ival = 0;
 	if (id == ID_OutputIdBtn)
-		val = 1;
+		ival = 1;
 	else if (id == ID_OutputSnBtn)
-		val = 2;
+		ival = 2;
 
-	glbin_comp_analyzer.SetAnnotType(val);
-	glbin_comp_analyzer.OutputAnnotData();
-	FluoRefresh(0, { gstListCtrl, gstTreeCtrl });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetOutputAnnotData(ival);
 }
 
 void ComponentDlg::OnOutputMeshData(wxCommandEvent& event)
 {
-	auto vd = glbin_current.vol_data.lock();
-	glbin_conv_vol_mesh.SetVolumeData(vd);
-	glbin_conv_vol_mesh.Update(true);
-	glbin_conv_vol_mesh.MergeVertices(true);
-	auto md = glbin_conv_vol_mesh.GetMeshData();
-	glbin_color_mesh.SetVolumeData(vd);
-	glbin_color_mesh.SetMeshData(md);
-	glbin_color_mesh.SetUseSel(true);
-	glbin_color_mesh.SetUseComp(true);
-	glbin_color_mesh.Update();
-	if (md &&
-		glbin_data_manager.AddMeshData(md))
-	{
-		auto view = glbin_current.render_view.lock();
-		if (view)
-			view->AddMeshData(md);
-	}
-	FluoRefresh(0, { gstVolMeshThresh, gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompOutputMesh });
 }
 
 //distance
 void ComponentDlg::OnDistNeighborCheck(wxCommandEvent& event)
 {
 	bool bval = m_dist_neighbor_check->GetValue();
-	glbin_comp_analyzer.SetUseDistNeighbor(bval);
-	FluoUpdate({ gstDistNeighbor });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseDistNeighbor(bval);
 }
 
 void ComponentDlg::OnDistAllChanCheck(wxCommandEvent& event)
 {
 	bool bval = m_dist_all_chan_check->GetValue();
-	glbin_comp_analyzer.SetUseDistAllchan(bval);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDistAllChan(bval);
 }
 
 void ComponentDlg::OnDistNeighborSldr(wxScrollEvent& event)
@@ -2272,25 +2173,35 @@ void ComponentDlg::OnDistNeighborText(wxCommandEvent& event)
 	long val = 0;
 	m_dist_neighbor_text->GetValue().ToLong(&val);
 	m_dist_neighbor_sldr->ChangeValue(val);
-	glbin_comp_analyzer.SetDistNeighborNum(val);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDistNeighbor(val);
 }
 
 void ComponentDlg::OnDistOutput(wxCommandEvent& event)
 {
-	OutputDistance();
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompOutputDist });
 }
 
 void ComponentDlg::OnAlignCenterChk(wxCommandEvent& event)
 {
 	bool bval = m_align_center_chk->GetValue();
-	glbin_aligner.SetAlignCenter(bval);
-	FluoRefresh(1, { gstAlignCenter }, { -1 });
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetDistNeighbor(bval);
 }
 
 void ComponentDlg::OnAlignPca(wxCommandEvent& event)
 {
-	AlignPca(event.GetId());
-	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId()});
+	int ival = event.GetId();
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetAlignPca(ival);
 }
 
 void ComponentDlg::OnSize(wxSizeEvent& event)
@@ -2318,43 +2229,50 @@ void ComponentDlg::OnSize(wxSizeEvent& event)
 void ComponentDlg::OnUseSelChk(wxCommandEvent& event)
 {
 	bool bval = event.IsChecked();
-	glbin_comp_generator.SetUseSel(bval);
-	glbin_comp_analyzer.SetUseSel(bval);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseSel(bval);
 }
 
 void ComponentDlg::OnUseMlChk(wxCommandEvent& event)
 {
 	bool bval = m_use_ml_chk->GetValue();
-	glbin_comp_generator.SetUseMl(bval);
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetUseMl(bval);
 }
 
 void ComponentDlg::OnGenerate(wxCommandEvent& event)
 {
-	fluo::ValueCollection vc;
-	bool bval = m_use_sel_gen_chk->GetValue();
-	glbin_comp_generator.SetUseSel(bval);
-	if (glbin_comp_generator.GetAutoThreshold())
-		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-	glbin_comp_generator.Compute();
-	vc.insert({ gstCompGenOutput, gstRecordCmd, gstMaskMode });
-	FluoRefresh(0, vc);
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompGenerate });
 }
 
 void ComponentDlg::OnCluster(wxCommandEvent& event)
 {
-	glbin_clusterizer.Compute();
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompCluster });
 }
 
 void ComponentDlg::OnAnalyze(wxCommandEvent& event)
 {
-	glbin_comp_analyzer.Analyze();
-	FluoUpdate({ gstCompAnalysisResult });
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompAnalyze });
 }
 
 void ComponentDlg::OnIncludeBtn(wxCommandEvent& event)
 {
-	IncludeComps();
+	auto cols = m_output_grid->GetSelectedCols();
+	auto rows = m_output_grid->GetSelectedRows();
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->IncludeComps(cols, rows);
 }
 
 void ComponentDlg::OnExcludeBtn(wxCommandEvent& event)
@@ -2492,86 +2410,6 @@ void ComponentDlg::PasteData()
 	*/
 }
 
-void ComponentDlg::OutputDistance()
-{
-	ModalDlg fopendlg(
-		this, "Save Analysis Data", "", "",
-		"Text file (*.txt)|*.txt",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg.GetPath();
-		std::string str = filename.ToStdString();
-		std::ofstream outfile;
-		outfile.open(str, std::ofstream::out);
-		//output result matrix
-		glbin_comp_analyzer.OutputDistance(outfile);
-		outfile.close();
-	}
-}
-
-void ComponentDlg::AlignPca(int axis_type)
-{
-	flrd::RulerList list;
-	glbin_comp_analyzer.GetRulerListFromCelp(list);
-	glbin_aligner.SetRulerList(list);
-	glbin_aligner.SetAxisType(axis_type);
-	glbin_aligner.SetView(glbin_current.render_view.lock());
-	glbin_aligner.AlignPca(true);
-	FluoRefresh(3, { gstNull }, { glbin_current.GetViewId() });
-}
-
-void ComponentDlg::IncludeComps()
-{
-	//get list of selected comps
-	wxArrayInt seli = m_output_grid->GetSelectedCols();
-	bool sel_all = seli.GetCount();
-	flrd::CelpList cl;
-	if (!sel_all)
-	{
-		std::vector<unsigned int> ids;
-		std::vector<unsigned int> bids;
-		seli = m_output_grid->GetSelectedRows();
-		int bn = glbin_comp_analyzer.GetBrickNum();
-		AddSelArrayInt(ids, bids, seli, bn > 1);
-		glbin_comp_analyzer.SetSelectedIds(ids, bids);
-		glbin_comp_analyzer.GetSelectedCelp(cl, true);
-	}
-	else
-		glbin_comp_analyzer.GetAllCelp(cl, true);
-
-	glbin_comp_selector.SetList(cl);
-	glbin_comp_selector.SelectList();
-
-	FluoRefresh(2, { gstCompAnalysisResult });
-}
-
-void ComponentDlg::ExcludeComps()
-{
-	//get list of selected comps
-	wxArrayInt seli = m_output_grid->GetSelectedCols();
-	bool sel_all = seli.GetCount();
-	flrd::CelpList cl;
-	if (!sel_all)
-	{
-		std::vector<unsigned int> ids;
-		std::vector<unsigned int> bids;
-		seli = m_output_grid->GetSelectedRows();
-		int bn = glbin_comp_analyzer.GetBrickNum();
-		AddSelArrayInt(ids, bids, seli, bn > 1);
-		glbin_comp_analyzer.SetSelectedIds(ids, bids);
-		glbin_comp_analyzer.GetSelectedCelp(cl, true);
-	}
-	else
-		glbin_comp_analyzer.GetAllCelp(cl, true);
-
-	glbin_comp_selector.SetList(cl);
-	glbin_comp_selector.EraseList();
-
-	FluoRefresh(2, { gstCompAnalysisResult });
-}
-
 void ComponentDlg::UpdateCompSelection()
 {
 	std::set<unsigned long long> ids;
@@ -2682,7 +2520,7 @@ void ComponentDlg::DeleteGridRows()
 }
 
 void ComponentDlg::AddSelArrayInt(std::vector<unsigned int>& ids,
-	std::vector<unsigned int> &bids, wxArrayInt &sel, bool bricks)
+	std::vector<unsigned int> &bids, const wxArrayInt &sel, bool bricks)
 {
 	wxString str;
 	unsigned long ulval;
@@ -2701,7 +2539,7 @@ void ComponentDlg::AddSelArrayInt(std::vector<unsigned int>& ids,
 }
 
 void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
-	std::vector<unsigned int> &bids, wxGridCellCoordsArray &sel, bool bricks)
+	std::vector<unsigned int> &bids, const wxGridCellCoordsArray &sel, bool bricks)
 {
 	wxString str;
 	unsigned long ulval;

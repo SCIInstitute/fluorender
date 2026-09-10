@@ -61,13 +61,6 @@ class RenderView;
 class Coordinator;
 class FluiBuilder;
 
-namespace fluo
-{
-	class AsyncTimer;
-	class StopWatch;
-	class AsyncTimerFactory;
-	class StopWatchFactory;
-}
 namespace flrd
 {
 	class EntryParams;
@@ -160,10 +153,6 @@ namespace flvr
 //agents
 #define glbin_coordinator fluo::Global::instance().get_coordinator()
 #define glbin_flui_builder fluo::Global::instance().get_flui_builder()
-
-//time
-#define glbin_atmf fluo::Global::instance().getAsyncTimerFactory()
-#define glbin_swhf fluo::Global::instance().getStopWatchFactory()
 
 //current selection
 #define glbin_current fluo::Global::instance().get_current_objects()
@@ -272,12 +261,6 @@ namespace fluo
 		LookingGlassRenderer& get_looking_glass_renderer();
 		BaseXrRenderer* get_xr_renderer();
 
-		//time
-		AsyncTimer* getAsyncTimer(const std::string& name);
-		StopWatch* getStopWatch(const std::string& name);
-		AsyncTimerFactory& getAsyncTimerFactory();
-		StopWatchFactory& getStopWatchFactory();
-
 		//jvm
 		JVMInitializer* get_jvm_instance();
 
@@ -365,10 +348,6 @@ namespace fluo
 		//xr renderer
 		std::unique_ptr<LookingGlassRenderer> m_lg_renderer;
 		std::unique_ptr<BaseXrRenderer> m_xr_renderer;
-
-		//time
-		std::unique_ptr<fluo::AsyncTimerFactory> m_atmf;
-		std::unique_ptr<fluo::StopWatchFactory> m_swhf;
 
 		//jvm
 		std::unique_ptr<JVMInitializer> m_pJVMInstance;

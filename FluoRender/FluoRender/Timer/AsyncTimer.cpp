@@ -33,20 +33,78 @@ AsyncTimer::AsyncTimer()
 {
 }
 
-AsyncTimer::AsyncTimer(std::function<void(void)> func, const long &interval)
+AsyncTimer::AsyncTimer(
+	std::function<void(void)> func,
+	const long& interval)
+	: m_func(std::move(func)),
+	interval_(interval)
 {
-	m_func = func;
-	interval_ = interval;
-}
-
-AsyncTimer::AsyncTimer(const AsyncTimer& data, const CopyOp& copyop, bool copy_values) :
-	Node(data, copyop, false)
-{
-	if (copy_values)
-		copyValues(data, copyop);
 }
 
 AsyncTimer::~AsyncTimer()
 {
 	stop();
+}
+
+void AsyncTimer::start(long interval)
+{
+	stop(); // CHANGE:
+	// prevent multiple worker threads
+
+	interval_ = interval;
+	run_ = true;
+
+	m_thread = std::thread([this]()
+		{
+			std::unique_lock<std::mutex> lock(m_mutex);
+
+			while (run_)
+			{
+				// CHANGE:
+				// wait first, then execute.
+				if (m_cv.wait_for(
+					lock,
+					std::chrono::milliseconds(interval_),
+					[&] {
+					return !run_;
+				}))
+				{
+					break;
+				}
+
+				auto func = m_func;
+
+				lock.unlock();
+
+				try
+				{
+					if (func)
+						func();
+				}
+				catch (...)
+				{
+					// CHANGE:
+					// keep timer thread alive.
+				}
+
+				lock.lock();
+			}
+		});
+}
+
+void AsyncTimer::stop()
+{
+	if (!run_)
+		return;
+
+	run_ = false;
+
+	// CHANGE:
+	// wake worker immediately.
+	m_cv.notify_all();
+
+	// CHANGE:
+	// safely wait for worker exit.
+	if (m_thread.joinable())
+		m_thread.join();
 }

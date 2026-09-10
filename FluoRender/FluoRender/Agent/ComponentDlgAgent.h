@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Names.h>
+#include <AsyncTimer.hpp>
+#include <wx/wx.h>
 
 class ComponentDlg;
 class ComponentDlgAgent : public Agent
@@ -41,6 +43,61 @@ public:
 	virtual ~ComponentDlgAgent() = default;
 
 	ComponentDlg* GetDialog() const;
+
+	void SetIter(int ival);
+	void SetThresh(double dval);
+	void SetUseDistField(bool bval);
+	void SetDistStrength(double dval);
+	void SetDistFilterSize(int ival);
+	void SetMaxDist(int ival);
+	void SetDistThresh(double dval);
+	void SetUseDiff(bool bval);
+	void SetFalloff(double dval);
+	void SetUseDensity(bool bval);
+	void SetDensity(double dval);
+	void SetVarth(double dval);
+	void SetDensityWindowSize(int ival);
+	void SetDensityStatsSize(int ival);
+	void SetFixSize(int ival);
+	void SetCleanIter(int ival);
+	void SetCleanLimit(int ival);
+
+	void SetFixate(bool bval);
+	void SetClean(bool bval);
+	void SetRecord(bool bval);
+
+	void SetClusterMethod(int ival);
+	void SetClusterClnum(int ival);
+	void SetClusterMaxiter(int ival);
+	void SetClusterTol(double dval);
+	void SetClusterSize(int ival);
+	void SetClustereps(double dval);
+
+	void SetCompId(const std::string& str);
+	void SetUseMin(bool bval);
+	void SetMin(int ival);
+	void SetUseMax(bool bval);
+	void SetMax(int ival);
+
+	void SetConSize(int ival);
+	void SetConsistent(bool bval);
+	void SetColocal(bool bval);
+	void SetOutputType(int ival);
+	void SetOutputChannels(int ival);
+	void SetOutputAnnotData(int ival);
+
+	void SetUseDistNeighbor(bool bval);
+	void SetDistAllChan(bool bval);
+	void SetDistNeighbor(int ival);
+
+	void SetAlignCenter(bool bval);
+	void SetAlignPca(int ival);
+
+	void SetUseSel(bool bval);
+	void SetUseMl(bool bval);
+
+	void IncludeComps(const wxArrayInt& cols, const wxArrayInt& rows);
+	void ExcludeComps(const wxArrayInt& cols, const wxArrayInt& rows);
 
 protected:
 	std::span < const std::string_view>
@@ -60,6 +117,37 @@ private:
 	};
 
 	int m_max_lines = 1000;
+
+	fluo::AsyncTimer m_comp_gen_timer;
+
+private:
+	void TimerGenerateComps();
+	void CompCluster();
+	void CompAnalyze();
+
+	void FixUpdate();
+	void CleanUpdate();
+	void PlayCmdUpdate();
+	void ResetCmdUpdate();
+	void LoadCmdUpdate();
+	void SaveCmdUpdate();
+
+	void CompFull();
+	void CompExclusive();
+	void CompAppend();
+	void CompAll();
+	void CompClear();
+	void Shuffle();
+	void CompNew();
+	void CompAdd();
+	void CompReplace();
+	void CompCleanBkg();
+	void CompCombine();
+
+	void CompOutputMesh();
+
+	void OutputDistance();
+
 };
 
 #endif // ComponentDlgAgent_h

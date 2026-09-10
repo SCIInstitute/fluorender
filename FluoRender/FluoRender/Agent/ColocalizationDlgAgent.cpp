@@ -80,27 +80,89 @@ void ColocalizationDlgAgent::UpdateUI(const UpdateRequest& request)
 		dlg->UpdateUseSelection(glbin_colocal_def.m_use_mask);
 	}
 
-	bool colocal_update = false;
 	bool colocal_result = request.HasValue(gstColocalResult);
-	bool auto_update = request.HasValue(gstColocalAutoUpdate);
-	if (update_all || auto_update)
+	if (update_all || colocal_result)
 	{
-		if (auto_update)
-			colocal_update = glbin_colocalizer.GetAutoColocalize();
-	}
-	if (colocal_result || colocal_update)
-	{
-		glbin_colocalizer.Compute();
 		dlg->SetOutput();
 	}
 }
 
 void ColocalizationDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstColocalResult))
+	{
+		Colocalization();
+	}
 }
 
 ColocalizationDlg* ColocalizationDlgAgent::GetDialog() const
 {
 	return static_cast<ColocalizationDlg*>(GetWindow());
 }
+
+void ColocalizationDlgAgent::SetUseSelection(bool bval)
+{
+	glbin_colocal_def.m_use_mask = bval;
+	bool auto_update = glbin_colocalizer.GetAutoColocalize();
+	if (auto_update)
+	{
+		UpdateUIToData({ gstColocalResult });
+	}
+}
+
+void ColocalizationDlgAgent::SetMethod(int ival)
+{
+	glbin_colocal_def.m_method = ival;
+	bool auto_update = glbin_colocalizer.GetAutoColocalize();
+	if (auto_update)
+	{
+		UpdateUIToData({ gstColocalResult });
+	}
+}
+
+void ColocalizationDlgAgent::SetInWeight(bool bval)
+{
+	glbin_colocal_def.m_int_weighted = bval;
+	bool auto_update = glbin_colocalizer.GetAutoColocalize();
+	if (auto_update)
+	{
+		UpdateUIToData({ gstColocalResult });
+	}
+}
+
+void ColocalizationDlgAgent::SetRatio(bool bval)
+{
+	glbin_colocal_def.m_get_ratio = bval;
+	bool auto_update = glbin_colocalizer.GetAutoColocalize();
+	if (auto_update)
+	{
+		UpdateUIToData({ gstColocalResult });
+	}
+}
+
+void ColocalizationDlgAgent::SetPhysical(bool bval)
+{
+	glbin_colocal_def.m_physical_size = bval;
+	bool auto_update = glbin_colocalizer.GetAutoColocalize();
+	if (auto_update)
+	{
+		UpdateUIToData({ gstColocalResult });
+	}
+}
+
+void ColocalizationDlgAgent::SetColormap(bool bval)
+{
+	glbin_colocal_def.m_colormap = bval;
+	bool auto_update = glbin_colocalizer.GetAutoColocalize();
+	if (auto_update)
+	{
+		UpdateUIToData({ gstColocalResult });
+	}
+}
+
+void ColocalizationDlgAgent::Colocalization()
+{
+	glbin_colocalizer.Compute();
+	UpdateDataToUI({ gstColocalResult });
+}
+

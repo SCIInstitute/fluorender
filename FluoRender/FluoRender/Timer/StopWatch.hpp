@@ -28,104 +28,58 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _STOPWATCH_H_
 #define _STOPWATCH_H_
 
-#include <Node.hpp>
-
-#define gstStopWatch "default stop watch"
+#include <chrono>
+#include <vector>     // CHANGE
 
 namespace fluo
 {
-	class StopWatch : public Node
+	class StopWatch
 	{
 	public:
-		// 
-		// Construction and destruction
-		//
-
-		// Default constructor
-		//
 		StopWatch(unsigned int nBoxFilterSize = 1);
 		StopWatch(double interval);
-		StopWatch(const StopWatch& data, const CopyOp& copyop = CopyOp::SHALLOW_COPY, bool copy_values = true);
-
-		virtual Object* clone(const CopyOp& copyop) const
+		const char* className() const
 		{
-			return new StopWatch(*this, copyop);
+			return "StopWatch";
 		}
 
-		virtual bool isSameKindAs(const Object* obj) const
-		{
-			return dynamic_cast<const StopWatch*>(obj) != NULL;
-		}
-
-		virtual const char* className() const { return "StopWatch"; }
-
-		virtual StopWatch* asStopWatch() { return this; }
-		virtual const StopWatch* asStopWatch() const { return this; }
-
-		//
-		// Public methods
-		//
-
-		// start
-		//
 		void start();
-
-		// stop
-		//
 		void stop();
-
-		// sample
-		//
 		void sample();
 
-		// time
-		//
-		// Description:
-		//      Time interval in ms
-		//
+		// CHANGE:
+		// returns last measured interval in seconds
 		double time() const;
 
 		bool check();
+
+		// CHANGE:
+		// target interval in seconds
 		void interval(double);
 
-		// average
-		//
-		// Description:
-		//      Average time interval of the last events in ms.
-		//          Box filter size determines how many events get
-		//      tracked. If not at least filter-size events were timed
-		//      the result is undetermined.
-		//
-		double
-			average()
-			const;
+		double average() const;
 
-		unsigned long long
-			count() const;
+		unsigned long long count() const;
 
-		double
-			total_time() const;
+		double total_time() const;
 
-		double
-			total_fps() const;
+		double total_fps() const;
 
 		unsigned long long sys_time();
 
 		unsigned long long get_ticks();
 
 	protected:
-		// Destructor
-		//
 		virtual ~StopWatch();
 
 	private:
-		//
-		// Private data
-		//
+		using Clock = std::chrono::steady_clock; // CHANGE
 
-		unsigned long long _nStartCount;
-		unsigned long long _nStopCount;
-		unsigned long long _nFrequency;
+	private:
+		// CHANGE:
+		// store actual time points instead of epoch counts
+		Clock::time_point _startTime;
+		Clock::time_point _stopTime;
 
 		double _nLastPeriod;
 		double _nSum;
@@ -134,11 +88,21 @@ namespace fluo
 
 		unsigned int _nBoxFilterSize;
 		unsigned int _iFilterPosition;
-		double *     _aIntervals;
-		double _fInterval;//target interval
+
+		// CHANGE:
+		// replaces raw array
+		std::vector<double> _aIntervals;
+
+		// CHANGE:
+		// seconds
+		double _fInterval;
+
+		// CHANGE:
+		// last trigger time for check()
 		double _fLastTime;
 
 		bool _bClockRuns;
 	};
 }
-#endif // _STOPWATCH_H_ 
+
+#endif

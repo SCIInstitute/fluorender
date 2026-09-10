@@ -119,9 +119,6 @@ public:
 	void UpdateDistAllChan(bool bval);
 	void UpdateAlignCenter(bool bval);
 
-	//auto update
-	void LaunchAutoUpdateTimer();
-
 	//output
 	void CopyData();
 	void PasteData();
@@ -129,31 +126,16 @@ public:
 	//output
 	void UpdateGrid(const std::string& str1, const std::string& str2);
 	void OutputAnalysis(wxString &titles, wxString &values);
-	void OutputDistance();
-	void AlignPca(int axis_type);
+
+	void AddSelArrayInt(std::vector<unsigned int>& ids,
+		std::vector<unsigned int>& bids, const wxArrayInt& sel, bool bricks);
+	void AddSelCoordArray(std::vector<unsigned int>& ids,
+		std::vector<unsigned int>& bids, const wxGridCellCoordsArray& sel, bool bricks);
 
 	//selection
-	void IncludeComps();
-	void ExcludeComps();
 	void UpdateCompSelection();
 	void SelectGridCells();
 	void DeleteGridRows();
-
-	//setting funcs for sliders
-	void SetIter(int val);
-	void SetThresh(double val);
-	void SetDistStrength(double val);
-	void SetDistFilterSize(int val);
-	void SetMaxDist(int val);
-	void SetDistThresh(double val);
-	void SetFalloff(double val);
-	void SetDensity(double val);
-	void SetVarth(double val);
-	void SetDensityWindowSize(int val);
-	void SetDensityStatsSize(int val);
-	void SetFixSize(int val);
-	void SetCleanIter(int val);
-	void SetCleanLimit(int val);
 
 private:
 	//selected rows of output grid
@@ -222,8 +204,6 @@ private:
 	wxTextCtrl* m_cmd_file_text;
 	wxButton* m_save_cmd_btn;
 	wxButton* m_load_cmd_btn;
-	//auto update
-	wxTimer m_auto_update_timer;
 
 	//clustering page
 	wxRadioButton* m_cluster_method_exmax_rd;
@@ -308,10 +288,6 @@ private:
 	wxGrid *m_output_grid;
 
 private:
-	void AddSelArrayInt(std::vector<unsigned int>& ids,
-		std::vector<unsigned int>& bids, wxArrayInt& sel, bool bricks);
-	void AddSelCoordArray(std::vector<unsigned int>& ids,
-		std::vector<unsigned int>& bids, wxGridCellCoordsArray& sel, bool bricks);
 	void UpdateSelectedRows();
 
 private:
@@ -388,8 +364,6 @@ private:
 	void OnResetCmd(wxCommandEvent& event);
 	void OnLoadCmd(wxCommandEvent& event);
 	void OnSaveCmd(wxCommandEvent& event);
-	//auto update
-	void OnAutoUpdateTimer(wxTimerEvent& event);
 
 	//clustering page
 	void OnClusterMethodCheck(wxCommandEvent& event);

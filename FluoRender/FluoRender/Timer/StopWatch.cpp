@@ -26,201 +26,207 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <StopWatch.hpp>
+
 #include <chrono>
 
 using namespace fluo;
-using namespace std::chrono;
-// Default constructor
-//
+
+//--------------------------------------------------
+// Constructor
+//--------------------------------------------------
+
 StopWatch::StopWatch(unsigned int nBoxFilterSize) :
-	_nStartCount(0),
-	_nStopCount(0),
-	_nFrequency(0),
 	_nLastPeriod(0.0),
 	_nSum(0.0),
 	_nTotal(0.0),
 	_nCount(0),
 	_nBoxFilterSize(nBoxFilterSize),
 	_iFilterPosition(0),
-	_aIntervals(0),
-	_fInterval(100),//100ms, 10fps
+	_aIntervals(nBoxFilterSize, 0.0), // CHANGE
+	_fInterval(0.1),                  // CHANGE: 100 ms = 0.1 sec
+	_fLastTime(0.0),                  // CHANGE
 	_bClockRuns(false)
 {
-	_nFrequency = 1000;
-	// create array to store timing results
-	_aIntervals = new double[_nBoxFilterSize];
-
-	// initialize inverals with 0
-	for (unsigned int iInterval = 0; iInterval < _nBoxFilterSize; ++iInterval)
-		_aIntervals[iInterval] = 0.0;
 }
 
-StopWatch::StopWatch(const StopWatch& data, const CopyOp& copyop, bool copy_values) :
-	_nStartCount(data._nStartCount),
-	_nStopCount(data._nStopCount),
-	_nFrequency(data._nFrequency),
-	_nLastPeriod(data._nLastPeriod),
-	_nSum(data._nSum),
-	_nTotal(data._nTotal),
-	_nCount(data._nCount),
-	_nBoxFilterSize(data._nBoxFilterSize),
-	_iFilterPosition(data._iFilterPosition),
-	_aIntervals(data._aIntervals),
-	_fInterval(data._fInterval),
-	_bClockRuns(data._bClockRuns)
+StopWatch::StopWatch(double interval) :
+	StopWatch()
 {
-	// create array to store timing results
-	_aIntervals = new double[_nBoxFilterSize];
-
-	// initialize inverals with 0
-	for (unsigned int iInterval = 0; iInterval < _nBoxFilterSize; ++iInterval)
-		_aIntervals[iInterval] = 0.0;
+	_fInterval = interval;
 }
 
+//--------------------------------------------------
 // Destructor
-//
+//--------------------------------------------------
+
 StopWatch::~StopWatch()
 {
 	stop();
-	delete[] _aIntervals;
 }
 
-//
-// Public methods
-//
+//--------------------------------------------------
+// Start
+//--------------------------------------------------
 
-// start
-//
-void
-StopWatch::start()
+void StopWatch::start()
 {
-	if (_bClockRuns) return;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	_nStartCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
+	if (_bClockRuns)
+		return;
+
+	_startTime = Clock::now();
+
 	_bClockRuns = true;
-	_fLastTime = 0;
+	_fLastTime = 0.0;
 }
 
-// stop
-//
-void
-StopWatch::stop()
+//--------------------------------------------------
+// Stop
+//--------------------------------------------------
+
+void StopWatch::stop()
 {
-	if (!_bClockRuns) return;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	_nStopCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
-	_nLastPeriod = static_cast<double>(_nStopCount - _nStartCount)
-		/ static_cast<double>(_nFrequency);
+	if (!_bClockRuns)
+		return;
+
+	_stopTime = Clock::now();
+
+	_nLastPeriod =
+		std::chrono::duration<double>(
+			_stopTime - _startTime).count();
 
 	_nSum -= _aIntervals[_iFilterPosition];
 	_nSum += _nLastPeriod;
+
 	_aIntervals[_iFilterPosition] = _nLastPeriod;
+
 	_iFilterPosition++;
 	_iFilterPosition %= _nBoxFilterSize;
+
+	_bClockRuns = false; // CHANGE
 }
 
-// sample
-//
-void
-StopWatch::sample()
+//--------------------------------------------------
+// Sample
+//--------------------------------------------------
+
+void StopWatch::sample()
 {
-	if (!_bClockRuns) return;
-	unsigned long long nCurrentCount;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	nCurrentCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
-	_nLastPeriod = static_cast<double>(nCurrentCount - _nStartCount)
-		/ static_cast<double>(_nFrequency);
-	_nStartCount = nCurrentCount;
+	if (!_bClockRuns)
+		return;
+
+	auto current = Clock::now();
+
+	_nLastPeriod =
+		std::chrono::duration<double>(
+			current - _startTime).count();
+
+	_startTime = current;
 
 	_nSum -= _aIntervals[_iFilterPosition];
 	_nSum += _nLastPeriod;
+
 	_aIntervals[_iFilterPosition] = _nLastPeriod;
+
 	_iFilterPosition++;
 	_iFilterPosition %= _nBoxFilterSize;
 
-	//total
 	_nCount++;
+
 	if (_nCount >= _nBoxFilterSize)
 		_nTotal += _nLastPeriod;
 }
 
-// time
-//
-// Description:
-//      Time interval in ms
-//
-double
-StopWatch::time()
-const
+//--------------------------------------------------
+// Last interval in seconds
+//--------------------------------------------------
+
+double StopWatch::time() const
 {
-	return _fLastTime;
+	// CHANGE:
+	// much more intuitive
+	return _nLastPeriod;
 }
+
+//--------------------------------------------------
+// Interval check
+//--------------------------------------------------
 
 bool StopWatch::check()
 {
-	if (!_bClockRuns) return false;
-	unsigned long long nCurrentCount;
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	nCurrentCount = time_point_cast<milliseconds>(t1).time_since_epoch().count();
-	double cur_time = static_cast<double>(nCurrentCount - _nStartCount);
+	if (!_bClockRuns)
+		return false;
+
+	double cur_time =
+		std::chrono::duration<double>(
+			Clock::now() - _startTime).count();
+
 	if (cur_time - _fLastTime >= _fInterval)
 	{
 		_fLastTime = cur_time;
 		return true;
 	}
+
 	return false;
 }
+
+//--------------------------------------------------
 
 void StopWatch::interval(double val)
 {
 	_fInterval = val;
 }
 
-// average
-//
-// Description:
-//      Average time interval of the last events in ms.
-//          Box filter size determines how many events get
-//      tracked. If not at least filter-size events were timed
-//      the result is undetermined.
-//
-double
-StopWatch::average()
-const
+//--------------------------------------------------
+
+double StopWatch::average() const
 {
-	return _nSum / _nBoxFilterSize;
+	return _nBoxFilterSize ?
+		_nSum / _nBoxFilterSize : 0.0;
 }
 
-unsigned long long
-StopWatch::count() const
+//--------------------------------------------------
+
+unsigned long long StopWatch::count() const
 {
 	if (_nCount >= _nBoxFilterSize)
 		return _nCount - _nBoxFilterSize;
-	else
-		return 0;
+
+	return 0;
 }
 
-double
-StopWatch::total_time() const
+//--------------------------------------------------
+
+double StopWatch::total_time() const
 {
 	return _nTotal;
 }
 
-double
-StopWatch::total_fps() const
+//--------------------------------------------------
+
+double StopWatch::total_fps() const
 {
-	if (_nCount >= _nBoxFilterSize)
-		return static_cast<double>(_nCount) / _nTotal;
-	else
-		return 0;
+	if (_nCount < _nBoxFilterSize || _nTotal <= 0.0)
+		return 0.0;
+
+	return static_cast<double>(_nCount) / _nTotal;
 }
+
+//--------------------------------------------------
 
 unsigned long long StopWatch::sys_time()
 {
-	return time_point_cast<seconds>(system_clock::now()).time_since_epoch().count();
+	return static_cast<unsigned long long>(
+		std::chrono::time_point_cast<std::chrono::seconds>(
+			std::chrono::system_clock::now())
+		.time_since_epoch().count());
 }
+
+//--------------------------------------------------
 
 unsigned long long StopWatch::get_ticks()
 {
-	return time_point_cast<milliseconds>(steady_clock::now()).time_since_epoch().count();
+	return static_cast<unsigned long long>(
+		std::chrono::time_point_cast<std::chrono::milliseconds>(
+			Clock::now())
+		.time_since_epoch().count());
 }

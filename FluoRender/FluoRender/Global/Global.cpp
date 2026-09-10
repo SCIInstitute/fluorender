@@ -68,8 +68,6 @@ DEALINGS IN THE SOFTWARE.
 #include <HololensRenderer.h>
 #include <OpenXrRenderer.h>
 #include <OpenVrRenderer.h>
-#include <AsyncTimerFactory.hpp>
-#include <StopWatchFactory.hpp>
 #include <JVMInitializer.h>
 #include <KernelFactory.h>
 #include <Framebuffer.h>
@@ -301,8 +299,6 @@ Global::Global() :
 	//renderers
 	m_renderer_factory(std::make_unique<flrd::RendererFactory>()),
 	m_lg_renderer(std::make_unique<LookingGlassRenderer>()),
-	m_atmf(std::make_unique<fluo::AsyncTimerFactory>()),
-	m_swhf(std::make_unique<fluo::StopWatchFactory>()),
 	kernel_factory_(std::make_unique<flvr::KernelFactory>()),
 	framebuffer_manager_(std::make_unique<flvr::FramebufferManager>()),
 	vertex_array_manager_(std::make_unique<flvr::VertexArrayManager>()),
@@ -358,9 +354,6 @@ void Global::InitDatabase()
 
 void Global::BuildFactories()
 {
-	m_atmf->createDefault();
-	m_swhf->createDefault();
-
 	//shader factories
 	shader_manager_->add_factory<flvr::ImgShaderFactory>(gstImgShader);
 	shader_manager_->add_factory<flvr::VolShaderFactory>(gstVolShader);
@@ -743,26 +736,6 @@ BaseXrRenderer* Global::get_xr_renderer()
 		return m_xr_renderer.get();
 	}
 	return 0;
-}
-
-AsyncTimer* Global::getAsyncTimer(const std::string& name)
-{
-	return m_atmf->findFirst(name);
-}
-
-StopWatch* Global::getStopWatch(const std::string& name)
-{
-	return m_swhf->findFirst(name);
-}
-
-AsyncTimerFactory& Global::getAsyncTimerFactory()
-{
-	return *m_atmf;
-}
-
-StopWatchFactory& Global::getStopWatchFactory()
-{
-	return *m_swhf;
 }
 
 //jvm

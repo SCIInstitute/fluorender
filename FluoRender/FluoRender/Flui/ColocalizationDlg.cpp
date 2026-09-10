@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ColocalizationDlg.h>
+#include <ColocalizationDlgAgent.h>
 #include <Global.h>
 #include <Names.h>
 #include <ColocalDefault.h>
@@ -318,51 +319,64 @@ void ColocalizationDlg::PasteData()
 
 void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent& event)
 {
-	glbin_colocalizer.Compute();
-	FluoUpdate({ gstColocalResult });
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstColocalResult });
 }
 
 void ColocalizationDlg::OnUseSelChk(wxCommandEvent& event)
 {
-	glbin_colocal_def.m_use_mask = m_use_sel_chk->GetValue();
-	FluoUpdate({ gstColocalAutoUpdate });
+	bool bval = m_use_sel_chk->GetValue();
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->SetUseSelection(bval);
 }
 
 void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
 {
+	int ival = 0;
 	if (m_product_rdb->GetValue())
-		glbin_colocal_def.m_method = 0;
+		ival = 0;
 	else if (m_min_value_rdb->GetValue())
-		glbin_colocal_def.m_method = 1;
+		ival = 1;
 	else if (m_logical_and_rdb->GetValue())
-		glbin_colocal_def.m_method = 2;
-
-	FluoUpdate({ gstColocalAutoUpdate });
+		ival = 2;
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->SetMethod(ival);
 }
 
 //format
 void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent& event)
 {
-	glbin_colocal_def.m_int_weighted = m_int_weight_btn->GetValue();
-	FluoUpdate({ gstColocalAutoUpdate });
+	bool bval = m_int_weight_btn->GetValue();
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->SetInWeight(bval);
 }
 
 void ColocalizationDlg::OnRatioBtn(wxCommandEvent& event)
 {
-	glbin_colocal_def.m_get_ratio = m_ratio_btn->GetValue();
-	FluoUpdate({ gstColocalAutoUpdate });
+	bool bval = m_ratio_btn->GetValue();
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->SetRatio(bval);
 }
 
 void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent& event)
 {
-	glbin_colocal_def.m_physical_size = m_physical_btn->GetValue();
-	FluoUpdate({ gstColocalAutoUpdate });
+	bool bval = m_physical_btn->GetValue();
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->SetPhysical(bval);
 }
 
 void ColocalizationDlg::OnColorMapBtn(wxCommandEvent& event)
 {
-	glbin_colocal_def.m_colormap = m_colormap_btn->GetValue();
-	FluoUpdate({ gstColocalAutoUpdate });
+	bool bval = m_colormap_btn->GetValue();
+	auto agent = m_agent->As<ColocalizationDlgAgent>();
+	if (agent)
+		agent->SetColormap(bval);
 }
 
 void ColocalizationDlg::OnHistoryChk(wxCommandEvent& event)

@@ -50,8 +50,7 @@ enum class UpdateDir : int
 {
 	Any,
 	UItoData,
-	DataToUI,
-	View
+	DataToUI
 };
 
 struct UpdateRequest
@@ -124,7 +123,7 @@ struct UpdateRequest
 		view_vals.insert(gstRenderView);
 
 		UpdateRequest r(view_vals, sender, mode, reason);
-		r.dir = UpdateDir::View;
+		r.dir = UpdateDir::DataToUI;
 		return r;
 	}
 
@@ -144,7 +143,7 @@ struct UpdateRequest
 			UpdateMode::None,
 			reason);
 
-		r.dir = UpdateDir::View;
+		r.dir = UpdateDir::DataToUI;
 		r.targets = targets;
 		return r;
 	}
