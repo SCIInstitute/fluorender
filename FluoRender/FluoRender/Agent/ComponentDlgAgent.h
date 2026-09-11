@@ -30,8 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Names.h>
+#include <GridData.h>
 #include <AsyncTimer.hpp>
 #include <wx/wx.h>
+#include <set>
 
 class ComponentDlg;
 class ComponentDlgAgent : public Agent
@@ -43,6 +45,8 @@ public:
 	virtual ~ComponentDlgAgent() = default;
 
 	ComponentDlg* GetDialog() const;
+
+	int GetMaxLines() { return m_max_lines; }
 
 	void SetIter(int ival);
 	void SetThresh(double dval);
@@ -96,8 +100,11 @@ public:
 	void SetUseSel(bool bval);
 	void SetUseMl(bool bval);
 
-	void IncludeComps(const wxArrayInt& cols, const wxArrayInt& rows);
-	void ExcludeComps(const wxArrayInt& cols, const wxArrayInt& rows);
+	void IncludeComps(const GridSelection& sel);
+	void ExcludeComps(const GridSelection& sel);
+
+	void GridSelectionChanged(
+		const GridSelection& selection);
 
 protected:
 	std::span < const std::string_view>
@@ -113,7 +120,72 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstUseSelection,
+		gstUseMachineLearning,
+		gstIteration,
+		gstCompThreshold,
+		gstUseDiffusion,
+		gstDiffusionFalloff,
+		gstUseDensityField,
+		gstDensityFieldThresh,
+		gstDensityVarThresh,
+		gstDensityWindowSize,
+		gstDensityStatsSize,
+		gstUseDistField,
+		gstDistFieldStrength,
+		gstDistFieldFilterSize,
+		gstMaxDist,
+		gstDistFieldThresh,
+		gstFixateEnable,
+		gstGrowFixed,
+		gstFixateSize,
+		gstCleanEnable,
+		gstCleanIteration,
+		gstCleanSize,
+		gstRecordCmd,
+		gstClusterMethod,
+		gstClusterNum,
+		gstClusterMaxIter,
+		gstClusterTol,
+		gstClusterSize,
+		gstClusterEps,
+		gstCompIdColor,
+		gstUseMin,
+		gstMinValue,
+		gstUseMax,
+		gstMaxValue,
+		gstCompConsistent,
+		gstCompColocal,
+		gstCompOutputType,
+		gstDistNeighbor,
+		gstDistNeighborValue,
+		gstDistAllChan,
+		gstAlignCenter,
+		gstCompGenOutput,
+		gstCompAnalysisResult,
+		gstCompListSelection,
+		gstCompGenerate,
+		gstCompCluster,
+		gstCompAnalyze,
+		gstFixUpdate,
+		gstCleanUpdate,
+		gstPlayCmd,
+		gstResetCmd,
+		gstLoadCmd,
+		gstSaveCmd,
+		gstCompFull,
+		gstCompExclusive,
+		gstCompAppend,
+		gstCompAll,
+		gstCompClear,
+		gstShuffle,
+		gstCompNew,
+		gstCompAdd,
+		gstCompReplace,
+		gstCompClearBkg,
+		gstCompCombine,
+		gstCompOutputMesh,
+		gstCompOutputDist
 	};
 
 	int m_max_lines = 1000;
@@ -148,6 +220,15 @@ private:
 
 	void OutputDistance();
 
+	void OutputCompAnalysisResult();
+
+	void UpdateSelectionData(
+		const GridSelection& selection);
+
+	std::set<int> FindRowsForIds(
+		const std::set<unsigned long long>& ids);
+
+	void UpdateGridSelection();
 };
 
 #endif // ComponentDlgAgent_h

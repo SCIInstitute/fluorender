@@ -27,15 +27,8 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ComponentDlg.h>
 #include <ComponentDlgAgent.h>
-#include <Global.h>
-#include <Names.h>
-#include <CurrentObjects.h>
-#include <DataManager.h>
-#include <VolumeData.h>
-#include <Coordinator.h>
-#include <ModalDlg.h>
+#include <GridHelper.h>
 #include <wxSingleSlider.h>
-#include <Progress.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>
 #include <limits>
@@ -1297,102 +1290,42 @@ void ComponentDlg::UpdateAlignCenter(bool bval)
 	m_align_center_chk->SetValue(bval);
 }
 
-void ComponentDlg::UpdateGrid(const std::string& str1, const std::string& str2)
+void ComponentDlg::UpdateGrid(const GridData& data)
 {
-	DeleteGridRows();
-	wxString titles, values;
-	titles = str1;
-	values = str2;
-	OutputAnalysis(titles, values);
+	m_supress_select = true;
+
+	GridPopulateOptions options;
+	options.append_rows = false;
+	options.remove_extra_rows = !m_hold_history;
+	options.remove_extra_cols = !m_hold_history;
+	if (auto agent = m_agent->As<ComponentDlgAgent>())
+		options.max_rows = agent->GetMaxLines();
+
+	GridHelper::Populate(
+		m_output_grid,
+		data,
+		options);
+
+	m_output_grid->ClearSelection();
+
+	m_supress_select = false;
 }
 
-void ComponentDlg::OutputAnalysis(wxString& titles, wxString& values)
+bool ComponentDlg::GetCellULong(
+	int row,
+	int col,
+	unsigned long& value)
 {
-	wxString copy_data;
-	wxString cur_field;
-	wxString cur_line;
-	int i, k;
-	int id_idx = -1;
-	int max_lines = 1000;
+	return GridHelper::GetCellULong(
+		m_output_grid,
+		row,
+		col,
+		value);
+}
 
-	m_supress_select = true;
-	m_output_grid->BeginBatch();
-
-	k = 0;
-	cur_line = titles;
-	do
-	{
-		cur_field = cur_line.BeforeFirst('\t');
-		cur_line = cur_line.AfterFirst('\t');
-		if (m_output_grid->GetNumberCols() <= k)
-			m_output_grid->InsertCols(k);
-		m_output_grid->SetColLabelValue(k, cur_field);
-		if (cur_field == "ID")
-			id_idx = k;
-		++k;
-	} while (cur_line.IsEmpty() == false);
-
-	fluo::Color c;
-	auto vd = glbin_current.vol_data.lock();
-	unsigned long lval;
-	wxColor color;
-
-	Progress prg;
-	prg.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	prg.SetProgress(0, "Updating component list.");
-
-	i = 0;
-	copy_data = values;
-	do
-	{
-		if (i % 10 == 0)
-			prg.SetProgress(100.0 * i / max_lines, "Updating component list.");
-
-		k = 0;
-		cur_line = copy_data.BeforeFirst('\n');
-		copy_data = copy_data.AfterFirst('\n');
-		if (m_output_grid->GetNumberRows() <= i ||
-			m_hold_history)
-			m_output_grid->InsertRows(i);
-		do
-		{
-			cur_field = cur_line.BeforeFirst('\t');
-			cur_line = cur_line.AfterFirst('\t');
-			m_output_grid->SetCellValue(i, k, cur_field);
-			if (k == id_idx && vd)
-			{
-				if (cur_field.ToULong(&lval))
-				{
-					c = fluo::Color(lval, vd->GetShuffle());
-					color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-				}
-				else
-					color = wxColor(255, 255, 255);
-				m_output_grid->SetCellBackgroundColour(i, k, color);
-			}
-			++k;
-		} while (cur_line.IsEmpty() == false);
-		++i;
-
-	} while (copy_data.IsEmpty() == false);
-
-	//delete columns and rows if the old has more
-	if (!m_hold_history)
-	{
-		if (m_output_grid->GetNumberCols() > k)
-			m_output_grid->DeleteCols(k,
-				m_output_grid->GetNumberCols() - k);
-		if (m_output_grid->GetNumberRows() > i)
-			m_output_grid->DeleteRows(i,
-				m_output_grid->GetNumberRows() - i);
-	}
-
-	//m_output_grid->AutoSizeColumns();
-	m_output_grid->ClearSelection();
-	m_output_grid->EndBatch();
-	m_supress_select = false;
-
-	prg.SetProgress(0, "");
+int ComponentDlg::GetRowCount()
+{
+	return m_output_grid->GetNumberRows();
 }
 
 //comp generate page
@@ -1903,8 +1836,11 @@ void ComponentDlg::OnClusterepsText(wxCommandEvent& event)
 //analysis page
 void ComponentDlg::OnCompIdText(wxCommandEvent& event)
 {
-	unsigned long id;
 	wxString str = m_comp_id_text->GetValue();
+
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (agent)
+		agent->SetCompId(str.ToStdString());
 }
 
 void ComponentDlg::OnCompIdXBtn(wxCommandEvent& event)
@@ -2267,17 +2203,22 @@ void ComponentDlg::OnAnalyze(wxCommandEvent& event)
 
 void ComponentDlg::OnIncludeBtn(wxCommandEvent& event)
 {
-	auto cols = m_output_grid->GetSelectedCols();
-	auto rows = m_output_grid->GetSelectedRows();
-
 	auto agent = m_agent->As<ComponentDlgAgent>();
-	if (agent)
-		agent->IncludeComps(cols, rows);
+	if (!agent)
+		return;
+
+	agent->IncludeComps(
+		GridHelper::GetSelection(m_output_grid));
 }
 
 void ComponentDlg::OnExcludeBtn(wxCommandEvent& event)
 {
-	ExcludeComps();
+	auto agent = m_agent->As<ComponentDlgAgent>();
+	if (!agent)
+		return;
+
+	agent->ExcludeComps(
+		GridHelper::GetSelection(m_output_grid));
 }
 
 void ComponentDlg::OnHistoryChk(wxCommandEvent& event)
@@ -2296,8 +2237,35 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 	{
 		if (event.GetKeyCode() == wxKeyCode('C'))
 			CopyData();
-		else if (event.GetKeyCode() == wxKeyCode('V'))
-			PasteData();
+		//else if (event.GetKeyCode() == wxKeyCode('V'))
+		//	PasteData();
+	}
+}
+
+void ComponentDlg::CopyData()
+{
+	auto text =
+		GridHelper::CopySelection(
+			m_output_grid);
+
+	if (text.empty())
+		return;
+
+	if (wxTheClipboard->Open())
+	{
+		wxTheClipboard->SetData(
+			new wxTextDataObject(text));
+
+		wxTheClipboard->Close();
+	}
+}
+
+void ComponentDlg::DeleteGridRows()
+{
+	int rn = m_output_grid->GetNumberRows();
+	if (rn)
+	{
+		m_output_grid->DeleteRows(0, rn);
 	}
 }
 
@@ -2306,10 +2274,14 @@ void ComponentDlg::OnSelectCell(wxGridEvent& event)
 	if (m_supress_select)
 		return;
 
-	CallAfter([this] {
-		UpdateSelectedRows();
-		SelectGridCells();
-	});
+	CallAfter([this]
+		{
+			auto agent = m_agent->As<ComponentDlgAgent>();
+			if (agent)
+				agent->GridSelectionChanged(
+					GridHelper::GetSelection(
+						m_output_grid));
+		});
 
 	event.Skip();
 }
@@ -2319,269 +2291,40 @@ void ComponentDlg::OnRangeSelect(wxGridRangeSelectEvent& event)
 	if (m_supress_select)
 		return;
 
-	CallAfter([this] {
-		UpdateSelectedRows();
-		SelectGridCells();
-	});
+	CallAfter([this]
+		{
+			auto agent = m_agent->As<ComponentDlgAgent>();
+			if (agent)
+				agent->GridSelectionChanged(
+					GridHelper::GetSelection(
+						m_output_grid));
+		});
 
 	event.Skip();
 }
 
-void ComponentDlg::CopyData()
+void ComponentDlg::UpdateGridSelection(
+	const std::set<int>& rows,
+	int mode)
 {
-	int i, k;
-	wxString copy_data;
-	bool something_in_this_line;
+	m_supress_select = true;
 
-	copy_data.Clear();
-
-	bool t = m_output_grid->IsSelection();
-
-	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
+	if (mode == 0)
 	{
-		something_in_this_line = false;
-		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
-		{
-			if (m_output_grid->IsInSelection(i, k))
-			{
-				if (something_in_this_line == false)
-				{  // first field in this line => may need a linefeed
-					if (copy_data.IsEmpty() == false)
-					{     // ... if it is not the very first field
-						copy_data = copy_data + wxT("\n");  // next LINE
-					}
-					something_in_this_line = true;
-				}
-				else
-				{
-					// if not the first field in this line we need a field seperator (TAB)
-					copy_data = copy_data + wxT("\t");  // next COLUMN
-				}
-				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
-			}
-		}
+		GridHelper::SelectRows(
+			m_output_grid,
+			rows);
 	}
-
-	if (wxTheClipboard->Open())
+	else
 	{
-		// This data objects are held by the clipboard,
-		// so do not delete them in the app.
-		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
-		wxTheClipboard->Close();
-	}
-}
-
-void ComponentDlg::PasteData()
-{
-	/*	wxString copy_data;
-		wxString cur_field;
-		wxString cur_line;
-		int i, k, k2;
-
-		if (wxTheClipboard->Open())
+		for (int row : rows)
 		{
-			if (wxTheClipboard->IsSupported(wxDF_TEXT))
-			{
-				wxTextDataObject data;
-				wxTheClipboard->GetData(data);
-				copy_data = data.GetText();
-			}
-			wxTheClipboard->Close();
-		}
-
-		i = m_output_grid->GetGridCursorRow();
-		k = m_output_grid->GetGridCursorCol();
-		k2 = k;
-
-		do
-		{
-			cur_line = copy_data.BeforeFirst('\n');
-			copy_data = copy_data.AfterFirst('\n');
-			do
-			{
-				cur_field = cur_line.BeforeFirst('\t');
-				cur_line = cur_line.AfterFirst('\t');
-				m_output_grid->SetCellValue(i, k, cur_field);
-				k++;
-			} while (cur_line.IsEmpty() == false);
-			i++;
-			k = k2;
-		} while (copy_data.IsEmpty() == false);
-	*/
-}
-
-void ComponentDlg::UpdateCompSelection()
-{
-	std::set<unsigned long long> ids;
-	int mode = glbin_comp_selector.GetSelCompIdsMode();
-	glbin_comp_selector.GetSelectedCompIds(ids);
-	if (ids.empty())
-	{
-		m_output_grid->ClearSelection();
-		return;
-	}
-
-	int bn = glbin_comp_analyzer.GetBrickNum();
-
-	wxString str;
-	unsigned long ulv;
-	unsigned long long ull;
-	bool flag = mode == 1;
-	int lasti = -1;
-	wxArrayInt sel = m_output_grid->GetSelectedRows();
-	std::set<int> rows;
-	for (int i = 0; i < sel.GetCount(); ++i)
-		rows.insert(sel[i]);
-	for (int i = 0; i < m_output_grid->GetNumberRows(); ++i)
-	{
-		str = m_output_grid->GetCellValue(i, 0);
-		if (!str.ToULong(&ulv))
-			continue;
-		if (bn > 1)
-		{
-			str = m_output_grid->GetCellValue(i, 1);
-			if (!str.ToULongLong(&ull))
-				continue;
-			ull = (ull << 32) | ulv;
-		}
-		else
-			ull = ulv;
-		if (ids.find(ull) != ids.end())
-		{
-			if (!flag)
-			{
-				m_output_grid->ClearSelection();
-				flag = true;
-			}
-			if (mode == 0)
-			{
-				m_output_grid->SelectRow(i, true);
-				lasti = i;
-			}
+			if (m_output_grid->IsInSelection(row, 0))
+				m_output_grid->DeselectRow(row);
 			else
-			{
-				if (rows.find(i) != rows.end())
-					m_output_grid->DeselectRow(i);
-				else
-				{
-					m_output_grid->SelectRow(i, true);
-					lasti = i;
-				}
-			}
+				m_output_grid->SelectRow(row, true);
 		}
 	}
 
-	if (flag)
-	{
-		//SelectCompsCanvas();
-		if (lasti >= 0)
-			m_output_grid->GoToCell(lasti, 0);
-	}
-}
-
-void ComponentDlg::SelectGridCells()
-{
-	int bn = glbin_comp_analyzer.GetBrickNum();
-	std::vector<unsigned long long> ids;
-	//selected cells are retrieved using different functions
-	bool sel_all = false;
-	//if (seli.GetCount() >= m_output_grid->GetNumberRows())
-	//	sel_all = true;
-	wxString str;
-	unsigned long ulval;
-	unsigned long long id;
-	for (auto it : m_sel)
-	{
-		id = 0;
-		str = m_output_grid->GetCellValue(it, 0);
-		if (str.ToULong(&ulval))
-			id = ulval;
-		if (bn > 1)
-		{
-			str = m_output_grid->GetCellValue(it, 1);
-			if (str.ToULong(&ulval))
-				id = ((unsigned long long)(ulval) << 32) | id;
-		}
-		if (id)
-			ids.push_back(id);
-	}
-	glbin_comp_selector.SelectCompsCanvas(ids, sel_all);
-	FluoRefresh(3, { gstNull });
-}
-
-void ComponentDlg::DeleteGridRows()
-{
-	int rn = m_output_grid->GetNumberRows();
-	if (rn)
-	{
-		m_output_grid->DeleteRows(0, rn);
-		m_sel.clear();
-	}
-}
-
-void ComponentDlg::AddSelArrayInt(std::vector<unsigned int>& ids,
-	std::vector<unsigned int> &bids, const wxArrayInt &sel, bool bricks)
-{
-	wxString str;
-	unsigned long ulval;
-	for (size_t i = 0; i < sel.GetCount(); ++i)
-	{
-		str = m_output_grid->GetCellValue(sel[i], 0);
-		if (str.ToULong(&ulval))
-			ids.push_back(ulval);
-		if (bricks)
-		{
-			str = m_output_grid->GetCellValue(sel[i], 1);
-			if (str.ToULong(&ulval))
-				bids.push_back(ulval);
-		}
-	}
-}
-
-void ComponentDlg::AddSelCoordArray(std::vector<unsigned int> &ids,
-	std::vector<unsigned int> &bids, const wxGridCellCoordsArray &sel, bool bricks)
-{
-	wxString str;
-	unsigned long ulval;
-	for (size_t i = 0; i < sel.GetCount(); ++i)
-	{
-		str = m_output_grid->GetCellValue(sel[i].GetRow(), 0);
-		if (str.ToULong(&ulval))
-			ids.push_back(ulval);
-		if (bricks)
-		{
-			str = m_output_grid->GetCellValue(sel[i].GetRow(), 1);
-			if (str.ToULong(&ulval))
-				bids.push_back(ulval);
-		}
-	}
-}
-
-void ComponentDlg::UpdateSelectedRows()
-{
-	m_sel.clear();
-
-	// 1. Add individually selected cells
-	const auto& cells = m_output_grid->GetSelectedCells();
-	for (const auto& cell : cells)
-		m_sel.insert(cell.GetRow());
-
-	// 2. Add selected blocks
-	const auto& topLeft = m_output_grid->GetSelectionBlockTopLeft();
-	const auto& bottomRight = m_output_grid->GetSelectionBlockBottomRight();
-	for (size_t i = 0; i < topLeft.size(); ++i)
-	{
-		int top = topLeft[i].GetRow();
-		int bottom = bottomRight[i].GetRow();
-		for (int row = top; row <= bottom; ++row)
-			m_sel.insert(row);
-	}
-
-	// 3. Add the current cell if nothing else is selected
-	if (cells.empty() && topLeft.empty())
-	{
-		int row = m_output_grid->GetGridCursorRow();
-		if (row >= 0)
-			m_sel.insert(row);
-	}
+	m_supress_select = false;
 }

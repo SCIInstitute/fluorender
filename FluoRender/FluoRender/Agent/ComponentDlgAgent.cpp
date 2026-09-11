@@ -47,6 +47,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData.h>
 #include <Coordinator.h>
 #include <RulerList.h>
+#include <GridBuilder.h>
 #include <compatibility.h>
 
 ComponentDlgAgent::ComponentDlgAgent(
@@ -306,42 +307,22 @@ void ComponentDlgAgent::UpdateUI(const UpdateRequest& request)
 	//output
 	if (request.HasValue(gstCompGenOutput))
 	{
-		std::string str1, str2;
-		str1 = ws2s(glbin_comp_generator.GetTitles());
-		str2 = ws2s(glbin_comp_generator.GetValues());
-		dlg->UpdateGrid(str1, str2);
+		auto data = GridBuilder::Build(
+			ws2s(glbin_comp_generator.GetTitles()),
+			ws2s(glbin_comp_generator.GetValues()));
+
+		dlg->UpdateGrid(data);
 	}
 
 	if (request.HasValue(gstCompAnalysisResult))
 	{
-		size_t size = glbin_comp_analyzer.GetListSize();
-		bool saved = false;
-		if (size > m_max_lines)
-		{
-			ModalDlg fopendlg(dlg,
-				wxString::Format("Component count is over %d. Save in a file?", m_max_lines),
-				"", "", "Text file (*.txt)|*.txt",
-				wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-			int rval = fopendlg.ShowModal();
-			if (rval == wxID_OK)
-			{
-				wxString filename = fopendlg.GetPath();
-				std::wstring str = filename.ToStdWstring();
-				glbin_comp_analyzer.OutputCompListFile(str, 1);
-				saved = true;
-			}
-		}
-		if (!saved)
-		{
-			std::string titles, values;
-			glbin_comp_analyzer.OutputFormHeader(titles);
-			glbin_comp_analyzer.OutputCompListStr(values, 0);
-			dlg->UpdateGrid(titles, values);
-		}
+		OutputCompAnalysisResult();
 	}
 
 	if (request.HasValue(gstCompListSelection))
-		dlg->UpdateCompSelection();
+	{
+		UpdateGridSelection();
+	}
 }
 
 void ComponentDlgAgent::UpdateData(const UpdateRequest& request)
@@ -712,55 +693,123 @@ void ComponentDlgAgent::SetUseMl(bool bval)
 	glbin_comp_generator.SetUseMl(bval);
 }
 
-void ComponentDlgAgent::IncludeComps(const wxArrayInt& cols, const wxArrayInt& rows)
+void ComponentDlgAgent::IncludeComps(
+	const GridSelection& selection)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	//get list of selected comps
-	bool sel_all = cols.GetCount();
+	bool sel_all = !selection.rows.empty() &&
+		selection.rows.size() >=
+		static_cast<size_t>(dlg->GetRowCount());
+
 	flrd::CelpList cl;
+
 	if (!sel_all)
 	{
 		std::vector<unsigned int> ids;
 		std::vector<unsigned int> bids;
-		int bn = glbin_comp_analyzer.GetBrickNum();
-		dlg->AddSelArrayInt(ids, bids, rows, bn > 1);
-		glbin_comp_analyzer.SetSelectedIds(ids, bids);
-		glbin_comp_analyzer.GetSelectedCelp(cl, true);
+
+		int bn =
+			glbin_comp_analyzer.GetBrickNum();
+
+		for (int row : selection.rows)
+		{
+			unsigned long value;
+
+			if (dlg->GetCellULong(row, 0, value))
+				ids.push_back(
+					static_cast<unsigned int>(value));
+
+			if (bn > 1 &&
+				dlg->GetCellULong(row, 1, value))
+			{
+				bids.push_back(
+					static_cast<unsigned int>(value));
+			}
+		}
+
+		glbin_comp_analyzer.SetSelectedIds(
+			ids, bids);
+
+		glbin_comp_analyzer.GetSelectedCelp(
+			cl, true);
 	}
 	else
-		glbin_comp_analyzer.GetAllCelp(cl, true);
+	{
+		glbin_comp_analyzer.GetAllCelp(
+			cl, true);
+	}
 
 	glbin_comp_selector.SetList(cl);
 	glbin_comp_selector.SelectList();
 
-	NotifyViewUpdate({ gstCompAnalysisResult });
+	NotifyViewUpdate(
+		{ gstCompAnalysisResult });
 }
 
-void ComponentDlgAgent::ExcludeComps(const wxArrayInt& cols, const wxArrayInt& rows)
+void ComponentDlgAgent::ExcludeComps(
+	const GridSelection& selection)
 {
-	//get list of selected comps
-	bool sel_all = cols.GetCount();
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	bool sel_all = !selection.rows.empty() &&
+		selection.rows.size() >=
+		static_cast<size_t>(dlg->GetRowCount());
+
 	flrd::CelpList cl;
+
 	if (!sel_all)
 	{
 		std::vector<unsigned int> ids;
 		std::vector<unsigned int> bids;
-		//seli = m_output_grid->GetSelectedRows();
-		int bn = glbin_comp_analyzer.GetBrickNum();
-		AddSelArrayInt(ids, bids, rows, bn > 1);
-		glbin_comp_analyzer.SetSelectedIds(ids, bids);
-		glbin_comp_analyzer.GetSelectedCelp(cl, true);
+
+		int bn =
+			glbin_comp_analyzer.GetBrickNum();
+
+		for (int row : selection.rows)
+		{
+			unsigned long value;
+
+			if (dlg->GetCellULong(row, 0, value))
+				ids.push_back(
+					static_cast<unsigned int>(value));
+
+			if (bn > 1 &&
+				dlg->GetCellULong(row, 1, value))
+			{
+				bids.push_back(
+					static_cast<unsigned int>(value));
+			}
+		}
+
+		glbin_comp_analyzer.SetSelectedIds(
+			ids, bids);
+
+		glbin_comp_analyzer.GetSelectedCelp(
+			cl, true);
 	}
 	else
-		glbin_comp_analyzer.GetAllCelp(cl, true);
+	{
+		glbin_comp_analyzer.GetAllCelp(
+			cl, true);
+	}
 
 	glbin_comp_selector.SetList(cl);
 	glbin_comp_selector.EraseList();
 
-	NotifyViewUpdate({ gstCompAnalysisResult });
+	NotifyViewUpdate(
+		{ gstCompAnalysisResult });
+}
+
+void ComponentDlgAgent::GridSelectionChanged(
+	const GridSelection& selection)
+{
+	UpdateSelectionData(selection);
+	NotifyViewUpdate({ gstNull });
 }
 
 void ComponentDlgAgent::TimerGenerateComps()
@@ -985,3 +1034,101 @@ void ComponentDlgAgent::OutputDistance()
 	}
 }
 
+void ComponentDlgAgent::OutputCompAnalysisResult()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	size_t size = glbin_comp_analyzer.GetListSize();
+	bool saved = false;
+	if (size > m_max_lines)
+	{
+		ModalDlg fopendlg(dlg,
+			wxString::Format("Component count is over %d. Save in a file?", m_max_lines),
+			"", "", "Text file (*.txt)|*.txt",
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		int rval = fopendlg.ShowModal();
+		if (rval == wxID_OK)
+		{
+			wxString filename = fopendlg.GetPath();
+			std::wstring str = filename.ToStdWstring();
+			glbin_comp_analyzer.OutputCompListFile(str, 1);
+			saved = true;
+		}
+	}
+	if (!saved)
+	{
+		std::string titles, values;
+		glbin_comp_analyzer.OutputFormHeader(titles);
+		glbin_comp_analyzer.OutputCompListStr(values, 0);
+		auto data = GridBuilder::Build(titles, values);
+		auto vd = glbin_current.vol_data.lock();
+		if (vd)
+			GridFormatter::ApplyComponentColors(data, vd->GetShuffle());
+		dlg->UpdateGrid(data);
+	}
+}
+
+void ComponentDlgAgent::UpdateSelectionData(
+	const GridSelection& selection)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	std::vector<unsigned long long> ids;
+
+	int bn =
+		glbin_comp_analyzer.GetBrickNum();
+
+	for (int row : selection.rows)
+	{
+		unsigned long idv;
+		unsigned long brickv;
+
+		unsigned long long id = 0;
+
+		if (dlg->GetCellULong(row, 0, idv))
+			id = idv;
+
+		if (bn > 1 &&
+			dlg->GetCellULong(row, 1, brickv))
+		{
+			id =
+				(static_cast<unsigned long long>(
+					brickv) << 32) | id;
+		}
+
+		if (id)
+			ids.push_back(id);
+	}
+
+	bool sel_all = false;
+
+	glbin_comp_selector.SelectCompsCanvas(
+		ids,
+		sel_all);
+}
+
+void ComponentDlgAgent::UpdateGridSelection()
+{
+	std::set<unsigned long long> ids;
+
+	int mode =
+		glbin_comp_selector.GetSelCompIdsMode();
+
+	glbin_comp_selector.GetSelectedCompIds(
+		ids);
+
+	auto rows =
+		FindRowsForIds(ids);
+
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	dlg->UpdateGridSelection(
+		rows,
+		mode);
+}

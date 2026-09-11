@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _COMPONENTDLG_H_
 
 #include <PropPanel.h>
+#include <GridData.h>
 #include <wx/tglbtn.h>
 #include <wx/spinctrl.h>
 #include <wx/grid.h>
@@ -121,25 +122,16 @@ public:
 
 	//output
 	void CopyData();
-	void PasteData();
 
-	//output
-	void UpdateGrid(const std::string& str1, const std::string& str2);
-	void OutputAnalysis(wxString &titles, wxString &values);
+	void UpdateGrid(const GridData& data);
 
-	void AddSelArrayInt(std::vector<unsigned int>& ids,
-		std::vector<unsigned int>& bids, const wxArrayInt& sel, bool bricks);
-	void AddSelCoordArray(std::vector<unsigned int>& ids,
-		std::vector<unsigned int>& bids, const wxGridCellCoordsArray& sel, bool bricks);
-
-	//selection
-	void UpdateCompSelection();
-	void SelectGridCells();
+	bool GetCellULong(int row, int col, unsigned long& value);
+	int GetRowCount();
 	void DeleteGridRows();
 
+	void UpdateGridSelection(const std::set<int>& rows, int mode);
+
 private:
-	//selected rows of output grid
-	std::set<size_t> m_sel;
 	bool m_supress_select = false;
 
 	//output
@@ -286,9 +278,6 @@ private:
 	wxCheckBox* m_history_chk;
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
-
-private:
-	void UpdateSelectedRows();
 
 private:
 	//pages
