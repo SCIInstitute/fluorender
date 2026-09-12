@@ -47,6 +47,9 @@ private:
 class GridFormatter
 {
 public:
+	static void ApplyColocalizeColors(
+		GridData& data);
+
 	static void ApplyComponentColors(
 		GridData& data,
 		int shuffle);

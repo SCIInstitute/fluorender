@@ -109,13 +109,10 @@ public:
 	void UpdateAlignCenter(bool bval);
 	void UpdateBrushHistoryEnable();
 
-	//output
 	void CopyData();
 	void UpdateGrid(const GridData& data);
 
 private:
-	bool m_supress_select = false;
-
 	//output
 	bool m_hold_history;
 

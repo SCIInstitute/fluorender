@@ -601,8 +601,6 @@ void BrushToolDlg::CopyData()
 
 void BrushToolDlg::UpdateGrid(const GridData& data)
 {
-	m_supress_select = true;
-
 	GridPopulateOptions options;
 	options.append_rows = false;
 	options.remove_extra_rows = !m_hold_history;
@@ -614,8 +612,6 @@ void BrushToolDlg::UpdateGrid(const GridData& data)
 		options);
 
 	m_output_grid->ClearSelection();
-
-	m_supress_select = false;
 }
 
 //brush commands

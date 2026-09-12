@@ -37,6 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Count.h>
 #include <BrickTexture.h>
 #include <GlobalStates.h>
+#include <GridBuilder.h>
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 
@@ -184,6 +185,12 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 	if (count_update)
 	{
+		std::string titles =
+			"Voxel Count\t" \
+			"Voxel Count(Int. Weighted)\t" \
+			"Average Intensity\t" \
+			"Physical Size\n";
+		std::wstring values;
 		BrushGridData data;
 		flrd::CountVoxels counter;
 		counter.SetVolumeData(sel_vol);
@@ -222,9 +229,12 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 				break;
 			}
 		}
-		auto griddata = GridBuilder::Build(
-			ws2s(glbin_comp_generator.GetTitles()),
-			ws2s(glbin_comp_generator.GetValues()));
+		values += std::to_wstring(data.voxel_sum) + L"\t";
+		values += std::to_wstring(data.voxel_wsum) + L"\t";
+		values += std::to_wstring(data.avg_int) + L"\t";
+		values += std::to_wstring(data.size) + unit + L"\t";
+		values += std::to_wstring(data.wsize) + unit + L"\n";
+		auto griddata = GridBuilder::Build(titles, ws2s(values));
 
 		dlg->UpdateGrid(griddata);
 	}
@@ -233,13 +243,9 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 	{
 		if (glbin_vol_selector.m_test_speed)
 		{
-			BrushGridData data;
-			data.size = glbin_vol_selector.GetSpanSec();
-			data.wsize = data.size;
-			std::wstring unit = L"Sec.";
-			auto griddata = GridBuilder::Build(
-				ws2s(glbin_comp_generator.GetTitles()),
-				ws2s(glbin_comp_generator.GetValues()));
+			std::string titles = "Time\n";
+			std::string values = std::to_string(glbin_vol_selector.GetSpanSec()) + "Sec.";
+			auto griddata = GridBuilder::Build(titles, values);
 
 			dlg->UpdateGrid(griddata);
 		}

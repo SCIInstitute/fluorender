@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _COLOCALIZATIONDLG_H_
 
 #include <PropPanel.h>
+#include <GridData.h>
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
@@ -47,10 +48,8 @@ public:
 	void UpdateColocalColormap(bool bval);
 	void UpdateUseSelection(bool bval);
 
-	void SetOutput();
-
 	void CopyData();
-	void PasteData();
+	void UpdateGrid(const GridData& data);
 
 private:
 	//output

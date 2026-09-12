@@ -73,6 +73,7 @@ private:
 	};
 
 	void Colocalization();
+	void SetOutput();
 };
 
 #endif // ColocalizationDlgAgent_h

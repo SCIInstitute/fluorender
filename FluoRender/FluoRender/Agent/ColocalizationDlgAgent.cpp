@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <ColocalDefault.h>
 #include <Colocalize.h>
+#include <GridBuilder.h>
 
 ColocalizationDlgAgent::ColocalizationDlgAgent(
 	ColocalizationDlg* dlg) :
@@ -83,7 +84,7 @@ void ColocalizationDlgAgent::UpdateUI(const UpdateRequest& request)
 	bool colocal_result = request.HasValue(gstColocalResult);
 	if (update_all || colocal_result)
 	{
-		dlg->SetOutput();
+		SetOutput();
 	}
 }
 
@@ -166,3 +167,16 @@ void ColocalizationDlgAgent::Colocalization()
 	UpdateDataToUI({ gstColocalResult });
 }
 
+void ColocalizationDlgAgent::SetOutput()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	std::wstring titles = glbin_colocalizer.GetTitles();
+	std::wstring values = glbin_colocalizer.GetValues();
+	auto griddata = GridBuilder::Build(ws2s(titles), ws2s(values));
+	GridFormatter::ApplyColocalizeColors(griddata);
+
+	dlg->UpdateGrid(griddata);
+}

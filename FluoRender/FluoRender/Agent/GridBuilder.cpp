@@ -26,7 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <GridBuilder.h>
+#include <Global.h>
 #include <VolumeData.h>
+#include <VolumeGroup.h>
+#include <CurrentObjects.h>
+#include <ColocalDefault.h>
 #include <compatibility.h>
 #include <sstream>
 
@@ -91,6 +95,38 @@ GridData GridBuilder::Build(
 	}
 
 	return result;
+}
+
+void GridFormatter::ApplyColocalizeColors(
+	GridData& data)
+{
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
+	if (!vd && group)
+		vd = group->GetVolumeData(0);
+	bool colormap = glbin_colocal_def.m_colormap && vd &&
+		(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min) > 0.0;
+
+	for (auto& row : data.rows)
+		for (auto& cell : row.cells)
+		{
+			double val;
+			if (!TryToDouble(cell.text, val))
+				continue;
+
+			fluo::Color c;
+			if (colormap)
+			{
+				c = vd->GetColorFromColormap((val - glbin_colocal_def.m_cm_min)/
+					(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min));
+			}
+			else
+			{
+				c = fluo::Color(1.0);
+			}
+			cell.has_bg_color = true;
+			cell.bg_color = c;
+		}
 }
 
 void GridFormatter::ApplyComponentColors(

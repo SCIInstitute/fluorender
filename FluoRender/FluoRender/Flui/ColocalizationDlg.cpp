@@ -27,14 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ColocalizationDlg.h>
 #include <ColocalizationDlgAgent.h>
-#include <Global.h>
-#include <Names.h>
-#include <ColocalDefault.h>
-#include <StringConvert.h>
-#include <Colocalize.h>
-#include <CurrentObjects.h>
-#include <VolumeGroup.h>
-#include <VolumeData.h>
+#include <GridHelper.h>
 
 ColocalizationDlg::ColocalizationDlg(wxWindow* parent) :
 	PropPanel(parent,
@@ -191,131 +184,39 @@ void ColocalizationDlg::UpdateUseSelection(bool bval)
 	m_use_sel_chk->SetValue(bval);
 }
 
-void ColocalizationDlg::SetOutput()
-{
-	wxString copy_data;
-	wxString cur_field;
-	wxString cur_line;
-	int i, k;
-
-	k = 0;
-	cur_line = glbin_colocalizer.GetTitles();
-	do
-	{
-		cur_field = cur_line.BeforeFirst('\t');
-		cur_line = cur_line.AfterFirst('\t');
-		if (m_output_grid->GetNumberCols() <= k)
-			m_output_grid->InsertCols(k);
-		m_output_grid->SetColLabelValue(k, cur_field);
-		++k;
-	} while (cur_line.IsEmpty() == false);
-
-	fluo::Color c;
-	double val;
-	wxColor color;
-	auto vd = glbin_current.vol_data.lock();
-	auto group = glbin_current.vol_group.lock();
-	if (!vd && group)
-		vd = group->GetVolumeData(0);
-	bool colormap = glbin_colocal_def.m_colormap && vd &&
-		(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min) > 0.0;
-
-	i = 0;
-	copy_data = glbin_colocalizer.GetValues();
-	do
-	{
-		k = 0;
-		cur_line = copy_data.BeforeFirst('\n');
-		copy_data = copy_data.AfterFirst('\n');
-		if (m_output_grid->GetNumberRows() <= i ||
-			m_hold_history)
-			m_output_grid->InsertRows(i);
-		do
-		{
-			cur_field = cur_line.BeforeFirst('\t');
-			cur_line = cur_line.AfterFirst('\t');
-			m_output_grid->SetCellValue(i, k, cur_field);
-			if (colormap && cur_field.ToDouble(&val))
-			{
-				c = vd->GetColorFromColormap((val - glbin_colocal_def.m_cm_min)/
-					(glbin_colocal_def.m_cm_max - glbin_colocal_def.m_cm_min));
-				color = wxColor(c.r() * 255, c.g() * 255, c.b() * 255);
-				m_output_grid->SetCellBackgroundColour(i, k, color);
-			}
-			else
-			{
-				color = *wxWHITE;
-				m_output_grid->SetCellBackgroundColour(i, k, color);
-			}
-			++k;
-		} while (cur_line.IsEmpty() == false);
-		++i;
-	} while (copy_data.IsEmpty() == false);
-
-	if (m_output_grid->GetNumberCols() > k)
-		m_output_grid->DeleteCols(k,
-			m_output_grid->GetNumberCols() - k);
-
-	//m_output_grid->AutoSizeColumns(false);
-	if (glbin_colocal_def.m_physical_size && !glbin_colocal_def.m_get_ratio)
-		m_output_grid->SetDefaultColSize(100, true);
-	else
-		m_output_grid->SetDefaultColSize(70, true);
-
-	//m_output_grid->Fit();
-	m_output_grid->Layout();
-	m_output_grid->ClearSelection();
-	m_output_grid->AdjustScrollbars();
-	m_output_grid->ForceRefresh();
-}
-
 void ColocalizationDlg::CopyData()
 {
-	int i, k;
-	wxString copy_data;
-	bool something_in_this_line;
+	auto text =
+		GridHelper::CopySelection(
+			m_output_grid);
 
-	copy_data.Clear();
-
-	bool t = m_output_grid->IsSelection();
-
-	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
-	{
-		something_in_this_line = false;
-		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
-		{
-			if (m_output_grid->IsInSelection(i, k))
-			{
-				if (something_in_this_line == false)
-				{  // first field in this line => may need a linefeed
-					if (copy_data.IsEmpty() == false)
-					{     // ... if it is not the very first field
-						copy_data = copy_data + wxT("\n");  // next LINE
-					}
-					something_in_this_line = true;
-				}
-				else
-				{
-					// if not the first field in this line we need a field seperator (TAB)
-					copy_data = copy_data + wxT("\t");  // next COLUMN
-				}
-				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
-			}
-		}
-	}
+	if (text.empty())
+		return;
 
 	if (wxTheClipboard->Open())
 	{
-		// This data objects are held by the clipboard,
-		// so do not delete them in the app.
-		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
+		wxTheClipboard->SetData(
+			new wxTextDataObject(text));
+
 		wxTheClipboard->Close();
 	}
 }
 
-void ColocalizationDlg::PasteData()
+void ColocalizationDlg::UpdateGrid(const GridData& data)
 {
+	GridPopulateOptions options;
+	options.append_rows = false;
+	options.remove_extra_rows = !m_hold_history;
+	options.remove_extra_cols = !m_hold_history;
+
+	GridHelper::Populate(
+		m_output_grid,
+		data,
+		options);
+
+	m_output_grid->ClearSelection();
 }
+
 
 void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent& event)
 {
@@ -395,8 +296,8 @@ void ColocalizationDlg::OnKeyDown(wxKeyEvent& event)
 	{
 		if (event.GetKeyCode() == wxKeyCode('C'))
 			CopyData();
-		else if (event.GetKeyCode() == wxKeyCode('V'))
-			PasteData();
+		//else if (event.GetKeyCode() == wxKeyCode('V'))
+		//	PasteData();
 	}
 }
 
