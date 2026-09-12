@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <BrushToolDlg.h>
 #include <BrushToolDlgAgent.h>
+#include <GridHelper.h>
 #include <RenderView.h>
 #include <VolumeSelector.h>
 #include <wxSingleSlider.h>
@@ -580,27 +581,41 @@ void BrushToolDlg::UpdateBrushHistoryEnable()
 	m_history_chk->SetValue(m_hold_history);
 }
 
-//output
-void BrushToolDlg::SetOutput(const BrushGridData& data, const std::wstring& unit)
+void BrushToolDlg::CopyData()
 {
-	if (m_output_grid->GetNumberRows() == 0 ||
-		m_hold_history)
+	auto text =
+		GridHelper::CopySelection(
+			m_output_grid);
+
+	if (text.empty())
+		return;
+
+	if (wxTheClipboard->Open())
 	{
-		m_output_grid->InsertRows();
+		wxTheClipboard->SetData(
+			new wxTextDataObject(text));
+
+		wxTheClipboard->Close();
 	}
-	m_output_grid->SetCellValue(0, 0,
-		wxString::Format("%d", data.voxel_sum));
-	m_output_grid->SetCellValue(0, 1,
-		wxString::Format("%f", data.voxel_wsum));
-	m_output_grid->SetCellValue(0, 2,
-		wxString::Format("%f", data.avg_int));
-	m_output_grid->SetCellValue(0, 3,
-		wxString::Format("%f", data.size) + unit);
-	m_output_grid->SetCellValue(0, 4,
-		wxString::Format("%f", data.wsize) + unit);
-	//m_output_grid->Fit();
-	//m_output_grid->AutoSizeColumns();
+}
+
+void BrushToolDlg::UpdateGrid(const GridData& data)
+{
+	m_supress_select = true;
+
+	GridPopulateOptions options;
+	options.append_rows = false;
+	options.remove_extra_rows = !m_hold_history;
+	options.remove_extra_cols = !m_hold_history;
+
+	GridHelper::Populate(
+		m_output_grid,
+		data,
+		options);
+
 	m_output_grid->ClearSelection();
+
+	m_supress_select = false;
 }
 
 //brush commands
@@ -934,8 +949,8 @@ void BrushToolDlg::OnKeyDown(wxKeyEvent& event)
 	{
 		if (event.GetKeyCode() == wxKeyCode('C'))
 			CopyData();
-		else if (event.GetKeyCode() == wxKeyCode('V'))
-			PasteData();
+		//else if (event.GetKeyCode() == wxKeyCode('V'))
+		//	PasteData();
 	}
 }
 
@@ -981,88 +996,5 @@ void BrushToolDlg::OnAutoUpdateTimer(wxTimerEvent& event)
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
 		agent->UpdateUIToData({ gstTimerSegment });
-}
-
-void BrushToolDlg::CopyData()
-{
-	int i, k;
-	wxString copy_data;
-	bool something_in_this_line;
-
-	copy_data.Clear();
-
-	bool t = m_output_grid->IsSelection();
-
-	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
-	{
-		something_in_this_line = false;
-		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
-		{
-			if (m_output_grid->IsInSelection(i, k))
-			{
-				if (something_in_this_line == false)
-				{  // first field in this line => may need a linefeed
-					if (copy_data.IsEmpty() == false)
-					{     // ... if it is not the very first field
-						copy_data = copy_data + wxT("\n");  // next LINE
-					}
-					something_in_this_line = true;
-				}
-				else
-				{
-					// if not the first field in this line we need a field seperator (TAB)
-					copy_data = copy_data + wxT("\t");  // next COLUMN
-				}
-				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
-			}
-		}
-	}
-
-	if (wxTheClipboard->Open())
-	{
-		// This data objects are held by the clipboard,
-		// so do not delete them in the app.
-		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
-		wxTheClipboard->Close();
-	}
-}
-
-void BrushToolDlg::PasteData()
-{
-/*	wxString copy_data;
-	wxString cur_field;
-	wxString cur_line;
-	int i, k, k2;
-
-	if (wxTheClipboard->Open())
-	{
-		if (wxTheClipboard->IsSupported(wxDF_TEXT))
-		{
-			wxTextDataObject data;
-			wxTheClipboard->GetData(data);
-			copy_data = data.GetText();
-		}
-		wxTheClipboard->Close();
-	}
-
-	i = m_output_grid->GetGridCursorRow();
-	k = m_output_grid->GetGridCursorCol();
-	k2 = k;
-
-	do
-	{
-		cur_line = copy_data.BeforeFirst('\n');
-		copy_data = copy_data.AfterFirst('\n');
-		do
-		{
-			cur_field = cur_line.BeforeFirst('\t');
-			cur_line = cur_line.AfterFirst('\t');
-			m_output_grid->SetCellValue(i, k, cur_field);
-			k++;
-		} while (cur_line.IsEmpty() == false);
-		i++;
-		k = k2;
-	} while (copy_data.IsEmpty() == false);
-*/
 }
 

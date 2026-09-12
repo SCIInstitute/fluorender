@@ -222,7 +222,11 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 				break;
 			}
 		}
-		dlg->SetOutput(data, unit);
+		auto griddata = GridBuilder::Build(
+			ws2s(glbin_comp_generator.GetTitles()),
+			ws2s(glbin_comp_generator.GetValues()));
+
+		dlg->UpdateGrid(griddata);
 	}
 
 	if (request.HasValue(gstBrushSpeedResult))
@@ -233,7 +237,11 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 			data.size = glbin_vol_selector.GetSpanSec();
 			data.wsize = data.size;
 			std::wstring unit = L"Sec.";
-			dlg->SetOutput(data, unit);
+			auto griddata = GridBuilder::Build(
+				ws2s(glbin_comp_generator.GetTitles()),
+				ws2s(glbin_comp_generator.GetValues()));
+
+			dlg->UpdateGrid(griddata);
 		}
 	}
 }

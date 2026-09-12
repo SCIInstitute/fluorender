@@ -1290,6 +1290,24 @@ void ComponentDlg::UpdateAlignCenter(bool bval)
 	m_align_center_chk->SetValue(bval);
 }
 
+void ComponentDlg::CopyData()
+{
+	auto text =
+		GridHelper::CopySelection(
+			m_output_grid);
+
+	if (text.empty())
+		return;
+
+	if (wxTheClipboard->Open())
+	{
+		wxTheClipboard->SetData(
+			new wxTextDataObject(text));
+
+		wxTheClipboard->Close();
+	}
+}
+
 void ComponentDlg::UpdateGrid(const GridData& data)
 {
 	m_supress_select = true;
@@ -2239,24 +2257,6 @@ void ComponentDlg::OnKeyDown(wxKeyEvent& event)
 			CopyData();
 		//else if (event.GetKeyCode() == wxKeyCode('V'))
 		//	PasteData();
-	}
-}
-
-void ComponentDlg::CopyData()
-{
-	auto text =
-		GridHelper::CopySelection(
-			m_output_grid);
-
-	if (text.empty())
-		return;
-
-	if (wxTheClipboard->Open())
-	{
-		wxTheClipboard->SetData(
-			new wxTextDataObject(text));
-
-		wxTheClipboard->Close();
 	}
 }
 

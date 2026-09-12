@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _BRUSHTOOLDLG_H_
 
 #include <PropPanel.h>
+#include <GridData.h>
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 
@@ -109,9 +110,12 @@ public:
 	void UpdateBrushHistoryEnable();
 
 	//output
-	void SetOutput(const BrushGridData& data, const std::wstring& unit);
+	void CopyData();
+	void UpdateGrid(const GridData& data);
 
 private:
+	bool m_supress_select = false;
+
 	//output
 	bool m_hold_history;
 
@@ -171,9 +175,6 @@ private:
 	wxTimer m_auto_update_timer;
 
 private:
-	void CopyData();
-	void PasteData();
-
 	wxWindow* CreateToolPage(wxWindow* parent);
 	wxWindow* CreateListPage(wxWindow* parent);
 	wxWindow* CreateAlignPage(wxWindow* parent);
