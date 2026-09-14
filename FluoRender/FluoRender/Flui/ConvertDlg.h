@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _CONVERTDLG_H_
 
 #include <PropPanel.h>
+#include <GridData.h>
 #include <wx/grid.h>
 
 struct ConvertGridData
@@ -69,15 +70,8 @@ public:
 	void UpdateVolMeshSmoothT(double dval);
 
 	//output
-	void SetOutput(const ConvertGridData& data, const std::wstring& unit_area, const std::wstring& unit_vol);
-
-	//toolbar
-	void MeshConvert();
-	void MeshUpdate();
-	void MeshWeldVertices();
-	void MeshColor();
-	void MeshSimplify();
-	void MeshSmooth();
+	void CopyData();
+	void UpdateGrid(const GridData& data);
 
 private:
 	//output
@@ -113,9 +107,6 @@ private:
 private:
 	wxWindow* CreateSettingPage(wxWindow* parent);
 	wxWindow* CreateInfoPage(wxWindow* parent);
-
-	void CopyData();
-	void PasteData();
 
 	void OnToolBar(wxCommandEvent& event);
 

@@ -1125,4 +1125,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstCompOutputMesh "comp output mesh"
 #define gstCompOutputDist "comp output dist"
 
+//convert dialog agent
+#define gstMeshConvert "mesh convert"
+#define gstMeshUpdate "mesh update"
+#define gstMeshWeldVertices "mesh weld vertices"
+#define gstMeshColor "mesh color"
+#define gstMeshSimplify "mesh simplify"
+#define gstMeshSmooth "mesh smooth"
+
 #endif//NAMES_HPP

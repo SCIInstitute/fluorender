@@ -42,6 +42,15 @@ public:
 
 	ConvertDlg* GetDialog() const;
 
+	void SetIsoValue(double dval);
+	void SetDownSample(int ival);
+	void SetDownSampleZ(int ival);
+	void SetSimplify(double dval);
+	void SetSmoothStrength(double dval);
+	void SetSmoothScale(double dval);
+	void SetUseTransf(bool bval);
+	void SetUseSelection(bool bval);
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -58,6 +67,14 @@ private:
 	{
 		gstCurrentSelect,
 	};
+
+	void MeshConvert();
+	void MeshUpdate();
+	void MeshWeldVertices();
+	void MeshColor();
+	void MeshSimplify();
+	void MeshSmooth();
+
 };
 
 #endif // ConvertDlgAgent_h

@@ -189,7 +189,8 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 			"Voxel Count\t" \
 			"Voxel Count(Int. Weighted)\t" \
 			"Average Intensity\t" \
-			"Physical Size\n";
+			"Physical Size\t" \
+			"Physical Size(Int. Weighted)\n";
 		std::wstring values;
 		BrushGridData data;
 		flrd::CountVoxels counter;

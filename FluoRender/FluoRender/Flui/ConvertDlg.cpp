@@ -26,17 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ConvertDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <CurrentObjects.h>
-#include <DataManager.h>
-#include <VolumeData.h>
-#include <MeshData.h>
-#include <RenderView.h>
-#include <BaseConvVolMesh.h>
-#include <ColorMesh.h>
-#include <MeshStat.h>
-#include <VolumeSelector.h>
+#include <ConvertDlgAgent.h>
+#include <GridHelper.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
@@ -368,6 +359,39 @@ void ConvertDlg::UpdateVolMeshSmoothT(double dval)
 	m_cnv_vol_mesh_smooth_t_text->ChangeValue(wxString::Format("%.2f", dval));
 }
 
+void ConvertDlg::CopyData()
+{
+	auto text =
+		GridHelper::CopySelection(
+			m_output_grid);
+
+	if (text.empty())
+		return;
+
+	if (wxTheClipboard->Open())
+	{
+		wxTheClipboard->SetData(
+			new wxTextDataObject(text));
+
+		wxTheClipboard->Close();
+	}
+}
+
+void ConvertDlg::UpdateGrid(const GridData& data)
+{
+	GridPopulateOptions options;
+	options.append_rows = false;
+	options.remove_extra_rows = !m_hold_history;
+	options.remove_extra_cols = !m_hold_history;
+
+	GridHelper::Populate(
+		m_output_grid,
+		data,
+		options);
+
+	m_output_grid->ClearSelection();
+}
+
 //threshold
 void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent& event)
 {
@@ -381,14 +405,14 @@ void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent& event)
 void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent& event)
 {
 	wxString str = m_cnv_vol_mesh_thresh_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
+	double dval;
+	if (str.ToDouble(&dval))
 	{
-		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh.SetIsoValue(val);
+		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
+		auto agent = m_agent->As<ConvertDlgAgent>();
+		if (agent)
+			agent->SetIsoValue(dval);
 	}
-
-	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 //downsampling
@@ -407,10 +431,10 @@ void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent& event)
 	if (str.ToLong(&ival))
 	{
 		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		glbin_conv_vol_mesh.SetDownsample(ival);
+		auto agent = m_agent->As<ConvertDlgAgent>();
+		if (agent)
+			agent->SetDownSample(ival);
 	}
-
-	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 //downsampling Z
@@ -429,10 +453,10 @@ void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent& event)
 	if (str.ToLong(&ival))
 	{
 		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		glbin_conv_vol_mesh.SetDownsampleZ(ival);
+		auto agent = m_agent->As<ConvertDlgAgent>();
+		if (agent)
+			agent->SetDownSampleZ(ival);
 	}
-
-	FluoRefresh(2, { gstConvVolMeshUpdate });
 }
 
 void ConvertDlg::OnCnvVolMeshSimplifyChange(wxScrollEvent& event)
@@ -447,14 +471,14 @@ void ConvertDlg::OnCnvVolMeshSimplifyChange(wxScrollEvent& event)
 void ConvertDlg::OnCnvVolMeshSimplifyText(wxCommandEvent& event)
 {
 	wxString str = m_cnv_vol_mesh_simplify_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
+	double dval;
+	if (str.ToDouble(&dval))
 	{
-		m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh.SetSimplify(val);
+		m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(dval * 100.0));
+		auto agent = m_agent->As<ConvertDlgAgent>();
+		if (agent)
+			agent->SetSimplify(dval);
 	}
-
-	//FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothNChange(wxScrollEvent& event)
@@ -469,14 +493,14 @@ void ConvertDlg::OnCnvVolMeshSmoothNChange(wxScrollEvent& event)
 void ConvertDlg::OnCnvVolMeshSmoothNText(wxCommandEvent& event)
 {
 	wxString str = m_cnv_vol_mesh_smooth_n_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
+	double dval;
+	if (str.ToDouble(&dval))
 	{
-		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh.SetSmoothStrength(val);
+		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
+		auto agent = m_agent->As<ConvertDlgAgent>();
+		if (agent)
+			agent->SetSmoothStrength(dval);
 	}
-
-	//FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothTChange(wxScrollEvent& event)
@@ -491,189 +515,69 @@ void ConvertDlg::OnCnvVolMeshSmoothTChange(wxScrollEvent& event)
 void ConvertDlg::OnCnvVolMeshSmoothTText(wxCommandEvent& event)
 {
 	wxString str = m_cnv_vol_mesh_smooth_t_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
+	double dval;
+	if (str.ToDouble(&dval))
 	{
-		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(val * 100.0));
-		glbin_conv_vol_mesh.SetSmoothStrength(val);
+		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
+		auto agent = m_agent->As<ConvertDlgAgent>();
+		if (agent)
+			agent->SetSmoothScale(dval);
 	}
-
-	//FluoRefresh(2, { gstVolMeshInfo });
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
-	glbin_conv_vol_mesh.SetUseTransfer(bval);
-	FluoRefresh(2, { gstConvVolMeshUpdate });
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->SetUseTransf(bval);
 }
 
 void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
 {
 	bool bval = m_cnv_vol_mesh_selected_chk->GetValue();
-	glbin_conv_vol_mesh.SetUseMask(bval);
-	FluoRefresh(2, { gstConvVolMeshUpdate });
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->SetUseSelection(bval);
 }
 
 void ConvertDlg::OnToolBar(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 
 	switch (id)
 	{
 	case ID_MeshConvert:
-		MeshConvert();
+		vc.insert(gstMeshConvert);
 		break;
 	case ID_MeshUpdate:
-		MeshUpdate();
+		vc.insert(gstMeshUpdate);
 		break;
 	case ID_MeshWeldVertices:
-		MeshWeldVertices();
+		vc.insert(gstMeshWeldVertices);
 		break;
 	case ID_MeshColor:
-		MeshColor();
+		vc.insert(gstMeshColor);
 		break;
 	case ID_MeshSimplify:
-		MeshSimplify();
+		vc.insert(gstMeshSimplify);
 		break;
 	case ID_MeshSmooth:
-		MeshSmooth();
+		vc.insert(gstMeshSmooth);
 		break;
 	}
-}
 
-void ConvertDlg::MeshConvert()
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	glbin_conv_vol_mesh.SetVolumeData(vd);
-	glbin_conv_vol_mesh.Convert();
-	auto md = glbin_conv_vol_mesh.GetMeshData();
-	if (md)
-	{
-		glbin_data_manager.AddMeshData(md);
-		auto view = glbin_current.render_view.lock();
-		if (view)
-			view->AddMeshData(md);
-		//glbin_current.SetMeshData(md);
-	}
-
-	FluoRefresh(0, { gstVolMeshInfo, gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
-		{ glbin_current.GetViewId() });
-}
-
-void ConvertDlg::MeshUpdate()
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	glbin_conv_vol_mesh.SetVolumeData(vd);
-	glbin_conv_vol_mesh.Update(true);
-	auto md = glbin_conv_vol_mesh.GetMeshData();
-	if (md)
-	{
-		auto temp = glbin_data_manager.GetMeshData(md->GetName());
-		if (!temp)
-		{
-			glbin_data_manager.AddMeshData(md);
-			auto view = glbin_current.render_view.lock();
-			if (view)
-				view->AddMeshData(md);
-			//glbin_current.SetMeshData(md);
-		}
-	}
-
-	FluoRefresh(0, { gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
-		{ glbin_current.GetViewId() });
-}
-
-void ConvertDlg::MeshWeldVertices()
-{
-	//bool bval = m_cnv_vol_mesh_weld_chk->GetValue();
-	//glbin_conv_vol_mesh.SetVertexMerge(bval);
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	glbin_conv_vol_mesh.MergeVertices(true);
-	FluoRefresh(0, { gstVolMeshInfo },
-		{ glbin_current.GetViewId() });
-}
-
-void ConvertDlg::MeshColor()
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	auto md = glbin_conv_vol_mesh.GetMeshData();
-	if (!md)
-		return;
-	if (vd->GetLabel(false))
-	{
-		glbin_color_mesh.SetUseSel(true);
-		glbin_color_mesh.SetUseComp(true);
-	}
-	else if (vd->GetMask(false))
-	{
-		glbin_color_mesh.SetUseSel(true);
-		glbin_color_mesh.SetUseComp(false);
-	}
-	else
-	{
-		glbin_color_mesh.SetUseSel(false);
-		glbin_color_mesh.SetUseComp(false);
-	}
-	glbin_color_mesh.SetVolumeData(vd);
-	glbin_color_mesh.SetMeshData(md);
-	glbin_color_mesh.Update();
-	FluoRefresh(0, { gstNull },
-		{ glbin_current.GetViewId() });
-}
-
-void ConvertDlg::MeshSimplify()
-{
-	if (!glbin_conv_vol_mesh.GetMerged())
-		glbin_conv_vol_mesh.MergeVertices(false);
-	glbin_conv_vol_mesh.Simplify(true);
-	FluoRefresh(0, { gstVolMeshInfo },
-		{ glbin_current.GetViewId() });
-}
-
-void ConvertDlg::MeshSmooth()
-{
-	if (!glbin_conv_vol_mesh.GetMerged())
-		glbin_conv_vol_mesh.MergeVertices(false);
-	glbin_conv_vol_mesh.Smooth(true);
-	FluoRefresh(0, { gstVolMeshInfo },
-		{ glbin_current.GetViewId() });
-}
-
-//output
-void ConvertDlg::SetOutput(const ConvertGridData& data, const std::wstring& unit_area, const std::wstring& unit_vol)
-{
-	if (m_output_grid->GetNumberRows() == 0 ||
-		m_hold_history)
-	{
-		m_output_grid->InsertRows();
-	}
-	m_output_grid->SetCellValue(0, 0,
-		wxString::Format("%f", data.area) + unit_area);
-	m_output_grid->SetCellValue(0, 1,
-		wxString::Format("%f", data.volume) + unit_vol);
-	m_output_grid->SetCellValue(0, 2,
-		wxString::Format("%d", data.vertex_count));
-	m_output_grid->SetCellValue(0, 3,
-		wxString::Format("%d", data.triangle_count));
-	m_output_grid->SetCellValue(0, 4,
-		wxString::Format("%d", data.normal_count));
-	//m_output_grid->Fit();
-	//m_output_grid->AutoSizeColumns();
-	m_output_grid->ClearSelection();
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void ConvertDlg::OnUpdateBtn(wxCommandEvent& event)
 {
-	FluoUpdate({ gstVolMeshInfo });
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshInfo });
 }
 
 void ConvertDlg::OnHistoryChk(wxCommandEvent& event)
@@ -692,8 +596,8 @@ void ConvertDlg::OnKeyDown(wxKeyEvent& event)
 	{
 		if (event.GetKeyCode() == wxKeyCode('C'))
 			CopyData();
-		else if (event.GetKeyCode() == wxKeyCode('V'))
-			PasteData();
+		//else if (event.GetKeyCode() == wxKeyCode('V'))
+		//	PasteData();
 	}
 }
 
@@ -724,88 +628,5 @@ void ConvertDlg::OnSize(wxSizeEvent& event)
 		size.y = height;
 	size.x -= 15;
 	m_output_grid->SetMaxSize(size);
-}
-
-void ConvertDlg::CopyData()
-{
-	int i, k;
-	wxString copy_data;
-	bool something_in_this_line;
-
-	copy_data.Clear();
-
-	bool t = m_output_grid->IsSelection();
-
-	for (i = 0; i < m_output_grid->GetNumberRows(); i++)
-	{
-		something_in_this_line = false;
-		for (k = 0; k < m_output_grid->GetNumberCols(); k++)
-		{
-			if (m_output_grid->IsInSelection(i, k))
-			{
-				if (something_in_this_line == false)
-				{  // first field in this line => may need a linefeed
-					if (copy_data.IsEmpty() == false)
-					{     // ... if it is not the very first field
-						copy_data = copy_data + wxT("\n");  // next LINE
-					}
-					something_in_this_line = true;
-				}
-				else
-				{
-					// if not the first field in this line we need a field seperator (TAB)
-					copy_data = copy_data + wxT("\t");  // next COLUMN
-				}
-				copy_data = copy_data + m_output_grid->GetCellValue(i, k);    // finally we need the field value :-)
-			}
-		}
-	}
-
-	if (wxTheClipboard->Open())
-	{
-		// This data objects are held by the clipboard,
-		// so do not delete them in the app.
-		wxTheClipboard->SetData(new wxTextDataObject(copy_data));
-		wxTheClipboard->Close();
-	}
-}
-
-void ConvertDlg::PasteData()
-{
-	/*	wxString copy_data;
-		wxString cur_field;
-		wxString cur_line;
-		int i, k, k2;
-
-		if (wxTheClipboard->Open())
-		{
-			if (wxTheClipboard->IsSupported(wxDF_TEXT))
-			{
-				wxTextDataObject data;
-				wxTheClipboard->GetData(data);
-				copy_data = data.GetText();
-			}
-			wxTheClipboard->Close();
-		}
-
-		i = m_output_grid->GetGridCursorRow();
-		k = m_output_grid->GetGridCursorCol();
-		k2 = k;
-
-		do
-		{
-			cur_line = copy_data.BeforeFirst('\n');
-			copy_data = copy_data.AfterFirst('\n');
-			do
-			{
-				cur_field = cur_line.BeforeFirst('\t');
-				cur_line = cur_line.AfterFirst('\t');
-				m_output_grid->SetCellValue(i, k, cur_field);
-				k++;
-			} while (cur_line.IsEmpty() == false);
-			i++;
-			k = k2;
-		} while (copy_data.IsEmpty() == false);
-	*/
 }
 
