@@ -31,10 +31,6 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/listctrl.h>
 
-#define DATA_VOLUME			1
-#define DATA_MESH			2
-#define DATA_ANNOT			3
-
 class DataListCtrl : public wxListCtrl
 {
 public:
@@ -53,7 +49,9 @@ public:
 		m_silent_select = false;
 	}
 
-	void Append(int type, const wxString& name, const wxString& path);
+	void SelectItemSilently(ListItemType type, const wxString& name);
+
+	void Append(ListItemType type, const wxString& name, const wxString& path);
 	void SetText(long item, int col, const wxString &str);
 	wxString GetText(long item, int col);
 	void StartEdit();
@@ -76,7 +74,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+enum class ListItemType : int;
 class ListPanel : public PropPanel
 {
 	enum
@@ -111,22 +109,14 @@ public:
 		const wxString& name = "ListPanel");
 	~ListPanel();
 
-	void UpdateList();
-	void UpdateSelection();
-
-	void AddSelectionToView(int view);
-	void AddSelToCurView();
-	void RenameSelection(const std::wstring& name);
-	void SaveSelection();
-	void BakeSelection();
-	void SaveSelMask();
-	void DeleteSelection();
-	void DeleteAll();
+	void DeleteAllListItems();
+	void AppendListItem(ListItemType type, const std::wstring& name, const std::wstring& path);
+	void SelectListItem(ListItemType type, const std::wstring& name);
+	static wxWindow* CreateExtraControl(wxWindow* parent);
 
 private:
 	wxToolBar *m_toolbar;
 	DataListCtrl *m_datalist;
-	bool m_suppress_event = false;
 
 private:
 	void OnContextMenu(wxContextMenuEvent& event);
@@ -150,7 +140,6 @@ private:
 	void OnSizeYText(wxCommandEvent& event);
 	void OnSizeZText(wxCommandEvent& event);
 	void OnFilterChange(wxCommandEvent& event);
-	static wxWindow* CreateExtraControl(wxWindow* parent);
 };
 
 #endif//_LISTPANEL_H_

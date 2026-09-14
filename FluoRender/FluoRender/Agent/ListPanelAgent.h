@@ -31,6 +31,19 @@ DEALINGS IN THE SOFTWARE.
 #include <Agent.h>
 #include <Names.h>
 
+enum class ListItemType : int
+{
+	Invalid = 0,
+	Volume,
+	Mesh,
+	Annot
+};
+
+struct ListContextInfo
+{
+	ListItemType type;
+	bool path_valid;
+};
 class ListPanel;
 class ListPanelAgent : public Agent
 {
@@ -41,6 +54,9 @@ public:
 	virtual ~ListPanelAgent() = default;
 
 	ListPanel* GetPanel() const;
+
+	ListContextInfo GetListContextInfo();
+	std::vector<std::wstring> GetViewNames();
 
 protected:
 	std::span < const std::string_view>
@@ -53,11 +69,29 @@ protected:
 
 	void UpdateData(const UpdateRequest& request) override;
 
+	void SetSelName(const std::wstring& name);
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
+		gstListCtrl,
+		gstTreeLayerName,
 		gstCurrentSelect,
+		gstAddListSelToView
 	};
+
+	bool m_suppress_event = false;
+
+private:
+	void UpdateList();
+	void UpdateSelection();
+
+	void AddSelectionToView();
+	void SaveSelection();
+	void BakeSelection();
+	void SaveSelMask();
+	void DeleteSelection();
+	void DeleteAll();
 };
 
 #endif // ListPanelAgent_h

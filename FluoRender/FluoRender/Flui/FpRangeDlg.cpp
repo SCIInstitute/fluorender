@@ -26,9 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <FpRangeDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
+#include <FpRangeDlgAgent.h>
 #include <wx/valnum.h>
 
 FpRangeDlg::FpRangeDlg(wxWindow *parent)
@@ -124,7 +122,11 @@ void FpRangeDlg::OnMinText(wxCommandEvent& event)
 	wxString str = m_min_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-		m_fp_min = dval;
+	{
+		auto agent = m_agent->As<FpRangeDlgAgent>();
+		if (agent)
+			agent->SetFpMin(dval);
+	}
 }
 
 void FpRangeDlg::OnMaxText(wxCommandEvent& event)
@@ -132,18 +134,25 @@ void FpRangeDlg::OnMaxText(wxCommandEvent& event)
 	wxString str = m_max_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-		m_fp_max = dval;
+	{
+		auto agent = m_agent->As<FpRangeDlgAgent>();
+		if (agent)
+			agent->SetFpMax(dval);
+	}
 }
 
 void FpRangeDlg::OnShow(wxShowEvent& event)
 {
-	FluoUpdate({});
+	auto agent = m_agent->As<FpRangeDlgAgent>();
+	if (agent)
+		agent->UpdateDataToUI({});
 }
 
 void FpRangeDlg::OnOkBtn(wxCommandEvent& event)
 {
-	glbin_settings.m_fp_min = m_fp_min;
-	glbin_settings.m_fp_max = m_fp_max;
+	auto agent = m_agent->As<FpRangeDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstFpRangeUpdate });
 	Hide();
 }
 

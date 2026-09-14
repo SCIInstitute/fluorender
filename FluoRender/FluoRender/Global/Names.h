@@ -1136,4 +1136,15 @@ DEALINGS IN THE SOFTWARE.
 //count dialog agent
 #define gstCountAnalyze "count analyze"
 
+//fp range dialog agent
+#define gstFpRangeUpdate "fp range update"
+
+//list panel agent
+#define gstAddListSelToView "add list sel to view"
+#define gstListSaveSelection "list save selection"
+#define gstListBakeSelection "list bake selection"
+#define gstListSaveSelMask "list save sel mask"
+#define gstListDeleteSelection "list delete selection"
+#define gstListDeleteAll "list delete all"
+
 #endif//NAMES_HPP

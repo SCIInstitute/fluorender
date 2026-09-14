@@ -26,20 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ListPanel.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <ModalDlg.h>
-#include <RenderView.h>
-#include <VolumeData.h>
-#include <MeshData.h>
-#include <AnnotData.h>
-#include <Root.h>
-#include <CurrentObjects.h>
-#include <DataManager.h>
-#include <VolumeRenderer.h>
+#include <ListPanelAgent.h>
 #include <png_resource.h>
-#include <compatibility.h>
 #include <wx/valnum.h>
 //resources
 #include <icons.h>
@@ -77,14 +65,38 @@ DataListCtrl::DataListCtrl(
 	Bind(wxEVT_LIST_ITEM_SELECTED, &DataListCtrl::OnSelectionChanged, this);
 }
 
-void DataListCtrl::Append(int type, const wxString& name, const wxString& path)
+void DataListCtrl::SelectItemSilently(ListItemType type, const wxString& name)
+{
+	wxString type_str;
+	if (type == ListItemType::Volume)
+		type_str = "Volume";
+	else if (type == ListItemType::Mesh)
+		type_str = "Mesh";
+	else if (type == ListItemType::Annot)
+		type_str = "AnnotData";
+
+	for (int i = 0; i < GetItemCount(); ++i)
+	{
+		auto stype = GetText(i, 0);
+		auto sname = GetText(i, 1);
+
+		if (stype == type_str &&
+			sname == name)
+		{
+			SelectItemSilently(i);
+			break;
+		}
+	}
+}
+
+void DataListCtrl::Append(ListItemType type, const wxString& name, const wxString& path)
 {
 	long tmp = 0;
-	if (type == DATA_VOLUME)
+	if (type == ListItemType::Volume)
 		tmp = InsertItem(GetItemCount(), "Volume");
-	else if (type == DATA_MESH)
+	else if (type == ListItemType::Mesh)
 		tmp = InsertItem(GetItemCount(), "Mesh");
-	else if (type == DATA_ANNOT)
+	else if (type == ListItemType::Annot)
 		tmp = InsertItem(GetItemCount(), "AnnotData");
 
 	SetItem(tmp, 1, name);
@@ -276,456 +288,25 @@ ListPanel::~ListPanel()
 {
 }
 
-void ListPanel::UpdateList()
+void ListPanel::DeleteAllListItems()
 {
-	m_suppress_event = true;
-
 	m_datalist->DeleteAllItems();
-
-	for (int i = 0; i < glbin_data_manager.GetVolumeNum(); i++)
-	{
-		auto vd = glbin_data_manager.GetVolumeData(i);
-		if (vd)
-		{
-			std::wstring name = vd->GetName();
-			std::wstring path = vd->GetPath();
-			m_datalist->Append(DATA_VOLUME, name, path);
-		}
-	}
-
-	for (int i = 0; i < glbin_data_manager.GetMeshNum(); i++)
-	{
-		auto md = glbin_data_manager.GetMeshData(i);
-		if (md)
-		{
-			std::wstring name = md->GetName();
-			std::wstring path = md->GetPath();
-			m_datalist->Append(DATA_MESH, name, path);
-		}
-	}
-
-	for (int i = 0; i < glbin_data_manager.GetAnnotNum(); i++)
-	{
-		auto ann = glbin_data_manager.GetAnnotData(i);
-		if (ann)
-		{
-			std::wstring name = ann->GetName();
-			std::wstring path = ann->GetPath();
-			m_datalist->Append(DATA_ANNOT, name, path);
-		}
-	}
-
-	m_suppress_event = false;
 }
 
-void ListPanel::UpdateSelection()
+void ListPanel::AppendListItem(ListItemType type, const std::wstring& name, const std::wstring& path)
 {
-	int type = glbin_current.GetType();
-	std::wstring name, item_type;
-	switch (type)
-	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (vd)
-			name = vd->GetName();
-		item_type = L"Volume";
-	}
-	break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (md)
-			name = md->GetName();
-		item_type = L"Mesh";
-	}
-	break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (ann)
-			name = ann->GetName();
-		item_type = L"AnnotData";
-	}
-	break;
-	}
-
-	for (int i = 0; i < m_datalist->GetItemCount(); ++i)
-	{
-		std::wstring stype = m_datalist->GetText(i, 0).ToStdWstring();
-		std::wstring sname = m_datalist->GetText(i, 1).ToStdWstring();
-
-		if (stype == item_type &&
-			sname == name)
-		{
-			m_datalist->SelectItemSilently(i);
-			break;
-		}
-	}
+	m_datalist->Append(type, name, path);
 }
 
-void ListPanel::AddSelectionToView(int vid)
+void ListPanel::SelectListItem(ListItemType type, const std::wstring& name)
 {
-	Root* root = glbin_data_manager.GetRoot();
-	if (!root)
-		return;
-	auto view = root->GetView(vid);
-	if (!view)
-		return;
-
-	fluo::ValueCollection vc;
-	bool view_empty = true;
-	int type = glbin_current.GetType();
-
-	switch (type)
-	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (!vd)
-			break;
-
-		std::wstring name = vd->GetName();
-		auto vd_add = vd;
-
-		for (int i = 0; i < root->GetViewNum(); ++i)
-		{
-			auto v = root->GetView(i);
-			if (v && v->GetVolumeData(name))
-			{
-				vd_add = glbin_data_manager.DuplicateVolumeData(vd);
-				break;
-			}
-		}
-
-		int chan_num = view->GetAny();
-		view_empty = chan_num > 0 ? false : view_empty;
-		fluo::Color color(1.0, 1.0, 1.0);
-		if (chan_num == 0)
-			color = fluo::Color(1.0, 0.0, 0.0);
-		else if (chan_num == 1)
-			color = fluo::Color(0.0, 1.0, 0.0);
-		else if (chan_num == 2)
-			color = fluo::Color(0.0, 0.0, 1.0);
-
-		if (chan_num >= 0 && chan_num < 3)
-			vd_add->SetColor(color);
-
-		auto group = view->AddVolumeData(vd_add);
-		glbin_current.SetVolumeData(vd_add);
-		if (view->GetChannelMixMode() == ChannelMixMode::Depth)
-			vc.insert(gstUpdateSync);
-		vc.insert(gstVolumePropPanel);
-	}
-		break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (!md)
-			break;
-		int chan_num = view->GetAny();
-		view_empty = chan_num > 0 ? false : view_empty;
-		view->AddMeshData(md);
-		vc.insert(gstMeshPropPanel);
-	}
-		break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (!ann)
-			break;
-		int chan_num = view->GetAny();
-		view_empty = chan_num > 0 ? false : view_empty;
-		view->AddAnnotData(ann);
-		vc.insert(gstAnnotatPropPanel);
-	}
-		break;
-	}
-
-	//update
-	if (vid)
-	{
-		if (view_empty)
-			view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-		else
-			view->InitView(INIT_BOUNDS | INIT_CENTER);
-	}
-	vc.insert({ gstListCtrl, gstTreeCtrl, gstCurrentSelect });
-	FluoRefresh(0, vc, { vid });
-}
-
-void ListPanel::AddSelToCurView()
-{
-	AddSelectionToView(glbin_current.GetViewId());
-}
-
-void ListPanel::RenameSelection(const std::wstring& name)
-{
-	std::wstring new_name = name;
-	for (int i = 1; glbin_data_manager.CheckNames(new_name); i++)
-		new_name = new_name + L"_" + std::to_wstring(i);
-	int type = glbin_current.GetType();
-
-	switch (type)
-	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (vd)
-			vd->SetName(new_name);
-	}
-		break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (md)
-			md->SetName(new_name);
-	}
-		break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (ann)
-			ann->SetName(new_name);
-	}
-		break;
-	}
-	FluoRefresh(0, { gstTreeLayerName });
-}
-
-void ListPanel::SaveSelection()
-{
-	int type = glbin_current.GetType();
-	long item = m_datalist->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	switch (type)
-	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (!vd)
-			break;
-		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
-		vd->SetResample(false);
-
-		ModalDlg fopendlg(
-			m_frame, "Save Volume Data", "", "",
-			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-			"Utah Nrrd file (*.nrrd)|*.nrrd",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		fopendlg.SetExtraControlCreator(CreateExtraControl);
-
-		int rval = fopendlg.ShowModal();
-
-		if (rval == wxID_OK)
-		{
-			std::wstring filename = fopendlg.GetPath().ToStdWstring();
-			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
-				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-				false, glbin_settings.m_save_compress,
-				glbin_settings.m_save_crop,
-				fluo::Point(), q, fluo::Vector(), false);
-			std::wstring str = vd->GetPath();
-			m_datalist->SetText(item, 2, str);
-		}
-	}
-	break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (!md)
-			break;
-		ModalDlg fopendlg(
-			m_frame, "Save Mesh Data", "", "",
-			"OBJ file (*.obj)|*.obj",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-		int rval = fopendlg.ShowModal();
-
-		if (rval == wxID_OK)
-		{
-			std::wstring filename = fopendlg.GetPath().ToStdWstring();
-
-			md->Save(filename);
-			std::wstring str = md->GetPath();
-			m_datalist->SetText(item, 2, str);
-		}
-	}
-	break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (!ann)
-			break;
-		ModalDlg fopendlg(
-			m_frame, "Save AnnotData", "", "",
-			"Text file (*.txt)|*.txt",
-			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-		int rval = fopendlg.ShowModal();
-
-		if (rval == wxID_OK)
-		{
-			std::wstring filename = fopendlg.GetPath().ToStdWstring();
-
-			ann->Save(filename);
-			std::wstring str = ann->GetPath();
-			m_datalist->SetText(item, 2, str);
-		}
-	}
-	break;
-	}
-}
-
-void ListPanel::BakeSelection()
-{
-	int type = glbin_current.GetType();
-	long item = m_datalist->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-
-	ModalDlg fopendlg(
-		m_frame, "Bake Volume Data", "", "",
-		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
-		"Utah Nrrd file (*.nrrd)|*.nrrd",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg.SetExtraControlCreator(CreateExtraControl);
-
-	int rval = fopendlg.ShowModal();
-
-	if (rval == wxID_OK)
-	{
-		std::wstring filename = fopendlg.GetPath().ToStdWstring();
-
-		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
-		vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
-			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-			true, glbin_settings.m_save_compress,
-			glbin_settings.m_save_crop,
-			fluo::Point(), q, fluo::Vector(), false);
-		std::wstring str = vd->GetPath();
-		m_datalist->SetText(item, 2, str);
-	}
-}
-
-void ListPanel::SaveSelMask()
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (vd)
-	{
-		vd->SaveMask(true, vd->GetCurTime(), vd->GetCurChannel());
-		vd->SaveLabel(true, vd->GetCurTime(), vd->GetCurChannel());
-	}
-}
-
-void ListPanel::DeleteSelection()
-{
-	Root* root = glbin_data_manager.GetRoot();
-	if (!root)
-		return;
-	int type = glbin_current.GetType();
-
-	switch (type)
-	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (!vd)
-			break;
-		std::wstring name = vd->GetName();
-		//from view
-		for (int i = 0; i < root->GetViewNum(); i++)
-		{
-			auto view = root->GetView(i);
-			if (view)
-			{
-				view->RemoveVolumeData(name);
-			}
-		}
-		//from datamanager
-		int index = glbin_data_manager.GetVolumeIndex(name);
-		if (index != -1)
-		{
-			glbin_data_manager.RemoveVolumeData(index);
-		}
-	}
-	break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (!md)
-			break;
-		std::wstring name = md->GetName();
-		//from view
-		for (int i = 0; i < root->GetViewNum(); i++)
-		{
-			auto view = root->GetView(i);
-			if (view)
-			{
-				view->RemoveMeshData(name);
-			}
-		}
-		//from datamanager
-		int index = glbin_data_manager.GetMeshIndex(name);
-		if (index != -1)
-		{
-			glbin_data_manager.RemoveMeshData(index);
-		}
-	}
-	break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (!ann)
-			break;
-		std::wstring name = ann->GetName();
-		//from view
-		for (int i = 0; i < root->GetViewNum(); i++)
-		{
-			auto view = root->GetView(i);
-			if (view)
-				view->RemoveAnnotData(name);
-		}
-		//from datamanager
-		int index = glbin_data_manager.GetAnnotIndex(name);
-		if (index != -1)
-			glbin_data_manager.RemoveAnnotData(index);
-	}
-	break;
-	}
-
-	glbin_current.SetRoot();
-	FluoRefresh(0, { gstTreeCtrl, gstListCtrl });
-}
-
-void ListPanel::DeleteAll()
-{
-	Root* root = glbin_data_manager.GetRoot();
-	if (!root)
-		return;
-	for (int i = 0; i < root->GetViewNum(); ++i)
-	{
-		auto view = root->GetView(i);
-		if (view)
-			view->ClearAll();
-	}
-	glbin_data_manager.ClearAll();
-	glbin_current.SetRoot();
-	FluoRefresh(0, { gstTreeCtrl, gstListCtrl });
+	m_datalist->SelectItemSilently(type, name);
 }
 
 void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 {
-	Root* root = glbin_data_manager.GetRoot();
-	if (!root)
+	auto agent = m_agent->As<ListPanelAgent>();
+	if (!agent)
 		return;
 
 	int seln = m_datalist->GetSelectedItemCount();
@@ -747,11 +328,10 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 
 	wxMenu menu;
 	wxMenu* add_to_menu = new wxMenu;
-	for (int i = 0; i < root->GetViewNum(); ++i)
+	auto view_list = agent->GetViewNames();
+	for (size_t i = 0; i < view_list.size(); ++i)
 	{
-		auto view = root->GetView(i);
-		add_to_menu->Append(ID_ViewID + i,
-			view->GetName());
+		add_to_menu->Append(ID_ViewID + i, view_list[i]);
 	}
 
 	menu.Append(ID_AddToView, "Add to", add_to_menu);
@@ -764,46 +344,15 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 	menu.Append(ID_Delete, "Delete");
 	menu.Append(ID_Rename, "Rename");
 	//save/save as
-	switch (glbin_current.GetType())
+	auto info = agent->GetListContextInfo();
+	if (info.path_valid)
+		menu.Append(ID_Save, "Save As...");
+	else
+		menu.Append(ID_Save, "Save...");
+	if (info.type == ListItemType::Volume)
 	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (vd)
-		{
-			if (vd->GetPath() == L"")
-				menu.Append(ID_Save, "Save...");
-			else
-				menu.Append(ID_Save, "Save As...");
-			menu.Append(ID_Bake, "Bake...");
-			menu.Append(ID_SaveMask, "Save Mask");
-		}
-	}
-		break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (md)
-		{
-			if (md->GetPath() == L"")
-				menu.Append(ID_Save, "Save...");
-			else
-				menu.Append(ID_Save, "Save As...");
-		}
-	}
-		break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (ann)
-		{
-			if (ann->GetPath() == L"")
-				menu.Append(ID_Save, "Save...");
-			else
-				menu.Append(ID_Save, "Save As...");
-		}
-	}
-		break;
+		menu.Append(ID_Bake, "Bake...");
+		menu.Append(ID_SaveMask, "Save Mask");
 	}
 
 	PopupMenu(&menu, point.x, point.y);
@@ -811,70 +360,76 @@ void ListPanel::OnContextMenu(wxContextMenuEvent& event)
 
 void ListPanel::OnToolbar(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ListPanelAgent>();
+	if (!agent)
+		return;
+
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 
 	switch (id)
 	{
 	case ID_AddToView:
-		AddSelToCurView();
+		vc.insert(gstAddListSelToView);
 		break;
 	case ID_Rename:
 		m_datalist->StartEdit();
 		break;
 	case ID_Save:
-		SaveSelection();
+		vc.insert(gstListSaveSelection);
 		break;
 	case ID_Bake:
-		BakeSelection();
+		vc.insert(gstListBakeSelection);
 		break;
 	case ID_SaveMask:
-		SaveSelMask();
+		vc.insert(gstListSaveSelMask);
 		break;
 	case ID_Delete:
-		DeleteSelection();
+		vc.insert(gstListDeleteSelection);
 		break;
 	case ID_DeleteAll:
-		DeleteAll();
+		vc.insert(gstListDeleteAll);
 		break;
 	}
+
+	agent->UpdateUIToData(vc);
 }
 
 void ListPanel::OnMenu(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<ListPanelAgent>();
+	if (!agent)
+		return;
+
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 
-	if (id < ID_ViewID)
+	switch (id)
 	{
-		switch (id)
-		{
-		case ID_AddToView:
-			AddSelToCurView();
-			break;
-		case ID_Rename:
-			m_datalist->StartEdit();
-			break;
-		case ID_Save:
-			SaveSelection();
-			break;
-		case ID_Bake:
-			BakeSelection();
-			break;
-		case ID_SaveMask:
-			SaveSelMask();
-			break;
-		case ID_Delete:
-			DeleteSelection();
-			break;
-		case ID_DeleteAll:
-			DeleteAll();
-			break;
-		}
+	case ID_AddToView:
+		vc.insert(gstAddListSelToView);
+		break;
+	case ID_Rename:
+		m_datalist->StartEdit();
+		break;
+	case ID_Save:
+		vc.insert(gstListSaveSelection);
+		break;
+	case ID_Bake:
+		vc.insert(gstListBakeSelection);
+		break;
+	case ID_SaveMask:
+		vc.insert(gstListSaveSelMask);
+		break;
+	case ID_Delete:
+		vc.insert(gstListDeleteSelection);
+		break;
+	case ID_DeleteAll:
+		vc.insert(gstListDeleteAll);
+		break;
 	}
-	else
-	{
-		int ival = id - ID_ViewID;
-		AddSelectionToView(ival);
-	}
+
+	agent->UpdateUIToData(vc);
 }
 
 void ListPanel::OnSelect(wxListEvent& event)

@@ -39,44 +39,22 @@ FpRangeDlgAgent::FpRangeDlgAgent(
 
 }
 
-bool FpRangeDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void FpRangeDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void FpRangeDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	double dval;
 
-	if (update_all || FOUND_VALUE(gstFpRangeMin))
+	if (update_all || request.HasValue(gstFpRangeMin))
 	{
 		dval = glbin_settings.m_fp_min;
 		dlg->UpdateFpRangeMin(dval);
 	}
-	if (update_all || FOUND_VALUE(gstFpRangeMax))
+	if (update_all || request.HasValue(gstFpRangeMax))
 	{
 		dval = glbin_settings.m_fp_max;
 		dlg->UpdateFpRangeMax(dval);
@@ -85,10 +63,24 @@ void FpRangeDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void FpRangeDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstFpRangeUpdate))
+	{
+		glbin_settings.m_fp_min = m_fp_min;
+		glbin_settings.m_fp_max = m_fp_max;
+	}
 }
 
 FpRangeDlg* FpRangeDlgAgent::GetDialog() const
 {
 	return static_cast<FpRangeDlg*>(GetWindow());
+}
+
+void FpRangeDlgAgent::SetFpMin(double dval)
+{
+	m_fp_min = dval;
+}
+
+void FpRangeDlgAgent::SetFpMax(double dval)
+{
+	m_fp_max = dval;
 }
