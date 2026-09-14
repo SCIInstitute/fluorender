@@ -55,9 +55,6 @@ void ConvertDlgAgent::UpdateUI(const UpdateRequest& request)
 	if (!dlg)
 		return;
 
-	//update user interface
-	if (request.HasValue(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	double dval;

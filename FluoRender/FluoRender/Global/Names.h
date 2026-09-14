@@ -1133,4 +1133,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMeshSimplify "mesh simplify"
 #define gstMeshSmooth "mesh smooth"
 
+//count dialog agent
+#define gstCountAnalyze "count analyze"
+
 #endif//NAMES_HPP

@@ -75,7 +75,7 @@ public:
 
 private:
 	//output
-	bool m_hold_history;
+	bool m_hold_history = false;
 
 	wxToolBar* m_toolbar;
 

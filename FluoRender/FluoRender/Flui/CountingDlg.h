@@ -29,8 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #define _COUNTINGDLG_H_
 
 #include <PropPanel.h>
+#include <GridData.h>
+#include <wx/grid.h>
 
-class CountingDlg : public PropPanel
+class CountingDlg : public TabbedPanel
 {
 public:
 	CountingDlg(wxWindow* parent);
@@ -42,26 +44,44 @@ public:
 	void UpdateCountMaxValue(int ival);
 	void UpdateCountUseMax(bool bval);
 
-	void OutputSize();
+	//output
+	void CopyData();
+	void UpdateGrid(const GridData& data);
 
 private:
+	//output
+	bool m_hold_history = false;
+
 	//component analyzer
 	wxCheckBox *m_ca_select_only_chk;
 	wxTextCtrl *m_ca_min_text;
 	wxTextCtrl *m_ca_max_text;
 	wxCheckBox *m_ca_ignore_max_chk;
 	wxButton *m_ca_analyze_btn;
-	wxTextCtrl *m_ca_comps_text;
-	wxTextCtrl *m_ca_volume_text;
-	wxTextCtrl *m_ca_vol_unit_text;
+
+	//output
+	wxCheckBox* m_history_chk;
+	wxButton* m_clear_hist_btn;
+	wxGrid* m_output_grid;
 
 private:
+	wxWindow* CreateSettingPage(wxWindow* parent);
+	wxWindow* CreateInfoPage(wxWindow* parent);
+
 	//component analyzer
 	void OnUseSelChk(wxCommandEvent& event);
 	void OnMinText(wxCommandEvent& event);
 	void OnMaxText(wxCommandEvent& event);
 	void OnIgnoreMaxChk(wxCommandEvent& event);
 	void OnAnalyzeBtn(wxCommandEvent& event);
+
+	//output
+	void OnHistoryChk(wxCommandEvent& event);
+	void OnClearHistBtn(wxCommandEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
+	void OnSelectCell(wxGridEvent& event);
+	//resize
+	void OnSize(wxSizeEvent& event);
 };
 
 #endif//_COUNTINGDLG_H_

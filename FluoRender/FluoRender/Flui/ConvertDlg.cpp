@@ -39,8 +39,7 @@ ConvertDlg::ConvertDlg(wxWindow *parent) :
 	TabbedPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 620)),
-		0, "ConvertDlg"),
-	m_hold_history(false)
+		0, "ConvertDlg")
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

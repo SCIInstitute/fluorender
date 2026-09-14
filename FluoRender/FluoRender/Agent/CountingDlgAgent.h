@@ -42,6 +42,11 @@ public:
 
 	CountingDlg* GetDialog() const;
 
+	void SetUseSelection(bool bval);
+	void SetMinNum(int ival);
+	void SetMaxNum(int ival);
+	void SetUseMax(bool bval);
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -56,11 +61,16 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstUseSelection,
+		gstCountMinValue,
+		gstCountMaxValue,
+		gstCountUseMax,
+		gstCountResult,
+		gstCountAnalyze
 	};
 
-	//max volume value
-	double m_max_value;
+private:
+	void Analyze();
 };
 
 #endif // CountingDlgAgent_h

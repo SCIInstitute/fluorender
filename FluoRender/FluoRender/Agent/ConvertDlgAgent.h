@@ -65,7 +65,24 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstVolMeshThresh,
+		gstVolMeshDownXY,
+		gstVolMeshDownZ,
+		gstUseTransferFunc,
+		gstUseSelection,
+		gstVolMeshSimplify,
+		gstVolMeshSmoothN,
+		gstVolMeshSmoothT,
+		gstVolMeshInfo,
+		gstBrushCountAutoUpdate,
+		gstConvVolMeshUpdateTransf,
+		gstConvVolMeshUpdate,
+		gstMeshConvert,
+		gstMeshUpdate,
+		gstMeshWeldVertices,
+		gstMeshColor,
+		gstMeshSimplify,
+		gstMeshSmooth
 	};
 
 	void MeshConvert();

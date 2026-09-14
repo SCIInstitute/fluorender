@@ -32,8 +32,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
+#include <RenderView.h>
 #include <CompGenerator.h>
 #include <CompAnalyzer.h>
+#include <GridBuilder.h>
 
 CountingDlgAgent::CountingDlgAgent(
 	CountingDlg* dlg) :
@@ -42,79 +44,126 @@ CountingDlgAgent::CountingDlgAgent(
 
 }
 
-bool CountingDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void CountingDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void CountingDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
 	bool update_all = request.values.empty();
-	m_max_value = vd->GetMaxValue();
 
 	bool bval;
 	int ival;
 
 	//selected only
-	if (update_all || FOUND_VALUE(gstUseSelection))
+	if (update_all || request.HasValue(gstUseSelection))
 	{
 		bval = glbin_comp_generator.GetUseSel();
 		dlg->UpdateUseSelection(bval);
 	}
 	//min voxel
-	if (update_all || FOUND_VALUE(gstCountMinValue))
+	if (update_all || request.HasValue(gstCountMinValue))
 	{
 		ival = glbin_comp_analyzer.GetMinNum();
 		dlg->UpdateCountMinValue(ival);
 	}
 	//max voxel
-	if (update_all || FOUND_VALUE(gstCountMaxValue))
+	if (update_all || request.HasValue(gstCountMaxValue))
 	{
 		ival = glbin_comp_analyzer.GetMaxNum();
 		dlg->UpdateCountMaxValue(ival);
 	}
 	//ignore max
-	if (update_all || FOUND_VALUE(gstCountUseMax))
+	if (update_all || request.HasValue(gstCountUseMax))
 	{
 		bval = !glbin_comp_analyzer.GetUseMax();
 		dlg->UpdateCountUseMax(bval);
 	}
 	//result
-	if (FOUND_VALUE(gstCountResult))
-		dlg->OutputSize();
+	if (request.HasValue(gstCountResult))
+	{
+		std::string titles =
+			"Components\t" \
+			"Voxel Sum\t" \
+			"Size\n";
+		std::wstring values;
+		size_t count = glbin_comp_analyzer.GetCount();
+		size_t vox = glbin_comp_analyzer.GetVox();
+		double size = glbin_comp_analyzer.GetSize();
+		std::wstring unit;
+		auto view = glbin_current.render_view.lock();
+		if (!view)
+			return;
+		switch (view->m_sb_unit)
+		{
+		case 0:
+			unit = L"nm\u00B3";
+			break;
+		case 1:
+		default:
+			unit = L"\u03BCm\u00B3";
+			break;
+		case 2:
+			unit = L"mm\u00B3";
+			break;
+		}
+		values += std::to_wstring(count) + L"\t";
+		values += std::to_wstring(vox) + L"\t";
+		values += std::to_wstring(size) + unit + L"\n";
+		auto griddata = GridBuilder::Build(titles, ws2s(values));
+		dlg->UpdateGrid(griddata);
+	}
 }
 
 void CountingDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstCountAnalyze))
+		Analyze();
 }
 
 CountingDlg* CountingDlgAgent::GetDialog() const
 {
 	return static_cast<CountingDlg*>(GetWindow());
+}
+
+void CountingDlgAgent::SetUseSelection(bool bval)
+{
+	glbin_comp_generator.SetUseSel(bval);
+}
+
+void CountingDlgAgent::SetMinNum(int ival)
+{
+	glbin_comp_analyzer.SetUseMin(true);
+	glbin_comp_analyzer.SetMinNum(ival);
+}
+
+void CountingDlgAgent::SetMaxNum(int ival)
+{
+	glbin_comp_analyzer.SetUseMax(true);
+	glbin_comp_analyzer.SetMaxNum(ival);
+	UpdateDataToUI({ gstCountUseMax });
+}
+
+void CountingDlgAgent::SetUseMax(bool bval)
+{
+	glbin_comp_analyzer.SetUseMax(bval);
+}
+
+void CountingDlgAgent::Analyze()
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+
+	glbin_comp_generator.SetVolumeData(vd);
+	glbin_comp_generator.Compute();
+	glbin_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.Analyze();
+	glbin_comp_analyzer.Count();
+
+	NotifyViewUpdate({ gstCountResult, gstMaskMode });
 }
