@@ -43,25 +43,6 @@ TreePanelAgent::TreePanelAgent(
 
 }
 
-bool TreePanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void TreePanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 TreePanel* TreePanelAgent::GetPanel() const
 {
 	return static_cast<TreePanel*>(GetWindow());
@@ -73,28 +54,25 @@ void TreePanelAgent::UpdateUI(const UpdateRequest& request)
 	if (!panel)
 		return;
 
-	if (FOUND_VALUE(gstNull))
-		return;
-
 	bool update_all = request.values.empty();
 
 	//update icons only
-	if (update_all || FOUND_VALUE(gstTreeCtrl) || FOUND_VALUE(gstTreeLayerName))
+	if (update_all || request.HasValue(gstTreeCtrl) || request.HasValue(gstTreeLayerName))
 		panel->UpdateTree();
 	else
 	{
-		if (update_all || FOUND_VALUE(gstTreeIcons))
+		if (update_all || request.HasValue(gstTreeIcons))
 			panel->UpdateTreeIcons();
-		if (update_all || FOUND_VALUE(gstTreeColors))
+		if (update_all || request.HasValue(gstTreeColors))
 			panel->UpdateTreeColors();
 	}
 
-	if (update_all || FOUND_VALUE(gstCurrentSelect))
+	if (update_all || request.HasValue(gstCurrentSelect))
 	{
 		panel->UpdateTreeSel();
 	}
 
-	if (update_all || FOUND_VALUE(gstFreehandToolState))
+	if (update_all || request.HasValue(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
 		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;

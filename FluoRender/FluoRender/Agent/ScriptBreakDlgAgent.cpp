@@ -39,44 +39,21 @@ ScriptBreakDlgAgent::ScriptBreakDlgAgent(
 
 }
 
-bool ScriptBreakDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void ScriptBreakDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void ScriptBreakDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
-
 	bool update_all = request.values.empty();
 
-	if (update_all || FOUND_VALUE(gstScriptBreakTitle))
+	if (update_all || request.HasValue(gstScriptBreakTitle))
 	{
 		auto str = glbin_script_proc.GetTitle();
 		dlg->SetLabel(str);
 	}
 
-	if (update_all || FOUND_VALUE(gstScriptBreakInfo))
+	if (update_all || request.HasValue(gstScriptBreakInfo))
 	{
 		auto str = glbin_script_proc.GetInfo();
 		dlg->UpdateScriptBreakInfo(str);

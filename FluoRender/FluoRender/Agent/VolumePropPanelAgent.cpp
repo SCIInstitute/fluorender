@@ -49,25 +49,6 @@ VolumePropPanelAgent::VolumePropPanelAgent(
 
 }
 
-bool VolumePropPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void VolumePropPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 VolumePropPanel* VolumePropPanelAgent::GetPanel() const
 {
 	return static_cast<VolumePropPanel*>(GetWindow());
@@ -82,9 +63,6 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	if (!vd)
 		return;
 
-	if (FOUND_VALUE(gstNull))
-		return;
-
 	//std::chrono::time_point t = std::chrono::high_resolution_clock::now();
 
 	double dval = 0.0;
@@ -96,20 +74,20 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	m_max_val = vd->GetMaxValue();
 	m_max_val = std::max(255.0, m_max_val);
 
-	bool update_all = request.values.empty() || FOUND_VALUE(gstVolumeProps);
-	bool update_tips = update_all || FOUND_VALUE(gstMultiFuncTips);
-	bool update_gamma = update_all || FOUND_VALUE(gstGamma3d);
-	bool update_boundary = update_all || FOUND_VALUE(gstBoundary);
-	bool update_minmax = update_all || FOUND_VALUE(gstMinMax);
-	bool update_threshold = update_all || FOUND_VALUE(gstThreshold);
-	bool update_color = update_all || FOUND_VALUE(gstColor);
-	bool update_alpha = update_all || FOUND_VALUE(gstAlpha);
-	bool update_luminance = update_all || FOUND_VALUE(gstLuminance);
-	bool update_shading = update_all || FOUND_VALUE(gstShading);
-	bool update_shadow = update_all || FOUND_VALUE(gstShadow);
-	bool update_sample = update_all || FOUND_VALUE(gstSampleRate);
-	bool update_colormap = update_all || FOUND_VALUE(gstColormap);
-	bool update_histogram = update_all || FOUND_VALUE(gstUpdateHistogram);
+	bool update_all = request.values.empty() || request.HasValue(gstVolumeProps);
+	bool update_tips = update_all || request.HasValue(gstMultiFuncTips);
+	bool update_gamma = update_all || request.HasValue(gstGamma3d);
+	bool update_boundary = update_all || request.HasValue(gstBoundary);
+	bool update_minmax = update_all || request.HasValue(gstMinMax);
+	bool update_threshold = update_all || request.HasValue(gstThreshold);
+	bool update_color = update_all || request.HasValue(gstColor);
+	bool update_alpha = update_all || request.HasValue(gstAlpha);
+	bool update_luminance = update_all || request.HasValue(gstLuminance);
+	bool update_shading = update_all || request.HasValue(gstShading);
+	bool update_shadow = update_all || request.HasValue(gstShadow);
+	bool update_sample = update_all || request.HasValue(gstSampleRate);
+	bool update_colormap = update_all || request.HasValue(gstColormap);
+	bool update_histogram = update_all || request.HasValue(gstUpdateHistogram);
 	bool mf_enable = glbin_settings.m_mulfunc == 5;
 
 	//DBGPRINT(L"update vol props, update_all=%d, vc_size=%d\n", update_all, vc.size());
@@ -158,7 +136,7 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 		panel->UpdateBoundaryTips(bval);
 	}
 	//minmax
-	if (update_minmax || FOUND_VALUE(gstTransparent))
+	if (update_minmax || request.HasValue(gstTransparent))
 	{
 		dval = vd->GetLowOffset();
 		int low = int(std::round(dval * m_max_val));
@@ -241,7 +219,7 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 		dval = vd->GetShadowIntensity();
 		panel->UpdateShadow(bval, dval);
 	}
-	if (update_all || FOUND_VALUE(gstShadowDir))
+	if (update_all || request.HasValue(gstShadowDir))
 	{
 		bval = glbin_settings.m_shadow_dir;
 		double dirx = glbin_settings.m_shadow_dir_x;
@@ -271,7 +249,7 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//spacings
-	if (update_all || FOUND_VALUE(gstSpacing))
+	if (update_all || request.HasValue(gstSpacing))
 	{
 		auto spc = vd->GetBaseSpacing();
 		panel->UpdateSpacing(spc);
@@ -335,62 +313,62 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//mask mode
-	if (update_all || FOUND_VALUE(gstMainMode))
+	if (update_all || request.HasValue(gstMainMode))
 	{
 		auto main_mode = vd->GetMainColorMode();
 		panel->UpdateMainMode(main_mode);
 	}
 
-	if (update_all || FOUND_VALUE(gstMaskMode))
+	if (update_all || request.HasValue(gstMaskMode))
 	{
 		auto mask_mode = vd->GetMaskColorMode();
 		panel->UpdateMaskMode(mask_mode);
 	}
 
 	//inversion
-	if (update_all || FOUND_VALUE(gstInvert))
+	if (update_all || request.HasValue(gstInvert))
 	{
 		bval = vd->GetInvert();
 		panel->UpdateInvert(bval);
 	}
 
 	//MIP
-	if (update_all || FOUND_VALUE(gstRenderMode))
+	if (update_all || request.HasValue(gstRenderMode))
 	{
 		bval = vd->GetRenderMode() == flvr::RenderMode::Mip;
 		panel->UpdateRenderMode(bval);
 	}
 
 	//transparency
-	if (update_all || FOUND_VALUE(gstTransparent))
+	if (update_all || request.HasValue(gstTransparent))
 	{
 		bval = vd->GetAlphaPower() > 1.1;
 		panel->UpdateTransparent(bval);
 	}
 
 	//legend
-	if (update_all || FOUND_VALUE(gstLegend))
+	if (update_all || request.HasValue(gstLegend))
 	{
 		bval = vd->GetLegend();
 		panel->UpdateLegend(bval);
 	}
 
 	//outline
-	if (update_all || FOUND_VALUE(gstOutline))
+	if (update_all || request.HasValue(gstOutline))
 	{
 		bval = vd->GetOutline();
 		panel->UpdateOutline(bval);
 	}
 
 	//interpolate
-	if (update_all || FOUND_VALUE(gstInterpolate))
+	if (update_all || request.HasValue(gstInterpolate))
 	{
 		bval = vd->GetInterpolate();
 		panel->UpdateInterpolate(bval);
 	}
 
 	//sync group
-	if (update_all || FOUND_VALUE(gstSyncGroup))
+	if (update_all || request.HasValue(gstSyncGroup))
 	{
 		auto group = m_group.lock();
 		if (group)
@@ -399,14 +377,14 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//noise reduction
-	if (update_all || FOUND_VALUE(gstNoiseRedct))
+	if (update_all || request.HasValue(gstNoiseRedct))
 	{
 		bval = vd->GetNR();
 		panel->UpdateNoiseRedct(bval);
 	}
 
 	//blend mode
-	if (update_all || FOUND_VALUE(gstChannelMixMode))
+	if (update_all || request.HasValue(gstChannelMixMode))
 	{
 		auto channel_mix_mode = vd->GetChannelMixMode();
 		bval = channel_mix_mode == ChannelMixMode::Depth;
@@ -425,16 +403,13 @@ void VolumePropPanelAgent::UpdateData(const UpdateRequest& request)
 	if (!vd)
 		return;
 
-	if (FOUND_VALUE(gstNull))
-		return;
-
-	bool update_all = request.values.empty() || FOUND_VALUE(gstVolumeProps);
-	bool update_colormap = update_all || FOUND_VALUE(gstColormap);
+	bool update_all = request.values.empty() || request.HasValue(gstVolumeProps);
+	bool update_colormap = update_all || request.HasValue(gstColormap);
 	
 	//colormap
 	if (update_colormap ||
-		FOUND_VALUE(gstRulerList) ||
-		FOUND_VALUE(gstRulerListCur))
+		request.HasValue(gstRulerList) ||
+		request.HasValue(gstRulerListCur))
 	{
 		auto proj = vd->GetColormapProj();
 		if (proj == flvr::ColormapProj::Radial ||

@@ -45,39 +45,17 @@ MeasureDlgAgent::MeasureDlgAgent(
 
 }
 
-bool MeasureDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MeasureDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	if (FOUND_VALUE(gstNull))
-		return;
-
 	bool update_all = request.values.empty();
 
 	int ival;
 
-	if (update_all || FOUND_VALUE(gstFreehandToolState))
+	if (update_all || request.HasValue(gstFreehandToolState))
 	{
 		auto view = glbin_current.render_view.lock();
 		InteractiveMode int_mode = view ? view->GetIntMode() : InteractiveMode::Disabled;
@@ -85,17 +63,17 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		dlg->UpdateFreehandToolState(int_mode, rul_mode);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerList))
+	if (update_all || request.HasValue(gstRulerList))
 	{
 		dlg->UpdateRulerList();
 	}
 
-	if (FOUND_VALUE(gstRulerListCur))
+	if (request.HasValue(gstRulerListCur))
 	{
 		dlg->UpdateRulerListCur();
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerListDisp))
+	if (update_all || request.HasValue(gstRulerListDisp))
 	{
 		RulerListDisplayInfo info;
 		auto list = glbin_current.GetRulerList();
@@ -112,29 +90,29 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		dlg->UpdateRulerListDisp(info);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerListSel))
+	if (update_all || request.HasValue(gstRulerListSel))
 	{
 		ival = glbin_ruler_handler.GetRulerIndex();
 		dlg->UpdateRulerListSel(ival);
 	}
 
-	if (FOUND_VALUE(gstRulerGroupSel))
+	if (request.HasValue(gstRulerGroupSel))
 	{
 		dlg->UpdateGroupSel();
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerProfile))
+	if (update_all || request.HasValue(gstRulerProfile))
 	{
 		dlg->UpdateProfile();
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerMethod))
+	if (update_all || request.HasValue(gstRulerMethod))
 	{
 		ival = glbin_settings.m_point_volume_mode;
 		dlg->UpdateRulerMethod(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerTransient))
+	if (update_all || request.HasValue(gstRulerTransient))
 	{
 		auto ruler = glbin_current.GetRuler();
 		if (ruler)
@@ -143,12 +121,12 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		}
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerUseTransf))
+	if (update_all || request.HasValue(gstRulerUseTransf))
 	{
 		dlg->UpdateRulerUseTransf(glbin_settings.m_ruler_use_transf);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerDisp))
+	if (update_all || request.HasValue(gstRulerDisp))
 	{
 		auto ruler = glbin_current.GetRuler();
 		bool bval0 = false;
@@ -166,17 +144,17 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 		dlg->UpdateRulerDisp(bval0, bval1, bval2);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerRelaxType))
+	if (update_all || request.HasValue(gstRulerRelaxType))
 	{
 		dlg->UpdateRulerRelaxType(glbin_settings.m_ruler_relax_type);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerF1))
+	if (update_all || request.HasValue(gstRulerF1))
 	{
 		dlg->UpdateRulerF1(glbin_settings.m_ruler_relax_f1);
 	}
 
-	if (update_all || FOUND_VALUE(gstRulerInterpolation))
+	if (update_all || request.HasValue(gstRulerInterpolation))
 	{
 		auto ruler = glbin_current.GetRuler();
 		if (ruler)
@@ -187,7 +165,7 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//align center
-	if (update_all || FOUND_VALUE(gstAlignCenter))
+	if (update_all || request.HasValue(gstAlignCenter))
 	{
 		bool bval = glbin_aligner.GetAlignCenter();
 		dlg->UpdateAlignCenter(bval);

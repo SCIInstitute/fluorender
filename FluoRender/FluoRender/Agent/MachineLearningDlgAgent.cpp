@@ -39,30 +39,8 @@ MachineLearningDlgAgent::MachineLearningDlgAgent(
 
 }
 
-bool MachineLearningDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MachineLearningDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void MachineLearningDlgAgent::UpdateUI(const UpdateRequest& request)
 {
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	//request panels to update
@@ -87,37 +65,15 @@ MachineLearningPanelAgent::MachineLearningPanelAgent(
 
 }
 
-bool MachineLearningPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MachineLearningPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void MachineLearningPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
 	if (!panel)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
-	if (update_all || FOUND_VALUE(gstMlTopList))
+	if (update_all || request.HasValue(gstMlTopList))
 		panel->PopTopList();
 }
 
@@ -138,47 +94,25 @@ MLCompGenPanelAgent::MLCompGenPanelAgent(
 
 }
 
-bool MLCompGenPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MLCompGenPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void MLCompGenPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
 	if (!panel)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	bool bval;
 
 	if (update_all ||
-		FOUND_VALUE(gstMlAutoStart) ||
-		FOUND_VALUE(gstMlCgAutoStart))
+		request.HasValue(gstMlAutoStart) ||
+		request.HasValue(gstMlCgAutoStart))
 	{
 		bval = glbin_settings.m_cg_auto_start;
 		panel->SetAutoStart(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
+	if (update_all || request.HasValue(gstMlAutoLoadTable))
 		panel->AutoLoadTable();
 }
 
@@ -199,53 +133,31 @@ MLVolPropPanelAgent::MLVolPropPanelAgent(
 
 }
 
-bool MLVolPropPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MLVolPropPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void MLVolPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
 	if (!panel)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	bool bval;
 
 	if (update_all ||
-		FOUND_VALUE(gstMlAutoStart) ||
-		FOUND_VALUE(gstMlVpAutoStart))
+		request.HasValue(gstMlAutoStart) ||
+		request.HasValue(gstMlVpAutoStart))
 	{
 		bval = glbin_settings.m_vp_auto_start;
 		panel->UpdateAutoStart(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMlVpAutoApply))
+	if (update_all || request.HasValue(gstMlVpAutoApply))
 	{
 		bval = glbin_settings.m_vp_auto_apply;
 		panel->UpdateAutoApply(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMlAutoLoadTable))
+	if (update_all || request.HasValue(gstMlAutoLoadTable))
 		panel->AutoLoadTable();
 }
 

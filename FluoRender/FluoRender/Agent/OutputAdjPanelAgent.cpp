@@ -45,25 +45,6 @@ OutputAdjPanelAgent::OutputAdjPanelAgent(
 
 }
 
-bool OutputAdjPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void OutputAdjPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void OutputAdjPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
@@ -83,31 +64,29 @@ void OutputAdjPanelAgent::UpdateUI(const UpdateRequest& request)
 		}
 		return;
 	}
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = request.values.empty() || FOUND_VALUE(gstCurrentSelect);
+	bool update_all = request.values.empty() || request.HasValue(gstCurrentSelect);
 
 	int ival;
 	//mf button tips
-	if (update_all || FOUND_VALUE(gstMultiFuncTips))
+	if (update_all || request.HasValue(gstMultiFuncTips))
 	{
 		ival = glbin_settings.m_mulfunc;
 	}
 
-	bool bSyncR = FOUND_VALUE(gstSyncR);
-	bool bSyncG = FOUND_VALUE(gstSyncG);
-	bool bSyncB = FOUND_VALUE(gstSyncB);
-	bool bGammaR = FOUND_VALUE(gstGammaR);
-	bool bGammaG = FOUND_VALUE(gstGammaG);
-	bool bGammaB = FOUND_VALUE(gstGammaB);
-	bool bBrightnessR = FOUND_VALUE(gstBrightnessR);
-	bool bBrightnessG = FOUND_VALUE(gstBrightnessG);
-	bool bBrightnessB = FOUND_VALUE(gstBrightnessB);
-	bool bHdrR = FOUND_VALUE(gstEqualizeR);
-	bool bHdrG = FOUND_VALUE(gstEqualizeG);
-	bool bHdrB = FOUND_VALUE(gstEqualizeB);
+	bool bSyncR = request.HasValue(gstSyncR);
+	bool bSyncG = request.HasValue(gstSyncG);
+	bool bSyncB = request.HasValue(gstSyncB);
+	bool bGammaR = request.HasValue(gstGammaR);
+	bool bGammaG = request.HasValue(gstGammaG);
+	bool bGammaB = request.HasValue(gstGammaB);
+	bool bBrightnessR = request.HasValue(gstBrightnessR);
+	bool bBrightnessG = request.HasValue(gstBrightnessG);
+	bool bBrightnessB = request.HasValue(gstBrightnessB);
+	bool bHdrR = request.HasValue(gstEqualizeR);
+	bool bHdrG = request.HasValue(gstEqualizeG);
+	bool bHdrB = request.HasValue(gstEqualizeB);
 
-	if (FOUND_VALUE(gstUpdateSync))
+	if (request.HasValue(gstUpdateSync))
 	{
 		UpdateSync();
 		bSyncR = bSyncG = bSyncB = true;

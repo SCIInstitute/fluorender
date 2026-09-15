@@ -42,25 +42,6 @@ MeshPropPanelAgent::MeshPropPanelAgent(
 
 }
 
-bool MeshPropPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MeshPropPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 MeshPropPanel* MeshPropPanelAgent::GetPanel() const
 {
 	return static_cast<MeshPropPanel*>(GetWindow());
@@ -75,9 +56,7 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	if (!md)
 		return;
 
-	if (FOUND_VALUE(gstNull))
-		return;
-	bool update_all = request.values.empty() || FOUND_VALUE(gstMeshProps);
+	bool update_all = request.values.empty() || request.HasValue(gstMeshProps);
 
 	fluo::Color cval;
 	double dval;
@@ -85,28 +64,28 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	bool bval;
 
 	//outline
-	if (update_all || FOUND_VALUE(gstOutline))
+	if (update_all || request.HasValue(gstOutline))
 	{
 		bval = md->GetOutline();
 		panel->UpdateOutline(bval);
 	}
 
 	//legend
-	if (update_all || FOUND_VALUE(gstLegend))
+	if (update_all || request.HasValue(gstLegend))
 	{
 		bval = md->GetLegend();
 		panel->UpdateLegend(bval);
 	}
 
 	//color
-	if (update_all || FOUND_VALUE(gstMeshColor))
+	if (update_all || request.HasValue(gstMeshColor))
 	{
 		cval = md->GetDataColor();
 		panel->UpdateMeshColor(cval);
 	}
 
 	//alpha
-	if (update_all || FOUND_VALUE(gstMeshAlpha))
+	if (update_all || request.HasValue(gstMeshAlpha))
 	{
 		bval = md->GetAlphaEnable();
 		dval = md->GetAlpha();
@@ -114,7 +93,7 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//shading
-	if (update_all || FOUND_VALUE(gstMeshShading))
+	if (update_all || request.HasValue(gstMeshShading))
 	{
 		bval = md->GetShading();
 		double strength = md->GetShadingStrength();
@@ -123,14 +102,14 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//shadow
-	if (update_all || FOUND_VALUE(gstMeshShadow))
+	if (update_all || request.HasValue(gstMeshShadow))
 	{
 		bval = md->GetShadowEnable();
 		dval = md->GetShadowIntensity();
 		panel->UpdateMeshShadow(bval, dval);
 	}
 	//dir
-	if (update_all || FOUND_VALUE(gstShadowDir))
+	if (update_all || request.HasValue(gstShadowDir))
 	{
 		bval = glbin_settings.m_shadow_dir;
 		double dirx = glbin_settings.m_shadow_dir_x;
@@ -143,7 +122,7 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//scaling
-	if (update_all || FOUND_VALUE(gstMeshScale))
+	if (update_all || request.HasValue(gstMeshScale))
 	{
 		bval = md->GetScalingEnable();
 		auto vval = md->GetScaling();

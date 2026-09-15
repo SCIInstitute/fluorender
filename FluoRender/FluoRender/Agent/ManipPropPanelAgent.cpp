@@ -40,25 +40,6 @@ ManipPropPanelAgent::ManipPropPanelAgent(
 
 }
 
-bool ManipPropPanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void ManipPropPanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 ManipPropPanel* ManipPropPanelAgent::GetPanel() const
 {
 	return static_cast<ManipPropPanel*>(GetWindow());
@@ -73,24 +54,21 @@ void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	if (!md)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	fluo::Vector vval;
 
-	if (update_all || FOUND_VALUE(gstMeshTranslation))
+	if (update_all || request.HasValue(gstMeshTranslation))
 	{
 		vval = md->GetTranslation();
 		panel->UpdateMeshTranslation(vval);
 	}
-	if (update_all || FOUND_VALUE(gstMeshRotation))
+	if (update_all || request.HasValue(gstMeshRotation))
 	{
 		vval = md->GetRotation();
 		panel->UpdateMeshRotation(vval);
 	}
-	if (update_all || FOUND_VALUE(gstMeshScale))
+	if (update_all || request.HasValue(gstMeshScale))
 	{
 		vval = md->GetScaling();
 		panel->UpdateMeshScale(vval);

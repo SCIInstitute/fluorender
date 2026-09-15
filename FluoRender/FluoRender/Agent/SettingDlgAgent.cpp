@@ -42,34 +42,12 @@ SettingDlgAgent::SettingDlgAgent(
 
 }
 
-bool SettingDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void SettingDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
 	double dval;
@@ -78,7 +56,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	//project page
 	//project save
-	if (update_all || FOUND_VALUE(gstSaveProjectEnable))
+	if (update_all || request.HasValue(gstSaveProjectEnable))
 	{
 		SaveProjectInfo info(
 			glbin_settings.m_prj_save,
@@ -93,13 +71,13 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//font
-	if (update_all || FOUND_VALUE(gstFontFile))
+	if (update_all || request.HasValue(gstFontFile))
 	{
 		std::vector<std::string> font_list;
 		if (GetFontList(font_list))
 			dlg->UpdateFontFile(font_list);
 	}
-	if (update_all || FOUND_VALUE(gstSettingsFont))
+	if (update_all || request.HasValue(gstSettingsFont))
 	{
 		std::filesystem::path p(glbin_settings.m_font_file);
 		auto str = p.stem().string();
@@ -109,56 +87,56 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//line width
-	if (update_all || FOUND_VALUE(gstLineWidth))
+	if (update_all || request.HasValue(gstLineWidth))
 	{
 		dval = glbin_settings.m_line_width;
 		dlg->UpdateLineWidth(dval);
 	}
 
 	//paint history depth
-	if (update_all || FOUND_VALUE(gstPaintHistory))
+	if (update_all || request.HasValue(gstPaintHistory))
 	{
 		ival = glbin_brush_def.m_paint_hist_depth;
 		dlg->UpdatePaintHistory(ival);
 	}
 
 	//pencil distance
-	if (update_all || FOUND_VALUE(gstPencilDist))
+	if (update_all || request.HasValue(gstPencilDist))
 	{
 		dval = glbin_settings.m_pencil_dist;
 		dlg->UpdatePencilDist(dval);	
 	}
 
 	//micro blending
-	if (update_all || FOUND_VALUE(gstMicroBlendEnable))
+	if (update_all || request.HasValue(gstMicroBlendEnable))
 	{
 		bval = glbin_settings.m_micro_blend;
 		dlg->UpdateMicroBlendEnable(bval);
 	}
 
 	//depth peeling
-	if (update_all || FOUND_VALUE(gstPeelNum))
+	if (update_all || request.HasValue(gstPeelNum))
 	{
 		ival = glbin_settings.m_peeling_layers;
 		dlg->UpdatePeelNum(ival);
 	}
 
 	//rotations
-	if (update_all || FOUND_VALUE(gstSettingsRot))
+	if (update_all || request.HasValue(gstSettingsRot))
 	{
 		dval = glbin_settings.m_pin_threshold;
 		dlg->UpdateSettingRot(dval);
 	}
 
 	//gradient background
-	if (update_all || FOUND_VALUE(gstGradBg))
+	if (update_all || request.HasValue(gstGradBg))
 	{
 		bval = glbin_settings.m_grad_bg;
 		dlg->UpdateGradBg(bval);
 	}
 
 	//match background color
-	if (update_all || FOUND_VALUE(gstClearColorBg))
+	if (update_all || request.HasValue(gstClearColorBg))
 	{
 		bval = glbin_settings.m_clear_color_bg;
 		dlg->UpdateClearColorBg(bval);
@@ -166,14 +144,14 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	//performance page
 	//mouse interactions
-	if (update_all || FOUND_VALUE(gstMouseInt))
+	if (update_all || request.HasValue(gstMouseInt))
 	{
 		ival = glbin_settings.m_interactive_quality;
 		dlg->UpdateMouseInt(ival);
 	}
 
 	//memory settings
-	if (update_all || FOUND_VALUE(gstStreamEnable))
+	if (update_all || request.HasValue(gstStreamEnable))
 	{
 		StreamInfo info(
 			glbin_settings.m_stream_rendering,
@@ -187,7 +165,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//automate page
-	if (update_all || FOUND_VALUE(gstAutomate))
+	if (update_all || request.HasValue(gstAutomate))
 	{
 		AutomateInfo info(
 			glbin_automate_def.m_histogram,
@@ -201,7 +179,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	//display page
 	//stereo
-	if (update_all || FOUND_VALUE(gstHologramMode))
+	if (update_all || request.HasValue(gstHologramMode))
 	{
 		HologramInfo info(
 			glbin_settings.m_hologram_mode,
@@ -217,14 +195,14 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//display id
-	if (update_all || FOUND_VALUE(gstFullscreenDisplay))
+	if (update_all || request.HasValue(gstFullscreenDisplay))
 	{
 		ival = glbin_settings.m_disp_id;
 		dlg->UpdateFullscreenDisplay(ival);
 	}
 
 	//color depth
-	if (update_all || FOUND_VALUE(gstDisplayColorDepth))
+	if (update_all || request.HasValue(gstDisplayColorDepth))
 	{
 		ival = glbin_settings.m_color_depth;
 		dlg->UpdateDisplayColorDepth(ival);
@@ -232,7 +210,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	//format page
 	//wavelength to color
-	if (update_all || FOUND_VALUE(gstWavelengthColors))
+	if (update_all || request.HasValue(gstWavelengthColors))
 	{
 		int val1 = glbin_settings.m_wav_color1;
 		int val2 = glbin_settings.m_wav_color2;
@@ -242,7 +220,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//max texture size
-	if (update_all || FOUND_VALUE(gstMaxTextureSize))
+	if (update_all || request.HasValue(gstMaxTextureSize))
 	{
 		bval = glbin_settings.m_use_max_texture_size;
 		if (bval)
@@ -252,7 +230,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 		dlg->UpdateMaxTextureSize(bval, ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstDeviceTree))
+	if (update_all || request.HasValue(gstDeviceTree))
 	{
 		DeviceTreeInfo result;
 
@@ -284,7 +262,7 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 	}
 
 	//java
-	if (update_all || FOUND_VALUE(gstSettingsJava))
+	if (update_all || request.HasValue(gstSettingsJava))
 	{
 		std::wstring jvm = glbin_settings.m_jvm_path;
 		std::wstring ij = glbin_settings.m_ij_path;

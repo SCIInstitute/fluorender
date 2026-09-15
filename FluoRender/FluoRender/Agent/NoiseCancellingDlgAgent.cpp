@@ -42,33 +42,10 @@ NoiseCancellingDlgAgent::NoiseCancellingDlgAgent(
 
 }
 
-bool NoiseCancellingDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void NoiseCancellingDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void NoiseCancellingDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
-		return;
-
-	//update user interface
-	if (FOUND_VALUE(gstNull))
 		return;
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
@@ -81,14 +58,14 @@ void NoiseCancellingDlgAgent::UpdateUI(const UpdateRequest& request)
 	int ival;
 	bool bval;
 
-	if (update_all || FOUND_VALUE(gstNrThresh))
+	if (update_all || request.HasValue(gstNrThresh))
 	{
 		//threshold
 		dval = glbin_comp_def.m_nr_thresh;
 		dlg->UpdateNrThresh(dval, m_max_value);
 	}
 
-	if (update_all || FOUND_VALUE(gstNrSize))
+	if (update_all || request.HasValue(gstNrSize))
 	{
 		//voxel
 		ival = glbin_comp_def.m_nr_size;
@@ -96,13 +73,13 @@ void NoiseCancellingDlgAgent::UpdateUI(const UpdateRequest& request)
 		dlg->UpdateNrSize(ival, res.intx());
 	}
 
-	if (update_all || FOUND_VALUE(gstUseSelection))
+	if (update_all || request.HasValue(gstUseSelection))
 	{
 		bval = glbin_comp_generator.GetUseSel();
 		dlg->UpdateUseSelection(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstNrPreview))
+	if (update_all || request.HasValue(gstNrPreview))
 	{
 		bval = glbin_comp_def.m_nr_preview;
 		dlg->UpdateNrPreview(bval);

@@ -40,44 +40,22 @@ OclDlgAgent::OclDlgAgent(
 
 }
 
-bool OclDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void OclDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void OclDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
-	//update user interface
-	if (FOUND_VALUE(gstNull))
-		return;
 	bool update_all = request.values.empty();
 
-	if (update_all || FOUND_VALUE(gstKernelList))
+	if (update_all || request.HasValue(gstKernelList))
 	{
 		std::vector<std::wstring> list;
 		if (GetKernelList(list))
 			dlg->UpdateKernelList(list);
 	}
 
-	if (update_all || FOUND_VALUE(gstKernelListSelect))
+	if (update_all || request.HasValue(gstKernelListSelect))
 	{
 		int idx = glbin_kernel_executor.GetFileIndex();
 		dlg->UpdateKernelListSelect(idx);

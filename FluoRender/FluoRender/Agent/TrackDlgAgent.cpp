@@ -45,32 +45,10 @@ TrackDlgAgent::TrackDlgAgent(
 
 }
 
-bool TrackDlgAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void TrackDlgAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto dlg = GetDialog();
 	if (!dlg)
-		return;
-
-	if (FOUND_VALUE(gstNull))
 		return;
 
 	bool update_all = request.values.empty();
@@ -88,57 +66,57 @@ void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 	bool bval;
 
 	//create page
-	if (update_all || FOUND_VALUE(gstTrackFile))
+	if (update_all || request.HasValue(gstTrackFile))
 	{
 		//track file
 		std::wstring str = trkg->get().GetPath();
 		dlg->UpdateTrackFile(str);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackIter))
+	if (update_all || request.HasValue(gstTrackIter))
 	{
 		ival = glbin_settings.m_track_iter;
 		dlg->UpdateTrackIter(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackSize))
+	if (update_all || request.HasValue(gstTrackSize))
 	{
 		dval = glbin_settings.m_component_size;
 		dlg->UpdateTrackSize(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackSimilarity))
+	if (update_all || request.HasValue(gstTrackSimilarity))
 	{
 		dval = glbin_settings.m_similarity;
 		dlg->UpdateTrackSimilarity(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackContactFactor))
+	if (update_all || request.HasValue(gstTrackContactFactor))
 	{
 		dval = glbin_settings.m_contact_factor;
 		dlg->UpdateTrackContactFactor(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackConsistent))
+	if (update_all || request.HasValue(gstTrackConsistent))
 	{
 		bval = glbin_settings.m_consistent_color;
 		dlg->UpdateTrackConsistent(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackMerge))
+	if (update_all || request.HasValue(gstTrackMerge))
 	{
 		bval = glbin_settings.m_try_merge;
 		dlg->UpdateTrackMerge(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackSplit))
+	if (update_all || request.HasValue(gstTrackSplit))
 	{
 		bval = glbin_settings.m_try_split;
 		dlg->UpdateTrackSplit(bval);
 	}
 
 	//select page
-	if (update_all || FOUND_VALUE(gstTrackCompId))
+	if (update_all || request.HasValue(gstTrackCompId))
 	{
 		unsigned long id;
 		if (TryToULong(m_comp_id, id))
@@ -148,20 +126,20 @@ void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 		}
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackCellSize))
+	if (update_all || request.HasValue(gstTrackCellSize))
 	{
 		dval = glbin_settings.m_component_size;
 		dlg->UpdateTrackCellSize(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackUncertainLow))
+	if (update_all || request.HasValue(gstTrackUncertainLow))
 	{
 		ival = trkg->get().GetUncertainLow();
 		dlg->UpdateTrackUncertainLow(ival);
 	}
 
 	//modify page
-	if (update_all || FOUND_VALUE(gstTrackNewCompId))
+	if (update_all || request.HasValue(gstTrackNewCompId))
 	{
 		unsigned long id;
 		if (TryToULong(m_comp_id3, id))
@@ -171,7 +149,7 @@ void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 		}
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackClusterNum))
+	if (update_all || request.HasValue(gstTrackClusterNum))
 	{
 		ival = glbin_trackmap_proc.GetClusterNum();
 		dlg->UpdateTrackClusterNum(ival);
@@ -179,20 +157,20 @@ void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	//analysis page (empty)
 	//lists
-	if (update_all || FOUND_VALUE(gstGhostNum))
+	if (update_all || request.HasValue(gstGhostNum))
 	{
 		ival = trkg->get().GetGhostNum();
 		dlg->UpdateGhostNum(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstGhostEnable))
+	if (update_all || request.HasValue(gstGhostEnable))
 	{
 		bool bval1 = trkg->get().GetDrawTail();
 		bool bval2 = trkg->get().GetDrawLead();
 		dlg->UpdateGhostEnable(bval1, bval2);
 	}
 
-	if (update_all || FOUND_VALUE(gstTrackList))
+	if (update_all || request.HasValue(gstTrackList))
 	{
 		auto data = GetTrackViewData();
 		dlg->UpdateTracks(data);

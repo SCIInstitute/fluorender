@@ -46,25 +46,6 @@ MoviePanelAgent::MoviePanelAgent(
 
 }
 
-bool MoviePanelAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MoviePanelAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
-}
-
 MoviePanel* MoviePanelAgent::GetPanel() const
 {
 	return static_cast<MoviePanel*>(GetWindow());
@@ -76,28 +57,25 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 	if (!panel)
 		return;
 
-	if (FOUND_VALUE(gstNull))
-		return;
-
-	bool update_all = request.values.empty() || FOUND_VALUE(gstMoviePanelAgent);
+	bool update_all = request.values.empty() || request.HasValue(gstMoviePanelAgent);
 	bool bval;
 	int ival;
 	double dval;
 
 	//modes
-	if (update_all || FOUND_VALUE(gstMovFps))
+	if (update_all || request.HasValue(gstMovFps))
 	{
 		dval = glbin_moviemaker.GetFps();
 		panel->UpdateMovFps(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovLength))
+	if (update_all || request.HasValue(gstMovLength))
 	{
 		dval = glbin_moviemaker.GetMovieLength();
 		panel->UpdateMovLength(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovViewList))
+	if (update_all || request.HasValue(gstMovViewList))
 	{
 		MovViewListInfo info;
 		Root* root = glbin_data_manager.GetRoot();
@@ -111,19 +89,19 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 			}
 		}
 	}
-	if (update_all || FOUND_VALUE(gstMovViewIndex))
+	if (update_all || request.HasValue(gstMovViewIndex))
 	{
 		ival = glbin_mov_def.m_view_idx;
 		panel->UpdateMovViewIndex(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovSliderStyle))
+	if (update_all || request.HasValue(gstMovSliderStyle))
 	{
 		bval = glbin_mov_def.m_slider_style;
 		panel->UpdateMovSliderStyle(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovProgSlider))
+	if (update_all || request.HasValue(gstMovProgSlider))
 	{
 		int cf = glbin_moviemaker.GetCurrentFrame();
 		int ts = glbin_moviemaker.GetScrollThumbSize();
@@ -132,37 +110,37 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 		panel->UpdateMovProgSlider(sf, ts, sf, ef);
 	}
 
-	if (update_all || FOUND_VALUE(gstBeginFrame))
+	if (update_all || request.HasValue(gstBeginFrame))
 	{
 		ival = glbin_moviemaker.GetClipStartFrame();
 		panel->UpdateBeginFrame(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstEndFrame))
+	if (update_all || request.HasValue(gstEndFrame))
 	{
 		ival = glbin_moviemaker.GetClipEndFrame();
 		panel->UpdateEndFrame(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstCurrentFrame))
+	if (update_all || request.HasValue(gstCurrentFrame))
 	{
 		ival = glbin_moviemaker.GetCurrentFrame();
 		panel->UpdateCurrentFrame(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstTotalFrames))
+	if (update_all || request.HasValue(gstTotalFrames))
 	{
 		ival = glbin_moviemaker.GetFullFrameNum();
 		panel->UpdateTotalFrames(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovCurTime))
+	if (update_all || request.HasValue(gstMovCurTime))
 	{
 		dval = glbin_moviemaker.GetCurrentTime();
 		panel->UpdateMovCurTime(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovPlay))
+	if (update_all || request.HasValue(gstMovPlay))
 	{
 		bool running = glbin_moviemaker.IsRunning();
 		bool reverse = glbin_moviemaker.IsReverse();
@@ -170,90 +148,90 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 		panel->UpdateMovPlay(running, reverse, script);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovLoop))
+	if (update_all || request.HasValue(gstMovLoop))
 	{
 		bval = glbin_moviemaker.IsLoop();
 		panel->UpdateMovLoop(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovRotEnable))
+	if (update_all || request.HasValue(gstMovRotEnable))
 	{
 		bval = glbin_moviemaker.GetRotateEnable();
 		panel->UpdateMovRotEnable(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovRotAxis))
+	if (update_all || request.HasValue(gstMovRotAxis))
 	{
 		ival = glbin_moviemaker.GetRotateAxis();
 		panel->UpdateMovRotAxis(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovRotAng))
+	if (update_all || request.HasValue(gstMovRotAng))
 	{
 		ival = glbin_moviemaker.GetRotateDeg();
 		panel->UpdateMovRotAng(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovIntrpMode))
+	if (update_all || request.HasValue(gstMovIntrpMode))
 	{
 		ival = glbin_moviemaker.GetInterpolation();
 		panel->UpdateMovIntrpMode(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovSeqMode))
+	if (update_all || request.HasValue(gstMovSeqMode))
 	{
 		ival = glbin_moviemaker.GetSeqMode();
 		panel->UpdateMovSeqMode(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstMovSeqNum))
+	if (update_all || request.HasValue(gstMovSeqNum))
 	{
 		int scn = glbin_moviemaker.GetSeqCurNum();
 		int san = glbin_moviemaker.GetSeqAllNum();
 		panel->UpdateMovSeqNum(scn, san);
 	}
 
-	if (update_all || FOUND_VALUE(gstCaptureParam))
+	if (update_all || request.HasValue(gstCaptureParam))
 	{
 		bval = glbin_moviemaker.GetKeyframeEnable();
 		panel->UpdateCaptureParam(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstParamKeyDuration))
+	if (update_all || request.HasValue(gstParamKeyDuration))
 	{
 		dval = glbin_moviemaker.GetKeyDuration();
 		panel->UpdateParamKeyDuration(dval);
 	}
 
-	if (update_all || FOUND_VALUE(gstParamList))
+	if (update_all || request.HasValue(gstParamList))
 		panel->UpdateParamList();
 
-	if (update_all || FOUND_VALUE(gstParamListSelect))
+	if (update_all || request.HasValue(gstParamListSelect))
 	{
 		dval = glbin_moviemaker.GetCurProg();
 		ival = glbin_interpolator.GetKeyIndexFromTime(dval);
 		panel->UpdateParamListSelect(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstCamLockObjEnable))
+	if (update_all || request.HasValue(gstCamLockObjEnable))
 	{
 		bval = glbin_moviemaker.GetCamLock();
 		panel->UpdateCamLockObjEnable(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstCamLockType))
+	if (update_all || request.HasValue(gstCamLockType))
 	{
 		ival = glbin_moviemaker.GetCamLockType() - 1;
 		panel->UpdateCamLockType(ival);
 	}
 
-	if (update_all || FOUND_VALUE(gstCropEnable))
+	if (update_all || request.HasValue(gstCropEnable))
 	{
 		bval = glbin_moviemaker.GetCropEnable();
 		panel->UpdateCropEnable(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstCropValues))
+	if (update_all || request.HasValue(gstCropValues))
 	{
 		int x = glbin_moviemaker.GetCropX();
 		int y = glbin_moviemaker.GetCropY();
@@ -262,7 +240,7 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 		panel->UpdateCropValues(x, y, w, h);
 	}
 
-	if (update_all || FOUND_VALUE(gstScalebarPos))
+	if (update_all || request.HasValue(gstScalebarPos))
 	{
 		ival = glbin_moviemaker.GetScalebarPos();
 		int x = glbin_moviemaker.GetScalebarX();
@@ -270,26 +248,26 @@ void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 		panel->UpdateScalebarPos(ival, x, y);
 	}
 
-	if (update_all || FOUND_VALUE(gstRunScript))
+	if (update_all || request.HasValue(gstRunScript))
 	{
 		bval = glbin_settings.m_run_script;
 		panel->UpdateRunScript(bval);
 	}
 
-	if (update_all || FOUND_VALUE(gstScriptFile))
+	if (update_all || request.HasValue(gstScriptFile))
 	{
 		std::wstring filename = glbin_settings.m_script_file;
 		panel->UpdateScriptFile(filename);
 	}
 
-	if (update_all || FOUND_VALUE(gstScriptList))
+	if (update_all || request.HasValue(gstScriptList))
 	{
 		std::vector<std::wstring> list;
 		if (GetScriptFiles(list))
 			panel->UpdateScriptList(list);
 	}
 
-	if (update_all || FOUND_VALUE(gstScriptSelect))
+	if (update_all || request.HasValue(gstScriptSelect))
 	{
 		std::vector<std::wstring> list;
 		if (GetScriptFiles(list))
