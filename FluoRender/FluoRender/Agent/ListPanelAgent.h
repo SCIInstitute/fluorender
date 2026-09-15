@@ -57,6 +57,8 @@ public:
 
 	ListContextInfo GetListContextInfo();
 	std::vector<std::wstring> GetViewNames();
+	void SetSelName(const std::wstring& name);
+	void SetCurrentSelection(ListItemType type, const std::wstring& name);
 
 protected:
 	std::span < const std::string_view>
@@ -69,15 +71,18 @@ protected:
 
 	void UpdateData(const UpdateRequest& request) override;
 
-	void SetSelName(const std::wstring& name);
-
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
 		gstListCtrl,
 		gstTreeLayerName,
 		gstCurrentSelect,
-		gstAddListSelToView
+		gstAddListSelToView,
+		gstListSaveSelection,
+		gstListBakeSelection,
+		gstListSaveSelMask,
+		gstListDeleteSelection,
+		gstListDeleteAll
 	};
 
 	bool m_suppress_event = false;

@@ -131,6 +131,22 @@ void ListPanelAgent::SetSelName(const std::wstring& name)
 	NotifyViewUpdate({ gstTreeLayerName });
 }
 
+void ListPanelAgent::SetCurrentSelection(ListItemType type, const std::wstring& name)
+{
+	switch (type)
+	{
+	case ListItemType::Volume:
+		glbin_current.SetVolumeData(glbin_data_manager.GetVolumeData(name));
+		break;
+	case ListItemType::Mesh:
+		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
+		break;
+	case ListItemType::Annot:
+		glbin_current.SetAnnotData(glbin_data_manager.GetAnnotData(name));
+	}
+	NotifyViewUpdate({ gstCurrentSelect });
+}
+
 ListContextInfo ListPanelAgent::GetListContextInfo()
 {
 	ListContextInfo info{ ListItemType::Invalid, false };
@@ -185,6 +201,7 @@ std::vector<std::wstring> ListPanelAgent::GetViewNames()
 		auto view = root->GetView(i);
 		list.push_back(view->GetName());
 	}
+	return list;
 }
 
 void ListPanelAgent::UpdateList()
@@ -379,25 +396,94 @@ void ListPanelAgent::SaveSelection()
 		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
 		vd->SetResample(false);
 
-		ModalDlg fopendlg(
-			panel, "Save Volume Data", "", "",
-			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
-			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
+		SaveVolumeOptions initial_options;
+
+		initial_options.compress =
+			glbin_settings.m_save_compress;
+
+		initial_options.crop =
+			glbin_settings.m_save_crop;
+
+		initial_options.filter =
+			glbin_settings.m_save_filter;
+
+		if (auto vd = glbin_current.vol_data.lock())
+		{
+			initial_options.resize =
+				vd->GetResample();
+
+			auto sz =
+				vd->GetResampledSize();
+
+			initial_options.size_x = sz.intx();
+			initial_options.size_y = sz.inty();
+			initial_options.size_z = sz.intz();
+		}
+
+		SaveVolumeHook hook(initial_options);
+
+		ModalDlg dlg(
+			panel,
+			"Save Volume Data",
+			"",
+			"",
+			"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"
+			"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"
 			"Utah Nrrd file (*.nrrd)|*.nrrd",
 			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		fopendlg.SetExtraControlCreator(panel->CreateExtraControl);
 
-		int rval = fopendlg.ShowModal();
+		dlg.SetCustomizeHook(hook);
 
-		if (rval == wxID_OK)
+		if (dlg.ShowModal() != wxID_OK)
+			break;
+
+		const SaveVolumeOptions& selected_options =
+			hook.GetOptions();
+
+		// Persist settings.
+
+		glbin_settings.m_save_compress =
+			selected_options.compress;
+
+		glbin_settings.m_save_crop =
+			selected_options.crop;
+
+		glbin_settings.m_save_filter =
+			selected_options.filter;
+
+		std::wstring filename =
+			dlg.GetPath().ToStdWstring();
+
+		// Apply resize settings if needed.
+		if (selected_options.resize)
 		{
-			std::wstring filename = fopendlg.GetPath().ToStdWstring();
-			vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
-				glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-				false, glbin_settings.m_save_compress,
-				glbin_settings.m_save_crop,
-				fluo::Point(), q, fluo::Vector(), false);
+			vd->SetResample(true);
+
+			vd->SetResampledSize(
+				fluo::Vector(
+					selected_options.size_x,
+					selected_options.size_y,
+					selected_options.size_z));
 		}
+		else
+		{
+			vd->SetResample(false);
+		}
+
+		vd->Save(
+			filename,
+			dlg.GetFilterIndex(),
+			3,
+			false,
+			selected_options.crop,
+			selected_options.filter,
+			false,
+			selected_options.compress,
+			selected_options.crop,
+			fluo::Point(),
+			q,
+			fluo::Vector(),
+			false);
 	}
 	break;
 	case 3://mesh
@@ -450,34 +536,96 @@ void ListPanelAgent::BakeSelection()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-
-	int type = glbin_current.GetType();
-
 	auto vd = glbin_current.vol_data.lock();
 	if (!vd)
 		return;
 
-	ModalDlg fopendlg(
+	SaveVolumeOptions initial_options;
+
+	initial_options.compress =
+		glbin_settings.m_save_compress;
+
+	initial_options.crop =
+		glbin_settings.m_save_crop;
+
+	initial_options.filter =
+		glbin_settings.m_save_filter;
+
+	if (auto vd = glbin_current.vol_data.lock())
+	{
+		initial_options.resize =
+			vd->GetResample();
+
+		auto sz =
+			vd->GetResampledSize();
+
+		initial_options.size_x = sz.intx();
+		initial_options.size_y = sz.inty();
+		initial_options.size_z = sz.intz();
+	}
+
+	SaveVolumeHook hook(initial_options);
+
+	ModalDlg dlg(
 		panel, "Bake Volume Data", "", "",
 		"Muti-page Tiff file (*.tif, *.tiff)|*.tif;*.tiff|"\
 		"Single-page Tiff sequence (*.tif)|*.tif;*.tiff|"\
 		"Utah Nrrd file (*.nrrd)|*.nrrd",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg.SetExtraControlCreator(panel->CreateExtraControl);
+	dlg.SetCustomizeHook(hook);
 
-	int rval = fopendlg.ShowModal();
+	if (dlg.ShowModal() != wxID_OK)
+		return;
 
-	if (rval == wxID_OK)
+	const SaveVolumeOptions& selected_options =
+		hook.GetOptions();
+
+	// Persist settings.
+
+	glbin_settings.m_save_compress =
+		selected_options.compress;
+
+	glbin_settings.m_save_crop =
+		selected_options.crop;
+
+	glbin_settings.m_save_filter =
+		selected_options.filter;
+
+	std::wstring filename =
+		dlg.GetPath().ToStdWstring();
+
+	// Apply resize settings if needed.
+	if (selected_options.resize)
 	{
-		std::wstring filename = fopendlg.GetPath().ToStdWstring();
+		vd->SetResample(true);
 
-		fluo::Quaternion q = vd->GetClippingBox().GetRotation();
-		vd->Save(filename, fopendlg.GetFilterIndex(), 3, false,
-			glbin_settings.m_save_crop, glbin_settings.m_save_filter,
-			true, glbin_settings.m_save_compress,
-			glbin_settings.m_save_crop,
-			fluo::Point(), q, fluo::Vector(), false);
+		vd->SetResampledSize(
+			fluo::Vector(
+				selected_options.size_x,
+				selected_options.size_y,
+				selected_options.size_z));
 	}
+	else
+	{
+		vd->SetResample(false);
+	}
+
+
+	fluo::Quaternion q = vd->GetClippingBox().GetRotation();
+	vd->Save(
+		filename,
+		dlg.GetFilterIndex(),
+		3,
+		false,
+		selected_options.crop,
+		selected_options.filter,
+		true,
+		selected_options.compress,
+		selected_options.crop,
+		fluo::Point(),
+		q,
+		fluo::Vector(),
+		false);
 
 	UpdateDataToUI({ gstListCtrl });
 }

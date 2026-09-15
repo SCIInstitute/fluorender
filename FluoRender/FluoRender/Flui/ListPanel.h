@@ -30,6 +30,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 #include <wx/listctrl.h>
+#include <wx/filedlgcustomize.h>
+
+enum class ListItemType : int;
 
 class DataListCtrl : public wxListCtrl
 {
@@ -61,7 +64,6 @@ public:
 
 private:
 	wxTextCtrl *m_rename_text;
-	wxString m_rename;
 	long m_selected;
 	bool m_silent_select = false;
 
@@ -71,6 +73,51 @@ private:
 	void OnNameEnter(wxCommandEvent& event);
 	void OnSelectionChanged(wxListEvent& event);
 	void OnKillFocus(wxFocusEvent& event);
+};
+
+struct SaveVolumeOptions
+{
+	bool compress = false;
+	bool crop = false;
+
+	bool resize = false;
+	int size_x = 0;
+	int size_y = 0;
+	int size_z = 0;
+
+	int filter = 0;
+};
+
+class SaveVolumeHook :
+	public wxFileDialogCustomizeHook
+{
+public:
+	SaveVolumeHook(
+		const SaveVolumeOptions& options);
+
+	void AddCustomControls(
+		wxFileDialogCustomize& customizer) override;
+
+	void TransferDataFromCustomControls() override;
+
+	const SaveVolumeOptions& GetOptions() const
+	{
+		return m_options;
+	}
+
+private:
+	SaveVolumeOptions m_options;
+
+	wxFileDialogCheckBox* m_comp_chk = nullptr;
+	wxFileDialogCheckBox* m_crop_chk = nullptr;
+
+	wxFileDialogCheckBox* m_resize_chk = nullptr;
+
+	wxFileDialogTextCtrl* m_size_x_txt = nullptr;
+	wxFileDialogTextCtrl* m_size_y_txt = nullptr;
+	wxFileDialogTextCtrl* m_size_z_txt = nullptr;
+
+	wxFileDialogChoice* m_filter_choice = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +159,7 @@ public:
 	void DeleteAllListItems();
 	void AppendListItem(ListItemType type, const std::wstring& name, const std::wstring& path);
 	void SelectListItem(ListItemType type, const std::wstring& name);
-	static wxWindow* CreateExtraControl(wxWindow* parent);
+	void RenameSelection(const wxString& name);
 
 private:
 	wxToolBar *m_toolbar;
@@ -132,14 +179,6 @@ private:
 	void OnScrollWin(wxScrollWinEvent& event);
 	void OnScroll(wxMouseEvent& event);
 	void OnKillFocus(wxFocusEvent& event);
-
-	void OnCropCheck(wxCommandEvent& event);
-	void OnCompCheck(wxCommandEvent& event);
-	void OnResizeCheck(wxCommandEvent& event);
-	void OnSizeXText(wxCommandEvent& event);
-	void OnSizeYText(wxCommandEvent& event);
-	void OnSizeZText(wxCommandEvent& event);
-	void OnFilterChange(wxCommandEvent& event);
 };
 
 #endif//_LISTPANEL_H_

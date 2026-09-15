@@ -163,11 +163,11 @@ void DataListCtrl::OnTextFocus(wxMouseEvent& event)
 
 void DataListCtrl::OnNameText(wxCommandEvent& event)
 {
-	m_rename = m_rename_text->GetValue();
+	auto name = m_rename_text->GetValue();
 	wxWindow* par = GetParent();
 	ListPanel* lp = dynamic_cast<ListPanel*>(par);
 	if (lp)
-		lp->RenameSelection(m_rename.ToStdWstring());
+		lp->RenameSelection(name);
 }
 
 void DataListCtrl::OnNameEnter(wxCommandEvent& event)
@@ -203,6 +203,104 @@ void DataListCtrl::OnKillFocus(wxFocusEvent& event)
 {
 	EndEdit();
 	event.Skip();
+}
+
+SaveVolumeHook::SaveVolumeHook(
+	const SaveVolumeOptions& options) :
+	m_options(options)
+{
+
+}
+
+void SaveVolumeHook::AddCustomControls(
+	wxFileDialogCustomize& customizer)
+{
+	customizer.AddStaticText("Additional Options");
+
+	m_comp_chk =
+		customizer.AddCheckBox(
+			"Lempel-Ziv-Welch Compression");
+
+	m_comp_chk->SetValue(
+		m_options.compress);
+
+	m_crop_chk =
+		customizer.AddCheckBox(
+			"Use Clipping Planes to Crop");
+
+	m_crop_chk->SetValue(
+		m_options.crop);
+
+	m_resize_chk =
+		customizer.AddCheckBox(
+			"Resize");
+
+	m_resize_chk->SetValue(
+		m_options.resize);
+
+	customizer.AddStaticText(
+		"Size X");
+
+	m_size_x_txt =
+		customizer.AddTextCtrl(
+			std::to_string(
+				m_options.size_x));
+
+	customizer.AddStaticText(
+		"Size Y");
+
+	m_size_y_txt =
+		customizer.AddTextCtrl(
+			std::to_string(
+				m_options.size_y));
+
+	customizer.AddStaticText(
+		"Size Z");
+
+	m_size_z_txt =
+		customizer.AddTextCtrl(
+			std::to_string(
+				m_options.size_z));
+
+	static const wxString kFilterChoices[] =
+	{
+		"Nearest neighbor",
+		"Bilinear",
+		"Trilinear",
+		"Box"
+	};
+
+	m_filter_choice =
+		customizer.AddChoice(
+			WXSIZEOF(kFilterChoices),
+			kFilterChoices);
+
+	m_filter_choice->SetSelection(
+		m_options.filter);
+}
+
+void SaveVolumeHook::TransferDataFromCustomControls()
+{
+	m_options.compress =
+		m_comp_chk->GetValue();
+
+	m_options.crop =
+		m_crop_chk->GetValue();
+
+	m_options.resize =
+		m_resize_chk->GetValue();
+
+	m_options.size_x =
+		wxAtoi(m_size_x_txt->GetValue());
+
+	m_options.size_y =
+		wxAtoi(m_size_y_txt->GetValue());
+
+	m_options.size_z =
+		wxAtoi(m_size_z_txt->GetValue());
+
+	m_options.filter =
+		m_filter_choice->GetSelection();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -296,6 +394,13 @@ void ListPanel::DeleteAllListItems()
 void ListPanel::AppendListItem(ListItemType type, const std::wstring& name, const std::wstring& path)
 {
 	m_datalist->Append(type, name, path);
+}
+
+void ListPanel::RenameSelection(const wxString& name)
+{
+	auto agent = m_agent->As<ListPanelAgent>();
+	if (agent)
+		agent->SetSelName(name.ToStdWstring());
 }
 
 void ListPanel::SelectListItem(ListItemType type, const std::wstring& name)
@@ -443,35 +548,44 @@ void ListPanel::OnSelect(wxListEvent& event)
 
 	std::wstring stype = m_datalist->GetText(item, 0).ToStdWstring();
 	std::wstring name = m_datalist->GetText(item, 1).ToStdWstring();
+	ListItemType type = ListItemType::Invalid;
 
 	if (stype == L"Volume")
 	{
-		glbin_current.SetVolumeData(glbin_data_manager.GetVolumeData(name));
+		type = ListItemType::Volume;
 	}
 	else if (stype == L"Mesh")
 	{
-		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
+		type = ListItemType::Mesh;
 	}
 	else if (stype == L"AnnotData")
 	{
-		glbin_current.SetAnnotData(glbin_data_manager.GetAnnotData(name));
+		type = ListItemType::Annot;
 	}
 
-	FluoRefresh(1, { gstCurrentSelect });
+	auto agent = m_agent->As<ListPanelAgent>();
+	if (agent)
+		agent->SetCurrentSelection(type, name);
 
 	event.Skip();
 }
 
 void ListPanel::OnAct(wxListEvent& event)
 {
-	AddSelToCurView();
+	auto agent = m_agent->As<ListPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAddListSelToView });
 }
 
 void ListPanel::OnKeyDown(wxKeyEvent& event)
 {
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		DeleteSelection();
+	{
+		auto agent = m_agent->As<ListPanelAgent>();
+		if (agent)
+			agent->UpdateUIToData({ gstListDeleteSelection });
+	}
 }
 
 void ListPanel::OnKeyUp(wxKeyEvent& event)
@@ -505,199 +619,5 @@ void ListPanel::OnKillFocus(wxFocusEvent& event)
 {
 	m_datalist->EndEdit();
 	event.Skip();
-}
-
-//crop
-void ListPanel::OnCropCheck(wxCommandEvent& event)
-{
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		glbin_settings.m_save_crop = ch1->GetValue();
-}
-
-//compress
-void ListPanel::OnCompCheck(wxCommandEvent& event)
-{
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		glbin_settings.m_save_compress = ch1->GetValue();
-}
-
-void ListPanel::OnResizeCheck(wxCommandEvent& event)
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	wxCheckBox* comp_chk = (wxCheckBox*)event.GetEventObject();
-	if (!comp_chk)
-		return;
-	bool resize = comp_chk->GetValue();
-	wxWindow* panel = comp_chk->GetParent();
-	if (!panel)
-		return;
-	wxTextCtrl* size_x_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_X_TXT);
-	wxTextCtrl* size_y_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Y_TXT);
-	wxTextCtrl* size_z_txt = (wxTextCtrl*)panel->FindWindow(ID_RESIZE_Z_TXT);
-	//set size values
-	if (size_x_txt && size_y_txt && size_z_txt)
-	{
-		if (resize)
-		{
-			auto res = vd->GetResolution();
-			size_x_txt->ChangeValue(std::to_string(res.intx()));
-			size_y_txt->ChangeValue(std::to_string(res.inty()));
-			size_z_txt->ChangeValue(std::to_string(res.intz()));
-		}
-		else
-		{
-			size_x_txt->ChangeValue("");
-			size_y_txt->ChangeValue("");
-			size_z_txt->ChangeValue("");
-		}
-	}
-	vd->SetResample(resize);
-}
-
-void ListPanel::OnSizeXText(wxCommandEvent& event)
-{
-	wxTextCtrl* size_x_txt = (wxTextCtrl*)event.GetEventObject();
-	auto vd = glbin_current.vol_data.lock();
-	if (size_x_txt && vd)
-	{
-		auto size = vd->GetResampledSize();
-		size.x(STOI(size_x_txt->GetValue().ToStdString()));
-		vd->SetResampledSize(size);
-	}
-}
-
-void ListPanel::OnSizeYText(wxCommandEvent& event)
-{
-	wxTextCtrl* size_y_txt = (wxTextCtrl*)event.GetEventObject();
-	auto vd = glbin_current.vol_data.lock();
-	if (size_y_txt && vd)
-	{
-		auto size = vd->GetResampledSize();
-		size.y(STOI(size_y_txt->GetValue().ToStdString()));
-		vd->SetResampledSize(size);
-	}
-}
-
-void ListPanel::OnSizeZText(wxCommandEvent& event)
-{
-	wxTextCtrl* size_z_txt = (wxTextCtrl*)event.GetEventObject();
-	auto vd = glbin_current.vol_data.lock();
-	if (size_z_txt && vd)
-	{
-		auto size = vd->GetResampledSize();
-		size.z(STOI(size_z_txt->GetValue().ToStdString()));
-		vd->SetResampledSize(size);
-	}
-}
-
-void ListPanel::OnFilterChange(wxCommandEvent& event)
-{
-	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
-	if (combo)
-		glbin_settings.m_save_filter = combo->GetSelection();
-}
-
-wxWindow* ListPanel::CreateExtraControl(wxWindow* parent)
-{
-	wxIntegerValidator<unsigned int> vald_int;
-
-	wxPanel* panel = new wxPanel(parent);
-#ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-#elifdef __linux__
-	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
-#endif
-	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
-		wxVERTICAL, panel, "Additional Options");
-
-	//compressed
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* comp_chk = new wxCheckBox(panel, ID_LZW_COMP,
-		"Lempel-Ziv-Welch Compression");
-	comp_chk->Connect(comp_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(ListPanel::OnCompCheck), NULL, panel);
-	comp_chk->SetValue(glbin_settings.m_save_compress);
-	sizer1->Add(10, 10);
-	sizer1->Add(comp_chk);
-	//crop
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* crop_chk = new wxCheckBox(panel, ID_CROP,
-		"Use Clipping Planes to Crop");
-	crop_chk->Connect(crop_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(ListPanel::OnCropCheck), NULL, panel);
-	crop_chk->SetValue(glbin_settings.m_save_crop);
-	sizer2->Add(10, 10);
-	sizer2->Add(crop_chk);
-	//resize
-	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
-	wxCheckBox* resize_chk = new wxCheckBox(panel, ID_RESIZE_CHK,
-		"Resize");
-	resize_chk->Connect(resize_chk->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(ListPanel::OnResizeCheck), NULL, panel);
-	wxTextCtrl* size_x_txt = new wxTextCtrl(panel, ID_RESIZE_X_TXT, "",
-		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	size_x_txt->Connect(size_x_txt->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(ListPanel::OnSizeXText), NULL, panel);
-	wxTextCtrl* size_y_txt = new wxTextCtrl(panel, ID_RESIZE_Y_TXT, "",
-		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	size_y_txt->Connect(size_y_txt->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(ListPanel::OnSizeYText), NULL, panel);
-	wxTextCtrl* size_z_txt = new wxTextCtrl(panel, ID_RESIZE_Z_TXT, "",
-		wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
-	size_z_txt->Connect(size_z_txt->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(ListPanel::OnSizeZText), NULL, panel);
-	wxComboBox* combo = new wxComboBox(panel, ID_FILTER,
-		"Filter", wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
-	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
-		wxCommandEventHandler(ListPanel::OnFilterChange), NULL, panel);
-	std::vector<std::string> combo_list;
-	combo_list.push_back("Nearest neighbor");
-	combo_list.push_back("Bilinear");
-	combo_list.push_back("Trilinear");
-	combo_list.push_back("Box");
-	for (size_t i = 0; i < combo_list.size(); ++i)
-		combo->Append(combo_list[i]);
-	combo->SetSelection(glbin_settings.m_save_filter);
-
-	if (auto vd = glbin_current.vol_data.lock())
-	{
-		bool resize = vd->GetResample();
-		auto size = vd->GetResampledSize();
-		resize_chk->SetValue(resize);
-		if (resize)
-		{
-			size_x_txt->ChangeValue(std::to_string(size.intx()));
-			size_y_txt->ChangeValue(std::to_string(size.inty()));
-			size_z_txt->ChangeValue(std::to_string(size.intz()));
-		}
-	}
-	sizer3->Add(10, 10);
-	sizer3->Add(resize_chk, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(size_x_txt, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(size_y_txt, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(size_z_txt, 0, wxALIGN_CENTER);
-	sizer3->Add(10, 10);
-	sizer3->Add(combo, 0, wxALIGN_CENTER);
-
-	//group
-	group1->Add(10, 10);
-	group1->Add(sizer1);
-	group1->Add(10, 10);
-	group1->Add(sizer2);
-	group1->Add(10, 10);
-	group1->Add(sizer3);
-	group1->Add(10, 20);
-
-	panel->SetSizerAndFit(group1);
-	panel->Layout();
-
-	return panel;
 }
 
