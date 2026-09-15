@@ -285,7 +285,7 @@ unsigned long long LIFReader::ReadMetadata(FILE* pfile, unsigned long long ioffs
 		return 0;
 	if (HasAttribute(root, "Version"))
 	{
-		m_version = STOUL(GetAttributeValue(root, "Version"));
+		m_version = ToULong(GetAttributeValue(root, "Version"));
 	}
 	ReadElement(root);
 
@@ -544,7 +544,7 @@ void LIFReader::ReadData(tinyxml2::XMLElement* node, std::wstring &name)
 		else if (str == "Memory")
 		{
 			str = GetAttributeValue(child, "Size");
-			sbsize = STOULL(str);
+			sbsize = ToULLong(str);
 			if (HasAttribute(child, "MemoryBlockID"))
 				sbname = s2ws(GetAttributeValue(child, "MemoryBlockID"));
 		}
@@ -607,13 +607,13 @@ void LIFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node, LIFReader::ImageInf
 			ChannelInfo cinfo;
 			cinfo.chan = static_cast<int>(imgi.channels.size());
 			str = GetAttributeValue(child, "Resolution");
-			cinfo.res = STOUL(str);
+			cinfo.res = ToULong(str);
 			str = GetAttributeValue(child, "Min");
-			cinfo.minv = STOD(str);
+			cinfo.minv = ToDouble(str);
 			str = GetAttributeValue(child, "Max");
-			cinfo.maxv = STOD(str);
+			cinfo.maxv = ToDouble(str);
 			str = GetAttributeValue(child, "BytesInc");
-			cinfo.inc = STOULL(str);
+			cinfo.inc = ToULLong(str);
 			cinfo.lut = GetAttributeValue(child, "LUTName");
 			imgi.channels.push_back(cinfo);
 			imgi.minv = std::min(imgi.minv, cinfo.minv);
@@ -642,13 +642,13 @@ void LIFReader::ReadSubBlockInfo(tinyxml2::XMLElement* node, LIFReader::ImageInf
 				else if (str == "mm")
 					sfactor = 1e3;
 				str = GetAttributeValue(child, "NumberOfElements");
-				size = STOUL(str);
+				size = ToULong(str);
 				str = GetAttributeValue(child, "Origin");
-				orig = STOD(str) * sfactor;
+				orig = ToDouble(str) * sfactor;
 				str = GetAttributeValue(child, "Length");
-				len = STOD(str) * sfactor;
+				len = ToDouble(str) * sfactor;
 				str = GetAttributeValue(child, "BytesInc");
-				inc = STOULL(str);
+				inc = ToULLong(str);
 				AddSubBlockInfo(imgi, did, size, orig, len, inc);
 			}
 		}
@@ -708,17 +708,17 @@ bool LIFReader::ReadTileScanInfo(tinyxml2::XMLElement* node, TileList& list)
 		{
 			TileScanInfo info;
 			str = GetAttributeValue(child, "FieldX");
-			info.fieldx = STOI(str);
+			info.fieldx = ToInt(str);
 			str = GetAttributeValue(child, "FieldY");
-			info.fieldy = STOI(str);
+			info.fieldy = ToInt(str);
 			str = GetAttributeValue(child, "FieldZ");
-			info.fieldz = STOI(str);
+			info.fieldz = ToInt(str);
 			str = GetAttributeValue(child, "PosX");
-			info.posx = STOD(str);
+			info.posx = ToDouble(str);
 			str = GetAttributeValue(child, "PosY");
-			info.posy = STOD(str);
+			info.posy = ToDouble(str);
 			str = GetAttributeValue(child, "PosZ");
-			info.posz = STOD(str);
+			info.posz = ToDouble(str);
 			list.push_back(info);
 		}
 		child = child->NextSiblingElement();

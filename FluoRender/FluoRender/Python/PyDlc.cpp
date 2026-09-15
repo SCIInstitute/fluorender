@@ -153,7 +153,7 @@ bool PyDlc::AddRulers(size_t toff)
 		if (entry[0] == "time_offset")
 		{
 			has_toff = true;
-			toff = STOI(entry[1]);
+			toff = ToInt(entry[1]);
 			continue;
 		}
 
@@ -169,7 +169,7 @@ bool PyDlc::AddRulers(size_t toff)
 				start = true;
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-				size_t t = STOI(entry[0]) + toff;
+				size_t t = ToInt(entry[0]) + toff;
 				size_t c = 0;
 				int rst;
 				for (auto& i : points)
@@ -207,7 +207,7 @@ bool PyDlc::AddRulers(size_t toff)
 			{
 				std::vector<fluo::Point> points;
 				getPoints(entry, props, points);
-				size_t t = STOI(entry[0]) + toff;
+				size_t t = ToInt(entry[0]) + toff;
 				size_t c = 0, ri = 0, rpi = 0;
 				std::shared_ptr<Ruler> r;
 				int rst;

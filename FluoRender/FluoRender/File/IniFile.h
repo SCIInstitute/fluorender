@@ -420,7 +420,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOL(str);
+		*value = ToLong(str);
 		return true;
 	}
 
@@ -432,7 +432,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOUL(str);
+		*value = ToULong(str);
 		return true;
 	}
 
@@ -444,7 +444,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOI(str);
+		*value = ToInt(str);
 		return true;
 	}
 
@@ -456,7 +456,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOUL(str);
+		*value = ToULong(str);
 		return true;
 	}
 
@@ -468,7 +468,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOULL(str);
+		*value = ToULLong(str);
 		return true;
 	}
 
@@ -480,7 +480,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = static_cast<short>(STOI(str));
+		*value = static_cast<short>(ToInt(str));
 		return true;
 	}
 
@@ -492,7 +492,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = static_cast<unsigned short>(STOUL(str));
+		*value = static_cast<unsigned short>(ToULong(str));
 		return true;
 	}
 
@@ -504,7 +504,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOD(str);
+		*value = ToDouble(str);
 		return true;
 	}
 
@@ -516,7 +516,7 @@ protected:
 			*value = def;
 			return false;
 		}
-		*value = STOF(str);
+		*value = ToFloat(str);
 		return true;
 	}
 

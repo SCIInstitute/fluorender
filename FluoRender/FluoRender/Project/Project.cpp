@@ -111,8 +111,8 @@ void Project::Open(const std::wstring& filename)
 	if (fconfig->Read("ver_major", &ver_major) &&
 		fconfig->Read("ver_minor", &ver_minor))
 	{
-		l_major = STOL(ver_major);
-		d_minor = STOD(ver_minor);
+		l_major = ToLong(ver_major);
+		d_minor = ToDouble(ver_minor);
 
 		if (l_major > fluo::VersionMajor)
 			SetProgress(0, "The project file is saved by a newer version of FluoRender.\n" \

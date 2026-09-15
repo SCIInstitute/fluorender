@@ -147,10 +147,10 @@ namespace flrd
 			for (size_t i = 0; i < entry.size(); ++i)
 			{
 				if (props[i] == "x")
-					p.x(STOF(entry[i]));
+					p.x(ToFloat(entry[i]));
 				if (props[i] == "y")
 				{
-					p.y(STOF(entry[i]));
+					p.y(ToFloat(entry[i]));
 					points.push_back(p);
 				}
 			}

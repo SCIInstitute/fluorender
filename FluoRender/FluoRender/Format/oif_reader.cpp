@@ -116,7 +116,7 @@ int OIFReader::Preprocess()
 				else break;
 			}
 			if (t_num.size() > 0)
-				info.filenumber = WSTOI(t_num);
+				info.filenumber = ToInt(t_num);
 			else
 				info.filenumber = 0;
 			info.filename = list.at(i);
@@ -243,7 +243,7 @@ void OIFReader::ReadTifSequence(const std::wstring& file_name, int t)
 					else
 						break;
 				}
-				num_c = WSTOI(wstr);
+				num_c = ToInt(wstr);
 				wstr.clear();
 			}
 			//read z number 'Z'
@@ -257,7 +257,7 @@ void OIFReader::ReadTifSequence(const std::wstring& file_name, int t)
 					else
 						break;
 				}
-				num_z = WSTOI(wstr);
+				num_z = ToInt(wstr);
 				wstr.clear();
 			}
 			//read time number 'T'
@@ -271,7 +271,7 @@ void OIFReader::ReadTifSequence(const std::wstring& file_name, int t)
 					else
 						break;
 				}
-				num_t = WSTOI(wstr);
+				num_t = ToInt(wstr);
 				wstr.clear();
 			}
 			//read lambda number 'L'
@@ -285,7 +285,7 @@ void OIFReader::ReadTifSequence(const std::wstring& file_name, int t)
 					else
 						break;
 				}
-				num_l = WSTOI(wstr);
+				num_l = ToInt(wstr);
 				wstr.clear();
 			}
 
@@ -499,7 +499,7 @@ void OIFReader::ReadOifLine(const std::wstring oneline)
 					cur_chan = chan_num;
 					WavelengthInfo info;
 					info.chan_num = cur_chan;
-					info.wavelength = WSTOD(str2);
+					info.wavelength = ToDouble(str2);
 					if (light_type == L"Transmitted Light")
 						info.wavelength = -1;
 					m_excitation_wavelength_list.push_back(info);
@@ -517,21 +517,21 @@ void OIFReader::ReadOifLine(const std::wstring oneline)
 	{
 		//calculate
 		double spc = 0.0;
-		double dmax = WSTOD(max_size);
+		double dmax = ToDouble(max_size);
 		if (dmax > 0.0)
-			spc = fabs((WSTOD(end_pos) -
-				WSTOD(start_pos))) /
+			spc = fabs((ToDouble(end_pos) -
+				ToDouble(start_pos))) /
 			dmax;
 		if ((int64_t)pix_unit.find(L"nm") != -1)
 			spc /= 1000.0;
 		if ((int64_t)axis_code.find(L"X") != -1)
 		{
-			m_size.x(WSTOI(max_size));
+			m_size.x(ToInt(max_size));
 			m_spacing.x(spc);
 		}
 		else if ((int64_t)axis_code.find(L"Y") != -1)
 		{
-			m_size.y(WSTOI(max_size));
+			m_size.y(ToInt(max_size));
 			m_spacing.y(spc);
 		}
 		else if ((int64_t)axis_code.find(L"Z") != -1)

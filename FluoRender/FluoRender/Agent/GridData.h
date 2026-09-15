@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Color.h>
 #include <string>
 #include <vector>
+#include <set>
 
 struct GridCellData
 {

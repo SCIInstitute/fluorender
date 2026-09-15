@@ -346,7 +346,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOL(str);
+			*value = ToLong(str);
 			return true;
 		}
 		*value = def;
@@ -358,7 +358,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOUL(str);
+			*value = ToULong(str);
 			return true;
 		}
 		*value = def;
@@ -370,7 +370,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOI(str);
+			*value = ToInt(str);
 			return true;
 		}
 		*value = def;
@@ -382,7 +382,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOUL(str);
+			*value = ToULong(str);
 			return true;
 		}
 		*value = def;
@@ -394,7 +394,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOULL(str);
+			*value = ToULLong(str);
 			return true;
 		}
 		*value = def;
@@ -406,7 +406,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = static_cast<short>(STOI(str));
+			*value = static_cast<short>(ToInt(str));
 			return true;
 		}
 		*value = def;
@@ -418,7 +418,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = static_cast<unsigned short>(STOUL(str));
+			*value = static_cast<unsigned short>(ToULong(str));
 			return true;
 		}
 		*value = def;
@@ -430,7 +430,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOD(str);
+			*value = ToDouble(str);
 			return true;
 		}
 		*value = def;
@@ -442,7 +442,7 @@ protected:
 		std::string str;
 		if (ReadString(key, &str))
 		{
-			*value = STOF(str);
+			*value = ToFloat(str);
 			return true;
 		}
 		*value = def;

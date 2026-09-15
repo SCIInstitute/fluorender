@@ -390,9 +390,9 @@ std::shared_ptr<AText> AnnotData::GetAText(const std::wstring& str) const
 	}
 	if (tab_counter == 4)
 	{
-		double x = WSTOD(sX);
-		double y = WSTOD(sY);
-		double z = WSTOD(sZ);
+		double x = ToDouble(sX);
+		double y = ToDouble(sY);
+		double z = ToDouble(sZ);
 		fluo::Vector res(1.0);
 		auto vd_ptr = m_vd.lock();
 		if (vd_ptr)

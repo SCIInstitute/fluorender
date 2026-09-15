@@ -371,7 +371,7 @@ int ScriptProc::TimeMode(std::string& str)
 		return TM_ALL_POST_REWIND;
 	if (str == "TM_ALL")
 		return TM_ALL;
-	return STOI(str);
+	return ToInt(str);
 }
 
 int ScriptProc::GetTimeNum()

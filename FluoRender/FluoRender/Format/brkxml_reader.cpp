@@ -259,18 +259,18 @@ BRKXMLReader::ImageInfo BRKXMLReader::ReadImageInfo(tinyxml2::XMLElement* infoNo
 
 	std::string strValue;
 
-	ival = STOI(infoNode->Attribute("nChannel"));
+	ival = ToInt(infoNode->Attribute("nChannel"));
 	iinfo.nChannel = ival;
 
-	ival = STOI(infoNode->Attribute("nFrame"));
+	ival = ToInt(infoNode->Attribute("nFrame"));
 	iinfo.nFrame = ival;
 
-	ival = STOI(infoNode->Attribute("nLevel"));
+	ival = ToInt(infoNode->Attribute("nLevel"));
 	iinfo.nLevel = ival;
 
 	if (HasAttribute(infoNode, "CopyableLv"))
 	{
-		ival = STOI(infoNode->Attribute("CopyableLv"));
+		ival = ToInt(infoNode->Attribute("CopyableLv"));
 		iinfo.copyableLv = ival;
 	}
 	else
@@ -290,7 +290,7 @@ void BRKXMLReader::ReadPyramid(tinyxml2::XMLElement* lvRootNode, std::vector<Lev
 		{
 			if (strcmp(child->Name(), "Level") == 0)
 			{
-				level = STOI(child->Attribute("lv"));
+				level = ToInt(child->Attribute("lv"));
 				if (level >= 0)
 				{
 					if (level + 1 > pylamid.size()) pylamid.resize(level + 1);
@@ -306,19 +306,19 @@ void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo& lvinfo)
 {
 	std::string strValue;
 
-	lvinfo.imageW = STOI(lvNode->Attribute("imageW"));
+	lvinfo.imageW = ToInt(lvNode->Attribute("imageW"));
 
-	lvinfo.imageH = STOI(lvNode->Attribute("imageH"));
+	lvinfo.imageH = ToInt(lvNode->Attribute("imageH"));
 
-	lvinfo.imageD = STOI(lvNode->Attribute("imageD"));
+	lvinfo.imageD = ToInt(lvNode->Attribute("imageD"));
 
-	lvinfo.xspc = STOD(lvNode->Attribute("xspc"));
+	lvinfo.xspc = ToDouble(lvNode->Attribute("xspc"));
 
-	lvinfo.yspc = STOD(lvNode->Attribute("yspc"));
+	lvinfo.yspc = ToDouble(lvNode->Attribute("yspc"));
 
-	lvinfo.zspc = STOD(lvNode->Attribute("zspc"));
+	lvinfo.zspc = ToDouble(lvNode->Attribute("zspc"));
 
-	lvinfo.bit_depth = STOI(lvNode->Attribute("bitDepth"));
+	lvinfo.bit_depth = ToInt(lvNode->Attribute("bitDepth"));
 
 	if (HasAttribute(lvNode, "FileType"))
 	{
@@ -335,11 +335,11 @@ void BRKXMLReader::ReadLevel(tinyxml2::XMLElement* lvNode, LevelInfo& lvinfo)
 		if (child->Name())
 		{
 			if (strcmp(child->Name(), "Bricks") == 0) {
-				lvinfo.brick_baseW = STOI(child->Attribute("brick_baseW"));
+				lvinfo.brick_baseW = ToInt(child->Attribute("brick_baseW"));
 
-				lvinfo.brick_baseH = STOI(child->Attribute("brick_baseH"));
+				lvinfo.brick_baseH = ToInt(child->Attribute("brick_baseH"));
 
-				lvinfo.brick_baseD = STOI(child->Attribute("brick_baseD"));
+				lvinfo.brick_baseD = ToInt(child->Attribute("brick_baseD"));
 
 				ReadPackedBricks(child, lvinfo.bricks);
 			}
@@ -362,7 +362,7 @@ void BRKXMLReader::ReadPackedBricks(
 		{
 			if (strcmp(child->Name(), "Brick") == 0)
 			{
-				id = STOI(child->Attribute("id"));
+				id = ToInt(child->Attribute("id"));
 
 				if (id + 1 > brks.size())
 					brks.resize(id + 1, NULL);
@@ -379,23 +379,23 @@ void BRKXMLReader::ReadBrick(
 	tinyxml2::XMLElement* brickNode,
 	std::shared_ptr<BrickInfo>& binfo)
 {
-	binfo->id = STOI(brickNode->Attribute("id"));
+	binfo->id = ToInt(brickNode->Attribute("id"));
 
-	binfo->x_size = STOI(brickNode->Attribute("width"));
+	binfo->x_size = ToInt(brickNode->Attribute("width"));
 
-	binfo->y_size = STOI(brickNode->Attribute("height"));
+	binfo->y_size = ToInt(brickNode->Attribute("height"));
 
-	binfo->z_size = STOI(brickNode->Attribute("depth"));
+	binfo->z_size = ToInt(brickNode->Attribute("depth"));
 
-	binfo->x_start = STOI(brickNode->Attribute("st_x"));
+	binfo->x_start = ToInt(brickNode->Attribute("st_x"));
 
-	binfo->y_start = STOI(brickNode->Attribute("st_y"));
+	binfo->y_start = ToInt(brickNode->Attribute("st_y"));
 
-	binfo->z_start = STOI(brickNode->Attribute("st_z"));
+	binfo->z_start = ToInt(brickNode->Attribute("st_z"));
 
-	binfo->offset = STOI(brickNode->Attribute("offset"));
+	binfo->offset = ToInt(brickNode->Attribute("offset"));
 
-	binfo->fsize = STOI(brickNode->Attribute("size"));
+	binfo->fsize = ToInt(brickNode->Attribute("size"));
 
 	tinyxml2::XMLElement* child = brickNode->FirstChildElement();
 	while (child)
@@ -417,17 +417,17 @@ void BRKXMLReader::ReadBrick(
 
 void BRKXMLReader::Readbox(tinyxml2::XMLElement* boxNode, double& x0, double& y0, double& z0, double& x1, double& y1, double& z1)
 {
-	x0 = STOD(boxNode->Attribute("x0"));
+	x0 = ToDouble(boxNode->Attribute("x0"));
 
-	y0 = STOD(boxNode->Attribute("y0"));
+	y0 = ToDouble(boxNode->Attribute("y0"));
 
-	z0 = STOD(boxNode->Attribute("z0"));
+	z0 = ToDouble(boxNode->Attribute("z0"));
 
-	x1 = STOD(boxNode->Attribute("x1"));
+	x1 = ToDouble(boxNode->Attribute("x1"));
 
-	y1 = STOD(boxNode->Attribute("y1"));
+	y1 = ToDouble(boxNode->Attribute("y1"));
 
-	z1 = STOD(boxNode->Attribute("z1"));
+	z1 = ToDouble(boxNode->Attribute("z1"));
 }
 
 void BRKXMLReader::ReadFilenames(
@@ -445,11 +445,11 @@ void BRKXMLReader::ReadFilenames(
 		{
 			if (strcmp(child->Name(), "File") == 0)
 			{
-				frame = STOI(child->Attribute("frame"));
+				frame = ToInt(child->Attribute("frame"));
 
-				channel = STOI(child->Attribute("channel"));
+				channel = ToInt(child->Attribute("channel"));
 
-				id = STOI(child->Attribute("brickID"));
+				id = ToInt(child->Attribute("brickID"));
 
 				if (frame + 1 > filename.size())
 					filename.resize(frame + 1);
@@ -502,10 +502,10 @@ void BRKXMLReader::ReadFilenames(
 
 				filename[frame][channel][id]->offset = 0;
 				if (HasAttribute(child, "offset"))
-					filename[frame][channel][id]->offset = STOI(child->Attribute("offset"));
+					filename[frame][channel][id]->offset = ToInt(child->Attribute("offset"));
 				filename[frame][channel][id]->datasize = 0;
 				if (HasAttribute(child, "datasize"))
-					filename[frame][channel][id]->datasize = STOI(child->Attribute("datasize"));
+					filename[frame][channel][id]->datasize = ToInt(child->Attribute("datasize"));
 
 				if (HasAttribute(child, "filetype"))
 				{
@@ -582,13 +582,13 @@ bool BRKXMLReader::loadMetadata(const std::wstring& file)
 				str = child->Attribute("name");
 				lm.name = s2ws(str);
 
-				lm.x = STOD(child->Attribute("x"));
-				lm.y = STOD(child->Attribute("y"));
-				lm.z = STOD(child->Attribute("z"));
+				lm.x = ToDouble(child->Attribute("x"));
+				lm.y = ToDouble(child->Attribute("y"));
+				lm.z = ToDouble(child->Attribute("z"));
 
-				lm.spcx = STOD(child->Attribute("spcx"));
-				lm.spcy = STOD(child->Attribute("spcy"));
-				lm.spcz = STOD(child->Attribute("spcz"));
+				lm.spcx = ToDouble(child->Attribute("spcx"));
+				lm.spcy = ToDouble(child->Attribute("spcy"));
+				lm.spcz = ToDouble(child->Attribute("spcz"));
 
 				m_landmarks.push_back(lm);
 			}

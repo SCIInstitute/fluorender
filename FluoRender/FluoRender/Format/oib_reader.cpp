@@ -112,7 +112,7 @@ int OIBReader::Preprocess()
 				else break;
 			}
 			if (t_num.size() > 0)
-				info.filenumber = WSTOI(t_num);
+				info.filenumber = ToInt(t_num);
 			else
 				info.filenumber = 0;
 			info.filename = list.at(i);
@@ -332,7 +332,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 								else
 									break;
 							}
-							num_c = WSTOI(wstr.c_str());
+							num_c = ToInt(wstr.c_str());
 							wstr.clear();
 						}
 						//read z number 'Z'
@@ -346,7 +346,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 								else
 									break;
 							}
-							num_z = WSTOI(wstr.c_str());
+							num_z = ToInt(wstr.c_str());
 							wstr.clear();
 						}
 						//read time number 'T'
@@ -360,7 +360,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 								else
 									break;
 							}
-							num_t = WSTOI(wstr.c_str());
+							num_t = ToInt(wstr.c_str());
 							wstr.clear();
 						}
 						//read lambda number 'L'
@@ -374,7 +374,7 @@ void OIBReader::ReadOibInfo(unsigned char* pbyData, size_t size)
 								else
 									break;
 							}
-							num_l = WSTOI(wstr.c_str());
+							num_l = ToInt(wstr.c_str());
 							wstr.clear();
 						}
 
@@ -572,7 +572,7 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 							cur_chan = chan_num;
 							WavelengthInfo info;
 							info.chan_num = cur_chan;
-							info.wavelength = WSTOD(str2.c_str());
+							info.wavelength = ToDouble(str2.c_str());
 							if (light_type == L"Transmitted Light")
 								info.wavelength = -1;
 							m_excitation_wavelength_list.push_back(info);
@@ -593,21 +593,21 @@ void OIBReader::ReadOif(unsigned char *pbyData, size_t size)
 		{
 			//calculate
 			double spc = 0.0;
-			double dmax = WSTOD(max_size.c_str());
+			double dmax = ToDouble(max_size.c_str());
 			if (dmax > 0.0)
-				spc = fabs((WSTOD(end_pos.c_str()) -
-					WSTOD(start_pos.c_str()))) /
+				spc = fabs((ToDouble(end_pos.c_str()) -
+					ToDouble(start_pos.c_str()))) /
 				dmax;
 			if ((int64_t)pix_unit.find(L"nm") != -1)
 				spc /= 1000.0;
 			if ((int64_t)axis_code.find(L"X") != -1)
 			{
-				m_size.x(WSTOI(max_size.c_str()));
+				m_size.x(ToInt(max_size.c_str()));
 				m_spacing.x(spc);
 			}
 			else if ((int64_t)axis_code.find(L"Y") != -1)
 			{
-				m_size.y(WSTOI(max_size.c_str()));
+				m_size.y(ToInt(max_size.c_str()));
 				m_spacing.y(spc);
 			}
 			else if ((int64_t)axis_code.find(L"Z") != -1)

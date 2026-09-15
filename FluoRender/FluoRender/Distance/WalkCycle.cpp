@@ -502,7 +502,7 @@ void WalkCycle::LoadCycle(const std::wstring& name)
 				if (entry[0] == "correlation")
 				{
 					//correlation
-					in_corr_ = STOD(entry[1]);
+					in_corr_ = ToDouble(entry[1]);
 				}
 			}
 			continue;

@@ -76,7 +76,7 @@ int BaseMeshReader::Preprocess()
 				else break;
 			}
 			if (t_num.size() > 0)
-				info.filenumber = WSTOI(t_num);
+				info.filenumber = ToInt(t_num);
 			else
 				info.filenumber = 0;
 			info.filename = list.at(i);

@@ -222,7 +222,7 @@ int BaseVolReader::GetPatternNumber(std::wstring &path_name, int mode, bool coun
 		else
 			break;
 	}
-	number = WSTOI(str);
+	number = ToInt(str);
 
 	if (count)
 	{
@@ -525,7 +525,7 @@ double BaseVolReader::get_double(const std::string& str, int64_t pos)
 			break;
 	}
 	if (num_str != "")
-		return STOD(num_str.c_str());
+		return ToDouble(num_str.c_str());
 	else
 		return 0;
 }
