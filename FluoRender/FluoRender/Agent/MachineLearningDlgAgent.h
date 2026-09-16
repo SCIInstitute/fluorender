@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Names.h>
+#include <GridData.h>
+#include <string>
 
 class MachineLearningDlg;
 class MachineLearningDlgAgent : public Agent
@@ -58,10 +60,6 @@ private:
 	{
 		gstCurrentSelect,
 	};
-
-	//max volume value
-	double m_max_value;
-
 };
 
 class MachineLearningPanel;
@@ -75,7 +73,23 @@ public:
 
 	MachineLearningPanel* GetPanel() const;
 
+	std::string GetTopGridName() { return m_top_grid_name; }
+	std::string GetBotGridName() { return m_bot_grid_name; }
+
+	virtual void SetTable(const std::wstring& name) = 0;
+	virtual void SetAutoStart(bool bval) = 0;
+	virtual void DeleteRecord(const GridSelection& sel) = 0;
+	virtual void UpdateCellChanged(const GridCellChanged& cell) = 0;
+	virtual void UpdateList(int index);
+
 protected:
+	bool m_record = false;//state for recording
+	std::wstring m_dir;//dir for searching tables
+	std::wstring m_ext;//file extension for tables
+	std::wstring m_exepath;//path to executable
+	std::string m_top_grid_name;
+	std::string m_bot_grid_name;
+
 	std::span < const std::string_view>
 		AcceptedValues() const override
 	{
@@ -86,27 +100,38 @@ protected:
 
 	void UpdateData(const UpdateRequest& request) override;
 
+	virtual void UpdateTopListFromFile();
+	virtual void UpdateTopListByName();
+	virtual void UpdateBotList() {};
+	virtual bool MatchTableName(std::wstring& name);
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
 		gstCurrentSelect,
 	};
 
-	//max volume value
-	double m_max_value;
-
+	virtual void DelTable() = 0;
+	virtual void DupTable() = 0;
+	virtual void StartRecording() = 0;
+	virtual void ApplyRecord() = 0;
 };
 
 class MLCompGenPanel;
-class MLCompGenPanelAgent : public Agent
+class MLCompGenPanelAgent : public MachineLearningPanelAgent
 {
 public:
 	MLCompGenPanelAgent(
 		MLCompGenPanel* panel);
 
-	virtual ~MLCompGenPanelAgent() = default;
+	virtual ~MLCompGenPanelAgent();
 
 	MLCompGenPanel* GetPanel() const;
+
+	virtual void SetTable(const std::wstring& name) override;
+	virtual void SetAutoStart(bool bval) override;
+	virtual void DeleteRecord(const GridSelection& sel) override;
+	virtual void UpdateCellChanged(const GridCellChanged& cell) override;
 
 protected:
 	std::span < const std::string_view>
@@ -119,19 +144,22 @@ protected:
 
 	void UpdateData(const UpdateRequest& request) override;
 
+	void UpdateBotList() override;
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
 		gstCurrentSelect,
 	};
 
-	//max volume value
-	double m_max_value;
-
+	virtual void DelTable() override;
+	virtual void DupTable() override;
+	virtual void StartRecording() override;
+	virtual void ApplyRecord() override;
 };
 
 class MLVolPropPanel;
-class MLVolPropPanelAgent : public Agent
+class MLVolPropPanelAgent : public MachineLearningPanelAgent
 {
 public:
 	MLVolPropPanelAgent(
@@ -157,10 +185,6 @@ private:
 	{
 		gstCurrentSelect,
 	};
-
-	//max volume value
-	double m_max_value;
-
 };
 
 #endif // MachineLearningDlgAgent_h

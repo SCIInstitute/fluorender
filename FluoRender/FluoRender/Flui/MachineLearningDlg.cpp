@@ -26,18 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MachineLearningDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <EntryHist.h>
-#include <Table.h>
-#include <TableHistParams.h>
-#include <CompGenerator.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <VolumeGroup.h>
-#include <Directory.h>
-#include <filesystem>
+#include <MachineLearningDlgAgent.h>
+#include <GridHelper.h>
 
 MachineLearningDlg::MachineLearningDlg(wxWindow* parent) :
 	TabbedPanel(parent,
@@ -82,11 +72,8 @@ MachineLearningPanel::MachineLearningPanel(wxWindow* parent) :
 	PropPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 620)),
-		0, "MachineLearningPanel"),
-	m_record(false)
+		0, "MachineLearningPanel")
 {
-	std::filesystem::path p = GetUserSettingsRoot();
-	m_exepath = p.wstring();
 }
 
 MachineLearningPanel::~MachineLearningPanel()
@@ -95,6 +82,10 @@ MachineLearningPanel::~MachineLearningPanel()
 
 void MachineLearningPanel::Create()
 {
+	auto agent = m_agent->As<MachineLearningPanelAgent>();
+	if (!agent)
+		return;
+
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -108,7 +99,7 @@ void MachineLearningPanel::Create()
 
 	m_panel_top = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerTop = new wxBoxSizer(wxVERTICAL);
-	st = new wxStaticText(m_panel_top, wxID_ANY, m_top_grid_name,
+	st = new wxStaticText(m_panel_top, wxID_ANY, agent->GetTopGridName(),
 		wxDefaultPosition, wxDefaultSize);
 	m_top_grid = new wxGrid(m_panel_top, wxID_ANY);
 	m_top_grid->CreateGrid(1, 5);
@@ -155,7 +146,7 @@ void MachineLearningPanel::Create()
 
 	m_panel_bot = new wxPanel(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER);
 	wxBoxSizer* sizerBot = new wxBoxSizer(wxVERTICAL);
-	st = new wxStaticText(m_panel_bot, wxID_ANY, m_bot_grid_name,
+	st = new wxStaticText(m_panel_bot, wxID_ANY, agent->GetBotGridName(),
 		wxDefaultPosition, wxDefaultSize);
 	m_bot_grid = new wxGrid(m_panel_bot, wxID_ANY);
 	m_bot_grid->CreateGrid(1, 2);
@@ -173,16 +164,16 @@ void MachineLearningPanel::Create()
 	m_start_rec_btn = new wxToggleButton(m_panel_bot, wxID_ANY, "Start",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_start_rec_btn->Bind(wxEVT_TOGGLEBUTTON, &MachineLearningPanel::OnStartRec, this);
-	if (m_record)
-	{
-		m_start_rec_btn->SetLabel("Started");
-		m_start_rec_btn->SetValue(true);
-	}
-	else
-	{
-		m_start_rec_btn->SetLabel("Start");
-		m_start_rec_btn->SetValue(false);
-	}
+	//if (m_record)
+	//{
+	//	m_start_rec_btn->SetLabel("Started");
+	//	m_start_rec_btn->SetValue(true);
+	//}
+	//else
+	//{
+	//	m_start_rec_btn->SetLabel("Start");
+	//	m_start_rec_btn->SetValue(false);
+	//}
 	m_del_rec_btn = new wxButton(m_panel_bot, wxID_ANY, "Delete",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 	m_del_rec_btn->Bind(wxEVT_BUTTON, &MachineLearningPanel::OnDelRec, this);
@@ -223,45 +214,16 @@ void MachineLearningPanel::Create()
 	m_panel_bot->Layout();
 }
 
-void MachineLearningPanel::PopTopList()
+void MachineLearningPanel::PopTopList(const GridData& data)
 {
 	int row = m_top_grid->GetNumberRows();
 	if (row)
 		m_top_grid->DeleteRows(0, row, true);
 
-	std::filesystem::path p(m_exepath);
-	p /= m_dir;
-	std::wstring path = p.wstring();
-	std::wstring name, ext, filename;
-	int i = 0;
-	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
-		return;
-	for (const auto& entry : std::filesystem::directory_iterator(path))
-	{
-		ext = entry.path().extension().wstring();
-		if (ext != m_ext)
-			continue;
-		filename = entry.path().wstring();
-		flrd::Table table;
-		table.open(filename, true);
-		m_top_grid->InsertRows(i);
-		name = table.getName();
-		if (name.empty()) name = entry.path().stem().wstring();
-		m_top_grid->SetCellValue(i, 0, name);
-		m_top_grid->SetCellValue(i, 1, std::to_string(table.getRecNum()));
-		m_top_grid->SetCellValue(i, 2, table.getNotes());
-		char b[32];
-		std::tm* ptm;
-		std::time_t createTime = table.getCreateTime();
-		ptm = std::localtime(&createTime);
-		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
-		m_top_grid->SetCellValue(i, 4, std::string(b));
-		std::time_t modifyTime = table.getModifyTime();
-		ptm = std::localtime(&modifyTime);
-		std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
-		m_top_grid->SetCellValue(i, 3, std::string(b));
-		i++;
-	}
+	GridHelper::Populate(
+		m_top_grid,
+		data);
+
 	m_top_grid->AutoSizeColumns();
 	m_top_grid->ClearSelection();
 	row = m_top_grid->GetNumberRows();
@@ -275,66 +237,54 @@ void MachineLearningPanel::PopTopList()
 	m_splitter->SetSashPosition(y);
 }
 
-void MachineLearningPanel::UpdateList(int index)
+void MachineLearningPanel::UpdateTopListRow(
+	const GridRowData& row_data)
 {
-	if (index & 1)
-		this->UpdateTopList();
-	if (index & 2)
-		this->UpdateBotList();
-}
+	if (row_data.cells.empty())
+		return;
 
-void MachineLearningPanel::UpdateTopList()
-{
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	std::wstring name = table.getName();
-	for (int i = 0; i < m_top_grid->GetNumberRows(); ++i)
+	wxString name(row_data.cells[0].text);
+
+	for (int row = 0; row < m_top_grid->GetNumberRows(); ++row)
 	{
-		if (m_top_grid->GetCellValue(i, 0) == wxString(name))
+		if (m_top_grid->GetCellValue(row, 0) == name)
 		{
-			m_top_grid->SetCellValue(i, 1, std::to_string(table.getRecNum()));
-			m_top_grid->SetCellValue(i, 2, table.getNotes());
-			char b[32];
-			std::tm* ptm;
-			std::time_t createTime = table.getCreateTime();
-			ptm = std::localtime(&createTime);
-			std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
-			m_top_grid->SetCellValue(i, 4, std::string(b));
-			std::time_t modifyTime = table.getModifyTime();
-			ptm = std::localtime(&modifyTime);
-			std::strftime(b, 32, "%m/%d/%Y %H:%M:%S", ptm);
-			m_top_grid->SetCellValue(i, 3, std::string(b));
-			break;
+			GridHelper::UpdateRow(
+				m_top_grid,
+				row,
+				row_data);
+			return;
 		}
 	}
 }
 
-bool MachineLearningPanel::MatchTableName(std::wstring& name)
+void MachineLearningPanel::PopBotList(const GridData& data)
 {
-	bool modified = false;
-	std::filesystem::path p(m_exepath);
-	p /= m_dir;
-	std::wstring path = p.wstring();
-	std::wstring stem, ext;
-	if (!std::filesystem::exists(p) || !std::filesystem::is_directory(p))
-		return modified;
-	while (true)
+	int row = m_bot_grid->GetNumberRows();
+	if (row)
+		m_bot_grid->DeleteRows(0, row, true);
+
+	GridHelper::Populate(
+		m_bot_grid,
+		data);
+
+	EvenSizeBotGrid();
+	m_bot_grid->ClearSelection();
+	Layout();
+}
+
+void MachineLearningPanel::UpdateStartRecording(bool bval)
+{
+	if (bval)
 	{
-		bool found_same = false;
-		for (const auto& entry : std::filesystem::directory_iterator(path))
-		{
-			stem = entry.path().stem().wstring();
-			ext = entry.path().extension().wstring();
-			if (ext == m_ext && stem == name)
-			{
-				found_same = true;
-				INC_NUMBER(name);
-				modified = true;
-			}
-		}
-		if (!found_same)
-			break;
+		m_start_rec_btn->SetLabel("Started");
+		m_start_rec_btn->SetValue(true);
 	}
-	return modified;
+	else
+	{
+		m_start_rec_btn->SetLabel("Start");
+		m_start_rec_btn->SetValue(false);
+	}
 }
 
 void MachineLearningPanel::EvenSizeBotGrid()
@@ -376,30 +326,11 @@ void MachineLearningPanel::OnBotGridCellChanged(wxGridEvent& event)
 MLCompGenPanel::MLCompGenPanel(wxWindow* parent) :
 	MachineLearningPanel(parent)
 {
-	m_dir = L"Database";
-	m_ext = L".cgtbl";
-	m_top_grid_name = "Data Sets";
-	m_bot_grid_name = "Machine Learning Records";
 	Create();
-
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	table.setUpdateFunc(std::bind(
-		&MLCompGenPanel::UpdateList, this, std::placeholders::_1));
 }
 
 MLCompGenPanel::~MLCompGenPanel()
 {
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	//save existing table if modified
-	if (table.getModified())
-	{
-		std::wstring name = table.getName();
-		std::filesystem::path p(m_exepath);
-		p /= m_dir;
-		p /= name + m_ext;
-		std::wstring filename = p.wstring();
-		table.save(filename);
-	}
 }
 
 void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
@@ -414,113 +345,67 @@ void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 	{
 		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
 		LoadTable(name);
-		UpdateBotList();
+		auto agent = m_agent->As<MLCompGenPanelAgent>();
+		if (agent)
+			agent->UpdateDataToUI({ gstMlBotList });
 	}
 }
 
 void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
 {
-	wxArrayInt seli = m_top_grid->GetSelectedRows();
-	size_t count = seli.GetCount();
-	if (!count)
-		return;
-
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	std::wstring name;
-	std::filesystem::path p(m_exepath);
-	p /= m_dir;
-	p /= "";
-	std::wstring filename = p.wstring();
-	for (size_t i = 0; i < count; ++i)
-	{
-		name = m_top_grid->GetCellValue(seli[i], 0).ToStdWstring();
-		if (name == table.getName())
-		{
-			table.clear();
-			UpdateBotList();
-		}
-		name = filename + name + m_ext;
-		std::remove(ws2s(name).c_str());
-	}
-	PopTopList();
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompGenDelTable });
 }
 
 void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
 {
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	if (table.getRecSize() == 0)
-	{
-		OnNewTable(event);
-		return;
-	}
-
-	flrd::TableHistParams new_table(table);
-	std::wstring name = new_table.getName();
-	if (MatchTableName(name))
-		new_table.setName(name);
-	//save it
-	std::filesystem::path p(m_exepath);
-	p /= m_dir;
-	p /= name + m_ext;
-	std::wstring str = p.wstring();
-	new_table.save(str);
-	PopTopList();
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompGenDupTable });
 }
 
 void MLCompGenPanel::OnAutoLoad(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (!agent)
+		return;
 	wxArrayInt seli = m_top_grid->GetSelectedRows();
 	if (seli.GetCount() > 0)
 	{
 		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
-		glbin_settings.m_cg_table = name;
+		agent->SetTable(name);
 	}
 }
 
 void MLCompGenPanel::OnAutoStartRec(wxCommandEvent& event)
 {
-	glbin_settings.m_cg_auto_start = m_auto_start_check->GetValue();
+	bool bval = m_auto_start_check->GetValue();
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->SetAutoStart(bval);
 }
 
 void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
 {
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	if (table.getName().empty())
-	{
-		m_record = false;
-		m_start_rec_btn->SetValue(false);
-		return;
-	}
-
-	m_record = !m_record;
-	if (m_record)
-	{
-		m_start_rec_btn->SetLabel("Started");
-		m_start_rec_btn->SetValue(true);
-		glbin.set_cg_table_enable(true);
-	}
-	else
-	{
-		m_start_rec_btn->SetLabel("Start");
-		m_start_rec_btn->SetValue(false);
-		glbin.set_cg_table_enable(false);
-	}
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompGenStartRec });
 }
 
 void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 {
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	wxArrayInt seli = m_bot_grid->GetSelectedRows();
-	std::vector<size_t> vi;
-	size_t count = table.getRecSize();
-	for (size_t i = 0; i < seli.GetCount(); ++i)
-		vi.push_back(count - 1 - seli[i]);
-	table.delRecords(vi);
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->DeleteRecord(
+			GridHelper::GetSelection(m_bot_grid));
 }
 
 void MLCompGenPanel::OnApplyRec(wxCommandEvent& event)
 {
-	glbin_comp_generator.ApplyRecord();
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompGenApplyRecord });
 }
 
 void MLCompGenPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
@@ -530,105 +415,21 @@ void MLCompGenPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
 
 void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 {
-	int c = event.GetCol();
-	int r = event.GetRow();
-	std::wstring str0, str1;
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	if (c == 0)
-	{
-		//name
-		str0 = event.GetString();
-		str1 = m_top_grid->GetCellValue(r, c).ToStdWstring();
-		if (str0 == table.getName())
-			table.setName(str1);
-		flrd::TableHistParams temptbl;
-		std::filesystem::path p(m_exepath);
-		p /= m_dir;
-		p /= "";
-		std::wstring filename = p.wstring();
-		temptbl.open(filename + str0 + m_ext);
-		temptbl.setName(str1);
-		temptbl.save(filename + str1 + m_ext);
-		PopTopList();
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (!agent)
+		return;
+
+	GridCellChanged info;
+	info.col = event.GetCol();
+	info.row = event.GetRow();
+	info.old_value = event.GetString();
+	info.new_value = m_top_grid->GetCellValue(info.row, info.col).ToStdWstring();
+	info.index_value = m_top_grid->GetCellValue(info.row, 0).ToStdWstring();
+	agent->UpdateCellChanged(info);
+	if (info.col == 0)
 		m_top_grid->ClearSelection();
-	}
-	else if (c == 2)
-	{
-		//notes
-		str0 = m_top_grid->GetCellValue(r, 0).ToStdWstring();
-		str1 = m_top_grid->GetCellValue(r, c).ToStdWstring();
-		if (str0 == table.getName())
-		{
-			table.setNotes(str1);
-		}
-		else
-		{
-			flrd::TableHistParams temptbl;
-			std::filesystem::path p(m_exepath);
-			p /= m_dir;
-			p /= str0 + m_ext;
-			std::wstring filename = p.wstring();
-			temptbl.open(filename);
-			temptbl.setNotes(str1);
-			temptbl.save(filename);
-		}
-	}
+
 	event.Skip();
-}
-
-void MLCompGenPanel::UpdateBotList()
-{
-	int row = m_bot_grid->GetNumberRows();
-	if (row > 0)
-		m_bot_grid->DeleteRows(0, row, true);
-
-	flrd::TableHistParams& table = glbin.get_cg_table();
-	std::wstring name = table.getName();
-	if (name.empty())
-	{
-		m_bot_table_name->SetLabelText("No table loaded");
-		m_start_prompt_text->Hide();
-		m_record = false;
-		m_start_rec_btn->SetValue(false);
-		m_start_rec_btn->SetLabel("Start");
-		glbin.set_cg_table_enable(false);
-	}
-	else
-	{
-		m_bot_table_name->SetLabelText(L"Table loaded:" + name);
-		m_start_prompt_text->Show();
-	}
-	std::string str_in, str_out;
-	std::vector<float> data_in, data_out;
-	for (int i = 0; i < table.getRecSize(); ++i)
-	{
-		m_bot_grid->InsertRows(0);
-
-		str_in.clear();
-		data_in = table.getOneInput(i);
-		size_t len = data_in.size();
-		if (len)
-		{
-			for (size_t j = 0; j < data_in.size() - 1; ++j)
-				str_in += wxString::Format("%.2f", data_in[j]).ToStdString() + ", ";
-			str_in += wxString::Format("%.2f", data_in[len - 1]).ToStdString();
-		}
-		m_bot_grid->SetCellValue(0, 0, str_in);
-
-		str_out.clear();
-		data_out = table.getOneOutput(i);
-		len = data_out.size();
-		if (len)
-		{
-			for (size_t j = 0; j < data_out.size() - 1; ++j)
-				str_out += wxString::Format("%.2f", data_out[j]).ToStdString() + ", ";
-			str_out += wxString::Format("%.2f", data_out[len - 1]).ToStdString();
-		}
-		m_bot_grid->SetCellValue(0, 1, str_out);
-	}
-	EvenSizeBotGrid();
-	m_bot_grid->ClearSelection();
-	Layout();
 }
 
 void MLCompGenPanel::AutoLoadTable()

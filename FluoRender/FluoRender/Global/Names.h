@@ -777,6 +777,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMlAutoStart "ml auto start"
 #define gstMlAutoLoadTable "ml auto load table"
 #define gstMlTopList "ml top list"
+#define gstMlBotList "ml bot list"
 #define gstMlCgAutoStart "ml cg auto start"
 #define gstMlVpAutoStart "ml vp auto start"
 #define gstMlVpAutoApply "ml vp auto apply"
@@ -1146,5 +1147,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstListSaveSelMask "list save sel mask"
 #define gstListDeleteSelection "list delete selection"
 #define gstListDeleteAll "list delete all"
+
+//machine learning agents
+#define gstCompGenDelTable "comp gen del table"
+#define gstCompGenDupTable "comp gen dup table"
+#define gstCompGenStartRec "comp gen start rec"
+#define gstCompGenApplyRecord "comp gen apply record"
 
 #endif//NAMES_HPP

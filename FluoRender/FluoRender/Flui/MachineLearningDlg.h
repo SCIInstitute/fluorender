@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _MACHINELEARNINGDLG_H_
 
 #include <PropPanel.h>
+#include <GridData.h>
 #include <wx/grid.h>
 #include <wx/splitter.h>
 #include <wx/tglbtn.h>
@@ -54,11 +55,11 @@ public:
 	MachineLearningPanel(wxWindow* parent);
 	~MachineLearningPanel();
 
-	void Create();
-	virtual void PopTopList();
-	virtual void UpdateList(int index);
-	virtual void UpdateTopList();
-	virtual void UpdateBotList() {};
+	virtual void PopTopList(const GridData& data);
+	virtual void UpdateTopListRow(const GridRowData& data);
+	virtual void PopBotList(const GridData& data);
+	virtual void UpdateStartRecording(bool bval);
+
 	virtual void AutoLoadTable() = 0;
 	virtual void LoadTable(const std::wstring& filename) = 0;
 	virtual void SaveTable(const std::wstring& filename) = 0;
@@ -69,7 +70,6 @@ protected:
 	//
 	wxPanel* m_panel_top;
 	wxGrid *m_top_grid;
-	wxString m_top_grid_name;
 	wxButton* m_new_table_btn;
 	wxButton* m_load_table_btn;
 	wxButton* m_del_table_btn;
@@ -78,7 +78,6 @@ protected:
 	//
 	wxPanel* m_panel_bot;
 	wxGrid *m_bot_grid;
-	wxString m_bot_grid_name;
 	wxBoxSizer* m_sizer2;
 	wxStaticText* m_bot_table_name;
 	wxStaticText* m_start_prompt_text;
@@ -87,13 +86,9 @@ protected:
 	wxButton* m_del_rec_btn;
 	wxButton* m_apply_rec_btn;
 
-	bool m_record;//state for recording
-	std::wstring m_dir;//dir for searching tables
-	std::wstring m_ext;//file extension for tables
-	std::wstring m_exepath;//path to executable
-
 protected:
-	virtual bool MatchTableName(std::wstring& name);
+	virtual void Create();
+
 	virtual void EvenSizeBotGrid();
 	//
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
@@ -122,7 +117,6 @@ public:
 	MLCompGenPanel(wxWindow* parent);
 	~MLCompGenPanel();
 
-	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::wstring& filename);
 	virtual void SaveTable(const std::wstring& filename);
@@ -156,7 +150,6 @@ public:
 	MLVolPropPanel(wxWindow* parent);
 	~MLVolPropPanel();
 
-	virtual void UpdateBotList();
 	virtual void AutoLoadTable();
 	virtual void LoadTable(const std::wstring& filename);
 	virtual void SaveTable(const std::wstring& filename);

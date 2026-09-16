@@ -64,6 +64,15 @@ struct GridSelection
 	std::vector<GridCellCoord> cells;
 };
 
+struct GridCellChanged
+{
+	int row;
+	int col;
+	std::wstring old_value;
+	std::wstring new_value;
+	std::wstring index_value;
+};
+
 struct GridPopulateOptions
 {
 	bool append_rows = false;

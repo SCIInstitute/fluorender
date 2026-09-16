@@ -40,6 +40,11 @@ public:
 		const GridData& data,
 		const GridPopulateOptions& options = {});
 
+	static bool UpdateRow(
+		wxGrid* grid,
+		int row,
+		const GridRowData& data);
+
 	static void Clear(
 		wxGrid* grid);
 

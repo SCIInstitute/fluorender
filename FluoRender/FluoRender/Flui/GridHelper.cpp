@@ -136,6 +136,54 @@ void GridHelper::Populate(
 	grid->EndBatch();
 }
 
+bool GridHelper::UpdateRow(
+	wxGrid* grid,
+	int row,
+	const GridRowData& data)
+{
+	if (!grid)
+		return false;
+
+	if (row < 0 || row >= grid->GetNumberRows())
+		return false;
+
+	grid->BeginBatch();
+
+	for (size_t col = 0; col < data.cells.size(); ++col)
+	{
+		const auto& cell = data.cells[col];
+
+		grid->SetCellValue(
+			row,
+			static_cast<int>(col),
+			wxString(cell.text));
+
+		if (cell.has_bg_color)
+		{
+			wxColor color(
+				cell.bg_color.r() * 255,
+				cell.bg_color.g() * 255,
+				cell.bg_color.b() * 255);
+
+			grid->SetCellBackgroundColour(
+				row,
+				static_cast<int>(col),
+				color);
+		}
+		else
+		{
+			grid->SetCellBackgroundColour(
+				row,
+				static_cast<int>(col),
+				*wxWHITE);
+		}
+	}
+
+	grid->EndBatch();
+
+	return true;
+}
+
 void GridHelper::Clear(wxGrid* grid)
 {
 	if (!grid)
