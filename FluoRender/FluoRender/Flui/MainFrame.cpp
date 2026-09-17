@@ -63,7 +63,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MachineLearningDlg.h>
 #include <ScriptBreakDlg.h>
 #include <FpRangeDlg.h>
-#include <AsyncTimerFactory.hpp>
 #include <Tester.h>
 #include <TextureRenderer.h>
 #include <msk_writer.h>

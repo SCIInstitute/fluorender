@@ -30,31 +30,18 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrame.h>
 #include <Global.h>
 #include <Names.h>
+#include <Root.h>
+#include <DataManager.h>
+#include <RenderView.h>
+#include <Coordinator.h>
+#include <RenderCanvas.h>
+#include <RenderCanvasAgent.h>
 
 MainFrameAgent::MainFrameAgent(
 	MainFrame* frame) :
 	Agent(frame)
 {
 
-}
-
-bool MainFrameAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return true;
-}
-
-void MainFrameAgent::Update(
-	const UpdateRequest& request)
-{
-	if (request.dir == UpdateDir::DataToUI)
-	{
-		UpdateUI(request);
-	}
-	else if (request.dir == UpdateDir::UItoData)
-	{
-		UpdateData(request);
-	}
 }
 
 void MainFrameAgent::UpdateUI(const UpdateRequest& request)
@@ -73,13 +60,25 @@ MainFrame* MainFrameAgent::GetMainFrame() const
 
 void MainFrameAgent::SetFocusVRenderViews(wxBasisSlider* slider)
 {
-	for (auto& it : m_renderview_panels)
+	auto root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
+
+	for (int i = 0; i < root->GetViewNum(); ++i)
 	{
-		if (!it)
+		auto view = root->GetView(i);
+		if (!view)
 			continue;
-		RenderCanvas* canvas = it->GetRenderCanvas();
-		if (canvas)
-			canvas->SetFocusedSlider(slider);
+		auto agent = glbin_coordinator.FindRenderCanvasAgent(view);
+		if (agent)
+		{
+			if (auto canvas_agent = agent->As<RenderCanvasAgent>())
+			{
+				RenderCanvas* canvas = canvas_agent->GetCanvas();
+				if (canvas)
+					canvas->SetFocusedSlider(slider);
+			}
+		}
 	}
 }
 
