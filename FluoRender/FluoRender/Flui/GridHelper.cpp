@@ -246,6 +246,25 @@ void GridHelper::SelectRows(
 		grid->GoToCell(last_row, 0);
 }
 
+int GridHelper::FindRow(
+	wxGrid* grid,
+	int col,
+	const std::wstring& text)
+{
+	if (!grid)
+		return -1;
+
+	int rows = grid->GetNumberRows();
+
+	for (int row = 0; row < rows; ++row)
+	{
+		if (grid->GetCellValue(row, col).ToStdWstring() == text)
+			return row;
+	}
+
+	return -1;
+}
+
 std::set<int> GridHelper::GetSelectedRows(wxGrid* grid)
 {
 	std::set<int> result;

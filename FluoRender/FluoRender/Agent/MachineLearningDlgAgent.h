@@ -76,6 +76,8 @@ public:
 	std::string GetTopGridName() { return m_top_grid_name; }
 	std::string GetBotGridName() { return m_bot_grid_name; }
 
+	virtual void LoadTable(const std::wstring& filename) = 0;
+	virtual void SaveTable(const std::wstring& filename) = 0;
 	virtual void SetTable(const std::wstring& name) = 0;
 	virtual void SetAutoStart(bool bval) = 0;
 	virtual void DeleteRecord(const GridSelection& sel) = 0;
@@ -111,10 +113,12 @@ private:
 		gstCurrentSelect,
 	};
 
+	virtual void UpdateAutoStart() = 0;
 	virtual void DelTable() = 0;
 	virtual void DupTable() = 0;
 	virtual void StartRecording() = 0;
 	virtual void ApplyRecord() = 0;
+	virtual void AutoLoadTable() = 0;
 };
 
 class MLCompGenPanel;
@@ -128,6 +132,8 @@ public:
 
 	MLCompGenPanel* GetPanel() const;
 
+	virtual void LoadTable(const std::wstring& filename) override;
+	virtual void SaveTable(const std::wstring& filename) override;
 	virtual void SetTable(const std::wstring& name) override;
 	virtual void SetAutoStart(bool bval) override;
 	virtual void DeleteRecord(const GridSelection& sel) override;
@@ -152,10 +158,12 @@ private:
 		gstCurrentSelect,
 	};
 
+	virtual void UpdateAutoStart() override;
 	virtual void DelTable() override;
 	virtual void DupTable() override;
 	virtual void StartRecording() override;
 	virtual void ApplyRecord() override;
+	virtual void AutoLoadTable() override;
 };
 
 class MLVolPropPanel;
@@ -165,9 +173,18 @@ public:
 	MLVolPropPanelAgent(
 		MLVolPropPanel* panel);
 
-	virtual ~MLVolPropPanelAgent() = default;
+	virtual ~MLVolPropPanelAgent();
 
 	MLVolPropPanel* GetPanel() const;
+
+	virtual void LoadTable(const std::wstring& filename) override;
+	virtual void SaveTable(const std::wstring& filename) override;
+	virtual void SetTable(const std::wstring& name) override;
+	virtual void SetAutoStart(bool bval) override;
+	virtual void DeleteRecord(const GridSelection& sel) override;
+	virtual void UpdateCellChanged(const GridCellChanged& cell) override;
+
+	void SetAutoApply(bool bval);
 
 protected:
 	std::span < const std::string_view>
@@ -180,11 +197,21 @@ protected:
 
 	void UpdateData(const UpdateRequest& request) override;
 
+	void UpdateBotList() override;
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
 		gstCurrentSelect,
 	};
+
+	virtual void UpdateAutoStart() override;
+	virtual void DelTable() override;
+	virtual void DupTable() override;
+	virtual void StartRecording() override;
+	virtual void ApplyRecord() override;
+	virtual void AutoLoadTable() override;
+	void UpdateAutoApply();
 };
 
 #endif // MachineLearningDlgAgent_h

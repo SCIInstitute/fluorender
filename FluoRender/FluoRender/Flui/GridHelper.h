@@ -55,6 +55,11 @@ public:
 		wxGrid* grid,
 		const std::set<int>& rows);
 
+	static int FindRow(
+		wxGrid* grid,
+		int col,
+		const std::wstring& text);
+
 	static std::string CopySelection(
 		wxGrid* grid);
 

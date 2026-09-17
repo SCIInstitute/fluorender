@@ -60,10 +60,7 @@ public:
 	virtual void PopBotList(const GridData& data);
 	virtual void UpdateStartRecording(bool bval);
 
-	virtual void AutoLoadTable() = 0;
-	virtual void LoadTable(const std::wstring& filename) = 0;
-	virtual void SaveTable(const std::wstring& filename) = 0;
-	virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
+	//virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
 
 protected:
 	wxSplitterWindow* m_splitter;
@@ -117,11 +114,6 @@ public:
 	MLCompGenPanel(wxWindow* parent);
 	~MLCompGenPanel();
 
-	virtual void AutoLoadTable();
-	virtual void LoadTable(const std::wstring& filename);
-	virtual void SaveTable(const std::wstring& filename);
-	virtual void SetAutoStart(bool bval);
-
 	void UpdateAutoStart(bool bval);
 
 protected:
@@ -149,11 +141,6 @@ class MLVolPropPanel : public MachineLearningPanel
 public:
 	MLVolPropPanel(wxWindow* parent);
 	~MLVolPropPanel();
-
-	virtual void AutoLoadTable();
-	virtual void LoadTable(const std::wstring& filename);
-	virtual void SaveTable(const std::wstring& filename);
-	virtual void SetAutoStart(bool bval);
 
 	void UpdateAutoStart(bool bval);
 	void UpdateAutoApply(bool bval);

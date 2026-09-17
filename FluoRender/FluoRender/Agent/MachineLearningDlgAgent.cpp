@@ -35,6 +35,9 @@ DEALINGS IN THE SOFTWARE.
 #include <TableHistParams.h>
 #include <GridBuilder.h>
 #include <CompGenerator.h>
+#include <CurrentObjects.h>
+#include <VolumeData.h>
+#include <VolumeGroup.h>
 #include <Directory.h>
 #include <filesystem>
 
@@ -64,12 +67,26 @@ MachineLearningDlg* MachineLearningDlgAgent::GetDialog() const
 	return static_cast<MachineLearningDlg*>(GetWindow());
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanelAgent::MachineLearningPanelAgent(
 	MachineLearningPanel* panel) :
 	Agent(panel)
 {
 	std::filesystem::path p = GetUserSettingsRoot();
 	m_exepath = p.wstring();
+}
+
+MachineLearningPanel* MachineLearningPanelAgent::GetPanel() const
+{
+	return static_cast<MachineLearningPanel*>(GetWindow());
+}
+
+void MachineLearningPanelAgent::UpdateList(int index)
+{
+	if (index & 1)
+		this->UpdateTopListByName();
+	if (index & 2)
+		this->UpdateBotList();
 }
 
 void MachineLearningPanelAgent::UpdateUI(const UpdateRequest& request)
@@ -89,11 +106,6 @@ void MachineLearningPanelAgent::UpdateUI(const UpdateRequest& request)
 void MachineLearningPanelAgent::UpdateData(const UpdateRequest& request)
 {
 
-}
-
-MachineLearningPanel* MachineLearningPanelAgent::GetPanel() const
-{
-	return static_cast<MachineLearningPanel*>(GetWindow());
 }
 
 void MachineLearningPanelAgent::UpdateTopListFromFile()
@@ -155,14 +167,6 @@ void MachineLearningPanelAgent::UpdateTopListFromFile()
 	panel->PopTopList(griddata);
 }
 
-void MachineLearningPanelAgent::UpdateList(int index)
-{
-	if (index & 1)
-		this->UpdateTopListByName();
-	if (index & 2)
-		this->UpdateBotList();
-}
-
 void MachineLearningPanelAgent::UpdateTopListByName()
 {
 	auto panel = GetPanel();
@@ -218,6 +222,7 @@ bool MachineLearningPanelAgent::MatchTableName(std::wstring& name)
 	return modified;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLCompGenPanelAgent::MLCompGenPanelAgent(
 	MLCompGenPanel* panel) :
 	MachineLearningPanelAgent(panel)
@@ -247,43 +252,36 @@ MLCompGenPanelAgent::~MLCompGenPanelAgent()
 	}
 }
 
-void MLCompGenPanelAgent::UpdateUI(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-
-	bool update_all = request.values.empty();
-
-	bool bval;
-
-	if (update_all ||
-		request.HasValue(gstMlAutoStart) ||
-		request.HasValue(gstMlCgAutoStart))
-	{
-		bval = glbin_settings.m_cg_auto_start;
-		panel->SetAutoStart(bval);
-	}
-
-	if (update_all || request.HasValue(gstMlAutoLoadTable))
-		panel->AutoLoadTable();
-}
-
-void MLCompGenPanelAgent::UpdateData(const UpdateRequest& request)
-{
-	if (request.HasValue(gstCompGenDelTable))
-		DelTable();
-	if (request.HasValue(gstCompGenDupTable))
-		DupTable();
-	if (request.HasValue(gstCompGenStartRec))
-		StartRecording();
-	if (request.HasValue(gstCompGenApplyRecord))
-		ApplyRecord();
-}
-
 MLCompGenPanel* MLCompGenPanelAgent::GetPanel() const
 {
 	return static_cast<MLCompGenPanel*>(GetWindow());
+}
+
+void MLCompGenPanelAgent::LoadTable(const std::wstring& filename)
+{
+	std::filesystem::path p(m_exepath);
+	p /= m_dir;
+	p /= "";
+	std::wstring str = p.wstring();
+	flrd::TableHistParams& table = glbin.get_cg_table();
+	//save existing table if modified
+	if (table.getModified())
+	{
+		std::wstring name = table.getName();
+		str += name + m_ext;
+		table.save(str);
+	}
+	str += filename + m_ext;
+	table.open(str);
+}
+
+void MLCompGenPanelAgent::SaveTable(const std::wstring& filename)
+{
+	std::filesystem::path p(m_exepath);
+	p /= m_dir;
+	p /= filename + m_ext;
+	std::wstring str = p.wstring();
+	glbin.get_cg_table().save(str);
 }
 
 void MLCompGenPanelAgent::SetTable(const std::wstring& name)
@@ -352,6 +350,37 @@ void MLCompGenPanelAgent::UpdateCellChanged(const GridCellChanged& cell)
 	}
 }
 
+void MLCompGenPanelAgent::UpdateUI(const UpdateRequest& request)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	bool update_all = request.values.empty();
+
+	if (update_all ||
+		request.HasValue(gstMlAutoStart) ||
+		request.HasValue(gstMlCgAutoStart))
+	{
+		UpdateAutoStart();
+	}
+
+	if (update_all || request.HasValue(gstMlAutoLoadTable))
+		AutoLoadTable();
+}
+
+void MLCompGenPanelAgent::UpdateData(const UpdateRequest& request)
+{
+	if (request.HasValue(gstCompGenDelTable))
+		DelTable();
+	if (request.HasValue(gstCompGenDupTable))
+		DupTable();
+	if (request.HasValue(gstCompGenStartRec))
+		StartRecording();
+	if (request.HasValue(gstCompGenApplyRecord))
+		ApplyRecord();
+}
+
 void MLCompGenPanelAgent::UpdateBotList()
 {
 	auto panel = GetPanel();
@@ -401,6 +430,14 @@ void MLCompGenPanelAgent::UpdateBotList()
 	}
 
 	panel->PopBotList(data);
+}
+
+void MLCompGenPanelAgent::UpdateAutoStart()
+{
+	bool bval = glbin_settings.m_cg_auto_start;
+	auto panel = GetPanel();
+	if (panel)
+		panel->UpdateAutoStart(bval);
 }
 
 void MLCompGenPanelAgent::DelTable()
@@ -455,11 +492,145 @@ void MLCompGenPanelAgent::ApplyRecord()
 	glbin_comp_generator.ApplyRecord();
 }
 
+void MLCompGenPanelAgent::AutoLoadTable()
+{
+	std::wstring name = glbin_settings.m_cg_table;
+	LoadTable(name);
+	UpdateBotList();
+
+	if (glbin_settings.m_cg_auto_start)
+	{
+		StartRecording();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MLVolPropPanelAgent::MLVolPropPanelAgent(
 	MLVolPropPanel* panel) :
 	MachineLearningPanelAgent(panel)
 {
+	m_dir = L"Database";
+	m_ext = L".vptbl";
+	m_top_grid_name = "Data Sets";
+	m_bot_grid_name = "Machine Learning Records";
 
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	table.setUpdateFunc(std::bind(
+		&MLVolPropPanelAgent::UpdateList, this, std::placeholders::_1));
+}
+
+MLVolPropPanelAgent::~MLVolPropPanelAgent()
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	//save existing table if modified
+	if (table.getModified())
+	{
+		std::wstring name = table.getName();
+		std::filesystem::path p(m_exepath);
+		p /= m_dir;
+		p /= name + m_ext;
+		std::wstring filename = p.wstring();
+		table.save(filename);
+	}
+}
+
+MLVolPropPanel* MLVolPropPanelAgent::GetPanel() const
+{
+	return static_cast<MLVolPropPanel*>(GetWindow());
+}
+
+void MLVolPropPanelAgent::LoadTable(const std::wstring& filename)
+{
+	std::filesystem::path p(m_exepath);
+	p /= m_dir;
+	p /= "";
+	std::wstring str = p.wstring();
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	std::wstring str2;
+	//save existing table if modified
+	if (table.getModified())
+	{
+		std::wstring name = table.getName();
+		str2 = str + name + m_ext;
+		table.save(str2);
+	}
+	str2 = str + filename + m_ext;
+	table.open(str2);
+}
+
+void MLVolPropPanelAgent::SaveTable(const std::wstring& filename)
+{
+	std::filesystem::path p(m_exepath);
+	p /= m_dir;
+	p /= filename + m_ext;
+	std::wstring str = p.wstring();
+	glbin.get_vp_table().save(str);
+}
+
+void MLVolPropPanelAgent::SetTable(const std::wstring& name)
+{
+	glbin_settings.m_vp_table = name;
+}
+
+void MLVolPropPanelAgent::SetAutoStart(bool bval)
+{
+	glbin_settings.m_vp_auto_start = bval;
+}
+
+void MLVolPropPanelAgent::DeleteRecord(const GridSelection& sel)
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	std::vector<size_t> vi;
+	size_t count = table.getRecSize();
+	for (auto i : sel.rows)
+		vi.push_back(count - 1 - i);
+	table.delRecords(vi);
+}
+
+void MLVolPropPanelAgent::UpdateCellChanged(const GridCellChanged& cell)
+{
+	int c = cell.col;
+	int r = cell.row;
+	std::wstring str0, str1;
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	if (c == 0)
+	{
+		//name
+		str0 = cell.old_value;
+		str1 = cell.new_value;
+		if (str0 == table.getName())
+			table.setName(str1);
+		flrd::TableHistParams temptbl;
+		std::filesystem::path p(m_exepath);
+		p /= m_dir;
+		p /= "";
+		std::wstring filename = p.wstring();
+		temptbl.open(filename + str0 + m_ext);
+		temptbl.setName(str1);
+		temptbl.save(filename + str1 + m_ext);
+		UpdateTopListFromFile();
+	}
+	else if (c == 2)
+	{
+		//notes
+		str0 = cell.index_value;
+		str1 = cell.new_value;
+		if (str0 == table.getName())
+		{
+			table.setNotes(str1);
+		}
+		else
+		{
+			flrd::TableHistParams temptbl;
+			std::filesystem::path p(m_exepath);
+			p /= m_dir;
+			p /= str0 + m_ext;
+			std::wstring filename = p.wstring();
+			temptbl.open(filename);
+			temptbl.setNotes(str1);
+			temptbl.save(filename);
+		}
+	}
 }
 
 void MLVolPropPanelAgent::UpdateUI(const UpdateRequest& request)
@@ -476,26 +647,168 @@ void MLVolPropPanelAgent::UpdateUI(const UpdateRequest& request)
 		request.HasValue(gstMlAutoStart) ||
 		request.HasValue(gstMlVpAutoStart))
 	{
-		bval = glbin_settings.m_vp_auto_start;
-		panel->UpdateAutoStart(bval);
+		UpdateAutoStart();
 	}
 
 	if (update_all || request.HasValue(gstMlVpAutoApply))
 	{
-		bval = glbin_settings.m_vp_auto_apply;
-		panel->UpdateAutoApply(bval);
+		UpdateAutoApply();
 	}
 
 	if (update_all || request.HasValue(gstMlAutoLoadTable))
-		panel->AutoLoadTable();
+		AutoLoadTable();
 }
 
 void MLVolPropPanelAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstVolPropDelTable))
+		DelTable();
+	if (request.HasValue(gstVolPropDupTable))
+		DupTable();
+	if (request.HasValue(gstVolPropStartRec))
+		StartRecording();
+	if (request.HasValue(gstVolPropApplyRecord))
+		ApplyRecord();
 }
 
-MLVolPropPanel* MLVolPropPanelAgent::GetPanel() const
+void MLVolPropPanelAgent::UpdateBotList()
 {
-	return static_cast<MLVolPropPanel*>(GetWindow());
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	GridData data;
+	flrd::TableHistParams& table = glbin.get_vp_table();
+
+	for (int i = 0; i < table.getRecSize(); ++i)
+	{
+		GridRowData row;
+
+		// input column
+		{
+			std::string str;
+			auto values = table.getOneInput(i);
+
+			for (size_t j = 0; j < values.size(); ++j)
+			{
+				if (j > 0)
+					str += ", ";
+
+				str += wxString::Format("%.2f", values[j]).ToStdString();
+			}
+
+			row.cells.push_back({ str });
+		}
+
+		// output column
+		{
+			std::string str;
+			auto values = table.getOneOutput(i);
+
+			for (size_t j = 0; j < values.size(); ++j)
+			{
+				if (j > 0)
+					str += ", ";
+
+				str += wxString::Format("%.2f", values[j]).ToStdString();
+			}
+
+			row.cells.push_back({ str });
+		}
+
+		data.rows.push_back(row);
+	}
+
+	panel->PopBotList(data);
 }
+
+void MLVolPropPanelAgent::UpdateAutoStart()
+{
+	bool bval = glbin_settings.m_vp_auto_start;
+	auto panel = GetPanel();
+	if (panel)
+		panel->UpdateAutoStart(bval);
+}
+
+void MLVolPropPanelAgent::DelTable()
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+
+	std::wstring name;
+	std::filesystem::path p(m_exepath);
+	p /= m_dir;
+	p /= "";
+	std::wstring filename = p.wstring();
+	std::remove(ws2s(name).c_str());
+	UpdateTopListFromFile();
+	UpdateBotList();
+}
+
+void MLVolPropPanelAgent::DupTable()
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	flrd::TableHistParams new_table(table);
+	std::wstring name = new_table.getName();
+	if (MatchTableName(name))
+		new_table.setName(name);
+	//save it
+	std::filesystem::path p(m_exepath);
+	p /= m_dir;
+	p /= name + m_ext;
+	std::wstring str = p.wstring();
+	new_table.save(str);
+	UpdateTopListFromFile();
+}
+
+void MLVolPropPanelAgent::StartRecording()
+{
+	flrd::TableHistParams& table = glbin.get_vp_table();
+	if (table.getName().empty())
+	{
+		m_record = false;
+	}
+	else
+	{
+		m_record = !m_record;
+	}
+	glbin.set_vp_table_enable(m_record);
+	auto panel = GetPanel();
+	if (panel)
+		panel->UpdateStartRecording(m_record);
+}
+
+void MLVolPropPanelAgent::ApplyRecord()
+{
+	auto vd = glbin_current.vol_data.lock();
+	auto group = glbin_current.vol_group.lock();
+	if (group && group->GetVolumeSyncProp())
+		group->ApplyMlVolProp();
+	else if (vd)
+		vd->ApplyMlVolProp();
+}
+
+void MLVolPropPanelAgent::AutoLoadTable()
+{
+	std::wstring name = glbin_settings.m_vp_table;
+	LoadTable(name);
+	UpdateBotList();
+
+	if (glbin_settings.m_vp_auto_start)
+	{
+		StartRecording();
+	}
+}
+
+void MLVolPropPanelAgent::UpdateAutoApply()
+{
+	bool bval = glbin_settings.m_vp_auto_apply;
+	auto panel = GetPanel();
+	if (panel)
+		panel->UpdateAutoApply(bval);
+}
+
+void MLVolPropPanelAgent::SetAutoApply(bool bval)
+{
+	glbin_settings.m_vp_auto_apply = bval;
+}
+

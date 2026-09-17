@@ -1153,5 +1153,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstCompGenDupTable "comp gen dup table"
 #define gstCompGenStartRec "comp gen start rec"
 #define gstCompGenApplyRecord "comp gen apply record"
+#define gstVolPropDelTable "vol prop del table"
+#define gstVolPropDupTable "vol prop dup table"
+#define gstVolPropStartRec "vol prop start rec"
+#define gstVolPropApplyRecord "vol prop apply record"
 
 #endif//NAMES_HPP
