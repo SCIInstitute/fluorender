@@ -58,7 +58,7 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstNull,
 	};
 };
 
@@ -110,7 +110,8 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstMlTopList,
+		gstMlBotList
 	};
 
 	virtual void UpdateAutoStart() = 0;
@@ -155,7 +156,15 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstMlTopList,
+		gstMlBotList,
+		gstMlAutoStart,
+		gstMlCgAutoStart,
+		gstMlAutoLoadTable,
+		gstCompGenDelTable,
+		gstCompGenDupTable,
+		gstCompGenStartRec,
+		gstCompGenApplyRecord
 	};
 
 	virtual void UpdateAutoStart() override;
@@ -202,7 +211,16 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstMlTopList,
+		gstMlBotList,
+		gstMlAutoStart,
+		gstMlVpAutoStart,
+		gstMlVpAutoApply,
+		gstMlAutoLoadTable,
+		gstVolPropDelTable,
+		gstVolPropDupTable,
+		gstVolPropStartRec,
+		gstVolPropApplyRecord
 	};
 
 	virtual void UpdateAutoStart() override;
