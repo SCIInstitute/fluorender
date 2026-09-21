@@ -65,10 +65,15 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstMeshTranslation,
+		gstMeshRotation,
+		gstMeshScale,
+		gstManipUpdateMesh
 	};
 
 	std::weak_ptr<MeshData> m_md;
+
+	void UpdateMeshData();
 };
 
 #endif // ManipPropPanelAgent_h

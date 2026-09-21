@@ -77,5 +77,25 @@ void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)
 
 void ManipPropPanelAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstManipUpdateMesh))
+		UpdateMeshData();
 }
+
+void ManipPropPanelAgent::UpdateMeshData()
+{
+	auto md = m_md.lock();
+	if (!md)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	md->SetTranslation(panel->GetTranslation());
+
+	md->SetRotation(panel->GetRotation());
+
+	md->SetScaling(panel->GetScaling());
+
+	NotifyViewUpdate({ gstNull });
+}
+

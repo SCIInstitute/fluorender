@@ -26,10 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ManipPropPanel.h>
-#include <Global.h>
-#include <Names.h>
-#include <MeshData.h>
-#include <compatibility.h>
+#include <ManipPropPanelAgent.h>
 
 ManipPropPanel::ManipPropPanel(
 	wxWindow* parent,
@@ -208,6 +205,45 @@ void ManipPropPanel::UpdateMeshScale(const fluo::Vector& vval)
 	m_z_scl_text->ChangeValue(str);
 }
 
+fluo::Vector ManipPropPanel::GetTranslation()
+{
+	double x, y, z;
+	wxString str;
+	str = m_x_trans_text->GetValue();
+	str.ToDouble(&x);
+	str = m_y_trans_text->GetValue();
+	str.ToDouble(&y);
+	str = m_z_trans_text->GetValue();
+	str.ToDouble(&z);
+	return fluo::Vector(x, y, z);
+}
+
+fluo::Vector ManipPropPanel::GetRotation()
+{
+	double x, y, z;
+	wxString str;
+	str = m_x_rot_text->GetValue();
+	str.ToDouble(&x);
+	str = m_y_rot_text->GetValue();
+	str.ToDouble(&y);
+	str = m_z_rot_text->GetValue();
+	str.ToDouble(&z);
+	return fluo::Vector(x, y, z);
+}
+
+fluo::Vector ManipPropPanel::GetScaling()
+{
+	double x, y, z;
+	wxString str;
+	str = m_x_scl_text->GetValue();
+	str.ToDouble(&x);
+	str = m_y_scl_text->GetValue();
+	str.ToDouble(&y);
+	str = m_z_scl_text->GetValue();
+	str.ToDouble(&z);
+	return fluo::Vector(x, y, z);
+}
+
 void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
 {
 	int sender_id = event.GetId();
@@ -250,7 +286,9 @@ void ManipPropPanel::OnSpinUp(wxSpinEvent& event)
 		dval += 1.0;
 		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->ChangeValue(str);
-		UpdateMeshData();
+		auto agent = m_agent->As<ManipPropPanelAgent>();
+		if (agent)
+			agent->UpdateUIToData({ gstManipUpdateMesh });
 	}
 }
 
@@ -296,46 +334,16 @@ void ManipPropPanel::OnSpinDown(wxSpinEvent& event)
 		dval -= 1.0;
 		wxString str = wxString::Format("%.3f", dval);
 		text_ctrl->ChangeValue(str);
-		UpdateMeshData();
+		auto agent = m_agent->As<ManipPropPanelAgent>();
+		if (agent)
+			agent->UpdateUIToData({ gstManipUpdateMesh });
 	}
-}
-
-void ManipPropPanel::UpdateMeshData()
-{
-	auto md = m_md.lock();
-	if (!md)
-		return;
-
-	double x, y, z;
-	wxString str = m_x_trans_text->GetValue();
-	str.ToDouble(&x);
-	str = m_y_trans_text->GetValue();
-	str.ToDouble(&y);
-	str = m_z_trans_text->GetValue();
-	str.ToDouble(&z);
-	md->SetTranslation(fluo::Vector(x, y, z));
-
-	str = m_x_rot_text->GetValue();
-	str.ToDouble(&x);
-	str = m_y_rot_text->GetValue();
-	str.ToDouble(&y);
-	str = m_z_rot_text->GetValue();
-	str.ToDouble(&z);
-	md->SetRotation(fluo::Vector(x, y, z));
-
-	str = m_x_scl_text->GetValue();
-	str.ToDouble(&x);
-	str = m_y_scl_text->GetValue();
-	str.ToDouble(&y);
-	str = m_z_scl_text->GetValue();
-	str.ToDouble(&z);
-	md->SetScaling(fluo::Vector(x, y, z));
-
-	FluoRefresh(1, { gstNull });
 }
 
 void ManipPropPanel::OnValueEnter(wxCommandEvent& event)
 {
-	UpdateMeshData();
+	auto agent = m_agent->As<ManipPropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstManipUpdateMesh });
 }
 

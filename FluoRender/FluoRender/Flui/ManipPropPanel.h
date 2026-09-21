@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _MANIPPROPPANEL_H_
 
 #include <PropPanel.h>
+#include <Vector.h>
 #include <wx/scrolwin.h>
 #include <wx/spinbutt.h>
 #include <memory>
@@ -72,7 +73,9 @@ public:
 	void UpdateMeshRotation(const fluo::Vector& vval);
 	void UpdateMeshScale(const fluo::Vector& vval);
 
-	void UpdateMeshData();
+	fluo::Vector GetTranslation();
+	fluo::Vector GetRotation();
+	fluo::Vector GetScaling();
 
 private:
 	wxStaticText* m_trans_st;

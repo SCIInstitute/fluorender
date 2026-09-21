@@ -58,6 +58,40 @@ private:
 	{
 		gstCurrentSelect,
 	};
+
+	void ToggleDisplay();
+	void SetCurrentRuler();
+
+	//toolbar1
+	void Locator();
+	void Probe();
+	void RulerLine();
+	void Protractor();
+	void Ellipse();
+	void RulerPolyline();
+	void Pencil();
+	void Grow();
+
+	//toolbar2
+	void RulerMove();
+	void RulerMovePoint();
+	void Magnet();
+	void RulerMovePencil();
+	void RulerFlip();
+	void RulerAvg();
+	void Lock();
+	void Relax();
+
+	//toolbar3
+	void DeleteSelection();
+	void DeleteAll();
+	void DeletePoint();
+	void Prune();//remove branches with length equal to or smaller than len
+	void Profile();
+	void Distance();
+	void Project();
+	void Export();
+
 };
 
 #endif // MeasureDlgAgent_h

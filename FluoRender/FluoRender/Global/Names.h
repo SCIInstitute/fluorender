@@ -1158,4 +1158,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolPropStartRec "vol prop start rec"
 #define gstVolPropApplyRecord "vol prop apply record"
 
+//manip prop panel agent
+#define gstManipUpdateMesh "manip update mesh"
+
 #endif//NAMES_HPP

@@ -200,7 +200,7 @@ public:
 	~MeasureDlg();
 
 	//update
-	void UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMode rul_mode);
+	void UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMode rul_mode, bool redist_length);
 
 	void UpdateRulerList();
 	void UpdateRulerListCur();
@@ -219,39 +219,6 @@ public:
 	void UpdateRulerF1(double dval);
 	void UpdateRulerInterpolation(int ival);
 	void UpdateAlignCenter(bool bval);
-
-	void ToggleDisplay();
-	void SetCurrentRuler();
-
-	//toolbar1
-	void Locator();
-	void Probe();
-	void RulerLine();
-	void Protractor();
-	void Ellipse();
-	void RulerPolyline();
-	void Pencil();
-	void Grow();
-
-	//toolbar2
-	void RulerMove();
-	void RulerMovePoint();
-	void Magnet();
-	void RulerMovePencil();
-	void RulerFlip();
-	void RulerAvg();
-	void Lock();
-	void Relax();
-
-	//toolbar3
-	void DeleteSelection();
-	void DeleteAll();
-	void DeletePoint();
-	void Prune();//remove branches with length equal to or smaller than len
-	void Profile();
-	void Distance();
-	void Project();
-	void Export();
 
 private:
 	//list ctrl
