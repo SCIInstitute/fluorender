@@ -127,9 +127,61 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct RulerListItemInfo
+{
+	bool disp = false;
+	int id = -1;
+	bool transient = false;
+
+	std::string unit;
+	std::string name;
+
+	unsigned int group = 0;
+	int group_count = 0;
+
+	std::string intensity;
+	std::string color;
+
+	int branches = 0;
+	double length = 0.0;
+	double angle = 0.0;
+
+	std::string center;
+	int trans_time = 0;
+
+	std::string points;
+	std::string voxels;
+};
+
+struct RulerListInfo
+{
+	std::vector<RulerListItemInfo> items;
+};
+
+struct RulerCurrentInfo
+{
+	int index = -1;
+
+	std::string name;
+	std::string center;
+	std::string color_text;
+	bool color_set;
+	fluo::Color color;
+};
+
 struct RulerListDisplayInfo
 {
 	std::vector<bool> visible;
+};
+
+struct RulerGroupSelectionInfo
+{
+	std::vector<int> selected_indices;
+};
+
+struct RulerProfileInfo
+{
+	std::vector<std::string> profile;
 };
 
 class MeasureDlg : public TabbedPanel
@@ -202,14 +254,12 @@ public:
 	//update
 	void UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMode rul_mode, bool redist_length);
 
-	void UpdateRulerList();
-	void UpdateRulerListCur();
-
+	void UpdateRulerList(const RulerListInfo& info);
+	void UpdateRulerListCur(const RulerCurrentInfo& info);
 	void UpdateRulerListDisp(const RulerListDisplayInfo& info);
 	void UpdateRulerListSel(int ival);
-
-	void UpdateGroupSel();
-	void UpdateProfile();
+	void UpdateGroupSel(const RulerGroupSelectionInfo& info);
+	void UpdateProfile(const RulerProfileInfo& info);
 
 	void UpdateRulerMethod(int ival);
 	void UpdateRulerTransient(bool bval);
@@ -219,6 +269,11 @@ public:
 	void UpdateRulerF1(double dval);
 	void UpdateRulerInterpolation(int ival);
 	void UpdateAlignCenter(bool bval);
+
+	void SetCurrentRuler();
+
+	//get
+	std::set<int> GetCurrentSelection();
 
 private:
 	//list ctrl

@@ -32,6 +32,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 
 class MeasureDlg;
+struct RulerListInfo;
+struct RulerCurrentInfo;
+struct RulerListDisplayInfo;
+struct RulerGroupSelectionInfo;
+struct RulerProfileInfo;
 class MeasureDlgAgent : public Agent
 {
 public:
@@ -41,6 +46,8 @@ public:
 	virtual ~MeasureDlgAgent() = default;
 
 	MeasureDlg* GetDialog() const;
+
+	void SetCurrentRuler(const RulerCurrentInfo& info);
 
 protected:
 	std::span < const std::string_view>
@@ -59,8 +66,13 @@ private:
 		gstCurrentSelect,
 	};
 
+	RulerListInfo GetRulerListInfo();
+	RulerCurrentInfo GetCurrentRulerInfo();
+	RulerListDisplayInfo GetRulerListDisplayInfo();
+	RulerGroupSelectionInfo GetGroupSelectionInfo();
+	RulerProfileInfo GetProfileInfo();
+
 	void ToggleDisplay();
-	void SetCurrentRuler();
 
 	//toolbar1
 	void Locator();

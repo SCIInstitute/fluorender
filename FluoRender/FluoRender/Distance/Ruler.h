@@ -566,7 +566,7 @@ namespace flrd
 		}
 
 		//color
-		void SetColor(fluo::Color& color)
+		void SetColor(const fluo::Color& color)
 		{
 			m_color = color; m_use_color = true;
 		}

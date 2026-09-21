@@ -1161,4 +1161,31 @@ DEALINGS IN THE SOFTWARE.
 //manip prop panel agent
 #define gstManipUpdateMesh "manip update mesh"
 
+//measure dialog
+#define gstCurrentRuler "current ruler"
+#define gstRulerLocator "ruler locator"
+#define gstRulerProbe "ruler probe"
+#define gstRulerLine "ruler line"
+#define gstRulerProtractor "ruler protractor"
+#define gstRulerEllipse "ruler ellipse"
+#define gstRulerPolyline "ruler polyline"
+#define gstRulerPencil "ruler pencil"
+#define gstRulerGrow "ruler grow"
+#define gstRulerMove "ruler move"
+#define gstRulerMovePoint "ruler move point"
+#define gstRulerMagnet "ruler magnet"
+#define gstRulerMovePencil "ruler move pencil"
+#define gstRulerFlip "ruler flip"
+#define gstRulerAvg "ruler avg"
+#define gstRulerLock "ruler lock"
+#define gstRulerRelax "ruler relax"
+#define gstRulerDeleteSelection "ruler delete selection"
+#define gstRulerDeleteAll "ruler delete all"
+#define gstRulerDeletePoint "ruler delete point"
+#define gstRulerPrune "ruler prune"
+#define gstRulerProfile "ruler profile"
+#define gstRulerDistance "ruler distance"
+#define gstRulerProject "ruler project"
+#define gstRulerExport "ruler export"
+
 #endif//NAMES_HPP

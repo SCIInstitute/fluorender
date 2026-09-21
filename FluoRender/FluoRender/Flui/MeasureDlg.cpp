@@ -27,18 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <MeasureDlg.h>
 #include <MeasureDlgAgent.h>
-#include <GridHelper.h>
 #include <Ruler.h>
 #include <RenderView.h>
 #include <wx/artprov.h>
 #include <wx/valnum.h>
-//#include <wx/wfstream.h>
-//#include <wx/txtstrm.h>
 #include <wx/clipbrd.h>
-//#include <sstream>
-//#include <fstream>
-//#include <iostream>
-//#include <iterator>
 //resources
 #include <png_resource.h>
 #include <ruler.xpm>
@@ -892,151 +885,62 @@ void MeasureDlg::UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMo
 	m_toolbar3->ToggleTool(ID_RulerDelBtn, int_mode == InteractiveMode::RulerDelPoint);
 }
 
-void MeasureDlg::UpdateRulerList()
+void MeasureDlg::UpdateRulerList(
+	const RulerListInfo& info)
 {
-	m_ruler_list->m_name_text->Hide();
-	m_ruler_list->m_center_text->Hide();
-	m_ruler_list->m_color_picker->Hide();
-
-	auto view = glbin_current.render_view.lock();
-	auto ruler_list = glbin_current.GetRulerList();
-	if (!ruler_list)
-		return;
-
 	std::set<int> sel;
 	m_ruler_list->GetCurrSelection(sel);
 
-	auto groups = ruler_list->get().Groups();
-	std::vector<int> group_count(groups.size(), 0);
-
 	m_ruler_list->DeleteAllItems();
 
-	wxString points;
-	fluo::Point p;
-	int num_points;
-	size_t t;
-	if (view->m_frame_num_type == 1)
-		t = view->m_param_cur_num;
-	else
-		t = view->m_tseq_cur_num;
-	for (int i = 0; i < (int)ruler_list->get().size(); i++)
+	for (const auto& item : info.items)
 	{
-		auto ruler = ruler_list->get().GetRuler(i);
-		if (!ruler) continue;
-		ruler->SetWorkTime(t);
-		if (ruler->GetTransient() &&
-			ruler->GetTransTime() != t)
-			continue;
-
-		wxString unit;
-		switch (view->m_sb_unit)
-		{
-		case 0:
-			unit = "nm";
-			break;
-		case 1:
-		default:
-			unit = L"\u03BCm";
-			break;
-		case 2:
-			unit = "mm";
-			break;
-		}
-
-		points = "";
-		num_points = ruler->GetNumPoint();
-		if (num_points > 0)
-		{
-			p = ruler->GetPoint(0);
-			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
-		}
-		if (num_points > 1)
-		{
-			p = ruler->GetPoint(num_points - 1);
-			points += ", ";
-			points += wxString::Format("(%.2f, %.2f, %.2f)", p.x(), p.y(), p.z());
-		}
-		unsigned int group = ruler->Group();
-		int count = 0;
-		auto iter = std::find(groups.begin(), groups.end(), group);
-		if (iter != groups.end())
-		{
-			int index = std::distance(groups.begin(), iter);
-			count = ++group_count[index];
-		}
-		double dval = ruler->GetProfileMaxValue();
-		dval *= ruler->GetScalarScale();
-		wxString intensity = wxString::Format("%.0f", dval);
-		wxString color;
-		if (ruler->GetUseColor())
-			color = wxString::Format("RGB(%d, %d, %d)",
-				int(std::round(ruler->GetColor().r() * 255)),
-				int(std::round(ruler->GetColor().g() * 255)),
-				int(std::round(ruler->GetColor().b() * 255)));
-		else
-			color = "N/A";
-		wxString center;
-		fluo::Point cp = ruler->GetCenter();
-		center = wxString::Format("(%.2f, %.2f, %.2f)",
-			cp.x(), cp.y(), cp.z());
-		wxString voxels = ruler->GetDelInfoValues(", ");
 		m_ruler_list->Append(
-			ruler->GetDisp(),
-			ruler->Id(),
-			ruler->GetTransient(),
-			unit,
-			ruler->GetName(),
-			group,
-			count,
-			intensity,
-			color,
-			ruler->GetNumBranch(),
-			ruler->GetLength(),
-			ruler->GetAngle(),
-			center,
-			ruler->GetTransTime(),
-			points,
-			voxels);
+			item.disp,
+			item.id,
+			item.transient,
+			item.unit,
+			item.name,
+			item.group,
+			item.group_count,
+			item.intensity,
+			item.color,
+			item.branches,
+			item.length,
+			item.angle,
+			item.center,
+			item.trans_time,
+			item.points,
+			item.voxels);
 	}
 
 	m_ruler_list->AdjustSize();
 
-	glbin_vertex_array_manager.set_dirty(flvr::VAType::VA_Rulers);
-
-	//select
 	int size = m_ruler_list->GetItemCount();
-	for (auto it : sel)
+	for (auto idx : sel)
 	{
-		if (it < size)
-			m_ruler_list->SelectItemSilently(it);
+		if (idx < size)
+			m_ruler_list->SelectItemSilently(idx);
 	}
 }
 
-void MeasureDlg::UpdateRulerListCur()
+void MeasureDlg::UpdateRulerListCur(
+	const RulerCurrentInfo& info)
 {
-	auto ruler = glbin_current.GetRuler();
-	int item = glbin_ruler_handler.GetRulerIndex();
-	if (!ruler)
+	if (info.index < 0)
 		return;
 
-	wxString str = ruler->GetName();
-	fluo::Point p = ruler->GetCenter();
-	fluo::Color c = ruler->GetColor();
-	bool use_color = ruler->GetUseColor();
+	m_ruler_list->SetText(
+		info.index, 0, info.name);
 
-	m_ruler_list->SetText(item, 0, str);
-	str = wxString::Format("(%.2f, %.2f, %.2f)",
-		p.x(), p.y(), p.z());
-	m_ruler_list->SetText(item, CenterCol, str);
-	m_ruler_list->SetText(item, PointCol, str);
-	if (use_color)
-		str = wxString::Format("RGB(%d, %d, %d)",
-			int(std::round(c.r() * 255)),
-			int(std::round(c.g() * 255)),
-			int(std::round(c.b() * 255)));
-	else
-		str = "N/A";
-	m_ruler_list->SetText(item, ColorCol, str);
+	m_ruler_list->SetText(
+		info.index, CenterCol, info.center);
+
+	m_ruler_list->SetText(
+		info.index, PointCol, info.center);
+
+	m_ruler_list->SetText(
+		info.index, ColorCol, info.color_text);
 }
 
 void MeasureDlg::UpdateRulerListDisp(
@@ -1060,20 +964,21 @@ void MeasureDlg::UpdateRulerListSel(int ival)
 	m_ruler_list->SelectItemSilently(ival);
 }
 
-void MeasureDlg::UpdateGroupSel()
+void MeasureDlg::UpdateGroupSel(
+	const RulerGroupSelectionInfo& info)
 {
 	m_ruler_list->ClearSelection();
-	auto ruler_list = glbin_current.GetRulerList();
-	if (!ruler_list)
-		return;
 
-	size_t gi = glbin_ruler_handler.GetGroup();
-	for (size_t i = 0; i < ruler_list->get().size(); ++i)
+	for (auto index : info.selected_indices)
+		m_ruler_list->SelectItemSilently(index);
+}
+
+void MeasureDlg::UpdateProfile(const RulerProfileInfo& info)
+{
+	for (size_t i = 0; i < info.profile.size(); ++i)
 	{
-		auto ruler = ruler_list->get().GetRuler(i);
-		if (!ruler) continue;
-		if (ruler->Group() == gi)
-			m_ruler_list->SelectItemSilently(i);
+		auto str = info.profile[i];
+		m_ruler_list->SetText(i, IntCol, str);
 	}
 }
 
@@ -1122,85 +1027,106 @@ void MeasureDlg::UpdateAlignCenter(bool bval)
 	m_align_center->SetValue(bval);
 }
 
+void MeasureDlg::SetCurrentRuler()
+{
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCurrentRuler });
+}
+
+std::set<int> MeasureDlg::GetCurrentSelection()
+{
+	std::set<int> sel;
+	m_ruler_list->GetCurrSelection(sel);
+	return sel;
+}
+
 void MeasureDlg::OnToolbar(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (!agent)
+		return;
+
 	int id = event.GetId();
+	fluo::ValueCollection vc;
 
 	switch (id)
 	{
 	case ID_RulerLocator:
-		Locator();
+		vc.insert(gstRulerLocator);
 		break;
 	case ID_RulerProbe:
-		Probe();
+		vc.insert(gstRulerProbe);
 		break;
 	case ID_RulerLine:
-		RulerLine();
+		vc.insert(gstRulerLine);
 		break;
 	case ID_RulerAngle:
-		Protractor();
+		vc.insert(gstRulerProtractor);
 		break;
 	case ID_RulerEllipse:
-		Ellipse();
+		vc.insert(gstRulerEllipse);
 		break;
 	case ID_RulerPolyline:
-		RulerPolyline();
+		vc.insert(gstRulerPolyline);
 		break;
 	case ID_RulerPencil:
-		Pencil();
+		vc.insert(gstRulerPencil);
 		break;
 	case ID_RulerGrow:
-		Grow();
+		vc.insert(gstRulerGrow);
 		break;
 	case ID_RulerMoveBtn:
-		RulerMove();
+		vc.insert(gstRulerMove);
 		break;
 	case ID_RulerMovePointBtn:
-		RulerMovePoint();
+		vc.insert(gstRulerMovePoint);
 		break;
 	case ID_MagnetBtn:
-		Magnet();
+		vc.insert(gstRulerMagnet);
 		break;
 	case ID_RulerMovePencilBtn:
-		RulerMovePencil();
+		vc.insert(gstRulerMovePencil);
 		break;
 	case ID_RulerFlipBtn:
-		RulerFlip();
+		vc.insert(gstRulerFlip);
 		break;
 	case ID_RulerAvgBtn:
-		RulerAvg();
+		vc.insert(gstRulerAvg);
 		break;
 	case ID_LockBtn:
-		Lock();
+		vc.insert(gstRulerLock);
 		break;
 	case ID_RelaxBtn:
-		Relax();
+		vc.insert(gstRulerRelax);
 		break;
 	case ID_DeleteBtn:
-		DeleteSelection();
+		vc.insert(gstRulerDeleteSelection);
 		break;
 	case ID_DeleteAllBtn:
-		DeleteAll();
+		vc.insert(gstRulerDeleteAll);
 		break;
 	case ID_RulerDelBtn:
-		DeletePoint();
+		vc.insert(gstRulerDeletePoint);
 		break;
 	case ID_PruneBtn:
-		Prune();
+		vc.insert(gstRulerPrune);
 		break;
 	case ID_ProfileBtn:
-		Profile();
+		vc.insert(gstRulerProfile);
 		break;
 	case ID_DistanceBtn:
-		Distance();
+		vc.insert(gstRulerDistance);
 		break;
 	case ID_ProjectBtn:
-		Project();
+		vc.insert(gstRulerProject);
 		break;
 	case ID_ExportBtn:
-		Export();
+		vc.insert(gstRulerExport);
 		break;
 	}
+
+	agent->UpdateUIToData(vc);
 }
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)

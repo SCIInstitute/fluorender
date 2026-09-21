@@ -37,6 +37,9 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerList.h>
 #include <MainSettings.h>
 #include <RulerAlign.h>
+#include <Coordinator.h>
+#include <GlobalStates.h>
+#include <VolumeData.h>
 
 MeasureDlgAgent::MeasureDlgAgent(
 	MeasureDlg* dlg) :
@@ -66,28 +69,19 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	if (update_all || request.HasValue(gstRulerList))
 	{
-		dlg->UpdateRulerList();
+		auto info = GetRulerListInfo();
+		dlg->UpdateRulerList(info);
 	}
 
 	if (request.HasValue(gstRulerListCur))
 	{
-		dlg->UpdateRulerListCur();
+		auto info = GetCurrentRulerInfo();
+		dlg->UpdateRulerListCur(info);
 	}
 
 	if (update_all || request.HasValue(gstRulerListDisp))
 	{
-		RulerListDisplayInfo info;
-		auto list = glbin_current.GetRulerList();
-		auto ruler_list = list->get();
-		if (!ruler_list.IsEmpty())
-		{
-			for (size_t i = 0; i < ruler_list.size(); ++i)
-			{
-				auto ruler = ruler_list.GetRuler(i);
-				info.visible.push_back(ruler && ruler->GetDisp());
-			}
-		}
-
+		auto info = GetRulerListDisplayInfo();
 		dlg->UpdateRulerListDisp(info);
 	}
 
@@ -99,12 +93,14 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 
 	if (request.HasValue(gstRulerGroupSel))
 	{
-		dlg->UpdateGroupSel();
+		auto info = GetGroupSelectionInfo();
+		dlg->UpdateGroupSel(info);
 	}
 
 	if (update_all || request.HasValue(gstRulerProfile))
 	{
-		dlg->UpdateProfile();
+		auto info = GetProfileInfo();
+		dlg->UpdateProfile(info);
 	}
 
 	if (update_all || request.HasValue(gstRulerMethod))
@@ -175,7 +171,102 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void MeasureDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstRulerLocator))
+	{
+		Locator();
+	}
+	if (request.HasValue(gstRulerProbe))
+	{
+		Probe();
+	}
+	if (request.HasValue(gstRulerLine))
+	{
+		RulerLine();
+	}
+	if (request.HasValue(gstRulerProtractor))
+	{
+		Protractor();
+	}
+	if (request.HasValue(gstRulerEllipse))
+	{
+		Ellipse();
+	}
+	if (request.HasValue(gstRulerPolyline))
+	{
+		RulerPolyline();
+	}
+	if (request.HasValue(gstRulerPencil))
+	{
+		Pencil();
+	}
+	if (request.HasValue(gstRulerGrow))
+	{
+		Grow();
+	}
+	if (request.HasValue(gstRulerMove))
+	{
+		RulerMove();
+	}
+	if (request.HasValue(gstRulerMovePoint))
+	{
+		RulerMovePoint();
+	}
+	if (request.HasValue(gstRulerMagnet))
+	{
+		Magnet();
+	}
+	if (request.HasValue(gstRulerMovePencil))
+	{
+		RulerMovePencil();
+	}
+	if (request.HasValue(gstRulerFlip))
+	{
+		RulerFlip();
+	}
+	if (request.HasValue(gstRulerAvg))
+	{
+		RulerAvg();
+	}
+	if (request.HasValue(gstRulerLock))
+	{
+		Lock();
+	}
+	if (request.HasValue(gstRulerRelax))
+	{
+		Relax();
+	}
+	if (request.HasValue(gstRulerDeleteSelection))
+	{
+		DeleteSelection();
+	}
+	if (request.HasValue(gstRulerDeleteAll))
+	{
+		DeleteAll();
+	}
+	if (request.HasValue(gstRulerDeletePoint))
+	{
+		DeletePoint();
+	}
+	if (request.HasValue(gstRulerPrune))
+	{
+		Prune();
+	}
+	if (request.HasValue(gstRulerProfile))
+	{
+		Profile();
+	}
+	if (request.HasValue(gstRulerDistance))
+	{
+		Distance();
+	}
+	if (request.HasValue(gstRulerProject))
+	{
+		Project();
+	}
+	if (request.HasValue(gstRulerExport))
+	{
+		Export();
+	}
 }
 
 MeasureDlg* MeasureDlgAgent::GetDialog() const
@@ -183,16 +274,315 @@ MeasureDlg* MeasureDlgAgent::GetDialog() const
 	return static_cast<MeasureDlg*>(GetWindow());
 }
 
-void MeasureDlgAgent::ToggleDisplay()
+namespace
 {
-	std::set<int> sel;
-	if (!m_ruler_list->GetCurrSelection(sel))
-		return;
-	glbin_ruler_handler.ToggleDisplay(sel);
-	FluoRefresh(2, { gstRulerListDisp, gstRulerDisp }, { glbin_current.GetViewId() });
+	std::string PointToString(const fluo::Point& p)
+	{
+		std::ostringstream oss;
+
+		oss << std::fixed << std::setprecision(2)
+			<< "("
+			<< p.x() << ", "
+			<< p.y() << ", "
+			<< p.z() << ")";
+
+		return oss.str();
+	}
 }
 
-void MeasureDlgAgent::SetCurrentRuler()
+RulerListInfo MeasureDlgAgent::GetRulerListInfo()
+{
+	RulerListInfo result;
+
+	auto view = glbin_current.render_view.lock();
+	auto ruler_list = glbin_current.GetRulerList();
+
+	if (!view || !ruler_list)
+		return result;
+
+	auto groups = ruler_list->get().Groups();
+	std::vector<int> group_count(groups.size(), 0);
+
+	size_t t = view->m_frame_num_type == 1 ?
+		view->m_param_cur_num :
+		view->m_tseq_cur_num;
+
+	std::wstring unit;
+
+	switch (view->m_sb_unit)
+	{
+	case 0:
+		unit = L"nm";
+		break;
+
+	case 1:
+	default:
+		unit = L"\u03BCm";
+		break;
+
+	case 2:
+		unit = L"mm";
+		break;
+	}
+
+	for (int i = 0;
+		i < static_cast<int>(ruler_list->get().size());
+		++i)
+	{
+		auto ruler = ruler_list->get().GetRuler(i);
+
+		if (!ruler)
+			continue;
+
+		ruler->SetWorkTime(t);
+
+		if (ruler->GetTransient() &&
+			ruler->GetTransTime() != t)
+		{
+			continue;
+		}
+
+		std::string points;
+
+		int num_points = ruler->GetNumPoint();
+
+		if (num_points > 0)
+		{
+			points += PointToString(
+				ruler->GetPoint(0));
+		}
+
+		if (num_points > 1)
+		{
+			points += ", ";
+			points += PointToString(
+				ruler->GetPoint(num_points - 1));
+		}
+
+		unsigned int group = ruler->Group();
+
+		int count = 0;
+
+		auto iter =
+			std::find(groups.begin(),
+				groups.end(),
+				group);
+
+		if (iter != groups.end())
+		{
+			size_t index =
+				std::distance(groups.begin(), iter);
+
+			count = ++group_count[index];
+		}
+
+		double dval =
+			ruler->GetProfileMaxValue() *
+			ruler->GetScalarScale();
+
+		std::ostringstream intensity_ss;
+		intensity_ss << std::fixed
+			<< std::setprecision(0)
+			<< dval;
+
+		std::string intensity =
+			intensity_ss.str();
+
+		std::string color;
+
+		if (ruler->GetUseColor())
+		{
+			std::ostringstream color_ss;
+
+			color_ss
+				<< "RGB("
+				<< int(std::round(
+					ruler->GetColor().r() * 255))
+				<< ", "
+				<< int(std::round(
+					ruler->GetColor().g() * 255))
+				<< ", "
+				<< int(std::round(
+					ruler->GetColor().b() * 255))
+				<< ")";
+
+			color = color_ss.str();
+		}
+		else
+		{
+			color = "N/A";
+		}
+
+		std::string center =
+			PointToString(
+				ruler->GetCenter());
+
+		std::string voxels =
+			ruler->GetDelInfoValues(", ");
+
+		RulerListItemInfo item;
+
+		item.disp = ruler->GetDisp();
+		item.id = ruler->Id();
+		item.transient = ruler->GetTransient();
+
+		item.unit = ws2s(unit);
+		item.name = ws2s(ruler->GetName());
+
+		item.group = group;
+		item.group_count = count;
+
+		item.intensity = intensity;
+		item.color = color;
+
+		item.branches = ruler->GetNumBranch();
+		item.length = ruler->GetLength();
+		item.angle = ruler->GetAngle();
+
+		item.center = center;
+		item.trans_time = ruler->GetTransTime();
+
+		item.points = points;
+		item.voxels = voxels;
+
+		result.items.push_back(std::move(item));
+	}
+
+	return result;
+}
+
+RulerCurrentInfo MeasureDlgAgent::GetCurrentRulerInfo()
+{
+	RulerCurrentInfo info;
+
+	auto ruler = glbin_current.GetRuler();
+	if (!ruler)
+		return info;
+
+	std::string color_text;
+	auto color = ruler->GetColor();
+
+	if (ruler->GetUseColor())
+	{
+		std::ostringstream color_ss;
+
+		color_ss
+			<< "RGB("
+			<< int(std::round(
+				color.r() * 255))
+			<< ", "
+			<< int(std::round(
+				color.g() * 255))
+			<< ", "
+			<< int(std::round(
+				color.b() * 255))
+			<< ")";
+
+		color_text = color_ss.str();
+		info.color_set = true;
+	}
+	else
+	{
+		color_text = "N/A";
+		info.color_set = false;
+	}
+
+	info.index = glbin_ruler_handler.GetRulerIndex();
+	info.name = ws2s(ruler->GetName());
+	info.center = PointToString(ruler->GetCenter());
+	info.color = color;
+	info.color_text = color_text;
+
+	return info;
+}
+
+RulerListDisplayInfo MeasureDlgAgent::GetRulerListDisplayInfo()
+{
+	RulerListDisplayInfo info;
+	auto list = glbin_current.GetRulerList();
+	auto ruler_list = list->get();
+	if (!ruler_list.IsEmpty())
+	{
+		for (size_t i = 0; i < ruler_list.size(); ++i)
+		{
+			auto ruler = ruler_list.GetRuler(i);
+			info.visible.push_back(ruler && ruler->GetDisp());
+		}
+	}
+	return info;
+}
+
+RulerGroupSelectionInfo MeasureDlgAgent::GetGroupSelectionInfo()
+{
+	RulerGroupSelectionInfo result;
+
+	auto ruler_list =
+		glbin_current.GetRulerList();
+
+	if (!ruler_list)
+		return result;
+
+	size_t group =
+		glbin_ruler_handler.GetGroup();
+
+	for (size_t i = 0;
+		i < ruler_list->get().size();
+		++i)
+	{
+		auto ruler =
+			ruler_list->get().GetRuler(i);
+
+		if (!ruler)
+			continue;
+
+		if (ruler->Group() == group)
+			result.selected_indices.push_back(
+				static_cast<int>(i));
+	}
+
+	return result;
+}
+
+RulerProfileInfo MeasureDlgAgent::GetProfileInfo()
+{
+	RulerProfileInfo info;
+
+	auto ruler_list = glbin_current.GetRulerList();
+	for (int i = 0;
+		i < static_cast<int>(ruler_list->get().size());
+		++i)
+	{
+		auto ruler = ruler_list->get().GetRuler(i);
+		if (!ruler)
+			continue;
+
+		double dval = ruler->GetProfileMaxValue();
+		dval *= ruler->GetScalarScale();
+		auto str = std::to_string(dval);
+		info.profile.push_back(str);
+	}
+
+	return info;
+}
+
+void MeasureDlgAgent::ToggleDisplay()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.ToggleDisplay(sel);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	if (view)
+		NotifyViewUpdate(
+			{ gstRulerListDisp, gstRulerDisp },
+			target);
+}
+
+void MeasureDlgAgent::SetCurrentRuler(const RulerCurrentInfo& info)
 {
 	auto ruler = glbin_current.GetRuler();
 	int focus = glbin_ruler_handler.GetEditingRuler();
@@ -202,74 +592,57 @@ void MeasureDlgAgent::SetCurrentRuler()
 	auto view = glbin_current.render_view.lock();
 	if (!ruler || !view)
 		return;
-	ruler->SetName(m_ruler_list->m_name.ToStdWstring());
+	ruler->SetName(s2ws(info.name));
 	if (ruler->GetRulerMode() == flrd::RulerMode::Locator)
 	{
 		ruler->SetWorkTime(view->m_tseq_cur_num);
-		ruler->SetPoint(0, m_ruler_list->m_center);
+		ruler->SetPoint(0, info.center);
 	}
-	if (m_ruler_list->m_color_set)
-		ruler->SetColor(m_ruler_list->m_color);
-	FluoRefresh(0, { gstRulerListCur },
-		{ glbin_current.GetViewId() });
-}
-
-void MeasureDlgAgent::UpdateProfile()
-{
-	wxString str;
-	for (int i = 0; i < m_ruler_list->GetItemCount(); ++i)
-	{
-		auto ruler = glbin_ruler_handler.GetRuler(i);
-		if (!ruler)
-			continue;
-
-		double dval = ruler->GetProfileMaxValue();
-		dval *= ruler->GetScalarScale();
-		str = wxString::Format("%.0f", dval);
-		m_ruler_list->SetText(i, IntCol, str);
-	}
+	if (info.color_set)
+		ruler->SetColor(info.color);
+	NotifyViewUpdate({ gstRulerListCur });
 }
 
 void MeasureDlgAgent::Locator()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Probe()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Probe);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerLine()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Protractor()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Protractor);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Ellipse()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Ellipse);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerPolyline()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Polyline);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Pencil()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::Pencil);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Grow()
@@ -288,31 +661,31 @@ void MeasureDlgAgent::Grow()
 		}
 	}
 
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
 }
 
 void MeasureDlgAgent::RulerMove()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::MoveRuler);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerMovePoint()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::EditRulerPoint);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Magnet()
 {
 	glbin_states.ToggleMagnet(false);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerMovePencil()
 {
 	glbin_states.ToggleMagnet(true);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerFlip()
@@ -338,7 +711,7 @@ void MeasureDlgAgent::RulerAvg()
 void MeasureDlgAgent::Lock()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::RulerLockPoint);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Relax()
@@ -370,7 +743,7 @@ void MeasureDlgAgent::DeleteAll()
 void MeasureDlgAgent::DeletePoint()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::RulerDelPoint);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	NotifyViewUpdate({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Prune()
