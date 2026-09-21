@@ -352,6 +352,8 @@ void MLCompGenPanelAgent::UpdateCellChanged(const GridCellChanged& cell)
 
 void MLCompGenPanelAgent::UpdateUI(const UpdateRequest& request)
 {
+	MachineLearningPanelAgent::UpdateUI(request);
+
 	auto panel = GetPanel();
 	if (!panel)
 		return;
@@ -635,6 +637,8 @@ void MLVolPropPanelAgent::UpdateCellChanged(const GridCellChanged& cell)
 
 void MLVolPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
+	MachineLearningPanelAgent::UpdateUI(request);
+
 	auto panel = GetPanel();
 	if (!panel)
 		return;
