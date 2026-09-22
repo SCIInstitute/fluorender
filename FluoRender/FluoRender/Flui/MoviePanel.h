@@ -44,6 +44,16 @@ DEALINGS IN THE SOFTWARE.
 
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
+class MoviePanel;
+
+struct KeyframeInfo
+{
+	int id;
+	int time;
+	int duration;
+	int interpolation;
+	std::wstring description;
+};
 
 class KeyListCtrl : public wxListCtrl
 {
@@ -53,6 +63,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = wxLC_REPORT | wxLC_SINGLE_SEL);
 	~KeyListCtrl();
+
+	MoviePanel* GetMoviePanel();
 
 	void SelectItemSilently(int i)
 	{
@@ -82,8 +94,7 @@ public:
 	void DeleteAll();
 	wxString GetText(long item, int col);
 	void SetText(long item, int col, wxString& str);
-	void Update();
-	void UpdateText();
+	void SetKeyframes(const std::vector<KeyframeInfo>& keys);
 
 private:
 	wxImageList* m_images;
@@ -181,6 +192,16 @@ public:
 	void UpdateScriptFile(const std::wstring& filename);
 	void UpdateScriptList(const std::vector<std::wstring>& list);
 	void UpdateScriptListSelect(int ival);
+
+	//keyframe list methods
+	void SelectKeyframe(int id);
+	void DeleteKeyframe(int id);
+	void DeleteAllKeyframes();
+	void SetKeyframeTime(int id, double time);
+	void SetKeyframeDuration(int id, double duration);
+	void SetKeyframeInterpolation(int id, int type);
+	void SetKeyframeDescription(int id, const std::wstring& description);
+	void MoveKeyframe(int sourceId, int targetId, bool before);
 
 	//common
 	void SetFps(double val);

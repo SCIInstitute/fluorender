@@ -26,22 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <MoviePanel.h>
-#include <Directory.h>
-#include <Global.h>
-#include <GlobalStates.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <MovieDefault.h>
-#include <RenderView.h>
-#include <Root.h>
-#include <DataManager.h>
-#include <CurrentObjects.h>
-#include <RenderViewPanel.h>
-#include <Interpolator.h>
-#include <MovieMaker.h>
+#include <MoviePanelAgent.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
-#include <ModalDlg.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
@@ -124,6 +111,11 @@ KeyListCtrl::~KeyListCtrl()
 {
 }
 
+MoviePanel* KeyListCtrl::GetMoviePanel()
+{
+	return dynamic_cast<MoviePanel*>(GetParent());
+}
+
 void KeyListCtrl::Append(int id, int time, int duration, int interp, const std::wstring& description)
 {
 	long tmp = InsertItem(GetItemCount(), wxString::Format("%d", id), 0);
@@ -135,72 +127,53 @@ void KeyListCtrl::Append(int id, int time, int duration, int interp, const std::
 
 void KeyListCtrl::DeleteSel()
 {
-	long item = GetNextItem(-1,
+	long item = GetNextItem(
+		-1,
 		wxLIST_NEXT_ALL,
 		wxLIST_STATE_SELECTED);
+
 	if (item == -1)
 		return;
-	wxString str = GetItemText(item);
-	long id;
-	str.ToLong(&id);
 
-	glbin_interpolator.RemoveKey(id);
-	Update();
+	long id;
+	GetItemText(item).ToLong(&id);
+
+	if (auto panel = GetMoviePanel())
+		panel->DeleteKeyframe(int(id));
 }
 
 void KeyListCtrl::DeleteAll()
 {
-	glbin_interpolator.Clear();
-	Update();
+	if (auto panel = GetMoviePanel())
+		panel->DeleteAllKeyframes();
 }
 
-void KeyListCtrl::Update()
+void KeyListCtrl::SetKeyframes(
+	const std::vector<KeyframeInfo>& keys)
 {
 	m_frame_text->Hide();
 	m_duration_text->Hide();
 	m_interpolation_cmb->Hide();
 	m_description_text->Hide();
+
 	m_editing_item = -1;
 
 	DeleteAllItems();
-	for (int i = 0; i < glbin_interpolator.GetKeyNum(); i++)
+
+	for (const auto& key : keys)
 	{
-		int id = glbin_interpolator.GetKeyID(i);
-		int time = glbin_interpolator.GetKeyTime(i);
-		int duration = glbin_interpolator.GetKeyDuration(i);
-		int interp = glbin_interpolator.GetKeyType(i);
-		std::wstring desc = glbin_interpolator.GetKeyDesc(i);
-		Append(id, time, duration, interp, desc);
+		Append(
+			key.id,
+			key.time,
+			key.duration,
+			key.interpolation,
+			key.description);
 	}
 
 	for (int i = 0; i < 4; ++i)
 		SetColumnWidth(i, wxLIST_AUTOSIZE_USEHEADER);
+
 	SetColumnWidth(4, wxLIST_AUTOSIZE);
-}
-
-void KeyListCtrl::UpdateText()
-{
-	wxString str;
-
-	for (int i = 0; i < glbin_interpolator.GetKeyNum(); i++)
-	{
-		int id = glbin_interpolator.GetKeyID(i);
-		int time = glbin_interpolator.GetKeyTime(i);
-		int duration = glbin_interpolator.GetKeyDuration(i);
-		int interp = glbin_interpolator.GetKeyType(i);
-		std::wstring desc = glbin_interpolator.GetKeyDesc(i);
-
-		wxString wx_id = wxString::Format("%d", id);
-		wxString wx_time = wxString::Format("%d", time);
-		wxString wx_duration = wxString::Format("%d", duration);
-		SetText(i, 0, wx_id);
-		SetText(i, 1, wx_time);
-		SetText(i, 2, wx_duration);
-		str = interp == 0 ? "Linear" : "Smooth";
-		SetText(i, 3, str);
-		str = desc;
-		SetText(i, 4, str);
-	}
 }
 
 wxString KeyListCtrl::GetText(long item, int col)
@@ -273,7 +246,7 @@ void KeyListCtrl::OnSelection(wxListEvent& event)
 	}
 }
 
-void KeyListCtrl::EndEdit(bool update)
+void KeyListCtrl::EndEdit(bool refresh)
 {
 	if (m_duration_text->IsShown())
 	{
@@ -281,8 +254,14 @@ void KeyListCtrl::EndEdit(bool update)
 		m_duration_text->Hide();
 		m_interpolation_cmb->Hide();
 		m_description_text->Hide();
+
 		m_editing_item = -1;
-		if (update) UpdateText();
+
+		if (refresh)
+		{
+			if (auto panel = GetMoviePanel())
+				panel->UpdateParamList();
+		}
 	}
 }
 
@@ -296,16 +275,18 @@ void KeyListCtrl::OnFrameText(wxCommandEvent& event)
 	if (m_editing_item == -1)
 		return;
 
-	wxString str = GetItemText(m_editing_item);
 	long id;
-	str.ToLong(&id);
+	GetItemText(m_editing_item).ToLong(&id);
 
-	int index = glbin_interpolator.GetKeyIndex(int(id));
-	str = m_frame_text->GetValue();
+	wxString str = m_frame_text->GetValue();
+
 	double time;
 	if (str.ToDouble(&time))
 	{
-		glbin_interpolator.ChangeTime(index, time);
+		if (auto panel = GetMoviePanel())
+			panel->SetKeyframeTime(int(id), time);
+
+		SetText(m_editing_item, 1, str);
 	}
 }
 
@@ -314,16 +295,17 @@ void KeyListCtrl::OnDurationText(wxCommandEvent& event)
 	if (m_editing_item == -1)
 		return;
 
-	wxString str = GetItemText(m_editing_item);
 	long id;
-	str.ToLong(&id);
+	GetItemText(m_editing_item).ToLong(&id);
 
-	int index = glbin_interpolator.GetKeyIndex(int(id));
-	str = m_duration_text->GetValue();
+	wxString str = m_duration_text->GetValue();
+
 	double duration;
 	if (str.ToDouble(&duration))
 	{
-		glbin_interpolator.ChangeDuration(index, duration);
+		if (auto panel = GetMoviePanel())
+			panel->SetKeyframeDuration(int(id), duration);
+
 		SetText(m_editing_item, 2, str);
 	}
 }
@@ -333,19 +315,18 @@ void KeyListCtrl::OnInterpoCmb(wxCommandEvent& event)
 	if (m_editing_item == -1)
 		return;
 
-	wxString str = GetItemText(m_editing_item);
 	long id;
-	str.ToLong(&id);
+	GetItemText(m_editing_item).ToLong(&id);
 
-	int index = glbin_interpolator.GetKeyIndex(int(id));
-	FlKeyGroup* keygroup = glbin_interpolator.GetKeyGroup(index);
-	if (keygroup)
-	{
-		int sel = m_interpolation_cmb->GetSelection();
-		keygroup->type = sel;
-		str = sel == 0 ? "Linear" : "Smooth";
-		SetText(m_editing_item, 3, str);
-	}
+	int sel = m_interpolation_cmb->GetSelection();
+
+	if (auto panel = GetMoviePanel())
+		panel->SetKeyframeInterpolation(int(id), sel);
+
+	wxString str =
+		sel == 0 ? "Linear" : "Smooth";
+
+	SetText(m_editing_item, 3, str);
 }
 
 void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
@@ -353,18 +334,19 @@ void KeyListCtrl::OnDescritionText(wxCommandEvent& event)
 	if (m_editing_item == -1)
 		return;
 
-	wxString str = GetItemText(m_editing_item);
 	long id;
-	str.ToLong(&id);
+	GetItemText(m_editing_item).ToLong(&id);
 
-	int index = glbin_interpolator.GetKeyIndex(int(id));
-	FlKeyGroup* keygroup = glbin_interpolator.GetKeyGroup(index);
-	if (keygroup)
+	wxString str = m_description_text->GetValue();
+
+	if (auto panel = GetMoviePanel())
 	{
-		str = m_description_text->GetValue();
-		keygroup->desc = str.ToStdWstring();
-		SetText(m_editing_item, 4, str);
+		panel->SetKeyframeDescription(
+			int(id),
+			str.ToStdWstring());
 	}
+
+	SetText(m_editing_item, 4, str);
 }
 
 void KeyListCtrl::OnKeyDown(wxKeyEvent& event)
@@ -399,25 +381,34 @@ void KeyListCtrl::OnBeginDrag(wxListEvent& event)
 void KeyListCtrl::OnDragging(wxMouseEvent& event)
 {
 	wxPoint pos = event.GetPosition();
+
 	int flags = wxLIST_HITTEST_ONITEM;
-	long index = HitTest(pos, flags, NULL); // got to use it at last
-	if (index >= 0 && index != m_editing_item && index != m_dragging_to_item)
+	long target = HitTest(pos, flags, NULL);
+
+	if (target < 0 ||
+		target == m_editing_item ||
+		target == m_dragging_to_item)
 	{
-		m_dragging_to_item = index;
-
-		//change the content in the interpolator
-		if (m_editing_item > m_dragging_to_item)
-			glbin_interpolator.MoveKeyBefore(m_editing_item, m_dragging_to_item);
-		else
-			glbin_interpolator.MoveKeyAfter(m_editing_item, m_dragging_to_item);
-
-		DeleteItem(m_editing_item);
-		InsertItem(m_dragging_to_item, "", 0);
-		UpdateText();
-
-		m_editing_item = m_dragging_to_item;
-		SelectItemSilently(m_editing_item);
+		return;
 	}
+
+	long sourceId;
+	GetItemText(m_editing_item).ToLong(&sourceId);
+
+	long targetId;
+	GetItemText(target).ToLong(&targetId);
+
+	bool before = m_editing_item > target;
+
+	if (auto panel = GetMoviePanel())
+	{
+		panel->MoveKeyframe(
+			int(sourceId),
+			int(targetId),
+			before);
+	}
+
+	m_dragging_to_item = target;
 }
 
 void KeyListCtrl::OnEndDrag(wxMouseEvent& event)
@@ -1432,7 +1423,12 @@ void MoviePanel::UpdateParamKeyDuration(double dval)
 
 void MoviePanel::UpdateParamList()
 {
-	m_keylist->Update();
+	std::vector<KeyframeInfo> keys;
+
+	if (auto agent = m_agent->As<MoviePanelAgent>())
+		m_agent->GetKeyframes(keys);
+
+	m_keylist->SetKeyframes(keys);
 }
 
 void MoviePanel::UpdateParamListSelect(int ival)
@@ -1553,6 +1549,46 @@ void MoviePanel::UpdateScriptListSelect(int ival)
 		//wxSize ss = m_script_list->GetItemSpacing();
 		//m_script_list->ScrollList(0, ss.y*ival);
 	}
+}
+
+void MoviePanel::SelectKeyframe(int id)
+{
+
+}
+
+void MoviePanel::DeleteKeyframe(int id)
+{
+
+}
+
+void MoviePanel::DeleteAllKeyframes()
+{
+
+}
+
+void MoviePanel::SetKeyframeTime(int id, double time)
+{
+
+}
+
+void MoviePanel::SetKeyframeDuration(int id, double duration)
+{
+
+}
+
+void MoviePanel::SetKeyframeInterpolation(int id, int type)
+{
+
+}
+
+void MoviePanel::SetKeyframeDescription(int id, const std::wstring& description)
+{
+
+}
+
+void MoviePanel::MoveKeyframe(int sourceId, int targetId, bool before)
+{
+
 }
 
 void MoviePanel::SetFps(double val)
