@@ -1194,4 +1194,16 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerDeleteAllKeys "ruler delete all keys"
 #define gstRulerToggleDisp "ruler toggle disp"
 
+//mesh prop panel
+#define gstMeshOutline "mesh outline"
+#define gstMeshSyncGroup "mesh sync group"
+#define gstMeshResetDefault "mesh reset default"
+#define gstMeshSaveDefault "mesh save default"
+#define gstMeshEnableShading "mesh enable shading"
+#define gstMeshShine "mesh shine"
+#define gstMeshEnableAlpha "mesh enable alpha"
+#define gstMeshEnableScale "mesh enable scale"
+#define gstMeshEnableShadow "mesh enable shadow"
+#define gstEnableShadowDir "enable shadow dir"
+
 #endif//NAMES_HPP

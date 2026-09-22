@@ -30,8 +30,6 @@ DEALINGS IN THE SOFTWARE.
 
 #include <PropPanel.h>
 
-class MeshData;
-class MeshGroup;
 class wxSingleSlider;
 class wxUndoableColorPicker;
 class wxColourPickerEvent;
@@ -57,11 +55,6 @@ public:
 		const wxString& name = "MeshPropPanel");
 	~MeshPropPanel();
 
-	void SetMeshData(const std::shared_ptr<MeshData>& md);
-	std::shared_ptr<MeshData> GetMeshData();
-	void SetMeshGroup(const std::shared_ptr<MeshGroup>& mg);
-	std::shared_ptr<MeshGroup> GetMeshGroup();
-
 	//update
 	void UpdateOutline(bool bval);
 	void UpdateLegend(bool bval);
@@ -72,14 +65,23 @@ public:
 	void UpdateShadowDir(bool bval, double dval);
 	void UpdateMeshScale(bool bval, double dval);
 
-	void EnableShadowDir(bool);
-	void SetShadowDir(double, bool);
+	//get
+	bool GetOutline();
+	bool GetSyncGroup();
+	bool GetLegend();
+	bool GetEnableShading();
+	double GetShading();
+	double GetShine();
+	bool GetEnableAlpha();
+	double GetAlpha();
+	bool GetEnableScale();
+	double GetScale();
+	bool GetEnableShadow();
+	double GetShadow();
+	bool GetEnableShadowDir();
+	double GetShadowDir();
 
 private:
-	std::weak_ptr<MeshGroup> m_group;
-	std::weak_ptr<MeshData> m_md;
-	bool m_sync_group;
-
 	wxUndoableToolbar* m_options_toolbar;
 
 	wxTextCtrl *m_color_text;
@@ -107,15 +109,8 @@ private:
 	wxTextCtrl* m_scale_text;
 
 private:
-	void SetOutline();
-	void SetSyncGroup();
-	void SetLegend();
-	void SaveDefault();
-	void ResetDefault();
-
 	void OnOptions(wxCommandEvent& event);
 
-	void OnColorChange(const wxColor& c);
 	void OnColorTextChange(wxCommandEvent& event);
 	void OnColorTextFocus(wxMouseEvent& event);
 	void OnColorBtn(wxColourPickerEvent& event);

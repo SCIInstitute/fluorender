@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 class MeshPropPanel;
 class MeshData;
+class MeshGroup;
 
 class MeshPropPanelAgent : public Agent
 {
@@ -51,6 +52,13 @@ public:
 		return m_md.lock();
 	}
 
+	std::shared_ptr<MeshGroup> GetGroup() const
+	{
+		return m_group.lock();
+	}
+
+	void SetColor(const fluo::Color& color);
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -65,10 +73,49 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstMeshProps,
+		gstOutline,
+		gstLegend,
+		gstMeshColor,
+		gstMeshAlpha,
+		gstMeshShading,
+		gstMeshShadow,
+		gstShadowDir,
+		gstMeshScale,
+		gstMeshOutline,
+		gstMeshSyncGroup,
+		gstMeshResetDefault,
+		gstMeshSaveDefault,
+		gstMeshEnableShading,
+		gstMeshShine,
+		gstMeshEnableAlpha,
+		gstMeshEnableScale,
+		gstMeshEnableShadow,
+		gstEnableShadowDir
 	};
 
 	std::weak_ptr<MeshData> m_md;
+	std::weak_ptr<MeshGroup> m_group;
+	bool m_sync_group;
+
+private:
+	void SetOutline();
+	void SetSyncGroup();
+	void SetLegend();
+	void SaveDefault();
+	void ResetDefault();
+
+	void SetEnableShading();
+	void SetShading();
+	void SetShine();
+	void SetEnableAlpha();
+	void SetAlpha();
+	void SetEnableScale();
+	void SetScale();
+	void SetEnableShadow();
+	void SetShadow();
+	void SetEnableShadowDir();
+	void SetShadowDir();
 };
 
 #endif // MeshPropPanelAgent_h
