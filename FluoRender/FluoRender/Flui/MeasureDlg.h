@@ -162,6 +162,7 @@ struct RulerCurrentInfo
 {
 	int index = -1;
 
+	flrd::RulerMode mode;
 	std::string name;
 	std::string center;
 	std::string color_text;
@@ -274,6 +275,7 @@ public:
 
 	//get
 	std::set<int> GetCurrentSelection();
+	int GetFocusSelection();
 
 private:
 	//list ctrl

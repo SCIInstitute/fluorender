@@ -40,6 +40,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Coordinator.h>
 #include <GlobalStates.h>
 #include <VolumeData.h>
+#include <VolumeRenderer.h>
+#include <ModalDlg.h>
+#include <Project.h>
+#include <DistCalculator.h>
 
 MeasureDlgAgent::MeasureDlgAgent(
 	MeasureDlg* dlg) :
@@ -171,6 +175,10 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void MeasureDlgAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstCurrentRuler))
+	{
+		SetSelectedRulers();
+	}
 	if (request.HasValue(gstRulerLocator))
 	{
 		Locator();
@@ -266,6 +274,30 @@ void MeasureDlgAgent::UpdateData(const UpdateRequest& request)
 	if (request.HasValue(gstRulerExport))
 	{
 		Export();
+	}
+	if (request.HasValue(gstRulerNewGroup))
+	{
+		NewGroup();
+	}
+	if (request.HasValue(gstRulerGroupRulers))
+	{
+		GroupRulers();
+	}
+	if (request.HasValue(gstRulerToggleGroupDisp))
+	{
+		ToggleGroupDisp();
+	}
+	if (request.HasValue(gstRulerDeleteKey))
+	{
+		DeleteKey();
+	}
+	if (request.HasValue(gstRulerDeleteAllKeys))
+	{
+		DeleteAllKeys();
+	}
+	if (request.HasValue(gstRulerToggleDisp))
+	{
+		ToggleDisplay();
 	}
 }
 
@@ -488,6 +520,7 @@ RulerCurrentInfo MeasureDlgAgent::GetCurrentRulerInfo()
 	}
 
 	info.index = glbin_ruler_handler.GetRulerIndex();
+	info.mode = ruler->GetRulerMode();
 	info.name = ws2s(ruler->GetName());
 	info.center = PointToString(ruler->GetCenter());
 	info.color = color;
@@ -576,10 +609,24 @@ void MeasureDlgAgent::ToggleDisplay()
 	auto view = glbin_current.render_view.lock();
 	std::set<Agent*> target{ this };
 	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
-	if (view)
-		NotifyViewUpdate(
-			{ gstRulerListDisp, gstRulerDisp },
-			target);
+	NotifyViewUpdate({ gstRulerListDisp, gstRulerDisp }, target);
+}
+
+void MeasureDlgAgent::SetSelectedRulers()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetSelectedRulers(sel);
+	int focus = dlg->GetFocusSelection();
+	if (focus > -1)
+		glbin_ruler_handler.SetEditingRuler(focus);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerTransient, gstRulerInterpolation, gstRulerDisp, gstColormap }, target);
 }
 
 void MeasureDlgAgent::SetCurrentRuler(const RulerCurrentInfo& info)
@@ -601,6 +648,186 @@ void MeasureDlgAgent::SetCurrentRuler(const RulerCurrentInfo& info)
 	if (info.color_set)
 		ruler->SetColor(info.color);
 	NotifyViewUpdate({ gstRulerListCur });
+}
+
+void MeasureDlgAgent::SetIntensityMethod(int ival)
+{
+	glbin_settings.m_point_volume_mode = ival;
+}
+
+void MeasureDlgAgent::SetTransient(bool bval)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetTransient(bval, sel);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
+}
+
+void MeasureDlgAgent::SetUseTransfer(bool bval)
+{
+	glbin_settings.m_ruler_use_transf = bval;
+}
+
+void MeasureDlgAgent::SetDispPoint(bool bval)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetDisplay(bval, sel, 0);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
+}
+
+void MeasureDlgAgent::SetDispLine(bool bval)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetDisplay(bval, sel, 1);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
+}
+
+void MeasureDlgAgent::SetDispName(bool bval)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetDisplay(bval, sel, 2);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
+}
+
+void MeasureDlgAgent::SetDispAll(bool bval)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetDisplay(bval, sel, 0);
+	glbin_ruler_handler.SetDisplay(bval, sel, 1);
+	glbin_ruler_handler.SetDisplay(bval, sel, 2);
+	glbin_ruler_handler.SetDisplay(bval, sel);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
+}
+
+void MeasureDlgAgent::SetRelaxData(int ival)
+{
+	glbin_settings.m_ruler_relax_type = ival;
+}
+
+void MeasureDlgAgent::SetRelaxValue(double dval)
+{
+	glbin_dist_calculator.SetF1(dval);
+	glbin_settings.m_ruler_relax_f1 = dval;
+}
+
+void MeasureDlgAgent::SetGroup(unsigned int ival)
+{
+	glbin_ruler_handler.SetGroup(ival);
+}
+
+void MeasureDlgAgent::SetInterpolation(int ival)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.SetInterp(ival, sel);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
+}
+
+void MeasureDlgAgent::SetAlignCenter(bool bval)
+{
+	glbin_aligner.SetAlignCenter(bval);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstAlignCenter }, target);
+}
+
+void MeasureDlgAgent::AlignRuler(int ival)
+{
+	auto ruler = glbin_current.GetRuler();
+	if (!ruler)
+		return;
+
+	glbin_aligner.SetRuler(ruler);
+	glbin_aligner.SetAxisType(ival);
+	glbin_aligner.AlignRuler();
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target;
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstNull }, target);
+}
+
+void MeasureDlgAgent::AlignPca(int ival)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	flrd::RulerList list;
+	glbin_ruler_handler.GetRulerList(sel, list);
+	glbin_aligner.SetRulerList(list);
+	glbin_aligner.SetAxisType(ival);
+	glbin_aligner.AlignPca(true);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target;
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstNull }, target);
+}
+
+bool MeasureDlgAgent::GetSelectedRulerText(
+	std::wstring& text) const
+{
+	auto ruler = glbin_current.GetRuler();
+	if (!ruler)
+		return false;
+
+	auto cp = ruler->GetCenter();
+
+	text = wxString::Format(
+		"%.2f\t%.2f\t%.2f",
+		cp.x(), cp.y(), cp.z()).ToStdWstring();
+
+	return true;
 }
 
 void MeasureDlgAgent::Locator()
@@ -690,22 +917,32 @@ void MeasureDlgAgent::RulerMovePencil()
 
 void MeasureDlgAgent::RulerFlip()
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.Flip(sel);
 
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
 }
 
 void MeasureDlgAgent::RulerAvg()
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.AddAverage(sel);
 
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
 }
 
 void MeasureDlgAgent::Lock()
@@ -716,28 +953,42 @@ void MeasureDlgAgent::Lock()
 
 void MeasureDlgAgent::Relax()
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.Relax(sel);
 
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
 }
 
 void MeasureDlgAgent::DeleteSelection()
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.DeleteSelection(sel);
-	FluoRefresh(2, { gstRulerList, gstRulerListSel },
-		{ glbin_current.GetViewId() });
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList, gstRulerListSel }, target);
 }
 
 void MeasureDlgAgent::DeleteAll()
 {
 	glbin_ruler_handler.DeleteAll(false);
-	FluoRefresh(2, { gstRulerList, gstRulerListSel },
-		{ glbin_current.GetViewId() });
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList, gstRulerListSel }, target);
 }
 
 void MeasureDlgAgent::DeletePoint()
@@ -748,59 +999,77 @@ void MeasureDlgAgent::DeletePoint()
 
 void MeasureDlgAgent::Prune()
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.Prune(sel);
 
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
 }
 
 void MeasureDlgAgent::Profile()
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.Profile(sel);
 
-	FluoUpdate({ gstRulerProfile });
+	UpdateDataToUI({ gstRulerProfile });
 }
 
 void MeasureDlgAgent::Distance()
 {
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
 	ModalDlg fopendlg(
-		this, "Save Analysis Data", "", "",
+		dlg, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxString wxstr = fopendlg.GetPath();
-		std::set<int> sel;
-		m_ruler_list->GetCurrSelection(sel);
+		auto sel = dlg->GetCurrentSelection();
 		glbin_ruler_handler.Distance(sel, wxstr.ToStdWstring());
 	}
 }
 
 void MeasureDlgAgent::Project()
 {
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
 	ModalDlg fopendlg(
-		this, "Save Analysis Data", "", "",
+		dlg, "Save Analysis Data", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	int rval = fopendlg.ShowModal();
 	if (rval == wxID_OK)
 	{
 		wxString wxstr = fopendlg.GetPath();
-		std::set<int> sel;
-		m_ruler_list->GetCurrSelection(sel);
+		auto sel = dlg->GetCurrentSelection();
 		glbin_ruler_handler.Project(sel, wxstr.ToStdWstring());
 	}
 }
 
 void MeasureDlgAgent::Export()
 {
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
 	ModalDlg fopendlg(
-		m_frame, "Export rulers", "", "",
+		dlg, "Export rulers", "", "",
 		"Text file (*.txt)|*.txt",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
@@ -811,5 +1080,60 @@ void MeasureDlgAgent::Export()
 		wxString filename = fopendlg.GetPath();
 		glbin_project.ExportRulerList(filename.ToStdWstring());
 	}
+}
+
+void MeasureDlgAgent::NewGroup()
+{
+	glbin_ruler_handler.NewGroup();
+}
+
+void MeasureDlgAgent::GroupRulers()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.GroupRulers(sel);
+	UpdateDataToUI({ gstRulerList });
+}
+
+void MeasureDlgAgent::ToggleGroupDisp()
+{
+	glbin_ruler_handler.ToggleGroupDisp();
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerListDisp }, target);
+}
+
+void MeasureDlgAgent::DeleteKey()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.DeleteKey(sel);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
+}
+
+void MeasureDlgAgent::DeleteAllKeys()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	auto sel = dlg->GetCurrentSelection();
+	glbin_ruler_handler.DeleteAllKeys(sel);
+
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstRulerList }, target);
 }
 

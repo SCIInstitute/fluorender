@@ -1041,6 +1041,13 @@ std::set<int> MeasureDlg::GetCurrentSelection()
 	return sel;
 }
 
+int MeasureDlg::GetFocusSelection()
+{
+	return m_ruler_list->GetFocusedItem();
+	//if (focus == -1)
+	//	return;
+}
+
 void MeasureDlg::OnToolbar(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MeasureDlgAgent>();
@@ -1131,94 +1138,82 @@ void MeasureDlg::OnToolbar(wxCommandEvent& event)
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 {
-	glbin_settings.m_point_volume_mode = event.GetId();
+	int ival = event.GetId();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetIntensityMethod(ival);
 }
 
 void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 {
 	bool bval = m_transient_chk->GetValue();
-
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetTransient(bval, sel);
-
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetTransient(bval);
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 {
-	glbin_settings.m_ruler_use_transf = m_use_transfer_chk->GetValue();
+	bool bval = m_use_transfer_chk->GetValue();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetUseTransfer(bval);
 }
 
 void MeasureDlg::OnDispPointCheck(wxCommandEvent& event)
 {
 	bool bval = m_disp_point_chk->GetValue();
-
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetDisplay(bval, sel, 0);
-
-	FluoRefresh(2, { gstRulerList, gstRulerDisp },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetDispPoint(bval);
 }
 
 void MeasureDlg::OnDispLineCheck(wxCommandEvent& event)
 {
 	bool bval = m_disp_line_chk->GetValue();
-
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetDisplay(bval, sel, 1);
-
-	FluoRefresh(2, { gstRulerList, gstRulerDisp },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetDispLine(bval);
 }
 
 void MeasureDlg::OnDispNameCheck(wxCommandEvent& event)
 {
 	bool bval = m_disp_name_chk->GetValue();
-
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetDisplay(bval, sel, 2);
-
-	FluoRefresh(2, { gstRulerList, gstRulerDisp },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetDispName(bval);
 }
 
 void MeasureDlg::OnDispAllCheck(wxCommandEvent& event)
 {
 	bool bval = m_disp_all_chk->GetValue();
-
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetDisplay(bval, sel, 0);
-	glbin_ruler_handler.SetDisplay(bval, sel, 1);
-	glbin_ruler_handler.SetDisplay(bval, sel, 2);
-	glbin_ruler_handler.SetDisplay(bval, sel);
-
-	FluoRefresh(2, { gstRulerList, gstRulerDisp },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetDispAll(bval);
 }
 
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 {
-	glbin_settings.m_ruler_relax_type = m_relax_data_cmb->GetSelection();
+	int ival = m_relax_data_cmb->GetSelection();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetRelaxData(ival);
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
-	glbin_dist_calculator.SetF1(dval);
-	glbin_settings.m_ruler_relax_f1 = dval;
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetRelaxValue(dval);
 }
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 {
 	double dval = m_relax_value_spin->GetValue();
-	glbin_dist_calculator.SetF1(dval);
-	glbin_settings.m_ruler_relax_f1 = dval;
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetRelaxValue(dval);
 }
 
 //ruler list
@@ -1227,121 +1222,108 @@ void MeasureDlg::OnGroupText(wxCommandEvent& event)
 	unsigned long ival;
 	if (!m_group_text->GetValue().ToULong(&ival))
 		return;
-
-	glbin_ruler_handler.SetGroup(ival);
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetRelaxValue(ival);
 }
 
 void MeasureDlg::OnNewGroup(wxCommandEvent& event)
 {
-	glbin_ruler_handler.NewGroup();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerNewGroup });
 }
 
 void MeasureDlg::OnChgGroup(wxCommandEvent& event)
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.GroupRulers(sel);
-	FluoUpdate({ gstRulerList });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerGroupRulers });
 }
 
 void MeasureDlg::OnSelGroup(wxCommandEvent& event)
 {
-	FluoUpdate({ gstRulerGroupSel });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerGroupSel });
 }
 
 void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 {
-	glbin_ruler_handler.ToggleGroupDisp();
-	FluoRefresh(2, { gstRulerListDisp },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerToggleGroupDisp });
 }
 
 //interpolation/key
 void MeasureDlg::OnInterpCmb(wxCommandEvent& event)
 {
 	int ival = m_interp_cmb->GetSelection();
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetInterp(ival, sel);
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetInterpolation(ival);
 }
 
 void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.DeleteKey(sel);
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerDeleteKey });
 }
 
 void MeasureDlg::OnDeleteAllKeyBtn(wxCommandEvent& event)
 {
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.DeleteAllKeys(sel);
-	FluoRefresh(2, { gstRulerList },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerDeleteAllKeys });
 }
 
 void MeasureDlg::OnAlignCenterChk(wxCommandEvent& event)
 {
 	bool bval = m_align_center->GetValue();
-	glbin_aligner.SetAlignCenter(bval);
-	FluoRefresh(1, { gstAlignCenter }, { -1 });
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->SetAlignCenter(bval);
 }
 
 void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
-	auto ruler = glbin_current.GetRuler();
-	if (!ruler)
-		return;
-
-	glbin_aligner.SetRuler(ruler);
-	glbin_aligner.SetAxisType(event.GetId());
-	glbin_aligner.AlignRuler();
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	int ival = event.GetId();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->AlignRuler(ival);
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 {
-	flrd::RulerList list;
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.GetRulerList(sel, list);
-	glbin_aligner.SetRulerList(list);
-	glbin_aligner.SetAxisType(event.GetId());
-	glbin_aligner.AlignPca(true);
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	int ival = event.GetId();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->AlignPca(ival);
 }
 
 void MeasureDlg::OnKeyDown(wxKeyEvent& event)
 {
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (!agent)
+		return;
+
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		DeleteSelection();
+	{
+		agent->UpdateUIToData({ gstRulerDeleteSelection });
+	}
 	if (event.GetKeyCode() == wxKeyCode('C') &&
 		wxGetKeyState(WXK_CONTROL))
 	{
-		long item = m_ruler_list->GetNextItem(-1,
-			wxLIST_NEXT_ALL,
-			wxLIST_STATE_SELECTED);
-		if (item != -1)
+		std::wstring text;
+		if (agent->GetSelectedRulerText(text))
 		{
-			auto ruler = glbin_current.GetRuler();
-			if (ruler)
+			if (wxTheClipboard->Open())
 			{
-				fluo::Point cp = ruler->GetCenter();
-				wxString center = wxString::Format("%.2f\t%.2f\t%.2f",
-					cp.x(), cp.y(), cp.z());
-				if (wxTheClipboard->Open())
-				{
-					wxTheClipboard->SetData(new wxTextDataObject(center));
-					wxTheClipboard->Close();
-				}
+				wxTheClipboard->SetData(
+					new wxTextDataObject(text));
+				wxTheClipboard->Close();
 			}
 		}
 	}
@@ -1374,18 +1356,18 @@ void MeasureDlg::OnMenuItem(wxCommandEvent& event)
 {
 	wxObject* obj = event.GetEventObject();
 	wxMenu* menu = dynamic_cast<wxMenu*>(obj);
-	if (!menu)
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (!menu || !agent)
 	{
 		event.Skip();
 		return;
 	}
 
 	int id = event.GetId();
-
 	switch (id)
 	{
 	case ID_ToggleDisp:
-		ToggleDisplay();
+		agent->UpdateUIToData({ gstRulerToggleDisp });
 		break;
 	}
 }
@@ -1395,32 +1377,26 @@ void MeasureDlg::OnSelection(wxListEvent& event)
 	if (m_ruler_list->m_silent_select)
 		return;
 
-	long focus = m_ruler_list->GetFocusedItem();
-	if (focus == -1)
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (!agent)
 		return;
-	glbin_ruler_handler.SetEditingRuler(focus);
-	std::set<int> sel;
-	m_ruler_list->GetCurrSelection(sel);
-	glbin_ruler_handler.SetSelectedRulers(sel);
 
-	auto ruler = glbin_current.GetRuler();
-	if (!ruler)
-		return;
-	flrd::RulerMode rul_mode = ruler->GetRulerMode();
-	bool use_color = ruler->GetUseColor();
-	fluo::Color color = ruler->GetColor();
-	m_ruler_list->StartEdit(static_cast<int>(rul_mode), use_color, color);
-	
-	FluoRefresh(0, { gstRulerTransient, gstRulerInterpolation, gstRulerDisp, gstColormap },
-		{ glbin_current.GetViewId() });
+	agent->UpdateUIToData({ gstCurrentRuler });
+
+	RulerCurrentInfo info = agent->GetCurrentRulerInfo();
+	if (info.index > -1)
+	{
+		m_ruler_list->StartEdit(
+			static_cast<int>(info.mode),
+			info.color_set,
+			info.color);
+
+	}
 }
 
 void MeasureDlg::OnEndSelection(wxListEvent& event)
 {
 	m_ruler_list->EndEdit();
-	//std::set<int> sel;
-	//m_ruler_list->GetCurrSelection(sel);
-	//glbin_ruler_handler.SetSelRulers(sel);
 	SetCurrentRuler();
 }
 
@@ -1440,5 +1416,7 @@ void MeasureDlg::OnScrollMouse(wxMouseEvent& event)
 
 void MeasureDlg::OnAct(wxListEvent& event)
 {
-	ToggleDisplay();
+	auto agent = m_agent->As<MeasureDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRulerToggleDisp });
 }

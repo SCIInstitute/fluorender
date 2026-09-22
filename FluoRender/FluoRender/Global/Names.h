@@ -1187,5 +1187,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerDistance "ruler distance"
 #define gstRulerProject "ruler project"
 #define gstRulerExport "ruler export"
+#define gstRulerNewGroup "ruler new group"
+#define gstRulerGroupRulers "ruler group rulers"
+#define gstRulerToggleGroupDisp "ruler toggle group disp"
+#define gstRulerDeleteKey "ruler delete key"
+#define gstRulerDeleteAllKeys "ruler delete all keys"
+#define gstRulerToggleDisp "ruler toggle disp"
 
 #endif//NAMES_HPP

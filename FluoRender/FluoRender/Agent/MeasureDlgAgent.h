@@ -48,6 +48,24 @@ public:
 	MeasureDlg* GetDialog() const;
 
 	void SetCurrentRuler(const RulerCurrentInfo& info);
+	void SetIntensityMethod(int ival);
+	void SetTransient(bool bval);
+	void SetUseTransfer(bool bval);
+	void SetDispPoint(bool bval);
+	void SetDispLine(bool bval);
+	void SetDispName(bool bval);
+	void SetDispAll(bool bval);
+	void SetRelaxData(int ival);
+	void SetRelaxValue(double dval);
+	void SetGroup(unsigned int ival);
+	void SetInterpolation(int ival);
+	void SetAlignCenter(bool bval);
+	void AlignRuler(int ival);
+	void AlignPca(int ival);
+
+	bool GetSelectedRulerText(
+		std::wstring& text) const;
+	RulerCurrentInfo GetCurrentRulerInfo();
 
 protected:
 	std::span < const std::string_view>
@@ -67,12 +85,12 @@ private:
 	};
 
 	RulerListInfo GetRulerListInfo();
-	RulerCurrentInfo GetCurrentRulerInfo();
 	RulerListDisplayInfo GetRulerListDisplayInfo();
 	RulerGroupSelectionInfo GetGroupSelectionInfo();
 	RulerProfileInfo GetProfileInfo();
 
 	void ToggleDisplay();
+	void SetSelectedRulers();
 
 	//toolbar1
 	void Locator();
@@ -104,6 +122,12 @@ private:
 	void Project();
 	void Export();
 
+	//others
+	void NewGroup();
+	void GroupRulers();
+	void ToggleGroupDisp();
+	void DeleteKey();
+	void DeleteAllKeys();
 };
 
 #endif // MeasureDlgAgent_h
