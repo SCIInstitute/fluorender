@@ -81,32 +81,55 @@ private:
 	void SetSliderStyle();
 	//frames
 	void SetScrollFrame();
-	void SetFullFrame(int val);
-	void SetStartFrame(int val);
-	void SetEndFrame(int val);
-	void SetCurrentFrame(int val, bool notify);
-	void SetCurrentTime(double val, bool notify);
+	void SetStartFrame();
+	void SetEndFrame();
+	void SetCurrentFrame();
+	void SetCurrentTime();
+	void SetFullFrame();
 	void Play();
 	void PlayInv();
 	void Rewind();
 	void Forward();
-	void Loop(bool val);
+	void Loop();
 	void IncFrame();
 	void DecFrame();
-	void Save(const std::wstring& filename);
+	void Save();
+
+	void SetRotateEnable();
+	void SetRotateAxis();
+	void SetRotateDeg();
+	void SetRotateInterp();
+	void SetSeqMode();
+	void SetSeqDec();
+	void SetSeqInc();
+	void SetSeqNum();
 
 	//keyframe movie
-	void SetKeyframeMovie(bool val);
+	void SetKeyframeNum();
+	void SetKeyframeMovie();
+	void SetKeyDuration();
+	void SetKeyInterpolation();
+	void InsertKey();
+
+	//lock
+	void SetCameraLock();
+	void SetCameraLockType();
+	void SetCameraLockCenter();
+
+	//preset
+	void GenerateKeys();
 
 	//crop
-	void SetCropEnable(bool val);
-	void SetCropValues(int, int, int, int);
-	void SetScalebarPos(int pos);
-	void SetScalebarValues(int x, int y);
+	void SetCropEnable();
+	void SetCropValues();
+	void SetScalebarPos();
+	void SetScalebarValues();
 
 	//script
-	void EnableScript(bool val, const std::wstring& filename = L"");
-
+	void EnableScript();
+	void SetScriptFile();
+	void LoadScriptFile();
+	void SelectScriptFile();
 };
 
 #endif // MoviePanelAgent_h

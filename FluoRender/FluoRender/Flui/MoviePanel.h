@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/listctrl.h>
 #include <wx/spinbutt.h>
 #include <wx/tglbtn.h>
+#include <wx/filedlgcustomize.h>
 #include <vector>
 #include <string>
 
@@ -65,6 +66,25 @@ struct ScriptInfo
 {
 	std::string id;
 	std::wstring filename;
+};
+
+struct MovViewListInfo
+{
+	std::vector<std::wstring> views;
+};
+
+struct CropInfo
+{
+	int x;
+	int y;
+	int w;
+	int h;
+};
+
+struct ScalebarOffset
+{
+	int x;
+	int y;
 };
 
 class KeyListCtrl : public wxListCtrl
@@ -140,9 +160,59 @@ private:
 	void OnMouseScroll(wxMouseEvent& event);
 };
 
-struct MovViewListInfo
+struct SaveMovieOptions
 {
-	std::vector<std::wstring> views;
+	bool project_save = false;
+	double movie_length_sec = 0.0;
+
+	bool embed_project_files = false;
+
+	int dpi = 72;
+
+	bool enlarge_output = false;
+	double enlarge_scale = 1.0;
+
+	bool compress = false;
+	bool save_alpha = false;
+	bool save_float = false;
+
+	double bitrate = 20.0;
+
+	// calculated on transfer back
+	double estimated_size_mb = 0.0;
+};
+
+class SaveMovieHook :
+	public wxFileDialogCustomizeHook
+{
+public:
+	SaveMovieHook(const SaveMovieOptions& options);
+
+	void AddCustomControls(
+		wxFileDialogCustomize& customizer) override;
+
+	void TransferDataFromCustomControls() override;
+
+	const SaveMovieOptions& GetOptions() const
+	{
+		return m_options;
+	}
+
+private:
+	SaveMovieOptions m_options;
+
+	wxFileDialogCheckBox* m_embed_chk = nullptr;
+
+	wxFileDialogTextCtrl* m_dpi_txt = nullptr;
+
+	wxFileDialogCheckBox* m_enlarge_chk = nullptr;
+	wxFileDialogTextCtrl* m_enlarge_txt = nullptr;
+
+	wxFileDialogCheckBox* m_compress_chk = nullptr;
+	wxFileDialogCheckBox* m_alpha_chk = nullptr;
+	wxFileDialogCheckBox* m_float_chk = nullptr;
+
+	wxFileDialogTextCtrl* m_bitrate_txt = nullptr;
 };
 
 class MoviePanel : public TabbedPanel
@@ -223,6 +293,32 @@ public:
 	double GetMovieLength();
 	int GetViewIndex();
 	int GetProgressScroll();
+	int GetStartFrame();
+	int GetEndFrame();
+	int GetCurrentFrame();
+	double GetCurTime();
+	int GetFullFrame();
+	bool GetLoop();
+	bool GetRotateEnable();
+	int GetRotateAxis();
+	int GetRotateDeg();
+	int GetRotateInterp();
+	int GetSeqMode();
+	int GetSeqNum();
+	int GetKeyframeNum();
+	bool GetKeyframeEnable();
+	double GetKeyDuration();
+	int GetKeyInterpolation();
+	bool GetCameraLock();
+	int GetCameraLockType();
+	int GetPresetNum();
+	bool GetCropEnable();
+	CropInfo GetCropValues();
+	int GetScalebarPos();
+	ScalebarOffset GetScalebarOffset();
+	bool GetScriptEnable();
+	std::wstring GetScriptFileName();
+	std::string GetSelScriptName();
 
 private:
 	//common controls
@@ -403,17 +499,6 @@ private:
 	void OnScriptFileBtn(wxCommandEvent& event);
 	void OnScriptListSelected(wxListEvent &event);
 
-	//help
-	void OnChEnlargeCheck(wxCommandEvent& event);
-	void OnSlEnlargeScroll(wxScrollEvent& event);
-	void OnTxEnlargeText(wxCommandEvent& event);
-	void OnMovieQuality(wxCommandEvent& event);
-	void OnCh1Check(wxCommandEvent& event);
-	void OnCh2Check(wxCommandEvent& event);
-	void OnCh3Check(wxCommandEvent& event);
-	void OnDpiText(wxCommandEvent& event);
-	void OnChEmbedCheck(wxCommandEvent& event);
-	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 };
 
 #endif//_MOVIEPANEL_H_

@@ -127,19 +127,10 @@ void KeyListCtrl::Append(int id, int time, int duration, int interp, const std::
 
 void KeyListCtrl::DeleteSel()
 {
-	long item = GetNextItem(
-		-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item == -1)
-		return;
-
-	long id;
-	GetItemText(item).ToLong(&id);
-
 	if (auto panel = GetMoviePanel())
-		panel->DeleteKeyframe(int(id));
+	{
+		panel->DeleteKeyframe(panel->GetKeyframeNum());
+	}
 }
 
 void KeyListCtrl::DeleteAll()
@@ -1623,8 +1614,7 @@ double MoviePanel::GetFps()
 	double val;
 	if (str.ToDouble(&val))
 		return val;
-	else
-		return 1.0;
+	return 1.0;
 }
 
 double MoviePanel::GetMovieLength()
@@ -1633,8 +1623,7 @@ double MoviePanel::GetMovieLength()
 	double val;
 	if (str.ToDouble(&val))
 		return val;
-	else
-		return 1.0;
+	return 1.0;
 }
 
 int MoviePanel::GetViewIndex()
@@ -1645,6 +1634,230 @@ int MoviePanel::GetViewIndex()
 int MoviePanel::GetProgressScroll()
 {
 	return m_progress_sldr->GetValue();
+}
+
+int MoviePanel::GetStartFrame()
+{
+	wxString str = m_start_frame_text->GetValue();
+	long lval;
+	if (str.ToLong(&lval))
+		return lval;
+	return 0;
+}
+
+int MoviePanel::GetEndFrame()
+{
+	wxString str = m_end_frame_text->GetValue();
+	long lval;
+	if (str.ToLong(&lval))
+		return lval;
+	return 0;
+}
+
+int MoviePanel::GetCurrentFrame()
+{
+	wxString str = m_cur_frame_text->GetValue();
+	long lval;
+	if (str.ToLong(&lval))
+		return lval;
+	return 0;
+}
+
+double MoviePanel::GetCurTime()
+{
+	wxString str = m_progress_text->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+int MoviePanel::GetFullFrame()
+{
+	wxString str = m_full_frame_text->GetValue();
+	long lval;
+	if (str.ToLong(&lval))
+		return lval;
+	return 1;
+}
+
+bool MoviePanel::GetLoop()
+{
+	return m_loop_btn->GetValue();
+}
+
+bool MoviePanel::GetRotateEnable()
+{
+	return m_rot_chk->GetValue();
+}
+
+int MoviePanel::GetRotateAxis()
+{
+	int val = 0;
+	if (m_x_rd->GetValue())
+		val = 0;
+	else if (m_y_rd->GetValue())
+		val = 1;
+	else if (m_z_rd->GetValue())
+		val = 2;
+	return val;
+}
+
+int MoviePanel::GetRotateDeg()
+{
+	wxString str = m_degree_text->GetValue();
+	long ival = 0;
+	if (str.ToLong(&ival))
+		return ival;
+	return 0;
+}
+
+int MoviePanel::GetRotateInterp()
+{
+	return m_rot_int_cmb->GetCurrentSelection();
+}
+
+int MoviePanel::GetSeqMode()
+{
+	if (m_bat_chk->GetValue())
+		return 2;
+	if (m_seq_chk->GetValue())
+		return 1;
+	return 0;
+}
+
+int MoviePanel::GetSeqNum()
+{
+	wxString str = m_seq_num_text->GetValue();
+	long val;
+	if (str.ToLong(&val))
+		return val;
+	return 0;
+}
+
+int MoviePanel::GetKeyframeNum()
+{
+	long item = m_keylist->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+	if (item == -1)
+		return 0;
+	wxString str = m_keylist->GetItemText(item);
+	long id;
+	if (str.ToLong(&id))
+		return id;
+	return 0;
+}
+
+bool MoviePanel::GetKeyframeEnable()
+{
+	return m_keyframe_chk->GetValue();
+}
+
+double MoviePanel::GetKeyDuration()
+{
+	wxString str = m_duration_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	return 1.0;
+}
+
+int MoviePanel::GetKeyInterpolation()
+{
+	return m_interpolation_cmb->GetSelection();
+}
+
+bool MoviePanel::GetCameraLock()
+{
+	return m_cam_lock_chk->GetValue();
+}
+
+int MoviePanel::GetCameraLockType()
+{
+	return m_cam_lock_cmb->GetSelection() + 1;
+}
+
+int MoviePanel::GetPresetNum()
+{
+	long item = m_auto_key_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	if (item != -1)
+		return item;
+	return 0;
+}
+
+bool MoviePanel::GetCropEnable()
+{
+	return m_crop_chk->GetValue();
+}
+
+CropInfo MoviePanel::GetCropValues()
+{
+	wxString temp;
+	long x = 0, y = 0, w = 0, h = 0;
+	temp = m_crop_x_text->GetValue();
+	temp.ToLong(&x);
+	temp = m_crop_y_text->GetValue();
+	temp.ToLong(&y);
+	temp = m_crop_w_text->GetValue();
+	temp.ToLong(&w);
+	temp = m_crop_h_text->GetValue();
+	temp.ToLong(&h);
+
+	return CropInfo(x, y, w, h);
+}
+
+int MoviePanel::GetScalebarPos()
+{
+	int pos = 3;
+	if (m_sb_tl_rb->GetValue())
+		pos = 0;
+	else if (m_sb_tr_rb->GetValue())
+		pos = 1;
+	else if (m_sb_bl_rb->GetValue())
+		pos = 2;
+	else if (m_sb_br_rb->GetValue())
+		pos = 3;
+	return pos;
+}
+
+ScalebarOffset MoviePanel::GetScalebarOffset()
+{
+	wxString temp;
+	long x = 0, y = 0;
+	temp = m_sb_dx_text->GetValue();
+	temp.ToLong(&x);
+	temp = m_sb_dy_text->GetValue();
+	temp.ToLong(&y);
+
+	return ScalebarOffset(x, y);
+}
+
+bool MoviePanel::GetScriptEnable()
+{
+	return m_run_script_chk->GetValue();
+}
+
+std::wstring MoviePanel::GetScriptFileName()
+{
+	return m_script_file_text->GetValue().ToStdWstring();
+}
+
+std::string MoviePanel::GetSelScriptName()
+{
+	long item = m_script_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	std::string str;
+	if (item != -1)
+	{
+		str = m_script_list->GetItemText(item, 1).ToStdString();
+	}
+	return str;
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
@@ -1689,333 +1902,264 @@ void MoviePanel::OnProgressScroll(wxScrollEvent& event)
 
 void MoviePanel::OnStartFrameText(wxCommandEvent& event)
 {
-	wxString str = m_start_frame_text->GetValue();
-	long lval;
-	if (str.ToLong(&lval))
-		SetStartFrame(lval);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBeginFrame });
 }
 
 void MoviePanel::OnEndFrameText(wxCommandEvent& event)
 {
-	wxString str = m_end_frame_text->GetValue();
-	long lval;
-	if (str.ToLong(&lval))
-		SetEndFrame(lval);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEndFrame });
 }
 
 void MoviePanel::OnCurFrameText(wxCommandEvent& event)
 {
-	wxString str = m_cur_frame_text->GetValue();
-	long lval;
-	if (str.ToLong(&lval))
-		SetCurrentFrame(lval, false);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCurrentFrame });
 }
 
 void MoviePanel::OnCurTimeText(wxCommandEvent& event)
 {
-	wxString str = m_progress_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
-		SetCurrentTime(val, false);
-}
-
-void MoviePanel::OnPlay(wxCommandEvent& event)
-{
-	Play();
-}
-
-void MoviePanel::OnPlayInv(wxCommandEvent& event)
-{
-	PlayInv();
-}
-
-void MoviePanel::OnRewind(wxCommandEvent& event)
-{
-	Rewind();
-}
-
-void MoviePanel::OnForward(wxCommandEvent& event)
-{
-	Forward();
-}
-
-void MoviePanel::OnLoop(wxCommandEvent& event)
-{
-	Loop(m_loop_btn->GetValue());
-}
-
-void MoviePanel::OnStartFrameBtn(wxCommandEvent& event)
-{
-	int frame = glbin_moviemaker.GetCurrentFrame();
-	SetStartFrame(frame);
-}
-
-void MoviePanel::OnEndFrameBtn(wxCommandEvent& event)
-{
-	int frame = glbin_moviemaker.GetCurrentFrame();
-	SetEndFrame(frame);
-}
-
-void MoviePanel::OnIncFrame(wxCommandEvent& event)
-{
-	IncFrame();
-}
-
-void MoviePanel::OnDecFrame(wxCommandEvent& event)
-{
-	DecFrame();
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovCurTime });
 }
 
 void MoviePanel::OnFullFrameText(wxCommandEvent& event)
 {
-	wxString str = m_full_frame_text->GetValue();
-	long val;
-	if (str.ToLong(&val))
-		SetFullFrame(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTotalFrames });
+}
+
+void MoviePanel::OnPlay(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovPlay });
+}
+
+void MoviePanel::OnPlayInv(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovPlayInv });
+}
+
+void MoviePanel::OnRewind(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovRewind });
+}
+
+void MoviePanel::OnForward(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovForward });
+}
+
+void MoviePanel::OnLoop(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovLoop });
+}
+
+void MoviePanel::OnStartFrameBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstBeginFrame });
+}
+
+void MoviePanel::OnEndFrameBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstEndFrame });
+}
+
+void MoviePanel::OnIncFrame(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovIncFrame });
+}
+
+void MoviePanel::OnDecFrame(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovDecFrame });
 }
 
 void MoviePanel::OnSave(wxCommandEvent& event)
 {
-	ModalDlg fopendlg(
-		m_frame, "Save Movie Sequence",
-		"", "output",
-		"MP4 file (*.mp4)|*.mp4|"\
-		"Tiff files(*.tif)|*.tif|"\
-		"Tiff files(*.tiff)|*.tiff|"\
-		"Png files(*.png)|*.png|"\
-		"Jpeg files(*.jpg)|*.jpg|"\
-		"Jpeg files(*.jpeg)|*.jpeg|"\
-		"Jpeg2000 files(*.jp2)|*.jp2",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg.SetExtraControlCreator(CreateExtraCaptureControl);
-	fopendlg.CenterOnParent();
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		Save(fopendlg.GetPath().ToStdWstring());
-	}
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSave });
 }
 
 void MoviePanel::OnRotateChecked(wxCommandEvent& event)
 {
-	bool val = m_rot_chk->GetValue();
-	glbin_moviemaker.SetRotateEnable(val);
-	FluoUpdate({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovRotEnable });
 }
 
 void MoviePanel::OnRotAxis(wxCommandEvent& event)
 {
-	int val = 0;
-	if (m_x_rd->GetValue())
-		val = 0;
-	else if (m_y_rd->GetValue())
-		val = 1;
-	else if (m_z_rd->GetValue())
-		val = 2;
-	glbin_moviemaker.SetRotateAxis(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovRotAxis });
 }
 
 void MoviePanel::OnDegreeText(wxCommandEvent& event)
 {
-	wxString str = m_degree_text->GetValue();
-	long ival = 0;
-	str.ToLong(&ival);
-	glbin_moviemaker.SetRotateDeg(ival);
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovRotAng });
 }
 
 void MoviePanel::OnRotIntCmb(wxCommandEvent& event)
 {
-	int val = m_rot_int_cmb->GetCurrentSelection();
-	glbin_moviemaker.SetInterpolation(val);
-	FluoUpdate({ gstMovIntrpMode });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovIntrpMode });
 }
 
 void MoviePanel::OnSequenceChecked(wxCommandEvent& event)
 {
-	bool val = m_seq_chk->GetValue();
-	if (val)
-		glbin_moviemaker.SetSeqMode(1);
-	else
-		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSeqMode });
 }
 
 void MoviePanel::OnBatchChecked(wxCommandEvent& event)
 {
-	int val = m_bat_chk->GetValue();
-	if (val)
-		glbin_moviemaker.SetSeqMode(2);
-	else
-		glbin_moviemaker.SetSeqMode(0);
-	FluoUpdate({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSeqMode });
 }
 
 void MoviePanel::OnSeqDecBtn(wxCommandEvent& event)
 {
-	int val = glbin_moviemaker.GetSeqCurNum();
-	glbin_moviemaker.SetSeqCurNum(val - 1);
-	FluoRefresh(2,
-		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
-		{ glbin_current.GetViewId() });
-}
-
-void MoviePanel::OnSeqNumText(wxCommandEvent& event)
-{
-	wxString str = m_seq_num_text->GetValue();
-	long val;
-	if (str.ToLong(&val))
-		glbin_moviemaker.SetSeqCurNum(val);
-	FluoRefresh(2,
-		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSeqDec });
 }
 
 void MoviePanel::OnSeqIncBtn(wxCommandEvent& event)
 {
-	int val = glbin_moviemaker.GetSeqCurNum();
-	glbin_moviemaker.SetSeqCurNum(val + 1);
-	FluoRefresh(2,
-		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSeqInc });
+}
+
+void MoviePanel::OnSeqNumText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSeqNum });
 }
 
 void MoviePanel::OnAct(wxListEvent& event)
 {
-	long item = m_keylist->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	if (item == -1)
-		return;
-	wxString str = m_keylist->GetItemText(item);
-	long id;
-	str.ToLong(&id);
-
-	int index = glbin_interpolator.GetKeyIndex(int(id));
-	double time = glbin_interpolator.GetKeyTime(index);
-	glbin_moviemaker.SetCurrentFrame(time);
-
-	auto view = glbin_moviemaker.GetView();
-	if (view)
-		view->SetParams(time);
-	FluoRefresh(2, { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect },
-		{ glbin_current.GetViewId() });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovKeyframeNum });
 }
 
 void MoviePanel::OnKeyframeChk(wxCommandEvent& event)
 {
-	bool val = m_keyframe_chk->GetValue();
-	SetKeyframeMovie(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCaptureParam });
 }
 
 void MoviePanel::OnDurationText(wxCommandEvent& event)
 {
-	wxString str = m_duration_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	glbin_moviemaker.SetKeyDuration(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKeyDuration });
 }
 
 void MoviePanel::OnInterpolation(wxCommandEvent& event)
 {
-	int val = m_interpolation_cmb->GetSelection();
-	glbin_moviemaker.SetInterpolation(val);
-	FluoUpdate({ gstMovIntrpMode });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKeyInterpolation });
 }
 
 void MoviePanel::OnInsKey(wxCommandEvent& event)
 {
-	if (!glbin_moviemaker.GetKeyframeEnable())
-		glbin_moviemaker.SetKeyframeEnable(true, true);
-
-	wxString str;
-	long item = m_keylist->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-	int index = -1;
-	if (item != -1)
-	{
-		str = m_keylist->GetItemText(item);
-		long id;
-		str.ToLong(&id);
-		index = glbin_interpolator.GetKeyIndex(id);
-	}
-	glbin_moviemaker.InsertKey(index);
-
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovInsertKey });
 }
 
 void MoviePanel::OnDelKey(wxCommandEvent& event)
 {
-	m_keylist->DeleteSel();
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+	DeleteKeyframe(GetKeyframeNum());
 }
 
 void MoviePanel::OnDelAll(wxCommandEvent& event)
 {
-	m_keylist->DeleteAll();
-	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
-	FluoUpdate({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
+	DeleteAllKeyframes();
 }
 
 void MoviePanel::OnCamLockChk(wxCommandEvent& event)
 {
-	glbin_moviemaker.SetCamLock(m_cam_lock_chk->GetValue());
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCamLockObjEnable });
 }
 
 void MoviePanel::OnCamLockCmb(wxCommandEvent& event)
 {
-	glbin_moviemaker.SetCamLockType(m_cam_lock_cmb->GetSelection() + 1);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCamLockType });
 }
 
 void MoviePanel::OnCamLockBtn(wxCommandEvent& event)
 {
-	m_view->SetLockCenter();
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCamLockCtr });
 }
 
 //auto key
 void MoviePanel::OnGenKey(wxCommandEvent& event)
 {
-	long item = m_auto_key_list->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item != -1)
-	{
-		glbin_moviemaker.MakeKeys(item);
-		if (!glbin_moviemaker.GetKeyframeEnable())
-			glbin_moviemaker.SetKeyframeEnable(true, true);
-
-		m_notebook->SetSelection(1);
-		FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
-	}
+	m_notebook->SetSelection(1);
 }
 
 void MoviePanel::OnCropCheck(wxCommandEvent& event)
 {
-	SetCropEnable(m_crop_chk->GetValue());
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCropEnable });
 }
 
 void MoviePanel::OnResetCrop(wxCommandEvent& event)
 {
-	SetCropEnable(true);
+	m_crop_chk->SetValue(true);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCropEnable });
 }
 
 void MoviePanel::OnEditCrop(wxCommandEvent& event)
 {
-	wxString temp;
-	long x, y, w, h;
-	temp = m_crop_x_text->GetValue();
-	temp.ToLong(&x);
-	temp = m_crop_y_text->GetValue();
-	temp.ToLong(&y);
-	temp = m_crop_w_text->GetValue();
-	temp.ToLong(&w);
-	temp = m_crop_h_text->GetValue();
-	temp.ToLong(&h);
-
-	SetCropValues(x, y, w, h);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCropValues });
 }
 
 void MoviePanel::OnCropSpinUp(wxSpinEvent& event)
@@ -2066,27 +2210,16 @@ void MoviePanel::OnCropSpinDown(wxSpinEvent& event)
 
 void MoviePanel::OnSbRadio(wxCommandEvent& event)
 {
-	int pos = 3;
-	if (m_sb_tl_rb->GetValue())
-		pos = 0;
-	else if (m_sb_tr_rb->GetValue())
-		pos = 1;
-	else if (m_sb_bl_rb->GetValue())
-		pos = 2;
-	else if (m_sb_br_rb->GetValue())
-		pos = 3;
-	SetScalebarPos(pos);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScalebarPos });
 }
 
 void MoviePanel::OnSbEdit(wxCommandEvent& event)
 {
-	wxString temp;
-	long x, y;
-	temp = m_sb_dx_text->GetValue();
-	temp.ToLong(&x);
-	temp = m_sb_dy_text->GetValue();
-	temp.ToLong(&y);
-	SetScalebarValues(x, y);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScalbarOffset });
 }
 
 void MoviePanel::OnSbSpinUp(wxSpinEvent& event)
@@ -2130,381 +2263,167 @@ void MoviePanel::OnSbSpinDown(wxSpinEvent& event)
 //script
 void MoviePanel::OnRunScriptChk(wxCommandEvent& event)
 {
-	bool val = m_run_script_chk->GetValue();
-	std::wstring str = m_script_file_text->GetValue().ToStdWstring();
-	EnableScript(val, str);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableScript });
 }
 
 void MoviePanel::OnScriptFileEdit(wxCommandEvent& event)
 {
-	wxString str = m_script_file_text->GetValue();
-	glbin_settings.m_script_file = str;
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScriptFile });
 }
 
 void MoviePanel::OnScriptClearBtn(wxCommandEvent& event)
 {
 	m_script_file_text->Clear();
-	EnableScript(false);
+	m_run_script_chk->SetValue(false);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableScript });
 }
 
 void MoviePanel::OnScriptFileBtn(wxCommandEvent& event)
 {
-	ModalDlg fopendlg(
-		m_frame, "Choose a 4D script file", "", "",
-		"4D script file (*.txt)|*.txt",
-		wxFD_OPEN);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		std::wstring file = fopendlg.GetPath().ToStdWstring();
-		glbin_settings.m_script_file = file;
-		m_script_file_text->ChangeValue(file);
-
-		EnableScript(true, file);
-	}
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstLoadScriptFile });
 }
 
 void MoviePanel::OnScriptListSelected(wxListEvent& event)
 {
-	long item = m_script_list->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSelectScriptFile });
+}
 
-	if (item != -1)
+SaveMovieHook::SaveMovieHook(const SaveMovieOptions& options) :
+	m_options(options)
+{
+
+}
+
+void SaveMovieHook::AddCustomControls(
+	wxFileDialogCustomize& customizer)
+{
+	customizer.AddStaticText(
+		"Additional Options");
+
+	customizer.AddStaticText(
+		"TIFF sequence is preferable for very short movies.");
+
+	if (m_options.project_save)
 	{
-		wxString file = m_script_list->GetItemText(item, 1);
-		std::filesystem::path p = GetUserSettingsRoot();
-		p = p / "Scripts" / (file.ToStdString() + ".txt");
-		std::wstring filename = p.wstring();
-		m_script_file_text->ChangeValue(filename);
-		EnableScript(true, filename);
-	}
-}
+		m_embed_chk =
+			customizer.AddCheckBox(
+				"Embed all files in the project folder");
 
-void MoviePanel::EnableScript(bool val, const std::wstring& filename)
-{
-	glbin_settings.m_run_script = val;
-	glbin_settings.m_script_file = filename;
-	FluoRefresh(2, { gstMovPlay, gstRunScript }, { glbin_current.GetViewId() });
-}
-
-//ch1
-void MoviePanel::OnCh1Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch1 = (wxCheckBox*)event.GetEventObject();
-	if (ch1)
-		glbin_settings.m_save_compress = ch1->GetValue();
-}
-
-//ch2
-void MoviePanel::OnCh2Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
-	if (ch2)
-		glbin_settings.m_save_alpha = ch2->GetValue();
-}
-
-//ch3
-void MoviePanel::OnCh3Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
-	if (ch3)
-		glbin_settings.m_save_float = ch3->GetValue();
-}
-
-void MoviePanel::OnDpiText(wxCommandEvent& event)
-{
-	wxTextCtrl* tx_dpi = (wxTextCtrl*)event.GetEventObject();
-	wxString str = event.GetString();
-	long lval;
-	str.ToLong(&lval);
-	glbin_settings.m_dpi = lval;
-	if (!tx_dpi)
-		return;
-	wxCheckBox* ch_enlarge = (wxCheckBox*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_CHK);
-	wxSlider* sl_enlarge = (wxSlider*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_SLDR);
-	wxTextCtrl* tx_enlarge = (wxTextCtrl*)tx_dpi->GetParent()->FindWindow(ID_ENLARGE_TEXT);
-	bool enlarge = lval > 72;
-	if (ch_enlarge)
-		ch_enlarge->SetValue(enlarge);
-	double enlarge_scale = (double)lval / 72.0;
-	auto view = glbin_current.render_view.lock();
-	if (view)
-	{
-		view->SetEnlarge(enlarge);
-		view->SetEnlargeScale(enlarge_scale);
-	}
-	if (sl_enlarge)
-	{
-		sl_enlarge->Enable(enlarge);
-		sl_enlarge->SetValue(std::round(enlarge_scale * 10));
-	}
-	if (tx_enlarge)
-	{
-		tx_enlarge->Enable(enlarge);
-		tx_enlarge->ChangeValue(wxString::Format("%.1f", enlarge_scale));
-	}
-}
-
-//enlarge output image
-void MoviePanel::OnChEnlargeCheck(wxCommandEvent& event)
-{
-	wxCheckBox* ch_enlarge = (wxCheckBox*)event.GetEventObject();
-	if (ch_enlarge)
-	{
-		bool enlarge = ch_enlarge->GetValue();
-		auto view = glbin_current.render_view.lock();
-		if (view)
-			view->SetEnlarge(enlarge);
-		if (ch_enlarge->GetParent())
-		{
-			wxSlider* sl_enlarge = (wxSlider*)
-				ch_enlarge->GetParent()->FindWindow(
-					ID_ENLARGE_SLDR);
-			wxTextCtrl* tx_enlarge = (wxTextCtrl*)
-				ch_enlarge->GetParent()->FindWindow(
-					ID_ENLARGE_TEXT);
-			if (sl_enlarge && tx_enlarge)
-			{
-				if (enlarge)
-				{
-					sl_enlarge->Enable();
-					tx_enlarge->Enable();
-				}
-				else
-				{
-					sl_enlarge->Disable();
-					tx_enlarge->Disable();
-				}
-			}
-		}
-	}
-}
-
-void MoviePanel::OnSlEnlargeScroll(wxScrollEvent& event)
-{
-	int ival = event.GetPosition();
-	wxSlider* sl_enlarge = (wxSlider*)event.GetEventObject();
-	if (sl_enlarge && sl_enlarge->GetParent())
-	{
-		wxTextCtrl* tx_enlarge = (wxTextCtrl*)
-			sl_enlarge->GetParent()->FindWindow(
-				ID_ENLARGE_TEXT);
-		if (tx_enlarge)
-		{
-			wxString str = wxString::Format("%.1f", ival / 10.0);
-			tx_enlarge->ChangeValue(str);
-		}
-	}
-}
-
-void MoviePanel::OnTxEnlargeText(wxCommandEvent& event)
-{
-	wxString str = event.GetString();
-	double dval;
-	str.ToDouble(&dval);
-	auto view = glbin_current.render_view.lock();
-	if (view)
-		view->SetEnlargeScale(dval);
-	int ival = std::round(dval * 10);
-	wxTextCtrl* tx_enlarge = (wxTextCtrl*)event.GetEventObject();
-	if (tx_enlarge && tx_enlarge->GetParent())
-	{
-		wxSlider* sl_enlarge = (wxSlider*)
-			tx_enlarge->GetParent()->FindWindow(
-				ID_ENLARGE_SLDR);
-		if (sl_enlarge)
-			sl_enlarge->SetValue(ival);
-	}
-}
-
-//movie quality
-void MoviePanel::OnMovieQuality(wxCommandEvent& event)
-{
-	wxString str = event.GetString();
-	double dval;
-	str.ToDouble(&dval);
-	glbin_settings.m_mov_bitrate = dval;
-	wxTextCtrl* tx_qual = (wxTextCtrl*)event.GetEventObject();
-	if (tx_qual && tx_qual->GetParent())
-	{
-		wxTextCtrl* tx_estimate = (wxTextCtrl*)
-			tx_qual->GetParent()->FindWindow(ID_MOV_ESTIMATE_TEXT);
-		if (tx_estimate)
-		{
-			double size = glbin_settings.m_mov_bitrate *
-				glbin_moviemaker.GetMovieLength() / 8.;
-			tx_estimate->ChangeValue(wxString::Format("%.2f", size));
-		}
+		m_embed_chk->SetValue(
+			m_options.embed_project_files);
 	}
 
+	customizer.AddStaticText("Output Resolution");
+
+	m_dpi_txt =
+		customizer.AddTextCtrl(
+			wxString::Format("%d", m_options.dpi));
+
+	m_enlarge_chk =
+		customizer.AddCheckBox(
+			"Enlarge output image");
+
+	m_enlarge_chk->SetValue(
+		m_options.enlarge_output);
+
+	m_enlarge_txt =
+		customizer.AddTextCtrl(
+			wxString::Format("%.1f",
+				m_options.enlarge_scale));
+
+	customizer.AddStaticText(
+		"Image Sequence Options");
+
+	m_compress_chk =
+		customizer.AddCheckBox(
+			"Compress to save space");
+	m_compress_chk->SetValue(
+		m_options.compress);
+
+	m_alpha_chk =
+		customizer.AddCheckBox(
+			"Save alpha");
+	m_alpha_chk->SetValue(
+		m_options.save_alpha);
+
+	m_float_chk =
+		customizer.AddCheckBox(
+			"Save float channel");
+	m_float_chk->SetValue(
+		m_options.save_float);
+
+	customizer.AddStaticText(
+		"Movie Options");
+
+	m_bitrate_txt =
+		customizer.AddTextCtrl(
+			wxString::Format("%.1f",
+				m_options.bitrate));
 }
-//embed project
-void MoviePanel::OnChEmbedCheck(wxCommandEvent& event)
+
+void SaveMovieHook::TransferDataFromCustomControls()
 {
-	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
-	if (ch_embed)
-		glbin_settings.m_vrp_embed = ch_embed->GetValue();
-}
-
-wxWindow* MoviePanel::CreateExtraCaptureControl(wxWindow* parent)
-{
-	wxPanel* panel = new wxPanel(parent);
-#ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-#elifdef __linux__
-	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
-#endif
-	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
-		wxVERTICAL, panel, "Additional Options");
-
-	wxStaticText* mov_note = new wxStaticText(panel, wxID_ANY,
-		"TIFF sequence is preferrable for very short movies.\n",
-		wxDefaultPosition, parent->FromDIP(wxSize(-1, 20)));
-
-	//copy all files check box
-	wxBoxSizer* line0 = 0;
-	if (glbin_settings.m_prj_save)
+	if (m_embed_chk)
 	{
-		line0 = new wxBoxSizer(wxHORIZONTAL);
-		wxCheckBox* ch_embed = 0;
-		ch_embed = new wxCheckBox(panel, wxID_ANY,
-			"Embed all files in the project folder");
-		ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-			wxCommandEventHandler(MoviePanel::OnChEmbedCheck), NULL, panel);
-		ch_embed->SetValue(glbin_settings.m_vrp_embed);
-		line0->Add(ch_embed, 0, wxALIGN_CENTER);
+		m_options.embed_project_files =
+			m_embed_chk->GetValue();
 	}
 
-	//dpi
-	wxBoxSizer* line1 = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText* st = new wxStaticText(panel, wxID_ANY, "DPI: ",
-		wxDefaultPosition, wxDefaultSize);
-	wxIntegerValidator<unsigned int> vald_int;
-	wxTextCtrl* tx_dpi = new wxTextCtrl(panel, wxID_ANY,
-		"", wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
-	tx_dpi->Connect(tx_dpi->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(MoviePanel::OnDpiText), NULL, panel);
-	float dpi = glbin_settings.m_dpi;
-	tx_dpi->ChangeValue(wxString::Format("%.0f", dpi));
-	//enlarge
-	wxCheckBox* ch_enlarge = new wxCheckBox(panel, ID_ENLARGE_CHK,
-		"Enlarge output image");
-	ch_enlarge->Connect(ch_enlarge->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnChEnlargeCheck), NULL, panel);
-	bool enlarge = dpi > 72;
-	double enlarge_scale = dpi / 72.0;
-	ch_enlarge->SetValue(enlarge);
-	wxSlider* sl_enlarge = new wxSlider(panel, ID_ENLARGE_SLDR,
-		10, 10, 100);
-	sl_enlarge->Connect(sl_enlarge->GetId(), wxEVT_COMMAND_SLIDER_UPDATED,
-		wxScrollEventHandler(MoviePanel::OnSlEnlargeScroll), NULL, panel);
-	sl_enlarge->Enable(enlarge);
-	sl_enlarge->SetValue(std::round(enlarge_scale * 10));
-	wxFloatingPointValidator<double> vald_fp(1);
-	wxTextCtrl* tx_enlarge = new wxTextCtrl(panel, ID_ENLARGE_TEXT,
-		"1.0", wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp);
-	tx_enlarge->Connect(tx_enlarge->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(MoviePanel::OnTxEnlargeText), NULL, panel);
-	tx_enlarge->Enable(enlarge);
-	tx_enlarge->ChangeValue(wxString::Format("%.1f", enlarge_scale));
-	line1->Add(st, 0, wxALIGN_CENTER);
-	line1->Add(tx_dpi, 0, wxALIGN_CENTER);
-	line1->Add(5, 5);
-	line1->Add(ch_enlarge, 0, wxALIGN_CENTER);
-	line1->Add(5, 5);
-	line1->Add(sl_enlarge, 1, wxEXPAND);
-	line1->Add(5, 5);
-	line1->Add(tx_enlarge, 0, wxALIGN_CENTER);
-
-	//compressed TIFF
-	wxBoxSizer* line2 = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText* tiffopts = new wxStaticText(panel, wxID_ANY, "Image Sequence Options:",
-		wxDefaultPosition, wxDefaultSize);
-	wxCheckBox* ch1 = new wxCheckBox(panel, wxID_ANY,
-		"Compress to save space");
-	ch1->Connect(ch1->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnCh1Check), NULL, panel);
-	if (ch1)
-		ch1->SetValue(glbin_settings.m_save_compress);
-	wxCheckBox* ch2 = new wxCheckBox(panel, wxID_ANY,
-		"Save alpha");
-	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnCh2Check), NULL, panel);
-	if (ch2)
-		ch2->SetValue(glbin_settings.m_save_alpha);
-	wxCheckBox* ch3 = new wxCheckBox(panel, wxID_ANY,
-		"Save float channel");
-	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MoviePanel::OnCh3Check), NULL, panel);
-	if (ch3)
-		ch3->SetValue(glbin_settings.m_save_float);
-	line2->Add(tiffopts, 0, wxALIGN_CENTER);
-	line2->Add(5, 5);
-	line2->Add(ch1, 0, wxALIGN_CENTER);
-	line2->Add(5, 5);
-	line2->Add(ch2, 0, wxALIGN_CENTER);
-	line2->Add(5, 5);
-	line2->Add(ch3, 0, wxALIGN_CENTER);
-
-	// movie quality
-	wxBoxSizer* line3 = new wxBoxSizer(wxHORIZONTAL);
-	//bitrate
-	wxStaticText* MOVopts = new wxStaticText(panel, wxID_ANY, "Movie Options:",
-		wxDefaultPosition, wxDefaultSize);
-	wxTextCtrl* bitrate_text = new wxTextCtrl(panel, wxID_ANY, "20.0",
-		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
-	bitrate_text->Connect(bitrate_text->GetId(), wxEVT_TEXT,
-		wxCommandEventHandler(MoviePanel::OnMovieQuality), NULL, panel);
-	st = new wxStaticText(panel, wxID_ANY, "Bitrate:",
-		wxDefaultPosition, wxDefaultSize);
-	wxStaticText* st2 = new wxStaticText(panel, wxID_ANY, "Mbps",
-		wxDefaultPosition, wxDefaultSize);
-	wxStaticText* st3 = new wxStaticText(panel, wxID_ANY, "Estimated size:",
-		wxDefaultPosition, wxDefaultSize);
-	wxTextCtrl* tx_estimate = new wxTextCtrl(panel, ID_MOV_ESTIMATE_TEXT, "2.5",
-		wxDefaultPosition, parent->FromDIP(wxSize(60, 20)), wxTE_RIGHT);
-	tx_estimate->Disable();
-	double dval;
-	wxString str = bitrate_text->GetValue();
-	str.ToDouble(&dval);
-	glbin_settings.m_mov_bitrate = dval;
-	double size = glbin_settings.m_mov_bitrate *
-		glbin_moviemaker.GetMovieLength() / 8.;
-	tx_estimate->ChangeValue(wxString::Format("%.2f", size));
-
-	line3->Add(MOVopts, 0, wxALIGN_CENTER);
-	line3->Add(st, 0, wxALIGN_CENTER);
-	line3->Add(5, 5);
-	line3->Add(bitrate_text, 0, wxALIGN_CENTER);
-	line3->Add(5, 5);
-	line3->Add(st2, 0, wxALIGN_CENTER);
-	line3->Add(5, 5);
-	line3->Add(st3, 0, wxALIGN_CENTER);
-	line3->Add(tx_estimate, 0, wxALIGN_CENTER);
-	st2 = new wxStaticText(panel, wxID_ANY, "MB",
-		wxDefaultPosition, wxDefaultSize);
-	line3->Add(5, 5);
-	line3->Add(st2, 0, wxALIGN_CENTER);
-	//group
-	group1->Add(5, 5);
-	group1->Add(mov_note);
-	group1->Add(5, 5);
-	if (glbin_settings.m_prj_save)
+	if (m_dpi_txt)
 	{
-		group1->Add(line0);
-		group1->Add(5, 5);
-	}
-	group1->Add(line1);
-	group1->Add(5, 5);
-	group1->Add(line2);
-	group1->Add(5, 5);
-	group1->Add(line3);
-	group1->Add(5, 5);
-	panel->SetSizerAndFit(group1);
-	panel->Layout();
+		long value = 72;
 
-	return panel;
+		if (m_dpi_txt->GetValue().ToLong(&value))
+			m_options.dpi = static_cast<int>(value);
+	}
+
+	if (m_enlarge_chk)
+	{
+		m_options.enlarge_output =
+			m_enlarge_chk->GetValue();
+	}
+
+	if (m_enlarge_txt)
+	{
+		double value = 1.0;
+
+		if (m_enlarge_txt->GetValue().ToDouble(&value))
+			m_options.enlarge_scale = value;
+	}
+
+	if (m_compress_chk)
+		m_options.compress =
+		m_compress_chk->GetValue();
+
+	if (m_alpha_chk)
+		m_options.save_alpha =
+		m_alpha_chk->GetValue();
+
+	if (m_float_chk)
+		m_options.save_float =
+		m_float_chk->GetValue();
+
+	if (m_bitrate_txt)
+	{
+		double value = 20.0;
+
+		if (m_bitrate_txt->GetValue().ToDouble(&value))
+			m_options.bitrate = value;
+	}
+
+	m_options.estimated_size_mb =
+		m_options.bitrate *
+		m_options.movie_length_sec /
+		8.0;
 }
 

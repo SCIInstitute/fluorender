@@ -1208,5 +1208,21 @@ DEALINGS IN THE SOFTWARE.
 
 //movie panel
 #define gstPresetList "preset list"
+#define gstMovPlayInv "mov play inv"
+#define gstMovForward "mov forward"
+#define gstMovIncFrame "mov inc frame"
+#define gstMovDecFrame "mov dec frame"
+#define gstMovSave "mov save"
+#define gstMovSeqDec "mov seq dec"
+#define gstMovSeqInc "mov seq inc"
+#define gstMovKeyframeNum "mov keyframe num"
+#define gstKeyDuration "key duration"
+#define gstKeyInterpolation "key interpolation"
+#define gstMovInsertKey "mov insert key"
+#define gstGenerateKeys "generate keys"
+#define gstScalbarOffset "scalebar offset"
+#define gstEnableScript "enable script"
+#define gstLoadScriptFile "load script file"
+#define gstSelectScriptFile "select script file"
 
 #endif//NAMES_HPP

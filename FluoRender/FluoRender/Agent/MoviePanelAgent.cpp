@@ -40,6 +40,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Directory.h>
 #include <CurrentObjects.h>
 #include <Coordinator.h>
+#include <GlobalStates.h>
+#include <ModalDlg.h>
 
 MoviePanelAgent::MoviePanelAgent(
 	MoviePanel* panel) :
@@ -339,6 +341,82 @@ void MoviePanelAgent::UpdateData(const UpdateRequest& request)
 		SetSliderStyle();
 	if (request.HasValue(gstMovProgSlider))
 		SetScrollFrame();
+	if (request.HasValue(gstBeginFrame))
+		SetStartFrame();
+	if (request.HasValue(gstEndFrame))
+		SetEndFrame();
+	if (request.HasValue(gstCurrentFrame))
+		SetCurrentFrame();
+	if (request.HasValue(gstMovCurTime))
+		SetCurrentTime();
+	if (request.HasValue(gstTotalFrames))
+		SetFullFrame();
+	if (request.HasValue(gstMovPlay))
+		Play();
+	if (request.HasValue(gstMovPlayInv))
+		PlayInv();
+	if (request.HasValue(gstMovRewind))
+		Rewind();
+	if (request.HasValue(gstMovForward))
+		Forward();
+	if (request.HasValue(gstMovLoop))
+		Loop();
+	if (request.HasValue(gstMovIncFrame))
+		IncFrame();
+	if (request.HasValue(gstMovDecFrame))
+		DecFrame();
+	if (request.HasValue(gstMovSave))
+		Save();
+	if (request.HasValue(gstMovRotEnable))
+		SetRotateEnable();
+	if (request.HasValue(gstMovRotAxis))
+		SetRotateAxis();
+	if (request.HasValue(gstMovRotAng))
+		SetRotateDeg();
+	if (request.HasValue(gstMovIntrpMode))
+		SetRotateInterp();
+	if (request.HasValue(gstMovSeqMode))
+		SetSeqMode();
+	if (request.HasValue(gstMovSeqDec))
+		SetSeqDec();
+	if (request.HasValue(gstMovSeqInc))
+		SetSeqInc();
+	if (request.HasValue(gstMovSeqNum))
+		SetSeqNum();
+	if (request.HasValue(gstMovKeyframeNum))
+		SetKeyframeNum();
+	if (request.HasValue(gstCaptureParam))
+		SetKeyframeMovie();
+	if (request.HasValue(gstKeyDuration))
+		SetKeyDuration();
+	if (request.HasValue(gstKeyInterpolation))
+		SetKeyInterpolation();
+	if (request.HasValue(gstMovInsertKey))
+		InsertKey();
+	if (request.HasValue(gstCamLockObjEnable))
+		SetCameraLock();
+	if (request.HasValue(gstCamLockType))
+		SetCameraLockType();
+	if (request.HasValue(gstCamLockCtr))
+		SetCameraLockCenter();
+	if (request.HasValue(gstGenerateKeys))
+		GenerateKeys();
+	if (request.HasValue(gstCropEnable))
+		SetCropEnable();
+	if (request.HasValue(gstCropValues))
+		SetCropValues();
+	if (request.HasValue(gstScalebarPos))
+		SetScalebarPos();
+	if (request.HasValue(gstScalbarOffset))
+		SetScalebarValues();
+	if (request.HasValue(gstEnableScript))
+		EnableScript();
+	if (request.HasValue(gstScriptFile))
+		SetScriptFile();
+	if (request.HasValue(gstLoadScriptFile))
+		LoadScriptFile();
+	if (request.HasValue(gstSelectScriptFile))
+		SelectScriptFile();
 }
 
 void MoviePanelAgent::SelectKeyframe(int id)
@@ -349,13 +427,15 @@ void MoviePanelAgent::SelectKeyframe(int id)
 void MoviePanelAgent::DeleteKeyframe(int id)
 {
 	glbin_interpolator.RemoveKey(id);
-	UpdateDataToUI({ gstParamList });
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	UpdateDataToUI({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
 void MoviePanelAgent::DeleteAllKeyframes()
 {
 	glbin_interpolator.Clear();
-	UpdateDataToUI({ gstParamList });
+	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
+	UpdateDataToUI({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
 void MoviePanelAgent::SetKeyframeTime(int id, double time)
@@ -467,54 +547,74 @@ void MoviePanelAgent::SetScrollFrame()
 	NotifyViewUpdate(vc, target);
 }
 
-void MoviePanelAgent::SetFullFrame(int val)
+void MoviePanelAgent::SetStartFrame()
 {
-	glbin_moviemaker.SetFullFrameNum(val);
+	auto panel = GetPanel();
+	if (panel)
+		return;
 
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
-}
-
-void MoviePanelAgent::SetStartFrame(int val)
-{
 	if (glbin_moviemaker.IsRunning())
 		return;
-	glbin_moviemaker.SetClipStartFrame(val);
+	glbin_moviemaker.SetClipStartFrame(panel->GetStartFrame());
 
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	UpdateDataToUI({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
-void MoviePanelAgent::SetEndFrame(int val)
+void MoviePanelAgent::SetEndFrame()
 {
+	auto panel = GetPanel();
+	if (panel)
+		return;
+
 	if (glbin_moviemaker.IsRunning())
 		return;
-	glbin_moviemaker.SetClipEndFrame(val);
+	glbin_moviemaker.SetClipEndFrame(panel->GetEndFrame());
 
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
+	UpdateDataToUI({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
-void MoviePanelAgent::SetCurrentFrame(int val, bool notify)
+void MoviePanelAgent::SetCurrentFrame()
 {
-	//if (glbin_moviemaker.IsRunning())
-	//	return;
-	glbin_moviemaker.SetCurrentFrame(val);
+	auto panel = GetPanel();
+	if (panel)
+		return;
+
+	glbin_moviemaker.SetCurrentFrame(panel->GetCurrentFrame());
 
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstMovSeqNum };
-	if (notify)
-		vc.insert(gstCurrentFrame);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
-void MoviePanelAgent::SetCurrentTime(double val, bool notify)
+void MoviePanelAgent::SetCurrentTime()
 {
+	auto panel = GetPanel();
+	if (panel)
+		return;
+
 	if (glbin_moviemaker.IsRunning())
 		return;
 
-	glbin_moviemaker.SetCurrentTime(val);
+	glbin_moviemaker.SetCurrentTime(panel->GetCurTime());
 
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum };
-	if (notify)
-		vc.insert(gstMovCurTime);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
+}
+
+void MoviePanelAgent::SetFullFrame()
+{
+	auto panel = GetPanel();
+	if (panel)
+		return;
+
+	glbin_moviemaker.SetFullFrameNum(panel->GetFullFrame());
+
+	UpdateDataToUI({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
 void MoviePanelAgent::Play()
@@ -522,7 +622,10 @@ void MoviePanelAgent::Play()
 	glbin_moviemaker.Play(false);
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
 void MoviePanelAgent::PlayInv()
@@ -530,7 +633,10 @@ void MoviePanelAgent::PlayInv()
 	glbin_moviemaker.Play(true);
 
 	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
 void MoviePanelAgent::Rewind()
@@ -538,7 +644,10 @@ void MoviePanelAgent::Rewind()
 	glbin_moviemaker.Rewind();
 
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
 void MoviePanelAgent::Forward()
@@ -546,12 +655,19 @@ void MoviePanelAgent::Forward()
 	glbin_moviemaker.Forward();
 
 	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
-void MoviePanelAgent::Loop(bool val)
+void MoviePanelAgent::Loop()
 {
-	glbin_moviemaker.SetLoop(val);
+	auto panel = GetPanel();
+	if (panel)
+		return;
+
+	glbin_moviemaker.SetLoop(panel->GetLoop());
 }
 
 void MoviePanelAgent::IncFrame()
@@ -562,7 +678,10 @@ void MoviePanelAgent::IncFrame()
 	frame++;
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
 void MoviePanelAgent::DecFrame()
@@ -573,50 +692,383 @@ void MoviePanelAgent::DecFrame()
 	frame--;
 	glbin_moviemaker.SetCurrentFrame(frame);
 	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
-void MoviePanelAgent::Save(const std::wstring& filename)
+void MoviePanelAgent::Save()
 {
-	if (glbin_moviemaker.IsRunning())
+	auto panel = GetPanel();
+	if (!panel)
 		return;
 
-	glbin_states.m_capture = true;
-	glbin_moviemaker.SetFileName(filename);
-	glbin_moviemaker.PlaySave();
+	ModalDlg dlg(
+		panel, "Save Movie Sequence",
+		"", "output",
+		"MP4 file (*.mp4)|*.mp4|"\
+		"Tiff files(*.tif)|*.tif|"\
+		"Tiff files(*.tiff)|*.tiff|"\
+		"Png files(*.png)|*.png|"\
+		"Jpeg files(*.jpg)|*.jpg|"\
+		"Jpeg files(*.jpeg)|*.jpeg|"\
+		"Jpeg2000 files(*.jp2)|*.jp2",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
-	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
+	SaveMovieOptions initial_options;
+
+	initial_options.project_save = glbin_settings.m_prj_save;
+	initial_options.movie_length_sec = glbin_moviemaker.GetMovieLength();
+	initial_options.embed_project_files = glbin_settings.m_vrp_embed;
+	initial_options.dpi = glbin_settings.m_dpi;
+	initial_options.enlarge_output = initial_options.dpi > 72;
+	initial_options.enlarge_scale = initial_options.dpi / 72.0;
+	initial_options.compress = glbin_settings.m_save_compress;
+	initial_options.save_alpha = glbin_settings.m_save_alpha;
+	initial_options.save_float = glbin_settings.m_save_float;
+	initial_options.bitrate = glbin_settings.m_mov_bitrate;
+	initial_options.estimated_size_mb = 0.0;
+
+	SaveMovieHook hook(initial_options);
+
+	dlg.SetCustomizeHook(hook);
+	dlg.CenterOnParent();
+	int rval = dlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		//update settings
+		glbin_settings.m_prj_save = initial_options.project_save;
+		glbin_settings.m_vrp_embed = initial_options.embed_project_files;
+		glbin_settings.m_dpi = initial_options.dpi;
+		glbin_settings.m_save_compress = initial_options.compress;
+		glbin_settings.m_save_alpha = initial_options.save_alpha;
+		glbin_settings.m_save_float = initial_options.save_float;
+		glbin_settings.m_mov_bitrate = initial_options.bitrate;
+
+		if (glbin_moviemaker.IsRunning())
+			return;
+
+		glbin_states.m_capture = true;
+		glbin_moviemaker.SetFileName(dlg.GetPath().ToStdWstring());
+		glbin_moviemaker.PlaySave();
+
+		fluo::ValueCollection vc = { gstMovPlay };
+		auto view = glbin_current.render_view.lock();
+		std::set<Agent*> target{ this };
+		target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+		NotifyViewUpdate(vc, target);
+	}
 }
 
-void MoviePanelAgent::SetKeyframeMovie(bool val)
+void MoviePanelAgent::SetRotateEnable()
 {
-	glbin_moviemaker.SetKeyframeEnable(val, true);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
+	glbin_moviemaker.SetRotateEnable(panel->GetRotateEnable());
+	UpdateDataToUI({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
-void MoviePanelAgent::SetCropEnable(bool val)
+void MoviePanelAgent::SetRotateAxis()
 {
-	glbin_moviemaker.SetCropEnable(val);
-	FluoRefresh(2, { gstCropEnable, gstCropValues }, { glbin_current.GetViewId() });
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetRotateAxis(panel->GetRotateAxis());
 }
 
-void MoviePanelAgent::SetCropValues(int x, int y, int w, int h)
+void MoviePanelAgent::SetRotateDeg()
 {
-	glbin_moviemaker.SetCropValues(x, y, w, h);
-	FluoRefresh(2, { gstCropValues }, { glbin_current.GetViewId() });
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetRotateDeg(panel->GetRotateDeg());
+	UpdateDataToUI({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
-void MoviePanelAgent::SetScalebarPos(int pos)
+void MoviePanelAgent::SetRotateInterp()
 {
-	glbin_moviemaker.SetScalebarPos(pos);
-	FluoRefresh(2, { gstNull }, { glbin_current.GetViewId() });
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetInterpolation(panel->GetRotateInterp());
+	UpdateDataToUI({ gstMovIntrpMode });
 }
 
-void MoviePanelAgent::SetScalebarValues(int x, int y)
+void MoviePanelAgent::SetSeqMode()
 {
-	glbin_moviemaker.SetScalebarDist(x, y);
-	FluoRefresh(2, { gstScalebarPos }, { glbin_current.GetViewId() });
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetSeqMode(panel->GetSeqMode());
+	UpdateDataToUI({ gstCaptureParam, gstMovRotEnable, gstMovSeqMode, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovLength, gstMovProgSlider, gstMovSeqNum });
 }
 
+void MoviePanelAgent::SetSeqDec()
+{
+	int val = glbin_moviemaker.GetSeqCurNum();
+	glbin_moviemaker.SetSeqCurNum(val - 1);
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		target);
+}
+
+void MoviePanelAgent::SetSeqInc()
+{
+	int val = glbin_moviemaker.GetSeqCurNum();
+	glbin_moviemaker.SetSeqCurNum(val + 1);
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		target);
+}
+
+void MoviePanelAgent::SetSeqNum()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetSeqCurNum(panel->GetSeqNum());
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum },
+		target);
+}
+
+void MoviePanelAgent::SetKeyframeNum()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int index = glbin_interpolator.GetKeyIndex(panel->GetKeyframeNum());
+	double time = glbin_interpolator.GetKeyTime(index);
+	glbin_moviemaker.SetCurrentFrame(time);
+
+	auto view = glbin_moviemaker.GetView();
+	if (view)
+		view->SetParams(time);
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCurrentFrame, gstMovProgSlider, gstMovSeqNum, gstParamListSelect },
+		target);
+}
+
+void MoviePanelAgent::SetKeyframeMovie()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetKeyframeEnable(panel->GetKeyframeEnable(), true);
+
+	auto view = glbin_moviemaker.GetView();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum },
+		target);
+}
+
+void MoviePanelAgent::SetKeyDuration()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetKeyDuration(panel->GetKeyDuration());
+}
+
+void MoviePanelAgent::SetKeyInterpolation()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetInterpolation(panel->GetKeyInterpolation());
+	UpdateDataToUI({ gstMovIntrpMode });
+}
+
+void MoviePanelAgent::InsertKey()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	if (!glbin_moviemaker.GetKeyframeEnable())
+		glbin_moviemaker.SetKeyframeEnable(true, true);
+
+	int index = glbin_interpolator.GetKeyIndex(panel->GetKeyframeNum());
+	glbin_moviemaker.InsertKey(index);
+
+	UpdateDataToUI({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
+}
+
+void MoviePanelAgent::SetCameraLock()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetCamLock(panel->GetCameraLock());
+}
+
+void MoviePanelAgent::SetCameraLockType()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetCamLockType(panel->GetCameraLockType());
+}
+
+void MoviePanelAgent::SetCameraLockCenter()
+{
+	if (auto view = glbin_moviemaker.GetView())
+		view->SetLockCenter();
+}
+
+void MoviePanelAgent::GenerateKeys()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.MakeKeys(panel->GetPresetNum());
+	if (!glbin_moviemaker.GetKeyframeEnable())
+		glbin_moviemaker.SetKeyframeEnable(true, true);
+
+	UpdateDataToUI({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstMovCurTime, gstMovSeqNum, gstParamList, gstParamListSelect });
+}
+
+void MoviePanelAgent::SetCropEnable()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetCropEnable(panel->GetCropEnable());
+	auto view = glbin_moviemaker.GetView();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCropEnable, gstCropValues }, target);
+}
+
+void MoviePanelAgent::SetCropValues()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto crop_info = panel->GetCropValues();
+	glbin_moviemaker.SetCropValues(crop_info.x, crop_info.y, crop_info.w, crop_info.h);
+	auto view = glbin_moviemaker.GetView();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstCropValues }, target);
+}
+
+void MoviePanelAgent::SetScalebarPos()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_moviemaker.SetScalebarPos(panel->GetScalebarPos());
+	auto view = glbin_moviemaker.GetView();
+	std::set<Agent*> target;
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstNull }, target);
+}
+
+void MoviePanelAgent::SetScalebarValues()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto offset = panel->GetScalebarOffset();
+	glbin_moviemaker.SetScalebarDist(offset.x, offset.y);
+	auto view = glbin_moviemaker.GetView();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstScalebarPos }, target);
+}
+
+void MoviePanelAgent::EnableScript()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_settings.m_run_script = panel->GetScriptEnable();
+	glbin_settings.m_script_file = panel->GetScriptFileName();
+	auto view = glbin_moviemaker.GetView();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(
+		{ gstMovPlay, gstRunScript }, target);
+}
+
+void MoviePanelAgent::SetScriptFile()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_settings.m_script_file = panel->GetScriptFileName();
+}
+
+void MoviePanelAgent::LoadScriptFile()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	ModalDlg fopendlg(
+		panel, "Choose a 4D script file", "", "",
+		"4D script file (*.txt)|*.txt",
+		wxFD_OPEN);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		std::wstring file = fopendlg.GetPath().ToStdWstring();
+		glbin_settings.m_script_file = file;
+		glbin_settings.m_run_script = true;
+		UpdateDataToUI({ gstMovPlay, gstRunScript });
+	}
+}
+
+void MoviePanelAgent::SelectScriptFile()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto name = panel->GetSelScriptName();
+	std::filesystem::path p = GetUserSettingsRoot();
+	p = p / "Scripts" / (name + ".txt");
+	std::wstring filename = p.wstring();
+	glbin_settings.m_script_file = filename;
+	glbin_settings.m_run_script = true;
+	UpdateDataToUI({ gstMovPlay, gstRunScript, gstScriptFile });
+}
