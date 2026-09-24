@@ -245,42 +245,48 @@ void Interpolator::RemoveKey(int id)
 void Interpolator::MoveKeyBefore(int from_idx, int to_idx)
 {
 	if (from_idx == to_idx ||
-		from_idx == to_idx-1)
+		from_idx == to_idx - 1)
 		return;
 
-	if (from_idx<0 || from_idx>=(int)m_key_list.size())
+	if (from_idx < 0 || from_idx >= (int)m_key_list.size())
 		return;
-	FlKeyGroup *from_grp = m_key_list[from_idx];
-	if (to_idx<0 || to_idx>=(int)m_key_list.size())
+	if (to_idx < 0 || to_idx >= (int)m_key_list.size())
 		return;
-	FlKeyGroup *to_grp = m_key_list[to_idx];
 
-	//insert before
+	FlKeyGroup* grp = m_key_list[from_idx];
+
 	m_key_list.erase(m_key_list.begin() + from_idx);
-	m_key_list.insert(m_key_list.begin() + to_idx, from_grp);
 
-	FixTime(to_idx);
+	if (from_idx < to_idx)
+		--to_idx;
+
+	m_key_list.insert(m_key_list.begin() + to_idx, grp);
+
+	FixTime(std::min(from_idx, to_idx));
 }
 
 //move after
 void Interpolator::MoveKeyAfter(int from_idx, int to_idx)
 {
 	if (from_idx == to_idx ||
-		from_idx == to_idx+1)
+		from_idx == to_idx + 1)
 		return;
 
-	if (from_idx<0 || from_idx>=(int)m_key_list.size())
+	if (from_idx < 0 || from_idx >= (int)m_key_list.size())
 		return;
-	FlKeyGroup *from_grp = m_key_list[from_idx];
-	if (to_idx<0 || to_idx>=(int)m_key_list.size())
+	if (to_idx < 0 || to_idx >= (int)m_key_list.size())
 		return;
-	FlKeyGroup *to_grp = m_key_list[to_idx];
 
-	//insert after
+	FlKeyGroup* grp = m_key_list[from_idx];
+
 	m_key_list.erase(m_key_list.begin() + from_idx);
-	m_key_list.insert(m_key_list.begin() + to_idx, from_grp);
 
-	FixTime(from_idx);
+	if (from_idx < to_idx)
+		--to_idx;
+
+	m_key_list.insert(m_key_list.begin() + to_idx + 1, grp);
+
+	FixTime(std::min(from_idx, to_idx));
 }
 
 void Interpolator::FixTime(int index)
@@ -331,6 +337,22 @@ void Interpolator::ChangeDuration(int index, double duration)
 				m_key_list[i]->dt;
 		}
 	}
+}
+
+void Interpolator::ChangeInterpolation(int index, int type)
+{
+	if (index < 0 || index >= (int)m_key_list.size())
+		return;
+
+	m_key_list[index]->type = type;
+}
+
+void Interpolator::ChangeDescription(int index, const std::wstring& str)
+{
+	if (index < 0 || index >= (int)m_key_list.size())
+		return;
+
+	m_key_list[index]->desc = str;
 }
 
 bool Interpolator::GetDouble(FlKeyCode keycode, double t, double &dval)

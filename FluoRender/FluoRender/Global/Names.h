@@ -1206,4 +1206,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMeshEnableShadow "mesh enable shadow"
 #define gstEnableShadowDir "enable shadow dir"
 
+//movie panel
+#define gstPresetList "preset list"
+
 #endif//NAMES_HPP

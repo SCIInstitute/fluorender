@@ -46,6 +46,15 @@ public:
 
 	MoviePanel* GetPanel() const;
 
+	void SelectKeyframe(int id);
+	void DeleteKeyframe(int id);
+	void DeleteAllKeyframes();
+	void SetKeyframeTime(int id, double time);
+	void SetKeyframeDuration(int id, double duration);
+	void SetKeyframeInterpolation(int id, int type);
+	void SetKeyframeDescription(int id, const std::wstring& description);
+	void MoveKeyframe(int sourceId, int targetId, bool before);
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -64,6 +73,40 @@ private:
 	};
 
 	size_t GetScriptFiles(std::vector<std::wstring>& list);
+
+	//common
+	void SetFps();
+	void SetMovieLength();
+	void SetViewIndex();
+	void SetSliderStyle();
+	//frames
+	void SetScrollFrame();
+	void SetFullFrame(int val);
+	void SetStartFrame(int val);
+	void SetEndFrame(int val);
+	void SetCurrentFrame(int val, bool notify);
+	void SetCurrentTime(double val, bool notify);
+	void Play();
+	void PlayInv();
+	void Rewind();
+	void Forward();
+	void Loop(bool val);
+	void IncFrame();
+	void DecFrame();
+	void Save(const std::wstring& filename);
+
+	//keyframe movie
+	void SetKeyframeMovie(bool val);
+
+	//crop
+	void SetCropEnable(bool val);
+	void SetCropValues(int, int, int, int);
+	void SetScalebarPos(int pos);
+	void SetScalebarValues(int x, int y);
+
+	//script
+	void EnableScript(bool val, const std::wstring& filename = L"");
+
 };
 
 #endif // MoviePanelAgent_h

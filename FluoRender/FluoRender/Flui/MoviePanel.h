@@ -55,6 +55,18 @@ struct KeyframeInfo
 	std::wstring description;
 };
 
+struct PresetInfo
+{
+	std::string id;
+	std::string name;
+};
+
+struct ScriptInfo
+{
+	std::string id;
+	std::wstring filename;
+};
+
 class KeyListCtrl : public wxListCtrl
 {
 public:
@@ -177,11 +189,14 @@ public:
 	void UpdateCaptureParam(bool bval);
 	void UpdateParamKeyDuration(double dval);
 
-	void UpdateParamList();
+	void UpdateParamList();//called by list itself
+	void UpdateParamList(const std::vector<KeyframeInfo>& list);
 	void UpdateParamListSelect(int ival);
 
 	void UpdateCamLockObjEnable(bool bval);
 	void UpdateCamLockType(int ival);
+
+	void UpdatePresetList(const std::vector<PresetInfo>& list);
 
 	void UpdateCropEnable(bool bval);
 	void UpdateCropValues(int x, int y, int w, int h);
@@ -190,10 +205,10 @@ public:
 
 	void UpdateRunScript(bool bval);
 	void UpdateScriptFile(const std::wstring& filename);
-	void UpdateScriptList(const std::vector<std::wstring>& list);
+	void UpdateScriptList(const std::vector<ScriptInfo>& list);
 	void UpdateScriptListSelect(int ival);
 
-	//keyframe list methods
+	//keyframe list methods called by the list itself
 	void SelectKeyframe(int id);
 	void DeleteKeyframe(int id);
 	void DeleteAllKeyframes();
@@ -203,38 +218,11 @@ public:
 	void SetKeyframeDescription(int id, const std::wstring& description);
 	void MoveKeyframe(int sourceId, int targetId, bool before);
 
-	//common
-	void SetFps(double val);
-	void SetMovieLength(double val);
-	void SetView(int val);
-	void SetSliderStyle();
-	//frames
-	void SetFullFrame(int val);
-	void SetStartFrame(int val);
-	void SetEndFrame(int val);
-	void SetScrollFrame(int val, bool notify);
-	void SetCurrentFrame(int val, bool notify);
-	void SetCurrentTime(double val, bool notify);
-	void Play();
-	void PlayInv();
-	void Rewind();
-	void Forward();
-	void Loop(bool val);
-	void IncFrame();
-	void DecFrame();
-	void Save(const std::wstring& filename);
-
-	//keyframe movie
-	void SetKeyframeMovie(bool val);
-
-	//crop
-	void SetCropEnable(bool val);
-	void SetCropValues(int, int, int, int);
-	void SetScalebarPos(int pos);
-	void SetScalebarValues(int x, int y);
-
-	//script
-	void EnableScript(bool val, const std::wstring& filename = L"");
+	//get
+	double GetFps();
+	double GetMovieLength();
+	int GetViewIndex();
+	int GetProgressScroll();
 
 private:
 	//common controls

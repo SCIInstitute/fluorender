@@ -85,6 +85,8 @@ public:
 	void FixTime(int index = 0);
 	void ChangeTime(int index, double time);
 	void ChangeDuration(int index, double duration);
+	void ChangeInterpolation(int index, int type);
+	void ChangeDescription(int index, const std::wstring& str);
 	void MoveKeyBefore(int from_idx, int to_idx);
 	void MoveKeyAfter(int from_idx, int to_idx);
 

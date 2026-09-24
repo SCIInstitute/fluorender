@@ -689,19 +689,6 @@ wxWindow* MoviePanel::CreateTemplatePage(wxWindow* parent)
 	m_auto_key_list->InsertColumn(0, itemCol);
 	itemCol.SetText("Keyframe Preset");
 	m_auto_key_list->InsertColumn(1, itemCol);
-	//options
-	//channel comb 1
-	long tmp;
-	std::vector<std::string> str_list = glbin_moviemaker.GetAutoKeyTypes();
-	int i = 0;
-	wxString str;
-	for (auto& it : str_list)
-	{
-		i++;
-		str = wxString::Format("%d", i);
-		tmp = m_auto_key_list->InsertItem(i - 1, str, 0);
-		m_auto_key_list->SetItem(tmp, 1, it);
-	}
 	m_auto_key_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	m_auto_key_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 	m_auto_key_list->Bind(wxEVT_LIST_ITEM_ACTIVATED, &MoviePanel::OnGenKey, this);
@@ -1044,11 +1031,6 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	m_slider_btn->Realize();
 	m_progress_sldr = new wxUndoableScrollBar(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(-1, 20)));
-	m_progress_sldr->SetScrollbar2(
-		glbin_moviemaker.GetCurrentFrame(),
-		glbin_moviemaker.GetScrollThumbSize(),
-		glbin_moviemaker.GetClipStartFrame(),
-		glbin_moviemaker.GetClipEndFrame(), 1);
 	m_progress_sldr->Bind(wxEVT_SCROLL_CHANGED, &MoviePanel::OnProgressScroll, this);
 	sizer2->Add(5, 5);
 	sizer2->Add(m_slider_btn, 0, wxALIGN_CENTER);
@@ -1423,12 +1405,14 @@ void MoviePanel::UpdateParamKeyDuration(double dval)
 
 void MoviePanel::UpdateParamList()
 {
-	std::vector<KeyframeInfo> keys;
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstParamList });
+}
 
-	if (auto agent = m_agent->As<MoviePanelAgent>())
-		m_agent->GetKeyframes(keys);
-
-	m_keylist->SetKeyframes(keys);
+void MoviePanel::UpdateParamList(const std::vector<KeyframeInfo>& list)
+{
+	m_keylist->SetKeyframes(list);
 }
 
 void MoviePanel::UpdateParamListSelect(int ival)
@@ -1448,6 +1432,28 @@ void MoviePanel::UpdateCamLockObjEnable(bool bval)
 void MoviePanel::UpdateCamLockType(int ival)
 {
 	m_cam_lock_cmb->SetSelection(ival);
+}
+
+void MoviePanel::UpdatePresetList(const std::vector<PresetInfo>& list)
+{
+	m_auto_key_list->DeleteAllItems();
+
+	long row = 0;
+	for (const auto& preset : list)
+	{
+		long item = m_auto_key_list->InsertItem(
+			row,
+			preset.id);
+
+		m_auto_key_list->SetItem(
+			item,
+			1,
+			preset.name);
+
+		++row;
+	}
+	m_auto_key_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+	m_auto_key_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
 }
 
 void MoviePanel::UpdateCropEnable(bool bval)
@@ -1523,17 +1529,23 @@ void MoviePanel::UpdateScriptFile(const std::wstring& filename)
 	m_script_file_text->ChangeValue(filename);
 }
 
-void MoviePanel::UpdateScriptList(const std::vector<std::wstring>& list)
+void MoviePanel::UpdateScriptList(const std::vector<ScriptInfo>& list)
 {
 	m_script_list->DeleteAllItems();
-	std::wstring filename;
-	long tmp;
-	for (size_t i = 0; i < list.size(); ++i)
+
+	long row = 0;
+	for (const auto& script : list)
 	{
-		std::filesystem::path p(list[i]);
-		filename = p.stem().wstring();
-		tmp = m_script_list->InsertItem(i, std::to_wstring(i + 1), 0);
-		m_script_list->SetItem(tmp, 1, filename);
+		long item = m_script_list->InsertItem(
+			row,
+			script.id);
+
+		m_script_list->SetItem(
+			item,
+			1,
+			script.filename);
+
+		++row;
 	}
 	m_script_list->SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
 	m_script_list->SetColumnWidth(1, wxLIST_AUTOSIZE);
@@ -1558,230 +1570,81 @@ void MoviePanel::SelectKeyframe(int id)
 
 void MoviePanel::DeleteKeyframe(int id)
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->DeleteKeyframe(id);
 }
 
 void MoviePanel::DeleteAllKeyframes()
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->DeleteAllKeyframes();
 }
 
 void MoviePanel::SetKeyframeTime(int id, double time)
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->SetKeyframeTime(id, time);
 }
 
 void MoviePanel::SetKeyframeDuration(int id, double duration)
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->SetKeyframeDuration(id, duration);
 }
 
 void MoviePanel::SetKeyframeInterpolation(int id, int type)
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->SetKeyframeInterpolation(id, type);
 }
 
 void MoviePanel::SetKeyframeDescription(int id, const std::wstring& description)
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->SetKeyframeDescription(id, description);
 }
 
 void MoviePanel::MoveKeyframe(int sourceId, int targetId, bool before)
 {
-
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->MoveKeyframe(sourceId, targetId, before);
 }
 
-void MoviePanel::SetFps(double val)
+double MoviePanel::GetFps()
 {
-	glbin_moviemaker.SetFps(val);
-
-	FluoUpdate({ gstMovFps, gstMovLength });
+	wxString str = m_fps_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	else
+		return 1.0;
 }
 
-void MoviePanel::SetMovieLength(double val)
+double MoviePanel::GetMovieLength()
 {
-	glbin_moviemaker.SetMovieLength(val);
-
-	FluoUpdate({ gstMovFps, gstMovLength });
+	wxString str = m_movie_len_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	else
+		return 1.0;
 }
 
-void MoviePanel::SetView(int index)
+int MoviePanel::GetViewIndex()
 {
-	glbin_mov_def.m_view_idx = index;
-
-	FluoUpdate({ gstMovViewIndex });
+	return m_views_cmb->GetCurrentSelection();
 }
 
-void MoviePanel::SetSliderStyle()
+int MoviePanel::GetProgressScroll()
 {
-	glbin_mov_def.m_slider_style = !glbin_mov_def.m_slider_style;
-
-	FluoUpdate({ gstMovSliderStyle });
-}
-
-void MoviePanel::SetFullFrame(int val)
-{
-	glbin_moviemaker.SetFullFrameNum(val);
-
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
-}
-
-void MoviePanel::SetStartFrame(int val)
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-	glbin_moviemaker.SetClipStartFrame(val);
-
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
-}
-
-void MoviePanel::SetEndFrame(int val)
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-	glbin_moviemaker.SetClipEndFrame(val);
-
-	FluoUpdate({ gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovFps, gstMovLength, gstMovProgSlider, gstMovSeqNum });
-}
-
-void MoviePanel::SetScrollFrame(int val, bool notify)
-{
-	if (glbin_moviemaker.GetCurrentFrame() == val)
-		return;
-	glbin_moviemaker.SetCurrentFrame(val);
-
-	fluo::ValueCollection vc = { gstMovCurTime, gstCurrentFrame, gstMovSeqNum };
-	if (notify)
-		vc.insert(gstMovProgSlider);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::SetCurrentFrame(int val, bool notify)
-{
-	//if (glbin_moviemaker.IsRunning())
-	//	return;
-	glbin_moviemaker.SetCurrentFrame(val);
-
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstMovSeqNum };
-	if (notify)
-		vc.insert(gstCurrentFrame);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::SetCurrentTime(double val, bool notify)
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-
-	glbin_moviemaker.SetCurrentTime(val);
-
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovProgSlider, gstMovSeqNum };
-	if (notify)
-		vc.insert(gstMovCurTime);
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::Play()
-{
-	glbin_moviemaker.Play(false);
-
-	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::PlayInv()
-{
-	glbin_moviemaker.Play(true);
-
-	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::Rewind()
-{
-	glbin_moviemaker.Rewind();
-
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::Forward()
-{
-	glbin_moviemaker.Forward();
-
-	fluo::ValueCollection vc = { gstCurrentFrame, gstMovCurTime, gstMovProgSlider, gstMovPlay, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::Loop(bool val)
-{
-	glbin_moviemaker.SetLoop(val);
-}
-
-void MoviePanel::IncFrame()
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-	int frame = glbin_moviemaker.GetCurrentFrame();
-	frame++;
-	glbin_moviemaker.SetCurrentFrame(frame);
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::DecFrame()
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-	int frame = glbin_moviemaker.GetCurrentFrame();
-	frame--;
-	glbin_moviemaker.SetCurrentFrame(frame);
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::Save(const std::wstring& filename)
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-
-	glbin_states.m_capture = true;
-	glbin_moviemaker.SetFileName(filename);
-	glbin_moviemaker.PlaySave();
-
-	fluo::ValueCollection vc = { gstMovPlay };
-	FluoRefresh(2, vc, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::SetKeyframeMovie(bool val)
-{
-	glbin_moviemaker.SetKeyframeEnable(val, true);
-
-	FluoUpdate({ gstCaptureParam, gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstMovCurTime, gstMovSeqNum });
-}
-
-void MoviePanel::SetCropEnable(bool val)
-{
-	glbin_moviemaker.SetCropEnable(val);
-	FluoRefresh(2, { gstCropEnable, gstCropValues }, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::SetCropValues(int x, int y, int w, int h)
-{
-	glbin_moviemaker.SetCropValues(x, y, w, h);
-	FluoRefresh(2, { gstCropValues }, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::SetScalebarPos(int pos)
-{
-	glbin_moviemaker.SetScalebarPos(pos);
-	FluoRefresh(2, { gstNull }, { glbin_current.GetViewId() });
-}
-
-void MoviePanel::SetScalebarValues(int x, int y)
-{
-	glbin_moviemaker.SetScalebarDist(x, y);
-	FluoRefresh(2, { gstScalebarPos }, { glbin_current.GetViewId() });
+	return m_progress_sldr->GetValue();
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
@@ -1791,35 +1654,37 @@ void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)
 
 void MoviePanel::OnFpsEdit(wxCommandEvent& event)
 {
-	wxString str = m_fps_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
-		SetFps(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovFps });
 }
 
 void MoviePanel::OnMovieLenText(wxCommandEvent& event)
 {
-	wxString str = m_movie_len_text->GetValue();
-	double val;
-	if (str.ToDouble(&val))
-		SetMovieLength(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovLength });
 }
 
 void MoviePanel::OnViewSelected(wxCommandEvent& event)
 {
-	int val = m_views_cmb->GetCurrentSelection();
-	SetView(val);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovViewIndex });
 }
 
 void MoviePanel::OnSliderStyle(wxCommandEvent& event)
 {
-	SetSliderStyle();
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovSliderStyle });
 }
 
 void MoviePanel::OnProgressScroll(wxScrollEvent& event)
 {
-	int val = m_progress_sldr->GetValue();
-	SetScrollFrame(val, false);
+	auto agent = m_agent->As<MoviePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovProgSlider });
 }
 
 void MoviePanel::OnStartFrameText(wxCommandEvent& event)
