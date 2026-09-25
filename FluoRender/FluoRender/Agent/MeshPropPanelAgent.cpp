@@ -201,16 +201,10 @@ void MeshPropPanelAgent::UpdateData(const UpdateRequest& request)
 	{
 		SetShadowDir();
 	}
-}
-
-void MeshPropPanelAgent::SetColor(const fluo::Color& color)
-{
-	auto md = m_md.lock();
-	if (!md)
-		return;
-
-	md->SetColor(color);
-	NotifyViewUpdate({ gstMeshColor, gstTreeColors });
+	if (request.HasValue(gstMeshColor))
+	{
+		SetColor();
+	}
 }
 
 void MeshPropPanelAgent::SetOutline()
@@ -544,3 +538,19 @@ void MeshPropPanelAgent::SetShadowDir()
 	//else
 	//	FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
 }
+
+void MeshPropPanelAgent::SetColor()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto md = m_md.lock();
+	if (!md)
+		return;
+
+	auto color = panel->GetColor();
+	md->SetColor(color);
+	NotifyViewUpdate({ gstMeshColor, gstTreeColors });
+}
+

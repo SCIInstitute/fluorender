@@ -57,8 +57,6 @@ public:
 		return m_group.lock();
 	}
 
-	void SetColor(const fluo::Color& color);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -116,6 +114,8 @@ private:
 	void SetShadow();
 	void SetEnableShadowDir();
 	void SetShadowDir();
+	void SetColor();
+
 };
 
 #endif // MeshPropPanelAgent_h

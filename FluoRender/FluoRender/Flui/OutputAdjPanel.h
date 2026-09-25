@@ -72,6 +72,12 @@ public:
 
 	void ClearUndo();
 
+	//get
+	double GetGamma(int i);
+	double GetBrightness(int i);
+	double GetHdr(int i);
+	bool GetSync(int i);
+
 private:
 	//sync red
 	wxUndoableToolbar* m_sync_r_chk;

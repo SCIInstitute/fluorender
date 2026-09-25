@@ -211,7 +211,80 @@ void OutputAdjPanelAgent::UpdateUI(const UpdateRequest& request)
 
 void OutputAdjPanelAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstSyncGammaR))
+		SyncGamma(0);
+	if (request.HasValue(gstSyncGammaG))
+		SyncGamma(1);
+	if (request.HasValue(gstSyncGammaB))
+		SyncGamma(2);
+	if (request.HasValue(gstDefaultGammaR))
+		SetGamma(0, glbin_outadj_def.m_gamma_r, true);
+	if (request.HasValue(gstDefaultGammaG))
+		SetGamma(1, glbin_outadj_def.m_gamma_g, true);
+	if (request.HasValue(gstDefaultGammaB))
+		SetGamma(2, glbin_outadj_def.m_gamma_b, true);
 
+	if (request.HasValue(gstSyncBrightnessR))
+		SyncBrightness(0);
+	if (request.HasValue(gstSyncBrightnessG))
+		SyncBrightness(1);
+	if (request.HasValue(gstSyncBrightnessB))
+		SyncBrightness(2);
+	if (request.HasValue(gstDefaultBrightnessR))
+		SetBrightness(0, glbin_outadj_def.m_brightness_r, true);
+	if (request.HasValue(gstDefaultBrightnessG))
+		SetBrightness(1, glbin_outadj_def.m_brightness_g, true);
+	if (request.HasValue(gstDefaultBrightnessB))
+		SetBrightness(2, glbin_outadj_def.m_brightness_b, true);
+
+	if (request.HasValue(gstSyncEqualizeR))
+		SyncHdr(0);
+	if (request.HasValue(gstSyncEqualizeG))
+		SyncHdr(1);
+	if (request.HasValue(gstSyncEqualizeB))
+		SyncHdr(2);
+	if (request.HasValue(gstDefaultEqualizeR))
+		SetHdr(0, glbin_outadj_def.m_hdr_r, true);
+	if (request.HasValue(gstDefaultEqualizeG))
+		SetHdr(1, glbin_outadj_def.m_hdr_g, true);
+	if (request.HasValue(gstDefaultEqualizeB))
+		SetHdr(2, glbin_outadj_def.m_hdr_b, true);
+
+	if (request.HasValue(gstGammaR))
+		SetGamma(0);
+	if (request.HasValue(gstGammaG))
+		SetGamma(1);
+	if (request.HasValue(gstGammaB))
+		SetGamma(2);
+	if (request.HasValue(gstBrightnessR))
+		SetBrightness(0);
+	if (request.HasValue(gstBrightnessG))
+		SetBrightness(1);
+	if (request.HasValue(gstBrightnessB))
+		SetBrightness(2);
+	if (request.HasValue(gstEqualizeR))
+		SetHdr(0);
+	if (request.HasValue(gstEqualizeG))
+		SetHdr(1);
+	if (request.HasValue(gstEqualizeB))
+		SetHdr(2);
+
+	if (request.HasValue(gstSyncR))
+		SetSync(0);
+	if (request.HasValue(gstSyncG))
+		SetSync(1);
+	if (request.HasValue(gstSyncB))
+		SetSync(2);
+
+	if (request.HasValue(gstOutputAdjSaveDefault))
+		SaveDefault();
+
+	if (request.HasValue(gstDefaultR))
+		SetDefaultR();
+	if (request.HasValue(gstDefaultG))
+		SetDefaultG();
+	if (request.HasValue(gstDefaultB))
+		SetDefaultB();
 }
 
 OutputAdjPanel* OutputAdjPanelAgent::GetPanel() const
@@ -588,6 +661,38 @@ void OutputAdjPanelAgent::SetHdr(int i, double val, bool notify)
 	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
 }
 
+void OutputAdjPanelAgent::SetSync(int i)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetSync(i, panel->GetSync(i), true);
+}
+
+void OutputAdjPanelAgent::SetGamma(int i)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetGamma(i, panel->GetGamma(i), true);
+}
+
+void OutputAdjPanelAgent::SetBrightness(int i)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetBrightness(i, panel->GetBrightness(i), true);
+}
+
+void OutputAdjPanelAgent::SetHdr(int i)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetHdr(i, panel->GetHdr(i), true);
+}
+
 void OutputAdjPanelAgent::SyncColor(fluo::Color& c, double val)
 {
 	for (int i : {0, 1, 2})
@@ -932,5 +1037,57 @@ void OutputAdjPanelAgent::SyncHdr(int i)
 		vc.insert(gstEqualizeB);
 
 	glbin_coordinator.Dispatch(UpdateRequest::ViewUpdate(vc));
+}
+
+void OutputAdjPanelAgent::SaveDefault()
+{
+	int type = glbin_current.GetType();
+	switch (type)
+	{
+	case 1://view
+	case 3://mesh
+	case 6://mesh group
+		glbin_outadj_def.Set(*glbin_current.render_view.lock());
+		break;
+	case 2://volume data
+		glbin_outadj_def.Set(*glbin_current.vol_data.lock());
+		break;
+	case 5://group
+		glbin_outadj_def.Set(*glbin_current.vol_group.lock());
+		break;
+	}
+}
+
+void OutputAdjPanelAgent::SetDefaultR()
+{
+	SetGamma(0, glbin_outadj_def.m_gamma_r, false);
+	SetBrightness(0, glbin_outadj_def.m_brightness_r, false);
+	SetHdr(0, glbin_outadj_def.m_hdr_r, false);
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstGammaR, gstBrightnessR, gstEqualizeR }, target);
+}
+
+void OutputAdjPanelAgent::SetDefaultG()
+{
+	SetGamma(0, glbin_outadj_def.m_gamma_g, false);
+	SetBrightness(0, glbin_outadj_def.m_brightness_g, false);
+	SetHdr(0, glbin_outadj_def.m_hdr_g, false);
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstGammaG, gstBrightnessG, gstEqualizeG }, target);
+}
+
+void OutputAdjPanelAgent::SetDefaultB()
+{
+	SetGamma(0, glbin_outadj_def.m_gamma_b, false);
+	SetBrightness(0, glbin_outadj_def.m_brightness_b, false);
+	SetHdr(0, glbin_outadj_def.m_hdr_b, false);
+	auto view = glbin_current.render_view.lock();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstGammaB, gstBrightnessB, gstEqualizeB }, target);
 }
 

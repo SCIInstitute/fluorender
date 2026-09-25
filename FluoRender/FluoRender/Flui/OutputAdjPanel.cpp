@@ -26,15 +26,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <OutputAdjPanel.h>
+#include <OutputAdjPanelAgent.h>
+#include <MainFrameAgent.h>
 #include <Global.h>
-#include <Names.h>
 #include <MainSettings.h>
-#include <RenderView.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <VolumeGroup.h>
-#include <Color.h>
-#include <ShaderProgram.h>
+#include <Coordinator.h>
 #include <wxFadeButton.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
@@ -609,19 +605,101 @@ void OutputAdjPanel::ClearUndo()
 	m_b_hdr_sldr->Clear();
 }
 
+double OutputAdjPanel::GetGamma(int i)
+{
+	wxString str;
+	switch (i)
+	{
+	case 0:
+		str = m_r_gamma_text->GetValue();
+		break;
+	case 1:
+		str = m_g_gamma_text->GetValue();
+		break;
+	case 2:
+		str = m_b_gamma_text->GetValue();
+		break;
+	}
+	double val;
+	if (str.ToDouble(&val) && val != 0.0)
+		return 1.0 / val;
+	return 1.0;
+}
+
+double OutputAdjPanel::GetBrightness(int i)
+{
+	wxString str;
+	switch (i)
+	{
+	case 0:
+		str = m_r_brightness_text->GetValue();
+		break;
+	case 1:
+		str = m_g_brightness_text->GetValue();
+		break;
+	case 2:
+		str = m_b_brightness_text->GetValue();
+		break;
+	}
+	double val;
+	if (str.ToDouble(&val))
+		return 	val / 256.0 + 1.0;
+	return 0.0;
+}
+
+double OutputAdjPanel::GetHdr(int i)
+{
+	wxString str;
+	switch (i)
+	{
+	case 0:
+		str = m_r_hdr_text->GetValue();
+		break;
+	case 1:
+		str = m_g_hdr_text->GetValue();
+		break;
+	case 2:
+		str = m_b_hdr_text->GetValue();
+		break;
+	}
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+bool OutputAdjPanel::GetSync(int i)
+{
+	switch (i)
+	{
+	case 0:
+		return m_sync_r_chk->GetToolState(0);
+	case 1:
+		return m_sync_g_chk->GetToolState(0);
+	case 2:
+		return m_sync_b_chk->GetToolState(0);
+	}
+	return false;
+}
+
 //multifunc
 void OutputAdjPanel::OnRGammaMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncGamma(0);
+		agent->UpdateUIToData({ gstSyncGammaR });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_r_gamma_sldr);
+		frame->SetFocusVRenderViews(m_r_gamma_sldr);
 		break;
 	case 2:
-		SetGamma(0, glbin_outadj_def.m_gamma_r, true);
+		agent->UpdateUIToData({ gstDefaultGammaR });
 		break;
 	case 3:
 		break;
@@ -635,16 +713,21 @@ void OutputAdjPanel::OnRGammaMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnGGammaMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncGamma(1);
+		agent->UpdateUIToData({ gstSyncGammaG });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_g_gamma_sldr);
+		frame->SetFocusVRenderViews(m_g_gamma_sldr);
 		break;
 	case 2:
-		SetGamma(1, glbin_outadj_def.m_gamma_g, true);
+		agent->UpdateUIToData({ gstDefaultGammaG });
 		break;
 	case 3:
 		break;
@@ -658,16 +741,21 @@ void OutputAdjPanel::OnGGammaMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnBGammaMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncGamma(2);
+		agent->UpdateUIToData({ gstSyncGammaB });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_b_gamma_sldr);
+		frame->SetFocusVRenderViews(m_b_gamma_sldr);
 		break;
 	case 2:
-		SetGamma(2, glbin_outadj_def.m_gamma_b, true);
+		agent->UpdateUIToData({ gstDefaultGammaB });
 		break;
 	case 3:
 		break;
@@ -681,16 +769,21 @@ void OutputAdjPanel::OnBGammaMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnRBrightnessMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncBrightness(0);
+		agent->UpdateUIToData({ gstSyncBrightnessR });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_r_brightness_sldr);
+		frame->SetFocusVRenderViews(m_r_brightness_sldr);
 		break;
 	case 2:
-		SetBrightness(0, glbin_outadj_def.m_brightness_r, true);
+		agent->UpdateUIToData({ gstDefaultBrightnessR });
 		break;
 	case 3:
 		break;
@@ -704,16 +797,21 @@ void OutputAdjPanel::OnRBrightnessMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnGBrightnessMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncBrightness(1);
+		agent->UpdateUIToData({ gstSyncBrightnessG });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_g_brightness_sldr);
+		frame->SetFocusVRenderViews(m_g_brightness_sldr);
 		break;
 	case 2:
-		SetBrightness(1, glbin_outadj_def.m_brightness_g, true);
+		agent->UpdateUIToData({ gstDefaultBrightnessG });
 		break;
 	case 3:
 		break;
@@ -727,16 +825,21 @@ void OutputAdjPanel::OnGBrightnessMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnBBrightnessMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncBrightness(2);
+		agent->UpdateUIToData({ gstSyncBrightnessB });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_b_brightness_sldr);
+		frame->SetFocusVRenderViews(m_b_brightness_sldr);
 		break;
 	case 2:
-		SetBrightness(2, glbin_outadj_def.m_brightness_b, true);
+		agent->UpdateUIToData({ gstDefaultBrightnessB });
 		break;
 	case 3:
 		break;
@@ -750,16 +853,21 @@ void OutputAdjPanel::OnBBrightnessMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnRHdrMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncHdr(0);
+		agent->UpdateUIToData({ gstSyncEqualizeR });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_r_hdr_sldr);
+		frame->SetFocusVRenderViews(m_r_hdr_sldr);
 		break;
 	case 2:
-		SetHdr(0, glbin_outadj_def.m_hdr_r, true);
+		agent->UpdateUIToData({ gstDefaultEqualizeR });
 		break;
 	case 3:
 		break;
@@ -773,16 +881,21 @@ void OutputAdjPanel::OnRHdrMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnGHdrMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncHdr(1);
+		agent->UpdateUIToData({ gstSyncEqualizeG });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_g_hdr_sldr);
+		frame->SetFocusVRenderViews(m_g_hdr_sldr);
 		break;
 	case 2:
-		SetHdr(1, glbin_outadj_def.m_hdr_g, true);
+		agent->UpdateUIToData({ gstDefaultEqualizeG });
 		break;
 	case 3:
 		break;
@@ -796,16 +909,21 @@ void OutputAdjPanel::OnGHdrMF(wxCommandEvent& event)
 
 void OutputAdjPanel::OnBHdrMF(wxCommandEvent& event)
 {
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncHdr(2);
+		agent->UpdateUIToData({ gstSyncEqualizeB });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_b_hdr_sldr);
+		frame->SetFocusVRenderViews(m_b_hdr_sldr);
 		break;
 	case 2:
-		SetHdr(2, glbin_outadj_def.m_hdr_b, true);
+		agent->UpdateUIToData({ gstDefaultEqualizeB });
 		break;
 	case 3:
 		break;
@@ -821,51 +939,42 @@ void OutputAdjPanel::OnRGammaChange(wxScrollEvent & event)
 {
 	double val = m_r_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_r_gamma_text->ChangeValue(str);
-	SetGamma(0, 1.0 / val, false);
+	m_r_gamma_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnRGammaText(wxCommandEvent& event)
 {
-	wxString str = m_r_gamma_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_r_gamma_sldr->ChangeValue(std::round(val * 100));
-	SetGamma(0, 1.0 / val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGammaR });
 }
 
 void OutputAdjPanel::OnGGammaChange(wxScrollEvent & event)
 {
 	double val = m_g_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_g_gamma_text->ChangeValue(str);
-	SetGamma(1, 1.0 / val, false);
+	m_g_gamma_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnGGammaText(wxCommandEvent& event)
 {
-	wxString str = m_g_gamma_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_g_gamma_sldr->ChangeValue(std::round(val * 100));
-	SetGamma(1, 1.0 / val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGammaG });
 }
 
 void OutputAdjPanel::OnBGammaChange(wxScrollEvent & event)
 {
 	double val = m_b_gamma_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_b_gamma_text->ChangeValue(str);
-	SetGamma(2, 1.0 / val, false);
+	m_b_gamma_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnBGammaText(wxCommandEvent& event)
 {
-	wxString str = m_b_gamma_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_b_gamma_sldr->ChangeValue(std::round(val * 100));
-	SetGamma(2, 1.0 / val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGammaB });
 }
 
 //brightness
@@ -874,18 +983,14 @@ void OutputAdjPanel::OnRBrightnessChange(wxScrollEvent & event)
 	int ival = m_r_brightness_sldr->GetValue();
 	double dval = ival / 256.0 + 1.0;
 	wxString str = wxString::Format("%d", ival);
-	m_r_brightness_text->ChangeValue(str);
-	SetBrightness(0, dval, false);
+	m_r_brightness_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnRBrightnessText(wxCommandEvent& event)
 {
-	wxString str = m_r_brightness_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_r_brightness_sldr->ChangeValue(std::round(val));
-	val = val / 256.0 + 1.0;
-	SetBrightness(0, val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBrightnessR });
 }
 
 void OutputAdjPanel::OnGBrightnessChange(wxScrollEvent & event)
@@ -893,18 +998,14 @@ void OutputAdjPanel::OnGBrightnessChange(wxScrollEvent & event)
 	int ival = m_g_brightness_sldr->GetValue();
 	double dval = ival / 256.0 + 1.0;
 	wxString str = wxString::Format("%d", ival);
-	m_g_brightness_text->ChangeValue(str);
-	SetBrightness(1, dval, false);
+	m_g_brightness_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnGBrightnessText(wxCommandEvent& event)
 {
-	wxString str = m_g_brightness_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_g_brightness_sldr->ChangeValue(std::round(val));
-	val = val / 256.0 + 1.0;
-	SetBrightness(1, val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBrightnessG });
 }
 
 void OutputAdjPanel::OnBBrightnessChange(wxScrollEvent & event)
@@ -912,153 +1013,104 @@ void OutputAdjPanel::OnBBrightnessChange(wxScrollEvent & event)
 	int ival = m_b_brightness_sldr->GetValue();
 	double dval = ival / 256.0 + 1.0;
 	wxString str = wxString::Format("%d", ival);
-	m_b_brightness_text->ChangeValue(str);
-	SetBrightness(2, dval, false);
+	m_b_brightness_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnBBrightnessText(wxCommandEvent& event)
 {
-	wxString str = m_b_brightness_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_b_brightness_sldr->ChangeValue(std::round(val));
-	val = val / 256.0 + 1.0;
-	SetBrightness(2, val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBrightnessB });
 }
 
 void OutputAdjPanel::OnRHdrChange(wxScrollEvent& event)
 {
 	double val = m_r_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_r_hdr_text->ChangeValue(str);
-	SetHdr(0, val, false);
+	m_r_hdr_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnRHdrText(wxCommandEvent& event)
 {
-	wxString str = m_r_hdr_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_r_hdr_sldr->ChangeValue(std::round(val * 100));
-	SetHdr(0, val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEqualizeR });
 }
 
 void OutputAdjPanel::OnGHdrChange(wxScrollEvent& event)
 {
 	double val = m_g_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_g_hdr_text->ChangeValue(str);
-	SetHdr(1, val, false);
+	m_g_hdr_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnGHdrText(wxCommandEvent& event)
 {
-	wxString str = m_g_hdr_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_g_hdr_sldr->ChangeValue(std::round(val * 100));
-	SetHdr(1, val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEqualizeG });
 }
 
 void OutputAdjPanel::OnBHdrChange(wxScrollEvent& event)
 {
 	double val = m_b_hdr_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
-	m_b_hdr_text->ChangeValue(str);
-	SetHdr(2, val, false);
+	m_b_hdr_text->SetValue(str);
 }
 
 void OutputAdjPanel::OnBHdrText(wxCommandEvent& event)
 {
-	wxString str = m_b_hdr_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_b_hdr_sldr->ChangeValue(std::round(val * 100));
-	SetHdr(2, val, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEqualizeB });
 }
 
 void OutputAdjPanel::OnSyncRCheck(wxCommandEvent& event)
 {
-	SetSync(0, m_sync_r_chk->GetToolState(0));
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSyncR });
 }
 
 void OutputAdjPanel::OnSyncGCheck(wxCommandEvent& event)
 {
-	SetSync(1, m_sync_g_chk->GetToolState(0));
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSyncG });
 }
 
 void OutputAdjPanel::OnSyncBCheck(wxCommandEvent& event)
 {
-	SetSync(2, m_sync_b_chk->GetToolState(0));
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSyncB });
 }
 
 void OutputAdjPanel::OnSaveDefault(wxCommandEvent& event)
 {
-	int type = glbin_current.GetType();
-	switch (type)
-	{
-	case 1://view
-	case 3://mesh
-	case 6://mesh group
-		glbin_outadj_def.Set(*glbin_current.render_view.lock());
-		break;
-	case 2://volume data
-		glbin_outadj_def.Set(*glbin_current.vol_data.lock());
-		break;
-	case 5://group
-		glbin_outadj_def.Set(*glbin_current.vol_group.lock());
-		break;
-	}
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstOutputAdjSaveDefault });
 }
 
 void OutputAdjPanel::OnRReset(wxCommandEvent& event)
 {
-	double dval;
-	dval = 1.0 / glbin_outadj_def.m_gamma_r;
-	m_r_gamma_sldr->ChangeValue(std::round(dval * 100.0));
-	m_r_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
-	SetGamma(0, glbin_outadj_def.m_gamma_r, false);
-	dval = (glbin_outadj_def.m_brightness_r - 1.0) * 256.0;
-	m_r_brightness_sldr->ChangeValue(std::round(dval));
-	m_r_brightness_text->ChangeValue(wxString::Format("%d", int(std::round(dval))));
-	SetBrightness(0, glbin_outadj_def.m_brightness_r, false);
-	dval = glbin_outadj_def.m_hdr_r;
-	m_r_hdr_sldr->ChangeValue(std::round(dval * 100.0));
-	m_r_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
-	SetHdr(0, glbin_outadj_def.m_hdr_r, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstDefaultR });
 }
 
 void OutputAdjPanel::OnGReset(wxCommandEvent& event)
 {
-	double dval;
-	dval = 1.0 / glbin_outadj_def.m_gamma_g;
-	m_g_gamma_sldr->ChangeValue(std::round(dval * 100.0));
-	m_g_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
-	SetGamma(1, glbin_outadj_def.m_gamma_g, false);
-	dval = (glbin_outadj_def.m_brightness_g - 1.0) * 256.0;
-	m_g_brightness_sldr->ChangeValue(std::round(dval));
-	m_g_brightness_text->ChangeValue(wxString::Format("%d", int(std::round(dval))));
-	SetBrightness(1, glbin_outadj_def.m_brightness_g, false);
-	dval = glbin_outadj_def.m_hdr_g;
-	m_g_hdr_sldr->ChangeValue(std::round(dval * 100.0));
-	m_g_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
-	SetHdr(1, glbin_outadj_def.m_hdr_g, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstDefaultG });
 }
 
 void OutputAdjPanel::OnBReset(wxCommandEvent& event)
 {
-	double dval;
-	dval = 1.0 / glbin_outadj_def.m_gamma_b;
-	m_b_gamma_sldr->ChangeValue(std::round(dval * 100.0));
-	m_b_gamma_text->ChangeValue(wxString::Format("%.2f", dval));
-	SetGamma(2, glbin_outadj_def.m_gamma_b, false);
-	dval = (glbin_outadj_def.m_brightness_b - 1.0) * 256.0;
-	m_b_brightness_sldr->ChangeValue(std::round(dval));
-	m_b_brightness_text->ChangeValue(wxString::Format("%d", int(std::round(dval))));
-	SetBrightness(2, glbin_outadj_def.m_brightness_b, false);
-	dval = glbin_outadj_def.m_hdr_b;
-	m_b_hdr_sldr->ChangeValue(std::round(dval * 100.0));
-	m_b_hdr_text->ChangeValue(wxString::Format("%.2f", dval));
-	SetHdr(2, glbin_outadj_def.m_hdr_b, false);
+	auto agent = m_agent->As<OutputAdjPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstDefaultB });
 }
 

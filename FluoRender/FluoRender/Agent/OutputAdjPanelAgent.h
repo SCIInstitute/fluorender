@@ -60,6 +60,11 @@ private:
 	void SetGamma(int i, double val, bool update = true);
 	void SetBrightness(int i, double val, bool update = true);
 	void SetHdr(int i, double val, bool update = true);
+	//from ui
+	void SetSync(int i);
+	void SetGamma(int i);
+	void SetBrightness(int i);
+	void SetHdr(int i);
 
 	void SyncColor(fluo::Color& c, double val);
 	void SyncGamma(fluo::Color& c, int i, double val, fluo::ValueCollection& vc, bool notify);
@@ -69,10 +74,51 @@ private:
 	void SyncBrightness(int i);
 	void SyncHdr(int i);
 
+	void SaveDefault();
+	void SetDefaultR();
+	void SetDefaultG();
+	void SetDefaultB();
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
 		gstCurrentSelect,
+		gstMultiFuncTips,
+		gstSyncR,
+		gstSyncG,
+		gstSyncB,
+		gstGammaR,
+		gstGammaG,
+		gstGammaB,
+		gstBrightnessR,
+		gstBrightnessG,
+		gstBrightnessB,
+		gstEqualizeR,
+		gstEqualizeG,
+		gstEqualizeB,
+		gstUpdateSync,
+		gstSyncGammaR,
+		gstSyncGammaG,
+		gstSyncGammaB,
+		gstDefaultGammaR,
+		gstDefaultGammaG,
+		gstDefaultGammaB,
+		gstSyncBrightnessR,
+		gstSyncBrightnessG,
+		gstSyncBrightnessB,
+		gstDefaultBrightnessR,
+		gstDefaultBrightnessG,
+		gstDefaultBrightnessB,
+		gstSyncEqualizeR,
+		gstSyncEqualizeG,
+		gstSyncEqualizeB,
+		gstDefaultEqualizeR,
+		gstDefaultEqualizeG,
+		gstDefaultEqualizeB,
+		gstOutputAdjSaveDefault,
+		gstDefaultR,
+		gstDefaultG,
+		gstDefaultB
 	};
 
 	bool m_enable_all = true;

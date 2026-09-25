@@ -56,11 +56,26 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstNrThresh,
+		gstNrSize,
+		gstUseSelection,
+		gstNrPreview,
+		gstNrDoPreview,
+		gstNrDoErase
 	};
 
 	//max volume value
 	double m_max_value = 255.0;
+
+private:
+	void Preview();
+	void Enhance();
+
+	void SetMaskThreshold();
+	void SetNrSize();
+	void SetUseSelection();
+	void Erase();
+	void SetPreview();
 };
 
 #endif // NoiseCancellingDlgAgent_h

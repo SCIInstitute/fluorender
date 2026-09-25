@@ -26,16 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <NoiseCancellingDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <ComponentDefault.h>
-#include <TreePanel.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <CompGenerator.h>
-#include <CompAnalyzer.h>
-#include <CompSelector.h>
-#include <VolumeSelector.h>
+#include <NoiseCancellingDlgAgent.h>
 #include <wxSingleSlider.h>
 #include <wx/valnum.h>
 
@@ -161,84 +152,32 @@ void NoiseCancellingDlg::UpdateNrPreview(bool bval)
 	m_enhance_sel_chk->SetValue(bval);
 }
 
-void NoiseCancellingDlg::Preview()
+double NoiseCancellingDlg::GetThreshold()
 {
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-
-	bool bval = glbin_comp_generator.GetUseSel();
-	glbin_comp_generator.SetThresh(glbin_comp_def.m_nr_thresh);
-	glbin_comp_generator.SetVolumeData(vd);
-	glbin_comp_generator.Compute();
-
-	bool use_min = glbin_comp_analyzer.GetUseMin();
-	bool use_max = glbin_comp_analyzer.GetUseMax();
-	int min_num = glbin_comp_analyzer.GetMinNum();
-	int max_num = glbin_comp_analyzer.GetMaxNum();
-
-	glbin_comp_analyzer.SetUseMin(false);
-	glbin_comp_analyzer.SetUseMax(true);
-	glbin_comp_analyzer.SetMinNum(0);
-	glbin_comp_analyzer.SetMaxNum(glbin_comp_def.m_nr_size);
-	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze();
-
-	//cell size filter
-	glbin_comp_selector.SetUseMin(false);
-	glbin_comp_selector.SetUseMax(true);
-	glbin_comp_selector.SetMinNum(0);
-	glbin_comp_selector.SetMaxNum(glbin_comp_def.m_nr_size);
-	glbin_comp_selector.CompFull();
-
-	glbin_comp_def.m_nr_preview = true;
-
-	Enhance();
-
-	//restore settings
-	glbin_comp_analyzer.SetUseMin(use_min);
-	glbin_comp_analyzer.SetUseMax(use_max);
-	glbin_comp_analyzer.SetMinNum(min_num);
-	glbin_comp_analyzer.SetMaxNum(max_num);
-	glbin_comp_selector.SetUseMin(use_min);
-	glbin_comp_selector.SetUseMax(use_max);
-	glbin_comp_selector.SetMinNum(min_num);
-	glbin_comp_selector.SetMaxNum(max_num);
+	wxString str = m_threshold_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
 }
 
-void NoiseCancellingDlg::Enhance()
+int NoiseCancellingDlg::GetNrSize()
 {
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
+	wxString str = m_voxel_text->GetValue();
+	long ival;
+	if (str.ToLong(&ival))
+		return ival;
+	return 0;
+}
 
-	if (glbin_comp_def.m_nr_preview)
-	{
-		fluo::Color mask_color = vd->GetMaskColor();
-		double hdr_r = 0.0;
-		double hdr_g = 0.0;
-		double hdr_b = 0.0;
-		if (mask_color.r() > 0.0)
-			hdr_r = 0.4;
-		if (mask_color.g() > 0.0)
-			hdr_g = 0.4;
-		if (mask_color.b() > 0.0)
-			hdr_b = 0.4;
-		fluo::Color hdr_color(hdr_r, hdr_g, hdr_b);
-		glbin_comp_def.m_nr_hdr_r = vd->GetHdr().r();
-		glbin_comp_def.m_nr_hdr_g = vd->GetHdr().g();
-		glbin_comp_def.m_nr_hdr_b = vd->GetHdr().b();
-		vd->SetHdr(hdr_color);
-	}
-	else if (!glbin_comp_def.m_nr_preview)
-	{
-		fluo::Color c(
-			glbin_comp_def.m_nr_hdr_r,
-			glbin_comp_def.m_nr_hdr_g,
-			glbin_comp_def.m_nr_hdr_b);
-		vd->SetHdr(c);
-	}
-	FluoRefresh(3, { gstNull });
+bool NoiseCancellingDlg::GetUseSelection()
+{
+	return m_ca_select_only_chk->GetValue();
+}
+
+bool NoiseCancellingDlg::GetPreview()
+{
+	return m_enhance_sel_chk->GetValue();
 }
 
 //threshold
@@ -252,17 +191,9 @@ void NoiseCancellingDlg::OnThresholdChange(wxScrollEvent& event)
 
 void NoiseCancellingDlg::OnThresholdText(wxCommandEvent& event)
 {
-	wxString str = m_threshold_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_threshold_sldr->ChangeValue(std::round(val*10.0));
-	glbin_comp_def.m_nr_thresh = val/m_max_value;
-
-	//change mask threshold
-	auto vd = glbin_current.vol_data.lock();
-	if (vd)
-		vd->SetMaskThreshold(glbin_comp_def.m_nr_thresh);
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<NoiseCancellingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstNrThresh });
 }
 
 //voxel size
@@ -276,34 +207,35 @@ void NoiseCancellingDlg::OnVoxelChange(wxScrollEvent& event)
 
 void NoiseCancellingDlg::OnVoxelText(wxCommandEvent& event)
 {
-	wxString str = m_voxel_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	m_voxel_sldr->ChangeValue(ival);
-	glbin_comp_def.m_nr_size = ival;
+	auto agent = m_agent->As<NoiseCancellingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstNrSize });
 }
 
 void NoiseCancellingDlg::OnSelOnlyChk(wxCommandEvent& event)
 {
-	bool bval = m_ca_select_only_chk->GetValue();
-	glbin_comp_generator.SetUseSel(bval);
-	FluoRefresh(1, { gstUseSelection }, { -1 });
+	auto agent = m_agent->As<NoiseCancellingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstUseSelection });
 }
 
 void NoiseCancellingDlg::OnPreviewBtn(wxCommandEvent& event)
 {
-	Preview();
-	FluoRefresh(1, { gstNrPreview }, { -1 });
+	auto agent = m_agent->As<NoiseCancellingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstNrDoPreview });
 }
 
 void NoiseCancellingDlg::OnEraseBtn(wxCommandEvent& event)
 {
-	glbin_vol_selector.Erase();
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<NoiseCancellingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstNrDoErase });
 }
 
 void NoiseCancellingDlg::OnEnhanceSelChk(wxCommandEvent& event)
 {
-	glbin_comp_def.m_nr_preview = m_enhance_sel_chk->GetValue();
-	FluoRefresh(3, { gstNull });
+	auto agent = m_agent->As<NoiseCancellingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstNrPreview });
 }

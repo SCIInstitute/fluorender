@@ -43,8 +43,11 @@ public:
 	void UpdateUseSelection(bool bval);
 	void UpdateNrPreview(bool bval);
 
-	void Preview();
-	void Enhance();
+	//get
+	double GetThreshold();
+	int GetNrSize();
+	bool GetUseSelection();
+	bool GetPreview();
 
 private:
 	wxCheckBox *m_ca_select_only_chk;

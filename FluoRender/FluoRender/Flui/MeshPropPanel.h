@@ -80,6 +80,7 @@ public:
 	double GetShadow();
 	bool GetEnableShadowDir();
 	double GetShadowDir();
+	fluo::Color GetColor();
 
 private:
 	wxUndoableToolbar* m_options_toolbar;

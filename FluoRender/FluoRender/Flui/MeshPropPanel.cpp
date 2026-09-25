@@ -400,6 +400,17 @@ double MeshPropPanel::GetShadowDir()
 	return 0.0;
 }
 
+fluo::Color MeshPropPanel::GetColor()
+{
+	wxString str = m_color_text->GetValue();
+	wxColor wxc;
+	if (GetColorString(str, wxc) == 3)
+	{
+		return fluo::Color(wxc.Red() / 255.0, wxc.Green() / 255.0, wxc.Blue() / 255.0);
+	}
+	return fluo::Color();
+}
+
 void MeshPropPanel::OnOptions(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MeshPropPanelAgent>();
@@ -433,15 +444,9 @@ void MeshPropPanel::OnOptions(wxCommandEvent& event)
 
 void MeshPropPanel::OnColorTextChange(wxCommandEvent& event)
 {
-	wxString str = m_color_text->GetValue();
-	wxColor wxc;
-	if (GetColorString(str, wxc) == 3)
-	{
-		fluo::Color color(wxc.Red() / 255.0, wxc.Green() / 255.0, wxc.Blue() / 255.0);
-		auto agent = m_agent->As<MeshPropPanelAgent>();
-		if (agent)
-			agent->SetColor(color);
-	}
+	auto agent = m_agent->As<MeshPropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMeshColor });
 }
 
 void MeshPropPanel::OnColorTextFocus(wxMouseEvent& event)
@@ -451,11 +456,9 @@ void MeshPropPanel::OnColorTextFocus(wxMouseEvent& event)
 
 void MeshPropPanel::OnColorBtn(wxColourPickerEvent& event)
 {
-	wxColor wxc = event.GetColour();
-	fluo::Color color(wxc.Red() / 255.0, wxc.Green() / 255.0, wxc.Blue() / 255.0);
 	auto agent = m_agent->As<MeshPropPanelAgent>();
 	if (agent)
-		agent->SetColor(color);
+		agent->UpdateUIToData({ gstMeshColor });
 }
 
 void MeshPropPanel::OnShadingCheck(wxCommandEvent& event)

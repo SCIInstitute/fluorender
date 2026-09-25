@@ -185,6 +185,27 @@ DEALINGS IN THE SOFTWARE.
 #define gstSyncR "sync r"
 #define gstSyncG "sync g"
 #define gstSyncB "sync b"
+#define gstSyncGammaR "sync gamma r"
+#define gstSyncGammaG "sync gamma g"
+#define gstSyncGammaB "sync gamma b"
+#define gstSyncBrightnessR "sync brightness r"
+#define gstSyncBrightnessG "sync brightness g"
+#define gstSyncBrightnessB "sync brightness b"
+#define gstSyncEqualizeR "sync equalize r"
+#define gstSyncEqualizeG "sync equalize g"
+#define gstSyncEqualizeB "sync equalize b"
+#define gstDefaultR "default r"
+#define gstDefaultG "default g"
+#define gstDefaultB "default b"
+#define gstDefaultGammaR "default gamma r"
+#define gstDefaultGammaG "default gamma g"
+#define gstDefaultGammaB "default gamma b"
+#define gstDefaultBrightnessR "default brightness r"
+#define gstDefaultBrightnessG "default brightness g"
+#define gstDefaultBrightnessB "default brightness b"
+#define gstDefaultEqualizeR "default equalize r"
+#define gstDefaultEqualizeG "default equalize g"
+#define gstDefaultEqualizeB "default equalize b"
 #define gstUpdateSync "update sync"
 //bounding box
 #define gstBounds "bounds"
@@ -1224,5 +1245,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstEnableScript "enable script"
 #define gstLoadScriptFile "load script file"
 #define gstSelectScriptFile "select script file"
+
+//output adj panel
+#define gstOutputAdjSaveDefault "output adj save default"
+
+//noise reduction dialog
+#define gstNrDoPreview "nr do preview"
+#define gstNrDoErase "nr do erase"
+
 
 #endif//NAMES_HPP
