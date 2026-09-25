@@ -26,15 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <OclDlg.h>
-#include <Directory.h>
-#include <Global.h>
-#include <Names.h>
-#include <RenderView.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <DataManager.h>
+#include <OclDlgAgent.h>
 #include <ModalDlg.h>
-#include <KernelExecutor.h>
 #include <wxSingleSlider.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
@@ -221,56 +214,83 @@ void OclDlg::UpdateKernelListSelect(int ival)
 			wxLIST_STATE_SELECTED);
 }
 
-void OclDlg::Execute()
+void OclDlg::UpdateOutputText(const std::wstring& str, bool clear)
 {
-	auto vd = glbin_current.vol_data.lock();
-	auto view = glbin_current.render_view.lock();
-	if (!vd || ! view)
-		return;
+	if (clear)
+		m_output_txt->ChangeValue("");
 
-	m_output_txt->ChangeValue("");
+	(*m_output_txt) << str;
+}
 
-	//get volume currently selected
-	bool dup = true;
-	wxString vd_name = vd->GetName();
-	if (vd_name.Find("_CL") != wxNOT_FOUND)
-		dup = false;
-	//bool dup = false;
+void OclDlg::UpdateKernelFileName(const std::wstring& str)
+{
+	m_kernel_file_txt->ChangeValue(str);
+}
 
-	//get cl code
-	wxString code = m_kernel_edit_stc->GetText();
-	glbin_kernel_executor.SetCode(code.ToStdString());
-	glbin_kernel_executor.SetVolume(vd);
-	glbin_kernel_executor.SetDuplicate(dup);
-	glbin_kernel_executor.Execute();
+void OclDlg::UpdateKernelIterations(int ival)
+{
+	m_iterations_sldr->ChangeValue(ival);
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_iterations_txt->GetValue())
+		m_iterations_txt->ChangeValue(str);
+}
 
-	(*m_output_txt) << glbin_kernel_executor.GetInfo();
+std::string OclDlg::GetCode()
+{
+	return m_kernel_edit_stc->GetText().ToStdString();
+}
 
-	//add result for rendering
-	if (dup)
+std::wstring OclDlg::GetKernelFileName()
+{
+	return m_kernel_file_txt->GetValue().ToStdWstring();
+}
+
+bool OclDlg::SaveKernelFile(const std::wstring& str)
+{
+	return m_kernel_edit_stc->SaveFile(str);
+}
+
+int OclDlg::GetIterations()
+{
+	wxString str = m_iterations_txt->GetValue();
+	long ival;
+	if (str.ToLong(&ival))
+		return ival;
+	return 1;
+}
+
+std::wstring OclDlg::GetKernelFile()
+{
+	long item = m_kernel_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+
+	std::wstring str;
+	if (item != -1)
 	{
-		auto vd_r = glbin_kernel_executor.GetResult(true);
-		if (!vd_r)
-			return;
-		glbin_data_manager.AddVolumeData(vd_r);
-		view->AddVolumeData(vd_r);
-		vd->SetDisp(false);
-		glbin_current.SetVolumeData(vd_r);
+		str = m_kernel_list->GetItemText(item, 1).ToStdWstring();
 	}
+	return str;
+}
 
-	fluo::ValueCollection vc;
-	if (dup)
-		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
-	else
-		vc.insert({ gstNull });
+int OclDlg::GetKernelFileIndex()
+{
+	return m_kernel_list->GetNextItem(-1,
+		wxLIST_NEXT_ALL,
+		wxLIST_STATE_SELECTED);
+}
 
-	FluoRefresh(1, vc, { glbin_current.GetViewId() });
+void OclDlg::LoadFile(const std::wstring& str)
+{
+	m_kernel_edit_stc->LoadFile(str);
+	m_kernel_edit_stc->EmptyUndoBuffer();
+	m_kernel_file_txt->ChangeValue(str);
 }
 
 void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 {
 	ModalDlg fopendlg(
-		m_frame, "Choose a filter file", 
+		this, "Choose a filter file", 
 		"", "", "Filter file|*.cl;*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
 	int rval = fopendlg.ShowModal();
@@ -285,51 +305,23 @@ void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 
 void OclDlg::OnSaveBtn(wxCommandEvent& event)
 {
-	wxString filename = m_kernel_file_txt->GetValue();
-	if (filename == "")
-	{
-		wxCommandEvent e;
-		OnSaveAsBtn(e);
-	}
-	else
-		m_kernel_edit_stc->SaveFile(filename);
+	auto agent = m_agent->As<OclDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKernelSave });
 }
 
 void OclDlg::OnSaveAsBtn(wxCommandEvent& event)
 {
-	ModalDlg fopendlg(
-		m_frame, "Choose an filter file", 
-		"", "", "Filter file|*.cl;*.txt", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg.GetPath();
-		rval = m_kernel_edit_stc->SaveFile(filename);
-		if (rval)
-		{
-			m_kernel_file_txt->ChangeValue(filename);
-			std::filesystem::path p(filename.ToStdString());
-			std::string fn = p.filename().string();
-			p = GetUserSettingsRoot();
-			p = p / "CL_code" / fn;
-			fn = p.string();
-			m_kernel_edit_stc->SaveFile(fn);
-			//fn = p.stem().string();
-			//m_kernel_list->InsertItem(m_kernel_list->GetItemCount(), fn);
-			FluoUpdate({ gstKernelList });
-		}
-	}
+	auto agent = m_agent->As<OclDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKernelSaveAs });
 }
 
 void OclDlg::OnExecuteBtn(wxCommandEvent& event)
 {
-	glbin_kernel_executor.SetProgress(0, "Running volume filter.");
-
-	Execute();
-
-	glbin_kernel_executor.SetRange(0, 100);
-	glbin_kernel_executor.SetProgress(0, "");
+	auto agent = m_agent->As<OclDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKernelExecute });
 }
 
 void OclDlg::OnIterationsChange(wxScrollEvent& event)
@@ -342,41 +334,23 @@ void OclDlg::OnIterationsChange(wxScrollEvent& event)
 
 void OclDlg::OnIterationsEdit(wxCommandEvent& event)
 {
-	wxString str = m_iterations_txt->GetValue();
-	unsigned long ival;
-	str.ToULong(&ival);
-	m_iterations_sldr->ChangeValue(ival);
-	glbin_kernel_executor.SetRepeat(ival - 1);
+	auto agent = m_agent->As<OclDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKernelIterations });
 }
 
 void OclDlg::OnKernelListSelected(wxListEvent& event)
 {
-	long item = m_kernel_list->GetNextItem(-1,
-		wxLIST_NEXT_ALL,
-		wxLIST_STATE_SELECTED);
-
-	if (item != -1)
-	{
-		wxString file = m_kernel_list->GetItemText(item, 1);
-		std::filesystem::path p = GetUserSettingsRoot();
-		p = p / "CL_code" / (file.ToStdString() + ".cl");
-		file = p.string();
-		m_kernel_edit_stc->LoadFile(file);
-		m_kernel_edit_stc->EmptyUndoBuffer();
-		m_kernel_file_txt->ChangeValue(file);
-
-		//get cl code
-		wxString code = m_kernel_edit_stc->GetText();
-		glbin_kernel_executor.SetCode(code.ToStdString());
-		glbin_kernel_executor.SetFileIndex(item);
-	}
+	auto agent = m_agent->As<OclDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKernelList });
 }
 
 void OclDlg::OnKernelTextChanged(wxStyledTextEvent& event)
 {
-	//get cl code
-	wxString code = m_kernel_edit_stc->GetText();
-	glbin_kernel_executor.SetCode(code.ToStdString());
+	auto agent = m_agent->As<OclDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstKernelCode });
 }
 
 #ifdef _DEBUG

@@ -1253,5 +1253,10 @@ DEALINGS IN THE SOFTWARE.
 #define gstNrDoPreview "nr do preview"
 #define gstNrDoErase "nr do erase"
 
+//opencl kernel dialog
+#define gstKernelExecute "kernel execute"
+#define gstKernelSave "kernel save"
+#define gstKernelSaveAs "kernel save as"
+#define gstKernelIterations "kernel iterations"
 
 #endif//NAMES_HPP

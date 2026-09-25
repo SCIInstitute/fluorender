@@ -43,7 +43,18 @@ public:
 	//update
 	void UpdateKernelList(const std::vector<std::wstring>& list);
 	void UpdateKernelListSelect(int ival);
-	void Execute();
+	void UpdateOutputText(const std::wstring& str, bool clear);
+	void UpdateKernelFileName(const std::wstring& str);
+	void UpdateKernelIterations(int ival);
+
+	//get
+	std::string GetCode();
+	std::wstring GetKernelFileName();
+	bool SaveKernelFile(const std::wstring& str);
+	int GetIterations();
+	std::wstring GetKernelFile();
+	int GetKernelFileIndex();
+	void LoadFile(const std::wstring& str);
 
 private:
 	//ui

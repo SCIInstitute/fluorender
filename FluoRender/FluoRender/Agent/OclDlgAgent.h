@@ -62,6 +62,12 @@ private:
 	};
 
 	bool GetKernelList(std::vector<std::wstring>& list);
+	void Execute();
+	void Save();
+	void SaveAs();
+	void SetIterations();
+	void SetCode();
+	void SetFileIndex();
 };
 
 #endif // OclDlgAgent_h
