@@ -1258,5 +1258,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstKernelSave "kernel save"
 #define gstKernelSaveAs "kernel save as"
 #define gstKernelIterations "kernel iterations"
+#define gstKernelCode "kernel code"
 
 #endif//NAMES_HPP

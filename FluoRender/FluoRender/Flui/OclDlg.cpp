@@ -300,6 +300,10 @@ void OclDlg::OnBrowseBtn(wxCommandEvent& event)
 		m_kernel_edit_stc->LoadFile(filename);
 		m_kernel_edit_stc->EmptyUndoBuffer();
 		m_kernel_file_txt->ChangeValue(filename);
+
+		auto agent = m_agent->As<OclDlgAgent>();
+		if (agent)
+			agent->UpdateUIToData({ gstKernelListSelect });
 	}
 }
 
@@ -343,7 +347,7 @@ void OclDlg::OnKernelListSelected(wxListEvent& event)
 {
 	auto agent = m_agent->As<OclDlgAgent>();
 	if (agent)
-		agent->UpdateUIToData({ gstKernelList });
+		agent->UpdateUIToData({ gstKernelListSelect });
 }
 
 void OclDlg::OnKernelTextChanged(wxStyledTextEvent& event)

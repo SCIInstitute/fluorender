@@ -58,7 +58,13 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstKernelList,
+		gstKernelListSelect,
+		gstKernelIterations,
+		gstKernelExecute,
+		gstKernelSave,
+		gstKernelSaveAs,
+		gstKernelCode
 	};
 
 	bool GetKernelList(std::vector<std::wstring>& list);
@@ -66,8 +72,8 @@ private:
 	void Save();
 	void SaveAs();
 	void SetIterations();
+	void SetCodeFromFile();
 	void SetCode();
-	void SetFileIndex();
 };
 
 #endif // OclDlgAgent_h

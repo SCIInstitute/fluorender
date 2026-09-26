@@ -84,6 +84,10 @@ void OclDlgAgent::UpdateData(const UpdateRequest& request)
 		SaveAs();
 	if (request.HasValue(gstKernelIterations))
 		SetIterations();
+	if (request.HasValue(gstKernelListSelect))
+		SetCodeFromFile();
+	if (request.HasValue(gstKernelCode))
+		SetCode();
 }
 
 OclDlg* OclDlgAgent::GetDialog() const
@@ -218,7 +222,7 @@ void OclDlgAgent::SetIterations()
 	}
 }
 
-void OclDlgAgent::SetCode()
+void OclDlgAgent::SetCodeFromFile()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
@@ -230,13 +234,17 @@ void OclDlgAgent::SetCode()
 	filename = p.wstring();
 	dlg->LoadFile(filename);
 
+	SetCode();
+}
+
+void OclDlgAgent::SetCode()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
 	//get cl code
 	auto code = dlg->GetCode();
 	glbin_kernel_executor.SetCode(code);
 	glbin_kernel_executor.SetFileIndex(dlg->GetKernelFileIndex());
-}
-
-void OclDlgAgent::SetFileIndex()
-{
-
 }
