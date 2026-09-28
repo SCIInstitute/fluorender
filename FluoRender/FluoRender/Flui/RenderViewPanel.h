@@ -101,10 +101,6 @@ public:
 		const wxString& name = "RenderView");
 	~RenderViewPanel();
 
-	int GetId() const { return m_id; }
-	//reset counter
-	static void ResetID();
-
 	void SetRenderCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
 	RenderCanvas* GetRenderCanvas() { return m_canvas; }
 	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }
@@ -137,52 +133,16 @@ public:
 	void UpdateRotSliderMode(bool bval);
 	void UpdateCamRotation(const fluo::Vector& val, int ival);
 
-	//update
-	void SetChannelMixMode(ChannelMixMode val);
-	void Capture();
-	void SetInfo(bool val);
-	void SetDrawCamCtr(bool val);
-	void SetLegend(bool val);
-	void SetDrawColormap();
-	void SetDrawScalebar();
-	void SetScaleText(double val);
-	void SetScaleUnit(int val);
-	void SetBgColor(fluo::Color val);
-	void SetBgColorInvert(bool val);
-	void SetAov(double val, bool notify);
-	void SetProjection();
-	void SetCamMode();
-	void SetStereography();
-	void SetHolography();
-	void SetFullScreen();
-	void CloseFullScreen();
-
-	void SetDepthAttenEnable(bool val);
-	void SetDepthAtten(double val, bool notify);
-
-	void SetCenter();
-	void SetScale121();
-	void SetScaleFactor(double val);
-	void SetScaleMode(int val);
-
-	void SetRotLock(bool val);
-	void SetSliderType();
-	void SetRotations(const fluo::Vector& val, bool notify);
-	void SetZeroRotations();
-
 	//get rendering context
 	wxGLContext* GetContext();
 
-	//bit mask for items to save
-	bool m_default_saved;
-	void SaveDefault(unsigned int mask = 0xffffffff);
-	void LoadSettings();
+	//get
+	ChannelMixMode GetChannelMixMethod();
+	bool GetInfo();
+	bool GetCamCtr();
+	bool GetLegend();
 
 private:
-	static int m_max_id;
-	int m_id;
-	double m_dpi_sf, m_dpi_sf2;
-
 	//trigger for entering full screen
 	wxTimer m_enter_fscreen_trigger;
 
@@ -233,9 +193,10 @@ private:
 	wxComboBox *m_ortho_view_cmb;
 	wxToolBar* m_rot_btn;
 
-private:
-	int GetViewId();
+	//values set by ui
+	ChannelMixMode m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 
+private:
 	//called when updated from bars
 	void CreateBar();
 

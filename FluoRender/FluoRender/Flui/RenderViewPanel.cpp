@@ -27,23 +27,13 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <RenderViewPanel.h>
+#include <RenderViewPanelAgent.h>
+#include <RenderCanvas.h>
 #include <Global.h>
 #include <Names.h>
-#include <GlobalStates.h>
 #include <MainSettings.h>
-#include <RenderCanvas.h>
-#include <ClipPlanePanel.h>
-#include <ModalDlg.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <Project.h>
-#include <VolumeSelector.h>
-#include <Ruler.h>
-#include <RulerHandler.h>
-#include <RenderCanvasAgent.h>
-#include <FluiBuilder.h>
 #include <RenderView.h>
-
+#include <RenderCanvasAgent.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
@@ -52,13 +42,10 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
-#include <limits>
+#include <wx/display.h>
 #include <png_resource.h>
 #include <icons.h>
-#include <wx/display.h>
-#include <Debug.h>
-
-int RenderViewPanel::m_max_id = 1;
+#include <limits>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +56,6 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	long style,
 	const wxString& name) :
 	PropPanel(parent, pos, size, style, name),
-	m_default_saved(false),
 	m_enter_fscreen_trigger(this, 0)
 {
 	// temporarily block events during constructor:
@@ -85,8 +71,6 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	//m_dpi_sf2 = std::round(m_dpi_sf - 0.1);
 	//m_dpi_sf2 = m_dpi_sf2 < m_dpi_sf ? m_dpi_sf : 1;
 
-	m_id = m_max_id;
-	SetName(wxString::Format("Render View:%d", m_max_id++));
 	//m_canvas = glbin_flui_builder.BuildRenderCanvas(this, sharedContext);
 	//m_renderview = m_canvas->GetAgent()->GetView();
 	m_view_sizer->Add(m_canvas, 1, wxEXPAND);
@@ -129,13 +113,6 @@ RenderViewPanel::~RenderViewPanel()
 	glbin.del_undo_control(m_x_rot_sldr);
 	glbin.del_undo_control(m_y_rot_sldr);
 	glbin.del_undo_control(m_z_rot_sldr);
-}
-
-int RenderViewPanel::GetViewId()
-{
-	//if (!m_renderview)
-	//	return 0;
-	//return m_renderview->Id();
 }
 
 void RenderViewPanel::CreateBar()
@@ -830,361 +807,36 @@ void RenderViewPanel::UpdateCamRotation(const fluo::Vector& val, int ival)
 	m_x_rot_text->Update();
 	m_y_rot_text->Update();
 	m_z_rot_text->Update();
-	m_ortho_view_cmb->Select();
+	m_ortho_view_cmb->Select(ival);
 }
 
-void RenderViewPanel::SetChannelMixMode(ChannelMixMode val)
+//get rendering context
+wxGLContext* RenderViewPanel::GetContext()
 {
-	fluo::ValueCollection vc;
-	m_renderview->UpdateChannelMixMode(val, vc);
-	vc.insert(gstMixMethod);
-	FluoRefresh(0, vc, { GetViewId() });
-}
-
-void RenderViewPanel::Capture()
-{
-	//reset enlargement
-	m_renderview->SetEnlarge(false);
-	m_renderview->SetEnlargeScale(1.0);
-
-	ModalDlg file_dlg(m_frame,
-		"Save Captured Image", "", "output",
-		"Tiff File (*.tif)|*.tif|"\
-		"Tiff File (*.tiff)|*.tiff|"\
-		"Png File (*.png)|*.png|"\
-		"Jpeg File (*.jpg)|*.jpg|"\
-		"Jpeg File (*.jpeg)|*.jpeg|"\
-		"Jpeg2000 File (*.jp2)|*.jp2",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
-	int rval = file_dlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		m_renderview->m_cap_file = file_dlg.GetPath();
-		m_renderview->m_capture = true;
-		glbin_states.m_capture = true;
-		glbin_refresh_scheduler_manager.requestDraw(
-			DrawRequest("Capture refresh", { static_cast<int>(m_renderview->Id()) }));
-
-		if (glbin_settings.m_prj_save)
-		{
-			std::wstring new_folder = m_renderview->m_cap_file + L"_project";
-			MkDirW(new_folder);
-			std::filesystem::path p = new_folder;
-			p /= file_dlg.GetFilename().ToStdString() + "_project.vrp";
-			std::wstring prop_file = p.wstring();
-			bool inc = std::filesystem::exists(prop_file) &&
-				glbin_settings.m_prj_save_inc;
-			glbin_project.Save(prop_file, inc);
-		}
-	}
-}
-
-void RenderViewPanel::SetInfo(bool val)
-{
-	if (val)
-		m_renderview->m_draw_info |= 1;
+	if (m_canvas)
+		return m_canvas->m_glRC/*GetContext()*/;
 	else
-		m_renderview->m_draw_info &= ~1;
-
-	FluoRefresh(2, { gstDrawInfo }, { GetViewId() });
+		return 0;
 }
 
-void RenderViewPanel::SetDrawCamCtr(bool val)
+ChannelMixMode RenderViewPanel::GetChannelMixMethod()
 {
-	m_renderview->m_draw_camctr = val;
-
-	FluoRefresh(2, { gstDrawCamCtr }, { GetViewId() });
+	return m_channel_mix_mode;
 }
 
-void RenderViewPanel::SetLegend(bool val)
+bool RenderViewPanel::GetInfo()
 {
-	m_renderview->m_draw_legend = val;
-
-	FluoRefresh(2, { gstDrawLegend }, { GetViewId() });
+	return m_hud_tb->GetToolState(ID_InfoChk);
 }
 
-void RenderViewPanel::SetDrawColormap()
+bool RenderViewPanel::GetCamCtr()
 {
-	int val = m_renderview->m_colormap_disp;
-	val++;
-	val = val % 3; // cycle through 0, 1, 2
-	m_renderview->m_colormap_disp = val;
-
-	FluoRefresh(2, { gstDrawColormap }, { GetViewId() });
+	return m_hud_tb->GetToolState(ID_CamCtrChk);
 }
 
-void RenderViewPanel::SetDrawScalebar()
+bool RenderViewPanel::GetLegend()
 {
-	int val = m_renderview->m_scalebar_disp;
-	val++;
-	val = val % 3; // cycle through 0, 1, 2
-	m_renderview->m_scalebar_disp = val;
-
-	FluoRefresh(2, { gstDrawScaleBar }, { GetViewId() });
-}
-
-void RenderViewPanel::SetScaleText(double val)
-{
-	std::wstring str, num_text, unit_text;
-	num_text = std::to_wstring((int)val);
-	switch (m_renderview->m_sb_unit)
-	{
-	case 0:
-		unit_text = L"nm";
-		break;
-	case 1:
-	default:
-		unit_text = L"\u03BCm";
-		break;
-	case 2:
-		unit_text = L"mm";
-		break;
-	}
-	str = num_text + L" " + unit_text;
-	m_renderview->SetSBText(str);
-	m_renderview->SetScaleBarLen(val);
-	m_renderview->m_sb_num = num_text;
-
-	FluoRefresh(2, {gstNull}, { GetViewId() });
-}
-
-void RenderViewPanel::SetScaleUnit(int val)
-{
-	m_renderview->m_sb_unit = val;
-	double dval = m_renderview->m_sb_length;
-	std::wstring str, num_text, unit_text;
-	num_text = std::to_wstring((int)dval);
-	switch (val)
-	{
-	case 0:
-		unit_text = L"nm";
-		break;
-	case 1:
-	default:
-		unit_text = L"\u03BCm";
-		break;
-	case 2:
-		unit_text = L"mm";
-		break;
-	}
-	str = num_text + L" " + unit_text;
-	m_renderview->SetSBText(str);
-	m_renderview->SetScaleBarLen(dval);
-	m_renderview->m_sb_num = num_text;
-
-	FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanel::SetBgColor(fluo::Color val)
-{
-	m_renderview->SetBackgroundColor(val);
-
-	FluoRefresh(2, { gstBgColor }, { GetViewId() });
-}
-
-void RenderViewPanel::SetBgColorInvert(bool val)
-{
-	m_bg_color_inv = val;
-	fluo::Color c = m_renderview->GetBackgroundColor();
-	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	m_renderview->SetBackgroundColor(c);
-
-	FluoRefresh(2, { gstBgColor, gstBgColorInv }, { GetViewId() });
-}
-
-void RenderViewPanel::SetAov(double val, bool notify)
-{
-	if (val < 11)
-	{
-		m_renderview->SetPersp(false);
-		if (m_renderview->GetAov() == 10)
-			return;
-		m_renderview->SetAov(10);
-	}
-	else if (val > 100)
-	{
-		m_renderview->SetPersp(true);
-		if (m_renderview->GetAov() == 100)
-			return;
-		m_renderview->SetAov(100);
-	}
-	else
-	{
-		m_renderview->SetPersp(true);
-		if (m_renderview->GetAov() == val)
-			return;
-		m_renderview->SetAov(val);
-	}
-
-	if (notify)
-		FluoRefresh(2, { gstAov }, { GetViewId() });
-	else
-		FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanel::SetProjection()
-{
-	bool bval = m_renderview->GetPersp();
-	if (bval)
-	{
-		SetAov(10, true);
-	}
-	else
-	{
-		SetAov(45, true);
-	}
-}
-
-void RenderViewPanel::SetCamMode()
-{
-	int ival = m_renderview->GetCamMode();
-	ival = (ival + 1) % 2; // cycle through 0 and 1
-	m_renderview->SetCamMode(ival);
-
-	FluoRefresh(2, { gstCamMode }, { GetViewId() });
-}
-
-void RenderViewPanel::SetStereography()
-{
-	int ival = glbin_settings.m_hologram_mode;
-	glbin_settings.m_hologram_mode = ival == 1 ? 0 : 1;
-	FluoRefresh(0, { gstHologramMode });
-}
-
-void RenderViewPanel::SetHolography()
-{
-	int ival = glbin_settings.m_hologram_mode;
-	glbin_settings.m_hologram_mode = ival == 2 ? 0 : 2;
-	FluoRefresh(0, { gstHologramMode });
-}
-
-void RenderViewPanel::SetFullScreen()
-{
-	m_enter_fscreen_trigger.Start(10);
-}
-
-void RenderViewPanel::CloseFullScreen()
-{
-	if (m_canvas->GetParent() == m_full_frame)
-		m_canvas->Close();
-}
-
-void RenderViewPanel::SetDepthAttenEnable(bool val)
-{
-	m_renderview->SetFog(val);
-	FluoRefresh(2, { gstDepthAtten }, { GetViewId() });
-}
-
-void RenderViewPanel::SetDepthAtten(double val, bool notify)
-{
-	if (m_renderview->GetFogIntensity() == val)
-		return;
-	m_renderview->SetFogIntensity(val);
-	if (notify)
-		FluoRefresh(2, { gstDaInt }, { GetViewId() });
-	else
-		FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanel::SetCenter()
-{
-	m_renderview->SetCenter();
-	FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanel::SetScale121()
-{
-	m_renderview->SetScale121();
-	if (m_renderview->m_mouse_focus)
-		m_canvas->SetFocus();
-	FluoRefresh(2, { gstScaleFactor }, { GetViewId() });
-}
-
-void RenderViewPanel::SetScaleFactor(double val)
-{
-	double factor = val;
-	switch (m_renderview->m_scale_mode)
-	{
-		case 0:
-			break;
-		case 1:
-			factor = val * m_renderview->Get121ScaleFactor();
-			break;
-		case 2:
-		{
-			auto vd = m_renderview->m_cur_vol.lock();
-			if (!vd && !m_renderview->GetVolPopListEmpty())
-				vd = m_renderview->GetVolPopList(0);
-			if (vd)
-			{
-				auto spc = vd->GetSpacing(vd->GetLevel());
-				if (spc.x() > 0.0)
-					factor = val * m_renderview->Get121ScaleFactor() * spc.x();
-			}
-		}
-		break;
-	}
-	if (m_renderview->m_scale_factor == factor)
-		return;
-	m_renderview->m_scale_factor = factor;
-	FluoRefresh(2, { gstScaleFactor, gstPinRotCtr }, { GetViewId() });
-}
-
-void RenderViewPanel::SetScaleMode(int val)
-{
-	m_renderview->m_scale_mode = val;
-	FluoRefresh(2, { gstScaleMode, gstScaleFactor }, { GetViewId() });
-}
-
-void RenderViewPanel::SetRotLock(bool val)
-{
-	m_renderview->SetRotLock(val);
-	if (val)
-	{
-		fluo::Vector rot = m_renderview->GetRotations();
-		rot = fluo::Vector(static_cast<int>(rot.x() / 45) * 45,
-				static_cast<int>(rot.y() / 45) * 45,
-				static_cast<int>(rot.z() / 45) * 45);
-		SetRotations(rot, true);
-	}
-	FluoRefresh(2, { gstGearedEnable }, { GetViewId() });
-}
-
-void RenderViewPanel::SetSliderType()
-{
-	m_rot_slider = !m_rot_slider;
-	FluoRefresh(2, { gstRotSliderMode }, { GetViewId() });
-}
-
-void RenderViewPanel::SetRotations(const fluo::Vector& val, bool notify)
-{
-	if (m_renderview->GetRotations() == val)
-		return;
-	m_renderview->SetRotations(val, false);
-	if (notify)
-		FluoRefresh(2, { gstCamRotation }, { GetViewId() });
-	else
-		FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanel::SetZeroRotations()
-{
-	fluo::Vector rot = m_renderview->GetRotations();
-	if (rot.x() == 0.0 &&
-		rot.y() == 0.0 &&
-		rot.z() == 0.0)
-	{
-		//reset
-		rot = m_renderview->ResetZeroRotations();
-		m_renderview->SetRotations(rot, false);
-	}
-	else
-	{
-		m_renderview->SetZeroRotations();
-		m_renderview->SetRotations(fluo::Vector(0), false);
-	}
-	FluoRefresh(2, { gstCamRotation }, { GetViewId() });
+	return m_hud_tb->GetToolState(ID_LegendChk);
 }
 
 void RenderViewPanel::OnChannelMixMode(wxCommandEvent& event)
@@ -1194,53 +846,49 @@ void RenderViewPanel::OnChannelMixMode(wxCommandEvent& event)
 	switch (id)
 	{
 	case ID_ChannelMixLayered:
-		SetChannelMixMode(ChannelMixMode::Layered);
+		m_channel_mix_mode = ChannelMixMode::Layered;
 		break;
 	case ID_ChannelMixDepth:
-		SetChannelMixMode(ChannelMixMode::Depth);
+		m_channel_mix_mode = ChannelMixMode::Depth;
 		break;
 	case ID_ChannelMixCompositeAdd:
-		SetChannelMixMode(ChannelMixMode::CompositeAdd);
+		m_channel_mix_mode = ChannelMixMode::CompositeAdd;
 		break;
 	}
+
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMixMethod });
 }
 
 void RenderViewPanel::OnHud(wxCommandEvent& event)
 {
 	int id = event.GetId();
 
+	fluo::ValueCollection vc;
+
 	switch (id)
 	{
 	case ID_InfoChk:
-		SetInfo(m_hud_tb->GetToolState(ID_InfoChk));
+		vc.insert(gstDrawInfo);
 		break;
 	case ID_CamCtrChk:
-		SetDrawCamCtr(m_hud_tb->GetToolState(ID_CamCtrChk));
+		vc.insert(gstDrawCamCtr);
 		break;
 	case ID_LegendChk:
-		SetLegend(m_hud_tb->GetToolState(ID_LegendChk));
+		vc.insert(gstDrawLegend);
 		break;
 	case ID_Colormap:
-		SetDrawColormap();
+		vc.insert(gstDrawColormap);
 		break;
 	case ID_ScaleBar:
-		SetDrawScalebar();
+		vc.insert(gstDrawScaleBar);
 		break;
 	}
-}
 
-void RenderViewPanel::OnSnapshotBtn(wxCommandEvent& event)
-{
-	Capture();
-}
-
-void RenderViewPanel::OnViewManipBtn(wxCommandEvent& event)
-{
-	if (m_renderview)
-		m_renderview->SetIntMode(InteractiveMode::Viewport);
-	glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
-	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void RenderViewPanel::OnScaleText(wxCommandEvent& event)
@@ -1266,6 +914,22 @@ void RenderViewPanel::OnBgColorChange(wxColourPickerEvent& event)
 void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
 {
 	SetBgColorInvert(!m_bg_color_inv);
+}
+
+void RenderViewPanel::OnSnapshotBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCapture });
+}
+
+void RenderViewPanel::OnViewManipBtn(wxCommandEvent& event)
+{
+	if (m_renderview)
+		m_renderview->SetIntMode(InteractiveMode::Viewport);
+	glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
+	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
+	FluoRefresh(0, { gstFreehandToolState }, { -1 });
 }
 
 void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
@@ -1577,21 +1241,6 @@ void RenderViewPanel::OnRotSettings(wxCommandEvent& event)
 		SetRotations(fluo::Vector(0), true);
 		break;
 	}
-}
-
-//reset counter
-void RenderViewPanel::ResetID()
-{
-	m_max_id = 1;
-}
-
-//get rendering context
-wxGLContext* RenderViewPanel::GetContext()
-{
-	if (m_canvas)
-		return m_canvas->m_glRC/*GetContext()*/;
-	else
-		return 0;
 }
 
 //bar top

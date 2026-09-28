@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderViewPanel;
 class RenderView;
+class RenderCanvasAgent;
 
 class RenderViewPanelAgent : public Agent
 {
@@ -46,15 +47,24 @@ public:
 
 	RenderViewPanel* GetPanel() const;
 
-	void SetView(const std::shared_ptr<RenderView>& view)
-	{
-		m_view = view;
-	}
-
 	std::shared_ptr<RenderView> GetView() const
 	{
 		return m_view.lock();
 	}
+
+	void SetRenderCanvasAgent(RenderCanvasAgent* agent)
+	{
+		m_canvas_agent = agent;
+	}
+	RenderCanvasAgent* GetRenderCanvasAgent()
+	{
+		return m_canvas_agent;
+	}
+
+	int GetId() const { return m_id; }
+	int GetViewId();
+	//reset counter
+	static void ResetID();
 
 protected:
 	std::span < const std::string_view>
@@ -75,11 +85,56 @@ private:
 
 	std::weak_ptr<RenderView> m_view;
 
+	RenderCanvasAgent* m_canvas_agent = nullptr;
+
+	static int m_max_id;
+	int m_id;
+	double m_dpi_sf, m_dpi_sf2;
+
 	bool m_bg_color_inv = false;
 	//rot slider style
 	bool m_rot_slider = false;
 	int m_pin_by_user = 0;//override pin by scale: 0:by scale; 1:always pin; 2:always not pin
 	bool m_pin_by_scale = false;
+	//bit mask for items to save
+	bool m_default_saved;
+
+private:
+	//update
+	void SetChannelMixMode();
+	void SetInfo();
+	void SetDrawCamCtr();
+	void SetLegend();
+	void SetDrawColormap();
+	void SetDrawScalebar();
+	void SetScaleText(double val);
+	void SetScaleUnit(int val);
+	void Capture();
+	void SetBgColor(fluo::Color val);
+	void SetBgColorInvert(bool val);
+	void SetAov(double val, bool notify);
+	void SetProjection();
+	void SetCamMode();
+	void SetStereography();
+	void SetHolography();
+	void SetFullScreen();
+	void CloseFullScreen();
+
+	void SetDepthAttenEnable(bool val);
+	void SetDepthAtten(double val, bool notify);
+
+	void SetCenter();
+	void SetScale121();
+	void SetScaleFactor(double val);
+	void SetScaleMode(int val);
+
+	void SetRotLock(bool val);
+	void SetSliderType();
+	void SetRotations(const fluo::Vector& val, bool notify);
+	void SetZeroRotations();
+
+	void SaveDefault(unsigned int mask = 0xffffffff);
+	void LoadSettings();
 
 };
 

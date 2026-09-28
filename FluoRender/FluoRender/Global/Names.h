@@ -1260,4 +1260,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstKernelIterations "kernel iterations"
 #define gstKernelCode "kernel code"
 
+//render view panel
+#define gstRenderViewName "render view name"
+
 #endif//NAMES_HPP
