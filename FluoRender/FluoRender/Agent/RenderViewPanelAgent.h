@@ -107,11 +107,11 @@ private:
 	void SetLegend();
 	void SetDrawColormap();
 	void SetDrawScalebar();
-	void SetScaleText(double val);
-	void SetScaleUnit(int val);
+	void SetScaleText();
+	void SetScaleUnit();
 	void Capture();
-	void SetBgColor(fluo::Color val);
-	void SetBgColorInvert(bool val);
+	void SetBgColor();
+	void SetBgColorInvert();
 	void SetAov(double val, bool notify);
 	void SetProjection();
 	void SetCamMode();

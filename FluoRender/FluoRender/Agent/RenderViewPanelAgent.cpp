@@ -34,6 +34,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <VolumeData.h>
 #include <Coordinator.h>
+#include <ModalDlg.h>
+#include <GlobalStates.h>
+#include <Project.h>
 
 int RenderViewPanelAgent::m_max_id = 1;
 
@@ -114,6 +117,11 @@ void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)
 	{
 		ival = view->m_scalebar_disp;
 		panel->UpdateDrawScalebar(ival);
+	}
+	if (update_all || request.HasValue(gstScaleBarLen))
+	{
+		dval = view->m_sb_length;
+		panel->UpdateScaleBarValue(dval);
 	}
 	if (update_all || request.HasValue(gstScaleBarUnit))
 	{
@@ -261,8 +269,16 @@ void RenderViewPanelAgent::UpdateData(const UpdateRequest& request)
 		SetDrawColormap();
 	if (request.HasValue(gstDrawScaleBar))
 		SetDrawScalebar();
+	if (request.HasValue(gstScaleBarLen))
+		SetScaleText();
+	if (request.HasValue(gstScaleBarUnit))
+		SetScaleUnit();
+	if (request.HasValue(gstBgColor))
+		SetBgColor();
+	if (request.HasValue(gstBgColorInv))
+		SetBgColorInvert();
 	if (request.HasValue(gstCapture))
-		SetDrawScalebar();
+		Capture();
 }
 
 int RenderViewPanelAgent::GetViewId()
@@ -387,38 +403,19 @@ void RenderViewPanelAgent::SetDrawScalebar()
 	NotifyViewUpdate({ gstDrawScaleBar }, target);
 }
 
-void RenderViewPanelAgent::SetScaleText(double val)
+void RenderViewPanelAgent::SetScaleText()
 {
-	std::wstring str, num_text, unit_text;
-	num_text = std::to_wstring((int)val);
-	switch (m_renderview->m_sb_unit)
-	{
-	case 0:
-		unit_text = L"nm";
-		break;
-	case 1:
-	default:
-		unit_text = L"\u03BCm";
-		break;
-	case 2:
-		unit_text = L"mm";
-		break;
-	}
-	str = num_text + L" " + unit_text;
-	m_renderview->SetSBText(str);
-	m_renderview->SetScaleBarLen(val);
-	m_renderview->m_sb_num = num_text;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	auto view = GetView();
+	if (!view)
+		return;
 
-	FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetScaleUnit(int val)
-{
-	m_renderview->m_sb_unit = val;
-	double dval = m_renderview->m_sb_length;
+	double dval = panel->GetScalebarValue();
 	std::wstring str, num_text, unit_text;
 	num_text = std::to_wstring((int)dval);
-	switch (val)
+	switch (view->m_sb_unit)
 	{
 	case 0:
 		unit_text = L"nm";
@@ -432,37 +429,117 @@ void RenderViewPanelAgent::SetScaleUnit(int val)
 		break;
 	}
 	str = num_text + L" " + unit_text;
-	m_renderview->SetSBText(str);
-	m_renderview->SetScaleBarLen(dval);
-	m_renderview->m_sb_num = num_text;
+	view->SetSBText(str);
+	view->SetScaleBarLen(dval);
+	view->m_sb_num = num_text;
 
-	FluoRefresh(2, { gstNull }, { GetViewId() });
+	std::set<Agent*> target{};
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstNull }, target);
 }
 
-void RenderViewPanelAgent::SetBgColor(fluo::Color val)
+void RenderViewPanelAgent::SetScaleUnit()
 {
-	m_renderview->SetBackgroundColor(val);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	auto view = GetView();
+	if (!view)
+		return;
 
-	FluoRefresh(2, { gstBgColor }, { GetViewId() });
+	int ival = panel->GetScalebarUnit();
+	view->m_sb_unit = ival;
+	double dval = view->m_sb_length;
+	std::wstring str, num_text, unit_text;
+	num_text = std::to_wstring((int)dval);
+	switch (ival)
+	{
+	case 0:
+		unit_text = L"nm";
+		break;
+	case 1:
+	default:
+		unit_text = L"\u03BCm";
+		break;
+	case 2:
+		unit_text = L"mm";
+		break;
+	}
+	str = num_text + L" " + unit_text;
+	view->SetSBText(str);
+	view->SetScaleBarLen(dval);
+	view->m_sb_num = num_text;
+
+	std::set<Agent*> target{};
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstNull }, target);
 }
 
-void RenderViewPanelAgent::SetBgColorInvert(bool val)
+void RenderViewPanelAgent::SetBgColor()
 {
-	m_bg_color_inv = val;
-	fluo::Color c = m_renderview->GetBackgroundColor();
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	auto view = GetView();
+	if (!view)
+		return;
+
+	auto color = panel->GetBgColor();
+	view->SetBackgroundColor(color);
+
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstBgColor }, target);
+}
+
+void RenderViewPanelAgent::SetBgColorInvert()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	m_bg_color_inv = !m_bg_color_inv;
+	fluo::Color c = view->GetBackgroundColor();
 	c = fluo::Color(1.0, 1.0, 1.0) - c;
-	m_renderview->SetBackgroundColor(c);
+	view->SetBackgroundColor(c);
 
-	FluoRefresh(2, { gstBgColor, gstBgColorInv }, { GetViewId() });
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstBgColor, gstBgColorInv }, target);
 }
 
 void RenderViewPanelAgent::Capture()
 {
-	//reset enlargement
-	m_renderview->SetEnlarge(false);
-	m_renderview->SetEnlargeScale(1.0);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	auto view = GetView();
+	if (!view)
+		return;
 
-	ModalDlg file_dlg(m_frame,
+	//reset enlargement
+	view->SetEnlarge(false);
+	view->SetEnlargeScale(1.0);
+
+	CaptureOptions options;
+	options.compress =
+		glbin_settings.m_save_compress;
+	options.saveAlpha =
+		glbin_settings.m_save_alpha;
+	options.saveFloat =
+		glbin_settings.m_save_float;
+	options.dpi =
+		static_cast<int>(glbin_settings.m_dpi);
+	options.enlarge =
+		glbin_settings.m_dpi > 72;
+	options.enlargeScale =
+		glbin_settings.m_dpi / 72.0;
+	options.embedFiles =
+		glbin_settings.m_vrp_embed;
+
+	CaptureHook hook(options);
+
+	ModalDlg dlg(panel,
 		"Save Captured Image", "", "output",
 		"Tiff File (*.tif)|*.tif|"\
 		"Tiff File (*.tiff)|*.tiff|"\
@@ -471,22 +548,28 @@ void RenderViewPanelAgent::Capture()
 		"Jpeg File (*.jpeg)|*.jpeg|"\
 		"Jpeg2000 File (*.jp2)|*.jp2",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	file_dlg.SetExtraControlCreator(CreateExtraCaptureControl);
-	int rval = file_dlg.ShowModal();
+
+	dlg.SetCustomizeHook(hook);
+
+	int rval = dlg.ShowModal();
 	if (rval == wxID_OK)
 	{
-		m_renderview->m_cap_file = file_dlg.GetPath();
-		m_renderview->m_capture = true;
+		const CaptureOptions& selected_options =
+			hook.GetOptions();
+
+		view->m_cap_file = dlg.GetPath().ToStdWstring();
+		view->m_capture = true;
 		glbin_states.m_capture = true;
-		glbin_refresh_scheduler_manager.requestDraw(
-			DrawRequest("Capture refresh", { static_cast<int>(m_renderview->Id()) }));
+		std::set<Agent*> target{};
+		target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+		NotifyViewUpdate({ gstNull }, target);
 
 		if (glbin_settings.m_prj_save)
 		{
-			std::wstring new_folder = m_renderview->m_cap_file + L"_project";
+			std::wstring new_folder = view->m_cap_file + L"_project";
 			MkDirW(new_folder);
 			std::filesystem::path p = new_folder;
-			p /= file_dlg.GetFilename().ToStdString() + "_project.vrp";
+			p /= dlg.GetFilename().ToStdString() + "_project.vrp";
 			std::wstring prop_file = p.wstring();
 			bool inc = std::filesystem::exists(prop_file) &&
 				glbin_settings.m_prj_save_inc;

@@ -47,7 +47,117 @@ DEALINGS IN THE SOFTWARE.
 #include <icons.h>
 #include <limits>
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CaptureHook::CaptureHook(
+	const CaptureOptions& options) :
+	m_options(options)
+{
+}
+
+void CaptureHook::AddCustomControls(
+	wxFileDialogCustomize& customizer)
+{
+	// Compress
+
+	m_compressChk =
+		customizer.AddCheckBox(
+			"Compress to save space");
+
+	m_compressChk->SetValue(
+		m_options.compress);
+
+	// Alpha
+
+	m_alphaChk =
+		customizer.AddCheckBox(
+			"Save alpha channel");
+
+	m_alphaChk->SetValue(
+		m_options.saveAlpha);
+
+	// Float
+
+	m_floatChk =
+		customizer.AddCheckBox(
+			"Save float channel");
+
+	m_floatChk->SetValue(
+		m_options.saveFloat);
+
+	// DPI
+
+	m_dpiTxt =
+		customizer.AddTextCtrl(
+			wxString::Format("%d",
+				m_options.dpi));
+
+	// Enlarge
+
+	m_enlargeChk =
+		customizer.AddCheckBox(
+			"Enlarge output image");
+
+	m_enlargeChk->SetValue(
+		m_options.enlarge);
+
+	m_enlargeTxt =
+		customizer.AddTextCtrl(
+			wxString::Format("%.1f",
+				m_options.enlargeScale));
+
+	// Embed
+
+	if (glbin_settings.m_prj_save)
+	{
+		m_embedChk =
+			customizer.AddCheckBox(
+				"Embed all files in the project folder");
+
+		m_embedChk->SetValue(
+			m_options.embedFiles);
+	}
+}
+
+void CaptureHook::TransferDataFromCustomControls()
+{
+	if (m_compressChk)
+		m_options.compress =
+		m_compressChk->GetValue();
+
+	if (m_alphaChk)
+		m_options.saveAlpha =
+		m_alphaChk->GetValue();
+
+	if (m_floatChk)
+		m_options.saveFloat =
+		m_floatChk->GetValue();
+
+	if (m_dpiTxt)
+	{
+		long dpi = 72;
+
+		if (m_dpiTxt->GetValue().ToLong(&dpi))
+			m_options.dpi =
+			static_cast<int>(dpi);
+	}
+
+	if (m_enlargeChk)
+		m_options.enlarge =
+		m_enlargeChk->GetValue();
+
+	if (m_enlargeTxt)
+	{
+		double scale = 1.0;
+
+		if (m_enlargeTxt->GetValue().ToDouble(&scale))
+			m_options.enlargeScale =
+			scale;
+	}
+
+	if (m_embedChk)
+		m_options.embedFiles =
+		m_embedChk->GetValue();
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	wxGLContext* sharedContext,
@@ -628,6 +738,11 @@ void RenderViewPanel::UpdateDrawScalebar(int ival)
 	}
 }
 
+void RenderViewPanel::UpdateScaleBarValue(double dval)
+{
+	m_scale_text->SetValue(wxString::Format("%.0f", dval));
+}
+
 void RenderViewPanel::UpdateScaleBarUnit(int ival)
 {
 	m_scale_cmb->Select(ival);
@@ -839,6 +954,26 @@ bool RenderViewPanel::GetLegend()
 	return m_hud_tb->GetToolState(ID_LegendChk);
 }
 
+double RenderViewPanel::GetScalebarValue()
+{
+	wxString str = m_scale_text->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+int RenderViewPanel::GetScalebarUnit()
+{
+	return m_scale_cmb->GetSelection();
+}
+
+fluo::Color RenderViewPanel::GetBgColor()
+{
+	wxColor c = m_bg_color_picker->GetColour();
+	return fluo::Color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
+}
+
 void RenderViewPanel::OnChannelMixMode(wxCommandEvent& event)
 {
 	int id = event.GetId();
@@ -893,27 +1028,30 @@ void RenderViewPanel::OnHud(wxCommandEvent& event)
 
 void RenderViewPanel::OnScaleText(wxCommandEvent& event)
 {
-	wxString str = m_scale_text->GetValue();
-	double len;
-	str.ToDouble(&len);
-	SetScaleText(len);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScaleBarLen });
 }
 
 void RenderViewPanel::OnScaleUnit(wxCommandEvent& event)
 {
-	SetScaleUnit(m_scale_cmb->GetSelection());
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScaleBarUnit });
 }
 
 void RenderViewPanel::OnBgColorChange(wxColourPickerEvent& event)
 {
-	wxColor c = m_bg_color_picker->GetColour();
-	fluo::Color color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
-	SetBgColor(color);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBgColor });
 }
 
 void RenderViewPanel::OnBgInvBtn(wxCommandEvent& event)
 {
-	SetBgColorInvert(!m_bg_color_inv);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBgColorInv });
 }
 
 void RenderViewPanel::OnSnapshotBtn(wxCommandEvent& event)

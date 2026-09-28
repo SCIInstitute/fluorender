@@ -32,6 +32,55 @@ DEALINGS IN THE SOFTWARE.
 #include <PropPanel.h>
 #include <wx/clrpicker.h>
 #include <wx/spinbutt.h>
+#include <wx/filedlgcustomize.h>
+
+struct CaptureOptions
+{
+	bool compress = false;
+
+	bool saveAlpha = false;
+	bool saveFloat = false;
+
+	int dpi = 72;
+
+	bool enlarge = false;
+	double enlargeScale = 1.0;
+
+	bool embedFiles = false;
+};
+
+class CaptureHook :
+	public wxFileDialogCustomizeHook
+{
+public:
+	CaptureHook(
+		const CaptureOptions& options);
+
+	void AddCustomControls(
+		wxFileDialogCustomize& customizer) override;
+
+	void TransferDataFromCustomControls() override;
+
+	const CaptureOptions& GetOptions() const
+	{
+		return m_options;
+	}
+
+private:
+	CaptureOptions m_options;
+
+	wxFileDialogCheckBox* m_compressChk = nullptr;
+
+	wxFileDialogCheckBox* m_alphaChk = nullptr;
+	wxFileDialogCheckBox* m_floatChk = nullptr;
+
+	wxFileDialogTextCtrl* m_dpiTxt = nullptr;
+
+	wxFileDialogCheckBox* m_enlargeChk = nullptr;
+	wxFileDialogTextCtrl* m_enlargeTxt = nullptr;
+
+	wxFileDialogCheckBox* m_embedChk = nullptr;
+};
 
 class RenderCanvas;
 class wxGLContext;
@@ -114,6 +163,7 @@ public:
 	void UpdateDrawLegend(bool bval);
 	void UpdateDrawColormap(int ival);
 	void UpdateDrawScalebar(int ival);
+	void UpdateScaleBarValue(double dval);
 	void UpdateScaleBarUnit(int ival);
 	void UpdateBgColor(const fluo::Color& c);
 	void UpdateBgColorInvert(bool bval);
@@ -141,6 +191,9 @@ public:
 	bool GetInfo();
 	bool GetCamCtr();
 	bool GetLegend();
+	double GetScalebarValue();
+	int GetScalebarUnit();
+	fluo::Color GetBgColor();
 
 private:
 	//trigger for entering full screen
