@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Names.h>
+#include <AsyncTimer.hpp>
 #include <memory>
 
 class RenderViewPanel;
@@ -98,6 +99,7 @@ private:
 	bool m_pin_by_scale = false;
 	//bit mask for items to save
 	bool m_default_saved;
+	fluo::AsyncTimer m_fullscreen_trigger;
 
 private:
 	//update
@@ -110,30 +112,39 @@ private:
 	void SetScaleText();
 	void SetScaleUnit();
 	void Capture();
+	void SetViewManip();
+	void SetAovSldrIdle();
 	void SetBgColor();
 	void SetBgColorInvert();
-	void SetAov(double val, bool notify);
+	void SetAov();
 	void SetProjection();
 	void SetCamMode();
+	void SaveDefault(unsigned int mask = 0xffffffff);
 	void SetStereography();
 	void SetHolography();
 	void SetFullScreen();
 	void CloseFullScreen();
 
-	void SetDepthAttenEnable(bool val);
-	void SetDepthAtten(double val, bool notify);
+	void SetDepthAttenEnable();
+	void SetDepthAtten();
+	void DepthAttenReset();
 
+	void SetPin();
 	void SetCenter();
+	void SetClickCenter();
 	void SetScale121();
-	void SetScaleFactor(double val);
-	void SetScaleMode(int val);
+	void SetScaleFactor();
+	void ScaleFactorReset();
+	void SetScaleMode();
 
-	void SetRotLock(bool val);
 	void SetSliderType();
-	void SetRotations(const fluo::Vector& val, bool notify);
+	void SetRotations();
+	void SetRotationsScroll();
+	void SetOrthoView();
+	void SetRotLock();
 	void SetZeroRotations();
+	void ResetRotations();
 
-	void SaveDefault(unsigned int mask = 0xffffffff);
 	void LoadSettings();
 
 };

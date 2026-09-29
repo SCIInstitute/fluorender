@@ -165,8 +165,7 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(parent, pos, size, style, name),
-	m_enter_fscreen_trigger(this, 0)
+	PropPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -199,8 +198,6 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	glbin.add_undo_control(m_x_rot_sldr);
 	glbin.add_undo_control(m_y_rot_sldr);
 	glbin.add_undo_control(m_z_rot_sldr);
-
-	Bind(wxEVT_TIMER, &RenderViewPanel::OnSetFullScreen, this);
 
 	Thaw();
 }
@@ -934,6 +931,61 @@ wxGLContext* RenderViewPanel::GetContext()
 		return 0;
 }
 
+bool RenderViewPanel::SetFullScreen()
+{
+	if (m_canvas->GetParent() != m_full_frame)
+	{
+		m_view_sizer->Detach(m_canvas);
+		m_view_sizer->AddStretchSpacer();
+		m_canvas->Reparent(m_full_frame);
+		//get display id
+		unsigned int disp_id = glbin_settings.m_disp_id;
+		if (disp_id >= wxDisplay::GetCount())
+			disp_id = 0;
+		wxDisplay display(disp_id);
+		wxRect rect = display.GetGeometry();
+		m_full_frame->SetSize(rect.GetSize());
+		wxPoint pos = rect.GetPosition();
+#ifdef _DARWIN
+		pos -= wxPoint(0, 10);
+#endif
+		m_full_frame->SetPosition(pos);
+#ifdef _WIN32
+		m_full_frame->ShowFullScreen(true);
+#endif
+		m_canvas->SetPosition(wxPoint(0, 0));
+		m_canvas->SetSize(m_full_frame->GetSize());
+		if (glbin_settings.m_stay_top)
+			m_full_frame->SetWindowStyle(wxBORDER_NONE | wxSTAY_ON_TOP);
+		else
+			m_full_frame->SetWindowStyle(wxBORDER_NONE);
+#ifdef _WIN32
+		if (!glbin_settings.m_show_cursor)
+			ShowCursor(false);
+#endif
+		m_full_frame->Iconize(false);
+		m_full_frame->Raise();
+		m_full_frame->Show();
+		m_canvas->m_full_screen = true;
+		m_canvas->SetFocus();
+		return true;
+	}
+
+	m_canvas->Close();
+	return false;
+}
+
+void RenderViewPanel::CloseFullScreen()
+{
+	if (m_canvas->GetParent() == m_full_frame)
+		m_canvas->Close();
+}
+
+void RenderViewPanel::FocusCanvas()
+{
+	m_canvas->SetFocus();
+}
+
 ChannelMixMode RenderViewPanel::GetChannelMixMethod()
 {
 	return m_channel_mix_mode;
@@ -972,6 +1024,79 @@ fluo::Color RenderViewPanel::GetBgColor()
 {
 	wxColor c = m_bg_color_picker->GetColour();
 	return fluo::Color(c.Red() / 255.0, c.Green() / 255.0, c.Blue() / 255.0);
+}
+
+bool RenderViewPanel::GetMouseInAovSldr()
+{
+	wxPoint pos = wxGetMousePosition();
+	wxRect reg = m_aov_sldr->GetScreenRect();
+	wxWindow* window = wxWindow::FindFocus();
+	return window && reg.Contains(pos);
+}
+
+int RenderViewPanel::GetAov()
+{
+	wxString str = m_aov_text->GetValue();
+	int ival = 10;
+	long val;
+	if (str.ToLong(&val))
+		ival = val;
+	return ival;
+}
+
+bool RenderViewPanel::GetDepthAttenEnable()
+{
+	return m_depth_atten_btn->GetToolState(0);
+}
+
+double RenderViewPanel::GetDepthAttenValue()
+{
+	wxString str = m_depth_atten_factor_text->GetValue();
+	double val = 0.0;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+bool RenderViewPanel::GetPin()
+{
+	return m_pin_btn->GetToolState(0);
+}
+
+double RenderViewPanel::GetScaleFactor()
+{
+	wxString str = m_scale_factor_text->GetValue();
+	long val = 0;
+	if (str.ToLong(&val) && val > 0)
+		return val / 100.0;
+	return 1.0;
+}
+
+fluo::Vector RenderViewPanel::GetRotations()
+{
+	wxString str;
+	double rotx = 0, roty = 0, rotz = 0;
+	str = m_x_rot_text->GetValue();
+	str.ToDouble(&rotx);
+	str = m_y_rot_text->GetValue();
+	str.ToDouble(&roty);
+	str = m_z_rot_text->GetValue();
+	str.ToDouble(&rotz);
+	return fluo::Vector(rotx, roty, rotz);
+}
+
+fluo::Vector RenderViewPanel::GetRotationsScroll()
+{
+	double rotx, roty, rotz;
+	rotx = m_x_rot_sldr->GetValue();
+	roty = m_y_rot_sldr->GetValue();
+	rotz = m_z_rot_sldr->GetValue();
+	return fluo::Vector(rotx, roty, rotz);
+}
+
+int RenderViewPanel::GetOrthoView()
+{
+	return m_ortho_view_cmb->GetSelection();
 }
 
 void RenderViewPanel::OnChannelMixMode(wxCommandEvent& event)
@@ -1063,203 +1188,142 @@ void RenderViewPanel::OnSnapshotBtn(wxCommandEvent& event)
 
 void RenderViewPanel::OnViewManipBtn(wxCommandEvent& event)
 {
-	if (m_renderview)
-		m_renderview->SetIntMode(InteractiveMode::Viewport);
-	glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
-	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstViewManip });
 }
 
 void RenderViewPanel::OnAovSldrIdle(wxIdleEvent& event)
 {
-	if (m_renderview->m_capture)
-		return;
-
-	wxPoint pos = wxGetMousePosition();
-	wxRect reg = m_aov_sldr->GetScreenRect();
-	wxWindow* window = wxWindow::FindFocus();
-	bool bval = window && reg.Contains(pos);
-	glbin_states.m_mouse_in_aov_slider = bval;
-	if (glbin_states.ClipDisplayChanged())
-		FluoRefresh(3, { gstNull },
-			{ GetViewId() });
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMouseInAovSldr });
 }
 
 void RenderViewPanel::OnAovChange(wxScrollEvent& event)
 {
 	int ival = m_aov_sldr->GetValue();
-	bool bval = m_renderview->GetPersp();
-
-	SetAov(ival, true);
+	m_aov_text->SetValue(wxString::Format("%d", ival));
 }
 
 void RenderViewPanel::OnAovText(wxCommandEvent& event)
 {
-	wxString str = m_aov_text->GetValue();
-	int ival = 10;
-	long val;
-	if (str.ToLong(&val))
-		ival = val;
-	SetAov(ival, true);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAov });
 }
 
 void RenderViewPanel::OnToolBar2(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
-
 	switch (id)
 	{
 	case ID_OrthoPerspBtn:
 		//toggle between ortho and perspective
-		SetProjection();
+		vc.insert(gstProjection);
 		break;
 	case ID_CamModeBtn:
-		SetCamMode();
+		vc.insert(gstCamMode);
 		break;
 	case ID_DefaultBtn:
-		SaveDefault();
+		vc.insert(gstSaveViewDefault);
 		break;
 	}
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void RenderViewPanel::OnFullScreenToolbar(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
-
 	switch (id)
 	{
 	case ID_VrChk:
-		SetStereography();
+		vc.insert(gstStereography);
 		break;
 	case ID_LookingGlassChk:
-		SetHolography();
+		vc.insert(gstHolography);
 		break;
 	case ID_FullScreenBtn:
-		SetFullScreen();
+		vc.insert(gstFullScreen);
 		break;
 	}
-}
-
-void RenderViewPanel::OnSetFullScreen(wxTimerEvent& event)
-{
-	m_enter_fscreen_trigger.Stop();
-	if (m_canvas->GetParent() != m_full_frame)
-	{
-		m_view_sizer->Detach(m_canvas);
-		m_view_sizer->AddStretchSpacer();
-		m_canvas->Reparent(m_full_frame);
-		//get display id
-		unsigned int disp_id = glbin_settings.m_disp_id;
-		if (disp_id >= wxDisplay::GetCount())
-			disp_id = 0;
-		wxDisplay display(disp_id);
-		wxRect rect = display.GetGeometry();
-		m_full_frame->SetSize(rect.GetSize());
-		wxPoint pos = rect.GetPosition();
-#ifdef _DARWIN
-		pos -= wxPoint(0, 10);
-#endif
-		m_full_frame->SetPosition(pos);
-#ifdef _WIN32
-		m_full_frame->ShowFullScreen(true);
-#endif
-		m_canvas->SetPosition(wxPoint(0, 0));
-		m_canvas->SetSize(m_full_frame->GetSize());
-		if (glbin_settings.m_stay_top)
-			m_full_frame->SetWindowStyle(wxBORDER_NONE | wxSTAY_ON_TOP);
-		else
-			m_full_frame->SetWindowStyle(wxBORDER_NONE);
-#ifdef _WIN32
-		if (!glbin_settings.m_show_cursor)
-			ShowCursor(false);
-#endif
-		m_full_frame->Iconize(false);
-		m_full_frame->Raise();
-		m_full_frame->Show();
-		m_canvas->m_full_screen = true;
-		m_canvas->SetFocus();
-		glbin_refresh_scheduler_manager.requestDraw(
-			DrawRequest("Full screen refresh", { static_cast<int>(m_renderview->Id()) }));
-	}
-	else
-	{
-		m_canvas->Close();
-	}
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void RenderViewPanel::OnDepthAttenCheck(wxCommandEvent& event)
 {
-	SetDepthAttenEnable(m_depth_atten_btn->GetToolState(0));
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstDepthAtten });
 }
 
 //bar left
 void RenderViewPanel::OnDepthAttenChange(wxScrollEvent& event)
 {
 	double val = m_depth_atten_factor_sldr->GetValue() / 100.0;
-	m_depth_atten_factor_text->ChangeValue(wxString::Format("%.2f", val));
+	m_depth_atten_factor_text->SetValue(wxString::Format("%.2f", val));
 	m_depth_atten_factor_text->Update();
-	SetDepthAtten(val, false);
 }
 
 void RenderViewPanel::OnDepthAttenEdit(wxCommandEvent& event)
 {
-	wxString str = m_depth_atten_factor_text->GetValue();
-	double val = 0;
-	str.ToDouble(&val);
-	m_depth_atten_factor_sldr->ChangeValue(std::round(val * 100));
-	SetDepthAtten(val, false);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstDaInt });
 }
 
 void RenderViewPanel::OnDepthAttenReset(wxCommandEvent& event)
 {
-	SetDepthAttenEnable(glbin_view_def.m_use_fog);
-	SetDepthAtten(glbin_view_def.m_fog_intensity, true);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstDepthAttenReset });
 }
 
 void RenderViewPanel::OnPin(wxCommandEvent& event)
 {
-	bool val = m_pin_btn->GetToolState(0);
-	if (m_pin_by_scale == val)
-		m_pin_by_user = 0;
-	else
-		m_pin_by_user = val ? 2 : 1;
-	m_renderview->SetPinRotCenter(val, true);
-	FluoRefresh(2, { gstPinRotCtr }, { GetViewId() });
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstViewPin });
 }
 
 void RenderViewPanel::OnCenter(wxCommandEvent& event)
 {
-	SetCenter();
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCenter });
 }
 
 void RenderViewPanel::OnCenterClick(wxCommandEvent& event)
 {
-	glbin_states.ToggleIntMode(InteractiveMode::CenterClick);
-	m_frame->UpdateProps({ gstFreehandToolState });
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstClickCenter });
 }
 
 void RenderViewPanel::OnScale121(wxCommandEvent& event)
 {
-	SetScale121();
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScaleFactor121 });
 }
 
 void RenderViewPanel::OnScaleFactorChange(wxScrollEvent& event)
 {
 	int ival = m_scale_factor_sldr->GetValue();
-	double dval = ival / 100.0;
-	SetScaleFactor(dval);
+	m_scale_factor_text->SetValue(wxString::Format("%d", ival));
 }
 
 void RenderViewPanel::OnScaleFactorEdit(wxCommandEvent& event)
 {
-	wxString str = m_scale_factor_text->GetValue();
-	long val = 0;
-	str.ToLong(&val);
-	if (val > 0)
-	{
-		double dval = val / 100.0;
-		SetScaleFactor(dval);
-	}
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScaleFactor });
 }
 
 void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
@@ -1272,7 +1336,7 @@ void RenderViewPanel::OnScaleFactorSpinUp(wxSpinEvent& event)
 	else
 		val--;
 	if (val > 0)
-		SetScaleFactor(val / 100.0);
+		m_scale_factor_text->SetValue(wxString::Format("%d", val));
 }
 
 void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
@@ -1285,99 +1349,69 @@ void RenderViewPanel::OnScaleFactorSpinDown(wxSpinEvent& event)
 	else
 		val++;
 	if (val > 0)
-		SetScaleFactor(val / 100.0);
+		m_scale_factor_text->SetValue(wxString::Format("%d", val));
 }
 
 void RenderViewPanel::OnScaleReset(wxCommandEvent& event)
 {
-	SetScaleFactor(glbin_view_def.m_scale_factor);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScaleFactorReset });
 }
 
 void RenderViewPanel::OnScaleMode(wxCommandEvent& event)
 {
-	int mode = m_renderview->m_scale_mode;
-	mode += 1;
-	mode = mode > 2 ? 0 : mode;
-	SetScaleMode(mode);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScaleMode });
 }
 
 void RenderViewPanel::OnRotSliderMode(wxCommandEvent& event)
 {
-	SetSliderType();
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRotSliderMode });
 }
 
 void RenderViewPanel::OnRotEdit(wxCommandEvent& event)
 {
-	wxString str;
-	double rotx, roty, rotz;
-	str = m_x_rot_text->GetValue();
-	str.ToDouble(&rotx);
-	str = m_y_rot_text->GetValue();
-	str.ToDouble(&roty);
-	str = m_z_rot_text->GetValue();
-	str.ToDouble(&rotz);
-	SetRotations(fluo::Vector(rotx, roty, rotz), true);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstViewRotations });
 }
 
 void RenderViewPanel::OnRotScroll(wxScrollEvent& event)
 {
-	double rotx, roty, rotz;
-	rotx = m_x_rot_sldr->GetValue();
-	roty = m_y_rot_sldr->GetValue();
-	rotz = m_z_rot_sldr->GetValue();
-	SetRotations(fluo::Vector(rotx, roty, rotz), true);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstViewRotationsScroll });
 }
 
 void RenderViewPanel::OnOrthoViewSelected(wxCommandEvent& event)
 {
-	int sel = 6;
-	if (m_ortho_view_cmb)
-		sel = m_ortho_view_cmb->GetSelection();
-	switch (sel)
-	{
-	case 0://+Z
-		m_renderview->SetRotations(fluo::Vector(0.0, 0.0, 0.0), false);
-		break;
-	case 1://-Z
-		m_renderview->SetRotations(fluo::Vector(0.0, 180.0, 0.0), false);
-		break;
-	case 2://+Y
-		m_renderview->SetRotations(fluo::Vector(90.0, 0.0, 0.0), false);
-		break;
-	case 3://-Y
-		m_renderview->SetRotations(fluo::Vector(270.0, 0.0, 0.0), false);
-		break;
-	case 4://+X
-		m_renderview->SetRotations(fluo::Vector(0.0, 90.0, 0.0), false);
-		break;
-	case 5://-X
-		m_renderview->SetRotations(fluo::Vector(0.0, 270.0, 0.0), false);
-		break;
-	}
-	if (sel < 6)
-		SetRotLock(true);
-	else
-		SetRotLock(false);
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstOrthoView });
 }
 
 void RenderViewPanel::OnRotSettings(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
-
 	switch (id)
 	{
 	case ID_RotLockChk:
-	{
-		bool bval = m_renderview->GetRotLock();
-		SetRotLock(!bval);
-	}
+		vc.insert(gstGearedEnable);
 		break;
 	case ID_ZeroRotBtn:
-		SetZeroRotations();
+		vc.insert(gstZeroRotations);
 		break;
 	case ID_RotResetBtn:
-		SetRotations(fluo::Vector(0), true);
+		vc.insert(gstRotationsReset);
 		break;
 	}
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 

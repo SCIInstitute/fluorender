@@ -37,6 +37,9 @@ DEALINGS IN THE SOFTWARE.
 #include <ModalDlg.h>
 #include <GlobalStates.h>
 #include <Project.h>
+#include <VolumeSelector.h>
+#include <RulerHandler.h>
+#include <Ruler.h>
 
 int RenderViewPanelAgent::m_max_id = 1;
 
@@ -48,6 +51,10 @@ RenderViewPanelAgent::RenderViewPanelAgent(
 	m_default_saved(false)
 {
 	m_id = m_max_id++;
+	m_fullscreen_trigger.setFunc([this]()
+	{
+		SetFullScreen();
+	});
 }
 
 RenderViewPanel* RenderViewPanelAgent::GetPanel() const
@@ -279,6 +286,60 @@ void RenderViewPanelAgent::UpdateData(const UpdateRequest& request)
 		SetBgColorInvert();
 	if (request.HasValue(gstCapture))
 		Capture();
+	if (request.HasValue(gstViewManip))
+		SetViewManip();
+	if (request.HasValue(gstMouseInAovSldr))
+		SetAovSldrIdle();
+	if (request.HasValue(gstAov))
+		SetAov();
+	if (request.HasValue(gstProjection))
+		SetProjection();
+	if (request.HasValue(gstCamMode))
+		SetCamMode();
+	if (request.HasValue(gstSaveViewDefault))
+		SaveDefault();
+	if (request.HasValue(gstStereography))
+		SetStereography();
+	if (request.HasValue(gstHolography))
+		SetHolography();
+	if (request.HasValue(gstFullScreen))
+		m_fullscreen_trigger.start(10);
+	if (request.HasValue(gstCloseFullScreen))
+		CloseFullScreen();
+	if (request.HasValue(gstDepthAtten))
+		SetDepthAttenEnable();
+	if (request.HasValue(gstDaInt))
+		SetDepthAtten();
+	if (request.HasValue(gstDepthAttenReset))
+		DepthAttenReset();
+	if (request.HasValue(gstViewPin))
+		SetPin();
+	if (request.HasValue(gstCenter))
+		SetCenter();
+	if (request.HasValue(gstClickCenter))
+		SetClickCenter();
+	if (request.HasValue(gstScaleFactor121))
+		SetScale121();
+	if (request.HasValue(gstScaleFactor))
+		SetScaleFactor();
+	if (request.HasValue(gstScaleFactorReset))
+		ScaleFactorReset();
+	if (request.HasValue(gstScaleMode))
+		SetScaleMode();
+	if (request.HasValue(gstRotSliderMode))
+		SetSliderType();
+	if (request.HasValue(gstViewRotations))
+		SetRotations();
+	if (request.HasValue(gstViewRotationsScroll))
+		SetRotationsScroll();
+	if (request.HasValue(gstOrthoView))
+		SetOrthoView();
+	if (request.HasValue(gstGearedEnable))
+		SetRotLock();
+	if (request.HasValue(gstZeroRotations))
+		SetZeroRotations();
+	if (request.HasValue(gstRotationsReset))
+		ResetRotations();
 }
 
 int RenderViewPanelAgent::GetViewId()
@@ -578,8 +639,47 @@ void RenderViewPanelAgent::Capture()
 	}
 }
 
-void RenderViewPanelAgent::SetAov(double val, bool notify)
+void RenderViewPanelAgent::SetViewManip()
 {
+	auto view = GetView();
+	if (!view)
+		return;
+
+	if (view)
+		view->SetIntMode(InteractiveMode::Viewport);
+	glbin_vol_selector.SetSelectMode(flrd::SelectMode::Disabled);
+	glbin_ruler_handler.SetRulerMode(flrd::RulerMode::Disabled);
+	NotifyViewUpdate({ gstFreehandToolState });
+}
+
+void RenderViewPanelAgent::SetAovSldrIdle()
+{
+	auto view = GetView();
+	if (!view || view->m_capture)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	glbin_states.m_mouse_in_aov_slider = panel->GetMouseInAovSldr();
+	if (glbin_states.ClipDisplayChanged())
+	{
+		std::set<Agent*> target{};
+		target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+		NotifyViewUpdate({ gstNull }, target);
+	}
+}
+
+void RenderViewPanelAgent::SetAov()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int val = panel->GetAov();
 	if (val < 11)
 	{
 		view->SetPersp(false);
@@ -602,178 +702,54 @@ void RenderViewPanelAgent::SetAov(double val, bool notify)
 		view->SetAov(val);
 	}
 
-	if (notify)
-		FluoRefresh(2, { gstAov }, { GetViewId() });
-	else
-		FluoRefresh(2, { gstNull }, { GetViewId() });
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstAov }, target);
 }
 
 void RenderViewPanelAgent::SetProjection()
 {
+	auto view = GetView();
+	if (!view)
+		return;
+
 	bool bval = view->GetPersp();
 	if (bval)
 	{
-		SetAov(10, true);
+		view->SetPersp(false);
+		view->SetAov(10);
 	}
 	else
 	{
-		SetAov(45, true);
+		view->SetPersp(true);
+		view->SetAov(45);
 	}
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstAov }, target);
 }
 
 void RenderViewPanelAgent::SetCamMode()
 {
+	auto view = GetView();
+	if (!view)
+		return;
+
 	int ival = view->GetCamMode();
 	ival = (ival + 1) % 2; // cycle through 0 and 1
 	view->SetCamMode(ival);
 
-	FluoRefresh(2, { gstCamMode }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetStereography()
-{
-	int ival = glbin_settings.m_hologram_mode;
-	glbin_settings.m_hologram_mode = ival == 1 ? 0 : 1;
-	FluoRefresh(0, { gstHologramMode });
-}
-
-void RenderViewPanelAgent::SetHolography()
-{
-	int ival = glbin_settings.m_hologram_mode;
-	glbin_settings.m_hologram_mode = ival == 2 ? 0 : 2;
-	FluoRefresh(0, { gstHologramMode });
-}
-
-void RenderViewPanelAgent::SetFullScreen()
-{
-	m_enter_fscreen_trigger.Start(10);
-}
-
-void RenderViewPanelAgent::CloseFullScreen()
-{
-	if (m_canvas->GetParent() == m_full_frame)
-		m_canvas->Close();
-}
-
-void RenderViewPanelAgent::SetDepthAttenEnable(bool val)
-{
-	view->SetFog(val);
-	FluoRefresh(2, { gstDepthAtten }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetDepthAtten(double val, bool notify)
-{
-	if (view->GetFogIntensity() == val)
-		return;
-	view->SetFogIntensity(val);
-	if (notify)
-		FluoRefresh(2, { gstDaInt }, { GetViewId() });
-	else
-		FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetCenter()
-{
-	view->SetCenter();
-	FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetScale121()
-{
-	view->SetScale121();
-	if (view->m_mouse_focus)
-		m_canvas->SetFocus();
-	FluoRefresh(2, { gstScaleFactor }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetScaleFactor(double val)
-{
-	double factor = val;
-	switch (view->m_scale_mode)
-	{
-	case 0:
-		break;
-	case 1:
-		factor = val * view->Get121ScaleFactor();
-		break;
-	case 2:
-	{
-		auto vd = view->m_cur_vol.lock();
-		if (!vd && !view->GetVolPopListEmpty())
-			vd = view->GetVolPopList(0);
-		if (vd)
-		{
-			auto spc = vd->GetSpacing(vd->GetLevel());
-			if (spc.x() > 0.0)
-				factor = val * view->Get121ScaleFactor() * spc.x();
-		}
-	}
-	break;
-	}
-	if (view->m_scale_factor == factor)
-		return;
-	view->m_scale_factor = factor;
-	FluoRefresh(2, { gstScaleFactor, gstPinRotCtr }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetScaleMode(int val)
-{
-	view->m_scale_mode = val;
-	FluoRefresh(2, { gstScaleMode, gstScaleFactor }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetRotLock(bool val)
-{
-	view->SetRotLock(val);
-	if (val)
-	{
-		fluo::Vector rot = view->GetRotations();
-		rot = fluo::Vector(static_cast<int>(rot.x() / 45) * 45,
-			static_cast<int>(rot.y() / 45) * 45,
-			static_cast<int>(rot.z() / 45) * 45);
-		SetRotations(rot, true);
-	}
-	FluoRefresh(2, { gstGearedEnable }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetSliderType()
-{
-	m_rot_slider = !m_rot_slider;
-	FluoRefresh(2, { gstRotSliderMode }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetRotations(const fluo::Vector& val, bool notify)
-{
-	if (view->GetRotations() == val)
-		return;
-	view->SetRotations(val, false);
-	if (notify)
-		FluoRefresh(2, { gstCamRotation }, { GetViewId() });
-	else
-		FluoRefresh(2, { gstNull }, { GetViewId() });
-}
-
-void RenderViewPanelAgent::SetZeroRotations()
-{
-	fluo::Vector rot = view->GetRotations();
-	if (rot.x() == 0.0 &&
-		rot.y() == 0.0 &&
-		rot.z() == 0.0)
-	{
-		//reset
-		rot = view->ResetZeroRotations();
-		view->SetRotations(rot, false);
-	}
-	else
-	{
-		view->SetZeroRotations();
-		view->SetRotations(fluo::Vector(0), false);
-	}
-	FluoRefresh(2, { gstCamRotation }, { GetViewId() });
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate({ gstCamMode }, target);
 }
 
 void RenderViewPanelAgent::SaveDefault(unsigned int mask)
 {
+	auto view = GetView();
+	if (!view)
+		return;
+
 	wxString str;
 	wxColor cVal;
 
@@ -833,11 +809,368 @@ void RenderViewPanelAgent::SaveDefault(unsigned int mask)
 		glbin_view_def.m_colormap_disp = view->m_colormap_disp;
 }
 
+void RenderViewPanelAgent::SetStereography()
+{
+	int ival = glbin_settings.m_hologram_mode;
+	glbin_settings.m_hologram_mode = ival == 1 ? 0 : 1;
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstHologramMode }, target);
+}
+
+void RenderViewPanelAgent::SetHolography()
+{
+	int ival = glbin_settings.m_hologram_mode;
+	glbin_settings.m_hologram_mode = ival == 2 ? 0 : 2;
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstHologramMode }, target);
+}
+
+void RenderViewPanelAgent::SetFullScreen()
+{
+	m_fullscreen_trigger.stop();
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->SetFullScreen();
+	if (bval)
+	{
+		std::set<Agent*> target{};
+		target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+		NotifyViewUpdate({ gstNull }, target);
+	}
+}
+
+void RenderViewPanelAgent::CloseFullScreen()
+{
+	auto panel = GetPanel();
+	if (panel)
+		panel->CloseFullScreen();
+}
+
+void RenderViewPanelAgent::SetDepthAttenEnable()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	view->SetFog(panel->GetDepthAttenEnable());
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstDepthAtten }, target);
+}
+
+void RenderViewPanelAgent::SetDepthAtten()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double dval = panel->GetDepthAttenValue();
+	if (view->GetFogIntensity() == dval)
+		return;
+	view->SetFogIntensity(dval);
+	view->SetFog(panel->GetDepthAttenEnable());
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstDaInt }, target);
+}
+
+void RenderViewPanelAgent::DepthAttenReset()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	view->SetFog(glbin_view_def.m_use_fog);
+	view->SetFogIntensity(glbin_view_def.m_fog_intensity);
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstDepthAtten, gstDaInt }, target);
+}
+
+void RenderViewPanelAgent::SetPin()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	bool bval = panel->GetPin();
+	if (m_pin_by_scale == bval)
+		m_pin_by_user = 0;
+	else
+		m_pin_by_user = bval ? 2 : 1;
+	view->SetPinRotCenter(bval, true);
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstPinRotCtr }, target);
+}
+
+void RenderViewPanelAgent::SetCenter()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	view->SetCenter();
+	std::set<Agent*> target{};
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstNull }, target);
+}
+
+void RenderViewPanelAgent::SetClickCenter()
+{
+	glbin_states.ToggleIntMode(InteractiveMode::CenterClick);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void RenderViewPanelAgent::SetScale121()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	view->SetScale121();
+	if (view->m_mouse_focus)
+		panel->FocusCanvas();
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstScaleFactor }, target);
+}
+
+void RenderViewPanelAgent::SetScaleFactor()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double factor = panel->GetScaleFactor();
+	switch (view->m_scale_mode)
+	{
+	case 0:
+		break;
+	case 1:
+		factor *= view->Get121ScaleFactor();
+		break;
+	case 2:
+	{
+		auto vd = view->m_cur_vol.lock();
+		if (!vd && !view->GetVolPopListEmpty())
+			vd = view->GetVolPopList(0);
+		if (vd)
+		{
+			auto spc = vd->GetSpacing(vd->GetLevel());
+			if (spc.x() > 0.0)
+				factor *= view->Get121ScaleFactor() * spc.x();
+		}
+	}
+	break;
+	}
+	if (view->m_scale_factor == factor)
+		return;
+	view->m_scale_factor = factor;
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstScaleFactor, gstPinRotCtr }, target);
+}
+
+void RenderViewPanelAgent::ScaleFactorReset()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	view->m_scale_factor = glbin_view_def.m_scale_factor;
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstScaleFactor, gstPinRotCtr }, target);
+}
+
+void RenderViewPanelAgent::SetScaleMode()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	int mode = view->m_scale_mode;
+	mode += 1;
+	mode = mode > 2 ? 0 : mode;
+	view->m_scale_mode = mode;
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstScaleMode, gstScaleFactor }, target);
+}
+
+void RenderViewPanelAgent::SetSliderType()
+{
+	m_rot_slider = !m_rot_slider;
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstRotSliderMode }, target);
+}
+
+void RenderViewPanelAgent::SetRotations()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto val = panel->GetRotations();
+	if (view->GetRotations() == val)
+		return;
+	view->SetRotations(val, false);
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstCamRotation }, target);
+}
+
+void RenderViewPanelAgent::SetRotationsScroll()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto val = panel->GetRotationsScroll();
+	if (view->GetRotations() == val)
+		return;
+	view->SetRotations(val, false);
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstCamRotation }, target);
+}
+
+void RenderViewPanelAgent::SetOrthoView()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int sel = panel->GetOrthoView();
+	switch (sel)
+	{
+	case 0://+Z
+		view->SetRotations(fluo::Vector(0.0, 0.0, 0.0), false);
+		break;
+	case 1://-Z
+		view->SetRotations(fluo::Vector(0.0, 180.0, 0.0), false);
+		break;
+	case 2://+Y
+		view->SetRotations(fluo::Vector(90.0, 0.0, 0.0), false);
+		break;
+	case 3://-Y
+		view->SetRotations(fluo::Vector(270.0, 0.0, 0.0), false);
+		break;
+	case 4://+X
+		view->SetRotations(fluo::Vector(0.0, 90.0, 0.0), false);
+		break;
+	case 5://-X
+		view->SetRotations(fluo::Vector(0.0, 270.0, 0.0), false);
+		break;
+	}
+	if (sel < 6)
+		view->SetRotLock(true);
+	else
+		view->SetRotLock(false);
+
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstCamRotation, gstGearedEnable }, target);
+}
+
+void RenderViewPanelAgent::SetRotLock()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	bool bval = !view->GetRotLock();
+	view->SetRotLock(bval);
+	if (bval)
+	{
+		fluo::Vector rot = view->GetRotations();
+		rot = fluo::Vector(static_cast<int>(rot.x() / 45) * 45,
+			static_cast<int>(rot.y() / 45) * 45,
+			static_cast<int>(rot.z() / 45) * 45);
+		view->SetRotations(rot, true);
+	}
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstCamRotation, gstGearedEnable }, target);
+}
+
+void RenderViewPanelAgent::SetZeroRotations()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	fluo::Vector rot = view->GetRotations();
+	if (rot.x() == 0.0 &&
+		rot.y() == 0.0 &&
+		rot.z() == 0.0)
+	{
+		//reset
+		rot = view->ResetZeroRotations();
+		view->SetRotations(rot, false);
+	}
+	else
+	{
+		view->SetZeroRotations();
+		view->SetRotations(fluo::Vector(0), false);
+	}
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstCamRotation }, target);
+}
+
+void RenderViewPanelAgent::ResetRotations()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	view->SetRotations(fluo::Vector(0), true);
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({ gstCamRotation }, target);
+}
+
 void RenderViewPanelAgent::LoadSettings()
 {
+	auto view = GetView();
+	if (!view)
+		return;
+
 	glbin_view_def.Apply(*view);
 	m_rot_slider = glbin_view_def.m_rot_slider;
 
-	FluoRefresh(2, {}, { GetViewId() });
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({}, target);
 }
 

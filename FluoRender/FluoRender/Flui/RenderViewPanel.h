@@ -186,6 +186,10 @@ public:
 	//get rendering context
 	wxGLContext* GetContext();
 
+	bool SetFullScreen();
+	void CloseFullScreen();
+	void FocusCanvas();
+
 	//get
 	ChannelMixMode GetChannelMixMethod();
 	bool GetInfo();
@@ -194,11 +198,17 @@ public:
 	double GetScalebarValue();
 	int GetScalebarUnit();
 	fluo::Color GetBgColor();
+	bool GetMouseInAovSldr();
+	int GetAov();
+	bool GetDepthAttenEnable();
+	double GetDepthAttenValue();
+	bool GetPin();
+	double GetScaleFactor();
+	fluo::Vector GetRotations();
+	fluo::Vector GetRotationsScroll();
+	int GetOrthoView();
 
 private:
-	//trigger for entering full screen
-	wxTimer m_enter_fscreen_trigger;
-
 	//render view///////////////////////////////////////////////
 	RenderCanvas *m_canvas;
 	wxFrame* m_full_frame;
@@ -267,7 +277,6 @@ private:
 	void OnAovText(wxCommandEvent& event);
 	void OnToolBar2(wxCommandEvent& event);
 	void OnFullScreenToolbar(wxCommandEvent& event);
-	void OnSetFullScreen(wxTimerEvent& event);
 
 	//bar left
 	void OnDepthAttenCheck(wxCommandEvent& event);

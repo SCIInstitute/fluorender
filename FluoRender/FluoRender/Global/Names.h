@@ -1262,5 +1262,21 @@ DEALINGS IN THE SOFTWARE.
 
 //render view panel
 #define gstRenderViewName "render view name"
+#define gstViewManip "view manip"
+#define gstMouseInAovSldr "mouse in aov sldr"
+#define gstProjection "projection"
+#define gstSaveViewDefault "save view default"
+#define gstStereography "stereography"
+#define gstHolography "holography"
+#define gstCloseFullScreen "close full screen"
+#define gstDepthAttenReset "depth atten reset"
+#define gstViewPin "view pin"
+#define gstClickCenter "click center"
+#define gstScaleFactorReset "scale factor reset"
+#define gstViewRotations "view rotations"
+#define gstViewRotationsScroll "view rotations scroll"
+#define gstOrthoView "ortho view"
+#define gstZeroRotations "zero rotations"
+#define gstRotationsReset "rotations reset"
 
 #endif//NAMES_HPP
