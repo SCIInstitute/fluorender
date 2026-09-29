@@ -582,24 +582,24 @@ void RenderViewPanelAgent::SetAov(double val, bool notify)
 {
 	if (val < 11)
 	{
-		m_renderview->SetPersp(false);
-		if (m_renderview->GetAov() == 10)
+		view->SetPersp(false);
+		if (view->GetAov() == 10)
 			return;
-		m_renderview->SetAov(10);
+		view->SetAov(10);
 	}
 	else if (val > 100)
 	{
-		m_renderview->SetPersp(true);
-		if (m_renderview->GetAov() == 100)
+		view->SetPersp(true);
+		if (view->GetAov() == 100)
 			return;
-		m_renderview->SetAov(100);
+		view->SetAov(100);
 	}
 	else
 	{
-		m_renderview->SetPersp(true);
-		if (m_renderview->GetAov() == val)
+		view->SetPersp(true);
+		if (view->GetAov() == val)
 			return;
-		m_renderview->SetAov(val);
+		view->SetAov(val);
 	}
 
 	if (notify)
@@ -610,7 +610,7 @@ void RenderViewPanelAgent::SetAov(double val, bool notify)
 
 void RenderViewPanelAgent::SetProjection()
 {
-	bool bval = m_renderview->GetPersp();
+	bool bval = view->GetPersp();
 	if (bval)
 	{
 		SetAov(10, true);
@@ -623,9 +623,9 @@ void RenderViewPanelAgent::SetProjection()
 
 void RenderViewPanelAgent::SetCamMode()
 {
-	int ival = m_renderview->GetCamMode();
+	int ival = view->GetCamMode();
 	ival = (ival + 1) % 2; // cycle through 0 and 1
-	m_renderview->SetCamMode(ival);
+	view->SetCamMode(ival);
 
 	FluoRefresh(2, { gstCamMode }, { GetViewId() });
 }
@@ -657,15 +657,15 @@ void RenderViewPanelAgent::CloseFullScreen()
 
 void RenderViewPanelAgent::SetDepthAttenEnable(bool val)
 {
-	m_renderview->SetFog(val);
+	view->SetFog(val);
 	FluoRefresh(2, { gstDepthAtten }, { GetViewId() });
 }
 
 void RenderViewPanelAgent::SetDepthAtten(double val, bool notify)
 {
-	if (m_renderview->GetFogIntensity() == val)
+	if (view->GetFogIntensity() == val)
 		return;
-	m_renderview->SetFogIntensity(val);
+	view->SetFogIntensity(val);
 	if (notify)
 		FluoRefresh(2, { gstDaInt }, { GetViewId() });
 	else
@@ -674,14 +674,14 @@ void RenderViewPanelAgent::SetDepthAtten(double val, bool notify)
 
 void RenderViewPanelAgent::SetCenter()
 {
-	m_renderview->SetCenter();
+	view->SetCenter();
 	FluoRefresh(2, { gstNull }, { GetViewId() });
 }
 
 void RenderViewPanelAgent::SetScale121()
 {
-	m_renderview->SetScale121();
-	if (m_renderview->m_mouse_focus)
+	view->SetScale121();
+	if (view->m_mouse_focus)
 		m_canvas->SetFocus();
 	FluoRefresh(2, { gstScaleFactor }, { GetViewId() });
 }
@@ -689,45 +689,45 @@ void RenderViewPanelAgent::SetScale121()
 void RenderViewPanelAgent::SetScaleFactor(double val)
 {
 	double factor = val;
-	switch (m_renderview->m_scale_mode)
+	switch (view->m_scale_mode)
 	{
 	case 0:
 		break;
 	case 1:
-		factor = val * m_renderview->Get121ScaleFactor();
+		factor = val * view->Get121ScaleFactor();
 		break;
 	case 2:
 	{
-		auto vd = m_renderview->m_cur_vol.lock();
-		if (!vd && !m_renderview->GetVolPopListEmpty())
-			vd = m_renderview->GetVolPopList(0);
+		auto vd = view->m_cur_vol.lock();
+		if (!vd && !view->GetVolPopListEmpty())
+			vd = view->GetVolPopList(0);
 		if (vd)
 		{
 			auto spc = vd->GetSpacing(vd->GetLevel());
 			if (spc.x() > 0.0)
-				factor = val * m_renderview->Get121ScaleFactor() * spc.x();
+				factor = val * view->Get121ScaleFactor() * spc.x();
 		}
 	}
 	break;
 	}
-	if (m_renderview->m_scale_factor == factor)
+	if (view->m_scale_factor == factor)
 		return;
-	m_renderview->m_scale_factor = factor;
+	view->m_scale_factor = factor;
 	FluoRefresh(2, { gstScaleFactor, gstPinRotCtr }, { GetViewId() });
 }
 
 void RenderViewPanelAgent::SetScaleMode(int val)
 {
-	m_renderview->m_scale_mode = val;
+	view->m_scale_mode = val;
 	FluoRefresh(2, { gstScaleMode, gstScaleFactor }, { GetViewId() });
 }
 
 void RenderViewPanelAgent::SetRotLock(bool val)
 {
-	m_renderview->SetRotLock(val);
+	view->SetRotLock(val);
 	if (val)
 	{
-		fluo::Vector rot = m_renderview->GetRotations();
+		fluo::Vector rot = view->GetRotations();
 		rot = fluo::Vector(static_cast<int>(rot.x() / 45) * 45,
 			static_cast<int>(rot.y() / 45) * 45,
 			static_cast<int>(rot.z() / 45) * 45);
@@ -744,9 +744,9 @@ void RenderViewPanelAgent::SetSliderType()
 
 void RenderViewPanelAgent::SetRotations(const fluo::Vector& val, bool notify)
 {
-	if (m_renderview->GetRotations() == val)
+	if (view->GetRotations() == val)
 		return;
-	m_renderview->SetRotations(val, false);
+	view->SetRotations(val, false);
 	if (notify)
 		FluoRefresh(2, { gstCamRotation }, { GetViewId() });
 	else
@@ -755,20 +755,89 @@ void RenderViewPanelAgent::SetRotations(const fluo::Vector& val, bool notify)
 
 void RenderViewPanelAgent::SetZeroRotations()
 {
-	fluo::Vector rot = m_renderview->GetRotations();
+	fluo::Vector rot = view->GetRotations();
 	if (rot.x() == 0.0 &&
 		rot.y() == 0.0 &&
 		rot.z() == 0.0)
 	{
 		//reset
-		rot = m_renderview->ResetZeroRotations();
-		m_renderview->SetRotations(rot, false);
+		rot = view->ResetZeroRotations();
+		view->SetRotations(rot, false);
 	}
 	else
 	{
-		m_renderview->SetZeroRotations();
-		m_renderview->SetRotations(fluo::Vector(0), false);
+		view->SetZeroRotations();
+		view->SetRotations(fluo::Vector(0), false);
 	}
 	FluoRefresh(2, { gstCamRotation }, { GetViewId() });
+}
+
+void RenderViewPanelAgent::SaveDefault(unsigned int mask)
+{
+	wxString str;
+	wxColor cVal;
+
+	//render modes
+	if (mask & 0x1)
+		glbin_view_def.m_channel_mix_mode = view->GetChannelMixMode();
+	//background color
+	if (mask & 0x2)
+		glbin_view_def.m_bg_color = view->GetBackgroundColor();
+	//camera center
+	if (mask & 0x4)
+		glbin_view_def.m_draw_camctr = view->m_draw_camctr;
+	//camctr size
+	if (mask & 0x8)
+		glbin_view_def.m_camctr_size = view->m_camctr_size;
+	//fps
+	if (mask & 0x10)
+		glbin_view_def.m_draw_info = view->m_draw_info;
+	//selection
+	if (mask & 0x20)
+		glbin_view_def.m_draw_legend = view->m_draw_legend;
+	//mouse focus
+	if (mask & 0x40)
+		glbin_view_def.m_mouse_focus = view->m_mouse_focus;
+	//ortho/persp
+	if (mask & 0x80)
+	{
+		glbin_view_def.m_persp = view->GetPersp();
+		glbin_view_def.m_aov = view->GetAov();
+		glbin_view_def.m_cam_mode = view->GetCamMode();
+	}
+	//rotations
+	if (mask & 0x100)
+	{
+		glbin_view_def.m_rot = view->GetRotations();
+		glbin_view_def.m_rot_lock = view->GetRotLock();
+		glbin_view_def.m_rot_slider = m_rot_slider;
+	}
+	//depth atten
+	if (mask & 0x200)
+	{
+		glbin_view_def.m_use_fog = view->GetFog();
+		glbin_view_def.m_fog_intensity = view->GetFogIntensity();
+	}
+	//scale factor
+	if (mask & 0x400)
+	{
+		glbin_view_def.m_pin_rot_center = view->m_pin_rot_ctr;
+		glbin_view_def.m_scale_factor = view->m_scale_factor;
+		glbin_view_def.m_scale_mode = view->m_scale_mode;
+	}
+	//camera center
+	if (mask & 0x800)
+		glbin_view_def.m_center = view->GetCenters();
+	//colormap
+	if (mask & 0x1000)
+		glbin_view_def.m_colormap_disp = view->m_colormap_disp;
+}
+
+void RenderViewPanelAgent::LoadSettings()
+{
+	glbin_view_def.Apply(*view);
+	m_rot_slider = glbin_view_def.m_rot_slider;
+
+	FluoRefresh(2, {}, { GetViewId() });
 }
 

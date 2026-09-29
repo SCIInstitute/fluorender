@@ -294,17 +294,6 @@ private:
 
 	void OnRotSettings(wxCommandEvent& event);
 	void OnOrthoViewSelected(wxCommandEvent& event);
-
-	//capture options
-	void OnCh1Check(wxCommandEvent& event);
-	void OnChAlphaCheck(wxCommandEvent& event);
-	void OnChFloatCheck(wxCommandEvent& event);
-	void OnDpiText(wxCommandEvent& event);
-	void OnChEmbedCheck(wxCommandEvent& event);
-	void OnChEnlargeCheck(wxCommandEvent& event);
-	void OnSlEnlargeScroll(wxScrollEvent& event);
-	void OnTxEnlargeText(wxCommandEvent& event);
-	static wxWindow* CreateExtraCaptureControl(wxWindow* parent);
 };
 
 #endif//_RENDERVIEWPANEL_H_
