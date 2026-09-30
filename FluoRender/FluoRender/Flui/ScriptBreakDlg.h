@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SCRIPTBREAK_H_
 #define _SCRIPTBREAK_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
-class ScriptBreakDlg : public PropPanel
+class ScriptBreakDlg : public AgentPanel
 {
 public:
 	ScriptBreakDlg(wxWindow* parent);

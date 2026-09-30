@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvasAgent.h>
 #include <wxNotebookSerializer.h>
 
-double PropBase::getDpiScaleFactor()
+double AgentOwner::getDpiScaleFactor()
 {
 	wxWindow* win = dynamic_cast<wxWindow*>(this);
 	if (win)
@@ -49,7 +49,7 @@ double PropBase::getDpiScaleFactor()
 	return 1;
 }
 
-PropPanel::PropPanel(
+AgentPanel::AgentPanel(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -60,7 +60,7 @@ PropPanel::PropPanel(
 
 }
 
-PropDialog::PropDialog(
+AgentDialog::AgentDialog(
 	wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
@@ -77,7 +77,7 @@ TabbedPanel::TabbedPanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(parent, pos, size, style, name)
+	AgentPanel(parent, pos, size, style, name)
 {
 }
 

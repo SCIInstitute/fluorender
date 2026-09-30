@@ -28,13 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _OCLDLG_H_
 #define _OCLDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/stc/stc.h>
 #include <wx/listctrl.h>
 #include <string>
 
 class wxSingleSlider;
-class OclDlg : public PropPanel
+class OclDlg : public AgentPanel
 {
 public:
 	OclDlg(wxWindow* parent);

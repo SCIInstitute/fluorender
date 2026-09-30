@@ -69,7 +69,7 @@ MachineLearningDlg::~MachineLearningDlg()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanel::MachineLearningPanel(wxWindow* parent) :
-	PropPanel(parent,
+	AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningPanel")

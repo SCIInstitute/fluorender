@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CALCULATIONDLG_H_
 #define _CALCULATIONDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
-class CalculationDlg : public PropPanel
+class CalculationDlg : public AgentPanel
 {
 public:
 	CalculationDlg(wxWindow* parent);

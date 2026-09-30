@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ANNOTATPROPPANEL_H_
 #define _ANNOTATPROPPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <memory>
 
-class AnnotatPropPanel : public PropPanel
+class AnnotatPropPanel : public AgentPanel
 {
 public:
 	AnnotatPropPanel(

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TREEPANEL_H_
 #define _TREEPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
@@ -124,7 +124,7 @@ namespace flrd
 	enum class SelectMode : int;
 	enum class RulerMode : int;
 }
-class TreePanel : public PropPanel
+class TreePanel : public AgentPanel
 {
 public:
 	enum

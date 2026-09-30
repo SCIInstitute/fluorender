@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <GridHelper.h>
 
 ColocalizationDlg::ColocalizationDlg(wxWindow* parent) :
-	PropPanel(parent,
+	AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 500)),
 		0, "ColocalizationDlg"),

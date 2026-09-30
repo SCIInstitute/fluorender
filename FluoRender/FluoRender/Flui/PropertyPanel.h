@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _PROPERTY_PANEL_H_
 #define _PROPERTY_PANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 class PropertyPanel : public TabbedPanel
 {

@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <Directory.h>
 #include <DragDrop.h>
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <ProjectPanel.h>
 #include <TreePanel.h>
 #include <ListPanel.h>
@@ -487,7 +487,7 @@ MainFrame::MainFrame(
 
 	//create prop panel
 	m_prop_panel = new PropertyPanel(this);
-	//m_prop_panel->SetName("PropPanel");
+	//m_prop_panel->SetName("AgentPanel");
 
 	//clipping view
 	m_clip_plane_panel = new ClipPlanePanel(this,

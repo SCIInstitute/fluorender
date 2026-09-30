@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _PROJECT_PANEL_H_
 #define _PROJECT_PANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 class ProjectPanel : public TabbedPanel
 {

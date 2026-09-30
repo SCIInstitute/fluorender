@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <HelpDlgAgent.h>
 
 HelpDlg::HelpDlg(wxWindow* parent) :
-	PropPanel(parent,
+	AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(600, 600)),
 		0, "HelpDlg"),

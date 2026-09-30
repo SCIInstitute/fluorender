@@ -49,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
 //END_EVENT_TABLE()
 
 TesterDlg::TesterDlg(MainFrame *frame)
-: PropPanel(frame, frame,
+: AgentPanel(frame, frame,
 	wxDefaultPosition,
 	frame->FromDIP(wxSize(600, 600)),
 	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|

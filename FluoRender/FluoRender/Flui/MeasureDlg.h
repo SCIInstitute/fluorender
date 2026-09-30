@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MEASUREDLG_H_
 #define _MEASUREDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <Color.h>
 #include <Point.h>
 #include <wx/listctrl.h>

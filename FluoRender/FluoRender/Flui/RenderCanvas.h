@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RENDERCANVAS_H_
 #define _RENDERCANVAS_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <Size.h>
 #include <Point.h>
 #include <wxBasisSlider.h>
@@ -46,7 +46,7 @@ DEALINGS IN THE SOFTWARE.
 class RenderViewPanel;
 class RenderView;
 class RenderCanvasAgent;
-class RenderCanvas : public PropBase, public wxGLCanvas
+class RenderCanvas : public AgentOwner, public wxGLCanvas
 {
 public:
 	RenderCanvas(

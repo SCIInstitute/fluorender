@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _HELPDLG_H_
 #define _HELPDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/html/htmlwin.h>
 
-class HelpDlg : public PropPanel
+class HelpDlg : public AgentPanel
 {
 public:
 	HelpDlg(wxWindow* parent);

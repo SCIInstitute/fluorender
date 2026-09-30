@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MAINFRAME_H_
 #define _MAINFRAME_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <Value.hpp>
 #include <Version.h>
 #include <wx/wx.h>
@@ -104,7 +104,7 @@ class VolumeData;
 class MeshData;
 class MeshGroup;
 class AnnotData;
-class PropPanel;
+class AgentPanel;
 class PropertyPanel;
 class VolumePropPanel;
 class MeshPropPanel;
@@ -132,7 +132,7 @@ class FpRangeDlg;
 class wxGaugeStatusbar;
 class wxBasisSlider;
 
-class MainFrame : public wxFrame, public PropBase
+class MainFrame : public wxFrame, public AgentOwner
 {
 	enum
 	{
@@ -399,7 +399,7 @@ private:
 	std::vector<RenderViewPanel*> m_renderview_panels;
 	PropertyPanel* m_prop_panel;
 	//prop panel children
-	std::vector<PropPanel*> m_prop_pages;
+	std::vector<AgentPanel*> m_prop_pages;
 	ClipPlanePanel* m_clip_plane_panel;
 	OutputAdjPanel* m_output_adj_panel;
 	MoviePanel* m_movie_panel;

@@ -28,13 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MESHPROPPANEL_H_
 #define _MESHPROPPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 class wxSingleSlider;
 class wxUndoableColorPicker;
 class wxColourPickerEvent;
 class wxUndoableToolbar;
-class MeshPropPanel: public PropPanel
+class MeshPropPanel: public AgentPanel
 {
 	enum
 	{

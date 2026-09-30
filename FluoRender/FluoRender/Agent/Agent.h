@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string_view>
 #include <span>
 
-class PropBase;
+class AgentOwner;
 class Agent;
 
 enum class UpdateMode : int
@@ -171,14 +171,14 @@ protected:
 	}
 
 public:
-	explicit Agent(PropBase* owner) :
+	explicit Agent(AgentOwner* owner) :
 		owner_(owner)
 	{
 	}
 
 	virtual ~Agent() = default;
 
-	PropBase* GetOwner() const
+	AgentOwner* GetOwner() const
 	{
 		return owner_;
 	}
@@ -264,7 +264,7 @@ protected:
 	virtual void UpdateData(const UpdateRequest& request) {}
 
 private:
-	PropBase* owner_ = nullptr;
+	AgentOwner* owner_ = nullptr;
 };
 
 #endif//Agent_h

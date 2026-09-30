@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _CLIPPINGVIEW_H_
 #define _CLIPPINGVIEW_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/spinbutt.h>
 #include <string>
 #include <array>

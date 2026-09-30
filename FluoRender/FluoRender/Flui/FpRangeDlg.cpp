@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 
 FpRangeDlg::FpRangeDlg(wxWindow *parent)
-: PropDialog(parent,
+: AgentDialog(parent,
 	wxDefaultPosition,
 	parent->FromDIP(wxSize(400, 200)),
 	wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER |

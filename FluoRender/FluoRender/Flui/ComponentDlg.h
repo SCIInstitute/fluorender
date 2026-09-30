@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COMPONENTDLG_H_
 #define _COMPONENTDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <GridData.h>
 #include <wx/tglbtn.h>
 #include <wx/spinctrl.h>

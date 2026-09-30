@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/splitter.h>
 
 OclDlg::OclDlg(wxWindow* parent) :
-	PropPanel(parent,
+	AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(550, 600)),
 		0, "OclDlg")

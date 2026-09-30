@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MOVIEPANEL_H_
 #define _MOVIEPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/listctrl.h>
 #include <wx/spinbutt.h>
 #include <wx/tglbtn.h>

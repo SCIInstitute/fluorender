@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _ADJUSTVIEW_H_
 #define _ADJUSTVIEW_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 class wxFadeButton;
 class wxSingleSlider;

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _BRUSHTOOLDLG_H_
 #define _BRUSHTOOLDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <GridData.h>
 #include <wx/grid.h>
 #include <wx/tglbtn.h>

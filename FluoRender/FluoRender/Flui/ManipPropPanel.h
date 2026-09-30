@@ -28,14 +28,14 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MANIPPROPPANEL_H_
 #define _MANIPPROPPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <Vector.h>
 #include <wx/scrolwin.h>
 #include <wx/spinbutt.h>
 #include <memory>
 
 class MeshData;
-class ManipPropPanel: public PropPanel
+class ManipPropPanel: public AgentPanel
 {
 	enum
 	{

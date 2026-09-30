@@ -28,11 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TESTER_H_
 #define _TESTER_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 class wxSingleSlider;
 class MainFrame;
-class TesterDlg : public PropPanel
+class TesterDlg : public AgentPanel
 {
 	//enum
 	//{

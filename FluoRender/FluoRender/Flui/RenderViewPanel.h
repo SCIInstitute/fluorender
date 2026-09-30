@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _RENDERVIEWPANEL_H_
 #define _RENDERVIEWPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/clrpicker.h>
 #include <wx/spinbutt.h>
 #include <wx/filedlgcustomize.h>
@@ -89,7 +89,7 @@ class wxUndoableScrollBar;
 class wxUndoableToolbar;
 class wxUndoableColorPicker;
 enum class ChannelMixMode : int;
-class RenderViewPanel: public PropPanel
+class RenderViewPanel: public AgentPanel
 {
 public:
 	enum

@@ -28,9 +28,9 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _FPRANGEDLG_H_
 #define _FPRANGEDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
-class FpRangeDlg : public PropDialog
+class FpRangeDlg : public AgentDialog
 {
 public:
 	FpRangeDlg(wxWindow* parent);

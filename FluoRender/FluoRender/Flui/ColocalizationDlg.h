@@ -28,13 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COLOCALIZATIONDLG_H_
 #define _COLOCALIZATIONDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <GridData.h>
 #include <wx/tglbtn.h>
 #include <wx/grid.h>
 #include <wx/clipbrd.h>
 
-class ColocalizationDlg : public PropPanel
+class ColocalizationDlg : public AgentPanel
 {
 public:
 	ColocalizationDlg(wxWindow* parent);

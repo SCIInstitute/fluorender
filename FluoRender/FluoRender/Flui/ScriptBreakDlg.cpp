@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptBreakDlgAgent.h>
 
 ScriptBreakDlg::ScriptBreakDlg(wxWindow* parent) :
-	PropPanel(parent,
+	AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(400, 300)),
 		0, "ScriptBreakDlg")

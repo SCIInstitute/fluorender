@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _TRACEDLG_H_
 #define _TRACEDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/listctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>

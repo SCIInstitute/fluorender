@@ -303,7 +303,7 @@ TreePanel::TreePanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(parent, pos, size, style, name),
+	AgentPanel(parent, pos, size, style, name),
 	m_scroll_pos(-1)
 {
 	wxEventBlocker blocker(this);

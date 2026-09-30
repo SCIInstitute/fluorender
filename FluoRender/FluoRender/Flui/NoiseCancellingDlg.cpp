@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/valnum.h>
 
 NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
-	PropPanel(parent,
+	AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(450, 200)),
 		0, "NoiseCancellingDlg")

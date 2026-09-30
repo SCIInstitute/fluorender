@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MACHINELEARNINGDLG_H_
 #define _MACHINELEARNINGDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <GridData.h>
 #include <wx/grid.h>
 #include <wx/splitter.h>
@@ -49,7 +49,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MachineLearningPanel : public PropPanel
+class MachineLearningPanel : public AgentPanel
 {
 public:
 	MachineLearningPanel(wxWindow* parent);

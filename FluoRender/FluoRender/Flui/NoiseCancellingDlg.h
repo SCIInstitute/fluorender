@@ -28,10 +28,10 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _NOISECANCELLINGDLG_H_
 #define _NOISECANCELLINGDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 class wxSingleSlider;
-class NoiseCancellingDlg : public PropPanel
+class NoiseCancellingDlg : public AgentPanel
 {
 public:
 	NoiseCancellingDlg(wxWindow* parent);

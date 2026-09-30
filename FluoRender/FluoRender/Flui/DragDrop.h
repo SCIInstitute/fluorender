@@ -28,13 +28,13 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _DRAGDROP_H_
 #define _DRAGDROP_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/wx.h>
 #include <wx/dnd.h>
 #include <vector>
 #include <string>
 
-class DnDFile : public wxFileDropTarget, public PropBase
+class DnDFile : public wxFileDropTarget, public AgentOwner
 {
 public:
 	DnDFile();

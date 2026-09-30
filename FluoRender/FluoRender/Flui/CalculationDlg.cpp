@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationDlgAgent.h>
 
 CalculationDlg::CalculationDlg(wxWindow* parent)
-	: PropPanel(parent,
+	: AgentPanel(parent,
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 350)),
 		0, "CalculationDlg")

@@ -35,11 +35,11 @@ DEALINGS IN THE SOFTWARE.
 
 class Agent;
 
-class PropBase
+class AgentOwner
 {
 public:
-	PropBase() {};
-	~PropBase() {};
+	AgentOwner() {};
+	~AgentOwner() {};
 
 	Agent* GetAgent() const { return m_agent.get(); }
 
@@ -51,33 +51,33 @@ protected:
 	virtual double getDpiScaleFactor();
 };
 
-class PropPanel : public PropBase, public wxScrolledWindow
+class AgentPanel : public AgentOwner, public wxScrolledWindow
 {
 public:
-	PropPanel(wxWindow* parent,
+	AgentPanel(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "PropPanel");
-	~PropPanel() {};
+		const wxString& name = "AgentPanel");
+	~AgentPanel() {};
 
 protected:
 };
 
-class PropDialog : public PropBase, public wxDialog
+class AgentDialog : public AgentOwner, public wxDialog
 {
 public:
-	PropDialog(wxWindow* parent,
+	AgentDialog(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "PropPanel");
-	~PropDialog() {};
+		const wxString& name = "AgentPanel");
+	~AgentDialog() {};
 
 protected:
 };
 
-class TabbedPanel : public PropPanel
+class TabbedPanel : public AgentPanel
 {
 public:
 	TabbedPanel(

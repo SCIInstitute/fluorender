@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SETTINGDLG_H_
 #define _SETTINGDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/treectrl.h>
 #include <vector>
 #include <string>

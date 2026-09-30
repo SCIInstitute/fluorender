@@ -34,7 +34,7 @@ ManipPropPanel::ManipPropPanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(parent, pos, size, style, name)
+	AgentPanel(parent, pos, size, style, name)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

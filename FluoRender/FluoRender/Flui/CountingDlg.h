@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _COUNTINGDLG_H_
 #define _COUNTINGDLG_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <GridData.h>
 #include <wx/grid.h>
 

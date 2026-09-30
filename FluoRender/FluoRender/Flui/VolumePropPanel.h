@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _VOLUMEPROPPANEL_H_
 #define _VOLUMEPROPPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 
 namespace flvr
 {
@@ -48,7 +48,7 @@ class wxUndoableComboBox;
 class wxUndoableColorPicker;
 class wxColourPickerEvent;
 class wxUndoableTextCtrl;
-class VolumePropPanel: public PropPanel
+class VolumePropPanel: public AgentPanel
 {
 	enum
 	{

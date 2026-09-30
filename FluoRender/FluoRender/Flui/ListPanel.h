@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _LISTPANEL_H_
 #define _LISTPANEL_H_
 
-#include <PropPanel.h>
+#include <AgentOwner.h>
 #include <wx/listctrl.h>
 #include <wx/filedlgcustomize.h>
 
@@ -122,7 +122,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 enum class ListItemType : int;
-class ListPanel : public PropPanel
+class ListPanel : public AgentPanel
 {
 	enum
 	{
