@@ -26,13 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ScriptBreakDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <MainFrame.h>
-#include <MoviePanel.h>
-#include <ScriptProc.h>
-#include <MovieMaker.h>
+#include <ScriptBreakDlgAgent.h>
 
 ScriptBreakDlg::ScriptBreakDlg(wxWindow* parent) :
 	PropPanel(parent,
@@ -86,27 +80,28 @@ void ScriptBreakDlg::UpdateScriptBreakInfo(const std::string& str)
 	m_info_text->ChangeValue(str);
 }
 
-void ScriptBreakDlg::Hold()
+bool ScriptBreakDlg::GetDoNotShow()
 {
-	glbin_moviemaker.Hold();
-	FluoUpdate();
-	m_frame->ShowScriptBreakDlg();
+	return m_shown_chk->GetValue();
 }
 
 void ScriptBreakDlg::OnShownChk(wxCommandEvent& event)
 {
-	glbin_settings.m_script_break = m_shown_chk->GetValue();
+	auto agent = m_agent->As<ScriptBreakDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstScriptBreak });
 }
 
 void ScriptBreakDlg::OnStopBtn(wxCommandEvent& event)
 {
-	glbin_moviemaker.Stop();
-	glbin_moviemaker.Rewind();
-	m_frame->ShowScriptBreakDlg(false);
+	auto agent = m_agent->As<ScriptBreakDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovieStop });
 }
 
 void ScriptBreakDlg::OnContinueBtn(wxCommandEvent& event)
 {
-	glbin_moviemaker.Resume();
-	m_frame->ShowScriptBreakDlg(false);
+	auto agent = m_agent->As<ScriptBreakDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMovieContinue });
 }

@@ -39,7 +39,8 @@ public:
 	//update
 	void UpdateScriptBreakInfo(const std::string& str);
 
-	void Hold();
+	//get
+	bool GetDoNotShow();
 
 private:
 	wxTextCtrl* m_info_text;

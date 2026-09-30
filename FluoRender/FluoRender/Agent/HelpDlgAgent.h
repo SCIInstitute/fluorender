@@ -25,25 +25,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef ScriptBreakDlgAgent_h
-#define ScriptBreakDlgAgent_h
+#ifndef HelpDlgAgent_h
+#define HelpDlgAgent_h
 
 #include <Agent.h>
 #include <Names.h>
+#include <span>
+#include <string>
 
-class ScriptBreakDlg;
-class ScriptBreakDlgAgent : public Agent
+class HelpDlg;
+class HelpDlgAgent : public Agent
 {
 public:
-	ScriptBreakDlgAgent(
-		ScriptBreakDlg* dlg);
+	HelpDlgAgent(
+		HelpDlg* dlg);
 
-	virtual ~ScriptBreakDlgAgent() = default;
+	virtual ~HelpDlgAgent() = default;
 
-	ScriptBreakDlg* GetDialog() const;
+	HelpDlg* GetDialog() const;
 
 protected:
-	std::span < const std::string_view>
+	std::span<const std::string_view>
 		AcceptedValues() const override
 	{
 		return kAcceptedValues;
@@ -56,19 +58,10 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstScriptBreakTitle,
-		gstScriptBreakInfo,
-		gstScriptHold,
-		gstScriptBreak,
-		gstMovieStop,
-		gstMovieContinue
+		gstHelpDlg
 	};
 
-private:
-	void Hold();
-	void SetScriptBreak();
-	void MovieStop();
-	void MovieContinue();
 };
 
-#endif // ScriptBreakDlgAgent_h
+
+#endif//HelpDlgAgent_h

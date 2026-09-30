@@ -45,6 +45,8 @@ public:
 
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
+	void ShowScriptBreakDlg(bool bval);
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override

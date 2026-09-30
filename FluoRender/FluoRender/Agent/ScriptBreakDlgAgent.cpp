@@ -31,6 +31,10 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Names.h>
 #include <ScriptProc.h>
+#include <MovieMaker.h>
+#include <Coordinator.h>
+#include <MainFrameAgent.h>
+#include <MainSettings.h>
 
 ScriptBreakDlgAgent::ScriptBreakDlgAgent(
 	ScriptBreakDlg* dlg) :
@@ -62,7 +66,14 @@ void ScriptBreakDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void ScriptBreakDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstScriptHold))
+		Hold();
+	if (request.HasValue(gstScriptBreak))
+		SetScriptBreak();
+	if (request.HasValue(gstMovieStop))
+		MovieStop();
+	if (request.HasValue(gstMovieContinue))
+		MovieContinue();
 }
 
 ScriptBreakDlg* ScriptBreakDlgAgent::GetDialog() const
@@ -70,3 +81,35 @@ ScriptBreakDlg* ScriptBreakDlgAgent::GetDialog() const
 	return static_cast<ScriptBreakDlg*>(GetWindow());
 }
 
+void ScriptBreakDlgAgent::Hold()
+{
+	glbin_moviemaker.Hold();
+	UpdateDataToUI({});
+	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (frame_agent)
+		frame_agent->ShowScriptBreakDlg(true);
+}
+
+void ScriptBreakDlgAgent::SetScriptBreak()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_script_break = dlg->GetDoNotShow();
+}
+
+void ScriptBreakDlgAgent::MovieStop()
+{
+	glbin_moviemaker.Stop();
+	glbin_moviemaker.Rewind();
+	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (frame_agent)
+		frame_agent->ShowScriptBreakDlg(false);
+}
+
+void ScriptBreakDlgAgent::MovieContinue()
+{
+	glbin_moviemaker.Resume();
+	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (frame_agent)
+		frame_agent->ShowScriptBreakDlg(false);
+}

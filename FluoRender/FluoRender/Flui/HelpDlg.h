@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class HelpDlg : public PropPanel
 {
 public:
-	HelpDlg(MainFrame* frame);
+	HelpDlg(wxWindow* parent);
 	~HelpDlg();
 
 private:

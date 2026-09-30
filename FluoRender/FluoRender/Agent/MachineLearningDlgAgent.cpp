@@ -645,8 +645,6 @@ void MLVolPropPanelAgent::UpdateUI(const UpdateRequest& request)
 
 	bool update_all = request.values.empty();
 
-	bool bval;
-
 	if (update_all ||
 		request.HasValue(gstMlAutoStart) ||
 		request.HasValue(gstMlVpAutoStart))

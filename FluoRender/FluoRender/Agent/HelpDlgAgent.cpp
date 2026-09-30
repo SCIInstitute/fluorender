@@ -25,50 +25,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#ifndef ScriptBreakDlgAgent_h
-#define ScriptBreakDlgAgent_h
+#include <HelpDlgAgent.h>
+#include <HelpDlg.h>
 
-#include <Agent.h>
-#include <Names.h>
-
-class ScriptBreakDlg;
-class ScriptBreakDlgAgent : public Agent
+HelpDlgAgent::HelpDlgAgent(
+	HelpDlg* dlg) :
+	Agent(dlg)
 {
-public:
-	ScriptBreakDlgAgent(
-		ScriptBreakDlg* dlg);
 
-	virtual ~ScriptBreakDlgAgent() = default;
+}
 
-	ScriptBreakDlg* GetDialog() const;
+void HelpDlgAgent::UpdateUI(const UpdateRequest& request)
+{
+}
 
-protected:
-	std::span < const std::string_view>
-		AcceptedValues() const override
-	{
-		return kAcceptedValues;
-	}
+void HelpDlgAgent::UpdateData(const UpdateRequest& request)
+{
+}
 
-	void UpdateUI(const UpdateRequest& request) override;
+HelpDlg* HelpDlgAgent::GetDialog() const
+{
+	return static_cast<HelpDlg*>(GetWindow());
+}
 
-	void UpdateData(const UpdateRequest& request) override;
-
-private:
-	static constexpr std::string_view kAcceptedValues[] =
-	{
-		gstScriptBreakTitle,
-		gstScriptBreakInfo,
-		gstScriptHold,
-		gstScriptBreak,
-		gstMovieStop,
-		gstMovieContinue
-	};
-
-private:
-	void Hold();
-	void SetScriptBreak();
-	void MovieStop();
-	void MovieContinue();
-};
-
-#endif // ScriptBreakDlgAgent_h

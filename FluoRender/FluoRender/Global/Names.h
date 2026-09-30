@@ -1279,4 +1279,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstZeroRotations "zero rotations"
 #define gstRotationsReset "rotations reset"
 
+//script break dialog
+#define gstScriptHold "script hold"
+#define gstScriptBreak "script break"
+#define gstMovieStop "movie stop"
+#define gstMovieContinue "movie continue"
+
+//help dialog placeholder
+#define gstHelpDlg "help dlg"
+
 #endif//NAMES_HPP

@@ -26,15 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <HelpDlg.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainFrame.h>
+#include <HelpDlgAgent.h>
 
-HelpDlg::HelpDlg(MainFrame *frame) :
-	PropPanel(frame,
-	wxDefaultPosition,
-	frame->FromDIP(wxSize(600, 600)),
-	0, "HelpDlg"),
+HelpDlg::HelpDlg(wxWindow* parent) :
+	PropPanel(parent,
+		wxDefaultPosition,
+		parent->FromDIP(wxSize(600, 600)),
+		0, "HelpDlg"),
 m_html(0)
 {
 	// temporarily block events during constructor:
