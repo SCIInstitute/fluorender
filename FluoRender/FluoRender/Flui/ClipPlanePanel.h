@@ -42,6 +42,7 @@ class wxFadeButton;
 class wxDoubleSlider;
 class wxSingleSlider;
 class wxUndoableToolbar;
+class wxNumTextCtrl;
 class TreeLayer;
 
 struct ClipPlaneToolTips
@@ -132,16 +133,16 @@ private:
 	//sliders for clipping planes
 	//x
 	wxDoubleSlider *m_clipx_sldr;
-	wxTextCtrl *m_x1_clip_text;
-	wxTextCtrl *m_x2_clip_text;
+	wxNumTextCtrl *m_x1_clip_text;
+	wxNumTextCtrl *m_x2_clip_text;
 	//y
 	wxDoubleSlider *m_clipy_sldr;
-	wxTextCtrl *m_y1_clip_text;
-	wxTextCtrl *m_y2_clip_text;
+	wxNumTextCtrl *m_y1_clip_text;
+	wxNumTextCtrl *m_y2_clip_text;
 	//z
 	wxDoubleSlider *m_clipz_sldr;
-	wxTextCtrl *m_z1_clip_text;
-	wxTextCtrl *m_z2_clip_text;
+	wxNumTextCtrl *m_z1_clip_text;
+	wxNumTextCtrl *m_z2_clip_text;
 
 	wxToolBar *m_linkx_tb;
 	wxToolBar* m_linky_tb;
@@ -164,9 +165,9 @@ private:
 	wxSingleSlider *m_x_rot_sldr;
 	wxSingleSlider *m_y_rot_sldr;
 	wxSingleSlider *m_z_rot_sldr;
-	wxTextCtrl *m_x_rot_text;
-	wxTextCtrl *m_y_rot_text;
-	wxTextCtrl *m_z_rot_text;
+	wxNumTextCtrl *m_x_rot_text;
+	wxNumTextCtrl *m_y_rot_text;
+	wxNumTextCtrl *m_z_rot_text;
 	wxSpinButton* m_x_rot_spin;
 	wxSpinButton* m_y_rot_spin;
 	wxSpinButton* m_z_rot_spin;

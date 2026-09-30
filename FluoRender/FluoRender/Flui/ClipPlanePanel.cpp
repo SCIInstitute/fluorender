@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxDoubleSlider.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
+#include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
 #include <wx/gbsizer.h>
 #include <Debug.h>
@@ -146,9 +147,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_clipx_sldr->SetRangeColor(wxColor(255, 128, 128));
 	m_clipx_sldr->SetThumbColor(wxColor(255, 128, 128), wxColor(255, 128, 255));
-	m_x1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_x1_clip_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
-	m_x2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
+	m_x2_clip_text = new wxNumTextCtrl(page, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linkx_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -188,9 +189,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_clipy_sldr->SetRangeColor(wxColor(128, 255, 128));
 	m_clipy_sldr->SetThumbColor(wxColor(128, 255, 128), wxColor(255, 255, 128));
-	m_y1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_y1_clip_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
-	m_y2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
+	m_y2_clip_text = new wxNumTextCtrl(page, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linky_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -230,9 +231,9 @@ wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)
 		wxPoint(0, 0), wxDefaultSize, ls);
 	m_clipz_sldr->SetRangeColor(wxColor(128, 128, 255));
 	m_clipz_sldr->SetThumbColor(wxColor(128, 128, 255), wxColor(128, 255, 255));
-	m_z1_clip_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_z1_clip_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
-	m_z2_clip_text = new wxTextCtrl(page, wxID_ANY, "512",
+	m_z2_clip_text = new wxNumTextCtrl(page, wxID_ANY, "512",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_int);
 	m_linkz_tb = new wxToolBar(page, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -337,7 +338,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_x_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_x_rot_sldr->SetRangeStyle(2);
-	m_x_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
+	m_x_rot_text = new wxNumTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_fp1);
 	m_x_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
@@ -359,7 +360,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_y_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_y_rot_sldr->SetRangeStyle(2);
-	m_y_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
+	m_y_rot_text = new wxNumTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_fp1);
 	m_y_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);
@@ -381,7 +382,7 @@ wxWindow* ClipPlanePanel::CreateRotatePage(wxWindow* parent)
 	m_z_rot_sldr = new wxSingleSlider(page, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, ls);
 	m_z_rot_sldr->SetRangeStyle(2);
-	m_z_rot_text = new wxTextCtrl(page, wxID_ANY, "0.0",
+	m_z_rot_text = new wxNumTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(34, 20)), wxTE_CENTRE, vald_fp1);
 	m_z_rot_spin = new wxSpinButton(page, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxSP_VERTICAL);

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/tglbtn.h>
 
+class wxNumTextCtrl;
 class wxSingleSlider;
 struct BrushGridData
 {
@@ -132,27 +133,27 @@ private:
 	//selection strength
 	//translate
 	wxSingleSlider* m_brush_scl_translate_sldr;
-	wxTextCtrl* m_brush_scl_translate_text;
+	wxNumTextCtrl* m_brush_scl_translate_text;
 	//gm falloff
 	wxSingleSlider* m_brush_gm_falloff_sldr;
-	wxTextCtrl* m_brush_gm_falloff_text;
+	wxNumTextCtrl* m_brush_gm_falloff_text;
 	//2d influence
 	wxSingleSlider* m_brush_2dinfl_sldr;
-	wxTextCtrl* m_brush_2dinfl_text;
+	wxNumTextCtrl* m_brush_2dinfl_text;
 	//brush properties
 	//size 1
 	wxSingleSlider* m_brush_size1_sldr;
-	wxTextCtrl *m_brush_size1_text;
+	wxNumTextCtrl *m_brush_size1_text;
 	//size 2
 	wxCheckBox* m_brush_size2_chk;
 	wxSingleSlider* m_brush_size2_sldr;
-	wxTextCtrl* m_brush_size2_text;
+	wxNumTextCtrl* m_brush_size2_text;
 	//size relation
 	wxRadioButton* m_brush_size_data_rb;
 	wxRadioButton* m_brush_size_screen_rb;
 	//growth
 	wxSingleSlider* m_brush_iter_sldr;
-	wxTextCtrl* m_brush_iter_text;
+	wxNumTextCtrl* m_brush_iter_text;
 	//align
 	wxCheckBox* m_align_center_chk;
 	wxButton* m_align_xyz;

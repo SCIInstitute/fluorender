@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <VolumeSelector.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 //resources
@@ -228,7 +229,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_brush_scl_translate_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_scl_translate_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSclTranslateChange, this);
-	m_brush_scl_translate_text = new wxTextCtrl(page, wxID_ANY, "0.0",
+	m_brush_scl_translate_text = new wxNumTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp1);
 	m_brush_scl_translate_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSclTranslateText, this);
 	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -242,7 +243,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_brush_gm_falloff_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_gm_falloff_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushGmFalloffChange, this);
-	m_brush_gm_falloff_text = new wxTextCtrl(page, wxID_ANY, "0.000",
+	m_brush_gm_falloff_text = new wxNumTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp3);
 	m_brush_gm_falloff_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushGmFalloffText, this);
 	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -254,7 +255,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_brush_2dinfl_sldr = new wxSingleSlider(page, wxID_ANY, 100, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_2dinfl_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrush2dinflChange, this);
-	m_brush_2dinfl_text = new wxTextCtrl(page, wxID_ANY, "1.00",
+	m_brush_2dinfl_text = new wxNumTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_fp2);
 	m_brush_2dinfl_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrush2dinflText, this);
 	sizer1_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -294,7 +295,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_brush_iter_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_iter_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushIterChange, this);
-	m_brush_iter_text = new wxTextCtrl(page, wxID_ANY, "10",
+	m_brush_iter_text = new wxNumTextCtrl(page, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_brush_iter_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushIterText, this);
 	sizer2_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -306,7 +307,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_brush_size1_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size1_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize1Change, this);
-	m_brush_size1_text = new wxTextCtrl(page, wxID_ANY, "10",
+	m_brush_size1_text = new wxNumTextCtrl(page, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_brush_size1_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize1Text, this);
 	sizer2_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -320,7 +321,7 @@ wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)
 	m_brush_size2_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 300,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_brush_size2_sldr->Bind(wxEVT_SCROLL_CHANGED, &BrushToolDlg::OnBrushSize2Change, this);
-	m_brush_size2_text = new wxTextCtrl(page, wxID_ANY, "30",
+	m_brush_size2_text = new wxNumTextCtrl(page, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_brush_size2_text->Bind(wxEVT_TEXT, &BrushToolDlg::OnBrushSize2Text, this);
 	sizer2_2->Add(st, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
