@@ -346,7 +346,8 @@ int RenderViewPanelAgent::GetViewId()
 {
 	auto view = GetView();
 	if (view)
-		view->Id();
+		return view->Id();
+	return 0;
 }
 
 //reset counter

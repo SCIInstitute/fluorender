@@ -165,7 +165,8 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	PropPanel(parent, pos, size, style, name)
+	PropPanel(parent, pos, size, style, name),
+	m_channel_mix_mode(ChannelMixMode::CompositeAdd)
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);

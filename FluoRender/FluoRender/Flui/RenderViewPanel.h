@@ -257,7 +257,7 @@ private:
 	wxToolBar* m_rot_btn;
 
 	//values set by ui
-	ChannelMixMode m_channel_mix_mode = ChannelMixMode::CompositeAdd;
+	ChannelMixMode m_channel_mix_mode;
 
 private:
 	//called when updated from bars
