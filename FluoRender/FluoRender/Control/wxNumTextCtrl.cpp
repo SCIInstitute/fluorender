@@ -26,57 +26,75 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
+#include <wxNumTextCtrl.h>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel,
-	const std::shared_ptr<AnnotData>& ann) :
-	Agent(panel),
-	m_ann(ann)
+wxBEGIN_EVENT_TABLE(wxNumTextCtrl, wxTextCtrl)
+EVT_TIMER(wxID_ANY, wxNumTextCtrl::OnTimer)
+EVT_KILL_FOCUS(wxNumTextCtrl::OnKillFocus)
+wxEND_EVENT_TABLE()
+
+wxNumTextCtrl::wxNumTextCtrl(
+	wxWindow* parent,
+	wxWindowID id,
+	const wxString& value,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style) :
+	wxTextCtrl(parent, id, value, pos, size, style),
+	timer_(this)
 {
-
 }
 
-AnnotatPropPanel* AnnotatPropPanelAgent::GetPanel() const
+wxNumTextCtrl::~wxNumTextCtrl()
 {
-	return static_cast<AnnotatPropPanel*>(GetOwner());
+	timer_.Stop();
 }
 
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
+void wxNumTextCtrl::ChangeValue(const wxString& value)
 {
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
+	// Normal behavior when not editing
+	if (!HasFocus())
+	{
+		has_pending_ = false;
+		timer_.Stop();
 
-	if (request.HasValue(gstAnnotMemoText))
-	{
-		std::wstring str = ann->GetMemo();
-		panel->SetMemoText(str);
+		wxTextCtrl::ChangeValue(value);
+		return;
 	}
-	if (request.HasValue(gstAnnotMemoReadOnly))
-	{
-		bool bval = ann->GetMemoRO();
-		panel->SetMemoReadOnly(bval);
-	}
+
+	// User is editing.
+	// Remember latest value and delay update.
+	pending_value_ = value;
+	has_pending_ = true;
+
+	timer_.StartOnce(DelayMs);
 }
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
+void wxNumTextCtrl::OnTimer(wxTimerEvent&)
 {
-	auto panel = GetPanel();
-	if (!panel)
+	// User still editing.
+	if (HasFocus())
+	{
+		timer_.StartOnce(DelayMs);
 		return;
-	auto ann = GetData();
-	if (!ann)
+	}
+
+	ApplyPendingValue();
+}
+
+void wxNumTextCtrl::OnKillFocus(wxFocusEvent& event)
+{
+	ApplyPendingValue();
+
+	event.Skip();
+}
+
+void wxNumTextCtrl::ApplyPendingValue()
+{
+	if (!has_pending_)
 		return;
 
-	if (request.HasValue(gstAnnotMemoText))
-	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
+	has_pending_ = false;
+
+	wxTextCtrl::ChangeValue(pending_value_);
 }

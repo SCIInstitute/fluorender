@@ -28,22 +28,27 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _DRAGDROP_H_
 #define _DRAGDROP_H_
 
+#include <PropPanel.h>
 #include <wx/wx.h>
 #include <wx/dnd.h>
+#include <vector>
+#include <string>
 
-class DnDFile : public wxFileDropTarget
+class DnDFile : public wxFileDropTarget, public PropBase
 {
 public:
-	DnDFile(wxWindow *frame, wxWindow *view = 0);
+	DnDFile();
 	~DnDFile();
 
 	virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
 	virtual bool OnDropFiles(wxCoord x, wxCoord y,
 		const wxArrayString& filenames);
 
+	//get
+	std::vector<std::wstring> GetFilenames() { return filenames_; }
+
 private:
-	wxWindow *m_frame;
-	wxWindow *m_view;
+	std::vector<std::wstring> filenames_;
 };
 
 #endif//_DRAGDROP_H_

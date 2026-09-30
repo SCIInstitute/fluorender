@@ -290,7 +290,7 @@ void ClipPlanePanelAgent::UpdateData(const UpdateRequest& request)
 
 ClipPlanePanel* ClipPlanePanelAgent::GetPanel() const
 {
-	return static_cast<ClipPlanePanel*>(GetWindow());
+	return static_cast<ClipPlanePanel*>(GetOwner());
 }
 
 std::shared_ptr<TreeLayer> ClipPlanePanelAgent::GetObject()

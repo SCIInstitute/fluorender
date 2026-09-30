@@ -64,7 +64,7 @@ void MachineLearningDlgAgent::UpdateData(const UpdateRequest& request)
 
 MachineLearningDlg* MachineLearningDlgAgent::GetDialog() const
 {
-	return static_cast<MachineLearningDlg*>(GetWindow());
+	return static_cast<MachineLearningDlg*>(GetOwner());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ MachineLearningPanelAgent::MachineLearningPanelAgent(
 
 MachineLearningPanel* MachineLearningPanelAgent::GetPanel() const
 {
-	return static_cast<MachineLearningPanel*>(GetWindow());
+	return static_cast<MachineLearningPanel*>(GetOwner());
 }
 
 void MachineLearningPanelAgent::UpdateList(int index)
@@ -254,7 +254,7 @@ MLCompGenPanelAgent::~MLCompGenPanelAgent()
 
 MLCompGenPanel* MLCompGenPanelAgent::GetPanel() const
 {
-	return static_cast<MLCompGenPanel*>(GetWindow());
+	return static_cast<MLCompGenPanel*>(GetOwner());
 }
 
 void MLCompGenPanelAgent::LoadTable(const std::wstring& filename)
@@ -538,7 +538,7 @@ MLVolPropPanelAgent::~MLVolPropPanelAgent()
 
 MLVolPropPanel* MLVolPropPanelAgent::GetPanel() const
 {
-	return static_cast<MLVolPropPanel*>(GetWindow());
+	return static_cast<MLVolPropPanel*>(GetOwner());
 }
 
 void MLVolPropPanelAgent::LoadTable(const std::wstring& filename)

@@ -289,7 +289,7 @@ void OutputAdjPanelAgent::UpdateData(const UpdateRequest& request)
 
 OutputAdjPanel* OutputAdjPanelAgent::GetPanel() const
 {
-	return static_cast<OutputAdjPanel*>(GetWindow());
+	return static_cast<OutputAdjPanel*>(GetOwner());
 }
 
 void OutputAdjPanelAgent::UpdateSync()

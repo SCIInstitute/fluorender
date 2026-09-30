@@ -25,58 +25,45 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#ifndef DragDropFileAgent_h
+#define DragDropFileAgent_h
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
+#include <Agent.h>
+#include <Names.h>
+#include <span>
+#include <string>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel,
-	const std::shared_ptr<AnnotData>& ann) :
-	Agent(panel),
-	m_ann(ann)
+class DnDFile;
+class DragDropFileAgent : public Agent
 {
+public:
+	DragDropFileAgent(
+		DnDFile* dlg);
 
-}
+	virtual ~DragDropFileAgent() = default;
 
-AnnotatPropPanel* AnnotatPropPanelAgent::GetPanel() const
-{
-	return static_cast<AnnotatPropPanel*>(GetOwner());
-}
-
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
-
-	if (request.HasValue(gstAnnotMemoText))
+protected:
+	std::span<const std::string_view>
+		AcceptedValues() const override
 	{
-		std::wstring str = ann->GetMemo();
-		panel->SetMemoText(str);
+		return kAcceptedValues;
 	}
-	if (request.HasValue(gstAnnotMemoReadOnly))
-	{
-		bool bval = ann->GetMemoRO();
-		panel->SetMemoReadOnly(bval);
-	}
-}
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
+	void UpdateUI(const UpdateRequest& request) override;
 
-	if (request.HasValue(gstAnnotMemoText))
+	void UpdateData(const UpdateRequest& request) override;
+
+	DnDFile* GetDnDFile() const;
+
+private:
+	static constexpr std::string_view kAcceptedValues[] =
 	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
-}
+		gstDragDropFile
+	};
+
+private:
+	void DropFiles();
+};
+
+
+#endif//DragDropFileAgent_h

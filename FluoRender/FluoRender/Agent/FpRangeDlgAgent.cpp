@@ -72,7 +72,7 @@ void FpRangeDlgAgent::UpdateData(const UpdateRequest& request)
 
 FpRangeDlg* FpRangeDlgAgent::GetDialog() const
 {
-	return static_cast<FpRangeDlg*>(GetWindow());
+	return static_cast<FpRangeDlg*>(GetOwner());
 }
 
 void FpRangeDlgAgent::SetFpMin(double dval)

@@ -78,7 +78,7 @@ void ScriptBreakDlgAgent::UpdateData(const UpdateRequest& request)
 
 ScriptBreakDlg* ScriptBreakDlgAgent::GetDialog() const
 {
-	return static_cast<ScriptBreakDlg*>(GetWindow());
+	return static_cast<ScriptBreakDlg*>(GetOwner());
 }
 
 void ScriptBreakDlgAgent::Hold()

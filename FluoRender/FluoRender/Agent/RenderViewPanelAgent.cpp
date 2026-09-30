@@ -59,7 +59,7 @@ RenderViewPanelAgent::RenderViewPanelAgent(
 
 RenderViewPanel* RenderViewPanelAgent::GetPanel() const
 {
-	return static_cast<RenderViewPanel*>(GetWindow());
+	return static_cast<RenderViewPanel*>(GetOwner());
 }
 
 void RenderViewPanelAgent::UpdateUI(const UpdateRequest& request)

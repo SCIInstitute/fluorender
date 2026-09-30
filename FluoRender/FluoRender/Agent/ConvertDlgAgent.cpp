@@ -200,7 +200,7 @@ void ConvertDlgAgent::UpdateData(const UpdateRequest& request)
 
 ConvertDlg* ConvertDlgAgent::GetDialog() const
 {
-	return static_cast<ConvertDlg*>(GetWindow());
+	return static_cast<ConvertDlg*>(GetOwner());
 }
 
 void ConvertDlgAgent::SetIsoValue(double dval)

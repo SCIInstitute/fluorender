@@ -55,7 +55,7 @@ void MainFrameAgent::UpdateData(const UpdateRequest& request)
 
 MainFrame* MainFrameAgent::GetMainFrame() const
 {
-	return static_cast<MainFrame*>(GetWindow());
+	return static_cast<MainFrame*>(GetOwner());
 }
 
 void MainFrameAgent::SetFocusVRenderViews(wxBasisSlider* slider)

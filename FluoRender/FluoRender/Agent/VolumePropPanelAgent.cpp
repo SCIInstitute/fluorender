@@ -51,7 +51,7 @@ VolumePropPanelAgent::VolumePropPanelAgent(
 
 VolumePropPanel* VolumePropPanelAgent::GetPanel() const
 {
-	return static_cast<VolumePropPanel*>(GetWindow());
+	return static_cast<VolumePropPanel*>(GetOwner());
 }
 
 void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)

@@ -50,7 +50,7 @@ ListPanelAgent::ListPanelAgent(
 
 ListPanel* ListPanelAgent::GetPanel() const
 {
-	return static_cast<ListPanel*>(GetWindow());
+	return static_cast<ListPanel*>(GetOwner());
 }
 
 void ListPanelAgent::UpdateUI(const UpdateRequest& request)

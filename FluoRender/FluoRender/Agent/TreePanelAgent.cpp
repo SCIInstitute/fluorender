@@ -45,7 +45,7 @@ TreePanelAgent::TreePanelAgent(
 
 TreePanel* TreePanelAgent::GetPanel() const
 {
-	return static_cast<TreePanel*>(GetWindow());
+	return static_cast<TreePanel*>(GetOwner());
 }
 
 void TreePanelAgent::UpdateUI(const UpdateRequest& request)

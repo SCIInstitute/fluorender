@@ -48,7 +48,7 @@ MeshPropPanelAgent::MeshPropPanelAgent(
 
 MeshPropPanel* MeshPropPanelAgent::GetPanel() const
 {
-	return static_cast<MeshPropPanel*>(GetWindow());
+	return static_cast<MeshPropPanel*>(GetOwner());
 }
 
 void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)

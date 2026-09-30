@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string_view>
 #include <span>
 
-class wxWindow;
+class PropBase;
 class Agent;
 
 enum class UpdateMode : int
@@ -171,16 +171,16 @@ protected:
 	}
 
 public:
-	explicit Agent(wxWindow* window) :
-		window_(window)
+	explicit Agent(PropBase* owner) :
+		owner_(owner)
 	{
 	}
 
 	virtual ~Agent() = default;
 
-	wxWindow* GetWindow() const
+	PropBase* GetOwner() const
 	{
-		return window_;
+		return owner_;
 	}
 
 	virtual bool Accept(
@@ -264,7 +264,7 @@ protected:
 	virtual void UpdateData(const UpdateRequest& request) {}
 
 private:
-	wxWindow* window_ = nullptr;
+	PropBase* owner_ = nullptr;
 };
 
 #endif//Agent_h

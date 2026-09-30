@@ -1288,4 +1288,7 @@ DEALINGS IN THE SOFTWARE.
 //help dialog placeholder
 #define gstHelpDlg "help dlg"
 
+//drag and drop file
+#define gstDragDropFile "drag drop file"
+
 #endif//NAMES_HPP

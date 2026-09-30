@@ -25,58 +25,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
+#pragma once
 
-#include <AnnotatPropPanelAgent.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotData.h>
+#include <wx/textctrl.h>
+#include <wx/timer.h>
 
-AnnotatPropPanelAgent::AnnotatPropPanelAgent(
-	AnnotatPropPanel* panel,
-	const std::shared_ptr<AnnotData>& ann) :
-	Agent(panel),
-	m_ann(ann)
+class wxNumTextCtrl :
+	public wxTextCtrl
 {
+public:
+	wxNumTextCtrl(
+		wxWindow* parent,
+		wxWindowID id = wxID_ANY,
+		const wxString& value = wxEmptyString,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0);
 
-}
+	virtual ~wxNumTextCtrl();
 
-AnnotatPropPanel* AnnotatPropPanelAgent::GetPanel() const
-{
-	return static_cast<AnnotatPropPanel*>(GetOwner());
-}
+	// hides wxTextCtrl::ChangeValue
+	void ChangeValue(const wxString& value);
 
-void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
+private:
+	static constexpr int DelayMs = 1500;
 
-	if (request.HasValue(gstAnnotMemoText))
-	{
-		std::wstring str = ann->GetMemo();
-		panel->SetMemoText(str);
-	}
-	if (request.HasValue(gstAnnotMemoReadOnly))
-	{
-		bool bval = ann->GetMemoRO();
-		panel->SetMemoReadOnly(bval);
-	}
-}
+	void OnTimer(wxTimerEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
 
-void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
-{
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	auto ann = GetData();
-	if (!ann)
-		return;
+	void ApplyPendingValue();
 
-	if (request.HasValue(gstAnnotMemoText))
-	{
-		std::wstring str = panel->GetMemoText();
-		ann->SetMemo(str);
-	}
-}
+private:
+	wxTimer timer_;
+
+	bool has_pending_ = false;
+	wxString pending_value_;
+
+	wxDECLARE_EVENT_TABLE();
+};

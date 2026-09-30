@@ -373,7 +373,7 @@ void BrushToolDlgAgent::UpdateData(const UpdateRequest& request)
 
 BrushToolDlg* BrushToolDlgAgent::GetDialog() const
 {
-	return static_cast<BrushToolDlg*>(GetWindow());
+	return static_cast<BrushToolDlg*>(GetOwner());
 }
 
 void BrushToolDlgAgent::SetBrushSclTranslate(double dval)

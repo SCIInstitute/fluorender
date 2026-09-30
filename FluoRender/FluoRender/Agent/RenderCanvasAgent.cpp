@@ -165,5 +165,5 @@ void RenderCanvasAgent::PerformDraw()
 
 RenderCanvas* RenderCanvasAgent::GetCanvas() const
 {
-	return static_cast<RenderCanvas*>(GetWindow());
+	return static_cast<RenderCanvas*>(GetOwner());
 }

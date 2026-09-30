@@ -42,7 +42,7 @@ ManipPropPanelAgent::ManipPropPanelAgent(
 
 ManipPropPanel* ManipPropPanelAgent::GetPanel() const
 {
-	return static_cast<ManipPropPanel*>(GetWindow());
+	return static_cast<ManipPropPanel*>(GetOwner());
 }
 
 void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)

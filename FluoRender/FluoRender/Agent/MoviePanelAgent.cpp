@@ -52,7 +52,7 @@ MoviePanelAgent::MoviePanelAgent(
 
 MoviePanel* MoviePanelAgent::GetPanel() const
 {
-	return static_cast<MoviePanel*>(GetWindow());
+	return static_cast<MoviePanel*>(GetOwner());
 }
 
 void MoviePanelAgent::UpdateUI(const UpdateRequest& request)

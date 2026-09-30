@@ -45,6 +45,6 @@ void HelpDlgAgent::UpdateData(const UpdateRequest& request)
 
 HelpDlg* HelpDlgAgent::GetDialog() const
 {
-	return static_cast<HelpDlg*>(GetWindow());
+	return static_cast<HelpDlg*>(GetOwner());
 }
 

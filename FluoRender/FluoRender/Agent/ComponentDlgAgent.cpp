@@ -375,7 +375,7 @@ void ComponentDlgAgent::UpdateData(const UpdateRequest& request)
 
 ComponentDlg* ComponentDlgAgent::GetDialog() const
 {
-	return static_cast<ComponentDlg*>(GetWindow());
+	return static_cast<ComponentDlg*>(GetOwner());
 }
 
 void ComponentDlgAgent::SetIter(int ival)

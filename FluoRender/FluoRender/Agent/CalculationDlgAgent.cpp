@@ -114,7 +114,7 @@ void CalculationDlgAgent::UpdateData(const UpdateRequest& request)
 
 CalculationDlg* CalculationDlgAgent::GetDialog() const
 {
-	return static_cast<CalculationDlg*>(GetWindow());
+	return static_cast<CalculationDlg*>(GetOwner());
 }
 
 void CalculationDlgAgent::CombineVolumes()

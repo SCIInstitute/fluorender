@@ -184,7 +184,7 @@ void TrackDlgAgent::UpdateData(const UpdateRequest& request)
 
 TrackDlg* TrackDlgAgent::GetDialog() const
 {
-	return static_cast<TrackDlg*>(GetWindow());
+	return static_cast<TrackDlg*>(GetOwner());
 }
 
 std::vector<TrackItem> TrackDlgAgent::BuildTrackList(

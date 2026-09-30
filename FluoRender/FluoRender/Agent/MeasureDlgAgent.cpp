@@ -303,7 +303,7 @@ void MeasureDlgAgent::UpdateData(const UpdateRequest& request)
 
 MeasureDlg* MeasureDlgAgent::GetDialog() const
 {
-	return static_cast<MeasureDlg*>(GetWindow());
+	return static_cast<MeasureDlg*>(GetOwner());
 }
 
 namespace

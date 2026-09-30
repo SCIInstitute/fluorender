@@ -98,7 +98,7 @@ void ColocalizationDlgAgent::UpdateData(const UpdateRequest& request)
 
 ColocalizationDlg* ColocalizationDlgAgent::GetDialog() const
 {
-	return static_cast<ColocalizationDlg*>(GetWindow());
+	return static_cast<ColocalizationDlg*>(GetOwner());
 }
 
 void ColocalizationDlgAgent::SetUseSelection(bool bval)

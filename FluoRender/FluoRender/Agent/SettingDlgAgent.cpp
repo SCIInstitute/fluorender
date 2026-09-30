@@ -279,7 +279,7 @@ void SettingDlgAgent::UpdateData(const UpdateRequest& request)
 
 SettingDlg* SettingDlgAgent::GetDialog() const
 {
-	return static_cast<SettingDlg*>(GetWindow());
+	return static_cast<SettingDlg*>(GetOwner());
 }
 
 bool SettingDlgAgent::GetFontList(std::vector<std::string>& list) const

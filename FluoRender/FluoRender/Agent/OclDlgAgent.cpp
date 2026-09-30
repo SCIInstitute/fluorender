@@ -92,7 +92,7 @@ void OclDlgAgent::UpdateData(const UpdateRequest& request)
 
 OclDlg* OclDlgAgent::GetDialog() const
 {
-	return static_cast<OclDlg*>(GetWindow());
+	return static_cast<OclDlg*>(GetOwner());
 }
 
 bool OclDlgAgent::GetKernelList(std::vector<std::wstring>& list)

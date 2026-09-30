@@ -127,7 +127,7 @@ void CountingDlgAgent::UpdateData(const UpdateRequest& request)
 
 CountingDlg* CountingDlgAgent::GetDialog() const
 {
-	return static_cast<CountingDlg*>(GetWindow());
+	return static_cast<CountingDlg*>(GetOwner());
 }
 
 void CountingDlgAgent::SetUseSelection(bool bval)

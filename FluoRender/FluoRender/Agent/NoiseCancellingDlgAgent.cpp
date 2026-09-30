@@ -107,7 +107,7 @@ void NoiseCancellingDlgAgent::UpdateData(const UpdateRequest& request)
 
 NoiseCancellingDlg* NoiseCancellingDlgAgent::GetDialog() const
 {
-	return static_cast<NoiseCancellingDlg*>(GetWindow());
+	return static_cast<NoiseCancellingDlg*>(GetOwner());
 }
 
 void NoiseCancellingDlgAgent::Preview()
