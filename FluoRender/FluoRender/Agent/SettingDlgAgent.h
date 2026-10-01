@@ -60,6 +60,8 @@ private:
 	};
 
 	bool GetFontList(std::vector<std::string>& list) const;
+	
+	void SetProjectSave();
 };
 
 #endif // SettingDlgAgent_h

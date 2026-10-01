@@ -26,20 +26,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <SettingDlg.h>
-#include <Directory.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <RenderView.h>
-#include <DataManager.h>
-#include <RenderViewPanel.h>
-#include <ShaderProgram.h>
-#include <KernelProgram.h>
-#include <BrickTexture.h>
-#include <TextRenderer.h>
+#include <SettingDlgAgent.h>
 #include <wxSingleSlider.h>
 #include <wxNumTextCtrl.h>
-#include <ModalDlg.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
 #include <wx/display.h>
@@ -1379,10 +1368,17 @@ void SettingDlg::UpdateSettingsJava(const std::wstring& jvm, const std::wstring&
 	}
 }
 
+bool SettingDlg::GetProjectSave() const
+{
+	return m_prj_save_chk->GetValue();
+}
+
 //events
 void SettingDlg::OnProjectSaveCheck(wxCommandEvent& event)
 {
-	glbin_settings.m_prj_save = m_prj_save_chk->GetValue();
+	auto agent = m_agent->As<SettingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSaveProjectEnable });
 }
 
 void SettingDlg::OnProjectSaveIncCheck(wxCommandEvent& event)

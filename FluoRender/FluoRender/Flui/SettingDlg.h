@@ -112,6 +112,9 @@ public:
 	void UpdateDeviceTree(const DeviceTreeInfo& info);
 	void UpdateSettingsJava(const std::wstring& jvm, const std::wstring& ij, const std::wstring& bioformats, int ival);
 
+	//get
+	bool GetProjectSave() const;
+
 private:
 	//save project
 	wxCheckBox* m_prj_save_chk;

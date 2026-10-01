@@ -274,7 +274,8 @@ void SettingDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void SettingDlgAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstSaveProjectEnable))
+		SetProjectSave();
 }
 
 SettingDlg* SettingDlgAgent::GetDialog() const
@@ -302,4 +303,11 @@ bool SettingDlgAgent::GetFontList(std::vector<std::string>& list) const
 		return false;
 	std::sort(list.begin(), list.end());
 	return true;
+}
+
+void SettingDlgAgent::SetProjectSave()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_prj_save = dlg->GetProjectSave();
 }
